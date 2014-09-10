@@ -1,4 +1,4 @@
-% \CheckSum{1464}
+% \CheckSum{1471}
 % \iffalse meta-comment
 % ======================================================================
 %
@@ -47,7 +47,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-pagestyle.dtx}[%
-  2014/08/29 v2.02 TUD-KOMA-Script (pagestyle)%
+  2014/09/09 v2.02 TUD-KOMA-Script (pagestyle)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -310,13 +310,37 @@
 %
 % \changes{v2.02}{2014/07/25}{Unterstützung \cls{standalone}-Klasse}%^^A
 %
-% Die Klasse~\cls{standalone} ändert allerhand an den Einstellungen der 
-% Seitenränder. Damit sich diese bei der Verwendung mit den \TUDScript-Klassen 
-% nicht in die Quere kommen, werden die Seitenränder auf die Einstellungen der
-% Klasse gesetzt und das Laden von \pkg{scrlayer-scrpage} verhindert.
+% Mit der Klasse~\cls{standalone} können insbesondere Grafiken als separate 
+% Dateien erzeugt und später im Dokument eingebunden werden. Diese Klasse 
+% ändert allerhand an den Einstellungen der Seitenränder. Damit sich diese bei
+% der Verwendung mit den \TUDScript-Klassen nicht in die Quere kommen, müssen 
+% für einige Einstellungen unterdrückt werden.
+%
+% \begin{macro}{\tud@ifsacrop}
+% \changes{v2.02}{2014/09/08}{neu}%^^A
+% Mit diesem Makro kann die Verwendung der Option \opt{crop} mit der Klasse 
+% \cls{standalone} geprüft werden. Das erste Argument wird ausgeführt, wenn 
+% die Klasse geladen und die Option aktiv ist. Das zweite Argument wird 
+% ausgeführt, wenn entweder die Option \opt{crop} deaktiviert ist oder die 
+% Klasse \cls{standalone} gar nicht geladen wurde.
+%    \begin{macrocode}
+\newcommand*\tud@ifsacrop{%
+  \ifcsdef{ifsa@crop}{%
+    \ifbool{sa@crop}{\@firstoftwo}{\@secondoftwo}%
+  }{%
+    \@secondoftwo%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@ifsacrop
+%
+% Ist die  Klasse \cls{standalone} zusammen mit der Option \opt{crop} aktiv,
+% werden die Seitenränder auf die Einstellungen dieser Klasse gesetzt und das
+% Laden von \pkg{scrlayer-scrpage} verhindert.
+%
 %    \begin{macrocode}
 \AtEndPreamble{%
-  \ifcsdef{ifsa@crop}{\ifbool{sa@crop}{%
+  \tud@ifsacrop{%
     \PreventPackageFromLoading{scrlayer-scrpage}%
     \pagestyle{empty}%
     \hoffset=-72.27pt%
@@ -332,7 +356,7 @@
     \evensidemargin=0pt%
     \topskip=0pt%
     \textheight=\dimexpr\maxdimen%
-  }{}}{}%
+  }{}%
 }
 %    \end{macrocode}
 %
@@ -369,8 +393,9 @@
 % Damit der Anwender beliebige Optionen an \pkg{scrlayer-scrpage} übergeben 
 % kann, wird das Paket erst zum Ende der Präambel geladen, wenn dies nicht 
 % bereits vorher geschehen ist.
+% \ToDo{Versionsanforderung rein, sobald aktuelle Version auf CTAN vorhanden}
 %    \begin{macrocode}
-  \RequirePackage{scrlayer-scrpage}[2013/12/14]%
+  \RequirePackage{scrlayer-scrpage}%[2013/12/14]%
 %    \end{macrocode}
 % Anschließend werden verschiedene, sogeannte Layers für die einzelnen Elemente 
 % auf einer Seite erstellt. Dies sind das aus dem Satzspiegel nach links
@@ -1464,13 +1489,17 @@
 % alle Satzspiegeleinstellungen korrekt vornimmt und auch alle Klassenoptionen 
 % korrekt verarbeitet, wird das Laden mit \cs{AtEndPreamble} bis ans Ende der
 % Präambel verzögert und vorher der Satzspiegel neu berechnet. Anschließend 
-% erstellt \cs{tud@geometry@process} alle benötigten Satzspiegel.
+% erstellt \cs{tud@geometry@process} alle benötigten Satzspiegel. Dies passiert 
+% \emph{nicht}, wenn die \cls{standalone}-Klasse mit der Option \opt{crop} 
+% geladen wurde, um die Seitenränder nicht zu ändern.
 %    \begin{macrocode}
 \AtEndPreamble{%
-  \recalctypearea%
-  \RequirePackage{geometry}[2010/09/12]%
-  \tud@geometry@process%
-  \setlength{\tud@dim@headdiff}{\tud@ta@headdiff}%
+  \tud@ifsacrop{}{%
+    \recalctypearea%
+    \RequirePackage{geometry}[2010/09/12]%
+    \tud@geometry@process%
+    \setlength{\tud@dim@headdiff}{\tud@ta@headdiff}%
+  }%
 }
 %    \end{macrocode}
 % \begin{macro}{\tud@geometry@process}
