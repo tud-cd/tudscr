@@ -2,7 +2,7 @@
 TUD-KOMA-Script
 ===============
 
-TUD-KOMA-Script 2014/04/21 v2.00
+TUD-KOMA-Script 2014/04/24 v2.01
 Copyright (c) Falk Hanisch <tudscr[at]gmail.com>, 2012-2014
 
 This material is subject to the LaTeX Project Public License.
@@ -47,6 +47,10 @@ Das Bundle beinhaltet:
 Versionen
 ---------
 
+**v2.01** (2014/04/24)
++ Fehlerkorrekturen beim Kerning der Ziffern und bei der Schriftstärke auf der 
+  Titelseite
+  
 **v2.00** (2014/04/22)
 + Das TUD-KOMA-Script-Bundle wurde von Grund auf überarbeitet und mittels 
   `docstrip` erzeugt. Viele Fehler wurden entfernt und die Robustheit der 
@@ -93,6 +97,9 @@ The bundle offers:
 
 Versions
 --------
+
+**v2.01** (2014/04/24)
++ Fixes the kerning of the digits and the font weight at the title page.
 
 **v2.00** (2014/04/22)
 + The TUD-KOMA-Script bundle has been redesigned from the ground up and is 
