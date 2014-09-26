@@ -55,14 +55,14 @@
       \fi%
     }%
   \fi%
-  \@TUDVersion{2014/09/01 v2.02 TUD-KOMA-Script}%
+  \@TUDVersion{2014/09/03 v2.02 TUD-KOMA-Script}%
 \endgroup%
 \providecommand*\tudscrmail{tudscr@gmail.com}
 \newcommand*\tudinh@name{tudscrreprt}
 %%% From File: tudscr-manual.dtx
 \NeedsTeXFormat{LaTeX2e}[2011/06/27]
 \ProvidesClass{tudscrman}[%
-  2014/09/01 v2.02 TUD-KOMA-Script
+  2014/09/03 v2.02 TUD-KOMA-Script
   class (internal manual)%
 ]
 %%% From File: tudscr-base.dtx
@@ -170,15 +170,15 @@
   topsep=\medskipamount,labelwidth=\linewidth,labelsep=0pt,font=\normalfont,%
   parsep=\parskip,listparindent=\parindent,before=\before@packages%
 }
-\newcommand*\item@packages{}
+\newcommand*\itempackages{}
 \newcommand*\before@packages{%
-  \ifdefvoid{\item@packages}{%
-    \let\item@packages\item%
+  \ifdefvoid{\itempackages}{%
+    \let\itempackages\item%
     \let\item\tud@item@pkg%
   }{}%
 }
 \newcommand*\tud@item@pkg[1][]{%
-  \item@packages[{\DeclarePackage{#1}\texturn{#1}}]%
+  \itempackages[{\DeclarePackage{#1}\texturn{#1}}]%
 }
 \RequirePackage{filemod}[2011/09/19]
 \newcommand*\tud@write@file{}
@@ -490,9 +490,11 @@
   }%
 }
 \DeclareExpandableDocumentCommand\@Class{st'om}{#4}
-\newcommand*\DeclareClass[1]{%
-  \label{files:#1}\Hy@raisedlink{\hyperdef{\jobname}{files:#1}{}}%
-  \index[files]{\hyperidx[files:#1]{\texturn{#1}~{\idxfont(Klasse)}}|declare}%
+\NewDocumentCommand\DeclareClass{om}{%
+  \IfValueTF{#1}{\ChangedAt@Process{#1!\emph{neu}!\Class{#2}}}{}%
+  \Hy@raisedlink{\hyperdef{\jobname}{files:#2}{}}%
+  \label{files:#2}%
+  \index[files]{\hyperidx[files:#2]{\texturn{#2}~{\idxfont(Klasse)}}|declare}%
 }
 \newcommand*\@TempPackage{}
 \NewDocumentCommand\Package{st'om}{%
@@ -512,10 +514,18 @@
   \fi%
 }
 \DeclareExpandableDocumentCommand\@Package{st'om}{#4}
-\NewDocumentCommand\DeclarePackage{om}{%
-  \label{files:#2}\Hy@raisedlink{\hyperdef{\jobname}{files:#2}{}}%
-  \index[files]{\hyperidx[files:#2]{\texturn{#2}~{\idxfont(Paket)}}|declare}%
-  \IfValueTF{#1}{\ChangedAt@Process{#1!\emph{neu}!\Package{#2}}}{}%
+\NewDocumentCommand\DeclarePackage{som}{%
+  \IfValueTF{#2}{\ChangedAt@Process{#2!\emph{neu}!\Package{#3}}}{}%
+  \IfBooleanTF{#1}{%
+    \raisebox{4\baselineskip}[0pt][0pt]{\hyperdef{\jobname}{files:#3}{}}%
+    \par\nobreak%
+    \vskip\dimexpr-\parskip-\baselineskip%
+    \@afterindentfalse\@afterheading%
+  }{%
+    \Hy@raisedlink{\hyperdef{\jobname}{files:#3}{}}%
+  }%
+  \label{files:#3}%
+  \index[files]{\hyperidx[files:#3]{\texturn{#3}~{\idxfont(Paket)}}|declare}%
 }
 \newcommand*\@TempOption{}
 \NewDocumentCommand\Option{st'omo}{%
@@ -698,7 +708,8 @@
         \IfValueTF{#5}%
           {\edef\@tempa{#4:#5:#7}}%
           {\edef\@tempa{#4:#7}}%
-        \label{\@tempa}\Hy@raisedlink{\hyperdef{\jobname}{\@tempa}{}}%
+        \Hy@raisedlink{\hyperdef{\jobname}{\@tempa}{}}%
+        \label{\@tempa}%
         \@HyperIndex{#4}{#5}{#6}{#7}{#8}[(declare]%
       \fi%
       #2\IfValueTF{#3}{#3}{}%
@@ -722,9 +733,9 @@
     \IfValueTF{#5}{\edef\@tempa{#4:#5:#7}}{\edef\@tempa{#4:#7}}%
     \ifcsdef{r@\@tempa}{%
       \let\@tempb\relax%
-      \ifstr{#9}{autoref}{\def\@tempb{ unter \autoref{\@tempa}}}{}%
+      \ifstr{#9}{autoref}{\def\@tempb{ in \autoref{\@tempa}}}{}%
       \ifstr{#9}{pageref}{\def\@tempb{ \vpageref{\@tempa}}}{}%
-      \ifstr{#9}{fullref}{\def\@tempb{ unter \fullref{\@tempa}}}{}%
+      \ifstr{#9}{fullref}{\def\@tempb{ in \fullref{\@tempa}}}{}%
       \mbox{\hyperref{}{\jobname}{\@tempa}{#2}\IfValueTF{#3}{#3}{}}\@tempb%
     }{\mbox{#2\IfValueTF{#3}{#3}{}}}%
   \fi%
@@ -879,8 +890,8 @@
     \global\@additionallistfalse%
     \global\let\@changedatdeclarelist\relax%
     \IfValueTF{#2}{#2}{}%
-    \ifvmode\else\par\fi%
-    \vspace{1.5\baselineskipglue}\nobreak%
+    \par\nobreak%
+    \vskip 1.5\baselineskipglue%
     \@afterindentfalse\@afterheading%
   \fi%
 }
@@ -897,7 +908,9 @@
   \forlistloop\ChangedAt@Split{\@changedatlist}%
   \sortlist{\@changedatversionlist}%
   \marginnote{%
-    \def\@tempa####1{\ignorespaces####1\tabularnewline}%
+    \def\@tempa####1{%
+      \ignorespaces\hyperref[idx:changelog]{####1}\tabularnewline%
+    }%
     \begin{tabular}{|l|}%
       \hline{\footnotesize\rule{0pt}{.8\baselineskip}}%
       \forlistloop\@tempa{\@changedatversionlist}%

@@ -1,4 +1,4 @@
-% \CheckSum{2022}
+% \CheckSum{2037}
 % \iffalse meta-comment
 % ======================================================================
 %
@@ -49,7 +49,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-manual.dtx}[%
-  2014/09/02 v2.02 TUD-KOMA-Script\space%
+  2014/09/03 v2.02 TUD-KOMA-Script\space%
 %</driver>
 %<identify>\NeedsTeXFormat{LaTeX2e}[2011/06/27]
 %<class&identify>\ProvidesClass{tudscrman}[%
@@ -305,7 +305,7 @@
 % \end{macro}^^A \before@values
 % \end{environment}^^A values
 % \begin{environment}{packages}
-% \begin{macro}{\item@packages}
+% \begin{macro}{\itempackages}
 % \begin{macro}{\tud@item@pkg}
 % \begin{macro}{\before@packages}
 % Ähnlich wie für die Auflistung von Werten eines Schlüssels wird auch mit der 
@@ -317,20 +317,20 @@
   topsep=\medskipamount,labelwidth=\linewidth,labelsep=0pt,font=\normalfont,%
   parsep=\parskip,listparindent=\parindent,before=\before@packages%
 }
-\newcommand*\item@packages{}
+\newcommand*\itempackages{}
 \newcommand*\before@packages{%
-  \ifdefvoid{\item@packages}{%
-    \let\item@packages\item%
+  \ifdefvoid{\itempackages}{%
+    \let\itempackages\item%
     \let\item\tud@item@pkg%
   }{}%
 }
 \newcommand*\tud@item@pkg[1][]{%
-  \item@packages[{\DeclarePackage{#1}\texturn{#1}}]%
+  \itempackages[{\DeclarePackage{#1}\texturn{#1}}]%
 }
 %    \end{macrocode}
 % \end{macro}^^A \before@packages
 % \end{macro}^^A \tud@item@pkg
-% \end{macro}^^A \item@packages
+% \end{macro}^^A \itempackages
 % \end{environment}^^A packages
 % \begin{macro}{\tud@write@file}
 % \changes{v2.02}{2014/08/19}{neu}%^^A
@@ -673,9 +673,9 @@
 % \changes{v2.02}{2014/08/16}{neu}%^^A
 % Mit diesen Makros wird es möglich, selektierbare Zeilenbereiche aus einer 
 % anzugebenden Datei direkt auszulesen und auszuführen. Diese Lösung wurde 
-% unter \url{http://tex.stackexchange.com/a/4923} vorgestellt. Dies war für 
-% eine Inline"=Dokumentation von Tutorials gedacht. Diese wurden mittlerweile 
-% jedoch in separate Dateien ausgelagert.
+% auf  LaTeX Stack Exchange\footnote{\url{http://tex.stackexchange.com/a/4923}} 
+% vorgestellt. Dies war für eine Inline"=Dokumentation von Tutorials gedacht.
+% Diese wurden mittlerweile jedoch in separate Dateien ausgelagert.
 %    \begin{macrocode}
 %%\newread\pin@file
 %%\newcommand\pin@accu{}
@@ -991,9 +991,9 @@
 %    \end{macrocode}
 % Der Befehl \cs{autorefname} dient dazu, den Verweistyp beziehungsweise den 
 % bezeichner des aktuellen oder optional zu einem speziellen Label ohne die 
-% dazugehörige Nummerierung zu erhalten. Das Prinzip wurde hierfür von 
-% \url{http://tex.stackexchange.com/questions/33776/get-label-target-type} 
-% übernommen.
+% dazugehörige Nummerierung zu erhalten. Auf der Seite LaTeX Stack Exchange%
+%\footnote{\url{http://tex.stackexchange.com/q/33776/}} wurde das Prinzip 
+% vorgestellt und hier übernommen.
 %    \begin{macrocode}
 \newcommand*\autorefname[1][current]{%
   \ifstr{#1}{current}{%
@@ -1121,9 +1121,11 @@
   }%
 }
 \DeclareExpandableDocumentCommand\@Class{st'om}{#4}
-\newcommand*\DeclareClass[1]{%
-  \label{files:#1}\Hy@raisedlink{\hyperdef{\jobname}{files:#1}{}}%
-  \index[files]{\hyperidx[files:#1]{\texturn{#1}~{\idxfont(Klasse)}}|declare}%
+\NewDocumentCommand\DeclareClass{om}{%
+  \IfValueTF{#1}{\ChangedAt@Process{#1!\emph{neu}!\Class{#2}}}{}%
+  \Hy@raisedlink{\hyperdef{\jobname}{files:#2}{}}%
+  \label{files:#2}%
+  \index[files]{\hyperidx[files:#2]{\texturn{#2}~{\idxfont(Klasse)}}|declare}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \@TempClass
@@ -1136,7 +1138,7 @@
 % \begin{macro}{\DeclarePackage}
 % \changes{v2.02}{2014/07/10}{optionales Argument für Änderungsnotiz}%^^A
 % \begin{macro}{\@TempPackage}
-% Für die Auszeichnungen von Paketen gelten vorhergehende Aussagen äquivalent. 
+% Für die Auszeichnungen von Paketen gelten vorherigen Aussagen äquivalent. 
 % Zusätzlich wird ein Befehl für Tutorials erstellt, welcher auf das Handbuch 
 % verweist.
 %    \begin{macrocode}
@@ -1158,10 +1160,18 @@
   \fi%
 }
 \DeclareExpandableDocumentCommand\@Package{st'om}{#4}
-\NewDocumentCommand\DeclarePackage{om}{%
-  \label{files:#2}\Hy@raisedlink{\hyperdef{\jobname}{files:#2}{}}%
-  \index[files]{\hyperidx[files:#2]{\texturn{#2}~{\idxfont(Paket)}}|declare}%
-  \IfValueTF{#1}{\ChangedAt@Process{#1!\emph{neu}!\Package{#2}}}{}%
+\NewDocumentCommand\DeclarePackage{som}{%
+  \IfValueTF{#2}{\ChangedAt@Process{#2!\emph{neu}!\Package{#3}}}{}%
+  \IfBooleanTF{#1}{%
+    \raisebox{4\baselineskip}[0pt][0pt]{\hyperdef{\jobname}{files:#3}{}}%
+    \par\nobreak%
+    \vskip\dimexpr-\parskip-\baselineskip%
+    \@afterindentfalse\@afterheading%
+  }{%
+    \Hy@raisedlink{\hyperdef{\jobname}{files:#3}{}}%
+  }%
+  \label{files:#3}%
+  \index[files]{\hyperidx[files:#3]{\texturn{#3}~{\idxfont(Paket)}}|declare}%
 }
 %</class&body>
 %<*package&body>
@@ -1467,8 +1477,8 @@
 % \marg{Ausgabe} und ein möglicher \oarg{Anhang}. Danach wird der Zielindex 
 % \marg{Index} und~-- für Parameter~-- der \parg{Haupteintrag} übergeben. Es 
 % folgt der zu machende Indexeintrag selbst mit \oarg{Vorsatz}, \marg{Eintrag},
-% \oarg{Anhang} und zum Abschluss \marg{Formatierung}. Der vollständige 
-% Funktionsaufruf lautet:
+% \oarg{Anhang} und zum Abschluss \marg{Formatierung}. Der Funktionsaufruf
+% lautet:
 % \newline\begingroup\tiny
 % \cs{@ProcessOutput}*
 % \marg{Ausgabe}\oarg{Anhang}\marg{Index}\parg{Haupteintrag}\ignorespaces%
@@ -1493,7 +1503,8 @@
         \IfValueTF{#5}%
           {\edef\@tempa{#4:#5:#7}}%
           {\edef\@tempa{#4:#7}}%
-        \label{\@tempa}\Hy@raisedlink{\hyperdef{\jobname}{\@tempa}{}}%  
+        \Hy@raisedlink{\hyperdef{\jobname}{\@tempa}{}}%
+        \label{\@tempa}%
         \@HyperIndex{#4}{#5}{#6}{#7}{#8}[(declare]%
       \fi%
       #2\IfValueTF{#3}{#3}{}%
@@ -1529,9 +1540,9 @@
     \IfValueTF{#5}{\edef\@tempa{#4:#5:#7}}{\edef\@tempa{#4:#7}}%
     \ifcsdef{r@\@tempa}{%
       \let\@tempb\relax%
-      \ifstr{#9}{autoref}{\def\@tempb{ unter \autoref{\@tempa}}}{}%
+      \ifstr{#9}{autoref}{\def\@tempb{ in \autoref{\@tempa}}}{}%
       \ifstr{#9}{pageref}{\def\@tempb{ \vpageref{\@tempa}}}{}%
-      \ifstr{#9}{fullref}{\def\@tempb{ unter \fullref{\@tempa}}}{}%
+      \ifstr{#9}{fullref}{\def\@tempb{ in \fullref{\@tempa}}}{}%
       \mbox{\hyperref{}{\jobname}{\@tempa}{#2}\IfValueTF{#3}{#3}{}}\@tempb%
     }{\mbox{#2\IfValueTF{#3}{#3}{}}}%
   \fi%
@@ -1708,8 +1719,8 @@
   }%
 }{%
 %    \end{macrocode}
-% Am Ende der Umgebung wird das übergebenen Hauptargument abermals ausgeführt,
-% was zum Setzen des Indexeintragsendes für die jeweilige Deklaration führt
+% Am Ende der Umgebung wird das übergebenen Hauptargument erneut ausgeführt,
+% was zum Beenden der Indexeinträge für die jeweilige Deklaration führt
 % (\cs{@openindexfalse}, siehe \cs{@ProcessOutput}). Dafür werden die Makros für
 % die Angabe obligatorischer und optionaler Parameter lokal umdefiniert.
 %    \begin{macrocode}
@@ -1809,8 +1820,8 @@
 % Deklarationsbox ausgegeben.
 %    \begin{macrocode}
     \IfValueTF{#2}{#2}{}%
-    \ifvmode\else\par\fi%
-    \vspace{1.5\baselineskipglue}\nobreak%
+    \par\nobreak%
+    \vskip 1.5\baselineskipglue%
     \@afterindentfalse\@afterheading%
   \fi%
 }
@@ -1827,11 +1838,12 @@
 % \changes{v2.02}{2014/07/25}{erweitert}%^^A
 % An den Befehl \cs{ChangedAt} kann eine kommagetrente Liste mit verschiedenen
 % Versionsnummern und dazugehörigen Änderungen übergeben werden. Er wird in der 
-% Form: \cs{ChangedAt}\texttt{\{v2.00!Definition,v2.01!Erweiterung\}} genutzt.
-% Mit dem Makro \cs{ChangedAt@Process} wird zu der angegebenen Versionsnummer 
-% ein Eintrag in die Änderungsliste erstellt, wenn mit einem Ausrufezeichen
-% getrennt der gewünschte Inhalt gegeben wurde. Auf jeden Fall werden alle
-% übergegebenen Versionsnummern in einer Liste als Randnotiz einmalig gesetzt. 
+% Form: \cs{ChangedAt}\marg{Version!Definition,Version!Erweiterung} genutzt.
+% Der Prozess selbst wird mit \cs{ChangedAt@Process} durchgeführt. Es wird
+% zu der angegebenen Versionsnummer ein Eintrag in die Änderungsliste erstellt,
+% wenn mit einem Ausrufezeichen getrennt der gewünschte Inhalt gegeben wurde.
+% Auf jeden Fall werden alle übergegebenen Versionsnummern in einer Liste als
+% Randnotiz einmalig gesetzt. 
 %    \begin{macrocode}
 \newcommand*\ChangedAt[1]{\strut\ChangedAt@Process{#1}\ignorespaces}
 %    \end{macrocode}
@@ -1853,11 +1865,10 @@
 % \begin{macro}{\@changedatversionlist}
 % \changes{v2.02}{2014/09/02}{neu}%^^A
 % Mit diesen Befehlen wird die Änderungshistorie in Form eines Index erstellt. 
-% Der Befehl \cs{ChangedAt@Process} setzt eine kommagetrennte Liste~-- z.\,B.
-% aus \cs{ChangedAt}~-- in eine Liste im Format von \pkg{etoolbox} um.
-% Anschließend wird diese für die Liste der Änderungen mit \cs{ChangedAt@Split} 
-% aufgespalten. Die einzelnen Einträge werden mit \cs{ChangedAt@@Process}
-% weiter verarbeitet.
+% Der Befehl \cs{ChangedAt@Process} setzt eine kommagetrennte Liste in eine 
+% im Format von \pkg{etoolbox} um. Anschließend wird diese für die Liste der
+% Änderungen mit \cs{ChangedAt@Split} aufgespalten. Die einzelnen Einträge
+% werden mit \cs{ChangedAt@@Process} weiter verarbeitet.
 %    \begin{macrocode}
 \newcommand*\@changedatlist{}
 \newcommand*\ChangedAt@Default{}
@@ -1882,7 +1893,9 @@
 % Anschließend wird diese wieder zurückgesetzt.
 %    \begin{macrocode}
   \marginnote{%
-    \def\@tempa####1{\ignorespaces####1\tabularnewline}%
+    \def\@tempa####1{%
+      \ignorespaces\hyperref[idx:changelog]{####1}\tabularnewline%
+    }%
     \begin{tabular}{|l|}%
       \hline{\footnotesize\rule{0pt}{.8\baselineskip}}%
       \forlistloop\@tempa{\@changedatversionlist}%

@@ -121,6 +121,8 @@ Paket manipulieren.
 
 \section{URL-Umbrüche im Literaturverzeichnis mit \Package{biblatex}}
 \index{Literaturverzeichnis}
+%
+\ChangedAt{v2.02}
 Wird das Paket \Package{biblatex} verwendet, kann es unter Umständen dazu 
 kommen, das eine URL nicht vernünftig umbrochen werden. Ist dies der Fall, 
 können die Zählern \Counter*{biburlnumpenalty}, \Counter*{biburlucpenalty} und 
@@ -134,6 +136,8 @@ Dokumentation des \Package{biblatex}"=Paketes zu entnehmen.
 
 \section{Bezeichnungen der Gliederungsebenen durch \Package{hyperref}}
 \index{Querverweise}
+%
+\ChangedAt{v2.02}
 Das Paket \Package{hyperref} stellt für Querverweise unter anderem den Befehl 
 \Macro*{autoref}\Parameter{label} zur Verfügung. Mit diesem wird~-- im 
 Gegensatz zur Verwendung von \Macro*{ref}~-- bei einer Referenz nicht nur die 
@@ -388,6 +392,87 @@ vor der ersten und nach der letzten entfernt werden.
 
 
 
+
+
+
+\section{Warnungen bei der Verwendung von \Package{multicol}}
+%
+\ChangedAt{v2.02}
+Das einzig momentan bekannte Problem der \TUDScript"=Klasse tritt in Verbindung 
+mit dem Paket \Package[?]{multicol} auf. Dieses greift~-- ähnlich zu dem für 
+die Seitenstile verwendeten Paket \Package{scrlayer-scrpage}~-- sehr stark in 
+die Ausgaberoutine von \hologo{LaTeXe} ein. Bei Spaltenumbrüchen innerhalb der 
+\Environment*{multicols}"=Umgebung kommt es sehr häufig zu folgender Warnung:
+%
+\begin{quoting}
+\begin{Code}
+Underfull \hbox (badness 10000) has occurred while \output is active
+\end{Code}
+\end{quoting}
+%
+Wird \Package{scrlayer-scrpage} nicht verwendet, unterbleibt die Warnung. Beide 
+Pakete haben in der Kombination miteinander augenscheinlich ein Problem. Die 
+Autoren der beiden Pakete wurden über dieses Problem informiert, signalisierten 
+jedoch verständlicherweise wenig Bereitschaft, der Ursache auf den Grund zu 
+gehen. Leider kann für die \TUDScript-Klassen auf \Package{scrlayer-scrpage} 
+nicht verzichtet werden, es ist von essentieller Bedeutung für die Seitenstile 
+im \CD der \TnUD. Am Ausgabeergebnis ändert sich nichts. Im Zweifelsfall werden 
+jedoch eine Menge bedeutungsloser Warnungen generiert. 
+
+Es gibt allerdings eine Möglichkeit, diese zu unterdrücken. Hierfür wird auf 
+die Funktionalitäten von \Package{etoolbox} zurückgegriffen, was ohnehin von 
+den \TUDScript-Klassen geladen wird. In der Präambel kann folgender Quelltext 
+verwendet werden:
+%
+\begin{quoting}
+\begin{Code}
+\makeatletter
+\apptocmd{\prepare@multicols}{\hbadness10000}{}{}
+\makeatother
+\end{Code}
+\end{quoting}
+%
+Dadurch werden die durch \hologo{LaTeXe} generierten Warnungen innerhalb der 
+\Environment*{multicols}"=Umgebung deaktiviert. Es muss dabei beachtet werden, 
+dass dies für alle Boxen~-- und nicht nur jene beim Spaltenumbruch~-- gilt.
+
+
+
+\section{Lokale Änderungen von Befehlen und Einstellungen}
+\index{Gruppierungen}
+%
+\ChangedAt{v2.02}
+Ein zentraler Bestandteil von \hologo{LaTeX} ist die Verwendung von Gruppen 
+oder Gruppierungen. Innerhalb dieser bleiben alle vorgenommenen Änderungen an 
+Befehlen, Umgebungen oder Einstellungen lokal. Dies kann sehr nützlich sein, 
+wenn beispielsweise das Verhalten eines bestimmten Makros einmalig oder 
+innerhalb von selbst definierten Befehlen oder Umgebungen geändert werden, im 
+Normalfall jedoch die ursprüngliche Funktionalität behalten soll.
+\begin{Example}
+\index{Schriftauszeichnung}
+Der Befehl \Macro*{emph} wird von \hologo{LaTeX} für Hervorhebungen im Text 
+bereitgestellt und führt normalerweise zu einer kursiven oder~-- falls kein 
+Schriftschnitt mit echten Kursiven vorhanden ist~-- kursivierten Auszeichnung. 
+Soll nun in einem bestimmten Abschnitt die Auszeichnung mit fetter Schrift 
+erfolgen, kann der Befehl \Macro*{emph} innerhalb einer Gruppierung geändert 
+und verändert werden. Wird diese beendet, verhält sich der Befehl wie gewohnt.
+\begin{Code}
+In diesem Text wird ein bestimmtes \emph{Wort} hervorgehoben.
+
+\begingroup
+\renewcommand*\emph[1]{\textbf{#1}}%
+In diesem Text wird ein bestimmtes \emph{Wort} hervorgehoben.
+\endgroup
+
+In diesem Text wird ein bestimmtes \emph{Wort} hervorgehoben.
+\end{Code}
+\end{Example}
+Eine Gruppierung kann entweder mit \Macro*{begingroup} und \Macro*{endgroup} 
+oder einfach mit einem geschweiften Klammerpaar \texttt{\{\dots\}} definiert 
+werden.
+
+
+
 \section{Platzierung von Gleitobjekten}
 \label{sec:tips:floats}
 \index{Gleitobjekte|?}
@@ -484,56 +569,3 @@ schreiben:
 \makeatother
 \end{Code}
 \end{Example}
-
-
-
-\section{Warnungen bei der Verwendung von \Package{multicol}}
-Das einzig momentan bekannte Problem der \TUDScript"=Klasse tritt in Verbindung 
-mit dem Paket \Package[?]{multicol} auf. Dieses greift~-- ähnlich zu dem für 
-die Seitenstile verwendeten Paket \Package{scrlayer-scrpage}~-- sehr stark in 
-die Ausgaberoutine von \hologo{LaTeXe} ein. Bei Spaltenumbrüchen innerhalb der 
-\Environment*{multicols}"=Umgebung kommt es sehr häufig zu folgender Warnung:
-%
-\begin{quoting}
-\begin{Code}
-Underfull \hbox (badness 10000) has occurred while \output is active
-\end{Code}
-\end{quoting}
-%
-Wird \Package{scrlayer-scrpage} nicht verwendet, unterbleibt die Warnung. Beide 
-Pakete haben in der Kombination miteinander augenscheinlich ein Problem. Die 
-Autoren der beiden Pakete wurden über dieses Problem informiert, signalisierten 
-jedoch verständlicherweise wenig Bereitschaft, der Ursache auf den Grund zu 
-gehen. Leider kann für die \TUDScript-Klassen auf \Package{scrlayer-scrpage} 
-nicht verzichtet werden, es ist von essentieller Bedeutung für die Seitenstile 
-im \CD der \TnUD. Am Ausgabeergebnis ändert sich nichts. Im Zweifelsfall werden 
-jedoch eine Menge bedeutungsloser Warnungen generiert. 
-
-Es gibt allerdings eine Möglichkeit, diese zu unterdrücken. Hierfür wird auf 
-die Funktionalitäten von \Package{etoolbox} zurückgegriffen, was ohnehin von 
-den \TUDScript-Klassen geladen wird. In der Präambel kann folgender Quelltext 
-verwendet werden:
-%
-\begin{quoting}
-\begin{Code}
-\makeatletter
-\apptocmd{\prepare@multicols}{\hbadness10000}{}{}
-\makeatother
-\end{Code}
-\end{quoting}
-%
-Dadurch werden die durch \hologo{LaTeXe} generierten Warnungen innerhalb der 
-\Environment*{multicols}"=Umgebung deaktiviert. Es muss dabei beachtet werden, 
-dass dies für alle Boxen~-- und nicht nur jene beim Spaltenumbruch~-- gilt.
-
-
-
-\section{Lokale Änderungen in einer Gruppierung}
-\ToDo[doc]{text}[v2.02]
-\begin{quoting}
-\begin{Code}[escapechar=§]
-\begingroup
-§\dots§
-\endgroup
-\end{Code}
-\end{quoting}
