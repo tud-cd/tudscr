@@ -1,0 +1,933 @@
+\setchapterpreamble{%
+  Zusätzlich zu den eigentlichen Hauptklassen werden im \TUDScript-Bundle 
+  weitere Paket bereitgestellt. Diese werden im Folgenden vorgestellt.%
+}
+\chapter{Zusätzliche Pakete im \TUDScript-Bundle}
+\DeclarePackage{tudscrsupervisor}
+\section{Das Paket \Package*{tudscrsupervisor} -- Studentische Betreuung}
+Dieses Paket stellt für das Erstellen von Aufgabenstellungen und Gutachten  
+wissenschaftlicher Arbeiten sowie offiziellen Aushängen im \CD passende 
+Umgebungen und Befehle für den Anwender bereit. Deshalb richtet es sich 
+vornehmlich an Mitarbeiter an der \TnUD, kann jedoch natürlich auch von 
+Studenten genutzt werden.
+
+
+\subsection{Aufgabenstellung für eine wissenschaftliche Arbeit}
+%
+\begin{Declaration}{\Environment{task}[\OLParameter{Überschrift}]}{%
+  \Environment{tudpage} in \autoref{macros:tudpage}
+}
+\begin{Declaration}{\Key{\Environment{task}}{headline}[\PName{Überschrift}]}
+\printdeclarationlist%
+\index{Aufgabenstellung|!(}%
+%
+Mit der \Environment{task}"=Umgebung kann ein Aufgabenstellung für eine 
+wissenschaftliche Arbeit ausgegeben werden. Sie basiert auf der Umgebung 
+\Environment{tudpage} und akzeptiert deshalb im optionalen Argument alle 
+Parameter, welche bei der Beschreibung von \Environment'{tudpage} erläutert 
+wurden.
+
+Für die Aufgabenstellung wird normalerweise eine Überschrift gesetzt, welche 
+sich aus \Term{taskname} und~-- falls der Typ der Abschlussarbeit angegeben 
+wurde~-- noch aus \Term{tasktext} und \Macro{thesis} zusammensetzt. Der 
+Parameter \Key*{\Environment{task}}{headline} kann genutzt werden, um diese 
+automatisch generierte Überschrift anzupassen.
+
+Zu Beginn der Aufgabenstellung erscheint eine Tabelle mit den angegebenen 
+Informationen zum Autor bzw. zu den Autoren der Abschlussarbeit. Zwingend 
+anzugeben sind dafür lediglich der Name des oder der Verfasser (\Macro{author}) 
+sowie der Titel der Arbeit (\Macro{title}), welcher am Ende der Tabelle in 
+fetter Schrift aufgeführt wird. Optional werden noch die Felder für den 
+Studiengang (\Macro{course}), die Fachrichtung (\Macro{discipline}) sowie die 
+Matrikelnummer (\Macro{matriculationnumber}) und das Immatrikulationsjahr 
+(\Macro{matriculationyear}) ausgegeben, wobei nicht angegebene Felder beim Satz 
+ignoriert werden. Der eigentliche Inhalt der Umgebung~-- die Aufgabenstellung 
+selbst~-- wird nach dem generierten Kopf ausgegeben
+
+Nach der Ausgabe des Inhaltes der Aufgabenstellung werden der oder die mit 
+\Macro{supervisor} definierten Betreuer aufgelistet. Dabei wird unter dem 
+jeweiligen Namen selbst der sprachabhängige Bezeichner (\Term{supervisorname}, 
+\Term{supervisorothername}) gesetzt. Darauf folgend erscheint das Ausgabedatum 
+(\Macro{issuedate}) und der verpflichtende Abgabetermin (\Macro{duedate}). Zum 
+Schluss wird die Unterschriftzeile für den Prüfungsausschussvorsitzenden 
+(\Macro{chairman}) und den betreuenden Hochschullehrer (\Macro{professor}) 
+gesetzt. Für genannte Personen werden unter dem Namen selbst die Bezeichner 
+ausgegeben (\Term{chairmanname} und \Term{professorname}).
+\end{Declaration}
+\end{Declaration}
+
+\begin{Declaration}{\Macro{taskform}\LParameter%
+  \Parameter{Ziele}\Parameter{Schwerpunkte}%
+}
+\printdeclarationlist%
+%
+Zusätzlich zur der frei gestaltbaren Umgebung \Environment*{task} zur Erstellung
+einer Aufgabenstellung wird ein separater Befehl für eine standardisierte 
+Ausgabe zur Verfügung gestellt. Dieser strukturiert die Aufgabenstellung in die 
+zwei Bereiche \emph{Ziele} und \emph{Schwerpunkte} der Arbeit mit dazugehörigen 
+Überschriften (\Term{objectivesname}, \Term{focusname}).
+
+Im optionalen Argument können alle Parameter der Umgebung \Environment*{task} 
+verwendet werden. Im ersten obligatorischen Argument sollte ein Text mit einer 
+kurzen thematischen Einordnung und dem eigentlichen Ziel der Arbeit erscheinen. 
+im zweiten Argument sollen die thematischen Schwerpunkte in Stichpunkten 
+benannt werden. Der Inhalt des zweiten notwendigen Argumentes wird in einer 
+\Environment{itemize}"=Umgebung gesetzt. Deshalb \emph{muss} jedem Stichpunkt 
+\Macro*{item} vorangestellt werden.
+\index{Aufgabenstellung|!)}%
+\end{Declaration}
+%
+\begin{Example}
+Die empfohlene Verwendung des Befehls \Macro*{taskform} ist wie folgt:
+\begin{Code}[escapechar=§]
+\taskform{%
+  Motivation der Arbeit im ersten Absatz§\dots§
+  
+  Ziele der Arbeit im zweiten Absatz§\dots§
+}{%
+  \item Schwerpunkt 1
+  \item Schwerpunkt 2
+}
+\end{Code}
+Hierzu sei auch auf das Minimalbeispiel in \autoref{sec:exmpl:task} verwiesen.
+\end{Example}
+
+\Rename[macros]{v2.02}{\Macro{branch}}{\Macro{discipline}}
+\begin{Declaration}{\Macro{course}\Parameter{Studiengang}}
+\begin{Declaration}{\Macro{discipline}\Parameter{Studienrichtung}}
+\printdeclarationlist%
+\index{Kollaboratives Schreiben}%
+%
+Mit diesen beiden Befehlen kann der Studiengang sowie die Studienrichtung für 
+den Autor oder die Autoren angegeben werden. Diese Informationen werden zu 
+Beginn der \Environment{task}"=Umgebung gesetzten Tabelle ausgegeben. Werden 
+diese Befehle innerhalb des Makros \Macro{author} verwendet, können auch 
+unterschiedliche Angaben für mehrere Autoren gemacht werden. Dabei sind die 
+Autoren mit \Macro{and} voneinander zu trennen.
+\end{Declaration}
+\end{Declaration}
+
+\begin{Declaration}{\Macro{chairman}\Parameter{Prüfungsausschussvorsitzender}}
+\printdeclarationlist%
+%
+Wird dieses Feld genutzt, wird neben dem betreuenden Hochschullehrer 
+(\Macro{professor}) auch der Vorsitzende des Prüfungsausschusses am Ende der 
+Aufgabenstellung aufgeführt. Dies wird zumeist für Abschlussarbeiten wie 
+beispielsweise \masterthesisname{} oder \diplomathesisname{} benötigt.
+\end{Declaration}
+
+\begin{Declaration}{\Macro{issuedate}\Parameter{Ausgabedatum}}
+\begin{Declaration}{\Macro{duedate}\Parameter{Abgabetermin}}
+\printdeclarationlist%
+%
+Mit diesen beiden Befehlen sollte das Datum der Ausgabe der Aufgabenstellung 
+sowie der spätest mögliche Abgabetermin angegeben werden. Ist das Paket 
+\Package{isodate} geladen, wird die damit eingestellte Formatierung des Datums 
+durch den Befehl \Macro{printdate} aus diesem Paket für \Macro*{issuedate} und 
+\Macro*{duedate} verwendet.
+\end{Declaration}
+\end{Declaration}
+
+
+\subsection{Gutachten für wissenschaftliche Arbeiten}
+%
+\begin{Declaration}{\Environment{evaluation}[\OLParameter{Überschrift}]}{%
+  \Environment{tudpage} in \autoref{macros:tudpage}
+}
+\begin{Declaration}{%
+  \Key{\Environment{evaluation}}{headline}[\PName{Überschrift}]%
+}
+\begin{Declaration}{\Key{\Environment{evaluation}}{grade}[\PName{Note}]}
+\printdeclarationlist%
+\index{Gutachten|!(}%
+%
+Diese Umgebung wird für das Erstellen eines Gutachtens einer wissenschaftlichen 
+Arbeit bereitgestellt. Auch diese unterstützt alle Parameter, welche für die 
+Umgebung \Environment'{tudpage} beschrieben wurden.
+
+Für ein Gutachten wird gewöhnlich eine Überschrift aus \Term{evaluationname} 
+und~-- falls der Abschlussarbeitstyp angegeben wurde~-- \Term{evaluationtext} 
+sowie \Macro{thesis} generiert. Diese automatisch generierte Überschrift kann 
+mit dem Parameter \Key*{\Environment{evaluation}}{headline} ersetzt werden. Am 
+Ende des Gutachtens wird die mit \Key*{\Environment{evaluation}}{grade} 
+gegebene Note in fetter Schrift ausgezeichnet.
+
+Am Anfang der \Environment*{evaluation}"=Umgebung wird die gleiche Tabelle mit 
+Autorenangaben ausgegeben, wie dies bei der \Environment{task}"=Umgebung der 
+Fall ist. Nach dem Tabellenkopf folgt auch hier der eigentliche Inhalt, sprich 
+das Gutachten der Abschlussarbeit. Abgeschlossen wird die Umgebung mit der 
+gegebenen Note~-- welche innerhalb von \Term{gradetext} ausgegeben wird~-- 
+sowie der Orts- und Datumsangabe (\Macro{place}, \Macro{date}) und der 
+darauffolgenden Unterschriftzeile für den oder die Gutachter (\Macro{referee}), 
+welche wiederum mit den entsprechenden sprachabhängigen Bezeichner 
+(\Term{refereename}, \Term{refereeothername}) ergänzt werden.
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+
+\begin{Declaration}{\Macro{evaluationform}\LParameter%
+  \Parameter{Aufgabe}\Parameter{Inhalt}\Parameter{Bewertung}\Parameter{Note}%
+}
+\printdeclarationlist%
+%
+Neben der individuell nutzbaren Umgebung \Environment*{evaluation} wird ein 
+separater Befehl zur Erstellung eines standardisierten Gutachtens 
+bereitgestellt. Dieser strukturiert die Ausgabe in die vier Bereiche 
+\emph{Aufgabe}, \emph{Inhalt}, \emph{Bewertung} und \emph{Note} und versieht 
+die jeweiligen Bereiche mit der dazugehörigen Überschrift beziehungsweise 
+Textausgabe (\Term{taskname}, \Term{contentname}, \Term{assessmentname} und 
+\Term{gradetext}). Das optionale Argument unterstützt alle Parameter der 
+\Environment{evaluation}"=Umgebung.
+\index{Gutachten|!)}%
+\end{Declaration}
+%
+\begin{Example}
+Die empfohlene Verwendung des Befehls \Macro*{evaluationform} ist wie folgt:
+\begin{Code}[escapechar=§]
+\evaluationform{%
+  Kurzbeschreibung der Aufgabenstellung§\dots§
+}{%
+  Zusammenfassung von Inhalt und Struktur§\dots§
+}{%
+  Bewertung der schriftlichen Abschlussarbeit§\dots§
+}{%
+  Zahl (Note)
+}
+\end{Code}
+Hierzu sei auch auf das Minimalbeispiel in \autoref{sec:exmpl:evaluation} 
+verwiesen.
+\end{Example}
+
+\begin{Declaration}{\Macro{grade}\Parameter{Note}}
+\printdeclarationlist%
+%
+Neben der Angabe der Note für ein Gutachten über den Parameter 
+\Key*{\Environment{evaluation}}{grade} kann dafür auch dieser global wirkende 
+Befehl verwendet werden.
+\end{Declaration}
+
+
+\subsection{Aushang}
+%
+\begin{Declaration}{\Environment{notice}[\OLParameter{Überschrift}]}{%
+  \Environment{tudpage} in \autoref{macros:tudpage}
+}
+\begin{Declaration}{\Key{\Environment{notice}}{headline}[\PName{Überschrift}]}
+\printdeclarationlist%
+\index{Aushang|!(}%
+%
+Für das Anfertigen eines Aushangs kann diese Umgebung verwendet werden. Sie 
+basiert abermals auf der Umgebung \Environment{tudpage} und unterstützt alle 
+deren Parameter.
+
+Wurde ein Datum angegeben, wird dieses in der oberen rechten Ecke gesetzt. 
+Anschließend wird die Überschrift ausgegeben, welche für gewöhnlich dem Inhalt 
+von \Term{noticename} entspricht und mit \Key*{\Environment{notice}}{headline} 
+geändert werden kann. Nach der Überschrift wird bereits der Inhalt der Umgebung 
+ausgegeben. Wurde mit \Macro{contactperson} ein oder mehrere Ansprechpartner 
+angegeben, werden diese Informationen am Ende der Umgebung ausgegeben.
+\end{Declaration}
+\end{Declaration}
+
+\begin{Declaration}{\Macro{noticeform}\LParameter%
+  \Parameter{Inhalt}\Parameter{Schwerpunkte}%
+}
+\printdeclarationlist%
+%
+Auch für diese Umgebung gibt es einen Befehl für eine normierte Form. Diese 
+soll vor allem Verwendung für den Aushang studentischer Arbeitsthemen finden. 
+Für das optionale Argument können sämtliche Parameter verwendet werden, die 
+auch die \Environment*{notice}"=Umgebung unterstützt.
+
+Das erste obligatorische Argument sollte für eine kurze Inhaltsbeschreibung 
+verwendet werden. Neben dem textuellen Teil sollte hier wenn möglich eine 
+thematisch passende Abbildung eingebunden werden (\Macro{includegraphics}). Das 
+zweite Argument wird~--wie schon bei \Macro{taskform}~-- dazu verwendet, einige 
+Schwerpunkte aufzuzählen. Auch hier kommt nach der gliedernden Überschrift 
+(\Term{focusname}) eine \Environment{itemize}"=Umgebung zum Einsatz, allen 
+Schwerpunkten muss ein \Macro*{item} vorangestellt werden.
+\index{Aushang|!)}%
+\end{Declaration}
+%
+\begin{Example}
+Die empfohlene Verwendung des Befehls \Macro*{noticeform} ist wie folgt:
+\begin{Code}[escapechar=§]
+\noticeform{%
+  Kurzbeschreibung des Inhaltes der studentischen Arbeit§\dots§
+  
+  Bild (optional), einzubinden mit:
+    \includegraphics[§\PName{Optionen}§]{§\PName{Datei}§}
+}{%
+  \item Schwerpunkt 1
+  \item Schwerpunkt 2
+}
+\end{Code}
+Hierzu sei auch auf das Minimalbeispiel in \autoref{sec:exmpl:notice} verwiesen.
+\end{Example}
+
+\Rename[macros]{v2.02}{\Macro{contact}}{\Macro{contactperson}}
+\Rename[macros]{v2.02}{\Macro{phone}}{\Macro{telephone}}
+\Rename[macros]{v2.02}{\Macro{email}}{\Macro{emailaddress}}
+\begin{Declaration}{\Macro{contactperson}\Parameter{Kontaktperson(en)}}
+\begin{Declaration}{\Macro{office}\Parameter{Dienstsitz}}
+\begin{Declaration}{\Macro{telephone}\Parameter{Telefonnummer}}
+\begin{Declaration}{\Macro{emailaddress}\Parameter{E-Mail-Adresse}}
+\printdeclarationlist%
+%
+Am Ende eines Aushangs können mit \Macro*{contactperson} Kontaktinformationen 
+für eine oder mehrere Ansprechpartner angegeben werden. Soll mehr als eine 
+Kontaktperson genannt werden, so müssen diese innerhalb des Befehls
+\Macro*{contactperson} mit dem Befehl \Macro{and} getrennt werden. Für jede 
+Person kann innerhalb von \Macro*{contactperson} der Dienstsitz 
+(\Macro*{office}), die dienstliche Telefonnummer (\Macro*{telephone}) sowie die 
+geschäftliche E-Mail"=Adresse (\Macro*{email}) angegeben werden. Sollte das 
+Paket \Package*{hyperref} geladen werden, wird die gegebene E-Mail"=Adresse 
+direkt in einen entsprechenden Link gewandelt.
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+
+
+\subsection{Zusätzliche sprachabhängige Bezeichner}
+\index{Bezeichner|!(}
+Für das Paket \Package*{tudscrsupervisor} werden für die zusätzlichen 
+Umgebungen weiter Bezeichner definiert. Für eine etwaige Anpassung dieser sei 
+auf \autoref{sec:localization} verwiesen.
+
+\begin{Declaration}{\Term{taskname}}
+\begin{Declaration}{\Term{tasktext}}
+\printdeclarationlist%
+%
+Die Bezeichnung der Aufgabenstellung selbst ist in \Term*{taskname} enthalten. 
+Für die Generierung einer Überschrift wird dieser verwendet. Wurde außerdem mit 
+\Macro{thesis} oder \Macro{subject} der Typ der Abschlussarbeit%
+\footnote{%
+  \Option{subjectthesis} oder spezieller Wert aus \autoref{tab:thesis}
+}
+angegeben, wird die Überschrift zusammen mit dem Bezeichner \Term*{tasktext}
+um die Typisierung erweitert. Falls gewünscht, kann die automatisch generierte 
+Überschrift mit dem Parameter \Key{\Environment{task}}{headline} der Umgebung 
+\Environment{task} überschrieben werden.
+\TermTable{taskname,tasktext}
+\end{Declaration}
+\end{Declaration}
+
+\Rename[terms]{v2.02}{\Term{branchname}}{\Term{disciplinename}}
+\begin{Declaration}{\Term{authorname}}
+\begin{Declaration}{\Term{titlename}}
+\begin{Declaration}{\Term{coursename}}
+\begin{Declaration}{\Term{disciplinename}}
+\printdeclarationlist%
+%
+Diese Bezeichner werden in der Tabelle mit den Autoreninformationen zu Beginn 
+der Aufgabenstellung verwendet. Dabei werden \Term*{coursename} und 
+\Term*{disciplinename} nur genutzt, wenn für mindestens einen Autor die Befehle 
+\Macro{course} und/oder \Macro{discipline} verwendet wurden.
+\TermTable{authorname,titlename,coursename,disciplinename}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+
+\begin{Declaration}{\Term{issuedatetext}}
+\begin{Declaration}{\Term{duedatetext}}
+\printdeclarationlist%
+%
+Am Ende der Aufgabenstellung wird nach dem oder der Betreuer das Ausgabe- und 
+Abgabedatum (\Macro{issuedate}, \Macro{duedate}) der Abschlussarbeit mit 
+folgenden Bezeichner erläutert.
+\TermTable{issuedatetext,duedatetext}
+\end{Declaration}
+\end{Declaration}
+
+\begin{Declaration}{\Term{chairmanname}}
+\printdeclarationlist%
+%
+Wurde der Prüfungsausschussvorsitzende (\Macro{chairman}) angegeben, erfolgt 
+unter dem Namen selbst die Ausgabe des Bezeichners.
+\TermTable{chairmanname}
+\end{Declaration}
+
+\begin{Declaration}{\Term{focusname}}
+\begin{Declaration}{\Term{objectivesname}}
+\printdeclarationlist%
+%
+Wird die standardisierte Form der Aufgabenstellung genutzt (\Macro{taskform}), 
+so werden die zwei Überschriften mit diesen Bezeichnern gesetzt.
+\TermTable{focusname,objectivesname}
+\end{Declaration}
+\end{Declaration}
+
+\begin{Declaration}{\Term{evaluationname}}
+\begin{Declaration}{\Term{evaluationtext}}
+\printdeclarationlist%
+%
+Die Bezeichnung des Gutachten selbst ist in \Term*{evaluationname} enthalten. 
+Für die Generierung der Überschrift wird der Bezeichner \Term*{evaluationtext} 
+sowie der mit \Macro{thesis} oder gegebenenfalls mit \Macro{subject} gegebenen 
+Typ der Abschlussarbeit verwendet. Diese automatisch generierte Überschrift 
+kann mit dem Parameter \Key{\Environment{evaluation}}{headline} der 
+Umgebung \Environment{evaluation} durch den Anwender überschrieben werden.
+\TermTable{evaluationname,evaluationtext}
+\end{Declaration}
+\end{Declaration}
+
+\begin{Declaration}{\Term{contentname}}
+\begin{Declaration}{\Term{assessmentname}}
+\printdeclarationlist%
+%
+Bei der standardisierten Form des Gutachten (\Macro{evaluationform}) werden die 
+gliedernden Überschriften mit den Bezeichnern \Term*{taskname}, 
+\Term*{contentname} und \Term*{assessmentname} gesetzt.
+\TermTable{contentname,assessmentname}
+\end{Declaration}
+\end{Declaration}
+
+\begin{Declaration}{\Term{gradetext}}
+\printdeclarationlist%
+%
+Wird für ein Gutachten mit dem Befehl \Macro{grade}\Parameter{Note} oder mit 
+dem Parameter \Key{\Environment{evaluation}}{grade}[\PName{Note}] die Note 
+angegeben, so wird diese innerhalb von \Term*{gradetext} verwendet.
+\grade{\PName{Note}}
+\TermTable*{gradetext}{.7\textwidth}
+\end{Declaration}
+
+\Rename[terms]{v2.02}{\Term{contactname}}{\Term{contactpersonname}}
+\begin{Declaration}{\Term{noticename}}
+\begin{Declaration}{\Term{contactpersonname}}
+\printdeclarationlist%
+%
+Die Bezeichnung des Aushangs selbst ist in \Term*{noticename} enthalten. Für 
+die Generierung einer Überschrift wird dieser verwendet. Falls gewünscht, kann 
+diese mit dem Parameter \Key{\Environment{notice}}{headline} der Umgebung 
+\Environment{notice} überschrieben werden. Wurde eine Kontaktperson mit dem 
+Befehl \Macro{contactperson} angegeben, wird als Überschrift der Kontaktdaten 
+der Bezeichner \Term*{contactpersonname} verwendet.
+
+\TermTable{noticename,contactpersonname}
+\end{Declaration}
+\end{Declaration}
+\index{Bezeichner|!)}
+
+
+
+\DeclarePackage{tudscrcolor}
+\section{Das Paket \Package*{tudscrcolor} -- Farben im \CD}%
+\index{Farben|!}%
+%
+Für das \CD sind mehrere Farben vorgesehen. Die prägnanteste aller ist die 
+Hausfarbe \Color*{HKS41}, danach folgen die Farben für Auszeichnungen der ersten
+(\Color*{HKS44}) und der zweiten Kategorie (\Color*{HKS36}, \Color*{HKS33}, 
+\Color*{HKS57}, \Color*{HKS65}) sowie eine Ausnahmefarbe (\Color*{HKS07}). 
+Diese Farben dürfen sowohl in ihrer Grundform als auch in helleren Tönen mit 
+einer Abstufung in 10\,\%"~Schritten verwendet werden. Das ohnehin verwendete 
+Paket \Package{xcolor} stellt genau diese Funktionalität zur Verfügung. Jede 
+der Farben kann sowohl über \Color*{HKS}\PName{Zahl} als auch über ein 
+Pseudonym \Color*{cd}\PName{Farbe} angesprochen werden. Diese werden in diesem 
+\autorefname dokumentiert und dargestellt.
+%
+\begin{Example*}
+Die Grundfarbe \Color*{HKS44} soll in der auf 20\% reduzierten, helleren 
+Abstufung genutzt werden. Innerhalb eines Befehls, der als Argument eine 
+gültige Farbe erwartet, muss lediglich \Color*{HKS44}\PValue{!20} angegeben 
+werden. Dies wird hier exemplarisch mit dieser \colorbox{HKS44!20}{%
+  Box \Macro*{colorbox}\PParameter{HKS44!20}\PParameter{Box}%
+} demonstriert.
+\end{Example*}
+%
+Bei der farbigen Gestaltung des \CDs (\Option{cd}[color]) ist der Hintergrund 
+des Titels und der Teileseiten in \Color*{HKS41} und die Schrift auf selbigen 
+in \Color*{HKS41}\PValue{!30} gehalten Der Hintergrund der Kapitelseiten 
+erscheint in \Color*{HKS41}\PValue{!10} und die Schrift in \Color*{HKS41}. Wird 
+die Variante mit weniger Farbeinsatz gewählt, bleibt der Hintergrund der 
+Gliederungsseiten weiß, die darauf eingesetzte Schrift ist bei Elementen 
+\Color*{HKS41}.
+
+Sollen bestimmte Optionen an das Paket \Package{xcolor} weitergereicht werden, 
+gibt es dafür zwei Möglichkeiten. Diese kann entweder vor dem Laden der Klasse 
+direkt an \Package{xcolor} übergeben werden%
+\footnote{%
+  \Macro*{PassOptionsToPackage}\Parameter{Option}\PParameter{xcolor} gefolgt von
+  \Macro*{documentclass}\OParameter{Klassenoptionen}\PParameter{tudscr\dots}
+} oder es wird \Package*{tudscrcolor} mit der entsprechenden Option geladen.%
+\footnote{
+  \Macro*{usepackage}\OParameter{Option}\PParameter{\Package*{tudscrcolor}};
+  \Package*{tudscrcolor} reicht \PName{Option} an \Package{xcolor} weiter
+}
+\newcommand*\cdcolorcalc{}
+\newcommand*\cdcolorname{}
+\newcommand*\cdcolorvalue{}
+\newcommand*\cdcolortext{}
+\newcommand*\cdcolor[2][0]{%
+  \noindent%
+  \begin{tikzpicture}[every node/.style={%
+    rectangle,minimum height=.1\linewidth,minimum width=25mm%
+  }]%
+  \def\cdcolorcalc##1##2{%
+    \pgfmathparse{100-##1*10}%
+    \xdef\cdcolorname{HKS##2!\pgfmathresult}%
+    \xdef\cdcolorvalue{\pgfmathresult}%
+    \pgfmathparse{10+##1*10}%
+  }%
+  \foreach \x in {0,1,...,9}{%
+    \cdcolorcalc{\x}{#2}%
+    \ifnum\x<#1%
+      \def\cdcolortext{white}%
+    \else%
+      \def\cdcolortext{black}%
+    \fi%
+    \node [fill=\cdcolorname,rotate=90] at (.\x\linewidth,0)%
+      {\textcolor{\cdcolortext}{HKS#2!\pgfmathprintnumber\cdcolorvalue}};%
+  };%
+  \end{tikzpicture}%
+}
+
+
+\subsection{Primäre Hausfarbe}
+%
+\begin{Declaration}{\Color{HKS41}[cddarkblue]}
+\printdeclarationlist%
+\cdcolor[6]{41}
+\end{Declaration}
+
+
+\subsection{Sekundäre Hausfarbe (Geschäftsausstattung)}
+%
+\begin{Declaration}{\Color{HKS92}[cdgray]}
+\printdeclarationlist%
+\cdcolor[4]{92}
+\end{Declaration}
+
+
+\subsection{Auszeichnungsfarbe 1.Kategorie}
+%
+\begin{Declaration}{\Color{HKS44}[cdblue]}
+\printdeclarationlist%
+\cdcolor[4]{44}
+\end{Declaration}
+
+
+\subsection{Auszeichnungsfarbe 2.Kategorie}
+%
+\begin{Declaration}{\Color{HKS36}[cdindigo]}
+\begin{Declaration}{\Color{HKS33}[cdpurple]}
+\begin{Declaration}{\Color{HKS57}[cddarkgreen]}
+\begin{Declaration}{\Color{HKS65}[cdgreen]}
+\printdeclarationlist%
+\cdcolor[4]{36}\vskip\baselineskipglue
+\cdcolor[4]{33}\vskip\baselineskipglue
+\cdcolor[2]{57}\vskip\baselineskipglue
+\cdcolor{65}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+
+
+\subsection{Ausnahmefarbe}
+%
+\begin{Declaration}{\Color{HKS07}[cdorange]}
+\printdeclarationlist%
+\cdcolor{07}
+\end{Declaration}
+
+
+\subsection{Zusätzliche Farbdefinitionen}
+Das Paket \Package*{tudscrcolor} definiert im Normalfall lediglich die zuvor 
+beschriebenen Grundfarben \Color*{HKS41}, \Color*{HKS92}, \Color*{HKS44}, 
+\Color*{HKS36}, \Color*{HKS33}, \Color*{HKS57}, \Color*{HKS65} sowie 
+\Color*{HKS07}. Alle anderen farblichen Abstufungen können mit den beschrieben 
+Möglichkeiten des Paketes \Package{xcolor} generiert werden.
+
+\begin{Declaration}{\Option{full}}
+\printdeclarationlist%
+%
+In den letzten Jahren sind viele verschiedene Klassen und Pakete für das \CD 
+der \TnUD entstanden. Innerhalb dieser existieren abweichende Farbdefinitionen. 
+Um eine Migration von anderen Klassen und Paketen auf das \TUDScript-Bundle zu 
+ermöglichen, existiert die Paketoption \Option*{full}. Wird diese aktiviert, so 
+werden zusätzlich weitere Farben nach dem Schema \Color*{HKS41K}\PName{Zahl} 
+und \Color*{HKS41-}\PName{Zahl} bereitgestellt, wobei der hinten angestellte 
+Zahlenwert aus der 10er-Reihe kommen muss.
+\end{Declaration}
+
+
+
+\subsection{Umstellung des Farbmodells}
+\index{Farben!Farbmodell}%
+Normalerweise verwendet \Package*{tudscrcolor} das CMYK"=Farbmodell. Außerdem 
+wird weiterhin noch der RGB"=Farbraum unterstützt. Eine Umschaltung des 
+Farbmodells ist beispielsweise für gewisse Funktionen des Paketes 
+\Package{tikz} notwendig.
+
+\begin{Declaration}{\Option{RGB}}
+\printdeclarationlist%
+%
+Mit dieser Option werden bereits beim Laden des Paketes \Package*{tudscrcolor} 
+die Farben nicht nach dem CMYK"=Farbmodell sondern im RGB"=Farbraum global 
+definiert.
+\end{Declaration}
+
+\begin{Declaration}{\Macro{setcdcolors}\Parameter{Farbmodell}}
+\printdeclarationlist%
+%
+Mit diesem Befehl kann innerhalb des Dokumentes das verwendete Farbmodell 
+angepasst werden. Damit ist es möglich, lokal innerhalb einer Umgebung den 
+Farbmodus zu ändern und so nur in bestimmten Situationen beispielsweise aus dem 
+CMYK"=Farbmodell in den RGB"=Farbraum zu wechseln. Unterstützte Werte für 
+\PName{Farbmodell} sind \PValue{CMYK} und \PValue{RGB} beziehungsweise 
+\PValue{rgb}.
+\end{Declaration}
+
+\bigskip\noindent
+\Attention{%
+  Beachten Sie, dass die Darstellung der Farben im jeweiligen Farbmodus 
+  (\PValue{CMYK} oder \PValue{RGB}) je nach verwendeter Bildschirm- Drucker- 
+  und Softwarekonfiguration verschieden ausfallen kann. Die verwendeten 
+  RGB-Werte entstammen aus dem Handbuch zum \CD und sind lediglich 
+  Näherungswerte. Abweichungen vom gedruckten \Color*{HKS}-Farbregister und 
+  selbst ermittelten Werten sind technisch nicht zu vermeiden.
+}
+
+
+
+\DeclarePackage[v2.02]{tudscrfonts}
+\section{Das Paket \Package*{tudscrfonts} -- Schriften im \CD}
+\ChangedAt{v2.02}
+Dieses Paket stellt die Schriften des \CDs für \hologo{LaTeXe}-Klassen bereit, 
+welche \emph{nicht} zum \TUDScript-Bundle gehören. Das Paket unterstützt einen 
+Großteil der in \fullref{sec:fonts} beschriebenen Optionen und Befehle. Die 
+nutzbaren Paketoptionen sind für den Fließtext \Option{cdfont}~-- ohne die 
+Einstellungsmöglichkeiten für den Querbalken des \CDs (\Option{barfont})~-- und 
+für die mathematischen Schriften \Option{sansmath} sowie \Option{slantedgreek}. 
+Da von \Package*{tudscrfonts} intern das Paket \Package{tudscrbase} geladen 
+wird, können diese entweder als Paketoptionen im optionalen Argument von 
+\Macro*{usepackage}\OParameter{Paketoption}\PParameter{\Package*{tudscrfonts}} 
+oder direkt als Klassenoption angegeben werden. Zusätzlich ist nach dem Laden 
+des Paketes die späte Optionenwahl mit \Macro{TUDoption} beziehungsweise 
+\Macro{TUDoptions} möglich.
+
+Des Weiteren wird das Paket \Package{textcase} geladen, welches die Befehle 
+\Macro{MakeTextUppercase} und \Macro{NoCaseChange} zur Verfügung stellt. Der 
+Befehl \Macro{ifdin} wird ebenso wie die in \autoref{sec:fonts} beschriebenen 
+Textschalter und "~kommandos sowie die Befehle für die griechischen Buchstaben 
+bereitgestellt.
+
+Prinzipiell kann das Paket \Package*{tudscrfonts} mit jeder beliebigen 
+\hologo{LaTeXe}-Klasse verwendet werden. Sollen allerdings die Überschriften~-- 
+wie im \CD vorgesehen~-- in Majuskeln der \DIN gesetzt werden, muss der 
+Anwender dies für die jeweilige Klasse selbst umsetzen. Dafür sei noch einmal 
+auf die Textauswahlbefehle \Macro{textdbn} und \Macro{dinbn} sowie den Befehl 
+\Macro{MakeTextUppercase} zur automatisierten Großschreibung hingewiesen.
+
+Das Paket \Package*{tudscrfonts} ist insbesondere für die Verwendung zusammen 
+mit den Klassen \Class{tudbook}, \Class{tudbeamer}, \Class{tudletter}, 
+\Class{tudfax}, \Class{tudhaus} sowie \Class{tudform} vorgesehen. Die 
+Schriftinstallation für das \TUDScript-Bundle unterscheidet sich von der für 
+die gerade genannten Klassen sehr stark. Dabei wurde auch die Bezeichnung der 
+Schriftfamilien geändert. Dies hatte zwei Gründe, wobei der letztere der 
+entscheidende ist:
+%
+\begin{enumerate}
+\item
+  Die bisherige Schriftbenennung entsprach nicht dem offiziellen     
+  \hrfn{http://mirrors.ctan.org/info/fontname/fontname.pdf}%
+  {\hologo{TeX}-Namensschema}
+\item
+  Bei der Installation für das \TUDScript-Bundle werden sowohl die Metriken
+  als auch das Kerning der Schriften für Fließtext und den Mathematikmodus 
+  angepasst, was das Ergebnis der erzeugten Ausgabe beeinflusst. Damit jedoch
+  Dokumente, die mit den Klassen von Klaus Bergmann erstellt wurden, weiterhin 
+  genauso ausgegeben werden wie bisher, mussten die Schriftfamilien einen neuen 
+  Namen erhalten.
+\end{enumerate}
+%
+Wird nun das Paket \Package*{tudscrfonts} zusammen mit den alten Klassen von 
+Klaus Bergmann verwendet hat dies den Vorteil, dass auch in diesen das 
+angepasste Kerning der Schriften sowie der stark verbesserte Mathematiksatz zum 
+Tragen kommen. Außerdem kann bei der Verwendung von \Package*{tudscrfonts} auf 
+eine Installation der Schriften des \CDs in der alten Variante verzichtet 
+werden.
+\Attention{%
+  In diesem Fall \emph{muss} dieses Paket zusammen mit den alten Klassen 
+  verwendet werden, wobei sich das Ausgabeergebnis im Vergleich zu den alten 
+  Schriften ändern kann. Alternativ können diese auch parallel zu den neuen 
+  Schriftfamilien installiert werden. Hierfür werden die Skripte
+  \hrfn{https://github.com/tud-cd/tudscrold/releases/download/v1.0/tudfonts_install.bat}{\File{tudfonts\_install.bat}}
+  beziehungsweise
+  \hrfn{https://github.com/tud-cd/tudscrold/releases/download/v1.0/tudfonts_install.sh}{\File{tudfonts\_install.sh}}
+  bereitgestellt.
+}
+
+
+
+
+\DeclarePackage{tudscrcomp}
+\section{Das Paket \Package*{tudscrcomp} -- Kompatibilität zu alten Klassen}
+\label{sec:comp}
+\index{Version!v1.0|(}
+\index{Kompatibilität!Version v1.0|(}
+\index{Kompatibilität!\Class*{tudbook}|(}
+%
+\noindent\Attention{%
+  Sollten Sie die \Class{tudbook}-Klasse oder \TUDScript in der Version~v1.0 
+  nie genutzt haben, können Sie dieses \autorefname ohne Weiteres überspringen.
+  Sämtliche hier vorgestellten Optionen und Befehle sind in der aktuellen 
+  Version von \TUDScript obsolet.
+}
+
+\bigskip\noindent
+Zu Beginn der Entwicklung von \TUDScript bildete die Klasse \Class{tudbook}
+die Basis. Ziel war es, sämtliche Funktionalitäten dieser beizubehalten und 
+zusätzlich den vollen Funktionsumfang der \KOMAScript-Klassen nutzbar zu 
+machen. Bei der kompletten Neuimplementierung der \TUDScript-Klassen wurde sehr 
+viel verändert und verbessert. Einige der Optionen und Befehle waren jedoch 
+bereits in der \TUDScript-Version~v1.0 Relikte, um die Kompatibilität zur 
+\Class{tudbook}-Klasse zu gewährleisten. Mit der Version~v2.00 wurden einige 
+aus Gründen der Konsistenz lediglich umbenannt, andere wiederum wurden 
+vollständig entfernt oder über neue Befehle und Optionen in ihrer 
+Funktionalität ersetzt und erweitert. 
+
+Das Paket \Package{tudscrcomp} dient zum Umstieg von \TUDScript der Version~v1.0
+beziehungsweise der \Class{tudbook}-Klasse. Nach dem Laden des Paketes stehen 
+Optionen und Befehle bereit, welche von den alten Klassen definiert wurden und 
+das entsprechende Verhalten nachahmen. Die Intention ist, alte Dokumente 
+möglichst schnell und einfach auf die \TUDScript-Klassen portieren zu können. 
+Des Weiteren ist beschrieben, wie sich die Funktionalität ohne Verwendung des 
+Paketes mit den Mitteln von \TUDScript umsetzen lassen.
+%Für den Satz neuer Dokumente wird empfohlen, auf den Einsatz dieses Paketes 
+%komplett zu verzichten und stattdessen die neuen Befehle zu nutzen.
+
+\begin{Declaration}{\Option{serifmath}}{%
+  identisch zu \Option{sansmath}[false]%
+}
+\printdeclarationlist%
+%
+Die Funktionalität wird durch die Option \Option{sansmath} bereitgestellt.
+\end{Declaration}
+
+\begin{Declaration}{\Option{colortitle}}{%
+  identisch zu \Option{cdtitle}[color]%
+}
+\begin{Declaration}{\Option{nocolortitle}}{%
+  identisch zu \Option{cdtitle}[true]%
+}
+\printdeclarationlist%
+%
+Die Funktionalität wird durch die Option \Option{cdtitle} bereitgestellt.
+\end{Declaration}
+\end{Declaration}
+
+\begin{Declaration}{\Macro{einrichtung}\Parameter{Fakultät}}{%
+  identisch zu \Macro{faculty}
+}
+\begin{Declaration}{\Macro{fachrichtung}\Parameter{Einrichtung}}{%
+  identisch zu \Macro{department}
+}
+\begin{Declaration}{\Macro{institut}\Parameter{Institut}}{%
+  identisch zu \Macro{institute}
+}
+\begin{Declaration}{\Macro{professur}\Parameter{Lehrstuhl}}{%
+  identisch zu \Macro{chair}
+}
+\printdeclarationlist%
+%
+Dies sind die deutschsprachigen Befehle für den Kopf im \CD.
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+
+\begin{Declaration}{\Macro{moreauthor}\Parameter{Autorenzusatz}}{%
+  identisch zu \Macro{authormore}%
+}
+\printdeclarationlist%
+%
+Ursprünglich war diese Befehl für das Unterbringen aller möglichen, 
+zusätzlichen Autoreninformationen gedacht. Auch der Befehl \Macro{authormore} 
+ist ein Rudiment davon. Empfohlen wird die Verwendung der Befehle 
+\Macro{dateofbirth}, \Macro{placeofbirth}, \Macro{matriculationnumber} und 
+\Macro{matriculationyear} sowie für die Aufgabenstellung einer 
+wissenschaftlichen Arbeit \Macro{course} und \Macro{discipline} aus dem Paket 
+\Package{tudscrsupervisor}.
+\end{Declaration}
+
+\begin{Declaration}{\Macro{submitdate}\Parameter{Datum}}{%
+  identisch zu \Macro{date}%
+}
+\printdeclarationlist%
+%
+Die Funktionalität wird durch den erweiterten Standardbefehl \Macro{date} 
+abgedeckt.
+\end{Declaration}
+
+\begin{Declaration}{\Macro{supervisorII}\Parameter{Name}}{%
+  identisch zur Verwendung von \Macro{and} innerhalb von \Macro{supervisor}%
+}
+\printdeclarationlist%
+%
+Es sollte \Macro{supervisor}\PParameter{\PName{Name} \Macro{and} \PName{Name}}
+anstelle des Befehls \Macro*{supervisorII}\Parameter{Name} verwendet werden.
+\end{Declaration}
+
+\begin{Declaration}{\Macro{supervisedby}\Parameter{Bezeichnung}}{%
+  siehe \Term{supervisorname}%
+}
+\begin{Declaration}{\Macro{supervisedIIby}\Parameter{Bezeichnung}}{%
+  siehe \Term{supervisorothername}%
+}
+\begin{Declaration}{\Macro{submittedon}\Parameter{Bezeichnung}}{%
+  siehe \Term{datetext}%
+}
+\printdeclarationlist%
+%
+Zur Änderung der Bezeichnung der Betreuer sollten die sprachabhängigen 
+Bezeichner wie in \autoref{sec:localization} beschrieben angepasst werden. Eine 
+Verwendung der alten Befehle entfernt die Abhängigkeit der Bezeichner von der 
+verwendeten Sprache.
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+
+\begin{Declaration}{\Macro{dissertation}}
+\printdeclarationlist%
+%
+Die Funktionalität kann durch die Befehle \Macro{thesis}\PParameter{diss} und 
+\Macro{referee} sowie die Bezeichner \Term{refereename} und 
+\Term{refereeothername} dargestellt werden.
+\end{Declaration}
+
+\begin{Declaration}{\Option{ddcfooter}}{%
+  identisch zu \Option{ddcfoot}[true]%
+}
+\printdeclarationlist%
+%
+Die Funktionalität wird durch die Option \Option{ddcfoot} bereitgestellt.
+\end{Declaration}
+
+\begin{Declaration}{\Macro{chapterpage}}
+\printdeclarationlist%
+%
+Durch diesen Befehl können Kapitelseiten konträr zur eigentlichen Einstellung 
+aktiviert oder deaktiviert werden. Prinzipiell ist dies auch durch Änderung der 
+Option \Option{chapterpage} möglich. Allerdings wird davon abgeraten, da dies 
+zu einem inkonsistenten Layout innerhalb des Dokumentes führt.
+\end{Declaration}
+
+\begin{Declaration}{\Environment{theglossary}[\OParameter{Präambel}]}
+\begin{Declaration}{\Macro{glossitem}\Parameter{Begriff}}
+\printdeclarationlist%
+%
+Die \Class{tudbook}-Klasse stellt eine rudimentäre Umgebung für ein Glossar 
+bereit. Allerdings gibt es dafür bereits zahlreiche und besser implementierte 
+Pakete. Daher wird für diese Umgebung keine Portierung vorgenommen, sondern 
+lediglich die ursprüngliche Definition übernommen. Allerdings sein an dieser 
+Stelle auf wesentlich bessere Lösungen wie beispielsweise das Paket 
+\Package{glossaries} oder~-- mit Abstrichen~-- das nicht ganz so umfangreiche 
+Paket \Package{nomencl} verwiesen. 
+\end{Declaration}
+\end{Declaration}
+\index{Version!v1.0|)}
+\index{Kompatibilität!Version v1.0|)}
+\index{Kompatibilität!\Class*{tudbook}|)}
+
+
+
+\DeclarePackage{mathswap}
+\section{Das Paket \Package*{mathswap}}
+\index{Trennzeichen}\index{Mathematiksatz}
+\index{Trennzeichen!Dezimaltrennzeichen}
+\index{Trennzeichen!Tausendertrennzeichen}
+Die Verwendung von Dezimal- und Tausendertrennzeichen im mathematischen Satz 
+sind regional sehr unterschiedlich. In den meisten englischsprachigen Ländern 
+wird der Punkt als Dezimaltrennzeichen und das Komma zur Zifferngruppierung 
+verwendet, im restlichen Europa wird dies genau entgegengesetzt praktiziert.
+Dieses Paket soll dazu dienen, beliebige formatierte Zahlen in ihrer Ausgabe 
+anzupassen. Dafür werden die Zeichen Punkt (\ .\ ) und Komma (\ ,\ ) als 
+aktive Zeichen im Mathematikmodus definiert.
+
+Ähnliche Funktionalitäten werden bereits durch die Pakete \Package{icomma} und 
+\Package{ziffer} bereitgestellt. Bei \Package{icomma} muss jedoch beim
+Verfassen des Dokumentes durch den Autor beachtet werden, ob das verwendete
+Komma einem Dezimaltrennzeichen entspricht ($t=1,\!2$) oder einem normalen 
+Komma im Mathematiksatz ($z=f(x,y)$), wo ein gewisser Abstand nach dem Komma 
+durchaus gewünscht ist. Das Paket \Package{ziffer} liefert dafür die gewünschte 
+Funktionalität,%
+\footnote{kein Leerraum nach Komma, wenn direkt danach eine Ziffer folgt}
+ist allerdings etwas unflexibel, was den Umgang mit den Trennzeichen anbelangt.
+Als Alternative zu diesem Paket kann außerdem \Package{ionumbers} verwendet 
+werden.
+
+Das Paket \Package*{mathswap} sorgt dafür, dass Trennzeichen direkt vor einer 
+Ziffer erkannt und nach bestimmten Vorgaben ersetzt werden. Sollte sich jedoch 
+zwischen Trennzeichen und Ziffer Leerraum befinden, wird dieser als solcher
+auch gesetzt. Für ein Beispiel zur Verwendung des Paketes sei auf das Tutorial 
+\Tutorial{mathswap} in \autoref{sec:exmpl:mathswap} hingewiesen.
+
+\begin{Declaration}{\Macro{commaswap}\Parameter{Trennzeichen}}
+\begin{Declaration}{\Macro{dotswap}\Parameter{Trennzeichen}}
+\printdeclarationlist%
+%
+Die beiden Befehle \Macro*{commaswap} und \Macro*{dotswap} sind die zentrale 
+Benutzerschnittstelle des Paketes. Das Makro \Macro*{commaswap} definiert das 
+Trennzeichen oder den Inhalt, wodurch ein Komma ersetzt werden soll, auf 
+welches direkt danach eine Ziffer folgt. Normalerweise setzt \hologo{LaTeX}
+nach einem Komma im mathematischen Satz zusätzlich einen horizontalen Abstand.
+Bei der Ersetzung durch \Macro*{commaswap} entfällt dieser. Die Voreinstellung
+für \Macro*{commaswap} ist deshalb auf ein Komma (,) gesetzt. Mit dem Makro 
+\Macro*{dotswap} kann definiert werden, wodurch der Punkt im mathematischen 
+Satz ersetzt werden soll, wenn auf diesen direkt anschließend eine Ziffer 
+folgt. Da der Punkt im deutschsprachigem Raum zur Gruppierung von Ziffern 
+genutzt wird, ist hierfür standardmäßig ein halbes geschütztes Leerzeichen 
+definiert (\Macro*{,}).
+\end{Declaration}
+\end{Declaration}
+\begin{Declaration}[v2.02]{\Macro{mathswapon}}
+\begin{Declaration}[v2.02]{\Macro{mathswapoff}}
+\printdeclarationlist%
+%
+Die Funktionalität von \Package*{mathswap} kann innerhalb des Dokumentes mit 
+diesen beiden Befehlen an- und abgeschaltet werden. Beim Laden des Paketes ist 
+es standardmäßig aktiviert.
+\end{Declaration}
+\end{Declaration}
+
+
+
+\DeclarePackage{twocolfix}
+\section{Das Paket \Package*{twocolfix}}
+\index{Zweispaltensatz|?}%
+Der \hologo{LaTeXe}-Kernel enthält einen Fehler, der Kapitelüberschriften im
+zweispaltigen Layout höher setzt, als im einspaltigen. Der 
+\hrfn{http://www.latex-project.org/cgi-bin/ltxbugs2html?pr=latex/3126}{Fehler}
+ist zwar schon länger bekannt, allerdings noch nicht in \Package{ltxfix2e} 
+übernommen worden. Das Paket \Package{twocolfix} behebt das Problem. Eine 
+Integration dieses Bugfixes in \KOMAScript{} wurde bereits bei Markus Kohm 
+angefragt, jedoch von ihm bis jetzt \hrfn{http://www.komascript.de/node/1681} 
+{nicht weiter verfolgt}.
+
+
+
+\section{Zukünftige Arbeiten}
+Diese Dinge sollen langfristig in das \TUDScript-Bundle eingearbeitet werden.
+\DeclareClass{tudscrlttr}
+\subsection{\Class*{tudscrlttr} auf Basis von \Class*{scrlttr2}}
+\ToDo[imp,nxt]{Klasse \Class*{tudscrlttr}}[v2.x]
+%\chapter[Die Briefklasse \Class*{tudscrlttr}]{Die Briefklasse}
+Es soll die Klasse
+%
+\begin{description}
+  \item \Class*{tudscrlttr}
+\end{description}
+%
+für Briefe im \CD der \TnUD entstehen. Auch Vorlagen für Fax und 
+Hausmitteilungen sollen dabei abfallen.
+\DeclarePackage{tudscrposter}
+\subsection{Das Paket \Package*{tudscrposter}}
+\ToDo[imp,nxt]{%
+  Paket \Package*{tudscrposter} als Ersatz für \Class{tudmathposter}%
+}[v2.x]
+Die Funktionalität der Klasse \Class{tudmathposter} soll in ein eigenständiges 
+Paket mit dem Namen \Package*{tudscrposter} o.\,ä. überführt werden.

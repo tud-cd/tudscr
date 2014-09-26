@@ -1,0 +1,165 @@
+\RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
+\documentclass[english,ngerman]{tudscrartcl}
+\usepackage{selinput}
+\SelectInputMappings{adieresis={ä},germandbls={ß}}
+\usepackage[T1]{fontenc}
+\usepackage{tudscrman}
+\lstset{%
+  inputencoding=utf8,extendedchars=true,
+  literate=%
+    {ä}{{\"a}}1 {ö}{{\"o}}1 {ü}{{\"u}}1
+    {Ä}{{\"A}}1 {Ö}{{\"O}}1 {Ü}{{\"U}}1
+    {~}{{\textasciitilde}}1 {ß}{{\ss}}1
+}
+
+\usepackage{amsmath}
+
+\begin{document}
+\title{Ein Beitrag zum mathematischen Satz in \NoCaseChange{\hologo{LaTeXe}}}
+\author{Falk Hanisch}
+\date{21.08.2014}
+\StartTutorial
+\begin{Tutorial*}
+\RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
+\documentclass[ngerman]{scrartcl}
+\usepackage{selinput}\SelectInputMappings{adieresis={ä},germandbls={ß}}
+\usepackage[T1]{fontenc}
+\usepackage{babel}
+
+\usepackage{amsmath}
+
+\begin{document}
+\end{Tutorial*}
+
+Ein guter Mathematiksatz ist in \hologo{LaTeX} durchaus Sisyphusarbeit. Wenn 
+mikrotypographisch alles richtig gemacht werden soll, gibt es einiges zu 
+beachten. Generell gilt, dass Variablen kursiv, Bezeichnungen und Konstanten
+aufrecht gesetzt werden.
+
+Um beschreibende Indizes bei Formelzeichen richtig zu setzen, ist ohne weitere 
+Maßnahmen die exzessive Nutzung der Befehle \Macro*{mathrm}\PParameter{\dots} 
+und \Macro*{mathit}\PParameter{\dots} wohl oder übel notwendig. So wird aus:
+
+\begin{Tutorial}
+\begin{equation*}
+\begin{gathered}
+M_{EM} = \frac{M_{Rad}}{i_g \cdot i_A} - M_{VM} \\
+\textrm{für }
+\begin{aligned}
+0\leq M_{VM}\leq M_{VMmax} \\ 
+M_{EMmin}\leq M_{EM}\leq M_{EMmax}
+\end{aligned}
+\end{gathered}
+\end{equation*}
+\end{Tutorial}
+
+mit ziemlich viel Anpassungsarbeit:
+
+\begin{Tutorial}
+\begin{equation*}
+\begin{gathered}
+M_\mathrm{EM} = \frac{M_\mathrm{Rad}}{i_g \cdot i_A} - M_\mathrm{VM} \\
+\textrm{für }
+\begin{aligned}
+0\leq M_\mathrm{VM}\leq M_\mathrm{VM_{max}} \\ 
+M_\mathrm{EM_{min}}\leq M_\mathrm{EM}\leq M_\mathrm{EM_{max}}
+\end{aligned}
+\end{gathered}
+\end{equation*}
+\end{Tutorial}
+
+Wie man sieht, ist dabei eine ganze Menge Handarbeit vonnöten. Allerdings lässt 
+sich das relativ gut vereinfachen lassen. Zu diesem Zwecke wird ein Befehl 
+\Macro*{ind}\PParameter{\dots} für das Setzen von Indizes bei Formelzeichen 
+definiert. Danach kann man sich~-- wenn man das für nötig und sinnvoll 
+erachtet~-- noch zusätzliche Befehle für häufig verwendete Ausdrücke schnitzen. 
+Als Beispiel wird das schon eben genutzte Drehmoment \ensuremath{M} verwendet. 
+Hierfür könnte man Folgendes definieren:
+
+\begin{Tutorial}
+\newcommand*{\ind}[1]{\ensuremath{_\mathrm{#1}}}
+\newcommand*{\M}[1]{\ensuremath{M\ind{#1}}}
+\end{Tutorial}
+
+und damit diese Ausgabe erzeugen:
+
+\begin{Tutorial}
+\begin{equation*}
+\begin{gathered}
+\M{EM} = \frac{\M{Rad}}{i_g \cdot i_A} - \M{VM} \\
+\textrm{für }
+\begin{aligned}
+0\leq \M{VM}\leq \M{VM_{max}} \\ 
+\M{EM_{min}}\leq \M{EM}\leq \M{EM_{max}}
+\end{aligned}
+\end{gathered}
+\end{equation*}
+\end{Tutorial}
+
+Netter Nebeneffekt ist, dass man den Befehl aufgrund der Verwendung von 
+\Macro*{ensuremath}\PParameter{\dots} nun auch im Fließtext verwenden kann, 
+beispielsweise wie hier \M{VM_{ind}} (\Macro*{M}\PParameter{VM\_\{ind\}}) für 
+das induzierte Moment einer Verbrennungskraftmaschine.
+
+Möchte man es sich noch bequemer machen, strikt man sich noch eine Lösung, in
+der man~-- im Gegensatz zum \hologo{LaTeX}"=Standardfall~-- \textbf{nach} dem
+obligatorischen Argument noch ein optionales für einen weiteren Index angeben
+kann, um damit der natürlichen Schreibweise zu entsprechen. Es wird der Befehl 
+\Macro*{M} so definiert, das dieser entweder mit \Macro*{M}\Parameter{Index} 
+oder in der Variante \Macro*{M}\Parameter{Index}\OParameter{Indexindex} 
+genutzt 
+werden kann.
+
+\begin{Tutorial}
+\renewcommand*{\ind}[1]{\ensuremath{_\mathrm{#1}}}
+\makeatletter
+\renewcommand*{\M}[1]{\@ifnextchar[{\o@M{#1}}{\n@M{#1}}}
+\newcommand*{\n@M}{}
+\newcommand*{\o@M}{}
+\def\n@M#1{\ensuremath{M\ind{#1}}}
+\def\o@M#1[#2]{\ensuremath{M\ind{#1_{#2}}}}
+\makeatother
+\end{Tutorial}
+
+Somit vereinfacht sich das zu Beginn vorgestellte Beispiel recht deutlich:
+
+\begin{Tutorial}
+\begin{equation*}
+\begin{gathered}
+\M{EM} = \frac{\M{Rad}}{i_g \cdot i\_A} - \M{VM} \\
+\textrm{für }
+\begin{aligned}
+0\leq \M{VM}\leq \M{VM}[max] \\ 
+\M{EM}[min]\leq \M{EM}\leq \M{EM}[max]
+\end{aligned}
+\end{gathered}
+\end{equation*}
+\end{Tutorial}
+
+\vskip\baselineskipglue
+Das Definieren von \Macro*{M}\Parameter{Index}\OParameter{Indexindex} mit 
+angehängtem optionalen Argument ist ehrlich gesagt nur ein wenig Spielerei und 
+soll zeigen, wie dies prinzipiell mit \hologo{LaTeXe}"=Mitteln funktioniert. 
+Das Paket \Package{xparse} könnte alternativ zum hier vorgestellten Vorgehen 
+für die Befehlsdeklaration des optionalen \textbf{nach} dem obligatorischen 
+Argument genutzt werden. Damit würde die Befehlsdeklaration für \Macro*{M} 
+folgendermaßen lauten:
+\begin{quotation}
+\begin{Code}
+\NewDocumentCommand \M { m o } {%
+  \ensuremath{%
+    M\ind{%
+      #1
+      \IfNoValueTF{#2}{}{_{#2}}
+    }%
+  }%
+}
+\end{Code}
+\end{quotation}
+%
+Das Ende des Dokumentes nicht vergessen.
+\begin{Tutorial*}
+\end{document}
+\end{Tutorial*}
+\FinishTutorial
+\end{document}

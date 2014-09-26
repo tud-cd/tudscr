@@ -19,11 +19,11 @@ cd temp
 call clear.bat
 mkdir tex\latex\tudscr
 mkdir source\latex\tudscr
-mkdir doc\latex\tudscr
+mkdir doc\latex\tudscr\tutorials
 echo \BaseDirectory{.}> docstrip.cfg
 echo \UseTDS>> docstrip.cfg
 tex tudscr.ins
-rem move source\latex\tudscr\doc\tudscrman.sty source\latex\tudscr\doc\tutorials\
+move doc\tudscrman.sty doc\tutorials\
 copy tex\latex\tudscr\tudscrdoc.cls tudscrdoc.cls
 pdflatex "\def\tudfinalflag{}\input{tudscrsource.tex}"
 pdflatex "\def\tudfinalflag{}\input{tudscrsource.tex}"
@@ -34,7 +34,7 @@ move  *.dtx            source\latex\tudscr\
 move  tudscr.ins       source\latex\tudscr\
 move  tudscrsource.tex source\latex\tudscr\
 xcopy doc              source\latex\tudscr\doc\ /s
-rem mkdir doc\latex\tudscr\tutorials
+del source\latex\tudscr\doc\tudscr_test.tex> nul
 for /f %%f in ('dir  /b ..\*.md') do copy ..\%%f doc\latex\tudscr\%%~nf
 move tudscrsource.pdf doc\latex\tudscr\
 move logo             tex\latex\tudscr\
@@ -42,7 +42,6 @@ del *.* /q> nul
 echo =========================================================================
 echo  Erzeugen des Benutzerhandbuchs
 echo =========================================================================
-rem del source\latex\tudscr\doc\tudscr_test.tex> nul
 copy tex\latex\tudscr\*.* doc
 copy tex\latex\tudscr\logo\*.* doc
 cd doc
@@ -54,10 +53,12 @@ pdflatex -shell-escape "\def\tudfinalflag{}\input{tudscr.tex}"
 pdflatex "\def\tudfinalflag{}\def\tudprintflag{}\input{tudscr.tex}"
 copy tudscr.pdf tudscr_print.pdf
 pdflatex "\def\tudfinalflag{}\input{tudscr.tex}"
-move tudscr*.pdf latex\tudscr
-rem move tutorials\*.pdf latex\tudscr\tutorials\
+attrib +h "tutorials\*-temp.*"
+move tudscr*.pdf     latex\tudscr
+move tutorials\*.pdf latex\tudscr\tutorials\
 del *.* /q> nul
 rmdir /s /q examples> nul
+rmdir /s /q tutorials> nul
 echo =========================================================================
 echo  Erzeugen der Installationdateien
 echo =========================================================================
@@ -104,7 +105,7 @@ attrib +h *_all.zip
 move *.zip GitHub\
 attrib -h *_all.zip
 move temp\tudscr_%version%_full.zip  GitHub\tudscr_%version%.zip
-rem move temp\tudscr_uninstall.*         GitHub\release\
+move temp\tudscr_uninstall.*         GitHub\
 echo =========================================================================
 echo  Release fuer CTAN
 echo =========================================================================

@@ -1,4 +1,4 @@
-% \CheckSum{437}
+% \CheckSum{442}
 % \iffalse meta-comment
 % ======================================================================
 %
@@ -64,12 +64,12 @@
 %
 % \section{Installationsskripte}
 %
-% Hier werden die Installationsskripte für Windows und Linux automatisch 
+% Hier werden die Installationsskripte fÃ¼r Windows und Linux automatisch 
 % generiert.
 %
 % \StopEventually{\PrintIndex\PrintChanges}
 %
-% \subsection{Installationsskripte für Windows}
+% \subsection{Installationsskripte fÃ¼r Windows}
 %
 %    \begin{macrocode}
 % \iffalse
@@ -80,7 +80,7 @@ rem
 % \iffalse
 %<*full>
 % \fi
-rem Installation TUD-KOMA-Script-Bundle + TUD-CD-Schriftarten unter Windows
+rem Installation TUD-KOMA-Script-Bundle + TUD-CD-Schriften unter Windows
 % \iffalse
 %</full>
 %<*update>
@@ -90,19 +90,19 @@ rem Update TUD-KOMA-Script-Bundle unter Windows
 %</update>
 %<*font>
 % \fi
-rem Installation TUD-CD-Schriftarten unter Windows
+rem Installation TUD-CD-Schriften unter Windows
 % \iffalse
 %</font>
 %<*uninstall>
 % \fi
-rem Deinstallation TUD-KOMA-Script-Bundles v1.0 unter Windows
+rem Deinstallation TUD-KOMA-Script-Bundle unter Windows
 % \iffalse
 %</uninstall>
 % \fi
 rem
 rem Autor: Falk Hanisch
 rem
-rem letzte Bearbeitung: 23.07.2014
+rem letzte Bearbeitung: 26.08.2014
 rem
 rem getestet auf:
 rem Microsoft Windows Vista Business
@@ -119,7 +119,7 @@ echo  =======================================================================
 % \iffalse
 %<*full>
 % \fi
-echo   Installation TUD-KOMA-Script-Bundle + TUD-CD-Schriftarten unter Windows
+echo   Installation TUD-KOMA-Script-Bundle + TUD-CD-Schriften unter Windows
 % \iffalse
 %</full>
 %<*update>
@@ -129,12 +129,12 @@ echo   Update TUD-KOMA-Script-Bundle unter Windows
 %</update>
 %<*font>
 % \fi
-echo   Installation TUD-CD-Schriftarten unter Windows
+echo   Installation TUD-CD-Schriften unter Windows
 % \iffalse
 %</font>
 %<*uninstall>
 % \fi
-echo   Deinstallation TUD-KOMA-Script-Bundles v1.0 unter Windows
+echo   Deinstallation TUD-KOMA-Script-Bundle unter Windows
 % \iffalse
 %</uninstall>
 % \fi
@@ -178,7 +178,6 @@ call:checkpackage "fontinst.sty"
 % \fi 
 call:checkpackage "cmbright.sty"
 call:checkpackage "iwona.sty"
-call:checkpackage "eulervm.sty"
 % \iffalse
 %</!old>
 %<*(full|update)&!old>
@@ -189,15 +188,17 @@ call:checkpackage "mweights.sty"
 % \fi
 if "%missing%" == "true" goto :abort
 tex --version> distrib.tmp
-set /p distrib= < distrib.tmp
+set /p distrib=< distrib.tmp
+%</!uninstall>
 kpsewhich --var-value=TEXMFHOME> texmfpath.tmp
-set /p texmfpath= < texmfpath.tmp
+set /p texmfpath=< texmfpath.tmp
 if "%texmfpath%"=="" (
   set texmfpath=%USERPROFILE%\texmf
   setlocal enabledelayedexpansion
   echo !texmfpath!> texmfpath.tmp
   endlocal
 )
+%<*!uninstall>
 :MiKTeX
   echo %distrib% | find "MiKTeX"> nul
   if errorlevel 1 goto :TeXLive
@@ -241,9 +242,9 @@ if "%texmfpath%"=="" (
 %</update>
 %<*font>
 % \fi
-  echo   Installation der TUD-CD-Schriftarten in lokales Verzeichnis.
+  echo   Installation der TUD-CD-Schriften in lokales Verzeichnis.
   echo.
-  echo   Es wird empfohlen, die TUD-CD-Schriftarten in ein separates
+  echo   Es wird empfohlen, die TUD-CD-Schriften in ein separates
   echo   Verzeichnis im lokalen Benutzerpfad zu installieren:
 % \iffalse
 %</font>
@@ -260,13 +261,13 @@ if "%texmfpath%"=="" (
   )
   echo   [j]a (ENTER) / [n]ein:
   echo.
-  set /p texmfpath= < texmfpath.tmp
+  set /p texmfpath=< texmfpath.tmp
   set w=
   set /p w=
   echo.
-  if /I "%w%"=="" goto install
-  if /I "%w%"=="j" goto install
-  if /I "%w%"=="n" goto set_texmfpath
+  if /i "%w%"=="" goto install
+  if /i "%w%"=="j" goto install
+  if /i "%w%"=="n" goto set_texmfpath
   goto proof_userinput
 :set_texmfpath
   set texmfpath=
@@ -291,15 +292,74 @@ if "%texmfpath%"=="" (
 %</update>
 %<*font>
 % \fi
-  echo   Installation der TUD-CD-Schriftarten in:
+  echo   Installation der TUD-CD-Schriften in:
 % \iffalse
 %</font>
 % \fi
   echo   %texmfpath%
   echo  =======================================================================
   echo.
-  set /p texmfpath= < texmfpath.tmp
+  set /p texmfpath=< texmfpath.tmp
   if not exist "%texmfpath%" mkdir %texmfpath%
+% \iffalse
+%</!uninstall>
+%<*uninstall>
+% \fi
+set /p texmfpath=< texmfpath.tmp
+kpsewhich tudscrbase.sty --path=%texmfpath%/tex/latex/tudscr> texmfpath.tmp
+set texmfpath=
+set /p texmfpath=< texmfpath.tmp
+del texmfpath.tmp> nul
+if "%texmfpath%"=="" (
+  echo  =======================================================================
+  echo   TUD-KOMA-Script lokal nicht gefunden, Abbruch der Deinstallation
+  echo  =======================================================================
+  goto:showpaths
+)
+set texmfpath=%texmfpath:tudscrbase.sty=%
+echo  =======================================================================
+echo   TUD-KOMA-Script wird aus folgendem Pfad entfernt:
+echo   %texmfpath%
+echo  =======================================================================
+echo.
+echo   [j]a (ENTER) / [n]ein:
+echo.
+set /p w=
+if /i "%w%"=="" goto uninstall
+if /i "%w%"=="j" goto uninstall
+echo.
+echo  =======================================================================
+echo   Abbruch der Deinstallation
+echo  =======================================================================
+goto:showpaths
+:uninstall
+cd %texmfpath%
+rmdir /s /q logo> nul
+del *.cls> nul
+del *.sty> nul
+cd ..\..\..
+if exist doc\latex\tudscr rmdir /s /q doc\latex\tudscr> nul
+if exist source\latex\tudscr rmdir /s /q source\latex\tudscr> nul
+texhash
+echo  =======================================================================
+echo   Die Deinstallation wird beendet.
+echo  =======================================================================
+:showpaths
+echo.
+echo  =======================================================================
+echo   TUD-KOMA-Script ist noch in folgenden Pfaden existent:
+echo.
+kpsewhich tudscrbase.sty --all
+echo.
+echo  =======================================================================
+echo.
+pause
+echo.
+exit 0
+% \iffalse
+%</uninstall>
+%<*!uninstall>
+% \fi
   cd /d %~dp0
 % \iffalse
 %<*full|update>
@@ -396,9 +456,9 @@ if "%texmfpath%"=="" (
   echo 10/19
   tftopl cmbrsy10.tfm cmbrsy10.pl
   echo 11/19
-  tftopl zeusm10.tfm zeusm10.pl
+  tftopl sy-iwonamz.tfm sy-iwonamz.pl
   echo 12/19
-  tftopl zeusb10.tfm zeusb10.pl
+  tftopl sy-iwonahz.tfm sy-iwonahz.pl
   echo 13/19
   tftopl rm-iwonach.tfm rm-iwonach.pl
   echo 14/19
@@ -538,7 +598,7 @@ if "%texmfpath%"=="" (
 % \fi
     goto :endmap
   :updatemap
-    set /p var= < %mapcfg%
+    set /p var=< %mapcfg%
 % \iffalse
 %<*old>
 % \fi
@@ -613,7 +673,7 @@ if "%texmfpath%"=="" (
   cd /d %~dp0
   rmdir /s/q tudscrtemp
   echo.
-  goto:eof
+  exit 0
 :abort
   echo.
   echo  =======================================================================
@@ -623,7 +683,7 @@ if "%texmfpath%"=="" (
   pause
   cd /d %~dp0
   rmdir /s/q tudscrtemp
-  goto:eof
+  exit 0
 :checkfile
   if not exist ../%~1 (
     set missing=true
@@ -641,7 +701,7 @@ if "%texmfpath%"=="" (
   goto:eof
 :checkpackage
   kpsewhich %~1> package.tmp
-  set /p package= < package.tmp
+  set /p package=< package.tmp
   if "%package%"=="" (
     set missing=true
     call:missingpackage %~1
@@ -658,49 +718,22 @@ if "%texmfpath%"=="" (
   goto:eof
 % \iffalse
 %</!uninstall>
-%<*uninstall>
-% \fi
-kpsewhich tudscrlocale.sty > tudscrlocale.tmp
-set /p instfolder= < tudscrlocale.tmp
-del tudscrlocale.tmp
-if "%instfolder%"=="" (
-  echo  =======================================================================
-  echo   TUD-KOMA-Script v1.0 wurde nicht gefunden, Abbruch der Deinstallation
-  echo  =======================================================================
-  pause
-  echo.
-  exit 0
-)
-set instfolder=%instfolder:tudscrlocale.sty=%
-cd %instfolder%\..
-if exist tudscr rmdir /s /q tudscr > nul
-cd %instfolder%\..\..\..\doc\latex\
-if exist tudscr rmdir /s /q tudscr > nul
-cd /d %~dp0
-texhash
-echo  =======================================================================
-echo   Die Deinstallation wird beendet.
-echo  =======================================================================
-pause
-echo.
-% \iffalse
-%</uninstall>
 %</win>
 % \fi
 %    \end{macrocode}
 %
-% \subsection{Installationsskripte für Unix-Systeme}
+% \subsection{Installationsskripte fÃ¼r Unix-Systeme}
 %
 %    \begin{macrocode}
 % \iffalse
 %<*unix>
 % \fi
-#!/bin/bash -e
+#!/bin/bash
 #
 % \iffalse
 %<*full>
 % \fi
-# Installation TUD-KOMA-Script-Bundle + TUD-CD-Schriftarten unter Unix
+# Installation TUD-KOMA-Script-Bundle + TUD-CD-Schriften unter Unix
 % \iffalse
 %</full>
 %<*update>
@@ -710,25 +743,26 @@ echo.
 %</update>
 %<*font>
 % \fi
-# Installation TUD-CD-Schriftarten unter Unix
+# Installation TUD-CD-Schriften unter Unix
 % \iffalse
 %</font>
 %<*uninstall>
 % \fi
-# Deinstallation TUD-KOMA-Script-Bundle v1.0 unter Unix
+# Deinstallation TUD-KOMA-Script-Bundle unter Unix
 % \iffalse
 %</uninstall>
 % \fi
 #
 # Autor: Falk Hanisch, Jons-Tobias Wamhoff
 #
-# letzte Bearbeitung: 23.07.2014
+# letzte Bearbeitung: 26.08.2014
 #
 # getestet auf:
 # Ubuntu 14.04
 #
 # in Kombination mit:
 # Tex Live 2013
+# Tex Live 2014
 #
 % \iffalse
 %<*!uninstall>
@@ -740,7 +774,6 @@ echo.
 # fontinst.sty (Ubuntu package texlive-font-utils)
 # cmbright.sty (Ubuntu package texlive-fonts-extra)
 # iwona.sty    (Ubuntu package texlive-fonts-extra)
-# eulervm.sty  (Ubuntu package texlive-fonts-extra)
 #
 # Benoetigte Schriften (im gleichen Verzeichnis):
 # DIN_Bd_PS.zip, Univers_PS.zip
@@ -800,6 +833,7 @@ abort()
   echo
   cd ..
   rm -rf tudscrtemp
+  exit 0
 }
 #
 #
@@ -812,7 +846,7 @@ echo  =======================================================================
 % \ifflse
 %<*full>
 % \fi
-echo   Installation TUD-KOMA-Script-Bundle + TUD-CD-Schriftarten unter Unix
+echo   Installation TUD-KOMA-Script-Bundle + TUD-CD-Schriften unter Unix
 % \iffalse
 %</full>
 %<*update>
@@ -822,12 +856,12 @@ echo   Update TUD-KOMA-Script-Bundle unter Unix
 %</update>
 %<*font>
 % \fi
-echo   Installation TUD-CD-Schriftarten unter Unix
+echo   Installation TUD-CD-Schriften unter Unix
 % \iffalse
 %</font>
 %<*uninstall>
 % \fi
-echo   Deinstallation TUD-KOMA-Script-Bundle v1.0 unter Unix
+echo   Deinstallation TUD-KOMA-Script-Bundle unter Unix
 % \iffalse
 %</uninstall>
 % \fi
@@ -867,7 +901,6 @@ checkpackage "fontinst.sty"
 % \fi 
 checkpackage "cmbright.sty"
 checkpackage "iwona.sty"
-checkpackage "eulervm.sty"
 % \iffalse
 %</!old>
 %<*(full|update)&!old>
@@ -896,7 +929,7 @@ echo   Update des TUD-KOMA-Script-Bundles in den lokalen Benutzerpfad:
 %</update>
 %<*font>
 % \fi
-echo   Installation der TUD-CD-Schriftarten in den lokalen Benutzerpfad:
+echo   Installation der TUD-CD-Schriften in den lokalen Benutzerpfad:
 % \iffalse
 %</font>
 % \fi
@@ -907,6 +940,48 @@ echo  =======================================================================
 rm -rf tudscrtemp
 mkdir -p tudscrtemp/converted
 % \iffalse
+%</!uninstall>
+%<*uninstall>
+% \fi
+texmfpath=$(kpsewhich --var-value=TEXMFHOME)
+if [ -z "$texmfpath" ]; then
+  texmfpath=$(kpsewhich --var-value=TEXMFLOCAL)
+fi
+texmfpath=$(kpsewhich tudscrbase.sty --path=$texmfpath/tex/latex/tudscr)
+if [ -z "$texmfpath" ]; then
+  echo  =======================================================================
+  echo   TUD-KOMA-Script lokal nicht gefunden, Abbruch der Deinstallation
+  echo  =======================================================================
+else
+  texmfpath=$(echo $texmfpath|rev|cut -c15-|rev)
+  cd $texmfpath
+  rm -rf logo
+  rm -f *.cls
+  rm -f *.sty
+  cd ../../..
+  if [ -d doc/latex/tudscr ]; then
+    rm -rf doc/latex/tudscr
+  fi
+  if [ -d source/latex/tudscr ]; then
+    rm -rf source/latex/tudscr
+  fi
+  texhash
+  echo  =======================================================================
+  echo   Die Deinstallation wird beendet.
+  echo  =======================================================================
+fi
+echo
+echo  =======================================================================
+echo   TUD-KOMA-Script ist noch in folgenden Pfaden existent:
+echo
+kpsewhich tudscrbase.sty --all
+echo
+echo  =======================================================================
+echo
+exit 0
+% \iffalse
+%</uninstall>
+%<*!uninstall>
 %<*full|update>
 % \fi
 unzip -u tudscr_$version.zip -d $texmfpath
@@ -1140,29 +1215,6 @@ rm -rf tudscrtemp
 exit 0
 % \iffalse
 %</!uninstall>
-%<*uninstall>
-% \fi
-instfolder=$(kpsewhich tudscrlocale.sty)
-if [ -z "$instfolder" ]; then
-  echo  =======================================================================
-  echo   TUD-KOMA-Script v1.0 wurde nicht gefunden, Abbruch der Deinstallation
-  echo  =======================================================================
-  pause
-  echo.
-  exit 0
-fi
-instfolder=$(echo $instfolder|rev|cut -c17-|rev)
-cd $instfolder/..
-rm -rf tudscr
-cd $instfolder/../../../doc/latex/
-rm -rf tudscr
-texhash
-echo  =======================================================================
-echo   Die Deinstallation wird beendet.
-echo  =======================================================================
-exit 0
-% \iffalse
-%</uninstall>
 %</unix>
 % \fi
 %    \end{macrocode}
