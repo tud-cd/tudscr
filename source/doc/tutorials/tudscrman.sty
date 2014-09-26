@@ -55,7 +55,7 @@
       \fi%
     }%
   \fi%
-  \@TUDVersion{2014/09/08 v2.02 TUD-KOMA-Script}%
+  \@TUDVersion{2014/09/12 v2.02 TUD-KOMA-Script}%
 \endgroup%
 \providecommand*\tudscrmail{tudscr@gmail.com}
 \@ifundefined{tudcls@name}{%
@@ -70,7 +70,7 @@
 %%% From File: tudscr-manual.dtx
 \NeedsTeXFormat{LaTeX2e}[2011/06/27]
 \ProvidesPackage{tudscrman}[%
-  2014/09/08 v2.02 TUD-KOMA-Script
+  2014/09/12 v2.02 TUD-KOMA-Script
   package (internal tutorials)%
 ]
 %%% From File: tudscr-base.dtx
@@ -78,6 +78,9 @@
 %%% From File: tudscr-manual.dtx
 \KOMAoptions{headings=small}%
 \TUDoptions{cd=true,cdfoot=true}%
+\newif\if@tud@todo
+\@tud@todotrue
+\TUD@ifkey{ToDo}{@tud@todo}
 %%% From File: tudscr-base.dtx
 %%% From File: tudscr-manual.dtx
 \newlength\baselineskipglue
@@ -95,6 +98,10 @@
 \RequirePackage{quoting}[2014/01/28]
 \RequirePackage{isodate}[2010/01/03]
 \RequirePackage{hologo}[2012/04/26]
+\RequirePackage{marginnote}[2012/03/29]
+\newcommand*\tud@write@file{}
+\newcommand*\tud@write@option{}
+\newcommand*\tud@write@copy{}
 \RequirePackage{listings}[2014/03/04]
 \lstnewenvironment{Code}[1][]{\lstset{style=tudscr,#1}}{}
 \lstdefinestyle{tudscr}{%
@@ -113,19 +120,6 @@
 \RequirePackage{filecontents}[2011/10/08]
 \RequirePackage{silence}[2012/07/02]
 \WarningFilter[Tutorial]{latex}{Overwriting file}%
-\newenvironment{Tutorial}{\@Tutorial}{\@@Tutorial}
-\newenvironment{Tutorial*}{\@Tutorial}{\@@Tutorial}
-\AfterEndEnvironment{Tutorial}{%
-  \@@@Tutorial%
-  \input{\jobname-temp.tut}%
-  \global\let\@@@Tutorial\relax%
-  \par\@afterindentfalse\@afterheading
-}
-\AfterEndEnvironment{Tutorial*}{%
-  \global\let\@@@Tutorial\relax%
-  \par\@afterindentfalse\@afterheading%
-}
-\newcommand\TutorialPreamble[1]{\gdef\@@@Tutorial{#1}}
 \newcommand*\@Tutorial{%
   \ActivateWarningFilters[Tutorial]%
   \@nameuse{filecontents*}{\jobname-temp.tut}%
@@ -143,6 +137,88 @@
 }
 \newcommand*\@@@Tutorial{}
 \let\@@@Tutorial\relax
+\newcommand\TutorialPreamble[1]{\gdef\@@@Tutorial{#1}}
+\newenvironment{Tutorial}{\@Tutorial}{\@@Tutorial}
+\newenvironment{Tutorial*}{\@Tutorial}{\@@Tutorial}
+\newenvironment{Tutorial+}[1]{\gdef\@@@Tutorial{#1}\@Tutorial}{\@@Tutorial}
+\AfterEndEnvironment{Tutorial}{%
+  \@@@Tutorial%
+  \input{\jobname-temp.tut}%
+  \global\let\@@@Tutorial\relax%
+  \par\@afterindentfalse\@afterheading
+}
+\AfterEndEnvironment{Tutorial*}{%
+  \global\let\@@@Tutorial\relax%
+  \par\@afterindentfalse\@afterheading%
+}
+\ifcase\pdf@shellescape\or
+  \begin{filecontents*}{\jobname-temp.tex}
+  \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
+  \documentclass[english,ngerman]{tudscrreprt}
+  \usepackage[utf8]{inputenc}
+  \usepackage[T1]{fontenc}
+  \usepackage{babel}
+  \usepackage{tudscrsupervisor}
+  \usepackage{isodate}
+  \begin{document}
+  \input{\jobname.tut}
+  \end{document}
+  \end{filecontents*}
+\fi
+\AfterEndEnvironment{Tutorial+}{%
+  \IfFileExists{\jobname-temp}{%
+    \edef\tud@write@file{\jobname-temp}%
+    \edef\tud@write@option{-jobname=\@@@Tutorial-temp }%
+    \edef\tud@write@copy{}%
+  }{%
+    \edef\tud@write@file{tutorials/\jobname-temp}%
+    \edef\tud@write@option{%
+      -output-directory tutorials -jobname=\@@@Tutorial-temp
+    }%
+    \edef\tud@write@copy{tutorials\@backslashchar}%
+  }%
+  \immediate\write18{%
+    copy \tud@write@copy\jobname-temp.tut \tud@write@copy\@@@Tutorial-temp.tut
+  }
+  \immediate\write18{%
+    pdflatex \tud@write@option \tud@write@file.tex
+    pdflatex \tud@write@option \tud@write@file.tex
+    pdflatex \tud@write@option \tud@write@file.tex
+  }%
+  \global\let\@@@Tutorial\relax%
+  \par\@afterindentfalse\@afterheading%
+}
+\NewDocumentCommand\includetutorial{omO{1}}{%
+  \IfFileExists{\jobname-temp}{%
+    \edef\tud@write@file{#2-temp}
+  }{%
+    \edef\tud@write@file{tutorials/#2-temp}
+  }
+  \IfFileExists{\tud@write@file.pdf}{%
+    \@tempcnta\z@%
+    \@for\@tempa:=#3\do{\advance\@tempcnta\@ne}%
+    \ifnum\@tempcnta>\z@%
+      \setlength{\@tempdima}{\textwidth}%
+      \divide\@tempdima\@tempcnta%
+      \advance\@tempcnta\m@ne%
+      \multiply\@tempcnta 2%
+      \addtolength{\@tempdima}{-\@tempcnta\tabcolsep}%
+      \@for\@tempa:=#3\do{%
+        \advance\@tempcnta\m@ne%
+        \edef\@tempb{%
+          keepaspectratio,page=\@tempa,width=\the\@tempdima,%
+          \IfNoValueTF{#1}{}{#1}%
+        }
+        \fbox{%
+          \expandafter\includegraphics\expandafter[\@tempb]{%
+            \tud@write@file.pdf%
+          }%
+        }%
+        \ifnum\@tempcnta>\z@\hfill\fi%
+      }%
+    \fi%
+  }{}%
+}
 \newwrite\tud@tut@output
 \immediate\openout\tud@tut@output=\jobname.tut\relax
 \newread\tud@tut@input
@@ -163,7 +239,7 @@
   \closein\tud@tut@input%
   \endgroup%
 }
-\newcommand*\StartTutorial[1][%
+\newcommand\StartTutorial[1][%
   \noindent%
   Bevor es richtig los geht, werden die Dokumentklasse sowie die notwendigen
   Pakete geladen:
@@ -176,13 +252,55 @@
 }
 \newcommand*\FinishTutorial{%
   \immediate\closeout\tud@tut@output%
-  \clearpage\@afterindentfalse\@afterheading%
+  \clearpage\pagestyle{empty}\@afterindentfalse\@afterheading%
   Zum Ende wird das vollst\"andige Tutorial als \"ubersetzbarer Quelltext
-  f\"ur  ausgegeben, um es via Copy~\&~Paste direkt verwenden zu k\"onnen.
+  ausgegeben, um es via Copy~\&~Paste direkt verwenden zu k\"onnen.
   \begin{quoting}[rightmargin=0pt]%
   \lstinputlisting[style=tudscr]{\jobname.tut}%
   \end{quoting}%
 }
+\PassOptionsToPackage{colorinlistoftodos,obeyFinal,color=HKS92!10}{todonotes}
+\RequirePackage{todonotes}[2012/07/25]
+\newcommand*\@ToDo{}
+\NewDocumentCommand\ToDo{somo}{%
+  \ifbool{@tud@todo}{%
+    \begingroup%
+      \define@boolkey{todonotes}{doc}[true]{%
+        \ifbool{KV@todonotes@doc}{\setkeys{todonotes}{color=HKS41!30}}{}%
+      }%
+      \define@boolkey{todonotes}{man}[true]{%
+        \ifbool{KV@todonotes@man}{\setkeys{todonotes}{color=HKS41!10}}{}%
+      }%
+      \define@boolkey{todonotes}{imp}[true]{%
+        \ifbool{KV@todonotes@imp}{\setkeys{todonotes}{color=HKS07!50}}{}%
+      }%
+      \define@boolkey{todonotes}{nxt}[true]{%
+        \ifbool{KV@todonotes@nxt}{\setkeys{todonotes}{color=HKS57!30}}{}%
+      }%
+      \def\@ToDo{}%
+      \IfNoValueTF{#2}{%
+        \IfBooleanTF{#1}{\edef\@ToDo{nolist}}{}%
+      }{%
+        \IfBooleanTF{#1}{\edef\@ToDo{#2,nolist}}{\edef\@ToDo{#2}}%
+      }%
+      \renewcommand*\marginpar[2][]{\marginnote[##1]{##2}[\dimexpr-1.6ex+1pt]}%
+      \vskip.8ex%
+      \IfNoValueTF{#4}{}{%
+        \settowidth\marginparwidth{#4}%
+        \addtolength\marginparwidth{\dimexpr1.6ex+1pt}%
+        \let\par\relax\noindent%
+        \edef\@tempa{\noexpand\todo[\@ToDo,noline,nolist]}%
+        \@tempa{#4}%
+      }%
+      \edef\@tempa{\noexpand\todo[\@ToDo,inline]}%
+      \@tempa{#3}%
+    \endgroup%
+    \par\@afterindentfalse\@afterheading%
+  }{}%
+  \ignorespaces%
+}
+\newcommand*\ListOfToDo{\if@tud@todo\listoftodos\fi}
+\reversemarginpar
 \PassOptionsToPackage{hyperindex=false}{hyperref}
 \RequirePackage{hyperref}[2012/11/06]
 \hypersetup{colorlinks,linkcolor=blue}
@@ -207,6 +325,11 @@
     \IfValueTF{#3}{\texttt{=#3}}{}%
   }%
 }
+\NewDocumentCommand\Environment{sm}{%
+  \IfBooleanTF{#1}{\texttt{#2}}{%
+    \hyperref{../\tudscr@manual}{\tudscr@manual}{macros:#2}{\texttt{#2}}%
+  }%
+}
 \NewDocumentCommand\Macro{sm}{%
   \IfBooleanTF{#1}{\texttt{\bsc#2}}{%
     \hyperref{../\tudscr@manual}{\tudscr@manual}{macros:#2}{\texttt{\bsc#2}}%
@@ -226,6 +349,7 @@
 \newrobustcmd*\POParameter[1]{\texttt{[#1]}}
 %%% From File: tudscr-misc.dtx
 \RequirePackage{xspace}[2009/10/20]
+\xspaceaddexceptions{"=}
 \newcommand*\vTUDScript{}
 \AtBeginDocument{%
   \def\@tempb#1 #2 #3\relax#4\relax{\def\vTUDScript{#2}}%

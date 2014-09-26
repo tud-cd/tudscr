@@ -1,4 +1,4 @@
-% \CheckSum{2051}
+% \CheckSum{2186}
 % \iffalse meta-comment
 % ======================================================================
 %
@@ -49,7 +49,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-manual.dtx}[%
-  2014/09/09 v2.02 TUD-KOMA-Script\space%
+  2014/09/15 v2.02 TUD-KOMA-Script\space%
 %</driver>
 %<identify>\NeedsTeXFormat{LaTeX2e}[2011/06/27]
 %<class&identify>\ProvidesClass{tudscrman}[%
@@ -150,6 +150,10 @@
 %    \begin{macrocode}
 \RequirePackage{hologo}[2012/04/26]
 %    \end{macrocode}
+% Das Paket \pkg{marginnote} stellt nicht fließenden Randnotizen bereit.
+%    \begin{macrocode}
+\RequirePackage{marginnote}[2012/03/29]
+%    \end{macrocode}
 %
 % \iffalse
 %<*class>
@@ -171,10 +175,6 @@
 % Flattersatz aktiviert. 
 %    \begin{macrocode}
 \RequirePackage{ragged2e}[2009/05/21]
-%    \end{macrocode}
-% Das Paket \pkg{marginnote} stellt nicht fließenden Randnotizen bereit.
-%    \begin{macrocode}
-\RequirePackage{marginnote}[2012/03/29]
 %    \end{macrocode}
 % Die Fußnoten werden nicht mit jedem Kapitel zurückgesetzt.
 %    \begin{macrocode}
@@ -332,35 +332,51 @@
 % \end{macro}^^A \tud@item@pkg
 % \end{macro}^^A \itempackages
 % \end{environment}^^A packages
+%
+% \iffalse
+%</class>
+% \fi
+%
 % \begin{macro}{\tud@write@file}
 % \changes{v2.02}{2014/08/19}{neu}%^^A
 % \begin{macro}{\tud@write@option}
 % \changes{v2.02}{2014/08/19}{neu}%^^A
+% \begin{macro}{\tud@write@copy}
+% \changes{v2.02}{2014/09/11}{neu}%^^A
 % Diese beiden Hilfsmakros werden für das automatisierte Ausführen der 
 % Kompilierung von Beispielen und Tutorials via \cs{write18} benötigt.
 %    \begin{macrocode}
-\RequirePackage{filemod}[2011/09/19]
 \newcommand*\tud@write@file{}
 \newcommand*\tud@write@option{}
+%<*package>
+\newcommand*\tud@write@copy{}
+%</package>
 %    \end{macrocode}
+% \end{macro}^^A \tud@write@copy
 % \end{macro}^^A \tud@write@option
 % \end{macro}^^A \tud@write@file
+%
+% \iffalse
+%<*class>
+% \fi
+%
 % \begin{macro}{\includeexample}
 % \changes{v2.02}{2014/07/25}{Skalierung der eingefügten Seiten}%^^A
 % Mit diesem Befehl wird eine \LaTeX-Datei ggf. übersetzt und anschließend als
 % PDF"~Datei wieder eingebunden.
 %    \begin{macrocode}
+\RequirePackage{filemod}[2011/09/19]
 \RequirePackage{pdfpages}[2013/08/25]
 \newcommand*\includeexample[1]{%
 %    \end{macrocode}
 % Die Datei kann sowohl im Stammpfad als auch im Unterordner liegen\dots
 %    \begin{macrocode}
   \IfFileExists{#1}{%
-    \def\tud@write@file{#1}%
-    \let\tud@write@option\relax%
+    \edef\tud@write@file{#1}%
+    \edef\tud@write@option{}%
   }{%
-    \def\tud@write@file{examples/#1}%
-    \def\tud@write@option{-output-director examples }%
+    \edef\tud@write@file{examples/#1}%
+    \edef\tud@write@option{-output-directory examples }%
   }%
   \lstinputlisting[style=tudscr]{\tud@write@file}%
   \filemodCmp{./\tud@write@file.pdf}{./\tud@write@file.tex}{}{%
@@ -453,8 +469,12 @@
 % \changes{v2.02}{2014/08/16}{neu}%^^A
 % \begin{environment}{Tutorial*}
 % \changes{v2.02}{2014/08/19}{neu}%^^A
+% \begin{environment}{Tutorial+}
+% \changes{v2.02}{2014/09/10}{neu}%^^A
 % \begin{macro}{\TutorialPreamble}
 % \changes{v2.02}{2014/08/20}{neu}%^^A
+% \begin{macro}{\includetutorial}
+% \changes{v2.02}{2014/09/10}{neu}%^^A
 % \begin{macro}{\@Tutorial}
 % \changes{v2.02}{2014/08/19}{neu}%^^A
 % \begin{macro}{\@@Tutorial}
@@ -464,7 +484,11 @@
 % Die Umgebung \env{Tutorial} ist für die Ausgabe und gleichzeitige Ausführung 
 % von Quelltext gedacht. Dazu speichert diese ihren Inhalt in eine temporäre 
 % Datei, die dann mehrmals ausgelesen werden kann. Die Sternversion dieser 
-% Umgebung gibt den Quelltext vollsätndig aus, ohne diesen auszuführen.
+% Umgebung gibt den Quelltext vollständig aus, ohne diesen auszuführen. Die 
+% Version mit Pluszeichen führt den Quelltext in einer separaten Datei mit 
+% einem minimalen Dokumentkörper aus, um daraus eine PDF-Datei zu erzeugen, 
+% welche im nachhinein wieder mit \cs{includetutorial} als Grafik eingebunden
+% werden kann.
 %
 % Damit die Umgebungen nicht doppelt implementiert werden müssen,  werden die
 % Hilfsmakros \cs{@Tutorial} und \cs{@@Tutorial} definiert. Für die eigentlich 
@@ -484,19 +508,6 @@
 \RequirePackage{filecontents}[2011/10/08]
 \RequirePackage{silence}[2012/07/02]
 \WarningFilter[Tutorial]{latex}{Overwriting file}%
-\newenvironment{Tutorial}{\@Tutorial}{\@@Tutorial}
-\newenvironment{Tutorial*}{\@Tutorial}{\@@Tutorial}
-\AfterEndEnvironment{Tutorial}{%
-  \@@@Tutorial%
-  \input{\jobname-temp.tut}%
-  \global\let\@@@Tutorial\relax%
-  \par\@afterindentfalse\@afterheading
-}
-\AfterEndEnvironment{Tutorial*}{%
-  \global\let\@@@Tutorial\relax%
-  \par\@afterindentfalse\@afterheading%
-}
-\newcommand\TutorialPreamble[1]{\gdef\@@@Tutorial{#1}}
 \newcommand*\@Tutorial{%
   \ActivateWarningFilters[Tutorial]%
   \@nameuse{filecontents*}{\jobname-temp.tut}%
@@ -514,11 +525,109 @@
 }
 \newcommand*\@@@Tutorial{}
 \let\@@@Tutorial\relax
+\newcommand\TutorialPreamble[1]{\gdef\@@@Tutorial{#1}}
+\newenvironment{Tutorial}{\@Tutorial}{\@@Tutorial}
+\newenvironment{Tutorial*}{\@Tutorial}{\@@Tutorial}
+\newenvironment{Tutorial+}[1]{\gdef\@@@Tutorial{#1}\@Tutorial}{\@@Tutorial}
+\AfterEndEnvironment{Tutorial}{%
+  \@@@Tutorial%
+  \input{\jobname-temp.tut}%
+  \global\let\@@@Tutorial\relax%
+  \par\@afterindentfalse\@afterheading
+}
+\AfterEndEnvironment{Tutorial*}{%
+  \global\let\@@@Tutorial\relax%
+  \par\@afterindentfalse\@afterheading%
+}
+%    \end{macrocode}
+% Die Umgebung \env{Tutorial+} verwendet nach der Ausgabe des temporären 
+% Quelltextes diesen abermals, um daraus eine PDF-Datei zu erzeugen. Das 
+% übergebene Argument ist dabei der zu erzeugende Dateiname, welchem noch der 
+% Suffix \glqq -temp\grqq angehangen wird. Um die PDF-Datei erzeugen zu können, 
+% wird mithilfe der \env{filecontents}"=Umgebung eine temporäre \LaTeX-Datei 
+% erzeugt, die den zuletzt verwendeten Quelltext kompiliert.
+%    \begin{macrocode}
+\ifcase\pdf@shellescape\or
+  \begin{filecontents*}{\jobname-temp.tex}
+  \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
+  \documentclass[english,ngerman]{tudscrreprt}
+  \usepackage[utf8]{inputenc}
+  \usepackage[T1]{fontenc}
+  \usepackage{babel}
+  \usepackage{tudscrsupervisor}
+  \usepackage{isodate}
+  \begin{document}
+  \input{\jobname.tut}
+  \end{document}
+  \end{filecontents*}
+\fi
+%    \end{macrocode}
+% Das Ganze hier ist etwas kryptisch. Der Test auf den Dateinamen ist wahr, 
+% wenn die Tutorialdatei selber ausgeführt wird. Erfolgt hingegen der Aufruf 
+% bei der Übersetzung des Handbuchs, ist der Test negativ. Warum genau weiß ich 
+% nicht. Es hilft aber auf alle Fälle, um die Pfade anzupassen.
+%    \begin{macrocode}
+\AfterEndEnvironment{Tutorial+}{%
+  \IfFileExists{\jobname-temp}{%
+    \edef\tud@write@file{\jobname-temp}%
+    \edef\tud@write@option{-jobname=\@@@Tutorial-temp }%
+    \edef\tud@write@copy{}%
+  }{%
+    \edef\tud@write@file{tutorials/\jobname-temp}%
+    \edef\tud@write@option{%
+      -output-directory tutorials -jobname=\@@@Tutorial-temp 
+    }%
+    \edef\tud@write@copy{tutorials\@backslashchar}%
+  }%
+  \immediate\write18{%
+    copy \tud@write@copy\jobname-temp.tut \tud@write@copy\@@@Tutorial-temp.tut
+  }
+  \immediate\write18{%
+    pdflatex \tud@write@option \tud@write@file.tex
+    pdflatex \tud@write@option \tud@write@file.tex
+    pdflatex \tud@write@option \tud@write@file.tex
+  }%
+  \global\let\@@@Tutorial\relax%
+  \par\@afterindentfalse\@afterheading%
+}
+\NewDocumentCommand\includetutorial{omO{1}}{%
+  \IfFileExists{\jobname-temp}{%
+    \edef\tud@write@file{#2-temp}
+  }{%
+    \edef\tud@write@file{tutorials/#2-temp}
+  }
+  \IfFileExists{\tud@write@file.pdf}{%
+    \@tempcnta\z@%
+    \@for\@tempa:=#3\do{\advance\@tempcnta\@ne}%
+    \ifnum\@tempcnta>\z@%
+      \setlength{\@tempdima}{\textwidth}%
+      \divide\@tempdima\@tempcnta%
+      \advance\@tempcnta\m@ne%
+      \multiply\@tempcnta 2%
+      \addtolength{\@tempdima}{-\@tempcnta\tabcolsep}%
+      \@for\@tempa:=#3\do{%
+        \advance\@tempcnta\m@ne%
+        \edef\@tempb{%
+          keepaspectratio,page=\@tempa,width=\the\@tempdima,%
+          \IfNoValueTF{#1}{}{#1}%
+        }
+        \fbox{%
+          \expandafter\includegraphics\expandafter[\@tempb]{%
+            \tud@write@file.pdf%
+          }%
+        }%
+        \ifnum\@tempcnta>\z@\hfill\fi%
+      }%
+    \fi%
+  }{}%
+}
 %    \end{macrocode}
 % \end{macro}^^A \@@@Tutorial
 % \end{macro}^^A \@@Tutorial
 % \end{macro}^^A \@Tutorial
+% \end{macro}^^A \includetutorial
 % \end{macro}^^A \TutorialPreamble
+% \end{environment}^^A Tutorial+
 % \end{environment}^^A Tutorial*
 % \end{environment}^^A Tutorial
 % \begin{macro}{\tud@tut@input}
@@ -595,7 +704,7 @@
 % Handbuch definiert. Außerdem wird gleich der Titel und ein einleitender Satz 
 % gesetzt.
 %    \begin{macrocode}
-\newcommand*\StartTutorial[1][%
+\newcommand\StartTutorial[1][%
   \noindent%
   Bevor es richtig los geht, werden die Dokumentklasse sowie die notwendigen 
   Pakete geladen:
@@ -612,9 +721,9 @@
 %    \begin{macrocode}
 \newcommand*\FinishTutorial{%
   \immediate\closeout\tud@tut@output%
-  \clearpage\@afterindentfalse\@afterheading%
+  \clearpage\pagestyle{empty}\@afterindentfalse\@afterheading%
   Zum Ende wird das vollst\"andige Tutorial als \"ubersetzbarer Quelltext 
-  f\"ur  ausgegeben, um es via Copy~\&~Paste direkt verwenden zu k\"onnen.
+  ausgegeben, um es via Copy~\&~Paste direkt verwenden zu k\"onnen.
   \begin{quoting}[rightmargin=0pt]%
   \lstinputlisting[style=tudscr]{\jobname.tut}%
   \end{quoting}%
@@ -643,15 +752,17 @@
 }
 \NewDocumentCommand\Tutorial{som}{%
   \IfFileExists{#3}{%
-    \def\tud@write@file{#3}%
-    \let\tud@write@option\relax%
+    \edef\tud@write@file{#3}%
+    \edef\tud@write@option{}%
   }{%
-    \def\tud@write@file{tutorials/#3}%
-    \def\tud@write@option{-output-director tutorials }%
+    \edef\tud@write@file{tutorials/#3}%
+    \edef\tud@write@option{-output-directory tutorials }%
   }%
   \filemodCmp{./\tud@write@file.pdf}{./\tud@write@file.tex}{}{%
     \immediate\write18{%
-      pdflatex \tud@write@option \tud@write@file.tex
+      pdflatex -shell-escape \tud@write@option \tud@write@file.tex
+    }%
+    \immediate\write18{%
       pdflatex \tud@write@option \tud@write@file.tex
       pdflatex \tud@write@option \tud@write@file.tex
     }%
@@ -727,6 +838,12 @@
 % \end{macro}^^A \pin@accu
 % \end{macro}^^A \pin@file
 % \end{macro}^^A \pin@
+%
+% \iffalse
+%</class&body>
+%<*body>
+% \fi
+%
 % \begin{macro}{\ToDo}
 % \changes{v2.02}{2014/07/10}{Verwendung von \pkg{todonotes}}%^^A
 % \begin{macro}{\@ToDo}
@@ -743,7 +860,7 @@
 % angedachte Version eingetragen werden kann. Mit \cs{ListOfToDo} wird abhängig
 % von der Option \opt{ToDo} eine Liste der offenen Aufgaben erstellt.
 %    \begin{macrocode}
-\PassOptionsToPackage{colorinlistoftodos,obeyFinal}{todonotes}
+\PassOptionsToPackage{colorinlistoftodos,obeyFinal,color=HKS92!10}{todonotes}
 \RequirePackage{todonotes}[2012/07/25]
 \newcommand*\@ToDo{}
 \NewDocumentCommand\ToDo{somo}{%
@@ -787,10 +904,10 @@
         \settowidth\marginparwidth{#4}%
         \addtolength\marginparwidth{\dimexpr1.6ex+1pt}%
         \let\par\relax\noindent%
-        \edef\@tempa{\noexpand\todo[color=none,\@ToDo,noline,nolist]}%
+        \edef\@tempa{\noexpand\todo[\@ToDo,noline,nolist]}%
         \@tempa{#4}%
       }%
-      \edef\@tempa{\noexpand\todo[color=none,\@ToDo,inline]}%
+      \edef\@tempa{\noexpand\todo[\@ToDo,inline]}%
       \@tempa{#3}%
     \endgroup%
     \par\@afterindentfalse\@afterheading%
@@ -809,6 +926,12 @@
 % \end{macro}^^A \ListOfToDo
 % \end{macro}^^A \@ToDo
 % \end{macro}^^A \ToDo
+%
+% \iffalse
+%</body>
+%<*class&body>
+% \fi
+%
 % \begin{macro}{\PrintIndex}
 % \begin{macro}{\PrintIndexPrologue}
 % \changes{v2.02}{2014/08/20}{neu}%^^A
@@ -1262,6 +1385,15 @@
     }%
   \fi%
 }
+%</class&body>
+%<*package&body>
+\NewDocumentCommand\Environment{sm}{%
+  \IfBooleanTF{#1}{\texttt{#2}}{%
+    \hyperref{../\tudscr@manual}{\tudscr@manual}{macros:#2}{\texttt{#2}}%
+  }%
+}
+%</package&body>
+%<*class&body>
 %    \end{macrocode}
 % \end{macro}^^A \@TempEnvironment
 % \end{macro}^^A \Environment
@@ -2255,7 +2387,7 @@
 %
 % \iffalse
 %</body>
-%<*class&option>
+%<*option>
 % \fi
 %
 % \begin{option}{ToDo}
@@ -2271,6 +2403,12 @@
 %    \end{macrocode}
 % \end{macro}^^A \if@tud@todo
 % \end{option}^^A ToDo
+%
+% \iffalse
+%</option>
+%<*class&option>
+% \fi
+%
 % Es werden einige Optionen für das Handbuch standardmäßig aktiviert. Dazu 
 % werden diese an die entsprechende Elternklasse übergeben.
 %    \begin{macrocode}

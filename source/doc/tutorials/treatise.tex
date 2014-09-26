@@ -12,33 +12,61 @@
     {Ä}{{\"A}}1 {Ö}{{\"O}}1 {Ü}{{\"U}}1
     {~}{{\textasciitilde}}1 {ß}{{\ss}}1
 }
-
-\usepackage{atbegshi}
-
 \usepackage{tudscrsupervisor}
-
+\usepackage{units}
+%\usepackage{tocstyle}
+%\newtocstyle[KOMAlike]{compressed}{
+%    \settocfeature[1]{entryvskip}{.5em plus 1pt}%  % Die Stellschraube
+%}
+%\usetocstyle{compressed}
 \begin{document}
 \TUDoption{cdfont}{no,nodin}
-\title{Eine Vorlage für eine Abschlussarbeit}
+\KOMAoptions{headings=normal}
+\title{%
+  Ein Anwenderleitfaden für das Erstellen einer wissenschaftlichen Abhandlung%
+}
 \author{Falk Hanisch}
-\date{09.09.2014}
-\StartTutorial[\tableofcontents]
-%
-\section{Einleitung}
-Der Versuch, ein allumfassendes Tutorial für eine Abschlussarbeit zur Verfügung 
-zu stellen gleicht der Suche nach einer eierlegenden Wollmilchsau. Es ist quasi 
-nicht möglich, alle möglichen Anforderungen an eine wissenschaftliche Arbeit in 
-einem Dokument abzudecken. Dennoch soll hier versucht werden, einen Großteil 
-der für gewöhnlich auftretenden Erfordernisse zu bearbeiten. Am Ende dieses 
-Tutorials findet sich der resultierende, ausführbare Quelltext.
+\date{10.09.2014}
+\StartTutorial[%
+  \begin{abstract}\noindent
+  Der Versuch, ein allumfassendes Tutorial für eine wissenschaftliche Arbeit 
+  zur Verfügung zu stellen gleicht der beschwerlichen Suche nach einer 
+  eierlegenden Wollmilchsau. Es ist quasi nicht möglich, alle möglichen 
+  Anforderungen an eine wissenschaftliche Arbeit in einem Dokument abzudecken. 
+  Dennoch soll hier versucht werden, einen Großteil der für gewöhnlich 
+  auftretenden Erfordernisse zu bearbeiten.
+  
+  Dieses Tutorial hat \emph{nicht} die Intention, \hologo{LaTeX}-Einsteigern 
+  sämtliche Grundlagen zu erläutern. Vielmehr wird davon ausgegangen, das der 
+  Leser die ersten Versuche mit \hologo{LaTeXe} bereits hinter sich hat. 
+  Dennoch wird versucht, alle Schritte möglichst leicht nachvollziehbar zu 
+  gestalten.
+  
+  In erster Linie ist dieser Anwenderleitfaden für die praktische Umsetzung mit 
+  einer \TUDScript-Dokumentklasse gedacht, kann jedoch~-- natürlich mit 
+  gewissen Abstrichen~-- auch als Grundlage für andere Klassen, insbesondere 
+  die aus dem \KOMAScript"=Bundle genutzt werden. Viele der verwendeten 
+  Optionen und Befehle werden hier nur sporadisch erläutert. Eine detaillierte 
+  Erklärung lässt sich jedoch jederzeit sehr einfach über die Hyperlinks zu den 
+  entsprechenden Stellen im \href{run:../tudscr.pdf}{\TUDScript-Handbuch} 
+  öffnen.
+  
+  Das Tutorial muss nicht zwingend vollständig nachvollzogen werden. Es ist in 
+  einzelne Abschnitte untergliedert, damit der Anwender sich bestimmte Aspekte 
+  erarbeiten kann. Nichtsdestotrotz findet sich am Ende dieses Dokumentes das 
+  komplette Tutorial als ausführbarer Quelltext.
+  \end{abstract}
+]
+\clearpage\tableofcontents\clearpage
 
+\section{Einleitung}
 Zu Beginn werden allerhand Pakete geladen, auf die im späteren Verlauf noch 
-genauer eingegangen wird. Den Start macht das Paket \Package{hyphsubst}. Dieses 
-wird für eine verbesserte Silbentrennung für die deutsche Sprache benötigt und 
-muss bereits \emph{vor} der Klasse geladen werden, damit es richtig 
-funktioniert. Die Option \Option*{ngerman} führt dabei zur Verwendung der neuen 
-deutschen Rechtschreibung. Für die alte Orthographie ist stattdessen die Option 
-\Option*{german} zu verwenden.
+genauer eingegangen wird. Den Anfang macht das Paket \Package{hyphsubst}. 
+Dieses wird für eine verbesserte Silbentrennung für die deutsche Sprache 
+benötigt und muss bereits \emph{vor} der Klasse geladen werden, damit es 
+problemlos funktioniert. Die Option \Option*{ngerman} führt dabei zur 
+Verwendung der neuen deutschen Rechtschreibung. Für die alte Orthographie ist 
+stattdessen die Option \Option*{german} zu verwenden.
 
 Beim Laden der Klasse mit \Macro*{documentclass} sollten die im Dokument 
 verwendeten Sprachen als Klassenoption angegeben werden, wobei die zuletzt 
@@ -64,8 +92,8 @@ mit der Option~\Option*{T1} aktiviert werden.
 \usepackage[T1]{fontenc}
 \end{Tutorial*}
 %
-Das Paket \Package{fixltx2e} behebt einige Fehler im \hologo{LaTeXe}-Kernel. In 
-neuen Dokumenten kann es bedenkenlos geladen werden.
+Das Paket \Package{fixltx2e} behebt einige Fehler im \hologo{LaTeXe}-Kernel. 
+In neuen Dokumenten kann es bedenkenlos geladen werden.
 %
 \begin{Tutorial*}
 \usepackage{fixltx2e}
@@ -83,9 +111,49 @@ kann begonnen werden.
 \begin{document}
 \end{Tutorial*}
 
-\section{Umschlagseite und Titel}
 
-\begin{Tutorial}
+\section{Satzspiegel und Bindekorrektur}
+Gleich zu Beginn und bevor das eigentliche Verfassen der Arbeit beginnt, sollte 
+man sich Gedanken über das zu nutzenden Layout und den Satzspiegel machen, um 
+bei der Finalisierung keine böse Überraschung bei Seitenumbrüchen oder der 
+Position von Gleitobjekten zu erleben.
+
+Zuallererst gilt zu entscheiden, ob das Dokument einseitig oder beidseitig 
+gesetzt werden soll. Ist Letzteres der Fall, so sollte \Option*{twoside} als 
+Klassenoption angegeben werden. Im nächsten Schritt ist der zu verwendenden 
+Satzspiegel festzulegen. Hierfür kann die Option \Option{geometry} verwendet 
+werden, welche im \TUDScript-Handbuch beschrieben wird. Normalerweise wird das 
+Dokument im asymmetrischen Layout des \CDs gesetzt. Dieses Verhalten kann mit 
+\Option{geometry}[false] deaktiviert werden und der Satzspiegel wird durch das 
+Paket \Package{typearea} nach typographischen Gesichtspunkten konstruiert.
+
+Falls die Arbeit nach der Fertigstellung gebunden werden soll, so ist auf den 
+notwendigen Binderand zu achten, quasi der Teil einer Seite, welcher durch die 
+Bindung \enquote{verschwindet} und nicht mehr als sichtbarer Teil der Seite 
+vorhanden ist. Als Faustregel gilt, dass die erforderliche Bindekorrektur in 
+etwa der halben Höhe des Buchblocks entsprechen sollte. Dessen Höhe wiederum 
+ist abhängig von der Anzahl der Seiten sowie der Papierdichte. Wird qualitativ 
+höherwertiges Papier mit einer Dichte von \unit[100]{g/m²} verwendet, so 
+entsprechen 100~Blatt in etwa einer Höhe von \unit[12]{mm}. Dementsprechend 
+wäre bei diesem Beispiel eine Bindekorrektur \unit[6]{mm} notwendig. Diese 
+kann mit der Klassenoption \Option{BCOR}[6mm] eingestellt werden.
+
+
+\section{Umschlagseite und Titel}
+Umschlagseite und Titel sind sich in ihrer Gestalt sehr ähnlich. Allerdings 
+gibt es ein paar kleine Unterschiede. Zum einen werden auf dem Cover weniger 
+Informationen als auf der Titelseite ausgegeben. Zum anderen wird der Titel 
+immer im Satzspiegel des restlichen Dokumentes ausgegeben, wohingegen die 
+Umschlagseite ohne weitere Optionen im asymmetrischen Layout des \CDs der \TnUD 
+erscheint. Wie dies geändert werden kann, ist im Handbuch für \Macro{makecover} 
+erläutert. Die resultierende Ausgabe des nachfolgenden Quelltextauszugs ist in 
+\autoref{fig:title} zu sehen.
+\begin{figure}
+\includetutorial{Title}[1,2]
+\caption{Umschlagseite und Titel}
+\label{fig:title}
+\end{figure}
+\begin{Tutorial+}{Title}
 \faculty{Juristische Fakultät}
 \department{Fachrichtung Strafrecht}
 \institute{Institut für Kriminologie}
@@ -97,36 +165,155 @@ kann begonnen werden.
 \thesis{master}
 \graduation[M.Sc.]{Master of Science}
 \author{%
-  Mickey Mouse\matriculationnumber{12345678}
-  \dateofbirth{2.1.1990}\placeofbirth{Dresden}
-  \course{Klinische Prognostik}\discipline{Individualprognose}
+  Mickey Mouse
+  \matriculationnumber{12345678}
+  \dateofbirth{2.1.1990}
+  \placeofbirth{Dresden}
   \and%
-  Donald Duck\matriculationnumber{87654321}
-  \dateofbirth{1.2.1990}\placeofbirth{Berlin}
-  \course{Statistische Prognostik}\discipline{Makrosoziologische Prognosen}
+  Donald Duck
+  \matriculationnumber{87654321}
+  \dateofbirth{1.2.1990}
+  \placeofbirth{Berlin}
 }
-\date{20.04.2014}
-\issuedate{1.2.2012}
-\duedate{1.8.2012}
 \matriculationyear{2010}
 \supervisor{Dagobert Duck \and Mac Moneysac}
 \professor{Prof. Dr. Kater Karlo}
-\chairman{Prof. Dr. Primus von Quack}
-\end{Tutorial}
-\begin{Tutorial*}
+\date{10.09.2014}
 \makecover
 \maketitle
-\end{Tutorial*}
-
-
+\end{Tutorial+}
 
 
 \section{Aufgabenstellung}
+Wird eine Abschlussarbeit an der \TnUD geschrieben, kann entweder die Umgebung 
+\Environment{task} oder der Befehl \Macro{taskform} für die Erstellung einer 
+Aufgabenstellung verwendet werden. Bei beiden Varianten wird zu Beginn eine 
+Tabelle mit Informationen zum Autor angegeben und am Ende der oder die Betreuer 
+der Arbeit sowie Professor und gegebenenfalls der Prüfungsausschussvorsitzende. 
+Dazwischen kann bei der Umgebung \Environment{task} ein freier Inhalt angegeben 
+werden. Der Befehl \Macro{taskform} erzeugt eine standardisierte Ausgabe. Das 
+Resultat des folgenden Quelltextes ist in \autoref{fig:task} dargestellt.
+\begin{figure}
+\includetutorial{Task}[1,2]
+\caption{Aufgabenstellung in freier und standardisierter Form}
+\label{fig:task}
+\end{figure}
+\begin{Tutorial+}{Task}
+\faculty{Juristische Fakultät}
+\department{Fachrichtung Strafrecht}
+\institute{Institut für Kriminologie}
+\chair{Lehrstuhl für Kriminalprognose}
+\title{%
+  Entwicklung eines optimalen Verfahrens zur Eroberung des
+  Geldspeichers in Entenhausen
+}
+\thesis{master}
+\graduation[M.Sc.]{Master of Science}
+\author{%
+  Mickey Mouse
+  \matriculationnumber{12345678}
+  \dateofbirth{2.1.1990}
+  \placeofbirth{Dresden}
+  \course{Klinische Prognostik}
+  \discipline{Individualprognose}
+\and%
+  Donald Duck\matriculationnumber{87654321}
+  \dateofbirth{1.2.1990}
+  \placeofbirth{Berlin}
+  \course{Statistische Prognostik}
+  \discipline{Makrosoziologische Prognosen}
+}
+\matriculationyear{2010}
+\issuedate{1.2.2015}
+\duedate{1.8.2015}
+\supervisor{Dagobert Duck \and Mac Moneysac}
+\professor{Prof. Dr. Kater Karlo}
+\chairman{Prof. Dr. Primus von Quack}
+\newcommand\taskcontent{%
+  Momentan ist das besagte Thema in aller Munde. Insbesondere wird es
+  gerade in vielen~-- wenn nicht sogar in allen~-- Medien diskutiert.
+  Es ist momentan noch nicht abzusehen, ob und wann sich diese Situation
+  ändert. Eine kurzfristige Verlagerung aus dem Fokus der Öffentlichkeit
+  wird nicht erwartet.
+  
+  Als Ziel dieser Arbeit soll identifiziert werden, warum das Thema
+  gerade so omnipräsent ist und wie man diesen Effekt abschwächen
+  könnte. Zusätzlich sollen Methoden entwickelt werden, wie sich ein
+  ähnlicher Vorgang zukünftig vermeiden ließe.
+}
+\begin{task}
+\bigskip\taskcontent
+\end{task}
+\taskform[pagestyle=empty]{\taskcontent}{%
+  \item Recherche
+  \item Analyse
+  \item Entwicklung eines Konzeptes
+  \item Anwendung der entwickelten Methodik
+  \item Dokumentation und grafische Aufbereitung der Ergebnisse
+}
+\end{Tutorial+}
+
 
 \section{Erklärungen}
+Für die meisten Abschlussarbeiten an der \TnUD wird vom Verfasser eine 
+Selbstständigkeitserklärung verlangt. Für diese wird ein Standardtext 
+bereitgestellt. Dieser kann mit dem Befehl \Macro{confirmation} ausgegeben 
+werden. Wurde das Thema in Kooperation mit einem Unternehmen bearbeitet, so 
+wird zumeist auch ein Sperrvermerk gefordert, welcher mit \Macro{blocking} 
+erzeugt werden kann. Mit \Macro{declaration} werden beide Erklärungen direkt 
+nacheinander erzeugt. Die verwendete Überschrift und ein möglicher Eintrag in 
+das Inhaltsverzeichnis können über die Option \Option{declaration} reguliert 
+werden. Eine mögliche Ausprägung der Erklärungen ist in \autoref{fig:decl} 
+abgebildet.
+\begin{figure}
+\centering
+\includetutorial[width=.5\textwidth]{Declaration}
+\caption{Selbstständigkeitserklärung und Sperrvermerk}
+\label{fig:decl}
+\end{figure}
+\begin{Tutorial+}{Declaration}
+\title{%
+  Entwicklung eines optimalen Verfahrens zur Eroberung des
+  Geldspeichers in Entenhausen
+}
+\author{Mickey Mouse\and Donald Duck}
+\declaration[company=FIRMA]
+\end{Tutorial+}
+
+
+\section{Zusammenfassung}
+Häufig wird zu Beginn einer wissenschaftliche Arbeit die Motivation und der 
+Inhalt dieser zusammengefasst, um den Leser die Thematik der Abhandlung 
+vorzustellen. in den meisten Fällen wird diese dabei in deutscher und 
+englischer Sprache verfasst. Hierfür stellt \KOMAScript bereits die Umgebung 
+\Environment{abstract} bereit. Vielfach wird der Wunsch geäußert, sowohl die 
+deutsche als auch die englische Zusammenfassung auf derselben Seite zu setzen. 
+Diese Variante wird durch die \TUDScript-Klassen ermöglicht, die resultierende 
+Ausgabe ist in \autoref{fig:abstr} zu sehen.
+\begin{figure}
+\centering
+\includetutorial[width=.5\textwidth]{Abstract}
+\caption{Zusammenfassung in deutscher und englischer Sprache}
+\label{fig:abstr}
+\end{figure}
+\begin{Tutorial+}{Abstract}
+\TUDoption{abstract}{multiple,section}
+\begin{abstract}
+  Dies ist der deutschsprachige Teil der Zusammenfassung, in dem die
+  Motivation sowie der Inhalt der nachfolgenden wissenschaftlichen
+  Abhandlung kurz dargestellt werden.
+\nextabstract[english]
+  This is the english part of the summary, in which the motivation and
+  the content of the following academic treatise are briefly presented.
+\end{abstract}
+\end{Tutorial+}
+
 
 \section{Inhalts-, Abbildungs-, und Tabellenverzeichnis}
 
+\section{Abkürzungsverzeichnis}
+
+\section{Symbolverzeichnis}
 %%Anfangszitat: Der Text erscheint jetzt kursiv (\itshape) und kleiner als der 
 %%normale Text (\footnotesize). Mit \dictumwidth wird die Breite des Textfeldes 
 %%gesteuert. Sie nimmt jetzt 65% der gesamten Textbreite ein. Mit 
@@ -137,16 +324,29 @@ kann begonnen werden.
 %\renewcommand*{\dictumwidth}{.75\textwidth}
 %\renewcommand*{\raggeddictumtext}{\raggedleft}
 
+%\documentclass{tudscrbook}
+%\usepackage{selinput}
+%\SelectInputMappings{adieresis={ä},germandbls={ß}}
+%\usepackage[T1]{fontenc}
+%\newcommand*\listofloaname{List of Algorithms} 
+%\newcommand*{\listofalgorithms}{\listoftoc{loa}}
+%\addtotoclist[float]{loa}
+%\begin{document}
+%\title{Mein Titel}
+%\author{Mein Name}
+%\KOMAoption{listof}{leveldown}
+%\addchap{Lists of Figures, Tables and Algorithms}
+%\listoffigures
+%\listoftables
+%\listofalgorithms
+%\cleardoublepage
+%\end{document}
+
+
 
 \section{Gleitumgebungen}
 \subsection{Grafiken und Untergrafiken}
 \subsection{Tabellen}
-
-\section{Literaturverzeichnis}
-
-\section{Abkürzungsverzeichnis}
-
-\section{Symbolverzeichnis}
 
 \section{Listen}
 
@@ -158,9 +358,12 @@ kann begonnen werden.
 
 \section{Querverweise}
 
+\section{Silbentrennung}
+
+\section{Literaturverzeichnis}
+
 \section{Quelltexte}
 
-\section{Silbentrennung}
 
 
 \dots % §§§
@@ -180,7 +383,6 @@ kann begonnen werden.
 \end{Tutorial*}
 %
 \begin{Tutorial*}
-\usepackage{tudscrsupervisor}
 \usepackage{caption}
 \usepackage{floatrow}
 \usepackage{tikz}
@@ -203,33 +405,9 @@ kann begonnen werden.
 \usepackage{bookmark}
 \end{Tutorial*}
 %
-\begin{Tutorial*}
-\taskform[pagestyle=empty]{%
-  Momentan ist das besagte Thema in aller Munde. Insbesondere wird es
-  gerade in vielen~-- wenn nicht sogar in allen~-- Medien diskutiert.
-  Es ist momentan noch nicht abzusehen, ob und wann sich diese Situation
-  ändert. Eine kurzfristige Verlagerung aus dem Fokus der Öffentlichkeit
-  wird nicht erwartet.
-  Als Ziel dieser Arbeit soll identifiziert werden, warum das Thema
-  gerade so omnipräsent ist und wie man diesen Effekt abschwächen
-  könnte. Zusätzlich sollen Methoden entwickelt werden, wie sich ein
-  ähnlicher Vorgang zukünftig vermeiden ließe.
-}{%
-  \item Recherche
-  \item Analyse
-  \item Entwicklung eines Konzeptes
-  \item Anwendung der entwickelten Methodik
-  \item Dokumentation und grafische Aufbereitung der Ergebnisse
-}
-\end{document}
-\end{Tutorial*}
-
 \FinishTutorial
 \clearpage
   \begin{itemize}
-  \item Cover
-  \item Tiel
-  \item Aufgabenstellung
   \item inhaltsverzeichnis, tabellen und abbildungsverzeichnis
   \item abstract
   \item grafiken und untergrafiken?
@@ -240,4 +418,6 @@ kann begonnen werden.
   \item mathematikmodus
   \item tabbing-umgebung
   \end{itemize}
+\ListOfToDo
+\ToDo[imp]{Einarbeiten von paragraph in treatise}[v2.02]
 \end{document}

@@ -55,14 +55,14 @@
       \fi%
     }%
   \fi%
-  \@TUDVersion{2014/09/08 v2.02 TUD-KOMA-Script}%
+  \@TUDVersion{2014/09/12 v2.02 TUD-KOMA-Script}%
 \endgroup%
 \providecommand*\tudscrmail{tudscr@gmail.com}
 \newcommand*\tudinh@name{tudscrreprt}
 %%% From File: tudscr-manual.dtx
 \NeedsTeXFormat{LaTeX2e}[2011/06/27]
 \ProvidesClass{tudscrman}[%
-  2014/09/08 v2.02 TUD-KOMA-Script
+  2014/09/12 v2.02 TUD-KOMA-Script
   class (internal manual)%
 ]
 %%% From File: tudscr-base.dtx
@@ -103,11 +103,11 @@
 \RequirePackage{quoting}[2014/01/28]
 \RequirePackage{isodate}[2010/01/03]
 \RequirePackage{hologo}[2012/04/26]
+\RequirePackage{marginnote}[2012/03/29]
 \RequirePackage{enumitem}[2011/09/28]
 \setlist{noitemsep}
 \RequirePackage{tabularx}[1999/01/07]
 \RequirePackage{ragged2e}[2009/05/21]
-\RequirePackage{marginnote}[2012/03/29]
 \RequirePackage{chngcntr}[2009/09/02]
 \counterwithout{footnote}{chapter}
 \RequirePackage{booktabs}[2005/04/14]
@@ -180,17 +180,17 @@
 \newcommand*\tud@item@pkg[1][]{%
   \itempackages[{\DeclarePackage{#1}\texturn{#1}}]%
 }
-\RequirePackage{filemod}[2011/09/19]
 \newcommand*\tud@write@file{}
 \newcommand*\tud@write@option{}
+\RequirePackage{filemod}[2011/09/19]
 \RequirePackage{pdfpages}[2013/08/25]
 \newcommand*\includeexample[1]{%
   \IfFileExists{#1}{%
-    \def\tud@write@file{#1}%
-    \let\tud@write@option\relax%
+    \edef\tud@write@file{#1}%
+    \edef\tud@write@option{}%
   }{%
-    \def\tud@write@file{examples/#1}%
-    \def\tud@write@option{-output-director examples }%
+    \edef\tud@write@file{examples/#1}%
+    \edef\tud@write@option{-output-directory examples }%
   }%
   \lstinputlisting[style=tudscr]{\tud@write@file}%
   \filemodCmp{./\tud@write@file.pdf}{./\tud@write@file.tex}{}{%
@@ -236,15 +236,17 @@
 }
 \NewDocumentCommand\Tutorial{som}{%
   \IfFileExists{#3}{%
-    \def\tud@write@file{#3}%
-    \let\tud@write@option\relax%
+    \edef\tud@write@file{#3}%
+    \edef\tud@write@option{}%
   }{%
-    \def\tud@write@file{tutorials/#3}%
-    \def\tud@write@option{-output-director tutorials }%
+    \edef\tud@write@file{tutorials/#3}%
+    \edef\tud@write@option{-output-directory tutorials }%
   }%
   \filemodCmp{./\tud@write@file.pdf}{./\tud@write@file.tex}{}{%
     \immediate\write18{%
-      pdflatex \tud@write@option \tud@write@file.tex
+      pdflatex -shell-escape \tud@write@option \tud@write@file.tex
+    }%
+    \immediate\write18{%
       pdflatex \tud@write@option \tud@write@file.tex
       pdflatex \tud@write@option \tud@write@file.tex
     }%
@@ -295,7 +297,7 @@
 %%    \errmessage{File `#2' doesn't exist!}%
 %%  }%
 %%}
-\PassOptionsToPackage{colorinlistoftodos,obeyFinal}{todonotes}
+\PassOptionsToPackage{colorinlistoftodos,obeyFinal,color=HKS92!10}{todonotes}
 \RequirePackage{todonotes}[2012/07/25]
 \newcommand*\@ToDo{}
 \NewDocumentCommand\ToDo{somo}{%
@@ -325,10 +327,10 @@
         \settowidth\marginparwidth{#4}%
         \addtolength\marginparwidth{\dimexpr1.6ex+1pt}%
         \let\par\relax\noindent%
-        \edef\@tempa{\noexpand\todo[color=none,\@ToDo,noline,nolist]}%
+        \edef\@tempa{\noexpand\todo[\@ToDo,noline,nolist]}%
         \@tempa{#4}%
       }%
-      \edef\@tempa{\noexpand\todo[color=none,\@ToDo,inline]}%
+      \edef\@tempa{\noexpand\todo[\@ToDo,inline]}%
       \@tempa{#3}%
     \endgroup%
     \par\@afterindentfalse\@afterheading%
@@ -1065,6 +1067,7 @@
 \newrobustcmd*\POParameter[1]{\texttt{[#1]}}
 %%% From File: tudscr-misc.dtx
 \RequirePackage{xspace}[2009/10/20]
+\xspaceaddexceptions{"=}
 \newcommand*\vTUDScript{}
 \AtBeginDocument{%
   \def\@tempb#1 #2 #3\relax#4\relax{\def\vTUDScript{#2}}%
