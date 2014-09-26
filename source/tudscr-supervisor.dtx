@@ -1,4 +1,4 @@
-% \CheckSum{609}
+% \CheckSum{596}
 % \iffalse meta-comment
 % ======================================================================
 %
@@ -47,7 +47,7 @@
 %<*driver>
 % \fi
 \ProvidesFile{tudscr-supervisor.dtx}%
-  [2014/04/22 v2.00 TUD-KOMA-Script (supervisors)]
+  [2014/06/04 v2.01b TUD-KOMA-Script (supervisors)]
 % \iffalse
 \documentclass{tudscrdoc}
 \KOMAoptions{parskip=half-}
@@ -186,16 +186,11 @@
 \newcommand{\taskform}[3][]{%
   \begin{task}[#1]
     \vskip-\lastskip%
-    \ifxblank{#2}{}{%
-      \vspace*{-\parskip}%
-      \minisec{\objectivesname}%
-      #2%
-    }%
+    \ifxblank{#2}{}{\minisec{\objectivesname}#2}%
     \ifxblank{#3}{}{%
-      \vspace*{-\parskip}%
       \minisec{\focusname}%
       \begin{itemize}\tud@RaggedRight%
-      #3
+        #3
       \end{itemize}%
     }%
   \end{task}%
@@ -289,27 +284,18 @@
 \newcommand{\evaluationform}[5][]{%
   \begin{evaluation}[#1]
     \vskip-\lastskip%
-    \ifxblank{#2}{}{%
-      \vspace*{-\parskip}%
-      \minisec{\taskname}%
-      #2%
-    }%
-    \ifxblank{#3}{}{%
-      \vspace*{-\parskip}%
-      \minisec{\contentname}%
-      #3%
-    }%
-    \ifxblank{#4}{}{%
-      \vspace*{-\parskip}%
-      \minisec{\assessmentname}%
-      #4%
-    }%
+    \ifxblank{#2}{}{\minisec{\taskname}#2}%
+    \ifxblank{#3}{}{\minisec{\contentname}#3}%
+    \ifxblank{#4}{}{\minisec{\assessmentname}#4}%
     \ifxblank{#5}{}{\def\@grade{#5}}%
   \end{evaluation}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \evaluationform
 % \begin{macro}{\tud@author@table}
+% \changes{v2.01b}{2014/06/04}{%
+%   Probleme mit \pkg{calc} behoben%
+% }
 % \begin{length}{\tud@dim@table}
 % Der Befehl \cs{tud@author@table} dient zur Ausgabe einer Tabelle mit
 % Informationen zum Autor/zu den Autoren\footnote{Matrikelnummer, Jahrgang,
@@ -370,7 +356,7 @@
 % genutzt werden. Dafür wird \cs{tud@multiple@setfields\{\cs{null}\}}\{\}
 % aufgerufen, um alle potentiellen Felder erkennen zu können.
 %    \begin{macrocode}
-  \global\setlength{\tud@dim@table}{2em}%
+  \setlength{\tud@dim@table}{2em}%
   \gdef\tud@multiple@field{@@author}%
   \tud@multiple@setfields{\null}{}%
 %    \end{macrocode}
@@ -393,9 +379,10 @@
   \@for\@tempb:=\@tempa\do{%
     \settowidth{\@tempdima}{\@tempb\@titledelim}%
     \ifdim\@tempdima>\tud@dim@table\relax%
-      \global\setlength{\tud@dim@table}{\@tempdima}%
+      \setlength{\tud@dim@table}{\@tempdima}%
     \fi%
   }%
+  \global\tud@dim@table=\tud@dim@table%
 %    \end{macrocode}
 % Die Tabelle mit den benötigten Bezeichnern. Damit diese bis an den Seiterand
 % ohne Warnungen gesetzt werden können, wird die Auszeichnung von Absatzenden
@@ -510,13 +497,11 @@
     \vskip-\lastskip%
     \ifxblank{#2}{}{%
       \ifx\@@title\@empty\else%
-        \vspace*{-\parskip}%
         \minisec{\expandonce{\@@title}}%
       \fi%
       #2%
     }%
     \ifxblank{#3}{}{%
-      \vspace*{-\parskip}%
       \minisec{\focusname}%
       \begin{itemize}\tud@RaggedRight%
       #3

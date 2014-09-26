@@ -47,6 +47,9 @@ Das Bundle beinhaltet:
 Versionen
 ---------
 
+**v2.01b** (2014/06/04)
++ Bug bei Aufgabenstellung behoben (tudscrsupervisor)
+
 **v2.01a** (2014/06/03)
 + Bug bei der Verwendung des Untertitels behoben
 
@@ -100,6 +103,9 @@ The bundle offers:
 
 Versions
 --------
+
+**v2.01b** (2014/06/04)
++ Fixed bug when using task (tudscrsupervisor)
 
 **v2.01a** (2014/06/03)
 + Fixed bug when using the subtitle.
