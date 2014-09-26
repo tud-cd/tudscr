@@ -1,4 +1,4 @@
-% \CheckSum{2027}
+% \CheckSum{2022}
 % \iffalse meta-comment
 % ======================================================================
 %
@@ -49,7 +49,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-manual.dtx}[%
-  2014/08/27 v2.02 TUD-KOMA-Script\space%
+  2014/09/02 v2.02 TUD-KOMA-Script\space%
 %</driver>
 %<identify>\NeedsTeXFormat{LaTeX2e}[2011/06/27]
 %<class&identify>\ProvidesClass{tudscrman}[%
@@ -628,14 +628,17 @@
 %
 % \begin{macro}{\Tutorial}
 % \changes{v2.02}{2014/08/22}{neu}%^^A
-% \begin{macro}{\@Tutorial}
-% \changes{v2.02}{2014/08/22}{neu}%^^A
+% \begin{macro}{\hypertut}
+% \changes{v2.02}{2014/09/02}{neu}%^^A
 % Die gegebenenfalls notwendige Kompilierung und die Referenzierung eines 
 % Tutorials aus dem Handbuch erfolgt mit \cs{Tutorial}. Hierfür werden abermals
-% die Hilfsmakros \cs{tud@write@file} und \cs{tud@write@option} verwendet.
-% außerdem erfolgt ein verlinkter Eintrag in den Index.
+% die beiden Hilfsmakros \cs{tud@write@file} und \cs{tud@write@option} 
+% verwendet. Außerdem erfolgt mit \cs{hypertut} ein verlinkter Eintrag in den
+% Index.
 %    \begin{macrocode}
-\newcommand*\@Tutorial{}
+\newrobustcmd*\hypertut[2]{%
+  \hyperref{tutorials/#1.pdf}{\jobname}{tutorials:#1}{\texturn{#1.pdf}#2}%
+}
 \NewDocumentCommand\Tutorial{som}{%
   \IfFileExists{#3}{%
     \def\tud@write@file{#3}%
@@ -650,14 +653,9 @@
       pdflatex \tud@write@option \tud@write@file.tex
     }%
   }%
-  \IfFileExists{tutorials/#3.pdf}{%
-    \def\@Tutorial####1{%
-      \hyperref{tutorials/#3}{\jobname}{tutorials:#3}{\texturn{#3.pdf}####1}%
-    }%
-  }{\def\@Tutorial####1{\texturn{#3.pdf}####1}}%
-  \@Tutorial{}%
+  \IfFileExists{tutorials/#3.pdf}{\hypertut{#3}{}}{\texturn{#3.pdf}}%
   \IfBooleanTF{#1}{}{%
-    \index[files]{\@Tutorial{~{\idxfont(Datei)}\IfValueTF{#2}{|#2}{}}}%
+    \index[files]{\hypertut{#3}{~{\idxfont(Tutorial)}\IfValueTF{#2}{|#2}{}}}%
   }%
 }
 %    \end{macrocode}
@@ -813,6 +811,8 @@
 % \changes{v2.02}{2014/08/20}{neu}%^^A
 % \begin{macro}{\@printindexprologue}
 % \changes{v2.02}{2014/08/20}{neu}%^^A
+% \begin{macro}{\@printindexskip}
+% \changes{v2.02}{2014/09/02}{neu}%^^A
 % \begin{macro}{\Index}
 % \begin{macro}{\seeidx}
 % \begin{macro}{\@printindex}
@@ -851,6 +851,7 @@
     \@printindex[terms]%
     \begingroup%
       \let\lettergroup\@gobble%
+      \let\indexspace\par%
       \@printindex[fonts]%
       \@printindex[colors]%
     \endgroup%
@@ -863,6 +864,11 @@
 \newcommand*\PrintIndexPrologue[1]{\long\gdef\@printindexprologue{#1}}
 \newcommand*\@printindexprologue{}
 %    \end{macrocode}
+% Durch die Verwendung der \env{multicols}"=Umgebung werden zu große vertikale 
+% Abstände gesetzt. Dies wird mit diesem Befehl rückgängig gemacht.
+%    \begin{macrocode}
+\newcommand*\@printindexskip{\ifnum\imki@columns>\@ne\vspace{-\multicolsep}\fi}
+%    \end{macrocode}
 % Der Befehl \cs{@printindex} setzt vor jedem Unterindex  ein referenzierbares
 % Label und gibt diesen danach aus.
 %    \begin{macrocode}
@@ -871,7 +877,7 @@
   \apptocmd{\prepare@multicols}{\hbadness10000}{}{}%
   \ifblank{#1}{%
     \ifx\@printindexprologue\@empty%
-      \indexprologue[\vspace*{0pt}]{\label{idx:main}}%
+      \indexprologue[\@printindexskip]{\label{idx:main}}%
     \else%
       \indexprologue{%
         \label{idx:main}%
@@ -879,11 +885,11 @@
         \@printindexprologue%
       }%
     \fi%
-    \printindex%
+    \printindex\@printindexskip%
     \let\@printindexprologue\@empty%
   }{%
-    \indexprologue[\vspace*{0pt}]{\label{idx:#1}}%
-    \printindex[#1]%
+    \indexprologue[\@printindexskip]{\label{idx:#1}}%
+    \printindex[#1]\@printindexskip%
   }%
 }
 %    \end{macrocode}
@@ -903,6 +909,7 @@
 % \end{macro}^^A \@printindex
 % \end{macro}^^A \seeidx
 % \end{macro}^^A \Index
+% \end{macro}^^A \@printindexskip
 % \end{macro}^^A \@printindexprologue
 % \end{macro}^^A \PrintIndexPrologue
 % \end{macro}^^A \PrintIndex
@@ -1154,7 +1161,7 @@
 \NewDocumentCommand\DeclarePackage{om}{%
   \label{files:#2}\Hy@raisedlink{\hyperdef{\jobname}{files:#2}{}}%
   \index[files]{\hyperidx[files:#2]{\texturn{#2}~{\idxfont(Paket)}}|declare}%
-  \IfValueTF{#1}{\ChangedAt@Log[{\Package{#2}}]{#1}}{}%
+  \IfValueTF{#1}{\ChangedAt@Process{#1!\emph{neu}!\Package{#2}}}{}%
 }
 %</class&body>
 %<*package&body>
@@ -1653,13 +1660,26 @@
 \NewDocumentEnvironment{Declaration}{omoog}{%
   \listadd\@declarationlist{#2}%
 %    \end{macrocode}
-% Die optional angegebenen Änderungen werden mit \cs{ChangedAt@Log} verarbeitet
-% und für die Kennzeichnung am Rand in der Liste \cs{@changedatdeclarelist}
-% gespeichert.
+% Die optional angegebenen Änderungen werden später mit \cs{ChangedAt@Process} 
+% verarbeitet und für das Eintragen in der Änderungsliste sowie die Randnotiz
+% in der Liste \cs{@changedatdeclarelist} gespeichert. Um für Deklarationen die
+% dazugehörige Option, Befehl etc. kenntlich zu machen, wird der fragliche 
+% Befehl an  \cs{ChangedAt@Process} weitergegeben. Da mehrere kommaseparierte 
+% Werte angegeben werden können, muss das optionale Argument dahingehend 
+% abgearbeitet werden. Wenn keine weitere Erklärung angegeben wurde, wird der 
+% entspredchende Eintrag mit dem Attribut \emph{neu} versehen.
 %    \begin{macrocode}
   \IfValueTF{#1}{%
-    \ChangedAt@Log[{#2}]{#1}%
-    \listeadd\@changedatdeclarelist{#1}%
+    \@for\@tempa:=#1\do{%
+      \@expandtwoargs\in@{!}{\@tempa}
+      \ifin@
+        \expandafter\listadd\expandafter\@changedatdeclarelist%
+          \expandafter{\@tempa!#2}%
+      \else
+        \expandafter\listadd\expandafter\@changedatdeclarelist%
+          \expandafter{\@tempa!\emph{neu}!#2}%
+      \fi
+    }%
   }{}%
 %    \end{macrocode}
 % Hier noch die Listen für Voreinstellungen\dots
@@ -1722,14 +1742,13 @@
 %    \begin{macrocode}
 \NewDocumentCommand\printdeclarationlist{sd()}{%
   \ifx\@declarationlist\relax\else%
+    \ifvmode\else\par\fi%
+    \addpenalty{\@beginparpenalty}%
+    \addvspace{1.5\baselineskipglue}%
 %    \end{macrocode}
 % Die Sternversion erzeugt die Ausgabe ohne Deklarationsindexbefehle.
 %    \begin{macrocode}
     \IfBooleanTF{#1}{\global\@noindextrue}{\global\@noindexfalse}%
-    \ifvmode\else\par\fi%
-    \allowbreak%
-    \addpenalty{\@beginparpenalty}%
-    \addvspace{1.2\baselineskipglue}%
     \@declaretrue\@openindextrue%
     \@afterindentfalse\@afterheading%
 %    \end{macrocode}
@@ -1771,11 +1790,12 @@
       \fi%
     }{}%
 %    \end{macrocode}
-% Änderungsliste wird innerhalb dieser Deklaration mit \cs{ChangedAt@Margin} 
-% abgearbeitet, sortiert und ausgegeben.
+% Die Einträge in der Änderungsliste sowie die dazugehörige Randnotiz werden
+% innerhalb der Deklaration mit \cs{ChangedAt@Process} abgearbeitet, sortiert 
+% und erstellt.
 %    \begin{macrocode}
     \ifx\@changedatdeclarelist\relax\else%
-      \ChangedAt@Margin{\@changedatdeclarelist}%
+      \ChangedAt@Process{\@changedatdeclarelist}%
     \fi%
     \setlength{\changedatmarginskip}{\z@}%
     \global\let\@declarationlist\relax%
@@ -1789,7 +1809,8 @@
 % Deklarationsbox ausgegeben.
 %    \begin{macrocode}
     \IfValueTF{#2}{#2}{}%
-    \vskip\baselineskipglue\nobreak%
+    \ifvmode\else\par\fi%
+    \vspace{1.5\baselineskipglue}\nobreak%
     \@afterindentfalse\@afterheading%
   \fi%
 }
@@ -1805,168 +1826,55 @@
 % \begin{macro}{\ChangedAt}
 % \changes{v2.02}{2014/07/25}{erweitert}%^^A
 % An den Befehl \cs{ChangedAt} kann eine kommagetrente Liste mit verschiedenen
-% Versionsnummern und dazugehörigen Änderungen übergeben werden. Verwendet wird
-% er in der Form: \cs{ChangedAt}\texttt{\{v2.00!Definition,v2.01!Erweiterung\}}.
-% Jede Version innerhalb der Liste wird dabei zum einen als Randnotiz mit
-% \cs{ChangedAt@Margin} genau einmal gesetzt. Zusätlich erfolgt mit dem Makro 
-% \cs{ChangedAt@Log} unter der angegebenen Versionsnummer ein Eintrag in die
-% Änderungsliste mit dem Inhalt, welcher durch das Ausrufezeichen abgetrennt
-% wurde. Die Sternversion unterdrückt einen etwaigen Einzug der folgenden Zeile.
+% Versionsnummern und dazugehörigen Änderungen übergeben werden. Er wird in der 
+% Form: \cs{ChangedAt}\texttt{\{v2.00!Definition,v2.01!Erweiterung\}} genutzt.
+% Mit dem Makro \cs{ChangedAt@Process} wird zu der angegebenen Versionsnummer 
+% ein Eintrag in die Änderungsliste erstellt, wenn mit einem Ausrufezeichen
+% getrennt der gewünschte Inhalt gegeben wurde. Auf jeden Fall werden alle
+% übergegebenen Versionsnummern in einer Liste als Randnotiz einmalig gesetzt. 
 %    \begin{macrocode}
-\newcommand*\ChangedAt[1]{%
-  \strut%
-  \ChangedAt@Log{#1}%
-  \ChangedAt@Margin{#1}%
-  \ignorespaces%
-}
+\newcommand*\ChangedAt[1]{\strut\ChangedAt@Process{#1}\ignorespaces}
 %    \end{macrocode}
 % \end{macro}^^A \ChangedAt
-% \begin{macro}{\ChangedAt@Log}
-% \changes{v2.02}{2014/07/25}{neu}%^^A
-% \begin{macro}{\ChangedAt@LogDefault}
-% \changes{v2.02}{2014/07/25}{neu}%^^A
-% \begin{macro}{\ChangedAt@LogSplit}
-% \changes{v2.02}{2014/07/25}{neu}%^^A
-% \begin{macro}{\ChangedAt@@Log}
-% \changes{v2.02}{2014/07/25}{neu}%^^A
-% \begin{macro}{\ChangedAt@@@Log}
-% \changes{v2.02}{2014/07/25}{neu}%^^A
+% \begin{macro}{\ChangedAt@Process}
+% \changes{v2.02}{2014/09/02}{neu}%^^A
+% \begin{macro}{\ChangedAt@@Process}
+% \changes{v2.02}{2014/09/02}{neu}%^^A
+% \begin{macro}{\ChangedAt@@@Process}
+% \changes{v2.02}{2014/09/02}{neu}%^^A
+% \begin{macro}{\ChangedAt@Default}
+% \changes{v2.02}{2014/09/02}{neu}%^^A
+% \begin{macro}{\ChangedAt@Split}
+% \changes{v2.02}{2014/09/02}{neu}%^^A
 % \begin{macro}{\@changedatlist}
-% \changes{v2.02}{2014/07/25}{neu}%^^A
-% Mit diesen Befehlen wird die Änderungshistorie erstellt. \cs{ChangedAt@Log}
-% setzt eine kommagetrennte Liste~-- z.\,B. aus \cs{ChangedAt}~-- in eine Liste
-% im Format von \pkg{etoolbox} um. Anschließend wird diese für die Liste der 
-% Änderungen mit \cs{ChangedAt@LogSplit} aufgespalten. Die einzelnen Einträge 
-% werden anschließend mit \cs{ChangedAt@@Log} weiter verarbeitet.
+% \changes{v2.02}{2014/09/02}{neu}%^^A
+% \begin{length}{\changedatmarginskip}
+% \changes{v2.02}{2014/09/02}{neu}%^^A
+% \begin{macro}{\@changedatversionlist}
+% \changes{v2.02}{2014/09/02}{neu}%^^A
+% Mit diesen Befehlen wird die Änderungshistorie in Form eines Index erstellt. 
+% Der Befehl \cs{ChangedAt@Process} setzt eine kommagetrennte Liste~-- z.\,B.
+% aus \cs{ChangedAt}~-- in eine Liste im Format von \pkg{etoolbox} um.
+% Anschließend wird diese für die Liste der Änderungen mit \cs{ChangedAt@Split} 
+% aufgespalten. Die einzelnen Einträge werden mit \cs{ChangedAt@@Process}
+% weiter verarbeitet.
 %    \begin{macrocode}
 \newcommand*\@changedatlist{}
-\newcommand*\ChangedAt@LogDefault{}
-\newcommand*\ChangedAt@Log[2][]{%
-  \let\@changedatlist\relax%
-  \@for\@tempa:=#2\do{\listeadd{\@changedatlist}{\expandonce\@tempa}}%
-%    \end{macrocode}
-% Bei der Deklaration von Optionen, Befehlen etc. werden diese automatisch in 
-% der Liste der Änderungen vor der gegebenen Erklärung selbst ausgegeben.
-% Hierfür wird das optionale Argument genutzt. Damit lediglich diese und nicht
-% noch die dazugehörigen Argumente eingetragen werden, werden die relevanten
-% Befehle deaktiviert und das optionale Argument in \cs{ChangedAt@LogDefault}
-% expandiert.
-%    \begin{macrocode}
-  \def\ChangedAt@LogDefault{#1}%
-  \begingroup%
-    \ifx\ChangedAt@LogDefault\@empty\else%
-      \let\PName\@gobble%
-      \let\PBoolean\relax%
-      \let\PSet\relax%
-      \let\PValue\@gobble%
-      \let\Parameter\@gobble%
-      \let\OParameter\@gobble%
-      \let\LParameter\relax%
-      \let\OLParameter\@gobble%
-      \let\PParameter\@gobble%
-      \let\POParameter\@gobble%
-      \xdef\ChangedAt@LogDefault{#1}%
-    \fi%
-  \endgroup%
-  \forlistloop\ChangedAt@LogSplit{\@changedatlist}%
-}
-%    \end{macrocode}
-% Der Befehl \cs{ChangedAt@LogSplit} teilt ein gegebenes Argument am Delimiter
-% Ausrufezeichen (\glqq !\grqq) in zwei Argumente auf und reicht diese an 
-% \cs{ChangedAt@@Log} weiter. Sollte kein Ausrufezeichen gefunden werden, so
-% war das zweite übergebene Argument mit dem~-- von \pkg{xparse} definierten~--
-% leeren Wert \texttt{-NoValue-} an \cs{ChangedAt@@Log} übergeben.
-%    \begin{macrocode}
-\NewDocumentCommand\ChangedAt@LogSplit{>{\SplitArgument{1}{!}}m}{%
-  \ChangedAt@@Log#1%
-}
-%    \end{macrocode}
-% Hiermit wird der Eintrag in die Änderungshistorie erzeugt. Dabei ist zu 
-% unterscheiden, ob der Befehl \cs{ChangedAt} direkt genutzt wurde oder aber 
-% der Eintrag innerhlab der \env{Declaration}-Umgebung erfolgte. Dies wird 
-% anhand von \cs{ChangedAt@LogDefault} erkannt. Für den ersten Fall erfolgt 
-% ein Eintrag lediglich, wenn neben der Versionsnummer selbst auch eine 
-% Erklärung angegben wurde~-- eine Randnotiz wird aber in jedem Fall gesetzt. 
-% Im zweiten Fall wird der Erklärung \emph{immer} \cs{ChangedAt@LogDefault} 
-% vorangestellt. Sollte keine Erklärung direkt angegeben worden sein, so wird
-% in der Änderungsliste vermerkt, dass es sich um eine neue Option, Befehl etc.
-% handelt. Der eigentliche Eintrag selbst erfolgt mit \cs{ChangedAt@@@Log}.
-%    \begin{macrocode}
-\newcommand*\ChangedAt@@Log[2]{%
-  \ifx\ChangedAt@LogDefault\@empty%
-    \IfValueTF{#2}{\ChangedAt@@@Log{#1}{#2}}{}%
-  \else%
-    \IfValueTF{#2}{%
-      \ChangedAt@@@Log{#1}{\ChangedAt@LogDefault: #2}%
-    }{%
-      \ChangedAt@@@Log{#1}{\ChangedAt@LogDefault: \emph{neu}}%
-    }%
-  \fi%
-}
-%    \end{macrocode}
-% Mit \cs{ChangedAt@@@Log} Erfolgen die Einträge in die Änderungsliste.
-%    \begin{macrocode}
-\newcommand*\ChangedAt@@@Log[2]{%
-  \begingroup%
-%    \end{macrocode}
-% Für geänderte Parameter wird als Haupteintrag das dazugehörige Makro bzw. die
-% entsprechende Umgebung verwendet. Der geänderte Parameter folgt danach.
-% Zuerst muss ggf. das Makro \cs{ChangedAt@LogDefault} expandiert werden.
-%    \begin{macrocode}
-    \def\@tempa{#2}%
-    \in@{\ChangedAt@LogDefault}{#2}%
-    \ifin@%
-      \expandafter\def\expandafter\@tempa\expandafter{\ChangedAt@LogDefault}%
-    \fi%
-%    \end{macrocode}
-% Danach wird geprüft, ob das Makro \cs{Key} übergeben wurde.
-%    \begin{macrocode}
-    \expandafter\in@\expandafter\Key\expandafter{\@tempa}%
-    \ifin@%
-      \begingroup%
-        \RenewDocumentCommand\Key{sommo}{\xdef\@TempKey{##3:}}%
-        \setbox0\vtop{#2}%
-      \endgroup%
-      \index[changelog]{#1!\@TempKey\ #2}%
-    \else%
-      \index[changelog]{#1!#2}%
-    \fi%
-  \endgroup%
-}
-%    \end{macrocode}
-% \end{macro}^^A \@changedatlist
-% \end{macro}^^A \ChangedAt@@@Log
-% \end{macro}^^A \ChangedAt@@Log
-% \end{macro}^^A \ChangedAt@LogSplit
-% \end{macro}^^A \ChangedAt@LogDefault
-% \end{macro}^^A \ChangedAt@Log
-% \begin{macro}{\ChangedAt@Margin}
-% \changes{v2.02}{2014/08/06}{neu}%^^A
-% \begin{macro}{\ChangedAt@MarginSplit}
-% \changes{v2.02}{2014/08/06}{neu}%^^A
-% \begin{macro}{\ChangedAt@@Margin}
-% \changes{v2.02}{2014/08/06}{neu}%^^A
-% \begin{length}{\changedatmarginskip}
-% \changes{v2.02}{2014/08/06}{neu}%^^A
-% \begin{macro}{\@changedatversionlist}
-% \changes{v2.02}{2014/08/06}{neu}%^^A
-% Mit diesen Befehlen werden die Randnotizen zur Kennzeichnung von Änderungen im
-% Handbuch erstellt. Der Befehl \cs{ChangedAt@Log} setzt eine kommagetrennte
-% Liste~-- z.\,B. aus \cs{ChangedAt}~-- in eine \pkg{etoolbox}-Liste um. Diese
-% wird mit \cs{ChangedAt@MarginSplit} aufgespalten. Die einzelnen Einträge 
-% werden einzeln mit \cs{ChangedAt@@Margin} verarbeitet. Als Ergebnis wird eine 
-% Liste erzeugt, in welcher alle angegebenen Versionsnummern genau einmal 
-% erscheinen. Mit \cs{sortlist} werden diese in die richtige Reihenfolge
-% sortiert und anschließend als Randnotiz in einer Tabelle ausgegeben.
-%    \begin{macrocode}
+\newcommand*\ChangedAt@Default{}
 \newlength{\changedatmarginskip}
 \newcommand*\@changedatversionlist{}
 \let\@changedatversionlist\relax
-\NewDocumentCommand\ChangedAt@Margin{m}{%
+\newcommand*\ChangedAt@Process[1]{%
   \let\@changedatlist\relax%
-  \@for\@tempa:=#1\do{\listeadd{\@changedatlist}{\expandonce\@tempa}}%
   \let\@changedatversionlist\relax%
-  \forlistloop\ChangedAt@MarginSplit{\@changedatlist}%
+  \@for\@tempa:=#1\do{\listeadd{\@changedatlist}{\expandonce\@tempa}}%
+  \forlistloop\ChangedAt@Split{\@changedatlist}%
+%    \end{macrocode}
+% Nach der Verarbeitung aller Einräge sind in \cs{@changedatlist} alle 
+% angegebenen Versionsnummern genau einmal enthalten. Mit \cs{sortlist} werden 
+% diese in die richtige Reihenfolge sortiert und anschließend als Randnotiz in
+% einer Tabelle ausgegeben.
+%    \begin{macrocode}
   \sortlist{\@changedatversionlist}%
 %    \end{macrocode}
 % Die Länge \cs{changedatmarginskip} wird verwendet, um gegebenenfalls den 
@@ -1984,32 +1892,108 @@
   \setlength{\changedatmarginskip}{\z@}%
 }
 %    \end{macrocode}
-% \cs{ChangedAt@MarginSplit} funktioniert äquivlaent zu \cs{ChangedAt@LogSplit}.
+% Der Befehl \cs{ChangedAt@Split} teilt ein gegebenes Argument am Delimiter
+% Ausrufezeichen (\glqq !\grqq) in drei Argumente auf und reicht diese an 
+% \cs{ChangedAt@@Process} weiter. Sollte kein oder nur Ausrufezeichen gefunden 
+% werden, so wird das zweite und/oder dritte Argument mit dem~-- vom Paket
+% \pkg{xparse} definierten~-- leeren Wert \texttt{-NoValue-} an den Befehl
+% \cs{ChangedAt@@Process} übergeben.
 %    \begin{macrocode}
-\NewDocumentCommand\ChangedAt@MarginSplit{>{\SplitArgument{1}{!}}m}{%
-  \ChangedAt@@Margin#1%
+\NewDocumentCommand\ChangedAt@Split{>{\SplitArgument{2}{!}}m}{%
+  \ChangedAt@@Process#1%
 }
 %    \end{macrocode}
-% Mit \cs{ChangedAt@@Margin} wird fügt der Liste \cs{changedatversionlist}
-% einen Versionseintrag einmalig zu.
+% Hiermit wird der Eintrag in die Änderungshistorie erzeugt. Dabei ist zu 
+% unterscheiden, ob der Befehl \cs{ChangedAt} direkt genutzt wurde oder aber 
+% der Eintrag innerhalb der \env{Declaration}-Umgebung erfolgte. Dies wird 
+% anhand von des dritten Argumentes erkannt. Für den ersten Fall erfolgt ein
+% Eintrag lediglich, wenn neben der Versionsnummer selbst auch eine Erklärung
+% angegben wurde~-- eine Randnotiz wird aber in jedem Fall gesetzt. Im zweiten
+% Fall wird der Erklärung \emph{immer} \cs{ChangedAt@Default} vorangestellt.
+% Sollte keine Erklärung direkt angegeben worden sein, so wird in der
+% Änderungsliste vermerkt, dass es sich um eine \emph{neue} Option, Befehl etc.
+% handelt. Der eigentliche Eintrag selbst erfolgt mit \cs{ChangedAt@@@Process}.
 %    \begin{macrocode}
-\newcommand*\ChangedAt@@Margin[2]{%
+\newcommand*\ChangedAt@@Process[3]{%
+  \IfNoValueTF{#3}{%
+    \IfValueTF{#2}{\ChangedAt@@@Process{#1}{#2}}{}%
+  }{%
+%    \end{macrocode}
+% Bei der Deklaration von Optionen, Befehlen etc. werden diese automatisch in 
+% der Liste der Änderungen vor der gegebenen Erklärung selbst ausgegeben.
+% Hierfür wird das dritte Argument genutzt. Damit lediglich diese und nicht
+% noch die dazugehörigen Argumente eingetragen werden, werden die relevanten
+% Befehle deaktiviert und das optionale Argument in \cs{ChangedAt@Default}
+% expandiert.
+%    \begin{macrocode}
+    \begingroup%
+      \let\PName\@gobble%
+      \let\PBoolean\relax%
+      \let\PSet\relax%
+      \let\PValue\@gobble%
+      \let\Parameter\@gobble%
+      \let\OParameter\@gobble%
+      \let\LParameter\relax%
+      \let\OLParameter\@gobble%
+      \let\PParameter\@gobble%
+      \let\POParameter\@gobble%
+      \xdef\ChangedAt@Default{#3}%
+    \endgroup%
+    \ChangedAt@@@Process{#1}{\ChangedAt@Default: #2}%
+  }%
+%    \end{macrocode}
+% Außerdem wird der Liste \cs{changedatversionlist} die aktuelle Version
+% einmalig hinzugefügt, um alle in einer Randnotiz ausgeben zu können.
+%    \begin{macrocode}
   \xifinlist{#1}{\@changedatversionlist}{}{\listeadd\@changedatversionlist{#1}}%
+}
+%    \end{macrocode}
+% Mit \cs{ChangedAt@@@Process} Erfolgen die Einträge in die Änderungsliste.
+%    \begin{macrocode}
+\newcommand*\ChangedAt@@@Process[2]{%
+  \begingroup%
+%    \end{macrocode}
+% Für geänderte Parameter wird als Haupteintrag das dazugehörige Makro bzw. die
+% entsprechende Umgebung verwendet. Der geänderte Parameter folgt danach.
+% Zuerst muss ggf. das Makro \cs{ChangedAt@Default} expandiert werden.
+%    \begin{macrocode}
+    \def\@tempa{#2}%
+    \in@{\ChangedAt@Default}{#2}%
+    \ifin@%
+      \expandafter\def\expandafter\@tempa\expandafter{\ChangedAt@Default}%
+    \fi%
+%    \end{macrocode}
+% Danach wird geprüft, ob das Makro \cs{Key} übergeben wurde.
+%    \begin{macrocode}
+    \expandafter\in@\expandafter\Key\expandafter{\@tempa}%
+    \ifin@%
+      \begingroup%
+        \RenewDocumentCommand\Key{sommo}{\xdef\@TempKey{##3:}}%
+        \setbox0\vtop{#2}%
+      \endgroup%
+      \index[changelog]{#1!\@TempKey\ #2}%
+    \else%
+      \index[changelog]{#1!#2}%
+    \fi%
+  \endgroup%
 }
 %    \end{macrocode}
 % \end{macro}^^A \@changedatversionlist
 % \end{length}^^A \changedatmarginskip
-% \end{macro}^^A \ChangedAt@@Margin
-% \end{macro}^^A \ChangedAt@MarginSplit
-% \end{macro}^^A \ChangedAt@Margin
+% \end{macro}^^A \@changedatlist
+% \end{macro}^^A \ChangedAt@Split
+% \end{macro}^^A \ChangedAt@Default
+% \end{macro}^^A \ChangedAt@@@Process
+% \end{macro}^^A \ChangedAt@@Process
+% \end{macro}^^A \ChangedAt@Process
 % \begin{macro}{\Rename}
 % \changes{v2.02}{2014/07/25}{neu}%^^A
 % Der Befehl \cs{Rename} erzeugt einen Eintrag in der Änderungshistorie sowie 
 % einen Eintrag im gewünschten Index mit einem Verweis auf den neuen Befehl.
 %    \begin{macrocode}
 \newcommand*\Rename[4][]{%
-  \ChangedAt@@@Log{#2}{#3: \emph{umbenannt}~\textrightarrow~siehe #4}%
-  \ChangedAt@@@Log{#2}{#4: \emph{neu}~\textrightarrow~ersetzt #3}%
+  \ChangedAt@@@Process{#2}{#3: \emph{umbenannt}~\textrightarrow~siehe #4}%
+  \ChangedAt@@@Process{#2}{#4: \emph{neu}~\textrightarrow~ersetzt #3}%
   \listeadd\@changedatdeclarelist{#2}%
   \index[#1]{#3|see{#4}}%
 }
@@ -2183,6 +2167,7 @@
 % allerdings nur, wenn das Paket \pkg{fontenc} geladen wird.
 %    \begin{macrocode}
   \addtokomafont{section}{\strut\ignorespaces}% derber Hack!
+  \addtokomafont{subsection}{\strut\ignorespaces}% derber Hack!
 %    \end{macrocode}
 % \begin{macro}{\tudfinalflag}
 % \begin{macro}{\tudprintflag}

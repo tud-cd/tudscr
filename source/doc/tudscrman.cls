@@ -55,14 +55,14 @@
       \fi%
     }%
   \fi%
-  \@TUDVersion{2014/08/29 v2.02 TUD-KOMA-Script}%
+  \@TUDVersion{2014/09/01 v2.02 TUD-KOMA-Script}%
 \endgroup%
 \providecommand*\tudscrmail{tudscr@gmail.com}
 \newcommand*\tudinh@name{tudscrreprt}
 %%% From File: tudscr-manual.dtx
 \NeedsTeXFormat{LaTeX2e}[2011/06/27]
 \ProvidesClass{tudscrman}[%
-  2014/08/29 v2.02 TUD-KOMA-Script
+  2014/09/01 v2.02 TUD-KOMA-Script
   class (internal manual)%
 ]
 %%% From File: tudscr-base.dtx
@@ -230,7 +230,9 @@
 \newcommand*\tud@currentHref{}
 \BeforeBeginEnvironment{Code}{\global\let\tud@currentHref\@currentHref}
 \AfterEndEnvironment{Code}{\global\let\@currentHref\tud@currentHref}
-\newcommand*\@Tutorial{}
+\newrobustcmd*\hypertut[2]{%
+  \hyperref{tutorials/#1.pdf}{\jobname}{tutorials:#1}{\texturn{#1.pdf}#2}%
+}
 \NewDocumentCommand\Tutorial{som}{%
   \IfFileExists{#3}{%
     \def\tud@write@file{#3}%
@@ -245,14 +247,9 @@
       pdflatex \tud@write@option \tud@write@file.tex
     }%
   }%
-  \IfFileExists{tutorials/#3.pdf}{%
-    \def\@Tutorial####1{%
-      \hyperref{tutorials/#3}{\jobname}{tutorials:#3}{\texturn{#3.pdf}####1}%
-    }%
-  }{\def\@Tutorial####1{\texturn{#3.pdf}####1}}%
-  \@Tutorial{}%
+  \IfFileExists{tutorials/#3.pdf}{\hypertut{#3}{}}{\texturn{#3.pdf}}%
   \IfBooleanTF{#1}{}{%
-    \index[files]{\@Tutorial{~{\idxfont(Datei)}\IfValueTF{#2}{|#2}{}}}%
+    \index[files]{\hypertut{#3}{~{\idxfont(Tutorial)}\IfValueTF{#2}{|#2}{}}}%
   }%
 }
 %%\newread\pin@file
@@ -365,6 +362,7 @@
     \@printindex[terms]%
     \begingroup%
       \let\lettergroup\@gobble%
+      \let\indexspace\par%
       \@printindex[fonts]%
       \@printindex[colors]%
     \endgroup%
@@ -373,12 +371,13 @@
 }
 \newcommand*\PrintIndexPrologue[1]{\long\gdef\@printindexprologue{#1}}
 \newcommand*\@printindexprologue{}
+\newcommand*\@printindexskip{\ifnum\imki@columns>\@ne\vspace{-\multicolsep}\fi}
 \newcommand*\@printindex[1][]{%
   \pagebreak[3]%
   \apptocmd{\prepare@multicols}{\hbadness10000}{}{}%
   \ifblank{#1}{%
     \ifx\@printindexprologue\@empty%
-      \indexprologue[\vspace*{0pt}]{\label{idx:main}}%
+      \indexprologue[\@printindexskip]{\label{idx:main}}%
     \else%
       \indexprologue{%
         \label{idx:main}%
@@ -386,11 +385,11 @@
         \@printindexprologue%
       }%
     \fi%
-    \printindex%
+    \printindex\@printindexskip%
     \let\@printindexprologue\@empty%
   }{%
-    \indexprologue[\vspace*{0pt}]{\label{idx:#1}}%
-    \printindex[#1]%
+    \indexprologue[\@printindexskip]{\label{idx:#1}}%
+    \printindex[#1]\@printindexskip%
   }%
 }
 \newcommand*\seeidx[2]{\pageref{idx:#1}}
@@ -516,7 +515,7 @@
 \NewDocumentCommand\DeclarePackage{om}{%
   \label{files:#2}\Hy@raisedlink{\hyperdef{\jobname}{files:#2}{}}%
   \index[files]{\hyperidx[files:#2]{\texturn{#2}~{\idxfont(Paket)}}|declare}%
-  \IfValueTF{#1}{\ChangedAt@Log[{\Package{#2}}]{#1}}{}%
+  \IfValueTF{#1}{\ChangedAt@Process{#1!\emph{neu}!\Package{#2}}}{}%
 }
 \newcommand*\@TempOption{}
 \NewDocumentCommand\Option{st'omo}{%
@@ -784,8 +783,16 @@
 \NewDocumentEnvironment{Declaration}{omoog}{%
   \listadd\@declarationlist{#2}%
   \IfValueTF{#1}{%
-    \ChangedAt@Log[{#2}]{#1}%
-    \listeadd\@changedatdeclarelist{#1}%
+    \@for\@tempa:=#1\do{%
+      \@expandtwoargs\in@{!}{\@tempa}
+      \ifin@
+        \expandafter\listadd\expandafter\@changedatdeclarelist%
+          \expandafter{\@tempa!#2}%
+      \else
+        \expandafter\listadd\expandafter\@changedatdeclarelist%
+          \expandafter{\@tempa!\emph{neu}!#2}%
+      \fi
+    }%
   }{}%
   \IfNoValueTF{#3}{%
     \listadd\@presetlist{\relax}%
@@ -829,11 +836,10 @@
 }
 \NewDocumentCommand\printdeclarationlist{sd()}{%
   \ifx\@declarationlist\relax\else%
-    \IfBooleanTF{#1}{\global\@noindextrue}{\global\@noindexfalse}%
     \ifvmode\else\par\fi%
-    \allowbreak%
     \addpenalty{\@beginparpenalty}%
-    \addvspace{1.2\baselineskipglue}%
+    \addvspace{1.5\baselineskipglue}%
+    \IfBooleanTF{#1}{\global\@noindextrue}{\global\@noindexfalse}%
     \@declaretrue\@openindextrue%
     \@afterindentfalse\@afterheading%
     \def\@tempa##1{\ignorespaces##1\tabularnewline}%
@@ -863,7 +869,7 @@
       \fi%
     }{}%
     \ifx\@changedatdeclarelist\relax\else%
-      \ChangedAt@Margin{\@changedatdeclarelist}%
+      \ChangedAt@Process{\@changedatdeclarelist}%
     \fi%
     \setlength{\changedatmarginskip}{\z@}%
     \global\let\@declarationlist\relax%
@@ -873,24 +879,41 @@
     \global\@additionallistfalse%
     \global\let\@changedatdeclarelist\relax%
     \IfValueTF{#2}{#2}{}%
-    \vskip\baselineskipglue\nobreak%
+    \ifvmode\else\par\fi%
+    \vspace{1.5\baselineskipglue}\nobreak%
     \@afterindentfalse\@afterheading%
   \fi%
 }
-\newcommand*\ChangedAt[1]{%
-  \strut%
-  \ChangedAt@Log{#1}%
-  \ChangedAt@Margin{#1}%
-  \ignorespaces%
-}
+\newcommand*\ChangedAt[1]{\strut\ChangedAt@Process{#1}\ignorespaces}
 \newcommand*\@changedatlist{}
-\newcommand*\ChangedAt@LogDefault{}
-\newcommand*\ChangedAt@Log[2][]{%
+\newcommand*\ChangedAt@Default{}
+\newlength{\changedatmarginskip}
+\newcommand*\@changedatversionlist{}
+\let\@changedatversionlist\relax
+\newcommand*\ChangedAt@Process[1]{%
   \let\@changedatlist\relax%
-  \@for\@tempa:=#2\do{\listeadd{\@changedatlist}{\expandonce\@tempa}}%
-  \def\ChangedAt@LogDefault{#1}%
-  \begingroup%
-    \ifx\ChangedAt@LogDefault\@empty\else%
+  \let\@changedatversionlist\relax%
+  \@for\@tempa:=#1\do{\listeadd{\@changedatlist}{\expandonce\@tempa}}%
+  \forlistloop\ChangedAt@Split{\@changedatlist}%
+  \sortlist{\@changedatversionlist}%
+  \marginnote{%
+    \def\@tempa####1{\ignorespaces####1\tabularnewline}%
+    \begin{tabular}{|l|}%
+      \hline{\footnotesize\rule{0pt}{.8\baselineskip}}%
+      \forlistloop\@tempa{\@changedatversionlist}%
+      \hline%
+    \end{tabular}%
+  }[\changedatmarginskip]%
+  \setlength{\changedatmarginskip}{\z@}%
+}
+\NewDocumentCommand\ChangedAt@Split{>{\SplitArgument{2}{!}}m}{%
+  \ChangedAt@@Process#1%
+}
+\newcommand*\ChangedAt@@Process[3]{%
+  \IfNoValueTF{#3}{%
+    \IfValueTF{#2}{\ChangedAt@@@Process{#1}{#2}}{}%
+  }{%
+    \begingroup%
       \let\PName\@gobble%
       \let\PBoolean\relax%
       \let\PSet\relax%
@@ -901,31 +924,18 @@
       \let\OLParameter\@gobble%
       \let\PParameter\@gobble%
       \let\POParameter\@gobble%
-      \xdef\ChangedAt@LogDefault{#1}%
-    \fi%
-  \endgroup%
-  \forlistloop\ChangedAt@LogSplit{\@changedatlist}%
+      \xdef\ChangedAt@Default{#3}%
+    \endgroup%
+    \ChangedAt@@@Process{#1}{\ChangedAt@Default: #2}%
+  }%
+  \xifinlist{#1}{\@changedatversionlist}{}{\listeadd\@changedatversionlist{#1}}%
 }
-\NewDocumentCommand\ChangedAt@LogSplit{>{\SplitArgument{1}{!}}m}{%
-  \ChangedAt@@Log#1%
-}
-\newcommand*\ChangedAt@@Log[2]{%
-  \ifx\ChangedAt@LogDefault\@empty%
-    \IfValueTF{#2}{\ChangedAt@@@Log{#1}{#2}}{}%
-  \else%
-    \IfValueTF{#2}{%
-      \ChangedAt@@@Log{#1}{\ChangedAt@LogDefault: #2}%
-    }{%
-      \ChangedAt@@@Log{#1}{\ChangedAt@LogDefault: \emph{neu}}%
-    }%
-  \fi%
-}
-\newcommand*\ChangedAt@@@Log[2]{%
+\newcommand*\ChangedAt@@@Process[2]{%
   \begingroup%
     \def\@tempa{#2}%
-    \in@{\ChangedAt@LogDefault}{#2}%
+    \in@{\ChangedAt@Default}{#2}%
     \ifin@%
-      \expandafter\def\expandafter\@tempa\expandafter{\ChangedAt@LogDefault}%
+      \expandafter\def\expandafter\@tempa\expandafter{\ChangedAt@Default}%
     \fi%
     \expandafter\in@\expandafter\Key\expandafter{\@tempa}%
     \ifin@%
@@ -939,34 +949,9 @@
     \fi%
   \endgroup%
 }
-\newlength{\changedatmarginskip}
-\newcommand*\@changedatversionlist{}
-\let\@changedatversionlist\relax
-\NewDocumentCommand\ChangedAt@Margin{m}{%
-  \let\@changedatlist\relax%
-  \@for\@tempa:=#1\do{\listeadd{\@changedatlist}{\expandonce\@tempa}}%
-  \let\@changedatversionlist\relax%
-  \forlistloop\ChangedAt@MarginSplit{\@changedatlist}%
-  \sortlist{\@changedatversionlist}%
-  \marginnote{%
-    \def\@tempa####1{\ignorespaces####1\tabularnewline}%
-    \begin{tabular}{|l|}%
-      \hline{\footnotesize\rule{0pt}{.8\baselineskip}}%
-      \forlistloop\@tempa{\@changedatversionlist}%
-      \hline%
-    \end{tabular}%
-  }[\changedatmarginskip]%
-  \setlength{\changedatmarginskip}{\z@}%
-}
-\NewDocumentCommand\ChangedAt@MarginSplit{>{\SplitArgument{1}{!}}m}{%
-  \ChangedAt@@Margin#1%
-}
-\newcommand*\ChangedAt@@Margin[2]{%
-  \xifinlist{#1}{\@changedatversionlist}{}{\listeadd\@changedatversionlist{#1}}%
-}
 \newcommand*\Rename[4][]{%
-  \ChangedAt@@@Log{#2}{#3: \emph{umbenannt}~\textrightarrow~siehe #4}%
-  \ChangedAt@@@Log{#2}{#4: \emph{neu}~\textrightarrow~ersetzt #3}%
+  \ChangedAt@@@Process{#2}{#3: \emph{umbenannt}~\textrightarrow~siehe #4}%
+  \ChangedAt@@@Process{#2}{#4: \emph{neu}~\textrightarrow~ersetzt #3}%
   \listeadd\@changedatdeclarelist{#2}%
   \index[#1]{#3|see{#4}}%
 }
@@ -1047,6 +1032,7 @@
 }
 \AtBeginDocument{%
   \addtokomafont{section}{\strut\ignorespaces}% derber Hack!
+  \addtokomafont{subsection}{\strut\ignorespaces}% derber Hack!
   \ifdef{\tudfinalflag}{\TUDoptions{ToDo=false}}{}%
   \ifdef{\tudprintflag}{\hypersetup{hidelinks}\TUDoptions{color=no}}{}%
 }
