@@ -55,14 +55,14 @@
       \fi%
     }%
   \fi%
-  \@TUDVersion{2014/09/04 v2.02 TUD-KOMA-Script}%
+  \@TUDVersion{2014/09/08 v2.02 TUD-KOMA-Script}%
 \endgroup%
 \providecommand*\tudscrmail{tudscr@gmail.com}
 \newcommand*\tudinh@name{tudscrreprt}
 %%% From File: tudscr-manual.dtx
 \NeedsTeXFormat{LaTeX2e}[2011/06/27]
 \ProvidesClass{tudscrman}[%
-  2014/09/04 v2.02 TUD-KOMA-Script
+  2014/09/08 v2.02 TUD-KOMA-Script
   class (internal manual)%
 ]
 %%% From File: tudscr-base.dtx
@@ -197,6 +197,7 @@
     \immediate\write18{%
       pdflatex \tud@write@option \tud@write@file.tex
       pdflatex \tud@write@option \tud@write@file.tex
+      pdflatex \tud@write@option \tud@write@file.tex
     }%
   }%
   \IfFileExists{\tud@write@file.pdf}{%
@@ -243,6 +244,7 @@
   }%
   \filemodCmp{./\tud@write@file.pdf}{./\tud@write@file.tex}{}{%
     \immediate\write18{%
+      pdflatex \tud@write@option \tud@write@file.tex
       pdflatex \tud@write@option \tud@write@file.tex
       pdflatex \tud@write@option \tud@write@file.tex
     }%

@@ -1,4 +1,4 @@
-% \CheckSum{2035}
+% \CheckSum{2051}
 % \iffalse meta-comment
 % ======================================================================
 %
@@ -49,7 +49,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-manual.dtx}[%
-  2014/09/04 v2.02 TUD-KOMA-Script\space%
+  2014/09/09 v2.02 TUD-KOMA-Script\space%
 %</driver>
 %<identify>\NeedsTeXFormat{LaTeX2e}[2011/06/27]
 %<class&identify>\ProvidesClass{tudscrman}[%
@@ -367,6 +367,7 @@
     \immediate\write18{%
       pdflatex \tud@write@option \tud@write@file.tex
       pdflatex \tud@write@option \tud@write@file.tex
+      pdflatex \tud@write@option \tud@write@file.tex
     }%
   }%
   \IfFileExists{\tud@write@file.pdf}{%
@@ -650,6 +651,7 @@
   }%
   \filemodCmp{./\tud@write@file.pdf}{./\tud@write@file.tex}{}{%
     \immediate\write18{%
+      pdflatex \tud@write@option \tud@write@file.tex
       pdflatex \tud@write@option \tud@write@file.tex
       pdflatex \tud@write@option \tud@write@file.tex
     }%
@@ -1194,7 +1196,8 @@
 % Befehl gerade innerhalb der Änderungsliste verwendet wird. Ist dies der Fall, 
 % wird der verarbeitende Befehl \cs{@ProcessChangedAt} aufgerufen. Mit dem 
 % optionalen Argument \emph{nach} dem Hauptargument kann der Option im Handbuch 
-% ein Wert zugewiesen werden.
+% ein Wert zugewiesen werden. Für Tutorials wird ein Befehl definiert, der auf 
+% das Handbuch verweist.
 %    \begin{macrocode}
 \newcommand*\@TempOption{}
 \NewDocumentCommand\Option{st'omo}{%
@@ -1211,6 +1214,18 @@
     }%
   \fi%
 }
+%</class&body>
+%<*package&body>
+\NewDocumentCommand\Option{smo}{%
+  \IfBooleanTF{#1}{%
+    \texttt{#2}\IfValueTF{#3}{\texttt{=#3}}{}%
+  }{%
+    \hyperref{../\tudscr@manual}{\tudscr@manual}{options:#2}{\texttt{#2}}%
+    \IfValueTF{#3}{\texttt{=#3}}{}%
+  }%
+}
+%</package&body>
+%<*class&body>
 %    \end{macrocode}
 % \end{macro}^^A \@TempOption
 % \end{macro}^^A \Option
