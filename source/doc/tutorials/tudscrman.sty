@@ -55,7 +55,7 @@
       \fi%
     }%
   \fi%
-  \@TUDVersion{2014/09/12 v2.02 TUD-KOMA-Script}%
+  \@TUDVersion{2014/09/17 v2.02 TUD-KOMA-Script}%
 \endgroup%
 \providecommand*\tudscrmail{tudscr@gmail.com}
 \@ifundefined{tudcls@name}{%
@@ -70,7 +70,7 @@
 %%% From File: tudscr-manual.dtx
 \NeedsTeXFormat{LaTeX2e}[2011/06/27]
 \ProvidesPackage{tudscrman}[%
-  2014/09/12 v2.02 TUD-KOMA-Script
+  2014/09/17 v2.02 TUD-KOMA-Script
   package (internal tutorials)%
 ]
 %%% From File: tudscr-base.dtx
@@ -141,29 +141,30 @@
 \newenvironment{Tutorial}{\@Tutorial}{\@@Tutorial}
 \newenvironment{Tutorial*}{\@Tutorial}{\@@Tutorial}
 \newenvironment{Tutorial+}[1]{\gdef\@@@Tutorial{#1}\@Tutorial}{\@@Tutorial}
+\newenvironment{Tutorial-}{\@Tutorial}{\@@Tutorial}
 \AfterEndEnvironment{Tutorial}{%
   \@@@Tutorial%
   \input{\jobname-temp.tut}%
   \global\let\@@@Tutorial\relax%
-  \par\@afterindentfalse\@afterheading
+  \par\noindent%
 }
 \AfterEndEnvironment{Tutorial*}{%
   \global\let\@@@Tutorial\relax%
-  \par\@afterindentfalse\@afterheading%
+  \par\noindent%
 }
 \ifcase\pdf@shellescape\or
-  \begin{filecontents*}{\jobname-temp.tex}
-  \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
-  \documentclass[english,ngerman]{tudscrreprt}
-  \usepackage[utf8]{inputenc}
-  \usepackage[T1]{fontenc}
-  \usepackage{babel}
-  \usepackage{tudscrsupervisor}
-  \usepackage{isodate}
-  \begin{document}
-  \input{\jobname.tut}
-  \end{document}
-  \end{filecontents*}
+\begin{filecontents*}{\jobname-temp.tex}
+\RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
+\documentclass[english,ngerman]{tudscrreprt}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{babel}
+\usepackage{tudscrsupervisor}
+\usepackage{isodate}
+\begin{document}
+\input{\jobname.tut}
+\end{document}
+\end{filecontents*}
 \fi
 \AfterEndEnvironment{Tutorial+}{%
   \IfFileExists{\jobname-temp}{%
@@ -186,7 +187,7 @@
     pdflatex \tud@write@option \tud@write@file.tex
   }%
   \global\let\@@@Tutorial\relax%
-  \par\@afterindentfalse\@afterheading%
+  \par\noindent%
 }
 \NewDocumentCommand\includetutorial{omO{1}}{%
   \IfFileExists{\jobname-temp}{%
@@ -219,6 +220,7 @@
     \fi%
   }{}%
 }
+\AtBeginEnvironment{Tutorial-}{\let\tud@tut@append\relax}
 \newwrite\tud@tut@output
 \immediate\openout\tud@tut@output=\jobname.tut\relax
 \newread\tud@tut@input
@@ -295,7 +297,7 @@
       \edef\@tempa{\noexpand\todo[\@ToDo,inline]}%
       \@tempa{#3}%
     \endgroup%
-    \par\@afterindentfalse\@afterheading%
+    \par\noindent%
   }{}%
   \ignorespaces%
 }
@@ -312,6 +314,7 @@
   \let\NoCaseChange\@firstofone%
 }
 \newrobustcmd*\bsc{\@backslashchar}
+\newcommand*\File[1]{\mbox{\texturn{#1}}}
 \NewDocumentCommand\Package{sm}{%
   \IfBooleanTF{#1}{\texturn{#2}}{%
     \hyperref{../\tudscr@manual}{\tudscr@manual}{files:#2}{\texturn{#2}}%
@@ -362,8 +365,20 @@
     \textsf{T\kern.05em U\kern.05em D\kern.1em-\kern.1em}\KOMAScript%
   }\xspace%
 }
-\newcommand*\@TUDScript{TUD-KOMA-SCRIPT}
+\newcommand*\@TUDScript{TUD-KOMA-Script}
 \RequirePackage{scrhack}[2014/07/07]
+\newcommand*\hrfn[2]{\href{#1}{#2}\footnote{\scriptsize\url{#1}}}
+\NewDocumentCommand\scrguide{s}{%
+  \def\@tempc{%
+    http://mirrors.ctan.org/macros/latex/contrib/koma-script/doc/scrguide.pdf%
+  }%
+  \IfBooleanTF{#1}{%
+    \href{\@tempc}{\File{scrguide.pdf}}%
+  }{%
+    \hrfn{\@tempc}{\File{scrguide.pdf}}%
+  }%
+  \xspace%
+}
 \newcommand*\CD{Corporate Design\xspace}
 \newcommand*\CDs{Corporate Designs\xspace}
 \newcommand*\TUD{Technische Universit\"at Dresden\xspace}

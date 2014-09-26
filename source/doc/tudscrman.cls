@@ -55,14 +55,14 @@
       \fi%
     }%
   \fi%
-  \@TUDVersion{2014/09/12 v2.02 TUD-KOMA-Script}%
+  \@TUDVersion{2014/09/17 v2.02 TUD-KOMA-Script}%
 \endgroup%
 \providecommand*\tudscrmail{tudscr@gmail.com}
 \newcommand*\tudinh@name{tudscrreprt}
 %%% From File: tudscr-manual.dtx
 \NeedsTeXFormat{LaTeX2e}[2011/06/27]
 \ProvidesClass{tudscrman}[%
-  2014/09/12 v2.02 TUD-KOMA-Script
+  2014/09/17 v2.02 TUD-KOMA-Script
   class (internal manual)%
 ]
 %%% From File: tudscr-base.dtx
@@ -333,7 +333,7 @@
       \edef\@tempa{\noexpand\todo[\@ToDo,inline]}%
       \@tempa{#3}%
     \endgroup%
-    \par\@afterindentfalse\@afterheading%
+    \par\noindent%
   }{}%
   \ignorespaces%
 }
@@ -1076,11 +1076,11 @@
 }
 \newcommand*\vKOMAScript{v3.12\xspace}
 \DeclareRobustCommand\TUDScript{%
-  \ifdin{\@TUDScript}{%
+  \ifdin{\MakeTextUppercase{\@TUDScript}}{%
     \textsf{T\kern.05em U\kern.05em D\kern.1em-\kern.1em}\KOMAScript%
   }\xspace%
 }
-\newcommand*\@TUDScript{TUD-KOMA-SCRIPT}
+\newcommand*\@TUDScript{TUD-KOMA-Script}
 \RequirePackage{scrhack}[2014/07/07]
 \newcommand*\Attention[1]{\marginnote{\fbox{Achtung!}}\emph{#1}}
 \NewDocumentCommand\Forum{s}{%
@@ -1094,6 +1094,7 @@
 \newcommand*\notudscrartcl{%
   F\"ur die Klasse \Class{tudscrartcl} ist diese Einstellung nicht verf\"ugbar.
 }
+\newlength{\tempdim}
 \newcommand*\hrfn[2]{\href{#1}{#2}\footnote{\scriptsize\url{#1}}}
 \NewDocumentCommand\scrguide{s}{%
   \def\@tempc{%
@@ -1106,7 +1107,6 @@
   }%
   \xspace%
 }
-\newlength{\tempdim}
 \newcommand*\CD{Corporate Design\xspace}
 \newcommand*\CDs{Corporate Designs\xspace}
 \newcommand*\TUD{Technische Universit\"at Dresden\xspace}

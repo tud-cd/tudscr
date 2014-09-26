@@ -1,4 +1,4 @@
-% \CheckSum{2186}
+% \CheckSum{2192}
 % \iffalse meta-comment
 % ======================================================================
 %
@@ -49,7 +49,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-manual.dtx}[%
-  2014/09/15 v2.02 TUD-KOMA-Script\space%
+  2014/09/17 v2.02 TUD-KOMA-Script\space%
 %</driver>
 %<identify>\NeedsTeXFormat{LaTeX2e}[2011/06/27]
 %<class&identify>\ProvidesClass{tudscrman}[%
@@ -471,6 +471,8 @@
 % \changes{v2.02}{2014/08/19}{neu}%^^A
 % \begin{environment}{Tutorial+}
 % \changes{v2.02}{2014/09/10}{neu}%^^A
+% \begin{environment}{Tutorial-}
+% \changes{v2.02}{2014/09/16}{neu}%^^A
 % \begin{macro}{\TutorialPreamble}
 % \changes{v2.02}{2014/08/20}{neu}%^^A
 % \begin{macro}{\includetutorial}
@@ -483,12 +485,19 @@
 % \changes{v2.02}{2014/08/19}{neu}%^^A
 % Die Umgebung \env{Tutorial} ist für die Ausgabe und gleichzeitige Ausführung 
 % von Quelltext gedacht. Dazu speichert diese ihren Inhalt in eine temporäre 
-% Datei, die dann mehrmals ausgelesen werden kann. Die Sternversion dieser 
-% Umgebung gibt den Quelltext vollständig aus, ohne diesen auszuführen. Die 
-% Version mit Pluszeichen führt den Quelltext in einer separaten Datei mit 
-% einem minimalen Dokumentkörper aus, um daraus eine PDF-Datei zu erzeugen, 
-% welche im nachhinein wieder mit \cs{includetutorial} als Grafik eingebunden
-% werden kann.
+% Datei, die dann mehrmals ausgelesen werden kann. Damit kann der angegebene 
+% Quelltext zum einen ausgeführt und zum anderen im Dokument selber ausgegeben 
+% werden. Die Sternversion dieser Umgebung gibt den Quelltext vollständig aus,
+% ohne diesen auszuführen. Die Version mit Pluszeichen führt den Quelltext in
+% einer separaten Datei mit einem minimalen Dokumentkörper aus, um daraus eine
+% PDF-Datei zu erzeugen, welche im nachhinein wieder mit \cs{includetutorial}
+% als Grafik eingebunden werden kann. Dies ist für Quelltextabschnitte gedacht, 
+% deren Ausgabe zu groß ist, um diese direkt anzuzeigen und dennoch dargestellt 
+% werden soll. All diesen Varianten ist gemein, dass der angegebene Quelltext
+% am Ende des Tutorials mit \cs{FinishTutorial} chronologisch ausgegeben wird.
+% Um Quelltextausschnitte zur weiterführenden Information anzugeben, ohne diese 
+% in das Copy"~\&"~Paste"~Beispiel zu übernehmen, wird die außerdem die Version 
+% mit Minuszeichen definiert.
 %
 % Damit die Umgebungen nicht doppelt implementiert werden müssen,  werden die
 % Hilfsmakros \cs{@Tutorial} und \cs{@@Tutorial} definiert. Für die eigentlich 
@@ -529,15 +538,16 @@
 \newenvironment{Tutorial}{\@Tutorial}{\@@Tutorial}
 \newenvironment{Tutorial*}{\@Tutorial}{\@@Tutorial}
 \newenvironment{Tutorial+}[1]{\gdef\@@@Tutorial{#1}\@Tutorial}{\@@Tutorial}
+\newenvironment{Tutorial-}{\@Tutorial}{\@@Tutorial}
 \AfterEndEnvironment{Tutorial}{%
   \@@@Tutorial%
   \input{\jobname-temp.tut}%
   \global\let\@@@Tutorial\relax%
-  \par\@afterindentfalse\@afterheading
+  \par\noindent%
 }
 \AfterEndEnvironment{Tutorial*}{%
   \global\let\@@@Tutorial\relax%
-  \par\@afterindentfalse\@afterheading%
+  \par\noindent%
 }
 %    \end{macrocode}
 % Die Umgebung \env{Tutorial+} verwendet nach der Ausgabe des temporären 
@@ -548,18 +558,18 @@
 % erzeugt, die den zuletzt verwendeten Quelltext kompiliert.
 %    \begin{macrocode}
 \ifcase\pdf@shellescape\or
-  \begin{filecontents*}{\jobname-temp.tex}
-  \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
-  \documentclass[english,ngerman]{tudscrreprt}
-  \usepackage[utf8]{inputenc}
-  \usepackage[T1]{fontenc}
-  \usepackage{babel}
-  \usepackage{tudscrsupervisor}
-  \usepackage{isodate}
-  \begin{document}
-  \input{\jobname.tut}
-  \end{document}
-  \end{filecontents*}
+\begin{filecontents*}{\jobname-temp.tex}
+\RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
+\documentclass[english,ngerman]{tudscrreprt}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{babel}
+\usepackage{tudscrsupervisor}
+\usepackage{isodate}
+\begin{document}
+\input{\jobname.tut}
+\end{document}
+\end{filecontents*}
 \fi
 %    \end{macrocode}
 % Das Ganze hier ist etwas kryptisch. Der Test auf den Dateinamen ist wahr, 
@@ -588,8 +598,14 @@
     pdflatex \tud@write@option \tud@write@file.tex
   }%
   \global\let\@@@Tutorial\relax%
-  \par\@afterindentfalse\@afterheading%
+  \par\noindent%
 }
+%    \end{macrocode}
+% Der Befehl \cs{includetutorial} bindet die mit \env{Tutorial+} erzeugten
+% PDF-Grafiken schließlich ein. Das angehängte optionale Argument dient zur
+% Angabe der einzubindenden Seiten der PDF-Datei, wobei die PDF-Grafiken 
+% automatisch auf die passende Breite skaliert werden.
+%    \begin{macrocode}
 \NewDocumentCommand\includetutorial{omO{1}}{%
   \IfFileExists{\jobname-temp}{%
     \edef\tud@write@file{#2-temp}
@@ -622,11 +638,17 @@
   }{}%
 }
 %    \end{macrocode}
+% Die Umgebung \env{Tutorial-} gibt lediglich den Inhalt im Dokument aus ohne 
+% weitere Aktionen. Hierfür wird \cs{tud@tut@append} lokal deaktiviert.
+%    \begin{macrocode}
+\AtBeginEnvironment{Tutorial-}{\let\tud@tut@append\relax}
+%    \end{macrocode}
 % \end{macro}^^A \@@@Tutorial
 % \end{macro}^^A \@@Tutorial
 % \end{macro}^^A \@Tutorial
 % \end{macro}^^A \includetutorial
 % \end{macro}^^A \TutorialPreamble
+% \end{environment}^^A Tutorial-
 % \end{environment}^^A Tutorial+
 % \end{environment}^^A Tutorial*
 % \end{environment}^^A Tutorial
@@ -910,7 +932,7 @@
       \edef\@tempa{\noexpand\todo[\@ToDo,inline]}%
       \@tempa{#3}%
     \endgroup%
-    \par\@afterindentfalse\@afterheading%
+    \par\noindent%
   }{}%
   \ignorespaces%
 }
@@ -1102,19 +1124,20 @@
 % \fi
 %
 % \begin{macro}{\Email}
-% \begin{macro}{\autorefname}
-% \begin{macro}{\@autorefname}
-% \begin{macro}{\@@autorefname}
 % Hyperlink für die Angabe einer E-Mail-Adresse.
 %    \begin{macrocode}
 \newcommand*\Email[1]{\href{mailto:#1}{\nolinkurl{#1}}}%
 %    \end{macrocode}
+% \end{macro}^^A \Email
 % Die Bezeichner für die Abschnittsebenen werden umbenannt.
 %    \begin{macrocode}
 \renewcaptionname{ngerman}{\sectionautorefname}{Unterkapitel}
 \renewcaptionname{ngerman}{\subsectionautorefname}{Abschnitt}
 \renewcaptionname{ngerman}{\subsubsectionautorefname}{Unterabschnitt}
 %    \end{macrocode}
+% \begin{macro}{\autorefname}
+% \begin{macro}{\@autorefname}
+% \begin{macro}{\@@autorefname}
 % Der Befehl \cs{autorefname} dient dazu, den Verweistyp beziehungsweise den 
 % bezeichner des aktuellen oder optional zu einem speziellen Label ohne die 
 % dazugehörige Nummerierung zu erhalten. Auf der Seite LaTeX Stack Exchange%
@@ -1148,7 +1171,6 @@
 % \end{macro}^^A \@@autorefname
 % \end{macro}^^A \@autorefname
 % \end{macro}^^A \autorefname
-% \end{macro}^^A \Email
 % \begin{macro}{\if@declare}
 % \begin{macro}{\if@openindex}
 % \begin{macro}{\idxfont}
@@ -1221,6 +1243,11 @@
     \index[files]{\texturn{#3}~{\idxfont(Datei)}\IfValueTF{#2}{|#2}{}}%
   }%
 }
+%</class&body>
+%<*package&body>
+\newcommand*\File[1]{\mbox{\texturn{#1}}}
+%</package&body>
+%<*class&body>
 %    \end{macrocode}
 % \end{macro}^^A \File
 % \begin{macro}{\Class}

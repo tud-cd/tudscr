@@ -27,6 +27,19 @@
 }
 \author{Falk Hanisch}
 \date{10.09.2014}
+\makeatletter
+\begingroup%
+  \def\and{, }%
+  \let\thanks\@gobble%
+  \let\footnote\@gobble%
+  \hypersetup{%
+    pdfauthor = {\@author},%
+    pdftitle = {\@title},%
+    pdfsubject = {Tutorial für \hologo{LaTeXe}},%
+    pdfkeywords = {LaTeX, \TUDScript, Tutorial, Anwenderleitfaden},%
+  }%
+\endgroup%
+\makeatother
 \StartTutorial[%
   \begin{abstract}\noindent
   Der Versuch, ein allumfassendes Tutorial für eine wissenschaftliche Arbeit 
@@ -42,22 +55,36 @@
   Dennoch wird versucht, alle Schritte möglichst leicht nachvollziehbar zu 
   gestalten.
   
-  In erster Linie ist dieser Anwenderleitfaden für die praktische Umsetzung mit 
-  einer \TUDScript-Dokumentklasse gedacht, kann jedoch~-- natürlich mit 
-  gewissen Abstrichen~-- auch als Grundlage für andere Klassen, insbesondere 
-  die aus dem \KOMAScript"=Bundle genutzt werden. Viele der verwendeten 
-  Optionen und Befehle werden hier nur sporadisch erläutert. Eine detaillierte 
-  Erklärung lässt sich jedoch jederzeit sehr einfach über die Hyperlinks zu den 
+  Für absolute Neueinsteiger gibt es einige freie Tutorials, welche die ersten 
+  Schritte mit \hologo{LaTeXe} stark erleichtern. Sehr empfehlenswert ist die 
+  ausführliche \hrfn{http://www.fadi-semmo.de/latex/workshop/}{Workshop-Reihe} 
+  von  Fadi~Semmo. Außerdem stellt Nicola~L.~C.~Talbot sehr gute Tutorials für 
+  \hrfn{http://www.dickimaw-books.com/latex/novices/}{\hologo{LaTeX}-Novizen} 
+  sowie \hrfn{http://www.dickimaw-books.com/latex/thesis/}{Dissertationen} zur 
+  freien Verfügung.
+  
+  In erster Linie ist dieser Leitfaden für Anwender gedacht, die für ihre
+  wissenschaftliche Arbeit eine \TUDScript"=Dokumentklasse verwenden wollen. 
+  Das vorgestellte Vorgehen kann jedoch~-- natürlich mit gewissen Abstrichen~-- 
+  auch mit anderen Klassen, insbesondere denen aus dem \KOMAScript"=Bundle, 
+  umgesetzt werden. Viele der verwendeten Optionen und Befehle werden hier nur 
+  sporadisch in ihrer Grundfunktion erläutert. Eine detaillierte Erläuterung 
+  lässt sich jedoch jederzeit sehr einfach über die farbigen Hyperlinks zu den 
   entsprechenden Stellen im \href{run:../tudscr.pdf}{\TUDScript-Handbuch} 
   öffnen.
   
-  Das Tutorial muss nicht zwingend vollständig nachvollzogen werden. Es ist in 
-  einzelne Abschnitte untergliedert, damit der Anwender sich bestimmte Aspekte 
-  erarbeiten kann. Nichtsdestotrotz findet sich am Ende dieses Dokumentes das 
-  komplette Tutorial als ausführbarer Quelltext.
+  Der Anwenderleitfaden muss nicht zwingend vollständig nachvollzogen werden. 
+  Dieser ist in einzelne Abschnitte untergliedert, damit der Anwender sich 
+  bestimmte Aspekte erarbeiten kann. Sollten Querbezüge zu den einzelnen 
+  Abschnitten bestehen, werden diese auch genannt. Zu guter Letzt findet sich 
+  am Ende dieses Dokumentes das komplette Tutorial als ausführbarer Quelltext. 
   \end{abstract}
 ]
-\clearpage\tableofcontents\clearpage
+\clearpage
+\tableofcontents
+\listoffigures
+\listoftables
+\clearpage
 
 \section{Einleitung}
 Zu Beginn werden allerhand Pakete geladen, auf die im späteren Verlauf noch 
@@ -103,6 +130,17 @@ Für die Aufgabenstellung wird das Paket \Package{tudscrsupervisor} benötigt.
 %
 \begin{Tutorial*}
 \usepackage{tudscrsupervisor}
+\end{Tutorial*}
+%
+Damit alle möglichen Querverweise in einem PDF-Dokument automatisch verlinkt 
+werden, sollte das Paket \Package{hyperref} geladen werden. Da dieses allerhand 
+Veränderungen an vielen Standardbefehlen vornimmt, sollte dieses als letztes in 
+der Präambel eingebunden werden. Nur Pakete, bei denen in der Dokumentation 
+explizit darauf hingewiesen wird, dass diese nach \Package{hyperref} zu laden 
+sind, sollten auch danach folgen.
+%
+\begin{Tutorial*}
+\usepackage{hyperref}
 \end{Tutorial*}
 %
 Damit sind alle notwendigen Pakete eingebunden und es das eigentliche Dokument 
@@ -285,11 +323,14 @@ abgebildet.
 Häufig wird zu Beginn einer wissenschaftliche Arbeit die Motivation und der 
 Inhalt dieser zusammengefasst, um den Leser die Thematik der Abhandlung 
 vorzustellen. in den meisten Fällen wird diese dabei in deutscher und 
-englischer Sprache verfasst. Hierfür stellt \KOMAScript bereits die Umgebung 
-\Environment{abstract} bereit. Vielfach wird der Wunsch geäußert, sowohl die 
-deutsche als auch die englische Zusammenfassung auf derselben Seite zu setzen. 
-Diese Variante wird durch die \TUDScript-Klassen ermöglicht, die resultierende 
-Ausgabe ist in \autoref{fig:abstr} zu sehen.
+englischer Sprache verfasst. Hierfür stellt \KOMAScript{} bereits die Umgebung 
+\Environment{abstract} bereit.
+
+Vielfach wird der Wunsch geäußert, sowohl die deutsche als auch die englische 
+Zusammenfassung auf derselben Seite zu setzen. Diese Variante kann mithilfe 
+der \TUDScript-Klassen sehr einfach umgesetzt werden, wie der nachfolgende 
+Quelltextauszug zeigt. Die resultierende Ausgabe ist in \autoref{fig:abstr} zu 
+sehen.
 \begin{figure}
 \centering
 \includetutorial[width=.5\textwidth]{Abstract}
@@ -310,10 +351,42 @@ Ausgabe ist in \autoref{fig:abstr} zu sehen.
 
 
 \section{Inhalts-, Abbildungs-, und Tabellenverzeichnis}
+Zum Inhaltsverzeichnis ist nicht allzu viel zu sagen. Dieses wird mit dem
+\hologo{LaTeX}"=Standardbefehl \Macro*{tableofcontents} erzeugt und führt die 
+Gliederung des erstellten Dokumentes entsprechend der verwendeten Befehle 
+(\Macro*{part}, \Macro*{addpart}, \Macro*{chapter}, \Macro*{addchap}, 
+\Macro*{section}, \Macro*{addsec} etc.) auf. Wurde das Paket \Package{hyperref} 
+geladen, so werden im Inhaltsverzeichnis PDF-Hyperlinks auf die einzelnen 
+Abschnitte erzeugt.
+
+Abbildungen und Tabellen werden mit \hologo{LaTeX} normalerweise innerhalb 
+sogenannter Gleitumgebungen eingebunden (\Environment*{figure}"=Umgebung und 
+\Environment*{table}"=Umgebung). Innerhalb dieser Umgebungen kann der Befehl 
+\Macro*{caption}\OParameter{Verzeichniseintrag}\Parameter{Bezeichnung} genutzt 
+werden, um diesen eine Bezeichnung hinzuzufügen. Mit \Macro*{listoffigures} 
+beziehungsweise \Macro*{listoftables} lassen sich Verzeichnisse erstellen, in 
+denen alle Gleitobjekte des jeweiligen Typs ausgegeben werden, falls diese denn 
+eine Bezeichnung hinzugefügt wurde. Sollen Abbildungen oder Tabellen außerhalb 
+ihrer angestammten Gleitumgebung genutzt und benannt werden, kann dies mit
+\Macro*{captionof}\Parameter{Typ}\OParameter{Verzeichniseintrag}\Parameter{Bezeichnung}
+erfolgen. Weitere Informationen hierzu sind der \KOMAScript"=Anleitung 
+\scrguide zu 
+entnehmen. Außerdem wird in diesem Tutorial in \autoref{sec:floats} genauer auf 
+die Verwendung von Gleitumgebungen eingegangen.
+%
+\begin{Tutorial*}
+\tableofcontents
+\listoffigures
+\listoftables
+\end{Tutorial*}
+
 
 \section{Abkürzungsverzeichnis}
-
+bla
+%
 \section{Symbolverzeichnis}
+blubb
+%
 %%Anfangszitat: Der Text erscheint jetzt kursiv (\itshape) und kleiner als der 
 %%normale Text (\footnotesize). Mit \dictumwidth wird die Breite des Textfeldes 
 %%gesteuert. Sie nimmt jetzt 65% der gesamten Textbreite ein. Mit 
@@ -345,6 +418,7 @@ Ausgabe ist in \autoref{fig:abstr} zu sehen.
 
 
 \section{Gleitumgebungen}
+\label{sec:floats}
 \subsection{Grafiken und Untergrafiken}
 \subsection{Tabellen}
 
@@ -377,7 +451,6 @@ Ausgabe ist in \autoref{fig:abstr} zu sehen.
 \usepackage{quoting}% §§§ bereits geladen
 \usepackage{isodate}% §§§ bereits geladen
 \usepackage{listings}% §§§ bereits geladen
-\usepackage{hyperref}% §§§ bereits geladen
 \usepackage{xspace}% §§§ bereits geladen
 \usepackage{scrhack}% §§§ bereits geladen
 \end{Tutorial*}
@@ -405,11 +478,13 @@ Ausgabe ist in \autoref{fig:abstr} zu sehen.
 \usepackage{bookmark}
 \end{Tutorial*}
 %
+Damit ist das Tutorial beendet.
+\begin{Tutorial*}
+\end{document}
+\end{Tutorial*}
 \FinishTutorial
 \clearpage
   \begin{itemize}
-  \item inhaltsverzeichnis, tabellen und abbildungsverzeichnis
-  \item abstract
   \item grafiken und untergrafiken?
   \item tabellen
   \item literaturverzteichnis
