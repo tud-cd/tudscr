@@ -1,4 +1,4 @@
-% \CheckSum{986}
+% \CheckSum{1003}
 % \iffalse meta-comment
 % ======================================================================
 %
@@ -47,7 +47,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-layout.dtx}[%
-  2014/09/03 v2.02 TUD-KOMA-Script (layout)%
+  2014/09/12 v2.02 TUD-KOMA-Script (layout)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -568,7 +568,9 @@
 % Falls die Schriftarten des \CDs installiert wurden, wird DIN-Bold verwendet, 
 % sonst die Standardüberschriften.
 %    \begin{macrocode}
-\newcommand*\tud@font@heading{\if@tud@din\dinbn\tud@raggedright\fi}
+\newcommand*\tud@font@heading{%
+  \if@tud@din\dinbn\tud@raggedright\else\tud@RaggedRight\fi%
+}
 \newcommand*\tud@font@heading@size{\Huge}
 %    \end{macrocode}
 % Anschließend wird das Schriftelement für die Option \opt{parttitle} erstellt.
@@ -1190,6 +1192,32 @@
 %</book|report>
 % \fi
 %
+% \begin{macro}{\SecDef}
+% \begin{macro}{\scr@section@dblarg}
+% \begin{macro}{\scr@section@xdblarg}
+% Diese Befehle werden ab der \KOMAScript-Version~v3.13a eingeführt. Damit 
+% werden obligatorische Argumente der Gliederungsebenen besser auf das 
+% optionale Argument dupliziert, falls dieses nicht angegeben wurde. Damit das 
+% auch mit der Version~v3.12 funktioniert, werden die entsprechenden Befehle 
+% hier bereitgehalten.
+%    \begin{macrocode}
+\providecommand*\SecDef[2]{\@ifstar{#2}{\scr@section@dblarg{#1}}}
+\providecommand\scr@section@dblarg[1]{%
+  \kernel@ifnextchar[%]
+    {#1}%
+    {\scr@section@xdblarg{#1}}%
+}
+\providecommand\scr@section@xdblarg[2]{%
+  \begingroup
+    \edef\reserved@a{%
+      \unexpanded{\endgroup\let\scr@osectarg\z@#1[{#2}]{#2}\def\scr@osectarg}%
+      {\scr@osectarg}}%
+  \reserved@a
+}
+%    \end{macrocode}
+% \end{macro}^^A \scr@section@xdblarg
+% \end{macro}^^A \scr@section@dblarg
+% \end{macro}^^A \SecDef
 % \begin{macro}{\tud@part}
 % \begin{macro}{\tud@spart}
 % \begin{macro}{\tud@addpart}
@@ -1204,6 +1232,34 @@
 % \begin{macro}{\tud@ssubsection}
 % \begin{macro}{\tud@subsubsection}
 % \begin{macro}{\tud@ssubsubsection}
+% \begin{macro}{\tud@npart}
+% \changes{v2.02}{2014/09/12}{entfernt}%^^A
+% \begin{macro}{\tud@opart}
+% \changes{v2.02}{2014/09/12}{entfernt}%^^A
+% \begin{macro}{\tud@naddpart}
+% \changes{v2.02}{2014/09/12}{entfernt}%^^A
+% \begin{macro}{\tud@oaddpart}
+% \changes{v2.02}{2014/09/12}{entfernt}%^^A
+% \begin{macro}{\tud@nchapter}
+% \changes{v2.02}{2014/09/12}{entfernt}%^^A
+% \begin{macro}{\tud@ochapter}
+% \changes{v2.02}{2014/09/12}{entfernt}%^^A
+% \begin{macro}{\tud@naddchap}
+% \changes{v2.02}{2014/09/12}{entfernt}%^^A
+% \begin{macro}{\tud@oaddchap}
+% \changes{v2.02}{2014/09/12}{entfernt}%^^A
+% \begin{macro}{\tud@nsection}
+% \changes{v2.02}{2014/09/12}{entfernt}%^^A
+% \begin{macro}{\tud@osection}
+% \changes{v2.02}{2014/09/12}{entfernt}%^^A
+% \begin{macro}{\tud@nsubsection}
+% \changes{v2.02}{2014/09/12}{entfernt}%^^A
+% \begin{macro}{\tud@osubsection}
+% \changes{v2.02}{2014/09/12}{entfernt}%^^A
+% \begin{macro}{\tud@nsubsubsection}
+% \changes{v2.02}{2014/09/12}{entfernt}%^^A
+% \begin{macro}{\tud@osubsubsection}
+% \changes{v2.02}{2014/09/12}{entfernt}%^^A
 % Das \CD verlangt, dass sämtliche Auszeichnungen, die in DIN~Bold gesetzt
 % werden, groß zu schreiben sind. Für die Klassen bedeutet dies, dass alle
 % Überschriften automatisch in Majuskeln und in der gewünschten Schriftart
@@ -1213,10 +1269,15 @@
 % Dazu werden die benötigten Hilfsmakros initialisiert. Die Gliederungsbefehle
 % selbst werden innerhalb des Befehles \cs{tud@sectioning@set} durch
 % \cs{tud@cmd@store} gesichert und anschließend mit \cs{tud@sectioning@case}
-% neu definiert. Dabei wird in der ersten Stufe unterschieden, ob die
-% Sternversion des Gliederungsbefehls durch den Anwender verwendet wird und
-% ggf. das Hilfsmakro \cs{tud@s\meta{Gliederungsbefehl}} aufgerufen.
-% Andernfalls wird \cs{tud@\meta{Gliederungsbefehl}} verwendet.
+% neu definiert. Dabei wird mit \cs{SecDef} unterschieden, ob die Sternversion
+% des Gliederungsbefehls durch den Anwender verwendet wird und ggf. das
+% Hilfsmakro \cs{tud@s\meta{Gliederungsbefehl}} aufgerufen. Andernfalls wird
+% \cs{tud@\meta{Gliederungsbefehl}} verwendet.
+%
+% Alle angepassten Gliederungsbefehle werden seit der Version~v2.02 ausnahmslos 
+% mit \cs{SecDef} erzeugt. Damit wurden die früher benötigten Hilfsmakros 
+% \cs{tud@n\meta{Gliederungsbefehl}} und  \cs{tud@o\meta{Gliederungsbefehl}}
+% überflüssig unt deshalb entfernt.
 %    \begin{macrocode}
 \newcommand*\tud@part{}
 \newcommand*\tud@spart{}
@@ -1235,54 +1296,6 @@
 \newcommand*\tud@subsubsection{}
 \newcommand*\tud@ssubsubsection{}
 %    \end{macrocode}
-% \end{macro}^^A \tud@ssubsubsection
-% \end{macro}^^A \tud@subsubsection
-% \end{macro}^^A \tud@ssubsection
-% \end{macro}^^A \tud@subsection
-% \end{macro}^^A \tud@ssection
-% \end{macro}^^A \tud@section
-% \end{macro}^^A \tud@saddchap
-% \end{macro}^^A \tud@addchap
-% \end{macro}^^A \tud@schapter
-% \end{macro}^^A \tud@chapter
-% \end{macro}^^A \tud@saddpart
-% \end{macro}^^A \tud@addpart
-% \end{macro}^^A \tud@spart
-% \end{macro}^^A \tud@part
-% \begin{macro}{\tud@npart}
-% \begin{macro}{\tud@opart}
-% \begin{macro}{\tud@naddpart}
-% \begin{macro}{\tud@oaddpart}
-% \begin{macro}{\tud@nchapter}
-% \begin{macro}{\tud@ochapter}
-% \begin{macro}{\tud@naddchap}
-% \begin{macro}{\tud@oaddchap}
-% \begin{macro}{\tud@nsection}
-% \begin{macro}{\tud@osection}
-% \begin{macro}{\tud@nsubsection}
-% \begin{macro}{\tud@osubsection}
-% \begin{macro}{\tud@nsubsubsection}
-% \begin{macro}{\tud@osubsubsection}
-% Wird keine Sternversion verwendet, sind zwei weitere Hilfsmakros nötig, um
-% zwischen den Varianten mit und ohne optionales Argument zu entscheiden.
-%    \begin{macrocode}
-\newcommand*\tud@npart{}
-\newcommand*\tud@opart{}
-\newcommand*\tud@naddpart{}
-\newcommand*\tud@oaddpart{}
-%<*book|report>
-\newcommand*\tud@nchapter{}
-\newcommand*\tud@ochapter{}
-\newcommand*\tud@naddchap{}
-\newcommand*\tud@oaddchap{}
-%</book|report>
-\newcommand*\tud@nsection{}
-\newcommand*\tud@osection{}
-\newcommand*\tud@nsubsection{}
-\newcommand*\tud@osubsection{}
-\newcommand*\tud@nsubsubsection{}
-\newcommand*\tud@osubsubsection{}
-%    \end{macrocode}
 % \end{macro}^^A \tud@osubsubsection
 % \end{macro}^^A \tud@nsubsubsection
 % \end{macro}^^A \tud@osubsection
@@ -1297,9 +1310,24 @@
 % \end{macro}^^A \tud@naddpart
 % \end{macro}^^A \tud@opart
 % \end{macro}^^A \tud@npart
+% \end{macro}^^A \tud@ssubsubsection
+% \end{macro}^^A \tud@subsubsection
+% \end{macro}^^A \tud@ssubsection
+% \end{macro}^^A \tud@subsection
+% \end{macro}^^A \tud@ssection
+% \end{macro}^^A \tud@section
+% \end{macro}^^A \tud@saddchap
+% \end{macro}^^A \tud@addchap
+% \end{macro}^^A \tud@schapter
+% \end{macro}^^A \tud@chapter
+% \end{macro}^^A \tud@saddpart
+% \end{macro}^^A \tud@addpart
+% \end{macro}^^A \tud@spart
+% \end{macro}^^A \tud@part
 % \begin{macro}{\tud@sectioning@set}
 % \changes{v2.02}{2014/08/16}{Bug mit Majuskeln bei \cs{addsec} behoben}%^^A
 % \begin{macro}{\tud@sectioning@case}
+% \changes{v2.02}{2014/09/12}{neue Implementierung mit \cs{SecDef}}%^^A
 % \begin{macro}{\tud@sectioning@reset}
 % \begin{macro}{\tud@sectioning@uppercase}
 % \changes{v2.02}{2014/07/25}{neu}%^^A
@@ -1321,9 +1349,7 @@
 % ein vereinfachtes Vorgehen.
 %    \begin{macrocode}
   \ifstr{#2}{minisec}{%
-    \renewcommand\minisec[1]{%
-      \tud@cmd@use{minisec}{\tud@makeuppercase{##1}}%
-    }%
+    \renewcommand\minisec[1]{\@@tud@minisec{\tud@makeuppercase{##1}}}%
 %    \end{macrocode}
 % Hier erfolgt die Anpassung und Formatierung aller anderen Gliederungsbefehle.
 %    \begin{macrocode}
@@ -1346,42 +1372,39 @@
 \newcommand*\tud@sectioning@case[1]{%
 %    \end{macrocode}
 % Als erstes wird unterschieden, ob die normale oder aber die nicht-nummerierte
-% sprich die Sternversion gefordert ist. Für die Teileebene werden also
-% beispielsweise \cs{tud@part} und \cs{tud@spart} aufgerufen.
+% sprich die Sternversion gefordert ist. Dies passiert mit \cs{SecDef}. Für die 
+% Teileebene werden beispielsweise entweder \cs{tud@part} oder \cs{tud@spart}
+% aufgerufen. Dabei wird durch \cs{SecDef} für \cs{tud@part} das obligatorische
+% in das optionale Argument kopiert, falls keines angegeben wurde.
 %    \begin{macrocode}
-  \@namedef{#1}{\@ifstar{\@nameuse{tud@s#1}}{\@nameuse{tud@#1}}}%
-%    \end{macrocode}
-% Für die normale Version wird geprüft, ob ein optionales Argument angegeben
-% wurde. Am Beispiel nachvollzogen bedeutet dies, dass bei einem gegebenen
-% optionalen Argument der Befehl \cs{tud@opart} aufgerufen wird, sonst
-% \cs{tud@npart}.
-%    \begin{macrocode}
-  \@namedef{tud@#1}{\@ifnextchar[%]
-    {\@nameuse{tud@o#1}}{\@nameuse{tud@n#1}}%
+  \csedef{#1}{%
+    \noexpand\SecDef%
+    \expandafter\expandafter\expandafter\noexpand%
+      \expandafter\csname tud@#1\endcsname%
+    \expandafter\expandafter\expandafter\noexpand%
+      \expandafter\csname tud@s#1\endcsname%
   }%
 %    \end{macrocode}
-% Für die normale Version wird der in \cs{@@tud@\meta{Gliederungsbefehl}}
+% Da für die normale Version das optionale Argument ggf. durch \cs{SecDef} 
+% automatisch erzeugt wird, ist nur die Definition eines Befehls mit optionalen 
+% Argument notwendig. Dabei wird der in \cs{@@tud@\meta{Gliederungsbefehl}}
 % gesicherte Originalbefehl mit dem gewünschten Eintrag als optionales Argument
 % aufgerufen und nur das obligatorische Argument mit \cs{tud@makeuppercase}
 % behandelt.
 %    \begin{macrocode}
-  \@namedef{tud@n#1}##1{%
-    \@nameuse{@@tud@#1}[##1]{\tud@sectioning@uppercase{##1}}%
-  }%
-%    \end{macrocode}
-% Für die Version mit optionalen Argument wird dieses einfach an den originalen
-% Befehl durchgereicht. Das obligatorische Argument wird wie immer mit
-% \cs{tud@makeuppercase} behandelt.
-%    \begin{macrocode}
-  \@namedef{tud@o#1}[##1]##2{%
-    \@nameuse{@@tud@#1}[##1]{\tud@sectioning@uppercase{##2}}%
+  \csedef{tud@#1}[##1]##2{%
+    \expandafter\expandafter\expandafter\noexpand%
+      \expandafter\csname @@tud@#1\endcsname%
+      [{##1}]{\noexpand\tud@sectioning@uppercase{##2}}%
   }%
 %    \end{macrocode}
 % Für die Version mit Stern gibt es kein optionales Argument. Dementsprechend
 % wird hier lediglich das obligatorische Argument in Großbuchstaben gesetzt.
 %    \begin{macrocode}
-  \@namedef{tud@s#1}##1{%
-    \@nameuse{@@tud@#1}*{\tud@sectioning@uppercase{##1}}%
+  \csedef{tud@s#1}##1{%
+    \expandafter\expandafter\expandafter\noexpand%
+      \expandafter\csname @@tud@#1\endcsname*%
+      {\noexpand\tud@sectioning@uppercase{##1}}%
   }%
 %    \end{macrocode}
 % Aus nicht ganz nachvollziehbaren Gründen gibt es bei Überschriften, die mit
@@ -1391,14 +1414,11 @@
 % Deshalb werden für \cs{addsec} die Befehle leicht abgewandelt definiert.
 %    \begin{macrocode}
   \ifstr{#1}{addsec}{%
-    \@namedef{tud@n#1}##1{%
-      \@nameuse{@@tud@#1}[##1]{\tud@sectioning@uppercase##1}%
+    \def\tud@addsec[##1]##2{%
+      \@@tud@addsec[{##1}]{\tud@sectioning@uppercase##2}%
     }%
-    \@namedef{tud@o#1}[##1]##2{%
-      \@nameuse{@@tud@#1}[##1]{\tud@sectioning@uppercase##2}%
-    }%
-    \@namedef{tud@s#1}##1{%
-      \@nameuse{@@tud@#1}*{\tud@sectioning@uppercase##1}%
+    \def\tud@saddsec##1{%
+      \@@tud@addsec*{\tud@sectioning@uppercase##1}%
     }%
   }{}%
 %    \end{macrocode}
@@ -1412,14 +1432,14 @@
   \ifstr{#1}{chapter}{\@tempswatrue}{}%
   \ifstr{#1}{addchap}{\@tempswatrue}{}%
   \if@tempswa%
-    \def\@tempa{n,o,s}%
+    \def\@tempa{,s}%
     \@for\@tempb:=\@tempa\do{%
       \expandafter\pretocmd\expandafter{\csname tud@\@tempb#1\endcsname}{%
         \tud@chapter@pre%
-      }{}{}%
+      }{}{\tud@patch@wrn{tud@sectioning@case}}%
       \expandafter\apptocmd\expandafter{\csname tud@\@tempb#1\endcsname}{%
         \tud@chapter@app%
-      }{}{}%
+      }{}{\tud@patch@wrn{tud@sectioning@case}}%
     }%
   \fi%
 %</book|report>

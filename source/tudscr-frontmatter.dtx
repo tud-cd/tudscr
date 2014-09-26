@@ -1,4 +1,4 @@
-% \CheckSum{504}
+% \CheckSum{506}
 % \iffalse meta-comment
 % ======================================================================
 %
@@ -47,7 +47,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-frontmatter.dtx}[%
-  2014/09/03 v2.02 TUD-KOMA-Script (frontmatter)%
+  2014/09/15 v2.02 TUD-KOMA-Script (frontmatter)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -86,7 +86,7 @@
 % \fi
 %
 % \begin{macro}{\tud@fm@set}
-% \changes{v2.02}{2014/07/18}{Neuimplementierung für \pkg{scrlayer}}%^^A
+% \changes{v2.02}{2014/07/18}{Neuimplementierung für \pkg{scrlayer-scrpage}}%^^A
 % Dies ist das zentrale Makro zur Ausgabe der einzelnen Erklärungen, welches
 % alle relevanten Optionen\footnote{\opt{titlepage}, \opt{twocolumn},
 % \opt{abstract/declaration=multi}, \opt{abstract/declaration=fill} sowie die
@@ -151,7 +151,7 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@fm@set
 % \begin{macro}{\tud@fm@check}
-% \changes{v2.02}{2014/07/18}{Eingeführt mit Verwendung von \pkg{scrlayer}}%^^A
+% \changes{v2.02}{2014/07/18}{neu}%^^A
 % Mit diesem Befehl wird für den Fall, dass eine oder mehrerer Erklräungen auf
 % einer einzelnen Seite gesetzt werden sollen geprüft, ob dies überhaupt 
 % möglich ist. Sollte dies nicht der Fall sein, wird eine Warnung ausgegeben.
@@ -184,9 +184,9 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@fm@check
 % \begin{macro}{\tud@fm@body}
-% \changes{v2.02}{2014/07/18}{Neuimplementierung für \pkg{scrlayer}}%^^A
+% \changes{v2.02}{2014/07/18}{Neuimplementierung für \pkg{scrlayer-scrpage}}%^^A
 % \begin{macro}{\tud@fm@vcenter}
-% \changes{v2.02}{2014/07/18}{Mit Verwendung von \pkg{scrlayer} entfernt}%^^A
+% \changes{v2.02}{2014/07/18}{Mit \pkg{scrlayer-scrpage} entfernt}%^^A
 % Dieser Befehl formatiert den im dritten Argument gespeicherten Inhalt der
 % Erklärung. Sollte das Paket \pkg{multicol} Verwendung finden, wird hier die
 % entsprechende Umgebung gestartet. Für das Setzen der Überschrift und der 
@@ -218,7 +218,7 @@
 % \end{macro}^^A \tud@fm@vcenter
 % \end{macro}^^A \tud@fm@body
 % \begin{macro}{\tud@fm@head}
-% \changes{v2.02}{2014/07/18}{an \pkg{scrlayer} angepasst}%^^A
+% \changes{v2.02}{2014/07/18}{an \pkg{scrlayer-scrpage} angepasst}%^^A
 % Dieses Makro dient zur Festlegung der Gliederungsebene der Überschrift der
 % Erklärung. Die gewählte Gliederungsebene ist in \cs{tud@\meta{Typ}@level}
 % gespeichert. Verwendet wird das Makro folgendermaßen:
@@ -236,13 +236,14 @@
 %    \begin{macrocode}
 \newcommand*\tud@fm@head[2]{%
   \ifcase\@nameuse{tud@#1@level}\relax%
-    \def\@tempa{\csname phantomsection\endcsname}%
+    \def\@tempa{\endgraf\csname phantomsection\endcsname}%
   \or%
     \def\@tempa{%
+      \endgraf
       \csname phantomsection\endcsname%
       \@afterindentfalse%
       \begingroup%
-        \endgraf\centering%
+        \centering%
         \normalfont\sectfont\nobreak#2%
         \@endparpenalty\@M%
         \endgraf%
@@ -275,13 +276,13 @@
     \else%
       \ifx\@mkboth\@gobble\else\markright{\MakeMarkcase{#2}}\fi%
     \fi%%
-  }{}{}
+  }{}{\tud@patch@wrn{tud@fm@head}}
   \@tempa%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@fm@head
 % \begin{macro}{\tud@fm@next}
-% \changes{v2.02}{2014/07/19}{Eingeführt mit Verwendung von \pkg{scrlayer}}%^^A
+% \changes{v2.02}{2014/07/19}{mit \pkg{scrlayer-scrpage} eingeführt}%^^A
 % Dieser Befehl sorgt für die Trennung einzelner Abschnitte innerhalb der 
 % Umgebungen \env{abstract} und \env{declarations}. Dabei werden bei aktiver
 % vertikaler Ausrichtung die entsprchenden Abstände dazwischen eingefügt.
@@ -310,7 +311,7 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@fm@next
 % \begin{macro}{\tud@fm@pagestyle}
-% \changes{v2.02}{2014/07/19}{Eingeführt mit Verwendung von \pkg{scrlayer}}%^^A
+% \changes{v2.02}{2014/07/19}{neu}%^^A
 % Dieser Befehl sorgt für die Auswahl des Seitenstiles über die Parameter von
 % \env{abstract} und \env{declarations}.
 %    \begin{macrocode}
@@ -777,7 +778,7 @@
 % \end{parameter}^^A columns
 % \end{parameter}^^A language
 % \begin{macro}{\declaration}
-% \changes{v2.02}{2014/07/18}{Neuimplementierung für \pkg{scrlayer}}%^^A
+% \changes{v2.02}{2014/07/18}{Neuimplementierung für \pkg{scrlayer-scrpage}}%^^A
 % Dieser Befehl dient zur Ausgabe von sowohl Selbstständigkeitserklärung als
 % auch Sperrvermerk. Über das optionale Argument kann ohne Schlüssel die
 % gewünschte Sprache eingestellt werden. Zusätzlich können Optionen als
@@ -800,7 +801,7 @@
 %    \end{macrocode}
 % \end{macro}^^A \declaration
 % \begin{macro}{\confirmation}
-% \changes{v2.02}{2014/07/18}{Neuimplementierung für \pkg{scrlayer}}%^^A
+% \changes{v2.02}{2014/07/18}{Neuimplementierung für \pkg{scrlayer-scrpage}}%^^A
 % \begin{macro}{\tud@fm@confirmation}
 % \changes{v2.02}{2014/07/18}{neu}%^^A
 % Mit diesem Befehl kann die Selbstständigkeitserklärung ausgegeben werden. Das
@@ -842,8 +843,8 @@
 % \end{macro}^^A \tud@fm@confirmation
 % \end{macro}^^A \confirmation
 % \begin{macro}{\blocking}
-% \changes{v2.02}{2014/05/16}{neu, anstatt \cs{restriction} (entfernt)}%^^A
-% \changes{v2.02}{2014/07/18}{Neuimplementierung für \pkg{scrlayer}}%^^A
+% \changes{v2.02}{2014/05/16}{neu, \cs{restriction} umbenannt}%^^A
+% \changes{v2.02}{2014/07/18}{an \pkg{scrlayer-scrpage} angepasst}%^^A
 % \begin{macro}{\tud@fm@blocking}
 % \changes{v2.02}{2014/07/18}{neu}%^^A
 % Für den Sperrvermerk wird äquivalent zu \cs{confirmation} verfahren. Das
