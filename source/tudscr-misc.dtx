@@ -1,0 +1,381 @@
+% \CheckSum{194}
+% \iffalse meta-comment
+% ======================================================================
+%
+% Das Corporate Design der TU Dresden auf Basis der KOMA-Script-Klassen
+%
+% ======================================================================
+% This work may be distributed and/or modified under the conditions of
+% the LaTeX Project Public License, version 1.3c of the license.
+% The latest version of this license is in
+%     http://www.latex-project.org/lppl.txt
+% and version 1.3c or later is part of all distributions of LaTeX
+% version 2005/12/01 or later and of this work.
+% This work has the LPPL maintenance status "author-maintained".
+% The current maintainer and author of this work is Falk Hanisch.
+% ----------------------------------------------------------------------
+% Dieses Werk darf nach den Bedingungen der LaTeX Project Public Lizenz,
+% Version 1.3c, verteilt und/oder veraendert werden.
+% Die neuste Version dieser Lizenz ist
+%     http://www.latex-project.org/lppl.txt
+% und Version 1.3c ist Teil aller Verteilungen von LaTeX
+% Version 2005/12/01 oder spaeter und dieses Werks.
+% Dieses Werk hat den LPPL-Verwaltungs-Status "author-maintained"
+% (allein durch den Autor verwaltet).
+% Der aktuelle Verwalter und Autor dieses Werkes ist Falk Hanisch.
+% ======================================================================
+% \fi
+%
+% \CharacterTable
+%  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
+%   Lower-case    \a\b\c\d\e\f\g\h\i\j\k\l\m\n\o\p\q\r\s\t\u\v\w\x\y\z
+%   Digits        \0\1\2\3\4\5\6\7\8\9
+%   Exclamation   \!     Double quote  \"     Hash (number) \#
+%   Dollar        \$     Percent       \%     Ampersand     \&
+%   Acute accent  \'     Left paren    \(     Right paren   \)
+%   Asterisk      \*     Plus          \+     Comma         \,
+%   Minus         \-     Point         \.     Solidus       \/
+%   Colon         \:     Semicolon     \;     Less than     \<
+%   Equals        \=     Greater than  \>     Question mark \?
+%   Commercial at \@     Left bracket  \[     Backslash     \\
+%   Right bracket \]     Circumflex    \^     Underscore    \_
+%   Grave accent  \`     Left brace    \{     Vertical bar  \|
+%   Right brace   \}     Tilde         \~}
+%
+% \iffalse
+%%% From File: tudscr-misc.dtx
+%<*driver>
+% \fi
+\ProvidesFile{tudscr-misc.dtx}%
+  [2014/04/22 v2.00 TUD-KOMA-Script (miscellaneous)]
+% \iffalse
+\documentclass{tudscrdoc}
+\KOMAoptions{parskip=half-}
+\CodelineIndex
+\RecordChanges
+\GetFileInfo{tudscr-misc.dtx}
+\begin{document}
+  \maketitle
+  \DocInput{\filename}
+\end{document}
+%</driver>
+% \fi
+%
+% \selectlanguage{ngerman}
+%
+% \section{Verschiedenes}
+%
+% Alles, wofür sich eine separate Datei nicht lohnt, landet hier.
+%
+% \StopEventually{\PrintIndex\PrintChanges}
+%
+% \iffalse
+%<*class&option>
+% \fi
+%
+% \subsection{Sprungmarken}
+%
+% \begin{option}{tudbookmarks}
+% \begin{macro}{\if@tud@bookmarks}
+% Wird das Paket \pkg{hyperref} geladen, so kann die Option \opt{tudbookmarks}
+% genutzt werden, um zu steuern, ob für Titel und Inhaltsverzeichnis
+% automatisch ein Eintrag für die Sprungmarken erzeugt werden soll.
+%    \begin{macrocode}
+\newif\if@tud@bookmarks
+\TUD@ifkey{tudbookmarks}{@tud@bookmarks}
+%    \end{macrocode}
+% \end{macro}^^A \if@tud@bookmarks
+% \end{option}^^A tudbookmarks
+%
+% \iffalse
+%</class&option>
+%<*class&!option>
+% \fi
+%
+% \begin{macro}{\tudbookmark}
+% \begin{macro}{\tud@footnote@unhyper}
+% \begin{macro}{\tud@footnote@rehyper}
+% Die Befehle zum Eintragen der Sprungmarken. Im Dokument kann auch der Befehl
+% \cs{tudbookmark} vom Anwender genutzt werden, um manuell weitere Lesezeichen
+% zu erzeugen.
+%
+% Außerdem müssen für die Titelseite die Fußnoten auf den Originalzustand
+% zurückgesetzt werden. Dafür werden die Befehle \cs{tud@footnote@unhyper} und
+% \cs{tud@footnote@rehyper} definert.
+%    \begin{macrocode}
+\newcommand*\tudbookmark[1][]{\@gobbletwo}
+\newcommand*\phantomsection{}
+\let\phantomsection\relax
+\newcommand*\tud@footnote@unhyper{}
+\newcommand*\tud@footnote@rehyper{}
+\AfterPackage{hyperref}{%
+  \renewcommand*\tudbookmark[3][]{%
+    \relax%
+    \if@tud@bookmarks%
+      \phantomsection%
+      \ifblank{#1}{\pdfbookmark{#2}{#3}}{\pdfbookmark[#1]{#2}{#3}}%
+    \fi%
+  }%
+  \renewcommand*\tud@footnote@unhyper{%
+    \let\Hy@saved@footnotemark\@footnotemark%
+    \let\Hy@saved@footnotetext\@footnotetext%
+    \let\@footnotemark\H@@footnotemark%
+    \let\@footnotetext\H@@footnotetext%
+  }%
+  \renewcommand*\tud@footnote@rehyper{%
+    \ifx\@footnotemark\H@@footnotemark%
+      \let\@footnotemark\Hy@saved@footnotemark%
+    \fi%
+    \ifx\@footnotetext\H@@footnotetext%
+      \let\@footnotetext\Hy@saved@footnotetext%
+    \fi%
+  }%
+}
+\AtBeginDocument{%
+  \pretocmd{\makecover}{%
+%<*book|report>
+    \tudbookmark[0]{\coverpagename}{cover}
+%</book|report>
+%<*article>
+    \tudbookmark[1]{\coverpagename}{cover}
+%</article>
+    \ifdef{\bookmarksetup}{\bookmarksetup{startatroot}}{}%
+  }{}{\tud@patch@wrn{makecover}}%
+  \pretocmd{\maketitle}{%
+%<*book|report>
+    \tudbookmark[0]{\titlepagename}{title}
+%</book|report>
+%<*article>
+    \tudbookmark[1]{\titlepagename}{title}
+%</article>
+    \ifdef{\bookmarksetup}{\bookmarksetup{startatroot}}{}%
+  }{}{\tud@patch@wrn{maketitle}}%
+  \pretocmd{\tableofcontents}{%
+%<*book|report>
+    \if@openright\cleardoublepage\else\clearpage\fi%
+    \tudbookmark[0]{\contentsname}{toc}%
+%</book|report>
+%<*article>
+    \tudbookmark[1]{\contentsname}{toc}%
+%</article>
+    \ifdef{\bookmarksetup}{\bookmarksetup{startatroot}}{}%
+  }{}{\tud@patch@wrn{tableofcontents}}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@footnote@rehyper
+% \end{macro}^^A \tud@footnote@unhyper
+% \end{macro}^^A \tudbookmark
+%
+% \subsection{Parameter für Umgebungen und mehrspaltige Texte}
+%
+% Diese Befehle dienen dazu, bei Umgebungen die Sprache über einen Parameter
+% anzugeben sowie das Paket \pkg{multicol} verwenden zu können.
+% \begin{macro}{\tud@environmenthandler}
+% Hiermit kann sowohl die zu verwendende Sprache als auch die Anzahl der
+% gewünschten Spalten für bestimmte Umgebungen ohne die explizite Angabe eines
+% Schlüssels festgelegt werden. Momentan betrifft das die beiden Umgebungen
+% \env{abstract} und \env{tudpage}.
+%    \begin{macrocode}
+\newcommand*\tud@environmenthandler[1]{%
+  \def\@tempa{#1}%
+  \@for\@tempb:=\@tempa\do{%
+    \ifx\@tempb\@empty\else%
+      \ifxnumber{\@tempb}{\let\tud@multicols\@tempb}{%
+      \ifstr{\@tempb}{twocolumn}{\def\tud@multicols{2}}{%
+        \expandafter\selectlanguage\expandafter{\@tempb}%
+      }}%
+    \fi%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@environmenthandler
+% \begin{macro}{\tud@multicols}
+% \begin{macro}{\tud@multicols@check}
+% Im Makro \cs{tud@multicols} wird die Anzahl der gewünschten Spalten in einer
+% Umgebung für die Verwendung des \pkg{multicol}"=Paketes gespeichert.
+%    \begin{macrocode}
+\newcommand*\tud@multicols{1}
+%    \end{macrocode}
+% Der Befehl \cs{tud@multicols@check} prüft, ob das Paket \pkg{multicol} geladen 
+% wurde. Falls dies nicht der Fall ist, wird eine Warnung ausgegeben.
+%    \begin{macrocode}
+\newcommand*\tud@multicols@check{%
+  \ifdef{\multicols}{}{%
+    \ifnum\tud@multicols>1\relax%
+      \ClassWarning{\tudcls@name}{%
+        The option 'columns=\tud@multicols' is only supported,\MessageBreak%
+        when package 'multicol' is loaded%
+      }%
+      \def\tud@multicols{1}%
+    \fi%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@multicols@check
+% \end{macro}^^A \tud@multicols
+%
+% \iffalse
+%</class&!option>
+%<*titlepage|class&!option>
+% \fi
+%
+% \subsection{Bedingte Majuskeln für Überschriften}
+%
+% Überschriften sollen bloß in Großbuchstaben gesetzt werden, wenn auch 
+% tatsächlich die Schrift DIN~Bold verwendet wird.
+% \begin{macro}{\tud@makeuppercase}
+% \begin{macro}{\ifdin}
+% Der Befehl führt \cs{MakeTextUppercase}\marg{Text} deshalb nur aus, wenn die 
+% richtige Schriftfamilie verwendet wird.
+%    \begin{macrocode}
+\newcommand*\tud@makeuppercase[1]{%
+  \ifx\f@family\tud@dinbold%
+    \begingroup%
+    \MakeTextUppercase{#1}%
+    \endgroup%
+  \else%
+    #1%
+  \fi%
+%    \end{macrocode}
+% Aufgrund eines Fehlers im \hologo{LaTeX}-Kernels liegt die Grundlinie für die 
+% Gliederungsebene \cs{scetion} zu hoch. Mit dem Einfügen des vertikalen 
+% Freiraums für die Umlaute würde diese automatisch nach unten verschoben. 
+% Allerdings ist das ein ziemlich übler Hack.
+%    \begin{macrocode}
+%%  \vphantom{\"A\"O\"U}%
+}
+%    \end{macrocode}
+% Der Befehl \cs{ifdin} prüft auf die Verwendung von DIN~Bold. Davon abhängig 
+% wird entweder das erste oder das zweite Argument ausgeführt. Dies kann für die 
+% die Befehle aller Gliederungsebenen genutzt werden, um zwischen der Ausgabe im 
+% Dokument sowie Inhaltserzeichnis und/oder Kolumnentitel zu unterscheiden.
+%    \begin{macrocode}
+\newcommand*\ifdin{%
+  \ifx\f@family\tud@dinbold\relax%
+   \expandafter\@firstoftwo%
+ \else%
+   \expandafter\@secondoftwo%
+ \fi%
+}
+%    \end{macrocode}
+% \end{macro}^^A \ifdin
+% \end{macro}^^A \tud@makeuppercase
+%
+% \iffalse
+%</titlepage|class&!option>
+%<*class&option>
+% \fi
+%
+% \subsection{Erzwungene Minuskeln für Strings}
+%
+% Um angegebene Werte bei Schlüssel-Wert-Paaren oder Schlüsselwörter in
+% bestimmten Feldern sicher erkennen zu können, werden diese zwingend in
+% Kleinbuchstaben geschieben.
+% \begin{macro}{\tud@lowerstring}
+% Das Makro wird mit \cs{tud@lowerstring}\marg{Zielmakro}\marg{String} bennutzt.
+%    \begin{macrocode}
+\newcommand*\tud@lowerstring[2]{%
+  \protected@edef#1{#2}%
+  \lowercase\expandafter{%
+    \expandafter\gdef\expandafter #1\expandafter{#1}%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@lowerstring
+%
+% \subsection{Standardoptionen}
+%
+% Durchreichen aller Klassenoptionen an die \KOMAScript-Klasse.
+%    \begin{macrocode}
+\DeclareOption*{\PassOptionsToClass{\CurrentOption}{\scrcls@name}}
+%    \end{macrocode}
+% Es werden die Standardoptionen ausgeführt. Die Ausführung selbst wird durch
+% den Befehl \cs{TUD@noworlater} innerhalb von \cs{TUD@key} auf das Ende der
+% \KOMAScript-Klasse verzögert.
+% \todo[v3.12]{Datum anpassen}
+%    \begin{macrocode}
+\TUDExecuteOptions{\TUDDefaultOptions}
+\TUDProcessOptions
+\LoadClass{\scrcls@name}[2012/07/29]
+%    \end{macrocode}
+% Nach der Abarbeitung aller Optionen innerhalb der Präambel müssen die
+% folgenden Befehle einmalig ausgeführt werden. Damit dies sicher erst danach
+% und am Ende der Präambel erfolgt, wird die Ausführung mit \cs{AtEndPreamble}
+% verzögert.
+%    \begin{macrocode}
+\AtEndPreamble{%
+  \tud@layout@process%
+  \recalctypearea%
+}
+%    \end{macrocode}
+%
+% \subsection{Externe Pakete}
+%
+% Für die Verwendung der hier erstellten \KOMAScript-Wrapper-Klassen werden
+% einige wenige Pakete eingebunden. Dabei wurde versucht, die Anzahl der
+% Pakete möglichst gering zu halten und nur die wirklich notwendigen zu
+% verwenden.
+%
+% Für das Setzen der Überschriften in Majuskeln\footnote{Großbuchstaben} mit
+% \cs{MakeTextUppercase}, was den internen \LaTeX-Befehl \cs{MakeUppercase}
+% verbessert, wird das Paket \pkg{textcase} genutzt.
+%    \begin{macrocode}
+\RequirePackage{textcase}
+%    \end{macrocode}
+% Das Paket \pkg{geometry} erlaubt eine genaue Vorgabe des Satzspiegels und
+% der Seitenränder, wie es vom \CD der TU~Dresden verlangt wird.
+%    \begin{macrocode}
+\RequirePackage{geometry}
+%    \end{macrocode}
+% Das Paket \pkg{mweights} wird verwendet, um für die einzelnen Schriftfamilien
+% unterschiedliche Sandardstärken zu nutzen. Insbesondere betrifft dies die
+% \texttt{typewriter}"=Familie.
+%    \begin{macrocode}
+\RequirePackage{mweights}
+%    \end{macrocode}
+% Die \env{abstract}-Umgebung wird im Vergleich zu den \KOMAScript-Klassen
+% stark erweitert. Dafür wird das Paket \pkg{environ} für eine erweiterte
+% Umgebungsdefinition benötigt.
+%    \begin{macrocode}
+\RequirePackage{environ}
+%    \end{macrocode}
+% Für das Setzen von Feldern werden bei einem übergebenen Argument führende und
+% angehängte Leerzeichen entfernt.
+%    \begin{macrocode}
+\RequirePackage{trimspaces}
+%    \end{macrocode}
+% Es folgen die Pakete, welche bei Bedarf am Ende der Präambel geladen werden.
+%    \begin{macrocode}
+\AtEndPreamble{%
+%    \end{macrocode}
+% Mit \pkg{graphicx} werden die Logos der TU~Dresden sowie von Dresden Concept
+% mit dem Befehl \cs{includegraphics} u.\,a. auf der Titelseite eingebunden.
+% \todo[v3.12]{Laden von \pkg{graphics} mit Warnung verhindern.}
+%    \begin{macrocode}
+  \@ifpackageloaded{graphicx}{}{\RequirePackage{graphicx}}%
+%    \end{macrocode}
+% Mit dem Paket \pkg{tudscrcolor} werden die Befehle für die Auswahl der Farben
+% des \CDs definiert, welches wiederum \pkg{xcolor} lädt.
+%    \begin{macrocode}
+  \@ifpackageloaded{tudscrcolor}{}{\RequirePackage{tudscrcolor}}%
+%    \end{macrocode}
+% Wenn die Farben für Titel- und Kapitelseiten umgeschaltet werden, geht die 
+% Information über die aktuelle Text- und Seitenfarbe verloren. Um dies zu 
+% verhindern, kann das Paket \pkg{pagecolor} geladen werden. Das Laden sollte 
+% aber solange verzögert werden, bis das Paket \pkg{tudscrcolor} geladen ist.
+% \todo[v3.12]{Verzögern des Ladens von \pkg{pagecolor} aktivieren.}
+%    \begin{macrocode}
+%  \if@tud@pagecolor%
+%    \UnPreventPackageFromLoading*{pagecolor}%
+%    \RequirePackage{pagecolor}%
+%  \fi%
+}
+%    \end{macrocode}
+%
+% \iffalse
+%</class&option>
+% \fi
+%
+% \Finale
+%
+\endinput

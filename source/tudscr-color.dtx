@@ -1,0 +1,448 @@
+% \CheckSum{241}
+% \iffalse meta-comment
+% ======================================================================
+%
+% Das Corporate Design der TU Dresden auf Basis der KOMA-Script-Klassen
+%
+% ======================================================================
+% This work may be distributed and/or modified under the conditions of
+% the LaTeX Project Public License, version 1.3c of the license.
+% The latest version of this license is in
+%     http://www.latex-project.org/lppl.txt
+% and version 1.3c or later is part of all distributions of LaTeX
+% version 2005/12/01 or later and of this work.
+% This work has the LPPL maintenance status "author-maintained".
+% The current maintainer and author of this work is Falk Hanisch.
+% ----------------------------------------------------------------------
+% Dieses Werk darf nach den Bedingungen der LaTeX Project Public Lizenz,
+% Version 1.3c, verteilt und/oder veraendert werden.
+% Die neuste Version dieser Lizenz ist
+%     http://www.latex-project.org/lppl.txt
+% und Version 1.3c ist Teil aller Verteilungen von LaTeX
+% Version 2005/12/01 oder spaeter und dieses Werks.
+% Dieses Werk hat den LPPL-Verwaltungs-Status "author-maintained"
+% (allein durch den Autor verwaltet).
+% Der aktuelle Verwalter und Autor dieses Werkes ist Falk Hanisch.
+% ======================================================================
+% \fi
+%
+% \CharacterTable
+%  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
+%   Lower-case    \a\b\c\d\e\f\g\h\i\j\k\l\m\n\o\p\q\r\s\t\u\v\w\x\y\z
+%   Digits        \0\1\2\3\4\5\6\7\8\9
+%   Exclamation   \!     Double quote  \"     Hash (number) \#
+%   Dollar        \$     Percent       \%     Ampersand     \&
+%   Acute accent  \'     Left paren    \(     Right paren   \)
+%   Asterisk      \*     Plus          \+     Comma         \,
+%   Minus         \-     Point         \.     Solidus       \/
+%   Colon         \:     Semicolon     \;     Less than     \<
+%   Equals        \=     Greater than  \>     Question mark \?
+%   Commercial at \@     Left bracket  \[     Backslash     \\
+%   Right bracket \]     Circumflex    \^     Underscore    \_
+%   Grave accent  \`     Left brace    \{     Vertical bar  \|
+%   Right brace   \}     Tilde         \~}
+%
+% \iffalse
+%%% From File: tudscr-color.dtx
+%<*driver>
+% \fi
+\ProvidesFile{tudscr-color.dtx}%
+  [2014/04/22 v2.00 TUD-KOMA-Script (colors)]
+% \iffalse
+\documentclass{tudscrdoc}
+\KOMAoptions{parskip=half-}
+\CodelineIndex
+\RecordChanges
+\GetFileInfo{tudscr-color.dtx}
+\begin{document}
+  \maketitle
+  \DocInput{\filename}
+\end{document}
+%</driver>
+% \fi
+%
+% \selectlanguage{ngerman}
+%
+% \section{Die Farben des \CDs}
+%
+% Das \CD der Technischen Universität Dresden legt nicht nur die zu nutzenden
+% Schriften und das Layout sondern auch die zu verwendenden Farben fest. Diese
+% werden nachfolgend für das CMYK"~ und RGB"~Farbmodel definiert. Sie können im
+% Dokument mit sämtlichen Befehlen zur Farbauswahl wie \cs{color}\marg{Farbe} 
+% oder aber \cs{textcolor}\marg{Farbe} verwendet werden.
+%
+% \StopEventually{\PrintIndex\PrintChanges}
+%
+% \iffalse
+%<*package&header>
+% \fi
+%
+% \subsection{Identifizierung des Pakets \pkg{tudscrcolor}}
+%
+%    \begin{macrocode}
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{tudscrcolor}[%
+  \TUDVersion\space package (corporate design colors)%
+]
+\DeclareOption{reduced}{\let\setcdcolors@add\relax}
+\DeclareOption{full}{\let\setcdcolors@add\setcdcolors@full}
+\DeclareOption*{\PassOptionsToPackage{\CurrentOption}{xcolor}}
+%    \end{macrocode}
+%
+% \iffalse
+%</package&header>
+%<*class|package&body>
+% \fi
+%
+% \subsection{Befehle für die \cls{tudscr}-Klassen}
+%
+% \iffalse
+%<*class>
+% \fi
+%
+% \todo[v3.12]{%
+%   Abfrage \cs{@ifpackageloaded} durch Verzögerung des Paketes 
+%   \pkg{pagecolor} nicht notwendig.%
+% }
+% \begin{macro}{\nopagecolor}
+% \begin{macro}{\tud@pagecolor}
+% \begin{macro}{\tud@restorepagecolor}
+% Diese Befehle dienen zum Umschalten der Farben für Titel- und Kapitelseiten.
+%    \begin{macrocode}
+\newcommand*\tud@pagecolor[1]{}
+\newcommand*\tud@restorepagecolor{}
+\AfterPackage{tudscrcolor}{%
+  \providecommand*\nopagecolor{\pagecolor{white}}%
+  \@ifpackageloaded{pagecolor}{}{%
+    \let\tud@pagecolor\pagecolor%
+    \let\tud@restorepagecolor\nopagecolor%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@restorepagecolor
+% \end{macro}^^A \tud@pagecolor
+% \end{macro}^^A \nopagecolor
+% \todo[v3.12]{Verzögerung des Paketes \pkg{pagecolor} aktivieren.}
+% \begin{macro}{\if@tud@pagecolor}
+% Wenn die Farben für Titel- und Kapitelseiten umgeschaltet werden, geht die
+% Information über die aktuelle Text- und Seitenfarbe verloren. Um dies zu
+% verhindern, kann das Paket \pkg{pagecolor} geladen werden, welches mit den
+% Befehlen \cs{newcolor} und \cs{restorecolor} ein Wiederherstellen ermöglicht.
+%    \begin{macrocode}
+% \newif\if@tud@pagecolor
+% \PreventPackageFromLoading[\@tud@pagecolortrue]{pagecolor}
+\AfterPackage{pagecolor}{%
+  \let\tud@pagecolor\newpagecolor%
+  \let\tud@restorepagecolor\restorepagecolor%
+}
+%    \end{macrocode}
+% \end{macro}^^A \if@tud@pagecolor
+% Sollte das Paket \pkg{pdfpages} geladen werden, so ist eine Definition
+% der Standardseitenfarbe zum Einbinden von PDF-Dokumenten notwendig.
+% Andernfalls werden bei der Verwendung von \cs{includepdf} nur leere Seiten
+% erzeugt.
+%    \begin{macrocode}
+\AfterPackage{pdfpages}{\AtEndPreamble{\nopagecolor}}
+%    \end{macrocode}
+%
+% \iffalse
+%</class>
+%<*package&body>
+% \fi
+%
+% \subsection{Farbdefinitionen für das Paket \pkg{tudscrcolor}}
+%
+% \begin{macro}{\setcdcolors}
+% \begin{macro}{\setcdcolors@add}
+% Der Befehl \cs{setcdcolors} definiert die Farben des \CDs. Das Argument dient
+% zur Auswahl des gewünschten Farbmodels. Dies kann dazu genutzt werden,
+% innerhalb des Dokumentes die Definition der Farben für ein neues Farbmodell zu
+% ändern.
+%    \begin{macrocode}
+\newcommand*\setcdcolors@add{}
+\newcommand*\setcdcolors[1]{%
+  \def\@tempa{#1}\ifx\@tempa\@empty\else%
+    \selectcolormodel{\@tempa}
+  \fi%
+%    \end{macrocode}
+% \begin{color}{HKS41}
+% Die primäre Hausfarbe (dunkles Blau)
+%    \begin{macrocode}
+  \definecolor{HKS41}{cmyk/RGB/rgb}{%
+    1.00,0.70,0.10,0.50/011,042,081/0.0431372549,0.16470588235,0.31764705882%
+  }
+%    \end{macrocode}
+% \end{color}^^A HKS41
+% \begin{color}{HKS92}
+% Die sekundäre Hausfarbe (grau), allein und ausschließlich für die Verwendung
+% in der Geschäftsausstattung und nicht für Fließtext, Grafiken etc.
+%    \begin{macrocode}
+  \definecolor{HKS92}{cmyk/RGB/rgb}{%
+    0.10,0.00,0.05,0.65/080,089,085/0.31372549019,0.34901960784,0.33333333333%
+  }
+%    \end{macrocode}
+% \end{color}^^A HKS92
+% \begin{color}{HKS44}
+% Auszeichnungen 1. Kategorie (helles Blau)
+%    \begin{macrocode}
+  \definecolor{HKS44}{cmyk/RGB/rgb}{%
+    1.00,0.50,0.00,0.00/000,089,163/0,0.34901960784,0.63921568627%
+  }
+%    \end{macrocode}
+% \end{color}^^A HKS44
+% \begin{color}{HKS36}
+% \begin{color}{HKS33}
+% \begin{color}{HKS57}
+% \begin{color}{HKS65}
+% Auszeichnungen 2. Kategorie (Indigo, Purpur, dunkles Grün, helles Grün)
+%    \begin{macrocode}
+  \definecolor{HKS36}{cmyk/RGB/rgb}{%
+    0.80,0.90,0.00,0.00/081,041,127/0.31764705882,0.16078431372,0.49803921568%
+  }
+  \definecolor{HKS33}{cmyk/RGB/rgb}{%
+    0.50,1.00,0.00,0.00/129,026,120/0.50588235294,0.10196078431,0.47058823529%
+  }
+  \definecolor{HKS57}{cmyk/RGB/rgb}{%
+    1.00,0.00,0.90,0.20/000,122,071/0,0.47843137254,0.28235294117%
+  }
+  \definecolor{HKS65}{cmyk/RGB/rgb}{%
+    0.65,0.00,1.00,0.00/034,173,054/0.13333333333,0.67843137254,0.21176470588%
+  }
+%    \end{macrocode}
+% \end{color}^^A HKS65
+% \end{color}^^A HKS57
+% \end{color}^^A HKS33
+% \end{color}^^A HKS36
+% \begin{color}{HKS07}
+% Ausnahmefarbe (Orange)
+%    \begin{macrocode}
+  \definecolor{HKS07}{cmyk/RGB/rgb}{%
+    0.00,0.60,1.00,0.00/232,123,020/0.90980392156,0.48235294117,0.07843137254%
+  }
+%    \end{macrocode}
+% \end{color}^^A HKS07
+% \begin{color}{cddarkblue}
+% \begin{color}{cdgray}
+% \begin{color}{cdblue}
+% \begin{color}{cdindigo}
+% \begin{color}{cdpurple}
+% \begin{color}{cddarkgreen}
+% \begin{color}{cdgreen}
+% \begin{color}{cdorange}
+% Die definierten Grundfarben werden zur einfacheren Verwendung im Dokument noch 
+% einmal speziell benannt.
+%    \begin{macrocode}
+  \colorlet{cddarkblue}{HKS41}
+  \colorlet{cdgray}{HKS92}
+  \colorlet{cdblue}{HKS44}
+  \colorlet{cdindigo}{HKS36}
+  \colorlet{cdpurple}{HKS33}
+  \colorlet{cddarkgreen}{HKS57}
+  \colorlet{cdgreen}{HKS65}
+  \colorlet{cdorange}{HKS07}
+%    \end{macrocode}
+% \end{color}^^A cdorange
+% \end{color}^^A cdgreen
+% \end{color}^^A cddarkgreen
+% \end{color}^^A cdpurple
+% \end{color}^^A cdindigo
+% \end{color}^^A cdblue
+% \end{color}^^A cdgray
+% \end{color}^^A cddarkblue
+% Damit enden die notwendigen Farbdefinitionen für das \pkg{tudscrcolor}-Paket.
+% Abhängig von den gewählten Optionen werden mit \cs{setcdcolors@add} ggf.
+% zusätzliche Farbnamen definiert.
+%    \begin{macrocode}
+  \setcdcolors@add%
+}
+%    \end{macrocode}
+% \end{macro}^^A \setcdcolors@add
+% \end{macro}^^A \setcdcolors
+% \begin{macro}{\setcdcolors@full}
+% Die erweiterten Farbbefehle werden durch \pkg{tudscrcolor} definiert, wenn
+% das Paket explizit mit der Option \opt{full} geladen wird. Damit werden 
+% alle gängigen Farbdefinitionen der vielen Insellösungen des \LaTeX-Universums
+% an der Technischen Universität Dresden unterstützt.
+%    \begin{macrocode}
+\newcommand*\setcdcolors@full{%
+  \colorlet{HKS41K100}{HKS41!100}
+  \colorlet{HKS41K90}{HKS41!90}
+  \colorlet{HKS41K80}{HKS41!80}
+  \colorlet{HKS41K70}{HKS41!70}
+  \colorlet{HKS41K60}{HKS41!60}
+  \colorlet{HKS41K50}{HKS41!50}
+  \colorlet{HKS41K40}{HKS41!40}
+  \colorlet{HKS41K30}{HKS41!30}
+  \colorlet{HKS41K20}{HKS41!20}
+  \colorlet{HKS41K10}{HKS41!10}
+  \colorlet{HKS92K100}{HKS92!100}
+  \colorlet{HKS92K90}{HKS92!90}
+  \colorlet{HKS92K80}{HKS92!80}
+  \colorlet{HKS92K70}{HKS92!70}
+  \colorlet{HKS92K60}{HKS92!60}
+  \colorlet{HKS92K50}{HKS92!50}
+  \colorlet{HKS92K40}{HKS92!40}
+  \colorlet{HKS92K30}{HKS92!30}
+  \colorlet{HKS92K20}{HKS92!20}
+  \colorlet{HKS92K10}{HKS92!10}
+  \colorlet{HKS44K100}{HKS44!100}
+  \colorlet{HKS44K90}{HKS44!90}
+  \colorlet{HKS44K80}{HKS44!80}
+  \colorlet{HKS44K70}{HKS44!70}
+  \colorlet{HKS44K60}{HKS44!60}
+  \colorlet{HKS44K50}{HKS44!50}
+  \colorlet{HKS44K40}{HKS44!40}
+  \colorlet{HKS44K30}{HKS44!30}
+  \colorlet{HKS44K20}{HKS44!20}
+  \colorlet{HKS44K10}{HKS44!10}
+  \colorlet{HKS36K10}{HKS36!10}
+  \colorlet{HKS36K20}{HKS36!20}
+  \colorlet{HKS36K30}{HKS36!30}
+  \colorlet{HKS36K40}{HKS36!40}
+  \colorlet{HKS36K50}{HKS36!50}
+  \colorlet{HKS36K60}{HKS36!60}
+  \colorlet{HKS36K70}{HKS36!70}
+  \colorlet{HKS36K80}{HKS36!80}
+  \colorlet{HKS36K90}{HKS36!90}
+  \colorlet{HKS36K100}{HKS36!100}
+  \colorlet{HKS33K10}{HKS33!10}
+  \colorlet{HKS33K20}{HKS33!20}
+  \colorlet{HKS33K30}{HKS33!30}
+  \colorlet{HKS33K40}{HKS33!40}
+  \colorlet{HKS33K50}{HKS33!50}
+  \colorlet{HKS33K60}{HKS33!60}
+  \colorlet{HKS33K70}{HKS33!70}
+  \colorlet{HKS33K80}{HKS33!80}
+  \colorlet{HKS33K90}{HKS33!90}
+  \colorlet{HKS33K100}{HKS33!100}
+  \colorlet{HKS57K10}{HKS57!10}
+  \colorlet{HKS57K20}{HKS57!20}
+  \colorlet{HKS57K30}{HKS57!30}
+  \colorlet{HKS57K40}{HKS57!40}
+  \colorlet{HKS57K50}{HKS57!50}
+  \colorlet{HKS57K60}{HKS57!60}
+  \colorlet{HKS57K70}{HKS57!70}
+  \colorlet{HKS57K80}{HKS57!80}
+  \colorlet{HKS57K90}{HKS57!90}
+  \colorlet{HKS57K100}{HKS57!100}
+  \colorlet{HKS65K10}{HKS65!10}
+  \colorlet{HKS65K20}{HKS65!20}
+  \colorlet{HKS65K30}{HKS65!30}
+  \colorlet{HKS65K40}{HKS65!40}
+  \colorlet{HKS65K50}{HKS65!50}
+  \colorlet{HKS65K60}{HKS65!60}
+  \colorlet{HKS65K70}{HKS65!70}
+  \colorlet{HKS65K80}{HKS65!80}
+  \colorlet{HKS65K90}{HKS65!90}
+  \colorlet{HKS65K100}{HKS65!100}
+  \colorlet{HKS07K10}{HKS07!10}
+  \colorlet{HKS07K20}{HKS07!20}
+  \colorlet{HKS07K30}{HKS07!30}
+  \colorlet{HKS07K40}{HKS07!40}
+  \colorlet{HKS07K50}{HKS07!50}
+  \colorlet{HKS07K60}{HKS07!60}
+  \colorlet{HKS07K70}{HKS07!70}
+  \colorlet{HKS07K80}{HKS07!80}
+  \colorlet{HKS07K90}{HKS07!90}
+  \colorlet{HKS07K100}{HKS07!100}
+  \colorlet{HKS41-100}{HKS41!100}
+  \colorlet{HKS41-90}{HKS41!90}
+  \colorlet{HKS41-80}{HKS41!80}
+  \colorlet{HKS41-70}{HKS41!70}
+  \colorlet{HKS41-60}{HKS41!60}
+  \colorlet{HKS41-50}{HKS41!50}
+  \colorlet{HKS41-40}{HKS41!40}
+  \colorlet{HKS41-30}{HKS41!30}
+  \colorlet{HKS41-20}{HKS41!20}
+  \colorlet{HKS41-10}{HKS41!10}
+  \colorlet{HKS92-100}{HKS92!100}
+  \colorlet{HKS92-90}{HKS92!90}
+  \colorlet{HKS92-80}{HKS92!80}
+  \colorlet{HKS92-70}{HKS92!70}
+  \colorlet{HKS92-60}{HKS92!60}
+  \colorlet{HKS92-50}{HKS92!50}
+  \colorlet{HKS92-40}{HKS92!40}
+  \colorlet{HKS92-30}{HKS92!30}
+  \colorlet{HKS92-20}{HKS92!20}
+  \colorlet{HKS92-10}{HKS92!10}
+  \colorlet{HKS44-100}{HKS44!100}
+  \colorlet{HKS44-90}{HKS44!90}
+  \colorlet{HKS44-80}{HKS44!80}
+  \colorlet{HKS44-70}{HKS44!70}
+  \colorlet{HKS44-60}{HKS44!60}
+  \colorlet{HKS44-50}{HKS44!50}
+  \colorlet{HKS44-40}{HKS44!40}
+  \colorlet{HKS44-30}{HKS44!30}
+  \colorlet{HKS44-20}{HKS44!20}
+  \colorlet{HKS44-10}{HKS44!10}
+  \colorlet{HKS36-10}{HKS36!10}
+  \colorlet{HKS36-20}{HKS36!20}
+  \colorlet{HKS36-30}{HKS36!30}
+  \colorlet{HKS36-40}{HKS36!40}
+  \colorlet{HKS36-50}{HKS36!50}
+  \colorlet{HKS36-60}{HKS36!60}
+  \colorlet{HKS36-70}{HKS36!70}
+  \colorlet{HKS36-80}{HKS36!80}
+  \colorlet{HKS36-90}{HKS36!90}
+  \colorlet{HKS36-100}{HKS36!100}
+  \colorlet{HKS33-10}{HKS33!10}
+  \colorlet{HKS33-20}{HKS33!20}
+  \colorlet{HKS33-30}{HKS33!30}
+  \colorlet{HKS33-40}{HKS33!40}
+  \colorlet{HKS33-50}{HKS33!50}
+  \colorlet{HKS33-60}{HKS33!60}
+  \colorlet{HKS33-70}{HKS33!70}
+  \colorlet{HKS33-80}{HKS33!80}
+  \colorlet{HKS33-90}{HKS33!90}
+  \colorlet{HKS33-100}{HKS33!100}
+  \colorlet{HKS57-10}{HKS57!10}
+  \colorlet{HKS57-20}{HKS57!20}
+  \colorlet{HKS57-30}{HKS57!30}
+  \colorlet{HKS57-40}{HKS57!40}
+  \colorlet{HKS57-50}{HKS57!50}
+  \colorlet{HKS57-60}{HKS57!60}
+  \colorlet{HKS57-70}{HKS57!70}
+  \colorlet{HKS57-80}{HKS57!80}
+  \colorlet{HKS57-90}{HKS57!90}
+  \colorlet{HKS57-100}{HKS57!100}
+  \colorlet{HKS65-10}{HKS65!10}
+  \colorlet{HKS65-20}{HKS65!20}
+  \colorlet{HKS65-30}{HKS65!30}
+  \colorlet{HKS65-40}{HKS65!40}
+  \colorlet{HKS65-50}{HKS65!50}
+  \colorlet{HKS65-60}{HKS65!60}
+  \colorlet{HKS65-70}{HKS65!70}
+  \colorlet{HKS65-80}{HKS65!80}
+  \colorlet{HKS65-90}{HKS65!90}
+  \colorlet{HKS65-100}{HKS65!100}
+  \colorlet{HKS07-10}{HKS07!10}
+  \colorlet{HKS07-20}{HKS07!20}
+  \colorlet{HKS07-30}{HKS07!30}
+  \colorlet{HKS07-40}{HKS07!40}
+  \colorlet{HKS07-50}{HKS07!50}
+  \colorlet{HKS07-60}{HKS07!60}
+  \colorlet{HKS07-70}{HKS07!70}
+  \colorlet{HKS07-80}{HKS07!80}
+  \colorlet{HKS07-90}{HKS07!90}
+  \colorlet{HKS07-100}{HKS07!100}
+}
+%    \end{macrocode}
+% \end{macro}^^A \setcdcolors@full
+% Zum Schluss werden die Optionen ausgeführt und ggf. an \pkg{xcolor} 
+% weitergereicht. Anschließend werden die Farben für das Dokument definiert.
+% Ohne die Angabe eines optionalen Argumentes an das Paket \pkg{xcolor} erfolgt
+% die Definition für den gewählten bzw. standardmäßig eingestellten Farbraum.
+%    \begin{macrocode}
+\ExecuteOptions{reduced}
+\ProcessOptions\relax
+\RequirePackage{xcolor}
+\setcdcolors{}
+%    \end{macrocode}
+%
+% \iffalse
+%</package&body>
+% \fi
+%
+% \Finale
+%
+\endinput

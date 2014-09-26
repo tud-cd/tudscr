@@ -1,0 +1,1273 @@
+% \CheckSum{1206}
+% \iffalse meta-comment
+% ======================================================================
+%
+% Das Corporate Design der TU Dresden auf Basis der KOMA-Script-Klassen
+%
+% ======================================================================
+% This work may be distributed and/or modified under the conditions of
+% the LaTeX Project Public License, version 1.3c of the license.
+% The latest version of this license is in
+%     http://www.latex-project.org/lppl.txt
+% and version 1.3c or later is part of all distributions of LaTeX
+% version 2005/12/01 or later and of this work.
+% This work has the LPPL maintenance status "author-maintained".
+% The current maintainer and author of this work is Falk Hanisch.
+% ----------------------------------------------------------------------
+% Dieses Werk darf nach den Bedingungen der LaTeX Project Public Lizenz,
+% Version 1.3c, verteilt und/oder veraendert werden.
+% Die neuste Version dieser Lizenz ist
+%     http://www.latex-project.org/lppl.txt
+% und Version 1.3c ist Teil aller Verteilungen von LaTeX
+% Version 2005/12/01 oder spaeter und dieses Werks.
+% Dieses Werk hat den LPPL-Verwaltungs-Status "author-maintained"
+% (allein durch den Autor verwaltet).
+% Der aktuelle Verwalter und Autor dieses Werkes ist Falk Hanisch.
+% ======================================================================
+% \fi
+%
+% \CharacterTable
+%  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
+%   Lower-case    \a\b\c\d\e\f\g\h\i\j\k\l\m\n\o\p\q\r\s\t\u\v\w\x\y\z
+%   Digits        \0\1\2\3\4\5\6\7\8\9
+%   Exclamation   \!     Double quote  \"     Hash (number) \#
+%   Dollar        \$     Percent       \%     Ampersand     \&
+%   Acute accent  \'     Left paren    \(     Right paren   \)
+%   Asterisk      \*     Plus          \+     Comma         \,
+%   Minus         \-     Point         \.     Solidus       \/
+%   Colon         \:     Semicolon     \;     Less than     \<
+%   Equals        \=     Greater than  \>     Question mark \?
+%   Commercial at \@     Left bracket  \[     Backslash     \\
+%   Right bracket \]     Circumflex    \^     Underscore    \_
+%   Grave accent  \`     Left brace    \{     Vertical bar  \|
+%   Right brace   \}     Tilde         \~}
+%
+% \iffalse
+%%% From File: tudscr-manual.dtx
+%<*driver>
+% \fi
+\ProvidesFile{tudscr-manual.dtx}%
+  [2014/04/22 v2.00 TUD-KOMA-Script (manual)]
+% \iffalse
+\documentclass{tudscrdoc}
+\KOMAoptions{parskip=half-}
+\CodelineIndex
+\RecordChanges
+\GetFileInfo{tudscr-manual.dtx}
+\begin{document}
+  \maketitle
+  \DocInput{\filename}
+\end{document}
+%</driver>
+% \fi
+%
+% \selectlanguage{ngerman}
+%
+% \section{Klasse für das \TUDScript-Handbuch}
+%
+% Diese Klasse wird für das Benutzerhanduch des \TUDScript-Bundles verwendet.
+%
+% \StopEventually{\PrintIndex\PrintChanges}
+%
+% \subsection{Identifizierung der Klasse \cls{tudscrman}}
+%
+%    \begin{macrocode}
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesClass{tudscrman}[\TUDVersion\space{}internal manual class]%
+%    \end{macrocode}
+%
+% \subsection{Die Klasse \pkg{tudscrman}}
+%
+% Basis für das Handbuch ist die Klasse \cls{tudscrreprt}. An diese werden alle 
+% Klassenoptionen weitergereicht.
+%
+%    \begin{macrocode}
+\DeclareOption*{\PassOptionsToClass{\CurrentOption}{tudscrreprt}}
+\ProcessOptions\relax
+\LoadClass{tudscrreprt}
+%    \end{macrocode}
+% \begin{length}{\baselineskipglue}
+% Diese Länge wird in der Dokumentation für alle möglichen stauch- und dehnbaren 
+% Einfügen genutzt.
+%    \begin{macrocode}
+\newlength\baselineskipglue
+\setlength\baselineskipglue{%
+  .5\baselineskip plus .5\baselineskip minus .25\baselineskip%
+}
+%    \end{macrocode}
+% \end{length}^^A \baselineskipglue
+% Des Weiteren werden einige Pakete geladen. Dabei wird \pkg{microtype} für den 
+% optischen Randausgleich verwendet, \pkg{textcomp} stellt Pfeile u.\,ä. im 
+% Fließtext zur Verfügung, mit \pkg{tabularx} können Tabellen bestimmter Breite 
+% und automatisch berechneten Spaltenbreiten gesetzt werden. Mit \pkg{ragged2e} 
+% wird~-- falls benötigt~-- im Flattersatz die Silbentrennung aktiviert. Das
+% Paket \pkg{marginnote} wird für  die Auszeichnung von Änderungen und
+% ToDo-Notizen am Seitenrand verwendet. Außerdem wird das Paket \pkg{xparse} 
+% geladen. Dieses erlaubt eine sehr freie Deklaration von Makros mit (fast) 
+% beliebig arangierbaren optionalen Argumenten.
+%    \begin{macrocode}
+\RequirePackage{microtype}
+\RequirePackage{textcomp}
+\RequirePackage{tabularx}
+\RequirePackage{ragged2e}
+\RequirePackage{marginnote}
+\RequirePackage{xparse}
+%    \end{macrocode}
+% Die Fußnoten werden nicht mit jedem Kapitel zurückgesetzt.
+%    \begin{macrocode}
+\RequirePackage{chngcntr}
+\counterwithout{footnote}{chapter}
+%    \end{macrocode}
+% Das Paket erlaubt das Beeinflussen der Standardlisten und die Ableitung neuer 
+% Listen aus diesen. Hier werden die Zwischenräume innerhalb der Listen entfernt.
+%    \begin{macrocode}
+\RequirePackage{enumitem}
+\setlist{noitemsep}
+%    \end{macrocode}
+% \begin{environment}{values}
+% \begin{macro}{\before@values}
+% \begin{macro}{\item@values}
+% \begin{macro}{\itemtrue}
+% \begin{macro}{\itemfalse}
+% \begin{macro}{\tud@item@val}
+% \begin{macro}{\tud@item@add}
+% \begin{macro}{\tud@item@format}
+% \begin{macro}{\tud@item}
+% \begin{macro}{\tud@@item}
+% \begin{macro}{\tud@@@item}
+% Die Liste \env{values} dient zum Benennen der möglichen Werte für einen 
+% bestimmten Schlüssel. Im Handbuch kommt diese Liste vorallem bei Optionen aber 
+% auch bei bestimmten Befehls- und Optionsparametern zum Einsatz.
+%    \begin{macrocode}
+\newlist{values}{description}{1}
+\setlist[values]{%
+  topsep=.5\baselineskipglue,labelwidth=\columnwidth,labelsep=0pt,
+  font=\normalfont\ttfamily,before*=\before@values%
+}
+%    \end{macrocode}
+% Zu Beginn der Umgebung wird die Definition des \cs{item}-Befehls gesichert und 
+% anschließend geändert.
+%    \begin{macrocode}
+\newcommand*\before@values{%
+  \let\item@values\item%
+  \let\item\tud@item%
+%%  \par\RaggedRight%
+}
+%    \end{macrocode}
+% Die folgenden beiden Befehle enthalten die Standardwerte für boolsche Schalter.
+%    \begin{macrocode}
+\newcommand*\itemfalse{\def\tud@item@val{false/off/no}\item}
+\newcommand*\itemtrue{\def\tud@item@val{true/on/yes}\item}
+%    \end{macrocode}
+% Mit der neuen Definition kann der Säumniswert mit \cs{item*} explizit in der 
+% Liste hervorgehoben werden.
+%    \begin{macrocode}
+\newcommand*\item@values{}
+\newcommand*\tud@item@val{}
+\newcommand*\tud@item@add{}
+\newcommand*\tud@item@format{}
+\newcommand*\tud@item{%
+  \@ifstar{%
+    \def\tud@item@add{(Säumniswert)}%
+    \let\tud@item@format\emph%
+    \tud@@item%
+  }{%
+    \let\tud@item@add\relax%
+    \let\tud@item@format\relax%
+    \tud@@item%
+  }%
+}
+%    \end{macrocode}
+% In der zweiten Instanz wird das optionale Argument von \cs{item} ausgewertet.
+% Dabei wird das Hilfsmakro \cs{tud@item@val} beachtet, welches evtl. mit den 
+% Befehlen \cs{itemtrue} oder \cs{itemfalse} gesetzt wurde und vor dem 
+% optionalen Argument aufgeführt wird. 
+%    \begin{macrocode}
+\newcommand*\tud@@item[1][]{%
+  \ifstrempty{#1}%
+    {\edef\@tempa{\tud@item@val}}%
+    {\ifstr{\tud@item@val}{}%
+      {\edef\@tempa{#1}}%
+      {\edef\@tempa{\tud@item@val/#1}}%
+    }%
+  \def\tud@item@val{}%
+%    \end{macrocode}
+% Wurde weder \cs{tud@item@val} gesetzt noch ein Wert im optionalen Argument von 
+% \cs{item} angegeben, so wird der gesicherte Befehl ausgeführt. Ansonsten folgt 
+% die dritte Instanz.
+%    \begin{macrocode}
+  \ifstr{\@tempa}{}{\item@values}{\tud@@@item}%
+}
+%    \end{macrocode}
+% Der gesicherte Befehl wird mit den aufbereiteten Formatierungen genutzt.
+%    \begin{macrocode}
+\newcommand*\tud@@@item[1][]{%
+  \ifstrempty{#1}{}{%
+    \ifx\tud@item@add\relax%
+      \def\tud@item@add{#1}%
+    \else%
+      \apptocmd{\tud@item@add}{~#1}{}{}
+    \fi%
+  }%
+  \item@values[%
+    \tud@item@format{\@tempa:}%
+    \ifx\tud@item@add\relax\else\textuln{\space\footnotesize\tud@item@add}\fi%
+  ]
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@@@item
+% \end{macro}^^A \tud@@item
+% \end{macro}^^A \tud@item
+% \end{macro}^^A \tud@item@format
+% \end{macro}^^A \tud@item@add
+% \end{macro}^^A \tud@item@val
+% \end{macro}^^A \itemfalse
+% \end{macro}^^A \itemtrue
+% \end{macro}^^A \item@values
+% \end{macro}^^A \before@values
+% \end{environment}^^A values
+% \begin{environment}{packages}
+% \begin{macro}{\item@packages}
+% \begin{macro}{\tud@item@pkg}
+% \begin{macro}{\before@packages}
+% Ähnlich wie für die Auflistung von Werten eines Schlüssels wird auch mit der 
+% Charakterisierung von Paketen verfahren. Diese werden in der Auflistung 
+% speziell gekennzeichnet und mit \cs{DeclarePackage} im Index eingetragen.
+%    \begin{macrocode}
+\newlist{packages}{description}{2}
+\setlist[packages]{%
+  topsep=\medskipamount,labelwidth=\linewidth,labelsep=0pt,font=\normalfont,%
+  parsep=\parskip,listparindent=\parindent,before=\before@packages%
+}
+\newcommand*\item@packages{}
+\newcommand*\before@packages{%
+  \ifdefvoid{\item@packages}{%
+    \let\item@packages\item%
+    \let\item\tud@item@pkg%
+  }{}%
+%%  \par\RaggedRight%
+}
+\newcommand*\tud@item@pkg[1][]{%
+  \item@packages[{\DeclarePackage{#1}\texturn{#1}}]%
+}
+%    \end{macrocode}
+% \end{macro}^^A \before@packages
+% \end{macro}^^A \tud@item@pkg
+% \end{macro}^^A \item@packages
+% \end{environment}^^A packages
+% \begin{macro}{\includeexample}
+% Mit diesem Befehl wird eine \hologo{TeX}-Datei ggf. übersetzt und anschließend 
+% als PDF"~Datei wieder eingebunden.
+%    \begin{macrocode}
+\RequirePackage{filemod}
+\RequirePackage{pdfpages}
+\newcommand*{\includeexample}[1]{%
+  \lstinputlisting[style=tudscr]{examples/#1.tex}
+  \filemodCmp{./examples/#1.pdf}{./examples/#1.tex}{}{%
+    \immediate\write18{%
+      pdflatex -output-director examples examples/#1.tex
+      pdflatex -output-director examples examples/#1.tex
+    }%
+  }
+  \IfFileExists{examples/#1.pdf}{\includepdf[pages=-]{examples/#1.pdf}}{}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \includeexample
+% \begin{macro}{\Email}
+% \begin{macro}{\tudprintflag}
+% Für die Erstellung des Indexes wird das Paket \pkg{imakeidx} zusammen mit 
+% \textbf{xindy} verwendet. Zusätzlich werden \pkg{varioref} und \pkg{hyperref}
+% geladen. Damit wird der Befehl \cs{Email} als Link definiert. Außerdem wird
+% geprüft, ob durch einen externen \hologo{pdfLaTeX}-Aufruf das Flag
+% \cs{tudprintflag} definiert wurde. In  diesem Fall werden Optionen für den
+% unbunten Druck aktiviert.
+%    \begin{macrocode}
+\AtEndPreamble{%
+  \RequirePackage[xindy,splitindex]{imakeidx}%
+  \indexsetup{%
+    level=\addsec,toclevel=section,noclearpage,%
+    firstpagestyle=myheadings,%headers={\indexname}{\indexname}%
+  }%
+  \newcommand*\xdyopt{-M tudscrman.xdy -L german-din}%
+  \RequirePackage{varioref}%
+  \RequirePackage[hyperindex=false,colorlinks,linkcolor=blue]{hyperref}%
+  \newcommand*\Email[1]{\href{mailto:#1}{\nolinkurl{#1}}}
+  \pdfstringdefDisableCommands{%
+    \let\Application\@Application%
+    \let\Class\@Class%
+    \let\Package\@Package%
+  }%
+  \ifdef{\tudprintflag}{\hypersetup{hidelinks}}{\TUDoptions{color}}%
+  \makeindex[title={Allgemeiner Index},options=\xdyopt]%
+  \makeindex[title={Klassen- und Paketoptionen},name=options,options=\xdyopt]%
+  \makeindex[title={Umgebungen und Befehle},name=macros,options=\xdyopt]%
+  \makeindex[title={Umgebungs- und Befehlsparameter},name=keys,options=\xdyopt]%
+  \makeindex[title={Sprachabh\"angige Bezeichner},name=terms,options=\xdyopt]%
+%%  \makeindex[title={Schriftelemente},name=fonts,options=\xdyopt]%
+  \makeindex[title={Farben},name=colors,options=\xdyopt]%
+  \makeindex[title={Klassen, Pakete und Dateien},name=files,options=\xdyopt]%
+%%  \makeindex[title={\"Anderungsliste},name=changelog,options=\xdyopt]%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tudprintflag
+% \end{macro}^^A \Email
+% \begin{macro}{\PrintIndex}
+% \begin{macro}{\Index}
+% \begin{macro}{\@printindex}
+% Der Befehl \cs{PrintIndex} ist die Zusammenfassung für die Ausgabe aller 
+% Indexe. Mit \cs{Index} werden im Allgemeinen Index Querverweise auf die 
+% Spezialindexe gesetzt. Der Befehl \cs{@printindex} setzt vor jedem Unterindex 
+% ein referenzierbares Label und gibt diesen danach aus.
+%    \begin{macrocode}
+\newcommand*\PrintIndex{%
+  \@printindex%
+  \@printindex[options]%
+  \@printindex[macros]%
+  \@printindex[keys]%
+  \@printindex[terms]%
+%%  \@printindex[fonts]%
+  \begingroup%
+  \let\lettergroup\@gobble%
+  \@printindex[colors]%
+  \endgroup%
+  \@printindex[files]%
+}
+\newcommand*\Index[3][]{%
+  \ifcsdef{r@idx:#3}{%
+    \index{\ifblank{#1}{#2}{#1}|see{\hyperref[idx:#3]{Index der #2}}}%
+  }{%
+    \index{\ifblank{#1}{#2}{#1}|see{Index der #2}}%
+  }%
+}
+\newcommand*\@printindex[1][]{%
+  \pagebreak[3]%
+  \ifblank{#1}{%
+    \indexprologue[\vspace*{0pt}]{\label{idx:main}}%
+    \printindex%
+  }{%
+    \indexprologue[\vspace*{0pt}]{\label{idx:#1}}
+    \printindex[#1]
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \@printindex
+% \end{macro}^^A \Index
+% \end{macro}^^A \PrintIndex
+% \begin{macro}{\PrintChangelog}
+% \begin{macro}{\ChangedAt}
+% \begin{macro}{\if@changelog}
+% Ähnlich wie für den index wird auch für die Änderungsliste verfahren.
+%    \begin{macrocode}
+\newif\if@changelog
+\newcommand*\PrintChangelog{%
+  \begingroup%
+  \let\lettergroup\@gobble%
+  \@changelogtrue%
+  \@printindex[changelog]%
+  \endgroup%
+}
+%    \end{macrocode}
+% Hier wird zum ersten Mal von den Möglichkeiten des Paketes \pkg{xparse} 
+% Gebrauch gemacht.
+%    \begin{macrocode}
+\NewDocumentCommand\ChangedAt{mo}{%
+  \begingroup%
+  \setlength{\fboxsep}{0pt}%
+  \marginnote{\footnotesize\fbox{\texturn{\ \strut#1\ }}}%
+  \IfValueTF{#2}{%
+    \let\PName\@gobble%
+    \let\PBoolean\relax%
+    \let\PSet\relax%
+    \let\PValue\@gobble%
+    \let\Parameter\@gobble%
+    \let\OParameter\@gobble%
+    \let\LParameter\relax%
+    \let\OLParameter\@gobble%
+    \let\PParameter\@gobble%
+    \let\POParameter\@gobble%
+    \index[changelog]{#1!#2}%
+  }{}%
+  \endgroup%
+}
+%    \end{macrocode}
+% \end{macro}^^A \if@changelog
+% \end{macro}^^A \ChangedAt
+% \end{macro}^^A \PrintChangelog
+% \begin{macro}{\if@declare}
+% \begin{macro}{\if@openindex}
+% \begin{macro}{\bsc}
+% \begin{macro}{\idxfont}
+% \begin{macro}{\if@noindex}
+% Alle möglichen Befehle und Helferlein zum Steuern der Ausgabe.
+%    \begin{macrocode}
+\newif\if@declare
+\newif\if@openindex
+\newcommand*\bsc{}
+\DeclareRobustCommand*\bsc{\@backslashchar}
+\newcommand*\idxfont{}
+\let\idxfont\footnotesize
+\newif\if@noindex
+%    \end{macrocode}
+% \end{macro}^^A \if@noindex
+% \end{macro}^^A \idxfont
+% \end{macro}^^A \bsc
+% \end{macro}^^A \if@openindex
+% \end{macro}^^A \if@declare
+% Im Folgenden werden allerhand Befehle mit Hilfe des Paketes \pkg{xparse} 
+% definiert, um bestimmte Begriffe, Klassen, Pakete, Optionen, Umgebungen, 
+% Befehle, Parameter, Bezeichner, Längen, Schriftelemente und Farben speziell
+% auszuzeichnen und im Index einzutragen. Allen diesen Befehlen ist gemein, dass 
+% diese in der Sternversion nicht in den Index eingetragen werden.
+%
+% Für (fast) alle der folgenden Befehle gilt, dass die Verwendung in der Form 
+% \cs{\meta{Befehl}'} fügt eine zusätzliche Referenz auf  den Abschnitt ihrer
+% Deklaration ein. Das erste optionale Argument dient für eine spezielle
+% Auszeichnung im Index. Die eigentliche Behandlung der Eingabe und die 
+% Eintragungen in den Index erfolgen dabei mit dem Befehl \cs{@ProcessOutput}.
+% \begin{macro}{\Application}
+% \begin{macro}{\@Application}
+% Die Auszeichnung und der Indexeintrag einer Anwendungssoftware.
+%    \begin{macrocode}
+\NewDocumentCommand\Application{som}{%
+  \ifdin{#3}{%
+    \mbox{\textubn{#3}}
+    \IfBooleanTF{#1}{}{%
+      \index{#3~{\protect\idxfont(Anwendungssoftware)}\IfValueTF{#2}{|#2}{}}%
+    }%
+  }%
+}
+\DeclareExpandableDocumentCommand\@Application{som}{#3}
+%    \end{macrocode}
+% \end{macro}^^A \@Application
+% \end{macro}^^A \Application
+% \begin{macro}{\Distribution}
+% Die Auszeichnung und der Indexeintrag einer \hologo{LaTeX}-Distribution.
+%    \begin{macrocode}
+\NewDocumentCommand\Distribution{som}{%
+  \mbox{\texturn{#3}}
+  \IfBooleanTF{#1}{}{%
+    \index{#3~{\protect\idxfont(Distribution)}\IfValueTF{#2}{|#2}{}}%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \Distribution
+% \begin{macro}{\Path}
+% Die Auszeichnung eines Dateipfades.
+%    \begin{macrocode}
+\newcommand*\Path{}
+\DeclareRobustCommand*\Path[1]{\mbox{\texttt{#1}}}
+%    \end{macrocode}
+% \end{macro}^^A \Path
+% \begin{macro}{\File}
+% Die Auszeichnung und der Indexeintrag einer Datei.
+%    \begin{macrocode}
+\NewDocumentCommand\File{som}{%
+  \mbox{\texturn{#3}}%
+  \IfBooleanTF{#1}{}{%
+    \index[files]{#3~{\protect\idxfont(Datei)}\IfValueTF{#2}{|#2}{}}%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \File
+% \begin{macro}{\Class}
+% \begin{macro}{\@Class}
+% \begin{macro}{\DeclareClass}
+% \begin{macro}{\@TempClass}
+% Die Auszeichnung und der Indexeintrag einer Klasse. Sollte gerade DIN~Bold 
+% verwendet werden~-- der Befehl wird innerhalb einer Überschrift verwendet~-- 
+% wird lediglich das Hauptargument ausgegeben. Außerdem wird für Einträge mit 
+% dem \pkg{hyperref}-Paket mit \cs{@Class} eine expandierbare Version des 
+% Befehls definiert. Mit \cs{DeclareClass} wird eine Klasse deklariert.
+%    \begin{macrocode}
+\newcommand*\@TempClass{}
+\NewDocumentCommand\Class{st'om}{%
+  \ifdin{#4}{%
+    \gdef\@TempClass{~{\protect\idxfont(Klasse)}}%
+    \IfBooleanTF{#2}{%
+      \@ProcessOutput[#1]{\texturn{#4}}{files}{#4}[\@TempClass]{autoref}%
+    }{%
+      \@ProcessOutput[#1]{\texturn{#4}}{files}{#4}[\@TempClass]{#3}%
+    }%
+  }%
+}
+\DeclareExpandableDocumentCommand\@Class{st'om}{#4}
+\newcommand*\DeclareClass[1]{%
+  \phantomsection\label{files:#1}%
+  \index[files]{\hyperref[files:#1]{#1~{\protect\idxfont(Klasse)}}|declare}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \@TempClass
+% \end{macro}^^A \DeclareClass
+% \end{macro}^^A \@Class
+% \end{macro}^^A \Class
+% \begin{macro}{\Package}
+% \begin{macro}{\@Package}
+% \begin{macro}{\DeclarePackage}
+% \begin{macro}{\@TempPackage}
+% Für die Auszeichnungen von Paketen gelten vorhergehende Aussagen äquivalent.
+%    \begin{macrocode}
+\newcommand*\@TempPackage{}
+\NewDocumentCommand\Package{st'om}{%
+  \ifdin{#4}{%
+    \gdef\@TempPackage{~{\protect\idxfont(Paket)}}%
+    \IfBooleanTF{#2}{%
+      \@ProcessOutput[#1]{\texturn{#4}}{files}{#4}[\@TempPackage]{autoref}%
+    }{%
+      \@ProcessOutput[#1]{\texturn{#4}}{files}{#4}[\@TempPackage]{#3}%
+    }%
+  }%
+}
+\DeclareExpandableDocumentCommand\@Package{st'om}{#4}
+\newcommand*\DeclarePackage[1]{%
+  \phantomsection\label{files:#1}%
+  \index[files]{\hyperref[files:#1]{#1~{\protect\idxfont(Paket)}}|declare}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \@TempPackage
+% \end{macro}^^A \DeclarePackage
+% \end{macro}^^A \@Package
+% \end{macro}^^A \Package
+% \begin{macro}{\Option}
+% \begin{macro}{\@TempOption}
+% Für die Auszeichnung von Optionen wird zusätzlich unterschieden, ob der Befehl 
+% gerade innerhalb der Änderungsliste verwendet wird. Ist dies der Fall, wird 
+% der verarbeitende Befehl \cs{@ProcessChangedAt} aufgerufen. Mit dem optionalen 
+% Argument \emph{nach} dem Hauptargument kann der Option im Handbuch ein Wert 
+% zugewiesen werden.
+%    \begin{macrocode}
+\newcommand*\@TempOption{}
+\NewDocumentCommand\Option{st'omo}{%
+  \if@changelog%
+    \@ProcessChangedAt{options}{#4}%
+  \else%
+    \IfValueTF{#5}{\gdef\@TempOption{\texttt{=#5}}}{\gdef\@TempOption{}}%
+    \IfBooleanTF{#2}{%
+      \@ProcessOutput[#1]{\texttt{#4}}[\@TempOption]{options}{#4}{pageref}%
+    }{%
+      \@ProcessOutput[#1]{\texttt{#4}}[\@TempOption]{options}{#4}{#3}%
+    }%
+  \fi%
+}
+%    \end{macrocode}
+% \end{macro}^^A \@TempOption
+% \end{macro}^^A \Option
+% \begin{macro}{\Environment}
+% \begin{macro}{\@TempEnvironment}
+% Auch hier wird für die Änderungsliste unterschieden. 
+%    \begin{macrocode}
+\newcommand*\@TempEnvironment{}
+\NewDocumentCommand\Environment{st'omo}{%
+  \if@changelog%
+    \@ProcessChangedAt{macros}{#4}%
+  \else%
+%    \end{macrocode}
+% Außerdem wird für den Fall, dass der \cs{Environment}-Befehl innerhalb der
+% \env{Declaration}-Umgebung verwendet wird, eine spezielle Ausgabe erzeugt. Nur
+% hier kommt das optionale Argument nach dem Hauptargument zum Tragen. Damit
+% können etwaige obligatorische und optionale Argumente angegeben werden.
+%    \begin{macrocode}
+    \if@declare%
+      \gdef\@TempEnvironment{%
+        \texttt{\bsc{}begin\{#4\}\IfValueTF{#5}{#5}{}}\tabularnewline%
+        \texttt{\dots}\tabularnewline%
+        \texttt{\bsc{}end\{#4\}}%
+      }%
+    \else%
+      \gdef\@TempEnvironment{\texttt{#4}}%
+    \fi%
+    \IfBooleanTF{#2}{%
+      \@ProcessOutput[#1]{\@TempEnvironment}{macros}{#4}{pageref}%
+    }{%
+      \@ProcessOutput[#1]{\@TempEnvironment}{macros}{#4}{#3}%
+    }%
+  \fi%
+}
+%    \end{macrocode}
+% \end{macro}^^A \@TempEnvironment
+% \end{macro}^^A \Environment
+% \begin{macro}{\Macro}
+% Die Auszeichnung und der Indexeintrag eines Befehls.
+%    \begin{macrocode}
+\NewDocumentCommand\Macro{st'om}{%
+  \if@changelog%
+    \@ProcessChangedAt[\bsc]{macros}{#4}%
+  \else%
+    \IfBooleanTF{#2}{%
+      \@ProcessOutput[#1]{\texttt{\bsc#4}}{macros}[\bsc]{#4}{pageref}%
+    }{%
+      \@ProcessOutput[#1]{\texttt{\bsc#4}}{macros}[\bsc]{#4}{#3}%
+    }%
+  \fi%
+}
+%    \end{macrocode}
+% \end{macro}^^A \Macro
+% \begin{macro}{\Key}
+% \begin{macro}{\@TempKey}
+% Die Auszeichnung und der Indexeintrag eines Parameters für Umgebungen und 
+% Befehle. Das erste Argument ist die Umgebung oder der Befehl, wofür der 
+% Parameter gültig ist. Das zweite Argument ist der Parameter selbst. Dafür 
+% werden die Befehle \cs{Environment} und \cs{Macro} lokale umdefiniert. 
+%    \begin{macrocode}
+\newcommand*\@TempKey{}
+\NewDocumentCommand\Key{sommo}{%
+  \begingroup%
+  \let\Environment\@firstofone%
+  \let\Macro\@firstofone%
+  \if@changelog%
+    \@ProcessChangedAt{keys}{#4}%
+  \else%
+    \gdef\@TempKey{\if@declare~{\protect\idxfont(Parameter)}\fi}%
+    \IfValueTF{#5}{%
+      \@ProcessOutput[#1]{\texttt{#4}}[\texttt{=#5}\@TempKey]%
+        {macros}(#3){#4}{#2}%
+    }{%
+      \@ProcessOutput[#1]{\texttt{#4}}[\@TempKey]{macros}(#3){#4}{#2}%
+    }%
+  \fi%
+  \endgroup%
+}
+%    \end{macrocode}
+% \end{macro}^^A \@TempKey
+% \end{macro}^^A \Key
+% \begin{macro}{\Length}
+% \begin{macro}{\@TempLength}
+% Die Auszeichnung und der Indexeintrag einer \hologo{LaTeX}-Länge.
+%    \begin{macrocode}
+\newcommand*\@TempLength{}
+\NewDocumentCommand\Length{som}{%
+  \if@changelog%
+    \@ProcessChangedAt[\bsc]{macros}{#3}%
+  \else%
+    \gdef\@TempLength{\if@declare~{\protect\idxfont(L\"ange)}\fi}%
+    \@ProcessOutput[#1]{\texttt{\bsc#3}}[\@TempLength]%
+      {macros}[\bsc]{#3}[~{\protect\idxfont(L\"ange)}]{#2}%
+  \fi%
+}
+%    \end{macrocode}
+% \end{macro}^^A \@TempLength
+% \end{macro}^^A \Length
+% \begin{macro}{\Counter}
+% \begin{macro}{\@TempCounter}
+% Die Auszeichnung und der Indexeintrag einer \hologo{LaTeX}-Zählers.
+%    \begin{macrocode}
+\newcommand*\@TempCounter{}
+\NewDocumentCommand\Counter{som}{%
+  \if@changelog%
+    \@ProcessChangedAt{macros}{#3}%
+  \else%
+    \gdef\@TempCounter{\if@declare~{\protect\idxfont(Z\"ahler)}\fi}%
+    \@ProcessOutput[#1]{\texttt{#3}}[\@TempCounter]%
+      {macros}{#3}[~{\protect\idxfont(Z\"ahler)}]{#2}%
+  \fi%
+}
+%    \end{macrocode}
+% \end{macro}^^A \@TempCounter
+% \end{macro}^^A \Counter
+% \begin{macro}{\Term}
+% \begin{macro}{\@TempTerm}
+% Die Auszeichnung und der Indexeintrag eines sprachabhängigen Bezeichners.
+%    \begin{macrocode}
+\newcommand*\@TempTerm{}
+\NewDocumentCommand\Term{som}{%
+  \if@changelog%
+    \@ProcessChangedAt[\bsc]{terms}{#3}%
+  \else%
+    \gdef\@TempTerm{\if@declare~{\protect\idxfont(Bezeichner)}\fi}%
+    \@ProcessOutput[#1]{\texttt{\bsc#3}}[\@TempTerm]{terms}[\bsc]{#3}{#2}%
+  \fi%
+}
+%    \end{macrocode}
+% \end{macro}^^A \@TempTerm
+% \end{macro}^^A \Term
+% \begin{macro}{\TermTable}
+% \begin{macro}{\@TermTable}
+% \begin{macro}{\@@TermTable}
+% \begin{macro}{\@termlist}
+% Für sprachabhängige Bezeichner wird zusätzlich der Befehl \cs{TermTable} 
+% definiert, dem eine kommaseparierte Liste übergeben werden kann. Anhand dieser 
+% Liste werden die enthalten Begriffe für die Sprachen Deutsch und English in
+% einer Tabelle ausgegeben. Die Sternversion dieses Befehls nutzt dafür die 
+%\env{tabularx}-Umgebung. Für diese kann ein zweites Argument angegeben werden, 
+% welches die gewünschte Breite der Tabelle angibt.
+%    \begin{macrocode}
+\newcommand\@termlist{}
+\let\@termlist\relax
+\NewDocumentCommand\TermTable{smg}{%
+  \forcsvlist{\listadd\@termlist}{#2}%
+  \vskip\baselineskipglue\noindent%
+  \IfBooleanTF{#1}{%
+    \IfValueTF{#3}{\setlength\@tempdima{#3}}{\setlength\@tempdima{\linewidth}}%
+    \setlength{\@tempdimb}{-.7\baselineskip}%
+    \begin{tabularx}{\@tempdima}{lXX}\@TermTable\end{tabularx}
+  }{%
+    \setlength{\@tempdimb}{\z@}%
+    \begin{tabular}{lll}\@TermTable\end{tabular}
+  }%
+  \let\@termlist\relax%
+  \par\noindent%
+}
+\newcommand*\@TermTable{%
+  \toprule
+  \textbf{Bezeichner} & \textbf{Deutsch} & \textbf{Englisch} \tabularnewline
+  \midrule
+  \forlistloop\@@TermTable{\@termlist}
+  \bottomrule
+}
+\newcommand*\@@TermTable[1]{%
+  \Term{#1} &
+  \ifstr{\@nameuse{#1}}{}{\PName{leer}}{\@nameuse{#1}} &
+  \selectlanguage{english}\vspace*{\@tempdimb}%
+  \ifstr{\@nameuse{#1}}{}{\PName{empty}}{\@nameuse{#1}}\tabularnewline
+}
+%    \end{macrocode}
+% \end{macro}^^A \@termlist
+% \end{macro}^^A \@@TermTable
+% \end{macro}^^A \@TermTable
+% \end{macro}^^A \TermTable
+% \begin{macro}{\Font}
+% \begin{macro}{\@TempFont}
+% Die Auszeichnung und der Indexeintrag eines Schriftelementes.
+%    \begin{macrocode}
+\newcommand*\@TempFont{}
+\NewDocumentCommand\Font{som}{%
+  \if@changelog%
+    \@ProcessChangedAt{fonts}{#3}%
+  \else%
+    \gdef\@TempFont{%
+      \texttt{#3}\if@declare~{\protect\idxfont(Schriftelement)}\fi%
+    }%
+    \@ProcessOutput[#1]{\@TempFont}{fonts}{#3}{#2}%
+  \fi%
+}
+%    \end{macrocode}
+% \end{macro}^^A \@TempFont
+% \end{macro}^^A \Font
+% \begin{macro}{\Color}
+% \begin{macro}{\@TempColor}
+% Die Auszeichnung und der Indexeintrag einer Farbe des \CDs.
+%    \begin{macrocode}
+\newcommand*\@TempColor{}
+\NewDocumentCommand\Color{somo}{%
+  \if@changelog%
+    \@ProcessChangedAt{colors}{#3}%
+  \else%
+    \gdef\@TempColor{%
+      \IfValueTF{#4}{~\texttt{(#4)}}{}%
+      \if@declare~{\protect\idxfont(Farbe)}\fi%
+    }%
+    \@ProcessOutput[#1]{\texttt{#3}}[\@TempColor]{colors}{#3}{#2}%
+  \fi%
+}
+%    \end{macrocode}
+% \end{macro}^^A \@TempColor
+% \end{macro}^^A \Color
+% \begin{macro}{\@ProcessOutput}
+% Der Befehl \cs{@ProcessOutput} ist das Herzstück der Auszeichnungen aller
+% Elemente. Das erste optionale Argument ist der eventuell übergebene Stern für 
+% die eines beliebigen Auszeichnungsbefehl. Darauf folgen die gewünschte 
+% \marg{Ausgabe} und ein möglicher \oarg{Anhang}. Danach wird der Zielindex 
+% \marg{Index} und~-- für Parameter~-- der \parg{Haupteintrag} übergeben. Es 
+% folgt der zu machende Indexeintrag selbst mit \oarg{Vorsatz}, \marg{Eintrag},
+% \oarg{Anhang} und zum Abschluss \marg{Formatierung}. Der vollständige 
+% Funktionsaufruf lautet:
+% \newline\begingroup\tiny
+% \cs{@ProcessOutput}*
+% \marg{Ausgabe}\oarg{Anhang}\marg{Index}\parg{Haupteintrag}\ignorespaces%
+% \oarg{Vorsatz}\marg{Eintrag}\oarg{Anhang}\marg{Formatierung}
+% \endgroup
+%    \begin{macrocode}
+\NewDocumentCommand\@ProcessOutput{omomd()omom}{%
+%    \end{macrocode}
+% Dabei wird unterschieden, ob ein beliebiger Auszeichnungsbefehl innerhalb der
+% \env{Declaration}-Umgebung verwendet wird (\cs{if@declare}). Ist dies der Fall 
+% wird ein Label und mit \cs{@HyperIndex} ein spezieller Indexeintrag für die
+% Deklaration erstellt. Eine Ausgabe der Auszeichnung erfolgt in diesem Fall 
+% nicht, dafür zeichnet der Befehl \cs{printdeclarationlist} verantwortlich.
+% Außerdem wird mit Hilfe der \env{Declaration}-Umgebung der Anfang und
+% das Ende der Deklaration für den Indexeintrag mit \cs{@HyperIndex} exakt
+% festgelegt. Der Schalter \cs{if@openindex} wird zu Beginn der Umgebung auf 
+% \cs{@openindextrue} gesetzt, am Ende der Umgebung auf \cs{@openindexfalse}.
+%    \begin{macrocode}
+  \if@declare%
+    \if@openindex%
+      \if@noindex\else%
+        \IfValueTF{#5}%
+          {\edef\@tempa{#4:#5:#7}}%
+          {\edef\@tempa{#4:#7}}%
+        \label{\@tempa}%
+        \@HyperIndex{#4}{#5}{#6}{#7}{#8}[(declare]%
+      \fi%
+      #2\IfValueTF{#3}{#3}{}%
+    \else%
+      \if@noindex\else%
+        \@HyperIndex{#4}{#5}{#6}{#7}{#8}[declare)]%
+      \fi%
+    \fi%
+  \else%
+%    \end{macrocode}
+% Findet der Auszeichnungsbefehl außerhalb der \env{Declaration}-Umgebung 
+% Verwendung, wird für den Fall, dass keine Sternversion genutzt wurde, mit
+% \cs{@HyperIndex} ein Eintrag im dazugehörigen Index erzeugt.
+%    \begin{macrocode}
+    \IfBooleanTF{#1}{}{%
+      \@tempswafalse%
+      \ifstr{#9}{autoref}{\@tempswatrue}{}%
+      \ifstr{#9}{pageref}{\@tempswatrue}{}%
+      \if@tempswa%
+        \@HyperIndex{#4}{#5}{#6}{#7}{#8}%
+      \else%
+        \@HyperIndex{#4}{#5}{#6}{#7}{#8}[#9]%
+      \fi%
+    }%
+%    \end{macrocode}
+% Danach erfolgt die Ausgabe der Auszeichnung. Sollte für diesen ein Label 
+% durch eine Deklaration innerhalb der \env{Declaration}-Umgebung definiert 
+% worden sein, so wird auf dieses ein Hyperlink gesetzt. Ansonsten erfolgt die 
+% normale textuelle Ausgabe. Für Parameter muss der Hyperlink dabei aufgrund des 
+% definierten Haupteintrag etwas anders ausgeführt werden. 
+%    \begin{macrocode}
+    \IfValueTF{#5}{\edef\@tempa{#4:#5:#7}}{\edef\@tempa{#4:#7}}%
+    \ifcsdef{r@\@tempa}{%
+      \let\@tempb\relax%
+      \ifstr{#9}{autoref}{\def\@tempb{~unter \autoref{\@tempa}}}{}%
+      \ifstr{#9}{pageref}{\def\@tempb{~\vpageref{\@tempa}}}{}%
+      \mbox{\hyperref[\@tempa]{#2}\IfValueTF{#3}{#3}{}}\@tempb%
+    }{\mbox{#2\IfValueTF{#3}{#3}{}}}%
+  \fi%
+}
+%    \end{macrocode}
+% \end{macro}^^A \@ProcessOutput
+% \begin{macro}{\@HyperIndex}
+% Dieser Befehl sorgt für die eigentlichen Indexeinträge. Dabei werden für 
+% Einträge, welche innerhalb der \env{Declaration}-Umgebung deklariert wurden, 
+% ein Hyperlink im Index erstellt. Das erste Argument \marg{Index} enthält den 
+% gewünschten Zielindex. Danach folgt~-- für Parameter~-- der Haupteintrag. Es 
+% folgt der zu machende Indexeintrag selbst mit \marg{Vorsatz}, \marg{Eintrag},
+% \marg{Anhang} und zum Abschluss \oarg{Formatierung}. Der vollständige 
+% Funktionsaufruf lautet:
+% \newline\begingroup\tiny
+% \cs{@HyperIndex}\marg{Index}\marg{Haupteintrag}\ignorespaces%
+% \marg{Vorsatz}\marg{Eintrag}\marg{Anhang}\oarg{Formatierung}
+% \endgroup
+%    \begin{macrocode}
+\NewDocumentCommand\@HyperIndex{mmmmmo}{%
+  \IfValueTF{#3}{\def\@tempa{#3}}{\def\@tempa{}}%
+  \IfValueTF{#5}{\def\@tempb{#5}}{\def\@tempb{}}%
+  \IfValueTF{#6}{\def\@tempc{|#6}}{\def\@tempc{}}%
+%    \end{macrocode}
+% Auch hier wird unterschieden, ob es sich um einen Parameter (keys) handelt. 
+% Wurde für einen Parameter eine Umgebung oder ein Befehl bereits definiert, 
+% werden zwei Indexeinträge generiert. Einer beim Befehl selber als Untereintrag 
+% für den jeweiligen Parameter und einer im Index für Parameter selbst mit der 
+% dazugehörigen Umgebung bzw. dem dazugehörigen Befehl. Beide erhalten einen 
+% entsprechenden Hyperlink zur Deklaration.
+%    \begin{macrocode}
+  \IfValueTF{#2}{%
+    \ifcsdef{r@#1:#2:#4}{%
+      \edef\@tempb{#1:#2:#4}%
+      \index[#1]{%
+        #2!\hyperref[\@tempb]{\expandonce\@tempa#4}%
+        ~{\protect\idxfont(Parameter)}%
+        \expandonce\@tempc%
+      }%
+      \begingroup%
+      \let\Environment\@firstofone%
+      \def\Macro##1{\bsc##1}%
+      \index[keys]{%
+        \hyperref[\@tempb]{\expandonce\@tempa#4~{\protect\idxfont(#2)}}%
+        \expandonce\@tempc%
+      }%
+      \endgroup%
+    }{%
+      \index[#1]{#2!\expandonce\@tempa#4\expandonce\@tempb}%
+    }%
+%    \end{macrocode}
+% Falls es sich nicht um einen Parameter handelt, wird lediglich der Eintrag im 
+% speziellen Index vorgenommen und ggf. ein Hyperlink erzeugt.
+%    \begin{macrocode}
+  }{%
+    \ifcsdef{r@#1:#4}{%
+      \index[#1]{%
+        \hyperref[#1:#4]{\expandonce\@tempa#4\expandonce\@tempb}%
+        \expandonce\@tempc%
+      }%
+    }{%
+      \index[#1]{\expandonce\@tempa#4\expandonce\@tempb\expandonce\@tempc}%
+    }%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \@HyperIndex
+% \begin{macro}{\@ProcessChangedAt}
+% Auch die Änderungsliste erhält einen Hyperlink zur Deklaration, falls eine 
+% existiert.
+%    \begin{macrocode}
+\newcommand*\@ProcessChangedAt[3][]{%
+  \ifcsdef{r@#2:#3}{\hyperref[#2:#3]{\mbox{#1#3}}}{\mbox{#1#3}}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \@ProcessChangedAt
+% \begin{environment}{Declaration}
+% \begin{macro}{\printdeclarationlist}
+% \begin{macro}{\@declarationlist}
+% \begin{macro}{\@presetlist}
+% \begin{macro}{\if@presetlist}
+% \begin{macro}{\@additionallist}
+% \begin{macro}{\if@additionallist}
+% Es werden die Hilfsmakros für die Ausgabe einer Deklaration initialisiert.
+%    \begin{macrocode}
+\newcommand\@declarationlist{}
+\newcommand\@presetlist{}
+\newif\if@presetlist
+\newcommand\@additionallist{}
+\newif\if@additionallist
+\let\@declarationlist\relax
+\let\@presetlist\relax
+\let\@additionallist\relax
+%    \end{macrocode}
+% Die \env{Declaration}-Umgebung dient zur Deklaration von Optionen, Umgebungen, 
+% Befehlen, Parametern, Bezeichnern, Längen, Schriftelementen und Farben. Diese 
+% werden mit den entsprechenden Auszeichnungsbefehlen übergeben. Im zweiten 
+% Argument~-- das erste optionale~-- kann die Voreinstellung für eine Option 
+% oder dergleichen angegeben werden. Das nächste Argument erlaubt die Angabe 
+% einer bedingten Voreinstellung, also einer anderen Voreinstellung als der 
+% zuerst angegeben unter bestimmten Voraussetzungen. Diese muss in der Form 
+% \oarg{Bedingung:Voreinstellung} angegeben werden. Das letzte Argument ist 
+% ebenfalls optional, wird aber in der Form \marg{Zusatz} angegeben und enthält 
+% ggf. zusätzliche Informationen.
+%
+% Die Umgebung selbst gibt zu Beginn nichts weiter aus sondern sammelt lediglich 
+% alle übergebenen Argumente in jeweiligen Listen. Die eigentliche Ausgabe 
+% erfolgt mit dem Befehl \cs{printdeclarationlist}.
+%    \begin{macrocode}
+\NewDocumentEnvironment{Declaration}{moog}{%
+  \listadd\@declarationlist{#1}%
+  \IfNoValueTF{#2}{%
+    \listadd\@presetlist{\relax}%
+  }{%
+    \@presetlisttrue%
+    \IfNoValueTF{#3}{%
+      \listadd\@presetlist{preset:\,#2}%
+    }{%
+      \def\@tempa[##1:##2]{##1:\,##2}%
+      \listeadd\@presetlist{preset:\,#2\,|\,\expandonce{\@tempa[#3]}}%
+    }%
+  }%
+  \IfNoValueTF{#4}{%
+    \listadd\@additionallist{\relax}%
+  }{%
+    \@additionallisttrue%
+    \listadd\@additionallist{\hspace*{\tabcolsep}\small(#4)}%
+    \in@{\Environment}{#1}%
+    \ifin@ \listadd\@additionallist{\tabularnewline}\fi%
+  }%
+}{%
+%    \end{macrocode}
+% Am Ende der Umgebung wird das übergebenen Hauptargument abermals ausgeführt,
+% was zum Setzen des Indexeintragsendes für die jeweilige Deklaration führt
+% (\cs{@openindexfalse}, siehe \cs{@ProcessOutput}). Dafür werden die Makros für
+% die Angabe obligatorischer und optionaler Parameter lokal umdefiniert.
+%    \begin{macrocode}
+  \ifx\@declarationlist\relax\else%
+    \ClassError{\tudclsname}{\string\printdeclarationlist\space is missing}{%
+      \string\@declarationlist\space is not empty. Did you forget\MessageBreak%
+      to print this list with \string\printdeclarationlist?%
+    }%
+  \fi%
+  \let\PName\@gobble%
+  \let\PBoolean\relax%
+  \let\PSet\relax%
+  \let\PValue\@gobble%
+  \let\Parameter\@gobble%
+  \let\OParameter\@gobble%
+  \let\LParameter\relax%
+  \let\OLParameter\@gobble%
+  \let\PParameter\@gobble%
+  \let\POParameter\@gobble%
+  \vskip-\lastskip%
+  \@declaretrue\@openindexfalse#1\@declarefalse%
+  \pagebreak[0]%
+}
+%    \end{macrocode}
+% Mit dem Befehl \cs{printdeclarationlist} erfolgt die eingentliche Ausgabe 
+% aller Deklarationen. Zweck ist es, mehrere \env{Declaration}-Umgebungen 
+% ineinander verschachteln zu können und eine Ausgabe aller auf einmal zu 
+% erzeugen. Die durch die ggf. nacheinander folgenden Deklarationen wurden in 
+% entsprechenden Listen gesammelt und werden hier jetzt formatiert ausgegben.
+%    \begin{macrocode}
+\NewDocumentCommand\printdeclarationlist{sod()}{%
+  \ifx\@declarationlist\relax\else%
+%    \end{macrocode}
+% Die Sternversion des Befehls erzeugt die Ausgabe ohne Deklarationsindexbefehle.
+%    \begin{macrocode}
+    \IfBooleanTF{#1}{\global\@noindextrue}{\global\@noindexfalse}
+    \@declaretrue\@openindextrue%
+    \ifvmode\else\par\fi%
+    \allowbreak%
+    \addpenalty{\@beginparpenalty}%
+    \addvspace{\baselineskipglue}%
+    \noindent\phantomsection%
+%    \end{macrocode}
+% Die deklarierten Optionen, Umgebungen, Befehle etc. werden in einer umrahmten 
+% Box ausgegeben.
+%    \begin{macrocode}
+    \def\@tempa##1{\ignorespaces##1\tabularnewline}%
+    \begin{tabular}{|l|}%
+      \hline%
+      \forlistloop\@tempa{\@declarationlist}%
+      \hline%
+    \end{tabular}%
+    \@declarefalse%
+%    \end{macrocode}
+% Danach werden ggf. die Voreinstellungen und Zusatzinformationen gesetzt.
+%    \begin{macrocode}
+    \ifboolexpr{bool {@presetlist} or bool {@additionallist}}{%
+      \if@presetlist%
+        \qquad%
+        \texttt{%
+          \begin{tabular}{l}%
+            \forlistloop\@tempa{\@presetlist}%
+          \end{tabular}%
+        }%
+      \fi%
+      \if@additionallist%
+        \begin{tabular}{@{}l@{}}%
+          \forlistloop\@tempa{\@additionallist}%
+        \end{tabular}%
+      \fi%
+    }{}%
+%    \end{macrocode}
+% Das optionale Argument kann für eine Versionsnummer für eine gemachte Änderung
+% genutzt werden.
+%    \begin{macrocode}
+    \IfValueTF{#2}{%
+      \ChangedAt{#2}%
+      \begingroup%
+      \let\marginnote\@gobble%
+      \def\@tempa##1{\ChangedAt{#2}[##1]}%
+      \forlistloop\@tempa{\@declarationlist}%
+      \endgroup%
+    }{}%
+    \global\let\@declarationlist\relax%
+    \global\let\@presetlist\relax%
+    \global\@presetlistfalse%
+    \global\let\@additionallist\relax%
+    \global\@additionallistfalse%
+%    \end{macrocode}
+% Zum Schluss wird das zweite optionale Argument (in runden Klammern) neben der
+% Deklaratiionsbox ausgegeben.
+%    \begin{macrocode}
+    \IfValueTF{#3}{#3}{}%
+    \vskip\baselineskipglue\nobreak%
+    \@afterindentfalse\@afterheading%
+  \fi%
+}
+%    \end{macrocode}
+% \end{macro}^^A \if@additionallist
+% \end{macro}^^A \@additionallist
+% \end{macro}^^A \if@presetlist
+% \end{macro}^^A \@presetlist
+% \end{macro}^^A \@declarationlist
+% \end{macro}^^A \printdeclarationlist
+% \end{environment}^^A Declaration
+% \begin{environment}{tabularm}
+% \begin{macro}{\allcolumnpar}
+% \begin{macro}{\@allcolumnpar}
+% \begin{macro}{\tabularm@box}
+% \begin{macro}{\tabularm@num}
+% \begin{length}{\tabularm@wd}
+% Die Umgebung \env{tabularm} ist eine Erweiterung der \env{tabularm}-Umgebung.
+% In dieser wird die Breite der zu setzenden Tabelle mit Hilfe der Box 
+% \cs{tabularm@box} in \cs{tabularm@wd} gespeichert. Anschließend kann mit dem
+% Befehl \cs{allcolumnpar} eine Zeile über alle Spalten der Tabelle 
+% ausgegeben werden. Dabei ist das zu übergebende Argument die Anzahl der zu 
+% erzeugenden, linksbündigen Spalten.
+%    \begin{macrocode}
+\newsavebox\tabularm@box
+\newlength\tabularm@wd
+\newcommand*\tabularm@num{1}
+\NewEnviron{tabularm}[1]{%
+  \begin{lrbox}{\tabularm@box}%
+    \let\allcolumnpar\@gobble%
+    \begin{tabular}{*{#1}l}\BODY\end{tabular}%
+  \end{lrbox}%
+  \setlength{\tabularm@wd}{\wd\tabularm@box}%
+%%  \addtolength{\tabularm@wd}{-2\tabcolsep}%
+  \def\tabularm@num{#1}%
+  \let\allcolumnpar\@allcolumnpar%
+  \begin{tabular}{*{#1}l}\BODY\end{tabular}%
+}
+\newcommand*\@allcolumnpar[1]{%
+  \multicolumn{\tabularm@num}{@{}p{\tabularm@wd}@{}}{#1}%
+}
+%    \end{macrocode}
+% \end{length}^^A \tabularm@wd
+% \end{macro}^^A \tabularm@box
+% \end{macro}^^A \tabularm@num
+% \end{macro}^^A \@allcolumnpar
+% \end{macro}^^A \allcolumnpar
+% \end{environment}^^A tabularm
+% \begin{macro}{\PName}
+% \begin{macro}{\PBoolean}
+% \begin{macro}{\PSet}
+% \begin{macro}{\Parameter}
+% \begin{macro}{\OParameter}
+% \begin{macro}{\LParameter}
+% \begin{macro}{\OLParameter}
+% \begin{macro}{\PValue}
+% \begin{macro}{\PParameter}
+% \begin{macro}{\POParameter}
+% Diese Befehle dienen zum Auszeichnen von obligatorischen und optionalen 
+% Parametern und Befehlen oder bestimmten Wertzuweisungen.
+%    \begin{macrocode}
+\DeclareRobustCommand*\PName[1]{\texttt{\textit{<#1>}}}
+\DeclareRobustCommand*\PBoolean{\PName{Ein-Aus-Wert}}%
+\DeclareRobustCommand*\PSet{\PName{Einstellung}}%
+\DeclareRobustCommand*\Parameter[1]{\texttt{\{}\PName{#1}\texttt{\}}}
+\DeclareRobustCommand*\OParameter[1]{\texttt{[}\PName{#1}\texttt{]}}
+\DeclareRobustCommand*\LParameter{\texttt{[}\PName{Parameterliste}\texttt{]}}
+\DeclareRobustCommand*\OLParameter[1]{%
+  \texttt{[}\PName{#1}|\PName{Parameterliste}\texttt{]}
+}
+\DeclareRobustCommand*\PValue[1]{\texttt{#1}}
+\DeclareRobustCommand*\PParameter[1]{\texttt{\{#1\}}}
+\DeclareRobustCommand*\POParameter[1]{\texttt{[#1]}}
+%    \end{macrocode}
+% \end{macro}^^A \POParameter
+% \end{macro}^^A \PParameter
+% \end{macro}^^A \PValue
+% \end{macro}^^A \OLParameter
+% \end{macro}^^A \LParameter
+% \end{macro}^^A \OParameter
+% \end{macro}^^A \Parameter
+% \end{macro}^^A \PSet
+% \end{macro}^^A \PBoolean
+% \end{macro}^^A \PName
+% \begin{environment}{code}
+% \begin{environment}{Example}
+% Diese beiden Umgebungen werden für die Erläuterung von bestimmten Aspekten 
+% zusammen mit einem Quelltextbeispiel im Handbuch verwendet. Dabei enthält 
+% \env{Example} einen kurzen, erklärenden Text. In der \env{code}-Umgebung, 
+% welche innerhalb von \env{Example} verwendet wird, folgt der Quelltext.
+%    \begin{macrocode}
+\RequirePackage{listings}
+\lstnewenvironment{code}[1][]{\lstset{style=tudscr,#1}}{}
+\lstdefinestyle{tudscr}{%
+  basicstyle=\let\bfseries@tt\mdseries@tt\ttfamily\setstretch{1},%
+  columns=fullflexible,keepspaces,%
+  aboveskip=.5\baselineskipglue,%
+  belowskip=.5\baselineskipglue,%
+  language=[LaTeX]TeX,%
+  texcl,%
+}
+\newenvironment{Example}{%
+  \labeling{{\usekomafont{disposition}Beispiel:\ }}%
+  \item[{\usekomafont{disposition}Beispiel:\ }]%
+}{%
+  \endlabeling%
+}
+%    \end{macrocode}
+% \end{environment}^^A Example
+% \end{environment}^^A code
+% \begin{option}{ToDo}
+% \begin{macro}{\ToDo}
+% \begin{macro}{\todo@mark}
+% Die Option kann aktiviert werden, um mit \cs{ToDo} definerte, offene Aufgaben 
+% als gerahmte Anmerkung im Text anzuzeigen. Das optionale Argument kann genutzt 
+% werden, um die Randnotiz~-- standardmäßig \glqq ToDo\grqq~-- zu ändern.
+%    \begin{macrocode}
+\newcommand*\todo@mark{}
+\newcommand\ToDo[2][]{}
+\TUD@key{ToDo}[true]{%
+  \TUD@set@ifkey{ToDo}{@tempswa}{#1}%
+  \if@tempswa%
+    \renewcommand\ToDo[2][]{%
+      \def\todo@mark{\ifstr{##1}{}{ToDo}{##1}}%
+      \endgraf\vskip1ex%
+      \hfuzz0.8pt%
+      \noindent\leavevmode\marginnote{\fbox{\todo@mark\strut}}%
+        [\dimexpr-\fboxsep-\fboxrule]%
+      \fbox{\parbox{\dimexpr\textwidth-2\fboxsep}{##2\strut}}%
+      \vskip1ex%
+      \noindent$\!\!$%
+    }%
+  \else%
+    \renewcommand\ToDo[2][]{}%
+  \fi%
+}
+%    \end{macrocode}
+% \end{macro}^^A \todo@mark
+% \end{macro}^^A \ToDo
+% \end{option}^^A ToDo
+% \begin{macro}{\vTUD}
+% \begin{macro}{\vTUDScript}
+% \begin{macro}{\TUDScript}
+% \begin{macro}{\Attention}
+% \begin{macro}{\forum}
+% \begin{macro}{\notudscrartcl}
+% \begin{macro}{\CD}
+% \begin{macro}{\CDs}
+% \begin{macro}{\TUD}
+% \begin{macro}{\TnUD}
+% \begin{macro}{\DDC}
+% \begin{macro}{\Univers}
+% \begin{macro}{\DIN}
+% Diese Befehle stellen regelmäßig im Handbuch genutzte Textbausteine bereit. 
+% Dazu wird der Befehl \cs{xspace} aus dem \pkg{xspace}-Paket genutzt.
+%    \begin{macrocode}
+\RequirePackage{xspace}
+\newcommand*\vTUD{Version~\NoCaseChange{v}1.0\xspace}
+%    \end{macrocode}
+% Der Befehl \cs{vTUDScript} enthält die aktuelle Versionsnummer des 
+% \TUDScript-Bundles.
+%    \begin{macrocode}
+\newcommand*\vTUDScript{}
+\AtBeginDocument{%
+  \def\@tempb#1 #2 #3\relax#4\relax{\def\vTUDScript{#2}}%
+  \edef\@tempa{\TUDVersion}%
+  \expandafter\@tempb\@tempa\relax? ? \relax\relax%
+}
+\DeclareRobustCommand\TUDScript{%
+  \ifdin{TUD-KOMA-SCRIPT}{%
+    \texorpdfstring{%
+      \textsf{T\kern.05em U\kern.05em D\kern.1em-\kern.1em}\KOMAScript%
+    }{TUD-KOMA-Script}%
+  }%
+}
+%    \end{macrocode}
+% \dots und der Rest.
+%    \begin{macrocode}
+\newcommand*\Attention{\marginnote{\tiny\fbox{Achtung!}}}
+\newcommand*\forum{\url{http://latex.wcms-file3.tu-dresden.de/phpBB3/}\xspace}
+\newcommand*\notudscrartcl{%
+  Für die Klasse \Class{tudscrartcl} ist diese Einstellung nicht verfügbar.
+}
+\newcommand*\CD{\foreignlanguage{english}{Corporate Design}\xspace}
+\newcommand*\CDs{\foreignlanguage{english}{Corporate Designs}\xspace}
+\newcommand*\TUD{Technische Universit\"at Dresden\xspace}
+\newcommand*\TnUD{Technischen Universit\"at Dresden\xspace}
+\newcommand*\DDC{\mbox{DRESDEN-concept}\xspace}
+\newcommand*\Univers{\textubn{Univers}\xspace}
+\newcommand*\DIN{\textdbn{DIN~BOLD}\xspace}
+%    \end{macrocode}
+% \end{macro}^^A \DIN
+% \end{macro}^^A \Univers
+% \end{macro}^^A \DDC
+% \end{macro}^^A \TnUD
+% \end{macro}^^A \TUD
+% \end{macro}^^A \CDs
+% \end{macro}^^A \CD
+% \end{macro}^^A \notudscrartcl
+% \end{macro}^^A \forum
+% \end{macro}^^A \Attention
+% \end{macro}^^A \TUDScript
+% \end{macro}^^A \vTUDScript
+% \end{macro}^^A \vTUD
+% Ganz zum Schluss wird der Seitenstil für Teileseiten gesetzt.
+%    \begin{macrocode}
+\renewcommand*\partpagestyle{empty}
+%    \end{macrocode}
+%
+% \Finale
+%
+\endinput

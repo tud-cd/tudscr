@@ -1,0 +1,176 @@
+% \CheckSum{123}
+% \iffalse meta-comment
+% ======================================================================
+%
+% Das Corporate Design der TU Dresden auf Basis der KOMA-Script-Klassen
+%
+% ======================================================================
+% This work may be distributed and/or modified under the conditions of
+% the LaTeX Project Public License, version 1.3c of the license.
+% The latest version of this license is in
+%     http://www.latex-project.org/lppl.txt
+% and version 1.3c or later is part of all distributions of LaTeX
+% version 2005/12/01 or later and of this work.
+% This work has the LPPL maintenance status "author-maintained".
+% The current maintainer and author of this work is Falk Hanisch.
+% ----------------------------------------------------------------------
+% Dieses Werk darf nach den Bedingungen der LaTeX Project Public Lizenz,
+% Version 1.3c, verteilt und/oder veraendert werden.
+% Die neuste Version dieser Lizenz ist
+%     http://www.latex-project.org/lppl.txt
+% und Version 1.3c ist Teil aller Verteilungen von LaTeX
+% Version 2005/12/01 oder spaeter und dieses Werks.
+% Dieses Werk hat den LPPL-Verwaltungs-Status "author-maintained"
+% (allein durch den Autor verwaltet).
+% Der aktuelle Verwalter und Autor dieses Werkes ist Falk Hanisch.
+% ======================================================================
+% \fi
+%
+% \CharacterTable
+%  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
+%   Lower-case    \a\b\c\d\e\f\g\h\i\j\k\l\m\n\o\p\q\r\s\t\u\v\w\x\y\z
+%   Digits        \0\1\2\3\4\5\6\7\8\9
+%   Exclamation   \!     Double quote  \"     Hash (number) \#
+%   Dollar        \$     Percent       \%     Ampersand     \&
+%   Acute accent  \'     Left paren    \(     Right paren   \)
+%   Asterisk      \*     Plus          \+     Comma         \,
+%   Minus         \-     Point         \.     Solidus       \/
+%   Colon         \:     Semicolon     \;     Less than     \<
+%   Equals        \=     Greater than  \>     Question mark \?
+%   Commercial at \@     Left bracket  \[     Backslash     \\
+%   Right bracket \]     Circumflex    \^     Underscore    \_
+%   Grave accent  \`     Left brace    \{     Vertical bar  \|
+%   Right brace   \}     Tilde         \~}
+%
+% \iffalse
+%%% From File: tudscr-twocolfix.dtx
+%<*driver>
+% \fi
+\ProvidesFile{tudscr-twocolfix.dtx}%
+  [2014/04/22 v2.00 TUD-KOMA-Script (twocolfix)]
+% \iffalse
+\documentclass{tudscrdoc}
+\KOMAoptions{parskip=half-}
+\CodelineIndex
+\RecordChanges
+\GetFileInfo{tudscr-twocolfix.dtx}
+\begin{document}
+  \maketitle
+  \DocInput{\filename}
+\end{document}
+%</driver>
+% \fi
+%
+% \selectlanguage{ngerman}
+%
+% \section{Bugfix für den zweispaltigen Satz}
+%
+% Der \LaTeXe-Kernel enthält einen Fehler, der Kapitelüberschriften im
+% zweispaltigen Layout höher setzt, als im einspaltigen. Der Fehler ist zwar
+% schon länger bekannt,\footnote{\url{%
+% http://www.latex-project.org/cgi-bin/ltxbugs2html?pr=latex/3126}} allerdings
+% noch nicht in \pkg{ltxfix2e} übernommen worden. Das Paket \pkg{twocolfix}
+% soll das Problem beheben. Eine Integration dieses Bugfixes in \KOMAScript{}
+% wurde bereits bei Markus Kohm angefragt,\footnote{\url{%
+% http://www.komascript.de/node/1681}} jedoch von ihm bis jetzt nicht weiter
+% verfolgt.
+%
+% \StopEventually{\PrintIndex\PrintChanges}
+%
+% \iffalse
+%<*package&header>
+% \fi
+%
+% \subsection{Identifizierung des Pakets \pkg{twocolfix}}
+%
+%    \begin{macrocode}
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{twocolfix}[\TUDVersion\space package (twocolumn layout bugfix)]
+%    \end{macrocode}
+%
+% \iffalse
+%</package&header>
+%<*package&body>
+% \fi
+%
+% \subsection{Das Paket \pkg{twocolfix}}
+%
+% Neudefinition des fehlerhaften Befehls aus dem \LaTeXe-Kernel. Die
+% \KOMAScript-Klassen selbst definieren \cs{@topnewpage} um und sichern vorher
+% das Original in \cs{scr@topnewpage}. Daher wird der neue Befehl erst temporär
+% definiert. 
+%    \begin{macrocode}
+\long\def \@tempa [#1]{%
+  \@nodocument%
+  \@next\@currbox\@freelist{}{}%
+  \global \setbox\@currbox%
+    \vbox {%
+      \break%
+      \prevdepth\z@%
+      \begingroup%
+      \normalcolor%
+      \hsize\textwidth%
+%    \end{macrocode}
+% Damit der Inhalt des optionale Argumentes mit den gleichen Absatzeinstellungen
+% gesetzt wird, darf der Befehl \cs{@parboxrestore} nicht aufgerufen werden.
+% Alternativ müsste \KOMAScript{} eine Option bereitstellen, mit der sich die
+% Einstellungen für Absätze wiederherstellen lassen.
+%    \begin{macrocode}
+%      \@parboxrestore
+%      \KOMAoptions{parskip=last}
+      \col@number \@ne%
+      \ignorespaces #1\par%
+      \ifdim\parskip>\z@\null\fi%
+      \vskip -\dbltextfloatsep%
+      \endgroup%
+      \ifdim\parskip>\z@\vskip\parskip\else\null\fi%
+      \vskip -\topskip%
+  }%
+  \begingroup%
+    \splitmaxdepth\maxdepth \splittopskip\topskip%
+    \setbox\@tempboxa \vsplit\@currbox to\z@%
+  \endgroup%
+  \ifdim \ht\@currbox>\textheight%
+    \ht\@currbox \textheight%
+  \fi%
+  \global \count\@currbox \tw@%
+  \@tempdima -\ht\@currbox%
+  \advance \@tempdima -\dbltextfloatsep%
+  \global \advance \@colht \@tempdima%
+  \ifx \@dbltoplist \@empty%
+  \else%
+    \@latexerr{Float(s) lost}\@ehb%
+    \let \@dbltoplist \@empty%
+  \fi%
+  \@cons \@dbltoplist \@currbox%
+  \global \@dbltopnum \m@ne%
+  \ifdim \@colht<2.5\baselineskip%
+    \@latex@warning@no@line {Optional argument of \noexpand\twocolumn
+                too tall on page \thepage}%
+    \@emptycol%
+    \if@firstcolumn%
+    \else%
+      \@emptycol%
+    \fi%
+  \else%
+    \global \vsize \@colht%
+    \global \@colroom \@colht%
+    \@floatplacement%
+  \fi%
+}
+%    \end{macrocode}
+% Nachdem der Befehl zuerst temporär definert wurde, wird nun abhängig von der
+% aktiven Klasse der notwendige Befehl mit der neuen Definition überschrieben.
+%    \begin{macrocode}
+\@ifundefined{scr@topnewpage}
+  {\let\@topnewpage\@tempa}
+  {\let\scr@topnewpage\@tempa}
+%    \end{macrocode}
+%
+% \iffalse
+%</package&body>
+% \fi
+%
+% \Finale
+%
+\endinput

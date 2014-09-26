@@ -1,0 +1,241 @@
+% \CheckSum{130}
+% \iffalse meta-comment
+% ======================================================================
+%
+% Das Corporate Design der TU Dresden auf Basis der KOMA-Script-Klassen
+%
+% ======================================================================
+% This work may be distributed and/or modified under the conditions of
+% the LaTeX Project Public License, version 1.3c of the license.
+% The latest version of this license is in
+%     http://www.latex-project.org/lppl.txt
+% and version 1.3c or later is part of all distributions of LaTeX
+% version 2005/12/01 or later and of this work.
+% This work has the LPPL maintenance status "author-maintained".
+% The current maintainer and author of this work is Falk Hanisch.
+% ----------------------------------------------------------------------
+% Dieses Werk darf nach den Bedingungen der LaTeX Project Public Lizenz,
+% Version 1.3c, verteilt und/oder veraendert werden.
+% Die neuste Version dieser Lizenz ist
+%     http://www.latex-project.org/lppl.txt
+% und Version 1.3c ist Teil aller Verteilungen von LaTeX
+% Version 2005/12/01 oder spaeter und dieses Werks.
+% Dieses Werk hat den LPPL-Verwaltungs-Status "author-maintained"
+% (allein durch den Autor verwaltet).
+% Der aktuelle Verwalter und Autor dieses Werkes ist Falk Hanisch.
+% ======================================================================
+% \fi
+%
+% \CharacterTable
+%  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
+%   Lower-case    \a\b\c\d\e\f\g\h\i\j\k\l\m\n\o\p\q\r\s\t\u\v\w\x\y\z
+%   Digits        \0\1\2\3\4\5\6\7\8\9
+%   Exclamation   \!     Double quote  \"     Hash (number) \#
+%   Dollar        \$     Percent       \%     Ampersand     \&
+%   Acute accent  \'     Left paren    \(     Right paren   \)
+%   Asterisk      \*     Plus          \+     Comma         \,
+%   Minus         \-     Point         \.     Solidus       \/
+%   Colon         \:     Semicolon     \;     Less than     \<
+%   Equals        \=     Greater than  \>     Question mark \?
+%   Commercial at \@     Left bracket  \[     Backslash     \\
+%   Right bracket \]     Circumflex    \^     Underscore    \_
+%   Grave accent  \`     Left brace    \{     Vertical bar  \|
+%   Right brace   \}     Tilde         \~}
+%
+% \iffalse
+%%% From File: tudscr-mathswap.dtx
+%<*driver>
+% \fi
+\ProvidesFile{tudscr-mathswap.dtx}%
+  [2014/04/22 v2.00 TUD-KOMA-Script (mathswap)]
+% \iffalse
+\documentclass{tudscrdoc}
+\KOMAoptions{parskip=half-}
+\CodelineIndex
+\RecordChanges
+\GetFileInfo{tudscr-mathswap.dtx}
+\begin{document}
+  \maketitle
+  \DocInput{\filename}
+\end{document}
+%</driver>
+% \fi
+%
+% \selectlanguage{ngerman}
+%
+% \section{Aktive Trennzeichen im mathematischen Satz}
+%
+% Die Verwendung von Dezimal- und Tausendertrennzeichen im mathematischen Satz 
+% sind regional sehr unterschiedlich. In den meisten englischsprachigen Ländern 
+% wird der Punkt als Dezimaltrennzeichen und das Komma zur Zifferngruppierung 
+% verwendet, im restlichen Europa wird dies genau entgegengesetzt praktiziert.
+% Dieses Paket soll dazu dienen, beliebige formatierte Zahlen in ihrer Ausgabe 
+% anzupassen. Dafür werden die Zeichen Punkt (\ .\ ) und Komma (\ ,\ ) als 
+% aktive Zeichen im Mathematikmodus definiert.
+% 
+% Ähnliche Funktionalitäten werden bereits durch die Pakete \pkg{icomma} und 
+% \pkg{ziffer} bereitgestellt. Bei \pkg{icomma} muss jedoch beim
+% Verfassen des Dokumentes durch den Autor beachtet werden, ob das verwendete
+% Komma einem Dezimaltrennzeichen entspricht ($t=1,\!2$) oder aber einem
+% normalen Komma im Mathematiksatz ($z=f(x,y)$), wo ein gewisser Abstand nach
+% dem Komma durchaus gewünscht ist. Das Paket \pkg{ziffer} liefert dafür die
+% gewünschte Funktionalität,%
+% \footnote{kein Leerraum nach Komma, wenn direkt danach eine Ziffer folgt}
+% ist allerdings etwas unflexibel, was den Umgang mit den Trennzeichen anbelangt.
+% Als Alternative zu diesem Paket kann außerdem \pkg{ionumbers} verwendet werden.
+% 
+% Das Paket \pkg{mathswap} sorgt dafür, dass Trennzeichen direkt vor einer 
+% Ziffer erkannt und nach bestimmten Vorgaben ersetzt werden. Sollte sich jedoch 
+% zwischen Trennzeichen und Ziffer Leerraum befinden, wird dieser als solcher
+% auch gesetzt.
+%
+% \StopEventually{\PrintIndex\PrintChanges}
+%
+% \iffalse
+%<*package&header>
+% \fi
+%
+% \subsection{Identifizierung des Pakets \pkg{mathswap}}
+%
+%    \begin{macrocode}
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{mathswap}[%
+  \TUDVersion\space package (swap mathematical separators)%
+]
+%    \end{macrocode}
+%
+% \iffalse
+%</package&header>
+%<*package&body>
+% \fi
+%
+% \subsection{Das Paket \pkg{mathswap}}
+%
+% \begin{macro}{\commaswap}
+% \begin{macro}{\dotswap}
+% \begin{macro}{\@commaswap}
+% \begin{macro}{\@dotswap}
+% Die beiden Befehle \cs{commaswap} und \cs{dotswap} sind die zentrale 
+% Benutzerschnittstelle des Paketes. Das Makro \cs{commaswap} definiert das 
+% Trennzeichen oder den Inhalt, wodurch ein Komma ersetzt werden soll, auf 
+% welches direkt danach eine Ziffer folgt. Normalerweise setzt \LaTeX
+% nach einem Komma im mathematischen Satz zusätzlich einen horizontalen Abstand.
+% Bei der Ersetzung durch \cs{commaswap} entfällt dieser. Die Voreinstellung
+% für \cs{commaswap} ist deshalb auf ein Komma (,) gesetzt.
+% 
+% Mit dem Makro \cs{dotswap} kann definiert werden, wodurch der Punkt im 
+% mathematischen Satz ersetzt werden soll, wenn auf diesen direkt anschließend 
+% eine Ziffer folgt. Da der Punkt im deutschsprachigem Raum zur Gruppierung von
+% Ziffern genutzt wird, ist hierfür standardmäßig ein halbes geschütztes
+% Leerzeichen definiert (\cs{,}).
+%
+% Die mit \cs{commaswap}\marg{Trennzeichen} und \cs{dotswap}\marg{Trennzeichen}
+% definierten Trennzeichen werden in \cs{@commaswap} und \cs{@dotswap} gesichert.
+%    \begin{macrocode}
+\newcommand*\@commaswap{,}
+\newcommand*\commaswap[1]{\gdef\@commaswap{#1}}
+\newcommand*\@dotswap{\,}
+\newcommand*\dotswap[1]{\gdef\@dotswap{#1}}
+%    \end{macrocode}
+% \end{macro}^^A \@dotswap
+% \end{macro}^^A \@commaswap
+% \end{macro}^^A \dotswap
+% \end{macro}^^A \commaswap
+% \begin{macro}{\ms@comma}
+% \begin{macro}{\ms@commachar}
+% \begin{macro}{\ms@dot}
+% \begin{macro}{\ms@dotchar}
+% In den Befehlen \cs{ms@commachar} und \cs{ms@dotchar} wird die originale 
+% Definition von Komma und Punkt im Mathematikmodus gesichert, welche weiterhin 
+% verwendet wird, falls nach diesen nicht direkt eine Ziffer folgt. Mit den 
+% Makros \cs{ms@comma} und \cs{ms@dot} werden die Definitionen von Komma und 
+% Punkt als normale Textzeichen für den mathematischen Satz bereitgehalten. 
+% Anschließend werden beide als aktive Zeichen für den Mathematikmodus gesetzt.
+%    \begin{macrocode}
+\newcommand*\ms@commachar{}
+\newcommand*\ms@dotchar{}
+\AtBeginDocument{%
+  \DeclareMathSymbol{\ms@comma}{\mathord}{letters}{"3B}%
+  \mathchardef\ms@commachar\mathcode\expandafter`,%
+  \mathcode\expandafter`,="8000%
+  \DeclareMathSymbol{\ms@dot}{\mathord}{letters}{"3A}%
+  \mathchardef\ms@dotchar\mathcode\expandafter`.%
+  \mathcode\expandafter`.="8000%
+}
+%    \end{macrocode}
+% \end{macro}^^A \ms@dotchar
+% \end{macro}^^A \ms@dot
+% \end{macro}^^A \ms@commachar
+% \end{macro}^^A \ms@comma
+% \begin{macro}{\ms@token}
+% \begin{macro}{.}
+% \begin{macro}{,}
+% \begin{macro}{\ms@smartcomma}
+% \begin{macro}{\ms@smartdot}
+% Mit \cs{futurelet} wird dem Makro \cs{ms@token} das nachfolgende Zeichen von 
+% Komma bzw. Punkt zugewiesen. Anschließend wird mittels \cs{ms@smartcomma} bzw.
+% \cs{ms@smartdot} geprüft, ob es sich beim Inhalt von \cs{ms@token} um eine 
+% Ziffer handelt. Dazu wird der Befehl \cs{ms@ifnum} verwendet. Sollte dies der 
+% Fall sein, so wird ein Komma innerhalb einer Zahl durch \cs{@commaswap} und
+% ein Punkt entsprechend mit \cs{@dotswap} ersetzt. Sollte direkt nach dem
+% Trennzeichen keine Ziffer folgen, wird für Punkt und Komma die originale 
+% Definition aus \cs{ms@commachar} bzw. \cs{ms@dotchar} verwendet.
+%    \begin{macrocode}
+\newcommand*\ms@token{}
+\begingroup%
+  \catcode`,=\active%
+  \gdef,{\futurelet\ms@token\ms@smartcomma}%
+  \catcode`.=\active%
+  \gdef.{\futurelet\ms@token\ms@smartdot}%
+\endgroup%
+\def\ms@smartcomma{\ms@ifnum{\@commaswap}{\ms@commachar}}
+\def\ms@smartdot{\ms@ifnum{\@dotswap}{\ms@dotchar}}
+%    \end{macrocode}
+% \end{macro}^^A \ms@smartdot
+% \end{macro}^^A \ms@smartcomma
+% \end{macro}^^A .
+% \end{macro}^^A ,
+% \end{macro}^^A \ms@token
+% \begin{macro}{\ms@ifnum}
+% \begin{macro}{\ms@@ifnum}
+% Der Befehl \cs{ms@ifnum} reicht das erste Argument an \cs{ms@@ifnum} weiter,
+% falls der Inhalt von \cs{ms@token} zu einer Ziffer expandiert. Andernfalls
+% wird das zweite Argument ausgeführt.
+%    \begin{macrocode}
+\def\ms@ifnum#1#2{%
+  \ifx\ms@token0\ms@@ifnum{#1}\else%
+  \ifx\ms@token1\ms@@ifnum{#1}\else%
+  \ifx\ms@token2\ms@@ifnum{#1}\else%
+  \ifx\ms@token3\ms@@ifnum{#1}\else%
+  \ifx\ms@token4\ms@@ifnum{#1}\else%
+  \ifx\ms@token5\ms@@ifnum{#1}\else%
+  \ifx\ms@token6\ms@@ifnum{#1}\else%
+  \ifx\ms@token7\ms@@ifnum{#1}\else%
+  \ifx\ms@token8\ms@@ifnum{#1}\else%
+  \ifx\ms@token9\ms@@ifnum{#1}\else%
+  #2%
+  \fi\fi\fi\fi\fi\fi\fi\fi\fi\fi%
+}
+%    \end{macrocode}
+% Wurde eine nachfolgende Ziffer erkannt, so wird die Definition von Punkt und 
+% Komma auf die eines normalen Textzeichens gesetzt und anschließend die mit 
+% \cs{commaswap} bzw. \cs{dotswap} angegebene Ersetzung ausgegeben.
+%    \begin{macrocode}
+\def\ms@@ifnum#1{%
+  \begingroup%
+  \mathcode\expandafter`,=\the\ms@comma%
+  \mathcode\expandafter`.=\the\ms@dot%
+  #1%
+  \endgroup%
+}
+%    \end{macrocode}
+% \end{macro}^^A \ms@@ifnum
+% \end{macro}^^A \ms@ifnum
+%
+% \iffalse
+%</package&body>
+% \fi
+%
+% \Finale
+%
+\endinput

@@ -1,0 +1,555 @@
+% \CheckSum{609}
+% \iffalse meta-comment
+% ======================================================================
+%
+% Das Corporate Design der TU Dresden auf Basis der KOMA-Script-Klassen
+%
+% ======================================================================
+% This work may be distributed and/or modified under the conditions of
+% the LaTeX Project Public License, version 1.3c of the license.
+% The latest version of this license is in
+%     http://www.latex-project.org/lppl.txt
+% and version 1.3c or later is part of all distributions of LaTeX
+% version 2005/12/01 or later and of this work.
+% This work has the LPPL maintenance status "author-maintained".
+% The current maintainer and author of this work is Falk Hanisch.
+% ----------------------------------------------------------------------
+% Dieses Werk darf nach den Bedingungen der LaTeX Project Public Lizenz,
+% Version 1.3c, verteilt und/oder veraendert werden.
+% Die neuste Version dieser Lizenz ist
+%     http://www.latex-project.org/lppl.txt
+% und Version 1.3c ist Teil aller Verteilungen von LaTeX
+% Version 2005/12/01 oder spaeter und dieses Werks.
+% Dieses Werk hat den LPPL-Verwaltungs-Status "author-maintained"
+% (allein durch den Autor verwaltet).
+% Der aktuelle Verwalter und Autor dieses Werkes ist Falk Hanisch.
+% ======================================================================
+% \fi
+%
+% \CharacterTable
+%  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
+%   Lower-case    \a\b\c\d\e\f\g\h\i\j\k\l\m\n\o\p\q\r\s\t\u\v\w\x\y\z
+%   Digits        \0\1\2\3\4\5\6\7\8\9
+%   Exclamation   \!     Double quote  \"     Hash (number) \#
+%   Dollar        \$     Percent       \%     Ampersand     \&
+%   Acute accent  \'     Left paren    \(     Right paren   \)
+%   Asterisk      \*     Plus          \+     Comma         \,
+%   Minus         \-     Point         \.     Solidus       \/
+%   Colon         \:     Semicolon     \;     Less than     \<
+%   Equals        \=     Greater than  \>     Question mark \?
+%   Commercial at \@     Left bracket  \[     Backslash     \\
+%   Right bracket \]     Circumflex    \^     Underscore    \_
+%   Grave accent  \`     Left brace    \{     Vertical bar  \|
+%   Right brace   \}     Tilde         \~}
+%
+% \iffalse
+%%% From File: tudscr-supervisor.dtx
+%<*driver>
+% \fi
+\ProvidesFile{tudscr-supervisor.dtx}%
+  [2014/04/22 v2.00 TUD-KOMA-Script (supervisors)]
+% \iffalse
+\documentclass{tudscrdoc}
+\KOMAoptions{parskip=half-}
+\CodelineIndex
+\RecordChanges
+\GetFileInfo{tudscr-supervisor.dtx}
+\begin{document}
+  \maketitle
+  \DocInput{\filename}
+\end{document}
+%</driver>
+% \fi
+%
+% \selectlanguage{ngerman}
+%
+% \section{Aufgabenstellung}
+%
+% Diese Paket stellt für die \cls{tudscr}-Klassen eine Umgebung für die
+% Aufgabenstellung einer Abschlussarbeit bereit.
+%
+% \StopEventually{\PrintIndex\PrintChanges}
+%
+% \iffalse
+%<*package&header>
+% \fi
+%
+% \subsection{Identifizierung des Pakets \pkg{tudscrsupervisor}}
+%
+%    \begin{macrocode}
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{tudscrsupervisor}[\TUDVersion\space package (supervisors)]
+\ifx\tudcls@name\undefined
+  \PackageError{tudscrsupervisor}{Unsupported class found}{%
+    This package can only be used with a class out of the\MessageBreak%
+    tudscr bundle (tudscrartcl, tudscrreprt, tudscrbook)%
+  }
+  \endinput
+\fi
+%    \end{macrocode}
+%
+% \iffalse
+%</package&header>
+%<*package&body>
+% \fi
+%
+% \subsection{Das Paket \pkg{tudscrsupervisor}}
+%
+% \begin{environment}{task}
+% Die Umgebung für die Aufgabenstellung nutzt die \env{tudpage}-Umgebung. Sie
+% wird auf einer neuen (rechten) Seite gesetzt. Es wird zu Beginn eine Tabelle 
+% mit Informationen zum Autor gesetzt. Zum Abschluss werden Betreuer,
+% Hochschullehrer und ggf. Vorsitzender des Prüfungsausschusses ausgegeben.
+%    \begin{macrocode}
+\newenvironment{task}[1][]{%
+%    \end{macrocode}
+% Die \env{tudpage}-Umgebung wird geöffnet. Mit dem Parameter \opt{headline} 
+% kann die standardmäßige Überschrift überschrieben werden. Die Aufgabenstellung 
+% wird normal mit DDC-Logo im Fuß gesetzt.
+%    \begin{macrocode}
+  \cleardoubleoddpage%
+  \def\@headline{}%
+  \TUD@parameter{tudpage}{%
+    \TUD@parameter@define{headline}{\def\@headline{##1}}%
+    \TUD@parameter@let{line}{headline}%
+    \TUD@parameter@sethandler{\def\@headline{##1}}%
+    \TUD@parameter@set{foot=ddc}%
+  }%
+  \tudpage[#1]%
+%    \end{macrocode}
+% Zu Beginn wird als erstes die Überschrift und~-- die entsprechende Option
+% vorausgesetzt~-- im PDF einen Lesezeichen- oder auch Outline-Eintrag gesetzt.
+%    \begin{macrocode}
+  \tudbookmark{\taskname}{task}%
+  \subsection*{%
+    \ifx\@headline\@empty%
+      \taskname\space%
+      \ifx\tasktext\@empty\else\ifx\@thesis\@empty\else%
+        \ignorespaces\tasktext\space\trim@spaces{\@thesis}%
+      \fi\fi%
+    \else\@headline\fi%
+  }%
+  \tud@author@table%
+}{%
+%    \end{macrocode}
+% Da auch Betreuer durch den Befehl \cs{and} getrennt werden, wird dieser für
+% die korrekte Ausgabe umdefiniert. Anschließend folgt die Ausgabe in einer
+% Tabelle, die Spalte der Bezeichner entspricht der aus dem oberen Teil.
+%    \begin{macrocode}
+  \def\and{%
+    \tabularnewline%
+    \ifx\supervisorothername\@empty\else\supervisorothername\@titledelim\fi%
+      & \def\and{\tabularnewline &}%
+  }%
+  \vskip-\lastskip%
+  \ifdim\parskip>\z@\vskip\parskip\else\vskip\topsep\fi\medskip%
+  \begingroup%
+  \setparsizes{\z@}{\z@}{\z@\@plus 1fil}\par@updaterelative%
+  \begin{tabular}{@{}p{\tud@dim@table}l@{}}%
+    \supervisorname\@titledelim &
+      \@supervisor\tabularnewline[\smallskipamount]%
+    \issuedatetext\@titledelim & \@issuedate\tabularnewline%
+    \duedatetext\@titledelim & \@duedate\tabularnewline%
+  \end{tabular}%
+%    \end{macrocode}
+% Darunter wird etwas Platz für die Unterschriften von betreuendem Professor
+% und ggf. Prüfungsausschussvorsitzenden gehalten. Auch diese beiden werden
+% in einer Tabelle ausgegeben. Die \env{tudpage}-Umgebung wird beendet, und
+% eine neue (rechte) Seite geöffnet.
+%    \begin{macrocode}
+  \vskip 15mm plus 10mm minus 10mm%
+  \ifx\@chairman\@empty\else%
+    \begin{tabular}{@{}l@{}}%
+      \@chairman\tabularnewline%
+      \chairmanname\tabularnewline%
+    \end{tabular}%
+    \hfill%
+  \fi%
+  \ifx\@professor\@empty\else%
+    \begin{tabular}{@{}l@{}}%
+      \@professor\tabularnewline%
+      \professorname\tabularnewline%
+    \end{tabular}%
+  \fi%
+  \par%
+  \endgroup%
+  \endtudpage%
+  \cleardoublepage%
+}
+%    \end{macrocode}
+% \end{environment}^^A task
+% \begin{macro}{\taskform}
+% Dies soll die Standardform einer Aufgabenstellung sein. Im ersten Argument
+% werden kurz die Ziele motiviert und erläutert, im zweiten Argument werden im
+% besten Fall die Schwerpunkte in einer \env{itemize}-Umgebung aufgeschlüsselt.
+%    \begin{macrocode}
+\newcommand{\taskform}[3][]{%
+  \begin{task}[#1]
+    \vskip-\lastskip%
+    \ifxblank{#2}{}{%
+      \vspace*{-\parskip}%
+      \minisec{\objectivesname}%
+      #2%
+    }%
+    \ifxblank{#3}{}{%
+      \vspace*{-\parskip}%
+      \minisec{\focusname}%
+      \begin{itemize}\tud@RaggedRight%
+      #3
+      \end{itemize}%
+    }%
+  \end{task}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \taskform
+% \begin{environment}{evaluation}
+% Die Umgebung für das Gutachten nutzt ebenfalls die \env{tudpage}-Umgebung. Sie
+% wird auf einer neuen (rechten) Seite gesetzt. Es wird zu Beginn eine Tabelle 
+% mit Informationen zum Autor gesetzt. Zum Abschluss werden Ort, Datum und 
+% Gutachter ausgegeben.
+%    \begin{macrocode}
+\newenvironment{evaluation}[1][]{%
+%    \end{macrocode}
+% Die \env{tudpage}-Umgebung wird geöffnet.  Mit dem Parameter \opt{headline} 
+% kann die standardmäßige Überschrift überschrieben werden. Das Gutachten wird
+% normalerweise mit DDC-Logo im Fuß gesetzt. Zu Beginn wird als erstes die
+% Überschrift und~-- die entsprechende Option vorausgesetzt~-- im PDF einen
+% Lesezeichen- oder auch Outline-Eintrag gesetzt.
+%    \begin{macrocode}
+  \cleardoubleoddpage%
+  \def\@headline{}%
+  \TUD@parameter{tudpage}{%
+    \TUD@parameter@define{headline}{\def\@headline{##1}}%
+    \TUD@parameter@let{line}{headline}%
+    \TUD@parameter@define{grade}{\def\@grade{##1}}%
+    \TUD@parameter@sethandler{\def\@headline{##1}}%
+    \TUD@parameter@set{foot=ddc}%
+  }%
+  \tudpage[#1]%
+  \tudbookmark{\evaluationname}{evaluation}%
+  \subsection*{%
+    \ifx\@headline\@empty%
+      \evaluationname\space%
+      \ifx\evaluationtext\@empty\else\ifx\@thesis\@empty\else%
+        \ignorespaces\evaluationtext\space\trim@spaces{\@thesis}%
+      \fi\fi%
+    \else\@headline\fi%
+  }%
+  \tud@author@table%
+}{%
+%    \end{macrocode}
+% Die gegebenen Note sowie Ort und Datum werden am Ende ggf. ausgegeben.
+%    \begin{macrocode}
+  \vskip-\lastskip%
+  \ifdim\parskip>\z@\vskip\parskip\else\vskip\topsep\fi%
+  \medskip%
+  \ifx\@grade\@empty\else%
+    \noindent\gradetext%
+    \vskip\bigskipamount%
+  \fi%
+  \ifx\@date\@empty\else%
+    \noindent%
+    \ifx\@place\@empty\else\@place,~\fi\@date%
+    \vskip\bigskipamount%
+  \fi%
+  \bigskip\bigskip\noindent%
+%    \end{macrocode}
+% Der Befehl \cs{and} wird für einen möglichen Zweitgutachter angepasst. Das 
+% Hilfsmakro \cs{@tempa} dient zur Übernahme des richtigen Bezeichners für
+% Erst- bzw. Zweitgutachter. Sollten mit \cs{referee} keine Gutachter angegeben
+% sein, so werden die angegeben Betreuer verwendet.
+%    \begin{macrocode}
+  \ifx\@referee\@empty\let\@referee\@supervisor\fi%
+  \let\@tempa\refereename%
+  \def\and{%
+    \tabularnewline%
+    \@tempa%
+    \endtabular%
+    \hfill%
+    \tabular{@{}l@{}}%
+    \global\let\@tempa\refereeothername%
+  }%
+  \begin{tabular}{@{}l@{}}%
+  \@referee%
+  \tabularnewline%
+  \@tempa%
+  \end{tabular}%
+  \hfill\null%
+  \endtudpage%
+  \cleardoublepage%
+}
+%    \end{macrocode}
+% \end{environment}^^A evaluation
+% \begin{macro}{\evaluationform}
+% Dies soll die Standardform eines Gutachtens sein. Im ersten Argument wird kurz 
+% die Aufgabenstellung zusammengefasst, im zweiten Argument wird der Inhalt und 
+% die Struktur der Arbeit kurz beschrieben. Im dritten Argument erfolgt die
+% Bewertung, das letzte Argument beinhaltet die Note.
+%    \begin{macrocode}
+\newcommand{\evaluationform}[5][]{%
+  \begin{evaluation}[#1]
+    \vskip-\lastskip%
+    \ifxblank{#2}{}{%
+      \vspace*{-\parskip}%
+      \minisec{\taskname}%
+      #2%
+    }%
+    \ifxblank{#3}{}{%
+      \vspace*{-\parskip}%
+      \minisec{\contentname}%
+      #3%
+    }%
+    \ifxblank{#4}{}{%
+      \vspace*{-\parskip}%
+      \minisec{\assessmentname}%
+      #4%
+    }%
+    \ifxblank{#5}{}{\def\@grade{#5}}%
+  \end{evaluation}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \evaluationform
+% \begin{macro}{\tud@author@table}
+% \begin{length}{\tud@dim@table}
+% Der Befehl \cs{tud@author@table} dient zur Ausgabe einer Tabelle mit
+% Informationen zum Autor/zu den Autoren\footnote{Matrikelnummer, Jahrgang,
+% Studiengang etc.} für Aufgabenstellung und Gutachten.
+%    \begin{macrocode}
+\newlength{\tud@dim@table}%
+\newcommand*\tud@author@table{%
+  \begingroup%
+  \let\thanks\@gobble%
+  \let\footnote\@gobble%
+%    \end{macrocode}
+% Der Befehl \cs{tud@split@@author} ist original aus den \cls{tudscr}-Klassen
+% und dient zur formatierten Ausgabe von mehreren Autoren, welche durch
+% \cs{author}\marg{Autor(en)} angegeben und mit \cs{and} getrennt wurden.
+% Er wird hier auf die Ausgabe der Autoren mit den jeweils zusätzlich gegebenen
+% Informationen in einer Tabelle angepasst.
+%    \begin{macrocode}
+  \renewcommand*\tud@split@@author[2]{%
+%    \end{macrocode}
+% Weil alle Autoren in einer Tabelle gesetzt werden wird geprüft, welche Felder
+% individuell via \cs{author} angegeben wurden. Damit die Tabellen die gleiche
+% Höhe haben, auch wenn für einen Autor ein Feld ausgelassen wurde, werden alle
+% insgesamt angegebenen Felder mit via \cs{tud@multiple@setfields} mit \cs{null}
+% initialisiert. Anschließend werden für den aktuellen Autor angegebenen Felder
+% gesetzt.
+%    \begin{macrocode}
+    \tud@multiple@setfields{\null}{##1}%
+%    \end{macrocode}
+% Nach viel Geplänkel kommt nun die eigentliche Tabelle mit ggf. zusätzlichen
+% Informationen zum Autor.
+%    \begin{macrocode}
+    \begin{tabular}{l@{}}%
+      \ifx\@course\@empty\else\@course\tabularnewline\fi%
+      \ifx\@branch\@empty\else\@branch\tabularnewline\fi%
+      \textsf{\textbf{\ignorespaces##1}}\tabularnewline%
+      \ifx\@matriculationnumber\@empty\else%
+        \@matriculationnumber\tabularnewline%
+      \fi%
+      \ifx\@matriculationyear\@empty\else%
+        \@matriculationyear\tabularnewline%
+      \fi%
+    \end{tabular}%
+%    \end{macrocode}
+% Sollte ein weiterer Autor folgen, wird \cs{tabcolsep} zusätzlich eingefügt,
+% um den Standardabstand bei Tabellen zu sichern, da die Tabelle vorher ohne
+% rechten \glqq Rand\grqq{} gesetzt wurde, um die letzte Tabelle ggf. genau bis
+% zum rechten Rand setzen zu können.
+%    \begin{macrocode}
+    \tud@multiple@@@split{##2}{~~\hspace{\tabcolsep}}
+  }%
+%    \end{macrocode}
+% Zu Beginn wird eine Tabelle mit den Bezeichnern aller genutzten Feldern
+% ausgegeben. Danach folgen alle Autoren. Damit ein einheitliches Layout
+% entsteht und auch die Tabellen am Ende der Umgebung in der ersten Spalte die
+% gleiche Breite haben wie im oberen Teil, ist die Bestimmung einer festen
+% Spaltenbreite notwendig, die so breit wie der längste Bezeichner ist.
+% Dafür muss festgestellt werden, welche optionalen Felder denn nun überhaupt
+% genutzt werden. Dafür wird \cs{tud@multiple@setfields\{\cs{null}\}}\{\}
+% aufgerufen, um alle potentiellen Felder erkennen zu können.
+%    \begin{macrocode}
+  \global\setlength{\tud@dim@table}{2em}%
+  \gdef\tud@multiple@field{@@author}%
+  \tud@multiple@setfields{\null}{}%
+%    \end{macrocode}
+% Anschließend werden die Bezeichner sowohl der obligatorischen als auch der
+% genutzten, optionalen Felder expandiert. Anschließend wir mit dieser Liste
+% der längste bestimmt und in \cs{tud@dim@table} gespeichert.
+%    \begin{macrocode}
+  \edef\@tempa{%
+    \authorname,\titlename,\supervisorname,\supervisorothername,%
+    \issuedatetext,\duedatetext,%
+    \expandafter\ifx\@matriculationnumber\@empty\else%
+      \matriculationnumbername%
+    \fi,%
+    \expandafter\ifx\@matriculationyear\@empty\else%
+      \matriculationyearname%
+    \fi,%
+    \expandafter\ifx\@course\@empty\else\coursename\fi,%
+    \expandafter\ifx\@branch\@empty\else\branchname\fi,%
+  }%
+  \@for\@tempb:=\@tempa\do{%
+    \settowidth{\@tempdima}{\@tempb\@titledelim}%
+    \ifdim\@tempdima>\tud@dim@table\relax%
+      \global\setlength{\tud@dim@table}{\@tempdima}%
+    \fi%
+  }%
+%    \end{macrocode}
+% Die Tabelle mit den benötigten Bezeichnern. Damit diese bis an den Seiterand
+% ohne Warnungen gesetzt werden können, wird die Auszeichnung von Absatzenden
+% aufgehoben.
+%    \begin{macrocode}
+  \begingroup%
+  \setparsizes{\z@}{\z@}{\z@\@plus 1fil}\par@updaterelative%
+  \begin{tabular}{@{}p{\tud@dim@table}}%
+    \ifx\@course\@empty\else%
+      \coursename\@titledelim\tabularnewline%
+    \fi%
+    \ifx\@branch\@empty\else%
+      \branchname\@titledelim\tabularnewline%
+    \fi%
+    \authorname\@titledelim\tabularnewline%
+    \ifx\@matriculationnumber\@empty\else%
+      \matriculationnumbername\@titledelim\tabularnewline%
+    \fi%
+    \ifx\@matriculationyear\@empty\else%
+      \matriculationyearname\@titledelim\tabularnewline%
+    \fi%
+  \end{tabular}%
+%    \end{macrocode}
+% Folgend werden die Autoren wie schon bei \cs{maketitle} mit den gleichen
+% Makros gesplittet und separat ausgegeben.
+%    \begin{macrocode}
+  \tud@multiple@split{@@author}%
+%    \end{macrocode}
+% Nach den Autoren wird der Titel über die komplette Textbreite ausgegeben.
+% Danach wird der Inhalt der Aufgabenstellung ausgegeben.
+%    \begin{macrocode}
+  \vskip\smallskipamount%
+  \begin{tabular}{@{}p{\tud@dim@table}%
+    p{\dimexpr\textwidth-\tud@dim@table-2\tabcolsep\relax}@{}}%
+    \titlename\@titledelim & \tud@RaggedRight\textsf{\textbf{\@@title}}%
+  \end{tabular}%
+  \par%
+  \endgroup%
+  \ifdim\parskip>\z@\else\vskip\topsep\fi%
+  \endgroup%
+  \noindent\ignorespaces%
+}
+%    \end{macrocode}
+% \end{length}^^A \tud@dim@table
+% \end{macro}^^A \tud@author@table
+% \begin{macro}{\tud@author@checkfields}
+% Der Befehl \cs{tud@author@checkfields} wird um die hier im Paket zusätzlich
+% definierten Felder erweitert.
+%    \begin{macrocode}
+\patchcmd{\tud@split@@author@list}{\authormore}%
+  {\authormore,\branch,\course,\discipline}{}{}
+%    \end{macrocode}
+% \end{macro}^^A \tud@author@checkfields
+% \begin{environment}{notice}
+% Die Umgebung für Aushänge nutzt ebenfalls die \env{tudpage}-Umgebung. Sie wird
+% auf einer neuen (rechten) Seite gesetzt. Die Überschrift wird in der 
+% Voreinstellung auf den sprachabhängigen Bezeichner \cs{noticename} gesetzt, 
+% welcher allerdings mit dem Parameter \opt{headline} überschrieben werden kann.
+%    \begin{macrocode}
+\newenvironment{notice}[1][]{%
+  \cleardoubleoddpage%
+  \def\@headline{\noticename}%
+  \TUD@parameter{tudpage}{%
+    \TUD@parameter@define{headline}{\def\@headline{##1}}%
+    \TUD@parameter@let{line}{headline}%
+    \TUD@parameter@sethandler{\def\@headline{##1}}%
+    \TUD@parameter@set{foot=ddc}%
+  }%
+  \tudpage[#1]%
+  \tudbookmark{\noticename}{notice}%
+%    \end{macrocode}
+% Es wird zu Beginn das angegebene Datum oben auf der rechten Seite ausgegeben. 
+% Anschließend wird die Überschrift und der gegebene Titel gesetzt. 
+%    \begin{macrocode}
+  \ifx\@date\@empty\else%
+    \begingroup%
+      \vspace*{-\parskip}%
+      \vspace*{-2\baselineskip}%
+      \raggedleft
+      \@date\par%
+      \vspace*{-\parskip}%
+    \endgroup%
+  \fi%
+  \ifx\@headline\@empty\else%
+    \section*{\@headline}%
+  \fi%
+}{%
+%    \end{macrocode}
+% Wenn keine Kontaktperson direkt angegeben wurden, werden die Informationen der
+% angegeben Betreuer verwendet. Wenn eine Personenangabe gefunden wurde, werden 
+% die Kontaktdaten ausgegeben.
+%    \begin{macrocode}
+  \ifx\@contact\@empty\let\@contact\@supervisor\fi%
+  \ifx\@contact\@empty\else%
+    \vskip-\lastskip%
+    \ifdim\parskip>\z@\vskip\parskip\else\vskip\topsep\fi%
+    \subsection*{\contactname}%
+    \noindent\tud@multiple@split{@contact}\hfill\null%
+  \fi%
+  \endtudpage%
+  \cleardoublepage%
+}
+%    \end{macrocode}
+% \end{environment}^^A notice
+% \begin{macro}{\noticeform}
+% Dies soll die Standardform eines Aushangs für eine Abschlussarbeit sein. Im
+% ersten Argument wird kurz der Inhalt zusammengefasst, im zweiten Argument 
+% werden die Arbeitsschwerpunkte beschrieben.
+%    \begin{macrocode}
+\newcommand{\noticeform}[3][]{%
+  \begin{notice}[#1]
+    \vskip-\lastskip%
+    \ifxblank{#2}{}{%
+      \ifx\@@title\@empty\else%
+        \vspace*{-\parskip}%
+        \minisec{\expandonce{\@@title}}%
+      \fi%
+      #2%
+    }%
+    \ifxblank{#3}{}{%
+      \vspace*{-\parskip}%
+      \minisec{\focusname}%
+      \begin{itemize}\tud@RaggedRight%
+      #3
+      \end{itemize}%
+    }%
+  \end{notice}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \noticeform
+% \begin{macro}{\tud@split@contact}
+% \begin{macro}{\tud@split@contact@list}
+% Mit diesem Befehl werden für einen Aushang die Daten für einen oder mehrere 
+% Kontaktpersonen ausgegeben.
+%    \begin{macrocode}
+\newcommand*\tud@split@contact[2]{%
+  \tud@multiple@setfields{\null}{#1}%
+  \begin{tabular}{@{}l@{}}%
+    \ignorespaces#1\tabularnewline%
+    \ifx\@office\@empty\else\@office\tabularnewline\fi%
+    \ifx\@phone\@empty\else\@phone\tabularnewline\fi%
+    \ifx\@email\@empty\else\@email\tabularnewline\fi%
+  \end{tabular}%
+  \tud@multiple@@@split{#2}{\hfill}%
+}
+\newcommand*\tud@split@contact@list{\office,\phone,\email}
+%    \end{macrocode}
+% \end{macro}^^A \tud@split@contact@list
+% \end{macro}^^A \tud@split@sontact
+%
+% \iffalse
+%</package&body>
+% \fi
+%
+% \Finale
+%
+\endinput
