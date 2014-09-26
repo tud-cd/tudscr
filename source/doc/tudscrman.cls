@@ -1090,6 +1090,17 @@
   F\"ur die Klasse \Class{tudscrartcl} ist diese Einstellung nicht verf\"ugbar.
 }
 \newcommand*\hrfn[2]{\href{#1}{#2}\footnote{\scriptsize\url{#1}}}
+\NewDocumentCommand\scrguide{s}{%
+  \def\@tempc{%
+    http://mirrors.ctan.org/macros/latex/contrib/koma-script/doc/scrguide.pdf%
+  }%
+  \IfBooleanTF{#1}{%
+    \href{\@tempc}{\File{scrguide.pdf}}%
+  }{%
+    \hrfn{\@tempc}{\File{scrguide.pdf}}%
+  }%
+  \xspace%
+}
 \newlength{\tempdim}
 \newcommand*\CD{Corporate Design\xspace}
 \newcommand*\CDs{Corporate Designs\xspace}
