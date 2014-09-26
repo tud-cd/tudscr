@@ -1044,6 +1044,81 @@ der Dokumentation nachgelesen werden.
 \ToDo[imp,nxt]{%
   Titelseite und Cover auf Drittlogos und dergleichen mit scrlayer erweitern.
 }[v2.x]
+
+
+\subsection{Die Umschlagseite}
+\label{sec:cover}%
+\index{Umschlagseite|!}%
+\index{Titel!Umschlagseite}\index{Layout!Umschlagseite}%
+%
+Zusätzlich zum Titel selbst~-- bestehend aus möglichem Schmutztitel, der 
+eigentlichen Titelseite und der nachgelagerten Elementen, welche alle mit dem 
+Befehl \Macro{maketitle} ausgegeben werden~-- kann eine Umschlagseite erzeugt 
+werden. Die Titelseite selbst gehört immer zum Buchblock und wird daher im 
+gleichen Satzspiegel gesetzt. Dem entgegen steht die Umschlagseite, welche 
+zumeist in einem separaten Layout erscheint. 
+\ChangedAt{v2.02}
+Für die Felder der Umschlagseite im \CD lässt sich~-- wie auch für den Titel~-- 
+die verwendete Schrift anpassen. Es werden sowohl die neuen Schriftelemente 
+\Font{titlepage} und \Font{thesis} als auch die durch \KOMAScript{} definierten 
+\Font{titlehead}, \Font{subject}, \Font{title}, \Font{subtitle}, \Font{author}, 
+und \Font{publishers} unterstützt.
+
+Eine Umschlagseite wird zumeist für gebundene Abschlussarbeiten verlangt, um 
+beispielsweise mit diesem Element einen Prägedruck auf dem Buchdeckel 
+durchzuführen. Hierfür ist es sinnvoll, mit \Option{cdcover}[true] die farbige 
+Ausprägung der Umschlagseite zu deaktivieren, falls diese für das restliche 
+Dokument aktiv ist (\Option{cd}[color]).
+\begin{Declaration}[%
+  v2.02!Umschlagseite für \Option*{cdcover}[false] hinzugefügt,%
+  v2.02!Unterstützung der Schriftelemente \Font*{titlehead}{,} 
+    \Font*{subject}{,} \Font*{title}{,} \Font*{subtitle}{,} \Font*{author}{,} 
+    \Font*{publishers} und \Font*{thesis}%
+]{\Macro{makecover}\OLParameter{Seitenzahl}}
+\begin{Declaration}{\Key{\Macro{makecover}}{cdlayout}[\PBoolean]}
+\begin{Declaration}[v2.02]{%
+  \Key{\Macro{makecover}}{pagenumber}[\PName{Seitenzahl}]
+}
+\begin{Declaration}{\Key{\Macro{makecover}}{cdcover}[\PSet]}
+\begin{Declaration}{\Key{\Macro{makecover}}{cdfont}[\PSet]}
+\begin{Declaration}{\Key{\Macro{makecover}}{widehead}[\PBoolean]}
+\printdeclarationlist%
+%
+Wird \Option{cdcover}[true] gewählt, so wird die Umschlagseite im \CD der 
+\TnUD gesetzt. Auf dieser werden der Titel des Dokumentes, die Typisierung 
+durch \Macro{thesis} und/oder \Macro{subject} sowie der Autor oder respektive 
+die Autoren und gegebenenfalls der Verlag ausgegeben.
+\ChangedAt{v2.02}
+Für die Einstellung \Option{cdcover}[false] wird lediglich der normale 
+\KOMAScript"=Titel{} als separate Umschlagseite ausgegeben. 
+
+Der Satzspiegel der Umschlagseite kann mit \Key*{\Macro{makecover}}{cdlayout} 
+im optionalen Argument geändert werden. Wird dieser aktiviert, so erscheint das 
+Cover~-- unabhängig von der Option \Option{geometry}~-- im asymmetrischen 
+Satzspiegel des \CDs. Andernfalls wird die Umschlagseite wie das restliche 
+Dokument im Buchblock gesetzt. In diesem Fall können die Seitenränder mit den 
+Befehlen \Macro{coverpagetopmargin}, \Macro{coverpageleftmargin}, 
+\Macro{coverpagerightmargin} sowie \Macro{coverpagebottommargin} eingestellt 
+werden. Mehr dazu ist im \KOMAScript"=Anwenderhandbuch zu finden.
+
+Die anderen Parameter entsprechen in ihrem Verhalten prinzipiell den 
+gleichnamigen Klassenoptionen.%
+\footnote{%
+  Dies betrifft die Optionen \Option'{cdcover}, \Option'{cdfont} sowie 
+  \Option'{widehead}. Das Verhalten sowie die jeweils gültigen Wertzuweisungen 
+  können bei den Beschreibungen der jeweiligen Option in den entsprechenden 
+  Abschnitten nachgelesen werden.
+}
+Die Einstellungen dieser Parameter wirken sich nur lokal und einzig auf die 
+Umschlagseite aus.
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+
+
 \subsection{Der Titel}
 \label{sec:title}
 \index{Titel|!(}
@@ -1072,7 +1147,13 @@ standardmäßig in \DIN sondern in \textubn{Univers~65~Bold} ausgegeben wird.
     \Font*{subject}{,} \Font*{title}{,} \Font*{subtitle}{,} \Font*{author}{,} 
     \Font*{date}{,} \Font*{publishers}{,} \Font*{dedication}{,} 
     \Font*{titlepage} und \Font*{thesis}%
-]{\Macro{maketitle}\OParameter{Seitenzahl}}
+]{\Macro{maketitle}\OLParameter{Seitenzahl}}
+\begin{Declaration}[v2.02]{%
+  \Key{\Macro{maketitle}}{pagenumber}[\PName{Seitenzahl}]
+}
+\begin{Declaration}[v2.02]{\Key{\Macro{maketitle}}{cdcover}[\PSet]}
+\begin{Declaration}[v2.02]{\Key{\Macro{maketitle}}{cdfont}[\PSet]}
+\begin{Declaration}[v2.02]{\Key{\Macro{maketitle}}{widehead}[\PBoolean]}
 \begin{Declaration}{%
   \Macro{maketitleonecolumn}\OParameter{Seitenzahl}\Parameter{Einspaltentext}%
 }
@@ -1111,6 +1192,10 @@ Wird im zweispaltigen Satz (\Option{twocolumn}) ein Titelkopf verwendet
 werden, so wird der verfügbare Platz für die Spalten falsch berechnet. Abhilfe 
 schafft hier das Paket \Package{afterpage}, welches einfach in der Präambel 
 geladen werden muss.
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
 \end{Declaration}
 \end{Declaration}
 
@@ -1423,72 +1508,6 @@ beliebig anpassen. Voreingestellt ist ein Doppelpunkt gefolgt von einem
 Leerzeichen (:\Macro*{nobreakspace}).
 \end{Declaration}
 \index{Titel|!)}
-
-\subsection{Die Umschlagseite}
-\label{sec:cover}%
-\index{Umschlagseite|!}%
-\index{Titel!Umschlagseite}\index{Layout!Umschlagseite}%
-%
-Zusätzlich zum Titel selbst~-- bestehend aus möglichem Schmutztitel, der 
-eigentlichen Titelseite und der nachgelagerten Elementen, welche alle mit dem 
-Befehl \Macro{maketitle} ausgegeben werden~-- kann eine Umschlagseite erzeugt 
-werden. Der Titel selbst gehört immer zum Buchblock und wird daher im gleichen 
-Satzspiegel gesetzt. Dem entgegen steht das Cover, welches zumeist in einem 
-separaten Layout erscheint. Für die Umschlagseite werden fast alle Felder und 
-Schriftelemente unterstützt, welche auch für den Titel im \CD zur Verfügung 
-stehen.
-
-Eine Umschlagseite wird zumeist für gebundene Abschlussarbeiten verlangt, um 
-beispielsweise mit diesem Element einen Prägedruck auf dem Buchdeckel 
-durchzuführen. Hierfür ist es sinnvoll, mit \Option{cdcover}[true] die farbige 
-Ausprägung der Umschlagseite zu deaktivieren, falls diese für das restliche 
-Dokument aktiv ist (\Option{cd}[color]).
-\begin{Declaration}[%
-  v2.02!Umschlagseite für \Option*{cdcover}[false] hinzugefügt,%
-  v2.02!Unterstützung der Schriftelemente \Font*{titlehead}{,} 
-    \Font*{subject}{,} \Font*{title}{,} \Font*{subtitle}{,} \Font*{author}{,} 
-    \Font*{publishers} und \Font*{thesis}%
-]{\Macro{makecover}\OLParameter{cdlayout}}
-\begin{Declaration}{\Key{\Macro{makecover}}{cdlayout}[\PBoolean]}
-\begin{Declaration}[v2.02]{\Key{\Macro{makecover}}{pagenumber}[\PBoolean]}
-\begin{Declaration}{\Key{\Macro{makecover}}{cdcover}[\PSet]}
-\begin{Declaration}{\Key{\Macro{makecover}}{cdfont}[\PSet]}
-\begin{Declaration}{\Key{\Macro{makecover}}{widehead}[\PBoolean]}
-\printdeclarationlist%
-%
-Wird \Option{cdcover}[true] gewählt, so wird die Umschlagseite im \CD der 
-\TnUD gesetzt. Auf dieser werden der Titel des Dokumentes, die Typisierung 
-durch \Macro{thesis} und/oder \Macro{subject} sowie der Autor oder respektive 
-die Autoren und gegebenenfalls der Verlag ausgegeben.
-\ChangedAt{v2.02}
-Für die Einstellung \Option{cdcover}[false] wird lediglich der normale 
-\KOMAScript"=Titel{} als separate Umschlagseite ausgegeben. 
-
-Der Satzspiegel der Umschlagseite kann mit \Key*{\Macro{makecover}}{cdlayout} 
-im optionalen Argument geändert werden. Wird dieser aktiviert, so erscheint das 
-Cover~-- unabhängig von der Option \Option{geometry}~-- im asymmetrischen 
-Satzspiegel des \CDs. Andernfalls wird die Umschlagseite wie das restliche 
-Dokument im Buchblock gesetzt. In diesem Fall können die Seitenränder mit den 
-Befehlen \Macro{coverpagetopmargin}, \Macro{coverpageleftmargin}, 
-\Macro{coverpagerightmargin} sowie \Macro{coverpagebottommargin} eingestellt 
-werden. Mehr dazu ist im \KOMAScript"=Anwenderhandbuch zu finden.
-
-Die anderen Parameter entsprechen in ihrem Verhalten prinzipiell den 
-gleichnamigen Klassenoptionen.%
-\footnote{%
-  Dies betrifft die Optionen \Option'{cdcover}, \Option'{cdfont} sowie 
-  \Option'{widehead}. Das Verhalten sowie die jeweils gültigen Wertzuweisungen 
-  können bei den Beschreibungen der jeweiligen Option in den entsprechenden 
-  Abschnitten nachgelesen werden.
-}
-Die Einstellungen dieser Parameter wirken sich nur lokal und einzig auf die 
-Umschlagseite aus.
-\end{Declaration}
-\end{Declaration}
-\end{Declaration}
-\end{Declaration}
-\end{Declaration}
-\end{Declaration}
 
 
 \subsection{Die Teileseite}
