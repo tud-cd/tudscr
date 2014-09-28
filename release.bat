@@ -87,6 +87,7 @@ copy temp\doc\latex\tudscr\tudscr_print.pdf release\temp\
 move temp\install\*.*                       release\temp\
 rmdir /s /q temp\install> nul
 cd release\temp
+for /f %%f in ('dir /b *.bat') do unix2dos %%f
 7za a -tzip tudscr_%version%_full.zip   .\..\..\temp\*
 7za a -tzip tudscr_%version%_update.zip .\..\..\temp\* -xr!logo
 7za a -tzip tudscrfonts.zip             @7za_files_metrics.txt
