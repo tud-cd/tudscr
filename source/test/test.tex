@@ -3,33 +3,109 @@
 \usepackage{selinput}
 \SelectInputMappings{adieresis={ä},germandbls={ß}}
 \usepackage[T1]{fontenc}
-\usepackage{lmodern}
-\usepackage{tudscrsupervisor}
+\usepackage{babel}
+\usepackage{enumitem}\setlist{noitemsep}
+\usepackage{tabu,booktabs,units}
 \usepackage{blindtext}
-\usepackage{hyperref}
-\usepackage[xindy]{glossaries}
-\setStyleFile{}
+\usepackage[colorlinks]{hyperref}
+\usepackage[%
+  automake,%
+  translate=babel,
+%  xindy,%={language=german-din},%
+  acronym,% Abkürzungen
+  symbols,% Formelzeichen
+  nomain,% kein Glossar
+  nogroupskip,%
+]{glossaries}
+\setStyleFile{\jobname-temp}
 \makeglossaries
 
-\newglossaryentry{ex}{name={sample},description={an example}}
-\newacronym{svm}{SVM}{support vector machine}
-
-\newglossaryentry{potato}{name={potato},plural={potatoes},
-description={starchy tuber}}
-\newglossaryentry{cabbage}{name={cabbage},
-description={vegetable with thick green or purple leaves}}
-\newglossaryentry{carrot}{name={carrot},
-description={orange root}}
-
-
-
 \begin{document}
-First use: \gls{svm}. Second use: \gls{svm}.
 
-Here’s my \gls{ex} term.
+\newacronym{spsp}{SPSP}{Single-Pair Shortest Path}
+\newacronym{sssp}{SSSP}{Single-Source Shortest Path}
+\newacronym{apsp}{APSP}{All-Pairs Shortest Path}
 
-Chop the \gls{cabbage}, \glspl{potato} and \glspl{carrot}.
+In der Graphentheorie wird häufig die Lösung des Problems des kürzesten Pfades 
+zwischen zwei Knoten gesucht, welches auch als \gls{spsp} bezeichnet wird. 
+Dieses Problem lässt sich auf die Variationen \gls{sssp} und \gls{apsp} 
+erweitern. Für die Lösung von \gls{spsp}, \gls{sssp} oder \gls{apsp} kommen 
+unterschiedliche Algorithmen zum Einsatz.
 
-%\printglossary
-\printglossaries
+\printacronyms
+
+\newglossarystyle{acronymstabu}{%
+  \renewenvironment{theglossary}{
+    \begin{tabu}spread 0pt[l]{@{}lX<{\strut}l@{}}
+  }{
+    \end{tabu}
+  }
+  \renewcommand*{\glossaryheader}{}%
+  \renewcommand*{\glsgroupheading}[1]{}%
+  \renewcommand*{\glsgroupskip}{}%
+  \renewcommand*{\glossentry}[2]{%
+    \glsentryitem{##1}% Entry number if required
+    \glstarget{##1}{\sffamily\bfseries\glossentryname{##1}} &
+    \glsentrydesc{##1} &
+    ##2\tabularnewline
+  }
+}
+\newacronym{lwusab}{LWUBSA}{%
+  Das ist ein ziemlich \textbf{l}anger und \textbf{w}ahnsinnig 
+  \textbf{u}mständlicher \textbf{B}egriff der hier möglichst \textbf{s}innvoll 
+  \textbf{a}bgekürzt werden soll
+}
+\gls{lwusab}
+
+\printacronyms[style=acronymstabu]
+
+\newcommand{\newsymbol}[5][]{%
+  \newglossaryentry{#2}{%
+    name={#3},%
+    symbol={\ensuremath{#4}},%
+    user1={\ensuremath{\mathrm{#5}}},%
+    type=symbols,%
+    description={},%
+    #1%
+  }%
+}
+\newsymbol{l}{Länge}{l}{m}
+\newsymbol{m}{Masse}{m}{kg}
+\newsymbol{t}{Zeit}{t}{s}
+\newsymbol{f}{Frequenz}{f}{s^{-1}}
+\newsymbol{F}{Kraft}{F}{m \cdot kg \cdot s^{-2}=\frac{J}{m}}
+
+Die Einheiten für die \gls{f} und die \gls{F} werden aus den SI"=Basiseinheiten 
+der Basisgrößen \gls{l}, \gls{m} und \gls{t} abgeleitet.
+
+\printsymbols
+
+\newglossarystyle{symbolstabu}{%
+  \renewenvironment{theglossary}{%
+    \begin{longtabu}spread 0pt[l]{ccX<{\strut}l}%
+  }{%
+    \end{longtabu}%
+  }%  
+  \renewcommand*{\glossaryheader}{%
+    \toprule
+    \bfseries Symbol & \bfseries Einheit & \bfseries Name & \bfseries Seite(n)
+    \\\midrule\endhead\bottomrule\endfoot%
+  }%
+  \renewcommand*{\glsgroupheading}[1]{}%
+  \renewcommand*{\glsgroupskip}{}%
+  \renewcommand*{\glossentry}[2]{%
+    \glsentryitem{##1}% Entry number if required
+    \glstarget{##1}{\glossentrysymbol{##1}} &
+    \glsentryuseri{##1} &
+    \glossentryname{##1} &
+    ##2\tabularnewline%
+  }% 
+}
+\defglsentryfmt[symbols]{\glsgenentryfmt~\glsentrysymbol{\glslabel}}
+\newcommand{\sym}[1]{\glssymbol{#1}}
+
+Die Einheiten für die \gls{f} und die \gls{F} werden aus den SI"=Basiseinheiten 
+der Basisgrößen \gls{l}, \gls{m} und \gls{t} abgeleitet.
+
+\printsymbols[style=symbolstabu]
 \end{document}
