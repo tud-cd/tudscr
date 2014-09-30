@@ -1,4 +1,4 @@
-% \CheckSum{1044}
+% \CheckSum{1079}
 % \iffalse meta-comment
 % ======================================================================
 %
@@ -47,7 +47,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-fonts.dtx}[%
-  2014/09/29 v2.02 TUD-KOMA-Script\space%
+  2014/09/30 v2.02 TUD-KOMA-Script\space%
 %</driver>
 %<package&identify>\NeedsTeXFormat{LaTeX2e}[2011/06/27]
 %<package&identify>\ProvidesPackage{tudscrfonts}[%
@@ -78,6 +78,7 @@
 % \changes{v2.02}{2014/06/23}{Unterstützung für \pkg{titlepage} entfernt}%^^A
 % \changes{v2.02}{2014/07/08}{Verwendung von \cs{FamilyKeyState}}%^^A
 % \changes{v2.02}{2014/08/29}{Unterstützung für \pkg{fontspec}}%^^A
+% \changes{v2.02}{2014/09/30}{Nutzung alter tud-Klassen ermöglicht}%^^A
 %
 % \section{Schriften des \CDs}
 %
@@ -111,18 +112,37 @@
 %<*package&identify>
 % \fi
 %
-% \subsection{Verwendung mit den \TUDScript-Klassen der Version v1.0}
+% \subsection{Verwendung alter TUD-Klassen oder \TUDScript~v1.0}
 %
+% Das Paket kann genutzt werden, um alle möglichen veralteten Klassen mit den
+% neuen Schriftfamilien zu verwenden.
+% \begin{macro}{\if@tud@oldclass}
+% \changes{v2.02}{2014/08/29}{neu}%^^A
+% \begin{macro}{\if@tud@oldscrclass}
+% \changes{v2.02}{2014/08/29}{neu}%^^A
+%    \begin{macrocode}
+\newif\if@tud@oldclass
+\newif\if@tud@oldscrclass
+%    \end{macrocode}
+% Wenn eine der alten Klassen aus den Vorlagen von Klaus Bergmann geladen 
+% wurde, wird dies für spätere Anpassungen registriert.
+%    \begin{macrocode}
+\@ifclassloaded{tudbook}{\@tud@oldclasstrue}{}%
+\@ifclassloaded{tudbeamer}{\@tud@oldclasstrue}{}%
+\@ifclassloaded{tudfax}{\@tud@oldclasstrue}{}%
+\@ifclassloaded{tudform}{\@tud@oldclasstrue}{}%
+\@ifclassloaded{tudhaus}{\@tud@oldclasstrue}{}%
+\@ifclassloaded{tudletter}{\@tud@oldclasstrue}{}%
+%    \end{macrocode}
 % Soll das Paket \pkg{tudscrfonts} mit den \TUDScript-Klassen der Version~v1.0
 % genutzt werden, muss Sorge dafür getragen werden, dass einige veraltete 
 % Befehle aktualisiert werden. Hierfür müssen diese \glqq unschädlich\grqq
 % gemacht werden, noch bevor das Paket selbst in Erscheinung tritt.
 %    \begin{macrocode}
-\@tempswafalse
-\@ifclassloaded{tudscrbookold}{\@tempswatrue}{}
-\@ifclassloaded{tudscrreprtold}{\@tempswatrue}{}
-\@ifclassloaded{tudscrartclold}{\@tempswatrue}{}
-\if@tempswa
+\@ifclassloaded{tudscrbookold}{\@tud@oldscrclasstrue}{}%
+\@ifclassloaded{tudscrreprtold}{\@tud@oldscrclasstrue}{}%
+\@ifclassloaded{tudscrartclold}{\@tud@oldscrclasstrue}{}%
+\if@tud@oldscrclass
   \let\TUDoptions\relax
   \let\TUDoption\relax
   \let\univln\relax
@@ -136,6 +156,8 @@
   \let\dinbn\relax
 \fi
 %    \end{macrocode}
+% \end{macro}^^A if@tud@oldscrclass
+% \end{macro}^^A if@tud@oldclass
 % \iffalse
 %</package&identify>
 %<*(class|package)&option>
@@ -162,8 +184,6 @@
 % \begin{macro}{\tud@univers}
 % \begin{macro}{\tud@dinbold}
 % \begin{macro}{\tud@mathenc}
-% \begin{macro}{\if@tud@oldclass}
-% \changes{v2.02}{2014/08/29}{neu}%^^A
 % Mit der Option  \opt{fontspec} kann die explizite Verwendung des Paketes 
 % \pkg{fontspec} aktiviert werden. Nur so ist eine vollständige Anpassung der 
 % Schriften an die Funktionalitäten des Paketes möglich. Zu Beginn werden 
@@ -197,7 +217,6 @@
   }%
 %</class>
 %<*package>
-\newif\if@tud@oldclass
 \AtEndOfPackage{%
   \TUD@key{fontspec}[]{%
     \PackageError{tudscrfonts}{Option `fontspec' too late}{%
@@ -212,16 +231,6 @@
       the package `fontspec' before `tudscrfonts'.%
     }%
   }{}
-%    \end{macrocode}
-% Wenn eine der alten Klassen aus den Vorlagen von Klaus Bergmann geladen 
-% wurde, wird dies für spätere Anpassungen registriert.
-%    \begin{macrocode}
-  \@ifclassloaded{tudbook}{\@tud@oldclasstrue}{}%
-  \@ifclassloaded{tudbeamer}{\@tud@oldclasstrue}{}%
-  \@ifclassloaded{tudfax}{\@tud@oldclasstrue}{}%
-  \@ifclassloaded{tudform}{\@tud@oldclasstrue}{}%
-  \@ifclassloaded{tudhaus}{\@tud@oldclasstrue}{}%
-  \@ifclassloaded{tudletter}{\@tud@oldclasstrue}{}%
 %</package>
 }
 %    \end{macrocode}
@@ -308,7 +317,6 @@
 %    \begin{macrocode}
 }
 %    \end{macrocode}
-% \end{macro}^^A if@tud@oldclass
 % \end{macro}^^A \tud@mathenc
 % \end{macro}^^A \tud@dinbold
 % \end{macro}^^A \tud@univers
@@ -788,17 +796,17 @@
         BoldItalicFont = LMMonoSlant10-Regular,%
       ]%
 %    \end{macrocode}
-% Für die alten Klassen von Klaus Bergamnn werden die fetten Schriften in einem
-% stärkeren Schriftschnitt gesetzt.
+% Für die alten Klassen von Klaus Bergmann sowie \TUDScript in der Version~v1.0 
+% werden die fetten Schriften in einem stärkeren Schriftschnitt gesetzt.
 %    \begin{macrocode}
 %<*package>
-      \if@tud@oldclass%
+      \ifboolexpr{bool {@tud@oldclass} or bool {@tud@oldscrclass}}{%
         \setsansfont{Univers Light}[%
           BoldFont = Univers Bold,%
           ItalicFont = Univers Light Oblique,%
           BoldItalicFont = Univers Bold Oblique,%
         ]%
-      \fi%
+      }{}%
 %</package>
     \fi%
 %    \end{macrocode}
@@ -814,12 +822,13 @@
       \else%
         \renewcommand*\bfdefault{m}%
 %    \end{macrocode}
-% Bei den alten Klassen von Klaus Bergmann sind die fetten Schriften stärker.
+% Bei den alten Klassen von Klaus Bergmann bzw. \TUDScript~v1.0 sind die fetten 
+% Schriften stärker.
 %    \begin{macrocode}
 %<*package>
-        \if@tud@oldclass%
+        \ifboolexpr{bool {@tud@oldclass} or bool {@tud@oldscrclass}}{%
           \renewcommand*\bfdefault{b}%
-        \fi%
+        }{}%
 %</package>
         \renewcommand*\mddefault{l}%
       \fi%
@@ -1156,23 +1165,10 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \ifdin
-% Damit die Schrift im Dokument später noch umgestellt werden kann, werden
-% sämtliche Einstellungen erst zu Beginn des Dokumentes gesichert. Deshalb wird
-% der dafür verantwortliche Befehl \cs{tud@font@cdfonts} hier zum ersten Mal
-% verwendet. Damit ist es möglich, die Schriften eventuell geladener Pakete wie
-% \pkg{lmodern} oder \pkg{libertine} vorher zu sichern und später wieder zu
-% aktivieren. Auch die Einstellungen für den Mathematiksatz werden erstmalig 
-% durch \cs{tud@font@mathfonts} gesetzt.
-%    \begin{macrocode}
-\AtBeginDocument{%
-  \if@tud@cdfonts\tud@font@cdfonts\fi%
-  \tud@font@mathfonts%
-}
-%    \end{macrocode}
-% Wird das Paket \pkg{tudscrfonts} mit den alten Klassen von Klaus Bergmann 
-% verwendet, müssen einige Kompatibilitätseinstellungen vorgenmommen werden.
-% Dies betrifft insbesondere allerhand darin definierte fixe Schriften, sowie
-% die Mathematikschriften.
+% Wird das Paket \pkg{tudscrfonts} mit den alten TUD-Klassen oder \TUDScript in 
+% der Version~v1.0 verwendet, müssen einige Kompatibilitätseinstellungen 
+% vorgenmommen werden. Dies betrifft insbesondere allerhand darin definierter,
+% fixer Schriften sowie die Mathematikschriften.
 %    \begin{macrocode}
 %<*package>
 \AtBeginDocument{%
@@ -1245,8 +1241,47 @@
     \let\dinBold\dinbn%
     \let\dinfamily\dinbn%
   }{}%
+  \ifbool{@tud@oldscrclass}{%
+    \cmd@restore{rmdefault}%
+    \cmd@restore{sfdefault}%
+    \cmd@restore{bfdefault}%
+    \cmd@restore{mddefault}%
+    \cmd@restore{familydefault}%
+    \cmd@restore{seriesdefault}%
+    \cmd@restore{shapedefault}%
+    \cmd@restore{rmfamily}%
+    \cmd@restore{sffamily}%
+    \cmd@restore{ttfamily}%
+    \DeclareSymbolFontAlphabet{\mathrm}{operators}
+    \if@tud@fontspec%
+      \DeclareFixedFont{\univLightHead}{\encodingdefault}%
+        {UniversLight}{m}{n}{\tud@head@fntsz}%
+      \DeclareFixedFont{\univBoldHead}{\encodingdefault}%
+        {UniversBold}{m}{n}{\tud@head@fntsz}%
+    \else%
+      \if@tud@univers%
+        \DeclareFixedFont{\univLightHead}{\encodingdefault}%
+          {\tud@univers}{l}{n}{\tud@head@fntsz}%
+        \DeclareFixedFont{\univBoldHead}{\encodingdefault}%
+          {\tud@univers}{b}{n}{\tud@head@fntsz}%
+      \fi%
+    \fi%
+  }{}%
 }
 %</package>
+%    \end{macrocode}
+% Damit die Schrift im Dokument später noch umgestellt werden kann, werden
+% sämtliche Einstellungen erst zu Beginn des Dokumentes gesichert. Deshalb wird
+% der dafür verantwortliche Befehl \cs{tud@font@cdfonts} hier zum ersten Mal
+% verwendet. Damit ist es möglich, die Schriften eventuell geladener Pakete wie
+% \pkg{lmodern} oder \pkg{libertine} vorher zu sichern und später wieder zu
+% aktivieren. Auch die Einstellungen für den Mathematiksatz werden erstmalig 
+% durch \cs{tud@font@mathfonts} gesetzt.
+%    \begin{macrocode}
+\AtBeginDocument{%
+  \if@tud@cdfonts\tud@font@cdfonts\fi%
+  \tud@font@mathfonts%
+}
 %    \end{macrocode}
 % Das Paket \pkg{cmbright} bringt zusätzlich noch Schriftschnitte für die
 % \pkg{ams}"=Pakete mit. Diese werden gegebenenfalls geladen.
