@@ -57,7 +57,7 @@
       \fi%
     }%
   \fi%
-  \@TUDVersion{2014/09/17 v2.02 TUD-KOMA-Script}%
+  \@TUDVersion{2014/09/30 v2.02 TUD-KOMA-Script}%
 \endgroup%
 \providecommand*\tudscrmail{tudscr@gmail.com}
 \@ifundefined{tudcls@name}{%
@@ -72,7 +72,7 @@
 %%% From File: tudscr-manual.dtx
 \NeedsTeXFormat{LaTeX2e}[2011/06/27]
 \ProvidesPackage{tudscrman}[%
-  2014/09/17 v2.02 TUD-KOMA-Script
+  2014/09/30 v2.02 TUD-KOMA-Script
   package (internal tutorials)%
 ]
 %%% From File: tudscr-base.dtx
@@ -321,6 +321,28 @@
   \let\NoCaseChange\@firstofone%
 }
 \newrobustcmd*\bsc{\@backslashchar}
+\newcommand*\Email[1]{\href{mailto:#1}{\nolinkurl{#1}}}%
+\renewcaptionname{ngerman}{\sectionautorefname}{Unterkapitel}
+\renewcaptionname{ngerman}{\subsectionautorefname}{Abschnitt}
+\renewcaptionname{ngerman}{\subsubsectionautorefname}{Unterabschnitt}
+\newcommand*\autorefname[1][current]{%
+  \ifstr{#1}{current}{%
+    \expandafter\HyPsd@@autorefname\@currentHref\@nil%
+  }{%
+    \@autorefname\HyPsd@@autorefname{#1}%
+  }%
+  \unskip\xspace%
+}
+\newcommand*\@autorefname[2]{%
+  \expandafter\ifx\csname r@#2\endcsname\relax%
+    ??%
+  \else%
+    \expandafter\expandafter\expandafter\@@autorefname%
+        \csname r@#2\endcsname{}{}{}{}\@nil#1\@nil%
+  \fi%
+}
+\newcommand*\@@autorefname{}
+\def\@@autorefname#1#2#3#4#5\@nil#6\@nil{#6#4.\@nil}
 \newcommand*\Application[1]{\mbox{\texturs{#1}}}
 \newcommand*\Distribution[1]{\mbox{\texturn{#1}}}
 \newcommand*\File[1]{\mbox{\texturn{#1}}}
@@ -347,18 +369,23 @@
     \hyperref{../\tudscr@manual}{\tudscr@manual}{macros:#2}{\texttt{\bsc#2}}%
   }%
 }
-\newrobustcmd*\PName[1]{\texttt{\textsl{<#1>}}}
+\NewDocumentCommand\Length{sm}{%
+  \IfBooleanTF{#1}{\texttt{\bsc#2}}{%
+    \hyperref{../\tudscr@manual}{\tudscr@manual}{macros:#2}{\texttt{\bsc#2}}%
+  }%
+}
+\newrobustcmd*\PName[1]{\mbox{\texttt{\textsl{<#1>}}}}
 \newrobustcmd*\PBoolean{\PName{Ein-Aus-Wert}}
 \newrobustcmd*\PSet{\PName{Einstellung}}
-\newrobustcmd*\Parameter[1]{\texttt{\{}\PName{#1}\texttt{\}}}
-\newrobustcmd*\OParameter[1]{\texttt{[}\PName{#1}\texttt{]}}
-\newrobustcmd*\LParameter{\texttt{[}\PName{Parameterliste}\texttt{]}}
+\newrobustcmd*\Parameter[1]{\mbox{\texttt{\{}\PName{#1}\texttt{\}}}}
+\newrobustcmd*\OParameter[1]{\mbox{\texttt{[}\PName{#1}\texttt{]}}}
+\newrobustcmd*\LParameter{\mbox{\texttt{[}\PName{Parameterliste}\texttt{]}}}
 \newrobustcmd*\OLParameter[1]{%
-  \texttt{[}\PName{#1}|\PName{Parameterliste}\texttt{]}%
+  \mbox{\texttt{[}\PName{#1}|\PName{Parameterliste}\texttt{]}}%
 }
-\newrobustcmd*\PValue[1]{\texttt{#1}}
-\newrobustcmd*\PParameter[1]{\texttt{\{#1\}}}
-\newrobustcmd*\POParameter[1]{\texttt{[#1]}}
+\newrobustcmd*\PValue[1]{\mbox{\texttt{#1}}}
+\newrobustcmd*\PParameter[1]{\mbox{\texttt{\{#1\}}}}
+\newrobustcmd*\POParameter[1]{\mbox{\texttt{[#1]}}}
 %%% From File: tudscr-misc.dtx
 \RequirePackage{xspace}[2009/10/20]
 \xspaceaddexceptions{"=}
