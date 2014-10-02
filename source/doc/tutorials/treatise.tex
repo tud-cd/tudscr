@@ -511,15 +511,21 @@ Symbolverzeichnis?
 Das Paket \Package{glossaries} stellt für die Definition von Abkürzungen einen 
 speziellen Befehl bereit. Mit\Macro*{newacronym}\LParameter\Parameter{Label}%
 \Parameter{Abkürzung}\Parameter{Wortgruppe} wird eine Abkürzung definiert und 
-kann später über \Parameter{Label} genutzt werden. Folgend werden sowohl drei 
-Abkürzungen als auch eine Textpassage, in welcher selbige mit dem Befehl 
-\Macro*{gls}\Parameter{label} verwendet werden, definiert.
+kann später über \Parameter{Label} genutzt werden. Für ein kleines Beispiel 
+werden drei Abkürzungen erstellt\dots
 %
-\TutorialPreamble{\textbf{\textsf{Die Ausgabe der Textpassage}}}
 \begin{Tutorial}
 \newacronym{spsp}{SPSP}{Single-Pair Shortest Path}
 \newacronym{sssp}{SSSP}{Single-Source Shortest Path}
 \newacronym{apsp}{APSP}{All-Pairs Shortest Path}
+\end{Tutorial}
+\vspace*{-2\baselineskip}\par\noindent%
+%
+\dots und diese in einer kurzen Textpassage mit \Macro*{gls}\Parameter{label} 
+verwendet.
+%
+\TutorialPreamble{\minisec{Ausgabe der Textpassage}}
+\begin{Tutorial}
 In der Graphentheorie wird häufig die Lösung des Problems des kürzesten
 Pfades zwischen zwei Knoten gesucht, welches auch als \gls{spsp}
 bezeichnet wird. Dieses Problem lässt sich auf die Variationen \gls{sssp}
@@ -528,7 +534,52 @@ und \gls{apsp} erweitern. Für die Lösung von \gls{spsp}, \gls{sssp} oder
 \end{Tutorial}
 %
 Gut zu sehen ist, dass sich die Ausgabe der Abkürzung bei der ersten Verwendung 
-mit \Macro*{gls} von der zweiten (und jeder weiteren) unterscheidet.
+mit \Macro*{gls} von der zweiten~-- und jeder weiteren~-- unterscheidet. Das 
+Verhalten lässt sich über verschiedene Stile mit \Macro*{setacronymstyle} 
+anpassen. Die Ausgabe einer Liste aller Abkürzungen erfolgt mit:
+%
+\begin{Tutorial*}
+\printacronyms
+\end{Tutorial*}
+\begin{quoting}[rightmargin=0pt]
+\printacronyms
+\end{quoting}
+%
+Dabei werden die Abkürzungen in einer \Environment*{description}"=Umgebung 
+gesetzt. Dies ist absolut ausreichend. Mir persönlich ist die Darstellung in 
+einer quasi-tabellarischen Form jedoch lieber. Dabei soll eigentliche Stil mit 
+fettgedruckter Abkürzung beibehalten werden. Das \Package{glossaries}"=Paket 
+stellt zwar auch eine Menge Stilen in Tabellenform bereit, allerdings nicht in 
+dem gewünschten Stil. Deshalb wird hier gezeigt, wie ein eigener Stil kreiert 
+werden kann. 
+%
+\begin{Tutorial}
+\newglossarystyle{acronymstabu}{%
+  \renewenvironment{theglossary}{
+    \begin{tabu}spread 0pt[l]{@{}lX<{\strut}l@{}}
+  }{
+    \end{tabu}
+  }
+  \renewcommand*{\glossaryheader}{}%
+  \renewcommand*{\glsgroupheading}[1]{}%
+  \renewcommand*{\glsgroupskip}{}%
+  \renewcommand*{\glossentry}[2]{%
+    \glsentryitem{##1}% Entry number if required
+    \glstarget{##1}{\sffamily\bfseries\glossentryname{##1}} &
+    \glsentrydesc{##1} &
+    ##2\tabularnewline
+  }
+}
+\newacronym{lwusab}{LWUBSA}{%
+  Das ist ein ziemlich \textbf{l}anger und \textbf{w}ahnsinnig 
+  \textbf{u}mständlicher \textbf{B}egriff der hier möglichst \textbf{s}innvoll 
+  \textbf{a}bgekürzt werden soll
+}
+\gls{lwusab}
+\printacronyms[style=acronymstabu]
+\end{Tutorial}
+
+
 
 \section{Anfangszitat oder Schlauer Spruch}
 %%Anfangszitat: Der Text erscheint jetzt kursiv (\itshape) und kleiner als der 
@@ -578,45 +629,45 @@ mit \Macro*{gls} von der zweiten (und jeder weiteren) unterscheidet.
 
 \dots % §§§
 %
-\begin{Tutorial-}
-\usepackage{xparse}% §§§ bereits geladen
-\usepackage{microtype}% §§§ bereits geladen
-\usepackage{textcomp}% §§§ bereits geladen
-\usepackage{setspace}% §§§ bereits geladen
-\usepackage{csquotes}% §§§ bereits geladen
-\usepackage{quoting}% §§§ bereits geladen
-\usepackage{isodate}% §§§ bereits geladen
-\usepackage{listings}% §§§ bereits geladen
-\usepackage{xspace}% §§§ bereits geladen
-\usepackage{scrhack}% §§§ bereits geladen
-\end{Tutorial-}
-%
-\begin{Tutorial-}
-\usepackage{caption}
-\usepackage{floatrow}
-\usepackage{tikz}
-\usepackage{biblatex}
-\usepackage{array}
-\usepackage{booktabs}
-\usepackage{tabularx}
-\usepackage{ltxtable}
-\usepackage{tabu}
-\usepackage{enumitem}
-\setlist{noitemsep}
-\usepackage{mathtools}
-\usepackage{units}
-\usepackage{siunitx}
-\usepackage{xpunctuate}
-\usepackage{ellipsis}
-\usepackage{varioref}
-\usepackage{chngcntr}
-\usepackage{bookmark}
-\end{Tutorial-}
-%
-Damit ist das Tutorial beendet.
-\begin{Tutorial*}
-\end{document}
-\end{Tutorial*}
+%\begin{Tutorial-}
+%\usepackage{xparse}% §§§ bereits geladen
+%\usepackage{microtype}% §§§ bereits geladen
+%\usepackage{textcomp}% §§§ bereits geladen
+%\usepackage{setspace}% §§§ bereits geladen
+%\usepackage{csquotes}% §§§ bereits geladen
+%\usepackage{quoting}% §§§ bereits geladen
+%\usepackage{isodate}% §§§ bereits geladen
+%\usepackage{listings}% §§§ bereits geladen
+%\usepackage{xspace}% §§§ bereits geladen
+%\usepackage{scrhack}% §§§ bereits geladen
+%\end{Tutorial-}
+%%
+%\begin{Tutorial-}
+%\usepackage{caption}
+%\usepackage{floatrow}
+%\usepackage{tikz}
+%\usepackage{biblatex}
+%\usepackage{array}
+%\usepackage{booktabs}
+%\usepackage{tabularx}
+%\usepackage{ltxtable}
+%\usepackage{tabu}
+%\usepackage{enumitem}
+%\setlist{noitemsep}
+%\usepackage{mathtools}
+%\usepackage{units}
+%\usepackage{siunitx}
+%\usepackage{xpunctuate}
+%\usepackage{ellipsis}
+%\usepackage{varioref}
+%\usepackage{chngcntr}
+%\usepackage{bookmark}
+%\end{Tutorial-}
+%%
+%Damit ist das Tutorial beendet.
+%\begin{Tutorial*}
+%\end{document}
+%\end{Tutorial*}
 \FinishTutorial
 \clearpage
   \begin{itemize}
