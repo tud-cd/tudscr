@@ -34,7 +34,7 @@ move  *.dtx            source\latex\tudscr\
 move  tudscr.ins       source\latex\tudscr\
 move  tudscrsource.tex source\latex\tudscr\
 xcopy doc              source\latex\tudscr\doc\ /s
-del source\latex\tudscr\doc\tudscr_test.tex> nul
+del source\latex\tudscr\doc\*-test.tex /s > nul
 for /f %%f in ('dir  /b ..\*.md') do copy ..\%%f doc\latex\tudscr\%%~nf
 move tudscrsource.pdf doc\latex\tudscr\
 move logo             tex\latex\tudscr\
