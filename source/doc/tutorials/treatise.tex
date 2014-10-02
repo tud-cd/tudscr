@@ -23,6 +23,7 @@
     nomain,% kein Glossar
     translate=babel,%
     nogroupskip,%
+    toc,%
   ]{glossaries}
   \setStyleFile{\jobname-temp}
   \makeglossaries
@@ -182,7 +183,8 @@ genauer auf die hier genutzten Paketoptionen eingegangen.
   symbols,% Formelzeichen
   nomain,% kein Glossar
   translate=babel,%
-  nogroupskip,% 
+  nogroupskip,%
+  toc,%
 ]{glossaries}
 \makeglossaries
 \end{Tutorial*}
@@ -435,6 +437,7 @@ die Verwendung von Gleitumgebungen eingegangen.
 \tableofcontents
 \listoffigures
 \listoftables
+\clearpage
 \end{Tutorial*}
 
 
@@ -506,11 +509,13 @@ technisches Glossar erzeugt werden soll.
 Mit der Option \Option*{translate}[babel] werden die Überschriften der Glossare 
 in der Dokumentsprache gesetzt, mit \Option*{nogroupskip} kann der automatische 
 Abstand zwischen den Einträgen zur Gruppierung innerhalb eines Glossars 
-entfernt werden.
+entfernt werden. Die Option \Option*{toc} fügt die Verzeichnisse dem 
+Inhaltsverzeichnis hinzu.
 %
 \begin{Tutorial-}
   translate=babel,%
-  nogroupskip,% 
+  nogroupskip,%
+  toc,%
 \end{Tutorial-}
 %
 Damit sind alle verwendeten Optionen erläutert. Schließlich sorgt der Befehl 
@@ -531,8 +536,9 @@ Symbolverzeichnis?
 Das Paket \Package{glossaries} stellt für die Definition von Abkürzungen einen 
 speziellen Befehl bereit. Mit\Macro*{newacronym}\LParameter\Parameter{Label}%
 \Parameter{Abkürzung}\Parameter{Wortgruppe} wird eine Abkürzung definiert und 
-kann später über \Parameter{Label} genutzt werden. Für ein kleines Beispiel 
-werden drei Abkürzungen erstellt\dots
+kann später über \Parameter{Label} genutzt werden. Die möglichen optionalen 
+Parameter können in der Dokumentation zu \Package{glossaries} nachgeschlagen 
+werden. Für ein kleines Beispiel werden drei Abkürzungen erstellt\dots
 %
 \begin{Tutorial}
 \newacronym{spsp}{SPSP}{Single-Pair Shortest Path}
@@ -642,10 +648,69 @@ neuen Stils.
 \end{quoting}
 
 \subsubsection{Symbolverzeichnis}
-Für das Erstellen 
+Für das Erzeugen eines Symbolverzeichnisses kann ebenfalls \Package{glossaries} 
+verwendet werden. Allerdings muss hierfür ein wenig mehr Aufwand getrieben 
+werden, da das Paket hierfür keine dedizierte Schnittstelle bereitstellt. Wurde 
+die Paketoption \Option*{symbols} angegeben wird jedoch zumindest das dazu 
+notwendige Glossar erstellt.
 
-
-
+Als erstes sollte ein gut nutzbarer Befehl zum Definieren eines neuen Symbols 
+erstellt werden. In Anlehnung an den Befehl für Abkürzungen wird dieser 
+\Macro*{newsymbol} genannt. Dieser hat ein optionales und vier obligatorische 
+Argumente, wobei das optionale Argument prinzipiell alle Schlüssel-Wert-Paare 
+enthalten kann, die durch \Package{glossaries} akzeptiert werden. Welche davon 
+letztlich auch Auswirkungen haben, hängt allerdings von der Gestaltung des 
+Stils durch den Anwender ab. Der nachfolgend definierte Befehl hat folgende 
+Gestalt:
+%
+\begin{quoting}[rightmargin=0pt]
+\Macro*{newsymbol}\LParameter\Parameter{Label}\Parameter{Bezeichnung}%
+\Parameter{Symbol}\Parameter{Einheit}
+\end{quoting}
+%
+Mit \PName{Label} erfolgt die eindeutige Kennzeichnung des Symbols, gefolgt von 
+der \PName{Bezeichnung} und dem Formelzeichen beziehungsweise \PName{Symbol} 
+selbst sowie die dazugehörige physikalische \PName{Einheit}.
+%
+\begin{Tutorial}
+\newcommand*{\newsymbol}[5][]{%
+  \newglossaryentry{#2}{%
+    type=symbols,%
+    description={},%
+    name={#3},%
+    symbol={\ensuremath{#4}},%
+    user1={\ensuremath{\mathrm{#5}}},%
+    sort=#2,%
+    #1%
+  }%
+}
+\end{Tutorial}
+%
+Da es sich zumeist um mathematische Symbole handelt, wird für das Symbol und 
+die Einheit mit \Macro*{ensuremath} sorge getragen, dass diese auch im 
+Textmodus ohne Probleme verwendet werden können. Etwas problematisch kann unter 
+Umständen die Zuweisung des Labels zum Schlüssel \PValue{sort} sein. Hier ist 
+eine manuelle Festlegung für diesen Schlüssel durch den Anwender über das 
+optionale Argument eventuell sinnvoll. Für ein kleines Beispiel werden fünf 
+Formelzeichen definiert\dots
+%
+\begin{Tutorial}
+\newsymbol{l}{Länge}{l}{m}
+\newsymbol{m}{Masse}{m}{kg}
+\newsymbol{t}{Zeit}{t}{s}
+\newsymbol{f}{Frequenz}{f}{s^{-1}}
+\newsymbol{F}{Kraft}{F}{m \cdot kg \cdot s^{-2}=\frac{J}{m}}
+\end{Tutorial}
+\vspace*{-1.5\baselineskip}\par\noindent%
+%
+\dots und diese in einer kurzen Textpassage mit \Macro*{gls}\Parameter{Label} 
+verwendet.
+%
+\TutorialPreamble{\minisec{Ausgabe der Textpassage}}
+\begin{Tutorial}
+Die Einheiten für die \gls{f} und die \gls{F} werden aus den SI"=Basiseinheiten 
+der Basisgrößen \gls{l}, \gls{m} und \gls{t} abgeleitet.
+\end{Tutorial}
 
 
 \section{Anfangszitat oder Schlauer Spruch}
@@ -731,11 +796,20 @@ Für das Erstellen
 %\usepackage{bookmark}
 %\end{Tutorial-}
 %%
-%Damit ist das Tutorial beendet.
-%\begin{Tutorial*}
-%\end{document}
-%\end{Tutorial*}
-\FinishTutorial
+Damit ist das Tutorial beendet.
+\begin{Tutorial*}
+\end{document}
+\end{Tutorial*}
+\FinishTutorial[%
+  Für das Erstellen von Abkürzungs- und Symbolverzeichnis sollte das mehrmalige 
+  Ausführen von \PValue{pdflatex}~\PName{Dateiname} vollkommen ausreichen. In 
+  diesem Fall werden die Einträge mit \Application{makeindex} sortiert. Soll 
+  stattdessen \Application{xindy} die Sortierung durchführen, muss beim Laden 
+  von \Package{glossaries} die entsprechende Paketoption aktiviert werden. Im 
+  einfachsten Fall sollte nach der Verwendung von \hologo{pdfLaTeX} der Aufruf 
+  des Perl"=Skriptes \PValue{makeglossaries}~\PName{Dateiname} erfolgen. Dies 
+  ist ohne weiteres Zutun nur mit \Distribution{\hologo{TeX}~Live} möglich.
+]
 \clearpage
   \begin{itemize}
   \item grafiken und untergrafiken?
