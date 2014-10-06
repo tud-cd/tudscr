@@ -420,14 +420,16 @@
   }%
 }
 \PassOptionsToPackage{hyperindex=false}{hyperref}
-\RequirePackage{hyperref}[2012/11/06]
-\hypersetup{colorlinks,linkcolor=blue}
-\pdfstringdefDisableCommands{%
-  \let\Application\@Application%
-  \let\Class\@Class%
-  \let\Package\@Package%
-  \let\TUDScript\@TUDScript%
-  \let\NoCaseChange\@firstofone%
+\AtEndPreamble{%
+  \RequirePackage{hyperref}[2012/11/06]
+  \hypersetup{colorlinks,linkcolor=blue}
+  \pdfstringdefDisableCommands{%
+    \let\Application\@Application%
+    \let\Class\@Class%
+    \let\Package\@Package%
+    \let\TUDScript\@TUDScript%
+    \let\NoCaseChange\@firstofone%
+  }%
 }
 \newrobustcmd*\bsc{\@backslashchar}
 \newcommand*\Email[1]{\href{mailto:#1}{\nolinkurl{#1}}}%

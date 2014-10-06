@@ -4,16 +4,16 @@
 \SelectInputMappings{adieresis={ä},germandbls={ß}}
 \usepackage[T1]{fontenc}
 \usepackage{lmodern}
-\usepackage{tudscrman}
-\lstset{%
-  inputencoding=utf8,extendedchars=true,
-  literate=%
-    {ä}{{\"a}}1 {ö}{{\"o}}1 {ü}{{\"u}}1
-    {Ä}{{\"A}}1 {Ö}{{\"O}}1 {Ü}{{\"U}}1
-    {~}{{\textasciitilde}}1 {ß}{{\ss}}1
-}
 \usepackage{tudscrsupervisor}
-\usepackage{tabu}
+\usepackage{tabu,booktabs}
+\usepackage{units}
+
+%\usepackage{tocstyle}
+%\newtocstyle[KOMAlike]{compressed}{
+%    \settocfeature[1]{entryvskip}{.5em plus 1pt}%  % Die Stellschraube
+%}
+%\usetocstyle{compressed}
+
 \AfterPackage*{hyperref}{%
   \usepackage[%
     automake,%
@@ -24,17 +24,19 @@
     translate=babel,%
     nogroupskip,%
     toc,%
+    section=subsection,%
   ]{glossaries}
   \setStyleFile{\jobname-temp}
   \makeglossaries
 }
-\usepackage{units}
-
-%\usepackage{tocstyle}
-%\newtocstyle[KOMAlike]{compressed}{
-%    \settocfeature[1]{entryvskip}{.5em plus 1pt}%  % Die Stellschraube
-%}
-%\usetocstyle{compressed}
+\usepackage{tudscrman}
+\lstset{%
+  inputencoding=utf8,extendedchars=true,
+  literate=%
+    {ä}{{\"a}}1 {ö}{{\"o}}1 {ü}{{\"u}}1
+    {Ä}{{\"A}}1 {Ö}{{\"O}}1 {Ü}{{\"U}}1
+    {~}{{\textasciitilde}}1 {ß}{{\ss}}1
+}
 
 \begin{document}
 \TUDoptions{cdfont=no}
@@ -146,17 +148,27 @@ In neuen Dokumenten kann es bedenkenlos geladen werden.
 \usepackage{fixltx2e}
 \end{Tutorial*}
 %
+Das Paket \Package{tabu} ist relativ neu und versucht, viele Funktionalitäten 
+ganz unterschiedlicher Pakete für den Tabellensatz in sich zu vereinen. Damit 
+die erstellten Tabellen auch gut aussehen, ist das Paket \Package{booktabs} 
+sehr zu empfehlen. Hinweise zum guten und korrekten Tabellensatz werden 
+übrigens in \autoref{sec:tables} gegeben.
+%
+\begin{Tutorial*}
+\usepackage{tabu}
+\usepackage{booktabs}
+\end{Tutorial*}
+%
+Mit \Package{units} lassen sich Einheiten typographisch korrekt setzen.
+%
+\begin{Tutorial*}
+\usepackage{units}
+\end{Tutorial*}
+%
 Für die Aufgabenstellung wird das Paket \Package{tudscrsupervisor} benötigt.
 %
 \begin{Tutorial*}
 \usepackage{tudscrsupervisor}
-\end{Tutorial*}
-%
-Das Paket \Package{tabu} ist relativ neu und versucht, viele Funktionalitäten 
-ganz unterschiedlicher Pakete für den Tabellensatz in sich zu vereinen.
-%
-\begin{Tutorial*}
-\usepackage{tabu}
 \end{Tutorial*}
 %
 Damit alle möglichen Querverweise in einem PDF-Dokument automatisch verlinkt 
@@ -185,6 +197,7 @@ genauer auf die hier genutzten Paketoptionen eingegangen.
   translate=babel,%
   nogroupskip,%
   toc,%
+  section=section,%
 ]{glossaries}
 \makeglossaries
 \end{Tutorial*}
@@ -510,12 +523,14 @@ Mit der Option \Option*{translate}[babel] werden die Überschriften der Glossare
 in der Dokumentsprache gesetzt, mit \Option*{nogroupskip} kann der automatische 
 Abstand zwischen den Einträgen zur Gruppierung innerhalb eines Glossars 
 entfernt werden. Die Option \Option*{toc} fügt die Verzeichnisse dem 
-Inhaltsverzeichnis hinzu.
+Inhaltsverzeichnis hinzu, mit \Option*{section} kann die Gliederungsebene für 
+die Überschrift angegeben werden.
 %
 \begin{Tutorial-}
   translate=babel,%
   nogroupskip,%
   toc,%
+  section=section,%
 \end{Tutorial-}
 %
 Damit sind alle verwendeten Optionen erläutert. Schließlich sorgt der Befehl 
@@ -541,16 +556,14 @@ Parameter können in der Dokumentation zu \Package{glossaries} nachgeschlagen
 werden. Für ein kleines Beispiel werden drei Abkürzungen erstellt\dots
 %
 \begin{Tutorial}
+\newacronym{apsp}{APSP}{All-Pairs Shortest Path}
 \newacronym{spsp}{SPSP}{Single-Pair Shortest Path}
 \newacronym{sssp}{SSSP}{Single-Source Shortest Path}
-\newacronym{apsp}{APSP}{All-Pairs Shortest Path}
 \end{Tutorial}
-\vspace*{-1.5\baselineskip}\par\noindent%
 %
 \dots und diese in einer kurzen Textpassage mit \Macro*{gls}\Parameter{Label} 
 verwendet.
 %
-\TutorialPreamble{\minisec{Ausgabe der Textpassage}}
 \begin{Tutorial}
 In der Graphentheorie wird häufig die Lösung des Problems des kürzesten
 Pfades zwischen zwei Knoten gesucht, welches auch als \gls{spsp}
@@ -567,8 +580,9 @@ anpassen. Die Ausgabe einer Liste aller Abkürzungen erfolgt mit:
 \begin{Tutorial*}
 \printacronyms
 \end{Tutorial*}
-\vspace*{-1.5\baselineskip}\par\noindent%
 \begin{quoting}[rightmargin=0pt]
+\vspace*{-\baselineskip}
+\glsdisablehyper
 \printacronyms
 \end{quoting}
 %
@@ -618,7 +632,12 @@ benötigten Platz berechnet. Für \Environment*{tabu}"=Tabellen kann anstelle
 einer festen Breite auch \PValue{spread 0pt} angegeben werden. Dadurch werden 
 Spalten vom Typ~\PValue{X} anfänglich in ihrer natürlichen Breite gesetzt. 
 Sobald jedoch die Gesamtbreite der Tabelle die Seitenbreite überschreiten 
-würde, werden die \PValue{X}"~Spalten automatisch umbrochen.
+würde, werden die \PValue{X}"~Spalten automatisch umbrochen. Geschieht dies 
+tatsächlich, gibt es beim Paket \Package{tabu} jedoch ein kleineres Problem. 
+In umbrochenen Spalten setzt \Package{tabu} zu wenig vertikalen Freiraum am 
+unteren Ende. Um dies zu beheben wird am Schluss jeder \PValue{X}"~Spalte mit
+\PValue{X<\{\Macro*{strut}\}} einfach der Befehl \Macro*{strut} angehängt, der 
+vertikalen Freiraum ober- und unterhalb der aktuellen Grundlinie einfügt.
 
 Der Rest des Stils ist recht schnell erläutert. Zunächst wird auf Tabellenköpfe 
 sowie Gruppierungen (Abstände und Überschriften) verzichtet. Schließlich ist 
@@ -641,10 +660,11 @@ neuen Stils.
 %
 \begin{Tutorial*}
 \printacronyms[style=acronymstabu]
+\clearpage
 \end{Tutorial*}
-\vspace*{-1.5\baselineskip}\par\noindent%
 \begin{quoting}[rightmargin=0pt]
-\printacronyms[style=acronymstabu]
+\vspace*{-\baselineskip}
+\printacronyms[type=acronym,style=acronymstabu]
 \end{quoting}
 
 \subsubsection{Symbolverzeichnis}
@@ -668,9 +688,13 @@ Gestalt:
 \Parameter{Symbol}\Parameter{Einheit}
 \end{quoting}
 %
-Mit \PName{Label} erfolgt die eindeutige Kennzeichnung des Symbols, gefolgt von 
-der \PName{Bezeichnung} und dem Formelzeichen beziehungsweise \PName{Symbol} 
-selbst sowie die dazugehörige physikalische \PName{Einheit}.
+Mit \PName{Label} erfolgt die eindeutige Kennzeichnung des Symbols. Außerdem 
+wird dies für die Sortierung verwendet, was unter Umständen etwas problematisch 
+sein könnte. Eine manuelle Festlegung für den dazugehörigen Schlüssel durch den 
+Anwender über das optionale Argument mit \PValue{sort=}\PName{Bezeichnung} ist 
+eventuell sinnvoll. Nach dem \PName{Label} folgt die \PName{Bezeichnung} für 
+das Formelzeichen beziehungsweise das \PName{Symbol} sowie die dazugehörige 
+physikalische \PName{Einheit}.
 %
 \begin{Tutorial}
 \newcommand*{\newsymbol}[5][]{%
@@ -680,7 +704,7 @@ selbst sowie die dazugehörige physikalische \PName{Einheit}.
     name={#3},%
     symbol={\ensuremath{#4}},%
     user1={\ensuremath{\mathrm{#5}}},%
-    sort=#2,%
+    sort={#2},%
     #1%
   }%
 }
@@ -688,30 +712,115 @@ selbst sowie die dazugehörige physikalische \PName{Einheit}.
 %
 Da es sich zumeist um mathematische Symbole handelt, wird für das Symbol und 
 die Einheit mit \Macro*{ensuremath} sorge getragen, dass diese auch im 
-Textmodus ohne Probleme verwendet werden können. Etwas problematisch kann unter 
-Umständen die Zuweisung des Labels zum Schlüssel \PValue{sort} sein. Hier ist 
-eine manuelle Festlegung für diesen Schlüssel durch den Anwender über das 
-optionale Argument eventuell sinnvoll. Für ein kleines Beispiel werden fünf 
-Formelzeichen definiert\dots
+Textmodus ohne Probleme verwendet werden können. 
+Für ein kleines Beispiel werden fünf Formelzeichen definiert\dots
 %
 \begin{Tutorial}
 \newsymbol{l}{Länge}{l}{m}
 \newsymbol{m}{Masse}{m}{kg}
+\newsymbol{a}{Beschleunigung}{a}{\nicefrac{m}{s^2}}
 \newsymbol{t}{Zeit}{t}{s}
 \newsymbol{f}{Frequenz}{f}{s^{-1}}
-\newsymbol{F}{Kraft}{F}{m \cdot kg \cdot s^{-2}=\frac{J}{m}}
+\newsymbol{F}{Kraft}{F}{m \cdot kg \cdot s^{-2}=\nicefrac{J}{m}}
 \end{Tutorial}
-\vspace*{-1.5\baselineskip}\par\noindent%
 %
 \dots und diese in einer kurzen Textpassage mit \Macro*{gls}\Parameter{Label} 
 verwendet.
 %
-\TutorialPreamble{\minisec{Ausgabe der Textpassage}}
 \begin{Tutorial}
-Die Einheiten für die \gls{f} und die \gls{F} werden aus den SI"=Basiseinheiten 
+Die Einheiten für die \gls{f} und die \gls{F} werden aus den SI"=Einheiten 
 der Basisgrößen \gls{l}, \gls{m} und \gls{t} abgeleitet.
 \end{Tutorial}
+%
+Damit wären zumindest die Symbole definiert. Allerdings ist noch nicht 
+festgelegt, wie genau die Ausgabe des Symbolverzeichnisses aussehen soll. 
+Momentan erzeugt der Befehl \Macro*{printsymbols} jedenfalls kein sinnvolles 
+Verzeichnis:
+%
+\begin{Tutorial*}
+\printsymbols
+\end{Tutorial*}
+\begin{quoting}[rightmargin=0pt]
+\vspace*{-\baselineskip}
+\glsdisablehyper
+\printsymbols
+\end{quoting}
+%
+Für dieses muss erst ein Stil definiert werden, was hier ähnlich zum Stil 
+\PValue{acronymstabu} geschieht. Einziger Unterschied hier ist, neben der 
+Anzahl der Spalten, dass eine \Environment*{longtabu}"=Umgebung verwendet wird. 
+Damit diese linksbündig im Text erscheint muss vor dem obligatorischen Argument 
+mit den Spaltendefinitionen noch das optionale Argument \PValue{l} angegeben 
+werden.
+%
+\begin{Tutorial}
+\newglossarystyle{symbolstabu}{%
+  \renewenvironment{theglossary}{%
+    \begin{longtabu}spread 0pt[l]{ccX<{\strut}l}%
+  }{%
+    \end{longtabu}%
+  }%  
+  \renewcommand*{\glossaryheader}{%
+    \toprule
+    \bfseries Symbol & \bfseries Einheit &
+    \bfseries Name & \bfseries Seite(n)
+    \tabularnewline\midrule\endhead%
+    \bottomrule\endfoot%
+  }%
+  \renewcommand*{\glsgroupheading}[1]{}%
+  \renewcommand*{\glsgroupskip}{}%
+  \renewcommand*{\glossentry}[2]{%
+    \glsentryitem{##1}% Entry number if required
+    \glstarget{##1}{\glossentrysymbol{##1}} &
+    \glsentryuseri{##1} &
+    \glossentryname{##1} &
+    ##2\tabularnewline%
+  }% 
+}
+\end{Tutorial}
+%
+Innerhalb von \Macro*{newglossarystyle} wird \Macro*{glossaryheader} für einen
+Tabellenkopf definiert, wie er auch für eine \Environment*{longtable}"=Umgebung 
+erscheinen würde. In hier vorgestellten Fall werden Kopf und Fuß mit 
+\Macro*{endhead} und \Macro*{endfoot} terminiert. Diese werden beim einem 
+möglichen Seitenumbruch zu Beginn und am Ende auf jeder Seite gesetzt.
 
+Damit man die Symbole auch wirklich sinnvoll nutzen kann, sollte das 
+Erscheinungsbild der Einträge mit \Macro*{defglsentryfmt} angepasst werden.
+%
+\begin{Tutorial}
+\defglsentryfmt[symbols]{%
+  \ifmmode%
+    \glssymbol{\glslabel}%
+  \else%
+    \glsgenentryfmt~\glsentrysymbol{\glslabel}%
+  \fi%
+}
+\end{Tutorial}
+%
+Diese Definition führt dazu, dass bei der Verwendung eines Symbols mit
+\Macro*{gls}\Parameter{Label} im Text diesem die Bezeichnung vorangestellt 
+wird, im Mathematikmodus allerdings allein das Symbol verwendet wird. Das 
+nachfolgende Beispiel macht dies deutlich.
+%
+\begin{Tutorial}
+Die Einheiten für die \gls{f} und die \gls{F} werden aus den SI"=Einheiten 
+der Basisgrößen \gls{l}, \gls{m} und \gls{t} abgeleitet. Und dann gibt es
+noch die Grundgleichung der Mechanik, welche für den Fall einer konstanten 
+Kraftwirkung in die Bewegungsrichtung einer Punktmasse lautet:
+$\gls{F} = \gls{m} \cdot \gls{a}$
+\end{Tutorial}
+%
+Das Symbolverzeichnis kann sich nun durchaus sehen lassen.
+%
+\begin{Tutorial*}
+\printsymbols[style=symbolstabu]
+\clearpage
+\end{Tutorial*}
+\begin{quoting}[rightmargin=0pt]
+\vspace*{-\baselineskip}
+\printsymbols[style=symbolstabu]
+\end{quoting}
 
 \section{Anfangszitat oder Schlauer Spruch}
 %%Anfangszitat: Der Text erscheint jetzt kursiv (\itshape) und kleiner als der 
@@ -729,9 +838,10 @@ der Basisgrößen \gls{l}, \gls{m} und \gls{t} abgeleitet.
 \label{sec:floats}
 
 \subsection{Grafiken und Untergrafiken}
+\label{sec:graphics}
 
 \subsection{Tabellen}
-
+\label{sec:tables}
 
 \section{Listen}
 

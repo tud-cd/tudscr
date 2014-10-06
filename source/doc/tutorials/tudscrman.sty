@@ -148,12 +148,24 @@
   \@@@Tutorial\par%
   \setlength{\@tempdimc}{\leftskip}%
   \setlength{\leftskip}{\leftmargin}%
-  \noindent\ignorespaces\input{\jobname-temp.tut}%
-  \par%
-  \setlength{\leftskip}{\@tempdimc}%
+  \@tempswafalse%
+  \begingroup%
+    \setbox0\vbox{\input{\jobname-temp.tut}}%
+    \setlength{\@tempdimb}{\dimexpr\ht0+\dp0}%
+    \ifdim\@tempdimb=\z@\relax
+      \global\@tempswatrue%
+    \fi%
+  \endgroup%
+  \noindent\ignorespaces%
+  \input{\jobname-temp.tut}%
   \global\let\@@@Tutorial\relax%
-  \vspace{.5\baselineskipglue}%
+  \if@tempswa%
+    \vspace{-\baselineskip}%
+  \else%
+    \vspace{.5\baselineskipglue}%
+  \fi%
   \par\noindent%
+  \setlength{\leftskip}{\@tempdimc}%
 }
 \AfterEndEnvironment{Tutorial*}{%
   \global\let\@@@Tutorial\relax%
@@ -311,14 +323,16 @@
 \newcommand*\ListOfToDo{\if@tud@todo\listoftodos\fi}
 \reversemarginpar
 \PassOptionsToPackage{hyperindex=false}{hyperref}
-\RequirePackage{hyperref}[2012/11/06]
-\hypersetup{colorlinks,linkcolor=blue}
-\pdfstringdefDisableCommands{%
-  \let\Application\@Application%
-  \let\Class\@Class%
-  \let\Package\@Package%
-  \let\TUDScript\@TUDScript%
-  \let\NoCaseChange\@firstofone%
+\AtEndPreamble{%
+  \RequirePackage{hyperref}[2012/11/06]
+  \hypersetup{colorlinks,linkcolor=blue}
+  \pdfstringdefDisableCommands{%
+    \let\Application\@Application%
+    \let\Class\@Class%
+    \let\Package\@Package%
+    \let\TUDScript\@TUDScript%
+    \let\NoCaseChange\@firstofone%
+  }%
 }
 \newrobustcmd*\bsc{\@backslashchar}
 \newcommand*\Email[1]{\href{mailto:#1}{\nolinkurl{#1}}}%
