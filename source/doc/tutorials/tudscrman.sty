@@ -122,30 +122,15 @@
 \RequirePackage{filecontents}[2011/10/08]
 \RequirePackage{silence}[2012/07/02]
 \WarningFilter[Tutorial]{latex}{Overwriting file}%
-\newcommand*\@Tutorial{%
-  \ActivateWarningFilters[Tutorial]%
-  \@nameuse{filecontents*}{\jobname-temp.tut}%
-}
-\newcommand*\@@Tutorial{%
-  \@nameuse{endfilecontents*}%
-  \DeactivateWarningFilters[Tutorial]%
+\newcommand*\@Tutorial{}
+\let\@Tutorial\relax
+\newcommand\TutorialPreamble[1]{\gdef\@Tutorial{#1}}
+\newenvironment{Tutorial}{\tud@tut@pre}{%
+  \tud@tut@post%
   \tud@tut@append%
-  \gdef\@tempa{%
-    \begin{quoting}[rightmargin=0pt]%
-    \lstinputlisting[style=tudscr]{\jobname-temp.tut}%
-    \end{quoting}%
-  }%
-  \aftergroup\@tempa%
+  \aftergroup\tud@tut@lst%
 }
-\newcommand*\@@@Tutorial{}
-\let\@@@Tutorial\relax
-\newcommand\TutorialPreamble[1]{\gdef\@@@Tutorial{#1}}
-\newenvironment{Tutorial}{\@Tutorial}{\@@Tutorial}
-\newenvironment{Tutorial*}{\@Tutorial}{\@@Tutorial}
-\newenvironment{Tutorial+}[1]{\gdef\@@@Tutorial{#1}\@Tutorial}{\@@Tutorial}
-\newenvironment{Tutorial-}{\@Tutorial}{\@@Tutorial}
 \AfterEndEnvironment{Tutorial}{%
-  \@@@Tutorial\par%
   \setlength{\@tempdimc}{\leftskip}%
   \setlength{\leftskip}{\leftmargin}%
   \@tempswafalse%
@@ -156,9 +141,13 @@
       \global\@tempswatrue%
     \fi%
   \endgroup%
+  \ifx\@Tutorial\relax\else%
+    \@Tutorial\par%
+    \vspace{.5\baselineskipglue}%
+  \fi%
   \noindent\ignorespaces%
   \input{\jobname-temp.tut}%
-  \global\let\@@@Tutorial\relax%
+  \global\let\@Tutorial\relax%
   \if@tempswa%
     \vspace{-\baselineskip}%
   \else%
@@ -167,9 +156,13 @@
   \par\noindent%
   \setlength{\leftskip}{\@tempdimc}%
 }
-\AfterEndEnvironment{Tutorial*}{%
-  \global\let\@@@Tutorial\relax%
-  \par\noindent%
+\newenvironment{Tutorial!}[1]{%
+  \gdef\@Tutorial{#1}%
+  \tud@tut@pre%
+}{%
+  \tud@tut@post%
+  \tud@tut@append%
+  \aftergroup\tud@tut@lst%
 }
 \ifcase\pdf@shellescape\or
 \begin{filecontents*}{\jobname-temp.tex}
@@ -185,27 +178,27 @@
 \end{document}
 \end{filecontents*}
 \fi
-\AfterEndEnvironment{Tutorial+}{%
+\AfterEndEnvironment{Tutorial!}{%
   \IfFileExists{\jobname-temp}{%
     \edef\tud@write@file{\jobname-temp}%
-    \edef\tud@write@option{-jobname=\@@@Tutorial-temp }%
+    \edef\tud@write@option{-jobname=\@Tutorial-temp }%
     \edef\tud@write@copy{}%
   }{%
     \edef\tud@write@file{tutorials/\jobname-temp}%
     \edef\tud@write@option{%
-      -output-directory tutorials -jobname=\@@@Tutorial-temp
+      -output-directory tutorials -jobname=\@Tutorial-temp
     }%
     \edef\tud@write@copy{tutorials\@backslashchar}%
   }%
   \immediate\write18{%
-    copy \tud@write@copy\jobname-temp.tut \tud@write@copy\@@@Tutorial-temp.tut
+    copy \tud@write@copy\jobname-temp.tut \tud@write@copy\@Tutorial-temp.tut
   }
   \immediate\write18{%
     pdflatex \tud@write@option \tud@write@file.tex
     pdflatex \tud@write@option \tud@write@file.tex
     pdflatex \tud@write@option \tud@write@file.tex
   }%
-  \global\let\@@@Tutorial\relax%
+  \global\let\@Tutorial\relax%
   \par\noindent%
 }
 \NewDocumentCommand\includetutorial{omO{1}}{%
@@ -239,7 +232,36 @@
     \fi%
   }{}%
 }
-\AtBeginEnvironment{Tutorial-}{\let\tud@tut@append\relax}
+\AfterEndEnvironment{Tutorial*}{%
+  \global\let\@Tutorial\relax%
+  \par\noindent%
+}
+\newenvironment{Tutorial*}{\tud@tut@pre}{%
+  \tud@tut@post%
+  \tud@tut@append%
+  \aftergroup\tud@tut@lst%
+}
+\newenvironment{Tutorial+}{\tud@tut@pre}{%
+  \tud@tut@post%
+  \tud@tut@append%
+}
+\newenvironment{Tutorial-}{\tud@tut@pre}{%
+  \tud@tut@post%
+  \aftergroup\tud@tut@lst%
+}
+\newcommand*\tud@tut@pre{%
+  \ActivateWarningFilters[Tutorial]%
+  \@nameuse{filecontents*}{\jobname-temp.tut}%
+}
+\newcommand*\tud@tut@post{%
+  \@nameuse{endfilecontents*}%
+  \DeactivateWarningFilters[Tutorial]%
+}
+\newcommand*\tud@tut@lst{%
+  \begin{quoting}[rightmargin=0pt]%
+  \lstinputlisting[style=tudscr]{\jobname-temp.tut}%
+  \end{quoting}%
+}
 \newwrite\tud@tut@output
 \immediate\openout\tud@tut@output=\jobname.tut\relax
 \newread\tud@tut@input
@@ -271,7 +293,7 @@
   \manualmark\markright{\@title}%
   \maketitle#1%
 }
-\newcommand*\FinishTutorial[1][]{%
+\newcommand\FinishTutorial[1][]{%
   \immediate\closeout\tud@tut@output%
   \clearpage\pagestyle{empty}\@afterindentfalse\@afterheading%
   Zum Ende wird das vollst\"andige Tutorial als \"ubersetzbarer Quelltext
@@ -361,8 +383,10 @@
 \newcommand*\Distribution[1]{\mbox{\texturn{#1}}}
 \newcommand*\File[1]{\mbox{\texturn{#1}}}
 \NewDocumentCommand\Package{sm}{%
-  \IfBooleanTF{#1}{\texturn{#2}}{%
+  \IfBooleanTF{#1}{%
     \hyperref{../\tudscr@manual}{\tudscr@manual}{files:#2}{\texturn{#2}}%
+  }{%
+    \href{http://www.ctan.org/pkg/#2}{\texturn{#2}}%
   }%
 }
 \NewDocumentCommand\Option{smo}{%

@@ -4,6 +4,14 @@
 \SelectInputMappings{adieresis={ä},germandbls={ß}}
 \usepackage[T1]{fontenc}
 \usepackage{lmodern}
+\usepackage{tudscrman}
+\lstset{%
+  inputencoding=utf8,extendedchars=true,
+  literate=%
+    {ä}{{\"a}}1 {ö}{{\"o}}1 {ü}{{\"u}}1
+    {Ä}{{\"A}}1 {Ö}{{\"O}}1 {Ü}{{\"U}}1
+    {~}{{\textasciitilde}}1 {ß}{{\ss}}1
+}
 \usepackage{tudscrsupervisor}
 \usepackage{tabu,booktabs}
 \usepackage{units}
@@ -17,26 +25,21 @@
 \AfterPackage*{hyperref}{%
   \usepackage[%
     automake,%
-  %  xindy,%={language=german-din},%
     acronym,% Abkürzungen
     symbols,% Formelzeichen
     nomain,% kein Glossar
     translate=babel,%
     nogroupskip,%
-    toc,%
-    section=subsection,%
+    section=subsubsection,%
   ]{glossaries}
   \setStyleFile{\jobname-temp}
   \makeglossaries
 }
-\usepackage{tudscrman}
-\lstset{%
-  inputencoding=utf8,extendedchars=true,
-  literate=%
-    {ä}{{\"a}}1 {ö}{{\"o}}1 {ü}{{\"u}}1
-    {Ä}{{\"A}}1 {Ö}{{\"O}}1 {Ü}{{\"U}}1
-    {~}{{\textasciitilde}}1 {ß}{{\ss}}1
-}
+
+\usepackage{csquotes}
+\usepackage[backend=biber,style=alphabetic]{biblatex}
+\usepackage{filecontents}
+\addbibresource{treatise-temp.bib}
 
 \begin{document}
 \TUDoptions{cdfont=no}
@@ -77,7 +80,7 @@
   Für absolute Neueinsteiger gibt es einige freie Tutorials, welche die ersten 
   Schritte mit \hologo{LaTeXe} stark erleichtern. Sehr empfehlenswert ist die 
   ausführliche \hrfn{http://www.fadi-semmo.de/latex/workshop/}{Workshop-Reihe} 
-  von  Fadi~Semmo. Außerdem stellt Nicola~L.~C.~Talbot sehr gute Tutorials für 
+  von Fadi~Semmo. Außerdem stellt Nicola~L.~C.~Talbot sehr gute Tutorials für 
   \hrfn{http://www.dickimaw-books.com/latex/novices/}{\hologo{LaTeX}-Novizen} 
   sowie \hrfn{http://www.dickimaw-books.com/latex/thesis/}{Dissertationen} zur 
   freien Verfügung.
@@ -86,11 +89,13 @@
   wissenschaftliche Arbeit eine \TUDScript"=Dokumentklasse verwenden wollen. 
   Das vorgestellte Vorgehen kann jedoch~-- natürlich mit gewissen Abstrichen~-- 
   auch mit anderen Klassen, insbesondere denen aus dem \KOMAScript"=Bundle, 
-  umgesetzt werden. Viele der verwendeten Optionen und Befehle werden hier nur 
-  sporadisch in ihrer Grundfunktion erläutert. Eine detaillierte Erläuterung 
-  lässt sich jedoch jederzeit sehr einfach über die farbigen Hyperlinks zu den 
-  entsprechenden Stellen im \href{run:../tudscr.pdf}{\TUDScript-Handbuch} 
-  öffnen.
+  umgesetzt werden. Viele der hier verwendeten Optionen und Befehle aus dem 
+  \TUDScript-Bundle werden nur sporadisch in ihrer Grundfunktion erläutert. 
+  Eine detaillierte Erläuterung lässt sich jedoch jederzeit sehr einfach über 
+  die farbigen Hyperlinks im \href{run:../tudscr.pdf}{\TUDScript-Handbuch} 
+  öffnen. Des Weiteren wird hier sehr häufig auf die Dokumentation zu einzelnen 
+  Paketen hingewiesen. Diese lassen sich sehr einfach über die Kommandozeile 
+  respektive das Terminal über den Aufruf \PValue{texdoc }\PName{Paket} öffnen.
   
   Der Anwenderleitfaden muss nicht zwingend vollständig nachvollzogen werden. 
   Dieser ist in einzelne Abschnitte untergliedert, damit der Anwender sich 
@@ -109,14 +114,22 @@
 
 \section{Einleitung}
 \label{sec:introduction}
-Zu Beginn werden allerhand Pakete geladen, auf die im späteren Verlauf noch 
-genauer eingegangen wird. Den Anfang macht das Paket \Package{hyphsubst}. 
-Dieses wird für eine verbesserte Silbentrennung für die deutsche Sprache 
-benötigt und muss bereits \emph{vor} der Klasse geladen werden, damit es 
-problemlos funktioniert. Die Option \Option*{ngerman} führt dabei zur 
-Verwendung der neuen deutschen Rechtschreibung. Für die alte Orthographie ist 
-stattdessen die Option \Option*{german} zu verwenden.
+Zu Beginn werden allerhand Pakete geladen. Bei einigen wird in der Einleitung 
+nicht weiter darauf eingegangen, diese werden in den relevanten Abschnitten in 
+diesem Tutorial genauer erläutert. 
 
+Den Anfang macht das Paket \Package{hyphsubst}. Dieses wird für eine wesentlich 
+verbesserte Silbentrennung für die deutsche Sprache benötigt und muss bereits 
+\emph{vor} der Klasse geladen werden, damit es problemlos funktioniert. Die 
+Option \Option*{ngerman} führt dabei zur Verwendung der Trennmuster für die 
+neue deutsche Rechtschreibung, wobei der Wert \PValue{ngerman-x-latest} die 
+neuesten lädt. Für die alte Orthographie ist stattdessen die Option 
+\Option*{german} und der angepasste Wert zu verwenden.
+%
+\begin{Tutorial*}
+\RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
+\end{Tutorial*}
+%
 Beim Laden der Klasse mit \Macro*{documentclass} sollten die im Dokument 
 verwendeten Sprachen als Klassenoption angegeben werden, wobei die zuletzt 
 angegebene als aktuelle Sprache aktiviert wird. Dadurch werden diese nicht nur 
@@ -124,7 +137,6 @@ an das Paket \Package{babel} sondern auch an andere Pakete weitergereicht,
 welche sprachspezifische Einstellungen vornehmen.
 %
 \begin{Tutorial*}
-\RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrreprt}
 \usepackage{babel}
 \end{Tutorial*}
@@ -151,24 +163,44 @@ In neuen Dokumenten kann es bedenkenlos geladen werden.
 Das Paket \Package{tabu} ist relativ neu und versucht, viele Funktionalitäten 
 ganz unterschiedlicher Pakete für den Tabellensatz in sich zu vereinen. Damit 
 die erstellten Tabellen auch gut aussehen, ist das Paket \Package{booktabs} 
-sehr zu empfehlen. Hinweise zum guten und korrekten Tabellensatz werden 
-übrigens in \autoref{sec:tables} gegeben.
+sehr zu empfehlen. Hinweise zum guten und korrekten Tabellensatz werden in 
+\autoref{sec:tables} gegeben.
 %
 \begin{Tutorial*}
 \usepackage{tabu}
 \usepackage{booktabs}
 \end{Tutorial*}
 %
-Mit \Package{units} lassen sich Einheiten typographisch korrekt setzen.
+Mit \Package{units} lassen sich Einheiten typographisch korrekt setzen. 
+Außerdem stellt diese Paket den Befehl \Macro*{nicefrac} zur Verfügung, mit dem 
+sich eine schönere Darstellungen von mathematischen Brüchen~-- insbesondere für 
+den Fließtext~-- setzen lässt.
 %
 \begin{Tutorial*}
 \usepackage{units}
 \end{Tutorial*}
 %
-Für die Aufgabenstellung wird das Paket \Package{tudscrsupervisor} benötigt.
+Für eine Aufgabenstellung im Corporate Design der Technischen Universität 
+Dresden, wie sie in \autoref{sec:task} vorgestellt wird, muss das Paket 
+\Package{tudscrsupervisor} geladen werden.
 %
 \begin{Tutorial*}
 \usepackage{tudscrsupervisor}
+\end{Tutorial*}
+%
+Für das Literaturverzeichnis wird das Paket \Package{biblatex} geladen. Für 
+dieses wird außerdem die Verwendung von \Package{csquotes} sehr empfohlen. Mit 
+der Umgebung \Environment*{filecontents} wird eine Literaturdatenbank 
+\PValue{treatise-temp.bib} direkt beim Kompilieren mit \hologo{LaTeX} für ein 
+kleines Beispiel erzeugt. Damit dies im Dokument selbst und nicht nur in der 
+Präambel erfolgen kann, wird das Paket \Package{filecontents} geladen. Alles 
+Weitere dazu ist in \autoref{sec:biblatex} zu finden.
+%
+\begin{Tutorial*}
+\usepackage{csquotes}
+\usepackage[backend=biber,style=alphabetic]{biblatex}
+\usepackage{filecontents}
+\addbibresource{treatise-temp.bib}
 \end{Tutorial*}
 %
 Damit alle möglichen Querverweise in einem PDF-Dokument automatisch verlinkt 
@@ -252,7 +284,7 @@ erläutert. Die resultierende Ausgabe des nachfolgenden Quelltextauszugs ist in
 \caption{Umschlagseite und Titel}
 \label{fig:title}
 \end{figure}
-\begin{Tutorial+}{Title}
+\begin{Tutorial!}{Title}
 \faculty{Juristische Fakultät}
 \department{Fachrichtung Strafrecht}
 \institute{Institut für Kriminologie}
@@ -280,7 +312,7 @@ erläutert. Die resultierende Ausgabe des nachfolgenden Quelltextauszugs ist in
 \date{10.09.2014}
 \makecover
 \maketitle
-\end{Tutorial+}
+\end{Tutorial!}
 
 
 
@@ -294,20 +326,24 @@ betreuenden Hochschullehrer respektive wissenschaftlichen Mitarbeiters.
 
 
 \subsection{Aufgabenstellung}
+\label{sec:task}
 Wird eine Abschlussarbeit an der \TnUD geschrieben, kann entweder die Umgebung 
 \Environment{task} oder der Befehl \Macro{taskform} für die Erstellung einer 
 Aufgabenstellung verwendet werden. Bei beiden Varianten wird zu Beginn eine 
 Tabelle mit Informationen zum Autor angegeben und am Ende der oder die Betreuer 
 der Arbeit sowie Professor und gegebenenfalls der Prüfungsausschussvorsitzende. 
 Dazwischen kann bei der Umgebung \Environment{task} ein freier Inhalt angegeben 
-werden. Der Befehl \Macro{taskform} erzeugt eine standardisierte Ausgabe. Das 
-Resultat des folgenden Quelltextes ist in \autoref{fig:task} dargestellt.
+werden. Der Befehl \Macro{taskform} erzeugt eine standardisierte Ausgabe. Dabei 
+ist darauf zu achten, dass das zweite obligatorische Argument innerhalb einer 
+\Environment*{itemize}"=Umgebung verwendet wird und somit \Macro*{item} zu 
+nutzen ist. Das Resultat des folgenden Quelltextes ist in \autoref{fig:task} 
+dargestellt.
 \begin{figure}
 \includetutorial{Task}[1,2]
 \caption{Aufgabenstellung in freier und standardisierter Form}
 \label{fig:task}
 \end{figure}
-\begin{Tutorial+}{Task}
+\begin{Tutorial!}{Task}
 \faculty{Juristische Fakultät}
 \department{Fachrichtung Strafrecht}
 \institute{Institut für Kriminologie}
@@ -361,7 +397,7 @@ Resultat des folgenden Quelltextes ist in \autoref{fig:task} dargestellt.
   \item Anwendung der entwickelten Methodik
   \item Dokumentation und grafische Aufbereitung der Ergebnisse
 }
-\end{Tutorial+}
+\end{Tutorial!}
 
 
 \subsection{Zusammenfassung}
@@ -382,7 +418,7 @@ sehen.
 \caption{Zusammenfassung in deutscher und englischer Sprache}
 \label{fig:abstr}
 \end{figure}
-\begin{Tutorial+}{Abstract}
+\begin{Tutorial!}{Abstract}
 \TUDoption{abstract}{multiple,section}
 \begin{abstract}
   Dies ist der deutschsprachige Teil der Zusammenfassung, in dem die
@@ -392,7 +428,7 @@ sehen.
   This is the english part of the summary, in which the motivation and
   the content of the following academic treatise are briefly presented.
 \end{abstract}
-\end{Tutorial+}
+\end{Tutorial!}
 
 
 \subsection{Erklärungen}
@@ -412,14 +448,14 @@ abgebildet.
 \caption{Selbstständigkeitserklärung und Sperrvermerk}
 \label{fig:decl}
 \end{figure}
-\begin{Tutorial+}{Declaration}
+\begin{Tutorial!}{Declaration}
 \title{%
   Entwicklung eines optimalen Verfahrens zur Eroberung des
   Geldspeichers in Entenhausen
 }
 \author{Mickey Mouse\and Donald Duck}
 \declaration[company=FIRMA]
-\end{Tutorial+}
+\end{Tutorial!}
 
 
 \subsection{Inhalts-, Abbildungs-, und Tabellenverzeichnis}
@@ -443,8 +479,8 @@ ihrer angestammten Gleitumgebung genutzt und benannt werden, kann dies mit
 \Macro*{captionof}\Parameter{Typ}\OParameter{Verzeichniseintrag}\Parameter{Bezeichnung}
 erfolgen. Weitere Informationen hierzu sind der \KOMAScript"=Anleitung 
 \scrguide zu 
-entnehmen. Außerdem wird in diesem Tutorial in \autoref{sec:floats} genauer auf 
-die Verwendung von Gleitumgebungen eingegangen.
+entnehmen. Außerdem wird in \autoref{sec:floats} genauer auf die Verwendung von 
+Gleitumgebungen eingegangen.
 %
 \begin{Tutorial*}
 \tableofcontents
@@ -454,6 +490,100 @@ die Verwendung von Gleitumgebungen eingegangen.
 \end{Tutorial*}
 
 
+\subsection{Literaturverzeichnis}
+\label{sec:biblatex}
+Für das Erstellen eines Literaturverzeichnisses wurde in der Vergangenheit fast 
+ausschließlich \hologo{BibTeX} verwendet. Lieder wird auch heute immer noch 
+darauf verwiesen, obwohl es seit einigen Jahren das Paket \Package{biblatex} 
+gibt, welches insbesondere für neue Dokumente definitiv den Vorzug erhalten 
+sollte. Auch die Umstellung älterer \hologo{BibTeX}"=Datenbanken ist mit 
+wenigen Handgriffen realisierbar. Für \Package{biblatex} existieren eine Menge 
+unterschiedlicher, vordefinierter Zitierstile, welche sich im Vergleich zu 
+\hologo{BibTeX} auch wesentlich leichter an die individuellen Bedürfnisse 
+anpassen lassen. Ein weiterer Vorteil ist die Unterstützung von Datenbanken, 
+welche eine UTF"~8"~Kodierung nutzen, wenn \Application{biber} zur Sortierung 
+der Einträge verwendet wird. Welcher Stil und welches Backend zur Sortierung 
+genutzt werden soll, lässt sich durch das optionale Argument beim Laden des 
+Paketes festlegen.
+%
+\begin{Tutorial-}
+\usepackage[backend=biber,style=alphabetic]{biblatex}
+\end{Tutorial-}
+%
+Die Erstellung einer Literaturdatenbank kann entweder von Hand oder mithilfe 
+einer externen Anwendung erfolgen. Für die letztgenannte Variante sind die 
+Programme \Application{Citavi} respektive \Application{JabRef} empfehlenswert. 
+Eine Einführung in die beiden Anwendungen würde allerdings zu weit führen. 
+Deshalb wird nachfolgend eine Literaturdatenbank mit drei Einträgen manuell 
+erzeugt, wobei hierfür die \Environment*{filecontents}"=Umgebung verwendet 
+wird, mit der innerhalb eines \hologo{LaTeX}"=Dokumentes externe Textdateien 
+erstellt werden können. Zuerst die Ausgabe, darunter folgt die Erläuterung:
+%
+\begin{Tutorial}
+\begin{filecontents}{treatise-temp.bib}
+@book{goossens94,
+  author    = {Goossens, Michel and Mittelbach, Frank
+               and Samarin, Alexander},
+  title     = {The LaTeX Companion},
+  date      = {1994},
+  publisher = {Addison-Wesley},
+  location  = {Reading, Massachusetts},
+  language  = {english},
+}
+@book{knuth84,
+  author    = {Knuth, Donald E.},
+  title     = {The \TeX book},
+  date      = {1984},
+  maintitle = {Computers \& Typesetting},
+  volume    = {A},
+  publisher = {Addison-Wesley},
+  location  = {Reading, Massachusetts},
+  language  = {english},
+}
+@manual{hanisch14,
+  author    = {Hanisch, Falk},
+  title     = {Ein \LaTeX"=Bundle für Dokumente im neuen Corporate Design
+               der Technischen Universität Dresden},
+  date      = {2014},
+  subtitle  = {Benutzerhandbuch},
+  location  = {Dresden},
+  language  = {german},
+}
+\end{filecontents}
+\end{Tutorial}
+%
+Es wurden drei Einträge definiert. Jeder Eintrag in eine \PValue{.bib}-Datei 
+beginnt mit \PValue{@}\PName{Eintragstyp}. Direkt danach erstes ist für den 
+Eintrag ein \emph{eindeutiges} \PParameter{Label} festzulegen. Anschließend 
+können für unterschiedliche Felder die dazugehörige Werte eingetragen werden. 
+Die verwendbaren Eintragstypen und die für diesen benötigten und zusätzlich 
+nutzbaren Felder sind in der Dokumentation von \Package{biblatex} zu finden.
+
+Im einfachsten Fall werden die Einträge mit \Macro*{cite}\Parameter{macro} im 
+Dokument referenziert. Für die Referenzierung werden durch \Package{biblatex} 
+weitere Befehle angeboten.
+%
+\begin{Tutorial}
+In diesem Textabschnitt werden \cite{knuth84} sowie \cite{goossens94} und 
+\cite{hanisch14} zitiert.
+\end{Tutorial}
+%
+Das Literaturverzeichnis wird mit \Macro*{printbibliography} ausgegeben, wobei 
+nicht alle Einträge der Literaturdatenbank sondern lediglich die tatsächlich 
+referenzierten verwendet werden.
+%
+\begin{Tutorial*}
+\printbibliography[heading=subbibliography]
+\end{Tutorial*}
+\begin{Tutorial+}
+\clearpage
+\end{Tutorial+}
+\begin{quoting}[rightmargin=0pt]
+\vspace*{-\baselineskip}
+\printbibliography[heading=subbibliography]
+\end{quoting}
+
+
 \subsection{Abkürzungs- und Symbolverzeichnis}
 \label{sec:glossaries}
 Für die Auszeichnung von Abkürzungen gibt es zwei sehr gute Pakete, die dieses 
@@ -461,7 +591,7 @@ Unterfangen stark vereinfachen. Die einfachere~-- jedoch nicht so mächtige~--
 der beiden Varianten ist die Nutzung des Paketes \Package{acro}. Sollen nur 
 Abkürzungen und gegebenenfalls eine sortierte Liste dieser gesetzt werden, ist 
 dieses allerdings absolut ausreichend. Für ein Symbolverzeichnis lässt sich in 
-dieser Variante das Paket \Package*{nomencl} nutzen. Dieses bietet meiner 
+dieser Variante das Paket \Package{nomencl} nutzen. Dieses bietet meiner 
 Meinung nach jedoch keine großen Vorteile, stattdessen kann auch einfach eine 
 Tabelle händisch erzeugt werden. Das Paket \Package{acro} ist sehr gut und 
 ausführlich dokumentiert. Deshalb wird hier auf eine exemplarische Erläuterung 
@@ -594,7 +724,7 @@ stellt zwar auch eine Menge Stilen in Tabellenform bereit, allerdings nicht in
 dem gewünschten Stil. Deshalb wird hier gezeigt, wie ein eigener Stil kreiert 
 werden kann. Dafür wird der Befehl \Macro*{newglossarystyle} verwendet. Die 
 Definition des neuen Stils \PValue{acronymstabu} wird nachfolgend ausgegeben, 
-die Erläuterung dazu schließt sich daran an.
+die Erläuterung dazu schließt sich daran an:
 %
 \begin{Tutorial}
 \newglossarystyle{acronymstabu}{%
@@ -660,8 +790,10 @@ neuen Stils.
 %
 \begin{Tutorial*}
 \printacronyms[style=acronymstabu]
-\clearpage
 \end{Tutorial*}
+\begin{Tutorial+}
+\clearpage
+\end{Tutorial+}
 \begin{quoting}[rightmargin=0pt]
 \vspace*{-\baselineskip}
 \printacronyms[type=acronym,style=acronymstabu]
@@ -754,12 +886,12 @@ mit den Spaltendefinitionen noch das optionale Argument \PValue{l} angegeben
 werden.
 %
 \begin{Tutorial}
-\newglossarystyle{symbolstabu}{%
+\newglossarystyle{symbolslongtabu}{%
   \renewenvironment{theglossary}{%
     \begin{longtabu}spread 0pt[l]{ccX<{\strut}l}%
   }{%
     \end{longtabu}%
-  }%  
+  }%
   \renewcommand*{\glossaryheader}{%
     \toprule
     \bfseries Symbol & \bfseries Einheit &
@@ -775,7 +907,7 @@ werden.
     \glsentryuseri{##1} &
     \glossentryname{##1} &
     ##2\tabularnewline%
-  }% 
+  }%
 }
 \end{Tutorial}
 %
@@ -814,13 +946,37 @@ $\gls{F} = \gls{m} \cdot \gls{a}$
 Das Symbolverzeichnis kann sich nun durchaus sehen lassen.
 %
 \begin{Tutorial*}
-\printsymbols[style=symbolstabu]
-\clearpage
+\printsymbols[style=symbolslongtabu]
 \end{Tutorial*}
+\begin{Tutorial+}
+\clearpage
+\end{Tutorial+}
 \begin{quoting}[rightmargin=0pt]
-\vspace*{-\baselineskip}
+\newglossarystyle{symbolstabu}{%
+  \renewenvironment{theglossary}{%
+    \begin{tabu}spread 0pt{ccX<{\strut}l}%
+  }{%
+    \bottomrule\end{tabu}%
+  }%
+  \renewcommand*{\glossaryheader}{%
+    \toprule
+    \bfseries Symbol & \bfseries Einheit &
+    \bfseries Name & \bfseries Seite(n)
+    \tabularnewline\midrule%
+  }%
+  \renewcommand*{\glsgroupheading}[1]{}%
+  \renewcommand*{\glsgroupskip}{}%
+  \renewcommand*{\glossentry}[2]{%
+    \glsentryitem{##1}% Entry number if required
+    \glstarget{##1}{\glossentrysymbol{##1}} &
+    \glsentryuseri{##1} &
+    \glossentryname{##1} &
+    ##2\tabularnewline%
+  }%
+}
 \printsymbols[style=symbolstabu]
 \end{quoting}
+
 
 \section{Anfangszitat oder Schlauer Spruch}
 %%Anfangszitat: Der Text erscheint jetzt kursiv (\itshape) und kleiner als der 
@@ -862,14 +1018,7 @@ Das Symbolverzeichnis kann sich nun durchaus sehen lassen.
 \section{Silbentrennung}
 
 
-\section{Literaturverzeichnis}
-
-
 \section{Quelltexte}
-
-
-
-\dots % §§§
 %
 %\begin{Tutorial-}
 %\usepackage{xparse}% §§§ bereits geladen
@@ -908,9 +1057,10 @@ Das Symbolverzeichnis kann sich nun durchaus sehen lassen.
 %%
 Damit ist das Tutorial beendet.
 \begin{Tutorial*}
+\dots
 \end{document}
 \end{Tutorial*}
-\FinishTutorial[%
+\FinishTutorial[\par%
   Für das Erstellen von Abkürzungs- und Symbolverzeichnis sollte das mehrmalige 
   Ausführen von \PValue{pdflatex}~\PName{Dateiname} vollkommen ausreichen. In 
   diesem Fall werden die Einträge mit \Application{makeindex} sortiert. Soll 
