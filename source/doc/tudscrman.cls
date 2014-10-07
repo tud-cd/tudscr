@@ -180,7 +180,10 @@
   }{}%
 }
 \newcommand*\tud@item@pkg[1][]{%
-  \itempackages[{\DeclarePackage{#1}\texturn{#1}}]%
+  \itempackages[{%
+    \DeclarePackage{#1}%
+    \href{http://www.ctan.org/pkg/#1}{\texturn{#1}}%
+  }]%
 }
 \newcommand*\tud@write@file{}
 \newcommand*\tud@write@option{}
@@ -493,6 +496,9 @@
       \@ProcessOutput[#1]{\texturn{#4}}{files}%
         [\protect\univrn]{#4}[\@TempClass]{#3}%
     }%
+%%    \IfBooleanTF{#2}{\gdef\@tempa{fullref}}{\xdef\@tempa{#3}}%
+%%    \@ProcessOutput[#1]{\texturn{#4}}{files}[\protect\univrn]%
+%%      {#4}[~{\idxfont(Klasse)}]{\@tempa}%
   }%
 }
 \DeclareExpandableDocumentCommand\@Class{st'om}{#4}
@@ -516,6 +522,9 @@
         \@ProcessOutput[#1]{\texturn{#4}}{files}%
           [\protect\univrn]{#4}[\@TempPackage]{#3}%
       }%
+%%      \IfBooleanTF{#2}{\gdef\@tempa{fullref}}{\xdef\@tempa{#3}}%
+%%      \@ProcessOutput[#1]{\texturn{#4}}{files}[\protect\univrn]%
+%%        {#4}[~{\idxfont(Paket)}]{\@tempa}%
     }%
   \fi%
 }
