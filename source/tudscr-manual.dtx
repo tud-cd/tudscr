@@ -1,4 +1,4 @@
-% \CheckSum{2238}
+% \CheckSum{2199}
 % \iffalse meta-comment
 % ======================================================================
 %
@@ -1200,41 +1200,88 @@
 % definiert, um bestimmte Begriffe, Klassen, Pakete, Optionen, Umgebungen, 
 % Befehle, Parameter, Bezeichner, Längen, Schriftelemente und Farben speziell
 % auszuzeichnen und im Index einzutragen. Allen diesen Befehlen ist gemein, 
-% dass diese in der Sternversion nicht in den Index eingetragen werden.
+% dass diese in der Sternversion nicht in den Index eingetragen werden,wenn sie 
+% denn im Fließtext verwendet werden. Wird die Sternversion jedoch in einer 
+% Änderungsnotiz genutzt, so wird die normalerweise angehängte Beschreibung des 
+% Elementes unterdrückt.
 %
-% Für (fast) alle der folgenden Befehle gilt, dass die Verwendung in der Form 
-% \cs{\meta{Befehl}'} fügt eine zusätzliche Referenz auf  den Abschnitt ihrer
-% Deklaration ein. Das erste optionale Argument dient für eine spezielle
-% Auszeichnung im Index. Die eigentliche Behandlung der Eingabe und die 
-% Eintragungen in den Index erfolgen dabei mit dem Befehl \cs{@ProcessOutput}.
-% \begin{macro}{\Application}
-% \begin{macro}{\@Application}
-% Die Auszeichnung und der Indexeintrag einer Anwendungssoftware.
+% Für (fast) alle der folgenden Befehle gilt, dass diese mit zwei optionalen 
+% Befehlen am Ende genutzt werden können. Mit \val{'refformat'} kann angegeben 
+% werden, obder automatisch erzeugte Hyperlink um einen textuellen Querverweis  
+% ergänzt werden soll. Mit \val{|idxformat|} kann die Erscheinung im Index 
+% angepasst werden. Die eigentliche Behandlung der Eingabe und die Eintragungen
+% in den Index erfolgen dabei mit dem Befehl \cs{@ProcessOutput}, für einen 
+% Eintrag in die Änderungsliste wird der Befehl \cs{@ProcessChangedAt} genutzt. 
+%
+% \begin{macro}{\CheckIndexFormat}
+% \changes{v2.02}{2014/10/08}{neu}%^^A
+% \begin{macro}{\SetIndexFormat}
+% \changes{v2.02}{2014/10/08}{neu}%^^A
+% \begin{macro}{\@IndexFormat}
+% \changes{v2.02}{2014/10/08}{neu}%^^A
+% Zuerst werden jedoch einige Hilfsmakros erstellt mit denen überprüft wird, ob
+% die Sternversion zusammen mit einer Indexformatierung \val{|idxformat|} 
+% genutzt wurde, was sich widerspricht. In diesem Fall erfolgt eine Warnung.
 %    \begin{macrocode}
-\NewDocumentCommand\Application{som}{%
-  \ifdin{#3}{%
-    \mbox{\texturs{#3}}%
-    \IfBooleanTF{#1}{}{%
-      \index{\texturs{#3}~{\idxfont(Anwendungssoftware)}\IfValueTF{#2}{|#2}{}}%
+\newcommand*\@IndexFormat{}
+\let\@IndexFormat\relax
+\newcommand*\CheckIndexFormat[2]{%
+  \IfBooleanT{#1}{%
+    \IfValueT{#2}{%
+      \ClassWarning{\tudcls@name}{%
+        You've used the starred version so no entry for\MessageBreak%
+        the index is created and the optional argument\MessageBreak%
+        |`index format'| will be ignored%
+      }%
     }%
   }%
 }
+\newcommand*\SetIndexFormat[2]{%
+  \CheckIndexFormat{#1}{#2}%
+  \IfBooleanTF{#1}{%
+    \def\@IndexFormat{#1}%
+  }{%
+    \IfValueTF{#2}{\def\@IndexFormat{#2}}{\def\@IndexFormat{}}%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \@IndexFormat
+% \end{macro}^^A \SetIndexFormat
+% \end{macro}^^A \CheckIndexFormat
+% \begin{macro}{\Application}
+% \changes{v2.02}{2014/10/08}{überarbeitet}%^^A
+% \begin{macro}{\@Application}
+% Die Auszeichnung und der Indexeintrag einer Anwendungssoftware.
+%    \begin{macrocode}
+\NewDocumentCommand\Application{smd||}{%
+  \ifdin{#2}{%
+    \mbox{\texturs{#2}}%
+    \CheckIndexFormat{#1}{#3}%
+    \IfBooleanF{#1}{%
+      \index{\texturs{#2}~{\idxfont(Anwendungssoftware)}\IfValueT{#3}{|#3}}%
+    }%
+  }%
+}
+\DeclareExpandableDocumentCommand\@Application{sm}{#2}
 %</class&body>
 %<*package&body>
 \newcommand*\Application[1]{\mbox{\texturs{#1}}}
 %</package&body>
 %<*class&body>
-\DeclareExpandableDocumentCommand\@Application{som}{#3}
 %    \end{macrocode}
 % \end{macro}^^A \@Application
 % \end{macro}^^A \Application
 % \begin{macro}{\Distribution}
+% \changes{v2.02}{2014/10/08}{überarbeitet}%^^A
 % Die Auszeichnung und der Indexeintrag einer \LaTeX-Distribution.
 %    \begin{macrocode}
-\NewDocumentCommand\Distribution{somo}{%
-  \mbox{\texturn{#3\IfValueTF{#4}{~#4}{}}}%
-  \IfBooleanTF{#1}{}{%
-    \index{\texturn{#3}~{\idxfont(Distribution)}\IfValueTF{#2}{|#2}{}}%
+\NewDocumentCommand\Distribution{smod||}{%
+  \ifdin{#2\IfValueT{#3}{~#3}}{%
+    \mbox{\texturn{#2\IfValueT{#3}{~#3}}}%
+    \CheckIndexFormat{#1}{#4}%
+    \IfBooleanF{#1}{%
+      \index{\texturn{#2}~{\idxfont(Distribution)}\IfValueT{#4}{|#4}}%
+    }%
   }%
 }
 %</class&body>
@@ -1253,12 +1300,16 @@
 %    \end{macrocode}
 % \end{macro}^^A \Path
 % \begin{macro}{\File}
+% \changes{v2.02}{2014/10/08}{überarbeitet}%^^A
 % Die Auszeichnung und der Indexeintrag einer Datei.
 %    \begin{macrocode}
-\NewDocumentCommand\File{som}{%
-  \mbox{\texturn{#3}}%
-  \IfBooleanTF{#1}{}{%
-    \index[files]{\texturn{#3}~{\idxfont(Datei)}\IfValueTF{#2}{|#2}{}}%
+\NewDocumentCommand\File{smd||}{%
+  \ifdin{#2}{%
+    \mbox{\texturn{#2}}%
+    \CheckIndexFormat{#1}{#3}%
+    \IfBooleanF{#1}{%
+      \index[files]{\texturn{#2}~{\idxfont(Datei)}\IfValueT{#3}{|#3}}%
+    }%
   }%
 }
 %</class&body>
@@ -1268,33 +1319,8 @@
 %<*class&body>
 %    \end{macrocode}
 % \end{macro}^^A \File
-% \begin{macro}{\Class}
-% \begin{macro}{\@Class}
 % \begin{macro}{\DeclareClass}
-% \begin{macro}{\@TempClass}
-% Die Auszeichnung und der Indexeintrag einer Klasse. Sollte gerade DIN~Bold 
-% verwendet werden~-- der Befehl wird innerhalb einer Überschrift verwendet~-- 
-% wird lediglich das Hauptargument ausgegeben. Außerdem wird für Einträge mit 
-% dem \pkg{hyperref}-Paket mit \cs{@Class} eine expandierbare Version des 
-% Befehls definiert. Mit \cs{DeclareClass} wird eine Klasse deklariert.
 %    \begin{macrocode}
-\newcommand*\@TempClass{}
-\NewDocumentCommand\Class{st'om}{%
-  \ifdin{#4}{%
-    \gdef\@TempClass{~{\idxfont(Klasse)}}%
-    \IfBooleanTF{#2}{%
-      \@ProcessOutput[#1]{\texturn{#4}}{files}%
-        [\protect\univrn]{#4}[\@TempClass]{fullref}%
-    }{%
-      \@ProcessOutput[#1]{\texturn{#4}}{files}%
-        [\protect\univrn]{#4}[\@TempClass]{#3}%
-    }%
-%%    \IfBooleanTF{#2}{\gdef\@tempa{fullref}}{\xdef\@tempa{#3}}%
-%%    \@ProcessOutput[#1]{\texturn{#4}}{files}[\protect\univrn]%
-%%      {#4}[~{\idxfont(Klasse)}]{\@tempa}%
-  }%
-}
-\DeclareExpandableDocumentCommand\@Class{st'om}{#4}
 \NewDocumentCommand\DeclareClass{om}{%
   \IfValueTF{#1}{\ChangedAt@Process{#1!\emph{neu}!\Class{#2}}}{}%
   \Hy@raisedlink{\hyperdef{\jobname}{files:#2}{}}%
@@ -1302,41 +1328,33 @@
   \index[files]{\hyperidx[files:#2]{\texturn{#2}~{\idxfont(Klasse)}}|declare}%
 }
 %    \end{macrocode}
-% \end{macro}^^A \@TempClass
 % \end{macro}^^A \DeclareClass
+% \begin{macro}{\Class}
+% \changes{v2.02}{2014/10/08}{überarbeitet}%^^A
+% \begin{macro}{\@Class}
+% \begin{macro}{\@TempClass}
+% \changes{v2.02}{2014/10/08}{entfernt}%^^A
+% Die Auszeichnung und der Indexeintrag einer Klasse. Sollte gerade DIN~Bold 
+% verwendet werden~-- der Befehl wird innerhalb einer Überschrift genutzt~-- 
+% wird lediglich das Hauptargument ausgegeben. Außerdem wird für Einträge mit 
+% dem \pkg{hyperref}-Paket mit \cs{@Class} eine expandierbare Version des 
+% Befehls definiert.
+%    \begin{macrocode}
+\NewDocumentCommand\Class{smd''d||}{%
+  \ifdin{#2}{%
+    \SetIndexFormat{#1}{#4}%
+    \@ProcessOutput{\texturn{#2}}'#3'%
+      {files}[\protect\univrn]{#2}[~{\idxfont(Klasse)}]%
+  }%
+}
+\DeclareExpandableDocumentCommand\@Class{sm}{#2}
+%    \end{macrocode}
+% \end{macro}^^A \@TempClass
 % \end{macro}^^A \@Class
 % \end{macro}^^A \Class
-% \begin{macro}{\Package}
-% \changes{v2.02}{2014/07/10}{Ausgabe für ChangeLog hinzugefügt}%^^A
-% \begin{macro}{\@Package}
 % \begin{macro}{\DeclarePackage}
 % \changes{v2.02}{2014/07/10}{optionales Argument für Änderungsnotiz}%^^A
-% \begin{macro}{\@TempPackage}
-% Für die Auszeichnungen von Paketen gelten vorherigen Aussagen äquivalent. 
-% Zusätzlich wird ein Befehl für Tutorials erstellt, welcher auf das Handbuch 
-% verweist.
 %    \begin{macrocode}
-\newcommand*\@TempPackage{}
-\NewDocumentCommand\Package{st'om}{%
-  \if@changelog%
-    \@ProcessChangedAt{files}[\protect\univrn]{#4}[~{\idxfont(Paket)}]%
-  \else%
-    \ifdin{#4}{%
-      \gdef\@TempPackage{~{\idxfont(Paket)}}%
-      \IfBooleanTF{#2}{%
-        \@ProcessOutput[#1]{\texturn{#4}}{files}%
-          [\protect\univrn]{#4}[\@TempPackage]{fullref}%
-      }{%
-        \@ProcessOutput[#1]{\texturn{#4}}{files}%
-          [\protect\univrn]{#4}[\@TempPackage]{#3}%
-      }%
-%%      \IfBooleanTF{#2}{\gdef\@tempa{fullref}}{\xdef\@tempa{#3}}%
-%%      \@ProcessOutput[#1]{\texturn{#4}}{files}[\protect\univrn]%
-%%        {#4}[~{\idxfont(Paket)}]{\@tempa}%
-    }%
-  \fi%
-}
-\DeclareExpandableDocumentCommand\@Package{st'om}{#4}
 \NewDocumentCommand\DeclarePackage{som}{%
   \IfValueTF{#2}{\ChangedAt@Process{#2!\emph{neu}!\Package{#3}}}{}%
   \IfBooleanTF{#1}{%
@@ -1350,6 +1368,30 @@
   \label{files:#3}%
   \index[files]{\hyperidx[files:#3]{\texturn{#3}~{\idxfont(Paket)}}|declare}%
 }
+%    \end{macrocode}
+% \end{macro}^^A \DeclarePackage
+% \begin{macro}{\Package}
+% \changes{v2.02}{2014/07/10}{Ausgabe für ChangeLog hinzugefügt}%^^A
+% \changes{v2.02}{2014/10/08}{überarbeitet}%^^A
+% \begin{macro}{\@Package}
+% \begin{macro}{\@TempPackage}
+% \changes{v2.02}{2014/10/08}{entfernt}%^^A
+% Für die Auszeichnungen von Paketen gelten vorherigen Aussagen äquivalent. 
+% Zusätzlich wird ein Befehl für Tutorials erstellt, welcher auf das Handbuch 
+% verweist.
+%    \begin{macrocode}
+\NewDocumentCommand\Package{smd''d||}{%
+  \if@changelog%
+    \@ProcessChangedAt{#1}{files}{\protect\univrn}{#2}{Paket}%
+  \else%
+    \ifdin{#2}{%
+      \SetIndexFormat{#1}{#4}%
+      \@ProcessOutput{\texturn{#2}}'#3'%
+        {files}[\protect\univrn]{#2}[~{\idxfont(Paket)}]%
+    }%
+  \fi%
+}
+\DeclareExpandableDocumentCommand\@Package{sm}{#2}
 %</class&body>
 %<*package&body>
 \NewDocumentCommand\Package{sm}{%
@@ -1361,31 +1403,24 @@
 %<*class&body>
 %    \end{macrocode}
 % \end{macro}^^A \@TempPackage
-% \end{macro}^^A \DeclarePackage
 % \end{macro}^^A \@Package
 % \end{macro}^^A \Package
 % \begin{macro}{\Option}
+% \changes{v2.02}{2014/10/08}{überarbeitet}%^^A
 % \begin{macro}{\@TempOption}
-% Für die Auszeichnung von Optionen wird zusätzlich unterschieden, ob der 
-% Befehl gerade innerhalb der Änderungsliste verwendet wird. Ist dies der Fall, 
-% wird der verarbeitende Befehl \cs{@ProcessChangedAt} aufgerufen. Mit dem 
-% optionalen Argument \emph{nach} dem Hauptargument kann der Option im Handbuch 
-% ein Wert zugewiesen werden. Für Tutorials wird ein Befehl definiert, der auf 
-% das Handbuch verweist.
+% Im Gegensatz zu den vorherigen Befehlen gibt es ein ordinäres optionales 
+% Argument nach dem Hauptargument. Damit kann der Option im Handbuch ein Wert
+% zugewiesen werden. Für Tutorials wird ein Befehl definiert, der auf das
+% Handbuch verweist.
 %    \begin{macrocode}
 \newcommand*\@TempOption{}
-\NewDocumentCommand\Option{st'omo}{%
+\NewDocumentCommand\Option{smod''d||}{%
   \if@changelog%
-    \@ProcessChangedAt{options}[\ttfamily]{#4}[~{\idxfont(Option)}]%
+    \@ProcessChangedAt{#1}{options}{\ttfamily}{#2}{Option}%
   \else%
-    \IfValueTF{#5}{\gdef\@TempOption{\texttt{=#5}}}{\gdef\@TempOption{}}%
-    \IfBooleanTF{#2}{%
-      \@ProcessOutput[#1]{\texttt{#4}}[\@TempOption]{options}%
-        [\ttfamily]{#4}{fullref}%
-    }{%
-      \@ProcessOutput[#1]{\texttt{#4}}[\@TempOption]{options}%
-        [\ttfamily]{#4}{#3}%
-    }%
+    \IfValueTF{#3}{\gdef\@TempOption{\texttt{=#3}}}{\gdef\@TempOption{}}%
+    \SetIndexFormat{#1}{#5}%
+    \@ProcessOutput{\texttt{#2}}[\@TempOption]'#4'{options}[\ttfamily]{#2}%
   \fi%
 }
 %</class&body>
@@ -1404,13 +1439,15 @@
 % \end{macro}^^A \@TempOption
 % \end{macro}^^A \Option
 % \begin{macro}{\Environment}
+% \changes{v2.02}{2014/10/08}{überarbeitet}%^^A
 % \begin{macro}{\@TempEnvironment}
-% Auch hier wird für die Änderungsliste unterschieden. 
+% Auch hier wird für die Änderungsliste unterschieden und für Tutorials ein 
+% Befehl definiert, welcher auf das Handbuch referenziert.
 %    \begin{macrocode}
 \newcommand*\@TempEnvironment{}
-\NewDocumentCommand\Environment{st'omo}{%
+\NewDocumentCommand\Environment{smod''d||}{%
   \if@changelog%
-    \@ProcessChangedAt{macros}[\ttfamily]{#4}[~{\idxfont(Umgebung)}]%
+    \@ProcessChangedAt{#1}{macros}{\ttfamily}{#2}{Umgebung}%
   \else%
 %    \end{macrocode}
 % Außerdem wird für den Fall, dass der \cs{Environment}-Befehl innerhalb der
@@ -1420,20 +1457,15 @@
 %    \begin{macrocode}
     \if@declare%
       \gdef\@TempEnvironment{%
-        \texttt{\bsc{}begin\{#4\}\IfValueTF{#5}{#5}{}}\tabularnewline%
+        \texttt{\bsc{}begin\{#2\}\IfValueT{#3}{#3}}\tabularnewline%
         \texttt{\dots}\tabularnewline%
-        \texttt{\bsc{}end\{#4\}}%
+        \texttt{\bsc{}end\{#2\}}%
       }%
     \else%
-      \gdef\@TempEnvironment{\texttt{#4}}%
+      \gdef\@TempEnvironment{\texttt{#2}}%
     \fi%
-    \IfBooleanTF{#2}{%
-      \@ProcessOutput[#1]{\@TempEnvironment}{macros}%
-        [\ttfamily]{#4}{fullref}%
-    }{%
-      \@ProcessOutput[#1]{\@TempEnvironment}{macros}%
-        [\ttfamily]{#4}{#3}%
-    }%
+    \SetIndexFormat{#1}{#5}%
+    \@ProcessOutput{\@TempEnvironment}'#4'{macros}[\ttfamily]{#2}%
   \fi%
 }
 %</class&body>
@@ -1449,20 +1481,16 @@
 % \end{macro}^^A \@TempEnvironment
 % \end{macro}^^A \Environment
 % \begin{macro}{\Macro}
-% Die Auszeichnung und der Indexeintrag eines Befehls. Zusätzlich wird ein 
-% Befehl für Tutorials erstellt, welcher auf das Handbuch verweist.
+% \changes{v2.02}{2014/10/08}{überarbeitet}%^^A
+% Die Auszeichnung und der Indexeintrag eines Befehls sowie für das Paket 
+% \pkg{tudscrman} der Hyperlink auf das Handbuch.
 %    \begin{macrocode}
-\NewDocumentCommand\Macro{st'om}{%
+\NewDocumentCommand\Macro{smd''d||}{%
   \if@changelog%
-    \@ProcessChangedAt{macros}[\ttfamily\bsc]{#4}[~{\idxfont(Befehl)}]%
+    \@ProcessChangedAt{#1}{macros}{\ttfamily\bsc}{#2}{Befehl}%
   \else%
-    \IfBooleanTF{#2}{%
-      \@ProcessOutput[#1]{\texttt{\bsc#4}}{macros}%
-        [\ttfamily\bsc]{#4}{fullref}%
-    }{%
-      \@ProcessOutput[#1]{\texttt{\bsc#4}}{macros}%
-        [\ttfamily\bsc]{#4}{#3}%
-    }%
+    \SetIndexFormat{#1}{#4}%
+    \@ProcessOutput{\texttt{\bsc#2}}'#3'{macros}[\ttfamily\bsc]{#2}%
   \fi%
 }
 %</class&body>
@@ -1477,28 +1505,30 @@
 %    \end{macrocode}
 % \end{macro}^^A \Macro
 % \begin{macro}{\Key}
+% \changes{v2.02}{2014/10/08}{überarbeitet}%^^A
 % \begin{macro}{\@TempKey}
 % Die Auszeichnung und der Indexeintrag eines Parameters für Umgebungen und 
 % Befehle. Das erste Argument ist die Umgebung oder der Befehl, wofür der 
 % Parameter gültig ist. Das zweite Argument ist der Parameter selbst. Dafür 
-% werden die Befehle \cs{Environment} und \cs{Macro} lokal umdefiniert. 
+% werden die Befehle \cs{Environment} und \cs{Macro} lokal umdefiniert. Das 
+% ordinäre obligatorische Argument danach dient der Zuweisung eines Wertes im
+% Fließtext.
 %    \begin{macrocode}
 \newcommand*\@TempKey{}
-\NewDocumentCommand\Key{sommo}{%
+\NewDocumentCommand\Key{smmod''d||}{%
   \if@changelog%
-    \@ProcessChangedAt{macros}(#3)[\ttfamily]{#4}[~{\idxfont(Parameter)}]%
+    \@ProcessChangedAt{#1}{macros}(#2){\ttfamily}{#3}{Parameter}%
   \else%
     \begingroup%
-    \let\Environment\@firstofone%
-    \let\Macro\@firstofone%
-    \gdef\@TempKey{\if@declare~{\idxfont(Parameter)}\fi}%
-    \IfValueTF{#5}{%
-      \@ProcessOutput[#1]{\texttt{#4}}[\texttt{=#5}\@TempKey]{macros}(#3)%
-        [\ttfamily]{#4}{#2}%
-    }{%
-      \@ProcessOutput[#1]{\texttt{#4}}[\@TempKey]{macros}(#3)%
-        [\ttfamily]{#4}{#2}%
-    }%
+      \let\Environment\@firstofone%
+      \let\Macro\@firstofone%
+      \IfValueTF{#4}{%
+        \gdef\@TempKey{\texttt{=#4}\if@declare~{\idxfont(Parameter)}\fi}%
+      }{%
+        \gdef\@TempKey{\if@declare~{\idxfont(Parameter)}\fi}%
+      }%
+      \SetIndexFormat{#1}{#6}%
+      \@ProcessOutput{\texttt{#3}}[\@TempKey]'#5'{macros}(#2)[\ttfamily]{#3}%
     \endgroup%
   \fi%
 }
@@ -1507,76 +1537,69 @@
 % \end{macro}^^A \Key
 % \begin{macro}{\PageStyle}
 % \changes{v2.02}{2014/07/25}{neu}%^^A
-% \begin{macro}{\@TempPageStyle}
-% \changes{v2.02}{2014/07/25}{neu}%^^A
+% \changes{v2.02}{2014/10/08}{überarbeitet}%^^A
 % Die Auszeichnung und der Indexeintrag eines Seitenstils.
 %    \begin{macrocode}
-\newcommand*\@TempPageStyle{}
-\NewDocumentCommand\PageStyle{st'om}{%
+\NewDocumentCommand\PageStyle{smd''d||}{%
   \if@changelog%
-    \@ProcessChangedAt{macros}[\ttfamily]{#4}[~{\idxfont(Seitenstil)}]%
+    \@ProcessChangedAt{#1}{macros}{\ttfamily}{#2}{Seitenstil}%
   \else%
-    \gdef\@TempPageStyle{%
-      \texttt{#4}\if@declare~{\idxfont(Seitenstil)}\fi%
-    }%
-    \IfBooleanTF{#2}{%
-      \@ProcessOutput[#1]{\@TempPageStyle}{macros}%
-        [\ttfamily]{#4}[~{\idxfont(Seitenstil)}]{fullref}%
-    }{%
-      \@ProcessOutput[#1]{\@TempPageStyle}{macros}%
-        [\ttfamily]{#4}[~{\idxfont(Seitenstil)}]{#3}%
-    }%
+    \SetIndexFormat{#1}{#4}%
+    \@ProcessOutput{\texttt{#2}\if@declare~{\idxfont(Seitenstil)}\fi}'#3'%
+      {macros}[\ttfamily]{#2}[~{\idxfont(Seitenstil)}]%
   \fi%
 }
 %    \end{macrocode}
-% \end{macro}^^A \@TempPageStyle
 % \end{macro}^^A \PageStyle
 % \begin{macro}{\Length}
+% \changes{v2.02}{2014/10/08}{überarbeitet}%^^A
 % \begin{macro}{\@TempLength}
+% \changes{v2.02}{2014/10/08}{entfernt}%^^A
 % Die Auszeichnung und der Indexeintrag einer \LaTeX-Länge.
 %    \begin{macrocode}
-\newcommand*\@TempLength{}
-\NewDocumentCommand\Length{som}{%
+\NewDocumentCommand\Length{smd''d||}{%
   \if@changelog%
-    \@ProcessChangedAt{macros}[\ttfamily\bsc]{#3}[~{\idxfont(L\"ange)}]%
+    \@ProcessChangedAt{#1}{macros}{\ttfamily\bsc}{#2}{L\"ange}%
   \else%
-    \gdef\@TempLength{\if@declare~{\idxfont(L\"ange)}\fi}%
-    \@ProcessOutput[#1]{\texttt{\bsc#3}}[\@TempLength]%
-      {macros}[\ttfamily\bsc]{#3}[~{\idxfont(L\"ange)}]{#2}%
+    \SetIndexFormat{#1}{#4}%
+    \@ProcessOutput{\texttt{\bsc#2}}[\if@declare~{\idxfont(L\"ange)}\fi]'#3'%
+      {macros}[\ttfamily\bsc]{#2}[~{\idxfont(L\"ange)}]%
   \fi%
 }
 %    \end{macrocode}
 % \end{macro}^^A \@TempLength
 % \end{macro}^^A \Length
 % \begin{macro}{\Counter}
+% \changes{v2.02}{2014/10/08}{überarbeitet}%^^A
 % \begin{macro}{\@TempCounter}
+% \changes{v2.02}{2014/10/08}{entfernt}%^^A
 % Die Auszeichnung und der Indexeintrag einer \LaTeX-Zählers.
 %    \begin{macrocode}
-\newcommand*\@TempCounter{}
-\NewDocumentCommand\Counter{som}{%
+\NewDocumentCommand\Counter{smd''d||}{%
   \if@changelog%
-    \@ProcessChangedAt{macros}[\ttfamily]{#3}[~{\idxfont(Z\"ahler)}]%
+    \@ProcessChangedAt{#1}{macros}{\ttfamily}{#2}{Z\"ahler}%
   \else%
-    \gdef\@TempCounter{\if@declare~{\idxfont(Z\"ahler)}\fi}%
-    \@ProcessOutput[#1]{\texttt{#3}}[\@TempCounter]{macros}%
-      [\ttfamily]{#3}[~{\idxfont(Z\"ahler)}]{#2}%
+    \SetIndexFormat{#1}{#4}%
+    \@ProcessOutput{\texttt{#2}}[\if@declare~{\idxfont(Z\"ahler)}\fi]%
+      {macros}[\ttfamily]{#2}[~{\idxfont(Z\"ahler)}]%
   \fi%
 }
 %    \end{macrocode}
 % \end{macro}^^A \@TempCounter
 % \end{macro}^^A \Counter
 % \begin{macro}{\Term}
+% \changes{v2.02}{2014/10/08}{überarbeitet}%^^A
 % \begin{macro}{\@TempTerm}
+% \changes{v2.02}{2014/10/08}{entfernt}%^^A
 % Die Auszeichnung und der Indexeintrag eines sprachabhängigen Bezeichners.
 %    \begin{macrocode}
-\newcommand*\@TempTerm{}
-\NewDocumentCommand\Term{som}{%
+\NewDocumentCommand\Term{smd''d||}{%
   \if@changelog%
-    \@ProcessChangedAt{terms}[\ttfamily\bsc]{#3}[~{\idxfont(Bezeichner)}]%
+    \@ProcessChangedAt{#1}{terms}{\ttfamily\bsc}{#2}{Bezeichner}%
   \else%
-    \gdef\@TempTerm{\if@declare~{\idxfont(Bezeichner)}\fi}%
-    \@ProcessOutput[#1]{\texttt{\bsc#3}}[\@TempTerm]{terms}%
-      [\ttfamily\bsc]{#3}{#2}%
+    \SetIndexFormat{#1}{#4}%
+    \@ProcessOutput{\texttt{\bsc#2}}[\if@declare~{\idxfont(Bezeichner)}\fi]'#3'%
+      {terms}[\ttfamily\bsc]{#2}%
   \fi%
 }
 %    \end{macrocode}
@@ -1629,62 +1652,61 @@
 % \end{macro}^^A \@TermTable
 % \end{macro}^^A \TermTable
 % \begin{macro}{\Font}
+% \changes{v2.02}{2014/10/08}{überarbeitet}%^^A
 % \begin{macro}{\@TempFont}
+% \changes{v2.02}{2014/10/08}{entfernt}%^^A
 % Die Auszeichnung und der Indexeintrag eines Schriftelementes.
 %    \begin{macrocode}
-\newcommand*\@TempFont{}
-\NewDocumentCommand\Font{som}{%
+\NewDocumentCommand\Font{smd''d||}{%
   \if@changelog%
-    \IfBooleanTF{#1}{%
-      \@ProcessChangedAt{fonts}[\ttfamily]{#3}%
-    }{%
-      \@ProcessChangedAt{fonts}[\ttfamily]{#3}[~{\idxfont(Schriftelement)}]%
-    }%
+    \@ProcessChangedAt{#1}{fonts}{\ttfamily}{#2}{Schriftelement}%
   \else%
-    \gdef\@TempFont{%
-      \texttt{#3}\if@declare~{\idxfont(Schriftelement)}\fi%
-    }%
-    \@ProcessOutput[#1]{\@TempFont}{fonts}[\ttfamily]{#3}{#2}%
+    \SetIndexFormat{#1}{#4}%
+    \@ProcessOutput{\texttt{#2}\if@declare~{\idxfont(Schriftelement)}\fi}%
+      {fonts}[\ttfamily]{#2}%
   \fi%
 }
 %    \end{macrocode}
 % \end{macro}^^A \@TempFont
 % \end{macro}^^A \Font
 % \begin{macro}{\Color}
+% \changes{v2.02}{2014/10/08}{überarbeitet}%^^A
 % \begin{macro}{\@TempColor}
+% \changes{v2.02}{2014/10/08}{entfernt}%^^A
 % Die Auszeichnung und der Indexeintrag einer Farbe des \CDs.
 %    \begin{macrocode}
-\newcommand*\@TempColor{}
-\NewDocumentCommand\Color{somo}{%
+\NewDocumentCommand\Color{smod''d||}{%
   \if@changelog%
-    \@ProcessChangedAt{colors}[\ttfamily]{#3}[~{\idxfont(Farbe)}]%
+    \@ProcessChangedAt{#1}{colors}{\ttfamily}{#2}{Farbe}%
   \else%
-    \gdef\@TempColor{%
-      \IfValueTF{#4}{~\texttt{(#4)}}{}%
-      \if@declare~{\idxfont(Farbe)}\fi%
-    }%
-    \@ProcessOutput[#1]{\texttt{#3}}[\@TempColor]{colors}[\ttfamily]{#3}{#2}%
+    \SetIndexFormat{#1}{#5}%
+    \@ProcessOutput{\texttt{#2}}[%
+      \IfValueT{#3}{~\texttt{(#3)}}\if@declare~{\idxfont(Farbe)}\fi%
+    ]'#4'{colors}[\ttfamily]{#2}%
   \fi%
 }
 %    \end{macrocode}
 % \end{macro}^^A \@TempColor
 % \end{macro}^^A \Color
 % \begin{macro}{\@ProcessOutput}
+% \changes{v2.02}{2014/10/08}{Markup für Index und Fließtext getrennt}%^^A
 % Der Befehl \cs{@ProcessOutput} ist das Herzstück der Auszeichnungen aller
-% Elemente. Das erste optionale Argument ist der eventuell übergebene Stern für 
-% einen beliebigen Auszeichnungsbefehl. Darauf folgen die gewünschte 
-% \marg{Ausgabe} und ein möglicher \oarg{Anhang}. Danach wird der Zielindex 
+% Elemente. Das erste obligatorische Argument ist der übergebene Wert, welcher 
+% in einer bestimmten Form ausgezeichnet werden soll. Darauf folgen die ein 
+% möglicher \oarg{Anhang} sowie ggf. das \val{'}\meta{Kürzel}\val{'} für die
+% Erweiterung der Referenzierunug im Fließtext. Danach wird der Zielindex 
 % \marg{Index} und~-- für Parameter~-- der \parg{Haupteintrag} übergeben. Es 
-% folgt der zu machende Indexeintrag selbst mit \oarg{Vorsatz}, \marg{Eintrag},
-% \oarg{Anhang} und zum Abschluss \marg{Formatierung}. Der Funktionsaufruf
-% lautet:
+% folgt der zu erstellende Indexeintrag mit \oarg{Vorsatz}, \marg{Eintrag} und
+% \oarg{Anhang}. Die Formatierung für den Indexbefehl wurde zuvor durch
+% \cs{SetIndexFormat} in \cs{@IndexFormat} gespeichert. Der vollständige 
+% Funktionsaufruf lautet:
 % \newline\begingroup\tiny
 % \cs{@ProcessOutput}*
-% \marg{Ausgabe}\oarg{Anhang}\marg{Index}\parg{Haupteintrag}\ignorespaces%
-% \oarg{Vorsatz}\marg{Eintrag}\oarg{Anhang}\marg{Formatierung}
+% \marg{Ausgabe}\oarg{Anhang}\val{'}\meta{Kürzel}\val{'}\ignorespaces%
+% \marg{Index}\parg{Haupteintrag}\oarg{Vorsatz}\marg{Eintrag}\oarg{Anhang}
 % \endgroup
 %    \begin{macrocode}
-\NewDocumentCommand\@ProcessOutput{omomd()omom}{%
+\NewDocumentCommand\@ProcessOutput{mod''md()omo}{%
 %    \end{macrocode}
 % Mit dem Schalter \cs{if@declare} wird unterschieden, ob ein beliebiger
 % Auszeichnungsbefehl innerhalb der Umgebung~\env{Declaration} verwendet wird.
@@ -1697,6 +1719,12 @@
 % auf \cs{@openindextrue} gesetzt, am Ende dieser auf \cs{@openindexfalse}.
 %    \begin{macrocode}
   \if@declare%
+    \ifx\@IndexFormat\@empty\else%
+      \ClassError{\tudcls@name}{Can't use |`index format'|}{%
+        It is not possible to use |`index format'|\MessageBreak%
+        within the arguments of `Declaration'%
+      }%
+    \fi%
     \if@openindex%
       \if@noindex\else%
         \IfValueTF{#5}%
@@ -1704,12 +1732,12 @@
           {\edef\@tempa{#4:#7}}%
         \Hy@raisedlink{\hyperdef{\jobname}{\@tempa}{}}%
         \label{\@tempa}%
-        \@HyperIndex{#4}{#5}{#6}{#7}{#8}[(declare]%
+        \@HyperIndex{#4}{#5}{#6}{#7}{#8}{(declare}%
       \fi%
-      #2\IfValueTF{#3}{#3}{}%
+      #1\IfValueT{#2}{#2}%
     \else%
       \if@noindex\else%
-        \@HyperIndex{#4}{#5}{#6}{#7}{#8}[declare)]%
+        \@HyperIndex{#4}{#5}{#6}{#7}{#8}{declare)}%
       \fi%
     \fi%
   \else%
@@ -1718,17 +1746,15 @@
 % Verwendung, wird für den Fall, dass keine Sternversion genutzt wurde, mit
 % \cs{@HyperIndex} ein Eintrag im dazugehörigen Index erzeugt.
 %    \begin{macrocode}
-    \IfBooleanTF{#1}{}{%
-      \@tempswafalse%
-      \ifstr{#9}{autoref}{\@tempswatrue}{}%
-      \ifstr{#9}{pageref}{\@tempswatrue}{}%
-      \ifstr{#9}{fullref}{\@tempswatrue}{}%
-      \if@tempswa%
-        \@HyperIndex{#4}{#5}{#6}{#7}{#8}%
-      \else%
-        \@HyperIndex{#4}{#5}{#6}{#7}{#8}[#9]%
-      \fi%
-    }%
+    \ifx\@IndexFormat\relax%
+      \ClassError{\tudcls@name}{\string\SetIndexFormat\space unused}{%
+        It seems you have forgotten to use \string\SetIndexFormat%
+      }%
+    \else%
+      \expandafter\IfBooleanF\expandafter{\@IndexFormat}{%
+        \@HyperIndex{#4}{#5}{#6}{#7}{#8}{\@IndexFormat}%
+      }%
+    \fi%
 %    \end{macrocode}
 % Danach erfolgt die Ausgabe der Auszeichnung. Sollte für diesen ein Label 
 % durch eine Deklaration innerhalb der \env{Declaration}-Umgebung definiert 
@@ -1738,17 +1764,45 @@
 %    \begin{macrocode}
     \IfValueTF{#5}{\edef\@tempa{#4:#5:#7}}{\edef\@tempa{#4:#7}}%
     \ifcsdef{r@\@tempa}{%
-      \let\@tempb\relax%
-      \ifstr{#9}{autoref}{\def\@tempb{ in \autoref{\@tempa}}}{}%
-      \ifstr{#9}{pageref}{\def\@tempb{ \vpageref{\@tempa}}}{}%
-      \ifstr{#9}{fullref}{\def\@tempb{ in \fullref{\@tempa}}}{}%
-      \mbox{\hyperref{}{\jobname}{\@tempa}{#2}\IfValueTF{#3}{#3}{}}\@tempb%
-    }{\mbox{#2\IfValueTF{#3}{#3}{}}}%
+%    \end{macrocode}
+% Wurde ein Format für den Querverweis gesetzt, muss dieses validiert werden.
+%    \begin{macrocode}
+      \IfValueTF{#3}{%
+        \def\@tempb{%
+          \ClassWarning{\tudcls@name}{%
+            You've used an unknown index format |`#3'|.\MessageBreak%
+            Only |auto|, |page| and |full| are valid%
+          }%
+        }%
+        \ifstr{#3}{auto}{\def\@tempb{ in \autoref{\@tempa}}}{}%
+        \ifstr{#3}{page}{\def\@tempb{ \vpageref{\@tempa}}}{}%
+        \ifstr{#3}{full}{\def\@tempb{ in \fullref{\@tempa}}}{}%
+      }{%
+        \let\@tempb\relax%
+      }%
+      \mbox{\hyperref{}{\jobname}{\@tempa}{#1}\IfValueT{#2}{#2}}\@tempb%
+    }{%
+%    \end{macrocode}
+% Wurde ein Format für den Querverweis gesetztund existiert kein dazugehöriges 
+% Label, wird eine Warnung ausgegeben.
+%    \begin{macrocode}
+      \IfValueT{#3}{%
+        \ClassWarning{\tudcls@name}{%
+          No cross-reference created, label \@tempa\space is missing%
+        }%
+      }%
+      \mbox{#1\IfValueT{#2}{#2}}%
+    }%
   \fi%
+%    \end{macrocode}
+% Zum Schluss wird \cs{@IndexFormat} zurückgesetzt.
+%    \begin{macrocode}
+  \let\@IndexFormat\relax%
 }
 %    \end{macrocode}
 % \end{macro}^^A \@ProcessOutput
 % \begin{macro}{\@HyperIndex}
+% \changes{v2.02}{2014/10/08}{überarbeitet}%^^A
 % \begin{macro}{\hyperidx}
 % \changes{v2.02}{2014/08/16}{neu}%^^A
 % Dieser Befehl sorgt für die eigentlichen Indexeinträge. Dabei werden für 
@@ -1760,7 +1814,7 @@
 % Funktionsaufruf lautet:
 % \newline\begingroup\tiny
 % \cs{@HyperIndex}\marg{Index}\marg{Haupteintrag}\ignorespaces%
-% \marg{Vorsatz}\marg{Eintrag}\marg{Anhang}\oarg{Formatierung}
+% \marg{Vorsatz}\marg{Eintrag}\marg{Anhang}\marg{Formatierung}
 % \endgroup
 %
 % Aufgrund der Nichtbeachtung von regulären Ausdrücken durch den Indexprozessor
@@ -1772,10 +1826,10 @@
 % \texttt{merge-rule} verworfen werden kann.
 %    \begin{macrocode}
 \newrobustcmd*\hyperidx[2][]{\hyperref{}{\jobname}{#1}{#2}}
-\NewDocumentCommand\@HyperIndex{mmmmmo}{%
+\NewDocumentCommand\@HyperIndex{mmmmmm}{%
   \IfValueTF{#3}{\def\@tempa{#3}}{\def\@tempa{}}%
   \IfValueTF{#5}{\def\@tempb{#5}}{\def\@tempb{}}%
-  \IfValueTF{#6}{\def\@tempc{|#6}}{\def\@tempc{}}%
+  \IfValueTF{#6}{\edef\@tempc{|#6}}{\def\@tempc{}}%
 %    \end{macrocode}
 % Auch hier wird unterschieden, ob es sich um einen Parameter (keys) handelt. 
 % Wurde für einen Parameter eine Umgebung oder ein Befehl bereits definiert, 
@@ -1924,7 +1978,7 @@
 % die Angabe obligatorischer und optionaler Parameter lokal umdefiniert.
 %    \begin{macrocode}
   \ifx\@declarationlist\relax\else%
-    \ClassError{\tudclsname}{\string\printdeclarationlist\space is missing}{%
+    \ClassError{\tudcls@name}{\string\printdeclarationlist\space is missing}{%
       \string\@declarationlist\space is not empty. Did you forget\MessageBreak%
       to print this list with \string\printdeclarationlist?%
     }%
@@ -2213,23 +2267,24 @@
 % \end{macro}^^A \Rename
 % \begin{macro}{\@ProcessChangedAt}
 % \changes{v2.02}{2014/07/25}{erweitert}%^^A
+% \changes{v2.02}{2014/10/08}{Sternversion ergänzt}%^^A
 % Auch die Änderungsliste erhält einen Hyperlink zur Deklaration, falls eine 
 % existiert. Für Umgebungs- und Befehlsparameter wird mit dem zweiten optionalen
 % Argument ein Untereintrag für die dazugehörige Umgebung beziehungsweise den 
 % dazugehörigen Befehl erzeugt.
 %    \begin{macrocode}
-\NewDocumentCommand\@ProcessChangedAt{md()omo}{%
+\NewDocumentCommand\@ProcessChangedAt{mmd()mmm}{%
   \begingroup%
     \let\texttt\@firstofone%
     \let\texturn\@firstofone%
     \let\Environment\@firstofone%
     \let\Macro\@firstofone%
-    \IfValueTF{#2}{\xdef\@tempa{#1:#2:#4}}{\xdef\@tempa{#1:#4}}%
+    \IfValueTF{#3}{\xdef\@tempa{#2:#3:#5}}{\xdef\@tempa{#2:#5}}%
   \endgroup%
-  \IfValueTF{#3}{%
-    \def\@tempb{\begingroup#3#4\endgroup\IfValueTF{#5}{#5}{}}%
+  \IfBooleanTF{#1}{%
+    \def\@tempb{\begingroup#4#5\endgroup}%
   }{%
-    \def\@tempb{\begingroup#4\endgroup\IfValueTF{#5}{#5}{}}%
+    \def\@tempb{\begingroup#4#5\endgroup~{\idxfont(#6)}}%
   }%
   \ifcsdef{r@\@tempa}{\hyperidx[\@tempa]{\@tempb}}{\@tempb}%
 }
