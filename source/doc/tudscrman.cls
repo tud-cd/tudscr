@@ -179,8 +179,19 @@
     \let\item\tud@item@pkg%
   }{}%
 }
-\newcommand*\tud@item@pkg[1][]{%
-  \itempackages[{\DeclarePackage{#1}\texturn{#1}}]%
+\NewDocumentCommand\tud@item@pkg{od()}{%
+  \itempackages[{%
+    \IfValueT{#1}{%
+      \Hy@raisedlink{\hyperdef{\jobname}{files:#1}{}}%
+      \label{files:#1}%
+      \IfValueTF{#2}{%
+        \def\@tempa{http://www.ctan.org/pkg/#2}%
+      }{%
+        \def\@tempa{http://www.ctan.org/pkg/#1}%
+      }%
+      \href{\@tempa}{\Package{#1}'none'|!|}%
+    }%
+  }]%
 }
 \newcommand*\tud@write@file{}
 \newcommand*\tud@write@option{}
@@ -254,8 +265,8 @@
     }%
   }%
   \IfFileExists{tutorials/#3.pdf}{\hypertut{#3}{}}{\texturn{#3.pdf}}%
-  \IfBooleanTF{#1}{}{%
-    \index[files]{\hypertut{#3}{~{\idxfont(Tutorial)}\IfValueTF{#2}{|#2}{}}}%
+  \IfBooleanF{#1}{%
+    \index[files]{\hypertut{#3}{~{\idxfont(Tutorial)}\IfValueT{#2}{|#2}}}%
   }%
 }
 %%\newread\pin@file
@@ -318,14 +329,14 @@
         \ifbool{KV@todonotes@nxt}{\setkeys{todonotes}{color=HKS57!30}}{}%
       }%
       \def\@ToDo{}%
-      \IfNoValueTF{#2}{%
-        \IfBooleanTF{#1}{\edef\@ToDo{nolist}}{}%
-      }{%
+      \IfValueTF{#2}{%
         \IfBooleanTF{#1}{\edef\@ToDo{#2,nolist}}{\edef\@ToDo{#2}}%
+      }{%
+        \IfBooleanT{#1}{\edef\@ToDo{nolist}}%
       }%
       \renewcommand*\marginpar[2][]{\marginnote[##1]{##2}[\dimexpr-1.6ex+1pt]}%
       \vskip.8ex%
-      \IfNoValueTF{#4}{}{%
+      \IfValueT{#4}{%
         \settowidth\marginparwidth{#4}%
         \addtolength\marginparwidth{\dimexpr1.6ex+1pt}%
         \let\par\relax\noindent%
@@ -455,199 +466,170 @@
 \PassOptionsToPackage{open,openlevel=0}{bookmark}
 \RequirePackage{bookmark}[2011/12/02]
 \newif\if@declare
+\newif\if@stareddeclare
 \newif\if@openindex
 \newcommand*\idxfont{}
 \let\idxfont\footnotesize
 \robustify{\idxfont}
 \newif\if@noindex
-\NewDocumentCommand\Application{som}{%
-  \ifdin{#3}{%
-    \mbox{\texturs{#3}}%
-    \IfBooleanTF{#1}{}{%
-      \index{\texturs{#3}~{\idxfont(Anwendungssoftware)}\IfValueTF{#2}{|#2}{}}%
+\newcommand*\@IndexFormat{}
+\let\@IndexFormat\relax
+\newcommand*\CheckIndexFormat[2]{%
+  \IfBooleanT{#1}{%
+    \IfValueT{#2}{%
+      \ClassWarning{\tudcls@name}{%
+        You've used the starred version so no entry for\MessageBreak%
+        the index is created and the optional argument\MessageBreak%
+        |#2| will be ignored%
+      }%
     }%
   }%
 }
-\DeclareExpandableDocumentCommand\@Application{som}{#3}
-\NewDocumentCommand\Distribution{somo}{%
-  \mbox{\texturn{#3\IfValueTF{#4}{~#4}{}}}%
-  \IfBooleanTF{#1}{}{%
-    \index{\texturn{#3}~{\idxfont(Distribution)}\IfValueTF{#2}{|#2}{}}%
+\newcommand*\SetIndexFormat[2]{%
+  \CheckIndexFormat{#1}{#2}%
+  \IfBooleanTF{#1}{%
+    \def\@IndexFormat{#1}%
+  }{%
+    \IfValueTF{#2}{\def\@IndexFormat{#2}}{\def\@IndexFormat{}}%
+  }%
+}
+\NewDocumentCommand\Application{smd||}{%
+  \ifdin{#2}{%
+    \mbox{\texturs{#2}}%
+    \CheckIndexFormat{#1}{#3}%
+    \IfBooleanF{#1}{%
+      \index{\texturs{#2}~{\idxfont(Anwendungssoftware)}\IfValueT{#3}{|#3}}%
+    }%
+  }%
+}
+\DeclareExpandableDocumentCommand\@Application{sm}{#2}
+\NewDocumentCommand\Distribution{smod||}{%
+  \ifdin{#2\IfValueT{#3}{~#3}}{%
+    \mbox{\texturn{#2\IfValueT{#3}{~#3}}}%
+    \CheckIndexFormat{#1}{#4}%
+    \IfBooleanF{#1}{%
+      \index{\texturn{#2}~{\idxfont(Distribution)}\IfValueT{#4}{|#4}}%
+    }%
   }%
 }
 \newrobustcmd*\Path[1]{\mbox{\texttt{#1}}}
-\NewDocumentCommand\File{som}{%
-  \mbox{\texturn{#3}}%
-  \IfBooleanTF{#1}{}{%
-    \index[files]{\texturn{#3}~{\idxfont(Datei)}\IfValueTF{#2}{|#2}{}}%
-  }%
-}
-\newcommand*\@TempClass{}
-\NewDocumentCommand\Class{st'om}{%
-  \ifdin{#4}{%
-    \gdef\@TempClass{~{\idxfont(Klasse)}}%
-    \IfBooleanTF{#2}{%
-      \@ProcessOutput[#1]{\texturn{#4}}{files}%
-        [\protect\univrn]{#4}[\@TempClass]{fullref}%
-    }{%
-      \@ProcessOutput[#1]{\texturn{#4}}{files}%
-        [\protect\univrn]{#4}[\@TempClass]{#3}%
+\NewDocumentCommand\File{smd||}{%
+  \ifdin{#2}{%
+    \mbox{\texturn{#2}}%
+    \CheckIndexFormat{#1}{#3}%
+    \IfBooleanF{#1}{%
+      \index[files]{\texturn{#2}~{\idxfont(Datei)}\IfValueT{#3}{|#3}}%
     }%
   }%
 }
-\DeclareExpandableDocumentCommand\@Class{st'om}{#4}
-\NewDocumentCommand\DeclareClass{om}{%
-  \IfValueTF{#1}{\ChangedAt@Process{#1!\emph{neu}!\Class{#2}}}{}%
-  \Hy@raisedlink{\hyperdef{\jobname}{files:#2}{}}%
-  \label{files:#2}%
-  \index[files]{\hyperidx[files:#2]{\texturn{#2}~{\idxfont(Klasse)}}|declare}%
+\NewDocumentCommand\Class{smd''d||}{%
+  \ifdin{#2}{%
+    \SetIndexFormat{#1}{#4}%
+    \@ProcessOutput{\texturn{#2}}'#3'%
+      {files}[\protect\univrn]{#2}[~{\idxfont(Klasse)}]%
+  }%
 }
-\newcommand*\@TempPackage{}
-\NewDocumentCommand\Package{st'om}{%
+\DeclareExpandableDocumentCommand\@Class{sm}{#2}
+\NewDocumentCommand\Package{smd''d||}{%
   \if@changelog%
-    \@ProcessChangedAt{files}[\protect\univrn]{#4}[~{\idxfont(Paket)}]%
+    \@ProcessChangedAt{#1}{files}{\protect\univrn}{#2}{Paket}%
   \else%
-    \ifdin{#4}{%
-      \gdef\@TempPackage{~{\idxfont(Paket)}}%
-      \IfBooleanTF{#2}{%
-        \@ProcessOutput[#1]{\texturn{#4}}{files}%
-          [\protect\univrn]{#4}[\@TempPackage]{fullref}%
-      }{%
-        \@ProcessOutput[#1]{\texturn{#4}}{files}%
-          [\protect\univrn]{#4}[\@TempPackage]{#3}%
-      }%
+    \ifdin{#2}{%
+      \SetIndexFormat{#1}{#4}%
+      \@ProcessOutput{\texturn{#2}}'#3'%
+        {files}[\protect\univrn]{#2}[~{\idxfont(Paket)}]%
     }%
   \fi%
 }
-\DeclareExpandableDocumentCommand\@Package{st'om}{#4}
-\NewDocumentCommand\DeclarePackage{som}{%
-  \IfValueTF{#2}{\ChangedAt@Process{#2!\emph{neu}!\Package{#3}}}{}%
-  \IfBooleanTF{#1}{%
-    \raisebox{4\baselineskip}[0pt][0pt]{\hyperdef{\jobname}{files:#3}{}}%
-    \par\nobreak%
-    \vskip\dimexpr-\parskip-\baselineskip%
-    \@afterindentfalse\@afterheading%
-  }{%
-    \Hy@raisedlink{\hyperdef{\jobname}{files:#3}{}}%
-  }%
-  \label{files:#3}%
-  \index[files]{\hyperidx[files:#3]{\texturn{#3}~{\idxfont(Paket)}}|declare}%
-}
+\DeclareExpandableDocumentCommand\@Package{sm}{#2}
 \newcommand*\@TempOption{}
-\NewDocumentCommand\Option{st'omo}{%
+\NewDocumentCommand\Option{smod''d||}{%
   \if@changelog%
-    \@ProcessChangedAt{options}[\ttfamily]{#4}[~{\idxfont(Option)}]%
+    \@ProcessChangedAt{#1}{options}{\ttfamily}{#2}{Option}%
   \else%
-    \IfValueTF{#5}{\gdef\@TempOption{\texttt{=#5}}}{\gdef\@TempOption{}}%
-    \IfBooleanTF{#2}{%
-      \@ProcessOutput[#1]{\texttt{#4}}[\@TempOption]{options}%
-        [\ttfamily]{#4}{fullref}%
-    }{%
-      \@ProcessOutput[#1]{\texttt{#4}}[\@TempOption]{options}%
-        [\ttfamily]{#4}{#3}%
-    }%
+    \IfValueTF{#3}{\gdef\@TempOption{\texttt{=#3}}}{\gdef\@TempOption{}}%
+    \SetIndexFormat{#1}{#5}%
+    \@ProcessOutput{\texttt{#2}}[\@TempOption]'#4'{options}[\ttfamily]{#2}%
   \fi%
 }
 \newcommand*\@TempEnvironment{}
-\NewDocumentCommand\Environment{st'omo}{%
+\NewDocumentCommand\Environment{smod''d||}{%
   \if@changelog%
-    \@ProcessChangedAt{macros}[\ttfamily]{#4}[~{\idxfont(Umgebung)}]%
+    \@ProcessChangedAt{#1}{macros}{\ttfamily}{#2}{Umgebung}%
   \else%
     \if@declare%
       \gdef\@TempEnvironment{%
-        \texttt{\bsc{}begin\{#4\}\IfValueTF{#5}{#5}{}}\tabularnewline%
+        \texttt{\bsc{}begin\{#2\}\IfValueT{#3}{#3}}\tabularnewline%
         \texttt{\dots}\tabularnewline%
-        \texttt{\bsc{}end\{#4\}}%
+        \texttt{\bsc{}end\{#2\}}%
       }%
     \else%
-      \gdef\@TempEnvironment{\texttt{#4}}%
+      \gdef\@TempEnvironment{\texttt{#2}}%
     \fi%
-    \IfBooleanTF{#2}{%
-      \@ProcessOutput[#1]{\@TempEnvironment}{macros}%
-        [\ttfamily]{#4}{fullref}%
-    }{%
-      \@ProcessOutput[#1]{\@TempEnvironment}{macros}%
-        [\ttfamily]{#4}{#3}%
-    }%
+    \SetIndexFormat{#1}{#5}%
+    \@ProcessOutput{\@TempEnvironment}'#4'{macros}[\ttfamily]{#2}%
   \fi%
 }
-\NewDocumentCommand\Macro{st'om}{%
+\NewDocumentCommand\Macro{smd''d||}{%
   \if@changelog%
-    \@ProcessChangedAt{macros}[\ttfamily\bsc]{#4}[~{\idxfont(Befehl)}]%
+    \@ProcessChangedAt{#1}{macros}{\ttfamily\bsc}{#2}{Befehl}%
   \else%
-    \IfBooleanTF{#2}{%
-      \@ProcessOutput[#1]{\texttt{\bsc#4}}{macros}%
-        [\ttfamily\bsc]{#4}{fullref}%
-    }{%
-      \@ProcessOutput[#1]{\texttt{\bsc#4}}{macros}%
-        [\ttfamily\bsc]{#4}{#3}%
-    }%
+    \SetIndexFormat{#1}{#4}%
+    \@ProcessOutput{\texttt{\bsc#2}}'#3'{macros}[\ttfamily\bsc]{#2}%
   \fi%
 }
 \newcommand*\@TempKey{}
-\NewDocumentCommand\Key{sommo}{%
+\NewDocumentCommand\Key{smmod''d||}{%
   \if@changelog%
-    \@ProcessChangedAt{macros}(#3)[\ttfamily]{#4}[~{\idxfont(Parameter)}]%
+    \@ProcessChangedAt{#1}{macros}(#2){\ttfamily}{#3}{Parameter}%
   \else%
     \begingroup%
-    \let\Environment\@firstofone%
-    \let\Macro\@firstofone%
-    \gdef\@TempKey{\if@declare~{\idxfont(Parameter)}\fi}%
-    \IfValueTF{#5}{%
-      \@ProcessOutput[#1]{\texttt{#4}}[\texttt{=#5}\@TempKey]{macros}(#3)%
-        [\ttfamily]{#4}{#2}%
-    }{%
-      \@ProcessOutput[#1]{\texttt{#4}}[\@TempKey]{macros}(#3)%
-        [\ttfamily]{#4}{#2}%
-    }%
+      \let\Environment\@firstofone%
+      \let\Macro\@firstofone%
+      \IfValueTF{#4}{%
+        \gdef\@TempKey{\texttt{=#4}\if@declare~{\idxfont(Parameter)}\fi}%
+      }{%
+        \gdef\@TempKey{\if@declare~{\idxfont(Parameter)}\fi}%
+      }%
+      \SetIndexFormat{#1}{#6}%
+      \@ProcessOutput{\texttt{#3}}[\@TempKey]'#5'{macros}(#2)[\ttfamily]{#3}%
     \endgroup%
   \fi%
 }
-\newcommand*\@TempPageStyle{}
-\NewDocumentCommand\PageStyle{st'om}{%
+\NewDocumentCommand\PageStyle{smd''d||}{%
   \if@changelog%
-    \@ProcessChangedAt{macros}[\ttfamily]{#4}[~{\idxfont(Seitenstil)}]%
+    \@ProcessChangedAt{#1}{macros}{\ttfamily}{#2}{Seitenstil}%
   \else%
-    \gdef\@TempPageStyle{%
-      \texttt{#4}\if@declare~{\idxfont(Seitenstil)}\fi%
-    }%
-    \IfBooleanTF{#2}{%
-      \@ProcessOutput[#1]{\@TempPageStyle}{macros}%
-        [\ttfamily]{#4}[~{\idxfont(Seitenstil)}]{fullref}%
-    }{%
-      \@ProcessOutput[#1]{\@TempPageStyle}{macros}%
-        [\ttfamily]{#4}[~{\idxfont(Seitenstil)}]{#3}%
-    }%
+    \SetIndexFormat{#1}{#4}%
+    \@ProcessOutput{\texttt{#2}\if@declare~{\idxfont(Seitenstil)}\fi}'#3'%
+      {macros}[\ttfamily]{#2}[~{\idxfont(Seitenstil)}]%
   \fi%
 }
-\newcommand*\@TempLength{}
-\NewDocumentCommand\Length{som}{%
+\NewDocumentCommand\Length{smd''d||}{%
   \if@changelog%
-    \@ProcessChangedAt{macros}[\ttfamily\bsc]{#3}[~{\idxfont(L\"ange)}]%
+    \@ProcessChangedAt{#1}{macros}{\ttfamily\bsc}{#2}{L\"ange}%
   \else%
-    \gdef\@TempLength{\if@declare~{\idxfont(L\"ange)}\fi}%
-    \@ProcessOutput[#1]{\texttt{\bsc#3}}[\@TempLength]%
-      {macros}[\ttfamily\bsc]{#3}[~{\idxfont(L\"ange)}]{#2}%
+    \SetIndexFormat{#1}{#4}%
+    \@ProcessOutput{\texttt{\bsc#2}}[\if@declare~{\idxfont(L\"ange)}\fi]'#3'%
+      {macros}[\ttfamily\bsc]{#2}[~{\idxfont(L\"ange)}]%
   \fi%
 }
-\newcommand*\@TempCounter{}
-\NewDocumentCommand\Counter{som}{%
+\NewDocumentCommand\Counter{smd''d||}{%
   \if@changelog%
-    \@ProcessChangedAt{macros}[\ttfamily]{#3}[~{\idxfont(Z\"ahler)}]%
+    \@ProcessChangedAt{#1}{macros}{\ttfamily}{#2}{Z\"ahler}%
   \else%
-    \gdef\@TempCounter{\if@declare~{\idxfont(Z\"ahler)}\fi}%
-    \@ProcessOutput[#1]{\texttt{#3}}[\@TempCounter]{macros}%
-      [\ttfamily]{#3}[~{\idxfont(Z\"ahler)}]{#2}%
+    \SetIndexFormat{#1}{#4}%
+    \@ProcessOutput{\texttt{#2}}[\if@declare~{\idxfont(Z\"ahler)}\fi]%
+      {macros}[\ttfamily]{#2}[~{\idxfont(Z\"ahler)}]%
   \fi%
 }
-\newcommand*\@TempTerm{}
-\NewDocumentCommand\Term{som}{%
+\NewDocumentCommand\Term{smd''d||}{%
   \if@changelog%
-    \@ProcessChangedAt{terms}[\ttfamily\bsc]{#3}[~{\idxfont(Bezeichner)}]%
+    \@ProcessChangedAt{#1}{terms}{\ttfamily\bsc}{#2}{Bezeichner}%
   \else%
-    \gdef\@TempTerm{\if@declare~{\idxfont(Bezeichner)}\fi}%
-    \@ProcessOutput[#1]{\texttt{\bsc#3}}[\@TempTerm]{terms}%
-      [\ttfamily\bsc]{#3}{#2}%
+    \SetIndexFormat{#1}{#4}%
+    \@ProcessOutput{\texttt{\bsc#2}}[\if@declare~{\idxfont(Bezeichner)}\fi]'#3'%
+      {terms}[\ttfamily\bsc]{#2}%
   \fi%
 }
 \newcommand\@termlist{}
@@ -680,77 +662,109 @@
   \selectlanguage{english}\vspace*{\@tempdimc}%
   \ifstr{\@nameuse{#1}}{}{\PName{empty}}{\@nameuse{#1}}\tabularnewline%
 }
-\newcommand*\@TempFont{}
-\NewDocumentCommand\Font{som}{%
+\NewDocumentCommand\Font{smd''d||}{%
   \if@changelog%
-    \IfBooleanTF{#1}{%
-      \@ProcessChangedAt{fonts}[\ttfamily]{#3}%
-    }{%
-      \@ProcessChangedAt{fonts}[\ttfamily]{#3}[~{\idxfont(Schriftelement)}]%
-    }%
+    \@ProcessChangedAt{#1}{fonts}{\ttfamily}{#2}{Schriftelement}%
   \else%
-    \gdef\@TempFont{%
-      \texttt{#3}\if@declare~{\idxfont(Schriftelement)}\fi%
-    }%
-    \@ProcessOutput[#1]{\@TempFont}{fonts}[\ttfamily]{#3}{#2}%
+    \SetIndexFormat{#1}{#4}%
+    \@ProcessOutput{\texttt{#2}\if@declare~{\idxfont(Schriftelement)}\fi}%
+      {fonts}[\ttfamily]{#2}%
   \fi%
 }
-\newcommand*\@TempColor{}
-\NewDocumentCommand\Color{somo}{%
+\NewDocumentCommand\Color{smod''d||}{%
   \if@changelog%
-    \@ProcessChangedAt{colors}[\ttfamily]{#3}[~{\idxfont(Farbe)}]%
+    \@ProcessChangedAt{#1}{colors}{\ttfamily}{#2}{Farbe}%
   \else%
-    \gdef\@TempColor{%
-      \IfValueTF{#4}{~\texttt{(#4)}}{}%
-      \if@declare~{\idxfont(Farbe)}\fi%
-    }%
-    \@ProcessOutput[#1]{\texttt{#3}}[\@TempColor]{colors}[\ttfamily]{#3}{#2}%
+    \SetIndexFormat{#1}{#5}%
+    \@ProcessOutput{\texttt{#2}}[%
+      \IfValueT{#3}{~\texttt{(#3)}}\if@declare~{\idxfont(Farbe)}\fi%
+    ]'#4'{colors}[\ttfamily]{#2}%
   \fi%
 }
-\NewDocumentCommand\@ProcessOutput{omomd()omom}{%
+\NewDocumentCommand\@ProcessOutput{mod''md()omo}{%
   \if@declare%
     \if@openindex%
-      \if@noindex\else%
-        \IfValueTF{#5}%
-          {\edef\@tempa{#4:#5:#7}}%
-          {\edef\@tempa{#4:#7}}%
-        \Hy@raisedlink{\hyperdef{\jobname}{\@tempa}{}}%
-        \label{\@tempa}%
-        \@HyperIndex{#4}{#5}{#6}{#7}{#8}[(declare]%
+      \IfValueT{#3}{%
+        \ClassWarning{\tudcls@name}{%
+          It is not possible to use any cross-reference\MessageBreak%
+          shorthand like '#3' within the arguments of\MessageBreak%
+          the environment `Declaration'%
+        }%
+      }%
+      \ifx\@IndexFormat\@empty\else%
+        \ClassWarning{\tudcls@name}{%
+            It is not possible to use any indexing format\MessageBreak%
+            like |\@IndexFormat| within the arguments of the\MessageBreak%
+            environment `Declaration'%
+        }%
       \fi%
-      #2\IfValueTF{#3}{#3}{}%
+      \if@noindex\else%
+        \IfValueTF{#5}{\edef\@tempa{#4:#5:#7}}{\edef\@tempa{#4:#7}}%
+        \if@stareddeclare%
+          \raisebox{4\baselineskip}[0pt][0pt]{\hyperdef{\jobname}{\@tempa}{}}%
+          \par\nobreak\vskip\dimexpr-\parskip-\baselineskip%
+          \@afterindentfalse\@afterheading%
+        \else%
+          \Hy@raisedlink{\hyperdef{\jobname}{\@tempa}{}}%
+        \fi%
+        \label{\@tempa}%
+        \@HyperIndex{#4}{#5}{#6}{#7}{#8}{(declare}%
+      \fi%
+      \if@stareddeclare\else%
+        #1\IfValueT{#2}{#2}%
+      \fi%
     \else%
       \if@noindex\else%
-        \@HyperIndex{#4}{#5}{#6}{#7}{#8}[declare)]%
+        \@HyperIndex{#4}{#5}{#6}{#7}{#8}{declare)}%
       \fi%
     \fi%
   \else%
-    \IfBooleanTF{#1}{}{%
-      \@tempswafalse%
-      \ifstr{#9}{autoref}{\@tempswatrue}{}%
-      \ifstr{#9}{pageref}{\@tempswatrue}{}%
-      \ifstr{#9}{fullref}{\@tempswatrue}{}%
-      \if@tempswa%
-        \@HyperIndex{#4}{#5}{#6}{#7}{#8}%
-      \else%
-        \@HyperIndex{#4}{#5}{#6}{#7}{#8}[#9]%
-      \fi%
-    }%
+    \ifx\@IndexFormat\relax%
+      \ClassError{\tudcls@name}{\string\SetIndexFormat\space unused}{%
+        It seems you have forgotten to use \string\SetIndexFormat%
+      }%
+    \else%
+      \expandafter\IfBooleanF\expandafter{\@IndexFormat}{%
+        \@HyperIndex{#4}{#5}{#6}{#7}{#8}{\@IndexFormat}%
+      }%
+    \fi%
     \IfValueTF{#5}{\edef\@tempa{#4:#5:#7}}{\edef\@tempa{#4:#7}}%
     \ifcsdef{r@\@tempa}{%
       \let\@tempb\relax%
-      \ifstr{#9}{autoref}{\def\@tempb{ in \autoref{\@tempa}}}{}%
-      \ifstr{#9}{pageref}{\def\@tempb{ \vpageref{\@tempa}}}{}%
-      \ifstr{#9}{fullref}{\def\@tempb{ in \fullref{\@tempa}}}{}%
-      \mbox{\hyperref{}{\jobname}{\@tempa}{#2}\IfValueTF{#3}{#3}{}}\@tempb%
-    }{\mbox{#2\IfValueTF{#3}{#3}{}}}%
+      \def\@tempc{\mbox{\hyperref{}{\jobname}{\@tempa}{#1}\IfValueT{#2}{#2}}}%
+      \IfValueT{#3}{%
+        \def\@tempb{%
+          \ClassWarning{\tudcls@name}{%
+            You've used the unknown cross-reference\MessageBreak%
+            shorthand '#3'. Only 'auto', 'page'\MessageBreak%
+            and 'full' as well as 'none' are valid%
+          }%
+        }%
+        \ifstr{#3}{auto}{\def\@tempb{ in \autoref{\@tempa}}}{}%
+        \ifstr{#3}{page}{\def\@tempb{ \vpageref{\@tempa}}}{}%
+        \ifstr{#3}{full}{\def\@tempb{ in \fullref{\@tempa}}}{}%
+        \ifstr{#3}{none}{%
+          \let\@tempb\relax%
+          \def\@tempc{\mbox{#1\IfValueT{#2}{#2}}}%
+        }{}%
+      }%
+      \@tempc\@tempb%
+    }{%
+      \IfValueT{#3}{%
+        \ClassWarning{\tudcls@name}{%
+          No cross-reference created, label \@tempa\space is missing%
+        }%
+      }%
+      \mbox{#1\IfValueT{#2}{#2}}%
+    }%
   \fi%
+  \let\@IndexFormat\relax%
 }
 \newrobustcmd*\hyperidx[2][]{\hyperref{}{\jobname}{#1}{#2}}
-\NewDocumentCommand\@HyperIndex{mmmmmo}{%
+\NewDocumentCommand\@HyperIndex{mmmmmm}{%
   \IfValueTF{#3}{\def\@tempa{#3}}{\def\@tempa{}}%
   \IfValueTF{#5}{\def\@tempb{#5}}{\def\@tempb{}}%
-  \IfValueTF{#6}{\def\@tempc{|#6}}{\def\@tempc{}}%
+  \IfValueTF{#6}{\edef\@tempc{|#6}}{\def\@tempc{}}%
   \IfValueTF{#2}{%
     \ifcsdef{r@#1:#2:#4}{%
       \edef\@tempb{#1:#2:#4}%
@@ -795,48 +809,7 @@
 \newcommand*\@additionallist{}
 \let\@additionallist\relax
 \newif\if@additionallist
-\newcommand*\@changedatdeclarelist{}
-\let\@changedatdeclarelist\relax
-\NewDocumentEnvironment{Declaration}{omoog}{%
-  \listadd\@declarationlist{#2}%
-  \IfValueTF{#1}{%
-    \@for\@tempa:=#1\do{%
-      \@expandtwoargs\in@{!}{\@tempa}
-      \ifin@
-        \expandafter\listadd\expandafter\@changedatdeclarelist%
-          \expandafter{\@tempa!#2}%
-      \else
-        \expandafter\listadd\expandafter\@changedatdeclarelist%
-          \expandafter{\@tempa!\emph{neu}!#2}%
-      \fi
-    }%
-  }{}%
-  \IfNoValueTF{#3}{%
-    \listadd\@presetlist{\relax}%
-  }{%
-    \@presetlisttrue%
-    \IfNoValueTF{#4}{%
-      \listadd\@presetlist{preset:\,#3}%
-    }{%
-      \def\@tempa[##1:##2]{##1:\,##2}%
-      \listeadd\@presetlist{preset:\,#3\,|\,\expandonce{\@tempa[#4]}}%
-    }%
-  }%
-  \IfNoValueTF{#5}{%
-    \listadd\@additionallist{\relax}%
-  }{%
-    \@additionallisttrue%
-    \listadd\@additionallist{\hspace*{\tabcolsep}\small(#5)}%
-    \in@{\Environment}{#2}%
-    \ifin@ \listadd\@additionallist{\tabularnewline}\fi%
-  }%
-}{%
-  \ifx\@declarationlist\relax\else%
-    \ClassError{\tudclsname}{\string\printdeclarationlist\space is missing}{%
-      \string\@declarationlist\space is not empty. Did you forget\MessageBreak%
-      to print this list with \string\printdeclarationlist?%
-    }%
-  \fi%
+\newcommand*\@gobbleparameters{%
   \let\PName\@gobble%
   \let\PBoolean\relax%
   \let\PSet\relax%
@@ -847,16 +820,53 @@
   \let\OLParameter\@gobble%
   \let\PParameter\@gobble%
   \let\POParameter\@gobble%
+}
+\NewDocumentEnvironment{Declaration}{omoog}{%
+  \listadd\@declarationlist{#2}%
+  \@changedatdeclare{#1}{#2}%
+  \IfValueTF{#3}{%
+    \@presetlisttrue%
+    \IfValueTF{#4}{%
+      \def\@tempa[##1:##2]{##1:\,##2}%
+      \listeadd\@presetlist{preset:\,#3\,|\,\expandonce{\@tempa[#4]}}%
+    }{%
+      \listadd\@presetlist{preset:\,#3}%
+    }%
+  }{%
+    \listadd\@presetlist{\relax}%
+  }%
+  \IfValueTF{#5}{%
+    \@additionallisttrue%
+    \listadd\@additionallist{\hspace*{\tabcolsep}\small(#5)}%
+    \in@{\Environment}{#2}%
+    \ifin@ \listadd\@additionallist{\tabularnewline}\fi%
+  }{%
+    \listadd\@additionallist{\relax}%
+  }%
+}{%
+  \ifx\@declarationlist\relax\else%
+    \ClassError{\tudcls@name}{\string\printdeclarationlist\space is missing}{%
+      \string\@declarationlist\space is not empty. Did you forget\MessageBreak%
+      to print this list with \string\printdeclarationlist?%
+    }%
+  \fi%
+  \@gobbleparameters%
   \vskip-\lastskip%
   \@declaretrue\@openindexfalse#2\@declarefalse%
   \pagebreak[0]%
 }
-\NewDocumentCommand\printdeclarationlist{sd()}{%
+\NewDocumentCommand\printdeclarationlist{sod()}{%
   \ifx\@declarationlist\relax\else%
     \ifvmode\else\par\fi%
     \addpenalty{\@beginparpenalty}%
     \addvspace{1.5\baselineskipglue}%
-    \IfBooleanTF{#1}{\global\@noindextrue}{\global\@noindexfalse}%
+    \IfBooleanTF{#1}{%
+      \global\@noindextrue%
+      \renewcommand*\@changedatdeclaredefault{\emph{entf\"allt}}%
+    }{%
+      \global\@noindexfalse%
+    }%
+    \IfValueT{#2}{\renewcommand*\@changedatdeclaredefault{\emph{#2}}}%
     \@declaretrue\@openindextrue%
     \@afterindentfalse\@afterheading%
     \def\@tempa##1{\ignorespaces##1\tabularnewline}%
@@ -868,7 +878,6 @@
         \hline%
       \end{tabular}%
     }\usebox0%
-    \setlength\changedatmarginskip{\dimexpr.5\baselineskip-.5\ht0-.5\dp0\relax}%
     \@declarefalse%
     \ifboolexpr{bool {@presetlist} or bool {@additionallist}}{%
       \if@presetlist%
@@ -885,21 +894,59 @@
         \end{tabular}%
       \fi%
     }{}%
-    \ifx\@changedatdeclarelist\relax\else%
-      \ChangedAt@Process{\@changedatdeclarelist}%
-    \fi%
-    \setlength{\changedatmarginskip}{\z@}%
     \global\let\@declarationlist\relax%
     \global\let\@presetlist\relax%
     \global\@presetlistfalse%
     \global\let\@additionallist\relax%
     \global\@additionallistfalse%
-    \global\let\@changedatdeclarelist\relax%
-    \IfValueTF{#2}{#2}{}%
+    \printchangedatlist[\dimexpr.5\baselineskip-.5\ht0-.5\dp0\relax]%
+    \IfValueT{#3}{#3}%
     \par\nobreak%
     \vskip 1.5\baselineskipglue%
     \@afterindentfalse\@afterheading%
   \fi%
+}
+\NewDocumentEnvironment{Declaration*}{om}{%
+  \@changedatdeclare{#1}{#2}%
+  \@stareddeclaretrue%
+  \global\@noindexfalse%
+  \@declaretrue\@openindextrue#2\@declarefalse%
+  \@stareddeclarefalse%
+}{%
+  \ifx\@changedatdeclarelist\relax\else%
+    \ClassError{\tudcls@name}{\string\printchangedatlist\space is missing}{%
+      \string\@changedatdeclarelist\space is not empty. Did you\MessageBreak%
+      forget to print this list with \string\printchangedatlist?%
+    }%
+  \fi%
+  \@gobbleparameters%
+  \@declaretrue\@openindexfalse#2\@declarefalse%
+}
+\newcommand*\@changedatdeclarelist{}
+\let\@changedatdeclarelist\relax
+\newcommand*\@changedatdeclaredefault{\emph{neu}}
+\newcommand*\@changedatdeclare[2]{%
+  \IfValueT{#1}{%
+    \@for\@tempa:=#1\do{%
+      \@expandtwoargs\in@{!}{\@tempa}%
+      \ifin@%
+        \expandafter\listadd\expandafter\@changedatdeclarelist%
+          \expandafter{\@tempa!#2}%
+      \else%
+        \expandafter\listadd\expandafter\@changedatdeclarelist%
+          \expandafter{\@tempa!\@changedatdeclaredefault!#2}%
+      \fi%
+    }%
+  }%
+}
+\newcommand*\printchangedatlist[1][.2\baselineskip]{%
+    \ifx\@changedatdeclarelist\relax\else%
+      \setlength\changedatmarginskip{#1}%
+      \ChangedAt@Process{\@changedatdeclarelist}%
+      \setlength{\changedatmarginskip}{\z@}%
+      \global\let\@changedatdeclarelist\relax%
+      \@afterindentfalse\@afterheading%
+    \fi%
 }
 \newcommand*\ChangedAt[1]{\strut\ChangedAt@Process{#1}\ignorespaces}
 \newcommand*\@changedatlist{}
@@ -929,23 +976,14 @@
   \ChangedAt@@Process#1%
 }
 \newcommand*\ChangedAt@@Process[3]{%
-  \IfNoValueTF{#3}{%
-    \IfValueTF{#2}{\ChangedAt@@@Process{#1}{#2}}{}%
-  }{%
+  \IfValueTF{#3}{%
     \begingroup%
-      \let\PName\@gobble%
-      \let\PBoolean\relax%
-      \let\PSet\relax%
-      \let\PValue\@gobble%
-      \let\Parameter\@gobble%
-      \let\OParameter\@gobble%
-      \let\LParameter\relax%
-      \let\OLParameter\@gobble%
-      \let\PParameter\@gobble%
-      \let\POParameter\@gobble%
+      \@gobbleparameters%
       \xdef\ChangedAt@Default{#3}%
     \endgroup%
     \ChangedAt@@@Process{#1}{\ChangedAt@Default: #2}%
+  }{%
+    \IfValueT{#2}{\ChangedAt@@@Process{#1}{#2}}%
   }%
   \xifinlist{#1}{\@changedatversionlist}{}{\listeadd\@changedatversionlist{#1}}%
 }
@@ -974,18 +1012,18 @@
   \listeadd\@changedatdeclarelist{#2}%
   \index[#1]{#3|see{#4}}%
 }
-\NewDocumentCommand\@ProcessChangedAt{md()omo}{%
+\NewDocumentCommand\@ProcessChangedAt{mmd()mmm}{%
   \begingroup%
     \let\texttt\@firstofone%
     \let\texturn\@firstofone%
     \let\Environment\@firstofone%
     \let\Macro\@firstofone%
-    \IfValueTF{#2}{\xdef\@tempa{#1:#2:#4}}{\xdef\@tempa{#1:#4}}%
+    \IfValueTF{#3}{\xdef\@tempa{#2:#3:#5}}{\xdef\@tempa{#2:#5}}%
   \endgroup%
-  \IfValueTF{#3}{%
-    \def\@tempb{\begingroup#3#4\endgroup\IfValueTF{#5}{#5}{}}%
+  \IfBooleanTF{#1}{%
+    \def\@tempb{\begingroup#4#5\endgroup}%
   }{%
-    \def\@tempb{\begingroup#4\endgroup\IfValueTF{#5}{#5}{}}%
+    \def\@tempb{\begingroup#4#5\endgroup~{\idxfont(#6)}}%
   }%
   \ifcsdef{r@\@tempa}{\hyperidx[\@tempa]{\@tempb}}{\@tempb}%
 }
