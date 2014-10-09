@@ -219,14 +219,15 @@
 % \end{macro}^^A \tud@fm@body
 % \begin{macro}{\tud@fm@head}
 % \changes{v2.02}{2014/07/18}{an \pkg{scrlayer-scrpage} angepasst}%^^A
+% \changes{v2.02}{2014/10/09}{Bugfix für Kolumnentitel}%^^A
 % Dieses Makro dient zur Festlegung der Gliederungsebene der Überschrift der
 % Erklärung. Die gewählte Gliederungsebene ist in \cs{tud@\meta{Typ}@level}
 % gespeichert. Verwendet wird das Makro folgendermaßen:
-% \cs{tud@fm@set}\marg{Erklärungstyp}\marg{Überschrift}\marg{Inhalt}.
-% Damit die ggf. aktive Option \opt{abstract/declaration=toc} funktionieren
-% kann, wird für die Level, in denen keine Standardüberschrift verwendet wird,
-% mit dem Befehl \cs{phantomsection} aus dem Paket \pkg{hyperref}~-- wenn es 
-% tatsächlich geladen wurde~--  ein Anker für einen Hyperlink erzeugt. Ist
+% \cs{tud@fm@head}\marg{Erklärungstyp}\marg{Überschrift}\marg{Inhalt}. Damit 
+% die ggf. aktive Option \opt{abstract/declaration=toc} funktionieren kann,
+% wird für die Level, in denen keine Standardüberschrift verwendet wird, mit
+% dem Befehl \cs{phantomsection} aus dem Paket \pkg{hyperref}~-- wenn es 
+% tatsächlich geladen wurde~-- ein Anker für einen Hyperlink erzeugt. Ist
 % \cs{if@tud@\meta{Typ}@toc} wahr, so entspricht der erzeugte Eintrag ins
 % Inhaltsverzeichnis für \cls{tudscrartcl} immer dem eines Abschnitts, der für
 % \cls{tudscrbook} und \cls{tudscrreprt} für die untersten drei Ebenen abhängig
@@ -236,48 +237,50 @@
 %    \begin{macrocode}
 \newcommand*\tud@fm@head[2]{%
   \ifcase\@nameuse{tud@#1@level}\relax%
-    \def\@tempa{\endgraf\csname phantomsection\endcsname}%
+    \endgraf%
+    \csname phantomsection\endcsname%
+    \if@titlepage%
+      \ifbool{@tud@#1@toc}{\addxcontentsline{toc}{chapter}{#2}}{}%
+    \fi%
   \or%
-    \def\@tempa{%
-      \endgraf
-      \csname phantomsection\endcsname%
-      \@afterindentfalse%
-      \begingroup%
-        \centering%
-        \normalfont\sectfont\nobreak#2%
-        \@endparpenalty\@M%
-        \endgraf%
-      \endgroup%
-      \nopagebreak%
-      \vskip\dimexpr\bigskipamount-\parskip\relax%
-      \@afterheading%
+    \endgraf%
+    \csname phantomsection\endcsname%
+%<*book|report>
+    \if@titlepage%
+      \ifbool{@tud@#1@toc}{\addxcontentsline{toc}{chapter}{#2}}{}%
+    \else%
+%</book|report>
+      \ifbool{@tud@#1@toc}{\addxcontentsline{toc}{section}{#2}}{}%
+%<*book|report>
+    \fi%
+%</book|report>
+    \ifx\@mkboth\@gobbletwo\else\markright{\MakeMarkcase{#2}}\fi%
+    \@afterindentfalse%
+    \begingroup%
+      \centering%
+      \normalfont\sectfont\nobreak#2%
+      \@endparpenalty\@M%
+      \endgraf%
+    \endgroup%
+    \nopagebreak%
+    \vskip\dimexpr\bigskipamount-\parskip\relax%
+    \@afterheading%
+  \or%
+    \ifbool{@tud@#1@toc}{%
+      \addsec{#2}%
+    }{%
+      \addsec*{#2}%
+      \ifx\@mkboth\@gobbletwo\else\markright{\MakeMarkcase{#2}}\fi%
     }%
-  \or%
-    \def\@tempa{\addsec*{#2}}%
 %<*book|report>
   \or%
-    \def\@tempa{\addchap*{#2}}%
+    \ifbool{@tud@#1@toc}{%
+      \addchap{#2}%
+    }{%
+      \addchap*{#2}\@mkdouble{\MakeMarkcase{#2}}%
+    }%
 %</book|report>
   \fi%
-  \apptocmd{\@tempa}{%
-    \ifbool{@tud@#1@toc}{%
-%<*book|report>
-      \if@titlepage%
-        \addxcontentsline{toc}{chapter}{#2}%
-      \else%
-%</book|report>
-        \addxcontentsline{toc}{section}{#2}%
-%<*book|report>
-      \fi%
-%</book|report>
-    }{}%
-    \if@titlepage%
-      \@mkboth{\MakeMarkcase{#2}}{\MakeMarkcase{#2}}%
-    \else%
-      \ifx\@mkboth\@gobble\else\markright{\MakeMarkcase{#2}}\fi%
-    \fi%%
-  }{}{\tud@patch@wrn{tud@fm@head}}
-  \@tempa%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@fm@head
