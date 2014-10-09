@@ -257,8 +257,8 @@
     }%
   }%
   \IfFileExists{tutorials/#3.pdf}{\hypertut{#3}{}}{\texturn{#3.pdf}}%
-  \IfBooleanTF{#1}{}{%
-    \index[files]{\hypertut{#3}{~{\idxfont(Tutorial)}\IfValueTF{#2}{|#2}{}}}%
+  \IfBooleanF{#1}{%
+    \index[files]{\hypertut{#3}{~{\idxfont(Tutorial)}\IfValueT{#2}{|#2}}}%
   }%
 }
 %%\newread\pin@file
@@ -321,14 +321,14 @@
         \ifbool{KV@todonotes@nxt}{\setkeys{todonotes}{color=HKS57!30}}{}%
       }%
       \def\@ToDo{}%
-      \IfNoValueTF{#2}{%
-        \IfBooleanTF{#1}{\edef\@ToDo{nolist}}{}%
-      }{%
+      \IfValueTF{#2}{%
         \IfBooleanTF{#1}{\edef\@ToDo{#2,nolist}}{\edef\@ToDo{#2}}%
+      }{%
+        \IfBooleanT{#1}{\edef\@ToDo{nolist}}%
       }%
       \renewcommand*\marginpar[2][]{\marginnote[##1]{##2}[\dimexpr-1.6ex+1pt]}%
       \vskip.8ex%
-      \IfNoValueTF{#4}{}{%
+      \IfValueT{#4}{%
         \settowidth\marginparwidth{#4}%
         \addtolength\marginparwidth{\dimexpr1.6ex+1pt}%
         \let\par\relax\noindent%
@@ -514,7 +514,7 @@
   }%
 }
 \NewDocumentCommand\DeclareClass{om}{%
-  \IfValueTF{#1}{\ChangedAt@Process{#1!\emph{neu}!\Class{#2}}}{}%
+  \IfValueT{#1}{\ChangedAt@Process{#1!\emph{neu}!\Class{#2}}}%
   \Hy@raisedlink{\hyperdef{\jobname}{files:#2}{}}%
   \label{files:#2}%
   \index[files]{\hyperidx[files:#2]{\texturn{#2}~{\idxfont(Klasse)}}|declare}%
@@ -528,7 +528,7 @@
 }
 \DeclareExpandableDocumentCommand\@Class{sm}{#2}
 \NewDocumentCommand\DeclarePackage{som}{%
-  \IfValueTF{#2}{\ChangedAt@Process{#2!\emph{neu}!\Package{#3}}}{}%
+  \IfValueT{#2}{\ChangedAt@Process{#2!\emph{neu}!\Package{#3}}}%
   \IfBooleanTF{#1}{%
     \raisebox{4\baselineskip}[0pt][0pt]{\hyperdef{\jobname}{files:#3}{}}%
     \par\nobreak%
@@ -701,9 +701,7 @@
     \fi%
     \if@openindex%
       \if@noindex\else%
-        \IfValueTF{#5}%
-          {\edef\@tempa{#4:#5:#7}}%
-          {\edef\@tempa{#4:#7}}%
+        \IfValueTF{#5}{\edef\@tempa{#4:#5:#7}}{\edef\@tempa{#4:#7}}%
         \Hy@raisedlink{\hyperdef{\jobname}{\@tempa}{}}%
         \label{\@tempa}%
         \@HyperIndex{#4}{#5}{#6}{#7}{#8}{(declare}%
@@ -804,7 +802,7 @@
 \let\@changedatdeclarelist\relax
 \NewDocumentEnvironment{Declaration}{omoog}{%
   \listadd\@declarationlist{#2}%
-  \IfValueTF{#1}{%
+  \IfValueT{#1}{%
     \@for\@tempa:=#1\do{%
       \@expandtwoargs\in@{!}{\@tempa}
       \ifin@
@@ -815,25 +813,25 @@
           \expandafter{\@tempa!\emph{neu}!#2}%
       \fi
     }%
-  }{}%
-  \IfNoValueTF{#3}{%
-    \listadd\@presetlist{\relax}%
-  }{%
+  }%
+  \IfValueTF{#3}{%
     \@presetlisttrue%
-    \IfNoValueTF{#4}{%
-      \listadd\@presetlist{preset:\,#3}%
-    }{%
+    \IfValueTF{#4}{%
       \def\@tempa[##1:##2]{##1:\,##2}%
       \listeadd\@presetlist{preset:\,#3\,|\,\expandonce{\@tempa[#4]}}%
+    }{%
+      \listadd\@presetlist{preset:\,#3}%
     }%
-  }%
-  \IfNoValueTF{#5}{%
-    \listadd\@additionallist{\relax}%
   }{%
+    \listadd\@presetlist{\relax}%
+  }%
+  \IfValueTF{#5}{%
     \@additionallisttrue%
     \listadd\@additionallist{\hspace*{\tabcolsep}\small(#5)}%
     \in@{\Environment}{#2}%
     \ifin@ \listadd\@additionallist{\tabularnewline}\fi%
+  }{%
+    \listadd\@additionallist{\relax}%
   }%
 }{%
   \ifx\@declarationlist\relax\else%
@@ -900,7 +898,7 @@
     \global\let\@additionallist\relax%
     \global\@additionallistfalse%
     \global\let\@changedatdeclarelist\relax%
-    \IfValueTF{#2}{#2}{}%
+    \IfValueT{#2}{#2}%
     \par\nobreak%
     \vskip 1.5\baselineskipglue%
     \@afterindentfalse\@afterheading%
@@ -934,9 +932,7 @@
   \ChangedAt@@Process#1%
 }
 \newcommand*\ChangedAt@@Process[3]{%
-  \IfNoValueTF{#3}{%
-    \IfValueTF{#2}{\ChangedAt@@@Process{#1}{#2}}{}%
-  }{%
+  \IfValueTF{#3}{%
     \begingroup%
       \let\PName\@gobble%
       \let\PBoolean\relax%
@@ -951,6 +947,8 @@
       \xdef\ChangedAt@Default{#3}%
     \endgroup%
     \ChangedAt@@@Process{#1}{\ChangedAt@Default: #2}%
+  }{%
+    \IfValueT{#2}{\ChangedAt@@@Process{#1}{#2}}%
   }%
   \xifinlist{#1}{\@changedatversionlist}{}{\listeadd\@changedatversionlist{#1}}%
 }

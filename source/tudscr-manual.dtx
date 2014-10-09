@@ -633,7 +633,7 @@
         \advance\@tempcnta\m@ne%
         \edef\@tempb{%
           keepaspectratio,page=\@tempa,width=\the\@tempdima,%
-          \IfNoValueTF{#1}{}{#1}%
+          \IfValueT{#1}{#1}%
         }
         \fbox{%
           \expandafter\includegraphics\expandafter[\@tempb]{%
@@ -798,8 +798,8 @@
     }%
   }%
   \IfFileExists{tutorials/#3.pdf}{\hypertut{#3}{}}{\texturn{#3.pdf}}%
-  \IfBooleanTF{#1}{}{%
-    \index[files]{\hypertut{#3}{~{\idxfont(Tutorial)}\IfValueTF{#2}{|#2}{}}}%
+  \IfBooleanF{#1}{%
+    \index[files]{\hypertut{#3}{~{\idxfont(Tutorial)}\IfValueT{#2}{|#2}}}%
   }%
 }
 %    \end{macrocode}
@@ -915,10 +915,10 @@
 % In \cs{@ToDo} wird das optionale Argument für \pkg{todonotes} gesichert.
 %    \begin{macrocode}
       \def\@ToDo{}%
-      \IfNoValueTF{#2}{%
-        \IfBooleanTF{#1}{\edef\@ToDo{nolist}}{}%
-      }{%
+      \IfValueTF{#2}{%
         \IfBooleanTF{#1}{\edef\@ToDo{#2,nolist}}{\edef\@ToDo{#2}}%
+      }{%
+        \IfBooleanT{#1}{\edef\@ToDo{nolist}}%
       }%
 %    \end{macrocode}
 % Damit die Randnotiz nicht verrutscht, wird \cs{marginnote} anstelle von 
@@ -930,7 +930,7 @@
 %    \end{macrocode}
 % hier erfolgt die Ausgabe.
 %    \begin{macrocode}
-      \IfNoValueTF{#4}{}{%
+      \IfValueT{#4}{%
         \settowidth\marginparwidth{#4}%
         \addtolength\marginparwidth{\dimexpr1.6ex+1pt}%
         \let\par\relax\noindent%
@@ -1322,7 +1322,7 @@
 % \begin{macro}{\DeclareClass}
 %    \begin{macrocode}
 \NewDocumentCommand\DeclareClass{om}{%
-  \IfValueTF{#1}{\ChangedAt@Process{#1!\emph{neu}!\Class{#2}}}{}%
+  \IfValueT{#1}{\ChangedAt@Process{#1!\emph{neu}!\Class{#2}}}%
   \Hy@raisedlink{\hyperdef{\jobname}{files:#2}{}}%
   \label{files:#2}%
   \index[files]{\hyperidx[files:#2]{\texturn{#2}~{\idxfont(Klasse)}}|declare}%
@@ -1356,7 +1356,7 @@
 % \changes{v2.02}{2014/07/10}{optionales Argument für Änderungsnotiz}%^^A
 %    \begin{macrocode}
 \NewDocumentCommand\DeclarePackage{som}{%
-  \IfValueTF{#2}{\ChangedAt@Process{#2!\emph{neu}!\Package{#3}}}{}%
+  \IfValueT{#2}{\ChangedAt@Process{#2!\emph{neu}!\Package{#3}}}%
   \IfBooleanTF{#1}{%
     \raisebox{4\baselineskip}[0pt][0pt]{\hyperdef{\jobname}{files:#3}{}}%
     \par\nobreak%
@@ -1427,10 +1427,10 @@
 %<*package&body>
 \NewDocumentCommand\Option{smo}{%
   \IfBooleanTF{#1}{%
-    \texttt{#2}\IfValueTF{#3}{\texttt{=#3}}{}%
+    \texttt{#2}\IfValueT{#3}{\texttt{=#3}}%
   }{%
     \hyperref{../\tudscr@manual}{\tudscr@manual}{options:#2}{\texttt{#2}}%
-    \IfValueTF{#3}{\texttt{=#3}}{}%
+    \IfValueT{#3}{\texttt{=#3}}%
   }%
 }
 %</package&body>
@@ -1727,9 +1727,7 @@
     \fi%
     \if@openindex%
       \if@noindex\else%
-        \IfValueTF{#5}%
-          {\edef\@tempa{#4:#5:#7}}%
-          {\edef\@tempa{#4:#7}}%
+        \IfValueTF{#5}{\edef\@tempa{#4:#5:#7}}{\edef\@tempa{#4:#7}}%
         \Hy@raisedlink{\hyperdef{\jobname}{\@tempa}{}}%
         \label{\@tempa}%
         \@HyperIndex{#4}{#5}{#6}{#7}{#8}{(declare}%
@@ -1933,7 +1931,7 @@
 % abgearbeitet werden. Wenn keine weitere Erklärung angegeben wurde, wird der 
 % entspredchende Eintrag mit dem Attribut \emph{neu} versehen.
 %    \begin{macrocode}
-  \IfValueTF{#1}{%
+  \IfValueT{#1}{%
     \@for\@tempa:=#1\do{%
       \@expandtwoargs\in@{!}{\@tempa}
       \ifin@
@@ -1944,31 +1942,31 @@
           \expandafter{\@tempa!\emph{neu}!#2}%
       \fi
     }%
-  }{}%
+  }%
 %    \end{macrocode}
 % Hier noch die Listen für Voreinstellungen\dots
 %    \begin{macrocode}
-  \IfNoValueTF{#3}{%
-    \listadd\@presetlist{\relax}%
-  }{%
+  \IfValueTF{#3}{%
     \@presetlisttrue%
-    \IfNoValueTF{#4}{%
-      \listadd\@presetlist{preset:\,#3}%
-    }{%
+    \IfValueTF{#4}{%
       \def\@tempa[##1:##2]{##1:\,##2}%
       \listeadd\@presetlist{preset:\,#3\,|\,\expandonce{\@tempa[#4]}}%
+    }{%
+      \listadd\@presetlist{preset:\,#3}%
     }%
+  }{%
+    \listadd\@presetlist{\relax}%
   }%
 %    \end{macrocode}
 % \dots sowie zusätliche Informationen.
 %    \begin{macrocode}
-  \IfNoValueTF{#5}{%
-    \listadd\@additionallist{\relax}%
-  }{%
+  \IfValueTF{#5}{%
     \@additionallisttrue%
     \listadd\@additionallist{\hspace*{\tabcolsep}\small(#5)}%
     \in@{\Environment}{#2}%
     \ifin@ \listadd\@additionallist{\tabularnewline}\fi%
+  }{%
+    \listadd\@additionallist{\relax}%
   }%
 }{%
 %    \end{macrocode}
@@ -2072,7 +2070,7 @@
 % Zum Schluss wird das optionale Argument (in runden Klammern) neben der
 % Deklarationsbox ausgegeben.
 %    \begin{macrocode}
-    \IfValueTF{#2}{#2}{}%
+    \IfValueT{#2}{#2}%
     \par\nobreak%
     \vskip 1.5\baselineskipglue%
     \@afterindentfalse\@afterheading%
@@ -2181,9 +2179,7 @@
 % handelt. Der eigentliche Eintrag selbst erfolgt mit \cs{ChangedAt@@@Process}.
 %    \begin{macrocode}
 \newcommand*\ChangedAt@@Process[3]{%
-  \IfNoValueTF{#3}{%
-    \IfValueTF{#2}{\ChangedAt@@@Process{#1}{#2}}{}%
-  }{%
+  \IfValueTF{#3}{%
 %    \end{macrocode}
 % Bei der Deklaration von Optionen, Befehlen etc. werden diese automatisch in 
 % der Liste der Änderungen vor der gegebenen Erklärung selbst ausgegeben.
@@ -2206,6 +2202,8 @@
       \xdef\ChangedAt@Default{#3}%
     \endgroup%
     \ChangedAt@@@Process{#1}{\ChangedAt@Default: #2}%
+  }{%
+    \IfValueT{#2}{\ChangedAt@@@Process{#1}{#2}}%
   }%
 %    \end{macrocode}
 % Außerdem wird der Liste \cs{changedatversionlist} die aktuelle Version
