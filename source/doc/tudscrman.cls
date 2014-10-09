@@ -179,10 +179,18 @@
     \let\item\tud@item@pkg%
   }{}%
 }
-\newcommand*\tud@item@pkg[1][]{%
+\NewDocumentCommand\tud@item@pkg{od()}{%
   \itempackages[{%
-    \DeclarePackage{#1}%
-    \href{http://www.ctan.org/pkg/#1}{\texturn{#1}}%
+    \IfValueT{#1}{%
+      \Hy@raisedlink{\hyperdef{\jobname}{files:#1}{}}%
+      \label{files:#1}%
+      \IfValueTF{#2}{%
+        \def\@tempa{http://www.ctan.org/pkg/#2}%
+      }{%
+        \def\@tempa{http://www.ctan.org/pkg/#1}%
+      }%
+      \href{\@tempa}{\Package{#1}'none'|!|}%
+    }%
   }]%
 }
 \newcommand*\tud@write@file{}
@@ -458,6 +466,7 @@
 \PassOptionsToPackage{open,openlevel=0}{bookmark}
 \RequirePackage{bookmark}[2011/12/02]
 \newif\if@declare
+\newif\if@stareddeclare
 \newif\if@openindex
 \newcommand*\idxfont{}
 \let\idxfont\footnotesize
@@ -471,7 +480,7 @@
       \ClassWarning{\tudcls@name}{%
         You've used the starred version so no entry for\MessageBreak%
         the index is created and the optional argument\MessageBreak%
-        |`index format'| will be ignored%
+        |#2| will be ignored%
       }%
     }%
   }%
@@ -513,12 +522,6 @@
     }%
   }%
 }
-\NewDocumentCommand\DeclareClass{om}{%
-  \IfValueT{#1}{\ChangedAt@Process{#1!\emph{neu}!\Class{#2}}}%
-  \Hy@raisedlink{\hyperdef{\jobname}{files:#2}{}}%
-  \label{files:#2}%
-  \index[files]{\hyperidx[files:#2]{\texturn{#2}~{\idxfont(Klasse)}}|declare}%
-}
 \NewDocumentCommand\Class{smd''d||}{%
   \ifdin{#2}{%
     \SetIndexFormat{#1}{#4}%
@@ -527,19 +530,6 @@
   }%
 }
 \DeclareExpandableDocumentCommand\@Class{sm}{#2}
-\NewDocumentCommand\DeclarePackage{som}{%
-  \IfValueT{#2}{\ChangedAt@Process{#2!\emph{neu}!\Package{#3}}}%
-  \IfBooleanTF{#1}{%
-    \raisebox{4\baselineskip}[0pt][0pt]{\hyperdef{\jobname}{files:#3}{}}%
-    \par\nobreak%
-    \vskip\dimexpr-\parskip-\baselineskip%
-    \@afterindentfalse\@afterheading%
-  }{%
-    \Hy@raisedlink{\hyperdef{\jobname}{files:#3}{}}%
-  }%
-  \label{files:#3}%
-  \index[files]{\hyperidx[files:#3]{\texturn{#3}~{\idxfont(Paket)}}|declare}%
-}
 \NewDocumentCommand\Package{smd''d||}{%
   \if@changelog%
     \@ProcessChangedAt{#1}{files}{\protect\univrn}{#2}{Paket}%
@@ -693,20 +683,36 @@
 }
 \NewDocumentCommand\@ProcessOutput{mod''md()omo}{%
   \if@declare%
-    \ifx\@IndexFormat\@empty\else%
-      \ClassError{\tudcls@name}{Can't use |`index format'|}{%
-        It is not possible to use |`index format'|\MessageBreak%
-        within the arguments of `Declaration'%
-      }%
-    \fi%
     \if@openindex%
+      \IfValueT{#3}{%
+        \ClassWarning{\tudcls@name}{%
+          It is not possible to use any cross-reference\MessageBreak%
+          shorthand like '#3' within the arguments of\MessageBreak%
+          the environment `Declaration'%
+        }%
+      }%
+      \ifx\@IndexFormat\@empty\else%
+        \ClassWarning{\tudcls@name}{%
+            It is not possible to use any indexing format\MessageBreak%
+            like |\@IndexFormat| within the arguments of the\MessageBreak%
+            environment `Declaration'%
+        }%
+      \fi%
       \if@noindex\else%
         \IfValueTF{#5}{\edef\@tempa{#4:#5:#7}}{\edef\@tempa{#4:#7}}%
-        \Hy@raisedlink{\hyperdef{\jobname}{\@tempa}{}}%
+        \if@stareddeclare%
+          \raisebox{4\baselineskip}[0pt][0pt]{\hyperdef{\jobname}{\@tempa}{}}%
+          \par\nobreak\vskip\dimexpr-\parskip-\baselineskip%
+          \@afterindentfalse\@afterheading%
+        \else%
+          \Hy@raisedlink{\hyperdef{\jobname}{\@tempa}{}}%
+        \fi%
         \label{\@tempa}%
         \@HyperIndex{#4}{#5}{#6}{#7}{#8}{(declare}%
       \fi%
-      #1\IfValueT{#2}{#2}%
+      \if@stareddeclare\else%
+        #1\IfValueT{#2}{#2}%
+      \fi%
     \else%
       \if@noindex\else%
         \@HyperIndex{#4}{#5}{#6}{#7}{#8}{declare)}%
@@ -724,20 +730,25 @@
     \fi%
     \IfValueTF{#5}{\edef\@tempa{#4:#5:#7}}{\edef\@tempa{#4:#7}}%
     \ifcsdef{r@\@tempa}{%
-      \IfValueTF{#3}{%
+      \let\@tempb\relax%
+      \def\@tempc{\mbox{\hyperref{}{\jobname}{\@tempa}{#1}\IfValueT{#2}{#2}}}%
+      \IfValueT{#3}{%
         \def\@tempb{%
           \ClassWarning{\tudcls@name}{%
-            You've used an unknown index format |`#3'|.\MessageBreak%
-            Only |auto|, |page| and |full| are valid%
+            You've used the unknown cross-reference\MessageBreak%
+            shorthand '#3'. Only 'auto', 'page'\MessageBreak%
+            and 'full' as well as 'none' are valid%
           }%
         }%
         \ifstr{#3}{auto}{\def\@tempb{ in \autoref{\@tempa}}}{}%
         \ifstr{#3}{page}{\def\@tempb{ \vpageref{\@tempa}}}{}%
         \ifstr{#3}{full}{\def\@tempb{ in \fullref{\@tempa}}}{}%
-      }{%
-        \let\@tempb\relax%
+        \ifstr{#3}{none}{%
+          \let\@tempb\relax%
+          \def\@tempc{\mbox{#1\IfValueT{#2}{#2}}}%
+        }{}%
       }%
-      \mbox{\hyperref{}{\jobname}{\@tempa}{#1}\IfValueT{#2}{#2}}\@tempb%
+      \@tempc\@tempb%
     }{%
       \IfValueT{#3}{%
         \ClassWarning{\tudcls@name}{%
@@ -798,22 +809,21 @@
 \newcommand*\@additionallist{}
 \let\@additionallist\relax
 \newif\if@additionallist
-\newcommand*\@changedatdeclarelist{}
-\let\@changedatdeclarelist\relax
+\newcommand*\@gobbleparameters{%
+  \let\PName\@gobble%
+  \let\PBoolean\relax%
+  \let\PSet\relax%
+  \let\PValue\@gobble%
+  \let\Parameter\@gobble%
+  \let\OParameter\@gobble%
+  \let\LParameter\relax%
+  \let\OLParameter\@gobble%
+  \let\PParameter\@gobble%
+  \let\POParameter\@gobble%
+}
 \NewDocumentEnvironment{Declaration}{omoog}{%
   \listadd\@declarationlist{#2}%
-  \IfValueT{#1}{%
-    \@for\@tempa:=#1\do{%
-      \@expandtwoargs\in@{!}{\@tempa}
-      \ifin@
-        \expandafter\listadd\expandafter\@changedatdeclarelist%
-          \expandafter{\@tempa!#2}%
-      \else
-        \expandafter\listadd\expandafter\@changedatdeclarelist%
-          \expandafter{\@tempa!\emph{neu}!#2}%
-      \fi
-    }%
-  }%
+  \@changedatdeclare{#1}{#2}%
   \IfValueTF{#3}{%
     \@presetlisttrue%
     \IfValueTF{#4}{%
@@ -840,26 +850,23 @@
       to print this list with \string\printdeclarationlist?%
     }%
   \fi%
-  \let\PName\@gobble%
-  \let\PBoolean\relax%
-  \let\PSet\relax%
-  \let\PValue\@gobble%
-  \let\Parameter\@gobble%
-  \let\OParameter\@gobble%
-  \let\LParameter\relax%
-  \let\OLParameter\@gobble%
-  \let\PParameter\@gobble%
-  \let\POParameter\@gobble%
+  \@gobbleparameters%
   \vskip-\lastskip%
   \@declaretrue\@openindexfalse#2\@declarefalse%
   \pagebreak[0]%
 }
-\NewDocumentCommand\printdeclarationlist{sd()}{%
+\NewDocumentCommand\printdeclarationlist{sod()}{%
   \ifx\@declarationlist\relax\else%
     \ifvmode\else\par\fi%
     \addpenalty{\@beginparpenalty}%
     \addvspace{1.5\baselineskipglue}%
-    \IfBooleanTF{#1}{\global\@noindextrue}{\global\@noindexfalse}%
+    \IfBooleanTF{#1}{%
+      \global\@noindextrue%
+      \renewcommand*\@changedatdeclaredefault{\emph{entf\"allt}}%
+    }{%
+      \global\@noindexfalse%
+    }%
+    \IfValueT{#2}{\renewcommand*\@changedatdeclaredefault{\emph{#2}}}%
     \@declaretrue\@openindextrue%
     \@afterindentfalse\@afterheading%
     \def\@tempa##1{\ignorespaces##1\tabularnewline}%
@@ -871,7 +878,6 @@
         \hline%
       \end{tabular}%
     }\usebox0%
-    \setlength\changedatmarginskip{\dimexpr.5\baselineskip-.5\ht0-.5\dp0\relax}%
     \@declarefalse%
     \ifboolexpr{bool {@presetlist} or bool {@additionallist}}{%
       \if@presetlist%
@@ -888,21 +894,59 @@
         \end{tabular}%
       \fi%
     }{}%
-    \ifx\@changedatdeclarelist\relax\else%
-      \ChangedAt@Process{\@changedatdeclarelist}%
-    \fi%
-    \setlength{\changedatmarginskip}{\z@}%
     \global\let\@declarationlist\relax%
     \global\let\@presetlist\relax%
     \global\@presetlistfalse%
     \global\let\@additionallist\relax%
     \global\@additionallistfalse%
-    \global\let\@changedatdeclarelist\relax%
-    \IfValueT{#2}{#2}%
+    \printchangedatlist[\dimexpr.5\baselineskip-.5\ht0-.5\dp0\relax]%
+    \IfValueT{#3}{#3}%
     \par\nobreak%
     \vskip 1.5\baselineskipglue%
     \@afterindentfalse\@afterheading%
   \fi%
+}
+\NewDocumentEnvironment{Declaration*}{om}{%
+  \@changedatdeclare{#1}{#2}%
+  \@stareddeclaretrue%
+  \global\@noindexfalse%
+  \@declaretrue\@openindextrue#2\@declarefalse%
+  \@stareddeclarefalse%
+}{%
+  \ifx\@changedatdeclarelist\relax\else%
+    \ClassError{\tudcls@name}{\string\printchangedatlist\space is missing}{%
+      \string\@changedatdeclarelist\space is not empty. Did you\MessageBreak%
+      forget to print this list with \string\printchangedatlist?%
+    }%
+  \fi%
+  \@gobbleparameters%
+  \@declaretrue\@openindexfalse#2\@declarefalse%
+}
+\newcommand*\@changedatdeclarelist{}
+\let\@changedatdeclarelist\relax
+\newcommand*\@changedatdeclaredefault{\emph{neu}}
+\newcommand*\@changedatdeclare[2]{%
+  \IfValueT{#1}{%
+    \@for\@tempa:=#1\do{%
+      \@expandtwoargs\in@{!}{\@tempa}%
+      \ifin@%
+        \expandafter\listadd\expandafter\@changedatdeclarelist%
+          \expandafter{\@tempa!#2}%
+      \else%
+        \expandafter\listadd\expandafter\@changedatdeclarelist%
+          \expandafter{\@tempa!\@changedatdeclaredefault!#2}%
+      \fi%
+    }%
+  }%
+}
+\newcommand*\printchangedatlist[1][.2\baselineskip]{%
+    \ifx\@changedatdeclarelist\relax\else%
+      \setlength\changedatmarginskip{#1}%
+      \ChangedAt@Process{\@changedatdeclarelist}%
+      \setlength{\changedatmarginskip}{\z@}%
+      \global\let\@changedatdeclarelist\relax%
+      \@afterindentfalse\@afterheading%
+    \fi%
 }
 \newcommand*\ChangedAt[1]{\strut\ChangedAt@Process{#1}\ignorespaces}
 \newcommand*\@changedatlist{}
@@ -934,16 +978,7 @@
 \newcommand*\ChangedAt@@Process[3]{%
   \IfValueTF{#3}{%
     \begingroup%
-      \let\PName\@gobble%
-      \let\PBoolean\relax%
-      \let\PSet\relax%
-      \let\PValue\@gobble%
-      \let\Parameter\@gobble%
-      \let\OParameter\@gobble%
-      \let\LParameter\relax%
-      \let\OLParameter\@gobble%
-      \let\PParameter\@gobble%
-      \let\POParameter\@gobble%
+      \@gobbleparameters%
       \xdef\ChangedAt@Default{#3}%
     \endgroup%
     \ChangedAt@@@Process{#1}{\ChangedAt@Default: #2}%
