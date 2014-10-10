@@ -9,5 +9,5 @@ attrib +h "doc\tutorials\*.sty"
 attrib -h "doc\tutorials\*-temp.*"
 attrib -h "install\*.tex"
 attrib +h "logo\*.*"
-del "*.*" /s /q
+del "*.*" /s /q> nul
 attrib -h "*.*" /s
