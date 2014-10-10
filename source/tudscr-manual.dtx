@@ -1,4 +1,4 @@
-% \CheckSum{2231}
+% \CheckSum{2288}
 % \iffalse meta-comment
 % ======================================================================
 %
@@ -49,7 +49,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-manual.dtx}[%
-  2014/10/09 v2.02 TUD-KOMA-Script\space%
+  2014/10/10 v2.02 TUD-KOMA-Script\space%
 %</driver>
 %<identify>\NeedsTeXFormat{LaTeX2e}[2011/06/27]
 %<class&identify>\ProvidesClass{tudscrman}[%
@@ -64,7 +64,9 @@
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
 \usepackage{selinput}\SelectInputMappings{adieresis={ä},germandbls={ß}}
+\usepackage[T1]{fontenc}
 \usepackage{babel}
+\IfFileExists{tudscrfonts.sty}{\usepackage{tudscrfonts}}{}
 \KOMAoptions{parskip=half-}
 \CodelineIndex
 \RecordChanges
@@ -480,10 +482,12 @@
 % \end{macro}^^A \tudscr@manual
 % \begin{environment}{Tutorial}
 % \changes{v2.02}{2014/08/16}{neu}%^^A
+% \begin{environment}{Tutorial!}
+% \changes{v2.02}{2014/10/07}{neu}%^^A
 % \begin{environment}{Tutorial*}
 % \changes{v2.02}{2014/08/19}{neu}%^^A
 % \begin{environment}{Tutorial+}
-% \changes{v2.02}{2014/09/10}{neu}%^^A
+% \changes{v2.02}{2014/10/07}{neu}%^^A
 % \begin{environment}{Tutorial-}
 % \changes{v2.02}{2014/09/16}{neu}%^^A
 % \begin{macro}{\TutorialPreamble}
@@ -492,36 +496,35 @@
 % \changes{v2.02}{2014/09/10}{neu}%^^A
 % \begin{macro}{\@Tutorial}
 % \changes{v2.02}{2014/08/19}{neu}%^^A
-% \begin{macro}{\@@Tutorial}
-% \changes{v2.02}{2014/08/19}{neu}%^^A
-% \begin{macro}{\@@@Tutorial}
-% \changes{v2.02}{2014/08/19}{neu}%^^A
 % Die Umgebung \env{Tutorial} ist für die Ausgabe und gleichzeitige Ausführung 
 % von Quelltext gedacht. Dazu speichert diese ihren Inhalt in eine temporäre 
 % Datei, die dann mehrmals ausgelesen werden kann. Damit kann der angegebene 
 % Quelltext zum einen ausgeführt und zum anderen im Dokument selber ausgegeben 
 % werden. Die Sternversion dieser Umgebung gibt den Quelltext vollständig aus,
-% ohne diesen auszuführen. Die Version mit Pluszeichen führt den Quelltext in
+% ohne diesen auszuführen. Die Ausrufezeichen"=Version führt den Quelltext in 
 % einer separaten Datei mit einem minimalen Dokumentkörper aus, um daraus eine
 % PDF-Datei zu erzeugen, welche im nachhinein wieder mit \cs{includetutorial}
 % als Grafik eingebunden werden kann. Dies ist für Quelltextabschnitte gedacht, 
 % deren Ausgabe zu groß ist, um diese direkt anzuzeigen und dennoch dargestellt 
 % werden soll. All diesen Varianten ist gemein, dass der angegebene Quelltext
 % am Ende des Tutorials mit \cs{FinishTutorial} chronologisch ausgegeben wird.
-% Um Quelltextausschnitte zur weiterführenden Information anzugeben, ohne diese 
-% in das Copy"~\&"~Paste"~Beispiel zu übernehmen, wird die außerdem die Version 
-% mit Minuszeichen definiert.
+% Die Variante mit Pluszeichen fügt dem Copy"~\&"~Paste"~Beispiel Quelltext
+% hinzu, ohne diesen auszugeben oder auszuführen. Um Quelltextausschnitte zur
+% weiterführenden Information anzugeben, wird die außerdem die Version mit
+% Minuszeichen definiert. Diese werden nicht in das Copy"~\&"~Paste"~Beispiel
+% übernommen.
 %
-% Damit die Umgebungen nicht doppelt implementiert werden müssen,  werden die
-% Hilfsmakros \cs{@Tutorial} und \cs{@@Tutorial} definiert. Für die eigentlich 
-% Ausgabe wird die \env{filecontents}"=Umgebung verwendet. Da deswegen die
-% Verwendung eines optionalen Argumentes für die \env{Tutorial}"=Umgebungen 
-% nicht möglich ist, wird \cs{TutorialPreamble}  bereitgestellt, womit der 
-% Ausgabe noch ein erläuternder Text vorangestellt werden kann.
+% Damit die Umgebungen nicht doppelt implementiert werden müssen, werden die
+% Hilfsmakros \cs{tud@tut@pre} und \cs{tud@tut@post} definiert. Für die Ausgabe
+% wird die \env{filecontents}"=Umgebung verwendet. Da deswegen die Verwendung
+% eines optionalen Argumentes für die \env{Tutorial}"=Umgebungen nicht möglich
+% ist, wird \cs{TutorialPreamble}  bereitgestellt, womit der Ausgabe noch ein
+% erläuternder Text vorangestellt werden kann.
 %
 % Zusätzlich wird der Inhalt der Datei mit \cs{tud@tut@append} an eine Datei 
-% gehängt, welche alle innerhalb des Dokumentes gesetzten Quelltexte enthält. 
-% Weiteres dazu bei der Beschreibung von \cs{FinishTutorial}
+% gehängt, welche alle innerhalb des Dokumentes gesetzten Quelltexte für ein 
+% Copy"~\&"~Paste"~Beispiel enthält. Weiteres dazu bei der Beschreibung von
+% \cs{FinishTutorial}
 %
 % Da das Paket \pkg{filecontents} beim Uberschreiben einer Datei für gewöhnlich
 % eine Warnung erzeugt, wird diese innerhalb der \env{Tutorial}"=Umgebungen 
@@ -530,50 +533,63 @@
 \RequirePackage{filecontents}[2011/10/08]
 \RequirePackage{silence}[2012/07/02]
 \WarningFilter[Tutorial]{latex}{Overwriting file}%
-\newcommand*\@Tutorial{%
-  \ActivateWarningFilters[Tutorial]%
-  \@nameuse{filecontents*}{\jobname-temp.tut}%
-}
-\newcommand*\@@Tutorial{%
-  \@nameuse{endfilecontents*}%
-  \DeactivateWarningFilters[Tutorial]%
+\newcommand*\@Tutorial{}
+\let\@Tutorial\relax
+\newcommand\TutorialPreamble[1]{\gdef\@Tutorial{#1}}
+\newenvironment{Tutorial}{\tud@tut@pre}{%
+  \tud@tut@post%
   \tud@tut@append%
-  \gdef\@tempa{%
-    \begin{quoting}[rightmargin=0pt]%
-    \lstinputlisting[style=tudscr]{\jobname-temp.tut}%
-    \end{quoting}%
-  }%
-  \aftergroup\@tempa%
-}
-\newcommand*\@@@Tutorial{}
-\let\@@@Tutorial\relax
-\newcommand\TutorialPreamble[1]{\gdef\@@@Tutorial{#1}}
-\newenvironment{Tutorial}{\@Tutorial}{\@@Tutorial}
-\newenvironment{Tutorial*}{\@Tutorial}{\@@Tutorial}
-\newenvironment{Tutorial+}[1]{\gdef\@@@Tutorial{#1}\@Tutorial}{\@@Tutorial}
-\newenvironment{Tutorial-}{\@Tutorial}{\@@Tutorial}
-\AfterEndEnvironment{Tutorial}{%
-  \@@@Tutorial\par%
-  \setlength{\@tempdimc}{\leftskip}%
-  \setlength{\leftskip}{\leftmargin}%
-  \noindent\ignorespaces\input{\jobname-temp.tut}%
-  \par%
-  \setlength{\leftskip}{\@tempdimc}%
-  \global\let\@@@Tutorial\relax%
-  \vspace{.5\baselineskipglue}%
-  \par\noindent%
-}
-\AfterEndEnvironment{Tutorial*}{%
-  \global\let\@@@Tutorial\relax%
-  \par\noindent%
+  \aftergroup\tud@tut@lst%
 }
 %    \end{macrocode}
-% Die Umgebung \env{Tutorial+} verwendet nach der Ausgabe des temporären 
-% Quelltextes diesen abermals, um daraus eine PDF-Datei zu erzeugen. Das 
-% übergebene Argument ist dabei der zu erzeugende Dateiname, welchem noch der 
-% Suffix \glqq -temp\grqq angehangen wird. Um die PDF-Datei erzeugen zu können, 
-% wird mithilfe der \env{filecontents}"=Umgebung eine temporäre \LaTeX-Datei 
-% erzeugt, die den zuletzt verwendeten Quelltext kompiliert.
+% Für die Ausgabe des Quelltextergebnisses erfolgt ein linker Einzug. Außerdem 
+% werden unter anderem abhängig von der Verwendung eines erklärenden Textes die 
+% eingefügten vertikalen Abstände angepasst.
+%    \begin{macrocode}
+\AfterEndEnvironment{Tutorial}{%
+  \setlength{\@tempdimc}{\leftskip}%
+  \setlength{\leftskip}{\leftmargin}%
+  \@tempswafalse%
+  \begingroup%
+    \setbox0\vbox{\input{\jobname-temp.tut}}%
+    \setlength{\@tempdimb}{\dimexpr\ht0+\dp0}%
+    \ifdim\@tempdimb=\z@\relax
+      \global\@tempswatrue%
+    \fi%
+  \endgroup%
+  \ifx\@Tutorial\relax\else%
+    \@Tutorial\par%
+    \vspace{.5\baselineskipglue}%
+  \fi%
+  \noindent\ignorespaces%
+  \input{\jobname-temp.tut}%
+  \global\let\@Tutorial\relax%
+  \if@tempswa%
+    \vspace{-\baselineskip}%
+  \else%
+    \vspace{.5\baselineskipglue}%
+  \fi%
+  \par\noindent%
+  \setlength{\leftskip}{\@tempdimc}%
+}
+%    \end{macrocode}
+% Die Umgebung \env{Tutorial!}\dots
+%    \begin{macrocode}
+\newenvironment{Tutorial!}[1]{%
+  \gdef\@Tutorial{#1}%
+  \tud@tut@pre%
+}{%
+  \tud@tut@post%
+  \tud@tut@append%
+  \aftergroup\tud@tut@lst%
+}
+%    \end{macrocode}
+% \dots verwendet nach der Ausgabe des temporären Quelltextes diesen abermals,
+% um daraus eine PDF-Datei zu erzeugen. Das übergebene Argument ist dabei der
+% zu erzeugende Dateiname, welchem noch der Suffix \glqq -temp\grqq angehangen
+% wird. Um die benötigte PDF-Datei erstellen zu können, wird mithilfe einer
+% \env{filecontents}"=Umgebung eine temporäre \LaTeX-Datei erzeugt, die den
+% zuletzt verwendeten Quelltext kompiliert.
 %    \begin{macrocode}
 \ifcase\pdf@shellescape\or
 \begin{filecontents*}{\jobname-temp.tex}
@@ -595,31 +611,31 @@
 % bei der Übersetzung des Handbuchs, ist der Test negativ. Warum genau weiß ich 
 % nicht. Es hilft aber auf alle Fälle, um die Pfade anzupassen.
 %    \begin{macrocode}
-\AfterEndEnvironment{Tutorial+}{%
+\AfterEndEnvironment{Tutorial!}{%
   \IfFileExists{\jobname-temp}{%
     \edef\tud@write@file{\jobname-temp}%
-    \edef\tud@write@option{-jobname=\@@@Tutorial-temp }%
+    \edef\tud@write@option{-jobname=\@Tutorial-temp }%
     \edef\tud@write@copy{}%
   }{%
     \edef\tud@write@file{tutorials/\jobname-temp}%
     \edef\tud@write@option{%
-      -output-directory tutorials -jobname=\@@@Tutorial-temp 
+      -output-directory tutorials -jobname=\@Tutorial-temp 
     }%
     \edef\tud@write@copy{tutorials\@backslashchar}%
   }%
   \immediate\write18{%
-    copy \tud@write@copy\jobname-temp.tut \tud@write@copy\@@@Tutorial-temp.tut
+    copy \tud@write@copy\jobname-temp.tut \tud@write@copy\@Tutorial-temp.tut
   }
   \immediate\write18{%
     pdflatex \tud@write@option \tud@write@file.tex
     pdflatex \tud@write@option \tud@write@file.tex
     pdflatex \tud@write@option \tud@write@file.tex
   }%
-  \global\let\@@@Tutorial\relax%
+  \global\let\@Tutorial\relax%
   \par\noindent%
 }
 %    \end{macrocode}
-% Der Befehl \cs{includetutorial} bindet die mit \env{Tutorial+} erzeugten
+% Der Befehl \cs{includetutorial} bindet die mit \env{Tutorial!} erzeugten
 % PDF-Grafiken schließlich ein. Das angehängte optionale Argument dient zur
 % Angabe der einzubindenden Seiten der PDF-Datei, wobei die PDF-Grafiken 
 % automatisch auf die passende Breite skaliert werden.
@@ -656,20 +672,65 @@
   }{}%
 }
 %    \end{macrocode}
-% Die Umgebung \env{Tutorial-} gibt lediglich den Inhalt im Dokument aus ohne 
-% weitere Aktionen. Hierfür wird \cs{tud@tut@append} lokal deaktiviert.
+% Die Umgebung \env{Tutorial*} gibt den Inhalt im Dokument als Quelltext aus 
+% und fügt diesem dem Copy"~\&"~Paste"~Beispiel hinzu.
 %    \begin{macrocode}
-\AtBeginEnvironment{Tutorial-}{\let\tud@tut@append\relax}
+\AfterEndEnvironment{Tutorial*}{%
+  \global\let\@Tutorial\relax%
+  \par\noindent%
+}
+\newenvironment{Tutorial*}{\tud@tut@pre}{%
+  \tud@tut@post%
+  \tud@tut@append%
+  \aftergroup\tud@tut@lst%
+}
 %    \end{macrocode}
-% \end{macro}^^A \@@@Tutorial
-% \end{macro}^^A \@@Tutorial
+% Die Umgebungen \env{Tutorial+} und \env{Tutorial-} schreiben ihren Quelltext
+% entweder in das Copy"~\&"~Paste"~Beispiel oder geben diesen im Dokument aus.
+%    \begin{macrocode}
+\newenvironment{Tutorial+}{\tud@tut@pre}{%
+  \tud@tut@post%
+  \tud@tut@append%
+}
+\newenvironment{Tutorial-}{\tud@tut@pre}{%
+  \tud@tut@post%
+  \aftergroup\tud@tut@lst%
+}
+%    \end{macrocode}
 % \end{macro}^^A \@Tutorial
 % \end{macro}^^A \includetutorial
 % \end{macro}^^A \TutorialPreamble
 % \end{environment}^^A Tutorial-
 % \end{environment}^^A Tutorial+
 % \end{environment}^^A Tutorial*
+% \end{environment}^^A Tutorial!
 % \end{environment}^^A Tutorial
+% \begin{macro}{\tud@tut@pre}
+% \changes{v2.02}{2014/08/19}{neu}%^^A
+% \begin{macro}{\tud@tut@post}
+% \changes{v2.02}{2014/08/19}{neu}%^^A
+% \begin{macro}{\tud@tut@lst}
+% \changes{v2.02}{2014/10/07}{neu}%^^A
+% Dies sind die Hilfsmakros, welche zu Beginn und Ende der unterschiedlichen
+% \env{Tutorial}"=Umgebungen verwendet werden.
+%    \begin{macrocode}
+\newcommand*\tud@tut@pre{%
+  \ActivateWarningFilters[Tutorial]%
+  \@nameuse{filecontents*}{\jobname-temp.tut}%
+}
+\newcommand*\tud@tut@post{%
+  \@nameuse{endfilecontents*}%
+  \DeactivateWarningFilters[Tutorial]%
+}
+\newcommand*\tud@tut@lst{%
+  \begin{quoting}[rightmargin=0pt]%
+  \lstinputlisting[style=tudscr]{\jobname-temp.tut}%
+  \end{quoting}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@tut@lst
+% \end{macro}^^A \tud@tut@post
+% \end{macro}^^A \tud@tut@pre
 % \begin{macro}{\tud@tut@input}
 % \changes{v2.02}{2014/08/19}{neu}%^^A
 % \begin{macro}{\tud@tut@output}
@@ -680,7 +741,7 @@
 % \changes{v2.02}{2014/08/19}{neu}%^^A
 % Bei den Tutorials soll zum Schluss ein komplett kompilierbares Beispiel für
 % Copy~\&~Paste gegeben werden. Um dieses zusammenzubauen, werden alle im 
-% Dokument innerhlab der \env{Tutorials}"=Umgebung gegebenen Codefragmente 
+% Dokument innerhalb der \env{Tutorials}"=Umgebung gegebenen Codefragmente 
 % zusammengesetzt. Um die Quelltexte einlesen und verarbeiten zu können, wird
 % ein Eingabe- sowie ein Ausgabestream benötigt.
 %    \begin{macrocode}
@@ -759,11 +820,12 @@
 % Der Befehl \cs{FinishTutorial} schleißt den noch offenen Ausgabestream und
 % gibt den vorgestellten Quelltext vollständig aus.
 %    \begin{macrocode}
-\newcommand*\FinishTutorial{%
+\newcommand\FinishTutorial[1][]{%
   \immediate\closeout\tud@tut@output%
   \clearpage\pagestyle{empty}\@afterindentfalse\@afterheading%
-  Zum Ende wird das vollst\"andige Tutorial als \"ubersetzbarer Quelltext 
-  ausgegeben, um es via Copy~\&~Paste direkt verwenden zu k\"onnen.
+  Zum Ende des Dokumentes wird das vorgestellte Tutorial als \"ubersetzbarer 
+  Quelltext ausgegeben, um dieses direkt mittels Copy~\&~Paste verwenden und 
+  alle Punkte nachvollziehen zu k\"onnen. #1
   \begin{quoting}[rightmargin=0pt]%
   \lstinputlisting[style=tudscr]{\jobname.tut}%
   \end{quoting}%
@@ -813,7 +875,7 @@
   }%
 }
 %    \end{macrocode}
-% \end{macro}^^A \@Tutorial
+% \end{macro}^^A \hypertut
 % \end{macro}^^A \Tutorial
 % \begin{macro}{\pin@}
 % \changes{v2.02}{2014/08/16}{neu}%^^A
@@ -1113,18 +1175,20 @@
 % geladen.
 %    \begin{macrocode}
 \PassOptionsToPackage{hyperindex=false}{hyperref}
-\RequirePackage{hyperref}[2012/11/06]
-\hypersetup{colorlinks,linkcolor=blue}
+\AtEndPreamble{%
+  \RequirePackage{hyperref}[2012/11/06]
+  \hypersetup{colorlinks,linkcolor=blue}
 %    \end{macrocode}
 % Für die PDF-Outline-Einträge werden die folgenden Befehle durch eine robuste
 % Version ersetzt.
 %    \begin{macrocode}
-\pdfstringdefDisableCommands{%
-  \let\Application\@Application%
-  \let\Class\@Class%
-  \let\Package\@Package%
-  \let\TUDScript\@TUDScript%
-  \let\NoCaseChange\@firstofone%
+  \pdfstringdefDisableCommands{%
+    \let\Application\@Application%
+    \let\Class\@Class%
+    \let\Package\@Package%
+    \let\TUDScript\@TUDScript%
+    \let\NoCaseChange\@firstofone%
+  }%
 }
 %    \end{macrocode}
 % \begin{macro}{\bsc}
@@ -1136,10 +1200,6 @@
 %    \end{macrocode}
 % \end{macro}^^A \bsc
 %
-% \iffalse
-%</body>
-%<*class&body>
-% \fi
 %
 % \begin{macro}{\Email}
 % Hyperlink für die Angabe einer E-Mail-Adresse.
@@ -1157,7 +1217,7 @@
 % \begin{macro}{\@autorefname}
 % \begin{macro}{\@@autorefname}
 % Der Befehl \cs{autorefname} dient dazu, den Verweistyp beziehungsweise den 
-% bezeichner des aktuellen oder optional zu einem speziellen Label ohne die 
+% Bezeichner des aktuellen oder optional zu einem speziellen Label ohne die 
 % dazugehörige Nummerierung zu erhalten. Auf der Seite LaTeX Stack Exchange%
 %\footnote{\url{http://tex.stackexchange.com/q/33776/}} wurde das Prinzip 
 % vorgestellt und hier übernommen.
@@ -1181,6 +1241,12 @@
 \newcommand*\@@autorefname{}
 \def\@@autorefname#1#2#3#4#5\@nil#6\@nil{#6#4.\@nil}
 %    \end{macrocode}
+%
+% \iffalse
+%</body>
+%<*class&body>
+% \fi
+%
 % Mit \pkg{bookmark} wird das Erzeugen von PDF-Outline-Einträgen verbessert.
 %    \begin{macrocode}
 \PassOptionsToPackage{open,openlevel=0}{bookmark}
@@ -1386,8 +1452,10 @@
 %</class&body>
 %<*package&body>
 \NewDocumentCommand\Package{sm}{%
-  \IfBooleanTF{#1}{\texturn{#2}}{%
+  \IfBooleanTF{#1}{%
     \hyperref{../\tudscr@manual}{\tudscr@manual}{files:#2}{\texturn{#2}}%
+  }{%
+    \href{http://www.ctan.org/pkg/#2}{\texturn{#2}}%
   }%
 }
 %</package&body>
@@ -1558,6 +1626,15 @@
       {macros}[\ttfamily\bsc]{#2}[~{\idxfont(L\"ange)}]%
   \fi%
 }
+%</class&body>
+%<*package&body>
+\NewDocumentCommand\Length{sm}{%
+  \IfBooleanTF{#1}{\texttt{\bsc#2}}{%
+    \hyperref{../\tudscr@manual}{\tudscr@manual}{macros:#2}{\texttt{\bsc#2}}%
+  }%
+}
+%</package&body>
+%<*class&body>
 %    \end{macrocode}
 % \end{macro}^^A \@TempLength
 % \end{macro}^^A \Length
@@ -1847,7 +1924,7 @@
 % \marg{Vorsatz}\marg{Eintrag}\marg{Anhang}\marg{Formatierung}
 % \endgroup
 %
-% Aufgrund der Nichtbeachtung von regulären Ausdrücken durch den Indexprozessor
+% Aufgrund der Nichtbeachtung von RegExp"=Ausdrücken durch den Indexprozessor
 % \texttt{texindy} (\url{http://sourceforge.net/p/xindy/bugs/22/}) muss hierfür
 % etwas getrickst werden. Der Befehl \cs{hyperidx} hat ein optionales Argument, 
 % in welchem das für \cs{hyperref} eigentlich obligatorische Label enthalten 
@@ -1965,8 +2042,8 @@
   \listadd\@declarationlist{#2}%
 %    \end{macrocode}
 % Die optional angegebenen Änderungen werden später mit \cs{ChangedAt@Process} 
-% verarbeitet und für das Eintragen in der Änderungsliste sowie die Randnotiz
-% mit \cs{@changedatdeclare} in der Liste \cs{@changedatdeclarelist} gesichert.
+% verarbeitet und für die Änderungsliste sowie die Randnotiz mit
+% \cs{@changedatdeclare} in der Liste \cs{@changedatdeclarelist} gesichert.
 %    \begin{macrocode}
   \@changedatdeclare{#1}{#2}% 
 %    \end{macrocode}
@@ -2078,7 +2155,7 @@
       \fi%
     }{}%
 %    \end{macrocode}
-% Alle für eine Deklaration verwendeten Listen werden nach ihrer Abarbeitung 
+% Alle für die Deklaration verwendeten Listen werden nach ihrer Abarbeitung 
 % zurückgesetzt.
 %    \begin{macrocode}
     \global\let\@declarationlist\relax%
@@ -2562,18 +2639,18 @@
 % Diese Befehle dienen zum Auszeichnen von obligatorischen und optionalen 
 % Parametern und Befehlen oder bestimmten Wertzuweisungen.
 %    \begin{macrocode}
-\newrobustcmd*\PName[1]{\texttt{\textsl{<#1>}}}
+\newrobustcmd*\PName[1]{\mbox{\texttt{\textsl{<#1>}}}}
 \newrobustcmd*\PBoolean{\PName{Ein-Aus-Wert}}
 \newrobustcmd*\PSet{\PName{Einstellung}}
-\newrobustcmd*\Parameter[1]{\texttt{\{}\PName{#1}\texttt{\}}}
-\newrobustcmd*\OParameter[1]{\texttt{[}\PName{#1}\texttt{]}}
-\newrobustcmd*\LParameter{\texttt{[}\PName{Parameterliste}\texttt{]}}
+\newrobustcmd*\Parameter[1]{\mbox{\texttt{\{}\PName{#1}\texttt{\}}}}
+\newrobustcmd*\OParameter[1]{\mbox{\texttt{[}\PName{#1}\texttt{]}}}
+\newrobustcmd*\LParameter{\mbox{\texttt{[}\PName{Parameterliste}\texttt{]}}}
 \newrobustcmd*\OLParameter[1]{%
-  \texttt{[}\PName{#1}|\PName{Parameterliste}\texttt{]}%
+  \mbox{\texttt{[}\PName{#1}|\PName{Parameterliste}\texttt{]}}%
 }
-\newrobustcmd*\PValue[1]{\texttt{#1}}
-\newrobustcmd*\PParameter[1]{\texttt{\{#1\}}}
-\newrobustcmd*\POParameter[1]{\texttt{[#1]}}
+\newrobustcmd*\PValue[1]{\mbox{\texttt{#1}}}
+\newrobustcmd*\PParameter[1]{\mbox{\texttt{\{#1\}}}}
+\newrobustcmd*\POParameter[1]{\mbox{\texttt{[#1]}}}
 %    \end{macrocode}
 % \end{macro}^^A \POParameter
 % \end{macro}^^A \PParameter
@@ -2665,8 +2742,8 @@
 %    \end{macrocode}
 % Innerhalb ausgewählter Auszeichnungs- und Textbefehle sollten die Befehle
 % selbst, nicht jedoch die Argumente verworfen werden. Leider werden die 
-% manuell erstellten RegExp-Regeln durch \texttt{texindy} zu spät angewendet 
-%(siehe \url{http://sourceforge.net/p/xindy/bugs/22/}).
+% manuell erstellten RegExp-Regeln durch \texttt{texindy} zu spät genutzt 
+% (\url{http://sourceforge.net/p/xindy/bugs/22/}).
 %    \begin{macrocode}
 ;;; (merge-rule "\\hyperindex\{(.*)\}\{(.*)\}" "/2" :eregexp)
 ;;; (merge-rule "\\hologo\{(.*)\}" "/1" :eregexp)

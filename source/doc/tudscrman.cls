@@ -57,14 +57,14 @@
       \fi%
     }%
   \fi%
-  \@TUDVersion{2014/09/30 v2.02 TUD-KOMA-Script}%
+  \@TUDVersion{2014/10/10 v2.02 TUD-KOMA-Script}%
 \endgroup%
 \providecommand*\tudscrmail{tudscr@gmail.com}
 \newcommand*\tudinh@name{tudscrreprt}
 %%% From File: tudscr-manual.dtx
 \NeedsTeXFormat{LaTeX2e}[2011/06/27]
 \ProvidesClass{tudscrman}[%
-  2014/09/30 v2.02 TUD-KOMA-Script
+  2014/10/10 v2.02 TUD-KOMA-Script
   class (internal manual)%
 ]
 %%% From File: tudscr-base.dtx
@@ -431,14 +431,16 @@
   }%
 }
 \PassOptionsToPackage{hyperindex=false}{hyperref}
-\RequirePackage{hyperref}[2012/11/06]
-\hypersetup{colorlinks,linkcolor=blue}
-\pdfstringdefDisableCommands{%
-  \let\Application\@Application%
-  \let\Class\@Class%
-  \let\Package\@Package%
-  \let\TUDScript\@TUDScript%
-  \let\NoCaseChange\@firstofone%
+\AtEndPreamble{%
+  \RequirePackage{hyperref}[2012/11/06]
+  \hypersetup{colorlinks,linkcolor=blue}
+  \pdfstringdefDisableCommands{%
+    \let\Application\@Application%
+    \let\Class\@Class%
+    \let\Package\@Package%
+    \let\TUDScript\@TUDScript%
+    \let\NoCaseChange\@firstofone%
+  }%
 }
 \newrobustcmd*\bsc{\@backslashchar}
 \newcommand*\Email[1]{\href{mailto:#1}{\nolinkurl{#1}}}%
@@ -1093,18 +1095,18 @@
   \ifdef{\tudfinalflag}{\TUDoptions{ToDo=false}}{}%
   \ifdef{\tudprintflag}{\hypersetup{hidelinks}\TUDoptions{color=no}}{}%
 }
-\newrobustcmd*\PName[1]{\texttt{\textsl{<#1>}}}
+\newrobustcmd*\PName[1]{\mbox{\texttt{\textsl{<#1>}}}}
 \newrobustcmd*\PBoolean{\PName{Ein-Aus-Wert}}
 \newrobustcmd*\PSet{\PName{Einstellung}}
-\newrobustcmd*\Parameter[1]{\texttt{\{}\PName{#1}\texttt{\}}}
-\newrobustcmd*\OParameter[1]{\texttt{[}\PName{#1}\texttt{]}}
-\newrobustcmd*\LParameter{\texttt{[}\PName{Parameterliste}\texttt{]}}
+\newrobustcmd*\Parameter[1]{\mbox{\texttt{\{}\PName{#1}\texttt{\}}}}
+\newrobustcmd*\OParameter[1]{\mbox{\texttt{[}\PName{#1}\texttt{]}}}
+\newrobustcmd*\LParameter{\mbox{\texttt{[}\PName{Parameterliste}\texttt{]}}}
 \newrobustcmd*\OLParameter[1]{%
-  \texttt{[}\PName{#1}|\PName{Parameterliste}\texttt{]}%
+  \mbox{\texttt{[}\PName{#1}|\PName{Parameterliste}\texttt{]}}%
 }
-\newrobustcmd*\PValue[1]{\texttt{#1}}
-\newrobustcmd*\PParameter[1]{\texttt{\{#1\}}}
-\newrobustcmd*\POParameter[1]{\texttt{[#1]}}
+\newrobustcmd*\PValue[1]{\mbox{\texttt{#1}}}
+\newrobustcmd*\PParameter[1]{\mbox{\texttt{\{#1\}}}}
+\newrobustcmd*\POParameter[1]{\mbox{\texttt{[#1]}}}
 %%% From File: tudscr-misc.dtx
 \RequirePackage{xspace}[2009/10/20]
 \xspaceaddexceptions{"=}

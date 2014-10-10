@@ -57,7 +57,7 @@
       \fi%
     }%
   \fi%
-  \@TUDVersion{2014/09/30 v2.02 TUD-KOMA-Script}%
+  \@TUDVersion{2014/10/10 v2.02 TUD-KOMA-Script}%
 \endgroup%
 \providecommand*\tudscrmail{tudscr@gmail.com}
 \@ifundefined{tudcls@name}{%
@@ -72,7 +72,7 @@
 %%% From File: tudscr-manual.dtx
 \NeedsTeXFormat{LaTeX2e}[2011/06/27]
 \ProvidesPackage{tudscrman}[%
-  2014/09/30 v2.02 TUD-KOMA-Script
+  2014/10/10 v2.02 TUD-KOMA-Script
   package (internal tutorials)%
 ]
 %%% From File: tudscr-base.dtx
@@ -122,42 +122,47 @@
 \RequirePackage{filecontents}[2011/10/08]
 \RequirePackage{silence}[2012/07/02]
 \WarningFilter[Tutorial]{latex}{Overwriting file}%
-\newcommand*\@Tutorial{%
-  \ActivateWarningFilters[Tutorial]%
-  \@nameuse{filecontents*}{\jobname-temp.tut}%
-}
-\newcommand*\@@Tutorial{%
-  \@nameuse{endfilecontents*}%
-  \DeactivateWarningFilters[Tutorial]%
+\newcommand*\@Tutorial{}
+\let\@Tutorial\relax
+\newcommand\TutorialPreamble[1]{\gdef\@Tutorial{#1}}
+\newenvironment{Tutorial}{\tud@tut@pre}{%
+  \tud@tut@post%
   \tud@tut@append%
-  \gdef\@tempa{%
-    \begin{quoting}[rightmargin=0pt]%
-    \lstinputlisting[style=tudscr]{\jobname-temp.tut}%
-    \end{quoting}%
-  }%
-  \aftergroup\@tempa%
+  \aftergroup\tud@tut@lst%
 }
-\newcommand*\@@@Tutorial{}
-\let\@@@Tutorial\relax
-\newcommand\TutorialPreamble[1]{\gdef\@@@Tutorial{#1}}
-\newenvironment{Tutorial}{\@Tutorial}{\@@Tutorial}
-\newenvironment{Tutorial*}{\@Tutorial}{\@@Tutorial}
-\newenvironment{Tutorial+}[1]{\gdef\@@@Tutorial{#1}\@Tutorial}{\@@Tutorial}
-\newenvironment{Tutorial-}{\@Tutorial}{\@@Tutorial}
 \AfterEndEnvironment{Tutorial}{%
-  \@@@Tutorial\par%
   \setlength{\@tempdimc}{\leftskip}%
   \setlength{\leftskip}{\leftmargin}%
-  \noindent\ignorespaces\input{\jobname-temp.tut}%
-  \par%
+  \@tempswafalse%
+  \begingroup%
+    \setbox0\vbox{\input{\jobname-temp.tut}}%
+    \setlength{\@tempdimb}{\dimexpr\ht0+\dp0}%
+    \ifdim\@tempdimb=\z@\relax
+      \global\@tempswatrue%
+    \fi%
+  \endgroup%
+  \ifx\@Tutorial\relax\else%
+    \@Tutorial\par%
+    \vspace{.5\baselineskipglue}%
+  \fi%
+  \noindent\ignorespaces%
+  \input{\jobname-temp.tut}%
+  \global\let\@Tutorial\relax%
+  \if@tempswa%
+    \vspace{-\baselineskip}%
+  \else%
+    \vspace{.5\baselineskipglue}%
+  \fi%
+  \par\noindent%
   \setlength{\leftskip}{\@tempdimc}%
-  \global\let\@@@Tutorial\relax%
-  \vspace{.5\baselineskipglue}%
-  \par\noindent%
 }
-\AfterEndEnvironment{Tutorial*}{%
-  \global\let\@@@Tutorial\relax%
-  \par\noindent%
+\newenvironment{Tutorial!}[1]{%
+  \gdef\@Tutorial{#1}%
+  \tud@tut@pre%
+}{%
+  \tud@tut@post%
+  \tud@tut@append%
+  \aftergroup\tud@tut@lst%
 }
 \ifcase\pdf@shellescape\or
 \begin{filecontents*}{\jobname-temp.tex}
@@ -173,27 +178,27 @@
 \end{document}
 \end{filecontents*}
 \fi
-\AfterEndEnvironment{Tutorial+}{%
+\AfterEndEnvironment{Tutorial!}{%
   \IfFileExists{\jobname-temp}{%
     \edef\tud@write@file{\jobname-temp}%
-    \edef\tud@write@option{-jobname=\@@@Tutorial-temp }%
+    \edef\tud@write@option{-jobname=\@Tutorial-temp }%
     \edef\tud@write@copy{}%
   }{%
     \edef\tud@write@file{tutorials/\jobname-temp}%
     \edef\tud@write@option{%
-      -output-directory tutorials -jobname=\@@@Tutorial-temp
+      -output-directory tutorials -jobname=\@Tutorial-temp
     }%
     \edef\tud@write@copy{tutorials\@backslashchar}%
   }%
   \immediate\write18{%
-    copy \tud@write@copy\jobname-temp.tut \tud@write@copy\@@@Tutorial-temp.tut
+    copy \tud@write@copy\jobname-temp.tut \tud@write@copy\@Tutorial-temp.tut
   }
   \immediate\write18{%
     pdflatex \tud@write@option \tud@write@file.tex
     pdflatex \tud@write@option \tud@write@file.tex
     pdflatex \tud@write@option \tud@write@file.tex
   }%
-  \global\let\@@@Tutorial\relax%
+  \global\let\@Tutorial\relax%
   \par\noindent%
 }
 \NewDocumentCommand\includetutorial{omO{1}}{%
@@ -227,7 +232,36 @@
     \fi%
   }{}%
 }
-\AtBeginEnvironment{Tutorial-}{\let\tud@tut@append\relax}
+\AfterEndEnvironment{Tutorial*}{%
+  \global\let\@Tutorial\relax%
+  \par\noindent%
+}
+\newenvironment{Tutorial*}{\tud@tut@pre}{%
+  \tud@tut@post%
+  \tud@tut@append%
+  \aftergroup\tud@tut@lst%
+}
+\newenvironment{Tutorial+}{\tud@tut@pre}{%
+  \tud@tut@post%
+  \tud@tut@append%
+}
+\newenvironment{Tutorial-}{\tud@tut@pre}{%
+  \tud@tut@post%
+  \aftergroup\tud@tut@lst%
+}
+\newcommand*\tud@tut@pre{%
+  \ActivateWarningFilters[Tutorial]%
+  \@nameuse{filecontents*}{\jobname-temp.tut}%
+}
+\newcommand*\tud@tut@post{%
+  \@nameuse{endfilecontents*}%
+  \DeactivateWarningFilters[Tutorial]%
+}
+\newcommand*\tud@tut@lst{%
+  \begin{quoting}[rightmargin=0pt]%
+  \lstinputlisting[style=tudscr]{\jobname-temp.tut}%
+  \end{quoting}%
+}
 \newwrite\tud@tut@output
 \immediate\openout\tud@tut@output=\jobname.tut\relax
 \newread\tud@tut@input
@@ -259,11 +293,12 @@
   \manualmark\markright{\@title}%
   \maketitle#1%
 }
-\newcommand*\FinishTutorial{%
+\newcommand\FinishTutorial[1][]{%
   \immediate\closeout\tud@tut@output%
   \clearpage\pagestyle{empty}\@afterindentfalse\@afterheading%
-  Zum Ende wird das vollst\"andige Tutorial als \"ubersetzbarer Quelltext
-  ausgegeben, um es via Copy~\&~Paste direkt verwenden zu k\"onnen.
+  Zum Ende des Dokumentes wird das vorgestellte Tutorial als \"ubersetzbarer
+  Quelltext ausgegeben, um dieses direkt mittels Copy~\&~Paste verwenden und
+  alle Punkte nachvollziehen zu k\"onnen. #1
   \begin{quoting}[rightmargin=0pt]%
   \lstinputlisting[style=tudscr]{\jobname.tut}%
   \end{quoting}%
@@ -311,22 +346,48 @@
 \newcommand*\ListOfToDo{\if@tud@todo\listoftodos\fi}
 \reversemarginpar
 \PassOptionsToPackage{hyperindex=false}{hyperref}
-\RequirePackage{hyperref}[2012/11/06]
-\hypersetup{colorlinks,linkcolor=blue}
-\pdfstringdefDisableCommands{%
-  \let\Application\@Application%
-  \let\Class\@Class%
-  \let\Package\@Package%
-  \let\TUDScript\@TUDScript%
-  \let\NoCaseChange\@firstofone%
+\AtEndPreamble{%
+  \RequirePackage{hyperref}[2012/11/06]
+  \hypersetup{colorlinks,linkcolor=blue}
+  \pdfstringdefDisableCommands{%
+    \let\Application\@Application%
+    \let\Class\@Class%
+    \let\Package\@Package%
+    \let\TUDScript\@TUDScript%
+    \let\NoCaseChange\@firstofone%
+  }%
 }
 \newrobustcmd*\bsc{\@backslashchar}
+\newcommand*\Email[1]{\href{mailto:#1}{\nolinkurl{#1}}}%
+\renewcaptionname{ngerman}{\sectionautorefname}{Unterkapitel}
+\renewcaptionname{ngerman}{\subsectionautorefname}{Abschnitt}
+\renewcaptionname{ngerman}{\subsubsectionautorefname}{Unterabschnitt}
+\newcommand*\autorefname[1][current]{%
+  \ifstr{#1}{current}{%
+    \expandafter\HyPsd@@autorefname\@currentHref\@nil%
+  }{%
+    \@autorefname\HyPsd@@autorefname{#1}%
+  }%
+  \unskip\xspace%
+}
+\newcommand*\@autorefname[2]{%
+  \expandafter\ifx\csname r@#2\endcsname\relax%
+    ??%
+  \else%
+    \expandafter\expandafter\expandafter\@@autorefname%
+        \csname r@#2\endcsname{}{}{}{}\@nil#1\@nil%
+  \fi%
+}
+\newcommand*\@@autorefname{}
+\def\@@autorefname#1#2#3#4#5\@nil#6\@nil{#6#4.\@nil}
 \newcommand*\Application[1]{\mbox{\texturs{#1}}}
 \newcommand*\Distribution[1]{\mbox{\texturn{#1}}}
 \newcommand*\File[1]{\mbox{\texturn{#1}}}
 \NewDocumentCommand\Package{sm}{%
-  \IfBooleanTF{#1}{\texturn{#2}}{%
+  \IfBooleanTF{#1}{%
     \hyperref{../\tudscr@manual}{\tudscr@manual}{files:#2}{\texturn{#2}}%
+  }{%
+    \href{http://www.ctan.org/pkg/#2}{\texturn{#2}}%
   }%
 }
 \NewDocumentCommand\Option{smo}{%
@@ -347,18 +408,23 @@
     \hyperref{../\tudscr@manual}{\tudscr@manual}{macros:#2}{\texttt{\bsc#2}}%
   }%
 }
-\newrobustcmd*\PName[1]{\texttt{\textsl{<#1>}}}
+\NewDocumentCommand\Length{sm}{%
+  \IfBooleanTF{#1}{\texttt{\bsc#2}}{%
+    \hyperref{../\tudscr@manual}{\tudscr@manual}{macros:#2}{\texttt{\bsc#2}}%
+  }%
+}
+\newrobustcmd*\PName[1]{\mbox{\texttt{\textsl{<#1>}}}}
 \newrobustcmd*\PBoolean{\PName{Ein-Aus-Wert}}
 \newrobustcmd*\PSet{\PName{Einstellung}}
-\newrobustcmd*\Parameter[1]{\texttt{\{}\PName{#1}\texttt{\}}}
-\newrobustcmd*\OParameter[1]{\texttt{[}\PName{#1}\texttt{]}}
-\newrobustcmd*\LParameter{\texttt{[}\PName{Parameterliste}\texttt{]}}
+\newrobustcmd*\Parameter[1]{\mbox{\texttt{\{}\PName{#1}\texttt{\}}}}
+\newrobustcmd*\OParameter[1]{\mbox{\texttt{[}\PName{#1}\texttt{]}}}
+\newrobustcmd*\LParameter{\mbox{\texttt{[}\PName{Parameterliste}\texttt{]}}}
 \newrobustcmd*\OLParameter[1]{%
-  \texttt{[}\PName{#1}|\PName{Parameterliste}\texttt{]}%
+  \mbox{\texttt{[}\PName{#1}|\PName{Parameterliste}\texttt{]}}%
 }
-\newrobustcmd*\PValue[1]{\texttt{#1}}
-\newrobustcmd*\PParameter[1]{\texttt{\{#1\}}}
-\newrobustcmd*\POParameter[1]{\texttt{[#1]}}
+\newrobustcmd*\PValue[1]{\mbox{\texttt{#1}}}
+\newrobustcmd*\PParameter[1]{\mbox{\texttt{\{#1\}}}}
+\newrobustcmd*\POParameter[1]{\mbox{\texttt{[#1]}}}
 %%% From File: tudscr-misc.dtx
 \RequirePackage{xspace}[2009/10/20]
 \xspaceaddexceptions{"=}
