@@ -52,7 +52,9 @@
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
 \usepackage{selinput}\SelectInputMappings{adieresis={ä},germandbls={ß}}
+\usepackage[T1]{fontenc}
 \usepackage{babel}
+\IfFileExists{tudscrfonts.sty}{\usepackage{tudscrfonts}}{}
 \KOMAoptions{parskip=half-}
 \CodelineIndex
 \RecordChanges
@@ -163,7 +165,7 @@
 % wiederhergestellt bzw. mit \cs{tud@cmd@use} verwendet werden. Ist das Layout 
 % des \CDs gefordert wird entweder mit \cs{tud@maketitlepage} eine Titelseite 
 % gesetzt~--  wobei sich diese in ihrer Struktur am originalen \cs{maketitle}
-% orientiert~-- oder der Titelkopf wird in seinem Layout angepasst.
+% orientiert~-- oder das Titelkopflayout wird angepasst.
 %    \begin{macrocode}
 \newcommand*\tud@titlepagenumber{}%
 \let\tud@titlepagenumber\relax%
@@ -299,9 +301,10 @@
 %    \begin{macrocode}
       \tud@footnote@unhyper%
 %    \end{macrocode}
-% Die Option \opt{titlepage=firstiscover} wird im Gegensatz zu \KOMAScript{} 
-% nur für \cs{extratitle} unterstützt. Soll eine Umschlagseite im \CD erstellt 
-% werden, so ist der Befehl \cs{makecover} zu nutzen.
+% Im Gegensatz zu den \KOMAScript-Klassen wird für eine Umschlagseite die 
+% Option \opt{titlepage=firstiscover} nur für den Schmutztitel \cs{extratitle}
+% und nicht für die eigentlcihe Titelseite unterstützt. Für ein Cover im \CD
+% ist der Befehl \cs{makecover} mit den dazugehörigen Parametern zu nutzen.
 %    \begin{macrocode}
       \ifx\@extratitle\@empty%
         \if@titlepageiscoverpage%
@@ -902,10 +905,9 @@
 % \begin{macro}{\tud@check@author}
 % \changes{v2.02}{2014/08/17}{neu}%^^A
 % \begin{macro}{\tud@split@author}
-% \changes{v2.02}{2014/07/25}{neu, umbenannt von \cs{tud@split@@author}}%^^A
+% \changes{v2.02}{2014/07/25}{neu, aus Umbenennung \cs{tud@split@@author}}%^^A
 % \begin{macro}{\tud@split@author@list}
-% \changes{v2.02}{2014/07/25}{neu, umbenannt von 
-%   \cs{tud@split@@author@list}}%^^A
+% \changes{v2.02}{2014/07/25}{neu, Umbenennung \cs{tud@split@@author@list}}%^^A
 % \begin{macro}{\tud@newline}
 % Das Makro \cs{tud@split@author} dient der formatierten Ausgabe aller 
 % Informationen für mehrere Autoren auf der Titelseite. Falls das Autorenfeld 
@@ -1070,11 +1072,12 @@
     }{}%
   }{}%
 %    \end{macrocode}
-% Jetzt werden so lange einzelne Seiten ausgeben, bis der Rest der Box kleiner
-% als eine Seite ist. Dabei sollen für das Zerteilen der Box dieselben
+% Jetzt werden der Inhalt stückweise so lange auf einzelnen Seiten ausgeben,
+% bis der immer kleiner werdende Rest in der Box auf eine Seite passt. Dabei
+% sollen für das seitenweise Zerteilen des Inhaltes innerhalb der Box dieselben
 % Rahmenbedingungen für den Seitenaufbau gelten, wie auch im normalen Dokument.
-% Nach der Ausgabe der ersten vollständigen Seite wird der verfügbare Platz 
-% wieder auf das normale Maß zurückgesetzt.
+% Nach der Ausgabe der ersten vollständigen Seite wird der verfügbare Platz auf
+% das normale Maß zurückgesetzt.
 %    \begin{macrocode}
   \@whiledim\@tempdimc<\ht\tud@title@twocolumn@box\do{%
     \splittopskip\topskip%
@@ -1146,7 +1149,10 @@
 %
 % \subsection{Cover}
 %
-% Zusätzlich zum eigentlichen Titel kann eine Umschlagseite ausgegeben werden.
+% Zusätzlich zur eigentlichen Titelseite kann für Druckerzeugnisse eine 
+% separate Umschlagseite erzeugt werden. Um die Gestaltung dieser anzupassen, 
+% wurden Einstellungsmöglichkeiten vorgesehen, die insbesondere den verwendeten
+% Satzspiegel betreffen.
 % \begin{macro}{\makecover}
 % \changes{v2.02}{2014/06/23}{Warnung für die Option \opt{titlepage} mit dem
 %   Wert \val{firstiscover}}%^^A
