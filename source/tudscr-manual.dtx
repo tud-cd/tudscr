@@ -1,4 +1,4 @@
-% \CheckSum{2285}
+% \CheckSum{2268}
 % \iffalse meta-comment
 % ======================================================================
 %
@@ -49,7 +49,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-manual.dtx}[%
-  2014/10/10 v2.02 TUD-KOMA-Script\space%
+  2014/10/11 v2.02 TUD-KOMA-Script\space%
 %</driver>
 %<identify>\NeedsTeXFormat{LaTeX2e}[2011/06/27]
 %<class&identify>\ProvidesClass{tudscrman}[%
@@ -480,6 +480,44 @@
 \newcommand*\tudscr@manual{tudscr}%
 %    \end{macrocode}
 % \end{macro}^^A \tudscr@manual
+% Für den Anwender werden einige Tutorials bereitgestellt, für welche der 
+% Quelltext bei dessen Beschriebung in eine separate Datei geschrieben und ggf. 
+% ausgeführt  wird. Hierfür werden im folgenden einige Umgebungen definiert.
+%
+% Da das Paket \pkg{filecontents} beim Uberschreiben einer Datei für gewöhnlich
+% eine Warnung erzeugt, wird diese innerhalb der \env{Tutorial}"=Umgebungen 
+% mithilfe des Paketes \pkg{silence} deaktiviert.
+%    \begin{macrocode}
+\RequirePackage{filecontents}[2011/10/08]
+\RequirePackage{silence}[2012/07/02]
+\WarningFilter[Tutorial]{latex}{Overwriting file}%
+%    \end{macrocode}
+% \begin{macro}{\tud@tut@pre}
+% \changes{v2.02}{2014/08/19}{neu}%^^A
+% \begin{macro}{\tud@tut@post}
+% \changes{v2.02}{2014/08/19}{neu}%^^A
+% \begin{macro}{\tud@tut@lst}
+% \changes{v2.02}{2014/10/07}{neu}%^^A
+% Dies sind die Hilfsmakros, welche zu Beginn und Ende der unterschiedlichen
+% \env{Tutorial}"=Umgebungen verwendet werden.
+%    \begin{macrocode}
+\newcommand*\tud@tut@pre{%
+  \ActivateWarningFilters[Tutorial]%
+  \@nameuse{filecontents*}{\jobname-temp.tut}%
+}
+\newcommand*\tud@tut@post{%
+  \@nameuse{endfilecontents*}%
+  \DeactivateWarningFilters[Tutorial]%
+}
+\newcommand*\tud@tut@lst{%
+  \begin{quoting}[rightmargin=0pt]%
+  \lstinputlisting[style=tudscr]{\jobname-temp.tut}%
+  \end{quoting}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@tut@lst
+% \end{macro}^^A \tud@tut@post
+% \end{macro}^^A \tud@tut@pre
 % \begin{environment}{Tutorial}
 % \changes{v2.02}{2014/08/16}{neu}%^^A
 % \begin{environment}{Tutorial!}
@@ -490,10 +528,10 @@
 % \changes{v2.02}{2014/10/07}{neu}%^^A
 % \begin{environment}{Tutorial-}
 % \changes{v2.02}{2014/09/16}{neu}%^^A
-% \begin{macro}{\TutorialPreamble}
-% \changes{v2.02}{2014/08/20}{neu}%^^A
 % \begin{macro}{\includetutorial}
 % \changes{v2.02}{2014/09/10}{neu}%^^A
+% \begin{macro}{\TutorialPreamble}
+% \changes{v2.02}{2014/08/20}{neu}%^^A
 % \begin{macro}{\@Tutorial}
 % \changes{v2.02}{2014/08/19}{neu}%^^A
 % Die Umgebung \env{Tutorial} ist für die Ausgabe und gleichzeitige Ausführung 
@@ -526,13 +564,7 @@
 % Copy"~\&"~Paste"~Beispiel enthält. Weiteres dazu bei der Beschreibung von
 % \cs{FinishTutorial}
 %
-% Da das Paket \pkg{filecontents} beim Uberschreiben einer Datei für gewöhnlich
-% eine Warnung erzeugt, wird diese innerhalb der \env{Tutorial}"=Umgebungen 
-% mithilfe des Paketes \pkg{silence} deaktiviert.
 %    \begin{macrocode}
-\RequirePackage{filecontents}[2011/10/08]
-\RequirePackage{silence}[2012/07/02]
-\WarningFilter[Tutorial]{latex}{Overwriting file}%
 \newcommand*\@Tutorial{}
 \let\@Tutorial\relax
 \newcommand\TutorialPreamble[1]{\gdef\@Tutorial{#1}}
@@ -547,29 +579,21 @@
 % eingefügten vertikalen Abstände angepasst.
 %    \begin{macrocode}
 \AfterEndEnvironment{Tutorial}{%
+  \def\@tempa#1{%
+    \settoheight\@tempdima{#1}%
+    \ifdim\@tempdima=\z@\relax\@tempswafalse\else\@tempswatrue\fi%
+    #1%
+    \if@tempswa%
+      \par%
+      \vspace{\baselineskipglue}%
+      \noindent\ignorespaces%
+    \fi%
+  }%
+  \@tempa{\@Tutorial}%
+  \global\let\@Tutorial\relax%
   \setlength{\@tempdimc}{\leftskip}%
   \setlength{\leftskip}{\leftmargin}%
-  \@tempswafalse%
-  \begingroup%
-    \setbox0\vbox{\input{\jobname-temp.tut}}%
-    \setlength{\@tempdimb}{\dimexpr\ht0+\dp0}%
-    \ifdim\@tempdimb=\z@\relax
-      \global\@tempswatrue%
-    \fi%
-  \endgroup%
-  \ifx\@Tutorial\relax\else%
-    \@Tutorial\par%
-    \vspace{.5\baselineskipglue}%
-  \fi%
-  \noindent\ignorespaces%
-  \input{\jobname-temp.tut}%
-  \global\let\@Tutorial\relax%
-  \if@tempswa%
-    \vspace{-\baselineskip}%
-  \else%
-    \vspace{.5\baselineskipglue}%
-  \fi%
-  \par\noindent%
+  \@tempa{\input{\jobname-temp.tut}}%
   \setlength{\leftskip}{\@tempdimc}%
 }
 %    \end{macrocode}
@@ -675,14 +699,14 @@
 % Die Umgebung \env{Tutorial*} gibt den Inhalt im Dokument als Quelltext aus 
 % und fügt diesem dem Copy"~\&"~Paste"~Beispiel hinzu.
 %    \begin{macrocode}
-\AfterEndEnvironment{Tutorial*}{%
-  \global\let\@Tutorial\relax%
-  \par\noindent%
-}
 \newenvironment{Tutorial*}{\tud@tut@pre}{%
   \tud@tut@post%
   \tud@tut@append%
   \aftergroup\tud@tut@lst%
+}
+\AfterEndEnvironment{Tutorial*}{%
+  \global\let\@Tutorial\relax%
+  \par\noindent%
 }
 %    \end{macrocode}
 % Die Umgebungen \env{Tutorial+} und \env{Tutorial-} schreiben ihren Quelltext
@@ -698,39 +722,13 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \@Tutorial
-% \end{macro}^^A \includetutorial
 % \end{macro}^^A \TutorialPreamble
+% \end{macro}^^A \includetutorial
 % \end{environment}^^A Tutorial-
 % \end{environment}^^A Tutorial+
 % \end{environment}^^A Tutorial*
 % \end{environment}^^A Tutorial!
 % \end{environment}^^A Tutorial
-% \begin{macro}{\tud@tut@pre}
-% \changes{v2.02}{2014/08/19}{neu}%^^A
-% \begin{macro}{\tud@tut@post}
-% \changes{v2.02}{2014/08/19}{neu}%^^A
-% \begin{macro}{\tud@tut@lst}
-% \changes{v2.02}{2014/10/07}{neu}%^^A
-% Dies sind die Hilfsmakros, welche zu Beginn und Ende der unterschiedlichen
-% \env{Tutorial}"=Umgebungen verwendet werden.
-%    \begin{macrocode}
-\newcommand*\tud@tut@pre{%
-  \ActivateWarningFilters[Tutorial]%
-  \@nameuse{filecontents*}{\jobname-temp.tut}%
-}
-\newcommand*\tud@tut@post{%
-  \@nameuse{endfilecontents*}%
-  \DeactivateWarningFilters[Tutorial]%
-}
-\newcommand*\tud@tut@lst{%
-  \begin{quoting}[rightmargin=0pt]%
-  \lstinputlisting[style=tudscr]{\jobname-temp.tut}%
-  \end{quoting}%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@tut@lst
-% \end{macro}^^A \tud@tut@post
-% \end{macro}^^A \tud@tut@pre
 % \begin{macro}{\tud@tut@input}
 % \changes{v2.02}{2014/08/19}{neu}%^^A
 % \begin{macro}{\tud@tut@output}

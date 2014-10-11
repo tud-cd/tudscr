@@ -122,6 +122,19 @@
 \RequirePackage{filecontents}[2011/10/08]
 \RequirePackage{silence}[2012/07/02]
 \WarningFilter[Tutorial]{latex}{Overwriting file}%
+\newcommand*\tud@tut@pre{%
+  \ActivateWarningFilters[Tutorial]%
+  \@nameuse{filecontents*}{\jobname-temp.tut}%
+}
+\newcommand*\tud@tut@post{%
+  \@nameuse{endfilecontents*}%
+  \DeactivateWarningFilters[Tutorial]%
+}
+\newcommand*\tud@tut@lst{%
+  \begin{quoting}[rightmargin=0pt]%
+  \lstinputlisting[style=tudscr]{\jobname-temp.tut}%
+  \end{quoting}%
+}
 \newcommand*\@Tutorial{}
 \let\@Tutorial\relax
 \newcommand\TutorialPreamble[1]{\gdef\@Tutorial{#1}}
@@ -131,29 +144,21 @@
   \aftergroup\tud@tut@lst%
 }
 \AfterEndEnvironment{Tutorial}{%
+  \def\@tempa#1{%
+    \settoheight\@tempdima{#1}%
+    \ifdim\@tempdima=\z@\relax\@tempswafalse\else\@tempswatrue\fi%
+    #1%
+    \if@tempswa%
+      \par%
+      \vspace{\baselineskipglue}%
+      \noindent\ignorespaces%
+    \fi%
+  }%
+  \@tempa{\@Tutorial}%
+  \global\let\@Tutorial\relax%
   \setlength{\@tempdimc}{\leftskip}%
   \setlength{\leftskip}{\leftmargin}%
-  \@tempswafalse%
-  \begingroup%
-    \setbox0\vbox{\input{\jobname-temp.tut}}%
-    \setlength{\@tempdimb}{\dimexpr\ht0+\dp0}%
-    \ifdim\@tempdimb=\z@\relax
-      \global\@tempswatrue%
-    \fi%
-  \endgroup%
-  \ifx\@Tutorial\relax\else%
-    \@Tutorial\par%
-    \vspace{.5\baselineskipglue}%
-  \fi%
-  \noindent\ignorespaces%
-  \input{\jobname-temp.tut}%
-  \global\let\@Tutorial\relax%
-  \if@tempswa%
-    \vspace{-\baselineskip}%
-  \else%
-    \vspace{.5\baselineskipglue}%
-  \fi%
-  \par\noindent%
+  \@tempa{\input{\jobname-temp.tut}}%
   \setlength{\leftskip}{\@tempdimc}%
 }
 \newenvironment{Tutorial!}[1]{%
@@ -232,14 +237,14 @@
     \fi%
   }{}%
 }
-\AfterEndEnvironment{Tutorial*}{%
-  \global\let\@Tutorial\relax%
-  \par\noindent%
-}
 \newenvironment{Tutorial*}{\tud@tut@pre}{%
   \tud@tut@post%
   \tud@tut@append%
   \aftergroup\tud@tut@lst%
+}
+\AfterEndEnvironment{Tutorial*}{%
+  \global\let\@Tutorial\relax%
+  \par\noindent%
 }
 \newenvironment{Tutorial+}{\tud@tut@pre}{%
   \tud@tut@post%
@@ -248,19 +253,6 @@
 \newenvironment{Tutorial-}{\tud@tut@pre}{%
   \tud@tut@post%
   \aftergroup\tud@tut@lst%
-}
-\newcommand*\tud@tut@pre{%
-  \ActivateWarningFilters[Tutorial]%
-  \@nameuse{filecontents*}{\jobname-temp.tut}%
-}
-\newcommand*\tud@tut@post{%
-  \@nameuse{endfilecontents*}%
-  \DeactivateWarningFilters[Tutorial]%
-}
-\newcommand*\tud@tut@lst{%
-  \begin{quoting}[rightmargin=0pt]%
-  \lstinputlisting[style=tudscr]{\jobname-temp.tut}%
-  \end{quoting}%
 }
 \newwrite\tud@tut@output
 \immediate\openout\tud@tut@output=\jobname.tut\relax
