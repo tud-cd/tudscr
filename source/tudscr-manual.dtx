@@ -1,4 +1,4 @@
-% \CheckSum{2268}
+% \CheckSum{2281}
 % \iffalse meta-comment
 % ======================================================================
 %
@@ -492,6 +492,10 @@
 \RequirePackage{silence}[2012/07/02]
 \WarningFilter[Tutorial]{latex}{Overwriting file}%
 %    \end{macrocode}
+% \begin{macro}{\AddToTutorialHook}
+% \changes{v2.02}{2014/10/11}{neu}%^^A
+% \begin{macro}{\tud@tut@hook}
+% \changes{v2.02}{2014/10/11}{neu}%^^A
 % \begin{macro}{\tud@tut@pre}
 % \changes{v2.02}{2014/08/19}{neu}%^^A
 % \begin{macro}{\tud@tut@post}
@@ -501,6 +505,8 @@
 % Dies sind die Hilfsmakros, welche zu Beginn und Ende der unterschiedlichen
 % \env{Tutorial}"=Umgebungen verwendet werden.
 %    \begin{macrocode}
+\newcommand*\tud@tut@hook{}
+\newcommand*\AddToTutorialHook[1]{\appto\tud@tut@hook{#1}}%
 \newcommand*\tud@tut@pre{%
   \ActivateWarningFilters[Tutorial]%
   \@nameuse{filecontents*}{\jobname-temp.tut}%
@@ -518,6 +524,8 @@
 % \end{macro}^^A \tud@tut@lst
 % \end{macro}^^A \tud@tut@post
 % \end{macro}^^A \tud@tut@pre
+% \end{macro}^^A \tud@tut@hook
+% \end{macro}^^A \AddToTutorialHook
 % \begin{environment}{Tutorial}
 % \changes{v2.02}{2014/08/16}{neu}%^^A
 % \begin{environment}{Tutorial!}
@@ -579,15 +587,28 @@
 % eingefügten vertikalen Abstände angepasst.
 %    \begin{macrocode}
 \AfterEndEnvironment{Tutorial}{%
+%    \end{macrocode}
+% Nach dem Ausführen des Argumentes von \cs{@tempa} wird geprüft, ob dieses 
+% überhaupt eine sichtbare Ausgabe erzeugt hat. Nur für diesen Fall wird nach 
+% der Ausgabe vertikaler Leerraum eingefügt. Der Anfang entspricht prinzipiell
+% dem Standardbefehl \cs{settoheight}, jedoch wird im Inneren zusätzlich eine
+% \cs{vbox} verwendet, um damit auch mathematische Umgebungen testen zu können. 
+% Das Ganze findet innerhalb einer Gruppierung statt, um keine Änderungen zu
+% erzeugen.
+%    \begin{macrocode}
   \def\@tempa#1{%
-    \settoheight\@tempdima{#1}%
-    \ifdim\@tempdima=\z@\relax\@tempswafalse\else\@tempswatrue\fi%
     #1%
-    \if@tempswa%
-      \par%
-      \vspace{\baselineskipglue}%
-      \noindent\ignorespaces%
-    \fi%
+    \begingroup%
+      \tud@tut@hook%
+      \setbox\@tempboxa\hbox{\vbox{#1}}%
+      \@tempdima=\ht\@tempboxa%
+      \setbox\@tempboxa\box\voidb@x%
+      \ifdim\@tempdima>\z@\relax%
+        \par%
+        \vspace{\baselineskipglue}%
+        \noindent\ignorespaces%
+      \fi%
+    \endgroup%
   }%
   \@tempa{\@Tutorial}%
   \global\let\@Tutorial\relax%

@@ -122,6 +122,8 @@
 \RequirePackage{filecontents}[2011/10/08]
 \RequirePackage{silence}[2012/07/02]
 \WarningFilter[Tutorial]{latex}{Overwriting file}%
+\newcommand*\tud@tut@hook{}
+\newcommand*\AddToTutorialHook[1]{\appto\tud@tut@hook{#1}}%
 \newcommand*\tud@tut@pre{%
   \ActivateWarningFilters[Tutorial]%
   \@nameuse{filecontents*}{\jobname-temp.tut}%
@@ -145,14 +147,18 @@
 }
 \AfterEndEnvironment{Tutorial}{%
   \def\@tempa#1{%
-    \settoheight\@tempdima{#1}%
-    \ifdim\@tempdima=\z@\relax\@tempswafalse\else\@tempswatrue\fi%
     #1%
-    \if@tempswa%
-      \par%
-      \vspace{\baselineskipglue}%
-      \noindent\ignorespaces%
-    \fi%
+    \begingroup%
+      \tud@tut@hook%
+      \setbox\@tempboxa\hbox{\vbox{#1}}%
+      \@tempdima=\ht\@tempboxa%
+      \setbox\@tempboxa\box\voidb@x%
+      \ifdim\@tempdima>\z@\relax%
+        \par%
+        \vspace{\baselineskipglue}%
+        \noindent\ignorespaces%
+      \fi%
+    \endgroup%
   }%
   \@tempa{\@Tutorial}%
   \global\let\@Tutorial\relax%
