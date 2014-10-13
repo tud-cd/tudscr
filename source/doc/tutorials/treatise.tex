@@ -201,14 +201,16 @@ Weitere dazu ist in \autoref{sec:biblatex} zu finden.
 \end{Tutorial*}
 %
 Damit alle möglichen Querverweise in einem PDF-Dokument automatisch verlinkt 
-werden, sollte das Paket \Package{hyperref} geladen werden. Da dieses allerhand 
+werden, sollte das Paket \Package{hyperref} geladen werden. Um die erzeugten 
+Links verträglich aussehen zu lassen, werden die Optionen \Option*{colorlinks} 
+sowie \Option*{linkcolor}[blue] verwendet. Da \Package{hyperref} allerhand 
 Veränderungen an vielen Standardbefehlen vornimmt, sollte dieses als letztes in 
 der Präambel eingebunden werden. Nur Pakete, bei denen in der Dokumentation 
 explizit darauf hingewiesen wird, dass diese nach \Package{hyperref} zu laden 
 sind, sollten auch danach folgen.
 %
 \begin{Tutorial*}
-\usepackage{hyperref}
+\usepackage[colorlinks,linkcolor=blue]{hyperref}
 \end{Tutorial*}
 %
 Eines dieser wenigen Pakete ist \Package{glossaries}. Dieses wird in diesem 
@@ -477,9 +479,8 @@ eine Bezeichnung hinzugefügt wurde. Sollen Abbildungen oder Tabellen außerhalb
 ihrer angestammten Gleitumgebung genutzt und benannt werden, kann dies mit
 \Macro*{captionof}\Parameter{Typ}\OParameter{Verzeichniseintrag}\Parameter{Bezeichnung}
 erfolgen. Weitere Informationen hierzu sind der \KOMAScript"=Anleitung 
-\scrguide zu 
-entnehmen. Außerdem wird in \autoref{sec:floats} genauer auf die Verwendung von 
-Gleitumgebungen eingegangen.
+\scrguide zu entnehmen. Außerdem wird in \autoref{sec:floats} genauer auf die 
+Verwendung von Gleitumgebungen eingegangen.
 %
 \begin{Tutorial*}
 \tableofcontents
@@ -575,9 +576,6 @@ referenzierten verwendet werden.
 \begin{Tutorial*}
 \printbibliography[heading=subbibliography]
 \end{Tutorial*}
-\begin{Tutorial+}
-\clearpage
-\end{Tutorial+}
 \begin{quoting}[rightmargin=0pt]
 \vspace*{-\baselineskip}
 \printbibliography[heading=subbibliography]
@@ -707,12 +705,12 @@ mit \Macro*{gls} von der zweiten~-- und jeder weiteren~-- unterscheidet. Das
 Verhalten lässt sich über verschiedene Stile mit \Macro*{setacronymstyle} 
 anpassen. Die Ausgabe einer Liste aller Abkürzungen erfolgt mit:
 %
-\begin{Tutorial*}
+\begin{Tutorial-}
 \printacronyms
-\end{Tutorial*}
+\end{Tutorial-}
 \begin{quoting}[rightmargin=0pt]
 \vspace*{-\baselineskip}
-%\glsdisablehyper
+\glsdisablehyper
 \printacronyms
 \end{quoting}
 %
@@ -726,14 +724,14 @@ werden kann. Dafür wird der Befehl \Macro*{newglossarystyle} verwendet. Die
 Definition des neuen Stils \PValue{acronymstabu} wird nachfolgend ausgegeben, 
 die Erläuterung dazu schließt sich daran an:
 %
-\AddToTutorialHook{\let\newglossarystyle\renewglossarystyle}
+\TutorialHook{\let\newglossarystyle\renewglossarystyle}
 \begin{Tutorial}
 \newglossarystyle{acronymstabu}{%
-  \renewenvironment{theglossary}{
-    \begin{tabu}spread 0pt{@{}lX<{\strut}l@{}}
-  }{
-    \end{tabu}
-  }
+  \renewenvironment{theglossary}{%
+    \begin{tabu}spread 0pt{@{}lX<{\strut}l@{}}%
+  }{%
+    \end{tabu}\par\bigskip%
+  }%
   \renewcommand*{\glossaryheader}{}%
   \renewcommand*{\glsgroupheading}[1]{}%
   \renewcommand*{\glsgroupskip}{}%
@@ -792,9 +790,6 @@ neuen Stils.
 \begin{Tutorial*}
 \printacronyms[style=acronymstabu]
 \end{Tutorial*}
-\begin{Tutorial+}
-\clearpage
-\end{Tutorial+}
 \begin{quoting}[rightmargin=0pt]
 \vspace*{-\baselineskip}
 \printacronyms[type=acronym,style=acronymstabu]
@@ -829,7 +824,7 @@ eventuell sinnvoll. Nach dem \PName{Label} folgt die \PName{Bezeichnung} für
 das Formelzeichen beziehungsweise das \PName{Symbol} sowie die dazugehörige 
 physikalische \PName{Einheit}.
 %
-\AddToTutorialHook{\let\newcommand\renewcommand}
+\TutorialHook{\let\newcommand\renewcommand}
 \begin{Tutorial}
 \newcommand*{\newsymbol}[5][]{%
   \newglossaryentry{#2}{%
@@ -861,19 +856,23 @@ Für ein kleines Beispiel werden fünf Formelzeichen definiert\dots
 \dots und diese in einer kurzen Textpassage mit \Macro*{gls}\Parameter{Label} 
 verwendet.
 %
-\begin{Tutorial}
+\begin{Tutorial'}
 Die Einheiten für die \gls{f} sowie die \gls{F} werden aus den 
 SI"=Einheiten der Basisgrößen \gls{l}, \gls{m} und \gls{t} abgeleitet.
-\end{Tutorial}
+Und dann gibt es noch die Grundgleichung der Mechanik, welche für den
+Fall einer konstanten Kraftwirkung in die Bewegungsrichtung einer
+Punktmasse lautet:
+$\gls{F} = \gls{m} \cdot \gls{a}$
+\end{Tutorial'}
 %
 Damit wären zumindest die Symbole definiert. Allerdings ist noch nicht 
 festgelegt, wie genau die Ausgabe des Symbolverzeichnisses aussehen soll. 
 Momentan erzeugt der Befehl \Macro*{printsymbols} jedenfalls kein sinnvolles 
 Verzeichnis:
 %
-\begin{Tutorial*}
+\begin{Tutorial-}
 \printsymbols
-\end{Tutorial*}
+\end{Tutorial-}
 \begin{quoting}[rightmargin=0pt]
 \vspace*{-\baselineskip}
 \glsdisablehyper
@@ -887,6 +886,7 @@ Damit diese linksbündig im Text erscheint muss vor dem obligatorischen Argument
 mit den Spaltendefinitionen noch das optionale Argument \PValue{l} angegeben 
 werden.
 %
+\TutorialHook{\let\newglossarystyle\renewglossarystyle}
 \begin{Tutorial}
 \newglossarystyle{symbolslongtabu}{%
   \renewenvironment{theglossary}{%
@@ -951,11 +951,9 @@ Das Symbolverzeichnis kann sich nun durchaus sehen lassen.
 \begin{Tutorial*}
 \printsymbols[style=symbolslongtabu]
 \end{Tutorial*}
-\begin{Tutorial+}
-\clearpage
-\end{Tutorial+}
 \begin{quoting}[rightmargin=0pt]
 \newglossarystyle{symbolstabu}{%
+  \setglossarystyle{symbolslongtabu}%
   \renewenvironment{theglossary}{%
     \begin{tabu}spread 0pt{ccX<{\strut}l}%
   }{%
@@ -967,40 +965,51 @@ Das Symbolverzeichnis kann sich nun durchaus sehen lassen.
     \bfseries Name & \bfseries Seite(n)
     \tabularnewline\midrule%
   }%
-  \renewcommand*{\glsgroupheading}[1]{}%
-  \renewcommand*{\glsgroupskip}{}%
-  \renewcommand*{\glossentry}[2]{%
-    \glsentryitem{##1}% Entry number if required
-    \glstarget{##1}{\glossentrysymbol{##1}} &
-    \glsentryuseri{##1} &
-    \glossentryname{##1} &
-    ##2\tabularnewline%
-  }%
 }
 \printsymbols[style=symbolstabu]
 \end{quoting}
 
 
 \section{Anfangszitat oder Schlauer Spruch}
-%%Anfangszitat: Der Text erscheint jetzt kursiv (\itshape) und kleiner als der 
-%%normale Text (\footnotesize). Mit \dictumwidth wird die Breite des Textfeldes 
-%%gesteuert. Sie nimmt jetzt 65% der gesamten Textbreite ein. Mit 
-%%%\raggeddictumtext wird die Ausrichtung des Textes gesteuert. \raggedleft 
-%%%heißt, 
-%%%dass der Text links „ausflattert”, also rechtsbündig gesetzt wird.
-%\setkomafont{dictumtext}{\itshape}
-%\renewcommand*{\dictumwidth}{.75\textwidth}
-%\renewcommand*{\raggeddictumtext}{\raggedleft}
+\dictum[Johann Wolfgang von Goethe]{Es irrt der Mensch, solang er strebt.}
+\bigskip\noindent
+Oftmals möchte der Autor einer wissenschaftlichen Arbeit für das erste oder 
+auch jedes Kapitel ein Zitat oder ähnliches voranstellen. Dies kann mit dem 
+Befehl \Macro*{dictum}\OParameter{Autor}\Parameter{Text} erfolgen. Damit wird 
+der im obligatorischen Argument angegeben Ausspruch in einer \Macro*{parbox} 
+ausgegeben. Das optionale Argument kann für die Angabe des Autors verwendet 
+werden. Soll das Ganze für einen Teil oder ein Kapitel erfolgen, sollte der 
+Befehl \Macro*{dictum} innerhalb von \Macro*{setpartpreamble} beziehungsweise 
+\Macro*{setchapterpreamble} verwendet werden. Genaueres hierzu und zu den 
+Möglichkeiten, die Gestalt des Zitats zu beeinflussen, ist in der \scrguide zu 
+finden.
+\begin{Tutorial*}
+\setchapterpreamble{%
+  \dictum[Johann Wolfgang von Goethe]{%
+    Es irrt der Mensch, solang er strebt.%
+  }%
+}
+\chapter{Einleitung}
+\end{Tutorial*}
+
+
+\section{Erstellen von Abbildungen}
+\label{sec:figures}
+\subsection{tikz}
+\subsection{pstricks}
 
 
 \section{Gleitumgebungen}
 \label{sec:floats}
 
+
 \subsection{Grafiken und Untergrafiken}
 \label{sec:graphics}
 
+
 \subsection{Tabellen}
 \label{sec:tables}
+
 
 \section{Listen}
 
@@ -1060,9 +1069,20 @@ Das Symbolverzeichnis kann sich nun durchaus sehen lassen.
 %%
 Damit ist das Tutorial beendet.
 \begin{Tutorial*}
-\dots
 \end{document}
 \end{Tutorial*}
+
+  \begin{itemize}
+  \item grafiken und untergrafiken?
+  \item tabellen
+  \item literaturverzteichnis
+  \item floatrow
+  \item mathematikmodus
+  \item tabbing-umgebung
+  \end{itemize}
+\ListOfToDo
+\ToDo[imp]{Einarbeiten von paragraph in treatise}[v2.02]
+
 \FinishTutorial[%
   Um das im kopierten Beispiel erstellte Literaturverzeichnis in das Dokument 
   einbinden zu können, bedarf es dem einmaligen Aufruf von \Application{biber}. 
@@ -1079,15 +1099,4 @@ Damit ist das Tutorial beendet.
   des Perl"=Skriptes \PValue{makeglossaries}~\PName{Dateiname} erfolgen. Dies 
   ist ohne weiteres Zutun nur mit \Distribution{\hologo{TeX}~Live} möglich.
 ]
-\clearpage
-  \begin{itemize}
-  \item grafiken und untergrafiken?
-  \item tabellen
-  \item literaturverzteichnis
-  \item floatrow
-  \item mathematikmodus
-  \item tabbing-umgebung
-  \end{itemize}
-\ListOfToDo
-\ToDo[imp]{Einarbeiten von paragraph in treatise}[v2.02]
 \end{document}

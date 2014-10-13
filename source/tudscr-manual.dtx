@@ -1,4 +1,4 @@
-% \CheckSum{2281}
+% \CheckSum{2287}
 % \iffalse meta-comment
 % ======================================================================
 %
@@ -492,7 +492,7 @@
 \RequirePackage{silence}[2012/07/02]
 \WarningFilter[Tutorial]{latex}{Overwriting file}%
 %    \end{macrocode}
-% \begin{macro}{\AddToTutorialHook}
+% \begin{macro}{\TutorialHook}
 % \changes{v2.02}{2014/10/11}{neu}%^^A
 % \begin{macro}{\tud@tut@hook}
 % \changes{v2.02}{2014/10/11}{neu}%^^A
@@ -500,13 +500,16 @@
 % \changes{v2.02}{2014/08/19}{neu}%^^A
 % \begin{macro}{\tud@tut@post}
 % \changes{v2.02}{2014/08/19}{neu}%^^A
+% \begin{macro}{\tud@tut@write}
+% \changes{v2.02}{2014/10/13}{neu}%^^A
 % \begin{macro}{\tud@tut@lst}
 % \changes{v2.02}{2014/10/07}{neu}%^^A
 % Dies sind die Hilfsmakros, welche zu Beginn und Ende der unterschiedlichen
 % \env{Tutorial}"=Umgebungen verwendet werden.
 %    \begin{macrocode}
 \newcommand*\tud@tut@hook{}
-\newcommand*\AddToTutorialHook[1]{\appto\tud@tut@hook{#1}}%
+\let\tud@tut@hook\relax
+\newcommand*\TutorialHook[1]{\def\tud@tut@hook{#1}}%
 \newcommand*\tud@tut@pre{%
   \ActivateWarningFilters[Tutorial]%
   \@nameuse{filecontents*}{\jobname-temp.tut}%
@@ -515,6 +518,46 @@
   \@nameuse{endfilecontents*}%
   \DeactivateWarningFilters[Tutorial]%
 }
+%    \end{macrocode}
+% Für die Ausgabe des Quelltextergebnisses erfolgt ein linker Einzug. Außerdem 
+% werden unter anderem abhängig von der Verwendung eines erklärenden Textes die 
+% eingefügten vertikalen Abstände angepasst.
+%    \begin{macrocode}
+\newcommand*\tud@tut@write{%
+%    \end{macrocode}
+% Nach dem Ausführen des ersten Argumentes von \cs{@tempa} wird geprüft, ob
+% dieses überhaupt eine sichtbare Ausgabe erzeugt hat. Nur für diesen Fall wird
+% nach dieser vertikaler Leerraum eingefügt. Der Anfang entspricht prinzipiell
+% dem Standardbefehl \cs{settoheight}, jedoch wird im Inneren zusätzlich eine
+% \cs{vbox} verwendet, um damit auch mathematische Umgebungen testen zu können. 
+% Das Ganze findet innerhalb einer Gruppierung statt, um keine Änderungen zu
+% erzeugen.
+%    \begin{macrocode}
+  \def\@tempa##1##2{%
+    ##1%
+    \begingroup%
+      ##2%
+      \setbox\@tempboxa\hbox{\vbox{##1}}%
+      \@tempdima=\ht\@tempboxa%
+      \setbox\@tempboxa\box\voidb@x%
+      \ifdim\@tempdima>\z@\relax%
+        \par%
+        \vspace{\baselineskipglue}%
+        \noindent\ignorespaces%
+      \fi%
+    \endgroup%
+  }%
+  \@tempa{\@Tutorial}{}%
+  \global\let\@Tutorial\relax%
+  \setlength{\@tempdimc}{\leftskip}%
+  \setlength{\leftskip}{\leftmargin}%
+  \@tempa{\input{\jobname-temp.tut}}{\tud@tut@hook}%
+  \let\tud@tut@hook\relax%
+  \setlength{\leftskip}{\@tempdimc}%
+}
+%    \end{macrocode}
+% Damit wird der Quelltext eingezogen ausgegeben.
+%    \begin{macrocode}
 \newcommand*\tud@tut@lst{%
   \begin{quoting}[rightmargin=0pt]%
   \lstinputlisting[style=tudscr]{\jobname-temp.tut}%
@@ -522,12 +565,15 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@tut@lst
+% \end{macro}^^A \tud@tut@write
 % \end{macro}^^A \tud@tut@post
 % \end{macro}^^A \tud@tut@pre
 % \end{macro}^^A \tud@tut@hook
-% \end{macro}^^A \AddToTutorialHook
+% \end{macro}^^A \TutorialHook
 % \begin{environment}{Tutorial}
 % \changes{v2.02}{2014/08/16}{neu}%^^A
+% \begin{environment}{Tutorial'}
+% \changes{v2.02}{2014/10/13}{neu}%^^A
 % \begin{environment}{Tutorial!}
 % \changes{v2.02}{2014/10/07}{neu}%^^A
 % \begin{environment}{Tutorial*}
@@ -558,7 +604,9 @@
 % hinzu, ohne diesen auszugeben oder auszuführen. Um Quelltextausschnitte zur
 % weiterführenden Information anzugeben, wird die außerdem die Version mit
 % Minuszeichen definiert. Diese werden nicht in das Copy"~\&"~Paste"~Beispiel
-% übernommen.
+% übernommen. Schließlich gibt es noch die Version mit Apostroph, die den 
+% angegebenen Quelltext sowohl ausgibt als auch ausführt, jedoch nicht in das 
+% Copy"~\&"~Paste"~Beispiel schreibt.
 %
 % Damit die Umgebungen nicht doppelt implementiert werden müssen, werden die
 % Hilfsmakros \cs{tud@tut@pre} und \cs{tud@tut@post} definiert. Für die Ausgabe
@@ -581,42 +629,13 @@
   \tud@tut@append%
   \aftergroup\tud@tut@lst%
 }
+\AfterEndEnvironment{Tutorial}{\tud@tut@write}%
 %    \end{macrocode}
-% Für die Ausgabe des Quelltextergebnisses erfolgt ein linker Einzug. Außerdem 
-% werden unter anderem abhängig von der Verwendung eines erklärenden Textes die 
-% eingefügten vertikalen Abstände angepasst.
-%    \begin{macrocode}
-\AfterEndEnvironment{Tutorial}{%
-%    \end{macrocode}
-% Nach dem Ausführen des Argumentes von \cs{@tempa} wird geprüft, ob dieses 
-% überhaupt eine sichtbare Ausgabe erzeugt hat. Nur für diesen Fall wird nach 
-% der Ausgabe vertikaler Leerraum eingefügt. Der Anfang entspricht prinzipiell
-% dem Standardbefehl \cs{settoheight}, jedoch wird im Inneren zusätzlich eine
-% \cs{vbox} verwendet, um damit auch mathematische Umgebungen testen zu können. 
-% Das Ganze findet innerhalb einer Gruppierung statt, um keine Änderungen zu
-% erzeugen.
-%    \begin{macrocode}
-  \def\@tempa#1{%
-    #1%
-    \begingroup%
-      \tud@tut@hook%
-      \setbox\@tempboxa\hbox{\vbox{#1}}%
-      \@tempdima=\ht\@tempboxa%
-      \setbox\@tempboxa\box\voidb@x%
-      \ifdim\@tempdima>\z@\relax%
-        \par%
-        \vspace{\baselineskipglue}%
-        \noindent\ignorespaces%
-      \fi%
-    \endgroup%
-  }%
-  \@tempa{\@Tutorial}%
-  \global\let\@Tutorial\relax%
-  \setlength{\@tempdimc}{\leftskip}%
-  \setlength{\leftskip}{\leftmargin}%
-  \@tempa{\input{\jobname-temp.tut}}%
-  \setlength{\leftskip}{\@tempdimc}%
+\newenvironment{Tutorial'}{\tud@tut@pre}{%
+  \tud@tut@post%
+  \aftergroup\tud@tut@lst%
 }
+\AfterEndEnvironment{Tutorial'}{\tud@tut@write}%
 %    \end{macrocode}
 % Die Umgebung \env{Tutorial!}\dots
 %    \begin{macrocode}
@@ -718,7 +737,7 @@
 }
 %    \end{macrocode}
 % Die Umgebung \env{Tutorial*} gibt den Inhalt im Dokument als Quelltext aus 
-% und fügt diesem dem Copy"~\&"~Paste"~Beispiel hinzu.
+% und fügt diesem dem Copy"~\&"~Paste"~Beispiel hinzu ohne diese auszuführen.
 %    \begin{macrocode}
 \newenvironment{Tutorial*}{\tud@tut@pre}{%
   \tud@tut@post%
@@ -732,6 +751,7 @@
 %    \end{macrocode}
 % Die Umgebungen \env{Tutorial+} und \env{Tutorial-} schreiben ihren Quelltext
 % entweder in das Copy"~\&"~Paste"~Beispiel oder geben diesen im Dokument aus.
+% In keinem Fall wird der Quelltext ausgeführt.
 %    \begin{macrocode}
 \newenvironment{Tutorial+}{\tud@tut@pre}{%
   \tud@tut@post%
@@ -749,6 +769,7 @@
 % \end{environment}^^A Tutorial+
 % \end{environment}^^A Tutorial*
 % \end{environment}^^A Tutorial!
+% \end{environment}^^A Tutorial'
 % \end{environment}^^A Tutorial
 % \begin{macro}{\tud@tut@input}
 % \changes{v2.02}{2014/08/19}{neu}%^^A
