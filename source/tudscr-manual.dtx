@@ -1,4 +1,4 @@
-% \CheckSum{2287}
+% \CheckSum{2315}
 % \iffalse meta-comment
 % ======================================================================
 %
@@ -49,7 +49,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-manual.dtx}[%
-  2014/10/11 v2.02 TUD-KOMA-Script\space%
+  2014/10/14 v2.02 TUD-KOMA-Script\space%
 %</driver>
 %<identify>\NeedsTeXFormat{LaTeX2e}[2011/06/27]
 %<class&identify>\ProvidesClass{tudscrman}[%
@@ -347,66 +347,43 @@
 % \end{macro}^^A \tud@item@pkg
 % \end{macro}^^A \itempackages
 % \end{environment}^^A packages
-%
-% \iffalse
-%</class>
-% \fi
-%
-% \begin{macro}{\tud@write@file}
-% \changes{v2.02}{2014/08/19}{neu}%^^A
-% \begin{macro}{\tud@write@option}
-% \changes{v2.02}{2014/08/19}{neu}%^^A
-% \begin{macro}{\tud@write@copy}
-% \changes{v2.02}{2014/09/11}{neu}%^^A
-% Diese beiden Hilfsmakros werden für das automatisierte Ausführen der 
-% Kompilierung von Beispielen und Tutorials via \cs{write18} benötigt.
-%    \begin{macrocode}
-\newcommand*\tud@write@file{}
-\newcommand*\tud@write@option{}
-%<*package>
-\newcommand*\tud@write@copy{}
-%</package>
-%    \end{macrocode}
-% \end{macro}^^A \tud@write@copy
-% \end{macro}^^A \tud@write@option
-% \end{macro}^^A \tud@write@file
-%
-% \iffalse
-%<*class>
-% \fi
-%
 % \begin{macro}{\includeexample}
 % \changes{v2.02}{2014/07/25}{Skalierung der eingefügten Seiten}%^^A
+% \changes{v2.02}{2014/10/14}{Reimplementierung}%^^A
 % Mit diesem Befehl wird eine \LaTeX-Datei ggf. übersetzt und anschließend als
-% PDF"~Datei wieder eingebunden.
+% PDF"~Datei wieder eingebunden. Zuvor wird der dazugehörige Quelltext mittels
+% \cs{lstinputlisting} im Dokument ausgegeben.
 %    \begin{macrocode}
 \RequirePackage{filemod}[2011/09/19]
 \RequirePackage{pdfpages}[2013/08/25]
 \newcommand*\includeexample[1]{%
+  \lstinputlisting[style=tudscr]{examples/#1}%
 %    \end{macrocode}
-% Die Datei kann sowohl im Stammpfad als auch im Unterordner liegen\dots
+% Die Beispiele werden nur erneut kompiliert, wenn sich diese geändert haben 
+% oder noch gar kein entsprechendes PDF"~Dokument existiert.
 %    \begin{macrocode}
-  \IfFileExists{#1}{%
-    \edef\tud@write@file{#1}%
-    \edef\tud@write@option{}%
-  }{%
-    \edef\tud@write@file{examples/#1}%
-    \edef\tud@write@option{-output-directory examples }%
-  }%
-  \lstinputlisting[style=tudscr]{\tud@write@file}%
-  \filemodCmp{./\tud@write@file.pdf}{./\tud@write@file.tex}{}{%
-    \immediate\write18{%
-      pdflatex \tud@write@option \tud@write@file.tex
-      pdflatex \tud@write@option \tud@write@file.tex
-      pdflatex \tud@write@option \tud@write@file.tex
+  \ifcase\pdf@shellescape\or%
+    \filemodCmp{examples/#1.pdf}{examples/#1.tex}{}{%
+      \immediate\write18{%
+        pdflatex -shell-escape -output-directory examples examples/#1.tex
+        pdflatex -output-directory examples examples/#1.tex
+        pdflatex -output-directory examples examples/#1.tex
+      }%
     }%
-  }%
-  \IfFileExists{\tud@write@file.pdf}{%
+  \fi%
+%    \end{macrocode}
+% Ist die gesuchte Datei vorhanden, wird diese auch eingebunden. Andernfalls 
+% wird eine Warnung mit dem Hinweis auf die notwendige Verwednung von 
+% \val{pdflatex} mit der Option \opt{--shell-escape} erzeugt.
+%    \begin{macrocode}
+  \IfFileExists{examples/#1.pdf}{%
     \includepdf[%
       pages=-,noautoscale,frame,keepaspectratio,pagecommand={},%
       height=\textheight,width=\textwidth, offset=5mm 0mm%
-    ]{\tud@write@file.pdf}%
-  }{}%
+    ]{examples/#1.pdf}%
+  }{%
+    \tud@shellescape@wrn%
+  }%
 }
 %    \end{macrocode}
 % \end{macro}^^A \includeexample
@@ -436,6 +413,21 @@
 %</class>
 % \fi
 %
+% \begin{macro}{\tud@shellescape@wrn}
+% \changes{v2.02}{2014/10/14}{neu}%^^A
+% Dieses Makro wird verwendet, wenn eine gesuchte Datei nicht gefunden wurde, 
+% weil das Dokument noch nicht mit der Option  \opt{--shell-escape} kompiliert 
+% wurde.
+%    \begin{macrocode}
+\newcommand*\tud@shellescape@wrn{%
+  \ClassWarning{\tudcls@name}{%
+    You have to recompile this document with\MessageBreak%
+    activated shell escape option%
+  }%
+  \global\let\tud@shellescape@wrn\relax%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@shellescape@wrn
 % \begin{environment}{Code}
 % \begin{macro}{\tud@currentHref}
 % Folgend werden Befehle und Umgebungen für die Darstellung von Quelltexten im 
@@ -504,8 +496,15 @@
 % \changes{v2.02}{2014/10/13}{neu}%^^A
 % \begin{macro}{\tud@tut@lst}
 % \changes{v2.02}{2014/10/07}{neu}%^^A
+% \begin{macro}{\tud@write@file}
+% \changes{v2.02}{2014/08/19}{neu}%^^A
+% \begin{macro}{\tud@write@option}
+% \changes{v2.02}{2014/08/19}{neu}%^^A
+% \begin{macro}{\tud@write@copy}
+% \changes{v2.02}{2014/09/11}{neu}%^^A
 % Dies sind die Hilfsmakros, welche zu Beginn und Ende der unterschiedlichen
-% \env{Tutorial}"=Umgebungen verwendet werden.
+% \env{Tutorial}"=Umgebungen sowie für das automatisierte Ausführen der 
+% Kompilierung von Tutorials via \cs{write18} benötigt und verwendet werden.
 %    \begin{macrocode}
 \newcommand*\tud@tut@hook{}
 \let\tud@tut@hook\relax
@@ -563,7 +562,13 @@
   \lstinputlisting[style=tudscr]{\jobname-temp.tut}%
   \end{quoting}%
 }
+\newcommand*\tud@write@file{}
+\newcommand*\tud@write@option{}
+\newcommand*\tud@write@copy{}
 %    \end{macrocode}
+% \end{macro}^^A \tud@write@copy
+% \end{macro}^^A \tud@write@option
+% \end{macro}^^A \tud@write@file
 % \end{macro}^^A \tud@tut@lst
 % \end{macro}^^A \tud@tut@write
 % \end{macro}^^A \tud@tut@post
@@ -630,7 +635,6 @@
   \aftergroup\tud@tut@lst%
 }
 \AfterEndEnvironment{Tutorial}{\tud@tut@write}%
-%    \end{macrocode}
 \newenvironment{Tutorial'}{\tud@tut@pre}{%
   \tud@tut@post%
   \aftergroup\tud@tut@lst%
@@ -670,31 +674,36 @@
 \end{filecontents*}
 \fi
 %    \end{macrocode}
-% Das Ganze hier ist etwas kryptisch. Der Test auf den Dateinamen ist wahr, 
-% wenn die Tutorialdatei selber ausgeführt wird. Erfolgt hingegen der Aufruf 
-% bei der Übersetzung des Handbuchs, ist der Test negativ. Warum genau weiß ich 
-% nicht. Es hilft aber auf alle Fälle, um die Pfade anzupassen.
+% Der Quelltext aus der \env{Tutorial!}"=Umgebung wird~-- wie bei allen anderen
+% \env{Tutorial}"=Umgebungen~-- in der Datei \val{\string\jobname-temp.tut}
+% gesichert. Diese wird in die separate Datei \cs{\meta{Argument}-temp.tut} 
+% kopiert. Anschließend wird diese in der Datei \val{\string\jobname-temp.tex}
+% eingebunden. Damit dies sowohl bei der direkten Übersetzung als auch bei der
+% Kompilierung aus dem Handbuch heraus funktioniert, wird \cs{tudtutorialflag}
+% zur Unterscheidung verwendet.
 %    \begin{macrocode}
 \AfterEndEnvironment{Tutorial!}{%
-  \IfFileExists{\jobname-temp}{%
-    \edef\tud@write@file{\jobname-temp}%
-    \edef\tud@write@option{-jobname=\@Tutorial-temp }%
-    \edef\tud@write@copy{}%
-  }{%
-    \edef\tud@write@file{tutorials/\jobname-temp}%
-    \edef\tud@write@option{%
-      -output-directory tutorials -jobname=\@Tutorial-temp 
+  \ifcase\pdf@shellescape\or%
+    \ifdef{\tudtutorialflag}{%
+      \edef\tud@write@file{tutorials/\jobname-temp}%
+      \edef\tud@write@option{%
+        -output-directory tutorials -jobname=\@Tutorial-temp %
+      }%
+      \edef\tud@write@copy{tutorials\@backslashchar}%
+    }{%
+      \edef\tud@write@file{\jobname-temp}%
+      \edef\tud@write@option{-jobname=\@Tutorial-temp }%
+      \edef\tud@write@copy{}%
     }%
-    \edef\tud@write@copy{tutorials\@backslashchar}%
-  }%
-  \immediate\write18{%
-    copy \tud@write@copy\jobname-temp.tut \tud@write@copy\@Tutorial-temp.tut
-  }
-  \immediate\write18{%
-    pdflatex \tud@write@option \tud@write@file.tex
-    pdflatex \tud@write@option \tud@write@file.tex
-    pdflatex \tud@write@option \tud@write@file.tex
-  }%
+    \immediate\write18{%
+      copy \tud@write@copy\jobname-temp.tut \tud@write@copy\@Tutorial-temp.tut
+    }
+    \immediate\write18{%
+      pdflatex \tud@write@option \tud@write@file.tex
+      pdflatex \tud@write@option \tud@write@file.tex
+      pdflatex \tud@write@option \tud@write@file.tex
+    }%
+  \fi%
   \global\let\@Tutorial\relax%
   \par\noindent%
 }
@@ -706,10 +715,10 @@
 %    \begin{macrocode}
 \NewDocumentCommand\includetutorial{omO{1}}{%
   \IfFileExists{\jobname-temp}{%
-    \edef\tud@write@file{#2-temp}
+    \edef\tud@write@file{#2-temp}%
   }{%
-    \edef\tud@write@file{tutorials/#2-temp}
-  }
+    \edef\tud@write@file{tutorials/#2-temp}%
+  }%
   \IfFileExists{\tud@write@file.pdf}{%
     \@tempcnta\z@%
     \@for\@tempa:=#3\do{\advance\@tempcnta\@ne}%
@@ -733,7 +742,9 @@
         \ifnum\@tempcnta>\z@\hfill\fi%
       }%
     \fi%
-  }{}%
+  }{%
+    \tud@shellescape@wrn%
+  }%
 }
 %    \end{macrocode}
 % Die Umgebung \env{Tutorial*} gibt den Inhalt im Dokument als Quelltext aus 
@@ -882,35 +893,69 @@
 %
 % \begin{macro}{\Tutorial}
 % \changes{v2.02}{2014/08/22}{neu}%^^A
+% \changes{v2.02}{2014/10/14}{Reimplementierung}%^^A
 % \begin{macro}{\hypertut}
 % \changes{v2.02}{2014/09/02}{neu}%^^A
 % Die gegebenenfalls notwendige Kompilierung und die Referenzierung eines 
-% Tutorials aus dem Handbuch erfolgt mit \cs{Tutorial}. Hierfür werden abermals
-% die beiden Hilfsmakros \cs{tud@write@file} und \cs{tud@write@option} 
-% verwendet. Außerdem erfolgt mit \cs{hypertut} ein verlinkter Eintrag in den
-% Index.
+% Tutorials aus dem Handbuch erfolgt mit \cs{Tutorial}. Außerdem erfolgt mit
+% \cs{hypertut} ein verlinkter Eintrag in den Index.
 %    \begin{macrocode}
 \newrobustcmd*\hypertut[2]{%
   \hyperref{tutorials/#1.pdf}{\jobname}{tutorials:#1}{\texturn{#1.pdf}#2}%
 }
 \NewDocumentCommand\Tutorial{som}{%
-  \IfFileExists{#3}{%
-    \edef\tud@write@file{#3}%
-    \edef\tud@write@option{}%
+  \ifcase\pdf@shellescape\or%
+%    \end{macrocode}
+% Um mit den verschachtelten Aufrufen von pdf\LaTeX{} umgehen zu können, wird 
+% beim Aufruf \cs{tudtutorialflag} definiert. Damit wird innerhalb des Paketes
+% \pkg{tudscrman}~-- welches von den Tutorials genutzt wird~-- erkannt, dass es
+% sich um einen Aufruf aus der Klasse \cls{tudscrman} handelt.
+%    \begin{macrocode}
+    \filemodCmp{tutorials/#3.pdf}{tutorials/#3.tex}{}{%
+      \immediate\write18{%
+        pdflatex -shell-escape -output-directory tutorials 
+        \noexpand\def\noexpand\tudtutorialflag\noexpand{\noexpand}
+        \noexpand\input{tutorials/#3.tex}
+      }%
+%    \end{macrocode}
+% Der Aufruf von \val{biber} erfolgt nur, wenn dieser notwendig ist.
+%    \begin{macrocode}
+      \IfFileExists{tutorials/#3.bcf}{%
+        \immediate\write18{%
+          biber -output-directory tutorials #3
+        }%
+      }%
+%    \end{macrocode}
+% Das das Paket \pkg{glossaries} prinzipiell x"~beliebige Glossare erstellen 
+% kann, ist der Aufruf von \val{makeglossaries} obligatorisch.
+%    \begin{macrocode}
+      \immediate\write18{%
+        makeglossaries -d tutorials #3
+      }%
+%    \end{macrocode}
+% Nachdem alle Hilfprozessoren gelaufen sind, dard pdf\LaTeX noch zweimal.
+%    \begin{macrocode}
+      \immediate\write18{%
+        pdflatex -output-directory tutorials 
+        \noexpand\def\noexpand\tudtutorialflag\noexpand{\noexpand}\noexpand
+        \input{tutorials/#3.tex}
+      }%
+      \immediate\write18{%
+        pdflatex -output-directory tutorials 
+        \noexpand\def\noexpand\tudtutorialflag\noexpand{\noexpand}\noexpand
+        \input{tutorials/#3.tex}
+      }%
+    }%
+  \fi%
+%    \end{macrocode}
+% Hyperlink und Indexeintrag.
+%    \begin{macrocode}
+  \IfFileExists{tutorials/#3.pdf}{%
+    \hypertut{#3}{}%
   }{%
-    \edef\tud@write@file{tutorials/#3}%
-    \edef\tud@write@option{-output-directory tutorials }%
+    \texturn{#3.pdf}%
+    \tud@shellescape@wrn%
   }%
-  \filemodCmp{./\tud@write@file.pdf}{./\tud@write@file.tex}{}{%
-    \immediate\write18{%
-      pdflatex -shell-escape \tud@write@option \tud@write@file.tex
-    }%
-    \immediate\write18{%
-      pdflatex \tud@write@option \tud@write@file.tex
-      pdflatex \tud@write@option \tud@write@file.tex
-    }%
-  }%
-  \IfFileExists{tutorials/#3.pdf}{\hypertut{#3}{}}{\texturn{#3.pdf}}%
   \IfBooleanF{#1}{%
     \index[files]{\hypertut{#3}{~{\idxfont(Tutorial)}\IfValueT{#2}{|#2}}}%
   }%
@@ -1233,7 +1278,7 @@
 }
 %    \end{macrocode}
 % \begin{macro}{\bsc}
-% \changes{v2.02}{2014/07/22}{\cs{DeclareRobustCommand} ersetzt durch
+% \changes{v2.02}{2014/07/22}{\cs{DeclareRobustCommand} ersetzt mit
 %   \cs{newrobustcmd} aus \pkg{etoolbox}}%^^A
 % Eine einfacher zu verwendende Kurzform.
 %    \begin{macrocode}
