@@ -1,4 +1,4 @@
-% \CheckSum{2315}
+% \CheckSum{2306}
 % \iffalse meta-comment
 % ======================================================================
 %
@@ -49,7 +49,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-manual.dtx}[%
-  2014/10/14 v2.02 TUD-KOMA-Script\space%
+  2014/10/15 v2.02 TUD-KOMA-Script\space%
 %</driver>
 %<identify>\NeedsTeXFormat{LaTeX2e}[2011/06/27]
 %<class&identify>\ProvidesClass{tudscrman}[%
@@ -2252,9 +2252,12 @@
 %    \end{macrocode}
 % Die Einträge in der Änderungsliste sowie die dazugehörige Randnotiz werden
 % innerhalb der Deklaration mit \cs{printchangedatlist} erzeugt. Das optionale 
-% Argument sorgt für die Verschiebung der Randnotiz auf die richtige Höhe.
+% Argument sorgt für die Verschiebung der Randnotiz auf die richtige Höhe, um 
+% den Höhenversatz zwischen Randnotiz und Deklarationsrahmen auszugleichen.
 %    \begin{macrocode}
-    \printchangedatlist[\dimexpr.5\baselineskip-.5\ht0-.5\dp0\relax]%
+    \printchangedatlist[%
+      \dimexpr.5\ht\strutbox+.5\dp\strutbox-.5\ht0-.5\dp0\relax%
+    ]%
 %    \end{macrocode}
 % Zum Schluss wird das optionale Argument (in runden Klammern) neben der
 % Deklarationsbox ausgegeben.
@@ -2336,18 +2339,17 @@
 }
 %    \end{macrocode}
 % Die Einträge in der Änderungsliste sowie die dazugehörige Randnotiz werden 
-% mit dem Makro \cs{ChangedAt@Process} abgearbeitet, sortiert und erstellt. Mit
-% \cs{printchangedatlist} wird der Versatz der Randnotiz gesetzt und danach die
-% Liste an \cs{ChangedAt@Process} weitergegeben.
+% mit dem Makro \cs{ChangedAt@Process} abgearbeitet, sortiert und erstellt. Bei
+% \cs{printchangedatlist} wird mit dem optionalen Argument der Versatz für die 
+% Randnotiz gesetzt. Dieser wird wie auch die Liste an \cs{ChangedAt@Process}
+% übergeben, womit diese und die Randnotiz letztendlich erzeugt werden.
 %    \begin{macrocode}
-\newcommand*\printchangedatlist[1][.2\baselineskip]{%
-    \ifx\@changedatdeclarelist\relax\else%
-      \setlength\changedatmarginskip{#1}%
-      \ChangedAt@Process{\@changedatdeclarelist}%
-      \setlength{\changedatmarginskip}{\z@}%
-      \global\let\@changedatdeclarelist\relax%
-      \@afterindentfalse\@afterheading%
-    \fi%
+\newcommand*\printchangedatlist[1][\z@]{%
+  \ifx\@changedatdeclarelist\relax\else%
+    \ChangedAt@Process{#1}{\@changedatdeclarelist}%
+    \global\let\@changedatdeclarelist\relax%
+    \@afterindentfalse\@afterheading%
+  \fi%
 }
 %    \end{macrocode}
 % \end{macro}^^A \@changedatdeclarelist
@@ -2356,16 +2358,20 @@
 % \end{macro}^^A \printchangedatlist
 % \begin{macro}{\ChangedAt}
 % \changes{v2.02}{2014/07/25}{erweitert}%^^A
+% \changes{v2.02}{2014/10/15}{Sternversion neu (keine Randnotiz)}%^^A
 % An den Befehl \cs{ChangedAt} kann eine kommagetrente Liste mit verschiedenen
 % Versionsnummern und dazugehörigen Änderungen übergeben werden. Er wird in der 
 % Form: \cs{ChangedAt}\marg{Version!Definition,Version!Erweiterung} genutzt.
 % Der Prozess selbst wird mit \cs{ChangedAt@Process} durchgeführt. Es wird
 % zu der angegebenen Versionsnummer ein Eintrag in die Änderungsliste erstellt,
 % wenn mit einem Ausrufezeichen getrennt der gewünschte Inhalt gegeben wurde.
-% Auf jeden Fall werden alle übergegebenen Versionsnummern in einer Liste als
-% Randnotiz einmalig gesetzt. 
+%
+% Alle übergegebenen Versionsnummern werden als Liste mit einmaligen Einträgen 
+% in einer Randnotiz gesetzt. Mit dem optionalen Argument kann ein vertikaler 
+% dieser angegeben werden. Die Sternversion von \cs{ChangedAt} unterdrückt die
+% Ausgabe dieser Randnotiz.
 %    \begin{macrocode}
-\newcommand*\ChangedAt[1]{\strut\ChangedAt@Process{#1}\ignorespaces}
+\NewDocumentCommand\ChangedAt{sO{\z@}m}{\ChangedAt@Process[#1]{#2}{#3}}
 %    \end{macrocode}
 % \end{macro}^^A \ChangedAt
 % \begin{macro}{\ChangedAt@Process}
@@ -2380,8 +2386,6 @@
 % \changes{v2.02}{2014/09/02}{neu}%^^A
 % \begin{macro}{\@changedatlist}
 % \changes{v2.02}{2014/09/02}{neu}%^^A
-% \begin{length}{\changedatmarginskip}
-% \changes{v2.02}{2014/09/02}{neu}%^^A
 % \begin{macro}{\@changedatversionlist}
 % \changes{v2.02}{2014/09/02}{neu}%^^A
 % Mit diesen Befehlen wird die Änderungshistorie in Form eines Index erstellt. 
@@ -2392,37 +2396,34 @@
 %    \begin{macrocode}
 \newcommand*\@changedatlist{}
 \newcommand*\ChangedAt@Default{}
-\newlength{\changedatmarginskip}
 \newcommand*\@changedatversionlist{}
 \let\@changedatversionlist\relax
-\newcommand*\ChangedAt@Process[1]{%
+\newcommand*\ChangedAt@Process[3][]{%
   \let\@changedatlist\relax%
   \let\@changedatversionlist\relax%
-  \@for\@tempa:=#1\do{\listeadd{\@changedatlist}{\expandonce\@tempa}}%
+  \@for\@tempa:=#3\do{\listeadd{\@changedatlist}{\expandonce\@tempa}}%
   \forlistloop\ChangedAt@Split{\@changedatlist}%
 %    \end{macrocode}
 % Nach der Verarbeitung aller Einräge sind in \cs{@changedatlist} alle 
 % angegebenen Versionsnummern genau einmal enthalten. Mit \cs{sortlist} werden 
 % diese in die richtige Reihenfolge sortiert und anschließend als Randnotiz in
-% einer Tabelle ausgegeben.
+% einer Tabelle ausgegeben, falls nicht die Sternversion verwendet wurde.
 %    \begin{macrocode}
-  \sortlist{\@changedatversionlist}%
-%    \end{macrocode}
-% Die Länge \cs{changedatmarginskip} wird verwendet, um gegebenenfalls den 
-% Höhenversatz zwischen Randnotiz und Deklarationsrahmen auszugleichen.
-% Anschließend wird diese wieder zurückgesetzt.
-%    \begin{macrocode}
-  \marginnote{%
-    \def\@tempa####1{%
-      \ignorespaces\hyperref[idx:changelog]{####1}\tabularnewline%
-    }%
-    \begin{tabular}{|l|}%
-      \hline{\footnotesize\rule{0pt}{.8\baselineskip}}%
-      \forlistloop\@tempa{\@changedatversionlist}%
-      \hline%
-    \end{tabular}%
-  }[\changedatmarginskip]%
-  \setlength{\changedatmarginskip}{\z@}%
+  \IfBooleanF{#1}{%
+    \sortlist{\@changedatversionlist}%
+    \strut%
+    \marginnote{%
+      \def\@tempa####1{%
+        \ignorespaces\hyperref[idx:changelog]{####1}\tabularnewline%
+      }%
+      \begin{tabular}{|l|}%
+        \hline%
+        \forlistloop\@tempa{\@changedatversionlist}%
+        \hline%
+      \end{tabular}%
+    }[#2]%
+    \ignorespaces%
+  }%
 }
 %    \end{macrocode}
 % Der Befehl \cs{ChangedAt@Split} teilt ein gegebenes Argument am Delimiter
@@ -2503,7 +2504,6 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \@changedatversionlist
-% \end{length}^^A \changedatmarginskip
 % \end{macro}^^A \@changedatlist
 % \end{macro}^^A \ChangedAt@Split
 % \end{macro}^^A \ChangedAt@Default
