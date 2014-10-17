@@ -81,6 +81,7 @@ cd %~dp0
 mkdir release\temp
 mkdir release\GitHub
 copy *.md                                   release\temp\
+xcopy addon release\temp\ /s
 copy development\fonts\*.*                  release\temp\
 copy development\tools\*.*                  release\temp\
 copy temp\doc\latex\tudscr\tudscr.pdf       release\temp\
@@ -102,6 +103,8 @@ for /f %%f in ('dir /b *.md') do copy %%f %%~nf.txt
 7za a -tzip .\..\TUD-KOMA-Script_%version%_Unix_full.zip      -x!*.bat -x!7za.exe @7za_files_full.txt
 rem 7za a -tzip .\..\TUD-KOMA-Script_%version%_Unix_update.zip    -x!*.bat -x!7za.exe @7za_files_update.txt
 7za a -tzip .\..\TUD-KOMA-Script_fonts_Unix.zip               -x!*.bat -x!7za.exe @7za_files_fonts.txt
+7za a -tzip .\..\tudscr4lyx.zip       .\tudscr4lyx\*
+7za a -tzip .\..\tudscr4texstudio.zip .\tudscr4texstudio\*
 cd..
 attrib +h *_all.zip
 move *.zip GitHub\
