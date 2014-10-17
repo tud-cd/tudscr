@@ -17,6 +17,7 @@ echo =========================================================================
 xcopy source temp\ /s
 cd temp
 call clear.bat
+if exist test rmdir /s /q test> nul
 mkdir tex\latex\tudscr
 mkdir source\latex\tudscr
 mkdir doc\latex\tudscr\tutorials

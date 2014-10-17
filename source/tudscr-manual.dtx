@@ -49,7 +49,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-manual.dtx}[%
-  2014/10/15 v2.02 TUD-KOMA-Script\space%
+  2014/10/16 v2.02 TUD-KOMA-Script\space%
 %</driver>
 %<identify>\NeedsTeXFormat{LaTeX2e}[2011/06/27]
 %<class&identify>\ProvidesClass{tudscrman}[%
@@ -2380,6 +2380,7 @@
 % \changes{v2.02}{2014/09/02}{neu}%^^A
 % \begin{macro}{\ChangedAt@@@Process}
 % \changes{v2.02}{2014/09/02}{neu}%^^A
+% \changes{v2.02}{2014/10/16}{Unterteilung Änderungsliste in Bereiche}%^^A
 % \begin{macro}{\ChangedAt@Default}
 % \changes{v2.02}{2014/09/02}{neu}%^^A
 % \begin{macro}{\ChangedAt@Split}
@@ -2452,19 +2453,24 @@
   \IfValueTF{#3}{%
 %    \end{macrocode}
 % Bei der Deklaration von Optionen, Befehlen etc. werden diese automatisch in 
-% der Liste der Änderungen vor der gegebenen Erklärung selbst ausgegeben.
-% Hierfür wird das dritte Argument genutzt. Damit lediglich diese und nicht
-% noch die dazugehörigen Argumente eingetragen werden, werden die relevanten
-% Befehle deaktiviert und das optionale Argument in \cs{ChangedAt@Default}
-% expandiert.
+% der Liste der Änderungen im Bereich \glqq Implementierung\grqq vor der
+% gegebenen Erklärung selbst ausgegeben. Hierfür wird das dritte Argument
+% genutzt. Damit lediglich diese und nicht noch die dazugehörigen Argumente
+% eingetragen werden, werden die relevanten Befehle deaktiviert und das
+% optionale Argument in \cs{ChangedAt@Default} expandiert.
 %    \begin{macrocode}
     \begingroup%
       \@gobbleparameters%
       \xdef\ChangedAt@Default{#3}%
     \endgroup%
-    \ChangedAt@@@Process{#1}{\ChangedAt@Default: #2}%
+    \ChangedAt@@@Process{#1}{Implementierung}{\ChangedAt@Default: #2}%
   }{%
-    \IfValueT{#2}{\ChangedAt@@@Process{#1}{#2}}%
+%    \end{macrocode}
+% Wurde \cs{ChangedAt} direkt und nicht über das optionale Argument der 
+% Umgebungen \env{Declaration} genutzt, erscheint der gewünschte Eintrag im
+% Bereich \glqq Allgemein\grqq.
+%    \begin{macrocode}
+    \IfValueT{#2}{\ChangedAt@@@Process{#1}{Allgemein}{#2}}%
   }%
 %    \end{macrocode}
 % Außerdem wird der Liste \cs{changedatversionlist} die aktuelle Version
@@ -2475,15 +2481,15 @@
 %    \end{macrocode}
 % Mit \cs{ChangedAt@@@Process} Erfolgen die Einträge in die Änderungsliste.
 %    \begin{macrocode}
-\newcommand*\ChangedAt@@@Process[2]{%
+\newcommand*\ChangedAt@@@Process[3]{%
   \begingroup%
 %    \end{macrocode}
 % Für geänderte Parameter wird als Haupteintrag das dazugehörige Makro bzw. die
 % entsprechende Umgebung verwendet. Der geänderte Parameter folgt danach.
 % Zuerst muss ggf. das Makro \cs{ChangedAt@Default} expandiert werden.
 %    \begin{macrocode}
-    \def\@tempa{#2}%
-    \in@{\ChangedAt@Default}{#2}%
+    \def\@tempa{#3}%
+    \in@{\ChangedAt@Default}{#3}%
     \ifin@%
       \expandafter\def\expandafter\@tempa\expandafter{\ChangedAt@Default}%
     \fi%
@@ -2494,11 +2500,11 @@
     \ifin@%
       \begingroup%
         \RenewDocumentCommand\Key{sommo}{\xdef\@TempKey{##3:}}%
-        \setbox0\vtop{#2}%
+        \setbox0\hbox{#3}%
       \endgroup%
-      \index[changelog]{#1!\@TempKey\ #2}%
+      \index[changelog]{#1!#2!\@TempKey\ #3}%
     \else%
-      \index[changelog]{#1!#2}%
+      \index[changelog]{#1!#2!#3}%
     \fi%
   \endgroup%
 }
@@ -2516,8 +2522,12 @@
 % einen Eintrag im gewünschten Index mit einem Verweis auf den neuen Befehl.
 %    \begin{macrocode}
 \newcommand*\Rename[4][]{%
-  \ChangedAt@@@Process{#2}{#3: \emph{umbenannt}~\textrightarrow~siehe #4}%
-  \ChangedAt@@@Process{#2}{#4: \emph{neu}~\textrightarrow~ersetzt #3}%
+  \ChangedAt@@@Process{#2}{Umbenennungen}{%
+    #3: \emph{umbenannt}~\textrightarrow~siehe #4%
+  }%
+  \ChangedAt@@@Process{#2}{Implementierung}{%
+    #4: \emph{neu}~\textrightarrow~ersetzt #3%
+  }%
   \listeadd\@changedatdeclarelist{#2}%
   \index[#1]{#3|see{#4}}%
 }
