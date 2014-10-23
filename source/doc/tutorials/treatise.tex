@@ -7,6 +7,7 @@
 \SelectInputMappings{adieresis={ä},germandbls={ß}}
 \usepackage[T1]{fontenc}
 \usepackage{lmodern}
+
 \usepackage{tudscrman}
 \lstset{%
   inputencoding=utf8,extendedchars=true,
@@ -38,8 +39,17 @@
 \addbibresource{treatise-temp.bib}
 \renewcommand{\floatpagefraction}{0.7}
 
+\ifpdf
+  \usepackage{tikz}
+  \usetikzlibrary{chains}
+  \usetikzlibrary{decorations.markings}
+  \tikzset{on grid}
+\fi
+
+\usepackage{pstricks,pst-node}
+
 \begin{document}
-\TUDoptions{cdfont=no}
+\TUDoptions{cdfont=false}
 \KOMAoptions{headings=normal}
 \title{%
   Ein Anwenderleitfaden für das Erstellen einer wissenschaftlichen Abhandlung%
@@ -310,7 +320,7 @@ erläutert. Die resultierende Ausgabe des nachfolgenden Quelltextauszugs ist in
 \end{Tutorial!}
 %
 \begin{figure}
-\includetutorial{Title}[1,2]
+\IncludeTutorial{Title}[1,2]
 \caption{Umschlagseite und Titel}
 \label{fig:title}
 \end{figure}
@@ -399,7 +409,7 @@ dargestellt.
 \end{Tutorial!}
 %
 \begin{figure}
-\includetutorial{Task}[1,2]
+\IncludeTutorial{Task}[1,2]
 \caption{Aufgabenstellung in freier und standardisierter Form}
 \label{fig:task}
 \end{figure}
@@ -432,7 +442,7 @@ sehen.
 %
 \begin{figure}
 \centering
-\includetutorial[width=.5\textwidth]{Abstract}
+\IncludeTutorial[width=.5\textwidth]{Abstract}
 \caption{Zusammenfassung in deutscher und englischer Sprache}
 \label{fig:abstr}
 \end{figure}
@@ -461,7 +471,7 @@ abgebildet.
 %
 \begin{figure}
 \centering
-\includetutorial[width=.5\textwidth]{Declaration}
+\IncludeTutorial[width=.5\textwidth]{Declaration}
 \caption{Selbstständigkeitserklärung und Sperrvermerk}
 \label{fig:decl}
 \end{figure}
@@ -1003,8 +1013,175 @@ finden.
 
 \section{Erstellen von Abbildungen}
 \label{sec:figures}
+
+
 \subsection{tikz}
+\begin{Tutorial*}
+\begin{figure}
+\begin{tikzpicture}
+  \newlength{\tikzunit}
+  \setlength{\tikzunit}{.01\textwidth}
+  \tikzset{x=\tikzunit,y=\tikzunit}
+  \tikzstyle{inner box}=[%
+    text width=18\tikzunit,
+    align=center,
+    rectangle,
+    inner sep=0pt,
+    minimum height=8\tikzunit,
+    font=\hspace{0pt},
+    draw
+  ]
+  \tikzstyle{inner label}=[align=center, font=\scriptsize]
+  \tikzstyle{inner box chain}=[every node/.style={on chain}]
+  \tikzstyle{inner box chain below}=[%
+    inner box chain, node distance=8\tikzunit,continue chain=going below
+  ]
+  \tikzstyle{inner box chain right}=[%
+    inner box chain,node distance=35\tikzunit,continue chain=going right
+  ]
+  \tikzstyle{inner box chain above}=[%
+    inner box chain,node distance=16\tikzunit,continue chain=going above
+  ]
+  \tikzstyle{pstarrow->}=[%
+    decoration={markings,
+      mark=at position 1 with {\arrow[xscale=1.5]{stealth}};
+    },
+    postaction={decorate},
+    shorten >=0.7pt
+  ]
+  \newcommand\tikzparbox[2][9]{%
+    \parbox{#1\tikzunit}{\centering\hspace{0pt}#2}%
+  }
+  \begin{scope}[start chain]
+    \begin{scope}[inner box chain below]
+      \node(NE)[inner box]{Navigations\-ebene};
+      \node(NB)[inner label]{gewählte Fahrtroute\\zeitlicher Ablauf};
+      \node(BE)[inner box]{{Bahnführungs\-ebene}};
+      \node(BS)[inner label]{%
+        gewählte Führungsgrößen:\\Sollspur, Sollgeschwindigkeit%
+      };
+      \node(SE)[inner box]{Stabilisierungs\-ebene};
+    \end{scope}
+    \begin{scope}[inner box chain right]
+      \node(LQ)[inner box]{Längs- und Querdynamik};
+      \node(FO)[inner box]{Fahrbahn\-oberfläche};
+    \end{scope}
+    \begin{scope}[inner box chain above]
+      \node(FR)[inner box]{Fahrraum\\\smallskip{\scriptsize Straße 
+      und\\\vspace{-1.5ex}Verkehrssituation}};
+      \node(SN)[inner box]{Straßennetz};
+    \end{scope}
+  \end{scope}
+  \begin{scope}[inner label,minimum size=0pt]
+    \draw [pstarrow->] (FO) -| ++(13.5,-12) to
+      node [above]{Istspur, Istgeschwindigkeit} ++(-97,0) |- (SE);
+    \draw [pstarrow->] (FR) -| ++(14  ,-32) to 
+      node [above]{Bereich sicherer Führungsgrößen} ++(-98,0) |- (BE);
+    \draw [pstarrow->] (SN) -| ++(14.5  ,-52) to 
+      node [above]{mögliche Fahrtroute} ++(-99,0) |- (NE);
+  \end{scope}
+  \begin{scope}[inner label]
+    \draw              (NE) to (NB);
+    \draw [pstarrow->] (NB) to (BE);
+    \draw              (BE) to (BS);
+    \draw [pstarrow->] (BS) to (SE);
+    \draw [pstarrow->] (SE) to
+      node[above] {\tikzparbox{Stell\-größen}}
+      node[below] {\tikzparbox{Lenken Gasgeben Bremsen}}
+    (LQ);
+    \draw [pstarrow->] (LQ) to
+      node[above]{\tikzparbox{Regel\-größen}}
+      node[below]{\tikzparbox{Fahrzeugbewegung}}
+    (FO);
+    \draw [pstarrow->] (LQ)+(24,0) |- (FR);
+    \draw [pstarrow->] (LQ)+(24,0) |- (SN);
+  \end{scope}
+  \begin{scope}[very thick,rounded corners=5\tikzunit]
+    \draw (-12.5,-40) rectangle (12.5,14);
+    \draw ( 22.5,-40) rectangle (47.5,-18);
+    \draw ( 57.5,-40) rectangle (82.5,14);
+  \end{scope}
+  \begin{scope}[font=\bfseries]
+    \node at (0,9) {Fahrer};
+    \node at (35,-23) {Fahrzeug};
+    \node at (70,9) {Umwelt};
+  \end{scope}
+\end{tikzpicture}
+\caption{Eine mit TikZ erstellte Grafik}\label{fig:tikz}
+\end{figure}
+\end{Tutorial*}
+\InputTutorial
+
 \subsection{pstricks}
+\begin{Tutorial*}
+\begin{figure}
+\psset{%
+  unit=.01\textwidth,%
+  cornersize=absolute,%
+  labelsep=.8ex,%
+  linewidth=.4pt,%
+  arrowscale=1.5,%
+}
+\begin{pspicture}(0,-2)(100,64)
+\newcommand\fnodetext{}
+\def\fnodetext(#1)#2#3{%
+  \fnode[framesize=18 8](#1){#2}%
+  \rput(#1){\parbox{17\psunit}{\centering\hspace{0pt}#3}}%
+}
+\newcommand\scriptbox[2][24]{%
+  \parbox{#1\psunit}{\scriptsize\centering\hspace{0pt}#2}%
+}
+\rput(15,10){%
+  \rput(0,49){\textbf{Fahrer}}
+  \fnodetext(0,40){NE}{Navigations\-ebene}
+  \fnodetext(0,24){BE}{Bahnführungsebene}
+  \fnodetext(0,08){SE}{Stabilisierungsebene}
+  \ncline{->}{NE}{BE}
+  \ncput*{\scriptbox{gewählte Fahrtroute\\zeitlicher Ablauf}}
+  \ncline{->}{BE}{SE}
+  \ncput*{%
+    \scriptbox{gewählte Führungsgrößen:\\Sollspur,~Sollgeschwindigkeit}%
+  }
+  \psframe[dimen=middle,linewidth=1.2pt,linearc=5](-12.5,0)(12.5,54)
+}
+\rput(50,10){%
+  \rput(0,17){\textbf{Fahrzeug}}
+  \fnodetext(0,8){FZ}{Längs- und\\Querdynamik}
+  \psframe[dimen=middle,linewidth=1.2pt,linearc=5](-12.5,0)(12.5,22)
+}
+\rput(85,10){%
+  \rput(0,49){\textbf{Umwelt}}
+  \fnodetext(0,40){SN}{Straßennetz}
+  \fnodetext(0,24){FR}{%
+    Fahrraum\\\smallskip\scriptsize{Straße und Verkehrssituation}%
+  }
+  \fnodetext(0,08){FO}{Fahrbahn\-oberfläche}
+  \psframe[dimen=middle,linewidth=1.2pt,linearc=5](-12.5,0)(12.5,54)
+}
+
+\ncline{->}{SE}{FZ}
+\naput{\scriptbox[9]{Stell\-größen}}
+\nbput{\scriptbox[9]{Lenken Gasgeben Bremsen}}
+\ncline{->}{FZ}{FO}
+\naput{\scriptbox[9]{Regel\-größen}}
+\nbput{\scriptbox[9]{Fahrzeugbewegung}}
+
+\psset{armA=15,armB=0,angleA=0,angleB=180}
+\ncangles{->}{FZ}{FR}
+\ncangles{->}{FZ}{SN}
+
+\psset{angleA=180,angleB=0}
+\ncloop[loopsize=12,arm=4.5]{<-}{SE}{FO}
+\naput{\scriptbox{Istspur, Istgeschwindigkeit}}
+\ncloop[loopsize=32,arm=5]{<-}{BE}{FR}
+\naput{\scriptbox[30]{Bereich sicherer Führungsgrößen}}
+\ncloop[loopsize=52,arm=5.5]{<-}{NE}{SN}
+\naput{\scriptbox{mögliche Fahrtroute}}
+\end{pspicture}
+\caption{Eine mit pstricks erstellte Grafik}\label{fig:pstricks}
+\end{figure}
+\end{Tutorial*}
+\InputTutorial
 
 
 \section{Gleitumgebungen}
