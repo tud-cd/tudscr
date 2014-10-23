@@ -5,19 +5,20 @@ echo  Festlegen der Version, welche erstellt werden soll
 echo =========================================================================
 echo.
 for /f "tokens=1,2,3 delims= " %%a in (
-  'findstr /R \@TUDVersion{[0-9][0-9][0-9][0-9]/[0-9][0-9]/[0-9][0-9] source\tudscr-version.dtx'
+  'findstr /r \@TUDVersion{[0-9][0-9][0-9][0-9]/[0-9][0-9]/[0-9][0-9] source\tudscr-version.dtx'
 ) do set version=%%b
 set /p append=%version%
 set version=%version%%append%
-if exist temp rmdir /s /q temp> nul
-if exist release rmdir /s /q release> nul
+if exist temp rmdir temp /s /q > nul
+if exist release rmdir release /s /q > nul
 echo =========================================================================
 echo  Erzeugen der Klassen und der inline-Dokumentation fuer %version%
 echo =========================================================================
+call update_classes.bat
 xcopy source temp\ /s
 cd temp
 call clear.bat
-if exist test rmdir /s /q test> nul
+if exist test rmdir test/s /q > nul
 mkdir tex\latex\tudscr
 mkdir source\latex\tudscr
 mkdir doc\latex\tudscr\tutorials
@@ -25,7 +26,6 @@ echo \BaseDirectory{.}> docstrip.cfg
 echo \UseTDS>> docstrip.cfg
 tex tudscr.ins
 move doc\tudscrman.sty doc\tutorials\
-copy tex\latex\tudscr\tudscrdoc.cls tudscrdoc.cls
 pdflatex "\def\tudfinalflag{}\input{tudscrsource.tex}"
 pdflatex "\def\tudfinalflag{}\input{tudscrsource.tex}"
 makeindex -s gglo.ist -o tudscrsource.gls tudscrsource.glo
@@ -35,16 +35,14 @@ move  *.dtx            source\latex\tudscr\
 move  tudscr.ins       source\latex\tudscr\
 move  tudscrsource.tex source\latex\tudscr\
 xcopy doc              source\latex\tudscr\doc\ /s
-del source\latex\tudscr\doc\*-test.tex /s > nul
+del source\latex\tudscr\test.tex /s > nul
 for /f %%f in ('dir  /b ..\*.md') do copy ..\%%f doc\latex\tudscr\%%~nf
 move tudscrsource.pdf doc\latex\tudscr\
 move logo             tex\latex\tudscr\
-del *.* /q> nul
+del *.* /q > nul
 echo =========================================================================
 echo  Erzeugen des Benutzerhandbuchs
 echo =========================================================================
-copy tex\latex\tudscr\*.* doc
-copy tex\latex\tudscr\logo\*.* doc
 cd doc
 pdflatex -shell-escape "\def\tudfinalflag{}\input{tudscr.tex}"
 pdflatex "\def\tudfinalflag{}\input{tudscr.tex}"
@@ -54,12 +52,13 @@ pdflatex -shell-escape "\def\tudfinalflag{}\input{tudscr.tex}"
 pdflatex "\def\tudfinalflag{}\def\tudprintflag{}\input{tudscr.tex}"
 copy tudscr.pdf tudscr_print.pdf
 pdflatex "\def\tudfinalflag{}\input{tudscr.tex}"
-attrib +h "tutorials\*-temp.*"
+attrib +h "tutorials\*-temp.pdf"
+attrib +h "tutorials\*-pics.pdf"
 move tudscr*.pdf     latex\tudscr
 move tutorials\*.pdf latex\tudscr\tutorials\
-del *.* /q> nul
-rmdir /s /q examples> nul
-rmdir /s /q tutorials> nul
+del *.* /q > nul
+rmdir examples /s /q > nul
+rmdir tutorials /s /q > nul
 echo =========================================================================
 echo  Erzeugen der Installationdateien
 echo =========================================================================
@@ -87,7 +86,7 @@ copy development\tools\*.*                  release\temp\
 copy temp\doc\latex\tudscr\tudscr.pdf       release\temp\
 copy temp\doc\latex\tudscr\tudscr_print.pdf release\temp\
 move temp\install\*.*                       release\temp\
-rmdir /s /q temp\install> nul
+rmdir temp\install /s /q > nul
 cd release\temp
 for /f %%f in ('dir /b *.bat') do unix2dos %%f
 7za a -tzip tudscr_%version%_full.zip   .\..\..\temp\*
@@ -125,5 +124,5 @@ echo  Loeschen aller temporaeren Dateien
 echo =========================================================================
 pause.
 cd %~dp0
-if exist temp rmdir /s /q temp> nul
-if exist release\temp rmdir /s /q release\temp> nul
+if exist temp rmdir temp /s /q > nul
+if exist release\temp rmdir release\temp /s /q > nul
