@@ -1,245 +1,158 @@
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
-\documentclass[english,ngerman]{tudscrreprt}
-\usepackage{babel}
-\usepackage{selinput}\SelectInputMappings{adieresis={ä},germandbls={ß}}
+\documentclass[%
+  english,ngerman,%
+  geometry=no,DIV=12,automark,%
+]{tudscrartcl}
+\usepackage{selinput}
+\SelectInputMappings{adieresis={ä},germandbls={ß}}
 \usepackage[T1]{fontenc}
-\usepackage{fixltx2e}
-\usepackage{tabu}
-\usepackage{booktabs}
-\usepackage{units}
+\usepackage{lmodern}
+
+\usepackage{tudscrman2}
+\lstset{%
+  inputencoding=utf8,extendedchars=true,
+  literate=%
+    {ä}{{\"a}}1 {ö}{{\"o}}1 {ü}{{\"u}}1
+    {Ä}{{\"A}}1 {Ö}{{\"O}}1 {Ü}{{\"U}}1
+    {~}{{\textasciitilde}}1 {ß}{{\ss}}1
+}
 \usepackage{tudscrsupervisor}
+\usepackage{tabu,booktabs}
+\usepackage{units}
+\AfterPackage*{hyperref}{%
+  \usepackage[%
+    automake,%
+    acronym,%
+    symbols,%
+    nomain,%
+    translate=babel,%
+    nogroupskip,%
+    section=subsubsection,%
+  ]{glossaries}
+  \setStyleFile{\jobname-temp}
+  \renewcommand*{\glsglossarymark}[1]{}
+  \makeglossaries
+}
 \usepackage{csquotes}
 \usepackage[backend=biber,style=alphabetic]{biblatex}
 \usepackage{filecontents}
 \addbibresource{treatise-temp.bib}
-\usepackage[colorlinks,linkcolor=blue]{hyperref}
-\usepackage[%
-automake,%
-% xindy,%=language=german-din,% mit Tex Live einfach verwendbar
-acronym,% Abkürzungen
-symbols,% Formelzeichen
-nomain,% kein Glossar
-translate=babel,%
-nogroupskip,%
-toc,%
-section=section,%
-]{glossaries}
-\makeglossaries
+\renewcommand{\floatpagefraction}{0.7}
+
+\ifpdf
+  \usepackage{tikz}
+  \usetikzlibrary{chains}
+  \usetikzlibrary{decorations.markings}
+  \tikzset{on grid}
+\else
+  \newcommand*\pgfsyspdfmark[3]{}
+\fi
+\usepackage{pstricks,pst-node,pst-pdf}
+
 \begin{document}
-\faculty{Juristische Fakultät}
-\department{Fachrichtung Strafrecht}
-\institute{Institut für Kriminologie}
-\chair{Lehrstuhl für Kriminalprognose}
+\TUDoptions{cdfont=no}
+\KOMAoptions{headings=normal}
 \title{%
-Entwicklung eines optimalen Verfahrens zur Eroberung des
-Geldspeichers in Entenhausen
+  Ein Anwenderleitfaden für das Erstellen einer wissenschaftlichen Abhandlung%
 }
-\thesis{master}
-\graduation[M.Sc.]{Master of Science}
-\author{%
-Mickey Mouse
-\matriculationnumber{12345678}
-\dateofbirth{2.1.1990}
-\placeofbirth{Dresden}
-\and%
-Donald Duck
-\matriculationnumber{87654321}
-\dateofbirth{1.2.1990}
-\placeofbirth{Berlin}
-}
-\matriculationyear{2010}
-\supervisor{Dagobert Duck \and Mac Moneysac}
-\professor{Prof. Dr. Kater Karlo}
+\author{Falk Hanisch}
 \date{10.09.2014}
-\makecover
-\maketitle
-\faculty{Juristische Fakultät}
-\department{Fachrichtung Strafrecht}
-\institute{Institut für Kriminologie}
-\chair{Lehrstuhl für Kriminalprognose}
-\title{%
-Entwicklung eines optimalen Verfahrens zur Eroberung des
-Geldspeichers in Entenhausen
+\makeatletter
+\begingroup%
+  \def\and{, }%
+  \let\thanks\@gobble%
+  \let\footnote\@gobble%
+  \hypersetup{%
+    pdfauthor = {\@author},%
+    pdftitle = {\@title},%
+    pdfsubject = {Tutorial für \hologo{LaTeXe}},%
+    pdfkeywords = {LaTeX, \TUDScript, Tutorial, Anwenderleitfaden},%
+  }%
+\endgroup%
+\makeatother
+\StartTutorial
+
+
+\subsection{pstricks}
+
+\begin{Tutorial*}
+\begin{figure}
+\psset{%
+  unit=.01\textwidth,%
+  cornersize=absolute,%
+  labelsep=.8ex,%
+  linewidth=.4pt,%
+  arrowscale=1.5,%
 }
-\thesis{master}
-\graduation[M.Sc.]{Master of Science}
-\author{%
-Mickey Mouse
-\matriculationnumber{12345678}
-\dateofbirth{2.1.1990}
-\placeofbirth{Dresden}
-\course{Klinische Prognostik}
-\discipline{Individualprognose}
-\and%
-Donald Duck\matriculationnumber{87654321}
-\dateofbirth{1.2.1990}
-\placeofbirth{Berlin}
-\course{Statistische Prognostik}
-\discipline{Makrosoziologische Prognosen}
+\begin{pspicture}(0,-2)(100,64)
+\newcommand\fnodetext{}
+\def\fnodetext(#1)#2#3{%
+  \fnode[framesize=18 8](#1){#2}%
+  \rput(#1){\parbox{17\psunit}{\centering\hspace{0pt}#3}}%
 }
-\matriculationyear{2010}
-\issuedate{1.2.2015}
-\duedate{1.8.2015}
-\supervisor{Dagobert Duck \and Mac Moneysac}
-\professor{Prof. Dr. Kater Karlo}
-\chairman{Prof. Dr. Primus von Quack}
-\newcommand\taskcontent{%
-Momentan ist das besagte Thema in aller Munde. Insbesondere wird es
-gerade in vielen~-- wenn nicht sogar in allen~-- Medien diskutiert.
-Es ist momentan noch nicht abzusehen, ob und wann sich diese Situation
-ändert. Eine kurzfristige Verlagerung aus dem Fokus der Öffentlichkeit
-wird nicht erwartet.
-Als Ziel dieser Arbeit soll identifiziert werden, warum das Thema
-gerade so omnipräsent ist und wie man diesen Effekt abschwächen
-könnte. Zusätzlich sollen Methoden entwickelt werden, wie sich ein
-ähnlicher Vorgang zukünftig vermeiden ließe.
+\newcommand\scriptbox[2][24]{%
+  \parbox{#1\psunit}{\scriptsize\centering\hspace{0pt}#2}%
 }
-\begin{task}
-\smallskip
-\par\noindent
-\taskcontent
-\end{task}
-\taskform[pagestyle=empty]{\taskcontent}{%
-\item Recherche
-\item Analyse
-\item Entwicklung eines Konzeptes
-\item Anwendung der entwickelten Methodik
-\item Dokumentation und grafische Aufbereitung der Ergebnisse
+\rput(15,10){%
+  \rput(0,49){\textbf{Fahrer}}
+  \fnodetext(0,40){NE}{Navigations\-ebene}
+  \fnodetext(0,24){BE}{Bahnführungsebene}
+  \fnodetext(0,08){SE}{Stabilisierungsebene}
+  \ncline{->}{NE}{BE}
+  \ncput*{\scriptbox{gewählte Fahrtroute\\zeitlicher Ablauf}}
+  \ncline{->}{BE}{SE}
+  \ncput*{\scriptbox{gewählte Führungsgrößen:\\Sollspur,~Sollgeschwindigkeit}}
+  \psframe[dimen=middle,linewidth=1.2pt,linearc=5](-12.5,0)(12.5,54)
 }
-\TUDoption{abstract}{multiple,section}
-\begin{abstract}
-Dies ist der deutschsprachige Teil der Zusammenfassung, in dem die
-Motivation sowie der Inhalt der nachfolgenden wissenschaftlichen
-Abhandlung kurz dargestellt werden.
-\nextabstract[english]
-This is the english part of the summary, in which the motivation and
-the content of the following academic treatise are briefly presented.
-\end{abstract}
-\title{%
-Entwicklung eines optimalen Verfahrens zur Eroberung des
-Geldspeichers in Entenhausen
+\rput(50,10){%
+  \rput(0,17){\textbf{Fahrzeug}}
+  \fnodetext(0,8){FZ}{Längs- und\\Querdynamik}
+  \psframe[dimen=middle,linewidth=1.2pt,linearc=5](-12.5,0)(12.5,22)
 }
-\author{Mickey Mouse\and Donald Duck}
-\declaration[company=FIRMA]
-\tableofcontents
-\listoffigures
-\listoftables
-\clearpage
-\begin{filecontents}{treatise-temp.bib}
-@book{goossens94,
-author = {Goossens, Michel and Mittelbach, Frank
-and Samarin, Alexander},
-title = {The LaTeX Companion},
-date = {1994},
-publisher = {Addison-Wesley},
-location = {Reading, Massachusetts},
-language = {english},
+\rput(85,10){%
+  \rput(0,49){\textbf{Umwelt}}
+  \fnodetext(0,40){SN}{Straßennetz}
+  \fnodetext(0,24){FR}{%
+    Fahrraum\\\smallskip\scriptsize{Straße und Verkehrssituation}%
+  }
+  \fnodetext(0,08){FO}{Fahrbahn\-oberfläche}
+  \psframe[dimen=middle,linewidth=1.2pt,linearc=5](-12.5,0)(12.5,54)
 }
-@book{knuth84,
-author = {Knuth, Donald E.},
-title = {The \TeX book},
-date = {1984},
-maintitle = {Computers \& Typesetting},
-volume = {A},
-publisher = {Addison-Wesley},
-location = {Reading, Massachusetts},
-language = {english},
-}
-@manual{hanisch14,
-author = {Hanisch, Falk},
-title = {Ein \LaTeX"=Bundle für Dokumente
-im neuen Corporate Design
-der Technischen Universität Dresden},
-date = {2014},
-subtitle = {Benutzerhandbuch},
-location = {Dresden},
-language = {german},
-}
-\end{filecontents}
-In diesem Textabschnitt werden \cite{knuth84} sowie \cite{goossens94} und
-\cite{hanisch14} zitiert.
-\printbibliography[heading=subbibliography]
-\newacronym{apsp}{APSP}{All-Pairs Shortest Path}
-\newacronym{spsp}{SPSP}{Single-Pair Shortest Path}
-\newacronym{sssp}{SSSP}{Single-Source Shortest Path}
-In der Graphentheorie wird häufig die Lösung des Problems des kürzesten
-Pfades zwischen zwei Knoten gesucht. Dieses Problem wird häugig auch
-mit \gls{spsp} bezeichnet. Es lässt sich auf die Variationen \gls{sssp}
-und \gls{apsp} erweitern. Für die Lösung von \gls{spsp}, \gls{sssp} oder
-\gls{apsp} kommen unterschiedliche Algorithmen zum Einsatz.
-\newglossarystyle{acronymstabu}{%
-\renewenvironment{theglossary}{%
-\begin{tabu}spread 0pt{@{}lX<{\strut}l@{}}%
-}{%
-\end{tabu}\par\bigskip%
-}%
-\renewcommand*{\glossaryheader}{}%
-\renewcommand*{\glsgroupheading}[1]{}%
-\renewcommand*{\glsgroupskip}{}%
-\renewcommand*{\glossentry}[2]{%
-\glsentryitem{##1}% Entry number if required
-\glstarget{##1}{\sffamily\bfseries\glossentryname{##1}} &
-\glsentrydesc{##1} &
-##2\tabularnewline
-}
-}
-\printacronyms[style=acronymstabu]
-\newcommand*{\newsymbol}[5][]{%
-\newglossaryentry{#2}{%
-type=symbols,%
-description={},%
-name={#3},%
-symbol={\ensuremath{#4}},%
-user1={\ensuremath{\mathrm{#5}}},%
-sort={#2},%
-#1%
-}%
-}
-\newsymbol{l}{Länge}{l}{m}
-\newsymbol{m}{Masse}{m}{kg}
-\newsymbol{a}{Beschleunigung}{a}{\nicefrac{m}{s^2}}
-\newsymbol{t}{Zeit}{t}{s}
-\newsymbol{f}{Frequenz}{f}{s^{-1}}
-\newsymbol{F}{Kraft}{F}{m \cdot kg \cdot s^{-2}=\nicefrac{J}{m}}
-\newglossarystyle{symbolslongtabu}{%
-\renewenvironment{theglossary}{%
-\begin{longtabu}spread 0pt[l]{ccX<{\strut}l}%
-}{%
-\end{longtabu}%
-}%
-\renewcommand*{\glossaryheader}{%
-\toprule
-\bfseries Symbol & \bfseries Einheit &
-\bfseries Name & \bfseries Seite(n)
-\tabularnewline\midrule\endhead%
-\bottomrule\endfoot%
-}%
-\renewcommand*{\glsgroupheading}[1]{}%
-\renewcommand*{\glsgroupskip}{}%
-\renewcommand*{\glossentry}[2]{%
-\glsentryitem{##1}% Entry number if required
-\glstarget{##1}{\glossentrysymbol{##1}} &
-\glsentryuseri{##1} &
-\glossentryname{##1} &
-##2\tabularnewline%
-}%
-}
-\defglsentryfmt[symbols]{%
-\ifmmode%
-\glssymbol{\glslabel}%
-\else%
-\glsgenentryfmt~\glsentrysymbol{\glslabel}%
-\fi%
-}
-Die Einheiten für die \gls{f} sowie die \gls{F} werden aus den
-SI"=Einheiten der Basisgrößen \gls{l}, \gls{m} und \gls{t} abgeleitet.
-Und dann gibt es noch die Grundgleichung der Mechanik, welche für den
-Fall einer konstanten Kraftwirkung in die Bewegungsrichtung einer
-Punktmasse lautet:
-$\gls{F} = \gls{m} \cdot \gls{a}$
-\printsymbols[style=symbolslongtabu]
-\setchapterpreamble{%
-\dictum[Johann Wolfgang von Goethe]{Es irrt der Mensch, solang er strebt.}
-}
-\chapter{Einleitung}
+
+\ncline{->}{SE}{FZ}
+\naput{\scriptbox[9]{Stell\-größen}}
+\nbput{\scriptbox[9]{Lenken Gasgeben Bremsen}}
+\ncline{->}{FZ}{FO}
+\naput{\scriptbox[9]{Regel\-größen}}
+\nbput{\scriptbox[9]{Fahrzeugbewegung}}
+
+\psset{armA=15,armB=0,angleA=0,angleB=180}
+\ncangles{->}{FZ}{FR}
+\ncangles{->}{FZ}{SN}
+
+\psset{angleA=180,angleB=0}
+\ncloop[loopsize=12,arm=4.5]{<-}{SE}{FO}
+\naput{\scriptbox{Istspur, Istgeschwindigkeit}}
+\ncloop[loopsize=32,arm=5]{<-}{BE}{FR}
+\naput{\scriptbox[30]{Bereich sicherer Führungsgrößen}}
+\ncloop[loopsize=52,arm=5.5]{<-}{NE}{SN}
+\naput{\scriptbox{mögliche Fahrtroute}}
+\end{pspicture}
+\end{figure}
+\end{Tutorial*}
+\inputtutorial
+
+
+\begin{itemize}
+\item grafiken und untergrafiken?
+\item tabellen
+\item literaturverzteichnis
+\item floatrow
+\item mathematikmodus
+\item tabbing-umgebung
+\end{itemize}
+\ListOfToDo
+\ToDo[imp]{Einarbeiten von paragraph in treatise}[v2.02]
+
+\FinishTutorial
 \end{document}

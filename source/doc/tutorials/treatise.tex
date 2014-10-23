@@ -7,7 +7,7 @@
 \SelectInputMappings{adieresis={ä},germandbls={ß}}
 \usepackage[T1]{fontenc}
 \usepackage{lmodern}
-\usepackage{tudscrman}
+\usepackage{tudscrman2}
 \lstset{%
   inputencoding=utf8,extendedchars=true,
   literate=%
@@ -38,8 +38,14 @@
 \addbibresource{treatise-temp.bib}
 \renewcommand{\floatpagefraction}{0.7}
 
+\usepackage{tikz}
+\usetikzlibrary{chains}
+\usetikzlibrary{decorations.markings}
+\tikzset{on grid}
+\usepackage{pstricks,pst-node,pst-pdf}
+
 \begin{document}
-\TUDoptions{cdfont=no}
+\TUDoptions{cdfont=false}
 \KOMAoptions{headings=normal}
 \title{%
   Ein Anwenderleitfaden für das Erstellen einer wissenschaftlichen Abhandlung%
@@ -1004,6 +1010,101 @@ finden.
 \section{Erstellen von Abbildungen}
 \label{sec:figures}
 \subsection{tikz}
+\begin{Tutorial*}
+\begin{figure}
+\newlength{\tikzunit}
+\setlength{\tikzunit}{.01\textwidth}
+\tikzset{x=\tikzunit,y=\tikzunit}
+\begin{tikzpicture}
+  \tikzstyle{inner box}=[%
+    text width=18\tikzunit,
+    align=center,
+    rectangle,
+    inner sep=0pt,
+    minimum height=8\tikzunit,
+    font=\hspace{0pt},
+    draw
+  ]
+  \tikzstyle{inner label}=[align=center, font=\scriptsize]
+  \tikzstyle{inner box chain}=[every node/.style={on chain}]
+  \tikzstyle{inner box chain below}=[%
+    inner box chain, node distance=8\tikzunit,continue chain=going below
+  ]
+  \tikzstyle{inner box chain right}=[%
+    inner box chain,node distance=35\tikzunit,continue chain=going right
+  ]
+  \tikzstyle{inner box chain above}=[%
+    inner box chain,node distance=16\tikzunit,continue chain=going above
+  ]
+  \tikzstyle{pstarrow->}=[%
+    decoration={markings,
+      mark=at position 1 with {\arrow[xscale=1.5]{stealth}};
+    },
+    postaction={decorate},
+    shorten >=0.7pt
+  ]
+  \newcommand\tikzparbox[2][9]{%
+    \parbox{#1\tikzunit}{\centering\hspace{0pt}#2}%
+  }
+  \begin{scope}[start chain]
+    \begin{scope}[inner box chain below]
+      \node(NE)[inner box]{Navigations\-ebene};
+      \node(NB)[inner label]{gewählte Fahrtroute\\zeitlicher Ablauf};
+      \node(BE)[inner box]{{Bahnführungs\-ebene}};
+      \node(BS)[inner label]{%
+        gewählte Führungsgrößen:\\Sollspur, Sollgeschwindigkeit%
+      };
+      \node(SE)[inner box]{Stabilisierungs\-ebene};
+    \end{scope}
+    \begin{scope}[inner box chain right]
+      \node(LQ)[inner box]{Längs- und Querdynamik};
+      \node(FO)[inner box]{Fahrbahn\-oberfläche};
+    \end{scope}
+    \begin{scope}[inner box chain above]
+      \node(FR)[inner box]{Fahrraum\\\smallskip{\scriptsize Straße 
+      und\\\vspace{-1.5ex}Verkehrssituation}};
+      \node(SN)[inner box]{Straßennetz};
+    \end{scope}
+  \end{scope}
+  \begin{scope}[inner label,minimum size=0pt]
+    \draw [pstarrow->] (FO) -| ++(13.5,-12) to
+      node [above]{Istspur, Istgeschwindigkeit} ++(-97,0) |- (SE);
+    \draw [pstarrow->] (FR) -| ++(14  ,-32) to 
+      node [above]{Bereich sicherer Führungsgrößen} ++(-98,0) |- (BE);
+    \draw [pstarrow->] (SN) -| ++(14.5  ,-52) to 
+      node [above]{mögliche Fahrtroute} ++(-99,0) |- (NE);
+  \end{scope}
+  \begin{scope}[inner label]
+    \draw              (NE) to (NB);
+    \draw [pstarrow->] (NB) to (BE);
+    \draw              (BE) to (BS);
+    \draw [pstarrow->] (BS) to (SE);
+    \draw [pstarrow->] (SE) to
+      node[above] {\tikzparbox{Stell\-größen}}
+      node[below] {\tikzparbox{Lenken Gasgeben Bremsen}}
+    (LQ);
+    \draw [pstarrow->] (LQ) to
+      node[above]{\tikzparbox{Regel\-größen}}
+      node[below]{\tikzparbox{Fahrzeugbewegung}}
+    (FO);
+    \draw [pstarrow->] (LQ)+(24,0) |- (FR);
+    \draw [pstarrow->] (LQ)+(24,0) |- (SN);
+  \end{scope}
+  \begin{scope}[very thick,rounded corners=5\tikzunit]
+    \draw (-12.5,-40) rectangle (12.5,14);
+    \draw ( 22.5,-40) rectangle (47.5,-18);
+    \draw ( 57.5,-40) rectangle (82.5,14);
+  \end{scope}
+  \begin{scope}[font=\bfseries]
+    \node at (0,9) {Fahrer};
+    \node at (35,-23) {Fahrzeug};
+    \node at (70,9) {Umwelt};
+  \end{scope}
+\end{tikzpicture}
+\label{fig:tikz}\caption{Eine mit TikZ erstellte Grafik}
+\end{figure}
+\end{Tutorial*}
+\inputtutorial
 \subsection{pstricks}
 
 
