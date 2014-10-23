@@ -1,4 +1,4 @@
-% \CheckSum{2316}
+% \CheckSum{2319}
 % \iffalse meta-comment
 % ======================================================================
 %
@@ -49,7 +49,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-manual.dtx}[%
-  2014/10/22 v2.02 TUD-KOMA-Script\space%
+  2014/10/23 v2.02 TUD-KOMA-Script\space%
 %</driver>
 %<identify>\NeedsTeXFormat{LaTeX2e}[2011/06/27]
 %<class&identify>\ProvidesClass{tudscrman}[%
@@ -291,7 +291,9 @@
   }%
   \item@values[%
     \tud@item@format{\@tempa:}%
-    \ifx\tud@item@add\relax\else\textuln{\space\footnotesize\tud@item@add}\fi%
+    \ifx\tud@item@add\relax\else%
+      {\normalfont\space\footnotesize\tud@item@add}%
+    \fi%
   ]%
 }
 %    \end{macrocode}
@@ -463,9 +465,9 @@
 % allzu lästig ist, wird mithilfe von \pkg{silence} die normalerweise erzeugte 
 % Warnung der nicht aktivierten Option \opt{shell escape} deaktiviert.
 %    \begin{macrocode}
-\RequirePackage{ifplatform}[2012/07/02]
 \RequirePackage{silence}[2012/07/02]
 \WarningFilter*{ifplatform}{^^J \space\space\space shell escape is disabled}
+\RequirePackage{ifplatform}[2010/10/22]
 %    \end{macrocode}
 %
 % \iffalse
@@ -473,13 +475,13 @@
 %<*package&body>
 % \fi
 %
-% \begin{macro}{\tudscr@manual}
+% \begin{macro}{\tud@manual}
 % Der Befehl enthält den Dateinamen des Anwenderhandbuchs für alle Querverweise 
 % aus einem Tutorial.
 %    \begin{macrocode}
-\newcommand*\tudscr@manual{tudscr}%
+\newcommand*\tud@manual{tudscr}%
 %    \end{macrocode}
-% \end{macro}^^A \tudscr@manual
+% \end{macro}^^A \tud@manual
 % Für den Anwender werden einige Tutorials bereitgestellt, für welche der 
 % Quelltext bei dessen Beschriebung in eine separate Datei geschrieben und ggf. 
 % ausgeführt wird. Hierfür werden im folgenden einige Umgebungen definiert.
@@ -946,7 +948,7 @@
 % \cs{hypertut} ein verlinkter Eintrag in den Index.
 %    \begin{macrocode}
 \newrobustcmd*\hypertut[2]{%
-  \hyperref{tutorials/#1.pdf}{\jobname}{tutorials:#1}{\texturn{#1.pdf}#2}%
+  \hyperref{tutorials/#1.pdf}{\jobname}{tutorials:#1}{\textsbn{#1.pdf}#2}%
 }
 \newwrite\tud@tut@bat
 \NewDocumentCommand\Tutorial{som}{%
@@ -986,7 +988,7 @@
   \IfFileExists{tutorials/#3.pdf}{%
     \hypertut{#3}{}%
   }{%
-    \texturn{#3.pdf}%
+    \textsbn{#3.pdf}%
     \tud@shellescape@wrn%
   }%
   \IfBooleanF{#1}{%
@@ -1176,7 +1178,7 @@
 % \begin{macro}{\@printindex}
 % \changes{v2.02}{2014/07/25}{neu}%^^A
 % Für die Erstellung des Indexes wird das Paket \pkg{imakeidx} zusammen mit 
-% \textbf{xindy} verwendet.
+% \pkg{xindy} verwendet.
 %    \begin{macrocode}
 \PassOptionsToPackage{xindy,splitindex}{imakeidx}
 \RequirePackage{imakeidx}[2013/07/11]%
@@ -1465,17 +1467,17 @@
 %    \begin{macrocode}
 \NewDocumentCommand\Application{smd||}{%
   \ifdin{#2}{%
-    \mbox{\texturs{#2}}%
+    \mbox{\textsbs{#2}}%
     \CheckIndexFormat{#1}{#3}%
     \IfBooleanF{#1}{%
-      \index{\texturs{#2}~{\idxfont(Anwendungssoftware)}\IfValueT{#3}{|#3}}%
+      \index{\textsbs{#2}~{\idxfont(Anwendungssoftware)}\IfValueT{#3}{|#3}}%
     }%
   }%
 }
 \DeclareExpandableDocumentCommand\@Application{sm}{#2}
 %</class&body>
 %<*package&body>
-\newcommand*\Application[1]{\mbox{\texturs{#1}}}
+\newcommand*\Application[1]{\mbox{\textsbs{#1}}}
 %</package&body>
 %<*class&body>
 %    \end{macrocode}
@@ -1487,16 +1489,16 @@
 %    \begin{macrocode}
 \NewDocumentCommand\Distribution{smod||}{%
   \ifdin{#2\IfValueT{#3}{~#3}}{%
-    \mbox{\texturn{#2\IfValueT{#3}{~#3}}}%
+    \mbox{\textsbn{#2\IfValueT{#3}{~#3}}}%
     \CheckIndexFormat{#1}{#4}%
     \IfBooleanF{#1}{%
-      \index{\texturn{#2}~{\idxfont(Distribution)}\IfValueT{#4}{|#4}}%
+      \index{\textsbn{#2}~{\idxfont(Distribution)}\IfValueT{#4}{|#4}}%
     }%
   }%
 }
 %</class&body>
 %<*package&body>
-\newcommand*\Distribution[1]{\mbox{\texturn{#1}}}
+\newcommand*\Distribution[1]{\mbox{\textsbn{#1}}}
 %</package&body>
 %<*class&body>
 %    \end{macrocode}
@@ -1515,16 +1517,16 @@
 %    \begin{macrocode}
 \NewDocumentCommand\File{smd||}{%
   \ifdin{#2}{%
-    \mbox{\texturn{#2}}%
+    \mbox{\textsbn{#2}}%
     \CheckIndexFormat{#1}{#3}%
     \IfBooleanF{#1}{%
-      \index[files]{\texturn{#2}~{\idxfont(Datei)}\IfValueT{#3}{|#3}}%
+      \index[files]{\textsbn{#2}~{\idxfont(Datei)}\IfValueT{#3}{|#3}}%
     }%
   }%
 }
 %</class&body>
 %<*package&body>
-\newcommand*\File[1]{\mbox{\texturn{#1}}}
+\newcommand*\File[1]{\mbox{\textsbn{#1}}}
 %</package&body>
 %<*class&body>
 %    \end{macrocode}
@@ -1545,8 +1547,8 @@
 \NewDocumentCommand\Class{smd''d||}{%
   \ifdin{#2}{%
     \SetIndexFormat{#1}{#4}%
-    \@ProcessOutput{\texturn{#2}}'#3'%
-      {files}[\protect\univrn]{#2}[~{\idxfont(Klasse)}]%
+    \@ProcessOutput{\textsbn{#2}}'#3'%
+      {files}[\protect\sbnfont]{#2}[~{\idxfont(Klasse)}]%
   }%
 }
 \DeclareExpandableDocumentCommand\@Class{sm}{#2}
@@ -1569,12 +1571,12 @@
 %    \begin{macrocode}
 \NewDocumentCommand\Package{smd''d||}{%
   \if@changelog%
-    \@ProcessChangedAt{#1}{files}{\protect\univrn}{#2}{Paket}%
+    \@ProcessChangedAt{#1}{files}{\protect\sbnfont}{#2}{Paket}%
   \else%
     \ifdin{#2}{%
       \SetIndexFormat{#1}{#4}%
-      \@ProcessOutput{\texturn{#2}}'#3'%
-        {files}[\protect\univrn]{#2}[~{\idxfont(Paket)}]%
+      \@ProcessOutput{\textsbn{#2}}'#3'%
+        {files}[\protect\sbnfont]{#2}[~{\idxfont(Paket)}]%
     }%
   \fi%
 }
@@ -1583,9 +1585,9 @@
 %<*package&body>
 \NewDocumentCommand\Package{sm}{%
   \IfBooleanTF{#1}{%
-    \hyperref{../\tudscr@manual}{\tudscr@manual}{files:#2}{\texturn{#2}}%
+    \hyperref{../\tud@manual}{\tud@manual}{files:#2}{\textsbn{#2}}%
   }{%
-    \href{http://www.ctan.org/pkg/#2}{\texturn{#2}}%
+    \href{http://www.ctan.org/pkg/#2}{\textsbn{#2}}%
   }%
 }
 %</package&body>
@@ -1619,7 +1621,7 @@
   \IfBooleanTF{#1}{%
     \texttt{#2}\IfValueT{#3}{\texttt{=#3}}%
   }{%
-    \hyperref{../\tudscr@manual}{\tudscr@manual}{options:#2}{\texttt{#2}}%
+    \hyperref{../\tud@manual}{\tud@manual}{options:#2}{\texttt{#2}}%
     \IfValueT{#3}{\texttt{=#3}}%
   }%
 }
@@ -1662,7 +1664,7 @@
 %<*package&body>
 \NewDocumentCommand\Environment{sm}{%
   \IfBooleanTF{#1}{\texttt{#2}}{%
-    \hyperref{../\tudscr@manual}{\tudscr@manual}{macros:#2}{\texttt{#2}}%
+    \hyperref{../\tud@manual}{\tud@manual}{macros:#2}{\texttt{#2}}%
   }%
 }
 %</package&body>
@@ -1687,7 +1689,7 @@
 %<*package&body>
 \NewDocumentCommand\Macro{sm}{%
   \IfBooleanTF{#1}{\texttt{\bsc#2}}{%
-    \hyperref{../\tudscr@manual}{\tudscr@manual}{macros:#2}{\texttt{\bsc#2}}%
+    \hyperref{../\tud@manual}{\tud@manual}{macros:#2}{\texttt{\bsc#2}}%
   }%
 }
 %</package&body>
@@ -1760,7 +1762,7 @@
 %<*package&body>
 \NewDocumentCommand\Length{sm}{%
   \IfBooleanTF{#1}{\texttt{\bsc#2}}{%
-    \hyperref{../\tudscr@manual}{\tudscr@manual}{macros:#2}{\texttt{\bsc#2}}%
+    \hyperref{../\tud@manual}{\tud@manual}{macros:#2}{\texttt{\bsc#2}}%
   }%
 }
 %</package&body>
@@ -2588,7 +2590,8 @@
 \NewDocumentCommand\@ProcessChangedAt{mmd()mmm}{%
   \begingroup%
     \let\texttt\@firstofone%
-    \let\texturn\@firstofone%
+    \let\textsbn\@firstofone%
+    \let\textsbs\@firstofone%
     \let\Environment\@firstofone%
     \let\Macro\@firstofone%
     \IfValueTF{#3}{\xdef\@tempa{#2:#3:#5}}{\xdef\@tempa{#2:#5}}%
@@ -2853,7 +2856,7 @@
 %
 % \changes{v2.02}{2014/07/25}{Erstellung via \pkg{docstrip}}%^^A
 %
-% Für die Erstellung der Indizes wird zum Sortieren das Programm \textbf{xindy} 
+% Für die Erstellung der Indizes wird zum Sortieren das Programm \pkg{xindy} 
 % genutzt. Für dieses wird eine eigene Stildatei verwendet, welche hier kurz
 % beschrieben wird.
 %
@@ -2888,8 +2891,8 @@
 ;;; (merge-rule "\\hyperindex\{(.*)\}\{(.*)\}" "/2" :eregexp)
 ;;; (merge-rule "\\hologo\{(.*)\}" "/1" :eregexp)
 ;;; (merge-rule "\\texttt\{(.*)\}" "/1" :eregexp)
-;;; (merge-rule "\\texturn\{(.*)\}" "/1" :eregexp)
-;;; (merge-rule "\\texturs\{(.*)\}" "/1" :eregexp)
+;;; (merge-rule "\\textsbn\{(.*)\}" "/1" :eregexp)
+;;; (merge-rule "\\textsbs\{(.*)\}" "/1" :eregexp)
 %    \end{macrocode}
 % Es werden die Attribute \emph{declare} mit der Abkürzung \emph{!} sowie
 % \emph{important} mit der Abkürzung \emph{?} und \emph{default} definiert, 
@@ -2916,8 +2919,8 @@
 %    \begin{macrocode}
 (markup-locref :open "\textbf{\hyperpage{" :close "}}" :attr "declare")
 (markup-locref :open "\textbf{\hyperpage{" :close "}}" :attr "!")
-(markup-locref :open "\textit{\hyperpage{" :close "}}" :attr "important")
-(markup-locref :open "\textit{\hyperpage{" :close "}}" :attr "?")
+(markup-locref :open "\textsl{\hyperpage{" :close "}}" :attr "important")
+(markup-locref :open "\textsl{\hyperpage{" :close "}}" :attr "?")
 (markup-locref :open "\hyperpage{" :close "}" :attr "default")
 %    \end{macrocode}
 % Punkte zwischen Eintrag und Seitenzahl.
