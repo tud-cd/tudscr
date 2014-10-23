@@ -1,4 +1,4 @@
-% \CheckSum{2285}
+% \CheckSum{2306}
 % \iffalse meta-comment
 % ======================================================================
 %
@@ -49,7 +49,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-manual.dtx}[%
-  2014/10/10 v2.02 TUD-KOMA-Script\space%
+  2014/10/16 v2.02 TUD-KOMA-Script\space%
 %</driver>
 %<identify>\NeedsTeXFormat{LaTeX2e}[2011/06/27]
 %<class&identify>\ProvidesClass{tudscrman}[%
@@ -347,66 +347,43 @@
 % \end{macro}^^A \tud@item@pkg
 % \end{macro}^^A \itempackages
 % \end{environment}^^A packages
-%
-% \iffalse
-%</class>
-% \fi
-%
-% \begin{macro}{\tud@write@file}
-% \changes{v2.02}{2014/08/19}{neu}%^^A
-% \begin{macro}{\tud@write@option}
-% \changes{v2.02}{2014/08/19}{neu}%^^A
-% \begin{macro}{\tud@write@copy}
-% \changes{v2.02}{2014/09/11}{neu}%^^A
-% Diese beiden Hilfsmakros werden für das automatisierte Ausführen der 
-% Kompilierung von Beispielen und Tutorials via \cs{write18} benötigt.
-%    \begin{macrocode}
-\newcommand*\tud@write@file{}
-\newcommand*\tud@write@option{}
-%<*package>
-\newcommand*\tud@write@copy{}
-%</package>
-%    \end{macrocode}
-% \end{macro}^^A \tud@write@copy
-% \end{macro}^^A \tud@write@option
-% \end{macro}^^A \tud@write@file
-%
-% \iffalse
-%<*class>
-% \fi
-%
 % \begin{macro}{\includeexample}
 % \changes{v2.02}{2014/07/25}{Skalierung der eingefügten Seiten}%^^A
+% \changes{v2.02}{2014/10/14}{Reimplementierung}%^^A
 % Mit diesem Befehl wird eine \LaTeX-Datei ggf. übersetzt und anschließend als
-% PDF"~Datei wieder eingebunden.
+% PDF"~Datei wieder eingebunden. Zuvor wird der dazugehörige Quelltext mittels
+% \cs{lstinputlisting} im Dokument ausgegeben.
 %    \begin{macrocode}
 \RequirePackage{filemod}[2011/09/19]
 \RequirePackage{pdfpages}[2013/08/25]
 \newcommand*\includeexample[1]{%
+  \lstinputlisting[style=tudscr]{examples/#1}%
 %    \end{macrocode}
-% Die Datei kann sowohl im Stammpfad als auch im Unterordner liegen\dots
+% Die Beispiele werden nur erneut kompiliert, wenn sich diese geändert haben 
+% oder noch gar kein entsprechendes PDF"~Dokument existiert.
 %    \begin{macrocode}
-  \IfFileExists{#1}{%
-    \edef\tud@write@file{#1}%
-    \edef\tud@write@option{}%
-  }{%
-    \edef\tud@write@file{examples/#1}%
-    \edef\tud@write@option{-output-directory examples }%
-  }%
-  \lstinputlisting[style=tudscr]{\tud@write@file}%
-  \filemodCmp{./\tud@write@file.pdf}{./\tud@write@file.tex}{}{%
-    \immediate\write18{%
-      pdflatex \tud@write@option \tud@write@file.tex
-      pdflatex \tud@write@option \tud@write@file.tex
-      pdflatex \tud@write@option \tud@write@file.tex
+  \ifcase\pdf@shellescape\or%
+    \filemodCmp{examples/#1.pdf}{examples/#1.tex}{}{%
+      \immediate\write18{%
+        pdflatex -shell-escape -output-directory examples examples/#1.tex
+        pdflatex -output-directory examples examples/#1.tex
+        pdflatex -output-directory examples examples/#1.tex
+      }%
     }%
-  }%
-  \IfFileExists{\tud@write@file.pdf}{%
+  \fi%
+%    \end{macrocode}
+% Ist die gesuchte Datei vorhanden, wird diese auch eingebunden. Andernfalls 
+% wird eine Warnung mit dem Hinweis auf die notwendige Verwednung von 
+% \val{pdflatex} mit der Option \opt{--shell-escape} erzeugt.
+%    \begin{macrocode}
+  \IfFileExists{examples/#1.pdf}{%
     \includepdf[%
       pages=-,noautoscale,frame,keepaspectratio,pagecommand={},%
       height=\textheight,width=\textwidth, offset=5mm 0mm%
-    ]{\tud@write@file.pdf}%
-  }{}%
+    ]{examples/#1.pdf}%
+  }{%
+    \tud@shellescape@wrn%
+  }%
 }
 %    \end{macrocode}
 % \end{macro}^^A \includeexample
@@ -436,6 +413,21 @@
 %</class>
 % \fi
 %
+% \begin{macro}{\tud@shellescape@wrn}
+% \changes{v2.02}{2014/10/14}{neu}%^^A
+% Dieses Makro wird verwendet, wenn eine gesuchte Datei nicht gefunden wurde, 
+% weil das Dokument noch nicht mit der Option  \opt{--shell-escape} kompiliert 
+% wurde.
+%    \begin{macrocode}
+\newcommand*\tud@shellescape@wrn{%
+  \ClassWarning{\tudcls@name}{%
+    You have to recompile this document with\MessageBreak%
+    activated shell escape option%
+  }%
+  \global\let\tud@shellescape@wrn\relax%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@shellescape@wrn
 % \begin{environment}{Code}
 % \begin{macro}{\tud@currentHref}
 % Folgend werden Befehle und Umgebungen für die Darstellung von Quelltexten im 
@@ -480,8 +472,113 @@
 \newcommand*\tudscr@manual{tudscr}%
 %    \end{macrocode}
 % \end{macro}^^A \tudscr@manual
+% Für den Anwender werden einige Tutorials bereitgestellt, für welche der 
+% Quelltext bei dessen Beschriebung in eine separate Datei geschrieben und ggf. 
+% ausgeführt  wird. Hierfür werden im folgenden einige Umgebungen definiert.
+%
+% Da das Paket \pkg{filecontents} beim Uberschreiben einer Datei für gewöhnlich
+% eine Warnung erzeugt, wird diese innerhalb der \env{Tutorial}"=Umgebungen 
+% mithilfe des Paketes \pkg{silence} deaktiviert.
+%    \begin{macrocode}
+\RequirePackage{filecontents}[2011/10/08]
+\RequirePackage{silence}[2012/07/02]
+\WarningFilter[Tutorial]{latex}{Overwriting file}%
+%    \end{macrocode}
+% \begin{macro}{\TutorialHook}
+% \changes{v2.02}{2014/10/11}{neu}%^^A
+% \begin{macro}{\tud@tut@hook}
+% \changes{v2.02}{2014/10/11}{neu}%^^A
+% \begin{macro}{\tud@tut@pre}
+% \changes{v2.02}{2014/08/19}{neu}%^^A
+% \begin{macro}{\tud@tut@post}
+% \changes{v2.02}{2014/08/19}{neu}%^^A
+% \begin{macro}{\tud@tut@write}
+% \changes{v2.02}{2014/10/13}{neu}%^^A
+% \begin{macro}{\tud@tut@lst}
+% \changes{v2.02}{2014/10/07}{neu}%^^A
+% \begin{macro}{\tud@write@file}
+% \changes{v2.02}{2014/08/19}{neu}%^^A
+% \begin{macro}{\tud@write@option}
+% \changes{v2.02}{2014/08/19}{neu}%^^A
+% \begin{macro}{\tud@write@copy}
+% \changes{v2.02}{2014/09/11}{neu}%^^A
+% Dies sind die Hilfsmakros, welche zu Beginn und Ende der unterschiedlichen
+% \env{Tutorial}"=Umgebungen sowie für das automatisierte Ausführen der 
+% Kompilierung von Tutorials via \cs{write18} benötigt und verwendet werden.
+%    \begin{macrocode}
+\newcommand*\tud@tut@hook{}
+\let\tud@tut@hook\relax
+\newcommand*\TutorialHook[1]{\def\tud@tut@hook{#1}}%
+\newcommand*\tud@tut@pre{%
+  \ActivateWarningFilters[Tutorial]%
+  \@nameuse{filecontents*}{\jobname-temp.tut}%
+}
+\newcommand*\tud@tut@post{%
+  \@nameuse{endfilecontents*}%
+  \DeactivateWarningFilters[Tutorial]%
+}
+%    \end{macrocode}
+% Für die Ausgabe des Quelltextergebnisses erfolgt ein linker Einzug. Außerdem 
+% werden unter anderem abhängig von der Verwendung eines erklärenden Textes die 
+% eingefügten vertikalen Abstände angepasst.
+%    \begin{macrocode}
+\newcommand*\tud@tut@write{%
+%    \end{macrocode}
+% Nach dem Ausführen des ersten Argumentes von \cs{@tempa} wird geprüft, ob
+% dieses überhaupt eine sichtbare Ausgabe erzeugt hat. Nur für diesen Fall wird
+% nach dieser vertikaler Leerraum eingefügt. Der Anfang entspricht prinzipiell
+% dem Standardbefehl \cs{settoheight}, jedoch wird im Inneren zusätzlich eine
+% \cs{vbox} verwendet, um damit auch mathematische Umgebungen testen zu können. 
+% Das Ganze findet innerhalb einer Gruppierung statt, um keine Änderungen zu
+% erzeugen.
+%    \begin{macrocode}
+  \def\@tempa##1##2{%
+    ##1%
+    \begingroup%
+      ##2%
+      \setbox\@tempboxa\hbox{\vbox{##1}}%
+      \@tempdima=\ht\@tempboxa%
+      \setbox\@tempboxa\box\voidb@x%
+      \ifdim\@tempdima>\z@\relax%
+        \par%
+        \vspace{\baselineskipglue}%
+        \noindent\ignorespaces%
+      \fi%
+    \endgroup%
+  }%
+  \@tempa{\@Tutorial}{}%
+  \global\let\@Tutorial\relax%
+  \setlength{\@tempdimc}{\leftskip}%
+  \setlength{\leftskip}{\leftmargin}%
+  \@tempa{\input{\jobname-temp.tut}}{\tud@tut@hook}%
+  \let\tud@tut@hook\relax%
+  \setlength{\leftskip}{\@tempdimc}%
+}
+%    \end{macrocode}
+% Damit wird der Quelltext eingezogen ausgegeben.
+%    \begin{macrocode}
+\newcommand*\tud@tut@lst{%
+  \begin{quoting}[rightmargin=0pt]%
+  \lstinputlisting[style=tudscr]{\jobname-temp.tut}%
+  \end{quoting}%
+}
+\newcommand*\tud@write@file{}
+\newcommand*\tud@write@option{}
+\newcommand*\tud@write@copy{}
+%    \end{macrocode}
+% \end{macro}^^A \tud@write@copy
+% \end{macro}^^A \tud@write@option
+% \end{macro}^^A \tud@write@file
+% \end{macro}^^A \tud@tut@lst
+% \end{macro}^^A \tud@tut@write
+% \end{macro}^^A \tud@tut@post
+% \end{macro}^^A \tud@tut@pre
+% \end{macro}^^A \tud@tut@hook
+% \end{macro}^^A \TutorialHook
 % \begin{environment}{Tutorial}
 % \changes{v2.02}{2014/08/16}{neu}%^^A
+% \begin{environment}{Tutorial'}
+% \changes{v2.02}{2014/10/13}{neu}%^^A
 % \begin{environment}{Tutorial!}
 % \changes{v2.02}{2014/10/07}{neu}%^^A
 % \begin{environment}{Tutorial*}
@@ -490,10 +587,10 @@
 % \changes{v2.02}{2014/10/07}{neu}%^^A
 % \begin{environment}{Tutorial-}
 % \changes{v2.02}{2014/09/16}{neu}%^^A
-% \begin{macro}{\TutorialPreamble}
-% \changes{v2.02}{2014/08/20}{neu}%^^A
 % \begin{macro}{\includetutorial}
 % \changes{v2.02}{2014/09/10}{neu}%^^A
+% \begin{macro}{\TutorialPreamble}
+% \changes{v2.02}{2014/08/20}{neu}%^^A
 % \begin{macro}{\@Tutorial}
 % \changes{v2.02}{2014/08/19}{neu}%^^A
 % Die Umgebung \env{Tutorial} ist für die Ausgabe und gleichzeitige Ausführung 
@@ -512,7 +609,9 @@
 % hinzu, ohne diesen auszugeben oder auszuführen. Um Quelltextausschnitte zur
 % weiterführenden Information anzugeben, wird die außerdem die Version mit
 % Minuszeichen definiert. Diese werden nicht in das Copy"~\&"~Paste"~Beispiel
-% übernommen.
+% übernommen. Schließlich gibt es noch die Version mit Apostroph, die den 
+% angegebenen Quelltext sowohl ausgibt als auch ausführt, jedoch nicht in das 
+% Copy"~\&"~Paste"~Beispiel schreibt.
 %
 % Damit die Umgebungen nicht doppelt implementiert werden müssen, werden die
 % Hilfsmakros \cs{tud@tut@pre} und \cs{tud@tut@post} definiert. Für die Ausgabe
@@ -526,13 +625,7 @@
 % Copy"~\&"~Paste"~Beispiel enthält. Weiteres dazu bei der Beschreibung von
 % \cs{FinishTutorial}
 %
-% Da das Paket \pkg{filecontents} beim Uberschreiben einer Datei für gewöhnlich
-% eine Warnung erzeugt, wird diese innerhalb der \env{Tutorial}"=Umgebungen 
-% mithilfe des Paketes \pkg{silence} deaktiviert.
 %    \begin{macrocode}
-\RequirePackage{filecontents}[2011/10/08]
-\RequirePackage{silence}[2012/07/02]
-\WarningFilter[Tutorial]{latex}{Overwriting file}%
 \newcommand*\@Tutorial{}
 \let\@Tutorial\relax
 \newcommand\TutorialPreamble[1]{\gdef\@Tutorial{#1}}
@@ -541,37 +634,12 @@
   \tud@tut@append%
   \aftergroup\tud@tut@lst%
 }
-%    \end{macrocode}
-% Für die Ausgabe des Quelltextergebnisses erfolgt ein linker Einzug. Außerdem 
-% werden unter anderem abhängig von der Verwendung eines erklärenden Textes die 
-% eingefügten vertikalen Abstände angepasst.
-%    \begin{macrocode}
-\AfterEndEnvironment{Tutorial}{%
-  \setlength{\@tempdimc}{\leftskip}%
-  \setlength{\leftskip}{\leftmargin}%
-  \@tempswafalse%
-  \begingroup%
-    \setbox0\vbox{\input{\jobname-temp.tut}}%
-    \setlength{\@tempdimb}{\dimexpr\ht0+\dp0}%
-    \ifdim\@tempdimb=\z@\relax
-      \global\@tempswatrue%
-    \fi%
-  \endgroup%
-  \ifx\@Tutorial\relax\else%
-    \@Tutorial\par%
-    \vspace{.5\baselineskipglue}%
-  \fi%
-  \noindent\ignorespaces%
-  \input{\jobname-temp.tut}%
-  \global\let\@Tutorial\relax%
-  \if@tempswa%
-    \vspace{-\baselineskip}%
-  \else%
-    \vspace{.5\baselineskipglue}%
-  \fi%
-  \par\noindent%
-  \setlength{\leftskip}{\@tempdimc}%
+\AfterEndEnvironment{Tutorial}{\tud@tut@write}%
+\newenvironment{Tutorial'}{\tud@tut@pre}{%
+  \tud@tut@post%
+  \aftergroup\tud@tut@lst%
 }
+\AfterEndEnvironment{Tutorial'}{\tud@tut@write}%
 %    \end{macrocode}
 % Die Umgebung \env{Tutorial!}\dots
 %    \begin{macrocode}
@@ -606,31 +674,36 @@
 \end{filecontents*}
 \fi
 %    \end{macrocode}
-% Das Ganze hier ist etwas kryptisch. Der Test auf den Dateinamen ist wahr, 
-% wenn die Tutorialdatei selber ausgeführt wird. Erfolgt hingegen der Aufruf 
-% bei der Übersetzung des Handbuchs, ist der Test negativ. Warum genau weiß ich 
-% nicht. Es hilft aber auf alle Fälle, um die Pfade anzupassen.
+% Der Quelltext aus der \env{Tutorial!}"=Umgebung wird~-- wie bei allen anderen
+% \env{Tutorial}"=Umgebungen~-- in der Datei \val{\string\jobname-temp.tut}
+% gesichert. Diese wird in die separate Datei \cs{\meta{Argument}-temp.tut} 
+% kopiert. Anschließend wird diese in der Datei \val{\string\jobname-temp.tex}
+% eingebunden. Damit dies sowohl bei der direkten Übersetzung als auch bei der
+% Kompilierung aus dem Handbuch heraus funktioniert, wird \cs{tudtutorialflag}
+% zur Unterscheidung verwendet.
 %    \begin{macrocode}
 \AfterEndEnvironment{Tutorial!}{%
-  \IfFileExists{\jobname-temp}{%
-    \edef\tud@write@file{\jobname-temp}%
-    \edef\tud@write@option{-jobname=\@Tutorial-temp }%
-    \edef\tud@write@copy{}%
-  }{%
-    \edef\tud@write@file{tutorials/\jobname-temp}%
-    \edef\tud@write@option{%
-      -output-directory tutorials -jobname=\@Tutorial-temp 
+  \ifcase\pdf@shellescape\or%
+    \ifdef{\tudtutorialflag}{%
+      \edef\tud@write@file{tutorials/\jobname-temp}%
+      \edef\tud@write@option{%
+        -output-directory tutorials -jobname=\@Tutorial-temp %
+      }%
+      \edef\tud@write@copy{tutorials\@backslashchar}%
+    }{%
+      \edef\tud@write@file{\jobname-temp}%
+      \edef\tud@write@option{-jobname=\@Tutorial-temp }%
+      \edef\tud@write@copy{}%
     }%
-    \edef\tud@write@copy{tutorials\@backslashchar}%
-  }%
-  \immediate\write18{%
-    copy \tud@write@copy\jobname-temp.tut \tud@write@copy\@Tutorial-temp.tut
-  }
-  \immediate\write18{%
-    pdflatex \tud@write@option \tud@write@file.tex
-    pdflatex \tud@write@option \tud@write@file.tex
-    pdflatex \tud@write@option \tud@write@file.tex
-  }%
+    \immediate\write18{%
+      copy \tud@write@copy\jobname-temp.tut \tud@write@copy\@Tutorial-temp.tut
+    }
+    \immediate\write18{%
+      pdflatex \tud@write@option \tud@write@file.tex
+      pdflatex \tud@write@option \tud@write@file.tex
+      pdflatex \tud@write@option \tud@write@file.tex
+    }%
+  \fi%
   \global\let\@Tutorial\relax%
   \par\noindent%
 }
@@ -642,10 +715,10 @@
 %    \begin{macrocode}
 \NewDocumentCommand\includetutorial{omO{1}}{%
   \IfFileExists{\jobname-temp}{%
-    \edef\tud@write@file{#2-temp}
+    \edef\tud@write@file{#2-temp}%
   }{%
-    \edef\tud@write@file{tutorials/#2-temp}
-  }
+    \edef\tud@write@file{tutorials/#2-temp}%
+  }%
   \IfFileExists{\tud@write@file.pdf}{%
     \@tempcnta\z@%
     \@for\@tempa:=#3\do{\advance\@tempcnta\@ne}%
@@ -669,24 +742,27 @@
         \ifnum\@tempcnta>\z@\hfill\fi%
       }%
     \fi%
-  }{}%
+  }{%
+    \tud@shellescape@wrn%
+  }%
 }
 %    \end{macrocode}
 % Die Umgebung \env{Tutorial*} gibt den Inhalt im Dokument als Quelltext aus 
-% und fügt diesem dem Copy"~\&"~Paste"~Beispiel hinzu.
+% und fügt diesem dem Copy"~\&"~Paste"~Beispiel hinzu ohne diese auszuführen.
 %    \begin{macrocode}
-\AfterEndEnvironment{Tutorial*}{%
-  \global\let\@Tutorial\relax%
-  \par\noindent%
-}
 \newenvironment{Tutorial*}{\tud@tut@pre}{%
   \tud@tut@post%
   \tud@tut@append%
   \aftergroup\tud@tut@lst%
 }
+\AfterEndEnvironment{Tutorial*}{%
+  \global\let\@Tutorial\relax%
+  \par\noindent%
+}
 %    \end{macrocode}
 % Die Umgebungen \env{Tutorial+} und \env{Tutorial-} schreiben ihren Quelltext
 % entweder in das Copy"~\&"~Paste"~Beispiel oder geben diesen im Dokument aus.
+% In keinem Fall wird der Quelltext ausgeführt.
 %    \begin{macrocode}
 \newenvironment{Tutorial+}{\tud@tut@pre}{%
   \tud@tut@post%
@@ -698,39 +774,14 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \@Tutorial
-% \end{macro}^^A \includetutorial
 % \end{macro}^^A \TutorialPreamble
+% \end{macro}^^A \includetutorial
 % \end{environment}^^A Tutorial-
 % \end{environment}^^A Tutorial+
 % \end{environment}^^A Tutorial*
 % \end{environment}^^A Tutorial!
+% \end{environment}^^A Tutorial'
 % \end{environment}^^A Tutorial
-% \begin{macro}{\tud@tut@pre}
-% \changes{v2.02}{2014/08/19}{neu}%^^A
-% \begin{macro}{\tud@tut@post}
-% \changes{v2.02}{2014/08/19}{neu}%^^A
-% \begin{macro}{\tud@tut@lst}
-% \changes{v2.02}{2014/10/07}{neu}%^^A
-% Dies sind die Hilfsmakros, welche zu Beginn und Ende der unterschiedlichen
-% \env{Tutorial}"=Umgebungen verwendet werden.
-%    \begin{macrocode}
-\newcommand*\tud@tut@pre{%
-  \ActivateWarningFilters[Tutorial]%
-  \@nameuse{filecontents*}{\jobname-temp.tut}%
-}
-\newcommand*\tud@tut@post{%
-  \@nameuse{endfilecontents*}%
-  \DeactivateWarningFilters[Tutorial]%
-}
-\newcommand*\tud@tut@lst{%
-  \begin{quoting}[rightmargin=0pt]%
-  \lstinputlisting[style=tudscr]{\jobname-temp.tut}%
-  \end{quoting}%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@tut@lst
-% \end{macro}^^A \tud@tut@post
-% \end{macro}^^A \tud@tut@pre
 % \begin{macro}{\tud@tut@input}
 % \changes{v2.02}{2014/08/19}{neu}%^^A
 % \begin{macro}{\tud@tut@output}
@@ -821,7 +872,9 @@
 %    \begin{macrocode}
 \newcommand\FinishTutorial[1][]{%
   \immediate\closeout\tud@tut@output%
-  \clearpage\pagestyle{empty}\@afterindentfalse\@afterheading%
+  \clearpage%
+  \addsec{Copy~\&~Paste}%
+  \pagestyle{empty}%
   Zum Ende des Dokumentes wird das vorgestellte Tutorial als \"ubersetzbarer 
   Quelltext ausgegeben, um dieses direkt mittels Copy~\&~Paste verwenden und 
   alle Punkte nachvollziehen zu k\"onnen. #1
@@ -840,35 +893,69 @@
 %
 % \begin{macro}{\Tutorial}
 % \changes{v2.02}{2014/08/22}{neu}%^^A
+% \changes{v2.02}{2014/10/14}{Reimplementierung}%^^A
 % \begin{macro}{\hypertut}
 % \changes{v2.02}{2014/09/02}{neu}%^^A
 % Die gegebenenfalls notwendige Kompilierung und die Referenzierung eines 
-% Tutorials aus dem Handbuch erfolgt mit \cs{Tutorial}. Hierfür werden abermals
-% die beiden Hilfsmakros \cs{tud@write@file} und \cs{tud@write@option} 
-% verwendet. Außerdem erfolgt mit \cs{hypertut} ein verlinkter Eintrag in den
-% Index.
+% Tutorials aus dem Handbuch erfolgt mit \cs{Tutorial}. Außerdem erfolgt mit
+% \cs{hypertut} ein verlinkter Eintrag in den Index.
 %    \begin{macrocode}
 \newrobustcmd*\hypertut[2]{%
   \hyperref{tutorials/#1.pdf}{\jobname}{tutorials:#1}{\texturn{#1.pdf}#2}%
 }
 \NewDocumentCommand\Tutorial{som}{%
-  \IfFileExists{#3}{%
-    \edef\tud@write@file{#3}%
-    \edef\tud@write@option{}%
+  \ifcase\pdf@shellescape\or%
+%    \end{macrocode}
+% Um mit den verschachtelten Aufrufen von pdf\LaTeX{} umgehen zu können, wird 
+% beim Aufruf \cs{tudtutorialflag} definiert. Damit wird innerhalb des Paketes
+% \pkg{tudscrman}~-- welches von den Tutorials genutzt wird~-- erkannt, dass es
+% sich um einen Aufruf aus der Klasse \cls{tudscrman} handelt.
+%    \begin{macrocode}
+    \filemodCmp{tutorials/#3.pdf}{tutorials/#3.tex}{}{%
+      \immediate\write18{%
+        pdflatex -shell-escape -output-directory tutorials 
+        \noexpand\def\noexpand\tudtutorialflag\noexpand{\noexpand}
+        \noexpand\input{tutorials/#3.tex}
+      }%
+%    \end{macrocode}
+% Der Aufruf von \val{biber} erfolgt nur, wenn dieser notwendig ist.
+%    \begin{macrocode}
+      \IfFileExists{tutorials/#3.bcf}{%
+        \immediate\write18{%
+          biber -output-directory tutorials #3
+        }%
+      }%
+%    \end{macrocode}
+% Das das Paket \pkg{glossaries} prinzipiell x"~beliebige Glossare erstellen 
+% kann, ist der Aufruf von \val{makeglossaries} obligatorisch.
+%    \begin{macrocode}
+      \immediate\write18{%
+        makeglossaries -d tutorials #3
+      }%
+%    \end{macrocode}
+% Nachdem alle Hilfprozessoren gelaufen sind, dard pdf\LaTeX noch zweimal.
+%    \begin{macrocode}
+      \immediate\write18{%
+        pdflatex -output-directory tutorials 
+        \noexpand\def\noexpand\tudtutorialflag\noexpand{\noexpand}\noexpand
+        \input{tutorials/#3.tex}
+      }%
+      \immediate\write18{%
+        pdflatex -output-directory tutorials 
+        \noexpand\def\noexpand\tudtutorialflag\noexpand{\noexpand}\noexpand
+        \input{tutorials/#3.tex}
+      }%
+    }%
+  \fi%
+%    \end{macrocode}
+% Hyperlink und Indexeintrag.
+%    \begin{macrocode}
+  \IfFileExists{tutorials/#3.pdf}{%
+    \hypertut{#3}{}%
   }{%
-    \edef\tud@write@file{tutorials/#3}%
-    \edef\tud@write@option{-output-directory tutorials }%
+    \texturn{#3.pdf}%
+    \tud@shellescape@wrn%
   }%
-  \filemodCmp{./\tud@write@file.pdf}{./\tud@write@file.tex}{}{%
-    \immediate\write18{%
-      pdflatex -shell-escape \tud@write@option \tud@write@file.tex
-    }%
-    \immediate\write18{%
-      pdflatex \tud@write@option \tud@write@file.tex
-      pdflatex \tud@write@option \tud@write@file.tex
-    }%
-  }%
-  \IfFileExists{tutorials/#3.pdf}{\hypertut{#3}{}}{\texturn{#3.pdf}}%
   \IfBooleanF{#1}{%
     \index[files]{\hypertut{#3}{~{\idxfont(Tutorial)}\IfValueT{#2}{|#2}}}%
   }%
@@ -1191,7 +1278,7 @@
 }
 %    \end{macrocode}
 % \begin{macro}{\bsc}
-% \changes{v2.02}{2014/07/22}{\cs{DeclareRobustCommand} ersetzt durch
+% \changes{v2.02}{2014/07/22}{\cs{DeclareRobustCommand} ersetzt mit
 %   \cs{newrobustcmd} aus \pkg{etoolbox}}%^^A
 % Eine einfacher zu verwendende Kurzform.
 %    \begin{macrocode}
@@ -2165,9 +2252,12 @@
 %    \end{macrocode}
 % Die Einträge in der Änderungsliste sowie die dazugehörige Randnotiz werden
 % innerhalb der Deklaration mit \cs{printchangedatlist} erzeugt. Das optionale 
-% Argument sorgt für die Verschiebung der Randnotiz auf die richtige Höhe.
+% Argument sorgt für die Verschiebung der Randnotiz auf die richtige Höhe, um 
+% den Höhenversatz zwischen Randnotiz und Deklarationsrahmen auszugleichen.
 %    \begin{macrocode}
-    \printchangedatlist[\dimexpr.5\baselineskip-.5\ht0-.5\dp0\relax]%
+    \printchangedatlist[%
+      \dimexpr.5\ht\strutbox+.5\dp\strutbox-.5\ht0-.5\dp0\relax%
+    ]%
 %    \end{macrocode}
 % Zum Schluss wird das optionale Argument (in runden Klammern) neben der
 % Deklarationsbox ausgegeben.
@@ -2249,18 +2339,17 @@
 }
 %    \end{macrocode}
 % Die Einträge in der Änderungsliste sowie die dazugehörige Randnotiz werden 
-% mit dem Makro \cs{ChangedAt@Process} abgearbeitet, sortiert und erstellt. Mit
-% \cs{printchangedatlist} wird der Versatz der Randnotiz gesetzt und danach die
-% Liste an \cs{ChangedAt@Process} weitergegeben.
+% mit dem Makro \cs{ChangedAt@Process} abgearbeitet, sortiert und erstellt. Bei
+% \cs{printchangedatlist} wird mit dem optionalen Argument der Versatz für die 
+% Randnotiz gesetzt. Dieser wird wie auch die Liste an \cs{ChangedAt@Process}
+% übergeben, womit diese und die Randnotiz letztendlich erzeugt werden.
 %    \begin{macrocode}
-\newcommand*\printchangedatlist[1][.2\baselineskip]{%
-    \ifx\@changedatdeclarelist\relax\else%
-      \setlength\changedatmarginskip{#1}%
-      \ChangedAt@Process{\@changedatdeclarelist}%
-      \setlength{\changedatmarginskip}{\z@}%
-      \global\let\@changedatdeclarelist\relax%
-      \@afterindentfalse\@afterheading%
-    \fi%
+\newcommand*\printchangedatlist[1][\z@]{%
+  \ifx\@changedatdeclarelist\relax\else%
+    \ChangedAt@Process{#1}{\@changedatdeclarelist}%
+    \global\let\@changedatdeclarelist\relax%
+    \@afterindentfalse\@afterheading%
+  \fi%
 }
 %    \end{macrocode}
 % \end{macro}^^A \@changedatdeclarelist
@@ -2269,16 +2358,20 @@
 % \end{macro}^^A \printchangedatlist
 % \begin{macro}{\ChangedAt}
 % \changes{v2.02}{2014/07/25}{erweitert}%^^A
+% \changes{v2.02}{2014/10/15}{Sternversion neu (keine Randnotiz)}%^^A
 % An den Befehl \cs{ChangedAt} kann eine kommagetrente Liste mit verschiedenen
 % Versionsnummern und dazugehörigen Änderungen übergeben werden. Er wird in der 
 % Form: \cs{ChangedAt}\marg{Version!Definition,Version!Erweiterung} genutzt.
 % Der Prozess selbst wird mit \cs{ChangedAt@Process} durchgeführt. Es wird
 % zu der angegebenen Versionsnummer ein Eintrag in die Änderungsliste erstellt,
 % wenn mit einem Ausrufezeichen getrennt der gewünschte Inhalt gegeben wurde.
-% Auf jeden Fall werden alle übergegebenen Versionsnummern in einer Liste als
-% Randnotiz einmalig gesetzt. 
+%
+% Alle übergegebenen Versionsnummern werden als Liste mit einmaligen Einträgen 
+% in einer Randnotiz gesetzt. Mit dem optionalen Argument kann ein vertikaler 
+% dieser angegeben werden. Die Sternversion von \cs{ChangedAt} unterdrückt die
+% Ausgabe dieser Randnotiz.
 %    \begin{macrocode}
-\newcommand*\ChangedAt[1]{\strut\ChangedAt@Process{#1}\ignorespaces}
+\NewDocumentCommand\ChangedAt{sO{\z@}m}{\ChangedAt@Process[#1]{#2}{#3}}
 %    \end{macrocode}
 % \end{macro}^^A \ChangedAt
 % \begin{macro}{\ChangedAt@Process}
@@ -2287,13 +2380,12 @@
 % \changes{v2.02}{2014/09/02}{neu}%^^A
 % \begin{macro}{\ChangedAt@@@Process}
 % \changes{v2.02}{2014/09/02}{neu}%^^A
+% \changes{v2.02}{2014/10/16}{Unterteilung Änderungsliste in Bereiche}%^^A
 % \begin{macro}{\ChangedAt@Default}
 % \changes{v2.02}{2014/09/02}{neu}%^^A
 % \begin{macro}{\ChangedAt@Split}
 % \changes{v2.02}{2014/09/02}{neu}%^^A
 % \begin{macro}{\@changedatlist}
-% \changes{v2.02}{2014/09/02}{neu}%^^A
-% \begin{length}{\changedatmarginskip}
 % \changes{v2.02}{2014/09/02}{neu}%^^A
 % \begin{macro}{\@changedatversionlist}
 % \changes{v2.02}{2014/09/02}{neu}%^^A
@@ -2305,37 +2397,34 @@
 %    \begin{macrocode}
 \newcommand*\@changedatlist{}
 \newcommand*\ChangedAt@Default{}
-\newlength{\changedatmarginskip}
 \newcommand*\@changedatversionlist{}
 \let\@changedatversionlist\relax
-\newcommand*\ChangedAt@Process[1]{%
+\newcommand*\ChangedAt@Process[3][]{%
   \let\@changedatlist\relax%
   \let\@changedatversionlist\relax%
-  \@for\@tempa:=#1\do{\listeadd{\@changedatlist}{\expandonce\@tempa}}%
+  \@for\@tempa:=#3\do{\listeadd{\@changedatlist}{\expandonce\@tempa}}%
   \forlistloop\ChangedAt@Split{\@changedatlist}%
 %    \end{macrocode}
 % Nach der Verarbeitung aller Einräge sind in \cs{@changedatlist} alle 
 % angegebenen Versionsnummern genau einmal enthalten. Mit \cs{sortlist} werden 
 % diese in die richtige Reihenfolge sortiert und anschließend als Randnotiz in
-% einer Tabelle ausgegeben.
+% einer Tabelle ausgegeben, falls nicht die Sternversion verwendet wurde.
 %    \begin{macrocode}
-  \sortlist{\@changedatversionlist}%
-%    \end{macrocode}
-% Die Länge \cs{changedatmarginskip} wird verwendet, um gegebenenfalls den 
-% Höhenversatz zwischen Randnotiz und Deklarationsrahmen auszugleichen.
-% Anschließend wird diese wieder zurückgesetzt.
-%    \begin{macrocode}
-  \marginnote{%
-    \def\@tempa####1{%
-      \ignorespaces\hyperref[idx:changelog]{####1}\tabularnewline%
-    }%
-    \begin{tabular}{|l|}%
-      \hline{\footnotesize\rule{0pt}{.8\baselineskip}}%
-      \forlistloop\@tempa{\@changedatversionlist}%
-      \hline%
-    \end{tabular}%
-  }[\changedatmarginskip]%
-  \setlength{\changedatmarginskip}{\z@}%
+  \IfBooleanF{#1}{%
+    \sortlist{\@changedatversionlist}%
+    \strut%
+    \marginnote{%
+      \def\@tempa####1{%
+        \ignorespaces\hyperref[idx:changelog]{####1}\tabularnewline%
+      }%
+      \begin{tabular}{|l|}%
+        \hline%
+        \forlistloop\@tempa{\@changedatversionlist}%
+        \hline%
+      \end{tabular}%
+    }[#2]%
+    \ignorespaces%
+  }%
 }
 %    \end{macrocode}
 % Der Befehl \cs{ChangedAt@Split} teilt ein gegebenes Argument am Delimiter
@@ -2364,19 +2453,24 @@
   \IfValueTF{#3}{%
 %    \end{macrocode}
 % Bei der Deklaration von Optionen, Befehlen etc. werden diese automatisch in 
-% der Liste der Änderungen vor der gegebenen Erklärung selbst ausgegeben.
-% Hierfür wird das dritte Argument genutzt. Damit lediglich diese und nicht
-% noch die dazugehörigen Argumente eingetragen werden, werden die relevanten
-% Befehle deaktiviert und das optionale Argument in \cs{ChangedAt@Default}
-% expandiert.
+% der Liste der Änderungen im Bereich \glqq Implementierung\grqq vor der
+% gegebenen Erklärung selbst ausgegeben. Hierfür wird das dritte Argument
+% genutzt. Damit lediglich diese und nicht noch die dazugehörigen Argumente
+% eingetragen werden, werden die relevanten Befehle deaktiviert und das
+% optionale Argument in \cs{ChangedAt@Default} expandiert.
 %    \begin{macrocode}
     \begingroup%
       \@gobbleparameters%
       \xdef\ChangedAt@Default{#3}%
     \endgroup%
-    \ChangedAt@@@Process{#1}{\ChangedAt@Default: #2}%
+    \ChangedAt@@@Process{#1}{Implementierung}{\ChangedAt@Default: #2}%
   }{%
-    \IfValueT{#2}{\ChangedAt@@@Process{#1}{#2}}%
+%    \end{macrocode}
+% Wurde \cs{ChangedAt} direkt und nicht über das optionale Argument der 
+% Umgebungen \env{Declaration} genutzt, erscheint der gewünschte Eintrag im
+% Bereich \glqq Allgemein\grqq.
+%    \begin{macrocode}
+    \IfValueT{#2}{\ChangedAt@@@Process{#1}{Allgemein}{#2}}%
   }%
 %    \end{macrocode}
 % Außerdem wird der Liste \cs{changedatversionlist} die aktuelle Version
@@ -2387,15 +2481,15 @@
 %    \end{macrocode}
 % Mit \cs{ChangedAt@@@Process} Erfolgen die Einträge in die Änderungsliste.
 %    \begin{macrocode}
-\newcommand*\ChangedAt@@@Process[2]{%
+\newcommand*\ChangedAt@@@Process[3]{%
   \begingroup%
 %    \end{macrocode}
 % Für geänderte Parameter wird als Haupteintrag das dazugehörige Makro bzw. die
 % entsprechende Umgebung verwendet. Der geänderte Parameter folgt danach.
 % Zuerst muss ggf. das Makro \cs{ChangedAt@Default} expandiert werden.
 %    \begin{macrocode}
-    \def\@tempa{#2}%
-    \in@{\ChangedAt@Default}{#2}%
+    \def\@tempa{#3}%
+    \in@{\ChangedAt@Default}{#3}%
     \ifin@%
       \expandafter\def\expandafter\@tempa\expandafter{\ChangedAt@Default}%
     \fi%
@@ -2406,17 +2500,16 @@
     \ifin@%
       \begingroup%
         \RenewDocumentCommand\Key{sommo}{\xdef\@TempKey{##3:}}%
-        \setbox0\vtop{#2}%
+        \setbox0\hbox{#3}%
       \endgroup%
-      \index[changelog]{#1!\@TempKey\ #2}%
+      \index[changelog]{#1!#2!\@TempKey\ #3}%
     \else%
-      \index[changelog]{#1!#2}%
+      \index[changelog]{#1!#2!#3}%
     \fi%
   \endgroup%
 }
 %    \end{macrocode}
 % \end{macro}^^A \@changedatversionlist
-% \end{length}^^A \changedatmarginskip
 % \end{macro}^^A \@changedatlist
 % \end{macro}^^A \ChangedAt@Split
 % \end{macro}^^A \ChangedAt@Default
@@ -2429,8 +2522,12 @@
 % einen Eintrag im gewünschten Index mit einem Verweis auf den neuen Befehl.
 %    \begin{macrocode}
 \newcommand*\Rename[4][]{%
-  \ChangedAt@@@Process{#2}{#3: \emph{umbenannt}~\textrightarrow~siehe #4}%
-  \ChangedAt@@@Process{#2}{#4: \emph{neu}~\textrightarrow~ersetzt #3}%
+  \ChangedAt@@@Process{#2}{Umbenennungen}{%
+    #3: \emph{umbenannt}~\textrightarrow~siehe #4%
+  }%
+  \ChangedAt@@@Process{#2}{Implementierung}{%
+    #4: \emph{neu}~\textrightarrow~ersetzt #3%
+  }%
   \listeadd\@changedatdeclarelist{#2}%
   \index[#1]{#3|see{#4}}%
 }

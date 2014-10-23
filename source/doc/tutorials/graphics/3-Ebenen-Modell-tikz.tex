@@ -1,0 +1,153 @@
+\RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
+\documentclass[ngerman,DIV=12]{scrreprt}
+\usepackage{selinput}\SelectInputMappings{adieresis={ä},germandbls={ß}}
+\usepackage[T1]{fontenc}
+\usepackage{babel}
+
+\usepackage{showframe}
+
+\usepackage{tikz}
+\usetikzlibrary{arrows}
+\usetikzlibrary{trees}
+\usetikzlibrary{shapes.misc}
+\usetikzlibrary{decorations.markings}
+\usetikzlibrary{arrows}
+\usetikzlibrary{calc}
+\usetikzlibrary{chains}
+\usetikzlibrary{decorations.markings}
+\usetikzlibrary{positioning}
+\usetikzlibrary{shapes.misc}
+\usetikzlibrary{trees}
+
+\tikzset{on grid}
+
+% pstricks-Pfeile in TikZ
+\tikzstyle{pstarrow->}=[%
+	decoration={markings,
+		mark=at position 1 with {\arrow[xscale=1.5]{stealth}};
+	},
+  postaction={decorate},
+  shorten >=0.7pt
+]
+\tikzstyle{pstarrow<-}=[%
+	decoration={markings,
+		mark=at position 4.8pt with {\arrow[xscale=1.5]{stealth reversed}};
+	},
+  postaction={decorate},
+  shorten <=0.7pt
+]
+\tikzstyle{pstarrow<->}=[%
+	decoration={markings,
+		mark=at position 4.8pt with {\arrow[xscale=1.5]{stealth reversed}},
+		mark=at position 1 with {\arrow[xscale=1.5]{stealth}};
+	},
+  postaction={decorate},
+  shorten <=0.7pt,
+  shorten >=0.7pt
+]
+
+% abgerundete Boxen
+\tikzstyle{rounded box}=[%
+	minimum height=3.5ex, minimum width=\myGlength,rounded rectangle,draw
+]
+
+% abgewinkelte Baumdiagramme
+\tikzstyle{edge description}=[%
+	edge from parent path={%
+  	(\tikzparentnode\tikzparentanchor)
+  	|- 
+  	+(0pt,-\tikzsiblingdistance-\tikznumberofcurrentchild\tikzsiblingdistance)
+  	-- (\tikzchildnode\tikzchildanchor)
+  },
+	grow via three points={%
+		one child at (\tikzleveldistance,-\tikzsiblingdistance)
+		and two children at (\tikzleveldistance,-\tikzsiblingdistance)
+		and (\tikzleveldistance,-2\tikzsiblingdistance)
+	}
+]
+
+
+\begin{document}
+\newlength{\tikzunit}
+\setlength{\tikzunit}{.01\textwidth}
+\tikzset{x=\tikzunit,y=\tikzunit}
+
+\tikzstyle{inner box}=[%
+  text width=17\tikzunit,%
+  align=center,
+  rectangle,
+  minimum height=8\tikzunit,
+  font=\hspace{0pt},
+  draw
+]
+\tikzstyle{inner label}=[align=center, font=\scriptsize]
+\tikzstyle{inner box chain}=[every node/.style={on chain}]
+\tikzstyle{inner box chain below}=[%
+  inner box chain, node distance=8\tikzunit,continue chain=going below
+]
+\tikzstyle{inner box chain right}=[%
+  inner box chain,node distance=35\tikzunit,continue chain=going right
+]
+\tikzstyle{inner box chain above}=[%
+  inner box chain,node distance=16\tikzunit,continue chain=going above
+]
+\begin{figure}
+\centering
+\begin{tikzpicture}
+  \begin{scope}[start chain]
+    \begin{scope}[inner box chain below]
+      \node(NE)[inner box]{Navigations\-ebene};
+      \node(NB)[inner label]{gewählte Fahrtroute\\zeitlicher Ablauf};
+      \node(BE)[inner box]{{Bahnführungs\-ebene}};
+      \node(BS)[inner label]{%
+        gewählte Führungsgrößen:\\Sollspur, Sollgeschwindigkeit%
+      };
+      \node(SE)[inner box]{Stabilisierungs\-ebene};
+    \end{scope}
+    \begin{scope}[inner box chain right]
+      \node(LQ)[inner box]{Längs- und Querdynamik};
+      \node(FO)[inner box]{Fahrbahn\-oberfläche};
+    \end{scope}
+    \begin{scope}[inner box chain above]
+      \node(FR)[inner box]{Fahrraum\\\smallskip{\scriptsize Straße 
+      und\\\vspace{-1.5ex}Verkehrssituation}};
+      \node(SN)[inner box]{Straßennetz};
+    \end{scope}
+  \end{scope}
+  \begin{scope}[inner label,minimum size=0pt]
+    \draw [pstarrow->] (FO) -| ++(13,-12) to node [above]{Istspur, 
+    Istgeschwindigkeit} ++(-96,0) |- (SE);
+    \draw [pstarrow->] (FR) -| ++(14  ,-33) to node [above]{Bereich sicherer 
+    Führungsgrößen} ++(-98,0) |- (BE);
+    \draw [pstarrow->] (SN) -| ++(15  ,-54) to node [above]{mögliche 
+    Fahrtroute} ++(-100,0) |- (NE);
+  \end{scope}
+  \begin{scope}[inner label]
+    \draw              (NE) to (NB);
+    \draw [pstarrow->] (NB) to (BE);
+    \draw              (BE) to (BS);
+    \draw [pstarrow->] (BS) to (SE);
+    \draw [pstarrow->] (SE) to
+      node[above] {\parbox{9\tikzunit}{\centering Stell\-größen}}
+      node[below] {\parbox{9\tikzunit}{\centering Lenken Gasgeben Bremsen}}
+    (LQ);
+    \draw [pstarrow->] (LQ) to
+      node[above]{\parbox{9\tikzunit}{\centering Regel\-größen}}
+      node[below]{\parbox{9\tikzunit}{\centering\hspace{0pt}Fahrzeugbewegung}}
+    (FO);
+    \draw [pstarrow->] (LQ)+(24,0) |- (FR);
+    \draw [pstarrow->] (LQ)+(24,0) |- (SN);
+  \end{scope}
+  \begin{scope}[very thick,rounded corners=5\tikzunit]
+    \draw (-12.5,-40) rectangle (12.5,12);
+    \draw ( 22.5,-40) rectangle (47.5,-20);
+    \draw ( 57.5,-40) rectangle (82.5,12);
+  \end{scope}
+  \begin{scope}[font=\bfseries]
+    \node at (0,8) {Fahrer};
+    \node at (35,-24) {Fahrzeug};
+    \node at (70,8) {Umwelt};
+  \end{scope}
+\end{tikzpicture}
+\end{figure}
+\end{document}
