@@ -49,7 +49,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-manual.dtx}[%
-  2014/10/23 v2.02 TUD-KOMA-Script\space%
+  2014/10/24 v2.02 TUD-KOMA-Script\space%
 %</driver>
 %<identify>\NeedsTeXFormat{LaTeX2e}[2011/06/27]
 %<class&identify>\ProvidesClass{tudscrman}[%
@@ -487,139 +487,125 @@
 % ausgeführt wird. Hierfür werden im folgenden einige Umgebungen definiert.
 %
 % Da das Paket \pkg{filecontents} beim Uberschreiben einer Datei für gewöhnlich
-% eine Warnung erzeugt, wird diese innerhalb der \env{Tutorial}"=Umgebungen 
-% mithilfe des Paketes \pkg{silence} deaktiviert.
+% eine Warnung erzeugt, wird diese innerhalb der Umgebungen \env{Excerpt} und 
+% \env{Hint} sowie deren Varianten mit dem Paket \pkg{silence} deaktiviert.
 %    \begin{macrocode}
 \RequirePackage{filecontents}[2011/10/08]
 \WarningFilter[Tutorial]{latex}{Overwriting file}%
 %    \end{macrocode}
-% \begin{environment}{Tutorial}
+% \begin{environment}{Excerpt}
 % \changes{v2.02}{2014/08/16}{neu}%^^A
-% \begin{environment}{Tutorial'}
-% \changes{v2.02}{2014/10/13}{neu}%^^A
-% \begin{environment}{Tutorial*}
+% \begin{environment}{Excerpt*}
 % \changes{v2.02}{2014/08/19}{neu}%^^A
-% \begin{environment}{Tutorial+}
+% \begin{environment}{Excerpt!}
 % \changes{v2.02}{2014/10/07}{neu}%^^A
-% \begin{environment}{Tutorial-}
-% \changes{v2.02}{2014/09/16}{neu}%^^A
-% \begin{environment}{Tutorial!}
-% \changes{v2.02}{2014/10/07}{neu}%^^A
-% \begin{macro}{\@Tutorial}
+% \begin{macro}{\@ExcerptFile}
 % \changes{v2.02}{2014/08/19}{neu}%^^A
-% Die Umgebung \env{Tutorial} ist für die Ausgabe und gleichzeitige Ausführung 
-% von Quelltext gedacht. Dazu speichert diese ihren Inhalt in eine temporäre 
+% Die Umgebung \env{Excerpt} wird zur Ausgabe von Quelltextauszügen verwendet. 
+% Gleichzeitig werden diese für die vollständige Ausgabe aller Auszüge aus dem
+% Tutorial gesammelt. Dazu speichert die Umgebung den Inhalt in eine temporäre 
 % Datei, die dann mehrmals ausgelesen werden kann. Damit kann der angegebene 
-% Quelltext zum einen ausgeführt und zum anderen im Dokument selber ausgegeben 
+% Quelltext nicht nur ausgegeben sondern auch im Dokument selber ausgeführt 
 % werden. Die Sternversion dieser Umgebung gibt den Quelltext vollständig aus,
 % ohne diesen auszuführen. Die Ausrufezeichen"=Version führt den Quelltext in 
 % einer separaten Datei mit einem minimalen Dokumentkörper aus, um daraus eine
-% PDF-Datei zu erzeugen, welche im nachhinein wieder mit \cs{IncludeTutorial}
+% PDF-Datei zu erzeugen, welche im nachhinein wieder mit \cs{IncludeExcerpt}
 % als Grafik eingebunden werden kann. Dies ist für Quelltextabschnitte gedacht, 
 % deren Ausgabe zu groß ist, um diese direkt anzuzeigen und dennoch dargestellt 
-% werden soll. All diesen Varianten ist gemein, dass der angegebene Quelltext
-% am Ende des Tutorials mit \cs{FinishTutorial} chronologisch ausgegeben wird.
-% Die Variante mit Pluszeichen fügt dem Copy"~\&"~Paste"~Beispiel Quelltext
-% hinzu, ohne diesen auszugeben oder auszuführen. Um Quelltextausschnitte zur
-% weiterführenden Information anzugeben, wird die außerdem die Version mit
-% Minuszeichen definiert. Diese werden nicht in das Copy"~\&"~Paste"~Beispiel
-% übernommen. Schließlich gibt es noch die Version mit Apostroph, die den 
-% angegebenen Quelltext sowohl ausgibt als auch ausführt, jedoch nicht in das 
-% Copy"~\&"~Paste"~Beispiel schreibt.
+% werden sollen. Der angegebene Quelltext aller \env{Excerpt}"=Varianten wird
+% am Ende des Tutorials mit \cs{FinishTutorial} chronologisch ausgegeben.
 %
 % Damit die Umgebungen nicht doppelt implementiert werden müssen, werden die
-% Hilfsmakros \cs{tud@tut@pre} und \cs{tud@tut@post} definiert. Für die Ausgabe
-% wird die \env{filecontents}"=Umgebung verwendet. Zusätzlich wird der Inhalt
-% der Datei mit \cs{tud@tut@append} an \val{\string\jobname-all-temp.tex}
-% gehängt, wo alle innerhalb des Dokumentes gesetzten Quelltexte für ein 
-% Copy"~\&"~Paste"~Beispiel enthalten sind. Weiteres dazu bei der Beschreibung
-% von \cs{FinishTutorial}
-%
+% Hilfsmakros \cs{tud@tut@pre} und \cs{tud@tut@post} definiert. Diese nutzen 
+% die \env{filecontents}"=Umgebung, welche den Inhalt in die temporäre Datei 
+% \val{\string\jobname-temp.tex} schreibt. Zusätzlich wird dieser Inhalt mit
+% \cs{tud@tut@append} der Datei \val{\string\jobname-all-temp.tex} hinzugefügt. 
+% Damit werden alle innerhalb des Dokumentes gesetzten Quelltextauszüge für ein 
+% Copy"~\&"~Paste"~Beispiel gesammelt und mit \cs{FinishTutorial} ausgegeben.
 %    \begin{macrocode}
-\newenvironment{Tutorial}{\tud@tut@pre}{%
+\newenvironment{Excerpt}{\tud@tut@pre}{%
   \tud@tut@post%
   \tud@tut@append%
-}
-\AfterEndEnvironment{Tutorial}{%
-  \tud@tut@lst%
-  \tud@tut@out%
-  \global\let\@TutorialPreamble\relax%
-}%
-\newenvironment{Tutorial'}{\tud@tut@pre}{%
-  \tud@tut@post%
-}
-\AfterEndEnvironment{Tutorial'}{%
-  \tud@tut@lst%
-  \tud@tut@out%
-  \global\let\@TutorialPreamble\relax%
+  \gdef\@tempa{%
+    \tud@tut@lst%
+    \tud@tut@input%
+    \global\let\@InputPreamble\relax%
+  }%
+  \aftergroup\@tempa%
 }
 %    \end{macrocode}
-% Die Umgebung \env{Tutorial*} gibt den Inhalt im Dokument als Quelltext aus 
+% Die Umgebung \env{Excerpt*} gibt den Inhalt im Dokument als Quelltext aus 
 % und fügt diesem dem Copy"~\&"~Paste"~Beispiel hinzu ohne diese auszuführen.
 %    \begin{macrocode}
-\newenvironment{Tutorial*}{\tud@tut@pre}{%
+\newenvironment{Excerpt*}{\tud@tut@pre}{%
   \tud@tut@post%
   \tud@tut@append%
-}
-\AfterEndEnvironment{Tutorial*}{%
-  \tud@tut@lst%
-  \global\let\@TutorialPreamble\relax%
-  \par\noindent%
-}
-%    \end{macrocode}
-% Die Umgebungen \env{Tutorial+} und \env{Tutorial-} schreiben ihren Quelltext
-% entweder in das Copy"~\&"~Paste"~Beispiel oder geben diesen im Dokument aus.
-% In keinem Fall wird der Quelltext ausgeführt.
-%    \begin{macrocode}
-\newenvironment{Tutorial+}{\tud@tut@pre}{%
-  \tud@tut@post%
-  \tud@tut@append%
-}
-\AfterEndEnvironment{Tutorial+}{%
-  \global\let\@TutorialPreamble\relax%
-}
-\newenvironment{Tutorial-}{\tud@tut@pre}{%
-  \tud@tut@post%
-}
-\AfterEndEnvironment{Tutorial-}{%
-  \tud@tut@lst%
-  \global\let\@TutorialPreamble\relax%
-  \par\noindent%
+  \gdef\@tempa{%
+    \tud@tut@lst%
+    \global\let\@InputPreamble\relax%
+  }%
+  \aftergroup\@tempa%
 }
 %    \end{macrocode}
-% Die Umgebung \env{Tutorial!} erzeugt nach der Ausgabe des Quelltextes mit dem
-% Makro \cs{tud@tut@pdf} eine PDF-Datei, welche mit \cs{IncludeTutorial} in das 
+% Die Umgebung \env{Excerpt!} erzeugt nach der Ausgabe des Quelltextes mit dem
+% Makro \cs{tud@tut@pdf} eine PDF-Datei, welche mit \cs{IncludeExcerpt} in das 
 % Tutorial eingebunden werden kann.
 %    \begin{macrocode}
-\newcommand*\@Tutorial{}
-\let\@Tutorial\relax
-\newenvironment{Tutorial!}[1]{%
-  \gdef\@Tutorial{#1}%
+\newcommand*\@ExcerptFile{}
+\let\@ExcerptFile\relax
+\newenvironment{Excerpt!}[1]{%
+  \gdef\@ExcerptFile{#1}%
   \tud@tut@pre%
 }{%
   \tud@tut@post%
   \tud@tut@append%
-}
-\AfterEndEnvironment{Tutorial!}{%
-  \tud@tut@lst%
-  \tud@tut@pdf%
-  \global\let\@TutorialPreamble\relax%
-  \par\noindent%
+  \gdef\@tempa{%
+    \tud@tut@lst%
+    \tud@tut@pdf%
+    \global\let\@InputPreamble\relax%
+  }%
+  \aftergroup\@tempa%
 }
 %    \end{macrocode}
-% \end{macro}^^A \@Tutorial
-% \end{environment}^^A Tutorial!
-% \end{environment}^^A Tutorial-
-% \end{environment}^^A Tutorial+
-% \end{environment}^^A Tutorial*
-% \end{environment}^^A Tutorial'
-% \end{environment}^^A Tutorial
+% \end{macro}^^A \@ExcerptFile
+% \end{environment}^^A Excerpt!
+% \end{environment}^^A Excerpt*
+% \end{environment}^^A Excerpt
+% \begin{environment}{Hint}
+% \changes{v2.02}{2014/09/16}{neu}%^^A
+% \begin{environment}{Hint*}
+% \changes{v2.02}{2014/10/13}{neu}%^^A
+% Um Quelltextausschnitte zur weiterführenden Information anzugeben, wird die
+% die \env{Hint}"=Umgebung definiert. Der Inhalt wird zwar ausgegben und~-- 
+% falls nicht die Sternversion genutzt wurde~-- ausgeführt, jedoch nicht in das 
+% Copy"~\&"~Paste"~Beispiel übernommen. 
+%    \begin{macrocode}
+\newenvironment{Hint}{\tud@tut@pre}{%
+  \tud@tut@post%
+  \gdef\@tempa{%
+    \tud@tut@lst%
+    \tud@tut@input%
+    \global\let\@InputPreamble\relax%
+  }%
+  \aftergroup\@tempa%
+}
+\newenvironment{Hint*}{\tud@tut@pre}{%
+  \tud@tut@post%
+  \gdef\@tempa{%
+    \tud@tut@lst%
+    \global\let\@InputPreamble\relax%
+  }%
+  \aftergroup\@tempa%
+}
+%    \end{macrocode}
+% \end{environment}^^A Hint*
+% \end{environment}^^A Hint
 % \begin{macro}{\tud@tut@pre}
 % \changes{v2.02}{2014/08/19}{neu}%^^A
 % \begin{macro}{\tud@tut@post}
 % \changes{v2.02}{2014/08/19}{neu}%^^A
-% Dies sind die Hilfsmakros, welche zu Beginn und Ende der unterschiedlichen
-% \env{Tutorial}"=Umgebungen für das Sichern der Inhalte in eine Hilfsdatei
+% Dies sind die Hilfsmakros, welche zu Beginn und Ende der beiden Umgebungen 
+% \env{Excerpt} und \env{Hint} für das Sichern der Inhalte in eine Hilfsdatei
 % verantwortlich zeichnen.
 %    \begin{macrocode}
 \newcommand*\tud@tut@pre{%
@@ -633,30 +619,30 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@tut@post
 % \end{macro}^^A \tud@tut@pre
-% \begin{macro}{\tud@tut@out}
+% \begin{macro}{\tud@tut@input}
 % \changes{v2.02}{2014/10/13}{neu}%^^A
-% \begin{macro}{\TutorialPreamble}
+% \begin{macro}{\InputPreamble}
 % \changes{v2.02}{2014/08/20}{neu}%^^A
-% \begin{macro}{\@TutorialPreamble}
+% \begin{macro}{\@InputPreamble}
 % \changes{v2.02}{2014/10/22}{neu}%^^A
-% \begin{macro}{\TutorialHook}
+% \begin{macro}{\InputHook}
 % \changes{v2.02}{2014/10/11}{neu}%^^A
-% \begin{macro}{\@TutorialHook}
+% \begin{macro}{\@InputHook}
 % \changes{v2.02}{2014/10/11}{neu}%^^A
 % Bereitstellung von Hilfsmakros für die formatierte Ausgabe von Quelltexten.
 %    \begin{macrocode}
-\newcommand\@TutorialPreamble{}
-\let\@TutorialPreamble\relax
-\newcommand\TutorialPreamble[1]{\long\gdef\@TutorialPreamble{#1}}
-\newcommand*\@TutorialHook{}
-\let\@TutorialHook\relax
-\newcommand*\TutorialHook[1]{\gdef\@TutorialHook{#1}}%
+\newcommand\@InputPreamble{}
+\let\@InputPreamble\relax
+\newcommand\InputPreamble[1]{\long\gdef\@InputPreamble{#1}}
+\newcommand*\@InputHook{}
+\let\@InputHook\relax
+\newcommand*\InputHook[1]{\gdef\@InputHook{#1}}%
 %    \end{macrocode}
 % Für die Ausgabe des Quelltextergebnisses erfolgt ein linker Einzug. Außerdem 
 % werden unter anderem abhängig von der Verwendung eines erklärenden Textes die 
 % eingefügten vertikalen Abstände angepasst.
 %    \begin{macrocode}
-\newcommand*\tud@tut@out{%
+\newcommand*\tud@tut@input{%
 %    \end{macrocode}
 % Nach dem Ausführen des ersten Argumentes von \cs{@tempa} wird geprüft, ob
 % dieses überhaupt eine sichtbare Ausgabe erzeugt hat. Nur für diesen Fall wird
@@ -674,7 +660,7 @@
       \@tempdima=\ht\@tempboxa%
       \setbox\@tempboxa\box\voidb@x%
       \ifdim\@tempdima>\z@\relax%
-        \par%
+        \endgraf%
         \vspace{\baselineskipglue}%
         \noindent\ignorespaces%
       \fi%
@@ -682,32 +668,32 @@
   }%
 %    \end{macrocode}
 % Da aufgrund der Verwendung der \env{filecontents}"=Umgebung ein optionales
-% Argument für alle Abwandlungen der \env{Tutorial}"=Umgebungen nicht möglich 
-% ist, wird \cs{TutorialPreamble} bereitgestellt, womit der Ausgabe noch ein
+% Argument für alle Abwandlungen der \env{Excerpt}"=Umgebungen nicht möglich 
+% ist, wird \cs{InputPreamble} bereitgestellt, womit der Ausgabe noch ein
 % erläuternder Text vorangestellt werden kann.
 %    \begin{macrocode}
-  \@tempa{\@TutorialPreamble}{}%
+  \@tempa{\@InputPreamble}{}%
   \setlength{\@tempdimc}{\leftskip}%
   \setlength{\leftskip}{\leftmargin}%
 %    \end{macrocode}
 % Durch die zweimalige Verwendung von \val{\string\jobname-temp.tex}~-- einmal 
 % dirket und einmal innerhalb einer Box~-- können darin verwendete Befehle wie
-% \cs{newcommand} zu Fehler führen. Mit dem Makro \cs{TutorialHook} lassen sich 
+% \cs{newcommand} zu Fehler führen. Mit dem Makro \cs{InputHook} lassen sich 
 % diese Konflikte durch eine lokale Redefinition ebensoclher Befehle auflösen
 % (bspw. \cs{let}\cs{newcommand}\cs{renewcommand}).
 %    \begin{macrocode}
   \ActivateWarningFilters[Tutorial]%
-  \@tempa{\input{\jobname-temp.tex}}{\@TutorialHook}%
+  \@tempa{\input{\jobname-temp.tex}}{\@InputHook}%
   \DeactivateWarningFilters[Tutorial]%
-  \global\let\@TutorialHook\relax%
+  \global\let\@InputHook\relax%
   \setlength{\leftskip}{\@tempdimc}%
 }
 %    \end{macrocode}
-% \end{macro}^^A \@TutorialHook
-% \end{macro}^^A \TutorialHook
-% \end{macro}^^A \@TutorialPreamble
-% \end{macro}^^A \TutorialPreamble
-% \end{macro}^^A \tud@tut@out
+% \end{macro}^^A \@InputHook
+% \end{macro}^^A \InputHook
+% \end{macro}^^A \@InputPreamble
+% \end{macro}^^A \InputPreamble
+% \end{macro}^^A \tud@tut@input
 % \begin{macro}{\tud@tut@lst}
 % \changes{v2.02}{2014/10/07}{neu}%^^A
 % Damit wird der Quelltext eingezogen ausgegeben.
@@ -721,7 +707,7 @@
 % \end{macro}^^A \tud@tut@lst
 % \begin{macro}{\tud@tut@pdf}
 % \changes{v2.02}{2014/10/22}{neu}%^^A
-% Die Umgebung \env{Tutorial!} verwendet nach der Ausgabe des Quelltextes
+% Die Umgebung \env{Excerpt!} verwendet nach der Ausgabe des Quelltextes
 % diesen abermals, um daraus eine PDF-Datei zu erzeugen. Dafür wird mithilfe
 % einer \env{filecontents}"=Umgebung eine temporäre \LaTeX-Datei erzeugt, die
 % eine weitere temporäre Datei einbindet, um den enthaltenen Quelltext via 
@@ -746,13 +732,13 @@
 \end{filecontents*}
 \fi
 %    \end{macrocode}
-% Der Quelltext aus der \env{Tutorial!}"=Umgebung wird~-- wie bei allen anderen
-% \env{Tutorial}"=Umgebungen~-- in der Datei \val{\string\jobname-temp.tex}
+% Der Quelltext aus der \env{Excerpt!}"=Umgebung wird~-- wie bei allen anderen
+% \env{Excerpt}"=Umgebungen~-- in der Datei \val{\string\jobname-temp.tex}
 % gesichert. Durch die Nutzung der Option \opt{-jobname=\string\jobname-temp}
 % beim Aufruf von pdf\LaTeX{} wird die Definition von \cs{jobname} in der 
 % aufgerufenen Datei \val{\string\jobname-tutorial-temp.tex} überschrieben und
 % der Inhalt von \val{\string\jobname-temp.tex} wie gewünscht eingebunden und
-% kompiliert. Damit die erstellte PDF-Datei später mit \cs{IncludeTutorial} 
+% kompiliert. Damit die erstellte PDF-Datei später mit \cs{IncludeExcerpt} 
 % eingebunden werden kann, wird diese noch in \cs{\meta{Argument}-temp.pdf} 
 % umbenannt.
 %    \begin{macrocode}
@@ -764,32 +750,32 @@
       pdflatex -jobname=\jobname-temp \jobname-tutorial-temp.tex
     }%
     \ifwindows%
-      \immediate\write18{rename \jobname-temp.pdf \@Tutorial-temp.pdf}%
+      \immediate\write18{rename \jobname-temp.pdf \@ExcerptFile-temp.pdf}%
     \else%
-      \immediate\write18{mv \jobname-temp.pdf \@Tutorial-temp.pdf}%
+      \immediate\write18{mv \jobname-temp.pdf \@ExcerptFile-temp.pdf}%
     \fi%
   \fi%
-  \global\let\@Tutorial\relax%
+  \global\let\@ExcerptFile\relax%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@tut@pdf
-% \begin{macro}{\InputTutorial}
+% \begin{macro}{\InputExcerpt}
 % \changes{v2.02}{2014/10/21}{neu}%^^A
-% Mit \cs{InputTutorial} kann der Inhalt der letzen \env{Tutorial}"=Umgebung 
-% direkt ausgeführt werden, ohne diesen zuvor mit \cs{tud@tut@out} zu prüfen 
+% Mit \cs{InputExcerpt} kann der Inhalt der letzen \env{Excerpt}"=Umgebung 
+% direkt ausgeführt werden, ohne diesen zuvor mit \cs{tud@tut@input} zu prüfen 
 % und zu formatieren.
 %    \begin{macrocode}
-\newcommand*\InputTutorial{\input{\jobname-temp.tex}}
+\newcommand*\InputExcerpt{\input{\jobname-temp.tex}}
 %    \end{macrocode}
-% \end{macro}^^A \InputTutorial
-% \begin{macro}{\IncludeTutorial}
+% \end{macro}^^A \InputExcerpt
+% \begin{macro}{\IncludeExcerpt}
 % \changes{v2.02}{2014/09/10}{neu}%^^A
-% Der Befehl \cs{IncludeTutorial} bindet die mit \env{Tutorial!} erzeugten
+% Der Befehl \cs{IncludeExcerpt} bindet die mit \env{Excerpt!} erzeugten
 % PDF-Grafiken schließlich ein. Das angehängte optionale Argument dient zur
 % Angabe der einzubindenden Seiten der PDF-Datei, wobei die PDF-Grafiken 
 % automatisch auf die passende Breite skaliert werden.
 %    \begin{macrocode}
-\NewDocumentCommand\IncludeTutorial{omO{1}}{%
+\NewDocumentCommand\IncludeExcerpt{omO{1}}{%
   \IfFileExists{#2-temp.pdf}{%
     \@tempcnta\z@%
     \@for\@tempa:=#3\do{\advance\@tempcnta\@ne}%
@@ -814,10 +800,10 @@
   }%
 }
 %    \end{macrocode}
-% \end{macro}^^A \IncludeTutorial
-% \begin{macro}{\tud@tut@input}
+% \end{macro}^^A \IncludeExcerpt
+% \begin{macro}{\tud@tut@read}
 % \changes{v2.02}{2014/08/19}{neu}%^^A
-% \begin{macro}{\tud@tut@output}
+% \begin{macro}{\tud@tut@write}
 % \changes{v2.02}{2014/08/19}{neu}%^^A
 % \begin{macro}{\tud@tut@append}
 % \changes{v2.02}{2014/08/19}{neu}%^^A
@@ -825,13 +811,13 @@
 % \changes{v2.02}{2014/08/19}{neu}%^^A
 % Bei den Tutorials soll zum Schluss ein komplett kompilierbares Beispiel für
 % Copy~\&~Paste gegeben werden. Um dieses zusammenzubauen, werden alle im 
-% Dokument innerhalb der \env{Tutorials}"=Umgebung gegebenen Codefragmente 
-% zusammengesetzt. Um die Quelltexte einlesen und verarbeiten zu können, wird
-% ein Eingabe- sowie ein Ausgabestream benötigt.
+% Dokument innerhalb der Varianten der \env{Excerpt}"=Umgebungen gegebenen
+% Codefragmente zusammengesetzt. Um die Quelltexte einlesen und verarbeiten zu
+% können, wird ein Eingabe- sowie ein Ausgabestream benötigt.
 %    \begin{macrocode}
-\newwrite\tud@tut@output
-\immediate\openout\tud@tut@output=\jobname-all-temp.tex\relax
-\newread\tud@tut@input
+\newwrite\tud@tut@write
+\immediate\openout\tud@tut@write=\jobname-all-temp.tex\relax
+\newread\tud@tut@read
 \newcommand*\tud@tut@line{}
 %    \end{macrocode}
 % Mit \cs{tud@tut@append} wird der Inhalt des zuletzt gesetzten Tutorials aus 
@@ -842,28 +828,28 @@
 \newcommand*\tud@tut@append{%
   \begingroup%
   \endlinechar=-1%
-  \openin\tud@tut@input=\jobname-temp.tex%
+  \openin\tud@tut@read=\jobname-temp.tex%
 %    \end{macrocode}
 % Der Schalter \cs{if@tempswa} wird verwendet, um unnötige Leerzeilen in der
 % Ausgabedatei zu entfernen.
 %    \begin{macrocode}
   \@tempswafalse%
-  \loop\unless\ifeof\tud@tut@input%
-    \read\tud@tut@input to\tud@tut@line%
+  \loop\unless\ifeof\tud@tut@read%
+    \read\tud@tut@read to\tud@tut@line%
     \ifx\tud@tut@line\@empty\else\@tempswatrue\fi%
     \if@tempswa%
-      \immediate\write\tud@tut@output{\unexpanded\expandafter{\tud@tut@line}}%
+      \immediate\write\tud@tut@write{\unexpanded\expandafter{\tud@tut@line}}%
     \fi%
     \ifx\tud@tut@line\@empty\@tempswafalse\else\@tempswatrue\fi%
   \repeat%
-  \closein\tud@tut@input%
+  \closein\tud@tut@read%
   \endgroup%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@tut@line
 % \end{macro}^^A \tud@tut@append
-% \end{macro}^^A \tud@tut@output
-% \end{macro}^^A \tud@tut@input
+% \end{macro}^^A \tud@tut@write
+% \end{macro}^^A \tud@tut@read
 %
 % \iffalse
 %</package&body>
@@ -916,7 +902,7 @@
 % gibt den vorgestellten Quelltext vollständig aus.
 %    \begin{macrocode}
 \newcommand\FinishTutorial[1][]{%
-  \immediate\closeout\tud@tut@output%
+  \immediate\closeout\tud@tut@write%
   \clearpage%
   \addsec{Copy~\&~Paste}%
   \pagestyle{empty}%
