@@ -1,4 +1,4 @@
-% \CheckSum{2320}
+% \CheckSum{2335}
 % \iffalse meta-comment
 % ======================================================================
 %
@@ -49,7 +49,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-manual.dtx}[%
-  2014/10/27 v2.02 TUD-KOMA-Script\space%
+  2014/10/28 v2.02 TUD-KOMA-Script\space%
 %</driver>
 %<identify>\NeedsTeXFormat{LaTeX2e}[2011/06/27]
 %<class&identify>\ProvidesClass{tudscrman}[%
@@ -1544,9 +1544,11 @@
 % \changes{v2.02}{2014/10/09}{entfernt}%^^A
 % Die Auszeichnung und der Indexeintrag einer Klasse. Sollte gerade DIN~Bold 
 % verwendet werden~-- der Befehl wird innerhalb einer Überschrift genutzt~-- 
-% wird lediglich das Hauptargument ausgegeben. Außerdem wird für Einträge mit 
-% dem \pkg{hyperref}-Paket mit \cs{@Class} eine expandierbare Version des 
-% Befehls definiert.
+% wird lediglich das Hauptargument ausgegeben. Das optionale Argument zwischen 
+% Apostrophen kann für die Formatierung eines Querverweises im Text genutzt 
+% werden, das optionale Argument zwischen senkrechten Strichen dient der 
+% Formatierung des Indexeintrages. Außerdem wird für Einträge mit dem Paket
+% \pkg{hyperref} mit \cs{@Class} eine expandierbare Version definiert.
 %    \begin{macrocode}
 \NewDocumentCommand\Class{smd''d||}{%
   \ifdin{#2}{%
@@ -1566,20 +1568,25 @@
 % \changes{v2.02}{2014/10/08}{überarbeitet}%^^A
 % \begin{macro}{\@Package}
 % \begin{macro}{\@TempPackage}
-% \changes{v2.02}{2014/10/08}{entfernt}%^^A
 % \begin{macro}{\DeclarePackage}
 % \changes{v2.02}{2014/10/09}{entfernt}%^^A
 % Für die Auszeichnungen von Paketen gelten vorherigen Aussagen äquivalent. 
+% Für Pakete wird ergänzend ein Hyperlink auf CTAN erzeugt, wenn für dieses 
+% kein Label im Dokument besteht, wo dieses genauer erläutert wird. Mit dem 
+% optionalen Argument in runden Klammern lässt sich der Paketname für den Link, 
+% welcher normalerweise aus obligatorischen Argument entnommen wird, anpassen.
 % Zusätzlich wird ein Befehl für Tutorials erstellt, welcher auf das Handbuch 
 % verweist.
 %    \begin{macrocode}
-\NewDocumentCommand\Package{smd''d||}{%
+\newcommand*\@TempPackage{}
+\NewDocumentCommand\Package{smd''d()d||}{%
   \if@changelog%
     \@ProcessChangedAt{#1}{files}{\protect\sbnfont}{#2}{Paket}%
   \else%
     \ifdin{#2}{%
-      \SetIndexFormat{#1}{#4}%
-      \@ProcessOutput{\textsbn{#2}}'#3'%
+      \IfValueTF{#4}{\def\@TempPackage{#4}}{\def\@TempPackage{#2}}%
+      \SetIndexFormat{#1}{#5}%
+      \@ProcessOutput{\textsbn{#2}}'#3'(\@TempPackage)%
         {files}[\protect\sbnfont]{#2}[~{\idxfont(Paket)}]%
     }%
   \fi%
@@ -1587,11 +1594,15 @@
 \DeclareExpandableDocumentCommand\@Package{sm}{#2}
 %</class&body>
 %<*package&body>
-\NewDocumentCommand\Package{sm}{%
+\NewDocumentCommand\Package{smd()}{%
   \IfBooleanTF{#1}{%
     \manualhyperref{files:#2}{\textsbn{#2}}%
   }{%
-    \href{http://www.ctan.org/pkg/#2}{\textsbn{#2}}%
+    \IfValueTF{#3}{%
+      \href{http://www.ctan.org/pkg/#3}{\textsbn{#2}}%
+    }{%
+      \href{http://www.ctan.org/pkg/#2}{\textsbn{#2}}%
+    }%
   }%
 }
 %</package&body>
@@ -1623,9 +1634,9 @@
 %<*package&body>
 \NewDocumentCommand\Option{smo}{%
   \IfBooleanTF{#1}{%
-    \texttt{#2}\IfValueT{#3}{\texttt{=#3}}%
-  }{%
     \manualhyperref{options:#2}{\texttt{#2}}\IfValueT{#3}{\texttt{=#3}}%
+  }{%
+    \texttt{#2}\IfValueT{#3}{\texttt{=#3}}%
   }%
 }
 %</package&body>
@@ -1666,8 +1677,10 @@
 %</class&body>
 %<*package&body>
 \NewDocumentCommand\Environment{sm}{%
-  \IfBooleanTF{#1}{\texttt{#2}}{%
+  \IfBooleanTF{#1}{%
     \manualhyperref{macros:#2}{\texttt{#2}}%
+  }{%
+    \texttt{#2}%
   }%
 }
 %</package&body>
@@ -1691,8 +1704,10 @@
 %</class&body>
 %<*package&body>
 \NewDocumentCommand\Macro{sm}{%
-  \IfBooleanTF{#1}{\texttt{\bsc#2}}{%
+  \IfBooleanTF{#1}{%
     \manualhyperref{macros:#2}{\texttt{\bsc#2}}%
+  }{%
+    \texttt{\bsc#2}%
   }%
 }
 %</package&body>
@@ -1764,8 +1779,10 @@
 %</class&body>
 %<*package&body>
 \NewDocumentCommand\Length{sm}{%
-  \IfBooleanTF{#1}{\texttt{\bsc#2}}{%
+  \IfBooleanTF{#1}{%
     \manualhyperref{macros:#2}{\texttt{\bsc#2}}%
+  }{%
+    \texttt{\bsc#2}%
   }%
 }
 %</package&body>
@@ -1911,7 +1928,7 @@
 % \marg{Index}\parg{Haupteintrag}\oarg{Vorsatz}\marg{Eintrag}\oarg{Anhang}
 % \endgroup
 %    \begin{macrocode}
-\NewDocumentCommand\@ProcessOutput{mod''md()omo}{%
+\NewDocumentCommand\@ProcessOutput{mod''d()md()omo}{%
 %    \end{macrocode}
 % Mit dem Schalter \cs{if@declare} wird unterschieden, ob ein beliebiger
 % Auszeichnungsbefehl innerhalb der Umgebung~\env{Declaration} verwendet wird.
@@ -1940,7 +1957,7 @@
         }%
       \fi%
       \if@noindex\else%
-        \IfValueTF{#5}{\edef\@tempa{#4:#5:#7}}{\edef\@tempa{#4:#7}}%
+        \IfValueTF{#6}{\edef\@tempa{#5:#6:#8}}{\edef\@tempa{#5:#8}}%
 %    \end{macrocode}
 % Wird zur Deklaration die Umgebung \env{Declaration*} genutzt, so wird der 
 % Hyperlink ein ganzes Stück nach oben verschoben. Hintergrund ist, dass diese 
@@ -1959,7 +1976,7 @@
           \Hy@raisedlink{\hyperdef{\jobname}{\@tempa}{}}%
         \fi%
         \label{\@tempa}%
-        \@HyperIndex{#4}{#5}{#6}{#7}{#8}{(declare}%
+        \@HyperIndex{#5}{#6}{#7}{#8}{#9}{(declare}%
       \fi%
 %    \end{macrocode}
 % Die \env{Declaration*}"=Umgebung erzeugt keine direkte Ausgabe sondern nur 
@@ -1971,7 +1988,7 @@
       \fi%
     \else%
       \if@noindex\else%
-        \@HyperIndex{#4}{#5}{#6}{#7}{#8}{declare)}%
+        \@HyperIndex{#5}{#6}{#7}{#8}{#9}{declare)}%
       \fi%
     \fi%
   \else%
@@ -1986,7 +2003,7 @@
       }%
     \else%
       \expandafter\IfBooleanF\expandafter{\@IndexFormat}{%
-        \@HyperIndex{#4}{#5}{#6}{#7}{#8}{\@IndexFormat}%
+        \@HyperIndex{#5}{#6}{#7}{#8}{#9}{\@IndexFormat}%
       }%
     \fi%
 %    \end{macrocode}
@@ -1996,7 +2013,7 @@
 % normale textuelle Ausgabe. Für Parameter muss der Hyperlink dabei aufgrund 
 % des definierten Haupteintrag etwas anders ausgeführt werden (\cs{@tempa}). 
 %    \begin{macrocode}
-    \IfValueTF{#5}{\edef\@tempa{#4:#5:#7}}{\edef\@tempa{#4:#7}}%
+    \IfValueTF{#6}{\edef\@tempa{#5:#6:#8}}{\edef\@tempa{#5:#8}}%
     \ifcsdef{r@\@tempa}{%
 %    \end{macrocode}
 % Wurde ein Format für den Querverweis gesetzt, muss dieses validiert werden. 
@@ -2025,7 +2042,7 @@
       \@tempc\@tempb%
     }{%
 %    \end{macrocode}
-% Wurde ein Format für den Querverweis gesetzt und existiert kein dazugehöriges 
+% Wurde ein Format für den Querverweis gesetzt und es existiert kein passendes
 % Label, wird eine Warnung ausgegeben.
 %    \begin{macrocode}
       \IfValueT{#3}{%
@@ -2033,7 +2050,17 @@
           No cross-reference created, label \@tempa\space is missing%
         }%
       }%
-      \mbox{#1\IfValueT{#2}{#2}}%
+%    \end{macrocode}
+% Sollte ein Paket mit \cs{Package} angegeben worden sein, so wurde das erste
+% optionale Argument in runden Klammern verwendet. Dieses wird genutzt, um 
+% einen Hyperlink auf CTAN zu generieren. Die Ausgabe selbst besteht in jedem 
+% Fall aus dem ersten obligatorischen und ggf. dem ersten optionalen Argument.
+%    \begin{macrocode}
+      \IfValueTF{#4}{%
+        \href{http://www.ctan.org/pkg/#4}{\mbox{#1\IfValueT{#2}{#2}}}%
+      }{%
+        \mbox{#1\IfValueT{#2}{#2}}%
+      }%
     }%
   \fi%
 %    \end{macrocode}
