@@ -1,0 +1,281 @@
+\RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
+\documentclass[%
+  english,ngerman,%
+  geometry=no,DIV=12,automark,%
+]{tudscrartcl}
+\usepackage{selinput}
+\SelectInputMappings{adieresis={ä},germandbls={ß}}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+
+\usepackage{tudscrman}
+\lstset{%
+  inputencoding=utf8,extendedchars=true,
+  literate=%
+    {ä}{{\"a}}1 {ö}{{\"o}}1 {ü}{{\"u}}1
+    {Ä}{{\"A}}1 {Ö}{{\"O}}1 {Ü}{{\"U}}1
+    {~}{{\textasciitilde}}1 {ß}{{\ss}}1
+}
+\TUDoptions{cdfont=false}
+\KOMAoptions{headings=normal}
+
+\usepackage{tudscrsupervisor}
+\usepackage{tabu,tabularx,booktabs}
+\usepackage{longtable}
+\usepackage{ltxtable}
+\usepackage{filecontents}
+
+\usepackage{units}
+\AfterPackage*{hyperref}{%
+  \usepackage[%
+    automake,%
+    acronym,%
+    symbols,%
+    nomain,%
+    translate=babel,%
+    nogroupskip,%
+    section=subsubsection,%
+  ]{glossaries}
+  \setStyleFile{\jobname-temp}
+  \renewcommand*{\glsglossarymark}[1]{}
+  \makeglossaries
+}
+\usepackage{csquotes}
+\usepackage[backend=biber,style=alphabetic]{biblatex}
+\usepackage{filecontents}
+\addbibresource{treatise-temp.bib}
+
+\usepackage{enumitem}
+
+\renewcommand{\floatpagefraction}{0.7}
+
+\ifpdf
+  \usepackage{tikz}
+  \usetikzlibrary{chains}
+  \usetikzlibrary{decorations.markings}
+  \tikzset{on grid}
+\fi
+
+\usepackage{pstricks,pst-node}
+\usepackage{blindtext}
+\begin{document}
+
+
+\section{Tabellen}
+\label{sec:tables}
+Zum Thema \enquote{Tabellensatz mit \hologo{LaTeX}} sind bereits zahlreiche 
+\hrfn{http://userpage.fu-berlin.de/latex/Materialien/tabsatz.pdf}{Leitfäden} im 
+Internet zu finden. Deshalb werde ich meine Ausführungen zu diesem Punkt 
+relativ kurz halten. Zwei Regeln sollten beim Satz von Tabellen in jedem Fall 
+beachtet werden:
+%
+\begin{enumerate}[itemindent=0pt,labelwidth=*,labelsep=1em,label=\Roman*.]
+\item keine vertikalen Linien
+\item keine doppelten Linien
+\end{enumerate}
+%
+Das Paket \Package{booktabs} ist für den Satz von hochwertigen Tabellen eine 
+große Hilfe und stellt die Befehle \Macro{toprule}, \Macro{midrule} sowie
+\Macro{cmidrule} und \Macro{bottomrule} für unterschiedliche horizontale Linien 
+bereit. Außerdem existiert das Paket \Package{array}, welches mit dem Befehl 
+\Macro{newcolumntype} die Definition eigener Spaltentypen sowie die Verwendung 
+sogenannter \enquote{Hooks} vor und nach Einträgen innerhalb einer Spalte 
+(\PValue{>\{\dots\}}\PName{Spaltentyp}\PValue{<\{\dots\}}) ermöglicht.
+
+Für alle im Folgenden vorgestellten Umgebungen zum Setzen von Tabellen gilt, 
+dass die Inhalte zeilenweise angegeben werden, wobei die Einträge für die 
+einzelnen Spalten mit \PValue{\&} voneinander zu trennen sind. Das Beenden 
+einer Tabellenzeile und der Wechsel zur nächsten erfolgt normalerweise mit 
+\Macro{\bsc}. Da jedoch einige \hologo{LaTeX}-Pakete diesen Befehl innerhalb 
+von Tabellen lokal ändern ist es zur Vermeidung unnötiger Fehler wesentlich 
+sicherer, das Zeilenende ausschließlich mit \Macro{tabularnewline} zu setzen.
+
+\subsection{Die Standardumgebung \Environment{tabular}}
+Normalerweise gibt es vier unterschiedliche Spaltentypen. Die Spaltentypen 
+\PValue{l}, \PValue{c} und \PValue{r} stehen für linksbündige, zentrierte und 
+rechtsbündige Spalten, welche allerdings keinen Zeilenumbruch erlauben. Der 
+Inhalt wird quasi wie in einer \Macro {mbox} gesetzt, wodurch die Spalten sehr 
+breit werden und über den Seitenrand hinausragen können.
+
+Der Spaltentyp~\PValue{p}\Parameter{Breite} hingegen legt die Spaltenbreite 
+fest und setzt den Inhalt in jeder Zeile in eine \Macro{parbox}, wobei diese 
+wird mit ihrer obersten Zeile an der Grundlinie ausgerichtet wird. Das Paket
+\Package{array} stellt außerdem die Spaltentypen~\PValue{m}\Parameter{Breite} 
+und ~\PValue{b}\Parameter{Breite} bereit, welche ebenfalls mit \Macro{parbox} 
+gesetzt werden, die Ausrichtung an der Grundlinie jedoch zentriert respektive 
+an der unteren Zeile der Box erfolgt. Es folgt ein kurzes Beispiel.
+%
+\begin{Hint}
+\begin{tabular}{lcrp{40mm}}
+\toprule
+\textbf{Linksbündig} & \textbf{Zentriert} & 
+\textbf{Rechtsbündig} & \textbf{Blocksatz} \tabularnewline
+\midrule
+a   & b   & c   & Dieser Text erscheint im Blocksatz \tabularnewline
+aa  & bb  & cc  & Außerdem sind Zeilenumbrüche möglich\tabularnewline
+aaa & bbb & ccc & Zeilenumbruchsvorschauansicht\tabularnewline
+\bottomrule
+\end{tabular}
+\end{Hint}
+%
+Die Tabellenbreite ergibt sich aus der Breite der einzelnen Spalten. Bei dieser 
+Umgebung liegt es allein beim Anwender, auf die korrekte Breite der Tabelle zu 
+achten, damit diese nicht über die Seitenränder hinausragt. Das kann auf Dauer 
+recht aufwändig werden. Das Festlegen der Gesamtbreite einer Tabelle durch den 
+Anwender und das automatische Berechnen einiger oder aller Spaltenbreiten ist 
+sicher die angenehmere Variante. Hierfür stehen die Pakete \Package{tabularx} 
+oder \Package{tabu} zur Verfügung, welche nun kurz vorgestellt werden sollen.
+Wie man das Problem des nicht umbrochenen Eintrags in der letzten Spalte der 
+dritten Zeile lösen kann, wird ebenfalls dort erklärt.
+
+\subsection{Die Tabellenumgebung \Environment{tabularx}}
+Das Paket \Package{tabularx} stellt den Spaltentyp~\PValue{X} bereit, welcher
+prinzipiell dem Spaltentyp~\PValue{p} entspricht. Auch für diesen wird eine 
+\Macro{parbox} verwendet, allerdings wird deren Breite \emph{automatisch} 
+berechnet. Die Umgebung \Environment{tabularx} erwartet vor der Angabe der 
+Spaltentypen als obligatorisches Argument die gewünschte Breite der Tabelle. Zu 
+beachten ist, dass Spalten vom Typ~\PValue{l},~\PValue{c}~und~\PValue{r} 
+weiterhin ohne Zeilenumbruch gesetzt werden. Nur für Spalten vom Typ~\PValue{X} 
+und deren Derivate wird aus dem verbliebenen Platz die Breite berechnet. Für 
+die \Environment{tabularx}-Umgebung wird das vorherige Beispiel wiederholt.
+%
+\begin{Hint}
+\begin{tabularx}{12cm}{lcrX}
+\toprule
+\textbf{Linksbündig} & \textbf{Zentriert} & 
+\textbf{Rechtsbündig} & \textbf{Blocksatz} \tabularnewline
+\midrule
+a   & b   & c   & Dieser Text erscheint im Blocksatz \tabularnewline
+aa  & bb  & cc  & Außerdem sind Zeilenumbrüche möglich\tabularnewline
+aaa & bbb & ccc & Zeilenumbruchsvorschauansicht\tabularnewline
+aaa & bbb & ccc & \hspace{0pt}Zeilenumbruchsvorschauansicht\tabularnewline
+\bottomrule
+\end{tabularx}
+\end{Hint}
+%
+Die Breite der letzten Spalte wurde dabei aus der Angabe der Gesamtbreite mit 
+\PValue{12cm} berechnet. Des Weiteren ist zu sehen, wie das Problem des 
+Zeilenumbruchs behandelt werden kann. Normalerweise wird das erste Wort in 
+einem Absatz von \hologo{LaTeX} \emph{nie} umbrochen. Das kann mit dem Einfügen 
+eines horizontalen Abstandes mit dem Wert \PValue{0pt} umgangen werden. Die 
+gefundene Lösung ist allerdings alles andere als elegant.
+
+Mit den Möglichkeiten des Paketes \Package{array} ist das Problem relativ 
+schnell gelöst. Es wird mit \Macro{newcolumntype} ein neuer Spaltentyp 
+definiert. Das erste Argument von \Macro{newcolumntype} legt den Namen des 
+Spaltentyps fest. Mit \PValue{>\Parameter{Definitionen}}\Parameter{Typ} wird im 
+zweiten Argument das Ausführen von \PName{Definitionen} vor dem Setzen des 
+eigentlichen Inhaltes in einer \Parameter{Typ}"~Spalte definiert.
+
+Es wird ein neuer, auf der \PValue{X}"~Spalten basierender Typ~\PValue{Y} 
+definiert, welcher zu Beginn der Spalte den Phantomabstand automatisch einfügt. 
+Darauf basierend werden drei Spaltentypen für den links- und rechtsbündigen 
+sowie zentrierten Textsatz mit einem möglichen Zeilenumbruch erstellt.
+%
+\InputHook{\renewcommand*{\newcolumntype}[2]{}}
+\begin{Excerpt}
+\newcolumntype{Y}{>{\hspace{0pt}}X}
+\newcolumntype{L}{>{\raggedright}Y}
+\newcolumntype{C}{>{\centering}Y}
+\newcolumntype{R}{>{\raggedleft}Y}
+\end{Excerpt}
+%
+Die Umgebung \Environment{tabularx} erwartet vor der Angabe der Spaltentypen 
+als obligatorisches Argument die gewünschte Breite der Tabelle. Es ist dabei zu 
+beachten, dass Spalten vom Typ~\PValue{l},~\PValue{c}~und~\PValue{r} weiterhin 
+ohne Zeilenumbruch gesetzt werden. Nur für Spalten vom Typ~\PValue{X} und deren 
+Derivate wird aus dem verbliebenen Platz die Breite berechnet. Nachfolgend wird 
+die Tabelle gesetzt, das Ergebnis ist in \autoref{tab:tabularx} zu sehen.
+%
+\begin{Excerpt*}
+\begin{table}
+\begin{tabularx}{\textwidth}{@{}LCRY@{}}
+\toprule
+\textbf{Linksbündig} & \textbf{Zentriert} & 
+\textbf{Rechtsbündig} & \textbf{Blocksatz} \tabularnewline
+\midrule
+Ein linksbündiger Blindtext zur Demonstration einer L"~Spalte &
+Ein zentrierter Blindtext zur Demonstration einer C"~Spalte &
+Ein rechtsbündiger Blindtext zur Demonstration einer R"~Spalte &
+Ein im Blocksatz gesetzter Blindtext zur Demonstration einer Y"~Spalte
+\tabularnewline
+aaa & bbb & ccc & Zeilenumbruchsvorschauansicht\tabularnewline
+\bottomrule
+\end{tabularx}
+\caption{Eine \texttt{tabularx}-Tabelle}\label{tab:tabularx}
+\end{table}
+\end{Excerpt*}
+\InputExcerpt
+%
+Wahrscheinlich werden Sie sich über das Konstrukt~\PValue{@\{\}} vor der ersten 
+und nach der letzten Spalte wundern. Normalerweise wird in einer Tabelle mit 
+\Macro{hskip}\Macro{tabcolsep} vor \emph{und} nach jeder Spalte ein 
+horizontaler Zwischenraum eingefügt.%
+\footnote{Der Abstand zweier Spalten beträgt folglich 2\Macro{tabcolsep}.}
+Mit \PValue{@\Parameter{Ausdruck}} kann dies verhindert und stattdessen  
+\Parameter{Ausdruck} ausgeführt werden. Mit der Verwendung von \PValue{@\{\}} 
+an den entsprechenden Stellen bei der Angabe der Spaltentypen wurde der vor der 
+ersten und nach der letzten Tabellenspalte eingefügten Abstand unterdrückt.
+
+\subsection{Die Tabellenumgebung \Environment{tabu}}
+Das Paket \Package{tabu} bietet eine mächtige und komfortable Alternative zu 
+\Package{tabularx}. Es kam in diesem Tutorial bereits für die Verzeichnisse von 
+Abkürzungen und Symbolen in \autoref{sec:glossaries} zum Einsatz. Das Paket 
+definiert ebenso einen Spaltentyp~\PValue{X}, welchem allerdings zusätzlich ein 
+optionales Argument angehängt werden kann. Mit diesem lässt sich sowohl die 
+Gewichtung der automatisch berechneten Spalten untereinander als auch die 
+Positionierung zur Grundlinie sowie die Ausrichtung des Inhaltes ändern.
+%
+
+\begin{Hint}
+\begin{tabu}{lcrp{40mm}}
+\toprule
+\textbf{Linksbündig} & \textbf{Zentriert} & 
+\textbf{Rechtsbündig} & \textbf{Blocksatz} \tabularnewline
+\midrule
+a   & b   & c   & Dieser Text erscheint im Blocksatz \tabularnewline
+aa  & bb  & cc  & Außerdem sind Zeilenumbrüche möglich\tabularnewline
+aaa & bbb & ccc & Etwas Text, um dieses Feld zu füllen\tabularnewline
+\bottomrule
+\end{tabu}
+\end{Hint}
+
+\tabulinesep=_\dp\strutbox
+
+\begin{Hint}
+\begin{tabu}{lcrp{40mm}}
+\toprule
+\textbf{Linksbündig} & \textbf{Zentriert} & 
+\textbf{Rechtsbündig} & \textbf{Blocksatz} \tabularnewline
+\midrule
+a   & b   & c   & Dieser Text erscheint im Blocksatz \tabularnewline
+aa  & bb  & cc  & Außerdem sind Zeilenumbrüche möglich\tabularnewline
+aaa & bbb & ccc & Etwas Text, um dieses Feld zu füllen\tabularnewline
+\bottomrule
+\end{tabu}
+\end{Hint}
+
+\begin{Excerpt*}
+\begin{table}
+\caption{Eine \texttt{tabu}-Tabelle}\label{tab:tabu}
+\begin{tabu} to \textwidth {@{}X[2,l]X[2,c]X[2,r]X[3,j]@{}}
+\toprule
+\textbf{Linksbündig} & \textbf{Zentriert} & 
+\textbf{Rechtsbündig} & \textbf{Blocksatz} \tabularnewline
+\midrule
+Ein linksbündiger Blindtext zur Demonstration einer X[l]"~Spalte &
+Ein zentrierter Blindtext zur Demonstration einer X[c]"~Spalte &
+Ein rechtsbündiger Blindtext zur Demonstration einer X[r]"~Spalte &
+Ein im Blocksatz gesetzter Blindtext zur Demonstration einer X[j]"~Spalte
+\tabularnewline
+Ein linksbündiger Blindtext zur Demonstration einer X[l]"~Spalte &
+Ein zentrierter Blindtext zur Demonstration einer X[c]"~Spalte &
+Ein rechtsbündiger Blindtext zur Demonstration einer X[r]"~Spalte &
+Ein im Blocksatz gesetzter Blindtext zur Demonstration einer X[j]"~Spalte
+\tabularnewline
+\bottomrule
+\end{tabu}
+\end{table}
+\end{Excerpt*}
+\InputExcerpt
+\end{document}

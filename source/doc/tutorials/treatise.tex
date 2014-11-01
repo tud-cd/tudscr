@@ -16,8 +16,11 @@
     {Ä}{{\"A}}1 {Ö}{{\"O}}1 {Ü}{{\"U}}1
     {~}{{\textasciitilde}}1 {ß}{{\ss}}1
 }
+\TUDoptions{cdfont=false}
+\KOMAoptions{headings=normal}
+
 \usepackage{tudscrsupervisor}
-\usepackage{tabu,booktabs}
+\usepackage{tabu,tabularx,booktabs}
 \usepackage{units}
 \AfterPackage*{hyperref}{%
   \usepackage[%
@@ -52,12 +55,10 @@
 \usepackage{pstricks,pst-node}
 
 \begin{document}
-\TUDoptions{cdfont=false}
-\KOMAoptions{headings=normal}
 \title{%
   Ein Anwenderleitfaden für das Erstellen einer wissenschaftlichen Abhandlung%
 }
-\author{Falk Hanisch}
+\author{Falk Hanisch\thanks{\noexpand\href{mailto:\tudscrmail}{\tudscrmail}}}
 \date{10.09.2014}
 \makeatletter
 \begingroup%
@@ -82,10 +83,12 @@
   auftretenden Erfordernisse zu bearbeiten.
   
   Dieses Tutorial hat \emph{nicht} die Intention, \hologo{LaTeX}-Einsteigern 
-  sämtliche Grundlagen zu erläutern. Vielmehr wird davon ausgegangen, das der 
-  Leser die ersten Versuche mit \hologo{LaTeXe} bereits hinter sich hat. 
-  Dennoch wird versucht, alle Schritte möglichst leicht nachvollziehbar zu 
-  gestalten.
+  sämtliche Grundlagen zu erläutern. Vielmehr wird davon ausgegangen, dass Sie 
+  bereits erste Erfahrungen mit \hologo{LaTeXe} gesammelt haben. Dennoch wird 
+  versucht, alle Schritte möglichst leicht nachvollziehbar zu gestalten. Sollte 
+  Ihnen beim Lesen und Durcharbeiten des Tutorials etwas auf- oder missfallen, 
+  so dürfen Sie mich gerne per E-Mail kontaktieren. Auch Anregungen und Wünsche 
+  dürfen sie mir gegenüber gerne kommunizieren.
   
   Für absolute Neueinsteiger gibt es einige freie Tutorials, welche die ersten 
   Schritte mit \hologo{LaTeXe} stark erleichtern. Sehr empfehlenswert ist die 
@@ -102,16 +105,18 @@
   umgesetzt werden. Viele der hier verwendeten Optionen und Befehle aus dem 
   \TUDScript-Bundle werden nur sporadisch in ihrer Grundfunktion erläutert. 
   Eine detaillierte Erläuterung lässt sich jedoch jederzeit sehr einfach über 
-  die farbigen Hyperlinks im \href{run:../tudscr.pdf}{\TUDScript-Handbuch} 
-  öffnen. Des Weiteren wird hier sehr häufig auf die Dokumentation zu einzelnen 
-  Paketen hingewiesen. Diese lassen sich sehr einfach über die Kommandozeile 
-  respektive das Terminal über den Aufruf \PValue{texdoc }\PName{Paket} öffnen.
+  die farbigen Hyperlinks im \manualhyperref{}{\TUDScript-Handbuch} öffnen. Des 
+  Weiteren wird in diesem Tutorial auf verschiedenste Pakete verwiesen, deren 
+  Dokumentation sich entweder über die Kommandozeile respektive das Terminal 
+  mit dem Aufruf \PValue{texdoc }\PName{Paket} oder über den Hyperlink auf das 
+  \href{http://www.ctan.org/}{Comprehensive TeX Archive Network (CTAN)} öffnen 
+  lässt.
   
   Der Anwenderleitfaden muss nicht zwingend vollständig nachvollzogen werden. 
-  Dieser ist in einzelne Abschnitte untergliedert, damit der Anwender sich 
-  bestimmte Aspekte erarbeiten kann. Sollten Querbezüge zu den einzelnen 
-  Abschnitten bestehen, werden diese auch genannt. Zu guter Letzt findet sich 
-  am Ende dieses Dokumentes das komplette Tutorial als ausführbarer Quelltext. 
+  Dieser ist in einzelne Abschnitte untergliedert, damit Sie sich bestimmte 
+  Aspekte erarbeiten können. Sollten Querbezüge zu den einzelnen Abschnitten 
+  bestehen, werden diese auch genannt. Zu guter Letzt findet sich am Ende 
+  dieses Dokumentes das komplette Tutorial als ausführbarer Quelltext. 
   \end{abstract}
 ]
 %\clearpage
@@ -180,10 +185,10 @@ Bedürfnisse angepasst werden. Genaueres wird in \autoref{sec:lists} erläutert.
 \end{Excerpt*}
 %
 Das Paket \Package{tabu} ist relativ neu und versucht, viele Funktionalitäten 
-ganz unterschiedlicher Pakete für den Tabellensatz in sich zu vereinen. Damit 
-die erstellten Tabellen auch gut aussehen, ist das Paket \Package{booktabs} 
-sehr zu empfehlen. Hinweise zum guten und korrekten Tabellensatz werden in 
-\autoref{sec:tables} gegeben.
+ganz unterschiedlicher Pakete~-- beispielsweise von \Package{tabularx}~-- für 
+den Tabellensatz in sich zu vereinen. Damit die erstellten Tabellen auch gut 
+aussehen, ist das Paket \Package{booktabs} sehr zu empfehlen. Hinweise zum 
+guten und korrekten Tabellensatz werden in \autoref{sec:tables} gegeben.
 %
 \begin{Excerpt*}
 \usepackage{tabu}
@@ -749,18 +754,41 @@ gesetzt. Dies ist absolut ausreichend. Mir persönlich ist die Darstellung in
 einer quasi-tabellarischen Form jedoch lieber. Dabei soll eigentliche Stil mit 
 fettgedruckter Abkürzung beibehalten werden. Das \Package{glossaries}"=Paket 
 stellt zwar auch eine Menge Stilen in Tabellenform bereit, allerdings nicht in 
-dem gewünschten Stil. Deshalb wird hier gezeigt, wie ein eigener Stil kreiert 
-werden kann. Dafür wird der Befehl \Macro{newglossarystyle} verwendet. Die 
-Definition des neuen Stils \PValue{acronymstabu} wird nachfolgend ausgegeben, 
-die Erläuterung dazu schließt sich daran an:
+dem gewünschten Stil. Deshalb wird nachfolgend gezeigt, wie ein eigener Stil in 
+Tabellenform kreiert werden kann. 
+
+Es bieten sich die beiden Tabellenumgebungen \Environment{tabularx} oder 
+\Environment{tabu} an, bei denen die Spaltenbreite teilweise automatisch 
+berechnet wird, um sich manuelle Formatierungsarbeiten zu sparen. Hier werden 
+beide Varianten vorgestellt. Wie Sie Stile definieren, die auch Seitenumbrüche 
+in der Tabelle zulassen, können Sie etwas später bei Symbolverzeichnissen in 
+diesem \autorefname[sec:glossaries] erfahren. Falls Sie noch keine Erfahrungen 
+mit dem Satz von Tabellen in \hologo{LaTeX} haben, lohnt sich vorher vielleicht 
+ein Blick in \autoref{sec:tables}, um die verwendeten Befehle und Umgebungen zu 
+verstehen.
+
+\minisec{Eigener Stil mit \Environment{tabularx}}
+Für das Definieren eines eigenen Glossarstils wird \Macro{newglossarystyle} 
+verwendet, wobei für den neuen Stils die Umgebung \Environment{theglossary} 
+umdefiniert wird. Als erstes wird \Environment{tabularx} verwendet. Dabei 
+werden drei Spalten definiert. Die erste und letzte Spalte sind schlicht 
+linksbündig~(\PValue{l}). In diesen werden die Abkürzung selbst respektive die 
+Seitenzahl eingetragen. Die Verwendung von~\PValue{@\{\}} führt dazu, dass der 
+normalerweise vor der ersten und nach der letzten Spalte eingefügte Abstand von 
+\Length{tabcolsep} entfällt. Die Breite der Spalte vom Typ~\PValue{X} wird 
+automatisch berechnet. Aufgrund der Implementierung von \Environment{tabularx} 
+kann man diese nicht als verschachtelte Umgebung verwenden sondern muss diese 
+direkt in der Low"~Level"~Variante (\Macro{tabularx} und \Macro{endtabularx}) 
+nutzen. Die Definition des neuen Stils \PValue{acrotabularx} wird nachfolgend 
+ausgegeben, die weitergehende Erläuterung schließt sich daran an.
 %
 \InputHook{\let\newglossarystyle\renewglossarystyle}
 \begin{Excerpt}
-\newglossarystyle{acronymstabu}{%
+\newglossarystyle{acrotabularx}{%
   \renewenvironment{theglossary}{%
-    \begin{tabu}spread 0pt{@{}lX<{\strut}l@{}}%
+    \tabularx{\linewidth}{@{}lXl@{}}%
   }{%
-    \end{tabu}\par\bigskip%
+    \endtabularx\par\bigskip%
   }%
   \renewcommand*{\glossaryheader}{}%
   \renewcommand*{\glsgroupheading}[1]{}%
@@ -774,30 +802,6 @@ die Erläuterung dazu schließt sich daran an:
 }
 \end{Excerpt}
 %
-Als erstes wird die Umgebung \Environment{theglossary} umdefiniert, wobei 
-innerhalb dieser \Environment{tabu} aus dem Paket \Package{tabu} verwendet 
-wird. Dabei werden drei Spalten definiert. Die erste und letzte Spalte sind 
-schlicht linksbündig~(\PValue{l}). In diesen werden die Abkürzung selbst 
-beziehungsweise die Seitenzahl eingetragen. Die Verwendung von~\PValue{@\{\}} 
-führt dazu, dass der normalerweise vor der ersten und nach der letzten Spalte 
-eingefügte Abstand von \Length{tabcolsep} entfällt. Die mittlere Spalte vom 
-Typ~\PValue{X} verhält sich prinzipiell wie der gleichnamige Spaltentyp aus dem 
-Paket \Package{tabularx}. Allerdings gibt es hier eine Besonderheit.
-
-Für \Environment{tabularx}"=Tabellen muss generell eine feste Tabellenbreite 
-angegeben werden. Die Breite der \PValue{X}"~Spalten wird anhand dieser und 
-dem bereits für andere Spalten vom Typ~\PValue{l},~\PValue{r}~und~\PValue{c} 
-benötigten Platz berechnet. Für \Environment{tabu}"=Tabellen kann anstelle 
-einer festen Breite auch \PValue{spread 0pt} angegeben werden. Dadurch werden 
-Spalten vom Typ~\PValue{X} anfänglich in ihrer natürlichen Breite gesetzt. 
-Sobald jedoch die Gesamtbreite der Tabelle die Seitenbreite überschreiten 
-würde, werden die \PValue{X}"~Spalten automatisch umbrochen. Geschieht dies 
-tatsächlich, gibt es beim Paket \Package{tabu} jedoch ein kleineres Problem. 
-In umbrochenen Spalten setzt \Package{tabu} zu wenig vertikalen Freiraum am 
-unteren Ende. Um dies zu beheben wird am Schluss jeder \PValue{X}"~Spalte mit
-\PValue{X<\{\Macro{strut}\}} einfach der Befehl \Macro{strut} angehängt, der 
-vertikalen Freiraum ober- und unterhalb der aktuellen Grundlinie einfügt.
-
 Der Rest des Stils ist recht schnell erläutert. Zunächst wird auf Tabellenköpfe 
 sowie Gruppierungen (Abstände und Überschriften) verzichtet. Schließlich ist 
 der Befehl \Macro{glossentry} verantwortlich für die Formatierung der Einträge 
@@ -818,19 +822,78 @@ verwendet wurde, ausgegeben wird. Zum Abschluss die resultierende Ausgabe des
 neuen Stils.
 %
 \begin{Excerpt*}
-\printacronyms[style=acronymstabu]
+\printacronyms[style=acrotabularx]
 \end{Excerpt*}
 \begin{quoting}[rightmargin=0pt]
 \vspace*{-\baselineskip}
-\printacronyms[type=acronym,style=acronymstabu]
+\InputExcerpt
+\end{quoting}
+%
+Sollte der Platz für die Erläuterungen wie in diesem Beispiel in der mittleren 
+Spalte mehr als ausreichend sein und kein Zeilenumbruch benötigt werden, kann 
+auch einfach eine \Environment{tabular}"=Umgebung mit einer \PValue{l}"~Spalte 
+anstelle von \PValue{X} verwendet werden.
+
+\minisec{Eigener Stil mit \Environment{tabu}}
+Das Paket \Package{tabu} stellt mit \Environment{tabu} eine sehr komfortable 
+und gut zu nutzende Umgebung bereit. Leider ist das Paket in er aktuellen 
+Version~v2.8 mit etwas Vorsicht zu genießen, mehr dazu ist im Handbuch zu 
+\Package*{tabu} beschrieben. Nichtsdestotrotz soll hier gezeigt werden, wie man 
+die Umgebung verwenden kann. Äquivalent zu \Environment{tabularx} bietet auch
+\Environment{tabu} einen \PValue{X}"~Spaltentyp. Allerdings gibt es hier eine 
+Besonderheit. Für \Environment{tabularx}"=Tabellen muss generell eine feste 
+Tabellenbreite angegeben werden. Die Breite der \PValue{X}"~Spalten wird anhand 
+der angegebenen, gewünschten Gesamtbreite und dem bereits für andere Spalten 
+vom Typ~\PValue{l},~\PValue{r}~und~\PValue{c} benötigten Platz berechnet. 
+
+Für \Environment{tabu}"=Tabellen kann anstelle einer fest vorgegebenen Breite 
+auch \PValue{spread~0pt} angegeben werden. Dadurch werden \PValue{X}"~Spalten 
+anfänglich in ihrer natürlichen Breite gesetzt. Sobald jedoch die Gesamtbreite 
+der Tabelle den zur Verfügung stehenden Platz bis zum Zeilenende überschreiten 
+würde, werden die \PValue{X}"~Spalten automatisch umbrochen. Geschieht dies 
+tatsächlich, gibt es beim Paket \Package{tabu} jedoch ein kleineres Problem. 
+In umbrochenen Spalten setzt \Package{tabu} zu wenig vertikalen Freiraum am 
+unteren Ende. Um dies zu beheben wird am Schluss jeder \PValue{X}"~Spalte mit
+\PValue{X<\{\Macro{strut}\}} einfach der Befehl \Macro{strut} angehängt, der 
+vertikalen Freiraum ober- und unterhalb der aktuellen Grundlinie einfügt. In 
+\autoref{sec:tables} wird ein Ansatz aufgezeigt, wie man dies automatisiert 
+ausmerzen kann. Der Rest des Stils ist identisch zu \PValue{acrotabularx}.
+%
+\InputHook{\let\newglossarystyle\renewglossarystyle}
+\begin{Hint}
+\newglossarystyle{acrotabu}{%
+  \renewenvironment{theglossary}{%
+    \begin{tabu}spread 0pt{@{}lX<{\strut}l@{}}%
+  }{%
+    \end{tabu}\par\bigskip%
+  }%
+  \renewcommand*{\glossaryheader}{}%
+  \renewcommand*{\glsgroupheading}[1]{}%
+  \renewcommand*{\glsgroupskip}{}%
+  \renewcommand*{\glossentry}[2]{%
+    \glsentryitem{##1}% Entry number if required
+    \glstarget{##1}{\sffamily\bfseries\glossentryname{##1}} &
+    \glsentrydesc{##1} &
+    ##2\tabularnewline
+  }
+}
+\end{Hint}
+%
+\begin{Hint*}
+\printacronyms[style=acrotabu]
+\end{Hint*}
+\begin{quoting}[rightmargin=0pt]
+\vspace*{-\baselineskip}
+\glsdisablehyper
+\InputExcerpt
 \end{quoting}
 
 \subsubsection{Symbolverzeichnis}
 Für das Erzeugen eines Symbolverzeichnisses kann ebenfalls \Package{glossaries} 
-verwendet werden. Allerdings muss hierfür ein wenig mehr Aufwand getrieben 
-werden, da das Paket hierfür keine dedizierte Schnittstelle bereitstellt. Wurde 
-die Paketoption \Option{symbols} angegeben wird jedoch zumindest das dazu 
-notwendige Glossar erstellt.
+verwendet werden. Allerdings muss dazu ein wenig mehr Aufwand getrieben werden, 
+da das Paket hierfür keine dedizierte Schnittstelle bereitstellt. Wurde die 
+Paketoption \Option{symbols} angegeben wird jedoch zumindest das notwendige 
+Glossar erstellt.
 
 Als erstes sollte ein gut nutzbarer Befehl zum Definieren eines neuen Symbols 
 erstellt werden. In Anlehnung an den Befehl für Abkürzungen wird dieser 
@@ -841,10 +904,10 @@ letztlich auch Auswirkungen haben, hängt allerdings von der Gestaltung des
 Stils durch den Anwender ab. Der nachfolgend definierte Befehl hat folgende 
 Gestalt:
 %
-\par\vspace{\baselineskipglue}\noindent
+\begin{quoting}[leftmargin=\parindent]
 \Macro{newsymbol}\LParameter\Parameter{Label}\Parameter{Bezeichnung}%
 \Parameter{Symbol}\Parameter{Einheit}
-\par\vspace{\baselineskipglue}\noindent
+\end{quoting}
 %
 Mit \PName{Label} erfolgt die eindeutige Kennzeichnung des Symbols. Außerdem 
 wird dies für die Sortierung verwendet, was unter Umständen etwas problematisch 
@@ -909,16 +972,33 @@ Verzeichnis:
 \printsymbols
 \end{quoting}
 %
-Für dieses muss erst ein Stil definiert werden, was hier ähnlich zum Stil 
-\PValue{acronymstabu} geschieht. Einziger Unterschied hier ist, neben der 
-Anzahl der Spalten, dass eine \Environment{longtabu}"=Umgebung verwendet wird. 
-Damit diese linksbündig im Text erscheint muss vor dem obligatorischen Argument 
-mit den Spaltendefinitionen noch das optionale Argument \PValue{l} angegeben 
+Für dieses muss erst ein Stil definiert werden, was nachfolgend ähnlich zum 
+Stil \PValue{acrotabularx} respektive \PValue{acrotabu} geschieht. Allerdings 
+wird hier eine Variante gezeigt, mit der die Tabellen einen Seitenumbruch 
+zulassen.
+
+\minisec{Eigener Stil mit \Environment{tabularx} und \Environment{longtable}}
+Soweit mir bekannt ist, lassen sich umbruchfähige Tabellen nicht direkt mit 
+\Environment{tabularx} setzen. Vielmehr ist das Paket \Package{ltxtable} 
+notwendig. Dieses wiederum verlangt, dass die zu setzende Tabelle in einer 
+separaten Datei abgelegt wird. Möchte man diese dennoch im Hauptdokument 
+belassen, kann man die \Environment{filecontents}"=Umgebung nutzen.
+
+Leider ist mir kein Weg bekannt, diesen Prozess ohne wahnsinnig großen Aufwand 
+für das Erstellen eines Glossars zu portieren. Für umbruchfähige Tabellen mit 
+automatisch berechneten Spaltenbreiten kommt meines Wissens nach momentan nur 
+das Paket \Package{tabu} infrage.
+
+\minisec{Eigener Stil mit \Environment{tabu}}
+Das Paket \Package{tabu} definiert die \Environment{longtabu}"=Umgebung, die 
+wiederum auf \Environment{longtable} basiert und nachfolgend verwendet wird. 
+Damit diese linksbündig gesetzt wird, muss vor dem obligatorischen Argument mit 
+den Spaltendefinitionen noch das optionale Argument \OParameter{l} angegeben 
 werden.
 %
 \InputHook{\let\newglossarystyle\renewglossarystyle}
 \begin{Excerpt}
-\newglossarystyle{symbolslongtabu}{%
+\newglossarystyle{symblongtabu}{%
   \renewenvironment{theglossary}{%
     \begin{longtabu}spread 0pt[l]{ccX<{\strut}l}%
   }{%
@@ -979,11 +1059,11 @@ $\gls{F} = \gls{m} \cdot \gls{a}$
 Das Symbolverzeichnis kann sich nun durchaus sehen lassen.
 %
 \begin{Excerpt*}
-\printsymbols[style=symbolslongtabu]
+\printsymbols[style=symblongtabu]
 \end{Excerpt*}
 \begin{quoting}[rightmargin=0pt]
-\newglossarystyle{symbolstabu}{%
-  \setglossarystyle{symbolslongtabu}%
+\newglossarystyle{symbtabu}{%
+  \setglossarystyle{symblongtabu}%
   \renewenvironment{theglossary}{%
     \begin{tabu}spread 0pt{ccX<{\strut}l}%
   }{%
@@ -996,7 +1076,7 @@ Das Symbolverzeichnis kann sich nun durchaus sehen lassen.
     \tabularnewline\midrule%
   }%
 }
-\printsymbols[style=symbolstabu]
+\printsymbols[style=symbtabu]
 \end{quoting}
 
 
@@ -1029,21 +1109,27 @@ finden.
 \label{sec:lists}
 Für Auflistungen aller Art bietet \hologo{LaTeX} die drei Standardumgebungen 
 \Environment{iteimze}, \Environment{enumerate} und \Environment{description}. 
-Das häufigste anliegen bei der Verwendung dieser Umgebungen ist das Reduzieren 
+Das häufigste Anliegen bei der Verwendung dieser Umgebungen ist das Reduzieren 
 der Abstände zwischen den einzelnen, mit \Macro{item} gesetzten Punkten, welche 
 sehr häufig als zu groß empfunden werden. Eine Aufzählung erscheint ohne 
 weitere Anpassungen normalerweise so:
 %
-\begin{Excerpt}
+\InputPreamble{%
+  Aufzählung mit einer \Environment{itemize}-Umgebung und Standardabständen:%
+}
+\begin{Hint}
 \begin{itemize}
 \item erster Punkt
 \item zweiter Punkt
 \item dritter Punkt
 \end{itemize}
-\end{Excerpt}
+\end{Hint}
 %
 Dabei wirken die Abstände zwischen den einzelnen Punkten tatsächlich etwas 
-überdimensioniert Um diese zu entfernen, kann folgendes gemacht werden:
+überdimensioniert Um diese zu entfernen, kann die Option \Option{noitemsep} aus 
+dem Paket \Package{enumitem} verwendet werden. Mit dem Befehl \Macro{setlist} 
+werden~-- ohne zusätzliche Angaben im optionalen Argument~-- alle Umgebungen 
+für Aufzählungen global geändert:
 %
 \begin{Excerpt}
 \setlist{noitemsep}
@@ -1051,6 +1137,9 @@ Dabei wirken die Abstände zwischen den einzelnen Punkten tatsächlich etwas
 %
 Das Ergebnis stellt sich folgendermaßen dar:
 %
+\InputPreamble{%
+  Aufzählung mit einer \Environment{itemize}-Umgebung ohne vertikale Abstände:%
+}
 \begin{Excerpt}
 \begin{itemize}
 \item erster Punkt
@@ -1061,15 +1150,9 @@ Das Ergebnis stellt sich folgendermaßen dar:
 %
 Natürlich erlaubt das Paket noch weitergehende Einstellungen für die Umgebungen 
 \Environment{itemize}, \Environment{enumerate} und \Environment{description}. 
-Des Weiteren können diese für eigene Aufzählungsumgebungen geklont und für die 
-eigenen Bedürfnisse angepasst werden. Genaueres hierzu ist der Dokumentation 
-entnehmen.
-
-
-
-\section{Tabellen}
-\label{sec:tables}
-\ToDo{siehste selber}
+Zusätzlich können diese für eigene Aufzählungsumgebungen geklont und den 
+eigenen Bedürfnissen angepasst werden. Genaueres hierzu ist der Dokumentation 
+des Paketes \Package{enumitem} entnehmen.
 
 
 
@@ -1100,7 +1183,7 @@ Quelltextauszug exemplarisch gezeigt, das Ergebnis ist in \autoref{fig:example}
 zu sehen. Worauf man bei Gleitobjekten in jedem Fall achten sollte, dass die 
 Verwendung von \Macro{label} immer erst \emph{nach} \Macro{caption} erfolgt, da 
 der erzeugte Anker sich sonst nicht auf das Objekt bezieht.
-
+%
 \begin{Excerpt*}
 \begin{figure}
 \centering
@@ -1108,10 +1191,8 @@ der erzeugte Anker sich sonst nicht auf das Objekt bezieht.
 \caption{Beispielgrafik}\label{fig:example}
 \end{figure}
 \end{Excerpt*}
-
 \InputExcerpt
-
-\noindent
+%
 In der Konsequenz ist dies hier ein Plädoyer, bei der Platzierung von Tabellen 
 und Abbildungen vollständig auf \hologo{LaTeX} zu vertrauen. Anfangs kann der 
 Anwender dies als Kontrollverlust empfinden. Sobald Sie jedoch Änderungen am 
@@ -1188,10 +1269,207 @@ den Platzierungsparameter \POParameter{H} zur Verfügung stellt. Allerdings ist
 dies meiner Meinung nach alles andere als konsequent.
 
 
-
 \subsection{Grafiken und Untergrafiken, Stildefinition}
 \label{sec:graphics}
 \ToDo{floatrow}
+
+
+
+\section{Tabellen}
+\label{sec:tables}
+Zum Thema \enquote{Tabellensatz mit \hologo{LaTeX}} sind bereits zahlreiche 
+\hrfn{http://userpage.fu-berlin.de/latex/Materialien/tabsatz.pdf}{Leitfäden} im 
+Internet zu finden. Deshalb werde ich meine Ausführungen zu diesem Punkt 
+relativ kurz halten. Zwei Regeln sollten beim Satz von Tabellen in jedem Fall 
+beachtet werden:
+%
+\begin{enumerate}[itemindent=0pt,labelwidth=*,labelsep=1em,label=\Roman*.]
+\item keine vertikalen Linien
+\item keine doppelten Linien
+\end{enumerate}
+%
+Das Paket \Package{booktabs} ist für den Satz von hochwertigen Tabellen eine 
+große Hilfe und stellt die Befehle \Macro{toprule}, \Macro{midrule} sowie
+\Macro{cmidrule} und \Macro{bottomrule} für unterschiedliche horizontale Linien 
+bereit. Außerdem existiert das Paket \Package{array}, welches mit dem Befehl 
+\Macro{newcolumntype} die Definition eigener Spaltentypen sowie die Verwendung 
+sogenannter \enquote{Hooks} vor und nach Einträgen innerhalb einer Spalte 
+(\PValue{>\{\dots\}}\PName{Spaltentyp}\PValue{<\{\dots\}}) ermöglicht.
+
+Für alle im Folgenden vorgestellten Umgebungen zum Setzen von Tabellen gilt, 
+dass die Inhalte zeilenweise angegeben werden, wobei die Einträge für die 
+einzelnen Spalten mit \PValue{\&} voneinander zu trennen sind. Das Beenden 
+einer Tabellenzeile und der Wechsel zur nächsten erfolgt normalerweise mit 
+\Macro{\bsc}. Da jedoch einige \hologo{LaTeX}-Pakete diesen Befehl innerhalb 
+von Tabellen lokal ändern ist es zur Vermeidung unnötiger Fehler wesentlich 
+sicherer, das Zeilenende ausschließlich mit \Macro{tabularnewline} zu setzen.
+
+\subsection{Die Standardumgebung \Environment{tabular}}
+Normalerweise gibt es vier unterschiedliche Spaltentypen. Die Spaltentypen 
+\PValue{l}, \PValue{c} und \PValue{r} stehen für linksbündige, zentrierte und 
+rechtsbündige Spalten, welche allerdings keinen Zeilenumbruch erlauben. Der 
+Inhalt wird quasi wie in einer \Macro {mbox} gesetzt, wodurch die Spalten sehr 
+breit werden und über den Seitenrand hinausragen können.
+
+Der Spaltentyp~\PValue{p}\Parameter{Breite} hingegen legt die Spaltenbreite 
+fest und setzt den Inhalt in jeder Zeile in eine \Macro{parbox}, wobei diese 
+wird mit ihrer obersten Zeile an der Grundlinie ausgerichtet wird. Das Paket
+\Package{array} stellt außerdem die Spaltentypen~\PValue{m}\Parameter{Breite} 
+und ~\PValue{b}\Parameter{Breite} bereit, welche ebenfalls mit \Macro{parbox} 
+gesetzt werden, die Ausrichtung an der Grundlinie jedoch zentriert respektive 
+an der unteren Zeile der Box erfolgt. Es folgt ein kurzes Beispiel.
+%
+\begin{Hint}
+\begin{tabular}{lcrp{40mm}}
+\toprule
+\textbf{Linksbündig} & \textbf{Zentriert} & 
+\textbf{Rechtsbündig} & \textbf{Blocksatz} \tabularnewline
+\midrule
+a   & b   & c   & Dieser Text erscheint im Blocksatz \tabularnewline
+aa  & bb  & cc  & Außerdem sind Zeilenumbrüche möglich\tabularnewline
+aaa & bbb & ccc & Zeilenumbruchsvorschauansicht\tabularnewline
+\bottomrule
+\end{tabular}
+\end{Hint}
+%
+Die Tabellenbreite ergibt sich aus der Breite der einzelnen Spalten. Bei dieser 
+Umgebung liegt es allein beim Anwender, auf die korrekte Breite der Tabelle zu 
+achten, damit diese nicht über die Seitenränder hinausragt. Das kann auf Dauer 
+recht aufwändig werden. Das Festlegen der Gesamtbreite einer Tabelle durch den 
+Anwender und das automatische Berechnen einiger oder aller Spaltenbreiten ist 
+sicher die angenehmere Variante. Hierfür stehen die Pakete \Package{tabularx} 
+oder \Package{tabu} zur Verfügung, welche nun kurz vorgestellt werden sollen.
+Wie man das Problem des nicht umbrochenen Eintrags in der letzten Spalte der 
+dritten Zeile lösen kann, wird ebenfalls dort erklärt.
+
+\subsection{Die Tabellenumgebung \Environment{tabularx}}
+Das Paket \Package{tabularx} stellt den Spaltentyp~\PValue{X} bereit, welcher 
+prinzipiell dem Spaltentyp~\PValue{p} entspricht. Auch für diesen wird eine 
+\Macro{parbox} verwendet, allerdings wird deren Breite \emph{automatisch} 
+berechnet. Die Umgebung \Environment{tabularx} erwartet vor der Angabe der 
+Spaltentypen als obligatorisches Argument die gewünschte Breite der Tabelle. Zu 
+beachten ist, dass Spalten vom Typ~\PValue{l},~\PValue{c}~und~\PValue{r} 
+weiterhin ohne Zeilenumbruch gesetzt werden. Nur für Spalten vom Typ~\PValue{X} 
+und deren Derivate wird aus dem verbliebenen Platz die Breite berechnet. Für 
+die \Environment{tabularx}-Umgebung wird das vorherige Beispiel wiederholt.
+%
+\begin{Hint}
+\begin{tabularx}{12cm}{lcrX}
+\toprule
+\textbf{Linksbündig} & \textbf{Zentriert} & 
+\textbf{Rechtsbündig} & \textbf{Blocksatz} \tabularnewline
+\midrule
+a   & b   & c   & Dieser Text erscheint im Blocksatz \tabularnewline
+aa  & bb  & cc  & Außerdem sind Zeilenumbrüche möglich\tabularnewline
+aaa & bbb & ccc & Zeilenumbruchsvorschauansicht\tabularnewline
+aaa & bbb & ccc & \hspace{0pt}Zeilenumbruchsvorschauansicht\tabularnewline
+\bottomrule
+\end{tabularx}
+\end{Hint}
+%
+Die Breite der letzten Spalte wurde dabei aus der Angabe der Gesamtbreite mit 
+\PValue{12cm} berechnet. Des Weiteren ist zu sehen, wie das Problem des 
+Zeilenumbruchs behandelt werden kann. Normalerweise wird das erste Wort in 
+einem Absatz von \hologo{LaTeX} \emph{nie} umbrochen. Das kann mit dem Einfügen 
+eines horizontalen Abstandes mit dem Wert \PValue{0pt} umgangen werden. Die 
+gefundene Lösung ist allerdings alles andere als elegant.
+
+Mit den Möglichkeiten des Paketes \Package{array} ist das Problem relativ 
+schnell gelöst. Es wird mit \Macro{newcolumntype} ein neuer Spaltentyp 
+definiert. Das erste Argument von \Macro{newcolumntype} legt den Namen des 
+Spaltentyps fest. Mit \PValue{>\Parameter{Definitionen}}\Parameter{Typ} wird im 
+zweiten Argument das Ausführen von \PName{Definitionen} vor dem Setzen des 
+eigentlichen Inhaltes in einer \Parameter{Typ}"~Spalte definiert.
+
+Es wird ein neuer, auf der \PValue{X}"~Spalten basierender Typ~\PValue{Y} 
+definiert, welcher zu Beginn der Spalte den Phantomabstand automatisch einfügt. 
+Darauf basierend werden drei Spaltentypen für den links- und rechtsbündigen 
+sowie zentrierten Textsatz mit einem möglichen Zeilenumbruch erstellt.
+%
+\InputHook{\renewcommand*{\newcolumntype}[2]{}}
+\begin{Excerpt}
+\newcolumntype{Y}{>{\hspace{0pt}}X}
+\newcolumntype{L}{>{\raggedright}Y}
+\newcolumntype{C}{>{\centering}Y}
+\newcolumntype{R}{>{\raggedleft}Y}
+\end{Excerpt}
+%
+\ToDo{weiter im Text}
+Nachfolgend wird die Tabelle gesetzt, das Ergebnis ist in 
+\autoref{tab:tabularx} zu sehen.
+%
+\begin{Excerpt*}
+\begin{table}
+\begin{tabularx}{\textwidth}{@{}LCRY@{}}
+\toprule
+\textbf{Linksbündig} & \textbf{Zentriert} & 
+\textbf{Rechtsbündig} & \textbf{Blocksatz} \tabularnewline
+\midrule
+Ein linksbündiger Blindtext zur Demonstration einer L"~Spalte &
+Ein zentrierter Blindtext zur Demonstration einer C"~Spalte &
+Ein rechtsbündiger Blindtext zur Demonstration einer R"~Spalte &
+Ein im Blocksatz gesetzter Blindtext zur Demonstration einer Y"~Spalte
+\tabularnewline
+aaa & bbb & ccc & Zeilenumbruchsvorschauansicht\tabularnewline
+\bottomrule
+\end{tabularx}
+\caption{Eine \texttt{tabularx}-Tabelle}\label{tab:tabularx}
+\end{table}
+\end{Excerpt*}
+\InputExcerpt
+%
+Wahrscheinlich werden Sie sich über das Konstrukt~\PValue{@\{\}} vor der ersten 
+und nach der letzten Spalte wundern. Normalerweise wird in einer Tabelle mit 
+\Macro{hskip}\Macro{tabcolsep} vor \emph{und} nach jeder Spalte ein 
+horizontaler Zwischenraum eingefügt.%
+\footnote{Der Abstand zweier Spalten beträgt folglich 2\Macro{tabcolsep}.}
+Mit \PValue{@\Parameter{Ausdruck}} kann dies verhindert und stattdessen  
+\Parameter{Ausdruck} ausgeführt werden. Mit der Verwendung von \PValue{@\{\}} 
+an den entsprechenden Stellen bei der Angabe der Spaltentypen wurde der vor der 
+ersten und nach der letzten Tabellenspalte eingefügten Abstand unterdrückt.
+
+\subsection{Die Tabellenumgebung \Environment{tabu}}
+Das Paket \Package{tabu} bietet eine mächtige und komfortable Alternative zu 
+\Package{tabularx}. Es kam in diesem Tutorial bereits für die Verzeichnisse von 
+Abkürzungen und Symbolen in \autoref{sec:glossaries} zum Einsatz. Das Paket 
+definiert ebenso einen Spaltentyp~\PValue{X}, welchem allerdings zusätzlich ein 
+optionales Argument angehängt werden kann. Mit diesem lässt sich sowohl die 
+Gewichtung der automatisch berechneten Spalten untereinander als auch die 
+Positionierung zur Grundlinie sowie die Ausrichtung des Inhaltes ändern.
+%
+\makeatletter
+\newcolumntype{Z}{}
+\renewcommand*\NC@rewrite@Z[1][]{\NC@find >{\hspace{0pt}}X[#1]<{\strut}}
+\makeatother
+\begin{tabu} to 124.3mm {lcrZ}
+\toprule
+\textbf{Linksbündig} & \textbf{Zentriert} & 
+\textbf{Rechtsbündig} & \textbf{Blocksatz} \tabularnewline
+\midrule
+a   & b   & c   & Dieser Text erscheint im Blocksatz \tabularnewline
+aa  & bb  & cc  & Außerdem sind Zeilenumbrüche möglich\tabularnewline
+aaa & bbb & ccc & Etwas Text, um dieses Feld zu füllen\tabularnewline
+\bottomrule
+\end{tabu}
+\begin{Excerpt*}
+\begin{table}
+\caption{Eine \texttt{tabu}-Tabelle}\label{tab:tabu}
+\begin{tabu} to \textwidth {@{}X[2,l]X[2,c]X[2,r]X[3,j]@{}}
+\toprule
+\textbf{Linksbündig} & \textbf{Zentriert} & 
+\textbf{Rechtsbündig} & \textbf{Blocksatz} \tabularnewline
+\midrule
+Ein linksbündiger Blindtext zur Demonstration einer X[l]"~Spalte &
+Ein zentrierter Blindtext zur Demonstration einer X[c]"~Spalte &
+Ein rechtsbündiger Blindtext zur Demonstration einer X[r]"~Spalte &
+Ein im Blocksatz gesetzter Blindtext zur Demonstration einer X[j]"~Spalte
+\tabularnewline
+\bottomrule
+\end{tabu}
+\end{table}
+\end{Excerpt*}
+\InputExcerpt
+
 
 
 \section{Erstellen von Abbildungen}
@@ -1434,6 +1712,9 @@ Nachfolgend wird eine Grafik innerhalb einer Gleitumgebung erstellt.
 \subsection{Einheiten}
 
 
+\subsection{Silbentrennung im Flattersatz}
+
+
 
 \section{Querverweise}
 \label{sec:references}
@@ -1463,7 +1744,6 @@ Nachfolgend wird eine Grafik innerhalb einer Gleitumgebung erstellt.
 %\usepackage{caption}
 %\usepackage{floatrow}
 %\usepackage{array}
-%\usepackage{booktabs}
 %\usepackage{tabularx}
 %\usepackage{ltxtable}
 %\usepackage{tabu}

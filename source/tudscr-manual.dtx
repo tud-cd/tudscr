@@ -1,4 +1,4 @@
-% \CheckSum{2335}
+% \CheckSum{2349}
 % \iffalse meta-comment
 % ======================================================================
 %
@@ -138,7 +138,7 @@
 %    \end{macrocode}
 % Sprachabhängiges Setzen von Anführungszeichen.
 %    \begin{macrocode}
-\AtEndPreamble{\RequirePackage{csquotes}[2011/10/22]}
+\AfterPackage*{inputenc}{\RequirePackage{csquotes}[2011/10/22]}
 %    \end{macrocode}
 % Verbesserte Zitate.
 %    \begin{macrocode}
@@ -858,8 +858,8 @@
 %
 % Zu Beginn des Dokumentes werden Standardeinstellungen gemacht.
 %    \begin{macrocode}
-\KOMAoptions{headings=small}%
-\TUDoptions{cd=true,cdfoot=true}%
+\KOMAoptions{headings=small}
+\TUDoptions{cd=true,cdfoot=true}
 %    \end{macrocode}
 % Falls innerhalb eines Tutorials das Paket \pkg{pstricks} verwendet wird, muss
 % dafür Sorge getragen werden, dass die automatische Kompilierung reibungslos
@@ -982,6 +982,22 @@
   }%
 }
 %    \end{macrocode}
+%
+% \iffalse
+%</class&body>
+%<*package&body>
+% \fi
+%
+% Der Befehl für die Querverweise innerhalb von Tutorials.
+%    \begin{macrocode}
+\newcommand*\Tutorial[1]{\href{#1.pdf}{\textsbn{#1.pdf}}}
+%    \end{macrocode}
+%
+% \iffalse
+%</package&body>
+%<*class&body>
+% \fi
+%
 % \end{macro}^^A \hypertut
 % \end{macro}^^A \tud@tut@bat
 % \end{macro}^^A \Tutorial
@@ -1481,7 +1497,7 @@
 \DeclareExpandableDocumentCommand\@Application{sm}{#2}
 %</class&body>
 %<*package&body>
-\newcommand*\Application[1]{\mbox{\textsbs{#1}}}
+\newcommand*\Application[1]{\ifdin{#1}{\mbox{\textsbs{#1}}}}
 %</package&body>
 %<*class&body>
 %    \end{macrocode}
@@ -1502,7 +1518,7 @@
 }
 %</class&body>
 %<*package&body>
-\newcommand*\Distribution[1]{\mbox{\textsbn{#1}}}
+\newcommand*\Distribution[1]{\ifdin{#1}{\mbox{\textsbn{#1}}}}
 %</package&body>
 %<*class&body>
 %    \end{macrocode}
@@ -1530,7 +1546,7 @@
 }
 %</class&body>
 %<*package&body>
-\newcommand*\File[1]{\mbox{\textsbn{#1}}}
+\newcommand*\File[1]{\ifdin{#1}{\mbox{\textsbn{#1}}}}
 %</package&body>
 %<*class&body>
 %    \end{macrocode}
@@ -1595,13 +1611,15 @@
 %</class&body>
 %<*package&body>
 \NewDocumentCommand\Package{smd()}{%
-  \IfBooleanTF{#1}{%
-    \manualhyperref{files:#2}{\textsbn{#2}}%
-  }{%
-    \IfValueTF{#3}{%
-      \href{http://www.ctan.org/pkg/#3}{\textsbn{#2}}%
+  \ifdin{#2}{%
+    \IfBooleanTF{#1}{%
+      \manualhyperref{files:#2}{\textsbn{#2}}%
     }{%
-      \href{http://www.ctan.org/pkg/#2}{\textsbn{#2}}%
+      \IfValueTF{#3}{%
+        \href{http://www.ctan.org/pkg/#3}{\textsbn{#2}}%
+      }{%
+        \href{http://www.ctan.org/pkg/#2}{\textsbn{#2}}%
+      }%
     }%
   }%
 }
@@ -1633,10 +1651,12 @@
 %</class&body>
 %<*package&body>
 \NewDocumentCommand\Option{smo}{%
-  \IfBooleanTF{#1}{%
-    \manualhyperref{options:#2}{\texttt{#2}}\IfValueT{#3}{\texttt{=#3}}%
-  }{%
-    \texttt{#2}\IfValueT{#3}{\texttt{=#3}}%
+  \ifdin{#2}{%
+    \IfBooleanTF{#1}{%
+      \manualhyperref{options:#2}{\texttt{#2}}\IfValueT{#3}{\texttt{=#3}}%
+    }{%
+      \texttt{#2}\IfValueT{#3}{\texttt{=#3}}%
+    }%
   }%
 }
 %</package&body>
@@ -1677,10 +1697,12 @@
 %</class&body>
 %<*package&body>
 \NewDocumentCommand\Environment{sm}{%
-  \IfBooleanTF{#1}{%
-    \manualhyperref{macros:#2}{\texttt{#2}}%
-  }{%
-    \texttt{#2}%
+  \ifdin{#2}{%
+    \IfBooleanTF{#1}{%
+      \manualhyperref{macros:#2}{\texttt{#2}}%
+    }{%
+      \texttt{#2}%
+    }%
   }%
 }
 %</package&body>
@@ -1704,10 +1726,12 @@
 %</class&body>
 %<*package&body>
 \NewDocumentCommand\Macro{sm}{%
-  \IfBooleanTF{#1}{%
-    \manualhyperref{macros:#2}{\texttt{\bsc#2}}%
-  }{%
-    \texttt{\bsc#2}%
+  \ifdin{\bsc#2}{%
+    \IfBooleanTF{#1}{%
+      \manualhyperref{macros:#2}{\texttt{\bsc#2}}%
+    }{%
+      \texttt{\bsc#2}%
+    }%
   }%
 }
 %</package&body>
@@ -1779,10 +1803,12 @@
 %</class&body>
 %<*package&body>
 \NewDocumentCommand\Length{sm}{%
-  \IfBooleanTF{#1}{%
-    \manualhyperref{macros:#2}{\texttt{\bsc#2}}%
-  }{%
-    \texttt{\bsc#2}%
+  \ifdin{\bsc#2}{%
+    \IfBooleanTF{#1}{%
+      \manualhyperref{macros:#2}{\texttt{\bsc#2}}%
+    }{%
+      \texttt{\bsc#2}%
+    }%
   }%
 }
 %</package&body>
