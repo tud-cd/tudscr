@@ -1,4 +1,4 @@
-% \CheckSum{2349}
+% \CheckSum{2329}
 % \iffalse meta-comment
 % ======================================================================
 %
@@ -49,7 +49,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-manual.dtx}[%
-  2014/11/01 v2.02 TUD-KOMA-Script\space%
+  2014/11/02 v2.02 TUD-KOMA-Script\space%
 %</driver>
 %<identify>\NeedsTeXFormat{LaTeX2e}[2011/06/27]
 %<class&identify>\ProvidesClass{tudscrman}[%
@@ -109,9 +109,13 @@
 }
 %    \end{macrocode}
 % \end{length}^^A \baselineskipglue
-% Des Weiteren werden einige Pakete geladen. \pkg{xparse} erlaubt eine sehr
-% freie Deklaration von Makros mit nahezu beliebig arangierbaren (optionalen)
-% Argumenten.
+% Des Weiteren werden einige Pakete geladen. Mit \pkg{scrwfile} lassen sich 
+% Probleme mit zu wenigen Streams für das SChreiben externer Datein beheben.
+%    \begin{macrocode}
+\RequirePackage{scrwfile}[2013/08/05]
+%    \end{macrocode}
+% Das Paket \pkg{xparse} erlaubt eine sehr freie Deklaration von Makros mit
+% nahezu beliebig arrangierbaren (optionalen) Argumenten.
 %    \begin{macrocode}
 \RequirePackage{xparse}[2013/12/31]
 %    \end{macrocode}
@@ -519,13 +523,14 @@
 % Hilfsmakros \cs{tud@tut@pre} und \cs{tud@tut@post} definiert. Diese nutzen 
 % die \env{filecontents}"=Umgebung, welche den Inhalt in die temporäre Datei 
 % \val{\string\jobname-temp.tex} schreibt. Zusätzlich wird dieser Inhalt mit
-% \cs{tud@tut@append} der Datei \val{\string\jobname-all-temp.tex} hinzugefügt. 
-% Damit werden alle innerhalb des Dokumentes gesetzten Quelltextauszüge für ein 
+% \cs{tud@tut@append} der Datei \val{\string\jobname-preamble-temp.tex} oder 
+% \val{\string\jobname-document-temp.tex}~-- abhängig vom gegebenen Argument~--
+% hinzugefügt. So werden die im Dokumentes gesetzten Quelltextauszüge für ein 
 % Copy"~\&"~Paste"~Beispiel gesammelt und mit \cs{FinishTutorial} ausgegeben.
 %    \begin{macrocode}
 \newenvironment{Excerpt}{\tud@tut@pre}{%
   \tud@tut@post%
-  \tud@tut@append%
+  \tud@tut@append{document}%
   \gdef\@tempa{%
     \tud@tut@lst%
     \tud@tut@input%
@@ -539,7 +544,7 @@
 %    \begin{macrocode}
 \newenvironment{Excerpt*}{\tud@tut@pre}{%
   \tud@tut@post%
-  \tud@tut@append%
+  \tud@tut@append{document}%
   \gdef\@tempa{%
     \tud@tut@lst%
     \global\let\@InputPreamble\relax%
@@ -558,7 +563,7 @@
   \tud@tut@pre%
 }{%
   \tud@tut@post%
-  \tud@tut@append%
+  \tud@tut@append{document}%
   \gdef\@tempa{%
     \tud@tut@lst%
     \tud@tut@pdf%
@@ -600,6 +605,21 @@
 %    \end{macrocode}
 % \end{environment}^^A Hint*
 % \end{environment}^^A Hint
+% \begin{environment}{Preamble}
+% \changes{v2.02}{2014/11/02}{neu}%^^A
+% Die Umgebung \env{Preamble} dient für die sortierte Ausgabe von Quelltexten. 
+% Die in ihr gesetzten Inhalte werden für das Copy"~\&"~Paste-Beispiel vor 
+% allen Inhalten aus der Umgebung \env{Excerpt} ausgegeben.
+\newenvironment{Preamble}{\tud@tut@pre}{%
+  \tud@tut@post%
+  \tud@tut@append{preamble}%
+  \gdef\@tempa{%
+    \tud@tut@lst%
+    \global\let\@InputPreamble\relax%
+  }%
+  \aftergroup\@tempa%
+}
+% \end{environment}^^A Preamble
 % \begin{macro}{\tud@tut@pre}
 % \changes{v2.02}{2014/08/19}{neu}%^^A
 % \begin{macro}{\tud@tut@post}
@@ -801,9 +821,11 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \IncludeExcerpt
-% \begin{macro}{\tud@tut@read}
+% \begin{macro}{\tud@tut@write@preamble}
+% \changes{v2.02}{2014/11/02}{neu}%^^A
+% \begin{macro}{\tud@tut@write@document}
 % \changes{v2.02}{2014/08/19}{neu}%^^A
-% \begin{macro}{\tud@tut@write}
+% \begin{macro}{\tud@tut@read}
 % \changes{v2.02}{2014/08/19}{neu}%^^A
 % \begin{macro}{\tud@tut@append}
 % \changes{v2.02}{2014/08/19}{neu}%^^A
@@ -815,17 +837,17 @@
 % Codefragmente zusammengesetzt. Um die Quelltexte einlesen und verarbeiten zu
 % können, wird ein Eingabe- sowie ein Ausgabestream benötigt.
 %    \begin{macrocode}
-\newwrite\tud@tut@write
-\immediate\openout\tud@tut@write=\jobname-all-temp.tex\relax
+\newwrite\tud@tut@write@preamble
+\newwrite\tud@tut@write@document
 \newread\tud@tut@read
 \newcommand*\tud@tut@line{}
 %    \end{macrocode}
 % Mit \cs{tud@tut@append} wird der Inhalt des zuletzt gesetzten Tutorials aus 
-% der temporären Datei \cs{jobname-temp.tex} in \cs{jobname-all-temp.tex}
+% der temporären Datei \cs{jobname-temp.tex} in \cs{jobname-\#1-temp.tex}
 % geschrieben. In dieser Datei werden \emph{alle} Quelltexte gespeichert, um 
 % diese am Ende des Tutorials mit \cs{FinishTutorial} auszugeben.
 %    \begin{macrocode}
-\newcommand*\tud@tut@append{%
+\newcommand*\tud@tut@append[1]{%
   \begingroup%
   \endlinechar=-1%
   \openin\tud@tut@read=\jobname-temp.tex%
@@ -838,7 +860,9 @@
     \read\tud@tut@read to\tud@tut@line%
     \ifx\tud@tut@line\@empty\else\@tempswatrue\fi%
     \if@tempswa%
-      \immediate\write\tud@tut@write{\unexpanded\expandafter{\tud@tut@line}}%
+      \immediate\write\@nameuse{tud@tut@write@#1}{%
+        \unexpanded\expandafter{\tud@tut@line}%
+      }%
     \fi%
     \ifx\tud@tut@line\@empty\@tempswafalse\else\@tempswatrue\fi%
   \repeat%
@@ -848,8 +872,9 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@tut@line
 % \end{macro}^^A \tud@tut@append
-% \end{macro}^^A \tud@tut@write
 % \end{macro}^^A \tud@tut@read
+% \end{macro}^^A \tud@tut@write@document
+% \end{macro}^^A \tud@tut@write@preamble
 %
 % \iffalse
 %</package&body>
@@ -896,13 +921,18 @@
   \faculty{}%
   \setlength\headingsvskip{-15mm}%
   \maketitle#1%
+  \immediate\openout\tud@tut@write@preamble=\jobname-preamble-temp.tex\relax
+  \immediate\openout\tud@tut@write@document=\jobname-document-temp.tex\relax
+  \immediate\write\tud@tut@write@document{\string\begin{document}}
 }
 %    \end{macrocode}
 % Der Befehl \cs{FinishTutorial} schleißt den noch offenen Ausgabestream und
 % gibt den vorgestellten Quelltext vollständig aus.
 %    \begin{macrocode}
 \newcommand\FinishTutorial[1][]{%
-  \immediate\closeout\tud@tut@write%
+  \immediate\write\tud@tut@write@document{\string\end{document}}
+  \immediate\closeout\tud@tut@write@document%
+  \immediate\closeout\tud@tut@write@preamble%
   \clearpage%
   \addsec{Copy~\&~Paste}%
   \pagestyle{empty}%
@@ -910,7 +940,8 @@
   Quelltext ausgegeben, um dieses via Copy~\&~Paste verwenden und alle Punkte
   nachvollziehen zu k\"onnen. #1
   \begin{quoting}[rightmargin=0pt]%
-  \lstinputlisting[style=tudscr]{\jobname-all-temp.tex}%
+  \lstinputlisting[style=tudscr]{\jobname-preamble-temp.tex}%
+  \lstinputlisting[style=tudscr]{\jobname-document-temp.tex}%
   \end{quoting}%
 }
 %    \end{macrocode}
@@ -919,7 +950,7 @@
 %
 % \iffalse
 %</package&body>
-%<*class&body>
+%<*body>
 % \fi
 %
 % \begin{macro}{\Tutorial}
@@ -933,6 +964,7 @@
 % Tutorials aus dem Handbuch erfolgt mit \cs{Tutorial}. Außerdem erfolgt mit
 % \cs{hypertut} ein verlinkter Eintrag in den Index.
 %    \begin{macrocode}
+%<*class>
 \newrobustcmd*\hypertut[2]{%
   \hyperref{tutorials/#1.pdf}{\jobname}{tutorials:#1}{\textsbn{#1.pdf}#2}%
 }
@@ -981,95 +1013,17 @@
     \index[files]{\hypertut{#3}{~{\idxfont(Tutorial)}\IfValueT{#2}{|#2}}}%
   }%
 }
+%</class>
 %    \end{macrocode}
-%
-% \iffalse
-%</class&body>
-%<*package&body>
-% \fi
-%
 % Der Befehl für die Querverweise innerhalb von Tutorials.
 %    \begin{macrocode}
+%<*package>
 \newcommand*\Tutorial[1]{\href{#1.pdf}{\textsbn{#1.pdf}}}
+%</package>
 %    \end{macrocode}
-%
-% \iffalse
-%</package&body>
-%<*class&body>
-% \fi
-%
 % \end{macro}^^A \hypertut
 % \end{macro}^^A \tud@tut@bat
 % \end{macro}^^A \Tutorial
-% \begin{macro}{\pin@}
-% \changes{v2.02}{2014/08/16}{neu}%^^A
-% \begin{macro}{\pin@file}
-% \changes{v2.02}{2014/08/16}{neu}%^^A
-% \begin{macro}{\pin@accu}
-% \changes{v2.02}{2014/08/16}{neu}%^^A
-% \begin{macro}{\pin@line}
-% \changes{v2.02}{2014/08/16}{neu}%^^A
-% \begin{counter}{pin@lineno}
-% \changes{v2.02}{2014/08/16}{neu}%^^A
-% Mit diesen Makros wird es möglich, selektierbare Zeilenbereiche aus einer 
-% anzugebenden Datei direkt auszulesen und auszuführen. Diese Lösung wurde 
-% auf LaTeX Stack Exchange\footnote{\url{http://tex.stackexchange.com/a/4923}} 
-% vorgestellt. Dies war für eine Inline"=Dokumentation von Tutorials gedacht.
-% Diese wurden mittlerweile jedoch in separate Dateien ausgelagert.
-%    \begin{macrocode}
-%%\newread\pin@file
-%%\newcommand\pin@accu{}
-%%\newcommand\pin@line{}
-%%\newcounter{pin@lineno}
-%%\newcommand*\pin@[2]{%
-%%  \IfFileExists{#2}{%
-%%    \in@{-}{#1}%
-%%    \ifin@%
-%%      \def\@tempa[####1-####2]{%
-%%        \@tempcnta=####1\relax%
-%%        \@tempcntb=####2\relax%
-%%      }%
-%%    \else%
-%%      \def\@tempa[####1]{%
-%%        \@tempcnta=####1\relax%
-%%        \@tempcntb=####1\relax%
-%%      }%
-%%    \fi%
-%%    \@tempa[#1]%
-%%    \openin\pin@file #2%
-%%    \setcounter{pin@lineno}{1}%
-%%    \@whilenum\value{pin@lineno}<\@tempcnta \do{%
-%%      \read\pin@file to\pin@line%
-%%      \stepcounter{pin@lineno}%
-%%    }%
-%%    \addtocounter{pin@lineno}{-1}%
-%%    \let\pin@accu\empty%
-%%    \begingroup%
-%%    \endlinechar\newlinechar%
-%%    \@whilenum\value{pin@lineno}<\@tempcntb \do{%
-%%      \readline\pin@file to\pin@line%
-%%      \edef\pin@accu{\pin@accu\pin@line}%
-%%      \stepcounter{pin@lineno}%
-%%    }%
-%%    \closein\pin@file%
-%%    \expandafter\endgroup%
-%%    \scantokens\expandafter{\pin@accu}%
-%%  }{%
-%%    \errmessage{File `#2' doesn't exist!}%
-%%  }%
-%%}
-%    \end{macrocode}
-% \end{counter}^^A pin@lineno
-% \end{macro}^^A \pin@line
-% \end{macro}^^A \pin@accu
-% \end{macro}^^A \pin@file
-% \end{macro}^^A \pin@
-%
-% \iffalse
-%</class&body>
-%<*body>
-% \fi
-%
 % \begin{macro}{\ToDo}
 % \changes{v2.02}{2014/07/10}{Verwendung von \pkg{todonotes}}%^^A
 % \begin{macro}{\@ToDo}
@@ -1317,35 +1271,30 @@
 % Version ersetzt.
 %    \begin{macrocode}
   \pdfstringdefDisableCommands{%
+%<*class>
     \let\Application\@Application%
+%</class>
     \let\Class\@Class%
     \let\Package\@Package%
+    \let\Option\@Option%
+    \let\Environment\@Environment%
+    \let\Macro\@Macro%
     \let\TUDScript\@TUDScript%
     \let\NoCaseChange\@firstofone%
   }%
-}
 %    \end{macrocode}
-% \begin{macro}{\bsc}
-% \changes{v2.02}{2014/07/22}{\cs{DeclareRobustCommand} ersetzt mit
-%   \cs{newrobustcmd} aus \pkg{etoolbox}}%^^A
-% Eine einfacher zu verwendende Kurzform.
-%    \begin{macrocode}
-\newrobustcmd*\bsc{\@backslashchar}
-%    \end{macrocode}
-% \end{macro}^^A \bsc
-%
-%
+% Es folgen einige Befehle, die an das Paket \pkg{hyperref} gekoppelt sind.
 % \begin{macro}{\Email}
 % Hyperlink für die Angabe einer E-Mail-Adresse.
 %    \begin{macrocode}
-\newcommand*\Email[1]{\href{mailto:#1}{\nolinkurl{#1}}}%
+  \newcommand*\Email[1]{\href{mailto:#1}{\nolinkurl{#1}}}
 %    \end{macrocode}
 % \end{macro}^^A \Email
 % Die Bezeichner für die Abschnittsebenen werden umbenannt.
 %    \begin{macrocode}
-\renewcaptionname{ngerman}{\sectionautorefname}{Unterkapitel}
-\renewcaptionname{ngerman}{\subsectionautorefname}{Abschnitt}
-\renewcaptionname{ngerman}{\subsubsectionautorefname}{Unterabschnitt}
+  \renewcaptionname{ngerman}{\sectionautorefname}{Unterkapitel}
+  \renewcaptionname{ngerman}{\subsectionautorefname}{Abschnitt}
+  \renewcaptionname{ngerman}{\subsubsectionautorefname}{Unterabschnitt}
 %    \end{macrocode}
 % \begin{macro}{\autorefname}
 % \begin{macro}{\@autorefname}
@@ -1356,24 +1305,24 @@
 %\footnote{\url{http://tex.stackexchange.com/q/33776/}} wurde das Prinzip 
 % vorgestellt und hier übernommen.
 %    \begin{macrocode}
-\newcommand*\autorefname[1][current]{%
-  \ifstr{#1}{current}{%
-    \expandafter\HyPsd@@autorefname\@currentHref\@nil%
-  }{%
-    \@autorefname\HyPsd@@autorefname{#1}%
-  }%
-  \unskip\xspace%
-}
-\newcommand*\@autorefname[2]{%
-  \expandafter\ifx\csname r@#2\endcsname\relax%
-    ??%
-  \else%
-    \expandafter\expandafter\expandafter\@@autorefname%
-        \csname r@#2\endcsname{}{}{}{}\@nil#1\@nil%
-  \fi%
-}
-\newcommand*\@@autorefname{}
-\def\@@autorefname#1#2#3#4#5\@nil#6\@nil{#6#4.\@nil}
+  \newcommand*\autorefname[1][current]{%
+    \ifstr{#1}{current}{%
+      \expandafter\HyPsd@@autorefname\@currentHref\@nil%
+    }{%
+      \@autorefname\HyPsd@@autorefname{#1}%
+    }%
+    \unskip\xspace%
+  }
+  \newcommand*\@autorefname[2]{%
+    \expandafter\ifx\csname r@#2\endcsname\relax%
+      ??%
+    \else%
+      \expandafter\expandafter\expandafter\@@autorefname%
+          \csname r@#2\endcsname{}{}{}{}\@nil#1\@nil%
+    \fi%
+  }
+  \newcommand*\@@autorefname{}
+  \def\@@autorefname#1#2#3#4#5\@nil#6\@nil{#6#4.\@nil}
 %    \end{macrocode}
 % \end{macro}^^A \@@autorefname
 % \end{macro}^^A \@autorefname
@@ -1386,16 +1335,28 @@
 % Referenzieren auf diese.
 %    \begin{macrocode}
 %<*class>
-\newcommand*\manualhyperdef[2][\z@]{%
-  \raisebox{#1}[0pt][0pt]{\hyperdef{\jobname}{#2}{}}%
-}
+  \newcommand*\manualhyperdef[2][\z@]{%
+    \raisebox{#1}[0pt][0pt]{\hyperdef{\jobname}{#2}{}}%
+  }
 %</class>
 %<*package>
-\newcommand*\manualhyperref[2]{\hyperref{../\tud@manual}{\tud@manual}{#1}{#2}}
+  \newcommand*\manualhyperref[2]{\hyperref{../\tud@manual}{\tud@manual}{#1}{#2}}
 %</package>
 %    \end{macrocode}
 % \end{macro}^^A \autorefname
 % \end{macro}^^A \autorefname
+% Eine einfacher zu verwendende Kurzform.
+%    \begin{macrocode}
+}
+%    \end{macrocode}
+% \begin{macro}{\bsc}
+% \changes{v2.02}{2014/07/22}{\cs{DeclareRobustCommand} ersetzt mit
+%   \cs{newrobustcmd} aus \pkg{etoolbox}}%^^A
+% Eine einfacher zu verwendende Kurzform.
+%    \begin{macrocode}
+\newrobustcmd*\bsc{\@backslashchar}
+%    \end{macrocode}
+% \end{macro}^^A \bsc
 %
 % \iffalse
 %</body>
@@ -1480,11 +1441,18 @@
 % \end{macro}^^A \@IndexFormat
 % \end{macro}^^A \SetIndexFormat
 % \end{macro}^^A \CheckIndexFormat
+%
+% \iffalse
+%</class&body>
+%<*body>
+% \fi
+%
 % \begin{macro}{\Application}
 % \changes{v2.02}{2014/10/08}{überarbeitet}%^^A
 % \begin{macro}{\@Application}
 % Die Auszeichnung und der Indexeintrag einer Anwendungssoftware.
 %    \begin{macrocode}
+%<*class>
 \NewDocumentCommand\Application{smd||}{%
   \ifdin{#2}{%
     \mbox{\textsbs{#2}}%
@@ -1495,11 +1463,10 @@
   }%
 }
 \DeclareExpandableDocumentCommand\@Application{sm}{#2}
-%</class&body>
-%<*package&body>
+%</class>
+%<*package>
 \newcommand*\Application[1]{\ifdin{#1}{\mbox{\textsbs{#1}}}}
-%</package&body>
-%<*class&body>
+%</package>
 %    \end{macrocode}
 % \end{macro}^^A \@Application
 % \end{macro}^^A \Application
@@ -1507,6 +1474,7 @@
 % \changes{v2.02}{2014/10/08}{überarbeitet}%^^A
 % Die Auszeichnung und der Indexeintrag einer \LaTeX-Distribution.
 %    \begin{macrocode}
+%<*class>
 \NewDocumentCommand\Distribution{smod||}{%
   \ifdin{#2\IfValueT{#3}{~#3}}{%
     \mbox{\textsbn{#2\IfValueT{#3}{~#3}}}%
@@ -1516,11 +1484,10 @@
     }%
   }%
 }
-%</class&body>
-%<*package&body>
+%</class>
+%<*package>
 \newcommand*\Distribution[1]{\ifdin{#1}{\mbox{\textsbn{#1}}}}
-%</package&body>
-%<*class&body>
+%</package>
 %    \end{macrocode}
 % \end{macro}^^A \Distribution
 % \begin{macro}{\Path}
@@ -1535,6 +1502,7 @@
 % \changes{v2.02}{2014/10/08}{überarbeitet}%^^A
 % Die Auszeichnung und der Indexeintrag einer Datei.
 %    \begin{macrocode}
+%<*class>
 \NewDocumentCommand\File{smd||}{%
   \ifdin{#2}{%
     \mbox{\textsbn{#2}}%
@@ -1544,11 +1512,10 @@
     }%
   }%
 }
-%</class&body>
-%<*package&body>
+%</class>
+%<*package>
 \newcommand*\File[1]{\ifdin{#1}{\mbox{\textsbn{#1}}}}
-%</package&body>
-%<*class&body>
+%</package>
 %    \end{macrocode}
 % \end{macro}^^A \File
 % \begin{macro}{\Class}
@@ -1566,6 +1533,7 @@
 % Formatierung des Indexeintrages. Außerdem wird für Einträge mit dem Paket
 % \pkg{hyperref} mit \cs{@Class} eine expandierbare Version definiert.
 %    \begin{macrocode}
+%<*class>
 \NewDocumentCommand\Class{smd''d||}{%
   \ifdin{#2}{%
     \SetIndexFormat{#1}{#4}%
@@ -1573,6 +1541,18 @@
       {files}[\protect\sbnfont]{#2}[~{\idxfont(Klasse)}]%
   }%
 }
+%</class>
+%<*package>
+\NewDocumentCommand\Class{sm}{%
+  \ifdin{#2}{%
+    \IfBooleanTF{#1}{%
+      \manualhyperref{files:#2}{\textsbn{#2}}%
+    }{%
+      \textsbn{#2}%
+    }%
+  }%
+}
+%</package>
 \DeclareExpandableDocumentCommand\@Class{sm}{#2}
 %    \end{macrocode}
 % \end{macro}^^A \DeclareClass
@@ -1594,6 +1574,7 @@
 % Zusätzlich wird ein Befehl für Tutorials erstellt, welcher auf das Handbuch 
 % verweist.
 %    \begin{macrocode}
+%<*class>
 \newcommand*\@TempPackage{}
 \NewDocumentCommand\Package{smd''d()d||}{%
   \if@changelog%
@@ -1607,9 +1588,8 @@
     }%
   \fi%
 }
-\DeclareExpandableDocumentCommand\@Package{sm}{#2}
-%</class&body>
-%<*package&body>
+%</class>
+%<*package>
 \NewDocumentCommand\Package{smd()}{%
   \ifdin{#2}{%
     \IfBooleanTF{#1}{%
@@ -1623,8 +1603,8 @@
     }%
   }%
 }
-%</package&body>
-%<*class&body>
+%</package>
+\DeclareExpandableDocumentCommand\@Package{sm}{#2}
 %    \end{macrocode}
 % \end{macro}^^A \DeclarePackage
 % \end{macro}^^A \@TempPackage
@@ -1632,12 +1612,15 @@
 % \end{macro}^^A \Package
 % \begin{macro}{\Option}
 % \changes{v2.02}{2014/10/08}{überarbeitet}%^^A
+% \begin{macro}{\@Option}
+% \changes{v2.02}{2014/11/02}{neu}%^^A
 % \begin{macro}{\@TempOption}
 % Im Gegensatz zu den vorherigen Befehlen gibt es ein ordinäres optionales 
 % Argument nach dem Hauptargument. Damit kann der Option im Handbuch ein Wert
 % zugewiesen werden. Für Tutorials wird ein Befehl definiert, der auf das
 % Handbuch verweist.
 %    \begin{macrocode}
+%<*class>
 \newcommand*\@TempOption{}
 \NewDocumentCommand\Option{smod''d||}{%
   \if@changelog%
@@ -1648,8 +1631,8 @@
     \@ProcessOutput{\texttt{#2}}[\@TempOption]'#4'{options}[\ttfamily]{#2}%
   \fi%
 }
-%</class&body>
-%<*package&body>
+%</class>
+%<*package>
 \NewDocumentCommand\Option{smo}{%
   \ifdin{#2}{%
     \IfBooleanTF{#1}{%
@@ -1659,17 +1642,21 @@
     }%
   }%
 }
-%</package&body>
-%<*class&body>
+%</package>
+\DeclareExpandableDocumentCommand\@Option{sm}{#2}
 %    \end{macrocode}
 % \end{macro}^^A \@TempOption
+% \end{macro}^^A \@Option
 % \end{macro}^^A \Option
 % \begin{macro}{\Environment}
 % \changes{v2.02}{2014/10/08}{überarbeitet}%^^A
+% \begin{macro}{\@Environment}
+% \changes{v2.02}{2014/11/02}{neu}%^^A
 % \begin{macro}{\@TempEnvironment}
 % Auch hier wird für die Änderungsliste unterschieden und für Tutorials ein 
 % Befehl definiert, welcher auf das Handbuch referenziert.
 %    \begin{macrocode}
+%<*class>
 \newcommand*\@TempEnvironment{}
 \NewDocumentCommand\Environment{smod''d||}{%
   \if@changelog%
@@ -1694,8 +1681,8 @@
     \@ProcessOutput{\@TempEnvironment}'#4'{macros}[\ttfamily]{#2}%
   \fi%
 }
-%</class&body>
-%<*package&body>
+%</class>
+%<*package>
 \NewDocumentCommand\Environment{sm}{%
   \ifdin{#2}{%
     \IfBooleanTF{#1}{%
@@ -1705,16 +1692,20 @@
     }%
   }%
 }
-%</package&body>
-%<*class&body>
+%</package>
+\DeclareExpandableDocumentCommand\@Environment{sm}{#2}
 %    \end{macrocode}
 % \end{macro}^^A \@TempEnvironment
+% \end{macro}^^A \@Environment
 % \end{macro}^^A \Environment
 % \begin{macro}{\Macro}
 % \changes{v2.02}{2014/10/08}{überarbeitet}%^^A
+% \begin{macro}{\@Macro}
+% \changes{v2.02}{2014/11/02}{neu}%^^A
 % Die Auszeichnung und der Indexeintrag eines Befehls sowie für das Paket 
 % \pkg{tudscrman} der Hyperlink auf das Handbuch.
 %    \begin{macrocode}
+%<*class>
 \NewDocumentCommand\Macro{smd''d||}{%
   \if@changelog%
     \@ProcessChangedAt{#1}{macros}{\ttfamily\bsc}{#2}{Befehl}%
@@ -1723,8 +1714,8 @@
     \@ProcessOutput{\texttt{\bsc#2}}'#3'{macros}[\ttfamily\bsc]{#2}%
   \fi%
 }
-%</class&body>
-%<*package&body>
+%</class>
+%<*package>
 \NewDocumentCommand\Macro{sm}{%
   \ifdin{\bsc#2}{%
     \IfBooleanTF{#1}{%
@@ -1734,10 +1725,48 @@
     }%
   }%
 }
-%</package&body>
-%<*class&body>
+%</package>
+\DeclareExpandableDocumentCommand\@Macro{sm}{#2}
 %    \end{macrocode}
+% \end{macro}^^A \@Macro
 % \end{macro}^^A \Macro
+% \begin{macro}{\Length}
+% \changes{v2.02}{2014/10/08}{überarbeitet}%^^A
+% \begin{macro}{\@TempLength}
+% \changes{v2.02}{2014/10/08}{entfernt}%^^A
+% Die Auszeichnung und der Indexeintrag einer \LaTeX-Länge.
+%    \begin{macrocode}
+%<*class>
+\NewDocumentCommand\Length{smd''d||}{%
+  \if@changelog%
+    \@ProcessChangedAt{#1}{macros}{\ttfamily\bsc}{#2}{L\"ange}%
+  \else%
+    \SetIndexFormat{#1}{#4}%
+    \@ProcessOutput{\texttt{\bsc#2}}[\if@declare~{\idxfont(L\"ange)}\fi]'#3'%
+      {macros}[\ttfamily\bsc]{#2}[~{\idxfont(L\"ange)}]%
+  \fi%
+}
+%</class>
+%<*package>
+\NewDocumentCommand\Length{sm}{%
+  \ifdin{\bsc#2}{%
+    \IfBooleanTF{#1}{%
+      \manualhyperref{macros:#2}{\texttt{\bsc#2}}%
+    }{%
+      \texttt{\bsc#2}%
+    }%
+  }%
+}
+%</package>
+%    \end{macrocode}
+% \end{macro}^^A \@TempLength
+% \end{macro}^^A \Length
+%
+% \iffalse
+%</body>
+%<*class&body>
+% \fi
+%
 % \begin{macro}{\Key}
 % \changes{v2.02}{2014/10/08}{überarbeitet}%^^A
 % \begin{macro}{\@TempKey}
@@ -1785,37 +1814,6 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \PageStyle
-% \begin{macro}{\Length}
-% \changes{v2.02}{2014/10/08}{überarbeitet}%^^A
-% \begin{macro}{\@TempLength}
-% \changes{v2.02}{2014/10/08}{entfernt}%^^A
-% Die Auszeichnung und der Indexeintrag einer \LaTeX-Länge.
-%    \begin{macrocode}
-\NewDocumentCommand\Length{smd''d||}{%
-  \if@changelog%
-    \@ProcessChangedAt{#1}{macros}{\ttfamily\bsc}{#2}{L\"ange}%
-  \else%
-    \SetIndexFormat{#1}{#4}%
-    \@ProcessOutput{\texttt{\bsc#2}}[\if@declare~{\idxfont(L\"ange)}\fi]'#3'%
-      {macros}[\ttfamily\bsc]{#2}[~{\idxfont(L\"ange)}]%
-  \fi%
-}
-%</class&body>
-%<*package&body>
-\NewDocumentCommand\Length{sm}{%
-  \ifdin{\bsc#2}{%
-    \IfBooleanTF{#1}{%
-      \manualhyperref{macros:#2}{\texttt{\bsc#2}}%
-    }{%
-      \texttt{\bsc#2}%
-    }%
-  }%
-}
-%</package&body>
-%<*class&body>
-%    \end{macrocode}
-% \end{macro}^^A \@TempLength
-% \end{macro}^^A \Length
 % \begin{macro}{\Counter}
 % \changes{v2.02}{2014/10/08}{überarbeitet}%^^A
 % \begin{macro}{\@TempCounter}
