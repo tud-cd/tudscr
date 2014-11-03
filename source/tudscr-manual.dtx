@@ -1,4 +1,4 @@
-% \CheckSum{2329}
+% \CheckSum{2331}
 % \iffalse meta-comment
 % ======================================================================
 %
@@ -49,7 +49,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-manual.dtx}[%
-  2014/11/02 v2.02 TUD-KOMA-Script\space%
+  2014/11/03 v2.02 TUD-KOMA-Script\space%
 %</driver>
 %<identify>\NeedsTeXFormat{LaTeX2e}[2011/06/27]
 %<class&identify>\ProvidesClass{tudscrman}[%
@@ -853,18 +853,34 @@
   \openin\tud@tut@read=\jobname-temp.tex%
 %    \end{macrocode}
 % Der Schalter \cs{if@tempswa} wird verwendet, um unnötige Leerzeilen in der
-% Ausgabedatei zu entfernen.
+% Ausgabedatei zu entfernen. Wurde eine nicht leere Zeile gefunden, wird diese 
+% auf jeden Fall geschrieben, indem \cs{@tempswatrue} gesetzt wird. Eine leere 
+% Zeile wird~-- bis auf den Sonderfall, dass es sich um die letzte Zeile in der
+% Datei handelt~-- zunächst nicht weiter beachtet. Im Zweifelsfall wird diese
+% (erste) Leerzeile geschrieben. 
 %    \begin{macrocode}
   \@tempswafalse%
   \loop\unless\ifeof\tud@tut@read%
     \read\tud@tut@read to\tud@tut@line%
-    \ifx\tud@tut@line\@empty\else\@tempswatrue\fi%
+    \ifx\tud@tut@line\@empty%
+      \ifeof\tud@tut@read\@tempswafalse\fi%
+    \else%
+      \@tempswatrue%
+    \fi%
+%    \end{macrocode}
+% Hier erfolgt das eigentliche Schreiben im selektierten Stream.
+%    \begin{macrocode}
     \if@tempswa%
       \immediate\write\@nameuse{tud@tut@write@#1}{%
         \unexpanded\expandafter{\tud@tut@line}%
       }%
     \fi%
-    \ifx\tud@tut@line\@empty\@tempswafalse\else\@tempswatrue\fi%
+%    \end{macrocode}
+% Im Nachgang wird überprüft, ob die aktuell geschriebene Zeile leer war. Ist 
+% dies der Fall, so wird \cs{@tempswafalse} gesetzt, um eine etwaig folgende 
+% Leerzeile nicht in die Ausgabedatei zu schrieben.
+%    \begin{macrocode}
+    \ifx\tud@tut@line\@empty\@tempswafalse\fi%
   \repeat%
   \closein\tud@tut@read%
   \endgroup%
