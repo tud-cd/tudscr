@@ -16,7 +16,7 @@
 
 \begin{document}
 \title{Ein Beitrag zum mathematischen Satz in \NoCaseChange{\hologo{LaTeXe}}}
-\author{Falk Hanisch}
+\author{Falk Hanisch\thanks{\noexpand\href{mailto:\tudscrmail}{\tudscrmail}}}
 \date{21.08.2014}
 \makeatletter
 \begingroup%
@@ -34,28 +34,33 @@
 \makeatother
 \StartTutorial
 %
-\begin{Tutorial*}
+\begin{Preamble}
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
-\documentclass[ngerman]{tudscrartcl}% andere Klassen sind auch möglich
+\documentclass[ngerman]{tudscrartcl}% andere Klassen sind möglich
 \usepackage{selinput}\SelectInputMappings{adieresis={ä},germandbls={ß}}
 \usepackage[T1]{fontenc}
 \usepackage{babel}
+\usepackage{microtype}
 
+\end{Preamble}
+%
+Zusätzlich wird das Paket \Package{amsmath} geladen, welches unter anderem die 
+in diesem Tutorial verwendeten Mathematikumgebungen \Environment{equation}, 
+\Environment{gathered} und \Environment{aligned} zur Verfügung stellt.
+%
+\begin{Preamble}
 \usepackage{amsmath}
-
-\begin{document}
-\end{Tutorial*}
+\end{Preamble}
 %
 Ein guter Mathematiksatz ist in \hologo{LaTeX} durchaus Sisyphusarbeit. Wenn 
 mikrotypographisch alles richtig gemacht werden soll, gibt es einiges zu 
 beachten. Generell gilt, dass Variablen kursiv, Bezeichnungen und Konstanten
-aufrecht gesetzt werden.
-
-Um beschreibende Indizes bei Formelzeichen richtig zu setzen, ist ohne weitere 
-Maßnahmen die exzessive Nutzung der Befehle \Macro*{mathrm}\PParameter{\dots} 
-und \Macro*{mathit}\PParameter{\dots} wohl oder übel notwendig. So wird aus:
+aufrecht gesetzt werden. Um beschreibende Indizes bei Formelzeichen richtig zu 
+setzen, ist ohne weitere Maßnahmen die exzessive Nutzung der beiden Befehle 
+\Macro{mathrm}\PParameter{\dots} und \Macro{mathit}\PParameter{\dots} wohl oder 
+übel notwendig. Somit wird aus:
 %
-\begin{Tutorial}
+\begin{Trunk*}
 \begin{equation*}
 \begin{gathered}
 M_{EM} = \frac{M_{Rad}}{i_g \cdot i_A} - M_{VM} \\
@@ -66,11 +71,12 @@ M_{EMmin}\leq M_{EM}\leq M_{EMmax}
 \end{aligned}
 \end{gathered}
 \end{equation*}
-\end{Tutorial}
+
+\end{Trunk*}
 %
 mit ziemlich viel Anpassungsarbeit:
 %
-\begin{Tutorial}
+\begin{Trunk*}
 \begin{equation*}
 \begin{gathered}
 M_\mathrm{EM} = \frac{M_\mathrm{Rad}}{i_g \cdot i_A} - M_\mathrm{VM} \\
@@ -81,25 +87,27 @@ M_\mathrm{EM_{min}}\leq M_\mathrm{EM}\leq M_\mathrm{EM_{max}}
 \end{aligned}
 \end{gathered}
 \end{equation*}
-\end{Tutorial}
+
+\end{Trunk*}
 %
 Wie man sieht, ist dabei eine ganze Menge Handarbeit vonnöten. Allerdings lässt 
 sich das relativ gut vereinfachen lassen. Zu diesem Zwecke wird ein Befehl 
-\Macro*{ind}\PParameter{\dots} für das Setzen von Indizes bei Formelzeichen 
+\Macro{ind}\PParameter{\dots} für das Setzen von Indizes bei Formelzeichen 
 definiert. Danach kann man sich~-- wenn man das für nötig und sinnvoll 
 erachtet~-- noch zusätzliche Befehle für häufig verwendete Ausdrücke schnitzen. 
 Als Beispiel wird das schon eben genutzte Drehmoment \ensuremath{M} verwendet. 
 Hierfür könnte man Folgendes definieren:
 %
-\TutorialHook{\let\newcommand\renewcommand}
-\begin{Tutorial}
+\CodeHook{\let\newcommand\renewcommand}
+\begin{Trunk*}
 \newcommand*{\ind}[1]{\ensuremath{_\mathrm{#1}}}
 \newcommand*{\M}[1]{\ensuremath{M\ind{#1}}}
-\end{Tutorial}
+
+\end{Trunk*}
 %
 und damit diese Ausgabe erzeugen:
 %
-\begin{Tutorial}
+\begin{Trunk*}
 \begin{equation*}
 \begin{gathered}
 \M{EM} = \frac{\M{Rad}}{i_g \cdot i_A} - \M{VM} \\
@@ -110,24 +118,25 @@ und damit diese Ausgabe erzeugen:
 \end{aligned}
 \end{gathered}
 \end{equation*}
-\end{Tutorial}
+
+\end{Trunk*}
 %
 Netter Nebeneffekt ist, dass man den Befehl aufgrund der Verwendung von 
-\Macro*{ensuremath}\PParameter{\dots} nun auch im Fließtext verwenden kann, 
-beispielsweise wie hier \M{VM_{ind}} (\Macro*{M}\PParameter{VM\_\{ind\}}) für 
+\Macro{ensuremath}\PParameter{\dots} nun auch im Fließtext verwenden kann, 
+beispielsweise wie hier \M{VM_{ind}} (\Macro{M}\PParameter{VM\_\{ind\}}) für 
 das induzierte Moment einer Verbrennungskraftmaschine.
 
 Möchte man es sich noch bequemer machen, strikt man sich noch eine Lösung, in
 der man~-- im Gegensatz zum \hologo{LaTeX}"=Standardfall~-- \textbf{nach} dem
 obligatorischen Argument noch ein optionales für einen weiteren Index angeben
 kann, um damit der natürlichen Schreibweise zu entsprechen. Es wird der Befehl 
-\Macro*{M} so definiert, das dieser entweder mit \Macro*{M}\Parameter{Index} 
-oder in der Variante \Macro*{M}\Parameter{Index}\OParameter{Indexindex} 
+\Macro{M} so definiert, das dieser entweder mit \Macro{M}\Parameter{Index} 
+oder in der Variante \Macro{M}\Parameter{Index}\OParameter{Indexindex} 
 genutzt 
 werden kann.
 %
-\TutorialHook{\let\newcommand\renewcommand}
-\begin{Tutorial}
+\CodeHook{\let\newcommand\renewcommand}
+\begin{Trunk*}
 \renewcommand*{\ind}[1]{\ensuremath{_\mathrm{#1}}}
 \makeatletter
 \renewcommand*{\M}[1]{\@ifnextchar[{\o@M{#1}}{\n@M{#1}}}
@@ -136,11 +145,12 @@ werden kann.
 \def\n@M#1{\ensuremath{M\ind{#1}}}
 \def\o@M#1[#2]{\ensuremath{M\ind{#1_{#2}}}}
 \makeatother
-\end{Tutorial}
+
+\end{Trunk*}
 %
 Somit vereinfacht sich das zu Beginn vorgestellte Beispiel recht deutlich:
 %
-\begin{Tutorial}
+\begin{Trunk*}
 \begin{equation*}
 \begin{gathered}
 \M{EM} = \frac{\M{Rad}}{i_g \cdot i\_A} - \M{VM} \\
@@ -151,16 +161,16 @@ Somit vereinfacht sich das zu Beginn vorgestellte Beispiel recht deutlich:
 \end{aligned}
 \end{gathered}
 \end{equation*}
-\end{Tutorial}
+\end{Trunk*}
 %
-Das Definieren von \Macro*{M}\Parameter{Index}\OParameter{Indexindex} mit 
+Das Definieren von \Macro{M}\Parameter{Index}\OParameter{Indexindex} mit 
 angehängtem optionalen Argument ist ehrlich gesagt nur ein wenig Spielerei und 
 soll zeigen, wie dies prinzipiell mit \hologo{LaTeXe}"=Mitteln funktioniert. 
 Das Paket \Package{xparse} könnte alternativ zum hier vorgestellten Vorgehen 
 für die Befehlsdeklaration des optionalen \textbf{nach} dem obligatorischen 
-Argument genutzt werden. Damit würde die Befehlsdeklaration für \Macro*{M} 
+Argument genutzt werden. Damit würde die Befehlsdeklaration für \Macro{M} 
 folgendermaßen lauten:
-\begin{Tutorial-}
+\begin{Hint}
 \NewDocumentCommand \M { m o } {%
   \ensuremath{%
     M\ind{%
@@ -169,13 +179,7 @@ folgendermaßen lauten:
     }%
   }%
 }
-\end{Tutorial-}
-%
-Das Ende des Dokumentes nicht vergessen.
-%
-\begin{Tutorial*}
-\end{document}
-\end{Tutorial*}
+\end{Hint}
 %
 \FinishTutorial
 \end{document}
