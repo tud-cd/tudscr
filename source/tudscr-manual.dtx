@@ -1,4 +1,4 @@
-% \CheckSum{2388}
+% \CheckSum{2395}
 % \iffalse meta-comment
 % ======================================================================
 %
@@ -49,7 +49,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-manual.dtx}[%
-  2014/11/03 v2.02 TUD-KOMA-Script\space%
+  2014/11/04 v2.02 TUD-KOMA-Script\space%
 %</driver>
 %<identify>\NeedsTeXFormat{LaTeX2e}[2011/06/27]
 %<class&identify>\ProvidesClass{tudscrman}[%
@@ -143,6 +143,12 @@
 % Sprachabhängiges Setzen von Anführungszeichen.
 %    \begin{macrocode}
 \AfterPackage*{inputenc}{\RequirePackage{csquotes}[2011/10/22]}
+\AtBeginDocument{%
+  \@ifpackageloaded{csquotes}{}{%
+    \ClassWarning{\tudcls@name}{Package `csquotes' not loaded}%
+    \providecommand\enquote[1]{\glqg#1\grqq{}}%
+  }%
+}
 %    \end{macrocode}
 % Verbesserte Zitate.
 %    \begin{macrocode}
@@ -337,7 +343,7 @@
 \NewDocumentCommand\tud@item@pkg{od()}{%
   \itempackages[{%
     \IfValueT{#1}{%
-      \Hy@raisedlink{\hyperdef{\jobname}{files:#1}{}}%
+      \manualhyperdef{files:#1}%
       \label{files:#1}%
       \IfValueTF{#2}{%
         \def\@tempa{http://www.ctan.org/pkg/#2}%
@@ -1333,22 +1339,6 @@
   \RequirePackage{hyperref}[2012/11/06]
   \hypersetup{colorlinks,linkcolor=blue}
 %    \end{macrocode}
-% Für die PDF-Outline-Einträge werden die folgenden Befehle durch eine robuste
-% Version ersetzt.
-%    \begin{macrocode}
-  \pdfstringdefDisableCommands{%
-%<*class>
-    \let\Application\@Application%
-%</class>
-    \let\Class\@Class%
-    \let\Package\@Package%
-    \let\Option\@Option%
-    \let\Environment\@Environment%
-    \let\Macro\@Macro%
-    \let\TUDScript\@TUDScript%
-    \let\NoCaseChange\@firstofone%
-  }%
-%    \end{macrocode}
 % Es folgen einige Befehle, die an das Paket \pkg{hyperref} gekoppelt sind.
 % \begin{macro}{\Email}
 % Hyperlink für die Angabe einer E-Mail-Adresse.
@@ -1398,23 +1388,53 @@
 % \begin{macro}{\manualhyperref}
 % \changes{v2.02}{2014/10/27}{neu}%^^A
 % Diese beiden Befehle dienen zum Defnieren von Textankern im Handbuch und zum
-% Referenzieren auf diese.
+% Referenzieren auf diese. Bei der Erstelung des Ankers mit \cs{manualhyperdef} 
+% kann mit dem optionalen Argument dessen vertikale Position angepasst werden. 
+% Bleibt dieses leer, so wird der Anker mit \cs{Hy@raisedlink}~-- wie es auch
+% bei anderen \pkg{hyperref}-Labels geschieht~-- über die Grundlinie gehoben.
+% Das letzte der beiden Argumente in geschweiften Klammern ist optional und 
+% gibt den Inhalt einfach auf der aktuellen~-- nicht der korrigierten ~-- Höhe
+% aus.
 %    \begin{macrocode}
 %<*class>
-  \newcommand*\manualhyperdef[2][\z@]{%
-    \raisebox{#1}[0pt][0pt]{\hyperdef{\jobname}{#2}{}}%
+  \NewDocumentCommand\manualhyperdef{omG{}}{%
+    \IfValueTF{#1}{%
+      \raisebox{#1}[0pt][0pt]{\hyperdef{\jobname}{#2}{}}#3%
+    }{%
+      \Hy@raisedlink{\hyperdef{\jobname}{#2}{}}#3%
+    }%
   }
+  \newcommand*\manualhyperref[2]{\hyperref{}{\jobname}{#1}{#2}}
 %</class>
 %<*package>
   \newcommand*\manualhyperref[2]{\hyperref{../\tud@manual}{\tud@manual}{#1}{#2}}
 %</package>
 %    \end{macrocode}
-% \end{macro}^^A \autorefname
-% \end{macro}^^A \autorefname
-% Eine einfacher zu verwendende Kurzform.
+% \end{macro}^^A \manualhyperref
+% \end{macro}^^A \manualhyperdef
+% Und damit ist fast Schluss mit \pkg{hyperref}\dots
 %    \begin{macrocode}
 }
 %    \end{macrocode}
+% \begin{macro}{\pdfexpandableoutline}
+% \changes{v2.02}{2014/11/04}{neu}%^^A
+% \begin{macro}{\@TUDScript}
+% \changes{v2.02}{2014/08/16}{neu}%^^A
+% Für die PDF-Outline-Einträge müssen einige Befehle durch eine expandierbare
+% Version ersetzt werden. Um dies möglichst einfach zu gestalten, wird der 
+% Befehl \cs{pdfexpandableoutline} definiert.
+%    \begin{macrocode}
+\newcommand*\pdfexpandableoutline[1]{%
+  \AfterPackage*{hyperref}{\pdfstringdefDisableCommands{\csletcs{#1}{@#1}}}
+}
+%    \end{macrocode}
+% Den Anfang mach gleich \cs{TUDScript}.
+%    \begin{macrocode}
+\newcommand*\@TUDScript{TUD-KOMA-Script}
+\pdfexpandableoutline{TUDScript}
+%    \end{macrocode}
+% \end{macro}^^A \@TUDScript
+% \end{macro}^^A \pdfexpandableoutline
 % \begin{macro}{\bsc}
 % \changes{v2.02}{2014/07/22}{\cs{DeclareRobustCommand} ersetzt mit
 %   \cs{newrobustcmd} aus \pkg{etoolbox}}%^^A
@@ -1529,6 +1549,7 @@
   }%
 }
 \DeclareExpandableDocumentCommand\@Application{sm}{#2}
+\pdfexpandableoutline{Application}
 %</class>
 %<*package>
 \newcommand*\Application[1]{\ifdin{#1}{\mbox{\textsbs{#1}}}}
@@ -1601,11 +1622,15 @@
 %    \begin{macrocode}
 %<*class>
 \NewDocumentCommand\Class{smd''d||}{%
-  \ifdin{#2}{%
-    \SetIndexFormat{#1}{#4}%
-    \@ProcessOutput{\textsbn{#2}}'#3'%
-      {files}[\protect\sbnfont]{#2}[~{\idxfont(Klasse)}]%
-  }%
+  \if@changelog%
+    \@ProcessChangedAt{#1}{files}{\protect\sbnfont}{#2}{Klasse}%
+  \else%
+    \ifdin{#2}{%
+      \SetIndexFormat{#1}{#4}%
+      \@ProcessOutput{\textsbn{#2}}'#3'%
+        {files}[\protect\sbnfont]{#2}[~{\idxfont(Klasse)}]%
+    }%
+  \fi%
 }
 %</class>
 %<*package>
@@ -1620,6 +1645,7 @@
 }
 %</package>
 \DeclareExpandableDocumentCommand\@Class{sm}{#2}
+\pdfexpandableoutline{Class}
 %    \end{macrocode}
 % \end{macro}^^A \DeclareClass
 % \end{macro}^^A \@TempClass
@@ -1671,6 +1697,7 @@
 }
 %</package>
 \DeclareExpandableDocumentCommand\@Package{sm}{#2}
+\pdfexpandableoutline{Package}
 %    \end{macrocode}
 % \end{macro}^^A \DeclarePackage
 % \end{macro}^^A \@TempPackage
@@ -1710,6 +1737,7 @@
 }
 %</package>
 \DeclareExpandableDocumentCommand\@Option{sm}{#2}
+\pdfexpandableoutline{Option}
 %    \end{macrocode}
 % \end{macro}^^A \@TempOption
 % \end{macro}^^A \@Option
@@ -1760,6 +1788,7 @@
 }
 %</package>
 \DeclareExpandableDocumentCommand\@Environment{sm}{#2}
+\pdfexpandableoutline{Environment}%
 %    \end{macrocode}
 % \end{macro}^^A \@TempEnvironment
 % \end{macro}^^A \@Environment
@@ -2054,7 +2083,7 @@
 % und direkt nach einer Gliederungsüberschrift folgen sollte.
 %    \begin{macrocode}
         \if@stareddeclare%
-          \raisebox{4\baselineskip}[0pt][0pt]{\hyperdef{\jobname}{\@tempa}{}}%
+          \manualhyperdef[4\baselineskip]{\@tempa}%
           \par\nobreak\vskip\dimexpr-\parskip-\baselineskip%
           \@afterindentfalse\@afterheading%
         \else%
@@ -2062,7 +2091,7 @@
 % Andernfalls wird der normale Hyperlink gesetzt. Danach folgt in jedem Fall 
 % das Label, um darauf prüfen zu können.
 %    \begin{macrocode}
-          \Hy@raisedlink{\hyperdef{\jobname}{\@tempa}{}}%
+          \manualhyperdef{\@tempa}%
         \fi%
         \label{\@tempa}%
         \@HyperIndex{#5}{#6}{#7}{#8}{#9}{(declare}%
@@ -2579,7 +2608,7 @@
     \strut%
     \marginnote{%
       \def\@tempa####1{%
-        \ignorespaces\hyperref[idx:changelog]{####1}\tabularnewline%
+        \ignorespaces\manualhyperref{####1}{####1}\tabularnewline%
       }%
       \begin{tabular}{|l|}%
         \hline%
@@ -2592,7 +2621,7 @@
 }
 %    \end{macrocode}
 % Der Befehl \cs{ChangedAt@Split} teilt ein gegebenes Argument am Delimiter
-% Ausrufezeichen (\glqq !\grqq) in drei Argumente auf und reicht diese an 
+% Ausrufezeichen (\enquote{!}) in drei Argumente auf und reicht diese an 
 % \cs{ChangedAt@@Process} weiter. Sollte kein oder nur Ausrufezeichen gefunden 
 % werden, so wird das zweite und/oder dritte Argument mit dem~-- vom Paket
 % \pkg{xparse} definierten~-- leeren Wert \texttt{-NoValue-} an den Befehl
@@ -2617,7 +2646,7 @@
   \IfValueTF{#3}{%
 %    \end{macrocode}
 % Bei der Deklaration von Optionen, Befehlen etc. werden diese automatisch in 
-% der Liste der Änderungen im Bereich \glqq Implementierung\grqq vor der
+% der Liste der Änderungen im Bereich \enquote{Implementierung} vor der
 % gegebenen Erklärung selbst ausgegeben. Hierfür wird das dritte Argument
 % genutzt. Damit lediglich diese und nicht noch die dazugehörigen Argumente
 % eingetragen werden, werden die relevanten Befehle deaktiviert und das
@@ -2632,7 +2661,7 @@
 %    \end{macrocode}
 % Wurde \cs{ChangedAt} direkt und nicht über das optionale Argument der 
 % Umgebungen \env{Declaration} genutzt, erscheint der gewünschte Eintrag im
-% Bereich \glqq Allgemein\grqq.
+% Bereich \enquote{Allgemein}.
 %    \begin{macrocode}
     \IfValueT{#2}{\ChangedAt@@@Process{#1}{Allgemein}{#2}}%
   }%
@@ -2658,7 +2687,10 @@
       \expandafter\def\expandafter\@tempa\expandafter{\ChangedAt@Default}%
     \fi%
 %    \end{macrocode}
-% Danach wird geprüft, ob das Makro \cs{Key} übergeben wurde.
+% Danach wird geprüft, ob das Makro \cs{Key} übergeben wurde. Außerdem wird ein 
+% Anker in der Änderungsliste für die Referenzierung auf die einzelnen Bereiche 
+% (\enquote{Allgemein}, \enquote{Implementierung} und \enquote{Umbenennungen}) 
+% gesetzt.
 %    \begin{macrocode}
     \expandafter\in@\expandafter\Key\expandafter{\@tempa}%
     \ifin@%
@@ -2666,9 +2698,13 @@
         \RenewDocumentCommand\Key{sommo}{\xdef\@TempKey{##3:}}%
         \setbox0\hbox{#3}%
       \endgroup%
-      \index[changelog]{#1!#2!\@TempKey\ #3}%
+      \index[changelog]{%
+        \manualhyperdef{#1}{#1}!\manualhyperdef{#1:#2}{#2}!\@TempKey\ #3%
+      }%
     \else%
-      \index[changelog]{#1!#2!#3}%
+      \index[changelog]{%
+        \manualhyperdef{#1}{#1}!\manualhyperdef{#1:#2}{#2}!#3%
+      }%
     \fi%
   \endgroup%
 }
@@ -2983,7 +3019,7 @@
 (require "texindy.xdy")
 %    \end{macrocode}
 % Dies sind kleine Überbleibsel. Leider lässt sich für die Bereiche (noch) kein 
-% Markup für angehängte \glqq f.\grqq sowie \glqq ff.\grqq einstellen. Deshalb
+% Markup für angehängte \enquote{f.} sowie \enquote{ff.} einstellen. Deshalb
 % würden diese auch bei kursiven oder fetten Seitenzahlen in normaler Schrift
 % erscheinen, weshalb auf die Auszeichnung folgender Seiten verzichtet wird.
 %    \begin{macrocode}
