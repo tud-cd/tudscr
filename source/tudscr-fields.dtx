@@ -1,4 +1,4 @@
-% \CheckSum{402}
+% \CheckSum{398}
 % \iffalse meta-comment
 % ======================================================================
 %
@@ -47,7 +47,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-fields.dtx}[%
-  2014/11/04 v2.02 TUD-KOMA-Script (input fields)%
+  2014/11/05 v2.02 TUD-KOMA-Script (input fields)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -69,6 +69,7 @@
 % \selectlanguage{ngerman}
 %
 % \changes{v2.02}{2014/06/23}{Unterstützung für \pkg{titlepage} entfernt}%^^A
+% \changes{v2.02}{2014/11/05}{Korrekturen bei Verwendung von \cs{@@title}}%^^A
 %
 % \section{Eingabefelder für den Nutzer}
 %
@@ -157,16 +158,14 @@
 % ohne die etwaigen Fußnoten gespeichert. Das Feld \cs{@@author} wurde mit der 
 % Version~v2.02 entfernt.
 %    \begin{macrocode}
-\newcommand*\@@title{\@latex@error{No \noexpand\title given}\@ehc}
+\newcommand*\@@title{}
 \renewcommand*\title[1]{%
   \gdef\@title{#1}%
-  \gdef\@@title{%
-    \begingroup%
-      \let\thanks\@gobble%
-      \let\footnote\@gobble%
-      #1%
-    \endgroup%
-  }%
+  \begingroup%
+    \let\thanks\@gobble%
+    \let\footnote\@gobble%
+    \xdef\@@title{#1}%
+  \endgroup%
 }
 %    \end{macrocode}
 % \end{field}^^A \@@author
@@ -241,7 +240,7 @@
 }
 \newcommand*\tud@@thesis[2]{%
   \ifstr{#1}{subject}{%
-    \ifx\@thesis\empty\else%
+    \ifx\@thesis\@empty\else%
       \ClassWarning{\tudcls@name}{Field `thesis' is overwritten by `subject'}%
     \fi%
     \TUD@std@ifkey@lock{subjectthesis}{true}%
