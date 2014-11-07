@@ -1,4 +1,4 @@
-% \CheckSum{2392}
+% \CheckSum{2393}
 % \iffalse meta-comment
 % ======================================================================
 %
@@ -49,7 +49,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-manual.dtx}[%
-  2014/11/06 v2.02 TUD-KOMA-Script\space%
+  2014/11/07 v2.02 TUD-KOMA-Script\space%
 %</driver>
 %<identify>\NeedsTeXFormat{LaTeX2e}[2011/06/27]
 %<class&identify>\ProvidesClass{tudscrman}[%
@@ -261,6 +261,7 @@
     }{%
       \Hy@raisedlink{\hyperdef{\jobname}{#2}{}}%
     }%
+    \ignorespaces%
   }
   \newcommand*\manualhyperref[2]{\hyperref{}{\jobname}{#1}{#2}}
 %</class>
@@ -784,15 +785,6 @@
 %    \end{macrocode}
 % \end{macro}^^A \@TUDScript
 % \end{macro}^^A \pdfexpandableoutline
-% Die Überschriften der Ebene \cs{section} haben einen zu geringen Abstand der 
-% Grundlinien. Dieser wird mit diesem dreckigen Hack forciert. Das funktioniert 
-% allerdings nur, wenn das Paket \pkg{fontenc} geladen wird.
-%    \begin{macrocode}
-\AtBeginDocument{%
-  \addtokomafont{section}{\strut\ignorespaces}% derber Hack!
-  \addtokomafont{subsection}{\strut\ignorespaces}% derber Hack!
-}
-%    \end{macrocode}
 %
 % \subsubsection{Markup von Klassen, Paketen, Optionen und weiteren Elementen}
 % 
@@ -1818,7 +1810,7 @@
 % Argument sorgt für die Verschiebung der Randnotiz auf die richtige Höhe, um 
 % den Höhenversatz zwischen Randnotiz und Deklarationsrahmen auszugleichen.
 %    \begin{macrocode}
-    \printchangedatlist[%
+    \printchangedatlist*[%
       \dimexpr.5\ht\strutbox+.5\dp\strutbox-.5\ht0-.5\dp0\relax%
     ]%
 %    \end{macrocode}
@@ -2054,11 +2046,14 @@
 % Randnotiz gesetzt. Dieser wird wie auch die Liste an \cs{ChangedAt@Process}
 % übergeben, womit diese und die Randnotiz letztendlich erzeugt werden.
 %    \begin{macrocode}
-\newcommand*\printchangedatlist[1][\z@]{%
+\NewDocumentCommand\printchangedatlist{sO{\z@}}{%
   \ifx\@changedatdeclarelist\relax\else%
-    \ChangedAt@Process{#1}{\@changedatdeclarelist}%
+    \ChangedAt@Process{#2}{\@changedatdeclarelist}%
     \global\let\@changedatdeclarelist\relax%
-    \@afterindentfalse\@afterheading%
+    \IfBooleanF{#1}{%
+      \par\nobreak\vskip\dimexpr-\parskip-\baselineskip%
+      \@afterindentfalse\@afterheading%
+    }%
   \fi%
 }
 %    \end{macrocode}
