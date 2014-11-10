@@ -8,5 +8,7 @@ attrib +h "doc\*.cls"
 attrib +h "doc\*.xdy"
 attrib +h "doc\tutorials\*.sty"
 attrib +h "logo\*.*"
+attrib +h "test\*.cls"
+attrib +h "test\*.sty"
 del "*.*" /s /q> nul
 attrib -h "*.*" /s
