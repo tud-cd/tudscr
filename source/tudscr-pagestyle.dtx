@@ -1,4 +1,4 @@
-% \CheckSum{1474}
+% \CheckSum{1485}
 % \iffalse meta-comment
 % ======================================================================
 %
@@ -47,7 +47,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-pagestyle.dtx}[%
-  2014/11/05 v2.02 TUD-KOMA-Script (pagestyle)%
+  2014/11/10 v2.02 TUD-KOMA-Script (pagestyle)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -403,7 +403,7 @@
 % auf einer Seite erstellt. Dies sind das aus dem Satzspiegel nach links
 % verschobene Logo der \TnUD sowie \dots
 %    \begin{macrocode}
-  \AfterPackage+{scrlayer-scrpage}{%
+  \AfterPackage*{scrlayer-scrpage}{%
     \DeclareNewLayer[%
       background,head,align=tl,%
       voffset=\tud@dim@logoy,%
@@ -475,7 +475,7 @@
 % \pgs{scrheadings}-Ebenen verwendet.
 %    \begin{macrocode}
     \newpairofpagestyles{tudheadings}{}%
-    \AddLayersToPageStyle{tudheadings}{%
+    \RedeclarePageStyleByLayers{tudheadings}{%
       tudheadings.head.mainlogo,%
       tudheadings.head.logo,%
       tudheadings.head.topline,%
@@ -487,8 +487,10 @@
       scrheadings.foot.odd,%
       scrheadings.foot.even,%
       scrheadings.foot.oneside,%
+      scrheadings.foot.above.line,%
+      scrheadings.foot.below.line%
     }%
-    \AddLayersToPageStyle{plain.tudheadings}{%
+    \RedeclarePageStyleByLayers{plain.tudheadings}{%
       tudheadings.head.mainlogo,%
       tudheadings.head.logo,%
       tudheadings.head.topline,%
@@ -500,6 +502,8 @@
       plain.scrheadings.foot.odd,%
       plain.scrheadings.foot.even,%
       plain.scrheadings.foot.oneside,%
+      plain.scrheadings.foot.above.line,%
+      plain.scrheadings.foot.below.line%
     }%
     \DeclareNewPageStyleByLayers{empty.tudheadings}{%
       tudheadings.head.mainlogo,%
@@ -878,7 +882,8 @@
 % Dieser Befehl enthält die gültigen Werte für die Optionen \opt{ddc}, 
 % \opt{ddchead} sowie \opt{ddcfoot}.
 %    \begin{macrocode}
-\newcommand*\tud@ddc@switch{%
+\newcommand*\tud@ddc@switch{}
+\edef\tud@ddc@switch{%
   \TUD@numkey@bool,%
   {color}{2},{colour}{2},%
   {colorblack}{3},{colourblack}{3},%
@@ -1504,8 +1509,6 @@
 % \begin{macro}{\tud@geometry@process}
 % \changes{v2.02}{2014/06/23}{diverse Anpassungen an \pkg{scrlayer-scrpage}}%^^A
 % \begin{macro}{\tud@geometry@@process}
-% \begin{macro}{\tud@geometry@@@process}
-% \changes{v2.02}{2014/05/14}{Probleme in Verbindung mit \pkg{calc} behoben}%^^A
 % Das Makro \cs{tud@geometry@process} setzt die Option für den gewünschten
 % Satzspiegel um, sowohl für die Seitenränder als auch zur Einberechnung der
 % Kopf- und/oder Fußzeile. Um mehrere Satzspiegel verwenden zu können~-- was
@@ -1570,6 +1573,13 @@
       \tud@dim@ddcfoot-\tud@ta@footskip+\tud@dim@footskip\relax%
     }%
 %    \end{macrocode}
+% Sollte der \pkg{typearea}-Satzspiegel noch unterhalb des TUD-Kopfes liegen, 
+% wird der Abstand zum Kopf vergrößert.
+%    \begin{macrocode}
+    \ifdim\tud@ta@headdiff<\z@\relax%
+      \addtolength{\tud@dim@headsep}{-\tud@ta@headdiff}%
+    \fi%
+%    \end{macrocode}
 % Hier erfolgt die Definition der Hilfsmakros für das CD-konforme asymmetrische
 % bzw. an das \CD angelehnte Layout für einseitigen und zweiseitigen Satz.
 % Zuerst werden die verschiedenen unterschiedlichen horizontalen Ränder für die
@@ -1612,13 +1622,15 @@
       }%
     \fi%
 %    \end{macrocode}
-% Für alle drei Varianten der Gleichanteil.
+% Für alle drei Varianten der vertikale Gleichanteil.
 %    \begin{macrocode}
     \def\tud@geometry@vmargin{%
       top=\tud@dim@top,%
+      headheight=\tud@ta@headheight,%
       headsep=\tud@dim@headsep,%
       bottom=\tud@dim@bottom,%
       footskip=\tud@dim@footskip,%
+      \tud@geometry@hincl,%
     }%
     \def\tud@geometry@pmargin{%
       top={%
@@ -1677,7 +1689,8 @@
     \tud@geometry@hmargin,%
     \tud@geometry@pmargin,%
     \tud@geometry@dmargin,%
-    \tud@geometry@@@process%
+    ignorehead,%
+%%    \tud@geometry@fincl%
   }%
   \expandafter\newgeometry\expandafter{\@tempa}%
   \savegeometry{tudareaddc}%
@@ -1687,7 +1700,8 @@
   \edef\@tempa{%
     \tud@geometry@hmargin,%
     \tud@geometry@pmargin,%
-    \tud@geometry@@@process%
+    ignorehead,%
+%%    \tud@geometry@fincl%
   }%
   \expandafter\newgeometry\expandafter{\@tempa}%
   \savegeometry{tudarea}%
@@ -1697,36 +1711,37 @@
   \edef\@tempa{%
     \tud@geometry@hmargin,%
     \tud@geometry@vmargin,%
-    \tud@geometry@@@process%
+%%    \tud@geometry@fincl%
   }%
   \expandafter\newgeometry\expandafter{\@tempa}%
   \savegeometry{typearea}%
 }
 %    \end{macrocode}
-% Das Hilfsmakro \cs{tud@geometry@@@process} wird bei der Umsetzung der
-% einzelnen Satzspiegeloptionen mit \cs{tud@geometry@process} bzw.
-% \cs{tud@geometry@@process} genutzt, um die Optionen für das Einbeziehen
-% von Kopf- und Fußzeile in den Satzspiegel auszuwerten.
+% \end{macro}^^A \tud@geometry@@process
+% \end{macro}^^A \tud@geometry@process
+% \begin{macro}{\tud@geometry@hincl}
+% \changes{v2.02}{2014/06/23}{diverse Anpassungen an \pkg{scrlayer-scrpage}}%^^A
+% \begin{macro}{\tud@geometry@fincl}
+% Diese beiden Hilfsmakro werten die Optionen für das Einbeziehen von Kopf- und
+% Fußzeile aus.
 %    \begin{macrocode}
-\newcommand*\tud@geometry@@@process{%
+\newcommand*\tud@geometry@hincl{%
   \if@hincl%
-    \if@fincl%
-      includeheadfoot,%
-    \else%
-      includehead,ignorefoot,%
-    \fi%
+    includehead,%
   \else%
-    \if@fincl%
-      ignorehead,includefoot,%
-    \else%
-      ignoreheadfoot,%
-    \fi%
+    ignorehead,%
+  \fi%
+}
+\newcommand*\tud@geometry@fincl{%
+  \if@fincl%
+    includefoot,%
+  \else%
+    ignorefoot,%
   \fi%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@geometry@@@process
-% \end{macro}^^A \tud@geometry@@process
-% \end{macro}^^A \tud@geometry@process
+% \end{macro}^^A \tud@geometry@fincl
+% \end{macro}^^A \tud@geometry@hincl
 % \begin{environment}{tudpage}
 % \changes{v2.02}{2014/06/23}{an Paket \pkg{scrlayer-scrpage} angepasst}%^^A
 % \begin{macro}{\tud@ps}
