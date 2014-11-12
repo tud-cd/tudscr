@@ -1,4 +1,4 @@
-% \CheckSum{2393}
+% \CheckSum{2396}
 % \iffalse meta-comment
 % ======================================================================
 %
@@ -49,7 +49,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-manual.dtx}[%
-  2014/11/07 v2.02 TUD-KOMA-Script\space%
+  2014/11/12 v2.02 TUD-KOMA-Script\space%
 %</driver>
 %<identify>\NeedsTeXFormat{LaTeX2e}[2011/06/27]
 %<class&identify>\ProvidesClass{tudscrman}[%
@@ -250,18 +250,23 @@
 % \changes{v2.02}{2014/10/27}{neu}%^^A
 % Diese beiden Befehle dienen zum Defnieren von Textankern im Handbuch und zum
 % Referenzieren auf diese. Bei der Erstelung des Ankers mit \cs{manualhyperdef} 
-% kann mit dem optionalen Argument dessen vertikale Position angepasst werden. 
-% Bleibt dieses leer, so wird der Anker mit \cs{Hy@raisedlink}~-- wie es auch
-% bei anderen \pkg{hyperref}-Labels geschieht~-- über die Grundlinie gehoben.
+% wird zusätzlich auch noch ein Label (\cs{label}) erzeugt. Die Sternversion 
+% des Befehls unterdrückt dies. Der Anker wird mit \cs{Hy@raisedlink}~-- wie es 
+% auch bei normalen \pkg{hyperref}-Labels geschieht~-- über die Grundlinie
+% gehoben. Die Version mit Apostroph kann nach Überschriften verwendet werden 
+% und verschiebt die vertikale Position des Ankers noch weiter nach oben.
 %    \begin{macrocode}
 %<*class>
-  \NewDocumentCommand\manualhyperdef{om}{%
-    \IfValueTF{#1}{%
-      \raisebox{#1}[0pt][0pt]{\hyperdef{\jobname}{#2}{}}%
+  \NewDocumentCommand\manualhyperdef{st'm}{%
+    \IfBooleanTF{#2}{%
+      \raisebox{4\baselineskip}[0pt][0pt]{\hyperdef{\jobname}{#3}{}}%
+      \par\nobreak\vskip\dimexpr-\parskip-\baselineskip%
+      \@afterindentfalse\@afterheading%
     }{%
-      \Hy@raisedlink{\hyperdef{\jobname}{#2}{}}%
+      \Hy@raisedlink{\hyperdef{\jobname}{#3}{}}%
+      \ignorespaces%
     }%
-    \ignorespaces%
+    \IfBooleanF{#1}{\label{#3}}%
   }
   \newcommand*\manualhyperref[2]{\hyperref{}{\jobname}{#1}{#2}}
 %</class>
@@ -491,6 +496,8 @@
 %
 % \begin{macro}{\PName}
 % \begin{macro}{\PBoolean}
+% \begin{macro}{\PBName}
+% \changes{v2.02}{2014/11/12}{neu}%^^A
 % \begin{macro}{\PSet}
 % \begin{macro}{\Parameter}
 % \begin{macro}{\OParameter}
@@ -504,6 +511,7 @@
 %    \begin{macrocode}
 \newrobustcmd*\PName[1]{\mbox{\texttt{\textsl{<#1>}}}}
 \newrobustcmd*\PBoolean{\PName{Ein-Aus-Wert}}
+\newrobustcmd*\PBName[1]{\PBoolean|\PName{#1}}
 \newrobustcmd*\PSet{\PName{Einstellung}}
 \newrobustcmd*\Parameter[1]{\mbox{\texttt{\{}\PName{#1}\texttt{\}}}}
 \newrobustcmd*\OParameter[1]{\mbox{\texttt{[}\PName{#1}\texttt{]}}}
@@ -523,6 +531,7 @@
 % \end{macro}^^A \OParameter
 % \end{macro}^^A \Parameter
 % \end{macro}^^A \PSet
+% \end{macro}^^A \PBName
 % \end{macro}^^A \PBoolean
 % \end{macro}^^A \PName
 %
@@ -1438,17 +1447,14 @@
 % und direkt nach einer Gliederungsüberschrift folgen sollte.
 %    \begin{macrocode}
         \if@stareddeclare%
-          \manualhyperdef[4\baselineskip]{\@tempa}%
-          \par\nobreak\vskip\dimexpr-\parskip-\baselineskip%
-          \@afterindentfalse\@afterheading%
+          \manualhyperdef'{\@tempa}%
         \else%
 %    \end{macrocode}
-% Andernfalls wird der normale Hyperlink gesetzt. Danach folgt in jedem Fall 
-% das Label, um darauf prüfen zu können.
+% Andernfalls wird der normale Hyperlink gesetzt. Das Label zum Prüfen wird 
+% implizit durch \cs{manualhyperdef} gesetzt.
 %    \begin{macrocode}
           \manualhyperdef{\@tempa}%
         \fi%
-        \label{\@tempa}%
         \@HyperIndex{#5}{#6}{#7}{#8}{#9}{(declare}%
       \fi%
 %    \end{macrocode}
@@ -1562,12 +1568,12 @@
 % Aufgrund der Nichtbeachtung von RegExp"=Ausdrücken durch den Indexprozessor
 % \texttt{texindy} (\url{http://sourceforge.net/p/xindy/bugs/22/}) muss hierfür
 % etwas getrickst werden. Der Befehl \cs{hyperidx} hat ein optionales Argument, 
-% in welchem das für \cs{hyperref} eigentlich obligatorische Label enthalten 
-% ist. Das führt dazu, dass \texttt{texindy} dieses beim internen Filtern in 
-% eckigen Klammern beibehält und es anschließend über eine eigens definierte 
-% \texttt{merge-rule} verworfen werden kann.
+% in welchem das für \cs{manualhyperref} obligatorische Label enthalten ist.
+% Das führt dazu, dass \texttt{texindy} dieses beim internen Filtern in eckigen 
+% Klammern beibehält und es anschließend über eine in \texttt{tudscrman.xdy} 
+% eigens definierte \texttt{merge-rule} verworfen werden kann.
 %    \begin{macrocode}
-\newrobustcmd*\hyperidx[2][]{\hyperref{}{\jobname}{#1}{#2}}
+\newrobustcmd*\hyperidx[2][]{\manualhyperref{#1}{#2}}
 \NewDocumentCommand\@HyperIndex{mmmmmm}{%
   \IfValueTF{#3}{\def\@tempa{#3}}{\def\@tempa{}}%
   \IfValueTF{#5}{\def\@tempb{#5}}{\def\@tempb{}}%
@@ -1653,6 +1659,7 @@
 \newcommand*\@gobbleparameters{%
   \let\PName\@gobble%
   \let\PBoolean\relax%
+  \let\PBName\@gobble%
   \let\PSet\relax%
   \let\PValue\@gobble%
   \let\Parameter\@gobble%
@@ -2211,11 +2218,11 @@
         \setbox0\hbox{#3}%
       \endgroup%
       \index[changelog]{%
-        #1\manualhyperdef{#1}!\manualhyperdef{#1:#2}{#2}!\@TempKey\ #3%
+        #1 \manualhyperdef*{#1}!\manualhyperdef*{#1:#2}{#2}!\@TempKey\ #3%
       }%
     \else%
       \index[changelog]{%
-        #1\manualhyperdef{#1}!\manualhyperdef{#1:#2}{#2}!#3%
+        #1 \manualhyperdef*{#1}!\manualhyperdef*{#1:#2}{#2}!#3%
       }%
     \fi%
   \endgroup%
@@ -2422,18 +2429,17 @@
   \apptocmd{\prepare@multicols}{\hbadness10000}{}{}%
   \ifblank{#1}{%
     \ifx\@printindexprologue\@empty%
-      \indexprologue[\@printindexskip]{\label{idx:main}}%
+      \indexprologue[\@printindexskip]{\manualhyperdef'{idx:main}}%
     \else%
       \indexprologue{%
-        \label{idx:main}%
-        \@afterindentfalse\@afterheading%
+        \manualhyperdef'{idx:main}%
         \@printindexprologue%
       }%
     \fi%
     \printindex\@printindexskip%
     \let\@printindexprologue\@empty%
   }{%
-    \indexprologue[\@printindexskip]{\label{idx:#1}}%
+    \indexprologue[\@printindexskip]{\manualhyperdef'{idx:#1}}%
     \printindex[#1]\@printindexskip%
   }%
 }
@@ -2447,7 +2453,7 @@
 \NewDocumentCommand\Index{mom}{%
   \index{%
     #1!\textrightarrow{}\space%
-    \hyperref[idx:#3]{Index der \IfValueTF{#2}{#2}{#1}}|seeidx{#3}%
+    \manualhyperref{idx:#3}{Index der \IfValueTF{#2}{#2}{#1}}|seeidx{#3}%
   }%
 }
 %    \end{macrocode}
@@ -2475,7 +2481,7 @@
 \NewDocumentCommand\Changelog{m}{%
   \index{%
     #1!\textrightarrow{}\space%
-    \hyperref[idx:changelog]{\"Anderungsliste}|seeidx{changelog}%
+    \manualhyperref{idx:changelog}{\"Anderungsliste}|seeidx{changelog}%
   }%
 }
 %    \end{macrocode}
@@ -2555,7 +2561,6 @@
   \itempackages[{%
     \IfValueT{#1}{%
       \manualhyperdef{files:#1}%
-      \label{files:#1}%
       \IfValueTF{#2}{%
         \def\@tempa{http://www.ctan.org/pkg/#2}%
       }{%
