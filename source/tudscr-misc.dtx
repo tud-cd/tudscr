@@ -1,4 +1,4 @@
-% \CheckSum{289}
+% \CheckSum{303}
 % \iffalse meta-comment
 % ======================================================================
 %
@@ -47,7 +47,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-misc.dtx}[%
-  2014/11/07 v2.02 TUD-KOMA-Script (miscellaneous)%
+  2014/11/13 v2.02 TUD-KOMA-Script (miscellaneous)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -296,8 +296,8 @@
 % \subsection{Erzwungene Minuskeln für Strings}
 %
 % Um angegebene Werte bei Schlüssel-Wert-Paaren oder Schlüsselwörter in
-% bestimmten Feldern sicher erkennen zu können, werden diese zwingend in
-% Kleinbuchstaben geschieben.
+% bestimmten Feldern mit Sicherheit erkennen zu können, werden diese zwingend 
+% in Kleinbuchstaben geschieben.
 % \begin{macro}{\tud@lowerstring}
 % Das Makro wird mit \cs{tud@lowerstring}\marg{Zielmakro}\marg{String} bennutzt.
 %    \begin{macrocode}
@@ -309,6 +309,22 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@lowerstring
+%
+% \subsection{Expansion geschützter Makros}
+%
+% Im \LaTeX-Kernel wird der Befehl \cs{@expandtwoargs} definiert, welcher zwei 
+% Argumente in ein angegebenes Makro vollständig expandiert. Dabei erfolgt die 
+% Expansion der beiden Argumente aufgrund der standardmäßigen Verwendung von 
+% \cs{edef} allerdings vollständig und ohne die Beachtung von \cs{protect}.
+% \begin{macro}{\protected@expandtwoargs}
+% Der Befehl \cs{protected@expandtwoargs} kann äquivalent genutzt werden, 
+% lässt dabei aber mit \cs{protect} geschützte Makros unberührt.
+%    \begin{macrocode}
+\providecommand*\protected@expandtwoargs[3]{%
+  \protected@edef\reserved@a{\noexpand#1{#2}{#3}}\reserved@a%
+}
+%    \end{macrocode}
+% \end{macro}^^A \protected@expandtwoargs
 %
 % \iffalse
 %</class&body>
@@ -391,7 +407,10 @@
 \newcommand*\CDs{Corporate Designs\xspace}
 \newcommand*\TUD{Technische Universit\"at Dresden\xspace}
 \newcommand*\TnUD{Technischen Universit\"at Dresden\xspace}
-\newcommand*\DDC{\mbox{DRESDEN-concept}\xspace}
+\newcommand*\DDC{%
+  \mbox{D\kern.05em R\kern.05em E\kern.05em S\kern.05em D\kern.05em E\kern.05em 
+  N\kern.1em-\kern.1em concept}\xspace%
+}
 \AfterPackage*{babel}{%
   \@expandtwoargs\in@{,english,}{,\bbl@loaded,}%
   \ifin@%

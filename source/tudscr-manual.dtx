@@ -1,4 +1,4 @@
-% \CheckSum{2396}
+% \CheckSum{2406}
 % \iffalse meta-comment
 % ======================================================================
 %
@@ -1549,22 +1549,8 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \@ProcessOutput
-% \begin{macro}{\@HyperIndex}
-% \changes{v2.02}{2014/10/08}{überarbeitet}%^^A
 % \begin{macro}{\hyperidx}
 % \changes{v2.02}{2014/08/16}{neu}%^^A
-% Dieser Befehl sorgt für die eigentlichen Indexeinträge. Dabei werden für 
-% Einträge, welche innerhalb der \env{Declaration}-Umgebung deklariert wurden, 
-% ein Hyperlink im Index erstellt. Das erste Argument \marg{Index} enthält den 
-% gewünschten Zielindex. Danach folgt~-- für Parameter~-- der Haupteintrag. Es 
-% folgt der zu machende Indexeintrag selbst mit \marg{Vorsatz}, \marg{Eintrag},
-% \marg{Anhang} und zum Abschluss \oarg{Formatierung}. Der vollständige 
-% Funktionsaufruf lautet:
-% \newline\begingroup\scriptsize
-% \cs{@HyperIndex}\marg{Index}\marg{Haupteintrag}\ignorespaces%
-% \marg{Vorsatz}\marg{Eintrag}\marg{Anhang}\marg{Formatierung}
-% \endgroup
-%
 % Aufgrund der Nichtbeachtung von RegExp"=Ausdrücken durch den Indexprozessor
 % \texttt{texindy} (\url{http://sourceforge.net/p/xindy/bugs/22/}) muss hierfür
 % etwas getrickst werden. Der Befehl \cs{hyperidx} hat ein optionales Argument, 
@@ -1574,6 +1560,22 @@
 % eigens definierte \texttt{merge-rule} verworfen werden kann.
 %    \begin{macrocode}
 \newrobustcmd*\hyperidx[2][]{\manualhyperref{#1}{#2}}
+%    \end{macrocode}
+% \end{macro}^^A hyperidx
+% \begin{macro}{\@HyperIndex}
+% \changes{v2.02}{2014/10/08}{überarbeitet}%^^A
+% Dieser Befehl sorgt für die eigentlichen Indexeinträge. Dabei werden für 
+% Einträge, welche innerhalb der \env{Declaration}-Umgebung deklariert wurden, 
+% ein Hyperlink im Index erstellt. Das erste Argument \marg{Index} enthält den 
+% gewünschten Zielindex. Danach folgt~-- für Parameter~-- der Haupteintrag. 
+% Daran schließt der Indexeintrag selbst mit \marg{Vorsatz}, \marg{Eintrag},
+% \marg{Anhang} und zum Abschluss \oarg{Formatierung} an. Der vollständige 
+% Funktionsaufruf lautet:
+% \newline\begingroup\scriptsize
+% \cs{@HyperIndex}\marg{Index}\marg{Haupteintrag}\ignorespaces%
+% \marg{Vorsatz}\marg{Eintrag}\marg{Anhang}\marg{Formatierung}
+% \endgroup
+%    \begin{macrocode}
 \NewDocumentCommand\@HyperIndex{mmmmmm}{%
   \IfValueTF{#3}{\def\@tempa{#3}}{\def\@tempa{}}%
   \IfValueTF{#5}{\def\@tempb{#5}}{\def\@tempb{}}%
@@ -1594,17 +1596,24 @@
         ~{\idxfont(Parameter)}\expandonce\@tempc%
       }%
       \begingroup%
-      \let\Environment\@firstofone%
-      \def\Macro##1{\bsc##1}%
-      \index[keys]{%
-        \hyperidx[\@tempb]{%
-          \begingroup\expandonce\@tempa#4\endgroup~{\idxfont(\texttt{#2})}%
+        \let\Environment\@firstofone%
+        \def\Macro##1{\bsc##1}%
+        \index[keys]{%
+          \hyperidx[\@tempb]{%
+            \begingroup\expandonce\@tempa#4\endgroup~{\idxfont(\texttt{#2})}%
+          }%
+          \expandonce\@tempc%
         }%
-        \expandonce\@tempc%
-      }%
       \endgroup%
     }{%
-      \index[#1]{#2!\begingroup\expandonce\@tempa#4\endgroup\expandonce\@tempb}%
+      \index[#1]{%
+        #2!\begingroup\expandonce\@tempa#4\endgroup%
+        ~{\idxfont(Parameter)}\expandonce\@tempc%
+      }%
+      \index[keys]{%
+        \begingroup\expandonce\@tempa#4\endgroup~{\idxfont(\texttt{#2})}%
+        \expandonce\@tempc%
+      }%
     }%
 %    \end{macrocode}
 % Falls es sich nicht um einen Parameter handelt, wird lediglich der Eintrag im 
@@ -1627,7 +1636,6 @@
   }%
 }
 %    \end{macrocode}
-% \end{macro}^^A hyperidx
 % \end{macro}^^A \@HyperIndex
 %
 % \subsubsection{Deklarationen}
@@ -2035,7 +2043,7 @@
 \newcommand*\@changedatdeclare[2]{%
   \IfValueT{#1}{%
     \@for\@tempa:=#1\do{%
-      \@expandtwoargs\in@{!}{\@tempa}%
+      \protected@expandtwoargs\in@{!}{\@tempa}%
       \ifin@%
         \expandafter\listadd\expandafter\@changedatdeclarelist%
           \expandafter{\@tempa!#2}%
