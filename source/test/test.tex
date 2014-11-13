@@ -1,22 +1,318 @@
-\documentclass[headsepline,footsepline]{tudscrreprt}
+\RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
+\documentclass[english,ngerman]{tudscrreprt}
+\usepackage{babel}
+\usepackage{selinput}\SelectInputMappings{adieresis={ä},germandbls={ß}}
 \usepackage[T1]{fontenc}
-\usepackage{selinput}
-\SelectInputMappings{adieresis={ä},germandbls={ß}}
-\usepackage{blindtext}
-\title{Thema Diplomarbeit}
-\faculty{Fakultät}
-%\KOMAoptions{headsepline}
-\begin{document}
-
-\author{%
-  Mickey Mouse
-  \authormore{bla}\matriculationyear{2000}\enrolmentyear{2010}
-  \matriculationnumber{12345}\studentid{67890}
-  \birthplace{Da}\birthday{2.2.2002}
-\and
-  Donald Duck
-  \studentid{12345}\matriculationid{67890}%
-  \placeofbirth{Dorte}\dateofbirth{1.1.2001}%
+\usepackage{fixltx2e}
+\usepackage{tudscrsupervisor}
+\AfterPackage*{hyperref}{%
+\usepackage[%
+automake,%
+% xindy,%=language=german-din,% mit Tex Live einfach verwendbar
+acronym,% Abkürzungen
+symbols,% Formelzeichen
+nomain,% kein Glossar
+translate=babel,%
+nogroupskip,%
+toc,%
+section=chapter,%
+]{glossaries}
+\makeglossaries
+\newglossarystyle{acrotabularx}{%
+\renewenvironment{theglossary}{%
+\tabularx{\linewidth}{@{}lXl@{}}%
+}{%
+\endtabularx\par\bigskip%
+}%
+\renewcommand*{\glossaryheader}{}%
+\renewcommand*{\glsgroupheading}[1]{}%
+\renewcommand*{\glsgroupskip}{}%
+\renewcommand*{\glossentry}[2]{%
+\glsentryitem{##1}% Entry number if required
+\glstarget{##1}{\sffamily\bfseries\glossentryname{##1}} &
+\glsentrydesc{##1} &
+##2\tabularnewline
 }
+}
+\newglossarystyle{acrotabu}{%
+\renewenvironment{theglossary}{%
+\begin{tabu}spread 0pt{@{}lX<{\strut}l@{}}%
+}{%
+\end{tabu}\par\bigskip%
+}%
+\renewcommand*{\glossaryheader}{}%
+\renewcommand*{\glsgroupheading}[1]{}%
+\renewcommand*{\glsgroupskip}{}%
+\renewcommand*{\glossentry}[2]{%
+\glsentryitem{##1}% Entry number if required
+\glstarget{##1}{\sffamily\bfseries\glossentryname{##1}} &
+\glsentrydesc{##1} &
+##2\tabularnewline
+}
+}
+\newcommand*{\newsymbol}[5][]{%
+\newglossaryentry{#2}{%
+type=symbols,%
+description={},%
+name={#3},%
+symbol={\ensuremath{#4}},%
+user1={\ensuremath{\mathrm{#5}}},%
+sort={#2},%
+#1%
+}%
+}
+\newglossarystyle{symblongtabu}{%
+\renewenvironment{theglossary}{%
+\begin{longtabu}spread 0pt[l]{ccX<{\strut}l}%
+}{%
+\end{longtabu}%
+}%
+\renewcommand*{\glossaryheader}{%
+\toprule
+\bfseries Symbol & \bfseries Einheit &
+\bfseries Name & \bfseries Seite(n)
+\tabularnewline\midrule\endhead%
+\bottomrule\endfoot%
+}%
+\renewcommand*{\glsgroupheading}[1]{}%
+\renewcommand*{\glsgroupskip}{}%
+\renewcommand*{\glossentry}[2]{%
+\glsentryitem{##1}% Entry number if required
+\glstarget{##1}{\glossentrysymbol{##1}} &
+\glsentryuseri{##1} &
+\glossentryname{##1} &
+##2\tabularnewline%
+}%
+}
+\defglsentryfmt[symbols]{%
+\ifmmode%
+\glssymbol{\glslabel}%
+\else%
+\glsgenentryfmt~\glsentrysymbol{\glslabel}%
+\fi%
+}}
+\usepackage{csquotes}
+\usepackage[backend=biber,style=alphabetic]{biblatex}
+\usepackage{filecontents}
+\begin{filecontents}{treatise-temp.bib}
+@book{goossens94,
+author = {Goossens, Michel and Mittelbach, Frank
+and Samarin, Alexander},
+title = {The LaTeX Companion},
+date = {1994},
+publisher = {Addison-Wesley},
+location = {Reading, Massachusetts},
+language = {english},
+}
+@book{knuth84,
+author = {Knuth, Donald E.},
+title = {The \TeX book},
+date = {1984},
+maintitle = {Computers \& Typesetting},
+volume = {A},
+publisher = {Addison-Wesley},
+location = {Reading, Massachusetts},
+language = {english},
+}
+@manual{hanisch14,
+author = {Hanisch, Falk},
+title = {Ein \LaTeX"=Bundle für Dokumente
+im neuen Corporate Design
+der Technischen Universität Dresden},
+date = {2014},
+subtitle = {Benutzerhandbuch},
+location = {Dresden},
+language = {german},
+}
+\end{filecontents}
+\addbibresource{treatise-temp.bib}
+\usepackage{enumitem}
+\setlist{noitemsep}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabu}
+\usepackage{tabularx}
+\usepackage{microtype}
+\usepackage{units}
+\usepackage[colorlinks,linkcolor=blue]{hyperref}
+\begin{document}
+\faculty{Juristische Fakultät}
+\department{Fachrichtung Strafrecht}
+\institute{Institut für Kriminologie}
+\chair{Lehrstuhl für Kriminalprognose}
+\title{%
+Entwicklung eines optimalen Verfahrens zur Eroberung des
+Geldspeichers in Entenhausen
+}
+\thesis{master}
+\graduation[M.Sc.]{Master of Science}
+\author{%
+Mickey Mouse
+\matriculationnumber{12345678}
+\dateofbirth{2.1.1990}
+\placeofbirth{Dresden}
+\course{Klinische Prognostik}
+\discipline{Individualprognose}
+\and%
+Donald Duck\matriculationnumber{87654321}
+\dateofbirth{1.2.1990}
+\placeofbirth{Berlin}
+\course{Statistische Prognostik}
+\discipline{Makrosoziologische Prognosen}
+}
+\matriculationyear{2010}
+\supervisor{Dagobert Duck \and Mac Moneysac}
+\professor{Prof. Dr. Kater Karlo}
+\date{10.09.2014}
+\makecover
 \maketitle
+\newcommand\taskcontent{%
+Momentan ist das besagte Thema in aller Munde. Insbesondere wird es
+gerade in vielen~-- wenn nicht sogar in allen~-- Medien diskutiert.
+Es ist momentan noch nicht abzusehen, ob und wann sich diese Situation
+ändert. Eine kurzfristige Verlagerung aus dem Fokus der Öffentlichkeit
+wird nicht erwartet.
+Als Ziel dieser Arbeit soll identifiziert werden, warum das Thema
+gerade so omnipräsent ist und wie man diesen Effekt abschwächen
+könnte. Zusätzlich sollen Methoden entwickelt werden, wie sich ein
+ähnlicher Vorgang zukünftig vermeiden ließe.
+}
+\taskform[pagestyle=empty]{\taskcontent}{%
+\item Recherche
+\item Analyse
+\item Entwicklung eines Konzeptes
+\item Anwendung der entwickelten Methodik
+\item Dokumentation und grafische Aufbereitung der Ergebnisse
+}
+\TUDoption{abstract}{multiple,section}
+\begin{abstract}
+Dies ist der deutschsprachige Teil der Zusammenfassung, in dem die
+Motivation sowie der Inhalt der nachfolgenden wissenschaftlichen
+Abhandlung kurz dargestellt werden.
+\nextabstract[english]
+This is the english part of the summary, in which the motivation and
+the content of the following academic treatise are briefly presented.
+\end{abstract}
+\declaration[company=FIRMA]
+\tableofcontents
+\listoffigures
+\listoftables
+\printacronyms[style=acrotabu]
+\printsymbols[style=symblongtabu]
+\setchapterpreamble{%
+\renewcommand*\dictumwidth{.4\textwidth}%
+\dictum[Johann Wolfgang von Goethe]{%
+Es irrt der Mensch, solang er strebt.%
+}%
+\bigskip
+}
+\chapter{Einleitung}
+Nachdem nun der Vorspann und~-- bis auf das Literaturverzeichnis am
+Ende des Dokumentes auf Seite~\pageref{sec:bibliography}~-- alle
+Verzeichnisse erfolgreich ausgegeben wurden, wird nun die Verwendung
+der weiteren Umgebungen und Befehle demonstriert, welche im Tutorial
+\texturn{treatise.pdf} vorgestellt wurden.
+\newacronym{apsp}{APSP}{All-Pairs Shortest Path}
+\newacronym{spsp}{SPSP}{Single-Pair Shortest Path}
+\newacronym{sssp}{SSSP}{Single-Source Shortest Path}
+\section{Die Verwendung von Abkürzungen}
+In der Graphentheorie wird häufig die Lösung des Problems des kürzesten
+Pfades zwischen zwei Knoten gesucht. Dieses Problem wird häugig auch
+mit \gls{spsp} bezeichnet. Es lässt sich auf die Variationen \gls{sssp}
+und \gls{apsp} erweitern. Für die Lösung von \gls{spsp}, \gls{sssp} oder
+\gls{apsp} kommen unterschiedliche Algorithmen zum Einsatz.
+\newsymbol{l}{Länge}{l}{m}
+\newsymbol{m}{Masse}{m}{kg}
+\newsymbol{a}{Beschleunigung}{a}{\nicefrac{m}{s^2}}
+\newsymbol{t}{Zeit}{t}{s}
+\newsymbol{f}{Frequenz}{f}{s^{-1}}
+\newsymbol{F}{Kraft}{F}{m \cdot kg \cdot s^{-2}=\nicefrac{J}{m}}
+Die Einheiten für die \gls{f} sowie die \gls{F} werden aus den
+SI"=Einheiten der Basisgrößen \gls{l}, \gls{m} und \gls{t} abgeleitet.
+Und dann gibt es noch die Grundgleichung der Mechanik, welche für den
+Fall einer konstanten Kraftwirkung in die Bewegungsrichtung einer
+Punktmasse lautet:
+$\gls{F} = \gls{m} \cdot \gls{a}$
+\section{Zitieren und das Literaturverzeichnis}
+Das Literaturverzeichnis wir auf Basis der nachfolgend verwendeten Zitate
+erstellt und ist auf Seite~\pageref{sec:bibliography} zu finden.
+In diesem Textabschnitt werden die zwei bekannten \LaTeX-Bücher
+\cite{knuth84} und \cite{goossens94} sowie das Anwenderhandbuch
+\cite{hanisch14} zitiert.
+\section{Eine Aufzählung mit angepassten vertikalen Abständen}
+Ein kurzes Beispiel, wie eine Liste aussehen kann, nachdem die Möglichkeiten
+des Paketes \texttt{enumitem} genutzt und die vertikalen Abstände mit dem
+Befehl \texttt{\textbackslash setlist\{noitemsep\}} angepasst wurden.
+\begin{itemize}
+\item erster Punkt
+\item zweiter Punkt
+\item dritter Punkt
+\end{itemize}
+\section{Grafiken und Tabellen in Gleitumgebungen}
+Es folgt die Demonstration von Gleitumgebungen, welche sowohl für Grafiken als
+auch Tabellen verwendet werden sollten. Im vorliegenden Beispiel kann unter
+Umständen der Eindruck entstehen, dass diese Seite etwas zu überladen mit
+Gleitobjekten ist. Dies liegt nicht an der Verwendung der Gleitobjekte sondern
+vielmehr am zu geringen Textvolumen und den eingeschränkten Möglichkeiten von
+\LaTeX{}, diese an geigneten Stellen zu platzieren.
+\subsection{Das Einbinden von Grafiken}
+In \autoref{fig:example} wird dargestellt, wie eine Grafik im PDF-Format in ein
+Dokument eingebunden und auf diese verwiesen werden kann. Entscheidend dabei
+ist, den Anker für den Querverweis erst \emph{nach} der Beschriftung zu setzen.
+\begin{figure}
+\centering
+\includegraphics{TUD-black}
+\caption{Beispielgrafik}\label{fig:example}
+\end{figure}
+\subsection{Tabellen als Gleitobjekte}
+Auch Tabellen sollten in einer Gleitumgebung gesetzt werden. Nach diesem Absatz
+wird eine Tabelle mithilfe der \texttt{tabularx}-Umgebung erstellt. Zu sehen
+ist diese in \autoref{tab:tabularx}. Für diese werden zuvor neue Spaltentypen
+definiert.
+\newcolumntype{Y}{>{\hspace{0pt}}X}
+\newcolumntype{L}{>{\raggedright}Y}
+\newcolumntype{C}{>{\centering}Y}
+\newcolumntype{R}{>{\raggedleft}Y}
+\begin{table}
+\begin{tabularx}{\textwidth}{@{}LCRY@{}}
+\toprule
+\textbf{Linksbündig} & \textbf{Zentriert} &
+\textbf{Rechtsbündig} & \textbf{Blocksatz} \tabularnewline
+\midrule
+Ein linksbündiger Blindtext zur Demonstration einer L"~Spalte &
+Ein zentrierter Blindtext zur Demonstration einer C"~Spalte &
+Ein rechtsbündiger Blindtext zur Demonstration einer R"~Spalte &
+Ein im Blocksatz gesetzter Blindtext zur Demonstration einer Y"~Spalte
+\tabularnewline
+\bottomrule
+\end{tabularx}
+\caption{Eine \texttt{tabularx}-Tabelle}\label{tab:tabularx}
+\end{table}
+
+Eine andere Variante zum Setzen einer Tabelle mit variabler Spaltenbreite und
+festgelegter Gesamtbreite ist in \autoref{tab:tabu} zu sehen. Diese würde in
+der Umgebung \texttt{tabu} gesetzt. Auch für diese wird zuerst ein neuer
+Spaltentyp definiert, welcher die Unzulänglichkeiten der Umgebung reduziert.
+\makeatletter
+\newcolumntype{Z}{}
+\renewcommand*\NC@rewrite@Z[1][]{%
+\NC@find>{\hspace{0pt}}X[#1]<{\@finalstrut\@arstrutbox}%
+}
+\makeatother
+\begin{table}
+\caption{Eine \texttt{tabu}-Tabelle}\label{tab:tabu}
+\begin{tabu} to \textwidth {@{}Z[2,l]Z[3,c]Z[2,r]Z[3,j]@{}}
+\toprule
+\textbf{Linksbündig} & \textbf{Zentriert} &
+\textbf{Rechtsbündig} & \textbf{Blocksatz} \tabularnewline
+\midrule
+Ein linksbündiger Blindtext zur Demonstration einer Z[l]"~Spalte &
+Ein zentrierter Blindtext zur Demonstration einer Z[c]"~Spalte &
+Ein rechtsbündiger Blindtext zur Demonstration einer Z[r]"~Spalte &
+Ein im Blocksatz gesetzter Blindtext zur Demonstration einer Z"~Spalte
+\tabularnewline
+\bottomrule
+\end{tabu}
+\end{table}
+\printbibliography\label{sec:bibliography}
 \end{document}

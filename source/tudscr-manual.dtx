@@ -1,4 +1,4 @@
-% \CheckSum{2406}
+% \CheckSum{2419}
 % \iffalse meta-comment
 % ======================================================================
 %
@@ -192,6 +192,15 @@
 \else
   \TUDoptions{ToDo=false}
 \fi
+%    \end{macrocode}
+% Um die \cs{write18} sowohl für Windows als auch für unixoide Betriebssysteme 
+% nutzen zu können, wird das Paket \pkg{ifplatform} geladen. Damit dieses nicht 
+% allzu lästig ist, wird mithilfe von \pkg{silence} die normalerweise erzeugte 
+% Warnung der nicht aktivierten Option \opt{shell escape} deaktiviert.
+%    \begin{macrocode}
+\WarningFilter*{ifplatform}{^^J \space\space\space shell escape is disabled}
+\RequirePackage{ifplatform}[2010/10/22]
+%    \end{macrocode}
 % Das Paket \pkg{hyperref} wird für alle möglichen Links und Querverweise 
 % geladen.
 %    \begin{macrocode}
@@ -338,14 +347,6 @@
 % Befehle für die Dokumentation des Pakets \pkg{tudscrsupervisor}.
 %    \begin{macrocode}
 \RequirePackage{tudscrsupervisor}[\TUDVersion]
-%    \end{macrocode}
-% Um die \cs{write18} sowohl für Windows als auch für unixoide Betriebssysteme 
-% nutzen zu können, wird das Paket \pkg{ifplatform} geladen. Damit dieses nicht 
-% allzu lästig ist, wird mithilfe von \pkg{silence} die normalerweise erzeugte 
-% Warnung der nicht aktivierten Option \opt{shell escape} deaktiviert.
-%    \begin{macrocode}
-\WarningFilter*{ifplatform}{^^J \space\space\space shell escape is disabled}
-\RequirePackage{ifplatform}[2010/10/22]
 %    \end{macrocode}
 % Für die Erstellung des Indexes wird das Paket \pkg{imakeidx} zusammen mit 
 % \pkg{xindy} verwendet.
@@ -2670,20 +2671,18 @@
 % \changes{v2.02}{2014/11/03}{neu}%^^A
 % \begin{environment}{Trunk!}
 % \changes{v2.02}{2014/10/07}{neu}%^^A
-% \begin{macro}{\@TrunkFile}
-% \changes{v2.02}{2014/08/19}{neu}%^^A
 % Die Umgebung \env{Trunk} dient für die Ausgabe von Quelltexten, welche in 
 % einem \LaTeXe-Dokument innerhalb der \env{document}-Umgebung verwendet werden 
 % müssen oder sollten. Für das Copy"~\&"~Paste-Beispiel werden die gegebenen 
 % Inhalte nach den Inhalten aus der Umgebung \env{Preamble} ausgegeben. Die
 % Sternversion der Umgebung führt ihren Inhalt zusätzlich im Dokument aus. Die
 % Pluszeichen"=version fügt dem Ausgabestream ihren Inhalt hinzu, ohne diesen
-% auszugeben oder auszuführen. Die Ausrufezeichen"=Version führt den Quelltext 
-% in einer separaten Datei mit einem minimalen Dokumentkörper aus, um daraus
-% eine PDF-Datei zu erzeugen, welche im nachhinein wieder mit \cs{IncludeTrunk}
-% als Grafik eingebunden werden kann. Dies ist für Quelltextabschnitte gedacht, 
-% deren Ausgabe zu groß ist, um diese direkt anzuzeigen und dennoch dargestellt 
-% werden sollen.
+% auszugeben oder auszuführen. Die Ausrufezeichen"=Version fügt den Quelltext 
+% im Dokument ein und führt diesen zusätzlich in einer separaten Datei mit
+% einem minimalen Dokumentkörper aus, um daraus eine PDF-Datei zu erzeugen,
+% welche im Nachhinein mit \cs{IncludeStandalone} als Grafik eingebunden werden 
+% kann. Dies ist für Quelltextabschnitte gedacht, deren Ausgabe zu groß ist, um 
+% diese direkt anzuzeigen und dennoch dargestellt werden sollen.
 %    \begin{macrocode}
 \newenvironment{Trunk}{\tud@tut@pre}{%
   \tud@tut@post%
@@ -2712,15 +2711,8 @@
   }%
   \aftergroup\@tempa%
 }
-%    \end{macrocode}
-% Die Umgebung \env{Trunk!} erzeugt nach der Ausgabe des Quelltextes mit dem
-% Makro \cs{tud@tut@pdf} eine PDF-Datei, welche mit \cs{IncludeTrunk} in das 
-% Tutorial eingebunden werden kann.
-%    \begin{macrocode}
-\newcommand*\@TrunkFile{}
-\let\@TrunkFile\relax
 \newenvironment{Trunk!}[1]{%
-  \gdef\@TrunkFile{#1}%
+  \gdef\@StandaloneFile{#1}%
   \tud@tut@pre%
 }{%
   \tud@tut@post%
@@ -2733,7 +2725,6 @@
   \aftergroup\@tempa%
 }
 %    \end{macrocode}
-% \end{macro}^^A \@TrunkFile
 % \end{environment}^^A Trunk!
 % \end{environment}^^A Trunk+
 % \end{environment}^^A Trunk*
@@ -2742,10 +2733,14 @@
 % \changes{v2.02}{2014/09/16}{neu}%^^A
 % \begin{environment}{Hint*}
 % \changes{v2.02}{2014/10/13}{neu}%^^A
+% \begin{environment}{Hint!}
+% \changes{v2.02}{2014/11/13}{neu}%^^A
 % Um Quelltextausschnitte zur weiterführenden Information anzugeben, wird die
 % die \env{Hint}"=Umgebung definiert. Der Inhalt wird ausgegben und~-- falls
 % die Sternversion genutzt wurde~-- auch ausgeführt, allerdings nicht in das 
-% Copy"~\&"~Paste"~Beispiel übernommen. 
+% Copy"~\&"~Paste"~Beispiel übernommen. Die Verison mit Ausrufezeichen ist mit
+% \env{Trunk!} fast identisch. Allerdings erzeugt diese nur die PDF-Datei ohne 
+% den Quelltext selbst auszugeben.
 %    \begin{macrocode}
 \newenvironment{Hint}{\tud@tut@pre}{%
   \tud@tut@post%
@@ -2764,9 +2759,32 @@
   }%
   \aftergroup\@tempa%
 }
+\newenvironment{Hint!}[1]{%
+  \gdef\@StandaloneFile{#1}%
+  \tud@tut@pre%
+}{%
+  \tud@tut@post%
+  \gdef\@tempa{%
+    \tud@tut@lst%
+    \tud@tut@pdf%
+    \global\let\@CodePreamble\relax%
+  }%
+  \aftergroup\@tempa%
+}
 %    \end{macrocode}
+% \end{environment}^^A Hint!
 % \end{environment}^^A Hint*
 % \end{environment}^^A Hint
+% \begin{macro}{\@StandaloneFile}
+% \changes{v2.02}{2014/08/19}{neu}%^^A
+% Die Umgebungen \env{Trunk!} und \env{Hint!} erzeugen nach der Ausgabe des
+% Quelltextes mit dem Makro \cs{tud@tut@pdf} eine PDF-Datei, welche mit
+% \cs{IncludeStandalone} in das Tutorial eingebunden werden kann.
+%    \begin{macrocode}
+\newcommand*\@StandaloneFile{}
+\let\@StandaloneFile\relax
+%    \end{macrocode}
+% \end{macro}^^A \@StandaloneFile
 % \begin{macro}{\tud@tut@pre}
 % \changes{v2.02}{2014/08/19}{neu}%^^A
 % \begin{macro}{\tud@tut@post}
@@ -2915,7 +2933,7 @@
 % beim Aufruf von pdf\LaTeX{} wird die Definition von \cs{jobname} in der 
 % aufgerufenen Datei \val{\string\jobname-tutorial-temp.tex} überschrieben und
 % der Inhalt von \val{\string\jobname-temp.tex} wie gewünscht eingebunden und
-% kompiliert. Damit die erstellte PDF-Datei später mit \cs{IncludeTrunk} 
+% kompiliert. Damit die erstellte PDF-Datei später mit \cs{IncludeStandalone} 
 % eingebunden werden kann, wird diese noch in \cs{\meta{Argument}-temp.pdf} 
 % umbenannt.
 %    \begin{macrocode}
@@ -2927,23 +2945,23 @@
       pdflatex -jobname=\jobname-temp \jobname-tutorial-temp.tex
     }%
     \ifwindows%
-      \immediate\write18{rename \jobname-temp.pdf \@TrunkFile-temp.pdf}%
+      \immediate\write18{rename \jobname-temp.pdf \@StandaloneFile-temp.pdf}%
     \else%
-      \immediate\write18{mv \jobname-temp.pdf \@TrunkFile-temp.pdf}%
+      \immediate\write18{mv \jobname-temp.pdf \@StandaloneFile-temp.pdf}%
     \fi%
   \fi%
-  \global\let\@TrunkFile\relax%
+  \global\let\@StandaloneFile\relax%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@tut@pdf
-% \begin{macro}{\IncludeTrunk}
+% \begin{macro}{\IncludeStandalone}
 % \changes{v2.02}{2014/09/10}{neu}%^^A
-% Der Befehl \cs{IncludeTrunk} bindet die durch \env{Trunk!} generierten
+% Der Befehl \cs{IncludeStandalone} bindet die durch \env{Trunk!} generierten
 % PDF-Dateien schließlich ein. Das angehängte optionale Argument dient zur
 % Angabe der einzubindenden Seiten der PDF-Datei, wobei diese automatisch auf
 % die passende Breite skaliert werden.
 %    \begin{macrocode}
-\NewDocumentCommand\IncludeTrunk{omO{1}}{%
+\NewDocumentCommand\IncludeStandalone{omO{1}}{%
   \IfFileExists{#2-temp.pdf}{%
     \@tempcnta\z@%
     \@for\@tempa:=#3\do{\advance\@tempcnta\@ne}%
@@ -2968,7 +2986,7 @@
   }%
 }
 %    \end{macrocode}
-% \end{macro}^^A \IncludeTrunk
+% \end{macro}^^A \IncludeStandalone
 % \begin{macro}{\StartTutorial}
 % \changes{v2.02}{2014/08/21}{neu}%^^A
 % \begin{macro}{\FinishTutorial}
