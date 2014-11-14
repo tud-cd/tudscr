@@ -1,330 +1,186 @@
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
-\documentclass[english,ngerman]{tudscrreprt}
-\usepackage{babel}
-\usepackage{selinput}\SelectInputMappings{adieresis={ä},germandbls={ß}}
+\documentclass[%
+  english,ngerman,%
+  geometry=no,DIV=12,automark,%
+]{tudscrartcl}
+\usepackage{selinput}
+\SelectInputMappings{adieresis={ä},germandbls={ß}}
 \usepackage[T1]{fontenc}
-\usepackage{fixltx2e}
+\usepackage{lmodern}
+
+\usepackage{tudscrman}
+\lstset{%
+  inputencoding=utf8,extendedchars=true,
+  literate=%
+    {ä}{{\"a}}1 {ö}{{\"o}}1 {ü}{{\"u}}1
+    {Ä}{{\"A}}1 {Ö}{{\"O}}1 {Ü}{{\"U}}1
+    {~}{{\textasciitilde}}1 {ß}{{\ss}}1
+}
+\TUDoptions{cdfont=false}
+\KOMAoptions{headings=normal}
+
 \usepackage{tudscrsupervisor}
-\AfterPackage*{hyperref}{%
-\usepackage[%
-automake,%
-% xindy,%=language=german-din,% mit Tex Live einfach verwendbar
-acronym,% Abkürzungen
-symbols,% Formelzeichen
-nomain,% kein Glossar
-translate=babel,%
-nogroupskip,%
-toc,%
-section=chapter,%
-]{glossaries}
-\makeglossaries
-\newglossarystyle{acrotabularx}{%
-\renewenvironment{theglossary}{%
-\tabularx{\linewidth}{@{}lXl@{}}%
-}{%
-\endtabularx\par\bigskip%
-}%
-\renewcommand*{\glossaryheader}{}%
-\renewcommand*{\glsgroupheading}[1]{}%
-\renewcommand*{\glsgroupskip}{}%
-\renewcommand*{\glossentry}[2]{%
-\glsentryitem{##1}% Entry number if required
-\glstarget{##1}{\sffamily\bfseries\glossentryname{##1}} &
-\glsentrydesc{##1} &
-##2\tabularnewline
-}
-}
-\newglossarystyle{acrotabu}{%
-\renewenvironment{theglossary}{%
-\begin{tabu}spread 0pt{@{}lX<{\strut}l@{}}%
-}{%
-\end{tabu}\par\bigskip%
-}%
-\renewcommand*{\glossaryheader}{}%
-\renewcommand*{\glsgroupheading}[1]{}%
-\renewcommand*{\glsgroupskip}{}%
-\renewcommand*{\glossentry}[2]{%
-\glsentryitem{##1}% Entry number if required
-\glstarget{##1}{\sffamily\bfseries\glossentryname{##1}} &
-\glsentrydesc{##1} &
-##2\tabularnewline
-}
-}
-\newcommand*{\newsymbol}[5][]{%
-\newglossaryentry{#2}{%
-type=symbols,%
-description={},%
-name={#3},%
-symbol={\ensuremath{#4}},%
-user1={\ensuremath{\mathrm{#5}}},%
-sort={#2},%
-#1%
-}%
-}
-\newglossarystyle{symblongtabu}{%
-\renewenvironment{theglossary}{%
-\begin{longtabu}spread 0pt[l]{ccX<{\strut}l}%
-}{%
-\end{longtabu}%
-}%
-\renewcommand*{\glossaryheader}{%
-\toprule
-\bfseries Symbol & \bfseries Einheit &
-\bfseries Name & \bfseries Seite(n)
-\tabularnewline\midrule\endhead%
-\bottomrule\endfoot%
-}%
-\renewcommand*{\glsgroupheading}[1]{}%
-\renewcommand*{\glsgroupskip}{}%
-\renewcommand*{\glossentry}[2]{%
-\glsentryitem{##1}% Entry number if required
-\glstarget{##1}{\glossentrysymbol{##1}} &
-\glsentryuseri{##1} &
-\glossentryname{##1} &
-##2\tabularnewline%
-}%
-}
-\defglsentryfmt[symbols]{%
-\ifmmode%
-\glssymbol{\glslabel}%
-\else%
-\glsgenentryfmt~\glsentrysymbol{\glslabel}%
-\fi%
-}}
-\usepackage{csquotes}
-\usepackage[backend=biber,style=alphabetic]{biblatex}
-\usepackage{filecontents}
-\begin{filecontents}{treatise-temp.bib}
-@book{goossens94,
-author = {Goossens, Michel and Mittelbach, Frank
-and Samarin, Alexander},
-title = {The LaTeX Companion},
-date = {1994},
-publisher = {Addison-Wesley},
-location = {Reading, Massachusetts},
-language = {english},
-}
-@book{knuth84,
-author = {Knuth, Donald E.},
-title = {The \TeX book},
-date = {1984},
-maintitle = {Computers \& Typesetting},
-volume = {A},
-publisher = {Addison-Wesley},
-location = {Reading, Massachusetts},
-language = {english},
-}
-@manual{hanisch14,
-author = {Hanisch, Falk},
-title = {Ein \LaTeX"=Bundle für Dokumente
-im neuen Corporate Design
-der Technischen Universität Dresden},
-date = {2014},
-subtitle = {Benutzerhandbuch},
-location = {Dresden},
-language = {german},
-}
-\end{filecontents}
-\addbibresource{treatise-temp.bib}
-\usepackage{enumitem}
-\setlist{noitemsep}
-\usepackage{booktabs}
 \usepackage{array}
 \usepackage{tabu}
 \usepackage{tabularx}
-\usepackage{microtype}
+\usepackage{booktabs}
 \usepackage{units}
-\usepackage[colorlinks,linkcolor=blue]{hyperref}
+\AfterPackage*{hyperref}{%
+  \usepackage[%
+    automake,%
+    acronym,%
+    symbols,%
+    nomain,%
+    translate=babel,%
+    nogroupskip,%
+  ]{glossaries}
+  \setStyleFile{\jobname-temp}
+  \renewcommand*{\glsglossarymark}[1]{}
+  \makeglossaries
+}
+\usepackage{csquotes}
+\usepackage[backend=biber,style=alphabetic]{biblatex}
+\usepackage{filecontents}
+\addbibresource{treatise-temp.bib}
+
+\usepackage{enumitem}
+
+\usepackage{caption}
+\usepackage{floatrow}
+\renewcommand{\floatpagefraction}{0.7}
+
+\ifpdf
+  \usepackage{tikz}
+  \usetikzlibrary{chains}
+  \usetikzlibrary{decorations.markings}
+  \tikzset{on grid}
+\fi
+
+\usepackage{pstricks,pst-node}
+
+\makeatletter
+\newcommand*\pcolumnfuzz[1]{\pretocmd{\@endpbox}{\hfuzz=#1}{}{}}
+\makeatother
+
+\usepackage[open,openlevel=0]{bookmark}[2011/12/02]
+
 \begin{document}
-\faculty{Juristische Fakultät}
-\department{Fachrichtung Strafrecht}
-\institute{Institut für Kriminologie}
-\chair{Lehrstuhl für Kriminalprognose}
-\title{%
-Entwicklung eines optimalen Verfahrens zur Eroberung des
-Geldspeichers in Entenhausen
-}
-\thesis{master}
-\graduation[M.Sc.]{Master of Science}
-\author{%
-Mickey Mouse
-\matriculationnumber{12345678}
-\dateofbirth{2.1.1990}
-\placeofbirth{Dresden}
-\and%
-Donald Duck
-\matriculationnumber{87654321}
-\dateofbirth{1.2.1990}
-\placeofbirth{Berlin}
-}
-\matriculationyear{2010}
-\supervisor{Dagobert Duck \and Mac Moneysac}
-\professor{Prof. Dr. Kater Karlo}
-\date{10.09.2014}
-\makecover
-\maketitle
-\faculty{Juristische Fakultät}
-\department{Fachrichtung Strafrecht}
-\institute{Institut für Kriminologie}
-\chair{Lehrstuhl für Kriminalprognose}
-\title{%
-Entwicklung eines optimalen Verfahrens zur Eroberung des
-Geldspeichers in Entenhausen
-}
-\thesis{master}
-\graduation[M.Sc.]{Master of Science}
-\author{%
-Mickey Mouse
-\matriculationnumber{12345678}
-\dateofbirth{2.1.1990}
-\placeofbirth{Dresden}
-\course{Klinische Prognostik}
-\discipline{Individualprognose}
-\and%
-Donald Duck\matriculationnumber{87654321}
-\dateofbirth{1.2.1990}
-\placeofbirth{Berlin}
-\course{Statistische Prognostik}
-\discipline{Makrosoziologische Prognosen}
-}
-\matriculationyear{2010}
-\issuedate{1.2.2015}
-\duedate{1.8.2015}
-\supervisor{Dagobert Duck \and Mac Moneysac}
-\professor{Prof. Dr. Kater Karlo}
-\chairman{Prof. Dr. Primus von Quack}
-\newcommand\taskcontent{%
-Momentan ist das besagte Thema in aller Munde. Insbesondere wird es
-gerade in vielen~-- wenn nicht sogar in allen~-- Medien diskutiert.
-Es ist momentan noch nicht abzusehen, ob und wann sich diese Situation
-ändert. Eine kurzfristige Verlagerung aus dem Fokus der Öffentlichkeit
-wird nicht erwartet.
-Als Ziel dieser Arbeit soll identifiziert werden, warum das Thema
-gerade so omnipräsent ist und wie man diesen Effekt abschwächen
-könnte. Zusätzlich sollen Methoden entwickelt werden, wie sich ein
-ähnlicher Vorgang zukünftig vermeiden ließe.
-}
-\begin{task}
-\smallskip
-\par\noindent
-\taskcontent
-\end{task}
-\taskform[pagestyle=empty]{\taskcontent}{%
-\item Recherche
-\item Analyse
-\item Entwicklung eines Konzeptes
-\item Anwendung der entwickelten Methodik
-\item Dokumentation und grafische Aufbereitung der Ergebnisse
-}
-\TUDoption{abstract}{multiple,section}
-\begin{abstract}
-Dies ist der deutschsprachige Teil der Zusammenfassung, in dem die
-Motivation sowie der Inhalt der nachfolgenden wissenschaftlichen
-Abhandlung kurz dargestellt werden.
-\nextabstract[english]
-This is the english part of the summary, in which the motivation and
-the content of the following academic treatise are briefly presented.
-\end{abstract}
-\title{%
-Entwicklung eines optimalen Verfahrens zur Eroberung des
-Geldspeichers in Entenhausen
-}
-\author{Mickey Mouse\and Donald Duck}
-\declaration[company=FIRMA]
-\tableofcontents
-\listoffigures
-\listoftables
-\printacronyms[style=acrotabu]
-\printsymbols[style=symblongtabu]
-\setchapterpreamble{%
-\renewcommand*\dictumwidth{.4\textwidth}%
-\dictum[Johann Wolfgang von Goethe]{%
-Es irrt der Mensch, solang er strebt.%
-}%
-\bigskip
-}
-\chapter{Einleitung}
-Nachdem nun der Vorspann und~-- bis auf das Literaturverzeichnis am
-Ende des Dokumentes auf Seite~\pageref{sec:bibliography}~-- alle
-Verzeichnisse erfolgreich ausgegeben wurden, wird nun die Verwendung
-der weiteren Umgebungen und Befehle demonstriert, welche im Tutorial
-\texturn{treatise.pdf} vorgestellt wurden.
-\newacronym{apsp}{APSP}{All-Pairs Shortest Path}
-\newacronym{spsp}{SPSP}{Single-Pair Shortest Path}
-\newacronym{sssp}{SSSP}{Single-Source Shortest Path}
-\section{Die Verwendung von Abkürzungen}
-In der Graphentheorie wird häufig die Lösung des Problems des kürzesten
-Pfades zwischen zwei Knoten gesucht. Dieses Problem wird häugig auch
-mit \gls{spsp} bezeichnet. Es lässt sich auf die Variationen \gls{sssp}
-und \gls{apsp} erweitern. Für die Lösung von \gls{spsp}, \gls{sssp} oder
-\gls{apsp} kommen unterschiedliche Algorithmen zum Einsatz.
-\newsymbol{l}{Länge}{l}{m}
-\newsymbol{m}{Masse}{m}{kg}
-\newsymbol{a}{Beschleunigung}{a}{\nicefrac{m}{s^2}}
-\newsymbol{t}{Zeit}{t}{s}
-\newsymbol{f}{Frequenz}{f}{s^{-1}}
-\newsymbol{F}{Kraft}{F}{m \cdot kg \cdot s^{-2}=\nicefrac{J}{m}}
-Die Einheiten für die \gls{f} sowie die \gls{F} werden aus den
-SI"=Einheiten der Basisgrößen \gls{l}, \gls{m} und \gls{t} abgeleitet.
-Und dann gibt es noch die Grundgleichung der Mechanik, welche für den
-Fall einer konstanten Kraftwirkung in die Bewegungsrichtung einer
-Punktmasse lautet:
-$\gls{F} = \gls{m} \cdot \gls{a}$
-\section{Zitieren und das Literaturverzeichnis}
-Das Literaturverzeichnis wir auf Basis der nachfolgend verwendeten Zitate
-erstellt und ist auf Seite~\pageref{sec:bibliography} zu finden.
-In diesem Textabschnitt werden die zwei bekannten \LaTeX-Bücher
-\cite{knuth84} und \cite{goossens94} sowie das Anwenderhandbuch
-\cite{hanisch14} zitiert.
-\begin{itemize}
-\item erster Punkt
-\item zweiter Punkt
-\item dritter Punkt
-\end{itemize}
-\begin{figure}
-\centering
-\includegraphics{TUD-black}
-\caption{Beispielgrafik}\label{fig:example}
-\end{figure}
+
 \newcolumntype{Y}{>{\hspace{0pt}}X}
 \newcolumntype{L}{>{\raggedright}Y}
 \newcolumntype{C}{>{\centering}Y}
 \newcolumntype{R}{>{\raggedleft}Y}
-\begin{table}
-\begin{tabularx}{\textwidth}{@{}LCRY@{}}
-\toprule
-\textbf{Linksbündig} & \textbf{Zentriert} &
-\textbf{Rechtsbündig} & \textbf{Blocksatz} \tabularnewline
-\midrule
-Ein linksbündiger Blindtext zur Demonstration einer L"~Spalte &
-Ein zentrierter Blindtext zur Demonstration einer C"~Spalte &
-Ein rechtsbündiger Blindtext zur Demonstration einer R"~Spalte &
-Ein im Blocksatz gesetzter Blindtext zur Demonstration einer Y"~Spalte
-\tabularnewline
-\bottomrule
-\end{tabularx}
-\caption{Eine \texttt{tabularx}-Tabelle}\label{tab:tabularx}
-\end{table}
-\makeatletter
-\newcolumntype{Z}{}
-\renewcommand*\NC@rewrite@Z[1][]{%
-\NC@find>{\hspace{0pt}}X[#1]<{\@finalstrut\@arstrutbox}%
+\newcommand*\tableexample[2]{%
+  \begin{table}
+  \begin{tabularx}{.9\textwidth}{@{}LCRY@{}}
+  \toprule
+  \textbf{Linksbündig} & \textbf{Zentriert} & 
+  \textbf{Rechtsbündig} & \textbf{Blocksatz} \tabularnewline
+  \midrule
+  Ein linksbündiger Blindtext &
+  Ein zentrierter Blindtext &
+  Ein rechtsbündiger Blindtext &
+  Ein im Blocksatz gesetzter Blindtext
+  \tabularnewline
+  \bottomrule
+  \end{tabularx}
+  \caption{#1}\label{#2}%
+  \end{table}
 }
-\makeatother
+
+\subsection{Gleitobjektlayout}
+\label{sec:floatlayout}
+%
+Es wurde bis jetzt das prinzipielle Vorgehen bei der Nutzung von Gleitobjekten 
+beschrieben. Allerdings gibt es auch noch einige typographische Aspekte, welche 
+zu beachten sind. Zum einen sollte beachtet werden, dass die Beschriftung einer 
+Abbildung immer unterhalb dieser erfolgen sollte, bei Tabellen hingegen eine 
+Überschrift gesetzt wird. Hierfür muss der Anwender ohne die Verwendung eines 
+zusätzlichen Paketes selber Sorge tragen, indem er den Befehl \Macro{caption} 
+entweder vor oder nach dem eigentlichen Objekt in der Gleitumgebung verwendet. 
+Der zweite Punkt ist die verwendete Schrift innerhalb der Gleitumgebungen. 
+
+Damit sich der Inhalt dieser besser vom restlichen Fließtext abhebt und vom 
+Leser direkt als nicht dazugehörig erkannt werden kann ist es ratsam, diesen in 
+serifenloser Schrift zu setzen~-- die Verwendung einer Serifenschrift für den 
+Fließtext vorausgesetzt. Das Paket \Package{floatrow} bietet die Möglichkeiten, 
+diese beiden Punkte automatisiert umzusetzen. Außerdem wird zur Formatierung 
+der Beschriftungen das Paket \Package{caption} benötigt. Sollten Sie noch keine 
+Erfahrung mit dem Setzen von Tabellen mit \hologo{LaTeX} haben, so wäre zuvor 
+ein Blick in \autoref{sec:tables} sehr sinnvoll. In \autoref{tab:tabular} ist 
+zu sehen, wie der Inhalt einer \Environment{table}"=Gleitumgebung erscheint, 
+wenn die Funktionalitäten der beiden Pakete nicht genutzt werden.
+
+\tableexample{Eine Tabelle in einer Gleitumgebung}{tab:tabular}
+
+Um die \emph{Formatierung} der Bezeichnungen von Gleitobjekten anzupassen, wird 
+das Paket \Package{caption} benötigt.
+%
+\begin{Preamble}
+\usepackage{caption}
+\end{Preamble}
+%
+Diese stellt den Befehl \Macro{captionsetup} bereit. Mit diesem werden die 
+Beschriftungen in Serifenlosen und das Label zur besseren Unterscheidung im 
+fetten Schriftschnitt gesetzt.
+%
+\begin{Preamble*}
+\captionsetup{font=sf,labelfont=bf,labelsep=space}
+\end{Preamble*}
+%
+Um den Inhalt einer Gleitumgebung formatieren und die \emph{Platzierung} der 
+Beschriftungen beeinflussen zu können, wird \Package{floatrow} geladen.
+\begin{Preamble}
+\usepackage{floatrow}
+\end{Preamble}
+%
+Der Inhalt von Gleitobjekten wird~-- entgegen des normalen Verhaltens~-- durch 
+\Package{floatrow} automatisch zentriert gesetzt. Zusätzlich soll der Inhalt 
+noch die serifenlose Schriftfamilie verwenden. Dies lässt sich mit der Nutzung 
+des Befehls \Macro{floatsetup} realisieren.
+%
+\begin{Preamble*}
+\floatsetup{font=sf}
+\end{Preamble*}
+%
+Ohne weitere Maßnahmen werden durch \Package{floatrow} alle Beschriftungen 
+unterhalb der Gleitobjekte ausgegeben. Da das Ziel jedoch die Verwendung von 
+Tabellenüberschriften und Abbildungsunterschriften ist, wird dies für Tabellen
+angepasst.
+%
+\begin{Preamble*}
+\floatsetup[table]{style=plaintop}
+\end{Preamble*}
+%
+\ToDo{genau hier geht's weiter}
+\tableexample{Eine Tabelle in einer Gleitumgebung}{tab:tabularA}
+%
+\captionsetup{singlelinecheck=false,format=hang,justification=raggedright}
+\tableexample{Eine Tabelle in einer Gleitumgebung}{tab:tabularA}
+%
 \begin{table}
-\caption{Eine \texttt{tabu}-Tabelle}\label{tab:tabu}
-\begin{tabu} to \textwidth {@{}Z[2,l]Z[3,c]Z[2,r]Z[3,j]@{}}
-\toprule
-\textbf{Linksbündig} & \textbf{Zentriert} &
-\textbf{Rechtsbündig} & \textbf{Blocksatz} \tabularnewline
-\midrule
-Ein linksbündiger Blindtext zur Demonstration einer Z[l]"~Spalte &
-Ein zentrierter Blindtext zur Demonstration einer Z[c]"~Spalte &
-Ein rechtsbündiger Blindtext zur Demonstration einer Z[r]"~Spalte &
-Ein im Blocksatz gesetzter Blindtext zur Demonstration einer Z"~Spalte
-\tabularnewline
-\bottomrule
-\end{tabu}
+\ttabbox{%
+  \caption{Eine Tabelle in einer Gleitumgebung}\label{tab:tabularB}%
+}{%
+  \begin{tabularx}{.9\textwidth}{@{}LCRY@{}}
+  \toprule
+  \textbf{Linksbündig} & \textbf{Zentriert} & 
+  \textbf{Rechtsbündig} & \textbf{Blocksatz} \tabularnewline
+  \midrule
+  Ein linksbündiger Blindtext zur Demonstration einer L"~Spalte &
+  Ein zentrierter Blindtext zur Demonstration einer C"~Spalte &
+  Ein rechtsbündiger Blindtext zur Demonstration einer R"~Spalte &
+  Ein im Blocksatz gesetzter Blindtext zur Demonstration einer Y"~Spalte
+  \tabularnewline
+  \bottomrule
+  \end{tabularx}
+}
 \end{table}
-\printbibliography\label{sec:bibliography}
+%
+
+
+\subsection{Untergleitobjekte}
+\label{sec:subfloats}
+
+
 \end{document}
