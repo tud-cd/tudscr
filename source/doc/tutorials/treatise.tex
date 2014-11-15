@@ -1348,7 +1348,144 @@ dies meiner Meinung nach alles andere als konsequent und sinnvoll.
 
 \subsection{Gleitobjektlayout}
 \label{sec:floatlayout}
-\ToDo{floatrow}
+%
+Es wurde bis jetzt das prinzipielle Vorgehen bei der Nutzung von Gleitobjekten 
+beschrieben. Allerdings gibt es auch noch einige typographische Aspekte, welche 
+zu beachten sind. Zum einen sollte beachtet werden, dass die Beschriftung einer 
+Abbildung immer unterhalb dieser erfolgen sollte, bei Tabellen hingegen eine 
+Überschrift gesetzt wird. Hierfür muss der Anwender ohne die Verwendung eines 
+zusätzlichen Paketes selber Sorge tragen, indem er den Befehl \Macro{caption} 
+entweder vor oder nach dem eigentlichen Objekt in der Gleitumgebung verwendet. 
+Der zweite Punkt ist die verwendete Schrift innerhalb der Gleitumgebungen. 
+
+Damit sich der Inhalt dieser besser vom restlichen Fließtext abhebt und vom 
+Leser direkt als nicht dazugehörig erkannt werden kann ist es ratsam, diesen in 
+serifenloser Schrift zu setzen~-- die Verwendung einer Serifenschrift für den 
+Fließtext vorausgesetzt. Das Paket \Package{floatrow} bietet die Möglichkeiten, 
+diese beiden Punkte automatisiert umzusetzen. Außerdem wird zur Formatierung 
+der Beschriftungen das Paket \Package{caption} benötigt. Sollten Sie noch keine 
+Erfahrung mit dem Setzen von Tabellen mit \hologo{LaTeX} haben, so wäre zuvor 
+ein Blick in \autoref{sec:tables} sehr sinnvoll. 
+
+\newcommand*\tableexample[1][]{%
+  \begin{tabularx}{.75\textwidth}{@{}XXX@{}}
+  \toprule
+  \textbf{Erste Spalte} & \textbf{Zweite Spalte} & 
+  \textbf{Dritte Spalte} \tabularnewline
+  \midrule
+  Etwas Blindtext für die erste Spalte &
+  Etwas Blindtext für die zweite Spalte &
+  Etwas Blindtext für die dritte Spalte
+  \tabularnewline
+  \bottomrule
+  \end{tabularx}
+  #1%
+}
+\begin{table}
+\tableexample[%
+  \caption{Eine Tabelle in einer Gleitumgebung}\label{tab:tabular}%
+]
+\end{table}
+
+Normalerweise wird eine Tabelle sowie deren Beschriftung innerhalb einer 
+\Environment{table}"=Gleitumgebung in der selben Schrift wie der Fließtext 
+gesetzt, die korrekte Platzierung der Bezeichnungen bleibt dem Anwender 
+überlassen. Zu sehen ist dies in \autoref{tab:tabular}. Im folgenden wird 
+gezeigt, wie sich dies automatisiert für alle Gleitobjekte im Dokument ändern 
+lässt. Die \emph{Formatierung} der Bezeichnungen von Gleitobjekten kann 
+mithilfe des Paketes \Package{caption} angepasst werden.
+%
+\begin{Preamble}
+\usepackage{caption}
+\end{Preamble}
+%
+Diese stellt den Befehl \Macro{captionsetup} bereit. Mit diesem werden die 
+Beschriftungen in Serifenlosen und das Label zur besseren Unterscheidung im 
+fetten Schriftschnitt gesetzt.
+%
+\begin{Preamble*}
+\captionsetup{font=sf,labelfont=bf,labelsep=space}
+\end{Preamble*}
+%
+Um die \emph{Platzierung} der Beschriftungen beeinflussen sowie den Inhalt 
+einer Gleitumgebung formatieren zu können, wird \Package{floatrow} geladen.
+\begin{Preamble}
+\usepackage{floatrow}
+\end{Preamble}
+%
+Der Inhalt von Gleitobjekten wird~-- entgegen des normalen Verhaltens~-- durch 
+\Package{floatrow} automatisch zentriert gesetzt. Zusätzlich soll der Inhalt 
+noch die serifenlose Schriftfamilie verwenden. Dies lässt sich mit der Nutzung 
+des Befehls \Macro{floatsetup} realisieren.
+%
+\begin{Preamble*}
+\floatsetup{font=sf}
+\end{Preamble*}
+%
+Ohne weitere Maßnahmen werden durch \Package{floatrow} alle Beschriftungen 
+unterhalb der Gleitobjekte ausgegeben. Da das Ziel jedoch die Verwendung von 
+Tabellenüberschriften und Abbildungsunterschriften ist, wird dies für Tabellen
+angepasst.
+%
+\begin{Preamble*}
+\floatsetup[table]{style=plaintop}
+\end{Preamble*}
+%
+\begin{table}
+\tableexample[%
+  \caption{%
+    Eine Tabelle in einer Gleitumgebung mit einer angepassten Formatierung%
+  }\label{tab:tabularnew}%
+]
+\end{table}
+%
+Damit wären alle Einstellungen soweit erfolgt, in \autoref{tab:tabularnew} ist 
+das Ergebnis zu sehen. Zumeist soll die Beschriftung für Gleitobjekte nicht 
+zentriert sondern linksbündig gesetzt werden. Dies lässt sich ebenfalls mit den 
+Mitteln des Paketes \Package{caption} mit der Option \Option{justification} 
+erreichen. Damit dies auch für einzeilige Beschriftungen angewendet wird, muss 
+zusätzlich die Einstellung \Option{singlelinecheck} deaktiviert werden. Mit der 
+Option \Option{hang} kann außerdem beeinflusst werden, ob eine mehrzeilige 
+Beschriftung nach einem Zeilenumbruch direkt unter dem Label oder mit Einzug 
+fortgesetzt werden soll.
+%
+\begin{Preamble*}
+\captionsetup{singlelinecheck=off,format=hang,justification=raggedright}
+\end{Preamble*}
+%
+In \autoref{tab:tabularnew} fällt die Beschriftung auf, welche die Breite der 
+Tabelle überragt. Falls linksbündige Gleitumgebungsbezeichnungen verwendet 
+werden, wie dies gerade eingestellt wurde, besteht das Problem quasi bei jeder 
+Beschriftung, da diese immer am linken Seitenrand beginnen. Auch hierfür stellt 
+das Paket \Package{floatrow} die Befehle \Macro{ttabbox} für Tabellen sowie 
+\Macro{ffigbox} für Abbildungen bereit. Beide Makros erwarten im ersten 
+obligatorischen Argument den Befehl \Macro{caption} für die Beschriftung 
+gegebenenfalls gefolgt von einem mit \Macro{label} gesetzten Textanker. Im 
+zweiten Argument wird das Objekt selbst~-- sprich Tabelle oder Abbildung~-- 
+angegeben. Zu verwenden sind die Befehle folgendermaßen:
+%
+\lstset{escapechar=§}%
+\begin{Hint}
+\begin{table}
+\ttabbox
+  {\caption§\Parameter{Beschriftung}§\label§\Parameter{Label}§}
+  §\Parameter{Tabellendefinition}§
+\end{table}
+\end{Hint}
+%
+Diese beiden Makros sorgen dafür, dass die Beschriftungen in der jeweiligen 
+Breite des Objektes gesetzt werden. Deren Verwendung ist lediglich notwendig, 
+wenn das zu setzende Objekt schmaler als \Length{textwidth} ist. Das Ergebnis 
+der Verwendung von \Macro{ttabbox} ist in \autoref{tab:tabularbox} zu sehen.
+
+\begin{table}
+\ttabbox{%
+  \caption{%
+    Eine vollständig formatierte und mit dem Befehl \Macro{ttabbox} gesetzte 
+    Tabelle in einer \Environment{table}"=Gleitumgebung%
+ }\label{tab:tabularbox}%
+}{\tableexample}
+\end{table}
 
 
 \subsection{Untergleitobjekte}
@@ -1441,6 +1578,7 @@ Abschnitt demonstriert.
 
 
 \subsection{Tabellen mit variabler Spaltenbreite}
+\ToDo[doc]{ttabbox und tabellen etwas schmaler}
 Hierfür stehen die Pakete \Package{tabularx} oder \Package{tabu} zur Verfügung, 
 welche nun kurz vorgestellt werden sollen. Das Paket \Package{tabu} ist relativ 
 neu und versucht, viele Funktionalitäten ganz unterschiedlicher Pakete~-- 
@@ -1532,7 +1670,7 @@ Spalte. Nach dem Quelltextauszug wird dieses Konstrukt erläutert.
 Ein linksbündiger Blindtext zur Demonstration einer L"~Spalte &
 Ein zentrierter Blindtext zur Demonstration einer C"~Spalte &
 Ein rechtsbündiger Blindtext zur Demonstration einer R"~Spalte &
-Ein im Blocksatz gesetzter Blindtext zur Demonstration einer Y"~Spalte
+Ein Blindtext im Blocksatz zur Demonstration einer Y"~Spalte
 \tabularnewline
 \bottomrule
 \end{tabularx}
@@ -1630,7 +1768,7 @@ ist in \autoref{tab:tabu} zu sehen.
 \begin{Trunk}
 \begin{table}
 \caption{Eine \texttt{tabu}-Tabelle}\label{tab:tabu}
-\begin{tabu} to \textwidth {@{}Z[2,l]Z[3,c]Z[2,r]Z[3,j]@{}}
+\begin{tabu} to \textwidth {@{}Z[3,l]Z[2,c]Z[3,r]Z[2,j]@{}}
 \toprule
 \textbf{Linksbündig} & \textbf{Zentriert} & 
 \textbf{Rechtsbündig} & \textbf{Blocksatz} \tabularnewline
@@ -1638,7 +1776,7 @@ ist in \autoref{tab:tabu} zu sehen.
 Ein linksbündiger Blindtext zur Demonstration einer Z[l]"~Spalte &
 Ein zentrierter Blindtext zur Demonstration einer Z[c]"~Spalte &
 Ein rechtsbündiger Blindtext zur Demonstration einer Z[r]"~Spalte &
-Ein im Blocksatz gesetzter Blindtext zur Demonstration einer Z"~Spalte
+Ein Blindtext im Blocksatz zur Demonstration einer Z"~Spalte
 \tabularnewline
 \bottomrule
 \end{tabu}
@@ -1705,12 +1843,13 @@ Nachfolgend wird eine Grafik innerhalb einer Gleitumgebung erstellt.
 %
 \begin{Hint}
 \begin{figure}
+\caption{Eine mit TikZ erstellte Grafik}\label{fig:tikz}
 \begin{tikzpicture}
   \tikzstyle{inner box}=[%
-    text width=18\tikzunit,
+    text width=17\tikzunit,
     align=center,
     rectangle,
-    inner sep=0pt,
+    inner sep=.5\tikzunit,
     minimum height=8\tikzunit,
     font=\hspace{0pt},
     draw
@@ -1791,7 +1930,6 @@ Nachfolgend wird eine Grafik innerhalb einer Gleitumgebung erstellt.
     \node at (70,9) {Umwelt};
   \end{scope}
 \end{tikzpicture}
-\caption{Eine mit TikZ erstellte Grafik}\label{fig:tikz}
 \end{figure}
 \end{Hint}
 \InputCode
@@ -1870,7 +2008,23 @@ Nachfolgend wird eine Grafik innerhalb einer Gleitumgebung erstellt.
 
 
 \subsection{Die Verwendung von tikz und pstricks in einem Dokument}
-\ToDo{hinweis auf ifpdf und auto-pst-pdf}
+\ToDo[doc]{tikz und auto-pst-pdf (ifdpf notwendig)}
+
+
+\subsection{Die Verwendung von floatrow und pstricks in einem Dokument}
+\ToDo[doc]{ttabbox und auto-pst-pdf (ifdpf notwendig)}
+\begin{Hint}
+\usepackage{floatrow}
+\floatsetup{font=sf}
+\usepackage{xparse}
+\ifpdf\else
+  \RenewDocumentCommand{\fcapside}{ooo+m+m}{#4#5}
+  \RenewDocumentCommand{\ttabbox}{ooo+m+m}{#4#5}
+  \RenewDocumentCommand{\ffigbox}{ooo+m+m}{#4#5}
+\fi
+\end{Hint}
+
+
 
 \subsection{Auslagern von Grafiken in separate Dateien}
 \ToDo{standalone und subfiles}
