@@ -46,6 +46,8 @@
 \usepackage{enumitem}
 
 \usepackage{caption}
+\DeclareCaptionSubType[alph]{figure}
+\DeclareCaptionSubType[alph]{table}
 \usepackage{floatrow}
 \renewcommand{\floatpagefraction}{0.7}
 
@@ -1172,15 +1174,15 @@ weitere Anpassungen normalerweise so:
 %
 Dabei wirken die Abstände zwischen den einzelnen Punkten tatsächlich etwas 
 überdimensioniert. Mit dem Paket \Package{enumitem} können die Umgebungen für 
-Auflistungen einfach an die individuellen Bedürfnisse angepasst werden. Um 
-diese ungewollten Abstände zwischen den Listenpunkten zu entfernen, kann der 
-Schlüssel \Option{noitemsep} verwendet werden. Mit dem Befehl \Macro{setlist} 
-werden~-- ohne zusätzliche Angaben im optionalen Argument~-- alle Umgebungen 
-für Aufzählungen global geändert:
+Auflistungen einfach an die individuellen Bedürfnisse angepasst werden. 
 %
 \begin{Preamble}
 \usepackage{enumitem}
 \end{Preamble}
+Um diese ungewollten Abstände zwischen den Listenpunkten zu entfernen, kann der 
+Schlüssel \Option{noitemsep} verwendet werden. Mit dem Befehl \Macro{setlist} 
+werden~-- ohne zusätzliche Angaben im optionalen Argument~-- alle Umgebungen 
+für Aufzählungen global geändert:
 \begin{Preamble*}
 \setlist{noitemsep}
 
@@ -1253,11 +1255,16 @@ Verwendung der Gleitobjekte sondern vielmehr am zu geringen Textvolumen
 und den eingeschränkten Möglichkeiten von \LaTeX{}, diese an geigneten 
 Stellen zu platzieren. 
 
-\subsection{Das Einbinden von Grafiken}
+\subsection{Abbildungen als Gleitobjekte und das Einbinden von Grafiken}
 In \autoref{fig:example} wird dargestellt, wie eine Grafik im PDF-Format 
-in ein Dokument eingebunden und auf diese verwiesen werden kann. 
-Entscheidend dabei ist, den Anker für den Querverweis erst \emph{nach} 
-der Beschriftung zu setzen.
+in ein Dokument eingebunden und auf diese verwiesen werden kann. Ein 
+Querverweis auf ein Gleitobjekt sollte im Fließtext am besten mit Befehl 
+\texttt{\textbackslash autoref\{\emph{<Label>}\}} erstellt werden. 
+Hierfür ist ein entsprechender Anker am zu referenziereden Objekt nötig, 
+welcher mit dem Makro \texttt{\textbackslash label} erzeugt wird. Dabei 
+ist entscheidend, dass dieser Anker erst \emph{nach} der Beschriftung des 
+Objektes, welche mit \texttt{\textbackslash caption} erstellt wird, 
+gesetzt wird.
 
 \end{Trunk+}
 \begin{Trunk}
@@ -1451,6 +1458,7 @@ fortgesetzt werden soll.
 %
 \begin{Preamble*}
 \captionsetup{singlelinecheck=off,format=hang,justification=raggedright}
+
 \end{Preamble*}
 %
 In \autoref{tab:tabularnew} fällt die Beschriftung auf, welche die Breite der 
@@ -1471,18 +1479,26 @@ angegeben. Zu verwenden sind die Befehle folgendermaßen:
   {\caption§\Parameter{Beschriftung}§\label§\Parameter{Label}§}
   §\Parameter{Tabellendefinition}§
 \end{table}
+\begin{figure}
+\ffigbox
+  {\caption§\Parameter{Beschriftung}§\label§\Parameter{Label}§}
+  §\Parameter{Abbildungsdefinition}§
+\end{figure}
 \end{Hint}
 %
 Diese beiden Makros sorgen dafür, dass die Beschriftungen in der jeweiligen 
 Breite des Objektes gesetzt werden. Deren Verwendung ist lediglich notwendig, 
 wenn das zu setzende Objekt schmaler als \Length{textwidth} ist. Das Ergebnis 
-der Verwendung von \Macro{ttabbox} ist in \autoref{tab:tabularbox} zu sehen.
+der Verwendung von \Macro{ttabbox} ist in \autoref{tab:tabularbox} zu sehen. 
+Bei der Nutzung der beiden Befehle sollte darauf geachtet werden, dass zwischen 
+dem Ende der Tabelle und der schließender Klammer des zweiten Argumentes kein 
+ungewolltes Leerzeichen gesetzt wird.
 
 \begin{table}
 \ttabbox{%
   \caption{%
-    Eine vollständig formatierte und mit dem Befehl \Macro{ttabbox} gesetzte 
-    Tabelle in einer \Environment{table}"=Gleitumgebung%
+    Eine vollständig formatierte und mit \Macro{ttabbox} gesetzte Tabelle 
+    in einer \Environment{table}"=Gleitumgebung%
  }\label{tab:tabularbox}%
 }{\tableexample}
 \end{table}
@@ -1490,7 +1506,62 @@ der Verwendung von \Macro{ttabbox} ist in \autoref{tab:tabularbox} zu sehen.
 
 \subsection{Untergleitobjekte}
 \label{sec:subfloats}
-\ToDo{subfloats}
+Das Paket \Package{floatrow} stellt allerhand Möglichkeiten zur Erstellung von 
+nebeneinanderliegenden Gleitobjekten sowie \enquote{Untergleitobjekten} bereit 
+und ist insbesondere in Verbindung mit den Fähigkeiten von \Package{caption} 
+respektive \Package{subcaption} sehr gut für dieses Unterfangen nutzbar. Dafür 
+werden die Umgebungen \Environment{floatrow} und \Environment{subfloatrow} 
+angeboten, wobei letztere für ein Beispiel verwendet wird.
+
+Als erstes muss der Typ der zu erzeugenden Labels für Abbildungen und Tabellen 
+definiert werden. Dies geschieht mit dem Befehl \Macro{DeclareCaptionSubType} 
+aus dem Paket \Package{subcaption}.
+%
+\begin{Preamble}
+\DeclareCaptionSubType[alph]{figure}
+\DeclareCaptionSubType[alph]{table}
+\end{Preamble}
+%
+Anschließend werden die Untergleitobjekte formatiert. Dabei wird zum einen nach 
+dem alphanumerischen Label eine schließende Klammer gesetzt. Zum andern wird 
+ein Eintragen der Untergleitobjekte in das Abbildungsverzeichnis unterdrückt. 
+Lediglich die Bildunterschrift der Hauptabbildung wird in dieses eingetragen.
+%
+\begin{Preamble*}
+\captionsetup[subfloat]{labelformat=brace,list=off}
+\end{Preamble*}
+%
+Mit diesen Einstellungen wird eine gleitende Abbildung erstellt, welche in 
+\autoref{fig:logos} zu sehen ist. Es kann zusätzlich auf die Unterabbildungen 
+\autoref{fig:tud} und \autoref{fig:ddc} verwiesen werden.
+%
+\begin{Trunk+}
+\subsection{Untergleitobjekte}
+Nachdem nun schon eine gleitende Abbildung und zwei gleitende Tabellen 
+erstellt wurden, folgt jetzt noch eine gleitende Abbildung mit zwei 
+Unterabbildungen. Durch die drei gesetzten Anker kann im Fließtext 
+sowohl auf \autoref{fig:logos} als auch auf \autoref{fig:tud} sowie 
+\autoref{fig:ddc} verwiesen werden.
+
+\end{Trunk+}
+\begin{Trunk}
+\begin{figure}
+\ffigbox[\FBwidth]%
+  {\begin{subfloatrow}%
+    \ffigbox[\FBwidth]%
+      {\fbox{\includegraphics[height=2cm]{TUD-black}}}%
+      {%
+        \caption{Das offizielle Logo der Technischen Universität Dresden}
+        \label{fig:tud}%
+      }%
+    \ffigbox[\FBwidth]%
+      {\fbox{\includegraphics[height=2cm]{DDC-21}}}%
+      {\caption{Ein weiteres Logo}\label{fig:ddc}}%
+  \end{subfloatrow}}%
+  {\caption{Eine Gleitumgebung mit zwei Abbildungen}\label{fig:logos}}%
+\end{figure}
+\end{Trunk}
+\InputCode
 
 
 
@@ -1578,7 +1649,6 @@ Abschnitt demonstriert.
 
 
 \subsection{Tabellen mit variabler Spaltenbreite}
-\ToDo[doc]{ttabbox und tabellen etwas schmaler}
 Hierfür stehen die Pakete \Package{tabularx} oder \Package{tabu} zur Verfügung, 
 welche nun kurz vorgestellt werden sollen. Das Paket \Package{tabu} ist relativ 
 neu und versucht, viele Funktionalitäten ganz unterschiedlicher Pakete~-- 
@@ -1746,7 +1816,9 @@ Eine andere Variante zum Setzen einer Tabelle mit variabler Spaltenbreite
 und festgelegter Gesamtbreite ist in \autoref{tab:tabu} zu sehen. Diese 
 würde in der Umgebung \texttt{tabu} gesetzt. Auch für diese wird zuerst 
 ein neuer Spaltentyp definiert, welcher die Unzulänglichkeiten der 
-Umgebung reduziert.
+Umgebung reduziert. Außerdem wird \texttt{\textbackslash ttabbox} aus dem 
+Paket \texttt{floatrow} verwendet, um die Beschriftung auf die Breite der 
+Tabelle zu begrenzen.
 
 \end{Trunk+}
 \CodeHook{\renewcommand*{\newcolumntype}[2]{}}
@@ -1763,12 +1835,20 @@ Umgebung reduziert.
 Anschließend kann der \PValue{Z}"~Spaltentyp äquivalent zu \PValue{X} genutzt 
 werden. Zu beachten ist dabei insbesondere die Möglichkeit, die einzelnen 
 Spalten in ihrer resultierenden Breite zueinander zu gewichten. Das Ergebnis 
-ist in \autoref{tab:tabu} zu sehen.
+ist in \autoref{tab:tabu} zu sehen. Zu beachten ist dabei auch die Verwendung 
+von \Macro{ttabbox} aus dem Paket \Package{floatrow}, um die Beschriftung an 
+die Breite der Tabelle anzupassen. Genaueres dazu in \autoref{sec:floatlayout}.
 %
 \begin{Trunk}
 \begin{table}
-\caption{Eine \texttt{tabu}-Tabelle}\label{tab:tabu}
-\begin{tabu} to \textwidth {@{}Z[3,l]Z[2,c]Z[3,r]Z[2,j]@{}}
+\ttabbox{
+  \caption{%
+    Eine \texttt{tabu}-Tabelle in Verbindung mit dem Befehl 
+    \texttt{\textbackslash ttabbox}, welcher vom Paket \texttt{floatrow} 
+    für Beschriftungen in Objektbreite bereitgestellt wird%
+  }\label{tab:tabu}%
+}{%
+\begin{tabu} to .8\textwidth {@{}Z[3,l]Z[3,c]Z[3,r]Z[2,j]@{}}
 \toprule
 \textbf{Linksbündig} & \textbf{Zentriert} & 
 \textbf{Rechtsbündig} & \textbf{Blocksatz} \tabularnewline
@@ -1779,7 +1859,7 @@ Ein rechtsbündiger Blindtext zur Demonstration einer Z[r]"~Spalte &
 Ein Blindtext im Blocksatz zur Demonstration einer Z"~Spalte
 \tabularnewline
 \bottomrule
-\end{tabu}
+\end{tabu}}
 \end{table}
 
 \end{Trunk}
@@ -1813,7 +1893,7 @@ beide Pakete gibt es neben der umfangreichen Dokumentation zahlreiche Beispiele
 und Erläuterungen im Internet.
 
 
-\subsection{Das Paket tikz}
+\subsection{Das Paket \Package{tikz}}
 Zur Verwendung von \Package{tikz}(pgf) ist nicht viel zu sagen. Einfach in der 
 Dokumentpräambel einbinden und es kann losgehen. Für das nachfolgende Beispiel 
 sind außerdem noch zwei weitere Programmbibliotheken für \Package{tikz}(pgf) 
@@ -1839,7 +1919,8 @@ mit folgendem Quelltext erreicht werden:
 \tikzset{x=\tikzunit,y=\tikzunit}
 \end{Hint*}
 %
-Nachfolgend wird eine Grafik innerhalb einer Gleitumgebung erstellt.
+Nachfolgend wird eine Grafik innerhalb einer Gleitumgebung exemplarisch 
+erstellt. Das Ergebnis ist in \autoref{fig:tikz} zu sehen.
 %
 \begin{Hint}
 \begin{figure}
@@ -1935,9 +2016,42 @@ Nachfolgend wird eine Grafik innerhalb einer Gleitumgebung erstellt.
 \InputCode
 
 
-\subsection{Das Paket pstricks}
+\subsection{Das Paket \Package{pstricks}}
+Die zuvor mit \Package{tikz}(pgf) erstellte Grafik wird nachfolgend mit dem 
+Paket \Package{pstricks} erstellt. Mit diesem lassen sich PostScript"=Grafiken 
+erstellen. Ähnlich wie bei \Package{tikz}(pgf) gibt es ein Kernpaket und 
+zusätzliche Ergänzungen. Diese werden jedoch nicht als Programmbibliotheken 
+sondern ganz normal als \hologo{LaTeX}"=Pakete eingebunden.
+%
 \begin{Hint}
-\begin{figure}
+\usepackage{pstricks}
+\usepackage{pst-node}
+\end{Hint}
+%
+Die Verwendung von PostScript hat zahlreiche Vorteile, macht die direkte 
+Nutzung von \hologo{pdfLaTeX} etwas schwierig. Das Paket \Package{auto-pst-pdf} 
+schafft hier jedoch Abhilfe. Wird \hologo{pdfLaTeX} über die zusätzliche Option 
+\Option{--shell-escape} respektive \Option{--enable-write18} mit erweiterten 
+Schreibrechten aufgerufen, so werden die Abbildungen automatisch im PDF-Format 
+erzeugt und eingebunden.
+%
+\begin{Hint}
+\usepackage{auto-pst-pdf}
+\end{Hint}
+%
+Bei einigen Pakete kommt es in der Kombination mit \Package{auto-pst-pdf} zu 
+kleineren Problemen, die sich jedoch meist relativ leicht beheben lassen. Im 
+Handbuch wird die \manualhyperref{sec:tips:floatrow}{gleichzeitige Verwendung} 
+von \Package{auto-pst-pdf} in Kombination mit den Paketen \Package{tikz}(pgf), 
+\Package{todonotes} sowie \Package{floatrow}~-- bei der Nutzung des Befehls 
+\Macro{ffigbox}~-- erklärt. Diese Hinweise sollten Sie gegebenenfalls beachten.
+
+Ähnlich wie zuvor bei der \Package{tikz}(pgf)-Grafik wird die nachfolgende 
+\Package{pstricks}-Abbildung auf die Textbreite des Dokumentes skaliert, wobei 
+eine Einheit genau \unit[1]{\%} dieser entspricht. Außerdem werden noch ein 
+paar weitere Einstellungen gemacht. Dies geschieht mit:
+%
+\begin{Hint*}
 \psset{%
   unit=.01\textwidth,%
   cornersize=absolute,%
@@ -1945,6 +2059,13 @@ Nachfolgend wird eine Grafik innerhalb einer Gleitumgebung erstellt.
   linewidth=.4pt,%
   arrowscale=1.5,%
 }
+\end{Hint*}
+%
+Die \Package{pstricks}-Grafik wird innerhalb einer Gleitumgebung erzeugt, die 
+Ausgabe ist in \autoref{fig:pstricks} dargestellt.
+%
+\begin{Hint}
+\begin{figure}
 \begin{pspicture}(0,-2)(100,64)
 \newcommand\fnodetext{}
 \def\fnodetext(#1)#2#3{%
@@ -2007,22 +2128,7 @@ Nachfolgend wird eine Grafik innerhalb einer Gleitumgebung erstellt.
 \InputCode
 
 
-\subsection{Die Verwendung von tikz und pstricks in einem Dokument}
-\ToDo[doc]{tikz und auto-pst-pdf (ifdpf notwendig)}
 
-
-\subsection{Die Verwendung von floatrow und pstricks in einem Dokument}
-\ToDo[doc]{ttabbox und auto-pst-pdf (ifdpf notwendig)}
-\begin{Hint}
-\usepackage{floatrow}
-\floatsetup{font=sf}
-\usepackage{xparse}
-\ifpdf\else
-  \RenewDocumentCommand{\fcapside}{ooo+m+m}{#4#5}
-  \RenewDocumentCommand{\ttabbox}{ooo+m+m}{#4#5}
-  \RenewDocumentCommand{\ffigbox}{ooo+m+m}{#4#5}
-\fi
-\end{Hint}
 
 
 
@@ -2114,8 +2220,6 @@ Tutorial verwendete \Package{glossaries}.
 \end{Hint}
 
 \begin{Hint}
-\usepackage{caption}
-\usepackage{floatrow}
 \usepackage{mathtools}
 \usepackage{units}
 \usepackage{siunitx}

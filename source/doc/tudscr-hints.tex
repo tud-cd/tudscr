@@ -612,3 +612,65 @@ unerwarteter Weise Probleme auftreten, ist dessen Anleitung in \scrguide zu
 finden. Eine weitere Möglichkeit, das beschriebene Problem der geringen Menge 
 an Ausgabe-Streams zu umgehen, stellt das Paket \Package{morewrites} dar. 
 Allerdings ist dessen Verwendung nicht in allen Fällen von Erfolg gekrönt.
+
+
+\section{Probleme bei der Verwendung von \Package{auto-pst-pdf}}
+\manualhyperdef'{sec:tips:auto-pst-pdf}
+Sämtliche Probleme von \Package{auto-pst-pdf} in Kombination mit anderen 
+Paketen liegt an der Tatsache, dass dieses Paket automatisiert des aktuelle 
+Dokument durchläuft und nach dem Lesen der Präambel lediglich den Inhalt der 
+vorhandene \Environment{pspicture}"=Umgebungen über den PostScript-Pfad
+\Path{latex \textrightarrow{} dvips \textrightarrow{} ps2pdf} kompiliert und  
+PDF-Grafiken erstellt.
+
+Mit dem Paket \Package{ifpdf} kann erkannt werden, welcher Dokumentprozessor 
+gerade das Dokument kompiliert. Mit dem Makro \Macro{ifpdf} können abhängig 
+davon unterschiedliche Quelltexte ausgeführt werden, was im Folgenden genutzt 
+wird, um die Probleme zu beheben.
+%
+\begin{Code}
+\usepackage{ifpdf}
+\end{Code}
+
+
+\subsection{Die gleichzeitige Verwendung von \Package{floatrow}}
+Das Paket \Package{floatrow} stellt Befehle bereit, mit denen die Beschriftung 
+von Gleitobjekten sehr bequem gesetzt werden können. Diese Setzen ihren Inhalt 
+erst in einer Box, um deren Breite zu ermitteln. Anschließend wird dieser 
+ausgegeben. In Kombination mit \Package{auto-pst-pdf} führt dies zu einer 
+doppelten Erstellung der gewünschten Abbildung. Um dies zu vermeiden, müssen 
+die durch \Package{floatrow} bereitgestellten Befehle \enquote{unschädlich} 
+gemacht werden.
+
+Diesen Befehle können bis zu drei optionale Argumente \emph{vor} den beiden 
+obligatorischen übergeben werden. Dieses Verhalten ist für die standardmäßige 
+Benutzerschnittstelle für die (Re-)Definition durch \hologo{LaTeXe} nicht 
+vorgesehen. Deshalb wird für dieses Unterfangen das Paket \Package{xparse} 
+geladen, mit welchem dies möglich wird. Genaueres dazu ist der dazugehörigen 
+Paketdokumentation zu entnehmen. Verwendet man folgenden Quelltextauszug in der 
+Dokumentpräambel, kann man die \Package{floatrow}-Befehle auch in Verbindung 
+mit der \Environment{pspicture}"=Umgebung wie gewohnt verwenden.
+\begin{Code}
+\usepackage{floatrow}
+\usepackage{xparse}
+\ifpdf\else
+  \RenewDocumentCommand{\fcapside}{ooo+m+m}{#4#5}
+  \RenewDocumentCommand{\ttabbox}{ooo+m+m}{#4#5}
+  \RenewDocumentCommand{\ffigbox}{ooo+m+m}{#4#5}
+\fi
+\end{Code}
+
+
+\subsection{Die parallele Nutzung von \Package{tikz} und \Package{todonotes}}
+Mit \Package{tikz}(pgf) und respektive auch \Package{todonotes}~-- welches 
+das zuvor genannte nutzt~-- gibt es in Verbindung mit \Package{auto-pst-pdf} 
+ebenfalls Probleme. Dies lässt sich jedoch einfach lösen, indem man diese 
+Pakete lediglich in der Präambel einbindet, wenn \hologo{pdfLaTeX} als 
+Dokumentprozessor aktiv ist.
+%
+\begin{Code}
+\ifpdf
+  \usepackage{tikz}
+  \usepackage{todonotes}
+\fi
+\end{Code}
