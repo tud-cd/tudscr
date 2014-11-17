@@ -1,3 +1,4 @@
+\defaulthyphenchar=127
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrreprt}
 \usepackage{babel}
@@ -128,10 +129,20 @@ language = {german},
 \addbibresource{treatise-temp.bib}
 \usepackage{enumitem}
 \setlist{noitemsep}
+\usepackage{caption}
+\captionsetup{font=sf,labelfont=bf,labelsep=space}
+\usepackage{floatrow}
+\floatsetup{font=sf}
+\floatsetup[table]{style=plaintop}
+\captionsetup{singlelinecheck=off,format=hang,justification=raggedright}
+\DeclareCaptionSubType[alph]{figure}
+\DeclareCaptionSubType[alph]{table}
+\captionsetup[subfloat]{labelformat=brace,list=off}
 \usepackage{booktabs}
 \usepackage{array}
-\usepackage{tabu}
 \usepackage{tabularx}
+\usepackage{tabulary}
+\usepackage{tabu}
 \usepackage{microtype}
 \usepackage{units}
 \usepackage[colorlinks,linkcolor=blue]{hyperref}
@@ -219,8 +230,8 @@ der weiteren Umgebungen und Befehle demonstriert, welche im Tutorial
 In der Graphentheorie wird häufig die Lösung des Problems des kürzesten
 Pfades zwischen zwei Knoten gesucht. Dieses Problem wird häugig auch
 mit \gls{spsp} bezeichnet. Es lässt sich auf die Variationen \gls{sssp}
-und \gls{apsp} erweitern. Für die Lösung von \gls{spsp}, \gls{sssp} oder
-\gls{apsp} kommen unterschiedliche Algorithmen zum Einsatz.
+und \gls{apsp} erweitern. Für die Lösung von \gls{spsp}, \gls{sssp}
+oder \gls{apsp} kommen unterschiedliche Algorithmen zum Einsatz.
 \newsymbol{l}{Länge}{l}{m}
 \newsymbol{m}{Masse}{m}{kg}
 \newsymbol{a}{Beschleunigung}{a}{\nicefrac{m}{s^2}}
@@ -234,41 +245,77 @@ Fall einer konstanten Kraftwirkung in die Bewegungsrichtung einer
 Punktmasse lautet:
 $\gls{F} = \gls{m} \cdot \gls{a}$
 \section{Zitieren und das Literaturverzeichnis}
-Das Literaturverzeichnis wir auf Basis der nachfolgend verwendeten Zitate
-erstellt und ist auf Seite~\pageref{sec:bibliography} zu finden.
+Das Literaturverzeichnis wir auf Basis der nachfolgend verwendeten
+Zitate erstellt und ist auf Seite~\pageref{sec:bibliography} zu finden.
 In diesem Textabschnitt werden die zwei bekannten \LaTeX-Bücher
 \cite{knuth84} und \cite{goossens94} sowie das Anwenderhandbuch
 \cite{hanisch14} zitiert.
-\section{Eine Aufzählung mit angepassten vertikalen Abständen}
-Ein kurzes Beispiel, wie eine Liste aussehen kann, nachdem die Möglichkeiten
-des Paketes \texttt{enumitem} genutzt und die vertikalen Abstände mit dem
-Befehl \texttt{\textbackslash setlist\{noitemsep\}} angepasst wurden.
+\section{Eine Aufzählung mit angepassten Abständen}
+Ein kurzes Beispiel, wie eine Liste aussehen kann, nachdem die
+Möglichkeiten des Paketes \texttt{enumitem} genutzt und mit dem
+Befehl \texttt{\textbackslash setlist\{noitemsep\}} die vertikalen
+Abstände angepasst wurden.
 \begin{itemize}
 \item erster Punkt
 \item zweiter Punkt
 \item dritter Punkt
 \end{itemize}
 \section{Grafiken und Tabellen in Gleitumgebungen}
-Es folgt die Demonstration von Gleitumgebungen, welche sowohl für Grafiken als
-auch Tabellen verwendet werden sollten. Im vorliegenden Beispiel kann unter
-Umständen der Eindruck entstehen, dass diese Seite etwas zu überladen mit
-Gleitobjekten ist. Dies liegt nicht an der Verwendung der Gleitobjekte sondern
-vielmehr am zu geringen Textvolumen und den eingeschränkten Möglichkeiten von
-\LaTeX{}, diese an geigneten Stellen zu platzieren.
-\subsection{Das Einbinden von Grafiken}
-In \autoref{fig:example} wird dargestellt, wie eine Grafik im PDF-Format in ein
-Dokument eingebunden und auf diese verwiesen werden kann. Entscheidend dabei
-ist, den Anker für den Querverweis erst \emph{nach} der Beschriftung zu setzen.
+Es folgt die Demonstration von Gleitumgebungen, welche sowohl für
+Grafiken als auch Tabellen verwendet werden sollten. Im vorliegenden
+Beispiel kann unter Umständen der Eindruck entstehen, dass diese Seite
+etwas zu überladen mit Gleitobjekten ist. Dies liegt nicht an der
+Verwendung der Gleitobjekte sondern vielmehr am zu geringen Textvolumen
+und den eingeschränkten Möglichkeiten von \LaTeX{}, diese an geigneten
+Stellen zu platzieren.
+\subsection{Abbildungen als Gleitobjekte und das Einbinden von Grafiken}
+In \autoref{fig:example} wird dargestellt, wie eine Grafik im PDF-Format
+in ein Dokument eingebunden und auf diese verwiesen werden kann. Ein
+Querverweis auf ein Gleitobjekt sollte im Fließtext am besten mit Befehl
+\texttt{\textbackslash autoref\{\emph{<Label>}\}} erstellt werden.
+Hierfür ist ein entsprechender Anker am zu referenziereden Objekt nötig,
+welcher mit dem Makro \texttt{\textbackslash label} erzeugt wird. Dabei
+ist entscheidend, dass dieser Anker erst \emph{nach} der Beschriftung des
+Objektes, welche mit \texttt{\textbackslash caption} erstellt wird,
+gesetzt wird.
 \begin{figure}
 \centering
 \includegraphics{TUD-black}
 \caption{Beispielgrafik}\label{fig:example}
 \end{figure}
+\subsection{Untergleitobjekte}
+Nachdem nun schon eine gleitende Abbildung und zwei gleitende Tabellen
+erstellt wurden, folgt jetzt noch eine gleitende Abbildung mit zwei
+Unterabbildungen. Durch die drei gesetzten Anker kann im Fließtext
+sowohl auf \autoref{fig:logos} als auch auf \autoref{fig:tud} sowie
+\autoref{fig:ddc} verwiesen werden.
+\begin{figure}
+\ffigbox[\FBwidth]%
+{\begin{subfloatrow}%
+\ffigbox[\FBwidth]%
+{\fbox{\includegraphics[height=2cm]{TUD-black}}}%
+{%
+\caption{Das offizielle Logo der Technischen Universität Dresden}
+\label{fig:tud}%
+}%
+\ffigbox[\FBwidth]%
+{\fbox{\includegraphics[height=2cm]{DDC-21}}}%
+{\caption{Ein weiteres Logo}\label{fig:ddc}}%
+\end{subfloatrow}}%
+{\caption{Eine Gleitumgebung mit zwei Abbildungen}\label{fig:logos}}%
+\end{figure}
 \subsection{Tabellen als Gleitobjekte}
-Auch Tabellen sollten in einer Gleitumgebung gesetzt werden. Nach diesem Absatz
-wird eine Tabelle mithilfe der \texttt{tabularx}-Umgebung erstellt. Zu sehen
-ist diese in \autoref{tab:tabularx}. Für diese werden zuvor neue Spaltentypen
-definiert.
+Tabellen sollten in der \texttt{table}"=Gleitumgebung gesetzt werden.
+Welche Umgebung für die Tabelle selbst dabie genutzt wird ist dabei
+nicht relevant. Es können sowohl die normale \texttt{tabular}"=Umgebung
+als auch die Umgebungen \texttt{tabularx}, \texttt{tabulary} sowie
+\texttt{tabu} für variable Spaltenbreiten bei einer fest vorgegebenen
+Tabellenbreite oder jede andere Tabellenumgebung genutzt werden.
+Nachfolgend wird dies an mehreren Beispielen demonstriert.
+\subsubsection{Eine gleitende tabularx-Tabelle}
+Es wird eine Tabelle mithilfe der \texttt{tabularx}-Umgebung erstellt.
+Zu sehen ist diese in \autoref{tab:tabularx}. Für diese werden zuvor
+neue Spaltentypen definiert.
 \newcolumntype{Y}{>{\hspace{0pt}}X}
 \newcolumntype{L}{>{\raggedright}Y}
 \newcolumntype{C}{>{\centering}Y}
@@ -282,17 +329,20 @@ definiert.
 Ein linksbündiger Blindtext zur Demonstration einer L"~Spalte &
 Ein zentrierter Blindtext zur Demonstration einer C"~Spalte &
 Ein rechtsbündiger Blindtext zur Demonstration einer R"~Spalte &
-Ein im Blocksatz gesetzter Blindtext zur Demonstration einer Y"~Spalte
+Ein Blindtext im Blocksatz zur Demonstration einer Y"~Spalte
 \tabularnewline
 \bottomrule
 \end{tabularx}
 \caption{Eine \texttt{tabularx}-Tabelle}\label{tab:tabularx}
 \end{table}
-
-Eine andere Variante zum Setzen einer Tabelle mit variabler Spaltenbreite und
-festgelegter Gesamtbreite ist in \autoref{tab:tabu} zu sehen. Diese würde in
-der Umgebung \texttt{tabu} gesetzt. Auch für diese wird zuerst ein neuer
-Spaltentyp definiert, welcher die Unzulänglichkeiten der Umgebung reduziert.
+\subsubsection{Eine gleitende tabu-Tabelle}
+Eine andere Variante zum Setzen einer Tabelle mit variabler Spaltenbreite
+und festgelegter Gesamtbreite ist in \autoref{tab:tabu} zu sehen. Diese
+würde in der Umgebung \texttt{tabu} gesetzt. Auch für diese wird zuerst
+ein neuer Spaltentyp definiert, welcher die Unzulänglichkeiten der
+Umgebung reduziert. Außerdem wird \texttt{\textbackslash ttabbox} aus dem
+Paket \texttt{floatrow} verwendet, um die Beschriftung auf die Breite der
+Tabelle zu begrenzen.
 \makeatletter
 \newcolumntype{Z}{}
 \renewcommand*\NC@rewrite@Z[1][]{%
@@ -300,8 +350,14 @@ Spaltentyp definiert, welcher die Unzulänglichkeiten der Umgebung reduziert.
 }
 \makeatother
 \begin{table}
-\caption{Eine \texttt{tabu}-Tabelle}\label{tab:tabu}
-\begin{tabu} to \textwidth {@{}Z[2,l]Z[3,c]Z[2,r]Z[3,j]@{}}
+\ttabbox{
+\caption{%
+Eine \texttt{tabu}-Tabelle in Verbindung mit dem Befehl
+\texttt{\textbackslash ttabbox}, welcher vom Paket \texttt{floatrow}
+für Beschriftungen in Objektbreite bereitgestellt wird%
+}\label{tab:tabu}%
+}{%
+\begin{tabu} to .8\textwidth {@{}Z[3,l]Z[3,c]Z[3,r]Z[2,j]@{}}
 \toprule
 \textbf{Linksbündig} & \textbf{Zentriert} &
 \textbf{Rechtsbündig} & \textbf{Blocksatz} \tabularnewline
@@ -309,10 +365,10 @@ Spaltentyp definiert, welcher die Unzulänglichkeiten der Umgebung reduziert.
 Ein linksbündiger Blindtext zur Demonstration einer Z[l]"~Spalte &
 Ein zentrierter Blindtext zur Demonstration einer Z[c]"~Spalte &
 Ein rechtsbündiger Blindtext zur Demonstration einer Z[r]"~Spalte &
-Ein im Blocksatz gesetzter Blindtext zur Demonstration einer Z"~Spalte
+Ein Blindtext im Blocksatz zur Demonstration einer Z"~Spalte
 \tabularnewline
 \bottomrule
-\end{tabu}
+\end{tabu}}
 \end{table}
 \printbibliography\label{sec:bibliography}
 \end{document}
