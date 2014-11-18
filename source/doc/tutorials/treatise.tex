@@ -23,6 +23,7 @@
 \usepackage{array}
 \usepackage{tabu}
 \usepackage{tabularx}
+\usepackage{tabulary}
 \usepackage{booktabs}
 \usepackage{units}
 \AfterPackage*{hyperref}{%
@@ -41,7 +42,7 @@
 \usepackage{csquotes}
 \usepackage[backend=biber,style=alphabetic]{biblatex}
 \usepackage{filecontents}
-\addbibresource{treatise-temp.bib}
+\addbibresource{\jobname-temp.bib}
 
 \usepackage{enumitem}
 
@@ -181,7 +182,15 @@ In neuen Dokumenten kann es bedenkenlos geladen werden.
 %
 \begin{Preamble}
 \usepackage{fixltx2e}
-
+\end{Preamble}
+%
+Für die \KOMAScript-Klassen wird außerdem das Paket \Package{scrhack} 
+bereitgestellt. Dieses behebt einige Probleme bei der Kompatibilität mit 
+anderen Paketen bezüglich des Erstellens von Verzeichnissen. Deshalb sollte 
+dieses frühzeitig in der Präambel geladen werden. 
+%
+\begin{Preamble}
+\usepackage{scrhack}
 \end{Preamble}
 %
 Damit sind die allgemein notwendigen Pakete eingebunden. Es werden zwar weitere 
@@ -1026,7 +1035,7 @@ Auf eine Einführung in diese Anwendungen wird jedoch verzichtet.
 Die \Environment{filecontents}"=Umgebung kann verwendet werden, um innerhalb 
 eines \hologo{LaTeX}"=Dokumentes externe Dateien direkt beim Kompilieren zu
 erstellen. Damit wird nachfolgend für dieses Tutorial eine Literaturdatenbank 
-\PValue{treatise-temp.bib} mit drei Einträgen manuell erzeugt. Die Umgebung 
+\File{\jobname-temp.bib} mit drei Einträgen manuell erzeugt. Die Umgebung 
 gehört zu den Bordmitteln von \hologo{LaTeXe}. Das Paket \Package{filecontents} 
 erweitert die Umgebung dahingehend, dass \emph{bereits existierende Dateien} 
 überschrieben werden. Hier ist folglich Vorsicht geboten. Der große Vorteil ist 
@@ -1041,7 +1050,7 @@ nicht verzichtet werden kann.
 \end{Preamble}
 %
 Es werden folgend drei Einträge für die Literaturdatenbank definiert. Jeder 
-Eintrag einer \PValue{.bib}-Datei beginnt mit \PValue{@}\PName{Eintragstyp}. 
+Eintrag einer \File{.bib}-Datei beginnt mit \PValue{@}\PName{Eintragstyp}. 
 Direkt danach ist für jeden Eintrag ein \emph{eindeutiges} \PParameter{Label} 
 festzulegen. Anschließend können für unterschiedliche Felder die dazugehörige 
 Werte eingetragen werden. Die verwendbaren Eintragstypen und die für diesen 
@@ -1049,7 +1058,7 @@ benötigten und zusätzlich nutzbaren Felder sind in der Dokumentation von
 \Package{biblatex} zu finden.
 %
 \begin{Preamble*}
-\begin{filecontents}{treatise-temp.bib}
+\begin{filecontents}{\jobname-temp.bib}
 @book{goossens94,
   author    = {Goossens, Michel and Mittelbach, Frank
                and Samarin, Alexander},
@@ -1086,7 +1095,7 @@ Nachdem die Literaturdatenbank erstellt wurde, muss diese auch noch eingebunden
 werden. Dies geschieht mit:
 %
 \begin{Preamble}
-\addbibresource{treatise-temp.bib}
+\addbibresource{\jobname-temp.bib}
 
 \end{Preamble}
 %
@@ -1314,7 +1323,7 @@ keine Rolle spielt. Der Algorithmus arbeitet alle ihm zur Verfügung gestellten
 Optionen immer in der zuvor aufgezählten Reihenfolge ab, wobei diese nur als 
 Empfehlung und nicht als Verpflichtung angesehen werden. Es gibt folglich keine 
 Garantie, dass Ihr Vorschlag akzeptiert wird. Fügen sie dem optionalen Argument 
-ein \PValue{!} an, so verhindern Sie, dass \hologo{LaTeX} weitere Optionen 
+ein~\PValue{!} an, so verhindern Sie, dass \hologo{LaTeX} weitere Optionen 
 evaluiert. Das Gleitobjekt wird anhand der optionalen Parameter positioniert, 
 selbst wenn dabei ein unschönes Seitenlayout entsteht. Kann das Gleitobjekt 
 technisch unmöglich auf die angegebene Weise positioniert werden, wird dieses 
@@ -1398,7 +1407,7 @@ ein Blick in \autoref{sec:tables} sehr sinnvoll.
 Normalerweise wird eine Tabelle sowie deren Beschriftung innerhalb einer 
 \Environment{table}"=Gleitumgebung in der selben Schrift wie der Fließtext 
 gesetzt, die korrekte Platzierung der Bezeichnungen bleibt dem Anwender 
-überlassen. Zu sehen ist dies in \autoref{tab:tabular}. Im folgenden wird 
+überlassen. Zu sehen ist dies in \autoref{tab:tabular}. Im Folgenden wird 
 gezeigt, wie sich dies automatisiert für alle Gleitobjekte im Dokument ändern 
 lässt. Die \emph{Formatierung} der Bezeichnungen von Gleitobjekten kann 
 mithilfe des Paketes \Package{caption} angepasst werden.
@@ -1416,7 +1425,7 @@ fetten Schriftschnitt gesetzt.
 \end{Preamble*}
 %
 Um die \emph{Platzierung} der Beschriftungen beeinflussen sowie den Inhalt 
-einer Gleitumgebung formatieren zu können, wird \Package{floatrow} geladen.
+einer Gleitumgebung formatieren zu können, wird \Package{floatrow} geladen. 
 \begin{Preamble}
 \usepackage{floatrow}
 \end{Preamble}
@@ -1599,17 +1608,23 @@ sogenannter \enquote{Hooks} vor und nach Einträgen innerhalb einer Spalte
 %
 Für alle im Folgenden vorgestellten Umgebungen zum Setzen von Tabellen gilt, 
 dass die Inhalte zeilenweise angegeben werden, wobei die Einträge für die 
-einzelnen Spalten mit \PValue{\&} voneinander zu trennen sind. Das Beenden 
+einzelnen Spalten mit~\PValue{\&} voneinander zu trennen sind. Das Beenden 
 einer Tabellenzeile und der Wechsel zur nächsten erfolgt normalerweise mit 
-\Macro{\bsc}. Da jedoch einige \hologo{LaTeX}-Pakete diesen Befehl innerhalb 
-von Tabellen lokal ändern ist es zur Vermeidung unnötiger Fehler wesentlich 
-sicherer, das Zeilenende ausschließlich mit \Macro{tabularnewline} zu setzen.
+\PValue{\bsc\bsc}. Da jedoch einige \hologo{LaTeX}-Pakete diesen Befehl 
+innerhalb von Tabellen lokal ändern ist es zur Vermeidung unnötiger Fehler 
+wesentlich sicherer, das Zeilenende ausschließlich mit \Macro{tabularnewline} 
+zu setzen.
+
+Im Folgenden wird in einigen Tabellen bei der Definition der Spalten vor der 
+ersten und nach der letzten das Konstrukt~\PValue{@\{\}} verwendet, was das
+\manualhyperref{sec:tips:table}{Einrücken dieser Tabellenspalten verhindert} 
+und im Handbuch genauer erläutert wird. 
 
 
 \subsection{Die Standardumgebung \Environment{tabular}}
-Normalerweise gibt es vier unterschiedliche Spaltentypen. Die Spaltentypen 
-\PValue{l}, \PValue{c} und \PValue{r} stehen für linksbündige, zentrierte und 
-rechtsbündige Spalten, welche allerdings keinen Zeilenumbruch erlauben. Der 
+Normalerweise gibt es vier unterschiedliche Spaltentypen. Dabei stehen die drei 
+Spaltentypen~\PValue{l},~\PValue{c}~und~\PValue{r} für linksbündige, zentrierte 
+und rechtsbündige Spalten, welche allerdings keinen Zeilenumbruch erlauben. Der 
 Inhalt wird quasi wie in einer \Macro {mbox} gesetzt, wodurch die Spalten sehr 
 breit werden und über den Seitenrand hinausragen können.
 
@@ -1617,7 +1632,7 @@ Der Spaltentyp~\PValue{p}\Parameter{Breite} hingegen legt die Spaltenbreite
 fest und setzt den Inhalt in jeder Zeile in eine \Macro{parbox}, wobei diese 
 wird mit ihrer obersten Zeile an der Grundlinie ausgerichtet wird. Das Paket
 \Package{array} stellt außerdem die Spaltentypen~\PValue{m}\Parameter{Breite} 
-und ~\PValue{b}\Parameter{Breite} bereit, welche ebenfalls mit \Macro{parbox} 
+und~\PValue{b}\Parameter{Breite} bereit, welche ebenfalls mit \Macro{parbox} 
 gesetzt werden, die Ausrichtung an der Grundlinie jedoch zentriert respektive 
 an der unteren Zeile der Box erfolgt. Es folgt ein Beispiel zur Verwendung der 
 \Environment{tabular}-Umgebung.
@@ -1662,6 +1677,13 @@ Tabellensatz in sich zu vereinen.
 \usepackage{tabu}
 
 \end{Preamble}
+%
+Jedes der Pakete stellt einen oder mehrere neue Spaltentypen zur Verfügung. 
+Dies bedeutet jedoch nicht, dass in den dazugehörigen Tabellenumgebungen 
+lediglich diese genutzt werden können. Vielmehr werden diese zusätzlich 
+angeboten, was bedeutet, dass auch in den neuen Tabellenumgebungen weiterhin 
+die gewohnten Spaltentypen~\PValue{l},~\PValue{c},~\PValue{r}~und~\PValue{p} 
+verfügbar sind.
 
 \subsubsection{Die Tabellenumgebung \Environment{tabularx}}
 \label{sec:tabularx}
@@ -1696,9 +1718,9 @@ aaaa & bbbb & cccc & \hspace{0pt}Worttrennungsmusterkontrolle
 Die Breite der letzten Spalte wurde dabei aus der Angabe der Gesamtbreite mit 
 \PValue{11.7cm} berechnet. Des Weiteren ist zu sehen, wie das Problem des 
 Zeilenumbruchs behandelt werden kann. Normalerweise wird das erste Wort in 
-einem Absatz von \hologo{LaTeX} \emph{nie} umbrochen. Das kann mit dem Einfügen 
-eines horizontalen Abstandes mit dem Wert \PValue{0pt} umgangen werden. Die 
-gefundene Lösung ist allerdings alles andere als elegant.
+einem Absatz von \hologo{LaTeX} \emph{nie} umbrochen. Dies kann durch das 
+Einfügen eines breitenlosen Leerzeichens mit \Macro{hspace}\PParameter{0pt} 
+umgangen werden. Die gefundene Lösung ist allerdings alles andere als elegant.
 
 Mit den Möglichkeiten des Paketes \Package{array} ist das Problem relativ 
 schnell gelöst. Es wird mit \Macro{newcolumntype} ein neuer Spaltentyp 
@@ -1730,28 +1752,26 @@ neue Spaltentypen definiert.
 \CodeHook{\renewcommand*{\newcolumntype}[2]{}}
 \begin{Trunk*}
 \newcolumntype{Y}{>{\hspace{0pt}}X}
-\newcolumntype{L}{>{\raggedright}Y}
-\newcolumntype{C}{>{\centering}Y}
-\newcolumntype{R}{>{\raggedleft}Y}
+\newcolumntype{S}{>{\raggedright}Y}
+\newcolumntype{T}{>{\centering}Y}
+\newcolumntype{U}{>{\raggedleft}Y}
 
 \end{Trunk*}
 %
-Nachfolgend wird die Tabelle gesetzt mit den neuen Spaltentypen gesetzt. Achten 
-Sie auf die Verwendung von \PValue{@\{\}} vor der ersten und nach der letzten 
-Spalte. Nach dem Quelltextauszug wird dieses Konstrukt erläutert.
+Nachfolgend wird die Tabelle gesetzt mit den neuen Spaltentypen gesetzt.
 %
 \begin{Trunk}
 \begin{table}
-\begin{tabularx}{\textwidth}{@{}LCRY@{}}
+\begin{tabularx}{\textwidth}{@{}STUY@{}}
 \toprule
 \textbf{Linksbündig} & \textbf{Zentriert} & 
 \textbf{Rechtsbündig} & \textbf{Blocksatz} \tabularnewline
 \midrule
-Ein linksbündiger Blindtext zur Demonstration einer L"~Spalte &
-Ein zentrierter Blindtext zur Demonstration einer C"~Spalte &
-Ein rechtsbündiger Blindtext zur Demonstration einer R"~Spalte &
-Ein Blindtext im Blocksatz zur Demonstration einer Y"~Spalte
-\tabularnewline
+Ein linksbündiger Blindtext zur Demonstration einer S"~Spalte &
+Ein zentrierter Blindtext zur Demonstration einer T"~Spalte &
+Ein rechtsbündiger Blindtext zur Demonstration einer U"~Spalte &
+Ein längerer Blindtext im Blocksatz zur besseren Demonstration
+einer Y"~Spalte\tabularnewline
 \bottomrule
 \end{tabularx}
 \caption{Eine \texttt{tabularx}-Tabelle}\label{tab:tabularx}
@@ -1760,30 +1780,66 @@ Ein Blindtext im Blocksatz zur Demonstration einer Y"~Spalte
 \end{Trunk}
 \InputCode
 %
-Normalerweise wird in einer Tabelle mit \Macro{hskip}\Macro{tabcolsep} vor 
-\emph{und} nach jeder Spalte ein horizontaler Zwischenraum eingefügt.%
-\footnote{Der Abstand zweier Spalten beträgt folglich 2\Macro{tabcolsep}.}
-Mit \PValue{@\Parameter{Ausdruck}} kann dies verhindert und stattdessen  
-\Parameter{Ausdruck} ausgeführt werden. Mit der Verwendung von \PValue{@\{\}} 
-an den entsprechenden Stellen bei der Angabe der Spaltentypen wurde der vor der 
-ersten und nach der letzten Tabellenspalte eingefügten Abstand unterdrückt.
-Das Ergebnis ist in \autoref{tab:tabularx} zu sehen.
-
+Die Breite der einzelnen \PValue{X}"~Spalten und deren Derivaten ist dabei 
+identisch. Ein Gewichten der Spaltenbreiten untereinander ist prinzipiell 
+möglich, allerdings mit einigen Einschränkungen verbunden. Genaueres hierzu ist 
+der Dokumentation des Paketes \Package{tabularx} zu entnehmen.
 
 \subsubsection{Die Tabellenumgebung \Environment{tabulary}}
 \label{sec:tabulary}
-\ToDo[doc]{\Environment{tabulary}}
-%\begin{Trunk+}
-%\subsubsection{Eine gleitende tabulary-Tabelle}
-%Eine andere Variante zum Setzen einer Tabelle mit variabler Spaltenbreite 
-%und festgelegter Gesamtbreite ist in \autoref{tab:tabu} zu sehen. Diese 
-%würde in der Umgebung \texttt{tabu} gesetzt. Auch für diese wird zuerst 
-%ein neuer Spaltentyp definiert, welcher die Unzulänglichkeiten der 
-%Umgebung reduziert. Außerdem wird \texttt{\textbackslash ttabbox} aus dem 
-%Paket \texttt{floatrow} verwendet, um die Beschriftung auf die Breite der 
-%Tabelle zu begrenzen.
+Das Paket \Package{tabulary} verfolgt im Vergleich zum zuvor beschrieben Paket 
+\Package{tabularx} einen etwas anderen Ansatz. Anstatt die verfügbare Breite 
+über alle Spalten gleichmäßig zu verteilen, werden die Spaltenbreite anhand des 
+jeweils darin befindlichen Inhaltes zueinander gewichtet. Dafür werden die vier 
+Spaltentypen~\PValue{L},~\PValue{C},~\PValue{R}~sowie~\PValue{J} zur Verfügung 
+gestellt. Diese entsprechen prinzipiell dem Spaltentyp~\PValue{p}, allerdings 
+wird deren Breite \emph{automatisch} berechnet, wobei Spalten mit mehr Inhalt 
+breiter gesetzt werden. Für die automatische Berechnung der Spaltenbreiten muss 
+verständlicherweise die gewünschte Gesamtbreite angegeben werden, was bei der 
+\Environment{tabulary}-Umgebung mit dem ersten obligatorischen Argument vor der 
+Angabe der Spaltendefinition erfolgt. Werden für die Tabelle eine oder mehrere 
+Spalten vom Typ~\PValue{l},~\PValue{c}~und~\PValue{r} angegeben, so werden 
+diese weiterhin in ihrer natürlichen Breite und ohne Zeilenumbruch gesetzt. 
+
+Die Gewichtung der Spalten vom Typ~\PValue{LCRJ} und deren Derivate wird aus 
+dem verbliebenen Platz die Breite berechnet. Die Berechnung der Spaltenbreite 
+kann durch den Anwender außerdem über zwei Längen beeinflusst werden. Mit 
+\Length{tymin} wird die Mindestgröße für Spalten festgelegt. Sollten Sie 
+wissen, dass eine Spalte sehr schmal wird, können Sie allerdings auch einfach 
+eine der Standardspalten~\PValue{lcrp} nutzen. Mit der Länge \Length{tymax} 
+kann die maximale Ausdehnung einer der Spalten vom Typ~\PValue{LCRJ} festgelegt 
+werden. Für die \Environment{tabulary}-Umgebung wird das vorherige Beispiel 
+wiederholt. Zu beachten ist, dass die Spaltentypen~\PValue{LCRJ} mit dem Makro 
+\Macro{tyformat} bereits ein breitenloses Leerzeichen einsetzen, womit sich das 
+manuelle Einfügen von selbigem durch den Anwender erübrigt.
 %
-%\end{Trunk+}
+\begin{Trunk+}
+\subsubsection{Eine gleitende tabulary-Tabelle}
+Es wird eine Tabelle mithilfe der \texttt{tabulary}-Umgebung erstellt. 
+Zu sehen ist diese in \autoref{tab:tabulary}. 
+
+\end{Trunk+}
+\begin{Trunk}
+\begin{table}
+\begin{tabulary}{\textwidth}{@{}LCRJ@{}}
+\toprule
+\textbf{Linksbündig} & \textbf{Zentriert} & 
+\textbf{Rechtsbündig} & \textbf{Blocksatz} \tabularnewline
+\midrule
+Ein linksbündiger Blindtext zur Demonstration einer L"~Spalte &
+Ein zentrierter Blindtext zur Demonstration einer C"~Spalte &
+Ein rechtsbündiger Blindtext zur Demonstration einer R"~Spalte &
+Ein wesentlich längerer und absolut inhaltsleerer Blindtext im 
+Blocksatz für eine um einiges bessere Demonstration einer J"~Spalte
+\tabularnewline
+\bottomrule
+\end{tabulary}
+\caption{Eine \texttt{tabulary}-Tabelle}\label{tab:tabulary}
+\end{table}
+
+\end{Trunk}
+\InputCode
+
 
 \subsubsection{Die Tabellenumgebung \Environment{tabu}}
 \label{sec:tabu}
@@ -1859,11 +1915,13 @@ Tabelle zu begrenzen.
 \end{Trunk*}
 %
 Anschließend kann der \PValue{Z}"~Spaltentyp äquivalent zu \PValue{X} genutzt 
-werden. Zu beachten ist dabei insbesondere die Möglichkeit, die einzelnen 
-Spalten in ihrer resultierenden Breite zueinander zu gewichten. Das Ergebnis 
-ist in \autoref{tab:tabu} zu sehen. Zu beachten ist dabei auch die Verwendung 
-von \Macro{ttabbox} aus dem Paket \Package{floatrow}, um die Beschriftung an 
-die Breite der Tabelle anzupassen. Genaueres dazu in \autoref{sec:floatlayout}.
+werden. Zu beachten ist dabei insbesondere die Möglichkeit, die Spalten in 
+ihrer resultierenden Breite sehr einfach zueinander gewichten zu können~-- im 
+Gegensatz zur Umgebung \Environment{tabularx}, wo dieses Unterfangen etwas 
+schwieriger ist. Das Ergebnis ist in \autoref{tab:tabu} zu sehen. Zu beachten 
+ist dabei die Verwendung von \Macro{ttabbox} aus dem Paket \Package{floatrow}, 
+um die Beschriftung an die Breite der Tabelle anzupassen. Genaueres dazu in 
+\autoref{sec:floatlayout}.
 %
 \begin{Trunk}
 \begin{table}
@@ -1882,7 +1940,7 @@ die Breite der Tabelle anzupassen. Genaueres dazu in \autoref{sec:floatlayout}.
 Ein linksbündiger Blindtext zur Demonstration einer Z[l]"~Spalte &
 Ein zentrierter Blindtext zur Demonstration einer Z[c]"~Spalte &
 Ein rechtsbündiger Blindtext zur Demonstration einer Z[r]"~Spalte &
-Ein Blindtext im Blocksatz zur Demonstration einer Z"~Spalte
+Ein Blindtext im Blocksatz innerhalb einer Z"~Spalte
 \tabularnewline
 \bottomrule
 \end{tabu}}
@@ -2240,8 +2298,13 @@ von Wörtern mit Bindestrich an selbigem umgangen werden kann.
 \subsection{Worttrennung im Flattersatz}
 Normalerweise ist bei \hologo{LaTeXe} die Worttrennung im Flattersatz%
 \footnote{\Macro{raggedright}, \Macro{raggedleft}, \Macro{center}} deaktiviert. 
-Mit dem Paket \Package{ragged2e} kann diese hierfür aktiviert werden. Genaueres 
-dazu ist der Dokumentation des Paketes zu entnehmen.
+Mit dem Paket \Package{ragged2e} kann diese hierfür aktiviert werden. Wird es 
+geladen, stehen dem Anwender die Befehle \Macro{Centering}, \Macro{RaggedLeft} 
+sowie \Macro{RaggedRight} zur Verfügung, um Worttrennungen im Flattersatz zu 
+verwenden. Mit der Paketoption \Option{newcommands} können die originalen 
+Befehle \Macro{centering}, \Macro{raggedleft} und \Macro{raggedright} mit der 
+Definition der neuen überschrieben werden. Genaueres dazu ist der Dokumentation 
+des Paketes zu entnehmen.
 
 
 
@@ -2293,8 +2356,8 @@ Tutorial verwendete \Package{glossaries}.
 \ToDo{listings und fancyvrb}
 %
 
-
-\section{offene Punkte}
+\ListOfToDo
+\ToDo[imp]{Einarbeiten von \File{paragraph.tex} in \File{treatise.tex}}[v2.02]
 \ToDo{Zuordnen oder Erwähnen der Pakete}
 \begin{Hint}
 \usepackage{xparse}% §§§ bereits geladen
@@ -2325,6 +2388,11 @@ Damit ist das Tutorial beendet.
 \printbibliography\label{sec:bibliography}
 \end{Trunk+}
 
+\addsec{Index}
+Da das Tutorial etwas umfangreicher ist, wird für alle erläuterten Optionen, 
+Umgebungen und Befehle ein Index erstellt.
+\PrintIndex
+
 \FinishTutorial[%
   Um das im kopierten Beispiel erstellte Literaturverzeichnis in das Dokument 
   einbinden zu können, bedarf es dem einmaligen Aufruf von \Application{biber} 
@@ -2343,7 +2411,4 @@ Damit ist das Tutorial beendet.
   möglich ist. Nutzer von \Distribution{\hologo{MiKTeX}} müssen das Sortieren 
   mit \Application{xindy} händisch anstoßen.
 ]
-
-\ToDo[imp]{Einarbeiten von \File{paragraph.tex} in \File{treatise.tex}}[v2.02]
-\ListOfToDo
 \end{document}

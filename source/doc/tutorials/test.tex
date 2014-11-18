@@ -3,8 +3,7 @@
   english,ngerman,%
   geometry=no,DIV=12,automark,%
 ]{tudscrartcl}
-\usepackage{selinput}
-\SelectInputMappings{adieresis={ä},germandbls={ß}}
+\usepackage{selinput}\SelectInputMappings{adieresis={ä},germandbls={ß}}
 \usepackage[T1]{fontenc}
 \usepackage{lmodern}
 
@@ -16,6 +15,7 @@
     {Ä}{{\"A}}1 {Ö}{{\"O}}1 {Ü}{{\"U}}1
     {~}{{\textasciitilde}}1 {ß}{{\ss}}1
 }
+\lstset{escapechar=§}
 \TUDoptions{cdfont=false}
 \KOMAoptions{headings=normal}
 
@@ -23,6 +23,7 @@
 \usepackage{array}
 \usepackage{tabu}
 \usepackage{tabularx}
+\usepackage{tabulary}
 \usepackage{booktabs}
 \usepackage{units}
 \AfterPackage*{hyperref}{%
@@ -46,6 +47,8 @@
 \usepackage{enumitem}
 
 \usepackage{caption}
+\DeclareCaptionSubType[alph]{figure}
+\DeclareCaptionSubType[alph]{table}
 \usepackage{floatrow}
 \renewcommand{\floatpagefraction}{0.7}
 
@@ -65,10 +68,102 @@
 \usepackage[open,openlevel=0]{bookmark}[2011/12/02]
 
 \begin{document}
+\title{%
+  Ein Anwenderleitfaden für das Erstellen einer wissenschaftlichen Abhandlung%
+}
+\author{Falk Hanisch\thanks{\noexpand\href{mailto:\tudscrmail}{\tudscrmail}}}
+\date{18.11.2014}
+\makeatletter
+\begingroup%
+  \def\and{, }%
+  \let\thanks\@gobble%
+  \let\footnote\@gobble%
+  \hypersetup{%
+    pdfauthor = {\@author},%
+    pdftitle = {\@title},%
+    pdfsubject = {Tutorial für \hologo{LaTeXe}},%
+    pdfkeywords = {LaTeX, \TUDScript, Tutorial, Anwenderleitfaden},%
+  }%
+\endgroup%
+\makeatother
+\StartTutorial[%
+  \begin{abstract}\noindent
+  Der Versuch, ein allumfassendes Tutorial für eine wissenschaftliche Arbeit 
+  zur Verfügung zu stellen gleicht der beschwerlichen Suche nach einer 
+  eierlegenden Wollmilchsau. Es ist quasi nicht möglich, alle möglichen 
+  Anforderungen an eine wissenschaftliche Arbeit in einem Dokument abzudecken. 
+  Dennoch soll hier versucht werden, einen Großteil der für gewöhnlich 
+  auftretenden Erfordernisse zu bearbeiten.
+  
+  Dieses Tutorial hat \emph{nicht} die Intention, \hologo{LaTeX}-Einsteigern 
+  sämtliche Grundlagen zu erläutern. Vielmehr wird davon ausgegangen, dass Sie 
+  bereits erste Erfahrungen mit \hologo{LaTeXe} gesammelt haben. Dennoch wird 
+  versucht, alle Schritte möglichst leicht nachvollziehbar zu gestalten. Sollte 
+  Ihnen beim Lesen und Durcharbeiten des Tutorials etwas auf- oder missfallen, 
+  so dürfen Sie mich gerne per E-Mail kontaktieren. Auch Anregungen und Wünsche 
+  dürfen sie mir gegenüber gerne kommunizieren.
+  
+  Für absolute Neueinsteiger gibt es einige freie Tutorials, welche die ersten 
+  Schritte mit \hologo{LaTeXe} stark erleichtern. Sehr empfehlenswert ist die 
+  ausführliche \hrfn{http://www.fadi-semmo.de/latex/workshop/}{Workshop-Reihe} 
+  von Fadi~Semmo. Außerdem stellt Nicola~L.~C.~Talbot sehr gute Tutorials für 
+  \hrfn{http://www.dickimaw-books.com/latex/novices/}{\hologo{LaTeX}-Novizen} 
+  sowie \hrfn{http://www.dickimaw-books.com/latex/thesis/}{Dissertationen} zur 
+  freien Verfügung.
+  
+  In erster Linie ist dieser Leitfaden für Anwender gedacht, die für ihre
+  wissenschaftliche Arbeit eine \TUDScript"=Dokumentklasse verwenden wollen. 
+  Das vorgestellte Vorgehen kann jedoch~-- natürlich mit gewissen Abstrichen~-- 
+  auch mit anderen Klassen, insbesondere denen aus dem \KOMAScript"=Bundle, 
+  umgesetzt werden. Viele der hier verwendeten Optionen und Befehle aus dem 
+  \TUDScript-Bundle werden nur sporadisch in ihrer Grundfunktion erläutert. 
+  Eine detaillierte Erläuterung lässt sich jedoch jederzeit sehr einfach über 
+  die farbigen Hyperlinks im \manualhyperref{}{\TUDScript-Handbuch} öffnen.
+  Des Weiteren wird im Tutorial auf eine Vielzahl von Pakete verwiesen, deren 
+  Dokumentation sich entweder über den für jedes Paket erzeugten Hyperlink auf 
+  das \href{http://www.ctan.org/}{Comprehensive TeX Archive Network (CTAN)} 
+  oder alternativ über die Kommandozeile respektive das Terminal mit dem Aufruf 
+  \PValue{texdoc }\PName{Paket} direkt öffnen lässt.
+  
+  Der Anwenderleitfaden muss nicht zwingend vollständig nachvollzogen werden. 
+  Dieser ist in einzelne Abschnitte untergliedert, damit Sie sich bestimmte 
+  Aspekte erarbeiten können. Sollten Querbezüge zu den einzelnen Abschnitten 
+  bestehen, werden diese auch genannt. Zu guter Letzt findet sich am Ende 
+  dieses Dokumentes das komplette Tutorial als ausführbarer Quelltext. 
+  \end{abstract}
+]
+\tableofcontents
+\listoffigures
+\listoftables
 
 
-\subsection{Untergleitobjekte}
-\label{sec:subfloats}
 
 
+
+\addsec{Index}
+Da das Tutorial etwas umfangreicher ist, wird für alle erläuterten Optionen, 
+Umgebungen und Befehle ein Index erstellt.
+\PrintIndex
+
+\FinishTutorial[%
+  Um das im kopierten Beispiel erstellte Literaturverzeichnis in das Dokument 
+  einbinden zu können, bedarf es dem einmaligen Aufruf von \Application{biber} 
+  nach dem ersten Durchlauf von \hologo{pdfLaTeX}. Dies erfolgt mit dem Aufruf 
+  \PValue{biber}~\PName{Dateiname}. Danach ist ein weiteres mal die Verwendung 
+  von \PValue{pdflatex}~\PName{Dateiname} notwendig.
+
+  Für das Erstellen von Abkürzungs- und Symbolverzeichnis sollte das mehrmalige 
+  Ausführen von \PValue{pdflatex}~\PName{Dateiname} vollkommen ausreichen. In 
+  diesem Fall werden die Einträge mit \Application{makeindex} sortiert. Soll 
+  stattdessen \Application{xindy} die Sortierung durchführen, muss beim Laden 
+  von \Package{glossaries} die entsprechende Paketoption aktiviert werden. Für
+  diesen Fall sollte nach der Verwendung von \hologo{pdfLaTeX} der Aufruf des 
+  Perl"=Skriptes \PValue{makeglossaries}~\PName{Dateiname} erfolgen, was 
+  allerdings nur mit \Distribution{\hologo{TeX}~Live} ohne weiteres Zutun 
+  möglich ist. Nutzer von \Distribution{\hologo{MiKTeX}} müssen das Sortieren 
+  mit \Application{xindy} händisch anstoßen.
+]
+
+\ToDo[imp]{Einarbeiten von \File{paragraph.tex} in \File{treatise.tex}}[v2.02]
+\ListOfToDo
 \end{document}

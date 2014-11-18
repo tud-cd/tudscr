@@ -25,7 +25,6 @@ mkdir doc\latex\tudscr\tutorials
 echo \BaseDirectory{.}> docstrip.cfg
 echo \UseTDS>> docstrip.cfg
 tex tudscr.ins
-move doc\tudscrman.sty doc\tutorials\
 pdflatex "\def\tudfinalflag{}\input{tudscrsource.tex}"
 pdflatex "\def\tudfinalflag{}\input{tudscrsource.tex}"
 makeindex -s gglo.ist -o tudscrsource.gls tudscrsource.glo

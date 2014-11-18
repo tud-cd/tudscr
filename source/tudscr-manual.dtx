@@ -1,4 +1,4 @@
-% \CheckSum{2421}
+% \CheckSum{2458}
 % \iffalse meta-comment
 % ======================================================================
 %
@@ -49,7 +49,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-manual.dtx}[%
-  2014/11/14 v2.02 TUD-KOMA-Script\space%
+  2014/11/18 v2.02 TUD-KOMA-Script\space%
 %</driver>
 %<identify>\NeedsTeXFormat{LaTeX2e}[2011/06/27]
 %<class&identify>\ProvidesClass{tudscrman}[%
@@ -81,6 +81,7 @@
 % \selectlanguage{ngerman}
 %
 % \changes{v2.02}{2014/07/10}{Versionsnummer angepasst}%^^A
+% \changes{v2.02}{2014/11/18}{Index für Tutorials möglich}%^^A
 %
 % \section{Klasse und Paket für die Anwenderdokumentation von \TUDScript}
 %
@@ -294,6 +295,39 @@
 %    \begin{macrocode}
 }
 %    \end{macrocode}
+% Für die Erstellung des Indexes wird das Paket \pkg{imakeidx} zusammen mit 
+% \pkg{xindy} verwendet.
+%    \begin{macrocode}
+\PassOptionsToPackage{xindy,splitindex}{imakeidx}
+\RequirePackage{imakeidx}[2013/07/11]%
+\indexsetup{%
+%<*class>
+  level=\addsec,%
+%</class>
+%<*package>
+  level=\subsection*,%
+%</package>
+  noclearpage,firstpagestyle=headings,headers={\indexname}{\indexname}%
+}
+\newcommand*\xdyopt{-M tudscrman.xdy -L german-din}%
+%<*class>
+\makeindex[title={Allgemeiner Index},options=\xdyopt]%
+%</class>
+\makeindex[title={Klassen- und Paketoptionen},name=options,options=\xdyopt]%
+\makeindex[%
+  title={Umgebungen, Befehle und Seitenstile},name=macros,options=\xdyopt%
+]%
+%<*class>
+\makeindex[title={Umgebungs- und Befehlsparameter},name=keys,options=\xdyopt]%
+\makeindex[title={Sprachabh\"angige Bezeichner},name=terms,options=\xdyopt]%
+\makeindex[title={Schriftelemente},name=fonts,options=\xdyopt]%
+\makeindex[title={Farben},name=colors,options=\xdyopt]%
+%</class>
+\makeindex[title={Klassen, Pakete und Dateien},name=files,options=\xdyopt]%
+%<*class>
+\makeindex[title={\"Anderungsliste},name=changelog,columns=1,options=\xdyopt]%
+%</class>
+%    \end{macrocode}
 %
 % \iffalse
 %<*class>
@@ -348,28 +382,6 @@
 %    \begin{macrocode}
 \RequirePackage{tudscrsupervisor}[\TUDVersion]
 %    \end{macrocode}
-% Für die Erstellung des Indexes wird das Paket \pkg{imakeidx} zusammen mit 
-% \pkg{xindy} verwendet.
-%    \begin{macrocode}
-\PassOptionsToPackage{xindy,splitindex}{imakeidx}
-\RequirePackage{imakeidx}[2013/07/11]%
-\indexsetup{%
-  level=\addsec,noclearpage,%
-  firstpagestyle=headings,headers={\indexname}{\indexname}%
-}
-\newcommand*\xdyopt{-M tudscrman.xdy -L german-din}%
-\makeindex[title={Allgemeiner Index},options=\xdyopt]%
-\makeindex[title={Klassen- und Paketoptionen},name=options,options=\xdyopt]%
-\makeindex[%
-  title={Umgebungen, Befehle und Seitenstile},name=macros,options=\xdyopt%
-]%
-\makeindex[title={Umgebungs- und Befehlsparameter},name=keys,options=\xdyopt]%
-\makeindex[title={Sprachabh\"angige Bezeichner},name=terms,options=\xdyopt]%
-\makeindex[title={Schriftelemente},name=fonts,options=\xdyopt]%
-\makeindex[title={Farben},name=colors,options=\xdyopt]%
-\makeindex[title={Klassen, Pakete und Dateien},name=files,options=\xdyopt]%
-\makeindex[title={\"Anderungsliste},name=changelog,columns=1,options=\xdyopt]%
-%    \end{macrocode}
 %
 % \iffalse
 %</class>
@@ -384,7 +396,7 @@
 % Vielzahl solcher Streams benötigt. Das Paket \pkg{morewrites} hat keinen 
 % Einfluss auf \pkg{glossaries}.
 %    \begin{macrocode}
-%%\RequirePackage{scrwfile}[2013/08/05]
+\RequirePackage{scrwfile}[2013/08/05]
 %    \end{macrocode}
 % Die Umgebungen \env{Preamble}, \env{Trunk} und \env{Hint} sowie deren
 % Varianten nutzen das Paket \pkg{filecontents}, um ihren Inhalt in eine
@@ -928,6 +940,7 @@
     }{%
       \textsbn{#2}%
     }%
+    \index[files]{\begingroup\protect\sbnfont#2\endgroup~{\idxfont(Klasse)}}%
   }%
 }
 %</package>
@@ -980,6 +993,7 @@
         \href{http://www.ctan.org/pkg/#2}{\textsbn{#2}}%
       }%
     }%
+    \index[files]{\begingroup\protect\sbnfont#2\endgroup~{\idxfont(Paket)}}%
   }%
 }
 %</package>
@@ -1020,6 +1034,7 @@
     }{%
       \texttt{#2}\IfValueT{#3}{\texttt{=#3}}%
     }%
+    \index[options]{\begingroup\ttfamily#2\endgroup}%
   }%
 }
 %</package>
@@ -1071,6 +1086,7 @@
     }{%
       \texttt{#2}%
     }%
+    \index[macros]{\begingroup\ttfamily#2\endgroup}%
   }%
 }
 %</package>
@@ -1105,6 +1121,7 @@
     }{%
       \texttt{\bsc#2}%
     }%
+    \index[macros]{\begingroup\ttfamily\bsc#2\endgroup}%
   }%
 }
 %</package>
@@ -1137,6 +1154,7 @@
     }{%
       \texttt{\bsc#2}%
     }%
+    \index[macros]{\begingroup\ttfamily\bsc#2\endgroup~{\idxfont(L\"ange)}}%
   }%
 }
 %</package>
@@ -1148,6 +1166,7 @@
 %<*class>
 % \fi
 %
+% \minisec{Exklusive Auszeichnungen für die Klasse}
 % Alle weiteren Befehle werden ausschließlich für die Klasse \cls{tudscrman}
 % definiert.
 %
@@ -1316,6 +1335,16 @@
 %    \end{macrocode}
 % \end{macro}^^A \@TempColor
 % \end{macro}^^A \Color
+% Damit ist das Intermezzo mit Auszeichnungsbefehlen speziell für die Klasse 
+% beendet.
+%
+% \iffalse
+%</class>
+% \fi
+%
+% \iffalse
+%<*class>
+% \fi
 %
 % \subsection{Befehle und Umgebungen für die Klasse}
 %
@@ -1366,7 +1395,6 @@
 % \begin{macro}{\if@stareddeclare}
 % \changes{v2.02}{2014/10/09}{neu}%^^A
 % \begin{macro}{\if@openindex}
-% \begin{macro}{\idxfont}
 % \begin{macro}{\if@noindex}
 % Dies sin ein paar Hilfsmakros zur Steuerung des Markup sowie der Ausgabe von
 % Deklarationen, Index und Änderungsliste, welche bei den nächsten Befehlen und 
@@ -1375,13 +1403,9 @@
 \newif\if@declare
 \newif\if@stareddeclare
 \newif\if@openindex
-\newcommand*\idxfont{}
-\let\idxfont\footnotesize
-\robustify{\idxfont}
 \newif\if@noindex
 %    \end{macrocode}
 % \end{macro}^^A \if@noindex
-% \end{macro}^^A \idxfont
 % \end{macro}^^A \if@openindex
 % \end{macro}^^A \if@stareddeclare
 % \end{macro}^^A \if@declare
@@ -2016,6 +2040,93 @@
 % \end{macro}^^A \before@values
 % \end{environment}^^A values
 %
+% \subsubsection{Erläuterungen und weiterführende Ergänzungen im Handbuch}
+%
+% Es folgen einige Umgebungen, mit welchen bestimmte Aspekte oder Pakete im
+% Handbuch erläutert werden.
+%
+% \begin{environment}{Example}
+% \begin{environment}{Example*}
+% Diese Umgebung wird für die exemplarische Erläuterung von bestimmten Aspekten 
+% im Handbuch verwendet. Wenn dafür ein Quelltextauszug nötig ist, kann 
+% innerhalb dieser die \env{Code}-Umgebung genutzt werden. Die Sternversion 
+% unterdrückt dabei das Zurücksetzen des eigentlich entfernten vertikalen 
+% Abstandes.
+%    \begin{macrocode}
+\newenvironment{Example}{\@nameuse{Example*}}{%
+  \@nameuse{endExample*}%
+  \vspace{-\topsep}%
+}
+\newenvironment{Example*}{%
+  \labeling{{\usekomafont{disposition}Beispiel:\ }}%
+  \item[{\usekomafont{disposition}Beispiel:\ }]%
+}{%
+  \endlabeling%
+}
+%    \end{macrocode}
+% \end{environment}^^A Example*
+% \end{environment}^^A Example
+% \begin{environment}{Code}
+% \begin{macro}{\tud@currentHref}
+% Folgend werden Befehle und Umgebungen für die Darstellung von Quelltexten im 
+% Handbuch definiert. Mit dieser Umgebung können kurze Quelltextbeispiele im
+% Handbuch ausgegeben werden. Sicherlich sinnvoll ist, die \env{Code}-Umgebung
+% innerhalb von \env{Example} oder \env{quoting} zu verwenden, um den
+% Quelltext etwas abzuheben.
+%    \begin{macrocode}
+\lstnewenvironment{Code}[1][]{\lstset{style=tudscr,#1}}{}
+%    \end{macrocode}
+% Innerhalb der Umgebung \env{Code} wird \cs{@currentHref} unerwünschter Weise
+% geändert. Um dies zu vermeiden, wird dieser Befehl gesichert und anschließend
+% zurückgesetzt.
+%    \begin{macrocode}
+\newcommand*\tud@currentHref{}
+\BeforeBeginEnvironment{Code}{\global\let\tud@currentHref\@currentHref}
+\AfterEndEnvironment{Code}{\global\let\@currentHref\tud@currentHref}
+%    \end{macrocode}
+% \end{macro}^^A \tud@currentHref
+% \end{environment}^^A Code
+% \begin{environment}{packages}
+% \begin{macro}{\itempackages}
+% \begin{macro}{\tud@item@pkg}
+% \changes{v2.02}{2014/10/08}{\cs{DeclarePackage} entfernt}%^^A
+% \changes{v2.02}{2014/10/09}{optionales Argument für CTAN-Link}%^^A
+% \begin{macro}{\before@packages}
+% Ähnlich wie für die Auflistung von Werten eines Schlüssels wird auch mit der 
+% Charakterisierung von Paketen verfahren. Diese werden in der Auflistung 
+% speziell gekennzeichnet und mit \cs{DeclarePackage} im Index eingetragen.
+%    \begin{macrocode}
+\newlist{packages}{description}{2}
+\setlist[packages]{%
+  topsep=\medskipamount,labelwidth=\linewidth,labelsep=0pt,font=\normalfont,%
+  parsep=\parskip,listparindent=\parindent,before=\before@packages%
+}
+\newcommand*\itempackages{}
+\newcommand*\before@packages{%
+  \ifdefvoid{\itempackages}{%
+    \let\itempackages\item%
+    \let\item\tud@item@pkg%
+  }{}%
+}
+\NewDocumentCommand\tud@item@pkg{od()}{%
+  \itempackages[{%
+    \IfValueT{#1}{%
+      \manualhyperdef{files:#1}%
+      \IfValueTF{#2}{%
+        \def\@tempa{http://www.ctan.org/pkg/#2}%
+      }{%
+        \def\@tempa{http://www.ctan.org/pkg/#1}%
+      }%
+      \href{\@tempa}{\Package{#1}'none'|!|}%
+    }%
+  }]%
+}
+%    \end{macrocode}
+% \end{macro}^^A \before@packages
+% \end{macro}^^A \tud@item@pkg
+% \end{macro}^^A \itempackages
+% \end{environment}^^A packages
+%
 % \subsubsection{Änderungsliste}
 %
 % Um dem Anwender einen schnellen Überblick zu Änderungen der aktuellen Verison 
@@ -2386,204 +2497,6 @@
 % \end{macro}^^A \@sortedlist
 % \end{macro}^^A \@sortlist
 % \end{macro}^^A \sortlist
-%
-% \subsubsection{Ausgabe von Index und Änderungsliste}
-%
-% \begin{macro}{\PrintIndex}
-% \begin{macro}{\PrintIndexPrologue}
-% \changes{v2.02}{2014/08/20}{neu}%^^A
-% \begin{macro}{\@printindexprologue}
-% \changes{v2.02}{2014/08/20}{neu}%^^A
-% \begin{macro}{\@printindexskip}
-% \changes{v2.02}{2014/09/02}{neu}%^^A
-% \begin{macro}{\Index}
-% \begin{macro}{\seeidx}
-% \begin{macro}{\@printindex}
-% \changes{v2.02}{2014/07/25}{neu}%^^A
-% Der Befehl \cs{PrintIndex} ist die Zusammenfassung für die Ausgabe aller 
-% Indexe.
-%    \begin{macrocode}
-\newcommand*\PrintIndex{%
-  \begingroup%
-    \@printindex%
-    \@printindex[options]%
-    \@printindex[macros]%
-    \@printindex[keys]%
-    \@printindex[terms]%
-    \begingroup%
-      \let\lettergroup\@gobble%
-      \let\indexspace\par%
-      \@printindex[fonts]%
-      \@printindex[colors]%
-    \endgroup%
-    \@printindex[files]%
-  \endgroup%
-}
-%    \end{macrocode}
-% Hiermit kann der einleitende Teil für den allgemeinen Index gesetzt werden.
-%    \begin{macrocode}
-\newcommand*\PrintIndexPrologue[1]{\long\gdef\@printindexprologue{#1}}
-\newcommand*\@printindexprologue{}
-%    \end{macrocode}
-% Durch die Verwendung der \env{multicols}"=Umgebung werden zu große vertikale 
-% Abstände gesetzt. Dies wird mit diesem Befehl rückgängig gemacht.
-%    \begin{macrocode}
-\newcommand*\@printindexskip{\ifnum\imki@columns>\@ne\vspace{-\multicolsep}\fi}
-%    \end{macrocode}
-% Der Befehl \cs{@printindex} setzt vor jedem Unterindex ein referenzierbares
-% Label und gibt diesen danach aus.
-%    \begin{macrocode}
-\newcommand*\@printindex[1][]{%
-  \pagebreak[3]%
-  \apptocmd{\prepare@multicols}{\hbadness10000}{}{}%
-  \ifblank{#1}{%
-    \ifx\@printindexprologue\@empty%
-      \indexprologue[\@printindexskip]{\manualhyperdef'{idx:main}}%
-    \else%
-      \indexprologue{%
-        \manualhyperdef'{idx:main}%
-        \@printindexprologue%
-      }%
-    \fi%
-    \printindex\@printindexskip%
-    \let\@printindexprologue\@empty%
-  }{%
-    \indexprologue[\@printindexskip]{\manualhyperdef'{idx:#1}}%
-    \printindex[#1]\@printindexskip%
-  }%
-}
-%    \end{macrocode}
-% Der Befehl \cs{Index} dient zum Eintragen eines Schlagwortes im allgemeinen
-% Index und verweist auf den speziellen, zum Schlagwort gehörigen Index. Das
-% optionale Argument kann verwendet werden, um ggf. den Eintrag in den
-% allgemeinen Index anders zu benennen, als den Verweis.
-%    \begin{macrocode}
-\newcommand*\seeidx[2]{\pageref{idx:#1}}
-\NewDocumentCommand\Index{mom}{%
-  \index{%
-    #1!\textrightarrow{}\space%
-    \manualhyperref{idx:#3}{Index der \IfValueTF{#2}{#2}{#1}}|seeidx{#3}%
-  }%
-}
-%    \end{macrocode}
-% \end{macro}^^A \@printindex
-% \end{macro}^^A \seeidx
-% \end{macro}^^A \Index
-% \end{macro}^^A \@printindexskip
-% \end{macro}^^A \@printindexprologue
-% \end{macro}^^A \PrintIndexPrologue
-% \end{macro}^^A \PrintIndex
-% \begin{macro}{\PrintChangelog}
-% \begin{macro}{\if@changelog}
-% \begin{macro}{\Changelog}
-% \changes{v2.02}{2014/08/20}{neu}%^^A
-% Ähnlich wie für den Index wird auch für die Änderungsliste verfahren.
-%    \begin{macrocode}
-\newif\if@changelog
-\newcommand*\PrintChangelog{%
-  \begingroup%
-    \let\lettergroup\@gobble%
-    \@changelogtrue%
-    \@printindex[changelog]%
-  \endgroup%
-}
-\NewDocumentCommand\Changelog{m}{%
-  \index{%
-    #1!\textrightarrow{}\space%
-    \manualhyperref{idx:changelog}{\"Anderungsliste}|seeidx{changelog}%
-  }%
-}
-%    \end{macrocode}
-% \end{macro}^^A \Changelog
-% \end{macro}^^A \if@changelog
-% \end{macro}^^A \PrintChangelog
-%
-% \subsubsection{Erläuterungen und weiterführende Ergänzungen im Handbuch}
-%
-% Es folgen einige Umgebungen, mit welchen bestimmte Aspekte oder Pakete im
-% Handbuch erläutert werden.
-%
-% \begin{environment}{Example}
-% \begin{environment}{Example*}
-% Diese Umgebung wird für die exemplarische Erläuterung von bestimmten Aspekten 
-% im Handbuch verwendet. Wenn dafür ein Quelltextauszug nötig ist, kann 
-% innerhalb dieser die \env{Code}-Umgebung genutzt werden. Die Sternversion 
-% unterdrückt dabei das Zurücksetzen des eigentlich entfernten vertikalen 
-% Abstandes.
-%    \begin{macrocode}
-\newenvironment{Example}{\@nameuse{Example*}}{%
-  \@nameuse{endExample*}%
-  \vspace{-\topsep}%
-}
-\newenvironment{Example*}{%
-  \labeling{{\usekomafont{disposition}Beispiel:\ }}%
-  \item[{\usekomafont{disposition}Beispiel:\ }]%
-}{%
-  \endlabeling%
-}
-%    \end{macrocode}
-% \end{environment}^^A Example*
-% \end{environment}^^A Example
-% \begin{environment}{Code}
-% \begin{macro}{\tud@currentHref}
-% Folgend werden Befehle und Umgebungen für die Darstellung von Quelltexten im 
-% Handbuch definiert. Mit dieser Umgebung können kurze Quelltextbeispiele im
-% Handbuch ausgegeben werden. Sicherlich sinnvoll ist, die \env{Code}-Umgebung
-% innerhalb von \env{Example} oder \env{quoting} zu verwenden, um den
-% Quelltext etwas abzuheben.
-%    \begin{macrocode}
-\lstnewenvironment{Code}[1][]{\lstset{style=tudscr,#1}}{}
-%    \end{macrocode}
-% Innerhalb der Umgebung \env{Code} wird \cs{@currentHref} unerwünschter Weise
-% geändert. Um dies zu vermeiden, wird dieser Befehl gesichert und anschließend
-% zurückgesetzt.
-%    \begin{macrocode}
-\newcommand*\tud@currentHref{}
-\BeforeBeginEnvironment{Code}{\global\let\tud@currentHref\@currentHref}
-\AfterEndEnvironment{Code}{\global\let\@currentHref\tud@currentHref}
-%    \end{macrocode}
-% \end{macro}^^A \tud@currentHref
-% \end{environment}^^A Code
-% \begin{environment}{packages}
-% \begin{macro}{\itempackages}
-% \begin{macro}{\tud@item@pkg}
-% \changes{v2.02}{2014/10/08}{\cs{DeclarePackage} entfernt}%^^A
-% \changes{v2.02}{2014/10/09}{optionales Argument für CTAN-Link}%^^A
-% \begin{macro}{\before@packages}
-% Ähnlich wie für die Auflistung von Werten eines Schlüssels wird auch mit der 
-% Charakterisierung von Paketen verfahren. Diese werden in der Auflistung 
-% speziell gekennzeichnet und mit \cs{DeclarePackage} im Index eingetragen.
-%    \begin{macrocode}
-\newlist{packages}{description}{2}
-\setlist[packages]{%
-  topsep=\medskipamount,labelwidth=\linewidth,labelsep=0pt,font=\normalfont,%
-  parsep=\parskip,listparindent=\parindent,before=\before@packages%
-}
-\newcommand*\itempackages{}
-\newcommand*\before@packages{%
-  \ifdefvoid{\itempackages}{%
-    \let\itempackages\item%
-    \let\item\tud@item@pkg%
-  }{}%
-}
-\NewDocumentCommand\tud@item@pkg{od()}{%
-  \itempackages[{%
-    \IfValueT{#1}{%
-      \manualhyperdef{files:#1}%
-      \IfValueTF{#2}{%
-        \def\@tempa{http://www.ctan.org/pkg/#2}%
-      }{%
-        \def\@tempa{http://www.ctan.org/pkg/#1}%
-      }%
-      \href{\@tempa}{\Package{#1}'none'|!|}%
-    }%
-  }]%
-}
-%    \end{macrocode}
-% \end{macro}^^A \before@packages
-% \end{macro}^^A \tud@item@pkg
-% \end{macro}^^A \itempackages
-% \end{environment}^^A packages
 %
 % \iffalse
 %</class>
@@ -3106,6 +3019,151 @@
 %
 % \iffalse
 %</package>
+% \fi
+%
+% \subsection{Ausgabe von Index und Änderungsliste}
+%
+% Ein Index kann sowhol mit dem Paket als auch mit der Klasse erzeugt werden, 
+% die Änderungsliste ist der Klasse vorbehalten.
+% \begin{macro}{\idxfont}
+% Für zusätzliche Informationen im Index nach dem eigentlichen Eintrag wird 
+% eine etwas kleinere Schrift verwendet.
+%    \begin{macrocode}
+\newcommand*\idxfont{}
+\let\idxfont\footnotesize
+\robustify{\idxfont}
+%    \end{macrocode}
+% \end{macro}^^A \idxfont
+% \begin{macro}{\PrintIndex}
+% \begin{macro}{\PrintIndexPrologue}
+% \changes{v2.02}{2014/08/20}{neu}%^^A
+% \begin{macro}{\@printindexprologue}
+% \changes{v2.02}{2014/08/20}{neu}%^^A
+% \begin{macro}{\@printindexskip}
+% \changes{v2.02}{2014/09/02}{neu}%^^A
+% \begin{macro}{\Index}
+% \begin{macro}{\seeidx}
+% \begin{macro}{\@printindex}
+% \changes{v2.02}{2014/07/25}{neu}%^^A
+% Der Befehl \cs{PrintIndex} ist die Zusammenfassung für die Ausgabe aller 
+% Indexe.
+%    \begin{macrocode}
+\newcommand*\PrintIndex{%
+  \begingroup%
+%<*class>
+    \@printindex%
+%</class>
+    \@printindex[options]%
+    \@printindex[macros]%
+%<*class>
+    \@printindex[keys]%
+    \@printindex[terms]%
+    \begingroup%
+      \let\lettergroup\@gobble%
+      \let\indexspace\par%
+      \@printindex[fonts]%
+      \@printindex[colors]%
+    \endgroup%
+%</class>
+    \@printindex[files]%
+  \endgroup%
+}
+%    \end{macrocode}
+% Hiermit kann der einleitende Teil für den allgemeinen Index gesetzt werden.
+%    \begin{macrocode}
+%<*class>
+\newcommand*\PrintIndexPrologue[1]{\long\gdef\@printindexprologue{#1}}
+\newcommand*\@printindexprologue{}
+%</class>
+%    \end{macrocode}
+% Durch die Verwendung der \env{multicols}"=Umgebung werden zu große vertikale 
+% Abstände gesetzt. Dies wird mit diesem Befehl rückgängig gemacht.
+%    \begin{macrocode}
+\newcommand*\@printindexskip{\ifnum\imki@columns>\@ne\vspace{-\multicolsep}\fi}
+%    \end{macrocode}
+% Der Befehl \cs{@printindex} setzt vor jedem Unterindex ein referenzierbares
+% Label und gibt diesen danach aus.
+%    \begin{macrocode}
+\newcommand*\@printindex[1][]{%
+  \pagebreak[3]%
+  \apptocmd{\prepare@multicols}{\hbadness10000}{}{}%
+%<*class>
+  \ifblank{#1}{%
+    \ifx\@printindexprologue\@empty%
+      \indexprologue[\@printindexskip]{\manualhyperdef'{idx:main}}%
+    \else%
+      \indexprologue{%
+        \manualhyperdef'{idx:main}%
+        \@printindexprologue%
+      }%
+    \fi%
+    \printindex\@printindexskip%
+    \let\@printindexprologue\@empty%
+  }{%
+    \indexprologue[\@printindexskip]{\manualhyperdef'{idx:#1}}%
+    \printindex[#1]\@printindexskip%
+  }%
+%</class>
+%<*package>
+  \indexprologue[\@printindexskip]{}%
+  \printindex[#1]\@printindexskip%
+%</package>
+}
+%    \end{macrocode}
+% Der Befehl \cs{Index} dient zum Eintragen eines Schlagwortes im allgemeinen
+% Index und verweist auf den speziellen, zum Schlagwort gehörigen Index. Das
+% optionale Argument kann verwendet werden, um ggf. den Eintrag in den
+% allgemeinen Index anders zu benennen, als den Verweis.
+%    \begin{macrocode}
+%<*class>
+\newcommand*\seeidx[2]{\pageref{idx:#1}}
+\NewDocumentCommand\Index{mom}{%
+  \index{%
+    #1!\textrightarrow{}\space%
+    \manualhyperref{idx:#3}{Index der \IfValueTF{#2}{#2}{#1}}|seeidx{#3}%
+  }%
+}
+%</class>
+%    \end{macrocode}
+% \end{macro}^^A \@printindex
+% \end{macro}^^A \seeidx
+% \end{macro}^^A \Index
+% \end{macro}^^A \@printindexskip
+% \end{macro}^^A \@printindexprologue
+% \end{macro}^^A \PrintIndexPrologue
+% \end{macro}^^A \PrintIndex
+%
+% \iffalse
+%<*class>
+% \fi
+%
+% \begin{macro}{\PrintChangelog}
+% \begin{macro}{\if@changelog}
+% \begin{macro}{\Changelog}
+% \changes{v2.02}{2014/08/20}{neu}%^^A
+% Ähnlich wie für den Index wird auch für die Änderungsliste verfahren.
+%    \begin{macrocode}
+\newif\if@changelog
+\newcommand*\PrintChangelog{%
+  \begingroup%
+    \let\lettergroup\@gobble%
+    \@changelogtrue%
+    \@printindex[changelog]%
+  \endgroup%
+}
+\NewDocumentCommand\Changelog{m}{%
+  \index{%
+    #1!\textrightarrow{}\space%
+    \manualhyperref{idx:changelog}{\"Anderungsliste}|seeidx{changelog}%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \Changelog
+% \end{macro}^^A \if@changelog
+% \end{macro}^^A \PrintChangelog
+%
+% \iffalse
+%</class>
 %</body>
 %<*xindy>
 % \fi
