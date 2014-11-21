@@ -11,8 +11,8 @@ copy logo tex\latex\tudscr\logo\
 kpsewhich --var-value=TEXMFHOME> texmfpath.tmp
 set /p texmfpath=< texmfpath.tmp	
 xcopy tex "%texmfpath%\tex" /s /y
+copy doc\tudscrman.xdy ..\source\doc\tutorials\
 move doc\tudscrman.sty ..\source\doc\tutorials\
-move doc\tudscrman.xdy ..\source\doc\tutorials\
 move doc\tudscrman.*   ..\source\doc\
 cd %~dp0
 if exist temp rmdir /s /q temp> nul
