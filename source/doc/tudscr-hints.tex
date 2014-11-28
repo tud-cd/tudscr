@@ -69,71 +69,108 @@ Zur Verwendung der beiden Programme in Verbindung mit \Package{biblatex} und
 
 
 
-\section{Finden von unbekannten \NoCaseChange{\hologo{LaTeX}}-Symbolen}
-\index{Symbole}
-Für \hologo{LaTeX} stehen jede Menge Symbole zur Verfügung, die allerdings 
-nicht immer einfach zu finden sind. In der Zusammenfassung
-\hrfn{http://mirrors.ctan.org/info/symbols/comprehensive/symbols-a4.pdf}{\File{symbols-a4.pdf}}
-werden viele Symbole aus mehreren Paketen aufgeführt. Allerdings ist das 
-Auffinden eines speziellen Symbols nicht sehr komfortabel. Alternativ dazu kann 
-dieser \hrfn{http://detexify.kirelabs.org/classify.html}{Link} verwendet 
-werden. Auf dieser Seite wird das gesuchte Symbol einfach gezeichnet, die dazu 
-ähnlichsten werden zurückgegeben.
-
-
-
-\section{Zeilenabstände in Überschriften}
-\label{sec:tips:headings}
-Mit dem Paket \Package{setspace} kann der Zeilenabstand beziehungsweise der 
-Durchschuss innerhalb des Dokumentes geändert werden. Sollte dieser erhöht 
-worden sein, können die Abstände bei mehrzeiligen Überschriften als zu groß 
-erscheinen. Um dies zu korrigieren kann mit dem Befehl \Macro{addtokomafont}%
-\PParameter{disposition}\PParameter{\Macro*{setstretch}\PParameter{1}} der 
-Zeilenabstand aller Überschriften auf einzeilig zurückgeschaltet werden. Soll 
-dies nur für eine bestimmte Gliederungsebene erfolgen, so ist 
-\PParameter{disposition} durch das entsprechende Schriftelement zu ersetzen.
-
-
-
-\section{Unterdrückung des Einzuges eines Absatzes}
-\index{Absatzauszeichnung}
-Verwendet man~-- wie es aus typographischer Sicht zumeist sinnvoll ist~-- 
-Einzüge und keine vertikalen Abstände zur Auszeichnung von Absätzen im Dokument
-(\Option{parskip}[false]), kann es vorkommen, dass ein bestimmter Absatz~-- 
-beispielsweise der nach einer gewissen Umgebung folgende~-- ungewollt 
-eingerückt ist. Dies kann sehr einfach behoben werden, indem direkt zu Beginn 
-des Absatzes das Makro \Macro{noindent} verwendet wird. Möchte man das für 
-bestimmte Umgebungen oder Befehle automatisiert gestalten, ist das Paket
-\Package{noindentafter} zu empfehlen.
-
-
-
-\section{Unterbinden des Zurücksetzens von Fußnoten}%
-\label{sec:tips:counter}
-\index{Fußnoten}
-Oft taucht die Frage auf, wie man auch über Kapitel fortlaufende Fußnoten 
-erhalten kann. Dies ist sehr einfach mit dem Paket \Package{chngcntr} möglich. 
-Nach dem Laden des Paketes, kann das Rücksetzen des Zählers nach einem Kapitel 
-mit \Macro*{counterwithout*}\PParameter{footnote}\PParameter{chapter} 
-deaktiviert werden. Auch andere \hologo{LaTeX}-Zähler~-- wie beispielsweise der 
-bereits vorgestellte \Counter{symbolheadings}~-- lassen sich mit diesem 
-Paket manipulieren.
-
-
-
-\section{URL-Umbrüche im Literaturverzeichnis mit \Package{biblatex}}
-\index{Literaturverzeichnis}
+\section{Worttrennungen in deutschsprachigen Texten}
+\manualhyperdef'{sec:tips:hyphenation}
 %
-\ChangedAt{v2.02!\TaT: URL-Umbrüche im Literaturverzeichnis}
+\ChangedAt{v2.02!\TaT: Worttrennungen}
 %
-Wird das Paket \Package{biblatex} verwendet, kann es unter Umständen dazu 
-kommen, das eine URL nicht vernünftig umbrochen werden. Ist dies der Fall, 
-können die Zählern \Counter*{biburlnumpenalty}, \Counter*{biburlucpenalty} und 
-\Counter*{biburllcpenalty} erhöht werden. Die möglichen Werte liegen zwischen 0 
-und 10000, wobei es bei höheren Werte der Zähler zu mehr URL-Umbrüchen an 
-Ziffern (\Counter*{biburlnumpenalty}), Groß- (\Counter*{biburlucpenalty}) und 
-Kleinbuchstaben (\Counter*{biburllcpenalty}) kommt. Genaueres hierzu ist der 
-Dokumentation des \Package{biblatex}"=Paketes zu entnehmen.
+Die möglichen Trennstellen von Wörtern werden von \hologo{LaTeXe} mithilfe 
+eines Algorithmus berechnet. Dieser ist jedoch in seiner ursprünglichen Form 
+für die englische Sprache konzipiert worden. Für deutschsprachige Texte wird 
+die Worttrennung~-- insbesondere für zusammengeschriebenen Wörtern~-- mit dem 
+Paket \Package{hyphsubst} entscheidend verbessert. Dafür wird ein um vielerlei 
+Trennungsmuster ergänztes Wörterbuch aus dem Paket \Package{dehyph-exptl} 
+genutzt. 
+
+\Package{hyphsubst} muss bereits \emph{vor} den Dokumentklassen selbst geladen 
+werden. Außerdem wird das Paket \Package{babel} benötigt. Damit auch Wörter mit 
+Umlauten richtig getrennt werden, ist außerdem die Verwendung des Paketes 
+\Package{fontenc} mit der \PValue{T1}"~Schriftkodierung notwendig. Der Beginn 
+einer Dokumentpräambel könnte folgendermaßen aussehen:
+%
+\begin{quoting}[rightmargin=0pt]
+\begin{Code}[escapechar=§]
+\RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
+\documentclass[ngerman,§\PName{Klassenoptionen}§]§\Parameter{Dokumentklasse}§
+\usepackage{selinput}\SelectInputMappings{adieresis={ä},germandbls={ß}}
+\usepackage[T1]{fontenc}
+\usepackage{babel}
+§\dots§
+\end{Code}
+\end{quoting}
+%
+Eine Anmerkung noch zur Trennung von Wörtern mit Bindestrichen. Normalerweise 
+sind die beiden von \hologo{LaTeXe} verwendeten Zeichen für Bindestrich und 
+Trennstrich identisch. Leider wird der Trennungsalgorithmus von \hologo{LaTeXe} 
+bei Wörtern, welche bereits einen Bindestrich enthalten, außer Kraft gesetzt. 
+In der Folge werden~-- in der deutschen Sprache durchaus öfter anzutreffende~-- 
+Wortungetüme wie die \enquote{Donaudampfschifffahrts-Gesellschafterversammlung} 
+normalerweise nur direkt nach dem angegebenen Bindestrich getrennt. 
+
+Allerdings gibt es die Möglichkeit, das genutzte Zeichen für den Trennstrich 
+zu ändern. Dafür ist das Laden der \PValue{T1}"~Schriftkodierung mit dem Paket 
+\Package{fontenc} zwingend erforderlich. Wenn von der verwendeten Schrift 
+nichts anderes eingestellt ist, liegen sowohl Binde- als auch Trennstrich auf 
+Position~\PValue{45} der Zeichentabelle. In der \PValue{T1}"~Schriftkodierung 
+befindet sich auf der Position~\PValue{127} glücklicherweise für gewöhnlich das 
+gleiche Zeichen noch einmal. Dies ist jedoch von der verwendeten Schrift 
+abhängig. Wird der Ausdruck \Macro{defaulthyphenchar}\PValue{=127} in der 
+Dokumentpräambel verwendet, kann dieses Zeichen für den Trennstrich genutzt 
+werden. Bei den Schriften des \CDs der \TnUD ist dies bereits automatisch 
+eingestellt.
+
+Sollte trotz aller Maßnahmen dennoch einmal ein bestimmtes Wort falsch getrennt 
+werden, so kann die Worttrennung dieses Wortes manuell und global geändert 
+werden. Dies wird mit \Macro{hyphenation}\PParameter{Sil-ben-tren-nung} 
+gemacht. Es ist zu beachten, dass dies für alle Flexionsformen des Wortes 
+erfolgen sollte. Für eine lokale/temporäre Worttrennung kann mit Befehlen aus 
+dem Paket \Package{babel} gearbeitet werden. Diese sind: 
+
+\vskip\baselineskipglue\noindent
+\begin{tabular}{@{}ll}
+\textbf{Beschreibung} & \textbf{Befehl}\tabularnewline
+ausschließliche Trennstellen & \PValue{\bsc-}\tabularnewline
+zusätzliche Trennstellen & \PValue{"'-}\tabularnewline
+Umbruch ohne Trennstrich & \PValue{"'"'}\tabularnewline
+Bindestrich ohne Umbruch & \PValue{"'\textasciitilde}\tabularnewline
+Bindestrich, der weitere Trennstellen erlaubt & \PValue{"'=}\tabularnewline
+\end{tabular}
+
+
+
+\section{Lokale Änderungen von Befehlen und Einstellungen}
+\index{Gruppierungen}
+%
+\ChangedAt{v2.02!\TaT: Lokale Änderungen}
+%
+Ein zentraler Bestandteil von \hologo{LaTeX} ist die Verwendung von Gruppen 
+oder Gruppierungen. Innerhalb dieser bleiben alle vorgenommenen Änderungen an 
+Befehlen, Umgebungen oder Einstellungen lokal. Dies kann sehr nützlich sein, 
+wenn beispielsweise das Verhalten eines bestimmten Makros einmalig oder 
+innerhalb von selbst definierten Befehlen oder Umgebungen geändert werden, im 
+Normalfall jedoch die ursprüngliche Funktionalität behalten soll.
+\begin{Example}
+\index{Schriftauszeichnung}
+Der Befehl \Macro*{emph} wird von \hologo{LaTeX} für Hervorhebungen im Text 
+bereitgestellt und führt normalerweise zu einer kursiven oder~-- falls kein 
+Schriftschnitt mit echten Kursiven vorhanden ist~-- kursivierten Auszeichnung. 
+Soll nun in einem bestimmten Abschnitt die Auszeichnung mit fetter Schrift 
+erfolgen, kann der Befehl \Macro*{emph} innerhalb einer Gruppierung geändert 
+und verändert werden. Wird diese beendet, verhält sich der Befehl wie gewohnt.
+\begin{Code}
+In diesem Text wird ein bestimmtes \emph{Wort} hervorgehoben.
+
+\begingroup
+\renewcommand*\emph[1]{\textbf{#1}}%
+In diesem Text wird ein bestimmtes \emph{Wort} hervorgehoben.
+\endgroup
+
+In diesem Text wird ein bestimmtes \emph{Wort} hervorgehoben.
+\end{Code}
+\end{Example}
+Eine Gruppierung kann entweder mit \Macro*{begingroup} und \Macro*{endgroup} 
+oder einfach mit einem geschweiften Klammerpaar \texttt{\{\dots\}} definiert 
+werden.
 
 
 
@@ -162,31 +199,123 @@ Bezeichnungen von Gliederungsebenen können folgendermaßen verändert werden.
 
 
 
-\section{Setzen von Einheiten mit \Package{siunitx}}
-\label{sec:tips:siunitx}
-\index{Einheiten}
-Wenn \Package{siunitx} in einem deutschsprachigen Dokument genutzt soll
-werden, muss zumindest mit \Macro*{sisetup}\PParameter{locale = DE} die 
-richtige Lokalisierung angegeben werden. Sollen auch die Zahlen richtig 
-formatiert sein, müssen weitere Einstellungen vorgenommen werden. Die meiner 
-Meinung nach besten sind die folgenden.
+\section{URL-Umbrüche im Literaturverzeichnis mit \Package{biblatex}}
+\index{Literaturverzeichnis}
+%
+\ChangedAt{v2.02!\TaT: URL-Umbrüche im Literaturverzeichnis}
+%
+Wird das Paket \Package{biblatex} verwendet, kann es unter Umständen dazu 
+kommen, das eine URL nicht vernünftig umbrochen werden. Ist dies der Fall, 
+können die Zählern \Counter*{biburlnumpenalty}, \Counter*{biburlucpenalty} und 
+\Counter*{biburllcpenalty} erhöht werden. Die möglichen Werte liegen zwischen 0 
+und 10000, wobei es bei höheren Werte der Zähler zu mehr URL-Umbrüchen an 
+Ziffern (\Counter*{biburlnumpenalty}), Groß- (\Counter*{biburlucpenalty}) und 
+Kleinbuchstaben (\Counter*{biburllcpenalty}) kommt. Genaueres hierzu ist der 
+Dokumentation des \Package{biblatex}"=Paketes zu entnehmen.
+
+
+
+\section{Zeilenabstände in Überschriften}
+\label{sec:tips:headings}
+Mit dem Paket \Package{setspace} kann der Zeilenabstand beziehungsweise der 
+Durchschuss innerhalb des Dokumentes geändert werden. Sollte dieser erhöht 
+worden sein, können die Abstände bei mehrzeiligen Überschriften als zu groß 
+erscheinen. Um dies zu korrigieren kann mit dem Befehl \Macro{addtokomafont}%
+\PParameter{disposition}\PParameter{\Macro*{setstretch}\PParameter{1}} der 
+Zeilenabstand aller Überschriften auf einzeilig zurückgeschaltet werden. Soll 
+dies nur für eine bestimmte Gliederungsebene erfolgen, so ist 
+\PParameter{disposition} durch das entsprechende Schriftelement zu ersetzen.
+
+
+
+\section{Einrückung von Tabellenspalten verhindern}%
+\manualhyperdef'{sec:tips:table}
+\index{Tabellen}
+%
+Normalerweise wird in einer Tabelle vor \emph{und} nach jeder Spalte durch 
+\hologo{LaTeXe} etwas horizontaler Raum mit \Macro{hskip}\Macro{tabcolsep} 
+eingefügt.%
+\footnote{%
+  Der Abstand zweier Spalten beträgt folglich \PValue{2}\Macro{tabcolsep}.%
+}
+Dies geschieht auch \emph{vor} der ersten und \emph{nach} der letzten Spalte. 
+Diese optische Einrückung an den äußeren Rändern kann unter Umständen stören, 
+insbesondere bei Tabellen, die willentlich~-- beispielsweise mit den Paketen 
+\Package{tabularx}, \Package{tabulary} oder auch \Package{tabu}~-- über die 
+komplette Seitenbreite aufgespannt werden.
+
+Das Paket \Package{tabularborder} versucht, dieses Problem automatisiert zu 
+beheben, ist jedoch nicht zu allen \hologo{LaTeXe}-Paketen für den Tabellensatz 
+kompatibel, unter anderem auch nicht zu den drei zuvor genannten. Allerdings 
+lässt sich dieses Problem manuell durch den Anwender lösen. 
+
+Bei der Deklaration einer Tabelle kann mit~\PValue{@}\PParameter{\dots} vor und 
+nach dem Spaltentyp angegeben werden, was anstelle von \Length{tabcolsep} vor 
+beziehungsweise nach der eigentlichen Spalte eingeführt werden soll. Dies kann 
+für das Entfernen der Einrückungen genutzt werden, indem~\PValue{@\{\}} an den 
+entsprechenden Stellen bei der Angabe der Spaltentypen vor der ersten und nach 
+der letzten Tabellenspalte verwendet wird.
+%
+\begin{Example}
+Eine Tabelle mit zwei Spalten, wobei bei einer die Breite automatisch berechnet 
+wird, soll über die komplette Textbreite gesetzt werden. Dabei soll der Rand 
+vor der ersten und nach der letzten entfernt werden.
+\begin{Code}[escapechar=§]
+\begin{tabularx}{\textwidth}{@{}lX@{}}
+§\dots§ & §\dots§ \tabularnewline
+§\dots§
+\end{tabularx}
+\end{Code}
+\end{Example}
+
+
+
+\section{Warnung wegen zu geringer Höhe der Kopf-/Fußzeile}
+\label{sec:tips:headline}
+Wird das Paket \Package{setspace} verwendet, kann es passieren, dass nach der 
+Änderung des Zeilenabstandes \emph{innerhalb} des Dokumentes eine oder beide 
+der folgenden Warnungen erscheinen:
 %
 \begin{quoting}
 \begin{Code}
-\sisetup{%
-  locale = DE,%
-  input-decimal-markers={,},%
-  input-ignore={.},%
-  group-separator={\,},%
-  group-minimum-digits=3%
-}
+scrlayer-scrpage Warning: \headheight to low.
+scrlayer-scrpage Warning: \footheight to low.
 \end{Code}
 \end{quoting}
 %
-Das Komma kommt als Dezimaltrennzeichen zum Einsatz. Des Weiteren werden Punkte 
-innerhalb der Zahlen ignoriert und eine Gruppierung von jeweils drei Ziffern 
-vorgenommen. Alternativ zu diesem Paket kann übrigens auch \Package{units} 
-verwendet werden.
+Dies liegt an dem durch den vergrößerten Zeilenabstand erhöhten Bedarf für die
+Kopf- und Fußzeile, die Höhen können in diesem Fall direkt mit der Verwendung 
+von \Macro{recalctypearea} angepasst werden. Allerdings ändert das den 
+Satzspiegel im Dokument, was eine andere und durchaus berechtigte Warnung von 
+\Package{typearea} zur Folge hat. Falls die Änderung des Durchschusses wirklich 
+nötig ist, sollte dies in der Präambel des Dokumentes einmalig passieren. Dann 
+entfallen auch die Warnungen.
+
+
+
+\section{Unterdrückung des Einzuges eines Absatzes}
+\index{Absatzauszeichnung}
+Verwendet man~-- wie es aus typographischer Sicht zumeist sinnvoll ist~-- 
+Einzüge und keine vertikalen Abstände zur Auszeichnung von Absätzen im Dokument
+(\Option{parskip}[false]), kann es vorkommen, dass ein bestimmter Absatz~-- 
+beispielsweise der nach einer gewissen Umgebung folgende~-- ungewollt 
+eingerückt ist. Dies kann sehr einfach behoben werden, indem direkt zu Beginn 
+des Absatzes das Makro \Macro{noindent} verwendet wird. Möchte man das für 
+bestimmte Umgebungen oder Befehle automatisiert gestalten, ist das Paket
+\Package{noindentafter} zu empfehlen.
+
+
+
+\section{Unterbinden des Zurücksetzens von Fußnoten}%
+\label{sec:tips:counter}
+\index{Fußnoten}
+Oft taucht die Frage auf, wie man auch über Kapitel fortlaufende Fußnoten 
+erhalten kann. Dies ist sehr einfach mit dem Paket \Package{chngcntr} möglich. 
+Nach dem Laden des Paketes, kann das Rücksetzen des Zählers nach einem Kapitel 
+mit \Macro*{counterwithout*}\PParameter{footnote}\PParameter{chapter} 
+deaktiviert werden. Auch andere \hologo{LaTeX}-Zähler~-- wie beispielsweise der 
+bereits vorgestellte \Counter{symbolheadings}~-- lassen sich mit diesem 
+Paket manipulieren.
 
 
 
@@ -219,6 +348,106 @@ ignoriert wird:
 \newcommand*\zB{z.\,B\xperiod}
 \end{Code}
 \end{quoting}
+
+
+
+\section{Warnung beim Erzeugen des Inhaltsverzeichnisses}
+\index{Inhaltsverzeichnis}%
+%
+\ChangedAt{v2.02!\TaT: Warnung beim Erzeugen des Inhaltsverzeichnisses}
+%
+Erstellt man ein Inhaltsverzeichnis für ein Dokument mit einer dreistelligen 
+Seitenanzahl, so erhält man bei der Verwendung von \Macro*{tableofcontents} 
+viele Warnungen mit der Meldung:
+%
+\begin{quoting}
+\begin{Code}
+overfull \hbox
+\end{Code}
+\end{quoting}
+%
+Das liegt daran, dass die Seitenzahl in einer Box mit der Breite 
+\Macro*{@pnumwidth} gesetzt wird. Der hierfür standardmäßig verwendete Wert 
+von~\PValue{1.55em} ist in diesem Fall zu klein. Dieser kann folgendermaßen 
+geändert werden:
+%
+\begin{quoting}
+\begin{Code}
+\makeatletter
+\renewcommand*\@pnumwidth{1.7em}
+\makeatother
+\end{Code}
+\end{quoting}
+%
+Dabei sollte der eingesetzte Wert nicht zu groß ausfallen.
+
+
+
+\section{Setzen von Einheiten mit \Package{siunitx}}
+\label{sec:tips:siunitx}
+\index{Einheiten}
+Wenn \Package{siunitx} in einem deutschsprachigen Dokument genutzt soll
+werden, muss zumindest mit \Macro*{sisetup}\PParameter{locale = DE} die 
+richtige Lokalisierung angegeben werden. Sollen auch die Zahlen richtig 
+formatiert sein, müssen weitere Einstellungen vorgenommen werden. Die meiner 
+Meinung nach besten sind die folgenden.
+%
+\begin{quoting}
+\begin{Code}
+\sisetup{%
+  locale = DE,%
+  input-decimal-markers={,},%
+  input-ignore={.},%
+  group-separator={\,},%
+  group-minimum-digits=3%
+}
+\end{Code}
+\end{quoting}
+%
+Das Komma kommt als Dezimaltrennzeichen zum Einsatz. Des Weiteren werden Punkte 
+innerhalb der Zahlen ignoriert und eine Gruppierung von jeweils drei Ziffern 
+vorgenommen. Alternativ zu diesem Paket kann übrigens auch \Package{units} 
+verwendet werden.
+
+
+
+\section{Änderung des Papierformates}
+\index{Papierformat}
+Es kann vorkommen, dass man innerhalb eines Dokumentes kurzzeitig das 
+Papierformat ändern möchte, um beispielsweise eine Konstruktionsskizze in der 
+digitalen PDF"~Datei einzubinden. Dabei ist es sowohl möglich, lediglich die 
+Ausrichtung mit \Option{paper}[landscape] in ein Querformat zu ändern, als 
+auch die Größe des Papierformates selber.
+%
+\begin{Example}
+Ein Dokument im A4"~Format soll kurzzeitig auf ein A3"=Querformat geändert 
+werden. Das folgende Minimalbeispiel zeigt, wie das Papierformat mit den 
+Mitteln von \KOMAScript{} geändert werden kann.
+\begin{Code}
+\documentclass[paper=a4,pagesize]{tudscrreprt}
+\usepackage{selinput}
+\SelectInputMappings{adieresis={ä},germandbls={ß}}
+\usepackage[T1]{fontenc}
+\usepackage[ngerman]{babel}
+\usepackage{blindtext}
+
+\begin{document}
+\chapter{Überschrift Eins}
+\Blindtext
+
+\cleardoublepage
+\storeareas\PotraitArea% speichert den aktuellen Satzspiegel
+\KOMAoptions{paper=A3,paper=landscape,DIV=current}
+\chapter{Überschrift Zwei}
+\Blindtext
+
+\cleardoublepage
+\PotraitArea% lädt den gespeicherten Satzspiegel
+\chapter{Überschrift Drei}
+\Blindtext
+\end{document}
+\end{Code}
+\end{Example}
 
 
 
@@ -276,220 +505,7 @@ Unterordner relativ zum Pfad des Hauptdokumentes, kann dieser einfach mit
 angegeben werden.
 
 
-
-\section{Warnung wegen zu geringer Höhe der Kopf-/Fußzeile}
-\label{sec:tips:headline}
-Wird das Paket \Package{setspace} verwendet, kann es passieren, dass nach der 
-Änderung des Zeilenabstandes \emph{innerhalb} des Dokumentes eine oder beide 
-der folgenden Warnungen erscheinen:
-%
-\begin{quoting}
-\begin{Code}
-scrlayer-scrpage Warning: \headheight to low.
-scrlayer-scrpage Warning: \footheight to low.
-\end{Code}
-\end{quoting}
-%
-Dies liegt an dem durch den vergrößerten Zeilenabstand erhöhten Bedarf für die
-Kopf- und Fußzeile, die Höhen können in diesem Fall direkt mit der Verwendung 
-von \Macro{recalctypearea} angepasst werden. Allerdings ändert das den 
-Satzspiegel im Dokument, was eine andere und durchaus berechtigte Warnung von 
-\Package{typearea} zur Folge hat. Falls die Änderung des Durchschusses wirklich 
-nötig ist, sollte dies in der Präambel des Dokumentes einmalig passieren. Dann 
-entfallen auch die Warnungen.
-
-
-
-\section{Warnung beim Erzeugen des Inhaltsverzeichnisses}
-\index{Inhaltsverzeichnis}%
-%
-\ChangedAt{v2.02!\TaT: Warnung beim Erzeugen des Inhaltsverzeichnisses}
-%
-Erstellt man ein Inhaltsverzeichnis für ein Dokument mit einer dreistelligen 
-Seitenanzahl, so erhält man bei der Verwendung von \Macro*{tableofcontents} 
-viele Warnungen mit der Meldung:
-%
-\begin{quoting}
-\begin{Code}
-overfull \hbox
-\end{Code}
-\end{quoting}
-%
-Das liegt daran, dass die Seitenzahl in einer Box mit der Breite 
-\Macro*{@pnumwidth} gesetzt wird. Der hierfür standardmäßig verwendete Wert 
-von~\PValue{1.55em} ist in diesem Fall zu klein. Dieser kann folgendermaßen 
-geändert werden:
-%
-\begin{quoting}
-\begin{Code}
-\makeatletter
-\renewcommand*\@pnumwidth{1.7em}
-\makeatother
-\end{Code}
-\end{quoting}
-%
-Dabei sollte der eingesetzte Wert nicht zu groß ausfallen.
-
-
-
-\section{Änderung des Papierformates}
-\index{Papierformat}
-Es kann vorkommen, dass man innerhalb eines Dokumentes kurzzeitig das 
-Papierformat ändern möchte, um beispielsweise eine Konstruktionsskizze in der 
-digitalen PDF"~Datei einzubinden. Dabei ist es sowohl möglich, lediglich die 
-Ausrichtung mit \Option{paper}[landscape] in ein Querformat zu ändern, als 
-auch die Größe des Papierformates selber.
-%
-\begin{Example}
-Ein Dokument im A4"~Format soll kurzzeitig auf ein A3"=Querformat geändert 
-werden. Das folgende Minimalbeispiel zeigt, wie das Papierformat mit den 
-Mitteln von \KOMAScript{} geändert werden kann.
-\begin{Code}
-\documentclass[paper=a4,pagesize]{tudscrreprt}
-\usepackage{selinput}
-\SelectInputMappings{adieresis={ä},germandbls={ß}}
-\usepackage[T1]{fontenc}
-\usepackage[ngerman]{babel}
-\usepackage{blindtext}
-
-\begin{document}
-\chapter{Überschrift Eins}
-\Blindtext
-
-\cleardoublepage
-\storeareas\PotraitArea% speichert den aktuellen Satzspiegel
-\KOMAoptions{paper=A3,paper=landscape,DIV=current}
-\chapter{Überschrift Zwei}
-\Blindtext
-
-\cleardoublepage
-\PotraitArea% lädt den gespeicherten Satzspiegel
-\chapter{Überschrift Drei}
-\Blindtext
-\end{document}
-\end{Code}
-\end{Example}
-
-
-
-\section{Einrückung von Tabellenspalten verhindern}%
-\manualhyperdef'{sec:tips:table}
-\index{Tabellen}
-%
-Normalerweise wird in einer Tabelle vor \emph{und} nach jeder Spalte durch 
-\hologo{LaTeXe} etwas horizontaler Raum mit \Macro{hskip}\Macro{tabcolsep} 
-eingefügt.%
-\footnote{Der Abstand zweier Spalten beträgt folglich 2\Macro{tabcolsep}.}
-Dies geschieht auch \emph{vor} der ersten und \emph{nach} der letzten Spalte. 
-Diese optische Einrückung an den äußeren Rändern kann unter Umständen stören, 
-insbesondere bei Tabellen, die willentlich~-- beispielsweise mit den Paketen 
-\Package{tabularx}, \Package{tabulary} oder auch \Package{tabu}~-- über die 
-komplette Seitenbreite aufgespannt werden.
-
-Das Paket \Package{tabularborder} versucht, dieses Problem automatisiert zu 
-beheben, ist jedoch nicht zu allen \hologo{LaTeXe}-Paketen für den Tabellensatz 
-kompatibel, unter anderem auch nicht zu den drei zuvor genannten. Allerdings 
-lässt sich dieses Problem manuell durch den Anwender lösen. 
-
-Bei der Deklaration einer Tabelle kann mit~\PValue{@}\PParameter{\dots} vor und 
-nach dem Spaltentyp angegeben werden, was anstelle von \Length{tabcolsep} vor 
-beziehungsweise nach der eigentlichen Spalte eingeführt werden soll. Dies kann 
-für das Entfernen der Einrückungen genutzt werden, indem~\PValue{@\{\}} an den 
-entsprechenden Stellen bei der Angabe der Spaltentypen vor der ersten und nach 
-der letzten Tabellenspalte verwendet wird.
-%
-\begin{Example}
-Eine Tabelle mit zwei Spalten, wobei bei einer die Breite automatisch berechnet 
-wird, soll über die komplette Textbreite gesetzt werden. Dabei soll der Rand 
-vor der ersten und nach der letzten entfernt werden.
-\begin{Code}[escapechar=§]
-\begin{tabularx}{\textwidth}{@{}lX@{}}
-§\dots§ & §\dots§ \tabularnewline
-§\dots§
-\end{tabularx}
-\end{Code}
-\end{Example}
-
-
-
-\section{Warnung bei der Verwendung von \Package{multicol}}
-%
-\ChangedAt{v2.02!\TaT: Warnung bei der Verwendung von \Package{multicol}}
-%
-Das einzig momentan bekannte Problem der \TUDScript"=Klasse tritt in Verbindung 
-mit dem Paket \Package{multicol}|?| auf. Dieses greift~-- ähnlich zu dem für 
-die Seitenstile verwendeten Paket \Package{scrlayer-scrpage}~-- sehr stark in 
-die Ausgaberoutine von \hologo{LaTeXe} ein. Bei Spaltenumbrüchen innerhalb der 
-\Environment*{multicols}"=Umgebung kommt es sehr häufig zu folgender Warnung:
-%
-\begin{quoting}
-\begin{Code}
-Underfull \hbox (badness 10000) has occurred while \output is active
-\end{Code}
-\end{quoting}
-%
-Wird \Package{scrlayer-scrpage} nicht verwendet, unterbleibt die Warnung. Beide 
-Pakete haben in der Kombination miteinander augenscheinlich ein Problem. Die 
-Autoren der beiden Pakete wurden über dieses Problem informiert, signalisierten 
-jedoch verständlicherweise wenig Bereitschaft, der Ursache auf den Grund zu 
-gehen. Leider kann für die \TUDScript-Klassen auf \Package{scrlayer-scrpage} 
-nicht verzichtet werden, es ist von essentieller Bedeutung für die Seitenstile 
-im \CD der \TnUD. Am Ausgabeergebnis ändert sich nichts. Im Zweifelsfall werden 
-jedoch eine Menge bedeutungsloser Warnungen generiert. 
-
-Es gibt allerdings eine Möglichkeit, diese zu unterdrücken. Hierfür wird auf 
-die Funktionalitäten von \Package{etoolbox} zurückgegriffen, was ohnehin von 
-den \TUDScript-Klassen geladen wird. In der Präambel kann folgender Quelltext 
-verwendet werden:
-%
-\begin{quoting}
-\begin{Code}
-\makeatletter
-\apptocmd{\prepare@multicols}{\hbadness10000}{}{}
-\makeatother
-\end{Code}
-\end{quoting}
-%
-Dadurch werden die durch \hologo{LaTeXe} generierten Warnungen innerhalb der 
-\Environment*{multicols}"=Umgebung deaktiviert. Es muss dabei beachtet werden, 
-dass dies für alle Boxen~-- und nicht nur jene beim Spaltenumbruch~-- gilt.
-
-
-
-\section{Lokale Änderungen von Befehlen und Einstellungen}
-\index{Gruppierungen}
-%
-\ChangedAt{v2.02!\TaT: Lokale Änderungen}
-%
-Ein zentraler Bestandteil von \hologo{LaTeX} ist die Verwendung von Gruppen 
-oder Gruppierungen. Innerhalb dieser bleiben alle vorgenommenen Änderungen an 
-Befehlen, Umgebungen oder Einstellungen lokal. Dies kann sehr nützlich sein, 
-wenn beispielsweise das Verhalten eines bestimmten Makros einmalig oder 
-innerhalb von selbst definierten Befehlen oder Umgebungen geändert werden, im 
-Normalfall jedoch die ursprüngliche Funktionalität behalten soll.
-\begin{Example}
-\index{Schriftauszeichnung}
-Der Befehl \Macro*{emph} wird von \hologo{LaTeX} für Hervorhebungen im Text 
-bereitgestellt und führt normalerweise zu einer kursiven oder~-- falls kein 
-Schriftschnitt mit echten Kursiven vorhanden ist~-- kursivierten Auszeichnung. 
-Soll nun in einem bestimmten Abschnitt die Auszeichnung mit fetter Schrift 
-erfolgen, kann der Befehl \Macro*{emph} innerhalb einer Gruppierung geändert 
-und verändert werden. Wird diese beendet, verhält sich der Befehl wie gewohnt.
-\begin{Code}
-In diesem Text wird ein bestimmtes \emph{Wort} hervorgehoben.
-
-\begingroup
-\renewcommand*\emph[1]{\textbf{#1}}%
-In diesem Text wird ein bestimmtes \emph{Wort} hervorgehoben.
-\endgroup
-
-In diesem Text wird ein bestimmtes \emph{Wort} hervorgehoben.
-\end{Code}
-\end{Example}
-Eine Gruppierung kann entweder mit \Macro*{begingroup} und \Macro*{endgroup} 
-oder einfach mit einem geschweiften Klammerpaar \texttt{\{\dots\}} definiert 
-werden.
-
+\ToDo[doc]{Kapitel bzgl. Layout neu strukturieren}[v2.02]
 
 
 \section{Platzierung von Gleitobjekten}
@@ -595,6 +611,50 @@ schreiben:
 
 
 
+\section{Warnung bei der Verwendung von \Package{multicol}}
+%
+\ChangedAt{v2.02!\TaT: Warnung bei der Verwendung von \Package{multicol}}
+%
+Das einzig momentan bekannte Problem der \TUDScript"=Klasse tritt in Verbindung 
+mit dem Paket \Package{multicol}|?| auf. Dieses greift~-- ähnlich zu dem für 
+die Seitenstile verwendeten Paket \Package{scrlayer-scrpage}~-- sehr stark in 
+die Ausgaberoutine von \hologo{LaTeXe} ein. Bei Spaltenumbrüchen innerhalb der 
+\Environment*{multicols}"=Umgebung kommt es sehr häufig zu folgender Warnung:
+%
+\begin{quoting}
+\begin{Code}
+Underfull \hbox (badness 10000) has occurred while \output is active
+\end{Code}
+\end{quoting}
+%
+Wird \Package{scrlayer-scrpage} nicht verwendet, unterbleibt die Warnung. Beide 
+Pakete haben in der Kombination miteinander augenscheinlich ein Problem. Die 
+Autoren der beiden Pakete wurden über dieses Problem informiert, signalisierten 
+jedoch verständlicherweise wenig Bereitschaft, der Ursache auf den Grund zu 
+gehen. Leider kann für die \TUDScript-Klassen auf \Package{scrlayer-scrpage} 
+nicht verzichtet werden, es ist von essentieller Bedeutung für die Seitenstile 
+im \CD der \TnUD. Am Ausgabeergebnis ändert sich nichts. Im Zweifelsfall werden 
+jedoch eine Menge bedeutungsloser Warnungen generiert. 
+
+Es gibt allerdings eine Möglichkeit, diese zu unterdrücken. Hierfür wird auf 
+die Funktionalitäten von \Package{etoolbox} zurückgegriffen, was ohnehin von 
+den \TUDScript-Klassen geladen wird. In der Präambel kann folgender Quelltext 
+verwendet werden:
+%
+\begin{quoting}
+\begin{Code}
+\makeatletter
+\apptocmd{\prepare@multicols}{\hbadness10000}{}{}
+\makeatother
+\end{Code}
+\end{quoting}
+%
+Dadurch werden die durch \hologo{LaTeXe} generierten Warnungen innerhalb der 
+\Environment*{multicols}"=Umgebung deaktiviert. Es muss dabei beachtet werden, 
+dass dies für alle Boxen~-- und nicht nur jene beim Spaltenumbruch~-- gilt.
+
+
+
 \section{Fehlermeldung: ! No room for a new \textbackslash write}
 %
 \ChangedAt{v2.02!\TaT: Fehler beim Schreiben von Hilfsdateien}
@@ -632,17 +692,16 @@ Allerdings ist dessen Verwendung nicht in allen Fällen von Erfolg gekrönt.
 %
 \ChangedAt{v2.02!\TaT: Hinweise zu \Package{auto-pst-pdf}}
 %
-Sämtliche Probleme von \Package{auto-pst-pdf} in Kombination mit anderen 
-Paketen liegt an der Tatsache, dass dieses Paket automatisiert des aktuelle 
-Dokument durchläuft und nach dem Lesen der Präambel lediglich den Inhalt der 
-vorhandene \Environment{pspicture}"=Umgebungen über den PostScript-Pfad
-\Path{latex \textrightarrow{} dvips \textrightarrow{} ps2pdf} kompiliert und  
-PDF-Grafiken erstellt.
-
-Mit dem Paket \Package{ifpdf} kann erkannt werden, welcher Dokumentprozessor 
-gerade das Dokument kompiliert. Mit dem Makro \Macro{ifpdf} können abhängig 
-davon unterschiedliche Quelltexte ausgeführt werden, was im Folgenden genutzt 
-wird, um die Probleme zu beheben.
+Bei der Verwendung von \hologo{pdfLaTeX} liest das Paket \Package{auto-pst-pdf} 
+die Präambel ein und erstellt anschließend über den PostScript"=Pfad 
+\Path{latex \textrightarrow{} dvips \textrightarrow{} ps2pdf} eine PDF-Datei, 
+welche lediglich alle in den vorhandenen \Environment{pspicture}"=Umgebungen 
+erstellten Grafiken enthält. 
+Das Paket \Package{ifpdf} 
+stellt das Makro \Macro{ifpdf} bereit, mit welchem unterschieden werden kann, 
+ob \hologo{pdfLaTeX} als Dokumentprozessor verwendet wird. Abhängig davon 
+können unterschiedliche Quelltexte ausgeführt werden, was genutzt wird, um die 
+nachfolgend beschriebenen Probleme zu beheben.
 %
 \begin{quoting}
 \begin{Code}
@@ -654,15 +713,13 @@ wird, um die Probleme zu beheben.
 Das Paket \Package{floatrow} stellt Befehle bereit, mit denen die Beschriftung 
 von Gleitobjekten sehr bequem gesetzt werden können. Diese Setzen ihren Inhalt 
 erst in einer Box, um deren Breite zu ermitteln. Anschließend wird dieser 
-ausgegeben. In Kombination mit \Package{auto-pst-pdf} führt dies zu einer 
+ausgegeben. In Kombination mit \Package{auto-pst-pdf} führt das zu einer 
 doppelten Erstellung der gewünschten Abbildung. Um dies zu vermeiden, müssen 
 die durch \Package{floatrow} bereitgestellten Befehle \enquote{unschädlich} 
-gemacht werden.
-
-Diesen Befehle können bis zu drei optionale Argumente \emph{vor} den beiden 
-obligatorischen übergeben werden. Dieses Verhalten ist für die standardmäßige 
-Benutzerschnittstelle für die (Re-)Definition durch \hologo{LaTeXe} nicht 
-vorgesehen. Deshalb wird für dieses Unterfangen das Paket \Package{xparse} 
+gemacht werden. Die fraglichen Befehlen akzeptieren allerdings bis zu drei 
+optionale Argumente \emph{vor} den beiden obligatorischen, was für die 
+Benutzerschnittstelle für die (Re-)Definition durch \hologo{LaTeXe} 
+normalerweise nicht vorgesehen ist. Deshalb wird das Paket \Package{xparse} 
 geladen, mit welchem dies möglich wird. Genaueres dazu ist der dazugehörigen 
 Paketdokumentation zu entnehmen. Verwendet man folgenden Quelltextauszug in der 
 Dokumentpräambel, kann man die \Package{floatrow}-Befehle auch in Verbindung 
@@ -681,88 +738,27 @@ mit der \Environment{pspicture}"=Umgebung wie gewohnt verwenden.
 \end{quoting}
 
 \minisec{Die parallele Nutzung von \Package{tikz} und \Package{todonotes}}
-Mit \Package{tikz}(pgf) und respektive auch \Package{todonotes}~-- welches 
-das zuvor genannte nutzt~-- gibt es in Verbindung mit \Package{auto-pst-pdf} 
-ebenfalls Probleme. Dies lässt sich jedoch einfach lösen, indem man diese 
-Pakete lediglich in der Präambel einbindet, wenn \hologo{pdfLaTeX} als 
-Dokumentprozessor aktiv ist.
+Mit dem Paket \Package{tikz}(pgf)~-- und auch allen anderen Paketen die 
+selbiges nutzen wie beispielsweise \Package{todonotes}~-- gibt es in Verbindung 
+mit \Package{auto-pst-pdf} ebenfalls Probleme. Dies lässt sich lösen, indem man 
+diese Pakete lediglich in der Präambel einbindet, wenn \hologo{pdfLaTeX} aktiv 
+ist.
 %
 \begin{quoting}
 \begin{Code}
 \ifpdf
-  \usepackage{tikz}
-  \usepackage{todonotes}
+  \usepackage{tikz}%\dots gegebenenfalls weitere auf tikz basierende Pakete
 \fi
 \end{Code}
 \end{quoting}
 
-
-
-\section{Worttrennungen in nicht-englischsprachigen Texten}
-\manualhyperdef'{sec:tips:hyphenation}
-%
-\ChangedAt{v2.02!\TaT: Worttrennungen}
-%
-Die möglichen Trennstellen von Wörtern werden von \hologo{LaTeXe} mithilfe 
-eines Algorithmus berechnet. Dieser ist jedoch in seiner ursprünglichen Form 
-für die englische Sprache konzipiert worden. Für deutschsprachige Texte wird 
-die Worttrennung~-- insbesondere für zusammengeschriebenen Wörtern~-- mit dem 
-Paket \Package{hyphsubst} entscheidend verbessert. Dafür wird ein um vielerlei 
-Trennungsmuster ergänztes Wörterbuch aus dem Paket \Package{dehyph-exptl} 
-genutzt. 
-
-\Package{hyphsubst} muss bereits \emph{vor} den Dokumentklassen selbst geladen 
-werden. Außerdem wird das Paket \Package{babel} benötigt. Damit auch Wörter mit 
-Umlauten richtig getrennt werden, ist außerdem die Verwendung des Paketes 
-\Package{fontenc} mit der \PValue{T1}"~Schriftkodierung notwendig. Der Beginn 
-einer Dokumentpräambel könnte folgendermaßen aussehen:
-%
-\begin{quoting}[rightmargin=0pt]
-\begin{Code}[escapechar=§]
-\RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
-\documentclass[ngerman,§\PName{Klassenoptionen}§]§\Parameter{Dokumentklasse}§
-\usepackage{selinput}\SelectInputMappings{adieresis={ä},germandbls={ß}}
-\usepackage[T1]{fontenc}
-\usepackage{babel}
-§\dots§
-\end{Code}
-\end{quoting}
-%
-Eine Anmerkung noch zur Trennung von Wörtern mit Bindestrichen. Normalerweise 
-sind die beiden von \hologo{LaTeXe} verwendeten Zeichen für Bindestrich und 
-Trennstrich identisch. Leider wird der Trennungsalgorithmus von \hologo{LaTeXe} 
-bei Wörtern, welche bereits einen Bindestrich enthalten, außer Kraft gesetzt. 
-In der Folge werden~-- in der deutschen Sprache durchaus öfter anzutreffende~-- 
-Wortungetüme wie die \enquote{Donaudampfschifffahrts-Gesellschafterversammlung} 
-normalerweise nur direkt nach dem angegebenen Bindestrich getrennt. 
-
-Allerdings gibt es die Möglichkeit, das genutzte Zeichen für den Trennstrich 
-zu ändern. Dafür ist das Laden der \PValue{T1}"~Schriftkodierung mit dem Paket 
-\Package{fontenc} zwingend erforderlich. Wenn von der verwendeten Schrift 
-nichts anderes eingestellt ist, liegen sowohl Binde- als auch Trennstrich auf 
-Position~\PValue{45} der Zeichentabelle. In der \PValue{T1}"~Schriftkodierung 
-befindet sich auf der Position~\PValue{127} glücklicherweise für gewöhnlich das 
-gleiche Zeichen noch einmal. Dies ist jedoch von der verwendeten Schrift 
-abhängig. Wird der Ausdruck \Macro{defaulthyphenchar}\PValue{=127} in der 
-Dokumentpräambel verwendet, kann dieses Zeichen für den Trennstrich genutzt 
-werden. Bei den Schriften des \CDs der \TnUD ist dies bereits automatisch 
-eingestellt.
-
-Sollte trotz aller Maßnahmen dennoch einmal ein bestimmtes Wort falsch getrennt 
-werden, so kann die Worttrennung dieses Wortes manuell und global geändert 
-werden. Dies wird mit \Macro{hyphenation}\PParameter{Sil-ben-tren-nung} 
-gemacht. Es ist zu beachten, dass dies für alle Flexionsformen des Wortes 
-erfolgen sollte. Für eine lokale/temporäre Worttrennung kann mit Befehlen aus 
-dem Paket \Package{babel} gearbeitet werden. Diese sind: 
-
-\vskip\baselineskipglue\noindent
-\begin{tabular}{@{}ll}
-\textbf{Beschreibung} & \textbf{Befehl}\tabularnewline
-ausschließliche Trennstellen & \PValue{\bsc-}\tabularnewline
-zusätzliche Trennstellen & \PValue{"'-}\tabularnewline
-Umbruch ohne Trennstrich & \PValue{"'"'}\tabularnewline
-Bindestrich ohne Umbruch & \PValue{"'\textasciitilde}\tabularnewline
-Bindestrich, der weitere Trennstellen erlaubt & \PValue{"'=}\tabularnewline
-\end{tabular}
-
-\ToDo[doc]{Kapitel bzgl. Layout neu strukturieren}[v2.02]
+\section{Finden von unbekannten \NoCaseChange{\hologo{LaTeX}}-Symbolen}
+\index{Symbole}
+Für \hologo{LaTeX} stehen jede Menge Symbole zur Verfügung, die allerdings 
+nicht immer einfach zu finden sind. In der Zusammenfassung
+\hrfn{http://mirrors.ctan.org/info/symbols/comprehensive/symbols-a4.pdf}%
+{\File{symbols-a4.pdf}} werden viele Symbole aus mehreren Paketen aufgeführt. 
+Allerdings ist das Auffinden eines speziellen Symbols nicht sehr komfortabel. 
+Alternativ kann \hrfn{http://detexify.kirelabs.org/classify.html}{Detexify} 
+verwendet werden. Auf dieser Web-Seite wird das gesuchte Symbol einfach 
+gezeichnet, die dazu ähnlichsten werden zurückgegeben.
