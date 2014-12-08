@@ -25,7 +25,15 @@
 \usepackage{tabularx}
 \usepackage{tabulary}
 \usepackage{booktabs}
-\usepackage{units}
+\usepackage{siunitx}
+\sisetup{%
+  locale = DE,%
+  input-decimal-markers={,},%
+  input-ignore={.},%
+  group-separator={\,},%
+  group-minimum-digits=3%
+}
+\usepackage{xfrac}
 \AfterPackage*{hyperref}{%
   \usepackage[%
     automake,%
@@ -38,10 +46,41 @@
   ]{glossaries}
   \setStyleFile{\jobname-temp}
   \renewcommand*{\glsglossarymark}[1]{}
+  \newignoredglossary{abbreviation}
+  \newcommand*\newabbreviation[4][]{%
+    \newacronym[type=abbreviation,#1]{#2}{#3}{#4}%
+  }%
   \makeglossaries
 }
 \usepackage{csquotes}
 \usepackage[backend=biber,style=alphabetic]{biblatex}
+\addbibresource{\jobname.bib}
+\DefineBibliographyStrings{ngerman}{urlseen = {Am:}}
+
+\usepackage{enumitem}
+
+\usepackage{caption}
+\DeclareCaptionSubType[alph]{figure}
+\DeclareCaptionSubType[alph]{table}
+\usepackage{floatrow}
+\renewcommand{\floatpagefraction}{0.7}
+
+\ifpdf
+  \usepackage{tikz}
+  \usetikzlibrary{chains}
+  \usetikzlibrary{decorations.markings}
+  \tikzset{on grid}
+\fi
+
+\usepackage{pstricks,pst-node}
+
+\makeatletter
+\newcommand*\pcolumnfuzz[1]{\pretocmd{\@endpbox}{\hfuzz=#1}{}{}}
+\makeatother
+
+\usepackage[open,openlevel=0]{bookmark}[2011/12/02]
+
+
 \ActivateWarningFilters[Tutorial]%
 \begin{filecontents}{\jobname.bib}
 @book{talbot2012,
@@ -116,31 +155,7 @@
 }
 \end{filecontents}
 \DeactivateWarningFilters[Tutorial]%
-\addbibresource{\jobname.bib}
-\DefineBibliographyStrings{ngerman}{urlseen = {Am:}}
 
-\usepackage{enumitem}
-
-\usepackage{caption}
-\DeclareCaptionSubType[alph]{figure}
-\DeclareCaptionSubType[alph]{table}
-\usepackage{floatrow}
-\renewcommand{\floatpagefraction}{0.7}
-
-\ifpdf
-  \usepackage{tikz}
-  \usetikzlibrary{chains}
-  \usetikzlibrary{decorations.markings}
-  \tikzset{on grid}
-\fi
-
-\usepackage{pstricks,pst-node}
-
-\makeatletter
-\newcommand*\pcolumnfuzz[1]{\pretocmd{\@endpbox}{\hfuzz=#1}{}{}}
-\makeatother
-
-\usepackage[open,openlevel=0]{bookmark}[2011/12/02]
 
 \begin{document}
 \title{%
@@ -275,7 +290,8 @@ aufgeführt.
 
 
 
-\section{Satzspiegel und Bindekorrektur}
+\section{Makrotypographie}
+\subsection{Satzspiegel}
 Gleich zu Beginn und bevor das eigentliche Verfassen der Arbeit beginnt, sollte 
 man sich Gedanken über das zu nutzenden Layout und den Satzspiegel machen, um 
 bei der Finalisierung keine böse Überraschung bei Seitenumbrüchen oder der 
@@ -290,16 +306,25 @@ Dokument im asymmetrischen Layout des \CDs gesetzt. Dieses Verhalten kann mit
 \Option*{geometry}[false] deaktiviert werden und der Satzspiegel wird durch das 
 Paket \Package{typearea} nach typographischen Gesichtspunkten konstruiert.
 
+\subsection{Bindekorrektur}
 Falls die Arbeit nach der Fertigstellung gebunden werden soll, so ist auf den 
 notwendigen Binderand zu achten, quasi der Teil einer Seite, welcher durch die 
 Bindung \enquote{verschwindet} und nicht mehr als sichtbarer Teil der Seite 
 vorhanden ist. Als Faustregel gilt, dass die erforderliche Bindekorrektur in 
 etwa der halben Höhe des Buchblocks entsprechen sollte. Dessen Höhe wiederum 
 ist abhängig von der Anzahl der Seiten sowie der Papierdichte. Wird qualitativ 
-höherwertiges Papier mit einer Dichte von \unit[100]{g/m²} verwendet, so 
-entsprechen 100~Blatt in etwa einer Höhe von \unit[12]{mm}. Dementsprechend 
-wäre bei diesem Beispiel eine Bindekorrektur \unit[6]{mm} notwendig. Diese 
+höherwertiges Papier mit einer Dichte von \SI{100}{g/m^2} verwendet, so 
+entsprechen 100~Blatt in etwa einer Höhe von \SI{12}{mm}. Dementsprechend 
+wäre bei eine Bindekorrektur \SI{6}{mm} diesem Beispiel notwendig. Diese 
 kann mit der Klassenoption \Option*{BCOR}[6mm] eingestellt werden.
+
+
+\subsection{Änderung des Zeilenabstandes (Durchschuss)}
+Auf die Änderung des standardmäßigen Zeilenabstandes sollte aus typographischer 
+Sicht im Normalfall verzichtet werden. Die Gründe hierfür werden im Handbuch zu 
+\TUDScript bei der Vorstellung des Paketes \Package*{setspace} erläutert, 
+welches im Zweifelsfall für dieses Anliegen verwendet werden sollte. Ebenfalls 
+wird im Handbuch beschrieben, wie das Paket zu verwenden ist.
 
 
 
@@ -897,8 +922,8 @@ Mit \PName{Label} erfolgt die eindeutige Kennzeichnung des Symbols. Außerdem
 wird dies für die Sortierung verwendet, was unter Umständen etwas problematisch 
 sein könnte. Eine manuelle Festlegung für den dazugehörigen Schlüssel durch den 
 Anwender über das optionale Argument mit \PValue{sort=}\PName{Bezeichnung} ist 
-eventuell sinnvoll. Nach dem \PName{Label} folgt die \PName{Bezeichnung} für 
-das Formelzeichen beziehungsweise das \PName{Symbol} sowie die dazugehörige 
+eventuell sinnvoll. Nach dem \PName{Label} schließt die \PName{Bezeichnung} für 
+das Formelzeichen an, gefolgt vom \PName{Symbol} sowie der dazugehörige 
 physikalische \PName{Einheit}.
 %
 \CodeHook{\let\newcommand\renewcommand}
@@ -918,24 +943,26 @@ physikalische \PName{Einheit}.
 \end{Preamble*}
 %
 Da es sich zumeist um mathematische Symbole handelt, wird für das Symbol und 
-die Einheit mit \Macro{ensuremath} sorge getragen, dass diese auch im 
-Textmodus ohne Probleme verwendet werden können. Für ein kleines Beispiel 
-werden fünf Formelzeichen definiert. Dabei wird der Befehl \Macro{nicefrac} aus 
-dem Paket \Package{units} verwendet, welches in \autoref{sec:units} beschrieben 
-ist.
+die Einheit mit \Macro{ensuremath} Sorge getragen, dass diese auch im 
+Textmodus ohne Probleme verwendet werden können. Für das aufrechte Setzen der 
+Einheit wird für diese außerdem \Macro{mathrm} verwendet. Als Alternative dazu 
+könnte man auch den Befehl \Macro{si} aus dem Paket \Package{siunitx} benutzen. 
+Für ein kleines Beispiel werden fünf Formelzeichen definiert. Für eine gute 
+Darstellung der mathematischen Brüche wird dabei der Befehl \Macro{sfrac} aus 
+dem Paket \Package{xfrac} genutzt.
 %
 \begin{Trunk*}
 \newsymbol{l}{Länge}{l}{m}
 \newsymbol{m}{Masse}{m}{kg}
-\newsymbol{a}{Beschleunigung}{a}{\nicefrac{m}{s^2}}
+\newsymbol{a}{Beschleunigung}{a}{\sfrac{m}{s^2}}
 \newsymbol{t}{Zeit}{t}{s}
 \newsymbol{f}{Frequenz}{f}{s^{-1}}
-\newsymbol{F}{Kraft}{F}{m \cdot kg \cdot s^{-2}=\nicefrac{J}{m}}
+\newsymbol{F}{Kraft}{F}{m \cdot kg \cdot s^{-2} = \sfrac{J}{m}}
 
 \end{Trunk*}
 %
-\dots und diese in einer kurzen Textpassage mit \Macro{gls}\Parameter{Label} 
-verwendet.
+Die so definierten Symbole werden nun mit \Macro{gls}\Parameter{Label} in einer 
+kurzen Textpassage verwendet.
 %
 \begin{Hint*}
 Die Einheiten für die \gls{f} sowie die \gls{F} werden aus den 
@@ -1232,73 +1259,7 @@ finden. Es folgt ein Beispiel für die Verwendung im Dokument.
 
 
 
-\section{Listen}
-\label{sec:lists}
-Für Auflistungen aller Art bietet \hologo{LaTeX} die drei Standardumgebungen 
-\Environment{iteimze}, \Environment{enumerate} und \Environment{description}. 
-Das häufigste Anliegen bei der Verwendung dieser Umgebungen ist das Reduzieren 
-der Abstände zwischen den einzelnen, mit \Macro{item} gesetzten Punkten, welche 
-sehr häufig als zu groß empfunden werden. Eine Aufzählung erscheint ohne 
-weitere Anpassungen normalerweise so:
-%
-\CodePreamble{%
-  Aufzählung mit einer \Environment{itemize}-Umgebung und Standardabständen:%
-}
-\begin{Hint*}
-\begin{itemize}
-\item erster Punkt
-\item zweiter Punkt
-\item dritter Punkt
-\end{itemize}
-\end{Hint*}
-%
-Dabei wirken die Abstände zwischen den einzelnen Punkten tatsächlich etwas 
-überdimensioniert. Mit dem Paket \Package{enumitem} können die Umgebungen für 
-Auflistungen einfach an die individuellen Bedürfnisse angepasst werden. 
-%
-\begin{Preamble}
-\usepackage{enumitem}
-\end{Preamble}
-Um diese ungewollten Abstände zwischen den Listenpunkten zu entfernen, kann der 
-Schlüssel \Option{noitemsep} verwendet werden. Mit dem Befehl \Macro{setlist} 
-werden~-- ohne zusätzliche Angaben im optionalen Argument~-- alle Umgebungen 
-für Aufzählungen global geändert:
-\begin{Preamble*}
-\setlist{noitemsep}
-
-\end{Preamble*}
-%
-Das Ergebnis stellt sich folgendermaßen dar:
-%
-\begin{Trunk+}
-\section{Eine Aufzählung mit angepassten Abständen}
-Ein kurzes Beispiel, wie eine Liste aussehen kann, nachdem die 
-Möglichkeiten des Paketes \texttt{enumitem} genutzt und mit dem 
-Befehl \texttt{\textbackslash setlist\{noitemsep\}} die vertikalen 
-Abstände angepasst wurden.
-
-\end{Trunk+}
-\CodePreamble{%
-  Aufzählung mit einer \Environment{itemize}-Umgebung ohne vertikale Abstände:%
-}
-\begin{Trunk*}
-\begin{itemize}
-\item erster Punkt
-\item zweiter Punkt
-\item dritter Punkt
-\end{itemize}
-
-\end{Trunk*}
-%
-Natürlich erlaubt das Paket noch weitergehende Einstellungen für die Umgebungen 
-\Environment{itemize}, \Environment{enumerate} und \Environment{description}. 
-Zusätzlich können diese für eigene Aufzählungsumgebungen geklont und den 
-eigenen Bedürfnissen angepasst werden. Genaueres hierzu ist der Dokumentation 
-des Paketes \Package{enumitem} entnehmen.
-
-
-
-\section{Gleitumgebungen}
+\section{Gleitumgebungen für Abbildungen und Tabellen}
 \label{sec:floats}
 Die Positionierung von Abbildungen mit \hologo{LaTeX} kann zu Beginn für viele 
 Anfänger durchaus frustrierend sein. Das liegt häufig am Missverständnis der 
@@ -1646,7 +1607,7 @@ sowohl auf \autoref{fig:logos} als auch auf \autoref{fig:tud} sowie
 
 
 
-\section{Tabellen}
+\section{Tabellensatz}
 \label{sec:tables}
 Zum Thema \enquote{Tabellensatz mit \hologo{LaTeX}} sind bereits zahlreiche 
 \hrfn{http://userpage.fu-berlin.de/latex/Materialien/tabsatz.pdf}{Leitfäden} 
@@ -2022,6 +1983,293 @@ Ein Blindtext im Blocksatz innerhalb einer Z"~Spalte
 
 
 
+\section{Querverweise}
+\label{sec:references}
+%
+Damit alle möglichen Querverweise in einem PDF-Dokument automatisch verlinkt 
+werden, sollte das Paket \Package{hyperref} geladen werden. Um die erzeugten 
+Links verträglich aussehen zu lassen, werden die Optionen \Option{colorlinks} 
+sowie \Option{linkcolor}[blue] verwendet. Da \Package{hyperref} allerhand 
+Veränderungen an vielen Standardbefehlen vornimmt, sollte dieses als letztes in 
+der Präambel eingebunden werden. Nur Pakete, bei denen in der Dokumentation 
+explizit darauf hingewiesen wird, dass diese nach \Package{hyperref} zu laden 
+sind, sollten auch danach folgen. Eines dieser wenigen Pakete ist das in diesem 
+Tutorial verwendete \Package{glossaries}. 
+%
+\begin{Preamble}
+\usepackage[colorlinks,linkcolor=blue]{hyperref}
+\end{Preamble}
+%
+Um auf ein bestimmtes Objekt wie beispielsweise eine Tabelle, eine Abbildung 
+oder einen bestimmten Anschnitt im Dokument referenzieren zu können, muss mit 
+\Macro{label}\Parameter{label} ein Anker für selbiges an der entsprechenden 
+Stelle gesetzt werden. Bei Überschriften sollte dies direkt nach der Nutzung 
+des Gliederungsbefehls\footnote{\Macro{chapter}, \Macro{section} etc.} 
+erfolgen. Für Abbildungen, Tabellen oder andere Objekte in Gleitumgebungen muss 
+der Anker unmittelbar nach der Verwendung von \Macro{caption} respektive 
+\Macro{captionof} erstellt werden. Um nun auf diesen Anker zu referenzieren, 
+sollte nicht \Macro{ref} sondern \Macro{autoref} im Fließtext genutzt werden. 
+Letztgenannter Befehl erzeugt nicht nur einen Link mit der dazugehörigen 
+Nummerierung sondern stellt dieser die Bezeichnung des referenzierten Objektes%
+\footnote{\enquote{Abbildung}, \enquote{Tabelle}, \dots} voran. 
+
+Mit dem Befehl \Macro{pageref} lässt sich auf die Seite eines Ankers verweisen. 
+Das Paket \Package{varioref} kann dabei unterscheiden, ob der Anker sich auf 
+der aktuellen Seite, auf einer Seite direkt davor beziehungsweise danach oder 
+auf einer entfernteren Seite befindet und dementsprechend einen Hinweis darauf 
+ausgeben. Hierfür werden die Befehle \Macro{vref} sowie \Macro{vpageref} zur 
+Verfügung gestellt. Das Paket \Package{cleveref} vereint die Vorzüge von 
+\Macro{autoref} in Verbindung mit \Macro{vref} durch den Befehl \Macro{cref}.
+
+
+
+\section{Zitate}
+Für das wörtliche Zitieren kann das Paket \Package{csquotes} verwendet werden. 
+Dieses stellt den Befehl \Macro{enquote} bereit, der die kennzeichnenden 
+Anführungszeichen automatisch in Abhängigkeit der verwendeten Dokumentsprache 
+setzt. 
+%
+\begin{Preamble}
+\usepackage{csquotes}
+\end{Preamble}
+%
+Da für die unterschiedlichen Fachdisziplinen teils sehr unterschiedliche 
+Zitierrichtlinien existieren, kann hier keine allgemeingültige Empfehlung zu 
+Stilfragen gegeben werden. Zu beachten ist auf jeden Fall, dass zu wörtlichen 
+Zitaten eine Quellenangabe erfolgen \emph{muss}. Dabei sollte darauf geachtet 
+werden, dass nicht nur die Quelle selbst sondern zumindest auch die Seitenzahl 
+des Zitats angegeben wird.
+%
+\begin{refsection}[\jobname-temp.bib]
+\begin{Trunk*}
+\enquote{Dies ist ein zugegebenermaßen nicht sehr sinnvolles Zitat}
+\cite[58]{hanisch14}
+\end{Trunk*}
+%
+Längere Zitate sollten abgesetzt vom Fließtext ausgegeben werden. Hierfür 
+bietet sich das Paket \Package{quoting} an.
+%
+\begin{Preamble}
+\usepackage{quoting}
+\end{Preamble}
+%
+\begin{Trunk*}
+\begin{quoting}
+\enquote{%
+  Dies ist ein noch sinnloseres Zitat. Allerdings wird zumindest die
+  Wirkung der Umgebung \texttt{quoting} deutlich. Auch für dieses
+  wörtliche Zitat sollte die dazugehörige Referenz ausgegeben werden.%
+}
+\cite[12]{hanisch14}
+\end{quoting}
+\end{Trunk*}
+\end{refsection}
+
+
+
+\section{Worttrennungen}
+\label{sec:hyphenation}
+Bei der Verwendung von \hologo{LaTeXe} gibt es ab und an das Problem, dass 
+bestimmte Wörter am Zeilenende falsch getrennt werden. Dies hat historische 
+Gründe. Als \hologo{TeX} in den 1980er-Jahren entwickelt wurde, war es aufgrund 
+der zu dieser Zeit zur Verfügung stehenden Speichergrößen schier unmöglich, die 
+Worttrennungen mit einem Wörterbuchansatz umzusetzen. Stattdessen wurde~-- um 
+den benötigten Speicherbedarf möglichst gering zu halten~-- ein Algorithmus 
+entworfen, der mögliche Trennstellen in einem Wort mit einer Mustererkennung 
+ermittelt. Die verwendeten Muster basieren jedoch auf der englischen Sprache, 
+weshalb auch heute noch in nicht-englischsprachigen Texten teilweise falsche 
+Trennstellen gefunden werden.
+
+Gleich zu Beginn wurde bei der Einleitung in \autoref{sec:introduction} auf das 
+Paket \Package{hyphsubst} hingewiesen, welches dieses Manko~-- aufgrund der 
+nicht mehr so stark gegebenen Restriktionen bezüglich des Speicherbedarfes~-- 
+mit einem Wörterbuch behebt. Dieses Paket muss \emph{vor} dem Laden der 
+Dokumentklasse eingebunden werden. Außerdem wird das Paket \Package{babel} 
+benötigt. Damit auch Wörter mit Umlauten richtig getrennt werden, ist zudem die 
+Verwendung der \PValue{T1}"~Schriftkodierung notwendig. Der Beginn einer 
+Dokumentpräambel könnte folgendermaßen aussehen:
+%
+\begin{Hint}
+\RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
+\documentclass[ngerman,§\PName{Klassenoptionen}§]§\Parameter{Dokumentklasse}§
+\usepackage{selinput}\SelectInputMappings{adieresis={ä},germandbls={ß}}
+\usepackage[T1]{fontenc}
+\usepackage{babel}
+§\dots§
+\end{Hint}
+%
+Die Option \Option{ngerman}[ngerman-x-latest] führt dabei zur Verwendung der 
+Trennmuster für die neue deutsche Rechtschreibung (\PValue{ngerman}), wobei 
+\PValue{ngerman-x-latest} die neuesten aller verfügbaren Trennmuster lädt. Für 
+die alte Orthographie ist stattdessen \Option{german}[german-x-lastest] zu 
+verwenden.
+
+
+\subsection{Einmalige und globale Worttrennungskorrektur}
+Sollte es dennoch passieren, dass ein Wort nicht richtig getrennt wird, kann 
+dies manuell korrigiert werden. Dafür stellt das Paket \Package{babel} mehrere 
+Kurzbefehle zur Verfügung. Außerdem lassen sich mit \Macro{hyphenation} für ein 
+bestimmtes Wort alle potentiellen Trennstellen angeben. Im \TUDScript-Handbuch
+ist im Kapitel Tipps~\&~Tricks zum Thema \manualhyperref{sec:tips:hyphenation}{%
+Worttrennungen in deutschsprachigen Texten} mehr zu finden. Dort wird auch 
+erläutert, wie das Problem der alleinigen Trennung von Wörtern mit Bindestrich 
+an selbigem umgangen werden kann.
+
+
+\subsection{Worttrennung im Flattersatz}
+Normalerweise ist bei \hologo{LaTeXe} die Worttrennung im Flattersatz%
+\footnote{\Macro{raggedright}, \Macro{raggedleft}, \Macro{center}} deaktiviert. 
+Mit dem Paket \Package{ragged2e} kann diese hierfür aktiviert werden. Wird es 
+geladen, stehen dem Anwender die Befehle \Macro{Centering}, \Macro{RaggedLeft} 
+sowie \Macro{RaggedRight} zur Verfügung, um Worttrennungen im Flattersatz zu 
+verwenden. Mit der Paketoption \Option{newcommands} können die originalen 
+Befehle \Macro{centering}, \Macro{raggedleft} und \Macro{raggedright} mit der 
+Definition der neuen überschrieben werden. Genaueres dazu ist der Dokumentation 
+des Paketes zu entnehmen.
+
+
+
+\section{Mikrotypographische Feinheiten}
+Unter Mikrotypographie oder Detailtypographie versteht man die Gestaltung 
+folgender Feinheiten des Schriftsatzes:
+\begin{itemize}
+\item korrekte Anwendung der Satzzeichen
+\item Schriftart, Kapitälchen und Ligaturen
+\item Wortabstände sowie Laufweite (Buchstaben- und Zeichenabstände)
+\item optischer Randausgleich
+\end{itemize}
+
+\noindent Die letzten beiden Punkte werden sensationell gut durch das Paket 
+\Package{microtype} bearbeitet. Dieses muss lediglich in der Präambel geladen 
+werden, wobei es nicht mit der klassischen \hologo{TeX}-Engine, wohl jedoch mit 
+\hologo{pdfTeX} als auch \hologo{LuaTeX} sowie \hologo{XeTeX} funktioniert.
+%
+\begin{Preamble}
+\usepackage[babel]{microtype}
+
+\end{Preamble}
+%
+Die Option \Option{babel} ist nur notwendig, wenn einzelne Textpassagen oder 
+das gesamte Dokument in Englisch oder Französisch verfasst werden und hierfür 
+die genutzte Sprache mit den entsprechenden Möglichkeiten von \Package{babel} 
+eingestellt wird.
+
+Das korrekte Anwenden von Satzzeichen wird für deutschsprachige Texte bereits 
+in mehreren Artikeln \cite{neubauer1996,neubauer1997,struckmann2007,bier2009} 
+sehr gut erläutert, weshalb ein Hinweis auf diese Arbeiten für weitergehende 
+Informationen zu dieser Thematik absolut ausreichend ist. Nachfolgend werden 
+Tipps gegeben sowie einige \hologo{LaTeXe}-Pakete vorgestellt, die bei der 
+Umsetzung der in den genannten Artikeln erläuterten Empfehlungen helfen.
+
+
+\subsection{Abkürzungen}
+In \cite{struckmann2007} wird gleich zu Beginn darauf hingewiesen, wie häufig 
+verwendete Abkürzungen sehr einfach im Dokument verwendet werden können und 
+dabei typographisch richtig gesetzt werden. Beispielsweise gelingt dies für die 
+Abkürzung \enquote{\gls{zB}} mit der nachfolgenden Definition:
+%
+\begin{Hint}
+\newcommand{\zB}{\mbox{z.\,B.}\xspace}
+\end{Hint}
+%
+Wenn ohnehin das Paket \Package{glossaries} für Akronyme verwendet wird, kann 
+alternativ dazu auch dessen Funktionalität genutzt werden. Nach dem Einbinden 
+braucht man in der Präambel lediglich Folgendes einfügen:
+%
+\begin{Hint}
+  \newignoredglossary{abbreviation}
+  \newcommand*\newabbreviation[4][]{%
+    \newacronym[type=abbreviation,#1]{#2}{\mbox{#3\xspace}}{#4}%
+  }%
+\end{Hint}
+%
+Mit \Macro{newignoredglossary} wird dabei ein Glossar erstellt, welche bei der 
+Ausgabe aller Glossare mit \Macro{printglossaries} ignoriert wird. Im Dokument 
+kann die gewünschte Abkürzung mit 
+%
+\begin{Hint*}
+\newabbreviation{zB}{z.\,B.}{zum Beispiel}
+\end{Hint*}
+%
+definiert und über die gewohnten Befehlen aus \Package{glossaries} verwendet 
+werden.
+%
+\begin{Hint*}
+Die Ausgabe der eben definierten Abkürzung erfolgt \acrshort{zB} mit dem 
+Befehl \texttt{\textbackslash acrshort}. Wurde \texttt{glossaries} mit 
+der Option \texttt{shortcut} geladen, kann alternativ auch das kürzere 
+Makro \texttt{\textbackslash acs} genutzt werden.
+\end{Hint*}
+
+
+\subsection{Mathematiksatz}
+Von \hologo{LaTeXe} werden einige Umgebungen für das Setzen mathematischer 
+Formeln und Ausdrücke bereitgestellt, welche meist jedoch nicht \emph{alle} 
+Anforderungen eines Nutzers an den Mathematiksatz erfüllen können. Das Paket
+\Package{amsmath} bietet deshalb eine Reihe weiterführender Umgebungen für das 
+Setzen von einzeiligen und mehrzeiligen sowie ausgerichteter Formeln zur 
+Verfügung. Auf eine Einführung in das Paket wird~-- aufgrund der bereits in 
+großer Zahl vorhandenen Einführungen~-- in diesem Tutorial verzichtet. 
+
+Das Paket \Package{amsmath} stellt den De-facto-Standard für den mathematischen 
+Satz mit \hologo{LaTeXe} dar. Allerdings wird es~-- insbesondere aus diesem 
+Grund~-- nur sehr \enquote{vorsichtig} weiterentwickelt. Für das Setzen neuer 
+Dokumente sollte deswegen das Paket \Package{mathtools} verwendet werden, das 
+zwar auf \Package{amsmath} basiert, dieses Paket allerdings um zusätzliche
+Funktionalitäten ergänzt und Bugfixes bereithält.
+
+Neben diesem Tutorial stehen mit \Tutorial{mathtype} und \Tutorial{mathswap} 
+zwei weitere zur Verfügung, die sich explizit mit der Thematik eines guten 
+mathematischen Satz beschäftigen.
+
+
+\subsection{Einheiten}
+Mit dem Paket \Package{siunitx} lassen sich sowohl physikalische Einheiten als 
+auch Zahlen typographisch korrekt setzen. Sollen die Funktionalitäten in einem 
+deutschsprachigen Dokument problemlos nutzbar sein, so sind die Hinweise zum 
+\manualhyperref{sec:tips:siunitx}{Setzen von Einheiten mit \Package{siunitx}} 
+im \TUDScript-Handbuch zu beachten. Das Paket \Package{units} ist nicht ganz so 
+mächtig wie \Package{siunitx}, kann allerdings als pragmatische Alternative 
+gesehen und genutzt werden.
+
+
+\subsection{Darstellung von mathematischen Brüchen}
+Für ansehnliche und insbesondere im Fließtext gut lesbare mathematische Brüche 
+stellt das Paket \Package{xfrac} den Befehl \Macro{sfrac} zur Verfügung.
+%
+\begin{Preamble}
+\usepackage{xfrac}
+\end{Preamble}
+
+
+\subsection{Ligaturen}
+Die meisten \hologo{LaTeX}-Schriftfamilien enthalten Ligaturen, die für einen 
+typographisch sauberen Satz bei zusammengesetzten Wörtern, wie sie gerade im 
+Deutschen relativ häufig vorkommen, aufgetrennt werden müssten. Mit der 
+Anwendung \href{http://www.ctan.org/pkg/delig}{\Application{DeLig}} kann dies 
+automatisiert geschehen. Wird \hologo{LuaLaTeX} als Dokumentprozessor genutzt, 
+kann alternativ für dieses Unterfangen das Paket \Package{selnolig} verwendet 
+werden.
+
+
+\subsection{Datumsformatierung}
+Das Paket \Package{isodate} stellt den Befehl \Macro{printdate} bereit, welcher 
+für die Formatierung von Datumsangaben verwendet werden kann. Wird das Paket 
+mit einer der \TUDScript-Dokumentklassen geladen, wird der genannte Befehl 
+automatisch für alle bereitgestellten Datumsfelder verwendet.
+%
+\begin{Preamble}
+\usepackage{isodate}
+\end{Preamble}
+
+
+\subsection{Auslassungspunkte}
+\ToDo{Kurze Beschreibung}
+\begin{Hint}
+\usepackage{ellipsis}
+
+\end{Hint}
+
 \section{Erstellen von Abbildungen}
 \label{sec:figures}
 Die einfachste Möglichkeit, in einer wissenschaftlichen Abhandlung Grafiken zu 
@@ -2064,8 +2312,8 @@ notwendig.
 Ein kurze Anmerkungen zur Skalierung der Grafiken möchte ich mir erlauben. 
 Normalerweise verwendet \Package{tikz}(pgf) Koordinaten im Zentimeter"=Raster. 
 Ich persönlich bevorzuge der relativierte Skalierung auf die Textbreite des 
-Dokumentes, wobei eine Einheit genau \unit[1]{\%} dieser entspricht. Das kann 
-mit folgendem Quelltext erreicht werden:
+Dokumentes, wobei eine Einheit genau \SI{1}{\percent} dieser entspricht. Das 
+kann mit folgendem Quelltext erreicht werden:
 %
 \CodeHook{\renewcommand\newlength[1]{}}
 \begin{Hint*}
@@ -2203,7 +2451,7 @@ von \Package{auto-pst-pdf} in Kombination mit den Paketen \Package{tikz}(pgf),
 
 Ähnlich wie zuvor bei der \Package{tikz}(pgf)-Grafik wird die nachfolgende 
 \Package{pstricks}-Abbildung auf die Textbreite des Dokumentes skaliert, wobei 
-eine Einheit genau \unit[1]{\%} dieser entspricht. Außerdem werden noch ein 
+eine Einheit genau \SI{1}{\percent} dieser entspricht. Außerdem werden noch ein 
 paar weitere Einstellungen gemacht. Dies geschieht mit:
 %
 \begin{Hint*}
@@ -2288,177 +2536,12 @@ Damit \enquote{programmierte} Grafiken zum einen das Dokument respektive dessen
 Struktur nicht unnötig unübersichtlich machen und zum anderen nur nach einer 
 Änderung abermals kompiliert werden, um die Kompilierungsdauer möglichst gering 
 zu halten, ist es ratsam, diese in separate Dateien auszulagern. Hierfür bieten 
-sich die beiden Pakete \Package{subfiles} und \Package*{standalone} an, welche 
+sich die beiden Pakete \Package*{subfiles} und \Package*{standalone} an, welche 
 im Handbuch erläutert werden.
 
 
 
-\section{Worttrennung}
-\label{sec:hyphenation}
-Bei der Verwendung von \hologo{LaTeXe} gibt es ab und an das Problem, dass 
-bestimmte Wörter am Zeilenende falsch getrennt werden. Dies hat historische 
-Gründe. Als \hologo{TeX} in den 1980er-Jahren entwickelt wurde, war es aufgrund 
-der zu dieser Zeit zur Verfügung stehenden Speichergrößen schier unmöglich, die 
-Worttrennungen mit einem Wörterbuchansatz umzusetzen. Stattdessen wurde~-- um 
-den benötigten Speicherbedarf möglichst gering zu halten~-- ein Algorithmus 
-entworfen, der mögliche Trennstellen in einem Wort mit einer Mustererkennung 
-ermittelt. Die verwendeten Muster basieren jedoch auf der englischen Sprache, 
-weshalb auch heute noch in nicht-englischsprachigen Texten teilweise falsche 
-Trennstellen gefunden werden.
-
-Gleich zu Beginn wurde bei der Einleitung in \autoref{sec:introduction} auf das 
-Paket \Package{hyphsubst} hingewiesen, welches dieses Manko~-- aufgrund der 
-nicht mehr so stark gegebenen Restriktionen bezüglich des Speicherbedarfes~-- 
-mit einem Wörterbuch behebt. Dieses Paket muss \emph{vor} dem Laden der 
-Dokumentklasse eingebunden werden. Außerdem wird das Paket \Package{babel} 
-benötigt. Damit auch Wörter mit Umlauten richtig getrennt werden, ist zudem die 
-Verwendung der \PValue{T1}"~Schriftkodierung notwendig. Der Beginn einer 
-Dokumentpräambel könnte folgendermaßen aussehen:
-%
-\begin{Hint}
-\RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
-\documentclass[ngerman,§\PName{Klassenoptionen}§]§\Parameter{Dokumentklasse}§
-\usepackage{selinput}\SelectInputMappings{adieresis={ä},germandbls={ß}}
-\usepackage[T1]{fontenc}
-\usepackage{babel}
-§\dots§
-\end{Hint}
-%
-Die Option \Option{ngerman}[ngerman-x-latest] führt dabei zur Verwendung der 
-Trennmuster für die neue deutsche Rechtschreibung (\PValue{ngerman}), wobei 
-\PValue{ngerman-x-latest} die neuesten aller verfügbaren Trennmuster lädt. Für 
-die alte Orthographie ist stattdessen \Option{german}[german-x-lastest] zu 
-verwenden.
-
-
-\subsection{Einmalige und globale Worttrennungskorrektur}
-Sollte es dennoch passieren, dass ein Wort nicht richtig getrennt wird, kann 
-dies manuell korrigiert werden. Dafür stellt das Paket \Package{babel} mehrere 
-Kurzbefehle zur Verfügung. Außerdem lassen sich mit \Macro{hyphenation} für ein 
-bestimmtes Wort alle potentiellen Trennstellen angeben. Im \TUDScript-Handbuch
-ist dazu im Kapitel \manualhyperref{sec:tips:hyphenation}{Tipps \& Tricks} mehr 
-zu finden. Dort wird auch erläutert, wie das Problem der alleinigen Trennung 
-von Wörtern mit Bindestrich an selbigem umgangen werden kann.
-
-
-\subsection{Worttrennung im Flattersatz}
-Normalerweise ist bei \hologo{LaTeXe} die Worttrennung im Flattersatz%
-\footnote{\Macro{raggedright}, \Macro{raggedleft}, \Macro{center}} deaktiviert. 
-Mit dem Paket \Package{ragged2e} kann diese hierfür aktiviert werden. Wird es 
-geladen, stehen dem Anwender die Befehle \Macro{Centering}, \Macro{RaggedLeft} 
-sowie \Macro{RaggedRight} zur Verfügung, um Worttrennungen im Flattersatz zu 
-verwenden. Mit der Paketoption \Option{newcommands} können die originalen 
-Befehle \Macro{centering}, \Macro{raggedleft} und \Macro{raggedright} mit der 
-Definition der neuen überschrieben werden. Genaueres dazu ist der Dokumentation 
-des Paketes zu entnehmen.
-
-
-
-\section{Mikrotypographische Feinheiten}
-Unter Mikrotypographie oder Detailtypographie versteht man die Gestaltung 
-folgender Feinheiten des Schriftsatzes:
-\begin{itemize}
-\item korrekte Anwendung der Satzzeichen
-\item Schriftart, Kapitälchen und Ligaturen
-\item Wortabstände sowie Laufweite (Buchstaben- und Zeichenabstände)
-\item optischer Randausgleich
-\end{itemize}
-
-\noindent Die letzten beiden Punkte werden sensationell gut durch das Paket 
-\Package{microtype} bearbeitet. Dieses muss lediglich in der Präambel geladen 
-werden, wobei es nicht mit der klassischen \hologo{TeX}-Engine, wohl jedoch mit 
-\hologo{pdfTeX} als auch \hologo{LuaTeX} sowie \hologo{XeTeX} funktioniert.
-%
-\begin{Preamble}
-\usepackage[babel]{microtype}
-
-\end{Preamble}
-%
-Die Option \Option{babel} ist nur notwendig, wenn einzelne Textpassagen oder 
-das gesamte Dokument in Englisch oder Französisch verfasst werden und hierfür 
-die genutzte Sprache mit den entsprechenden Möglichkeiten von \Package{babel} 
-eingestellt wird.
-
-Die meisten \hologo{LaTeX}-Schriftfamilien enthalten außerdem Ligaturen, die 
-für einen typographisch sauberen Satz bei zusammengesetzten Wörtern, wie sie 
-gerade im Deutschen relativ häufig vorkommen, aufgetrennt werden müssten. Mit 
-der Anwendung \href{http://www.ctan.org/pkg/delig}{\Application{DeLig}} kann 
-dies automatisiert geschehen. Wird \hologo{LuaLaTeX} als Dokumentprozessor 
-genutzt, kann alternativ für dieses Unterfangen das Paket \Package{selnolig} 
-verwendet werden.
-
-Das korrekte Anwenden von Satzzeichen wird für deutschsprachige Texte bereits 
-in mehreren Artikeln \cite{neubauer1996,neubauer1997,struckmann2007,bier2009} 
-sehr gut erläutert, weshalb ein Hinweis auf diese Arbeiten für weitergehende 
-Informationen zu dieser Thematik absolut ausreichend ist. Nachfolgend werden 
-Tipps gegeben sowie einige \hologo{LaTeXe}-Pakete vorgestellt, die bei der 
-Umsetzung der in den genannten Artikeln erläuterten Empfehlungen helfen.
-
-\ToDo{Hier geht's weiter}
-\subsection{Abkürzungen}
-\ToDo[doc]{Hinweis auf Verwendung von glossaries bzw. acro}
-
-\subsection{Einheiten}
-\label{sec:units}
-Mit \Package{units} lassen sich physikalische Einheiten typographisch korrekt 
-setzen. Außerdem stellt diese Paket den Befehl \Macro{nicefrac} zur Verfügung, 
-mit dem sich mathematische Brüche~-- insbesondere für den Fließtext~-- sehr 
-ansehnlich darstellen lassen.
-%
-\begin{Preamble}
-\usepackage{units}
-
-\end{Preamble}
-
-
-
-
-\section{Sonderzeichen}
-
-
-
-\section{Querverweise}
-\label{sec:references}
-%
-Damit alle möglichen Querverweise in einem PDF-Dokument automatisch verlinkt 
-werden, sollte das Paket \Package{hyperref} geladen werden. Um die erzeugten 
-Links verträglich aussehen zu lassen, werden die Optionen \Option{colorlinks} 
-sowie \Option{linkcolor}[blue] verwendet. Da \Package{hyperref} allerhand 
-Veränderungen an vielen Standardbefehlen vornimmt, sollte dieses als letztes in 
-der Präambel eingebunden werden. Nur Pakete, bei denen in der Dokumentation 
-explizit darauf hingewiesen wird, dass diese nach \Package{hyperref} zu laden 
-sind, sollten auch danach folgen. Eines dieser wenigen Pakete ist das in diesem 
-Tutorial verwendete \Package{glossaries}. 
-%
-\begin{Preamble}
-\usepackage[colorlinks,linkcolor=blue]{hyperref}
-\end{Preamble}
-
-
-
-\section{Mathematiksatz}
-Von \hologo{LaTeXe} werden einige Umgebungen für das Setzen mathematischer 
-Formeln und Ausdrücke bereitgestellt, welche meist jedoch nicht \emph{alle} 
-Anforderungen eines Nutzers an den Mathematiksatz erfüllen können. Das Paket
-\Package{amsmath} bietet deshalb eine Reihe weiterführender Umgebungen für das 
-Setzen von einzeiligen und mehrzeiligen sowie ausgerichteter Formeln zur 
-Verfügung. Auf eine Einführung in das Paket wird~-- aufgrund der bereits in 
-großer Zahl vorhandenen Einführungen~-- in diesem Tutorial verzichtet. 
-
-Das Paket \Package{amsmath} stellt den De-facto-Standard für den mathematischen 
-Satz mit \hologo{LaTeXe} dar. Allerdings wird es aus diesem Grund nur sehr 
-\enquote{vorsichtig} weiterentwickelt. Für das Setzen neuer Dokumente sollte 
-deswegen das Paket \Package{mathtools} verwendet werden, welches zwar auf 
-\Package{amsmath} basiert, dieses allerdings um zusätzliche Funktionalitäten 
-erweitert und Bugfixes bereithält.
-
-Neben diesem Tutorial stehen mit \Tutorial{mathtype} und \Tutorial{mathswap} 
-zwei weitere zur Verfügung, die sich explizit mit der Thematik eines guten 
-mathematischen Satz beschäftigen.
-
-
-
-\section{Quelltexte}
+\section{Einbinden von Quelltexten}
 \ToDo[doc]{listings und fancyvrb}
 
 %\usepackage{listings} % [numbered] als Option gibt es für listings nicht
@@ -2483,34 +2566,116 @@ mathematischen Satz beschäftigen.
 %}{}
 %
 
-\begin{Hint}
-\usepackage{xparse}% §§§ bereits geladen
-\usepackage{textcomp}% §§§ bereits geladen
-\usepackage{setspace}% §§§ bereits geladen
-\usepackage{csquotes}% §§§ bereits geladen
-\usepackage{quoting}% §§§ bereits geladen
-\usepackage{isodate}% §§§ bereits geladen
-\usepackage{listings}% §§§ bereits geladen
-\usepackage{xspace}% §§§ bereits geladen
-\usepackage{scrhack}% §§§ bereits geladen
-\end{Hint}
 
-\begin{Hint}
-\usepackage{units}
-\usepackage{siunitx}
-\usepackage{xpunctuate}
-\usepackage{ellipsis}
-\usepackage{varioref}
+
+\section{Vermischtes}
+Hier taucht alles auf, was sich nicht in einen der vorherigen Abschnitte 
+eingliedern ließ.
+
+
+\subsection{Listen}
+\label{sec:lists}
+Für Auflistungen aller Art bietet \hologo{LaTeX} die drei Standardumgebungen 
+\Environment{iteimze}, \Environment{enumerate} und \Environment{description}. 
+Das häufigste Anliegen bei der Verwendung dieser Umgebungen ist das Reduzieren 
+der Abstände zwischen den einzelnen, mit \Macro{item} gesetzten Punkten, welche 
+sehr häufig als zu groß empfunden werden. Eine Aufzählung erscheint ohne 
+weitere Anpassungen normalerweise so:
+%
+\CodePreamble{%
+  Aufzählung mit einer \Environment{itemize}-Umgebung und Standardabständen:%
+}
+\begin{Hint*}
+\begin{itemize}
+\item erster Punkt
+\item zweiter Punkt
+\item dritter Punkt
+\end{itemize}
+\end{Hint*}
+%
+Dabei wirken die Abstände zwischen den einzelnen Punkten tatsächlich etwas 
+überdimensioniert. Mit dem Paket \Package{enumitem} können die Umgebungen für 
+Auflistungen einfach an die individuellen Bedürfnisse angepasst werden. 
+%
+\begin{Preamble}
+\usepackage{enumitem}
+\end{Preamble}
+Um diese ungewollten Abstände zwischen den Listenpunkten zu entfernen, kann der 
+Schlüssel \Option{noitemsep} verwendet werden. Mit dem Befehl \Macro{setlist} 
+werden~-- ohne zusätzliche Angaben im optionalen Argument~-- alle Umgebungen 
+für Aufzählungen global geändert:
+\begin{Preamble*}
+\setlist{noitemsep}
+
+\end{Preamble*}
+%
+Das Ergebnis stellt sich folgendermaßen dar:
+%
+\begin{Trunk+}
+\section{Eine Aufzählung mit angepassten Abständen}
+Ein kurzes Beispiel, wie eine Liste aussehen kann, nachdem die 
+Möglichkeiten des Paketes \texttt{enumitem} genutzt und mit dem 
+Befehl \texttt{\textbackslash setlist\{noitemsep\}} die vertikalen 
+Abstände angepasst wurden.
+
+\end{Trunk+}
+\CodePreamble{%
+  Aufzählung mit einer \Environment{itemize}-Umgebung ohne vertikale Abstände:%
+}
+\begin{Trunk*}
+\begin{itemize}
+\item erster Punkt
+\item zweiter Punkt
+\item dritter Punkt
+\end{itemize}
+
+\end{Trunk*}
+%
+Natürlich erlaubt das Paket noch weitergehende Einstellungen für die Umgebungen 
+\Environment{itemize}, \Environment{enumerate} und \Environment{description}. 
+Zusätzlich können diese für eigene Aufzählungsumgebungen geklont und den 
+eigenen Bedürfnissen angepasst werden. Genaueres hierzu ist der Dokumentation 
+des Paketes \Package{enumitem} entnehmen.
+
+
+\subsection{Fußnoten}
+Oftmals wird gewünscht, das Standardverhalten des Rücksetzens des Zählers für 
+Fußnoten beim Beginn eines neuen Kapitels zu deaktivieren. Dies kann mit dem 
+Paket \Package{chngcntr} realisiert werden. Dazu muss in der Präambel lediglich 
+folgendes eingestellt werden:
+%
+\begin{Preamble}
 \usepackage{chngcntr}
-\usepackage{bookmark}
+\counterwithout*{footnote}{chapter}
+
+\end{Preamble}
+
+
+\subsection{Sonderzeichen}
+Das Paket \Package{textcomp} stellt mehrere Befehle für die einfache Nutzung 
+von Sonderzeichen in der im Fließtext zur Verfügung.
+
+
+\subsection{Erweiterte Befehlsdeklaration}
+\ToDo{Kurze Beschreibung}
+\begin{Hint}
+\usepackage{xparse}
+\usepackage{xspace}% §§§ bereits geladen
+\usepackage{xpunctuate}
 \end{Hint}
 
-
-Damit ist das Tutorial beendet.
 \begin{Trunk+}
 \printbibliography\label{sec:bibliography}
 \end{Trunk+}
 \printbibliography[heading=bibintoc]
+
+\ListOfToDo
+\ToDo[doc]{Einarbeiten von \File{paragraph.tex} in \File{treatise.tex}}[v2.02]
+\ToDo{Abstände nach Kapitelüberschriften von Verzeichnissen passen nicht zum 
+normalen Layout}
+\ToDo[doc]{%
+  Ergebnis Copy \& Paste Beispiel prüfen, verbessern und ggf. erweitern%
+}[v2.02]
 
 \addsec{Index}
 Da das Tutorial etwas umfangreicher ist, wird für alle erläuterten Optionen, 
@@ -2535,9 +2700,4 @@ Umgebungen und Befehle ein Index erstellt.
   möglich ist. Nutzer von \Distribution{\hologo{MiKTeX}} müssen das Sortieren 
   mit \Application{xindy} händisch anstoßen.
 ]
-\ListOfToDo
-\ToDo[doc]{Einarbeiten von \File{paragraph.tex} in \File{treatise.tex}}[v2.02]
-\ToDo[doc]{Zuordnen oder Erwähnen der Pakete}
-\ToDo{Abstände nach Kapitelüberschriften von Verzeichnissen passen nicht zum 
-normalen Layout}
 \end{document}

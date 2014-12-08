@@ -25,10 +25,19 @@
 \usepackage{tabularx}
 \usepackage{tabulary}
 \usepackage{booktabs}
-\usepackage{units}
+\usepackage{siunitx}
+\sisetup{%
+  locale = DE,%
+  input-decimal-markers={,},%
+  input-ignore={.},%
+  group-separator={\,},%
+  group-minimum-digits=3%
+}
+\usepackage{xfrac}
 \AfterPackage*{hyperref}{%
   \usepackage[%
     automake,%
+    xindy={language=german-din},%
     acronym,%
     symbols,%
     nomain,%
@@ -37,12 +46,16 @@
   ]{glossaries}
   \setStyleFile{\jobname-temp}
   \renewcommand*{\glsglossarymark}[1]{}
+  \newignoredglossary{abbreviation}
+  \newcommand*\newabbreviation[4][]{%
+    \newacronym[type=abbreviation,#1]{#2}{#3}{#4}%
+  }%
   \makeglossaries
 }
 \usepackage{csquotes}
 \usepackage[backend=biber,style=alphabetic]{biblatex}
-\usepackage{filecontents}
-\addbibresource{treatise-temp.bib}
+\addbibresource{\jobname.bib}
+\DefineBibliographyStrings{ngerman}{urlseen = {Am:}}
 
 \usepackage{enumitem}
 
@@ -67,12 +80,88 @@
 
 \usepackage[open,openlevel=0]{bookmark}[2011/12/02]
 
+
+\ActivateWarningFilters[Tutorial]%
+\begin{filecontents}{\jobname.bib}
+@book{talbot2012,
+  author    = {Nicola L. C. Talbot},
+  title     = {{\LaTeX} for Complete Novices},
+  publisher = {Dickimaw Books},
+  series    = {Dickimaw {\LaTeX} Series},
+  volume    = {1},
+  isbn      = {978-1-909440-00-5},
+  address   = {Norfolk, UK},
+  year      = {2012},
+  url       = {http://www.dickimaw-books.com/latex/novices/},
+  urldate   = {2014-12-01},
+}
+@book{talbot2013,
+  author    = {Nicola L. C. Talbot},
+  title     = {Using {\LaTeX} to Write a PhD Thesis},
+  publisher = {Dickimaw Books},
+  series    = {Dickimaw {\LaTeX} Series},
+  volume    = {2},
+  isbn      = {978-1-909440-02-9},
+  address   = {Norfolk, UK},
+  year      = {2013},
+  url       = {http://www.dickimaw-books.com/latex/thesis/},
+  urldate   = {2014-12-01},
+}
+@online{reichert2012,
+  author       = {Reichert, Axel and Voß, Herbert},
+  title        = {\LaTeX~-- Satz von Tabellen},
+  organization = {Freie Universität Berlin},
+  date         = {2012-01-12},
+  url          = {http://userpage.fu-berlin.de/latex/Materialien/tabsatz.pdf},
+  urldate      = {2014-12-01}
+}
+@article{neubauer1996,
+  author       = {Marion Neubauer},
+  title        = {Feinheiten bei wissenschaftlichen Publikationen~--
+                   Mikrotypographie"=Regeln, Teil~I},
+  journaltitle = {Die \TeX{}nische Komödie},
+  year         = {1997},
+  month        = {2},
+  volume       = {4/96},
+  pages        = {23-40},
+  url          = {http://www.dante.de/tex/Dokumente/dtk-neubauer.pdf},
+  urldate      = {2014-12-01},
+}
+@article{neubauer1997,
+  author       = {Marion Neubauer},
+  title        = {Feinheiten bei wissenschaftlichen Publikationen~--
+                   Mikrotypographie"=Regeln, Teil~II},
+  journaltitle = {Die \TeX{}nische Komödie},
+  year         = {1997},
+  month        = {5},
+  volume       = {1/97},
+  pages        = {25--44},
+  url          = {http://www.dante.de/tex/Dokumente/dtk-neubauer.pdf},
+  urldate      = {2014-12-01},
+}
+@online{struckmann2007,
+  author  = {Struckmann, Werner},
+  title   = {Einige typographische Grundregeln und ihre Umsetzung in \LaTeX},
+  date    = {2007-09-03},
+  url     = {http://www2.informatik.hu-berlin.de/sv/lehre/typographie.pdf},
+  urldate = {2014-12-01}
+}
+@online{bier2009,
+  author  = {Bier, Christoph},
+  title   = {typokurz~-- Einige wichtige typografische Regeln},
+  date    = {2009-05-21},
+  url     = {http://zvisionwelt.wordpress.com/downloads/#typokurz},
+  urldate = {2014-12-01}
+}
+\end{filecontents}
+\DeactivateWarningFilters[Tutorial]%
+
 \begin{document}
 \title{%
   Ein Anwenderleitfaden für das Erstellen einer wissenschaftlichen Abhandlung%
 }
-\author{Falk Hanisch\thanks{\noexpand\href{mailto:\tudscrmail}{\tudscrmail}}}
-\date{18.11.2014}
+\author{Falk Hanisch\thanks{\noexpand\scriptsize\noexpand\Email{\tudscrmail}}}
+\date{01.12.2014}
 \makeatletter
 \begingroup%
   \def\and{, }%
@@ -108,8 +197,9 @@
   ausführliche \hrfn{http://www.fadi-semmo.de/latex/workshop/}{Workshop-Reihe} 
   von Fadi~Semmo. Außerdem stellt Nicola~L.~C.~Talbot sehr gute Tutorials für 
   \hrfn{http://www.dickimaw-books.com/latex/novices/}{\hologo{LaTeX}-Novizen} 
-  sowie \hrfn{http://www.dickimaw-books.com/latex/thesis/}{Dissertationen} zur 
-  freien Verfügung.
+  \cite{talbot2012} sowie 
+  \hrfn{http://www.dickimaw-books.com/latex/thesis/}{Dissertationen} 
+  \cite{talbot2013} zur freien Verfügung.
   
   In erster Linie ist dieser Leitfaden für Anwender gedacht, die für ihre
   wissenschaftliche Arbeit eine \TUDScript"=Dokumentklasse verwenden wollen. 
@@ -136,10 +226,6 @@
 \listoffigures
 \listoftables
 
-
-
-
-
 \addsec{Index}
 Da das Tutorial etwas umfangreicher ist, wird für alle erläuterten Optionen, 
 Umgebungen und Befehle ein Index erstellt.
@@ -163,7 +249,4 @@ Umgebungen und Befehle ein Index erstellt.
   möglich ist. Nutzer von \Distribution{\hologo{MiKTeX}} müssen das Sortieren 
   mit \Application{xindy} händisch anstoßen.
 ]
-
-\ToDo[imp]{Einarbeiten von \File{paragraph.tex} in \File{treatise.tex}}[v2.02]
-\ListOfToDo
 \end{document}
