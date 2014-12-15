@@ -1,7 +1,8 @@
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrreprt}
 \usepackage{babel}
-\usepackage{selinput}\SelectInputMappings{adieresis={ä},germandbls={ß}}
+\usepackage{selinput}
+\SelectInputMappings{adieresis={ä},germandbls={ß}}
 \usepackage[T1]{fontenc}
 \usepackage{fixltx2e}
 \usepackage{scrhack}
@@ -46,6 +47,13 @@ sort={#2},%
 #1%
 }%
 }
+\defglsentryfmt[symbols]{%
+\ifmmode%
+\glssymbol{\glslabel}%
+\else%
+\glsgenentryfmt~\glsentrysymbol{\glslabel}%
+\fi%
+}
 \newglossarystyle{symblongtabu}{%
 \renewenvironment{theglossary}{%
 \begin{longtabu}spread 0pt[l]{ccX<{\strut}l}%
@@ -68,14 +76,8 @@ sort={#2},%
 \glossentryname{##1} &
 ##2\tabularnewline%
 }%
-}
-\defglsentryfmt[symbols]{%
-\ifmmode%
-\glssymbol{\glslabel}%
-\else%
-\glsgenentryfmt~\glsentrysymbol{\glslabel}%
-\fi%
 }}
+% Ende von \AfterPackage*{hyperref}
 \usepackage{csquotes}
 \usepackage[backend=biber,style=alphabetic]{biblatex}
 \usepackage{filecontents}
@@ -126,15 +128,14 @@ language = {german},
 \usepackage{tabulary}
 \usepackage{tabu}
 \usepackage[colorlinks,linkcolor=blue]{hyperref}
-\usepackage{csquotes}
 \usepackage{quoting}
 \usepackage[babel]{microtype}
 \usepackage{xfrac}
-\usepackage{isodate}
 \usepackage{enumitem}
-\setlist{noitemsep}
-\usepackage{chngcntr}
-\counterwithout*{footnote}{chapter}
+\setlist[itemize]{noitemsep}
+\usepackage{isodate}
+\usepackage{ellipsis}
+\let\ellipsispunctuation\relax
 \begin{document}
 \faculty{Juristische Fakultät}
 \department{Fachrichtung Strafrecht}
@@ -154,7 +155,8 @@ Mickey Mouse
 \course{Klinische Prognostik}
 \discipline{Individualprognose}
 \and%
-Donald Duck\matriculationnumber{87654321}
+Donald Duck
+\matriculationnumber{87654321}
 \dateofbirth{1.2.1990}
 \placeofbirth{Berlin}
 \course{Statistische Prognostik}
@@ -212,10 +214,10 @@ Ende des Dokumentes auf Seite~\pageref{sec:bibliography}~-- alle
 Verzeichnisse erfolgreich ausgegeben wurden, wird nun die Verwendung
 der weiteren Umgebungen und Befehle demonstriert, welche im Tutorial
 \texturn{treatise.pdf} vorgestellt wurden.
+\section{Die Verwendung von Abkürzungen}
 \newacronym{apsp}{APSP}{All-Pairs Shortest Path}
 \newacronym{spsp}{SPSP}{Single-Pair Shortest Path}
 \newacronym{sssp}{SSSP}{Single-Source Shortest Path}
-\section{Die Verwendung von Abkürzungen}
 In der Graphentheorie wird häufig die Lösung des Problems des kürzesten
 Pfades zwischen zwei Knoten gesucht. Dieses Problem wird häugig auch
 mit \gls{spsp} bezeichnet. Es lässt sich auf die Variationen \gls{sssp}
@@ -232,8 +234,8 @@ SI"=Einheiten der Basisgrößen \gls{l}, \gls{m} und \gls{t} abgeleitet.
 Und dann gibt es noch die Grundgleichung der Mechanik, welche für den
 Fall einer konstanten Kraftwirkung in die Bewegungsrichtung einer
 Punktmasse lautet:
-$\gls{F} = \gls{m} \cdot \gls{a}$
-\section{Zitieren und das Literaturverzeichnis}
+\[\gls{F} = \gls{m} \cdot \gls{a}\]
+\section{Referenzen und das Literaturverzeichnis}
 Das Literaturverzeichnis wir auf Basis der nachfolgend verwendeten
 Zitate erstellt und ist auf Seite~\pageref{sec:bibliography} zu finden.
 In diesem Textabschnitt werden die zwei bekannten \LaTeX-Bücher
@@ -273,13 +275,10 @@ sowohl auf \autoref{fig:logos} als auch auf \autoref{fig:tud} sowie
 {\begin{subfloatrow}%
 \ffigbox[\FBwidth]%
 {\fbox{\includegraphics[height=2cm]{TUD-black}}}%
-{%
-\caption{Das offizielle Logo der Technischen Universität Dresden}
-\label{fig:tud}%
-}%
+{\caption{Eine Abbildung}\label{fig:tud}}%
 \ffigbox[\FBwidth]%
 {\fbox{\includegraphics[height=2cm]{DDC-21}}}%
-{\caption{Ein weiteres Logo}\label{fig:ddc}}%
+{\caption{Eine weitere Abbildung}\label{fig:ddc}}%
 \end{subfloatrow}}%
 {\caption{Eine Gleitumgebung mit zwei Abbildungen}\label{fig:logos}}%
 \end{figure}
@@ -296,11 +295,11 @@ Es wird eine Tabelle mithilfe der \texttt{tabularx}-Umgebung erstellt.
 Zu sehen ist diese in \autoref{tab:tabularx}. Für diese werden zuvor
 neue Spaltentypen definiert.
 \newcolumntype{Y}{>{\hspace{0pt}}X}
-\newcolumntype{S}{>{\raggedright}Y}
-\newcolumntype{T}{>{\centering}Y}
-\newcolumntype{U}{>{\raggedleft}Y}
+\newcolumntype{D}{>{\raggedright}Y}
+\newcolumntype{E}{>{\centering}Y}
+\newcolumntype{F}{>{\raggedleft}Y}
 \begin{table}
-\begin{tabularx}{\textwidth}{@{}STUY@{}}
+\begin{tabularx}{\textwidth}{@{}DEFY@{}}
 \toprule
 \textbf{Linksbündig} & \textbf{Zentriert} &
 \textbf{Rechtsbündig} & \textbf{Blocksatz} \tabularnewline
@@ -348,13 +347,7 @@ Tabelle zu begrenzen.
 }
 \makeatother
 \begin{table}
-\ttabbox{
-\caption{%
-Eine \texttt{tabu}-Tabelle in Verbindung mit dem Befehl
-\texttt{\textbackslash ttabbox}, welcher vom Paket \texttt{floatrow}
-für Beschriftungen in Objektbreite bereitgestellt wird%
-}\label{tab:tabu}%
-}{%
+\ttabbox{%
 \begin{tabu} to .8\textwidth {@{}Z[3,l]Z[3,c]Z[3,r]Z[2,j]@{}}
 \toprule
 \textbf{Linksbündig} & \textbf{Zentriert} &
@@ -366,27 +359,41 @@ Ein rechtsbündiger Blindtext zur Demonstration einer Z[r]"~Spalte &
 Ein Blindtext im Blocksatz innerhalb einer Z"~Spalte
 \tabularnewline
 \bottomrule
-\end{tabu}}
+\end{tabu}%
+}{%
+\caption[Eine \texttt{tabu}-Tabelle]{%
+Eine \texttt{tabu}-Tabelle in Verbindung mit dem Befehl
+\texttt{\textbackslash ttabbox}, welcher vom Paket \texttt{floatrow}
+für Beschriftungen in Objektbreite bereitgestellt wird%
+}\label{tab:tabu}%
+}
 \end{table}
-\enquote{Dies ist ein zugegebenermaßen nicht sehr sinnvolles Zitat}
+\section{Zitate}
+Bei der Verwendung von wörtlichen Zitaten sollten diese als solche
+gekennzeichnet werden.
+\enquote{Dies ist ein zugegebenermaßen nicht sehr sinnvolles Zitat.}
 \cite[58]{hanisch14}
+Für eine möglichst gut nachvollziehbare Referenz sollte nicht nur
+das Werk selber sondern zumindest die Seitenzahl und gegebenfalls
+der Absatz der originalen Textstelle angegeben werden.
 \begin{quoting}
 \enquote{%
 Dies ist ein noch sinnloseres Zitat. Allerdings wird zumindest die
-Wirkung der Umgebung \texttt{quoting} deutlich. Auch für dieses
-wörtliche Zitat sollte die dazugehörige Referenz ausgegeben werden.%
+Wirkung der Umgebung \texttt{quoting} bei der Absatzauszeichnung
+deutlich.
+Wie man sieht, ist der zweite Absatz~-- wie jeder weitere~-- aufgrund
+der Einstellung \texttt{parskip=false} eingezogen.
 }
-\cite[12]{hanisch14}
+\cite[sinngemäß nach][\pno{} 12, zweiter Absatz]{hanisch14}
 \end{quoting}
-\section{Eine Aufzählung mit angepassten Abständen}
-Ein kurzes Beispiel, wie eine Liste aussehen kann, nachdem die
-Möglichkeiten des Paketes \texttt{enumitem} genutzt und mit dem
-Befehl \texttt{\textbackslash setlist\{noitemsep\}} die vertikalen
-Abstände angepasst wurden.
+Ebenfalls sollten sinngemäße Zitate mit einer möglichst genauen Referenz
+angegeben werden. Dies kann im Laufe der Arbeit acuh für einen selbst von
+Vorteil sein, wenn man beispielsweise die originale Textpassage noch
+einmal analysieren möchte.
 \begin{itemize}
 \item erster Punkt
 \item zweiter Punkt
 \item dritter Punkt
 \end{itemize}
-\printbibliography\label{sec:bibliography}
+\printbibliography[heading=bibintoc]\label{sec:bibliography}
 \end{document}
