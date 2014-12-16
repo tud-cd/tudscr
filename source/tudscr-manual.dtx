@@ -1,4 +1,4 @@
-% \CheckSum{2487}
+% \CheckSum{2502}
 % \iffalse meta-comment
 % ======================================================================
 %
@@ -49,7 +49,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-manual.dtx}[%
-  2014/12/15 v2.02 TUD-KOMA-Script\space%
+  2014/12/16 v2.02 TUD-KOMA-Script\space%
 %</driver>
 %<identify>\NeedsTeXFormat{LaTeX2e}[2011/06/27]
 %<class&identify>\ProvidesClass{tudscrman}[%
@@ -2658,8 +2658,8 @@
 % \begin{environment}{Hint!}
 % \changes{v2.02}{2014/11/13}{neu}%^^A
 % Um Quelltextausschnitte zur weiterführenden Information anzugeben, wird die
-% die \env{Hint}"=Umgebung definiert. Der Inhalt wird ausgegben und~-- falls
-% die Sternversion genutzt wurde~-- auch ausgeführt, allerdings nicht in das 
+% Umgebung \env{Hint} definiert. Der Inhalt wird ausgegben und~-- falls die
+% Sternversion genutzt wurde~-- auch ausgeführt, allerdings nicht in das 
 % Copy"~\&"~Paste"~Beispiel übernommen. Ansonsten entsprechen alle Umgebungen 
 % in ihren Eigenschaften den äquivalenten \env{Trunk}-Umgebungen. Die Version 
 % mit Fragezeichen ist für Quelltextauszüge gedacht, die ungeprüft \emph{vor}
@@ -2847,7 +2847,7 @@
 %    \begin{macrocode}
 \ifnum\pdfshellescape=1\relax%
 \ActivateWarningFilters[Tutorial]%
-\begin{filecontents*}{\jobname-tutorial-temp.tex}
+\begin{filecontents*}{tutorial-temp.tex}
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrreprt}
 \usepackage[utf8]{inputenc}
@@ -2865,21 +2865,21 @@
 \fi
 %    \end{macrocode}
 % Der Quelltext aus der \env{Trunk!}"=Umgebung wird~-- wie bei allen anderen
-% \env{Trunk}"=Umgebungen~-- in der Datei \val{\string\jobname-temp.tex}
-% gesichert. Durch die Nutzung der Option \opt{-jobname=\string\jobname-temp}
-% beim Aufruf von pdf\LaTeX{} wird die Definition von \cs{jobname} in der 
-% aufgerufenen Datei \val{\string\jobname-tutorial-temp.tex} überschrieben und
-% der Inhalt von \val{\string\jobname-temp.tex} wie gewünscht eingebunden und
-% kompiliert. Damit die erstellte PDF-Datei später mit \cs{IncludeStandalone} 
-% eingebunden werden kann, wird diese noch in \cs{\meta{Argument}-temp.pdf} 
-% umbenannt.
+% Derivaten der Umgebungen \env{Trunk}~-- in \val{\string\jobname-temp.tex}
+% gesichert. Beim Aufruf von pdf\LaTeX{} wird durch die Verwendung der Option 
+% \opt{-jobname=\string\jobname-temp} die eigentliche Definition des Makros 
+% \cs{jobname} in der aufgerufenen Datei \val{tutorial-temp.tex} überschrieben
+% und der Inhalt von \val{\string\jobname-temp.tex} wie gewünscht eingebunden
+% und kompiliert. Damit die so erstellte PDF-Datei mit \cs{IncludeStandalone} 
+% im weiteren Verlauf in das Tutorial eingebunden werden kann, wird diese noch
+% in \cs{\meta{Argument}-temp.pdf} umbenannt.
 %    \begin{macrocode}
 \newcommand*\tud@tut@pdf{%
   \ifnum\pdfshellescape=1\relax%
     \immediate\write18{%
-      pdflatex -jobname=\jobname-temp \jobname-tutorial-temp.tex
-      pdflatex -jobname=\jobname-temp \jobname-tutorial-temp.tex
-      pdflatex -jobname=\jobname-temp \jobname-tutorial-temp.tex
+      pdflatex -jobname=\jobname-temp tutorial-temp.tex
+      pdflatex -jobname=\jobname-temp tutorial-temp.tex
+      pdflatex -jobname=\jobname-temp tutorial-temp.tex
     }%
     \ifwindows%
       \immediate\write18{rename \jobname-temp.pdf \@StandaloneFile-temp.pdf}%
@@ -2953,6 +2953,7 @@
   \immediate\write\tud@tut@write@trunk{^^J\string\end{document}^^J}
   \immediate\closeout\tud@tut@write@trunk%
   \immediate\closeout\tud@tut@write@preamble%
+  \tud@tut@collect%
   \clearpage%
   \addsec{Copy~\&~Paste}%
   \pagestyle{empty}%
@@ -2962,11 +2963,11 @@
   genutzten PDF-Betrachter~-- beim Kopieren die dargestellten Einz\"uge und 
   Abs\"atze m\"oglicherweise verloren gehen k\"onnen. Dies kann insbesondere 
   aufgrund fehlender Leerzeilen zu einem unvorteilhaften Ausgabeergebnis 
-  f\"uhren. Alternativ finden Sie unter \Path{texmf/doc/latex/tudscr/examples} 
-  das Beispiel auch als \File{.tex}-Datei. \par #1
+  f\"uhren.  Alternativ finden Sie den nachfolgenden \hologo{LaTeX}-Quelltext 
+  auch unter dem Pfad \Path{texmf/source/latex/tudscr/doc/examples/} als Datei
+  \File{\jobname-example.tex}. \par #1
   \begin{quoting}[rightmargin=0pt]%
-  \lstinputlisting[style=tudscr,belowskip=\z@]{\jobname-preamble-temp.tex}%
-  \lstinputlisting[style=tudscr,aboveskip=\z@]{\jobname-trunk-temp.tex}%
+  \lstinputlisting[style=tudscr]{\jobname-example-temp.tex}%
   \end{quoting}%
 }
 %    \end{macrocode}
@@ -2977,8 +2978,6 @@
 % \begin{macro}{\tud@tut@write@trunk}
 % \changes{v2.02}{2014/08/19}{neu}%^^A
 % \begin{macro}{\tud@tut@read}
-% \changes{v2.02}{2014/08/19}{neu}%^^A
-% \begin{macro}{\tud@tut@append}
 % \changes{v2.02}{2014/08/19}{neu}%^^A
 % \begin{macro}{\tud@tut@line}
 % \changes{v2.02}{2014/08/19}{neu}%^^A
@@ -2993,15 +2992,24 @@
 \newread\tud@tut@read
 \newcommand*\tud@tut@line{}
 %    \end{macrocode}
-% Mit \cs{tud@tut@append} wird der Inhalt des zuletzt gesetzten Tutorials aus 
-% der temporären Datei \cs{jobname-temp.tex} in \cs{jobname-\#1-temp.tex}
-% geschrieben. In dieser Datei werden \emph{alle} Quelltexte gespeichert, um 
-% diese am Ende des Tutorials mit \cs{FinishTutorial} auszugeben.
+% \end{macro}^^A \tud@tut@line
+% \end{macro}^^A \tud@tut@read
+% \end{macro}^^A \tud@tut@write@trunk
+% \end{macro}^^A \tud@tut@write@preamble
+% \begin{macro}{\tud@tut@write}
+% \changes{v2.02}{2014/12/16}{neu}%^^A
+% \begin{macro}{\tud@tut@append}
+% \changes{v2.02}{2014/08/19}{neu}%^^A
+% \begin{macro}{\tud@tut@collect}
+% \changes{v2.02}{2014/12/16}{neu}%^^A
+% Mit \cs{tud@tut@write} wird der Inhalt einer Datei, welche im ersten Argument 
+% angegeben wird, in den Ausgabestream des zweiten Argumentes geschrieben. Dies 
+% wird durch die Makros \cs{tud@tut@append} und \cs{tud@tut@collect} genutzt.
 %    \begin{macrocode}
-\newcommand*\tud@tut@append[1]{%
+\newcommand*\tud@tut@write[2]{%
   \begingroup%
-  \endlinechar=-1%
-  \openin\tud@tut@read=\jobname-temp.tex%
+  \endlinechar=-1\relax%
+  \openin\tud@tut@read=#1%
 %    \end{macrocode}
 % Der Schalter \cs{if@tempswa} wird verwendet, um unnötige Leerzeilen in der
 % Ausgabedatei zu entfernen. Wurde eine nicht leere Zeile gefunden, wird diese 
@@ -3012,7 +3020,7 @@
 %    \begin{macrocode}
   \@tempswafalse%
   \loop\unless\ifeof\tud@tut@read%
-    \read\tud@tut@read to\tud@tut@line%
+    \readline\tud@tut@read to\tud@tut@line%
     \ifx\tud@tut@line\@empty%
       \ifeof\tud@tut@read\@tempswafalse\fi%
     \else%
@@ -3022,9 +3030,7 @@
 % Hier erfolgt das eigentliche Schreiben im selektierten Stream.
 %    \begin{macrocode}
     \if@tempswa%
-      \immediate\write\@nameuse{tud@tut@write@#1}{%
-        \unexpanded\expandafter{\tud@tut@line}%
-      }%
+      \immediate\write#2{\unexpanded\expandafter{\tud@tut@line}}%
     \fi%
 %    \end{macrocode}
 % Im Nachgang wird überprüft, ob die aktuell geschriebene Zeile leer war. Ist 
@@ -3037,11 +3043,34 @@
   \endgroup%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@tut@line
+% Der innerhalb der Umgebungen \env{Preamble} und \env{Trunk}~-- sowie deren 
+% Derivaten~-- angegeben Inhalt wird beim Beenden dieser in die Hilfsdatei
+% \cs{jobname-temp.tex} zwischengespeichert. Mit dem Befehl \cs{tud@tut@append}
+% wird der Inhalt dieser Datei ausgelesen und den zusätzlichen Hilfsdateien
+% \cs{jobname-preamble-temp.tex} und \cs{jobname-trunk-temp.tex} angehangen und
+% damit gesichert, um Quelltextauszüge aus dem Tutorial für die Präambel sowie
+% den Dokumentteil trennen beziehungsweise sortieren zu können.
+%    \begin{macrocode}
+\newcommand*\tud@tut@append[1]{%
+  \tud@tut@write{\jobname-temp.tex}{\@nameuse{tud@tut@write@#1}}%
+}
+%    \end{macrocode}
+% Das Makro \cs{tud@tut@collect} fügt alle Quelltexte des Tutorials, welche 
+% nach Präambel und Dokumentteil sortiert wurden, in einer Datei zusammen. 
+% Diese wird zum einen am Ende des Tutorials mit \cs{FinishTutorial} ausgeben, 
+% zum anderen wird diese als Beispiel in den Ordner für Beispiele beim Erzeugen 
+% eines Release kopiert.
+%    \begin{macrocode}
+\newcommand*\tud@tut@collect{%
+  \immediate\openout\tud@tut@write@trunk\jobname-example-temp.tex\relax%
+  \tud@tut@write{\jobname-preamble-temp.tex}{\tud@tut@write@trunk}%
+  \tud@tut@write{\jobname-trunk-temp.tex}{\tud@tut@write@trunk}%
+  \immediate\closeout\tud@tut@write@trunk
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@tut@collect
 % \end{macro}^^A \tud@tut@append
-% \end{macro}^^A \tud@tut@read
-% \end{macro}^^A \tud@tut@write@trunk
-% \end{macro}^^A \tud@tut@write@preamble
+% \end{macro}^^A \tud@tut@write
 %
 % \iffalse
 %</package>

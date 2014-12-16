@@ -36,7 +36,7 @@ move  tudscr.ins       source\latex\tudscr\
 move  tudscrsource.tex source\latex\tudscr\
 xcopy doc              source\latex\tudscr\doc\ /s
 del source\latex\tudscr\test.tex /s > nul
-for /f %%f in ('dir  /b ..\*.md') do copy ..\%%f doc\latex\tudscr\%%~nf
+for /f %%f in ('dir /b ..\*.md') do copy ..\%%f doc\latex\tudscr\%%~nf
 move tudscrsource.pdf doc\latex\tudscr\
 move logo             tex\latex\tudscr\
 del *.* /q > nul
@@ -56,6 +56,15 @@ attrib +h "tutorials\*-temp.pdf"
 attrib +h "tutorials\*-pics.pdf"
 move tudscr*.pdf     latex\tudscr
 move tutorials\*.pdf latex\tudscr\tutorials\
+setlocal enabledelayedexpansion
+set "pattern=-temp"
+set "replace="
+for /f %%f in ('dir /b tutorials\*-example-temp.tex') do (
+  set "file=%%~f"
+  echo "!file!"
+  copy "tutorials\!file!" "examples\!file:%pattern%=%replace%!"
+)
+endlocal
 del *.* /q > nul
 rmdir examples /s /q > nul
 rmdir tutorials /s /q > nul

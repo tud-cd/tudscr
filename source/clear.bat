@@ -6,7 +6,7 @@ attrib +h "*.tex" /s
 attrib -h "*-temp.*" /s> nul
 attrib +h "doc\tudscrman.*" /s
 attrib +h "logo\*.*"
-attrib +h "test\*.cls"
-attrib +h "test\*.sty"
+attrib +h "test\*.cls"> nul
+attrib +h "test\*.sty"> nul
 del "*.*" /s /q> nul
 attrib -h "*.*" /s
