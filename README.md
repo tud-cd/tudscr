@@ -2,7 +2,7 @@
 TUD-KOMA-Script
 ===============
 
-TUD-KOMA-Script 2014/10/xx v2.02
+TUD-KOMA-Script 2014/12/16 v2.02
 Copyright (c) Falk Hanisch <tudscr[at]gmail.com>, 2012-2014
 
 This material is subject to the LaTeX Project Public License.
@@ -50,7 +50,7 @@ Das Bundle beinhaltet:
 Versionen
 ---------
 
-**v2.02** (2014/10/xx)
+**v2.02** (2014/12/16)
 + Paket `tudscrfonts`
 + Probleme mit der Klasse `standalone` behoben
 + Laden der Schriften des Corporate Designs im OpenType-Format mit `fontspec`
@@ -126,7 +126,7 @@ The bundle offers:
 Versions
 --------
 
-**v2.02** (2014/10/xx)
+**v2.02** (2014/12/16)
 + package `tudscrfonts`
 + fixed bug with class `standalone`
 + loading the corporate design fonts in OpenType format with `fontspec` is
