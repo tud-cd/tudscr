@@ -1,0 +1,889 @@
+\chapter{Unerlässliche und beachtenswerte Pakete}
+\manualhyperdef{sec:packages}
+\index{Kompatibilität!Pakete}
+\section{Von den neuen Hauptklassen benötigte Pakete}
+\label{sec:packages:needed}
+\subsection{Erforderliche Pakete bei der Schriftinstallation}
+%
+Für die Installation der Schriften sind die folgend genannten Pakete von
+\emph{essentieller} Bedeutung und daher \emph{zwingend} notwendig. Das 
+Vorhandensein dieser wird durch die jeweiligen Schriftinstallationsskripte
+(siehe~\autoref{sec:install}) geprüft und die Installation beim Fehlen eines 
+oder mehrerer Pakete mit einer entsprechenden Warnung abgebrochen.
+%
+\begin{packages}
+\item[fontinst]
+  Dieses Paket wird für die Installation der Schriften \Univers sowie \DIN 
+  benötigt.
+\item[cmbright]
+  Alle mathematischen Glyphen und Symbole, die nicht in den \Univers-Schriften 
+  enthalten sind, werden diesem Paket entnommen.
+\item[iwona]
+  Sowohl für die \Univers-Schriftfamilie als auch für \DIN werden fehlenden 
+  Glyphen und Symbole hieraus entnommen.
+\end{packages}
+%
+Zusätzlich werden die \texttt{Schreibmaschinenschriften} aus dem Paket 
+\Package{lmodern} verwendet.
+
+\subsection{Notwendige Pakete für die Verwendung der Hauptklassen}
+In diesem \autorefname werden alle Pakete genannt, die von den neuen Klassen 
+zwingend benötigt und geladen werden, um den Anwender das mehrmalige Laden 
+dieser Pakete oder mögliche Konflikte mit anderen Paketen zu ersparen.
+%
+\begin{packages}
+\item[scrbase](koma-script)
+  Dieses Paket gehört zum \KOMAScript-Bundle und erlaubt das Definieren von 
+  Klassenoptionen im Stil von \KOMAScript, welche auch noch nach dem Laden der 
+  Klasse mit den Befehlen \Macro{TUDoption} und \Macro{TUDoptions} geändert 
+  werden können. Von diesem wird das Paket \Package{keyval} geladen, welches 
+  das Definieren von Klassen"~ und Paketoptionen sowie Parametern nach dem 
+  Schlüssel"=Wert"=Prinzip ermöglicht.
+\item[kvsetkeys]
+  Hiermit wird das von \Package{scrbase} geladene Paket \Package{keyval} 
+  verbessert. Unter anderem kann das Verhalten für einen übergebenen, 
+  unbekannten Schlüssel festgelegt werden.
+\item[scrlayer-scrpage](koma-script)
+  \ChangedAt{v2.02!\Package{scrlayer-scrpage}: Für Verwendung notwendig}
+  Dieses \KOMAScript-Paket wird für die \PageStyle{tudheadings}-Seitenstile 
+  benötigt.
+\item[etoolbox]
+  Es werden viele Funktionen zum Testen und zur Ablaufkontrolle bereitgestellt 
+  und das einfache Manipulieren vorhandener Makros ermöglicht.
+\item[geometry]\index{Satzspiegel}
+  Das Paket ist essentiell für die \TUDScript-Klassen. Es wird zum Festlegen 
+  der Seitenränder respektive des Satzspiegels verwendet.
+\item[textcase]\index{Schriftauszeichnung}
+  Mit \Macro{MakeTextUppercase} wird die Großschreibung der Überschriften in 
+  \DIN erzwungen. Im \emph{Ausnahmefall} kann dies mit \Macro{NoCaseChange} 
+  unterbunden werden.
+\item[graphicx]\index{Grafiken}
+  Dies ist das De-facto-Standard-Paket zum Einbinden von Grafiken. Zum Setzen 
+  des Logos der \TnUD im Kopf wird \Macro{includegraphics} genutzt.
+\item[xcolor]\index{Farben}
+  Damit werden die Farben des \CDs zur Verwendung im Dokument definiert. 
+  Genaueres ist bei der Beschreibung von \Package{tudscrcolor}'auto' zu finden.
+\item[eviron]\index{Befehle!Deklaration}
+  Es wird eine verbesserte Deklaration von Umgebungen ermöglicht, bei der auch 
+  beim Abschluss der Umgebung auf die übergebenen Parameter zugegriffen werden 
+  kann. Dies wird die Neugestaltung der \Environment{abstract}"=Umgebung 
+  benötigt. Das Paket lädt \Package{trimspaces}, womit das Entfernen von 
+  überflüssigen Leerraum um einen Strings ermöglicht wird.
+\item[afterpage]
+  \ChangedAt{v2.02!\Package{afterpage}: Für Verwendung notwendig}
+  Der Befehl \Macro{afterpage}\Parameter{\dots} kann genutzt werden, um den 
+  Inhalt aus dessen Argument direkt nach der Ausgabe der aktuellen Seite 
+  auszuführen. Es wird für den Titelkopf im \CD für das zweispaltige Layout 
+  benötigt (\autoref{sec:title}).
+\end{packages}
+%
+Möchten Sie eines der hier aufgezählten Pakete selber mit bestimmten Optionen 
+laden, so sollten diese bereits \emph{vor} der Definition der Dokumentklasse an 
+das Paket weitergereicht werden.
+%
+\begin{Example}
+Das Weiterreichen von Optionen an Pakete muss folgendermaßen erfolgen:
+\begin{Code}[escapechar=§]
+\PassOptionsToPackage§\Parameter{Optionenliste}\Parameter{Paket}§
+\documentclass§\OParameter{Klassenoptionen}\PParameter{tudscr\dots}§
+\end{Code}
+\end{Example}
+
+
+
+\section{Durch \TUDScript direkt unterstütze Pakete}
+%
+\begin{packages}
+\item[hyperref]\index{Lesezeichen}\index{Querverweise}
+  Hiermit können in einem PDF-Dokument Lesezeichen, Querverweise und 
+  Hyperlinks erstellt werden. Wird es geladen, sind außerdem die Option 
+  \Option{tudbookmarks} sowie der Befehl \Macro{tudbookmark} nutzbar. Das 
+  Paket \Package{bookmark} erweitert die Unterstützung nochmals. Beide 
+  genannten Pakete sollten~-- bis auf sehr wenige Ausnahmen wie beispielsweise 
+  \Package{glossaries}~-- als letztes in der Präambel eingebunden werden.
+\item[isodate]\index{Datum|?}
+  Dieses Paket formatiert mit \Macro{printdate}\Parameter{Datum} die Ausgabe 
+  eines Datums automatisch in ein spezifiziertes Format. Wird es geladen, 
+  werden alle Datumsfelder, welche durch die \TUDScript-Klassen definiert 
+  wurden,%
+  \footnote{%
+    \Macro{date}, \Macro{dateofbirth}, \Macro{defensedate}, \Macro{duedate}, 
+    \Macro{issuedate}
+  }
+  in diesem Format ausgegeben.
+\item[multicol]\index{Zweispaltensatz|?}
+  Hiermit kann jeglicher beliebiger Inhalt in zwei oder mehr Spalten ausgegeben 
+  werden, wobei~-- im Gegensatz zur \hologo{LaTeX}-Option \Option{twocolumn}~-- 
+  für einen Spaltenausgleich gesorgt wird. Unterstützt wird das Paket innerhalb 
+  der Umgebungen \Environment{abstract} und \Environment{tudpage}.
+\item[quoting]\index{Zitate}
+  \hologo{LaTeX} bietet von Haus aus \emph{zwei} verschiedene Umgebungen für 
+  Zitate und ähnliches. Beide sind in ihrer Ausprägung starr und ignorieren 
+  beispielsweise die Einstellungen von \Option{parskip}. Dies wird durch die 
+  Umgebung \Environment{quoting} verbessert. Wird das Paket geladen, kommt 
+  diese gegebenenfalls innerhalb der \Environment{abstract}"=Umgebung zum 
+  Einsatz.
+\item[ragged2e]\index{Worttrennung}
+  Das Paket verbessert den Flattersatz, indem für diesen die Worttrennung 
+  aktiviert wird.
+\item[pagecolor]\index{Farben}
+  Mit dem Paket kann die Hintergrundfarbe der Seiten im Dokument geändert 
+  werden. Nach der Ausgabe einer farbigen Titel"~, Teile"~, oder Kapitelseite 
+  wird auf diese zurückgeschaltet.
+\end{packages}
+
+
+
+\section{Empfehlenswerte Pakete}
+\label{sec:packages:recommended}
+In diesem \autorefname wird eine Vielzahl an Paketen~-- zumeist kurz~-- 
+vorgestellt, welche sich für mich persönlich bei der Arbeit mit \hologo{LaTeX} 
+bewährt haben. Einige davon werden außerdem im Tutorial \Tutorial{treatise} in 
+ihrer Anwendung beschrieben. Für detaillierte Informationen sowie bei Fragen zu 
+den einzelnen Paketen sollte die jeweilige Dokumentation zu Rate gezogen
+werden,\footnote{Kommandozeile/Terminal: \Path{texdoc\,\PName{Paketname}}}
+das Lesen der hier gegebenen Kurzbeschreibung ersetzt dies in keinem Fall. 
+
+
+\subsection{Pakete zur Verwendung in jedem Dokument}
+Die hier vorgestellten Pakete gehören meiner Meinung nach in die Präambel eines 
+jeden Dokumentes. Egal, in welcher Sprache das Dokument verfasst wird, sollte 
+diese mit dem Paket \Package{babel} definiert werden~-- auch wenn dies 
+Englisch ist. Für deutschsprachige Dokumente ist für eine annehmbare 
+Worttrennung das Paket \Package{hyphsubst} unbedingt zu verwenden.
+
+\begin{packages}
+\item[fontenc]\index{Zeichensatzkodierung}
+  Das Paket erlaubt Festlegung der Zeichensatzkodierung des Ausgabefonts. Als 
+  Voreinstellung ist die Ausgabe als 7"~bit kodierte Schrift gewählt, was unter 
+  anderem dazu führt, dass keine echten Umlaute im erzeugten PDF-Dokument 
+  verwendet werden. Um auf 8"~bit"~Schriften zu schalten, sollte man
+  \Macro*{usepackage}\POParameter{T1}\PParameter{fontenc} nutzen.
+\item[selinput]\index{Eingabekodierung}
+  Hiermit erfolgt die (automatische) Festlegung der Eingabekodierung. Diese ist 
+  vom genutzten \hyperref[sec:tips:editor]{Editors (\autoref{sec:tips:editor})} 
+  und den darin gewählten Einstellung abhängig. Mit:
+  \begin{Code}
+    \usepackage{selinput}
+    \SelectInputMappings{adieresis={ä},germandbls={ß}}
+  \end{Code}\vspace{-\baselineskip}%
+  wird es verwendet. Dies macht den Quelltext portabel, womit beispielsweise 
+  einfach via Copy~\&~Paste ein \hrfn{http://www.komascript.de/minimalbeispiel}%
+  {Minimalbeispiel} bei Problemstellungen in einem Forum bereitgestellt werden 
+  kann. Alternativ dazu lässt sich mit dem Paket \Package{inputenc} die zu 
+  verwendende Eingabekodierung manuell einstellen
+  (\Macro*{usepackage}\OParameter{Eingabekodierung})\PParameter{inputenc}).
+\item[babel]\index{Sprachunterstützung}\index{Bezeichner}
+  Mit diesem Paket erfolgt die Einstellung der im Dokument verwendeten 
+  Sprache(n). Bei mehreren angegebenen Sprachen ist die zuletzt geladene die 
+  Hauptsprache des Dokumentes. Die gewünschten Sprachen sollten als nicht als 
+  Paketoption sondern als Klassenoption und gesetzt werden, damit auch andere 
+  Pakete auf die Spracheinstellungen zugreifen können. Für deutschsprachige 
+  Dokumente ist die Option \Option{ngerman} für die neue oder \Option{german} 
+  für die alte deutsche Rechtschreibung zu verwenden. 
+  
+  Mit dem Laden von \Package{babel} und der dazugehörigen Sprachen werden 
+  sowohl die Trennmuster als auch die sprachabhängigen Bezeichner angepasst.
+  Von einer Verwendung der obsoleten Pakete \Package{german} beziehungsweise 
+  \Package{ngerman} anstelle von \Package{babel} wird abgeraten. Für 
+  \hologo{LuaLaTeX} und \hologo{XeLaTeX} kann das Paket \Package{polyglossia} 
+  genutzt werden.
+\item[microtype]\index{Typographie}
+  Dieses Paket kümmert sich um den optischen Randausgleich%
+  \footnote{englisch: protrusion, margin kerning}
+  und das Nivellieren der Wortzwischenräume%
+  \footnote{englisch: font expansion}
+  im Dokument. Es funktioniert nicht mit der klassischen \hologo{TeX}-Engine, 
+  wohl jedoch mit \hologo{pdfTeX} als auch \hologo{LuaTeX} sowie \hologo{XeTeX}.
+\item[hyphsubst]\index{Worttrennung|!}
+  Die möglichen Trennstellen von Wörtern wird von \hologo{LaTeX} mithilfe 
+  eines Algorithmus berechnet. Dieser wird für deutschsprachige Texte mit dem 
+  Paket \Package{hyphsubst} entscheidend verbessert. Es muss bereits \emph{vor} 
+  der Dokumentklasse wie folgt geladen werden:
+  \begin{Code}[escapechar=§]
+    \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
+  \end{Code}\vspace{-\baselineskip}%
+  In \autoref{sec:tips:hyphenation} wird genauer auf das Zusammenspiel von 
+  \Package{hyphsubst} und \Package{babel} sowie \Package{fontenc} eingegangen,
+  ein Blick dahin wird dringend empfohlen. Zusätzliche werden dort weitere 
+  Hinweise für eine verbesserte Worttrennung gegeben. 
+\end{packages}
+
+
+\subsection{Pakete zur situativen Verwendung}
+Die nachfolgenden Pakete sollten nicht zwangsweise in jedem Dokument geladen 
+werden sondern nur, falls dies auch tatsächlich notwendig ist. Zur besseren 
+Übersicht wurde versucht, diese thematisch passend zu gruppieren. Daraus lässt 
+sich keinerlei Wertung bezüglich ihrer Nützlichkeit oder meiner persönlichen 
+Wertschätzung ableiten.
+
+\subsubsection{Typographie und Layout}
+\index{Typographie}
+%
+\begin{packages}
+\item[setspace]\index{Zeilenabstand}
+  Die Vergrößerung des Zeilenabstandes wird:
+  %
+  \begin{enumerate}[itemindent=0pt,labelwidth=*,labelsep=1em,label=\Roman*.]
+  \itempackages viel zu häufig und völlig unnötig gefordert und
+  \itempackages schließlich auch noch zu groß gewählt.
+  \end{enumerate}
+  %
+  Die Forderung nach Erhöhung des Zeilenabstandes~-- in der Typographie als 
+  Durchschuss bezeichnet~-- kommt noch aus den Zeiten der Textverarbeitung mit 
+  der Schreibmaschine. Ein einzeiliger Zeilenabstand bedeutete hier, dass die 
+  Unterlängen der oberen Zeile genau auf der Höhe der Oberlängen der folgenden 
+  Zeile lagen. Ein anderthalbzeiliger Zeilenabstand erzielte hier somit einen 
+  akzeptablen Durchschuss. Eine Erhöhung des Durchschusses bei der Verwendung 
+  von \hologo{LaTeX} ist an und für sich nicht notwendig. Sinnvoll ist dies 
+  nur, wenn im Fließtext serifenlose Schriften zum Einsatz kommen, um die damit 
+  verbundene schlechte Lesbarkeit etwas zu verbessern.
+  
+  Ist die Erhöhung des Durchschusses wirklich notwendig, sollte das Paket 
+  \Package{setspace} verwendet werden. Dieses stellt den Befehl 
+  \Macro{setstretch}\Parameter{Faktor} zur Verfügung, mit dem der Durchschuss 
+  beziehungsweise Zeilenabstand angepasst werden kann. Der Wert des Faktors 
+  ist standardmäßig auf~1 gestellt und sollte maximal bis~1.25 vergrößert 
+  werden. Der Befehl \Macro*{onehalfspacing} aus diesem Paket setzt diesen Wert 
+  auf eben genau~1.25. Allerdings ist hier anzumerken, dass die Vergrößerung 
+  des Zeilenabstandes~-- so wie ich es mir angelesen habe~-- aus der Sicht 
+  eines Typographen keine Spielerei ist sondern vielmehr allein der Lesbarkeit 
+  des Textes dient und möglichst gering ausfallen sollte.
+  
+  Ziel ist es, beim Lesen nach dem Beenden der aktuellen Zeile das Auffinden 
+  der neuen Zeile zu vereinfachen. Bei Serifen ist dies durch die Betonung der 
+  Grundlinie sehr gut möglich. Bei serifenlosen Schriften~-- wie der im \CD der 
+  \TnUD verwendeten \Univers~-- ist dies schwieriger und ein erweiterter 
+  Abstand der   Zeilen kann dabei durchaus hilfreich sein. Jedoch sollte nicht 
+  nach dem Motto \enquote{viel hilft viel} verfahren werden. In diesem Dokument 
+  wurde als Faktor für den Zeilenabstand \Macro{setstretch}\PParameter{1.1} 
+  gewählt. Nach einer Einstellung des Zeilenabstandes sollte der Satzspiegel 
+  unbedingt mit \Macro{recalctypearea} neu berechnet werden. Siehe dazu auch 
+  \autoref{sec:tips:headings} sowie \autoref{sec:tips:headline}.
+\item[csquotes]\index{Zitate}
+  Das Paket stellt unter anderem den Befehl \Macro{enquote}\Parameter{Zitat} 
+  zur Verfügung, welcher Anführungszeichen in Abhängigkeit der gewählten 
+  Sprache setzt. Zusätzlich werden weitere Kommandos und Optionen für die 
+  spezifischen Anforderungen des Zitierens bei wissenschaftlichen Arbeiten 
+  angeboten. Außerdem wird es durch \Package{biblatex} unterstützt und sollte 
+  zumindest bei dessen Verwendung geladen werden.
+\item[noindentafter]
+  \ChangedAt{v2.02!\Package{noindentafter}: Beschreibung hinzugefügt}
+  Mit diesem Paket lassen sich automatische Absatzeinzüge für selbst zu 
+  bestimmende Befehle und Umgebungen unterdrücken.
+\item[xspace]\index{Befehle!Deklaration}
+  Mit \Package{xspace} kann bei der Definition eigener Makros der Befehl 
+  \Macro{xspace} genutzt werden. Dieser setzt ein gegebenenfalls notwendiges 
+  Leerzeichen automatisch. In \autoref{sec:tips:xspace} ist die Definition 
+  eines solchen Befehls exemplarisch ausgeführt.
+\item[ellipsis]\index{Befehle!Deklaration}
+  In \hologo{LaTeX} folgten den Befehlen für Auslassungspunkte (\Macro{dots} 
+  und \Macro{textellipsis}) \emph{immer} ein Leerzeichen. Dies kann unter 
+  Umständen unerwünscht sein. Mit dem Paket \Package{ellipsis} wird das 
+  folgende Leerzeichen~-- im Gegensatz zum Standardverhalten~-- nur gesetzt, 
+  wenn ein Satzzeichen und kein Buchstabe folgt. Siehe dazu auch 
+  \autoref{sec:tips:dots}.
+\item[xpunctuate]\index{Befehle!Deklaration}
+  Die Funktionalität von \Package{xspace} wird um die Beachtung von 
+  Interpunktionen erweitert.
+\itempackages[\href{http://www.ctan.org/pkg/delig}{\Application{DeLig}}]
+  \index{Typographie}\index{Ligaturen}
+  Hierbei handelt es sich um ein Java-Script, welches anhand eines Wörterbuches 
+  falsche Ligaturen innerhalb eines Dokumentes automatisiert entfernt. Wird 
+  \Univers verwendet ist dies jedoch nicht notwendig, da diese keinerlei 
+  Ligaturen enthält, die insbesondere in deutschen Texten für einen guten Satz 
+  manuell aufgelöst werden müssten.%
+  \footnote{%
+    Das sind ff, fi, fl, ffi, und ffl bei den \hologo{LaTeX}"=Standardschriften.
+  }
+  Mit \hologo{LuaLaTeX} als Dokumentprozessor kann alternativ dazu auch 
+  \Package{selnolig} verwendet werden.
+\item[balance]\index{Zweispaltensatz}
+  Dieses Paket ermöglicht einen Spaltenausgleich im Zweispaltensatz auf der 
+  letzten Dokumentseite. Alternativ dazu kann auch \Package{multicol} verwendet 
+  werden.
+\end{packages}
+
+\subsubsection{Rechtschreibung}
+Für die Rechtschreibkontrolle zeichnet im Normalfall der verwendete Editor 
+verantwortlich. Dennoch gibt es einige wenige Pakete, welche sich diesem Thema 
+widmen. Diese sind jedoch lediglich nutzbar, wenn \hologo{LuaLaTeX} als 
+Dokumentprozessor genutzt wird.
+\begin{packages}
+\item[lua-check-hyphen]\index{Worttrennung}
+  Hiermit lassen sich mit \hologo{LuaLaTeX} Trennstellen am Zeilenende zur 
+  Prüfung markieren. Zum Thema der \textit{korrekten Worttrennung} sei außerdem 
+  auf \autoref{sec:tips:hyphenation} verwiesen.
+\item[spelling]\index{Rechtschreibung}
+  Wird \hologo{LuaLaTeX} als Prozessor verwendet, wird mit diesem Paket der 
+  reine Textanteil aus dem \hologo{LaTeX}"~Dokument extrahiert~-- wobei Makros 
+  und aktive Zeichen entfernt werden~-- und in eine separate Textdatei 
+  geschrieben. Anschließend kann diese Datei mit einer externen Software zur 
+  Rechtschreibprüfung wie \Application{GNU Aspell} oder \Application{Hunspell} 
+  analysiert werden. Wird durch dieses Programm eine Liste falsch geschriebener 
+  Wörter ausgegeben, können diese mit \Package{spelling} im PDF"~Dokument 
+  hervorgehoben werden.
+\end{packages}
+
+\subsubsection{Schriften und Sonderzeichen}
+\begin{packages}
+\item[lmodern](lm)\index{Schriftart}
+  Soll mit den klassischen \hologo{LaTeX}"=Standardschriften gearbeitet werden, 
+  empfiehlt sich die Verwendung des Paketes \Package{lmodern}. Dieses 
+  verbessert die Darstellung der Computer~Modern sowohl am Bildschirm als auch 
+  beim finalen Druck.
+\item[cfr-lm]\index{Schriftart}
+  Dieses experimentelle Paket liefert weitere Schriftschnitte für das Paket 
+  \Package{lmodern}.
+\item[newtx]
+  Es werden einige alternative Schriften sowohl für den Fließtext 
+  (\textit{Times} und \textit{Helvetica}) als auch den Mathematikmodus 
+  bereitgestellt.
+\item[libertine]\index{Schriftart}
+  Das Paket stellt die Schriften Linux~Libertine und Linux~Biolinum zur 
+  Verfügung. Um diese Schriftart auch für den Mathematikmodus verwenden zu 
+  können, sollte \Package{newtxmath} aus dem \Package{newtx}-Bundle mit     
+  \Macro*{usepackage}\POParameter{libertine}\PParameter{newtxmath} in der 
+  Präambel eingebunden werden. Das Paket \Package{libgreek} enthält griechische 
+  Buchstaben für Linux~Libertine.
+\item[mweights]\index{Schrift!Stärke}
+  In \hologo{LaTeXe} existieren die drei Schriftfamilien für Serifenschriften 
+  (\Macro{rmfamily}), serifenlose Schriften (\Macro{sffamily}) sowie die 
+  Schreibmaschinenschriften (\Macro{ttfamily}). Deren Schriftstärke wird für 
+  gewöhnlich mit den beiden Befehlen \Macro{mddefault} und \Macro{bfdefault} 
+  einheitlich festgelegt. Bei der Verwendung unterschiedlicher Schriftpakete 
+  kann es unter Umständen zu Problemen bei den Schriftstärken kommen. Das Paket 
+  \Package{mweights} erlaubt die individuelle Definition der Schriftstärke für 
+  jede der drei Schriftfamilien.
+\item[fontspec]
+  \ChangedAt{v2.02!\Package{fontspec}: %
+    Beschreibung hinzugefügt{,} mit \Option{fontspec} nutzbar%
+  }%
+  Wird als Dokumentprozessor nicht \hologo{pdfLaTeX} sondern \hologo{XeLaTeX} 
+  oder \hologo{LuaLaTeX} verwendet, können mit diesem Paket Systemschriften im 
+  OpenType-Format eingebunden werden, womit sich die Auswahl der verwendbaren 
+  Schriften in einem \hologo{LaTeX}"=Dokument stark erweitert. Das Paket wird 
+  mit der Option \Option{fontspec} durch \TUDScript unterstützt.
+\item[relsize]\index{Schrift!Größe}
+  Mithilfe dieses Paketes kann die Größe einer Textauszeichnung relativ zur 
+  aktuell gewählten Schriftgröße gesetzt werden.
+\item[textcomp]\index{Sonderzeichen}
+  Es werden zusätzliche Symbole und Sonderzeichen wie beispielsweise das 
+  Promille- oder Eurozeichen sowie Pfeile für den Fließtext zur Verfügung 
+  gestellt.
+\end{packages}
+%
+Auch für die mathematischen Schriften gibt es einige nützliche Pakete.
+\index{Mathematiksatz!Schrift}\index{Schrift!Mathematiksatz}
+%
+\begin{packages}
+\item[sansmath]
+  Sollten die normalen \hologo{LaTeX}-Schriften Computer~Modern verwendet 
+  werden, kann man dieses Paket zum serifenlosen Setzen mathematischer 
+  Ausdrücke nutzen. Werden die Schriften des \CDs der \TnUD zusammen mit den 
+  \TUDScript-Hauptklassen verwendet, sei auf die Option \Option{sansmath} 
+  verwiesen.
+\item[sfmath]
+  Diese Paket verfolgt ein ähnliches Ziel, kann jedoch im Gegensatz zu 
+  \Package{sansmath} nicht nur für Computer~Modern sondern mit der 
+  entsprechenden Option auch für Latin~Modern, Helvetica und 
+  Computer~Modern~Bright verwendet werden.
+\item[mathastext]
+   Mit dem Paket wird das Ziel verfolgt, aus der genutzten Schrift für den 
+   Fließtext alle notwendigen Zeichen für den Mathematiksatz zu extrahieren.
+\end{packages}
+
+\subsubsection{Mathematiksatz}
+\index{Mathematiksatz}
+Dies sind Pakete, die Umgebungen und Befehle für den Mathematiksatz sowie das 
+Setzen von Einheiten und Zahlen im Allgemeinen anbieten.
+
+\begin{packages}
+  \item[mathtools]
+    Dieses Paket stellt für das De-facto-Standard-Paket \Package{amsmath} für 
+    Mathematikumgebungen Bugfixes zur Verfügung und erweitert dieses.
+  \item[bm]
+    Das Paket bietet mit \Macro{bm} eine Alternative zu \Macro{boldsymbol} im 
+    \hrfn{http://tex.stackexchange.com/questions/3238}{Mathematiksatz}.
+\end{packages}
+%
+Für das typographisch korrekte Setzen von Einheiten~-- ein halbes Leerzeichen 
+zwischen Zahl und \emph{aufrecht} gesetzter Einheit~-- gibt es zwei gut 
+nutzbare Pakete.
+%
+\begin{packages}\index{Einheiten}
+\item[units]
+  Dies ist ein einfaches und sehr zweckdienliches Paket zum Setzen von 
+  Einheiten und für die meisten Anforderungen völlig ausreichend.
+\item[siunitx]
+  Dieses Paket ist in seinem Umfang im Vergleich deutlich erweitert. Neben 
+  Einheiten können zusätzlich auch Zahlen typographisch korrekt gesetzt werden. 
+  Die Ausgabe lässt sich in vielerlei Hinsicht an individuelle Bedürfnisse 
+  anpassen. Für deutschsprachige Dokumenten sollte die Lokalisierung angegeben 
+  werden. Mehr dazu in \autoref{sec:tips:siunitx}.
+\end{packages}
+%
+Die korrekte Formatierung von Zahlen ist häufig ein Problem bei der Verwendung 
+von \hologo{LaTeX}. Insbesondere, wenn in einem deutschsprachigen Dokument 
+Daten im typischen englischsprachigen Format verwendet werden, kommt es zu 
+Problemen. Dafür wird im \TUDScript-Bundle das Paket \Package{mathswap} 
+bereitgestellt. Dennoch gibt es zu diesem auch Alternativen.
+%
+\begin{packages}\index{Trennzeichen}
+  \item[icomma]
+    Wird im Mathematikmodus nach dem Komma ein Leerzeichen gesetzt, wird dies 
+    bei der Ausgabe beachtet. Der Verfasser muss sich demzufolge jederzeit 
+    selbst um die typographisch korrekte Ausgabe kümmern.
+  \item[ziffer]
+    Für deutschsprachige Dokumente wird das Komma als Dezimaltrennzeichen 
+    zwischen zwei Ziffern definiert. Folgt dem Komma keine Ziffer, wird 
+    jederzeit der obligatorische Freiraum gesetzt, was meiner Meinung nach 
+    besser als das Verhalten von \Package{icomma} ist.
+  \item[ionumbers]
+    Dieses Paket ist mir tatsächlich erst bei der Arbeit an \Package{mathswap} 
+    bekannt geworden. Es bietet mehr Funktionalitäten und kann als Alternative 
+    dazu betrachtet werden.
+\end{packages}
+%
+Weitere Hinweise und Anwendungsfälle zur mathematischen Typographie werden in 
+\autoref{sec:exmpl:mathtype} sowie \autoref{sec:exmpl:mathswap} gegeben.
+
+\subsubsection{Verzeichnisse aller Art}
+\index{Verzeichnisse|?}
+Neben dem Erstellen des eigentlichen Dokumentes sind für eine wissenschaftliche 
+Arbeit meist auch allerhand Verzeichnisse gefordert. Fester Bestandteil ist 
+dabei das Literaturverzeichnis, auch ein Abkürzungs- und Formelzeichen- 
+beziehungsweise Symbolverzeichnis werden häufig gefordert. Gegebenenfalls wird 
+auch noch ein Glossar benötigt. Hier werden die passenden Pakete vorgestellt. 
+Sollen im Dokument komplette Quelltexte oder auch nur Auszüge daraus erscheinen 
+und für diese auch gleich ein entsprechendes Verzeichnis generiert werden, so 
+sei auf das Paket \Package{listings}'full' verwiesen.
+
+\begin{packages}
+\item[biblatex]\index{Literaturverzeichnis}
+  Das Paket gibt es seit geraumer Zeit und es kann als legitimer Nachfolger zu 
+  \hologo{BibTeX} gesehen werden. Ähnlich dazu bietet \Package{biblatex} 
+  die Möglichkeit, Literaturdatenbanken einzubinden und verschiedene Stile der 
+  Referenzierung und Darstellung des Literaturverzeichnisses auszuwählen. 
+  
+  Mit \Package{biblatex} ist die Anpassung eines bestimmten Stiles wesentlich 
+  besser umsetzbar als mit \hologo{BibTeX}. Wird \Application{biber} für die 
+  Sortierung des Literaturverzeichnisses genutzt, ist die Verwendung einer 
+  UTF"~8-kodierten Literaturdatenbank problemlos möglich. In Verbindung mit 
+  \Package{biblatex} wird die zusätzliche Nutzung des Paketes 
+  \Package{csquotes} sehr empfohlen.
+\item[acro]\index{Abkürzungsverzeichnis}
+  Soll lediglich ein Abkürzungsverzeichnis erstellt werden, ist dieses Paket 
+  die erste Wahl. Es stellt Befehle zur Definition von Abkürzungen sowie zu 
+  deren Verwendung im Text und zur sortierten Ausgabe eines Verzeichnisses 
+  bereit. Alternativ dazu kann das Paket \Package{acronym} verwendet werden. 
+  Die Sortierung des Abkürzungsverzeichnisses muss hier allerdings manuell 
+  durch den Anwender erfolgen.
+\item[glossaries]\index{Glossar}\index{Abkürzungsverzeichnis}%
+  \index{Formelzeichenverzeichnis}\index{Symbolverzeichnis}%
+  Dies ist ein sehr mächtiges Paket zum Erstellen eines Glossars sowie 
+  Abkürzungs- und Symbolverzeichnisses. Die mannigfaltige Anzahl an Optionen 
+  ist zu Beginn eventuell etwas abschreckend. Insbesondere wenn Verzeichnisse 
+  für Abkürzungen \emph{und} Formelzeichen beziehungsweise Symbole benötigt 
+  werden, sollte man dieses Paket in Erwägung ziehen.
+  
+  Alternativ dazu kann für ein Symbolverzeichnis auch lediglich eine manuell 
+  gesetzte Tabelle genutzt werden. Das hierfür sehr häufig empfohlene Paket 
+  \Package{nomencl} bietet meiner Meinung nach demgegenüber keinerlei Vorteile.
+\end{packages}
+
+\subsubsection{Listen}
+\index{Listen|?}
+\begin{packages}
+\item[enumitem]
+  Das Paket \Package{enumitem} erweitert die rudimentären Funktionalitäten der 
+  \hologo{LaTeX}"=Standardlisten \Environment{itemize}, \Environment{enumerate}
+  sowie \Environment{description} und ermöglicht die individuelle Anpassung 
+  dieser durch die Bereitstellung vieler optionale Parameter nach dem
+  Schlüssel"=Wert"=Prinzip. Eine von mir sehr häufig genutzte Funktion ist 
+  beispielsweise die Entfernung des zusätzlichen Abstand zwischen den einzelnen 
+  Einträgen einer Liste mit \Macro{setlist}\PParameter{noitemsep}.
+\end{packages}
+
+\subsubsection{Tabellen}
+\index{Tabellen|?}
+Für den Tabellensatz in \hologo{LaTeX} werden von Haus aus die Umgebungen 
+\Environment{tabbing} und \Environment{tabular} beziehungsweise 
+\Environment{tabular*} bereitgestellt, welche in ihrer Funktionalität meist 
+für einen qualitativ hochwertigen Tabellensatz nicht ausreichen. Es werden 
+deshalb Pakete vorgestellt, die zusätzlich verwendet werden können. 
+\begin{packages}
+\item[array]
+  Dieses Paket ermöglicht mit dem Befehl \Macro{newcolumntype} das Erstellen 
+  eigener Spaltentypen sowie die erweiterte Definition von Tabellenspalten
+  (\PValue{>\{\dots\}}\PName{Spaltentyp}\PValue{<\{\dots\}}), wobei mithilfe 
+  sogenannter \enquote{Hooks} vor und nach Einträgen innerhalb einer Spalte 
+  gezielt Anweisungen gesetzt werden können. Außerdem kann die Höhe der Zeilen 
+  einer Tabelle mit \Macro{extrarowheight} angepasst werden.  
+\item[multirow]
+  Es wird der Befehl \Macro{multirow} definiert, der~-- ähnlich zum Makro 
+  \Macro{multicolumn}~-- das Zusammenfassen von mehreren Zeilen in einer 
+  Spalte ermöglicht.
+\item[widetable]
+  Mit der Standard"=\hologo{LaTeX}"=Umgebung \Environment{tabular*} kann eine 
+  Tabelle mit einer definierten Breite gesetzt werden. Dieses Paket stellt die 
+  Umgebung \Environment{widetable} zur Verfügung, die als Alternative genutzt 
+  werden kann und eine symmetrische Tabelle erzeugt.
+\item[booktabs]
+  Für einen guten Tabellensatz mit \hologo{LaTeX} gibt es bereits zahlreiche 
+  \hrfn{http://userpage.fu-berlin.de/latex/Materialien/tabsatz.pdf}{Tipps} im 
+  Internet zu finden. Zwei Regeln sollten dabei definitiv beachtet werden:
+  %
+  \begin{enumerate}[itemindent=0pt,labelwidth=*,labelsep=1em,label=\Roman*.]
+  \itempackages keine vertikalen Linien
+  \itempackages keine doppelten Linien
+  \end{enumerate}
+  %
+  Das Paket \Package{booktabs} (deutsche Dokumentation \Package*{booktabs-de}) 
+  ist für den Satz von hochwertigen Tabellen eine große Hilfe und stellt die 
+  Befehle \Macro{toprule}, \Macro{midrule} sowie \Macro{cmidrule} und 
+  \Macro{bottomrule} für unterschiedliche horizontale Linien bereit.
+\item[tabularborder]
+  Bei Tabellen wird zwischen Spalten automatisch ein horizontaler Abstand 
+  (\Length{tabcolsep}) gesetzt~-- besser gesagt jeweils vor und nach einer 
+  Spalte. Dies geschieht auch \emph{vor} der ersten und \emph{nach} der letzten 
+  Spalte. Dieser zusätzliche Platz an den äußeren Rändern kann störend wirken, 
+  insbesondere wenn die Tabelle über die komplette Textbreite gesetzt wird. Mit 
+  dem Paket \Package{tabularborder} kann dieser Platz automatisch entfernt 
+  werden.
+  
+  Dies funktioniert allerdings nur mit der \Environment{tabular}"=Umgebung. 
+  Die Tabellen aus den Paketen \Package{tabularx}, \Package{tabulary} und 
+  \Package{tabu} werden nicht unterstützt. Wie dieser Abstand bei diesen 
+  manuell entfernt werden kann, ist unter \autoref{sec:tips:table} zu finden.
+\item[tabularx]
+  Auch mit diesem Paket kann die Gesamtbreite einer Tabelle spezifiziert 
+  werden. Dafür wird der Spaltentyp \PValue{X} definiert, welcher als Argument 
+  der \Environment{tabularx}"=Umgebung beliebig häufig angegeben werden kann
+  (\Macro*{begin}\PParameter{tabularx}\Parameter{Breite}\Parameter{Spalten}). 
+  Die \PValue{X}"~Spalten ähneln denen vom Typ~\PValue{p}\Parameter{Breite}, 
+  wobei die Breite dieser aus der gewünschten Tabellengesamtbreite und dem 
+  benötigten Platz der gegebenenfalls vorhandenen Standardspalten automatisch 
+  berechnet wird.
+\item[tabulary]
+  Dies ist ein weiteres Paket zur automatischen Berechnung von Spaltenbreiten. 
+  Der zur Verfügung stehende Platz~-- gewünschte Gesamtbreite abzüglich der 
+  notwendigen Breite für die Standardspalten~-- wird jedoch nicht wie bei der 
+  Umgebung \Environment{tabularx} auf alle Spalten gleichmäßig verteilt sondern 
+  in der \Environment{tabulary}"=Umgebung für die Spaltentypen~\PValue{LCRJ} 
+  anhand ihres Zellinhaltes gewichtet vergeben. 
+  (\Macro*{begin}\PParameter{tabulary}\Parameter{Breite}\Parameter{Spalten}). 
+\item[longtable]
+  Sollen mehrseitige Tabellen mit Seitenumbruch erstellt werden, ist dieses 
+  Paket das Mittel der ersten Wahl. Für die Kombination mehrseitiger Tabellen 
+  mit einer \Environment{tabularx}"=Umgebung können die Pakete 
+  \Package{ltablex} oder besser noch \Package{ltxtable} verwendet werden.
+\item[ltxtable]
+  Wie bereits erwähnt sollte dieses Paket für mehrseitige Tabellen, die mit der 
+  Umgebung \Environment{tabularx} erstellt wurden, verwendet werden. 
+  Alternativ dazu kann man auch \Package{tabu} nutzen.
+\item[tabu]
+  \ChangedAt{v2.02!\Package{tabu}: Verwendung nur bedingt empfehlenswert}
+  Dies ist ein relativ neues Paket, welches versucht, viele der zuvor genannten 
+  Funktionalitäten zu implementieren und weitere bereitzustellen. Dafür werden 
+  die Umgebungen \Environment{tabu} und \Environment{longtabu} definiert. Es 
+  kann alternativ zu \Package{tabularx} verwendet werden und ist insbesondere 
+  als Ersatz für das Paket \Package{ltxtable} empfehlenswert.
+  
+  \Attention{%
+    Leider wären für das Paket in der aktuellen Version~v2.8 seit geraumer Zeit 
+    ein paar kleinere Bugfixes notwendig. Außerdem wird sich die 
+    \hrfn{https://groups.google.com/d/topic/comp.text.tex/xRGJTC74uCI}{%
+      Benutzerschnittstelle in einer zukünftigen Version
+    } sehr stark ändern, weshalb es momentan mit Vorsicht zu genießen ist. 
+    Zumindest sollte sich der Anwender bewusst sein, dass er mit dieser Version 
+    gesetzte Dokumente gegebenenfalls später anpassen muss.
+  }
+\end{packages}
+
+
+
+\subsubsection{Gleitobjekte}
+\index{Gleitobjekte|?}
+\index{Tabellen}\index{Grafiken}
+Es werden Pakete für die Beeinflussung von Aussehen, Beschriftung und 
+Positionierung von Gleitobjekten vorgestellt. Unter \autoref{sec:tips:floats} 
+sind außerdem Hinweise zur manuellen Manipulation der Gleitobjektplatzierung zu 
+finden.
+
+\begin{packages}
+\item[placeins]\index{Gleitobjekte!Platzierung}
+  Mit diesem Paket kann die Ausgabe von Gleitobjekten vor Kapiteln und wahlweise
+  Unterkapiteln erzwungen werden.
+\item[flafter]\index{Gleitobjekte!Platzierung}
+  Dieses Paket erlaubt die frühestmögliche Platzierung von Gleitobjekten im 
+  ausgegeben Dokument erst an der Stelle ihres Auftretens im Quelltext. Diese 
+  werden dementsprechend nie vor ihrer Definition am Anfang der Seite 
+  erscheinen.
+\item[caption]\index{Gleitobjekte!Beschriftung}
+  Die \KOMAScript-Klassen bietet bereits einige Möglichkeiten zum Setzen der 
+  Beschriftungen für Gleitobjekte. Dieses Paket ist daher meist nur in gewissen
+  Ausnahmefällen für spezielle Anweisungen notwendig, allerdings auch bei der 
+  Verwendung unbedenklich.
+\item[subcaption]\index{Gleitobjekte!Beschriftung}
+  Diese Paket kann zum einfachen Setzen von Unterabbildungen oder "~tabellen 
+  mit den entsprechenden Beschriftungen genutzt werden. Das dazu alternative 
+  Paket \Package{subfig} sollte vermieden werden, da es nicht mehr gepflegt 
+  wird und es mit diesem im Zusammenspiel mit anderen Paketen des Öfteren zu 
+  Problemen kommt. Sollte der Funktionsumfang von \Package{subcaption} nicht 
+  ausreichen, kann anstelle dessen das Paket \Package{floatrow} verwendet 
+  werden, welches ähnliche Funktionalitäten wie \Package{subfig} bereitstellt.
+\item[floatrow]\index{Gleitobjekte!Beschriftung}
+  Mit diesem Paket können global wirksame Einstellungen und Formatierungen für 
+  \emph{alle} Gleitobjekte eines Dokumentes vorgenommen werden. So kann unter 
+  anderem die verwendete Schrift (\Macro{floatsetup}\PParameter{font=\dots}) 
+  innerhalb der Umgebungen \Environment{float} und \Environment{table} 
+  eingestellt werden. Das typographisch richtige Setzen der Beschriftungen von 
+  Abbildungen als Unterschriften 
+  (\Macro{floatsetup}\POParameter{figore}\PParameter{capposition=bottom})
+  sowie Tabellen als Überschriften 
+  (\Macro{floatsetup}\POParameter{table}\PParameter{capposition=top})
+  kann automatisch erzwungen werden~-- unabhängig von der Position des Befehls 
+  zur Beschriftung \Macro{caption} innerhalb der Gleitobjektumgebung. Wird das 
+  Verhalten so wie empfohlen mit dem \Package{floatrow}-Paket eingestellt, 
+  sollte für eine richtige Platzierung der Tabellenüberschriften außerdem die 
+  \KOMAScript-Option \Option{captions}[tableheading] genutzt werden.
+\end{packages}
+
+\subsubsection{Grafiken und Abbildungen}
+\index{Grafiken|?}
+Grafiken für wissenschaftliche Arbeiten sollten als Vektorgrafiken erstellt 
+werden, um die Skalierbarkeit und hohe Druckqualität zu gewährleisten. 
+Bestenfalls folgen diese auch dem Stil der dazugehörigen Arbeit.%
+\footnote{%
+  Für qualitativ hochwertige Dokumente sollten übernommene Grafiken nicht 
+  direkt kopiert oder gescannt sondern im gewünschten Zielformat neu erstellt 
+  und mit der Referenz auf die Quelle ins Dokument eingebunden werden.
+}
+Für das Erstellen eigener Vektorgrafiken, welche die \hologo{LaTeX}"=Schriften 
+und das Layout des Hauptdokumentes nutzen, gibt es zwei mögliche Ansätze. 
+Entweder man \enquote{programmiert} die Grafiken ähnlich wie das Dokument 
+selber oder man nutzt Zeichenprogramme, die wiederum die Ausgabe oder das 
+Weiterreichen von Text an \hologo{LaTeX} unterstützen. Für das Programmieren 
+von Grafiken sollen hier die wichtigsten Pakete vorgestellt werden. Wie diese 
+zu verwenden sind, ist den dazugehörigen Paketdokumentationen zu entnehmen. 
+Außerdem wird im Tutorial \Tutorial{treatise} für beide Pakete jeweils ein 
+Beispiel gegeben.
+
+\begin{packages}
+\item[tikz](pgf)
+  Dies ist ein sehr mächtiges Paket für das Programmieren von Vektorgrafiken 
+  und sehr häufig~-- insbesondere bei Einsteigern~-- die erste Wahl bei der 
+  Verwendung von \hologo{pdfLaTeX}.
+\item[pstricks]
+  Das Paket \Package{pstricks} stellt die zweite Variante zum Programmieren 
+  von Grafiken dar. Mit diesem Paket hat man \emph{noch} mehr Möglichkeiten bei 
+  der Erstellung eigener Grafiken, da man mit \Package{pstricks} auf 
+  PostScript zugreifen kann und einige der bereitgestellten Befehle davon rege 
+  Gebrauch machen. Der daraus resultierende Nachteil ist, dass mit 
+  \Package{pstricks} die direkte Verwendung von \hologo{pdfLaTeX} nicht 
+  möglich ist.
+  
+  Die Grafiken aus den \Environment{pspicture}"=Umgebungen müssen deshalb erst 
+  über den Pfad \Path{latex \textrightarrow{} dvips \textrightarrow{} ps2pdf}
+  in PDF"~Dateien gewandelt werden. Diese lassen sich von \hologo{pdfLaTeX} 
+  anschließend als Abbildungen einbinden. Um dieses Vorgehen zu ermöglichen, 
+  können folgende Pakete genutzt werden:
+  %
+  \begin{packages}
+  \item[pst-pdf]
+    Dieses Paket stellt Methoden für den Export von PostSript-Grafiken in 
+    PDF-Datien bereit. Die einzelnen Aufrufe zur Kompilierung von DVI über 
+    PostScript zu PDF müssen durch den Anwender manuell beziehungsweise über 
+    die Ausgaberoutinen des verwendeten Editors durchgeführt werden.
+  \item[auto-pst-pdf]
+    Das Paket automatisiert die Erzeugung der \Package{pstricks}"=Grafiken mit 
+    dem Paket \Package{pst-pdf}. Dafür muss \hologo{pdfLaTeX} per Option mit 
+    Schreibrechten ausgeführt werden. Dazu ist der Aufruf von \Path{pdflatex} 
+    mit der Option \Path{-{}-shell-escape} beziehungsweise für Nutzer von 
+    \hologo{MiKTeX} mit \Path{-{}-enable-write18} notwendig. Bitte beachten Sie 
+    außerdem die Hinweise in \autoref{sec:tips:auto-pst-pdf}. Eine Alternative 
+    dazu ist das Paket \Package{pdftricks2}.
+  \end{packages}
+\end{packages}
+%
+Um bei der Erstellung von Grafiken mit \Package{pstricks} oder \Package{tikz} 
+nicht bei jeder Änderung das komplette Dokument kompilieren zu müssen, können 
+diese in separate Dateien ausgelagert werden. Hierfür sind die beiden Pakete 
+\Package{standalone} oder \Package{subfiles} sehr nützlich.
+
+Für das Zeichnen einer Grafik mit einem Bildbearbeitungsprogramm, welches die 
+Weiterverarbeitung durch \hologo{LaTeX} erlaubt, möchte ich auf die freien 
+Programme \Application{LaTeXDraw} und \Application{Inkscape} verweisen. 
+Insbesondere das zuletzt genannte Programm ist sehr empfehlenswert. Für die 
+erstellten Grafiken kann man den Export für die Einbindung in \hologo{LaTeX} 
+manuell durchführen. In \autoref{sec:tips:svg} wird vorgestellt, wie sich dies 
+automatisieren lässt.
+
+\subsubsection{Aufteilung des Hauptdokumentes in Unterdateien}
+Um während des Entwurfes eines Dokumentes die Zeitdauer für das Kompilieren zu 
+verkürzen, kann dieses in Unterdokumente gegliedert werden. Dadurch wird es 
+möglich, nur den momentan bearbeiteten Dokumentteil~-- respektive die aktuelle 
+\Package{tikz}- oder \Package{pstricks}-Grafik~-- zu kompilieren. Die meiner 
+Meinung nach besten Pakete für dieses Unterfangen werden folgend vorgestellt.
+%
+\begin{packages}
+\item[standalone]
+  \ChangedAt{v2.02!\Class{standalone}: Probleme behoben}
+  Dieses Paket ist für das Erstellen eigenständiger (Unter)"~Dokumente gedacht, 
+  welche später in ein Hauptdokument eingebunden werden können. Jedes dieser 
+  Teildokumente benötigt eine eigene Präambel. Optional lassen sich die 
+  Präambeln der Unterdokumente automatisch in ein Hauptdokument einbinden.
+\item[subfiles]
+\ChangedAt{v2.02!\Package{subfiles}: Beschreibung hinzugefügt}
+  Dieses Paket wählt einen etwas anderen Ansatz als \Package{standalone}. Es 
+  ist von Anfang an dafür gedacht, ein dediziertes Hauptdokument zu verwenden. 
+  Die darin mit \Macro{subfiles} eingebundenen Unterdateien nutzen bei der 
+  autarken Kompilierung dessen Präambel.
+\end{packages}
+%
+Unabhängig davon, ob Sie eines der beiden Pakete nutzen oder alles in einem 
+Dokument belassen, ist es ratsam, eigens definierte Befehle, Umgebungen und 
+ähnliches in ein separates Paket auszulagern. Dafür müssen Sie lediglich ein 
+leeres \hologo{LaTeX}-Dokument erzeugen und es unter \File*{mypreamble.sty} 
+oder einem anderen Namen im gleichen Ordner wie das Hauptdokument speichern. 
+Dann können Sie in dieser Datei ihre Deklarationen ausführen und diese mit 
+\Macro*{usepackage}\PParameter{mypreamble} in das Dokument einbinden. Dies hat 
+den Vorteil, dass das Hauptdokument zum einen übersichtlich bleibt und Sie zum 
+anderen Ihre persönliche Präambel generisch wachsen lassen und für andere 
+Dokumente wiederverwenden können.
+
+\subsubsection{Die kleinen und großen Helfer\dots}
+Hier taucht alles auf, was sich nicht eignete, in die vorherigen Kategorien 
+eingeordnet zu werden.
+%
+\begin{packages}
+\item[bookmark]\index{Lesezeichen}\index{Querverweise}
+  Dieses Paket verbessert und erweitert die von \Package{hyperref} angebotenen 
+  Möglichkeiten zur Erstellung von Lesezeichen~-- auch Outline"=Einträge~-- im 
+  PDF-Dokument. Beispielsweise können Schriftfarbe- und "~stil geändert werden.
+\item[calc]\index{Berechnungen}
+  Normalerweise können Berechnungen nur mit Low-Level-\hologo{TeX}-Primitiven 
+  im Dokument durchgeführt werden. Dieses Paket stellt eine einfachere Syntax 
+  für Rechenoperationen der vier Grundrechenarten zur Verfügung. Zusätzlich 
+  werden neue Befehle zur Bestimmung der Höhe und Breite bestimmter Textauszüge 
+  definiert.
+\item[chngcntr]\index{Zählermanipulation}
+  Das Paket erlaubt die Manipulation aller möglichen, bereits definierten 
+  \hologo{LaTeX}-Zähler. Es können Zähler so umdefiniert werden, dass sie bei 
+  der Änderung eines anderen Zählers automatisch zurückgesetzt werden oder eben 
+  nicht. Ein kleines Beispiel dazu ist in \autoref{sec:tips:counter} zu finden.
+\item[varioref]\index{Querverweise}
+  Mit diesem Paket lassen sich sehr gute Verweise auf bestimmte Seiten 
+  erzeugen. Insbesondere, wenn der Querverweis auf die aktuelle, die 
+  vorhergehende oder nachfolgende sowie im zweiseitigen Satz auf die 
+  gegenüberliegende Seite erfolgt, werden passende Textbausteine für diesen 
+  verwendet.
+\item[cleveref]\index{Querverweise}
+  Dieses Paket vereint die Vorzüge von \Package{varioref} mit der automatischen 
+  Benennung der referenzierten Objekte mit dem Befehl \Macro{autoref} aus dem 
+  Paket \Package{hyperref}.
+\item[marginnote]\index{Randnotizen}
+  Randnotizen, welche mit \Macro{marginpar} erzeugt werden, sind spezielle 
+  Gleitobjekte in \hologo{LaTeX}. Dies kann dazu führen, dass eine Notiz am 
+  Blattrand nicht direkt da gesetzt wird, wo diese intendiert war. Dieses Paket 
+  stellt den Befehl \Macro{marginnote} für nicht"~gleitende Randnotizen zur 
+  Verfügung. Alternativ dazu kann man auch \Package{mparhack} verwenden.
+\item[todonotes]\index{Randnotizen}
+  Mit \Package{todonotes} können noch offene Aufgaben in unterschiedlicher 
+  Formatierung am Blattrand oder im direkt Fließtext ausgegeben werden. Aus 
+  allen Anmerkungen lässt sich eine Liste aller offenen Punkte erzeugen.
+\item[xparse]\index{Befehle!Deklaration}
+  Dieses mächtige Paket entstammt dem \hologo{LaTeX3}-Projekt und bietet für 
+  die Erstellung eigener Befehle und Umgebungen einen alternativen Ansatz zu 
+  den bekannten \hologo{LaTeX}"=Deklarationsbefehlen \Macro*{newcommand} und 
+  \Macro*{newenvironment} sowie deren Derivaten. Mit \Package{xparse} wird es 
+  möglich, obligatorische und optionale Argumente an beliebigen Stellen 
+  innerhalb des Befehlskonstruktes zu definieren. Auch die Verwendung anderer 
+  Zeichen als eckige Klammern für die Spezifizierung eines optionalen 
+  Argumentes ist möglich.
+\item[xkeyval]\index{Befehle!Deklaration}
+  \ChangedAt{v2.02!\Package{xkeyval}: Beschreibung hinzugefügt}
+  Das \KOMAScript{}"=Bundle lädt das Paket \Package{keyval}, um Optionen mit 
+  einer Schlüssel"=Wert"=Syntax deklarieren zu können. Zusätzlich wird von 
+  \TUDScript das Paket \Package{kvsetkeys} geladen, um auf nicht definierte 
+  Schlüssel reagieren zu können. Die Schlüssel"=Wert"=Syntax kann auch für 
+  eigens definierte Makros genutzt werden, um sich das exzessive Verwenden von 
+  optionalen Argumenten zu ersparen. Damit wäre folgende Definition möglich:
+  \Macro*{newcommand}\Macro*{Befehl}\OParameter{Schlüssel"=Wert"=Liste}%
+  \Parameter{Argument}.
+  
+  Das Paket \Package{xkeyval} erweitert insbesondere die Möglichkeiten zur 
+  Deklaration unterschiedlicher Typen von Schlüsseln. Sollten die bereits durch 
+  \TUDScript geladenen Pakete \Package{keyval} und \Package{kvsetkeys} in ihrer 
+  Funktionalität nicht ausreichen, kann dieses Paket verwendet werden. Für die 
+  Entwicklung eigener Pakete, deren Optionen das Schlüssel"=Wert"=Format 
+  unterstützen, kann das Paket \Package{scrbase} genutzt werden. Soll aus einem 
+  Grund auf \KOMAScript{} gänzlich verzichtet werden, sind die beiden Pakete 
+  \Package{kvoptions} oder \Package{pgfkeys} eine Alternative.
+\item[listings]\index{Quelltexte einbinden}\index{Quelltextverzeichnis}%
+  Dieses Paket eignet sich hervorragend zur Quelltextdokumentation in 
+  \hologo{LaTeX}. Es bietet die Möglichkeit, externe Quelldateien einzulesen 
+  und darzustellen sowie die Syntax in Abhängigkeit der verwendeten 
+  Programmiersprache hervorzuheben. Zusätzlich lässt sich ein Verzeichnis mit 
+  allen eingebundenen sowie direkt im Dokument angegebenen Quelltextauszügen 
+  erstellen.
+%  
+  \ChangedAt{v2.02!\Package{listings}: Beschreibung ergänzt}
+  Wird \Package{listings} in Dokumenten mit UTF"~8-Kodierung verwendet, sollte 
+  direkt nach dem Laden des Paketes in der Präambel Folgendes hinzugefügt 
+  werden:
+  \begin{Code}
+    \lstset{%
+      inputencoding=utf8,extendedchars=true,
+      literate=%
+        {ä}{{\"a}}1 {ö}{{\"o}}1 {ü}{{\"u}}1
+        {Ä}{{\"A}}1 {Ö}{{\"O}}1 {Ü}{{\"U}}1
+        {~}{{\textasciitilde}}1 {ß}{{\ss}}1
+    }
+  \end{Code}\vspace{-\baselineskip}%
+\item[mwe]\index{Minimalbeispiel|!}
+  \ChangedAt{v2.02!\Package{mwe}: Beschreibung hinzugefügt}
+  Mit diesem Paket lassen sich sehr einfach Minimalbeispiele erzeugen, die 
+  sowohl Blindtexte respektive Abbildungen enthalten sollen.
+\item[filemod]
+  Wird entweder \hologo{pdfLaTeX} oder \hologo{LuaLaTeX} als Prozessor 
+  eingesetzt, können mit diesem Paket das Änderungsdatum zweier Dateien 
+  miteinander verglichen und in Abhängigkeit davon definierbare Aktionen 
+  ausgeführt werden.
+\item[coseoul]
+  Mit diesem Paket kann man die Struktur der Gliederung relativ angeben. Es 
+  wird keine absolute Gliederungsebene (\Macro*{chapter}, \Macro*{section}) 
+  angegeben sondern die Relation zwischen vorheriger und aktueller Ebene 
+  (\Macro*{levelup}, \Macro*{levelstay}, \Macro*{leveldown}).
+\item[dprogress]\index{Debugging}
+  Das Paket schreibt bei der Kompilierung des Dokumentes die Gliederung in die 
+  Logdatei. Dies kann im Fehlerfall beim Auffinden des Problems im Dokument 
+  helfen. Allerdings werden dafür die Gliederungsebenen so umdefiniert, dass 
+  diese keine optionalen Argumente mehr unterstützen,was jedoch für die 
+  \TUDScript-Klassen von essentieller Bedeutung ist. Zum Debuggen kann es 
+  trotzdem sporadisch eingesetzt werden.
+\end{packages}
+
+\subsubsection{Bugfixes}
+%
+\begin{packages}
+\item[scrhack](koma-script)
+  Das Paket behebt Kompatibilitätsprobleme der \KOMAScript-Klassen mit den 
+  Paketen \Package{hyperref}, \Package{float}, \Package{floatrow} und
+  \Package{listings}. Es ist durchaus empfehlenswert, jedoch sollte man 
+  unbedingt die Dokumentation beachten.
+\item[fixltx2e]
+  Dieses Paket enthält Bugfixes für \hologo{LaTeXe}. Da diese eventuell zu 
+  Inkompatibilitäten mit früheren Versionen führen könnten, wurden diese nicht 
+  in den \hologo{LaTeXe}-Kernel eingepflegt. Für neu gesetzte Dokumente kann es 
+  ohne Bedenken verwendet werden.
+\item[mparhack]
+  Zur Behebung falsch gesetzter Randnotizen wird ein Bugfix für 
+  \Macro{marginpar} bereitgestellt. Alternativ dazu kann man auch 
+  \Package{marginnote} verwenden.
+\item[etex]
+  Das Paket kann genutzt werden, falls die maximale Anzahl der normalerweise 
+  verfügbaren \hologo{LaTeX}-Register für Längen, Zähler etc. überschritten 
+  wurde.
+\end{packages}

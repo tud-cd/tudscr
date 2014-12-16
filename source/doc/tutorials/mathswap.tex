@@ -1,0 +1,143 @@
+\RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
+\documentclass[english,ngerman]{tudscrartcl}
+\usepackage{selinput}\SelectInputMappings{adieresis={ä},germandbls={ß}}
+\usepackage[T1]{fontenc}
+\usepackage{tudscrman}
+\lstset{%
+  inputencoding=utf8,extendedchars=true,
+  literate=%
+    {ä}{{\"a}}1 {ö}{{\"o}}1 {ü}{{\"u}}1
+    {Ä}{{\"A}}1 {Ö}{{\"O}}1 {Ü}{{\"U}}1
+    {~}{{\textasciitilde}}1 {ß}{{\ss}}1
+}
+
+\usepackage{mathswap}
+
+\begin{document}
+\date{16.12.2014}
+\author{Falk Hanisch\thanks{\noexpand\scriptsize\noexpand\Email{\tudscrmail}}}
+\title{Änderung der Trennzeichen im Mathematikmodus}
+\makeatletter
+\begingroup%
+  \def\and{, }%
+  \let\thanks\@gobble%
+  \let\footnote\@gobble%
+  \hypersetup{%
+    pdfauthor = {\@author},%
+    pdftitle = {\@title},%
+    pdfsubject = {Mathematiksatz in \hologo{LaTeXe}},%
+    pdfkeywords = {LaTeX, \TUDScript, Tutorial, Mathematiksatz},%
+  }%
+\endgroup%
+\markright{\@title}
+\makeatother
+\StartTutorial
+%
+\begin{Preamble}
+\RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
+\documentclass[english,ngerman]{tudscrartcl}% andere Klassen sind möglich
+\usepackage{selinput}\SelectInputMappings{adieresis={ä},germandbls={ß}}
+\usepackage[T1]{fontenc}
+\usepackage{babel}
+\usepackage{microtype}
+
+\end{Preamble}
+%
+Zusätzlich wird das Paket \Package{mathswap} geladen, welches die Änderung der 
+Gruppierungs- und Dezimaltrennzeichen von Zahlen im Mathematikmodus ermöglicht.
+%
+\begin{Preamble}
+\usepackage{mathswap}
+\end{Preamble}
+%
+Werden in einer wissenschaftlichen Abhandlung vielerlei Daten importiert und 
+beispielsweise tabellarisch dargestellt, kann es durchaus sein, dass diese 
+importierten Daten nicht dem Zahlenformat entsprechen, welches für die 
+verwendete Dokumentsprache normalerweise notwendig wäre. Um sich die manuelle 
+Konvertierung der Daten zu ersparen, kann alternativ dazu die Möglichkeit 
+genutzt werden, dies mit Hilfe von \hologo{LaTeXe} selbst zu erledigen. In 
+diesem Tutorial wird hierfür das Paket \Package*{mathswap} genutzt. Alternativ 
+dazu kann auch das Paket \Package{ionumbers} verwendet werden.
+
+Ohne die Verwendung eines speziellen Paketes zur Zahlenformatierung wird eine 
+Zahl im mathematischen Modus durch \hologo{LaTeXe} normalerweise so 
+ausgegeben: 
+%
+\CodePreamble{%
+  Ausgabe mit deutscher Zifferngruppierung ohne \Package*{mathswap}%
+}
+\begin{Trunk*}
+\mathswapoff
+\(4.523,58\)
+\mathswapon
+\end{Trunk*}
+%
+Da in der Präambel dieses Dokumentes das Paket \Package*{mathswap} bereits 
+geladen wurde, musste mit \Macro*{mathswapoff} auf das Standardverhalten von 
+\hologo{LaTeXe} geschaltet werden. Der Befehl \Macro*{mathswapon} aktiviert 
+wiederum die Funktionalität von \Package*{mathswap}.
+
+Für diese Tutorial wird angenommen, dass die wissenschaftlichen Abhandlung in 
+deutscher Sprache verfasst wird. Ist nun eine Zahl im deutschen Zahlenformat 
+gegeben, kann diese einfach im Mathematikmodus angegeben werden. Diese wird 
+den hierzulande existierenden Konventionen entsprechend gruppiert ausgegeben:
+%
+\CodePreamble{%
+  Ausgabe mit deutscher Zifferngruppierung und Sprache \PValue{ngerman}%
+}
+\begin{Trunk*}
+\(4.523,58\)
+\end{Trunk*}
+%
+Sollte die gleiche Zahl in englischer Formatierung gegeben sein, funktioniert 
+dies nicht mehr:
+%
+\CodePreamble{%
+  Ausgabe mit englischer Zifferngruppierung und Sprache \PValue{ngerman}%
+}
+\begin{Trunk*}
+\(4,523.58\)
+\end{Trunk*}
+%
+Mit der Verwendung der beiden Befehle \Macro*{commaswap}\PParameter{\bsc,}
+sowie \Macro*{dotswap}\PParameter{,} können die Substitutionen für Komma und 
+Punkt im Mathematikmodus geändert:
+%
+\CodePreamble{%
+  Ausgabe mit englischer Zifferngruppierung und geänderten Trennzeichen%
+}
+\begin{Trunk*}
+\begingroup
+  \commaswap{\,}
+  \dotswap{,}
+  \(4,523.58\)
+\endgroup
+\end{Trunk*}
+%
+Die Verwendung von \Macro{begingroup} und \Macro{endgroup} führt hierbei 
+dazu, dass die Änderungen der beiden Trennzeichen nur lokal innerhalb dieser 
+Gruppe erfolgt.
+
+Wird das Paket \Package*{mathswap} zusammen mit einer \TUDScript-Klasse 
+verwendet, werden die Dezimaltrennzeichen im Mathematikmodus sprachabhängig 
+definiert. Wird die Dokumentsprache auf \PValue{english} gesetzt, so werden die
+Dezimaltrennzeichen standardmäßig für die englischsprachige Zifferngruppierung 
+definiert. In diesem Fall müssen Zahlen, welche im deutschsprachigen Format 
+gruppiert sind, angepasst werden:
+%
+\CodePreamble{
+  Ausgabe bei \PValue{english} als gewählter Sprache%
+}
+\begin{Trunk*}
+\begingroup%
+  \selectlanguage{english}%
+  \(4,523.58\)\\
+  \(4.523,58\)\\
+  \commaswap{.}
+  \dotswap{\,}
+  \(4.523,58\)%
+\endgroup
+\end{Trunk*}
+%
+\FinishTutorial
+\end{document}

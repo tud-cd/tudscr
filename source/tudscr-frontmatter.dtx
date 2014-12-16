@@ -1,4 +1,4 @@
-% \CheckSum{460}
+% \CheckSum{587}
 % \iffalse meta-comment
 % ======================================================================
 %
@@ -45,11 +45,16 @@
 % \iffalse
 %%% From File: tudscr-frontmatter.dtx
 %<*driver>
-% \fi
-\ProvidesFile{tudscr-frontmatter.dtx}%
-  [2014/06/04 v2.01b TUD-KOMA-Script (frontmatter)]
-% \iffalse
-\documentclass{tudscrdoc}
+\ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
+\ProvidesFile{tudscr-frontmatter.dtx}[%
+  2014/12/04 v2.02 TUD-KOMA-Script (frontmatter)%
+]
+\RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
+\documentclass[english,ngerman]{tudscrdoc}
+\usepackage{selinput}\SelectInputMappings{adieresis={Ã¤},germandbls={ÃŸ}}
+\usepackage[T1]{fontenc}
+\usepackage{babel}
+\usepackage{tudscrfonts} % only load this package, if the fonts are installed
 \KOMAoptions{parskip=half-}
 \CodelineIndex
 \RecordChanges
@@ -63,295 +68,356 @@
 %
 % \selectlanguage{ngerman}
 %
-% \section{Befehle und Umgebungen für den Vorspann}
+% \changes{v2.02}{2014/07/08}{Verwendung \cs{FamilyKeyState}}%^^A
+% \changes{v2.02}{2014/11/05}{Verbesserungen fÃ¼r Kolumnentitel und
+%   Inhaltsverzeichnis}%^^A
+%
+% \section{Befehle und Umgebungen fÃ¼r den Vorspann}
 %
 % Im Vorspann des Dokumentes kann der Benutzer eine Zusammenfassung angegeben.
-% Außerdem kann eine Selbstständigkeitserklärung sowie ein Sperrvermerk
-% hinzugefügt werden. Damit für diese das Layout möglichst individuell gewählt
-% werden kann, werden hier entsprechende Optionen und die dafür notwendige
+% AuÃŸerdem kann eine SelbststÃ¤ndigkeitserklÃ¤rung sowie ein Sperrvermerk
+% hinzugefÃ¼gt werden. Damit fÃ¼r diese das Layout mÃ¶glichst individuell gewÃ¤hlt
+% werden kann, werden hier entsprechende Optionen und die dafÃ¼r notwendige
 % Ausgabe definiert. Im weiteren Verlauf der Dokumentation wird der Begriff
-% \glqq Erklärung\grqq für die unterschiedlichen Elemente verwendet. Die
-% verwendeten Schalter und Befehle zum Setzen der Optionen heißen entweder
+% \enquote{ErklÃ¤rung} fÃ¼r die unterschiedlichen Elemente verwendet. Die
+% verwendeten Schalter und Befehle zum Setzen der Optionen heiÃŸen entweder
 % \cs{tud@abstract@\dots} oder aber \cs{tud@declaration@\dots} je nach Element.
 %
 % \StopEventually{\PrintIndex\PrintChanges}
 %
 % \iffalse
-%<*class&!option>
+%<*class&body>
 % \fi
 %
+% \begin{macro}{\tud@fm@check}
+% \changes{v2.02}{2014/07/18}{neu}%^^A
+% Mit diesem Befehl wird fÃ¼r den Fall, dass eine oder mehrerer ErklrÃ¤ungen auf
+% einer einzelnen Seite gesetzt werden sollen geprÃ¼ft, ob dies Ã¼berhaupt 
+% mÃ¶glich ist. Sollte dies nicht der Fall sein, wird eine Warnung ausgegeben.
+%    \begin{macrocode}
+\newcommand*\tud@fm@check[2]{%
+  \ifnumless{\@nameuse{tud@#1@level}}{3}{%
+    \@tempswatrue%
+    \ifboolexpr{bool {@tud@#1@fil} and bool {@tud@#1@multi}}{%
+      \setbox0\vbox{%
+        \ifcase\@nameuse{tud@#1@level}\relax\or\or%
+          \vspace*{-\parskip}%
+          {\usekomafont{section}\vspace*{-\baselineskip}}%
+        \fi%
+        #2%
+      }%
+      \ifdim\textheight<\dimexpr\ht0+\dp0\relax%
+        \ClassWarning{\tudcls@name}{%
+          The given content within the `#1'\MessageBreak%
+          environment is too large, so it wasn't possible\MessageBreak%
+          to center the body vertically. Setting the option\MessageBreak%
+          `#1=nofill' would be a solution. You\MessageBreak%
+          could also use multiple `#1' environments%
+        }%
+        \@tempswafalse%
+      \fi%
+    }{}%
+  }{}%
+  #2%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@fm@check
 % \begin{macro}{\tud@fm@set}
-% Dies ist das zentrale Makro zur Ausgabe der einzelnen Erklärungen, welches
+% \changes{v2.02}{2014/07/18}{Neuimplementierung fÃ¼r \pkg{scrlayer-scrpage}}%^^A
+% Dies ist das zentrale Makro zur Ausgabe der einzelnen ErklÃ¤rungen, welches
 % alle relevanten Optionen\footnote{\opt{titlepage}, \opt{twocolumn},
-% \opt{abstract/declaration=double}, \opt{abstract/declaration=fill} sowie die
-% Gliederungsebene der Überschrift} unterscheidet und die Erklärungen diesen
+% \opt{abstract/declaration=multi}, \opt{abstract/declaration=fill} sowie die
+% Gliederungsebene der Ãœberschrift} unterscheidet und die ErklÃ¤rungen diesen
 % entsprechend setzt. Verwendet wird der Befehl wie folgt:
-% \cs{tud@fm@set}\marg{Erklärungstyp}\marg{Überschrift}\marg{Inhalt}
+% \cs{tud@fm@set}\marg{ErklÃ¤rungstyp}\marg{Ãœberschrift}\marg{Inhalt}
 %    \begin{macrocode}
 \newcommand*\tud@fm@set[3]{%
 %    \end{macrocode}
-% Ist die Gliederungsebene der Erklärung kein Kapitel\dots
+% Sollte die Gliederungsebene der ErklÃ¤rung einem Kapitel entsprechen, wird
+% jede ErklÃ¤rung immer auf eine neue Seite gesetzt. Die Optionen zum vertikalen 
+% Zentrieren wird ignoriert. Auf eine Warnung fÃ¼r den Anwender wird verzichtet.
 %    \begin{macrocode}
 %<*book|report>
-  \ifnumless{\@nameuse{tud@#1@level}}{3}{%
-%</book|report>
-%    \end{macrocode}
-% \dots und die Option \opt{titlepage} ist aktiviert\dots
-%    \begin{macrocode}
-    \if@titlepage%
-%    \end{macrocode}
-% \dots dann wird im Zweispaltensatz der Schalter \cs{@tud@\meta{Typ}@double}
-% ausgewertet und für den Fall von \opt{abstract/declaration=double} kein
-% Spaltenumbruch erzeugt. Ansonsten werden nachfolgende Erklärungen in eine
-% neue Spalte gesetzt.
-%    \begin{macrocode}
-      \if@twocolumn%
-        \tud@fm@body{#1}{#2}{#3}%
-        \ifbool{@tud@#1@double}{}{\newpage}%
-%    \end{macrocode}
-% Sollte im normalen Satz \opt{abstract/declaration=double} aktiviert sein, so
-% wird versucht, nachfolgende Erklärung auf der gleichen Seite wie die erste
-% unterzubringen. Dazu wird die zunächst benötigte Höhe für die Ausgabe des
-% Inhaltes mithilfe einer Box berechnet und mit dem noch verfügbaren Platz auf
-% der Seite~-- gespeichert in \cs{tud@dim@double}~-- verglichen.
-%    \begin{macrocode}
-      \else%
-        \ifbool{@tud@#1@double}{%
-          \par%
-          \ifdim\pagetotal=\z@\relax%
-            \booltrue{@tud@#1@first}%
-          \fi%
-          \ifbool{@tud@#1@first}{%
-            \setlength{\tud@dim@double}{\textheight}%
-            \clearpage%
-          }{}%
-          \setbox0\vtop{\strut\tud@fm@body{#1}{#2}{#3}}%
-          \setlength{\tud@dim@double}{\dimexpr\tud@dim@double-\ht0-\dp0}\relax%
-          \global\tud@dim@double=\tud@dim@double%
-%    \end{macrocode}
-% Ist genügend Platz vorhanden, erfolgt die Ausgabe auf der aktuellen Seite.
-%    \begin{macrocode}
-          \ifdim\tud@dim@double>\z@\relax%
-            \tud@fm@vcenter{#1}{#2}{#3}%
-            \global\boolfalse{@tud@#1@first}%
-%    \end{macrocode}
-% Sollte nicht genügend Platz vorhanden sein, erfolgt eine Warnung und die
-% Zusammenfassung wird auf einer neuen Seite ausgegeben.
-%    \begin{macrocode}
-          \else%
-            \tud@fm@double@wrn{#1}%
-            \clearpage%
-            \global\booltrue{@tud@#1@first}%
-            \tud@fm@vcenter{#1}{#2}{#3}%
-          \fi%
-%    \end{macrocode}
-% Im normalen Satz wird bei deaktivierter \opt{\meta{Typ}=double}-Option der
-% Inhalt der Erklärung zentriert mit
-% \cs{tud@fm@vcenter}\marg{Erklärungstyp}\marg{Überschrift}\marg{Inhalt}
-% auf der Seite ausgegeben.
-%    \begin{macrocode}
-        }{%
-          \clearpage%
-          \tud@fm@vcenter{#1}{#2}{#3}%
-          \clearpage%
-        }%
-      \fi%
-%    \end{macrocode}
-% Bei deaktivierter \opt{titlepage}-Option werden die Inhalte jeder erzeugten
-% Erklärung direkt nacheinander ausgegeben. Ein gezieltes Erstellen von genau
-% zwei Erklärungen auf einer Seite ist nicht vorgesehen und erzeugt bei aktiver
-% \opt{abstract/declaration=double}-Option eine Warnung. Beim Satz über zwei
-% Spalten erfolgt die Ausgabe ohne sonderliche Auszeichnung. Im normalen Satz
-% wird die Erklärung wie ein Zitat ausgegeben, sollte dessen Überschrift nicht
-% in Form eines Abschnitts gesetzt werden.\footnote{es wird der Inhalt der
-% Erklärung mittels \cs{tud@quoting} und \cs{tud@endquoting} entweder in der
-% normalen \env{quotation}-Umgebung oder aber~-- wenn entsprechend das Paket
-% \pkg{quoting} geladen wurde~-- in der \env{quoting}-Umgebung gesetzt}
-%    \begin{macrocode}
-    \else%
-      \ifbool{@tud@#1@double}{\tud@fm@option@wrn{#1}}{}%
-      \if@twocolumn%
-        \tud@fm@body{#1}{#2}{#3}%
-      \else%
-        \ifnum\@nameuse{tud@#1@level}<2\tud@quoting\fi%
-        \tud@fm@body{#1}{#2}{#3}%
-        \ifnum\@nameuse{tud@#1@level}<2\tud@endquoting\fi%
-      \fi%
-    \fi%
-%    \end{macrocode}
-% Sollte die Gliederungsebene der Erklärung einem Kapitel entsprechen, wird
-% hier jede Erklärung immer auf eine neue Seite gesetzt. Es wird sowohl bei
-% deaktivierter \opt{titlepage}-Option\footnote{Warum sollte man einen
-% Titelkopf nutzen, wenn die meist direkt nachfolgende Erklärung selbst als
-% Kapitel auf eine neue Seite gesetzt wird?} als auch bei aktivierter
-% \opt{abstract/declaration=double}-Option eine passende Warnung ausgegeben.
-%    \begin{macrocode}
-%<*book|report>
-  }{%
-    \if@titlepage\else\tud@fm@level@wrn{#1}\fi%
-    \ifbool{@tud@#1@double}{\tud@fm@option@wrn{#1}}{}%
-    \clearpage%
-    \tud@fm@body{#1}{#2}{#3}%
-    \clearpage%
+  \ifnumless{\@nameuse{tud@#1@level}}{3}{}{%
+    \boolfalse{@tud@#1@multi}%
+    \boolfalse{@tud@#1@fil}%
   }%
 %</book|report>
+% Im Zweispaltensatz wird der Inhalt der Umgebung einfach ausgegeben, eine 
+% vertikale Zentrierung findet nicht statt.
+%    \begin{macrocode}
+  \if@twocolumn%
+    \tud@fm@body{#1}{#2}{#3}%
+%    \end{macrocode}
+% Beim einspaltigen Satz wird die \opt{titlepage}-Option beachtet.
+%    \begin{macrocode}
+  \else%
+%    \end{macrocode}
+% Sollte diese aktiv sein, wird jede ErklÃ¤rung oder Zusammenfassung abhÃ¤ngig 
+% von der Einstellung von \opt{abstract/declaration=multi} entweder auf eine
+% neue Seite gesetzt, oder aber auf der aktuellen ausgegeben. Dabei werden
+% diese ggf. noch vertikal auf der Seite ausgerichtet.
+%    \begin{macrocode}
+    \if@titlepage%
+      \ifbool{@tud@#1@multi}{}{\clearpage}%
+      \ifbool{@tud@#1@fil}{%
+        \ifcase\@nameuse{tud@#1@level}\relax\or\or%
+          \vspace*{-\parskip}%
+          {\usekomafont{section}\vspace*{-2\baselineskip}}%
+        \fi%
+        \if@tempswa\vspace*{\z@ \@plus 1fil}\fi%
+      }{}%
+      \tud@fm@body{#1}{#2}{#3}%
+      \ifbool{@tud@#1@fil}{\vspace*{\z@ \@plus 2fil}}{}%
+%    \end{macrocode}
+% Bei deaktivierter \opt{titlepage}-Option werden die Inhalte jeder erzeugten
+% ErklÃ¤rung direkt nacheinander ausgegeben. Die ErklÃ¤rung oder Zusammenfassung 
+% wird dabei wie ein Zitat ausgegeben, sollte dessen Ãœberschrift nicht
+% in Form eines Abschnitts gesetzt werden. Der Inhalt wird entweder in der
+% normalen \env{quotation}-Umgebung oder aber~-- wenn entsprechend das Paket
+% \pkg{quoting} geladen wurde~-- in der \env{quoting}-Umgebung gesetzt. Die
+% entsprechende Umgebung wird hierfÃ¼r im Makro \cs{tud@quoting} gespeichert.
+%    \begin{macrocode}
+    \else%
+      \ifnum\@nameuse{tud@#1@level}<2\begin{\tud@quoting}\fi%
+      \tud@fm@body{#1}{#2}{#3}%
+      \ifnum\@nameuse{tud@#1@level}<2\end{\tud@quoting}\fi%
+    \fi%
+  \fi%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@fm@set
-% \todo[v3.12]{%
-%   addchaptertocentry und addsectiontocentry durch addxcontentsline ersetzen
-% }
-% \begin{macro}{\tud@fm@head}
-% Dieses Makro dient zur Festlegung der Gliederungsebene der Überschrift der
-% Erklärung. Die gewählte Gliederungsebene ist in \cs{tud@\meta{Typ}@level}
-% gespeichert. Verwendet wird das Makro folgendermaßen:
-% \cs{tud@fm@set}\marg{Erklärungstyp}\marg{Überschrift}\marg{Inhalt}.
-% Damit die ggf. aktive Option \opt{abstract/declaration=toc} funktionieren
-% kann, wird für die Level, in denen keine Standardüberschrift verwendet wird,
-% mit dem Befehl \cs{phantomsection} aus dem Paket \pkg{hyperref} ein Anker für
-% einen möglichen Hyperlink erzeugt.\footnote{ist das Paket nicht geladen, ist
-% \cs{phantomsection} als \cs{relax} definiert} Ist \cs{if@tud@\meta{Typ}@toc}
-% wahr, so entspricht der erzeugte Eintrag ins Inhaltsverzeichnis für
-% \cls{tudscrartcl} immer dem eines Abschnitts, der für \cls{tudscrbook} und
-% \cls{tudscrreprt} immer dem eines Kapitels, unabhängig von der tatsächlich
-% gewählten Gliederungsebene.\footnote{sonst sieht das Inhaltsverzeichnis recht
-% bescheiden aus}
-%    \begin{macrocode}
-\newcommand*\tud@fm@head[2]{%
-  \ifcase\@nameuse{tud@#1@level}\relax%
-    \def\@tempa{\phantomsection}%
-  \or%
-    \def\@tempa{%
-      \phantomsection%
-      \@afterindentfalse%
-      \begin{center}%
-        \normalfont\sectfont\nobreak#2%
-        \@endparpenalty\@M%
-      \end{center}%
-      \nopagebreak%
-      \vskip\dimexpr\bigskipamount-\parskip%
-      \@afterheading%
-    }%
-  \or%
-    \def\@tempa{\addsec*{#2}}%
-%<*book|report>
-  \or%
-    \def\@tempa{\addchap*{#2}}%
-%</book|report>
-  \fi%
-  \ifbool{@tud@#1@toc}{%
-%<*book|report>
-    \apptocmd{\@tempa}{\addchaptertocentry{}{#2}}{}{}%
-%</book|report>
-%<*article>
-    \apptocmd{\@tempa}{\addsectiontocentry{}{#2}}{}{}%
-%</article>
-  }{}%
-  \@tempa%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@fm@head
+% \begin{macro}{\tud@fm@body}
+% \changes{v2.02}{2014/07/18}{Neuimplementierung fÃ¼r \pkg{scrlayer-scrpage}}%^^A
 % \begin{macro}{\tud@fm@vcenter}
-% Mit diesem Befehl wird die Erklärung vertikal zentriert auf einer Seite
-% ausgegeben, wenn genügend Platz vorhanden ist.
+% \changes{v2.02}{2014/07/18}{Mit \pkg{scrlayer-scrpage} entfernt}%^^A
+% Dieser Befehl formatiert den im dritten Argument gespeicherten Inhalt der
+% ErklÃ¤rung. Sollte das Paket \pkg{multicol} Verwendung finden, wird hier die
+% entsprechende Umgebung gestartet. FÃ¼r das Setzen der Ãœberschrift und der 
+% Kolumnentitel wird \cs{tud@fm@head} verwendet, welches abhÃ¤ngig von den
+% gewÃ¤hlten Optionen die Gliederungsebene der Ãœberschrift setzt. Die optional
+% gewÃ¤hlte vertikale Ausrichtung des Inhaltes wird seit Version~v2.02 nicht 
+% mehr von \cs{tud@fm@vcenter} sondern hier direkt ausgefÃ¼hrt.
 %    \begin{macrocode}
-\newcommand*\tud@fm@vcenter[3]{%
-  \ifdim\@tempdima>\dimexpr\textheight\relax%
-    \tud@fm@body{#1}{#2}{#3}%
-%    \end{macrocode}
-% Sollte als Überschrift die Gliederungsebene eines Abschnittes gewählt sein,
-% so wird standardmäßig durch den \cs{section}-Befehl ein zusätzlicher Abstand
-% eingefügt. Damit dieser beim vertikalen Zentrieren keinen Einfluss hat, wird
-% dieser bei aktivem Schalter \cs{if@tud@\meta{Typ}@fil} entfernt.
-%    \begin{macrocode}
+\newcommand*\tud@fm@body[3]{%
+  \ifnum\tud@multicols>1\relax%
+    \begin{multicols}{\tud@multicols}[{\tud@fm@head{#1}{#2}}]%
   \else%
-    \ifbool{@tud@#1@fil}{%
-      \ifcase\@nameuse{tud@#1@level}\relax\or\or%
-        \vspace*{-\parskip}%
-        {\usekomafont{section}\vspace*{-2\baselineskip}}%
+%    \end{macrocode}
+% FÃ¼r die Verwendung einer kleinen, zentrierten Ãœberschrift wird vorher ein
+% Abstand eingefÃ¼gt. Dies ist jedoch nur notwendig, wenn \env{multicols} nicht 
+% verwendet wird.
+%    \begin{macrocode}
+    \ifbool{@tud@#1@multi}{%
+      \ifcase\@nameuse{tud@#1@level}\relax\or%
+        \vspace{\dimexpr\bigskipamount-\parskip\relax}%
       \fi%
-%    \end{macrocode}
-% Dabei wird zur optischen Zentrierung der Platz zum oberen Seitenrand etwas
-% kleiner als der zum unteren gewählt.
-%    \begin{macrocode}
-      \ifbool{@tud@#1@first}{\vspace*{\z@ \@plus 2fil}}{}%
     }{}%
-%    \end{macrocode}
-% Die Ausgabe des formatierten Erklärung und der zweite Teil der optischen
-% Zentrierung.
-%    \begin{macrocode}
-    \tud@fm@body{#1}{#2}{#3}%
-    \ifbool{@tud@#1@fil}{\vspace*{\z@ \@plus 3fil}}{}%
+    \tud@fm@head{#1}{#2}%
+  \fi%
+  #3\par%
+  \ifnum\tud@multicols>1\relax%
+    \end{multicols}%
   \fi%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@fm@vcenter
-% \begin{macro}{\tud@fm@body}
-% Dieser Befehl formatiert den im dritten Argument gespeicherten Inhalt der
-% Erklärung. Sollte das Paket \pkg{multicol} Verwendung finden, wird hier die
-% entsprechende Umgebung gestartet. Für das Setzen der Überschrift wird
-% \cs{tud@fm@head} verwendet, welches abhängig von den gewählten Optionen die
-% Gliederungsebene der Überschrift setzt.
-% \todo[v3.12]{%
-%   Seitenstile für tudpage, abstract und declaration als Option; dann ist auch
-%   auch die Verwendung von \cs{@mkboth} möglich
-% }
+% \end{macro}^^A \tud@fm@body
+% \begin{macro}{\tud@fm@head}
+% \changes{v2.02}{2014/07/18}{an \pkg{scrlayer-scrpage} angepasst}%^^A
+% \changes{v2.02}{2014/10/09}{Bugfix fÃ¼r Kolumnentitel}%^^A
+% Dieses Makro dient zur Festlegung der Gliederungsebene der Ãœberschrift der
+% ErklÃ¤rung. Die gewÃ¤hlte Gliederungsebene ist in \cs{tud@\meta{Typ}@level}
+% gespeichert. Verwendet wird das Makro folgendermaÃŸen:
+% \cs{tud@fm@head}\marg{ErklÃ¤rungstyp}\marg{Ãœberschrift}\marg{Inhalt}. Damit 
+% die ggf. aktive Option \opt{abstract/declaration=toc} funktionieren kann,
+% wird fÃ¼r die Level, in denen keine StandardÃ¼berschrift verwendet wird, mit
+% dem Befehl \cs{phantomsection} aus dem Paket \pkg{hyperref}~-- wenn es 
+% tatsÃ¤chlich geladen wurde~-- ein Anker fÃ¼r einen Hyperlink erzeugt. Ist
+% \cs{if@tud@\meta{Typ}@toc} wahr, so entspricht der erzeugte Eintrag ins
+% Inhaltsverzeichnis fÃ¼r \cls{tudscrartcl} normalerweise dem eines Abschnitts,
+% der fÃ¼r \cls{tudscrbook} und \cls{tudscrreprt} dem eines Kapitels.%
+% \footnote{sonst sieht das Inhaltsverzeichnis recht bescheiden aus}
+% Mit der Eintellung \val{tocleveldown} kann der Eintrag um eine Ebene 
 %    \begin{macrocode}
-\newcommand*\tud@fm@body[3]{%
-% ^^A  \@mkboth{\MakeMarkcase{#2}}{\MakeMarkcase{#2}}%
-  \if@titlepage\@mkboth{}{}\fi%
+\newcommand*\tud@fm@head[2]{%
+  \ifcase\@nameuse{tud@#1@level}\relax%
+    \if@titlepage\endgraf\fi%
+    \csname phantomsection\endcsname%
+  \or%
+    \if@titlepage\endgraf\fi%
+    \csname phantomsection\endcsname%
+    \@afterindentfalse%
+    \begingroup%
+      \centering%
+      \normalfont\sectfont\nobreak#2%
+      \@endparpenalty\@M%
+      \endgraf%
+    \endgroup%
+    \nopagebreak%
+    \vskip\dimexpr\bigskipamount-\parskip\relax%
+    \@afterheading%
+  \or%
+    \section*{#2}%
+    \ifx\@mkboth\@gobbletwo\else\markright{\MakeMarkcase{#2}}\fi%
+%<*book|report>
+  \or%
+    \chapter*{#2}%
+    \@mkdouble{\MakeMarkcase{#2}}%
+%</book|report>
+  \fi%
+  \ifbool{@tud@#1@markboth}{%
+    \markboth{\MakeMarkcase{#2}}{\MakeMarkcase{#2}}%
+  }{}%
+  \ifbool{@tud@#1@toc}{%
+    \ifbool{@tud@#1@toc@leveldown}{%
+%<*book|report>
+      \addsectiontocentry{}{#2}%
+%</book|report>
+%<*article>
+      \addsubsectiontocentry{}{#2}%
+%</article>
+    }{%
+%<*book|report>
+      \addchaptertocentry{}{#2}%
+%</book|report>
+%<*article>
+      \addsectiontocentry{}{#2}%
+%</article>
+    }
+  }{}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@fm@head
+% \begin{macro}{\tud@fm@next}
+% \changes{v2.02}{2014/07/19}{mit \pkg{scrlayer-scrpage} eingefÃ¼hrt}%^^A
+% Dieser Befehl sorgt fÃ¼r die Trennung einzelner Abschnitte innerhalb der 
+% Umgebungen \env{abstract} und \env{declarations}. Dabei werden bei aktiver
+% vertikaler Ausrichtung die entsprchenden AbstÃ¤nde dazwischen eingefÃ¼gt.
+%    \begin{macrocode}
+\newcommand*\tud@fm@next[2]{%
+  \TUD@parameter@set[#1]{#2}%
   \if@twocolumn%
-    \ifcase\@nameuse{tud@#1@level}\relax\or%
-      \ifbool{@tud@#1@first}{%
-        \global\boolfalse{@tud@#1@first}%
-        \vspace{\dimexpr\bigskipamount-\parskip}%
-      }{}%
-    \fi%
-    \tud@fm@head{#1}{#2}%
-    #3\par%
-    \ifcase\@nameuse{tud@#1@level}\relax\or%
-      \vspace{\dimexpr\bigskipamount-\parskip}%
-    \fi%
+    \ifbool{@tud@#1@multi}{\par}{\newpage}
   \else%
-    \ifnum\tud@multicols>1\relax%
-      \begin{multicols}{\tud@multicols}[{\tud@fm@head{#1}{#2}}]%
+    \if@titlepage%
+      \ifbool{@tud@#1@fil}{%
+        \vspace*{\z@ \@plus 1fil}%
+        \ifbool{@tud@#1@multi}{}{%
+          \vspace*{\z@ \@plus 1fil}%  
+          \clearpage%
+          \ifcase\@nameuse{tud@#1@level}\relax\or\or%
+            \vspace*{-\parskip}%
+            {\usekomafont{section}\vspace*{-2\baselineskip}}%
+          \fi%
+          \vspace*{\z@ \@plus 1fil}%
+        }%
+      }{\ifbool{@tud@#1@multi}{}{\clearpage}}%
     \else%
-      \tud@fm@head{#1}{#2}%
-    \fi%
-    #3\par%
-    \ifnum\tud@multicols>1\relax%
-      \end{multicols}\leavevmode%
-    \else%
-      \ifcase\@nameuse{tud@#1@level}\relax\or%
-        \bigskip\vskip-\parskip\null%
+      \ifnum\@nameuse{tud@#1@level}<2
+        \end{\tud@quoting}
+        \begin{\tud@quoting}
       \fi%
     \fi%
   \fi%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@fm@body
+% \end{macro}^^A \tud@fm@next
+% \begin{macro}{\tud@fm@pagestyle}
+% \changes{v2.02}{2014/07/19}{neu}%^^A
+% Dieser Befehl sorgt fÃ¼r die Auswahl des Seitenstiles Ã¼ber die Parameter von
+% \env{abstract} und \env{declarations}.
+%    \begin{macrocode}
+\newcommand*\tud@fm@pagestyle[2]{%
+  \if@titlepage%
+    \ifcsdef{ps@#2}{\renewcommand*\tud@ps{#2}}{%
+      \ClassError{\tudcls@name}{`#2' is no valid pagestyle}{}%
+    }%
+  \else%
+    \ClassWarning{\tudcls@name}{%
+%<*article>
+      The key `pagestyle' can only be used with\MessageBreak%
+      activated option `titlepage'%
+%</article>
+%<*book|report>
+      The key `pagestyle' can only be used either with\MessageBreak%
+      activated option `titlepage' or with chapter\MessageBreak%
+      headings (`#1=chapter')%
+%</book|report>
+    }%
+  \fi%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@fm@pagestyle
+% \begin{macro}{\tud@fm@level@wrn}
+% \changes{v2.02}{2014/07/19}{entfernt}%^^A
+% \begin{macro}{\tud@fm@option@wrn}
+% \changes{v2.02}{2014/07/19}{entfernt}%^^A
+% \begin{macro}{\tud@fm@multi@wrn}
+% \changes{v2.02}{2014/07/19}{entfernt}%^^A
+% Die Befehle fÃ¼r die Warnungen an den Benutzer bei nicht beachteten oder nicht 
+% umsetzbaren Einstellungen wurden mit der Version~v2.02 entfernt, da Sie als 
+% wenig sinnvoll erachtet wurden. 
+% \end{macro}^^A \tud@fm@multi@wrn
+% \end{macro}^^A \tud@fm@option@wrn
+% \end{macro}^^A \tud@fm@level@wrn
 % \begin{macro}{\tud@quoting}
 % \begin{macro}{\tud@endquoting}
-% Mit diesen Befehlen kann das empfehlenswerte Paket \pkg{quoting} unterstützt
-% werden. Sollte dieses geladen werden, wird für das Setzen der Zusammenfassung
+% \changes{v2.02}{2014/07/19}{entfernt}%^^A
+% Mit diesem Befehl kann das empfehlenswerte Paket \pkg{quoting} unterstÃ¼tzt
+% werden. Sollte dieses geladen werden, wird fÃ¼r das Setzen der Zusammenfassung
 % bei einem Titelkopf die \env{quoting}-Umgebung genutzt.
 %    \begin{macrocode}
-\let\tud@quoting\quotation
-\let\tud@endquoting\endquotation
-\AfterPackage{quoting}{%
-  \let\tud@quoting\quoting%
-  \let\tud@endquoting\endquoting%
-}
+\newcommand*\tud@quoting{quotation}
+\AfterPackage{quoting}{\renewcommand*\tud@quoting{quoting}}
 %    \end{macrocode}
 % \end{macro}^^A \tud@endquoting
 % \end{macro}^^A \tud@quoting
 %
 % \iffalse
-%</class&!option>
+%</class&body>
 %<*class&option>
 % \fi
 %
-% \subsection{Erweiterung der Umgebung für eine Zusammenfassung}
+% \begin{macro}{\tud@fm@switch}
+% \changes{v2.02}{2014/11/05}{neu}%^^A
+% Das aus \KOMAScript{} bekannte Verhalten fÃ¼r die Zusammenfassung wird fÃ¼r die
+% beiden Klassen \cls{tudscrartcl} und \cls{tudscrreprt} adaptiert. Dazu werden
+% boolesche SchlÃ¼ssel bei der Definiton der beiden Optionen \opt{abstract} und 
+% \opt{declaration} eingefÃ¼gt. AuÃŸerdem werden zusÃ¤tzliche Werte zur Auswahl 
+% einer Gliederungsebene fÃ¼r die gesetzten Ãœberschriften wie \cs{section} oder 
+% \cs{chapter}\footnote{nicht fÃ¼r \cls{tudscrartcl}} oder bereitgestellt, 
+% welche auch fÃ¼r die Buchklasse \cls{tudscrbook} zur VerfÃ¼gung stehen. Das 
+% Setzen von EintrÃ¤gen ins Inhaltsverzeichnis lÃ¤sst sich ebenfalls anpassen.
+%
+% Des Weiteren werden mehrere SchlÃ¼ssel fÃ¼r die Anordnung und Positionierung
+% von Zusammenfassung bzw. ErklÃ¤rungen bereitgestellt. Diese dienen dem Setzen
+% der  Optionen \opt{abstract/declaration} mit den Werten \val{single/multi}, 
+% \val{toc/notoc}, \val{fill/nofill} sowie \val{leveldown}.
+%    \begin{macrocode}
+\newcommand*\tud@fm@switch{%
+  {section}{2},{sect}{2},{sec}{2},{addsec}{2},%
+%<*article>
+  {new}{2},{std}{2},{heading}{2},%
+%</article>
+%<*book|report>
+  {chapter}{3},{chap}{3},{addchap}{3},%
+  {new}{3},{std}{3},{heading}{3},%
+%</book|report>
+  {totoc}{4},{toc}{4},{totoclevelup}{4},{toclevelup}{4},{levelup}{4},%
+  {totocleveldown}{5},{tocleveldown}{5},{leveldown}{5},%
+  {nottotoc}{6},{notoc}{6},%
+  {markboth}{7},{mark}{7},%
+  {nomarkboth}{8},{nomark}{8},%
+  {one}{9},{simple}{9},{single}{9},%
+  {multi}{10},{multiple}{10},{all}{10},{two}{10},{both}{10},{double}{10},%
+  {nofil}{11},{nofill}{11},{novfil}{11},{novfill}{11},%
+  {fil}{12},{fill}{12},{vfil}{12},{vfill}{12}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@fm@switch
+%
+% \subsection{Erweiterung der Umgebung fÃ¼r eine Zusammenfassung}
 %
 % Die \env{abstract}-Umgebung wird um mehrere Optionen erweitert. So kann
 % in den neuen \cls{tudscr}-Klassen die Sprache der Zusammenfassung leicht
@@ -360,14 +426,14 @@
 % \begin{macro}{\if@tud@abstract@toc}
 % \begin{macro}{\if@tud@abstract@toc@locked}
 % Der Befehl \cs{tud@abstract@level} beschreibt die Gliederungsebene der
-% Überschrift der Zusammenfassung numerisch und wird über die Schlüssel der
-% Option \opt{abstract} gesetzt. Über \opt{abstract=toc/notoc} wird festgelegt,
+% Ãœberschrift der Zusammenfassung numerisch und wird Ã¼ber die SchlÃ¼ssel der
+% Option \opt{abstract} gesetzt. Ãœber \opt{abstract=toc/notoc} wird festgelegt,
 % ob die Zusammenfassung einen eigenen Eintrag ins Inhaltsverzeichnis bekommt.
-% Da unterschiedliche Gliederungsebenen der Überschriften möglich sind, wird das
-% Standardverhalten in Abhängigkeit dieser gewählt. Initial erscheint für
+% Da unterschiedliche Gliederungsebenen der Ãœberschriften mÃ¶glich sind, wird das
+% Standardverhalten in AbhÃ¤ngigkeit dieser gewÃ¤hlt. Initial erscheint fÃ¼r
 % \cls{tudscrreprt} und \cls{tudscrartcl}~-- wie in \KOMAScript{} auch~-- keine
-% Überschrift und kein Eintrag im Inhaltsverzeichnis. In \cls{tudscrbook} wird
-% standardmäßig eine Überschrift in Form eines Kapitels mit Eintrag ins
+% Ãœberschrift und kein Eintrag im Inhaltsverzeichnis. In \cls{tudscrbook} wird
+% standardmÃ¤ÃŸig eine Ãœberschrift in Form eines Kapitels mit Eintrag ins
 % Inhaltsverzeichnis gesetzt.
 %    \begin{macrocode}
 %<*report|article>
@@ -382,14 +448,33 @@
 % \end{macro}^^A \if@tud@abstract@toc@locked
 % \end{macro}^^A \if@tud@abstract@toc
 % \end{macro}^^A \tud@abstract@level
-% \begin{macro}{\if@tud@abstract@double}
-% Mit diesem Schalter wird ggf. versucht, eine in einer anderen Sprache
-% verfasste Zusammenfassung auf die gleiche Seite wie die erste zu setzen.
-% Dazu muss die Option \opt{abstract=single/double} genutzt werden.
+% \begin{macro}{\if@tud@abstract@toc@leveldown}
+% \changes{v2.02}{2014/11/05}{neu}%^^A
+% Dieser Schalter bestimmt, ob der Eintrag in das Inhaltsverzeichnis in der
+% obersten Gliederungsebene~-- \cs{chapter} fÃ¼r die Klassen \cls{tudscrbook}
+% und \cls{tudscrreprt} sowie \cs{section} fÃ¼r \cls{tudscrartcl}~-- oder in der
+% darunterliegenden erfolgt.
 %    \begin{macrocode}
-\newif\if@tud@abstract@double
+\newif\if@tud@abstract@toc@leveldown
 %    \end{macrocode}
-% \end{macro}^^A \if@tud@abstract@double
+% \end{macro}^^A \if@tud@abstract@toc@leveldown
+% \begin{macro}{\if@tud@abstract@markboth}
+% \changes{v2.02}{2014/11/05}{neu}%^^A
+% Dieser Schalter setzt rechten und linken Kolumnentitel automatisch auf die
+% verwendete Ãœberschrift.
+%    \begin{macrocode}
+\newif\if@tud@abstract@markboth
+%    \end{macrocode}
+% \end{macro}^^A \if@tud@abstract@markboth
+% \begin{macro}{\if@tud@abstract@multi}
+% Is dieser Schalter aktiviert, wird eine durch \cs{nextabstract} angegebene 
+% zweite~-- wahrscheinlich in einer Fremdsprache verfasste~-- Zusammenfassung
+% auf die gleiche Seite wie die erste zu setzen. Gesetzt wird der Schalter Ã¼ber 
+% die Option \opt{abstract=single/multi}.
+%    \begin{macrocode}
+\newif\if@tud@abstract@multi
+%    \end{macrocode}
+% \end{macro}^^A \if@tud@abstract@multi
 % \begin{macro}{\if@tud@abstract@fil}
 % Mit diesem Schalter wird bestimmt, ob eine Zusammenfassung auf einer Seite
 % vertikal zentriert wird. Er wird mit \opt{abstract=fill/nofill} gesetzt und
@@ -399,102 +484,73 @@
 \@tud@abstract@filtrue
 %    \end{macrocode}
 % \end{macro}^^A \if@tud@abstract@fil
-% \begin{macro}{\if@tud@abstract@first}
-% \begin{length}{\tud@dim@double}
-% Um prüfen zu können, ob noch genügend Platz für eine weitere Zusammenfassung
-% auf einer Seite vorhanden ist, wird die Länge \cs{tud@dim@double} benötigt.
-% Außerdem wird der Schalter \cs{if@tud@abstract@first} definiert, mit welchem
-% unterschieden werden kann, ob es sich um die erste von mehreren
-% Zusammenfassungen auf einer Seite handelt.
-%    \begin{macrocode}
-\newif\if@tud@abstract@first
-\@tud@abstract@firsttrue
-\newlength{\tud@dim@double}
-%    \end{macrocode}
-% \end{length}^^A \tud@dim@double
-% \end{macro}^^A \if@tud@abstract@first
-% \todo[v3.12]{abstract im tudpagestyle als key (scrlayer)}
 % \begin{option}{abstract}
-% Das aus \KOMAScript{} bekannte Verhalten wird für die beiden Klassen
-% \cls{tudscrartcl} und \cls{tudscrreprt} adaptiert. Außerdem werden
-% zusätzliche Optionen für den Stil der Überschriften in Form von
-% Gliederungsebenen wie Kapitel\footnote{bei \cls{tudscrbook} und
-% \cls{tudscrreprt}} oder Unterkapitel bereitgestellt, welche~-- im Gegensatz
-% zu \KOMAScript{}~-- auch für die Buchklasse \cls{tudscrbook} zur Verfügung
-% stehen.
+% Alle Klassen unterstÃ¼tzen die Werte, welche in \cs{tud@fm@switch} definiert 
+% wurden. Die beiden Klassen \cls{tudscrartcl} und\ cls{tudscrreprt} adaptieren 
+% auÃŸerdem das aus \KOMAScript{} bekannte Verhalten Ã¼ber die booleschen Werte
+% aus \cs{TUD@numkey@bool}.
 %    \begin{macrocode}
 %<*report|article>
 \TUD@key{abstract}[true]{%
+  \edef\@tempb{\TUD@numkey@bool,\tud@fm@switch}%
 %</report|article>
 %<*book>
 \TUD@key{abstract}[chapter]{%
+  \edef\@tempb{\tud@fm@switch}%
 %</book>
-  \TUD@set@numkey{abstract}{@tempa}{%
+  \TUD@set@numkey{abstract}{@tempa}{\@tempb}{#1}%
+%    \end{macrocode}
+% Bei der Einstellungen der Ãœberschriftgliederungsebene wird auÃŸerdem das
+% Standardverhalten fÃ¼r einen Eintrag ins Inhaltsverzeichnis festgelegt, was
+% allerdings vom Anwender jederzeit Ã¼berschrieben werden kann.
+%    \begin{macrocode}
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \ifcase \@tempa\relax%
 %<*report|article>
-    {false}{0},{off}{0},{no}{0},%
-    {true}{1},{on}{1},{yes}{1},%
+      \def\tud@abstract@level{0}%
+      \stdbool@lock{@tud@abstract@toc}{false}%
 %</report|article>
-    {section}{2},{sect}{2},{sec}{2},%
-%<*article>
-    {new}{2},{std}{2},{heading}{2},%
-%</article>
+    \or%
+%<*report|article>
+      \def\tud@abstract@level{1}%
+      \stdbool@lock{@tud@abstract@toc}{false}%
+%</report|article>
+    \or%
+      \def\tud@abstract@level{2}%
+      \stdbool@lock{@tud@abstract@toc}{true}%
+    \or%
 %<*book|report>
-    {chapter}{3},{chap}{3},%
-    {new}{3},{std}{3},{heading}{3},%
+      \def\tud@abstract@level{3}%
+      \stdbool@lock{@tud@abstract@toc}{true}%
 %</book|report>
 %    \end{macrocode}
-% Zusätzlich lassen sich die Werte \opt{abstract=double}, \opt{abstract=toc}
-% sowie \opt{abstract=fill} setzen.
-%    \begin{macrocode}
-    {totoc}{4},{toc}{4},%
-    {nottotoc}{5},{notoc}{5},%
-    {one}{6},{simple}{6},{single}{6},%
-    {two}{7},{both}{7},{double}{7},%
-    {nofil}{8},{nofill}{8},{novfil}{8},{novfill}{8},%
-    {fil}{9},{fill}{9},{vfil}{9},{vfill}{9},%
-  }{#1}%
-%    \end{macrocode}
-% Bei der Einstellungen der Überschriftgliederungsebene wird außerdem das
-% Standardverhalten für einen Eintrag ins Inhaltsverzeichnis festgelegt, was
-% allerdings vom Anwender jederzeit überschrieben werden kann.
-%    \begin{macrocode}
-  \ifcase \@tempa\relax%
-%<*report|article>
-    \def\tud@abstract@level{0}%
-    \stdbool@lock{@tud@abstract@toc}{false}%
-%</report|article>
-  \or%
-%<*report|article>
-    \def\tud@abstract@level{1}%
-    \stdbool@lock{@tud@abstract@toc}{false}%
-%</report|article>
-  \or%
-    \def\tud@abstract@level{2}%
-    \stdbool@lock{@tud@abstract@toc}{true}%
-  \or%
-%<*book|report>
-    \def\tud@abstract@level{3}%
-    \stdbool@lock{@tud@abstract@toc}{true}%
-%</book|report>
-%    \end{macrocode}
-% Neben den Einstellungen für die Art der Gliederungsebene der Überschrift für
-% die Zusammenfassung können außerdem noch die Optionen gesetzt werden, ob
-% versucht werden soll, eine mögliche Zusammenfassung in einer anderen Sprache
-% auf die gleiche Seite wie die erste zu setzen (\opt{abstract=double}) und ob
+% Neben den Einstellungen fÃ¼r die Art der Gliederungsebene der Ãœberschrift fÃ¼r
+% die Zusammenfassung kÃ¶nnen auÃŸerdem noch die Optionen gesetzt werden, ob
+% versucht werden soll, eine mÃ¶gliche Zusammenfassung in einer anderen Sprache
+% auf die gleiche Seite wie die erste zu setzen (\opt{abstract=multi}) und ob
 % die Zusammenfassung einen Eintrag ins Inhaltsverzeichnis bekommen soll.
 %    \begin{macrocode}
-  \or%
-    \setbool@lock{@tud@abstract@toc}{true}%
-  \or%
-    \setbool@lock{@tud@abstract@toc}{false}%
-  \or%
-    \@tud@abstract@doublefalse%
-  \or%
-    \@tud@abstract@doubletrue%
-  \or%
-    \@tud@abstract@filfalse%
-  \or%
-    \@tud@abstract@filtrue%
+    \or%
+      \setbool@lock{@tud@abstract@toc}{true}%
+      \@tud@abstract@toc@leveldownfalse%
+    \or%
+      \setbool@lock{@tud@abstract@toc}{true}%
+      \@tud@abstract@toc@leveldowntrue%
+    \or%
+      \setbool@lock{@tud@abstract@toc}{false}%
+    \or%
+      \@tud@abstract@markbothtrue%
+    \or%
+      \@tud@abstract@markbothfalse%
+    \or%
+      \@tud@abstract@multifalse%
+    \or%
+      \@tud@abstract@multitrue%
+    \or%
+      \@tud@abstract@filfalse%
+    \or%
+      \@tud@abstract@filtrue%
+    \fi%
   \fi%
 }
 %    \end{macrocode}
@@ -502,15 +558,15 @@
 %
 % \iffalse
 %</class&option>
-%<*class&!option>
+%<*class&body>
 % \fi
 %
 % \begin{environment}{abstract}
-% Die \env{abstract}-Umgebung wird komplett überarbeitet. Um alle gewünschten
-% Optionen\footnote{\opt{titlepage}, \opt{twocolumn}, \opt{abstract@double},
-% \opt{abstract@fil} sowie Gliederungsebene der Überschrift} beachten zu
-% können, wird auf die Möglichkeiten der Definition mit \cs{NewEnviron} aus dem
-% Paket \pkg{environ} zurückgegriffen. Damit ist es möglich, gezielt auf den
+% Die \env{abstract}-Umgebung wird komplett Ã¼berarbeitet. Um alle gewÃ¼nschten
+% Optionen\footnote{\opt{titlepage}, \opt{twocolumn}, \opt{abstract@multi},
+% \opt{abstract@fil} sowie Gliederungsebene der Ãœberschrift} beachten zu
+% kÃ¶nnen, wird auf die MÃ¶glichkeiten der Definition mit \cs{NewEnviron} aus dem
+% Paket \pkg{environ} zurÃ¼ckgegriffen. Damit ist es mÃ¶glich, gezielt auf den
 % Inhalt der Umgebung selbst mit dem Befehl \cs{BODY} zuzugreifen. Dieser
 % Mechanismus wird innerhalb von \cs{tud@abstractbody} verwendet.
 %    \begin{macrocode}
@@ -520,89 +576,130 @@
 %</report|article>
 \NewEnviron{abstract}[1][]{%
 %    \end{macrocode}
-% Als erstes werden die Optionen verarbeitet. Sollte nach Abarbeitung der
-% Optionen für \env{abstract} festgestellt werden, dass eine spezielle
-% Spaltenanzahl gewünscht ist, so wird~-- für den Fall, dass das Paket
+% Sollten Ãœberschriften in Form von Kapiteln gewÃ¤hlt worden sein, so wird 
+% temporÃ¤r die \opt{titlepage}-Option aktivert, da alle weiteren notwendigen 
+% Einstellungen dieser entsprechen. Bei aktiver \opt{titlepage}-Option wird 
+% anschlieÃŸend der aktuelle Seitenstil gesichert, um diesen nach der Umgebung
+% wiederherstellen zu kÃ¶nnen.
+%    \begin{macrocode}
+  \ifnumless{\@nameuse{tud@abstract@level}}{3}{}{\@titlepagetrue}%
+  \if@titlepage%
+    \tud@currentpagestyle@set%
+    \clearpage\def\tud@ps{empty}%
+  \fi%
+%    \end{macrocode}
+% Als nÃ¤chstes werden die Optionen verarbeitet. Sollte nach Abarbeitung der
+% Optionen fÃ¼r \env{abstract} festgestellt werden, dass eine spezielle
+% Spaltenanzahl gewÃ¼nscht ist, so wird~-- fÃ¼r den Fall, dass das Paket
 % \pkg{multicol} geladen ist~-- diese gesetzt. Sonst wird die angegbene Anzahl
-% der Spalten ignoriert und eine Warnung ausgegeben.
+% der Spalten ignoriert und eine Warnung ausgegeben. Bei aktiver Option
+% \opt{titlepage} kann Ã¼ber den Parameter \opt{pagestyle} der Seitenstil 
+% innerhalb der Umgebung geÃ¤ndert werden. Dieser wird automatisch auf
+% \val{headings} gesetzt, wenn beidseitige Kolumnentitel verwendet werden.
 %    \begin{macrocode}
   \TUD@parameter@set[abstract]{#1}%
+  \if@tud@abstract@markboth\def\tud@ps{headings}\fi%
   \tud@multicols@check%
-  \tud@fm@set{abstract}{\abstractname}{\BODY}%
-}
+  \if@titlepage\tud@ps@select\fi%
+  \tud@fm@check{abstract}{\tud@fm@set{abstract}{\abstractname}{\BODY}}%
+%    \end{macrocode}
+% Nach der Umgebung wird bei aktiver \opt{titlepage}-Option der ursprÃ¼ngliche 
+% Seitenstil zurÃ¼ckgesetzt.
+%    \begin{macrocode}
+}[%
+  \if@titlepage%
+    \aftergroup\tud@currentpagestyle@reset%
+    \clearpage%
+  \fi%
+]
 %    \end{macrocode}
 % \end{environment}^^A abstract
 % \begin{parameter}{language}
 % \begin{parameter}{columns}
+% \begin{parameter}{pagestyle}
+% \changes{v2.02}{2014/07/19}{neu}%^^A
+% \begin{parameter}{markboth}
+% \changes{v2.02}{2014/11/05}{neu}%^^A
 % \begin{parameter}{abstract}
 % \begin{parameter}{option}
-% Als Schlüssel für die \env{abstract}-Umgebung können Sprache, Anzahl der
-% Spalten oder auch die zur Umgebung gehörigen Klassenoptionen angegeben werden.
+% Als SchlÃ¼ssel fÃ¼r die \env{abstract}-Umgebung kÃ¶nnen Sprache, Anzahl der
+% Spalten oder auch die zur Umgebung gehÃ¶rigen Klassenoptionen angegeben werden.
 %    \begin{macrocode}
 \TUD@parameter{abstract}{%
   \TUD@parameter@define{language}{\selectlanguage{#1}}%
   \TUD@parameter@define{columns}{\def\tud@multicols{#1}}%
+  \TUD@parameter@define{pagestyle}{\tud@fm@pagestyle{abstract}{#1}}%
+  \TUD@parameter@define{markboth}[true]{%
+    \ifstr{#1}{true}{\@tud@abstract@markbothtrue}{%
+    \ifstr{#1}{on}{\@tud@abstract@markbothtrue}{%
+    \ifstr{#1}{yes}{\@tud@abstract@markbothtrue}{%
+    \ifstr{#1}{false}{\@tud@abstract@markbothfalse}{%
+    \ifstr{#1}{no}{\@tud@abstract@markbothfalse}{%
+    \ifstr{#1}{off}{\@tud@abstract@markbothfalse}{%
+      \@tud@abstract@markbothfalse%
+      \manualmark\markboth{#1}{#1}%
+    }}}}}}%
+  }%
   \TUD@parameter@define{abstract}{\TUDoption{abstract}{#1}}%
   \TUD@parameter@define{option}{\TUDoption{abstract}{#1}}%
 %    \end{macrocode}
-% Für die Optionsangabe ohne Schlüssel und Wert kann eine Anzahl an Spalten
-% oder eine alternative Sprache angegeben werden. Hierfür ist der Befehl
+% FÃ¼r die Optionsangabe ohne SchlÃ¼ssel und Wert kann eine Anzahl an Spalten
+% oder eine alternative Sprache angegeben werden. HierfÃ¼r ist der Befehl
 % \cs{tud@environmenthandler} definiert, welcher auch von \env{tudpage}-Umgebung
 % verwendet wird
 %    \begin{macrocode}
-  \TUD@parameter@sethandler{\tud@environmenthandler{#1}}
+  \TUD@parameter@sethandler{\tud@environmenthandler{#1}}%
 }
 %    \end{macrocode}
 % \end{parameter}^^A option
 % \end{parameter}^^A abstract
+% \end{parameter}^^A markboth
+% \end{parameter}^^A pagestyle
 % \end{parameter}^^A columns
 % \end{parameter}^^A language
-% \todo[v3.12]{%
-%   Einführen mit currentpagestyle sinnvoll; wie bei \texttt{abstract=chapter}?
-%   bestenfalls chapterpagestyle als weitere Option; wenn nicht gegeben, dann mit
-%   option pagestyle überschreiben bzw. erahnen\dots
-% }
-% \begin{macro}{\abstractpagestyle}
-% Damit der Anwender relativ schnell beeinflussen kann, wie der Seitenstil
-% für die Zusammenfassung sein soll, wird dieser Befehl eingeführt. Dabei wird
-% im Standardfall für allerlei Unterscheidungen gesorgt.
+% \begin{macro}{\nextabstract}
+% Um einzelne Abschnitte innerhalb einer Zusammenfassung trennen zu kÃ¶nnen, ist
+% dieser Befehl notwendig.
 %    \begin{macrocode}
-% ^^A\newcommand*\abstractpagestyle{%
-% ^^A  \if@titlepage%
-% ^^A    empty%
-% ^^A  \else%
-% ^^A%<*book|report>
-% ^^A    \ifnum\tud@abstract@level>2%
-% ^^A      \chapterpagestyle%
-% ^^A    \else%
-% ^^A      plain%
-% ^^A    \fi%
-% ^^A%</book|report>
-% ^^A%<*article>
-% ^^A    plain%
-% ^^A%</article>
-% ^^A  \fi%
-% ^^A}
+\newcommand*\nextabstract[1][]{%
+  \ifnum\tud@multicols>1\relax%
+    \end{multicols}%
+  \else%
+    \ifbool{@tud@abstract@multi}{%
+      \ifcase\@nameuse{tud@abstract@level}\relax\or%
+        \vspace{\dimexpr\bigskipamount-\parskip\relax}%
+      \fi%
+    }{}%
+  \fi%
+  \tud@fm@next{abstract}{#1}%
+  \ifnum\tud@multicols>1\relax%
+    \begin{multicols}{\tud@multicols}[{\tud@fm@head{abstract}{\abstractname}}]%
+  \else%
+    \tud@fm@head{abstract}{\abstractname}%
+  \fi%
+}
 %    \end{macrocode}
-% \end{macro}^^A \abstractpagestyle
+% \end{macro}^^A \nextabstract
 %
 % \iffalse
-%</class&!option>
+%</class&body>
 %<*class&option>
 % \fi
 %
-% \subsection{Befehle für Selbstständigkeitserklärung und Sperrvermerk}
+% \subsection{Befehle fÃ¼r SelbststÃ¤ndigkeitserklÃ¤rung und Sperrvermerk}
 %
-% Die Befehle für Selbstständigkeitserklärung und Sperrvermerk werden
-% äquivalent zur \env{abstract}-Umgebung mit den gleichen Optionen
+% Die Befehle fÃ¼r SelbststÃ¤ndigkeitserklÃ¤rung und Sperrvermerk werden
+% Ã¤quivalent zur \env{abstract}-Umgebung mit den gleichen Optionen
 % ausgestattet.
-% \todo[v3.12]{declaration im tudpagestyle als key (scrlayer)}
 % \begin{macro}{\tud@declaration@level}
 % \begin{macro}{\if@tud@declaration@toc}
 % \begin{macro}{\if@tud@declaration@toc@locked}
-% \begin{macro}{\if@tud@declaration@double}
+% \begin{macro}{\if@tud@declaration@toc@leveldown}
+% \changes{v2.02}{2014/11/05}{}%^^A
+% \begin{macro}{\if@tud@declaration@markboth}
+% \changes{v2.02}{2014/11/05}{neu}%^^A
+% \begin{macro}{\if@tud@declaration@multi}
 % \begin{macro}{\if@tud@declaration@fil}
-% \begin{macro}{\if@tud@declaration@first}
 % Siehe die Option \opt{abstract}.
 %    \begin{macrocode}
 %<*report|article>
@@ -613,16 +710,17 @@
 \newcommand*\tud@declaration@level{3}
 \newbool@lock[true]{@tud@declaration@toc}
 %</book>
-\newif\if@tud@declaration@double
-\@tud@declaration@doubletrue
+\newif\if@tud@declaration@toc@leveldown
+\newif\if@tud@declaration@markboth
+\newif\if@tud@declaration@multi
+\@tud@declaration@multitrue
 \newif\if@tud@declaration@fil
 \@tud@declaration@filtrue
-\newif\if@tud@declaration@first
-\@tud@declaration@firsttrue
 %    \end{macrocode}
-% \end{macro}^^A \if@tud@declaration@first
 % \end{macro}^^A \if@tud@declaration@fil
-% \end{macro}^^A \if@tud@declaration@double
+% \end{macro}^^A \if@tud@declaration@multi
+% \end{macro}^^A \if@tud@declaration@markboth
+% \end{macro}^^A \if@tud@declaration@toc@leveldown
 % \end{macro}^^A \if@tud@declaration@toc@locked
 % \end{macro}^^A \if@tud@declaration@toc
 % \end{macro}^^A \tud@declaration@level
@@ -635,50 +733,44 @@
 %<*book>
 \TUD@key{declaration}[chapter]{%
 %</book>
-  \TUD@set@numkey{declaration}{@tempa}{%
-    {false}{0},{off}{0},{no}{0},%
-    {true}{1},{on}{1},{yes}{1},%
-    {section}{2},{sect}{2},{sec}{2},%
-%<*article>
-    {new}{2},{std}{2},{heading}{2},%
-%</article>
+  \edef\@tempb{\TUD@numkey@bool,\tud@fm@switch}%
+  \TUD@set@numkey{declaration}{@tempa}{\@tempb}{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \ifcase \@tempa\relax%
+      \def\tud@declaration@level{0}%
+      \stdbool@lock{@tud@declaration@toc}{false}%
+    \or%
+      \def\tud@declaration@level{1}%
+      \stdbool@lock{@tud@declaration@toc}{false}%
+    \or%
+      \def\tud@declaration@level{2}%
+      \stdbool@lock{@tud@declaration@toc}{true}%
+    \or%
 %<*book|report>
-    {chapter}{3},{chap}{3},%
-    {new}{3},{std}{3},{heading}{3},%
+      \def\tud@declaration@level{3}%
+      \stdbool@lock{@tud@declaration@toc}{true}%
 %</book|report>
-    {totoc}{4},{toc}{4},%
-    {nottotoc}{5},{notoc}{5},%
-    {one}{6},{simple}{6},{single}{6},%
-    {two}{7},{both}{7},{double}{7},%
-    {nofil}{8},{nofill}{8},{novfil}{8},{novfill}{8},%
-    {fil}{9},{fill}{9},{vfil}{9},{vfill}{9},%
-  }{#1}%
-  \ifcase \@tempa\relax%
-    \def\tud@declaration@level{0}%
-    \stdbool@lock{@tud@declaration@toc}{false}%
-  \or%
-    \def\tud@declaration@level{1}%
-    \stdbool@lock{@tud@declaration@toc}{false}%
-  \or%
-    \def\tud@declaration@level{2}%
-    \stdbool@lock{@tud@declaration@toc}{true}%
-  \or%
-%<*book|report>
-    \def\tud@declaration@level{3}%
-    \stdbool@lock{@tud@declaration@toc}{true}%
-%</book|report>
-  \or%
-    \stdbool@lock{@tud@declaration@toc}{false}%
-  \or%
-    \stdbool@lock{@tud@declaration@toc}{false}%
-  \or%
-    \@tud@declaration@doublefalse%
-  \or%
-    \@tud@declaration@doubletrue%
-  \or%
-    \@tud@declaration@filfalse%
-  \or%
-    \@tud@declaration@filtrue%
+    \or%
+      \stdbool@lock{@tud@declaration@toc}{true}%
+      \@tud@declaration@toc@leveldownfalse%
+    \or%
+      \stdbool@lock{@tud@declaration@toc}{true}%
+      \@tud@declaration@toc@leveldowntrue%
+    \or%
+      \stdbool@lock{@tud@declaration@toc}{false}%
+    \or%
+      \@tud@declaration@markbothtrue%
+    \or%
+      \@tud@declaration@markbothfalse%
+    \or%
+      \@tud@declaration@multifalse%
+    \or%
+      \@tud@declaration@multitrue%
+    \or%
+      \@tud@declaration@filfalse%
+    \or%
+      \@tud@declaration@filtrue%
+    \fi%
   \fi%
 }
 %    \end{macrocode}
@@ -686,108 +778,85 @@
 %
 % \iffalse
 %</class&option>
-%<*class&!option>
+%<*class&body>
 % \fi
 %
-% \begin{macro}{\confirmation}
-% Mit diesem Befehl kann die Selbstständigkeitserklärung ausgegeben werden. Das
-% optionale Argument bestimmt, wer als Unterstützer angegeben wird. Damit bei
-% der Angabe eines leeren optionalen Argumentes dieses Feld geleert wird, muss
-% mit \cs{@ifnextchar[} eine Fallunterscheidung gemacht werden, ob ein solches
-% angegeben wurde. Außerdem sind Schlüssel-Wert-Paare als Option nutzbar.
+% \begin{environment}{declarations}
+% \begin{macro}{\if@tud@declarations}
+% Die \env{declarations}-Umgebung wird Ã¤hnlich zur \env{abstract}-Umgebung 
+% definiert. Prinzipiell funktioniert diese genauso, inklusive der Parameter.
+% Der Schalter \cs{if@tud@declarations} wird verwendet, um die weiteren Befehle
+% \cs{declaration}, \cs{confirmation} und \cs{blocking} innerhalb und auÃŸerhalb
+% dieser Umgebung verwenden zu kÃ¶nnen.
 %    \begin{macrocode}
-\newcommand*\confirmation{%
+\newif\if@tud@declarations
+\NewEnviron{declarations}[1][]{%
+  \ifnumless{\@nameuse{tud@declaration@level}}{3}{}{\@titlepagetrue}%
+  \if@titlepage%
+    \tud@currentpagestyle@set%
+    \clearpage\def\tud@ps{empty}%
+  \fi%
+  \@tud@declarationstrue%
+  \TUD@parameter@set[declaration]{#1}%
+  \if@tud@declaration@markboth\def\tud@ps{headings}\fi%
+  \tud@multicols@check%
+  \if@titlepage\tud@ps@select\fi%
+  \tud@fm@check{declaration}{\BODY}%
+}[%
+  \if@titlepage%
+    \aftergroup\tud@currentpagestyle@reset%
+    \clearpage%
+  \fi%
+]
 %    \end{macrocode}
-% Ist ein optionales Argument gegeben, wird ohne Schlüsselangabe dank dem Paket
-% \pkg{kvsetkeys} mit dem Befehl \cs{TUD@parameter@sethandler} das Feld für die
-% Unterstützer gesetzt bzw. bei leerem Argument geleert. Andernfalls werden
-% durch \cs{TUD@parameter@set} die Schlüssel-Wert-Paare ausgewertet.
-%    \begin{macrocode}
-  \def\@tempa[##1]{%
-    \begingroup%
-      \ifblank{##1}{\supporter{}}{}%
-      \TUD@parameter{declaration}{%
-        \TUD@parameter@sethandler{\supporter{##1}}
-        \TUD@parameter@set{##1}
-      }%
-      \@tempb%
-    \endgroup%
-  }%
-%    \end{macrocode}
-% Ohne optionales Argument erfolgt die Ausgabe ohne Optionsbehandlung direkt.
-%    \begin{macrocode}
-  \def\@tempb{%
-    \tud@fm@set{declaration}{\confirmationname}%
-      {\confirmationtext\endgraf\@confirmationclosing}%
-  }%
-  \@ifnextchar[%]
-  {\@tempa}{\begingroup\@tempb\endgroup}%
-}
-%    \end{macrocode}
-% \end{macro}^^A \confirmation
-% \begin{macro}{\restriction}
-% Für den Sperrvermerk wird äquivalent zu \cs{confirmation} verfahren. Das
-% optionale Argument ohne Schlüssel setzt hier die Firma für den Sperrvermerk.
-%    \begin{macrocode}
-\newcommand*\restriction{%
-  \def\@tempa[##1]{%
-    \begingroup%
-      \ifblank{##1}{\company{}}{}%
-      \TUD@parameter{declaration}{%
-        \TUD@parameter@sethandler{\company{##1}}
-        \TUD@parameter@set{##1}
-      }%
-      \@tempb%
-    \endgroup%
-  }%
-  \def\@tempb{%
-    \tud@fm@set{declaration}{\restrictionname}{\restrictiontext}%
-  }%
-  \@ifnextchar[%]
-  {\@tempa}{\begingroup\@tempb\endgroup}%
-}
-%    \end{macrocode}
-% \end{macro}^^A \restriction
-% \begin{macro}{\declaration}
-% Dieser Befehl dient zur Ausgabe von sowohl Selbstständigkeitserklärung als
-% auch Sperrvermerk. Über das optionale Argument kann ohne Schlüssel die
-% gewünschte Sprache eingestellt werden. Zusätzlich können Optionen als
-% Schlüssel-Wert-Paare angegeben werden.
-%    \begin{macrocode}
-\newcommand*\declaration[1][]{%
-  \clearpage%
-  \begingroup%
-    \TUD@parameter{declaration}{%
-      \TUD@parameter@sethandler{\selectlanguage{#1}}
-      \TUD@parameter@set{#1}
-    }%
-    \@tud@declaration@firsttrue%
-    \confirmation\restriction%
-  \endgroup%
-  \clearpage%
-}
-%    \end{macrocode}
-% \end{macro}^^A \declaration
+% \end{macro}^^A \if@tud@declarations
+% \end{environment}^^A declarations
 % \begin{parameter}{language}
+% \begin{parameter}{columns}
+% \changes{v2.02}{2014/07/19}{neu}%^^A
+% \begin{parameter}{pagestyle}
+% \changes{v2.02}{2014/07/19}{neu}%^^A
+% \begin{parameter}{markboth}
+% \changes{v2.02}{2014/11/05}{neu}%^^A
 % \begin{parameter}{supporter}
 % \begin{parameter}{place}
 % \begin{parameter}{closing}
 % \begin{parameter}{company}
 % \begin{parameter}{declaration}
 % \begin{parameter}{option}
-% Dies sind die möglichen Schlüssel für die Befehle \cs{declaration},
-% \cs{confirmation} und \cs{restriction}. Die Schlüssel \opt{declaration} bzw.
+% Dies sind die mÃ¶glichen SchlÃ¼ssel fÃ¼r die Befehle \cs{declaration},
+% \cs{confirmation} und \cs{blocking}. Die SchlÃ¼ssel \opt{declaration} bzw.
 % \opt{option} dienen zum Setzen der Werte, welche auch als Klassenoptionen
-% gesetzt werden können.
+% gesetzt werden kÃ¶nnen.
 %    \begin{macrocode}
 \TUD@parameter{declaration}{%
   \TUD@parameter@define{language}{\selectlanguage{#1}}%
-  \TUD@parameter@define{company}{\company{#1}}%
-  \TUD@parameter@define{supporter}{\supporter{#1}}%
-  \TUD@parameter@define{place}{\place{#1}}%
-  \TUD@parameter@define{closing}{\confirmationclosing{#1}}%
+  \TUD@parameter@define{columns}{\def\tud@multicols{#1}}%
+  \TUD@parameter@define{pagestyle}{\tud@fm@pagestyle{declaration}{#1}}%
+  \TUD@parameter@define{markboth}[true]{%
+    \ifstr{#1}{true}{\@tud@declaration@markbothtrue}{%
+    \ifstr{#1}{on}{\@tud@declaration@markbothtrue}{%
+    \ifstr{#1}{yes}{\@tud@declaration@markbothtrue}{%
+    \ifstr{#1}{false}{\@tud@declaration@markbothfalse}{%
+    \ifstr{#1}{no}{\@tud@declaration@markbothfalse}{%
+    \ifstr{#1}{off}{\@tud@declaration@markbothfalse}{%
+      \@tud@declaration@markbothfalse%
+      \manualmark\markboth{#1}{#1}%
+    }}}}}}%
+  }%
+  \TUD@parameter@define{company}{\def\@company{#1}}%
+  \TUD@parameter@define{supporter}{\def\@supporter{#1}}%
+  \TUD@parameter@define{place}{\def\@place{#1}}%
+  \TUD@parameter@define{closing}{\def\@confirmationclosing{#1}}%
   \TUD@parameter@define{declaration}{\TUDoption{declaration}{#1}}%
   \TUD@parameter@define{option}{\TUDoption{declaration}{#1}}%
+%    \end{macrocode}
+% FÃ¼r die Optionsangabe ohne SchlÃ¼ssel und Wert kann eine Anzahl an Spalten
+% oder eine alternative Sprache angegeben werden. HierfÃ¼r ist der Befehl
+% \cs{tud@environmenthandler} definiert, welcher auch von \env{tudpage}-Umgebung
+% verwendet wird
+%    \begin{macrocode}
+  \TUD@parameter@sethandler{\tud@environmenthandler{#1}}%
 }
 %    \end{macrocode}
 % \end{parameter}^^A option
@@ -796,64 +865,111 @@
 % \end{parameter}^^A closing
 % \end{parameter}^^A place
 % \end{parameter}^^A supporter
+% \end{parameter}^^A markboth
+% \end{parameter}^^A pagestyle
+% \end{parameter}^^A columns
 % \end{parameter}^^A language
-% \todo[v3.12]{Einführen mit currentpagestyle sinnvoll; wie bei chapter?}
-% \begin{macro}{\declarationpagestyle}
-% Damit der Anwender relativ schnell beeinflussen kann, wie der Seitenstil
-% für die Erklärungen sein soll, wird dieser Befehl eingeführt. Dabei wird
-% im Standardfall für allerlei Unterscheidungen gesorgt.
+% \begin{macro}{\declaration}
+% \changes{v2.02}{2014/07/18}{Neuimplementierung fÃ¼r \pkg{scrlayer-scrpage}}%^^A
+% Dieser Befehl dient zur Ausgabe von sowohl SelbststÃ¤ndigkeitserklÃ¤rung als
+% auch Sperrvermerk. Ãœber das optionale Argument kann ohne SchlÃ¼ssel die
+% gewÃ¼nschte Sprache eingestellt werden. ZusÃ¤tzlich kÃ¶nnen Optionen als
+% SchlÃ¼ssel-Wert-Paare angegeben werden.
 %    \begin{macrocode}
-%  ^^A\newcommand*\declarationpagestyle{%
-%  ^^A  \if@titlepage%
-%  ^^A    empty%
-%  ^^A  \else%
-%  ^^A%<*book|report>
-%  ^^A    \ifnum\tud@declaration@level>2%
-%  ^^A      \chapterpagestyle%
-%  ^^A    \else%
-%  ^^A      plain%
-%  ^^A    \fi%
-%  ^^A%</book|report>
-%  ^^A%<*article>
-%  ^^A    plain%
-%  ^^A%</article>
-%  ^^A  \fi%
-%  ^^A}
-%    \end{macrocode}
-% \end{macro}^^A \declarationpagestyle
-% \begin{macro}{\tud@fm@level@wrn}
-% \begin{macro}{\tud@fm@option@wrn}
-% \begin{macro}{\tud@fm@double@wrn}
-% Die Befehle dienen zur Warnung für nicht sinnvoll gewählte oder aber sich
-% gegenseitig ausschließende Optionen.
-%    \begin{macrocode}
-\newcommand*\tud@fm@level@wrn[1]{%
-  \ClassWarning{\tudcls@name}{%
-    Headings in chapter style '#1=chapter'\MessageBreak%
-    are not recommended without the titlepage\MessageBreak%
-    option%
-  }%
-}
-\newcommand*\tud@fm@option@wrn[1]{%
-  \ClassWarning{\tudcls@name}{%
-    The option '#1=double' is not supported\MessageBreak%
-    neither with chapter headings nor without an\MessageBreak%
-    activated titlepage%
-  }%
-}
-\newcommand*\tud@fm@double@wrn[1]{%
-  \ClassWarning{\tudcls@name}{%
-    It wasn't possible to use '#1=double'\MessageBreak%
-    because of too much content within #1%
+\newcommand*\declaration[1][]{%
+  \ifbool{@tud@declarations}{%
+    \begingroup%
+      \TUD@parameter@set[declaration]{#1}%
+      \tud@fm@confirmation%
+      \tud@fm@blocking
+    \endgroup%
+  }{%
+    \begin{declarations}[#1]%
+      \tud@fm@confirmation%
+      \tud@fm@blocking%
+    \end{declarations}%
   }%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@fm@double@wrn
-% \end{macro}^^A \tud@fm@option@wrn
-% \end{macro}^^A \tud@fm@level@wrn
+% \end{macro}^^A \declaration
+% \begin{macro}{\confirmation}
+% \changes{v2.02}{2014/07/18}{Neuimplementierung fÃ¼r \pkg{scrlayer-scrpage}}%^^A
+% \begin{macro}{\tud@fm@confirmation}
+% \changes{v2.02}{2014/07/18}{neu}%^^A
+% Mit diesem Befehl kann die SelbststÃ¤ndigkeitserklÃ¤rung ausgegeben werden. Das
+% optionale Argument bestimmt, wer als UnterstÃ¼tzer angegeben wird. AuÃŸerdem
+% sind SchlÃ¼ssel-Wert-Paare als Option nutzbar.
+%    \begin{macrocode}
+\newcommand*\confirmation[1][]{%
+%    \end{macrocode}
+% Damit das optionale Argument ohne SchlÃ¼ssel fÃ¼r die UnterstÃ¼tzer verwendet 
+% werden kann, wird der Handler umdefiniert.
+%    \begin{macrocode}
+  \TUD@parameter@sethandler[declaration]{\def\@supporter{##1}}%
+  \ifbool{@tud@declarations}{%
+    \begingroup%
+      \TUD@parameter@set[declaration]{#1}%
+      \tud@fm@confirmation%
+    \endgroup%
+  }{%
+    \begin{declarations}[#1]%
+      \tud@fm@confirmation%
+    \end{declarations}%
+  }%
+%    \end{macrocode}
+% Der Handler wird auf das ursprÃ¼ngliche Verhalten zurÃ¼ckgesetzt.
+%    \begin{macrocode}
+  \TUD@parameter@sethandler[declaration]{\tud@environmenthandler{##1}}%
+}
+%    \end{macrocode}
+% Dies ist der eigentliche Inhalt des Befehls \cs{confirmation}.
+%    \begin{macrocode}
+\newcommand*\tud@fm@confirmation{%
+  \tud@fm@check{declaration}{%
+    \tud@fm@set{declaration}{\confirmationname}{%
+      \confirmationtext\vskip0pt\@confirmationclosing%
+    }%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@fm@confirmation
+% \end{macro}^^A \confirmation
+% \begin{macro}{\blocking}
+% \changes{v2.02}{2014/05/16}{neu, \cs{restriction} umbenannt}%^^A
+% \changes{v2.02}{2014/07/18}{an \pkg{scrlayer-scrpage} angepasst}%^^A
+% \begin{macro}{\tud@fm@blocking}
+% \changes{v2.02}{2014/07/18}{neu}%^^A
+% FÃ¼r den Sperrvermerk wird Ã¤quivalent zu \cs{confirmation} verfahren. Das
+% optionale Argument ohne SchlÃ¼ssel setzt hier die Firma fÃ¼r den Sperrvermerk.
+%    \begin{macrocode}
+\newcommand*\blocking[1][]{%
+  \TUD@parameter@sethandler[declaration]{\def\@company{##1}}%
+  \ifbool{@tud@declarations}{%
+    \begingroup%
+      \TUD@parameter@set[declaration]{#1}%
+      \tud@fm@blocking%
+    \endgroup%
+  }{%
+    \begin{declarations}[#1]%
+      \tud@fm@blocking%
+    \end{declarations}%
+  }%
+  \TUD@parameter@sethandler[declaration]{\tud@environmenthandler{##1}}%
+}
+%    \end{macrocode}
+% Dies ist der eigentliche Inhalt des Befehls \cs{blocking}.
+%    \begin{macrocode}
+\newcommand*\tud@fm@blocking{%
+  \tud@fm@check{declaration}{%
+    \tud@fm@set{declaration}{\blockingname}{\blockingtext}%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@fm@blocking
+% \end{macro}^^A \blocking
 %
 % \iffalse
-%</class&!option>
+%</class&body>
 % \fi
 %
 % \Finale

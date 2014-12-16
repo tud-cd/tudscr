@@ -1,4 +1,4 @@
-% \CheckSum{199}
+% \CheckSum{336}
 % \iffalse meta-comment
 % ======================================================================
 %
@@ -45,11 +45,25 @@
 % \iffalse
 %%% From File: tudscr-comp.dtx
 %<*driver>
-% \fi
-\ProvidesFile{tudscr-comp.dtx}%
-  [2014/04/22 v2.00 TUD-KOMA-Script (compatibility for tudbook)]
-% \iffalse
-\documentclass{tudscrdoc}
+\ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
+\ProvidesFile{tudscr-comp.dtx}[%
+  2014/11/05 v2.02 TUD-KOMA-Script\space%
+%</driver>
+%<package>\NeedsTeXFormat{LaTeX2e}[2011/06/27]
+%<package>\ProvidesPackage{tudscrcomp}[%
+%<*driver|package>
+%!TUDVersion
+%<package>  package
+  (compatibility for tudbook)%
+]
+%</driver|package>
+%<*driver>
+\RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
+\documentclass[english,ngerman]{tudscrdoc}
+\usepackage{selinput}\SelectInputMappings{adieresis={ä},germandbls={ß}}
+\usepackage[T1]{fontenc}
+\usepackage{babel}
+\usepackage{tudscrfonts} % only load this package, if the fonts are installed
 \KOMAoptions{parskip=half-}
 \CodelineIndex
 \RecordChanges
@@ -63,40 +77,20 @@
 %
 % \selectlanguage{ngerman}
 %
-% \section{Kompatibilit�t f�r alte \cls{tudbook}-Dokumente}
+% \section{Kompatibilität für die \cls{tudbook}-Klasse und frühere Versionen}
 %
-% Diese Paket stellt f�r die \cls{tudscr}-Klassen eine Schnittstelle bereit,
-% die es erm�glicht, die in der alten \cls{tudbook}-Klasse und dem dazugeh�rigen
+% Diese Paket stellt für die \cls{tudscr}-Klassen eine Schnittstelle bereit,
+% die es ermöglicht, die in der alten \cls{tudbook}-Klasse und dem dazugehörigen
 % \pkg{tudthesis}-Paket definierten Befehle hier zu benutzen, um alte Dokumente
 % mit den neuen Klassen zu setzen.
 %
 % \StopEventually{\PrintIndex\PrintChanges}
 %
 % \iffalse
-%<*package&header>
+%<*package>
 % \fi
 %
-% \subsection{Identifizierung des Pakets \pkg{tudscrcomp}}
-%
-%    \begin{macrocode}
-\NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{tudscrcomp}%
-  [\TUDVersion\space package (compatibility for tudbook)]
-\ifx\tudcls@name\undefined
-  \PackageError{tudscrcomp}{Unsupported class found}{%
-    This package can only be used with a class out of the\MessageBreak%
-    tudscr bundle (tudscrartcl, tudscrreprt, tudscrbook)%
-  }
-  \endinput
-\fi
-%    \end{macrocode}
-%
-% \iffalse
-%</package&header>
-%<*package&body>
-% \fi
-%
-% \subsection{Das Paket \pkg{tudscrcomp}}
+% \subsection{Das Paket \pkg{tudscrcomp} -- \cls{tudbook}-Kompatibilität}
 %
 % \begin{macro}{\einrichtung}
 % \begin{macro}{\fachrichtung}
@@ -108,7 +102,7 @@
 % \begin{macro}{\supervisedby}
 % \begin{macro}{\supervisedIIby}
 % \begin{macro}{\submittedon}
-% Es werden Aliasbefehle f�r die Eingabefelder definiert.
+% Es werden Aliasbefehle für die Eingabefelder definiert.
 %    \begin{macrocode}
 \newcommand*\einrichtung{}
 \let\einrichtung\faculty
@@ -123,7 +117,7 @@
 \newcommand*\submitdate{}
 \let\submitdate\date
 \newcommand*\supervisorII[1]{%
-  \expandafter\gdef\expandafter\@supervisor\expandafter{\@supervisor\and#1}%
+  \expandafter\gdef\expandafter\@supervisor\expandafter{\@supervisor\and #1}%
 }
 \newcommand*\supervisedby[1]{\gdef\supervisorname{#1}}
 \newcommand*\supervisedIIby[1]{\gdef\supervisorothername{#1}}
@@ -153,9 +147,9 @@
 % \end{macro}^^A \dissertation
 % \begin{option}{colortitle}
 % \begin{option}{nocolortitle}
-% F�r farbige Einstellungen wird von \cls{tudbook} die Option \opt{color} 
-% definiert. Soll die Titelseite kontr�r dazu gesetzt werden, muss sich mit den
-% Schl�sseln \opt{colortitle} und \opt{nocolortitle} beholfen werden.
+% Für farbige Einstellungen wird von \cls{tudbook} die Option \opt{color} 
+% definiert. Soll die Titelseite konträr dazu gesetzt werden, muss sich mit den
+% Schlüsseln \opt{colortitle} und \opt{nocolortitle} beholfen werden.
 %    \begin{macrocode}
 \TUD@key{colortitle}[true]{%
   \TUD@set@ifkey{colortitle}{@tempswa}{#1}%
@@ -177,13 +171,14 @@
 % \end{option}^^A nocolortitle
 % \end{option}^^A colortitle
 % \begin{option}{ddcfooter}
-% Au�er der Option \opt{ddc} gibt es bei der alten \cls{tudbook}-Klasse noch
-% den Schl�ssel \opt{ddcfooter}. Dieser wird auf die Option \opt{ddcfoot} gelegt.
+% Außer der Option \opt{ddc} gibt es bei der alten \cls{tudbook}-Klasse noch
+% den Schlüssel \opt{ddcfooter}. Dieser wird auf die Option \opt{ddcfoot} 
+% gelegt.
 %    \begin{macrocode}
 \TUD@key{ddcfooter}[true]{%
   \TUD@set@ifkey{ddcfooter}{@tempswa}{#1}%
   \if@tempswa%
-    \TUDoptions{ddcfoot}%
+    \TUDoptions{ddcfoot=true}%
   \else%
     \TUDoptions{ddcfoot=false}%
   \fi%
@@ -193,7 +188,7 @@
 % \begin{environment}{theglossary}
 % \begin{macro}{\glossaryname}
 % \begin{macro}{\glossitem}
-% Eine rudiment�re Umgebung f�r ein Glossar.
+% Eine rudimentäre Umgebung für ein Glossar.
 %    \begin{macrocode}
 \AtBeginDocument{%
   \ifdef{\theglossary}{}{%
@@ -213,7 +208,7 @@
         \setlength{\itemindent}{-\leftmargin}%
       }%
     }{\endlist}
-    \newcommand{\glossitem}[1]{\item[] #1\par}%
+    \newcommand\glossitem[1]{\item[] #1\par}%
   }%
 }
 %    \end{macrocode}
@@ -222,15 +217,15 @@
 % \end{environment}^^A theglossary
 % \begin{option}{serifmath}
 % Die alte \cls{tudbook}-Klasse hat neben der Option \opt{sansmath}
-% au�erdem den zus�tzlichen Schl�ssel \opt{serifmath} definiert, welcher aus
-% Gr�nden der Kompatibilit�t hier ebenfalls vorgehalten wird.
+% außerdem den zusätzlichen Schlüssel \opt{serifmath} definiert, welcher aus
+% Gründen der Kompatibilität hier ebenfalls vorgehalten wird.
 %    \begin{macrocode}
 \TUD@key{serifmath}[true]{%
   \TUD@set@ifkey{serifmath}{@tempswa}{#1}%
   \if@tempswa%
     \TUDoptions{sansmath=false}%
   \else%
-    \TUDoptions{sansmath}%
+    \TUDoptions{sansmath=true}%
   \fi%
 }
 %    \end{macrocode}
@@ -241,27 +236,30 @@
 % \begin{macro}{\tud@chapterpage@unset}
 % \begin{macro}{\tud@chapterpage@wrn}
 % Die alte \cls{tudbook}-Klasse stellt den Befehl \cs{chapterpage} bereit.
-% Mit diesem ist es m�glich, das Verhalten der Kapitelseiten~-- welches durch
-% die Option \opt{chapterpage} gesteuert wird~-- tempor�r umzuschalten, also
-% statt Kapitelseiten lediglich �berschriften zu setzen und umgekehrt. Dies ist
+% Mit diesem ist es möglich, das Verhalten der Kapitelseiten~-- welches durch
+% die Option \opt{chapterpage} gesteuert wird~-- temporär umzuschalten, also
+% statt Kapitelseiten lediglich Überschriften zu setzen und umgekehrt. Dies ist
 % typographisch durchaus zu hinterfragen, allerdings sollen die neuen Klassen
-% m�glichst kompatibel zu der alten sein, weshalb diese Funktionalit�t trotzdem
+% möglichst kompatibel zu der alten sein, weshalb diese Funktionalität trotzdem
 % implementiert wird. Der Befehl \cs{chapterpage} setzt den globalen Schalter
-% \cs{if@tud@chapterpage@temp}. Der Befehl \cs{tud@chapterpage@set} setzt f�r 
-% Kapitel das komplement�re Verhalten zur eigentlich gew�hlten
-% \opt{chapterpage}"=Option. Nach dem Setzen der entsprechenden �berschrift
+% \cs{if@tud@chapterpage@temp}. Der Befehl \cs{tud@chapterpage@set} setzt für 
+% Kapitel das komplementäre Verhalten zur eigentlich gewählten
+% \opt{chapterpage}"=Option. Nach dem Setzen der entsprechenden Überschrift
 % wird \cs{tud@chapterpage@set} nochmals aufgerufen, das Verhalten auf den
-% urspr�nglichen Zustand geschaltet und der globale Schalter
-% \cs{if@tud@chapterpage@temp} zur�ckgesetzt.
+% ursprünglichen Zustand geschaltet und der globale Schalter
+% \cs{if@tud@chapterpage@temp} zurückgesetzt.
 %    \begin{macrocode}
 \newif\if@tud@chapterpage@temp
-\newcommand*\chapterpage{\@tud@chapterpage@temptrue\tud@chapterpage@wrn}
+\newcommand*\chapterpage{%
+  \global\@tud@chapterpage@temptrue%
+  \tud@chapterpage@wrn%
+}
 \newcommand*\tud@chapterpage@set[1][]{%
   \if@tud@chapterpage@temp%
     \if@tud@chapterpage%
       \TUDoptions{chapterpage=false}%
     \else%
-      \TUDoptions{chapterpage}%
+      \TUDoptions{chapterpage=true}%
     \fi%
   \fi%
 }
@@ -270,21 +268,25 @@
   \global\@tud@chapterpage@tempfalse%
 }
 \AtEndPreamble{%
-  \pretocmd{\tud@nchapter}{\tud@chapterpage@set}{}{}
-  \apptocmd{\tud@nchapter}{\tud@chapterpage@unset}{}{}
-  \pretocmd{\tud@schapter}{\tud@chapterpage@set}{}{}
-  \apptocmd{\tud@schapter}{\tud@chapterpage@unset}{}{}
-  \pretocmd{\tud@ochapter}{\tud@chapterpage@set}{}{}
-  \apptocmd{\tud@ochapter}{\tud@chapterpage@unset}{}{}
-  \pretocmd{\tud@naddchap}{\tud@chapterpage@set}{}{}
-  \apptocmd{\tud@naddchap}{\tud@chapterpage@unset}{}{}
-  \pretocmd{\tud@saddchap}{\tud@chapterpage@set}{}{}
-  \apptocmd{\tud@saddchap}{\tud@chapterpage@unset}{}{}
-  \pretocmd{\tud@oaddchap}{\tud@chapterpage@set}{}{}
-  \apptocmd{\tud@oaddchap}{\tud@chapterpage@unset}{}{}
+  \pretocmd{\tud@chapter}{\tud@chapterpage@set}%
+    {}{\tud@patch@wrn{tud@nchapter}}%
+  \apptocmd{\tud@chapter}{\tud@chapterpage@unset}%
+    {}{\tud@patch@wrn{tud@nchapter}}%
+  \pretocmd{\tud@schapter}{\tud@chapterpage@set}%
+    {}{\tud@patch@wrn{tud@schapter}}%
+  \apptocmd{\tud@schapter}{\tud@chapterpage@unset}%
+    {}{\tud@patch@wrn{tud@schapter}}%
+  \pretocmd{\tud@addchap}{\tud@chapterpage@set}%
+    {}{\tud@patch@wrn{tud@naddchap}}%
+  \apptocmd{\tud@addchap}{\tud@chapterpage@unset}%
+    {}{\tud@patch@wrn{tud@naddchap}}%
+  \pretocmd{\tud@saddchap}{\tud@chapterpage@set}%
+    {}{\tud@patch@wrn{tud@saddchap}}%
+  \apptocmd{\tud@saddchap}{\tud@chapterpage@unset}%
+    {}{\tud@patch@wrn{tud@saddchap}}%
 }
 %    \end{macrocode}
-% Da wie bereits beschrieben das Vorgehen �u�erst fragw�rdig ist, wird bei der
+% Da wie bereits beschrieben das Vorgehen äußerst fragwürdig ist, wird bei der
 % Verwendung von \cs{chapterpage} zumindest einmalig eine Warnung ausgegeben.
 %    \begin{macrocode}
 \newcommand*\tud@chapterpage@wrn{%
@@ -303,7 +305,263 @@
 % \end{macro}^^A \chapterpage
 %
 % \iffalse
-%</package&body>
+%</package>
+% \fi
+%
+% \subsection{Kompatibilität zu früheren \TUDScript-Versionen}
+%
+% Neben den Optionen und Befehlen im Paket \pkg{tudscrcomp} gibt es weitere 
+% veraltete, die jedoch direkt in den Klassen vorgehalten werden. Deren Maßgabe 
+% ist es, die Kompatibilität zu älteren \TUDScript-Versionen zu erhalten. 
+%
+% Mit der Version v2.02 wurde eine Menge~-- teilweise sehr tiefgreifend~-- 
+% geändert. Die Kompatibilität zu früheren Versionen wird nicht verfolgt.
+% In Zukunft wird es wohl noch die ein oder andere Änderung geben. Hierfür soll 
+% jedoch allerdings sehr wohl ein Kompatibilitätsmodus zur Verfügung stehen. 
+% Hiermit wird alles dafür vorbereitet.
+%
+% \iffalse
+%<*class&option>
+% \fi
+%
+% \begin{option}{color}
+% \begin{option}{colour}
+% Die alte \cls{tudbook}-Klasse hat die Option \opt{color} definiert, mit
+% welcher ein Umschalten auf farbige Titel- und Kapitelseiten möglich ist. Aus
+% Kompatibilitätsgründen wird diese hier ebenfalls vorgehalten.
+%    \begin{macrocode}
+\TUD@key{color}[true]{%
+  \TUD@set@numkey{color}{@tempa}{%
+    \TUD@numkey@bool,%
+    {simple}{0},{std}{0},{standard}{0},{mono}{0},{monochrom}{0},%
+    {color}{1},{colour}{1},{full}{1},%
+    {colorfull}{1},{fullcolor}{1},{colourfull}{1},{fullcolour}{1},%
+    {lite}{2},{colorlite}{2},{litecolor}{2},{colourlite}{2},{litecolour}{2},%
+    {light}{2},{colorlight}{2},{lightcolor}{2},{colorpale}{2},{palecolor}{2},%
+    {pale}{2},{colourlight}{2},{lightcolour}{2},{colourpale}{2},{palecolour}{2}%
+  }{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \ifcase \@tempa\relax%
+      \TUDoptions{cd=true}%
+    \or%
+      \TUDoptions{cd=color}%
+    \or%
+      \TUDoptions{cd=lite}%
+    \fi%
+  \fi%
+}
+\TUD@key{colour}[true]{\TUDoptions{color=#1}\FamilyKeyStateProcessed}
+%    \end{macrocode}
+% \end{option}^^A colour
+% \end{option}^^A color
+% \begin{option}{tudfonts}
+% Diese Option wird nur aus Gründen der Kompatibilität zu v1.0 definiert.
+%    \begin{macrocode}
+\TUD@key{tudfonts}[true]{%
+  \TUD@set@ifkey{tudfonts}{@tempswa}{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \if@tempswa%
+      \TUDoptions{cdfont=true}%
+    \else%
+      \TUDoptions{cdfont=false}%
+    \fi%
+  \fi%
+}
+%    \end{macrocode}
+% \end{option}^^A tudfonts
+% \begin{option}{tudfoot}
+% Diese Option wird nur aus Gründen der Kompatibilität zu v1.0 definiert.
+%    \begin{macrocode}
+\TUD@key{tudfoot}[true]{%
+  \TUD@set@ifkey{tudfoot}{@tempswa}{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \if@tempswa%
+      \TUDoptions{cdfoot=true}%
+    \else%
+      \TUDoptions{cdfoot=false}%
+    \fi%
+  \fi%
+}
+%    \end{macrocode}
+% \end{option}^^A tudfoot
+% \begin{option}{tudscrver}
+% \changes{v2.02}{2014/08/22}{neu}%^^A
+% \begin{macro}{\tudscr@v@comp}
+% \changes{v2.02}{2014/08/22}{neu}%^^A
+% \begin{macro}{\tudscr@v@first}
+% \changes{v2.02}{2014/08/22}{neu}%^^A
+% \begin{macro}{\tudscr@v@2.02}
+% \changes{v2.02}{2014/08/22}{neu}%^^A
+% \begin{macro}{\tudscr@v@last}
+% \changes{v2.02}{2014/08/22}{neu}%^^A
+% In einigen Fällen sind Änderungen mit früheren Versionen nicht kompatibel 
+% oder unerwünscht, weil diese beispielsweise das Ausgabeergebnis verändern.
+% Standardmäßig werden die Klassen in der aktuellen Version geladen. Mit 
+% \opt{tudscrver=\meta{Version}} kann auf das Verhalten einer früheren
+% Version geschaltet werden. Die eingestellte Kompatibilität wird als Zahl in 
+% \cs{tudscr@v@comp} gespeichert. In den Makros \cs{tudscr@v@\meta{Version}}
+% werden die zugehörigen Nummern gespeichert.
+%    \begin{macrocode}
+\newcommand*\tudscr@v@comp{\tudscr@v@last}
+\TUD@key{tudscrver}[last]{%
+  \scr@ifundefinedorrelax{tudscr@v@#1}{%
+    \def\tudscr@v@comp{0}%
+    \ClassWarningNoLine{\tudcls@name}{%
+      You have set option `tudscrver' to `#1', but\MessageBreak%
+      this value of version is not supported.\MessageBreak%
+      Because of this, version was set to `first'%
+    }%
+    \FamilyKeyStateProcessed%
+  }{%
+    \ClassInfoNoLine{\tudcls@name}{%
+      Switching compatibility level to `#1'%
+    }%
+    \edef\tudscr@v@comp{\@nameuse{tudscr@v@#1}}%
+    \FamilyKeyStateProcessed%
+  }%
+}
+%    \end{macrocode} 
+% Eine zusätzliche Bedingung gibt es noch: Die Kompatibilität kann nur beim
+% Laden der Klasse gesetzt werden. Danach geht dies nicht mehr.
+%    \begin{macrocode}
+\AtEndOfClass{%
+  \TUD@key{tudscrver}[]{%
+    \ClassError{\tudcls@name}{Option `tudscrver' too late}{%
+      Option `tudscrver' can only be set while loading the\MessageBreak%
+      class `\tudcls@name' but you have tried to set it up later.%
+    }%
+    \FamilyKeyStateProcessed%
+  }%
+% Außerdem wird darauf geachtet, dass mindestens \KOMAScript-Version~v3.12
+% vorhanden ist, andernfalls wird ein Fehler erzeugt.
+%    \begin{macrocode}
+  \ifcsdef{scr@v@3.12}{%
+    \ifnum\scr@compatibility<\@nameuse{scr@v@3.12}\relax%
+      \ClassError{\tudcls@name}{%
+        KOMA-Script compatibility level too low%
+      }{%
+        \TUDVersion\space has to be used at least with\MessageBreak%
+        KOMA-Script `version=v3.12'%
+      }%
+    \fi%
+  }{%
+    \ClassError{\tudcls@name}{%
+      outdated version of KOMA-Script%
+    }{%
+      \TUDVersion\space has to be used with KOMA-Script v3.12 or newer%
+    }%
+  }%
+}
+\@namedef{tudscr@v@first}{0}
+\@namedef{tudscr@v@2.02}{0}
+\@namedef{tudscr@v@last}{0}
+%    \end{macrocode}
+% \end{macro}^^A \tudscr@v@last
+% \end{macro}^^A \tudscr@v@2.02
+% \end{macro}^^A \tudscr@v@first
+% \end{macro}^^A \tudscr@v@comp
+% \end{option}^^A tudscrver
+%
+% \iffalse
+%</class&option>
+%<*class&body>
+% \fi
+%
+% \begin{length}{\chapterheadingvskip}
+% Die Länge \cs{chapterheadingvskip} wird aus Gründen der Kompatibilität zu
+% älteren Versionen definiert.
+%    \begin{macrocode}
+%<*book|report>
+\newlength{\chapterheadingvskip}
+\let\chapterheadingvskip\headingsvskip
+%</book|report>
+%    \end{macrocode}
+% \end{length}^^A \chapterheadingvskip
+% \begin{macro}{\professorship}
+% Für die Angabe des Lehrstuhls bzw. der Professur mit kann anstelle von 
+% \cs{chair} als Aliasbefehl auch \cs{professorship} genutzt werden.
+%    \begin{macrocode}
+\newcommand*\professorship{}
+\let\professorship\chair
+%    \end{macrocode}
+% \end{macro}^^A \professorship
+% \begin{macro}{\student}
+% Der Befehl \cs{student} kann als Alias für \cs{author} genutzt werden.
+%    \begin{macrocode}
+\newcommand*\student{}
+\let\student\author
+%    \end{macrocode}
+% \end{macro}^^A \student
+% \begin{macro}{\studentid}
+% \begin{macro}{\matriculationid}
+% Zur Angabe von Matrikelnummer kann auch \cs{studentid} oder
+% \cs{matriculationnumber} genutzt werden.
+%    \begin{macrocode}
+\newrobustcmd*\studentid{}
+\newrobustcmd*\matriculationid{}
+\let\studentid\matriculationnumber
+\let\matriculationid\matriculationnumber
+%    \end{macrocode}
+% \end{macro}^^A \matriculationid
+% \end{macro}^^A \studentid
+% \begin{macro}{\enrolmentyear}
+% Das Immatrikulationsjahr kann auch mit \cs{enrolmentyear} angegeben werden.
+%    \begin{macrocode}
+\newrobustcmd*\enrolmentyear{}
+\let\enrolmentyear\matriculationyear
+%    \end{macrocode}
+% \end{macro}^^A \enrolmentyear
+% \begin{macro}{\birthplace}
+% Zur Angabe des Geburtsortes kann auch \cs{birthplace} verwendet werden.
+%    \begin{macrocode}
+\newrobustcmd*\birthplace{}
+\let\birthplace\placeofbirth
+%    \end{macrocode}
+% \end{macro}^^A \birthplace
+% \begin{macro}{\location}
+% Für die Angabe des Ortes kann auch \cs{location} genutzt werden.
+%    \begin{macrocode}
+\newcommand*\location{}
+\let\location\place
+%    \end{macrocode}
+% \end{macro}^^A \location
+% \begin{macro}{\submissiondate}
+% Der Befehl \cs{submissiondate} kann als Aliasbefehl für den Standardbefehl 
+% \cs{date} zur Datumsangabe genutzt werden.
+%    \begin{macrocode}
+\newcommand*\submissiondate{}
+\let\submissiondate\date
+%    \end{macrocode}
+% \end{macro}^^A \submissiondate
+% \begin{macro}{\oralexaminationdate}
+% Für \cs{defensedate} kann als Aliasbefehl auch \cs{oralexaminationdate}
+% verwendet werden.
+%    \begin{macrocode}
+\newcommand*\oralexaminationdate{}
+\let\oralexaminationdate\defensedate
+%    \end{macrocode}
+% \end{macro}^^A \oralexaminationdate
+% \begin{macro}{\birthday}
+% Der Geburtstag kann auch mit \cs{birthday} angegeben werden.
+%    \begin{macrocode}
+\newrobustcmd*\birthday{}
+\let\birthday\dateofbirth
+%    \end{macrocode}
+% \end{macro}^^A \birthday
+% \begin{macro}{\logofile}
+% \begin{macro}{\logofilename}
+% Diese beiden Befehle können anstelle von \cs{headlogo} eingesetzt werden.
+%    \begin{macrocode}
+\newcommand*\logofile{}
+\let\logofile\headlogo
+\newcommand*\logofilename{}
+\let\logofilename\headlogo
+%    \end{macrocode}
+% \end{macro}^^A \logofilename
+% \end{macro}^^A \logofile
+%
+% \iffalse
+%</class&body>
 % \fi
 %
 % \Finale

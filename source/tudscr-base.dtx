@@ -1,4 +1,4 @@
-% \CheckSum{265}
+% \CheckSum{271}
 % \iffalse meta-comment
 % ======================================================================
 %
@@ -45,11 +45,25 @@
 % \iffalse
 %%% From File: tudscr-base.dtx
 %<*driver>
-% \fi
-\ProvidesFile{tudscr-base.dtx}%
-  [2014/04/22 v2.00 TUD-KOMA-Script (basefile)]
-% \iffalse
-\documentclass{tudscrdoc}
+\ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
+\ProvidesFile{tudscr-base.dtx}[%
+  2014/11/05 v2.02 TUD-KOMA-Script\space%
+%</driver>
+%<package>\NeedsTeXFormat{LaTeX2e}[2011/06/27]
+%<package>\ProvidesPackage{tudscrbase}[%
+%<*driver|package>
+%!TUDVersion
+%<package>  package
+  (basics for the bundle)%
+]
+%</driver|package>
+%<*driver>
+\RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
+\documentclass[english,ngerman]{tudscrdoc}
+\usepackage{selinput}\SelectInputMappings{adieresis={Ã¤},germandbls={ÃŸ}}
+\usepackage[T1]{fontenc}
+\usepackage{babel}
+\usepackage{tudscrfonts} % only load this package, if the fonts are installed
 \KOMAoptions{parskip=half-}
 \CodelineIndex
 \RecordChanges
@@ -63,63 +77,40 @@
 %
 % \selectlanguage{ngerman}
 %
+% \changes{v2.02}{2014/06/23}{UnterstÃ¼tzung fÃ¼r \pkg{titlepage} entfernt}%^^A
+%
 % \section{Grundlegende Befehle und Pakete}
 %
-% Für die Erstellung der Wrapper-Klassen werden die dafür benötigten Pakete
+% FÃ¼r die Erstellung der Wrapper-Klassen werden die dafÃ¼r benÃ¶tigten Pakete
 % eingebunden und Steuerungsbefehle definiert.
 %
 % \StopEventually{\PrintIndex\PrintChanges}
 %
 % \iffalse
-%<*class>
-% \fi
-%
-% \subsection{Laden des Pakets}
-% Die Klassen benötigen das Paket und laden dieses auch.
-%    \begin{macrocode}
-\RequirePackage{tudscrbase}[\TUDVersion]
-%    \end{macrocode}
-%
-% \iffalse
-%</class>
-%<*package&header>
-% \fi
-%
-% \subsection{Identifizierung des Pakets \pkg{tudscrbase}}
-%
-%    \begin{macrocode}
-\NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{tudscrbase}[%
-  \TUDVersion\space package (TUD-KOMA-Script-dependent basics and keyval usage)%
-]
-%    \end{macrocode}
-%
-% \iffalse
-%</package&header>
-%<*package&body>
+%<*package>
 % \fi
 %
 % \subsection{Das Paket \pkg{tudscrbase}}
 %
-% Das Paket \pkg{scrbase} wird zur Optionsdefinition benötigt.
+% Das Paket \pkg{scrbase} wird zur Optionsdefinition benÃ¶tigt.
 %    \begin{macrocode}
-\RequirePackage{scrbase}
+\RequirePackage{scrbase}[2013/12/19]
 %    \end{macrocode}
-% Das Paket \pkg{kvsetkeys} erweitert \pkg{keyval} um die Möglichkeit, das
-% Verhalten bei der Angabe eines nicht definierten Schlüssels festzulegen.
+% Das Paket \pkg{kvsetkeys} erweitert \pkg{keyval} um die MÃ¶glichkeit, das
+% Verhalten bei der Angabe eines nicht definierten SchlÃ¼ssels festzulegen.
 %    \begin{macrocode}
-\RequirePackage{kvsetkeys}
+\RequirePackage{kvsetkeys}[2012/04/25]
 %    \end{macrocode}
-% Das Paket \pkg{etoolbox} wird für die Manipulation bereits definierter
-% Makros sowie zur erweiterten Auswertung boolescher Ausdrücke benötigt.
+% Das Paket \pkg{etoolbox} wird fÃ¼r die Manipulation bereits definierter
+% Makros sowie zur erweiterten Auswertung boolescher AusdrÃ¼cke benÃ¶tigt.
 %    \begin{macrocode}
-\RequirePackage{etoolbox}
+\RequirePackage{etoolbox}[2011/01/03]
 %    \end{macrocode}
 %
 % \subsubsection{Robuster Test auf leeres Argument}
 %
 % \begin{macro}{\ifxblank}
-% Hiermit kann ein Argument geprüft werden, ob dieses blank ist (leer oder
+% Hiermit kann ein Argument geprÃ¼ft werden, ob dieses blank ist (leer oder
 % Leerzeichen). In seiner Syntax ist er identisch zu \cs{ifblank}, allerdings
 % expandiert er im Gegensatz zu diesem das gegebene Argument.
 %    \begin{macrocode}
@@ -143,9 +134,8 @@
 %    \end{macrocode}
 % \end{macro}^^A \ifxnumber
 %
-% \subsubsection{Schlüssel und Parameter für die Wrapper-Klassen}
+% \subsubsection{SchlÃ¼ssel und Parameter fÃ¼r die Wrapper-Klassen}
 %
-% \todo[v3.12]{FamilyKeyState}
 % \begin{macro}{\TUDProcessOptions}
 % \begin{macro}{\TUDExecuteOptions}
 % \begin{macro}{\TUDDefaultOptions}
@@ -158,13 +148,15 @@
 % \begin{macro}{\TUD@ifkey}
 % \begin{macro}{\TUD@set@ifkey}
 % \begin{macro}{\TUD@numkey}
+% \begin{macro}{\TUD@numkey@bool}
+% \changes{v2.02}{2014/11/05}{neu}%^^A
 % \begin{macro}{\TUD@set@numkey}
 % \begin{macro}{\TUD@unknown@keyval}
 % In Anlehnung an \KOMAScript{} werden hier Befehle zur Definition und
-% Ausführung unterschiedlicher Klassenoptionen mithilfe der Funktionen aus
-% dem \pkg{scrbase}-Paket erstellt. Klassenoptionen können entweder als
-% Schalter (\cs{TUD@ifkey}) oder aber mit mehreren möglichen Werten
-% (\cs{TUD@numkey}) definiert werden. Die Grundeinstellungen für alle
+% AusfÃ¼hrung unterschiedlicher Klassenoptionen mithilfe der Funktionen aus
+% dem \pkg{scrbase}-Paket erstellt. Klassenoptionen kÃ¶nnen entweder als
+% Schalter (\cs{TUD@ifkey}) oder aber mit mehreren mÃ¶glichen Werten
+% (\cs{TUD@numkey}) definiert werden. Die Grundeinstellungen fÃ¼r alle
 % \cls{tudscr}-Klassen werden in \cs{TUDDefaultOptions} hinterlegt.
 %    \begin{macrocode}
 \DefineFamily{TUD}
@@ -195,11 +187,19 @@
   \DefineFamilyMember{TUD}%
   \FamilyNumericalKey[#1]{TUD}%
 }
+%    \end{macrocode}
+% Um Dopplungen im Code zu vermeiden, werden fÃ¼r die numerische SchlÃ¼ssel die 
+% booleschen Standardwertzuweisungen in einem Makro gespeichert.
+%    \begin{macrocode}
+\newcommand*\TUD@numkey@bool{%
+  {false}{0},{off}{0},{no}{0},{true}{1},{on}{1},{yes}{1}%
+}
 \newcommand*\TUD@set@numkey{\FamilySetNumerical{TUD}}
 \newcommand*\TUD@unknown@keyval{\FamilyUnknownKeyValue{TUD}}
 %    \end{macrocode}
 % \end{macro}^^A \TUD@unknown@keyval
 % \end{macro}^^A \TUD@set@numkey
+% \end{macro}^^A \TUD@numkey@bool
 % \end{macro}^^A \TUD@numkey
 % \end{macro}^^A \TUD@set@ifkey
 % \end{macro}^^A \TUD@ifkey
@@ -218,34 +218,34 @@
 % \begin{macro}{\TUD@set@ifkey@lock}
 % \begin{macro}{\TUD@set@numkey@lock}
 % Da sich die Klassenoptionen teilweise selbst gegenseitig beeinflussen oder
-% aber in bestimmten Fällen eine Option in Abhängigkeit von einer anderen
-% unterschiedliche Standardwerte annehmen soll, wird dafür eine Möglichkeit
-% geschaffen. Dabei kann der Nutzer jederzeit einen von einer Option abhängigen
-% Standardwert einer Klassenoption überschreiben. Die Klassenoptionen selber
+% aber in bestimmten FÃ¤llen eine Option in AbhÃ¤ngigkeit von einer anderen
+% unterschiedliche Standardwerte annehmen soll, wird dafÃ¼r eine MÃ¶glichkeit
+% geschaffen. Dabei kann der Nutzer jederzeit einen von einer Option abhÃ¤ngigen
+% Standardwert einer Klassenoption Ã¼berschreiben. Die Klassenoptionen selber
 % werden intern mit dem Befehl \cs{TUD@key@lock} definiert und die Standardwerte
 % sowie deren Manipulation innerhalb der Optionen mit \cs{TUD@std@ifkey@lock}
 % bzw. \cs{TUD@std@numkey@lock} gesetzt. Mit \cs{TUD@set@ifkey@lock} und
 % \cs{TUD@set@numkey@lock} werden bei der expliziten Anwendung einer Option
-% durch den Nutzer die entsprechenden Werte geändert und gegen ein internes
-% Überschreiben gesperrt.
+% durch den Nutzer die entsprechenden Werte geÃ¤ndert und gegen ein internes
+% Ãœberschreiben gesperrt.
 %    \begin{macrocode}
 \newcommand*\TUD@key@lock[2][.\@currname.\@currext]{%
 %    \end{macrocode}
 % Basierend auf dem Namen des Schalters wird die notwendige, boolesche Variable
 % erzeugt (\cs{if@tud@\meta{Schaltername}@lock}), welche im Falle des direkten
-% Aufrufs des Schlüssels durch den Anwender, ein internes Überschreiben
+% Aufrufs des SchlÃ¼ssels durch den Anwender, ein internes Ãœberschreiben
 % verhindert.
 %    \begin{macrocode}
   \newbool{@tud@#2@locked}%
   \TUD@key[{#1}]{#2}%
 }
 %    \end{macrocode}
-% Es kann intern über \cs{if\meta{Schaltername}@lock} geprüft werden, ob einem
-% mit Schlüssel, der mit \cs{TUD@key@lock} definiert wurde, durch den Anwender
+% Es kann intern Ã¼ber \cs{if\meta{Schaltername}@lock} geprÃ¼ft werden, ob einem
+% mit SchlÃ¼ssel, der mit \cs{TUD@key@lock} definiert wurde, durch den Anwender
 % ein explizites Verhalten zugewiesen wurde. Sollte dies nicht der Fall sein,
 % kann dieser hiermit intern beliebig angepasst werden. Da es durch das Setzen
 % der Option mit \cs{TUDoption} zu einer Sperrung kommt, muss diese folgend
-% wieder rückgängig gemacht werden.
+% wieder rÃ¼ckgÃ¤ngig gemacht werden.
 %    \begin{macrocode}
 \newcommand*\TUD@std@ifkey@lock[2]{%
   \ifbool{@tud@#1@locked}{}{%
@@ -273,9 +273,9 @@
 % \begin{macro}{\csset@lock}
 % Mit \cs{csdef@lock}\marg{Name}\marg{Definition} kann ein Befehl definiert
 % werden, welcher intern nur mit \cs{csstd@lock}\marg{Name}\marg{Definition}
-% geschrieben wird, wenn nicht über eine entsprechende Option ein explizites
+% geschrieben wird, wenn nicht Ã¼ber eine entsprechende Option ein explizites
 % Verhalten mit \cs{csset@lock}\marg{Name}\marg{Definition} zugewiesen wurde.
-% Dies ist äquivalent zu \cs{TUD@std@ifkey@lock} und \cs{TUD@set@ifkey@lock}
+% Dies ist Ã¤quivalent zu \cs{TUD@std@ifkey@lock} und \cs{TUD@set@ifkey@lock}
 % bzw. \cs{TUD@std@numkey@lock} und \cs{TUD@set@numkey@lock}
 %    \begin{macrocode}
 \newcommand*\csdef@lock[2]{%
@@ -325,16 +325,17 @@
 % \begin{macro}{\tud@cmd@reset}
 % \begin{macro}{\tud@cmd@use}
 % \begin{macro}{\tud@cmd@restore}
-% Mit diesen beiden Befehlene wird es möglich, Originalbefehle sichern, nutzen
-% und wiederherstellen zu können. Dies wird benötigt, um zwischen den einzelnen
-% Layouts über Optionseinstellungen zu wechseln und dabei von einem definierten
+% Mit diesen beiden Befehlene wird es mÃ¶glich, Originalbefehle sichern, nutzen
+% und wiederherstellen zu kÃ¶nnen. Dies wird benÃ¶tigt, um zwischen den einzelnen
+% Layouts Ã¼ber Optionseinstellungen zu wechseln und dabei von einem definierten
 % Anfangszustand auszugehen. Mit dem Aufruf \cs{tud@cmd@store}\marg{Befehlsname}
 % wird der angegebene Befehl in einem neuen Makro \cs{@@tud@\meta{Befehlsname}}
-% gespeichert. Der Originalbefehl kann als solcher weiterhin mit dem Befehl
-% \cs{tud@cmd@use}\marg{Befehlsname} genutzt werden. Das Makro
-% \cs{tud@cmd@reset}\marg{Befehlsname} setzt den Originalbefehl zurück. Durch
-% \cs{tud@cmd@restore}\marg{Befehlsname} wird das mit \cs{tud@cmd@store}
-% erstellte Hilfsmakro zusätzlich noch gelöscht.
+% gespeichert.
+%
+% Der Originalbefehl kann als solcher mit \cs{tud@cmd@use}\marg{Befehlsname} 
+% weiterhin genutzt werden. Das Makro \cs{tud@cmd@reset}\marg{Befehlsname}
+% setzt den Originalbefehl zurÃ¼ck. Durch \cs{tud@cmd@restore}\marg{Befehlsname}
+% wird das mit \cs{tud@cmd@store} erstellte Hilfsmakro zusÃ¤tzlich gelÃ¶scht.
 %    \begin{macrocode}
 \newcommand*\tud@cmd@store[1]{%
   \ifcsdef{@@tud@#1}{}{\csletcs{@@tud@#1}{#1}}%
@@ -364,9 +365,9 @@
 % \cs{patchcmd}) und dies nicht gelingt.
 %    \begin{macrocode}
 \newcommand*\tud@patch@wrn[1]{%
-  \ClassWarning{\tudcls@name}{%
-    It wasn't possible to patch '#1'.\MessageBreak%
-    Please contact the author via \filemail.\MessageBreak%
+  \PackageWarning{tudscrbase}{%
+    It wasn't possible to patch `#1'.\MessageBreak%
+    Please contact the author via \tudscrmail.\MessageBreak%
     Without a bugfix an erroneous output\MessageBreak%
     may occur.
   }%
@@ -376,17 +377,17 @@
 % \begin{macro}{\TUD@parameter}
 % \begin{macro}{\TUD@parameter@family}
 % \begin{macro}{\TUD@parameter@checkfamily}
-% Mit \cs{TUD@parameter}\marg{Familienname}\marg{Definitionen} können
-% Schlüssel"=Wert"=Parameter für die optionalen Argumente von Befehle definiert
-% werden. Das erste Argument definiert den Familiennamen für den jeweiligen 
-% Befehl, welcher eindeutig gewählt werden sollte. Dieser wird im Hilfsmakro
+% Mit \cs{TUD@parameter}\marg{Familienname}\marg{Definitionen} kÃ¶nnen
+% SchlÃ¼ssel"=Wert"=Parameter fÃ¼r die optionalen Argumente von Befehle definiert
+% werden. Das erste Argument definiert den Familiennamen fÃ¼r den jeweiligen 
+% Befehl, welcher eindeutig gewÃ¤hlt werden sollte. Dieser wird im Hilfsmakro
 % \cs{TUD@parameter@family} gesichert. Dies soll im Zusammenspiel mit dem 
-% Makro \cs{TUD@parameter@checkfamily} dafür sorgen, dass die im Folgenden
+% Makro \cs{TUD@parameter@checkfamily} dafÃ¼r sorgen, dass die im Folgenden
 % bereitgestellten Befehle\footnote{\cs{TUD@parameter@define},
 % \cs{TUD@parameter@let}, \cs{TUD@parameter@sethandler},
 % \cs{TUD@parameter@set}}~-- welche die eigentliche Definition der Parameter 
-% für den Benutzer bewerkstelligen~-- nur innerhalb des zweiten Argumentes von
-% \cs{TUD@parameter} verwendet werden können.
+% fÃ¼r den Benutzer bewerkstelligen~-- nur innerhalb des zweiten Argumentes von
+% \cs{TUD@parameter} verwendet werden kÃ¶nnen.
 %    \begin{macrocode}
 \newcommand*\TUD@parameter@family{}%
 \newcommand*\TUD@parameter[2]{%
@@ -396,7 +397,7 @@
 }
 \let\TUD@parameter@family\relax%
 %    \end{macrocode}
-% Dieser Befehl prüft, ob eine Familie für den Paramter definiert wurde.
+% Dieser Befehl prÃ¼ft, ob eine Familie fÃ¼r den Paramter definiert wurde.
 %    \begin{macrocode}
 \newcommand*\TUD@parameter@checkfamily[1]{%
   \ifx\TUD@parameter@family\relax%
@@ -415,9 +416,10 @@
 % \end{macro}^^A \TUD@parameter
 % \begin{macro}{\TUD@parameter@define}
 % \begin{macro}{\TUD@parameter@let}
+% \changes{v2.02}{2014/07/25}{Beachtung der gegebenen Standardwerte}%^^A
 % \begin{macro}{\TUD@parameter@sethandler}
-% \cs{TUD@parameter@define}\marg{Name}\oarg{Säumniswert}\marg{Verarbeitung}
-% nutzt \cs{define@key} aus dem \pkg{keyval}"=Paket, um einen Schlüssel und
+% \cs{TUD@parameter@define}\marg{Name}\oarg{SÃ¤umniswert}\marg{Verarbeitung}
+% nutzt \cs{define@key} aus dem \pkg{keyval}"=Paket, um einen SchlÃ¼ssel und
 % dessen Verarbeitung zu definieren, wobei auf den zugewiesenen Wert innerhalb 
 % des zweiten obligatorischen Argumentes mit \texttt{\#1} zugegriffen werden
 % kann.
@@ -431,23 +433,32 @@
   }%
 }
 %    \end{macrocode}
-% Mit \cs{TUD@parameter@let}\marg{Name}\marg{Name} kann äquivalent zur
+% Mit \cs{TUD@parameter@let}\marg{Name}\marg{Name} kann Ã¤quivalent zur
 % \mbox{\TeX-Primitive \cs{let}} die Definition der Verarbeitung eines
-% Parameters auf einen weiteren übertragen werden.
+% Parameters auf einen weiteren Ã¼bertragen werden.
 %    \begin{macrocode}
 \newcommand*\TUD@parameter@let[3][]{%
   \ifxblank{#1}{%
     \TUD@parameter@checkfamily{\TUD@parameter@let}%
-    \@expandtwoargs{\csletcs}%
-      {KV@\TUD@parameter@family @#2}{KV@\TUD@parameter@family @#3}%
+    \@expandtwoargs{\csletcs}{%
+      KV@\TUD@parameter@family @#2%
+    }{%
+      KV@\TUD@parameter@family @#3%
+    }%
+    \@expandtwoargs{\csletcs}{%
+      KV@\TUD@parameter@family @#2@default%
+    }{%
+      KV@\TUD@parameter@family @#3@default%
+    }%
   }{%
     \@expandtwoargs{\csletcs}{KV@#1@#2}{KV@#1@#3}%
+    \@expandtwoargs{\csletcs}{KV@#1@#2@default}{KV@#1@#3@default}%
   }%
 }
 %    \end{macrocode}
-% Außerdem kann durch \cs{TUD@parameter@sethandler}\marg{Verarbeitung} definiert
+% AuÃŸerdem kann durch \cs{TUD@parameter@sethandler}\marg{Verarbeitung} definiert
 % werden, wie verfahren werden soll, wenn ein optionales Argument im klasischen
-% \LaTeX-Stil und nicht in der Schlüssel"=Wert"=Syntax angegeben wird. Auf das
+% \LaTeX-Stil und nicht in der SchlÃ¼ssel"=Wert"=Syntax angegeben wird. Auf das
 % optionale Argument wird ganz normal mit \texttt{\#1} zugegriffen.
 %    \begin{macrocode}
 \newcommand*\TUD@parameter@sethandler[1][]{%
@@ -466,7 +477,7 @@
 % Mit \cs{TUD@parameter@set}\oarg{Familienname}\marg{Parameterliste} wird die
 % Verarbeitung aller gegebenen Parameter veranlasst. Normalerweise wird dieser
 % Befehl innerhalb des zweiten Argumentes von \cs{TUD@parameter} verwendet.
-% Alternativ dazu kann die gewünschte Familie im optionalen Argument angegeben
+% Alternativ dazu kann die gewÃ¼nschte Familie im optionalen Argument angegeben
 % werden.
 %    \begin{macrocode}
 \newcommand*\TUD@parameter@set[1][]{%
@@ -480,14 +491,14 @@
 %    \end{macrocode}
 % \end{macro}^^A \TUD@parameter@set
 % \begin{macro}{\TUD@parameter@wrn}
-% Das Makro \cs{TUD@parameter@wrn}\marg{Parameter}\marg{Werteliste} gibt für
-% den Fall einer ungültigen Wertzuweisung an einen bestimmten \meta{Parameter}
-% eine Warnung mit einem entsprechenden Hinweis auf gültige Werte innerhalb von
+% Das Makro \cs{TUD@parameter@wrn}\marg{Parameter}\marg{Werteliste} gibt fÃ¼r
+% den Fall einer ungÃ¼ltigen Wertzuweisung an einen bestimmten \meta{Parameter}
+% eine Warnung mit einem entsprechenden Hinweis auf gÃ¼ltige Werte innerhalb von
 % \meta{Werteliste} aus.
 %    \begin{macrocode}
 \newcommand*\TUD@parameter@wrn[2]{%
-  \ClassWarning{\tudcls@name}{%
-    Parameter '#1' can only be used with these values:\MessageBreak%
+  \PackageWarning{tudscrbase}{%
+    Parameter `#1' can only be used with values:\MessageBreak%
     #2%
   }%
 }
@@ -495,36 +506,103 @@
 % \end{macro}^^A \TUD@parameter@wrn
 %
 % \iffalse
-%</package&body>
-%<*titlepage>
+%</package>
+%<*load>
 % \fi
 %
-% \subsubsection{Schlüssel und Befehle für das \pkg{titlepage}-Paket}
-%
-% Als erstes wird die Familie für das \pkg{titlepage}"=Paket definiert.
+% \subsection{Laden des Paketes}
+% Die Klassen benÃ¶tigen das Paket und laden dieses auch.
 %    \begin{macrocode}
-\DefineFamilyMember[TU-Dresden]{title}
+\RequirePackage{tudscrbase}[\TUDVersion]
 %    \end{macrocode}
-% Für den Fall, dass das \pkg{titlepage}-Paket ohne \KOMAScript-Klassen genutzt
-% wird, müssen die entsprechenden Befehle trotzdem funktionieren.
+%
+% \iffalse
+%</load>
+%<*execute>
+% \fi
+%
+% \subsection{Durchreichen von Optionen und Standardoptionen}
+%
+% Durchreichen aller Klassenoptionen an die \KOMAScript-Klasse bzw. an die
+% genutzte \TUDScript-Elternklasse.
 %    \begin{macrocode}
-\providecommand*\newkomafont[2]{%
-  \expandafter\newcommand\expandafter*\csname @#1font\endcsname{#2}%
-}
-\providecommand*\usekomafont[1]{%
-  \scr@ifundefinedorrelax{@#1font}{}{\csname @#1font\endcsname}%
-}
-\providecommand*\addtokomafont[2]{%
-  \scr@ifundefinedorrelax{@#1font}{%
-    \newkomafont{#1}{#2}%
-  }{%
-    \expandafter\l@addto@macro\csname @#1font\endcsname{#2}%
+%<*!inherit>
+\DeclareOption*{\PassOptionsToClass{\CurrentOption}{\scrcls@name}}
+%</!inherit>
+%<*inherit>
+\DeclareOption*{\PassOptionsToClass{\CurrentOption}{\tudinh@name}}
+%</inherit>
+%    \end{macrocode}
+% Es werden die Standardoptionen ausgefÃ¼hrt. Die AusfÃ¼hrung selbst wird durch
+% den Befehl \cs{TUD@noworlater} innerhalb von \cs{TUD@key} auf das Ende der
+% \KOMAScript-Klasse verzÃ¶gert.
+%    \begin{macrocode}
+%<*!inherit>
+\TUDExecuteOptions{\TUDDefaultOptions}
+%</!inherit>
+\TUDProcessOptions\relax
+%    \end{macrocode}
+% Die korrespindierende \KOMAScript-Klasse bzw. \TUDScript-Elternklasse wird 
+% geladen.
+%    \begin{macrocode}
+%<*!inherit>
+\LoadClass{\scrcls@name}[2013/12/19]
+%</!inherit>
+%<*inherit>
+\LoadClass{\tudinh@name}
+%</inherit>
+%    \end{macrocode}
+%
+% \iffalse
+%<*!inherit>
+% \fi
+%
+% \subsection{Externe Pakete}
+%
+% \changes{v2.01}{2014/04/24}{Versionsanforderungen bei benÃ¶tigten Paketen}%^^A
+% \changes{v2.02}{2014/07/08}{Warnung bei der Verwendung von \pkg{graphics}}%^^A
+%
+% FÃ¼r die Verwendung der hier erstellten \KOMAScript-Wrapper-Klassen werden
+% einige wenige Pakete eingebunden. Dabei wurde versucht, die Anzahl der
+% Pakete mÃ¶glichst gering zu halten und nur die wirklich notwendigen zu
+% verwenden.
+%
+% Die \env{abstract}-Umgebung wird im Vergleich zu den \KOMAScript-Klassen
+% stark erweitert. FÃ¼r diese sowie fÃ¼r die Umgebungen \env{declarations} und 
+% \env{tudpage} wird das Paket \pkg{environ} fÃ¼r die Umgebungsdefinition
+% benÃ¶tigt.
+%    \begin{macrocode}
+\RequirePackage{environ}[2013/04/01]
+%    \end{macrocode}
+% Es folgen die Pakete, welche bei Bedarf am Ende der PrÃ¤ambel geladen werden.
+%    \begin{macrocode}
+\AtEndPreamble{%
+%    \end{macrocode}
+% Mit \pkg{graphicx} werden die Logos der TU~Dresden sowie von Dresden Concept
+% mit dem Befehl \cs{includegraphics} u.\,a. auf der Titelseite eingebunden.
+% Sollte lediglich das \pkg{graphics}-Paket geladen worden sein, so wird der
+% Nutzer mit einer Warnung informiert, dass das \pkg{graphicx}-Paket zusÃ¤tzlich 
+% geladen wird.
+%    \begin{macrocode}
+  \@ifpackageloaded{graphicx}{}{%
+    \@ifpackageloaded{graphics}{%
+      \ClassWarningNoLine{\tudcls@name}{%
+        The package `graphics' was superseded by `graphicx'%
+      }%
+    }{}%
   }%
+  \RequirePackage{graphicx}[1999/02/16]%
+%    \end{macrocode}
+% Mit dem Paket \pkg{tudscrcolor} werden die Befehle fÃ¼r die Auswahl der Farben
+% des \CDs definiert, welches wiederum \pkg{xcolor} lÃ¤dt.
+%    \begin{macrocode}
+  \RequirePackage{tudscrcolor}[\TUDVersion]%
 }
 %    \end{macrocode}
 %
 % \iffalse
-%</titlepage>
+%</!inherit>
+%</execute>
 % \fi
 %
 % \Finale

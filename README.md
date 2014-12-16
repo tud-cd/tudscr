@@ -2,7 +2,7 @@
 TUD-KOMA-Script
 ===============
 
-TUD-KOMA-Script 2014/06/03 v2.01a
+TUD-KOMA-Script 2014/12/16 v2.02
 Copyright (c) Falk Hanisch <tudscr[at]gmail.com>, 2012-2014
 
 This material is subject to the LaTeX Project Public License.
@@ -38,14 +38,33 @@ Das Bundle beinhaltet:
   Wrapper-Klassen von `scrartcl`, `scrreprt` and `scrbook`,
 + das Paket `tudscrsupervisor`, welches Umgebungen und Befehle für die
   Erstellung von Aufgabenstellungen, Gutachten und Aushängen bereitstellt,
++ das Paket `tudscrfonts`, das die Schriften des Corporate Designs der
+  Technischen Universität Dresden für die LaTeX-Standard-Klassen und die 
+  KOMA-Script-Klassen nutzbar macht,
 + das Paket `mathswap` für das Austauschen mathematischer Trennzeichen 
   innerhalb von Zahlen (ähnlich zu `ionumbers`),
 + das Paket `twocolfix` zur Fehlerbefehbung der Position von Überschriften im
   zweispaltigen Layout und
-+ eine umfassende Anwenderdokumentation.
++ eine umfassende Anwenderdokumentation sowie mehrere Tutorials.
 
 Versionen
 ---------
+
+**v2.02** (2014/12/16)
++ Paket `tudscrfonts`
++ Probleme mit der Klasse `standalone` behoben
++ Laden der Schriften des Corporate Designs im OpenType-Format mit `fontspec`
+  ermöglicht
++ verbesserte Installationsroutine der PostScript-Schriften
++ Seiten im Stil des Corporate Designs werden mithilfe des Paketes
+  `scrlayer-scrpage` erzeugt
++ verschiedene Optionen und Befehle zur individuellen Gestaltung dieser Seiten
++ Unterstützung der KOMA-Script-Schriftelemente für Titel und Umschlagseite
++ Befehle und Umgebungen für Zusammenfassung, Selbstständigkeitserklärung und
+  Sperrvermerk wurden verbessert
++ Fussnoten in Überschriften können per Option mit Symbolen gesetzt werden
++ einige Befehle wurden für Kompatibilität zu anderen Paketen umbenannt
++ Funktionalität des Paketes `mathswap` im Dokument umschaltbar
 
 **v2.01b** (2014/06/04)
 + Bug bei Aufgabenstellung behoben (tudscrsupervisor)
@@ -56,7 +75,7 @@ Versionen
 **v2.01** (2014/04/24)
 + Fehlerkorrekturen beim Kerning der Ziffern und bei der Schriftstärke auf der 
   Titelseite
-  
+
 **v2.00** (2014/04/22)
 + Das TUD-KOMA-Script-Bundle wurde von Grund auf überarbeitet und mittels 
   `docstrip` erzeugt. Viele Fehler wurden entfernt und die Robustheit der 
@@ -95,14 +114,33 @@ The bundle offers:
   wrapper classes for `scrartcl`, `scrreprt` and `scrbook`,
 + the package `tudscrsupervisor` providing environments and macros to create
   tasks, evaluations and notices for scientific theses,
++ the package `tudscrfonts`, which makes the corporate design fonts of the
+  Technische Universität Dresden available for LaTeX standard classes and 
+  KOMA-Script classes,
 + the package `mathswap` for swapping math delimiters within numbers (similiar
   to `ionumbers`),
 + the package `twocolfix` for fixing the positioning bug of headings in
   twocolumn layout and
-+ an comprehensive user documentation.
++ an comprehensive user documentation as well as several tutorials.
 
 Versions
 --------
+
+**v2.02** (2014/12/16)
++ package `tudscrfonts`
++ fixed bug with class `standalone`
++ loading the corporate design fonts in OpenType format with `fontspec` is
+  possible
++ improved installation routine of PostScript fonts
++ pages in the style of the corporate design are generated using the package 
+  `scrlayer-scrpage`
++ various options and commands to customize these pages
++ support of the KOMA-Script font elements for title and cover
++ commands and environments for abstract, statement of authorship and
+  restriction note have been improved
++ footnotes in headings can be set as symbols per option `footnotes`
++ some commands have been renamed for compatibility with other packages
++ functionality of the package `mathswap` can be switched within the document
 
 **v2.01b** (2014/06/04)
 + Fixed bug when using task (tudscrsupervisor)

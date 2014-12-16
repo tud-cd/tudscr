@@ -1,4 +1,4 @@
-% \CheckSum{241}
+% \CheckSum{233}
 % \iffalse meta-comment
 % ======================================================================
 %
@@ -45,11 +45,25 @@
 % \iffalse
 %%% From File: tudscr-color.dtx
 %<*driver>
-% \fi
-\ProvidesFile{tudscr-color.dtx}%
-  [2014/04/22 v2.00 TUD-KOMA-Script (colors)]
-% \iffalse
-\documentclass{tudscrdoc}
+\ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
+\ProvidesFile{tudscr-color.dtx}[%
+  2014/10/10 v2.02 TUD-KOMA-Script\space%
+%</driver>
+%<package>\NeedsTeXFormat{LaTeX2e}[2011/06/27]
+%<package>\ProvidesPackage{tudscrcolor}[%
+%<*driver|package>
+%!TUDVersion
+%<package>  package
+  (corporate design colors)%
+]
+%</driver|package>
+%<*driver>
+\RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
+\documentclass[english,ngerman]{tudscrdoc}
+\usepackage{selinput}\SelectInputMappings{adieresis={Ã¤},germandbls={ÃŸ}}
+\usepackage[T1]{fontenc}
+\usepackage{babel}
+\usepackage{tudscrfonts} % only load this package, if the fonts are installed
 \KOMAoptions{parskip=half-}
 \CodelineIndex
 \RecordChanges
@@ -65,78 +79,57 @@
 %
 % \section{Die Farben des \CDs}
 %
-% Das \CD der Technischen Universität Dresden legt nicht nur die zu nutzenden
+% Das \CD der Technischen UniversitÃ¤t Dresden legt nicht nur die zu nutzenden
 % Schriften und das Layout sondern auch die zu verwendenden Farben fest. Diese
-% werden nachfolgend für das CMYK"~ und RGB"~Farbmodel definiert. Sie können im
-% Dokument mit sämtlichen Befehlen zur Farbauswahl wie \cs{color}\marg{Farbe} 
+% werden nachfolgend fÃ¼r das CMYK"~ und RGB"~Farbmodel definiert. Sie kÃ¶nnen im
+% Dokument mit sÃ¤mtlichen Befehlen zur Farbauswahl wie \cs{color}\marg{Farbe} 
 % oder aber \cs{textcolor}\marg{Farbe} verwendet werden.
 %
 % \StopEventually{\PrintIndex\PrintChanges}
 %
 % \iffalse
-%<*package&header>
+%<*package>
 % \fi
 %
-% \subsection{Identifizierung des Pakets \pkg{tudscrcolor}}
+% \subsection{Optionen des Paketes \pkg{tudscrcolor}}
 %
 %    \begin{macrocode}
-\NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{tudscrcolor}[%
-  \TUDVersion\space package (corporate design colors)%
-]
 \DeclareOption{reduced}{\let\setcdcolors@add\relax}
 \DeclareOption{full}{\let\setcdcolors@add\setcdcolors@full}
 \DeclareOption*{\PassOptionsToPackage{\CurrentOption}{xcolor}}
 %    \end{macrocode}
 %
 % \iffalse
-%</package&header>
-%<*class|package&body>
-% \fi
-%
-% \subsection{Befehle für die \cls{tudscr}-Klassen}
-%
-% \iffalse
+%</package>
 %<*class>
 % \fi
 %
-% \todo[v3.12]{%
-%   Abfrage \cs{@ifpackageloaded} durch Verzögerung des Paketes 
-%   \pkg{pagecolor} nicht notwendig.%
-% }
+% \subsection{Befehle fÃ¼r die \cls{tudscr}-Klassen}
+%
 % \begin{macro}{\nopagecolor}
 % \begin{macro}{\tud@pagecolor}
 % \begin{macro}{\tud@restorepagecolor}
-% Diese Befehle dienen zum Umschalten der Farben für Titel- und Kapitelseiten.
+% Diese Befehle dienen zum Umschalten der Farben fÃ¼r Titel- und Kapitelseiten.
+% Wenn die Farben fÃ¼r Titel- und Kapitelseiten umgeschaltet werden, geht die
+% Information Ã¼ber die aktuelle Text- und Seitenfarbe verloren. Um dies zu
+% verhindern, kann das Paket \pkg{pagecolor} geladen werden, welches mit den
+% Befehlen \cs{newcolor} und \cs{restorecolor} ein Wiederherstellen ermÃ¶glicht.
 %    \begin{macrocode}
 \newcommand*\tud@pagecolor[1]{}
 \newcommand*\tud@restorepagecolor{}
 \AfterPackage{tudscrcolor}{%
   \providecommand*\nopagecolor{\pagecolor{white}}%
-  \@ifpackageloaded{pagecolor}{}{%
-    \let\tud@pagecolor\pagecolor%
-    \let\tud@restorepagecolor\nopagecolor%
+  \let\tud@pagecolor\pagecolor%
+  \let\tud@restorepagecolor\nopagecolor%
+  \AfterPackage*{pagecolor}{%
+    \let\tud@pagecolor\newpagecolor%
+    \let\tud@restorepagecolor\restorepagecolor%
   }%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@restorepagecolor
 % \end{macro}^^A \tud@pagecolor
 % \end{macro}^^A \nopagecolor
-% \todo[v3.12]{Verzögerung des Paketes \pkg{pagecolor} aktivieren.}
-% \begin{macro}{\if@tud@pagecolor}
-% Wenn die Farben für Titel- und Kapitelseiten umgeschaltet werden, geht die
-% Information über die aktuelle Text- und Seitenfarbe verloren. Um dies zu
-% verhindern, kann das Paket \pkg{pagecolor} geladen werden, welches mit den
-% Befehlen \cs{newcolor} und \cs{restorecolor} ein Wiederherstellen ermöglicht.
-%    \begin{macrocode}
-% \newif\if@tud@pagecolor
-% \PreventPackageFromLoading[\@tud@pagecolortrue]{pagecolor}
-\AfterPackage{pagecolor}{%
-  \let\tud@pagecolor\newpagecolor%
-  \let\tud@restorepagecolor\restorepagecolor%
-}
-%    \end{macrocode}
-% \end{macro}^^A \if@tud@pagecolor
 % Sollte das Paket \pkg{pdfpages} geladen werden, so ist eine Definition
 % der Standardseitenfarbe zum Einbinden von PDF-Dokumenten notwendig.
 % Andernfalls werden bei der Verwendung von \cs{includepdf} nur leere Seiten
@@ -147,17 +140,17 @@
 %
 % \iffalse
 %</class>
-%<*package&body>
+%<*package>
 % \fi
 %
-% \subsection{Farbdefinitionen für das Paket \pkg{tudscrcolor}}
+% \subsection{Farbdefinitionen fÃ¼r das Paket \pkg{tudscrcolor}}
 %
 % \begin{macro}{\setcdcolors}
 % \begin{macro}{\setcdcolors@add}
 % Der Befehl \cs{setcdcolors} definiert die Farben des \CDs. Das Argument dient
-% zur Auswahl des gewünschten Farbmodels. Dies kann dazu genutzt werden,
-% innerhalb des Dokumentes die Definition der Farben für ein neues Farbmodell zu
-% ändern.
+% zur Auswahl des gewÃ¼nschten Farbmodels. Dies kann dazu genutzt werden,
+% innerhalb des Dokumentes die Definition der Farben fÃ¼r ein neues Farbmodell zu
+% Ã¤ndern.
 %    \begin{macrocode}
 \newcommand*\setcdcolors@add{}
 \newcommand*\setcdcolors[1]{%
@@ -166,7 +159,7 @@
   \fi%
 %    \end{macrocode}
 % \begin{color}{HKS41}
-% Die primäre Hausfarbe (dunkles Blau)
+% Die primÃ¤re Hausfarbe (dunkles Blau)
 %    \begin{macrocode}
   \definecolor{HKS41}{cmyk/RGB/rgb}{%
     1.00,0.70,0.10,0.50/011,042,081/0.0431372549,0.16470588235,0.31764705882%
@@ -174,8 +167,8 @@
 %    \end{macrocode}
 % \end{color}^^A HKS41
 % \begin{color}{HKS92}
-% Die sekundäre Hausfarbe (grau), allein und ausschließlich für die Verwendung
-% in der Geschäftsausstattung und nicht für Fließtext, Grafiken etc.
+% Die sekundÃ¤re Hausfarbe (grau), allein und ausschlieÃŸlich fÃ¼r die Verwendung
+% in der GeschÃ¤ftsausstattung und nicht fÃ¼r FlieÃŸtext, Grafiken etc.
 %    \begin{macrocode}
   \definecolor{HKS92}{cmyk/RGB/rgb}{%
     0.10,0.00,0.05,0.65/080,089,085/0.31372549019,0.34901960784,0.33333333333%
@@ -194,7 +187,7 @@
 % \begin{color}{HKS33}
 % \begin{color}{HKS57}
 % \begin{color}{HKS65}
-% Auszeichnungen 2. Kategorie (Indigo, Purpur, dunkles Grün, helles Grün)
+% Auszeichnungen 2. Kategorie (Indigo, Purpur, dunkles GrÃ¼n, helles GrÃ¼n)
 %    \begin{macrocode}
   \definecolor{HKS36}{cmyk/RGB/rgb}{%
     0.80,0.90,0.00,0.00/081,041,127/0.31764705882,0.16078431372,0.49803921568%
@@ -223,17 +216,19 @@
 % \end{color}^^A HKS07
 % \begin{color}{cddarkblue}
 % \begin{color}{cdgray}
+% \begin{color}{cdgrey}
 % \begin{color}{cdblue}
 % \begin{color}{cdindigo}
 % \begin{color}{cdpurple}
 % \begin{color}{cddarkgreen}
 % \begin{color}{cdgreen}
 % \begin{color}{cdorange}
-% Die definierten Grundfarben werden zur einfacheren Verwendung im Dokument noch 
-% einmal speziell benannt.
+% Die definierten Grundfarben werden zur einfacheren Verwendung im Dokument 
+% noch einmal speziell benannt.
 %    \begin{macrocode}
   \colorlet{cddarkblue}{HKS41}
   \colorlet{cdgray}{HKS92}
+  \colorlet{cdgrey}{HKS92}
   \colorlet{cdblue}{HKS44}
   \colorlet{cdindigo}{HKS36}
   \colorlet{cdpurple}{HKS33}
@@ -247,11 +242,12 @@
 % \end{color}^^A cdpurple
 % \end{color}^^A cdindigo
 % \end{color}^^A cdblue
+% \end{color}^^A cdgrey
 % \end{color}^^A cdgray
 % \end{color}^^A cddarkblue
-% Damit enden die notwendigen Farbdefinitionen für das \pkg{tudscrcolor}-Paket.
-% Abhängig von den gewählten Optionen werden mit \cs{setcdcolors@add} ggf.
-% zusätzliche Farbnamen definiert.
+% Damit enden die notwendigen Farbdefinitionen fÃ¼r das \pkg{tudscrcolor}-Paket.
+% AbhÃ¤ngig von den gewÃ¤hlten Optionen werden mit \cs{setcdcolors@add} ggf.
+% zusÃ¤tzliche Farbnamen definiert.
 %    \begin{macrocode}
   \setcdcolors@add%
 }
@@ -261,8 +257,8 @@
 % \begin{macro}{\setcdcolors@full}
 % Die erweiterten Farbbefehle werden durch \pkg{tudscrcolor} definiert, wenn
 % das Paket explizit mit der Option \opt{full} geladen wird. Damit werden 
-% alle gängigen Farbdefinitionen der vielen Insellösungen des \LaTeX-Universums
-% an der Technischen Universität Dresden unterstützt.
+% alle gÃ¤ngigen Farbdefinitionen der vielen InsellÃ¶sungen des \LaTeX-Universums
+% an der Technischen UniversitÃ¤t Dresden unterstÃ¼tzt.
 %    \begin{macrocode}
 \newcommand*\setcdcolors@full{%
   \colorlet{HKS41K100}{HKS41!100}
@@ -428,19 +424,19 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \setcdcolors@full
-% Zum Schluss werden die Optionen ausgeführt und ggf. an \pkg{xcolor} 
-% weitergereicht. Anschließend werden die Farben für das Dokument definiert.
+% Zum Schluss werden die Optionen ausgefÃ¼hrt und ggf. an \pkg{xcolor} 
+% weitergereicht. AnschlieÃŸend werden die Farben fÃ¼r das Dokument definiert.
 % Ohne die Angabe eines optionalen Argumentes an das Paket \pkg{xcolor} erfolgt
-% die Definition für den gewählten bzw. standardmäßig eingestellten Farbraum.
+% die Definition fÃ¼r den gewÃ¤hlten bzw. standardmÃ¤ÃŸig eingestellten Farbraum.
 %    \begin{macrocode}
 \ExecuteOptions{reduced}
 \ProcessOptions\relax
-\RequirePackage{xcolor}
+\RequirePackage{xcolor}[2007/01/21]
 \setcdcolors{}
 %    \end{macrocode}
 %
 % \iffalse
-%</package&body>
+%</package>
 % \fi
 %
 % \Finale

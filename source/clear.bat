@@ -3,9 +3,10 @@ attrib +h "*.bat" /s
 attrib +h "*.dtx" /s
 attrib +h "*.ins" /s
 attrib +h "*.tex" /s
-attrib +h "doc\*.cls"
-attrib +h "doc\*.xdy"
-attrib -h "install\*.tex"
+attrib -h "*-temp.*" /s> nul
+attrib +h "doc\tudscrman.*" /s
 attrib +h "logo\*.*"
-del "*.*" /s /q
+attrib +h "test\*.cls"> nul
+attrib +h "test\*.sty"> nul
+del "*.*" /s /q> nul
 attrib -h "*.*" /s
