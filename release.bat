@@ -25,7 +25,6 @@ mkdir doc\latex\tudscr\tutorials
 echo \BaseDirectory{.}> docstrip.cfg
 echo \UseTDS>> docstrip.cfg
 tex tudscr.ins
-move doc\tudscrman.sty doc\tutorials\
 pdflatex "\def\tudfinalflag{}\input{tudscrsource.tex}"
 pdflatex "\def\tudfinalflag{}\input{tudscrsource.tex}"
 makeindex -s gglo.ist -o tudscrsource.gls tudscrsource.glo
@@ -125,10 +124,24 @@ echo  Release fuer CTAN
 echo =========================================================================
 mkdir CTAN\tudscr\doc
 mkdir CTAN\tudscr\source
-mkdir CTAN\tudscr\tex
-xcopy ..\temp\doc\latex\tudscr\*.*    CTAN\tudscr\doc\    /s
-xcopy ..\temp\source\latex\tudscr\*.* CTAN\tudscr\source\ /s
-xcopy ..\temp\tex\latex\tudscr\*.*    CTAN\tudscr\tex\    /s
+mkdir CTAN\tudscr\tex\logo
+rem for /f %%f in ('dir /b temp\*.md') do copy temp\%%f CTAN\tudscr\%%~nf
+xcopy ..\temp\doc\latex\tudscr\*.*      CTAN\tudscr\doc\      /s
+xcopy ..\temp\source\latex\tudscr\*.*   CTAN\tudscr\source\   /s
+xcopy ..\temp\tex\latex\tudscr\logo\*.* CTAN\tudscr\tex\logo\ /s
+cd CTAN
+echo %cd%
+echo Set objArgs = WScript.Arguments > winzip.vbs
+echo InputFolder = objArgs(0) >> winzip.vbs
+echo ZipFile = objArgs(1) >> winzip.vbs
+echo CreateObject("Scripting.FileSystemObject").CreateTextFile(ZipFile, True).Write "PK" ^& Chr(5) ^& Chr(6) ^& String(18, vbNullChar) >> winzip.vbs
+echo Set objShell = CreateObject("Shell.Application") >> winzip.vbs
+echo Set source = objShell.NameSpace(InputFolder).Items >> winzip.vbs
+echo objShell.NameSpace(ZipFile).CopyHere(source) >> winzip.vbs
+echo wScript.Sleep 2000 >> winzip.vbs
+CScript  winzip.vbs  %cd%\tudscr  %cd%\tudscr.zip
+del winzip.vbs /q > nul
+if exist tudscr rmdir tudscr /s /q > nul
 echo =========================================================================
 echo  Loeschen aller temporaeren Dateien
 echo =========================================================================
