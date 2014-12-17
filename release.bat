@@ -125,7 +125,7 @@ echo =========================================================================
 mkdir CTAN\tudscr\doc
 mkdir CTAN\tudscr\source
 mkdir CTAN\tudscr\tex\logo
-rem for /f %%f in ('dir /b temp\*.md') do copy temp\%%f CTAN\tudscr\%%~nf
+for /f %%f in ('dir /b temp\*.md') do copy temp\%%f CTAN\tudscr\%%~nf
 xcopy ..\temp\doc\latex\tudscr\*.*      CTAN\tudscr\doc\      /s
 xcopy ..\temp\source\latex\tudscr\*.*   CTAN\tudscr\source\   /s
 xcopy ..\temp\tex\latex\tudscr\logo\*.* CTAN\tudscr\tex\logo\ /s
