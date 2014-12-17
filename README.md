@@ -2,7 +2,7 @@
 TUD-KOMA-Script
 ===============
 
-TUD-KOMA-Script 2014/12/16 v2.02
+TUD-KOMA-Script 2014/12/17 v2.02
 Copyright (c) Falk Hanisch <tudscr[at]gmail.com>, 2012-2014
 
 This material is subject to the LaTeX Project Public License.
@@ -51,7 +51,7 @@ Versionen
 ---------
 
 
-**v2.02** (2014/12/16)
+**v2.02** (2014/12/17)
 
 + Paket `tudscrfonts`
 + Probleme mit der Klasse `standalone` behoben
@@ -139,7 +139,7 @@ Versions
 --------
 
 
-**v2.02** (2014/12/16)
+**v2.02** (2014/12/17)
 
 + package `tudscrfonts`
 + fixed bug with class `standalone`
