@@ -124,12 +124,11 @@ echo  Release fuer CTAN
 echo =========================================================================
 mkdir CTAN\tudscr\doc
 mkdir CTAN\tudscr\source
-mkdir CTAN\tudscr\tex\logo
-for /f %%f in ('dir /b temp\*.md') do copy temp\%%f CTAN\tudscr\%%~nf
-xcopy ..\temp\doc\latex\tudscr\*.*      CTAN\tudscr\doc\      /s
-xcopy ..\temp\source\latex\tudscr\*.*   CTAN\tudscr\source\   /s
-xcopy ..\temp\tex\latex\tudscr\logo\*.* CTAN\tudscr\tex\logo\ /s
-cd CTAN
+mkdir CTAN\tudscr\logo
+xcopy ..\temp\doc\latex\tudscr\*.*      CTAN\tudscr\doc\    /s
+xcopy ..\temp\source\latex\tudscr\*.*   CTAN\tudscr\source\ /s
+xcopy ..\temp\tex\latex\tudscr\logo\*.* CTAN\tudscr\logo\   /s
+move  CTAN\tudscr\doc\README            CTAN\tudscr\README
 echo %cd%
 echo Set objArgs = WScript.Arguments > winzip.vbs
 echo InputFolder = objArgs(0) >> winzip.vbs
@@ -139,13 +138,13 @@ echo Set objShell = CreateObject("Shell.Application") >> winzip.vbs
 echo Set source = objShell.NameSpace(InputFolder).Items >> winzip.vbs
 echo objShell.NameSpace(ZipFile).CopyHere(source) >> winzip.vbs
 echo wScript.Sleep 2000 >> winzip.vbs
-CScript  winzip.vbs  %cd%\tudscr  %cd%\tudscr.zip
-del winzip.vbs /q > nul
-if exist tudscr rmdir tudscr /s /q > nul
+CScript  winzip.vbs  %cd%\CTAN  %cd%\tudscr.zip
 echo =========================================================================
 echo  Loeschen aller temporaeren Dateien
 echo =========================================================================
 pause.
+del winzip.vbs /q > nul
+if exist CTAN rmdir CTAN /s /q > nul
 cd %~dp0
 if exist temp rmdir temp /s /q > nul
 if exist release\temp rmdir release\temp /s /q > nul
