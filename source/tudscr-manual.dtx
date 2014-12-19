@@ -1,4 +1,4 @@
-% \CheckSum{2502}
+% \CheckSum{2611}
 % \iffalse meta-comment
 % ======================================================================
 %
@@ -43,13 +43,11 @@
 %   Right brace   \}     Tilde         \~}
 %
 % \iffalse
-%<*!xindy>
 %%% From File: tudscr-manual.dtx
-%</!xindy>
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-manual.dtx}[%
-  2014/12/16 v2.02 TUD-KOMA-Script\space%
+  2014/12/17 v2.02 TUD-KOMA-Script\space%
 %</driver>
 %<identify>\NeedsTeXFormat{LaTeX2e}[2011/06/27]
 %<class&identify>\ProvidesClass{tudscrman}[%
@@ -80,8 +78,8 @@
 %
 % \selectlanguage{ngerman}
 %
-% \changes{v2.02}{2014/07/10}{Versionsnummer angepasst}%^^A
 % \changes{v2.02}{2014/11/18}{Index für Tutorials möglich}%^^A
+% \changes{v2.02}{2014/12/17}{xindy-Stildatei wird zur Laufzeit erzeugt}%^^A
 %
 % \section{Klasse und Paket für die Anwenderdokumentation von \TUDScript}
 %
@@ -295,7 +293,7 @@
 }
 %    \end{macrocode}
 % Für die Erstellung des Indexes wird das Paket \pkg{imakeidx} zusammen mit 
-% \pkg{xindy} verwendet.
+% \pkg{xindy} verwendet. Zuerst ein paar kleinere Einstellungen für das Layout.
 %    \begin{macrocode}
 \PassOptionsToPackage{xindy,splitindex}{imakeidx}
 \RequirePackage{imakeidx}[2013/07/11]%
@@ -308,7 +306,161 @@
 %</package>
   noclearpage,firstpagestyle=headings,headers={\indexname}{\indexname}%
 }
-\newcommand*\xdyopt{-M tudscrman.xdy -L german-din}%
+\newcommand*\xdyopt{-M tudscrman-temp.xdy -L german-din}
+%    \end{macrocode}
+% \begin{macro}{\tud@write@i}
+% \changes{v2.02}{2014/10/22}{neu}%^^A
+% \begin{macro}{\tud@write@ii}
+% \changes{v2.02}{2014/11/02}{neu}%^^A
+% \begin{macro}{\tud@read}
+% \changes{v2.02}{2014/08/19}{neu}%^^A
+% Für die Erstellung der Indizes wird zum Sortieren das Programm \pkg{xindy} 
+% genutzt. Für dieses wird eine eigene Stildatei verwendet, welche zur Laufzeit 
+% erzeugt wofür zuerst ein Ausgabestream reserviert wird.
+%    \begin{macrocode}
+\newcommand*\tud@write@i{}
+\newwrite\tud@write@i
+%    \end{macrocode}
+% Für die Tutorials werden später zusätzlich noch ein weiterer Ausgabe- sowie 
+% ein Eingabestream benötigt, die hier gleich mit initilaisiert werden.
+%    \begin{macrocode}
+%<*package>
+\newcommand*\tud@write@ii{}
+\newwrite\tud@write@ii
+\newcommand*\tud@read{}
+\newread\tud@read
+%</package>
+%    \end{macrocode}
+% \end{macro}^^A \tud@read
+% \end{macro}^^A \tud@write@ii
+% \end{macro}^^A \tud@write@i
+% Nachfolgend wird die zu erstellenden \pkg{xindy}-Stildatei kurz beschrieben.
+%    \begin{macrocode}
+\openout\tud@write@i=tudscrman-temp.xdy
+%    \end{macrocode}
+% Als erstes wird Standard-\LaTeX-Modul geladen.
+%    \begin{macrocode}
+\write\tud@write@i{(require "texindy.xdy")}
+%    \end{macrocode}
+% Leider lässt sich für Seitenzahlbereiche via \val{:attr} (noch) kein Markup 
+% für angehängte \enquote{f.} sowie \enquote{ff.} einstellen. Diese würden 
+% deshalb bei kursiven oder fetten Seitenzahlen trotzdem in normaler Schrift
+% erscheinen, weshalb auf die Auszeichnung folgender Seiten verzichtet wird.
+%    \begin{macrocode}
+%\write\tud@write@i{(require "ff-ranges.xdy")}
+%    \end{macrocode}
+% Seitenbereiche werden sofort zusammengefasst, wobei als Trennzeichen ein
+% Halbgeviertstrich verwendet wird.
+%    \begin{macrocode}
+\write\tud@write@i{%
+(define-location-class^^J%
+\space\space "arabic-page-numbers" ("arabic-numbers") :min-range-length 1^^J%
+)%
+}
+\write\tud@write@i{(markup-range :sep "--")}
+%    \end{macrocode}
+% Alle Argumente in eckigen Klammern werden ignoriert. Dies wird bei einigen
+% Indexbefehlen genutzt, um die nicht beachteten RegExp-Regeln auszugleichen, 
+% siehe den nächsten Absatz.
+%    \begin{macrocode}
+\write\tud@write@i{(merge-rule "\[(.*)\]" "" :eregexp)}
+%    \end{macrocode}
+% Innerhalb ausgewählter Auszeichnungs- und Textbefehle sollten die Befehle
+% selbst, nicht jedoch die Argumente verworfen werden. Leider werden die 
+% manuell erstellten RegExp-Regeln durch \texttt{texindy} zu spät genutzt 
+% (\url{http://sourceforge.net/p/xindy/bugs/22/}).
+%    \begin{macrocode}
+%\write\tud@write@i{(merge-rule "\\hyperindex\{(.*)\}\{(.*)\}" "/2" :eregexp)}
+%\write\tud@write@i{(merge-rule "\\hologo\{(.*)\}" "/1" :eregexp)}
+%\write\tud@write@i{(merge-rule "\\texttt\{(.*)\}" "/1" :eregexp)}
+%\write\tud@write@i{(merge-rule "\\textsbn\{(.*)\}" "/1" :eregexp)}
+%\write\tud@write@i{(merge-rule "\\textsbs\{(.*)\}" "/1" :eregexp)}
+%    \end{macrocode}
+% Es werden die Attribute \emph{declare} mit der Abkürzung \emph{!} sowie
+% \emph{important} mit der Abkürzung \emph{?} und \emph{default} definiert, 
+% welche hierarchisch gleichgestellt sind.
+%    \begin{macrocode}
+\write\tud@write@i{%
+  (define-attributes (("declare" "!" "important" "?" "default")))%
+}
+%    \end{macrocode}
+% Eine Alternative wäre, diese in der Hierarchie zu unterscheiden, allerdings
+% war eine Bildung von zufriedenstellenden Seitenbereichen dabei nicht möglich
+% und wurde deshalb verworfen.
+%    \begin{macrocode}
+%\write\tud@write@i{(markup-attribute-group-list :sep ", ")}
+%\write\tud@write@i{%
+%\space\space(define-attributes (("declare" "!") ("important" "?")("default")))%
+%}
+%    \end{macrocode}
+% Einträge, die als wichtig deklariert wurden, können auch für normale zur 
+% Bereichsbildung verwendet werden.
+%    \begin{macrocode}
+\write\tud@write@i{(merge-to "important" "default")}
+\write\tud@write@i{(merge-to "?" "default")}
+%    \end{macrocode}
+% Hier erfolgt die Definition der Auszeichnugen der Attribute. Deklarationen 
+% werden fett gedruckt, wichtige Einträge erscheinen kursiv. Außerdem wird ein
+% entsprechnder Link auf die Seite eingefügt.
+%    \begin{macrocode}
+\write\tud@write@i{%
+(markup-locref^^J%
+\space\space :open "\string\textbf{\string\hyperpage{"^^J%
+\space\space :close "}}"^^J%
+\space\space :attr "declare"^^J%
+)%
+}
+\write\tud@write@i{%
+(markup-locref^^J%
+\space\space :open "\string\textbf{\string\hyperpage{"^^J%
+\space\space :close "}}"^^J%
+\space\space :attr "!"^^J%
+)%
+}
+\write\tud@write@i{%
+(markup-locref^^J%
+\space\space :open "\string\textsl{\string\hyperpage{"^^J%
+\space\space :close "}}"^^J%
+\space\space :attr "important"^^J%
+)%
+}
+\write\tud@write@i{%
+(markup-locref^^J%
+\space\space :open "\string\textsl{\string\hyperpage{"^^J%
+\space\space :close "}}"^^J%
+\space\space :attr "?"^^J%
+)%
+}
+\write\tud@write@i{%
+(markup-locref^^J%
+\space\space :open "\string\hyperpage{"^^J%
+\space\space :close "}"^^J%
+\space\space :attr "default"^^J%
+)%
+}
+%    \end{macrocode}
+% Punkte zwischen Eintrag und Seitenzahl.
+%    \begin{macrocode}
+\write\tud@write@i{%
+  (markup-locclass-list :open "\string\,\string\dotfill\string\,")%
+}
+%    \end{macrocode}
+% Dieser Querverweistyp wird speziell im allgemeinen Index verwendet, um auf 
+% einen Spezialindex zu verweisen.
+%    \begin{macrocode}
+\write\tud@write@i{(define-crossref-class "seeidx")}
+\write\tud@write@i{%
+(markup-crossref-list^^J%
+\space\space :class "seeidx" :open "\string\seeidx{" :sep "; " :close "}{}"^^J%
+)%
+}
+%    \end{macrocode}
+% Damit ist die \pkg{xindy}-Stildatei fertig.
+%    \begin{macrocode}
+\closeout\tud@write@i
+%    \end{macrocode}
+% Nun können die einzelnen Indizes erstellt werden.
+%    \begin{macrocode}
 %<*class>
 \makeindex[title={Allgemeiner Index},options=\xdyopt]%
 %</class>
@@ -559,8 +711,6 @@
 % \begin{macro}{\Tutorial}
 % \changes{v2.02}{2014/08/22}{neu}%^^A
 % \changes{v2.02}{2014/10/22}{Reimplementierung}%^^A
-% \begin{macro}{\tud@tut@bat}
-% \changes{v2.02}{2014/10/22}{neu}%^^A
 % \begin{macro}{\hypertut}
 % \changes{v2.02}{2014/09/02}{neu}%^^A
 % Die gegebenenfalls notwendige Kompilierung und die Referenzierung eines 
@@ -571,7 +721,6 @@
 \newrobustcmd*\hypertut[2]{%
   \hyperref{tutorials/#1.pdf}{\jobname}{tutorials:#1}{\textsbn{#1.pdf}#2}%
 }
-\newwrite\tud@tut@bat
 \NewDocumentCommand\Tutorial{som}{%
   \ifnum\pdfshellescape=1\relax%
 %    \end{macrocode}
@@ -580,8 +729,8 @@
 % pdf\LaTeX{} für die Tutorials im entsprechenden Ordner erfolgen.
 %    \begin{macrocode}
     \filemodCmp{tutorials/#3.pdf}{tutorials/#3.tex}{}{%
-      \immediate\openout\tud@tut@bat=tutorials.sh%
-      \immediate\write\tud@tut@bat{%
+      \immediate\openout\tud@write@i=tutorials.sh%
+      \immediate\write\tud@write@i{%
         cd tutorials^^J%
         pdflatex -shell-escape #3^^J%
         biber #3^^J%
@@ -589,7 +738,7 @@
         pdflatex #3^^J%
         pdflatex #3%
       }%
-      \immediate\closeout\tud@tut@bat%
+      \immediate\closeout\tud@write@i%
 %    \end{macrocode}
 % Hier erfolgt die Unterscheidung der Befehle für die unterschiedlichen OS.
 %    \begin{macrocode}
@@ -625,7 +774,6 @@
 %</package>
 %    \end{macrocode}
 % \end{macro}^^A \hypertut
-% \end{macro}^^A \tud@tut@bat
 % \end{macro}^^A \Tutorial
 %
 % \iffalse
@@ -2553,7 +2701,7 @@
 %    \begin{macrocode}
 \newenvironment{Preamble}{\tud@tut@pre}{%
   \tud@tut@post%
-  \tud@tut@append{preamble}%
+  \tud@tut@append{\tud@write@i}%
   \gdef\@tempa{%
     \tud@tut@lst%
     \global\let\@CodePreamble\relax%
@@ -2562,7 +2710,7 @@
 }
 \newenvironment{Preamble*}{\tud@tut@pre}{%
   \tud@tut@post%
-  \tud@tut@append{preamble}%
+  \tud@tut@append{\tud@write@i}%
   \gdef\@tempa{%
     \tud@tut@lst%
     \tud@tut@input%
@@ -2572,7 +2720,7 @@
 }
 \newenvironment{Preamble+}{\tud@tut@pre}{%
   \tud@tut@post%
-  \tud@tut@append{preamble}%
+  \tud@tut@append{\tud@write@i}%
   \gdef\@tempa{%
     \global\let\@CodePreamble\relax%
   }%
@@ -2606,7 +2754,7 @@
 %    \begin{macrocode}
 \newenvironment{Trunk}{\tud@tut@pre}{%
   \tud@tut@post%
-  \tud@tut@append{trunk}%
+  \tud@tut@append{\tud@write@ii}%
   \gdef\@tempa{%
     \tud@tut@lst%
     \global\let\@CodePreamble\relax%
@@ -2615,7 +2763,7 @@
 }
 \newenvironment{Trunk*}{\tud@tut@pre}{%
   \tud@tut@post%
-  \tud@tut@append{trunk}%
+  \tud@tut@append{\tud@write@ii}%
   \gdef\@tempa{%
     \tud@tut@lst%
     \tud@tut@input%
@@ -2625,7 +2773,7 @@
 }
 \newenvironment{Trunk+}{\tud@tut@pre}{%
   \tud@tut@post%
-  \tud@tut@append{trunk}%
+  \tud@tut@append{\tud@write@ii}%
   \gdef\@tempa{%
     \global\let\@CodePreamble\relax%
   }%
@@ -2636,7 +2784,7 @@
   \tud@tut@pre%
 }{%
   \tud@tut@post%
-  \tud@tut@append{trunk}%
+  \tud@tut@append{\tud@write@ii}%
   \gdef\@tempa{%
     \tud@tut@lst%
     \tud@tut@pdf%
@@ -2941,18 +3089,18 @@
   \faculty{}%
   \setlength\headingsvskip{-15mm}%
   \maketitle\noindent#1%
-  \immediate\openout\tud@tut@write@preamble=\jobname-preamble-temp.tex\relax
-  \immediate\openout\tud@tut@write@trunk=\jobname-trunk-temp.tex\relax
-  \immediate\write\tud@tut@write@trunk{^^J\string\begin{document}^^J}
+  \immediate\openout\tud@write@i=\jobname-preamble-temp.tex\relax
+  \immediate\openout\tud@write@ii=\jobname-trunk-temp.tex\relax
+  \immediate\write\tud@write@ii{^^J\string\begin{document}^^J}
 }
 %    \end{macrocode}
 % Der Befehl \cs{FinishTutorial} schleißt den noch offenen Ausgabestream und
 % gibt den vorgestellten Quelltext vollständig aus.
 %    \begin{macrocode}
 \newcommand\FinishTutorial[1][]{%
-  \immediate\write\tud@tut@write@trunk{^^J\string\end{document}^^J}
-  \immediate\closeout\tud@tut@write@trunk%
-  \immediate\closeout\tud@tut@write@preamble%
+  \immediate\write\tud@write@ii{^^J\string\end{document}^^J}
+  \immediate\closeout\tud@write@ii%
+  \immediate\closeout\tud@write@i%
   \tud@tut@collect%
   \clearpage%
   \addsec{Copy~\&~Paste}%
@@ -2973,43 +3121,30 @@
 %    \end{macrocode}
 % \end{macro}^^A \FinishTutorial
 % \end{macro}^^A \StartTutorial
-% \begin{macro}{\tud@tut@write@preamble}
-% \changes{v2.02}{2014/11/02}{neu}%^^A
-% \begin{macro}{\tud@tut@write@trunk}
-% \changes{v2.02}{2014/08/19}{neu}%^^A
-% \begin{macro}{\tud@tut@read}
-% \changes{v2.02}{2014/08/19}{neu}%^^A
+% \begin{macro}{\tud@tut@readtostream}
+% \changes{v2.02}{2014/12/16}{neu}%^^A
 % \begin{macro}{\tud@tut@line}
 % \changes{v2.02}{2014/08/19}{neu}%^^A
-% Bei den Tutorials soll zum Schluss ein komplett kompilierbares Beispiel für
-% Copy~\&~Paste gegeben werden. Um dieses zusammenzubauen, werden alle im 
-% Dokument innerhalb der Varianten der \env{Trunk}"=Umgebungen gegebenen
-% Codefragmente zusammengesetzt. Um die Quelltexte einlesen und verarbeiten zu
-% können, wird ein Eingabe- sowie ein Ausgabestream benötigt.
-%    \begin{macrocode}
-\newwrite\tud@tut@write@preamble
-\newwrite\tud@tut@write@trunk
-\newread\tud@tut@read
-\newcommand*\tud@tut@line{}
-%    \end{macrocode}
-% \end{macro}^^A \tud@tut@line
-% \end{macro}^^A \tud@tut@read
-% \end{macro}^^A \tud@tut@write@trunk
-% \end{macro}^^A \tud@tut@write@preamble
-% \begin{macro}{\tud@tut@write}
-% \changes{v2.02}{2014/12/16}{neu}%^^A
 % \begin{macro}{\tud@tut@append}
 % \changes{v2.02}{2014/08/19}{neu}%^^A
 % \begin{macro}{\tud@tut@collect}
 % \changes{v2.02}{2014/12/16}{neu}%^^A
-% Mit \cs{tud@tut@write} wird der Inhalt einer Datei, welche im ersten Argument 
-% angegeben wird, in den Ausgabestream des zweiten Argumentes geschrieben. Dies 
-% wird durch die Makros \cs{tud@tut@append} und \cs{tud@tut@collect} genutzt.
+% Bei den Tutorials soll zum Schluss ein komplett kompilierbares Beispiel für
+% Copy~\&~Paste gegeben werden. Um dieses zusammenzubauen, werden alle im 
+% Dokument innerhalb der Varianten der \env{Trunk}"=Umgebungen gegebenen
+% Codefragmente zusammengesetzt. Um die Quelltexte einlesen und verarbeiten zu
+% können, werden zwei Eingabe- sowie ein Ausgabestream benötigt, welche bereits 
+% zuvor initilaisiert wurden.
+%
+% Mit \cs{tud@tut@readtostream} wird der Inhalt der Datei im ersten Argument 
+% in den Ausgabestream des zweiten Argumentes geschrieben. Dies wird durch die
+% Makros \cs{tud@tut@append} und \cs{tud@tut@collect} genutzt.
 %    \begin{macrocode}
-\newcommand*\tud@tut@write[2]{%
+\newcommand*\tud@tut@line{}
+\newcommand*\tud@tut@readtostream[2]{%
   \begingroup%
   \endlinechar=-1\relax%
-  \openin\tud@tut@read=#1%
+  \openin\tud@read=#1%
 %    \end{macrocode}
 % Der Schalter \cs{if@tempswa} wird verwendet, um unnötige Leerzeilen in der
 % Ausgabedatei zu entfernen. Wurde eine nicht leere Zeile gefunden, wird diese 
@@ -3019,10 +3154,10 @@
 % (erste) Leerzeile geschrieben. 
 %    \begin{macrocode}
   \@tempswafalse%
-  \loop\unless\ifeof\tud@tut@read%
-    \readline\tud@tut@read to\tud@tut@line%
+  \loop\unless\ifeof\tud@read%
+    \readline\tud@read to\tud@tut@line%
     \ifx\tud@tut@line\@empty%
-      \ifeof\tud@tut@read\@tempswafalse\fi%
+      \ifeof\tud@read\@tempswafalse\fi%
     \else%
       \@tempswatrue%
     \fi%
@@ -3039,7 +3174,7 @@
 %    \begin{macrocode}
     \ifx\tud@tut@line\@empty\@tempswafalse\fi%
   \repeat%
-  \closein\tud@tut@read%
+  \closein\tud@read%
   \endgroup%
 }
 %    \end{macrocode}
@@ -3047,13 +3182,11 @@
 % Derivaten~-- angegeben Inhalt wird beim Beenden dieser in die Hilfsdatei
 % \cs{jobname-temp.tex} zwischengespeichert. Mit dem Befehl \cs{tud@tut@append}
 % wird der Inhalt dieser Datei ausgelesen und den zusätzlichen Hilfsdateien
-% \cs{jobname-preamble-temp.tex} und \cs{jobname-trunk-temp.tex} angehangen und
-% damit gesichert, um Quelltextauszüge aus dem Tutorial für die Präambel sowie
-% den Dokumentteil trennen beziehungsweise sortieren zu können.
+% \cs{jobname-preamble-temp.tex} beziehungsweise  \cs{jobname-trunk-temp.tex} 
+% angehangen und damit gesichert, um Quelltextauszüge aus dem Tutorial für die
+% Präambel sowie den Dokumentteil trennen beziehungsweise sortieren zu können.
 %    \begin{macrocode}
-\newcommand*\tud@tut@append[1]{%
-  \tud@tut@write{\jobname-temp.tex}{\@nameuse{tud@tut@write@#1}}%
-}
+\newcommand*\tud@tut@append[1]{\tud@tut@readtostream{\jobname-temp.tex}{#1}}
 %    \end{macrocode}
 % Das Makro \cs{tud@tut@collect} fügt alle Quelltexte des Tutorials, welche 
 % nach Präambel und Dokumentteil sortiert wurden, in einer Datei zusammen. 
@@ -3062,15 +3195,16 @@
 % eines Release kopiert.
 %    \begin{macrocode}
 \newcommand*\tud@tut@collect{%
-  \immediate\openout\tud@tut@write@trunk\jobname-example-temp.tex\relax%
-  \tud@tut@write{\jobname-preamble-temp.tex}{\tud@tut@write@trunk}%
-  \tud@tut@write{\jobname-trunk-temp.tex}{\tud@tut@write@trunk}%
-  \immediate\closeout\tud@tut@write@trunk
+  \immediate\openout\tud@write@ii\jobname-example-temp.tex\relax%
+  \tud@tut@readtostream{\jobname-preamble-temp.tex}{\tud@write@ii}%
+  \tud@tut@readtostream{\jobname-trunk-temp.tex}{\tud@write@ii}%
+  \immediate\closeout\tud@write@ii
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@tut@collect
 % \end{macro}^^A \tud@tut@append
-% \end{macro}^^A \tud@tut@write
+% \end{macro}^^A \tud@tut@line
+% \end{macro}^^A \tud@tut@readtostream
 %
 % \iffalse
 %</package>
@@ -3220,93 +3354,6 @@
 % \iffalse
 %</class>
 %</body>
-%<*xindy>
-% \fi
-%
-% \subsection{Die xindy-Stildatei \pkg{tudscrman.xdy}}
-%
-% \changes{v2.02}{2014/07/25}{Erstellung via \pkg{docstrip}}%^^A
-%
-% Für die Erstellung der Indizes wird zum Sortieren das Programm \pkg{xindy} 
-% genutzt. Für dieses wird eine eigene Stildatei verwendet, welche hier kurz
-% beschrieben wird.
-%
-% Als erstes wird Standard-\LaTeX-Modul geladen.
-%    \begin{macrocode}
-(require "texindy.xdy")
-%    \end{macrocode}
-% Dies sind kleine Überbleibsel. Leider lässt sich für die Bereiche (noch) kein 
-% Markup für angehängte \enquote{f.} sowie \enquote{ff.} einstellen. Deshalb
-% würden diese auch bei kursiven oder fetten Seitenzahlen in normaler Schrift
-% erscheinen, weshalb auf die Auszeichnung folgender Seiten verzichtet wird.
-%    \begin{macrocode}
-;;; (require "ff-ranges.xdy")
-;;; kein Markup der "f" via :attr umsetzbar
-%    \end{macrocode}
-% Seitenbereiche werden sofort zusammengefasst. Als Trennzeichen wird ein
-% Halbgeviertstrich verwendet.
-%    \begin{macrocode}
-(define-location-class "arabic-page-numbers"
-  ("arabic-numbers") :min-range-length 1)
-(markup-range :sep "--")
-%    \end{macrocode}
-% Argumente in eckigen Klammern werden ignoriert.
-%    \begin{macrocode}
-(merge-rule "\[(.*)\]" "" :eregexp)
-%    \end{macrocode}
-% Innerhalb ausgewählter Auszeichnungs- und Textbefehle sollten die Befehle
-% selbst, nicht jedoch die Argumente verworfen werden. Leider werden die 
-% manuell erstellten RegExp-Regeln durch \texttt{texindy} zu spät genutzt 
-% (\url{http://sourceforge.net/p/xindy/bugs/22/}).
-%    \begin{macrocode}
-;;; (merge-rule "\\hyperindex\{(.*)\}\{(.*)\}" "/2" :eregexp)
-;;; (merge-rule "\\hologo\{(.*)\}" "/1" :eregexp)
-;;; (merge-rule "\\texttt\{(.*)\}" "/1" :eregexp)
-;;; (merge-rule "\\textsbn\{(.*)\}" "/1" :eregexp)
-;;; (merge-rule "\\textsbs\{(.*)\}" "/1" :eregexp)
-%    \end{macrocode}
-% Es werden die Attribute \emph{declare} mit der Abkürzung \emph{!} sowie
-% \emph{important} mit der Abkürzung \emph{?} und \emph{default} definiert, 
-% welche hierarchisch gleichgestellt sind.
-%    \begin{macrocode}
-(define-attributes (("declare" "!" "important" "?" "default")))
-%    \end{macrocode}
-% Eine Alternative wäre, diese in der Hierarchie zu unterscheiden, allerdings
-% war eine Bildung von zufriedenstellenden Seitenbereichen dabei nicht möglich
-% und wurde deshalb verworfen.
-%    \begin{macrocode}
-;;; (markup-attribute-group-list :sep ", ")
-;;; (define-attributes (("declare" "!") ("important" "?") ("default")))
-%    \end{macrocode}
-% Einträge, die als wichtig deklariert wurden, können auch für normale zur 
-% Bereichsbildung verwendet werden.
-%    \begin{macrocode}
-(merge-to "important" "default")
-(merge-to "?" "default")
-%    \end{macrocode}
-% Hier erfolgt die Definition der Auszeichnugen der Attribute. Deklarationen 
-% werden fett gedruckt, wichtige Einträge erscheinen kursiv. Außerdem wird ein
-% entsprechnder Link auf die Seite eingefügt.
-%    \begin{macrocode}
-(markup-locref :open "\textbf{\hyperpage{" :close "}}" :attr "declare")
-(markup-locref :open "\textbf{\hyperpage{" :close "}}" :attr "!")
-(markup-locref :open "\textsl{\hyperpage{" :close "}}" :attr "important")
-(markup-locref :open "\textsl{\hyperpage{" :close "}}" :attr "?")
-(markup-locref :open "\hyperpage{" :close "}" :attr "default")
-%    \end{macrocode}
-% Punkte zwischen Eintrag und Seitenzahl.
-%    \begin{macrocode}
-(markup-locclass-list :open "\,\dotfill\,")
-%    \end{macrocode}
-% Dieser Querverweistyp wird speziell im allgemeinen Index verwendet, um auf 
-% einen Spezialindex zu verweisen.
-%    \begin{macrocode}
-(define-crossref-class "seeidx")
-(markup-crossref-list :class "seeidx" :open "\seeidx{" :sep "; " :close "}{}")
-%    \end{macrocode}
-%
-% \iffalse
-%</xindy>
 % \fi
 %
 % \Finale
