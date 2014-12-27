@@ -1,0 +1,340 @@
+%% 
+%% This is file `euler.sty',
+%% generated with the docstrip utility.
+%% 
+%% The original source files were:
+%% 
+%% euler.dtx  (with options: `package')
+
+%% File `euler.dtx'.
+%% Copyright (C) 1992 Frank Jensen.  All rights reserved.
+%% Copyright (C) 1993--1995 Frank Jensen and Frank Mittelbach.
+%% All rights reserved.
+
+\def\fileversion{v1.10}
+\def\filedate{2010/08/25}
+
+%% \CharacterTable
+%%  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
+%%   Lower-case    \a\b\c\d\e\f\g\h\i\j\k\l\m\n\o\p\q\r\s\t\u\v\w\x\y\z
+%%   Digits        \0\1\2\3\4\5\6\7\8\9
+%%   Exclamation   \!     Double quote  \"     Hash (number) \#
+%%   Dollar        \$     Percent       \%     Ampersand     \&
+%%   Acute accent  \'     Left paren    \(     Right paren   \)
+%%   Asterisk      \*     Plus          \+     Comma         \,
+%%   Minus         \-     Point         \.     Solidus       \/
+%%   Colon         \:     Semicolon     \;     Less than     \<
+%%   Equals        \=     Greater than  \>     Question mark \?
+%%   Commercial at \@     Left bracket  \[     Backslash     \\
+%%   Right bracket \]     Circumflex    \^     Underscore    \_
+%%   Grave accent  \`     Left brace    \{     Vertical bar  \|
+%%   Right brace   \}     Tilde         \~}
+\NeedsTeXFormat{LaTeX2e}[1994/12/01]
+\ProvidesPackage{tudfonts}[\filedate\space\fileversion\space Univers and DIN
+bold for TU Dresden(ts)]
+
+\let\auskommentiert\iffalse
+
+
+\newif\if@tudfonts@eulermath\@tudfonts@eulermathtrue
+\DeclareOption{noeulermath}{\@tudfonts@eulermathfalse}
+
+\newif\if@tudfonts@nodin\@tudfonts@nodinfalse
+\DeclareOption{noDIN}{\@tudfonts@nodintrue}
+
+\newif\if@tudfonts@sansmath\@tudfonts@sansmathtrue
+\DeclareOption{serifmath}{
+  \@tudfonts@sansmathfalse
+  \@tudfonts@eulermathfalse
+}
+
+\newif\if@tudfonts@heavyfont\@tudfonts@heavyfontfalse
+\DeclareOption{heavyfont}{\@tudfonts@heavyfonttrue}
+
+\ProcessOptions\relax
+
+\def\@if@tudfonts@din#1{%
+  \if@tudfonts@nodin
+    \PackageError{tudfonts}
+    {DIN fonts disabled. Unable to expand \string#1 .}%
+    \expandafter\@gobble
+  \fi
+}
+
+% Fontmaps laden
+\RequirePackage{ifpdf}
+\ifpdf% pdfTEX is running in pdf mode 
+  \@ifundefined{pdfmapfile}{}{%
+    \pdfmapfile{+univers.map}%
+    \if@tudfonts@nodin\else
+      \pdfmapfile{+dinbold.map}%
+    \fi
+  }
+\else% TEX or pdfTEX in dvi mode 
+\fi
+
+% Load packages
+\RequirePackage{amsfonts}
+\RequirePackage{amsmath}
+\RequirePackage{lmodern}
+\if@tudfonts@eulermath
+% Hier gibt es einiges zu korrigieren (wg. lmodern)
+  \providecommand\TextOldstyle{\usefont{OML}{lmm}\f@series{it}}
+  \RequirePackage{euler}
+
+  \DeclareSymbolFont{cmmigroup}{OML}{lmm}{m}{it}
+  \SetSymbolFont{cmmigroup}{bold}{OML}{lmm}{b}{it}
+%  \tracingall
+%  \@ifundefined{cm@equals@alphabet}{%
+%    \DeclareMathAlphabet\cm@equals@alphabet{OT1}{lmr}{m}{n}%
+%  }{
+  \makeatletter
+  \SetMathAlphabet\cm@equals@alphabet{normal}{OT1}{lmr}{m}{n}%}%
+  \SetMathAlphabet\cm@minus@alphabet{normal}{OMS}{lmsy}{m}{n}%}
+  %\@ifundefined{cm@minus@alphabet}{%
+    %\DeclareMathAlphabet\cm@minus@alphabet{OMS}{lmsy}{m}{n}%
+  %}{
+\fi
+\RequirePackage{calc}
+
+% DeclareMathSizes
+\newcommand\DeclareTudMathSizes[4]{%
+  \edef\@tempa{\noexpand\DeclareMathSizes{#1}}%
+  \setlength\@tempdima{#2pt*\tudmathsizefactor}%
+  \expandafter\edef\expandafter\@tempa\expandafter{%
+    \expandafter\noexpand\@tempa{\strip@pt\@tempdima}%
+  }%
+  \setlength\@tempdima{#3pt*\tudmathsizefactor}%
+  \expandafter\edef\expandafter\@tempa\expandafter{%
+    \expandafter\noexpand\@tempa{\strip@pt\@tempdima}%
+  }%
+  \setlength\@tempdima{#4pt*\tudmathsizefactor}%
+  \expandafter\edef\expandafter\@tempa\expandafter{%
+    \expandafter\noexpand\@tempa{\strip@pt\@tempdima}%
+  }%
+  \@tempa
+}
+\if@tudfonts@sansmath
+\newcommand\tudmathsizefactor{1}
+\def\mathfamilydefault{\sfdefault}
+\else
+\newcommand\tudmathsizefactor{7/6}
+\fi
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Schriftart für Text
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\renewcommand*{\familydefault}{\sfdefault}
+\if@tudfonts@heavyfont
+   \newcommand*\tudfont@series{m}
+\else
+   \newcommand*\tudfont@series{l}
+\fi
+\let\seriesdefault\tudfont@series
+\renewcommand*{\shapedefault}{n}
+\renewcommand*{\sfdefault}{aun}
+\renewcommand*{\ttdefault}{aun}
+%\renewcommand*{\rmdefault}{aun}% Required for package: url
+\normalfont
+
+% Definitionen der Originalfontnamen
+\newcommand\tudfonts@deffont[2]{%
+  \expandafter\newcommand\csname #1\endcsname{#2}%
+}
+\tudfonts@deffont{Univers CE 75 Black}{\fontfamily{aub}\fontseries{m}\normalshape}
+\tudfonts@deffont{Univers CE 75 Black Oblique}{\fontfamily{aub}\fontseries{m}\slshape}
+\tudfonts@deffont{Univers CE 60}{\fontfamily{aun}\fontseries{b}\normalshape}
+\tudfonts@deffont{Univers CE 60 Oblique}{\fontfamily{aun}\fontseries{b}\slshape}
+\tudfonts@deffont{Univers CE 45 Light}{\fontfamily{aun}\fontseries{l}\normalshape}
+\tudfonts@deffont{Univers CE 45 Light Oblique}{\fontfamily{aun}\fontseries{l}\slshape}
+\tudfonts@deffont{Univers CE 55}{\fontfamily{aun}\fontseries{m}\normalshape}
+\tudfonts@deffont{Univers CE 55 Oblique}{\fontfamily{aun}\fontseries{m}\slshape}
+\tudfonts@deffont{Din Bold}{\@if@tudfonts@din{\tudfont{Din Bold}}{\dinfamily}}
+\newcommand\tudfont[1]{\csname #1\endcsname}
+
+\newcommand*{\tudfamily}{\fontfamily{aun}\fontseries{\tudfont@series}\selectfont}
+\newcommand*{\dinfamily}{\@if@tudfonts@din\dinfamily{\fontfamily{din}\fontseries{b}\selectfont}}
+\newcommand*{\dinBold}{\@if@tudfonts@din\dinBold{\dinfamily}}
+
+% \textbullet aus Encoding TS1 für korrekte horizontale Ausrichtung.
+% Encoding TS1 bereits durch fix-cm.sty verfügbar.
+\DeclareTextSymbolDefault{\textbullet}{TS1}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Schriftart für Mathematisches
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\if@tudfonts@sansmath
+% Serifenlose Schrift für Variablen und anderes.
+% Für Operatoren kann direkt die Schriftart geändert werden, da hier das
+% OT1-Encoding verwendet wird. Dies entspricht der Vorgehensweise in
+% den Paketen sfmath.sty und mathptmx.sty.
+
+% Für Buchstaben u.ä. ist aber die Kodierung OML vorgegeben, die nicht
+% für Univers existiert. Man muss also die Buchstaben/Symbole einzeln
+% ändern. (Siehe auch sfmath.sty) Hier wird ein Auszug aus tudbook.cls
+% von Klaus Bergmann wiederverwendet.
+
+  \if@tudfonts@heavyfont
+    \SetSymbolFont{operators}{normal}{OT1}{aun}{m}{n}
+    \DeclareSymbolFont{aunUpright}{T1}{aun}{m}{n}
+    \DeclareSymbolFont{aunLetters}{T1}{aun}{m}{sl}
+  \else 
+    \SetSymbolFont{operators}{normal}{OT1}{aun}{l}{n}
+    \DeclareSymbolFont{aunUpright}{T1}{aun}{l}{n}
+    \DeclareSymbolFont{aunLetters}{T1}{aun}{l}{sl}
+  \fi
+  \SetSymbolFont{operators}{bold}{OT1}{aun}{b}{n}
+  \SetSymbolFont{aunUpright}{bold}{T1}{aun}{b}{n}
+  \SetSymbolFont{aunLetters}{bold}{T1}{aun}{b}{sl}  
+
+
+
+    \DeclareMathSymbol{0}{\mathalpha}{aunUpright}{`0}
+    \DeclareMathSymbol{1}{\mathalpha}{aunUpright}{`1}
+    \DeclareMathSymbol{2}{\mathalpha}{aunUpright}{`2}
+    \DeclareMathSymbol{3}{\mathalpha}{aunUpright}{`3}
+    \DeclareMathSymbol{4}{\mathalpha}{aunUpright}{`4}
+    \DeclareMathSymbol{5}{\mathalpha}{aunUpright}{`5}
+    \DeclareMathSymbol{6}{\mathalpha}{aunUpright}{`6}
+    \DeclareMathSymbol{7}{\mathalpha}{aunUpright}{`7}
+    \DeclareMathSymbol{8}{\mathalpha}{aunUpright}{`8}
+    \DeclareMathSymbol{9}{\mathalpha}{aunUpright}{`9}
+
+    \DeclareMathSymbol{a}{\mathalpha}{aunLetters}{`a}
+    \DeclareMathSymbol{b}{\mathalpha}{aunLetters}{`b}
+    \DeclareMathSymbol{c}{\mathalpha}{aunLetters}{`c}
+    \DeclareMathSymbol{d}{\mathalpha}{aunLetters}{`d}
+    \DeclareMathSymbol{e}{\mathalpha}{aunLetters}{`e}
+    \DeclareMathSymbol{f}{\mathalpha}{aunLetters}{`f}
+    \DeclareMathSymbol{g}{\mathalpha}{aunLetters}{`g}
+    \DeclareMathSymbol{h}{\mathalpha}{aunLetters}{`h}
+    \DeclareMathSymbol{i}{\mathalpha}{aunLetters}{`i}
+    \DeclareMathSymbol{j}{\mathalpha}{aunLetters}{`j}
+    \DeclareMathSymbol{k}{\mathalpha}{aunLetters}{`k}
+    \DeclareMathSymbol{l}{\mathalpha}{aunLetters}{`l}
+    \DeclareMathSymbol{m}{\mathalpha}{aunLetters}{`m}
+    \DeclareMathSymbol{n}{\mathalpha}{aunLetters}{`n}
+    \DeclareMathSymbol{o}{\mathalpha}{aunLetters}{`o}
+    \DeclareMathSymbol{p}{\mathalpha}{aunLetters}{`p}
+    \DeclareMathSymbol{q}{\mathalpha}{aunLetters}{`q}
+    \DeclareMathSymbol{r}{\mathalpha}{aunLetters}{`r}
+    \DeclareMathSymbol{s}{\mathalpha}{aunLetters}{`s}
+    \DeclareMathSymbol{t}{\mathalpha}{aunLetters}{`t}
+    \DeclareMathSymbol{u}{\mathalpha}{aunLetters}{`u}
+    \DeclareMathSymbol{v}{\mathalpha}{aunLetters}{`v}
+    \DeclareMathSymbol{w}{\mathalpha}{aunLetters}{`w}
+    \DeclareMathSymbol{x}{\mathalpha}{aunLetters}{`x}
+    \DeclareMathSymbol{y}{\mathalpha}{aunLetters}{`y}
+    \DeclareMathSymbol{z}{\mathalpha}{aunLetters}{`z}
+    \DeclareMathSymbol{A}{\mathalpha}{aunLetters}{`A}
+    \DeclareMathSymbol{B}{\mathalpha}{aunLetters}{`B}
+    \DeclareMathSymbol{C}{\mathalpha}{aunLetters}{`C}
+    \DeclareMathSymbol{D}{\mathalpha}{aunLetters}{`D}
+    \DeclareMathSymbol{E}{\mathalpha}{aunLetters}{`E}
+    \DeclareMathSymbol{F}{\mathalpha}{aunLetters}{`F}
+    \DeclareMathSymbol{G}{\mathalpha}{aunLetters}{`G}
+    \DeclareMathSymbol{H}{\mathalpha}{aunLetters}{`H}
+    \DeclareMathSymbol{I}{\mathalpha}{aunLetters}{`I}
+    \DeclareMathSymbol{J}{\mathalpha}{aunLetters}{`J}
+    \DeclareMathSymbol{K}{\mathalpha}{aunLetters}{`K}
+    \DeclareMathSymbol{L}{\mathalpha}{aunLetters}{`L}
+    \DeclareMathSymbol{M}{\mathalpha}{aunLetters}{`M}
+    \DeclareMathSymbol{N}{\mathalpha}{aunLetters}{`N}
+    \DeclareMathSymbol{O}{\mathalpha}{aunLetters}{`O}
+    \DeclareMathSymbol{P}{\mathalpha}{aunLetters}{`P}
+    \DeclareMathSymbol{Q}{\mathalpha}{aunLetters}{`Q}
+    \DeclareMathSymbol{R}{\mathalpha}{aunLetters}{`R}
+    \DeclareMathSymbol{S}{\mathalpha}{aunLetters}{`S}
+    \DeclareMathSymbol{T}{\mathalpha}{aunLetters}{`T}
+    \DeclareMathSymbol{U}{\mathalpha}{aunLetters}{`U}
+    \DeclareMathSymbol{V}{\mathalpha}{aunLetters}{`V}
+    \DeclareMathSymbol{W}{\mathalpha}{aunLetters}{`W}
+    \DeclareMathSymbol{X}{\mathalpha}{aunLetters}{`X}
+    \DeclareMathSymbol{Y}{\mathalpha}{aunLetters}{`Y}
+    \DeclareMathSymbol{Z}{\mathalpha}{aunLetters}{`Z}
+
+    \DeclareMathSymbol{,}{\mathpunct}{aunLetters}{`,}
+    \DeclareMathSymbol{.}{\mathord}{aunLetters}{`.}
+    \DeclareMathSymbol{/}{\mathord}{aunLetters}{`/}
+
+    \DeclareSymbolFontAlphabet{\mathsf}{operators}%MZ: angepasst
+    \DeclareSymbolFontAlphabet{\mathnormal}{aunLetters}
+    \SetMathAlphabet\mathbf{normal}{T1}{aun}{b}{n}
+    \SetMathAlphabet\mathbf{bold}{T1}{aun}{b}{n}
+%    \tracingall
+    \if@tudfonts@heavyfont
+      \DeclareMathAlphabet\mathit{T1}{aun}{m}{sl}
+      \SetMathAlphabet\mathit{bold}{T1}{aun}{m}{sl}
+    \else
+      \DeclareMathAlphabet\mathit{T1}{aun}{l}{sl}
+      \SetMathAlphabet\mathit{bold}{T1}{aun}{l}{sl}
+    \fi
+
+    \if@tudfonts@eulermath
+    \else
+    \DeclareMathSymbol\Gamma  \mathord{letters}{"00}
+    \DeclareMathSymbol\Delta  \mathord{letters}{"01}
+    \DeclareMathSymbol\Theta  \mathord{letters}{"02}
+    \DeclareMathSymbol\Lambda \mathord{letters}{"03}
+    \DeclareMathSymbol\Xi     \mathord{letters}{"04}
+    \DeclareMathSymbol\Pi     \mathord{letters}{"05}
+    \DeclareMathSymbol\Sigma  \mathord{letters}{"06}
+    \DeclareMathSymbol\Upsilon\mathord{letters}{"07}
+    \DeclareMathSymbol\Phi    \mathord{letters}{"08}
+    \DeclareMathSymbol\Psi    \mathord{letters}{"09}
+    \DeclareMathSymbol\Omega  \mathord{letters}{"0A}    
+    \fi
+
+    \let\operator@font\sffamily
+% Ende des Auszugs    
+\fi
+
+% Korrekte Symbolgrößen
+\DeclareFontFamily{OMX}{lmex}{}
+\DeclareFontShape{OMX}{lmex}{m}{n}{%
+  <->lmex10%
+}{}
+\if@tudfonts@eulermath
+\else
+\DeclareSymbolFont{largesymbols}{OMX}{lmex}{m}{n}%
+\fi
+
+\AtBeginDocument{%
+  \newdimen\big@size
+  \addto@hook\every@math@size{\setbox\z@\vbox{\hbox{$($}\kern\z@}%
+    \global\big@size 1.2\ht\z@}%
+  \def\bBigg@#1#2{%
+    {\hbox{$\left#2\vcenter to#1\big@size{}\right.\n@space$}}}%
+  \def\big{\bBigg@\@ne}%
+  \def\Big{\bBigg@{1.5}}%
+  \def\bigg{\bBigg@\tw@}%
+  \def\Bigg{\bBigg@{2.5}}%
+}
+
+
+\iffalse
+\DeclareMathSymbol{!}\mathord  {EulerFraktur}{"21}
+\DeclareMathSymbol{(}\mathopen {EulerFraktur}{"28}
+\DeclareMathSymbol{)}\mathclose{EulerFraktur}{"29}
+\DeclareMathSymbol{+}\mathbin  {EulerFraktur}{"2B}
+\DeclareMathSymbol{-}\mathbin  {EulerFraktur}{"2D}
+\DeclareMathSymbol{=}\mathrel  {EulerFraktur}{"3D}
+\DeclareMathSymbol{[}\mathopen {EulerFraktur}{"5B}
+\DeclareMathSymbol{]}\mathclose{EulerFraktur}{"5D}
+\DeclareMathSymbol{"}\mathord  {EulerFraktur}{"7D}
+\DeclareMathSymbol{&}\mathord  {EulerFraktur}{"26}
+\DeclareMathSymbol{:}\mathrel  {EulerFraktur}{"3A}
+\DeclareMathSymbol{;}\mathpunct{EulerFraktur}{"3B}
+\DeclareMathSymbol{?}\mathord  {EulerFraktur}{"3F}
+\DeclareMathSymbol{^}\mathord  {EulerFraktur}{"5E}
+\DeclareMathSymbol{`}\mathord  {EulerFraktur}{"12}
+\DeclareMathDelimiter{(}{EulerFraktur}{"28}{largesymbols}{"00}
+\DeclareMathDelimiter{)}{EulerFraktur}{"29}{largesymbols}{"01}
+\DeclareMathDelimiter{[}{EulerFraktur}{"5B}{largesymbols}{"02}
+\DeclareMathDelimiter{]}{EulerFraktur}{"5D}{largesymbols}{"03}
+\fi
+
+\endinput
+%% 
+%% End of file `tudfonts.sty'.
