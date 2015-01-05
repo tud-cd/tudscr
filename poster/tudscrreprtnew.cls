@@ -70,7 +70,7 @@
       \fi%
     }%
   \fi%
-  \@TUDVersion{2014/12/17 v2.02 TUD-KOMA-Script}%
+  \@TUDVersion{2015/01/05 v2.03-alpha TUD-KOMA-Script}%
 \endgroup%
 \providecommand*\tudscrmail{tudscr@gmail.com}
 \newcommand*\cls@name{report}
@@ -78,7 +78,7 @@
 \newcommand*\tudcls@name{tudscrreprt}
 \NeedsTeXFormat{LaTeX2e}[2011/06/27]
 \ProvidesClass{\tudcls@name}[%
-  2014/12/17 v2.02 TUD-KOMA-Script
+  2015/01/05 v2.03-alpha TUD-KOMA-Script
   document class (\cls@name)%
 ]
 \typeout{The Corporate Design of Technische Universitaet Dresden}
@@ -1797,7 +1797,8 @@
     \DeclareNewLayer[%
       background,head,align=tl,%
       voffset=\dimexpr\tud@dim@headheight+\tud@dim@line\relax,%
-      {contents=\tud@head@text@box},%ToDo
+      %ToDo: Schriftfarbe für Balken ggf. nur in erster Zeile anpassen
+      contents={\tud@head@text@box},%
     ]{tudheadings.head.text}%
     \DeclareNewLayer[%
       background,foot,%
@@ -2125,6 +2126,7 @@
 \newlength{\tud@ta@topmargin}
 \newlength{\tud@ta@headheight}
 \newlength{\tud@ta@headsep}
+\newlength{\tud@ta@footheight}
 \newlength{\tud@ta@footskip}
 \newlength{\tud@ta@headdiff}
 \newcommand*\tud@geometry@restore{}
@@ -2133,6 +2135,11 @@
   \setlength{\tud@ta@topmargin}{\topmargin}%
   \setlength{\tud@ta@headheight}{\headheight}%
   \setlength{\tud@ta@headsep}{\headsep}%
+  \scr@ifundefinedorrelax{ta@fh}{%
+    \setlength{\tud@ta@footheight}{\footheight}%
+  }{%
+    \setlength{\tud@ta@footheight}{\ta@fh}%
+  }%
   \setlength{\tud@ta@footskip}{\footskip}%
   \let\tud@geometry@restore\Gm@restore@org%
   \if@atdocument%
@@ -2179,17 +2186,28 @@
       footskip=\tud@ta@footskip,%
     }%
     \def\tud@geometry@dmargin{%
-      textheight=\dimexpr%
-        \tud@ta@textheight-\tud@ta@headdiff-\tud@dim@ddcdiff\relax,%
+      textheight=\dimexpr\tud@ta@textheight-\tud@ta@headdiff-\tud@dim@ddcdiff\relax,%
       footskip=\dimexpr\tud@ta@footskip+\tud@dim@ddcdiff\relax,%
     }%
+%    
+%      textheight=\dimexpr%
+%\tud@ta@textheight-\tud@ta@headdiff-\tud@dim@ddcdiff-\tud@ta@footheight\relax,%
+%footskip=\dimexpr\tud@ta@footskip+\tud@ta@footheight+\tud@dim@ddcdiff\relax,%
+%    
     \setlength{\tud@ta@headdiff}{\dimexpr%
       \tud@dim@headheight+\tud@dim@barheight+\tud@dim@headsep%
       -\tud@ta@topmargin-\tud@ta@headheight-\tud@ta@headsep-1in\relax%
     }%
+    % ToDo: Algorithmus noch sinnvoll für vergrößerung der Seite?
+    %       verbleibender Seitenrand sollte footsep entsprechen
     \setlength{\tud@dim@ddcdiff}{\dimexpr%
       \tud@dim@ddcfoot-\tud@ta@footskip+\tud@dim@footskip\relax%
     }%
+    \typeout{+++++ \the\tud@dim@ddcdiff}
+    \setlength{\tud@dim@ddcdiff}{20pt}%
+    % ToDo §§§ s darüber: Längenberechnung unabhängig von ta@footskip
+    % footskip ist (quasi) konstant in typearea, nur footheight sollte sich 
+    % ändern; dim@ddcdiff abhängig vom Platz nach unten!
     \ifdim\tud@ta@headdiff<\z@\relax%
       \addtolength{\tud@dim@headsep}{-\tud@ta@headdiff}%
     \fi%
@@ -2198,6 +2216,7 @@
       \def\tud@geometry@hmargin{%
         left=\tud@dim@left,%
         textwidth=\dimexpr\paperwidth-\tud@dim@both-\ta@bcor\relax,%
+        marginpar=\dimexpr\tud@dim@right-2\marginparsep\relax,%
         bindingoffset=\ta@bcor,%
         \if@twoside asymmetric,\fi%
       }%
@@ -2205,6 +2224,7 @@
       \def\tud@geometry@hmargin{%
         left=.5\tud@dim@both,%
         textwidth=\dimexpr\paperwidth-\tud@dim@both-\ta@bcor\relax,%
+        marginpar=\dimexpr\tud@dim@right-2\marginparsep\relax,%
         bindingoffset=\ta@bcor,%
       }%
     \or%
@@ -2216,6 +2236,7 @@
           left=.5\tud@dim@both,%
         \fi%
         textwidth=\dimexpr\paperwidth-\tud@dim@both-\ta@bcor\relax,%
+        marginpar=\dimexpr\tud@dim@right-2\marginparsep\relax,%
         bindingoffset=\ta@bcor,%
       }%
     \fi%
@@ -2234,17 +2255,18 @@
       headheight=\dimexpr\tud@dim@headheight+\tud@dim@barheight-\tud@dim@logoy\relax,%
       headsep=\tud@dim@headsep,%
       bottom=\tud@dim@bottom,%
-      footskip=\tud@dim@footskip,%
+%      footskip=\tud@dim@footskip,%
+      footskip=\dimexpr\tud@dim@footskip+\tud@ta@footheight\relax%
     }%
     \def\tud@geometry@dmargin{%
       \if@fincl%
         bottom=\dimexpr%
           \tud@dim@bottom+\tud@dim@ddcfoot+\tud@dim@footskip\relax,%
       \else%
-        bottom=\dimexpr%
-          \tud@dim@bottom+\tud@dim@ddcfoot\relax,%
+        bottom=\dimexpr\tud@dim@bottom+\tud@dim@ddcfoot\relax,%
       \fi%
-      footskip=\dimexpr\tud@dim@footskip+\tud@dim@ddcfoot\relax,%
+%      footskip=\dimexpr\tud@dim@footskip+\tud@dim@ddcfoot\relax,%
+      footskip=\dimexpr\tud@dim@footskip+\tud@ta@footheight%+\tud@dim@ddcfoot\relax%
     }%
     \setlength{\tud@ta@headdiff}{\dimexpr%
       \tud@dim@headheight+\tud@dim@barheight+\tud@dim@headsep%
@@ -2319,8 +2341,10 @@
   }{}%
 }
 \newcommand*\tud@currentpagestyle@reset{%
-  \expandafter\pagestyle\expandafter{\tud@currentpagestyle}%
-  \let\tud@currentpagestyle\relax%
+  \ifdefvoid{\tud@currentpagestyle}{}{%
+    \expandafter\pagestyle\expandafter{\tud@currentpagestyle}%
+    \let\tud@currentpagestyle\relax%
+  }%
 }
 \NewEnviron{tudpage}[1][]{%
   \tud@currentpagestyle@set%
