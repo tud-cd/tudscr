@@ -30,6 +30,7 @@ pdflatex "\def\tudfinalflag{}\input{tudscrsource.tex}"
 makeindex -s gglo.ist -o tudscrsource.gls tudscrsource.glo
 makeindex -s gind.ist -o tudscrsource.ind tudscrsource.idx
 pdflatex "\def\tudfinalflag{}\input{tudscrsource.tex}"
+pdflatex "\def\tudfinalflag{}\input{tudscrsource.tex}"
 move  *.dtx            source\latex\tudscr\
 move  tudscr.ins       source\latex\tudscr\
 move  tudscrsource.tex source\latex\tudscr\
@@ -48,6 +49,7 @@ pdflatex "\def\tudfinalflag{}\input{tudscr.tex}"
 pdflatex "\def\tudfinalflag{}\input{tudscr.tex}"
 pdflatex "\def\tudfinalflag{}\input{tudscr.tex}"
 pdflatex -shell-escape "\def\tudfinalflag{}\input{tudscr.tex}"
+pdflatex "\def\tudfinalflag{}\input{tudscr.tex}"
 pdflatex "\def\tudfinalflag{}\def\tudprintflag{}\input{tudscr.tex}"
 copy tudscr.pdf tudscr_print.pdf
 pdflatex "\def\tudfinalflag{}\input{tudscr.tex}"
