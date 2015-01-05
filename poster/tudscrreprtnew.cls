@@ -104,8 +104,8 @@
 ]{tudscrfonts}
 \newif\if@tud@univers
 \newif\if@tud@dinbold
-\newcommand*\tud@univers{mun}
-\newcommand*\tud@dinbold{016}
+\newcommand*\tud@univers{lun}
+\newcommand*\tud@dinbold{0m6}
 \newcommand*\tud@mathenc{OT1}
 \newif\if@tud@fontspec
 \TUD@key@lock{fontspec}[true]{%
@@ -1753,21 +1753,22 @@
     \oddsidemargin=0pt%
     \evensidemargin=0pt%
     \topskip=0pt%
-    \textheight=\dimexpr\maxdimen%
+    \textheight=\maxdimen%
   }{}%
 }
 \AtEndPreamble{%
   \RequirePackage{scrlayer-scrpage}[2013/12/14]%
   \AfterPackage*{scrlayer-scrpage}{%
     \DeclareNewLayer[%
-      background,head,align=tl,%
+      background,head,align=t,%
       voffset=\tud@dim@logoy,%
       contents={%
-        \hspace*{\dimexpr\tud@dim@logox-\tud@dim@left\relax}\tud@mainlogo%
+        \hspace*{\dimexpr\tud@dim@logox-\tud@dim@left\relax}%
+        \tud@mainlogo%
       },%
     ]{tudheadings.head.mainlogo}%
     \DeclareNewLayer[%
-      background,head,align=tl,%
+      background,head,align=t,%
       voffset=\tud@dim@logoy,%
       contents={\hfill\tud@headlogo},%
     ]{tudheadings.head.logo}%
@@ -1778,9 +1779,8 @@
     ]{tudheadings.head.topline}%
     \DeclareNewLayer[%
       background,head,align=tl,%
-      voffset={%
-        \dimexpr\tud@dim@headheight+\tud@dim@barheight-.5\tud@dim@line\relax%
-      },%
+      voffset=\dimexpr%
+        \tud@dim@headheight+\tud@dim@barheight-.5\tud@dim@line\relax,%
       contents={\if@tud@widehead\else\tud@head@rule{\textwidth}\fi},%
     ]{tudheadings.head.bottomline}%
     \DeclareNewLayer[%
@@ -1790,20 +1790,19 @@
     ]{tudheadings.head.topwideline}%
     \DeclareNewLayer[%
       background,align=tl,%
-      voffset={%
-        \dimexpr\tud@dim@headheight+\tud@dim@barheight-.5\tud@dim@line\relax%
-      },%
+      voffset=\dimexpr%
+        \tud@dim@headheight+\tud@dim@barheight-.5\tud@dim@line\relax,%
       contents={\if@tud@widehead\tud@head@rule{\paperwidth}\fi},%
     ]{tudheadings.head.bottomwideline}%
     \DeclareNewLayer[%
       background,head,align=tl,%
       voffset=\dimexpr\tud@dim@headheight+\tud@dim@line\relax,%
-      {contents=\tud@head@text@box},%
+      {contents=\tud@head@text@box},%ToDo
     ]{tudheadings.head.text}%
     \DeclareNewLayer[%
       background,foot,%
       contents={%
-        \vskip\dimexpr-\tud@dim@ddcfoot-\baselineskip+\ht\strutbox%
+        \vskip\dimexpr-\tud@dim@ddcfoot-\baselineskip+\ht\strutbox\relax%
         \hfill\tud@footlogo%
       },%
     ]{tudheadings.foot.ddclogo}%
@@ -1942,7 +1941,7 @@
 \newcommand*\tud@head@font{}
 \newcommand*\tud@head@rule[1]{%
   \color{\tud@head@color}%
-  \rule[\dimexpr\ht\strutbox\relax]{#1}{\tud@dim@line}%
+  \rule[\ht\strutbox]{#1}{\tud@dim@line}%
 }
 \newcommand*\tud@head@text@add[3][, ]{%
   \def\tud@head@font{#2}%
@@ -2164,27 +2163,24 @@
       width=\textwidth,%
     }%
     \def\tud@geometry@vmargin{%
-      top={%
-        \dimexpr\tud@ta@topmargin+\tud@ta@headheight+\tud@ta@headsep+1in\relax%
-      },%
+      top=\dimexpr%
+        \tud@ta@topmargin+\tud@ta@headheight+\tud@ta@headsep+1in\relax,%
       headheight=\tud@ta@headheight,%
       headsep=\tud@ta@headsep,%
       textheight=\tud@ta@textheight,%
       footskip=\tud@ta@footskip,%
     }%
     \def\tud@geometry@pmargin{%
-      top={%
-        \dimexpr\tud@dim@headheight+\tud@dim@barheight+\tud@dim@headsep\relax%
-      },%
-      headheight=\dimexpr\tud@dim@headheight+\tud@dim@barheight\relax,%
+      top=\dimexpr%
+        \tud@dim@headheight+\tud@dim@barheight+\tud@dim@headsep\relax,%
+      headheight=\dimexpr\tud@dim@headheight+\tud@dim@barheight-\tud@dim@logoy\relax,%
       headsep=\tud@dim@headsep,%
       textheight=\dimexpr\tud@ta@textheight-\tud@ta@headdiff\relax,%
       footskip=\tud@ta@footskip,%
     }%
     \def\tud@geometry@dmargin{%
-      textheight={%
-        \dimexpr\tud@ta@textheight-\tud@ta@headdiff-\tud@dim@ddcdiff\relax%
-      },%
+      textheight=\dimexpr%
+        \tud@ta@textheight-\tud@ta@headdiff-\tud@dim@ddcdiff\relax,%
       footskip=\dimexpr\tud@ta@footskip+\tud@dim@ddcdiff\relax,%
     }%
     \setlength{\tud@ta@headdiff}{\dimexpr%
@@ -2233,10 +2229,9 @@
       \tud@geometry@fincl,%
     }%
     \def\tud@geometry@pmargin{%
-      top={%
-        \dimexpr\tud@dim@headheight+\tud@dim@barheight+\tud@dim@headsep\relax%
-      },%
-      headheight=\dimexpr\tud@dim@headheight+\tud@dim@barheight\relax,%
+      top=\dimexpr%
+        \tud@dim@headheight+\tud@dim@barheight+\tud@dim@headsep\relax,%
+      headheight=\dimexpr\tud@dim@headheight+\tud@dim@barheight-\tud@dim@logoy\relax,%
       headsep=\tud@dim@headsep,%
       bottom=\tud@dim@bottom,%
       footskip=\tud@dim@footskip,%
@@ -2246,13 +2241,14 @@
         bottom=\dimexpr%
           \tud@dim@bottom+\tud@dim@ddcfoot+\tud@dim@footskip\relax,%
       \else%
-        bottom=\dimexpr\tud@dim@bottom+\tud@dim@ddcfoot\relax,%
+        bottom=\dimexpr%
+          \tud@dim@bottom+\tud@dim@ddcfoot\relax,%
       \fi%
       footskip=\dimexpr\tud@dim@footskip+\tud@dim@ddcfoot\relax,%
     }%
-    \setlength{\tud@ta@headdiff}{%
-      \dimexpr\tud@dim@headheight+\tud@dim@barheight%
-        +\tud@dim@headsep-\tud@dim@top\relax%
+    \setlength{\tud@ta@headdiff}{\dimexpr%
+      \tud@dim@headheight+\tud@dim@barheight+\tud@dim@headsep%
+        -\tud@dim@top\relax%
     }%
     \setlength{\tud@dim@ddcdiff}{\dimexpr%
       \tud@dim@ddcfoot+2\tud@dim@footskip-\tud@dim@bottom\relax%
@@ -2596,8 +2592,8 @@
     \def\tud@color@chapterpage{HKS41!10}%
     \def\tud@color@chapterfont{HKS41}%
   \fi%
-  \vspace*{%
-    \dimexpr\tud@dim@headdiff+\tud@dim@headingsvskip-\baselineskip\relax%
+  \vspace*{\dimexpr%
+    \tud@dim@headdiff+\tud@dim@headingsvskip-\baselineskip\relax%
   }%
   \if@tud@chapterpage%
     \vspace*{\pageheadingsvskip}%
@@ -3563,7 +3559,7 @@
     \ifstr{\tud@currentgeometry}{tudareaddc}{}{%
       \tud@ddc@check%
       \ifcase \@tempb\relax\else%
-        \setlength{\@tempdimc}{\dimexpr\textheight-\tud@dim@ddcdiff}%
+        \setlength{\@tempdimc}{\dimexpr\textheight-\tud@dim@ddcdiff\relax}%
       \fi%
     }{}%
   }{}%
@@ -3624,8 +3620,8 @@
       \ifcase \tud@layout@cover\relax%
         \let\coverpagetopmargin\tud@dim@top%
       \else%
-        \def\coverpagetopmargin{%
-          \dimexpr\tud@dim@headheight+\tud@dim@barheight+\tud@dim@headsep\relax%
+        \def\coverpagetopmargin{\dimexpr%
+          \tud@dim@headheight+\tud@dim@barheight+\tud@dim@headsep\relax%
         }%
       \fi%
       \let\coverpagebottommargin\tud@dim@bottom%
