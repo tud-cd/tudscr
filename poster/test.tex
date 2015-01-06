@@ -3,9 +3,11 @@
   ngerman,
 %  titlepage,
 %  widehead,
-  ddcfoot,
-  geometry=no,
-  DIV=12,
+  ddcfoot,color=pale,
+%  geometry=no,
+  DIV=12,%twoside,
+%  headinclude,
+%  footinclude,
 %  twoside,
 %  draft,
 %%  cd=color,
@@ -20,14 +22,13 @@
 \usepackage[T1]{fontenc}
 \usepackage{babel}
 \usepackage{blindtext}
-\usepackage{showframe}
+%\usepackage{showframe}
 \usepackage{layout}
-\usepackage{tudscrcolor}
+\usepackage{tudscrcolor,twocolfix}
 \usepackage{etoolbox}
 \usepackage{scrlayer-scrpage}
 
 \begin{document}
-
 \ifcsdef{tudcls@name}{%
 \faculty{Juristische Fakultät}
 \department{Fachrichtung Strafrecht}
@@ -48,7 +49,6 @@
   background,align=tl,%
   contents={%
     \color{HKS41}%
-%    \gdef\tud@head@color{white}%
     \rule{\layerwidth}{\tud@dim@headheight}%
   },%
 ]{tudheadings.head.back}%
@@ -57,7 +57,6 @@
   voffset=\dimexpr\tud@dim@headheight-.0\tud@dim@line\relax,%
   contents={%
     \color{HKS41!80}%
-%    \rule[\dimexpr\ht\strutbox\relax]{#1}{\tud@dim@line}%
     \rule{\layerwidth}{\tud@dim@barheight}
   },%
 ]{tudheadings.head.bar}%
@@ -67,48 +66,48 @@
 
 \DeclareNewLayer[%
   background,
-  bottommargin,
   hoffset=0pt,
+  voffset=\dimexpr%
+    \topmargin+1in+\headheight+\headsep+\textheight%
+    +\footskip-\footheight\relax,%
+  height=\dimexpr\paperheight-\layeryoffset\relax,%
+  width=\paperwidth,%
   contents={%
     \color{HKS41!80}%
-    \rule{\paperwidth}{\layerheight}%
+    \rule{\layerwidth}{\layerheight}%
   },%
 ]{tudheadings.foot.back}%
-\DeclareNewLayer[%
-  background,
-  foot,
-  hoffset=0pt,
-  contents={%
-    \color{HKS41!60}%
-    \rule{\paperwidth}{\layerheight}%
-  },%
-]{tudheadings.foot.back1}%
-\DeclareNewLayer[%
-  background,
-  footskip,
-  hoffset=0pt,
-  contents={%
-    \color{HKS41!40}%
-    \rule{\paperwidth}{\layerheight}%
-  },%
-]{tudheadings.foot.back2}%
 
+\RedeclareLayer[%
+  clone=tudheadings.foot.back,%
+  hoffset=\dimexpr
+    \if@twoside\ifodd\value{page}\oddsidemargin\else\evensidemargin\fi
+    \else\oddsidemargin\fi
+    +1in
+  \relax,
+  width=\textwidth,%
+  height=\dimexpr\paperheight-\layeryoffset-1pt\relax,%
+  contents={%
+    \hfill\vbox to \layerheight{\vfil\hbox{\tud@footlogo}\vfil}%
+  },%
+]{tudheadings.foot.ddclogo}%
+
+% ToDo §§§ evtl separater Layer für Drittlogos
+%\vbox to \layerheight{\vfil\hbox{\includegraphics[height=1cm]{DDC-07}}\vfil}
 
 
 \ifcsdef{tudcls@name}{%
 \DeclareNewPageStyleByLayers{color.tudheadings}{%
-  tudheadings.head.back,%
-  tudheadings.head.bar,%
+  tudheadings.head.back,%§§§
+  tudheadings.head.bar,%§§§
   tudheadings.head.mainlogo,%
   tudheadings.head.logo,%
 %  tudheadings.head.topline,%
 %  tudheadings.head.bottomline,%
-  tudheadings.head.topwideline,%
-  tudheadings.head.bottomwideline,%
+%  tudheadings.head.topwideline,%
+%  tudheadings.head.bottomwideline,%
   tudheadings.head.text,%
-  tudheadings.foot.back,%
-  tudheadings.foot.back1,%
-  tudheadings.foot.back2,%
+  tudheadings.foot.back,%§§§
   tudheadings.foot.ddclogo,%
   scrheadings.foot.odd,%
   scrheadings.foot.even,%
@@ -117,46 +116,102 @@
   scrheadings.foot.below.line%
 }%
 \listadd\tud@pslist{color.tudheadings}
-%\AddToLayerPageStyleOptions{color.tudheadings}{%
-%  onselect={\tud@ps@init}%
-%}%
+\AddToLayerPageStyleOptions{color.tudheadings}{%
+  onselect={\tud@ps@init},%
+  onbackground=\def\tud@head@logocolor{white},%
+}%
 
-
-\pagestyle{color.tudheadings}
-\letcs\ps@empty{ps@color.tudheadings}
 }{%
 \AddLayersToPageStyle{plain.scrheadings}{%
   tudheadings.foot.back,%
-  tudheadings.foot.back1,%
-  tudheadings.foot.back2,%
 }
-\let\ps@empty\ps@plain
+}
+\letcs\ps@empty{ps@color.tudheadings}
+
+\newcommand{\showlayout}{%
+\noindent
+%\the\footskip
+%\the\footheight
+%\the\tud@ta@footheight
+\layout*
 }
 
-%\the\tud@ta@footheight
-\the\tud@ta@footskip\layout*
+%\renewcommand*\titlepagestyle{color.tudheadings}
 
-%\the\tud@dim@footskip
-%\the\tud@ta@footheight
-%\setlength{\footskip}{\dimexpr\tud@dim@footskip+50pt-\tud@ta@footheight\relax}
-%\setlength{\footheight}{50pt}
-%\layout*
 
-\KOMAoptions{footheight=57pt}
-\recalctypearea
+\maketitle%onecolumn{\blindtext\Blindtext}
 
-%\the\tud@ta@footheight
-\the\tud@ta@footskip\layout*
+\part{title}
+\renewcommand{\chapterpagestyle}{tudheadings}
+\chapter{title}
 
-\KOMAoptions{footlines=1.25}
-\recalctypearea
+\blindtext
+\clearpage
 
-%\the\tud@ta@footheight
-\the\tud@ta@footskip\layout*
+\pagestyle{scrheadings}
+\Blindtext
 
-\TUDoptions{ddcfoot=no}
-\recalctypearea
-\the\tud@ta@footskip\layout*
+\pagestyle{color.tudheadings}
+\Blindtext
+\meaning\tud@head@logocolor
+%\clearpage
+\TUDoptions{parttitle,cd=pale}
+\meaning\tud@head@logocolor
+\part{title}
+\Blindtext
+
+
+%\recalctypearea
+%\the\tud@dim@margin
+%
+%\the\tud@dim@footarea
+%
+%\the\tud@dim@footsep
+%
+%\setlength{\@tempdima}{21mm}
+%\the\@tempdima
+%%\the\footheight
+%
+%%\the\footskip
+%
+%%\the\baselineskip
+
+%\showlayout
+
+%\setlength{\@tempdima}{\dimexpr\tud@dim@footarea-\tud@ta@footheight\relax}
+%\ifdim\@tempdima<\z@\relax\setlength{\@tempdima}{\z@}\fi%
+%\setlength{\footheight}{\dimexpr\footheight+\@tempdima}
+%\setlength{\footskip}{\dimexpr\footskip+\@tempdima}
+%\showlayout
+
+%\KOMAoptions{footheight=\tud@dim@footarea}
+%\recalctypearea
+%\showlayout
+
+%\KOMAoptions{footlines=1.25}
+%\recalctypearea
+%\showlayout
+
+
+
+%\TUDoptions{ddcfoot=on}
+%\recalctypearea
+%\showlayout
+
+%\setlength{\@tempdima}{\dimexpr\tud@dim@footarea-\tud@ta@footheight\relax}
+%\ifdim\@tempdima<\z@\relax\setlength{\@tempdima}{\z@}\fi%
+%\setlength{\footheight}{\dimexpr\footheight+\@tempdima}
+%\setlength{\footskip}{\dimexpr\footskip+\@tempdima}
+%\showlayout
+%
+%\KOMAoptions{footheight=\tud@dim@footarea}
+%\recalctypearea
+%\showlayout
+%
+%\KOMAoptions{footlines=1.25}
+%\recalctypearea
+%\showlayout
+
 \end{document}
 
 \section{Überschrift}

@@ -260,6 +260,7 @@
     \if@atdocument\tud@font@cdfonts\fi%
   \fi%
 }
+% ToDo §§§ umbenennen in cdbar für Erweiterung, falls per Option?
 \newcommand*\tud@barfont{0}
 \TUD@key@lock{barfont}[true]{%
   \TUD@set@numkey@lock{barfont}{tud@barfont}{%
@@ -450,7 +451,7 @@
   \fi%
 }
 %%% From File: tudscr-layout.dtx
-\newcommand*\tud@head@color{black}
+\newcommand*\tud@head@logocolor{black}
 \newcommand*\tud@cd{0}
 \csdef@lock{tud@layout@cover}{0}
 \csdef@lock{tud@layout@title}{0}
@@ -469,25 +470,26 @@
 \TUD@key{cd}[true]{%
   \TUD@set@numkey{cd}{tud@cd}{\tud@layout@switch}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \def\tud@head@color{black}%
     \ifcase \tud@cd\relax%
+      \def\tud@head@logocolor{black}%
       \csstd@lock{tud@layout@cover}{0}%
       \csstd@lock{tud@layout@title}{0}%
       \csstd@lock{tud@layout@part}{0}%
       \csstd@lock{tud@layout@chapter}{0}%
     \or%
+      \def\tud@head@logocolor{black}%
       \csstd@lock{tud@layout@cover}{1}%
       \csstd@lock{tud@layout@title}{1}%
       \csstd@lock{tud@layout@part}{1}%
       \csstd@lock{tud@layout@chapter}{1}%
     \or%
-      \def\tud@head@color{HKS41}%
+      \def\tud@head@logocolor{HKS41}%
       \csstd@lock{tud@layout@cover}{1}%
       \csstd@lock{tud@layout@title}{2}%
       \csstd@lock{tud@layout@part}{2}%
       \csstd@lock{tud@layout@chapter}{2}%
     \or%
-      \def\tud@head@color{HKS41}%
+      \def\tud@head@logocolor{white}%
       \csstd@lock{tud@layout@cover}{1}%
       \csstd@lock{tud@layout@title}{3}%
       \csstd@lock{tud@layout@part}{3}%
@@ -845,12 +847,12 @@
 }
 \newcommand*\tudscr@v@comp{\tudscr@v@last}
 \TUD@key{tudscrver}[last]{%
-  \scr@ifundefinedorrelax{tudscr@v@#1}{%
+  \ifcsvoid{tudscr@v@#1}{%
     \def\tudscr@v@comp{0}%
     \ClassWarningNoLine{\tudcls@name}{%
       You have set option `tudscrver' to `#1', but\MessageBreak%
-      this value of version is not supported.\MessageBreak%
-      Because of this, version was set to `first'%
+      this value is not supported. Because of this, the\MessageBreak%
+      value for `tudscrver' was set to `first'%
     }%
     \FamilyKeyStateProcessed%
   }{%
@@ -1614,12 +1616,9 @@
   \tud@locale@english{\@dotswap}{.}%
 }
 %%% From File: tudscr-pagestyle.dtx
-\newlength{\tud@dim@left}
-\newlength{\tud@dim@right}
+\newlength{\tud@dim@margin}
+\newlength{\tud@dim@rmargin}
 \newlength{\tud@dim@both}
-\newlength{\tud@dim@top}
-\newlength{\tud@dim@bottom}
-\newlength{\tud@dim@footskip}
 \newlength{\tud@dim@headheight}
 \newlength{\tud@dim@barheight}
 \newlength{\tud@dim@headsep}
@@ -1628,107 +1627,93 @@
 \newlength{\tud@dim@logowidth}
 \newlength{\tud@dim@logoheight}
 \newlength{\tud@dim@line}
-\newlength{\tud@dim@thinline}
 \newlength{\tud@dim@heavyline}
+\newlength{\tud@dim@thinline}
 \newlength{\tud@dim@headingsvskip}
+\newlength{\tud@dim@footsep}
+% ToDo §§§ kann wahrscheinlich raus
+\newlength{\tud@dim@footskip}
 \newlength{\tud@dim@headdiff}
-\newlength{\tud@dim@ddcdiff}
-\newlength{\tud@dim@ddcfoot}
 \newcommand*\tud@head@font@size{}
 \newcommand*\tud@geometry@set{%
   \ifdim\paperheight<148.1mm\relax%
+    \setlength{\tud@dim@margin}{15mm}%
     \setlength{\tud@dim@headheight}{17.5mm}%
     \setlength{\tud@dim@barheight}{2.5mm}%
     \setlength{\tud@dim@headsep}{6mm}%
     \setlength{\tud@dim@logox}{5.5mm}%
     \setlength{\tud@dim@logoy}{6.5mm}%
     \setlength{\tud@dim@logowidth}{28.5mm}%
-    \setlength{\tud@dim@left}{15mm}%
-    \setlength{\tud@dim@right}{10mm}%
-    \setlength{\tud@dim@top}{12.5mm}%
-    \setlength{\tud@dim@bottom}{12.5mm}%
     \setlength{\tud@dim@footskip}{6mm}%
     \setlength{\tud@dim@heavyline}{0.75pt}%
     \setlength{\tud@dim@thinline}{0.5pt}%
     \def\tud@head@font@size{4.5}%
   \else\ifdim\paperheight<297.1mm\relax%
+    \setlength{\tud@dim@margin}{30mm}%
     \setlength{\tud@dim@headheight}{35mm}%
     \setlength{\tud@dim@barheight}{5mm}%
     \setlength{\tud@dim@headsep}{12mm}%
     \setlength{\tud@dim@logox}{11mm}%
     \setlength{\tud@dim@logoy}{13.5mm}%
     \setlength{\tud@dim@logowidth}{57mm}%
-    \setlength{\tud@dim@left}{30mm}%
-    \setlength{\tud@dim@right}{20mm}%
-    \setlength{\tud@dim@top}{25mm}%
-    \setlength{\tud@dim@bottom}{25mm}%
     \setlength{\tud@dim@footskip}{12mm}%
     \setlength{\tud@dim@heavyline}{1pt}%
     \setlength{\tud@dim@thinline}{0.5pt}%
     \def\tud@head@font@size{9}%
   \else\ifdim\paperheight<420.1mm\relax%
+    \setlength{\tud@dim@margin}{42mm}%
     \setlength{\tud@dim@headheight}{50mm}%
     \setlength{\tud@dim@barheight}{7mm}%
     \setlength{\tud@dim@headsep}{17mm}%
     \setlength{\tud@dim@logox}{15.5mm}%
     \setlength{\tud@dim@logoy}{19mm}%
     \setlength{\tud@dim@logowidth}{80mm}%
-    \setlength{\tud@dim@left}{42mm}%
-    \setlength{\tud@dim@right}{28mm}%
-    \setlength{\tud@dim@top}{35mm}%
-    \setlength{\tud@dim@bottom}{35mm}%
     \setlength{\tud@dim@footskip}{17mm}%
     \setlength{\tud@dim@heavyline}{1.4pt}%
     \setlength{\tud@dim@thinline}{0.7pt}%
     \def\tud@head@font@size{13}%
   \else\ifdim\paperheight<594.1mm\relax%
+    \setlength{\tud@dim@margin}{60mm}%
     \setlength{\tud@dim@headheight}{70mm}%
     \setlength{\tud@dim@barheight}{10mm}%
     \setlength{\tud@dim@headsep}{24mm}%
     \setlength{\tud@dim@logox}{22mm}%
     \setlength{\tud@dim@logoy}{27mm}%
     \setlength{\tud@dim@logowidth}{114mm}%
-    \setlength{\tud@dim@left}{60mm}%
-    \setlength{\tud@dim@right}{40mm}%
-    \setlength{\tud@dim@top}{50mm}%
-    \setlength{\tud@dim@bottom}{50mm}%
     \setlength{\tud@dim@footskip}{24mm}%
     \setlength{\tud@dim@heavyline}{1.7pt}%
     \setlength{\tud@dim@thinline}{1pt}%
     \def\tud@head@font@size{13.5}%
   \else\ifdim\paperheight<841.1mm\relax%
+    \setlength{\tud@dim@margin}{85mm}%
     \setlength{\tud@dim@headheight}{100mm}%
     \setlength{\tud@dim@barheight}{14mm}%
     \setlength{\tud@dim@headsep}{34mm}%
     \setlength{\tud@dim@logox}{31mm}%
     \setlength{\tud@dim@logoy}{38mm}%
     \setlength{\tud@dim@logowidth}{161.5mm}%
-    \setlength{\tud@dim@left}{85mm}%
-    \setlength{\tud@dim@right}{56.5mm}%
-    \setlength{\tud@dim@top}{71mm}%
-    \setlength{\tud@dim@bottom}{71mm}%
     \setlength{\tud@dim@footskip}{34mm}%
     \setlength{\tud@dim@heavyline}{1.9pt}%
     \setlength{\tud@dim@thinline}{1.5pt}%
     \def\tud@head@font@size{14}%
   \else%
+    \setlength{\tud@dim@margin}{120mm}%
     \setlength{\tud@dim@headheight}{140mm}%
     \setlength{\tud@dim@barheight}{20mm}%
     \setlength{\tud@dim@headsep}{48mm}%
     \setlength{\tud@dim@logox}{44mm}%
     \setlength{\tud@dim@logoy}{54mm}%
     \setlength{\tud@dim@logowidth}{228mm}%
-    \setlength{\tud@dim@left}{120mm}%
-    \setlength{\tud@dim@right}{80mm}%
-    \setlength{\tud@dim@top}{100mm}%
-    \setlength{\tud@dim@bottom}{100mm}%
     \setlength{\tud@dim@footskip}{48mm}%
     \setlength{\tud@dim@heavyline}{2.1pt}%
     \setlength{\tud@dim@thinline}{2pt}%
     \def\tud@head@font@size{20}%
   \fi\fi\fi\fi\fi%
-  \setlength{\tud@dim@both}{\dimexpr\tud@dim@left+\tud@dim@right\relax}%
-  \setlength{\tud@dim@ddcfoot}{.6\tud@dim@headheight}%
+  \setlength{\tud@dim@rmargin}{\dimexpr2\tud@dim@margin/3\relax}%
+  \setlength{\tud@dim@both}{\dimexpr5\tud@dim@margin/3\relax}%
+  \setlength{\tud@dim@footsep}{\dimexpr%
+    \tud@dim@margin-.6\tud@dim@headheight\relax%
+  }%
 }
 \newcommand*\tud@ifsacrop{%
   \ifcsdef{ifsa@crop}{%
@@ -1763,7 +1748,7 @@
       background,head,align=t,%
       voffset=\tud@dim@logoy,%
       contents={%
-        \hspace*{\dimexpr\tud@dim@logox-\tud@dim@left\relax}%
+        \hspace*{\dimexpr\tud@dim@logox-\tud@dim@margin\relax}%
         \tud@mainlogo%
       },%
     ]{tudheadings.head.mainlogo}%
@@ -1797,13 +1782,12 @@
     \DeclareNewLayer[%
       background,head,align=tl,%
       voffset=\dimexpr\tud@dim@headheight+\tud@dim@line\relax,%
-      %ToDo: Schriftfarbe für Balken ggf. nur in erster Zeile anpassen
+      %ToDo: §§§ Schriftfarbe für Balken ggf. nur in erster Zeile anpassen
       contents={\tud@head@text@box},%
     ]{tudheadings.head.text}%
     \DeclareNewLayer[%
       background,foot,%
       contents={%
-        \vskip\dimexpr-\tud@dim@ddcfoot-\baselineskip+\ht\strutbox\relax%
         \hfill\tud@footlogo%
       },%
     ]{tudheadings.foot.ddclogo}%
@@ -1889,18 +1873,18 @@
     \ifstr{#1}{empty}{\def\@tempa{empty.tudheadings}}{}%
   }{}%
   \tud@ifinpslist{\@tempa}{%
-    \tud@ddc@check%
-    \ifcase \@tempb\relax%
+%    \tud@ddc@check%
+%    \ifcase \@tempb\relax%
       \ifstr{\tud@currentgeometry}{tudarea}{}{%
         \loadgeometry{tudarea}%
         \gdef\tud@currentgeometry{tudarea}%
       }%
-    \else%
-      \ifstr{\tud@currentgeometry}{tudareaddc}{}{%
-        \loadgeometry{tudareaddc}%
-        \gdef\tud@currentgeometry{tudareaddc}%
-      }%
-    \fi%
+%    \else%
+%      \ifstr{\tud@currentgeometry}{tudareaddc}{}{%
+%        \loadgeometry{tudareaddc}%
+%        \gdef\tud@currentgeometry{tudareaddc}%
+%      }%
+%    \fi%
     \setlength{\tud@dim@headdiff}{\z@}%
   }{%
     \ifstr{\tud@currentgeometry}{typearea}{}{%
@@ -1928,12 +1912,6 @@
 \patchcmd{\cleardoublepageusingstyle}{\pagestyle}{%
   \let\tud@beforepagestyle\@gobble\pagestyle%
 }{}{\tud@patch@wrn{cleardoublepageusingstyle}}
-\newcommand*\tud@ddc@enlargepage{%
-  \ifstr{\tud@currentgeometry}{tudareaddc}{}{%
-    \tud@ddc@check%
-    \ifcase \@tempb\relax\else\enlargethispage{-\tud@dim@ddcdiff}\fi%
-  }%
-}
 \newcommand*\tud@head@text{}
 \newcommand*\tud@head@text@first{}
 \newcommand*\tud@head@text@second{}
@@ -1941,7 +1919,7 @@
 \newcommand*\tud@head@text@buffer{}
 \newcommand*\tud@head@font{}
 \newcommand*\tud@head@rule[1]{%
-  \color{\tud@head@color}%
+  \color{\tud@head@logocolor}%
   \rule[\ht\strutbox]{#1}{\tud@dim@line}%
 }
 \newcommand*\tud@head@text@add[3][, ]{%
@@ -1982,7 +1960,9 @@
     \ClassWarningNoLine{\tudcls@name}{No `\string\faculty' given}%
     \faculty{}%
   \fi%
-  \color{\tud@head@color}%
+  % ToDo §§§ farbliche Anpassung der zweiten und dritten Zeile
+  %      abhängig von pagecolor
+  \color{\tud@head@logocolor}%
   \tud@head@font@set%
   \@tempswafalse%
   \def\tud@head@text@first{}%
@@ -2041,14 +2021,14 @@
 \newcommand*\tud@@mainlogo{}
 \newcommand*\tud@mainlogo{%
   \setlength{\@tempdima}{%
-    \dimexpr\oddsidemargin+1in+\tud@dim@logox-\tud@dim@left\relax%
+    \dimexpr\oddsidemargin+1in+\tud@dim@logox-\tud@dim@margin\relax%
   }%
   \ifdim\@tempdima<\ta@bcor\relax\tud@mainlogo@wrn{\the\@tempdima}\fi%
   \def\tud@@mainlogo{TUD-black}%
-  \ifstr{\tud@head@color}{HKS41}{\def\tud@@mainlogo{TUD-blue}}{}%
-  \ifstr{\tud@head@color}{cddarkblue}{\def\tud@@mainlogo{TUD-blue}}{}%
-  \ifstr{\tud@head@color}{white}{\def\tud@@mainlogo{TUD-white}}{}%
-  \color{\tud@head@color}%
+  \ifstr{\tud@head@logocolor}{HKS41}{\def\tud@@mainlogo{TUD-blue}}{}%
+  \ifstr{\tud@head@logocolor}{cddarkblue}{\def\tud@@mainlogo{TUD-blue}}{}%
+  \ifstr{\tud@head@logocolor}{white}{\def\tud@@mainlogo{TUD-white}}{}%
+%  \color{\tud@head@logocolor}% §§§
   \includegraphics[width=\tud@dim@logowidth]{\tud@@mainlogo}%
 }
 \newcommand*\headlogo[2][]{%
@@ -2066,9 +2046,9 @@
   \fi%
   \ifcase \@tempa\relax\or%
     \def\tud@@headlogo{DDC-24}%
-    \ifstr{\tud@head@color}{HKS41}{\def\tud@@headlogo{DDC-27}}{}%
-    \ifstr{\tud@head@color}{cddarkblue}{\def\tud@@headlogo{DDC-27}}{}%
-    \ifstr{\tud@head@color}{white}{\def\tud@@headlogo{DDC-30}}{}%
+    \ifstr{\tud@head@logocolor}{HKS41}{\def\tud@@headlogo{DDC-27}}{}%
+    \ifstr{\tud@head@logocolor}{cddarkblue}{\def\tud@@headlogo{DDC-27}}{}%
+    \ifstr{\tud@head@logocolor}{white}{\def\tud@@headlogo{DDC-30}}{}%
   \or%
     \def\tud@@headlogo{DDC-03}%
   \or%
@@ -2102,9 +2082,11 @@
   \tud@ddc@check%
   \ifcase \@tempb\relax\or%
     \def\tud@@footlogo{DDC-22}%
-    \ifstr{\tud@head@color}{HKS41}{\def\tud@@footlogo{DDC-25}}{}%
-    \ifstr{\tud@head@color}{cddarkblue}{\def\tud@@footlogo{DDC-25}}{}%
-    \ifstr{\tud@head@color}{white}{\def\tud@@footlogo{DDC-28}}{}%
+    % ToDo §§§ ddclogo@color oder footlogo@color
+    % vereintlichen von footlogo nach ddclogo
+    \ifstr{\tud@head@logocolor}{HKS41}{\def\tud@@footlogo{DDC-25}}{}%
+    \ifstr{\tud@head@logocolor}{cddarkblue}{\def\tud@@footlogo{DDC-25}}{}%
+    \ifstr{\tud@head@logocolor}{white}{\def\tud@@footlogo{DDC-28}}{}%
   \or%
     \def\tud@@footlogo{DDC-01}%
   \or%
@@ -2119,7 +2101,8 @@
     \def\tud@@footlogo{DDC-28}%
   \fi%
   \ifx\tud@@footlogo\@empty\else%
-    \includegraphics[height=\tud@dim@ddcfoot]{\tud@@footlogo}%
+    \setlength{\@tempdima}{\dimexpr.5\tud@dim@headheight\relax}%
+    \includegraphics[height=\@tempdima]{\tud@@footlogo}%
   \fi%
 }
 \newlength{\tud@ta@textheight}
@@ -2135,7 +2118,7 @@
   \setlength{\tud@ta@topmargin}{\topmargin}%
   \setlength{\tud@ta@headheight}{\headheight}%
   \setlength{\tud@ta@headsep}{\headsep}%
-  \scr@ifundefinedorrelax{ta@fh}{%
+  \ifcsvoid{ta@fh}{%
     \setlength{\tud@ta@footheight}{\footheight}%
   }{%
     \setlength{\tud@ta@footheight}{\ta@fh}%
@@ -2153,7 +2136,7 @@
 \newcommand*\tud@geometry@hmargin{}
 \newcommand*\tud@geometry@vmargin{}
 \newcommand*\tud@geometry@pmargin{}
-\newcommand*\tud@geometry@dmargin{}
+\newcommand*\tud@geometry@fmargin{}
 \AtEndPreamble{%
   \tud@ifsacrop{}{%
     \recalctypearea%
@@ -2162,6 +2145,8 @@
     \expandafter\pagestyle\expandafter{\currentpagestyle}%
   }%
 }
+\newlength{\extrafootheight}
+\setlength{\extrafootheight}{1cm}
 \newcommand*\tud@geometry@process{%
   \tud@geometry@set%
   \ifcase \tud@geometry\relax%
@@ -2183,40 +2168,24 @@
       headheight=\dimexpr\tud@dim@headheight+\tud@dim@barheight-\tud@dim@logoy\relax,%
       headsep=\tud@dim@headsep,%
       textheight=\dimexpr\tud@ta@textheight-\tud@ta@headdiff\relax,%
-      footskip=\tud@ta@footskip,%
     }%
-    \def\tud@geometry@dmargin{%
-      textheight=\dimexpr\tud@ta@textheight-\tud@ta@headdiff-\tud@dim@ddcdiff\relax,%
-      footskip=\dimexpr\tud@ta@footskip+\tud@dim@ddcdiff\relax,%
-    }%
-%    
+    \def\tud@geometry@fmargin{%
 %      textheight=\dimexpr%
-%\tud@ta@textheight-\tud@ta@headdiff-\tud@dim@ddcdiff-\tud@ta@footheight\relax,%
-%footskip=\dimexpr\tud@ta@footskip+\tud@ta@footheight+\tud@dim@ddcdiff\relax,%
-%    
+%        \tud@ta@textheight-\tud@ta@headdiff-\tud@ta@footskip\relax,%
+    }%
     \setlength{\tud@ta@headdiff}{\dimexpr%
       \tud@dim@headheight+\tud@dim@barheight+\tud@dim@headsep%
       -\tud@ta@topmargin-\tud@ta@headheight-\tud@ta@headsep-1in\relax%
     }%
-    % ToDo: Algorithmus noch sinnvoll für vergrößerung der Seite?
-    %       verbleibender Seitenrand sollte footsep entsprechen
-    \setlength{\tud@dim@ddcdiff}{\dimexpr%
-      \tud@dim@ddcfoot-\tud@ta@footskip+\tud@dim@footskip\relax%
-    }%
-    \typeout{+++++ \the\tud@dim@ddcdiff}
-    \setlength{\tud@dim@ddcdiff}{20pt}%
-    % ToDo §§§ s darüber: Längenberechnung unabhängig von ta@footskip
-    % footskip ist (quasi) konstant in typearea, nur footheight sollte sich 
-    % ändern; dim@ddcdiff abhängig vom Platz nach unten!
     \ifdim\tud@ta@headdiff<\z@\relax%
       \addtolength{\tud@dim@headsep}{-\tud@ta@headdiff}%
     \fi%
   \else%
     \ifcase \tud@geometry\or%
       \def\tud@geometry@hmargin{%
-        left=\tud@dim@left,%
+        left=\tud@dim@margin,%
         textwidth=\dimexpr\paperwidth-\tud@dim@both-\ta@bcor\relax,%
-        marginpar=\dimexpr\tud@dim@right-2\marginparsep\relax,%
+        marginpar=\dimexpr\tud@dim@rmargin-2\marginparsep\relax,%
         bindingoffset=\ta@bcor,%
         \if@twoside asymmetric,\fi%
       }%
@@ -2224,7 +2193,7 @@
       \def\tud@geometry@hmargin{%
         left=.5\tud@dim@both,%
         textwidth=\dimexpr\paperwidth-\tud@dim@both-\ta@bcor\relax,%
-        marginpar=\dimexpr\tud@dim@right-2\marginparsep\relax,%
+        marginpar=\dimexpr\tud@dim@rmargin-2\marginparsep\relax,%
         bindingoffset=\ta@bcor,%
       }%
     \or%
@@ -2236,16 +2205,16 @@
           left=.5\tud@dim@both,%
         \fi%
         textwidth=\dimexpr\paperwidth-\tud@dim@both-\ta@bcor\relax,%
-        marginpar=\dimexpr\tud@dim@right-2\marginparsep\relax,%
+        marginpar=\dimexpr\tud@dim@rmargin-2\marginparsep\relax,%
         bindingoffset=\ta@bcor,%
       }%
     \fi%
     \def\tud@geometry@vmargin{%
-      top=\tud@dim@top,%
+      top=\tud@dim@margin,%
       headheight=\tud@ta@headheight,%
       headsep=\tud@dim@headsep,%
-      bottom=\tud@dim@bottom,%
-      footskip=\tud@dim@footskip,%
+      bottom=\dimexpr\tud@dim@margin+\extrafootheight\relax,%
+      footskip=\dimexpr\tud@dim@footsep+\tud@ta@footheight\relax,%
       \tud@geometry@hincl,%
       \tud@geometry@fincl,%
     }%
@@ -2253,33 +2222,18 @@
       top=\dimexpr%
         \tud@dim@headheight+\tud@dim@barheight+\tud@dim@headsep\relax,%
       headheight=\dimexpr\tud@dim@headheight+\tud@dim@barheight-\tud@dim@logoy\relax,%
-      headsep=\tud@dim@headsep,%
-      bottom=\tud@dim@bottom,%
-%      footskip=\tud@dim@footskip,%
-      footskip=\dimexpr\tud@dim@footskip+\tud@ta@footheight\relax%
+      ignorehead,%
     }%
-    \def\tud@geometry@dmargin{%
-      \if@fincl%
-        bottom=\dimexpr%
-          \tud@dim@bottom+\tud@dim@ddcfoot+\tud@dim@footskip\relax,%
-      \else%
-        bottom=\dimexpr\tud@dim@bottom+\tud@dim@ddcfoot\relax,%
-      \fi%
-%      footskip=\dimexpr\tud@dim@footskip+\tud@dim@ddcfoot\relax,%
-      footskip=\dimexpr\tud@dim@footskip+\tud@ta@footheight%+\tud@dim@ddcfoot\relax%
+    \def\tud@geometry@fmargin{%
+      %includefoot
     }%
     \setlength{\tud@ta@headdiff}{\dimexpr%
       \tud@dim@headheight+\tud@dim@barheight+\tud@dim@headsep%
-        -\tud@dim@top\relax%
-    }%
-    \setlength{\tud@dim@ddcdiff}{\dimexpr%
-      \tud@dim@ddcfoot+2\tud@dim@footskip-\tud@dim@bottom\relax%
+        -\tud@dim@margin\relax%
     }%
   \fi%
   \ifdim\tud@ta@headdiff<\z@\relax\setlength{\tud@ta@headdiff}{\z@}\fi%
   \global\tud@ta@headdiff=\tud@ta@headdiff%
-  \ifdim\tud@dim@ddcdiff<\z@\relax\setlength{\tud@dim@ddcdiff}{\z@}\fi%
-  \global\tud@dim@ddcdiff=\tud@dim@ddcdiff%
   \setlength{\tud@dim@headingsvskip}{.6\tud@dim@headheight}%
   \global\tud@dim@headingsvskip=\tud@dim@headingsvskip%
   \tud@geometry@@process%
@@ -2287,17 +2241,16 @@
 \newcommand*\tud@geometry@@process{%
   \edef\@tempa{%
     \tud@geometry@hmargin,%
+    \tud@geometry@vmargin,%
     \tud@geometry@pmargin,%
-    \tud@geometry@dmargin,%
-    ignorehead,ignorefoot,%
+    \tud@geometry@fmargin,%
   }%
   \expandafter\newgeometry\expandafter{\@tempa}%
   \savegeometry{tudareaddc}%
   \edef\@tempa{%
     \tud@geometry@hmargin,%
+    \tud@geometry@vmargin,%
     \tud@geometry@pmargin,%
-    ignorehead,%
-    \tud@geometry@fincl%
   }%
   \expandafter\newgeometry\expandafter{\@tempa}%
   \savegeometry{tudarea}%
@@ -2325,7 +2278,9 @@
 \newcommand*\tud@ps{tudheadings}
 \newcommand*\tud@ps@init{%
   \global\let\tud@dim@line\tud@dim@thinline%
-  \ifstr{\tud@head@color}{white}{\global\let\tud@dim@line\tud@dim@heavyline}{}%
+  \ifstr{\tud@head@logocolor}{white}{%
+    \global\let\tud@dim@line\tud@dim@heavyline%
+  }{}%
 }
 \newcommand*\tud@ps@select{%
   \expandafter\pagestyle\expandafter{\tud@ps}%
@@ -2366,7 +2321,7 @@
 \TUD@parameter{tudpage}{%
   \TUD@parameter@define{language}{\selectlanguage{#1}}%
   \TUD@parameter@define{columns}{\def\tud@multicols{#1}}%
-  \TUD@parameter@define{color}[HKS41]{\def\tud@head@color{#1}}%
+  \TUD@parameter@define{color}[HKS41]{\def\tud@head@logocolor{#1}}%
   \TUD@parameter@let{colour}{color}%
   \TUD@parameter@define{widehead}[true]{\TUDoption{widehead}{#1}}%
   \TUD@parameter@define{ddc}[true]{\TUDoption{ddc}{#1}}%
@@ -2391,18 +2346,19 @@
   \TUD@parameter@sethandler{\tud@environmenthandler{#1}}%
 }
 %%% From File: tudscr-layout.dtx
-\newcommand*\tud@color@partfont{black}
-\newcommand*\tud@color@partpage{white}
-\newcommand*\tud@color@parthead{black}
-\newcommand*\tud@color@chapterfont{black}
-\newcommand*\tud@color@chapterpage{white}
+\newcommand*\tud@part@pagecolor{white}
+\newcommand*\tud@part@logocolor{black}
+\newcommand*\tud@part@fontcolor{black}
+\newcommand*\tud@chapter@pagecolor{white}
+\newcommand*\tud@chapter@logocolor{black}
+\newcommand*\tud@chapter@fontcolor{black}
 \newcommand*\tud@font@heading{%
   \if@tud@din\dinbn\tud@raggedright\else\tud@RaggedRight\fi%
 }
 \newcommand*\tud@font@heading@size{\Huge}
 \newkomafont{parttitle}{%
   \tud@font@heading%
-  \color{\tud@color@partfont}%
+  \color{\tud@part@fontcolor}%
   \usesizeofkomafont{section}%
 }
 \newlength{\pageheadingsvskip}
@@ -2433,18 +2389,18 @@
       \usekomafont{disposition}%
       \tud@font@heading%
       \tud@font@heading@size%
-      \color{\tud@color@titlefont}%
+      \color{\tud@title@fontcolor}%
     }%
     \tud@font@koma@set{subtitle}{%
       \tud@font@heading%
       \usesizeofkomafont{section}%
-      \color{\tud@color@titlefont}%
+      \color{\tud@title@fontcolor}%
     }%
     \tud@font@koma@set{subject}{%
       \fontfamily{\sfdefault}%
       \fontseries{\bfdefault}%
       \selectfont%
-      \color{\tud@color@titlefont}%
+      \color{\tud@title@fontcolor}%
     }%
     \tud@font@koma@set{author}{\usekomafont{subject}}%
     \tud@font@koma@set{date}{\usekomafont{titlepage}}%
@@ -2477,11 +2433,11 @@
     \else%
       \tud@sectioning@set[addpart]{part}{%
         \tud@font@heading%
-        \color{\tud@color@partfont}%
+        \color{\tud@part@fontcolor}%
       }%
       \tud@font@koma@set{partnumber}{%
         \tud@font@heading%
-        \color{\tud@color@partfont}%
+        \color{\tud@part@fontcolor}%
       }%
       \renewcommand*\partheadmidvskip{\par\nobreak\vspace{.5\baselineskip}}%
     \fi%
@@ -2513,7 +2469,7 @@
     \tud@sectioning@set[addchap]{chapter}{%
       \tud@font@heading%
       \tud@font@heading@size%
-      \color{\tud@color@chapterfont}%
+      \color{\tud@chapter@fontcolor}%
     }%
     \tud@font@koma@set{chapterprefix}{\usesizeofkomafont{partnumber}}%
     \tud@sectioning@set[addsec]{section}{\tud@font@heading}%
@@ -2529,17 +2485,17 @@
   \tud@layout@process%
 }
 \newcommand*\tud@partheadstartvskip{%
-  \def\tud@color@partfont{black}%
-  \def\tud@color@partpage{white}%
-  \def\tud@color@parthead{black}%
+  \def\tud@part@pagecolor{white}%
+  \def\tud@part@logocolor{black}%
+  \def\tud@part@fontcolor{black}%
   \ifcase \tud@layout@part\relax\or\or%
-    \def\tud@color@partfont{HKS41}%
-    \def\tud@color@partpage{white}%
-    \def\tud@color@parthead{HKS41}%
+    \def\tud@part@pagecolor{white}%
+    \def\tud@part@logocolor{HKS41}%
+    \def\tud@part@fontcolor{HKS41}%
   \or%
-    \def\tud@color@partpage{HKS41}%
-    \def\tud@color@partfont{HKS41!30}%
-    \def\tud@color@parthead{white}%
+    \def\tud@part@pagecolor{HKS41}%
+    \def\tud@part@logocolor{white}%
+    \def\tud@part@fontcolor{HKS41!30}%
   \fi%
   \begingroup%
     \vspace*{\dimexpr%
@@ -2551,7 +2507,7 @@
       \begingroup%
         \tud@font@heading%
         \tud@font@heading@size%
-        \color{\tud@color@partfont}%
+        \color{\tud@part@fontcolor}%
         \ifx\@@title\@empty%
           \tud@makeuppercase{\strut}%
         \else%
@@ -2567,9 +2523,9 @@
 }
 \newcommand*\tud@partheadendvskip{%
   \tud@cleardoublespecialpage{%
-    \tud@pagecolor{\tud@color@partpage}%
-    \def\tud@head@color{\tud@color@parthead}%
-    \addtokomafont{pagenumber}{\sffamily\color{\tud@color@partfont}}%
+    \tud@pagecolor{\tud@part@pagecolor}%
+    \def\tud@head@logocolor{\tud@part@logocolor}%
+    \addtokomafont{pagenumber}{\sffamily\color{\tud@part@fontcolor}}%
     \clearpage%
   }%
 }
@@ -2600,21 +2556,24 @@
 \newcommand*\tud@partpreamble{%
   \ifnum\tud@abstract@level>1\relax\def\tud@abstract@level{1}\fi%
   \KOMAoptions{titlepage=false}%
-  \addtokomafont{disposition}{\color{\tud@color@partfont}}%
-  \addtokomafont{dictumtext}{\color{\tud@color@partfont}}%
-  \color{\tud@color@partfont}%
+  \addtokomafont{disposition}{\color{\tud@part@fontcolor}}%
+  \addtokomafont{dictumtext}{\color{\tud@part@fontcolor}}%
+  \color{\tud@part@fontcolor}%
   \vskip\dimexpr\topskip+.9\baselineskip\relax%
   \@afterindentfalse\@afterheading%
 }
 \newcommand*\tud@chapterheadstartvskip{%
-  \def\tud@color@chapterpage{white}%
-  \def\tud@color@chapterfont{black}%
+  \def\tud@chapter@pagecolor{white}%
+  \def\tud@chapter@logocolor{black}%
+  \def\tud@chapter@fontcolor{black}%
   \ifcase \tud@layout@chapter\relax\or\or%
-    \def\tud@color@chapterpage{white}%
-    \def\tud@color@chapterfont{HKS41}%
+    \def\tud@chapter@pagecolor{white}%
+    \def\tud@chapter@logocolor{HKS41}%
+    \def\tud@chapter@fontcolor{HKS41}%
   \or%
-    \def\tud@color@chapterpage{HKS41!10}%
-    \def\tud@color@chapterfont{HKS41}%
+    \def\tud@chapter@pagecolor{HKS41!10}%
+    \def\tud@chapter@logocolor{HKS41}%
+    \def\tud@chapter@fontcolor{HKS41}%
   \fi%
   \vspace*{\dimexpr%
     \tud@dim@headdiff+\tud@dim@headingsvskip-\baselineskip\relax%
@@ -2654,9 +2613,9 @@
         \TUDoptions{cdfont=true}%
       \fi%
     \fi%
-    \addtokomafont{disposition}{\color{\tud@color@chapterfont}}%
-    \addtokomafont{dictumtext}{\color{\tud@color@chapterfont}}%
-    \color{\tud@color@chapterfont}%
+    \addtokomafont{disposition}{\color{\tud@chapter@fontcolor}}%
+    \addtokomafont{dictumtext}{\color{\tud@chapter@fontcolor}}%
+    \color{\tud@chapter@fontcolor}%
   \fi%
   \@afterindentfalse\@afterheading%
 }
@@ -2679,14 +2638,12 @@
 \newcommand*\tud@chapter@app{%
   \if@tud@chapterpage%
     \tud@cleardoublespecialpage{%
-      \tud@pagecolor{\tud@color@chapterpage}%
-      \def\tud@head@color{\tud@color@chapterfont}%
-      \addtokomafont{pagenumber}{\sffamily\color{\tud@color@chapterfont}}%
+      \tud@pagecolor{\tud@chapter@pagecolor}%
+      \def\tud@head@logocolor{\tud@chapter@logocolor}%
+      \addtokomafont{pagenumber}{\sffamily\color{\tud@chapter@fontcolor}}%
       \clearpage%
     }%
     \if@restonecol\twocolumn\fi%
-  \else%
-    \tud@ifinpslist{\chapterpagestyle}{\tud@ddc@enlargepage}{}%
   \fi%
   \if@twocolumn%
     \@afterindentfalse\@afterheading%
@@ -3108,9 +3065,9 @@
   \selectfont%
   \large%
 }
-\newcommand*\tud@color@titlefont{black}
-\newcommand*\tud@color@titlepage{white}
-\newcommand*\tud@color@titlehead{black}
+\newcommand*\tud@title@pagecolor{white}
+\newcommand*\tud@title@logocolor{black}
+\newcommand*\tud@title@fontcolor{black}
 \newcommand*\tud@titlepagenumber{}%
 \let\tud@titlepagenumber\relax%
 \newcommand*\tud@maketitle[1][]{%
@@ -3124,8 +3081,8 @@
         \tud@maketitlepage%
       \else%
         \ifcase \tud@layout@title\relax\or\else%
-          \def\tud@color@titlefont{HKS41}%
-          \def\tud@color@titlehead{HKS41}%
+          \def\tud@title@fontcolor{HKS41}%
+          \def\tud@title@logocolor{HKS41}%
         \fi%
         \let\@maketitle\tud@@maketitle%
         \ifx\tud@titlepagenumber\relax\gdef\tud@titlepagenumber{1}\fi%
@@ -3148,12 +3105,13 @@
 \newcommand*\tud@titleback{}%
 \newcommand*\tud@maketitlepage{%
   \ifcase \tud@layout@title\relax\or\or%
-    \def\tud@color@titlefont{HKS41}%
-    \def\tud@color@titlehead{HKS41}%
+    \def\tud@title@pagecolor{white}%
+    \def\tud@title@logocolor{HKS41}%
+    \def\tud@title@fontcolor{HKS41}%
   \or%
-    \def\tud@color@titlepage{HKS41}%
-    \def\tud@color@titlefont{HKS41!30}%
-    \def\tud@color@titlehead{white}%
+    \def\tud@title@pagecolor{HKS41}%
+    \def\tud@title@logocolor{white}%
+    \def\tud@title@fontcolor{HKS41!30}%
   \fi%
   \begin{titlepage}%
     \ifx\tud@titlepagenumber\relax\else%
@@ -3344,13 +3302,12 @@
       \fi%
     \fi%
     \def\@tempa{%
-      \tud@pagecolor{\tud@color@titlepage}%
-      \def\tud@head@color{\tud@color@titlehead}%
-      \color{\tud@color@titlefont}%
-      \addtokomafont{pagenumber}{\sffamily\color{\tud@color@titlefont}}%
-      \addtokomafont{footnote}{\sffamily\color{\tud@color@titlefont}}%
+      \tud@pagecolor{\tud@title@pagecolor}%
+      \def\tud@head@logocolor{\tud@title@logocolor}%
+      \color{\tud@title@fontcolor}%
+      \addtokomafont{pagenumber}{\sffamily\color{\tud@title@fontcolor}}%
+      \addtokomafont{footnote}{\sffamily\color{\tud@title@fontcolor}}%
       \thispagestyle{empty.tudheadings}%
-      \tud@ddc@enlargepage%
     }%
     \if@tud@cover%
       \begingroup%
@@ -3461,7 +3418,6 @@
     \ifx\@referee\@empty\else\tud@title@wrn{referee}\fi%
     \ifx\@professor\@empty\else\tud@title@wrn{professor}\fi%
     \vskip 2\bigskipamount%
-    \tud@ifinpslist{\titlepagestyle}{\tud@ddc@enlargepage}{}%
   \endgroup%
 }
 \newcommand*\tud@multiple@field{}
@@ -3555,7 +3511,6 @@
   \matriculationnumber,\studentid,\matriculationid,%
   \placeofbirth,\birthplace,\dateofbirth,\birthday,%
 }
-\RequirePackage{afterpage}[1995/10/27]
 \newcommand\maketitleonecolumn[2][]{%
   \if@twocolumn%
     \if@titlepage%
@@ -3578,27 +3533,13 @@
     \let\newpage\relax%
     \global\setbox\tud@title@twocolumn@box\vbox{#1\bigskip}%
   \endgroup%
-  \setlength{\@tempdimc}{\textheight}%
-  \tud@ifinpslist{\titlepagestyle}{%
-    \ifstr{\tud@currentgeometry}{tudareaddc}{}{%
-      \tud@ddc@check%
-      \ifcase \@tempb\relax\else%
-        \setlength{\@tempdimc}{\dimexpr\textheight-\tud@dim@ddcdiff\relax}%
-      \fi%
-    }{}%
-  }{}%
-  \@whiledim\@tempdimc<\ht\tud@title@twocolumn@box\do{%
+  \@whiledim\textheight<\ht\tud@title@twocolumn@box\do{%
     \splittopskip\topskip%
     \splitmaxdepth\maxdepth%
-    \vsplit\tud@title@twocolumn@box to \@tempdimc%
+    \vsplit\tud@title@twocolumn@box to \textheight%
     \clearpage%
-    \setlength{\@tempdimc}{\textheight}%
   }%
   \twocolumn[\unvbox\tud@title@twocolumn@box]%
-  \ifdim\@tempdimc<\textheight\relax%
-    \enlargethispage{-\tud@dim@ddcdiff}%
-    \afterpage{\enlargethispage{-\tud@dim@ddcdiff}}%
-  \fi%
 }
 \newcommand*\tud@letsubjectthesis{%
   \if@tud@subjectthesis\ifx\@thesis\@empty\else%
@@ -3642,15 +3583,15 @@
     \tud@layout@process%
     \if@tud@cover@cdlayout%
       \ifcase \tud@layout@cover\relax%
-        \let\coverpagetopmargin\tud@dim@top%
+        \let\coverpagetopmargin\tud@dim@margin%
       \else%
         \def\coverpagetopmargin{\dimexpr%
           \tud@dim@headheight+\tud@dim@barheight+\tud@dim@headsep\relax%
         }%
       \fi%
-      \let\coverpagebottommargin\tud@dim@bottom%
-      \let\coverpageleftmargin\tud@dim@left%
-      \let\coverpagerightmargin\tud@dim@right%
+      \let\coverpagebottommargin\tud@dim@margin%
+      \let\coverpageleftmargin\tud@dim@margin%
+      \let\coverpagerightmargin\tud@dim@rmargin%
     \else%
       \ifcase \tud@layout@cover\relax\else%
         \expandafter\def\expandafter\coverpagetopmargin\expandafter{%
@@ -3667,6 +3608,7 @@
       \ifx\tud@titlepagenumber\relax\gdef\tud@titlepagenumber{1}\fi%
       \tud@cmd@use{maketitle}[\tud@titlepagenumber]%
     \else%
+      % ToDo §§§ prüfen
       \@tud@covertrue%
       \@titlepagetrue%
       \edef\titlepage@restore{%
@@ -3677,34 +3619,34 @@
         \noexpand\let\noexpand\titlepage@restore\noexpand\relax%
       }%
       \begingroup%
-      \topmargin=\dimexpr \coverpagetopmargin-1in\relax%
-      \oddsidemargin=\dimexpr \coverpageleftmargin-1in\relax%
-      \evensidemargin=\dimexpr \coverpageleftmargin-1in\relax%
-      \textwidth=\dimexpr%
-        \paperwidth-\coverpageleftmargin-\coverpagerightmargin\relax%
-      \if@tud@cover@cdlayout%
-        \textheight=\dimexpr%
-          \paperheight-\coverpagetopmargin-\coverpagebottommargin\relax%
-        \headheight=0pt%
-        \headsep=0pt%
-      \else%
-        \textheight=\dimexpr\paperheight-\coverpagebottommargin%
-          -\tud@dim@headheight-\tud@dim@barheight%
-          -\tud@dim@headsep-\tud@dim@bottom\relax%
-        \headheight=\dimexpr\tud@dim@headheight+\tud@dim@barheight\relax%
-        \headsep=\tud@dim@headsep%
-      \fi%
-      \footskip=\tud@dim@footskip%
-      \@colht=\textheight%
-      \@colroom=\textheight%
-      \vsize=\textheight%
-      \columnwidth=\textwidth%
-      \hsize=\columnwidth%
-      \linewidth=\hsize%
-      \tud@dim@headdiff=\z@%
-      \ifdef{\hypersetup}{\hypersetup{pageanchor=false}}{}%
-      \tud@maketitle%
-      \clearpage%
+        \topmargin=\dimexpr \coverpagetopmargin-1in\relax%
+        \oddsidemargin=\dimexpr \coverpageleftmargin-1in\relax%
+        \evensidemargin=\dimexpr \coverpageleftmargin-1in\relax%
+        \textwidth=\dimexpr%
+          \paperwidth-\coverpageleftmargin-\coverpagerightmargin\relax%
+        \if@tud@cover@cdlayout%
+          \textheight=\dimexpr%
+            \paperheight-\coverpagetopmargin-\coverpagebottommargin\relax%
+          \headheight=0pt%
+          \headsep=0pt%
+        \else%
+          \textheight=\dimexpr\paperheight-\coverpagebottommargin%
+            -\tud@dim@headheight-\tud@dim@barheight%
+            -\tud@dim@headsep-\tud@dim@margin\relax%
+          \headheight=\dimexpr\tud@dim@headheight+\tud@dim@barheight\relax%
+          \headsep=\tud@dim@headsep%
+        \fi%
+        \footskip=\tud@dim@footskip%
+        \@colht=\textheight%
+        \@colroom=\textheight%
+        \vsize=\textheight%
+        \columnwidth=\textwidth%
+        \hsize=\columnwidth%
+        \linewidth=\hsize%
+        \tud@dim@headdiff=\z@%
+        \ifdef{\hypersetup}{\hypersetup{pageanchor=false}}{}%
+        \tud@maketitle%
+        \clearpage%
       \csname titlepage@restore\endcsname%
     \fi%
   \endgroup%
