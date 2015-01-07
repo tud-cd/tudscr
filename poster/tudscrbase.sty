@@ -1,0 +1,272 @@
+%%
+%% This is file `tudscrbase.sty',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% tudscr-version.dtx  (with options: `package')
+%% tudscr-base.dtx  (with options: `package')
+%% 
+%% ============================================================================
+%% 
+%%  TUD-KOMA-Script
+%%  Copyright (c) Falk Hanisch <tudscr[at]gmail.com>, 2012-2014
+%% 
+%% ============================================================================
+%% 
+%%  This work may be distributed and/or modified under the conditions of the
+%%  LaTeX Project Public License, version 1.3c of the license. The latest
+%%  version of this license is in http://www.latex-project.org/lppl.txt and
+%%  version 1.3c or later is part of all distributions of LaTeX 2005/12/01
+%%  or later and of this work. This work has the LPPL maintenance status
+%%  "author-maintained". The current maintainer and author of this work
+%%  is Falk Hanisch.
+%% 
+%% ----------------------------------------------------------------------------
+%% 
+%%  Dieses Werk darf nach den Bedingungen der LaTeX Project Public Lizenz,
+%%  Version 1.3c, verteilt und/oder veraendert werden. Die neuste Version
+%%  dieser Lizenz ist http://www.latex-project.org/lppl.txt und Version 1.3c
+%%  ist Teil aller Verteilungen von LaTeX 2005/12/01 oder spaeter und dieses
+%%  Werks. Dieses Werk hat den LPPL-Verwaltungs-Status "author-maintained",
+%%  wird somit allein durch den Autor verwaltet. Der aktuelle Verwalter und
+%%  Autor dieses Werkes ist Falk Hanisch.
+%% 
+%% ============================================================================
+%% 
+%%% From File: tudscr-version.dtx
+\begingroup%
+  \catcode`\@11\relax%
+  \ifx\TUDVersion\undefined%
+    \newcommand*\@TUDVersion[1]{\gdef\TUDVersion{#1}}%
+  \else%
+    \newcommand*\@TUDVersion[1]{%
+      \def\@tempa{#1}%
+      \ifx\TUDVersion\@tempa\else%
+        \@latex@warning@no@line{%
+          \noexpand\TUDVersion\space is `\TUDVersion',\MessageBreak%
+          but `#1' was expected!\MessageBreak%
+          You should not use classes, packages or files from\MessageBreak%
+          different TUD-KOMA-Script-Bundle versions%
+        }%
+      \fi%
+    }%
+  \fi%
+  \@TUDVersion{2015/01/05 v2.03-alpha TUD-KOMA-Script}%
+\endgroup%
+\providecommand*\tudscrmail{tudscr@gmail.com}
+\@ifundefined{TUDScript}{%
+  \DeclareRobustCommand{\TUDScript}{%
+    \ifdin{TUD-KOMA-SCRIPT}{%
+      \textsf{T\kern.05em U\kern.05em D\kern.1em-\kern.1em}\KOMAScript%
+    }\csname xspace\endcsname%
+  }%
+}{}
+%%% From File: tudscr-base.dtx
+\NeedsTeXFormat{LaTeX2e}[2011/06/27]
+\ProvidesPackage{tudscrbase}[%
+  2015/01/05 v2.03-alpha TUD-KOMA-Script
+  package
+  (basics for the bundle)%
+]
+\RequirePackage{scrbase}[2013/12/19]
+\RequirePackage{kvsetkeys}[2012/04/25]
+\RequirePackage{etoolbox}[2011/01/03]
+\newcommand*\ifxblank{\expandafter\ifblank\expandafter}
+\newcommand*\ifxnumber[1]{%
+  \if\relax\detokenize\expandafter{\romannumeral-0#1}\relax%
+    \expandafter\@firstoftwo%
+  \else%
+    \expandafter\@secondoftwo%
+  \fi%
+}
+\newcommand*\ifstrbool[4]{%
+  \ifstr{#1}{true}{#2}{%
+    \ifstr{#1}{on}{#2}{%
+      \ifstr{#1}{yes}{#2}{%
+        \ifstr{#1}{false}{#3}{%
+          \ifstr{#1}{no}{#3}{%
+            \ifstr{#1}{off}{#3}{%
+              #4%
+            }%
+          }%
+        }%
+      }%
+    }%
+  }%
+}
+\DefineFamily{TUD}
+\newcommand*\TUDProcessOptions{\FamilyProcessOptions{TUD}}
+\newcommand*\TUDExecuteOptions{\FamilyExecuteOptions{TUD}}
+\newcommand*\TUDDefaultOptions{cd,cdfont,tudbookmarks}
+\newcommand*\TUDoptions{\FamilyOptions{TUD}}
+\newcommand*\TUDoption{\FamilyOption{TUD}}
+\newcommand*\TUD@noworlater{\AtEndOfClass}
+\AtEndOfClass{\let\TUD@noworlater\@firstofone}
+\newcommand*\TUD@key[2][.\@currname.\@currext]{%
+  \DefineFamilyMember{TUD}%
+  \kernel@ifnextchar[%]
+    {\TUD@@key[#1]{#2}}{\TUD@@@key[#1]{#2}}%
+}
+\def\TUD@@key[#1]#2[#3]#4{%
+  \DefineFamilyKey[#1]{TUD}{#2}[{#3}]{\TUD@noworlater{#4}}%
+}
+\def\TUD@@@key[#1]#2#3{%
+  \DefineFamilyKey[#1]{TUD}{#2}{\TUD@noworlater{#3}}%
+}
+\newcommand*\TUD@ifkey[1][.\@currname.\@currext]{%
+  \DefineFamilyMember{TUD}%
+  \FamilyBoolKey[#1]{TUD}%
+}
+\newcommand*\TUD@set@ifkey{\FamilySetBool{TUD}}
+\newcommand*\TUD@numkey[1][.\@currname.\@currext]{%
+  \DefineFamilyMember{TUD}%
+  \FamilyNumericalKey[#1]{TUD}%
+}
+\newcommand*\TUD@numkey@bool{%
+  {false}{0},{off}{0},{no}{0},{true}{1},{on}{1},{yes}{1}%
+}
+\newcommand*\TUD@set@numkey{\FamilySetNumerical{TUD}}
+\newcommand*\TUD@unknown@keyval{\FamilyUnknownKeyValue{TUD}}
+\newcommand*\TUD@key@lock[2][.\@currname.\@currext]{%
+  \newbool{@tud@#2@locked}%
+  \TUD@key[{#1}]{#2}%
+}
+\newcommand*\TUD@std@ifkey@lock[2]{%
+  \ifbool{@tud@#1@locked}{}{%
+    \TUDoption{#1}{#2}%
+    \boolfalse{@tud@#1@locked}%
+  }%
+}
+\let\TUD@std@numkey@lock\TUD@std@ifkey@lock
+\newcommand*\TUD@set@ifkey@lock[1]{%
+  \booltrue{@tud@#1@locked}%
+  \TUD@set@ifkey{#1}%
+}
+\newcommand*\TUD@set@numkey@lock[1]{%
+  \booltrue{@tud@#1@locked}%
+  \TUD@set@numkey{#1}%
+}
+\newcommand*\csdef@lock[2]{%
+  \csdef{#1}{#2}%
+  \newbool{#1@locked}%
+}
+\newcommand*\csstd@lock[2]{%
+  \ifbool{#1@locked}{}{%
+    \csdef{#1}{#2}%
+    \boolfalse{#1@locked}%
+  }%
+}
+\newcommand*\csset@lock[2]{%
+  \csdef{#1}{#2}%
+  \booltrue{#1@locked}%
+}
+\newcommand*\newbool@lock[2][false]{%
+  \newbool{#2}%
+  \newbool{#2@locked}%
+  \setbool{#2}{#1}%
+}
+\newcommand*\stdbool@lock[2]{%
+  \ifbool{#1@locked}{}{%
+    \setbool{#1}{#2}%
+    \boolfalse{#1@locked}%
+  }%
+}
+\newcommand*\setbool@lock[2]{%
+  \setbool{#1}{#2}%
+  \booltrue{#1@locked}%
+}
+\newcommand*\tud@cmd@store[1]{%
+  \ifcsdef{@@tud@#1}{}{\csletcs{@@tud@#1}{#1}}%
+}
+\newcommand*\tud@cmd@reset[1]{%
+  \ifcsdef{@@tud@#1}{%
+    \csletcs{#1}{@@tud@#1}%
+  }{}%
+}
+\newcommand*\tud@cmd@use[1]{%
+  \ifcsdef{@@tud@#1}{\@nameuse{@@tud@#1}}{\@nameuse{#1}}%
+}
+\newcommand*\tud@cmd@restore[1]{%
+  \ifcsdef{@@tud@#1}{%
+    \csletcs{#1}{@@tud@#1}%
+    \csundef{@@tud@#1}%
+  }{}%
+}
+\newcommand*\tud@patch@wrn[1]{%
+  \PackageWarning{tudscrbase}{%
+    It wasn't possible to patch `#1'.\MessageBreak%
+    Please contact the author via \tudscrmail.\MessageBreak%
+    Without a bugfix an erroneous output\MessageBreak%
+    may occur.
+  }%
+}
+\newcommand*\TUD@parameter@family{}%
+\newcommand*\TUD@parameter[2]{%
+  \ifxblank{#1}{}{\xdef\TUD@parameter@family{#1}}%
+  #2%
+  \global\let\TUD@parameter@family\relax%
+}
+\let\TUD@parameter@family\relax%
+\newcommand*\TUD@parameter@checkfamily[1]{%
+  \ifx\TUD@parameter@family\relax%
+    \PackageError{tudscrbase}{%
+      No family for keys given.
+    }{%
+      You have to use \string#1\space within the\MessageBreak%
+      second argument of \string\TUD@parameter. The first \MessageBreak%
+      argument of \string\TUD@parameter\space has to be a unique family name.
+    }%
+  \fi%
+}
+\newcommand*\TUD@parameter@define[1][]{%
+  \ifxblank{#1}{%
+    \TUD@parameter@checkfamily{\TUD@parameter@define}%
+    \expandafter\define@key\expandafter{\TUD@parameter@family}%
+  }{%
+    \expandafter\define@key\expandafter{#1}%
+  }%
+}
+\newcommand*\TUD@parameter@let[3][]{%
+  \ifxblank{#1}{%
+    \TUD@parameter@checkfamily{\TUD@parameter@let}%
+    \@expandtwoargs{\csletcs}{%
+      KV@\TUD@parameter@family @#2%
+    }{%
+      KV@\TUD@parameter@family @#3%
+    }%
+    \@expandtwoargs{\csletcs}{%
+      KV@\TUD@parameter@family @#2@default%
+    }{%
+      KV@\TUD@parameter@family @#3@default%
+    }%
+  }{%
+    \@expandtwoargs{\csletcs}{KV@#1@#2}{KV@#1@#3}%
+    \@expandtwoargs{\csletcs}{KV@#1@#2@default}{KV@#1@#3@default}%
+  }%
+}
+\newcommand*\TUD@parameter@sethandler[1][]{%
+  \ifxblank{#1}{%
+    \TUD@parameter@checkfamily{\TUD@parameter@sethandler}%
+    \expandafter\kv@set@family@handler\expandafter{\TUD@parameter@family}%
+  }{%
+    \expandafter\kv@set@family@handler\expandafter{#1}%
+  }%
+}
+\newcommand*\TUD@parameter@set[1][]{%
+  \ifxblank{#1}{%
+    \TUD@parameter@checkfamily{\TUD@parameter@set}%
+    \expandafter\kvsetkeys\expandafter{\TUD@parameter@family}%
+  }{%
+    \expandafter\kvsetkeys\expandafter{#1}%
+  }%
+}
+\newcommand*\TUD@parameter@wrn[2]{%
+  \PackageWarning{tudscrbase}{%
+    Parameter `#1' can only be used with values:\MessageBreak%
+    #2%
+  }%
+}
+\endinput
+%%
+%% End of file `tudscrbase.sty'.

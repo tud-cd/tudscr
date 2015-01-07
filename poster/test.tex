@@ -1,12 +1,63 @@
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
+\documentclass[ngerman,automark]{scrreprt}
+\usepackage{selinput}\SelectInputMappings{adieresis={ä},germandbls={ß}}
+\usepackage[T1]{fontenc}
+\usepackage{babel}
+\usepackage{blindtext}
+\usepackage[automark]{scrlayer-scrpage}
+\usepackage{xcolor}
+\usepackage{blindtext}
+
+\definecolor{HKS41}{cmyk}{1.00,0.70,0.10,0.50}
+\DeclareLayer[
+  background,page,%
+  contents={%
+    \color{HKS41}%
+    \rule[-\dp\strutbox]{\layerwidth}{\layerheight}%
+  },%
+]{mylayer}
+\DeclareNewPageStyleByLayers[%
+  onbackground=\color{white},
+]{mypagestyle}{%
+  scrheadings.head.odd,%
+  scrheadings.head.even,%
+  scrheadings.head.oneside,%
+  scrheadings.head.above.line,%
+  scrheadings.head.below.line,%
+  scrheadings.foot.odd,%
+  scrheadings.foot.even,%
+  scrheadings.foot.oneside,%
+  scrheadings.foot.above.line,%
+  scrheadings.foot.below.line,%
+  mylayer,%
+}
+\begin{document}
+\Blindtext[4][2]
+\clearpage
+
+\pagestyle{mypagestyle}
+{
+\color{white}
+\Blindtext[4][2]
+\clearpage
+}
+
+\pagestyle{scrheadings}
+\Blindtext[4][2]
+\end{document}
+
+
+
+\RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[%
-  ngerman,
-%  titlepage,
+  ngerman,%
+  %twoside,automark,
+%  titlepage=no,
 %  widehead,
   ddcfoot,color=pale,
 %  geometry=no,
   DIV=12,%twoside,
-%  headinclude,
+  headinclude,
 %  footinclude,
 %  twoside,
 %  draft,
@@ -23,28 +74,27 @@
 \usepackage{babel}
 \usepackage{blindtext}
 %\usepackage{showframe}
-\usepackage{layout}
+%\usepackage{layout}
 \usepackage{tudscrcolor,twocolfix}
 \usepackage{etoolbox}
 \usepackage{scrlayer-scrpage}
 
 \begin{document}
-\ifcsdef{tudcls@name}{%
 \faculty{Juristische Fakultät}
 \department{Fachrichtung Strafrecht}
 \institute{Institut für Kriminologie}
 \chair{Lehrstuhl für Kriminalprognose und noch etwas}
 \extraheadline{Lehrstuhl für Kriminalprognose}
-%\TUDoptions{ddcfoot}
-}{}
+
 \date{16.12.2014}
 \author{Mickey Mouse}
 \title{Die Klasse tudscrposter}
 \subtitle{Eine \LaTeX-Klasse für die Evaluationsposter}
 %\maketitle
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \makeatletter
-\ifcsdef{tudcls@name}{%
 \DeclareNewLayer[%
   background,align=tl,%
   contents={%
@@ -60,10 +110,6 @@
     \rule{\layerwidth}{\tud@dim@barheight}
   },%
 ]{tudheadings.head.bar}%
-}{}
-
-
-
 \DeclareNewLayer[%
   background,
   hoffset=0pt,
@@ -77,7 +123,6 @@
     \rule{\layerwidth}{\layerheight}%
   },%
 ]{tudheadings.foot.back}%
-
 \RedeclareLayer[%
   clone=tudheadings.foot.back,%
   hoffset=\dimexpr
@@ -88,26 +133,24 @@
   width=\textwidth,%
   height=\dimexpr\paperheight-\layeryoffset-1pt\relax,%
   contents={%
-    \hfill\vbox to \layerheight{\vfil\hbox{\tud@footlogo}\vfil}%
-  },%
-]{tudheadings.foot.ddclogo}%
-
+    \hfill\vbox to \layerheight{\vfil\hbox{\tud@ddclogo}\vfil}%
 % ToDo §§§ evtl separater Layer für Drittlogos
 %\vbox to \layerheight{\vfil\hbox{\includegraphics[height=1cm]{DDC-07}}\vfil}
-
-
-\ifcsdef{tudcls@name}{%
-\DeclareNewPageStyleByLayers{color.tudheadings}{%
+  },%
+]{tudheadings.foot.logo}%
+\DeclareNewPageStyleByLayers[%
+  onforeground=\color{red},% §§§ hier stimmt was nicht
+]{color.tudheadings}{%
   tudheadings.head.back,%§§§
   tudheadings.head.bar,%§§§
+  tudheadings.foot.back,%§§§
   tudheadings.head.mainlogo,%
   tudheadings.head.logo,%
-%  tudheadings.head.topline,%
-%  tudheadings.head.bottomline,%
-%  tudheadings.head.topwideline,%
-%  tudheadings.head.bottomwideline,%
+  tudheadings.head.topline,%
+  tudheadings.head.bottomline,%
+  tudheadings.head.topwideline,%
+  tudheadings.head.bottomwideline,%
   tudheadings.head.text,%
-  tudheadings.foot.back,%§§§
   tudheadings.foot.ddclogo,%
   scrheadings.foot.odd,%
   scrheadings.foot.even,%
@@ -115,102 +158,41 @@
   scrheadings.foot.above.line,%
   scrheadings.foot.below.line%
 }%
-\listadd\tud@pslist{color.tudheadings}
 \AddToLayerPageStyleOptions{color.tudheadings}{%
-  onselect={\tud@ps@init},%
+  onselect={%
+    \tud@ps@init%
+    \letcs\ps@plain{ps@plain.tudheadings}%
+    \letcs\ps@headings{ps@tudheadings}%
+    \def\sls@currentheadings{tudheadings}%
+    \def\sls@currentplain{plain.tudheadings}%
+    {
+    \TUDoptions{widehead}%
+    \color{red}%
+    }
+  },%
   onbackground=\def\tud@head@logocolor{white},%
-}%
-
-}{%
-\AddLayersToPageStyle{plain.scrheadings}{%
-  tudheadings.foot.back,%
 }
-}
-\letcs\ps@empty{ps@color.tudheadings}
+\DeclareNewPageStyleAlias{colour.tudheadings}{color.tudheadings}%
+\DeclareNewPageStyleAlias{color}{color.tudheadings}%
+\DeclareNewPageStyleAlias{colour}{color.tudheadings}%
+\listadd\tud@pslist{color.tudheadings}
 
-\newcommand{\showlayout}{%
-\noindent
-%\the\footskip
-%\the\footheight
-%\the\tud@ta@footheight
-\layout*
+\AfterSelectAnyPageStyle{%
+  \ifstr{\GetRealPageStyle{#1}}{color.tudheadings}{{\color{red}}}{bbb}
 }
 
-%\renewcommand*\titlepagestyle{color.tudheadings}
-
-
-\maketitle%onecolumn{\blindtext\Blindtext}
-
-\part{title}
-\renewcommand{\chapterpagestyle}{tudheadings}
-\chapter{title}
-
-\blindtext
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+bla 
 \clearpage
-
-\pagestyle{scrheadings}
-\Blindtext
-
 \pagestyle{color.tudheadings}
-\Blindtext
-\meaning\tud@head@logocolor
-%\clearpage
-\TUDoptions{parttitle,cd=pale}
-\meaning\tud@head@logocolor
-\part{title}
+
+%\tud@ifinpslist{\@nameuse{currentpagestyle}}{aaa}{bbb}%
+
 \Blindtext
 
-
-%\recalctypearea
-%\the\tud@dim@margin
-%
-%\the\tud@dim@footarea
-%
-%\the\tud@dim@footsep
-%
-%\setlength{\@tempdima}{21mm}
-%\the\@tempdima
-%%\the\footheight
-%
-%%\the\footskip
-%
-%%\the\baselineskip
-
-%\showlayout
-
-%\setlength{\@tempdima}{\dimexpr\tud@dim@footarea-\tud@ta@footheight\relax}
-%\ifdim\@tempdima<\z@\relax\setlength{\@tempdima}{\z@}\fi%
-%\setlength{\footheight}{\dimexpr\footheight+\@tempdima}
-%\setlength{\footskip}{\dimexpr\footskip+\@tempdima}
-%\showlayout
-
-%\KOMAoptions{footheight=\tud@dim@footarea}
-%\recalctypearea
-%\showlayout
-
-%\KOMAoptions{footlines=1.25}
-%\recalctypearea
-%\showlayout
-
-
-
-%\TUDoptions{ddcfoot=on}
-%\recalctypearea
-%\showlayout
-
-%\setlength{\@tempdima}{\dimexpr\tud@dim@footarea-\tud@ta@footheight\relax}
-%\ifdim\@tempdima<\z@\relax\setlength{\@tempdima}{\z@}\fi%
-%\setlength{\footheight}{\dimexpr\footheight+\@tempdima}
-%\setlength{\footskip}{\dimexpr\footskip+\@tempdima}
-%\showlayout
-%
-%\KOMAoptions{footheight=\tud@dim@footarea}
-%\recalctypearea
-%\showlayout
-%
-%\KOMAoptions{footlines=1.25}
-%\recalctypearea
-%\showlayout
+\clearpage
+\pagestyle{headings}
+\Blindtext
 
 \end{document}
 
