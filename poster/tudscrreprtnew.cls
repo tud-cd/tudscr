@@ -75,7 +75,7 @@
 \providecommand*\tudscrmail{tudscr@gmail.com}
 \newcommand*\cls@name{report}
 \newcommand*\scrcls@name{scrreprt}
-\newcommand*\tudcls@name{tudscrreprt}
+\newcommand*\tudcls@name{tudscrreprtnew}
 \NeedsTeXFormat{LaTeX2e}[2011/06/27]
 \ProvidesClass{\tudcls@name}[%
   2015/01/05 v2.03-alpha TUD-KOMA-Script
@@ -305,7 +305,7 @@
 \TUD@key{ddc}[true]{%
   \TUD@set@numkey{ddc}{tud@ddc}{\tud@ddc@switch}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \tud@ifinpslist{\@nameuse{currentpagestyle}}{\clearpage}{}%
+    \if@atdocument\tud@ifinpslist{\currentpagestyle}{\clearpage}{}\fi%
     \ifcase \tud@ddc\relax%
       \@tud@ddc@autosetfalse%
     \else%
@@ -322,7 +322,7 @@
     \if@tud@ddc@save%
       \begingroup%
         \let\tud@ddc@head\tud@ddc@save%
-        \tud@ifinpslist{\@nameuse{currentpagestyle}}{\clearpage}{}%
+        \if@atdocument\tud@ifinpslist{\currentpagestyle}{\clearpage}{}\fi%
       \endgroup%
     \fi%
     \ifcase \tud@ddc@head\relax\else%
@@ -341,7 +341,7 @@
     \if@tud@ddc@save%
       \begingroup%
         \let\tud@ddc@foot\tud@ddc@save%
-        \tud@ifinpslist{\@nameuse{currentpagestyle}}{\clearpage}{}%
+        \if@atdocument\tud@ifinpslist{\currentpagestyle}{\clearpage}{}\fi%
       \endgroup%
     \fi%
     \ifcase \tud@ddc@foot\relax\else%
@@ -365,12 +365,14 @@
     \fi%
   \fi%
 }
-\newcommand*\tud@ifinpslist[3]{\xifinlist{#1}{\tud@pslist}{#2}{#3}}
-\AfterPackage*{scrlayer-scrpage}{%
-  \renewcommand*\tud@ifinpslist[3]{%
-    \xifinlist{\GetRealPageStyle{#1}}{\tud@pslist}{#2}{#3}%
-  }%
+%% raus ab v3.15 ToDo
+\providecommand*\GetRealPageStyle[1]{#1}
+\BeforePackage{scrlayer-scrpage}{\undef\GetRealPageStyle}
+\newcommand*\tud@ifinpslist[3]{%
+  \xifinlist{\GetRealPageStyle{#1}}{\tud@pslist}{#2}{#3}%
 }
+%% rein ab v3.15 ToDo
+%%\newcommand*\tud@ifinpslist[3]{\xifinlist{#1}{\tud@pslist}{#2}{#3}}
 \newcommand*\tud@pslist{}
 \forcsvlist{\listadd\tud@pslist}{%
   tudheadings,plain.tudheadings,empty.tudheadings%
@@ -624,27 +626,21 @@
       \def\tud@cleardoublepage{\cleardoubleoddstandardpage}%
       \FamilyKeyStateProcessed%
     }{%
-      \ifcsdef{ps@#1}{%
-        \def\tud@cleardoublepage{\cleardoubleoddpageusingstyle{#1}}%
-        \FamilyKeyStateProcessed%
-      }{%
-        \ifx\@currname\tudcls@name%
-          \ifx\@currext\@clsextension%
-            \ifstr{#1}{headings}{%
-              \def\tud@cleardoublepage{\cleardoubleoddpageusingstyle{#1}}%
-              \FamilyKeyStateProcessed%
-            }{%
-              \tud@ifinpslist{#1}{%
-                \def\tud@cleardoublepage{\cleardoubleoddpageusingstyle{#1}}%
-                \FamilyKeyStateProcessed%
-              }{}%
-            }%
-          \fi%
-        \fi%
+      \AfterPreamble{%
+        \ifcsdef{ps@#1}{%
+          \def\tud@cleardoublepage{\cleardoubleoddpageusingstyle{#1}}%
+        }{%
+          \ClassError{\tudcls@name}{`#1' is no valid pagestyle}{%
+            You tried to use `#1' as a pagestyle for option\MessageBreak%
+            `cleardoublespecialpage', but it was never defined%
+          }%
+        }%
       }%
+      \FamilyKeyStateProcessed%
     }}}%
   \fi%
 }
+% §§§ clearcolor via scrlayer-scrpage
 \newcommand*\tud@cleardoublespecialpage[2][]{%
   \begingroup%
     #2%
@@ -653,13 +649,11 @@
         \def\@tempa{%
           #1%
           \tud@cleardoublepage%
-          \tud@restorepagecolor%
           \endgroup%
         }%
       \else%
         \def\@tempa{%
           \endgroup%
-          \tud@restorepagecolor%
           #1%
           \tud@cleardoublepage%
         }%
@@ -667,7 +661,6 @@
     }{%
       \if@tud@clearcolor\tud@clearcolor@wrn\fi%
       \def\@tempa{%
-        \tud@restorepagecolor%
         \endgroup%
         #1%
       }%
@@ -985,56 +978,56 @@
     \newcommand*\textdbn{}%
     \DeclareTextFontCommand{\textdbn}{\dinbn}%
   \fi%
-  \DeclareMathVersion{univers}
-  \DeclareMathVersion{universbold}
-  \SetSymbolFont{operators}{univers}{OT1}{\tud@univers}{l}{n}
-  \SetSymbolFont{letters}{univers}{OML}{\tud@univers}{l}{sl}
-  \SetSymbolFont{symbols}{univers}{OMS}{\tud@univers}{l}{n}
-  \SetSymbolFont{largesymbols}{univers}{OMX}{iwona}{m}{n}
-  \SetSymbolFont{operators}{universbold}{OT1}{\tud@univers}{b}{n}
-  \SetSymbolFont{letters}{universbold}{OML}{\tud@univers}{b}{sl}
-  \SetSymbolFont{symbols}{universbold}{OMS}{\tud@univers}{b}{n}
-  \SetSymbolFont{largesymbols}{universbold}{OMX}{iwona}{b}{n}
-  \SetMathAlphabet{\mathbf}{univers}{\tud@mathenc}{\tud@univers}{b}{n}
-  \SetMathAlphabet{\mathsf}{univers}{\tud@mathenc}{\tud@univers}{l}{n}
-  \SetMathAlphabet{\mathit}{univers}{\tud@mathenc}{\tud@univers}{l}{sl}
-  \SetMathAlphabet{\mathtt}{univers}{\tud@mathenc}{\tud@univers t}{l}{n}
-  \SetMathAlphabet{\mathbf}{universbold}{\tud@mathenc}{\tud@univers}{eb}{n}
-  \SetMathAlphabet{\mathsf}{universbold}{\tud@mathenc}{\tud@univers}{b}{n}
-  \SetMathAlphabet{\mathit}{universbold}{\tud@mathenc}{\tud@univers}{b}{sl}
-  \SetMathAlphabet{\mathtt}{universbold}{\tud@mathenc}{\tud@univers t}{b}{n}
-  \DeclareMathVersion{dinbold}
-  \SetSymbolFont{operators}{dinbold}{\tud@mathenc}{\tud@dinbold}{b}{n}
-  \SetSymbolFont{letters}{dinbold}{OML}{\tud@dinbold}{b}{sl}
-  \SetSymbolFont{symbols}{dinbold}{OMS}{\tud@dinbold}{b}{n}
-  \SetSymbolFont{largesymbols}{dinbold}{OMX}{iwona}{ebc}{n}
-  \SetMathAlphabet{\mathbf}{dinbold}{\tud@mathenc}{\tud@dinbold}{b}{n}
-  \SetMathAlphabet{\mathsf}{dinbold}{\tud@mathenc}{\tud@dinbold}{b}{n}
-  \SetMathAlphabet{\mathit}{dinbold}{\tud@mathenc}{\tud@dinbold}{b}{sl}
-  \DeclareMathSymbol{\upDelta}{\mathalpha}{operators}{1}
-  \DeclareMathSymbol{\upOmega}{\mathalpha}{operators}{10}
-  \DeclareMathSymbol{\upGamma}{\mathalpha}{operators}{0}
-  \DeclareMathSymbol{\upDelta}{\mathalpha}{operators}{1}
-  \DeclareMathSymbol{\upTheta}{\mathalpha}{operators}{2}
-  \DeclareMathSymbol{\upLambda}{\mathalpha}{operators}{3}
-  \DeclareMathSymbol{\upXi}{\mathalpha}{operators}{4}
-  \DeclareMathSymbol{\upPi}{\mathalpha}{operators}{5}
-  \DeclareMathSymbol{\upSigma}{\mathalpha}{operators}{6}
-  \DeclareMathSymbol{\upUpsilon}{\mathalpha}{operators}{7}
-  \DeclareMathSymbol{\upPhi}{\mathalpha}{operators}{8}
-  \DeclareMathSymbol{\upPsi}{\mathalpha}{operators}{9}
-  \DeclareMathSymbol{\upOmega}{\mathalpha}{operators}{10}
-  \DeclareMathSymbol{\varGamma}{\mathalpha}{letters}{0}
-  \DeclareMathSymbol{\varDelta}{\mathalpha}{letters}{1}
-  \DeclareMathSymbol{\varTheta}{\mathalpha}{letters}{2}
-  \DeclareMathSymbol{\varLambda}{\mathalpha}{letters}{3}
-  \DeclareMathSymbol{\varXi}{\mathalpha}{letters}{4}
-  \DeclareMathSymbol{\varPi}{\mathalpha}{letters}{5}
-  \DeclareMathSymbol{\varSigma}{\mathalpha}{letters}{6}
-  \DeclareMathSymbol{\varUpsilon}{\mathalpha}{letters}{7}
-  \DeclareMathSymbol{\varPhi}{\mathalpha}{letters}{8}
-  \DeclareMathSymbol{\varPsi}{\mathalpha}{letters}{9}
-  \DeclareMathSymbol{\varOmega}{\mathalpha}{letters}{10}
+  \DeclareMathVersion{univers}%
+  \DeclareMathVersion{universbold}%
+  \SetSymbolFont{operators}{univers}{OT1}{\tud@univers}{l}{n}%
+  \SetSymbolFont{letters}{univers}{OML}{\tud@univers}{l}{sl}%
+  \SetSymbolFont{symbols}{univers}{OMS}{\tud@univers}{l}{n}%
+  \SetSymbolFont{largesymbols}{univers}{OMX}{iwona}{m}{n}%
+  \SetSymbolFont{operators}{universbold}{OT1}{\tud@univers}{b}{n}%
+  \SetSymbolFont{letters}{universbold}{OML}{\tud@univers}{b}{sl}%
+  \SetSymbolFont{symbols}{universbold}{OMS}{\tud@univers}{b}{n}%
+  \SetSymbolFont{largesymbols}{universbold}{OMX}{iwona}{b}{n}%
+  \SetMathAlphabet{\mathbf}{univers}{\tud@mathenc}{\tud@univers}{b}{n}%
+  \SetMathAlphabet{\mathsf}{univers}{\tud@mathenc}{\tud@univers}{l}{n}%
+  \SetMathAlphabet{\mathit}{univers}{\tud@mathenc}{\tud@univers}{l}{sl}%
+  \SetMathAlphabet{\mathtt}{univers}{\tud@mathenc}{\tud@univers t}{l}{n}%
+  \SetMathAlphabet{\mathbf}{universbold}{\tud@mathenc}{\tud@univers}{eb}{n}%
+  \SetMathAlphabet{\mathsf}{universbold}{\tud@mathenc}{\tud@univers}{b}{n}%
+  \SetMathAlphabet{\mathit}{universbold}{\tud@mathenc}{\tud@univers}{b}{sl}%
+  \SetMathAlphabet{\mathtt}{universbold}{\tud@mathenc}{\tud@univers t}{b}{n}%
+  \DeclareMathVersion{dinbold}%
+  \SetSymbolFont{operators}{dinbold}{\tud@mathenc}{\tud@dinbold}{b}{n}%
+  \SetSymbolFont{letters}{dinbold}{OML}{\tud@dinbold}{b}{sl}%
+  \SetSymbolFont{symbols}{dinbold}{OMS}{\tud@dinbold}{b}{n}%
+  \SetSymbolFont{largesymbols}{dinbold}{OMX}{iwona}{ebc}{n}%
+  \SetMathAlphabet{\mathbf}{dinbold}{\tud@mathenc}{\tud@dinbold}{b}{n}%
+  \SetMathAlphabet{\mathsf}{dinbold}{\tud@mathenc}{\tud@dinbold}{b}{n}%
+  \SetMathAlphabet{\mathit}{dinbold}{\tud@mathenc}{\tud@dinbold}{b}{sl}%
+  \DeclareMathSymbol{\upDelta}{\mathalpha}{operators}{1}%
+  \DeclareMathSymbol{\upOmega}{\mathalpha}{operators}{10}%
+  \DeclareMathSymbol{\upGamma}{\mathalpha}{operators}{0}%
+  \DeclareMathSymbol{\upDelta}{\mathalpha}{operators}{1}%
+  \DeclareMathSymbol{\upTheta}{\mathalpha}{operators}{2}%
+  \DeclareMathSymbol{\upLambda}{\mathalpha}{operators}{3}%
+  \DeclareMathSymbol{\upXi}{\mathalpha}{operators}{4}%
+  \DeclareMathSymbol{\upPi}{\mathalpha}{operators}{5}%
+  \DeclareMathSymbol{\upSigma}{\mathalpha}{operators}{6}%
+  \DeclareMathSymbol{\upUpsilon}{\mathalpha}{operators}{7}%
+  \DeclareMathSymbol{\upPhi}{\mathalpha}{operators}{8}%
+  \DeclareMathSymbol{\upPsi}{\mathalpha}{operators}{9}%
+  \DeclareMathSymbol{\upOmega}{\mathalpha}{operators}{10}%
+  \DeclareMathSymbol{\varGamma}{\mathalpha}{letters}{0}%
+  \DeclareMathSymbol{\varDelta}{\mathalpha}{letters}{1}%
+  \DeclareMathSymbol{\varTheta}{\mathalpha}{letters}{2}%
+  \DeclareMathSymbol{\varLambda}{\mathalpha}{letters}{3}%
+  \DeclareMathSymbol{\varXi}{\mathalpha}{letters}{4}%
+  \DeclareMathSymbol{\varPi}{\mathalpha}{letters}{5}%
+  \DeclareMathSymbol{\varSigma}{\mathalpha}{letters}{6}%
+  \DeclareMathSymbol{\varUpsilon}{\mathalpha}{letters}{7}%
+  \DeclareMathSymbol{\varPhi}{\mathalpha}{letters}{8}%
+  \DeclareMathSymbol{\varPsi}{\mathalpha}{letters}{9}%
+  \DeclareMathSymbol{\varOmega}{\mathalpha}{letters}{10}%
 }
 \newcommand*\tud@font@cdfonts{%
   \tud@cmd@store{rmdefault}%
@@ -1220,16 +1213,11 @@
   \renewcommand*\tud@RaggedRight{\RaggedRight}%
 }
 %%% From File: tudscr-color.dtx
-\newcommand*\tud@pagecolor[1]{}
-\newcommand*\tud@restorepagecolor{}
+\newcommand*\tud@pagecolor{}
+\let\tud@pagecolor\relax
+% §§§ Befehl direkt in das Paket
 \AfterPackage{tudscrcolor}{%
   \providecommand*\nopagecolor{\pagecolor{white}}%
-  \let\tud@pagecolor\pagecolor%
-  \let\tud@restorepagecolor\nopagecolor%
-  \AfterPackage*{pagecolor}{%
-    \let\tud@pagecolor\newpagecolor%
-    \let\tud@restorepagecolor\restorepagecolor%
-  }%
 }
 \AfterPackage{pdfpages}{\AtEndPreamble{\nopagecolor}}
 %%% From File: tudscr-fields.dtx
@@ -1624,6 +1612,7 @@
 \newlength{\tud@dim@margin}
 \newlength{\tud@dim@rmargin}
 \newlength{\tud@dim@both}
+\newlength{\tud@dim@footsep}
 \newlength{\tud@dim@headheight}
 \newlength{\tud@dim@barheight}
 \newlength{\tud@dim@headsep}
@@ -1635,7 +1624,6 @@
 \newlength{\tud@dim@heavyline}
 \newlength{\tud@dim@thinline}
 \newlength{\tud@dim@headingsvskip}
-\newlength{\tud@dim@footsep}
 \newlength{\tud@dim@headdiff}
 \newcommand*\tud@head@font@size{}
 \newcommand*\tud@geometry@set{%
@@ -1784,6 +1772,7 @@
     \DeclareNewLayer[%
       background,foot,%
       contents={%
+        \vskip\dimexpr-\tud@dim@ddcfoot-\baselineskip+\ht\strutbox%
         \hfill\tud@ddclogo%
       },%
     ]{tudheadings.foot.logo}%
@@ -1839,10 +1828,14 @@
     \AddToLayerPageStyleOptions{empty.tudheadings}{%
       onselect={%
         \tud@ps@init%
+%% raus ab v3.15 ToDo
         \letcs\ps@plain{ps@plain.tudheadings}%
         \letcs\ps@headings{ps@tudheadings}%
         \def\sls@currentheadings{tudheadings}%
         \def\sls@currentplain{plain.tudheadings}%
+%% rein ab v3.15 ToDo
+%        \DeclarePageStyleAlias{plain}{plain.tudheadings}%
+%        \DeclarePageStyleAlias{headings}{tudheadings}%
       }%
     }%
     \DeclareNewPageStyleAlias{tudscrheadings}{tudheadings}%
@@ -1852,18 +1845,34 @@
     \DeclareNewPageStyleAlias{tudheadingsempty}{empty.tudheadings}%
     \DeclareNewPageStyleAlias{empty.tudscrheadings}{empty.tudheadings}%
     \DeclareNewPageStyleAlias{tudscrheadingsempty}{empty.tudheadings}%
+    \DeclareLayer[
+      background,page,%
+      contents={%
+        \ifundef{\tud@pagecolor}{}{%
+          \color{\tud@pagecolor}% §§§
+          \rule{\layerwidth}{\layerheight}%
+        }%
+      },%
+    ]{tudpagecolor}
+    \AddLayersToPageStyle{@everystyle@}{tudpagecolor}%
     \BeforeSelectAnyPageStyle{\tud@beforepagestyle{#1}}%
   }%
 }
 \newcommand*\tud@currentgeometry{}
 \newcommand*\tud@beforepagestyle[1]{%
-  \def\@tempa{#1}%
+%% §§§ prüfen ob alias, nur ausführen, wenn nicht
+%% raus ab v3.15 ToDo
+  \edef\@tempa{\GetRealPageStyle{#1}}%
   \ifstr{\sls@currentheadings}{tudheadings}{%
     \ifstr{#1}{headings}{\def\@tempa{tudheadings}}{}%
     \ifstr{#1}{plain}{\def\@tempa{plain.tudheadings}}{}%
-    \ifstr{#1}{empty}{\def\@tempa{empty.tudheadings}}{}%
   }{}%
+  \typeout{+++++ #1: \@tempa: \currentpagestyle}%
+  \edef\@tempc{\GetRealPageStyle{#1}}%
+  \typeout{***** \@tempc}%
   \tud@ifinpslist{\@tempa}{%
+%% rein ab v3.15 ToDo
+%%  \tud@ifinpslist{#1}{%
 % Doku: Teil für möglichen Briefsatzspiegel erstmal drin lassen (ToDo)
 %%    \tud@ddc@check%
 %%    \ifcase \@tempb\relax%
@@ -2022,7 +2031,7 @@
   \includegraphics[width=\tud@dim@logowidth]{\tud@@mainlogo}%
 }
 \newcommand*\headlogo[2][]{%
-  \tud@ifinpslist{\@nameuse{currentpagestyle}}{\clearpage}{}%
+  \if@atdocument\tud@ifinpslist{\currentpagestyle}{\clearpage}{}\fi%
   \def\tud@@headlogo{#2}%
   \def\tud@@@headlogo{#1}%
   \if@atdocument\expandafter\pagestyle\expandafter{\currentpagestyle}\fi%
@@ -2514,7 +2523,7 @@
 }
 \newcommand*\tud@partheadendvskip{%
   \tud@cleardoublespecialpage{%
-    \tud@pagecolor{\tud@part@pagecolor}%
+    \let\tud@pagecolor\tud@part@pagecolor%
     \def\tud@head@logocolor{\tud@part@logocolor}%
     \addtokomafont{pagenumber}{\sffamily\color{\tud@part@fontcolor}}%
     \clearpage%
@@ -2577,6 +2586,7 @@
 }%
 \newcommand*\tud@@@makechapterhead{}
 \let\tud@@@makechapterhead\@@makechapterhead
+%% v3.15 Patches prüfen ToDo
 \patchcmd{\tud@@@makechapterhead}{\chapterheadstartvskip}{%
   \chapterheadstartvskip%
   \if@chapterprefix%
@@ -2593,6 +2603,7 @@
   \setlength{\parskip}{\z@}%
   \size@chapter{#1}%
 }{}{\tud@patch@wrn{@@makechapterhead}}
+%% v3.15 Patches prüfen ENDE
 \newcommand*\tud@chapterpreamble{%
   \ifnum\tud@abstract@level>1\relax\def\tud@abstract@level{1}\fi%
   \KOMAoptions{titlepage=false}%
@@ -2629,7 +2640,7 @@
 \newcommand*\tud@chapter@app{%
   \if@tud@chapterpage%
     \tud@cleardoublespecialpage{%
-      \tud@pagecolor{\tud@chapter@pagecolor}%
+      \let\tud@pagecolor\tud@chapter@pagecolor%
       \def\tud@head@logocolor{\tud@chapter@logocolor}%
       \addtokomafont{pagenumber}{\sffamily\color{\tud@chapter@fontcolor}}%
       \clearpage%
@@ -2885,7 +2896,10 @@
 \newcommand*\tud@fm@pagestyle[2]{%
   \if@titlepage%
     \ifcsdef{ps@#2}{\def\tud@ps{#2}}{%
-      \ClassError{\tudcls@name}{`#2' is no valid pagestyle}{}%
+      \ClassError{\tudcls@name}{`#2' is no valid pagestyle}{%
+        You tried to use `#2' as a pagestyle for the\MessageBreak%
+        `#1' environment, but it was never defined%
+      }%
     }%
   \else%
     \ClassWarning{\tudcls@name}{%
@@ -3297,7 +3311,7 @@
       \fi%
     \fi%
     \def\@tempa{%
-      \tud@pagecolor{\tud@title@pagecolor}%
+      \let\tud@pagecolor\tud@title@pagecolor%
       \def\tud@head@logocolor{\tud@title@logocolor}%
       \color{\tud@title@fontcolor}%
       \addtokomafont{pagenumber}{\sffamily\color{\tud@title@fontcolor}}%
@@ -3308,7 +3322,6 @@
       \begingroup%
         \@tempa%
         \cleardoubleemptypage%
-        \tud@restorepagecolor%
       \endgroup%
     \else%
       \tud@cleardoublespecialpage[\tud@titleback]{%

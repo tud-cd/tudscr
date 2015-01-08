@@ -1,4 +1,4 @@
-% \CheckSum{271}
+% \CheckSum{279}
 % \iffalse meta-comment
 % ======================================================================
 %
@@ -47,7 +47,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-base.dtx}[%
-  2014/11/05 v2.02 TUD-KOMA-Script\space%
+  2015/01/08 v2.03 TUD-KOMA-Script\space%
 %</driver>
 %<package>\NeedsTeXFormat{LaTeX2e}[2011/06/27]
 %<package>\ProvidesPackage{tudscrbase}[%
@@ -134,6 +134,34 @@
 %    \end{macrocode}
 % \end{macro}^^A \ifxnumber
 %
+% \subsubsection{Test auf booleschen Ausdruck in Form eines Strings}
+%
+% \begin{macro}{\ifstrbool}
+% Dieser Befehl dient zum Testen, ob ein gegebener String als boolescher 
+% Ausdruck interpretiert werden kann. Ist der String als \enquote{wahr} 
+% interpretierbar, wird das zweite Argument ausgeführt. Kann der String als 
+% \enquote{falsch} angesehen werden, dementsprechen das dritte. Ist der String 
+% kein logischer Wert, kommt das letzte Argument zum Tragen. Die Syntax lautet: 
+% \cs{ifstrbool}\marg{Argument}\marg{Wahr}\marg{Falsch}\marg{Andernfalls}
+%    \begin{macrocode}
+\newcommand*\ifstrbool[4]{%
+  \ifstr{#1}{true}{#2}{%
+    \ifstr{#1}{on}{#2}{%
+      \ifstr{#1}{yes}{#2}{%
+        \ifstr{#1}{false}{#3}{%
+          \ifstr{#1}{no}{#3}{%
+            \ifstr{#1}{off}{#3}{%
+              #4%
+            }%
+          }%
+        }%
+      }%
+    }%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \ifstrbool
+%
 % \subsubsection{Schlüssel und Parameter für die Wrapper-Klassen}
 %
 % \begin{macro}{\TUDProcessOptions}
@@ -169,7 +197,7 @@
 \AtEndOfClass{\let\TUD@noworlater\@firstofone}
 \newcommand*\TUD@key[2][.\@currname.\@currext]{%
   \DefineFamilyMember{TUD}%
-  \@ifnextchar[%]
+  \kernel@ifnextchar[%]
     {\TUD@@key[#1]{#2}}{\TUD@@@key[#1]{#2}}%
 }
 \def\TUD@@key[#1]#2[#3]#4{%
