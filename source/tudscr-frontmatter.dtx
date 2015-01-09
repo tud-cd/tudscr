@@ -1,4 +1,4 @@
-% \CheckSum{587}
+% \CheckSum{597}
 % \iffalse meta-comment
 % ======================================================================
 %
@@ -47,7 +47,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-frontmatter.dtx}[%
-  2015/01/08 v2.03 TUD-KOMA-Script (frontmatter)%
+  2015/01/09 v2.03 TUD-KOMA-Script (frontmatter)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -565,6 +565,7 @@
 % \fi
 %
 % \begin{environment}{abstract}
+% \changes{v2.03}{2015/01/09}{Bugfix für Seitenstilauswahl}%^^A
 % Die \env{abstract}-Umgebung wird komplett überarbeitet. Um alle gewünschten
 % Optionen\footnote{\opt{titlepage}, \opt{twocolumn}, \opt{abstract@multi},
 % \opt{abstract@fil} sowie Gliederungsebene der Überschrift} beachten zu
@@ -581,29 +582,33 @@
 %    \end{macrocode}
 % Sollten Überschriften in Form von Kapiteln gewählt worden sein, so wird 
 % temporär die \opt{titlepage}-Option aktivert, da alle weiteren notwendigen 
-% Einstellungen dieser entsprechen. Bei aktiver \opt{titlepage}-Option wird 
-% anschließend der aktuelle Seitenstil gesichert, um diesen nach der Umgebung
-% wiederherstellen zu können.
+% Einstellungen dieser entsprechen. Über den Parameter \opt{pagestyle} kann bei 
+% der Verwendung einer Titelseite der Seitenstil definiert werden. Dafür wird 
+% das dafür verantwortliche Makro \cs{tud@ps} auf \cs{relax} gesetzt.
 %    \begin{macrocode}
   \ifnumless{\@nameuse{tud@abstract@level}}{3}{}{\@titlepagetrue}%
-  \if@titlepage%
-    \tud@currentpagestyle@set%
-    \clearpage\def\tud@ps{empty}%
-  \fi%
+  \let\tud@ps\relax%
 %    \end{macrocode}
 % Als nächstes werden die Optionen verarbeitet. Sollte nach Abarbeitung der
 % Optionen für \env{abstract} festgestellt werden, dass eine spezielle
 % Spaltenanzahl gewünscht ist, so wird~-- für den Fall, dass das Paket
 % \pkg{multicol} geladen ist~-- diese gesetzt. Sonst wird die angegbene Anzahl
-% der Spalten ignoriert und eine Warnung ausgegeben. Bei aktiver Option
-% \opt{titlepage} kann über den Parameter \opt{pagestyle} der Seitenstil 
-% innerhalb der Umgebung geändert werden. Dieser wird automatisch auf
-% \val{headings} gesetzt, wenn beidseitige Kolumnentitel verwendet werden.
+% der Spalten ignoriert und eine Warnung ausgegeben.
 %    \begin{macrocode}
   \TUD@parameter@set[abstract]{#1}%
-  \if@tud@abstract@markboth\def\tud@ps{headings}\fi%
   \tud@multicols@check%
-  \if@titlepage\tud@ps@select\fi%
+%    \end{macrocode}
+% Bei aktiver \opt{titlepage}-Option wird anschließend der aktuelle Seitenstil 
+% gesichert, um diesen nach der Umgebung wiederherstellen zu können. Wurde über 
+% die möglichen Parameter \opt{pagestyle} oder indirekt mit \opt{markboth} kein 
+% Seitenstil definiert, so wird dieser auf \val{empty} gesetzt.
+%    \begin{macrocode}
+  \if@titlepage%
+    \tud@currentpagestyle@set%
+    \ifx\tud@ps\relax\def\tud@ps{empty}\fi%
+    \clearpage%
+    \tud@ps@select%
+  \fi%
   \tud@fm@check{abstract}{\tud@fm@set{abstract}{\abstractname}{\BODY}}%
 %    \end{macrocode}
 % Nach der Umgebung wird bei aktiver \opt{titlepage}-Option der ursprüngliche 
@@ -632,16 +637,21 @@
   \TUD@parameter@define{language}{\selectlanguage{#1}}%
   \TUD@parameter@define{columns}{\def\tud@multicols{#1}}%
   \TUD@parameter@define{pagestyle}{\tud@fm@pagestyle{abstract}{#1}}%
+%    \end{macrocode}
+% Für das Setzen von Kolumnentiteln wird der Seitenstil auf \val{headings} 
+% gesetzt, falls kein anderer mit \opt{pagestyle} angegeben wurde.
+%    \begin{macrocode}
   \TUD@parameter@define{markboth}[true]{%
-    \ifstr{#1}{true}{\@tud@abstract@markbothtrue}{%
-    \ifstr{#1}{on}{\@tud@abstract@markbothtrue}{%
-    \ifstr{#1}{yes}{\@tud@abstract@markbothtrue}{%
-    \ifstr{#1}{false}{\@tud@abstract@markbothfalse}{%
-    \ifstr{#1}{no}{\@tud@abstract@markbothfalse}{%
-    \ifstr{#1}{off}{\@tud@abstract@markbothfalse}{%
+    \ifstrbool{#1}{%
+      \@tud@abstract@markbothtrue%
+      \ifx\tud@ps\relax\def\tud@ps{headings}\fi%
+    }{%
       \@tud@abstract@markbothfalse%
+    }{%
+      \@tud@abstract@markbothfalse%
+      \ifx\tud@ps\relax\def\tud@ps{headings}\fi%
       \manualmark\markboth{#1}{#1}%
-    }}}}}}%
+    }%
   }%
   \TUD@parameter@define{abstract}{\TUDoption{abstract}{#1}}%
   \TUD@parameter@define{option}{\TUDoption{abstract}{#1}}%
@@ -785,6 +795,7 @@
 % \fi
 %
 % \begin{environment}{declarations}
+% \changes{v2.03}{2015/01/09}{Bugfix für Seitenstilauswahl}%^^A
 % \begin{macro}{\if@tud@declarations}
 % Die \env{declarations}-Umgebung wird ähnlich zur \env{abstract}-Umgebung 
 % definiert. Prinzipiell funktioniert diese genauso, inklusive der Parameter.
@@ -794,16 +805,17 @@
 %    \begin{macrocode}
 \newif\if@tud@declarations
 \NewEnviron{declarations}[1][]{%
+  \@tud@declarationstrue%
   \ifnumless{\@nameuse{tud@declaration@level}}{3}{}{\@titlepagetrue}%
+  \let\tud@ps\relax%
+  \TUD@parameter@set[declaration]{#1}%
+  \tud@multicols@check%
   \if@titlepage%
     \tud@currentpagestyle@set%
-    \clearpage\def\tud@ps{empty}%
+    \ifx\tud@ps\relax\def\tud@ps{empty}\fi%
+    \clearpage%
+    \tud@ps@select%
   \fi%
-  \@tud@declarationstrue%
-  \TUD@parameter@set[declaration]{#1}%
-  \if@tud@declaration@markboth\def\tud@ps{headings}\fi%
-  \tud@multicols@check%
-  \if@titlepage\tud@ps@select\fi%
   \tud@fm@check{declaration}{\BODY}%
 }[%
   \if@titlepage%
@@ -837,15 +849,16 @@
   \TUD@parameter@define{columns}{\def\tud@multicols{#1}}%
   \TUD@parameter@define{pagestyle}{\tud@fm@pagestyle{declaration}{#1}}%
   \TUD@parameter@define{markboth}[true]{%
-    \ifstr{#1}{true}{\@tud@declaration@markbothtrue}{%
-    \ifstr{#1}{on}{\@tud@declaration@markbothtrue}{%
-    \ifstr{#1}{yes}{\@tud@declaration@markbothtrue}{%
-    \ifstr{#1}{false}{\@tud@declaration@markbothfalse}{%
-    \ifstr{#1}{no}{\@tud@declaration@markbothfalse}{%
-    \ifstr{#1}{off}{\@tud@declaration@markbothfalse}{%
+    \ifstrbool{#1}{%
+      \@tud@declaration@markbothtrue%
+      \ifx\tud@ps\relax\def\tud@ps{headings}\fi%
+    }{%
       \@tud@declaration@markbothfalse%
+    }{%
+      \@tud@declaration@markbothfalse%
+      \ifx\tud@ps\relax\def\tud@ps{headings}\fi%
       \manualmark\markboth{#1}{#1}%
-    }}}}}}%
+    }%
   }%
   \TUD@parameter@define{company}{\def\@company{#1}}%
   \TUD@parameter@define{supporter}{\def\@supporter{#1}}%
@@ -884,7 +897,7 @@
     \begingroup%
       \TUD@parameter@set[declaration]{#1}%
       \tud@fm@confirmation%
-      \tud@fm@blocking
+      \tud@fm@blocking%
     \endgroup%
   }{%
     \begin{declarations}[#1]%
@@ -930,7 +943,7 @@
 \newcommand*\tud@fm@confirmation{%
   \tud@fm@check{declaration}{%
     \tud@fm@set{declaration}{\confirmationname}{%
-      \confirmationtext\vskip0pt\@confirmationclosing%
+      \confirmationtext\vskip\z@\@confirmationclosing%
     }%
   }%
 }

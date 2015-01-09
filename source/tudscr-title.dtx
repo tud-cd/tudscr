@@ -1,4 +1,4 @@
-% \CheckSum{1375}
+% \CheckSum{1325}
 % \iffalse meta-comment
 % ======================================================================
 %
@@ -47,7 +47,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-title.dtx}[%
-  2014/11/13 v2.02 TUD-KOMA-Script (title)%
+  2015/01/09 v2.03 TUD-KOMA-Script (title)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -135,19 +135,19 @@
 %    \end{macrocode}
 % \end{KOMAfont}^^A titlepage
 % \end{KOMAfont}^^A thesis
-% \begin{macro}{\tud@color@titlefont}
-% \begin{macro}{\tud@color@titlepage}
-% \begin{macro}{\tud@color@titlehead}
+% \begin{macro}{\tud@title@pagecolor}
+% \begin{macro}{\tud@title@logocolor}
+% \begin{macro}{\tud@title@fontcolor}
 % Die Makros werden für die Hintergrundfarbe der Titelseite sowie die Farbe der 
 % Schriften verwendet.
 %    \begin{macrocode}
-\newcommand*\tud@color@titlefont{black}
-\newcommand*\tud@color@titlepage{white}
-\newcommand*\tud@color@titlehead{black}
+\newcommand*\tud@title@pagecolor{}
+\newcommand*\tud@title@logocolor{black}
+\newcommand*\tud@title@fontcolor{black}
 %    \end{macrocode}
-% \end{macro}^^A \tud@color@titlehead
-% \end{macro}^^A \tud@color@titlepage
-% \end{macro}^^A \tud@color@titlefont
+% \end{macro}^^A \tud@title@fontcolor
+% \end{macro}^^A \tud@title@logocolor
+% \end{macro}^^A \tud@title@pagecolor
 % \begin{macro}{\tud@maketitle}
 % \changes{v2.01a}{2014/06/03}{Fehler bei Nutzung von \cs{subtitle} behoben}%^^A
 % \changes{v2.02}{2014/06/23}{\val{firstiscover} wird als Wert für die Option 
@@ -175,7 +175,7 @@
 % Das optionale Argument wird für das Setzen der Parameter verwendet.
 %    \begin{macrocode}
     \TUD@parameter@set[title]{#1}%
-    \ifcase \tud@layout@title
+    \ifcase \tud@layout@title%
       \ifx\tud@titlepagenumber\relax\gdef\tud@titlepagenumber{1}\fi%
       \tud@cmd@use{maketitle}[\tud@titlepagenumber]%
     \else%
@@ -187,8 +187,8 @@
 %    \begin{macrocode}
       \else%
         \ifcase \tud@layout@title\relax\or\else%
-          \def\tud@color@titlefont{HKS41}%
-          \def\tud@color@titlehead{HKS41}%
+          \def\tud@title@fontcolor{HKS41}%
+          \def\tud@title@logocolor{HKS41}%
         \fi%
 %    \end{macrocode}
 % Um einen Titelkopf zu setzen, wird einfach der Originalbefehl verwendet und
@@ -259,12 +259,13 @@
 % Werte belegt.
 %    \begin{macrocode}
   \ifcase \tud@layout@title\relax\or\or%
-    \def\tud@color@titlefont{HKS41}%
-    \def\tud@color@titlehead{HKS41}%
+    \def\tud@title@pagecolor{}%
+    \def\tud@title@logocolor{HKS41}%
+    \def\tud@title@fontcolor{HKS41}%
   \or%
-    \def\tud@color@titlepage{HKS41}%
-    \def\tud@color@titlefont{HKS41!30}%
-    \def\tud@color@titlehead{white}%
+    \def\tud@title@pagecolor{HKS41}%
+    \def\tud@title@logocolor{white}%
+    \def\tud@title@fontcolor{HKS41!30}%
   \fi%
 %    \end{macrocode}
 % Die Titelseite. Es existieren die Optionen \opt{full} für eine vollständig
@@ -328,13 +329,13 @@
             \noexpand\let\noexpand\titlepage@restore\noexpand\relax%
           }%
           \begingroup%
-          \topmargin=\dimexpr \coverpagetopmargin-1in\relax%
-          \oddsidemargin=\dimexpr \coverpageleftmargin-1in\relax%
-          \evensidemargin=\dimexpr \coverpageleftmargin-1in\relax%
-          \textwidth=\dimexpr%
-            \paperwidth-\coverpageleftmargin-\coverpagerightmargin\relax%
-          \textheight=\dimexpr%
-            \paperheight-\coverpagetopmargin-\coverpagebottommargin\relax%
+          \topmargin=\dimexpr\coverpagetopmargin-1in\relax%
+          \oddsidemargin=\dimexpr\coverpageleftmargin-1in\relax%
+          \evensidemargin=\dimexpr\coverpageleftmargin-1in\relax%
+          \textwidth=\dimexpr\paperwidth-\coverpageleftmargin%
+            -\coverpagerightmargin\relax%
+          \textheight=\dimexpr\paperheight-\coverpagetopmargin%
+            -\coverpagebottommargin\relax%
           \headheight=0pt%
           \headsep=0pt%
           \footskip=\baselineskip%
@@ -377,8 +378,8 @@
 % Das ganze Layout wird vertikal so verschoben, dass der Titel auf der gleichen
 % Höhe steht wie die Überschriften auf Teil- und Kapitelseiten.
 %    \begin{macrocode}
-    \vspace*{\dimexpr%
-      \tud@dim@headdiff+\tud@dim@headingsvskip-\baselineskip+\parskip\relax%
+    \vspace*{\dimexpr\tud@dim@headdiff+\tud@dim@headingsvskip-\baselineskip%
+      +\parskip\relax%
     }%
     \vspace*{\pageheadingsvskip}%
     \setparsizes{\z@}{\z@}{\z@\@plus1fil}\par@updaterelative%
@@ -583,14 +584,18 @@
 % Es werden Schriftart, abhängig \opt{heavyfont} die Schriftstärke, sowie die 
 % Farbe der Seite und des Kopfes und die Linienstärke des Querbalkens und die
 % \DDC-Logos aus den Einstellungen übernommen.
+% \ToDo{Für Kompatibilitätsmodus beibehalten}[v2.03]
 %    \begin{macrocode}
     \def\@tempa{%
-      \tud@pagecolor{\tud@color@titlepage}%
-      \def\tud@head@color{\tud@color@titlehead}%
-      \color{\tud@color@titlefont}%
-      \addtokomafont{pagenumber}{\sffamily\color{\tud@color@titlefont}}%
-      \addtokomafont{footnote}{\sffamily\color{\tud@color@titlefont}}%
+      \let\tud@pagecolor\tud@title@pagecolor%
+      \let\tud@head@logocolor\tud@title@logocolor%
+      \color{\tud@title@fontcolor}%
+      \addtokomafont{pagenumber}{\sffamily\color{\tud@title@fontcolor}}%
+      \addtokomafont{footnote}{\sffamily\color{\tud@title@fontcolor}}%
       \thispagestyle{empty.tudheadings}%
+%    \end{macrocode}
+% \ToDo{Für Kompatibilitätsmodus beibehalten}[v2.03]
+%    \begin{macrocode}
       \tud@ddc@enlargepage%
     }%
 %    \end{macrocode}
@@ -601,7 +606,6 @@
       \begingroup%
         \@tempa%
         \cleardoubleemptypage%
-        \tud@restorepagecolor%
       \endgroup%
     \else%
 %    \end{macrocode}
@@ -720,8 +724,8 @@
 % gesetzt werden.
 %    \begin{macrocode}
   \global\@topnum=\z@%
-  \vspace*{\dimexpr%
-    \tud@dim@headdiff+\tud@dim@headingsvskip-\baselineskip+\parskip\relax%
+  \vspace*{\dimexpr\tud@dim@headdiff+\tud@dim@headingsvskip-\baselineskip%
+    +\parskip\relax%
   }%
   \vspace*{\headingsvskip}%
   \setparsizes{\z@}{\z@}{\z@\@plus1fil}\par@updaterelative%
@@ -800,6 +804,7 @@
 %    \end{macrocode}
 % Wird das \DDC-Logo gesetzt, muss dafür am unteren Rand entsprechend Platz 
 % gelassen werden.
+% \ToDo{Für Kompatibilitätsmodus beibehalten}[v2.03]
 %    \begin{macrocode}
     \tud@ifinpslist{\titlepagestyle}{\tud@ddc@enlargepage}{}%
   \endgroup%
@@ -1013,7 +1018,6 @@
 % anschließend ggf. \meta{Inhalt} einspaltig ausgegeben. Beim Satz eines
 % Titelkopfes wird der Befehl \cs{tud@title@twocolumn} zur Ausgabe genutzt.
 %    \begin{macrocode}
-\RequirePackage{afterpage}[1995/10/27]
 \newcommand\maketitleonecolumn[2][]{%
 %    \end{macrocode}
 % Hier erfolgt die Unterscheidung der Ausgabe, abhängig von der Option
@@ -1051,51 +1055,19 @@
     \global\setbox\tud@title@twocolumn@box\vbox{#1\bigskip}%
   \endgroup%
 %    \end{macrocode}
-% Für den speziellen Satzspiegel mit dem \DDC-Logo im Fuß ist im Zweifelsfall 
-% etwas Anpassungarbeit von Nöten. Sollte dieser für die Titelseite benötigt 
-% werden, der entsprechende Seitenstil ist aber nicht geladen, so wird für die
-% folgende Ausgaberoutine im ersten Durchlauf der Platz auf der Titelseite
-% reduziert.
-%    \begin{macrocode}
-  \setlength{\@tempdimc}{\textheight}%
-  \tud@ifinpslist{\titlepagestyle}{%
-    \ifstr{\tud@currentgeometry}{tudareaddc}{}{%
-      \tud@ddc@check%
-      \ifcase \@tempb\relax\else%
-        \setlength{\@tempdimc}{\dimexpr\textheight-\tud@dim@ddcdiff}%
-      \fi%
-    }{}%
-  }{}%
-%    \end{macrocode}
 % Jetzt werden der Inhalt stückweise so lange auf einzelnen Seiten ausgeben,
-% bis der immer kleiner werdende Rest in der Box auf eine Seite passt. Dabei
-% sollen für das seitenweise Zerteilen des Inhaltes innerhalb der Box dieselben
-% Rahmenbedingungen für den Seitenaufbau gelten, wie auch im normalen Dokument.
-% Nach der Ausgabe der ersten vollständigen Seite wird der verfügbare Platz auf
-% das normale Maß zurückgesetzt.
+% bis der immer kleiner werdende Rest in der Box auf eine Seite passt.
 %    \begin{macrocode}
-  \@whiledim\@tempdimc<\ht\tud@title@twocolumn@box\do{%
+  \@whiledim\textheight<\ht\tud@title@twocolumn@box\do{%
     \splittopskip\topskip%
     \splitmaxdepth\maxdepth%
-    \vsplit\tud@title@twocolumn@box to \@tempdimc%
+    \vsplit\tud@title@twocolumn@box to \textheight%
     \clearpage%
-    \setlength{\@tempdimc}{\textheight}%
   }%
 %    \end{macrocode}
 % Der Rest wir einfach als optionales Argument von \cs{twocolumn} ausgegeben.
 %    \begin{macrocode}
   \twocolumn[\unvbox\tud@title@twocolumn@box]%
-%    \end{macrocode}
-% Sollte der einspaltige Teil bereits auf der Titelseite selbst beendet worden
-% sein, so muss im zweispaltigen Satz für beide Spalten der Platz eingeschränkt 
-% werden. Leider ist das Vergrößern zweier Spalten in \LaTeXe nicht trivial
-% möglich, weshalb hierfür wird das Paket \pkg{afterpage} benötigt wird. Es 
-% wird die aktuelle und mit \cs{afterpage} die nächstfolgende Spalte verkürzt.
-%    \begin{macrocode}
-  \ifdim\@tempdimc<\textheight\relax%
-    \enlargethispage{-\tud@dim@ddcdiff}%
-    \afterpage{\enlargethispage{-\tud@dim@ddcdiff}}%
-  \fi%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@title@twocolumn@box
@@ -1148,18 +1120,28 @@
 % separate Umschlagseite erzeugt werden. Um die Gestaltung dieser anzupassen, 
 % wurden Einstellungsmöglichkeiten vorgesehen, die insbesondere den verwendeten
 % Satzspiegel betreffen.
+%
+% \begin{length}{\tud@coverpagetopmargin}
+% \changes{v2.02}{2014/08/12}{neu}^^A
+% In dieser Länge wird die Höhe des oberen Seitenrandes einer Seite mit dem 
+% Logo der TUD gespeichert.
+%    \begin{macrocode}
+\newlength\tud@coverpagetopmargin
+\setlength\tud@coverpagetopmargin{\dimexpr\tud@dim@headheight%
+  +\tud@dim@barheight+\tud@dim@headsep\relax%
+}
+%    \end{macrocode}
+% \end{length}^^A \tud@coverpagetopmargin
 % \begin{macro}{\makecover}
 % \changes{v2.02}{2014/06/23}{Warnung für die Option \opt{titlepage} mit dem
 %   Wert \val{firstiscover}}%^^A
 % \changes{v2.02}{2014/08/08}{\cs{makecover} jetzt auch ohne \CD verwendbar}^^A
+% \changes{v2.03}{2015/01/09}{Anpassungen für neue Satzspiegelerzeugung}%^^A
 % \begin{macro}{\if@tud@cover}
-% \begin{macro}{\tud@coverpagetopmargin}
-% \changes{v2.02}{2014/08/12}{neu}^^A
-% Der Befehl ist für ein Cover bei einem gebundenen Werk zu verwenden.
+% Der Befehl \cs{makecover} ist für eine Umschlagseite bei einem gebundenen 
+% Werk zu verwenden.
 %    \begin{macrocode}
 \newif\if@tud@cover
-\newcommand*\tud@coverpagetopmargin{}
-\let\tud@coverpagetopmargin\coverpagetopmargin
 \newcommand*\makecover[1][]{%
 % \changes{v2.02}{2014/08/12}{Satzspiegel bei \opt{cdlayout=false} 
 %   anpassbar}%^^A
@@ -1170,7 +1152,7 @@
     \ClassWarning{\tudcls@name}{%
       Using both option `titlepage=firstiscover' and\MessageBreak%
       `\string\makecover' together isn't supported. The\MessageBreak%
-      option `titlepage=firstiscover' will be ignorded. If you\MessageBreak%
+      option `titlepage=firstiscover' will be ignored. If you\MessageBreak%
       want to create an individual cover, you have to use\MessageBreak%
       `\string\extratitle' instead of `\string\makecover'.\MessageBreak%
       See also the documentation of KOMA-Script%
@@ -1197,30 +1179,13 @@
 % Wird der Parameter \opt{cdlayout} aktiviert, werden die Seitenränder wie 
 % durch das \CD vorgegeben eingestellt. Andernfalls entsprechen diese den 
 % Einstellungen des Satzspiegels und können mit \cs{coverpage\dots margin} 
-% durch den Anwender angepasst werden. Der mit \cs{coverpagetopmargin}
-% zusätzlich eingefügte, obere Seitenrand wird bei aktiviertem Parameter 
-% \opt{cdlayout} im Normalfall~-- sprich ohne eine Änderung des Befehls
-% \cs{coverpagetopmargin}~-- durch \cs{tud@coverpagetopmargin} ausgeglichen, um
-% den Titel auf der Umschlagseite in der richtigen vertikalen Position 
-% erscheinen zu lassen.
+% durch den Anwender angepasst werden.
 %    \begin{macrocode}
     \if@tud@cover@cdlayout%
-      \ifcase \tud@layout@cover\relax%
-        \let\coverpagetopmargin\tud@dim@top%
-      \else%
-        \def\coverpagetopmargin{%
-          \dimexpr\tud@dim@headheight+\tud@dim@barheight+\tud@dim@headsep\relax%
-        }%
-      \fi%
-      \let\coverpagebottommargin\tud@dim@bottom%
-      \let\coverpageleftmargin\tud@dim@left%
-      \let\coverpagerightmargin\tud@dim@right%
-    \else%
-      \ifcase \tud@layout@cover\relax\else%
-        \expandafter\def\expandafter\coverpagetopmargin\expandafter{%
-          \coverpagetopmargin-\tud@coverpagetopmargin%
-        }%
-      \fi%
+      \let\coverpagetopmargin\tud@dim@slimmargin%
+      \let\coverpagebottommargin\tud@dim@widemargin%
+      \let\coverpageleftmargin\tud@dim@widemargin%
+      \let\coverpagerightmargin\tud@dim@slimmargin%
     \fi%
 %    \end{macrocode}
 % Für den Fall, dass eine Umschlagseite gesetzt werden soll, die nicht im \CD 
@@ -1258,36 +1223,55 @@
         \noexpand\global\vsize\the\vsize%
         \noexpand\let\noexpand\titlepage@restore\noexpand\relax%
       }%
-      \begingroup%
-      \topmargin=\dimexpr \coverpagetopmargin-1in\relax%
-      \oddsidemargin=\dimexpr \coverpageleftmargin-1in\relax%
-      \evensidemargin=\dimexpr \coverpageleftmargin-1in\relax%
-      \textwidth=\dimexpr%
-        \paperwidth-\coverpageleftmargin-\coverpagerightmargin\relax%
 %    \end{macrocode}
-% Bei der Höhe des Textbereiches und der Kopfzeile muss unterschieden werden, 
-% ob der Satzspiegel im \CD oder aber im Buchblock erfolgen soll.
+% Linker und rechter Rand sowie die Textbreite werden identisch erzeugt. Für 
+% das Layout im \CD wurden die Seitenränder (\cs{coverpage\dots margin}) zuvor 
+% angepasst. Die Höhe der Kopfzeile wird auf \val{0pt} gesetzt.
 %    \begin{macrocode}
-      \if@tud@cover@cdlayout%
-        \textheight=\dimexpr%
-          \paperheight-\coverpagetopmargin-\coverpagebottommargin\relax%
+      \begingroup%
+        \oddsidemargin=\dimexpr\coverpageleftmargin-1in\relax%
+        \evensidemargin=\dimexpr\coverpageleftmargin-1in\relax%
+        \textwidth=\dimexpr\paperwidth-\coverpageleftmargin%
+          -\coverpagerightmargin\relax%
         \headheight=0pt%
         \headsep=0pt%
-      \else%
-        \textheight=\dimexpr\paperheight-\coverpagebottommargin%
-          -\tud@dim@headheight-\tud@dim@barheight%
-          -\tud@dim@headsep-\tud@dim@bottom\relax%
-        \headheight=\dimexpr\tud@dim@headheight+\tud@dim@barheight\relax%
-        \headsep=\tud@dim@headsep%
-      \fi%
-      \footskip=\tud@dim@footskip%
-      \@colht=\textheight%
-      \@colroom=\textheight%
-      \vsize=\textheight%
-      \columnwidth=\textwidth%
-      \hsize=\columnwidth%
-      \linewidth=\hsize%
-      \tud@dim@headdiff=\z@%
+%    \end{macrocode}
+% Bei der Höhe des Textbereiches und des oberen Seitenrandes muss unterschieden 
+% werden, ob der Satzspiegel im \CD oder aber im Buchblock erfolgen soll. Im 
+% Layout des \CDs geht das recht einfach.
+%    \begin{macrocode}
+        \if@tud@cover@cdlayout%
+          \let\coverpagetopmargin\tud@coverpagetopmargin%
+          \setlength{\@tempdima}{\z@}%
+        \else%
+%    \end{macrocode}
+% Soll ein eigener Satzspiegel verwendet werden, kann der obere Seitenrand über 
+% \cs{coverpagetopmargin} geändert werden. Allerdings wird dafür gesorgt, dass 
+% dieser zumindest groß genug bleibt, damit das Markenlogo der \TnUD ohne eine 
+% ungewünschte Überdeckung dargestellt werden kann.
+%    \begin{macrocode}
+          \setlength{\@tempdima}{\dimexpr\tud@coverpagetopmargin%
+            -\tud@dim@headingsvskip-\coverpagetopmargin\relax%
+          }%
+          \ifdim\@tempdima<\z@\relax\setlength{\@tempdima}{\z@}\fi%
+        \fi%
+%    \end{macrocode}
+% Damit alle Einstellungen korrekt und wie gewünscht übernommen werden, muss 
+% die Höhe des Textbereiches \cs{textheight} \emph{vor} der Größe des oberen 
+% Seitenrande gesetzt werden. Dies hat mit der originären Definition von 
+% \cs{coverpagetopmargin} zu tun. 
+%    \begin{macrocode}
+        \textheight=\dimexpr\paperheight-\coverpagetopmargin-\@tempdima%
+          -\coverpagebottommargin\relax%
+        \topmargin=\dimexpr\coverpagetopmargin-1in+\@tempdima\relax%
+        \footskip=\dimexpr\tud@dim@footsep+\tud@ta@footheight\relax%
+        \@colht=\textheight%
+        \@colroom=\textheight%
+        \vsize=\textheight%
+        \columnwidth=\textwidth%
+        \hsize=\columnwidth%
+        \linewidth=\hsize%
+        \tud@dim@headdiff=\z@%
 %    \end{macrocode}
 % Weil bereits die Titelseite normalerweise die Seitenzahl eins bekommt, kann es
 % bei der Verwendung des Paketes \pkg{hyperref} zu einer Warnung aufgrund der
@@ -1298,14 +1282,13 @@
 %    \end{macrocode}
 % Die Ausgabe des Covers und ggf. das Wiederherstellen des Satzspiegels.
 %    \begin{macrocode}
-      \tud@maketitle%
-      \clearpage%
+        \tud@maketitle%
+        \clearpage%
       \csname titlepage@restore\endcsname%
     \fi%
   \endgroup%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@coverpagetopmargin
 % \end{macro}^^A \if@tud@cover
 % \end{macro}^^A \makecover
 % \begin{parameter}{pagenumber}
@@ -1326,14 +1309,13 @@
   \TUD@parameter@define{pagenumber}{\def\tud@titlepagenumber{#1}}%
   \TUD@parameter@define{cdfont}[true]{\TUDoption{cdfont}{#1}}%
   \TUD@parameter@define{cdlayout}[true]{%
-    \ifstr{#1}{true}{\setbool@lock{@tud@cover@cdlayout}{true}}{%
-    \ifstr{#1}{on}{\setbool@lock{@tud@cover@cdlayout}{true}}{%
-    \ifstr{#1}{yes}{\setbool@lock{@tud@cover@cdlayout}{true}}{%
-    \ifstr{#1}{false}{\setbool@lock{@tud@cover@cdlayout}{false}}{%
-    \ifstr{#1}{no}{\setbool@lock{@tud@cover@cdlayout}{false}}{%
-    \ifstr{#1}{off}{\setbool@lock{@tud@cover@cdlayout}{false}}{%
+    \ifstrbool{#1}{%
+      \setbool@lock{@tud@cover@cdlayout}{true}%
+    }{%
+      \setbool@lock{@tud@cover@cdlayout}{false}%
+    }{%
       \TUD@parameter@wrn{cdlayout}{true,false}%
-    }}}}}}%
+    }%
   }%
   \TUD@parameter@sethandler{%
     \ifxnumber{#1}{%

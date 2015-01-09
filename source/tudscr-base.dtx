@@ -1,4 +1,4 @@
-% \CheckSum{279}
+% \CheckSum{288}
 % \iffalse meta-comment
 % ======================================================================
 %
@@ -47,7 +47,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-base.dtx}[%
-  2015/01/08 v2.03 TUD-KOMA-Script\space%
+  2015/01/09 v2.03 TUD-KOMA-Script\space%
 %</driver>
 %<package>\NeedsTeXFormat{LaTeX2e}[2011/06/27]
 %<package>\ProvidesPackage{tudscrbase}[%
@@ -137,6 +137,7 @@
 % \subsubsection{Test auf booleschen Ausdruck in Form eines Strings}
 %
 % \begin{macro}{\ifstrbool}
+% \changes{v2.03}{2015/01/09}{neu}%^^A
 % Dieser Befehl dient zum Testen, ob ein gegebener String als boolescher 
 % Ausdruck interpretiert werden kann. Ist der String als \enquote{wahr} 
 % interpretierbar, wird das zweite Argument ausgeführt. Kann der String als 
@@ -179,6 +180,10 @@
 % \begin{macro}{\TUD@numkey@bool}
 % \changes{v2.02}{2014/11/05}{neu}%^^A
 % \begin{macro}{\TUD@set@numkey}
+% \changes{v2.03}{2015/01/09}{neu}%^^A
+% \begin{macro}{\TUD@lengthkey}
+% \changes{v2.03}{2015/01/09}{neu}%^^A
+% \begin{macro}{\TUD@set@lengthkey}
 % \begin{macro}{\TUD@unknown@keyval}
 % In Anlehnung an \KOMAScript{} werden hier Befehle zur Definition und
 % Ausführung unterschiedlicher Klassenoptionen mithilfe der Funktionen aus
@@ -193,8 +198,14 @@
 \newcommand*\TUDDefaultOptions{cd,cdfont,tudbookmarks}
 \newcommand*\TUDoptions{\FamilyOptions{TUD}}
 \newcommand*\TUDoption{\FamilyOption{TUD}}
+%    \end{macrocode}
+% Hiermit wird die Abarbeitung der Optionen an das Ende der Klasse verzögert.
+%    \begin{macrocode}
 \newcommand*\TUD@noworlater{\AtEndOfClass}
 \AtEndOfClass{\let\TUD@noworlater\@firstofone}
+%    \end{macrocode}
+% Dies sind die Befehle zur Definition einer Standardoption.
+%    \begin{macrocode}
 \newcommand*\TUD@key[2][.\@currname.\@currext]{%
   \DefineFamilyMember{TUD}%
   \kernel@ifnextchar[%]
@@ -206,11 +217,17 @@
 \def\TUD@@@key[#1]#2#3{%
   \DefineFamilyKey[#1]{TUD}{#2}{\TUD@noworlater{#3}}%
 }
+%    \end{macrocode}
+% Dies sind die Befehle zur Definition einer booleschen Option.
+%    \begin{macrocode}
 \newcommand*\TUD@ifkey[1][.\@currname.\@currext]{%
   \DefineFamilyMember{TUD}%
   \FamilyBoolKey[#1]{TUD}%
 }
 \newcommand*\TUD@set@ifkey{\FamilySetBool{TUD}}
+%    \end{macrocode}
+% Dies sind die Befehle zur Definition einer Option mit definierten Werten.
+%    \begin{macrocode}
 \newcommand*\TUD@numkey[1][.\@currname.\@currext]{%
   \DefineFamilyMember{TUD}%
   \FamilyNumericalKey[#1]{TUD}%
@@ -223,9 +240,23 @@
   {false}{0},{off}{0},{no}{0},{true}{1},{on}{1},{yes}{1}%
 }
 \newcommand*\TUD@set@numkey{\FamilySetNumerical{TUD}}
+%    \end{macrocode}
+% Dies sind die Befehle zur Definition einer Option zur Festlegung einer Länge.
+%    \begin{macrocode}
+\newcommand*\TUD@lengthkey[1][.\@currname.\@currext]{%
+  \DefineFamilyMember{TUD}%
+  \FamilyLengthKey[#1]{TUD}%
+}
+\newcommand*\TUD@set@lengthkey{\FamilySetLength{TUD}}
+%    \end{macrocode}
+% Dieser Befehl wird lediglich pro forma definiert. Derzeit wird er durch 
+% \KOMAScript nicht abgearbeitet.
+%    \begin{macrocode}
 \newcommand*\TUD@unknown@keyval{\FamilyUnknownKeyValue{TUD}}
 %    \end{macrocode}
 % \end{macro}^^A \TUD@unknown@keyval
+% \end{macro}^^A \TUD@set@lengthkey
+% \end{macro}^^A \TUD@lengthkey
 % \end{macro}^^A \TUD@set@numkey
 % \end{macro}^^A \TUD@numkey@bool
 % \end{macro}^^A \TUD@numkey

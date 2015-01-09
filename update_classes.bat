@@ -13,4 +13,4 @@ set /p texmfpath=< texmfpath.tmp
 xcopy tex "%texmfpath%\tex" /s /y
 cd %~dp0
 if exist temp rmdir /s /q temp> nul
-rem texhash
+texhash

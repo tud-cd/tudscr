@@ -1,4 +1,4 @@
-% \CheckSum{1021}
+% \CheckSum{1016}
 % \iffalse meta-comment
 % ======================================================================
 %
@@ -47,7 +47,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-layout.dtx}[%
-  2015/01/08 v2.03 TUD-KOMA-Script (layout)%
+  2015/01/09 v2.03 TUD-KOMA-Script (layout)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -173,7 +173,7 @@
       \csstd@lock{tud@layout@chapter}{2}%
 %</book|report>
     \or%
-      \def\tud@head@logocolor{white}%
+      \def\tud@head@logocolor{HKS41}%
       \csstd@lock{tud@layout@cover}{1}%
       \csstd@lock{tud@layout@title}{3}%
 %    \end{macrocode}
@@ -395,8 +395,11 @@
 % \begin{option}{cleardoublespecialpage}
 % \changes{v2.02}{2014/07/08}{Nutzung als globale Klassenoption mit Werten für
 %   Seitenstile aus den \KOMAScript{} bzw. \TUDScript-Klassen}%^^A
+% \changes{v2.03}{2015/01/09}{Prüfung des Seitenstils mit \cs{AfterPreamble}
+%   auf Beginn des Dokumentes verzögert}%^^A
 % \begin{macro}{\tud@cleardoublepage}
 % \begin{macro}{\tud@cleardoublespecialpage}
+% \changes{v2.03}{2015/01/09}{Befehl \cs{tud@restorepagecolor} nicht nötig}%^^A
 % Für Klassen mit separaten Teileseiten und Kapiteln wird eine zusätzliche
 % Option definiert, welche nur bei zweiseitigem Satz (\opt{twoside}) und
 % zusätzlich immer auf nur der rechten Seite öffnenden Teilen bzw. Kapiteln
@@ -439,29 +442,23 @@
       \def\tud@cleardoublepage{\cleardoubleoddstandardpage}%
       \FamilyKeyStateProcessed%
     }{%
-      \ifcsdef{ps@#1}{%
-        \def\tud@cleardoublepage{\cleardoubleoddpageusingstyle{#1}}%
-        \FamilyKeyStateProcessed%
-      }{%
 %    \end{macrocode}
 % Beim Laden der Klasse selbst sind die speziellen Seitenstile der \KOMAScript-
 % bzw. \TUDScript-Klassen noch nicht definiert. Diese sollen als Werte jedoch
-% trotzdem erlaubt sein.
+% trotzdem erlaubt sein. Deshalb wird für diesen Fall das Überprüfen mit
+% \cs{AfterPreamble} auf den Beginn des Dokumentes verzögert.
 %    \begin{macrocode}
-        \ifx\@currname\tudcls@name%
-          \ifx\@currext\@clsextension%
-            \ifstr{#1}{headings}{%
-              \def\tud@cleardoublepage{\cleardoubleoddpageusingstyle{#1}}%
-              \FamilyKeyStateProcessed%
-            }{%
-              \tud@ifinpslist{#1}{%
-                \def\tud@cleardoublepage{\cleardoubleoddpageusingstyle{#1}}%
-                \FamilyKeyStateProcessed%
-              }{}%
-            }%
-          \fi%
-        \fi%
+      \AfterPreamble{%
+        \ifcsdef{ps@#1}{%
+          \def\tud@cleardoublepage{\cleardoubleoddpageusingstyle{#1}}%
+        }{%
+          \ClassError{\tudcls@name}{`#1' is no valid pagestyle}{%
+            You tried to use `#1' as a pagestyle for option\MessageBreak%
+            `cleardoublespecialpage', but it was never defined%
+          }%
+        }%
       }%
+      \FamilyKeyStateProcessed%
     }}}%
   \fi%
 }
@@ -479,13 +476,11 @@
         \def\@tempa{%
           #1%
           \tud@cleardoublepage%
-          \tud@restorepagecolor%
           \endgroup%
         }%
       \else%
         \def\@tempa{%
           \endgroup%
-          \tud@restorepagecolor%
           #1%
           \tud@cleardoublepage%
         }%
@@ -493,7 +488,6 @@
     }{%
       \if@tud@clearcolor\tud@clearcolor@wrn\fi%
       \def\@tempa{%
-        \tud@restorepagecolor%
         \endgroup%
         #1%
       }%
@@ -546,12 +540,12 @@
 % Überschriften verwendet.
 %    \begin{macrocode}
 %<*book|report>
-\newcommand*\tud@part@pagecolor{white}
+\newcommand*\tud@part@pagecolor{}
 \newcommand*\tud@part@logocolor{black}
 %</book|report>
 \newcommand*\tud@part@fontcolor{black}
 %<*book|report>
-\newcommand*\tud@chapter@pagecolor{white}
+\newcommand*\tud@chapter@pagecolor{}
 \newcommand*\tud@chapter@logocolor{black}
 \newcommand*\tud@chapter@fontcolor{black}
 %</book|report>
@@ -847,7 +841,6 @@
 %
 % Für die \cls{tudscrartcl}-Klasse wird der vertikale Standardabstand
 % beibehalten und lediglich die Farbanpassung hinzugefügt.
-% \ToDo{Prüfen, ob für \cls{tudscrartcl} \cs{tud@part@fontcolor} nötig}[v2.03]
 %    \begin{macrocode}
 %<*article>
 \newcommand*\tud@partheadstartvskip{}
@@ -865,11 +858,11 @@
 %    \begin{macrocode}
 %<*book|report>
 \newcommand*\tud@partheadstartvskip{%
-  \def\tud@part@pagecolor{white}%
+  \def\tud@part@pagecolor{}%
   \def\tud@part@logocolor{black}%
   \def\tud@part@fontcolor{black}%
   \ifcase \tud@layout@part\relax\or\or%
-    \def\tud@part@pagecolor{white}%
+    \def\tud@part@pagecolor{}%
     \def\tud@part@logocolor{HKS41}%
     \def\tud@part@fontcolor{HKS41}%
   \or%
@@ -925,8 +918,8 @@
 %    \begin{macrocode}
 \newcommand*\tud@partheadendvskip{%
   \tud@cleardoublespecialpage{%
-    \tud@pagecolor{\tud@part@pagecolor}%
-    \def\tud@head@logocolor{\tud@part@logocolor}%
+    \let\tud@pagecolor\tud@part@pagecolor%
+    \let\tud@head@logocolor\tud@part@logocolor%
     \addtokomafont{pagenumber}{\sffamily\color{\tud@part@fontcolor}}%
     \clearpage%
   }%
@@ -1030,11 +1023,11 @@
 % für die jeweilig gewählte Option ausgewählt.
 %    \begin{macrocode}
 \newcommand*\tud@chapterheadstartvskip{%
-  \def\tud@chapter@pagecolor{white}%
+  \def\tud@chapter@pagecolor{}%
   \def\tud@chapter@logocolor{black}%
   \def\tud@chapter@fontcolor{black}%
   \ifcase \tud@layout@chapter\relax\or\or%
-    \def\tud@chapter@pagecolor{white}%
+    \def\tud@chapter@pagecolor{}%
     \def\tud@chapter@logocolor{HKS41}%
     \def\tud@chapter@fontcolor{HKS41}%
   \or%
@@ -1060,6 +1053,7 @@
 % vorangestellt. Außerdem muss die Überschrift bei aktivierter
 % \opt{chapterprefix}-Option um die Höhe des Präfixes nach oben verschoben
 % werden, damit die Überschrift selbst auf der richtigen Höhe liegt.
+% \ToDo{Patches prüfen}[v3.15]
 %    \begin{macrocode}
 \newcommand*\tud@@@makechapterhead{}
 \let\tud@@@makechapterhead\@@makechapterhead
@@ -1080,6 +1074,7 @@
 % Überschriften für alle Einstellungen der \opt{parskip}-Option immer auf
 % exakt der selben Höhe liegen und auch die Abstände zwischen den ggf.
 % genutzten Präfixen identisch sind.
+% \ToDo{Patches prüfen}[v3.15]
 %    \begin{macrocode}
 \patchcmd{\tud@@@makechapterhead}{\size@chapter{#1}}{%
   \setlength{\parskip}{\z@}%
@@ -1166,8 +1161,8 @@
 % Rückseite beachtet. Umgesetzt wird dies mit \cs{tud@cleardoublespecialpage}.
 %    \begin{macrocode}
     \tud@cleardoublespecialpage{%
-      \tud@pagecolor{\tud@chapter@pagecolor}%
-      \def\tud@head@logocolor{\tud@chapter@logocolor}%
+      \let\tud@pagecolor\tud@chapter@pagecolor%
+      \let\tud@head@logocolor\tud@chapter@logocolor%
       \addtokomafont{pagenumber}{\sffamily\color{\tud@chapter@fontcolor}}%
       \clearpage%
     }%
@@ -1178,6 +1173,7 @@
 %    \end{macrocode}
 % Sollten keine reinen Kapitelseiten verwendet werden, muss gegebenenfalls im
 % Fuß genügend Freiraum für das \DDC-Logo gelassen werden.
+% \ToDo{Für Kompatibilitätsmodus beibehalten}[v2.03]
 %    \begin{macrocode}
   \else%
     \tud@ifinpslist{\chapterpagestyle}{\tud@ddc@enlargepage}{}%
