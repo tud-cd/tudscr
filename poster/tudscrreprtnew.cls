@@ -1767,10 +1767,21 @@
       contents={\tud@head@text@box},%
     ]{tudheadings.head.text}%
     \DeclareNewLayer[%
-      background,foot,%
+      background,
+      hoffset=\dimexpr1in+
+        \if@twoside%
+          \ifodd\value{page}\oddsidemargin\else\evensidemargin\fi%
+        \else%
+          \oddsidemargin%
+        \fi\relax,%
+      voffset=\dimexpr\topmargin+1in+\headheight+\headsep+\textheight+\footskip%
+        -\footheight\relax,%
+      width=\textwidth,%
+      height=\dimexpr\paperheight-\layeryoffset-1pt\relax,%
       contents={%
-        \vskip\dimexpr-\tud@dim@ddcfoot-\baselineskip+\ht\strutbox%
-        \hfill\tud@ddclogo%
+        \hfill\vbox to \layerheight{\vfil\hbox{\tud@ddclogo}\vfil}%
+    % ToDo §§§ evtl separater Layer für Drittlogos
+    %\vbox to \layerheight{\vfil\hbox{\includegraphics[height=1cm]{DDC-07}}\vfil}
       },%
     ]{tudheadings.foot.logo}%
     \newpairofpagestyles{tudheadings}{}%
@@ -2150,6 +2161,7 @@
     \expandafter\pagestyle\expandafter{\currentpagestyle}%
   }%
 }
+\newlength\tud@dim@ddcfoot
 \newcommand*\tud@geometry@process{%
   \tud@geometry@set%
   \ifcase \tud@geometry\relax%
@@ -2651,7 +2663,7 @@
     }%
     \if@restonecol\twocolumn\fi%
   \else%
-    \tud@ifinpslist{\chapterpagestyle}{\tud@ddc@enlargepage}{}%
+    \if@tud@ps{\chapterpagestyle}{\tud@ddc@enlargepage}{}%
   \fi%
   \if@twocolumn%
     \@afterindentfalse\@afterheading%
@@ -3433,7 +3445,7 @@
     \ifx\@referee\@empty\else\tud@title@wrn{referee}\fi%
     \ifx\@professor\@empty\else\tud@title@wrn{professor}\fi%
     \vskip 2\bigskipamount%
-    \tud@ifinpslist{\titlepagestyle}{\tud@ddc@enlargepage}{}%
+    \if@tud@ps{\titlepagestyle}{\tud@ddc@enlargepage}{}%
   \endgroup%
 }
 \newcommand*\tud@multiple@field{}
