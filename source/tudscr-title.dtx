@@ -1,4 +1,4 @@
-% \CheckSum{1325}
+% \CheckSum{1305}
 % \iffalse meta-comment
 % ======================================================================
 %
@@ -47,7 +47,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-title.dtx}[%
-  2015/01/09 v2.03 TUD-KOMA-Script (title)%
+  2015/01/12 v2.03 TUD-KOMA-Script (title)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -1121,17 +1121,6 @@
 % wurden Einstellungsmöglichkeiten vorgesehen, die insbesondere den verwendeten
 % Satzspiegel betreffen.
 %
-% \begin{length}{\tud@coverpagetopmargin}
-% \changes{v2.02}{2014/08/12}{neu}^^A
-% In dieser Länge wird die Höhe des oberen Seitenrandes einer Seite mit dem 
-% Logo der TUD gespeichert.
-%    \begin{macrocode}
-\newlength\tud@coverpagetopmargin
-\setlength\tud@coverpagetopmargin{\dimexpr\tud@dim@headheight%
-  +\tud@dim@barheight+\tud@dim@headsep\relax%
-}
-%    \end{macrocode}
-% \end{length}^^A \tud@coverpagetopmargin
 % \begin{macro}{\makecover}
 % \changes{v2.02}{2014/06/23}{Warnung für die Option \opt{titlepage} mit dem
 %   Wert \val{firstiscover}}%^^A
@@ -1140,7 +1129,6 @@
 % \begin{macro}{\if@tud@cover}
 % Der Befehl \cs{makecover} ist für eine Umschlagseite bei einem gebundenen 
 % Werk zu verwenden.
-% \ToDo{oberer Seitenrand haut nicht hin}[v2.03]
 %    \begin{macrocode}
 \newif\if@tud@cover
 \newcommand*\makecover[1][]{%
@@ -1237,24 +1225,22 @@
         \headheight=0pt%
         \headsep=0pt%
 %    \end{macrocode}
-% Bei der Höhe des Textbereiches und des oberen Seitenrandes muss unterschieden 
-% werden, ob der Satzspiegel im \CD oder aber im Buchblock erfolgen soll. Im 
-% Layout des \CDs geht das recht einfach.
+% Bei der Höhe des oberen Seitenrandes muss unterschieden werden, ob der
+% Satzspiegel im \CD oder aber im Buchblock erscheinen soll.
 %    \begin{macrocode}
         \if@tud@cover@cdlayout%
-          \let\coverpagetopmargin\tud@coverpagetopmargin%
-          \setlength{\@tempdima}{\z@}%
+          \footskip=\dimexpr\tud@dim@footsep+\tud@ta@footheight\relax%
+          \def\coverpagetopmargin{\dimexpr\tud@dim@headheight%
+            +\tud@dim@barheight+\tud@dim@headsep\relax%
+          }%
         \else%
 %    \end{macrocode}
-% Soll ein eigener Satzspiegel verwendet werden, kann der obere Seitenrand über 
-% \cs{coverpagetopmargin} geändert werden. Allerdings wird dafür gesorgt, dass 
-% dieser zumindest groß genug bleibt, damit das Markenlogo der \TnUD ohne eine 
-% ungewünschte Überdeckung dargestellt werden kann.
+% Bei der Verwendung eines eigenen Satzspiegels kann der obere Seitenrand über 
+% \cs{coverpagetopmargin} geändert werden. Das Vermeiden einer unerwünschten 
+% Überdeckung des Kopfes oder ein zu kleiner Fußbereich muss durch den Anwender 
+% korrigiert werden.
 %    \begin{macrocode}
-          \setlength{\@tempdima}{\dimexpr\tud@coverpagetopmargin%
-            -\tud@dim@headingsvskip-\coverpagetopmargin\relax%
-          }%
-          \ifdim\@tempdima<\z@\relax\setlength{\@tempdima}{\z@}\fi%
+          \footskip=\baselineskip%
         \fi%
 %    \end{macrocode}
 % Damit alle Einstellungen korrekt und wie gewünscht übernommen werden, muss 
@@ -1262,10 +1248,9 @@
 % Seitenrande gesetzt werden. Dies hat mit der originären Definition von 
 % \cs{coverpagetopmargin} zu tun. 
 %    \begin{macrocode}
-        \textheight=\dimexpr\paperheight-\coverpagetopmargin-\@tempdima%
+        \textheight=\dimexpr\paperheight-\coverpagetopmargin%
           -\coverpagebottommargin\relax%
-        \topmargin=\dimexpr\coverpagetopmargin-1in+\@tempdima\relax%
-        \footskip=\dimexpr\tud@dim@footsep+\tud@ta@footheight\relax%
+        \topmargin=\dimexpr\coverpagetopmargin-1in\relax%
         \@colht=\textheight%
         \@colroom=\textheight%
         \vsize=\textheight%
@@ -1298,6 +1283,10 @@
 % \changes{v2.02}{2014/08/08}{entfernt}^^A
 % \begin{parameter}{tudfonts}
 % \changes{v2.02}{2014/08/08}{entfernt}^^A
+% \begin{parameter}{cdcover}
+% \changes{v2.03}{2015/01/12}{neu}^^A
+% \begin{parameter}{cd}
+% \changes{v2.03}{2015/01/12}{neu}^^A
 % \begin{parameter}{cdlayout}
 % \changes{v2.02}{2014/06/23}{neu}%^^A
 % \begin{macro}{\if@tud@cover@cdlayout}
@@ -1309,6 +1298,8 @@
 \TUD@parameter{cover}{%
   \TUD@parameter@define{pagenumber}{\def\tud@titlepagenumber{#1}}%
   \TUD@parameter@define{cdfont}[true]{\TUDoption{cdfont}{#1}}%
+  \TUD@parameter@define{cdcover}[true]{\TUDoption{cdcover}{#1}}%
+  \TUD@parameter@let{cd}{cdcover}%
   \TUD@parameter@define{cdlayout}[true]{%
     \ifstrbool{#1}{%
       \setbool@lock{@tud@cover@cdlayout}{true}%
@@ -1329,6 +1320,8 @@
 %    \end{macrocode}
 % \end{macro}^^A \if@tud@cover@cdlayout
 % \end{parameter}^^A cdlayout
+% \end{parameter}^^A cd
+% \end{parameter}^^A cdcover
 % \end{parameter}^^A tudfonts
 % \end{parameter}^^A cdfonts
 % \end{parameter}^^A cdfont

@@ -1622,6 +1622,8 @@
 \newlength{\tud@dim@thinline}
 \newlength{\tud@dim@headingsvskip}
 \newlength{\tud@dim@headdiff}
+\newlength{\tud@dim@ddcdiff}% §§§ raus
+\newlength{\tud@dim@ddcfoot}% §§§ raus
 \newcommand*\tud@head@font@size{}
 \newcommand*\tud@geometry@set{%
   \ifdim\paperheight<148.1mm\relax%
@@ -1767,8 +1769,8 @@
       contents={\tud@head@text@box},%
     ]{tudheadings.head.text}%
     \DeclareNewLayer[%
-      background,
-      hoffset=\dimexpr1in+
+      background,%
+      hoffset=\dimexpr1in+%
         \if@twoside%
           \ifodd\value{page}\oddsidemargin\else\evensidemargin\fi%
         \else%
@@ -1777,11 +1779,9 @@
       voffset=\dimexpr\topmargin+1in+\headheight+\headsep+\textheight+\footskip%
         -\footheight\relax,%
       width=\textwidth,%
-      height=\dimexpr\paperheight-\layeryoffset-1pt\relax,%
+      height=\dimexpr\paperheight-\layeryoffset\relax,%
       contents={%
         \hfill\vbox to \layerheight{\vfil\hbox{\tud@ddclogo}\vfil}%
-    % ToDo §§§ evtl separater Layer für Drittlogos
-    %\vbox to \layerheight{\vfil\hbox{\includegraphics[height=1cm]{DDC-07}}\vfil}
       },%
     ]{tudheadings.foot.logo}%
     \newpairofpagestyles{tudheadings}{}%
@@ -2094,6 +2094,7 @@
   }%
   \global\let\tud@headlogo@wrn\relax%
 }
+\newcommand*\tud@footlogo{}
 \newcommand*\tud@@ddclogo{}
 \newcommand*\tud@ddclogo{%
   \tud@ddc@check%
@@ -2116,9 +2117,7 @@
     \def\tud@@ddclogo{DDC-28}%
   \fi%
   \ifx\tud@@ddclogo\@empty\else%
-  % §§§ Größe des Logos überdenken, wie berechnen?
-    \setlength{\@tempdima}{\dimexpr.5\tud@dim@headheight\relax}%
-    \includegraphics[height=\@tempdima]{\tud@@ddclogo}%
+    \includegraphics[height=.5\tud@dim@headheight]{\tud@@ddclogo}%
   \fi%
 }
 \newlength{\tud@ta@textheight}
@@ -2161,7 +2160,6 @@
     \expandafter\pagestyle\expandafter{\currentpagestyle}%
   }%
 }
-\newlength\tud@dim@ddcfoot
 \newcommand*\tud@geometry@process{%
   \tud@geometry@set%
   \ifcase \tud@geometry\relax%
@@ -3587,10 +3585,6 @@
     activated titlepage option%
   }%
 }
-\newlength\tud@coverpagetopmargin
-\setlength\tud@coverpagetopmargin{\dimexpr\tud@dim@headheight%
-  +\tud@dim@barheight+\tud@dim@headsep\relax%
-}
 \newif\if@tud@cover
 \newcommand*\makecover[1][]{%
   \if@titlepageiscoverpage%
@@ -3643,18 +3637,16 @@
         \headheight=0pt%
         \headsep=0pt%
         \if@tud@cover@cdlayout%
-          \let\coverpagetopmargin\tud@coverpagetopmargin%
-          \setlength{\@tempdima}{\z@}%
-        \else%
-          \setlength{\@tempdima}{\dimexpr\tud@coverpagetopmargin%
-            -\tud@dim@headingsvskip-\coverpagetopmargin\relax%
+          \footskip=\dimexpr\tud@dim@footsep+\tud@ta@footheight\relax%
+          \def\coverpagetopmargin{\dimexpr\tud@dim@headheight%
+            +\tud@dim@barheight+\tud@dim@headsep\relax%
           }%
-          \ifdim\@tempdima<\z@\relax\setlength{\@tempdima}{\z@}\fi%
+        \else%
+          \footskip=\baselineskip%
         \fi%
-        \textheight=\dimexpr\paperheight-\coverpagetopmargin-\@tempdima%
+        \textheight=\dimexpr\paperheight-\coverpagetopmargin%
           -\coverpagebottommargin\relax%
-        \topmargin=\dimexpr\coverpagetopmargin-1in+\@tempdima\relax%
-        \footskip=\dimexpr\tud@dim@footsep+\tud@ta@footheight\relax%
+        \topmargin=\dimexpr\coverpagetopmargin-1in\relax%
         \@colht=\textheight%
         \@colroom=\textheight%
         \vsize=\textheight%
@@ -3673,6 +3665,8 @@
 \TUD@parameter{cover}{%
   \TUD@parameter@define{pagenumber}{\def\tud@titlepagenumber{#1}}%
   \TUD@parameter@define{cdfont}[true]{\TUDoption{cdfont}{#1}}%
+  \TUD@parameter@define{cdcover}[true]{\TUDoption{cdcover}{#1}}%
+  \TUD@parameter@let{cd}{cdcover}%
   \TUD@parameter@define{cdlayout}[true]{%
     \ifstrbool{#1}{%
       \setbool@lock{@tud@cover@cdlayout}{true}%

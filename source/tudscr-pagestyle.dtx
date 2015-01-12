@@ -1,4 +1,4 @@
-% \CheckSum{1534}
+% \CheckSum{1560}
 % \iffalse meta-comment
 % ======================================================================
 %
@@ -47,7 +47,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-pagestyle.dtx}[%
-  2015/01/09 v2.03 TUD-KOMA-Script (pagestyle)%
+  2015/01/12 v2.03 TUD-KOMA-Script (pagestyle)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -458,13 +458,23 @@
       contents={\tud@head@text@box},%
     ]{tudheadings.head.text}%
 %    \end{macrocode}
-% Außerdem wird eine weitere Ebene mit dem \DDC-Logo im Seitenfuß erstellt.
+% Außerdem wird eine weitere Ebene für Drittlogos sowie das \DDC-Logo im
+% Seitenfuß erstellt.
 %    \begin{macrocode}
     \DeclareNewLayer[%
-      background,foot,%
+      background,%
+      hoffset=\dimexpr1in+%
+        \if@twoside%
+          \ifodd\value{page}\oddsidemargin\else\evensidemargin\fi%
+        \else%
+          \oddsidemargin%
+        \fi\relax,%
+      voffset=\dimexpr\topmargin+1in+\headheight+\headsep+\textheight+\footskip%
+        -\footheight\relax,%
+      width=\textwidth,%
+      height=\dimexpr\paperheight-\layeryoffset\relax,%
       contents={%
-        \vskip\dimexpr-\tud@dim@ddcfoot-\baselineskip+\ht\strutbox%
-        \hfill\tud@ddclogo%
+        \hfill\vbox to \layerheight{\vfil\hbox{\tud@ddclogo}\vfil}%
       },%
     ]{tudheadings.foot.logo}%
 %    \end{macrocode}
@@ -1313,6 +1323,16 @@
 % \changes{v2.02}{2014/06/23}{entfernt}%^^A
 % Dieser Befehl wurde mit der \TUDScript-Version~v2.02 entfernt.
 % \end{macro}^^A \tud@ddc@sethead
+% \begin{macro}{\tud@footlogo}
+% \changes{v2.03}{2015/01/12}{neu}%^^A
+% \ToDo{%
+%   separater Befehl für Drittlogos; über Liste oder doch benutzerspezifisch
+%   anpassbar? Layer: tudheadings.foot.logo%
+% }[v2.03]
+%    \begin{macrocode}
+\newcommand*\tud@footlogo{}
+%    \end{macrocode}
+% \end{macro}^^A \tud@footlogo
 % \begin{macro}{\tud@ddclogo}
 % \changes{v2.02}{2014/06/23}{neu}%^^A
 % \begin{macro}{\tud@@ddclogo}
@@ -1342,7 +1362,7 @@
     \def\tud@@ddclogo{DDC-28}%
   \fi%
   \ifx\tud@@ddclogo\@empty\else%
-    \includegraphics[height=\tud@dim@ddcfoot]{\tud@@ddclogo}%
+    \includegraphics[height=.5\tud@dim@headheight]{\tud@@ddclogo}%
   \fi%
 }
 %    \end{macrocode}
