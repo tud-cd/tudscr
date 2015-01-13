@@ -1,4 +1,4 @@
-% \CheckSum{1305}
+% \CheckSum{1317}
 % \iffalse meta-comment
 % ======================================================================
 %
@@ -203,7 +203,7 @@
 % gesetzt und direkt danach der zweispaltige Satz begonnen.
 %    \begin{macrocode}
         \if@twocolumn%
-          \tud@title@twocolumn[{\tud@cmd@use{maketitle}[\tud@titlepagenumber]}]%
+          \tud@title@twocolumn{\tud@cmd@use{maketitle}[\tud@titlepagenumber]}%
         \else%
           \tud@cmd@use{maketitle}[\tud@titlepagenumber]%
         \fi%
@@ -806,7 +806,7 @@
 % gelassen werden.
 % \ToDo{Für Kompatibilitätsmodus beibehalten}[v2.03]
 %    \begin{macrocode}
-    \if@tud@ps{\titlepagestyle}{\tud@ddc@enlargepage}{}%
+    \iftudpagestyle{\titlepagestyle}{\tud@ddc@enlargepage}{}%
   \endgroup%
 }
 %    \end{macrocode}
@@ -1007,6 +1007,7 @@
 % \begin{macro}{\@maketitleonecolumn}
 % \changes{v2.02}{2014/08/12}{entfernt}%^^A
 % \begin{macro}{\tud@title@twocolumn}
+% \changes{v2.03}{2015/01/13}{Bugfix für falsche Position des Titels}%^^A
 % \begin{macro}{\tud@title@twocolumn@box}
 % Zum Setzen eines einspaltigen Titels mit einspaltiger Zusammenfassung bei
 % einem Titelkopf~-- dank der Hilfe von Markus Kohm.%
@@ -1028,7 +1029,7 @@
       \maketitle[#1]%
       \onecolumn{#2}\twocolumn%
     \else%
-      \tud@title@twocolumn[{\vspace*{.9\baselineskip}\maketitle[#1]{#2}}]%
+      \tud@title@twocolumn{\maketitle[#1]{#2}}%
     \fi%
   \else%
     \ClassError{\tudcls@name}{%
@@ -1042,7 +1043,7 @@
 % kann, wird mit einer Box gearbeitet.
 %    \begin{macrocode}
 \newsavebox\tud@title@twocolumn@box
-\newcommand\tud@title@twocolumn[1][]{%
+\newcommand\tud@title@twocolumn[1]{%
 %    \end{macrocode}
 % Zunächst wird auf einseitigen Satz umgeschaltet. Der zu schreibende Inhalt
 % wird in einer Box gespeichert. Während des Zusammenbaus der Box sind keine
@@ -1052,18 +1053,33 @@
   \begingroup%
     \let\clearpage\relax%
     \let\newpage\relax%
-    \global\setbox\tud@title@twocolumn@box\vbox{#1\bigskip}%
+%    \end{macrocode}
+% Sollte der Inhalt der Box größer als die verfügbare Texthöhe des Satzspiegels 
+% sein, muss aufgrund der verwendeten Box ein zusätzlicher vertikaler Abstand 
+% zur korrekten Postionierung der Überschrift eingefügt werden.
+%    \begin{macrocode}
+    \global\setbox\tud@title@twocolumn@box\vbox{%
+      \vspace*{.9\baselineskip}#1\bigskip%
+    }%
   \endgroup%
 %    \end{macrocode}
 % Jetzt werden der Inhalt stückweise so lange auf einzelnen Seiten ausgeben,
 % bis der immer kleiner werdende Rest in der Box auf eine Seite passt.
 %    \begin{macrocode}
-  \@whiledim\textheight<\ht\tud@title@twocolumn@box\do{%
-    \splittopskip\topskip%
-    \splitmaxdepth\maxdepth%
-    \vsplit\tud@title@twocolumn@box to \textheight%
-    \clearpage%
-  }%
+  \ifdim\ht\tud@title@twocolumn@box>\textheight\relax%
+    \@whiledim\ht\tud@title@twocolumn@box>\textheight\do{%
+      \splittopskip\topskip%
+      \splitmaxdepth\maxdepth%
+      \vsplit\tud@title@twocolumn@box to \textheight%
+      \clearpage%
+    }%
+%    \end{macrocode}
+% Passt der auszugebende einspaltige Teil auf eine Seite, ist keine Korrektur 
+% notwendig. In diesem Fall wird die Box einfach neu gesetzt.
+%    \begin{macrocode}
+  \else%
+    \setbox\tud@title@twocolumn@box\vbox{#1\bigskip}%
+  \fi%
 %    \end{macrocode}
 % Der Rest wir einfach als optionales Argument von \cs{twocolumn} ausgegeben.
 %    \begin{macrocode}
@@ -1249,7 +1265,7 @@
 % \cs{coverpagetopmargin} zu tun. 
 %    \begin{macrocode}
         \textheight=\dimexpr\paperheight-\coverpagetopmargin%
-          -\coverpagebottommargin\relax%
+          -\coverpagebottommargin-\tud@dim@extrabottommargin\relax%
         \topmargin=\dimexpr\coverpagetopmargin-1in\relax%
         \@colht=\textheight%
         \@colroom=\textheight%

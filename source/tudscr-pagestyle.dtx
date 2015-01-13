@@ -1,4 +1,4 @@
-% \CheckSum{1560}
+% \CheckSum{1623}
 % \iffalse meta-comment
 % ======================================================================
 %
@@ -47,7 +47,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-pagestyle.dtx}[%
-  2015/01/12 v2.03 TUD-KOMA-Script (pagestyle)%
+  2015/01/13 v2.03 TUD-KOMA-Script (pagestyle)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -69,7 +69,8 @@
 % \selectlanguage{ngerman}
 %
 % \changes{v2.02}{2014/06/23}{Unterstützung für \pkg{titlepage} entfernt}%^^A
-% \changes{v2.02}{2014/07/08}{Verwendung \cs{FamilyKeyState}}%^^A
+% \changes{v2.02}{2014/07/08}{Prüfung des Abarbeitungszustandes der 
+%   \TUDScript-Optionen mit \cs{FamilyKeyState}}%^^A
 %
 % \section{Der Seitenstil des \CDs}
 %
@@ -117,7 +118,9 @@
 % \changes{v2.02}{2015/01/09}{entfernt}%^^A
 % \begin{length}{\tud@dim@footskip}
 % \changes{v2.02}{2015/01/09}{entfernt}%^^A
-% Diese Befehle wurden mit der \TUDScript-Version~v2.03 allesamt entfernt.
+% Die Befehle wurden mit der \TUDScript-Version~v2.03 allesamt entfernt, da 
+% diese redundant waren und implizit durch andere, bereits für das \CD 
+% definierte Längen dargestellt werden können.
 % \end{length}^^A \tud@dim@footskip
 % \end{length}^^A \tud@dim@bottom
 % \end{length}^^A \tud@dim@top
@@ -143,6 +146,7 @@
 % \begin{length}{\tud@dim@logoy}
 % \begin{length}{\tud@dim@logowidth}
 % \begin{length}{\tud@dim@logoheight}
+% \changes{v2.03}{2015/01/13}{entfernt}%^^A
 % Außerdem müssen noch die Abmessungen und die Position des TUD-Logos definiert
 % werden, nämlich der horizontale (Soll"~)Abstand zwischen linkem Seitenrand
 % und Logo, der vertikale (Soll"~)Abstand zwischen oberem Seitenrand und Logo
@@ -152,7 +156,6 @@
 \newlength{\tud@dim@logox}
 \newlength{\tud@dim@logoy}
 \newlength{\tud@dim@logowidth}
-\newlength{\tud@dim@logoheight}
 %    \end{macrocode}
 % \end{length}^^A \tud@dim@logoheight
 % \end{length}^^A \tud@dim@logowidth
@@ -176,23 +179,24 @@
 % \end{length}^^A \tud@dim@thinline
 % \end{length}^^A \tud@dim@heavyline
 % \end{length}^^A \tud@dim@line
-% \begin{length}{\tud@dim@headingsvskip}
 % \begin{length}{\tud@dim@headdiff}
+% \begin{length}{\tud@dim@headingsvskip}
 % \changes{v2.02}{2014/06/23}{neu}%^^A
 % Die Längen für den vertikalen Standardversatz der Überschriften sowie die 
 % Differenz der Kopfhöhen von normalem Satzspiegel und dem mit dem TUD-Kopf.
 %    \begin{macrocode}
-\newlength{\tud@dim@headingsvskip}
 \newlength{\tud@dim@headdiff}
+\newlength{\tud@dim@headingsvskip}
 %    \end{macrocode}
-% \end{length}^^A \tud@dim@headingsvskip
 % \end{length}^^A \tud@dim@headdiff
+% \end{length}^^A \tud@dim@headingsvskip
 % \begin{length}{\tud@dim@ddcdiff}
 % \changes{v2.02}{2014/06/23}{neu}%^^A
 % \begin{length}{\tud@dim@ddcfoot}
 % \changes{v2.02}{2014/06/23}{neu, Umbenennung von \cs{tud@dim@ddcheight}}%^^A
 % Zu guter Letzt noch die Höhe des \DDC-Logos in der Fußzeile. Die maximale Höhe
 % der Fußzeile ist fest vorgegeben.
+% \ToDo{beide Längen raus}[v2.03]
 %    \begin{macrocode}
 \newlength{\tud@dim@ddcdiff}
 \newlength{\tud@dim@ddcfoot}
@@ -287,6 +291,7 @@
 %    \end{macrocode}
 % Hiermit wird sichergestellt, dass bei der Verwendung des \DDC-Logos im Fuß
 % ausreichend Platz zur Verfügung steht.
+% \ToDo{raus?}[v2.03]
 %    \begin{macrocode}
   \setlength{\tud@dim@ddcfoot}{.6\tud@dim@headheight}%
 }
@@ -296,7 +301,7 @@
 %
 % \subsection{Unterstützung der \cls{standalone}-Klasse}
 %
-% \changes{v2.02}{2014/07/25}{Unterstützung der \cls{standalone}"=Klasse}%^^A
+% \changes{v2.02}{2014/07/25}{Unterstützung der \cls{standalone}-Klasse}%^^A
 %
 % Mit der Klasse~\cls{standalone} können insbesondere Grafiken als separate 
 % Dateien erzeugt und später im Dokument eingebunden werden. Diese Klasse 
@@ -304,7 +309,7 @@
 % der Verwendung mit den \TUDScript-Klassen nicht in die Quere kommen, müssen 
 % für einige Einstellungen unterdrückt werden.
 %
-% \begin{macro}{\if@tud@sacrop}
+% \begin{macro}{\ifstandalonecrop}
 % \changes{v2.02}{2014/09/08}{neu}%^^A
 % Mit diesem Makro kann die Verwendung der Option \opt{crop} mit der Klasse 
 % \cls{standalone} geprüft werden. Das erste Argument wird ausgeführt, wenn 
@@ -312,7 +317,7 @@
 % ausgeführt, wenn entweder die Option \opt{crop} deaktiviert ist oder die 
 % Klasse \cls{standalone} gar nicht geladen wurde.
 %    \begin{macrocode}
-\newcommand*\if@tud@sacrop{%
+\newcommand*\ifstandalonecrop{%
   \ifcsdef{ifsa@crop}{%
     \ifbool{sa@crop}{\@firstoftwo}{\@secondoftwo}%
   }{%
@@ -320,7 +325,7 @@
   }%
 }
 %    \end{macrocode}
-% \end{macro}^^A \if@tud@sacrop
+% \end{macro}^^A \ifstandalonecrop
 %
 % Ist die Klasse \cls{standalone} zusammen mit der Option \opt{crop} aktiv,
 % werden die Seitenränder auf die Einstellungen dieser Klasse gesetzt und das
@@ -328,7 +333,7 @@
 %
 %    \begin{macrocode}
 \AtEndPreamble{%
-  \if@tud@sacrop{%
+  \ifstandalonecrop{%
     \PreventPackageFromLoading{scrlayer-scrpage}%
     \pagestyle{empty}%
     \hoffset=-72.27pt%
@@ -375,18 +380,19 @@
 % \changes{v2.02}{2014/06/23}{neu}%^^A
 % \begin{layer}{tudheadings.head.logo}
 % \changes{v2.02}{2014/06/23}{neu}%^^A
-% \begin{layer}{tudheadings.head.topline}
+% \begin{layer}{tudheadings.head.upperline}
 % \changes{v2.02}{2014/06/23}{neu}%^^A
-% \begin{layer}{tudheadings.head.bottomline}
+% \begin{layer}{tudheadings.head.lowerline}
 % \changes{v2.02}{2014/06/23}{neu}%^^A
-% \begin{layer}{tudheadings.head.topwideline}
+% \begin{layer}{tudheadings.head.upperwideline}
 % \changes{v2.02}{2014/06/23}{neu}%^^A
-% \begin{layer}{tudheadings.head.bottomwideline}
+% \begin{layer}{tudheadings.head.lowerwideline}
 % \changes{v2.02}{2014/06/23}{neu}%^^A
 % \begin{layer}{tudheadings.head.text}
 % \changes{v2.02}{2014/06/23}{neu}%^^A
 % \begin{layer}{tudheadings.foot.logo}
 % \changes{v2.02}{2014/06/23}{neu}%^^A
+% \changes{v2.03}{2015/01/13}{Ebenendeklaration ist kompatibilitätsabhängig}%^^A
 % Für das Erzeugen der Seitenstile wird das Paket \pkg{scrlayer-scrpage} 
 % genutzt. Mit diesem können verschiedene Ebenen erstellt werden, aus welchen 
 % anschließend der eigentliche Seitenstil zusammengesetzt wird.
@@ -431,24 +437,24 @@
       background,head,align=tl,%
       voffset=\dimexpr\tud@dim@headheight-.5\tud@dim@line\relax,%
       contents={\if@tud@widehead\else\tud@head@rule{\textwidth}\fi},%
-    ]{tudheadings.head.topline}%
+    ]{tudheadings.head.upperline}%
     \DeclareNewLayer[%
       background,head,align=tl,%
       voffset=\dimexpr\tud@dim@headheight+\tud@dim@barheight%
         -.5\tud@dim@line\relax,%
       contents={\if@tud@widehead\else\tud@head@rule{\textwidth}\fi},%
-    ]{tudheadings.head.bottomline}%
+    ]{tudheadings.head.lowerline}%
     \DeclareNewLayer[%
       background,align=tl,%
       voffset=\dimexpr\tud@dim@headheight-.5\tud@dim@line\relax,%
       contents={\if@tud@widehead\tud@head@rule{\paperwidth}\fi},%
-    ]{tudheadings.head.topwideline}%
+    ]{tudheadings.head.upperwideline}%
     \DeclareNewLayer[%
       background,align=tl,%
       voffset=\dimexpr\tud@dim@headheight+\tud@dim@barheight%
         -.5\tud@dim@line\relax,%
       contents={\if@tud@widehead\tud@head@rule{\paperwidth}\fi},%
-    ]{tudheadings.head.bottomwideline}%
+    ]{tudheadings.head.lowerwideline}%
 %    \end{macrocode}
 % \dots der Inhalt mit Fakultät, Einrichtung, Institut und Lehrstuhl.
 %    \begin{macrocode}
@@ -459,24 +465,40 @@
     ]{tudheadings.head.text}%
 %    \end{macrocode}
 % Außerdem wird eine weitere Ebene für Drittlogos sowie das \DDC-Logo im
-% Seitenfuß erstellt.
+% Seitenfuß erstellt. Dabei wird die Ebene in Abhängigkeit vom gewählten 
+% Kompatibilitätsmodus unterschiedlich definiert. Bis zur Version~v2.02 wurde 
+% für die Verwendung des \DDC-Logos der Satzspiegel geändert.
 %    \begin{macrocode}
-    \DeclareNewLayer[%
-      background,%
-      hoffset=\dimexpr1in+%
-        \if@twoside%
-          \ifodd\value{page}\oddsidemargin\else\evensidemargin\fi%
-        \else%
-          \oddsidemargin%
-        \fi\relax,%
-      voffset=\dimexpr\topmargin+1in+\headheight+\headsep+\textheight+\footskip%
-        -\footheight\relax,%
-      width=\textwidth,%
-      height=\dimexpr\paperheight-\layeryoffset\relax,%
-      contents={%
-        \hfill\vbox to \layerheight{\vfil\hbox{\tud@ddclogo}\vfil}%
-      },%
-    ]{tudheadings.foot.logo}%
+    \iftudscrverlower{2.03}{%
+      \DeclareNewLayer[%
+        background,foot,%
+        contents={%
+          \vskip\dimexpr-.6\tud@dim@headheight-\baselineskip+\ht\strutbox%
+          \hfill\tud@ddclogo%
+        },%
+      ]{tudheadings.foot.logo}%
+%    \end{macrocode}
+% Ab Version~v2.03 wird der Satzspiegel so gewählt, dass das \DDC-Logo in den 
+% normalen Seitenfuß passt.
+%    \begin{macrocode}
+    }{%
+      \DeclareNewLayer[%
+        background,%
+        hoffset=\dimexpr1in+%
+          \if@twoside%
+            \ifodd\value{page}\oddsidemargin\else\evensidemargin\fi%
+          \else%
+            \oddsidemargin%
+          \fi\relax,%
+        voffset=\dimexpr\topmargin+1in+\headheight+\headsep+\textheight%
+          +\footskip-\footheight\relax,%
+        width=\textwidth,%
+        height=\dimexpr\paperheight-\layeryoffset\relax,%
+        contents={%
+          \hfill\vbox to \layerheight{\vfil\hbox{\tud@ddclogo}\vfil\vfil}%
+        },%
+      ]{tudheadings.foot.logo}%
+    }%
 %    \end{macrocode}
 % Aus den zuvor erstellten Ebenen werden jetzt die eigentlichen Seitenstile 
 % zusammengesetzt. Mit \cs{newpairofpagestyles} wird neben dem Seitenstil
@@ -504,10 +526,10 @@
     \AddLayersToPageStyle{tudheadings}{%
       tudheadings.head.mainlogo,%
       tudheadings.head.logo,%
-      tudheadings.head.topline,%
-      tudheadings.head.bottomline,%
-      tudheadings.head.topwideline,%
-      tudheadings.head.bottomwideline,%
+      tudheadings.head.upperline,%
+      tudheadings.head.lowerline,%
+      tudheadings.head.upperwideline,%
+      tudheadings.head.lowerwideline,%
       tudheadings.head.text,%
       tudheadings.foot.logo,%
       scrheadings.foot.odd,%
@@ -519,10 +541,10 @@
     \AddLayersToPageStyle{plain.tudheadings}{%
       tudheadings.head.mainlogo,%
       tudheadings.head.logo,%
-      tudheadings.head.topline,%
-      tudheadings.head.bottomline,%
-      tudheadings.head.topwideline,%
-      tudheadings.head.bottomwideline,%
+      tudheadings.head.upperline,%
+      tudheadings.head.lowerline,%
+      tudheadings.head.upperwideline,%
+      tudheadings.head.lowerwideline,%
       tudheadings.head.text,%
       tudheadings.foot.logo,%
       plain.scrheadings.foot.odd,%
@@ -534,10 +556,10 @@
     \DeclareNewPageStyleByLayers{empty.tudheadings}{%
       tudheadings.head.mainlogo,%
       tudheadings.head.logo,%
-      tudheadings.head.topline,%
-      tudheadings.head.bottomline,%
-      tudheadings.head.topwideline,%
-      tudheadings.head.bottomwideline,%
+      tudheadings.head.upperline,%
+      tudheadings.head.lowerline,%
+      tudheadings.head.upperwideline,%
+      tudheadings.head.lowerwideline,%
       tudheadings.head.text,%
       tudheadings.foot.logo,%
     }%
@@ -611,10 +633,10 @@
 % \end{layer}^^A tudpagecolor
 % \end{layer}^^A tudheadings.foot.logo
 % \end{layer}^^A tudheadings.head.text
-% \end{layer}^^A tudheadings.head.bottomwideline
-% \end{layer}^^A tudheadings.head.topwideline
-% \end{layer}^^A tudheadings.head.bottomline
-% \end{layer}^^A tudheadings.head.topline
+% \end{layer}^^A tudheadings.head.lowerwideline
+% \end{layer}^^A tudheadings.head.upperwideline
+% \end{layer}^^A tudheadings.head.lowerline
+% \end{layer}^^A tudheadings.head.upperline
 % \end{layer}^^A tudheadings.head.logo
 % \end{layer}^^A tudheadings.head.mainlogo
 % \end{pagestyle}^^A empty.tudheadings
@@ -673,7 +695,7 @@
 %    \end{macrocode}
 % Für den Fall, das ein \pgs{tudheadings}-Seitenstil geladen werden soll\dots
 %    \begin{macrocode}
-  \if@tud@ps{\@tempa}{%
+  \iftudpagestyle{\@tempa}{%
 %    \end{macrocode}
 % \dots werden die Einstellungen für den Seitenfuß mit \cs{tud@ddc@check} in
 % \cs{@tempb} geschrieben und abhängig davon der richtige Satzspiegel geladen. 
@@ -1041,7 +1063,7 @@
 %    \begin{macrocode}
   \TUD@set@numkey{ddc}{tud@ddc}{\tud@ddc@switch}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \if@atdocument\if@tud@ps{\currentpagestyle}{\clearpage}{}\fi%
+    \if@atdocument\iftudpagestyle{\currentpagestyle}{\clearpage}{}\fi%
     \ifcase \tud@ddc\relax%
       \@tud@ddc@autosetfalse%
     \else%
@@ -1078,7 +1100,7 @@
     \if@tud@ddc@save%
       \begingroup%
         \let\tud@ddc@head\tud@ddc@save%
-        \if@atdocument\if@tud@ps{\currentpagestyle}{\clearpage}{}\fi%
+        \if@atdocument\iftudpagestyle{\currentpagestyle}{\clearpage}{}\fi%
       \endgroup%
     \fi%
 %    \end{macrocode}
@@ -1108,7 +1130,7 @@
     \if@tud@ddc@save%
       \begingroup%
         \let\tud@ddc@foot\tud@ddc@save%
-        \if@atdocument\if@tud@ps{\currentpagestyle}{\clearpage}{}\fi%
+        \if@atdocument\iftudpagestyle{\currentpagestyle}{\clearpage}{}\fi%
       \endgroup%
     \fi%
     \ifcase \tud@ddc@foot\relax\else%
@@ -1148,23 +1170,24 @@
 % \end{option}^^A ddcfoot
 % \end{option}^^A ddchead
 % \end{option}^^A ddc
-% \begin{macro}{\if@tud@ps}
+% \begin{macro}{\iftudpagestyle}
 % \changes{v2.02}{2014/06/23}{neu}%^^A
 % \begin{macro}{\tud@ps@list}
 % \changes{v2.02}{2014/06/23}{neu}%^^A
-% Mit dem Befehl \cs{if@tud@ps} wird geprüft, ob der übergebene 
-% Seitenstil~-- was auch das Makro \cs{currentpagestyle} sein kann, welches 
-% durch das Paket \pkg{scrlayer-scrpage} definiert wird und den aktuellen 
-% Seitenstil beinhaltet~-- einem aus \cs{tud@ps@list} entspricht. Ist dies der 
-% Fall, wird das zweite Argument ausgeführt, sonst das dritte.
+% Mit dem Befehl \cs{iftudpagestyle} wird geprüft, ob der im ersten Argument 
+% gegebene Seitenstil~-- was auch das Makro \cs{currentpagestyle} sein kann,
+% welches durch das Paket \pkg{scrlayer-scrpage} definiert wird und den
+% aktuellen Seitenstil beinhaltet~-- einem aus der Liste \cs{tud@ps@list}
+% entspricht. Ist dies der Fall, wird das zweite Argument ausgeführt, 
+% anderfalls das dritte.
 %
 % \ToDo{\cs{GetRealPageStyle} für \cs{currentpagestyle} nicht nötig}[v3.15]
-% ^^A \newcommand*\if@tud@ps[3]{\xifinlist{#1}{\tud@ps@list}{#2}{#3}}
+% ^^A \newcommand*\iftudpagestyle[3]{\xifinlist{#1}{\tud@ps@list}{#2}{#3}}
 %
 %    \begin{macrocode}
 \providecommand*\GetRealPageStyle[1]{#1}
 \BeforePackage{scrlayer-scrpage}{\undef\GetRealPageStyle}
-\newcommand*\if@tud@ps[3]{%
+\newcommand*\iftudpagestyle[3]{%
   \xifinlist{\GetRealPageStyle{#1}}{\tud@ps@list}{#2}{#3}%
 }
 \newcommand*\tud@ps@list{}
@@ -1173,7 +1196,7 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@ps@list
-% \end{macro}^^A \if@tud@ps
+% \end{macro}^^A \iftudpagestyle
 % \begin{option}{widehead}
 % \begin{macro}{\if@tud@widehead}
 % \begin{macro}{\if@tud@widehead@locked}
@@ -1189,23 +1212,23 @@
 % \end{macro}^^A \if@tud@widehead@locked
 % \end{macro}^^A \if@tud@widehead
 % \end{option}^^A widehead
-% \begin{option}{extrafootheight}
-% \begin{length}{\tud@dim@extrafootheight}
+% \begin{option}{extrabottommargin}
+% \begin{length}{\tud@dim@extrabottommargin}
 % Diese Option dient dazu, die Höhe des Fußes anzupassen. Dies ist jedoch nur 
 % möglich, wenn der Satzspiegel des \CDs verwendet wird. Kommt \pkg{typearea} 
 % zum Einsatz, ist die Option wirkungslos.
 % \ToDo{Neue Option im Handbuch dokumentieren}[v2.03]
 %    \begin{macrocode}
-\newlength\tud@dim@extrafootheight
-\TUD@key{extrafootheight}{%
-  \TUD@set@lengthkey{extrafootheight}{\tud@dim@extrafootheight}{#1}%
+\newlength\tud@dim@extrabottommargin
+\TUD@key{extrabottommargin}{%
+  \TUD@set@lengthkey{extrabottommargin}{\tud@dim@extrabottommargin}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \if@atdocument\recalctypearea\fi%
+    \if@atdocument\tud@geometry@process\fi%
   \fi%
 }
 %    \end{macrocode}
-% \end{length}^^A \tud@dim@extrafootheight
-% \end{option}^^A extrafootheight
+% \end{length}^^A \tud@dim@extrabottommargin
+% \end{option}^^A extrabottommargin
 %
 % \iffalse
 %</class&option>
@@ -1268,7 +1291,7 @@
 % \cs{includegraphics} weitergereicht werden können.
 %    \begin{macrocode}
 \newcommand*\headlogo[2][]{%
-  \if@atdocument\if@tud@ps{\currentpagestyle}{\clearpage}{}\fi%
+  \if@atdocument\iftudpagestyle{\currentpagestyle}{\clearpage}{}\fi%
   \def\tud@@headlogo{#2}%
   \def\tud@@@headlogo{#1}%
   \if@atdocument\expandafter\pagestyle\expandafter{\currentpagestyle}\fi%
@@ -1299,9 +1322,8 @@
     \def\tud@@headlogo{DDC-30}%
   \fi%
   \ifx\tud@@headlogo\@empty\else%
-    \settoheight{\tud@dim@logoheight}{\tud@mainlogo}%
-    \pretocmd{\tud@@@headlogo}{height=\tud@dim@logoheight,}%
-      {}{\tud@patch@wrn{tud@@@headlogo}}%
+    \settoheight{\@tempdima}{\tud@mainlogo}%
+    \epreto\tud@@@headlogo{height=\the\@tempdima,}{}{}%
     \expandafter\includegraphics\expandafter[\tud@@@headlogo]{\tud@@headlogo}%
   \fi%
 }
@@ -1337,6 +1359,7 @@
 % \changes{v2.02}{2014/06/23}{neu}%^^A
 % \begin{macro}{\tud@@ddclogo}
 % \changes{v2.02}{2014/06/23}{neu, \cs{tud@foot@logo} umbenannt}%^^A
+% \changes{v2.03}{2015/01/13}{Größe des Logos kompatibilitätsabhängig}%^^A
 % Diese Befehle dienen zum Einbinden des \DDC-Logos im Fuß der Seiten im Stil 
 % \pgs{tudheadings}.
 %    \begin{macrocode}
@@ -1362,7 +1385,12 @@
     \def\tud@@ddclogo{DDC-28}%
   \fi%
   \ifx\tud@@ddclogo\@empty\else%
-    \includegraphics[height=.5\tud@dim@headheight]{\tud@@ddclogo}%
+    \iftudscrverlower{2.03}{%
+      \setlength{\@tempdima}{.6\tud@dim@headheight}%
+    }{%
+      \settoheight{\@tempdima}{\tud@mainlogo}%
+    }%
+    \includegraphics[height=\@tempdima]{\tud@@ddclogo}%
   \fi%
 }
 %    \end{macrocode}
@@ -1635,7 +1663,7 @@
 % \end{macro}^^A \tud@geometry@pmargin
 % \end{macro}^^A \tud@geometry@vmargin
 % \end{macro}^^A \tud@geometry@hmargin
-% \changes{v2.02}{2014/06/29}{Verzögertes Laden von \pkg{geometry}}%^^A
+% \changes{v2.02}{2014/06/29}{\pkg{geometry} Laden verzögert}%^^A
 % Das Paket \pkg{geometry} erlaubt eine genaue Vorgabe des Satzspiegels und
 % der Seitenränder, wie es vom \CD der TU~Dresden verlangt wird. Damit dieses
 % alle Satzspiegeleinstellungen korrekt vornimmt und auch alle Klassenoptionen 
@@ -1647,7 +1675,7 @@
 % \opt{crop} geladen wurde, um die Seitenränder nicht zu ändern.
 %    \begin{macrocode}
 \AtEndPreamble{%
-  \if@tud@sacrop{}{%
+  \ifstandalonecrop{}{%
     \recalctypearea%
     \RequirePackage{geometry}[2010/09/12]%
     \tud@geometry@process%
@@ -1659,6 +1687,7 @@
 % \changes{v2.02}{2014/06/23}{Anpassungen an \pkg{scrlayer-scrpage}}%^^A
 % \changes{v2.03}{2015/01/09}{Satzspiegel des \CDs angepasst}%^^A
 % \changes{v2.03}{2015/01/09}{intiale Festlegung der Länge \cs{marginpar}}%^^A
+% \changes{v2.03}{2015/01/13}{Satzspiegel kompatibilitätsabhängig}%^^A
 % \begin{macro}{\tud@geometry@@process}
 % Das Makro \cs{tud@geometry@process} setzt die Option für den gewünschten
 % Satzspiegel um, sowohl für die Seitenränder als auch zur Einberechnung der
@@ -1717,6 +1746,9 @@
       +\tud@dim@barheight+\tud@dim@headsep-\tud@ta@topmargin%
       -\tud@ta@headheight-\tud@ta@headsep-1in\relax%
     }%
+%    \end{macrocode}
+% \ToDo{raus?}[v2.03]
+%    \begin{macrocode}
     \setlength{\tud@dim@ddcdiff}{\dimexpr\tud@dim@ddcfoot-\tud@ta@footskip%
       +\tud@dim@footsep\relax%
     }%
@@ -1738,7 +1770,11 @@
       \def\tud@geometry@hmargin{%
         left=\tud@dim@widemargin,%
         textwidth=\dimexpr\paperwidth-\tud@dim@both-\ta@bcor\relax,%
-        marginpar=\dimexpr\tud@dim@slimmargin-2\marginparsep\relax,%
+        \if@reversemargin%
+          marginpar=\dimexpr\tud@dim@widemargin-1.5\marginparsep\relax,%
+        \else%
+          marginpar=\dimexpr\tud@dim@slimmargin-1.5\marginparsep\relax,%
+        \fi%
         bindingoffset=\ta@bcor,%
         \if@twoside asymmetric,\fi%
       }%
@@ -1750,7 +1786,7 @@
       \def\tud@geometry@hmargin{%
         left=.5\tud@dim@both,%
         textwidth=\dimexpr\paperwidth-\tud@dim@both-\ta@bcor\relax,%
-        marginpar=\dimexpr\tud@dim@slimmargin-2\marginparsep\relax,%
+        marginpar=\dimexpr.5\tud@dim@both-1.5\marginparsep\relax,%
         bindingoffset=\ta@bcor,%
       }%
 %    \end{macrocode}
@@ -1768,21 +1804,42 @@
           left=.5\tud@dim@both,%
         \fi%
         textwidth=\dimexpr\paperwidth-\tud@dim@both-\ta@bcor\relax,%
-        marginpar=\dimexpr\tud@dim@slimmargin-2\marginparsep\relax,%
+        \if@twoside%
+          \if@reversemargin%
+            marginpar=\dimexpr.4\tud@dim@both-1.5\marginparsep\relax,%
+          \else%
+            marginpar=\dimexpr.6\tud@dim@both-1.5\marginparsep\relax,%
+          \fi%
+        \else%
+          marginpar=\dimexpr.5\tud@dim@both-1.5\marginparsep\relax,%
+        \fi%
         bindingoffset=\ta@bcor,%
       }%
     \fi%
 %    \end{macrocode}
 % Für alle drei Varianten der vertikale Gleichanteil.
 %    \begin{macrocode}
-    \def\tud@geometry@vmargin{%
-      top=\tud@dim@slimmargin,%
-      headheight=\tud@ta@headheight,%
-      headsep=\tud@dim@headsep,%
-      bottom=\dimexpr\tud@dim@widemargin+\tud@dim@extrafootheight\relax,%
-      footskip=\dimexpr\tud@dim@footsep+\tud@ta@footheight\relax,%
-      \tud@geometry@hincl,%
-      \tud@geometry@fincl,%
+    \iftudscrverlower{2.03}{%
+      \def\tud@geometry@vmargin{%
+        top=.5\tud@dim@both,%
+        headheight=\tud@ta@headheight,%
+        headsep=\tud@dim@headsep,%
+        bottom=\dimexpr.5\tud@dim@both+\tud@dim@extrabottommargin\relax,%
+        footskip=\dimexpr\tud@dim@headsep+\tud@ta@footheight%
+          -1.25\baselineskip\relax,%
+        \tud@geometry@hincl,%
+        \tud@geometry@fincl,%
+      }%
+    }{%
+      \def\tud@geometry@vmargin{%
+        top=\tud@dim@slimmargin,%
+        headheight=\tud@ta@headheight,%
+        headsep=\tud@ta@headsep,%
+        bottom=\dimexpr\tud@dim@widemargin+\tud@dim@extrabottommargin\relax,%
+        footskip=\dimexpr\tud@dim@footsep+\tud@ta@footheight\relax,%
+        \tud@geometry@hincl,%
+        \tud@geometry@fincl,%
+      }%
     }%
     \def\tud@geometry@pmargin{%
       top=\dimexpr\tud@dim@headheight+\tud@dim@barheight%
@@ -1808,9 +1865,18 @@
 % Es wird die Differenz der Höhen zwischen TUD-Kopf und Standardkopfzeile
 % für den Satzspiegel des \CDs berechnet.
 %    \begin{macrocode}
-    \setlength{\tud@ta@headdiff}{\dimexpr\tud@dim@headheight%
-      +\tud@dim@barheight+\tud@dim@headsep-\tud@dim@slimmargin\relax%
+    \iftudscrverlower{2.03}{%
+      \setlength{\tud@ta@headdiff}{\dimexpr\tud@dim@headheight%
+        +\tud@dim@barheight+\tud@dim@headsep-.5\tud@dim@both\relax%
+      }%
+    }{%
+      \setlength{\tud@ta@headdiff}{\dimexpr\tud@dim@headheight%
+        +\tud@dim@barheight+\tud@dim@headsep-\tud@dim@slimmargin\relax%
+      }%
     }%
+%    \end{macrocode}
+% \ToDo{raus?}[v2.03]
+%    \begin{macrocode}
     \setlength{\tud@dim@ddcdiff}{\dimexpr%
       \tud@dim@ddcfoot+2\tud@dim@footsep-\tud@dim@widemargin\relax%
     }%
@@ -1824,6 +1890,9 @@
   \global\tud@ta@headdiff=\tud@ta@headdiff%
   \setlength{\tud@dim@headingsvskip}{.6\tud@dim@headheight}%
   \global\tud@dim@headingsvskip=\tud@dim@headingsvskip%
+%    \end{macrocode}
+% \ToDo{raus?}[v2.03]
+%    \begin{macrocode}
   \ifdim\tud@dim@ddcdiff<\z@\relax\setlength{\tud@dim@ddcdiff}{\z@}\fi%
   \global\tud@dim@ddcdiff=\tud@dim@ddcdiff%
 %    \end{macrocode}
