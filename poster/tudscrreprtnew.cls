@@ -1868,7 +1868,7 @@
     \DeclareNewPageStyleAlias{tudheadingsempty}{empty.tudheadings}%
     \DeclareNewPageStyleAlias{empty.tudscrheadings}{empty.tudheadings}%
     \DeclareNewPageStyleAlias{tudscrheadingsempty}{empty.tudheadings}%
-    \BeforeSelectAnyPageStyle{\tud@beforepagestyle{#1}}%
+    \BeforeSelectAnyPageStyle{\tud@beforeselectanypagestyle{#1}}%
     \DeclareNewLayer[
       background,page,%
       contents={%
@@ -1887,8 +1887,7 @@
     \global\let\tud@dim@line\tud@dim@heavyline%
   }{}%
 }
-\newcommand*\tud@currentgeometry{}
-%\newcommand*\tud@beforepagestyle[1]{%
+%\newcommand*\tud@beforeselectanypagestyle[1]{%
 %%% §§§ prüfen ob alias, nur ausführen, wenn nicht
 %%% raus ab v3.15 ToDo
 %  \edef\@tempa{\GetRealPageStyle{#1}}%
@@ -1903,11 +1902,13 @@
 %%% rein ab v3.15 ToDo
 %%%  \iftudpagestyle{#1}{%
 %%% ...
-\newcommand*\tud@beforepagestyle[1]{%
-%  \typeout{+++++ #1: \GetRealPageStyle{#1}: \currentpagestyle}%
+\patchcmd{\thispagestyle}{\gdef\@specialstyle{#1}}{%
+  \xdef\@specialstyle{\GetRealPageStyle{#1}}
+}{}{\tud@patch@wrn{thispagestyle}}
+\newcommand*\tud@currentgeometry{}
+\newcommand*\tud@beforeselectanypagestyle[1]{%
   \ifstr{#1}{\GetRealPageStyle{#1}}{%
     \def\@tempa{#1}%
-%    \typeout{***** #1: \@tempa: \currentpagestyle}%
     \ifstr{\sls@currentheadings}{tudheadings}{%
       \ifstr{#1}{headings}{\def\@tempa{tudheadings}}{}%
       \ifstr{#1}{plain}{\def\@tempa{plain.tudheadings}}{}%
@@ -1951,13 +1952,13 @@
   }{}%
 }
 \patchcmd{\cleardoubleoddpageusingstyle}{\pagestyle}{%
-  \let\tud@beforepagestyle\@gobble\pagestyle%
+  \let\tud@beforeselectanypagestyle\@gobble\pagestyle%
 }{}{\tud@patch@wrn{cleardoubleoddpageusingstyle}}
 \patchcmd{\cleardoubleevenpageusingstyle}{\pagestyle}{%
-  \let\tud@beforepagestyle\@gobble\pagestyle%
+  \let\tud@beforeselectanypagestyle\@gobble\pagestyle%
 }{}{\tud@patch@wrn{cleardoubleevenpageusingstyle}}
 \patchcmd{\cleardoublepageusingstyle}{\pagestyle}{%
-  \let\tud@beforepagestyle\@gobble\pagestyle%
+  \let\tud@beforeselectanypagestyle\@gobble\pagestyle%
 }{}{\tud@patch@wrn{cleardoublepageusingstyle}}
 \iftudscrverlower{2.03}{%
   \newcommand*\tud@ddc@enlargepage[1][]{%
@@ -3808,7 +3809,7 @@
       \TUD@parameter@set[cover]{cdlayout=#1}%
     }%
   }%
-}%
+}
 %%% From File: tudscr-misc.dtx
 \newcounter{symbolheadings}[chapter]
 \newcommand*\tudbookmark[1][]{\@gobbletwo}
@@ -3836,7 +3837,6 @@
   \tudbookmark[0]{\titlepagename}{title}%
 }{}{\tud@patch@wrn{maketitle}}
 \pretocmd{\tableofcontents}{%
-  \if@openright\cleardoublepage\else\clearpage\fi%
   \if@tud@bookmarks%
     \ifdef{\bookmarksetup}{\bookmarksetup{startatroot}}{}%
   \fi%
