@@ -47,7 +47,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-comp.dtx}[%
-  2015/01/14 v2.03 TUD-KOMA-Script\space%
+  2015/01/21 v2.03 TUD-KOMA-Script\space%
 %</driver>
 %<package>\NeedsTeXFormat{LaTeX2e}[2011/06/27]
 %<package>\ProvidesPackage{tudscrcomp}[%
@@ -267,6 +267,30 @@
   \tud@chapterpage@set%
   \global\@tud@chapterpage@tempfalse%
 }
+%    \end{macrocode}
+% Da wie bereits beschrieben das Vorgehen äußerst fragwürdig ist, wird bei der
+% Verwendung von \cs{chapterpage} zumindest einmalig eine Warnung ausgegeben.
+%    \begin{macrocode}
+\newcommand*\tud@chapterpage@wrn{%
+  \ClassWarning{\tudcls@name}{%
+    The command \string\chapterpage\space is not\MessageBreak%
+    recommended. You should use the same style for\MessageBreak%
+    chapters throughout the document
+  }%
+  \global\let\tud@chapterpage@wrn\relax%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@chapterpage@wrn
+% \end{macro}^^A \tud@chapterpage@unset
+% \end{macro}^^A \tud@chapterpage@set
+% \end{macro}^^A \if@tud@chapterpage@temp
+% \end{macro}^^A \chapterpage
+% \begin{macro}{\tud@chapter}
+% \begin{macro}{\tud@schapter}
+% \begin{macro}{\tud@addchap}
+% \begin{macro}{\tud@saddchap}
+% Hier erfolgt die notwendige Anpassungen der internen Gliederungsbefehle.
+%    \begin{macrocode}
 \AtEndPreamble{%
   \pretocmd{\tud@chapter}{\tud@chapterpage@set}%
     {}{\tud@patch@wrn{tud@nchapter}}%
@@ -286,23 +310,10 @@
     {}{\tud@patch@wrn{tud@saddchap}}%
 }
 %    \end{macrocode}
-% Da wie bereits beschrieben das Vorgehen äußerst fragwürdig ist, wird bei der
-% Verwendung von \cs{chapterpage} zumindest einmalig eine Warnung ausgegeben.
-%    \begin{macrocode}
-\newcommand*\tud@chapterpage@wrn{%
-  \ClassWarning{\tudcls@name}{%
-    The command \string\chapterpage\space is not\MessageBreak%
-    recommended. You should use the same style for\MessageBreak%
-    chapters throughout the document
-  }%
-  \global\let\tud@chapterpage@wrn\relax%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@chapterpage@wrn
-% \end{macro}^^A \tud@chapterpage@unset
-% \end{macro}^^A \tud@chapterpage@set
-% \end{macro}^^A \if@tud@chapterpage@temp
-% \end{macro}^^A \chapterpage
+% \end{macro}^^A \tud@saddchap
+% \end{macro}^^A \tud@addchap
+% \end{macro}^^A \tud@schapter
+% \end{macro}^^A \tud@chapter
 %
 % \iffalse
 %</package>
@@ -386,15 +397,15 @@
 % \end{option}^^A tudfoot
 % \begin{option}{tudscrver}
 % \changes{v2.02}{2014/08/22}{neu}%^^A
-% \begin{macro}{\tudscr@v@comp}
+% \begin{macro}{\tud@v@comp}
 % \changes{v2.02}{2014/08/22}{neu}%^^A
-% \begin{macro}{\tudscr@v@first}
+% \begin{macro}{\tud@v@first}
 % \changes{v2.02}{2014/08/22}{neu}%^^A
-% \begin{macro}{\tudscr@v@2.02}
+% \begin{macro}{\tud@v@2.02}
 % \changes{v2.02}{2014/08/22}{neu}%^^A
-% \begin{macro}{\tudscr@v@2.03}
+% \begin{macro}{\tud@v@2.03}
 % \changes{v2.03}{2015/01/13}{neu}%^^A
-% \begin{macro}{\tudscr@v@last}
+% \begin{macro}{\tud@v@last}
 % \changes{v2.02}{2014/08/22}{neu}%^^A
 % \changes{v2.03}{2015/01/13}{angepasst}%^^A
 % In einigen Fällen sind Änderungen mit früheren Versionen nicht kompatibel 
@@ -402,14 +413,14 @@
 % Standardmäßig werden die Klassen in der aktuellen Version geladen. Mit 
 % \opt{tudscrver=\meta{Version}} kann auf das Verhalten einer früheren
 % Version geschaltet werden. Die eingestellte Kompatibilität wird als Zahl in 
-% \cs{tudscr@v@comp} gespeichert. In den Makros \cs{tudscr@v@\meta{Version}}
-% werden die zugehörigen Nummern gespeichert.
+% \cs{tud@v@comp} gespeichert. In den Makros \cs{tud@v@\meta{Version}} werden
+% die zugehörigen Nummern gespeichert.
 % \ToDo{Versionsunterschiede für v2.02 und v2.03 ausgleichen}[v2.03]
 %    \begin{macrocode}
-\newcommand*\tudscr@v@comp{\tudscr@v@last}
+\newcommand*\tud@v@comp{\tud@v@last}
 \TUD@key{tudscrver}[last]{%
-  \ifcsvoid{tudscr@v@#1}{%
-    \def\tudscr@v@comp{0}%
+  \ifcsvoid{tud@v@#1}{%
+    \def\tud@v@comp{0}%
     \ClassWarningNoLine{\tudcls@name}{%
       You have set option `tudscrver' to `#1', but\MessageBreak%
       this value is not supported. Because of this, the\MessageBreak%
@@ -420,7 +431,7 @@
     \ClassInfoNoLine{\tudcls@name}{%
       Switching compatibility level to `#1'%
     }%
-    \edef\tudscr@v@comp{\@nameuse{tudscr@v@#1}}%
+    \edef\tud@v@comp{\@nameuse{tud@v@#1}}%
     \FamilyKeyStateProcessed%
   }%
 }
@@ -456,16 +467,16 @@
     }%
   }%
 }
-\@namedef{tudscr@v@first}{0}
-\@namedef{tudscr@v@2.02}{0}
-\@namedef{tudscr@v@2.03}{1}
-\@namedef{tudscr@v@last}{1}
+\@namedef{tud@v@first}{0}
+\@namedef{tud@v@2.02}{0}
+\@namedef{tud@v@2.03}{1}
+\@namedef{tud@v@last}{1}
 %    \end{macrocode}
-% \end{macro}^^A \tudscr@v@last
-% \end{macro}^^A \tudscr@v@2.03
-% \end{macro}^^A \tudscr@v@2.02
-% \end{macro}^^A \tudscr@v@first
-% \end{macro}^^A \tudscr@v@comp
+% \end{macro}^^A \tud@v@last
+% \end{macro}^^A \tud@v@2.03
+% \end{macro}^^A \tud@v@2.02
+% \end{macro}^^A \tud@v@first
+% \end{macro}^^A \tud@v@comp
 % \end{option}^^A tudscrver
 % \begin{macro}{\iftudscrverlower}
 % \changes{v2.03}{2015/01/13}{neu}%^^A
@@ -473,7 +484,7 @@
 % den Klassen unterschiedliche Einstellungen vorgenommen werden.
 %    \begin{macrocode}
 \newcommand*\iftudscrverlower[1]{%
-  \ifnum\tudscr@v@comp<\@nameuse{tudscr@v@#1}\relax%
+  \ifnum\tud@v@comp<\@nameuse{tud@v@#1}\relax%
     \expandafter\@firstoftwo%
   \else%
     \expandafter\@secondoftwo%

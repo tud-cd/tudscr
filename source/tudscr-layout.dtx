@@ -1,4 +1,4 @@
-% \CheckSum{1016}
+% \CheckSum{1064}
 % \iffalse meta-comment
 % ======================================================================
 %
@@ -47,7 +47,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-layout.dtx}[%
-  2015/01/14 v2.03 TUD-KOMA-Script (layout)%
+  2015/01/21 v2.03 TUD-KOMA-Script (layout)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -68,8 +68,7 @@
 %
 % \selectlanguage{ngerman}
 %
-% \changes{v2.02}{2014/07/08}{Prüfung des Abarbeitungszustandes der 
-%   \TUDScript-Optionen mit \cs{FamilyKeyState}}%^^A
+% \changes{v2.02}{2014/07/08}{Optionen nutzen \cs{FamilyKeyState}}%^^A
 %
 % \section{Das Layout des \CDs}
 %
@@ -616,6 +615,24 @@
 %    \end{macrocode}
 % \end{length}^^A \headingsvskip
 % \end{length}^^A \pageheadingsvskip
+% \begin{macro}{\tud@headmidvskip}
+% \changes{v2.03}{2015/01/21}{neu}%^^A
+% \begin{macro}{\tud@headmidvskip@neg}
+% \changes{v2.03}{2015/01/21}{neu}%^^A
+% Mit \cs{tud@headmidvskip} wird der Abstände zwischen Nummerierung eines
+% Titels und der eigentlichen Bezeichnung gesetzt. Das gleiche gilt für eine
+% separate Kapitelnummernzeile (\opt{chapterprefix}) und dem eigentlichen
+% Kapiteltitel. Das Makro \cs{tud@headmidvskip@neg} wird benötigt, um ggf. 
+% vorher um den eingefügten Abstand nach oben zu verschieben.
+%    \begin{macrocode}
+\newcommand*\tud@headmidvskip{\par\nobreak\vspace{.5\baselineskip}}
+\newcommand*\tud@headmidvskip@neg{%
+  \setbox0\vbox{\tud@headmidvskip}%
+  \vspace*{\dimexpr-\dp\strutbox-\ht\strutbox-\ht0\relax}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@headmidvskip@neg
+% \end{macro}^^A \tud@headmidvskip
 % \begin{macro}{\tud@layout@process}
 % \changes{v2.02}{2014/08/29}{Anpassungen für \pkg{fontspec}}%^^A
 % Dieser Befehl kümmert sich darum, dass die gewählten Optionen für den
@@ -728,7 +745,7 @@
         \tud@font@heading%
         \color{\tud@part@fontcolor}%
       }%
-      \renewcommand*\partheadmidvskip{\par\nobreak\vspace{.5\baselineskip}}%
+      \let\partheadmidvskip\tud@headmidvskip%
     \fi%
 %</book|report>
 %    \end{macrocode}
@@ -743,7 +760,7 @@
       \tud@font@heading%
       \color{\tud@part@fontcolor}%
     }%
-    \renewcommand*\partheadmidvskip{\par\nobreak\vskip.3\baselineskip}%
+    \let\partheadmidvskip\tud@headmidvskip%
 %</article>
 %    \end{macrocode}
 % Einigen Makros werden mittels \cs{let} Definitionen von anderen Makros
@@ -757,7 +774,7 @@
     \let\partheadstartvskip\tud@partheadstartvskip%
 %<*book|report>
     \let\partheadendvskip\tud@partheadendvskip%
-    \renewcommand*\partheademptypage{}%
+    \let\partheademptypage\relax%
     \renewcommand*\partpagestyle{plain.tudheadings}%
 %</book|report>
     \let\@part\tud@@part%
@@ -834,6 +851,9 @@
 % \end{macro}^^A \tud@layout@process
 % \begin{macro}{\tud@partheadstartvskip}
 % \changes{v2.02}{2014/11/05}{Nutzung der Option \opt{parttitle} verbessert}%^^A
+% \changes{v2.03}{2015/01/21}{Bei Verwendung der Option \opt{parttitle}:
+%   Abstand ist identisch zu Untertitel auf Titelseite}%^^A
+% \begin{macro}{\partheadstartvskip}
 % Dieses Makro ersetzt den Standardbefehl \cs{partheadstartvskip} für die
 % CD-Teilseiten. Damit lassen sich insbesondere die Farbanpassungen für alle
 % Klassen sowie die Option \opt{parttitle} für \cls{tudscrreprt}- und
@@ -893,16 +913,22 @@
         \else%
           \tud@makeuppercase{\@@title}%
         \fi%
-        \par\nobreak\vskip .775\baselineskip%
+%    \end{macrocode}
+% Der Titel des Teils wird auf der gleichen Höhe wie der Untertitel auf der 
+% Titelseite ausgegeben.
+%    \begin{macrocode}
+        \par\nobreak
+        {\usekomafont{titlepage}\vskip 2ex\@plus1ex\@minus1ex}%
       \endgroup%
     \else%
       \usekomafont{partnumber}%
-      \vspace*{\dimexpr-\dp\strutbox-\ht\strutbox-.5\baselineskip\relax}%
+      \tud@headmidvskip@neg%
     \fi%
   \endgroup%
 }
 %</book|report>
 %    \end{macrocode}
+% \end{macro}^^A \partheadstartvskip
 % \end{macro}^^A \tud@partheadstartvskip
 %
 % \iffalse
@@ -937,6 +963,8 @@
 % \fi
 %
 % \begin{macro}{\tud@@part}
+% \changes{v2.03}{2015/01/21}{Korrektur bei der Position der Überschrift}%^^A
+% \begin{macro}{\@part}
 % Damit auch das Präfix der Teile in Majuskeln erscheint, wird dem Befehl
 % \cs{partformat}, welcher das Präfix enthält, für die \cls{tudscrartcl}-Klasse
 % der entsprechende Befehl vorangestellt.
@@ -945,7 +973,7 @@
 \let\tud@@part\@part
 \patchcmd{\tud@@part}%
   {\size@partnumber{\partformat}}%
-  {\size@partnumber{\tud@makeuppercase\partformat}}%
+  {\size@partnumber{\tud@makeuppercase{\partformat}}}%
   {}{\tud@patch@wrn{@part}}%
 %</article>
 %    \end{macrocode}
@@ -963,14 +991,18 @@
   }{}%
 }{%
   \ifnumbered{part}{%
-    \size@partnumber{\tud@makeuppercase\partformat}%
+    \size@partnumber{\tud@makeuppercase{\partformat}}%
+    \partheadmidvskip%
   }{%
-    \size@partnumber{\strut}%
+    \if@tud@parttitle\else%
+      \size@partnumber{\vphantom{\partname}}%
+      \partheadmidvskip%
+    \fi%
   }%
-  \unskip\partheadmidvskip%
 }{}{\tud@patch@wrn{@part}}%
 %</book|report>
 %    \end{macrocode}
+% \end{macro}^^A \@part
 % \end{macro}^^A \tud@@part
 %
 % \iffalse
@@ -978,6 +1010,7 @@
 % \fi
 %
 % \begin{macro}{\tud@@spart}
+% \begin{macro}{\@spart}
 % Bei den Teile-Befehlen ohne Gliederungsnummerierung muss zusätzlich der
 % Freiraum vorgehalten werden, damit alle Überschriften auf der gleichen
 % vertikalen Position liegen.
@@ -987,12 +1020,15 @@
   \normalfont
   \sectfont\nobreak\size@part
 }{%
-  \normalfont\sectfont\nobreak%
-  \size@partnumber{\strut}%
+  \normalfont\sectfont\nobreak
+  \if@tud@parttitle\else%
+    \size@partnumber{\vphantom{\partname}}%
+  \fi%
   \partheadmidvskip\unskip%
   \size@part%
 }{}{\tud@patch@wrn{@spart}}
 %    \end{macrocode}
+% \end{macro}^^A \@spart
 % \end{macro}^^A \tud@@spart
 % \begin{macro}{\tud@partpreamble}
 % Um die \KOMAScript-Befehle für die Teilepräambel auch für das farbige Layout
@@ -1037,8 +1073,14 @@
     \def\tud@chapter@logocolor{HKS41}%
     \def\tud@chapter@fontcolor{HKS41}%
   \fi%
-  \vspace*{%
-    \dimexpr\tud@dim@headdiff+\tud@dim@headingsvskip-\baselineskip\relax%
+  \ifcsdef{scr@v@3.15}{%
+    \vspace*{%
+      \dimexpr\tud@dim@headdiff+\tud@dim@headingsvskip+\parskip\relax%
+    }%
+  }{%
+    \vspace*{%
+      \dimexpr\tud@dim@headdiff+\tud@dim@headingsvskip-\baselineskip\relax%
+    }%
   }%
   \if@tud@chapterpage%
     \vspace*{\pageheadingsvskip}%
@@ -1049,40 +1091,64 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@chapterheadstartvskip
 % \begin{macro}{\tud@@@makechapterhead}
-% Damit das Präfix des Kapitels bei der gegebenenfalls aktivierten Option
-% \opt{chapterprefix} in Majuskeln erscheint, wird dem Befehl
-% \cs{chapterformat}, welcher das Präfix enthält, der entsprechende Befehl
-% vorangestellt. Außerdem muss die Überschrift bei aktivierter
-% \opt{chapterprefix}-Option um die Höhe des Präfixes nach oben verschoben
-% werden, damit die Überschrift selbst auf der richtigen Höhe liegt.
-% \ToDo{Patches prüfen}[v3.15]
+% \begin{macro}{\@@makechapterhead}
+% Für das Präfix des Kapitels bei der gegebenenfalls aktivierten Option
+% \opt{chapterprefix} ist einiges an Anpassungen notwendig, um die eigentliche 
+% Überschrift auf der gewünschten Position erscheinen zu lassen.
+%
+% Zunächst muss die Überschrift um die Höhe des Präfixes nach oben verschoben 
+% werden. Der Befehl \cs{chapterformat} enthält das Präfix slbst. Damit dieses 
+% in Majuskeln erscheint, wird \cs{chapterformat} im Argument des Makros 
+% \cs{tud@makeuppercase} verwendet. Zuletzt wird der Abstand zwischen Präfix 
+% und Kapiteltitel auf \cs{tud@headmidvskip} gesetzt. Weiterhin wird die Länge 
+% \cs{parskip} auf \cs{z@} gesetzt, damit die Überschriften für alle
+% Einstellmöglichkieten der \opt{parskip}-Option immer auf exakt der selben
+% Höhe liegen und auch die Abstände zwischen den ggf. genutzten Präfixen
+% identisch sind.
+%
+% Da der Quelltext sich bei \KOMAScript~v3.15 stark geändert hat, wird der 
+% Befehl \cs{@@makechapterhead} versionsabhängig angepasst.
 %    \begin{macrocode}
 \newcommand*\tud@@@makechapterhead{}
 \let\tud@@@makechapterhead\@@makechapterhead
-\patchcmd{\tud@@@makechapterhead}{\chapterheadstartvskip}{%
-  \chapterheadstartvskip%
-  \if@chapterprefix%
-    \begingroup%
-      \usekomafont{chapterprefix}%
-      \vspace*{\dimexpr-\dp\strutbox-\ht\strutbox-.5\baselineskip\relax}%
-    \endgroup%
-  \fi%
-}{}{\tud@patch@wrn{@@makechapterhead}}
-\patchcmd{\tud@@@makechapterhead}{\chapterformat}{%
-  \tud@makeuppercase{\chapterformat}%
-}{}{\tud@patch@wrn{@@makechapterhead}}
 %    \end{macrocode}
-% Weiterhin müssen alle vertikalen Abstände gelöscht werden, damit die
-% Überschriften für alle Einstellungen der \opt{parskip}-Option immer auf
-% exakt der selben Höhe liegen und auch die Abstände zwischen den ggf.
-% genutzten Präfixen identisch sind.
-% \ToDo{Patches prüfen}[v3.15]
+% Die Patches für \KOMAScript~v3.15.
 %    \begin{macrocode}
-\patchcmd{\tud@@@makechapterhead}{\size@chapter{#1}}{%
-  \setlength\parskip{\z@}%
-  \size@chapter{#1}%
-}{}{\tud@patch@wrn{@@makechapterhead}}
+\ifcsdef{scr@v@3.15}{%
+  \patchcmd{\tud@@@makechapterhead}{\chapterformat\chapterheadmidvskip}{%
+    \tud@headmidvskip@neg%
+    \tud@makeuppercase{\chapterformat}\tud@headmidvskip
+  }{}{\tud@patch@wrn{@@makechapterhead}}
+  \patchcmd{\tud@@@makechapterhead}{\IfUsePrefixLine{}{\raggedchapter}}{%
+    \IfUsePrefixLine{\IfUseNumber{\setlength\parskip{\z@}}{}}{\raggedchapter}%
+  }{}{\tud@patch@wrn{@@makechapterhead}}
 %    \end{macrocode}
+% Die Patches für \KOMAScript~v3.14 und früher.
+%    \begin{macrocode}
+}{%
+  \patchcmd{\tud@@@makechapterhead}{\chapterheadstartvskip}{%
+    \chapterheadstartvskip%
+    \ifnumbered{chapter}{%
+      \if@chapterprefix%
+        \begingroup%
+          \usekomafont{chapterprefix}%
+          \tud@headmidvskip@neg%
+        \endgroup%
+      \fi%
+    }{}%
+  }{}{\tud@patch@wrn{@@makechapterhead}}
+  \patchcmd{\tud@@@makechapterhead}{\chapterformat}{%
+    \tud@makeuppercase{\chapterformat}%
+  }{}{\tud@patch@wrn{@@makechapterhead}}
+  \patchcmd{\tud@@@makechapterhead}{\endgraf\nobreak\vskip.5\baselineskip}{%
+    \tud@headmidvskip
+  }{}{\tud@patch@wrn{@@makechapterhead}}
+  \patchcmd{\tud@@@makechapterhead}{\interlinepenalty}{%
+    \ifnumbered{chapter}{\setlength\parskip{\z@}}{}\interlinepenalty
+  }{}{\tud@patch@wrn{@@makechapterhead}}
+}
+%    \end{macrocode}
+% \end{macro}^^A \@@makechapterhead
 % \end{macro}^^A \tud@@@makechapterhead
 % \begin{macro}{\tud@chapterpreamble}
 % Um die \KOMAScript-Befehle für die Kapitelpräambel auch für das farbige Layout
@@ -1112,6 +1178,7 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@chapterpreamble
+% \begin{macro}{\set@@@@preamble}
 % Die beiden Befehle für Präambeln aus \KOMAScript{} ignorieren in ihrer
 % ursprünglichen Form die Einstellungen für \opt{parskip}. Dies wird mit diesem
 % Patch beseitigt. Außerdem werden das Makro für die Layouteinstellungen für 
@@ -1131,6 +1198,7 @@
   }%
 }{}{\tud@patch@wrn{set@@@@preamble}}
 %    \end{macrocode}
+% \end{macro}^^A \set@@@@preamble
 % \begin{macro}{\tud@chapter@pre}
 % \begin{macro}{\tud@chapter@app}
 % Diese beiden Makros dienen zur Behandlung der Besonderheiten von spearaten 
@@ -1218,6 +1286,7 @@
 % optionale Argument dupliziert, falls dieses nicht angegeben wurde. Damit das 
 % auch mit der Version~v3.12 funktioniert, werden die entsprechenden Befehle 
 % hier bereitgehalten.
+% \ToDo{Nur für vorherige KOMA-Script-Versionen bereitstellen}[v3.15]
 %    \begin{macrocode}
 \providecommand*\SecDef[2]{\@ifstar{#2}{\scr@section@dblarg{#1}}}
 \providecommand\scr@section@dblarg[1]{%

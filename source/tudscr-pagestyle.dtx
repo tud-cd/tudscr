@@ -1,4 +1,4 @@
-% \CheckSum{1640}
+% \CheckSum{1648}
 % \iffalse meta-comment
 % ======================================================================
 %
@@ -47,7 +47,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-pagestyle.dtx}[%
-  2015/01/14 v2.03 TUD-KOMA-Script (pagestyle)%
+  2015/01/21 v2.03 TUD-KOMA-Script (pagestyle)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -69,8 +69,7 @@
 % \selectlanguage{ngerman}
 %
 % \changes{v2.02}{2014/06/23}{Unterstützung für \pkg{titlepage} entfernt}%^^A
-% \changes{v2.02}{2014/07/08}{Prüfung des Abarbeitungszustandes der 
-%   \TUDScript-Optionen mit \cs{FamilyKeyState}}%^^A
+% \changes{v2.02}{2014/07/08}{Optionen nutzen \cs{FamilyKeyState}}%^^A
 %
 % \section{Der Seitenstil des \CDs}
 %
@@ -601,10 +600,10 @@
     \DeclareNewPageStyleAlias{empty.tudscrheadings}{empty.tudheadings}%
     \DeclareNewPageStyleAlias{tudscrheadingsempty}{empty.tudheadings}%
 %    \end{macrocode}
-% Der TUD-Kopf erfordert einen eigenen Satzspiegel, der ggf. durch 
-% \cs{tud@beforepagestyle} aktiviert bzw. deaktiviert wird.
+% Der Kopf im \CD der \TnUD erfordert einen eigenen Satzspiegel, der ggf. durch 
+% \cs{tud@beforeselectanypagestyle} aktiviert bzw. deaktiviert wird.
 %    \begin{macrocode}
-    \BeforeSelectAnyPageStyle{\tud@beforepagestyle{#1}}%
+    \BeforeSelectAnyPageStyle{\tud@beforeselectanypagestyle{#1}}%
 %    \end{macrocode}
 % \begin{layer}{tudpagecolor}
 % \changes{v2.03}{2015/01/09}{neu}%^^A
@@ -657,14 +656,22 @@
 % Diese Befehle wurden mit der \TUDScript-Version~v2.02 entfernt.
 % \end{macro}^^A \ps@tudpage@empty
 % \end{macro}^^A \ps@tudpage@plain
-% \begin{macro}{\tud@beforepagestyle}
+% \begin{macro}{\thispagestyle}
+% \changes{v2.03}{2015/01/20}{Auswahl eines Aliasseitenstils unterdrückt}%^^A
+%    \begin{macrocode}
+\patchcmd{\thispagestyle}{\gdef\@specialstyle{#1}}{%
+  \xdef\@specialstyle{\GetRealPageStyle{#1}}
+}{}{\tud@patch@wrn{thispagestyle}}
+%    \end{macrocode}
+% \end{macro}^^A \tud@beforeselectanypagestyle
+% \begin{macro}{\tud@beforeselectanypagestyle}
 % \changes{v2.02}{2014/06/23}{neu}%^^A
 % \begin{macro}{\tud@currentgeometry}
 % \changes{v2.02}{2014/06/23}{neu}%^^A
-% Mit \cs{tud@beforepagestyle} wird beim Umschalten des Seitenstils ggf. der 
-% Satzspiegel geändert. Dabei wird der aktivierte Satzspiegel in dem Makro 
-% \cs{tud@currentgeometry} gesichert, um darauf zu einem späteren Zeitpunkt 
-% prüfen zu können.
+% Mit \cs{tud@beforeselectanypagestyle} wird beim Umschalten des Seitenstils
+% gegebenfalls der Satzspiegel geändert. Dabei wird der aktivierte Satzspiegel
+% in dem Makro \cs{tud@currentgeometry} gesichert, um darauf zu einem späteren
+% Zeitpunkt prüfen zu können.
 %
 % Für den Fall, dass das Dokument nicht ausschließlich mit dem Kopf im \CD
 % auf jeder Seite gesetzt wird, muss der komplette vertikale Satzspiegel
@@ -674,7 +681,7 @@
 % Diese können mit \cs{loadgeometry}\marg{Stil} geladen werden.
 %    \begin{macrocode}
 \newcommand*\tud@currentgeometry{}
-\newcommand*\tud@beforepagestyle[1]{%
+\newcommand*\tud@beforeselectanypagestyle[1]{%
 %    \end{macrocode}
 % Der \pgs{tudheadings}-Seitenstil wird mit dem Befehl \cs{newpairofpagestyles}
 % derart definiert, dass zwischen \pgs{tudheadings} und \pgs{plain.tudheadings}
@@ -769,22 +776,28 @@
   }{}%
 }
 %    \end{macrocode}
+% \end{macro}^^A \tud@currentgeometry
+% \end{macro}^^A \tud@beforeselectanypagestyle
+% \begin{macro}{\cleardoubleoddpageusingstyle}
+% \begin{macro}{\cleardoubleevenpageusingstyle}
+% \begin{macro}{\cleardoublepageusingstyle}
 % Damit die Satzspiegelumstellungen nicht durchgeführt werden, wenn durch die 
 % folgenden \KOMAScript-Befehle Leerseiten erzeugt werden, müssen diese minimal
 % angepasst werden.
 %    \begin{macrocode}
 \patchcmd{\cleardoubleoddpageusingstyle}{\pagestyle}{%
-  \let\tud@beforepagestyle\@gobble\pagestyle%
+  \let\tud@beforeselectanypagestyle\@gobble\pagestyle%
 }{}{\tud@patch@wrn{cleardoubleoddpageusingstyle}}
 \patchcmd{\cleardoubleevenpageusingstyle}{\pagestyle}{%
-  \let\tud@beforepagestyle\@gobble\pagestyle%
+  \let\tud@beforeselectanypagestyle\@gobble\pagestyle%
 }{}{\tud@patch@wrn{cleardoubleevenpageusingstyle}}
 \patchcmd{\cleardoublepageusingstyle}{\pagestyle}{%
-  \let\tud@beforepagestyle\@gobble\pagestyle%
+  \let\tud@beforeselectanypagestyle\@gobble\pagestyle%
 }{}{\tud@patch@wrn{cleardoublepageusingstyle}}
 %    \end{macrocode}
-% \end{macro}^^A \tud@currentgeometry
-% \end{macro}^^A \tud@beforepagestyle
+% \end{macro}^^A \cleardoublepageusingstyle
+% \end{macro}^^A \cleardoubleevenpageusingstyle
+% \end{macro}^^A \cleardoubleoddpageusingstyle
 % \begin{macro}{\tud@ddc@enlargepage}
 % \changes{v2.02}{2014/06/23}{neu}%^^A
 % Der Befehl wird für die Titelkopf- und Kapitelseiten verwendet. Er 
@@ -1090,8 +1103,9 @@
     \fi%
 %    \end{macrocode}
 % Abschließend wird der aktuelle Seitenstil erneut aufgerufen, um bei einem
-% geänderten Fuß den notwendigen Satzspiegel zu laden. Siehe dazu auch 
-% \cs{tud@beforepagestyle}.
+% geänderten Fuß den notwendigen Satzspiegel zu laden. Dies ist jedoch nur 
+% notwendig, wenn die Option innerhalb des Dokumentes verwendet wurde. Siehe
+% \cs{tud@beforeselectanypagestyle}.
 %    \begin{macrocode}
     \if@atdocument\expandafter\pagestyle\expandafter{\currentpagestyle}\fi%
   \fi%
@@ -1649,7 +1663,8 @@
 % Damit Änderungen am Satzspiegel im Dokument sicher übernommen werden, wird 
 % das Setzen des Satzspiegels forciert. Dafür wird \cs{tud@currentgeometry} 
 % zurückgesetzt und anschließend der aktuelle Seitenstil erneut geladen, um das 
-% erneute und korrekte Ausführen von \cs{tud@beforepagestyle} zu erzwingen.
+% erneute und korrekte Ausführen von \cs{tud@beforeselectanypagestyle} zu 
+% erzwingen.
 %    \begin{macrocode}
     \gdef\tud@currentgeometry{}%
     \expandafter\pagestyle\expandafter{\currentpagestyle}%

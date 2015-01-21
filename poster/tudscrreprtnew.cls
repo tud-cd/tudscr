@@ -167,10 +167,13 @@
   \fi%
 }
 \RequirePackage{textcase}[2004/10/07]
-\patchcmd{\@uclcnotmath}{\@nonchangecase\ensuremath}{%
-  \@nonchangecase\ensuremath%
+\newcommand*\tud@uclcnotmath{%
   \def\footnote##1##{\toks@{\noexpand\footnote##1}\@footnote}%
   \def\@footnote##1{\NoCaseChange{\the\toks@{##1}}}%
+  \def\@mkboth##1##2{\NoCaseChange{\@mkboth{##1}{##2}}}%
+}
+\patchcmd{\@uclcnotmath}{\@nonchangecase\ensuremath}{%
+  \@nonchangecase\ensuremath\tud@uclcnotmath
 }{}{\tud@patch@wrn{@uclcnotmath}}%
 \newcommand*\tud@cdfont{0}
 \TUD@key{cdfont}[true]{%
@@ -845,10 +848,10 @@
     \fi%
   \fi%
 }
-\newcommand*\tudscr@v@comp{\tudscr@v@last}
+\newcommand*\tud@v@comp{\tud@v@last}
 \TUD@key{tudscrver}[last]{%
-  \ifcsvoid{tudscr@v@#1}{%
-    \def\tudscr@v@comp{0}%
+  \ifcsvoid{tud@v@#1}{%
+    \def\tud@v@comp{0}%
     \ClassWarningNoLine{\tudcls@name}{%
       You have set option `tudscrver' to `#1', but\MessageBreak%
       this value is not supported. Because of this, the\MessageBreak%
@@ -859,7 +862,7 @@
     \ClassInfoNoLine{\tudcls@name}{%
       Switching compatibility level to `#1'%
     }%
-    \edef\tudscr@v@comp{\@nameuse{tudscr@v@#1}}%
+    \edef\tud@v@comp{\@nameuse{tud@v@#1}}%
     \FamilyKeyStateProcessed%
   }%
 }
@@ -888,12 +891,12 @@
     }%
   }%
 }
-\@namedef{tudscr@v@first}{0}
-\@namedef{tudscr@v@2.02}{0}
-\@namedef{tudscr@v@2.03}{1}
-\@namedef{tudscr@v@last}{1}
+\@namedef{tud@v@first}{0}
+\@namedef{tud@v@2.02}{0}
+\@namedef{tud@v@2.03}{1}
+\@namedef{tud@v@last}{1}
 \newcommand*\iftudscrverlower[1]{%
-  \ifnum\tudscr@v@comp<\@nameuse{tudscr@v@#1}\relax%
+  \ifnum\tud@v@comp<\@nameuse{tud@v@#1}\relax%
     \expandafter\@firstoftwo%
   \else%
     \expandafter\@secondoftwo%
@@ -2471,6 +2474,11 @@
 }
 \newlength\pageheadingsvskip
 \newlength\headingsvskip
+\newcommand*\tud@headmidvskip{\par\nobreak\vspace{.5\baselineskip}}
+\newcommand*\tud@headmidvskip@neg{%
+  \setbox0\vbox{\tud@headmidvskip}%
+  \vspace*{\dimexpr-\dp\strutbox-\ht\strutbox-\ht0\relax}%
+}
 \newcommand*\tud@layout@process{%
   \ifcase\tud@layout@cover\relax%
     \stdbool@lock{@tud@cover@cdlayout}{false}%
@@ -2547,11 +2555,11 @@
         \tud@font@heading%
         \color{\tud@part@fontcolor}%
       }%
-      \renewcommand*\partheadmidvskip{\par\nobreak\vspace{.5\baselineskip}}%
+      \let\partheadmidvskip\tud@headmidvskip%
     \fi%
     \let\partheadstartvskip\tud@partheadstartvskip%
     \let\partheadendvskip\tud@partheadendvskip%
-    \renewcommand*\partheademptypage{}%
+    \let\partheademptypage\relax%
     \renewcommand*\partpagestyle{plain.tudheadings}%
     \let\@part\tud@@part%
     \let\@spart\tud@@spart%
@@ -2622,11 +2630,12 @@
         \else%
           \tud@makeuppercase{\@@title}%
         \fi%
-        \par\nobreak\vskip .775\baselineskip%
+        \par\nobreak
+        {\usekomafont{titlepage}\vskip 2ex\@plus1ex\@minus1ex}%
       \endgroup%
     \else%
       \usekomafont{partnumber}%
-      \vspace*{\dimexpr-\dp\strutbox-\ht\strutbox-.5\baselineskip\relax}%
+      \tud@headmidvskip@neg%
     \fi%
   \endgroup%
 }
@@ -2646,19 +2655,24 @@
   }{}%
 }{%
   \ifnumbered{part}{%
-    \size@partnumber{\tud@makeuppercase\partformat}%
+    \size@partnumber{\tud@makeuppercase{\partformat}}%
+    \partheadmidvskip%
   }{%
-    \size@partnumber{\strut}%
+    \if@tud@parttitle\else%
+      \size@partnumber{\vphantom{\partname}}%
+      \partheadmidvskip%
+    \fi%
   }%
-  \unskip\partheadmidvskip%
 }{}{\tud@patch@wrn{@part}}%
 \let\tud@@spart\@spart
 \patchcmd{\tud@@spart}{%
   \normalfont
   \sectfont\nobreak\size@part
 }{%
-  \normalfont\sectfont\nobreak%
-  \size@partnumber{\strut}%
+  \normalfont\sectfont\nobreak
+  \if@tud@parttitle\else%
+    \size@partnumber{\vphantom{\partname}}%
+  \fi%
   \partheadmidvskip\unskip%
   \size@part%
 }{}{\tud@patch@wrn{@spart}}
@@ -2684,8 +2698,14 @@
     \def\tud@chapter@logocolor{HKS41}%
     \def\tud@chapter@fontcolor{HKS41}%
   \fi%
-  \vspace*{%
-    \dimexpr\tud@dim@headdiff+\tud@dim@headingsvskip-\baselineskip\relax%
+  \ifcsdef{scr@v@3.15}{%
+    \vspace*{%
+      \dimexpr\tud@dim@headdiff+\tud@dim@headingsvskip+\parskip\relax%
+    }%
+  }{%
+    \vspace*{%
+      \dimexpr\tud@dim@headdiff+\tud@dim@headingsvskip-\baselineskip\relax%
+    }%
   }%
   \if@tud@chapterpage%
     \vspace*{\pageheadingsvskip}%
@@ -2695,22 +2715,78 @@
 }%
 \newcommand*\tud@@@makechapterhead{}
 \let\tud@@@makechapterhead\@@makechapterhead
-\patchcmd{\tud@@@makechapterhead}{\chapterheadstartvskip}{%
-  \chapterheadstartvskip%
-  \if@chapterprefix%
-    \begingroup%
-      \usekomafont{chapterprefix}%
-      \vspace*{\dimexpr-\dp\strutbox-\ht\strutbox-.5\baselineskip\relax}%
-    \endgroup%
-  \fi%
-}{}{\tud@patch@wrn{@@makechapterhead}}
-\patchcmd{\tud@@@makechapterhead}{\chapterformat}{%
-  \tud@makeuppercase{\chapterformat}%
-}{}{\tud@patch@wrn{@@makechapterhead}}
-\patchcmd{\tud@@@makechapterhead}{\size@chapter{#1}}{%
-  \setlength\parskip{\z@}%
-  \size@chapter{#1}%
-}{}{\tud@patch@wrn{@@makechapterhead}}
+\ifcsdef{scr@v@3.15}{%
+  \patchcmd{\tud@@@makechapterhead}{\chapterformat\chapterheadmidvskip}{%
+    \tud@headmidvskip@neg%
+    \tud@makeuppercase{\chapterformat}\tud@headmidvskip
+  }{}{\tud@patch@wrn{@@makechapterhead}}
+  \patchcmd{\tud@@@makechapterhead}{\IfUsePrefixLine{}{\raggedchapter}}{%
+    \IfUsePrefixLine{\IfUseNumber{\setlength\parskip{\z@}}{}}{\raggedchapter}%
+  }{}{\tud@patch@wrn{@@makechapterhead}}
+}{%
+  \patchcmd{\tud@@@makechapterhead}{\chapterheadstartvskip}{%
+    \chapterheadstartvskip%
+    \ifnumbered{chapter}{%
+      \if@chapterprefix%
+        \begingroup%
+          \usekomafont{chapterprefix}%
+          \tud@headmidvskip@neg%
+        \endgroup%
+      \fi%
+    }{}%
+  }{}{\tud@patch@wrn{@@makechapterhead}}
+  \patchcmd{\tud@@@makechapterhead}{\chapterformat}{%
+    \tud@makeuppercase{\chapterformat}%
+  }{}{\tud@patch@wrn{@@makechapterhead}}
+  \patchcmd{\tud@@@makechapterhead}{\endgraf\nobreak\vskip.5\baselineskip}{%
+    \tud@headmidvskip
+  }{}{\tud@patch@wrn{@@makechapterhead}}
+  \patchcmd{\tud@@@makechapterhead}{\interlinepenalty}{%
+    \ifnumbered{chapter}{\setlength\parskip{\z@}}{}\interlinepenalty
+  }{}{\tud@patch@wrn{@@makechapterhead}}
+}
+\newcommand*{\new@@makechapterhead}[1]{%
+  \@tempskipa=\glueexpr \scr@chapter@sectionbeforeskip\relax
+  \ifdim\@tempskipa<\z@\@tempskipa-\@tempskipa\fi
+  \chapterheadstartvskip
+  {%
+    \setlength{\parindent}{\z@}\setlength{\parfillskip}{\fill}%
+    \normalfont\sectfont\nobreak\nobreak\usekomafont{chapter}{}%
+     \def\IfUseNumber{\ifnumbered{chapter}}%
+    \if@chapterprefix
+      \raggedchapter
+      \let\IfUsePrefixLine\@firstoftwo
+      \let\@tempa\@firstofone
+    \else
+      \let\IfUsePrefixLine\@secondoftwo
+      \let\@tempa\@hangfrom
+    \fi
+    \@tempa{%
+      \IfUseNumber{%
+        \usekomafont{chapter}{%
+          \IfUsePrefixLine{%
+            {\usekomafont{chapterprefix}{%
+              \tud@headmidvskip@neg%
+              \tud@makeuppercase{\chapterformat}\tud@headmidvskip
+            }}%
+          }{%
+            \chapterformat
+          }%
+        }%
+      }{}%
+    }%
+    {%
+      \IfUsePrefixLine{\IfUseNumber{\setlength\parskip{\z@}}{}}{\raggedchapter}%
+      \interlinepenalty \@M
+      \usekomafont{chapter}{#1}\par
+    }%
+  }%
+  \nobreak\par\nobreak
+  \@tempskipa=\glueexpr \scr@chapter@sectionafterskip\relax
+  \ifdim\@tempskipa<\z@\@tempskipa-\@tempskipa\fi
+  \chapterheadendvskip
+}
+%\let\tud@@@makechapterhead\new@@makechapterhead
 \newcommand*\tud@chapterpreamble{%
   \ifnum\tud@abstract@level>1\relax\def\tud@abstract@level{1}\fi%
   \KOMAoptions{titlepage=false}%

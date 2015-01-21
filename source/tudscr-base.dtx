@@ -1,4 +1,4 @@
-% \CheckSum{288}
+% \CheckSum{302}
 % \iffalse meta-comment
 % ======================================================================
 %
@@ -47,7 +47,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-base.dtx}[%
-  2015/01/13 v2.03 TUD-KOMA-Script\space%
+  2015/01/21 v2.03 TUD-KOMA-Script\space%
 %</driver>
 %<package>\NeedsTeXFormat{LaTeX2e}[2011/06/27]
 %<package>\ProvidesPackage{tudscrbase}[%
@@ -384,36 +384,66 @@
 % \begin{macro}{\tud@cmd@reset}
 % \begin{macro}{\tud@cmd@use}
 % \begin{macro}{\tud@cmd@restore}
-% Mit diesen beiden Befehlene wird es möglich, Originalbefehle sichern, nutzen
-% und wiederherstellen zu können. Dies wird benötigt, um zwischen den einzelnen
+% \begin{macro}{\tud@cmd@check}
+% Mit diesen Befehlen wird es möglich, Originalbefehle sichern, nutzen und
+% wiederherstellen zu können. Dies wird benötigt, um zwischen den einzelnen
 % Layouts über Optionseinstellungen zu wechseln und dabei von einem definierten
-% Anfangszustand auszugehen. Mit dem Aufruf \cs{tud@cmd@store}\marg{Befehlsname}
-% wird der angegebene Befehl in einem neuen Makro \cs{@@tud@\meta{Befehlsname}}
-% gespeichert.
+% Anfangszustand auszugehen.
 %
-% Der Originalbefehl kann als solcher mit \cs{tud@cmd@use}\marg{Befehlsname} 
-% weiterhin genutzt werden. Das Makro \cs{tud@cmd@reset}\marg{Befehlsname}
-% setzt den Originalbefehl zurück. Durch \cs{tud@cmd@restore}\marg{Befehlsname}
-% wird das mit \cs{tud@cmd@store} erstellte Hilfsmakro zusätzlich gelöscht.
+% Mit dem Aufruf \cs{tud@cmd@store}\marg{Befehlsname} wird der angegebene 
+% Befehl in einem neuen Makro \cs{@@tud@\meta{Befehlsname}} gespeichert. Dieser 
+% kann danach beliebig angepasst werden. Soll der Befehl zu einem späteren 
+% Zeitpunkt auf den Orginalzustand zurücksetzen, kann hierfür jederzeit der 
+% Befehl \cs{tud@cmd@reset}\marg{Befehlsname} verwendet werden. Durch das Makro
+% \cs{tud@cmd@restore}\marg{Befehlsname} wird das mit \cs{tud@cmd@store}
+% erstellte Hilfsmakro zusätzlich noch  gelöscht. Der Originalbefehl kann als 
+% solcher mit \cs{tud@cmd@use}\marg{Befehlsname} weiterhin genutzt werden. 
 %    \begin{macrocode}
 \newcommand*\tud@cmd@store[1]{%
-  \ifcsdef{@@tud@#1}{}{\csletcs{@@tud@#1}{#1}}%
+  \ifcsdef{@@tud@#1}{}{%
+    \tud@cmd@check{#1}%
+    \csletcs{@@tud@#1}{#1}%
+  }%
 }
 \newcommand*\tud@cmd@reset[1]{%
   \ifcsdef{@@tud@#1}{%
+    \tud@cmd@check{#1}%
     \csletcs{#1}{@@tud@#1}%
   }{}%
 }
-\newcommand*\tud@cmd@use[1]{%
-  \ifcsdef{@@tud@#1}{\@nameuse{@@tud@#1}}{\@nameuse{#1}}%
-}
 \newcommand*\tud@cmd@restore[1]{%
   \ifcsdef{@@tud@#1}{%
+    \tud@cmd@check{#1}%
     \csletcs{#1}{@@tud@#1}%
     \csundef{@@tud@#1}%
   }{}%
 }
+\newcommand*\tud@cmd@use[1]{%
+  \ifcsdef{@@tud@#1}{%
+    \@nameuse{@@tud@#1}%
+  }{%
+    \tud@cmd@check{#1}%
+    \@nameuse{#1}%
+  }%
+}
 %    \end{macrocode}
+% Dieses Makro dient zum Überprüfen, ob der zu sichernde beziehungsweise 
+% wiederherzustellende Befehl überhaupt definiert ist. Sollte das nicht der 
+% Fall sein, wird ein Fehler ausgegeben.
+%    \begin{macrocode}
+\newcommand*\tud@cmd@check[1]{%
+  \ifcsdef{#1}{}{%
+    \PackageError{tudscrbase}{%
+      `\@backslashchar#1' is not defined%
+    }{%
+      The command `\@backslashchar#1' was never defined.\MessageBreak%
+      Please contact the TUD-KOMA-Script maintainer\MessageBreak%
+      via \tudscrmail. A bugfix is urgently required
+    }%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@cmd@check
 % \end{macro}^^A \tud@cmd@restore
 % \end{macro}^^A \tud@cmd@use
 % \end{macro}^^A \tud@cmd@reset
@@ -425,10 +455,10 @@
 %    \begin{macrocode}
 \newcommand*\tud@patch@wrn[1]{%
   \PackageWarning{tudscrbase}{%
-    It wasn't possible to patch `#1'.\MessageBreak%
-    Please contact the author via \tudscrmail.\MessageBreak%
-    Without a bugfix an erroneous output\MessageBreak%
-    may occur.
+    It wasn't possible to patch `\@backslashchar#1'.\MessageBreak%
+    Please contact the TUD-KOMA-Script maintainer\MessageBreak%
+    via \tudscrmail. Without a bugfix an\MessageBreak%
+    erroneous output may occur%
   }%
 }
 %    \end{macrocode}
