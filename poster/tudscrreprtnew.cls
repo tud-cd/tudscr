@@ -70,7 +70,7 @@
       \fi%
     }%
   \fi%
-  \@TUDVersion{2015/01/13 v2.03-alpha TUD-KOMA-Script}%
+  \@TUDVersion{2015/01/22 v2.03 TUD-KOMA-Script}%
 \endgroup%
 \providecommand*\tudscrmail{tudscr@gmail.com}
 \newcommand*\cls@name{report}
@@ -78,7 +78,7 @@
 \newcommand*\tudcls@name{tudscrreprt}
 \NeedsTeXFormat{LaTeX2e}[2011/06/27]
 \ProvidesClass{\tudcls@name}[%
-  2015/01/13 v2.03-alpha TUD-KOMA-Script
+  2015/01/22 v2.03 TUD-KOMA-Script
   document class (\cls@name)%
 ]
 \typeout{The Corporate Design of Technische Universitaet Dresden}
@@ -327,7 +327,9 @@
         \if@atdocument\iftudpagestyle{\currentpagestyle}{\clearpage}{}\fi%
       \endgroup%
     \fi%
-    \ifcase\tud@ddc@head\relax\else%
+    \ifcase\tud@ddc@head\relax%
+      \if@atdocument\expandafter\pagestyle\expandafter{\currentpagestyle}\fi%
+    \else%
       \@tud@ddc@savefalse%
       \TUDoptions{ddc=false}%
       \TUDoptions{ddcfoot=false}%
@@ -346,7 +348,9 @@
         \if@atdocument\iftudpagestyle{\currentpagestyle}{\clearpage}{}\fi%
       \endgroup%
     \fi%
-    \ifcase\tud@ddc@foot\relax\else%
+    \ifcase\tud@ddc@foot\relax%
+      \if@atdocument\expandafter\pagestyle\expandafter{\currentpagestyle}\fi%
+    \else%
       \@tud@ddc@savefalse%
       \TUDoptions{ddc=false}%
       \TUDoptions{ddchead=false}%
@@ -367,8 +371,6 @@
     \fi%
   \fi%
 }
-\providecommand*\GetRealPageStyle[1]{#1}
-\BeforePackage{scrlayer-scrpage}{\undef\GetRealPageStyle}
 \newcommand*\iftudpagestyle[3]{%
   \xifinlist{\GetRealPageStyle{#1}}{\tud@ps@list}{#2}{#3}%
 }
@@ -1632,7 +1634,10 @@
 \newlength\tud@dim@thinline
 \newlength\tud@dim@headdiff
 \newlength\tud@dim@headingsvskip
-\iftudscrverlower{2.03}{\newlength\tud@dim@ddcdiff}{}
+\iftudscrverlower{2.03}{%
+  \newlength\tud@dim@ddcdiff%
+  \newlength\tud@dim@ddclayer%
+}{}
 \newcommand*\tud@head@font@size{}
 \newcommand*\tud@geometry@set{%
   \ifdim\paperheight<148.1mm\relax%
@@ -1738,7 +1743,7 @@
   \RequirePackage{scrlayer-scrpage}[2013/12/14]%
   \AfterPackage*{scrlayer-scrpage}{%
     \DeclareNewLayer[%
-      background,head,align=t,%
+      background,headsep,%
       voffset=\tud@dim@logoy,%
       contents={%
         \hspace*{\dimexpr\tud@dim@logox-\tud@dim@widemargin\relax}%
@@ -1746,60 +1751,48 @@
       },%
     ]{tudheadings.head.mainlogo}%
     \DeclareNewLayer[%
-      background,head,align=t,%
+      background,headsep,%
       voffset=\tud@dim@logoy,%
       contents={\hfill\tud@headlogo},%
     ]{tudheadings.head.logo}%
     \DeclareNewLayer[%
-      background,head,align=tl,%
+      background,headsep,%
+      voffset=\dimexpr\tud@dim@topmargin+\tud@dim@line\relax,%
+      contents={\tud@head@text@box},%
+    ]{tudheadings.head.text}%
+    \DeclareNewLayer[%
+      background,headsep,%
       voffset=\dimexpr\tud@dim@topmargin-.5\tud@dim@line\relax,%
       contents={\if@tud@widehead\else\tud@head@rule{\textwidth}\fi},%
     ]{tudheadings.head.upperline}%
     \DeclareNewLayer[%
-      background,head,align=tl,%
+      background,headsep,%
       voffset=\dimexpr\tud@dim@topmargin+\tud@dim@barheight%
         -.5\tud@dim@line\relax,%
       contents={\if@tud@widehead\else\tud@head@rule{\textwidth}\fi},%
     ]{tudheadings.head.lowerline}%
     \DeclareNewLayer[%
-      background,align=tl,%
+      background,%
       voffset=\dimexpr\tud@dim@topmargin-.5\tud@dim@line\relax,%
       contents={\if@tud@widehead\tud@head@rule{\paperwidth}\fi},%
     ]{tudheadings.head.upperwideline}%
     \DeclareNewLayer[%
-      background,align=tl,%
+      background,%
       voffset=\dimexpr\tud@dim@topmargin+\tud@dim@barheight%
         -.5\tud@dim@line\relax,%
       contents={\if@tud@widehead\tud@head@rule{\paperwidth}\fi},%
     ]{tudheadings.head.lowerwideline}%
     \DeclareNewLayer[%
-      background,head,align=tl,%
-      voffset=\dimexpr\tud@dim@topmargin+\tud@dim@line\relax,%
-      contents={\tud@head@text@box},%
-    ]{tudheadings.head.text}%
-    \DeclareNewLayer[%
-      background,%
-      hoffset=\dimexpr1in+%
-        \if@twoside%
-          \ifodd\value{page}\oddsidemargin\else\evensidemargin\fi%
-        \else%
-          \oddsidemargin%
-        \fi\relax,%
-      voffset=\dimexpr\topmargin+1in+\headheight+\headsep+\textheight%
-        +\footskip-\footheight\relax,%
-      width=\textwidth,%
+      background,foot,%
       height=\dimexpr\paperheight-\layeryoffset\relax,%
       contents={%
         \hfill\vbox to \layerheight{\vfil\hbox{\tud@ddclogo}\vfil\vfil}%
       },%
     ]{tudheadings.foot.logo}%
-    \iftudscrverlower{2.03}{% §§§ evtl. mit modifylayer?
-      \RedeclareLayer[%
-        background,foot,%
-        contents={%
-          \vskip\dimexpr-.6\tud@dim@topmargin-\baselineskip+\ht\strutbox\relax%
-          \hfill\tud@ddclogo%
-        },%
+    \iftudscrverlower{2.03}{%
+      \ModifyLayer[%
+        voffset=\dimexpr\topmargin+1in+\headheight+\headsep+\textheight%
+          +\footskip-\footheight-\tud@dim@ddclayer-\dp\strutbox\relax,%
       ]{tudheadings.foot.logo}%
     }{}%
     \newpairofpagestyles{tudheadings}{}%
@@ -1812,11 +1805,11 @@
     \AddLayersToPageStyle{tudheadings}{%
       tudheadings.head.mainlogo,%
       tudheadings.head.logo,%
+      tudheadings.head.text,%
       tudheadings.head.upperline,%
       tudheadings.head.lowerline,%
       tudheadings.head.upperwideline,%
       tudheadings.head.lowerwideline,%
-      tudheadings.head.text,%
       tudheadings.foot.logo,%
       scrheadings.foot.odd,%
       scrheadings.foot.even,%
@@ -1824,14 +1817,20 @@
       scrheadings.foot.above.line,%
       scrheadings.foot.below.line%
     }%
+    \AddToLayerPageStyleOptions{tudheadings}{%
+      onselect=\tud@ps@setlinewidth%
+    }%
+    \DeclareNewPageStyleAlias{tud}{tudheadings}%
+    \DeclareNewPageStyleAlias{tudscr}{tudheadings}%
+    \DeclareNewPageStyleAlias{tudscrheadings}{tudheadings}%
     \AddLayersToPageStyle{plain.tudheadings}{%
       tudheadings.head.mainlogo,%
       tudheadings.head.logo,%
+      tudheadings.head.text,%
       tudheadings.head.upperline,%
       tudheadings.head.lowerline,%
       tudheadings.head.upperwideline,%
       tudheadings.head.lowerwideline,%
-      tudheadings.head.text,%
       tudheadings.foot.logo,%
       plain.scrheadings.foot.odd,%
       plain.scrheadings.foot.even,%
@@ -1839,39 +1838,38 @@
       plain.scrheadings.foot.above.line,%
       plain.scrheadings.foot.below.line%
     }%
+    \AddToLayerPageStyleOptions{plain.tudheadings}{%
+      onselect=\tud@ps@setlinewidth%
+    }%
+    \DeclareNewPageStyleAlias{plain.tudscrheadings}{plain.tudheadings}%
+    \DeclareNewPageStyleAlias{tudplain}{plain.tudheadings}%
+    \DeclareNewPageStyleAlias{tudscrplain}{plain.tudheadings}%
+    \DeclareNewPageStyleAlias{tudheadingsplain}{plain.tudheadings}%
+    \DeclareNewPageStyleAlias{tudscrheadingsplain}{plain.tudheadings}%
     \DeclareNewPageStyleByLayers{empty.tudheadings}{%
       tudheadings.head.mainlogo,%
       tudheadings.head.logo,%
+      tudheadings.head.text,%
       tudheadings.head.upperline,%
       tudheadings.head.lowerline,%
       tudheadings.head.upperwideline,%
       tudheadings.head.lowerwideline,%
-      tudheadings.head.text,%
       tudheadings.foot.logo,%
-    }%
-    \AddToLayerPageStyleOptions{tudheadings}{%
-      onselect=\tud@ps@setlinewidth%
-    }%
-    \AddToLayerPageStyleOptions{plain.tudheadings}{%
-      onselect=\tud@ps@setlinewidth%
     }%
     \AddToLayerPageStyleOptions{empty.tudheadings}{%
       onselect={%
         \tud@ps@setlinewidth%
-        \letcs\ps@plain{ps@plain.tudheadings}%
-        \letcs\ps@headings{ps@tudheadings}%
+        \DeclarePageStyleAlias{plain}{plain.tudheadings}%
+        \DeclarePageStyleAlias{headings}{tudheadings}%
         \def\sls@currentheadings{tudheadings}%
         \def\sls@currentplain{plain.tudheadings}%
       }%
     }%
-    \DeclareNewPageStyleAlias{tudscrheadings}{tudheadings}%
-    \DeclareNewPageStyleAlias{tudheadingsplain}{plain.tudheadings}%
-    \DeclareNewPageStyleAlias{plain.tudscrheadings}{plain.tudheadings}%
-    \DeclareNewPageStyleAlias{tudscrheadingsplain}{plain.tudheadings}%
-    \DeclareNewPageStyleAlias{tudheadingsempty}{empty.tudheadings}%
     \DeclareNewPageStyleAlias{empty.tudscrheadings}{empty.tudheadings}%
+    \DeclareNewPageStyleAlias{tudempty}{empty.tudheadings}%
+    \DeclareNewPageStyleAlias{tudscrempty}{empty.tudheadings}%
+    \DeclareNewPageStyleAlias{tudheadingsempty}{empty.tudheadings}%
     \DeclareNewPageStyleAlias{tudscrheadingsempty}{empty.tudheadings}%
-    \BeforeSelectAnyPageStyle{\tud@beforeselectanypagestyle{#1}}%
     \DeclareNewLayer[
       background,page,%
       contents={%
@@ -1880,8 +1878,9 @@
           \rule{\layerwidth}{\layerheight}%
         }%
       },%
-    ]{tudpagecolor}
-    \AddLayersToPageStyle{@everystyle@}{tudpagecolor}%
+    ]{tudheadings.pagecolor}
+    \AddLayersToPageStyle{@everystyle@}{tudheadings.pagecolor}%
+    \BeforeSelectAnyPageStyle{\tud@beforeselectanypagestyle{#1}}%
   }%
 }
 \newcommand*\tud@ps@setlinewidth{%
@@ -1890,21 +1889,6 @@
     \global\let\tud@dim@line\tud@dim@heavyline%
   }{}%
 }
-%\newcommand*\tud@beforeselectanypagestyle[1]{%
-%%% §§§ prüfen ob alias, nur ausführen, wenn nicht
-%%% raus ab v3.15 ToDo
-%  \edef\@tempa{\GetRealPageStyle{#1}}%
-%  \ifstr{\sls@currentheadings}{tudheadings}{%
-%    \ifstr{#1}{headings}{\def\@tempa{tudheadings}}{}%
-%    \ifstr{#1}{plain}{\def\@tempa{plain.tudheadings}}{}%
-%  }{}%
-%  \typeout{+++++ #1: \@tempa: \currentpagestyle}%
-%  \edef\@tempc{\GetRealPageStyle{#1}}%
-%  \typeout{***** \@tempc}%
-%  \iftudpagestyle{\@tempa}{%
-%%% rein ab v3.15 ToDo
-%%%  \iftudpagestyle{#1}{%
-%%% ...
 \patchcmd{\thispagestyle}{\gdef\@specialstyle{#1}}{%
   \xdef\@specialstyle{\GetRealPageStyle{#1}}
 }{}{\tud@patch@wrn{thispagestyle}}
@@ -1912,10 +1896,12 @@
 \newcommand*\tud@beforeselectanypagestyle[1]{%
   \ifstr{#1}{\GetRealPageStyle{#1}}{%
     \def\@tempa{#1}%
-    \ifstr{\sls@currentheadings}{tudheadings}{%
-      \ifstr{#1}{headings}{\def\@tempa{tudheadings}}{}%
-      \ifstr{#1}{plain}{\def\@tempa{plain.tudheadings}}{}%
-    }{}%
+    \ifcsdef{scr@v@3.15}{}{%
+      \ifstr{\sls@currentheadings}{tudheadings}{%
+        \ifstr{#1}{headings}{\def\@tempa{tudheadings}}{}%
+        \ifstr{#1}{plain}{\def\@tempa{plain.tudheadings}}{}%
+      }{}%
+    }%
     \iftudpagestyle{\@tempa}{%
       \iftudscrverlower{2.03}{%
         \tud@ddc@check%
@@ -1930,6 +1916,7 @@
             \gdef\tud@currentgeometry{tudareaddc}%
           }%
         \fi%
+        \tud@ddc@enlargelayer%
       }{%
         \ifstr{\tud@currentgeometry}{tudarea}{}{%
           \loadgeometry{tudarea}%
@@ -1973,6 +1960,15 @@
         \fi%
       }%
     }{}%
+  }%
+  \newcommand*\tud@ddc@enlargelayer{%
+    \tud@ddc@check%
+    \ifcase\@tempb\relax%
+      \setlength\tud@dim@ddclayer{\z@}%
+    \else%
+      \setlength\tud@dim@ddclayer{\tud@dim@ddcdiff}%
+    \fi%
+    \global\tud@dim@ddclayer=\tud@dim@ddclayer%
   }%
 }{}
 \newcommand*\tud@head@text{}
@@ -2638,6 +2634,7 @@
       \tud@headmidvskip@neg%
     \fi%
   \endgroup%
+  \iftudscrverlower{2.03}{\tud@ddc@enlargelayer}{}%
 }
 \newcommand*\tud@partheadendvskip{%
   \tud@cleardoublespecialpage{%
@@ -2745,48 +2742,6 @@
     \ifnumbered{chapter}{\setlength\parskip{\z@}}{}\interlinepenalty
   }{}{\tud@patch@wrn{@@makechapterhead}}
 }
-\newcommand*{\new@@makechapterhead}[1]{%
-  \@tempskipa=\glueexpr \scr@chapter@sectionbeforeskip\relax
-  \ifdim\@tempskipa<\z@\@tempskipa-\@tempskipa\fi
-  \chapterheadstartvskip
-  {%
-    \setlength{\parindent}{\z@}\setlength{\parfillskip}{\fill}%
-    \normalfont\sectfont\nobreak\nobreak\usekomafont{chapter}{}%
-     \def\IfUseNumber{\ifnumbered{chapter}}%
-    \if@chapterprefix
-      \raggedchapter
-      \let\IfUsePrefixLine\@firstoftwo
-      \let\@tempa\@firstofone
-    \else
-      \let\IfUsePrefixLine\@secondoftwo
-      \let\@tempa\@hangfrom
-    \fi
-    \@tempa{%
-      \IfUseNumber{%
-        \usekomafont{chapter}{%
-          \IfUsePrefixLine{%
-            {\usekomafont{chapterprefix}{%
-              \tud@headmidvskip@neg%
-              \tud@makeuppercase{\chapterformat}\tud@headmidvskip
-            }}%
-          }{%
-            \chapterformat
-          }%
-        }%
-      }{}%
-    }%
-    {%
-      \IfUsePrefixLine{\IfUseNumber{\setlength\parskip{\z@}}{}}{\raggedchapter}%
-      \interlinepenalty \@M
-      \usekomafont{chapter}{#1}\par
-    }%
-  }%
-  \nobreak\par\nobreak
-  \@tempskipa=\glueexpr \scr@chapter@sectionafterskip\relax
-  \ifdim\@tempskipa<\z@\@tempskipa-\@tempskipa\fi
-  \chapterheadendvskip
-}
-%\let\tud@@@makechapterhead\new@@makechapterhead
 \newcommand*\tud@chapterpreamble{%
   \ifnum\tud@abstract@level>1\relax\def\tud@abstract@level{1}\fi%
   \KOMAoptions{titlepage=false}%
@@ -2815,6 +2770,7 @@
   }%
 }{}{\tud@patch@wrn{set@@@@preamble}}
 \newcommand*\tud@chapter@pre{%
+  \iftudscrverlower{2.03}{\tud@ddc@enlargelayer}{}%
   \if@tud@chapterpage%
     \@restonecolfalse%
     \if@twocolumn\@restonecoltrue\onecolumn\fi%
@@ -2843,18 +2799,20 @@
   }%
   \global\let\tud@clearcolor@wrn\relax%
 }
-\providecommand*\SecDef[2]{\@ifstar{#2}{\scr@section@dblarg{#1}}}
-\providecommand\scr@section@dblarg[1]{%
-  \kernel@ifnextchar[%]
-    {#1}%
-    {\scr@section@xdblarg{#1}}%
-}
-\providecommand\scr@section@xdblarg[2]{%
-  \begingroup
-    \edef\reserved@a{%
-      \unexpanded{\endgroup\let\scr@osectarg\z@#1[{#2}]{#2}\def\scr@osectarg}%
-      {\scr@osectarg}}%
-  \reserved@a
+\ifcsdef{scr@v@3.13a}{}{%
+  \providecommand*\SecDef[2]{\@ifstar{#2}{\scr@section@dblarg{#1}}}
+  \providecommand\scr@section@dblarg[1]{%
+    \kernel@ifnextchar[%]
+      {#1}%
+      {\scr@section@xdblarg{#1}}%
+  }
+  \providecommand\scr@section@xdblarg[2]{%
+    \begingroup
+      \edef\reserved@a{%
+        \unexpanded{\endgroup\let\scr@osectarg\z@#1[{#2}]{#2}\def\scr@osectarg}%
+        {\scr@osectarg}}%
+    \reserved@a
+  }
 }
 \newcommand*\tud@part{}
 \newcommand*\tud@spart{}
@@ -2941,7 +2899,7 @@
 }
 \newcommand*\tud@font@koma@set[2]{%
   \ifcsdef{tud@font@koma@#1}{}{\addtokomafont{#1}{\@nameuse{tud@font@koma@#1}}}%
-  \@namedef{tud@font@koma@#1}{#2}%
+  \@namedef{tud@font@koma@#1}{#2\nobreak}%
 }
 \newcommand*\tud@font@koma@reset[1]{%
   \addtokomafont{#1}{\@nameuse{tud@font@koma@#1}}%
@@ -3503,7 +3461,10 @@
       \addtokomafont{pagenumber}{\sffamily\color{\tud@title@fontcolor}}%
       \addtokomafont{footnote}{\sffamily\color{\tud@title@fontcolor}}%
       \thispagestyle{empty.tudheadings}%
-      \iftudscrverlower{2.03}{\tud@ddc@enlargepage}{}%
+      \iftudscrverlower{2.03}{%
+        \tud@ddc@enlargelayer%
+        \tud@ddc@enlargepage%
+      }{}%
     }%
     \if@tud@cover%
       \begingroup%
@@ -3614,7 +3575,10 @@
     \ifx\@referee\@empty\else\tud@title@wrn{referee}\fi%
     \ifx\@professor\@empty\else\tud@title@wrn{professor}\fi%
     \vskip 2\bigskipamount%
-    \iftudscrverlower{2.03}{\tud@ddc@enlargepage[\titlepagestyle]}{}%
+    \iftudscrverlower{2.03}{%
+      \tud@ddc@enlargelayer%
+      \tud@ddc@enlargepage[\titlepagestyle]%
+    }{}%
   \endgroup%
 }
 \newcommand*\tud@multiple@field{}
@@ -3737,6 +3701,7 @@
     \tud@ddc@check%
     \ifcase\@tempb\relax\else%
       \setlength\@tempdima{\dimexpr\textheight-\tud@dim@ddcdiff\relax}%
+      \@tempswatrue%
     \fi%
   }{}%
   \ifdim\ht\tud@title@twocolumn@box>\@tempdima\relax%
@@ -3746,11 +3711,23 @@
       \vsplit\tud@title@twocolumn@box to \@tempdima%
       \clearpage%
       \setlength\@tempdima{\textheight}%
+      \iftudscrverlower{2.03}{\@tempswafalse}{}%
     }%
   \else%
     \setbox\tud@title@twocolumn@box\vbox{#1\bigskip}%
   \fi%
   \twocolumn[\unvbox\tud@title@twocolumn@box]%
+  \iftudscrverlower{2.03}{%
+    \if@tempswa%
+      \ClassWarning{\tudcls@name}{%
+        You are using a two-column title along with\MessageBreak%
+        the DDC-logo. Unfortunately in this case, the\MessageBreak%
+        type area hast to be adjusted manually. Please\MessageBreak%
+        use `\string\enlargethispage{-\the\tud@dim@ddcdiff}'\MessageBreak%
+        in both columns after the title%
+      }%
+    \fi%
+  }{}%
 }
 \newcommand*\tud@letsubjectthesis{%
   \if@tud@subjectthesis\ifx\@thesis\@empty\else%
@@ -3944,7 +3921,6 @@
 \newcommand*\tud@makeuppercase[1]{%
   \ifdin{\begingroup\MakeTextUppercase{#1}\endgroup}{#1}%
   \protect\vphantom{\"A\"O\"U}%
-%% \addtokomafont{section}{\strut\ignorespaces}%
 }
 \newcommand*\tud@lowerstring[2]{%
   \protected@edef#1{#2}%

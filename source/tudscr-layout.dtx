@@ -1,4 +1,4 @@
-% \CheckSum{1064}
+% \CheckSum{1065}
 % \iffalse meta-comment
 % ======================================================================
 %
@@ -47,7 +47,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-layout.dtx}[%
-  2015/01/21 v2.03 TUD-KOMA-Script (layout)%
+  2015/01/22 v2.03 TUD-KOMA-Script (layout)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -249,6 +249,7 @@
     \if@atdocument\tud@layout@process\fi%
   \fi%
 }
+%    \end{macrocode}
 % \end{option}^^A cdcover
 % \begin{option}{cdtitle}
 % \dots Titel (\opt{cdtitle}),\dots
@@ -625,11 +626,16 @@
 % Kapiteltitel. Das Makro \cs{tud@headmidvskip@neg} wird benötigt, um ggf. 
 % vorher um den eingefügten Abstand nach oben zu verschieben.
 %    \begin{macrocode}
+%<*article>
+\newcommand*\tud@headmidvskip{\par\nobreak}
+%</article>
+%<*book|report>
 \newcommand*\tud@headmidvskip{\par\nobreak\vspace{.5\baselineskip}}
 \newcommand*\tud@headmidvskip@neg{%
   \setbox0\vbox{\tud@headmidvskip}%
   \vspace*{\dimexpr-\dp\strutbox-\ht\strutbox-\ht0\relax}%
 }
+%</book|report>
 %    \end{macrocode}
 % \end{macro}^^A \tud@headmidvskip@neg
 % \end{macro}^^A \tud@headmidvskip
@@ -925,6 +931,10 @@
       \tud@headmidvskip@neg%
     \fi%
   \endgroup%
+%    \end{macrocode}
+% Die richtige Fußhöhe für das \DDC-Logo.
+%    \begin{macrocode}
+  \iftudscrverlower{2.03}{\tud@ddc@enlargelayer}{}%
 }
 %</book|report>
 %    \end{macrocode}
@@ -1206,7 +1216,12 @@
 % die Gliederungsbefehle der Kapitel innerhalb von \cs{tud@sectioning@case}.
 %    \begin{macrocode}
 \newcommand*\tud@chapter@pre{%
+%    \end{macrocode}
+% Die richtige Fußhöhe für das \DDC-Logo.
+%    \begin{macrocode}
+  \iftudscrverlower{2.03}{\tud@ddc@enlargelayer}{}%
   \if@tud@chapterpage%
+%    \end{macrocode}
 % Für den zweispaltigen Satz und aktivierter \opt{chapterpage}-Option muss
 % für die Kapitelseiten temporär auf einseitigen Satz umgestellt werden, damit
 % alle Befehle und Einstellungen beim Erzeugen des jeweiligen Kapitels zum
@@ -1286,20 +1301,21 @@
 % optionale Argument dupliziert, falls dieses nicht angegeben wurde. Damit das 
 % auch mit der Version~v3.12 funktioniert, werden die entsprechenden Befehle 
 % hier bereitgehalten.
-% \ToDo{Nur für vorherige KOMA-Script-Versionen bereitstellen}[v3.15]
 %    \begin{macrocode}
-\providecommand*\SecDef[2]{\@ifstar{#2}{\scr@section@dblarg{#1}}}
-\providecommand\scr@section@dblarg[1]{%
-  \kernel@ifnextchar[%]
-    {#1}%
-    {\scr@section@xdblarg{#1}}%
-}
-\providecommand\scr@section@xdblarg[2]{%
-  \begingroup
-    \edef\reserved@a{%
-      \unexpanded{\endgroup\let\scr@osectarg\z@#1[{#2}]{#2}\def\scr@osectarg}%
-      {\scr@osectarg}}%
-  \reserved@a
+\ifcsdef{scr@v@3.13a}{}{%
+  \providecommand*\SecDef[2]{\@ifstar{#2}{\scr@section@dblarg{#1}}}
+  \providecommand\scr@section@dblarg[1]{%
+    \kernel@ifnextchar[%]
+      {#1}%
+      {\scr@section@xdblarg{#1}}%
+  }
+  \providecommand\scr@section@xdblarg[2]{%
+    \begingroup
+      \edef\reserved@a{%
+        \unexpanded{\endgroup\let\scr@osectarg\z@#1[{#2}]{#2}\def\scr@osectarg}%
+        {\scr@osectarg}}%
+    \reserved@a
+  }
 }
 %    \end{macrocode}
 % \end{macro}^^A \scr@section@xdblarg
@@ -1567,7 +1583,7 @@
 %    \begin{macrocode}
 \newcommand*\tud@font@koma@set[2]{%
   \ifcsdef{tud@font@koma@#1}{}{\addtokomafont{#1}{\@nameuse{tud@font@koma@#1}}}%
-  \@namedef{tud@font@koma@#1}{#2}%
+  \@namedef{tud@font@koma@#1}{#2\nobreak}%
 }
 %    \end{macrocode}
 % Durch die Option \opt{headings} werden die Schriftelemente zurückgesetzt. 

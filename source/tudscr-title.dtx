@@ -1,4 +1,4 @@
-% \CheckSum{1372}
+% \CheckSum{1384}
 % \iffalse meta-comment
 % ======================================================================
 %
@@ -47,7 +47,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-title.dtx}[%
-  2015/01/21 v2.03 TUD-KOMA-Script (title)%
+  2015/01/22 v2.03 TUD-KOMA-Script (title)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -585,7 +585,6 @@
 % Es werden Schriftart, abhängig \opt{heavyfont} die Schriftstärke, sowie die 
 % Farbe der Seite und des Kopfes und die Linienstärke des Querbalkens und die
 % \DDC-Logos aus den Einstellungen übernommen.
-% \ToDo{Für Kompatibilitätsmodus beibehalten}[v2.03]
 %    \begin{macrocode}
     \def\@tempa{%
       \let\tud@pagecolor\tud@title@pagecolor%
@@ -595,9 +594,13 @@
       \addtokomafont{footnote}{\sffamily\color{\tud@title@fontcolor}}%
       \thispagestyle{empty.tudheadings}%
 %    \end{macrocode}
-% \ToDo{Für Kompatibilitätsmodus beibehalten}[v2.03]
+% Im Kompatibilitätsmodus für die Version~v2.02 wird im Zweifelsfall die Seite 
+% und das Layer für den Fuß mit \DDC-Logo vergrößert.
 %    \begin{macrocode}
-      \iftudscrverlower{2.03}{\tud@ddc@enlargepage}{}%
+      \iftudscrverlower{2.03}{%
+        \tud@ddc@enlargelayer%
+        \tud@ddc@enlargepage%
+      }{}%
     }%
 %    \end{macrocode}
 % Bei der Ausgabe des Covers werden lediglich die Farb- und Schriftdefinitionen
@@ -804,11 +807,13 @@
 %    \begin{macrocode}
     \vskip 2\bigskipamount%
 %    \end{macrocode}
-% Wird das \DDC-Logo gesetzt, muss dafür am unteren Rand entsprechend Platz 
-% gelassen werden.
-% \ToDo{Für Kompatibilitätsmodus beibehalten}[v2.03]
+% Wird das \DDC-Logo im Kompatibilitätsmodus für die Version~v2.02 gesetzt, 
+% muss dafür am unteren Rand entsprechend Platz gelassen werden.
 %    \begin{macrocode}
-    \iftudscrverlower{2.03}{\tud@ddc@enlargepage[\titlepagestyle]}{}%
+    \iftudscrverlower{2.03}{%
+      \tud@ddc@enlargelayer%
+      \tud@ddc@enlargepage[\titlepagestyle]%
+    }{}%
   \endgroup%
 }
 %    \end{macrocode}
@@ -921,6 +926,7 @@
   \ifpatchable{\@author}{\@latex@warning@no@line}{\@author\gdef\@author{}}{}%
 }
 \newcommand*\tud@split@author[2]{%
+%    \end{macrocode}
 % Zu Beginn werden alle Felder, welche innerhalb des \meta{Feld}-Argumentes
 % angegeben sind, initial gelöscht (erstes Argument \cs{tud@multiple@setfields})
 % Anschließend werden die Felder des aktuellen Teils gefüllt (zweites Argument 
@@ -1075,6 +1081,7 @@
     \tud@ddc@check%
     \ifcase\@tempb\relax\else%
       \setlength\@tempdima{\dimexpr\textheight-\tud@dim@ddcdiff\relax}%
+      \@tempswatrue%
     \fi%
   }{}%
 %    \end{macrocode}
@@ -1088,6 +1095,7 @@
       \vsplit\tud@title@twocolumn@box to \@tempdima%
       \clearpage%
       \setlength\@tempdima{\textheight}%
+      \iftudscrverlower{2.03}{\@tempswafalse}{}%
     }%
 %    \end{macrocode}
 % Passt der auszugebende einspaltige Teil auf eine Seite, ist eine vertikale 
@@ -1101,6 +1109,23 @@
 % Der Rest wir einfach als optionales Argument von \cs{twocolumn} ausgegeben.
 %    \begin{macrocode}
   \twocolumn[\unvbox\tud@title@twocolumn@box]%
+%    \end{macrocode}
+% In der Version~v2.02 wird eine Warnung ausgegeben, damit der Anwender den
+% Satzspiegel manuell anpassen kann. Die Verwendung von \pkg{afterpage} liefert 
+% leider nicht in allen Fällen das gewollte Ergebnis, weshalb darauf verzichtet 
+% wird.
+%    \begin{macrocode}
+  \iftudscrverlower{2.03}{%
+    \if@tempswa%
+      \ClassWarning{\tudcls@name}{%
+        You are using a two-column title along with\MessageBreak%
+        the DDC-logo. Unfortunately in this case, the\MessageBreak%
+        type area hast to be adjusted manually. Please\MessageBreak%
+        use `\string\enlargethispage{-\the\tud@dim@ddcdiff}'\MessageBreak%
+        in both columns after the title%
+      }%
+    \fi%
+  }{}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@title@twocolumn@box
@@ -1158,6 +1183,8 @@
 % \changes{v2.02}{2014/06/23}{Warnung für die Option \opt{titlepage} mit dem
 %   Wert \val{firstiscover}}%^^A
 % \changes{v2.02}{2014/08/08}{\cs{makecover} jetzt auch ohne \CD verwendbar}^^A
+% \changes{v2.02}{2014/08/12}{Satzspiegel bei deaktiviertem CD-Layout mit
+%   \cs{coverpage\dots{}margin} änderbar}^^A
 % \changes{v2.03}{2015/01/09}{Anpassungen für neue Satzspiegelerzeugung}%^^A
 % \begin{macro}{\if@tud@cover}
 % Der Befehl \cs{makecover} ist für eine Umschlagseite bei einem gebundenen 
@@ -1165,8 +1192,6 @@
 %    \begin{macrocode}
 \newif\if@tud@cover
 \newcommand*\makecover[1][]{%
-% \changes{v2.02}{2014/08/12}{Satzspiegel bei \opt{cdlayout=false} 
-%   anpassbar}%^^A
 %    \end{macrocode}
 % Ist die Option \opt{titlepage=firstiscover} aktiv, wird eine Warnung erzeugt.
 %    \begin{macrocode}
