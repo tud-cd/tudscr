@@ -1642,73 +1642,43 @@
 \newcommand*\tud@geometry@set{%
   \ifdim\paperheight<148.1mm\relax%
     \setlength\tud@dim@widemargin{15mm}%
-    \setlength\tud@dim@topmargin{17.5mm}%
-    \setlength\tud@dim@barheight{2.5mm}%
-    \setlength\tud@dim@headsep{6mm}%
-    \setlength\tud@dim@logox{5.5mm}%
-    \setlength\tud@dim@logoy{6.5mm}%
-    \setlength\tud@dim@logowidth{28.5mm}%
-    \setlength\tud@dim@heavyline{0.75pt}%
-    \setlength\tud@dim@thinline{0.5pt}%
+    \setlength\tud@dim@heavyline{0.5pt}%
+    \setlength\tud@dim@thinline{0.25pt}%
     \def\tud@head@font@size{4.5}%
   \else\ifdim\paperheight<297.1mm\relax%
     \setlength\tud@dim@widemargin{30mm}%
-    \setlength\tud@dim@topmargin{35mm}%
-    \setlength\tud@dim@barheight{5mm}%
-    \setlength\tud@dim@headsep{12mm}%
-    \setlength\tud@dim@logox{11mm}%
-    \setlength\tud@dim@logoy{13.5mm}%
-    \setlength\tud@dim@logowidth{57mm}%
     \setlength\tud@dim@heavyline{1pt}%
     \setlength\tud@dim@thinline{0.5pt}%
     \def\tud@head@font@size{9}%
   \else\ifdim\paperheight<420.1mm\relax%
-    \setlength\tud@dim@widemargin{42mm}%
-    \setlength\tud@dim@topmargin{50mm}%
-    \setlength\tud@dim@barheight{7mm}%
-    \setlength\tud@dim@headsep{17mm}%
-    \setlength\tud@dim@logox{15.5mm}%
-    \setlength\tud@dim@logoy{19mm}%
-    \setlength\tud@dim@logowidth{80mm}%
-    \setlength\tud@dim@heavyline{1.4pt}%
-    \setlength\tud@dim@thinline{0.7pt}%
-    \def\tud@head@font@size{13}%
+    \setlength\tud@dim@widemargin{42.426407mm}%
+    \setlength\tud@dim@heavyline{1.414214pt}%
+    \setlength\tud@dim@thinline{0.707107pt}%
+    \def\tud@head@font@size{12.727922}%
   \else\ifdim\paperheight<594.1mm\relax%
     \setlength\tud@dim@widemargin{60mm}%
-    \setlength\tud@dim@topmargin{70mm}%
-    \setlength\tud@dim@barheight{10mm}%
-    \setlength\tud@dim@headsep{24mm}%
-    \setlength\tud@dim@logox{22mm}%
-    \setlength\tud@dim@logoy{27mm}%
-    \setlength\tud@dim@logowidth{114mm}%
-    \setlength\tud@dim@heavyline{1.7pt}%
+    \setlength\tud@dim@heavyline{2pt}%
     \setlength\tud@dim@thinline{1pt}%
-    \def\tud@head@font@size{13.5}%
+    \def\tud@head@font@size{18}%
   \else\ifdim\paperheight<841.1mm\relax%
-    \setlength\tud@dim@widemargin{85mm}%
-    \setlength\tud@dim@topmargin{100mm}%
-    \setlength\tud@dim@barheight{14mm}%
-    \setlength\tud@dim@headsep{34mm}%
-    \setlength\tud@dim@logox{31mm}%
-    \setlength\tud@dim@logoy{38mm}%
-    \setlength\tud@dim@logowidth{161.5mm}%
-    \setlength\tud@dim@heavyline{1.9pt}%
-    \setlength\tud@dim@thinline{1.5pt}%
-    \def\tud@head@font@size{14}%
+    \setlength\tud@dim@widemargin{84.852814mm}%
+    \setlength\tud@dim@heavyline{2.828427pt}%
+    \setlength\tud@dim@thinline{1.414214pt}%
+    \def\tud@head@font@size{25.455844}%
   \else%
     \setlength\tud@dim@widemargin{120mm}%
-    \setlength\tud@dim@topmargin{140mm}%
-    \setlength\tud@dim@barheight{20mm}%
-    \setlength\tud@dim@headsep{48mm}%
-    \setlength\tud@dim@logox{44mm}%
-    \setlength\tud@dim@logoy{54mm}%
-    \setlength\tud@dim@logowidth{228mm}%
-    \setlength\tud@dim@heavyline{2.1pt}%
+    \setlength\tud@dim@heavyline{4pt}%
     \setlength\tud@dim@thinline{2pt}%
-    \def\tud@head@font@size{20}%
+    \def\tud@head@font@size{36}%
   \fi\fi\fi\fi\fi%
   \setlength\tud@dim@slimmargin{\dimexpr2\tud@dim@widemargin/3\relax}%
   \setlength\tud@dim@both{\dimexpr5\tud@dim@widemargin/3\relax}%
+  \setlength\tud@dim@topmargin{\dimexpr7\tud@dim@widemargin/6\relax}%
+  \setlength\tud@dim@barheight{\dimexpr\tud@dim@widemargin/6\relax}%
+  \setlength\tud@dim@headsep{\dimexpr2\tud@dim@widemargin/5\relax}%
+  \setlength\tud@dim@logox{\dimexpr1.1\tud@dim@widemargin/3\relax}%
+  \setlength\tud@dim@logoy{\dimexpr0.45\tud@dim@widemargin\relax}%
+  \setlength\tud@dim@logowidth{\dimexpr1.9\tud@dim@widemargin\relax}%
   \setlength\tud@dim@footsep{%
     \dimexpr\tud@dim@widemargin-.6\tud@dim@topmargin\relax%
   }%
@@ -2206,6 +2176,11 @@
     \def\tud@geometry@hmargin{%
       left=\dimexpr\oddsidemargin+1in\relax,%
       width=\textwidth,%
+      marginparwidth=\dimexpr\evensidemargin+1in-\tud@ta@headsep\relax,%
+      \if@twoside\if@reversemargin%
+        marginparwidth=\dimexpr\oddsidemargin+1in-\tud@ta@headsep\relax,%
+      \fi\fi%
+      marginparsep=.5\tud@ta@headsep,%
     }%
     \def\tud@geometry@vmargin{%
       top=\dimexpr\tud@ta@topmargin+\tud@ta@headheight+\tud@ta@headsep%
@@ -2248,10 +2223,11 @@
         left=\tud@dim@widemargin,%
         textwidth=\dimexpr\paperwidth-\tud@dim@both-\ta@bcor\relax,%
         \if@reversemargin%
-          marginpar=\dimexpr\tud@dim@widemargin-1.5\marginparsep\relax,%
+          marginparwidth=\dimexpr\tud@dim@widemargin-\tud@ta@headsep\relax,%
         \else%
-          marginpar=\dimexpr\tud@dim@slimmargin-1.5\marginparsep\relax,%
+          marginparwidth=\dimexpr\tud@dim@slimmargin-\tud@ta@headsep\relax,%
         \fi%
+        marginparsep=.5\tud@ta@headsep,%
         bindingoffset=\ta@bcor,%
         \if@twoside asymmetric,\fi%
       }%
@@ -2259,7 +2235,8 @@
       \def\tud@geometry@hmargin{%
         left=.5\tud@dim@both,%
         textwidth=\dimexpr\paperwidth-\tud@dim@both-\ta@bcor\relax,%
-        marginpar=\dimexpr.5\tud@dim@both-1.5\marginparsep\relax,%
+        marginparwidth=\dimexpr.5\tud@dim@both-\tud@ta@headsep\relax,%
+        marginparsep=.5\tud@ta@headsep,%
         bindingoffset=\ta@bcor,%
       }%
     \or%
@@ -2273,13 +2250,14 @@
         textwidth=\dimexpr\paperwidth-\tud@dim@both-\ta@bcor\relax,%
         \if@twoside%
           \if@reversemargin%
-            marginpar=\dimexpr.4\tud@dim@both-1.5\marginparsep\relax,%
+            marginparwidth=\dimexpr.4\tud@dim@both-\tud@ta@headsep\relax,%
           \else%
-            marginpar=\dimexpr.6\tud@dim@both-1.5\marginparsep\relax,%
+            marginparwidth=\dimexpr.6\tud@dim@both-\tud@ta@headsep\relax,%
           \fi%
         \else%
-          marginpar=\dimexpr.5\tud@dim@both-1.5\marginparsep\relax,%
+          marginparwidth=\dimexpr.5\tud@dim@both-\tud@ta@headsep\relax,%
         \fi%
+        marginparsep=.5\tud@ta@headsep,%
         bindingoffset=\ta@bcor,%
       }%
     \fi%
