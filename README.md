@@ -3,7 +3,7 @@ TUD-KOMA-Script
 ===============
 
 TUD-KOMA-Script 2015/xx/xx v2.03
-Copyright (c) Falk Hanisch <tudscr[at]gmail.com>, 2012-2015
+Copyright (c) Falk Hanisch <tudscr@gmail.com>, 2012-2015
 
 This material is subject to the LaTeX Project Public License version 1.3c or 
 later. See http://www.latex-project.org/lppl.txt for details of that license.
