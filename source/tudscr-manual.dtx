@@ -1,4 +1,4 @@
-% \CheckSum{2577}
+% \CheckSum{2581}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -584,6 +584,7 @@
 % \changes{v2.02}{2014/07/10}{neu}%^^A
 % \begin{macro}{\if@tud@todo}
 % \changes{v2.02}{2014/07/10}{neu}%^^A
+% \ToDo{FamilyKeyState nutzen}
 % Diese Option ist verantwortlich für den Schalter \cs{if@tud@todo}. Über 
 % diesen wird gesteuert, ob ToDo-Notizen ausgegeben werden sollen.
 %    \begin{macrocode}
@@ -683,23 +684,27 @@
 % \begin{macro}{\PValue}
 % \begin{macro}{\PParameter}
 % \begin{macro}{\POParameter}
+% \begin{macro}{\textOR}
+% \changes{v2.02}{2015/01/25}{neu}%^^A
 % Diese Befehle dienen zum Auszeichnen von obligatorischen und optionalen 
 % Parametern und Befehlen oder bestimmten Wertzuweisungen.
 %    \begin{macrocode}
+\newrobustcmd*\textOR{\,\textbardbl\,}
 \newrobustcmd*\PName[1]{\mbox{\texttt{\textsl{<#1>}}}}
 \newrobustcmd*\PBoolean{\PName{Ein-Aus-Wert}}
-\newrobustcmd*\PBName[1]{\PBoolean|\PName{#1}}
+\newrobustcmd*\PBName[1]{\PBoolean\textOR\PName{#1}}
 \newrobustcmd*\PSet{\PName{Einstellung}}
 \newrobustcmd*\Parameter[1]{\mbox{\texttt{\{}\PName{#1}\texttt{\}}}}
 \newrobustcmd*\OParameter[1]{\mbox{\texttt{[}\PName{#1}\texttt{]}}}
 \newrobustcmd*\LParameter{\mbox{\texttt{[}\PName{Parameterliste}\texttt{]}}}
 \newrobustcmd*\OLParameter[1]{%
-  \mbox{\texttt{[}\PName{#1}|\PName{Parameterliste}\texttt{]}}%
+  \mbox{\texttt{[}\PName{#1}\textOR\PName{Parameterliste}\texttt{]}}%
 }
 \newrobustcmd*\PValue[1]{\mbox{\texttt{#1}}}
 \newrobustcmd*\PParameter[1]{\mbox{\texttt{\{#1\}}}}
 \newrobustcmd*\POParameter[1]{\mbox{\texttt{[#1]}}}
 %    \end{macrocode}
+% \end{macro}^^A \textOR
 % \end{macro}^^A \POParameter
 % \end{macro}^^A \PParameter
 % \end{macro}^^A \PValue
@@ -869,6 +874,7 @@
       }%
 %    \end{macrocode}
 % In \cs{@ToDo} wird das optionale Argument für \pkg{todonotes} gesichert.
+% \ToDo[imp]{Option erweitern, Ausgabe auf bestimmten Typ beschränken}[v2.03]
 %    \begin{macrocode}
       \def\@ToDo{}%
       \IfValueTF{#2}{%
@@ -2355,15 +2361,15 @@
 % \changes{v2.02}{2014/10/15}{Sternversion neu (keine Randnotiz)}%^^A
 % An den Befehl \cs{ChangedAt} kann eine kommagetrente Liste mit verschiedenen
 % Versionsnummern und dazugehörigen Änderungen übergeben werden. Er wird in der 
-% Form: \cs{ChangedAt}\marg{Version!Definition,Version!Erweiterung} genutzt.
-% Der Prozess selbst wird mit \cs{ChangedAt@Process} durchgeführt. Es wird
-% zu der angegebenen Versionsnummer ein Eintrag in die Änderungsliste erstellt,
-% wenn mit einem Ausrufezeichen getrennt der gewünschte Inhalt gegeben wurde.
+% Form: \cs{ChangedAt}\marg{Version!Beschreibung} genutzt. Der Prozess selbst
+% wird mit \cs{ChangedAt@Process} durchgeführt. Es wird zu der angegebenen
+% Versionsnummer ein Eintrag in die Änderungsliste erstellt, wenn mit einem
+% Ausrufezeichen getrennt der gewünschte Inhalt gegeben wurde.
 %
 % Alle übergegebenen Versionsnummern werden als Liste mit einmaligen Einträgen 
 % in einer Randnotiz gesetzt. Mit dem optionalen Argument kann ein vertikaler 
-% dieser angegeben werden. Die Sternversion von \cs{ChangedAt} unterdrückt die
-% Ausgabe dieser Randnotiz.
+% dieser angegeben werden. Die Sternversion unterdrückt stattdessen die Ausgabe
+% dieser Randnotiz.
 %    \begin{macrocode}
 \NewDocumentCommand\ChangedAt{sO{\z@}m}{\ChangedAt@Process[#1]{#2}{#3}}
 %    \end{macrocode}
@@ -2399,7 +2405,7 @@
   \@for\@tempa:=#3\do{\listeadd{\@changedatlist}{\expandonce\@tempa}}%
   \forlistloop\ChangedAt@Split{\@changedatlist}%
 %    \end{macrocode}
-% Nach der Verarbeitung aller Einräge sind in \cs{@changedatlist} alle 
+% Nach der Verarbeitung aller Einräge sind in \cs{@changedatversionlist} alle 
 % angegebenen Versionsnummern genau einmal enthalten. Mit \cs{sortlist} werden 
 % diese in die richtige Reihenfolge sortiert und anschließend als Randnotiz in
 % einer Tabelle ausgegeben, falls nicht die Sternversion verwendet wurde.
@@ -2435,7 +2441,7 @@
 % Hiermit wird der Eintrag in die Änderungshistorie erzeugt. Dabei ist zu 
 % unterscheiden, ob der Befehl \cs{ChangedAt} direkt genutzt wurde oder aber 
 % der Eintrag innerhalb der \env{Declaration}-Umgebung erfolgte. Dies wird 
-% anhand von des dritten Argumentes erkannt. Für den ersten Fall erfolgt ein
+% anhand des dritten Argumentes erkannt. Für den ersten Fall erfolgt ein
 % Eintrag lediglich, wenn neben der Versionsnummer selbst auch eine Erklärung
 % angegben wurde~-- eine Randnotiz wird aber in jedem Fall gesetzt. Im zweiten
 % Fall wird der Erklärung \emph{immer} \cs{ChangedAt@Default} vorangestellt.
@@ -3242,7 +3248,6 @@
 % \begin{macro}{\seeidx}
 % \begin{macro}{\@printindex}
 % \changes{v2.02}{2014/07/25}{neu}%^^A
-% \begin{macro}{\prepare@multicols}
 % Der Befehl \cs{PrintIndex} ist die Zusammenfassung für die Ausgabe aller 
 % Indexe.
 %    \begin{macrocode}
@@ -3284,7 +3289,6 @@
 %    \begin{macrocode}
 \newcommand*\@printindex[1][]{%
   \pagebreak[3]%
-  \apptocmd{\prepare@multicols}{\hbadness10000}{}{}%
 %<*class>
   \ifblank{#1}{%
     \ifx\@printindexprologue\@empty%
@@ -3323,7 +3327,6 @@
 }
 %</class>
 %    \end{macrocode}
-% \end{macro}^^A \prepare@multicols
 % \end{macro}^^A \@printindex
 % \end{macro}^^A \seeidx
 % \end{macro}^^A \Index
