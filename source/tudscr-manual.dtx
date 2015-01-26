@@ -1,4 +1,4 @@
-% \CheckSum{2581}
+% \CheckSum{2606}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-manual.dtx}[%
-  2015/01/24 v2.03 TUD-KOMA-Script\space%
+  2015/01/27 v2.03 TUD-KOMA-Script\space%
 %</driver>
 %<identify>\NeedsTeXFormat{LaTeX2e}[2011/06/27]
 %<class&identify>\ProvidesClass{tudscrman}[%
@@ -584,14 +584,26 @@
 % \changes{v2.02}{2014/07/10}{neu}%^^A
 % \begin{macro}{\if@tud@todo}
 % \changes{v2.02}{2014/07/10}{neu}%^^A
-% \ToDo{FamilyKeyState nutzen}
+% \begin{macro}{\tud@todo@type}
+% \changes{v2.03}{2015/01/25}{neu}%^^A
 % Diese Option ist verantwortlich für den Schalter \cs{if@tud@todo}. Über 
 % diesen wird gesteuert, ob ToDo-Notizen ausgegeben werden sollen.
 %    \begin{macrocode}
 \newif\if@tud@todo
 \@tud@todotrue
-\TUD@ifkey{ToDo}{@tud@todo}
+\newcommand*\tud@todo@type{}
+\TUD@key{ToDo}[true]{%
+  \TUD@set@ifkey{ToDo}{@tud@todo}{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \let\tud@todo@type\relax%
+  \else%
+    \def\tud@todo@type{#1}%
+    \@tud@todotrue%
+    \FamilyKeyStateProcessed%
+  \fi%
+}
 %    \end{macrocode}
+% \end{macro}^^A \tud@todo@type
 % \end{macro}^^A \if@tud@todo
 % \end{option}^^A ToDo
 %
@@ -839,6 +851,7 @@
 %
 % \begin{macro}{\ToDo}
 % \changes{v2.02}{2014/07/10}{Verwendung von \pkg{todonotes}}%^^A
+% \changes{v2.03}{2015/01/25}{Ausgabe auf bestimmten Typ beschränkbar}%^^A
 % \begin{macro}{\@ToDo}
 % \changes{v2.02}{2014/07/10}{neu}%^^A
 % \begin{macro}{\ListOfToDo}
@@ -874,7 +887,6 @@
       }%
 %    \end{macrocode}
 % In \cs{@ToDo} wird das optionale Argument für \pkg{todonotes} gesichert.
-% \ToDo[imp]{Option erweitern, Ausgabe auf bestimmten Typ beschränken}[v2.03]
 %    \begin{macrocode}
       \def\@ToDo{}%
       \IfValueTF{#2}{%
@@ -884,25 +896,34 @@
       }%
 %    \end{macrocode}
 % Damit die Randnotiz nicht verrutscht, wird \cs{marginnote} anstelle von 
-% \cs{marginpar} verwendet. Außerdem ist eine Verschiebung um den durch 
-% \pkg{todonotes} definierten Leerraum notwendig.
+% \cs{marginpar} verwendet.
 %    \begin{macrocode}
       \renewcommand*\marginpar[2][]{%
         \marginnote[##1]{##2}[\dimexpr-1.6ex+1pt\relax]%
       }%
-      \vskip.8ex%
 %    \end{macrocode}
-% hier erfolgt die Ausgabe.
+% Die Ausgabe erfolgt entweder für alle ToDo-Notizen oder nur den per Option
+% festgelegten Typ.
 %    \begin{macrocode}
-      \IfValueT{#4}{%
-        \settowidth\marginparwidth{#4}%
-        \addtolength\marginparwidth{\dimexpr1.6ex+1pt\relax}%
-        \let\par\relax\noindent%
-        \edef\@tempa{\noexpand\todo[\@ToDo,noline,nolist]}%
-        \@tempa{#4}%
-      }%
-      \edef\@tempa{\noexpand\todo[\@ToDo,inline]}%
-      \@tempa{#3}%
+     \@tempswafalse
+     \ifdefvoid{\tud@todo@type}{\@tempswatrue}{}%
+     \IfValueT{#2}{\ifstr{#2}{\tud@todo@type}{\@tempswatrue}{}}%
+%    \end{macrocode}
+% Vor der Ausgabe ist eine vertikale Verschiebung um den durch \pkg{todonotes} 
+% definierten Leerraum notwendig.
+%    \begin{macrocode}
+      \if@tempswa%
+        \vskip.8ex%
+        \IfValueT{#4}{%
+          \settowidth\marginparwidth{#4}%
+          \addtolength\marginparwidth{\dimexpr1.6ex+1pt\relax}%
+          \let\par\relax\noindent%
+          \edef\@tempa{\noexpand\todo[\@ToDo,noline,nolist]}%
+          \@tempa{#4}%
+        }%
+        \edef\@tempa{\noexpand\todo[\@ToDo,inline]}%
+        \@tempa{#3}%
+      \fi%
     \endgroup%
     \par\noindent%
   }{}%
@@ -2361,10 +2382,11 @@
 % \changes{v2.02}{2014/10/15}{Sternversion neu (keine Randnotiz)}%^^A
 % An den Befehl \cs{ChangedAt} kann eine kommagetrente Liste mit verschiedenen
 % Versionsnummern und dazugehörigen Änderungen übergeben werden. Er wird in der 
-% Form: \cs{ChangedAt}\marg{Version!Beschreibung} genutzt. Der Prozess selbst
-% wird mit \cs{ChangedAt@Process} durchgeführt. Es wird zu der angegebenen
-% Versionsnummer ein Eintrag in die Änderungsliste erstellt, wenn mit einem
-% Ausrufezeichen getrennt der gewünschte Inhalt gegeben wurde.
+% Form: \cs{ChangedAt}\verb|{|\meta{Version}\verb|!|\meta{Beschreibung}\verb|}| 
+% genutzt. Mit \cs{ChangedAt@Process} wird der Prozess selbst durchgeführt. Es 
+% wird zu der angegebenen Versionsnummer ein Eintrag in die Änderungsliste
+% erstellt, wenn mit einem Ausrufezeichen getrennt der gewünschte Inhalt
+% gegeben wurde.
 %
 % Alle übergegebenen Versionsnummern werden als Liste mit einmaligen Einträgen 
 % in einer Randnotiz gesetzt. Mit dem optionalen Argument kann ein vertikaler 

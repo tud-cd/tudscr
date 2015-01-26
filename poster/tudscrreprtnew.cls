@@ -28,7 +28,7 @@
 %% ============================================================================
 %% 
 %%  TUD-KOMA-Script
-%%  Copyright (c) Falk Hanisch <tudscr[at]gmail.com>, 2012-2014
+%%  Copyright (c) Falk Hanisch <tudscr@gmail.com>, 2012-2015
 %% 
 %% ============================================================================
 %% 
@@ -42,13 +42,13 @@
 %% 
 %% ----------------------------------------------------------------------------
 %% 
-%%  Dieses Werk darf nach den Bedingungen der LaTeX Project Public Lizenz,
-%%  Version 1.3c, verteilt und/oder veraendert werden. Die neuste Version
-%%  dieser Lizenz ist http://www.latex-project.org/lppl.txt und Version 1.3c
-%%  ist Teil aller Verteilungen von LaTeX 2005/12/01 oder spaeter und dieses
-%%  Werks. Dieses Werk hat den LPPL-Verwaltungs-Status "author-maintained",
-%%  wird somit allein durch den Autor verwaltet. Der aktuelle Verwalter und
-%%  Autor dieses Werkes ist Falk Hanisch.
+%%  Dieses Werk darf nach den Bedingungen der LaTeX Project Public Lizenz
+%%  in der Version 1.3c, verteilt und/oder veraendert werden. Die aktuelle
+%%  Version dieser Lizenz ist http://www.latex-project.org/lppl.txt und
+%%  Version 1.3c oder spaeter ist Teil aller Verteilungen von LaTeX 2005/12/01
+%%  oder spaeter und dieses Werks. Dieses Werk hat den LPPL-Verwaltungs-Status
+%%  "author-maintained", wird somit allein durch den Autor verwaltet. Der
+%%  aktuelle Verwalter und Autor dieses Werkes ist Falk Hanisch.
 %% 
 %% ============================================================================
 %% 
@@ -70,7 +70,7 @@
       \fi%
     }%
   \fi%
-  \@TUDVersion{2015/01/22 v2.03 TUD-KOMA-Script}%
+  \@TUDVersion{2015/01/24 v2.03 TUD-KOMA-Script}%
 \endgroup%
 \providecommand*\tudscrmail{tudscr@gmail.com}
 \newcommand*\cls@name{report}
@@ -78,7 +78,7 @@
 \newcommand*\tudcls@name{tudscrreprt}
 \NeedsTeXFormat{LaTeX2e}[2011/06/27]
 \ProvidesClass{\tudcls@name}[%
-  2015/01/22 v2.03 TUD-KOMA-Script
+  2015/01/24 v2.03 TUD-KOMA-Script
   document class (\cls@name)%
 ]
 \typeout{The Corporate Design of Technische Universitaet Dresden}
@@ -1634,10 +1634,7 @@
 \newlength\tud@dim@thinline
 \newlength\tud@dim@headdiff
 \newlength\tud@dim@headingsvskip
-\iftudscrverlower{2.03}{%
-  \newlength\tud@dim@ddcdiff%
-  \newlength\tud@dim@ddclayer%
-}{}
+\iftudscrverlower{2.03}{\newlength\tud@dim@ddcdiff}{}
 \newcommand*\tud@head@font@size{}
 \newcommand*\tud@geometry@set{%
   \ifdim\paperheight<148.1mm\relax%
@@ -1756,13 +1753,44 @@
       background,foot,%
       height=\dimexpr\paperheight-\layeryoffset\relax,%
       contents={%
-        \hfill\vbox to \layerheight{\vfil\hbox{\tud@ddclogo}\vfil\vfil}%
+        \ifdim\footlogoheight>\z@\relax\else%
+          \settoheight\footlogoheight{\tud@mainlogo}%
+          \iftudscrverlower{2.03}{%
+            \setlength\footlogoheight{.6\tud@dim@topmargin}%
+          }{}%
+        \fi%
+        \setlength\@tempdima{%
+          \dimexpr\footlogoheight-\layerheight+\dp\strutbox\relax%
+        }%
+        \ifdim\@tempdima>\vfuzz\relax%
+          \ClassWarning{\tudcls@name}{%
+            The chosen `\string\footlogoheight' 
+            (\the\footlogoheight)\MessageBreak%
+            is \the\@tempdima\space higher than recommended. You\MessageBreak%
+            should decrease this length
+            \ifcase\tud@geometry\relax\else%
+              or alternatively\MessageBreak%
+              enlarge the bottom margin by using option\MessageBreak%
+              `extrabottommargin'%
+            \fi%
+          }%
+        \fi%
+        \let\@tempa\relax%
+        \@for\@tempb:=\tud@@footlogo\do{%
+          \@tempa%
+          \expandafter\tud@footlogo\expandafter{\@tempb}%
+          \let\@tempa\footlogosep%
+        }%
+        \tud@ddclogo%
       },%
     ]{tudheadings.foot.logo}%
     \iftudscrverlower{2.03}{%
       \ModifyLayer[%
         voffset=\dimexpr\topmargin+1in+\headheight+\headsep+\textheight%
-          +\footskip-\footheight-\tud@dim@ddclayer-\dp\strutbox\relax,%
+          +\footskip-\footheight-\tud@dim@ddcdiff%
+          \ifcase\tud@geometry\relax\else+\ht\strutbox+\dp\strutbox\fi%
+          \relax,%
+        height=\dimexpr.6\tud@dim@topmargin+\dp\strutbox\relax,%
       ]{tudheadings.foot.logo}%
     }{}%
     \newpairofpagestyles{tudheadings}{}%
@@ -1886,7 +1914,6 @@
             \gdef\tud@currentgeometry{tudareaddc}%
           }%
         \fi%
-        \tud@ddc@enlargelayer%
       }{%
         \ifstr{\tud@currentgeometry}{tudarea}{}{%
           \loadgeometry{tudarea}%
@@ -1930,15 +1957,6 @@
         \fi%
       }%
     }{}%
-  }%
-  \newcommand*\tud@ddc@enlargelayer{%
-    \tud@ddc@check%
-    \ifcase\@tempb\relax%
-      \setlength\tud@dim@ddclayer{\z@}%
-    \else%
-      \setlength\tud@dim@ddclayer{\tud@dim@ddcdiff}%
-    \fi%
-    \global\tud@dim@ddclayer=\tud@dim@ddclayer%
   }%
 }{}
 \newcommand*\tud@head@text{}
@@ -2090,7 +2108,7 @@
   \fi%
   \ifx\tud@@headlogo\@empty\else%
     \settoheight\@tempdima{\tud@mainlogo}%
-    \epreto\tud@@@headlogo{height=\the\@tempdima,}{}{}%
+    \epreto\tud@@@headlogo{keepaspectratio,totalheight=\the\@tempdima,}{}{}%
     \expandafter\includegraphics\expandafter[\tud@@@headlogo]{\tud@@headlogo}%
   \fi%
 }
@@ -2102,7 +2120,24 @@
   }%
   \global\let\tud@headlogo@wrn\relax%
 }
-\newcommand*\tud@footlogo{}
+\newlength\footlogoheight
+\newcommand*\footlogosep{\hfill}
+\newcommand*\footlogo[2][]{%
+  \if@atdocument\iftudpagestyle{\currentpagestyle}{\clearpage}{}\fi%
+  \def\tud@@footlogo{#2}%
+  \def\tud@@@footlogo{#1}%
+  \if@atdocument\expandafter\pagestyle\expandafter{\currentpagestyle}\fi%
+}
+\newcommand*\tud@@footlogo{}
+\newcommand*\tud@@@footlogo{}
+\newcommand*\tud@footlogo[1]{%
+  \vbox to \dimexpr\layerheight-\dp\strutbox\relax{%
+    \vfil\hbox{%
+      \epreto\tud@@@footlogo{keepaspectratio,totalheight=\footlogoheight,}{}{}%
+      \expandafter\includegraphics\expandafter[\tud@@@footlogo]{#1}%
+    }\vfil\vfil%
+  }%
+}
 \newcommand*\tud@@ddclogo{}
 \newcommand*\tud@ddclogo{%
   \tud@ddc@check%
@@ -2125,9 +2160,8 @@
     \def\tud@@ddclogo{DDC-28}%
   \fi%
   \ifx\tud@@ddclogo\@empty\else%
-    \settoheight\@tempdima{\tud@mainlogo}%
-    \iftudscrverlower{2.03}{\setlength\@tempdima{.6\tud@dim@topmargin}}{}%
-    \includegraphics[height=\@tempdima]{\tud@@ddclogo}%
+    \let\tud@@@footlogo\relax%
+    \hfill\tud@footlogo{\tud@@ddclogo}%
   \fi%
 }
 \newlength\tud@ta@textheight
@@ -2612,7 +2646,6 @@
       \tud@headmidvskip@neg%
     \fi%
   \endgroup%
-  \iftudscrverlower{2.03}{\tud@ddc@enlargelayer}{}%
 }
 \newcommand*\tud@partheadendvskip{%
   \tud@cleardoublespecialpage{%
@@ -2644,7 +2677,7 @@
   \normalfont
   \sectfont\nobreak\size@part
 }{%
-  \normalfont\sectfont\nobreak
+  \normalfont\sectfont\nobreak%
   \if@tud@parttitle\else%
     \size@partnumber{\vphantom{\partname}}%
   \fi%
@@ -2748,7 +2781,6 @@
   }%
 }{}{\tud@patch@wrn{set@@@@preamble}}
 \newcommand*\tud@chapter@pre{%
-  \iftudscrverlower{2.03}{\tud@ddc@enlargelayer}{}%
   \if@tud@chapterpage%
     \@restonecolfalse%
     \if@twocolumn\@restonecoltrue\onecolumn\fi%
@@ -2777,7 +2809,7 @@
   }%
   \global\let\tud@clearcolor@wrn\relax%
 }
-\ifcsdef{scr@v@3.13a}{}{%
+\ifcsdef{scr@v@3.14}{}{%
   \providecommand*\SecDef[2]{\@ifstar{#2}{\scr@section@dblarg{#1}}}
   \providecommand\scr@section@dblarg[1]{%
     \kernel@ifnextchar[%]
@@ -3439,10 +3471,7 @@
       \addtokomafont{pagenumber}{\sffamily\color{\tud@title@fontcolor}}%
       \addtokomafont{footnote}{\sffamily\color{\tud@title@fontcolor}}%
       \thispagestyle{empty.tudheadings}%
-      \iftudscrverlower{2.03}{%
-        \tud@ddc@enlargelayer%
-        \tud@ddc@enlargepage%
-      }{}%
+      \iftudscrverlower{2.03}{\tud@ddc@enlargepage}{}%
     }%
     \if@tud@cover%
       \begingroup%
@@ -3553,10 +3582,7 @@
     \ifx\@referee\@empty\else\tud@title@wrn{referee}\fi%
     \ifx\@professor\@empty\else\tud@title@wrn{professor}\fi%
     \vskip 2\bigskipamount%
-    \iftudscrverlower{2.03}{%
-      \tud@ddc@enlargelayer%
-      \tud@ddc@enlargepage[\titlepagestyle]%
-    }{}%
+    \iftudscrverlower{2.03}{\tud@ddc@enlargepage[\titlepagestyle]}{}%
   \endgroup%
 }
 \newcommand*\tud@multiple@field{}

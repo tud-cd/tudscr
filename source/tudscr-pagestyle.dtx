@@ -1,4 +1,4 @@
-% \CheckSum{1635}
+% \CheckSum{1720}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-pagestyle.dtx}[%
-  2015/01/24 v2.03 TUD-KOMA-Script (pagestyle)%
+  2015/01/27 v2.03 TUD-KOMA-Script (pagestyle)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -194,22 +194,13 @@
 % \end{length}^^A \tud@dim@headingsvskip
 % \begin{length}{\tud@dim@ddcdiff}
 % \changes{v2.02}{2014/06/23}{neu}%^^A
-% \begin{length}{\tud@dim@ddclayer}
-% \changes{v2.02}{2015/01/22}{neu}%^^A
 % Zu guter Letzt noch die Länge \cs{tud@dim@ddcdiff} für den Höhenausgleich des 
 % Seitenfußes, welcher bei der Verwendung des \DDC-Logos in der Fußzeile bei 
 % Version~v2.02 für den Satzspiegel notwendig war. Dieser etwas verschrobene
-% Satzspiegel wird im Kompatibilitätsmodus weiterhin angeboten. Die maximale
-% Höhe der Fußzeile ist fest vorgegeben. Die Länge \cs{tud@dim@ddclayer} wird 
-% benötigt, um den Layer \val{tudheadings.foot.logo} im Bedarfsfall in der Höhe
-% an das \DDC-Logo anpassen zu können. 
+% Satzspiegel wird im Kompatibilitätsmodus weiterhin angeboten.
 %    \begin{macrocode}
-\iftudscrverlower{2.03}{%
-  \newlength\tud@dim@ddcdiff%
-  \newlength\tud@dim@ddclayer%
-}{}
+\iftudscrverlower{2.03}{\newlength\tud@dim@ddcdiff}{}
 %    \end{macrocode}
-% \end{length}^^A \tud@dim@ddclayer
 % \end{length}^^A \tud@dim@ddcdiff
 % \begin{macro}{\tud@geometry@set}
 % \changes{v2.03}{2015/01/23}{Längenberechnung für den Satzspiegel an 
@@ -453,19 +444,61 @@
       background,foot,%
       height=\dimexpr\paperheight-\layeryoffset\relax,%
       contents={%
-        \hfill\vbox to \layerheight{\vfil\hbox{\tud@ddclogo}\vfil\vfil}%
+%    \end{macrocode}
+% Falls die Höhe der Logos im Fuß nicht durch den Anwender festgelegt wurden, 
+% werden passende Standardwerte gesetzt.
+%    \begin{macrocode}
+        \ifdim\footlogoheight>\z@\relax\else%
+          \settoheight\footlogoheight{\tud@mainlogo}%
+          \iftudscrverlower{2.03}{%
+            \setlength\footlogoheight{.6\tud@dim@topmargin}%
+          }{}%
+        \fi%
+%    \end{macrocode}
+% Die gesetzt Größe der Logos im Fuß wird geprüft. Sollten diese zu groß sein, 
+% wird eine Warnug ausgegeben.
+%    \begin{macrocode}
+        \setlength\@tempdima{%
+          \dimexpr\footlogoheight-\layerheight+\dp\strutbox\relax%
+        }%
+        \ifdim\@tempdima>\vfuzz\relax%
+          \ClassWarning{\tudcls@name}{%
+            The chosen `\string\footlogoheight' 
+            (\the\footlogoheight)\MessageBreak%
+            is \the\@tempdima\space higher than recommended. You\MessageBreak%
+            should decrease this length
+            \ifcase\tud@geometry\relax\else%
+              or alternatively\MessageBreak%
+              enlarge the bottom margin by using option\MessageBreak%
+              `extrabottommargin'%
+            \fi%
+          }%
+        \fi%
+%    \end{macrocode}
+% Hier erfolgt die eigentliche Ausgabe der Logos. Dabei werden ggf. zuerst die 
+% mit \cs{footlogo} angegeben wurden, anschließend wird das \DDC-Logo gesetzt, 
+% fall dies gefordert ist.
+%    \begin{macrocode}
+        \let\@tempa\relax%
+        \@for\@tempb:=\tud@@footlogo\do{%
+          \@tempa%
+          \expandafter\tud@footlogo\expandafter{\@tempb}%
+          \let\@tempa\footlogosep%
+        }%
+        \tud@ddclogo%
       },%
     ]{tudheadings.foot.logo}%
 %    \end{macrocode}
 % Bis zur Version~v2.02 wurde für die Verwendung des \DDC-Logos der Satzspiegel
-% geändert. Hier wird dem Rechnung getragen. Die Länge \cs{tud@dim@ddclayer} 
-% wird dabei nur gesetzt, falls das \DDC-Logo tatsächlich gerade für den 
-% Seitenstil verwendet wird.
+% geändert. Hier wird dem Rechnung getragen.
 %    \begin{macrocode}
     \iftudscrverlower{2.03}{%
       \ModifyLayer[%
         voffset=\dimexpr\topmargin+1in+\headheight+\headsep+\textheight%
-          +\footskip-\footheight-\tud@dim@ddclayer-\dp\strutbox\relax,%
+          +\footskip-\footheight-\tud@dim@ddcdiff%
+          \ifcase\tud@geometry\relax\else+\ht\strutbox+\dp\strutbox\fi%
+          \relax,%
+        height=\dimexpr.6\tud@dim@topmargin+\dp\strutbox\relax,%
       ]{tudheadings.foot.logo}%
     }{}%
 %    \end{macrocode}
@@ -721,11 +754,6 @@
           }%
         \fi%
 %    \end{macrocode}
-% Als letztes muss die Länge \cs{tud@dim@ddclayer} auf das richtige Maß gesetzt 
-% werden, damit ggf. das \DDC-Logo an der richtigen Position erscheint.
-%    \begin{macrocode}
-        \tud@ddc@enlargelayer%
-%    \end{macrocode}
 % Ab der Version~v2.03 ist nur noch ein Satzspiegel vonnöten.
 %    \begin{macrocode}
       }{%
@@ -797,8 +825,6 @@
 % \end{macro}^^A \cleardoubleoddpageusingstyle
 % \begin{macro}{\tud@ddc@enlargepage}
 % \changes{v2.02}{2014/06/23}{neu}%^^A
-% \begin{macro}{\tud@ddc@enlargelayer}
-% \changes{v2.03}{2015/01/22}{Befehl zum Setzen der \DDC-Fußhöhe}%^^A
 % Der Befehl wird nur für den Kompatibilitätsmodus zur Version~v2.02 benötigt 
 % und für die Titelkopf- und Kapitelseiten verwendet. Er verkleinert die
 % entsprechenden Seiten, wenn für diese mit dem Befehl \cs{thispagestyle} einer
@@ -817,18 +843,8 @@
       }%
     }{}%
   }%
-  \newcommand*\tud@ddc@enlargelayer{%
-    \tud@ddc@check%
-    \ifcase\@tempb\relax%
-      \setlength\tud@dim@ddclayer{\z@}%
-    \else%
-      \setlength\tud@dim@ddclayer{\tud@dim@ddcdiff}%
-    \fi%
-    \global\tud@dim@ddclayer=\tud@dim@ddclayer%
-  }%
 }{}
 %    \end{macrocode}
-% \end{macro}^^A \tud@ddc@enlargelayer
 % \end{macro}^^A \tud@ddc@enlargepage
 % \begin{macro}{\tud@head@text}
 % \begin{macro}{\tud@head@text@first}
@@ -1330,7 +1346,6 @@
 % \cs{tud@@headlogo} und das optionale Argument in \cs{tud@@@headlogo}
 % gespeichert, damit diese später über \cs{tud@headlogo} an den Befehl
 % \cs{includegraphics} weitergereicht werden können.
-% \ToDo{Größe des \DDC-Logos für Anwender einstellbar? Begrenzen?}[v2.04]
 %    \begin{macrocode}
 \newcommand*\headlogo[2][]{%
   \if@atdocument\iftudpagestyle{\currentpagestyle}{\clearpage}{}\fi%
@@ -1365,7 +1380,7 @@
   \fi%
   \ifx\tud@@headlogo\@empty\else%
     \settoheight\@tempdima{\tud@mainlogo}%
-    \epreto\tud@@@headlogo{height=\the\@tempdima,}{}{}%
+    \epreto\tud@@@headlogo{keepaspectratio,totalheight=\the\@tempdima,}{}{}%
     \expandafter\includegraphics\expandafter[\tud@@@headlogo]{\tud@@headlogo}%
   \fi%
 }
@@ -1383,20 +1398,50 @@
 % \end{macro}^^A \tud@@headlogo
 % \end{macro}^^A \tud@headlogo
 % \end{macro}^^A \headlogo
-% \begin{macro}{\tud@ddc@sethead}
-% \changes{v2.02}{2014/06/23}{entfernt}%^^A
-% Dieser Befehl wurde mit der \TUDScript-Version~v2.02 entfernt.
-% \end{macro}^^A \tud@ddc@sethead
+% \begin{macro}{\footlogo}
+% \changes{v2.03}{2015/01/27}{neu}%^^A
+% \begin{macro}{\footlogosep}
+% \changes{v2.03}{2015/01/27}{neu}%^^A
+% \begin{length}{\footlogoheight}
+% \changes{v2.03}{2015/01/27}{neu}%^^A
 % \begin{macro}{\tud@footlogo}
-% \changes{v2.04}{2015/xx/x}{neu}%^^A
-% Dieser Befehl soll später einmal für das Einfügen von Drittlogos im Seitenfuß 
-% verwendet werden.
-% \ToDo{separater Befehl für Drittlogos; über Liste oder benutzerspezifisch
-%   anpassbar? Layer: tudheadings.foot.logo}[v2.04]
+% \changes{v2.03}{2015/01/27}{neu}%^^A
+% \begin{macro}{\tud@@footlogo}
+% \changes{v2.03}{2015/01/27}{neu}%^^A
+% \begin{macro}{\tud@@@footlogo}
+% \changes{v2.03}{2015/01/27}{neu}%^^A
+% Mit dem Befehl \cs{footlogo} kann eine kommasparierte Liste für Logos im 
+% Fuß angegeben werden, die mit \cs{footlogosep} voneinander getrennt werden.
 %    \begin{macrocode}
-%\newcommand*\tud@footlogo{}
+\newlength\footlogoheight
+\newcommand*\footlogosep{\hfill}
+\newcommand*\footlogo[2][]{%
+  \if@atdocument\iftudpagestyle{\currentpagestyle}{\clearpage}{}\fi%
+  \def\tud@@footlogo{#2}%
+  \def\tud@@@footlogo{#1}%
+  \if@atdocument\expandafter\pagestyle\expandafter{\currentpagestyle}\fi%
+}
+\newcommand*\tud@@footlogo{}
+\newcommand*\tud@@@footlogo{}
 %    \end{macrocode}
+% Der Befehl \cs{tud@footlogo} wird genutzt, um die Logos für den Fuß innerhalb 
+% der Ebene \val{tudheadings.foot.logo} auszugeben.
+%    \begin{macrocode}
+\newcommand*\tud@footlogo[1]{%
+  \vbox to \dimexpr\layerheight-\dp\strutbox\relax{%
+    \vfil\hbox{%
+      \epreto\tud@@@footlogo{keepaspectratio,totalheight=\footlogoheight,}{}{}%
+      \expandafter\includegraphics\expandafter[\tud@@@footlogo]{#1}%
+    }\vfil\vfil%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@@@footlogo
+% \end{macro}^^A \tud@@footlogo
 % \end{macro}^^A \tud@footlogo
+% \end{length}^^A \footlogoheight
+% \end{macro}^^A \footlogosep
+% \end{macro}^^A \footlogo
 % \begin{macro}{\tud@ddclogo}
 % \changes{v2.02}{2014/06/23}{neu}%^^A
 % \begin{macro}{\tud@@ddclogo}
@@ -1427,21 +1472,20 @@
     \def\tud@@ddclogo{DDC-28}%
   \fi%
   \ifx\tud@@ddclogo\@empty\else%
-    \settoheight\@tempdima{\tud@mainlogo}%
-%    \end{macrocode}
-% Das \DDC-Logo war in der Version~v2.02 etwas größer.
-%    \begin{macrocode}
-    \iftudscrverlower{2.03}{\setlength\@tempdima{.6\tud@dim@topmargin}}{}%
-    \includegraphics[height=\@tempdima]{\tud@@ddclogo}%
+    \let\tud@@@footlogo\relax%
+    \hfill\tud@footlogo{\tud@@ddclogo}%
   \fi%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@@ddclogo
 % \end{macro}^^A \tud@ddclogo
+% \begin{macro}{\tud@ddc@sethead}
+% \changes{v2.02}{2014/06/23}{entfernt}%^^A
 % \begin{macro}{\tud@ddc@setfoot}
 % \changes{v2.02}{2014/06/23}{entfernt}%^^A
-% Dieser Befehl wurde mit der \TUDScript-Version~v2.02 entfernt.
+% Diese Befehle wurden mit der \TUDScript-Version~v2.02 entfernt.
 % \end{macro}^^A \tud@ddc@setfoot
+% \end{macro}^^A \tud@ddc@sethead
 %
 % \iffalse
 %</class&body>
