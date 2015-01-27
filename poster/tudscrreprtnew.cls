@@ -70,7 +70,7 @@
       \fi%
     }%
   \fi%
-  \@TUDVersion{2015/01/24 v2.03 TUD-KOMA-Script}%
+  \@TUDVersion{2015/01/27 v2.03 TUD-KOMA-Script}%
 \endgroup%
 \providecommand*\tudscrmail{tudscr@gmail.com}
 \newcommand*\cls@name{report}
@@ -78,7 +78,7 @@
 \newcommand*\tudcls@name{tudscrreprt}
 \NeedsTeXFormat{LaTeX2e}[2011/06/27]
 \ProvidesClass{\tudcls@name}[%
-  2015/01/24 v2.03 TUD-KOMA-Script
+  2015/01/27 v2.03 TUD-KOMA-Script
   document class (\cls@name)%
 ]
 \typeout{The Corporate Design of Technische Universitaet Dresden}
@@ -370,6 +370,7 @@
       \let\@tempb\tud@ddc%
     \fi%
   \fi%
+  \ifcase\@tempb\relax\ifx\tud@@footlogo\@empty\else\def\@tempb{-1}\fi\fi%
 }
 \newcommand*\iftudpagestyle[3]{%
   \xifinlist{\GetRealPageStyle{#1}}{\tud@ps@list}{#2}{#3}%
@@ -1778,7 +1779,9 @@
         \let\@tempa\relax%
         \@for\@tempb:=\tud@@footlogo\do{%
           \@tempa%
-          \expandafter\tud@footlogo\expandafter{\@tempb}%
+          \ifx\@tempb\@empty\else%
+            \expandafter\tud@footlogo\expandafter{\@tempb}%
+          \fi%
           \let\@tempa\footlogosep%
         }%
         \tud@ddclogo%
@@ -2440,14 +2443,7 @@
 \TUD@parameter{tudpage}{%
   \TUD@parameter@define{language}{\selectlanguage{#1}}%
   \TUD@parameter@define{columns}{\def\tud@multicols{#1}}%
-  \TUD@parameter@define{color}[HKS41]{\def\tud@head@logocolor{#1}}%
-  \TUD@parameter@let{colour}{color}%
-  \TUD@parameter@define{widehead}[true]{\TUDoption{widehead}{#1}}%
-  \TUD@parameter@define{ddc}[true]{\TUDoption{ddc}{#1}}%
-  \TUD@parameter@define{ddchead}[true]{\TUDoption{ddchead}{#1}}%
-  \TUD@parameter@define{ddcfoot}[true]{\TUDoption{ddcfoot}{#1}}%
-  \TUD@parameter@define{cdfont}[true]{\TUDoption{cdfont}{#1}}%
-  \TUD@parameter@define{barfont}[true]{\TUDoption{barfont}{#1}}%
+  % §§§ Seitenstilabfrageüberarbeiten
   \TUD@parameter@define{pagestyle}{%
     \ifstr{#1}{empty}{\renewcommand*\tud@ps{empty.tudheadings}}{%
     \ifstr{#1}{empty.tudheadings}{\renewcommand*\tud@ps{empty.tudheadings}}{%
@@ -2460,8 +2456,18 @@
       }%
     }}}}}}%
   }%
+  % §§§ auch für maketitle und makecover?! separater befehl?
+  \TUD@parameter@define{color}[HKS41]{\def\tud@head@logocolor{#1}}%
+  \TUD@parameter@let{colour}{color}%
+  \TUD@parameter@define{widehead}[true]{\TUDoption{widehead}{#1}}%
+  \TUD@parameter@define{ddc}[true]{\TUDoption{ddc}{#1}}%
+  \TUD@parameter@define{ddchead}[true]{\TUDoption{ddchead}{#1}}%
+  \TUD@parameter@define{ddcfoot}[true]{\TUDoption{ddcfoot}{#1}}%
+  \TUD@parameter@define{cdfont}[true]{\TUDoption{cdfont}{#1}}%
+  \TUD@parameter@define{barfont}[true]{\TUDoption{barfont}{#1}}%
   \TUD@parameter@define{headlogo}{\headlogo{#1}}%
   \TUD@parameter@let{logo}{headlogo}%
+  \TUD@parameter@define{footlogo}{\footlogo{#1}}%
   \TUD@parameter@sethandler{\tud@environmenthandler{#1}}%
 }
 %%% From File: tudscr-layout.dtx
@@ -3260,6 +3266,11 @@
 \TUD@parameter{title}{%
   \TUD@parameter@define{pagenumber}{\def\tud@titlepagenumber{#1}}%
   \TUD@parameter@define{cdfont}[true]{\TUDoption{cdfont}{#1}}%
+  \TUD@parameter@define{cdtitle}[true]{\TUDoption{cdtitle}{#1}}%
+  \TUD@parameter@let{cd}{cdtitle}%
+  \TUD@parameter@define{headlogo}{\headlogo{#1}}%
+  \TUD@parameter@let{logo}{headlogo}%
+  \TUD@parameter@define{footlogo}{\footlogo{#1}}%
   \TUD@parameter@sethandler{\TUD@parameter@set[title]{pagenumber=#1}}%
 }%
 \robustify{\thanks}%
@@ -3850,6 +3861,9 @@
   \TUD@parameter@define{cdfont}[true]{\TUDoption{cdfont}{#1}}%
   \TUD@parameter@define{cdcover}[true]{\TUDoption{cdcover}{#1}}%
   \TUD@parameter@let{cd}{cdcover}%
+  \TUD@parameter@define{headlogo}{\headlogo{#1}}%
+  \TUD@parameter@let{logo}{headlogo}%
+  \TUD@parameter@define{footlogo}{\footlogo{#1}}%
   \TUD@parameter@define{cdlayout}[true]{%
     \ifstrbool{#1}{%
       \setbool@lock{@tud@cover@cdlayout}{true}%
