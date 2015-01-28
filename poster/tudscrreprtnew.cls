@@ -175,27 +175,35 @@
 \patchcmd{\@uclcnotmath}{\@nonchangecase\ensuremath}{%
   \@nonchangecase\ensuremath\tud@uclcnotmath
 }{}{\tud@patch@wrn{@uclcnotmath}}%
-\newcommand*\tud@cdfont{0}
 \TUD@key{cdfont}[true]{%
-  \TUD@set@numkey{cdfont}{tud@cdfont}{%
+  \TUD@set@numkey{cdfont}{@tempa}{%
     \TUD@numkey@bool,%
     {light}{1},{lightfont}{1},{lite}{1},{litefont}{1},{noheavyfont}{1},%
     {heavy}{2},{heavyfont}{2},%
     {nodin}{3},{nodinbold}{3},{noDIN}{3},{noDINBold}{3},%
     {din}{4},{dinbold}{4},{DIN}{4},{DINBold}{4},%
-    {barfont}{5},{litebar}{5},{barlite}{5},{lightbar}{5},{barlight}{5},%
-    {barfontlite}{5},{litebarfont}{5},{barfontlight}{5},{lightbarfont}{5},%
-    {noheavybarfont}{5},{barfontnoheavy}{5},%
-    {heavybar}{6},{barheavy}{6},{barfontheavy}{6},{heavybarfont}{6},%
-    {serifmath}{7},{serif}{7},{nosansmath}{7},{nosans}{7},%
-    {sansmath}{8},{sans}{8},%
-    {upgreek}{9},{uprightgreek}{9},{uprightGreek}{9},%
-    {slgreek}{10},{slantedgreek}{10},{slantedGreek}{10},%
-    {fontspec}{11},{luatex}{11},{lualatex}{11}{xetex}{11},{xelatex}{11},%
-    {nofontspec}{12},{pdftex}{12},{pdflatex}{12}%
+    {nobar}{5},{nocdbar}{5},{nobarfont}{5},{nocdbarfont}{5},%
+    {bar}{6},{cdbar}{6},{barfont}{6},{cdbarfont}{6},{barcdfont}{6},%
+    {litebar}{6},{litecdbar}{6},{barlite}{6},{cdbarlite}{6},%
+    {lightbar}{6},{lightcdbar}{6},{barlight}{6},{cdbarlight}{6},%
+    {barfontlite}{6},{cdbarfontlite}{6},{barcdfontlite}{6},%
+    {litebarfont}{6},{litecdbarfont}{6},{litebarcdfont}{6},%
+    {barfontlight}{6},{cdbarfontlight}{6},{barcdfontlight}{6},%
+    {lightbarfont}{6},{lightcdbarfont}{6},{lightbarcdfont}{6},%
+    {noheavybarfont}{6},{noheavycdbarfont}{6},{noheavybarcdfont}{6},%
+    {barfontnoheavy}{6},{cdbarfontnoheavy}{6},{barcdfontnoheavy}{6},
+    {heavybar}{7},{heavycdbar}{7},{barheavy}{7},{cdbarheavy}{7},%
+    {barfontheavy}{7},{cdbarfontheavy}{7},{barcdfontheavy}{7},%
+    {heavybarfont}{7},{heavycdbarfont}{7},{heavybarcdfont}{7},%
+    {serifmath}{8},{serif}{8},{nosansmath}{8},{nosans}{8},%
+    {sansmath}{9},{sans}{9},%
+    {upgreek}{10},{uprightgreek}{10},{uprightGreek}{10},%
+    {slgreek}{11},{slantedgreek}{11},{slantedGreek}{11},%
+    {fontspec}{12},{luatex}{12},{lualatex}{12}{xetex}{12},{xelatex}{12},%
+    {nofontspec}{13},{pdftex}{13},{pdflatex}{13}%
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \ifcase\tud@cdfont\relax%
+    \ifcase\@tempa\relax%
       \TUDoptions{cdfonts=false}%
       \TUD@std@numkey@lock{barfont}{false}%
     \or%
@@ -210,6 +218,8 @@
       \TUDoptions{din=false}%
     \or%
       \TUDoptions{din=true}%
+    \or%
+      \TUDoptions{barfont=false}%
     \or%
       \TUDoptions{barfont=true}%
     \or%
@@ -262,15 +272,6 @@
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \if@atdocument\tud@font@cdfonts\fi%
   \fi%
-}
-\newcommand*\tud@barfont{0}
-\TUD@key@lock{barfont}[true]{%
-  \TUD@set@numkey@lock{barfont}{tud@barfont}{%
-    \TUD@numkey@bool,%
-    {cd}{1},{cdfont}{1},{cdfonts}{1},{tudfonts}{1},%
-    {light}{1},{lightfont}{1},{lite}{1},{litefont}{1},{noheavyfont}{1},%
-    {heavy}{2},{heavyfont}{2}%
-  }{#1}%
 }
 \newif\if@tud@din\@tud@dintrue
 \TUD@ifkey{din}{@tud@din}
@@ -370,7 +371,9 @@
       \let\@tempb\tud@ddc%
     \fi%
   \fi%
-  \ifcase\@tempb\relax\ifx\tud@@footlogo\@empty\else\def\@tempb{-1}\fi\fi%
+  \iftudscrverlower{2.03}{%
+    \ifcase\@tempb\relax\ifx\tud@@footlogo\@empty\else\let\@tempb\m@ne\fi\fi%
+  }{}%
 }
 \newcommand*\iftudpagestyle[3]{%
   \xifinlist{\GetRealPageStyle{#1}}{\tud@ps@list}{#2}{#3}%
@@ -378,10 +381,6 @@
 \newcommand*\tud@ps@list{}
 \forcsvlist{\listadd\tud@ps@list}{%
   tudheadings,plain.tudheadings,empty.tudheadings%
-}
-\newif\if@tud@widehead
-\TUD@key@lock{widehead}[true]{%
-  \TUD@set@ifkey@lock{widehead}{@tud@widehead}{#1}%
 }
 \newlength\tud@dim@extrabottommargin
 \TUD@key{extrabottommargin}{%
@@ -492,18 +491,24 @@
       \csstd@lock{tud@layout@title}{0}%
       \csstd@lock{tud@layout@part}{0}%
       \csstd@lock{tud@layout@chapter}{0}%
+      \TUD@std@ifkey@lock{chapterpage}{false}%
+      \TUD@std@ifkey@lock{widehead}{false}%
     \or%
       \def\tud@head@logocolor{black}%
       \csstd@lock{tud@layout@cover}{1}%
       \csstd@lock{tud@layout@title}{1}%
       \csstd@lock{tud@layout@part}{1}%
       \csstd@lock{tud@layout@chapter}{1}%
+      \TUD@std@ifkey@lock{chapterpage}{false}%
+      \TUD@std@ifkey@lock{widehead}{false}%
     \or%
       \def\tud@head@logocolor{HKS41}%
       \csstd@lock{tud@layout@cover}{1}%
       \csstd@lock{tud@layout@title}{2}%
       \csstd@lock{tud@layout@part}{2}%
       \csstd@lock{tud@layout@chapter}{2}%
+      \TUD@std@ifkey@lock{chapterpage}{false}%
+      \TUD@std@ifkey@lock{widehead}{false}%
     \or%
       \def\tud@head@logocolor{HKS41}%
       \csstd@lock{tud@layout@cover}{1}%
@@ -587,6 +592,48 @@
     \fi%
     \if@atdocument\tud@layout@process\fi%
   \fi%
+}
+\TUD@key{cdbar}[true]{%
+  \TUD@set@numkey{cdbar}{@tempa}{%
+    \TUD@numkey@bool,%
+    {nocd}{0},{nocdfont}{0},{nocdfonts}{0},{notudfonts}{0},%
+    {cd}{1},{cdfont}{1},{cdfonts}{1},{tudfonts}{1},%
+    {light}{1},{lightfont}{1},{lite}{1},{litefont}{1},{noheavyfont}{1},%
+    {heavy}{2},{heavyfont}{2},%
+    {wide}{3},{widehead}{3},%
+    {slim}{4},{slimhead}{4},{nowide}{4},{nowidehead}{4},%
+    {normal}{5},{normalhead}{5},{standard}{5},{standardhead}{5},%
+  }{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \ifcase\@tempa\relax%
+      \TUDoptions{barfont=false}%
+    \or%
+      \TUDoptions{barfont=true}%
+    \or%
+      \TUDoptions{barfont=heavy}%
+    \or%
+      \TUDoptions{widehead=true}%
+    \or%
+      \TUDoptions{widehead=false}%
+    \or%
+      \TUDoptions{barfont=true}%
+      \TUDoptions{widehead=false}%
+    \fi%
+  \fi%
+}
+\newcommand*\tud@barfont{0}
+\TUD@key@lock{barfont}[true]{%
+  \TUD@set@numkey@lock{barfont}{tud@barfont}{%
+    \TUD@numkey@bool,%
+    {nocd}{0},{nocdfont}{0},{nocdfonts}{0},{notudfonts}{0},%
+    {cd}{1},{cdfont}{1},{cdfonts}{1},{tudfonts}{1},%
+    {light}{1},{lightfont}{1},{lite}{1},{litefont}{1},{noheavyfont}{1},%
+    {heavy}{2},{heavyfont}{2}%
+  }{#1}%
+}
+\newif\if@tud@widehead
+\TUD@key@lock{widehead}[true]{%
+  \TUD@set@ifkey@lock{widehead}{@tud@widehead}{#1}%
 }
 \DefineFamilyMember{KOMA}
 \DefineFamilyKey{KOMA}{headings}{%
@@ -1159,7 +1206,7 @@
   \ifcase\tud@barfont\relax%
     \if@tud@cdfonts%
       \ClassWarning{\tudcls@name}{%
-        It isn't possible to use `barfont=false'\MessageBreak%
+        It isn't possible to use `cdbar=false'\MessageBreak%
         together with `cdfont=true'%
       }%
     \fi%
@@ -1765,7 +1812,7 @@
         }%
         \ifdim\@tempdima>\vfuzz\relax%
           \ClassWarning{\tudcls@name}{%
-            The chosen `\string\footlogoheight' 
+            The chosen `\string\footlogoheight'
             (\the\footlogoheight)\MessageBreak%
             is \the\@tempdima\space higher than recommended. You\MessageBreak%
             should decrease this length
@@ -2443,31 +2490,28 @@
 \TUD@parameter{tudpage}{%
   \TUD@parameter@define{language}{\selectlanguage{#1}}%
   \TUD@parameter@define{columns}{\def\tud@multicols{#1}}%
-  % §§§ Seitenstilabfrageüberarbeiten
   \TUD@parameter@define{pagestyle}{%
-    \ifstr{#1}{empty}{\renewcommand*\tud@ps{empty.tudheadings}}{%
-    \ifstr{#1}{empty.tudheadings}{\renewcommand*\tud@ps{empty.tudheadings}}{%
-    \ifstr{#1}{plain}{\renewcommand*\tud@ps{plain.tudheadings}}{%
-    \ifstr{#1}{plain.tudheadings}{\renewcommand*\tud@ps{plain.tudheadings}}{%
-    \ifstr{#1}{headings}{\renewcommand*\tud@ps{tudheadings}}{%
-    \ifstr{#1}{tudheadings}{\renewcommand*\tud@ps{tudheadings}}{%
-      \TUD@parameter@wrn{pagestyle}{%
-        headings, plain, empty or any tudheadings page style type%
-      }%
-    }}}}}}%
+    \iftudpagestyle{#1}{\renewcommand*\tud@ps{#1}}{%
+      \ifstr{#1}{empty}{\renewcommand*\tud@ps{empty.tudheadings}}{%
+      \ifstr{#1}{plain}{\renewcommand*\tud@ps{plain.tudheadings}}{%
+      \ifstr{#1}{headings}{\renewcommand*\tud@ps{tudheadings}}{%
+        \TUD@parameter@error{pagestyle}{%
+          headings, plain, empty or any tudheadings page style type%
+        }%
+      }}}%
+    }%
   }%
   % §§§ auch für maketitle und makecover?! separater befehl?
-  \TUD@parameter@define{color}[HKS41]{\def\tud@head@logocolor{#1}}%
-  \TUD@parameter@let{colour}{color}%
-  \TUD@parameter@define{widehead}[true]{\TUDoption{widehead}{#1}}%
-  \TUD@parameter@define{ddc}[true]{\TUDoption{ddc}{#1}}%
-  \TUD@parameter@define{ddchead}[true]{\TUDoption{ddchead}{#1}}%
-  \TUD@parameter@define{ddcfoot}[true]{\TUDoption{ddcfoot}{#1}}%
   \TUD@parameter@define{cdfont}[true]{\TUDoption{cdfont}{#1}}%
+  \TUD@parameter@define{cdbar}[true]{\TUDoption{cdbar}{#1}}%
   \TUD@parameter@define{barfont}[true]{\TUDoption{barfont}{#1}}%
+  \TUD@parameter@define{widehead}[true]{\TUDoption{widehead}{#1}}%
   \TUD@parameter@define{headlogo}{\headlogo{#1}}%
   \TUD@parameter@let{logo}{headlogo}%
   \TUD@parameter@define{footlogo}{\footlogo{#1}}%
+  \TUD@parameter@define{ddc}[true]{\TUDoption{ddc}{#1}}%
+  \TUD@parameter@define{ddchead}[true]{\TUDoption{ddchead}{#1}}%
+  \TUD@parameter@define{ddcfoot}[true]{\TUDoption{ddcfoot}{#1}}%
   \TUD@parameter@sethandler{\tud@environmenthandler{#1}}%
 }
 %%% From File: tudscr-layout.dtx
@@ -2850,7 +2894,7 @@
     \renewcommand\minisec[1]{\@@tud@minisec{\tud@makeuppercase{##1}}}%
   }{%
     \tud@sectioning@case{#2}%
-    \ifstrempty{#1}{}{%
+    \ifblank{#1}{}{%
       \tud@cmd@store{#1}%
       \tud@sectioning@case{#1}%
     }%
@@ -2900,7 +2944,7 @@
 }
 \newcommand*\tud@sectioning@reset[2][]{%
   \tud@cmd@restore{#2}%
-  \ifstrempty{#1}{}{\tud@cmd@restore{#1}}%
+  \ifblank{#1}{}{\tud@cmd@restore{#1}}%
   \tud@font@koma@unset{#2}%
 }
 \robustify{\footnote}%
@@ -3107,7 +3151,7 @@
     }%
   }%
   \TUD@parameter@define{abstract}{\TUDoption{abstract}{#1}}%
-  \TUD@parameter@define{option}{\TUDoption{abstract}{#1}}%
+  \TUD@parameter@let{option}{abstract}%
   \TUD@parameter@sethandler{\tud@environmenthandler{#1}}%
 }
 \newcommand*\nextabstract[1][]{%
@@ -3168,7 +3212,7 @@
   \TUD@parameter@define{place}{\def\@place{#1}}%
   \TUD@parameter@define{closing}{\def\@confirmationclosing{#1}}%
   \TUD@parameter@define{declaration}{\TUDoption{declaration}{#1}}%
-  \TUD@parameter@define{option}{\TUDoption{declaration}{#1}}%
+  \TUD@parameter@let{option}{declaration}%
   \TUD@parameter@sethandler{\tud@environmenthandler{#1}}%
 }
 \newcommand*\declaration[1][]{%
@@ -3264,10 +3308,10 @@
   \endgroup%
 }
 \TUD@parameter{title}{%
-  \TUD@parameter@define{pagenumber}{\def\tud@titlepagenumber{#1}}%
-  \TUD@parameter@define{cdfont}[true]{\TUDoption{cdfont}{#1}}%
   \TUD@parameter@define{cdtitle}[true]{\TUDoption{cdtitle}{#1}}%
   \TUD@parameter@let{cd}{cdtitle}%
+  \TUD@parameter@define{pagenumber}{\def\tud@titlepagenumber{#1}}%
+  \TUD@parameter@define{cdfont}[true]{\TUDoption{cdfont}{#1}}%
   \TUD@parameter@define{headlogo}{\headlogo{#1}}%
   \TUD@parameter@let{logo}{headlogo}%
   \TUD@parameter@define{footlogo}{\footlogo{#1}}%
@@ -3857,22 +3901,22 @@
 }
 \newbool@lock{@tud@cover@cdlayout}
 \TUD@parameter{cover}{%
-  \TUD@parameter@define{pagenumber}{\def\tud@titlepagenumber{#1}}%
-  \TUD@parameter@define{cdfont}[true]{\TUDoption{cdfont}{#1}}%
   \TUD@parameter@define{cdcover}[true]{\TUDoption{cdcover}{#1}}%
   \TUD@parameter@let{cd}{cdcover}%
-  \TUD@parameter@define{headlogo}{\headlogo{#1}}%
-  \TUD@parameter@let{logo}{headlogo}%
-  \TUD@parameter@define{footlogo}{\footlogo{#1}}%
   \TUD@parameter@define{cdlayout}[true]{%
     \ifstrbool{#1}{%
       \setbool@lock{@tud@cover@cdlayout}{true}%
     }{%
       \setbool@lock{@tud@cover@cdlayout}{false}%
     }{%
-      \TUD@parameter@wrn{cdlayout}{true,false}%
+      \TUD@parameter@error{cdlayout}{true,false}%
     }%
   }%
+  \TUD@parameter@define{pagenumber}{\def\tud@titlepagenumber{#1}}%
+  \TUD@parameter@define{cdfont}[true]{\TUDoption{cdfont}{#1}}%
+  \TUD@parameter@define{headlogo}{\headlogo{#1}}%
+  \TUD@parameter@let{logo}{headlogo}%
+  \TUD@parameter@define{footlogo}{\footlogo{#1}}%
   \TUD@parameter@sethandler{%
     \ifxnumber{#1}{%
       \TUD@parameter@set[cover]{pagenumber=#1}%

@@ -1,4 +1,4 @@
-% \CheckSum{1106}
+% \CheckSum{1101}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-fonts.dtx}[%
-  2015/01/24 v2.03 TUD-KOMA-Script\space%
+  2015/01/28 v2.03 TUD-KOMA-Script\space%
 %</driver>
 %<package&identify>\NeedsTeXFormat{LaTeX2e}[2011/06/27]
 %<package&identify>\ProvidesPackage{tudscrfonts}[%
@@ -187,6 +187,8 @@
 % \begin{option}{fontspec}
 % \changes{v2.02}{2014/08/29}{neu}%^^A
 % \begin{macro}{\if@tud@fontspec}
+% \changes{v2.02}{2014/08/29}{neu}%^^A
+% \begin{macro}{\if@tud@fontspec@locked}
 % \changes{v2.02}{2014/08/29}{neu}%^^A
 % \begin{macro}{\if@tud@univers}
 % \begin{macro}{\if@tud@dinbold}
@@ -332,6 +334,7 @@
 % \end{macro}^^A \tud@univers
 % \end{macro}^^A if@tud@dinbold
 % \end{macro}^^A if@tud@univers
+% \end{macro}^^A \if@tud@fontspec@locked
 % \end{macro}^^A \if@tud@fontspec
 % \end{option}^^A fontspec
 %
@@ -635,7 +638,6 @@
 % \begin{option}{cdfont}
 % \changes{v2.02}{2014/07/08}{Schlüsselwerte für \opt{barfont}}%^^A
 % \changes{v2.02}{2014/08/29}{Schlüsselwerte für \opt{fontspec}}%^^A
-% \begin{macro}{\tud@cdfont}
 % Mit dieser Option wird die zentrale Benutzerschnittstelle für alle möglichen
 % Schrifteinstellungen innerhalb Dokumentes geschaffen. Durch diese Option
 % können sowohl die verwendete Schrift für den Fließtext, als auch die Stärke
@@ -644,29 +646,37 @@
 % werden, ob für den Mathematiksatz serifenlose Schriften zum Einsatz kommen
 % sollen.
 %    \begin{macrocode}
-\newcommand*\tud@cdfont{0}
 \TUD@key{cdfont}[true]{%
-  \TUD@set@numkey{cdfont}{tud@cdfont}{%
+  \TUD@set@numkey{cdfont}{@tempa}{%
     \TUD@numkey@bool,%
     {light}{1},{lightfont}{1},{lite}{1},{litefont}{1},{noheavyfont}{1},%
     {heavy}{2},{heavyfont}{2},%
     {nodin}{3},{nodinbold}{3},{noDIN}{3},{noDINBold}{3},%
     {din}{4},{dinbold}{4},{DIN}{4},{DINBold}{4},%
 %<*class>
-    {barfont}{5},{litebar}{5},{barlite}{5},{lightbar}{5},{barlight}{5},%
-    {barfontlite}{5},{litebarfont}{5},{barfontlight}{5},{lightbarfont}{5},%
-    {noheavybarfont}{5},{barfontnoheavy}{5},%
-    {heavybar}{6},{barheavy}{6},{barfontheavy}{6},{heavybarfont}{6},%
+    {nobar}{5},{nocdbar}{5},{nobarfont}{5},{nocdbarfont}{5},%
+    {bar}{6},{cdbar}{6},{barfont}{6},{cdbarfont}{6},{barcdfont}{6},%
+    {litebar}{6},{litecdbar}{6},{barlite}{6},{cdbarlite}{6},%
+    {lightbar}{6},{lightcdbar}{6},{barlight}{6},{cdbarlight}{6},%
+    {barfontlite}{6},{cdbarfontlite}{6},{barcdfontlite}{6},%
+    {litebarfont}{6},{litecdbarfont}{6},{litebarcdfont}{6},%
+    {barfontlight}{6},{cdbarfontlight}{6},{barcdfontlight}{6},%
+    {lightbarfont}{6},{lightcdbarfont}{6},{lightbarcdfont}{6},%
+    {noheavybarfont}{6},{noheavycdbarfont}{6},{noheavybarcdfont}{6},%
+    {barfontnoheavy}{6},{cdbarfontnoheavy}{6},{barcdfontnoheavy}{6},
+    {heavybar}{7},{heavycdbar}{7},{barheavy}{7},{cdbarheavy}{7},%
+    {barfontheavy}{7},{cdbarfontheavy}{7},{barcdfontheavy}{7},%
+    {heavybarfont}{7},{heavycdbarfont}{7},{heavybarcdfont}{7},%
 %</class>
-    {serifmath}{7},{serif}{7},{nosansmath}{7},{nosans}{7},%
-    {sansmath}{8},{sans}{8},%
-    {upgreek}{9},{uprightgreek}{9},{uprightGreek}{9},%
-    {slgreek}{10},{slantedgreek}{10},{slantedGreek}{10},%
-    {fontspec}{11},{luatex}{11},{lualatex}{11}{xetex}{11},{xelatex}{11},%
-    {nofontspec}{12},{pdftex}{12},{pdflatex}{12}%
+    {serifmath}{8},{serif}{8},{nosansmath}{8},{nosans}{8},%
+    {sansmath}{9},{sans}{9},%
+    {upgreek}{10},{uprightgreek}{10},{uprightGreek}{10},%
+    {slgreek}{11},{slantedgreek}{11},{slantedGreek}{11},%
+    {fontspec}{12},{luatex}{12},{lualatex}{12}{xetex}{12},{xelatex}{12},%
+    {nofontspec}{13},{pdftex}{13},{pdflatex}{13}%
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \ifcase\tud@cdfont\relax%
+    \ifcase\@tempa\relax%
       \TUDoptions{cdfonts=false}%
 %<*class>
       \TUD@std@numkey@lock{barfont}{false}%
@@ -687,6 +697,10 @@
       \TUDoptions{din=false}%
     \or%
       \TUDoptions{din=true}%
+    \or%
+%<*class>
+      \TUDoptions{barfont=false}%
+%</class>
     \or%
 %<*class>
       \TUDoptions{barfont=true}%
@@ -711,7 +725,6 @@
   \fi%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@cdfont
 % \end{option}^^A cdfont
 % \begin{option}{cdfonts}
 % \begin{macro}{\if@tud@cdfonts}
@@ -998,28 +1011,6 @@
 %    \end{macrocode}
 % \end{macro}^^A \if@tud@heavyfont
 % \end{option}^^A heavyfont
-% \begin{option}{barfont}
-% \changes{v2.02}{2014/07/08}{neu}%^^A
-% \begin{macro}{\tud@barfont}
-% \changes{v2.02}{2014/07/08}{neu}%^^A
-% Mit dieser Option kann die Schrift des \CDs und deren Schriftstärke in der
-% TUD-Kopfzeile unabhängig von der gewählten Schriftart für den Fließtext 
-% aktiviert werden.
-%    \begin{macrocode}
-%<*class>
-\newcommand*\tud@barfont{0}
-\TUD@key@lock{barfont}[true]{%
-  \TUD@set@numkey@lock{barfont}{tud@barfont}{%
-    \TUD@numkey@bool,%
-    {cd}{1},{cdfont}{1},{cdfonts}{1},{tudfonts}{1},%
-    {light}{1},{lightfont}{1},{lite}{1},{litefont}{1},{noheavyfont}{1},%
-    {heavy}{2},{heavyfont}{2}%
-  }{#1}%
-}
-%</class>
-%    \end{macrocode}
-% \end{macro}^^A \tud@barfont
-% \end{option}^^A barfont
 % \begin{option}{din}
 % \begin{macro}{\if@tud@din}
 % Diese Option dient zur Auswahl, ob die Schrift DIN~Bold für die Überschriften 
@@ -1120,7 +1111,7 @@
   \ifcase\tud@barfont\relax%
     \if@tud@cdfonts%
       \ClassWarning{\tudcls@name}{%
-        It isn't possible to use `barfont=false'\MessageBreak%
+        It isn't possible to use `cdbar=false'\MessageBreak%
         together with `cdfont=true'%
       }%
     \fi%
