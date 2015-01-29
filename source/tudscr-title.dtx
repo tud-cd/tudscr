@@ -1,4 +1,4 @@
-% \CheckSum{1385}
+% \CheckSum{1383}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-title.dtx}[%
-  2015/01/28 v2.03 TUD-KOMA-Script (title)%
+  2015/01/29 v2.03 TUD-KOMA-Script (title)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -218,29 +218,59 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@titlepagenumber
 % \end{macro}^^A \tud@maketitle
-% \begin{parameter}{pagenumber}
-% \changes{v2.02}{2014/09/05}{neu}^^A
-% \begin{parameter}{cdfont}
-% \changes{v2.02}{2014/09/05}{neu}^^A
 % \begin{parameter}{cdtitle}
 % \changes{v2.03}{2015/01/12}{neu}^^A
 % \begin{parameter}{cd}
 % \changes{v2.03}{2015/01/12}{neu}^^A
+% \begin{parameter}{pagenumber}
+% \changes{v2.02}{2014/09/05}{neu}^^A
+% \begin{parameter}{cdfont}
+% \changes{v2.02}{2014/09/05}{neu}^^A
+% \begin{parameter}{cdfonts}
+% \begin{parameter}{tudfonts}
+% \begin{parameter}{cdbar}
+% \begin{parameter}{barfont}
+% \begin{parameter}{widehead}
+% \begin{parameter}{headlogo}
+% \begin{parameter}{logo}
+% \begin{parameter}{footlogo}
+% \begin{parameter}{ddc}
+% \begin{parameter}{ddchead}
+% \begin{parameter}{ddcfoot}
 % Die einzelnen Parameter dienen zur Einstellung der Titelseite und entsprechen
 % in ihrem Verhalten den gleichnamigen Klassenoptionen.
 %    \begin{macrocode}
 \TUD@parameter{title}{%
-  \TUD@parameter@define{pagenumber}{\def\tud@titlepagenumber{#1}}%
-  \TUD@parameter@define{cdfont}[true]{\TUDoption{cdfont}{#1}}%
   \TUD@parameter@define{cdtitle}[true]{\TUDoption{cdtitle}{#1}}%
   \TUD@parameter@let{cd}{cdtitle}%
+  \TUD@parameter@define{pagenumber}{\def\tud@titlepagenumber{#1}}%
+%    \end{macrocode}
+% Mit \cs{TUD@parameter@define@ps} werden alle verfügbaren Parameter für die 
+% Kopf- und Fußzeilen definiert.
+%    \begin{macrocode}
+  \TUD@parameter@define@ps{#1}%
+%    \end{macrocode}
+% Für den Fall, dass ein Wert nicht in der Schlüssel"=Wert"=Notation angegeben
+% wurde, wird versucht, das gegebene Argument als Seitenzahl zu verwenden.
+%    \begin{macrocode}
   \TUD@parameter@sethandler{\TUD@parameter@set[title]{pagenumber=#1}}%
 }%
 %    \end{macrocode}
-% \end{parameter}^^A cdtitle
-% \end{parameter}^^A cd
+% \end{parameter}^^A ddcfoot
+% \end{parameter}^^A ddchead
+% \end{parameter}^^A ddc
+% \end{parameter}^^A footlogo
+% \end{parameter}^^A logo
+% \end{parameter}^^A headlogo
+% \end{parameter}^^A widehead
+% \end{parameter}^^A barfont
+% \end{parameter}^^A cdbar
+% \end{parameter}^^A tudfonts
+% \end{parameter}^^A cdfonts
 % \end{parameter}^^A cdfont
 % \end{parameter}^^A pagenumber
+% \end{parameter}^^A cd
+% \end{parameter}^^A cdtitle
 % Die Befehle \cs{thanks} und \cs{footnotemark} werden mit \cs{robustify} 
 % behandelt, um die Makros vor dem Expandieren zu schützen. Dies ist z.\,B. für
 % \cs{tud@multiple@split} aber auch für weitere Felder auf dem Titel nötig.
@@ -1360,12 +1390,6 @@
 %    \end{macrocode}
 % \end{macro}^^A \if@tud@cover
 % \end{macro}^^A \makecover
-% \begin{parameter}{pagenumber}
-% \begin{parameter}{cdfont}
-% \begin{parameter}{cdfonts}
-% \changes{v2.02}{2014/08/08}{entfernt}^^A
-% \begin{parameter}{tudfonts}
-% \changes{v2.02}{2014/08/08}{entfernt}^^A
 % \begin{parameter}{cdcover}
 % \changes{v2.03}{2015/01/12}{neu}^^A
 % \begin{parameter}{cd}
@@ -1374,14 +1398,25 @@
 % \changes{v2.02}{2014/06/23}{neu}%^^A
 % \begin{macro}{\if@tud@cover@cdlayout}
 % \begin{macro}{\if@tud@cover@cdlayout@locked}
+% \begin{parameter}{pagenumber}
+% \begin{parameter}{cdfont}
+% \begin{parameter}{cdfonts}
+% \begin{parameter}{tudfonts}
+% \begin{parameter}{cdbar}
+% \begin{parameter}{barfont}
+% \begin{parameter}{widehead}
+% \begin{parameter}{headlogo}
+% \begin{parameter}{logo}
+% \begin{parameter}{footlogo}
+% \begin{parameter}{ddc}
+% \begin{parameter}{ddchead}
+% \begin{parameter}{ddcfoot}
 % Die einzelnen Parameter dienen zur Einstellung der Umschlagseite und
 % entsprechen in ihrem Verhalten den gleichnamigen Klassenoptionen~--
 % \opt{cdlayout} ausgenommen.
 %    \begin{macrocode}
 \newbool@lock{@tud@cover@cdlayout}
 \TUD@parameter{cover}{%
-  \TUD@parameter@define{pagenumber}{\def\tud@titlepagenumber{#1}}%
-  \TUD@parameter@define{cdfont}[true]{\TUDoption{cdfont}{#1}}%
   \TUD@parameter@define{cdcover}[true]{\TUDoption{cdcover}{#1}}%
   \TUD@parameter@let{cd}{cdcover}%
   \TUD@parameter@define{cdlayout}[true]{%
@@ -1393,6 +1428,17 @@
       \TUD@parameter@error{cdlayout}{true,false}%
     }%
   }%
+  \TUD@parameter@define{pagenumber}{\def\tud@titlepagenumber{#1}}%
+%    \end{macrocode}
+% Mit \cs{TUD@parameter@define@ps} werden alle verfügbaren Parameter für die 
+% Kopf- und Fußzeilen definiert.
+%    \begin{macrocode}
+  \TUD@parameter@define@ps{#1}%
+%    \end{macrocode}
+% Für den Fall, dass ein Wert nicht in der Schlüssel"=Wert"=Notation angegeben
+% wurde, wird versucht, das gegebene Argument entweder als booleschen Ausdruck 
+% für das Seitenlayout oder als Seitenzahl zu interpretieren.
+%    \begin{macrocode}
   \TUD@parameter@sethandler{%
     \ifxnumber{#1}{%
       \TUD@parameter@set[cover]{pagenumber=#1}%
@@ -1402,15 +1448,24 @@
   }%
 }
 %    \end{macrocode}
+% \end{parameter}^^A ddcfoot
+% \end{parameter}^^A ddchead
+% \end{parameter}^^A ddc
+% \end{parameter}^^A footlogo
+% \end{parameter}^^A logo
+% \end{parameter}^^A headlogo
+% \end{parameter}^^A widehead
+% \end{parameter}^^A barfont
+% \end{parameter}^^A cdbar
+% \end{parameter}^^A tudfonts
+% \end{parameter}^^A cdfonts
+% \end{parameter}^^A cdfont
+% \end{parameter}^^A pagenumber
 % \end{macro}^^A \if@tud@cover@cdlayout@locked
 % \end{macro}^^A \if@tud@cover@cdlayout
 % \end{parameter}^^A cdlayout
 % \end{parameter}^^A cd
 % \end{parameter}^^A cdcover
-% \end{parameter}^^A tudfonts
-% \end{parameter}^^A cdfonts
-% \end{parameter}^^A cdfont
-% \end{parameter}^^A pagenumber
 %
 % \iffalse
 %</class&body>

@@ -96,6 +96,7 @@
 %%% From File: tudscr-base.dtx
 \RequirePackage{tudscrbase}[\TUDVersion]
 %%% From File: tudscr-fonts.dtx
+%\providecommand*{\@fontsizefilebase}{tudscrsize}
 \PreventPackageFromLoading[%
   \ClassWarning{\tudcls@name}{%
     The package `tudscrfonts' must not be used with\MessageBreak%
@@ -182,19 +183,20 @@
     {heavy}{2},{heavyfont}{2},%
     {nodin}{3},{nodinbold}{3},{noDIN}{3},{noDINBold}{3},%
     {din}{4},{dinbold}{4},{DIN}{4},{DINBold}{4},%
-    {nobar}{5},{nocdbar}{5},{nobarfont}{5},{nocdbarfont}{5},%
-    {bar}{6},{cdbar}{6},{barfont}{6},{cdbarfont}{6},{barcdfont}{6},%
-    {litebar}{6},{litecdbar}{6},{barlite}{6},{cdbarlite}{6},%
-    {lightbar}{6},{lightcdbar}{6},{barlight}{6},{cdbarlight}{6},%
-    {barfontlite}{6},{cdbarfontlite}{6},{barcdfontlite}{6},%
-    {litebarfont}{6},{litecdbarfont}{6},{litebarcdfont}{6},%
-    {barfontlight}{6},{cdbarfontlight}{6},{barcdfontlight}{6},%
-    {lightbarfont}{6},{lightcdbarfont}{6},{lightbarcdfont}{6},%
-    {noheavybarfont}{6},{noheavycdbarfont}{6},{noheavybarcdfont}{6},%
-    {barfontnoheavy}{6},{cdbarfontnoheavy}{6},{barcdfontnoheavy}{6},
-    {heavybar}{7},{heavycdbar}{7},{barheavy}{7},{cdbarheavy}{7},%
-    {barfontheavy}{7},{cdbarfontheavy}{7},{barcdfontheavy}{7},%
-    {heavybarfont}{7},{heavycdbarfont}{7},{heavybarcdfont}{7},%
+    % §§§ passt noch nicht 1a
+    {nobar}{5},{nocdhead}{5},{nobarfont}{5},{nocdheadfont}{5},%
+    {bar}{6},{cdhead}{6},{barfont}{6},{cdheadfont}{6},{headcdfont}{6},%
+    {litebar}{6},{litecdhead}{6},{barlite}{6},{cdheadlite}{6},%
+    {lightbar}{6},{lightcdhead}{6},{barlight}{6},{cdheadlight}{6},%
+    {barfontlite}{6},{cdheadfontlite}{6},{headcdfontlite}{6},%
+    {litebarfont}{6},{litecdheadfont}{6},{liteheadcdfont}{6},%
+    {barfontlight}{6},{cdheadfontlight}{6},{headcdfontlight}{6},%
+    {lightbarfont}{6},{lightcdheadfont}{6},{lightheadcdfont}{6},%
+    {noheavybarfont}{6},{noheavycdheadfont}{6},{noheavyheadcdfont}{6},%
+    {barfontnoheavy}{6},{cdheadfontnoheavy}{6},{headcdfontnoheavy}{6},
+    {heavybar}{7},{heavycdhead}{7},{barheavy}{7},{cdheadheavy}{7},%
+    {barfontheavy}{7},{cdheadfontheavy}{7},{headcdfontheavy}{7},%
+    {heavybarfont}{7},{heavycdheadfont}{7},{heavyheadcdfont}{7},%
     {serifmath}{8},{serif}{8},{nosansmath}{8},{nosans}{8},%
     {sansmath}{9},{sans}{9},%
     {upgreek}{10},{uprightgreek}{10},{uprightGreek}{10},%
@@ -394,6 +396,7 @@
   \TUD@set@ifkey{cdfoot}{@tud@cdfoot}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \if@atdocument%
+      % §§§ prüfen, ob das so passt (was, wenn tudheadings ausgewählt?)
       \if@tud@cdfoot%
         \tud@ps@store{headings}%
         \tud@ps@store{plain}%
@@ -412,6 +415,7 @@
     \fi%
   \fi%
 }
+\AtBeginDocument{\if@tud@cdfoot\TUDoptions{cdfoot=true}\fi}
 \newcommand*\tud@ps@store[1]{%
   \tud@@ps@store{#1}{odd}{left}{head}{}%
   \tud@@ps@store{#1}{odd}{right}{head}{}%
@@ -451,7 +455,6 @@
     \csundef{@@tud@ps@#1@#2@#3@#4}%
   }%
 }
-\AtBeginDocument{\if@tud@cdfoot\TUDoptions{cdfoot=true}\fi}
 \newcommand*\tud@geometry{0}
 \TUD@key@lock{geometry}[true]{%
   \TUD@set@numkey@lock{geometry}{tud@geometry}{%
@@ -593,8 +596,10 @@
     \if@atdocument\tud@layout@process\fi%
   \fi%
 }
-\TUD@key{cdbar}[true]{%
-  \TUD@set@numkey{cdbar}{@tempa}{%
+% §§§ cdbar in cdhead
+% §§§ cdfoot auf Farbe erweitern
+\TUD@key{cdhead}[true]{%
+  \TUD@set@numkey{cdhead}{@tempa}{%
     \TUD@numkey@bool,%
     {nocd}{0},{nocdfont}{0},{nocdfonts}{0},{notudfonts}{0},%
     {cd}{1},{cdfont}{1},{cdfonts}{1},{tudfonts}{1},%
@@ -602,7 +607,7 @@
     {heavy}{2},{heavyfont}{2},%
     {wide}{3},{widehead}{3},%
     {slim}{4},{slimhead}{4},{nowide}{4},{nowidehead}{4},%
-    {normal}{5},{normalhead}{5},{standard}{5},{standardhead}{5},%
+    {normal}{4},{normalhead}{4},{standard}{4},{standardhead}{4},%
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax%
@@ -614,9 +619,6 @@
     \or%
       \TUDoptions{widehead=true}%
     \or%
-      \TUDoptions{widehead=false}%
-    \or%
-      \TUDoptions{barfont=true}%
       \TUDoptions{widehead=false}%
     \fi%
   \fi%
@@ -1206,7 +1208,7 @@
   \ifcase\tud@barfont\relax%
     \if@tud@cdfonts%
       \ClassWarning{\tudcls@name}{%
-        It isn't possible to use `cdbar=false'\MessageBreak%
+        It isn't possible to use `cdhead=false'\MessageBreak%
         together with `cdfont=true'%
       }%
     \fi%
@@ -1797,6 +1799,30 @@
         -.5\tud@dim@line\relax,%
       contents={\if@tud@widehead\tud@head@rule{\paperwidth}\fi},%
     ]{tudheadings.head.lowerwideline}%
+    
+    \newif\if@tud@test
+    \DeclareNewLayer[%
+      % §§§ evtl. auch mit clone arbeiten
+      background,align=tl,%
+      contents={%
+        \if@tud@test
+          \color{HKS41}%
+          \rule{\layerwidth}{\tud@dim@topmargin}%
+        \fi%
+      },%
+    ]{tudheadings.head.back}%
+    \DeclareNewLayer[%
+      % §§§ evtl. auch mit clone arbeiten
+      background,align=tl,%
+      voffset=\tud@dim@topmargin,%
+      contents={%
+        \if@tud@test
+          \color{HKS41!80}%
+          \rule{\layerwidth}{\tud@dim@barheight}
+        \fi
+      },%
+    ]{tudheadings.head.bar}%
+    
     \DeclareNewLayer[%
       background,foot,%
       height=\dimexpr\paperheight-\layeryoffset\relax,%
@@ -1851,8 +1877,10 @@
       \RemoveLayersFromPageStyle{plain.tudheadings}{#1}%
     }%
     \AddLayersToPageStyle{tudheadings}{%
+      tudheadings.head.back,%§§§
       tudheadings.head.mainlogo,%
       tudheadings.head.logo,%
+      tudheadings.head.bar,%§§§
       tudheadings.head.text,%
       tudheadings.head.upperline,%
       tudheadings.head.lowerline,%
@@ -1872,8 +1900,10 @@
     \DeclareNewPageStyleAlias{tudscr}{tudheadings}%
     \DeclareNewPageStyleAlias{tudscrheadings}{tudheadings}%
     \AddLayersToPageStyle{plain.tudheadings}{%
+      tudheadings.head.back,%§§§
       tudheadings.head.mainlogo,%
       tudheadings.head.logo,%
+      tudheadings.head.bar,%§§§
       tudheadings.head.text,%
       tudheadings.head.upperline,%
       tudheadings.head.lowerline,%
@@ -1895,8 +1925,10 @@
     \DeclareNewPageStyleAlias{tudheadingsplain}{plain.tudheadings}%
     \DeclareNewPageStyleAlias{tudscrheadingsplain}{plain.tudheadings}%
     \DeclareNewPageStyleByLayers{empty.tudheadings}{%
+      tudheadings.head.back,%§§§
       tudheadings.head.mainlogo,%
       tudheadings.head.logo,%
+      tudheadings.head.bar,%§§§
       tudheadings.head.text,%
       tudheadings.head.upperline,%
       tudheadings.head.lowerline,%
@@ -2123,7 +2155,7 @@
   \ifstr{\tud@head@logocolor}{HKS41}{\def\tud@@mainlogo{TUD-blue}}{}%
   \ifstr{\tud@head@logocolor}{cddarkblue}{\def\tud@@mainlogo{TUD-blue}}{}%
   \ifstr{\tud@head@logocolor}{white}{\def\tud@@mainlogo{TUD-white}}{}%
-  \includegraphics[width=\tud@dim@logowidth]{\tud@@mainlogo}%
+  \includegraphics[keepaspectratio,width=\tud@dim@logowidth]{\tud@@mainlogo}%
 }
 \newcommand*\headlogo[2][]{%
   \if@atdocument\iftudpagestyle{\currentpagestyle}{\clearpage}{}\fi%
@@ -2452,9 +2484,17 @@
 \newcommand*\tud@ps{tudheadings}
 \newcommand*\tud@ps@select{%
   \expandafter\pagestyle\expandafter{\tud@ps}%
-  \ifstr{\tud@ps}{empty}{\renewcommand*\chapterpagestyle{empty}}{}%
-  \ifstr{\tud@ps}{empty.tudheadings}{%
+  \ifstr{\GetRealPageStyle{\tud@ps}}{empty}{%
+    \renewcommand*\titlepagestyle{empty}%
+    \renewcommand*\partpagestyle{empty}%
+    \renewcommand*\chapterpagestyle{empty}%
+    \renewcommand*\indexpagestyle{empty}%
+  }{}%
+  \ifstr{\GetRealPageStyle{\tud@ps}}{empty.tudheadings}{%
+    \renewcommand*\titlepagestyle{empty.tudheadings}%
+    \renewcommand*\partpagestyle{empty.tudheadings}%
     \renewcommand*\chapterpagestyle{empty.tudheadings}%
+    \renewcommand*\indexpagestyle{empty.tudheadings}%
   }{}%
 }
 \newcommand*\tud@currentpagestyle{}
@@ -2487,6 +2527,21 @@
   \aftergroup\tud@currentpagestyle@reset%
   \clearpage%
 ]
+\newcommand*\TUD@parameter@define@ps[1]{%
+  \TUD@parameter@define{cdfont}[true]{\TUDoption{cdfont}{#1}}%
+  \TUD@parameter@define{cdfonts}[true]{\TUDoption{cdfonts}{#1}}%
+  \TUD@parameter@define{tudfonts}[true]{\TUDoption{cdfonts}{#1}}%
+  \TUD@parameter@define{cdhead}[true]{\TUDoption{cdhead}{#1}}%
+  \TUD@parameter@define{barfont}[true]{\TUDoption{barfont}{#1}}%
+  \TUD@parameter@define{widehead}[true]{\TUDoption{widehead}{#1}}%
+  \TUD@parameter@define{headlogo}{\headlogo{#1}}%
+  \TUD@parameter@let{logo}{headlogo}%
+  \TUD@parameter@define{cdfoot}[true]{\TUDoption{cdfoot}{#1}}%
+  \TUD@parameter@define{footlogo}{\footlogo{#1}}%
+  \TUD@parameter@define{ddc}[true]{\TUDoption{ddc}{#1}}%
+  \TUD@parameter@define{ddchead}[true]{\TUDoption{ddchead}{#1}}%
+  \TUD@parameter@define{ddcfoot}[true]{\TUDoption{ddcfoot}{#1}}%
+}
 \TUD@parameter{tudpage}{%
   \TUD@parameter@define{language}{\selectlanguage{#1}}%
   \TUD@parameter@define{columns}{\def\tud@multicols{#1}}%
@@ -2501,17 +2556,7 @@
       }}}%
     }%
   }%
-  % ��� auch f�r maketitle und makecover?! separater befehl?
-  \TUD@parameter@define{cdfont}[true]{\TUDoption{cdfont}{#1}}%
-  \TUD@parameter@define{cdbar}[true]{\TUDoption{cdbar}{#1}}%
-  \TUD@parameter@define{barfont}[true]{\TUDoption{barfont}{#1}}%
-  \TUD@parameter@define{widehead}[true]{\TUDoption{widehead}{#1}}%
-  \TUD@parameter@define{headlogo}{\headlogo{#1}}%
-  \TUD@parameter@let{logo}{headlogo}%
-  \TUD@parameter@define{footlogo}{\footlogo{#1}}%
-  \TUD@parameter@define{ddc}[true]{\TUDoption{ddc}{#1}}%
-  \TUD@parameter@define{ddchead}[true]{\TUDoption{ddchead}{#1}}%
-  \TUD@parameter@define{ddcfoot}[true]{\TUDoption{ddcfoot}{#1}}%
+  \TUD@parameter@define@ps{#1}%
   \TUD@parameter@sethandler{\tud@environmenthandler{#1}}%
 }
 %%% From File: tudscr-layout.dtx
@@ -3311,10 +3356,7 @@
   \TUD@parameter@define{cdtitle}[true]{\TUDoption{cdtitle}{#1}}%
   \TUD@parameter@let{cd}{cdtitle}%
   \TUD@parameter@define{pagenumber}{\def\tud@titlepagenumber{#1}}%
-  \TUD@parameter@define{cdfont}[true]{\TUDoption{cdfont}{#1}}%
-  \TUD@parameter@define{headlogo}{\headlogo{#1}}%
-  \TUD@parameter@let{logo}{headlogo}%
-  \TUD@parameter@define{footlogo}{\footlogo{#1}}%
+  \TUD@parameter@define@ps{#1}%
   \TUD@parameter@sethandler{\TUD@parameter@set[title]{pagenumber=#1}}%
 }%
 \robustify{\thanks}%
@@ -3913,10 +3955,7 @@
     }%
   }%
   \TUD@parameter@define{pagenumber}{\def\tud@titlepagenumber{#1}}%
-  \TUD@parameter@define{cdfont}[true]{\TUDoption{cdfont}{#1}}%
-  \TUD@parameter@define{headlogo}{\headlogo{#1}}%
-  \TUD@parameter@let{logo}{headlogo}%
-  \TUD@parameter@define{footlogo}{\footlogo{#1}}%
+  \TUD@parameter@define@ps{#1}%
   \TUD@parameter@sethandler{%
     \ifxnumber{#1}{%
       \TUD@parameter@set[cover]{pagenumber=#1}%
