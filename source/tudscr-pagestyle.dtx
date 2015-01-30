@@ -1,4 +1,4 @@
-% \CheckSum{1733}
+% \CheckSum{1778}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-pagestyle.dtx}[%
-  2015/01/29 v2.03 TUD-KOMA-Script (pagestyle)%
+  2015/01/30 v2.03 TUD-KOMA-Script (pagestyle)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -1482,6 +1482,81 @@
 %<*class&option>
 % \fi
 %
+% \begin{option}{cdhead}
+% \changes{v2.03}{2015/01/29}{neu}%^^A
+% Mit dieser Option wird die zentrale Benutzerschnittstelle für Einstellungen 
+% des typischen Querbalkens für den TUD-Kopf geschaffen. Durch diese Option
+% können sowohl die verwendete Schrift als auch die Stärke für den Balkentext
+% (Institut, Fakultät etc.) geändert werden. Zusätzlich kann die Laufweite des 
+% Querbalkens einstellen. Außerdem lässt sich für das farbige Layout der 
+% farblich abgesetzte Querbalken aktivieren.
+%    \begin{macrocode}
+\TUD@key{cdhead}[true]{%
+  \TUD@set@numkey{cdhead}{@tempa}{%
+    \TUD@numkey@bool,%
+    {nocd}{0},{nocdfont}{0},{nocdfonts}{0},{notudfonts}{0},%
+    {cd}{1},{cdfont}{1},{cdfonts}{1},{tudfonts}{1},%
+    {light}{1},{lightfont}{1},{lite}{1},{litefont}{1},{noheavyfont}{1},%
+    {heavy}{2},{heavyfont}{2},%
+    {wide}{3},{widehead}{3},%
+    {slim}{4},{slimhead}{4},{nowide}{4},{nowidehead}{4},%
+    {normal}{4},{normalhead}{4},{standard}{4},{standardhead}{4},%
+  }{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \ifcase\@tempa\relax%
+      \TUDoptions{barfont=false}%
+    \or%
+      \TUDoptions{barfont=true}%
+    \or%
+      \TUDoptions{barfont=heavy}%
+    \or%
+      \TUDoptions{widehead=true}%
+    \or%
+      \TUDoptions{widehead=false}%
+    \fi%
+  \fi%
+}
+%    \end{macrocode}
+% \end{option}^^A cdhead
+% \begin{option}{barfont}
+% \changes{v2.02}{2014/07/08}{neu}%^^A
+% \begin{macro}{\tud@barfont}
+% \changes{v2.02}{2014/07/08}{neu}%^^A
+% \begin{macro}{\if@tud@barfont@locked}
+% \changes{v2.02}{2014/07/08}{neu}%^^A
+% Mit dieser Option kann die Schrift des \CDs und deren Schriftstärke in der
+% TUD-Kopfzeile unabhängig von der gewählten Schriftart für den Fließtext 
+% aktiviert werden.
+%    \begin{macrocode}
+\newcommand*\tud@barfont{0}
+\TUD@key@lock{barfont}[true]{%
+  \TUD@set@numkey@lock{barfont}{tud@barfont}{%
+    \TUD@numkey@bool,%
+    {nocd}{0},{nocdfont}{0},{nocdfonts}{0},{notudfonts}{0},%
+    {cd}{1},{cdfont}{1},{cdfonts}{1},{tudfonts}{1},%
+    {light}{1},{lightfont}{1},{lite}{1},{litefont}{1},{noheavyfont}{1},%
+    {heavy}{2},{heavyfont}{2}%
+  }{#1}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \if@tud@barfont@locked
+% \end{macro}^^A \tud@barfont
+% \end{option}^^A barfont
+% \begin{option}{widehead}
+% \begin{macro}{\if@tud@widehead}
+% \begin{macro}{\if@tud@widehead@locked}
+% Der Schalter dient zur Steuerung der Breite des Querbalkens im Kopf der
+% \env{tudpage}-Seite. Entweder der Querbalken liegt im Satzspiegel oder
+% aber über die komplette Papierbreite.
+%    \begin{macrocode}
+\newif\if@tud@widehead
+\TUD@key@lock{widehead}[true]{%
+  \TUD@set@ifkey@lock{widehead}{@tud@widehead}{#1}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \if@tud@widehead@locked
+% \end{macro}^^A \if@tud@widehead
+% \end{option}^^A widehead
 % \begin{option}{cdfoot}
 % \begin{macro}{\if@tud@cdfoot}
 % \begin{macro}{\tud@ps@store}
@@ -1529,6 +1604,11 @@
   \fi%
 }
 %    \end{macrocode}
+% Damit die Einstellungen aus der Präambel übernommen werden, wird die Option
+% ggf. zu Beginn mit \cs{AtBeginDocument} aufgerufen.
+%    \begin{macrocode}
+\AtBeginDocument{\if@tud@cdfoot\TUDoptions{cdfoot=true}\fi}
+%    \end{macrocode}
 % Die nächsten beiden Befehle dienen zum Sichern der Kopf- und Fußzeilen\dots
 %    \begin{macrocode}
 \newcommand*\tud@ps@store[1]{%
@@ -1574,11 +1654,6 @@
     \csundef{@@tud@ps@#1@#2@#3@#4}%
   }%
 }
-%    \end{macrocode}
-% Damit die Einstellungen aus der Präambel übernommen werden, wird die Option
-% ggf. zu Beginn mit \cs{AtBeginDocument} aufgerufen.
-%    \begin{macrocode}
-\AtBeginDocument{\if@tud@cdfoot\TUDoptions{cdfoot=true}\fi}
 %    \end{macrocode}
 % \end{macro}^^A \tud@@ps@restore
 % \end{macro}^^A \tud@ps@restore
@@ -2139,7 +2214,7 @@
   \tud@currentpagestyle@set%
   \clearpage%
   \def\tud@ps{tudheadings}%
-  \TUD@parameter@set[tudpage]{#1}%
+  \TUD@parameter@set{tudpage}{#1}%
   \tud@ps@select%
   \tud@multicols@check%
 %    \end{macrocode}
@@ -2194,7 +2269,7 @@
 % \end{parameter}^^A tudfonts
 % \end{parameter}^^A cdfonts
 % \end{parameter}^^A cdfont
-% \begin{parameter}{cdbar}
+% \begin{parameter}{cdhead}
 % \changes{v2.03}{2015/01/28}{\val{barfont} und \val{widehead} überlagert}%^^A
 % \begin{parameter}{barfont}
 % \changes{v2.02}{2014/07/08}{neu}%^^A
@@ -2202,16 +2277,24 @@
 % Mit dem Parameter \val{barfont} kann die Verwendung der Schriften des \CDs
 % aktiviert werden, wenn diese im Fließtext nicht zum Einsatz kommen. Die
 % Breite des Querbalkens kann über den Parameter \val{widehead} ebenfalls
-% geändert werden. Seit der Verison~v2.03 übernimmt der Parameter \val{cdbar} 
+% geändert werden. Seit der Verison~v2.03 übernimmt der Parameter \val{cdhead} 
 % beide Aufgaben.
 %    \begin{macrocode}
-  \TUD@parameter@define{cdbar}[true]{\TUDoption{cdbar}{#1}}%
+  \TUD@parameter@define{cdhead}[true]{\TUDoption{cdhead}{#1}}%
   \TUD@parameter@define{barfont}[true]{\TUDoption{barfont}{#1}}%
   \TUD@parameter@define{widehead}[true]{\TUDoption{widehead}{#1}}%
 %    \end{macrocode}
 % \end{parameter}^^A widehead
 % \end{parameter}^^A barfont
-% \end{parameter}^^A cdbar
+% \end{parameter}^^A cdhead
+% \begin{parameter}{cdfoot}
+% \changes{v2.03}{2015/01/30}{neu}%^^A
+% Über \val{cdfoot} kann gg. die Hintergrundfarbe sowie die Standardfußzeile 
+% des \CDs aktiviert werden.
+%    \begin{macrocode}
+  \TUD@parameter@define{cdfoot}[true]{\TUDoption{cdfoot}{#1}}%
+%    \end{macrocode}
+% \end{parameter}^^A cdfoot
 % \begin{parameter}{headlogo}
 % \begin{parameter}{logo}
 % \begin{parameter}{footlogo}
@@ -2279,7 +2362,6 @@
 % \changes{v2.03}{2015/01/28}{\cs{iftudpagestyle} verwendet}%^^A
 % Mit diesem Parameter kann der verwendete Seitenstil eingestellt werden, wobei 
 % einer der \pgs{tudheadings}-Seitenstile verwendet wird.
-% \ToDo{\pgs{color.tudheadings} einbinden (color,colour)}[v2.04]
 %    \begin{macrocode}
   \TUD@parameter@define{pagestyle}{%
     \iftudpagestyle{#1}{\renewcommand*\tud@ps{#1}}{%
@@ -2312,12 +2394,13 @@
   \TUD@parameter@define@ps{#1}%
 %    \end{macrocode}
 % Für den Fall, dass ein Wert nicht in der Schlüssel"=Wert"=Notation gegeben
-% wird, erfolgt eine Sonderbehandlung durch \cs{tud@environmenthandler}, bei der
-% erst auf eine Zahl geprüft wird und anschießend versucht wird, das Argument
-% als Sprache zu setzen. Nach der Definition aller Parameter wird der Befehl
-% \cs{TUD@parameter} und damit auch die aktuelle Parameterfamilie beendet.
+% wird, erfolgt eine Sonderbehandlung durch \cs{TUD@parameter@defaulthandler},
+% bei dererst auf eine Zahl geprüft wird und anschießend versucht wird, das
+% Argument als Sprache zu setzen. Nach der Definition aller Parameter wird der
+% Befehl \cs{TUD@parameter} und damit auch die aktuelle Parameterfamilie
+% beendet.
 %    \begin{macrocode}
-  \TUD@parameter@sethandler{\tud@environmenthandler{#1}}%
+  \TUD@parameter@sethandler{\TUD@parameter@defaulthandler{tudpage}{#1}}%
 }
 %    \end{macrocode}
 %

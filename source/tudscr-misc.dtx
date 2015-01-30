@@ -1,4 +1,4 @@
-% \CheckSum{290}
+% \CheckSum{287}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-misc.dtx}[%
-  2015/01/24 v2.03 TUD-KOMA-Script (miscellaneous)%
+  2015/01/30 v2.03 TUD-KOMA-Script (miscellaneous)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -225,25 +225,27 @@
 %
 % Diese Befehle dienen dazu, bei Umgebungen die Sprache über einen Parameter
 % anzugeben sowie das Paket \pkg{multicol} verwenden zu können.
-% \begin{macro}{\tud@environmenthandler}
+% \begin{macro}{\TUD@parameter@defaulthandler}
 % Hiermit kann sowohl die zu verwendende Sprache als auch die Anzahl der
 % gewünschten Spalten für bestimmte Umgebungen ohne die explizite Angabe eines
 % Schlüssels festgelegt werden. Momentan betrifft das die beiden Umgebungen
 % \env{abstract} und \env{tudpage}.
 %    \begin{macrocode}
-\newcommand*\tud@environmenthandler[1]{%
-  \def\@tempa{#1}%
+\newcommand*\TUD@parameter@defaulthandler[2]{%
+  \def\@tempa{#2}%
   \@for\@tempb:=\@tempa\do{%
     \ifx\@tempb\@empty\else%
-      \ifxnumber{\@tempb}{\let\tud@multicols\@tempb}{%
-      \ifstr{\@tempb}{twocolumn}{\def\tud@multicols{2}}{%
-        \expandafter\selectlanguage\expandafter{\@tempb}%
-      }}%
+      \ifstr{\@tempb}{twocolumn}{\def\@tempb{2}}{}%
+      \ifxnumber{\@tempb}{%
+        \TUD@parameter@set{#1}{columns=\@tempb}%
+      }{%
+        \TUD@parameter@set{#1}{language=\@tempb}%
+      }%
     \fi%
   }%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@environmenthandler
+% \end{macro}^^A \TUD@parameter@defaulthandler
 % \begin{macro}{\tud@multicols}
 % \begin{macro}{\tud@multicols@check}
 % Im Makro \cs{tud@multicols} wird die Anzahl der gewünschten Spalten in einer
