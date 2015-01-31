@@ -485,8 +485,10 @@
 \DeclareExpandableDocumentCommand\@Package{sm}{#2}
 \pdfexpandableoutline{Package}
 \newcommand*\@TempOption{}
+% §§§ Eintragung der alten Optionen etc. im passenden Index fehlt
 \NewDocumentCommand\Option{smod''d||}{%
   \if@changelog%
+    \typeout{!!!!! #1 #2 #3 #4 #5}
     \@ProcessChangedAt{#1}{options}{\ttfamily}{#2}{Option}%
   \else%
     \IfValueTF{#3}{\gdef\@TempOption{\texttt{=#3}}}{\gdef\@TempOption{}}%
@@ -1065,15 +1067,20 @@
     }%
   \fi%
 }
-\NewDocumentCommand\ChangedAt{sO{\z@}m}{\ChangedAt@Process[#1]{#2}{Allgemein!#3}}
+\NewDocumentCommand\ChangedAt{sO{\z@}m}{%
+  \ChangedAt@Process[#1]{#2}[Allgemein]{#3}%
+}
 \newcommand*\@changedatlist{}
 \newcommand*\ChangedAt@Default{}
 \newcommand*\@changedatversionlist{}
 \let\@changedatversionlist\relax
-\newcommand*\ChangedAt@Process[3][]{%
+\NewDocumentCommand\ChangedAt@Process{omom}{%
   \let\@changedatlist\relax%
   \let\@changedatversionlist\relax%
-  \@for\@tempa:=#3\do{\listeadd{\@changedatlist}{\expandonce\@tempa}}%
+  \@for\@tempa:=#4\do{%
+    \IfValueT{#3}{\preto\@tempa{#3!}}%
+    \listeadd{\@changedatlist}{\expandonce\@tempa}%
+  }%
   \forlistloop\ChangedAt@Process@Split{\@changedatlist}%
   \IfBooleanF{#1}{%
     \sortlist{\@changedatversionlist}%
@@ -1129,6 +1136,17 @@
     \fi%
   \endgroup%
 }
+%\newcommand*\Rename[4][]{%
+%  \ChangedAt@@@Process{#2}{Umbenennungen}{%
+%    #3: \emph{umbenannt}~\textrightarrow~siehe #4%
+%  }%
+%  \ChangedAt@@@Process{#2}{Implementierung}{%
+%    #4: \emph{neu}~\textrightarrow~ersetzt #3%
+%  }%
+%  \listeadd\@changedatdeclarelist{#2}%
+%  \ifblank{#1}{}{\index[#1]{#3|see{#4}}}%
+%}
+% §§§ Eintragung der alten Optionen etc. im passenden Index fehlt
 \NewDocumentCommand\@ProcessChangedAt{mmd()mmm}{%
   \begingroup%
     \let\texttt\@firstofone%
@@ -1138,6 +1156,7 @@
     \let\Macro\@firstofone%
     \IfValueTF{#3}{\xdef\@tempa{#2:#3:#5}}{\xdef\@tempa{#2:#5}}%
   \endgroup%
+  \typeout{+++++ #1 #2 #3 #4 #5 #6}
   \IfBooleanTF{#1}{%
     \def\@tempb{\begingroup#4#5\endgroup}%
   }{%
@@ -1194,18 +1213,18 @@
 \robustify{\idxfont}
 \newcommand*\PrintIndex{%
   \begingroup%
-    \@printindex%
+%    \@printindex%
     \@printindex[options]%
-    \@printindex[macros]%
-    \@printindex[keys]%
-    \@printindex[terms]%
-    \begingroup%
-      \let\lettergroup\@gobble%
-      \let\indexspace\par%
-      \@printindex[fonts]%
-      \@printindex[colors]%
-    \endgroup%
-    \@printindex[files]%
+%    \@printindex[macros]%
+%    \@printindex[keys]%
+%    \@printindex[terms]%
+%    \begingroup%
+%      \let\lettergroup\@gobble%
+%      \let\indexspace\par%
+%      \@printindex[fonts]%
+%      \@printindex[colors]%
+%    \endgroup%
+%    \@printindex[files]%
   \endgroup%
 }
 \newcommand*\PrintIndexPrologue[1]{\long\gdef\@printindexprologue{#1}}

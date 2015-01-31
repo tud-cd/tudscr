@@ -2325,21 +2325,30 @@
 % bereitstellen zu können, werden Befehle zur automatisierten Erzeugung  einer 
 % solchen Liste definiert.
 %
-% \begin{macro}{\printchangedatlist}
-% \changes{v2.02}{2014/10/09}{neu}%^^A
 % \begin{macro}{\@changedatdeclare}
 % \changes{v2.02}{2014/10/09}{neu}%^^A
+% \changes{v2.03}{2015/01/31}{Umbenennungen ermöglicht}%^^A
 % \begin{macro}{\@changedatdeclaredefault}
 % \changes{v2.02}{2014/10/09}{neu}%^^A
 % \begin{macro}{\@changedatdeclarelist}
 % \changes{v2.02}{2014/07/25}{neu}%^^A
+% \begin{macro}{\ChangedAt@Split}
+% \changes{v2.03}{2015/01/31}{Umbenennungen ermöglicht}%^^A
+% \begin{macro}{\ChangedAt@@Split}
+% \changes{v2.03}{2015/01/31}{Umbenennungen ermöglicht}%^^A
+% \begin{macro}{\Rename@Split}
+% \changes{v2.03}{2015/01/31}{Umbenennungen ermöglicht}%^^A
+% \begin{macro}{\Rename@@Split}
+% \changes{v2.03}{2015/01/31}{Umbenennungen ermöglicht}%^^A
 % Um für Änderungsnotizen die dazugehörige Option, Befehl etc. bei einer 
 % Deklaration kenntlich zu machen, wird das deklarierte Element zusammen mit 
 % der Notiz in einer Liste gespeichert. Da mehrere kommaseparierte Werte
 % angegeben werden können, muss das optionale Argument der Umgebung
 % \env{Declaration} dahingehend abgearbeitet werden. Wenn keine weitere
 % Erklärung angegeben wurde, wird der entspredchende Eintrag mit dem Attribut
-% versehen, welches in \cs{@changedatdeclaredefault} gespeichert ist.
+% versehen, welches in \cs{@changedatdeclaredefault} gespeichert ist. Dabei 
+% kann außerdem angegeben werden, ob es sich bei Änderung um eine Umbenennung 
+% von Option, Befehl etc. handelt.
 %    \begin{macrocode}
 \newcommand*\@changedatdeclarelist{}
 \let\@changedatdeclarelist\relax
@@ -2347,18 +2356,81 @@
 \newcommand*\@changedatdeclare[2]{%
   \IfValueT{#1}{%
     \@for\@tempa:=#1\do{%
-      \protected@expandtwoargs\in@{!}{\@tempa}%
-      \ifin@%
-        \expandafter\listadd\expandafter\@changedatdeclarelist%
-          \expandafter{\@tempa!#2}%
-      \else%
-        \expandafter\listadd\expandafter\@changedatdeclarelist%
-          \expandafter{\@tempa!\@changedatdeclaredefault!#2}%
+      \ifx\@tempa\@empty\else%
+%    \end{macrocode}
+% Umbenenungen werden nach der Versionsnummer mit Schrägstrich eingeleitet, 
+% und mit \cs{Rename@Split} weiter abgearbeitet. Normale Änderungsnotizen 
+% enthalten ggf. ein Ausrufezeichen, sie werden mit \cs{ChangedAt@Split} 
+% ausgewertet.
+%    \begin{macrocode}
+        \protected@expandtwoargs\in@{/}{\@tempa}%
+        \ifin@%
+          \preto{\@tempa}{#2/}%
+          \expandafter\Rename@Split\expandafter{\@tempa}%
+        \else%
+          \preto{\@tempa}{#2!}%
+          \expandafter\ChangedAt@Split\expandafter{\@tempa}%
+        \fi%
       \fi%
     }%
   }%
 }
 %    \end{macrocode}
+% Die Änderungsnotiz für die Implementierung wird erst an den Ausrufezeichen 
+% in einzelne Argumente getrennt\dots
+%    \begin{macrocode}
+\NewDocumentCommand\ChangedAt@Split{>{\SplitArgument{2}{!}}m}{%
+  \ChangedAt@@Split#1%
+}
+%    \end{macrocode}
+% \dots und anschließend in die Liste \cs{@changedatdeclarelist}~-- in einer
+% etwas kryptischen Form~-- eingetragen.
+%    \begin{macrocode}
+\newcommand*\ChangedAt@@Split[3]{%
+  \listadd\@changedatdeclarelist{%
+    Implementierung!#2!\IfValueTF{#3}{#3}{\@changedatdeclaredefault}!#1%
+  }%
+}
+%    \end{macrocode}
+% Die Änderungsnotiz für die Umbenennungen wird erst an den Schrägstrichen in
+% einzelne Argumente getrennt\dots
+%    \begin{macrocode}
+\NewDocumentCommand\Rename@Split{>{\SplitArgument{3}{/}}m}{%
+  \Rename@@Split#1%
+}
+%    \end{macrocode}
+% \dots und anschließend in die Liste \cs{@changedatdeclarelist}~-- in einer
+% etwas kryptischen Form~-- eingetragen, wobei die alten Optionen, Befehle etc. 
+% ebenfalls genannt werden.
+%    \begin{macrocode}
+\newcommand*\Rename@@Split[4]{%
+  \listadd\@changedatdeclarelist{%
+    Implementierung!#2!%
+      \emph{neu}~\textrightarrow~ersetzt #3\IfValueT{#4}{ und #4}!#1%
+  }%
+%    \end{macrocode}
+% Außerdem werden die umbenannten bzw. ersetzten Optionen, Befehle etc. noch 
+% einmal separat in der Änderungsliste aufgeführt.
+%    \begin{macrocode}
+  \listadd\@changedatdeclarelist{%
+    Umbenennungen!#2!\emph{umbenannt/ersetzt}~\textrightarrow~siehe #1!#3%
+  }%
+  \IfValueT{#4}{%
+    \listadd\@changedatdeclarelist{%
+      Umbenennungen!#2!\emph{umbenannt/ersetzt}~\textrightarrow~siehe #1!#4%
+    }%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \Rename@@Split
+% \end{macro}^^A \Rename@Split
+% \end{macro}^^A \ChangedAt@@Split
+% \end{macro}^^A \ChangedAt@Split
+% \end{macro}^^A \@changedatdeclarelist
+% \end{macro}^^A \@changedatdeclaredefault
+% \end{macro}^^A \@changedatdeclare
+% \begin{macro}{\printchangedatlist}
+% \changes{v2.02}{2014/10/09}{neu}%^^A
 % Die Einträge in der Änderungsliste sowie die dazugehörige Randnotiz werden 
 % mit dem Makro \cs{ChangedAt@Process} abgearbeitet, sortiert und erstellt. Bei
 % \cs{printchangedatlist} wird mit dem optionalen Argument der Versatz für die 
@@ -2376,9 +2448,6 @@
   \fi%
 }
 %    \end{macrocode}
-% \end{macro}^^A \@changedatdeclarelist
-% \end{macro}^^A \@changedatdeclaredefault
-% \end{macro}^^A \@changedatdeclare
 % \end{macro}^^A \printchangedatlist
 % \begin{macro}{\ChangedAt}
 % \changes{v2.02}{2014/07/25}{erweitert}%^^A
@@ -2396,7 +2465,9 @@
 % dieser angegeben werden. Die Sternversion unterdrückt stattdessen die Ausgabe
 % dieser Randnotiz.
 %    \begin{macrocode}
-\NewDocumentCommand\ChangedAt{sO{\z@}m}{\ChangedAt@Process[#1]{#2}{#3}}
+\NewDocumentCommand\ChangedAt{sO{\z@}m}{%
+  \ChangedAt@Process[#1]{#2}[Allgemein]{#3}%
+}
 %    \end{macrocode}
 % \end{macro}^^A \ChangedAt
 % \begin{macro}{\ChangedAt@Process}
@@ -2408,7 +2479,7 @@
 % \changes{v2.02}{2014/10/16}{Unterteilung Änderungsliste in Bereiche}%^^A
 % \begin{macro}{\ChangedAt@Default}
 % \changes{v2.02}{2014/09/02}{neu}%^^A
-% \begin{macro}{\ChangedAt@Split}
+% \begin{macro}{\ChangedAt@Process@Split}
 % \changes{v2.02}{2014/09/02}{neu}%^^A
 % \begin{macro}{\@changedatlist}
 % \changes{v2.02}{2014/09/02}{neu}%^^A
@@ -2417,18 +2488,21 @@
 % Mit diesen Befehlen wird die Änderungshistorie in Form eines Index erstellt. 
 % Der Befehl \cs{ChangedAt@Process} setzt eine kommagetrennte Liste in eine 
 % im Format von \pkg{etoolbox} um. Anschließend wird diese für die Liste der
-% Änderungen mit \cs{ChangedAt@Split} aufgespalten. Die einzelnen Einträge
-% werden mit \cs{ChangedAt@@Process} weiter verarbeitet.
+% Änderungen mit \cs{ChangedAt@Process@Split} aufgespalten. Die einzelnen 
+% Einträge werden mit \cs{ChangedAt@@Process} weiter verarbeitet.
 %    \begin{macrocode}
 \newcommand*\@changedatlist{}
 \newcommand*\ChangedAt@Default{}
 \newcommand*\@changedatversionlist{}
 \let\@changedatversionlist\relax
-\newcommand*\ChangedAt@Process[3][]{%
+\NewDocumentCommand\ChangedAt@Process{omom}{%
   \let\@changedatlist\relax%
   \let\@changedatversionlist\relax%
-  \@for\@tempa:=#3\do{\listeadd{\@changedatlist}{\expandonce\@tempa}}%
-  \forlistloop\ChangedAt@Split{\@changedatlist}%
+  \@for\@tempa:=#4\do{%
+    \IfValueT{#3}{\preto\@tempa{#3!}}%
+    \listeadd{\@changedatlist}{\expandonce\@tempa}%
+  }%
+  \forlistloop\ChangedAt@Process@Split{\@changedatlist}%
 %    \end{macrocode}
 % Nach der Verarbeitung aller Einräge sind in \cs{@changedatversionlist} alle 
 % angegebenen Versionsnummern genau einmal enthalten. Mit \cs{sortlist} werden 
@@ -2452,14 +2526,14 @@
   }%
 }
 %    \end{macrocode}
-% Der Befehl \cs{ChangedAt@Split} teilt ein gegebenes Argument am Delimiter
-% Ausrufezeichen (\enquote{!}) in drei Argumente auf und reicht diese an 
-% \cs{ChangedAt@@Process} weiter. Sollte kein oder nur Ausrufezeichen gefunden 
-% werden, so wird das zweite und/oder dritte Argument mit dem~-- vom Paket
-% \pkg{xparse} definierten~-- leeren Wert \texttt{-NoValue-} an den Befehl
-% \cs{ChangedAt@@Process} übergeben.
+% Der Befehl \cs{ChangedAt@Process@Split} teilt ein gegebenes Argument am 
+% Delimiter Ausrufezeichen (\enquote{!}) in drei Argumente auf und reicht diese
+% an \cs{ChangedAt@@Process} weiter. Sollte kein oder nur Ausrufezeichen
+% gefunden werden, so wird das zweite und/oder dritte Argument mit dem~-- vom
+% Paket \pkg{xparse} definierten~-- leeren Wert \texttt{-NoValue-} an den 
+% Befehl \cs{ChangedAt@@Process} übergeben.
 %    \begin{macrocode}
-\NewDocumentCommand\ChangedAt@Split{>{\SplitArgument{2}{!}}m}{%
+\NewDocumentCommand\ChangedAt@Process@Split{>{\SplitArgument{3}{!}}m}{%
   \ChangedAt@@Process#1%
 }
 %    \end{macrocode}
@@ -2474,8 +2548,8 @@
 % Änderungsliste vermerkt, dass es sich um eine \emph{neue} Option, Befehl etc.
 % handelt. Der eigentliche Eintrag selbst erfolgt mit \cs{ChangedAt@@@Process}.
 %    \begin{macrocode}
-\newcommand*\ChangedAt@@Process[3]{%
-  \IfValueTF{#3}{%
+\newcommand*\ChangedAt@@Process[4]{%
+  \IfValueTF{#4}{%
 %    \end{macrocode}
 % Bei der Deklaration von Optionen, Befehlen etc. werden diese automatisch in 
 % der Liste der Änderungen im Bereich \enquote{Implementierung} vor der
@@ -2486,22 +2560,22 @@
 %    \begin{macrocode}
     \begingroup%
       \@gobbleparameters%
-      \xdef\ChangedAt@Default{#3}%
+      \xdef\ChangedAt@Default{#4}%
     \endgroup%
-    \ChangedAt@@@Process{#1}{Implementierung}{\ChangedAt@Default: #2}%
+    \ChangedAt@@@Process{#2}{#1}{\ChangedAt@Default: #3}%
   }{%
 %    \end{macrocode}
 % Wurde \cs{ChangedAt} direkt und nicht über das optionale Argument der 
 % Umgebungen \env{Declaration} genutzt, erscheint der gewünschte Eintrag im
 % Bereich \enquote{Allgemein}.
 %    \begin{macrocode}
-    \IfValueT{#2}{\ChangedAt@@@Process{#1}{Allgemein}{#2}}%
+    \IfValueT{#3}{\ChangedAt@@@Process{#2}{#1}{#3}}%
   }%
 %    \end{macrocode}
 % Außerdem wird der Liste \cs{changedatversionlist} die aktuelle Version
 % einmalig hinzugefügt, um alle in einer Randnotiz ausgeben zu können.
 %    \begin{macrocode}
-  \xifinlist{#1}{\@changedatversionlist}{}{\listeadd\@changedatversionlist{#1}}%
+  \xifinlist{#2}{\@changedatversionlist}{}{\listeadd\@changedatversionlist{#2}}%
 }
 %    \end{macrocode}
 % Mit \cs{ChangedAt@@@Process} Erfolgen die Einträge in die Änderungsliste.
@@ -2543,7 +2617,7 @@
 %    \end{macrocode}
 % \end{macro}^^A \@changedatversionlist
 % \end{macro}^^A \@changedatlist
-% \end{macro}^^A \ChangedAt@Split
+% \end{macro}^^A \ChangedAt@Process@Split
 % \end{macro}^^A \ChangedAt@Default
 % \end{macro}^^A \ChangedAt@@@Process
 % \end{macro}^^A \ChangedAt@@Process
