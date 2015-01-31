@@ -1017,42 +1017,43 @@
 \newcommand*\@changedatdeclare[2]{%
   \IfValueT{#1}{%
     \@for\@tempa:=#1\do{%
-      \protected@expandtwoargs\in@{/}{\@tempa}%
-      \ifin@%
-        \edef\@tempb{#2/\@tempa}%
-        \expandafter\Rename@Split\expandafter{\@tempb}%
-      \else%
-        \protected@expandtwoargs\in@{!}{\@tempa}%
+      \ifx\@tempa\@empty\else%
+        \protected@expandtwoargs\in@{/}{\@tempa}%
         \ifin@%
-          % Implementierung §§§
-          \expandafter\listadd\expandafter\@changedatdeclarelist%
-            \expandafter{\@tempa!#2}%
+          \preto{\@tempa}{#2/}%
+          \expandafter\Rename@Split\expandafter{\@tempa}%
         \else%
-          % Implementierung §§§
-          \expandafter\listadd\expandafter\@changedatdeclarelist%
-            \expandafter{\@tempa!\@changedatdeclaredefault!#2}%
+          \preto{\@tempa}{#2!}%
+          \expandafter\ChangedAt@Split\expandafter{\@tempa}%
         \fi%
       \fi%
     }%
   }%
 }
-\NewDocumentCommand\Rename@Split{>{\SplitArgument{3}{/}}m}{%
-  \Rename@Process#1%
+\NewDocumentCommand\ChangedAt@Split{>{\SplitArgument{2}{!}}m}{%
+  \ChangedAt@@Split#1%
 }
-\newcommand*\Rename@Process[4]{%
-  % Implementierung §§§
+\newcommand*\ChangedAt@@Split[3]{%
   \listadd\@changedatdeclarelist{%
-    #2!\emph{neu}~\textrightarrow~ersetzt #3\IfValueT{#4}{ und #4}!#1%
+    Implementierung!#2!\IfValueTF{#3}{#3}{\@changedatdeclaredefault}!#1%
   }%
-  % Umbenennungen/Ersetzungen §§§
-%  \ChangedAt@@@Process{#2}{Umbenennungen/Ersetzungen}{%
-%    #3: \emph{umbenannt/ersetzt}~\textrightarrow~siehe #1%
-%  }%
-%  \IfValueT{#4}{%
-%    \ChangedAt@@@Process{#2}{Umbenennungen/Ersetzungen}{%
-%      #4: \emph{umbenannt/ersetzt}~\textrightarrow~siehe #1%
-%    }%
-%  }%
+}
+\NewDocumentCommand\Rename@Split{>{\SplitArgument{3}{/}}m}{%
+  \Rename@@Split#1%
+}
+\newcommand*\Rename@@Split[4]{%
+  \listadd\@changedatdeclarelist{%
+    Implementierung!#2!%
+      \emph{neu}~\textrightarrow~ersetzt #3\IfValueT{#4}{ und #4}!#1%
+  }%
+  \listadd\@changedatdeclarelist{%
+    Umbenennungen!#2!\emph{umbenannt/ersetzt}~\textrightarrow~siehe #1!#3%
+  }%
+  \IfValueT{#4}{%
+    \listadd\@changedatdeclarelist{%
+      Umbenennungen!#2!\emph{umbenannt/ersetzt}~\textrightarrow~siehe #1!#4%
+    }%
+  }%
 }
 \NewDocumentCommand\printchangedatlist{sO{\z@}}{%
   \ifx\@changedatdeclarelist\relax\else%
@@ -1064,17 +1065,16 @@
     }%
   \fi%
 }
-\NewDocumentCommand\ChangedAt{sO{\z@}m}{\ChangedAt@Process[#1]{#2}{#3}}
+\NewDocumentCommand\ChangedAt{sO{\z@}m}{\ChangedAt@Process[#1]{#2}{Allgemein!#3}}
 \newcommand*\@changedatlist{}
 \newcommand*\ChangedAt@Default{}
 \newcommand*\@changedatversionlist{}
 \let\@changedatversionlist\relax
-% §§§ auf viertes Argument für Unterteilung erweitern
 \newcommand*\ChangedAt@Process[3][]{%
   \let\@changedatlist\relax%
   \let\@changedatversionlist\relax%
   \@for\@tempa:=#3\do{\listeadd{\@changedatlist}{\expandonce\@tempa}}%
-  \forlistloop\ChangedAt@Split{\@changedatlist}%
+  \forlistloop\ChangedAt@Process@Split{\@changedatlist}%
   \IfBooleanF{#1}{%
     \sortlist{\@changedatversionlist}%
     \strut%
@@ -1091,21 +1091,20 @@
     \ignorespaces%
   }%
 }
-\NewDocumentCommand\ChangedAt@Split{>{\SplitArgument{2}{!}}m}{%
+\NewDocumentCommand\ChangedAt@Process@Split{>{\SplitArgument{3}{!}}m}{%
   \ChangedAt@@Process#1%
 }
-% $$$ viertes Argument für Umbennenungen und Implementierung?
-\newcommand*\ChangedAt@@Process[3]{%
-  \IfValueTF{#3}{%
+\newcommand*\ChangedAt@@Process[4]{%
+  \IfValueTF{#4}{%
     \begingroup%
       \@gobbleparameters%
-      \xdef\ChangedAt@Default{#3}%
+      \xdef\ChangedAt@Default{#4}%
     \endgroup%
-    \ChangedAt@@@Process{#1}{Implementierung}{\ChangedAt@Default: #2}%
+    \ChangedAt@@@Process{#2}{#1}{\ChangedAt@Default: #3}%
   }{%
-    \IfValueT{#2}{\ChangedAt@@@Process{#1}{Allgemein}{#2}}%
+    \IfValueT{#3}{\ChangedAt@@@Process{#2}{#1}{#3}}%
   }%
-  \xifinlist{#1}{\@changedatversionlist}{}{\listeadd\@changedatversionlist{#1}}%
+  \xifinlist{#2}{\@changedatversionlist}{}{\listeadd\@changedatversionlist{#2}}%
 }
 \newcommand*\ChangedAt@@@Process[3]{%
   \begingroup%
