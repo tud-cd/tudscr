@@ -485,10 +485,8 @@
 \DeclareExpandableDocumentCommand\@Package{sm}{#2}
 \pdfexpandableoutline{Package}
 \newcommand*\@TempOption{}
-% §§§ Eintragung der alten Optionen etc. im passenden Index fehlt
 \NewDocumentCommand\Option{smod''d||}{%
   \if@changelog%
-    \typeout{!!!!! #1 #2 #3 #4 #5}
     \@ProcessChangedAt{#1}{options}{\ttfamily}{#2}{Option}%
   \else%
     \IfValueTF{#3}{\gdef\@TempOption{\texttt{=#3}}}{\gdef\@TempOption{}}%
@@ -1020,14 +1018,8 @@
   \IfValueT{#1}{%
     \@for\@tempa:=#1\do{%
       \ifx\@tempa\@empty\else%
-        \protected@expandtwoargs\in@{/}{\@tempa}%
-        \ifin@%
-          \preto{\@tempa}{#2/}%
-          \expandafter\Rename@Split\expandafter{\@tempa}%
-        \else%
-          \preto{\@tempa}{#2!}%
-          \expandafter\ChangedAt@Split\expandafter{\@tempa}%
-        \fi%
+        \preto{\@tempa}{#2!}%
+        \expandafter\ChangedAt@Split\expandafter{\@tempa}%
       \fi%
     }%
   }%
@@ -1040,27 +1032,14 @@
     Implementierung!#2!\IfValueTF{#3}{#3}{\@changedatdeclaredefault}!#1%
   }%
 }
-\NewDocumentCommand\Rename@Split{>{\SplitArgument{3}{/}}m}{%
-  \Rename@@Split#1%
-}
-\newcommand*\Rename@@Split[4]{%
-  \listadd\@changedatdeclarelist{%
-    Implementierung!#2!%
-      \emph{neu}~\textrightarrow~ersetzt #3\IfValueT{#4}{ und #4}!#1%
-  }%
-  \listadd\@changedatdeclarelist{%
-    Umbenennungen!#2!\emph{umbenannt/ersetzt}~\textrightarrow~siehe #1!#3%
-  }%
-  \IfValueT{#4}{%
-    \listadd\@changedatdeclarelist{%
-      Umbenennungen!#2!\emph{umbenannt/ersetzt}~\textrightarrow~siehe #1!#4%
-    }%
-  }%
-}
 \NewDocumentCommand\printchangedatlist{sO{\z@}}{%
   \ifx\@changedatdeclarelist\relax\else%
     \ChangedAt@Process{#2}{\@changedatdeclarelist}%
     \global\let\@changedatdeclarelist\relax%
+    \ifx\@renameatdeclarelist\relax\else%
+      \ChangedAt@Process{#2}{\@renameatdeclarelist}%
+      \global\let\@renameatdeclarelist\relax%
+    \fi%
     \IfBooleanF{#1}{%
       \par\nobreak\vskip\dimexpr-\parskip-\baselineskip\relax%
       \@afterindentfalse\@afterheading%
@@ -1136,17 +1115,27 @@
     \fi%
   \endgroup%
 }
-%\newcommand*\Rename[4][]{%
-%  \ChangedAt@@@Process{#2}{Umbenennungen}{%
-%    #3: \emph{umbenannt}~\textrightarrow~siehe #4%
+\newcommand*\@renameatdeclarelist{}
+\let\@renameatdeclarelist\relax
+% $$$ Kommaliste
+\newcommand*\Rename[4][]{%
+%  \listadd\@changedatdeclarelist{%
+%    Implementierung!#2!\emph{neu}~\textrightarrow~ersetzt #4!#3%
 %  }%
-%  \ChangedAt@@@Process{#2}{Implementierung}{%
-%    #4: \emph{neu}~\textrightarrow~ersetzt #3%
-%  }%
-%  \listeadd\@changedatdeclarelist{#2}%
-%  \ifblank{#1}{}{\index[#1]{#3|see{#4}}}%
-%}
-% §§§ Eintragung der alten Optionen etc. im passenden Index fehlt
+%  %
+  \@for\@tempa:={,#4}\do{%
+    \ifx\@tempa\@empty\else%
+      \protected@edef\@tempb{%
+        Umbenennungen!#2!\emph{umbenannt/ersetzt}~\textrightarrow~siehe 
+        #3!\expandonce\@tempa%
+      }%
+      \expandafter\listadd\expandafter\@renameatdeclarelist\expandafter{%
+        \@tempb%
+      }%
+      \ifblank{#1}{}{\index[#1]{\@tempa|see{#3}}}%
+    \fi%
+  }%
+}
 \NewDocumentCommand\@ProcessChangedAt{mmd()mmm}{%
   \begingroup%
     \let\texttt\@firstofone%
@@ -1156,7 +1145,6 @@
     \let\Macro\@firstofone%
     \IfValueTF{#3}{\xdef\@tempa{#2:#3:#5}}{\xdef\@tempa{#2:#5}}%
   \endgroup%
-  \typeout{+++++ #1 #2 #3 #4 #5 #6}
   \IfBooleanTF{#1}{%
     \def\@tempb{\begingroup#4#5\endgroup}%
   }{%
