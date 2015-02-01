@@ -1119,10 +1119,8 @@
 \let\@renameatdeclarelist\relax
 % $$$ Kommaliste
 \newcommand*\Rename[4][]{%
-%  \listadd\@changedatdeclarelist{%
-%    Implementierung!#2!\emph{neu}~\textrightarrow~ersetzt #4!#3%
-%  }%
-%  %
+  \@tempcnta=\z@%
+  \@tempcntb=\z@%
   \@for\@tempa:={,#4}\do{%
     \ifx\@tempa\@empty\else%
       \protected@edef\@tempb{%
@@ -1133,7 +1131,33 @@
         \@tempb%
       }%
       \ifblank{#1}{}{\index[#1]{\@tempa|see{#3}}}%
+      \advance\@tempcnta\@ne%
     \fi%
+  }%
+  \def\@tempb{}%
+  \def\@tempc{}%
+  \advance\@tempcntb\@ne%
+  \ifnum\@tempcnta>\@ne\relax%
+    \@for\@tempa:={,#4}\do{%
+      \ifx\@tempa\@empty\else%
+        \advance\@tempcntb\@ne%
+        \protected@eappto\@tempb{\@tempc\@tempa}%
+        \ifnum\@tempcntb=\@tempcnta\relax%
+          \def\@tempc{ und }%
+        \else%
+          \def\@tempc{, }%
+        \fi%
+      \fi%
+    }%
+  \else%
+    \def\@tempb{#4}%
+  \fi%
+  \protected@edef\@tempc{%
+    Implementierung!#2!\emph{neu}~\textrightarrow~ersetzt~\expandonce\@tempb!#3%
+  }%
+  \meaning\@tempc
+  \expandafter\listadd\expandafter\@changedatdeclarelist\expandafter{%
+    \@tempc%
   }%
 }
 \NewDocumentCommand\@ProcessChangedAt{mmd()mmm}{%
