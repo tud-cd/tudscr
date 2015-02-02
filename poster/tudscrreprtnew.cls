@@ -468,18 +468,18 @@
 }
 \AtBeginDocument{\if@tud@cdfoot\TUDoptions{cdfoot=true}\fi}
 \newcommand*\tud@ps@store[1]{%
-  \tud@@ps@store{#1}{odd}{left}{head}{}%
-  \tud@@ps@store{#1}{odd}{right}{head}{}%
-  \tud@@ps@store{#1}{odd}{middle}{head}{}%
-  \tud@@ps@store{#1}{even}{left}{head}{}%
-  \tud@@ps@store{#1}{even}{right}{head}{}%
-  \tud@@ps@store{#1}{even}{middle}{head}{}%
-  \tud@@ps@store{#1}{odd}{left}{foot}{}%
-  \tud@@ps@store{#1}{odd}{right}{foot}{}%
-  \tud@@ps@store{#1}{odd}{middle}{foot}{}%
-  \tud@@ps@store{#1}{even}{left}{foot}{}%
-  \tud@@ps@store{#1}{even}{right}{foot}{}%
-  \tud@@ps@store{#1}{even}{middle}{foot}{}%
+  \tud@@ps@store{#1}{odd}{left}{head}%
+  \tud@@ps@store{#1}{odd}{right}{head}%
+  \tud@@ps@store{#1}{odd}{middle}{head}%
+  \tud@@ps@store{#1}{even}{left}{head}%
+  \tud@@ps@store{#1}{even}{right}{head}%
+  \tud@@ps@store{#1}{even}{middle}{head}%
+  \tud@@ps@store{#1}{odd}{left}{foot}%
+  \tud@@ps@store{#1}{odd}{right}{foot}%
+  \tud@@ps@store{#1}{odd}{middle}{foot}%
+  \tud@@ps@store{#1}{even}{left}{foot}%
+  \tud@@ps@store{#1}{even}{right}{foot}%
+  \tud@@ps@store{#1}{even}{middle}{foot}%
 }
 \newcommand*\tud@@ps@store[4]{%
   \ifcsdef{@@tud@ps@#1@#2@#3@#4}{}{%
@@ -487,24 +487,24 @@
   }%
 }
 \newcommand*\tud@ps@restore[1]{%
-  \tud@@ps@restore{#1}{odd}{left}{head}{}%
-  \tud@@ps@restore{#1}{odd}{right}{head}{}%
-  \tud@@ps@restore{#1}{odd}{middle}{head}{}%
-  \tud@@ps@restore{#1}{even}{left}{head}{}%
-  \tud@@ps@restore{#1}{even}{right}{head}{}%
-  \tud@@ps@restore{#1}{even}{middle}{head}{}%
-  \tud@@ps@restore{#1}{odd}{left}{foot}{}%
-  \tud@@ps@restore{#1}{odd}{right}{foot}{}%
-  \tud@@ps@restore{#1}{odd}{middle}{foot}{}%
-  \tud@@ps@restore{#1}{even}{left}{foot}{}%
-  \tud@@ps@restore{#1}{even}{right}{foot}{}%
-  \tud@@ps@restore{#1}{even}{middle}{foot}{}%
+  \tud@@ps@restore{#1}{odd}{left}{head}%
+  \tud@@ps@restore{#1}{odd}{right}{head}%
+  \tud@@ps@restore{#1}{odd}{middle}{head}%
+  \tud@@ps@restore{#1}{even}{left}{head}%
+  \tud@@ps@restore{#1}{even}{right}{head}%
+  \tud@@ps@restore{#1}{even}{middle}{head}%
+  \tud@@ps@restore{#1}{odd}{left}{foot}%
+  \tud@@ps@restore{#1}{odd}{right}{foot}%
+  \tud@@ps@restore{#1}{odd}{middle}{foot}%
+  \tud@@ps@restore{#1}{even}{left}{foot}%
+  \tud@@ps@restore{#1}{even}{right}{foot}%
+  \tud@@ps@restore{#1}{even}{middle}{foot}%
 }
 \newcommand*\tud@@ps@restore[4]{%
   \ifcsdef{@@tud@ps@#1@#2@#3@#4}{%
     \csletcs{sls@ps@\@nameuse{sls@current#1}@#2@#3@#4}{@@tud@ps@#1@#2@#3@#4}%
     \csundef{@@tud@ps@#1@#2@#3@#4}%
-  }%
+  }{}%
 }
 \newcommand*\tud@geometry{0}
 \TUD@key@lock{geometry}[true]{%
@@ -1900,11 +1900,13 @@
       ]{tudheadings.foot.logo}%
     }{}%
     \newpairofpagestyles{tudheadings}{}%
-    \ForEachLayerOfPageStyle{tudheadings}{%
-      \RemoveLayersFromPageStyle{tudheadings}{#1}%
+    \ForEachLayerOfPageStyle{tudheadings}{%§§§ überarbeiten
+%      \RemoveLayersFromPageStyle{tudheadings}{#1}%
+      \typeout{+++++ #1}%
     }%
-    \ForEachLayerOfPageStyle{plain.tudheadings}{%
-      \RemoveLayersFromPageStyle{plain.tudheadings}{#1}%
+    \ForEachLayerOfPageStyle{plain.tudheadings}{%§§§ überarbeiten
+%      \RemoveLayersFromPageStyle{plain.tudheadings}{#1}%
+      \typeout{+++++ #1}%
     }%
     \AddLayersToPageStyle{tudheadings}{%
       tudheadings.head.back,%§§§
@@ -1917,11 +1919,11 @@
       tudheadings.head.upperwideline,%
       tudheadings.head.lowerwideline,%
       tudheadings.foot.logo,%
-      scrheadings.foot.odd,%
-      scrheadings.foot.even,%
-      scrheadings.foot.oneside,%
-      scrheadings.foot.above.line,%
-      scrheadings.foot.below.line%
+%      scrheadings.foot.odd,%
+%      scrheadings.foot.even,%
+%      scrheadings.foot.oneside,%
+%      scrheadings.foot.above.line,%
+%      scrheadings.foot.below.line%
     }%
     \AddToLayerPageStyleOptions{tudheadings}{%
       onselect=\tud@ps@setlinewidth%
@@ -1940,11 +1942,11 @@
       tudheadings.head.upperwideline,%
       tudheadings.head.lowerwideline,%
       tudheadings.foot.logo,%
-      plain.scrheadings.foot.odd,%
-      plain.scrheadings.foot.even,%
-      plain.scrheadings.foot.oneside,%
-      plain.scrheadings.foot.above.line,%
-      plain.scrheadings.foot.below.line%
+%      plain.scrheadings.foot.odd,%
+%      plain.scrheadings.foot.even,%
+%      plain.scrheadings.foot.oneside,%
+%      plain.scrheadings.foot.above.line,%
+%      plain.scrheadings.foot.below.line%
     }%
     \AddToLayerPageStyleOptions{plain.tudheadings}{%
       onselect=\tud@ps@setlinewidth%
