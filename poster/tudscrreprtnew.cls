@@ -70,7 +70,7 @@
       \fi%
     }%
   \fi%
-  \@TUDVersion{2015/01/27 v2.03 TUD-KOMA-Script}%
+  \@TUDVersion{2015/02/02 v2.03 TUD-KOMA-Script}%
 \endgroup%
 \providecommand*\tudscrmail{tudscr@gmail.com}
 \newcommand*\cls@name{report}
@@ -78,7 +78,7 @@
 \newcommand*\tudcls@name{tudscrreprt}
 \NeedsTeXFormat{LaTeX2e}[2011/06/27]
 \ProvidesClass{\tudcls@name}[%
-  2015/01/27 v2.03 TUD-KOMA-Script
+  2015/02/02 v2.03 TUD-KOMA-Script
   document class (\cls@name)%
 ]
 \typeout{The Corporate Design of Technische Universitaet Dresden}
@@ -119,6 +119,7 @@
     }%
     \FamilyKeyStateProcessed%
   }%
+%   §§§ PreventPackageFromLoading? Warnung mit Hinweis zu \PassOptionsToPackage
 }
 \AtEndPreamble{%
   \@expandtwoargs\in@{OT}{\encodingdefault}%
@@ -182,36 +183,28 @@
     {heavy}{2},{heavyfont}{2},%
     {nodin}{3},{nodinbold}{3},{noDIN}{3},{noDINBold}{3},%
     {din}{4},{dinbold}{4},{DIN}{4},{DINBold}{4},%
-%    % §§§ passt noch nicht 1a
-%    {nobar}{5},{nocdhead}{5},{nobarfont}{5},{nocdheadfont}{5},%
-%    %
-%    %{bar}{6},{head}{6},{cdhead}{6},
-%    {barfont}{6},
-%    %{cdheadfont}{6},{headcdfont}{6},%
-%    {litebar}{6},
-%    %{litecdhead}{6},
-%    {barlite}{6},%
-%    %{cdheadlite}{6},%
-%    {lightbar}{6},
-%    %{lightcdhead}{6},%
-%    {barlight}{6},
-%    %{cdheadlight}{6},%
-%    {barfontlite}{6},%
-%    %{cdheadfontlite}{6},{headcdfontlite}{6},%
-%    {litebarfont}{6},
-%    %{litecdheadfont}{6},{liteheadcdfont}{6},%
-%    {barfontlight}{6},
-%    %{cdheadfontlight}{6},{headcdfontlight}{6},%
-%    {lightbarfont}{6},
-%    %{lightcdheadfont}{6},{lightheadcdfont}{6},%
-%    {noheavybarfont}{6},
-%    %{noheavycdheadfont}{6},{noheavyheadcdfont}{6},%
-%    {barfontnoheavy}{6},
-%    %{cdheadfontnoheavy}{6},{headcdfontnoheavy}{6},
-%    {heavybar}{7},{heavycdhead}{7},{barheavy}{7},{cdheadheavy}{7},%
-%    {barfontheavy}{7},{cdheadfontheavy}{7},{headcdfontheavy}{7},%
-%    {heavybarfont}{7},{heavycdheadfont}{7},{heavyheadcdfont}{7},%
-%    %
+    {nohead}{5},{nocdhead}{5},{noheadfont}{5},{noheadcdfont}{5},%
+    {nocdheadfont}{5},{nobar}{5},{nobarfont}{5},%
+    {head}{6},{cdhead}{6},{headfont}{6},{headcdfont}{6},{cdheadfont}{6},%
+    {bar}{6},{barfont}{6},%
+    {litehead}{6},{litecdhead}{6},{liteheadfont}{6},{liteheadcdfont}{6},
+    {litecdheadfont}{6},{litebar}{6},{litebarfont}{6},%
+    {headlite}{6},{cdheadlite}{6},{headfontlite}{6},{headcdfontlite}{6},
+    {cdheadfontlite}{6},{barlite}{6},{barfontlite}{6},%
+    {lighthead}{6},{lightcdhead}{6},{lightheadfont}{6},{lightheadcdfont}{6},%
+    {lightcdheadfont}{6},{lightbar}{6},{lightbarfont}{6},%
+    {headlight}{6},{cdheadlight}{6},{headfontlight}{6},{headcdfontlight}{6},%
+    {cdheadfontlight}{6},{barlight}{6},{barfontlight}{6},%
+    {noheavyhead}{6},{noheavycdhead}{6},{noheavyheadfont}{6},%
+    {noheavyheadcdfont}{6},{noheavycdheadfont}{6},{noheavybar}{6},%
+    {noheavybarfont}{6},%
+    {headnoheavy}{6},{cdheadnoheavy}{6},{headfontnoheavy}{6},%
+    {headcdfontnoheavy}{6},{cdheadfontnoheavy}{6},{barnoheavy}{6},%
+    {barfontnoheavy}{6},%
+    {heavyhead}{7},{heavycdhead}{7},{heavyheadfont}{7},{heavyheadcdfont}{7},%
+    {heavycdheadfont}{7},{heavybar}{7},{heavybarfont}{7},%
+    {headheavy}{7},{cdheadheavy}{7},{headfontheavy}{7},{headcdfontheavy}{7},%
+    {cdheadfontheavy}{7},{barheavy}{7},{barfontheavy}{7},%
     {serifmath}{8},{serif}{8},{nosansmath}{8},{nosans}{8},%
     {sansmath}{9},{sans}{9},%
     {upgreek}{10},{uprightgreek}{10},{uprightGreek}{10},%
@@ -406,7 +399,7 @@
     \if@atdocument\tud@geometry@process\fi%
   \fi%
 }
-% §§§ cdbar in cdhead
+% §§§ cdhead auf Farbe erweitern
 % §§§ cdfoot auf Farbe erweitern
 \TUD@key{cdhead}[true]{%
   \TUD@set@numkey{cdhead}{@tempa}{%
@@ -469,6 +462,8 @@
         \tud@font@koma@unset{pageheadfoot}%
       \fi%
     \fi%
+  \else%
+    \TUDoptions{extrabottommargin=#1}%
   \fi%
 }
 \AtBeginDocument{\if@tud@cdfoot\TUDoptions{cdfoot=true}\fi}
@@ -895,6 +890,16 @@
   \fi%
 }
 \TUD@key{colour}[true]{\TUDoptions{color=#1}\FamilyKeyStateProcessed}
+\TUD@key{tudfonts}[true]{%
+  \TUD@set@ifkey{tudfonts}{@tempswa}{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \if@tempswa%
+      \TUDoptions{cdfont=true}%
+    \else%
+      \TUDoptions{cdfont=false}%
+    \fi%
+  \fi%
+}
 \TUD@key@lock{barfont}[true]{%
   \TUD@set@numkey@lock{barfont}{@tempa}{%
     \TUD@numkey@bool,%
@@ -910,16 +915,6 @@
       \TUDoptions{headfont=true}%
     \or%
       \TUDoptions{headfont=heavy}%
-    \fi%
-  \fi%
-}
-\TUD@key{tudfonts}[true]{%
-  \TUD@set@ifkey{tudfonts}{@tempswa}{#1}%
-  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \if@tempswa%
-      \TUDoptions{cdfont=true}%
-    \else%
-      \TUDoptions{cdfont=false}%
     \fi%
   \fi%
 }
@@ -2225,7 +2220,9 @@
   \fi%
   \ifx\tud@@headlogo\@empty\else%
     \settoheight\@tempdima{\tud@mainlogo}%
-    \epreto\tud@@@headlogo{keepaspectratio,totalheight=\the\@tempdima,}{}{}%
+    \protected@epreto\tud@@@headlogo{%
+      keepaspectratio,totalheight=\the\@tempdima,%
+    }%
     \expandafter\includegraphics\expandafter[\tud@@@headlogo]{\tud@@headlogo}%
   \fi%
 }
@@ -2247,13 +2244,30 @@
 }
 \newcommand*\tud@@footlogo{}
 \newcommand*\tud@@@footlogo{}
+\DeclareListParser{\tud@footlogo@parser}{:}%
 \newcommand*\tud@footlogo[1]{%
-  \vbox to \dimexpr\layerheight-\dp\strutbox\relax{%
-    \vfil\hbox{%
-      \epreto\tud@@@footlogo{keepaspectratio,totalheight=\footlogoheight,}{}{}%
-      \expandafter\includegraphics\expandafter[\tud@@@footlogo]{#1}%
-    }\vfil\vfil%
-  }%
+  \begingroup%
+    \def\@tempa{}%
+    \def\@tempb{}%
+    \@tempswatrue%
+    \renewcommand\do[1]{%
+      \if@tempswa%
+        \def\@tempa{##1}%
+        \@tempswafalse%
+      \else%
+        \expandafter\def\expandafter\@tempb\expandafter{\@tempb,##1}%
+      \fi%
+    }%
+    \tud@footlogo@parser{#1}%
+    \protected@eappto\tud@@@footlogo{\@tempb}%
+    \protected@epreto\tud@@@footlogo{%
+      keepaspectratio,totalheight=\the\footlogoheight,%
+    }%
+    \protected@edef\@tempc{\noexpand\includegraphics[\tud@@@footlogo]{\@tempa}}%
+    \vbox to \dimexpr\layerheight-\dp\strutbox\relax{%
+      \vfil\hbox{\@tempc}\vfil\vfil%
+    }%
+  \endgroup%
 }
 \newcommand*\tud@@ddclogo{}
 \newcommand*\tud@ddclogo{%
@@ -2368,6 +2382,12 @@
         footskip=\dimexpr\tud@ta@footskip+\tud@dim@ddcdiff\relax,%
       }%
     }{}%
+    \ifdim\tud@dim@extrabottommargin=\z@\relax\else%
+      \ClassWarning{\tudcls@name}{%
+        Option `extrabottommargin' is ineffective when\MessageBreak%
+        package typearea is used (`geometry=no')%
+      }%
+    \fi%
   \else%
     \ifcase\tud@geometry\or%
       \def\tud@geometry@hmargin{%

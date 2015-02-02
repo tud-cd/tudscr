@@ -1,4 +1,4 @@
-% \CheckSum{1778}
+% \CheckSum{1820}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-pagestyle.dtx}[%
-  2015/01/30 v2.03 TUD-KOMA-Script (pagestyle)%
+  2015/02/02 v2.03 TUD-KOMA-Script (pagestyle)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -1370,7 +1370,9 @@
   \fi%
   \ifx\tud@@headlogo\@empty\else%
     \settoheight\@tempdima{\tud@mainlogo}%
-    \epreto\tud@@@headlogo{keepaspectratio,totalheight=\the\@tempdima,}{}{}%
+    \protected@epreto\tud@@@headlogo{%
+      keepaspectratio,totalheight=\the\@tempdima,%
+    }%
     \expandafter\includegraphics\expandafter[\tud@@@headlogo]{\tud@@headlogo}%
   \fi%
 }
@@ -1396,6 +1398,9 @@
 % \changes{v2.03}{2015/01/27}{neu}%^^A
 % \begin{macro}{\tud@footlogo}
 % \changes{v2.03}{2015/01/27}{neu}%^^A
+% \changes{v2.03}{2015/02/02}{optionale Parameter datei-individuell nutzbar}%^^A
+% \begin{macro}{\tud@footlogo@parser}
+% \changes{v2.03}{2015/02/02}{neu}%^^A
 % \begin{macro}{\tud@@footlogo}
 % \changes{v2.03}{2015/01/27}{neu}%^^A
 % \begin{macro}{\tud@@@footlogo}
@@ -1417,17 +1422,49 @@
 % Der Befehl \cs{tud@footlogo} wird genutzt, um die Logos für den Fuß innerhalb 
 % der Ebene \val{tudheadings.foot.logo} auszugeben.
 %    \begin{macrocode}
+\DeclareListParser{\tud@footlogo@parser}{:}%
 \newcommand*\tud@footlogo[1]{%
-  \vbox to \dimexpr\layerheight-\dp\strutbox\relax{%
-    \vfil\hbox{%
-      \epreto\tud@@@footlogo{keepaspectratio,totalheight=\footlogoheight,}{}{}%
-      \expandafter\includegraphics\expandafter[\tud@@@footlogo]{#1}%
-    }\vfil\vfil%
-  }%
+  \begingroup%
+%    \end{macrocode}
+% Dabei soll es möglich sein, optionale Parameter an \cs{includegraphics} zu 
+% übergeben. Dies soll zum einen global für alle Dateien als auch individuell 
+% für einzelne Logos möglich sein. Zu diesem Zweck wird die Schnittstelle für 
+% den Anwender so gestaltet, dass individuelle Parameter mit einem Doppelpunkt
+% direkt an den Dateinamen angehangen werden können.
+%    \begin{macrocode}
+    \def\@tempa{}%
+    \def\@tempb{}%
+    \@tempswatrue%
+    \renewcommand\do[1]{%
+      \if@tempswa%
+        \def\@tempa{##1}%
+        \@tempswafalse%
+      \else%
+        \expandafter\def\expandafter\@tempb\expandafter{\@tempb,##1}%
+      \fi%
+    }%
+    \tud@footlogo@parser{#1}%
+%    \end{macrocode}
+% Wurden tatsächlich inidviduelle Parameter übergeben, so werden diese als 
+% letztes ausgeführt, um vorige Einstellungen überschreiben zu können.
+%    \begin{macrocode}
+    \protected@eappto\tud@@@footlogo{\@tempb}%
+%    \end{macrocode}
+% In jedem Fall werden die Grundeinstellungen als erstes ausgeführt.
+%    \begin{macrocode}
+    \protected@epreto\tud@@@footlogo{%
+      keepaspectratio,totalheight=\the\footlogoheight,%
+    }%
+    \protected@edef\@tempc{\noexpand\includegraphics[\tud@@@footlogo]{\@tempa}}%
+    \vbox to \dimexpr\layerheight-\dp\strutbox\relax{%
+      \vfil\hbox{\@tempc}\vfil\vfil%
+    }%
+  \endgroup%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@@@footlogo
 % \end{macro}^^A \tud@@footlogo
+% \end{macro}^^A \tud@footlogo@parser
 % \end{macro}^^A \tud@footlogo
 % \end{length}^^A \footlogoheight
 % \end{macro}^^A \footlogosep
@@ -1490,6 +1527,7 @@
 % (Institut, Fakultät etc.) geändert werden. Zusätzlich kann die Laufweite des 
 % Querbalkens einstellen. Außerdem lässt sich für das farbige Layout der 
 % farblich abgesetzte Querbalken aktivieren.
+% \ToDo{\opt{cdhead} auf Farbe erweitern}[v2.03]
 %    \begin{macrocode}
 \TUD@key{cdhead}[true]{%
   \TUD@set@numkey{cdhead}{@tempa}{%
@@ -1504,11 +1542,11 @@
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax%
-      \TUDoptions{barfont=false}%
+      \TUDoptions{headfont=false}%
     \or%
-      \TUDoptions{barfont=true}%
+      \TUDoptions{headfont=true}%
     \or%
-      \TUDoptions{barfont=heavy}%
+      \TUDoptions{headfont=heavy}%
     \or%
       \TUDoptions{widehead=true}%
     \or%
@@ -1518,19 +1556,19 @@
 }
 %    \end{macrocode}
 % \end{option}^^A cdhead
-% \begin{option}{barfont}
+% \begin{option}{headfont}
 % \changes{v2.02}{2014/07/08}{neu}%^^A
-% \begin{macro}{\tud@barfont}
+% \begin{macro}{\tud@headfont}
 % \changes{v2.02}{2014/07/08}{neu}%^^A
-% \begin{macro}{\if@tud@barfont@locked}
+% \begin{macro}{\if@tud@headfont@locked}
 % \changes{v2.02}{2014/07/08}{neu}%^^A
 % Mit dieser Option kann die Schrift des \CDs und deren Schriftstärke in der
 % TUD-Kopfzeile unabhängig von der gewählten Schriftart für den Fließtext 
 % aktiviert werden.
 %    \begin{macrocode}
-\newcommand*\tud@barfont{0}
-\TUD@key@lock{barfont}[true]{%
-  \TUD@set@numkey@lock{barfont}{tud@barfont}{%
+\newcommand*\tud@headfont{0}
+\TUD@key@lock{headfont}[true]{%
+  \TUD@set@numkey@lock{headfont}{tud@headfont}{%
     \TUD@numkey@bool,%
     {nocd}{0},{nocdfont}{0},{nocdfonts}{0},{notudfonts}{0},%
     {cd}{1},{cdfont}{1},{cdfonts}{1},{tudfonts}{1},%
@@ -1539,9 +1577,9 @@
   }{#1}%
 }
 %    \end{macrocode}
-% \end{macro}^^A \if@tud@barfont@locked
-% \end{macro}^^A \tud@barfont
-% \end{option}^^A barfont
+% \end{macro}^^A \if@tud@headfont@locked
+% \end{macro}^^A \tud@headfont
+% \end{option}^^A headfont
 % \begin{option}{widehead}
 % \begin{macro}{\if@tud@widehead}
 % \begin{macro}{\if@tud@widehead@locked}
@@ -1558,6 +1596,8 @@
 % \end{macro}^^A \if@tud@widehead
 % \end{option}^^A widehead
 % \begin{option}{cdfoot}
+% \changes{v2.03}{2015/02/02}{Option \opt{extrabottommargin} bei Längenangabe 
+%   indirekt nutzbar}%^^A
 % \begin{macro}{\if@tud@cdfoot}
 % \begin{macro}{\tud@ps@store}
 % \changes{v2.02}{2014/06/23}{neu}%^^A
@@ -1578,6 +1618,8 @@
 % Die ursprünglichen Kopf- und Fußzeilen werden mit \cs{tud@ps@store} 
 % gesichert, um gegebenenfalls zurückschalten zu können. Anschließend werden
 % diese mit dem neuen Stil überschrieben.
+% \ToDo{\opt{cdhead} auf Farbe erweitern}[v2.03]
+% \ToDo{prüfen, ob Sicherung der Seitenstile so sinnvoll}[v2.03]
 %    \begin{macrocode}
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \if@atdocument%
@@ -1601,6 +1643,11 @@
         \tud@font@koma@unset{pageheadfoot}%
       \fi%
     \fi%
+%    \end{macrocode}
+% Außerdem kann mit der Option \opt{extrabottommargin} gesetzt werden.
+%    \begin{macrocode}
+  \else%
+    \TUDoptions{extrabottommargin=#1}%
   \fi%
 }
 %    \end{macrocode}
@@ -1921,6 +1968,17 @@
         footskip=\dimexpr\tud@ta@footskip+\tud@dim@ddcdiff\relax,%
       }%
     }{}%
+%    \end{macrocode}
+% Sollte die Option \opt{extrabottommargin} verwendet worden sein, wird eine 
+% Warnung ausgegeben, dass diese für den \pkg{typearea}-Satzspiegel wirkungslos
+% ist.
+%    \begin{macrocode}
+    \ifdim\tud@dim@extrabottommargin=\z@\relax\else%
+      \ClassWarning{\tudcls@name}{%
+        Option `extrabottommargin' is ineffective when\MessageBreak%
+        package typearea is used (`geometry=no')%
+      }%
+    \fi%
 %    \end{macrocode}
 % Hier erfolgt die Definition der Hilfsmakros für das CD-konforme asymmetrische
 % bzw. an das \CD angelehnte Layout für einseitigen und zweiseitigen Satz.
@@ -2270,22 +2328,22 @@
 % \end{parameter}^^A cdfonts
 % \end{parameter}^^A cdfont
 % \begin{parameter}{cdhead}
-% \changes{v2.03}{2015/01/28}{\val{barfont} und \val{widehead} überlagert}%^^A
-% \begin{parameter}{barfont}
+% \changes{v2.03}{2015/01/28}{\val{headfont} und \val{widehead} überlagert}%^^A
+% \begin{parameter}{headfont}
 % \changes{v2.02}{2014/07/08}{neu}%^^A
 % \begin{parameter}{widehead}
-% Mit dem Parameter \val{barfont} kann die Verwendung der Schriften des \CDs
+% Mit dem Parameter \val{headfont} kann die Verwendung der Schriften des \CDs
 % aktiviert werden, wenn diese im Fließtext nicht zum Einsatz kommen. Die
 % Breite des Querbalkens kann über den Parameter \val{widehead} ebenfalls
 % geändert werden. Seit der Verison~v2.03 übernimmt der Parameter \val{cdhead} 
 % beide Aufgaben.
 %    \begin{macrocode}
   \TUD@parameter@define{cdhead}[true]{\TUDoption{cdhead}{#1}}%
-  \TUD@parameter@define{barfont}[true]{\TUDoption{barfont}{#1}}%
+  \TUD@parameter@define{headfont}[true]{\TUDoption{headfont}{#1}}%
   \TUD@parameter@define{widehead}[true]{\TUDoption{widehead}{#1}}%
 %    \end{macrocode}
 % \end{parameter}^^A widehead
-% \end{parameter}^^A barfont
+% \end{parameter}^^A headfont
 % \end{parameter}^^A cdhead
 % \begin{parameter}{cdfoot}
 % \changes{v2.03}{2015/01/30}{neu}%^^A
