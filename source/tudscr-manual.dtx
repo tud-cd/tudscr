@@ -1,4 +1,4 @@
-% \CheckSum{2610}
+% \CheckSum{2680}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-manual.dtx}[%
-  2015/01/29 v2.03 TUD-KOMA-Script\space%
+  2015/02/02 v2.03 TUD-KOMA-Script\space%
 %</driver>
 %<identify>\NeedsTeXFormat{LaTeX2e}[2011/06/27]
 %<class&identify>\ProvidesClass{tudscrman}[%
@@ -1870,6 +1870,7 @@
 % \begin{macro}{\if@additionallist}
 % \begin{macro}{\@gobbleparameters}
 % \changes{v2.02}{2014/10/09}{neu}%^^A
+% \changes{v2.03}{2015/02/02}{Makro \cs{relax} mit \cs{@empty} ersetzt}%^^A
 % Es werden einige Hilfsmakros für die Ausgabe einer Deklaration sowie der 
 % dazugehörigen Änderungsliste initialisiert.
 %    \begin{macrocode}
@@ -1883,13 +1884,13 @@
 \newif\if@additionallist
 \newcommand*\@gobbleparameters{%
   \let\PName\@gobble%
-  \let\PBoolean\relax%
+  \let\PBoolean\@empty%
   \let\PBName\@gobble%
-  \let\PSet\relax%
+  \let\PSet\@empty%
   \let\PValue\@gobble%
   \let\Parameter\@gobble%
   \let\OParameter\@gobble%
-  \let\LParameter\relax%
+  \let\LParameter\@empty%
   \let\OLParameter\@gobble%
   \let\PParameter\@gobble%
   \let\POParameter\@gobble%
@@ -2324,22 +2325,22 @@
 % Um dem Anwender einen schnellen Überblick zu Änderungen der aktuellen Verison 
 % bereitstellen zu können, werden Befehle zur automatisierten Erzeugung  einer 
 % solchen Liste definiert.
+% \ToDo{%
+%   Der Quelltext ist ein Grauen, das muss ich irgendwann einmal komplett
+%   überarbeiten. Insbesondere sollten die Argumente für die Änderungsliste 
+%   wesentlich strukturierter eingefügt werden, bestenfalls mit zwei oder mehr
+%   unterschiedlichen Trennzeichen.
+% }[?]
 %
 % \begin{macro}{\@changedatdeclare}
 % \changes{v2.02}{2014/10/09}{neu}%^^A
-% \changes{v2.03}{2015/01/31}{Umbenennungen ermöglicht}%^^A
+% \changes{v2.03}{2015/01/31}{Ersetzungen ermöglicht}%^^A
 % \begin{macro}{\@changedatdeclaredefault}
 % \changes{v2.02}{2014/10/09}{neu}%^^A
 % \begin{macro}{\@changedatdeclarelist}
 % \changes{v2.02}{2014/07/25}{neu}%^^A
 % \begin{macro}{\ChangedAt@Split}
-% \changes{v2.03}{2015/01/31}{Umbenennungen ermöglicht}%^^A
 % \begin{macro}{\ChangedAt@@Split}
-% \changes{v2.03}{2015/01/31}{Umbenennungen ermöglicht}%^^A
-% \begin{macro}{\Rename@Split}
-% \changes{v2.03}{2015/01/31}{Umbenennungen ermöglicht}%^^A
-% \begin{macro}{\Rename@@Split}
-% \changes{v2.03}{2015/01/31}{Umbenennungen ermöglicht}%^^A
 % Um für Änderungsnotizen die dazugehörige Option, Befehl etc. bei einer 
 % Deklaration kenntlich zu machen, wird das deklarierte Element zusammen mit 
 % der Notiz in einer Liste gespeichert. Da mehrere kommaseparierte Werte
@@ -2357,20 +2358,8 @@
   \IfValueT{#1}{%
     \@for\@tempa:=#1\do{%
       \ifx\@tempa\@empty\else%
-%    \end{macrocode}
-% Umbenenungen werden nach der Versionsnummer mit Schrägstrich eingeleitet, 
-% und mit \cs{Rename@Split} weiter abgearbeitet. Normale Änderungsnotizen 
-% enthalten ggf. ein Ausrufezeichen, sie werden mit \cs{ChangedAt@Split} 
-% ausgewertet.
-%    \begin{macrocode}
-        \protected@expandtwoargs\in@{/}{\@tempa}%
-        \ifin@%
-          \preto{\@tempa}{#2/}%
-          \expandafter\Rename@Split\expandafter{\@tempa}%
-        \else%
-          \preto{\@tempa}{#2!}%
-          \expandafter\ChangedAt@Split\expandafter{\@tempa}%
-        \fi%
+        \preto{\@tempa}{#2!}%
+        \expandafter\ChangedAt@Split\expandafter{\@tempa}%
       \fi%
     }%
   }%
@@ -2392,38 +2381,6 @@
   }%
 }
 %    \end{macrocode}
-% Die Änderungsnotiz für die Umbenennungen wird erst an den Schrägstrichen in
-% einzelne Argumente getrennt\dots
-%    \begin{macrocode}
-\NewDocumentCommand\Rename@Split{>{\SplitArgument{3}{/}}m}{%
-  \Rename@@Split#1%
-}
-%    \end{macrocode}
-% \dots und anschließend in die Liste \cs{@changedatdeclarelist}~-- in einer
-% etwas kryptischen Form~-- eingetragen, wobei die alten Optionen, Befehle etc. 
-% ebenfalls genannt werden.
-%    \begin{macrocode}
-\newcommand*\Rename@@Split[4]{%
-  \listadd\@changedatdeclarelist{%
-    Implementierung!#2!%
-      \emph{neu}~\textrightarrow~ersetzt #3\IfValueT{#4}{ und #4}!#1%
-  }%
-%    \end{macrocode}
-% Außerdem werden die umbenannten bzw. ersetzten Optionen, Befehle etc. noch 
-% einmal separat in der Änderungsliste aufgeführt.
-%    \begin{macrocode}
-  \listadd\@changedatdeclarelist{%
-    Umbenennungen!#2!\emph{umbenannt/ersetzt}~\textrightarrow~siehe #1!#3%
-  }%
-  \IfValueT{#4}{%
-    \listadd\@changedatdeclarelist{%
-      Umbenennungen!#2!\emph{umbenannt/ersetzt}~\textrightarrow~siehe #1!#4%
-    }%
-  }%
-}
-%    \end{macrocode}
-% \end{macro}^^A \Rename@@Split
-% \end{macro}^^A \Rename@Split
 % \end{macro}^^A \ChangedAt@@Split
 % \end{macro}^^A \ChangedAt@Split
 % \end{macro}^^A \@changedatdeclarelist
@@ -2465,8 +2422,8 @@
 % dieser angegeben werden. Die Sternversion unterdrückt stattdessen die Ausgabe
 % dieser Randnotiz.
 %    \begin{macrocode}
-\NewDocumentCommand\ChangedAt{sO{\z@}m}{%
-  \ChangedAt@Process[#1]{#2}[Allgemein]{#3}%
+\NewDocumentCommand\ChangedAt{sO{\z@}mO{Allgemein}}{%
+  \ChangedAt@Process[#1]{#2}[#4]{#3}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \ChangedAt
@@ -2499,8 +2456,10 @@
   \let\@changedatlist\relax%
   \let\@changedatversionlist\relax%
   \@for\@tempa:=#4\do{%
-    \IfValueT{#3}{\preto\@tempa{#3!}}%
-    \listeadd{\@changedatlist}{\expandonce\@tempa}%
+    \ifx\@tempa\@empty\else%
+      \IfValueT{#3}{\preto\@tempa{#3!}}%
+      \listeadd{\@changedatlist}{\expandonce\@tempa}%
+    \fi%
   }%
   \forlistloop\ChangedAt@Process@Split{\@changedatlist}%
 %    \end{macrocode}
@@ -2595,7 +2554,7 @@
 %    \end{macrocode}
 % Danach wird geprüft, ob das Makro \cs{Key} übergeben wurde. Außerdem wird ein 
 % Anker in der Änderungsliste für die Referenzierung auf die einzelnen Bereiche 
-% (\enquote{Allgemein}, \enquote{Implementierung} und \enquote{Umbenennungen}) 
+% (\enquote{Allgemein}, \enquote{Implementierung} und \enquote{Ersetzungen}) 
 % gesetzt.
 %    \begin{macrocode}
     \expandafter\in@\expandafter\Key\expandafter{\@tempa}%
@@ -2622,23 +2581,59 @@
 % \end{macro}^^A \ChangedAt@@@Process
 % \end{macro}^^A \ChangedAt@@Process
 % \end{macro}^^A \ChangedAt@Process
-% \begin{macro}{\Rename}
+% \begin{macro}{\Replace}
 % \changes{v2.02}{2014/07/25}{neu}%^^A
-% Der Befehl \cs{Rename} erzeugt einen Eintrag in der Änderungshistorie sowie 
+% \changes{v2.03}{2015/02/02}{auf mehrere Einträge erweitert}%^^A
+% Der Befehl \cs{Replace} erzeugt einen Eintrag in der Änderungshistorie sowie 
 % einen Eintrag im gewünschten Index mit einem Verweis auf den neuen Befehl.
 %    \begin{macrocode}
-\newcommand*\Rename[4][]{%
-  \ChangedAt@@@Process{#2}{Umbenennungen}{%
-    #3: \emph{umbenannt}~\textrightarrow~siehe #4%
+\newcommand*\Replace[4][]{%
+%    \end{macrocode}
+% Die alten Befehle in der Liste erhalten einen Eintrag in der Änderungsnotiz. 
+% Das Komma vor dem Argument in der Schleife ist notwendig, weil ansonsten das 
+% Argument sofort expandiert wird.
+%    \begin{macrocode}
+  \@tempcnta=\z@%
+  \@for\@tempa:={,#4}\do{%
+    \ifx\@tempa\@empty\else%
+      \protected@edef\@tempb{%
+        Ersetzungen!#2!\emph{entf\"allt}~\textrightarrow~siehe~#3!\@tempa%
+      }%
+      \expandafter\listadd\expandafter\@changedatdeclarelist\expandafter{%
+        \@tempb%
+      }%
+%    \end{macrocode}
+% Und der Eintrag im Index.
+%    \begin{macrocode}
+      \ifblank{#1}{}{\index[#1]{\@tempa|see{#3}}}%
+      \advance\@tempcnta\@ne%
+    \fi%
   }%
-  \ChangedAt@@@Process{#2}{Implementierung}{%
-    #4: \emph{neu}~\textrightarrow~ersetzt #3%
+%    \end{macrocode}
+% Der neue Befehl kommt ebenfalls in die  Änderungshistorie mit dem Hinweis auf 
+% die alten Befehle.
+%    \begin{macrocode}
+  \def\@tempb{}%
+  \def\@tempc{}%
+  \@tempcntb=\@ne%
+  \@for\@tempa:={,#4}\do{%
+    \ifx\@tempa\@empty\else%
+      \advance\@tempcntb\@ne%
+      \protected@eappto\@tempc{\@tempb\@tempa}%
+      \ifnum\@tempcntb<\@tempcnta\relax%
+        \def\@tempb{{,} }%
+      \else%
+        \def\@tempb{ und }%
+      \fi%
+    \fi%
   }%
-  \listeadd\@changedatdeclarelist{#2}%
-  \ifblank{#1}{}{\index[#1]{#3|see{#4}}}%
+  \protected@edef\@tempb{%
+    Implementierung!#2!\emph{neu}~\textrightarrow~ersetzt~\@tempc!#3%
+  }%
+  \expandafter\listadd\expandafter\@changedatdeclarelist\expandafter{\@tempb}%
 }
 %    \end{macrocode}
-% \end{macro}^^A \Rename
+% \end{macro}^^A \Replace
 % \begin{macro}{\@ProcessChangedAt}
 % \changes{v2.02}{2014/07/25}{erweitert}%^^A
 % \changes{v2.02}{2014/10/08}{Sternversion ergänzt}%^^A
