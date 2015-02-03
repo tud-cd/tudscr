@@ -1,4 +1,4 @@
-%%
+%% DepreacatedOption in comp verschieben
 %% This is file `tudscrreprt.cls',
 %% generated with the docstrip utility.
 %%
@@ -108,8 +108,8 @@
 \newcommand*\tud@dinbold{0m6}
 \newcommand*\tud@mathenc{OT1}
 \newif\if@tud@fontspec
-\TUD@key@lock{fontspec}[true]{%
-  \TUD@set@ifkey@lock{fontspec}{@tud@fontspec}{#1}%
+\TUD@key{fontspec}[true]{%
+  \TUD@set@ifkey{fontspec}{@tud@fontspec}{#1}%
 }
 \AtEndOfClass{%
   \TUD@key{fontspec}[]{%
@@ -176,6 +176,7 @@
 \patchcmd{\@uclcnotmath}{\@nonchangecase\ensuremath}{%
   \@nonchangecase\ensuremath\tud@uclcnotmath
 }{}{\tud@patch@wrn{@uclcnotmath}}%
+\newcommand*\tud@cdfont{0}
 \TUD@key{cdfont}[true]{%
   \TUD@set@numkey{cdfont}{@tempa}{%
     \TUD@numkey@bool,%
@@ -214,26 +215,38 @@
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax%
-      \TUDoptions{cdfonts=false}%
-      \TUD@std@numkey@lock{headfont}{false}%
+      \def\tud@cdfont{0}%
+      \TUD@std@ifkey@lock{sansmath}{false}%
+      \TUD@std@ifkey@lock{slantedgreek}{false}%
+%      
+            \TUD@std@numkey@lock{headfont}{false}%
+      \if@atdocument\tud@font@set\tud@layout@process\fi%
     \or%
-      \TUDoptions{cdfonts=true}%
-      \TUDoptions{heavyfont=false}%
-      \TUD@std@numkey@lock{headfont}{true}%
+      \def\tud@cdfont{1}%
+      \TUD@std@ifkey@lock{sansmath}{true}%
+      \TUD@std@ifkey@lock{slantedgreek}{true}%
+%      
+            \TUD@std@numkey@lock{headfont}{true}%
+%      
+      \if@atdocument\tud@font@set\tud@layout@process\fi%
     \or%
-      \TUDoptions{cdfonts=true}%
-      \TUDoptions{heavyfont=true}%
-      \TUD@std@numkey@lock{headfont}{heavy}%
+      \def\tud@cdfont{2}%
+      \TUD@std@ifkey@lock{sansmath}{true}%
+      \TUD@std@ifkey@lock{slantedgreek}{true}%
+%      
+            \TUD@std@numkey@lock{headfont}{heavy}%
+%      
+      \if@atdocument\tud@font@set\tud@layout@process\fi%
     \or%
-      \TUDoptions{din=false}%
+            \TUDoptions{din=false}%
     \or%
-      \TUDoptions{din=true}%
+            \TUDoptions{din=true}%
     \or%
-      \TUDoptions{headfont=false}%
+            \TUDoptions{headfont=false}%
     \or%
-      \TUDoptions{headfont=true}%
+            \TUDoptions{headfont=true}%
     \or%
-      \TUDoptions{headfont=heavy}%
+            \TUDoptions{headfont=heavy}%
     \or%
       \TUDoptions{sansmath=false}%
     \or%
@@ -249,54 +262,23 @@
     \fi%
   \fi%
 }
-\newif\if@tud@cdfonts
-\TUD@key{cdfonts}[true]{%
-  \TUD@set@ifkey{cdfonts}{@tud@cdfonts}{#1}%
-  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \if@tud@cdfonts%
-      \if@atdocument\tud@font@cdfonts\fi%
-      \TUD@std@ifkey@lock{sansmath}{true}%
-      \TUD@std@ifkey@lock{slantedgreek}{true}%
-    \else%
-      \if@atdocument%
-        \tud@cmd@restore{rmdefault}%
-        \tud@cmd@restore{sfdefault}%
-        \tud@cmd@restore{ttdefault}%
-        \tud@cmd@restore{bfdefault}%
-        \tud@cmd@restore{mddefault}%
-        \tud@cmd@restore{itdefault}%
-        \tud@cmd@restore{familydefault}%
-        \tud@cmd@restore{seriesdefault}%
-        \tud@cmd@restore{shapedefault}%
-        \normalfont\selectfont%
-      \fi%
-      \TUD@std@ifkey@lock{sansmath}{false}%
-      \TUD@std@ifkey@lock{slantedgreek}{false}%
-    \fi%
-    \if@atdocument\tud@layout@process\fi%
-  \fi%
-}
-\newif\if@tud@heavyfont
-\TUD@key{heavyfont}[true]{%
-  \TUD@set@ifkey{heavyfont}{@tud@heavyfont}{#1}%
-  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \if@atdocument\tud@font@cdfonts\fi%
-  \fi%
-}
+\AtBeginDocument{\tud@font@set\tud@font@math@set}
+% §§§ depreacated
 \newif\if@tud@din\@tud@dintrue
 \TUD@ifkey{din}{@tud@din}
+% §§§ depreacated in cdmath umbenennen
 \newif\if@tud@sansmath
 \TUD@key@lock{sansmath}[true]{%
   \TUD@set@ifkey@lock{sansmath}{@tud@sansmath}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \if@atdocument\tud@font@mathfonts\fi%
+    \if@atdocument\tud@font@math@set\fi%
   \fi%
 }
 \newif\if@tud@slantedgreek
 \TUD@key@lock{slantedgreek}[true]{%
   \TUD@set@ifkey@lock{slantedgreek}{@tud@slantedgreek}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \if@atdocument\tud@font@mathfonts\fi%
+    \if@atdocument\tud@font@math@set\fi%
   \fi%
 }
 %%% From File: tudscr-pagestyle.dtx
@@ -426,7 +408,9 @@
     \fi%
   \fi%
 }
+% \newcommand*\tud@head@font{} §§§
 \newcommand*\tud@headfont{0}
+% §§§ depreacated
 \TUD@key@lock{headfont}[true]{%
   \TUD@set@numkey@lock{headfont}{tud@headfont}{%
     \TUD@numkey@bool,%
@@ -436,6 +420,8 @@
     {heavy}{2},{heavyfont}{2}%
   }{#1}%
 }
+% §§§ depreacated
+% Schalter für headfont und widehead auf eine Variable
 \newif\if@tud@widehead
 \TUD@key@lock{widehead}[true]{%
   \TUD@set@ifkey@lock{widehead}{@tud@widehead}{#1}%
@@ -445,10 +431,9 @@
   \TUD@set@ifkey{cdfoot}{@tud@cdfoot}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \if@atdocument%
-      % §§§ prüfen, ob das so passt (was, wenn tudheadings ausgewählt?)
       \if@tud@cdfoot%
-        \tud@ps@store{headings}%
-        \tud@ps@store{plain}%
+        \tud@ps@store{scrheadings}%
+        \tud@ps@store{plain.scrheadings}%
         \tud@font@koma@set{pageheadfoot}{\upshape}%
         \clearpairofpagestyles%
         \ofoot[\pagemark]{%
@@ -457,8 +442,8 @@
           \if@twoside\ifodd\value{page}\quad\pagemark\fi\else\quad\pagemark\fi%
         }%
       \else%
-        \tud@ps@restore{headings}%
-        \tud@ps@restore{plain}%
+        \tud@ps@restore{scrheadings}%
+        \tud@ps@restore{plain.scrheadings}%
         \tud@font@koma@unset{pageheadfoot}%
       \fi%
     \fi%
@@ -483,7 +468,7 @@
 }
 \newcommand*\tud@@ps@store[4]{%
   \ifcsdef{@@tud@ps@#1@#2@#3@#4}{}{%
-    \csletcs{@@tud@ps@#1@#2@#3@#4}{sls@ps@\@nameuse{sls@current#1}@#2@#3@#4}%
+    \csletcs{@@tud@ps@#1@#2@#3@#4}{sls@ps@#1@#2@#3@#4}%
   }%
 }
 \newcommand*\tud@ps@restore[1]{%
@@ -502,7 +487,7 @@
 }
 \newcommand*\tud@@ps@restore[4]{%
   \ifcsdef{@@tud@ps@#1@#2@#3@#4}{%
-    \csletcs{sls@ps@\@nameuse{sls@current#1}@#2@#3@#4}{@@tud@ps@#1@#2@#3@#4}%
+    \csletcs{sls@ps@#1@#2@#3@#4}{@@tud@ps@#1@#2@#3@#4}%
     \csundef{@@tud@ps@#1@#2@#3@#4}%
   }{}%
 }
@@ -668,8 +653,8 @@
   }%
 }
 \newif\if@tud@parttitle
-\TUD@key@lock{parttitle}[true]{%
-  \TUD@set@ifkey@lock{parttitle}{@tud@parttitle}{#1}%
+\TUD@key{parttitle}[true]{%
+  \TUD@set@ifkey{parttitle}{@tud@parttitle}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \if@atdocument\tud@layout@process\fi%
   \fi%
@@ -890,6 +875,18 @@
   \fi%
 }
 \TUD@key{colour}[true]{\TUDoptions{color=#1}\FamilyKeyStateProcessed}
+% §§§ Warnung
+\TUD@key{cdfonts}[true]{%
+  \TUD@set@ifkey{cdfonts}{@tempswa}{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \if@tempswa%
+      \TUDoptions{cdfont=true}%
+    \else%
+      \TUDoptions{cdfont=false}%
+    \fi%
+  \fi%
+}
+% §§§ Warnung
 \TUD@key{tudfonts}[true]{%
   \TUD@set@ifkey{tudfonts}{@tempswa}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
@@ -900,6 +897,18 @@
     \fi%
   \fi%
 }
+% §§§ Warnung
+\TUD@key{heavyfont}[true]{%
+  \TUD@set@ifkey{heavyfont}{@tempswa}{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \if@tempswa
+      \TUDoptions{cdfont=heavy}%
+    \else
+      \TUDoptions{cdfont=true}%
+    \fi
+  \fi%
+}
+% §§§ Warnung
 \TUD@key@lock{barfont}[true]{%
   \TUD@set@numkey@lock{barfont}{@tempa}{%
     \TUD@numkey@bool,%
@@ -918,6 +927,7 @@
     \fi%
   \fi%
 }
+% §§§ Warnung
 \TUD@key{tudfoot}[true]{%
   \TUD@set@ifkey{tudfoot}{@tempswa}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
@@ -1122,150 +1132,165 @@
   \DeclareMathSymbol{\varPsi}{\mathalpha}{letters}{9}%
   \DeclareMathSymbol{\varOmega}{\mathalpha}{letters}{10}%
 }
-\newcommand*\tud@font@cdfonts{%
-  \tud@cmd@store{rmdefault}%
-  \tud@cmd@store{sfdefault}%
-  \tud@cmd@store{ttdefault}%
-  \tud@cmd@store{bfdefault}%
-  \tud@cmd@store{mddefault}%
-  \tud@cmd@store{itdefault}%
-  \tud@cmd@store{familydefault}%
-  \tud@cmd@store{seriesdefault}%
-  \tud@cmd@store{shapedefault}%
-  \if@tud@fontspec%
-    \if@tud@heavyfont%
-      \setsansfont{Univers}[%
-        BoldFont = Univers Bold,%
-        ItalicFont = Univers Oblique,%
-        BoldItalicFont = Univers Bold Oblique,%
-      ]%
-      \setmonofont{LMMono10-Regular}[%
-        BoldFont = LMMonoLt10-Bold,%
-        ItalicFont = LMMonoSlant10-Regular,%
-        BoldItalicFont = LMMonoLt10-BoldOblique,%
-      ]%
-    \else%
-      \setsansfont{Univers Light}[%
-        BoldFont = Univers,%
-        ItalicFont = Univers Light Oblique,%
-        BoldItalicFont = Univers Oblique,%
-      ]%
-      \setmonofont{LMMonoLt10-Regular}[%
-        BoldFont = LMMono10-Regular,%
-        ItalicFont = LMMonoLt10-Oblique,%
-        BoldItalicFont = LMMonoSlant10-Regular,%
-      ]%
-    \fi%
-  \else%
-    \if@tud@univers%
-      \renewcommand*\sfdefault{\tud@univers}%
-      \renewcommand*\ttdefault{\tud@univers t}%
-      \if@tud@heavyfont%
-        \renewcommand*\bfdefault{b}%
-        \renewcommand*\mddefault{m}%
+\newcommand*\tud@font@set{%
+  \ifnum\tud@cdfont>0\relax%
+    \tud@cmd@store{rmdefault}%
+    \tud@cmd@store{sfdefault}%
+    \tud@cmd@store{ttdefault}%
+    \tud@cmd@store{bfdefault}%
+    \tud@cmd@store{mddefault}%
+    \tud@cmd@store{itdefault}%
+    \tud@cmd@store{familydefault}%
+    \tud@cmd@store{seriesdefault}%
+    \tud@cmd@store{shapedefault}%
+    \if@tud@fontspec%
+      \ifnum\tud@cdfont=1\relax%
+        \setsansfont{Univers Light}[%
+          BoldFont = Univers,%
+          ItalicFont = Univers Light Oblique,%
+          BoldItalicFont = Univers Oblique,%
+        ]%
+        \setmonofont{LMMonoLt10-Regular}[%
+          BoldFont = LMMono10-Regular,%
+          ItalicFont = LMMonoLt10-Oblique,%
+          BoldItalicFont = LMMonoSlant10-Regular,%
+        ]%
       \else%
-        \renewcommand*\bfdefault{m}%
-        \renewcommand*\mddefault{l}%
+        \setsansfont{Univers}[%
+          BoldFont = Univers Bold,%
+          ItalicFont = Univers Oblique,%
+          BoldItalicFont = Univers Bold Oblique,%
+        ]%
+        \setmonofont{LMMono10-Regular}[%
+          BoldFont = LMMonoLt10-Bold,%
+          ItalicFont = LMMonoSlant10-Regular,%
+          BoldItalicFont = LMMonoLt10-BoldOblique,%
+        ]%
+      \fi%
+    \else%
+      \if@tud@univers%
+        \renewcommand*\sfdefault{\tud@univers}%
+        \renewcommand*\ttdefault{\tud@univers t}%
+        \ifnum\tud@cdfont=1\relax%
+          \renewcommand*\bfdefault{m}%
+          \renewcommand*\mddefault{l}%
+        \else%
+          \renewcommand*\bfdefault{b}%
+          \renewcommand*\mddefault{m}%
+        \fi%
       \fi%
     \fi%
+    \renewcommand*\rmdefault{\sfdefault}%
+    \renewcommand*\familydefault{\sfdefault}%
+    \renewcommand*\seriesdefault{\mddefault}%
+    \renewcommand*\shapedefault{\updefault}%
+  \else%
+    \tud@cmd@restore{rmdefault}%
+    \tud@cmd@restore{sfdefault}%
+    \tud@cmd@restore{ttdefault}%
+    \tud@cmd@restore{bfdefault}%
+    \tud@cmd@restore{mddefault}%
+    \tud@cmd@restore{itdefault}%
+    \tud@cmd@restore{familydefault}%
+    \tud@cmd@restore{seriesdefault}%
+    \tud@cmd@restore{shapedefault}%
   \fi%
-  \renewcommand*\rmdefault{\sfdefault}%
-  \renewcommand*\familydefault{\sfdefault}%
-  \renewcommand*\seriesdefault{\mddefault}%
-  \renewcommand*\shapedefault{\updefault}%
   \normalfont\selectfont%
 }
-\newcommand*\tud@font@mathfonts{%
-  \if@tud@sansmath\tud@sansmath\else\tud@serifmath\fi%
-  \if@tud@slantedgreek\tud@greek@slanted\else\tud@greek@upright\fi%
+\newcommand*\tud@font@math@set{%
+  \if@tud@univers%
+    \if@tud@sansmath%
+      \tud@cmd@store{mv@normal}%
+      \tud@cmd@store{mv@bold}%
+      \let\mv@normal\mv@univers%
+      \let\mv@bold\mv@universbold%
+    \else%
+      \tud@cmd@restore{mv@normal}%
+      \tud@cmd@restore{mv@bold}%
+    \fi%
+  \fi%
+  \if@tud@slantedgreek%
+    \tud@font@greek@slanted
+  \else%
+    \tud@font@greek@upright%
+  \fi%
   \mathversion{normal}%
 }
-\newcommand*\tud@sansmath{%
-  \if@tud@univers%
-    \tud@cmd@store{mv@normal}%
-    \tud@cmd@store{mv@bold}%
-    \let\mv@normal\mv@univers%
-    \let\mv@bold\mv@universbold%
-    \mathversion{normal}%
-  \fi%
-}
-\newcommand*\tud@serifmath{%
-  \if@tud@univers%
-    \tud@cmd@restore{mv@normal}%
-    \tud@cmd@restore{mv@bold}%
-    \mathversion{normal}%
-  \fi%
-}
-\newcount\tud@greek@upGamma
-\tud@greek@upGamma\Gamma
-\newcount\tud@greek@offset
+\newcount\tud@font@greek@upGamma
+\tud@font@greek@upGamma\Gamma
+\newcount\tud@font@greek@offset
 \let\@tempa\relax
 \DeclareMathSymbol{\@tempa}{\mathalpha}{letters}{0}
-\tud@greek@offset\@tempa
-\advance\tud@greek@offset-\Gamma
-\newcommand*\tud@greek@slanted{%
-  \ifnum\Gamma=\tud@greek@upGamma\relax\tud@greek@changeshape\fi%
+\tud@font@greek@offset\@tempa
+\advance\tud@font@greek@offset-\Gamma
+\newcommand*\tud@font@greek@slanted{%
+  \ifnum\Gamma=\tud@font@greek@upGamma\relax\tud@font@greek@changeshape\fi%
 }
-\newcommand*\tud@greek@upright{%
-  \ifnum\Gamma>\tud@greek@upGamma%
-    \tud@greek@offset=-\tud@greek@offset%
-    \tud@greek@changeshape%
-    \tud@greek@offset=-\tud@greek@offset%
+\newcommand*\tud@font@greek@upright{%
+  \ifnum\Gamma>\tud@font@greek@upGamma%
+    \tud@font@greek@offset=-\tud@font@greek@offset%
+    \tud@font@greek@changeshape%
+    \tud@font@greek@offset=-\tud@font@greek@offset%
   \fi%
 }
-\newcommand*\tud@greek@def[2]{%
+\newcommand*\tud@font@greek@def[2]{%
   \expandafter\@tempcnta\csname #1\endcsname%
   \advance\@tempcnta#2%
   \expandafter\mathchardef\csname #1\endcsname\@tempcnta%
 }
-\newcommand*\tud@greek@uc{%
+\newcommand*\tud@font@greek@uc{%
   Gamma,Delta,Theta,Lambda,Xi,Pi,Sigma,Upsilon,Phi,Psi,Omega%
 }
-\newcommand*\tud@greek@changeshape{%
-  \@for\@tempa:=\tud@greek@uc\do{%
-    \@expandtwoargs\tud@greek@def{\@tempa}{\tud@greek@offset}%
+\newcommand*\tud@font@greek@changeshape{%
+  \@for\@tempa:=\tud@font@greek@uc\do{%
+    \@expandtwoargs\tud@font@greek@def{\@tempa}{\tud@font@greek@offset}%
   }%
 }
 \newcommand*\tud@head@font@bold{}
 \newcommand*\tud@head@font@light{}
 \newcommand*\tud@head@font@set{%
-  \let\@raggedtwoe@everyselectfont\relax%
-  \spaceskip\z@\selectfont%
+  \ifdef{\@raggedtwoe@everyselectfont}{%
+    \let\@raggedtwoe@everyselectfont\relax%
+    \spaceskip\z@\selectfont%
+  }{}%
   \DeclareFixedFont{\tud@head@font@bold}{\encodingdefault}%
     {\sfdefault}{bx}{n}{\tud@head@font@size}%
   \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
     {\sfdefault}{\mddefault}{n}{\tud@head@font@size}%
+  \@tempswafalse%
   \ifcase\tud@headfont\relax%
-    \if@tud@cdfonts%
+    \ifnum\tud@cdfont>0\relax%
       \ClassWarning{\tudcls@name}{%
         It isn't possible to use `cdhead=false'\MessageBreak%
         together with `cdfont=true'%
       }%
+      \@tempswatrue%
     \fi%
-  \or%
-    \@tud@cdfontstrue%
-    \def\mddefault{l}%
-  \or%
-    \@tud@cdfontstrue%
-    \def\mddefault{m}%
+  \else%
+    \@tempswatrue%
   \fi%
-  \if@tud@cdfonts%
+  \if@tempswa%
     \if@tud@fontspec%
       \DeclareFixedFont{\tud@head@font@bold}{\encodingdefault}%
         {UniversBold}{m}{n}{\tud@head@font@size}%
-      \ifstr{\mddefault}{m}{%
-        \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
-          {UniversRegular}{m}{n}{\tud@head@font@size}%
-      }{%
+      \ifcase\tud@headfont\relax\or%
         \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
           {UniversLight}{m}{n}{\tud@head@font@size}%
-      }%
+      \or%
+        \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
+          {UniversRegular}{m}{n}{\tud@head@font@size}%
+      \fi%
     \else%
       \if@tud@univers%
         \DeclareFixedFont{\tud@head@font@bold}{\encodingdefault}%
           {\tud@univers}{b}{n}{\tud@head@font@size}%
-        \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
-          {\tud@univers}{\mddefault}{n}{\tud@head@font@size}%
+        \ifcase\tud@headfont\relax\or%
+          \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
+            {\tud@univers}{l}{n}{\tud@head@font@size}%
+        \or%
+          \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
+            {\tud@univers}{m}{n}{\tud@head@font@size}%
+        \fi%
       \fi%
     \fi%
   \fi%
@@ -1280,10 +1305,6 @@
   \else%
     \expandafter\@secondoftwo%
   \fi%
-}
-\AtBeginDocument{%
-  \if@tud@cdfonts\tud@font@cdfonts\fi%
-  \tud@font@mathfonts%
 }
 \AfterPackage*{amsfonts}{%
   \DeclareFontFamily{U}{msa}{}%
@@ -1899,16 +1920,7 @@
         height=\dimexpr.6\tud@dim@topmargin+\dp\strutbox\relax,%
       ]{tudheadings.foot.logo}%
     }{}%
-    \newpairofpagestyles{tudheadings}{}%
-    \ForEachLayerOfPageStyle{tudheadings}{%§§§ überarbeiten
-%      \RemoveLayersFromPageStyle{tudheadings}{#1}%
-      \typeout{+++++ #1}%
-    }%
-    \ForEachLayerOfPageStyle{plain.tudheadings}{%§§§ überarbeiten
-%      \RemoveLayersFromPageStyle{plain.tudheadings}{#1}%
-      \typeout{+++++ #1}%
-    }%
-    \AddLayersToPageStyle{tudheadings}{%
+    \DeclareNewPageStyleByLayers[onselect=\tud@ps@init]{tudheadings}{%
       tudheadings.head.back,%§§§
       tudheadings.head.mainlogo,%
       tudheadings.head.logo,%
@@ -1919,19 +1931,16 @@
       tudheadings.head.upperwideline,%
       tudheadings.head.lowerwideline,%
       tudheadings.foot.logo,%
-%      scrheadings.foot.odd,%
-%      scrheadings.foot.even,%
-%      scrheadings.foot.oneside,%
-%      scrheadings.foot.above.line,%
-%      scrheadings.foot.below.line%
-    }%
-    \AddToLayerPageStyleOptions{tudheadings}{%
-      onselect=\tud@ps@setlinewidth%
+      scrheadings.foot.odd,%
+      scrheadings.foot.even,%
+      scrheadings.foot.oneside,%
+      scrheadings.foot.above.line,%
+      scrheadings.foot.below.line%
     }%
     \DeclareNewPageStyleAlias{tud}{tudheadings}%
     \DeclareNewPageStyleAlias{tudscr}{tudheadings}%
     \DeclareNewPageStyleAlias{tudscrheadings}{tudheadings}%
-    \AddLayersToPageStyle{plain.tudheadings}{%
+    \DeclareNewPageStyleByLayers[onselect=\tud@ps@init]{plain.tudheadings}{%
       tudheadings.head.back,%§§§
       tudheadings.head.mainlogo,%
       tudheadings.head.logo,%
@@ -1942,21 +1951,18 @@
       tudheadings.head.upperwideline,%
       tudheadings.head.lowerwideline,%
       tudheadings.foot.logo,%
-%      plain.scrheadings.foot.odd,%
-%      plain.scrheadings.foot.even,%
-%      plain.scrheadings.foot.oneside,%
-%      plain.scrheadings.foot.above.line,%
-%      plain.scrheadings.foot.below.line%
-    }%
-    \AddToLayerPageStyleOptions{plain.tudheadings}{%
-      onselect=\tud@ps@setlinewidth%
+      plain.scrheadings.foot.odd,%
+      plain.scrheadings.foot.even,%
+      plain.scrheadings.foot.oneside,%
+      plain.scrheadings.foot.above.line,%
+      plain.scrheadings.foot.below.line%
     }%
     \DeclareNewPageStyleAlias{plain.tudscrheadings}{plain.tudheadings}%
     \DeclareNewPageStyleAlias{tudplain}{plain.tudheadings}%
     \DeclareNewPageStyleAlias{tudscrplain}{plain.tudheadings}%
     \DeclareNewPageStyleAlias{tudheadingsplain}{plain.tudheadings}%
     \DeclareNewPageStyleAlias{tudscrheadingsplain}{plain.tudheadings}%
-    \DeclareNewPageStyleByLayers{empty.tudheadings}{%
+    \DeclareNewPageStyleByLayers[onselect=\tud@ps@init]{empty.tudheadings}{%
       tudheadings.head.back,%§§§
       tudheadings.head.mainlogo,%
       tudheadings.head.logo,%
@@ -1967,15 +1973,6 @@
       tudheadings.head.upperwideline,%
       tudheadings.head.lowerwideline,%
       tudheadings.foot.logo,%
-    }%
-    \AddToLayerPageStyleOptions{empty.tudheadings}{%
-      onselect={%
-        \tud@ps@setlinewidth%
-        \DeclarePageStyleAlias{plain}{plain.tudheadings}%
-        \DeclarePageStyleAlias{headings}{tudheadings}%
-        \def\sls@currentheadings{tudheadings}%
-        \def\sls@currentplain{plain.tudheadings}%
-      }%
     }%
     \DeclareNewPageStyleAlias{empty.tudscrheadings}{empty.tudheadings}%
     \DeclareNewPageStyleAlias{tudempty}{empty.tudheadings}%
@@ -1995,7 +1992,11 @@
     \BeforeSelectAnyPageStyle{\tud@beforeselectanypagestyle{#1}}%
   }%
 }
-\newcommand*\tud@ps@setlinewidth{%
+\newcommand*\tud@ps@init{%
+  \DeclarePageStyleAlias{plain}{plain.tudheadings}%
+  \DeclarePageStyleAlias{headings}{tudheadings}%
+  \def\sls@currentheadings{tudheadings}%
+  \def\sls@currentplain{plain.tudheadings}%
   \global\let\tud@dim@line\tud@dim@thinline%
   \ifstr{\tud@head@logocolor}{white}{%
     \global\let\tud@dim@line\tud@dim@heavyline%
@@ -2078,13 +2079,11 @@
 \newcommand*\tud@head@text@second{}
 \newcommand*\tud@head@text@delimiter{}
 \newcommand*\tud@head@text@buffer{}
-\newcommand*\tud@head@font{}
 \newcommand*\tud@head@rule[1]{%
   \color{\tud@head@logocolor}%
   \rule[\ht\strutbox]{#1}{\tud@dim@line}%
 }
 \newcommand*\tud@head@text@add[3][, ]{%
-  \def\tud@head@font{#2}%
   \edef\tud@head@text{#3}%
   \ifx\tud@head@text\@empty%
     \def\tud@head@text@delimiter{}%
@@ -2096,7 +2095,7 @@
     \def\@tempa{%
       \tud@head@text@first%
       \tud@head@text@delimiter%
-      \tud@head@font%
+      #2%
       \tud@head@text%
     }%
     \settowidth\@tempdima{\@tempa}%
@@ -2111,7 +2110,7 @@
     \edef\tud@head@text@second{%
       \tud@head@text@second%
       \tud@head@text@delimiter%
-      \tud@head@font%
+      #2%
       \tud@head@text%
     }%
   \fi%
@@ -2587,7 +2586,7 @@
 \newcommand*\TUD@parameter@define@ps[1]{%
   \TUD@parameter@define{cdfont}[true]{\TUDoption{cdfont}{#1}}%
   \TUD@parameter@define{cdfonts}[true]{\TUDoption{cdfonts}{#1}}%
-  \TUD@parameter@define{tudfonts}[true]{\TUDoption{cdfonts}{#1}}%
+  \TUD@parameter@define{tudfonts}[true]{\TUDoption{tudfonts}{#1}}%
   \TUD@parameter@define{cdhead}[true]{\TUDoption{cdhead}{#1}}%
   \TUD@parameter@define{headfont}[true]{\TUDoption{headfont}{#1}}%
   \TUD@parameter@define{widehead}[true]{\TUDoption{widehead}{#1}}%
@@ -2909,11 +2908,11 @@
   \ifnum\tud@abstract@level>1\relax\def\tud@abstract@level{1}\fi%
   \KOMAoptions{titlepage=false}%
   \if@tud@chapterpage%
-    \if@tud@cdfonts%
-      \if@tud@heavyfont%
-        \TUDoptions{cdfont=heavy}%
-      \else%
+    \ifnum\tud@cdfont>0\relax%
+      \ifnum\tud@cdfont=1\relax%
         \TUDoptions{cdfont=true}%
+      \else%
+        \TUDoptions{cdfont=heavy}%
       \fi%
     \fi%
     \addtokomafont{disposition}{\color{\tud@chapter@fontcolor}}%
