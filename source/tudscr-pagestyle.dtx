@@ -1,4 +1,4 @@
-% \CheckSum{1820}
+% \CheckSum{1810}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-pagestyle.dtx}[%
-  2015/02/02 v2.03 TUD-KOMA-Script (pagestyle)%
+  2015/02/03 v2.03 TUD-KOMA-Script (pagestyle)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -505,31 +505,15 @@
     }{}%
 %    \end{macrocode}
 % Aus den zuvor erstellten Ebenen werden jetzt die eigentlichen Seitenstile 
-% zusammengesetzt. Mit \cs{newpairofpagestyles} wird neben dem Seitenstil
-% \pgs{tudheadings} der passende Seitenstil \pgs{plain.tudheadings} gleich mit
-% deklariert.
-%    \begin{macrocode}
-    \newpairofpagestyles{tudheadings}{}%
-%    \end{macrocode}
-% Allerdings führt der Befehl dazu, dass zunächst eine Vielzahl an Ebenen
-% hinzugefügt wird, welche nicht benötigt werden. Deshalb werden diese mit 
-% \cs{RemoveLayersFromPageStyle} zunächst entfernt.
-%    \begin{macrocode}
-    \ForEachLayerOfPageStyle{tudheadings}{%
-      \RemoveLayersFromPageStyle{tudheadings}{#1}%
-    }%
-    \ForEachLayerOfPageStyle{plain.tudheadings}{%
-      \RemoveLayersFromPageStyle{plain.tudheadings}{#1}%
-    }%
-%    \end{macrocode}
-% Als nächstes wird der \pgs{headings}-Seitenstil definiert. Dieser verwendet
-% den TUD-Kopf und die Fußzeilenebenen des Seitenstils \pgs{scrheadings}. Es 
-% werden die entsprechenden Ebenen zum jetzt leeren Seitenstil hinzugefügt.
+% zusammengesetzt. Als erstes wird der \pgs{headings}-Seitenstil definiert.
+% Dieser verwendet den TUD-Kopf und die Fußzeilenebenen des Seitenstils
+% \pgs{scrheadings}, welche zur Definition des Seitenstils verwendet werden.
+% Beim Aktivieren des Seitenstils wird außerdem \cs{tud@ps@init} ausgeführt.
 % Damit die Benutzerschnittstelle von \pkg{scrlayer-scrpage} für die Fußzeile 
 % weiterhin durch den Anwender verwendet werden kann, werden wie erwähnt die
 % entsprechenden \pgs{scrheadings}-Ebenen verwendet. 
 %    \begin{macrocode}
-    \AddLayersToPageStyle{tudheadings}{%
+    \DeclareNewPageStyleByLayers[onselect=\tud@ps@init]{tudheadings}{%
       tudheadings.head.mainlogo,%
       tudheadings.head.logo,%
       tudheadings.head.text,%
@@ -545,15 +529,7 @@
       scrheadings.foot.below.line%
     }%
 %    \end{macrocode}
-% Beim Aufruf des Seitenstils wird mit \cs{tud@ps@setlinewidth} in Abhängigkeit 
-% der eingestzten Hintergrundfarbe der Seite die Linienstärke des Querbalkens 
-% gesetzt.
-%    \begin{macrocode}
-    \AddToLayerPageStyleOptions{tudheadings}{%
-      onselect=\tud@ps@setlinewidth%
-    }%
-%    \end{macrocode}
-% Als letztes werden Aliasnamen für den Seitenstil definiert.
+% Zuletzt werden Aliasnamen für den Seitenstil definiert.
 %    \begin{macrocode}
     \DeclareNewPageStyleAlias{tud}{tudheadings}%
     \DeclareNewPageStyleAlias{tudscr}{tudheadings}%
@@ -562,7 +538,7 @@
 % Für den \pgs{plain}-Seitenstil wird ebenso verfahren. Hier werden für die 
 % Fußzeilenebenen des Seitenstils \pgs{plain.scrheadings} hinzugefügt.
 %    \begin{macrocode}
-    \AddLayersToPageStyle{plain.tudheadings}{%
+    \DeclareNewPageStyleByLayers[onselect=\tud@ps@init]{plain.tudheadings}{%
       tudheadings.head.mainlogo,%
       tudheadings.head.logo,%
       tudheadings.head.text,%
@@ -577,9 +553,6 @@
       plain.scrheadings.foot.above.line,%
       plain.scrheadings.foot.below.line%
     }%
-    \AddToLayerPageStyleOptions{plain.tudheadings}{%
-      onselect=\tud@ps@setlinewidth%
-    }%
     \DeclareNewPageStyleAlias{plain.tudscrheadings}{plain.tudheadings}%
     \DeclareNewPageStyleAlias{tudplain}{plain.tudheadings}%
     \DeclareNewPageStyleAlias{tudscrplain}{plain.tudheadings}%
@@ -589,7 +562,7 @@
 % Des Weiteren gibt es einen selbstständigen \enquote{leeren} Seitenstil, der 
 % lediglich aus dem Kopf besteht und einen lerren Seitenfuß hat.
 %    \begin{macrocode}
-    \DeclareNewPageStyleByLayers{empty.tudheadings}{%
+    \DeclareNewPageStyleByLayers[onselect=\tud@ps@init]{empty.tudheadings}{%
       tudheadings.head.mainlogo,%
       tudheadings.head.logo,%
       tudheadings.head.text,%
@@ -598,23 +571,6 @@
       tudheadings.head.upperwideline,%
       tudheadings.head.lowerwideline,%
       tudheadings.foot.logo,%
-    }%
-%    \end{macrocode}
-% Normalerweise werden durch \pkg{scrlayer-scrpage} bei der Umschaltung auf 
-% einen mit dem Befehl \cs{newpairofpagestyles}\marg{Seitenstil} definierten 
-% Seitenstil, die Seitenstile \pgs{headings} und \pgs{plain} als Aliase für 
-% \pgs{\meta{Seitenstil}} und \pgs{plain.\meta{Seitenstil}} festgelegt. Hiermit
-% wird zusätzlich dafür gesorgt, das der Seitenstil \pgs{empty.tudheadings}
-% diese ebenfalls definiert, sobald dieser ausgewählt wurde.
-%    \begin{macrocode}
-    \AddToLayerPageStyleOptions{empty.tudheadings}{%
-      onselect={%
-        \tud@ps@setlinewidth%
-        \DeclarePageStyleAlias{plain}{plain.tudheadings}%
-        \DeclarePageStyleAlias{headings}{tudheadings}%
-        \def\sls@currentheadings{tudheadings}%
-        \def\sls@currentplain{plain.tudheadings}%
-      }%
     }%
     \DeclareNewPageStyleAlias{empty.tudscrheadings}{empty.tudheadings}%
     \DeclareNewPageStyleAlias{tudempty}{empty.tudheadings}%
@@ -657,19 +613,35 @@
 % \end{pagestyle}^^A empty.tudheadings
 % \end{pagestyle}^^A plain.tudheadings
 % \end{pagestyle}^^A tudheadings
-% \begin{macro}{\tud@ps@setlinewidth}
+% \begin{macro}{\tud@ps@init}
 % \changes{v2.03}{2015/01/09}{neu}%^^A
-% Dieser Befehl wird bei der Initialiserung der Seitenstile aufgerufen und 
-% sorgt für die richtigen Linienstärken im Querbalken.
+% Dieser Befehl wird bei der Initialiserung der Seitenstile aufgerufen.
 %    \begin{macrocode}
-\newcommand*\tud@ps@setlinewidth{%
+\newcommand*\tud@ps@init{%
+%    \end{macrocode}
+% Normalerweise werden durch \pkg{scrlayer-scrpage} bei der Umschaltung auf 
+% einen mit dem Befehl \cs{newpairofpagestyles}\marg{Seitenstil} definierten 
+% Seitenstil, die Seitenstile \pgs{headings} und \pgs{plain} als Aliase für 
+% \pgs{\meta{Seitenstil}} und \pgs{plain.\meta{Seitenstil}} festgelegt. 
+% Allerdings definiert dieser Befehl zusätzliche Ebenen für Kopf- und Fußzeile, 
+% weshalb auf die Verwendung verziichtet wird. Das automatische Umschalten soll 
+% dennoch ermöglicht werden.
+%    \begin{macrocode}
+  \DeclarePageStyleAlias{plain}{plain.tudheadings}%
+  \DeclarePageStyleAlias{headings}{tudheadings}%
+  \def\sls@currentheadings{tudheadings}%
+  \def\sls@currentplain{plain.tudheadings}%
+%    \end{macrocode}
+% In Abhängigkeit von der eingestzten Hintergrundfarbe der Seite wird die 
+% Linienstärke des Querbalkens gesetzt.
+%    \begin{macrocode}
   \global\let\tud@dim@line\tud@dim@thinline%
   \ifstr{\tud@head@logocolor}{white}{%
     \global\let\tud@dim@line\tud@dim@heavyline%
   }{}%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@ps@setlinewidth
+% \end{macro}^^A \tud@ps@init
 % \begin{macro}{\ps@tudpage@plain}
 % \changes{v2.02}{2014/06/23}{entfernt}%^^A
 % \begin{macro}{\ps@tudpage@empty}
@@ -1619,13 +1591,12 @@
 % gesichert, um gegebenenfalls zurückschalten zu können. Anschließend werden
 % diese mit dem neuen Stil überschrieben.
 % \ToDo{\opt{cdhead} auf Farbe erweitern}[v2.03]
-% \ToDo{prüfen, ob Sicherung der Seitenstile so sinnvoll}[v2.03]
 %    \begin{macrocode}
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \if@atdocument%
       \if@tud@cdfoot%
-        \tud@ps@store{headings}%
-        \tud@ps@store{plain}%
+        \tud@ps@store{scrheadings}%
+        \tud@ps@store{plain.scrheadings}%
         \tud@font@koma@set{pageheadfoot}{\upshape}%
         \clearpairofpagestyles%
         \ofoot[\pagemark]{%
@@ -1638,8 +1609,8 @@
 % wiederhergestellt.
 %    \begin{macrocode}
       \else%
-        \tud@ps@restore{headings}%
-        \tud@ps@restore{plain}%
+        \tud@ps@restore{scrheadings}%
+        \tud@ps@restore{plain.scrheadings}%
         \tud@font@koma@unset{pageheadfoot}%
       \fi%
     \fi%
@@ -1659,18 +1630,18 @@
 % Die nächsten beiden Befehle dienen zum Sichern der Kopf- und Fußzeilen\dots
 %    \begin{macrocode}
 \newcommand*\tud@ps@store[1]{%
-  \tud@@ps@store{#1}{odd}{left}{head}{}%
-  \tud@@ps@store{#1}{odd}{right}{head}{}%
-  \tud@@ps@store{#1}{odd}{middle}{head}{}%
-  \tud@@ps@store{#1}{even}{left}{head}{}%
-  \tud@@ps@store{#1}{even}{right}{head}{}%
-  \tud@@ps@store{#1}{even}{middle}{head}{}%
-  \tud@@ps@store{#1}{odd}{left}{foot}{}%
-  \tud@@ps@store{#1}{odd}{right}{foot}{}%
-  \tud@@ps@store{#1}{odd}{middle}{foot}{}%
-  \tud@@ps@store{#1}{even}{left}{foot}{}%
-  \tud@@ps@store{#1}{even}{right}{foot}{}%
-  \tud@@ps@store{#1}{even}{middle}{foot}{}%
+  \tud@@ps@store{#1}{odd}{left}{head}%
+  \tud@@ps@store{#1}{odd}{right}{head}%
+  \tud@@ps@store{#1}{odd}{middle}{head}%
+  \tud@@ps@store{#1}{even}{left}{head}%
+  \tud@@ps@store{#1}{even}{right}{head}%
+  \tud@@ps@store{#1}{even}{middle}{head}%
+  \tud@@ps@store{#1}{odd}{left}{foot}%
+  \tud@@ps@store{#1}{odd}{right}{foot}%
+  \tud@@ps@store{#1}{odd}{middle}{foot}%
+  \tud@@ps@store{#1}{even}{left}{foot}%
+  \tud@@ps@store{#1}{even}{right}{foot}%
+  \tud@@ps@store{#1}{even}{middle}{foot}%
 }
 %    \end{macrocode}
 % \dots, wobei hierfür auf die internen Befehle von \pkg{scrlayer-scrpage} 
@@ -1678,28 +1649,28 @@
 %    \begin{macrocode}
 \newcommand*\tud@@ps@store[4]{%
   \ifcsdef{@@tud@ps@#1@#2@#3@#4}{}{%
-    \csletcs{@@tud@ps@#1@#2@#3@#4}{sls@ps@\@nameuse{sls@current#1}@#2@#3@#4}%
+    \csletcs{@@tud@ps@#1@#2@#3@#4}{sls@ps@#1@#2@#3@#4}%
   }%
 }
 \newcommand*\tud@ps@restore[1]{%
-  \tud@@ps@restore{#1}{odd}{left}{head}{}%
-  \tud@@ps@restore{#1}{odd}{right}{head}{}%
-  \tud@@ps@restore{#1}{odd}{middle}{head}{}%
-  \tud@@ps@restore{#1}{even}{left}{head}{}%
-  \tud@@ps@restore{#1}{even}{right}{head}{}%
-  \tud@@ps@restore{#1}{even}{middle}{head}{}%
-  \tud@@ps@restore{#1}{odd}{left}{foot}{}%
-  \tud@@ps@restore{#1}{odd}{right}{foot}{}%
-  \tud@@ps@restore{#1}{odd}{middle}{foot}{}%
-  \tud@@ps@restore{#1}{even}{left}{foot}{}%
-  \tud@@ps@restore{#1}{even}{right}{foot}{}%
-  \tud@@ps@restore{#1}{even}{middle}{foot}{}%
+  \tud@@ps@restore{#1}{odd}{left}{head}%
+  \tud@@ps@restore{#1}{odd}{right}{head}%
+  \tud@@ps@restore{#1}{odd}{middle}{head}%
+  \tud@@ps@restore{#1}{even}{left}{head}%
+  \tud@@ps@restore{#1}{even}{right}{head}%
+  \tud@@ps@restore{#1}{even}{middle}{head}%
+  \tud@@ps@restore{#1}{odd}{left}{foot}%
+  \tud@@ps@restore{#1}{odd}{right}{foot}%
+  \tud@@ps@restore{#1}{odd}{middle}{foot}%
+  \tud@@ps@restore{#1}{even}{left}{foot}%
+  \tud@@ps@restore{#1}{even}{right}{foot}%
+  \tud@@ps@restore{#1}{even}{middle}{foot}%
 }
 \newcommand*\tud@@ps@restore[4]{%
   \ifcsdef{@@tud@ps@#1@#2@#3@#4}{%
-    \csletcs{sls@ps@\@nameuse{sls@current#1}@#2@#3@#4}{@@tud@ps@#1@#2@#3@#4}%
+    \csletcs{sls@ps@#1@#2@#3@#4}{@@tud@ps@#1@#2@#3@#4}%
     \csundef{@@tud@ps@#1@#2@#3@#4}%
-  }%
+  }{}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@@ps@restore
