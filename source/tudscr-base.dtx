@@ -1,4 +1,4 @@
-% \CheckSum{294}
+% \CheckSum{291}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-base.dtx}[%
-  2015/01/30 v2.03 TUD-KOMA-Script\space%
+  2015/02/04 v2.03 TUD-KOMA-Script\space%
 %</driver>
 %<package>\NeedsTeXFormat{LaTeX2e}[2011/06/27]
 %<package>\ProvidesPackage{tudscrbase}[%
@@ -171,7 +171,6 @@
 %
 % \begin{macro}{\TUDProcessOptions}
 % \begin{macro}{\TUDExecuteOptions}
-% \begin{macro}{\TUDDefaultOptions}
 % \begin{macro}{\TUDoptions}
 % \begin{macro}{\TUDoption}
 % \begin{macro}{\TUD@noworlater}
@@ -193,13 +192,11 @@
 % Ausführung unterschiedlicher Klassenoptionen mithilfe der Funktionen aus
 % dem \pkg{scrbase}-Paket erstellt. Klassenoptionen können entweder als
 % Schalter (\cs{TUD@ifkey}) oder aber mit mehreren möglichen Werten
-% (\cs{TUD@numkey}) definiert werden. Die Grundeinstellungen für alle
-% \cls{tudscr}-Klassen werden in \cs{TUDDefaultOptions} hinterlegt.
+% (\cs{TUD@numkey}) definiert werden.
 %    \begin{macrocode}
 \DefineFamily{TUD}
 \newcommand*\TUDProcessOptions{\FamilyProcessOptions{TUD}}
 \newcommand*\TUDExecuteOptions{\FamilyExecuteOptions{TUD}}
-\newcommand*\TUDDefaultOptions{cd,cdfont,tudbookmarks}
 \newcommand*\TUDoptions{\FamilyOptions{TUD}}
 \newcommand*\TUDoption{\FamilyOption{TUD}}
 %    \end{macrocode}
@@ -272,7 +269,6 @@
 % \end{macro}^^A \TUD@noworlater
 % \end{macro}^^A \TUDoption
 % \end{macro}^^A \TUDoptions
-% \end{macro}^^A \TUDDefaultOptions
 % \end{macro}^^A \TUDExecuteOptions
 % \end{macro}^^A \TUDProcessOptions
 % \begin{macro}{\TUD@key@lock}
@@ -316,11 +312,11 @@
     \boolfalse{@tud@#1@locked}%
   }%
 }
-\let\TUD@std@numkey@lock\TUD@std@ifkey@lock
 \newcommand*\TUD@set@ifkey@lock[1]{%
   \booltrue{@tud@#1@locked}%
   \TUD@set@ifkey{#1}%
 }
+\let\TUD@std@numkey@lock\TUD@std@ifkey@lock
 \newcommand*\TUD@set@numkey@lock[1]{%
   \booltrue{@tud@#1@locked}%
   \TUD@set@numkey{#1}%
@@ -331,59 +327,59 @@
 % \end{macro}^^A \TUD@std@numkey@lock
 % \end{macro}^^A \TUD@std@ifkey@lock
 % \end{macro}^^A \TUD@key@lock
-% \begin{macro}{\csdef@lock}
-% \begin{macro}{\csstd@lock}
-% \begin{macro}{\csset@lock}
-% Mit \cs{csdef@lock}\marg{Name}\marg{Definition} kann ein Befehl definiert
-% werden, welcher intern nur mit \cs{csstd@lock}\marg{Name}\marg{Definition}
+% \begin{macro}{\cs@lock}
+% \begin{macro}{\cs@std@lock}
+% \begin{macro}{\cs@set@lock}
+% Mit \cs{cs@lock}\marg{Name}\marg{Definition} kann ein Befehl definiert
+% werden, welcher intern nur mit \cs{cs@std@lock}\marg{Name}\marg{Definition}
 % geschrieben wird, wenn nicht über eine entsprechende Option ein explizites
-% Verhalten mit \cs{csset@lock}\marg{Name}\marg{Definition} zugewiesen wurde.
+% Verhalten mit \cs{cs@set@lock}\marg{Name}\marg{Definition} zugewiesen wurde.
 % Dies ist äquivalent zu \cs{TUD@std@ifkey@lock} und \cs{TUD@set@ifkey@lock}
 % bzw. \cs{TUD@std@numkey@lock} und \cs{TUD@set@numkey@lock}
 %    \begin{macrocode}
-\newcommand*\csdef@lock[2]{%
+\newcommand*\cs@lock[2]{%
   \csdef{#1}{#2}%
   \newbool{#1@locked}%
 }
-\newcommand*\csstd@lock[2]{%
+\newcommand*\cs@std@lock[2]{%
   \ifbool{#1@locked}{}{%
     \csdef{#1}{#2}%
     \boolfalse{#1@locked}%
   }%
 }
-\newcommand*\csset@lock[2]{%
+\newcommand*\cs@set@lock[2]{%
   \csdef{#1}{#2}%
   \booltrue{#1@locked}%
 }
 %    \end{macrocode}
-% \end{macro}^^A \csset@lock
-% \end{macro}^^A \csstd@lock
-% \end{macro}^^A \csdef@lock
-% \begin{macro}{\newbool@lock}
-% \begin{macro}{\stdbool@lock}
-% \begin{macro}{\setbool@lock}
+% \end{macro}^^A \cs@set@lock
+% \end{macro}^^A \cs@std@lock
+% \end{macro}^^A \cs@lock
+% \begin{macro}{\bool@lock}
+% \begin{macro}{\bool@std@lock}
+% \begin{macro}{\bool@set@lock}
 % Diese Makros dienen in Anlehnung an die vorherigen zum Definieren und Setzen
 % von sperrbaren booleschen Schaltern.
 %    \begin{macrocode}
-\newcommand*\newbool@lock[2][false]{%
+\newcommand*\bool@lock[2][false]{%
   \newbool{#2}%
   \newbool{#2@locked}%
   \setbool{#2}{#1}%
 }
-\newcommand*\stdbool@lock[2]{%
+\newcommand*\bool@std@lock[2]{%
   \ifbool{#1@locked}{}{%
     \setbool{#1}{#2}%
     \boolfalse{#1@locked}%
   }%
 }
-\newcommand*\setbool@lock[2]{%
+\newcommand*\bool@set@lock[2]{%
   \setbool{#1}{#2}%
   \booltrue{#1@locked}%
 }
 %    \end{macrocode}
-% \end{macro}^^A \setbool@lock
-% \end{macro}^^A \stdbool@lock
-% \end{macro}^^A \newbool@lock
+% \end{macro}^^A \bool@set@lock
+% \end{macro}^^A \bool@std@lock
+% \end{macro}^^A \bool@lock
 % \begin{macro}{\tud@cmd@store}
 % \begin{macro}{\tud@cmd@reset}
 % \begin{macro}{\tud@cmd@use}
@@ -622,7 +618,7 @@
 % \KOMAScript-Klasse verzögert.
 %    \begin{macrocode}
 %<*!inherit>
-\TUDExecuteOptions{\TUDDefaultOptions}
+\TUDExecuteOptions{cd,cdfont,tudbookmarks}
 %</!inherit>
 \TUDProcessOptions\relax
 %    \end{macrocode}

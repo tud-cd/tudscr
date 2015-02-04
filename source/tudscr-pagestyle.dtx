@@ -1,4 +1,4 @@
-% \CheckSum{1810}
+% \CheckSum{1809}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-pagestyle.dtx}[%
-  2015/02/03 v2.03 TUD-KOMA-Script (pagestyle)%
+  2015/02/04 v2.03 TUD-KOMA-Script (pagestyle)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -413,24 +413,24 @@
     \DeclareNewLayer[%
       background,headsep,%
       voffset=\dimexpr\tud@dim@topmargin-.5\tud@dim@line\relax,%
-      contents={\if@tud@widehead\else\tud@head@rule{\textwidth}\fi},%
+      contents={\ifnum\tud@head@bar=\z@\relax\tud@head@rule{\textwidth}\fi},%
     ]{tudheadings.head.upperline}%
     \DeclareNewLayer[%
       background,headsep,%
       voffset=\dimexpr\tud@dim@topmargin+\tud@dim@barheight%
         -.5\tud@dim@line\relax,%
-      contents={\if@tud@widehead\else\tud@head@rule{\textwidth}\fi},%
+      contents={\ifnum\tud@head@bar=\z@\relax\tud@head@rule{\textwidth}\fi},%
     ]{tudheadings.head.lowerline}%
     \DeclareNewLayer[%
       background,%
       voffset=\dimexpr\tud@dim@topmargin-.5\tud@dim@line\relax,%
-      contents={\if@tud@widehead\tud@head@rule{\paperwidth}\fi},%
+      contents={\ifnum\tud@head@bar=\@ne\relax\tud@head@rule{\paperwidth}\fi},%
     ]{tudheadings.head.upperwideline}%
     \DeclareNewLayer[%
       background,%
       voffset=\dimexpr\tud@dim@topmargin+\tud@dim@barheight%
         -.5\tud@dim@line\relax,%
-      contents={\if@tud@widehead\tud@head@rule{\paperwidth}\fi},%
+      contents={\ifnum\tud@head@bar=\@ne\relax\tud@head@rule{\paperwidth}\fi},%
     ]{tudheadings.head.lowerwideline}%
 %    \end{macrocode}
 % Außerdem wird eine weitere Ebene für Drittlogos sowie das \DDC-Logo im
@@ -825,7 +825,6 @@
 % \begin{macro}{\tud@head@text@second}
 % \begin{macro}{\tud@head@text@delimiter}
 % \begin{macro}{\tud@head@text@buffer}
-% \begin{macro}{\tud@head@font}
 % Diese Befehle sind Hilfsmakros, die bei der Erzeugung der Textzeile inner- und
 % unterhalb des Querbalkens des TUD-Kopfes dienen.
 %    \begin{macrocode}
@@ -834,9 +833,7 @@
 \newcommand*\tud@head@text@second{}
 \newcommand*\tud@head@text@delimiter{}
 \newcommand*\tud@head@text@buffer{}
-\newcommand*\tud@head@font{}
 %    \end{macrocode}
-% \end{macro}^^A \tud@head@font
 % \end{macro}^^A \tud@head@text@buffer
 % \end{macro}^^A \tud@head@text@delimiter
 % \end{macro}^^A \tud@head@text@second
@@ -844,7 +841,7 @@
 % \end{macro}^^A \tud@head@text
 % \begin{macro}{\tud@head@rule}
 % \changes{v2.02}{2014/06/23}{gewünschte Breite als Argument}%^^A
-% Der Querbalken des Kopfes läuft je nach gewähltem Parameter \opt{widehead}
+% Der Querbalken des Kopfes läuft je nach gewähltem Parameter \cs{tud@head@bar}
 % entweder nur über den Textbereich oder aber über die gesamte Seitenbreite.
 % Der Befehl erzeugt eine horizontale Linie mit der übergebenen Breite und 
 % über \cs{tud@dim@line} definierter Dicke.
@@ -865,7 +862,6 @@
 % nachfolgt.
 %    \begin{macrocode}
 \newcommand*\tud@head@text@add[3][, ]{%
-  \def\tud@head@font{#2}%
   \edef\tud@head@text{#3}%
   \ifx\tud@head@text\@empty%
     \def\tud@head@text@delimiter{}%
@@ -877,7 +873,7 @@
     \def\@tempa{%
       \tud@head@text@first%
       \tud@head@text@delimiter%
-      \tud@head@font%
+      #2%
       \tud@head@text%
     }%
     \settowidth\@tempdima{\@tempa}%
@@ -892,7 +888,7 @@
     \edef\tud@head@text@second{%
       \tud@head@text@second%
       \tud@head@text@delimiter%
-      \tud@head@font%
+      #2%
       \tud@head@text%
     }%
   \fi%
@@ -923,7 +919,7 @@
 %    \begin{macrocode}
   \color{\tud@head@logocolor}%
 %    \end{macrocode}
-% Abhängig vom Schalter \cs{if@tud@cdfonts}~-- gesetzt entweder von der globalen
+% Abhängig vom Wert \cs{tud@cdfont}~-- gesetzt entweder von der globalen
 % Klassenoption oder vom lokalen Parameter \opt{cdfont}~-- werden entweder die
 % Schriften des \CDs oder aber die serifenlose Standardschrift für die Kopfzeile
 % verwendet.
@@ -1407,7 +1403,7 @@
     \def\@tempa{}%
     \def\@tempb{}%
     \@tempswatrue%
-    \renewcommand\do[1]{%
+    \def\do##1{%
       \if@tempswa%
         \def\@tempa{##1}%
         \@tempswafalse%
@@ -1493,14 +1489,23 @@
 %
 % \begin{option}{cdhead}
 % \changes{v2.03}{2015/01/29}{neu}%^^A
+% \begin{macro}{\tud@head@font}
+% \changes{v2.03}{2015/02/04}{neu}%^^A
+% \begin{macro}{\if@tud@head@font@locked}
+% \changes{v2.03}{2015/02/04}{neu}%^^A
+% \begin{macro}{\tud@head@bar}
+% \changes{v2.03}{2015/02/04}{neu}%^^A
+% \begin{macro}{\if@tud@head@bar@locked}
+% \changes{v2.03}{2015/02/04}{neu}%^^A
 % Mit dieser Option wird die zentrale Benutzerschnittstelle für Einstellungen 
-% des typischen Querbalkens für den TUD-Kopf geschaffen. Durch diese Option
-% können sowohl die verwendete Schrift als auch die Stärke für den Balkentext
-% (Institut, Fakultät etc.) geändert werden. Zusätzlich kann die Laufweite des 
-% Querbalkens einstellen. Außerdem lässt sich für das farbige Layout der 
-% farblich abgesetzte Querbalken aktivieren.
+% des typischen Querbalkens für den TUD-Kopf geschaffen. Durch sie können
+% sowohl die verwendete Schrift als auch die Stärke für den Balkentext
+% (Institut, Fakultät etc.) geändert werden. Zusätzlich ist die Laufweite des 
+% Querbalkens bzw. die Farbe einstellbar.
 % \ToDo{\opt{cdhead} auf Farbe erweitern}[v2.03]
 %    \begin{macrocode}
+\cs@lock{tud@head@font}{0}
+\cs@lock{tud@head@bar}{0}
 \TUD@key{cdhead}[true]{%
   \TUD@set@numkey{cdhead}{@tempa}{%
     \TUD@numkey@bool,%
@@ -1508,65 +1513,30 @@
     {cd}{1},{cdfont}{1},{cdfonts}{1},{tudfonts}{1},%
     {light}{1},{lightfont}{1},{lite}{1},{litefont}{1},{noheavyfont}{1},%
     {heavy}{2},{heavyfont}{2},%
-    {wide}{3},{widehead}{3},%
-    {slim}{4},{slimhead}{4},{nowide}{4},{nowidehead}{4},%
-    {normal}{4},{normalhead}{4},{standard}{4},{standardhead}{4},%
+    {slim}{3},{slimhead}{3},{nowide}{3},{nowidehead}{3},{textwidth}{3},%
+    {normal}{3},{normalhead}{3},{standard}{3},{standardhead}{3},%
+    {wide}{4},{widehead}{4},{paperwidth}{4}%
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax%
-      \TUDoptions{headfont=false}%
+      \cs@set@lock{tud@head@font}{0}%
     \or%
-      \TUDoptions{headfont=true}%
+      \cs@set@lock{tud@head@font}{1}%
     \or%
-      \TUDoptions{headfont=heavy}%
+      \cs@set@lock{tud@head@font}{2}%
     \or%
-      \TUDoptions{widehead=true}%
+      \cs@set@lock{tud@head@bar}{0}%
     \or%
-      \TUDoptions{widehead=false}%
+      \cs@set@lock{tud@head@bar}{1}%
     \fi%
   \fi%
 }
 %    \end{macrocode}
+% \end{macro}^^A \if@tud@head@bar@locked
+% \end{macro}^^A \tud@head@bar
+% \end{macro}^^A \if@tud@head@font@locked
+% \end{macro}^^A \tud@head@font
 % \end{option}^^A cdhead
-% \begin{option}{headfont}
-% \changes{v2.02}{2014/07/08}{neu}%^^A
-% \begin{macro}{\tud@headfont}
-% \changes{v2.02}{2014/07/08}{neu}%^^A
-% \begin{macro}{\if@tud@headfont@locked}
-% \changes{v2.02}{2014/07/08}{neu}%^^A
-% Mit dieser Option kann die Schrift des \CDs und deren Schriftstärke in der
-% TUD-Kopfzeile unabhängig von der gewählten Schriftart für den Fließtext 
-% aktiviert werden.
-%    \begin{macrocode}
-\newcommand*\tud@headfont{0}
-\TUD@key@lock{headfont}[true]{%
-  \TUD@set@numkey@lock{headfont}{tud@headfont}{%
-    \TUD@numkey@bool,%
-    {nocd}{0},{nocdfont}{0},{nocdfonts}{0},{notudfonts}{0},%
-    {cd}{1},{cdfont}{1},{cdfonts}{1},{tudfonts}{1},%
-    {light}{1},{lightfont}{1},{lite}{1},{litefont}{1},{noheavyfont}{1},%
-    {heavy}{2},{heavyfont}{2}%
-  }{#1}%
-}
-%    \end{macrocode}
-% \end{macro}^^A \if@tud@headfont@locked
-% \end{macro}^^A \tud@headfont
-% \end{option}^^A headfont
-% \begin{option}{widehead}
-% \begin{macro}{\if@tud@widehead}
-% \begin{macro}{\if@tud@widehead@locked}
-% Der Schalter dient zur Steuerung der Breite des Querbalkens im Kopf der
-% \env{tudpage}-Seite. Entweder der Querbalken liegt im Satzspiegel oder
-% aber über die komplette Papierbreite.
-%    \begin{macrocode}
-\newif\if@tud@widehead
-\TUD@key@lock{widehead}[true]{%
-  \TUD@set@ifkey@lock{widehead}{@tud@widehead}{#1}%
-}
-%    \end{macrocode}
-% \end{macro}^^A \if@tud@widehead@locked
-% \end{macro}^^A \if@tud@widehead
-% \end{option}^^A widehead
 % \begin{option}{cdfoot}
 % \changes{v2.03}{2015/02/02}{Option \opt{extrabottommargin} bei Längenangabe 
 %   indirekt nutzbar}%^^A
@@ -2285,36 +2255,21 @@
 \newcommand*\TUD@parameter@define@ps[1]{%
 %    \end{macrocode}
 % \begin{parameter}{cdfont}
-% \begin{parameter}{cdfonts}
-% \begin{parameter}{tudfonts}
-% Die Option \opt{cdfont} bzw. \opt{cdfonts} bestimmt, ob die Schriften des 
-% \CDs oder aber die standarmäßigen Serifenlosen für die Auszeichnugen in der
-% Kopfzeile und Serifen im Inhalt verwendet werden.
+% Die Option \opt{cdfont} bestimmt, ob die Schriften des \CDs oder aber die
+% standardmäßigen Serifenlosen für die Auszeichnugen in der Kopfzeile und
+% Serifen im Inhalt verwendet werden.
 %    \begin{macrocode}
   \TUD@parameter@define{cdfont}[true]{\TUDoption{cdfont}{#1}}%
-  \TUD@parameter@define{cdfonts}[true]{\TUDoption{cdfonts}{#1}}%
-  \TUD@parameter@define{tudfonts}[true]{\TUDoption{cdfonts}{#1}}%
 %    \end{macrocode}
-% \end{parameter}^^A tudfonts
-% \end{parameter}^^A cdfonts
 % \end{parameter}^^A cdfont
 % \begin{parameter}{cdhead}
-% \changes{v2.03}{2015/01/28}{\val{headfont} und \val{widehead} überlagert}%^^A
-% \begin{parameter}{headfont}
-% \changes{v2.02}{2014/07/08}{neu}%^^A
-% \begin{parameter}{widehead}
-% Mit dem Parameter \val{headfont} kann die Verwendung der Schriften des \CDs
+% \changes{v2.03}{2015/01/28}{\val{barfont} und \val{widehead} überlagert}%^^A
+% Mit dem Parameter \val{cdhead} kann die Verwendung der Schriften des \CDs
 % aktiviert werden, wenn diese im Fließtext nicht zum Einsatz kommen. Die
-% Breite des Querbalkens kann über den Parameter \val{widehead} ebenfalls
-% geändert werden. Seit der Verison~v2.03 übernimmt der Parameter \val{cdhead} 
-% beide Aufgaben.
+% Breite des Querbalkens kann über diesen Parameter ebenfalls geändert werden.
 %    \begin{macrocode}
   \TUD@parameter@define{cdhead}[true]{\TUDoption{cdhead}{#1}}%
-  \TUD@parameter@define{headfont}[true]{\TUDoption{headfont}{#1}}%
-  \TUD@parameter@define{widehead}[true]{\TUDoption{widehead}{#1}}%
 %    \end{macrocode}
-% \end{parameter}^^A widehead
-% \end{parameter}^^A headfont
 % \end{parameter}^^A cdhead
 % \begin{parameter}{cdfoot}
 % \changes{v2.03}{2015/01/30}{neu}%^^A
@@ -2325,17 +2280,15 @@
 %    \end{macrocode}
 % \end{parameter}^^A cdfoot
 % \begin{parameter}{headlogo}
-% \begin{parameter}{logo}
+% \changes{v2.03}{2015/01/28}{neu}%^^A
 % \begin{parameter}{footlogo}
 % \changes{v2.03}{2015/01/28}{neu}%^^A
 % Das Zweit- und die Drittlogos können ebenfalls lokal geändert werden.
 %    \begin{macrocode}
   \TUD@parameter@define{headlogo}{\headlogo{#1}}%
-  \TUD@parameter@let{logo}{headlogo}%
   \TUD@parameter@define{footlogo}{\footlogo{#1}}%
 %    \end{macrocode}
 % \end{parameter}^^A footlogo
-% \end{parameter}^^A logo
 % \end{parameter}^^A headlogo
 % \begin{parameter}{ddc}
 % \changes{v2.02}{2014/08/16}{neu}%^^A
@@ -2350,6 +2303,28 @@
 % \end{parameter}^^A ddcfoot
 % \end{parameter}^^A ddchead
 % \end{parameter}^^A ddc
+% \begin{parameter}{cdfonts}
+% \begin{parameter}{tudfonts}
+% \begin{parameter}{barfont}
+% \begin{parameter}{widehead}
+% \begin{parameter}{tudfoot}
+% \begin{parameter}{logo}
+
+% Für die Kompatibilität werden auch veraltete Parameter bereitgestellt.
+%    \begin{macrocode}
+  \TUD@parameter@define{cdfonts}[true]{\TUDoption{cdfonts}{#1}}%
+  \TUD@parameter@define{tudfonts}[true]{\TUDoption{tudfonts}{#1}}%
+  \TUD@parameter@define{barfont}[true]{\TUDoption{barfont}{#1}}%
+  \TUD@parameter@define{widehead}[true]{\TUDoption{widehead}{#1}}%
+  \TUD@parameter@define{tudfoot}[true]{\TUDoption{tudfoot}{#1}}%
+  \TUD@parameter@let{logo}{headlogo}%
+%    \end{macrocode}
+% \end{parameter}^^A logo
+% \end{parameter}^^A tudfoot
+% \end{parameter}^^A widehead
+% \end{parameter}^^A barfont
+% \end{parameter}^^A tudfonts
+% \end{parameter}^^A cdfonts
 % Damit sind alle notwendigen Parameter für die Kopf- und Fußzeile der Seiten
 % im Stil \pgs{tudheadings} definiert.
 %    \begin{macrocode}
@@ -2413,9 +2388,9 @@
 %   \opt{ddcfoot} übernommen}%^^A
 % Diese Parameter wurden entfernt. Stattdessen kann innerhalb der Umgebung
 % entweder der Befehl \cs{TUDoptions} mit den Schlüsseln \opt{ddchead=\dots}
-% und \opt{ddcfoot=\dots} bzw. für den Querbalken \opt{widehead=true/false}
-% sowie das Makro \cs{headlogo} genutzt werden oder aber die gleichnamigen 
-% Parameter der Umgebung.
+% und \opt{ddcfoot=\dots} bzw. für den Querbalken \opt{cdhead=\dots} sowie das
+% Makro \cs{headlogo} genutzt werden oder aber die gleichnamigen Parameter der
+% Umgebung.
 % \end{parameter}^^A head
 % \end{parameter}^^A foot
 % Hier werden die Parameter für Kopf- und Fußzeile tatsächlich defniert.

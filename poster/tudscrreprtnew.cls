@@ -1,4 +1,4 @@
-%% DepreacatedOption in comp verschieben
+%%
 %% This is file `tudscrreprt.cls',
 %% generated with the docstrip utility.
 %%
@@ -70,7 +70,7 @@
       \fi%
     }%
   \fi%
-  \@TUDVersion{2015/02/02 v2.03 TUD-KOMA-Script}%
+  \@TUDVersion{2015/02/04 v2.03 TUD-KOMA-Script}%
 \endgroup%
 \providecommand*\tudscrmail{tudscr@gmail.com}
 \newcommand*\cls@name{report}
@@ -78,7 +78,7 @@
 \newcommand*\tudcls@name{tudscrreprt}
 \NeedsTeXFormat{LaTeX2e}[2011/06/27]
 \ProvidesClass{\tudcls@name}[%
-  2015/02/02 v2.03 TUD-KOMA-Script
+  2015/02/04 v2.03 TUD-KOMA-Script
   document class (\cls@name)%
 ]
 \typeout{The Corporate Design of Technische Universitaet Dresden}
@@ -111,15 +111,29 @@
 \TUD@key{fontspec}[true]{%
   \TUD@set@ifkey{fontspec}{@tud@fontspec}{#1}%
 }
-\AtEndOfClass{%
-  \TUD@key{fontspec}[]{%
-    \ClassError{\tudcls@name}{Option `fontspec' too late}{%
+\AtEndOfClass%
+{%
+  \TUD@key{fontspec}[]
+  {%
+    \ClassError{\tudcls@name}
+      {Option `fontspec' too late}{%
       Option `fontspec' can only be set while loading the\MessageBreak%
-      class `\tudcls@name' but you have tried to set it up later.%
+      class `\tudcls@name'
+      but you have tried to set it up later.%
     }%
     \FamilyKeyStateProcessed%
   }%
-%   §§§ PreventPackageFromLoading? Warnung mit Hinweis zu \PassOptionsToPackage
+  \if@tud@fontspec%
+    \PreventPackageFromLoading[%
+      \ClassWarning{\tudcls@name}%
+      {%
+        You must not load the package `fontspec' as it is\MessageBreak%
+        loaded automatically at the end of the preamble.\MessageBreak%
+        If you want to pass options to `fontspec' use\MessageBreak%
+        `\string\PassOptionsToPackage{<option list>}{fontspec}'
+      }%
+    ]{fontspec}
+  \fi%
 }
 \AtEndPreamble{%
   \@expandtwoargs\in@{OT}{\encodingdefault}%
@@ -161,6 +175,7 @@
   \fi%
   \@tempa{\@tud@dinboldtrue}{\@tempb{DIN Bold}}%
   \if@tud@fontspec%
+    \UnPreventPackageFromLoading{fontspec}%
     \if@tud@univers\if@tud@dinbold%
       \PassOptionsToPackage{no-math}{fontspec}%
     \fi\fi%
@@ -176,7 +191,8 @@
 \patchcmd{\@uclcnotmath}{\@nonchangecase\ensuremath}{%
   \@nonchangecase\ensuremath\tud@uclcnotmath
 }{}{\tud@patch@wrn{@uclcnotmath}}%
-\newcommand*\tud@cdfont{0}
+\newcommand*\tud@font@heading{\dinbn\tud@raggedright}
+\newcommand*\tud@cdfont{1}
 \TUD@key{cdfont}[true]{%
   \TUD@set@numkey{cdfont}{@tempa}{%
     \TUD@numkey@bool,%
@@ -206,8 +222,9 @@
     {heavycdheadfont}{7},{heavybar}{7},{heavybarfont}{7},%
     {headheavy}{7},{cdheadheavy}{7},{headfontheavy}{7},{headcdfontheavy}{7},%
     {cdheadfontheavy}{7},{barheavy}{7},{barfontheavy}{7},%
+    {nomath}{8},{nocdmath}{8},%
     {serifmath}{8},{serif}{8},{nosansmath}{8},{nosans}{8},%
-    {sansmath}{9},{sans}{9},%
+    {math}{9},{cdmath}{9},{sansmath}{9},{sans}{9},%
     {upgreek}{10},{uprightgreek}{10},{uprightGreek}{10},%
     {slgreek}{11},{slantedgreek}{11},{slantedGreek}{11},%
     {fontspec}{12},{luatex}{12},{lualatex}{12}{xetex}{12},{xelatex}{12},%
@@ -216,41 +233,27 @@
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax%
       \def\tud@cdfont{0}%
-      \TUD@std@ifkey@lock{sansmath}{false}%
-      \TUD@std@ifkey@lock{slantedgreek}{false}%
-%      
-            \TUD@std@numkey@lock{headfont}{false}%
-      \if@atdocument\tud@font@set\tud@layout@process\fi%
+      \if@atdocument\tud@font@set\fi%
     \or%
       \def\tud@cdfont{1}%
-      \TUD@std@ifkey@lock{sansmath}{true}%
-      \TUD@std@ifkey@lock{slantedgreek}{true}%
-%      
-            \TUD@std@numkey@lock{headfont}{true}%
-%      
-      \if@atdocument\tud@font@set\tud@layout@process\fi%
+      \if@atdocument\tud@font@set\fi%
     \or%
       \def\tud@cdfont{2}%
-      \TUD@std@ifkey@lock{sansmath}{true}%
-      \TUD@std@ifkey@lock{slantedgreek}{true}%
-%      
-            \TUD@std@numkey@lock{headfont}{heavy}%
-%      
-      \if@atdocument\tud@font@set\tud@layout@process\fi%
+      \if@atdocument\tud@font@set\fi%
     \or%
-            \TUDoptions{din=false}%
+      \renewcommand*\tud@font@heading{\tud@RaggedRight}%
     \or%
-            \TUDoptions{din=true}%
+      \renewcommand*\tud@font@heading{\dinbn\tud@raggedright}
     \or%
-            \TUDoptions{headfont=false}%
+      \TUDoptions{cdhead=false}%
     \or%
-            \TUDoptions{headfont=true}%
+      \TUDoptions{cdhead=true}%
     \or%
-            \TUDoptions{headfont=heavy}%
+      \TUDoptions{cdhead=heavy}%
     \or%
-      \TUDoptions{sansmath=false}%
+      \TUDoptions{cdmath=false}%
     \or%
-      \TUDoptions{sansmath=true}%
+      \TUDoptions{cdmath=true}%
     \or%
       \TUDoptions{slantedgreek=false}%
     \or%
@@ -262,16 +265,30 @@
     \fi%
   \fi%
 }
-\AtBeginDocument{\tud@font@set\tud@font@math@set}
-% §§§ depreacated
-\newif\if@tud@din\@tud@dintrue
-\TUD@ifkey{din}{@tud@din}
-% §§§ depreacated in cdmath umbenennen
-\newif\if@tud@sansmath
-\TUD@key@lock{sansmath}[true]{%
-  \TUD@set@ifkey@lock{sansmath}{@tud@sansmath}{#1}%
+\AtBeginDocument{\tud@font@set}%
+\bool@lock{@tud@cdmath}
+\TUD@key{cdmath}[true]{%
+  \TUD@set@numkey{cdmath}{@tempa}{%
+    \TUD@numkey@bool,%
+    {serifmath}{0},{serif}{0},{nosansmath}{0},{nosans}{0},%
+    {sansmath}{1},{sans}{1},%
+    {upright}{2},{upgreek}{2},{uprightgreek}{2},{uprightGreek}{2},%
+    {slanted}{3},{slgreek}{3},{slantedgreek}{3},{slantedGreek}{3}%
+  }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \if@atdocument\tud@font@math@set\fi%
+    \ifcase\@tempa\relax%
+      \bool@set@lock{@tud@cdmath}{false}%
+      \TUD@std@ifkey@lock{slantedgreek}{false}%
+      \if@atdocument\tud@font@math@set\fi%
+    \or%
+      \bool@set@lock{@tud@cdmath}{true}%
+      \TUD@std@ifkey@lock{slantedgreek}{true}%
+      \if@atdocument\tud@font@math@set\fi%
+    \or
+      \TUDoptions{slantedgreek=false}%
+    \or
+      \TUDoptions{slantedgreek=true}%
+    \fi%
   \fi%
 }
 \newif\if@tud@slantedgreek
@@ -382,7 +399,8 @@
   \fi%
 }
 % §§§ cdhead auf Farbe erweitern
-% §§§ cdfoot auf Farbe erweitern
+\cs@lock{tud@head@font}{0}
+\cs@lock{tud@head@bar}{0}
 \TUD@key{cdhead}[true]{%
   \TUD@set@numkey{cdhead}{@tempa}{%
     \TUD@numkey@bool,%
@@ -390,42 +408,25 @@
     {cd}{1},{cdfont}{1},{cdfonts}{1},{tudfonts}{1},%
     {light}{1},{lightfont}{1},{lite}{1},{litefont}{1},{noheavyfont}{1},%
     {heavy}{2},{heavyfont}{2},%
-    {wide}{3},{widehead}{3},%
-    {slim}{4},{slimhead}{4},{nowide}{4},{nowidehead}{4},%
-    {normal}{4},{normalhead}{4},{standard}{4},{standardhead}{4},%
+    {slim}{3},{slimhead}{3},{nowide}{3},{nowidehead}{3},{textwidth}{3},%
+    {normal}{3},{normalhead}{3},{standard}{3},{standardhead}{3},%
+    {wide}{4},{widehead}{4},{paperwidth}{4}%
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax%
-      \TUDoptions{headfont=false}%
+      \cs@set@lock{tud@head@font}{0}%
     \or%
-      \TUDoptions{headfont=true}%
+      \cs@set@lock{tud@head@font}{1}%
     \or%
-      \TUDoptions{headfont=heavy}%
+      \cs@set@lock{tud@head@font}{2}%
     \or%
-      \TUDoptions{widehead=true}%
+      \cs@set@lock{tud@head@bar}{0}%
     \or%
-      \TUDoptions{widehead=false}%
+      \cs@set@lock{tud@head@bar}{1}%
     \fi%
   \fi%
 }
-% \newcommand*\tud@head@font{} §§§
-\newcommand*\tud@headfont{0}
-% §§§ depreacated
-\TUD@key@lock{headfont}[true]{%
-  \TUD@set@numkey@lock{headfont}{tud@headfont}{%
-    \TUD@numkey@bool,%
-    {nocd}{0},{nocdfont}{0},{nocdfonts}{0},{notudfonts}{0},%
-    {cd}{1},{cdfont}{1},{cdfonts}{1},{tudfonts}{1},%
-    {light}{1},{lightfont}{1},{lite}{1},{litefont}{1},{noheavyfont}{1},%
-    {heavy}{2},{heavyfont}{2}%
-  }{#1}%
-}
-% §§§ depreacated
-% Schalter für headfont und widehead auf eine Variable
-\newif\if@tud@widehead
-\TUD@key@lock{widehead}[true]{%
-  \TUD@set@ifkey@lock{widehead}{@tud@widehead}{#1}%
-}
+% §§§ cdfoot auf Farbe erweitern
 \newif\if@tud@cdfoot
 \TUD@key{cdfoot}[true]{%
   \TUD@set@ifkey{cdfoot}{@tud@cdfoot}{#1}%
@@ -506,11 +507,10 @@
 }
 %%% From File: tudscr-layout.dtx
 \newcommand*\tud@head@logocolor{black}
-\newcommand*\tud@cd{0}
-\csdef@lock{tud@layout@cover}{0}
-\csdef@lock{tud@layout@title}{0}
-\csdef@lock{tud@layout@part}{0}
-\csdef@lock{tud@layout@chapter}{0}
+\cs@lock{tud@layout@cover}{0}
+\cs@lock{tud@layout@title}{0}
+\cs@lock{tud@layout@part}{0}
+\cs@lock{tud@layout@chapter}{0}
 \newcommand*\tud@layout@switch{}
 \edef\tud@layout@switch{%
   \TUD@numkey@bool,%
@@ -521,41 +521,42 @@
   {full}{3},{colorfull}{3},{fullcolor}{3},{colourfull}{3},{fullcolour}{3},%
   {color}{3},{colour}{3}%
 }
+\newcommand*\tud@cd{0}
 \TUD@key{cd}[true]{%
   \TUD@set@numkey{cd}{tud@cd}{\tud@layout@switch}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\tud@cd\relax%
       \def\tud@head@logocolor{black}%
-      \csstd@lock{tud@layout@cover}{0}%
-      \csstd@lock{tud@layout@title}{0}%
-      \csstd@lock{tud@layout@part}{0}%
-      \csstd@lock{tud@layout@chapter}{0}%
+      \cs@std@lock{tud@layout@cover}{0}%
+      \cs@std@lock{tud@layout@title}{0}%
+      \cs@std@lock{tud@layout@part}{0}%
+      \cs@std@lock{tud@layout@chapter}{0}%
+      \cs@std@lock{tud@head@bar}{0}%
       \TUD@std@ifkey@lock{chapterpage}{false}%
-      \TUD@std@ifkey@lock{widehead}{false}%
     \or%
       \def\tud@head@logocolor{black}%
-      \csstd@lock{tud@layout@cover}{1}%
-      \csstd@lock{tud@layout@title}{1}%
-      \csstd@lock{tud@layout@part}{1}%
-      \csstd@lock{tud@layout@chapter}{1}%
+      \cs@std@lock{tud@layout@cover}{1}%
+      \cs@std@lock{tud@layout@title}{1}%
+      \cs@std@lock{tud@layout@part}{1}%
+      \cs@std@lock{tud@layout@chapter}{1}%
+      \cs@std@lock{tud@head@bar}{0}%
       \TUD@std@ifkey@lock{chapterpage}{false}%
-      \TUD@std@ifkey@lock{widehead}{false}%
     \or%
       \def\tud@head@logocolor{HKS41}%
-      \csstd@lock{tud@layout@cover}{1}%
-      \csstd@lock{tud@layout@title}{2}%
-      \csstd@lock{tud@layout@part}{2}%
-      \csstd@lock{tud@layout@chapter}{2}%
+      \cs@std@lock{tud@layout@cover}{1}%
+      \cs@std@lock{tud@layout@title}{2}%
+      \cs@std@lock{tud@layout@part}{2}%
+      \cs@std@lock{tud@layout@chapter}{2}%
+      \cs@std@lock{tud@head@bar}{0}%
       \TUD@std@ifkey@lock{chapterpage}{false}%
-      \TUD@std@ifkey@lock{widehead}{false}%
     \or%
       \def\tud@head@logocolor{HKS41}%
-      \csstd@lock{tud@layout@cover}{1}%
-      \csstd@lock{tud@layout@title}{3}%
-      \csstd@lock{tud@layout@part}{3}%
-      \csstd@lock{tud@layout@chapter}{3}%
+      \cs@std@lock{tud@layout@cover}{1}%
+      \cs@std@lock{tud@layout@title}{3}%
+      \cs@std@lock{tud@layout@part}{3}%
+      \cs@std@lock{tud@layout@chapter}{3}%
+      \cs@std@lock{tud@head@bar}{1}%
       \TUD@std@ifkey@lock{chapterpage}{true}%
-      \TUD@std@ifkey@lock{widehead}{true}%
     \fi%
     \if@atdocument%
       \tud@layout@process%
@@ -572,13 +573,13 @@
   \TUD@set@numkey{cdcover}{@tempa}{\tud@layout@switch}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax%
-      \csset@lock{tud@layout@cover}{0}%
+      \cs@set@lock{tud@layout@cover}{0}%
     \or%
-      \csset@lock{tud@layout@cover}{1}%
+      \cs@set@lock{tud@layout@cover}{1}%
     \or%
-      \csset@lock{tud@layout@cover}{2}%
+      \cs@set@lock{tud@layout@cover}{2}%
     \or%
-      \csset@lock{tud@layout@cover}{3}%
+      \cs@set@lock{tud@layout@cover}{3}%
     \fi%
     \if@atdocument\tud@layout@process\fi%
   \fi%
@@ -587,13 +588,13 @@
   \TUD@set@numkey{cdtitle}{@tempa}{\tud@layout@switch}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax%
-      \csset@lock{tud@layout@title}{0}%
+      \cs@set@lock{tud@layout@title}{0}%
     \or%
-      \csset@lock{tud@layout@title}{1}%
+      \cs@set@lock{tud@layout@title}{1}%
     \or%
-      \csset@lock{tud@layout@title}{2}%
+      \cs@set@lock{tud@layout@title}{2}%
     \or%
-      \csset@lock{tud@layout@title}{3}%
+      \cs@set@lock{tud@layout@title}{3}%
     \fi%
     \if@atdocument\tud@layout@process\fi%
   \fi%
@@ -602,13 +603,13 @@
   \TUD@set@numkey{cdpart}{@tempa}{\tud@layout@switch}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax%
-      \csset@lock{tud@layout@part}{0}%
+      \cs@set@lock{tud@layout@part}{0}%
     \or%
-      \csset@lock{tud@layout@part}{1}%
+      \cs@set@lock{tud@layout@part}{1}%
     \or%
-      \csset@lock{tud@layout@part}{2}%
+      \cs@set@lock{tud@layout@part}{2}%
     \or%
-      \csset@lock{tud@layout@part}{3}%
+      \cs@set@lock{tud@layout@part}{3}%
     \fi%
     \if@atdocument\tud@layout@process\fi%
   \fi%
@@ -617,38 +618,41 @@
   \TUD@set@numkey{cdchapter}{@tempa}{\tud@layout@switch}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax%
-      \csset@lock{tud@layout@chapter}{0}%
+      \cs@set@lock{tud@layout@chapter}{0}%
       \TUD@std@ifkey@lock{chapterpage}{false}%
     \or%
-      \csset@lock{tud@layout@chapter}{1}%
+      \cs@set@lock{tud@layout@chapter}{1}%
       \TUD@std@ifkey@lock{chapterpage}{false}%
     \or%
-      \csset@lock{tud@layout@chapter}{2}%
+      \cs@set@lock{tud@layout@chapter}{2}%
       \TUD@std@ifkey@lock{chapterpage}{false}%
     \or%
-      \csset@lock{tud@layout@chapter}{3}%
+      \cs@set@lock{tud@layout@chapter}{3}%
       \TUD@std@ifkey@lock{chapterpage}{true}%
     \fi%
     \if@atdocument\tud@layout@process\fi%
   \fi%
 }
+\newcommand*\tud@font@heading@size{}
+\AtEndOfClass{\let\tud@font@heading@size\size@part}
 \DefineFamilyMember{KOMA}
 \DefineFamilyKey{KOMA}{headings}{%
   \AtEndOfFamilyOptions{%
     \let\tud@font@heading@size\size@part%
-    \tud@layout@process%
-    \ifcase\tud@layout@part\relax\else%
-      \tud@font@koma@reset{part}%
-      \tud@font@koma@reset{partnumber}%
-    \fi%
-    \ifcase\tud@layout@chapter\relax\else%
-      \tud@font@koma@reset{chapter}%
-      \tud@font@koma@reset{chapterprefix}%
-      \let\chapterheadstartvskip\tud@chapterheadstartvskip%
-      \tud@font@koma@reset{section}%
-      \tud@font@koma@reset{subsection}%
-      \tud@font@koma@reset{subsubsection}%
-      \tud@font@koma@reset{minisec}%
+    \if@atdocument%
+      \tud@layout@process%
+      \ifcase\tud@layout@part\relax\else%
+        \tud@font@koma@reset{part}%
+        \tud@font@koma@reset{partnumber}%
+      \fi%
+      \ifcase\tud@layout@chapter\relax\else%
+        \tud@font@koma@reset{chapter}%
+        \tud@font@koma@reset{chapterprefix}%
+        \tud@font@koma@reset{section}%
+        \tud@font@koma@reset{subsection}%
+        \tud@font@koma@reset{subsubsection}%
+        \tud@font@koma@reset{minisec}%
+      \fi%
     \fi%
   }%
 }
@@ -739,7 +743,7 @@
   {fil}{12},{fill}{12},{vfil}{12},{vfill}{12}%
 }
 \newcommand*\tud@abstract@level{0}
-\newbool@lock{@tud@abstract@toc}
+\bool@lock{@tud@abstract@toc}
 \newif\if@tud@abstract@toc@leveldown
 \newif\if@tud@abstract@markboth
 \newif\if@tud@abstract@multi
@@ -751,24 +755,24 @@
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax%
       \def\tud@abstract@level{0}%
-      \stdbool@lock{@tud@abstract@toc}{false}%
+      \bool@std@lock{@tud@abstract@toc}{false}%
     \or%
       \def\tud@abstract@level{1}%
-      \stdbool@lock{@tud@abstract@toc}{false}%
+      \bool@std@lock{@tud@abstract@toc}{false}%
     \or%
       \def\tud@abstract@level{2}%
-      \stdbool@lock{@tud@abstract@toc}{true}%
+      \bool@std@lock{@tud@abstract@toc}{true}%
     \or%
       \def\tud@abstract@level{3}%
-      \stdbool@lock{@tud@abstract@toc}{true}%
+      \bool@std@lock{@tud@abstract@toc}{true}%
     \or%
-      \setbool@lock{@tud@abstract@toc}{true}%
+      \bool@set@lock{@tud@abstract@toc}{true}%
       \@tud@abstract@toc@leveldownfalse%
     \or%
-      \setbool@lock{@tud@abstract@toc}{true}%
+      \bool@set@lock{@tud@abstract@toc}{true}%
       \@tud@abstract@toc@leveldowntrue%
     \or%
-      \setbool@lock{@tud@abstract@toc}{false}%
+      \bool@set@lock{@tud@abstract@toc}{false}%
     \or%
       \@tud@abstract@markbothtrue%
     \or%
@@ -785,12 +789,12 @@
   \fi%
 }
 \newcommand*\tud@declaration@level{1}
-\newbool@lock{@tud@declaration@toc}
+\bool@lock{@tud@declaration@toc}
 \newif\if@tud@declaration@toc@leveldown
 \newif\if@tud@declaration@markboth
 \newif\if@tud@declaration@multi
-\@tud@declaration@multitrue
 \newif\if@tud@declaration@fil
+\@tud@declaration@multitrue
 \@tud@declaration@filtrue
 \TUD@key{declaration}[true]{%
   \edef\@tempb{\TUD@numkey@bool,\tud@fm@switch}%
@@ -798,24 +802,24 @@
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax%
       \def\tud@declaration@level{0}%
-      \stdbool@lock{@tud@declaration@toc}{false}%
+      \bool@std@lock{@tud@declaration@toc}{false}%
     \or%
       \def\tud@declaration@level{1}%
-      \stdbool@lock{@tud@declaration@toc}{false}%
+      \bool@std@lock{@tud@declaration@toc}{false}%
     \or%
       \def\tud@declaration@level{2}%
-      \stdbool@lock{@tud@declaration@toc}{true}%
+      \bool@std@lock{@tud@declaration@toc}{true}%
     \or%
       \def\tud@declaration@level{3}%
-      \stdbool@lock{@tud@declaration@toc}{true}%
+      \bool@std@lock{@tud@declaration@toc}{true}%
     \or%
-      \stdbool@lock{@tud@declaration@toc}{true}%
+      \bool@set@lock{@tud@declaration@toc}{true}%
       \@tud@declaration@toc@leveldownfalse%
     \or%
-      \stdbool@lock{@tud@declaration@toc}{true}%
+      \bool@set@lock{@tud@declaration@toc}{true}%
       \@tud@declaration@toc@leveldowntrue%
     \or%
-      \stdbool@lock{@tud@declaration@toc}{false}%
+      \bool@set@lock{@tud@declaration@toc}{false}%
     \or%
       \@tud@declaration@markbothtrue%
     \or%
@@ -854,6 +858,120 @@
 \newif\if@tud@bookmarks
 \TUD@ifkey{tudbookmarks}{@tud@bookmarks}
 %%% From File: tudscr-comp.dtx
+\newcommand*\tud@depreacated@key[2]{%
+  \ClassWarning{\tudcls@name}%
+  {%
+    The option key `#1' is depreacated.\MessageBreak%
+    It's recommended to use `#2' instead%
+  }%
+}
+\TUD@key{cdfonts}[true]{%
+  \TUD@set@ifkey{cdfonts}{@tempswa}{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \tud@depreacated@key{cdfonts}{cdfont}%
+    \if@tempswa%
+      \TUDoptions{cdfont=true}%
+    \else%
+      \TUDoptions{cdfont=false}%
+    \fi%
+  \fi%
+}
+\TUD@key{tudfonts}[true]{%
+  \TUD@set@ifkey{tudfonts}{@tempswa}{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \tud@depreacated@key{tudfonts}{cdfont}%
+    \if@tempswa%
+      \TUDoptions{cdfont=true}%
+    \else%
+      \TUDoptions{cdfont=false}%
+    \fi%
+  \fi%
+}
+\TUD@key{heavyfont}[true]{%
+  \TUD@set@ifkey{heavyfont}{@tempswa}{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \tud@depreacated@key{heavyfont}{cdfont}%
+    \if@tempswa%
+      \TUDoptions{cdfont=heavy}%
+    \else%
+      \TUDoptions{cdfont=true}%
+    \fi%
+  \fi%
+}
+\TUD@key{din}[true]{%
+  \TUD@set@ifkey{din}{@tempswa}{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \tud@depreacated@key{din}{cdfont}%
+    \if@tempswa%
+      \TUDoptions{cdfont=din}%
+    \else%
+      \TUDoptions{cdfont=nodin}%
+    \fi%
+  \fi%
+}
+\TUD@key{nodin}[true]{%
+  \TUD@set@ifkey{nodin}{@tempswa}{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \tud@depreacated@key{nodin}{cdfont}%
+    \if@tempswa%
+      \TUDoptions{cdfont=nodin}%
+    \else%
+      \TUDoptions{cdfont=din}%
+    \fi%
+  \fi%
+}
+\TUD@key{sansmath}[true]{%
+  \TUD@set@ifkey{sansmath}{@tempswa}{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \tud@depreacated@key{sansmath}{cdmath}%
+    \if@tempswa%
+      \TUDoptions{cdmath=true}%
+    \else%
+      \TUDoptions{cdmath=false}%
+    \fi%
+  \fi%
+}
+\TUD@key{barfont}[true]{%
+  \TUD@set@numkey{barfont}{@tempa}{%
+    \TUD@numkey@bool,%
+    {nocd}{0},{nocdfont}{0},{nocdfonts}{0},{notudfonts}{0},%
+    {cd}{1},{cdfont}{1},{cdfonts}{1},{tudfonts}{1},%
+    {light}{1},{lightfont}{1},{lite}{1},{litefont}{1},{noheavyfont}{1},%
+    {heavy}{2},{heavyfont}{2}%
+  }{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \tud@depreacated@key{barfont}{cdhead}%
+    \ifcase\@tempa\relax%
+      \TUDoptions{cdhead=false}%
+    \or%
+      \TUDoptions{cdhead=true}%
+    \or%
+      \TUDoptions{cdhead=heavy}%
+    \fi%
+  \fi%
+}
+\TUD@key{widehead}[true]{%
+  \TUD@set@ifkey{widehead}{@tempswa}{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \tud@depreacated@key{widehead}{cdhead}%
+    \if@tempswa%
+      \TUDoptions{cdhead=paperwidth}%
+    \else%
+      \TUDoptions{cdhead=textwidth}%
+    \fi%
+  \fi%
+}
+\TUD@key{tudfoot}[true]{%
+  \TUD@set@ifkey{tudfoot}{@tempswa}{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \tud@depreacated@key{tudfoot}{cdfoot}%
+    \if@tempswa%
+      \TUDoptions{cdfoot=true}%
+    \else%
+      \TUDoptions{cdfoot=false}%
+    \fi%
+  \fi%
+}
 \TUD@key{color}[true]{%
   \TUD@set@numkey{color}{@tempa}{%
     \TUD@numkey@bool,%
@@ -875,69 +993,6 @@
   \fi%
 }
 \TUD@key{colour}[true]{\TUDoptions{color=#1}\FamilyKeyStateProcessed}
-% §§§ Warnung
-\TUD@key{cdfonts}[true]{%
-  \TUD@set@ifkey{cdfonts}{@tempswa}{#1}%
-  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \if@tempswa%
-      \TUDoptions{cdfont=true}%
-    \else%
-      \TUDoptions{cdfont=false}%
-    \fi%
-  \fi%
-}
-% §§§ Warnung
-\TUD@key{tudfonts}[true]{%
-  \TUD@set@ifkey{tudfonts}{@tempswa}{#1}%
-  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \if@tempswa%
-      \TUDoptions{cdfont=true}%
-    \else%
-      \TUDoptions{cdfont=false}%
-    \fi%
-  \fi%
-}
-% §§§ Warnung
-\TUD@key{heavyfont}[true]{%
-  \TUD@set@ifkey{heavyfont}{@tempswa}{#1}%
-  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \if@tempswa
-      \TUDoptions{cdfont=heavy}%
-    \else
-      \TUDoptions{cdfont=true}%
-    \fi
-  \fi%
-}
-% §§§ Warnung
-\TUD@key@lock{barfont}[true]{%
-  \TUD@set@numkey@lock{barfont}{@tempa}{%
-    \TUD@numkey@bool,%
-    {nocd}{0},{nocdfont}{0},{nocdfonts}{0},{notudfonts}{0},%
-    {cd}{1},{cdfont}{1},{cdfonts}{1},{tudfonts}{1},%
-    {light}{1},{lightfont}{1},{lite}{1},{litefont}{1},{noheavyfont}{1},%
-    {heavy}{2},{heavyfont}{2}%
-  }{#1}%
-  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \ifcase\@tempa\relax%
-      \TUDoptions{headfont=false}%
-    \or%
-      \TUDoptions{headfont=true}%
-    \or%
-      \TUDoptions{headfont=heavy}%
-    \fi%
-  \fi%
-}
-% §§§ Warnung
-\TUD@key{tudfoot}[true]{%
-  \TUD@set@ifkey{tudfoot}{@tempswa}{#1}%
-  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \if@tempswa%
-      \TUDoptions{cdfoot=true}%
-    \else%
-      \TUDoptions{cdfoot=false}%
-    \fi%
-  \fi%
-}
 \newcommand*\tud@v@comp{\tud@v@last}
 \TUD@key{tudscrver}[last]{%
   \ifcsvoid{tud@v@#1}{%
@@ -994,7 +1049,7 @@
 }
 %%% From File: tudscr-base.dtx
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{\scrcls@name}}
-\TUDExecuteOptions{\TUDDefaultOptions}
+\TUDExecuteOptions{cd,cdfont,tudbookmarks}
 \TUDProcessOptions\relax
 \LoadClass{\scrcls@name}[2013/12/19]
 \RequirePackage{environ}[2013/04/01]
@@ -1133,7 +1188,19 @@
   \DeclareMathSymbol{\varOmega}{\mathalpha}{letters}{10}%
 }
 \newcommand*\tud@font@set{%
-  \ifnum\tud@cdfont>0\relax%
+  \ifcase\tud@cdfont\relax%
+    \tud@cmd@restore{rmdefault}%
+    \tud@cmd@restore{sfdefault}%
+    \tud@cmd@restore{ttdefault}%
+    \tud@cmd@restore{bfdefault}%
+    \tud@cmd@restore{mddefault}%
+    \tud@cmd@restore{itdefault}%
+    \tud@cmd@restore{familydefault}%
+    \tud@cmd@restore{seriesdefault}%
+    \tud@cmd@restore{shapedefault}%
+    \bool@std@lock{@tud@cdmath}{false}%
+    \cs@std@lock{tud@head@font}{0}%
+  \else%
     \tud@cmd@store{rmdefault}%
     \tud@cmd@store{sfdefault}%
     \tud@cmd@store{ttdefault}%
@@ -1143,8 +1210,10 @@
     \tud@cmd@store{familydefault}%
     \tud@cmd@store{seriesdefault}%
     \tud@cmd@store{shapedefault}%
+    \bool@std@lock{@tud@cdmath}{true}%
+    \cs@std@lock{tud@head@font}{\tud@cdfont}%
     \if@tud@fontspec%
-      \ifnum\tud@cdfont=1\relax%
+      \ifnum\tud@cdfont=\@ne\relax%
         \setsansfont{Univers Light}[%
           BoldFont = Univers,%
           ItalicFont = Univers Light Oblique,%
@@ -1171,7 +1240,7 @@
       \if@tud@univers%
         \renewcommand*\sfdefault{\tud@univers}%
         \renewcommand*\ttdefault{\tud@univers t}%
-        \ifnum\tud@cdfont=1\relax%
+        \ifnum\tud@cdfont=\@ne\relax%
           \renewcommand*\bfdefault{m}%
           \renewcommand*\mddefault{l}%
         \else%
@@ -1184,22 +1253,14 @@
     \renewcommand*\familydefault{\sfdefault}%
     \renewcommand*\seriesdefault{\mddefault}%
     \renewcommand*\shapedefault{\updefault}%
-  \else%
-    \tud@cmd@restore{rmdefault}%
-    \tud@cmd@restore{sfdefault}%
-    \tud@cmd@restore{ttdefault}%
-    \tud@cmd@restore{bfdefault}%
-    \tud@cmd@restore{mddefault}%
-    \tud@cmd@restore{itdefault}%
-    \tud@cmd@restore{familydefault}%
-    \tud@cmd@restore{seriesdefault}%
-    \tud@cmd@restore{shapedefault}%
   \fi%
   \normalfont\selectfont%
+  \tud@font@math@set%
+  \tud@layout@process%
 }
 \newcommand*\tud@font@math@set{%
   \if@tud@univers%
-    \if@tud@sansmath%
+    \if@tud@cdmath%
       \tud@cmd@store{mv@normal}%
       \tud@cmd@store{mv@bold}%
       \let\mv@normal\mv@univers%
@@ -1210,7 +1271,7 @@
     \fi%
   \fi%
   \if@tud@slantedgreek%
-    \tud@font@greek@slanted
+    \tud@font@greek@slanted%
   \else%
     \tud@font@greek@upright%
   \fi%
@@ -1258,8 +1319,8 @@
   \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
     {\sfdefault}{\mddefault}{n}{\tud@head@font@size}%
   \@tempswafalse%
-  \ifcase\tud@headfont\relax%
-    \ifnum\tud@cdfont>0\relax%
+  \ifcase\tud@head@font\relax%
+    \ifnum\tud@cdfont>\z@\relax%
       \ClassWarning{\tudcls@name}{%
         It isn't possible to use `cdhead=false'\MessageBreak%
         together with `cdfont=true'%
@@ -1273,7 +1334,7 @@
     \if@tud@fontspec%
       \DeclareFixedFont{\tud@head@font@bold}{\encodingdefault}%
         {UniversBold}{m}{n}{\tud@head@font@size}%
-      \ifcase\tud@headfont\relax\or%
+      \ifcase\tud@head@font\relax\or%
         \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
           {UniversLight}{m}{n}{\tud@head@font@size}%
       \or%
@@ -1284,7 +1345,7 @@
       \if@tud@univers%
         \DeclareFixedFont{\tud@head@font@bold}{\encodingdefault}%
           {\tud@univers}{b}{n}{\tud@head@font@size}%
-        \ifcase\tud@headfont\relax\or%
+        \ifcase\tud@head@font\relax\or%
           \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
             {\tud@univers}{l}{n}{\tud@head@font@size}%
         \or%
@@ -1831,24 +1892,24 @@
     \DeclareNewLayer[%
       background,headsep,%
       voffset=\dimexpr\tud@dim@topmargin-.5\tud@dim@line\relax,%
-      contents={\if@tud@widehead\else\tud@head@rule{\textwidth}\fi},%
+      contents={\ifnum\tud@head@bar=\z@\relax\tud@head@rule{\textwidth}\fi},%
     ]{tudheadings.head.upperline}%
     \DeclareNewLayer[%
       background,headsep,%
       voffset=\dimexpr\tud@dim@topmargin+\tud@dim@barheight%
         -.5\tud@dim@line\relax,%
-      contents={\if@tud@widehead\else\tud@head@rule{\textwidth}\fi},%
+      contents={\ifnum\tud@head@bar=\z@\relax\tud@head@rule{\textwidth}\fi},%
     ]{tudheadings.head.lowerline}%
     \DeclareNewLayer[%
       background,%
       voffset=\dimexpr\tud@dim@topmargin-.5\tud@dim@line\relax,%
-      contents={\if@tud@widehead\tud@head@rule{\paperwidth}\fi},%
+      contents={\ifnum\tud@head@bar=\@ne\relax\tud@head@rule{\paperwidth}\fi},%
     ]{tudheadings.head.upperwideline}%
     \DeclareNewLayer[%
       background,%
       voffset=\dimexpr\tud@dim@topmargin+\tud@dim@barheight%
         -.5\tud@dim@line\relax,%
-      contents={\if@tud@widehead\tud@head@rule{\paperwidth}\fi},%
+      contents={\ifnum\tud@head@bar=\@ne\relax\tud@head@rule{\paperwidth}\fi},%
     ]{tudheadings.head.lowerwideline}%
     
     \newif\if@tud@test
@@ -2251,7 +2312,7 @@
     \def\@tempa{}%
     \def\@tempb{}%
     \@tempswatrue%
-    \renewcommand\do[1]{%
+    \def\do##1{%
       \if@tempswa%
         \def\@tempa{##1}%
         \@tempswafalse%
@@ -2585,18 +2646,19 @@
 ]
 \newcommand*\TUD@parameter@define@ps[1]{%
   \TUD@parameter@define{cdfont}[true]{\TUDoption{cdfont}{#1}}%
-  \TUD@parameter@define{cdfonts}[true]{\TUDoption{cdfonts}{#1}}%
-  \TUD@parameter@define{tudfonts}[true]{\TUDoption{tudfonts}{#1}}%
   \TUD@parameter@define{cdhead}[true]{\TUDoption{cdhead}{#1}}%
-  \TUD@parameter@define{headfont}[true]{\TUDoption{headfont}{#1}}%
-  \TUD@parameter@define{widehead}[true]{\TUDoption{widehead}{#1}}%
   \TUD@parameter@define{cdfoot}[true]{\TUDoption{cdfoot}{#1}}%
   \TUD@parameter@define{headlogo}{\headlogo{#1}}%
-  \TUD@parameter@let{logo}{headlogo}%
-  \TUD@parameter@define{footlogo}{\footlogo{#1}}%
   \TUD@parameter@define{ddc}[true]{\TUDoption{ddc}{#1}}%
   \TUD@parameter@define{ddchead}[true]{\TUDoption{ddchead}{#1}}%
   \TUD@parameter@define{ddcfoot}[true]{\TUDoption{ddcfoot}{#1}}%
+  \TUD@parameter@define{cdfonts}[true]{\TUDoption{cdfonts}{#1}}%
+  \TUD@parameter@define{tudfonts}[true]{\TUDoption{tudfonts}{#1}}%
+  \TUD@parameter@define{barfont}[true]{\TUDoption{barfont}{#1}}%
+  \TUD@parameter@define{widehead}[true]{\TUDoption{widehead}{#1}}%
+  \TUD@parameter@define{tudfoot}[true]{\TUDoption{tudfoot}{#1}}%
+  \TUD@parameter@let{logo}{headlogo}%
+  \TUD@parameter@define{footlogo}{\footlogo{#1}}%
 }
 \TUD@parameter{tudpage}{%
   \TUD@parameter@define{language}{\selectlanguage{#1}}%
@@ -2622,10 +2684,6 @@
 \newcommand*\tud@chapter@pagecolor{}
 \newcommand*\tud@chapter@logocolor{black}
 \newcommand*\tud@chapter@fontcolor{black}
-\newcommand*\tud@font@heading{%
-  \if@tud@din\dinbn\tud@raggedright\else\tud@RaggedRight\fi%
-}
-\newcommand*\tud@font@heading@size{\Huge}
 \newkomafont{parttitle}{%
   \tud@font@heading%
   \color{\tud@part@fontcolor}%
@@ -2640,9 +2698,9 @@
 }
 \newcommand*\tud@layout@process{%
   \ifcase\tud@layout@cover\relax%
-    \stdbool@lock{@tud@cover@cdlayout}{false}%
+    \bool@std@lock{@tud@cover@cdlayout}{false}%
   \else%
-    \stdbool@lock{@tud@cover@cdlayout}{true}%
+    \bool@std@lock{@tud@cover@cdlayout}{true}%
   \fi%
   \ifcase\tud@layout@title\relax%
     \tud@cmd@restore{maketitle}%
@@ -2754,10 +2812,6 @@
     \let\chapterheadstartvskip\tud@chapterheadstartvskip%
     \let\@@makechapterhead\tud@@@makechapterhead%
   \fi%
-}
-\AtEndPreamble{%
-  \let\tud@font@heading@size\size@part%
-  \tud@layout@process%
 }
 \newcommand*\tud@partheadstartvskip{%
   \def\tud@part@pagecolor{}%
@@ -2908,12 +2962,10 @@
   \ifnum\tud@abstract@level>1\relax\def\tud@abstract@level{1}\fi%
   \KOMAoptions{titlepage=false}%
   \if@tud@chapterpage%
-    \ifnum\tud@cdfont>0\relax%
-      \ifnum\tud@cdfont=1\relax%
-        \TUDoptions{cdfont=true}%
-      \else%
-        \TUDoptions{cdfont=heavy}%
-      \fi%
+    \ifcase\tud@cdfont\relax\or%
+      \TUDoptions{cdfont=true}%
+    \or%
+      \TUDoptions{cdfont=heavy}%
     \fi%
     \addtokomafont{disposition}{\color{\tud@chapter@fontcolor}}%
     \addtokomafont{dictumtext}{\color{\tud@chapter@fontcolor}}%
@@ -3420,7 +3472,7 @@
 \newcommand*\tud@maketitle[1][]{%
   \begingroup%
     \TUD@parameter@set{title}{#1}%
-    \ifcase\tud@layout@title%
+    \ifcase\tud@layout@title\relax%
       \ifx\tud@titlepagenumber\relax\gdef\tud@titlepagenumber{1}\fi%
       \tud@cmd@use{maketitle}[\tud@titlepagenumber]%
     \else%
@@ -4031,15 +4083,15 @@
     \fi%
   \endgroup%
 }
-\newbool@lock{@tud@cover@cdlayout}
+\bool@lock{@tud@cover@cdlayout}
 \TUD@parameter{cover}{%
   \TUD@parameter@define{cdcover}[true]{\TUDoption{cdcover}{#1}}%
   \TUD@parameter@let{cd}{cdcover}%
   \TUD@parameter@define{cdlayout}[true]{%
     \ifstrbool{#1}{%
-      \setbool@lock{@tud@cover@cdlayout}{true}%
+      \bool@set@lock{@tud@cover@cdlayout}{true}%
     }{%
-      \setbool@lock{@tud@cover@cdlayout}{false}%
+      \bool@set@lock{@tud@cover@cdlayout}{false}%
     }{%
       \TUD@parameter@error{cdlayout}{true,false}%
     }%
@@ -4125,32 +4177,34 @@
   \protected@edef\reserved@a{\noexpand#1{#2}{#3}}\reserved@a%
 }
 %%% From File: tudscr-comp.dtx
+\newcommand*\tud@depreacated@cmd[2]{%
+  \ClassWarning{\tudcls@name}{%
+    The command `\@backslashchar#1' is depreacated.\MessageBreak%
+    It's recommended to use `\@backslashchar#2' instead%
+  }%
+  \csletcs{#1}{#2}%
+  \@nameuse{#2}%
+}
 \newlength\chapterheadingvskip
 \let\chapterheadingvskip\headingsvskip
-\newcommand*\professorship{}
-\let\professorship\chair
-\newcommand*\student{}
-\let\student\author
-\newrobustcmd*\studentid{}
-\newrobustcmd*\matriculationid{}
-\let\studentid\matriculationnumber
-\let\matriculationid\matriculationnumber
-\newrobustcmd*\enrolmentyear{}
-\let\enrolmentyear\matriculationyear
-\newrobustcmd*\birthplace{}
-\let\birthplace\placeofbirth
-\newcommand*\location{}
-\let\location\place
-\newcommand*\submissiondate{}
-\let\submissiondate\date
-\newcommand*\oralexaminationdate{}
-\let\oralexaminationdate\defensedate
-\newrobustcmd*\birthday{}
-\let\birthday\dateofbirth
-\newcommand*\logofile{}
-\let\logofile\headlogo
-\newcommand*\logofilename{}
-\let\logofilename\headlogo
+\newcommand*\professorship{\tud@depreacated@cmd{professorship}{chair}}
+\newcommand*\student{\tud@depreacated@cmd{student}{author}}
+\newrobustcmd*\studentid{\tud@depreacated@cmd{studentid}{matriculationnumber}}
+\newrobustcmd*\matriculationid{%
+  \tud@depreacated@cmd{matriculationid}{matriculationnumber}%
+}
+\newrobustcmd*\enrolmentyear{%
+  \tud@depreacated@cmd{enrolmentyear}{matriculationyear}%
+}
+\newrobustcmd*\birthplace{\tud@depreacated@cmd{birthplace}{placeofbirth}}
+\newcommand*\location{\tud@depreacated@cmd{location}{place}}
+\newcommand*\submissiondate{\tud@depreacated@cmd{submissiondate}{date}}
+\newcommand*\oralexaminationdate{%
+  \tud@depreacated@cmd{oralexaminationdate}{defensedate}%
+}
+\newrobustcmd*\birthday{\tud@depreacated@cmd{birthday}{dateofbirth}}
+\newcommand*\logofile{\tud@depreacated@cmd{logofile}{headlogo}}
+\newcommand*\logofilename{\tud@depreacated@cmd{logofilename}{headlogo}}
 \endinput
 %%
 %% End of file `tudscrreprt.cls'.
