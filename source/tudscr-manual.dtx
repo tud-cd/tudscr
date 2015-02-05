@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-manual.dtx}[%
-  2015/02/02 v2.03 TUD-KOMA-Script\space%
+  2015/02/05 v2.03 TUD-KOMA-Script\space%
 %</driver>
 %<identify>\NeedsTeXFormat{LaTeX2e}[2011/06/27]
 %<class&identify>\ProvidesClass{tudscrman}[%
@@ -323,7 +323,8 @@
 %<*package>
   level=\subsection*,%
 %</package>
-  noclearpage,firstpagestyle=headings,headers={\indexname}{\indexname}%
+  noclearpage,firstpagestyle=headings,headers={\indexname}{\indexname},%
+  othercode={\renewcommand*\subitem{\@idxitem\hspace*{15\p@}}}%
 }
 \newcommand*\xdyopt{-M tudscrman-temp.xdy -L german-din}
 %    \end{macrocode}
@@ -398,7 +399,7 @@
 % welche hierarchisch gleichgestellt sind.
 %    \begin{macrocode}
 \write\tud@write@i{%
-  (define-attributes (("declare" "!" "important" "?" "default")))%
+  (define-attributes (("declare" "!" "important" "?" "deprecated" "default")))%
 }
 %    \end{macrocode}
 % Eine Alternative wäre, diese in der Hierarchie zu unterscheiden, allerdings
@@ -452,6 +453,20 @@
 \space\space :open "\string\hyperpage{"^^J%
 \space\space :close "}"^^J%
 \space\space :attr "default"^^J%
+)%
+}
+%    \end{macrocode}
+% Für die Änderungsliste wird ein separates Attribut erstellt. Mit diesem wird 
+% es möglich, die Seitenangabe für Optionen und Befehle zu unterdrücken, welche 
+% aus \TUDScript entfernt oder veraltet wurden, wenn mit \cs{Replace} eine 
+% Alternative eingeführt wurde. Dafür wird der Befehl \cs{deprecatedhyperpage} 
+% verwendet, welcher im Bedarfsball auf \cs{@gobble} gesetzt wird.
+%    \begin{macrocode}
+\write\tud@write@i{%
+(markup-locref^^J%
+\space\space :open "\string\deprecatedhyperpage{"^^J%
+\space\space :close "}"^^J%
+\space\space :attr "deprecated"^^J%
 )%
 }
 %    \end{macrocode}
@@ -1587,7 +1602,7 @@
 % \begin{macro}{\if@stareddeclare}
 % \changes{v2.02}{2014/10/09}{neu}%^^A
 % \begin{macro}{\if@openindex}
-% \begin{macro}{\if@noindex}
+% \begin{macro}{\if@deprecated}
 % Dies sin ein paar Hilfsmakros zur Steuerung des Markup sowie der Ausgabe von
 % Deklarationen, Index und Änderungsliste, welche bei den nächsten Befehlen und 
 % Umgebungen genutzt werden.
@@ -1595,9 +1610,9 @@
 \newif\if@declare
 \newif\if@stareddeclare
 \newif\if@openindex
-\newif\if@noindex
+\newif\if@deprecated
 %    \end{macrocode}
-% \end{macro}^^A \if@noindex
+% \end{macro}^^A \if@deprecated
 % \end{macro}^^A \if@openindex
 % \end{macro}^^A \if@stareddeclare
 % \end{macro}^^A \if@declare
@@ -1648,21 +1663,33 @@
           the environment `Declaration'%
         }%
       }%
-      \ifx\@IndexFormat\@empty\else%
-        \ClassWarning{\tudcls@name}{%
-            It is not possible to use any indexing format\MessageBreak%
-            like |\@IndexFormat| within the arguments of the\MessageBreak%
-            environment `Declaration'%
+%    \end{macrocode}
+% Das zu erzeugende Label wird definiert.
+%    \begin{macrocode}
+      \IfValueTF{#6}{\edef\@tempa{#5:#6:#8}}{\edef\@tempa{#5:#8}}%
+%    \end{macrocode}
+% Für die Deklaration veralteter Optionen, Befehle etc. kann die Sternvariante 
+% des Auszeichnungsbefehle verwendet werden, um das Erzeugen eines Labels zu 
+% unterbinden.
+%    \begin{macrocode}
+      \if@deprecated%
+        \expandafter\IfBooleanF\expandafter{\@IndexFormat}{%
+          \manualhyperdef{\@tempa}%
         }%
-      \fi%
-      \if@noindex\else%
-        \IfValueTF{#6}{\edef\@tempa{#5:#6:#8}}{\edef\@tempa{#5:#8}}%
 %    \end{macrocode}
 % Wird zur Deklaration die Umgebung \env{Declaration*} genutzt, so wird der 
 % Hyperlink ein ganzes Stück nach oben verschoben. Hintergrund ist, dass diese 
 % Umgebung eigentlich nur zum Deklarieren von Klassen und Paketen gedacht ist 
 % und direkt nach einer Gliederungsüberschrift folgen sollte.
 %    \begin{macrocode}
+      \else%
+        \ifx\@IndexFormat\@empty\else%
+          \ClassWarning{\tudcls@name}{%
+            It is not possible to use any indexing format\MessageBreak%
+            like |\@IndexFormat| within the arguments of the\MessageBreak%
+            environment `Declaration'%
+          }%
+        \fi%
         \if@stareddeclare%
           \manualhyperdef'{\@tempa}%
         \else%
@@ -1683,7 +1710,7 @@
         #1\IfValueT{#2}{#2}%
       \fi%
     \else%
-      \if@noindex\else%
+      \if@deprecated\else%
         \@HyperIndex{#5}{#6}{#7}{#8}{#9}{declare)}%
       \fi%
     \fi%
@@ -1984,12 +2011,19 @@
 % Sternversion auf \emph{entfällt} voreingestellt.
 %    \begin{macrocode}
     \IfBooleanTF{#1}{%
-      \global\@noindextrue%
+      \global\@deprecatedtrue%
       \renewcommand*\@changedatdeclaredefault{\emph{entf\"allt}}%
     }{%
-      \global\@noindexfalse%
+      \global\@deprecatedfalse%
     }%
     \IfValueT{#2}{\renewcommand*\@changedatdeclaredefault{\emph{#2}}}%
+%    \end{macrocode}
+% Für überholte Einträge in der Änderungsliste wird das Indexattribut
+% \enquote{deprecated} angehängt.
+%    \begin{macrocode}
+    \if@deprecated%
+      \appto\@changedatdeclaredefault{|deprecated}%
+    \fi%
     \@declaretrue\@openindextrue%
     \@afterindentfalse\@afterheading%
 %    \end{macrocode}
@@ -2077,7 +2111,7 @@
 \NewDocumentEnvironment{Declaration*}{om}{%
   \@changedatdeclare{#1}{#2}%
   \@stareddeclaretrue%
-  \global\@noindexfalse%
+  \global\@deprecatedfalse%
   \@declaretrue\@openindextrue#2\@declarefalse%
   \@stareddeclarefalse%
 }{%
@@ -2210,7 +2244,7 @@
     \ifx\tud@item@add\relax%
       \def\tud@item@add{#1}%
     \else%
-      \apptocmd{\tud@item@add}{~#1}{}{}%
+      \appto\tud@item@add{~#1}%
     \fi%
   }%
   \item@values[%
@@ -2373,12 +2407,20 @@
 }
 %    \end{macrocode}
 % \dots und anschließend in die Liste \cs{@changedatdeclarelist}~-- in einer
-% etwas kryptischen Form~-- eingetragen.
+% etwas kryptischen Form~-- eingetragen. Dies geschieht jedoch nur, wenn im 
+% Argument nicht die Sternversion eines Auszeichnungsbefehls genutzt wurde. 
+% Diese sollen keinen Eintrag in der Änderungsliste, wohl aber eine Randnotiz
+% erzeugen.
 %    \begin{macrocode}
 \newcommand*\ChangedAt@@Split[3]{%
-  \listadd\@changedatdeclarelist{%
-    Implementierung!#2!\IfValueTF{#3}{#3}{\@changedatdeclaredefault}!#1%
-  }%
+  \in@{*}{#1}%
+  \ifin@%
+    \listadd\@changedatdeclarelist{Allgemein!#2}%
+  \else%
+    \listadd\@changedatdeclarelist{%
+      Implementierung!#2!\IfValueTF{#3}{#3}{\@changedatdeclaredefault}!#1%
+    }%
+  \fi%
 }
 %    \end{macrocode}
 % \end{macro}^^A \ChangedAt@@Split
@@ -2564,11 +2606,11 @@
         \setbox0\hbox{#3}%
       \endgroup%
       \index[changelog]{%
-        #1 \manualhyperdef*{#1}!\manualhyperdef*{#1:#2}{#2}!\@TempKey\ #3%
+        #1\manualhyperdef*{#1}!\manualhyperdef*{#1:#2}#2!\@TempKey\ #3%
       }%
     \else%
       \index[changelog]{%
-        #1 \manualhyperdef*{#1}!\manualhyperdef*{#1:#2}{#2}!#3%
+        #1\manualhyperdef*{#1}!\manualhyperdef*{#1:#2}#2!#3%
       }%
     \fi%
   \endgroup%
@@ -2587,17 +2629,17 @@
 % Der Befehl \cs{Replace} erzeugt einen Eintrag in der Änderungshistorie sowie 
 % einen Eintrag im gewünschten Index mit einem Verweis auf den neuen Befehl.
 %    \begin{macrocode}
-\newcommand*\Replace[4][]{%
+\NewDocumentCommand\Replace{sommm}{%
 %    \end{macrocode}
 % Die alten Befehle in der Liste erhalten einen Eintrag in der Änderungsnotiz. 
 % Das Komma vor dem Argument in der Schleife ist notwendig, weil ansonsten das 
 % Argument sofort expandiert wird.
 %    \begin{macrocode}
   \@tempcnta=\z@%
-  \@for\@tempa:={,#4}\do{%
+  \@for\@tempa:={,#5}\do{%
     \ifx\@tempa\@empty\else%
       \protected@edef\@tempb{%
-        Ersetzungen!#2!\emph{entf\"allt}~\textrightarrow~siehe~#3!\@tempa%
+        Implementierung!#3!\emph{entf\"allt}|see{#4}!\@tempa%
       }%
       \expandafter\listadd\expandafter\@changedatdeclarelist\expandafter{%
         \@tempb%
@@ -2605,7 +2647,7 @@
 %    \end{macrocode}
 % Und der Eintrag im Index.
 %    \begin{macrocode}
-      \ifblank{#1}{}{\index[#1]{\@tempa|see{#3}}}%
+      \IfValueT{#2}{\index[#2]{\@tempa|see{#4}}}%
       \advance\@tempcnta\@ne%
     \fi%
   }%
@@ -2616,7 +2658,7 @@
   \def\@tempb{}%
   \def\@tempc{}%
   \@tempcntb=\@ne%
-  \@for\@tempa:={,#4}\do{%
+  \@for\@tempa:={,#5}\do{%
     \ifx\@tempa\@empty\else%
       \advance\@tempcntb\@ne%
       \protected@eappto\@tempc{\@tempb\@tempa}%
@@ -2627,10 +2669,15 @@
       \fi%
     \fi%
   }%
-  \protected@edef\@tempb{%
-    Implementierung!#2!\emph{neu}~\textrightarrow~ersetzt~\@tempc!#3%
+%    \end{macrocode}
+% Die Sternversion unterdrückt den Hinweis auf neue Optionen, Befehle etc.
+%    \begin{macrocode}
+  \IfBooleanF{#1}{%
+    \protected@edef\@tempb{%
+      Implementierung!#3!\emph{neu}~\textrightarrow~ersetzt~\@tempc!#4%
+    }%
+    \expandafter\listadd\expandafter\@changedatdeclarelist\expandafter{\@tempb}%
   }%
-  \expandafter\listadd\expandafter\@changedatdeclarelist\expandafter{\@tempb}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \Replace
@@ -3437,13 +3484,22 @@
 % \begin{macro}{\if@changelog}
 % \begin{macro}{\Changelog}
 % \changes{v2.02}{2014/08/20}{neu}%^^A
-% Ähnlich wie für den Index wird auch für die Änderungsliste verfahren.
+% \begin{macro}{\deprecatedhyperpage}
+% \changes{v2.03}{2015/02/05}{neu}%^^A
+% Ähnlich wie für den Index wird auch für die Änderungsliste verfahren. Mit dem 
+% Makro \cs{deprecatedhyperpage} wird die Ausgabe der Seitenzahlen unterdrückt, 
+% wenn zusätzlich ein mit \cs{see} gesetzter Querverweis existiert.
 %    \begin{macrocode}
+\newcommand*\deprecatedhyperpage{}
 \newif\if@changelog
 \newcommand*\PrintChangelog{%
   \begingroup%
     \let\lettergroup\@gobble%
     \@changelogtrue%
+    \let\deprecatedhyperpage\hyperpage%
+    \preto\item{\let\deprecatedhyperpage\hyperpage}%
+    \preto\subitem{\let\deprecatedhyperpage\hyperpage}%
+    \preto\subsubitem{\let\deprecatedhyperpage\hyperpage}%
     \@printindex[changelog]%
   \endgroup%
 }
@@ -3454,12 +3510,34 @@
   }%
 }
 %    \end{macrocode}
+% \end{macro}^^A \deprecatedhyperpage
 % \end{macro}^^A \Changelog
 % \end{macro}^^A \if@changelog
 % \end{macro}^^A \PrintChangelog
 %
 % \iffalse
 %</class>
+% \fi
+%
+% \begin{macro}{\see}
+% \changes{v2.03}{2015/02/05}{neu}%^^A
+% Der Befehl wird zum einen so definiert, dass zwischen \cs{seename} und dem 
+% Argument ein geschütztes Leerzeichen verwendet wird.
+%    \begin{macrocode}
+%<*package>
+\renewcommand*\see[2]{\emph{\seename}~#1}
+%</package>
+%    \end{macrocode}
+% Innerhalb der Klasse dient er außerdem zum etwaigen Unterdrücken von 
+% Seitenzahlen in der Änderungsliste veralteter Optionen, Befehle etc.
+%    \begin{macrocode}
+%<*class>
+\renewcommand*\see[2]{\let\deprecatedhyperpage\@gobble\emph{\seename}~#1}
+%</class>
+%    \end{macrocode}
+% \end{macro}^^A \see
+%
+% \iffalse
 %</body>
 % \fi
 %

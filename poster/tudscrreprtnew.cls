@@ -858,17 +858,17 @@
 \newif\if@tud@bookmarks
 \TUD@ifkey{tudbookmarks}{@tud@bookmarks}
 %%% From File: tudscr-comp.dtx
-\newcommand*\tud@depreacated@key[2]{%
+\newcommand*\tud@deprecated@key[2]{%
   \ClassWarning{\tudcls@name}%
   {%
-    The option key `#1' is depreacated.\MessageBreak%
+    The option key `#1' is deprecated.\MessageBreak%
     It's recommended to use `#2' instead%
   }%
 }
 \TUD@key{cdfonts}[true]{%
   \TUD@set@ifkey{cdfonts}{@tempswa}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \tud@depreacated@key{cdfonts}{cdfont}%
+    \tud@deprecated@key{cdfonts}{cdfont}%
     \if@tempswa%
       \TUDoptions{cdfont=true}%
     \else%
@@ -879,7 +879,7 @@
 \TUD@key{tudfonts}[true]{%
   \TUD@set@ifkey{tudfonts}{@tempswa}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \tud@depreacated@key{tudfonts}{cdfont}%
+    \tud@deprecated@key{tudfonts}{cdfont}%
     \if@tempswa%
       \TUDoptions{cdfont=true}%
     \else%
@@ -890,7 +890,7 @@
 \TUD@key{heavyfont}[true]{%
   \TUD@set@ifkey{heavyfont}{@tempswa}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \tud@depreacated@key{heavyfont}{cdfont}%
+    \tud@deprecated@key{heavyfont}{cdfont}%
     \if@tempswa%
       \TUDoptions{cdfont=heavy}%
     \else%
@@ -901,7 +901,7 @@
 \TUD@key{din}[true]{%
   \TUD@set@ifkey{din}{@tempswa}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \tud@depreacated@key{din}{cdfont}%
+    \tud@deprecated@key{din}{cdfont}%
     \if@tempswa%
       \TUDoptions{cdfont=din}%
     \else%
@@ -912,7 +912,7 @@
 \TUD@key{nodin}[true]{%
   \TUD@set@ifkey{nodin}{@tempswa}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \tud@depreacated@key{nodin}{cdfont}%
+    \tud@deprecated@key{nodin}{cdfont}%
     \if@tempswa%
       \TUDoptions{cdfont=nodin}%
     \else%
@@ -923,11 +923,22 @@
 \TUD@key{sansmath}[true]{%
   \TUD@set@ifkey{sansmath}{@tempswa}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \tud@depreacated@key{sansmath}{cdmath}%
+    \tud@deprecated@key{sansmath}{cdmath}%
     \if@tempswa%
       \TUDoptions{cdmath=true}%
     \else%
       \TUDoptions{cdmath=false}%
+    \fi%
+  \fi%
+}
+\TUD@key{serifmath}[true]{%
+  \TUD@set@ifkey{serifmath}{@tempswa}{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \tud@deprecated@key{sansmath}{cdmath}%
+    \if@tempswa%
+      \TUDoptions{cdmath=false}%
+    \else%
+      \TUDoptions{cdmath=true}%
     \fi%
   \fi%
 }
@@ -940,7 +951,7 @@
     {heavy}{2},{heavyfont}{2}%
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \tud@depreacated@key{barfont}{cdhead}%
+    \tud@deprecated@key{barfont}{cdhead}%
     \ifcase\@tempa\relax%
       \TUDoptions{cdhead=false}%
     \or%
@@ -953,7 +964,7 @@
 \TUD@key{widehead}[true]{%
   \TUD@set@ifkey{widehead}{@tempswa}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \tud@depreacated@key{widehead}{cdhead}%
+    \tud@deprecated@key{widehead}{cdhead}%
     \if@tempswa%
       \TUDoptions{cdhead=paperwidth}%
     \else%
@@ -964,7 +975,7 @@
 \TUD@key{tudfoot}[true]{%
   \TUD@set@ifkey{tudfoot}{@tempswa}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \tud@depreacated@key{tudfoot}{cdfoot}%
+    \tud@deprecated@key{tudfoot}{cdfoot}%
     \if@tempswa%
       \TUDoptions{cdfoot=true}%
     \else%
@@ -2649,6 +2660,7 @@
   \TUD@parameter@define{cdhead}[true]{\TUDoption{cdhead}{#1}}%
   \TUD@parameter@define{cdfoot}[true]{\TUDoption{cdfoot}{#1}}%
   \TUD@parameter@define{headlogo}{\headlogo{#1}}%
+  \TUD@parameter@define{footlogo}{\footlogo{#1}}%
   \TUD@parameter@define{ddc}[true]{\TUDoption{ddc}{#1}}%
   \TUD@parameter@define{ddchead}[true]{\TUDoption{ddchead}{#1}}%
   \TUD@parameter@define{ddcfoot}[true]{\TUDoption{ddcfoot}{#1}}%
@@ -2658,7 +2670,6 @@
   \TUD@parameter@define{widehead}[true]{\TUDoption{widehead}{#1}}%
   \TUD@parameter@define{tudfoot}[true]{\TUDoption{tudfoot}{#1}}%
   \TUD@parameter@let{logo}{headlogo}%
-  \TUD@parameter@define{footlogo}{\footlogo{#1}}%
 }
 \TUD@parameter{tudpage}{%
   \TUD@parameter@define{language}{\selectlanguage{#1}}%
@@ -4177,9 +4188,9 @@
   \protected@edef\reserved@a{\noexpand#1{#2}{#3}}\reserved@a%
 }
 %%% From File: tudscr-comp.dtx
-\newcommand*\tud@depreacated@cmd[2]{%
+\newcommand*\tud@deprecated@cmd[2]{%
   \ClassWarning{\tudcls@name}{%
-    The command `\@backslashchar#1' is depreacated.\MessageBreak%
+    The command `\@backslashchar#1' is deprecated.\MessageBreak%
     It's recommended to use `\@backslashchar#2' instead%
   }%
   \csletcs{#1}{#2}%
@@ -4187,24 +4198,24 @@
 }
 \newlength\chapterheadingvskip
 \let\chapterheadingvskip\headingsvskip
-\newcommand*\professorship{\tud@depreacated@cmd{professorship}{chair}}
-\newcommand*\student{\tud@depreacated@cmd{student}{author}}
-\newrobustcmd*\studentid{\tud@depreacated@cmd{studentid}{matriculationnumber}}
+\newcommand*\professorship{\tud@deprecated@cmd{professorship}{chair}}
+\newcommand*\student{\tud@deprecated@cmd{student}{author}}
+\newrobustcmd*\studentid{\tud@deprecated@cmd{studentid}{matriculationnumber}}
 \newrobustcmd*\matriculationid{%
-  \tud@depreacated@cmd{matriculationid}{matriculationnumber}%
+  \tud@deprecated@cmd{matriculationid}{matriculationnumber}%
 }
 \newrobustcmd*\enrolmentyear{%
-  \tud@depreacated@cmd{enrolmentyear}{matriculationyear}%
+  \tud@deprecated@cmd{enrolmentyear}{matriculationyear}%
 }
-\newrobustcmd*\birthplace{\tud@depreacated@cmd{birthplace}{placeofbirth}}
-\newcommand*\location{\tud@depreacated@cmd{location}{place}}
-\newcommand*\submissiondate{\tud@depreacated@cmd{submissiondate}{date}}
+\newrobustcmd*\birthplace{\tud@deprecated@cmd{birthplace}{placeofbirth}}
+\newcommand*\location{\tud@deprecated@cmd{location}{place}}
+\newcommand*\submissiondate{\tud@deprecated@cmd{submissiondate}{date}}
 \newcommand*\oralexaminationdate{%
-  \tud@depreacated@cmd{oralexaminationdate}{defensedate}%
+  \tud@deprecated@cmd{oralexaminationdate}{defensedate}%
 }
-\newrobustcmd*\birthday{\tud@depreacated@cmd{birthday}{dateofbirth}}
-\newcommand*\logofile{\tud@depreacated@cmd{logofile}{headlogo}}
-\newcommand*\logofilename{\tud@depreacated@cmd{logofilename}{headlogo}}
+\newrobustcmd*\birthday{\tud@deprecated@cmd{birthday}{dateofbirth}}
+\newcommand*\logofile{\tud@deprecated@cmd{logofile}{headlogo}}
+\newcommand*\logofilename{\tud@deprecated@cmd{logofilename}{headlogo}}
 \endinput
 %%
 %% End of file `tudscrreprt.cls'.

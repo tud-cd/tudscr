@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-comp.dtx}[%
-  2015/02/04 v2.03 TUD-KOMA-Script\space%
+  2015/02/05 v2.03 TUD-KOMA-Script\space%
 %</driver>
 %<package>\NeedsTeXFormat{LaTeX2e}[2011/06/27]
 %<package>\ProvidesPackage{tudscrcomp}[%
@@ -157,18 +157,22 @@
 %    \begin{macrocode}
 \TUD@key{colortitle}[true]{%
   \TUD@set@ifkey{colortitle}{@tempswa}{#1}%
-  \if@tempswa%
-    \TUDoptions{cdtitle=color}%
-  \else%
-    \TUDoptions{cdtitle=true}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \if@tempswa%
+      \TUDoptions{cdtitle=color}%
+    \else%
+      \TUDoptions{cdtitle=true}%
+    \fi%
   \fi%
 }
 \TUD@key{nocolortitle}[true]{%
   \TUD@set@ifkey{nocolortitle}{@tempswa}{#1}%
-  \if@tempswa%
-    \TUDoptions{cdtitle=true}%
-  \else%
-    \TUDoptions{cdtitle=color}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \if@tempswa%
+      \TUDoptions{cdtitle=true}%
+    \else%
+      \TUDoptions{cdtitle=color}%
+    \fi%
   \fi%
 }
 %    \end{macrocode}
@@ -181,10 +185,12 @@
 %    \begin{macrocode}
 \TUD@key{ddcfooter}[true]{%
   \TUD@set@ifkey{ddcfooter}{@tempswa}{#1}%
-  \if@tempswa%
-    \TUDoptions{ddcfoot=true}%
-  \else%
-    \TUDoptions{ddcfoot=false}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \if@tempswa%
+      \TUDoptions{ddcfoot=true}%
+    \else%
+      \TUDoptions{ddcfoot=false}%
+    \fi%
   \fi%
 }
 %    \end{macrocode}
@@ -219,21 +225,6 @@
 % \end{macro}^^A \glossitem
 % \end{macro}^^A \glossaryname
 % \end{environment}^^A theglossary
-% \begin{option}{serifmath}
-% Die alte \cls{tudbook}-Klasse hat neben der Option \opt{sansmath}
-% außerdem den zusätzlichen Schlüssel \opt{serifmath} definiert, welcher aus
-% Gründen der Kompatibilität hier ebenfalls vorgehalten wird.
-%    \begin{macrocode}
-\TUD@key{serifmath}[true]{%
-  \TUD@set@ifkey{serifmath}{@tempswa}{#1}%
-  \if@tempswa%
-    \TUDoptions{cdmath=false}%
-  \else%
-    \TUDoptions{cdmath=true}%
-  \fi%
-}
-%    \end{macrocode}
-% \end{option}^^A serifmath
 % \begin{macro}{\chapterpage}
 % \begin{macro}{\if@tud@chapterpage@temp}
 % \begin{macro}{\tud@chapterpage@set}
@@ -339,15 +330,17 @@
 %<*class|fonts>
 % \fi
 %
-% \begin{macro}{\tud@depreacated@key}
-% \begin{macro}{\tud@depreacated@cmd}
+% \begin{macro}{\tud@deprecated@key}
+% \changes{v2.03}{2015/02/05}{neu}%^^A
+% \begin{macro}{\tud@deprecated@cmd}
+% \changes{v2.03}{2015/02/05}{neu}%^^A
 % Um alte Optionen und Befehle dem Anwender bei der Verwendung kenntlich zu 
 % machen, werden entsprechende Warnungen definiert. Für Optionen wird dabei
 % lediglich die empfohlene Option ausgegeben. Das Ausführen dieser wird später
 % definert.
 %    \begin{macrocode}
 %<*option>
-\newcommand*\tud@depreacated@key[2]{%
+\newcommand*\tud@deprecated@key[2]{%
 %<*!fonts>
   \ClassWarning{\tudcls@name}%
 %</!fonts>
@@ -355,7 +348,7 @@
   \PackageWarning{tudscrfonts}%
 %</fonts>
   {%
-    The option key `#1' is depreacated.\MessageBreak%
+    The option key `#1' is deprecated.\MessageBreak%
     It's recommended to use `#2' instead%
   }%
 }
@@ -365,9 +358,9 @@
 % den alten überschireben.
 %    \begin{macrocode}
 %<*body>
-\newcommand*\tud@depreacated@cmd[2]{%
+\newcommand*\tud@deprecated@cmd[2]{%
   \ClassWarning{\tudcls@name}{%
-    The command `\@backslashchar#1' is depreacated.\MessageBreak%
+    The command `\@backslashchar#1' is deprecated.\MessageBreak%
     It's recommended to use `\@backslashchar#2' instead%
   }%
   \csletcs{#1}{#2}%
@@ -375,8 +368,8 @@
 }
 %</body>
 %    \end{macrocode}
-% \end{macro}^^A \tud@depreacated@cmd
-% \end{macro}^^A \tud@depreacated@key
+% \end{macro}^^A \tud@deprecated@cmd
+% \end{macro}^^A \tud@deprecated@key
 %
 % \iffalse
 %<*option>
@@ -389,7 +382,7 @@
 \TUD@key{cdfonts}[true]{%
   \TUD@set@ifkey{cdfonts}{@tempswa}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \tud@depreacated@key{cdfonts}{cdfont}%
+    \tud@deprecated@key{cdfonts}{cdfont}%
     \if@tempswa%
       \TUDoptions{cdfont=true}%
     \else%
@@ -400,7 +393,7 @@
 \TUD@key{tudfonts}[true]{%
   \TUD@set@ifkey{tudfonts}{@tempswa}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \tud@depreacated@key{tudfonts}{cdfont}%
+    \tud@deprecated@key{tudfonts}{cdfont}%
     \if@tempswa%
       \TUDoptions{cdfont=true}%
     \else%
@@ -417,7 +410,7 @@
 \TUD@key{heavyfont}[true]{%
   \TUD@set@ifkey{heavyfont}{@tempswa}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \tud@depreacated@key{heavyfont}{cdfont}%
+    \tud@deprecated@key{heavyfont}{cdfont}%
     \if@tempswa%
       \TUDoptions{cdfont=heavy}%
     \else%
@@ -435,7 +428,7 @@
 \TUD@key{din}[true]{%
   \TUD@set@ifkey{din}{@tempswa}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \tud@depreacated@key{din}{cdfont}%
+    \tud@deprecated@key{din}{cdfont}%
     \if@tempswa%
       \TUDoptions{cdfont=din}%
     \else%
@@ -446,7 +439,7 @@
 \TUD@key{nodin}[true]{%
   \TUD@set@ifkey{nodin}{@tempswa}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \tud@depreacated@key{nodin}{cdfont}%
+    \tud@deprecated@key{nodin}{cdfont}%
     \if@tempswa%
       \TUDoptions{cdfont=nodin}%
     \else%
@@ -458,13 +451,17 @@
 % \end{option}^^A nodin
 % \end{option}^^A din
 % \begin{option}{sansmath}
+% \begin{option}{serifmath}
 % Mit dieser Option kann die genutzte Standardschrift für den Mathematiksatz
-% für das gesamte Dokument umgestellt werden.
+% für das gesamte Dokument umgestellt werden. Die \cls{tudbook}-Klasse hat 
+% neben der Option \opt{sansmath} außerdem den zusätzlichen Schlüssel
+% \opt{serifmath} definiert, welcher aus Gründen der Kompatibilität hier
+% ebenfalls vorgehalten wird.
 %    \begin{macrocode}
 \TUD@key{sansmath}[true]{%
   \TUD@set@ifkey{sansmath}{@tempswa}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \tud@depreacated@key{sansmath}{cdmath}%
+    \tud@deprecated@key{sansmath}{cdmath}%
     \if@tempswa%
       \TUDoptions{cdmath=true}%
     \else%
@@ -472,7 +469,19 @@
     \fi%
   \fi%
 }
+\TUD@key{serifmath}[true]{%
+  \TUD@set@ifkey{serifmath}{@tempswa}{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \tud@deprecated@key{sansmath}{cdmath}%
+    \if@tempswa%
+      \TUDoptions{cdmath=false}%
+    \else%
+      \TUDoptions{cdmath=true}%
+    \fi%
+  \fi%
+}
 %    \end{macrocode}
+% \end{option}^^A serifmath
 % \end{option}^^A sansmath
 %
 % \iffalse
@@ -494,7 +503,7 @@
     {heavy}{2},{heavyfont}{2}%
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \tud@depreacated@key{barfont}{cdhead}%
+    \tud@deprecated@key{barfont}{cdhead}%
     \ifcase\@tempa\relax%
       \TUDoptions{cdhead=false}%
     \or%
@@ -514,7 +523,7 @@
 \TUD@key{widehead}[true]{%
   \TUD@set@ifkey{widehead}{@tempswa}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \tud@depreacated@key{widehead}{cdhead}%
+    \tud@deprecated@key{widehead}{cdhead}%
     \if@tempswa%
       \TUDoptions{cdhead=paperwidth}%
     \else%
@@ -530,7 +539,7 @@
 \TUD@key{tudfoot}[true]{%
   \TUD@set@ifkey{tudfoot}{@tempswa}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \tud@depreacated@key{tudfoot}{cdfoot}%
+    \tud@deprecated@key{tudfoot}{cdfoot}%
     \if@tempswa%
       \TUDoptions{cdfoot=true}%
     \else%
@@ -692,13 +701,13 @@
 % Für die Angabe des Lehrstuhls bzw. der Professur mit kann anstelle von 
 % \cs{chair} als Aliasbefehl auch \cs{professorship} genutzt werden.
 %    \begin{macrocode}
-\newcommand*\professorship{\tud@depreacated@cmd{professorship}{chair}}
+\newcommand*\professorship{\tud@deprecated@cmd{professorship}{chair}}
 %    \end{macrocode}
 % \end{macro}^^A \professorship
 % \begin{macro}{\student}
 % Der Befehl \cs{student} kann als Alias für \cs{author} genutzt werden.
 %    \begin{macrocode}
-\newcommand*\student{\tud@depreacated@cmd{student}{author}}
+\newcommand*\student{\tud@deprecated@cmd{student}{author}}
 %    \end{macrocode}
 % \end{macro}^^A \student
 % \begin{macro}{\studentid}
@@ -706,9 +715,9 @@
 % Zur Angabe von Matrikelnummer kann auch \cs{studentid} oder
 % \cs{matriculationnumber} genutzt werden.
 %    \begin{macrocode}
-\newrobustcmd*\studentid{\tud@depreacated@cmd{studentid}{matriculationnumber}}
+\newrobustcmd*\studentid{\tud@deprecated@cmd{studentid}{matriculationnumber}}
 \newrobustcmd*\matriculationid{%
-  \tud@depreacated@cmd{matriculationid}{matriculationnumber}%
+  \tud@deprecated@cmd{matriculationid}{matriculationnumber}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \matriculationid
@@ -717,27 +726,27 @@
 % Das Immatrikulationsjahr kann auch mit \cs{enrolmentyear} angegeben werden.
 %    \begin{macrocode}
 \newrobustcmd*\enrolmentyear{%
-  \tud@depreacated@cmd{enrolmentyear}{matriculationyear}%
+  \tud@deprecated@cmd{enrolmentyear}{matriculationyear}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \enrolmentyear
 % \begin{macro}{\birthplace}
 % Zur Angabe des Geburtsortes kann auch \cs{birthplace} verwendet werden.
 %    \begin{macrocode}
-\newrobustcmd*\birthplace{\tud@depreacated@cmd{birthplace}{placeofbirth}}
+\newrobustcmd*\birthplace{\tud@deprecated@cmd{birthplace}{placeofbirth}}
 %    \end{macrocode}
 % \end{macro}^^A \birthplace
 % \begin{macro}{\location}
 % Für die Angabe des Ortes kann auch \cs{location} genutzt werden.
 %    \begin{macrocode}
-\newcommand*\location{\tud@depreacated@cmd{location}{place}}
+\newcommand*\location{\tud@deprecated@cmd{location}{place}}
 %    \end{macrocode}
 % \end{macro}^^A \location
 % \begin{macro}{\submissiondate}
 % Der Befehl \cs{submissiondate} kann als Aliasbefehl für den Standardbefehl 
 % \cs{date} zur Datumsangabe genutzt werden.
 %    \begin{macrocode}
-\newcommand*\submissiondate{\tud@depreacated@cmd{submissiondate}{date}}
+\newcommand*\submissiondate{\tud@deprecated@cmd{submissiondate}{date}}
 %    \end{macrocode}
 % \end{macro}^^A \submissiondate
 % \begin{macro}{\oralexaminationdate}
@@ -745,22 +754,22 @@
 % verwendet werden.
 %    \begin{macrocode}
 \newcommand*\oralexaminationdate{%
-  \tud@depreacated@cmd{oralexaminationdate}{defensedate}%
+  \tud@deprecated@cmd{oralexaminationdate}{defensedate}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \oralexaminationdate
 % \begin{macro}{\birthday}
 % Der Geburtstag kann auch mit \cs{birthday} angegeben werden.
 %    \begin{macrocode}
-\newrobustcmd*\birthday{\tud@depreacated@cmd{birthday}{dateofbirth}}
+\newrobustcmd*\birthday{\tud@deprecated@cmd{birthday}{dateofbirth}}
 %    \end{macrocode}
 % \end{macro}^^A \birthday
 % \begin{macro}{\logofile}
 % \begin{macro}{\logofilename}
 % Diese beiden Befehle können anstelle von \cs{headlogo} eingesetzt werden.
 %    \begin{macrocode}
-\newcommand*\logofile{\tud@depreacated@cmd{logofile}{headlogo}}
-\newcommand*\logofilename{\tud@depreacated@cmd{logofilename}{headlogo}}
+\newcommand*\logofile{\tud@deprecated@cmd{logofile}{headlogo}}
+\newcommand*\logofilename{\tud@deprecated@cmd{logofilename}{headlogo}}
 %    \end{macrocode}
 % \end{macro}^^A \logofilename
 % \end{macro}^^A \logofile
