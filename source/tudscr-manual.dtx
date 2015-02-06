@@ -1,4 +1,4 @@
-% \CheckSum{2680}
+% \CheckSum{2830}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-manual.dtx}[%
-  2015/02/05 v2.03 TUD-KOMA-Script\space%
+  2015/02/06 v2.03 TUD-KOMA-Script\space%
 %</driver>
 %<identify>\NeedsTeXFormat{LaTeX2e}[2011/06/27]
 %<class&identify>\ProvidesClass{tudscrman}[%
@@ -649,7 +649,7 @@
   headings=optiontoheadandtoc,%
   captions=tableheading,%
   numbers=noenddot,%
-  color=true,%
+  cd=color,%
 }{\tudinh@name}
 \PassOptionsToPackage{automark}{scrlayer-scrpage}
 %    \end{macrocode}
@@ -2008,22 +2008,70 @@
 % optionale Argument kann genutzt werden, um das standardmäßige Atrribut für 
 % die Änderungsliste, welches in \cs{@changedatdeclaredefault} hinterlegt ist,
 % zu ändern. Dies ist für die normale Version auf \emph{neu} und für die
-% Sternversion auf \emph{entfällt} voreingestellt.
+% Sternversion auf \emph{entfällt} voreingestellt. Für überholte Einträge in 
+% der Änderungsliste wird das Indexattribut \enquote{deprecated} angehängt.
 %    \begin{macrocode}
     \IfBooleanTF{#1}{%
       \global\@deprecatedtrue%
-      \renewcommand*\@changedatdeclaredefault{\emph{entf\"allt}}%
+      \renewcommand*\@changedatdeclaredefault{\emph{entf\"allt}|deprecated}%
     }{%
       \global\@deprecatedfalse%
     }%
-    \IfValueT{#2}{\renewcommand*\@changedatdeclaredefault{\emph{#2}}}%
 %    \end{macrocode}
-% Für überholte Einträge in der Änderungsliste wird das Indexattribut
-% \enquote{deprecated} angehängt.
+% Das optionale Argument kann verwendet werden, um allen Deklarationen die 
+% gleiche, nebenstehende Zusatzinformation mitzugeben, falls diese bis dahin
+% komplett leer waren. Wird die Sternversion verwendet, so wird für den Fall, 
+% dass vor der Umgebung \cs{Replace} verwendet wurde, die neue Option etc. als 
+% Querverweis angegeben.
 %    \begin{macrocode}
-    \if@deprecated%
-      \appto\@changedatdeclaredefault{|deprecated}%
+    \@tempswafalse%
+    \IfValueT{#2}{%
+      \if@additionallist%
+        \ClassWarning{\tudcls@name}{%
+          It is not possible to use the optional argument\MessageBreak%
+          of \string\printdeclarationlist due to the given\MessageBreak%
+          additional information as argument of the\MessageBreak%
+          environment `Declaration'%
+        }%
+      \else%
+        \@tempswatrue%
+      \fi%
+    }%
+    \IfBooleanTF{#1}{%
+      \if@additionallist\else%
+        \ifx\@Replace\relax\else\@tempswatrue\fi%
+      \fi%
+    }{%
+      \global\let\@Replace\relax%
+    }%
+%    \end{macrocode}
+% Entweder die Sternversion wird verwendet und es wurde zuvor \cs{Replace} 
+% verwendet oder es wurde zumindest das optionale Argument angegeben. In beiden 
+% Fällen wurde zuvor \cs{@additionallisttrue} gesetzt.
+%    \begin{macrocode}
+    \if@tempswa%
+      \@additionallisttrue%
+      \let\@additionallist\relax%
+      \let\@tempa\relax%
+      \ifx\@Replace\relax%
+        \IfValueT{#2}{\protected@edef\@tempa{#2}}%
+      \else%
+        \IfValueTF{#2}{%
+          \protected@edef\@tempa{#2{,} \see*{\@Replace}}%
+        }{%
+          \protected@edef\@tempa{\see*{\@Replace}}
+        }%
+      \fi%
+%    \end{macrocode}
+% Die Standardformatierung der Zusatzinformationen.
+%    \begin{macrocode}
+      \protected@edef\@tempb{\hspace*{\tabcolsep}\protect\small}
+      \def\@tempc##1{%
+        \listeadd\@additionallist{\expandonce\@tempb(\expandonce\@tempa)}%
+      }%
+      \forlistloop\@tempc{\@declarationlist}%
     \fi%
+    \global\let\@Replace\relax%
     \@declaretrue\@openindextrue%
     \@afterindentfalse\@afterheading%
 %    \end{macrocode}
@@ -2438,7 +2486,11 @@
 %    \begin{macrocode}
 \NewDocumentCommand\printchangedatlist{sO{\z@}}{%
   \ifx\@changedatdeclarelist\relax\else%
-    \ChangedAt@Process{#2}{\@changedatdeclarelist}%
+    \if@deprecated%
+      \ChangedAt@Process[#1]{#2}{\@changedatdeclarelist}%
+    \else%
+      \ChangedAt@Process{#2}{\@changedatdeclarelist}%
+    \fi%
     \global\let\@changedatdeclarelist\relax%
     \IfBooleanF{#1}{%
       \par\nobreak\vskip\dimexpr-\parskip-\baselineskip\relax%
@@ -2626,17 +2678,21 @@
 % \begin{macro}{\Replace}
 % \changes{v2.02}{2014/07/25}{neu}%^^A
 % \changes{v2.03}{2015/02/02}{auf mehrere Einträge erweitert}%^^A
+% \begin{macro}{\@Replace}
+% \changes{v2.03}{2015/02/06}{neu}%^^A
 % Der Befehl \cs{Replace} erzeugt einen Eintrag in der Änderungshistorie sowie 
 % einen Eintrag im gewünschten Index mit einem Verweis auf den neuen Befehl.
-%    \begin{macrocode}
-\NewDocumentCommand\Replace{sommm}{%
+%    \begin{macrocode}\\
+\newcommand*\@Replace{}
+\let\@Replace\relax
+\NewDocumentCommand\Replace{sommom}{%
 %    \end{macrocode}
 % Die alten Befehle in der Liste erhalten einen Eintrag in der Änderungsnotiz. 
 % Das Komma vor dem Argument in der Schleife ist notwendig, weil ansonsten das 
 % Argument sofort expandiert wird.
 %    \begin{macrocode}
   \@tempcnta=\z@%
-  \@for\@tempa:={,#5}\do{%
+  \@for\@tempa:={,#6}\do{%
     \ifx\@tempa\@empty\else%
       \protected@edef\@tempb{%
         Implementierung!#3!\emph{entf\"allt}|see{#4}!\@tempa%
@@ -2652,20 +2708,20 @@
     \fi%
   }%
 %    \end{macrocode}
-% Der neue Befehl kommt ebenfalls in die  Änderungshistorie mit dem Hinweis auf 
+% Der neue Befehl kommt ebenfalls in die Änderungshistorie mit dem Hinweis auf 
 % die alten Befehle.
 %    \begin{macrocode}
   \def\@tempb{}%
   \def\@tempc{}%
   \@tempcntb=\@ne%
-  \@for\@tempa:={,#5}\do{%
+  \@for\@tempa:={,#6}\do{%
     \ifx\@tempa\@empty\else%
       \advance\@tempcntb\@ne%
       \protected@eappto\@tempc{\@tempb\@tempa}%
       \ifnum\@tempcntb<\@tempcnta\relax%
         \def\@tempb{{,} }%
       \else%
-        \def\@tempb{ und }%
+        \def\@tempb{ sowie }%
       \fi%
     \fi%
   }%
@@ -2674,12 +2730,14 @@
 %    \begin{macrocode}
   \IfBooleanF{#1}{%
     \protected@edef\@tempb{%
-      Implementierung!#3!\emph{neu}~\textrightarrow~ersetzt~\@tempc!#4%
+      Implementierung!#3!\emph{neu}{,} ersetzt\IfValueT{#5}{ #5} \@tempc!#4%
     }%
     \expandafter\listadd\expandafter\@changedatdeclarelist\expandafter{\@tempb}%
   }%
+  \gdef\@Replace{#4}%
 }
 %    \end{macrocode}
+% \end{macro}^^A \@Replace
 % \end{macro}^^A \Replace
 % \begin{macro}{\@ProcessChangedAt}
 % \changes{v2.02}{2014/07/25}{erweitert}%^^A
@@ -3520,21 +3578,28 @@
 % \fi
 %
 % \begin{macro}{\see}
-% \changes{v2.03}{2015/02/05}{neu}%^^A
-% Der Befehl wird zum einen so definiert, dass zwischen \cs{seename} und dem 
-% Argument ein geschütztes Leerzeichen verwendet wird.
+% \changes{v2.03}{2015/02/06}{neu}%^^A
+% \begin{macro}{\seealso}
+% \changes{v2.03}{2015/02/06}{neu}%^^A
+% Diese Befehle werden zum einen so definiert, dass zwischen \cs{seename} und 
+% dem Argument ein geschütztes Leerzeichen verwendet wird. Die Sternversion 
+% benötigt kein zweites, leeres Argument.
 %    \begin{macrocode}
-%<*package>
-\renewcommand*\see[2]{\emph{\seename}~#1}
-%</package>
+\renewrobustcmd*\see[2]{%
+  \ifstr{#1}{*}{\emph{\seename}~#2}{\emph{\seename}~#1}%
 %    \end{macrocode}
 % Innerhalb der Klasse dient er außerdem zum etwaigen Unterdrücken von 
 % Seitenzahlen in der Änderungsliste veralteter Optionen, Befehle etc.
 %    \begin{macrocode}
 %<*class>
-\renewcommand*\see[2]{\let\deprecatedhyperpage\@gobble\emph{\seename}~#1}
+  \if@changelog\let\deprecatedhyperpage\@gobble\fi%
 %</class>
+}
+\renewrobustcmd*\seealso[2]{%
+  \ifstr{#1}{*}{\emph{\alsoname}~#2}{\emph{\alsoname}~#1}%
+}
 %    \end{macrocode}
+% \end{macro}^^A \seealso
 % \end{macro}^^A \see
 %
 % \iffalse

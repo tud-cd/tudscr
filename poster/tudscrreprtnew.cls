@@ -994,6 +994,7 @@
     {pale}{2},{colourlight}{2},{lightcolour}{2},{colourpale}{2},{palecolour}{2}%
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \tud@deprecated@key{color}{cd}%
     \ifcase\@tempa\relax%
       \TUDoptions{cd=true}%
     \or%
@@ -3663,16 +3664,15 @@
           \ifdefstring{\@date}{\today}{%
             \ifdefvoid{\@duedate}{%
               \ClassWarning{\tudcls@name}{%
-                `\string\submissiondate' or `\string\date' was not given.%
-                \MessageBreak%
+                \string\date' was not given.\MessageBreak%
                 Since a thesis is a self-contained work, an end\MessageBreak%
                 date should be specified by the author.\MessageBreak%
                 Nevertheless, today's date is used%
               }%
             }{%
               \ClassWarning{\tudcls@name}{%
-                `\string\submissiondate' or `\string\date' was not given.%
-                \MessageBreak It's substituted by the given due date%
+                `\string\date' was not given.\MessageBreak%
+                 It's substituted by the given due date%
               }%
               \let\@date\@duedate%
             }%
