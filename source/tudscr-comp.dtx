@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-comp.dtx}[%
-  2015/02/06 v2.03 TUD-KOMA-Script\space%
+  2015/02/12 v2.03 TUD-KOMA-Script\space%
 %</driver>
 %<package>\NeedsTeXFormat{LaTeX2e}[2011/06/27]
 %<package>\ProvidesPackage{tudscrcomp}[%
@@ -355,16 +355,22 @@
 %</option>
 %    \end{macrocode}
 % Bei alten Befehlen wird nach der Warnung die Definition des neuen Befehls auf 
-% den alten überschireben.
+% den alten überschrieben.
 %    \begin{macrocode}
 %<*body>
 \newcommand*\tud@deprecated@cmd[2]{%
-  \ClassWarning{\tudcls@name}{%
-    The command `\@backslashchar#1' is deprecated.\MessageBreak%
-    It's recommended to use `\@backslashchar#2' instead%
+  \AtBeginDocument{%
+    \ifcsdef{#1}{}{%
+      \expandafter\newrobustcmd\csname #1\endcsname{%
+        \ClassWarning{\tudcls@name}{%
+          The command `\@backslashchar#1' is deprecated.\MessageBreak%
+          It's recommended to use `\@backslashchar#2' instead%
+        }%
+        \csletcs{#1}{#2}%
+        \@nameuse{#2}%
+      }%
+    }%
   }%
-  \csletcs{#1}{#2}%
-  \@nameuse{#2}%
 }
 %</body>
 %    \end{macrocode}
@@ -702,13 +708,13 @@
 % Für die Angabe des Lehrstuhls bzw. der Professur mit kann anstelle von 
 % \cs{chair} als Aliasbefehl auch \cs{professorship} genutzt werden.
 %    \begin{macrocode}
-\newcommand*\professorship{\tud@deprecated@cmd{professorship}{chair}}
+\tud@deprecated@cmd{professorship}{chair}
 %    \end{macrocode}
 % \end{macro}^^A \professorship
 % \begin{macro}{\student}
 % Der Befehl \cs{student} kann als Alias für \cs{author} genutzt werden.
 %    \begin{macrocode}
-\newcommand*\student{\tud@deprecated@cmd{student}{author}}
+\tud@deprecated@cmd{student}{author}
 %    \end{macrocode}
 % \end{macro}^^A \student
 % \begin{macro}{\studentid}
@@ -716,64 +722,74 @@
 % Zur Angabe von Matrikelnummer kann auch \cs{studentid} oder
 % \cs{matriculationnumber} genutzt werden.
 %    \begin{macrocode}
-\newrobustcmd*\studentid{\tud@deprecated@cmd{studentid}{matriculationnumber}}
-\newrobustcmd*\matriculationid{%
-  \tud@deprecated@cmd{matriculationid}{matriculationnumber}%
-}
+\tud@deprecated@cmd{studentid}{matriculationnumber}
+\tud@deprecated@cmd{matriculationid}{matriculationnumber}
 %    \end{macrocode}
 % \end{macro}^^A \matriculationid
 % \end{macro}^^A \studentid
 % \begin{macro}{\enrolmentyear}
 % Das Immatrikulationsjahr kann auch mit \cs{enrolmentyear} angegeben werden.
 %    \begin{macrocode}
-\newrobustcmd*\enrolmentyear{%
-  \tud@deprecated@cmd{enrolmentyear}{matriculationyear}%
-}
+\tud@deprecated@cmd{enrolmentyear}{matriculationyear}%
 %    \end{macrocode}
 % \end{macro}^^A \enrolmentyear
 % \begin{macro}{\birthplace}
 % Zur Angabe des Geburtsortes kann auch \cs{birthplace} verwendet werden.
 %    \begin{macrocode}
-\newrobustcmd*\birthplace{\tud@deprecated@cmd{birthplace}{placeofbirth}}
+\tud@deprecated@cmd{birthplace}{placeofbirth}
 %    \end{macrocode}
 % \end{macro}^^A \birthplace
 % \begin{macro}{\location}
 % Für die Angabe des Ortes kann auch \cs{location} genutzt werden.
 %    \begin{macrocode}
-\newcommand*\location{\tud@deprecated@cmd{location}{place}}
+\tud@deprecated@cmd{location}{place}
 %    \end{macrocode}
 % \end{macro}^^A \location
 % \begin{macro}{\submissiondate}
 % Der Befehl \cs{submissiondate} kann als Aliasbefehl für den Standardbefehl 
 % \cs{date} zur Datumsangabe genutzt werden.
 %    \begin{macrocode}
-\newcommand*\submissiondate{\tud@deprecated@cmd{submissiondate}{date}}
+\tud@deprecated@cmd{submissiondate}{date}
 %    \end{macrocode}
 % \end{macro}^^A \submissiondate
 % \begin{macro}{\oralexaminationdate}
 % Für \cs{defensedate} kann als Aliasbefehl auch \cs{oralexaminationdate}
 % verwendet werden.
 %    \begin{macrocode}
-\newcommand*\oralexaminationdate{%
-  \tud@deprecated@cmd{oralexaminationdate}{defensedate}%
-}
+\tud@deprecated@cmd{oralexaminationdate}{defensedate}%
 %    \end{macrocode}
 % \end{macro}^^A \oralexaminationdate
 % \begin{macro}{\birthday}
 % Der Geburtstag kann auch mit \cs{birthday} angegeben werden.
 %    \begin{macrocode}
-\newrobustcmd*\birthday{\tud@deprecated@cmd{birthday}{dateofbirth}}
+\tud@deprecated@cmd{birthday}{dateofbirth}
 %    \end{macrocode}
 % \end{macro}^^A \birthday
 % \begin{macro}{\logofile}
 % \begin{macro}{\logofilename}
 % Diese beiden Befehle können anstelle von \cs{headlogo} eingesetzt werden.
 %    \begin{macrocode}
-\newcommand*\logofile{\tud@deprecated@cmd{logofile}{headlogo}}
-\newcommand*\logofilename{\tud@deprecated@cmd{logofilename}{headlogo}}
+\tud@deprecated@cmd{logofile}{headlogo}
+\tud@deprecated@cmd{logofilename}{headlogo}
 %    \end{macrocode}
 % \end{macro}^^A \logofilename
 % \end{macro}^^A \logofile
+% \begin{macro}{\startdate}
+% \begin{macro}{\finaldate}
+% \begin{macro}{\maturitydate}
+% Für das Paket \pkg{tudscrsupervisor} sind auch einige Befehle als veraltet 
+% anzusehen.
+%    \begin{macrocode}
+\AfterPackage*{tudscrsupervisor}{%
+  \tud@deprecated@cmd{startdate}{issuedate}%
+  \tud@deprecated@cmd{finaldate}{duedate}%
+  \tud@deprecated@cmd{maturitydate}{duedate}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \maturitydate
+% \end{macro}^^A \finaldate
+% \end{macro}^^A \startdate
+%
 %
 % \iffalse
 %</body>
