@@ -157,9 +157,10 @@
     }%
     \def\@tempb#1{%
       \ClassWarningNoLine{\tudcls@name}{%
-        `#1' fonts not found. Please use on of the\MessageBreak%
-        installation scripts out of the tudscr-bundle,\MessageBreak%
-        which suits to your OS. A fallback layout is used%
+        `#1' fonts not found for encoding `\encodingdefault'.\MessageBreak%
+        Please use on of the installation scripts out of the\MessageBreak%
+        tudscr-bundle, which suits to your OS or choose a\MessageBreak%
+        possible encoding. A fallback layout is used%
       }%
     }%
   \fi%
@@ -1079,14 +1080,14 @@
 %%% From File: tudscr-fonts.dtx
 \AtEndPreamble{%
   \if@tud@fontspec%
-    \newfontface\univln[NFSSFamily=UniversLight]{Univers Light}%
-    \newfontface\univrn[NFSSFamily=UniversRegular]{Univers}%
-    \newfontface\univbn[NFSSFamily=UniversBold]{Univers Bold}%
-    \newfontface\univxn[NFSSFamily=UniversBlack]{Univers Black}%
-    \newfontface\univls[NFSSFamily=UniversLightOblique]{Univers Light Oblique}%
-    \newfontface\univrs[NFSSFamily=UniversRegularOblique]{Univers Oblique}%
-    \newfontface\univbs[NFSSFamily=UniversBoldOblique]{Univers Bold Oblique}%
-    \newfontface\univxs[NFSSFamily=UniversBlackOblique]{Univers Black Oblique}%
+    \newfontface\univln{Univers Light}[NFSSFamily=UniversLight]%
+    \newfontface\univrn{Univers}[NFSSFamily=UniversRegular]%
+    \newfontface\univbn{Univers Bold}[NFSSFamily=UniversBold]%
+    \newfontface\univxn{Univers Black}[NFSSFamily=UniversBlack]%
+    \newfontface\univls{Univers Light Oblique}[NFSSFamily=UniversLightOblique]%
+    \newfontface\univrs{Univers Oblique}[NFSSFamily=UniversRegularOblique]%
+    \newfontface\univbs{Univers Bold Oblique}[NFSSFamily=UniversBoldOblique]%
+    \newfontface\univxs{Univers Black Oblique}[NFSSFamily=UniversBlackOblique]%
     \newcommand*\textuln[1]{{\univln#1}}%
     \newcommand*\texturn[1]{{\univrn#1}}%
     \newcommand*\textubn[1]{{\univbn#1}}%
@@ -1133,7 +1134,7 @@
     \DeclareTextFontCommand{\textuxs}{\univxs}%
   \fi%
   \if@tud@fontspec%
-    \newfontface\@dinbn{DIN Bold}[BoldFont = DIN Bold]%
+    \newfontface\@dinbn{DIN Bold}[NFSSFamily=DINBold,BoldFont = DIN Bold]%
     \newcommand*\dinbn{\@dinbn\if@tud@dinbold\mathversion{dinbold}\fi}%
     \newcommand*\textdbn[1]{{\dinbn#1}}%
   \else%
@@ -3664,7 +3665,7 @@
           \ifdefstring{\@date}{\today}{%
             \ifdefvoid{\@duedate}{%
               \ClassWarning{\tudcls@name}{%
-                \string\date' was not given.\MessageBreak%
+                `\string\date' was not given.\MessageBreak%
                 Since a thesis is a self-contained work, an end\MessageBreak%
                 date should be specified by the author.\MessageBreak%
                 Nevertheless, today's date is used%
@@ -4189,33 +4190,38 @@
 }
 %%% From File: tudscr-comp.dtx
 \newcommand*\tud@deprecated@cmd[2]{%
+  \AtBeginDocument{%
+    \ifcsdef{#1}{}{%
+      \expandafter\newrobustcmd\csname #1\endcsname{%
   \ClassWarning{\tudcls@name}{%
     The command `\@backslashchar#1' is deprecated.\MessageBreak%
     It's recommended to use `\@backslashchar#2' instead%
   }%
   \csletcs{#1}{#2}%
   \@nameuse{#2}%
+      }%
+    }%
+  }%
 }
 \newlength\chapterheadingvskip
 \let\chapterheadingvskip\headingsvskip
-\newcommand*\professorship{\tud@deprecated@cmd{professorship}{chair}}
-\newcommand*\student{\tud@deprecated@cmd{student}{author}}
-\newrobustcmd*\studentid{\tud@deprecated@cmd{studentid}{matriculationnumber}}
-\newrobustcmd*\matriculationid{%
-  \tud@deprecated@cmd{matriculationid}{matriculationnumber}%
+\tud@deprecated@cmd{professorship}{chair}
+\tud@deprecated@cmd{student}{author}
+\tud@deprecated@cmd{studentid}{matriculationnumber}
+\tud@deprecated@cmd{matriculationid}{matriculationnumber}
+\tud@deprecated@cmd{enrolmentyear}{matriculationyear}%
+\tud@deprecated@cmd{birthplace}{placeofbirth}
+\tud@deprecated@cmd{location}{place}
+\tud@deprecated@cmd{submissiondate}{date}
+\tud@deprecated@cmd{oralexaminationdate}{defensedate}%
+\tud@deprecated@cmd{birthday}{dateofbirth}
+\tud@deprecated@cmd{logofile}{headlogo}
+\tud@deprecated@cmd{logofilename}{headlogo}
+\AfterPackage*{tudscrsupervisor}{%
+  \tud@deprecated@cmd{startdate}{issuedate}%
+  \tud@deprecated@cmd{finaldate}{duedate}%
+  \tud@deprecated@cmd{maturitydate}{duedate}%
 }
-\newrobustcmd*\enrolmentyear{%
-  \tud@deprecated@cmd{enrolmentyear}{matriculationyear}%
-}
-\newrobustcmd*\birthplace{\tud@deprecated@cmd{birthplace}{placeofbirth}}
-\newcommand*\location{\tud@deprecated@cmd{location}{place}}
-\newcommand*\submissiondate{\tud@deprecated@cmd{submissiondate}{date}}
-\newcommand*\oralexaminationdate{%
-  \tud@deprecated@cmd{oralexaminationdate}{defensedate}%
-}
-\newrobustcmd*\birthday{\tud@deprecated@cmd{birthday}{dateofbirth}}
-\newcommand*\logofile{\tud@deprecated@cmd{logofile}{headlogo}}
-\newcommand*\logofilename{\tud@deprecated@cmd{logofilename}{headlogo}}
 \endinput
 %%
 %% End of file `tudscrreprt.cls'.
