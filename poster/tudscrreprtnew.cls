@@ -411,7 +411,9 @@
     {heavy}{2},{heavyfont}{2},%
     {slim}{3},{slimhead}{3},{nowide}{3},{nowidehead}{3},{textwidth}{3},%
     {normal}{3},{normalhead}{3},{standard}{3},{standardhead}{3},%
-    {wide}{4},{widehead}{4},{paperwidth}{4}%
+    {nocolor}{3},{nocolour}{3},%
+    {wide}{4},{widehead}{4},{paperwidth}{4},%
+    {color}{5},{colour}{5},{bicolor}{5},{bicolour}{5}%
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax%
@@ -424,10 +426,12 @@
       \cs@set@lock{tud@head@bar}{0}%
     \or%
       \cs@set@lock{tud@head@bar}{1}%
+    \or%
+      \cs@set@lock{tud@head@bar}{2}%
     \fi%
   \fi%
 }
-% §§§ cdfoot auf Farbe erweitern
+% §§§ cdfoot auf Farbe erweitern, Option überarbeiten
 \newif\if@tud@cdfoot
 \TUD@key{cdfoot}[true]{%
   \TUD@set@ifkey{cdfoot}{@tud@cdfoot}{#1}%
@@ -1925,12 +1929,12 @@
       contents={\ifnum\tud@head@bar=\@ne\relax\tud@head@rule{\paperwidth}\fi},%
     ]{tudheadings.head.lowerwideline}%
     
-    \newif\if@tud@test
+%    \newif\if@tud@test
     \DeclareNewLayer[%
       % §§§ evtl. auch mit clone arbeiten
       background,align=tl,%
       contents={%
-        \if@tud@test
+        \ifnum\tud@head@bar=\tw@\relax%
           \color{HKS41}%
           \rule{\layerwidth}{\tud@dim@topmargin}%
         \fi%
@@ -1941,10 +1945,10 @@
       background,align=tl,%
       voffset=\tud@dim@topmargin,%
       contents={%
-        \if@tud@test
+        \ifnum\tud@head@bar=\tw@\relax%
           \color{HKS41!80}%
-          \rule{\layerwidth}{\tud@dim@barheight}
-        \fi
+          \rule{\layerwidth}{\tud@dim@barheight}%
+        \fi%
       },%
     ]{tudheadings.head.bar}%
     
