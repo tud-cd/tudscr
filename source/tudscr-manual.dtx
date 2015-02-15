@@ -1,29 +1,33 @@
-% \CheckSum{2611}
+% \CheckSum{2750}
 % \iffalse meta-comment
-% ======================================================================
+% 
+% ============================================================================
+% 
+%  TUD-KOMA-Script
+%  Copyright (c) Falk Hanisch <tudscr@gmail.com>, 2012-2015
+% 
+% ============================================================================
+% 
+%  This work may be distributed and/or modified under the conditions of the
+%  LaTeX Project Public License, version 1.3c of the license. The latest
+%  version of this license is in http://www.latex-project.org/lppl.txt and 
+%  version 1.3c or later is part of all distributions of LaTeX 2005/12/01
+%  or later and of this work. This work has the LPPL maintenance status 
+%  "author-maintained". The current maintainer and author of this work
+%  is Falk Hanisch.
+% 
+% ----------------------------------------------------------------------------
+% 
+% Dieses Werk darf nach den Bedingungen der LaTeX Project Public Lizenz
+% in der Version 1.3c, verteilt und/oder veraendert werden. Die aktuelle 
+% Version dieser Lizenz ist http://www.latex-project.org/lppl.txt und 
+% Version 1.3c oder spaeter ist Teil aller Verteilungen von LaTeX 2005/12/01 
+% oder spaeter und dieses Werks. Dieses Werk hat den LPPL-Verwaltungs-Status 
+% "author-maintained", wird somit allein durch den Autor verwaltet. Der 
+% aktuelle Verwalter und Autor dieses Werkes ist Falk Hanisch.
+% 
+% ============================================================================
 %
-% Das Corporate Design der TU Dresden auf Basis der KOMA-Script-Klassen
-%
-% ======================================================================
-% This work may be distributed and/or modified under the conditions of
-% the LaTeX Project Public License, version 1.3c of the license.
-% The latest version of this license is in
-%     http://www.latex-project.org/lppl.txt
-% and version 1.3c or later is part of all distributions of LaTeX
-% version 2005/12/01 or later and of this work.
-% This work has the LPPL maintenance status "author-maintained".
-% The current maintainer and author of this work is Falk Hanisch.
-% ----------------------------------------------------------------------
-% Dieses Werk darf nach den Bedingungen der LaTeX Project Public Lizenz,
-% Version 1.3c, verteilt und/oder veraendert werden.
-% Die neuste Version dieser Lizenz ist
-%     http://www.latex-project.org/lppl.txt
-% und Version 1.3c ist Teil aller Verteilungen von LaTeX
-% Version 2005/12/01 oder spaeter und dieses Werks.
-% Dieses Werk hat den LPPL-Verwaltungs-Status "author-maintained"
-% (allein durch den Autor verwaltet).
-% Der aktuelle Verwalter und Autor dieses Werkes ist Falk Hanisch.
-% ======================================================================
 % \fi
 %
 % \CharacterTable
@@ -47,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-manual.dtx}[%
-  2015/01/05 v2.03 TUD-KOMA-Script\space%
+  2015/02/15 v2.03 TUD-KOMA-Script\space%
 %</driver>
 %<identify>\NeedsTeXFormat{LaTeX2e}[2011/06/27]
 %<class&identify>\ProvidesClass{tudscrman}[%
@@ -78,8 +82,9 @@
 %
 % \selectlanguage{ngerman}
 %
-% \changes{v2.02}{2014/11/18}{Index für Tutorials möglich}%^^A
-% \changes{v2.02}{2014/12/17}{xindy-Stildatei wird zur Laufzeit erzeugt}%^^A
+% \changes{v2.02}{2014/11/18}{\cls{tudscrman} Index für Tutorials möglich}%^^A
+% \changes{v2.02}{2014/12/17}{\cls{tudscrman} xindy-Stildatei wird bei der 
+%   Kompilierung erzeugt}%^^A
 %
 % \section{Klasse und Paket für die Anwenderdokumentation von \TUDScript}
 %
@@ -136,10 +141,23 @@
 %    \end{macrocode}
 % Das Paket \pkg{microtype} wird für den optischen Randausgleich verwendet.
 %    \begin{macrocode}
-\RequirePackage[babel]{microtype}[2013/05/23]
+\AfterPackage*{hyperref}{\RequirePackage[babel]{microtype}[2013/05/23]}
 %    \end{macrocode}
+% \begin{length}{\baselineskipglue}
+% Diese Länge wird in der Dokumentation für alle möglichen stauch- und 
+% dehnbaren Einfügen genutzt.
+%    \begin{macrocode}
+\newlength\baselineskipglue
+\AtBeginDocument{%
+  \setlength\baselineskipglue{%
+    .4\baselineskip plus .4\baselineskip minus .2\baselineskip%
+  }%
+}
+%    \end{macrocode}
+% \end{length}^^A \baselineskipglue
 % Verbesserte Zitate.
 %    \begin{macrocode}
+\PassOptionsToPackage{vskip=.5\baselineskipglue}{quoting}
 \RequirePackage{quoting}[2014/01/28]
 %    \end{macrocode}
 % Automatisierte Datumsformatierung.
@@ -200,12 +218,13 @@
 \RequirePackage{ifplatform}[2010/10/22]
 %    \end{macrocode}
 % Das Paket \pkg{hyperref} wird für alle möglichen Links und Querverweise 
-% geladen.
+% geladen, \pkg{bookmark} verbesssert das Erstellen der Outline-Einträge.
 %    \begin{macrocode}
-\PassOptionsToPackage{hyperindex=false}{hyperref}
-\AtEndPreamble{%
+\PassOptionsToPackage{hyperindex=false,colorlinks,linkcolor=blue}{hyperref}
+\PassOptionsToPackage{open,openlevel=0}{bookmark}
+\AtBeginDocument{%
   \RequirePackage{hyperref}[2012/11/06]
-  \hypersetup{colorlinks,linkcolor=blue}
+  \RequirePackage{bookmark}[2011/12/02]
 %    \end{macrocode}
 % Es folgen einige Befehle, die an das Paket \pkg{hyperref} gekoppelt sind.
 % \begin{macro}{\Email}
@@ -267,7 +286,7 @@
   \NewDocumentCommand\manualhyperdef{st'm}{%
     \IfBooleanTF{#2}{%
       \raisebox{4\baselineskip}[0pt][0pt]{\hyperdef{\jobname}{#3}{}}%
-      \par\nobreak\vskip\dimexpr-\parskip-\baselineskip%
+      \par\nobreak\vskip\dimexpr-\parskip-\baselineskip\relax%
       \@afterindentfalse\@afterheading%
     }{%
       \Hy@raisedlink{\hyperdef{\jobname}{#3}{}}%
@@ -304,7 +323,8 @@
 %<*package>
   level=\subsection*,%
 %</package>
-  noclearpage,firstpagestyle=headings,headers={\indexname}{\indexname}%
+  noclearpage,firstpagestyle=headings,headers={\indexname}{\indexname},%
+  othercode={\renewcommand*\subitem{\@idxitem\hspace*{15\p@}}}%
 }
 \newcommand*\xdyopt{-M tudscrman-temp.xdy -L german-din}
 %    \end{macrocode}
@@ -346,9 +366,8 @@
 % für angehängte \enquote{f.} sowie \enquote{ff.} einstellen. Diese würden 
 % deshalb bei kursiven oder fetten Seitenzahlen trotzdem in normaler Schrift
 % erscheinen, weshalb auf die Auszeichnung folgender Seiten verzichtet wird.
-%    \begin{macrocode}
-%\write\tud@write@i{(require "ff-ranges.xdy")}
-%    \end{macrocode}
+%^^A\write\tud@write@i{(require "ff-ranges.xdy")}
+%
 % Seitenbereiche werden sofort zusammengefasst, wobei als Trennzeichen ein
 % Halbgeviertstrich verwendet wird.
 %    \begin{macrocode}
@@ -369,30 +388,28 @@
 % selbst, nicht jedoch die Argumente verworfen werden. Leider werden die 
 % manuell erstellten RegExp-Regeln durch \texttt{texindy} zu spät genutzt 
 % (\url{http://sourceforge.net/p/xindy/bugs/22/}).
-%    \begin{macrocode}
-%\write\tud@write@i{(merge-rule "\\hyperindex\{(.*)\}\{(.*)\}" "/2" :eregexp)}
-%\write\tud@write@i{(merge-rule "\\hologo\{(.*)\}" "/1" :eregexp)}
-%\write\tud@write@i{(merge-rule "\\texttt\{(.*)\}" "/1" :eregexp)}
-%\write\tud@write@i{(merge-rule "\\textsbn\{(.*)\}" "/1" :eregexp)}
-%\write\tud@write@i{(merge-rule "\\textsbs\{(.*)\}" "/1" :eregexp)}
-%    \end{macrocode}
+%^^A\write\tud@write@i{(merge-rule "\\hyperidx\{(.*)\}\{(.*)\}" "/2" :eregexp)}
+%^^A\write\tud@write@i{(merge-rule "\\hologo\{(.*)\}" "/1" :eregexp)}
+%^^A\write\tud@write@i{(merge-rule "\\texttt\{(.*)\}" "/1" :eregexp)}
+%^^A\write\tud@write@i{(merge-rule "\\textsbn\{(.*)\}" "/1" :eregexp)}
+%^^A\write\tud@write@i{(merge-rule "\\textsbs\{(.*)\}" "/1" :eregexp)}
+% 
 % Es werden die Attribute \emph{declare} mit der Abkürzung \emph{!} sowie
 % \emph{important} mit der Abkürzung \emph{?} und \emph{default} definiert, 
 % welche hierarchisch gleichgestellt sind.
 %    \begin{macrocode}
 \write\tud@write@i{%
-  (define-attributes (("declare" "!" "important" "?" "default")))%
+  (define-attributes (("declare" "!" "important" "?" "deprecated" "default")))%
 }
 %    \end{macrocode}
 % Eine Alternative wäre, diese in der Hierarchie zu unterscheiden, allerdings
 % war eine Bildung von zufriedenstellenden Seitenbereichen dabei nicht möglich
 % und wurde deshalb verworfen.
-%    \begin{macrocode}
-%\write\tud@write@i{(markup-attribute-group-list :sep ", ")}
-%\write\tud@write@i{%
-%\space\space(define-attributes (("declare" "!") ("important" "?")("default")))%
-%}
-%    \end{macrocode}
+%^^A\write\tud@write@i{(markup-attribute-group-list :sep ", ")}
+%^^A\write\tud@write@i{%
+%^^A(define-attributes (("declare" "!") ("important" "?")("default")))%
+%^^A}
+%
 % Einträge, die als wichtig deklariert wurden, können auch für normale zur 
 % Bereichsbildung verwendet werden.
 %    \begin{macrocode}
@@ -436,6 +453,20 @@
 \space\space :open "\string\hyperpage{"^^J%
 \space\space :close "}"^^J%
 \space\space :attr "default"^^J%
+)%
+}
+%    \end{macrocode}
+% Für die Änderungsliste wird ein separates Attribut erstellt. Mit diesem wird 
+% es möglich, die Seitenangabe für Optionen und Befehle zu unterdrücken, welche 
+% aus \TUDScript entfernt oder veraltet wurden, wenn mit \cs{Replace} eine 
+% Alternative eingeführt wurde. Dafür wird der Befehl \cs{deprecatedhyperpage} 
+% verwendet, welcher im Bedarfsball auf \cs{@gobble} gesetzt wird.
+%    \begin{macrocode}
+\write\tud@write@i{%
+(markup-locref^^J%
+\space\space :open "\string\deprecatedhyperpage{"^^J%
+\space\space :close "}"^^J%
+\space\space :attr "deprecated"^^J%
 )%
 }
 %    \end{macrocode}
@@ -581,13 +612,26 @@
 % \changes{v2.02}{2014/07/10}{neu}%^^A
 % \begin{macro}{\if@tud@todo}
 % \changes{v2.02}{2014/07/10}{neu}%^^A
+% \begin{macro}{\tud@todo@type}
+% \changes{v2.03}{2015/01/25}{neu}%^^A
 % Diese Option ist verantwortlich für den Schalter \cs{if@tud@todo}. Über 
 % diesen wird gesteuert, ob ToDo-Notizen ausgegeben werden sollen.
 %    \begin{macrocode}
 \newif\if@tud@todo
 \@tud@todotrue
-\TUD@ifkey{ToDo}{@tud@todo}
+\newcommand*\tud@todo@type{}
+\TUD@key{ToDo}[true]{%
+  \TUD@set@ifkey{ToDo}{@tud@todo}{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \let\tud@todo@type\relax%
+  \else%
+    \def\tud@todo@type{#1}%
+    \@tud@todotrue%
+    \FamilyKeyStateProcessed%
+  \fi%
+}
 %    \end{macrocode}
+% \end{macro}^^A \tud@todo@type
 % \end{macro}^^A \if@tud@todo
 % \end{option}^^A ToDo
 %
@@ -605,7 +649,7 @@
   headings=optiontoheadandtoc,%
   captions=tableheading,%
   numbers=noenddot,%
-  color=true,%
+  cd=color,%
 }{\tudinh@name}
 \PassOptionsToPackage{automark}{scrlayer-scrpage}
 %    \end{macrocode}
@@ -619,7 +663,10 @@
 \DeclareOption{print}{\let\tudprintflag\relax}
 \AtBeginDocument{%
   \ifdef{\tudfinalflag}{\TUDoptions{ToDo=false}}{}%
-  \ifdef{\tudprintflag}{\hypersetup{hidelinks}\TUDoptions{color=no}}{}%
+  \ifdef{\tudprintflag}{%
+    \TUDoptions{color=no}%
+    \PassOptionsToPackage{hidelinks}{hyperref}%
+  }{}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tudprintflag
@@ -677,23 +724,27 @@
 % \begin{macro}{\PValue}
 % \begin{macro}{\PParameter}
 % \begin{macro}{\POParameter}
+% \begin{macro}{\textOR}
+% \changes{v2.02}{2015/01/25}{neu}%^^A
 % Diese Befehle dienen zum Auszeichnen von obligatorischen und optionalen 
 % Parametern und Befehlen oder bestimmten Wertzuweisungen.
 %    \begin{macrocode}
+\newrobustcmd*\textOR{\,\textbardbl\,}
 \newrobustcmd*\PName[1]{\mbox{\texttt{\textsl{<#1>}}}}
 \newrobustcmd*\PBoolean{\PName{Ein-Aus-Wert}}
-\newrobustcmd*\PBName[1]{\PBoolean|\PName{#1}}
+\newrobustcmd*\PBName[1]{\PBoolean\textOR\PName{#1}}
 \newrobustcmd*\PSet{\PName{Einstellung}}
 \newrobustcmd*\Parameter[1]{\mbox{\texttt{\{}\PName{#1}\texttt{\}}}}
 \newrobustcmd*\OParameter[1]{\mbox{\texttt{[}\PName{#1}\texttt{]}}}
 \newrobustcmd*\LParameter{\mbox{\texttt{[}\PName{Parameterliste}\texttt{]}}}
 \newrobustcmd*\OLParameter[1]{%
-  \mbox{\texttt{[}\PName{#1}|\PName{Parameterliste}\texttt{]}}%
+  \mbox{\texttt{[}\PName{#1}\textOR\PName{Parameterliste}\texttt{]}}%
 }
 \newrobustcmd*\PValue[1]{\mbox{\texttt{#1}}}
 \newrobustcmd*\PParameter[1]{\mbox{\texttt{\{#1\}}}}
 \newrobustcmd*\POParameter[1]{\mbox{\texttt{[#1]}}}
 %    \end{macrocode}
+% \end{macro}^^A \textOR
 % \end{macro}^^A \POParameter
 % \end{macro}^^A \PParameter
 % \end{macro}^^A \PValue
@@ -828,6 +879,7 @@
 %
 % \begin{macro}{\ToDo}
 % \changes{v2.02}{2014/07/10}{Verwendung von \pkg{todonotes}}%^^A
+% \changes{v2.03}{2015/01/25}{Ausgabe auf bestimmten Typ beschränkbar}%^^A
 % \begin{macro}{\@ToDo}
 % \changes{v2.02}{2014/07/10}{neu}%^^A
 % \begin{macro}{\ListOfToDo}
@@ -872,23 +924,34 @@
       }%
 %    \end{macrocode}
 % Damit die Randnotiz nicht verrutscht, wird \cs{marginnote} anstelle von 
-% \cs{marginpar} verwendet. Außerdem ist eine Verschiebung um den durch 
-% \pkg{todonotes} definierten Leerraum notwendig.
+% \cs{marginpar} verwendet.
 %    \begin{macrocode}
-      \renewcommand*\marginpar[2][]{\marginnote[##1]{##2}[\dimexpr-1.6ex+1pt]}%
-      \vskip.8ex%
-%    \end{macrocode}
-% hier erfolgt die Ausgabe.
-%    \begin{macrocode}
-      \IfValueT{#4}{%
-        \settowidth\marginparwidth{#4}%
-        \addtolength\marginparwidth{\dimexpr1.6ex+1pt}%
-        \let\par\relax\noindent%
-        \edef\@tempa{\noexpand\todo[\@ToDo,noline,nolist]}%
-        \@tempa{#4}%
+      \renewcommand*\marginpar[2][]{%
+        \marginnote[##1]{##2}[\dimexpr-1.6ex+1pt\relax]%
       }%
-      \edef\@tempa{\noexpand\todo[\@ToDo,inline]}%
-      \@tempa{#3}%
+%    \end{macrocode}
+% Die Ausgabe erfolgt entweder für alle ToDo-Notizen oder nur den per Option
+% festgelegten Typ.
+%    \begin{macrocode}
+     \@tempswafalse
+     \ifdefvoid{\tud@todo@type}{\@tempswatrue}{}%
+     \IfValueT{#2}{\ifstr{#2}{\tud@todo@type}{\@tempswatrue}{}}%
+%    \end{macrocode}
+% Vor der Ausgabe ist eine vertikale Verschiebung um den durch \pkg{todonotes} 
+% definierten Leerraum notwendig.
+%    \begin{macrocode}
+      \if@tempswa%
+        \vskip.8ex%
+        \IfValueT{#4}{%
+          \settowidth\marginparwidth{#4}%
+          \addtolength\marginparwidth{\dimexpr1.6ex+1pt\relax}%
+          \let\par\relax\noindent%
+          \edef\@tempa{\noexpand\todo[\@ToDo,noline,nolist]}%
+          \@tempa{#4}%
+        }%
+        \edef\@tempa{\noexpand\todo[\@ToDo,inline]}%
+        \@tempa{#3}%
+      \fi%
     \endgroup%
     \par\noindent%
   }{}%
@@ -917,16 +980,6 @@
 \newrobustcmd*\bsc{\@backslashchar}
 %    \end{macrocode}
 % \end{macro}^^A \bsc
-% \begin{length}{\baselineskipglue}
-% Diese Länge wird in der Dokumentation für alle möglichen stauch- und 
-% dehnbaren Einfügen genutzt.
-%    \begin{macrocode}
-\newlength\baselineskipglue
-\setlength\baselineskipglue{%
-  .4\baselineskip plus .4\baselineskip minus .2\baselineskip%
-}
-%    \end{macrocode}
-% \end{length}^^A \baselineskipglue
 % \begin{macro}{\tud@shellescape@wrn}
 % \changes{v2.02}{2014/10/14}{neu}%^^A
 % Dieses Makro wird verwendet, wenn eine gesuchte Datei nicht gefunden wurde, 
@@ -1426,10 +1479,10 @@
   \@afterindentfalse\@afterheading%
   \IfBooleanTF{#1}{%
     \IfValueTF{#3}{\setlength\@tempdima{#3}}{\setlength\@tempdima{\linewidth}}%
-    \setlength{\@tempdimc}{-.7\baselineskip}%
+    \setlength\@tempdimc{-.7\baselineskip}%
     \begin{tabularx}{\@tempdima}{lXX}\@TermTable\end{tabularx}%
   }{%
-    \setlength{\@tempdimc}{\z@}%
+    \setlength\@tempdimc{\z@}%
     \begin{tabular}{lll}\@TermTable\end{tabular}%
   }%
   \let\@termlist\relax%
@@ -1549,7 +1602,7 @@
 % \begin{macro}{\if@stareddeclare}
 % \changes{v2.02}{2014/10/09}{neu}%^^A
 % \begin{macro}{\if@openindex}
-% \begin{macro}{\if@noindex}
+% \begin{macro}{\if@deprecated}
 % Dies sin ein paar Hilfsmakros zur Steuerung des Markup sowie der Ausgabe von
 % Deklarationen, Index und Änderungsliste, welche bei den nächsten Befehlen und 
 % Umgebungen genutzt werden.
@@ -1557,9 +1610,9 @@
 \newif\if@declare
 \newif\if@stareddeclare
 \newif\if@openindex
-\newif\if@noindex
+\newif\if@deprecated
 %    \end{macrocode}
-% \end{macro}^^A \if@noindex
+% \end{macro}^^A \if@deprecated
 % \end{macro}^^A \if@openindex
 % \end{macro}^^A \if@stareddeclare
 % \end{macro}^^A \if@declare
@@ -1610,21 +1663,33 @@
           the environment `Declaration'%
         }%
       }%
-      \ifx\@IndexFormat\@empty\else%
-        \ClassWarning{\tudcls@name}{%
-            It is not possible to use any indexing format\MessageBreak%
-            like |\@IndexFormat| within the arguments of the\MessageBreak%
-            environment `Declaration'%
+%    \end{macrocode}
+% Das zu erzeugende Label wird definiert.
+%    \begin{macrocode}
+      \IfValueTF{#6}{\edef\@tempa{#5:#6:#8}}{\edef\@tempa{#5:#8}}%
+%    \end{macrocode}
+% Für die Deklaration veralteter Optionen, Befehle etc. kann die Sternvariante 
+% des Auszeichnungsbefehle verwendet werden, um das Erzeugen eines Labels zu 
+% unterbinden.
+%    \begin{macrocode}
+      \if@deprecated%
+        \expandafter\IfBooleanF\expandafter{\@IndexFormat}{%
+          \manualhyperdef{\@tempa}%
         }%
-      \fi%
-      \if@noindex\else%
-        \IfValueTF{#6}{\edef\@tempa{#5:#6:#8}}{\edef\@tempa{#5:#8}}%
 %    \end{macrocode}
 % Wird zur Deklaration die Umgebung \env{Declaration*} genutzt, so wird der 
 % Hyperlink ein ganzes Stück nach oben verschoben. Hintergrund ist, dass diese 
 % Umgebung eigentlich nur zum Deklarieren von Klassen und Paketen gedacht ist 
 % und direkt nach einer Gliederungsüberschrift folgen sollte.
 %    \begin{macrocode}
+      \else%
+        \ifx\@IndexFormat\@empty\else%
+          \ClassWarning{\tudcls@name}{%
+            It is not possible to use any indexing format\MessageBreak%
+            like |\@IndexFormat| within the arguments of the\MessageBreak%
+            environment `Declaration'%
+          }%
+        \fi%
         \if@stareddeclare%
           \manualhyperdef'{\@tempa}%
         \else%
@@ -1645,7 +1710,7 @@
         #1\IfValueT{#2}{#2}%
       \fi%
     \else%
-      \if@noindex\else%
+      \if@deprecated\else%
         \@HyperIndex{#5}{#6}{#7}{#8}{#9}{declare)}%
       \fi%
     \fi%
@@ -1691,6 +1756,7 @@
         }%
         \ifstr{#3}{auto}{\def\@tempb{ in \autoref{\@tempa}}}{}%
         \ifstr{#3}{page}{\def\@tempb{ \vpageref{\@tempa}}}{}%
+        \ifstr{#3}{ppage}{\def\@tempb{ \reftextfaraway{\@tempa}}}{}%
         \ifstr{#3}{full}{\def\@tempb{ in \fullref{\@tempa}}}{}%
         \ifstr{#3}{none}{%
           \let\@tempb\relax%
@@ -1832,6 +1898,7 @@
 % \begin{macro}{\if@additionallist}
 % \begin{macro}{\@gobbleparameters}
 % \changes{v2.02}{2014/10/09}{neu}%^^A
+% \changes{v2.03}{2015/02/02}{Makro \cs{relax} mit \cs{@empty} ersetzt}%^^A
 % Es werden einige Hilfsmakros für die Ausgabe einer Deklaration sowie der 
 % dazugehörigen Änderungsliste initialisiert.
 %    \begin{macrocode}
@@ -1845,13 +1912,13 @@
 \newif\if@additionallist
 \newcommand*\@gobbleparameters{%
   \let\PName\@gobble%
-  \let\PBoolean\relax%
+  \let\PBoolean\@empty%
   \let\PBName\@gobble%
-  \let\PSet\relax%
+  \let\PSet\@empty%
   \let\PValue\@gobble%
   \let\Parameter\@gobble%
   \let\OParameter\@gobble%
-  \let\LParameter\relax%
+  \let\LParameter\@empty%
   \let\OLParameter\@gobble%
   \let\PParameter\@gobble%
   \let\POParameter\@gobble%
@@ -1903,9 +1970,11 @@
     \@additionallisttrue%
     \listadd\@additionallist{\hspace*{\tabcolsep}\small(#5)}%
     \in@{\Environment}{#2}%
-    \ifin@ \listadd\@additionallist{\tabularnewline}\fi%
+    \ifin@\listadd\@additionallist{\tabularnewline}\fi%
   }{%
     \listadd\@additionallist{\relax}%
+    \in@{\Environment}{#2}%
+    \ifin@\listadd\@additionallist{\relax}\listadd\@additionallist{\relax}\fi%
   }%
 }{%
 %    \end{macrocode}
@@ -1942,15 +2011,46 @@
 % optionale Argument kann genutzt werden, um das standardmäßige Atrribut für 
 % die Änderungsliste, welches in \cs{@changedatdeclaredefault} hinterlegt ist,
 % zu ändern. Dies ist für die normale Version auf \emph{neu} und für die
-% Sternversion auf \emph{entfällt} voreingestellt.
+% Sternversion auf \emph{entfällt} voreingestellt. Für überholte Einträge in 
+% der Änderungsliste wird das Indexattribut \enquote{deprecated} angehängt.
 %    \begin{macrocode}
     \IfBooleanTF{#1}{%
-      \global\@noindextrue%
-      \renewcommand*\@changedatdeclaredefault{\emph{entf\"allt}}%
+      \global\@deprecatedtrue%
+      \renewcommand*\@changedatdeclaredefault{\emph{entf\"allt}|deprecated}%
     }{%
-      \global\@noindexfalse%
+      \global\@deprecatedfalse%
     }%
-    \IfValueT{#2}{\renewcommand*\@changedatdeclaredefault{\emph{#2}}}%
+%    \end{macrocode}
+% Das optionale Argument kann verwendet werden, um allen Deklarationen die 
+% gleiche, nebenstehende Zusatzinformation mitzugeben, falls diese bis dahin
+% komplett leer waren.
+%    \begin{macrocode}
+    \IfValueT{#2}{%
+      \if@additionallist%
+        \ClassWarning{\tudcls@name}{%
+          It is not possible to use the optional argument\MessageBreak%
+          of \string\printdeclarationlist due to the given\MessageBreak%
+          additional information as argument of the\MessageBreak%
+          environment `Declaration'%
+        }%
+      \else%
+%    \end{macrocode}
+% Wurde das optionale Argument angegeben und die Zusatzliste war leer, so wird
+% der Schalter \cs{@additionallisttrue} gesetzt.
+%    \begin{macrocode}
+        \@additionallisttrue%
+        \let\@additionallist\relax%
+        \protected@edef\@tempa{#2}%
+%    \end{macrocode}
+% Die Standardformatierung der Zusatzinformationen.
+%    \begin{macrocode}
+        \protected@edef\@tempb{\hspace*{\tabcolsep}\protect\small}%
+        \def\@tempc##1{%
+          \listeadd\@additionallist{\expandonce\@tempb(\expandonce\@tempa)}%
+        }%
+        \forlistloop\@tempc{\@declarationlist}%
+      \fi%
+    }%
     \@declaretrue\@openindextrue%
     \@afterindentfalse\@afterheading%
 %    \end{macrocode}
@@ -2038,7 +2138,7 @@
 \NewDocumentEnvironment{Declaration*}{om}{%
   \@changedatdeclare{#1}{#2}%
   \@stareddeclaretrue%
-  \global\@noindexfalse%
+  \global\@deprecatedfalse%
   \@declaretrue\@openindextrue#2\@declarefalse%
   \@stareddeclarefalse%
 }{%
@@ -2048,6 +2148,7 @@
       forget to print this list with \string\printchangedatlist?%
     }%
   \fi%
+  \global\@deprecatedfalse%
   \@gobbleparameters%
   \@declaretrue\@openindexfalse#2\@declarefalse%
 }
@@ -2074,7 +2175,7 @@
     \let\allcolumnpar\@gobble%
     \begin{tabular}{*{#1}l}\BODY\end{tabular}%
   \end{lrbox}%
-  \setlength{\tabularm@wd}{\wd\tabularm@box}%
+  \setlength\tabularm@wd{\wd\tabularm@box}%
   \def\tabularm@num{#1}%
   \let\allcolumnpar\@allcolumnpar%
   \begin{tabular}{*{#1}l}\BODY\end{tabular}%
@@ -2149,7 +2250,7 @@
 % optionalen Argument aufgeführt wird. 
 %    \begin{macrocode}
 \newcommand*\tud@@item[1][]{%
-  \ifstrempty{#1}%
+  \ifblank{#1}%
     {\edef\@tempa{\tud@item@val}}%
     {\ifstr{\tud@item@val}{}%
       {\edef\@tempa{#1}}%
@@ -2167,11 +2268,11 @@
 % Der gesicherte Befehl wird mit den aufbereiteten Formatierungen genutzt.
 %    \begin{macrocode}
 \newcommand*\tud@@@item[1][]{%
-  \ifstrempty{#1}{}{%
+  \ifblank{#1}{}{%
     \ifx\tud@item@add\relax%
       \def\tud@item@add{#1}%
     \else%
-      \apptocmd{\tud@item@add}{~#1}{}{}%
+      \appto\tud@item@add{~#1}%
     \fi%
   }%
   \item@values[%
@@ -2286,22 +2387,31 @@
 % Um dem Anwender einen schnellen Überblick zu Änderungen der aktuellen Verison 
 % bereitstellen zu können, werden Befehle zur automatisierten Erzeugung  einer 
 % solchen Liste definiert.
+% \ToDo{%
+%   Der Quelltext ist ein Grauen, das muss ich irgendwann einmal komplett
+%   überarbeiten. Insbesondere sollten die Argumente für die Änderungsliste 
+%   wesentlich strukturierter eingefügt werden, bestenfalls mit zwei oder mehr
+%   unterschiedlichen Trennzeichen.
+% }[?]
 %
-% \begin{macro}{\printchangedatlist}
-% \changes{v2.02}{2014/10/09}{neu}%^^A
 % \begin{macro}{\@changedatdeclare}
 % \changes{v2.02}{2014/10/09}{neu}%^^A
+% \changes{v2.03}{2015/01/31}{Ersetzungen ermöglicht}%^^A
 % \begin{macro}{\@changedatdeclaredefault}
 % \changes{v2.02}{2014/10/09}{neu}%^^A
 % \begin{macro}{\@changedatdeclarelist}
 % \changes{v2.02}{2014/07/25}{neu}%^^A
+% \begin{macro}{\ChangedAt@Split}
+% \begin{macro}{\ChangedAt@@Split}
 % Um für Änderungsnotizen die dazugehörige Option, Befehl etc. bei einer 
 % Deklaration kenntlich zu machen, wird das deklarierte Element zusammen mit 
 % der Notiz in einer Liste gespeichert. Da mehrere kommaseparierte Werte
 % angegeben werden können, muss das optionale Argument der Umgebung
 % \env{Declaration} dahingehend abgearbeitet werden. Wenn keine weitere
 % Erklärung angegeben wurde, wird der entspredchende Eintrag mit dem Attribut
-% versehen, welches in \cs{@changedatdeclaredefault} gespeichert ist.
+% versehen, welches in \cs{@changedatdeclaredefault} gespeichert ist. Dabei 
+% kann außerdem angegeben werden, ob es sich bei Änderung um eine Umbenennung 
+% von Option, Befehl etc. handelt.
 %    \begin{macrocode}
 \newcommand*\@changedatdeclarelist{}
 \let\@changedatdeclarelist\relax
@@ -2309,18 +2419,45 @@
 \newcommand*\@changedatdeclare[2]{%
   \IfValueT{#1}{%
     \@for\@tempa:=#1\do{%
-      \protected@expandtwoargs\in@{!}{\@tempa}%
-      \ifin@%
-        \expandafter\listadd\expandafter\@changedatdeclarelist%
-          \expandafter{\@tempa!#2}%
-      \else%
-        \expandafter\listadd\expandafter\@changedatdeclarelist%
-          \expandafter{\@tempa!\@changedatdeclaredefault!#2}%
+      \ifx\@tempa\@empty\else%
+        \preto{\@tempa}{#2!}%
+        \expandafter\ChangedAt@Split\expandafter{\@tempa}%
       \fi%
     }%
   }%
 }
 %    \end{macrocode}
+% Die Änderungsnotiz für die Implementierung wird erst an den Ausrufezeichen 
+% in einzelne Argumente getrennt\dots
+%    \begin{macrocode}
+\NewDocumentCommand\ChangedAt@Split{>{\SplitArgument{2}{!}}m}{%
+  \ChangedAt@@Split#1%
+}
+%    \end{macrocode}
+% \dots und anschließend in die Liste \cs{@changedatdeclarelist}~-- in einer
+% etwas kryptischen Form~-- eingetragen. Dies geschieht jedoch nur, wenn im 
+% Argument nicht die Sternversion eines Auszeichnungsbefehls genutzt wurde. 
+% Diese sollen keinen Eintrag in der Änderungsliste, wohl aber eine Randnotiz
+% erzeugen.
+%    \begin{macrocode}
+\newcommand*\ChangedAt@@Split[3]{%
+  \in@{*}{#1}%
+  \ifin@%
+    \listadd\@changedatdeclarelist{Allgemein!#2}%
+  \else%
+    \listadd\@changedatdeclarelist{%
+      Implementierung!#2!\IfValueTF{#3}{#3}{\@changedatdeclaredefault}!#1%
+    }%
+  \fi%
+}
+%    \end{macrocode}
+% \end{macro}^^A \ChangedAt@@Split
+% \end{macro}^^A \ChangedAt@Split
+% \end{macro}^^A \@changedatdeclarelist
+% \end{macro}^^A \@changedatdeclaredefault
+% \end{macro}^^A \@changedatdeclare
+% \begin{macro}{\printchangedatlist}
+% \changes{v2.02}{2014/10/09}{neu}%^^A
 % Die Einträge in der Änderungsliste sowie die dazugehörige Randnotiz werden 
 % mit dem Makro \cs{ChangedAt@Process} abgearbeitet, sortiert und erstellt. Bei
 % \cs{printchangedatlist} wird mit dem optionalen Argument der Versatz für die 
@@ -2329,35 +2466,39 @@
 %    \begin{macrocode}
 \NewDocumentCommand\printchangedatlist{sO{\z@}}{%
   \ifx\@changedatdeclarelist\relax\else%
-    \ChangedAt@Process{#2}{\@changedatdeclarelist}%
+    \if@deprecated%
+      \ChangedAt@Process[#1]{#2}{\@changedatdeclarelist}%
+    \else%
+      \ChangedAt@Process{#2}{\@changedatdeclarelist}%
+    \fi%
     \global\let\@changedatdeclarelist\relax%
     \IfBooleanF{#1}{%
-      \par\nobreak\vskip\dimexpr-\parskip-\baselineskip%
+      \par\nobreak\vskip\dimexpr-\parskip-\baselineskip\relax%
       \@afterindentfalse\@afterheading%
     }%
   \fi%
 }
 %    \end{macrocode}
-% \end{macro}^^A \@changedatdeclarelist
-% \end{macro}^^A \@changedatdeclaredefault
-% \end{macro}^^A \@changedatdeclare
 % \end{macro}^^A \printchangedatlist
 % \begin{macro}{\ChangedAt}
 % \changes{v2.02}{2014/07/25}{erweitert}%^^A
 % \changes{v2.02}{2014/10/15}{Sternversion neu (keine Randnotiz)}%^^A
 % An den Befehl \cs{ChangedAt} kann eine kommagetrente Liste mit verschiedenen
 % Versionsnummern und dazugehörigen Änderungen übergeben werden. Er wird in der 
-% Form: \cs{ChangedAt}\marg{Version!Definition,Version!Erweiterung} genutzt.
-% Der Prozess selbst wird mit \cs{ChangedAt@Process} durchgeführt. Es wird
-% zu der angegebenen Versionsnummer ein Eintrag in die Änderungsliste erstellt,
-% wenn mit einem Ausrufezeichen getrennt der gewünschte Inhalt gegeben wurde.
+% Form: \cs{ChangedAt}\verb|{|\meta{Version}\verb|!|\meta{Beschreibung}\verb|}| 
+% genutzt. Mit \cs{ChangedAt@Process} wird der Prozess selbst durchgeführt. Es 
+% wird zu der angegebenen Versionsnummer ein Eintrag in die Änderungsliste
+% erstellt, wenn mit einem Ausrufezeichen getrennt der gewünschte Inhalt
+% gegeben wurde.
 %
 % Alle übergegebenen Versionsnummern werden als Liste mit einmaligen Einträgen 
 % in einer Randnotiz gesetzt. Mit dem optionalen Argument kann ein vertikaler 
-% dieser angegeben werden. Die Sternversion von \cs{ChangedAt} unterdrückt die
-% Ausgabe dieser Randnotiz.
+% dieser angegeben werden. Die Sternversion unterdrückt stattdessen die Ausgabe
+% dieser Randnotiz.
 %    \begin{macrocode}
-\NewDocumentCommand\ChangedAt{sO{\z@}m}{\ChangedAt@Process[#1]{#2}{#3}}
+\NewDocumentCommand\ChangedAt{sO{\z@}mO{Allgemein}}{%
+  \ChangedAt@Process[#1]{#2}[#4]{#3}%
+}
 %    \end{macrocode}
 % \end{macro}^^A \ChangedAt
 % \begin{macro}{\ChangedAt@Process}
@@ -2369,7 +2510,7 @@
 % \changes{v2.02}{2014/10/16}{Unterteilung Änderungsliste in Bereiche}%^^A
 % \begin{macro}{\ChangedAt@Default}
 % \changes{v2.02}{2014/09/02}{neu}%^^A
-% \begin{macro}{\ChangedAt@Split}
+% \begin{macro}{\ChangedAt@Process@Split}
 % \changes{v2.02}{2014/09/02}{neu}%^^A
 % \begin{macro}{\@changedatlist}
 % \changes{v2.02}{2014/09/02}{neu}%^^A
@@ -2378,20 +2519,25 @@
 % Mit diesen Befehlen wird die Änderungshistorie in Form eines Index erstellt. 
 % Der Befehl \cs{ChangedAt@Process} setzt eine kommagetrennte Liste in eine 
 % im Format von \pkg{etoolbox} um. Anschließend wird diese für die Liste der
-% Änderungen mit \cs{ChangedAt@Split} aufgespalten. Die einzelnen Einträge
-% werden mit \cs{ChangedAt@@Process} weiter verarbeitet.
+% Änderungen mit \cs{ChangedAt@Process@Split} aufgespalten. Die einzelnen 
+% Einträge werden mit \cs{ChangedAt@@Process} weiter verarbeitet.
 %    \begin{macrocode}
 \newcommand*\@changedatlist{}
 \newcommand*\ChangedAt@Default{}
 \newcommand*\@changedatversionlist{}
 \let\@changedatversionlist\relax
-\newcommand*\ChangedAt@Process[3][]{%
+\NewDocumentCommand\ChangedAt@Process{omom}{%
   \let\@changedatlist\relax%
   \let\@changedatversionlist\relax%
-  \@for\@tempa:=#3\do{\listeadd{\@changedatlist}{\expandonce\@tempa}}%
-  \forlistloop\ChangedAt@Split{\@changedatlist}%
+  \@for\@tempa:=#4\do{%
+    \ifx\@tempa\@empty\else%
+      \IfValueT{#3}{\preto\@tempa{#3!}}%
+      \listeadd{\@changedatlist}{\expandonce\@tempa}%
+    \fi%
+  }%
+  \forlistloop\ChangedAt@Process@Split{\@changedatlist}%
 %    \end{macrocode}
-% Nach der Verarbeitung aller Einräge sind in \cs{@changedatlist} alle 
+% Nach der Verarbeitung aller Einräge sind in \cs{@changedatversionlist} alle 
 % angegebenen Versionsnummern genau einmal enthalten. Mit \cs{sortlist} werden 
 % diese in die richtige Reihenfolge sortiert und anschließend als Randnotiz in
 % einer Tabelle ausgegeben, falls nicht die Sternversion verwendet wurde.
@@ -2413,21 +2559,21 @@
   }%
 }
 %    \end{macrocode}
-% Der Befehl \cs{ChangedAt@Split} teilt ein gegebenes Argument am Delimiter
-% Ausrufezeichen (\enquote{!}) in drei Argumente auf und reicht diese an 
-% \cs{ChangedAt@@Process} weiter. Sollte kein oder nur Ausrufezeichen gefunden 
-% werden, so wird das zweite und/oder dritte Argument mit dem~-- vom Paket
-% \pkg{xparse} definierten~-- leeren Wert \texttt{-NoValue-} an den Befehl
-% \cs{ChangedAt@@Process} übergeben.
+% Der Befehl \cs{ChangedAt@Process@Split} teilt ein gegebenes Argument am 
+% Delimiter Ausrufezeichen (\enquote{!}) in drei Argumente auf und reicht diese
+% an \cs{ChangedAt@@Process} weiter. Sollte kein oder nur Ausrufezeichen
+% gefunden werden, so wird das zweite und/oder dritte Argument mit dem~-- vom
+% Paket \pkg{xparse} definierten~-- leeren Wert \texttt{-NoValue-} an den 
+% Befehl \cs{ChangedAt@@Process} übergeben.
 %    \begin{macrocode}
-\NewDocumentCommand\ChangedAt@Split{>{\SplitArgument{2}{!}}m}{%
+\NewDocumentCommand\ChangedAt@Process@Split{>{\SplitArgument{3}{!}}m}{%
   \ChangedAt@@Process#1%
 }
 %    \end{macrocode}
 % Hiermit wird der Eintrag in die Änderungshistorie erzeugt. Dabei ist zu 
 % unterscheiden, ob der Befehl \cs{ChangedAt} direkt genutzt wurde oder aber 
 % der Eintrag innerhalb der \env{Declaration}-Umgebung erfolgte. Dies wird 
-% anhand von des dritten Argumentes erkannt. Für den ersten Fall erfolgt ein
+% anhand des dritten Argumentes erkannt. Für den ersten Fall erfolgt ein
 % Eintrag lediglich, wenn neben der Versionsnummer selbst auch eine Erklärung
 % angegben wurde~-- eine Randnotiz wird aber in jedem Fall gesetzt. Im zweiten
 % Fall wird der Erklärung \emph{immer} \cs{ChangedAt@Default} vorangestellt.
@@ -2435,8 +2581,8 @@
 % Änderungsliste vermerkt, dass es sich um eine \emph{neue} Option, Befehl etc.
 % handelt. Der eigentliche Eintrag selbst erfolgt mit \cs{ChangedAt@@@Process}.
 %    \begin{macrocode}
-\newcommand*\ChangedAt@@Process[3]{%
-  \IfValueTF{#3}{%
+\newcommand*\ChangedAt@@Process[4]{%
+  \IfValueTF{#4}{%
 %    \end{macrocode}
 % Bei der Deklaration von Optionen, Befehlen etc. werden diese automatisch in 
 % der Liste der Änderungen im Bereich \enquote{Implementierung} vor der
@@ -2447,22 +2593,22 @@
 %    \begin{macrocode}
     \begingroup%
       \@gobbleparameters%
-      \xdef\ChangedAt@Default{#3}%
+      \xdef\ChangedAt@Default{#4}%
     \endgroup%
-    \ChangedAt@@@Process{#1}{Implementierung}{\ChangedAt@Default: #2}%
+    \ChangedAt@@@Process{#2}{#1}{\ChangedAt@Default: #3}%
   }{%
 %    \end{macrocode}
 % Wurde \cs{ChangedAt} direkt und nicht über das optionale Argument der 
 % Umgebungen \env{Declaration} genutzt, erscheint der gewünschte Eintrag im
 % Bereich \enquote{Allgemein}.
 %    \begin{macrocode}
-    \IfValueT{#2}{\ChangedAt@@@Process{#1}{Allgemein}{#2}}%
+    \IfValueT{#3}{\ChangedAt@@@Process{#2}{#1}{#3}}%
   }%
 %    \end{macrocode}
 % Außerdem wird der Liste \cs{changedatversionlist} die aktuelle Version
 % einmalig hinzugefügt, um alle in einer Randnotiz ausgeben zu können.
 %    \begin{macrocode}
-  \xifinlist{#1}{\@changedatversionlist}{}{\listeadd\@changedatversionlist{#1}}%
+  \xifinlist{#2}{\@changedatversionlist}{}{\listeadd\@changedatversionlist{#2}}%
 }
 %    \end{macrocode}
 % Mit \cs{ChangedAt@@@Process} Erfolgen die Einträge in die Änderungsliste.
@@ -2482,7 +2628,7 @@
 %    \end{macrocode}
 % Danach wird geprüft, ob das Makro \cs{Key} übergeben wurde. Außerdem wird ein 
 % Anker in der Änderungsliste für die Referenzierung auf die einzelnen Bereiche 
-% (\enquote{Allgemein}, \enquote{Implementierung} und \enquote{Umbenennungen}) 
+% (\enquote{Allgemein}, \enquote{Implementierung} und \enquote{Ersetzungen}) 
 % gesetzt.
 %    \begin{macrocode}
     \expandafter\in@\expandafter\Key\expandafter{\@tempa}%
@@ -2492,11 +2638,11 @@
         \setbox0\hbox{#3}%
       \endgroup%
       \index[changelog]{%
-        #1 \manualhyperdef*{#1}!\manualhyperdef*{#1:#2}{#2}!\@TempKey\ #3%
+        #1\manualhyperdef*{#1}!\manualhyperdef*{#1:#2}#2!\@TempKey\ #3%
       }%
     \else%
       \index[changelog]{%
-        #1 \manualhyperdef*{#1}!\manualhyperdef*{#1:#2}{#2}!#3%
+        #1\manualhyperdef*{#1}!\manualhyperdef*{#1:#2}#2!#3%
       }%
     \fi%
   \endgroup%
@@ -2504,28 +2650,40 @@
 %    \end{macrocode}
 % \end{macro}^^A \@changedatversionlist
 % \end{macro}^^A \@changedatlist
-% \end{macro}^^A \ChangedAt@Split
+% \end{macro}^^A \ChangedAt@Process@Split
 % \end{macro}^^A \ChangedAt@Default
 % \end{macro}^^A \ChangedAt@@@Process
 % \end{macro}^^A \ChangedAt@@Process
 % \end{macro}^^A \ChangedAt@Process
-% \begin{macro}{\Rename}
+% \begin{macro}{\Replace}
 % \changes{v2.02}{2014/07/25}{neu}%^^A
-% Der Befehl \cs{Rename} erzeugt einen Eintrag in der Änderungshistorie sowie 
+% \changes{v2.03}{2015/02/02}{auf mehrere Einträge erweitert}%^^A
+% Der Befehl \cs{Replace} erzeugt einen Eintrag in der Änderungshistorie sowie 
 % einen Eintrag im gewünschten Index mit einem Verweis auf den neuen Befehl.
 %    \begin{macrocode}
-\newcommand*\Rename[4][]{%
-  \ChangedAt@@@Process{#2}{Umbenennungen}{%
-    #3: \emph{umbenannt}~\textrightarrow~siehe #4%
+\NewDocumentCommand\Replace{ommm}{%
+%    \end{macrocode}
+% Die alten Befehle in der Liste erhalten einen Eintrag in der Änderungsnotiz. 
+% Das Komma vor dem Argument in der Schleife ist notwendig, weil ansonsten das 
+% Argument sofort expandiert wird.
+%    \begin{macrocode}
+  \@for\@tempa:={,#4}\do{%
+    \ifx\@tempa\@empty\else%
+      \protected@edef\@tempb{%
+        Implementierung!#2!\emph{entf\"allt}|see{#3}!\@tempa%
+      }%
+      \expandafter\listadd\expandafter\@changedatdeclarelist\expandafter{%
+        \@tempb%
+      }%
+%    \end{macrocode}
+% Und ggf. der Eintrag im Index.
+%    \begin{macrocode}
+      \IfValueT{#1}{\index[#1]{\@tempa|see{#3}}}%
+    \fi%
   }%
-  \ChangedAt@@@Process{#2}{Implementierung}{%
-    #4: \emph{neu}~\textrightarrow~ersetzt #3%
-  }%
-  \listeadd\@changedatdeclarelist{#2}%
-  \index[#1]{#3|see{#4}}%
 }
 %    \end{macrocode}
-% \end{macro}^^A \Rename
+% \end{macro}^^A \Replace
 % \begin{macro}{\@ProcessChangedAt}
 % \changes{v2.02}{2014/07/25}{erweitert}%^^A
 % \changes{v2.02}{2014/10/08}{Sternversion ergänzt}%^^A
@@ -2950,8 +3108,8 @@
 % Text vorangestellt werden kann.
 %    \begin{macrocode}
   \@tempa{\@CodePreamble}{}%
-  \setlength{\@tempdimc}{\leftskip}%
-  \setlength{\leftskip}{\leftmargin}%
+  \setlength\@tempdimc{\leftskip}%
+  \setlength\leftskip{\leftmargin}%
 %    \end{macrocode}
 % Durch die zweimalige Verwendung von \val{\string\jobname-temp.tex}~-- einmal 
 % dirket und einmal innerhalb einer Box~-- können darin verwendete Befehle wie
@@ -2963,7 +3121,7 @@
   \@tempa{\input{\jobname-temp.tex}}{\@CodeHook}%
   \DeactivateWarningFilters[Tutorial]%
   \global\let\@CodeHook\relax%
-  \setlength{\leftskip}{\@tempdimc}%
+  \setlength\leftskip{\@tempdimc}%
   \noindent\ignorespaces%
 }
 %    \end{macrocode}
@@ -3051,11 +3209,11 @@
     \@tempcnta\z@%
     \@for\@tempa:=#3\do{\advance\@tempcnta\@ne}%
     \ifnum\@tempcnta>\z@%
-      \setlength{\@tempdima}{\textwidth}%
+      \setlength\@tempdima{\textwidth}%
       \divide\@tempdima\@tempcnta%
       \advance\@tempcnta\m@ne%
       \multiply\@tempcnta 2%
-      \addtolength{\@tempdima}{-\@tempcnta\tabcolsep}%
+      \addtolength\@tempdima{-\@tempcnta\tabcolsep}%
       \@for\@tempa:=#3\do{%
         \advance\@tempcnta\m@ne%
         \edef\@tempb{%
@@ -3247,10 +3405,10 @@
 %<*class>
     \@printindex[keys]%
     \@printindex[terms]%
+    \@printindex[fonts]%
     \begingroup%
       \let\lettergroup\@gobble%
       \let\indexspace\par%
-      \@printindex[fonts]%
       \@printindex[colors]%
     \endgroup%
 %</class>
@@ -3275,7 +3433,6 @@
 %    \begin{macrocode}
 \newcommand*\@printindex[1][]{%
   \pagebreak[3]%
-  \apptocmd{\prepare@multicols}{\hbadness10000}{}{}%
 %<*class>
   \ifblank{#1}{%
     \ifx\@printindexprologue\@empty%
@@ -3330,13 +3487,22 @@
 % \begin{macro}{\if@changelog}
 % \begin{macro}{\Changelog}
 % \changes{v2.02}{2014/08/20}{neu}%^^A
-% Ähnlich wie für den Index wird auch für die Änderungsliste verfahren.
+% \begin{macro}{\deprecatedhyperpage}
+% \changes{v2.03}{2015/02/05}{neu}%^^A
+% Ähnlich wie für den Index wird auch für die Änderungsliste verfahren. Mit dem 
+% Makro \cs{deprecatedhyperpage} wird die Ausgabe der Seitenzahlen unterdrückt, 
+% wenn zusätzlich ein mit \cs{see} gesetzter Querverweis existiert.
 %    \begin{macrocode}
+\newcommand*\deprecatedhyperpage{}
 \newif\if@changelog
 \newcommand*\PrintChangelog{%
   \begingroup%
     \let\lettergroup\@gobble%
     \@changelogtrue%
+    \let\deprecatedhyperpage\hyperpage%
+    \preto\item{\let\deprecatedhyperpage\hyperpage}%
+    \preto\subitem{\let\deprecatedhyperpage\hyperpage}%
+    \preto\subsubitem{\let\deprecatedhyperpage\hyperpage}%
     \@printindex[changelog]%
   \endgroup%
 }
@@ -3347,12 +3513,41 @@
   }%
 }
 %    \end{macrocode}
+% \end{macro}^^A \deprecatedhyperpage
 % \end{macro}^^A \Changelog
 % \end{macro}^^A \if@changelog
 % \end{macro}^^A \PrintChangelog
 %
 % \iffalse
 %</class>
+% \fi
+%
+% \begin{macro}{\see}
+% \changes{v2.03}{2015/02/06}{neu}%^^A
+% \begin{macro}{\seealso}
+% \changes{v2.03}{2015/02/06}{neu}%^^A
+% Diese Befehle werden zum einen so definiert, dass zwischen \cs{seename} und 
+% dem Argument ein geschütztes Leerzeichen verwendet wird. Die Sternversion 
+% benötigt kein zweites, leeres Argument.
+%    \begin{macrocode}
+\renewrobustcmd*\see[2]{%
+  \ifstr{#1}{*}{\emph{\seename}~#2}{\emph{\seename}~#1}%
+%    \end{macrocode}
+% Innerhalb der Klasse dient er außerdem zum etwaigen Unterdrücken von 
+% Seitenzahlen in der Änderungsliste veralteter Optionen, Befehle etc.
+%    \begin{macrocode}
+%<*class>
+  \if@changelog\let\deprecatedhyperpage\@gobble\fi%
+%</class>
+}
+\renewrobustcmd*\seealso[2]{%
+  \ifstr{#1}{*}{\emph{\alsoname}~#2}{\emph{\alsoname}~#1}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \seealso
+% \end{macro}^^A \see
+%
+% \iffalse
 %</body>
 % \fi
 %

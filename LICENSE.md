@@ -1,7 +1,7 @@
 ============================================================================
 
  TUD-KOMA-Script
- Copyright (c) Falk Hanisch <tudscr[at]gmail.com>, 2012-2015
+ Copyright (c) Falk Hanisch <tudscr@gmail.com>, 2012-2015
 
 ============================================================================
 
@@ -16,10 +16,10 @@
 ----------------------------------------------------------------------------
 
  Dieses Werk darf nach den Bedingungen der LaTeX Project Public Lizenz
- in der Version 1.3c, verteilt und/oder verändert werden. Die neuste 
+ in der Version 1.3c, verteilt und/oder veraendert werden. Die aktuelle 
  Version dieser Lizenz ist http://www.latex-project.org/lppl.txt und 
- Version 1.3c oder später ist Teil aller Verteilungen von LaTeX 2005/12/01 
- oder später und dieses Werks. Dieses Werk hat den LPPL-Verwaltungs-Status 
+ Version 1.3c oder spaeter ist Teil aller Verteilungen von LaTeX 2005/12/01 
+ oder spaeter und dieses Werks. Dieses Werk hat den LPPL-Verwaltungs-Status 
  "author-maintained", wird somit allein durch den Autor verwaltet. Der 
  aktuelle Verwalter und Autor dieses Werkes ist Falk Hanisch.
 

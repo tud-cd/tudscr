@@ -1,4 +1,10 @@
 \chapter[Die Klassen tudscrbook, tudscrreprt und tudscrartcl]{Die Hauptklassen}
+\label{sec:mainclasses}
+\ChangedAt*{%
+  v2.00!Robustheit vieler Befehle und Optionen erhöht,%
+  v2.02!Umbenennung einiger Befehle für Kompatibilität mit anderen Paketen,%
+  v2.03!Anpassungen interner Befehle an \KOMAScript-Version~v3.15%
+}
 \begin{Declaration*}{\Class{tudscrbook}}
 \begin{Declaration*}{\Class{tudscrreprt}}
 \begin{Declaration*}{\Class{tudscrartcl}}
@@ -55,10 +61,15 @@ innerhalb dieser lokal begrenzt.
 \end{Declaration}
 
 
+
 \section{Die Schriften des \CDs}
 \label{sec:fonts}
 \index{Schrift|?}
 %
+\ChangedAt*{%
+  v2.00!Schriften~-- insbesondere für den mathematischen Satz~-- verbessert,%
+  v2.01!Unterschneidung (Kerning) der Ziffern für \Univers verbessert%
+}
 Das \CD der \TnUD gibt die Verwendung der Schriften \Univers für den Fließtext 
 sowie \DIN für das Setzen von Überschriften vor. Im Standardfall wird dies so 
 unterstützt. Da jedoch in längeren Texten die Verwendung von Serifenschriften 
@@ -87,7 +98,7 @@ Hinweise zum typographisch guten Mathematiksatz zu finden.
 
 \subsection{Schriften für den Textsatz}
 \begin{Declaration}[%
-  v2.02!Werte für Optionen \Option{barfont} und \Option{fontspec} ergänzt%
+  v2.02!Werte für Optionen \Option{cdhead} und \Option{fontspec} ergänzt%
 ]{\Option{cdfont}[\PSet]}[true]%
 \printdeclarationlist%
 \label{sec:text}%
@@ -108,7 +119,7 @@ Querbalken der Kopfzeile lässt sich hiermit ebenfalls einstellen.
     Für die Verwendung der klassischen \hologo{LaTeX}"=Schriften, ist das Paket 
     \Package{lmodern} sehr empfehlenswert.%
   }
-  Sollte das Layout des \CDs aktiviert sein (siehe \Option{cd}), werden die 
+  Sollte das Layout des \CDs aktiviert sein (\see*{\Option{cd}}), werden die 
   Überschriften in Großbuchstaben und \DIN gesetzt und nur die Schriftart des 
   Fließtextes kann angepasst werden.
 \itemtrue*[light/lightfont/noheavyfont]
@@ -141,33 +152,33 @@ Querbalken der Kopfzeile lässt sich hiermit ebenfalls einstellen.
 Für den Text im Querbalken gibt es folgende Einstellmöglichkeiten:
 %
 \begin{values}
-\item[barfont]
+\item[head/lighthead/lightfonthead/noheavyfonthead]
   Für den Querbalken der Kopfzeile wird unabhängig von der Verwendung der 
   Hausschriften die Schrift \Univers in normaler Schriftstärke verwendet,
-  siehe \Option{barfont}[true].
-\item[heavybarfont]
-  Die im Querbalken der Kopfzeile verwendete Stärke der Schrift \Univers wird 
-  erhöht, siehe \Option{barfont}[heavy].
+  \see*{\Option{cdhead}[true]}.
+\item[heavyhead/heavyfonthead]
+  Die im Querbalken der Kopfzeile verwendete Schrift ist in jedem Fall \Univers 
+  in erhöhter Stärke, \see*{\Option{cdhead}[heavy]}.
 \end{values}
 %
 Die verwendeten Mathematikschriften lassen sich mit folgenden Werte 
 beeinflussen:
 %
 \begin{values}
-\item[serifmath/serif/nosansmath/nosans]  
+\item[nomath/nocdmath]  
   Diese Einstellung deaktiviert die Verwendung von serifenlosen Schriften für 
   den mathematischen Satz. Es werden die \hologo{LaTeX}"=Standardschriften 
   verwendet und der Benutzer kann beliebige Schriftpakete für den 
-  Mathematikmodus nutzen, siehe \Option{sansmath}[false].
-\item[sansmath/sans]
+  Mathematikmodus nutzen, \see*{\Option{cdmath}[false]}.
+\item[math/cdmath]
   Es werden serifenlose Mathematikschriften für lateinische und griechische 
-  Lettern genutzt, siehe \Option{sansmath}[true].
-\item[upgreek/uprightgreek/uprightGreek]
+  Lettern genutzt, \see*{\Option{cdmath}[true]}.
+\item[upgreek/uprightgreek]
   Die großen griechischen Buchstaben werden im Mathematikmodus aufrecht gesetzt,
-  siehe \Option{slantedgreek}[false].
-\item[slgreek/slantedgreek/slantedGreek]
+  \see*{\Option{slantedgreek}[false]}.
+\item[slgreek/slantedgreek]
   In mathematischen Umgebungen erfolgt die Ausgabe der griechischen Majuskeln 
-  kursiv, siehe \Option{slantedgreek}[true].
+  kursiv, \see*{\Option{slantedgreek}[true]}.
 \end{values}
 %
 \ChangedAt{v2.02}
@@ -260,7 +271,7 @@ Die \TUDScript-Klassen definieren mit \Macro{newkomafont} diese neuen
 Schriftelemente. Dabei wird \Font{titlepage} auf der Titelseite für alle 
 Felder verwendet, welche kein spezielles Schriftelement verwenden und 
 \Font{thesis} für das mit \Macro{thesis} angegebene Feld, in welchem der Typ 
-einer Abschlussarbeit angegeben wird (siehe \autoref{sec:title}). Mit 
+einer Abschlussarbeit angegeben wird (\see*{\autoref{sec:title}}). Mit 
 \Font{parttitle} kann die Schrift für die Bezeichnung des Teils bei 
 aktivierter \Option{parttitle}-Option beeinflusst werden. Alle Schriften lassen 
 sich mit \Macro{addtokomafont}\Parameter{Schriftelement} anpassen.
@@ -286,8 +297,8 @@ sich mit \Macro{addtokomafont}\Parameter{Schriftelement} anpassen.
 \begin{Declaration}{\Macro{textuxs}\Parameter{Text}}
 \begin{Declaration}{\Macro{dinbn}}
 \begin{Declaration}{\Macro{textdbn}\Parameter{Text}}
-\settowidth{\tempdim}{\Macro{textuln}\Parameter{Text}}%
-\addtolength{\tempdim}{\dimexpr 2\tabcolsep+2\arrayrulewidth-\textwidth}%
+\settowidth\tempdim{\Macro{textuln}\Parameter{Text}}%
+\addtolength\tempdim{\dimexpr 2\tabcolsep+2\arrayrulewidth-\textwidth}%
 \printdeclarationlist(%
   \begin{minipage}{-\tempdim}%
   \centering%
@@ -353,35 +364,37 @@ Verwendung der letzteren Variante vorzuziehen.
 \end{Declaration}
 \end{Declaration}
 
+
 \subsection{Schriften für den Mathematiksatz}
-\begin{Declaration}{\Option{sansmath}[\PBoolean]}%
+\begin{Declaration}[v2.03]{\Option{cdmath}[\PBoolean]}%
   [true][\Option{cdfont}[false]:false]
 \printdeclarationlist%
 \label{sec:math}
 \index{Schrift!Mathematiksatz}\index{Mathematiksatz|!}
 \index{Schrift!Griechische Buchstaben}\index{Griechische Buchstaben}
 %
-Diese Option dient zur Verwendung serifenloser Mathematikschriften. Dafür 
-werden zum einen die griechischen Buchstaben aus \Package{cmbright} und zum 
-anderen die Symbole aus \Package{iwona} verwendet. Für die lateinischen 
-Buchstaben wird \Univers genutzt. Ein Umschalten auf Serifenlose und zurück 
-innerhalb des Dokumentes ist~-- beispielsweise in einer Abbildung oder in einer 
-Tabelle~-- durch \Macro{TUDoptions}\PParameter{\Option{sansmath}[true]} und 
-\Macro{TUDoptions}\PParameter{\Option{sansmath}[false]} möglich. Mit
-\Macro{boldmath} kann auf fette Mathematikschriften umgeschaltet werden.
-
-Mit der Einstellung \Option{sansmath}[false] wird auf die Standardschriften
-für den Mathematikmodus zurückgeschaltet. Sollen stattdessen andere serifenlose 
-Mathematikschriften genutzt werden, so sei auf \Package{sansmath}, 
-\Package{sansmathfonts}, \Package{mathastext}, \Package{sfmath} sowie 
-\Package{sansmathaccent} verwiesen.
+Diese Option dient zur Anpassung der Mathematikschriften. Wird diese aktiviert, 
+so werden zu den Hausschriften passende im Mathematikmodus genutzt, mit 
+\Option{cdmath}[false] wird auf die Standardschriften zurückgeschaltet. Ein 
+Umschalten innerhalb des Dokumentes ist~-- beispielsweise für Abbildungen oder 
+Tabellen~-- durch \Macro{TUDoptions}\PParameter{\Option{cdmath}[true/false]} 
+möglich. Mit \Macro{boldmath} kann auf fette Mathematikschriften umgeschaltet 
+werden.
 %
 \begin{values}
 \itemfalse
   Es werden die normalen \hologo{LaTeX}"=Serifenschriften beziehungsweise die 
   Schriften beliebig nutzbarer Pakete für den Mathematiksatz verwendet.
 \itemtrue*
-  Die serifenlose Mathematikschriften werden aktiviert.
+  Im Mathematikmodus wird \Univers genutzt. Außerdem kommen die griechischen 
+  Buchstaben aus dem Paket \Package{cmbright} sowie Symbole aus dem Paket 
+  \Package{iwona} zum Einsatz.
+\item[upgreek/uprightgreek]
+  Die griechischen Majuskeln werden aufrecht gesetzt, 
+  \see*{\Option{slantedgreek}[false]}.
+\item[slgreek/slantedgreek]
+  Die Ausgabe der griechischen Großbuchstaben erfolgt kursiv, 
+  \see*{\Option{slantedgreek}[true]}.	
 \end{values}
 \end{Declaration}
 
@@ -410,8 +423,8 @@ Mathematikschriften genutzt werden, so sei auf \Package{sansmath},
 \begin{Declaration}{\Macro{upPsi}}
 \begin{Declaration}{\Macro{upOmega}}
 \index{Schrift!Griechische Buchstaben}\index{Griechische Buchstaben}%
-\settowidth{\tempdim}{\Macro{varUpsilon}}%
-\addtolength{\tempdim}{\dimexpr 2\tabcolsep+2\arrayrulewidth-\textwidth}%
+\settowidth\tempdim{\Macro{varUpsilon}}%
+\addtolength\tempdim{\dimexpr 2\tabcolsep+2\arrayrulewidth-\textwidth\relax}%
 \printdeclarationlist(%
   \begin{minipage}{-\tempdim}%
     \newcommand\tablecontent{}%
@@ -440,7 +453,7 @@ Mathematikschriften genutzt werden, so sei auf \Package{sansmath},
 )%
 %
 Griechische Majuskeln werden sowohl in aufrechter als auch in geneigter Form 
-bereitgestellt. Unabhängig von den beiden Optionen \Option{sansmath} und 
+bereitgestellt. Unabhängig von den beiden Optionen \Option{cdmath} und 
 \Option{slantedgreek} können sowohl kursive als auch aufrechte griechischen 
 Großbuchstaben im Mathematikmodus direkt verwendet werden. Dies ist nützlich, 
 um zwischen kursiven Variablen und aufrechten Konstanten zu unterscheiden. Die 
@@ -543,23 +556,24 @@ Betriebssystem installiert sein.
 \section{Das Layout des \CDs}
 Das Hauptaugenmerk der neuen Klassen liegt auf der Umsetzung des \CDs der
 \TnUD für \hologo{LaTeX}. Ein großer Teil der definierten Optionen und Befehle
-dient genau dazu und wird folgend beschrieben.
+dient genau dazu und wird nachfolgend beschrieben.
 
 Einige spezielle Seiten werden im prägnanten Stil mit dem Logo der \TnUD und 
 der dazugehörigen Kopfzeile mit Querbalken gesetzt. Dies betrifft insbesondere 
-\hyperref[sec:title]{die Umschlagseite und den Titel in \autoref{sec:title}}, 
+\hyperref[sec:title]{die Umschlagseite und den Titel aus \autoref{sec:title}}, 
 die \hyperref[sec:part]{Teileseiten in \autoref{sec:part}} sowie die
-\hyperref[sec:chapter]{Kapitelseiten in \autoref{sec:chapter}}. 
-Außerdem können entweder mit den \PageStyle{tudheadings}"=Seitenstilen oder 
-mit der \Environment{tudpage}-Umgebung aus \autoref{sec:tudheadings} eigene 
-Seiten im selben Stil erzeugt werden. Wird das Paket \Package{tudscrsupervisor} 
-verwendet und mit den entsprechenden Befehlen oder Umgebungen aus diesem eine 
-Aufgabenstellung, ein Gutachten oder ein Aushang erstellt, so erscheinen auch 
-diese in besagtem Seitenstil.
+\hyperref[sec:chapter]{Kapitelseiten in \autoref{sec:chapter}}. Mit den 
+\PageStyle{tudheadings}"=Seitenstilen oder der \Environment{tudpage}-Umgebung  
+können weitere Seiten in diesem Stil erzeugt werden. Wird das Paket 
+\Package{tudscrsupervisor} verwendet und mit den bereitgestellten Befehlen oder 
+Umgebungen eine Aufgabenstellung, ein Gutachten oder ein Aushang erstellt, so 
+erscheinen auch diese in besagtem Seitenstil.
 
 
-\subsection{Das Erscheinungsbild von Titel, Teilen und Kapiteln}
-\begin{Declaration}{\Option{cd}[\PSet]}[true]
+\subsection{Die Gestalt von Titel, Umschlagseite, Teilen und Kapiteln}
+\begin{Declaration}[%
+  v2.03!Option für neue Gestaltungsmöglichkeiten erweitert%
+]{\Option{cd}[\PSet]}[true]
 \printdeclarationlist%
 \index{Layout}%
 %
@@ -570,18 +584,25 @@ Sie hat Einfluss auf die Ausprägung für Titel"~, Teil"~, und Kapitelseiten.
 \itemfalse
   Diese Einstellung erzeugt das Standard"=Verhalten der \KOMAScript"=Klassen, 
   es wird kein \CD genutzt.
-\itemtrue*[standard/simple/monochrom]
+\itemtrue*[nocolor/nocolour/monochrome]
   Das Layout für Titel"~, Teil"~ und Kapitelseiten ist im \CD, es wird 
   schwarze Schrift für Titel, Teil"~ und Kapitelüberschriften sowie im 
   Seitenkopf verwendet.
-\item[lite/light/pale]
+\item[lightcolor/pale]
   Die Einstellung entspricht weitestgehend der Option \Option{cd}[true], 
-  allerdings wird die primäre Hausfarbe \Color{HKS41} anstelle schwarzer 
-  Schrift genutzt.
-\item[color/colour/full]
+  allerdings wird die primäre Hausfarbe \Color{HKS41} für den Kopf des 
+  \PageStyle{tudheadings}"=Seitenstils und die Schrift genutzt.
+\item[bicolor/bicolour/bichrome]
+  \ChangedAt{v2.03} Der Kopf wird mit einem farbigen Hintergrund in der 
+  Hausfarbe gesetzt, auch der Querbalken wird farbig hinterlegt. Die Schrift 
+  wird in der primären Hausfarbe gesetzt.
+\item[color/colour]
   Der Titel sowie Teil"~ und Kapitelseiten werden allesamt farbig und im \CD 
   gestaltet, der Seitenkopf wird in der primären Hausfarbe \Color{HKS41} 
-  gesetzt.
+  gesetzt, der Querbalken erhält Linien als Begrenzung.
+\item[full/fullcolor/fullcolour]
+  \ChangedAt{v2.03} Entspricht der vorherigen Einstellung, allerdings wird der 
+  Querbalken nicht durch Linien begrenzt sondern farbig hinterlegt.
 \end{values}
 \end{Declaration}
 
@@ -599,12 +620,11 @@ sowohl den Titel innerhalb eines Titelkopfes (\Option{titlepage}[false]) als
 auch die Überschrift eines Kapitels bei deaktivierter Kapitelseite 
 (\Option{chapterpage}[false]) in ihrer vertikalen Position anzupassen.
 
-Normalerweise werden alle der zuvor genannten Überschriften im Layout relativ 
-tief im Textbereich gesetzt. Mit negativen Werten wird diese nach oben 
-verschoben, positive Werte setzen diese dementsprechend tiefer. Beim 
-Verschieben nach oben, sollte darauf geachtet werden, dass diese sich danach 
-noch innerhalb des Satzspiegels befinden, da dies \emph{nicht} automatisch 
-durch die Hauptklassen überprüft wird.
+Die zuvor genannten Überschriften werden normalerweise im Layout relativ tief 
+im Textbereich gesetzt. Mit negativen Werten werden die Überschriften nach oben 
+verschoben, wobei darauf geachtet werden sollte, dass diese sich danach noch 
+innerhalb des Satzspiegels befinden. Positive Werte setzen die Überschriften 
+dementsprechend tiefer.
 \end{Declaration}
 \end{Declaration}
 
@@ -615,23 +635,20 @@ Das Verhalten aller Elemente%
   Teileseite (\Macro{part}, \Macro{addpart}),
   Kapitelseite (\Macro{chapter}, \Macro{addchap})%
 }
-wird normalerweise von der Option \Option{cd}[\PSet] bestimmt. Bedarfsweise 
-können einzelne Elemente andererseits auch individuell mit abweichenden 
-Wertzuweisungen angepasst werden. Soll ein bestimmtes Elemente des Layouts 
-anders erscheinen als der Rest des Dokumentes, so kann der entsprechende Wert 
-mithilfe der folgenden Optionen überschrieben werden. Die gültigen 
-Wertzuweisungen für die einzelnen Elemente entsprechend dabei den möglichen 
-Werten für die Option \Option{cd}.
+wird von der Option \Option{cd}[\PSet] bestimmt. Soll ein bestimmtes Element 
+des Layouts abweichend erscheinen, so kann eine der folgenden Optionen genutzt 
+werden, um dieses individuell anzupassen. Die gültigen Wertzuweisungen für die 
+einzelnen Elemente entsprechend dabei den möglichen Werten für die Option 
+\Option{cd}.
 
 \begin{Declaration}{\Option{cdtitle}[\PSet]}
 \printdeclarationlist%
 \index{Titel}\index{Layout!Titel}%
 %
-Mit \Option{cdtitle} kann der Wert des Schlüssels \Option{cd} für die 
-Titelseite überschrieben werden. Es kann zwischen dem Standardtitel~-- welcher 
-durch \KOMAScript{} bereitgestellt wird~-- und dem Titel im \CD umgeschaltet 
-werden. Die neue Titelseite unterstützt alle durch \KOMAScript{} definierten 
-Befehle für den Titel.%
+Mit der Option \Option{cdtitle} kann die allgemeine Einstellung für den Titel 
+überschrieben werden. Es kann zwischen dem normalen (\Option{cdtitle}[false]) 
+und dem im \CD umgeschaltet werden. Die neue Titelseite unterstützt alle durch 
+\KOMAScript{} definierten Befehle für den Titel.%
 \footnote{\raggedright%
   \Macro{extratitle}\Parameter{Schmutztitel},\Macro{titlehead}\Parameter{Kopf},
   \Macro{subject}\Parameter{Typisierung},\Macro{title}\Parameter{Titel},
@@ -642,8 +659,8 @@ Befehle für den Titel.%
   \Macro{lowertitleback}\Parameter{Titelrückseitenfuß}
   und \Macro{dedication}\Parameter{Widmung}
 }
-Zusätzlich werden viele neue Felder für den Titel definiert, welche vor allem 
-für den Titel einer wissenschaftlichen Arbeit von Relevanz sind. Genaueres dazu 
+Zusätzlich werden viele neue Felder definiert, welche vor allem für eine 
+wissenschaftliche Arbeit von Relevanz sind. Genaueres dazu 
 ist in \autoref{sec:title} nachzulesen. Unabhängig von der gewählten Variante 
 der Titelseite wird diese immer mit \Macro{maketitle} erzeugt.
 \end{Declaration}
@@ -740,7 +757,7 @@ Vorderseite von Teil oder Kapitel gesetzt werden. \notudscrartcl
   erzeugte Rückseite verwendet.
 \item[color/colour]
   Im farbigen Layout ist auch die Rückseite von Teilen und Kapiteln farbig, 
-  siehe \Option{clearcolor}.
+  \see*{\Option{clearcolor}}.
 \makeatletter\item@values[\PName{Seitenstil}\textsl{:}]\makeatother
   Mit der Angabe von \Option{cleardoublespecialpage}[\PName{Seitenstil}] 
   kann ein beliebiger, bereits definierter Seitenstil für die Rückseite nach 
@@ -765,7 +782,7 @@ gegebenenfalls auch von Kapiteln~-- farbig gesetzt.%
 }
 Die Option wirkt sich ebenfalls auf die Rückseite des Titels aus.%
 \footnote{%
-  siehe \Macro{uppertitleback} und \Macro{lowertitleback} der 
+  \see*{\Macro{uppertitleback} und \Macro{lowertitleback}} der 
   \KOMAScript"=Dokumentation (\scrguide*)
 }
 Der Stil dieser zusätzlich eingefügten Rückseiten ist abhängig von der Option
@@ -787,35 +804,50 @@ Der Stil dieser zusätzlich eingefügten Rückseiten ist abhängig von der Optio
 \printdeclarationlist%
 \label{sec:tudheadings}
 %
-Ein zentrales Element des \CDs der \TnUD ist der eingeführte prägnante 
-Seitenkopf mit der Angabe von Fakultät (\Macro{faculty}), Einrichtung 
-(\Macro{department}), Institut (\Macro{institute}) und Lehrstuhl 
-(\Macro{chair}) in der dazugehörigen Kopfzeile mit Querbalken. Durch die 
-Verwendung von \Package{scrlayer-scrpage} lassen sich einzelne Seiten oder auch 
-ganze Dokumente sehr einfach in diesem Stil setzen. Hierzu muss lediglich einer 
-der Seitenstile mit \Macro{pagestyle}\Parameter{Seitenstil} geladen werden. 
+\ChangedAt*{%
+  v2.03!Seitenstile um zweifarbigen Kopf und farbigen Fuß erweitert%
+}%
+Ein zentrales Element des \CDs der \TnUD ist der prägnante Seitenkopf mit der 
+Angabe von Fakultät~(\Macro{faculty}), Einrichtung~(\Macro{department}), 
+Institut~(\Macro{institute}) und Lehrstuhl~(\Macro{chair}) im dazugehörigen 
+Querbalken. Durch die Nutzung des Paketes \Package{scrlayer-scrpage} lassen 
+sich entweder einzelne Seiten oder auch ganze Dokumente sehr einfach in diesem 
+Stil setzen. Hierzu muss lediglich mit \Macro{pagestyle}\Parameter{Seitenstil} 
+einer der Seitenstile geladen werden. 
 
-Allen Seitenstilen ist der typische Kopf gemein. Der Fuß des Seitenstils 
-\PageStyle{empty.tudheadings} ist immer leer, \PageStyle{tudheadings} und 
-\PageStyle{plain.tudheadings} übernehmen die Einstellungen für den Fuß aus der 
-Anwenderschnittstelle von \Package{scrlayer-scrpage}.%
+Allen Seitenstilen gemein ist der typische Kopf mit dem charakteristischen 
+Querbalken, dessen Gestalt für \emph{alle} Seitenstile gleichermaßen über die 
+Option \Option{cdhead} angepasst werden kann. Die Ausprägung des Fußes ist für 
+die einzelnen Seitenstile unterschiedlich. Dieser ist der Verwendung des Stils 
+\PageStyle{empty.tudheadings} immer leer. Die beiden Stile~-- oder vielmehr das 
+Seitenstil-Paar~-- \PageStyle{tudheadings} und \PageStyle{plain.tudheadings} 
+übernehmen die Einstellungen für die Fußzeile aus der Anwenderschnittstelle von 
+\Package{scrlayer-scrpage}.%
 \footnote{%
   Es können die Befehle \Macro{lefoot}, \Macro{cefoot} und \Macro{refoot} sowie 
-  \Macro{lofoot}, \Macro{cofoot} und \Macro{rofoot} verwendet werden.
+  \Macro{lofoot}, \Macro{cofoot} und \Macro{rofoot} respektive \Macro{ofoot}, 
+  \Macro{cfoot} und \Macro{ifoot} genutzt werden.
 }
-Wie diese zu verwenden ist, ist der \KOMAScript"=Anleitung zu entnehmen. 
-Alternativ zu einer eigenen Definition der Fußzeile kann außerdem die Option 
-\Option{cdfoot} verwendet werden.
+Wie diese zu verwenden ist, kann der \KOMAScript"=Anleitung entnommen werden. 
+Alternativ zu einer eigenen Definition der Fußzeile lässt sich außerdem die 
+Option \Option{cdfoot} verwenden.
 
-Sobald einer der neu definierten Seitenstile aktiviert wurde, sind diese 
-zusätzlich unter den Namen \PageStyle{headings}, \PageStyle{plain} und 
-\PageStyle{empty} verwendbar. Das hat den Vorteil, dass bei Optionen oder 
-Befehlen, die automatisch zwischen \PageStyle{headings}, \PageStyle{plain} 
-und \PageStyle{empty} umschalten, durch die einmalige Auswahl von einem der 
-Stile \PageStyle{tudheadings}, \PageStyle{plain.tudheadings} oder 
-\PageStyle{empty.tudheadings} nun zwischen diesen Stilen umgeschaltet wird. Um 
-auf das normale Verhalten zurückzuschalten, muss einer der beiden Seitenstile 
-\PageStyle{scrheadings} oder \PageStyle{plain.scrheadings} aktiviert werden.
+Sobald einer der definierten Stile mit \Macro{pagestyle}\Parameter{Seitentil} 
+aktiviert wurde, sind die beiden Seitenstile \PageStyle{tudheadings} sowie 
+\PageStyle{plain.tudheadings} zusätzlich unter den Namen \PageStyle{headings} 
+respektive \PageStyle{plain} verwendbar. Dies hat den Vorteil, dass bei 
+Optionen oder Befehlen, welche automatisch zwischen den beiden Seitenstilen 
+\PageStyle{headings} und \PageStyle{plain} umschalten, durch die einmalige 
+Auswahl von einem der \PageStyle{tudheadings}-Stilen nun zwischen diesen  
+umgeschaltet wird.
+
+Der Seitenstil \PageStyle{empty} erzeugt allerdings weiterhin eine komplett 
+leere Seite. Soll eine Seite mit der prägnanten Kopfzeile der \TnUD und leerem 
+Seitenfuß erschienen, so muss \Macro{pagestyle}\PParameter{empty.tudheadings} 
+manuell aufgerufen werden. Um auf das typische Verhalten von \KOMAScript{} 
+zurückzuschalten und Seiten ohne den prägnanten Kopf der \TnUD zu erhalten, 
+muss einer der Stile \PageStyle{scrheadings} oder \PageStyle{plain.scrheadings} 
+aktiviert werden.
 \end{Declaration}
 \end{Declaration}
 \end{Declaration}
@@ -837,11 +869,179 @@ Sollte der Platz in der ersten Zeile nicht ausreichen, erfolgt ein
 automatischer Zeilenumbruch.
 
 In besonderen Ausnahmefällen erlaubt das \CD die Angabe einer zusätzlichen
-zweiten beziehungsweise dritten Zeile, welche weitere, frei wählbare Angaben 
-enthält. Diese kann mit dem Befehl \Macro{extraheadline}\Parameter{Textzeile} 
-definiert werden.
+zweiten beziehungsweise dritten Zeile unterhalb der Angaben des Bereichs an der 
+\TnUD, welche weitere, frei wählbare Angaben enthält. Diese kann mit dem Befehl 
+\Macro{extraheadline}\Parameter{Textzeile} definiert werden.
 \end{Declaration}
 \end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+
+\begin{Declaration}[v2.03]{\Option{cdhead}[\PSet]}[true][%
+  \Option{cdfont}[false]:false%
+]
+\printdeclarationlist%
+\index{Kopfzeile!Schrift}%
+\index{Layout!Kopfzeile}%
+\index{Querbalken}\index{Layout!Querbalken}%
+%
+Mit dieser Option lassen sich für die \PageStyle{tudheadings}"=Seitenstile 
+sowohl die Gestalt des Logos sowie des Querbalkens als auch die darin 
+verwendete Schrift beeinflussen. Die folgenden Werte können für eine Anpassung 
+der Schriftart im Balken verwendet werden:
+%
+\begin{values}
+\itemfalse
+  Sollte mit \Option{cdfont}[false] die Verwendung der Hausschrift im Stil des 
+  \CDs der \TnUD deaktiviert worden sein, wird die Kopfzeile im Querbalken in
+  den Serifenlosen der genutzten Schrift gesetzt. Sind die Hausschriften 
+  aktiviert, hat diese Einstellung keinen Einfluss.
+\itemtrue*[light/lightfont/noheavyfont]
+  Im Querbalken wird für \Macro{faculty} \textubn{Univers~65~Bold} verwendet, 
+  für die Felder \Macro{department}, \Macro{institute}, \Macro{chair} und 
+  \Macro{extraheadline} kommt \textuln{Univers~45~Light} zum Einsatz.
+\item[heavy/heavyfont]
+  Der Inhalt von \Macro{faculty} wird weiterhin in \textubn{Univers~65~Bold} 
+  gesetzt, für die restlichen Felder wird \texturn{Univers~55~Regular} genutzt.
+\end{values}
+%
+Bei der Ausprägung des Kopfes und des Querbalkens gibt es mehrere Varianten:
+%
+\begin{values}
+\item[nocolor/nocolour/monochrome]
+  Der Kopf und die Linien des Querbalkens erscheinen in schwarzer Farbe.
+\item[lightcolor/pale]
+  Sowohl Kopf als auch Querbalken werden in der primären Hausfarbe gesetzt.
+\item[bicolor/bicolour/bichrome]
+  \ChangedAt{v2.03} Die Kopfzeile wird farblich abgesetzt, wobei der 
+  Hintergrund des Logos und der Querbalken unterschiedlich ausfallen. Die 
+  Außenlinien der Querbalkens entfallen.
+\end{values}
+%
+Die Außenlinien des Querbalkens laufen entweder bis zum Text"~ oder jedoch bis 
+zum Blattrand. Für den Fall, dass ein randloser Ausdruck technisch nicht 
+möglich ist, können die Varianten bei denen der Querbalken bis an den Blattrand 
+reicht Probleme bereiten. Deshalb kann mit der Option \Option{cdhead} dessen
+Breite angepasst werden. Normalerweise wird der Querbalken lediglich im 
+farbigen Layout in der Blattbreite erzeugt.
+%
+\begin{values}
+\item[textwidth/slim]
+  Der Querbalken im Kopf erstreckt sich immer nur über den Textbereich.
+\item[paperwidth/wide]
+  Die horizontale Ausdehnung des Querbalkens erstreckt sich immer bis an den 
+  Blattrand.
+\end{values}
+\end{Declaration}
+
+\ToDo[imp,nxt]{Text im Seitenfuß}[v2.04]
+\begin{Declaration}[%
+  v2.03!farbiger Hintergrund der Fußzeile möglich%
+]{\Option{cdfoot}[\PBoolean]}[false]%
+\printdeclarationlist%
+\index{Kolumnentitel}\index{Layout!Kolumnentitel}
+\index{Satzspiegel!doppelseitig}%
+
+Die \TUDScript-Klassen sind~-- insbesondere aufgrund der Möglichkeit zur 
+Verwendung des Paketes \Package{scrlayer-scrpage}~-- bei der Gestaltung der 
+Kopf"~ und Fußzeilen sehr flexibel und individuell anpassbar. Die Ausprägung 
+und der Inhalt dieser ist nicht explizit durch das \CD vorgegeben und können 
+durch den Anwender beliebig gewählt und geändert werden. Wird die Klassenoption 
+\Option{automark} angegeben, werden für das automatische Setzen der Marken die 
+Titel der Gliederungsebenen verwendet. Genaueres hierzu sowie der Möglichkeit, 
+die Kolumnentitel manuell festzulegen, ist dem Handbuch von \KOMAScript{} zu 
+entnehmen.
+
+Eine Möglichkeit für deren Gestaltung zeigt das Handbuch für das \CD der \TnUD. 
+Dieses wird ohne Kopf"~ und mit einer einfachen Fußzeile gesetzt, welche den 
+aktuellen Kolumnentitel sowie die Paginierung enthält. Mit \Option{cdfoot} kann 
+diese Ausprägung aktiviert werden, was auch für dieses Anwenderhandbuch 
+geschehen ist.
+%
+\begin{values}
+\itemfalse
+  Die Kopf"~ und Fußzeilen zeigen Standardverhalten, zur manuellen Änderung 
+  dieser sollte unbedingt das \KOMAScript"=Paket \Package{scrlayer-scrpage} 
+  verwendet werden.
+\itemtrue*
+  Die Kopf"~ und Fußzeilen des Dokumentes werden wie im Handbuch des \CDs der 
+  \TnUD gesetzt. Im doppelseitigen Satz (\Option{twoside}[true]) wird die 
+  Seitenzahl außen platziert.
+\end{values}
+%
+\ChangedAt{v2.03} 
+Sollte einer der \PageStyle{tudheadings}-Seitenstil aktiviert sein und es wird 
+auf der erzeugten Seite ein farbiges Layout~--  beispielsweise der zweifarbige 
+Kopf (\Option{cdhead}[bicolor]) oder ein farbiger Seitenhintergrund~-- genutzt, 
+so kann auch die Fußzeile einen farbigen Hintergrund erhalten.
+%
+\begin{values}
+\item[nocolor/nocolour/monochrome]
+  Der Fuß wird immer ohne farbigen Hintergrund gesetzt.
+\item[bicolor/bicolour/bichrome]
+  Die Fußzeile wird farblich abgesetzt, falls entweder der zweifarbige Kopf
+  (\Option{cdhead}[bicolor]) oder zumindest eine Seite mit einem farbigen 
+  Hintergrund in der Hausfarbe (Titel oder Kapitelseite) verwendet wurde.
+\end{values}
+\end{Declaration}
+
+\begin{Declaration}{\Macro{headlogo}\LParameter\Parameter{Dateiname}}
+\printdeclarationlist%
+\index{Zweitlogo|?}\index{Layout!Zweitlogo}\index{\DDC-Logo}%
+\index{Kopfzeile}\index{Kopfzeile!Logo}\index{Layout!Kopfzeile}
+%
+Neben dem Logo der \TnUD darf zusätzlich ein Zweitlogo im Kopf verwendet werden.
+Dieses lässt sich mit diesem Befehl einbinden. Normalerweise wird es auf die 
+Höhe der Erstlogos skaliert. Über das optionale Argument können weitere 
+Formatierungsbefehle an den verwendeten Befehl \Macro{includegraphics} 
+durchgereicht werden, um beispielsweise die Größe des Zweitlogos anzupassen.
+Welche Parameter angepasst werden können, ist der Dokumentation des
+\Package{graphicx}-Paketes zu entnehmen.
+
+Sollte die Option \Option{ddc} aktiviert sein, wird das \DDC-Logo nicht im Kopf 
+sondern automatisch im Fuß gesetzt. Die Option \Option{ddchead} setzt dieses 
+auf jeden Fall im Kopf und überschreibt damit das mit \Macro{headlogo} 
+angegebene Zweitlogo.
+\end{Declaration}
+
+\begin{Declaration}[v2.03]{%
+  \Macro{footlogo}\LParameter\Parameter{Dateinamenliste}%
+}
+\begin{Declaration}[v2.03]{\Macro{footlogosep}}%
+\begin{Declaration}[v2.03]{\Length{footlogoheight}}%
+\printdeclarationlist%
+\index{Drittlogo|?}\index{Layout!Drittlogo}\index{\DDC-Logo}%
+\index{Fußzeile}\index{Fußzeile!Logo}\index{Layout!Fußzeile}%
+
+Laut den Richtlinien des \CDs dürfen im Fußbereich weitere Logos erscheinen, 
+beispielsweise von kooperierenden Unternehmen oder Sponsoren. Die Dateinamen 
+der gewünschten Logos können als kommaseparierte Liste im obligatorischen 
+Argument des Befehls \Macro{footlogo} angegeben werden. Sollte tatsächlich 
+nicht nur ein Dateiname sondern eine Liste übergeben worden sein, so wird bei 
+der Ausgabe der Logos zwischen diesen jeweils der in \Macro{footlogosep} 
+gespeicherte Separator gesetzt. Die Voreinstellung dieses Befehls lautet
+\Macro*{newcommand*}\Macro{footlogosep}\PParameter{\Macro*{hfill}} und kann 
+beliebig angepasst werden. Der Separator wird auch gesetzt, wenn in der 
+\Parameter{Dateinamenliste} lediglich ein Komma verwendet wurde. So kann man 
+beispielsweise ein Logo mit \Macro{footlogo}\PParameter{,\PName{Dateiname},} 
+zentriert im Fuß setzen.
+
+Das optionale Argument von \Macro{footlogo} wird an \Macro{includegraphics} 
+weitergereicht. Bitte beachten Sie dabei, dass dies für alle angegeben Dateien 
+aus der Liste gleichermaßen geschieht. Sollen für einzelne Logos individuelle 
+Einstellungen vorgenommen werden, so sind die entsprechenden Parameter im 
+obligatorischen Argument dem jeweiligen Dateinamen mit Doppelpunkt~\PValue{:} 
+anzuhängen (\Macro{footlogo}\PParameter{\PName{Dateiname}:\PName{Parameter}}), 
+wobei diese \emph{nach} den allgemeinen Einstellungen für alle Logos angewendet 
+werden.Die möglichen Parameter und Werte für die optionalen Argumente sind der 
+Dokumentation des \Package{graphicx}-Paketes zu entnehmen.
+
+Ohne die Angabe eines optionalen Argumentes werden alle Logos im Fuß auf die 
+Höhe \Length{footlogoheight} skaliert, welche vom Anwender ebenfalls angepasst 
+werden kann. Sollte die Höhe des Fußbereiches nicht ausreichen um alle Logos in 
+der gewünschten Größe darstellen zu können, so kann diese über die Option 
+\Option{extrabottommargin} angepasst werden.
 \end{Declaration}
 \end{Declaration}
 \end{Declaration}
@@ -885,150 +1085,84 @@ werden:
   grauen verwendet. Für den Fuß wird der grüne Claim ebenfalls durch einen 
   schwarzen ersetzt. Dies ist insbesondere für kleine Darstellungen des Logos 
   im Fuß sinnvoll.
-\item[gray/grey/cdgray/cdgrey]
+\item[gray/grey]
   Dies Ausgabe des \DDC-Logos erfolgt in Graustufen.
 \item[black]
   Verwendung des Logos in Graustufen mit schwarzem Schriftzug.
-\item[blue/cddarkblue]
+\item[blue]
   Der Schriftzug und das Logo werden in der primären Hausfarbe \Color{HKS41} 
   und den entsprechenden Abstufungen gesetzt
 \item[white]
   Das \DDC-Logo sowie der dazugehörige Schriftzug sind vollständig weiß.
 \end{values}
 %
+Die Größe des \DDC-Logos ist vorgegeben. Es wird sowohl im Kopf als auch im Fuß 
+in der gleichen Höhe gesetzt, wie das Logo der \TnUD. Wird es im Fuß gesetzt, 
+lässt sich die Größe allerdings über die Länge \Length{footlogoheight} ändern. 
+Sollte nach einer Vergrößerung der Darstellung die Höhe des Fußbereiches nicht 
+ausreichen, so kann diese über die Option \Option{extrabottommargin} angepasst 
+werden.
+
 \end{Declaration}
 \end{Declaration}
-\end{Declaration}
-
-\begin{Declaration}{%
-  \Macro{headlogo}\LParameter\Parameter{Dateiname}%
-}
-\printdeclarationlist%
-\index{Zweitlogo|?}\index{Layout!Zweitlogo}\index{\DDC-Logo}%
-%
-Neben dem Logo der \TnUD darf zusätzlich ein Zweitlogo im Kopf verwendet werden.
-Dieses lässt sich mit diesem Befehl einbinden. Normalerweise wird es auf die 
-Höhe der Erstlogos skaliert. Über das optionale Argument können weitere 
-Formatierungsbefehle an den verwendeten Befehl \Macro{includegraphics} 
-durchgereicht werden, um beispielsweise die Größe des Zweitlogos anzupassen.
-Welche Parameter angepasst werden können, ist der Dokumentation des
-\Package{graphicx}-Paketes zu entnehmen.
-
-Sollte die Option \Option{ddc} aktiviert sein, wird das \DDC-Logo nicht im Kopf 
-sondern automatisch im Fuß gesetzt. Die Option \Option{ddchead} setzt dieses 
-auf jeden Fall im Kopf und überschreibt damit das mit \Macro{headlogo} 
-angegebene Zweitlogo.
-\end{Declaration}
-
-\begin{Declaration}{\Option{widehead}[\PBoolean]}%
-  [false][\Option{cd}[color]:true]%
-\printdeclarationlist%
-\index{Querbalken}\index{Layout!Querbalken}%
-%
-Für die \TUDScript-Klassen ist ein Seitenlayout entstanden, welche den Kopf des
-\CDs umsetzt. Dieser besteht aus dem Logo der \TnUD sowie einem darunter 
-befindlichen Querbalken, in welchem Fakultät, Einrichtung, Institut und 
-Lehrstuhl%
-\footnote{%
-  \Macro{faculty}, \Macro{department}, \Macro{institute} sowie \Macro{chair}%
-}
-aufgeführt werden können. Bei der Ausprägung dieses Balkens gibt es zwei 
-Varianten. Die Außenlinien laufen entweder bis zum Text"~ oder bis zum 
-Blattrand.
-
-Für den Fall, dass ein randloser Ausdruck technisch nicht möglich ist, 
-kann die letztere der beiden Variante Probleme bereiten. Deshalb kann mit der 
-Option \Option{widehead} die Breite des Querbalkens angepasst werden. 
-Normalerweise ist der Balken auf die Textbreite begrenzt, lediglich im farbigen 
-Layout wird dieser standardmäßig bis zum Blattrand verlängert.
-%
-\begin{values}
-\itemfalse
-  Der Querbalken im Kopf erstreckt sich nur über den Textbereich.
-\itemtrue*
-  Die horizontale Ausdehnung des Querbalkens erstreckt sich bis an den 
-  Blattrand.\footnote{Voreinstellung bei \Option{cd}[color]} 
-\end{values}
-\end{Declaration}
-
-\begin{Declaration}[v2.02]{\Option{barfont}[\PSet]}%
-  [true][\Option{cdfont}[false]:false]
-\printdeclarationlist%
-\index{Kopfzeile!Schrift}%
-\index{Layout!Kopfzeile}%
-%
-Mit dieser Option kann die Schrift im Querbalken der Kopfzeile für Seiten, 
-welche in einem der \PageStyle{tudheadings}"=Seitenstilen gesetzt wird, 
-beeinflusst werden.
-%
-\begin{values}
-\itemfalse
-  Sollte mit \Option{cdfont}[false] die Verwendung der Hausschrift im Stil des 
-  \CDs der \TnUD deaktiviert worden sein, wird die Kopfzeile im Querbalken in
-  den Serifenlosen der genutzten Schrift gesetzt. Sind die Hausschriften 
-  aktiviert, hat diese Einstellung keinen Einfluss.
-\itemtrue*[cdfont/light/lightfont/noheavyfont]
-  Im Querbalken wird für \Macro{faculty} \textubn{Univers~65~Bold} verwendet, 
-  für die Felder \Macro{department}, \Macro{institute}, \Macro{chair} und 
-  \Macro{extraheadline} kommt \textuln{Univers~45~Light} zum Einsatz.
-\item[heavy/heavyfont]
-  Der Inhalt von \Macro{faculty} wird weiterhin in \textubn{Univers~65~Bold} 
-  gesetzt, für die restlichen Felder wird \texturn{Univers~55~Regular} genutzt.
-\end{values}
 \end{Declaration}
 
 \begin{Declaration}[%
-  v2.02!Parameter \Key{\Environment{tudpage}}{head} und 
-    \Key{\Environment{tudpage}}{foot} entfernt
+  v2.02!\Key{\Environment{tudpage}}{head} \emph{entfällt},
+  v2.02!\Key{\Environment{tudpage}}{foot} \emph{entfällt},
+  v2.03!\Key{\Environment{tudpage}}{color} \emph{entfällt}
 ]{\Environment{tudpage}[\OLParameter{Sprache}]}
 \begin{Declaration}{\Key{\Environment{tudpage}}{language}[\PName{Sprache}]}
 \begin{Declaration}{\Key{\Environment{tudpage}}{columns}[\PName{Anzahl}]}
-\begin{Declaration}{\Key{\Environment{tudpage}}{color}[\PName{Farbe}]}
 \begin{Declaration}[v2.02]{\Key{\Environment{tudpage}}{pagestyle}[\PSet]}
-\begin{Declaration}{\Key{\Environment{tudpage}}{headlogo}[\PName{Dateiname}]}
-\begin{Declaration}[v2.02]{\Key{\Environment{tudpage}}{ddc}[\PSet]}
-\begin{Declaration}[v2.02]{\Key{\Environment{tudpage}}{ddchead}[\PSet]}
-\begin{Declaration}[v2.02]{\Key{\Environment{tudpage}}{ddcfoot}[\PSet]}
-\begin{Declaration}{\Key{\Environment{tudpage}}{cdfont}[\PSet]}
-\begin{Declaration}[v2.02]{\Key{\Environment{tudpage}}{barfont}[\PSet]}
-\begin{Declaration}{\Key{\Environment{tudpage}}{widehead}[\PBoolean]}
+\begin{Declaration}{\Key{\Environment{tudpage}}{cdfont}[\PSet]}{%
+  \see*{\Option{cdfont}'ppage'}%
+}
+\begin{Declaration}[v2.03]{\Key{\Environment{tudpage}}{cdhead}[\PSet]}{%
+  \see*{\Option{cdhead}'ppage'}%
+}
+\begin{Declaration}[v2.03]{\Key{\Environment{tudpage}}{cdfoot}[\PSet]}{%
+  \see*{\Option{cdfoot}'ppage'}%
+}
+\begin{Declaration}{\Key{\Environment{tudpage}}{headlogo}[\PName{Dateiname}]}{%
+  \see*{\Macro{headlogo}'ppage'}%
+}
+\begin{Declaration}[v2.03]{%
+  \Key{\Environment{tudpage}}{footlogo}[\PName{Dateinamenliste}]
+}{\see*{\Macro{footlogo}'ppage'}}
+\begin{Declaration}[v2.02]{\Key{\Environment{tudpage}}{ddc}[\PSet]}{%
+  \see*{\Option{ddc}'ppage'}%
+}
+\begin{Declaration}[v2.02]{\Key{\Environment{tudpage}}{ddchead}[\PSet]}{%
+  \see*{\Option{ddchead}'ppage'}%
+}
+\begin{Declaration}[v2.02]{\Key{\Environment{tudpage}}{ddcfoot}[\PSet]}{%
+  \see*{\Option{ddcfoot}'ppage'}%
+}
 \printdeclarationlist%
 \index{Layout}\index{Layout!Seitenstil}%
 \index{Kopfzeile}\index{Layout!Kopfzeile}%
 \index{Fußzeile}\index{Layout!Fußzeile}%
 \index{Schrift}\index{Kopfzeile!Schrift}
 %
-Diese Umgebung dient zum Setzen einer oder mehrerer Seiten innerhalb des 
-Dokumentes mit dem Kopf im \CD. Sie hat ihren Ursprung in einer früheren 
+Die \Environment{tudpage}"=Umgebung hat ihren Ursprung in einer früheren 
 Version, als die \PageStyle{tudheadings}"=Seitenstile noch nicht verfügbar 
-waren. Diese können mittlerweile anstelle der \Environment{tudpage}"=Umgebung 
-verwendet werden.
-
-Dabei lassen sich verschiedene Parameter als optionales Argument angegeben. 
-Wird das Paket \Package{babel} genutzt, kann die in der Umgebung verwendete 
-Sprache mit \Key{\Environment{tudpage}}{language}[\PName{Sprache}] geändert 
-werden, was zur lokalen Anpassung der sprachspezifischen Trennungsmuster und 
+waren, welche mittlerweile anstelle dieser Umgebung verwendet werden können.
+Für die \Environment{tudpage}"=Umgebung lassen sich verschiedene Parameter als 
+optionales Argument angegeben. Wird das Paket \Package{babel} genutzt, kann die 
+verwendete Sprache mit \Key{\Environment{tudpage}}{language}[\PName{Sprache}] 
+geändert werden, was zur Anpassung der sprachspezifischen Trennungsmuster und 
 Bezeichner führt. Wurde das Paket \Package{multicol} geladen, wird mit dem 
 Parameter \Key{\Environment{tudpage}}{columns}[\PName{Anzahl}] der Inhalt der 
-Umgebung mehrspaltig gesetzt.
+Umgebung mehrspaltig gesetzt. Mit \Key{\Environment{tudpage}}{pagestyle} kann 
+der Seitenstil angepasst werden, wobei \PValue{headings}, \PValue{plain} und 
+\PValue{empty} gültige Werte sind. 
 
-Mit dem Parameter \Key{\Environment{tudpage}}{color} kann die Farbe des Kopfes 
-auf eine beliebige geändert werden. Diese ist für den Fall eines farbigen 
-Layouts (\Option{cd}[pale|color]) auf die primäre Hausfarbe \Color{HKS41} 
-gesetzt, sonst ist der Kopf standardmäßig schwarz. Außerdem kann mit
-\Key{\Environment{tudpage}}{pagestyle} der Seitenstil angepasst werden. 
-Gültige Werte sind \PValue{headings}, \PValue{plain}, \PValue{empty} oder einer 
-der \PageStyle{tudheadings}"=Seitenstile. Soll lokal ein anderes Zweitlogo als 
-das mit \Macro{headlogo} gegebene erscheinen, so kann der Parameter 
-\Key{\Environment{tudpage}}{headlogo}[\PName{Dateiname}] verwendet werden.
-
-Die anderen Parameter entsprechen in ihrem Verhalten prinzipiell den 
-gleichnamigen Klassenoptionen, wirken sich jedoch nur lokal innerhalb der 
-\Environment{tudpage}"=Umgebung aus. Dies sind namentlich sowohl die Optionen 
-\Option{cdfont}'full' sowie \Option{ddc}, \Option{ddchead} und 
-\Option{ddcfoot}'full' als auch \Option{barfont} und \Option{widehead}'page'. 
-Das Verhalten sowie die jeweils gültigen Wertzuweisungen können in den 
-entsprechenden Abschnitten der Dokumentation nachgelesen werden.
+Die weiteren Parameter entsprechen in ihrem Verhalten prinzipiell den 
+gleichnamigen Klassenoptionen respektive Befehlen, wirken sich jedoch nur lokal 
+innerhalb der \Environment{tudpage}"=Umgebung aus. Das Verhalten sowie die 
+jeweils gültigen Wertzuweisungen können in den entsprechenden Abschnitten des 
+Handbuchs nachgelesen werden.
 \end{Declaration}
 \end{Declaration}
 \end{Declaration}
@@ -1043,7 +1177,7 @@ entsprechenden Abschnitten der Dokumentation nachgelesen werden.
 \end{Declaration}
 
 \ToDo[imp,nxt]{%
-  Titelseite und Cover auf Drittlogos und dergleichen mit scrlayer erweitern.
+  Titelseite und Cover auf freie Gestaltung mit scrlayer erweitern.
 }[v2.x]
 
 
@@ -1053,6 +1187,9 @@ entsprechenden Abschnitten der Dokumentation nachgelesen werden.
 \index{Umschlagseite|!}%
 \index{Titel!Umschlagseite}\index{Layout!Umschlagseite}%
 %
+\ChangedAt*{%
+  v2.03!Bugfix für Umschlagseite und Titel beim Satzspiegel%
+}
 Für den Titel werden alle Felder unterstützt, die bereits durch \KOMAScript{} 
 bereitgestellt werden. Darüber hinaus werden für die \TUDScript-Klassen weitere 
 Felder definiert, die Auswirkungen auf die Gestalt des Titels haben. Diese 
@@ -1093,7 +1230,30 @@ standardmäßig in \DIN sondern in \textubn{Univers~65~Bold} ausgegeben wird.
 \begin{Declaration}[v2.02]{%
   \Key{\Macro{maketitle}}{pagenumber}[\PName{Seitenzahl}]%
 }
-\begin{Declaration}[v2.02]{\Key{\Macro{maketitle}}{cdfont}[\PSet]}
+\begin{Declaration}[v2.02]{\Key{\Macro{maketitle}}{cdfont}[\PSet]}{%
+  \see*{\Option{cdfont}'ppage'}%
+}
+\begin{Declaration}[v2.03]{\Key{\Macro{maketitle}}{cdhead}[\PSet]}{%
+  \see*{\Option{cdhead}'ppage'}%
+}
+\begin{Declaration}[v2.03]{\Key{\Macro{maketitle}}{cdfoot}[\PSet]}{%
+  \see*{\Option{cdfoot}'ppage'}%
+}
+\begin{Declaration}[v2.03]{%
+  \Key{\Macro{maketitle}}{headlogo}[\PName{Dateiname}]%
+}{\see*{\Macro{headlogo}'ppage'}}
+\begin{Declaration}[v2.03]{%
+  \Key{\Macro{maketitle}}{footlogo}[\PName{Dateinamenliste}]
+}{\see*{\Macro{footlogo}'ppage'}}
+\begin{Declaration}[v2.03]{\Key{\Macro{maketitle}}{ddc}[\PSet]}{%
+  \see*{\Option{ddc}'ppage'}%
+}
+\begin{Declaration}[v2.03]{\Key{\Macro{maketitle}}{ddchead}[\PSet]}{%
+  \see*{\Option{ddchead}'ppage'}%
+}
+\begin{Declaration}[v2.03]{\Key{\Macro{maketitle}}{ddcfoot}[\PSet]}{%
+  \see*{\Option{ddcfoot}'ppage'}%
+}
 \printdeclarationlist%
 \index{Layout!Titel}%
 \index{Satzspiegel!doppelseitig}%
@@ -1102,35 +1262,40 @@ Der Befehl \Macro{maketitle} setzt für \Option{cdtitle}[false] den normalen
 \KOMAScript"=Titel{}, ansonsten wird die Titelseite im \CD der \TnUD erzeugt. 
 Letztere Variante ist im Vergleich zum Standardtitel um eine Vielzahl von 
 Feldern erweitert worden und erlaubt insbesondere die Angabe von Daten für das 
-Deckblatt einer akademischen Abschlussarbeit. Die einzelnen Felder werden in 
-diesem \autorefname erläutert. Wird das Dokument doppelseitig und mit rechts 
-öffnenden Kapiteln gesetzt,%
+Deckblatt einer akademischen Abschlussarbeit. Die einzelnen Felder werden 
+später in diesem \autorefname erläutert. Wird das Dokument doppelseitig und mit 
+rechts öffnenden Kapiteln gesetzt,%
 \footnote{%
   \Option{twoside} und \Option{open}[right], Standard für \Class{tudscrbook}
 }
-so wird zusätzlich die Option \Option{clearcolor} beachtet.
+so wird zusätzlich die Option \Option{clearcolor} beachtet. Dies gilt es 
+insbesondere bei der Verwendung der Befehle \Macro{uppertitleback} respektive 
+\Macro{lowertitleback} für die Titelrückseite zu beachten.
 
 Das optionale Argument erlaubt~-- ebenso wie bei den \KOMAScript"=Klassen~-- 
 die Änderung der Seitenzahl der Titelseite. Diese wird jedoch nicht ausgegeben, 
 sondern beeinflusst lediglich die Zählung. Sie sollten hier unbedingt eine 
 ungerade Zahl wählen, da sonst die gesamte Zählung durcheinander gerät. 
-Zusätzlich kann der Parameter \Key{\Macro{maketitle}}{cdfont} im optionalen 
-Argument verwendet werden, um die Nutzung der Schriften des \CDs zu regulieren. 
-Er entspricht in seinem Verhalten der gleichnamigen Klassenoption. Die gültigen 
-Wertzuweisungen können der Beschreibung der Option \Option{cdfont}'full' 
-entnommen werden. Die Einstellungen dieses Parameters wirkt sich nur lokal und 
-einzig auf die Umschlagseite aus.
+Wird eine Titelseite (\Option{titlepage}[true]) im \CD der \TnUD gesetzt 
+(\Option{cdtitle}[true]), können auch die weiterhin aufgeführten Parameter im 
+optionalen Argument verwendet werden. Diese entsprechen in ihrem Verhalten den 
+gleichnamigen Optionen respektive Befehlen, wirken sich jedoch nur lokal und 
+einzig auf die Titelseite aus. So kann beispielsweise die Nutzung eines 
+\DDC-Logos auf den Titel beschränkt bleiben.
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
 \end{Declaration}
 \end{Declaration}
 \end{Declaration}
 
 \begin{Declaration}{%
-  \Macro{maketitleonecolumn}\OParameter{Seitenzahl}\Parameter{Einspaltentext}%
+  \Macro{maketitleonecolumn}\OLParameter{Seitenzahl}\Parameter{Einspaltentext}%
 }
-\begin{Declaration}[v2.02]{%
-  \Key{\Macro{maketitleonecolumn}}{pagenumber}[\PName{Seitenzahl}]%
-}
-\begin{Declaration}[v2.02]{\Key{\Macro{maketitleonecolumn}}{cdfont}[\PSet]}
 \printdeclarationlist%
 \index{Layout!Titel}%
 \index{Satzspiegel!doppelseitig}%
@@ -1138,22 +1303,25 @@ einzig auf die Umschlagseite aus.
 %
 Im zweispaltigen Satz (\Option{twocolumn}) wird mit \Macro{maketitle} die 
 Titelseite selbst immer einspaltig gesetzt. Direkt nach dem Titel folgt 
-normalerweise der zweispaltige Fließtext. Mit dem Befehl 
-\Macro{maketitleonecolumn} 
-ermöglichen die \TUDScript-Klassen, nach dem Titel zusätzlich noch weitere 
-Textpassagen~-- beispielsweise eine Zusammenfassung~-- einspaltig zu setzen.
+normalerweise der zweispaltige Fließtext. Mit dem \TUDScript-Befehl 
+\Macro{maketitleonecolumn} kann nach dem Titel zusätzlich noch weiterer 
+Inhalt~-- beispielsweise eine Zusammenfassung~-- einspaltig gesetzt werden.
 
 Wird der Befehl bei einer Titelseite (\Option{titlepage}[true]) verwendet, wird 
-der Inhalt des Argumentes direkt nach dieser auf einer neuen Seite ebenfalls 
-einspaltig ausgegeben. Kommt jedoch ein Titelkopf (\Option{titlepage}[false]) 
-zum Einsatz, so folgt nach diesem die einspaltige Textpassage aus dem Argument. 
-Danach wird auf das zweispaltige Layout umgeschaltet, 
+der Inhalt des Argumentes (\PName{Einspaltentext}) direkt nach dieser auf einer 
+oder gegebenenfalls mehreren neuen Seiten ebenfalls einspaltig ausgegeben. 
+Kommt jedoch ein Titelkopf (\Option{titlepage}[false]) zum Einsatz, so folgt 
+diesem die einspaltige Textpassage aus dem obligatorischen Argument direkt. 
+Dabei erfolgt gegebenenfalls ein automatischer Seitenumbruch, falls der Inhalt 
+nicht auf eine einzelne Seite passt. Nach dem \PName{Einspaltentext} des 
+obligatorischen Argumentes wird direkt danach und ohne zusätzlichen Umbruch auf 
+das zweispaltige Layout umgeschaltet.
 
-Der optionale Parameter von \Macro{maketitleonecolumn} kann äquivalent zum 
-Befehl \Macro{maketitle} für die Anpassung der Seitenzahl und der verwendeten 
-Schrift verwendet werden.
-\end{Declaration}
-\end{Declaration}
+Der optionale Parameter von \Macro{maketitleonecolumn} kann äquivalent zu 
+\Macro{maketitle} für die Änderung der Seitenzahl, der verwendeten Schrift 
+sowie zur Anpassung von Kopf und Fuß verwendet werden. Dabei ist zu beachten, 
+dass ein Großteil der Parameter nur Auswirkungen haben, falls eine Titelseite
+(\Option{titlepage}[true]) verwendet wird.
 \end{Declaration}
 
 \begin{Declaration}[%
@@ -1162,18 +1330,41 @@ Schrift verwendet werden.
     \Font*{subject}{,} \Font*{title}{,} \Font*{subtitle}{,} \Font*{author}{,} 
     \Font*{publishers}{,} \Font*{titlepage} und \Font*{thesis}%
 ]{\Macro{makecover}\OLParameter{Seitenzahl}}
-\begin{Declaration}{\Key{\Macro{makecover}}{cdlayout}[\PBoolean]}
 \begin{Declaration}[v2.02]{%
   \Key{\Macro{makecover}}{pagenumber}[\PName{Seitenzahl}]%
 }
-\begin{Declaration}{\Key{\Macro{makecover}}{cdfont}[\PSet]}
+\begin{Declaration}{\Key{\Macro{makecover}}{cdgeometry}[\PBoolean]}
+\begin{Declaration}[v2.02]{\Key{\Macro{makecover}}{cdfont}[\PSet]}{%
+  \see*{\Option{cdfont}'ppage'}%
+}
+\begin{Declaration}[v2.03]{\Key{\Macro{makecover}}{cdhead}[\PSet]}{%
+  \see*{\Option{cdhead}'ppage'}%
+}
+\begin{Declaration}[v2.03]{\Key{\Macro{makecover}}{cdfoot}[\PSet]}{%
+  \see*{\Option{cdfoot}'ppage'}%
+}
+\begin{Declaration}[v2.03]{%
+  \Key{\Macro{makecover}}{headlogo}[\PName{Dateiname}]%
+}{\see*{\Macro{headlogo}'ppage'}}
+\begin{Declaration}[v2.03]{%
+  \Key{\Macro{makecover}}{footlogo}[\PName{Dateinamenliste}]
+}{\see*{\Macro{footlogo}'ppage'}}
+\begin{Declaration}[v2.03]{\Key{\Macro{makecover}}{ddc}[\PSet]}{%
+  \see*{\Option{ddc}'ppage'}%
+}
+\begin{Declaration}[v2.03]{\Key{\Macro{makecover}}{ddchead}[\PSet]}{%
+  \see*{\Option{ddchead}'ppage'}%
+}
+\begin{Declaration}[v2.03]{\Key{\Macro{makecover}}{ddcfoot}[\PSet]}{%
+  \see*{\Option{ddcfoot}'ppage'}%
+}
 \printdeclarationlist%
 %
 Eine Umschlagseite wird zumeist für gebundene Abschlussarbeiten verlangt, um 
 diese beispielsweise für einen Prägedruck auf dem Buchdeckel zu verwenden. 
-Hierfür ist es sinnvoll, mit \Option{cdcover}[true] die farbige Ausprägung der 
-Umschlagseite zu deaktivieren, falls diese für das restliche Dokument aktiv ist 
-(\Option{cd}[color]).
+Deshalb ist die farbige Ausprägung der Umschlagseite auch deaktiviert, wenn 
+diese für das restliche Dokument aktiv ist (\Option{cd}[color]). Dies kann 
+jedoch jederzeit mit \Option{cdcover}[\PSet] überschrieben werden.
 
 Wird \Option{cdcover}[true] gewählt, so wird die Umschlagseite im \CD der 
 \TnUD gesetzt. Auf dieser werden der Titel des Dokumentes, die Typisierung 
@@ -1187,75 +1378,24 @@ Für die Einstellung \Option{cdcover}[false] wird lediglich der normale
 Die Titelseite selbst gehört immer zum Buchblock und wird daher im gleichen 
 Satzspiegel gesetzt. Dem entgegen steht die Umschlagseite, welche zumeist in 
 einem anderen Layout erscheint. Normalerweise wird das Cover~-- unabhängig von 
-der Option \Option{geometry}~-- im asymmetrischen Satzspiegel des \CDs gesetzt. 
-Mit \Key{\Macro{makecover}}{cdlayout}[false] im optionalen Argument kann das 
-Verhalten geändert werden. In diesem Fall erscheint auch die Umschlagseite im 
-Buchblock des restlichen Dokumentes. Allerdings können für diese Einstellung 
-die Seitenränder durch den Nutzer mit den Befehlen \Macro{coverpagetopmargin}, 
+der Option \Option{cdgeometry}~-- im asymmetrischen Satzspiegel des \CDs 
+gesetzt. Mit \Key{\Macro{makecover}}{cdgeometry}[false] im optionalen Argument 
+kann das Verhalten geändert werden. In diesem Fall erscheint auch die 
+Umschlagseite im Buchblock des restlichen Dokumentes. Allerdings können für 
+diese Einstellung die Seitenränder mit den Befehlen \Macro{coverpagetopmargin}, 
 \Macro{coverpageleftmargin}, \Macro{coverpagerightmargin} sowie 
-\Macro{coverpagebottommargin} frei angepasst werden. Mehr dazu ist im 
-\KOMAScript"=Handbuch \scrguide zu finden.
+\Macro{coverpagebottommargin} durch den Nutzer frei angepasst werden. Mehr dazu 
+ist im \KOMAScript"=Handbuch \scrguide zu finden.
 
-Die beiden anderen optionalen Parameter \Key{\Macro{makecover}}{pagenumber} 
-sowie \Key{\Macro{makecover}}{cdfont} dienen~-- äquivalent zum Befehl 
-\Macro{maketitle}~-- zur Anpassung der Seitenzahl und der verwendeten Schrift.
+Das optionale Argument erlaubt die Änderung der Seitenzahl der Umschlagseite. 
+Diese wird jedoch nicht ausgegeben, sondern beeinflusst lediglich die Zählung. 
+Sie sollten hier unbedingt eine ungerade Zahl wählen, da sonst die gesamte 
+Zählung durcheinander gerät. Die weiterhin aufgeführten Parameter entsprechen 
+in ihrem Verhalten den gleichnamigen Optionen respektive Befehlen, wirken sich 
+jedoch nur lokal und einzig auf die Umschlagseite aus.
+
 \end{Declaration}
 \end{Declaration}
-\end{Declaration}
-\end{Declaration}
-
-\begin{Declaration}{\Macro{extratitle}\Parameter{Schmutztitel}}
-\begin{Declaration}{\Macro{titlehead}\Parameter{Kopf}}
-\begin{Declaration}{\Macro{title}\Parameter{Titel}}
-\begin{Declaration}[%
-  v2.01a!Bugfix für Schriftstärke bei Verwendung des Untertitels%
-]{\Macro{subtitle}\Parameter{Untertitel}}
-\begin{Declaration}{\Macro{publishers}\Parameter{Verlag}}
-\begin{Declaration}{\Macro{thanks}\Parameter{Fußnote}}
-\begin{Declaration}{\Macro{uppertitleback}\Parameter{Titelrückseitenkopf}}
-\begin{Declaration}{\Macro{lowertitleback}\Parameter{Titelrückseitenfuß}}
-\begin{Declaration}{\Macro{dedication}\Parameter{Widmung}}
-\printdeclarationlist%
-\index{Titel!Felder}%
-%
-Diese Befehle entsprechen den in ihrem Verhalten den originalen Pendants der 
-\KOMAScript"=Klassen{} und sollen hier der Vollständigkeit halber erwähnt 
-werden.
-
-Die Ausgabe des mit \Macro{extratitle} definierten Schmutztitels~-- welcher 
-beliebig gestaltet und formatiert werden kann~-- erfolgt als Bestandteil der 
-Titelei mit \Macro{maketitle} vor der eigentlichen Titelseite. Mit dem Befehl 
-\Macro{titlehead} kann ein zusätzlicher, beliebig formatierbarer Text oberhalb 
-der Typisierung und des Titels ausgegeben werden. Da die vertikale Position des 
-Dokumenttitels durch das \CD fest vorgegeben ist, kann es~-- im Gegensatz zu 
-den \KOMAScript"=Klassen~-- passieren, dass der Kopf des Haupttitels selbst in 
-die Kopfzeile ragt. Dies wird durch die \TUDScript-Klassen nicht geprüft und 
-muss gegebenenfalls vom Anwender kontrolliert werden.
-
-Die Befehle \Macro{title} und \Macro{subtitle} bedürfen keiner weiteren 
-Erklärung. Anzumerken ist, dass sowohl Titel als auch Untertitel normalerweise 
-in Majuskeln und \DIN gesetzt werden. Der mit dem Befehl \Macro{publishers} 
-definierte Inhalt muss nicht zwingende einen Verlag bezeichnen sondern kann 
-auch andere Informationen beinhalten, welche am Ende der Titelseite ausgegeben 
-werden sollen.
-
-Fußnoten werden auf dem Titel nicht mit \Macro{footnote}, sondern mit der 
-Anweisung \Macro{thanks} erzeugt. Diese dienen in der Regel für Anmerkungen bei 
-Titel oder den Autoren. Als Fußnotenzeichen werden dabei Symbole statt Zahlen 
-verwendet. Der Befehl \Macro{thanks} kann nur innerhalb des Arguments einer 
-der Anweisungen für die Titelseite wie beispielsweise \Macro{author} oder 
-\Macro{title} verwendet werden.
-
-\index{Satzspiegel!doppelseitig}%
-Im doppelseitigen Druck lässt sich die Rückseite der Haupttitelseite für 
-weitere Angaben nutzen. Sowohl den Titelrückseitenkopf als auch den
-Titelrückseitenfuß kann der Anwender mit \Macro{uppertitleback} und 
-\Macro{lowertitleback} frei gestalten.
-
-Mit \Macro{dedication} kann eine eigene Widmungsseite zentriert und in etwas 
-größerer Schrift gesetzt werden. Die Rückseite ist wie die des Schmutztitels 
-grundsätzlich leer. Die Widmung wird zusammen mit der restlichen Titelei durch 
-\Macro{maketitle} ausgegeben und muss daher vor dieser Anweisung definiert sein.
 \end{Declaration}
 \end{Declaration}
 \end{Declaration}
@@ -1272,13 +1412,12 @@ grundsätzlich leer. Die Widmung wird zusammen mit der restlichen Titelei durch
 %
 Für den Titel und die Umschlagseite werden durch die \TUDScript-Klassen
 eine Reihe von zusätzlichen Feldern bereitgestellt. Einigen dieser Felder wird 
-eine Beschreibung (siehe dazu \autoref{sec:localization}) vorangestellt. 
-Dazwischen wird bei der Ausgabe ein Trennzeichen eingefügt. Ein Doppelpunkt 
-gefolgt von einem Leerzeichen (:\Macro*{nobreakspace}) ist hierfür die 
-Voreinstellung. Mit dem Befehl \Macro{titledelimiter} lässt sich dieses 
-Trennzeichen beliebig an die individuellen Wünsche des Anwenders anpassen.
+eine Beschreibung (\see*{\autoref{sec:localization}}) vorangestellt. Dazwischen 
+wird bei der Ausgabe ein Trennzeichen eingefügt. Ein Doppelpunkt gefolgt von 
+einem Leerzeichen (:\Macro*{nobreakspace}) ist hierfür die Voreinstellung. Mit 
+dem Befehl \Macro{titledelimiter} lässt sich dieses Trennzeichen beliebig an 
+die individuellen Wünsche des Anwenders anpassen.
 \end{Declaration}
-
 
 \begin{Declaration}{\Macro{author}\Parameter{Autor(en)}}
 \begin{Declaration}{\Macro{authormore}\Parameter{Autorenzusatz}}
@@ -1457,8 +1596,7 @@ diesem Fall ignoriert.
 \end{values}
 \end{Declaration}
 
-\Rename[macros]{v2.02}{\Macro{degree}}{\Macro{graduation}}
-\begin{Declaration}{\Macro{graduation}\OParameter{Kurzform}\Parameter{Grad}}
+\begin{Declaration}[v2.02]{\Macro{graduation}\OParameter{Kurzform}\Parameter{Grad}}
 \printdeclarationlist%
 \index{Titel!Felder}%
 %
@@ -1516,6 +1654,68 @@ alle Datumsfelder des Dokumentes und folglich auch für die beiden Felder
 \Macro{date} und \Macro{defensedate} verwendet.
 \end{Declaration}
 \end{Declaration}
+
+\begin{Declaration}{\Macro{extratitle}\Parameter{Schmutztitel}}
+\begin{Declaration}{\Macro{titlehead}\Parameter{Kopf}}
+\begin{Declaration}{\Macro{title}\Parameter{Titel}}
+\begin{Declaration}[%
+  v2.01a!Bugfix für Schriftstärke bei Verwendung des Untertitels%
+]{\Macro{subtitle}\Parameter{Untertitel}}
+\begin{Declaration}{\Macro{publishers}\Parameter{Verlag}}
+\begin{Declaration}{\Macro{thanks}\Parameter{Fußnote}}
+\begin{Declaration}{\Macro{uppertitleback}\Parameter{Titelrückseitenkopf}}
+\begin{Declaration}{\Macro{lowertitleback}\Parameter{Titelrückseitenfuß}}
+\begin{Declaration}{\Macro{dedication}\Parameter{Widmung}}
+\printdeclarationlist%
+\index{Titel!Felder}%
+%
+Diese Befehle entsprechen den in ihrem Verhalten den originalen Pendants der 
+\KOMAScript"=Klassen{} und sollen hier der Vollständigkeit halber erwähnt 
+werden.
+
+Die Ausgabe des mit \Macro{extratitle} definierten Schmutztitels~-- welcher 
+beliebig gestaltet und formatiert werden kann~-- erfolgt als Bestandteil der 
+Titelei mit \Macro{maketitle} vor der eigentlichen Titelseite. Mit dem Befehl 
+\Macro{titlehead} kann ein zusätzlicher, beliebig formatierbarer Text oberhalb 
+der Typisierung und des Titels ausgegeben werden. Da die vertikale Position des 
+Dokumenttitels durch das \CD fest vorgegeben ist, kann es~-- im Gegensatz zu 
+den \KOMAScript"=Klassen~-- passieren, dass der Kopf des Haupttitels selbst in 
+die Kopfzeile ragt. Dies wird durch die \TUDScript-Klassen nicht geprüft und 
+muss gegebenenfalls vom Anwender kontrolliert werden.
+
+Die Befehle \Macro{title} und \Macro{subtitle} bedürfen keiner weiteren 
+Erklärung. Anzumerken ist, dass sowohl Titel als auch Untertitel normalerweise 
+in Majuskeln und \DIN gesetzt werden. Der mit dem Befehl \Macro{publishers} 
+definierte Inhalt muss nicht zwingende einen Verlag bezeichnen sondern kann 
+auch andere Informationen beinhalten, welche am Ende der Titelseite ausgegeben 
+werden sollen.
+
+Fußnoten werden auf dem Titel nicht mit \Macro{footnote}, sondern mit der 
+Anweisung \Macro{thanks} erzeugt. Diese dienen in der Regel für Anmerkungen bei 
+Titel oder den Autoren. Als Fußnotenzeichen werden dabei Symbole statt Zahlen 
+verwendet. Der Befehl \Macro{thanks} kann nur innerhalb des Arguments einer 
+der Anweisungen für die Titelseite wie beispielsweise \Macro{author} oder 
+\Macro{title} verwendet werden.
+
+\index{Satzspiegel!doppelseitig}%
+Im doppelseitigen Druck lässt sich die Rückseite der Haupttitelseite für 
+weitere Angaben nutzen. Sowohl den Titelrückseitenkopf als auch den
+Titelrückseitenfuß kann der Anwender mit \Macro{uppertitleback} und 
+\Macro{lowertitleback} frei gestalten.
+
+Mit \Macro{dedication} kann eine eigene Widmungsseite zentriert und in etwas 
+größerer Schrift gesetzt werden. Die Rückseite ist wie die des Schmutztitels 
+grundsätzlich leer. Die Widmung wird zusammen mit der restlichen Titelei durch 
+\Macro{maketitle} ausgegeben und muss daher vor dieser Anweisung definiert sein.
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
 \index{Titel|!)}
 
 
@@ -1524,7 +1724,7 @@ alle Datumsfelder des Dokumentes und folglich auch für die beiden Felder
 %
 \ChangedAt{%
   v2.02!\PageStyle{plain.tudheadings} wird genutzt!\Macro{partpagestyle}%
-}
+}[Implementierung]
 Wird für die Teileseiten das Layout des \CDs verwendet, so wird der Seitenstil 
 dieser (\Macro{partpagestyle}) auf \PageStyle{plain.tudheadings} gesetzt. 
 Möchten Sie stattdessen einen anderen Seitenstil nutzen, so kann dieser mit 
@@ -1574,22 +1774,22 @@ standardmäßig aktiviert. \notudscrartcl
 \begin{values}
 \itemfalse
   Es gibt keine Sonderstellung von Kapiteln, der nachfolgende Text wird direkt 
-  unter der Überschrift auf der gleichen Seite ausgegeben.
+  unter der Überschrift respektive nach der mit \Macro{setchapterpreamble} 
+  erzeugten Kapitelpräambel auf der gleichen Seite ausgegeben.
 \itemtrue*
-  Die Kapitelüberschrift wird auf einer separaten Seite gesetzt, der folgende
-  Text wird erst auf der nächsten beziehungsweise übernächsten Seite 
-  ausgegeben. Siehe dazu auch die Option \Option{cleardoublespecialpage}.
+  Die Kapitelüberschrift und gegebenenfalls die Kapitelpräambel werden auf 
+  einer separaten Seite gesetzt. Der folgende Text erscheint auf der nächsten   
+  respektive übernächsten Seite, \seealso*{\Option{cleardoublespecialpage}}.
 \end{values}
 %
 \ChangedAt{%
   v2.02!nicht mehr abhängig von \Macro{partpagestyle}!\Macro{chapterpagestyle}
-}
+}[Implementierung]
 Mit \Macro*{renewcommand*}\PParameter{\Macro{chapterpagestyle}}%
 \Parameter{Seitenstil} lässt sich übrigens~-- unabhängig von der Option 
-\Option{chapterpage}~-- der Seitenstil von Kapiteln anpassen. 
-
-Außerdem empfehle ich insbesondere bei der Verwendung separater Kapitelseiten 
-das Aktivieren der \KOMAScript-Option \Option{chapterprefix}. Damit werden die
+\Option{chapterpage}~-- der Seitenstil von Kapiteln anpassen. Bei der 
+Verwendung von separaten Kapitelseiten ist außerdem das Aktivieren der 
+\KOMAScript-Option \Option{chapterprefix} empfehlenswert. Damit werden die
 Kapitelüberschriften mit einer Vorsatzzeile gesetzt. Falls ein nummeriertes 
 Kapitel erzeugt wird, so wird zunächst in einer Zeile \enquote{Kapitel} gefolgt 
 von der aktuellen Kapitelnummer ausgegeben, in der nächsten Zeile wird 
@@ -1599,11 +1799,12 @@ nachzulesen.
 \end{Declaration}
 
 
-\subsection{Satzspiegel und Kolumnentitel}
-\begin{Declaration}{\Option{geometry}[\PSet]}[true]%
+\subsection{Der Satzspiegel}
+\begin{Declaration}[v2.03]{\Option{cdgeometry}[\PSet]}[true]%
 \printdeclarationlist%
+\index{Satzspiegel|(}\index{Layout!Satzspiegel|(}%
 \index{Seitenstil}\index{Layout!Seitenstil}%
-\index{Satzspiegel}\index{Satzspiegel!doppelseitig}\index{Layout!Satzspiegel}%
+\index{Satzspiegel!doppelseitig}%
 \index{Layout!Seitenränder}%
 %
 Diese Option ist für die Aufteilung beziehungsweise die Berechnung des 
@@ -1615,14 +1816,14 @@ vernünftigen doppelseitigen Satz zu ermöglichen.%
 Des Weiteren besteht die Möglichkeit, auf das Standardverhalten von 
 \KOMAScript{} zurückzufallen und die Satzspiegelberechnung durch das Paket
 \Package{typearea} vornehmen zu lassen. Hier hat insbesondere die Klassenoption 
-\Option{DIV}[\PSet] maßgeblichen Einfluss auf den Satzspiegel. Siehe dazu die 
-Dokumentation von \KOMAScript{}.
+\Option{DIV}[\PSet] maßgeblichen Einfluss auf den Satzspiegel. Mehr dazu ist in 
+der Dokumentation von \KOMAScript zu finden.
 %
 \begin{values}
 \itemfalse
   Die Satzspiegelberechnung erfolgt via \Package{typearea}, die Vorgaben des 
   \CDs bezüglich der Seitenränder werden ignoriert.
-\itemtrue*[tud/cd/asymmetric]
+\itemtrue*[asymmetric/cd]
   Die Seitenränder werden im asymmetrischen Stil des \CDs fest definiert und 
   auch für den doppelseitigen Satz (\Option{twoside}[true]) genutzt.%
   \footnote{links: 30\,mm, rechts: 20\,mm, oben: 25\,mm, unten: 30\,mm}
@@ -1631,10 +1832,9 @@ Dokumentation von \KOMAScript{}.
   zentriert.%
   \footnote{links: 25\,mm, rechts: 25\,mm, oben: 25\,mm, unten: 30\,mm}
 \item[balanced/twoside]
-  Im einseitigen Layout ist das Verhalten der Einstellung identisch zu
-  \Option{geometry}[symmetric]. Beim doppelseitigen Satz wird der Satzspiegel 
-  derart verändert, dass die Ränder der inneren Seiten schmaler sind als die 
-  der äußeren.%
+  Im einseitigen Layout ist diese Einstellung zu \Option{cdgeometry}[symmetric] 
+  identisch. Beim doppelseitigen Satz wird der Satzspiegel derart verändert, 
+  dass die Ränder der inneren Seiten schmaler sind als die der äußeren.%
   \footnote{innen: 20\,mm, außen: 30\,mm, oben: 25\,mm, unten: 30\,mm}
   \Attention{%
     Der so erzeugte Satzspiegel ist jedoch nicht sehr vorteilhaft. Es ist zu 
@@ -1644,11 +1844,42 @@ Dokumentation von \KOMAScript{}.
   }
 \end{values}
 %
-Für die Festlegung der Seitenränder wird das Paket \Package{geometry} 
-verwendet. Ist \Option{geometry}[false] gewählt, erfolgt die Berechnung des 
-Satzspiegels durch \Package{typearea}. Die damit berechneten Werte werden 
-anschließend an \Package{geometry} weitergereicht und durch dieses umgesetzt.
+Für die Festlegung der Seitenränder wird das Paket \Package{geometry} genutzt. 
+Ist \Option{cdgeometry}[false] gewählt, erfolgt die Berechnung des Satzspiegels 
+durch \Package{typearea}. Die damit berechneten Werte werden anschließend an 
+\Package{geometry} weitergereicht und durch dieses umgesetzt.
 \end{Declaration}
+
+\begin{Declaration}[v2.03]{\Option{extrabottommargin}[\PName{Höhe}]}%
+\printdeclarationlist%
+\index{Fußzeile|?}
+%
+Mit dieser Option kann die Größe des unteren Seitenrandes angepasst werden, 
+wenn der Satzspiegel des \CDs (\Option{cdgeometry}[true/symmetric/balanced]) 
+verwendet wird. Insbesondere für den Fall, dass Drittlogos im Fußbereich der 
+Seiten im Stil \PageStyle{tudheadings} verwendet werden, kann dieser unter 
+Umständen etwas zu klein sein. Dabei wird der Fußbereich durch positive Werte 
+vergrößert, negative Werte verkleinern diesen entsprechend. Es spielt dabei 
+keine Rolle, ob eine \hologo{LaTeX}-Länge, ein \hologo{TeX}-Abstand oder eine 
+\hologo{TeX}-Ausdehnung als Länge bei der Wertzuweisung verwendet wird.
+\end{Declaration}
+
+\subsubsection{Kopf"~ und Fußzeile im Zusammenspiel mit dem Satzspiegel}
+\index{Kopfzeile|?}\index{Layout!Kopfzeile}%
+\index{Fußzeile|?}\index{Layout!Fußzeile}%
+Da im \CD nicht festgelegt ist, wie die Gestaltung der Kopf"~ und Fußzeilen in 
+einer wissenschaftlichen Arbeit auszuführen ist, bleibt dem Nutzer dafür eine 
+gewisse Freiheit. Dafür sollte idealerweise das zu \KOMAScript{} gehörige Paket 
+\Package{scrlayer-scrpage} genutzt werden. 
+
+In der Dokumentation zu \Package{typearea} wird auch darauf eingegangen, wann 
+Kopf"~ und Fußzeile bei der Satzspiegelkonstruktion entweder dem Rand oder dem 
+Textkörper zugeschlagen werden sollten. Dies sollte bei der Erstellung eigener 
+Kopf"~ und Fußzeilen beachtet werden. Die Einstellung dafür erfolgt mit den 
+beiden \KOMAScript"=Optionen \Option{headinclude}[\PBoolean] sowie 
+\Option{footinclude}[\PBoolean]. Diese können~-- unabhängig von der gewählten 
+Einstellung zur Satzspiegelgestaltung für die Option \Option{cdgeometry}~-- 
+verwendet werden.
 
 \subsubsection{Bindekorrektur}
 \index{Bindekorrektur|!}\index{Layout!Bindekorrektur}%
@@ -1678,57 +1909,7 @@ in etwa einer Höhe von \unit[10]{mm}, bei \unit[100]{g/m²} ca. \unit[12]{mm}.
 Dementsprechend wäre eine Bindekorrektur von \Option{BCOR}[5mm] beziehungsweise 
 \Option{BCOR}[6mm] bei diesem Beispiel zu wählen.
 \end{Example}
-
-\subsubsection{Kopf"~ und Fußzeile im Zusammenspiel mit dem Satzspiegel}
-\index{Kopfzeile|!}\index{Layout!Kopfzeile}%
-\index{Fußzeile|!}\index{Layout!Fußzeile}%
-Da im \CD nicht festgelegt ist, wie die Gestaltung der Kopf"~ und Fußzeilen in 
-einer wissenschaftlichen Arbeit auszuführen ist, bleibt dem Nutzer dafür eine 
-gewisse Freiheit. Dafür sollte idealerweise das zu \KOMAScript{} gehörige Paket 
-\Package{scrlayer-scrpage} genutzt werden. 
-
-In der Dokumentation zu \Package{typearea} wird auch darauf eingegangen, wann 
-Kopf"~ und Fußzeile bei der Satzspiegelkonstruktion entweder dem Rand oder dem 
-Textkörper zugeschlagen werden sollten. Dies sollte bei der Erstellung eigener 
-Kopf"~ und Fußzeilen beachtet werden. Die Einstellung dafür erfolgt mit den 
-beiden \KOMAScript"=Optionen \Option{headinclude}[\PBoolean] sowie 
-\Option{footinclude}[\PBoolean]. Diese können~-- unabhängig von der gewählten 
-Einstellung zur Satzspiegelgestaltung über \Option{geometry}~-- verwendet 
-werden.
-
-\begin{Declaration}{\Option{cdfoot}[\PBoolean]}[false]%
-\printdeclarationlist%
-\index{Kolumnentitel}\index{Layout!Kolumnentitel}
-\index{Satzspiegel!doppelseitig}%
-
-Eine Möglichkeit zur Gestaltung der Kolumnentitel zeigt das Handbuch für das 
-\CD der \TnUD. Dieses wird ohne Kopf"~ und mit einer einfachen Fußzeile 
-gesetzt. Diese enthält dabei den aktuellen Kolumnentitel sowie die Paginierung. 
-Eine derartige Ausprägung ist nicht explizit durch das \CD vorgegeben, wurde 
-jedoch innerhalb der alten \Class{tudbook}"=Klasse exakt so umgesetzt.
-
-Die neuen \TUDScript-Klassen sind~-- insbesondere aufgrund der Möglichkeit zur 
-Verwendung des Paketes \Package{scrlayer-scrpage}~-- bei der Gestaltung der 
-Kopf"~ und Fußzeilen wesentlich flexibler. Dennoch kann mit dieser Option das 
-beschriebene Verhalten aktiviert werden. Hierbei wird beim doppelseitigen Satz 
-(\Option{twoside}[true]) die Seitenzahl außen gesetzt.
-%
-\begin{values}
-\itemfalse
-  Die Kopf"~ und Fußzeilen zeigen Standardverhalten, zur manuellen Änderung 
-  dieser sollte unbedingt das \KOMAScript"=Paket \Package{scrlayer-scrpage} 
-  verwendet werden.
-\itemtrue*
-  Die Kopf"~ und Fußzeilen des Dokumentes werden wie im Handbuch des \CDs der 
-  \TnUD beziehungsweise der \Class{tudbook}"=Klasse gesetzt.
-\end{values}
-%
-Der Inhalt der Kolumnentitel kann durch den Anwender frei gewählt werden. Wird 
-die Klassenoption \Option{automark} angegeben, werden für das automatische 
-Setzen der Marken die Titel der Gliederungsebenen verwendet. Genaueres hierzu 
-sowie der Möglichkeit, die Kolumnentitel manuell festzulegen, ist dem Handbuch 
-von \KOMAScript{} zu entnehmen.
-\end{Declaration}
+\index{Satzspiegel|)}\index{Layout!Satzspiegel|)}%
 
 
 \subsection{Die Farben des \CDs}
@@ -1743,6 +1924,10 @@ automatisch ein. Detaillierte Informationen sind in der Dokumentation von
 
 
 \section{Zusätzliche Optionen und Erweiterungen}
+\ChangedAt*{%
+  v2.03!Bugfix für \abstractname{,} \confirmationname{} und \blockingname{} 
+    bei Seitenstil und Kolumnentitel%
+}%
 Neben den Befehlen für die Anpassung des Layouts an das \CD der \TnUD stellen 
 die \TUDScript-Klassen weitere Befehle und Umgebungen zur Verfügung, um die 
 Anwendung insbesondere für wissenschaftliche Arbeiten zu erleichtern.
@@ -1811,7 +1996,7 @@ jederzeit mit folgenden Werten durch den Anwender überschrieben werden.
   Es wird ein nicht nummerierten Eintrag im Inhaltsverzeichnis auf der obersten 
   Gliederungsebene der verwendeten Dokumentklasse für die Zusammenfassung 
   gesetzt.
-\item[tocleveldown/totocleveldown/leveldown]
+\item[leveldown/tocleveldown/totocleveldown]
   \ChangedAt{v2.02}
   Der Inhaltsverzeichniseintrag wird eine Gliederungsebene unterhalb der 
   obersten erzeugt.
@@ -1866,7 +2051,7 @@ auf einer Seite unterdrückt werden.
 \end{values}
 %
 Die zuletzt genannten Einstellungen zur Positionierung der Zusammenfassungen 
-innerhalb der \Environment{abstract}"=Umgebung nur wirksam sind, wenn eine 
+innerhalb der \Environment{abstract}"=Umgebung sind nur wirksam, wenn eine 
 Titelseite (\Option{titlepage}[true]) und \emph{keine} Überschriften in Form 
 von Kapiteln (\Option{abstract}[chapter]) verwendet werden.
 \end{Declaration}
@@ -1883,19 +2068,22 @@ von Kapiteln (\Option{abstract}[chapter]) verwendet werden.
   \Key{\Environment{abstract}}{pagestyle}[\PName{Seitenstil}]%
 }
 \begin{Declaration}{\Key{\Environment{abstract}}{columns}[\PName{Anzahl}]}
-\begin{Declaration}{\Key{\Environment{abstract}}{option}[\PSet]}
+\begin{Declaration}{\Key{\Environment{abstract}}{option}[\PSet]}{%
+  \see*{\Option{abstract}'ppage'}%
+}
 \printdeclarationlist%
 \index{Zweispaltensatz}%
 %
-Diese Umgebung dient speziell für die Ausgabe einer Zusammenfassung. Wird ein 
-Titelkopf (\Option{titlepage}[false]) und keine Titelseite verwendet, so wird 
-für den Fall, dass die Zusammenfassung \emph{nicht} mit der Überschrift einer 
-Gliederungsebene gesetzt wird, diese wie bei den \KOMAScript"=Klassen in einer 
-\Environment{quotation}"=Umgebung gesetzt, um diese vom restlichen Fließtext 
-abzuheben. Diese hat jedoch den Nachteil, dass in besagter Umgebung die Option 
-\Option{parskip} nicht beachtet wird. Um dieses Problem zu beheben, kann das 
-Paket \Package{quoting} geladen werden, wodurch stattdessen die Umgebung 
-\Environment{quoting} verwendet wird.
+Die \Environment{abstract}-Umgebung dient speziell für die Ausgabe einer 
+Zusammenfassung, entweder zu Beginn eines Dokumentes oder beispielsweise vor 
+einem Teil oder Kapitel. Wird ein Titelkopf (\Option{titlepage}[false]) und 
+keine Titelseite verwendet, so wird für den Fall, dass die Zusammenfassung 
+\emph{nicht} mit der Überschrift einer Gliederungsebene gesetzt wird, diese wie 
+bei den \KOMAScript"=Klassen in einer \Environment{quotation}"=Umgebung 
+gesetzt, um diese vom restlichen Fließtext abzuheben. Diese hat jedoch den 
+Nachteil, dass in besagter Umgebung die Option \Option{parskip} nicht beachtet 
+wird. Um dieses Problem zu beheben, kann das Paket \Package{quoting} geladen 
+werden, wodurch stattdessen die Umgebung \Environment{quoting} verwendet wird.
 
 Mit der zuvor erläuterten Option \Option{abstract} kann eingestellt werden, in 
 welcher Gestalt die Zusammenfassung ausgegeben werden soll. Des Weiteren lässt 
@@ -1923,10 +2111,12 @@ für linke und rechte Seiten auf \Term{abstractname}. Außerdem lässt sich der
 Kolumnentitel mit \Key{\Environment{abstract}}{markboth}[\PName{Kolumnentitel}] 
 auch direkt festlegen. So können die Kolumnen beispielsweise mit der Verwendung 
 von \Key{\Environment{abstract}}{markboth}[\PParameter{}] auch gelöscht werden. 
-Sollte \Key{\Environment{abstract}}{markboth} verwendet werden, so wird in der
-Umgebung automatisch der Seitenstil \PageStyle{headings} verwendet. Mit dem 
-Parameter \Key{\Environment{abstract}}{pagestyle} dieser auch manuell angegeben 
-werden. Auch die \PageStyle{tudheadings}"=Seitenstile werden unterstützt.
+Sollte \Key{\Environment{abstract}}{markboth} aktiviert werden, so wird in der
+Umgebung automatisch der Seitenstil \PageStyle{headings} genutzt~-- falls eine 
+Titelseite und kein Titelkopf (\Option{titlepage}[true]) verwendet wird. Mit 
+dem Parameter \Key{\Environment{abstract}}{pagestyle} kann dieser auch manuell 
+angegeben werden, wobei die \PageStyle{tudheadings}"=Seitenstile ebenfalls 
+unterstützt werden.
 
 Wurde das Paket \Package{multicol} geladen, kann mit dem Parameter 
 \Key{\Environment{abstract}}{columns}[\PName{Anzahl}] die Zusammenfassung 
@@ -1950,9 +2140,9 @@ unterstützt werden. Das Minimalbeispiel in \fullref{sec:exmpl:dissertation}
 zeigt hierfür das notwendige Vorgehen.
 
 Wird die \Environment{abstract}"=Umgebung innerhalb des Argumentes der Befehle 
-\Macro{partpreamble} beziehungsweise \Macro{chapterpreamble} verwendet, so wird 
-die Überschrift~-- im Fall, dass nicht \Option{abstract}[false] gewählt ist~-- 
-\emph{immer} in Textgröße und zentriert gesetzt.
+\Macro{setpartpreamble} beziehungsweise \Macro{setchapterpreamble} verwendet, 
+so wird die Überschrift~-- im Fall, dass nicht \Option{abstract}[false] gewählt 
+ist~-- \emph{immer} in Textgröße und zentriert gesetzt.
 \end{Declaration}
 \end{Declaration}
 \end{Declaration}
@@ -2022,7 +2212,7 @@ folgenden Werten überschrieben werden.
   Unabhängig von der Wahl der Überschrift erhält jede Erklärung einen nicht
   nummerierten Eintrag im Inhaltsverzeichnis auf der obersten Gliederungsebene  
   der aktuell gerade verwendeten Dokumentklasse. 
-\item[tocleveldown/totocleveldown/leveldown]
+\item[leveldown/tocleveldown/totocleveldown]
   \ChangedAt{v2.02}
   Der Inhaltsverzeichniseintrag wird eine Gliederungsebene unterhalb der 
   obersten erzeugt.
@@ -2047,11 +2237,10 @@ forcieren, wobei hierfür der Titel der Überschrift genutzt wird.
   Die Einstellung für manuelle oder automatische Kolumnentitel werden beachtet.
 \end{values}
 %
-Des Weiteren kann mit dem Parameter \Key{\Environment{declaration}}{markboth} 
-der \Environment{declarations}"=Umgebung der Kolumnentitel mit einem beliebigen 
-Inhalt gesetzt werden. Verwenden Sie einen der Befehle \Macro{declaration} 
-beziehungsweise \Macro{confirmation} und \Macro{blocking} ist dies mit dem 
-gleichnamigen, optionalen Parameter ebenfalls möglich.
+Für \Macro{declaration} respektive \Macro{confirmation} und \Macro{blocking} 
+sowie die \Environment{declaration}"=Umgebung kann mit dem Parameter 
+\Key{\Environment{declaration}}{markboth} außerdem der Kolumnentitel mit einem 
+beliebigen Inhalt gesetzt werden. 
 
 Die folgenden Einstellungen zur Positionierung der Erklärungen haben lediglich 
 Auswirkungen, wenn die Überschrift der Erklärung \emph{nicht} im Form eines 
@@ -2100,6 +2289,13 @@ wird.
 \printdeclarationlist%
 \index{Selbstständigkeitserklärung}\index{Sperrvermerk}%
 %
+Für Selbstständigkeitserklärung und Sperrvermerk sollten im einfachsten Fall 
+die Befehle \Macro{declaration} beziehungsweise \Macro{confirmation} und 
+\Macro{blocking} verwendet werden. Sobald diese jedoch in anderer Reihenfolge,  
+mehrfacher Ausführung, unterschiedlichen Sprachen oder durch zusätzliche  
+Erklärungen ergänzt werden, so bietet die \Environment{declarations}-Umgebung 
+die notwendigen Freiheiten.
+
 Innerhalb dieser Umgebung können Selbstständigkeitserklärung und Sperrvermerk 
 mit dem Befehl \Macro{declaration} direkt nacheinander folgend beziehungsweise 
 mit \Macro{confirmation} und \Macro{blocking} auch separat ausgegeben werden. 
@@ -2128,18 +2324,121 @@ respektive \Term{blockingname} verwendet. Außerdem kann der Anwender diese mit
 festlegen. Sollte \Key{\Environment{declarations}}{markboth} verwendet werden, 
 wird der Seitenstil automatisch auf \PageStyle{headings} gesetzt. Mit dem 
 Parameter \Key{\Environment{declarations}}{pagestyle} lässt sich dieser für die 
-Umgebung auch manuell angegeben. 
-
+Umgebung auch manuell angegeben. Wurde das Paket \Package{multicol} geladen, 
+wird mit \Key{\Environment{declarations}}{columns}[\PName{Anzahl}] der Inhalt 
+der Umgebung mehrspaltig gesetzt. Für \Key{\Environment{declarations}}{option} 
+können alle gültigen Werte der Option \Option{declaration} angegeben werden. 
 Die Verwendung der Parameter \Key{\Macro{confirmation}}{supporter} sowie
 \Key{\Macro{confirmation}}{place} und \Key{\Macro{confirmation}}{closing} ist 
 in der Dokumentation des Befehls \Macro{confirmation} zu finden, der Parameter 
-\Key{\Macro{blocking}}{company} ist für \Macro{blocking} erläutert. Für den 
-Parameter \Key{\Environment{declarations}}{option} können alle gültigen Werte 
-der Option \Option{declaration} angegeben werden. Diese wirken sich nur lokal 
-innerhalb der \Environment{declarations}"=Umgebung aus.
+\Key{\Macro{blocking}}{company} ist für \Macro{blocking} erläutert. 
 \end{Declaration}
 \end{Declaration}
 \end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+
+\begin{Declaration}{\Macro{confirmation}\OLParameter{Unterstützer}}
+\begin{Declaration}{\Key{\Macro{confirmation}}{supporter}[\PName{Unterstützer}]}
+\begin{Declaration}{\Key{\Macro{confirmation}}{place}[\PName{Ort}]}
+\begin{Declaration}{\Key{\Macro{confirmation}}{closing}[\PName{Ende}]}
+\begin{Declaration}{\Key{\Macro{confirmation}}{language}[\PName{Sprache}]}
+\begin{Declaration}[v2.02]{%
+  \Key{\Macro{confirmation}}{markboth}[\PBName{Kolumnentitel}]%
+}
+\begin{Declaration}[v2.02]{%
+  \Key{\Macro{confirmation}}{pagestyle}[\PName{Seitenstil}]%
+}
+\begin{Declaration}[v2.02]{%
+  \Key{\Macro{confirmation}}{columns}[\PName{Anzahl}]%
+}
+\begin{Declaration}{\Key{\Macro{confirmation}}{option}[\PSet]}
+\printdeclarationlist%
+\index{Selbstständigkeitserklärung}\index{Datum}%
+%
+Mit diesem Befehl wird ein sprachspezifischer Standardtext für eine 
+Selbstständigkeitserklärung ausgegeben, welcher in \Term{confirmationtext} 
+gespeichert ist. Wie dieser angepasst beziehungsweise geändert werden kann, ist 
+unter \autoref{sec:localization} zu finden. Er kann sowohl innerhalb der 
+\Environment{declarations}"=Umgebung als auch außerhalb dieser direkt im 
+Dokument verwendet werden. 
+
+Wird \Term{confirmationtext} nicht geändert, kann dieser über das optionale 
+Argument von \Macro{confirmation} und die deklarierten Parameter angepasst 
+werden. Im Standardtext der Selbstständigkeitserklärung werden sowohl der Titel 
+als auch der Typ der Abschlussarbeit~-- falls dieser mit \Macro{thesis}, 
+\Macro{subject}\Parameter{\autoref{tab:thesis}} beziehungsweise mit der Option 
+\Option{subjectthesis} angegeben wurde~-- aufgeführt. Über den Parameter 
+\Key{\Macro{confirmation}}{supporter} oder \emph{zuvor} mit dem Befehl 
+\Macro{supporter} können weitere an der Arbeit beteiligte Personen angegeben 
+werden. Mehrere zu nennende Personen sind auch hier durch \Macro{and} zu 
+trennen. Das Feld der Unterstützer kann auch mit dem bloßen optionalen Argument 
+ohne die Angabe eines Parameters angepasst werden.
+
+Nach dem eigentlichen Text der Selbstständigkeitserklärung wird der mit 
+\Key{\Macro{confirmation}}{place} beziehungsweise \Macro{place} angegebene Ort 
+sowie das mit \Macro{date} eingestellte Datum ausgegeben. Als Voreinstellung 
+ist für den Ort \enquote{Dresden} gewählt. Danach folgen~-- mit etwas 
+vertikalem Freiraum für die notwendige Unterschrift~-- der Autor oder die 
+Autoren, angegeben durch den Befehl \Macro{author}. Soll anstelle dessen etwas 
+anderes nach dem Text der Selbstständigkeitserklärung gesetzt werden, kann dies 
+mit dem Parameter \Key{\Macro{confirmation}}{closing} oder zuvor mit dem 
+Befehl \Macro{confirmationclosing} angepasst werden. Die Parameter 
+\Key{\Environment{declarations}}{language}, 
+\Key{\Environment{declarations}}{markboth}, 
+\Key{\Environment{declarations}}{pagestyle}, 
+\Key{\Environment{declarations}}{columns} und 
+\Key{\Environment{declarations}}{option} entsprechen in ihrem Verhalten denen 
+der \Environment{declarations}"=Umgebung.
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+
+\begin{Declaration}[v2.02]{\Macro{blocking}\OLParameter{Firma}}
+\begin{Declaration}{\Key{\Macro{blocking}}{company}[\PName{Firma}]}
+\begin{Declaration}{\Key{\Macro{blocking}}{language}[\PName{Sprache}]}
+\begin{Declaration}[v2.02]{%
+  \Key{\Macro{blocking}}{markboth}[\PBName{Kolumnentitel}]%
+}
+\begin{Declaration}[v2.02]{\Key{\Macro{blocking}}{pagestyle}[\PName{Seitenstil}]}
+\begin{Declaration}[v2.02]{\Key{\Macro{blocking}}{columns}[\PName{Anzahl}]}
+\begin{Declaration}{\Key{\Macro{blocking}}{option}[\PSet]}
+\printdeclarationlist%
+\index{Sperrvermerk}%
+%
+Beim Sperrvermerk verhält es sich äquivalent zur Selbstständigkeitserklärung.
+Es wird der in \Term{blockingtext} hinterlegte Standardtext in der gewählten 
+Sprache ausgegeben. Dieser kann durch den Anwender geändert werden. Wie genau 
+ist in \autoref{sec:localization} beschrieben. Der Befehl \Macro{blocking} 
+kann sowohl innerhalb der Umgebung \Environment{declarations} als auch 
+außerhalb direkt im Dokument verwendet werden. 
+
+In seiner ursprünglichen Definition, kann er im optionalen Argument über die 
+deklarierten Parameter angepasst werden. Im Standardtext des Sperrvermerks 
+werden sowohl der Titel als auch der Typ der Abschlussarbeit~-- falls dieser 
+mit \Macro{thesis}, \Macro{subject}\Parameter{\autoref{tab:thesis}} respektive  
+mit der Option \Option{subjectthesis} angegeben wurde~-- aufgeführt. Mit 
+\Key{\Macro{blocking}}{company} oder \emph{vorher} mit \Macro{company} kann 
+zusätzlich eine im Sperrvermerk zu nennende Firma oder ähnliches angegeben 
+werden. Dieses Feld kann auch direkt im optionalen Argument ohne die Verwendung 
+eines Parameters gesetzt werden. Die weiteren Parameter 
+\Key{\Environment{declarations}}{language}, 
+\Key{\Environment{declarations}}{markboth}, 
+\Key{\Environment{declarations}}{pagestyle}, 
+\Key{\Environment{declarations}}{columns} und 
+\Key{\Environment{declarations}}{option} entsprechen in ihrem Verhalten denen 
+der \Environment{declarations}"=Umgebung.
 \end{Declaration}
 \end{Declaration}
 \end{Declaration}
@@ -2175,115 +2474,6 @@ alle für die \Environment{declarations}"=Umgebung beschriebenen Parameter.
 \end{Declaration}
 \end{Declaration}
 \end{Declaration}
-\end{Declaration}
-\end{Declaration}
-\end{Declaration}
-\end{Declaration}
-\end{Declaration}
-\end{Declaration}
-\end{Declaration}
-
-\begin{Declaration}{\Macro{confirmation}\OLParameter{Unterstützer}}
-\begin{Declaration}{\Key{\Macro{confirmation}}{supporter}[\PName{Unterstützer}]}
-\begin{Declaration}{\Key{\Macro{confirmation}}{place}[\PName{Ort}]}
-\begin{Declaration}{\Key{\Macro{confirmation}}{closing}[\PName{Ende}]}
-\begin{Declaration}{\Key{\Macro{confirmation}}{language}[\PName{Sprache}]}
-\begin{Declaration}[v2.02]{%
-  \Key{\Macro{confirmation}}{markboth}[\PBName{Kolumnentitel}]%
-}
-\begin{Declaration}[v2.02]{%
-  \Key{\Macro{confirmation}}{pagestyle}[\PName{Seitenstil}]%
-}
-\begin{Declaration}[v2.02]{%
-  \Key{\Macro{confirmation}}{columns}[\PName{Anzahl}]%
-}
-\begin{Declaration}{\Key{\Macro{confirmation}}{option}[\PSet]}
-\printdeclarationlist%
-\index{Selbstständigkeitserklärung}\index{Datum}%
-%
-Mit diesem Befehl wird ein sprachspezifischer Standardtext für eine 
-Selbstständigkeitserklärung ausgegeben, welcher in \Term{confirmationtext} 
-gespeichert ist. Wie dieser angepasst beziehungsweise geändert werden kann, ist 
-unter \autoref{sec:localization} zu finden. Er kann sowohl innerhalb der 
-\Environment{declarations}"=Umgebung als auch außerhalb direkt im Dokument 
-verwendet werden. 
-
-Wird er in seiner ursprünglichen Form belassen, kann er im optionalen Argument 
-über die deklarierten Parameter angepasst werden. Im Standardtext der 
-Selbstständigkeitserklärung werden sowohl der Titel als auch der Typ der 
-Abschlussarbeit~-- falls dieser mit \Macro{thesis} oder \Macro{subject} und 
-einem speziellen Wert aus \autoref{tab:thesis} beziehungsweise mit der Option 
-\Option{subjectthesis} angegeben wurde~-- aufgeführt. Über den Parameter 
-\Key{\Macro{confirmation}}{supporter} können weitere an der Arbeit beteiligte 
-Personen angegeben werden. Dies ist auch mit dem Befehl \Macro{supporter} 
-möglich, wenn dieser \emph{vor} \Macro{confirmation} verwendet wird. Mehrere 
-zu nennende Personen sind auch hier durch \Macro{and} zu trennen. Das Feld der 
-Unterstützer kann auch mit dem bloßen optionalen Argument ohne die Angabe eines 
-Parameters angepasst werden.
-
-Nach dem eigentlichen Text der Selbstständigkeitserklärung wird der mit 
-\Key{\Macro{confirmation}}{place} beziehungsweise \Macro{place} angegebene Ort 
-sowie das mit \Macro{date} eingestellte Datum ausgegeben. Als Voreinstellung 
-ist für den Ort \enquote{Dresden} gewählt. Danach folgen~-- mit etwas 
-vertikalem Freiraum für die notwendige Unterschrift~-- der Autor oder die 
-Autoren, angegeben durch den Befehl \Macro{author}. Soll anstelle dessen etwas 
-anderes nach dem Text der Selbstständigkeitserklärung gesetzt werden, kann dies 
-mit dem Parameter \Key{\Macro{confirmation}}{closing} oder zuvor mit dem 
-Befehl \Macro{confirmationclosing} angepasst werden. Die Parameter 
-\Key{\Environment{declarations}}{language}, 
-\Key{\Environment{declarations}}{pagestyle}, 
-\Key{\Environment{declarations}}{columns} und 
-\Key{\Environment{declarations}}{option} entsprechen in ihrem Verhalten denen 
-der \Environment{declarations}"=Umgebung.
-\end{Declaration}
-\end{Declaration}
-\end{Declaration}
-\end{Declaration}
-\end{Declaration}
-\end{Declaration}
-\end{Declaration}
-\end{Declaration}
-\end{Declaration}
-
-\Rename[macros]{v2.02}{\Macro{restriction}}{\Macro{blocking}}
-\begin{Declaration}{\Macro{blocking}\OLParameter{Firma}}
-\begin{Declaration}{\Key{\Macro{blocking}}{company}[\PName{Firma}]}
-\begin{Declaration}{\Key{\Macro{blocking}}{language}[\PName{Sprache}]}
-\begin{Declaration}[v2.02]{%
-  \Key{\Macro{blocking}}{markboth}[\PBName{Kolumnentitel}]%
-}
-\begin{Declaration}[v2.02]{%
-  \Key{\Macro{blocking}}{pagestyle}[\PName{Seitenstil}]%
-}
-\begin{Declaration}[v2.02]{%
-  \Key{\Macro{blocking}}{columns}[\PName{Anzahl}]%
-}
-\begin{Declaration}{\Key{\Macro{blocking}}{option}[\PSet]}
-\printdeclarationlist%
-\index{Sperrvermerk}%
-%
-Beim Sperrvermerk verhält es sich äquivalent zur Selbstständigkeitserklärung.
-Es wird der in \Term{blockingtext} hinterlegte Standardtext in der gewählten 
-Sprache ausgegeben. Dieser kann durch den Anwender geändert werden. Wie genau 
-ist in \autoref{sec:localization} beschrieben. Der Befehl \Macro{blocking} 
-kann sowohl innerhalb der Umgebung \Environment{declarations} als auch 
-außerhalb direkt im Dokument verwendet werden. 
-
-In seiner ursprünglichen Definition, kann er im optionalen Argument über die 
-deklarierten Parameter angepasst werden. Im Standardtext des Sperrvermerks 
-werden sowohl der Titel als auch der Typ der Abschlussarbeit~-- falls dieser 
-mit \Macro{thesis} oder \Macro{subject} und einem speziellen Wert aus 
-\autoref{tab:thesis} beziehungsweise mit der Option \Option{subjectthesis} 
-angegeben wurde~-- aufgeführt. Mit \Key{\Macro{blocking}}{company}~-- oder 
-\emph{vorher} mit dem Befehl \Macro{company}~-- kann zusätzlich eine im 
-Sperrvermerk zu nennende Firma oder ähnliches angegeben werden. Dieses Feld 
-kann auch direkt im optionalen Argument ohne die Verwendung eines Parameters 
-gesetzt werden. Die weiteren Parameter 
-\Key{\Environment{declarations}}{language}, 
-\Key{\Environment{declarations}}{pagestyle}, 
-\Key{\Environment{declarations}}{columns} und 
-\Key{\Environment{declarations}}{option} entsprechen in ihrem Verhalten denen 
-der \Environment{declarations}"=Umgebung.
 \end{Declaration}
 \end{Declaration}
 \end{Declaration}
@@ -2360,12 +2550,12 @@ Sollte der Anwender die im Folgenden erläuterten oder auch andere Bezeichner,
 welche von einem beliebigen (Sprach"~)Paket bereitgestellt werden, ändern 
 wollen, ist hierfür der Befehl
 \Macro{renewcaptionname}\Parameter{Sprache}\Parameter{Makro}\Parameter{Inhalt} 
-zu verwenden. Seit der Version~v3.12 stellt \KOMAScript sicher, dass die 
-Bezeichner erst \textbf{nach} \Macro*{begin}\PParameter{document} angepasst 
-werden und somit nicht durch ein später geladenes Paket abermals geändert 
-werden können. Es sollte natürlich dabei eine \PName{Sprache} angegeben werden, 
-welche im Dokument durch \Package{babel} oder ein anderes Sprachpaket verwendet 
-wird, beispielsweise \PValue{ngerman} oder \PValue{english}. 
+zu verwenden. Dabei stellt \KOMAScript{} sicher, dass die Bezeichner erst 
+\textbf{nach} \Macro*{begin}\PParameter{document} angepasst werden und somit 
+nicht durch ein später geladenes Paket abermals geändert werden können. Es 
+sollte natürlich dabei eine \PName{Sprache} angegeben werden, welche im 
+Dokument durch \Package{babel} oder ein anderes Sprachpaket verwendet wird, 
+beispielsweise \PValue{ngerman} oder \PValue{english}. 
 
 Die Makros der Bezeichner und deren Verwendung werden folgend kurz beschrieben 
 und tabellarisch aufgeführt. Dabei wurde versucht, alle Befehle der Bezeichner 
@@ -2375,7 +2565,7 @@ für bestimmte Begriffe auf \PValue{\dots{}name} und beschreibende Texte auf
 \begin{Declaration}{\Term{supervisorname}}
 \begin{Declaration}{\Term{supervisorothername}}
 \begin{Declaration}[%
-  v2.02!Unterscheidung zwischen einem und mehreren Gutachtern%
+  v2.02!Unterscheidung von einem und mehreren Gutachtern%
 ]{\Term{refereename}}
 \begin{Declaration}{\Term{refereeothername}}
 \begin{Declaration}{\Term{advisorname}}
@@ -2478,8 +2668,7 @@ vom eigentlichen Feld abgegrenzt.
 \end{Declaration}
 \end{Declaration}
 
-\Rename[terms]{v2.02}{\Term{degreetext}}{\Term{graduationtext}}
-\begin{Declaration}{\Term{graduationtext}}
+\begin{Declaration}[v2.02]{\Term{graduationtext}}
 \printdeclarationlist%
 \index{Titel}\index{Abschlussarbeit}\index{Typisierung}%
 %
@@ -2515,9 +2704,8 @@ von \KOMAScript{} für die Buchklasse nicht vorgesehen wird.
 \TermTable{abstractname}
 \end{Declaration}
 
-\Rename[terms]{v2.02}{\Term{restrictionname}}{\Term{blockingname}}
 \begin{Declaration}{\Term{confirmationname}}
-\begin{Declaration}{\Term{blockingname}}
+\begin{Declaration}[v2.02]{\Term{blockingname}}
 \printdeclarationlist%
 \index{Selbstständigkeitserklärung}\index{Sperrvermerk}%
 %
@@ -2527,9 +2715,8 @@ für die dazugehörigen Überschriften definiert.
 \end{Declaration}
 \end{Declaration}
 
-\Rename[terms]{v2.02}{\Term{restrictiontext}}{\Term{blockingtext}}
 \begin{Declaration}{\Term{confirmationtext}}
-\begin{Declaration}{\Term{blockingtext}}
+\begin{Declaration}[v2.02]{\Term{blockingtext}}
 \printdeclarationlist%
 %
 Die Texte der Erklärungen selbst sind derart aufgebaut, dass sie in 
@@ -2599,3 +2786,45 @@ für Quelltextausschnitte und das Quelltextverzeichnis verwendet.
 \end{Declaration}
 \end{Declaration}
 \index{Bezeichner|!)}
+
+\section{Kompatibilitätseinstellungen zu früheren Versionen}
+Bei der Entwicklung von \TUDScript lässt es sich nicht immer vermeiden, dass 
+Verbesserungen sowie Korrekturen an den Klassen und Paketen zu Änderungen am 
+Ergebnis der Ausgabe führen, insbesondere bei Umbruch und Layout. Für bereits
+archivierte Dokumente, welche mit einer früheren Version erstellt wurden ist 
+dies jedoch bei einer erneuten Kompilierung unter Umständen eher unerwünscht.
+
+\begin{Declaration}[v2.03]{\Option{tudscrver}[%
+  \PName{Version}\textOR\PValue{first}\textOR\PValue{last}%
+]}[last]
+\printdeclarationlist%
+\index{Kompatibilität|!}%
+%
+Mit der Option \Option{tudscrver} wird es möglich, auf das Verhalten einer 
+älteren Version von \TUDScript umzuschalten, um nach der Kompilierung das 
+erwartete Ergebnis zu erhalten. Neue Möglichkeiten, die sich nicht auf den 
+Umbruch oder das Layout auswirken, sind auch für den Fall verfügbar, dass per 
+Option die Kompatibilität zu einer älteren Version ausgewählt wurde. 
+
+Bei der Angabe einer unbekannten Version als Wert wird eine Warnung ausgegeben 
+und \Option{tudscrver}[first] angenommen. Mit \Option{tudscrver}[last] wird die 
+jeweils aktuell verfügbare Version ausgewählt und folglich auf die zukünftige 
+Kompatibilität des Dokumentes zu der genutzten Version verzichtet. Dieses 
+Verhalten entspricht der Voreinstellung. Es ist zu beachten, dass die Nutzung 
+von \Option{tudscrver} nur als Klassenoption möglich ist.
+%
+\begin{values}
+\item[\PValue{v2.02}\textOR\PValue{last}]
+  \ChangedAt{%
+    v2.03!Satzspiegel im \CD geändert{,} das \protect\DDC-Logo im Fußbereich 
+    wird ohne vergrößerten Seitenrand verwendet
+  }
+  Der Satzspiegel im Layout des \CDs (\see*{\Option{cdgeometry}}) wurde in der 
+  Version~v2.03 leicht geändert. Der obere Seitenrand wurde verkleinert, der 
+  untere im gleichen Maße vergrößert. Der verfügbare Textbereich ist folglich 
+  identisch. Bei der Aktivierung des \DDC-Logos im Fußbereich der Seite
+  (\see*{\Option{ddcfoot}}) wird im Gegensatz zur Version~v2.02 der gleiche 
+  Satzspiegel genutzt. Mit \Option{tudscrver}[v2.02] kann dieses Verhalten 
+  deaktiviert werden.
+\end{values}
+\end{Declaration}

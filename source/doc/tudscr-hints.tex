@@ -30,7 +30,7 @@ unter Windows in \Path{\%APPDATA\%\textbackslash texstudio} beziehungsweise
 unter unixoiden Betriebssystemen in \Path{.config/texstudio} eingefügt werden.
 
 Möchten Sie das grafische \hologo{LaTeX}-Frontend~\Application{\hologo{LyX}} 
-für das Erstellen eines Dokumentes mit \TUDScript verwenden, so werden dafür 
+für das Erstellen eines Dokumentes mit \TUDScript nutzen, so werden dafür 
 spezielle Layout-Dateien benötigt, um die Klassendateien verwenden zu können. 
 Diese sind zusammen mit einem exemplarischen \hologo{LyX}-Dokument als Archiv 
 \hrfn{https://github.com/tud-cd/tudscr/releases/download/LyX/tudscr4lyx.zip}%
@@ -39,6 +39,8 @@ dafür im \Application{\hologo{LyX}}"=Installationspfad in den passenden
 Unterordner kopiert werden. Dieser ist bei Windows
 \Path{\%PROGRAMFILES(X86)\%\textbackslash{}LyX~2.0\textbackslash{}Resources\textbackslash{}layouts}
 beziehungsweise bei unixoiden Betriebssystemen \Path{/usr/share/lyx/layouts}.
+Anschließend muss LyX über den Menüpunkt \emph{Werkzeuge} neu konfiguriert 
+werden. 
 
 
 
@@ -175,7 +177,7 @@ werden.
 
 
 
-\section{Bezeichnungen der Gliederungsebenen durch \Package{hyperref}}
+\section{Bezeichnung der Gliederungsebenen durch \Package{hyperref}}
 \index{Querverweise}
 %
 \ChangedAt{v2.02!\TaT: Bezeichnungen der Gliederungsebenen}
@@ -475,83 +477,6 @@ gezeichnet, die dazu ähnlichsten werden zurückgegeben.
 
 
 
-\section{Warnung bei der Verwendung von \Package{multicol}}
-%
-\ChangedAt{v2.02!\TaT: Warnung bei der Verwendung von \Package{multicol}}
-%
-Das einzig momentan bekannte Problem der \TUDScript"=Klasse tritt in Verbindung 
-mit dem Paket \Package{multicol}|?| auf. Dieses greift~-- ähnlich zu dem für 
-die Seitenstile verwendeten Paket \Package{scrlayer-scrpage}~-- sehr stark in 
-die Ausgaberoutine von \hologo{LaTeXe} ein. Bei Spaltenumbrüchen innerhalb der 
-\Environment{multicols}"=Umgebung kommt es sehr häufig zu folgender Warnung:
-%
-\begin{quoting}
-\begin{Code}
-Underfull \hbox (badness 10000) has occurred while \output is active
-\end{Code}
-\end{quoting}
-%
-Wird \Package{scrlayer-scrpage} nicht verwendet, unterbleibt die Warnung. Beide 
-Pakete haben in der Kombination miteinander augenscheinlich ein Problem. Die 
-Autoren der beiden Pakete wurden über dieses Problem informiert, signalisierten 
-jedoch verständlicherweise wenig Bereitschaft, der Ursache auf den Grund zu 
-gehen. Leider kann für die \TUDScript-Klassen auf \Package{scrlayer-scrpage} 
-nicht verzichtet werden, es ist von essentieller Bedeutung für die Seitenstile 
-im \CD der \TnUD. Am Ausgabeergebnis ändert sich nichts. Im Zweifelsfall werden 
-jedoch eine Menge bedeutungsloser Warnungen generiert. 
-
-Es gibt allerdings eine Möglichkeit, diese zu unterdrücken. Hierfür wird auf 
-die Funktionalitäten von \Package{etoolbox} zurückgegriffen, was ohnehin von 
-den \TUDScript-Klassen geladen wird. In der Präambel kann folgender Quelltext 
-verwendet werden:
-%
-\begin{quoting}
-\begin{Code}
-\makeatletter
-\apptocmd{\prepare@multicols}{\hbadness10000}{}{}
-\makeatother
-\end{Code}
-\end{quoting}
-%
-Dadurch werden die durch \hologo{LaTeXe} generierten Warnungen innerhalb der 
-\Environment{multicols}"=Umgebung deaktiviert. Es muss dabei beachtet werden, 
-dass dies für alle Boxen~-- und nicht nur jene beim Spaltenumbruch~-- gilt.
-
-
-
-\section{Fehlermeldung: ! No room for a new \textbackslash write}
-%
-\ChangedAt{v2.02!\TaT: Fehler beim Schreiben von Hilfsdateien}
-%
-Für das Erstellen und Schreiben externer Hilfsdateien steht \hologo{LaTeXe} nur 
-eine begrenzte Anzahl sogenannter Ausgabe-Streams zur Verfügung. Allein für 
-jedes zu erstellende Verzeichnis reserviert \hologo{LaTeX} selbst jeweils einen 
-neuen Stream. Auch einige bereits zuvor in diesem Handbuch vorgestellte, sehr 
-hilfreiche Pakete~-- wie beispielsweise \Package{hyperref}, \Package{biblatex}, 
-\Package{glossaries}, \Package{todonotes} oder auch \Package{filecontents}~-- 
-benötigen eigene Hilfsdateien und öffnen für das Erstellen dieser einen 
-Ausgabe-Stream oder mehr.
-
-Lädt der Anwender mehrere, in eine Hilfsdatei schreibende Pakete, kann es zur 
-der Fehlermeldung
-%
-\begin{quoting}
-\begin{Code}
-! No room for a new \write .
-\end{Code}
-\end{quoting}
-%
-kommen. Abhilfe schafft hier das Paket \Package{scrwfile}(koma-script), welches 
-einige Änderungen am \hologo{LaTeX}-Kern vornimmt, um die Anzahl der benötigten 
-Hilfsdateien für das Schreiben aller Verzeichnisse zu reduzieren. Es muss 
-einfach in der Präambel eingebunden werden. Sollten mit diesem Paket 
-unerwarteter Weise Probleme auftreten, ist dessen Anleitung in \scrguide zu 
-finden. Eine weitere Möglichkeit, das beschriebene Problem der geringen Menge 
-an Ausgabe-Streams zu umgehen, stellt das Paket \Package{morewrites} dar. 
-Allerdings ist dessen Verwendung nicht in allen Fällen von Erfolg gekrönt.
-
-
-
 \section{Änderung des Papierformates}
 \index{Papierformat}
 Es kann vorkommen, dass man innerhalb eines Dokumentes kurzzeitig das 
@@ -589,6 +514,11 @@ Mitteln von \KOMAScript{} geändert werden kann.
 \end{document}
 \end{Code}
 \end{Example}
+
+
+
+\ToDo[imp,nxt]{Schnittmarken implementieren und dokumentieren}[v2.04]
+%\section{Schnittmarken}
 
 
 
@@ -814,3 +744,36 @@ ist.
 \fi
 \end{Code}
 \end{quoting}
+
+
+
+\section{Fehlermeldung: ! No room for a new \textbackslash write}
+%
+\ChangedAt{v2.02!\TaT: Fehler beim Schreiben von Hilfsdateien}
+%
+Für das Erstellen und Schreiben externer Hilfsdateien steht \hologo{LaTeXe} nur 
+eine begrenzte Anzahl sogenannter Ausgabe-Streams zur Verfügung. Allein für 
+jedes zu erstellende Verzeichnis reserviert \hologo{LaTeX} selbst jeweils einen 
+neuen Stream. Auch einige bereits zuvor in diesem Handbuch vorgestellte, sehr 
+hilfreiche Pakete~-- wie beispielsweise \Package{hyperref}, \Package{biblatex}, 
+\Package{glossaries}, \Package{todonotes} oder auch \Package{filecontents}~-- 
+benötigen eigene Hilfsdateien und öffnen für das Erstellen dieser einen 
+Ausgabe-Stream oder mehr.
+
+Lädt der Anwender mehrere, in eine Hilfsdatei schreibende Pakete, kann es zur 
+der Fehlermeldung
+%
+\begin{quoting}
+\begin{Code}
+! No room for a new \write .
+\end{Code}
+\end{quoting}
+%
+kommen. Abhilfe schafft hier das Paket \Package{scrwfile}(koma-script), welches 
+einige Änderungen am \hologo{LaTeX}-Kern vornimmt, um die Anzahl der benötigten 
+Hilfsdateien für das Schreiben aller Verzeichnisse zu reduzieren. Es muss 
+einfach in der Präambel eingebunden werden. Sollten mit diesem Paket 
+unerwarteter Weise Probleme auftreten, ist dessen Anleitung in \scrguide zu 
+finden. Eine weitere Möglichkeit, das beschriebene Problem der geringen Menge 
+an Ausgabe-Streams zu umgehen, stellt das Paket \Package{morewrites} dar. 
+Allerdings ist dessen Verwendung nicht in allen Fällen von Erfolg gekrönt.

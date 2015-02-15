@@ -1,29 +1,33 @@
-% \CheckSum{587}
+% \CheckSum{637}
 % \iffalse meta-comment
-% ======================================================================
+% 
+% ============================================================================
+% 
+%  TUD-KOMA-Script
+%  Copyright (c) Falk Hanisch <tudscr@gmail.com>, 2012-2015
+% 
+% ============================================================================
+% 
+%  This work may be distributed and/or modified under the conditions of the
+%  LaTeX Project Public License, version 1.3c of the license. The latest
+%  version of this license is in http://www.latex-project.org/lppl.txt and 
+%  version 1.3c or later is part of all distributions of LaTeX 2005/12/01
+%  or later and of this work. This work has the LPPL maintenance status 
+%  "author-maintained". The current maintainer and author of this work
+%  is Falk Hanisch.
+% 
+% ----------------------------------------------------------------------------
+% 
+% Dieses Werk darf nach den Bedingungen der LaTeX Project Public Lizenz
+% in der Version 1.3c, verteilt und/oder veraendert werden. Die aktuelle 
+% Version dieser Lizenz ist http://www.latex-project.org/lppl.txt und 
+% Version 1.3c oder spaeter ist Teil aller Verteilungen von LaTeX 2005/12/01 
+% oder spaeter und dieses Werks. Dieses Werk hat den LPPL-Verwaltungs-Status 
+% "author-maintained", wird somit allein durch den Autor verwaltet. Der 
+% aktuelle Verwalter und Autor dieses Werkes ist Falk Hanisch.
+% 
+% ============================================================================
 %
-% Das Corporate Design der TU Dresden auf Basis der KOMA-Script-Klassen
-%
-% ======================================================================
-% This work may be distributed and/or modified under the conditions of
-% the LaTeX Project Public License, version 1.3c of the license.
-% The latest version of this license is in
-%     http://www.latex-project.org/lppl.txt
-% and version 1.3c or later is part of all distributions of LaTeX
-% version 2005/12/01 or later and of this work.
-% This work has the LPPL maintenance status "author-maintained".
-% The current maintainer and author of this work is Falk Hanisch.
-% ----------------------------------------------------------------------
-% Dieses Werk darf nach den Bedingungen der LaTeX Project Public Lizenz,
-% Version 1.3c, verteilt und/oder veraendert werden.
-% Die neuste Version dieser Lizenz ist
-%     http://www.latex-project.org/lppl.txt
-% und Version 1.3c ist Teil aller Verteilungen von LaTeX
-% Version 2005/12/01 oder spaeter und dieses Werks.
-% Dieses Werk hat den LPPL-Verwaltungs-Status "author-maintained"
-% (allein durch den Autor verwaltet).
-% Der aktuelle Verwalter und Autor dieses Werkes ist Falk Hanisch.
-% ======================================================================
 % \fi
 %
 % \CharacterTable
@@ -47,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-frontmatter.dtx}[%
-  2014/12/04 v2.02 TUD-KOMA-Script (frontmatter)%
+  2015/02/15 v2.03 TUD-KOMA-Script (frontmatter)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -68,9 +72,12 @@
 %
 % \selectlanguage{ngerman}
 %
-% \changes{v2.02}{2014/07/08}{Verwendung \cs{FamilyKeyState}}%^^A
-% \changes{v2.02}{2014/11/05}{Verbesserungen für Kolumnentitel und
-%   Inhaltsverzeichnis}%^^A
+% \changes{v2.02}{2014/07/08}{Optionen nutzen \cs{FamilyKeyState}}%^^A
+%
+% \ToDo{%
+%  Gesammelten Eintrag ins Inhaltsverzeichnis für alle Abschnitte\\
+%  \url{http://latex.wcms-file3.tu-dresden.de/phpBB3/viewtopic.php?f=11\&t=385}
+% }[v2.04]
 %
 % \section{Befehle und Umgebungen für den Vorspann}
 %
@@ -143,6 +150,7 @@
     \boolfalse{@tud@#1@fil}%
   }%
 %</book|report>
+%    \end{macrocode}
 % Im Zweispaltensatz wird der Inhalt der Umgebung einfach ausgegeben, eine 
 % vertikale Zentrierung findet nicht statt.
 %    \begin{macrocode}
@@ -226,6 +234,7 @@
 % \begin{macro}{\tud@fm@head}
 % \changes{v2.02}{2014/07/18}{an \pkg{scrlayer-scrpage} angepasst}%^^A
 % \changes{v2.02}{2014/10/09}{Bugfix für Kolumnentitel}%^^A
+% \changes{v2.02}{2014/11/05}{Bugfix Kolumnentitel und Inhaltsverzeichnis}%^^A
 % Dieses Makro dient zur Festlegung der Gliederungsebene der Überschrift der
 % Erklärung. Die gewählte Gliederungsebene ist in \cs{tud@\meta{Typ}@level}
 % gespeichert. Verwendet wird das Makro folgendermaßen:
@@ -284,7 +293,7 @@
 %<*article>
       \addsectiontocentry{}{#2}%
 %</article>
-    }
+    }%
   }{}%
 }
 %    \end{macrocode}
@@ -296,9 +305,9 @@
 % vertikaler Ausrichtung die entsprchenden Abstände dazwischen eingefügt.
 %    \begin{macrocode}
 \newcommand*\tud@fm@next[2]{%
-  \TUD@parameter@set[#1]{#2}%
+  \TUD@parameter@set{#1}{#2}%
   \if@twocolumn%
-    \ifbool{@tud@#1@multi}{\par}{\newpage}
+    \ifbool{@tud@#1@multi}{\par}{\newpage}%
   \else%
     \if@titlepage%
       \ifbool{@tud@#1@fil}{%
@@ -314,9 +323,9 @@
         }%
       }{\ifbool{@tud@#1@multi}{}{\clearpage}}%
     \else%
-      \ifnum\@nameuse{tud@#1@level}<2
-        \end{\tud@quoting}
-        \begin{\tud@quoting}
+      \ifnum\@nameuse{tud@#1@level}<2%
+        \end{\tud@quoting}%
+        \begin{\tud@quoting}%
       \fi%
     \fi%
   \fi%
@@ -330,8 +339,11 @@
 %    \begin{macrocode}
 \newcommand*\tud@fm@pagestyle[2]{%
   \if@titlepage%
-    \ifcsdef{ps@#2}{\renewcommand*\tud@ps{#2}}{%
-      \ClassError{\tudcls@name}{`#2' is no valid pagestyle}{}%
+    \ifcsdef{ps@#2}{\def\tud@ps{#2}}{%
+      \ClassError{\tudcls@name}{`#2' is no valid pagestyle}{%
+        You tried to use `#2' as a pagestyle for the\MessageBreak%
+        `#1' environment, but it was never defined%
+      }%
     }%
   \else%
     \ClassWarning{\tudcls@name}{%
@@ -398,11 +410,11 @@
 \newcommand*\tud@fm@switch{%
   {section}{2},{sect}{2},{sec}{2},{addsec}{2},%
 %<*article>
-  {new}{2},{std}{2},{heading}{2},%
+  {new}{2},{standard}{2},{heading}{2},%
 %</article>
 %<*book|report>
   {chapter}{3},{chap}{3},{addchap}{3},%
-  {new}{3},{std}{3},{heading}{3},%
+  {new}{3},{standard}{3},{heading}{3},%
 %</book|report>
   {totoc}{4},{toc}{4},{totoclevelup}{4},{toclevelup}{4},{levelup}{4},%
   {totocleveldown}{5},{tocleveldown}{5},{leveldown}{5},%
@@ -438,11 +450,11 @@
 %    \begin{macrocode}
 %<*report|article>
 \newcommand*\tud@abstract@level{0}
-\newbool@lock{@tud@abstract@toc}
+\bool@lock{@tud@abstract@toc}
 %</report|article>
 %<*book>
 \newcommand*\tud@abstract@level{3}
-\newbool@lock[true]{@tud@abstract@toc}
+\bool@lock[true]{@tud@abstract@toc}
 %</book>
 %    \end{macrocode}
 % \end{macro}^^A \if@tud@abstract@toc@locked
@@ -505,23 +517,23 @@
 % allerdings vom Anwender jederzeit überschrieben werden kann.
 %    \begin{macrocode}
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \ifcase \@tempa\relax%
+    \ifcase\@tempa\relax%
 %<*report|article>
       \def\tud@abstract@level{0}%
-      \stdbool@lock{@tud@abstract@toc}{false}%
+      \bool@std@lock{@tud@abstract@toc}{false}%
 %</report|article>
     \or%
 %<*report|article>
       \def\tud@abstract@level{1}%
-      \stdbool@lock{@tud@abstract@toc}{false}%
+      \bool@std@lock{@tud@abstract@toc}{false}%
 %</report|article>
     \or%
       \def\tud@abstract@level{2}%
-      \stdbool@lock{@tud@abstract@toc}{true}%
+      \bool@std@lock{@tud@abstract@toc}{true}%
     \or%
 %<*book|report>
       \def\tud@abstract@level{3}%
-      \stdbool@lock{@tud@abstract@toc}{true}%
+      \bool@std@lock{@tud@abstract@toc}{true}%
 %</book|report>
 %    \end{macrocode}
 % Neben den Einstellungen für die Art der Gliederungsebene der Überschrift für
@@ -531,13 +543,13 @@
 % die Zusammenfassung einen Eintrag ins Inhaltsverzeichnis bekommen soll.
 %    \begin{macrocode}
     \or%
-      \setbool@lock{@tud@abstract@toc}{true}%
+      \bool@set@lock{@tud@abstract@toc}{true}%
       \@tud@abstract@toc@leveldownfalse%
     \or%
-      \setbool@lock{@tud@abstract@toc}{true}%
+      \bool@set@lock{@tud@abstract@toc}{true}%
       \@tud@abstract@toc@leveldowntrue%
     \or%
-      \setbool@lock{@tud@abstract@toc}{false}%
+      \bool@set@lock{@tud@abstract@toc}{false}%
     \or%
       \@tud@abstract@markbothtrue%
     \or%
@@ -562,6 +574,7 @@
 % \fi
 %
 % \begin{environment}{abstract}
+% \changes{v2.03}{2015/01/09}{Bugfix für Seitenstilauswahl}%^^A
 % Die \env{abstract}-Umgebung wird komplett überarbeitet. Um alle gewünschten
 % Optionen\footnote{\opt{titlepage}, \opt{twocolumn}, \opt{abstract@multi},
 % \opt{abstract@fil} sowie Gliederungsebene der Überschrift} beachten zu
@@ -578,29 +591,33 @@
 %    \end{macrocode}
 % Sollten Überschriften in Form von Kapiteln gewählt worden sein, so wird 
 % temporär die \opt{titlepage}-Option aktivert, da alle weiteren notwendigen 
-% Einstellungen dieser entsprechen. Bei aktiver \opt{titlepage}-Option wird 
-% anschließend der aktuelle Seitenstil gesichert, um diesen nach der Umgebung
-% wiederherstellen zu können.
+% Einstellungen dieser entsprechen. Über den Parameter \opt{pagestyle} kann bei 
+% der Verwendung einer Titelseite der Seitenstil definiert werden. Dafür wird 
+% das dafür verantwortliche Makro \cs{tud@ps} auf \cs{relax} gesetzt.
 %    \begin{macrocode}
   \ifnumless{\@nameuse{tud@abstract@level}}{3}{}{\@titlepagetrue}%
-  \if@titlepage%
-    \tud@currentpagestyle@set%
-    \clearpage\def\tud@ps{empty}%
-  \fi%
+  \let\tud@ps\relax%
 %    \end{macrocode}
 % Als nächstes werden die Optionen verarbeitet. Sollte nach Abarbeitung der
 % Optionen für \env{abstract} festgestellt werden, dass eine spezielle
 % Spaltenanzahl gewünscht ist, so wird~-- für den Fall, dass das Paket
 % \pkg{multicol} geladen ist~-- diese gesetzt. Sonst wird die angegbene Anzahl
-% der Spalten ignoriert und eine Warnung ausgegeben. Bei aktiver Option
-% \opt{titlepage} kann über den Parameter \opt{pagestyle} der Seitenstil 
-% innerhalb der Umgebung geändert werden. Dieser wird automatisch auf
-% \val{headings} gesetzt, wenn beidseitige Kolumnentitel verwendet werden.
+% der Spalten ignoriert und eine Warnung ausgegeben.
 %    \begin{macrocode}
-  \TUD@parameter@set[abstract]{#1}%
-  \if@tud@abstract@markboth\def\tud@ps{headings}\fi%
+  \TUD@parameter@set{abstract}{#1}%
   \tud@multicols@check%
-  \if@titlepage\tud@ps@select\fi%
+%    \end{macrocode}
+% Bei aktiver \opt{titlepage}-Option wird anschließend der aktuelle Seitenstil 
+% gesichert, um diesen nach der Umgebung wiederherstellen zu können. Wurde über 
+% die möglichen Parameter \opt{pagestyle} oder indirekt mit \opt{markboth} kein 
+% Seitenstil definiert, so wird dieser auf \val{empty} gesetzt.
+%    \begin{macrocode}
+  \if@titlepage%
+    \tud@currentpagestyle@set%
+    \ifx\tud@ps\relax\def\tud@ps{empty}\fi%
+    \clearpage%
+    \tud@ps@select%
+  \fi%
   \tud@fm@check{abstract}{\tud@fm@set{abstract}{\abstractname}{\BODY}}%
 %    \end{macrocode}
 % Nach der Umgebung wird bei aktiver \opt{titlepage}-Option der ursprüngliche 
@@ -629,26 +646,31 @@
   \TUD@parameter@define{language}{\selectlanguage{#1}}%
   \TUD@parameter@define{columns}{\def\tud@multicols{#1}}%
   \TUD@parameter@define{pagestyle}{\tud@fm@pagestyle{abstract}{#1}}%
+%    \end{macrocode}
+% Für das Setzen von Kolumnentiteln wird der Seitenstil auf \val{headings} 
+% gesetzt, falls kein anderer mit \opt{pagestyle} angegeben wurde.
+%    \begin{macrocode}
   \TUD@parameter@define{markboth}[true]{%
-    \ifstr{#1}{true}{\@tud@abstract@markbothtrue}{%
-    \ifstr{#1}{on}{\@tud@abstract@markbothtrue}{%
-    \ifstr{#1}{yes}{\@tud@abstract@markbothtrue}{%
-    \ifstr{#1}{false}{\@tud@abstract@markbothfalse}{%
-    \ifstr{#1}{no}{\@tud@abstract@markbothfalse}{%
-    \ifstr{#1}{off}{\@tud@abstract@markbothfalse}{%
+    \ifstrbool{#1}{%
+      \@tud@abstract@markbothtrue%
+      \ifx\tud@ps\relax\def\tud@ps{headings}\fi%
+    }{%
       \@tud@abstract@markbothfalse%
+    }{%
+      \@tud@abstract@markbothfalse%
+      \ifx\tud@ps\relax\def\tud@ps{headings}\fi%
       \manualmark\markboth{#1}{#1}%
-    }}}}}}%
+    }%
   }%
   \TUD@parameter@define{abstract}{\TUDoption{abstract}{#1}}%
-  \TUD@parameter@define{option}{\TUDoption{abstract}{#1}}%
+  \TUD@parameter@let{option}{abstract}%
 %    \end{macrocode}
 % Für die Optionsangabe ohne Schlüssel und Wert kann eine Anzahl an Spalten
 % oder eine alternative Sprache angegeben werden. Hierfür ist der Befehl
-% \cs{tud@environmenthandler} definiert, welcher auch von \env{tudpage}-Umgebung
-% verwendet wird
+% \cs{TUD@parameter@defaulthandler} definiert, welcher auch von der Umgebung 
+% \env{tudpage} verwendet wird.
 %    \begin{macrocode}
-  \TUD@parameter@sethandler{\tud@environmenthandler{#1}}%
+  \TUD@parameter@sethandler{\TUD@parameter@defaulthandler{abstract}{#1}}%
 }
 %    \end{macrocode}
 % \end{parameter}^^A option
@@ -658,6 +680,7 @@
 % \end{parameter}^^A columns
 % \end{parameter}^^A language
 % \begin{macro}{\nextabstract}
+% \changes{v2.02}{2014/11/05}{neu}%^^A
 % Um einzelne Abschnitte innerhalb einer Zusammenfassung trennen zu können, ist
 % dieser Befehl notwendig.
 %    \begin{macrocode}
@@ -704,17 +727,17 @@
 %    \begin{macrocode}
 %<*report|article>
 \newcommand*\tud@declaration@level{1}
-\newbool@lock{@tud@declaration@toc}
+\bool@lock{@tud@declaration@toc}
 %</report|article>
 %<*book>
 \newcommand*\tud@declaration@level{3}
-\newbool@lock[true]{@tud@declaration@toc}
+\bool@lock[true]{@tud@declaration@toc}
 %</book>
 \newif\if@tud@declaration@toc@leveldown
 \newif\if@tud@declaration@markboth
 \newif\if@tud@declaration@multi
-\@tud@declaration@multitrue
 \newif\if@tud@declaration@fil
+\@tud@declaration@multitrue
 \@tud@declaration@filtrue
 %    \end{macrocode}
 % \end{macro}^^A \if@tud@declaration@fil
@@ -736,28 +759,28 @@
   \edef\@tempb{\TUD@numkey@bool,\tud@fm@switch}%
   \TUD@set@numkey{declaration}{@tempa}{\@tempb}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \ifcase \@tempa\relax%
+    \ifcase\@tempa\relax%
       \def\tud@declaration@level{0}%
-      \stdbool@lock{@tud@declaration@toc}{false}%
+      \bool@std@lock{@tud@declaration@toc}{false}%
     \or%
       \def\tud@declaration@level{1}%
-      \stdbool@lock{@tud@declaration@toc}{false}%
+      \bool@std@lock{@tud@declaration@toc}{false}%
     \or%
       \def\tud@declaration@level{2}%
-      \stdbool@lock{@tud@declaration@toc}{true}%
+      \bool@std@lock{@tud@declaration@toc}{true}%
     \or%
 %<*book|report>
       \def\tud@declaration@level{3}%
-      \stdbool@lock{@tud@declaration@toc}{true}%
+      \bool@std@lock{@tud@declaration@toc}{true}%
 %</book|report>
     \or%
-      \stdbool@lock{@tud@declaration@toc}{true}%
+      \bool@set@lock{@tud@declaration@toc}{true}%
       \@tud@declaration@toc@leveldownfalse%
     \or%
-      \stdbool@lock{@tud@declaration@toc}{true}%
+      \bool@set@lock{@tud@declaration@toc}{true}%
       \@tud@declaration@toc@leveldowntrue%
     \or%
-      \stdbool@lock{@tud@declaration@toc}{false}%
+      \bool@set@lock{@tud@declaration@toc}{false}%
     \or%
       \@tud@declaration@markbothtrue%
     \or%
@@ -782,6 +805,9 @@
 % \fi
 %
 % \begin{environment}{declarations}
+% \changes{v2.02}{2014/11/05}{neu}%^^A
+% \changes{v2.03}{2015/01/09}{Bugfix für Seitenstilauswahl}%^^A
+% \changes{v2.03}{2015/01/30}{Bugfix für Spaltenanzahl}%^^A
 % \begin{macro}{\if@tud@declarations}
 % Die \env{declarations}-Umgebung wird ähnlich zur \env{abstract}-Umgebung 
 % definiert. Prinzipiell funktioniert diese genauso, inklusive der Parameter.
@@ -791,17 +817,26 @@
 %    \begin{macrocode}
 \newif\if@tud@declarations
 \NewEnviron{declarations}[1][]{%
+  \@tud@declarationstrue%
   \ifnumless{\@nameuse{tud@declaration@level}}{3}{}{\@titlepagetrue}%
+  \let\tud@ps\relax%
+  \TUD@parameter@set{declaration}{#1}%
+  \tud@multicols@check%
   \if@titlepage%
     \tud@currentpagestyle@set%
-    \clearpage\def\tud@ps{empty}%
+    \ifx\tud@ps\relax\def\tud@ps{empty}\fi%
+    \clearpage%
+    \tud@ps@select%
   \fi%
-  \@tud@declarationstrue%
-  \TUD@parameter@set[declaration]{#1}%
-  \if@tud@declaration@markboth\def\tud@ps{headings}\fi%
-  \tud@multicols@check%
-  \if@titlepage\tud@ps@select\fi%
-  \tud@fm@check{declaration}{\BODY}%
+  \tud@fm@check{declaration}{%
+    \ifnum\tud@multicols>1\relax%
+      \begin{multicols}{\tud@multicols}%
+    \fi%
+    \BODY%
+    \ifnum\tud@multicols>1\relax%
+      \end{multicols}%
+    \fi%
+  }%
 }[%
   \if@titlepage%
     \aftergroup\tud@currentpagestyle@reset%
@@ -834,29 +869,31 @@
   \TUD@parameter@define{columns}{\def\tud@multicols{#1}}%
   \TUD@parameter@define{pagestyle}{\tud@fm@pagestyle{declaration}{#1}}%
   \TUD@parameter@define{markboth}[true]{%
-    \ifstr{#1}{true}{\@tud@declaration@markbothtrue}{%
-    \ifstr{#1}{on}{\@tud@declaration@markbothtrue}{%
-    \ifstr{#1}{yes}{\@tud@declaration@markbothtrue}{%
-    \ifstr{#1}{false}{\@tud@declaration@markbothfalse}{%
-    \ifstr{#1}{no}{\@tud@declaration@markbothfalse}{%
-    \ifstr{#1}{off}{\@tud@declaration@markbothfalse}{%
+    \ifstrbool{#1}{%
+      \@tud@declaration@markbothtrue%
+      \ifx\tud@ps\relax\def\tud@ps{headings}\fi%
+    }{%
       \@tud@declaration@markbothfalse%
+    }{%
+      \@tud@declaration@markbothfalse%
+      \ifx\tud@ps\relax\def\tud@ps{headings}\fi%
       \manualmark\markboth{#1}{#1}%
-    }}}}}}%
+    }%
   }%
   \TUD@parameter@define{company}{\def\@company{#1}}%
   \TUD@parameter@define{supporter}{\def\@supporter{#1}}%
   \TUD@parameter@define{place}{\def\@place{#1}}%
   \TUD@parameter@define{closing}{\def\@confirmationclosing{#1}}%
+  \TUD@parameter@let{confirmationclosing}{closing}%
   \TUD@parameter@define{declaration}{\TUDoption{declaration}{#1}}%
-  \TUD@parameter@define{option}{\TUDoption{declaration}{#1}}%
+  \TUD@parameter@let{option}{declaration}%
 %    \end{macrocode}
 % Für die Optionsangabe ohne Schlüssel und Wert kann eine Anzahl an Spalten
 % oder eine alternative Sprache angegeben werden. Hierfür ist der Befehl
-% \cs{tud@environmenthandler} definiert, welcher auch von \env{tudpage}-Umgebung
-% verwendet wird
+% \cs{TUD@parameter@defaulthandler} definiert, welcher auch von der Umgebung 
+% \env{tudpage} verwendet wird.
 %    \begin{macrocode}
-  \TUD@parameter@sethandler{\tud@environmenthandler{#1}}%
+  \TUD@parameter@sethandler{\TUD@parameter@defaulthandler{declaration}{#1}}%
 }
 %    \end{macrocode}
 % \end{parameter}^^A option
@@ -871,17 +908,21 @@
 % \end{parameter}^^A language
 % \begin{macro}{\declaration}
 % \changes{v2.02}{2014/07/18}{Neuimplementierung für \pkg{scrlayer-scrpage}}%^^A
+% \changes{v2.03}{2015/01/30}{Bugfix für Spaltenanzahl}%^^A
 % Dieser Befehl dient zur Ausgabe von sowohl Selbstständigkeitserklärung als
 % auch Sperrvermerk. Über das optionale Argument kann ohne Schlüssel die
 % gewünschte Sprache eingestellt werden. Zusätzlich können Optionen als
 % Schlüssel-Wert-Paare angegeben werden.
 %    \begin{macrocode}
 \newcommand*\declaration[1][]{%
+  \ifnum\tud@multicols>1\relax%
+    \end{multicols}%
+  \fi%
   \ifbool{@tud@declarations}{%
     \begingroup%
-      \TUD@parameter@set[declaration]{#1}%
+      \TUD@parameter@set{declaration}{#1}%
       \tud@fm@confirmation%
-      \tud@fm@blocking
+      \tud@fm@blocking%
     \endgroup%
   }{%
     \begin{declarations}[#1]%
@@ -889,11 +930,15 @@
       \tud@fm@blocking%
     \end{declarations}%
   }%
+  \ifnum\tud@multicols>1\relax%
+    \begin{multicols}{\tud@multicols}%
+  \fi%
 }
 %    \end{macrocode}
 % \end{macro}^^A \declaration
 % \begin{macro}{\confirmation}
 % \changes{v2.02}{2014/07/18}{Neuimplementierung für \pkg{scrlayer-scrpage}}%^^A
+% \changes{v2.03}{2015/01/30}{Bugfix für Spaltenanzahl}%^^A
 % \begin{macro}{\tud@fm@confirmation}
 % \changes{v2.02}{2014/07/18}{neu}%^^A
 % Mit diesem Befehl kann die Selbstständigkeitserklärung ausgegeben werden. Das
@@ -901,14 +946,19 @@
 % sind Schlüssel-Wert-Paare als Option nutzbar.
 %    \begin{macrocode}
 \newcommand*\confirmation[1][]{%
+  \ifnum\tud@multicols>1\relax%
+    \end{multicols}%
+  \fi%
 %    \end{macrocode}
 % Damit das optionale Argument ohne Schlüssel für die Unterstützer verwendet 
 % werden kann, wird der Handler umdefiniert.
 %    \begin{macrocode}
-  \TUD@parameter@sethandler[declaration]{\def\@supporter{##1}}%
+  \TUD@parameter@sethandler[declaration]{%
+    \TUD@parameter@set{declaration}{supporter=##1}%
+  }%
   \ifbool{@tud@declarations}{%
     \begingroup%
-      \TUD@parameter@set[declaration]{#1}%
+      \TUD@parameter@set{declaration}{#1}%
       \tud@fm@confirmation%
     \endgroup%
   }{%
@@ -919,7 +969,12 @@
 %    \end{macrocode}
 % Der Handler wird auf das ursprüngliche Verhalten zurückgesetzt.
 %    \begin{macrocode}
-  \TUD@parameter@sethandler[declaration]{\tud@environmenthandler{##1}}%
+  \TUD@parameter@sethandler[declaration]{%
+    \TUD@parameter@defaulthandler{declaration}{##1}%
+  }%
+  \ifnum\tud@multicols>1\relax%
+    \begin{multicols}{\tud@multicols}%
+  \fi%
 }
 %    \end{macrocode}
 % Dies ist der eigentliche Inhalt des Befehls \cs{confirmation}.
@@ -927,7 +982,7 @@
 \newcommand*\tud@fm@confirmation{%
   \tud@fm@check{declaration}{%
     \tud@fm@set{declaration}{\confirmationname}{%
-      \confirmationtext\vskip0pt\@confirmationclosing%
+      \confirmationtext\vskip\z@\@confirmationclosing%
     }%
   }%
 }
@@ -937,16 +992,22 @@
 % \begin{macro}{\blocking}
 % \changes{v2.02}{2014/05/16}{neu, \cs{restriction} umbenannt}%^^A
 % \changes{v2.02}{2014/07/18}{an \pkg{scrlayer-scrpage} angepasst}%^^A
+% \changes{v2.03}{2015/01/30}{Bugfix für Spaltenanzahl}%^^A
 % \begin{macro}{\tud@fm@blocking}
 % \changes{v2.02}{2014/07/18}{neu}%^^A
 % Für den Sperrvermerk wird äquivalent zu \cs{confirmation} verfahren. Das
 % optionale Argument ohne Schlüssel setzt hier die Firma für den Sperrvermerk.
 %    \begin{macrocode}
 \newcommand*\blocking[1][]{%
-  \TUD@parameter@sethandler[declaration]{\def\@company{##1}}%
+  \ifnum\tud@multicols>1\relax%
+    \end{multicols}%
+  \fi%
+  \TUD@parameter@sethandler[declaration]{%
+    \TUD@parameter@set{declaration}{company=##1}%
+  }%
   \ifbool{@tud@declarations}{%
     \begingroup%
-      \TUD@parameter@set[declaration]{#1}%
+      \TUD@parameter@set{declaration}{#1}%
       \tud@fm@blocking%
     \endgroup%
   }{%
@@ -954,7 +1015,12 @@
       \tud@fm@blocking%
     \end{declarations}%
   }%
-  \TUD@parameter@sethandler[declaration]{\tud@environmenthandler{##1}}%
+  \TUD@parameter@sethandler[declaration]{%
+    \TUD@parameter@defaulthandler{declaration}{##1}%
+  }%
+  \ifnum\tud@multicols>1\relax%
+    \begin{multicols}{\tud@multicols}%
+  \fi%
 }
 %    \end{macrocode}
 % Dies ist der eigentliche Inhalt des Befehls \cs{blocking}.
