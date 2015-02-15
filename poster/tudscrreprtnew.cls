@@ -70,7 +70,7 @@
       \fi%
     }%
   \fi%
-  \@TUDVersion{2015/02/04 v2.03 TUD-KOMA-Script}%
+  \@TUDVersion{2015/02/15 v2.03 TUD-KOMA-Script}%
 \endgroup%
 \providecommand*\tudscrmail{tudscr@gmail.com}
 \newcommand*\cls@name{report}
@@ -78,7 +78,7 @@
 \newcommand*\tudcls@name{tudscrreprt}
 \NeedsTeXFormat{LaTeX2e}[2011/06/27]
 \ProvidesClass{\tudcls@name}[%
-  2015/02/04 v2.03 TUD-KOMA-Script
+  2015/02/15 v2.03 TUD-KOMA-Script
   document class (\cls@name)%
 ]
 \typeout{The Corporate Design of Technische Universitaet Dresden}
@@ -450,8 +450,11 @@
 \TUD@key{cdfoot}[true]{%
   \TUD@set@numkey{cdfoot}{@tempa}{%
     \TUD@numkey@bool,%
-    {nocolor}{2},{nocolour}{2},%
-    {color}{3},{colour}{3}%
+    {nocolor}{2},{nocolour}{2},{monochrome}{2},{monochromatic}{2},%
+    {bicolor}{3},{bicolour}{3},{twocolor}{3},{twocolour}{3},%
+    {bichrome}{3},{bichromatic}{3},{dichrome}{3},{dichromatic}{3},%
+    {color}{3},{colour}{3},%
+    {full}{3},{colorfull}{3},{fullcolor}{3},{colourfull}{3},{fullcolour}{3}%
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax%
@@ -521,8 +524,8 @@
   }{}%
 }
 \newcommand*\tud@geometry{0}
-\TUD@key@lock{geometry}[true]{%
-  \TUD@set@numkey@lock{geometry}{tud@geometry}{%
+\TUD@key@lock{cdgeometry}[true]{%
+  \TUD@set@numkey@lock{cdgeometry}{tud@geometry}{%
     \TUD@numkey@bool,%
     {typearea}{0},%
     {tud}{1},{asymmetric}{1},{cd}{1},%
@@ -595,9 +598,9 @@
       \tud@layout@process%
     \else%
       \ifcase\tud@cd\relax%
-        \TUD@std@numkey@lock{geometry}{false}%
+        \TUD@std@numkey@lock{cdgeometry}{false}%
       \else%
-        \TUD@std@numkey@lock{geometry}{true}%
+        \TUD@std@numkey@lock{cdgeometry}{true}%
       \fi%
     \fi%
   \fi%
@@ -996,6 +999,10 @@
     \fi%
   \fi%
 }
+\TUD@key{geometry}[true]{%
+  \tud@deprecated@key{geometry}{cdgeometry}%
+  \TUDoptions{cdgeometry=#1}%
+}
 \TUD@key{barfont}[true]{%
   \TUD@set@numkey{barfont}{@tempa}{%
     \TUD@numkey@bool,%
@@ -1065,7 +1072,7 @@
     \fi%
   \fi%
 }
-\TUD@key{colour}[true]{\TUDoptions{color=#1}\FamilyKeyStateProcessed}
+\TUD@key{colour}[true]{\TUDoptions{color=#1}}
 \newcommand*\tud@v@comp{\tud@v@last}
 \TUD@key{tudscrver}[last]{%
   \ifcsvoid{tud@v@#1}{%
@@ -2587,7 +2594,7 @@
     \ifdim\tud@dim@extrabottommargin=\z@\relax\else%
       \ClassWarning{\tudcls@name}{%
         Option `extrabottommargin' is ineffective when\MessageBreak%
-        package typearea is used (`geometry=no')%
+        package typearea is used (`cdgeometry=no')%
       }%
     \fi%
   \else%
@@ -2834,9 +2841,9 @@
 }
 \newcommand*\tud@layout@process{%
   \ifcase\tud@layout@cover\relax%
-    \bool@std@lock{@tud@cover@cdlayout}{false}%
+    \bool@std@lock{@tud@cover@cdgeometry}{false}%
   \else%
-    \bool@std@lock{@tud@cover@cdlayout}{true}%
+    \bool@std@lock{@tud@cover@cdgeometry}{true}%
   \fi%
   \ifcase\tud@layout@title\relax%
     \tud@cmd@restore{maketitle}%
@@ -3528,6 +3535,7 @@
   \TUD@parameter@define{supporter}{\def\@supporter{#1}}%
   \TUD@parameter@define{place}{\def\@place{#1}}%
   \TUD@parameter@define{closing}{\def\@confirmationclosing{#1}}%
+  \TUD@parameter@let{confirmationclosing}{closing}%
   \TUD@parameter@define{declaration}{\TUDoption{declaration}{#1}}%
   \TUD@parameter@let{option}{declaration}%
   \TUD@parameter@sethandler{\TUD@parameter@defaulthandler{declaration}{#1}}%
@@ -4179,7 +4187,7 @@
     \TUD@parameter@set{cover}{#1}%
     \let\tud@layout@title\tud@layout@cover%
     \tud@layout@process%
-    \if@tud@cover@cdlayout%
+    \if@tud@cover@cdgeometry%
       \let\coverpagetopmargin\tud@dim@slimmargin%
       \let\coverpagebottommargin\tud@dim@widemargin%
       \let\coverpageleftmargin\tud@dim@widemargin%
@@ -4219,7 +4227,7 @@
           \footskip=\dimexpr\tud@dim@headsep+\tud@ta@footheight%
             -1.25\baselineskip\relax%
         }{}%
-        \if@tud@cover@cdlayout%
+        \if@tud@cover@cdgeometry%
           \def\coverpagetopmargin{%
             \dimexpr\tud@dim@topmargin+\tud@dim@barheight%
               +\tud@dim@headsep\relax%
@@ -4252,17 +4260,17 @@
     \fi%
   \endgroup%
 }
-\bool@lock{@tud@cover@cdlayout}
+\bool@lock{@tud@cover@cdgeometry}
 \TUD@parameter{cover}{%
   \TUD@parameter@define{cdcover}[true]{\TUDoption{cdcover}{#1}}%
   \TUD@parameter@let{cd}{cdcover}%
-  \TUD@parameter@define{cdlayout}[true]{%
+  \TUD@parameter@define{cdgeometry}[true]{%
     \ifstrbool{#1}{%
-      \bool@set@lock{@tud@cover@cdlayout}{true}%
+      \bool@set@lock{@tud@cover@cdgeometry}{true}%
     }{%
-      \bool@set@lock{@tud@cover@cdlayout}{false}%
+      \bool@set@lock{@tud@cover@cdgeometry}{false}%
     }{%
-      \TUD@parameter@error{cdlayout}{true,false}%
+      \TUD@parameter@error{cdgeometry}{true,false}%
     }%
   }%
   \TUD@parameter@define{pagenumber}{\def\tud@titlepagenumber{#1}}%
@@ -4271,7 +4279,7 @@
     \ifxnumber{#1}{%
       \TUD@parameter@set{cover}{pagenumber=#1}%
     }{%
-      \TUD@parameter@set{cover}{cdlayout=#1}%
+      \TUD@parameter@set{cover}{cdgeometry=#1}%
     }%
   }%
 }
