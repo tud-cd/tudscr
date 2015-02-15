@@ -2,7 +2,7 @@
 TUD-KOMA-Script
 ===============
 
-TUD-KOMA-Script 2015/02/15 v2.03
+TUD-KOMA-Script 2015/xx/xx v2.04
 Copyright (c) Falk Hanisch <tudscr@gmail.com>, 2012-2015
 
 This material is subject to the LaTeX Project Public License version 1.3c or 
@@ -52,6 +52,11 @@ Das Bundle beinhaltet:
 
 Versionen
 ---------
+
+
+**v2.04** (2015/xx/xx)
+
++ 
 
 
 **v2.03** (2015/02/15)
@@ -152,6 +157,11 @@ The bundle offers:
 
 Versions
 --------
+
+
+**v2.04** (2015/xx/xx)
+
++ 
 
 
 **v2.03** (2015/02/15)
