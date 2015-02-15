@@ -1,4 +1,4 @@
-% \CheckSum{1809}
+% \CheckSum{1954}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-pagestyle.dtx}[%
-  2015/02/05 v2.03 TUD-KOMA-Script (pagestyle)%
+  2015/02/15 v2.03 TUD-KOMA-Script (pagestyle)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -343,25 +343,6 @@
 % vorgesehen mit dem Logo der \TnUD in den Rand und dem Schriftzug bündig zum
 % Textblock gesetzt. 
 %
-% \begin{layer}{tudheadings.head.mainlogo}
-% \changes{v2.02}{2014/06/23}{neu}%^^A
-% \begin{layer}{tudheadings.head.logo}
-% \changes{v2.02}{2014/06/23}{neu}%^^A
-% \begin{layer}{tudheadings.head.upperline}
-% \changes{v2.02}{2014/06/23}{neu}%^^A
-% \begin{layer}{tudheadings.head.lowerline}
-% \changes{v2.02}{2014/06/23}{neu}%^^A
-% \begin{layer}{tudheadings.head.upperwideline}
-% \changes{v2.02}{2014/06/23}{neu}%^^A
-% \begin{layer}{tudheadings.head.lowerwideline}
-% \changes{v2.02}{2014/06/23}{neu}%^^A
-% \begin{layer}{tudheadings.head.text}
-% \changes{v2.02}{2014/06/23}{neu}%^^A
-% \begin{layer}{tudheadings.foot.logo}
-% \changes{v2.02}{2014/06/23}{neu}%^^A
-% \changes{v2.03}{2015/01/13}{Ebenendeklaration ist kompatibilitätsabhängig}%^^A
-% \begin{layer}{tudheadings.pagecolor}
-% \changes{v2.03}{2015/01/09}{neu}%^^A
 % Für das Erzeugen der Seitenstile wird das Paket \pkg{scrlayer-scrpage} 
 % genutzt. Mit diesem können verschiedene Ebenen erstellt werden, aus welchen 
 % anschließend der eigentliche Seitenstil zusammengesetzt wird.
@@ -370,15 +351,18 @@
 %    \end{macrocode}
 % Damit der Anwender beliebige Optionen an \pkg{scrlayer-scrpage} übergeben 
 % kann, wird das Paket erst zum Ende der Präambel geladen, wenn dies nicht 
-% bereits vorher geschehen ist.
+% bereits vorher geschehen ist. Anschließend werden verschiedene, sogeannte 
+% Layers respektive Ebenen für die einzelnen Elemente auf einer Seite erstellt.
 %    \begin{macrocode}
   \RequirePackage{scrlayer-scrpage}[2013/12/14]%
-%    \end{macrocode}
-% Anschließend werden verschiedene, sogeannte Layers für die einzelnen Elemente 
-% auf einer Seite erstellt. Dies sind das aus dem Satzspiegel nach links
-% verschobene Logo der \TnUD sowie \dots
-%    \begin{macrocode}
   \AfterPackage*{scrlayer-scrpage}{%
+%    \end{macrocode}
+% \begin{layer}{tudheadings.head.mainlogo}
+% \changes{v2.02}{2014/06/23}{neu}%^^A
+% \begin{layer}{tudheadings.head.logo}
+% \changes{v2.02}{2014/06/23}{neu}%^^A
+% Dies sind das links aus dem Satzspiegel verschobene Logo der \TnUD, \dots
+%    \begin{macrocode}
     \DeclareNewLayer[%
       background,headsep,%
       voffset=\tud@dim@logoy,%
@@ -388,7 +372,7 @@
       },%
     ]{tudheadings.head.mainlogo}%
 %    \end{macrocode}
-% \dots das Zweitlogo, \dots
+% \dots und das Zweitlogo.
 %    \begin{macrocode}
     \DeclareNewLayer[%
       background,headsep,%
@@ -396,7 +380,40 @@
       contents={\hfill\tud@headlogo},%
     ]{tudheadings.head.logo}%
 %    \end{macrocode}
-% \dots der Inhalt mit Fakultät, Einrichtung, Institut und Lehrstuhl.
+% \end{layer}^^A tudheadings.head.logo
+% \end{layer}^^A tudheadings.head.mainlogo
+% \begin{layer}{tudheadings.head.back}
+% \changes{v2.03}{2015/02/14}{neu}%^^A
+% \begin{layer}{tudheadings.head.bar}
+% \changes{v2.03}{2015/02/14}{neu}%^^A
+% Außerdem gibt es eine Variante ohne Querbalken-Outline. Stattdessen werden
+% der Querbalken und der darüberliegende Kopf farbig abgesetzt. 
+%    \begin{macrocode}
+    \DeclareNewLayer[%
+      background,%
+      contents={%
+        \ifnum\tud@head@bar>\@ne\relax%
+          \color{HKS41}%
+          \rule{\layerwidth}{\tud@dim@topmargin}%
+        \fi%
+      },%
+    ]{tudheadings.head.back}%
+    \DeclareNewLayer[%
+      background,%
+      voffset=\tud@dim@topmargin,%
+      contents={%
+        \ifnum\tud@head@bar>\@ne\relax%
+          \color{HKS41!80}%
+          \rule{\layerwidth}{\tud@dim@barheight}%
+        \fi%
+      },%
+    ]{tudheadings.head.bar}%
+%    \end{macrocode}
+% \end{layer}^^A tudheadings.head.bar
+% \end{layer}^^A tudheadings.head.back
+% \begin{layer}{tudheadings.head.text}
+% \changes{v2.02}{2014/06/23}{neu}%^^A
+% Fakultät, Einrichtung, Institut und Lehrstuhl als Inhalt des Querbalkens.
 %    \begin{macrocode}
     \DeclareNewLayer[%
       background,headsep,%
@@ -404,7 +421,16 @@
       contents={\tud@head@text@box},%
     ]{tudheadings.head.text}%
 %    \end{macrocode}
-% \dots die obere und untere Linie des Querbalkens sowohl in der normalen 
+% \end{layer}^^A tudheadings.head.text
+% \begin{layer}{tudheadings.head.upperline}
+% \changes{v2.02}{2014/06/23}{neu}%^^A
+% \begin{layer}{tudheadings.head.lowerline}
+% \changes{v2.02}{2014/06/23}{neu}%^^A
+% \begin{layer}{tudheadings.head.upperwideline}
+% \changes{v2.02}{2014/06/23}{neu}%^^A
+% \begin{layer}{tudheadings.head.lowerwideline}
+% \changes{v2.02}{2014/06/23}{neu}%^^A
+% Die Ebenen für obere und untere Linie des Querbalkens sowohl in der normalen 
 % Version, welche den Textbereich überspannt als auch in der Variante über die 
 % komplette Seitenbreite. Dabei muss für beide Varianten der entsprechenden 
 % horizontale Versatz beachtet werden. Dafür wird ggf. der Parameter \val{head} 
@@ -413,26 +439,51 @@
     \DeclareNewLayer[%
       background,headsep,%
       voffset=\dimexpr\tud@dim@topmargin-.5\tud@dim@line\relax,%
-      contents={\ifnum\tud@head@bar=\z@\relax\tud@head@rule{\textwidth}\fi},%
+      contents={%
+        \ifnum\tud@head@bar<\tw@\relax\if@tud@head@widebar\else%
+          \tud@head@rule{\textwidth}%
+        \fi\fi%
+      },%
     ]{tudheadings.head.upperline}%
     \DeclareNewLayer[%
       background,headsep,%
       voffset=\dimexpr\tud@dim@topmargin+\tud@dim@barheight%
         -.5\tud@dim@line\relax,%
-      contents={\ifnum\tud@head@bar=\z@\relax\tud@head@rule{\textwidth}\fi},%
+      contents={%
+        \ifnum\tud@head@bar<\tw@\relax\if@tud@head@widebar\else%
+          \tud@head@rule{\textwidth}%
+        \fi\fi%
+      },%
     ]{tudheadings.head.lowerline}%
     \DeclareNewLayer[%
       background,%
       voffset=\dimexpr\tud@dim@topmargin-.5\tud@dim@line\relax,%
-      contents={\ifnum\tud@head@bar=\@ne\relax\tud@head@rule{\paperwidth}\fi},%
+      contents={%
+        \ifnum\tud@head@bar<\tw@\relax\if@tud@head@widebar%
+          \tud@head@rule{\paperwidth}%
+        \fi\fi%
+      },%
     ]{tudheadings.head.upperwideline}%
     \DeclareNewLayer[%
       background,%
       voffset=\dimexpr\tud@dim@topmargin+\tud@dim@barheight%
         -.5\tud@dim@line\relax,%
-      contents={\ifnum\tud@head@bar=\@ne\relax\tud@head@rule{\paperwidth}\fi},%
+      contents={%
+        \ifnum\tud@head@bar<\tw@\relax\if@tud@head@widebar%
+          \tud@head@rule{\paperwidth}%
+        \fi\fi%
+      },%
     ]{tudheadings.head.lowerwideline}%
 %    \end{macrocode}
+% \end{layer}^^A tudheadings.head.lowerwideline
+% \end{layer}^^A tudheadings.head.upperwideline
+% \end{layer}^^A tudheadings.head.lowerline
+% \end{layer}^^A tudheadings.head.upperline
+% \begin{layer}{tudheadings.foot.logo}
+% \changes{v2.02}{2014/06/23}{neu}%^^A
+% \changes{v2.03}{2015/01/13}{Ebenendeklaration ist kompatibilitätsabhängig}%^^A
+% \begin{layer}{tudheadings.foot.back}
+% \changes{v2.03}{2015/02/15}{neu}%^^A
 % Außerdem wird eine weitere Ebene für Drittlogos sowie das \DDC-Logo im
 % Seitenfuß erstellt. Dabei wird die Ebene in Abhängigkeit vom gewählten 
 % Kompatibilitätsmodus unterschiedlich definiert. 
@@ -504,6 +555,41 @@
       ]{tudheadings.foot.logo}%
     }{}%
 %    \end{macrocode}
+% Diese Ebene wird als Hintergrund für den Fußbereich definiert.
+%    \begin{macrocode}
+    \DeclareNewLayer[%
+      background,%
+      hoffset=0pt,%
+      width=\paperwidth,%
+      voffset=\dimexpr\@nameuse{scr@l@tudheadings.foot.logo@y}%
+        -\dp\strutbox\relax,%
+      height=\dimexpr\paperheight-\layeryoffset\relax,%
+      contents={%
+        \if@tud@footcolor%
+          \let\@tempc\relax%
+          \ifnum\tud@head@bar>\@ne\def\@tempc{\color{HKS41}}\fi%
+          \ifstr{\tud@pagecolor}{HKS41}{\def\@tempc{\color{HKS41!80}}}{}%
+          \ifx\@tempc\relax\else%
+            \iftudscrverlower{2.03}{%
+              \tud@ddc@check%
+              \ifcase\@tempb\relax%
+                \vbox to \layerheight{%
+                  \vfil\@tempc%
+                  \rule{\layerwidth}{%
+                    \dimexpr\layerheight-\tud@dim@ddcdiff+\ht\strutbox\relax%
+                  }%
+                }%
+              \else%
+                \@tempc\rule{\layerwidth}{\layerheight}%
+              \fi%
+            }{\@tempc\rule{\layerwidth}{\layerheight}}%
+          \fi%
+        \fi%
+      },%
+    ]{tudheadings.foot.back}%
+%    \end{macrocode}
+% \end{layer}^^A tudheadings.foot.back
+% \end{layer}^^A tudheadings.foot.logo
 % Aus den zuvor erstellten Ebenen werden jetzt die eigentlichen Seitenstile 
 % zusammengesetzt. Als erstes wird der \pgs{headings}-Seitenstil definiert.
 % Dieser verwendet den TUD-Kopf und die Fußzeilenebenen des Seitenstils
@@ -513,14 +599,19 @@
 % weiterhin durch den Anwender verwendet werden kann, werden wie erwähnt die
 % entsprechenden \pgs{scrheadings}-Ebenen verwendet. 
 %    \begin{macrocode}
-    \DeclareNewPageStyleByLayers[onselect=\tud@ps@init]{tudheadings}{%
+    \DeclareNewPageStyleByLayers[%
+      onselect=\tud@ps@onselect,onbackground=\tud@ps@onbackground%
+    ]{tudheadings}{%
+      tudheadings.head.back,%
       tudheadings.head.mainlogo,%
       tudheadings.head.logo,%
+      tudheadings.head.bar,%
       tudheadings.head.text,%
       tudheadings.head.upperline,%
       tudheadings.head.lowerline,%
       tudheadings.head.upperwideline,%
       tudheadings.head.lowerwideline,%
+      tudheadings.foot.back,%
       tudheadings.foot.logo,%
       scrheadings.foot.odd,%
       scrheadings.foot.even,%
@@ -538,14 +629,19 @@
 % Für den \pgs{plain}-Seitenstil wird ebenso verfahren. Hier werden für die 
 % Fußzeilenebenen des Seitenstils \pgs{plain.scrheadings} hinzugefügt.
 %    \begin{macrocode}
-    \DeclareNewPageStyleByLayers[onselect=\tud@ps@init]{plain.tudheadings}{%
+    \DeclareNewPageStyleByLayers[%
+      onselect=\tud@ps@onselect,onbackground=\tud@ps@onbackground%
+    ]{plain.tudheadings}{%
+      tudheadings.head.back,%
       tudheadings.head.mainlogo,%
       tudheadings.head.logo,%
+      tudheadings.head.bar,%
       tudheadings.head.text,%
       tudheadings.head.upperline,%
       tudheadings.head.lowerline,%
       tudheadings.head.upperwideline,%
       tudheadings.head.lowerwideline,%
+      tudheadings.foot.back,%
       tudheadings.foot.logo,%
       plain.scrheadings.foot.odd,%
       plain.scrheadings.foot.even,%
@@ -562,14 +658,19 @@
 % Des Weiteren gibt es einen selbstständigen \enquote{leeren} Seitenstil, der 
 % lediglich aus dem Kopf besteht und einen lerren Seitenfuß hat.
 %    \begin{macrocode}
-    \DeclareNewPageStyleByLayers[onselect=\tud@ps@init]{empty.tudheadings}{%
+    \DeclareNewPageStyleByLayers[%
+      onselect=\tud@ps@onselect,onbackground=\tud@ps@onbackground%
+    ]{empty.tudheadings}{%
+      tudheadings.head.back,%
       tudheadings.head.mainlogo,%
       tudheadings.head.logo,%
+      tudheadings.head.bar,%
       tudheadings.head.text,%
       tudheadings.head.upperline,%
       tudheadings.head.lowerline,%
       tudheadings.head.upperwideline,%
       tudheadings.head.lowerwideline,%
+      tudheadings.foot.back,%
       tudheadings.foot.logo,%
     }%
     \DeclareNewPageStyleAlias{empty.tudscrheadings}{empty.tudheadings}%
@@ -578,6 +679,8 @@
     \DeclareNewPageStyleAlias{tudheadingsempty}{empty.tudheadings}%
     \DeclareNewPageStyleAlias{tudscrheadingsempty}{empty.tudheadings}%
 %    \end{macrocode}
+% \begin{layer}{tudheadings.pagecolor}
+% \changes{v2.03}{2015/01/09}{neu}%^^A
 % Um farbige Titel- Teil- und Kapitelseiten \emph{unabhängig} vom aktuell 
 % verwendeten Seitenstil erstellen zu können, wird die zusätzliche Ebene 
 % \val{tudheadings.pagecolor} definiert, die \emph{allen} Seitenstilen
@@ -594,6 +697,7 @@
     ]{tudheadings.pagecolor}
     \AddLayersToPageStyle{@everystyle@}{tudheadings.pagecolor}%
 %    \end{macrocode}
+% \end{layer}^^A tudheadings.pagecolor
 % Der Kopf im \CD der \TnUD erfordert einen eigenen Satzspiegel, der ggf. durch 
 % \cs{tud@beforeselectanypagestyle} aktiviert bzw. deaktiviert wird.
 %    \begin{macrocode}
@@ -601,23 +705,20 @@
   }%
 }
 %    \end{macrocode}
-% \end{layer}^^A tudheadings.pagecolor
-% \end{layer}^^A tudheadings.foot.logo
-% \end{layer}^^A tudheadings.head.text
-% \end{layer}^^A tudheadings.head.lowerwideline
-% \end{layer}^^A tudheadings.head.upperwideline
-% \end{layer}^^A tudheadings.head.lowerline
-% \end{layer}^^A tudheadings.head.upperline
-% \end{layer}^^A tudheadings.head.logo
-% \end{layer}^^A tudheadings.head.mainlogo
 % \end{pagestyle}^^A empty.tudheadings
 % \end{pagestyle}^^A plain.tudheadings
 % \end{pagestyle}^^A tudheadings
-% \begin{macro}{\tud@ps@init}
+% \begin{macro}{\tud@ps@onselect}
 % \changes{v2.03}{2015/01/09}{neu}%^^A
-% Dieser Befehl wird bei der Initialiserung der Seitenstile aufgerufen.
+% \begin{macro}{\tud@ps@onbackground}
+% \changes{v2.03}{2015/02/14}{neu}%^^A
+% \begin{macro}{\tud@head@logocolor}
+% \begin{macro}{\tud@foot@logocolor}
+% \changes{v2.03}{2015/02/15}{neu}%^^A
+% Diese Befehle werden bei der Initialiserung der Seitenstile beziehungsweise
+% zu Beginn der Ebenenausgabe aufgerufen.
 %    \begin{macrocode}
-\newcommand*\tud@ps@init{%
+\newcommand*\tud@ps@onselect{%
 %    \end{macrocode}
 % Normalerweise werden durch \pkg{scrlayer-scrpage} bei der Umschaltung auf 
 % einen mit dem Befehl \cs{newpairofpagestyles}\marg{Seitenstil} definierten 
@@ -631,17 +732,42 @@
   \DeclarePageStyleAlias{headings}{tudheadings}%
   \def\sls@currentheadings{tudheadings}%
   \def\sls@currentplain{plain.tudheadings}%
+}
+% Das Makro \cs{tud@head@logocolor} enthält die Farbe des Kopfes. Die Gestalt 
+% des Querbalkens kann über die Option \opt{cdhead} geändert werden. Für Titel, 
+% Teil und Kapitel gibt es speziell dazugehörige Optionen, womit das Aussehen
+% des Kopfes ggf. angepasst werden kann. Mit \cs{tud@foot@logocolor} erfolgt 
+% dies gleichermaßen für ein etwaiges \DDC-Logo.
+%    \begin{macrocode}
+\newcommand*\tud@head@logocolor{black}
+\newcommand*\tud@foot@logocolor{black}
+\newcommand*\tud@ps@onbackground{%
+  \ifcase\tud@head@bar\relax%
+    \def\tud@head@logocolor{black}%
+    \def\tud@foot@logocolor{black}%
+  \or%
+    \def\tud@head@logocolor{HKS41}%
+    \def\tud@foot@logocolor{HKS41}%
+  \or%
+    \def\tud@head@logocolor{white}%
+    \if@tud@footcolor%
+      \def\tud@foot@logocolor{white}%
+    \else%
+      \def\tud@foot@logocolor{HKS41}%
+    \fi%
+  \fi%
 %    \end{macrocode}
 % In Abhängigkeit von der eingestzten Hintergrundfarbe der Seite wird die 
 % Linienstärke des Querbalkens gesetzt.
 %    \begin{macrocode}
-  \global\let\tud@dim@line\tud@dim@thinline%
-  \ifstr{\tud@head@logocolor}{white}{%
-    \global\let\tud@dim@line\tud@dim@heavyline%
-  }{}%
+  \let\tud@dim@line\tud@dim@thinline%
+  \ifstr{\tud@head@logocolor}{white}{\let\tud@dim@line\tud@dim@heavyline}{}%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@ps@init
+% \end{macro}^^A \tud@foot@logocolor
+% \end{macro}^^A \tud@head@logocolor
+% \end{macro}^^A \tud@ps@onbackground
+% \end{macro}^^A \tud@ps@onselect
 % \begin{macro}{\ps@tudpage@plain}
 % \changes{v2.02}{2014/06/23}{entfernt}%^^A
 % \begin{macro}{\ps@tudpage@empty}
@@ -900,8 +1026,6 @@
 % \changes{v2.03}{2015/01/09}{Bugfix für zweite Zeile. Diese muss in jedem Fall 
 %   gesetzt werden, auch wenn sie leer ist.}%^^A
 % Dieser Befehl ist der Inhalt der Ebene für den Text der Kopfzeile.
-% \ToDo{Anpassung der Schriftfarbe der zweiten und dritten Zeile unterhalb des 
-% Querbalkens in Abhängigkeit von der Seitenfarbe (zweifarbiges Layout)}[v2.04]
 % \ToDo{Zeilenabstand bei unterschiedlichen Papiergrößen prüfen}[v2.04]
 %    \begin{macrocode}
 \newcommand*\tud@head@text@box{%
@@ -912,12 +1036,6 @@
     \ClassWarningNoLine{\tudcls@name}{No `\string\faculty' given}%
     \faculty{}%
   \fi%
-%    \end{macrocode}
-% Die Farbe des Kopfes wird für Titel und Teileseiten durch die gewählten
-% Optionen\footnote{\opt{cdtitle}, \opt{cdpart}} bestimmt.\footnote{für
-% die \env{tudpage}-Umgebung kann dieser angepasst werden}
-%    \begin{macrocode}
-  \color{\tud@head@logocolor}%
 %    \end{macrocode}
 % Abhängig vom Wert \cs{tud@cdfont}~-- gesetzt entweder von der globalen
 % Klassenoption oder vom lokalen Parameter \opt{cdfont}~-- werden entweder die
@@ -958,17 +1076,26 @@
 %    \begin{macrocode}
   \vbox{%
     \linespread{0}\selectfont%
+%    \end{macrocode}
+% Die Farbe des Textes der ersten Zeile entspricht immer der des Kopfes\dots
+%    \begin{macrocode}
+    \color{\tud@head@logocolor}%
     \tud@head@text@write{\tud@head@text@first}%
+%    \end{macrocode}
+% Die zweite und dritte Zeile sind bei zweifarbigen Kopf normalerweise blau, 
+% nur für einen dunklen Seitenhintergrund weiß.
+%    \begin{macrocode}
+    \ifnum\tud@head@bar>\@ne%
+      \ifdefvoid{\tud@pagecolor}{\color{HKS41}}{%
+        \ifstr{\tud@pagecolor}{HKS41}{\color{white}}{\color{HKS41}}%
+      }%
+    \fi%
     \ifx\tud@head@text@second\@empty%
-      \ifx\@extraheadline\@empty%
-        \newline\tud@head@font@light\tud@head@text@write{}%
-      \else%
-        \newline\tud@head@font@light\tud@head@text@write{\@extraheadline}%
-      \fi%
+      \newline\tud@head@font@light\tud@head@text@write{\@extraheadline}%
     \else%
       \newline\tud@head@text@write{\tud@head@text@second}%
       \ifx\@extraheadline\@empty\else%
-        \newline\tud@head@font@light\@extraheadline%
+        \vspace{-\tud@dim@line}\newline\tud@head@font@light\@extraheadline%
       \fi%
     \fi%
   }%
@@ -1049,12 +1176,12 @@
 \newcommand*\tud@ddc@switch{}
 \edef\tud@ddc@switch{%
   \TUD@numkey@bool,%
-  {color}{2},{colour}{2},%
-  {colorblack}{3},{colourblack}{3},%
-  {gray}{4},{grey}{4},{cdgray}{4},%
-  {black}{5},%
-  {blue}{6},{cddarkblue}{6},%
-  {white}{7}%
+  {color}{2},{colour}{2},{cdcolor}{2},{cdcolour}{2},%
+  {colorblack}{3},{colourblack}{3},{cdcolorblack}{3},{cdcolourblack}{3},%
+  {gray}{4},{grey}{4},{HKS92}{4},{cdgray}{4},{cdgrey}{4},%
+  {black}{5},{cdblack}{5},%
+  {blue}{6},{HKS41}{6},{cdblue}{6},{cddarkblue}{6},%
+  {white}{7},{cdwhite}{7}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@ddc@switch
@@ -1450,9 +1577,9 @@
   \tud@ddc@check%
   \ifcase\@tempb\relax\or%
     \def\tud@@ddclogo{DDC-22}%
-    \ifstr{\tud@head@logocolor}{HKS41}{\def\tud@@ddclogo{DDC-25}}{}%
-    \ifstr{\tud@head@logocolor}{cddarkblue}{\def\tud@@ddclogo{DDC-25}}{}%
-    \ifstr{\tud@head@logocolor}{white}{\def\tud@@ddclogo{DDC-28}}{}%
+    \ifstr{\tud@foot@logocolor}{HKS41}{\def\tud@@ddclogo{DDC-25}}{}%
+    \ifstr{\tud@foot@logocolor}{cddarkblue}{\def\tud@@ddclogo{DDC-25}}{}%
+    \ifstr{\tud@foot@logocolor}{white}{\def\tud@@ddclogo{DDC-28}}{}%
   \or%
     \def\tud@@ddclogo{DDC-01}%
   \or%
@@ -1495,17 +1622,19 @@
 % \changes{v2.03}{2015/02/04}{neu}%^^A
 % \begin{macro}{\tud@head@bar}
 % \changes{v2.03}{2015/02/04}{neu}%^^A
-% \begin{macro}{\if@tud@head@bar@locked}
-% \changes{v2.03}{2015/02/04}{neu}%^^A
+% \begin{macro}{\if@tud@head@widebar}
+% \changes{v2.03}{2015/02/14}{neu}%^^A
+% \begin{macro}{\if@tud@head@widebar@locked}
+% \changes{v2.03}{2015/02/14}{neu}%^^A
 % Mit dieser Option wird die zentrale Benutzerschnittstelle für Einstellungen 
 % des typischen Querbalkens für den TUD-Kopf geschaffen. Durch sie können
 % sowohl die verwendete Schrift als auch die Stärke für den Balkentext
 % (Institut, Fakultät etc.) geändert werden. Zusätzlich ist die Laufweite des 
 % Querbalkens bzw. die Farbe einstellbar.
-% \ToDo{\opt{cdhead} auf Farbe erweitern}[v2.03]
 %    \begin{macrocode}
 \cs@lock{tud@head@font}{0}
-\cs@lock{tud@head@bar}{0}
+\newcommand*\tud@head@bar{0}
+\bool@lock{@tud@head@widebar}
 \TUD@key{cdhead}[true]{%
   \TUD@set@numkey{cdhead}{@tempa}{%
     \TUD@numkey@bool,%
@@ -1513,9 +1642,16 @@
     {cd}{1},{cdfont}{1},{cdfonts}{1},{tudfonts}{1},%
     {light}{1},{lightfont}{1},{lite}{1},{litefont}{1},{noheavyfont}{1},%
     {heavy}{2},{heavyfont}{2},%
-    {slim}{3},{slimhead}{3},{nowide}{3},{nowidehead}{3},{textwidth}{3},%
-    {normal}{3},{normalhead}{3},{standard}{3},{standardhead}{3},%
-    {wide}{4},{widehead}{4},{paperwidth}{4}%
+    {nocolor}{3},{nocolour}{3},{monochrome}{3},{monochromatic}{3},%
+    {colorlite}{4},{litecolor}{4},{colourlite}{4},{litecolour}{4},%
+    {colorlight}{4},{lightcolor}{4},{colourlight}{4},{lightcolour}{4},%
+    {pale}{4},{colorpale}{4},{palecolor}{4},{colourpale}{4},{palecolour}{4},%
+    {bicolor}{5},{bicolour}{5},{twocolor}{5},{twocolour}{5},%
+    {bichrome}{5},{bichromatic}{5},{dichrome}{5},{dichromatic}{5},%
+    {color}{5},{colour}{5},%
+    {full}{5},{colorfull}{5},{fullcolor}{5},{colourfull}{5},{fullcolour}{5},%
+    {textwidth}{6},{slim}{6},{slimhead}{6},{nowide}{6},{nowidehead}{6},%
+    {paperwidth}{7},{wide}{7},{widehead}{7}%
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax%
@@ -1525,14 +1661,21 @@
     \or%
       \cs@set@lock{tud@head@font}{2}%
     \or%
-      \cs@set@lock{tud@head@bar}{0}%
+      \def\tud@head@bar{0}%
     \or%
-      \cs@set@lock{tud@head@bar}{1}%
+      \def\tud@head@bar{1}%
+    \or%
+      \def\tud@head@bar{2}%
+    \or%
+      \bool@set@lock{@tud@head@widebar}{false}%
+    \or%
+      \bool@set@lock{@tud@head@widebar}{true}%
     \fi%
   \fi%
 }
 %    \end{macrocode}
-% \end{macro}^^A \if@tud@head@bar@locked
+% \end{macro}^^A \if@tud@head@widebar@locked
+% \end{macro}^^A \if@tud@head@widebar
 % \end{macro}^^A \tud@head@bar
 % \end{macro}^^A \if@tud@head@font@locked
 % \end{macro}^^A \tud@head@font
@@ -1540,7 +1683,7 @@
 % \begin{option}{cdfoot}
 % \changes{v2.03}{2015/02/02}{Option \opt{extrabottommargin} bei Längenangabe 
 %   indirekt nutzbar}%^^A
-% \begin{macro}{\if@tud@cdfoot}
+% \begin{macro}{\if@tud@footcolor}
 % \begin{macro}{\tud@ps@store}
 % \changes{v2.02}{2014/06/23}{neu}%^^A
 % \begin{macro}{\tud@@ps@store}
@@ -1551,20 +1694,36 @@
 % \changes{v2.02}{2014/06/23}{neu}%^^A
 % Dieser Seitenstil mit dem Kolumnentitel im Fuß wurde bereits für die alte
 % \cls{tudbook}-Klasse bereitgestellt und soll auch hier optional angeboten
-% werden.
+% werden. Zusätzlich kann mit dieser Option ggf. ein farbiger Hintergrund in 
+% der Fußzeile aktiviert werden.
 %    \begin{macrocode}
-\newif\if@tud@cdfoot
+\newif\if@tud@footcolor
 \TUD@key{cdfoot}[true]{%
-  \TUD@set@ifkey{cdfoot}{@tud@cdfoot}{#1}%
+  \TUD@set@numkey{cdfoot}{@tempa}{%
+    \TUD@numkey@bool,%
+    {nocolor}{2},{nocolour}{2},%
+    {color}{3},{colour}{3}%
+  }{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \ifcase\@tempa\relax%
+%    \end{macrocode}
+% Die ursprünglichen Kopf- und Fußzeilen werden mit \cs{tud@ps@restore}
+% wiederhergestellt. Dies wird allerdings frühestens nach dem Laden von 
+% \pkg{scrlayer-scrpage} durchgeführt.
+%    \begin{macrocode}
+      \TUD@AfterPackage{scrlayer-scrpage}{%
+        \tud@ps@restore{scrheadings}%
+        \tud@ps@restore{plain.scrheadings}%
+        \tud@font@koma@unset{pageheadfoot}%
+      }%
 %    \end{macrocode}
 % Die ursprünglichen Kopf- und Fußzeilen werden mit \cs{tud@ps@store} 
 % gesichert, um gegebenenfalls zurückschalten zu können. Anschließend werden
-% diese mit dem neuen Stil überschrieben.
-% \ToDo{\opt{cdhead} auf Farbe erweitern}[v2.03]
+% diese mit dem neuen Stil überschrieben. Dies wird allerdings frühestens nach 
+% dem Laden von \pkg{scrlayer-scrpage} durchgeführt.
 %    \begin{macrocode}
-  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \if@atdocument%
-      \if@tud@cdfoot%
+    \or%
+      \TUD@AfterPackage{scrlayer-scrpage}{%
         \tud@ps@store{scrheadings}%
         \tud@ps@store{plain.scrheadings}%
         \tud@font@koma@set{pageheadfoot}{\upshape}%
@@ -1574,15 +1733,14 @@
           {\footnotesize\headmark}%
           \if@twoside\ifodd\value{page}\quad\pagemark\fi\else\quad\pagemark\fi%
         }%
+      }%
 %    \end{macrocode}
-% Die ursprünglichen Kopf- und Fußzeilen werden mit \cs{tud@ps@restore}
-% wiederhergestellt.
+% Hier kann die Hintergrundfarbe des Fußes aktiviert bzw. deaktiviert werden.
 %    \begin{macrocode}
-      \else%
-        \tud@ps@restore{scrheadings}%
-        \tud@ps@restore{plain.scrheadings}%
-        \tud@font@koma@unset{pageheadfoot}%
-      \fi%
+    \or%
+      \@tud@footcolorfalse%
+    \or%
+      \@tud@footcolortrue%
     \fi%
 %    \end{macrocode}
 % Außerdem kann mit der Option \opt{extrabottommargin} gesetzt werden.
@@ -1591,11 +1749,6 @@
     \TUDoptions{extrabottommargin=#1}%
   \fi%
 }
-%    \end{macrocode}
-% Damit die Einstellungen aus der Präambel übernommen werden, wird die Option
-% ggf. zu Beginn mit \cs{AtBeginDocument} aufgerufen.
-%    \begin{macrocode}
-\AtBeginDocument{\if@tud@cdfoot\TUDoptions{cdfoot=true}\fi}
 %    \end{macrocode}
 % Die nächsten beiden Befehle dienen zum Sichern der Kopf- und Fußzeilen\dots
 %    \begin{macrocode}
@@ -1647,7 +1800,7 @@
 % \end{macro}^^A \tud@ps@restore
 % \end{macro}^^A \tud@@ps@store
 % \end{macro}^^A \tud@ps@store
-% \end{macro}^^A \if@tud@cdfoot
+% \end{macro}^^A \if@tud@footcolor
 % \end{option}^^A cdfoot
 % \begin{macro}{\tud@ps@headings}
 % \changes{v2.02}{2014/06/23}{entfernt}%^^A

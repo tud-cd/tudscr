@@ -1,4 +1,4 @@
-% \CheckSum{1380}
+% \CheckSum{1400}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-title.dtx}[%
-  2015/02/04 v2.03 TUD-KOMA-Script (title)%
+  2015/02/15 v2.03 TUD-KOMA-Script (title)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -139,19 +139,12 @@
 %    \end{macrocode}
 % \end{KOMAfont}^^A titlepage
 % \end{KOMAfont}^^A thesis
-% \begin{macro}{\tud@title@pagecolor}
-% \begin{macro}{\tud@title@logocolor}
 % \begin{macro}{\tud@title@fontcolor}
-% Die Makros werden für die Hintergrundfarbe der Titelseite sowie die Farbe der 
-% Schriften verwendet.
+% Das Makro wird für die Hintergrundfarbe der Titelseite verwendet.
 %    \begin{macrocode}
-\newcommand*\tud@title@pagecolor{}
-\newcommand*\tud@title@logocolor{black}
 \newcommand*\tud@title@fontcolor{black}
 %    \end{macrocode}
 % \end{macro}^^A \tud@title@fontcolor
-% \end{macro}^^A \tud@title@logocolor
-% \end{macro}^^A \tud@title@pagecolor
 % \begin{macro}{\tud@maketitle}
 % \changes{v2.01a}{2014/06/03}{Fehler bei Nutzung von \cs{subtitle} behoben}%^^A
 % \changes{v2.02}{2014/06/23}{\val{firstiscover} wird als Wert für die Option 
@@ -190,9 +183,9 @@
 % hierfür wird die Ausprägung festgelegt. 
 %    \begin{macrocode}
       \else%
+        \def\tud@title@fontcolor{black}%
         \ifcase\tud@layout@title\relax\or\else%
           \def\tud@title@fontcolor{HKS41}%
-          \def\tud@title@logocolor{HKS41}%
         \fi%
 %    \end{macrocode}
 % Um einen Titelkopf zu setzen, wird einfach der Originalbefehl verwendet und
@@ -292,13 +285,14 @@
 % wird die entsprechende Layoutoption ausgewertet und entsprechend dieser die
 % Werte belegt.
 %    \begin{macrocode}
+  \def\tud@title@fontcolor{black}%
   \ifcase\tud@layout@title\relax\or\or%
-    \def\tud@title@pagecolor{}%
-    \def\tud@title@logocolor{HKS41}%
     \def\tud@title@fontcolor{HKS41}%
   \or%
-    \def\tud@title@pagecolor{HKS41}%
-    \def\tud@title@logocolor{white}%
+    \def\tud@title@fontcolor{HKS41}%
+  \or%
+    \def\tud@title@fontcolor{HKS41!30}%
+  \or%
     \def\tud@title@fontcolor{HKS41!30}%
   \fi%
 %    \end{macrocode}
@@ -620,8 +614,23 @@
 % Einstellungen übernommen.
 %    \begin{macrocode}
     \def\@tempa{%
-      \let\tud@pagecolor\tud@title@pagecolor%
-      \let\tud@head@logocolor\tud@title@logocolor%
+      \def\tud@pagecolor{}%
+      \ifcase\tud@layout@title\relax\or%
+        \def\tud@head@bar{0}%
+      \or%
+        \def\tud@head@bar{1}%
+      \or%
+        \def\tud@head@bar{2}%
+      \or%
+        \def\tud@pagecolor{HKS41}%
+        \def\tud@head@bar{-1}%
+        \def\tud@head@logocolor{white}%
+        \def\tud@foot@logocolor{white}%
+        \bool@std@lock{@tud@head@widebar}{true}%
+      \or%
+        \def\tud@pagecolor{HKS41}%
+        \def\tud@head@bar{2}%
+      \fi%
       \color{\tud@title@fontcolor}%
       \addtokomafont{pagenumber}{\sffamily\color{\tud@title@fontcolor}}%
       \addtokomafont{footnote}{\sffamily\color{\tud@title@fontcolor}}%

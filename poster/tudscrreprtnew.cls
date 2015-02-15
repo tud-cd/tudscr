@@ -203,31 +203,37 @@
     {din}{4},{dinbold}{4},{DIN}{4},{DINBold}{4},%
     {nohead}{5},{nocdhead}{5},{noheadfont}{5},{noheadcdfont}{5},%
     {nocdheadfont}{5},{nobar}{5},{nobarfont}{5},%
-    {head}{6},{cdhead}{6},{headfont}{6},{headcdfont}{6},{cdheadfont}{6},%
+    {head}{6},{headfont}{6},{cdhead}{6},{headcdfont}{6},{cdheadfont}{6},%
     {bar}{6},{barfont}{6},%
-    {litehead}{6},{litecdhead}{6},{liteheadfont}{6},{liteheadcdfont}{6},
-    {litecdheadfont}{6},{litebar}{6},{litebarfont}{6},%
-    {headlite}{6},{cdheadlite}{6},{headfontlite}{6},{headcdfontlite}{6},
-    {cdheadfontlite}{6},{barlite}{6},{barfontlite}{6},%
-    {lighthead}{6},{lightcdhead}{6},{lightheadfont}{6},{lightheadcdfont}{6},%
-    {lightcdheadfont}{6},{lightbar}{6},{lightbarfont}{6},%
-    {headlight}{6},{cdheadlight}{6},{headfontlight}{6},{headcdfontlight}{6},%
-    {cdheadfontlight}{6},{barlight}{6},{barfontlight}{6},%
-    {noheavyhead}{6},{noheavycdhead}{6},{noheavyheadfont}{6},%
-    {noheavyheadcdfont}{6},{noheavycdheadfont}{6},{noheavybar}{6},%
-    {noheavybarfont}{6},%
-    {headnoheavy}{6},{cdheadnoheavy}{6},{headfontnoheavy}{6},%
-    {headcdfontnoheavy}{6},{cdheadfontnoheavy}{6},{barnoheavy}{6},%
-    {barfontnoheavy}{6},%
-    {heavyhead}{7},{heavycdhead}{7},{heavyheadfont}{7},{heavyheadcdfont}{7},%
-    {heavycdheadfont}{7},{heavybar}{7},{heavybarfont}{7},%
-    {headheavy}{7},{cdheadheavy}{7},{headfontheavy}{7},{headcdfontheavy}{7},%
-    {cdheadfontheavy}{7},{barheavy}{7},{barfontheavy}{7},%
+    {lighthead}{6},{lightheadfont}{6},{lightfonthead}{6},%
+    {lightcdhead}{6},{lightheadcdfont}{6},{lightcdheadfont}{6},%
+    {lightbar}{6},{lightbarfont}{6},{lightfontbar}{6},%
+    {headlight}{6},{headfontlight}{6},{headlightfont}{6},%
+    {cdheadlight}{6},{headcdfontlight}{6},{cdheadfontlight}{6},%
+    {barlight}{6},{barfontlight}{6},{barlightfont}{6},%
+    {litehead}{6},{liteheadfont}{6},{litefonthead}{6},%
+    {litecdhead}{6},{liteheadcdfont}{6},{litecdheadfont}{6},%
+    {litebar}{6},{litebarfont}{6},{litefontbar}{6},%
+    {headlite}{6},{headfontlite}{6},{headlitefont}{6},%
+    {cdheadlite}{6},{headcdfontlite}{6},{cdheadfontlite}{6},%
+    {barlite}{6},{barfontlite}{6},{barlitefont}{6},%
+    {noheavyhead}{6},{noheavyheadfont}{6},{noheavyfonthead}{6},%
+    {noheavycdhead}{6},{noheavyheadcdfont}{6},{noheavycdheadfont}{6},%
+    {noheavybar}{6},{noheavybarfont}{6},{noheavyfontbar}{6},%
+    {headnoheavy}{6},{headfontnoheavy}{6},{headnoheavyfont}{6},%
+    {cdheadnoheavy}{6},{headcdfontnoheavy}{6},{cdheadfontnoheavy}{6},%
+    {barnoheavy}{6},{barfontnoheavy}{6},{barnoheavyfont}{6},%
+    {heavyhead}{7},{heavyheadfont}{7},{heavyfonthead}{7},%
+    {heavycdhead}{7},{heavyheadcdfont}{7},{heavycdheadfont}{7},%
+    {heavybar}{7},{heavybarfont}{7},{heavyfontbar}{7},%
+    {headheavy}{7},{headfontheavy}{7},{headheavyfont}{7},%
+    {cdheadheavy}{7},{headcdfontheavy}{7},{cdheadfontheavy}{7},%
+    {barheavy}{7},{barfontheavy}{7},{barheavyfont}{7},%
     {nomath}{8},{nocdmath}{8},%
     {serifmath}{8},{serif}{8},{nosansmath}{8},{nosans}{8},%
     {math}{9},{cdmath}{9},{sansmath}{9},{sans}{9},%
-    {upgreek}{10},{uprightgreek}{10},{uprightGreek}{10},%
-    {slgreek}{11},{slantedgreek}{11},{slantedGreek}{11},%
+    {upgreek}{10},{upright}{10},{uprightgreek}{10},{uprightGreek}{10},%
+    {slgreek}{11},{slanted}{11},{slantedgreek}{11},{slantedGreek}{11},%
     {fontspec}{12},{luatex}{12},{lualatex}{12}{xetex}{12},{xelatex}{12},%
     {nofontspec}{13},{pdftex}{13},{pdflatex}{13}%
   }{#1}%
@@ -303,12 +309,12 @@
 \newcommand*\tud@ddc@switch{}
 \edef\tud@ddc@switch{%
   \TUD@numkey@bool,%
-  {color}{2},{colour}{2},%
-  {colorblack}{3},{colourblack}{3},%
-  {gray}{4},{grey}{4},{cdgray}{4},%
-  {black}{5},%
-  {blue}{6},{cddarkblue}{6},%
-  {white}{7}%
+  {color}{2},{colour}{2},{cdcolor}{2},{cdcolour}{2},%
+  {colorblack}{3},{colourblack}{3},{cdcolorblack}{3},{cdcolourblack}{3},%
+  {gray}{4},{grey}{4},{HKS92}{4},{cdgray}{4},{cdgrey}{4},%
+  {black}{5},{cdblack}{5},%
+  {blue}{6},{HKS41}{6},{cdblue}{6},{cddarkblue}{6},%
+  {white}{7},{cdwhite}{7}%
 }
 \newcommand*\tud@ddc@save{}
 \newif\if@tud@ddc@save
@@ -399,9 +405,9 @@
     \if@atdocument\tud@geometry@process\fi%
   \fi%
 }
-% §§§ cdhead auf Farbe erweitern
 \cs@lock{tud@head@font}{0}
-\cs@lock{tud@head@bar}{0}
+\newcommand*\tud@head@bar{0}
+\bool@lock{@tud@head@widebar}
 \TUD@key{cdhead}[true]{%
   \TUD@set@numkey{cdhead}{@tempa}{%
     \TUD@numkey@bool,%
@@ -409,11 +415,16 @@
     {cd}{1},{cdfont}{1},{cdfonts}{1},{tudfonts}{1},%
     {light}{1},{lightfont}{1},{lite}{1},{litefont}{1},{noheavyfont}{1},%
     {heavy}{2},{heavyfont}{2},%
-    {slim}{3},{slimhead}{3},{nowide}{3},{nowidehead}{3},{textwidth}{3},%
-    {normal}{3},{normalhead}{3},{standard}{3},{standardhead}{3},%
-    {nocolor}{3},{nocolour}{3},%
-    {wide}{4},{widehead}{4},{paperwidth}{4},%
-    {color}{5},{colour}{5},{bicolor}{5},{bicolour}{5}%
+    {nocolor}{3},{nocolour}{3},{monochrome}{3},{monochromatic}{3},%
+    {colorlite}{4},{litecolor}{4},{colourlite}{4},{litecolour}{4},%
+    {colorlight}{4},{lightcolor}{4},{colourlight}{4},{lightcolour}{4},%
+    {pale}{4},{colorpale}{4},{palecolor}{4},{colourpale}{4},{palecolour}{4},%
+    {bicolor}{5},{bicolour}{5},{twocolor}{5},{twocolour}{5},%
+    {bichrome}{5},{bichromatic}{5},{dichrome}{5},{dichromatic}{5},%
+    {color}{5},{colour}{5},%
+    {full}{5},{colorfull}{5},{fullcolor}{5},{colourfull}{5},{fullcolour}{5},%
+    {textwidth}{6},{slim}{6},{slimhead}{6},{nowide}{6},{nowidehead}{6},%
+    {paperwidth}{7},{wide}{7},{widehead}{7}%
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax%
@@ -423,21 +434,34 @@
     \or%
       \cs@set@lock{tud@head@font}{2}%
     \or%
-      \cs@set@lock{tud@head@bar}{0}%
+      \def\tud@head@bar{0}%
     \or%
-      \cs@set@lock{tud@head@bar}{1}%
+      \def\tud@head@bar{1}%
     \or%
-      \cs@set@lock{tud@head@bar}{2}%
+      \def\tud@head@bar{2}%
+    \or%
+      \bool@set@lock{@tud@head@widebar}{false}%
+    \or%
+      \bool@set@lock{@tud@head@widebar}{true}%
     \fi%
   \fi%
 }
-% §§§ cdfoot auf Farbe erweitern, Option überarbeiten
-\newif\if@tud@cdfoot
+\newif\if@tud@footcolor
 \TUD@key{cdfoot}[true]{%
-  \TUD@set@ifkey{cdfoot}{@tud@cdfoot}{#1}%
+  \TUD@set@numkey{cdfoot}{@tempa}{%
+    \TUD@numkey@bool,%
+    {nocolor}{2},{nocolour}{2},%
+    {color}{3},{colour}{3}%
+  }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \if@atdocument%
-      \if@tud@cdfoot%
+    \ifcase\@tempa\relax%
+      \TUD@AfterPackage{scrlayer-scrpage}{%
+        \tud@ps@restore{scrheadings}%
+        \tud@ps@restore{plain.scrheadings}%
+        \tud@font@koma@unset{pageheadfoot}%
+      }%
+    \or%
+      \TUD@AfterPackage{scrlayer-scrpage}{%
         \tud@ps@store{scrheadings}%
         \tud@ps@store{plain.scrheadings}%
         \tud@font@koma@set{pageheadfoot}{\upshape}%
@@ -447,17 +471,16 @@
           {\footnotesize\headmark}%
           \if@twoside\ifodd\value{page}\quad\pagemark\fi\else\quad\pagemark\fi%
         }%
-      \else%
-        \tud@ps@restore{scrheadings}%
-        \tud@ps@restore{plain.scrheadings}%
-        \tud@font@koma@unset{pageheadfoot}%
-      \fi%
+      }%
+    \or%
+      \@tud@footcolorfalse%
+    \or%
+      \@tud@footcolortrue%
     \fi%
   \else%
     \TUDoptions{extrabottommargin=#1}%
   \fi%
 }
-\AtBeginDocument{\if@tud@cdfoot\TUDoptions{cdfoot=true}\fi}
 \newcommand*\tud@ps@store[1]{%
   \tud@@ps@store{#1}{odd}{left}{head}%
   \tud@@ps@store{#1}{odd}{right}{head}%
@@ -511,7 +534,6 @@
   \fi%
 }
 %%% From File: tudscr-layout.dtx
-\newcommand*\tud@head@logocolor{black}
 \cs@lock{tud@layout@cover}{0}
 \cs@lock{tud@layout@title}{0}
 \cs@lock{tud@layout@part}{0}
@@ -519,48 +541,54 @@
 \newcommand*\tud@layout@switch{}
 \edef\tud@layout@switch{%
   \TUD@numkey@bool,%
-  {simple}{1},{std}{1},{standard}{1},{mono}{1},{monochrom}{1},%
+  {nocolor}{1},{nocolour}{1},{monochrome}{1},{monochromatic}{1},%
   {lite}{2},{colorlite}{2},{litecolor}{2},{colourlite}{2},{litecolour}{2},%
   {light}{2},{colorlight}{2},{lightcolor}{2},{colourlight}{2},{lightcolour}{2},%
   {pale}{2},{colorpale}{2},{palecolor}{2},{colourpale}{2},{palecolour}{2},%
-  {full}{3},{colorfull}{3},{fullcolor}{3},{colourfull}{3},{fullcolour}{3},%
-  {color}{3},{colour}{3}%
+  {bicolor}{3},{bicolour}{3},{twocolor}{3},{twocolour}{3},%
+  {bichrome}{3},{bichromatic}{3},{dichrome}{3},{dichromatic}{3},%
+  {color}{4},{colour}{4},%
+  {full}{5},{colorfull}{5},{fullcolor}{5},{colourfull}{5},{fullcolour}{5}%
 }
 \newcommand*\tud@cd{0}
 \TUD@key{cd}[true]{%
   \TUD@set@numkey{cd}{tud@cd}{\tud@layout@switch}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\tud@cd\relax%
-      \def\tud@head@logocolor{black}%
       \cs@std@lock{tud@layout@cover}{0}%
       \cs@std@lock{tud@layout@title}{0}%
       \cs@std@lock{tud@layout@part}{0}%
       \cs@std@lock{tud@layout@chapter}{0}%
-      \cs@std@lock{tud@head@bar}{0}%
       \TUD@std@ifkey@lock{chapterpage}{false}%
     \or%
-      \def\tud@head@logocolor{black}%
       \cs@std@lock{tud@layout@cover}{1}%
       \cs@std@lock{tud@layout@title}{1}%
       \cs@std@lock{tud@layout@part}{1}%
       \cs@std@lock{tud@layout@chapter}{1}%
-      \cs@std@lock{tud@head@bar}{0}%
       \TUD@std@ifkey@lock{chapterpage}{false}%
     \or%
-      \def\tud@head@logocolor{HKS41}%
       \cs@std@lock{tud@layout@cover}{1}%
       \cs@std@lock{tud@layout@title}{2}%
       \cs@std@lock{tud@layout@part}{2}%
       \cs@std@lock{tud@layout@chapter}{2}%
-      \cs@std@lock{tud@head@bar}{0}%
       \TUD@std@ifkey@lock{chapterpage}{false}%
     \or%
-      \def\tud@head@logocolor{HKS41}%
       \cs@std@lock{tud@layout@cover}{1}%
       \cs@std@lock{tud@layout@title}{3}%
       \cs@std@lock{tud@layout@part}{3}%
       \cs@std@lock{tud@layout@chapter}{3}%
-      \cs@std@lock{tud@head@bar}{1}%
+      \TUD@std@ifkey@lock{chapterpage}{false}%
+    \or%
+      \cs@std@lock{tud@layout@cover}{1}%
+      \cs@std@lock{tud@layout@title}{4}%
+      \cs@std@lock{tud@layout@part}{4}%
+      \cs@std@lock{tud@layout@chapter}{4}%
+      \TUD@std@ifkey@lock{chapterpage}{true}%
+    \or%
+      \cs@std@lock{tud@layout@cover}{1}%
+      \cs@std@lock{tud@layout@title}{5}%
+      \cs@std@lock{tud@layout@part}{5}%
+      \cs@std@lock{tud@layout@chapter}{5}%
       \TUD@std@ifkey@lock{chapterpage}{true}%
     \fi%
     \if@atdocument%
@@ -585,6 +613,10 @@
       \cs@set@lock{tud@layout@cover}{2}%
     \or%
       \cs@set@lock{tud@layout@cover}{3}%
+    \or%
+      \cs@set@lock{tud@layout@cover}{4}%
+    \or%
+      \cs@set@lock{tud@layout@cover}{5}%
     \fi%
     \if@atdocument\tud@layout@process\fi%
   \fi%
@@ -600,6 +632,10 @@
       \cs@set@lock{tud@layout@title}{2}%
     \or%
       \cs@set@lock{tud@layout@title}{3}%
+    \or%
+      \cs@set@lock{tud@layout@title}{4}%
+    \or%
+      \cs@set@lock{tud@layout@title}{5}%
     \fi%
     \if@atdocument\tud@layout@process\fi%
   \fi%
@@ -615,6 +651,10 @@
       \cs@set@lock{tud@layout@part}{2}%
     \or%
       \cs@set@lock{tud@layout@part}{3}%
+    \or%
+      \cs@set@lock{tud@layout@part}{4}%
+    \or%
+      \cs@set@lock{tud@layout@part}{5}%
     \fi%
     \if@atdocument\tud@layout@process\fi%
   \fi%
@@ -633,6 +673,12 @@
       \TUD@std@ifkey@lock{chapterpage}{false}%
     \or%
       \cs@set@lock{tud@layout@chapter}{3}%
+      \TUD@std@ifkey@lock{chapterpage}{false}%
+    \or%
+      \cs@set@lock{tud@layout@chapter}{4}%
+      \TUD@std@ifkey@lock{chapterpage}{true}%
+    \or%
+      \cs@set@lock{tud@layout@chapter}{5}%
       \TUD@std@ifkey@lock{chapterpage}{true}%
     \fi%
     \if@atdocument\tud@layout@process\fi%
@@ -736,7 +782,7 @@
 \newcommand*\tud@fm@switch{%
   {section}{2},{sect}{2},{sec}{2},{addsec}{2},%
   {chapter}{3},{chap}{3},{addchap}{3},%
-  {new}{3},{std}{3},{heading}{3},%
+  {new}{3},{standard}{3},{heading}{3},%
   {totoc}{4},{toc}{4},{totoclevelup}{4},{toclevelup}{4},{levelup}{4},%
   {totocleveldown}{5},{tocleveldown}{5},{leveldown}{5},%
   {nottotoc}{6},{notoc}{6},%
@@ -846,6 +892,9 @@
   \TUD@set@ifkey@lock{subjectthesis}{@tud@subjectthesis}{#1}%
 }
 %%% From File: tudscr-misc.dtx
+\newcommand*\TUD@AfterPackage[2]{%
+  \if@atdocument#2\else\AfterPackage!{#1}{#2}\fi%
+}
 \newif\if@tud@symbolheadings
 \TUD@key{footnotes}{%
   \TUD@set@numkey{footnotes}{@tempa}{%
@@ -991,21 +1040,28 @@
 \TUD@key{color}[true]{%
   \TUD@set@numkey{color}{@tempa}{%
     \TUD@numkey@bool,%
-    {simple}{0},{std}{0},{standard}{0},{mono}{0},{monochrom}{0},%
-    {color}{1},{colour}{1},{full}{1},%
-    {colorfull}{1},{fullcolor}{1},{colourfull}{1},{fullcolour}{1},%
-    {lite}{2},{colorlite}{2},{litecolor}{2},{colourlite}{2},{litecolour}{2},%
-    {light}{2},{colorlight}{2},{lightcolor}{2},{colorpale}{2},{palecolor}{2},%
-    {pale}{2},{colourlight}{2},{lightcolour}{2},{colourpale}{2},{palecolour}{2}%
+    {nocolor}{0},{nocolour}{0},{monochrome}{0},{monochromatic}{0},%
+    {lite}{1},{light}{1},{pale}{1},%
+    {colorlite}{1},{litecolor}{1},{colourlite}{1},{litecolour}{1},%
+    {colorlight}{1},{lightcolor}{1},{colourlight}{1},{lightcolour}{1},%
+    {colorpale}{1},{palecolor}{1},{colourpale}{1},{palecolour}{1},%
+    {bicolor}{2},{bicolour}{2},{twocolor}{2},{twocolour}{2},%
+    {bichrome}{2},{bichromatic}{2},{dichrome}{2},{dichromatic}{2},%
+    {color}{3},{colour}{3},%
+    {full}{4},{colorfull}{4},{fullcolor}{4},{colourfull}{4},{fullcolour}{4}%
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \tud@deprecated@key{color}{cd}%
     \ifcase\@tempa\relax%
       \TUDoptions{cd=true}%
     \or%
+      \TUDoptions{cd=pale}%
+    \or%
+      \TUDoptions{cd=bicolor}%
+    \or%
       \TUDoptions{cd=color}%
     \or%
-      \TUDoptions{cd=lite}%
+      \TUDoptions{cd=fullcolor}%
     \fi%
   \fi%
 }
@@ -1902,6 +1958,25 @@
       contents={\hfill\tud@headlogo},%
     ]{tudheadings.head.logo}%
     \DeclareNewLayer[%
+      background,%
+      contents={%
+        \ifnum\tud@head@bar>\@ne\relax%
+          \color{HKS41}%
+          \rule{\layerwidth}{\tud@dim@topmargin}%
+        \fi%
+      },%
+    ]{tudheadings.head.back}%
+    \DeclareNewLayer[%
+      background,%
+      voffset=\tud@dim@topmargin,%
+      contents={%
+        \ifnum\tud@head@bar>\@ne\relax%
+          \color{HKS41!80}%
+          \rule{\layerwidth}{\tud@dim@barheight}%
+        \fi%
+      },%
+    ]{tudheadings.head.bar}%
+    \DeclareNewLayer[%
       background,headsep,%
       voffset=\dimexpr\tud@dim@topmargin+\tud@dim@line\relax,%
       contents={\tud@head@text@box},%
@@ -1909,49 +1984,41 @@
     \DeclareNewLayer[%
       background,headsep,%
       voffset=\dimexpr\tud@dim@topmargin-.5\tud@dim@line\relax,%
-      contents={\ifnum\tud@head@bar=\z@\relax\tud@head@rule{\textwidth}\fi},%
+      contents={%
+        \ifnum\tud@head@bar<\tw@\relax\if@tud@head@widebar\else%
+          \tud@head@rule{\textwidth}%
+        \fi\fi%
+      },%
     ]{tudheadings.head.upperline}%
     \DeclareNewLayer[%
       background,headsep,%
       voffset=\dimexpr\tud@dim@topmargin+\tud@dim@barheight%
         -.5\tud@dim@line\relax,%
-      contents={\ifnum\tud@head@bar=\z@\relax\tud@head@rule{\textwidth}\fi},%
+      contents={%
+        \ifnum\tud@head@bar<\tw@\relax\if@tud@head@widebar\else%
+          \tud@head@rule{\textwidth}%
+        \fi\fi%
+      },%
     ]{tudheadings.head.lowerline}%
     \DeclareNewLayer[%
       background,%
       voffset=\dimexpr\tud@dim@topmargin-.5\tud@dim@line\relax,%
-      contents={\ifnum\tud@head@bar=\@ne\relax\tud@head@rule{\paperwidth}\fi},%
+      contents={%
+        \ifnum\tud@head@bar<\tw@\relax\if@tud@head@widebar%
+          \tud@head@rule{\paperwidth}%
+        \fi\fi%
+      },%
     ]{tudheadings.head.upperwideline}%
     \DeclareNewLayer[%
       background,%
       voffset=\dimexpr\tud@dim@topmargin+\tud@dim@barheight%
         -.5\tud@dim@line\relax,%
-      contents={\ifnum\tud@head@bar=\@ne\relax\tud@head@rule{\paperwidth}\fi},%
+      contents={%
+        \ifnum\tud@head@bar<\tw@\relax\if@tud@head@widebar%
+          \tud@head@rule{\paperwidth}%
+        \fi\fi%
+      },%
     ]{tudheadings.head.lowerwideline}%
-    
-%    \newif\if@tud@test
-    \DeclareNewLayer[%
-      % §§§ evtl. auch mit clone arbeiten
-      background,align=tl,%
-      contents={%
-        \ifnum\tud@head@bar=\tw@\relax%
-          \color{HKS41}%
-          \rule{\layerwidth}{\tud@dim@topmargin}%
-        \fi%
-      },%
-    ]{tudheadings.head.back}%
-    \DeclareNewLayer[%
-      % §§§ evtl. auch mit clone arbeiten
-      background,align=tl,%
-      voffset=\tud@dim@topmargin,%
-      contents={%
-        \ifnum\tud@head@bar=\tw@\relax%
-          \color{HKS41!80}%
-          \rule{\layerwidth}{\tud@dim@barheight}%
-        \fi%
-      },%
-    ]{tudheadings.head.bar}%
-    
     \DeclareNewLayer[%
       background,foot,%
       height=\dimexpr\paperheight-\layeryoffset\relax,%
@@ -1998,16 +2065,49 @@
         height=\dimexpr.6\tud@dim@topmargin+\dp\strutbox\relax,%
       ]{tudheadings.foot.logo}%
     }{}%
-    \DeclareNewPageStyleByLayers[onselect=\tud@ps@init]{tudheadings}{%
-      tudheadings.head.back,%§§§
+    \DeclareNewLayer[%
+      background,%
+      hoffset=0pt,%
+      width=\paperwidth,%
+      voffset=\dimexpr\@nameuse{scr@l@tudheadings.foot.logo@y}%
+        -\dp\strutbox\relax,%
+      height=\dimexpr\paperheight-\layeryoffset\relax,%
+      contents={%
+        \if@tud@footcolor%
+          \let\@tempc\relax%
+          \ifnum\tud@head@bar>\@ne\def\@tempc{\color{HKS41}}\fi%
+          \ifstr{\tud@pagecolor}{HKS41}{\def\@tempc{\color{HKS41!80}}}{}%
+          \ifx\@tempc\relax\else%
+            \iftudscrverlower{2.03}{%
+              \tud@ddc@check%
+              \ifcase\@tempb\relax%
+                \vbox to \layerheight{%
+                  \vfil\@tempc%
+                  \rule{\layerwidth}{%
+                    \dimexpr\layerheight-\tud@dim@ddcdiff+\ht\strutbox\relax%
+                  }%
+                }%
+              \else%
+                \@tempc\rule{\layerwidth}{\layerheight}%
+              \fi%
+            }{\@tempc\rule{\layerwidth}{\layerheight}}%
+          \fi%
+        \fi%
+      },%
+    ]{tudheadings.foot.back}%
+    \DeclareNewPageStyleByLayers[%
+      onselect=\tud@ps@onselect,onbackground=\tud@ps@onbackground%
+    ]{tudheadings}{%
+      tudheadings.head.back,%
       tudheadings.head.mainlogo,%
       tudheadings.head.logo,%
-      tudheadings.head.bar,%§§§
+      tudheadings.head.bar,%
       tudheadings.head.text,%
       tudheadings.head.upperline,%
       tudheadings.head.lowerline,%
       tudheadings.head.upperwideline,%
       tudheadings.head.lowerwideline,%
+      tudheadings.foot.back,%
       tudheadings.foot.logo,%
       scrheadings.foot.odd,%
       scrheadings.foot.even,%
@@ -2018,16 +2118,19 @@
     \DeclareNewPageStyleAlias{tud}{tudheadings}%
     \DeclareNewPageStyleAlias{tudscr}{tudheadings}%
     \DeclareNewPageStyleAlias{tudscrheadings}{tudheadings}%
-    \DeclareNewPageStyleByLayers[onselect=\tud@ps@init]{plain.tudheadings}{%
-      tudheadings.head.back,%§§§
+    \DeclareNewPageStyleByLayers[%
+      onselect=\tud@ps@onselect,onbackground=\tud@ps@onbackground%
+    ]{plain.tudheadings}{%
+      tudheadings.head.back,%
       tudheadings.head.mainlogo,%
       tudheadings.head.logo,%
-      tudheadings.head.bar,%§§§
+      tudheadings.head.bar,%
       tudheadings.head.text,%
       tudheadings.head.upperline,%
       tudheadings.head.lowerline,%
       tudheadings.head.upperwideline,%
       tudheadings.head.lowerwideline,%
+      tudheadings.foot.back,%
       tudheadings.foot.logo,%
       plain.scrheadings.foot.odd,%
       plain.scrheadings.foot.even,%
@@ -2040,16 +2143,19 @@
     \DeclareNewPageStyleAlias{tudscrplain}{plain.tudheadings}%
     \DeclareNewPageStyleAlias{tudheadingsplain}{plain.tudheadings}%
     \DeclareNewPageStyleAlias{tudscrheadingsplain}{plain.tudheadings}%
-    \DeclareNewPageStyleByLayers[onselect=\tud@ps@init]{empty.tudheadings}{%
-      tudheadings.head.back,%§§§
+    \DeclareNewPageStyleByLayers[%
+      onselect=\tud@ps@onselect,onbackground=\tud@ps@onbackground%
+    ]{empty.tudheadings}{%
+      tudheadings.head.back,%
       tudheadings.head.mainlogo,%
       tudheadings.head.logo,%
-      tudheadings.head.bar,%§§§
+      tudheadings.head.bar,%
       tudheadings.head.text,%
       tudheadings.head.upperline,%
       tudheadings.head.lowerline,%
       tudheadings.head.upperwideline,%
       tudheadings.head.lowerwideline,%
+      tudheadings.foot.back,%
       tudheadings.foot.logo,%
     }%
     \DeclareNewPageStyleAlias{empty.tudscrheadings}{empty.tudheadings}%
@@ -2070,15 +2176,31 @@
     \BeforeSelectAnyPageStyle{\tud@beforeselectanypagestyle{#1}}%
   }%
 }
-\newcommand*\tud@ps@init{%
+\newcommand*\tud@ps@onselect{%
   \DeclarePageStyleAlias{plain}{plain.tudheadings}%
   \DeclarePageStyleAlias{headings}{tudheadings}%
   \def\sls@currentheadings{tudheadings}%
   \def\sls@currentplain{plain.tudheadings}%
-  \global\let\tud@dim@line\tud@dim@thinline%
-  \ifstr{\tud@head@logocolor}{white}{%
-    \global\let\tud@dim@line\tud@dim@heavyline%
-  }{}%
+}
+\newcommand*\tud@head@logocolor{black}
+\newcommand*\tud@foot@logocolor{black}
+\newcommand*\tud@ps@onbackground{%
+  \ifcase\tud@head@bar\relax%
+    \def\tud@head@logocolor{black}%
+    \def\tud@foot@logocolor{black}%
+  \or%
+    \def\tud@head@logocolor{HKS41}%
+    \def\tud@foot@logocolor{HKS41}%
+  \or%
+    \def\tud@head@logocolor{white}%
+    \if@tud@footcolor%
+      \def\tud@foot@logocolor{white}%
+    \else%
+      \def\tud@foot@logocolor{HKS41}%
+    \fi%
+  \fi%
+  \let\tud@dim@line\tud@dim@thinline%
+  \ifstr{\tud@head@logocolor}{white}{\let\tud@dim@line\tud@dim@heavyline}{}%
 }
 \patchcmd{\thispagestyle}{\gdef\@specialstyle{#1}}{%
   \xdef\@specialstyle{\GetRealPageStyle{#1}}
@@ -2198,7 +2320,6 @@
     \ClassWarningNoLine{\tudcls@name}{No `\string\faculty' given}%
     \faculty{}%
   \fi%
-  \color{\tud@head@logocolor}%
   \tud@head@font@set%
   \@tempswafalse%
   \def\tud@head@text@first{}%
@@ -2215,17 +2336,19 @@
   \fi%
   \vbox{%
     \linespread{0}\selectfont%
+    \color{\tud@head@logocolor}%
     \tud@head@text@write{\tud@head@text@first}%
+    \ifnum\tud@head@bar>\@ne%
+      \ifdefvoid{\tud@pagecolor}{\color{HKS41}}{%
+        \ifstr{\tud@pagecolor}{HKS41}{\color{white}}{\color{HKS41}}%
+      }%
+    \fi%
     \ifx\tud@head@text@second\@empty%
-      \ifx\@extraheadline\@empty%
-        \newline\tud@head@font@light\tud@head@text@write{}%
-      \else%
-        \newline\tud@head@font@light\tud@head@text@write{\@extraheadline}%
-      \fi%
+      \newline\tud@head@font@light\tud@head@text@write{\@extraheadline}%
     \else%
       \newline\tud@head@text@write{\tud@head@text@second}%
       \ifx\@extraheadline\@empty\else%
-        \newline\tud@head@font@light\@extraheadline%
+        \vspace{-\tud@dim@line}\newline\tud@head@font@light\@extraheadline%
       \fi%
     \fi%
   }%
@@ -2353,9 +2476,9 @@
   \tud@ddc@check%
   \ifcase\@tempb\relax\or%
     \def\tud@@ddclogo{DDC-22}%
-    \ifstr{\tud@head@logocolor}{HKS41}{\def\tud@@ddclogo{DDC-25}}{}%
-    \ifstr{\tud@head@logocolor}{cddarkblue}{\def\tud@@ddclogo{DDC-25}}{}%
-    \ifstr{\tud@head@logocolor}{white}{\def\tud@@ddclogo{DDC-28}}{}%
+    \ifstr{\tud@foot@logocolor}{HKS41}{\def\tud@@ddclogo{DDC-25}}{}%
+    \ifstr{\tud@foot@logocolor}{cddarkblue}{\def\tud@@ddclogo{DDC-25}}{}%
+    \ifstr{\tud@foot@logocolor}{white}{\def\tud@@ddclogo{DDC-28}}{}%
   \or%
     \def\tud@@ddclogo{DDC-01}%
   \or%
@@ -2695,11 +2818,7 @@
   \TUD@parameter@sethandler{\TUD@parameter@defaulthandler{tudpage}{#1}}%
 }
 %%% From File: tudscr-layout.dtx
-\newcommand*\tud@part@pagecolor{}
-\newcommand*\tud@part@logocolor{black}
 \newcommand*\tud@part@fontcolor{black}
-\newcommand*\tud@chapter@pagecolor{}
-\newcommand*\tud@chapter@logocolor{black}
 \newcommand*\tud@chapter@fontcolor{black}
 \newkomafont{parttitle}{%
   \tud@font@heading%
@@ -2831,16 +2950,14 @@
   \fi%
 }
 \newcommand*\tud@partheadstartvskip{%
-  \def\tud@part@pagecolor{}%
-  \def\tud@part@logocolor{black}%
   \def\tud@part@fontcolor{black}%
   \ifcase\tud@layout@part\relax\or\or%
-    \def\tud@part@pagecolor{}%
-    \def\tud@part@logocolor{HKS41}%
     \def\tud@part@fontcolor{HKS41}%
   \or%
-    \def\tud@part@pagecolor{HKS41}%
-    \def\tud@part@logocolor{white}%
+    \def\tud@part@fontcolor{HKS41}%
+  \or%
+    \def\tud@part@fontcolor{HKS41!30}%
+  \or%
     \def\tud@part@fontcolor{HKS41!30}%
   \fi%
   \begingroup%
@@ -2871,8 +2988,23 @@
 }
 \newcommand*\tud@partheadendvskip{%
   \tud@cleardoublespecialpage{%
-    \let\tud@pagecolor\tud@part@pagecolor%
-    \let\tud@head@logocolor\tud@part@logocolor%
+    \def\tud@pagecolor{}%
+    \ifcase\tud@layout@part\relax\or%
+      \def\tud@head@bar{0}%
+    \or%
+      \def\tud@head@bar{1}%
+    \or%
+      \def\tud@head@bar{2}%
+    \or%
+      \def\tud@pagecolor{HKS41}%
+      \def\tud@head@bar{-1}%
+      \def\tud@head@logocolor{white}%
+      \def\tud@foot@logocolor{white}%
+      \bool@std@lock{@tud@head@widebar}{true}%
+    \or%
+      \def\tud@pagecolor{HKS41}%
+      \def\tud@head@bar{2}%
+    \fi%
     \addtokomafont{pagenumber}{\sffamily\color{\tud@part@fontcolor}}%
     \clearpage%
   }%
@@ -2916,16 +3048,8 @@
   \@afterindentfalse\@afterheading%
 }
 \newcommand*\tud@chapterheadstartvskip{%
-  \def\tud@chapter@pagecolor{}%
-  \def\tud@chapter@logocolor{black}%
   \def\tud@chapter@fontcolor{black}%
-  \ifcase\tud@layout@chapter\relax\or\or%
-    \def\tud@chapter@pagecolor{}%
-    \def\tud@chapter@logocolor{HKS41}%
-    \def\tud@chapter@fontcolor{HKS41}%
-  \or%
-    \def\tud@chapter@pagecolor{HKS41!10}%
-    \def\tud@chapter@logocolor{HKS41}%
+  \ifcase\tud@layout@chapter\relax\or\else%
     \def\tud@chapter@fontcolor{HKS41}%
   \fi%
   \ifcsdef{scr@v@3.15}{%
@@ -3009,8 +3133,23 @@
 \newcommand*\tud@chapter@app{%
   \if@tud@chapterpage%
     \tud@cleardoublespecialpage{%
-      \let\tud@pagecolor\tud@chapter@pagecolor%
-      \let\tud@head@logocolor\tud@chapter@logocolor%
+      \def\tud@pagecolor{}%
+      \ifcase\tud@layout@chapter\relax\or%
+        \def\tud@head@bar{0}%
+      \or%
+        \def\tud@head@bar{1}%
+      \or%
+        \def\tud@head@bar{2}%
+      \or%
+        \def\tud@pagecolor{HKS41!10}%
+        \def\tud@head@bar{-1}%
+        \def\tud@head@logocolor{HKS41}%
+        \def\tud@foot@logocolor{HKS41}%
+        \bool@std@lock{@tud@head@widebar}{true}%
+      \or%
+        \def\tud@pagecolor{HKS41!10}%
+        \def\tud@head@bar{2}%
+      \fi%
       \addtokomafont{pagenumber}{\sffamily\color{\tud@chapter@fontcolor}}%
       \clearpage%
     }%
@@ -3481,8 +3620,6 @@
   \selectfont%
   \large%
 }
-\newcommand*\tud@title@pagecolor{}
-\newcommand*\tud@title@logocolor{black}
 \newcommand*\tud@title@fontcolor{black}
 \newcommand*\tud@titlepagenumber{}%
 \let\tud@titlepagenumber\relax%
@@ -3496,9 +3633,9 @@
       \if@titlepage%
         \tud@maketitlepage%
       \else%
+        \def\tud@title@fontcolor{black}%
         \ifcase\tud@layout@title\relax\or\else%
           \def\tud@title@fontcolor{HKS41}%
-          \def\tud@title@logocolor{HKS41}%
         \fi%
         \let\@maketitle\tud@@maketitle%
         \ifx\tud@titlepagenumber\relax\gdef\tud@titlepagenumber{1}\fi%
@@ -3522,13 +3659,14 @@
 \robustify{\footnotemark}%
 \newcommand*\tud@titleback{}%
 \newcommand*\tud@maketitlepage{%
+  \def\tud@title@fontcolor{black}%
   \ifcase\tud@layout@title\relax\or\or%
-    \def\tud@title@pagecolor{}%
-    \def\tud@title@logocolor{HKS41}%
     \def\tud@title@fontcolor{HKS41}%
   \or%
-    \def\tud@title@pagecolor{HKS41}%
-    \def\tud@title@logocolor{white}%
+    \def\tud@title@fontcolor{HKS41}%
+  \or%
+    \def\tud@title@fontcolor{HKS41!30}%
+  \or%
     \def\tud@title@fontcolor{HKS41!30}%
   \fi%
   \begin{titlepage}%
@@ -3720,8 +3858,23 @@
       \fi%
     \fi%
     \def\@tempa{%
-      \let\tud@pagecolor\tud@title@pagecolor%
-      \let\tud@head@logocolor\tud@title@logocolor%
+      \def\tud@pagecolor{}%
+      \ifcase\tud@layout@title\relax\or%
+        \def\tud@head@bar{0}%
+      \or%
+        \def\tud@head@bar{1}%
+      \or%
+        \def\tud@head@bar{2}%
+      \or%
+        \def\tud@pagecolor{HKS41}%
+        \def\tud@head@bar{-1}%
+        \def\tud@head@logocolor{white}%
+        \def\tud@foot@logocolor{white}%
+        \bool@std@lock{@tud@head@widebar}{true}%
+      \or%
+        \def\tud@pagecolor{HKS41}%
+        \def\tud@head@bar{2}%
+      \fi%
       \color{\tud@title@fontcolor}%
       \addtokomafont{pagenumber}{\sffamily\color{\tud@title@fontcolor}}%
       \addtokomafont{footnote}{\sffamily\color{\tud@title@fontcolor}}%

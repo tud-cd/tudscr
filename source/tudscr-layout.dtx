@@ -1,4 +1,4 @@
-% \CheckSum{1057}
+% \CheckSum{1090}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-layout.dtx}[%
-  2015/02/06 v2.03 TUD-KOMA-Script (layout)%
+  2015/02/15 v2.03 TUD-KOMA-Script (layout)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -89,15 +89,6 @@
 %
 % \subsection{Optionen}
 %
-% \begin{macro}{\tud@head@logocolor}
-% Dieses Makro definiert die Farbe des Kopfes. Diese kann durch die
-% entsprechende Option der \env{tudpage}"=Umgebung geändert werden. Außerdem
-% gibt es für Titel, Teil und Kapitel speziell dazugehörige Farben, so dass
-% das Aussehen des Kopfes ggf. angepasst wird.
-%    \begin{macrocode}
-\newcommand*\tud@head@logocolor{black}
-%    \end{macrocode}
-% \end{macro}^^A \tud@head@logocolor
 % \begin{option}{cd}
 % \begin{macro}{\tud@cd}
 % \begin{macro}{\tud@layout@cover}
@@ -140,12 +131,14 @@
 \newcommand*\tud@layout@switch{}
 \edef\tud@layout@switch{%
   \TUD@numkey@bool,%
-  {simple}{1},{std}{1},{standard}{1},{mono}{1},{monochrom}{1},%
+  {nocolor}{1},{nocolour}{1},{monochrome}{1},{monochromatic}{1},%
   {lite}{2},{colorlite}{2},{litecolor}{2},{colourlite}{2},{litecolour}{2},%
   {light}{2},{colorlight}{2},{lightcolor}{2},{colourlight}{2},{lightcolour}{2},%
   {pale}{2},{colorpale}{2},{palecolor}{2},{colourpale}{2},{palecolour}{2},%
-  {full}{3},{colorfull}{3},{fullcolor}{3},{colourfull}{3},{fullcolour}{3},%
-  {color}{3},{colour}{3}%
+  {bicolor}{3},{bicolour}{3},{twocolor}{3},{twocolour}{3},%
+  {bichrome}{3},{bichromatic}{3},{dichrome}{3},{dichromatic}{3},%
+  {color}{4},{colour}{4},%
+  {full}{5},{colorfull}{5},{fullcolor}{5},{colourfull}{5},{fullcolour}{5}%
 }
 %    \end{macrocode}
 % Es folgt die eigentliche Option.
@@ -154,28 +147,32 @@
 \TUD@key{cd}[true]{%
   \TUD@set@numkey{cd}{tud@cd}{\tud@layout@switch}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+%    \end{macrocode}
+% Layout nicht im \CD.
+%    \begin{macrocode}
     \ifcase\tud@cd\relax%
-      \def\tud@head@logocolor{black}%
       \cs@std@lock{tud@layout@cover}{0}%
       \cs@std@lock{tud@layout@title}{0}%
       \cs@std@lock{tud@layout@part}{0}%
 %<*book|report>
       \cs@std@lock{tud@layout@chapter}{0}%
-      \cs@std@lock{tud@head@bar}{0}%
       \TUD@std@ifkey@lock{chapterpage}{false}%
 %</book|report>
+%    \end{macrocode}
+% Layout im \CD mit schwarzer Schrift und schwarzem Kopf.
+%    \begin{macrocode}
     \or%
-      \def\tud@head@logocolor{black}%
       \cs@std@lock{tud@layout@cover}{1}%
       \cs@std@lock{tud@layout@title}{1}%
       \cs@std@lock{tud@layout@part}{1}%
 %<*book|report>
       \cs@std@lock{tud@layout@chapter}{1}%
-      \cs@std@lock{tud@head@bar}{0}%
       \TUD@std@ifkey@lock{chapterpage}{false}%
 %</book|report>
+%    \end{macrocode}
+% Layout im \CD mit blauer Schrift und blauem Kopf.
+%    \begin{macrocode}
     \or%
-      \def\tud@head@logocolor{HKS41}%
 %    \end{macrocode}
 % Die Umschlagseite wird standardmäßig immer monochrom gesetzt.
 %    \begin{macrocode}
@@ -184,32 +181,41 @@
       \cs@std@lock{tud@layout@part}{2}%
 %<*book|report>
       \cs@std@lock{tud@layout@chapter}{2}%
-      \cs@std@lock{tud@head@bar}{0}%
       \TUD@std@ifkey@lock{chapterpage}{false}%
 %</book|report>
+%    \end{macrocode}
+% Layout im \CD mit blauer Schrift und zweifarbigem Kopf.
+%    \begin{macrocode}
     \or%
-      \def\tud@head@logocolor{HKS41}%
       \cs@std@lock{tud@layout@cover}{1}%
       \cs@std@lock{tud@layout@title}{3}%
-%    \end{macrocode}
-% Ein komplett farbiges Layout ist bloß für Klassen mit Teil- und Kapitelseiten 
-% (\cls{tudscrbook} und \cls{tudscrreprt}) möglich. Ansonsten werden lediglich
-% die Überschriften, jedoch nicht der Seitenhintergrund farbig gestaltet.
-%    \begin{macrocode}
-%<*article>
-      \cs@std@lock{tud@layout@part}{2}%
-%</article>
-%<*book|report>
       \cs@std@lock{tud@layout@part}{3}%
+%<*book|report>
       \cs@std@lock{tud@layout@chapter}{3}%
+      \TUD@std@ifkey@lock{chapterpage}{false}%
 %</book|report>
 %    \end{macrocode}
-% Die Klassenoptionen \opt{chapterpage} sowie der breite Querbalken werden für
-% denFall der komplett farbigen Darstellung standardmäßig aktiviert können
-% allerdings vom Anwender überschrieben werden.
+% Farbiges Layout mit farbigem Hintergrund im \CD mit weißer Schrift und 
+% Outline im Kopf.
 %    \begin{macrocode}
+    \or%
+      \cs@std@lock{tud@layout@cover}{1}%
+      \cs@std@lock{tud@layout@title}{4}%
+      \cs@std@lock{tud@layout@part}{4}%
 %<*book|report>
-      \cs@std@lock{tud@head@bar}{1}%
+      \cs@std@lock{tud@layout@chapter}{4}%
+      \TUD@std@ifkey@lock{chapterpage}{true}%
+%</book|report>
+%    \end{macrocode}
+% Farbiges Layout mit farbigem Hintergrund im \CD mit weißer Schrift und 
+% farbigem Querbalken im Kopf.
+%    \begin{macrocode}
+    \or%
+      \cs@std@lock{tud@layout@cover}{1}%
+      \cs@std@lock{tud@layout@title}{5}%
+      \cs@std@lock{tud@layout@part}{5}%
+%<*book|report>
+      \cs@std@lock{tud@layout@chapter}{5}%
       \TUD@std@ifkey@lock{chapterpage}{true}%
 %</book|report>
     \fi%
@@ -264,6 +270,10 @@
       \cs@set@lock{tud@layout@cover}{2}%
     \or%
       \cs@set@lock{tud@layout@cover}{3}%
+    \or%
+      \cs@set@lock{tud@layout@cover}{4}%
+    \or%
+      \cs@set@lock{tud@layout@cover}{5}%
     \fi%
     \if@atdocument\tud@layout@process\fi%
   \fi%
@@ -284,6 +294,10 @@
       \cs@set@lock{tud@layout@title}{2}%
     \or%
       \cs@set@lock{tud@layout@title}{3}%
+    \or%
+      \cs@set@lock{tud@layout@title}{4}%
+    \or%
+      \cs@set@lock{tud@layout@title}{5}%
     \fi%
     \if@atdocument\tud@layout@process\fi%
   \fi%
@@ -303,12 +317,11 @@
     \or%
       \cs@set@lock{tud@layout@part}{2}%
     \or%
-%<*article>
-      \cs@set@lock{tud@layout@part}{2}%
-%</article>
-%<*book|report>
       \cs@set@lock{tud@layout@part}{3}%
-%</book|report>
+    \or%
+      \cs@set@lock{tud@layout@part}{4}%
+    \or%
+      \cs@set@lock{tud@layout@part}{5}%
     \fi%
     \if@atdocument\tud@layout@process\fi%
   \fi%
@@ -335,6 +348,12 @@
       \TUD@std@ifkey@lock{chapterpage}{false}%
     \or%
       \cs@set@lock{tud@layout@chapter}{3}%
+      \TUD@std@ifkey@lock{chapterpage}{false}%
+    \or%
+      \cs@set@lock{tud@layout@chapter}{4}%
+      \TUD@std@ifkey@lock{chapterpage}{true}%
+    \or%
+      \cs@set@lock{tud@layout@chapter}{5}%
       \TUD@std@ifkey@lock{chapterpage}{true}%
     \fi%
     \if@atdocument\tud@layout@process\fi%
@@ -554,32 +573,17 @@
 % verschiedener Textelemente sowie die farbliche Gestaltung verstanden. Für das
 % \CD gibt es dabei drei Ausprägungen, die für die verschiedenen Elemente
 % auch unabhängig gewählt werden können.
-% \begin{macro}{\tud@part@pagecolor}
-% \begin{macro}{\tud@part@logocolor}
 % \begin{macro}{\tud@part@fontcolor}
-% \begin{macro}{\tud@chapter@pagecolor}
-% \begin{macro}{\tud@chapter@logocolor}
 % \begin{macro}{\tud@chapter@fontcolor}
-% Die Makros werden für die Hintergrundfarbe der Seiten und die Farbe der
-% Überschriften verwendet.
+% Die Makros werden für die Farbe der Überschriften verwendet.
 %    \begin{macrocode}
-%<*book|report>
-\newcommand*\tud@part@pagecolor{}
-\newcommand*\tud@part@logocolor{black}
-%</book|report>
 \newcommand*\tud@part@fontcolor{black}
 %<*book|report>
-\newcommand*\tud@chapter@pagecolor{}
-\newcommand*\tud@chapter@logocolor{black}
 \newcommand*\tud@chapter@fontcolor{black}
 %</book|report>
 %    \end{macrocode}
 % \end{macro}^^A \tud@chapter@fontcolor
-% \end{macro}^^A \tud@chapter@logocolor
-% \end{macro}^^A \tud@chapter@pagecolor
 % \end{macro}^^A \tud@part@fontcolor
-% \end{macro}^^A \tud@part@logocolor
-% \end{macro}^^A \tud@part@pagecolor
 % \begin{KOMAfont}{tud@heading}
 % \changes{v2.02}{2014/08/24}{entfernt}%^^A
 % \begin{KOMAfont}{parttitle}
@@ -876,7 +880,7 @@
 \let\tud@partheadstartvskip\partheadstartvskip%
 \pretocmd{\tud@partheadstartvskip}{%
   \def\tud@part@fontcolor{black}%
-  \ifcase\tud@layout@part\relax\or\or%
+  \ifcase\tud@layout@part\relax\or\else%
     \def\tud@part@fontcolor{HKS41}%
   \fi%
 }{}{\tud@patch@wrn{tud@partheadstartvskip}}
@@ -887,16 +891,14 @@
 %    \begin{macrocode}
 %<*book|report>
 \newcommand*\tud@partheadstartvskip{%
-  \def\tud@part@pagecolor{}%
-  \def\tud@part@logocolor{black}%
   \def\tud@part@fontcolor{black}%
   \ifcase\tud@layout@part\relax\or\or%
-    \def\tud@part@pagecolor{}%
-    \def\tud@part@logocolor{HKS41}%
     \def\tud@part@fontcolor{HKS41}%
   \or%
-    \def\tud@part@pagecolor{HKS41}%
-    \def\tud@part@logocolor{white}%
+    \def\tud@part@fontcolor{HKS41}%
+  \or%
+    \def\tud@part@fontcolor{HKS41!30}%
+  \or%
     \def\tud@part@fontcolor{HKS41!30}%
   \fi%
   \begingroup%
@@ -954,8 +956,23 @@
 %    \begin{macrocode}
 \newcommand*\tud@partheadendvskip{%
   \tud@cleardoublespecialpage{%
-    \let\tud@pagecolor\tud@part@pagecolor%
-    \let\tud@head@logocolor\tud@part@logocolor%
+    \def\tud@pagecolor{}%
+    \ifcase\tud@layout@part\relax\or%
+      \def\tud@head@bar{0}%
+    \or%
+      \def\tud@head@bar{1}%
+    \or%
+      \def\tud@head@bar{2}%
+    \or%
+      \def\tud@pagecolor{HKS41}%
+      \def\tud@head@bar{-1}%
+      \def\tud@head@logocolor{white}%
+      \def\tud@foot@logocolor{white}%
+      \bool@std@lock{@tud@head@widebar}{true}%
+    \or%
+      \def\tud@pagecolor{HKS41}%
+      \def\tud@head@bar{2}%
+    \fi%
     \addtokomafont{pagenumber}{\sffamily\color{\tud@part@fontcolor}}%
     \clearpage%
   }%
@@ -1069,16 +1086,8 @@
 % für die jeweilig gewählte Option ausgewählt.
 %    \begin{macrocode}
 \newcommand*\tud@chapterheadstartvskip{%
-  \def\tud@chapter@pagecolor{}%
-  \def\tud@chapter@logocolor{black}%
   \def\tud@chapter@fontcolor{black}%
-  \ifcase\tud@layout@chapter\relax\or\or%
-    \def\tud@chapter@pagecolor{}%
-    \def\tud@chapter@logocolor{HKS41}%
-    \def\tud@chapter@fontcolor{HKS41}%
-  \or%
-    \def\tud@chapter@pagecolor{HKS41!10}%
-    \def\tud@chapter@logocolor{HKS41}%
+  \ifcase\tud@layout@chapter\relax\or\else%
     \def\tud@chapter@fontcolor{HKS41}%
   \fi%
   \ifcsdef{scr@v@3.15}{%
@@ -1238,8 +1247,23 @@
 % Rückseite beachtet. Umgesetzt wird dies mit \cs{tud@cleardoublespecialpage}.
 %    \begin{macrocode}
     \tud@cleardoublespecialpage{%
-      \let\tud@pagecolor\tud@chapter@pagecolor%
-      \let\tud@head@logocolor\tud@chapter@logocolor%
+      \def\tud@pagecolor{}%
+      \ifcase\tud@layout@chapter\relax\or%
+        \def\tud@head@bar{0}%
+      \or%
+        \def\tud@head@bar{1}%
+      \or%
+        \def\tud@head@bar{2}%
+      \or%
+        \def\tud@pagecolor{HKS41!10}%
+        \def\tud@head@bar{-1}%
+        \def\tud@head@logocolor{HKS41}%
+        \def\tud@foot@logocolor{HKS41}%
+        \bool@std@lock{@tud@head@widebar}{true}%
+      \or%
+        \def\tud@pagecolor{HKS41!10}%
+        \def\tud@head@bar{2}%
+      \fi%
       \addtokomafont{pagenumber}{\sffamily\color{\tud@chapter@fontcolor}}%
       \clearpage%
     }%
