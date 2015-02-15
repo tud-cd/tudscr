@@ -1,29 +1,33 @@
-% \CheckSum{586}
+% \CheckSum{583}
 % \iffalse meta-comment
-% ======================================================================
+% 
+% ============================================================================
+% 
+%  TUD-KOMA-Script
+%  Copyright (c) Falk Hanisch <tudscr@gmail.com>, 2012-2015
+% 
+% ============================================================================
+% 
+%  This work may be distributed and/or modified under the conditions of the
+%  LaTeX Project Public License, version 1.3c of the license. The latest
+%  version of this license is in http://www.latex-project.org/lppl.txt and 
+%  version 1.3c or later is part of all distributions of LaTeX 2005/12/01
+%  or later and of this work. This work has the LPPL maintenance status 
+%  "author-maintained". The current maintainer and author of this work
+%  is Falk Hanisch.
+% 
+% ----------------------------------------------------------------------------
+% 
+% Dieses Werk darf nach den Bedingungen der LaTeX Project Public Lizenz
+% in der Version 1.3c, verteilt und/oder veraendert werden. Die aktuelle 
+% Version dieser Lizenz ist http://www.latex-project.org/lppl.txt und 
+% Version 1.3c oder spaeter ist Teil aller Verteilungen von LaTeX 2005/12/01 
+% oder spaeter und dieses Werks. Dieses Werk hat den LPPL-Verwaltungs-Status 
+% "author-maintained", wird somit allein durch den Autor verwaltet. Der 
+% aktuelle Verwalter und Autor dieses Werkes ist Falk Hanisch.
+% 
+% ============================================================================
 %
-% Das Corporate Design der TU Dresden auf Basis der KOMA-Script-Klassen
-%
-% ======================================================================
-% This work may be distributed and/or modified under the conditions of
-% the LaTeX Project Public License, version 1.3c of the license.
-% The latest version of this license is in
-%     http://www.latex-project.org/lppl.txt
-% and version 1.3c or later is part of all distributions of LaTeX
-% version 2005/12/01 or later and of this work.
-% This work has the LPPL maintenance status "author-maintained".
-% The current maintainer and author of this work is Falk Hanisch.
-% ----------------------------------------------------------------------
-% Dieses Werk darf nach den Bedingungen der LaTeX Project Public Lizenz,
-% Version 1.3c, verteilt und/oder veraendert werden.
-% Die neuste Version dieser Lizenz ist
-%     http://www.latex-project.org/lppl.txt
-% und Version 1.3c ist Teil aller Verteilungen von LaTeX
-% Version 2005/12/01 oder spaeter und dieses Werks.
-% Dieses Werk hat den LPPL-Verwaltungs-Status "author-maintained"
-% (allein durch den Autor verwaltet).
-% Der aktuelle Verwalter und Autor dieses Werkes ist Falk Hanisch.
-% ======================================================================
 % \fi
 %
 % \CharacterTable
@@ -47,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-supervisor.dtx}[%
-  2014/11/04 v2.02 TUD-KOMA-Script\space%
+  2015/01/30 v2.03 TUD-KOMA-Script\space%
 %</driver>
 %<package>\NeedsTeXFormat{LaTeX2e}[2011/06/27]
 %<package>\ProvidesPackage{tudscrsupervisor}[%
@@ -91,6 +95,8 @@
 % \subsection{Das Paket \pkg{tudscrsupervisor}}
 %
 % \begin{environment}{task}
+% \changes{v2.03}{2015/01/05}{Bugfix für initialen Seitenstil}%^^A
+% \changes{v2.03}{2015/01/05}{Bugfix für Seitenstil im zweiseitigen Satz}%^^A
 % Die Umgebung für die Aufgabenstellung nutzt die \env{tudpage}-Umgebung. Sie
 % wird auf einer neuen (rechten) Seite gesetzt. Es wird zu Beginn eine Tabelle 
 % mit Informationen zum Autor gesetzt. Zum Abschluss werden Betreuer,
@@ -106,10 +112,9 @@
   \TUD@parameter{tudpage}{%
     \TUD@parameter@define{headline}{\def\@headline{##1}}%
     \TUD@parameter@let{line}{headline}%
-    \TUD@parameter@sethandler{\def\@headline{##1}}%
-    \TUD@parameter@set{pagestyle=empty}%
+    \TUD@parameter@sethandler{\TUD@parameter@set{tudpage}{headline=##1}}%
   }%
-  \tudpage[#1]%
+  \tudpage[pagestyle=empty,#1]%
 %    \end{macrocode}
 % Zu Beginn wird als erstes die Überschrift und~-- die entsprechende Option
 % vorausgesetzt~-- im PDF einen Lesezeichen- oder auch Outline-Eintrag gesetzt.
@@ -168,7 +173,7 @@
   \par%
   \endgroup%
   \endtudpage%
-  \cleardoublepage%
+  \aftergroup\cleardoublepage%
 }
 %    \end{macrocode}
 % \end{environment}^^A task
@@ -192,6 +197,7 @@
 %    \end{macrocode}
 % \end{macro}^^A \taskform
 % \begin{environment}{evaluation}
+% \changes{v2.03}{2015/01/05}{Bugfix für Seitenstil im zweiseitigen Satz}%^^A
 % Die Umgebung für das Gutachten nutzt ebenfalls die \env{tudpage}-Umgebung. Sie
 % wird auf einer neuen (rechten) Seite gesetzt. Es wird zu Beginn eine Tabelle 
 % mit Informationen zum Autor gesetzt. Zum Abschluss werden Ort, Datum und 
@@ -210,10 +216,9 @@
     \TUD@parameter@define{headline}{\def\@headline{##1}}%
     \TUD@parameter@let{line}{headline}%
     \TUD@parameter@define{grade}{\def\@grade{##1}}%
-    \TUD@parameter@sethandler{\def\@headline{##1}}%
-    \TUD@parameter@set{pagestyle=empty}%
+    \TUD@parameter@sethandler{\TUD@parameter@set{tudpage}{headline=##1}}%
   }%
-  \tudpage[#1]%
+  \tudpage[pagestyle=empty,#1]%
   \tudbookmark{\evaluationname}{evaluation}%
   \subsection*{%
     \ifx\@headline\@empty%
@@ -264,7 +269,7 @@
   \end{tabular}%
   \hfill\null%
   \endtudpage%
-  \cleardoublepage%
+  \aftergroup\cleardoublepage%
 }
 %    \end{macrocode}
 % \end{environment}^^A evaluation
@@ -292,7 +297,7 @@
 % Informationen zum Autor/zu den Autoren\footnote{Matrikelnummer, Jahrgang,
 % Studiengang etc.} für Aufgabenstellung und Gutachten.
 %    \begin{macrocode}
-\newlength{\tud@dim@table}%
+\newlength\tud@dim@table%
 \newcommand*\tud@author@table{%
   \tud@check@author%
   \begingroup%
@@ -348,7 +353,7 @@
 % genutzt werden. Dafür wird \cs{tud@multiple@setfields} mit \cs{null} als
 % Argument aufgerufen, um alle potentiellen Felder erkennen zu können.
 %    \begin{macrocode}
-  \setlength{\tud@dim@table}{2em}%
+  \setlength\tud@dim@table{2em}%
   \gdef\tud@multiple@field{@author}%
   \tud@multiple@setfields{\null}{}%
 %    \end{macrocode}
@@ -369,9 +374,9 @@
     \expandafter\ifx\@discipline\@empty\else\disciplinename\fi,%
   }%
   \@for\@tempb:=\@tempa\do{%
-    \settowidth{\@tempdima}{\@tempb\@titledelim}%
+    \settowidth\@tempdima{\@tempb\@titledelim}%
     \ifdim\@tempdima>\tud@dim@table\relax%
-      \setlength{\tud@dim@table}{\@tempdima}%
+      \setlength\tud@dim@table{\@tempdima}%
     \fi%
   }%
   \global\tud@dim@table=\tud@dim@table%
@@ -420,15 +425,16 @@
 %    \end{macrocode}
 % \end{length}^^A \tud@dim@table
 % \end{macro}^^A \tud@author@table
-% \begin{macro}{\tud@author@checkfields}
-% Der Befehl \cs{tud@author@checkfields} wird um die hier im Paket zusätzlich
+% \begin{macro}{\tud@split@author@list}
+% Der Befehl \cs{tud@split@author@list} wird um die hier im Paket zusätzlich
 % definierten Felder erweitert.
 %    \begin{macrocode}
 \patchcmd{\tud@split@author@list}{\authormore}%
   {\authormore,\course,\discipline}{}{\tud@patch@wrn{tud@split@author@list}}
 %    \end{macrocode}
-% \end{macro}^^A \tud@author@checkfields
+% \end{macro}^^A \tud@split@author@list
 % \begin{environment}{notice}
+% \changes{v2.03}{2015/01/05}{Bugfix für Seitenstil im zweiseitigen Satz}%^^A
 % Die Umgebung für Aushänge nutzt ebenfalls die \env{tudpage}-Umgebung. Sie wird
 % auf einer neuen (rechten) Seite gesetzt. Die Überschrift wird in der 
 % Voreinstellung auf den sprachabhängigen Bezeichner \cs{noticename} gesetzt, 
@@ -440,10 +446,9 @@
   \TUD@parameter{tudpage}{%
     \TUD@parameter@define{headline}{\def\@headline{##1}}%
     \TUD@parameter@let{line}{headline}%
-    \TUD@parameter@sethandler{\def\@headline{##1}}%
-    \TUD@parameter@set{pagestyle=empty}%
+    \TUD@parameter@sethandler{\TUD@parameter@set{tudpage}{headline=##1}}%
   }%
-  \tudpage[#1]%
+  \tudpage[pagestyle=empty,#1]%
   \tudbookmark{\noticename}{notice}%
 %    \end{macrocode}
 % Es wird zu Beginn das angegebene Datum oben auf der rechten Seite ausgegeben. 
@@ -475,7 +480,7 @@
     \noindent\tud@multiple@split{@contactperson}\hfill\null%
   \fi%
   \endtudpage%
-  \cleardoublepage%
+  \aftergroup\cleardoublepage%
 }
 %    \end{macrocode}
 % \end{environment}^^A notice

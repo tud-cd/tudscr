@@ -1,29 +1,33 @@
-% \CheckSum{1021}
+% \CheckSum{1090}
 % \iffalse meta-comment
-% ======================================================================
+% 
+% ============================================================================
+% 
+%  TUD-KOMA-Script
+%  Copyright (c) Falk Hanisch <tudscr@gmail.com>, 2012-2015
+% 
+% ============================================================================
+% 
+%  This work may be distributed and/or modified under the conditions of the
+%  LaTeX Project Public License, version 1.3c of the license. The latest
+%  version of this license is in http://www.latex-project.org/lppl.txt and 
+%  version 1.3c or later is part of all distributions of LaTeX 2005/12/01
+%  or later and of this work. This work has the LPPL maintenance status 
+%  "author-maintained". The current maintainer and author of this work
+%  is Falk Hanisch.
+% 
+% ----------------------------------------------------------------------------
+% 
+% Dieses Werk darf nach den Bedingungen der LaTeX Project Public Lizenz
+% in der Version 1.3c, verteilt und/oder veraendert werden. Die aktuelle 
+% Version dieser Lizenz ist http://www.latex-project.org/lppl.txt und 
+% Version 1.3c oder spaeter ist Teil aller Verteilungen von LaTeX 2005/12/01 
+% oder spaeter und dieses Werks. Dieses Werk hat den LPPL-Verwaltungs-Status 
+% "author-maintained", wird somit allein durch den Autor verwaltet. Der 
+% aktuelle Verwalter und Autor dieses Werkes ist Falk Hanisch.
+% 
+% ============================================================================
 %
-% Das Corporate Design der TU Dresden auf Basis der KOMA-Script-Klassen
-%
-% ======================================================================
-% This work may be distributed and/or modified under the conditions of
-% the LaTeX Project Public License, version 1.3c of the license.
-% The latest version of this license is in
-%     http://www.latex-project.org/lppl.txt
-% and version 1.3c or later is part of all distributions of LaTeX
-% version 2005/12/01 or later and of this work.
-% This work has the LPPL maintenance status "author-maintained".
-% The current maintainer and author of this work is Falk Hanisch.
-% ----------------------------------------------------------------------
-% Dieses Werk darf nach den Bedingungen der LaTeX Project Public Lizenz,
-% Version 1.3c, verteilt und/oder veraendert werden.
-% Die neuste Version dieser Lizenz ist
-%     http://www.latex-project.org/lppl.txt
-% und Version 1.3c ist Teil aller Verteilungen von LaTeX
-% Version 2005/12/01 oder spaeter und dieses Werks.
-% Dieses Werk hat den LPPL-Verwaltungs-Status "author-maintained"
-% (allein durch den Autor verwaltet).
-% Der aktuelle Verwalter und Autor dieses Werkes ist Falk Hanisch.
-% ======================================================================
 % \fi
 %
 % \CharacterTable
@@ -47,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-layout.dtx}[%
-  2014/11/21 v2.02 TUD-KOMA-Script (layout)%
+  2015/02/15 v2.03 TUD-KOMA-Script (layout)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -68,7 +72,7 @@
 %
 % \selectlanguage{ngerman}
 %
-% \changes{v2.02}{2014/07/08}{Nutzung \cs{FamilyKeyState}}%^^A
+% \changes{v2.02}{2014/07/08}{Optionen nutzen \cs{FamilyKeyState}}%^^A
 %
 % \section{Das Layout des \CDs}
 %
@@ -85,22 +89,18 @@
 %
 % \subsection{Optionen}
 %
-% \begin{macro}{\tud@head@color}
-% Dieses Makro definiert die Farbe des Kopfes. Diese kann durch die
-% entsprechende Option der \env{tudpage}"=Umgebung geändert werden. Außerdem
-% gibt es für Titel, Teil und Kapitel speziell dazugehörige Farben, so dass
-% das Aussehen des Kopfes ggf. angepasst wird.
-%    \begin{macrocode}
-\newcommand*\tud@head@color{black}
-%    \end{macrocode}
-% \end{macro}^^A \tud@head@color
 % \begin{option}{cd}
 % \begin{macro}{\tud@cd}
 % \begin{macro}{\tud@layout@cover}
 % \changes{v2.02}{2014/08/08}{neu}^^A
+% \begin{macro}{\if@tud@layout@cover@locked}
+% \changes{v2.02}{2014/08/08}{neu}^^A
 % \begin{macro}{\tud@layout@title}
+% \begin{macro}{\if@tud@layout@title@locked}
 % \begin{macro}{\tud@layout@part}
+% \begin{macro}{\if@tud@layout@part@locked}
 % \begin{macro}{\tud@layout@chapter}
+% \begin{macro}{\if@tud@layout@chapter@locked}
 % \begin{macro}{\tud@layout@switch}
 % Ein zentraler Teil der Wrapper-Klassen ist die Auswahl der Darstellung des
 % \CDs. Dabei kann gewählt werden, ob es einfarbig, mit leichtem oder aber mit
@@ -117,12 +117,11 @@
 % werden alle Komponenten mit einer zentralen Option festgelegt, können aber
 % auch durch den Nutzer explizit überschrieben werden.
 %    \begin{macrocode}
-\newcommand*\tud@cd{0}
-\csdef@lock{tud@layout@cover}{0}
-\csdef@lock{tud@layout@title}{0}
-\csdef@lock{tud@layout@part}{0}
+\cs@lock{tud@layout@cover}{0}
+\cs@lock{tud@layout@title}{0}
+\cs@lock{tud@layout@part}{0}
 %<*book|report>
-\csdef@lock{tud@layout@chapter}{0}
+\cs@lock{tud@layout@chapter}{0}
 %</book|report>
 %    \end{macrocode}
 % Dies sind die Standardoptionen für alle einzelnen Einstellungen des Layouts.
@@ -132,69 +131,92 @@
 \newcommand*\tud@layout@switch{}
 \edef\tud@layout@switch{%
   \TUD@numkey@bool,%
-  {simple}{1},{std}{1},{standard}{1},{mono}{1},{monochrom}{1},%
+  {nocolor}{1},{nocolour}{1},{monochrome}{1},{monochromatic}{1},%
   {lite}{2},{colorlite}{2},{litecolor}{2},{colourlite}{2},{litecolour}{2},%
   {light}{2},{colorlight}{2},{lightcolor}{2},{colourlight}{2},{lightcolour}{2},%
   {pale}{2},{colorpale}{2},{palecolor}{2},{colourpale}{2},{palecolour}{2},%
-  {full}{3},{colorfull}{3},{fullcolor}{3},{colourfull}{3},{fullcolour}{3},%
-  {color}{3},{colour}{3}%
+  {bicolor}{3},{bicolour}{3},{twocolor}{3},{twocolour}{3},%
+  {bichrome}{3},{bichromatic}{3},{dichrome}{3},{dichromatic}{3},%
+  {color}{4},{colour}{4},%
+  {full}{5},{colorfull}{5},{fullcolor}{5},{colourfull}{5},{fullcolour}{5}%
 }
 %    \end{macrocode}
 % Es folgt die eigentliche Option.
 %    \begin{macrocode}
+\newcommand*\tud@cd{0}
 \TUD@key{cd}[true]{%
   \TUD@set@numkey{cd}{tud@cd}{\tud@layout@switch}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \def\tud@head@color{black}%
-    \ifcase \tud@cd\relax%
-      \csstd@lock{tud@layout@cover}{0}%
-      \csstd@lock{tud@layout@title}{0}%
-      \csstd@lock{tud@layout@part}{0}%
+%    \end{macrocode}
+% Layout nicht im \CD.
+%    \begin{macrocode}
+    \ifcase\tud@cd\relax%
+      \cs@std@lock{tud@layout@cover}{0}%
+      \cs@std@lock{tud@layout@title}{0}%
+      \cs@std@lock{tud@layout@part}{0}%
 %<*book|report>
-      \csstd@lock{tud@layout@chapter}{0}%
+      \cs@std@lock{tud@layout@chapter}{0}%
+      \TUD@std@ifkey@lock{chapterpage}{false}%
 %</book|report>
+%    \end{macrocode}
+% Layout im \CD mit schwarzer Schrift und schwarzem Kopf.
+%    \begin{macrocode}
     \or%
-      \csstd@lock{tud@layout@cover}{1}%
-      \csstd@lock{tud@layout@title}{1}%
-      \csstd@lock{tud@layout@part}{1}%
+      \cs@std@lock{tud@layout@cover}{1}%
+      \cs@std@lock{tud@layout@title}{1}%
+      \cs@std@lock{tud@layout@part}{1}%
 %<*book|report>
-      \csstd@lock{tud@layout@chapter}{1}%
+      \cs@std@lock{tud@layout@chapter}{1}%
+      \TUD@std@ifkey@lock{chapterpage}{false}%
 %</book|report>
+%    \end{macrocode}
+% Layout im \CD mit blauer Schrift und blauem Kopf.
+%    \begin{macrocode}
     \or%
-      \def\tud@head@color{HKS41}%
 %    \end{macrocode}
 % Die Umschlagseite wird standardmäßig immer monochrom gesetzt.
 %    \begin{macrocode}
-      \csstd@lock{tud@layout@cover}{1}%
-      \csstd@lock{tud@layout@title}{2}%
-      \csstd@lock{tud@layout@part}{2}%
+      \cs@std@lock{tud@layout@cover}{1}%
+      \cs@std@lock{tud@layout@title}{2}%
+      \cs@std@lock{tud@layout@part}{2}%
 %<*book|report>
-      \csstd@lock{tud@layout@chapter}{2}%
+      \cs@std@lock{tud@layout@chapter}{2}%
+      \TUD@std@ifkey@lock{chapterpage}{false}%
 %</book|report>
+%    \end{macrocode}
+% Layout im \CD mit blauer Schrift und zweifarbigem Kopf.
+%    \begin{macrocode}
     \or%
-      \def\tud@head@color{HKS41}%
-      \csstd@lock{tud@layout@cover}{1}%
-      \csstd@lock{tud@layout@title}{3}%
-%    \end{macrocode}
-% Ein komplett farbiges Layout ist bloß für Klassen mit Teil- und Kapitelseiten 
-% (\cls{tudscrbook} und \cls{tudscrreprt}) möglich. Ansonsten werden lediglich
-% die Überschriften, jedoch nicht der Seitenhintergrund farbig gestaltet.
-%    \begin{macrocode}
-%<*article>
-      \csstd@lock{tud@layout@part}{2}%
-%</article>
+      \cs@std@lock{tud@layout@cover}{1}%
+      \cs@std@lock{tud@layout@title}{3}%
+      \cs@std@lock{tud@layout@part}{3}%
 %<*book|report>
-      \csstd@lock{tud@layout@part}{3}%
-      \csstd@lock{tud@layout@chapter}{3}%
+      \cs@std@lock{tud@layout@chapter}{3}%
+      \TUD@std@ifkey@lock{chapterpage}{false}%
 %</book|report>
 %    \end{macrocode}
-% Die Klassenoptionen \opt{chapterpage} und \opt{widehead} werden für den
-% Fall der komplett farbigen Darstellung standardmäßig aktiviert
-% können allerdings vom Anwender überschrieben werden.
+% Farbiges Layout mit farbigem Hintergrund im \CD mit weißer Schrift und 
+% Outline im Kopf.
 %    \begin{macrocode}
+    \or%
+      \cs@std@lock{tud@layout@cover}{1}%
+      \cs@std@lock{tud@layout@title}{4}%
+      \cs@std@lock{tud@layout@part}{4}%
 %<*book|report>
+      \cs@std@lock{tud@layout@chapter}{4}%
       \TUD@std@ifkey@lock{chapterpage}{true}%
-      \TUD@std@ifkey@lock{widehead}{true}%
+%</book|report>
+%    \end{macrocode}
+% Farbiges Layout mit farbigem Hintergrund im \CD mit weißer Schrift und 
+% farbigem Querbalken im Kopf.
+%    \begin{macrocode}
+    \or%
+      \cs@std@lock{tud@layout@cover}{1}%
+      \cs@std@lock{tud@layout@title}{5}%
+      \cs@std@lock{tud@layout@part}{5}%
+%<*book|report>
+      \cs@std@lock{tud@layout@chapter}{5}%
+      \TUD@std@ifkey@lock{chapterpage}{true}%
 %</book|report>
     \fi%
 %    \end{macrocode}
@@ -209,22 +231,26 @@
     \else%
 %    \end{macrocode}
 % Innerhalb der Präambel wird der Satzspiegel abhängig vom gewünschten Layout
-% festgelegt. Dies kann vom Benutzer mit dem Setzen der Option \opt{geometry}
+% festgelegt. Dies kann vom Benutzer mit dem Setzen der Option \opt{cdgeometry}
 % überschrieben werden.
 %    \begin{macrocode}
-      \ifcase \tud@cd\relax%
-        \TUD@std@numkey@lock{geometry}{false}%
+      \ifcase\tud@cd\relax%
+        \TUD@std@numkey@lock{cdgeometry}{false}%
       \else%
-        \TUD@std@numkey@lock{geometry}{true}%
+        \TUD@std@numkey@lock{cdgeometry}{true}%
       \fi%
     \fi%
   \fi%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@layout@switch
+% \end{macro}^^A \if@tud@layout@chapter@locked
 % \end{macro}^^A \tud@layout@chapter
+% \end{macro}^^A \if@tud@layout@part@locked
 % \end{macro}^^A \tud@layout@part
+% \end{macro}^^A \if@tud@layout@title@locked
 % \end{macro}^^A \tud@layout@title
+% \end{macro}^^A \if@tud@layout@cover@locked
 % \end{macro}^^A \tud@layout@cover
 % \end{macro}^^A \if@tud@cd
 % \end{option}^^A cd
@@ -236,18 +262,23 @@
 \TUD@key{cdcover}[true]{%
   \TUD@set@numkey{cdcover}{@tempa}{\tud@layout@switch}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \ifcase \@tempa\relax%
-      \csset@lock{tud@layout@cover}{0}%
+    \ifcase\@tempa\relax%
+      \cs@set@lock{tud@layout@cover}{0}%
     \or%
-      \csset@lock{tud@layout@cover}{1}%
+      \cs@set@lock{tud@layout@cover}{1}%
     \or%
-      \csset@lock{tud@layout@cover}{2}%
+      \cs@set@lock{tud@layout@cover}{2}%
     \or%
-      \csset@lock{tud@layout@cover}{3}%
+      \cs@set@lock{tud@layout@cover}{3}%
+    \or%
+      \cs@set@lock{tud@layout@cover}{4}%
+    \or%
+      \cs@set@lock{tud@layout@cover}{5}%
     \fi%
     \if@atdocument\tud@layout@process\fi%
   \fi%
 }
+%    \end{macrocode}
 % \end{option}^^A cdcover
 % \begin{option}{cdtitle}
 % \dots Titel (\opt{cdtitle}),\dots
@@ -255,14 +286,18 @@
 \TUD@key{cdtitle}[true]{%
   \TUD@set@numkey{cdtitle}{@tempa}{\tud@layout@switch}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \ifcase \@tempa\relax%
-      \csset@lock{tud@layout@title}{0}%
+    \ifcase\@tempa\relax%
+      \cs@set@lock{tud@layout@title}{0}%
     \or%
-      \csset@lock{tud@layout@title}{1}%
+      \cs@set@lock{tud@layout@title}{1}%
     \or%
-      \csset@lock{tud@layout@title}{2}%
+      \cs@set@lock{tud@layout@title}{2}%
     \or%
-      \csset@lock{tud@layout@title}{3}%
+      \cs@set@lock{tud@layout@title}{3}%
+    \or%
+      \cs@set@lock{tud@layout@title}{4}%
+    \or%
+      \cs@set@lock{tud@layout@title}{5}%
     \fi%
     \if@atdocument\tud@layout@process\fi%
   \fi%
@@ -275,19 +310,18 @@
 \TUD@key{cdpart}[true]{%
   \TUD@set@numkey{cdpart}{@tempa}{\tud@layout@switch}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \ifcase \@tempa\relax%
-      \csset@lock{tud@layout@part}{0}%
+    \ifcase\@tempa\relax%
+      \cs@set@lock{tud@layout@part}{0}%
     \or%
-      \csset@lock{tud@layout@part}{1}%
+      \cs@set@lock{tud@layout@part}{1}%
     \or%
-      \csset@lock{tud@layout@part}{2}%
+      \cs@set@lock{tud@layout@part}{2}%
     \or%
-%<*article>
-      \csset@lock{tud@layout@part}{2}%
-%</article>
-%<*book|report>
-      \csset@lock{tud@layout@part}{3}%
-%</book|report>
+      \cs@set@lock{tud@layout@part}{3}%
+    \or%
+      \cs@set@lock{tud@layout@part}{4}%
+    \or%
+      \cs@set@lock{tud@layout@part}{5}%
     \fi%
     \if@atdocument\tud@layout@process\fi%
   \fi%
@@ -303,17 +337,23 @@
 \TUD@key{cdchapter}[true]{%
   \TUD@set@numkey{cdchapter}{@tempa}{\tud@layout@switch}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \ifcase \@tempa\relax%
-      \csset@lock{tud@layout@chapter}{0}%
+    \ifcase\@tempa\relax%
+      \cs@set@lock{tud@layout@chapter}{0}%
       \TUD@std@ifkey@lock{chapterpage}{false}%
     \or%
-      \csset@lock{tud@layout@chapter}{1}%
+      \cs@set@lock{tud@layout@chapter}{1}%
       \TUD@std@ifkey@lock{chapterpage}{false}%
     \or%
-      \csset@lock{tud@layout@chapter}{2}%
+      \cs@set@lock{tud@layout@chapter}{2}%
       \TUD@std@ifkey@lock{chapterpage}{false}%
     \or%
-      \csset@lock{tud@layout@chapter}{3}%
+      \cs@set@lock{tud@layout@chapter}{3}%
+      \TUD@std@ifkey@lock{chapterpage}{false}%
+    \or%
+      \cs@set@lock{tud@layout@chapter}{4}%
+      \TUD@std@ifkey@lock{chapterpage}{true}%
+    \or%
+      \cs@set@lock{tud@layout@chapter}{5}%
       \TUD@std@ifkey@lock{chapterpage}{true}%
     \fi%
     \if@atdocument\tud@layout@process\fi%
@@ -323,35 +363,40 @@
 %    \end{macrocode}
 % \end{option}^^A cdchapter
 % \begin{option}{headings}
+% \begin{macro}{\tud@font@heading@size}
 % Die \KOMAScript-Option \opt{headings} setzt die Formatierung aller 
 % Überschriften zurück. Damit die Einstellungen für das \CD aktiv bleiben, 
 % werden nach der Ausführung der Option die mit \cs{tud@font@koma@set} 
 % definierten Makros \cs{tud@font@koma@\meta{Element}} erneut an die 
 % entsprechenden Schriftelemente angehängt.
 %    \begin{macrocode}
+\newcommand*\tud@font@heading@size{}
+\AtEndOfClass{\let\tud@font@heading@size\size@part}
 \DefineFamilyMember{KOMA}
 \DefineFamilyKey{KOMA}{headings}{%
   \AtEndOfFamilyOptions{%
     \let\tud@font@heading@size\size@part%
-    \tud@layout@process%
-    \ifcase \tud@layout@part\relax\else%
-      \tud@font@koma@reset{part}%
-      \tud@font@koma@reset{partnumber}%
+    \if@atdocument%
+      \tud@layout@process%
+      \ifcase\tud@layout@part\relax\else%
+        \tud@font@koma@reset{part}%
+        \tud@font@koma@reset{partnumber}%
 %<*book|report>
-    \fi%
-    \ifcase \tud@layout@chapter\relax\else%
-      \tud@font@koma@reset{chapter}%
-      \tud@font@koma@reset{chapterprefix}%
-      \let\chapterheadstartvskip\tud@chapterheadstartvskip%
+      \fi%
+      \ifcase\tud@layout@chapter\relax\else%
+        \tud@font@koma@reset{chapter}%
+        \tud@font@koma@reset{chapterprefix}%
 %</book|report>
-      \tud@font@koma@reset{section}%
-      \tud@font@koma@reset{subsection}%
-      \tud@font@koma@reset{subsubsection}%
-      \tud@font@koma@reset{minisec}%
+        \tud@font@koma@reset{section}%
+        \tud@font@koma@reset{subsection}%
+        \tud@font@koma@reset{subsubsection}%
+        \tud@font@koma@reset{minisec}%
+      \fi%
     \fi%
   }%
 }
 %    \end{macrocode}
+% \end{macro}^^A \tud@font@heading@size
 % \end{option}^^A headings
 %
 % \iffalse
@@ -362,19 +407,17 @@
 % \cls{tudscrbook} und \cls{tudscrreprt} definiert.
 % \begin{option}{parttitle}
 % \begin{macro}{\if@tud@parttitle}
-% \begin{macro}{\if@tud@parttitle@locked}
 % Der Schalter dient zur Steuerung, ob der Titel des Dokumentes wie im Handbuch
 % des \CDs auf den Teileseiten stehen soll.
 %    \begin{macrocode}
 \newif\if@tud@parttitle
-\TUD@key@lock{parttitle}[true]{%
-  \TUD@set@ifkey@lock{parttitle}{@tud@parttitle}{#1}%
+\TUD@key{parttitle}[true]{%
+  \TUD@set@ifkey{parttitle}{@tud@parttitle}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \if@atdocument\tud@layout@process\fi%
   \fi%
 }
 %    \end{macrocode}
-% \end{macro}^^A \if@tud@parttitle@locked
 % \end{macro}^^A \if@tud@parttitle
 % \end{option}^^A parttitle
 % \begin{option}{chapterpage}
@@ -394,8 +437,12 @@
 % \begin{option}{cleardoublespecialpage}
 % \changes{v2.02}{2014/07/08}{Nutzung als globale Klassenoption mit Werten für
 %   Seitenstile aus den \KOMAScript{} bzw. \TUDScript-Klassen}%^^A
+% \changes{v2.03}{2015/01/09}{Prüfung des Seitenstils mit \cs{AfterPreamble}
+%   auf Beginn des Dokumentes verzögert}%^^A
 % \begin{macro}{\tud@cleardoublepage}
 % \begin{macro}{\tud@cleardoublespecialpage}
+% \changes{v2.03}{2015/01/09}{Seitenhintergrund mit \pkg{scrlayer-scrpage},
+%   Makro \cs{tud@restorepagecolor} überflüssig}%^^A
 % Für Klassen mit separaten Teileseiten und Kapiteln wird eine zusätzliche
 % Option definiert, welche nur bei zweiseitigem Satz (\opt{twoside}) und
 % zusätzlich immer auf nur der rechten Seite öffnenden Teilen bzw. Kapiteln
@@ -438,29 +485,23 @@
       \def\tud@cleardoublepage{\cleardoubleoddstandardpage}%
       \FamilyKeyStateProcessed%
     }{%
-      \ifcsdef{ps@#1}{%
-        \def\tud@cleardoublepage{\cleardoubleoddpageusingstyle{#1}}%
-        \FamilyKeyStateProcessed%
-      }{%
 %    \end{macrocode}
 % Beim Laden der Klasse selbst sind die speziellen Seitenstile der \KOMAScript-
 % bzw. \TUDScript-Klassen noch nicht definiert. Diese sollen als Werte jedoch
-% trotzdem erlaubt sein.
+% trotzdem erlaubt sein. Deshalb wird für diesen Fall das Überprüfen mit
+% \cs{AfterPreamble} auf den Beginn des Dokumentes verzögert.
 %    \begin{macrocode}
-        \ifx\@currname\tudcls@name%
-          \ifx\@currext\@clsextension%
-            \ifstr{#1}{headings}{%
-              \def\tud@cleardoublepage{\cleardoubleoddpageusingstyle{#1}}%
-              \FamilyKeyStateProcessed%
-            }{%
-              \tud@ifinpslist{#1}{%
-                \def\tud@cleardoublepage{\cleardoubleoddpageusingstyle{#1}}%
-                \FamilyKeyStateProcessed%
-              }{}%
-            }%
-          \fi%
-        \fi%
+      \AfterPreamble{%
+        \ifcsdef{ps@#1}{%
+          \def\tud@cleardoublepage{\cleardoubleoddpageusingstyle{#1}}%
+        }{%
+          \ClassError{\tudcls@name}{`#1' is no valid pagestyle}{%
+            You tried to use `#1' as a pagestyle for option\MessageBreak%
+            `cleardoublespecialpage', but it was never defined%
+          }%
+        }%
       }%
+      \FamilyKeyStateProcessed%
     }}}%
   \fi%
 }
@@ -478,13 +519,11 @@
         \def\@tempa{%
           #1%
           \tud@cleardoublepage%
-          \tud@restorepagecolor%
           \endgroup%
         }%
       \else%
         \def\@tempa{%
           \endgroup%
-          \tud@restorepagecolor%
           #1%
           \tud@cleardoublepage%
         }%
@@ -492,7 +531,6 @@
     }{%
       \if@tud@clearcolor\tud@clearcolor@wrn\fi%
       \def\@tempa{%
-        \tud@restorepagecolor%
         \endgroup%
         #1%
       }%
@@ -535,32 +573,21 @@
 % verschiedener Textelemente sowie die farbliche Gestaltung verstanden. Für das
 % \CD gibt es dabei drei Ausprägungen, die für die verschiedenen Elemente
 % auch unabhängig gewählt werden können.
-% \begin{macro}{\tud@color@partfont}
-% \begin{macro}{\tud@color@partpage}
-% \begin{macro}{\tud@color@parthead}
-% \begin{macro}{\tud@color@chapterfont}
-% \begin{macro}{\tud@color@chapterpage}
-% Die Makros werden für die Hintergrundfarbe der Seiten und die Farbe der
-% Überschriften verwendet.
+% \begin{macro}{\tud@part@fontcolor}
+% \begin{macro}{\tud@chapter@fontcolor}
+% Die Makros werden für die Farbe der Überschriften verwendet.
 %    \begin{macrocode}
-\newcommand*\tud@color@partfont{black}
+\newcommand*\tud@part@fontcolor{black}
 %<*book|report>
-\newcommand*\tud@color@partpage{white}
-\newcommand*\tud@color@parthead{black}
-\newcommand*\tud@color@chapterfont{black}
-\newcommand*\tud@color@chapterpage{white}
+\newcommand*\tud@chapter@fontcolor{black}
 %</book|report>
 %    \end{macrocode}
-% \end{macro}^^A \tud@color@chapterpage
-% \end{macro}^^A \tud@color@chapterfont
-% \end{macro}^^A \tud@color@parthead
-% \end{macro}^^A \tud@color@partpage
-% \end{macro}^^A \tud@color@partfont
+% \end{macro}^^A \tud@chapter@fontcolor
+% \end{macro}^^A \tud@part@fontcolor
 % \begin{KOMAfont}{tud@heading}
 % \changes{v2.02}{2014/08/24}{entfernt}%^^A
 % \begin{KOMAfont}{parttitle}
-% \begin{macro}{\tud@font@heading}
-% \begin{macro}{\tud@font@heading@size}
+% \changes{v2.02}{2014/08/24}{neu}%^^A
 % \begin{macro}{\tud@font@heading@numsize}
 % \changes{v2.02}{2014/08/24}{entfernt}%^^A
 % \begin{macro}{\tud@font@part}
@@ -571,20 +598,11 @@
 % \changes{v2.02}{2014/06/23}{entfernt}%^^A
 % \begin{macro}{\tud@font@chapter}
 % \changes{v2.02}{2014/08/24}{entfernt}%^^A
-% Mit \cs{tud@font@heading} wird die Schriftart für Überschriften definiert.
-% Falls die Schriftarten des \CDs installiert wurden, wird DIN-Bold verwendet, 
-% sonst die Standardüberschriften.
-%    \begin{macrocode}
-\newcommand*\tud@font@heading{%
-  \if@tud@din\dinbn\tud@raggedright\else\tud@RaggedRight\fi%
-}
-\newcommand*\tud@font@heading@size{\Huge}
-%    \end{macrocode}
-% Anschließend wird das Schriftelement für die Option \opt{parttitle} erstellt.
+% Es wird das Schriftelement für die Option \opt{parttitle} erstellt.
 %    \begin{macrocode}
 \newkomafont{parttitle}{%
   \tud@font@heading%
-  \color{\tud@color@partfont}%
+  \color{\tud@part@fontcolor}%
   \usesizeofkomafont{section}%
 }
 %    \end{macrocode}
@@ -593,8 +611,6 @@
 % \end{macro}^^A \tud@font@part@number
 % \end{macro}^^A \tud@font@part
 % \end{macro}^^A \tud@font@heading@numsize
-% \end{macro}^^A \tud@font@heading@size
-% \end{macro}^^A \tud@font@heading
 % \end{KOMAfont}^^A parttitle
 % \end{KOMAfont}^^A tud@heading
 % \begin{length}{\pageheadingsvskip}
@@ -610,11 +626,34 @@
 % Kapiteln oder aber die des Titelkopfes (\opt{titlepage=false}) verschoben,
 % bei denen nach der Überschrift direkt der Fließtext folgt. 
 %    \begin{macrocode}
-\newlength{\pageheadingsvskip}
-\newlength{\headingsvskip}
+\newlength\pageheadingsvskip
+\newlength\headingsvskip
 %    \end{macrocode}
 % \end{length}^^A \headingsvskip
 % \end{length}^^A \pageheadingsvskip
+% \begin{macro}{\tud@headmidvskip}
+% \changes{v2.03}{2015/01/21}{neu}%^^A
+% \begin{macro}{\tud@headmidvskip@neg}
+% \changes{v2.03}{2015/01/21}{neu}%^^A
+% Mit \cs{tud@headmidvskip} wird der Abstände zwischen Nummerierung eines
+% Titels und der eigentlichen Bezeichnung gesetzt. Das gleiche gilt für eine
+% separate Kapitelnummernzeile (\opt{chapterprefix}) und dem eigentlichen
+% Kapiteltitel. Das Makro \cs{tud@headmidvskip@neg} wird benötigt, um ggf. 
+% vorher um den eingefügten Abstand nach oben zu verschieben.
+%    \begin{macrocode}
+%<*article>
+\newcommand*\tud@headmidvskip{\par\nobreak}
+%</article>
+%<*book|report>
+\newcommand*\tud@headmidvskip{\par\nobreak\vspace{.5\baselineskip}}
+\newcommand*\tud@headmidvskip@neg{%
+  \setbox0\vbox{\tud@headmidvskip}%
+  \vspace*{\dimexpr-\dp\strutbox-\ht\strutbox-\ht0\relax}%
+}
+%</book|report>
+%    \end{macrocode}
+% \end{macro}^^A \tud@headmidvskip@neg
+% \end{macro}^^A \tud@headmidvskip
 % \begin{macro}{\tud@layout@process}
 % \changes{v2.02}{2014/08/29}{Anpassungen für \pkg{fontspec}}%^^A
 % Dieser Befehl kümmert sich darum, dass die gewählten Optionen für den
@@ -627,10 +666,10 @@
 % Die Einstellungen für die Umschlagseite. Je nachdem, ob das \CD verwendet 
 % wird, wird der Satzspiegel standardmäßig umgestellt oder eben nicht.
 %    \begin{macrocode}
-  \ifcase \tud@layout@cover\relax%
-    \stdbool@lock{@tud@cover@cdlayout}{false}%
+  \ifcase\tud@layout@cover\relax%
+    \bool@std@lock{@tud@cover@cdgeometry}{false}%
   \else%
-    \stdbool@lock{@tud@cover@cdlayout}{true}%
+    \bool@std@lock{@tud@cover@cdgeometry}{true}%
   \fi%  
 %    \end{macrocode}
 % Die Einstellungen für den Titel. Vor dessen Umstellung werden die relevanten
@@ -638,7 +677,7 @@
 % später gegebenenfalls mit \cs{tud@cmd@restore}\marg{Befehl} wiederhergestellt
 % werden können.
 %    \begin{macrocode}
-  \ifcase \tud@layout@title\relax%
+  \ifcase\tud@layout@title\relax%
     \tud@cmd@restore{maketitle}%
     \tud@cmd@restore{@maketitle}%
     \tud@cmd@restore{titlepagestyle}%
@@ -658,18 +697,18 @@
       \usekomafont{disposition}%
       \tud@font@heading%
       \tud@font@heading@size%
-      \color{\tud@color@titlefont}%
+      \color{\tud@title@fontcolor}%
     }%
     \tud@font@koma@set{subtitle}{%
       \tud@font@heading%
       \usesizeofkomafont{section}%
-      \color{\tud@color@titlefont}%
+      \color{\tud@title@fontcolor}%
     }%
     \tud@font@koma@set{subject}{%
       \fontfamily{\sfdefault}%
       \fontseries{\bfdefault}%
       \selectfont%
-      \color{\tud@color@titlefont}%
+      \color{\tud@title@fontcolor}%
     }%
     \tud@font@koma@set{author}{\usekomafont{subject}}%
     \tud@font@koma@set{date}{\usekomafont{titlepage}}%
@@ -680,7 +719,7 @@
 %    \end{macrocode}
 % Das gleiche für die Teileseiten.
 %    \begin{macrocode}
-  \ifcase \tud@layout@part\relax%
+  \ifcase\tud@layout@part\relax%
     \tud@cmd@restore{partheadstartvskip}%
     \tud@cmd@restore{partheadmidvskip}%
 %<*book|report>
@@ -721,13 +760,13 @@
     \else%
       \tud@sectioning@set[addpart]{part}{%
         \tud@font@heading%
-        \color{\tud@color@partfont}%
+        \color{\tud@part@fontcolor}%
       }%
       \tud@font@koma@set{partnumber}{%
         \tud@font@heading%
-        \color{\tud@color@partfont}%
+        \color{\tud@part@fontcolor}%
       }%
-      \renewcommand*\partheadmidvskip{\par\nobreak\vspace{.5\baselineskip}}%
+      \let\partheadmidvskip\tud@headmidvskip%
     \fi%
 %</book|report>
 %    \end{macrocode}
@@ -736,13 +775,13 @@
 %<*article>
     \tud@sectioning@set[addpart]{part}{%
       \tud@font@heading%
-      \color{\tud@color@partfont}%
+      \color{\tud@part@fontcolor}%
     }%
     \tud@font@koma@set{partnumber}{%
       \tud@font@heading%
-      \color{\tud@color@partfont}%
+      \color{\tud@part@fontcolor}%
     }%
-    \renewcommand*\partheadmidvskip{\par\nobreak\vskip.3\baselineskip}%
+    \let\partheadmidvskip\tud@headmidvskip%
 %</article>
 %    \end{macrocode}
 % Einigen Makros werden mittels \cs{let} Definitionen von anderen Makros
@@ -756,7 +795,7 @@
     \let\partheadstartvskip\tud@partheadstartvskip%
 %<*book|report>
     \let\partheadendvskip\tud@partheadendvskip%
-    \renewcommand*\partheademptypage{}%
+    \let\partheademptypage\relax%
     \renewcommand*\partpagestyle{plain.tudheadings}%
 %</book|report>
     \let\@part\tud@@part%
@@ -773,10 +812,10 @@
 % Teileseiten.
 %    \begin{macrocode}
 %<*article>
-  \ifcase \tud@layout@part\relax%
+  \ifcase\tud@layout@part\relax%
 %</article>
 %<*book|report>
-  \ifcase \tud@layout@chapter\relax%
+  \ifcase\tud@layout@chapter\relax%
     \tud@cmd@restore{chapterheadstartvskip}%
     \tud@cmd@restore{chapterformat}%
     \tud@cmd@restore{@chapter}%
@@ -803,7 +842,7 @@
     \tud@sectioning@set[addchap]{chapter}{%
       \tud@font@heading%
       \tud@font@heading@size%
-      \color{\tud@color@chapterfont}%
+      \color{\tud@chapter@fontcolor}%
     }%
     \tud@font@koma@set{chapterprefix}{\usesizeofkomafont{partnumber}}%
 %</book|report>
@@ -821,18 +860,12 @@
   \fi%
 }
 %    \end{macrocode}
-% Die beteiligten Optionen führen den Befehl nur nach der Präambel aus. Um die
-% Grundeinstellungen zu Beginn des Dokumentes umzusetzen, werden die Befehle
-% am Ende der Präambel einmalig ausgeführt.
-%    \begin{macrocode}
-\AtEndPreamble{%
-  \let\tud@font@heading@size\size@part%
-  \tud@layout@process%
-}
-%    \end{macrocode}
 % \end{macro}^^A \tud@layout@process
 % \begin{macro}{\tud@partheadstartvskip}
 % \changes{v2.02}{2014/11/05}{Nutzung der Option \opt{parttitle} verbessert}%^^A
+% \changes{v2.03}{2015/01/21}{Bei Verwendung der Option \opt{parttitle}:
+%   Abstand ist identisch zu Untertitel auf Titelseite}%^^A
+% \begin{macro}{\partheadstartvskip}
 % Dieses Makro ersetzt den Standardbefehl \cs{partheadstartvskip} für die
 % CD-Teilseiten. Damit lassen sich insbesondere die Farbanpassungen für alle
 % Klassen sowie die Option \opt{parttitle} für \cls{tudscrreprt}- und
@@ -846,9 +879,9 @@
 \newcommand*\tud@partheadstartvskip{}
 \let\tud@partheadstartvskip\partheadstartvskip%
 \pretocmd{\tud@partheadstartvskip}{%
-  \def\tud@color@partfont{black}%
-  \ifcase \tud@layout@part\relax\or\or%
-    \def\tud@color@partfont{HKS41}%
+  \def\tud@part@fontcolor{black}%
+  \ifcase\tud@layout@part\relax\or\else%
+    \def\tud@part@fontcolor{HKS41}%
   \fi%
 }{}{\tud@patch@wrn{tud@partheadstartvskip}}
 %</article>
@@ -858,21 +891,20 @@
 %    \begin{macrocode}
 %<*book|report>
 \newcommand*\tud@partheadstartvskip{%
-  \def\tud@color@partfont{black}%
-  \def\tud@color@partpage{white}%
-  \def\tud@color@parthead{black}%
-  \ifcase \tud@layout@part\relax\or\or%
-    \def\tud@color@partfont{HKS41}%
-    \def\tud@color@partpage{white}%
-    \def\tud@color@parthead{HKS41}%
+  \def\tud@part@fontcolor{black}%
+  \ifcase\tud@layout@part\relax\or\or%
+    \def\tud@part@fontcolor{HKS41}%
   \or%
-    \def\tud@color@partpage{HKS41}%
-    \def\tud@color@partfont{HKS41!30}%
-    \def\tud@color@parthead{white}%
+    \def\tud@part@fontcolor{HKS41}%
+  \or%
+    \def\tud@part@fontcolor{HKS41!30}%
+  \or%
+    \def\tud@part@fontcolor{HKS41!30}%
   \fi%
   \begingroup%
-    \vspace*{\dimexpr%
-      \tud@dim@headdiff+\tud@dim@headingsvskip-\baselineskip+\parskip\relax%
+    \vspace*{%
+      \dimexpr\tud@dim@headdiff+\tud@dim@headingsvskip-\baselineskip%
+        +\parskip\relax%
     }%
     \vspace*{\pageheadingsvskip}%
     \setparsizes{\z@}{\z@}{\z@\@plus1fil}\par@updaterelative%
@@ -885,22 +917,28 @@
       \begingroup%
         \tud@font@heading%
         \tud@font@heading@size%
-        \color{\tud@color@partfont}%
+        \color{\tud@part@fontcolor}%
         \ifx\@@title\@empty%
           \tud@makeuppercase{\strut}%
         \else%
           \tud@makeuppercase{\@@title}%
         \fi%
-        \par\nobreak\vskip .775\baselineskip%
+%    \end{macrocode}
+% Der Titel des Teils wird auf der gleichen Höhe wie der Untertitel auf der 
+% Titelseite ausgegeben.
+%    \begin{macrocode}
+        \par\nobreak
+        {\usekomafont{titlepage}\vskip 2ex\@plus1ex\@minus1ex}%
       \endgroup%
     \else%
       \usekomafont{partnumber}%
-      \vspace*{\dimexpr-\dp\strutbox-\ht\strutbox-.5\baselineskip\relax}%
+      \tud@headmidvskip@neg%
     \fi%
   \endgroup%
 }
 %</book|report>
 %    \end{macrocode}
+% \end{macro}^^A \partheadstartvskip
 % \end{macro}^^A \tud@partheadstartvskip
 %
 % \iffalse
@@ -918,9 +956,24 @@
 %    \begin{macrocode}
 \newcommand*\tud@partheadendvskip{%
   \tud@cleardoublespecialpage{%
-    \tud@pagecolor{\tud@color@partpage}%
-    \def\tud@head@color{\tud@color@parthead}%
-    \addtokomafont{pagenumber}{\sffamily\color{\tud@color@partfont}}%
+    \def\tud@pagecolor{}%
+    \ifcase\tud@layout@part\relax\or%
+      \def\tud@head@bar{0}%
+    \or%
+      \def\tud@head@bar{1}%
+    \or%
+      \def\tud@head@bar{2}%
+    \or%
+      \def\tud@pagecolor{HKS41}%
+      \def\tud@head@bar{-1}%
+      \def\tud@head@logocolor{white}%
+      \def\tud@foot@logocolor{white}%
+      \bool@std@lock{@tud@head@widebar}{true}%
+    \or%
+      \def\tud@pagecolor{HKS41}%
+      \def\tud@head@bar{2}%
+    \fi%
+    \addtokomafont{pagenumber}{\sffamily\color{\tud@part@fontcolor}}%
     \clearpage%
   }%
 }
@@ -935,6 +988,8 @@
 % \fi
 %
 % \begin{macro}{\tud@@part}
+% \changes{v2.03}{2015/01/21}{Korrektur bei der Position der Überschrift}%^^A
+% \begin{macro}{\@part}
 % Damit auch das Präfix der Teile in Majuskeln erscheint, wird dem Befehl
 % \cs{partformat}, welcher das Präfix enthält, für die \cls{tudscrartcl}-Klasse
 % der entsprechende Befehl vorangestellt.
@@ -943,7 +998,7 @@
 \let\tud@@part\@part
 \patchcmd{\tud@@part}%
   {\size@partnumber{\partformat}}%
-  {\size@partnumber{\tud@makeuppercase\partformat}}%
+  {\size@partnumber{\tud@makeuppercase{\partformat}}}%
   {}{\tud@patch@wrn{@part}}%
 %</article>
 %    \end{macrocode}
@@ -961,14 +1016,18 @@
   }{}%
 }{%
   \ifnumbered{part}{%
-    \size@partnumber{\tud@makeuppercase\partformat}%
+    \size@partnumber{\tud@makeuppercase{\partformat}}%
+    \partheadmidvskip%
   }{%
-    \size@partnumber{\strut}%
+    \if@tud@parttitle\else%
+      \size@partnumber{\vphantom{\partname}}%
+      \partheadmidvskip%
+    \fi%
   }%
-  \unskip\partheadmidvskip%
 }{}{\tud@patch@wrn{@part}}%
 %</book|report>
 %    \end{macrocode}
+% \end{macro}^^A \@part
 % \end{macro}^^A \tud@@part
 %
 % \iffalse
@@ -976,6 +1035,7 @@
 % \fi
 %
 % \begin{macro}{\tud@@spart}
+% \begin{macro}{\@spart}
 % Bei den Teile-Befehlen ohne Gliederungsnummerierung muss zusätzlich der
 % Freiraum vorgehalten werden, damit alle Überschriften auf der gleichen
 % vertikalen Position liegen.
@@ -986,11 +1046,14 @@
   \sectfont\nobreak\size@part
 }{%
   \normalfont\sectfont\nobreak%
-  \size@partnumber{\strut}%
+  \if@tud@parttitle\else%
+    \size@partnumber{\vphantom{\partname}}%
+  \fi%
   \partheadmidvskip\unskip%
   \size@part%
 }{}{\tud@patch@wrn{@spart}}
 %    \end{macrocode}
+% \end{macro}^^A \@spart
 % \end{macro}^^A \tud@@spart
 % \begin{macro}{\tud@partpreamble}
 % Um die \KOMAScript-Befehle für die Teilepräambel auch für das farbige Layout
@@ -1003,9 +1066,9 @@
 \newcommand*\tud@partpreamble{%
   \ifnum\tud@abstract@level>1\relax\def\tud@abstract@level{1}\fi%
   \KOMAoptions{titlepage=false}%
-  \addtokomafont{disposition}{\color{\tud@color@partfont}}%
-  \addtokomafont{dictumtext}{\color{\tud@color@partfont}}%
-  \color{\tud@color@partfont}%
+  \addtokomafont{disposition}{\color{\tud@part@fontcolor}}%
+  \addtokomafont{dictumtext}{\color{\tud@part@fontcolor}}%
+  \color{\tud@part@fontcolor}%
 %    \end{macrocode}
 % Hiermit wird der unterschiedliche Abstand bei Teil- und Kapitelpräambeln 
 % ausgeglichen.
@@ -1023,17 +1086,18 @@
 % für die jeweilig gewählte Option ausgewählt.
 %    \begin{macrocode}
 \newcommand*\tud@chapterheadstartvskip{%
-  \def\tud@color@chapterpage{white}%
-  \def\tud@color@chapterfont{black}%
-  \ifcase \tud@layout@chapter\relax\or\or%
-    \def\tud@color@chapterpage{white}%
-    \def\tud@color@chapterfont{HKS41}%
-  \or%
-    \def\tud@color@chapterpage{HKS41!10}%
-    \def\tud@color@chapterfont{HKS41}%
+  \def\tud@chapter@fontcolor{black}%
+  \ifcase\tud@layout@chapter\relax\or\else%
+    \def\tud@chapter@fontcolor{HKS41}%
   \fi%
-  \vspace*{%
-    \dimexpr\tud@dim@headdiff+\tud@dim@headingsvskip-\baselineskip\relax%
+  \ifcsdef{scr@v@3.15}{%
+    \vspace*{%
+      \dimexpr\tud@dim@headdiff+\tud@dim@headingsvskip+\parskip\relax%
+    }%
+  }{%
+    \vspace*{%
+      \dimexpr\tud@dim@headdiff+\tud@dim@headingsvskip-\baselineskip\relax%
+    }%
   }%
   \if@tud@chapterpage%
     \vspace*{\pageheadingsvskip}%
@@ -1044,38 +1108,64 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@chapterheadstartvskip
 % \begin{macro}{\tud@@@makechapterhead}
-% Damit das Präfix des Kapitels bei der gegebenenfalls aktivierten Option
-% \opt{chapterprefix} in Majuskeln erscheint, wird dem Befehl
-% \cs{chapterformat}, welcher das Präfix enthält, der entsprechende Befehl
-% vorangestellt. Außerdem muss die Überschrift bei aktivierter
-% \opt{chapterprefix}-Option um die Höhe des Präfixes nach oben verschoben
-% werden, damit die Überschrift selbst auf der richtigen Höhe liegt.
+% \begin{macro}{\@@makechapterhead}
+% Für das Präfix des Kapitels bei der gegebenenfalls aktivierten Option
+% \opt{chapterprefix} ist einiges an Anpassungen notwendig, um die eigentliche 
+% Überschrift auf der gewünschten Position erscheinen zu lassen.
+%
+% Zunächst muss die Überschrift um die Höhe des Präfixes nach oben verschoben 
+% werden. Der Befehl \cs{chapterformat} enthält das Präfix slbst. Damit dieses 
+% in Majuskeln erscheint, wird \cs{chapterformat} im Argument des Makros 
+% \cs{tud@makeuppercase} verwendet. Zuletzt wird der Abstand zwischen Präfix 
+% und Kapiteltitel auf \cs{tud@headmidvskip} gesetzt. Weiterhin wird die Länge 
+% \cs{parskip} auf \cs{z@} gesetzt, damit die Überschriften für alle
+% Einstellmöglichkieten der \opt{parskip}-Option immer auf exakt der selben
+% Höhe liegen und auch die Abstände zwischen den ggf. genutzten Präfixen
+% identisch sind.
+%
+% Da der Quelltext sich bei \KOMAScript~v3.15 stark geändert hat, wird der 
+% Befehl \cs{@@makechapterhead} versionsabhängig angepasst.
 %    \begin{macrocode}
 \newcommand*\tud@@@makechapterhead{}
 \let\tud@@@makechapterhead\@@makechapterhead
-\patchcmd{\tud@@@makechapterhead}{\chapterheadstartvskip}{%
-  \chapterheadstartvskip%
-  \if@chapterprefix%
-    \begingroup%
-      \usekomafont{chapterprefix}%
-      \vspace*{\dimexpr-\dp\strutbox-\ht\strutbox-.5\baselineskip\relax}%
-    \endgroup%
-  \fi%
-}{}{\tud@patch@wrn{@@makechapterhead}}
-\patchcmd{\tud@@@makechapterhead}{\chapterformat}{%
-  \tud@makeuppercase{\chapterformat}%
-}{}{\tud@patch@wrn{@@makechapterhead}}
 %    \end{macrocode}
-% Weiterhin müssen alle vertikalen Abstände gelöscht werden, damit die
-% Überschriften für alle Einstellungen der \opt{parskip}-Option immer auf
-% exakt der selben Höhe liegen und auch die Abstände zwischen den ggf.
-% genutzten Präfixen identisch sind.
+% Die Patches für \KOMAScript~v3.15.
 %    \begin{macrocode}
-\patchcmd{\tud@@@makechapterhead}{\size@chapter{#1}}{%
-  \setlength{\parskip}{\z@}%
-  \size@chapter{#1}%
-}{}{\tud@patch@wrn{@@makechapterhead}}
+\ifcsdef{scr@v@3.15}{%
+  \patchcmd{\tud@@@makechapterhead}{\chapterformat\chapterheadmidvskip}{%
+    \tud@headmidvskip@neg%
+    \tud@makeuppercase{\chapterformat}\tud@headmidvskip
+  }{}{\tud@patch@wrn{@@makechapterhead}}
+  \patchcmd{\tud@@@makechapterhead}{\IfUsePrefixLine{}{\raggedchapter}}{%
+    \IfUsePrefixLine{\IfUseNumber{\setlength\parskip{\z@}}{}}{\raggedchapter}%
+  }{}{\tud@patch@wrn{@@makechapterhead}}
 %    \end{macrocode}
+% Die Patches für \KOMAScript~v3.14 und früher.
+%    \begin{macrocode}
+}{%
+  \patchcmd{\tud@@@makechapterhead}{\chapterheadstartvskip}{%
+    \chapterheadstartvskip%
+    \ifnumbered{chapter}{%
+      \if@chapterprefix%
+        \begingroup%
+          \usekomafont{chapterprefix}%
+          \tud@headmidvskip@neg%
+        \endgroup%
+      \fi%
+    }{}%
+  }{}{\tud@patch@wrn{@@makechapterhead}}
+  \patchcmd{\tud@@@makechapterhead}{\chapterformat}{%
+    \tud@makeuppercase{\chapterformat}%
+  }{}{\tud@patch@wrn{@@makechapterhead}}
+  \patchcmd{\tud@@@makechapterhead}{\endgraf\nobreak\vskip.5\baselineskip}{%
+    \tud@headmidvskip
+  }{}{\tud@patch@wrn{@@makechapterhead}}
+  \patchcmd{\tud@@@makechapterhead}{\interlinepenalty}{%
+    \ifnumbered{chapter}{\setlength\parskip{\z@}}{}\interlinepenalty
+  }{}{\tud@patch@wrn{@@makechapterhead}}
+}
+%    \end{macrocode}
+% \end{macro}^^A \@@makechapterhead
 % \end{macro}^^A \tud@@@makechapterhead
 % \begin{macro}{\tud@chapterpreamble}
 % Um die \KOMAScript-Befehle für die Kapitelpräambel auch für das farbige Layout
@@ -1090,21 +1180,20 @@
 % Die Farb- und Schrifteinstellungen sind nur für reine Kapitelseiten notwendig.
 %    \begin{macrocode}
   \if@tud@chapterpage%
-    \if@tud@cdfonts%
-      \if@tud@heavyfont%
-        \TUDoptions{cdfont=heavy}%
-      \else%
-        \TUDoptions{cdfont=true}%
-      \fi%
+    \ifcase\tud@cdfont\relax\or%
+      \TUDoptions{cdfont=true}%
+    \or%
+      \TUDoptions{cdfont=heavy}%
     \fi%
-    \addtokomafont{disposition}{\color{\tud@color@chapterfont}}%
-    \addtokomafont{dictumtext}{\color{\tud@color@chapterfont}}%
-    \color{\tud@color@chapterfont}%
+    \addtokomafont{disposition}{\color{\tud@chapter@fontcolor}}%
+    \addtokomafont{dictumtext}{\color{\tud@chapter@fontcolor}}%
+    \color{\tud@chapter@fontcolor}%
   \fi%
   \@afterindentfalse\@afterheading%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@chapterpreamble
+% \begin{macro}{\set@@@@preamble}
 % Die beiden Befehle für Präambeln aus \KOMAScript{} ignorieren in ihrer
 % ursprünglichen Form die Einstellungen für \opt{parskip}. Dies wird mit diesem
 % Patch beseitigt. Außerdem werden das Makro für die Layouteinstellungen für 
@@ -1124,6 +1213,7 @@
   }%
 }{}{\tud@patch@wrn{set@@@@preamble}}
 %    \end{macrocode}
+% \end{macro}^^A \set@@@@preamble
 % \begin{macro}{\tud@chapter@pre}
 % \begin{macro}{\tud@chapter@app}
 % Diese beiden Makros dienen zur Behandlung der Besonderheiten von spearaten 
@@ -1132,6 +1222,7 @@
 %    \begin{macrocode}
 \newcommand*\tud@chapter@pre{%
   \if@tud@chapterpage%
+%    \end{macrocode}
 % Für den zweispaltigen Satz und aktivierter \opt{chapterpage}-Option muss
 % für die Kapitelseiten temporär auf einseitigen Satz umgestellt werden, damit
 % alle Befehle und Einstellungen beim Erzeugen des jeweiligen Kapitels zum
@@ -1156,9 +1247,24 @@
 % Rückseite beachtet. Umgesetzt wird dies mit \cs{tud@cleardoublespecialpage}.
 %    \begin{macrocode}
     \tud@cleardoublespecialpage{%
-      \tud@pagecolor{\tud@color@chapterpage}%
-      \def\tud@head@color{\tud@color@chapterfont}%
-      \addtokomafont{pagenumber}{\sffamily\color{\tud@color@chapterfont}}%
+      \def\tud@pagecolor{}%
+      \ifcase\tud@layout@chapter\relax\or%
+        \def\tud@head@bar{0}%
+      \or%
+        \def\tud@head@bar{1}%
+      \or%
+        \def\tud@head@bar{2}%
+      \or%
+        \def\tud@pagecolor{HKS41!10}%
+        \def\tud@head@bar{-1}%
+        \def\tud@head@logocolor{HKS41}%
+        \def\tud@foot@logocolor{HKS41}%
+        \bool@std@lock{@tud@head@widebar}{true}%
+      \or%
+        \def\tud@pagecolor{HKS41!10}%
+        \def\tud@head@bar{2}%
+      \fi%
+      \addtokomafont{pagenumber}{\sffamily\color{\tud@chapter@fontcolor}}%
       \clearpage%
     }%
 %    \end{macrocode}
@@ -1167,10 +1273,10 @@
     \if@restonecol\twocolumn\fi%
 %    \end{macrocode}
 % Sollten keine reinen Kapitelseiten verwendet werden, muss gegebenenfalls im
-% Fuß genügend Freiraum für das \DDC-Logo gelassen werden.
+% Kompatibilitätsmodus genügend Freiraum für das \DDC-Logo gelassen werden.
 %    \begin{macrocode}
   \else%
-    \tud@ifinpslist{\chapterpagestyle}{\tud@ddc@enlargepage}{}%
+    \iftudscrverlower{2.03}{\tud@ddc@enlargepage[\chapterpagestyle]}{}%
   \fi%
 %    \end{macrocode}
 % Unabhängig von der Option \opt{chapterpage} wird deim zweispaltigen Layout 
@@ -1204,26 +1310,31 @@
 % \fi
 %
 % \begin{macro}{\SecDef}
+% \changes{v2.02}{2014/09/12}{neu}%^^A
 % \begin{macro}{\scr@section@dblarg}
+% \changes{v2.02}{2014/09/12}{neu}%^^A
 % \begin{macro}{\scr@section@xdblarg}
-% Diese Befehle werden ab der \KOMAScript-Version~v3.13a eingeführt. Damit 
+% \changes{v2.02}{2014/09/12}{neu}%^^A
+% Diese Befehle werden ab der \KOMAScript-Version~v3.14 eingeführt. Damit 
 % werden obligatorische Argumente der Gliederungsebenen besser auf das 
 % optionale Argument dupliziert, falls dieses nicht angegeben wurde. Damit das 
 % auch mit der Version~v3.12 funktioniert, werden die entsprechenden Befehle 
 % hier bereitgehalten.
 %    \begin{macrocode}
-\providecommand*\SecDef[2]{\@ifstar{#2}{\scr@section@dblarg{#1}}}
-\providecommand\scr@section@dblarg[1]{%
-  \kernel@ifnextchar[%]
-    {#1}%
-    {\scr@section@xdblarg{#1}}%
-}
-\providecommand\scr@section@xdblarg[2]{%
-  \begingroup
-    \edef\reserved@a{%
-      \unexpanded{\endgroup\let\scr@osectarg\z@#1[{#2}]{#2}\def\scr@osectarg}%
-      {\scr@osectarg}}%
-  \reserved@a
+\ifcsdef{scr@v@3.14}{}{%
+  \providecommand*\SecDef[2]{\@ifstar{#2}{\scr@section@dblarg{#1}}}
+  \providecommand\scr@section@dblarg[1]{%
+    \kernel@ifnextchar[%]
+      {#1}%
+      {\scr@section@xdblarg{#1}}%
+  }
+  \providecommand\scr@section@xdblarg[2]{%
+    \begingroup
+      \edef\reserved@a{%
+        \unexpanded{\endgroup\let\scr@osectarg\z@#1[{#2}]{#2}\def\scr@osectarg}%
+        {\scr@osectarg}}%
+    \reserved@a
+  }
 }
 %    \end{macrocode}
 % \end{macro}^^A \scr@section@xdblarg
@@ -1367,7 +1478,7 @@
 %    \begin{macrocode}
   }{%
     \tud@sectioning@case{#2}%
-    \ifstrempty{#1}{}{%
+    \ifblank{#1}{}{%
       \tud@cmd@store{#1}%
       \tud@sectioning@case{#1}%
     }%
@@ -1463,7 +1574,7 @@
 %    \begin{macrocode}
 \newcommand*\tud@sectioning@reset[2][]{%
   \tud@cmd@restore{#2}%
-  \ifstrempty{#1}{}{\tud@cmd@restore{#1}}%
+  \ifblank{#1}{}{\tud@cmd@restore{#1}}%
   \tud@font@koma@unset{#2}%
 }
 %    \end{macrocode}
@@ -1491,7 +1602,7 @@
 %    \begin{macrocode}
 \newcommand*\tud@font@koma@set[2]{%
   \ifcsdef{tud@font@koma@#1}{}{\addtokomafont{#1}{\@nameuse{tud@font@koma@#1}}}%
-  \@namedef{tud@font@koma@#1}{#2}%
+  \@namedef{tud@font@koma@#1}{#2\nobreak}%
 }
 %    \end{macrocode}
 % Durch die Option \opt{headings} werden die Schriftelemente zurückgesetzt. 

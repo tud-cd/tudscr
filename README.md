@@ -2,11 +2,11 @@
 TUD-KOMA-Script
 ===============
 
-TUD-KOMA-Script 2014/12/17 v2.02
-Copyright (c) Falk Hanisch <tudscr[at]gmail.com>, 2012-2014
+TUD-KOMA-Script 2015/02/15 v2.03
+Copyright (c) Falk Hanisch <tudscr@gmail.com>, 2012-2015
 
-This material is subject to the LaTeX Project Public License.
-See http://www.latex-project.org/lppl.txt for the details of that license.
+This material is subject to the LaTeX Project Public License version 1.3c or 
+later. See http://www.latex-project.org/lppl.txt for details of that license.
 
 English text below
 
@@ -18,11 +18,14 @@ Zusammenfassung
 Das TUD-KOMA-Script-Bundle stellt sowohl Klassen als auch Pakete bereit, um 
 LaTeX-Dokumente im Corporate Design der Technischen Universität Dresden zu 
 erstellen. Es basiert auf dem KOMA-Script-Bundle, welches zwingend vorhanden 
-sein muss. Außerdem sind die PostScript-Schriftfamilien Univers und DIN-Bold 
-erforderlich. Mitarbeiter und Studenten der Technischen Universität Dresden 
-können diese unter https://tu-dresden.de/service/publizieren/cd/4_latex vom 
-Universitätsmarketing  mit dem Hinweis auf die Verwendung von LaTeX anfordern.
+sein muss. Außerdem sollten die beiden PostScript-Schriftfamilien Univers und 
+DIN-Bold installiert werden. Geschieht dies nicht, können die Dokumentklassen 
+zwar genutzt werden, die ausgegebenen Dokumente entsprechen in diesem Fall 
+jedoch nicht dem ursprünglich erhofftem Stil.
 
+Mitarbeiter und Studenten der Technischen Universität Dresden können die 
+Schriftdateien unter https://tu-dresden.de/service/publizieren/cd/4_latex vom 
+Universitätsmarketing  mit dem Hinweis auf die Verwendung von LaTeX anfordern.
 Für die Installation der PostScript-Schriften sei auf den entsprechenden 
 Release unter https://github.com/tud-cd/tudscr/releases/tag/fonts und das 
 LaTeX-Forum der Technischen Universität Dresden verwiesen: 
@@ -49,6 +52,15 @@ Das Bundle beinhaltet:
 
 Versionen
 ---------
+
+
+**v2.03** (2015/02/15)
+
++ Anpassungen an KOMA-Script v3.15
++ Verbesserung des Satzspiegels für das Corporate Design
++ Kopf und Fuß können farbig dargestellt werden
++ Logos in der Fußzeile für Titel und dergleichen möglich
++ kleinere Fehlerkorrekturen
 
 
 **v2.02** (2014/12/17)
@@ -99,6 +111,7 @@ Versionen
 
 + erste Version des TUD-KOMA-Script-Bundles
 
+
 -------------------------------------------------------------------------------
 
 Summary
@@ -107,14 +120,16 @@ Summary
 The TUD-KOMA-Script bundle provides both classes and packages in order to 
 create LaTeX documents in the corporate design of the Technische Universität 
 Dresden. It bases on the KOMA-Script bundle, which must necessarily be present.
-In addition, the PostScript font families Univers and DIN-Bold are required. 
+In addition, the PostScript font families Univers and DIN-Bold should be 
+installed. Otherwise, the document classes can admittedly be used, but in this 
+case, the created documents do not correspond to the originally thought style.
+
 Employees and students of the Technische Universität Dresden can request these
 fonts via  https://tu-dresden.de/service/publizieren/cd/4_latex from the 
-university marketing university marketing with regard to the use of LaTeX.
-
-To install the PostScript fonts, please refer to the corresponding release 
-under https://github.com/tud-cd/tudscr/releases/tag/fonts and the LaTeX forum 
-of the Technische Universität Dresden: 
+university marketing university marketing with regard to the use of LaTeX. To 
+install the PostScript fonts, please refer to the corresponding release under 
+https://github.com/tud-cd/tudscr/releases/tag/fonts and the LaTeX forum of the 
+Technische Universität Dresden: 
 http://latex.wcms-file3.tu-dresden.de/phpBB3/index.php
 
 Classes and Packages
@@ -139,6 +154,15 @@ Versions
 --------
 
 
+**v2.03** (2015/02/15)
+
++ adjustments to KOMA-Script v3.15
++ improvement of the corporate design type area
++ colored head and foot possible
++ including logos in the foot for the title etc.
++ a few little bux fixes
+
+
 **v2.02** (2014/12/17)
 
 + package `tudscrfonts`
@@ -159,17 +183,17 @@ Versions
 
 **v2.01b** (2014/06/04)
 
-+ Fixed bug when using task (tudscrsupervisor)
++ fixed bug when using task (tudscrsupervisor)
 
 
 **v2.01a** (2014/06/03)
 
-+ Fixed bug when using the subtitle.
++ fixed bug when using the subtitle
 
 
 **v2.01** (2014/04/24)
 
-+ Fixes the kerning of the digits and the font weight at the title page.
++ fixes the kerning of the digits and the font weight at the title page
 
 
 **v2.00** (2014/04/22)

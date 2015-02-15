@@ -1,29 +1,33 @@
-% \CheckSum{298}
+% \CheckSum{293}
 % \iffalse meta-comment
-% ======================================================================
+% 
+% ============================================================================
+% 
+%  TUD-KOMA-Script
+%  Copyright (c) Falk Hanisch <tudscr@gmail.com>, 2012-2015
+% 
+% ============================================================================
+% 
+%  This work may be distributed and/or modified under the conditions of the
+%  LaTeX Project Public License, version 1.3c of the license. The latest
+%  version of this license is in http://www.latex-project.org/lppl.txt and 
+%  version 1.3c or later is part of all distributions of LaTeX 2005/12/01
+%  or later and of this work. This work has the LPPL maintenance status 
+%  "author-maintained". The current maintainer and author of this work
+%  is Falk Hanisch.
+% 
+% ----------------------------------------------------------------------------
+% 
+% Dieses Werk darf nach den Bedingungen der LaTeX Project Public Lizenz
+% in der Version 1.3c, verteilt und/oder veraendert werden. Die aktuelle 
+% Version dieser Lizenz ist http://www.latex-project.org/lppl.txt und 
+% Version 1.3c oder spaeter ist Teil aller Verteilungen von LaTeX 2005/12/01 
+% oder spaeter und dieses Werks. Dieses Werk hat den LPPL-Verwaltungs-Status 
+% "author-maintained", wird somit allein durch den Autor verwaltet. Der 
+% aktuelle Verwalter und Autor dieses Werkes ist Falk Hanisch.
+% 
+% ============================================================================
 %
-% Das Corporate Design der TU Dresden auf Basis der KOMA-Script-Klassen
-%
-% ======================================================================
-% This work may be distributed and/or modified under the conditions of
-% the LaTeX Project Public License, version 1.3c of the license.
-% The latest version of this license is in
-%     http://www.latex-project.org/lppl.txt
-% and version 1.3c or later is part of all distributions of LaTeX
-% version 2005/12/01 or later and of this work.
-% This work has the LPPL maintenance status "author-maintained".
-% The current maintainer and author of this work is Falk Hanisch.
-% ----------------------------------------------------------------------
-% Dieses Werk darf nach den Bedingungen der LaTeX Project Public Lizenz,
-% Version 1.3c, verteilt und/oder veraendert werden.
-% Die neuste Version dieser Lizenz ist
-%     http://www.latex-project.org/lppl.txt
-% und Version 1.3c ist Teil aller Verteilungen von LaTeX
-% Version 2005/12/01 oder spaeter und dieses Werks.
-% Dieses Werk hat den LPPL-Verwaltungs-Status "author-maintained"
-% (allein durch den Autor verwaltet).
-% Der aktuelle Verwalter und Autor dieses Werkes ist Falk Hanisch.
-% ======================================================================
 % \fi
 %
 % \CharacterTable
@@ -47,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-misc.dtx}[%
-  2014/12/12 v2.02 TUD-KOMA-Script (miscellaneous)%
+  2015/02/15 v2.03 TUD-KOMA-Script (miscellaneous)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -69,7 +73,7 @@
 % \selectlanguage{ngerman}
 %
 % \changes{v2.02}{2014/06/23}{Unterstützung für \pkg{titlepage} entfernt}%^^A
-% \changes{v2.02}{2014/07/08}{Verwendung \cs{FamilyKeyState}}%^^A
+% \changes{v2.02}{2014/07/08}{Optionen nutzen \cs{FamilyKeyState}}%^^A
 %
 % \section{Verschiedenes für die Hauptklassen}
 %
@@ -80,6 +84,22 @@
 % \iffalse
 %<*class&option>
 % \fi
+%
+% \subsection{Ausführung von paketspezifischem Quellcode}
+%
+% Ab und an ist es notwendig, bestimmten Quelltext erst gezielt nach einem 
+% Paket auszuführen.
+% \begin{macro}{\TUD@parameter@defaulthandler}
+% \changes{v2.03}{2015/02/15}{neu}%^^A
+% Im ersten Argument wird das paket angegeben, im zweiten der Quellcode. Dabei 
+% ist zu beachten, dass dieser im Dokument auch ausgeführt wird, wenn das Paket 
+% \emph{nicht} geladen wurde.
+%    \begin{macrocode}
+\newcommand*\TUD@AfterPackage[2]{%
+  \if@atdocument#2\else\AfterPackage!{#1}{#2}\fi%
+}
+%    \end{macrocode}
+% \end{macro}^^A \TUD@parameter@defaulthandler
 %
 % \subsection{Fußnoten in Überschriften}
 %
@@ -99,7 +119,7 @@
     {symbolheadings}{1}%
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \ifcase \@tempa\relax%
+    \ifcase\@tempa\relax%
       \@tud@symbolheadingsfalse%
     \or%
       \@tud@symbolheadingstrue%
@@ -183,6 +203,14 @@
   }%
   \pdfstringdefDisableCommands{\let\NoCaseChange\@firstofone}%
 }
+%    \end{macrocode}
+% \end{macro}^^A \tud@footnote@rehyper
+% \end{macro}^^A \tud@footnote@unhyper
+% \end{macro}^^A \tudbookmark
+% \begin{macro}{\maketitle}
+% \begin{macro}{\tableofcontents}
+% Für den Titel und das Inhaltsverzeichnis werden Outline-Einträge erzeugt.
+%    \begin{macrocode}
 \pretocmd{\maketitle}{%
   \if@tud@bookmarks%
     \ifdef{\bookmarksetup}{\bookmarksetup{startatroot}}{}%
@@ -195,9 +223,6 @@
 %</article>
 }{}{\tud@patch@wrn{maketitle}}
 \pretocmd{\tableofcontents}{%
-%<*book|report>
-  \if@openright\cleardoublepage\else\clearpage\fi%
-%</book|report>
   \if@tud@bookmarks%
     \ifdef{\bookmarksetup}{\bookmarksetup{startatroot}}{}%
   \fi%
@@ -209,33 +234,34 @@
 %</article>
 }{}{\tud@patch@wrn{tableofcontents}}
 %    \end{macrocode}
-% \end{macro}^^A \tud@footnote@rehyper
-% \end{macro}^^A \tud@footnote@unhyper
-% \end{macro}^^A \tudbookmark
+% \end{macro}^^A \tableofcontents
+% \end{macro}^^A \maketitle
 %
 % \subsection{Parameter für Umgebungen und mehrspaltige Texte}
 %
 % Diese Befehle dienen dazu, bei Umgebungen die Sprache über einen Parameter
 % anzugeben sowie das Paket \pkg{multicol} verwenden zu können.
-% \begin{macro}{\tud@environmenthandler}
+% \begin{macro}{\TUD@parameter@defaulthandler}
 % Hiermit kann sowohl die zu verwendende Sprache als auch die Anzahl der
 % gewünschten Spalten für bestimmte Umgebungen ohne die explizite Angabe eines
 % Schlüssels festgelegt werden. Momentan betrifft das die beiden Umgebungen
 % \env{abstract} und \env{tudpage}.
 %    \begin{macrocode}
-\newcommand*\tud@environmenthandler[1]{%
-  \def\@tempa{#1}%
+\newcommand*\TUD@parameter@defaulthandler[2]{%
+  \def\@tempa{#2}%
   \@for\@tempb:=\@tempa\do{%
     \ifx\@tempb\@empty\else%
-      \ifxnumber{\@tempb}{\let\tud@multicols\@tempb}{%
-      \ifstr{\@tempb}{twocolumn}{\def\tud@multicols{2}}{%
-        \expandafter\selectlanguage\expandafter{\@tempb}%
-      }}%
+      \ifstr{\@tempb}{twocolumn}{\def\@tempb{2}}{}%
+      \ifxnumber{\@tempb}{%
+        \TUD@parameter@set{#1}{columns=\@tempb}%
+      }{%
+        \TUD@parameter@set{#1}{language=\@tempb}%
+      }%
     \fi%
   }%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@environmenthandler
+% \end{macro}^^A \TUD@parameter@defaulthandler
 % \begin{macro}{\tud@multicols}
 % \begin{macro}{\tud@multicols@check}
 % Im Makro \cs{tud@multicols} wird die Anzahl der gewünschten Spalten in einer
@@ -267,20 +293,18 @@
 % tatsächlich die Schrift DIN~Bold verwendet wird.
 % \begin{macro}{\tud@makeuppercase}
 % Der Befehl führt \cs{MakeTextUppercase}\marg{Text} deshalb nur aus, wenn die 
-% richtige Schriftfamilie verwendet wird. Außerdem wird gleich noch die zu hoch
-% liegende Grundlinie bei Überschriften der beiden Ebenen \cs{section} und
-% \cs{subsection} nach unten korrigiert (derber Hack).
+% richtige Schriftfamilie verwendet wird. 
 %    \begin{macrocode}
 \newcommand*\tud@makeuppercase[1]{%
   \ifdin{\begingroup\MakeTextUppercase{#1}\endgroup}{#1}%
-  \protect\vphantom{\"A\"O\"U}%
 %    \end{macrocode}
-% Aufgrund eines Fehlers im \LaTeX-Kernels liegt die Grundlinie für die 
-% Gliederungsebene \cs{section} zu hoch. Mit dem Einfügen des vertikalen 
-% Freiraums für die Umlaute würde diese automatisch nach unten verschoben. 
-% Allerdings wäre das ein ziemlich übler Hack.
+% Aufgrund eines Fehlers im \LaTeX-Kernels liegt die Grundlinie für die beiden
+% Gliederungsebenen \cs{section} und \cs{subsection} zu hoch. Mit dem Einfügen
+% des vertikalen Freiraums für die Umlaute wird diese automatisch nach unten
+% verschoben. Allerdings ist das ein ziemlich übler Hack.
+%^^A \addtokomafont{section}{\strut\ignorespaces}%
 %    \begin{macrocode}
-%% \addtokomafont{section}{\strut\ignorespaces}%
+  \protect\vphantom{\"A\"O\"U}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@makeuppercase
@@ -309,6 +333,7 @@
 % Expansion der beiden Argumente aufgrund der standardmäßigen Verwendung von 
 % \cs{edef} allerdings vollständig und ohne die Beachtung von \cs{protect}.
 % \begin{macro}{\protected@expandtwoargs}
+% \changes{v2.02}{2014/11/13}{neu}%^^A
 % Der Befehl \cs{protected@expandtwoargs} kann äquivalent genutzt werden, 
 % lässt dabei aber mit \cs{protect} geschützte Makros unberührt.
 %    \begin{macrocode}
@@ -361,7 +386,7 @@
 %    \end{macrocode}
 % Ganz zum Schluss noch Bugfixes für unterschiedliche Pakete.
 %    \begin{macrocode}
-\RequirePackage{scrhack}[2014/07/07]
+\RequirePackage{scrhack}[2014/02/27]
 %    \end{macrocode}
 % \dots und der Rest.
 %    \begin{macrocode}
@@ -402,7 +427,7 @@
 \newcommand*\notudscrartcl{%
   F\"ur die Klasse \Class{tudscrartcl} ist diese Einstellung nicht verf\"ugbar.
 }
-\newlength{\tempdim}
+\newlength\tempdim
 %</manual&class>
 %</manual>
 \newcommand*\CD{Corporate Design\xspace}

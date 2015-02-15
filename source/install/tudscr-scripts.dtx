@@ -1,4 +1,4 @@
-% \CheckSum{442}
+% \CheckSum{439}
 % \iffalse meta-comment
 % ======================================================================
 %
@@ -46,7 +46,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-scripts.dtx}[%
-  2014/10/14 v2.02 TUD-KOMA-Script installation scripts%
+  2015/02/12 v2.03 TUD-KOMA-Script installation scripts%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -64,6 +64,8 @@
 % \fi
 %
 % \selectlanguage{ngerman}
+%
+% \changes{v2.03}{2015/01/23}{\pkg{mweights} unnötig}%^^A
 %
 % \section{Installationsskripte}
 %
@@ -116,16 +118,16 @@ rem Tex Live 2013
 rem Tex Live 2014
 rem
 echo.
-echo  =======================================================================
+echo  =====================================================================
 % \iffalse
 %<*full>
 % \fi
-echo   Installation TUD-KOMA-Script-Bundle + TUD-CD-Schriften unter Windows
+echo   Installation TUD-KOMA-Script + TUD-CD-Schriften unter Windows
 % \iffalse
 %</full>
 %<*update>
 % \fi
-echo   Update TUD-KOMA-Script-Bundle unter Windows
+echo   Update TUD-KOMA-Script unter Windows
 % \iffalse
 %</update>
 %<*font>
@@ -135,7 +137,7 @@ echo   Installation TUD-CD-Schriften unter Windows
 %</font>
 %<*uninstall>
 % \fi
-echo   Deinstallation TUD-KOMA-Script-Bundle unter Windows
+echo   Deinstallation TUD-KOMA-Script unter Windows
 % \iffalse
 %</uninstall>
 % \fi
@@ -181,16 +183,10 @@ call:checkpackage "cmbright.sty"
 call:checkpackage "iwona.sty"
 % \iffalse
 %</!old>
-%<*(full|update)&!old>
-% \fi
-call:checkpackage "mweights.sty"
-% \iffalse
-%</(full|update)&!old>
 % \fi
 if "%missing%" == "true" goto :abort
 tex --version> distrib.tmp
 set /p distrib=< distrib.tmp
-%</!uninstall>
 kpsewhich --var-value=TEXMFHOME> texmfpath.tmp
 set /p texmfpath=< texmfpath.tmp
 if "%texmfpath%"=="" (
@@ -199,13 +195,12 @@ if "%texmfpath%"=="" (
   echo !texmfpath!> texmfpath.tmp
   endlocal
 )
-%<*!uninstall>
 :MiKTeX
   echo %distrib% | find "MiKTeX"> nul
   if errorlevel 1 goto :TeXLive
   set distrib="MiKTeX"
   echo   MiKTeX-Distribution aktiv
-  echo  =======================================================================
+  echo  =====================================================================
   echo.
   goto :resume
 :TeXLive
@@ -213,17 +208,17 @@ if "%texmfpath%"=="" (
   if errorlevel 1 goto :nothing
   set distrib="TeXLive"
   echo   TeX Live-Distribution aktiv
-  echo  =======================================================================
+  echo  =====================================================================
   echo.
   goto :resume
 :nothing
   echo   weder TeX Live noch MiKTeX gefunden, Abbruch der Installation
-  echo  =======================================================================
+  echo  =====================================================================
   echo.
   goto :end
 :resume
   echo.
-  echo  =======================================================================
+  echo  =====================================================================
 % \iffalse
 %<*full>
 % \fi
@@ -254,7 +249,7 @@ if "%texmfpath%"=="" (
   echo   %texmfpath%
   echo.
 :proof_userinput
-  echo  =======================================================================
+  echo  =====================================================================
   echo.
   echo   Soll das Verzeichnis %texmfpath% genutzt werden?
   if not exist "%texmfpath%" (
@@ -279,7 +274,7 @@ if "%texmfpath%"=="" (
   goto proof_userinput
 :install
   echo.
-  echo  =======================================================================
+  echo  =====================================================================
 % \iffalse
 %<*full>
 % \fi
@@ -298,7 +293,7 @@ if "%texmfpath%"=="" (
 %</font>
 % \fi
   echo   %texmfpath%
-  echo  =======================================================================
+  echo  =====================================================================
   echo.
   set /p texmfpath=< texmfpath.tmp
   if not exist "%texmfpath%" mkdir "%texmfpath%"
@@ -306,57 +301,47 @@ if "%texmfpath%"=="" (
 %</!uninstall>
 %<*uninstall>
 % \fi
-set /p texmfpath=< texmfpath.tmp
-kpsewhich tudscrbase.sty --path=%texmfpath%/tex/latex/tudscr> texmfpath.tmp
-set texmfpath=
-set /p texmfpath=< texmfpath.tmp
-del texmfpath.tmp> nul
-if "%texmfpath%"=="" (
-  echo  =======================================================================
-  echo   TUD-KOMA-Script lokal nicht gefunden, Abbruch der Deinstallation
-  echo  =======================================================================
-  goto:showpaths
+kpsewhich --var-value=TEXMFDIST> texmfpath.tmp
+set /p texmfdist=< texmfpath.tmp
+kpsewhich tudscrbase.sty --all> texmfpath.tmp
+setlocal enabledelayedexpansion
+for /f "tokens=*" %%f in (texmfpath.tmp) do (
+  set "texmfpath=%%f"
+  if "%%f"=="!texmfpath:%texmfdist%=!" (
+    set texmfpath=!texmfpath:tudscrbase.sty=!
+    echo =====================================================================
+    echo   Soll TUD-KOMA-Script aus folgendem Pfad entfernt werden?
+    echo   !texmfpath!
+    echo =====================================================================
+    echo.
+    echo   [j]a ^(ENTER^) / [n]ein:
+    echo.
+    set /p w=
+    if /i "!w!"=="" call:uninstall "!texmfpath!"
+    if /i "!w!"=="j" call:uninstall "!texmfpath!"
+    echo.
+  )
 )
-set texmfpath=%texmfpath:tudscrbase.sty=%
-echo  =======================================================================
-echo   TUD-KOMA-Script wird aus folgendem Pfad entfernt:
-echo   %texmfpath%
-echo  =======================================================================
-echo.
-echo   [j]a (ENTER) / [n]ein:
-echo.
-set /p w=
-if /i "%w%"=="" goto uninstall
-if /i "%w%"=="j" goto uninstall
-echo.
-echo  =======================================================================
-echo   Abbruch der Deinstallation
-echo  =======================================================================
-goto:showpaths
-:uninstall
-cd %texmfpath%
-rmdir /s /q logo> nul
-del *.cls> nul
-del *.sty> nul
-cd ..\..\..
-if exist doc\latex\tudscr rmdir /s /q doc\latex\tudscr> nul
-if exist source\latex\tudscr rmdir /s /q source\latex\tudscr> nul
+endlocal
+del texmfpath.tmp> nul
 texhash
-echo  =======================================================================
-echo   Die Deinstallation wird beendet.
-echo  =======================================================================
-:showpaths
-echo.
-echo  =======================================================================
-echo   TUD-KOMA-Script ist noch in folgenden Pfaden existent:
-echo.
-kpsewhich tudscrbase.sty --all
-echo.
-echo  =======================================================================
+echo  =====================================================================
+echo   Es wurde keine (weitere) lokale Nutzerinstallation von 
+echo   TUD-KOMA-Script gefunden. Die Deinstallation wird beendet.
+echo  =====================================================================
 echo.
 pause
 echo.
 exit 0
+:uninstall
+  cd %~1
+  if exist logo rmdir /s /q logo> nul
+  del *.cls> nul
+  del *.sty> nul
+  cd ..\..\..
+  if exist doc\latex\tudscr rmdir /s /q doc\latex\tudscr> nul
+  if exist source\latex\tudscr rmdir /s /q source\latex\tudscr> nul
+  goto:eof
 % \iffalse
 %</uninstall>
 %<*!uninstall>
@@ -429,9 +414,9 @@ exit 0
   copy DINBd___.pfb converted\0m6b8a.pfb> nul
   copy DINBd___.afm converted\0m6b8a.afm> nul
   echo.
-  echo  =======================================================================
+  echo  =====================================================================
   echo   Virtuelle Schriften erzeugen. (Dies kann einen Moment dauern)
-  echo  =======================================================================
+  echo  =====================================================================
   echo.
   cd converted
   echo 00/19
@@ -500,9 +485,9 @@ exit 0
 %</!old>
 % \fi
   echo.
-  echo  =======================================================================
+  echo  =====================================================================
   echo   Konvertierung abgeschlossen.
-  echo  =======================================================================
+  echo  =====================================================================
   echo.
 % \iffalse
 %<*old>
@@ -640,7 +625,7 @@ exit 0
   goto :end
 :end
   echo.
-  echo  =======================================================================
+  echo  =====================================================================
 % \iffalse
 %<*full|font>
 % \fi
@@ -653,7 +638,7 @@ exit 0
 % \iffalse
 %</update>
 % \fi
-  echo  =======================================================================
+  echo  =====================================================================
 % \iffalse
 %<*!old>
 % \fi
@@ -666,7 +651,7 @@ exit 0
 %</full|update>
 % \fi
   echo   ueber den Konsolenaufruf 'texdoc tudscr' zu finden.
-  echo  =======================================================================
+  echo  =====================================================================
 % \iffalse
 %</!old>
 % \fi
@@ -678,9 +663,9 @@ exit 0
   exit 0
 :abort
   echo.
-  echo  =======================================================================
+  echo  =====================================================================
   echo   Abbruch der Installation, temporaere Dateien werden geloescht.
-  echo  =======================================================================
+  echo  =====================================================================
   echo.
   pause
   cd /d %~dp0
@@ -693,13 +678,13 @@ exit 0
   )
   goto:eof
 :missingfile
-  echo  =======================================================================
+  echo  =====================================================================
   echo.
   echo   Die Datei %~1 wurde nicht gefunden. Diese wird fuer die
   echo   Installation zwingend benoetigt. Bitte kopieren Sie %~1
-  echo   in das Verzeichnis des Skriptes und fuehren dieses danach erneut aus.
+  echo   in das Verzeichnis des Skriptes und fuehren dieses abermals aus.
   echo.
-  echo  =======================================================================
+  echo  =====================================================================
   goto:eof
 :checkpackage
   kpsewhich %~1> package.tmp
@@ -710,13 +695,13 @@ exit 0
   )
   goto:eof
 :missingpackage
-  echo  =======================================================================
+  echo  =====================================================================
   echo.
   echo   Das LaTeX-Paket %~1 wurde nicht gefunden. Dieses wird fuer
   echo   die Schriftinstallation zwingend benoetigt. Bitte %~1
-  echo   installieren und danach dieses Skript erneut ausfuehren.
+  echo   installieren und danach dieses Skript abermals ausfuehren.
   echo.
-  echo  =======================================================================
+  echo  =====================================================================
   goto:eof
 % \iffalse
 %</!uninstall>
@@ -798,13 +783,13 @@ checkfile()
 }
 missingfile()
 {
-  echo  =======================================================================
+  echo  =====================================================================
   echo
   echo   Die Datei $1 wurde nicht gefunden. Diese wird fuer die
   echo   Installation zwingend benoetigt. Bitte kopieren Sie $1
-  echo   in das Verzeichnis des Skriptes und fuehren dieses danach erneut aus.
+  echo   in das Verzeichnis des Skriptes und fuehren dieses abermals aus.
   echo
-  echo  =======================================================================
+  echo  =====================================================================
 }
 checkpackage()
 {
@@ -816,20 +801,20 @@ checkpackage()
 }
 missingpackage()
 {
-  echo  =======================================================================
+  echo  =====================================================================
   echo
   echo   Das LaTeX-Paket $1 wurde nicht gefunden. Dieses wird fuer
   echo   die Schriftinstallation zwingend benoetigt. Bitte $1
-  echo   installieren und danach dieses Skript erneut ausfuehren.
+  echo   installieren und danach dieses Skript abermals ausfuehren.
   echo
-  echo  =======================================================================
+  echo  =====================================================================
 }
 abort()
 {
   echo
-  echo  =======================================================================
+  echo  =====================================================================
   echo   Abbruch der Installation, temporaere Dateien werden geloescht.
-  echo  =======================================================================
+  echo  =====================================================================
   echo
   cd ..
   rm -rf tudscrtemp
@@ -842,16 +827,16 @@ abort()
 %</!uninstall>
 % \fi
 echo
-echo  =======================================================================
+echo  =====================================================================
 % \ifflse
 %<*full>
 % \fi
-echo   Installation TUD-KOMA-Script-Bundle + TUD-CD-Schriften unter Unix
+echo   Installation TUD-KOMA-Script + TUD-CD-Schriften unter Unix
 % \iffalse
 %</full>
 %<*update>
 % \fi
-echo   Update TUD-KOMA-Script-Bundle unter Unix
+echo   Update TUD-KOMA-Script unter Unix
 % \iffalse
 %</update>
 %<*font>
@@ -861,7 +846,7 @@ echo   Installation TUD-CD-Schriften unter Unix
 %</font>
 %<*uninstall>
 % \fi
-echo   Deinstallation TUD-KOMA-Script-Bundle unter Unix
+echo   Deinstallation TUD-KOMA-Script unter Unix
 % \iffalse
 %</uninstall>
 % \fi
@@ -903,11 +888,6 @@ checkpackage "cmbright.sty"
 checkpackage "iwona.sty"
 % \iffalse
 %</!old>
-%<*(full|update)&!old>
-% \fi
-checkpackage "mweights.sty"
-% \iffalse
-%</(full|update)&!old>
 % \fi
 if $missing ; then
   abort
@@ -936,26 +916,19 @@ echo   Installation der TUD-CD-Schriften in den lokalen Benutzerpfad:
 echo
 echo   $texmfpath
 echo
-echo  =======================================================================
+echo  =====================================================================
 rm -rf tudscrtemp
 mkdir -p tudscrtemp/converted
 % \iffalse
 %</!uninstall>
 %<*uninstall>
 % \fi
-texmfpath=$(kpsewhich --var-value=TEXMFHOME)
-if [ -z "$texmfpath" ]; then
-  texmfpath=$(kpsewhich --var-value=TEXMFLOCAL)
-fi
-texmfpath=$(kpsewhich tudscrbase.sty --path=$texmfpath/tex/latex/tudscr)
-if [ -z "$texmfpath" ]; then
-  echo  =======================================================================
-  echo   TUD-KOMA-Script lokal nicht gefunden, Abbruch der Deinstallation
-  echo  =======================================================================
-else
-  texmfpath=$(echo $texmfpath|rev|cut -c15-|rev)
-  cd $texmfpath
-  rm -rf logo
+uninstall()
+{
+  cd $1
+  if [ -d logo ]; then
+    rm -rf logo
+  fi
   rm -f *.cls
   rm -f *.sty
   cd ../../..
@@ -965,18 +938,32 @@ else
   if [ -d source/latex/tudscr ]; then
     rm -rf source/latex/tudscr
   fi
-  texhash
-  echo  =======================================================================
-  echo   Die Deinstallation wird beendet.
-  echo  =======================================================================
-fi
+}
+texmfdist=$(kpsewhich --var-value=TEXMFDIST)
+texmfpath=$(kpsewhich tudscrbase.sty --all)
+while read -r line; do
+  if [[ $line != *"$texmfdist"* ]]; then
+    texmftemp=$(echo $line|rev|cut -c15-|rev)
+    echo  =====================================================================
+    echo   Soll TUD-KOMA-Script aus folgendem Pfad entfernt werden?
+    echo   $texmftemp
+    echo  =====================================================================
+    echo
+    select yn in "Yes" "No"; do
+      case $yn in 
+        Yes ) uninstall $texmftemp; break;;
+        No )  break;;
+      esac
+    done <&4;
+    echo
+  fi
+done 4<&0 <<< "$texmfpath"
+texhash
 echo
-echo  =======================================================================
-echo   TUD-KOMA-Script ist noch in folgenden Pfaden existent:
-echo
-kpsewhich tudscrbase.sty --all
-echo
-echo  =======================================================================
+echo  =====================================================================
+echo   Es wurde keine \(weitere\) lokale Nutzerinstallation von 
+echo   TUD-KOMA-Script gefunden. Die Deinstallation wird beendet.
+echo  =====================================================================
 echo
 exit 0
 % \iffalse
@@ -1048,9 +1035,9 @@ cp uvczo___.afm converted/lunco8a.afm
 cp DINBd___.pfb converted/0m6b8a.pfb
 cp DINBd___.afm converted/0m6b8a.afm
 echo
-echo  =======================================================================
+echo  =====================================================================
 echo   Virtuelle Schriften erzeugen. \(Dies kann einen Moment dauern\)
-echo  =======================================================================
+echo  =====================================================================
 echo
 cd converted
 echo 00/19
@@ -1121,9 +1108,9 @@ latex createmap.tex
 %</!old>
 % \fi
 echo
-echo  =======================================================================
+echo  =====================================================================
 echo   Konvertierung abgeschlossen.
-echo  =======================================================================
+echo  =====================================================================
 echo
 % \iffalse
 %<*old>
@@ -1180,7 +1167,7 @@ updmap --enable Map=tudscr.map
 %</full|font>
 % \fi
 echo
-echo  =======================================================================
+echo  =====================================================================
 % \iffalse
 %<*full|font>
 % \fi
@@ -1193,7 +1180,7 @@ echo   Das Update wird beendet, temporaere Dateien werden geloescht.
 % \iffalse
 %</update>
 % \fi
-echo  =======================================================================
+echo  =====================================================================
 % \iffalse
 %<*!old>
 % \fi
@@ -1206,7 +1193,7 @@ echo   unter $texmfpath/doc/latex/tudscr oder
 %</full|update>
 % \fi
 echo   ueber den Konsolenaufruf texdoc tudscr zu finden.
-echo  =======================================================================
+echo  =====================================================================
 % \iffalse
 %</!old>
 % \fi
