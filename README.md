@@ -2,7 +2,7 @@
 TUD-KOMA-Script
 ===============
 
-TUD-KOMA-Script 2015/xx/xx v2.03
+TUD-KOMA-Script 2015/02/15 v2.03
 Copyright (c) Falk Hanisch <tudscr@gmail.com>, 2012-2015
 
 This material is subject to the LaTeX Project Public License version 1.3c or 
@@ -54,9 +54,13 @@ Versionen
 ---------
 
 
-**v2.03** (2015/xx/xx)
+**v2.03** (2015/02/15)
 
-+ 
++ Anpassungen an KOMA-Script v3.15
++ Verbesserung des Satzspiegels für das Corporate Design
++ Kopf und Fuß können farbig dargestellt werden
++ Logos in der Fußzeile für Titel und dergleichen möglich
++ kleinere Fehlerkorrekturen
 
 
 **v2.02** (2014/12/17)
@@ -150,9 +154,13 @@ Versions
 --------
 
 
-**v2.03** (2015/xx/xx)
+**v2.03** (2015/02/15)
 
-+
++ adjustments to KOMA-Script v3.15
++ improvement of the corporate design type area
++ colored head and foot possible
++ including logos in the foot for the title etc.
++ a few little bux fixes
 
 
 **v2.02** (2014/12/17)
@@ -175,17 +183,17 @@ Versions
 
 **v2.01b** (2014/06/04)
 
-+ Fixed bug when using task (tudscrsupervisor)
++ fixed bug when using task (tudscrsupervisor)
 
 
 **v2.01a** (2014/06/03)
 
-+ Fixed bug when using the subtitle.
++ fixed bug when using the subtitle
 
 
 **v2.01** (2014/04/24)
 
-+ Fixes the kerning of the digits and the font weight at the title page.
++ fixes the kerning of the digits and the font weight at the title page
 
 
 **v2.00** (2014/04/22)
