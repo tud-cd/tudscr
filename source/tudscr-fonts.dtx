@@ -1,4 +1,4 @@
-% \CheckSum{1131}
+% \CheckSum{2902}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,14 +51,18 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-fonts.dtx}[%
-  2015/02/16 v2.03 TUD-KOMA-Script\space%
+  2015/02/17 v2.04 TUD-KOMA-Script\space%
 %</driver>
 %<package&identify>\NeedsTeXFormat{LaTeX2e}[2011/06/27]
-%<package&identify>\ProvidesPackage{tudscrfonts}[%
+%<package&identify>\ProvidesPackage{%
+%<package&identify&!fontsizes>  tudscrfonts%
+%<package&identify&fontsizes>  tudscrfontsizes%
+%<package&identify>}[%
 %<*driver|package&identify>
 %!TUDVersion
 %<package>  package
-  (corporate design fonts)%
+%<!fontsizes>  (corporate design fonts)%
+%<fontsizes>  (creatings fontsize files)%
 ]
 %</driver|package&identify>
 %<*driver>
@@ -87,6 +91,7 @@
 % \changes{v2.02}{2014/08/29}{Unterstützung für \pkg{fontspec}}%^^A
 % \changes{v2.02}{2014/09/30}{\pkg{tudscrfonts} Nutzung alter tud-Klassen 
 %   mit neuen Schriftfamilien ermöglicht}%^^A
+% \changes{v2.04}{2015/02/17}{Eigene Schriftgrößendateien}%^^A
 %
 % \section{Schriften des \CDs}
 %
@@ -101,6 +106,7 @@
 % \StopEventually{\PrintIndex\PrintChanges}
 %
 % \iffalse
+%<*!fontsizes>
 %<*class&option>
 % \fi
 %
@@ -611,6 +617,16 @@
   \DeclareMathSymbol{\varPhi}{\mathalpha}{letters}{8}%
   \DeclareMathSymbol{\varPsi}{\mathalpha}{letters}{9}%
   \DeclareMathSymbol{\varOmega}{\mathalpha}{letters}{10}%
+%    \end{macrocode}
+% Damit die Schrift im Dokument später noch umgestellt werden kann, werden
+% sämtliche Einstellungen erst zu Beginn des Dokumentes gesichert. Deshalb wird
+% der dafür verantwortliche Befehl \cs{tud@font@set} hier zum ersten Mal
+% verwendet. Damit ist es möglich, die Schriften eventuell geladener Pakete wie
+% \pkg{lmodern} oder \pkg{libertine} vorher zu sichern und später wieder zu
+% aktivieren. Auch die Einstellungen für den Mathematiksatz werden erstmalig 
+% durch \cs{tud@font@math@set} gesetzt.
+%    \begin{macrocode}
+  \tud@font@set%
 }
 %    \end{macrocode}
 % \end{macro}^^A \varOmega
@@ -800,7 +816,9 @@
 %<*(class|package)&body>
 % \fi
 %
+% \ToDo{Laden von scrextend für tudscrfonts, Paket testen}[v2.04]
 % \begin{macro}{\tud@font@set}
+% \changes{v2.04}{2015/02/17}{Optionsabhängige Schriftgrößen}%^^A
 % Mit diesem Befehl werden entweder die normalen oder aber die Schriften des 
 % \CDs aktiviert. Dabei wird die Option \opt{fontspec} beachtet.
 %    \begin{macrocode}
@@ -820,7 +838,13 @@
     \tud@cmd@restore{seriesdefault}%
     \tud@cmd@restore{shapedefault}%
 %    \end{macrocode}
-% Die Mathematikschriften werden auf ihr Stanardverhalten zurückgesetzt. 
+% Die Auswahl der Schriftgrößendateien und die Berechnung nicht vorhandener 
+% Größen wird zurückgesetzt.
+%    \begin{macrocode}
+    \tud@cmd@restore{@fontsizefilebase}%
+    \tud@cmd@restore{changefontsizes}%
+%    \end{macrocode}
+% Die Mathematikschriften werden auf ihr Standardverhalten zurückgesetzt. 
 %    \begin{macrocode}
     \bool@std@lock{@tud@cdmath}{false}%
 %    \end{macrocode}
@@ -844,6 +868,16 @@
     \tud@cmd@store{familydefault}%
     \tud@cmd@store{seriesdefault}%
     \tud@cmd@store{shapedefault}%
+%    \end{macrocode}
+% Die Auswahl der Schriftgrößendateien und die Berechnung nicht vorhandener 
+% Größen wird gespeichert. Anschließend wird der Standardname der Dateien für 
+% Schriftgrößen geändert und ein adaptiertes Makro zur Berechnung dieser 
+% aktiviert.
+%    \begin{macrocode}
+    \tud@cmd@store{@fontsizefilebase}%
+    \tud@cmd@store{changefontsizes}%
+    \renewcommand*\@fontsizefilebase{tudscrsize}%
+    \let\changefontsizes\tud@changefontsizes%
 %    \end{macrocode}
 % Die Mathematikschriften werden bei der Verwendung der Schriften des \CDs~--
 % falls nicht anders durch den Anwender definiert~-- auf Serifenlose gesetzt.
@@ -927,14 +961,15 @@
     \renewcommand*\shapedefault{\updefault}%
   \fi%
 %    \end{macrocode}
-% Zum Abschluss wird die gewählte Standardschrift aktiviert. Danach erfolgt die 
-% Behandlung der mathrematikschriften. Ganz zum Schluss wird das Layout erneut 
-% gesetzt.
+% Zum Ende wird die gewählte Standardschrift aktiviert und die Schriftgröße 
+% ausgewählt. Danach erfolgt die Behandlung der mathrematikschriften. Ganz zum
+% Schluss wird das Layout erneut gesetzt.
 %    \begin{macrocode}
   \normalfont\selectfont%
+  \tud@setfontsize%
   \tud@font@math@set%
 %<*class>
-  \tud@layout@process%
+  \if@atdocument\tud@layout@process\fi%
 %</class>
 }
 %    \end{macrocode}
@@ -967,6 +1002,279 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@font@math@set
+% \begin{macro}{\tud@setfontsize}
+% \changes{v2.04}{2015/02/17}{neu}%^^A
+% Mit diesem Befehl wird nach der Auswahl der Schriftart die Schriftgröße 
+% definiert. Dies ist notwendig, weil die Schriften des \CDs andere Dateien für 
+% die Schriftgrößen verwenden, die geladen bzw. zurückgesetzt werden müssen.
+%    \begin{macrocode}
+\newcommand*\tud@setfontsize{%
+%    \end{macrocode}
+% Zu Beginn die Standardeinstelunngen für die folgenden Längen, damit beim 
+% Zurückschalten auch alles seine Ordnung hat.
+%    \begin{macrocode}
+  \setlength\smallskipamount{3\p@ \@plus 1\p@ \@minus 1\p@}
+  \setlength\medskipamount{6\p@ \@plus 2\p@ \@minus 2\p@}
+  \setlength\bigskipamount{12\p@ \@plus 4\p@ \@minus 4\p@}
+  \setlength{\abovecaptionskip}{10\p@}
+  \setlength{\belowcaptionskip}{0\p@}
+%    \end{macrocode}
+% Anschließend wird die Schriftgröße mit der \KOMAScript-Option \opt{fontsize}
+% gesetzt.
+%    \begin{macrocode}
+  \setlength\@tempdima{\@ptsize\p@}
+  \addtolength{\@tempdima}{10\p@}%
+  \edef\@tempa{\noexpand\KOMAoptions{fontsize=\strip@pt\@tempdima}}%
+  \@tempa%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@setfontsize
+% \begin{macro}{\tud@changefontsizes}
+% Hiermit kann die Schriftgröße im Dokument geändert werden, falls keine 
+% passende Schriftgrößendatei vorhanden ist. Der Befehl lehnt sich stark am
+% \KOMAScript-Befehl \cs{changefontsizes} an, ändert allerdings einige Längen
+% marginal.
+%    \begin{macrocode}
+\newcommand*{\tud@changefontsizes}[2][\dimexpr6\@tempdima/5\relax]{%
+  \ClassInfo{\tudcls@name}{Calculating font sizes for basic size `#2'}%
+  \@defaultunits\@tempdima#2pt\relax\@nnil
+  \setlength{\@tempdimc}{\@tempdima}%
+  \addtolength{\@tempdimc}{-10\p@}%
+  \edef\@ptsize{\strip@pt\@tempdimc}%
+  \setlength{\@tempdimb}{#1}%
+  \setlength{\@tempdimc}{\dimexpr (100\@tempdimb / \@tempdima * \p@)}%
+  \edef\@tempa{\strip@pt\@tempdimc}%
+  \@defaultunits\@tempdimb\dimexpr\@tempa\@tempdima/100\relax pt\relax\@nnil
+  \setlength{\@tempdimc}{\@tempdima}%
+  \scr@setlength{\abovedisplayskip}{\dimexpr5\@tempdimb/6\relax}%
+    {\dimexpr\@tempdimb/6\relax}{\dimexpr5\@tempdimb/12\relax}%
+  \scr@setlength{\abovedisplayshortskip}{\z@}{\dimexpr\@tempdimb/4\relax}{\z@}%
+  \scr@setlength{\belowdisplayshortskip}{\dimexpr\@tempdimb/2\relax}%
+    {\dimexpr\@tempdimb/4\relax}{\dimexpr\@tempdimb/4\relax}%
+  \setlength{\belowdisplayskip}{\abovedisplayskip}%
+  \edef\normalsize{%
+    \noexpand\@setfontsize\noexpand\normalsize
+    {\the\@tempdima}{\the\@tempdimb}%
+    \abovedisplayskip \the\abovedisplayskip
+    \abovedisplayshortskip \the\abovedisplayshortskip
+    \belowdisplayskip \the\belowdisplayskip
+    \belowdisplayshortskip \the\belowdisplayshortskip
+    \let\noexpand\@listi\noexpand\@listI
+  }%
+  \setlength{\@tempdima}{\dimexpr9\@tempdimc/10\relax}%
+  \setlength{\@tempdimb}{\dimexpr\@tempa\@tempdima/100\relax}%
+  \scr@setlength{\abovedisplayskip}{\dimexpr5\@tempdimb/6\relax}%
+    {\dimexpr\@tempdimb/6\relax}{\dimexpr5\@tempdimb/12\relax}%
+  \scr@setlength{\abovedisplayshortskip}{\z@}{\dimexpr\@tempdimb/4\relax}{\z@}%
+  \scr@setlength{\belowdisplayshortskip}{\dimexpr\@tempdimb/2\relax}%
+    {\dimexpr\@tempdimb/4\relax}{\dimexpr\@tempdimb/4\relax}%
+  \setlength{\belowdisplayskip}{\abovedisplayskip}%
+  \edef\small{%
+    \noexpand\@setfontsize\noexpand\small
+    {\the\@tempdima}{\the\@tempdimb}%
+    \abovedisplayskip \the\abovedisplayskip
+    \abovedisplayshortskip \the\abovedisplayshortskip
+    \belowdisplayskip \the\belowdisplayskip
+    \belowdisplayshortskip \the\belowdisplayshortskip
+    \let\noexpand\@listi\noexpand\@listi@small
+  }%
+  \setlength{\@tempdima}{\dimexpr4\@tempdimc/5\relax}%
+  \setlength{\@tempdimb}{\dimexpr\@tempa\@tempdima/100\relax}%
+  \scr@setlength{\abovedisplayskip}{\dimexpr5\@tempdimb/6\relax}%
+    {\dimexpr\@tempdimb/6\relax}{\dimexpr5\@tempdimb/12\relax}%
+  \scr@setlength{\abovedisplayshortskip}{\z@}{\dimexpr\@tempdimb/4\relax}{\z@}%
+  \scr@setlength{\belowdisplayshortskip}{\dimexpr\@tempdimb/2\relax}%
+    {\dimexpr\@tempdimb/4\relax}{\dimexpr\@tempdimb/4\relax}%
+  \setlength{\belowdisplayskip}{\abovedisplayskip}%
+  \edef\footnotesize{%
+    \noexpand\@setfontsize\noexpand\footnotesize
+    {\the\@tempdima}{\the\@tempdimb}%
+    \abovedisplayskip \the\abovedisplayskip
+    \abovedisplayshortskip \the\abovedisplayshortskip
+    \belowdisplayskip \the\belowdisplayskip
+    \belowdisplayshortskip \the\belowdisplayshortskip
+    \let\noexpand\@listi\noexpand\@listi@footnotesize
+  }%
+  \setlength{\@tempdima}{\dimexpr2\@tempdimc/3\relax}%
+  \setlength{\@tempdimb}{\dimexpr\@tempa\@tempdima/100\relax}%
+  \edef\scriptsize{%
+    \noexpand\@setfontsize\noexpand\scriptsize
+    {\the\@tempdima}{\the\@tempdimb}%
+  }%
+  \setlength{\@tempdima}{\dimexpr\@tempdimc/2\relax}%
+  \setlength{\@tempdimb}{\dimexpr\@tempa\@tempdima/100\relax}%
+  \edef\tiny{%
+    \noexpand\@setfontsize\noexpand\tiny
+    {\the\@tempdima}{\the\@tempdimb}%
+  }%
+  \setlength{\@tempdima}{\dimexpr11\@tempdimc/10\relax}%
+  \setlength{\@tempdimb}{\dimexpr\@tempa\@tempdima/100\relax}%
+  \edef\large{%
+    \noexpand\@setfontsize\noexpand\large
+    {\the\@tempdima}{\the\@tempdimb}%
+  }%
+  \setlength{\@tempdima}{\dimexpr13\@tempdimc/10\relax}%
+  \setlength{\@tempdimb}{\dimexpr\@tempa\@tempdima/100\relax}%
+  \edef\Large{%
+    \noexpand\@setfontsize\noexpand\Large
+    {\the\@tempdima}{\the\@tempdimb}%
+  }%
+  \setlength{\@tempdima}{\dimexpr16\@tempdimc/10\relax}%
+  \setlength{\@tempdimb}{\dimexpr\@tempa\@tempdima/100\relax}%
+  \edef\LARGE{%
+    \noexpand\@setfontsize\noexpand\LARGE
+    {\the\@tempdima}{\the\@tempdimb}%
+  }%
+  \setlength{\@tempdima}{\dimexpr19\@tempdimc/10\relax}%
+  \setlength{\@tempdimb}{\dimexpr\@tempa\@tempdima/100\relax}%
+  \edef\huge{%
+    \noexpand\@setfontsize\noexpand\huge
+    {\the\@tempdima}{\the\@tempdimb}%
+  }%
+  \setlength{\@tempdima}{\dimexpr22\@tempdimc/10\relax}%
+  \setlength{\@tempdimb}{\dimexpr\@tempa\@tempdima/100\relax}%
+  \edef\Huge{%
+    \noexpand\@setfontsize\noexpand\Huge
+    {\the\@tempdima}{\the\@tempdimb}%
+  }%
+  \normalsize
+  \setlength{\@tempdimb}{\f@baselineskip}%
+  \scr@setlength{\parsep}{\dimexpr\@tempdimb/3\relax}%
+    {\dimexpr\@tempdimb/6\relax}{\dimexpr\@tempdimb/12\relax}%
+  \scr@setlength{\topsep}{\dimexpr2\@tempdimb/3\relax}%
+    {\dimexpr\@tempdimb/6\relax}{\dimexpr\@tempdimb/3\relax}
+  \@tempswafalse
+  \begingroup
+    \def\@list@extra{\aftergroup\@tempswatrue}%
+    \csname @listi\endcsname
+  \endgroup
+  \edef\@listi{\leftmargin\leftmargini
+    \topsep \the\topsep
+    \parsep \the\parsep
+    \itemsep \parsep
+    \if@tempswa\noexpand\@list@extra\fi
+  }%
+  \let\@listI\@listi
+  \scr@setlength{\parsep}{\dimexpr\@tempdimb/4\relax}%
+    {\dimexpr\@tempdimb/8\relax}{\dimexpr\@tempdimb/12\relax}%
+  \scr@setlength{\topsep}{\dimexpr\@tempdimb/2\relax}%
+    {\dimexpr\@tempdimb/6\relax}{\dimexpr\@tempdimb/4\relax}%
+  \@tempswafalse
+  \begingroup
+    \def\@list@extra{\aftergroup\@tempswatrue}%
+    \csname @listi\endcsname
+  \endgroup
+  \edef\@listi@small{\leftmargin\leftmargini
+    \topsep \the\topsep
+    \parsep \the\parsep
+    \itemsep \parsep
+    \if@tempswa\noexpand\@list@extra\fi
+  }%
+  \scr@setlength{\parsep}{\dimexpr3\@tempdimb/16\relax}%
+    {\dimexpr3\@tempdimb/32\relax}{\dimexpr\@tempdimb/16\relax}%
+  \scr@setlength{\topsep}{\dimexpr3\@tempdimb/8\relax}%
+    {\dimexpr\@tempdimb/8\relax}{\dimexpr3\@tempdimb/16\relax}%
+  \@tempswafalse
+  \begingroup
+    \def\@list@extra{\aftergroup\@tempswatrue}%
+    \csname @listi\endcsname
+  \endgroup
+  \edef\@listi@footnotesize{\leftmargin\leftmargini
+    \topsep \the\topsep
+    \parsep \the\parsep
+    \itemsep \parsep
+    \if@tempswa\noexpand\@list@extra\fi
+  }%
+  \scr@setlength{\parsep}{\dimexpr\@tempdimb/6\relax}%
+    {\dimexpr\@tempdimb/12\relax}{\dimexpr\@tempdimb/12\relax}%
+  \scr@setlength{\topsep}{\dimexpr\@tempdimb/3\relax}%
+    {\dimexpr\@tempdimb/6\relax}{\dimexpr\@tempdimb/12\relax}%
+  \@tempswafalse
+  \begingroup
+    \def\@list@extra{\aftergroup\@tempswatrue}%
+    \csname @listii\endcsname
+  \endgroup
+  \edef\@listii{\leftmargin\leftmarginii
+    \labelwidth=\dimexpr \leftmargin-\labelsep
+    \topsep \the\topsep
+    \parsep \the\parsep
+    \itemsep \parsep
+    \if@tempswa\noexpand\@list@extra\fi
+  }%
+  \scr@setlength{\topsep}{\dimexpr\@tempdimb/6\relax}%
+    {\dimexpr\@tempdimb/12\relax}{\dimexpr\@tempdimb/12\relax}%
+  \setlength{\partopsep}{\z@ \@plus\z@ \@minus\p@}%
+  \@tempswafalse
+  \begingroup
+    \def\@list@extra{\aftergroup\@tempswatrue}%
+    \csname @listiii\endcsname
+  \endgroup
+  \edef\@listiii{\leftmargin\leftmarginiii
+    \labelwidth=\dimexpr \leftmargin-\labelsep
+    \topsep \the\topsep
+    \parsep \z@
+    \partopsep \the\partopsep
+    \itemsep \topsep
+    \if@tempswa\noexpand\@list@extra\fi
+  }%
+  \@tempswafalse
+  \begingroup
+    \def\@list@extra{\aftergroup\@tempswatrue}%
+    \csname @listiv\endcsname
+  \endgroup
+  \edef\@listiv{\leftmargin\leftmarginiv
+    \labelwidth=\dimexpr \leftmargin-\labelsep\relax
+    \if@tempswa\noexpand\@list@extra\fi
+  }%
+  \@tempswafalse
+  \begingroup
+    \def\@list@extra{\aftergroup\@tempswatrue}%
+    \csname @listv\endcsname
+  \endgroup
+  \edef\@listv{\leftmargin\leftmarginv
+    \labelwidth=\dimexpr \leftmargin-\labelsep\relax
+    \if@tempswa\noexpand\@list@extra\fi
+  }%
+  \@tempswafalse
+  \begingroup
+    \def\@list@extra{\aftergroup\@tempswatrue}%
+    \csname @listvi\endcsname
+  \endgroup
+  \edef\@listvi{\leftmargin\leftmarginvi
+    \labelwidth=\dimexpr \leftmargin-\labelsep\relax
+    \if@tempswa\noexpand\@list@extra\fi
+  }%
+  \@listi
+  \setlength{\@tempdimb}{\f@baselineskip}%
+  \setlength{\footnotesep}{\dimexpr5\@tempdimb/9\relax}%
+  \scr@setlength{\skip\footins}{\dimexpr3\@tempdimb/4\relax}%
+    {\dimexpr\@tempdimb/3\relax}{\dimexpr\@tempdimb/6\relax}%
+  \scr@setlength{\floatsep}{\@tempdimb}%
+    {\dimexpr\@tempdimb/6\relax}{\dimexpr\@tempdimb/6\relax}%
+  \scr@setlength{\textfloatsep}{\dimexpr5\@tempdimb/3\relax}%
+    {\dimexpr\@tempdimb/6\relax}{\dimexpr\@tempdimb/3\relax}%
+  \setlength{\intextsep}{\floatsep}%
+  \setlength{\dblfloatsep}{\floatsep}%
+  \setlength{\dbltextfloatsep}{\textfloatsep}%
+  \setlength{\@fptop}{\z@ \@plus 1fil}%
+  \setlength{\@fpsep}{\dimexpr2\@tempdimb/3\relax \@plus 2fil}%
+  \setlength{\@fpbot}{\@fptop}%
+  \setlength{\@dblfptop}{\@fptop}%
+  \setlength{\@dblfpsep}{\@fpsep}%
+  \setlength{\@dblfpbot}{\@fptop}%
+  \scr@setlength{\partopsep}{\dimexpr\@tempdimb/5\relax}%
+    {\dimexpr\@tempdimb/10\relax}{\dimexpr\@tempdimb/10\relax}%
+  \scr@setlength\smallskipamount{\dimexpr\@tempdimb/4\relax}
+    {\dimexpr\@tempdimb/12\relax}{\dimexpr\@tempdimb/12\relax}
+  \scr@setlength\medskipamount{\dimexpr\@tempdimb/2\relax}
+    {\dimexpr\@tempdimb/6\relax}{\dimexpr\@tempdimb/6\relax}
+  \scr@setlength\bigskipamount{\@tempdimb}
+    {\dimexpr\@tempdimb/3\relax}{\dimexpr\@tempdimb/3\relax}
+  \setlength\abovecaptionskip{\dimexpr5\@tempdimb/6\relax}
+  \setlength\belowcaptionskip{0\p@}
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@changefontsizes
 % \begin{macro}{\tud@font@greek@upGamma}
 % \begin{macro}{\tud@font@greek@offset}
 % Damit innerhalb des Dokumentes problemlos zwischen aufrechten und kursiven 
@@ -1041,17 +1349,6 @@
 %</(class|package)&body>
 %<*(class|package)&option>
 % \fi
-%
-% Damit die Schrift im Dokument später noch umgestellt werden kann, werden
-% sämtliche Einstellungen erst zu Beginn des Dokumentes gesichert. Deshalb wird
-% der dafür verantwortliche Befehl \cs{tud@font@set} hier zum ersten Mal
-% verwendet. Damit ist es möglich, die Schriften eventuell geladener Pakete wie
-% \pkg{lmodern} oder \pkg{libertine} vorher zu sichern und später wieder zu
-% aktivieren. Auch die Einstellungen für den Mathematiksatz werden erstmalig 
-% durch \cs{tud@font@math@set} gesetzt.
-%    \begin{macrocode}
-\AtBeginDocument{\tud@font@set}%
-%    \end{macrocode}
 %
 % \subsection{Schriften für den Mathematiksatz}
 %
@@ -1426,6 +1723,417 @@
 %
 % \iffalse
 %</package&body>
+%</!fontsizes>
+%<*fontsizes>
+% \fi
+%
+% \subsection{Erzeugen von Schriftgrößendateien}
+%
+% Ab der \TUDScript-Version~v2.04 werden eigene Schriftgößendateien sowie 
+% zusätzlich ein~-- aus \KOMAScript{} abgewandelter~-- Befehl zur automatischen 
+% Erzeugung dieser Dateien bereitgestellt. Zunächst die Dateien selber.
+%
+% \iffalse
+%<*10pt|11pt|12pt>
+% \fi
+%
+% Erst ein bisschen Geplänkel.
+%    \begin{macrocode}
+\ProvidesFile{%
+%<10pt>  tudscrsize10pt.clo%
+%<11pt>  tudscrsize11pt.clo%
+%<12pt>  tudscrsize12pt.clo%
+}[%
+%!TUDVersion
+  font size class option
+%<10pt>  (10pt)%
+%<11pt>  (11pt)%
+%<12pt>  (12pt)%
+]
+%    \end{macrocode}
+% Und jetzt die Schriftgrößendefinition.
+% \ToDo{vervollständigen}[v2.04]
+% \ToDo{%
+%   Ersetzen von:
+%   \begin{enumerate}
+%     \item 0.0pt mit \cs{z@}
+%     \item 1.0pt mit \cs{p@}
+%     \item .0pt mit \cs{p@}
+%     \item pt mit \cs{p@}
+%     \item plus mit \cs{@plus}
+%     \item minus mit \cs{@minus}
+%   \end{enumerate}
+% }[v2.04]
+%    \begin{macrocode}
+\def\normalsize{%
+%<*10pt>
+  \@setfontsize\normalsize{10}{12.0pt}%
+  \abovedisplayskip 10.0pt plus 2.0pt minus 5.0pt
+  \abovedisplayshortskip 0.0pt plus 3.0pt
+  \belowdisplayshortskip 6.0pt plus 3.0pt minus 3.0pt
+%</10pt>
+%<*11pt>
+  \@setfontsize\normalsize{11}{13.2pt}%
+  \abovedisplayskip 11.0pt plus 2.2pt minus 5.5pt
+  \abovedisplayshortskip 0.0pt plus 3.3pt
+  \belowdisplayshortskip 6.6pt plus 3.3pt minus 3.3pt
+%</11pt>
+%<*12pt>
+  \@setfontsize\normalsize{12}{14.4pt}%
+  \abovedisplayskip 12.0pt plus 2.4pt minus 6.0pt
+  \abovedisplayshortskip 0.0pt plus 3.6pt
+  \belowdisplayshortskip 7.2pt plus 3.6pt minus 3.6pt
+%</12pt>
+  \belowdisplayskip \abovedisplayskip
+  \let\@listi\@listI
+}
+\def\small{%
+%<*10pt>
+  \@setfontsize\small{9}{10.8pt}%
+  \abovedisplayskip 9.0pt plus 1.8pt minus 4.5pt
+  \abovedisplayshortskip 0.0pt plus 2.7pt
+  \belowdisplayshortskip 5.4pt plus 2.7pt minus 2.7pt
+%</10pt>
+%<*11pt>
+  \@setfontsize\small{9.9}{11.88pt}%
+  \abovedisplayskip 9.9pt plus 1.98pt minus 4.95pt
+  \abovedisplayshortskip 0.0pt plus 2.97pt
+  \belowdisplayshortskip 5.94pt plus 2.97pt minus 2.97pt
+%</11pt>
+%<*12pt>
+  \@setfontsize\small{10.8}{12.96pt}%
+  \abovedisplayskip 10.8pt plus 2.16pt minus 5.4pt
+  \abovedisplayshortskip 0.0pt plus 3.24pt
+  \belowdisplayshortskip 6.48pt plus 3.24pt minus 3.24pt
+%</12pt>
+  \def\@listi{%
+    \leftmargin\leftmargini
+%<*10pt>
+    \topsep6.0pt plus 2.0pt minus 3.0pt
+    \parsep3.0pt plus 1.5pt minus 1.0pt
+%</10pt>
+%<*11pt>
+    \topsep6.6pt plus 2.2pt minus 3.3pt
+    \parsep3.3pt plus 1.65pt minus 1.1pt
+%</11pt>
+%<*12pt>
+    \topsep7.2pt plus 2.4pt minus 3.6pt
+    \parsep3.6pt plus 1.8pt minus 1.2pt
+%</12pt>
+    \itemsep\parsep
+  }%
+  \belowdisplayskip \abovedisplayskip
+}
+\def\footnotesize{%
+%<*10pt>
+  \@setfontsize\footnotesize{8}{9.6pt}%
+  \abovedisplayskip 8.0pt plus 1.6pt minus 4.0pt
+  \abovedisplayshortskip 0.0pt plus 2.4pt
+  \belowdisplayshortskip 4.8pt plus 2.4pt minus 2.4pt
+%</10pt>
+%<*11pt>
+  \@setfontsize\footnotesize{8.8}{10.56pt}%
+  \abovedisplayskip 8.8pt plus 1.76pt minus 4.4pt
+  \abovedisplayshortskip 0.0pt plus 2.64pt
+  \belowdisplayshortskip 5.28pt plus 2.64pt minus 2.64pt
+%</11pt>
+%<*12pt>
+  \@setfontsize\footnotesize{9.6}{11.52pt}%
+  \abovedisplayskip 9.6pt plus 1.92pt minus 4.8pt
+  \abovedisplayshortskip 0.0pt plus 2.88pt
+  \belowdisplayshortskip 5.76pt plus 2.88pt minus 2.88pt
+%</12pt>
+  \def\@listi{%
+    \leftmargin\leftmargini
+%<*10pt>
+    \topsep4.5pt plus 1.5pt minus 2.25pt
+    \parsep2.25pt plus 1.125pt minus 1.0pt
+%</10pt>
+%<*11pt>
+    \topsep4.95pt plus 1.65pt minus 2.475pt
+    \parsep2.475pt plus 1.2375pt minus 1.0pt
+%</11pt>
+%<*12pt>
+    \topsep5.4pt plus 1.8pt minus 2.7pt
+    \parsep2.7pt plus 1.35pt minus 1.0pt
+%</12pt>
+    \itemsep\parsep
+  }%
+  \belowdisplayskip \abovedisplayskip
+}
+%<*10pt>
+%</10pt>
+%<*11pt>
+%</11pt>
+%<*12pt>
+%</12pt>
+\@ifundefined{@list@extra}{}{%
+  \l@addto@macro{\@listi}{\@list@extra}%
+  \let\@listI=\@listi
+  \l@addto@macro{\@listii}{\@list@extra}%
+  \l@addto@macro{\@listiii}{\@list@extra}%
+  \l@addto@macro{\footnotesize}{\protect\add@extra@listi{ftns}}%
+  \l@addto@macro{\small}{\protect\add@extra@listi{sml}}%
+}
+\@listi
+%    \end{macrocode}
+%
+% \iffalse
+%</10pt|11pt|12pt>
+%<*package&body>
+% \fi
+%
+% Nun wird der Inhalt des Pakets \pkg{tudscrfontsizes} definiert, welches auf 
+% \pkg{scrfontsizes} aufbaut.
+% \begin{macro}{\changefontsizes}
+% \begin{macro}{\tud@generate@fontfile}
+% Der Befehl \cs{tud@generate@fontfile} ist das Pendant zum \KOMAScript-Makro
+% \cs{generate@fontfile}. Mit diesem können eigenständige Schriftgrößendateien
+% erstellt werden.
+%    \begin{macrocode}
+\RequirePackage{scrfontsizes}[2015/02/07]
+\@ifundefined{tud@changefontsizes}{\RequirePackage{tudscrfonts}[2015/02/15]}{}
+\let\changefontsizes\tud@changefontsizes%
+\newcommand*{\tud@generate@fontfile}[2]{%
+  \def\@ind{\space\space}%
+  \immediate\openout\@fontfile #1#2.clo
+  \immediate\write\@fontfile{\@percentchar^^J%
+    \@percentchar\space This is file `#1#2.clo', generated with^^J%
+    \@percentchar\space scrfontsizes
+    \csname ver@scrfontsizes.sty\endcsname,^^J%
+    \@percentchar\space Copyright (c) Markus Kohm.^^J%
+    \@percentchar^^J%
+    \string\ProvidesFile{#1#2.clo}[%
+    \the\year/\ifnum\month<10 0\fi\the\month/\ifnum\day<10 0\fi\the\day%
+    \space generated font size class option (#2)]}%
+  \immediate\write\@fontfile{%
+    \string\def\string\normalsize{\@percentchar^^J%
+      \@ind\string\@setfontsize\string\normalsize{\f@size}{\f@baselineskip}%
+      \@percentchar^^J%
+      \@ind\string\abovedisplayskip\space \the\abovedisplayskip^^J%
+      \@ind\string\abovedisplayshortskip\space \the\abovedisplayshortskip^^J%
+      \@ind\string\belowdisplayshortskip\space \the\belowdisplayshortskip^^J%
+      \@ind\string\belowdisplayskip\space \string\abovedisplayskip^^J%
+      \@ind\string\let\string\@listi\string\@listI^^J%
+    }%
+  }%
+  \begingroup\small\@listi
+    \immediate\write\@fontfile{%
+      \string\def\string\small{\@percentchar^^J%
+        \@ind\string\@setfontsize\string\small{\f@size}{\f@baselineskip}%
+        \@percentchar^^J%
+        \@ind\string\abovedisplayskip\space \the\abovedisplayskip^^J%
+        \@ind\string\abovedisplayshortskip\space \the\abovedisplayshortskip^^J%
+        \@ind\string\belowdisplayshortskip\space \the\belowdisplayshortskip^^J%
+        \@ind\string\def\string\@listi{\@percentchar^^J%
+          \@ind\@ind\string\leftmargin\string\leftmargini^^J%
+          \@ind\@ind\string\topsep \the\topsep^^J%
+          \@ind\@ind\string\parsep \the\parsep^^J%
+          \@ind\@ind\string\itemsep \string\parsep^^J%
+        \@ind}\@percentchar^^J%
+        \@ind\string\belowdisplayskip\space \string\abovedisplayskip^^J%
+      }
+    }%
+  \endgroup
+  \begingroup\footnotesize\@listi
+    \immediate\write\@fontfile{%
+      \string\def\string\footnotesize{\@percentchar^^J%
+        \@ind\string\@setfontsize\string\footnotesize{\f@size}{\f@baselineskip}%
+        \@percentchar^^J%
+        \@ind\string\abovedisplayskip\space \the\abovedisplayskip^^J%
+        \@ind\string\abovedisplayshortskip\space \the\abovedisplayshortskip^^J%
+        \@ind\string\belowdisplayshortskip\space \the\belowdisplayshortskip^^J%
+        \@ind\string\def\string\@listi{\@percentchar^^J%
+          \@ind\@ind\string\leftmargin\string\leftmargini^^J%
+          \@ind\@ind\string\topsep \the\topsep^^J%
+          \@ind\@ind\string\parsep \the\parsep^^J%
+          \@ind\@ind\string\itemsep \string\parsep^^J%
+        \@ind}\@percentchar^^J%
+        \@ind\string\belowdisplayskip\space \string\abovedisplayskip^^J%
+      }%
+    }%
+  \endgroup
+  \begingroup\scriptsize
+    \immediate\write\@fontfile{%
+      \string\def\string\scriptsize{%
+        \string\@setfontsize\string\scriptsize{\f@size}{\f@baselineskip}%
+      }%
+    }%
+  \endgroup
+  \begingroup\tiny
+    \immediate\write\@fontfile{%
+      \string\def\string\tiny{%
+        \string\@setfontsize\string\tiny{\f@size}{\f@baselineskip}%
+      }%
+    }%
+  \endgroup
+  \begingroup\large
+    \immediate\write\@fontfile{%
+      \string\def\string\large{%
+        \string\@setfontsize\string\large{\f@size}{\f@baselineskip}%
+      }%
+    }%
+  \endgroup
+  \begingroup\Large
+    \immediate\write\@fontfile{%
+      \string\def\string\Large{%
+        \string\@setfontsize\string\Large{\f@size}{\f@baselineskip}%
+      }%
+    }%
+  \endgroup
+  \begingroup\LARGE
+    \immediate\write\@fontfile{%
+      \string\def\string\LARGE{%
+        \string\@setfontsize\string\LARGE{\f@size}{\f@baselineskip}%
+      }%
+    }%
+  \endgroup
+  \begingroup\huge
+    \immediate\write\@fontfile{%
+      \string\def\string\huge{%
+        \string\@setfontsize\string\huge{\f@size}{\f@baselineskip}%
+      }%
+    }%
+  \endgroup
+  \begingroup\Huge
+    \immediate\write\@fontfile{%
+      \string\def\string\Huge{%
+        \string\@setfontsize\string\Huge{\f@size}{\f@baselineskip}%
+      }%
+    }%
+  \endgroup
+  \immediate\write\@fontfile{\string\normalsize}%
+  \immediate\write\@fontfile{%
+    \string\setlength{\string\footnotesep}{\the\footnotesep}^^J%
+    \string\setlength{\string\skip\string\footins}{\the\skip\footins}^^J%
+    \string\setlength{\string\floatsep}{\the\floatsep}^^J%
+    \string\setlength{\string\textfloatsep}{\the\textfloatsep}^^J%
+    \string\setlength{\string\intextsep}{\the\intextsep}^^J%
+    \string\setlength{\string\dblfloatsep}{\the\dblfloatsep}^^J%
+    \string\setlength{\string\dbltextfloatsep}{\the\dbltextfloatsep}^^J%
+    \string\setlength{\string\@fptop}{\the\@fptop}^^J%
+    \string\setlength{\string\@fpsep}{\the\@fpsep}^^J%
+    \string\setlength{\string\@fpbot}{\the\@fpbot}^^J%
+    \string\setlength{\string\@dblfptop}{\the\@dblfptop}^^J%
+    \string\setlength{\string\@dblfpsep}{\the\@dblfpsep}^^J%
+    \string\setlength{\string\@dblfpbot}{\the\@dblfpbot}^^J%
+    \string\setlength{\string\partopsep}{\the\partopsep}%
+  }%
+  \begingroup
+    \@listi
+    \immediate\write\@fontfile{%
+      \string\def\string\@listi{\@percentchar^^J%
+        \@ind\string\leftmargin\string\leftmargini^^J%
+        \@ind\string\topsep \the\topsep^^J%
+        \@ind\string\parsep \the\parsep^^J%
+        \@ind\string\itemsep \string\parsep^^J%
+      }%
+    }%
+  \endgroup
+  \immediate\write\@fontfile{%
+    \string\let\string\@listI\string\@listi
+  }%
+  \begingroup
+    \@listii
+    \immediate\write\@fontfile{%
+      \string\def\string\@listii{\@percentchar^^J%
+        \@ind\string\leftmargin\string\leftmarginii^^J%
+        \@ind\string\labelwidth\string\leftmarginii^^J%
+        \@ind\string\advance\string\labelwidth-\string\labelsep^^J%
+        \@ind\string\topsep \the\topsep^^J%
+        \@ind\string\parsep \the\parsep^^J%
+        \@ind\string\itemsep \string\parsep^^J%
+      }%
+    }%
+  \endgroup
+  \begingroup
+    \@listiii
+    \immediate\write\@fontfile{%
+      \string\def\string\@listiii{\@percentchar^^J%
+        \@ind\string\leftmargin\string\leftmarginiii^^J%
+        \@ind\string\labelwidth\string\leftmarginiii^^J%
+        \@ind\string\advance\string\labelwidth-\string\labelsep^^J%
+        \@ind\string\topsep \the\topsep^^J%
+        \@ind\string\parsep \the\parsep^^J%
+        \@ind\string\partopsep \the\partopsep^^J%
+       \@ind\string\itemsep \string\topsep^^J%
+      }%
+    }%
+  \endgroup
+  \begingroup
+    \@listiv
+    \immediate\write\@fontfile{%
+      \string\def\string\@listiv{\@percentchar^^J%
+        \@ind\string\leftmargin\string\leftmarginiv^^J%
+        \@ind\string\labelwidth\string\leftmarginiv^^J%
+        \@ind\string\advance\string\labelwidth-\string\labelsep^^J%
+      }%
+    }%
+  \endgroup
+  \begingroup
+    \@listv
+    \immediate\write\@fontfile{%
+      \string\def\string\@listv{\@percentchar^^J%
+        \@ind\string\leftmargin\string\leftmarginv^^J%
+        \@ind\string\labelwidth\string\leftmarginv^^J%
+        \@ind\string\advance\string\labelwidth-\string\labelsep^^J%
+      }%
+    }%
+  \endgroup
+  \begingroup
+    \@listvi
+    \immediate\write\@fontfile{%
+      \string\def\string\@listvi{\@percentchar^^J%
+        \@ind\string\leftmargin\string\leftmarginvi^^J%
+        \@ind\string\labelwidth\string\leftmarginvi^^J%
+        \@ind\string\advance\string\labelwidth-\string\labelsep^^J%
+      }%
+    }%
+  \endgroup
+  \immediate\write\@fontfile{%
+    \string\setlength{\string\smallskipamount}{\the\smallskipamount}^^J%
+    \string\setlength{\string\medskipamount}{\the\medskipamount}^^J%
+    \string\setlength{\string\bigskipamount}{\the\bigskipamount}%
+  }%
+  \immediate\write\@fontfile{%
+    \string\@ifundefined{tudscrcls@name}{}{\@percentchar^^J%
+      \@ind\string\AfterClass+{\string\scrcls@name}{\@percentchar^^J%
+        \@ind\@ind\string\setlength{\string\abovecaptionskip}%
+          {\the\abovecaptionskip}^^J%
+        \@ind\@ind\string\setlength{\string\belowcaptionskip}%
+          {\the\belowcaptionskip}^^J%
+      }\@percentchar^^J%
+    }%
+  }%
+  \immediate\write\@fontfile{%
+    \string\@ifundefined{@list@extra}{}{\@percentchar^^J%
+      \@ind\string\l@addto@macro{\string\@listi}{\string\@list@extra}%
+      \@percentchar^^J%
+      \@ind\string\let\string\@listI=\string\@listi^^J%
+      \@ind\string\l@addto@macro{\string\@listii}{\string\@list@extra}%
+      \@percentchar^^J%
+      \@ind\string\l@addto@macro{\string\@listiii}{\string\@list@extra}%
+      \@percentchar^^J%
+      \@ind\string\l@addto@macro{\string\footnotesize}{\string\protect
+        \string\add@extra@listi{ftns}}\@percentchar^^J%
+      \@ind\string\l@addto@macro{\string\small}{\string\protect
+        \string\add@extra@listi{sml}}\@percentchar^^J%
+    }^^J%
+    \string\@listi^^J%
+    \string\endinput^^J%
+    \@percentchar^^J%
+    \@percentchar\space End of file `#1#2.clo'.
+  }
+  \immediate\closeout\@fontfile
+}
+\let\generate@fontfile\tud@generate@fontfile
+%    \end{macrocode}
+% \end{macro}^^A \tud@generate@fontfile
+% \end{macro}^^A \changefontsizes
+%
+% \iffalse
+%</package&body>
+%</fontsizes>
 % \fi
 %
 % \Finale
