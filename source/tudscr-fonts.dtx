@@ -1,4 +1,4 @@
-% \CheckSum{3156}
+% \CheckSum{3553}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -175,6 +175,18 @@
 %    \end{macrocode}
 % \end{macro}^^A if@tud@oldscrclass
 % \end{macro}^^A if@tud@oldclass
+%
+%
+% \subsection{Verwendung ohne \KOMAScript}
+%
+% Sollte keine \KOMAScript-Klasse genutzt werden, wird zusätzlich das Paket
+% \pkg{scrextend} benötigt.
+%    \begin{macrocode}
+\ifcsname KOMAClassName\endcsname\else%
+  \RequirePackage{scrextend}[2013/12/19]%
+\fi
+%    \end{macrocode}
+%
 % \iffalse
 %</package&identify>
 %<*(class|package)&option>
@@ -841,8 +853,10 @@
 % Die Auswahl der Schriftgrößendateien und die Berechnung nicht vorhandener 
 % Größen wird zurückgesetzt.
 %    \begin{macrocode}
-    \tud@cmd@restore{@fontsizefilebase}%
-    \tud@cmd@restore{changefontsizes}%
+    \iftudscrverlower{2.04}{}{%
+      \tud@cmd@restore{@fontsizefilebase}%
+      \tud@cmd@restore{changefontsizes}%
+    }%
 %    \end{macrocode}
 % Die Mathematikschriften werden auf ihr Standardverhalten zurückgesetzt. 
 %    \begin{macrocode}
@@ -874,10 +888,12 @@
 % Schriftgrößen geändert und ein adaptiertes Makro zur Berechnung dieser 
 % aktiviert.
 %    \begin{macrocode}
-    \tud@cmd@store{@fontsizefilebase}%
-    \tud@cmd@store{changefontsizes}%
-    \renewcommand*\@fontsizefilebase{tudscrsize}%
-    \let\changefontsizes\tud@changefontsizes%
+    \iftudscrverlower{2.04}{}{%
+      \tud@cmd@store{@fontsizefilebase}%
+      \tud@cmd@store{changefontsizes}%
+      \renewcommand*\@fontsizefilebase{tudscrsize}%
+      \let\changefontsizes\tud@changefontsizes%
+    }%
 %    \end{macrocode}
 % Die Mathematikschriften werden bei der Verwendung der Schriften des \CDs~--
 % falls nicht anders durch den Anwender definiert~-- auf Serifenlose gesetzt.
@@ -966,7 +982,7 @@
 % Schluss wird das Layout erneut gesetzt.
 %    \begin{macrocode}
   \normalfont\selectfont%
-  \tud@setfontsize%
+  \iftudscrverlower{2.04}{}{\tud@setfontsize}%
   \tud@font@math@set%
 %<*class>
   \if@atdocument\tud@layout@process\fi%
@@ -1035,8 +1051,14 @@
 % \KOMAScript-Befehl \cs{changefontsizes} an, ändert allerdings einige Längen
 % marginal.
 %    \begin{macrocode}
-\newcommand*{\tud@changefontsizes}[2][\dimexpr6\@tempdima/5\relax]{%
-  \ClassInfo{\tudcls@name}{Calculating font sizes for basic size `#2'}%
+\newcommand*{\tud@changefontsizes}[2][\dimexpr5\@tempdima/4\relax]{%
+%<*class>
+  \ClassInfo{\tudcls@name}%
+%</class>
+%<*package>
+  \PackageInfo{tudscrfonts}%
+%</package>
+    {Calculating font sizes for basic size `#2'}%
   \@defaultunits\@tempdima#2pt\relax\@nnil
   \setlength{\@tempdimc}{\@tempdima}%
   \addtolength{\@tempdimc}{-10\p@}%
@@ -1046,11 +1068,12 @@
   \edef\@tempa{\strip@pt\@tempdimc}%
   \@defaultunits\@tempdimb\dimexpr\@tempa\@tempdima/100\relax pt\relax\@nnil
   \setlength{\@tempdimc}{\@tempdima}%
-  \scr@setlength{\abovedisplayskip}{\dimexpr5\@tempdimb/6\relax}%
-    {\dimexpr\@tempdimb/6\relax}{\dimexpr5\@tempdimb/12\relax}%
-  \scr@setlength{\abovedisplayshortskip}{\z@}{\dimexpr\@tempdimb/4\relax}{\z@}%
-  \scr@setlength{\belowdisplayshortskip}{\dimexpr\@tempdimb/2\relax}%
-    {\dimexpr\@tempdimb/4\relax}{\dimexpr\@tempdimb/4\relax}%
+  \scr@setlength{\abovedisplayskip}{\dimexpr4\@tempdimb/5\relax}%
+    {\dimexpr\@tempdimb/5\relax}{\dimexpr2\@tempdimb/5\relax}%
+  \scr@setlength{\abovedisplayshortskip}{\z@}%
+    {\dimexpr6\@tempdimb/25\relax}{\z@}%
+  \scr@setlength{\belowdisplayshortskip}{\dimexpr12\@tempdimb/25\relax}%
+    {\dimexpr6\@tempdimb/25\relax}{\dimexpr6\@tempdimb/25\relax}%
   \setlength{\belowdisplayskip}{\abovedisplayskip}%
   \edef\normalsize{%
     \noexpand\@setfontsize\noexpand\normalsize
@@ -1063,11 +1086,12 @@
   }%
   \setlength{\@tempdima}{\dimexpr9\@tempdimc/10\relax}%
   \setlength{\@tempdimb}{\dimexpr\@tempa\@tempdima/100\relax}%
-  \scr@setlength{\abovedisplayskip}{\dimexpr5\@tempdimb/6\relax}%
-    {\dimexpr\@tempdimb/6\relax}{\dimexpr5\@tempdimb/12\relax}%
-  \scr@setlength{\abovedisplayshortskip}{\z@}{\dimexpr\@tempdimb/4\relax}{\z@}%
-  \scr@setlength{\belowdisplayshortskip}{\dimexpr\@tempdimb/2\relax}%
-    {\dimexpr\@tempdimb/4\relax}{\dimexpr\@tempdimb/4\relax}%
+  \scr@setlength{\abovedisplayskip}{\dimexpr4\@tempdimb/5\relax}%
+    {\dimexpr\@tempdimb/5\relax}{\dimexpr2\@tempdimb/5\relax}%
+  \scr@setlength{\abovedisplayshortskip}{\z@}%
+    {\dimexpr6\@tempdimb/25\relax}{\z@}%
+  \scr@setlength{\belowdisplayshortskip}{\dimexpr12\@tempdimb/25\relax}%
+    {\dimexpr6\@tempdimb/25\relax}{\dimexpr6\@tempdimb/25\relax}%
   \setlength{\belowdisplayskip}{\abovedisplayskip}%
   \edef\small{%
     \noexpand\@setfontsize\noexpand\small
@@ -1080,11 +1104,12 @@
   }%
   \setlength{\@tempdima}{\dimexpr4\@tempdimc/5\relax}%
   \setlength{\@tempdimb}{\dimexpr\@tempa\@tempdima/100\relax}%
-  \scr@setlength{\abovedisplayskip}{\dimexpr5\@tempdimb/6\relax}%
-    {\dimexpr\@tempdimb/6\relax}{\dimexpr5\@tempdimb/12\relax}%
-  \scr@setlength{\abovedisplayshortskip}{\z@}{\dimexpr\@tempdimb/4\relax}{\z@}%
-  \scr@setlength{\belowdisplayshortskip}{\dimexpr\@tempdimb/2\relax}%
-    {\dimexpr\@tempdimb/4\relax}{\dimexpr\@tempdimb/4\relax}%
+  \scr@setlength{\abovedisplayskip}{\dimexpr4\@tempdimb/5\relax}%
+    {\dimexpr\@tempdimb/5\relax}{\dimexpr2\@tempdimb/5\relax}%
+  \scr@setlength{\abovedisplayshortskip}{\z@}%
+    {\dimexpr6\@tempdimb/25\relax}{\z@}%
+  \scr@setlength{\belowdisplayshortskip}{\dimexpr12\@tempdimb/25\relax}%
+    {\dimexpr6\@tempdimb/25\relax}{\dimexpr6\@tempdimb/25\relax}%
   \setlength{\belowdisplayskip}{\abovedisplayskip}%
   \edef\footnotesize{%
     \noexpand\@setfontsize\noexpand\footnotesize
@@ -1139,10 +1164,10 @@
   }%
   \normalsize
   \setlength{\@tempdimb}{\f@baselineskip}%
-  \scr@setlength{\parsep}{\dimexpr\@tempdimb/3\relax}%
-    {\dimexpr\@tempdimb/6\relax}{\dimexpr\@tempdimb/12\relax}%
-  \scr@setlength{\topsep}{\dimexpr2\@tempdimb/3\relax}%
-    {\dimexpr\@tempdimb/6\relax}{\dimexpr\@tempdimb/3\relax}
+  \scr@setlength{\topsep}{\dimexpr16\@tempdimb/25\relax}%
+    {\dimexpr4\@tempdimb/25\relax}{\dimexpr8\@tempdimb/25\relax}
+  \scr@setlength{\parsep}{\dimexpr8\@tempdimb/25\relax}%
+    {\dimexpr4\@tempdimb/25\relax}{\dimexpr2\@tempdimb/25\relax}%
   \@tempswafalse
   \begingroup
     \def\@list@extra{\aftergroup\@tempswatrue}%
@@ -1155,10 +1180,10 @@
     \if@tempswa\noexpand\@list@extra\fi
   }%
   \let\@listI\@listi
-  \scr@setlength{\parsep}{\dimexpr\@tempdimb/4\relax}%
-    {\dimexpr\@tempdimb/8\relax}{\dimexpr\@tempdimb/12\relax}%
-  \scr@setlength{\topsep}{\dimexpr\@tempdimb/2\relax}%
-    {\dimexpr\@tempdimb/6\relax}{\dimexpr\@tempdimb/4\relax}%
+  \scr@setlength{\topsep}{\dimexpr12\@tempdimb/25\relax}%
+    {\dimexpr4\@tempdimb/25\relax}{\dimexpr6\@tempdimb/25\relax}%
+  \scr@setlength{\parsep}{\dimexpr6\@tempdimb/25\relax}%
+    {\dimexpr3\@tempdimb/25\relax}{\dimexpr2\@tempdimb/25\relax}%
   \@tempswafalse
   \begingroup
     \def\@list@extra{\aftergroup\@tempswatrue}%
@@ -1170,10 +1195,10 @@
     \itemsep \parsep
     \if@tempswa\noexpand\@list@extra\fi
   }%
-  \scr@setlength{\parsep}{\dimexpr3\@tempdimb/16\relax}%
-    {\dimexpr3\@tempdimb/32\relax}{\dimexpr\@tempdimb/16\relax}%
-  \scr@setlength{\topsep}{\dimexpr3\@tempdimb/8\relax}%
-    {\dimexpr\@tempdimb/8\relax}{\dimexpr3\@tempdimb/16\relax}%
+  \scr@setlength{\topsep}{\dimexpr36\@tempdimb/100\relax}%
+    {\dimexpr12\@tempdimb/100\relax}{\dimexpr18\@tempdimb/100\relax}%
+  \scr@setlength{\parsep}{\dimexpr18\@tempdimb/100\relax}%
+    {\dimexpr9\@tempdimb/100\relax}{\dimexpr6\@tempdimb/100\relax}%
   \@tempswafalse
   \begingroup
     \def\@list@extra{\aftergroup\@tempswatrue}%
@@ -1185,10 +1210,10 @@
     \itemsep \parsep
     \if@tempswa\noexpand\@list@extra\fi
   }%
-  \scr@setlength{\parsep}{\dimexpr\@tempdimb/6\relax}%
-    {\dimexpr\@tempdimb/12\relax}{\dimexpr\@tempdimb/12\relax}%
-  \scr@setlength{\topsep}{\dimexpr\@tempdimb/3\relax}%
-    {\dimexpr\@tempdimb/6\relax}{\dimexpr\@tempdimb/12\relax}%
+  \scr@setlength{\topsep}{\dimexpr8\@tempdimb/25\relax}%
+    {\dimexpr4\@tempdimb/25\relax}{\dimexpr2\@tempdimb/25\relax}%
+  \scr@setlength{\parsep}{\dimexpr4\@tempdimb/25\relax}%
+    {\dimexpr2\@tempdimb/25\relax}{\dimexpr2\@tempdimb/25\relax}%
   \@tempswafalse
   \begingroup
     \def\@list@extra{\aftergroup\@tempswatrue}%
@@ -1201,8 +1226,8 @@
     \itemsep \parsep
     \if@tempswa\noexpand\@list@extra\fi
   }%
-  \scr@setlength{\topsep}{\dimexpr\@tempdimb/6\relax}%
-    {\dimexpr\@tempdimb/12\relax}{\dimexpr\@tempdimb/12\relax}%
+  \scr@setlength{\topsep}{\dimexpr4\@tempdimb/25\relax}%
+    {\dimexpr2\@tempdimb/25\relax}{\dimexpr2\@tempdimb/25\relax}%
   \setlength{\partopsep}{\z@ \@plus\z@ \@minus\p@}%
   \@tempswafalse
   \begingroup
@@ -1246,18 +1271,18 @@
   }%
   \@listi
   \setlength{\@tempdimb}{\f@baselineskip}%
-  \setlength{\footnotesep}{\dimexpr13\@tempdimb/24\relax}%
-  \scr@setlength{\skip\footins}{\dimexpr3\@tempdimb/4\relax}%
-    {\dimexpr\@tempdimb/3\relax}{\dimexpr\@tempdimb/6\relax}%
+  \setlength{\footnotesep}{\dimexpr14\@tempdimb/25\relax}%
+  \scr@setlength{\skip\footins}{\dimexpr18\@tempdimb/25\relax}%
+    {\dimexpr8\@tempdimb/25\relax}{\dimexpr4\@tempdimb/25\relax}%
   \scr@setlength{\floatsep}{\@tempdimb}%
-    {\dimexpr\@tempdimb/6\relax}{\dimexpr\@tempdimb/6\relax}%
-  \scr@setlength{\textfloatsep}{\dimexpr5\@tempdimb/3\relax}%
-    {\dimexpr\@tempdimb/6\relax}{\dimexpr\@tempdimb/3\relax}%
+    {\dimexpr\@tempdimb/5\relax}{\dimexpr\@tempdimb/5\relax}%
+  \scr@setlength{\textfloatsep}{\dimexpr8\@tempdimb/5\relax}%
+    {\dimexpr\@tempdimb/5\relax}{\dimexpr2\@tempdimb/5\relax}%
   \setlength{\intextsep}{\floatsep}%
   \setlength{\dblfloatsep}{\floatsep}%
   \setlength{\dbltextfloatsep}{\textfloatsep}%
   \setlength{\@fptop}{\z@ \@plus 1fil}%
-  \setlength{\@fpsep}{\dimexpr2\@tempdimb/3\relax \@plus 2fil}%
+  \setlength{\@fpsep}{\dimexpr3\@tempdimb/5\relax \@plus 2fil}%
   \setlength{\@fpbot}{\@fptop}%
   \setlength{\@dblfptop}{\@fptop}%
   \setlength{\@dblfpsep}{\@fpsep}%
@@ -1265,12 +1290,12 @@
   \scr@setlength{\partopsep}{\dimexpr\@tempdimb/5\relax}%
     {\dimexpr\@tempdimb/10\relax}{\dimexpr\@tempdimb/10\relax}%
   \scr@setlength\smallskipamount{\dimexpr\@tempdimb/4\relax}
-    {\dimexpr\@tempdimb/12\relax}{\dimexpr\@tempdimb/12\relax}
+    {\dimexpr\@tempdimb/10\relax}{\dimexpr\@tempdimb/10\relax}
   \scr@setlength\medskipamount{\dimexpr\@tempdimb/2\relax}
-    {\dimexpr\@tempdimb/6\relax}{\dimexpr\@tempdimb/6\relax}
+    {\dimexpr\@tempdimb/5\relax}{\dimexpr\@tempdimb/5\relax}
   \scr@setlength\bigskipamount{\@tempdimb}
-    {\dimexpr\@tempdimb/3\relax}{\dimexpr\@tempdimb/3\relax}
-  \setlength\abovecaptionskip{\dimexpr5\@tempdimb/6\relax}
+    {\dimexpr2\@tempdimb/5\relax}{\dimexpr2\@tempdimb/5\relax}
+  \setlength\abovecaptionskip{\dimexpr4\@tempdimb/5\relax}
   \setlength\belowcaptionskip{0\p@}
 }
 %    \end{macrocode}
@@ -1752,73 +1777,61 @@
 ]
 %    \end{macrocode}
 % Und jetzt die Schriftgrößendefinition.
-% \ToDo{vervollständigen}[v2.04]
-% \ToDo{%
-%   Ersetzen von:
-%   \begin{enumerate}
-%     \item 0.0pt mit \cs{z@}
-%     \item 1.0pt mit \cs{p@}
-%     \item .0pt mit \cs{p@}
-%     \item pt mit \cs{p@}
-%     \item plus mit \cs{@plus}
-%     \item minus mit \cs{@minus}
-%   \end{enumerate}
-% }[v2.04]
 %    \begin{macrocode}
 \def\normalsize{%
 %<*10pt>
-  \@setfontsize\normalsize{10}{12.0pt}%
-  \abovedisplayskip 10.0pt plus 2.0pt minus 5.0pt
-  \abovedisplayshortskip 0.0pt plus 3.0pt
-  \belowdisplayshortskip 6.0pt plus 3.0pt minus 3.0pt
+  \@setfontsize\normalsize{10}{12.5\p@}%
+  \abovedisplayskip 10\p@ \@plus2.5\p@ \@minus5\p@
+  \abovedisplayshortskip \z@ \@plus3\p@
+  \belowdisplayshortskip 6\p@ \@plus3\p@ \@minus3\p@
 %</10pt>
 %<*11pt>
-  \@setfontsize\normalsize{11}{13.2pt}%
-  \abovedisplayskip 11.0pt plus 2.2pt minus 5.5pt
-  \abovedisplayshortskip 0.0pt plus 3.3pt
-  \belowdisplayshortskip 6.6pt plus 3.3pt minus 3.3pt
+  \@setfontsize\normalsize{11}{13.75\p@}%
+  \abovedisplayskip 11\p@ \@plus2.75\p@ \@minus5.5\p@
+  \abovedisplayshortskip \z@ \@plus3.3\p@
+  \belowdisplayshortskip 6.6\p@ \@plus3.3\p@ \@minus3.3\p@
 %</11pt>
 %<*12pt>
-  \@setfontsize\normalsize{12}{14.4pt}%
-  \abovedisplayskip 12.0pt plus 2.4pt minus 6.0pt
-  \abovedisplayshortskip 0.0pt plus 3.6pt
-  \belowdisplayshortskip 7.2pt plus 3.6pt minus 3.6pt
+  \@setfontsize\normalsize{12}{15\p@}%
+  \abovedisplayskip 12\p@ \@plus3\p@ \@minus6\p@
+  \abovedisplayshortskip \z@ \@plus3.6\p@
+  \belowdisplayshortskip 7.2\p@ \@plus3.6\p@ \@minus3.6\p@
 %</12pt>
   \belowdisplayskip\abovedisplayskip
   \let\@listi\@listI
 }
 \def\small{%
 %<*10pt>
-  \@setfontsize\small{9}{10.8pt}%
-  \abovedisplayskip 9.0pt plus 1.8pt minus 4.5pt
-  \abovedisplayshortskip 0.0pt plus 2.7pt
-  \belowdisplayshortskip 5.4pt plus 2.7pt minus 2.7pt
+  \@setfontsize\small{9}{11.25\p@}%
+  \abovedisplayskip 9\p@ \@plus2.25\p@ \@minus4.5\p@
+  \abovedisplayshortskip \z@ \@plus2.7\p@
+  \belowdisplayshortskip 5.4\p@ \@plus2.7\p@ \@minus2.7\p@
 %</10pt>
 %<*11pt>
-  \@setfontsize\small{9.9}{11.88pt}%
-  \abovedisplayskip 9.9pt plus 1.98pt minus 4.95pt
-  \abovedisplayshortskip 0.0pt plus 2.97pt
-  \belowdisplayshortskip 5.94pt plus 2.97pt minus 2.97pt
+  \@setfontsize\small{9.9}{12.375\p@}%
+  \abovedisplayskip 9.9\p@ \@plus2.475\p@ \@minus4.95\p@
+  \abovedisplayshortskip \z@ \@plus2.97\p@
+  \belowdisplayshortskip 5.94\p@ \@plus2.97\p@ \@minus2.97\p@
 %</11pt>
 %<*12pt>
-  \@setfontsize\small{10.8}{12.96pt}%
-  \abovedisplayskip 10.8pt plus 2.16pt minus 5.4pt
-  \abovedisplayshortskip 0.0pt plus 3.24pt
-  \belowdisplayshortskip 6.48pt plus 3.24pt minus 3.24pt
+  \@setfontsize\small{10.8}{13.5\p@}%
+  \abovedisplayskip 10.8\p@ \@plus2.7\p@ \@minus5.4\p@
+  \abovedisplayshortskip \z@ \@plus3.24\p@
+  \belowdisplayshortskip 6.48\p@ \@plus3.24\p@ \@minus3.24\p@
 %</12pt>
   \def\@listi{%
     \leftmargin\leftmargini
 %<*10pt>
-    \topsep6.0pt plus 2.0pt minus 3.0pt
-    \parsep3.0pt plus 1.5pt minus 1.0pt
+    \topsep 6\p@ \@plus2\p@ \@minus3\p@
+    \parsep 3\p@ \@plus1.5\p@ \@minus\p@
 %</10pt>
 %<*11pt>
-    \topsep6.6pt plus 2.2pt minus 3.3pt
-    \parsep3.3pt plus 1.65pt minus 1.1pt
+    \topsep 6.6\p@ \@plus2.2\p@ \@minus3.3\p@
+    \parsep 3.3\p@ \@plus1.65\p@ \@minus1.1\p@
 %</11pt>
 %<*12pt>
-    \topsep7.2pt plus 2.4pt minus 3.6pt
-    \parsep3.6pt plus 1.8pt minus 1.2pt
+    \topsep 7.2\p@ \@plus2.4\p@ \@minus3.6\p@
+    \parsep 3.6\p@ \@plus1.8\p@ \@minus1.2\p@
 %</12pt>
     \itemsep\parsep
   }%
@@ -1826,120 +1839,114 @@
 }
 \def\footnotesize{%
 %<*10pt>
-  \@setfontsize\footnotesize{8}{9.6pt}%
-  \abovedisplayskip 8.0pt plus 1.6pt minus 4.0pt
-  \abovedisplayshortskip 0.0pt plus 2.4pt
-  \belowdisplayshortskip 4.8pt plus 2.4pt minus 2.4pt
+  \@setfontsize\footnotesize{8}{10\p@}%
+  \abovedisplayskip 8\p@ \@plus2\p@ \@minus4\p@
+  \abovedisplayshortskip \z@ \@plus2.4\p@
+  \belowdisplayshortskip 4.8\p@ \@plus2.4\p@ \@minus2.4\p@
 %</10pt>
 %<*11pt>
-  \@setfontsize\footnotesize{8.8}{10.56pt}%
-  \abovedisplayskip 8.8pt plus 1.76pt minus 4.4pt
-  \abovedisplayshortskip 0.0pt plus 2.64pt
-  \belowdisplayshortskip 5.28pt plus 2.64pt minus 2.64pt
+  \@setfontsize\footnotesize{8.8}{11\p@}%
+  \abovedisplayskip 8.8\p@ \@plus2.2\p@ \@minus4.4\p@
+  \abovedisplayshortskip \z@ \@plus2.64\p@
+  \belowdisplayshortskip 5.28\p@ \@plus2.64\p@ \@minus2.64\p@
 %</11pt>
 %<*12pt>
-  \@setfontsize\footnotesize{9.6}{11.52pt}%
-  \abovedisplayskip 9.6pt plus 1.92pt minus 4.8pt
-  \abovedisplayshortskip 0.0pt plus 2.88pt
-  \belowdisplayshortskip 5.76pt plus 2.88pt minus 2.88pt
+  \@setfontsize\footnotesize{9.6}{12\p@}%
+  \abovedisplayskip 9.6\p@ \@plus2.4\p@ \@minus4.8\p@
+  \abovedisplayshortskip \z@ \@plus2.88\p@
+  \belowdisplayshortskip 5.76\p@ \@plus2.88\p@ \@minus2.88\p@
 %</12pt>
   \def\@listi{%
     \leftmargin\leftmargini
 %<*10pt>
-    \topsep4.5pt plus 1.5pt minus 2.25pt
-    \parsep2.25pt plus 1.125pt minus 1.0pt
+    \topsep 4.5\p@ \@plus1.5\p@ \@minus2.25\p@
+    \parsep 2.25\p@ \@plus1.125\p@ \@minus\p@
 %</10pt>
 %<*11pt>
-    \topsep4.95pt plus 1.65pt minus 2.475pt
-    \parsep2.475pt plus 1.2375pt minus 1.0pt
+    \topsep 4.95\p@ \@plus1.65\p@ \@minus2.475\p@
+    \parsep 2.475\p@ \@plus1.2375\p@ \@minus\p@
 %</11pt>
 %<*12pt>
-    \topsep5.4pt plus 1.8pt minus 2.7pt
-    \parsep2.7pt plus 1.35pt minus 1.0pt
+    \topsep 5.4\p@ \@plus1.8\p@ \@minus2.7\p@
+    \parsep 2.7\p@ \@plus1.35\p@ \@minus\p@
 %</12pt>
     \itemsep\parsep
   }%
   \belowdisplayskip\abovedisplayskip
 }
 %<*10pt>
-\def\scriptsize{\@setfontsize\scriptsize{6.5}{7.8pt}}
-\def\tiny{\@setfontsize\tiny{5}{6.0pt}}
-\def\large{\@setfontsize\large{11}{13.2pt}}
-\def\Large{\@setfontsize\Large{13}{15.6pt}}
-\def\LARGE{\@setfontsize\LARGE{16}{19.2pt}}
-\def\huge{\@setfontsize\huge{19}{22.8pt}}
-\def\Huge{\@setfontsize\Huge{22}{26.4pt}}
+\def\scriptsize{\@setfontsize\scriptsize{6.5}{8.125\p@}}
+\def\tiny{\@setfontsize\tiny{5}{6.25\p@}}
+\def\large{\@setfontsize\large{11}{13.75\p@}}
+\def\Large{\@setfontsize\Large{13}{16.25\p@}}
+\def\LARGE{\@setfontsize\LARGE{16}{20\p@}}
+\def\huge{\@setfontsize\huge{19}{23.75\p@}}
+\def\Huge{\@setfontsize\Huge{22}{27.5\p@}}
 %</10pt>
 %<*11pt>
-\def\scriptsize{\@setfontsize\scriptsize{7.15}{8.58pt}}
-\def\tiny{\@setfontsize\tiny{5.5}{6.6pt}}
-\def\large{\@setfontsize\large{12.1}{14.52pt}}
-\def\Large{\@setfontsize\Large{14.3}{17.16pt}}
-\def\LARGE{\@setfontsize\LARGE{17.6}{21.12pt}}
-\def\huge{\@setfontsize\huge{20.9}{25.08pt}}
-\def\Huge{\@setfontsize\Huge{24.2}{29.04pt}}
+\def\scriptsize{\@setfontsize\scriptsize{7.15}{8.9375\p@}}
+\def\tiny{\@setfontsize\tiny{5.5}{6.875\p@}}
+\def\large{\@setfontsize\large{12.1}{15.125\p@}}
+\def\Large{\@setfontsize\Large{14.3}{17.875\p@}}
+\def\LARGE{\@setfontsize\LARGE{17.6}{22\p@}}
+\def\huge{\@setfontsize\huge{20.9}{26.125\p@}}
+\def\Huge{\@setfontsize\Huge{24.2}{30.25\p@}}
 %</11pt>
 %<*12pt>
-\def\scriptsize{\@setfontsize\scriptsize{7.8}{9.36pt}}
-\def\tiny{\@setfontsize\tiny{6}{7.2pt}}
-\def\large{\@setfontsize\large{13.2}{15.84pt}}
-\def\Large{\@setfontsize\Large{15.6}{18.72pt}}
-\def\LARGE{\@setfontsize\LARGE{19.2}{23.04pt}}
-\def\huge{\@setfontsize\huge{22.8}{27.36pt}}
-\def\Huge{\@setfontsize\Huge{26.4}{31.68pt}}
+\def\scriptsize{\@setfontsize\scriptsize{7.8}{9.75\p@}}
+\def\tiny{\@setfontsize\tiny{6}{7.5\p@}}
+\def\large{\@setfontsize\large{13.2}{16.5\p@}}
+\def\Large{\@setfontsize\Large{15.6}{19.5\p@}}
+\def\LARGE{\@setfontsize\LARGE{19.2}{24\p@}}
+\def\huge{\@setfontsize\huge{22.8}{28.5\p@}}
+\def\Huge{\@setfontsize\Huge{26.4}{33\p@}}
 %</12pt>
 \normalsize
 %<*10pt>
-\setlength{\footnotesep}{6.5pt}
-\setlength{\skip\footins}{9.0pt plus 4.0pt minus 2.0pt}
-\setlength{\floatsep}{12.0pt plus 2.0pt minus 2.0pt}
-\setlength{\textfloatsep}{20.0pt plus 2.0pt minus 4.0pt}
-\setlength{\intextsep}{12.0pt plus 2.0pt minus 2.0pt}
-\setlength{\dblfloatsep}{12.0pt plus 2.0pt minus 2.0pt}
-\setlength{\dbltextfloatsep}{20.0pt plus 2.0pt minus 4.0pt}
+\setlength{\footnotesep}{7\p@}
+\setlength{\skip\footins}{9\p@ \@plus4\p@ \@minus2\p@}
+\setlength{\floatsep}{12.5\p@ \@plus2.5\p@ \@minus2.5\p@}
+\setlength{\textfloatsep}{20\p@ \@plus2.5\p@ \@minus5\p@}
 %</10pt>
 %<*11pt>
-\setlength{\footnotesep}{7.15pt}
-\setlength{\skip\footins}{9.9pt plus 4.4pt minus 2.2pt}
-\setlength{\floatsep}{13.2pt plus 2.2pt minus 2.2pt}
-\setlength{\textfloatsep}{22.0pt plus 2.2pt minus 4.4pt}
-\setlength{\intextsep}{13.2pt plus 2.2pt minus 2.2pt}
-\setlength{\dblfloatsep}{13.2pt plus 2.2pt minus 2.2pt}
-\setlength{\dbltextfloatsep}{22.0pt plus 2.2pt minus 4.4pt}
+\setlength{\footnotesep}{7.7\p@}
+\setlength{\skip\footins}{9.9\p@ \@plus4.4\p@ \@minus2.2\p@}
+\setlength{\floatsep}{13.75\p@ \@plus2.75\p@ \@minus2.75\p@}
+\setlength{\textfloatsep}{22\p@ \@plus2.75\p@ \@minus5.5\p@}
 %</11pt>
 %<*12pt>
-\setlength{\footnotesep}{7.8pt}
-\setlength{\skip\footins}{10.8pt plus 4.8pt minus 2.4pt}
-\setlength{\floatsep}{14.4pt plus 2.4pt minus 2.4pt}
-\setlength{\textfloatsep}{24.0pt plus 2.4pt minus 4.8pt}
-\setlength{\intextsep}{14.4pt plus 2.4pt minus 2.4pt}
-\setlength{\dblfloatsep}{14.4pt plus 2.4pt minus 2.4pt}
-\setlength{\dbltextfloatsep}{24.0pt plus 2.4pt minus 4.8pt}
+\setlength{\footnotesep}{8.4\p@}
+\setlength{\skip\footins}{10.8\p@ \@plus4.8\p@ \@minus2.4\p@}
+\setlength{\floatsep}{15\p@ \@plus3\p@ \@minus3\p@}
+\setlength{\textfloatsep}{24\p@ \@plus3\p@ \@minus6\p@}
 %</12pt>
-\setlength{\@fptop}{0.0pt plus 1.0fil}
+\intextsep\floatsep
+\dblfloatsep\floatsep
+\dbltextfloatsep\textfloatsep
+\setlength{\@fptop}{\z@ \@plus1fil}
+%<10pt>\setlength{\@fpsep}{7.5\p@ \@plus2fil}
+%<11pt>\setlength{\@fpsep}{8.25\p@ \@plus2fil}
+%<12pt>\setlength{\@fpsep}{9\p@ \@plus2fil}
 \@fpbot\@fptop
-%<10pt>\setlength{\@fpsep}{8.0pt plus 2.0fil}
-%<11pt>\setlength{\@fpsep}{8.8pt plus 2.0fil}
-%<12pt>\setlength{\@fpsep}{9.6pt plus 2.0fil}
 \@dblfptop\@fptop
-\@dblfpbot\@dblfptop
 \@dblfpsep\@fpsep
-%<10pt>\setlength{\partopsep}{2.4pt plus 1.2pt minus 1.2pt}
-%<11pt>\setlength{\partopsep}{2.64pt plus 1.32pt minus 1.32pt}
-%<12pt>\setlength{\partopsep}{2.88pt plus 1.44pt minus 1.44pt}
+\@dblfpbot\@dblfptop
+%<10pt>\setlength{\partopsep}{2.5\p@ \@plus1.25\p@ \@minus1.25\p@}
+%<11pt>\setlength{\partopsep}{2.75\p@ \@plus1.375\p@ \@minus1.375\p@}
+%<12pt>\setlength{\partopsep}{3\p@ \@plus1.5\p@ \@minus1.5\p@}
 \def\@listi{%
   \leftmargin\leftmargini
 %<*10pt>
-  \topsep8.0pt plus 2.0pt minus 4.0pt
-  \parsep4.0pt plus 2.0pt minus 1.0pt
+  \topsep 8\p@ \@plus2\p@ \@minus4\p@
+  \parsep 4\p@ \@plus2\p@ \@minus\p@
 %</10pt>
 %<*11pt>
-  \topsep8.8pt plus 2.2pt minus 4.4pt
-  \parsep4.4pt plus 2.2pt minus 1.1pt
+  \topsep 8.8\p@ \@plus2.2\p@ \@minus4.4\p@
+  \parsep 4.4\p@ \@plus2.2\p@ \@minus1.1\p@
 %</11pt>
 %<*12pt>
-  \topsep9.6pt plus 2.4pt minus 4.8pt
-  \parsep4.8pt plus 2.4pt minus 1.2pt
+  \topsep 9.6\p@ \@plus2.4\p@ \@minus4.8\p@
+  \parsep 4.8\p@ \@plus2.4\p@ \@minus1.2\p@
 %</12pt>
   \itemsep\parsep
 }
@@ -1949,16 +1956,16 @@
   \labelwidth\leftmarginii
   \advance\labelwidth-\labelsep
 %<*10pt>
-  \topsep4.0pt plus 2.0pt minus 1.0pt
-  \parsep2.0pt plus 1.0pt minus 1.0pt
+  \topsep 4\p@ \@plus2\p@ \@minus\p@
+  \parsep 2\p@ \@plus\p@ \@minus\p@
 %</10pt>
 %<*11pt>
-  \topsep4.4pt plus 2.2pt minus 1.1pt
-  \parsep2.2pt plus 1.1pt minus 1.1pt
+  \topsep 4.4\p@ \@plus2.2\p@ \@minus1.1\p@
+  \parsep 2.2\p@ \@plus1.1\p@ \@minus1.1\p@
 %</11pt>
 %<*12pt>
-  \topsep4.8pt plus 2.4pt minus 1.2pt
-  \parsep2.4pt plus 1.2pt minus 1.2pt
+  \topsep 4.8\p@ \@plus2.4\p@ \@minus1.2\p@
+  \parsep 2.4\p@ \@plus1.2\p@ \@minus1.2\p@
 %</12pt>
   \itemsep\parsep
 }
@@ -1967,16 +1974,16 @@
   \labelwidth\leftmarginiii
   \advance\labelwidth-\labelsep
 %<*10pt>
-  \topsep2.0pt plus 1.0pt minus 1.0pt
+  \topsep 2\p@ \@plus\p@ \@minus\p@
 %</10pt>
 %<*11pt>
-  \topsep2.2pt plus 1.1pt minus 1.1pt
+  \topsep 2.2\p@ \@plus1.1\p@ \@minus1.1\p@
 %</11pt>
 %<*12pt>
-  \topsep2.4pt plus 1.2pt minus 1.2pt
+  \topsep 2.4\p@ \@plus1.2\p@ \@minus1.2\p@
 %</12pt>
-  \parsep0.0pt
-  \partopsep0.0pt minus 1.0pt
+  \parsep\z@
+  \partopsep \z@ \@minus\p@
   \itemsep\topsep
 }
 \def\@listiv{%
@@ -1995,26 +2002,26 @@
   \advance\labelwidth-\labelsep
 }
 %<*10pt>
-\setlength{\smallskipamount}{3.0pt plus 1.0pt minus 1.0pt}
-\setlength{\medskipamount}{6.0pt plus 2.0pt minus 2.0pt}
-\setlength{\bigskipamount}{12.0pt plus 4.0pt minus 4.0pt}
+\setlength{\smallskipamount}{3.125\p@ \@plus1.25\p@ \@minus1.25\p@}
+\setlength{\medskipamount}{6.25\p@ \@plus2.5\p@ \@minus2.5\p@}
+\setlength{\bigskipamount}{12.5\p@ \@plus5\p@ \@minus5\p@}
 %</10pt>
 %<*11pt>
-\setlength{\smallskipamount}{3.3pt plus 1.1pt minus 1.1pt}
-\setlength{\medskipamount}{6.6pt plus 2.2pt minus 2.2pt}
-\setlength{\bigskipamount}{13.2pt plus 4.4pt minus 4.4pt}
+\setlength{\smallskipamount}{3.4375\p@ \@plus1.375\p@ \@minus1.375\p@}
+\setlength{\medskipamount}{6.875\p@ \@plus2.75\p@ \@minus2.75\p@}
+\setlength{\bigskipamount}{13.75\p@ \@plus5.5\p@ \@minus5.5\p@}
 %</11pt>
 %<*12pt>
-\setlength{\smallskipamount}{3.6pt plus 1.2pt minus 1.2pt}
-\setlength{\medskipamount}{7.2pt plus 2.4pt minus 2.4pt}
-\setlength{\bigskipamount}{14.4pt plus 4.8pt minus 4.8pt}
+\setlength{\smallskipamount}{3.75\p@ \@plus1.5\p@ \@minus1.5\p@}
+\setlength{\medskipamount}{7.5\p@ \@plus3\p@ \@minus3\p@}
+\setlength{\bigskipamount}{15\p@ \@plus6\p@ \@minus6\p@}
 %</12pt>
 \@ifundefined{tudscrcls@name}{}{%
   \AfterClass+{\scrcls@name}{%
-%<10pt>    \setlength{\abovecaptionskip}{10.0pt}
-%<11pt>    \setlength{\abovecaptionskip}{11.0pt}
-%<12pt>    \setlength{\abovecaptionskip}{12.0pt}
-    \setlength{\belowcaptionskip}{0.0pt}
+%<10pt>    \setlength{\abovecaptionskip}{10\p@}
+%<11pt>    \setlength{\abovecaptionskip}{11\p@}
+%<12pt>    \setlength{\abovecaptionskip}{12\p@}
+    \setlength{\belowcaptionskip}{\z@}
   }%
 }
 \@ifundefined{@list@extra}{}{%
