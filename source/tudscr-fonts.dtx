@@ -1,4 +1,4 @@
-% \CheckSum{3553}
+% \CheckSum{3588}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-fonts.dtx}[%
-  2015/02/17 v2.04 TUD-KOMA-Script\space%
+  2015/02/19 v2.04 TUD-KOMA-Script\space%
 %</driver>
 %<package&identify>\NeedsTeXFormat{LaTeX2e}[2011/06/27]
 %<package&identify>\ProvidesPackage{%
@@ -92,6 +92,9 @@
 % \changes{v2.02}{2014/09/30}{\pkg{tudscrfonts} Nutzung alter tud-Klassen 
 %   mit neuen Schriftfamilien ermöglicht}%^^A
 % \changes{v2.04}{2015/02/17}{Eigene Schriftgrößendateien}%^^A
+% \changes{v2.04}{2015/02/19}{Schriftschnitte für \cs{mathcal} (\pkg{eulervm}) 
+%   und \cs{mathfrak} sowie \cs{mathbb} (\pkg{newtx}) hinzugefügt}%^^A
+% \ToDo{Lösung für Option \opt{fontsize} finden}[v2.04]
 %
 % \section{Schriften des \CDs}
 %
@@ -126,7 +129,7 @@
 %<*package&identify>
 % \fi
 %
-% \subsection{Verwendung alter TUD-Klassen oder \TUDScript~v1.0}
+% \subsection{Nutzung des Paketes mit alten TUD-Klassen oder \TUDScript~v1.0}
 %
 % Das Paket kann genutzt werden, um alle möglichen veralteten Klassen mit den
 % neuen Schriftfamilien zu verwenden.
@@ -141,7 +144,8 @@
 % Wenn eine der alten Klassen aus den Vorlagen von Klaus Bergmann geladen 
 % wurde, wird dies für spätere Anpassungen registriert.
 % \ToDo{Klassen tudmathposter und tudposter einpflegen, 
-%   \cs{tudfont\marg{\dots}}, besser \cs{cdfont} für Klassen und Paket}[v2.04]
+%   \cs{tudfont\marg{\dots}}, besser \cs{cdfont} für Klassen und Paket, dabei 
+%   im Argument Leerzeichen und Bindestriche entfernen}[v2.04]
 % \ToDo{Klasse tudbeamer einpflegen}[v2.xx]
 %    \begin{macrocode}
 \@ifclassloaded{tudbook}{\@tud@oldclasstrue}{}%
@@ -177,7 +181,7 @@
 % \end{macro}^^A if@tud@oldclass
 %
 %
-% \subsection{Verwendung ohne \KOMAScript}
+% \subsection{Nutzung des Paketes mit den Standardklassen}
 %
 % Sollte keine \KOMAScript-Klasse genutzt werden, wird zusätzlich das Paket
 % \pkg{scrextend} benötigt.
@@ -206,6 +210,7 @@
 % \ToDo{%
 % \url{http://latex.wcms-file3.tu-dresden.de/phpBB3/viewtopic.php?p=1222\#p1222}
 % }[v2.04]
+% \ToDo{\cs{tud@mathenc} und \cs{lowercase} raus}[v2.04]
 % \begin{option}{fontspec}
 % \changes{v2.02}{2014/08/29}{neu}%^^A
 % \begin{macro}{\if@tud@fontspec}
@@ -630,6 +635,55 @@
   \DeclareMathSymbol{\varPsi}{\mathalpha}{letters}{9}%
   \DeclareMathSymbol{\varOmega}{\mathalpha}{letters}{10}%
 %    \end{macrocode}
+% Das Paket \pkg{cmbright} bringt zusätzlich noch Schriftschnitte für die
+% \pkg{ams}"=Pakete mit. Diese werden gegebenenfalls geladen.
+%    \begin{macrocode}
+  \AfterPackage*{amsfonts}{%
+    \DeclareFontFamily{U}{msa}{}%
+    \DeclareFontShape{U}{msa}{m}{n}{%
+      <-9>cmbras8%
+      <9-10>cmbras9%
+      <10->cmbras10%
+    }{}%
+    \DeclareFontFamily{U}{msb}{}%
+    \DeclareFontShape{U}{msb}{m}{n}{%
+      <-9>cmbrbs8%
+      <9-10>cmbrbs9%
+      <10->cmbrbs10%
+    }{}%
+%    \end{macrocode}
+% Sollten die Schriftdateien des Paketes \pkg{newtx} vorhanden sein, werden die 
+% Symbole für die Befehle \cs{mathfrak} sowie \cs{mathbb} aus \pkg{amsfonts} 
+% mit diesen verwendet.
+% \ToDo{Option \opt{cdmath} auf Verwendung erweitern (Warnung ausgeben, falls 
+%   aktiv und Dateien fehlen) und dokumentieren}[v2.04]
+%    \begin{macrocode}
+    \IfFileExists{untxmia.fd}{%
+      \ifcsname iftx@libertine\endcsname\else
+        \newif\iftx@libertine
+      \fi
+      \tx@libertinefalse
+      \ifcsname iftx@minion\endcsname\else
+        \newif\iftx@minion
+      \fi
+      \tx@minionfalse
+      \SetMathAlphabet{\mathfrak}{univers}{U}{ntxmia}{m}{it}%
+      \SetMathAlphabet{\mathfrak}{universbold}{U}{ntxmia}{b}{it}%
+    }{}%
+    \IfFileExists{untxsyb.fd}{%
+      \SetMathAlphabet{\mathbb}{univers}{U}{ntxsyb}{m}{n}%
+      \SetMathAlphabet{\mathbb}{universbold}{U}{ntxsyb}{b}{n}%
+    }{}%
+  }%
+%    \end{macrocode}
+% Auch für den Befehl \cs{mathcal} werden die Standardsymbole ggf. mit denen 
+% aus \pkg{eulervm} ersetzt.
+%    \begin{macrocode}
+  \IfFileExists{ueus.fd}{%
+    \SetMathAlphabet{\mathcal}{univers}{U}{eus}{m}{n}%
+    \SetMathAlphabet{\mathcal}{universbold}{U}{eus}{b}{n}%
+  }{}%
+%    \end{macrocode}
 % Damit die Schrift im Dokument später noch umgestellt werden kann, werden
 % sämtliche Einstellungen erst zu Beginn des Dokumentes gesichert. Deshalb wird
 % der dafür verantwortliche Befehl \cs{tud@font@set} hier zum ersten Mal
@@ -828,7 +882,6 @@
 %<*(class|package)&body>
 % \fi
 %
-% \ToDo{Laden von scrextend für tudscrfonts, Paket testen}[v2.04]
 % \begin{macro}{\tud@font@set}
 % \changes{v2.04}{2015/02/17}{Optionsabhängige Schriftgrößen}%^^A
 % Mit diesem Befehl werden entweder die normalen oder aber die Schriften des 
@@ -1672,24 +1725,6 @@
   }{}%
 }
 %</package>
-%    \end{macrocode}
-% Das Paket \pkg{cmbright} bringt zusätzlich noch Schriftschnitte für die
-% \pkg{ams}"=Pakete mit. Diese werden gegebenenfalls geladen.
-%    \begin{macrocode}
-\AfterPackage*{amsfonts}{%
-  \DeclareFontFamily{U}{msa}{}%
-  \DeclareFontShape{U}{msa}{m}{n}{%
-    <-9>cmbras8%
-    <9-10>cmbras9%
-    <10->cmbras10%
-  }{}%
-  \DeclareFontFamily{U}{msb}{}%
-  \DeclareFontShape{U}{msb}{m}{n}{%
-    <-9>cmbrbs8%
-    <9-10>cmbrbs9%
-    <10->cmbrbs10%
-  }{}%
-}
 %    \end{macrocode}
 %
 % \subsection{Anpassungen für das Paket \pkg{ragged2e}}

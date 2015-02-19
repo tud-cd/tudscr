@@ -1283,6 +1283,40 @@
   \DeclareMathSymbol{\varPhi}{\mathalpha}{letters}{8}%
   \DeclareMathSymbol{\varPsi}{\mathalpha}{letters}{9}%
   \DeclareMathSymbol{\varOmega}{\mathalpha}{letters}{10}%
+  \AfterPackage*{amsfonts}{%
+    \DeclareFontFamily{U}{msa}{}%
+    \DeclareFontShape{U}{msa}{m}{n}{%
+      <-9>cmbras8%
+      <9-10>cmbras9%
+      <10->cmbras10%
+    }{}%
+    \DeclareFontFamily{U}{msb}{}%
+    \DeclareFontShape{U}{msb}{m}{n}{%
+      <-9>cmbrbs8%
+      <9-10>cmbrbs9%
+      <10->cmbrbs10%
+    }{}%
+    \IfFileExists{untxmia.fd}{%
+      \ifcsname iftx@libertine\endcsname\else
+        \newif\iftx@libertine
+      \fi
+      \tx@libertinefalse
+      \ifcsname iftx@minion\endcsname\else
+        \newif\iftx@minion
+      \fi
+      \tx@minionfalse
+      \SetMathAlphabet{\mathfrak}{univers}{U}{ntxmia}{m}{it}%
+      \SetMathAlphabet{\mathfrak}{universbold}{U}{ntxmia}{b}{it}%
+    }{}%
+    \IfFileExists{untxsyb.fd}{%
+      \SetMathAlphabet{\mathbb}{univers}{U}{ntxsyb}{m}{n}%
+      \SetMathAlphabet{\mathbb}{universbold}{U}{ntxsyb}{b}{n}%
+    }{}%
+  }%
+  \IfFileExists{ueus.fd}{%
+    \SetMathAlphabet{\mathcal}{univers}{U}{eus}{m}{n}%
+    \SetMathAlphabet{\mathcal}{universbold}{U}{eus}{b}{n}%
+  }{}%
   \tud@font@set%
 }
 \newcommand*\tud@font@set{%
@@ -1732,20 +1766,6 @@
   \else%
     \expandafter\@secondoftwo%
   \fi%
-}
-\AfterPackage*{amsfonts}{%
-  \DeclareFontFamily{U}{msa}{}%
-  \DeclareFontShape{U}{msa}{m}{n}{%
-    <-9>cmbras8%
-    <9-10>cmbras9%
-    <10->cmbras10%
-  }{}%
-  \DeclareFontFamily{U}{msb}{}%
-  \DeclareFontShape{U}{msb}{m}{n}{%
-    <-9>cmbrbs8%
-    <9-10>cmbrbs9%
-    <10->cmbrbs10%
-  }{}%
 }
 \newcommand*\tud@raggedright{\raggedright}
 \newcommand*\tud@RaggedRight{\raggedright}
