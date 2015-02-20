@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-layout.dtx}[%
-  2015/02/17 v2.04 TUD-KOMA-Script (layout)%
+  2015/02/20 v2.04 TUD-KOMA-Script (layout)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -92,9 +92,9 @@
 % \begin{option}{cd}
 % \begin{macro}{\tud@cd}
 % \begin{macro}{\tud@layout@cover}
-% \changes{v2.02}{2014/08/08}{neu}^^A
+% \changes{v2.02}{2014/08/08}{neu}%^^A
 % \begin{macro}{\if@tud@layout@cover@locked}
-% \changes{v2.02}{2014/08/08}{neu}^^A
+% \changes{v2.02}{2014/08/08}{neu}%^^A
 % \begin{macro}{\tud@layout@title}
 % \begin{macro}{\if@tud@layout@title@locked}
 % \begin{macro}{\tud@layout@part}
@@ -255,7 +255,7 @@
 % \end{macro}^^A \if@tud@cd
 % \end{option}^^A cd
 % \begin{option}{cdcover}
-% \changes{v2.02}{2014/08/08}{neue Option für \cs{makecover}}^^A
+% \changes{v2.02}{2014/08/08}{neue Option für \cs{makecover}}%^^A
 % Das durch die Option \opt{cd} insgesamt festgelegte Layout kann für die
 % einzelnen Elemente Umschlagseite (\opt{cdcover}),\dots
 %    \begin{macrocode}
@@ -1197,19 +1197,23 @@
 % \begin{macro}{\set@@@@preamble}
 % Die beiden Befehle für Präambeln aus \KOMAScript{} ignorieren in ihrer
 % ursprünglichen Form die Einstellungen für \opt{parskip}. Dies wird mit diesem
-% Patch beseitigt. Außerdem werden das Makro für die Layouteinstellungen für 
-% Teile bzw. Kapitel (\cs{tud@\dots preamble}) aufgerufen. Für die Verwendung
-% der \env{abstract}-Umgebung in den Präambeln wird außerdem der Befehl
-% \cs{phantomsection} auf \cs{relax} gesetzt, um mit \cs{autoref} automatisch 
-% generierte Querverweise aus dem Paket \pkg{hyperref} nicht zu verändern.
+% Patch beseitigt. Außerdem wird das Makro für die Layouteinstellungen für 
+% Teile (\cs{tud@partpreamble}) respektive Kapitel (\cs{tud@chapterpreamble})
+% aufgerufen. Für die Verwendung der \env{abstract}-Umgebung in den Präambeln
+% wird außerdem der Befehl \cs{phantomsection} auf \cs{relax} gesetzt, um mit
+% \cs{autoref} automatisch generierte Querverweise aus dem Paket \pkg{hyperref}
+% nicht zu verändern. Alternativ zu \cs{let}\cs{@parboxrestore}\cs{relax} 
+% müsste innerhalb des Argumentes von \cs{parbox} die \KOMAScript-Option 
+% \opt{parbox} neu gesetzt werden.
+%^^A \KOMAoptions{parskip=last}
 %    \begin{macrocode}
 \patchcmd{\set@@@@preamble}{%
   \hbox to\hsize{#4\parbox[{#2}]{#3}{#6\par}#5\par}%
 }{%
   \def\@tempa####1@####2{\@nameuse{tud@####1preamble}}%
   \hbox to\hsize{%
-    \let\@parboxrestore\relax%
     \let\phantomsection\relax%
+    \let\@parboxrestore\relax%
     #4\parbox[{#2}]{#3}{\@tempa#1#6\par}#5\par%
   }%
 }{}{\tud@patch@wrn{set@@@@preamble}}

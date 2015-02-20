@@ -106,7 +106,6 @@
 \newif\if@tud@dinbold
 \newcommand*\tud@univers{lun}
 \newcommand*\tud@dinbold{0m6}
-\newcommand*\tud@mathenc{OT1}
 \newif\if@tud@fontspec
 \TUD@key{fontspec}[true]{%
   \TUD@set@ifkey{fontspec}{@tud@fontspec}{#1}%
@@ -136,15 +135,9 @@
   \fi%
 }
 \AtEndPreamble{%
-  \@expandtwoargs\in@{OT}{\encodingdefault}%
-  \ifin@%
-    \def\tud@mathenc{OT1}%
-  \else%
-    \def\tud@mathenc{T1}%
-  \fi%
   \if@tud@fontspec%
     \edef\@tempa{%
-      \lowercase{\noexpand\InputIfFileExists{\tud@mathenc\tud@univers.fd}}%
+      \lowercase{\noexpand\InputIfFileExists{OT1\tud@univers.fd}}%
     }%
     \def\@tempb#1{%
       \ClassInfoNoLine{\tudcls@name}{%
@@ -167,7 +160,7 @@
   \@tempa{\@tud@universtrue}{\@tempb{Univers}}%
   \if@tud@fontspec%
     \edef\@tempa{%
-      \lowercase{\noexpand\InputIfFileExists{\tud@mathenc\tud@dinbold.fd}}%
+      \lowercase{\noexpand\InputIfFileExists{OT1\tud@dinbold.fd}}%
     }%
   \else%
     \edef\@tempa{%
@@ -1243,22 +1236,22 @@
   \SetSymbolFont{letters}{universbold}{OML}{\tud@univers}{b}{sl}%
   \SetSymbolFont{symbols}{universbold}{OMS}{\tud@univers}{b}{n}%
   \SetSymbolFont{largesymbols}{universbold}{OMX}{iwona}{b}{n}%
-  \SetMathAlphabet{\mathbf}{univers}{\tud@mathenc}{\tud@univers}{b}{n}%
-  \SetMathAlphabet{\mathsf}{univers}{\tud@mathenc}{\tud@univers}{l}{n}%
-  \SetMathAlphabet{\mathit}{univers}{\tud@mathenc}{\tud@univers}{l}{sl}%
-  \SetMathAlphabet{\mathtt}{univers}{\tud@mathenc}{\tud@univers t}{l}{n}%
-  \SetMathAlphabet{\mathbf}{universbold}{\tud@mathenc}{\tud@univers}{eb}{n}%
-  \SetMathAlphabet{\mathsf}{universbold}{\tud@mathenc}{\tud@univers}{b}{n}%
-  \SetMathAlphabet{\mathit}{universbold}{\tud@mathenc}{\tud@univers}{b}{sl}%
-  \SetMathAlphabet{\mathtt}{universbold}{\tud@mathenc}{\tud@univers t}{b}{n}%
+  \SetMathAlphabet{\mathbf}{univers}{OT1}{\tud@univers}{b}{n}%
+  \SetMathAlphabet{\mathsf}{univers}{OT1}{\tud@univers}{l}{n}%
+  \SetMathAlphabet{\mathit}{univers}{OT1}{\tud@univers}{l}{sl}%
+  \SetMathAlphabet{\mathtt}{univers}{OT1}{\tud@univers t}{l}{n}%
+  \SetMathAlphabet{\mathbf}{universbold}{OT1}{\tud@univers}{eb}{n}%
+  \SetMathAlphabet{\mathsf}{universbold}{OT1}{\tud@univers}{b}{n}%
+  \SetMathAlphabet{\mathit}{universbold}{OT1}{\tud@univers}{b}{sl}%
+  \SetMathAlphabet{\mathtt}{universbold}{OT1}{\tud@univers t}{b}{n}%
   \DeclareMathVersion{dinbold}%
-  \SetSymbolFont{operators}{dinbold}{\tud@mathenc}{\tud@dinbold}{b}{n}%
+  \SetSymbolFont{operators}{dinbold}{OT1}{\tud@dinbold}{b}{n}%
   \SetSymbolFont{letters}{dinbold}{OML}{\tud@dinbold}{b}{sl}%
   \SetSymbolFont{symbols}{dinbold}{OMS}{\tud@dinbold}{b}{n}%
   \SetSymbolFont{largesymbols}{dinbold}{OMX}{iwona}{ebc}{n}%
-  \SetMathAlphabet{\mathbf}{dinbold}{\tud@mathenc}{\tud@dinbold}{b}{n}%
-  \SetMathAlphabet{\mathsf}{dinbold}{\tud@mathenc}{\tud@dinbold}{b}{n}%
-  \SetMathAlphabet{\mathit}{dinbold}{\tud@mathenc}{\tud@dinbold}{b}{sl}%
+  \SetMathAlphabet{\mathbf}{dinbold}{OT1}{\tud@dinbold}{b}{n}%
+  \SetMathAlphabet{\mathsf}{dinbold}{OT1}{\tud@dinbold}{b}{n}%
+  \SetMathAlphabet{\mathit}{dinbold}{OT1}{\tud@dinbold}{b}{sl}%
   \DeclareMathSymbol{\upDelta}{\mathalpha}{operators}{1}%
   \DeclareMathSymbol{\upOmega}{\mathalpha}{operators}{10}%
   \DeclareMathSymbol{\upGamma}{\mathalpha}{operators}{0}%
@@ -1674,7 +1667,8 @@
   \setlength\abovecaptionskip{\dimexpr4\@tempdimb/5\relax}
   \setlength\belowcaptionskip{0\p@}
 }
-% §§§ überdenken
+% §§§ überdenken: Minimalbeispiel mit dem deutlcih wird, was das Problem ist an 
+% Markus schicken
 \tud@cmd@store{changefontsizes}%
 \let\changefontsizes\tud@changefontsizes%
 \newcount\tud@font@greek@upGamma
