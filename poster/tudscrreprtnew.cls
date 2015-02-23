@@ -1127,306 +1127,23 @@
 }
 % §§§ evtl. auch Wert merken und mit tud@setfontsize ausführen
 % §§§ in tudscrfonts integrieren
-\TUD@key{fontsize}{%
-  \if@atdocument%
-    \KOMAoptions{fontsize=#1}%
-  \else%
-    \AtEndPreamble{%
-      \KOMAoptions{fontsize=#1}%
-%      \recalctypearea% AfterCalculatingTypearea überarbeiten
-    }
-  \fi%
-}
+%\TUD@key{fontsize}{%
+%  \if@atdocument%
+%    \KOMAoptions{fontsize=#1}%
+%  \else%
+%    \AtEndPreamble{%
+%      \KOMAoptions{fontsize=#1}%
+%%      \recalctypearea% AfterCalculatingTypearea überarbeiten
+%    }
+%  \fi%
+%}
 %%% From File: tudscr-base.dtx
+\PassOptionsToClass{parskip=relative}{\scrcls@name}
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{\scrcls@name}}
 \TUDExecuteOptions{cd,cdfont,tudbookmarks}
 \TUDProcessOptions\relax
-\LoadClass{\scrcls@name}[2013/12/19]
-\RequirePackage{environ}[2013/04/01]
-\AtEndPreamble{%
-  \@ifpackageloaded{graphicx}{}{%
-    \@ifpackageloaded{graphics}{%
-      \ClassWarningNoLine{\tudcls@name}{%
-        The package `graphics' was superseded by `graphicx'%
-      }%
-    }{}%
-  }%
-  \RequirePackage{graphicx}[1999/02/16]%
-  \RequirePackage{tudscrcolor}[\TUDVersion]%
-}
-%%% From File: tudscr-fonts.dtx
-\AtEndPreamble{%
-  \if@tud@fontspec%
-    \newfontface\univln{Univers Light}[NFSSFamily=UniversLight]%
-    \newfontface\univrn{Univers}[NFSSFamily=UniversRegular]%
-    \newfontface\univbn{Univers Bold}[NFSSFamily=UniversBold]%
-    \newfontface\univxn{Univers Black}[NFSSFamily=UniversBlack]%
-    \newfontface\univls{Univers Light Oblique}[NFSSFamily=UniversLightOblique]%
-    \newfontface\univrs{Univers Oblique}[NFSSFamily=UniversRegularOblique]%
-    \newfontface\univbs{Univers Bold Oblique}[NFSSFamily=UniversBoldOblique]%
-    \newfontface\univxs{Univers Black Oblique}[NFSSFamily=UniversBlackOblique]%
-    \newcommand*\textuln[1]{{\univln#1}}%
-    \newcommand*\texturn[1]{{\univrn#1}}%
-    \newcommand*\textubn[1]{{\univbn#1}}%
-    \newcommand*\textuxn[1]{{\univxn#1}}%
-    \newcommand*\textuls[1]{{\univls#1}}%
-    \newcommand*\texturs[1]{{\univrs#1}}%
-    \newcommand*\textubs[1]{{\univbs#1}}%
-    \newcommand*\textuxs[1]{{\univxs#1}}%
-  \else%
-    \if@tud@univers%
-      \newcommand*\univln{\usefont{\encodingdefault}{\tud@univers}{l}{n}}%
-      \newcommand*\univrn{\usefont{\encodingdefault}{\tud@univers}{m}{n}}%
-      \newcommand*\univbn{\usefont{\encodingdefault}{\tud@univers}{b}{n}}%
-      \newcommand*\univxn{\usefont{\encodingdefault}{\tud@univers}{eb}{n}}%
-      \newcommand*\univls{\usefont{\encodingdefault}{\tud@univers}{l}{sl}}%
-      \newcommand*\univrs{\usefont{\encodingdefault}{\tud@univers}{m}{sl}}%
-      \newcommand*\univbs{\usefont{\encodingdefault}{\tud@univers}{b}{sl}}%
-      \newcommand*\univxs{\usefont{\encodingdefault}{\tud@univers}{eb}{sl}}%
-    \else%
-      \newcommand*\univln{}%
-      \newcommand*\univrn{}%
-      \newcommand*\univbn{}%
-      \newcommand*\univxn{}%
-      \newcommand*\univls{}%
-      \newcommand*\univrs{}%
-      \newcommand*\univbs{}%
-      \newcommand*\univxs{}%
-    \fi%
-    \newcommand*\textuln{}%
-    \newcommand*\texturn{}%
-    \newcommand*\textubn{}%
-    \newcommand*\textuxn{}%
-    \newcommand*\textuls{}%
-    \newcommand*\texturs{}%
-    \newcommand*\textubs{}%
-    \newcommand*\textuxs{}%
-    \DeclareTextFontCommand{\textuln}{\univln}%
-    \DeclareTextFontCommand{\texturn}{\univrn}%
-    \DeclareTextFontCommand{\textubn}{\univbn}%
-    \DeclareTextFontCommand{\textuxn}{\univxn}%
-    \DeclareTextFontCommand{\textuls}{\univls}%
-    \DeclareTextFontCommand{\texturs}{\univrs}%
-    \DeclareTextFontCommand{\textubs}{\univbs}%
-    \DeclareTextFontCommand{\textuxs}{\univxs}%
-  \fi%
-  \if@tud@fontspec%
-    \newfontface\@dinbn{DIN Bold}[NFSSFamily=DINBold,BoldFont = DIN Bold]%
-    \newcommand*\dinbn{\@dinbn\if@tud@dinbold\mathversion{dinbold}\fi}%
-    \newcommand*\textdbn[1]{{\dinbn#1}}%
-  \else%
-    \if@tud@dinbold%
-      \newcommand*\dinbn{%
-        \usefont{\encodingdefault}{\tud@dinbold}{b}{n}%
-        \mathversion{dinbold}%
-      }%
-    \else%
-      \let\dinbn\sectfont%
-    \fi%
-    \newcommand*\textdbn{}%
-    \DeclareTextFontCommand{\textdbn}{\dinbn}%
-  \fi%
-  \DeclareMathVersion{univers}%
-  \DeclareMathVersion{universbold}%
-  \SetSymbolFont{operators}{univers}{OT1}{\tud@univers}{l}{n}%
-  \SetSymbolFont{letters}{univers}{OML}{\tud@univers}{l}{sl}%
-  \SetSymbolFont{symbols}{univers}{OMS}{\tud@univers}{l}{n}%
-  \SetSymbolFont{largesymbols}{univers}{OMX}{iwona}{m}{n}%
-  \SetSymbolFont{operators}{universbold}{OT1}{\tud@univers}{b}{n}%
-  \SetSymbolFont{letters}{universbold}{OML}{\tud@univers}{b}{sl}%
-  \SetSymbolFont{symbols}{universbold}{OMS}{\tud@univers}{b}{n}%
-  \SetSymbolFont{largesymbols}{universbold}{OMX}{iwona}{b}{n}%
-  \SetMathAlphabet{\mathbf}{univers}{OT1}{\tud@univers}{b}{n}%
-  \SetMathAlphabet{\mathsf}{univers}{OT1}{\tud@univers}{l}{n}%
-  \SetMathAlphabet{\mathit}{univers}{OT1}{\tud@univers}{l}{sl}%
-  \SetMathAlphabet{\mathtt}{univers}{OT1}{\tud@univers t}{l}{n}%
-  \SetMathAlphabet{\mathbf}{universbold}{OT1}{\tud@univers}{eb}{n}%
-  \SetMathAlphabet{\mathsf}{universbold}{OT1}{\tud@univers}{b}{n}%
-  \SetMathAlphabet{\mathit}{universbold}{OT1}{\tud@univers}{b}{sl}%
-  \SetMathAlphabet{\mathtt}{universbold}{OT1}{\tud@univers t}{b}{n}%
-  \DeclareMathVersion{dinbold}%
-  \SetSymbolFont{operators}{dinbold}{OT1}{\tud@dinbold}{b}{n}%
-  \SetSymbolFont{letters}{dinbold}{OML}{\tud@dinbold}{b}{sl}%
-  \SetSymbolFont{symbols}{dinbold}{OMS}{\tud@dinbold}{b}{n}%
-  \SetSymbolFont{largesymbols}{dinbold}{OMX}{iwona}{ebc}{n}%
-  \SetMathAlphabet{\mathbf}{dinbold}{OT1}{\tud@dinbold}{b}{n}%
-  \SetMathAlphabet{\mathsf}{dinbold}{OT1}{\tud@dinbold}{b}{n}%
-  \SetMathAlphabet{\mathit}{dinbold}{OT1}{\tud@dinbold}{b}{sl}%
-  \DeclareMathSymbol{\upDelta}{\mathalpha}{operators}{1}%
-  \DeclareMathSymbol{\upOmega}{\mathalpha}{operators}{10}%
-  \DeclareMathSymbol{\upGamma}{\mathalpha}{operators}{0}%
-  \DeclareMathSymbol{\upDelta}{\mathalpha}{operators}{1}%
-  \DeclareMathSymbol{\upTheta}{\mathalpha}{operators}{2}%
-  \DeclareMathSymbol{\upLambda}{\mathalpha}{operators}{3}%
-  \DeclareMathSymbol{\upXi}{\mathalpha}{operators}{4}%
-  \DeclareMathSymbol{\upPi}{\mathalpha}{operators}{5}%
-  \DeclareMathSymbol{\upSigma}{\mathalpha}{operators}{6}%
-  \DeclareMathSymbol{\upUpsilon}{\mathalpha}{operators}{7}%
-  \DeclareMathSymbol{\upPhi}{\mathalpha}{operators}{8}%
-  \DeclareMathSymbol{\upPsi}{\mathalpha}{operators}{9}%
-  \DeclareMathSymbol{\upOmega}{\mathalpha}{operators}{10}%
-  \DeclareMathSymbol{\varGamma}{\mathalpha}{letters}{0}%
-  \DeclareMathSymbol{\varDelta}{\mathalpha}{letters}{1}%
-  \DeclareMathSymbol{\varTheta}{\mathalpha}{letters}{2}%
-  \DeclareMathSymbol{\varLambda}{\mathalpha}{letters}{3}%
-  \DeclareMathSymbol{\varXi}{\mathalpha}{letters}{4}%
-  \DeclareMathSymbol{\varPi}{\mathalpha}{letters}{5}%
-  \DeclareMathSymbol{\varSigma}{\mathalpha}{letters}{6}%
-  \DeclareMathSymbol{\varUpsilon}{\mathalpha}{letters}{7}%
-  \DeclareMathSymbol{\varPhi}{\mathalpha}{letters}{8}%
-  \DeclareMathSymbol{\varPsi}{\mathalpha}{letters}{9}%
-  \DeclareMathSymbol{\varOmega}{\mathalpha}{letters}{10}%
-  \AfterPackage*{amsfonts}{%
-    \DeclareFontFamily{U}{msa}{}%
-    \DeclareFontShape{U}{msa}{m}{n}{%
-      <-9>cmbras8%
-      <9-10>cmbras9%
-      <10->cmbras10%
-    }{}%
-    \DeclareFontFamily{U}{msb}{}%
-    \DeclareFontShape{U}{msb}{m}{n}{%
-      <-9>cmbrbs8%
-      <9-10>cmbrbs9%
-      <10->cmbrbs10%
-    }{}%
-    \IfFileExists{untxmia.fd}{%
-      \ifcsname iftx@libertine\endcsname\else
-        \newif\iftx@libertine
-      \fi
-      \tx@libertinefalse
-      \ifcsname iftx@minion\endcsname\else
-        \newif\iftx@minion
-      \fi
-      \tx@minionfalse
-      \SetMathAlphabet{\mathfrak}{univers}{U}{ntxmia}{m}{it}%
-      \SetMathAlphabet{\mathfrak}{universbold}{U}{ntxmia}{b}{it}%
-    }{}%
-    \IfFileExists{untxsyb.fd}{%
-      \SetMathAlphabet{\mathbb}{univers}{U}{ntxsyb}{m}{n}%
-      \SetMathAlphabet{\mathbb}{universbold}{U}{ntxsyb}{b}{n}%
-    }{}%
-  }%
-  \IfFileExists{ueus.fd}{%
-    \SetMathAlphabet{\mathcal}{univers}{U}{eus}{m}{n}%
-    \SetMathAlphabet{\mathcal}{universbold}{U}{eus}{b}{n}%
-  }{}%
-  \tud@font@set%
-}
-\newcommand*\tud@font@set{%
-  \ifcase\tud@cdfont\relax%
-    \tud@cmd@restore{rmdefault}%
-    \tud@cmd@restore{sfdefault}%
-    \tud@cmd@restore{ttdefault}%
-    \tud@cmd@restore{bfdefault}%
-    \tud@cmd@restore{mddefault}%
-    \tud@cmd@restore{itdefault}%
-    \tud@cmd@restore{familydefault}%
-    \tud@cmd@restore{seriesdefault}%
-    \tud@cmd@restore{shapedefault}%
-    % §§§
-%    \iftudscrverlower{2.04}{}{%
-%      \tud@cmd@restore{@fontsizefilebase}%
-%      \tud@cmd@restore{changefontsizes}%
-%    }%
-    \bool@std@lock{@tud@cdmath}{false}%
-    \cs@std@lock{tud@head@font}{0}%
-  \else%
-    \tud@cmd@store{rmdefault}%
-    \tud@cmd@store{sfdefault}%
-    \tud@cmd@store{ttdefault}%
-    \tud@cmd@store{bfdefault}%
-    \tud@cmd@store{mddefault}%
-    \tud@cmd@store{itdefault}%
-    \tud@cmd@store{familydefault}%
-    \tud@cmd@store{seriesdefault}%
-    \tud@cmd@store{shapedefault}%
-%    \iftudscrverlower{2.04}{}{%
-%      \tud@cmd@store{@fontsizefilebase}%
-%      \tud@cmd@store{changefontsizes}%
-%      \renewcommand*\@fontsizefilebase{tudscrsize}%
-%      \let\changefontsizes\tud@changefontsizes%
-%    }%
-    \bool@std@lock{@tud@cdmath}{true}%
-    \cs@std@lock{tud@head@font}{\tud@cdfont}%
-    \if@tud@fontspec%
-      \ifnum\tud@cdfont=\@ne\relax%
-        \setsansfont{Univers Light}[%
-          BoldFont = Univers,%
-          ItalicFont = Univers Light Oblique,%
-          BoldItalicFont = Univers Oblique,%
-        ]%
-        \setmonofont{LMMonoLt10-Regular}[%
-          BoldFont = LMMono10-Regular,%
-          ItalicFont = LMMonoLt10-Oblique,%
-          BoldItalicFont = LMMonoSlant10-Regular,%
-        ]%
-      \else%
-        \setsansfont{Univers}[%
-          BoldFont = Univers Bold,%
-          ItalicFont = Univers Oblique,%
-          BoldItalicFont = Univers Bold Oblique,%
-        ]%
-        \setmonofont{LMMono10-Regular}[%
-          BoldFont = LMMonoLt10-Bold,%
-          ItalicFont = LMMonoSlant10-Regular,%
-          BoldItalicFont = LMMonoLt10-BoldOblique,%
-        ]%
-      \fi%
-    \else%
-      \if@tud@univers%
-        \renewcommand*\sfdefault{\tud@univers}%
-        \renewcommand*\ttdefault{\tud@univers t}%
-        \ifnum\tud@cdfont=\@ne\relax%
-          \renewcommand*\bfdefault{m}%
-          \renewcommand*\mddefault{l}%
-        \else%
-          \renewcommand*\bfdefault{b}%
-          \renewcommand*\mddefault{m}%
-        \fi%
-      \fi%
-    \fi%
-    \renewcommand*\rmdefault{\sfdefault}%
-    \renewcommand*\familydefault{\sfdefault}%
-    \renewcommand*\seriesdefault{\mddefault}%
-    \renewcommand*\shapedefault{\updefault}%
-  \fi%
-  \normalfont\selectfont%
-  \iftudscrverlower{2.04}{}{\tud@setfontsize}%
-  \tud@font@math@set%
-  \if@atdocument\tud@layout@process\fi%
-}
-\newcommand*\tud@font@math@set{%
-  \if@tud@univers%
-    \if@tud@cdmath%
-      \tud@cmd@store{mv@normal}%
-      \tud@cmd@store{mv@bold}%
-      \let\mv@normal\mv@univers%
-      \let\mv@bold\mv@universbold%
-    \else%
-      \tud@cmd@restore{mv@normal}%
-      \tud@cmd@restore{mv@bold}%
-    \fi%
-  \fi%
-  \if@tud@slantedgreek%
-    \tud@font@greek@slanted%
-  \else%
-    \tud@font@greek@upright%
-  \fi%
-  \mathversion{normal}%
-}
-\newcommand*\tud@setfontsize{%
-  \setlength\smallskipamount{3\p@ \@plus 1\p@ \@minus 1\p@}
-  \setlength\medskipamount{6\p@ \@plus 2\p@ \@minus 2\p@}
-  \setlength\bigskipamount{12\p@ \@plus 4\p@ \@minus 4\p@}
-  \setlength{\abovecaptionskip}{10\p@}
-  \setlength{\belowcaptionskip}{0\p@}
-  \setlength\@tempdima{\@ptsize\p@}
-  \addtolength{\@tempdima}{10\p@}%
-  \edef\@tempa{\noexpand\KOMAoptions{fontsize=\strip@pt\@tempdima}}%
-  \@tempa%
-}
 \newcommand*{\tud@changefontsizes}[2][\dimexpr5\@tempdima/4\relax]{%
-  \ClassInfo{\tudcls@name}%
+  \ClassWarning{\tudcls@name}%
     {Calculating font sizes for basic size `#2'}%
   \@defaultunits\@tempdima#2pt\relax\@nnil
   \setlength{\@tempdimc}{\@tempdima}%
@@ -1667,10 +1384,306 @@
   \setlength\abovecaptionskip{\dimexpr4\@tempdimb/5\relax}
   \setlength\belowcaptionskip{0\p@}
 }
-% §§§ überdenken: Minimalbeispiel mit dem deutlcih wird, was das Problem ist an 
-% Markus schicken
-\tud@cmd@store{changefontsizes}%
-\let\changefontsizes\tud@changefontsizes%
+%\newcommand*\changefontsizes[2][]{%
+%  \@defaultunits\@tempdima#2pt\relax\@nnil
+%  \setlength{\@tempdimc}{\@tempdima}%
+%%  \addtolength{\@tempdimc}{-10\p@}%
+%  \edef\@ptsize{\strip@pt\@tempdimc}%
+%}
+%\let\changefontsizes\tud@changefontsizes
+%\newcommand*\changefontsizes[1]{%
+%  \simple@changefontsizes{#1}%
+%%  \@defaultunits\@tempdima#1pt\relax\@nnil
+%%  \setlength{\@tempdimc}{\@tempdima}%
+%%  \addtolength{\@tempdimc}{-10\p@}%
+%%  \edef\@ptsize{\strip@pt\@tempdimc}%
+%%  \tud@changefontsizes{#1}%
+%}
+%\PassOptionsToClass{parskip=relative}{\scrcls@name}
+\LoadClass{\scrcls@name}[2013/12/19]
+\RequirePackage{environ}[2013/04/01]
+\AtEndPreamble{%
+  \@ifpackageloaded{graphicx}{}{%
+    \@ifpackageloaded{graphics}{%
+      \ClassWarningNoLine{\tudcls@name}{%
+        The package `graphics' was superseded by `graphicx'%
+      }%
+    }{}%
+  }%
+  \RequirePackage{graphicx}[1999/02/16]%
+  \RequirePackage{tudscrcolor}[\TUDVersion]%
+}
+%%% From File: tudscr-fonts.dtx
+\AtEndPreamble{%
+  \if@tud@fontspec%
+    \newfontface\univln{Univers Light}[NFSSFamily=UniversLight]%
+    \newfontface\univrn{Univers}[NFSSFamily=UniversRegular]%
+    \newfontface\univbn{Univers Bold}[NFSSFamily=UniversBold]%
+    \newfontface\univxn{Univers Black}[NFSSFamily=UniversBlack]%
+    \newfontface\univls{Univers Light Oblique}[NFSSFamily=UniversLightOblique]%
+    \newfontface\univrs{Univers Oblique}[NFSSFamily=UniversRegularOblique]%
+    \newfontface\univbs{Univers Bold Oblique}[NFSSFamily=UniversBoldOblique]%
+    \newfontface\univxs{Univers Black Oblique}[NFSSFamily=UniversBlackOblique]%
+    \newcommand*\textuln[1]{{\univln#1}}%
+    \newcommand*\texturn[1]{{\univrn#1}}%
+    \newcommand*\textubn[1]{{\univbn#1}}%
+    \newcommand*\textuxn[1]{{\univxn#1}}%
+    \newcommand*\textuls[1]{{\univls#1}}%
+    \newcommand*\texturs[1]{{\univrs#1}}%
+    \newcommand*\textubs[1]{{\univbs#1}}%
+    \newcommand*\textuxs[1]{{\univxs#1}}%
+  \else%
+    \if@tud@univers%
+      \newcommand*\univln{\usefont{\encodingdefault}{\tud@univers}{l}{n}}%
+      \newcommand*\univrn{\usefont{\encodingdefault}{\tud@univers}{m}{n}}%
+      \newcommand*\univbn{\usefont{\encodingdefault}{\tud@univers}{b}{n}}%
+      \newcommand*\univxn{\usefont{\encodingdefault}{\tud@univers}{eb}{n}}%
+      \newcommand*\univls{\usefont{\encodingdefault}{\tud@univers}{l}{sl}}%
+      \newcommand*\univrs{\usefont{\encodingdefault}{\tud@univers}{m}{sl}}%
+      \newcommand*\univbs{\usefont{\encodingdefault}{\tud@univers}{b}{sl}}%
+      \newcommand*\univxs{\usefont{\encodingdefault}{\tud@univers}{eb}{sl}}%
+    \else%
+      \newcommand*\univln{}%
+      \newcommand*\univrn{}%
+      \newcommand*\univbn{}%
+      \newcommand*\univxn{}%
+      \newcommand*\univls{}%
+      \newcommand*\univrs{}%
+      \newcommand*\univbs{}%
+      \newcommand*\univxs{}%
+    \fi%
+    \newcommand*\textuln{}%
+    \newcommand*\texturn{}%
+    \newcommand*\textubn{}%
+    \newcommand*\textuxn{}%
+    \newcommand*\textuls{}%
+    \newcommand*\texturs{}%
+    \newcommand*\textubs{}%
+    \newcommand*\textuxs{}%
+    \DeclareTextFontCommand{\textuln}{\univln}%
+    \DeclareTextFontCommand{\texturn}{\univrn}%
+    \DeclareTextFontCommand{\textubn}{\univbn}%
+    \DeclareTextFontCommand{\textuxn}{\univxn}%
+    \DeclareTextFontCommand{\textuls}{\univls}%
+    \DeclareTextFontCommand{\texturs}{\univrs}%
+    \DeclareTextFontCommand{\textubs}{\univbs}%
+    \DeclareTextFontCommand{\textuxs}{\univxs}%
+  \fi%
+  \if@tud@fontspec%
+    \newfontface\@dinbn{DIN Bold}[NFSSFamily=DINBold,BoldFont = DIN Bold]%
+    \newcommand*\dinbn{\@dinbn\if@tud@dinbold\mathversion{dinbold}\fi}%
+    \newcommand*\textdbn[1]{{\dinbn#1}}%
+  \else%
+    \if@tud@dinbold%
+      \newcommand*\dinbn{%
+        \usefont{\encodingdefault}{\tud@dinbold}{b}{n}%
+        \mathversion{dinbold}%
+      }%
+    \else%
+      \let\dinbn\sectfont%
+    \fi%
+    \newcommand*\textdbn{}%
+    \DeclareTextFontCommand{\textdbn}{\dinbn}%
+  \fi%
+  \DeclareMathVersion{univers}%
+  \DeclareMathVersion{universbold}%
+  \SetSymbolFont{operators}{univers}{OT1}{\tud@univers}{l}{n}%
+  \SetSymbolFont{letters}{univers}{OML}{\tud@univers}{l}{sl}%
+  \SetSymbolFont{symbols}{univers}{OMS}{\tud@univers}{l}{n}%
+  \SetSymbolFont{largesymbols}{univers}{OMX}{iwona}{m}{n}%
+  \SetSymbolFont{operators}{universbold}{OT1}{\tud@univers}{b}{n}%
+  \SetSymbolFont{letters}{universbold}{OML}{\tud@univers}{b}{sl}%
+  \SetSymbolFont{symbols}{universbold}{OMS}{\tud@univers}{b}{n}%
+  \SetSymbolFont{largesymbols}{universbold}{OMX}{iwona}{b}{n}%
+  \SetMathAlphabet{\mathbf}{univers}{OT1}{\tud@univers}{b}{n}%
+  \SetMathAlphabet{\mathsf}{univers}{OT1}{\tud@univers}{l}{n}%
+  \SetMathAlphabet{\mathit}{univers}{OT1}{\tud@univers}{l}{sl}%
+  \SetMathAlphabet{\mathtt}{univers}{OT1}{\tud@univers t}{l}{n}%
+  \SetMathAlphabet{\mathbf}{universbold}{OT1}{\tud@univers}{eb}{n}%
+  \SetMathAlphabet{\mathsf}{universbold}{OT1}{\tud@univers}{b}{n}%
+  \SetMathAlphabet{\mathit}{universbold}{OT1}{\tud@univers}{b}{sl}%
+  \SetMathAlphabet{\mathtt}{universbold}{OT1}{\tud@univers t}{b}{n}%
+  \DeclareMathVersion{dinbold}%
+  \SetSymbolFont{operators}{dinbold}{OT1}{\tud@dinbold}{b}{n}%
+  \SetSymbolFont{letters}{dinbold}{OML}{\tud@dinbold}{b}{sl}%
+  \SetSymbolFont{symbols}{dinbold}{OMS}{\tud@dinbold}{b}{n}%
+  \SetSymbolFont{largesymbols}{dinbold}{OMX}{iwona}{ebc}{n}%
+  \SetMathAlphabet{\mathbf}{dinbold}{OT1}{\tud@dinbold}{b}{n}%
+  \SetMathAlphabet{\mathsf}{dinbold}{OT1}{\tud@dinbold}{b}{n}%
+  \SetMathAlphabet{\mathit}{dinbold}{OT1}{\tud@dinbold}{b}{sl}%
+  \DeclareMathSymbol{\upDelta}{\mathalpha}{operators}{1}%
+  \DeclareMathSymbol{\upOmega}{\mathalpha}{operators}{10}%
+  \DeclareMathSymbol{\upGamma}{\mathalpha}{operators}{0}%
+  \DeclareMathSymbol{\upDelta}{\mathalpha}{operators}{1}%
+  \DeclareMathSymbol{\upTheta}{\mathalpha}{operators}{2}%
+  \DeclareMathSymbol{\upLambda}{\mathalpha}{operators}{3}%
+  \DeclareMathSymbol{\upXi}{\mathalpha}{operators}{4}%
+  \DeclareMathSymbol{\upPi}{\mathalpha}{operators}{5}%
+  \DeclareMathSymbol{\upSigma}{\mathalpha}{operators}{6}%
+  \DeclareMathSymbol{\upUpsilon}{\mathalpha}{operators}{7}%
+  \DeclareMathSymbol{\upPhi}{\mathalpha}{operators}{8}%
+  \DeclareMathSymbol{\upPsi}{\mathalpha}{operators}{9}%
+  \DeclareMathSymbol{\upOmega}{\mathalpha}{operators}{10}%
+  \DeclareMathSymbol{\varGamma}{\mathalpha}{letters}{0}%
+  \DeclareMathSymbol{\varDelta}{\mathalpha}{letters}{1}%
+  \DeclareMathSymbol{\varTheta}{\mathalpha}{letters}{2}%
+  \DeclareMathSymbol{\varLambda}{\mathalpha}{letters}{3}%
+  \DeclareMathSymbol{\varXi}{\mathalpha}{letters}{4}%
+  \DeclareMathSymbol{\varPi}{\mathalpha}{letters}{5}%
+  \DeclareMathSymbol{\varSigma}{\mathalpha}{letters}{6}%
+  \DeclareMathSymbol{\varUpsilon}{\mathalpha}{letters}{7}%
+  \DeclareMathSymbol{\varPhi}{\mathalpha}{letters}{8}%
+  \DeclareMathSymbol{\varPsi}{\mathalpha}{letters}{9}%
+  \DeclareMathSymbol{\varOmega}{\mathalpha}{letters}{10}%
+  \AfterPackage*{amsfonts}{%
+    \DeclareFontFamily{U}{msa}{}%
+    \DeclareFontShape{U}{msa}{m}{n}{%
+      <-9>cmbras8%
+      <9-10>cmbras9%
+      <10->cmbras10%
+    }{}%
+    \DeclareFontFamily{U}{msb}{}%
+    \DeclareFontShape{U}{msb}{m}{n}{%
+      <-9>cmbrbs8%
+      <9-10>cmbrbs9%
+      <10->cmbrbs10%
+    }{}%
+    \IfFileExists{untxmia.fd}{%
+      \ifcsname iftx@libertine\endcsname\else
+        \newif\iftx@libertine
+      \fi
+      \tx@libertinefalse
+      \ifcsname iftx@minion\endcsname\else
+        \newif\iftx@minion
+      \fi
+      \tx@minionfalse
+      \SetMathAlphabet{\mathfrak}{univers}{U}{ntxmia}{m}{it}%
+      \SetMathAlphabet{\mathfrak}{universbold}{U}{ntxmia}{b}{it}%
+    }{}%
+    \IfFileExists{untxsyb.fd}{%
+      \SetMathAlphabet{\mathbb}{univers}{U}{ntxsyb}{m}{n}%
+      \SetMathAlphabet{\mathbb}{universbold}{U}{ntxsyb}{b}{n}%
+    }{}%
+  }%
+  \IfFileExists{ueus.fd}{%
+    \SetMathAlphabet{\mathcal}{univers}{U}{eus}{m}{n}%
+    \SetMathAlphabet{\mathcal}{universbold}{U}{eus}{b}{n}%
+  }{}%
+  \tud@font@set%
+}
+\newcommand*\tud@font@set{%
+  \ifcase\tud@cdfont\relax%
+    \tud@cmd@restore{rmdefault}%
+    \tud@cmd@restore{sfdefault}%
+    \tud@cmd@restore{ttdefault}%
+    \tud@cmd@restore{bfdefault}%
+    \tud@cmd@restore{mddefault}%
+    \tud@cmd@restore{itdefault}%
+    \tud@cmd@restore{familydefault}%
+    \tud@cmd@restore{seriesdefault}%
+    \tud@cmd@restore{shapedefault}%
+    % §§§
+    \iftudscrverlower{2.04}{}{%
+%      \tud@cmd@restore{@fontsizefilebase}%
+%      \let\changefontsizes\simple@changefontsizes%
+    }%
+    \bool@std@lock{@tud@cdmath}{false}%
+    \cs@std@lock{tud@head@font}{0}%
+  \else%
+    \tud@cmd@store{rmdefault}%
+    \tud@cmd@store{sfdefault}%
+    \tud@cmd@store{ttdefault}%
+    \tud@cmd@store{bfdefault}%
+    \tud@cmd@store{mddefault}%
+    \tud@cmd@store{itdefault}%
+    \tud@cmd@store{familydefault}%
+    \tud@cmd@store{seriesdefault}%
+    \tud@cmd@store{shapedefault}%
+    \iftudscrverlower{2.04}{}{%
+%      \tud@cmd@store{@fontsizefilebase}%
+%      \tud@cmd@store{changefontsizes}%
+      \renewcommand*\@fontsizefilebase{tudscrsize}%
+%      \let\changefontsizes\tud@changefontsizes%
+    }%
+    \bool@std@lock{@tud@cdmath}{true}%
+    \cs@std@lock{tud@head@font}{\tud@cdfont}%
+    \if@tud@fontspec%
+      \ifnum\tud@cdfont=\@ne\relax%
+        \setsansfont{Univers Light}[%
+          BoldFont = Univers,%
+          ItalicFont = Univers Light Oblique,%
+          BoldItalicFont = Univers Oblique,%
+        ]%
+        \setmonofont{LMMonoLt10-Regular}[%
+          BoldFont = LMMono10-Regular,%
+          ItalicFont = LMMonoLt10-Oblique,%
+          BoldItalicFont = LMMonoSlant10-Regular,%
+        ]%
+      \else%
+        \setsansfont{Univers}[%
+          BoldFont = Univers Bold,%
+          ItalicFont = Univers Oblique,%
+          BoldItalicFont = Univers Bold Oblique,%
+        ]%
+        \setmonofont{LMMono10-Regular}[%
+          BoldFont = LMMonoLt10-Bold,%
+          ItalicFont = LMMonoSlant10-Regular,%
+          BoldItalicFont = LMMonoLt10-BoldOblique,%
+        ]%
+      \fi%
+    \else%
+      \if@tud@univers%
+        \renewcommand*\sfdefault{\tud@univers}%
+        \renewcommand*\ttdefault{\tud@univers t}%
+        \ifnum\tud@cdfont=\@ne\relax%
+          \renewcommand*\bfdefault{m}%
+          \renewcommand*\mddefault{l}%
+        \else%
+          \renewcommand*\bfdefault{b}%
+          \renewcommand*\mddefault{m}%
+        \fi%
+      \fi%
+    \fi%
+    \renewcommand*\rmdefault{\sfdefault}%
+    \renewcommand*\familydefault{\sfdefault}%
+    \renewcommand*\seriesdefault{\mddefault}%
+    \renewcommand*\shapedefault{\updefault}%
+  \fi%
+  \normalfont\selectfont%
+  \iftudscrverlower{2.04}{}{\tud@setfontsize}%
+  \tud@font@math@set%
+  \if@atdocument\tud@layout@process\fi%
+}
+\newcommand*\tud@font@math@set{%
+  \if@tud@univers%
+    \if@tud@cdmath%
+      \tud@cmd@store{mv@normal}%
+      \tud@cmd@store{mv@bold}%
+      \let\mv@normal\mv@univers%
+      \let\mv@bold\mv@universbold%
+    \else%
+      \tud@cmd@restore{mv@normal}%
+      \tud@cmd@restore{mv@bold}%
+    \fi%
+  \fi%
+  \if@tud@slantedgreek%
+    \tud@font@greek@slanted%
+  \else%
+    \tud@font@greek@upright%
+  \fi%
+  \mathversion{normal}%
+}
+\newcommand*\tud@setfontsize{%
+  \setlength\smallskipamount{3\p@ \@plus 1\p@ \@minus 1\p@}
+  \setlength\medskipamount{6\p@ \@plus 2\p@ \@minus 2\p@}
+  \setlength\bigskipamount{12\p@ \@plus 4\p@ \@minus 4\p@}
+  \setlength{\abovecaptionskip}{10\p@}
+  \setlength{\belowcaptionskip}{0\p@}
+  \setlength\@tempdima{\@ptsize\p@}
+  \addtolength{\@tempdima}{10\p@}%
+  \edef\@tempa{\noexpand\KOMAoptions{fontsize=\strip@pt\@tempdima}}%
+%  \@tempa%
+}
 \newcount\tud@font@greek@upGamma
 \tud@font@greek@upGamma\Gamma
 \newcount\tud@font@greek@offset
