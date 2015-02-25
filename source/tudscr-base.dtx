@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-base.dtx}[%
-  2015/02/12 v2.03 TUD-KOMA-Script\space%
+  2015/02/25 v2.04 TUD-KOMA-Script\space%
 %</driver>
 %<package>\NeedsTeXFormat{LaTeX2e}[2011/06/27]
 %<package>\ProvidesPackage{tudscrbase}[%
@@ -381,9 +381,9 @@
 % \end{macro}^^A \bool@std@lock
 % \end{macro}^^A \bool@lock
 % \begin{macro}{\tud@cmd@store}
+% \begin{macro}{\tud@cmd@restore}
 % \begin{macro}{\tud@cmd@reset}
 % \begin{macro}{\tud@cmd@use}
-% \begin{macro}{\tud@cmd@restore}
 % \begin{macro}{\tud@cmd@check}
 % \changes{v2.03}{2015/01/09}{neu}%^^A
 % Mit diesen Befehlen wird es möglich, Originalbefehle sichern, nutzen und
@@ -401,29 +401,25 @@
 % solcher mit \cs{tud@cmd@use}\marg{Befehlsname} weiterhin genutzt werden. 
 %    \begin{macrocode}
 \newcommand*\tud@cmd@store[1]{%
-  \ifcsdef{@@tud@#1}{}{%
-    \tud@cmd@check{#1}%
-    \csletcs{@@tud@#1}{#1}%
-  }%
-}
-\newcommand*\tud@cmd@reset[1]{%
-  \ifcsdef{@@tud@#1}{%
-    \tud@cmd@check{#1}%
-    \csletcs{#1}{@@tud@#1}%
-  }{}%
+  \tud@cmd@check{#1}%
+  \ifcsdef{@@tud@#1}{}{\csletcs{@@tud@#1}{#1}}%
 }
 \newcommand*\tud@cmd@restore[1]{%
+  \tud@cmd@check{#1}%
   \ifcsdef{@@tud@#1}{%
-    \tud@cmd@check{#1}%
     \csletcs{#1}{@@tud@#1}%
     \csundef{@@tud@#1}%
   }{}%
 }
+\newcommand*\tud@cmd@reset[1]{%
+  \tud@cmd@check{#1}%
+  \ifcsdef{@@tud@#1}{\csletcs{#1}{@@tud@#1}}{}%
+}
 \newcommand*\tud@cmd@use[1]{%
+  \tud@cmd@check{#1}%
   \ifcsdef{@@tud@#1}{%
     \@nameuse{@@tud@#1}%
   }{%
-    \tud@cmd@check{#1}%
     \@nameuse{#1}%
   }%
 }
@@ -445,9 +441,9 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@cmd@check
-% \end{macro}^^A \tud@cmd@restore
 % \end{macro}^^A \tud@cmd@use
 % \end{macro}^^A \tud@cmd@reset
+% \end{macro}^^A \tud@cmd@restore
 % \end{macro}^^A \tud@cmd@store
 % \begin{macro}{\tud@patch@wrn}
 % Dieses Makro wird verwendet, wenn mit den Mitteln von \pkg{etoolbox} bereits
