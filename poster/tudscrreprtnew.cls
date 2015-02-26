@@ -108,20 +108,24 @@
 \newcommand*\tud@dinbold{0m6}
 \newif\if@tud@fontspec
 \TUD@ifkey{fontspec}{@tud@fontspec}% §§§ deprecated
-\AtEndPreamble%
+\AtEndOfClass%
 {%
   \TUD@key{fontspec}[]
   {%
     \ClassError{\tudcls@name}
       {Option `fontspec' too late}{%
-      Option `fontspec' can only be used within the\MessageBreak%
-      preamble but you have tried to set it up later.%
+      Option `fontspec' can only be set while loading the\MessageBreak%
+      class `\tudcls@name'
+      but you have tried to set it up later.%
     }%
     \FamilyKeyStateProcessed%
   }%
   \if@tud@fontspec%
-    % §§§ no-math Option weiterreichen? Eher nicht
     \RequirePackage{fontspec}[2014/06/21]%
+  \fi%
+}%
+\AtEndPreamble{%
+  \if@tud@fontspec%
     \newcommand*\tud@iffontspec{\@firstoftwo}%
   \else%
     \newcommand*\tud@iffontspec{\@secondoftwo}%
@@ -1350,10 +1354,7 @@
   \RequirePackage{tudscrcolor}[\TUDVersion]%
 }
 %%% From File: tudscr-fonts.dtx
-% \AtEndPreamble{%
-% §§§ vereinfachenden Befehl, Kram auslagern
-\AfterPackage*{fontspec}{
-\AtBeginDocument{%
+\AtEndPreamble{%
   \tud@iffontspec{%
     \edef\@tempa{%
       \lowercase{\noexpand\IfFileExists{OT1\tud@univers.fd}}%
@@ -1463,109 +1464,116 @@
     \newcommand*\textdbn{}%
     \DeclareTextFontCommand{\textdbn}{\dinbn}%
   }%
-  \DeclareMathVersion{univers}%
-  \DeclareMathVersion{universbold}%
-  \SetSymbolFont{operators}{univers}{OT1}{\tud@univers}{l}{n}%
-  \SetSymbolFont{letters}{univers}{OML}{\tud@univers}{l}{sl}%
-  \SetSymbolFont{symbols}{univers}{OMS}{\tud@univers}{l}{n}%
-  \SetSymbolFont{largesymbols}{univers}{OMX}{iwona}{m}{n}%
-  \SetSymbolFont{operators}{universbold}{OT1}{\tud@univers}{b}{n}%
-  \SetSymbolFont{letters}{universbold}{OML}{\tud@univers}{b}{sl}%
-  \SetSymbolFont{symbols}{universbold}{OMS}{\tud@univers}{b}{n}%
-  \SetSymbolFont{largesymbols}{universbold}{OMX}{iwona}{b}{n}%
-  \SetMathAlphabet{\mathbf}{univers}{OT1}{\tud@univers}{b}{n}%
-  \SetMathAlphabet{\mathsf}{univers}{OT1}{\tud@univers}{l}{n}%
-  \SetMathAlphabet{\mathit}{univers}{OT1}{\tud@univers}{l}{sl}%
-  \SetMathAlphabet{\mathtt}{univers}{OT1}{\tud@univers t}{l}{n}%
-  \SetMathAlphabet{\mathbf}{universbold}{OT1}{\tud@univers}{eb}{n}%
-  \SetMathAlphabet{\mathsf}{universbold}{OT1}{\tud@univers}{b}{n}%
-  \SetMathAlphabet{\mathit}{universbold}{OT1}{\tud@univers}{b}{sl}%
-  \SetMathAlphabet{\mathtt}{universbold}{OT1}{\tud@univers t}{b}{n}%
-  \DeclareMathVersion{dinbold}%
-  \SetSymbolFont{operators}{dinbold}{OT1}{\tud@dinbold}{b}{n}%
-  \SetSymbolFont{letters}{dinbold}{OML}{\tud@dinbold}{b}{sl}%
-  \SetSymbolFont{symbols}{dinbold}{OMS}{\tud@dinbold}{b}{n}%
-  \SetSymbolFont{largesymbols}{dinbold}{OMX}{iwona}{ebc}{n}%
-  \SetMathAlphabet{\mathbf}{dinbold}{OT1}{\tud@dinbold}{b}{n}%
-  \SetMathAlphabet{\mathsf}{dinbold}{OT1}{\tud@dinbold}{b}{n}%
-  \SetMathAlphabet{\mathit}{dinbold}{OT1}{\tud@dinbold}{b}{sl}%
-  % §§§ vorher mit tud@ prefix definieren und mit \let beim Umschalten zuweisen
-  % §§§ \let\upOmega\tud@upOmega, ebenso für slantedgreek
-  \DeclareMathSymbol{\upDelta}{\mathalpha}{operators}{1}%
-  \DeclareMathSymbol{\upOmega}{\mathalpha}{operators}{10}%
-  \DeclareMathSymbol{\upGamma}{\mathalpha}{operators}{0}%
-  \DeclareMathSymbol{\upDelta}{\mathalpha}{operators}{1}%
-  \DeclareMathSymbol{\upTheta}{\mathalpha}{operators}{2}%
-  \DeclareMathSymbol{\upLambda}{\mathalpha}{operators}{3}%
-  \DeclareMathSymbol{\upXi}{\mathalpha}{operators}{4}%
-  \DeclareMathSymbol{\upPi}{\mathalpha}{operators}{5}%
-  \DeclareMathSymbol{\upSigma}{\mathalpha}{operators}{6}%
-  \DeclareMathSymbol{\upUpsilon}{\mathalpha}{operators}{7}%
-  \DeclareMathSymbol{\upPhi}{\mathalpha}{operators}{8}%
-  \DeclareMathSymbol{\upPsi}{\mathalpha}{operators}{9}%
-  \DeclareMathSymbol{\upOmega}{\mathalpha}{operators}{10}%
-  \DeclareMathSymbol{\varGamma}{\mathalpha}{letters}{0}%
-  \DeclareMathSymbol{\varDelta}{\mathalpha}{letters}{1}%
-  \DeclareMathSymbol{\varTheta}{\mathalpha}{letters}{2}%
-  \DeclareMathSymbol{\varLambda}{\mathalpha}{letters}{3}%
-  \DeclareMathSymbol{\varXi}{\mathalpha}{letters}{4}%
-  \DeclareMathSymbol{\varPi}{\mathalpha}{letters}{5}%
-  \DeclareMathSymbol{\varSigma}{\mathalpha}{letters}{6}%
-  \DeclareMathSymbol{\varUpsilon}{\mathalpha}{letters}{7}%
-  \DeclareMathSymbol{\varPhi}{\mathalpha}{letters}{8}%
-  \DeclareMathSymbol{\varPsi}{\mathalpha}{letters}{9}%
-  \DeclareMathSymbol{\varOmega}{\mathalpha}{letters}{10}%
-  \DeclareMathSymbol{0}{\mathalpha}{operators}{`0}
-  \DeclareMathSymbol{1}{\mathalpha}{operators}{`1}
-  \DeclareMathSymbol{2}{\mathalpha}{operators}{`2}
-  \DeclareMathSymbol{3}{\mathalpha}{operators}{`3}
-  \DeclareMathSymbol{4}{\mathalpha}{operators}{`4}
-  \DeclareMathSymbol{5}{\mathalpha}{operators}{`5}
-  \DeclareMathSymbol{6}{\mathalpha}{operators}{`6}
-  \DeclareMathSymbol{7}{\mathalpha}{operators}{`7}
-  \DeclareMathSymbol{8}{\mathalpha}{operators}{`8}
-  \DeclareMathSymbol{9}{\mathalpha}{operators}{`9}
-  \AfterPackage*{amsfonts}{%
-    \DeclareFontFamily{U}{msa}{}%
-    \DeclareFontShape{U}{msa}{m}{n}{%
-      <-9>cmbras8%
-      <9-10>cmbras9%
-      <10->cmbras10%
+  \AtBeginDocument{%
+    \DeclareMathVersion{univers}%
+    \DeclareMathVersion{universbold}%
+    \SetSymbolFont{operators}{univers}{OT1}{\tud@univers}{l}{n}%
+    \SetSymbolFont{letters}{univers}{OML}{\tud@univers}{l}{sl}%
+    \SetSymbolFont{symbols}{univers}{OMS}{\tud@univers}{l}{n}%
+    \SetSymbolFont{largesymbols}{univers}{OMX}{iwona}{m}{n}%
+    \SetSymbolFont{operators}{universbold}{OT1}{\tud@univers}{b}{n}%
+    \SetSymbolFont{letters}{universbold}{OML}{\tud@univers}{b}{sl}%
+    \SetSymbolFont{symbols}{universbold}{OMS}{\tud@univers}{b}{n}%
+    \SetSymbolFont{largesymbols}{universbold}{OMX}{iwona}{b}{n}%
+    \SetMathAlphabet{\mathbf}{univers}{OT1}{\tud@univers}{b}{n}%
+    \SetMathAlphabet{\mathsf}{univers}{OT1}{\tud@univers}{l}{n}%
+    \SetMathAlphabet{\mathit}{univers}{OT1}{\tud@univers}{l}{sl}%
+    \SetMathAlphabet{\mathtt}{univers}{OT1}{\tud@univers t}{l}{n}%
+    \SetMathAlphabet{\mathbf}{universbold}{OT1}{\tud@univers}{eb}{n}%
+    \SetMathAlphabet{\mathsf}{universbold}{OT1}{\tud@univers}{b}{n}%
+    \SetMathAlphabet{\mathit}{universbold}{OT1}{\tud@univers}{b}{sl}%
+    \SetMathAlphabet{\mathtt}{universbold}{OT1}{\tud@univers t}{b}{n}%
+    \DeclareMathVersion{dinbold}%
+    \SetSymbolFont{operators}{dinbold}{OT1}{\tud@dinbold}{b}{n}%
+    \SetSymbolFont{letters}{dinbold}{OML}{\tud@dinbold}{b}{sl}%
+    \SetSymbolFont{symbols}{dinbold}{OMS}{\tud@dinbold}{b}{n}%
+    \SetSymbolFont{largesymbols}{dinbold}{OMX}{iwona}{ebc}{n}%
+    \SetMathAlphabet{\mathbf}{dinbold}{OT1}{\tud@dinbold}{b}{n}%
+    \SetMathAlphabet{\mathsf}{dinbold}{OT1}{\tud@dinbold}{b}{n}%
+    \SetMathAlphabet{\mathit}{dinbold}{OT1}{\tud@dinbold}{b}{sl}%
+% §§§ vorher mit tud@ prefix definieren und mit \let beim Umschalten zuweisen
+% §§§ \let\upOmega\tud@upOmega, ebenso für slantedgreek
+    \DeclareMathSymbol{\upDelta}{\mathalpha}{operators}{1}%
+    \DeclareMathSymbol{\upOmega}{\mathalpha}{operators}{10}%
+    \DeclareMathSymbol{\upGamma}{\mathalpha}{operators}{0}%
+    \DeclareMathSymbol{\upDelta}{\mathalpha}{operators}{1}%
+    \DeclareMathSymbol{\upTheta}{\mathalpha}{operators}{2}%
+    \DeclareMathSymbol{\upLambda}{\mathalpha}{operators}{3}%
+    \DeclareMathSymbol{\upXi}{\mathalpha}{operators}{4}%
+    \DeclareMathSymbol{\upPi}{\mathalpha}{operators}{5}%
+    \DeclareMathSymbol{\upSigma}{\mathalpha}{operators}{6}%
+    \DeclareMathSymbol{\upUpsilon}{\mathalpha}{operators}{7}%
+    \DeclareMathSymbol{\upPhi}{\mathalpha}{operators}{8}%
+    \DeclareMathSymbol{\upPsi}{\mathalpha}{operators}{9}%
+    \DeclareMathSymbol{\upOmega}{\mathalpha}{operators}{10}%
+    \DeclareMathSymbol{\varGamma}{\mathalpha}{letters}{0}%
+    \DeclareMathSymbol{\varDelta}{\mathalpha}{letters}{1}%
+    \DeclareMathSymbol{\varTheta}{\mathalpha}{letters}{2}%
+    \DeclareMathSymbol{\varLambda}{\mathalpha}{letters}{3}%
+    \DeclareMathSymbol{\varXi}{\mathalpha}{letters}{4}%
+    \DeclareMathSymbol{\varPi}{\mathalpha}{letters}{5}%
+    \DeclareMathSymbol{\varSigma}{\mathalpha}{letters}{6}%
+    \DeclareMathSymbol{\varUpsilon}{\mathalpha}{letters}{7}%
+    \DeclareMathSymbol{\varPhi}{\mathalpha}{letters}{8}%
+    \DeclareMathSymbol{\varPsi}{\mathalpha}{letters}{9}%
+    \DeclareMathSymbol{\varOmega}{\mathalpha}{letters}{10}%
+    \DeclareMathSymbol{0}{\mathalpha}{operators}{`0}
+    \DeclareMathSymbol{1}{\mathalpha}{operators}{`1}
+    \DeclareMathSymbol{2}{\mathalpha}{operators}{`2}
+    \DeclareMathSymbol{3}{\mathalpha}{operators}{`3}
+    \DeclareMathSymbol{4}{\mathalpha}{operators}{`4}
+    \DeclareMathSymbol{5}{\mathalpha}{operators}{`5}
+    \DeclareMathSymbol{6}{\mathalpha}{operators}{`6}
+    \DeclareMathSymbol{7}{\mathalpha}{operators}{`7}
+    \DeclareMathSymbol{8}{\mathalpha}{operators}{`8}
+    \DeclareMathSymbol{9}{\mathalpha}{operators}{`9}
+    \@ifpackageloaded{amsfonts}{%
+% §§§ bei Schriftinstallation einbinden?
+% sowohl AMSa/b als auch mathfrac, mathbb und mathcal
+      \DeclareFontFamily{U}{\tud@univers a}{}%
+      \DeclareFontShape{U}{\tud@univers a}{m}{n}{%
+        <-9>cmbras8%
+        <9-10>cmbras9%
+        <10->cmbras10%
+      }{}%
+      \SetSymbolFont{AMSa}{univers}{U}{\tud@univers a}{m}{n}%
+      \SetSymbolFont{AMSa}{universbold}{U}{\tud@univers a}{m}{n}%
+      \DeclareFontFamily{U}{\tud@univers b}{}%
+      \DeclareFontShape{U}{\tud@univers b}{m}{n}{%
+        <-9>cmbrbs8%
+        <9-10>cmbrbs9%
+        <10->cmbrbs10%
+      }{}%
+      \SetSymbolFont{AMSb}{univers}{U}{\tud@univers b}{m}{n}%
+      \SetSymbolFont{AMSb}{universbold}{U}{\tud@univers b}{m}{n}%
+%      \IfFileExists{untxmia.fd}{%
+%        \ifcsname iftx@libertine\endcsname\else
+%          \newif\iftx@libertine
+%        \fi
+%        \tx@libertinefalse
+%        \ifcsname iftx@minion\endcsname\else
+%          \newif\iftx@minion
+%        \fi
+%        \tx@minionfalse
+%        \SetMathAlphabet{\mathfrak}{univers}{U}{ntxmia}{m}{it}%
+%        \SetMathAlphabet{\mathfrak}{universbold}{U}{ntxmia}{b}{it}%
+%      }{%
+%        % §§§ Warnung
+%      }%
+%      \IfFileExists{untxsyb.fd}{%
+%        \SetMathAlphabet{\mathbb}{univers}{U}{ntxsyb}{m}{n}%
+%        \SetMathAlphabet{\mathbb}{universbold}{U}{ntxsyb}{b}{n}%
+%      }{%
+%        % §§§ Warnung
+%      }%
     }{}%
-    \DeclareFontFamily{U}{msb}{}%
-    \DeclareFontShape{U}{msb}{m}{n}{%
-      <-9>cmbrbs8%
-      <9-10>cmbrbs9%
-      <10->cmbrbs10%
-    }{}%
-    \IfFileExists{untxmia.fd}{%
-      \ifcsname iftx@libertine\endcsname\else
-        \newif\iftx@libertine
-      \fi
-      \tx@libertinefalse
-      \ifcsname iftx@minion\endcsname\else
-        \newif\iftx@minion
-      \fi
-      \tx@minionfalse
-      \SetMathAlphabet{\mathfrak}{univers}{U}{ntxmia}{m}{it}%
-      \SetMathAlphabet{\mathfrak}{universbold}{U}{ntxmia}{b}{it}%
-    }{%
-      % §§§ Warnung
-    }%
-    \IfFileExists{untxsyb.fd}{%
-      \SetMathAlphabet{\mathbb}{univers}{U}{ntxsyb}{m}{n}%
-      \SetMathAlphabet{\mathbb}{universbold}{U}{ntxsyb}{b}{n}%
-    }{%
-      % §§§ Warnung
-    }%
+%    \IfFileExists{ueus.fd}{%
+%      \SetMathAlphabet{\mathcal}{univers}{U}{eus}{m}{n}%
+%      \SetMathAlphabet{\mathcal}{universbold}{U}{eus}{b}{n}%
+%    }{%
+%      % §§§ Warnung
+%    }%
   }%
-  \IfFileExists{ueus.fd}{%
-    \SetMathAlphabet{\mathcal}{univers}{U}{eus}{m}{n}%
-    \SetMathAlphabet{\mathcal}{universbold}{U}{eus}{b}{n}%
-  }{%
-    % §§§ Warnung
-  }%
-}
 }
 \newif\if@tud@mweights
 \AfterPackage*{mweights}{\@tud@mweightstrue}
@@ -3319,7 +3327,7 @@
   \fi%
 }
 % §§§ fontspec mit math-Option prüfen
-\AfterPreamble{\tud@font@set\tud@layout@process}
+\AtEndPreamble{\tud@font@set\tud@layout@process}
 \newcommand*\tud@partheadstartvskip{%
   \def\tud@part@fontcolor{black}%
   \ifcase\tud@layout@part\relax\or\or%
