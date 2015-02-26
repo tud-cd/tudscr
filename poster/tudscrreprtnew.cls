@@ -120,6 +120,7 @@
     \FamilyKeyStateProcessed%
   }%
   \if@tud@fontspec%
+    % §§§ no-math Option weiterreichen? Eher nicht
     \RequirePackage{fontspec}[2014/06/21]%
     \newcommand*\tud@iffontspec{\@firstoftwo}%
   \else%
@@ -1089,7 +1090,7 @@
 %  \fi%
 %}
 %%% From File: tudscr-base.dtx
-\PassOptionsToClass{parskip=relative}{\scrcls@name}
+\tud@ifverlower{2.04}{}{\PassOptionsToClass{parskip=relative}{\scrcls@name}}
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{\scrcls@name}}
 \TUDExecuteOptions{cd,cdfont,tudbookmarks}
 \TUDProcessOptions\relax
@@ -1335,7 +1336,6 @@
   \setlength\abovecaptionskip{\dimexpr4\@tempdimb/5\relax}
   \setlength\belowcaptionskip{0\p@}
 }
-\tud@ifverlower{2.04}{}{\PassOptionsToClass{parskip=relative}{\scrcls@name}}
 \LoadClass{\scrcls@name}[2013/12/19]
 \RequirePackage{environ}[2013/04/01]
 \AtEndPreamble{%
@@ -1350,7 +1350,10 @@
   \RequirePackage{tudscrcolor}[\TUDVersion]%
 }
 %%% From File: tudscr-fonts.dtx
-\AtEndPreamble{%
+% \AtEndPreamble{%
+% §§§ vereinfachenden Befehl, Kram auslagern
+\AfterPackage*{fontspec}{
+\AtBeginDocument{%
   \tud@iffontspec{%
     \edef\@tempa{%
       \lowercase{\noexpand\IfFileExists{OT1\tud@univers.fd}}%
@@ -1486,6 +1489,8 @@
   \SetMathAlphabet{\mathbf}{dinbold}{OT1}{\tud@dinbold}{b}{n}%
   \SetMathAlphabet{\mathsf}{dinbold}{OT1}{\tud@dinbold}{b}{n}%
   \SetMathAlphabet{\mathit}{dinbold}{OT1}{\tud@dinbold}{b}{sl}%
+  % §§§ vorher mit tud@ prefix definieren und mit \let beim Umschalten zuweisen
+  % §§§ \let\upOmega\tud@upOmega, ebenso für slantedgreek
   \DeclareMathSymbol{\upDelta}{\mathalpha}{operators}{1}%
   \DeclareMathSymbol{\upOmega}{\mathalpha}{operators}{10}%
   \DeclareMathSymbol{\upGamma}{\mathalpha}{operators}{0}%
@@ -1510,7 +1515,16 @@
   \DeclareMathSymbol{\varPhi}{\mathalpha}{letters}{8}%
   \DeclareMathSymbol{\varPsi}{\mathalpha}{letters}{9}%
   \DeclareMathSymbol{\varOmega}{\mathalpha}{letters}{10}%
-%  \let\tud@Omega\upOmega % §§§
+  \DeclareMathSymbol{0}{\mathalpha}{operators}{`0}
+  \DeclareMathSymbol{1}{\mathalpha}{operators}{`1}
+  \DeclareMathSymbol{2}{\mathalpha}{operators}{`2}
+  \DeclareMathSymbol{3}{\mathalpha}{operators}{`3}
+  \DeclareMathSymbol{4}{\mathalpha}{operators}{`4}
+  \DeclareMathSymbol{5}{\mathalpha}{operators}{`5}
+  \DeclareMathSymbol{6}{\mathalpha}{operators}{`6}
+  \DeclareMathSymbol{7}{\mathalpha}{operators}{`7}
+  \DeclareMathSymbol{8}{\mathalpha}{operators}{`8}
+  \DeclareMathSymbol{9}{\mathalpha}{operators}{`9}
   \AfterPackage*{amsfonts}{%
     \DeclareFontFamily{U}{msa}{}%
     \DeclareFontShape{U}{msa}{m}{n}{%
@@ -1551,6 +1565,7 @@
   }{%
     % §§§ Warnung
   }%
+}
 }
 \newif\if@tud@mweights
 \AfterPackage*{mweights}{\@tud@mweightstrue}
@@ -1699,6 +1714,7 @@
       \tud@cmd@restore{mv@bold}%
     \fi%
   \fi%
+  % §§§ \let\Omega\upOmega bzw. \let\Omega\varOmega
   \if@tud@slantedgreek%
     \tud@font@greek@slanted%
   \else%
@@ -3302,7 +3318,8 @@
     \let\@@makechapterhead\tud@@@makechapterhead%
   \fi%
 }
-\AfterEndPreamble{\tud@font@set\tud@layout@process}
+% §§§ fontspec mit math-Option prüfen
+\AfterPreamble{\tud@font@set\tud@layout@process}
 \newcommand*\tud@partheadstartvskip{%
   \def\tud@part@fontcolor{black}%
   \ifcase\tud@layout@part\relax\or\or%
