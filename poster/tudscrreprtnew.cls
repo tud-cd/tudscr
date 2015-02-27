@@ -70,7 +70,7 @@
       \fi%
     }%
   \fi%
-  \@TUDVersion{2015/02/17 v2.04 TUD-KOMA-Script}%
+  \@TUDVersion{2015/02/20 v2.04 BETA TUD-KOMA-Script}%
 \endgroup%
 \providecommand*\tudscrmail{tudscr@gmail.com}
 \newcommand*\cls@name{report}
@@ -78,7 +78,7 @@
 \newcommand*\tudcls@name{tudscrreprt}
 \NeedsTeXFormat{LaTeX2e}[2011/06/27]
 \ProvidesClass{\tudcls@name}[%
-  2015/02/17 v2.04 TUD-KOMA-Script
+  2015/02/20 v2.04 BETA TUD-KOMA-Script
   document class (\cls@name)%
 ]
 \typeout{The Corporate Design of Technische Universitaet Dresden}
@@ -107,7 +107,13 @@
 \newcommand*\tud@univers{lun}
 \newcommand*\tud@dinbold{0m6}
 \newif\if@tud@fontspec
-\TUD@ifkey{fontspec}{@tud@fontspec}% §§§ deprecated
+\TUD@key{fontspec}[true]{%
+  \ClassWarning{\tudcls@name}{%
+    The option key `fontspec' is deprecated.\MessageBreak%
+    You should load the package `fontspec' manually
+  }%
+  \TUD@set@ifkey{fontspec}{@tud@fontspec}{#1}%
+}
 \AtEndOfClass%
 {%
   \TUD@key{fontspec}[]
@@ -123,7 +129,7 @@
   \if@tud@fontspec%
     \RequirePackage{fontspec}[2014/06/21]%
   \fi%
-}%
+}
 \AtEndPreamble{%
   \if@tud@fontspec%
     \newcommand*\tud@iffontspec{\@firstoftwo}%
@@ -233,11 +239,9 @@
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax%
       \bool@set@lock{@tud@cdmath}{false}%
-      \TUD@std@ifkey@lock{slantedgreek}{false}%
       \if@atdocument\tud@font@math@set\fi%
     \or%
       \bool@set@lock{@tud@cdmath}{true}%
-      \TUD@std@ifkey@lock{slantedgreek}{true}%
       \if@atdocument\tud@font@math@set\fi%
     \or
       \TUDoptions{slantedgreek=false}%
@@ -246,13 +250,15 @@
     \fi%
   \fi%
 }
-\newif\if@tud@slantedgreek
-\TUD@key@lock{slantedgreek}[true]{%
-  \TUD@set@ifkey@lock{slantedgreek}{@tud@slantedgreek}{#1}%
+\bool@lock{@tud@slantedgreek}
+\TUD@key{slantedgreek}[true]{%
+  \TUD@set@ifkey{slantedgreek}{@tud@slantedgreek}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \bool@set@lock{@tud@slantedgreek}{#1}%
     \if@atdocument\tud@font@math@set\fi%
   \fi%
 }
+\TUD@key{slantedGreek}[true]{\TUDoptions{slantedgreek=#1}}
 %%% From File: tudscr-pagestyle.dtx
 \newcommand*\tud@ddc@switch{}
 \edef\tud@ddc@switch{%
@@ -843,9 +849,6 @@
   \TUD@set@ifkey@lock{subjectthesis}{@tud@subjectthesis}{#1}%
 }
 %%% From File: tudscr-misc.dtx
-\newcommand*\TUD@AfterPackage[2]{%
-  \if@atdocument#2\else\AfterPackage!{#1}{#2}\fi%
-}
 \newif\if@tud@symbolheadings
 \TUD@key{footnotes}{%
   \TUD@set@numkey{footnotes}{@tempa}{%
@@ -1081,7 +1084,7 @@
     \expandafter\@secondoftwo%
   \fi%
 }
-% §§§ evtl. auch Wert merken und mit tud@setfontsize ausführen
+% §§§ evtl. auch Wert merken und mit tud@font@size@set ausführen
 % §§§ in tudscrfonts integrieren
 %\TUD@key{fontsize}{%
 %  \if@atdocument%
@@ -1098,6 +1101,373 @@
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{\scrcls@name}}
 \TUDExecuteOptions{cd,cdfont,tudbookmarks}
 \TUDProcessOptions\relax
+\LoadClass{\scrcls@name}[2013/12/19]
+\RequirePackage{environ}[2013/04/01]
+\AtEndPreamble{%
+  \@ifpackageloaded{graphicx}{}{%
+    \@ifpackageloaded{graphics}{%
+      \ClassWarningNoLine{\tudcls@name}{%
+        The package `graphics' was superseded by `graphicx'%
+      }%
+    }{}%
+  }%
+  \RequirePackage{graphicx}[1999/02/16]%
+  \RequirePackage{tudscrcolor}[\TUDVersion]%
+}
+%%% From File: tudscr-fonts.dtx
+\newcommand*\tud@font@greek@loop[1]{%
+  \@for\@tempa:={%
+    Gamma,Delta,Theta,Lambda,Xi,Pi,Sigma,Upsilon,Phi,Psi,Omega%
+  }\do{#1{\@tempa}}%
+}
+\newcommand*\tud@font@greek@declare[1]{%
+  \edef\@tempb{%
+    \noexpand\DeclareMathSymbol{\csname tud@up#1\endcsname}%
+      {\noexpand\mathalpha}{operators}{\the\@tempcnta}%
+  }\@tempb%
+  \edef\@tempb{%
+    \noexpand\DeclareMathSymbol{\csname tud@var#1\endcsname}%
+      {\noexpand\mathalpha}{letters}{\the\@tempcnta}%
+  }\@tempb%
+  \csletcs{tud@#1}{tud@up#1}%
+  \advance \@tempcnta by 1%
+}
+\@tempcnta=0
+\tud@font@greek@loop\tud@font@greek@declare
+\AtEndPreamble{%
+  \tud@iffontspec{%
+    \edef\@tempa{%
+      \lowercase{\noexpand\IfFileExists{OT1\tud@univers.fd}}%
+    }%
+    \edef\@tempb{%
+      \lowercase{\noexpand\IfFileExists{OT1\tud@dinbold.fd}}%
+    }%
+    \def\@tempc#1{%
+      \ClassWarningNoLine{\tudcls@name}{%
+        `#1' fonts for math typesetting not found\MessageBreak%
+        Please use one of the installation scripts for the\MessageBreak%
+        tudscr-bundle mentioned in the manual.\MessageBreak%
+      }%
+    }%
+  }{%
+    \edef\@tempa{%
+      \lowercase{\noexpand\IfFileExists{\encodingdefault\tud@univers.fd}}%
+    }%
+    \edef\@tempb{%
+      \lowercase{\noexpand\IfFileExists{\encodingdefault\tud@dinbold.fd}}%
+    }%
+    \def\@tempc#1{%
+      \@tempswafalse%
+      \ifstr{OT1}{\encodingdefault}{\@tempswatrue}{}
+      \ifstr{T1}{\encodingdefault}{\@tempswatrue}{}
+      \ClassWarningNoLine{\tudcls@name}{%
+        `#1' fonts not found for encoding `\encodingdefault'.\MessageBreak%
+        \if@tempswa%
+          Please use one of the installation scripts for the\MessageBreak%
+          tudscr-bundle mentioned in the manual.\MessageBreak%
+        \else%
+          Please choose a possible encoding (`OT1' or `T1').\MessageBreak%
+        \fi%
+        A fallback layout is used%
+      }%
+    }%
+  }%
+  \@tempa{\@tud@universtrue}{\@tempc{Univers}}%
+  \@tempb{\@tud@dinboldtrue}{\@tempc{DIN Bold}}%
+  \tud@iffontspec{%
+    \newfontface\univln{Univers Light}[NFSSFamily=UniversLight]%
+    \newfontface\univrn{Univers}[NFSSFamily=UniversRegular]%
+    \newfontface\univbn{Univers Bold}[NFSSFamily=UniversBold]%
+    \newfontface\univxn{Univers Black}[NFSSFamily=UniversBlack]%
+    \newfontface\univls{Univers Light Oblique}[NFSSFamily=UniversLightOblique]%
+    \newfontface\univrs{Univers Oblique}[NFSSFamily=UniversRegularOblique]%
+    \newfontface\univbs{Univers Bold Oblique}[NFSSFamily=UniversBoldOblique]%
+    \newfontface\univxs{Univers Black Oblique}[NFSSFamily=UniversBlackOblique]%
+    \newcommand*\textuln[1]{{\univln#1}}%
+    \newcommand*\texturn[1]{{\univrn#1}}%
+    \newcommand*\textubn[1]{{\univbn#1}}%
+    \newcommand*\textuxn[1]{{\univxn#1}}%
+    \newcommand*\textuls[1]{{\univls#1}}%
+    \newcommand*\texturs[1]{{\univrs#1}}%
+    \newcommand*\textubs[1]{{\univbs#1}}%
+    \newcommand*\textuxs[1]{{\univxs#1}}%
+  }{%
+    \if@tud@univers%
+      \newcommand*\univln{\usefont{\encodingdefault}{\tud@univers}{l}{n}}%
+      \newcommand*\univrn{\usefont{\encodingdefault}{\tud@univers}{m}{n}}%
+      \newcommand*\univbn{\usefont{\encodingdefault}{\tud@univers}{b}{n}}%
+      \newcommand*\univxn{\usefont{\encodingdefault}{\tud@univers}{eb}{n}}%
+      \newcommand*\univls{\usefont{\encodingdefault}{\tud@univers}{l}{sl}}%
+      \newcommand*\univrs{\usefont{\encodingdefault}{\tud@univers}{m}{sl}}%
+      \newcommand*\univbs{\usefont{\encodingdefault}{\tud@univers}{b}{sl}}%
+      \newcommand*\univxs{\usefont{\encodingdefault}{\tud@univers}{eb}{sl}}%
+    \else%
+      \newcommand*\univln{}%
+      \newcommand*\univrn{}%
+      \newcommand*\univbn{}%
+      \newcommand*\univxn{}%
+      \newcommand*\univls{}%
+      \newcommand*\univrs{}%
+      \newcommand*\univbs{}%
+      \newcommand*\univxs{}%
+    \fi%
+    \newcommand*\textuln{}%
+    \newcommand*\texturn{}%
+    \newcommand*\textubn{}%
+    \newcommand*\textuxn{}%
+    \newcommand*\textuls{}%
+    \newcommand*\texturs{}%
+    \newcommand*\textubs{}%
+    \newcommand*\textuxs{}%
+    \DeclareTextFontCommand{\textuln}{\univln}%
+    \DeclareTextFontCommand{\texturn}{\univrn}%
+    \DeclareTextFontCommand{\textubn}{\univbn}%
+    \DeclareTextFontCommand{\textuxn}{\univxn}%
+    \DeclareTextFontCommand{\textuls}{\univls}%
+    \DeclareTextFontCommand{\texturs}{\univrs}%
+    \DeclareTextFontCommand{\textubs}{\univbs}%
+    \DeclareTextFontCommand{\textuxs}{\univxs}%
+  }%
+  \tud@iffontspec{%
+    \newfontface\@dinbn{DIN Bold}[NFSSFamily=DINBold,BoldFont = DIN Bold]%
+    \newcommand*\dinbn{\@dinbn\if@tud@dinbold\mathversion{dinbold}\fi}%
+    \newcommand*\textdbn[1]{{\dinbn#1}}%
+  }{%
+    \if@tud@dinbold%
+      \newcommand*\dinbn{%
+        \usefont{\encodingdefault}{\tud@dinbold}{b}{n}%
+        \mathversion{dinbold}%
+      }%
+    \else%
+      \let\dinbn\sectfont%
+    \fi%
+    \newcommand*\textdbn{}%
+    \DeclareTextFontCommand{\textdbn}{\dinbn}%
+  }%
+  \AtBeginDocument{%
+    \DeclareMathVersion{univers}%
+    \DeclareMathVersion{universbold}%
+    \SetSymbolFont{operators}{univers}{OT1}{\tud@univers}{l}{n}%
+    \SetSymbolFont{letters}{univers}{OML}{\tud@univers}{l}{sl}%
+    \SetSymbolFont{symbols}{univers}{OMS}{\tud@univers}{l}{n}%
+    \SetSymbolFont{largesymbols}{univers}{OMX}{iwona}{m}{n}%
+    \SetSymbolFont{operators}{universbold}{OT1}{\tud@univers}{b}{n}%
+    \SetSymbolFont{letters}{universbold}{OML}{\tud@univers}{b}{sl}%
+    \SetSymbolFont{symbols}{universbold}{OMS}{\tud@univers}{b}{n}%
+    \SetSymbolFont{largesymbols}{universbold}{OMX}{iwona}{b}{n}%
+    \SetMathAlphabet{\mathcal}{univers}{OMS}{lmsy}{m}{n}%
+    \SetMathAlphabet{\mathbf}{univers}{OT1}{\tud@univers}{b}{n}%
+    \SetMathAlphabet{\mathsf}{univers}{OT1}{\tud@univers}{l}{n}%
+    \SetMathAlphabet{\mathit}{univers}{OT1}{\tud@univers}{l}{sl}%
+    \SetMathAlphabet{\mathtt}{univers}{OT1}{\tud@univers t}{l}{n}%
+    \SetMathAlphabet{\mathcal}{universbold}{OMS}{lmsy}{b}{n}%
+    \SetMathAlphabet{\mathbf}{universbold}{OT1}{\tud@univers}{eb}{n}%
+    \SetMathAlphabet{\mathsf}{universbold}{OT1}{\tud@univers}{b}{n}%
+    \SetMathAlphabet{\mathit}{universbold}{OT1}{\tud@univers}{b}{sl}%
+    \SetMathAlphabet{\mathtt}{universbold}{OT1}{\tud@univers t}{b}{n}%
+    \DeclareMathVersion{dinbold}%
+    \SetSymbolFont{operators}{dinbold}{OT1}{\tud@dinbold}{b}{n}%
+    \SetSymbolFont{letters}{dinbold}{OML}{\tud@dinbold}{b}{sl}%
+    \SetSymbolFont{symbols}{dinbold}{OMS}{\tud@dinbold}{b}{n}%
+    \SetSymbolFont{largesymbols}{dinbold}{OMX}{iwona}{ebc}{n}%
+    \SetMathAlphabet{\mathbf}{dinbold}{OT1}{\tud@dinbold}{b}{n}%
+    \SetMathAlphabet{\mathsf}{dinbold}{OT1}{\tud@dinbold}{b}{n}%
+    \SetMathAlphabet{\mathit}{dinbold}{OT1}{\tud@dinbold}{b}{sl}%
+    \DeclareMathSymbol{0}{\mathalpha}{operators}{`0}
+    \DeclareMathSymbol{1}{\mathalpha}{operators}{`1}
+    \DeclareMathSymbol{2}{\mathalpha}{operators}{`2}
+    \DeclareMathSymbol{3}{\mathalpha}{operators}{`3}
+    \DeclareMathSymbol{4}{\mathalpha}{operators}{`4}
+    \DeclareMathSymbol{5}{\mathalpha}{operators}{`5}
+    \DeclareMathSymbol{6}{\mathalpha}{operators}{`6}
+    \DeclareMathSymbol{7}{\mathalpha}{operators}{`7}
+    \DeclareMathSymbol{8}{\mathalpha}{operators}{`8}
+    \DeclareMathSymbol{9}{\mathalpha}{operators}{`9}
+    \@ifpackageloaded{amsfonts}{%
+      \DeclareFontFamily{U}{\tud@univers a}{}%
+      \DeclareFontShape{U}{\tud@univers a}{m}{n}{<-> cmbras10}{}%
+      \SetSymbolFont{AMSa}{univers}{U}{\tud@univers a}{m}{n}%
+      \SetSymbolFont{AMSa}{universbold}{U}{\tud@univers a}{m}{n}%
+      \DeclareFontFamily{U}{\tud@univers b}{}%
+      \DeclareFontShape{U}{\tud@univers b}{m}{n}{<->cmbrbs10}{}%
+      \SetSymbolFont{AMSb}{univers}{U}{\tud@univers b}{m}{n}%
+      \SetSymbolFont{AMSb}{universbold}{U}{\tud@univers b}{m}{n}%
+      \SetMathAlphabet{\mathfrak}{univers}{U}{euf}{m}{n}
+      \SetMathAlphabet{\mathfrak}{universbold}{U}{euf}{b}{n}
+    }{}%
+    \let\@tempb\relax%
+    \let\@tempc\relax%
+    \DeclareMathSymbol{\@tempb}{\mathalpha}{letters}{0}%
+    \DeclareMathSymbol{\@tempc}{\mathord}{letters}{0}%
+    \@tempswafalse%
+    \ifnum\Gamma=\@tempb\relax\@tempswatrue\fi%
+    \ifnum\Gamma=\@tempc\relax\@tempswatrue\fi%
+    \if@tempswa
+      \bool@std@lock{@tud@slantedgreek}{true}%
+    \fi
+    \tud@font@greek@loop\tud@font@greek@init%
+    \tud@font@set%
+  }%
+}
+\newcommand*\tud@font@greek@init[1]{%
+  \ifcsdef{up#1}{}{%
+    \if@tempswa%
+      \csletcs{up#1}{tud@up#1}%
+    \else%
+      \csletcs{up#1}{#1}%
+    \fi%
+  }%
+  \ifcsdef{var#1}{}{%
+    \if@tempswa%
+      \csletcs{var#1}{#1}%
+    \else%
+      \csletcs{var#1}{tud@var#1}%
+    \fi%
+  }%
+}
+\newif\if@tud@mweights
+\AfterPackage*{mweights}{\@tud@mweightstrue}
+\newcommand*\tud@font@set{%
+  \if@tud@mweights%
+    \ifdef{\bfseries@rm}{}{\edef\mdseries@rm{\bfdefault}}%
+    \ifdef{\bfseries@sf}{}{\edef\bfseries@sf{\bfdefault}}%
+    \ifdef{\bfseries@tt}{}{\edef\bfseries@tt{\bfdefault}}%
+    \ifdef{\mdseries@rm}{}{\edef\mdseries@rm{\mddefault}}%
+    \ifdef{\mdseries@sf}{}{\edef\mdseries@sf{\mddefault}}%
+    \ifdef{\mdseries@tt}{}{\edef\mdseries@tt{\mddefault}}%
+  \fi%
+  \ifcase\tud@cdfont\relax%
+    \tud@cmd@restore{rmdefault}%
+    \tud@cmd@restore{sfdefault}%
+    \tud@cmd@restore{ttdefault}%
+    \tud@cmd@restore{bfdefault}%
+    \tud@cmd@restore{mddefault}%
+    \tud@cmd@restore{itdefault}%
+    \tud@cmd@restore{familydefault}%
+    \tud@cmd@restore{seriesdefault}%
+    \tud@cmd@restore{shapedefault}%
+    \if@tud@mweights%
+      \tud@cmd@restore{bfseries@rm}%
+      \tud@cmd@restore{bfseries@sf}%
+      \tud@cmd@restore{bfseries@tt}%
+      \tud@cmd@restore{mdseries@rm}%
+      \tud@cmd@restore{mdseries@sf}%
+      \tud@cmd@restore{mdseries@tt}%
+    \fi%
+    % §§§
+    \tud@ifverlower{2.04}{}{%
+%      \tud@cmd@restore{@fontsizefilebase}%
+%      \let\changefontsizes\simple@changefontsizes%
+    }%
+    \bool@std@lock{@tud@cdmath}{false}%
+    \cs@std@lock{tud@head@font}{0}%
+  \else%
+    \tud@cmd@store{rmdefault}%
+    \tud@cmd@store{sfdefault}%
+    \tud@cmd@store{ttdefault}%
+    \tud@cmd@store{bfdefault}%
+    \tud@cmd@store{mddefault}%
+    \tud@cmd@store{itdefault}%
+    \tud@cmd@store{familydefault}%
+    \tud@cmd@store{seriesdefault}%
+    \tud@cmd@store{shapedefault}%
+    \if@tud@mweights%
+      \tud@cmd@store{bfseries@rm}%
+      \tud@cmd@store{bfseries@sf}%
+      \tud@cmd@store{bfseries@tt}%
+      \tud@cmd@store{mdseries@rm}%
+      \tud@cmd@store{mdseries@sf}%
+      \tud@cmd@store{mdseries@tt}%
+    \fi%
+    \tud@ifverlower{2.04}{}{%
+%      \tud@cmd@store{@fontsizefilebase}%
+%      \tud@cmd@store{changefontsizes}%
+%      \renewcommand*\@fontsizefilebase{tudscrsize}%
+%      \let\changefontsizes\tud@changefontsizes%
+    }%
+    \bool@std@lock{@tud@cdmath}{true}%
+    \cs@std@lock{tud@head@font}{\tud@cdfont}%
+    \tud@iffontspec{%
+      \ifnum\tud@cdfont=\@ne\relax%
+        \setsansfont{Univers Light}[%
+          BoldFont = Univers,%
+          ItalicFont = Univers Light Oblique,%
+          BoldItalicFont = Univers Oblique,%
+        ]%
+        \setmonofont{LMMonoLt10-Regular}[%
+          BoldFont = LMMono10-Regular,%
+          ItalicFont = LMMonoLt10-Oblique,%
+          BoldItalicFont = LMMonoSlant10-Regular,%
+        ]%
+      \else%
+        \setsansfont{Univers}[%
+          BoldFont = Univers Bold,%
+          ItalicFont = Univers Oblique,%
+          BoldItalicFont = Univers Bold Oblique,%
+        ]%
+        \setmonofont{LMMono10-Regular}[%
+          BoldFont = LMMonoLt10-Bold,%
+          ItalicFont = LMMonoSlant10-Regular,%
+          BoldItalicFont = LMMonoLt10-BoldOblique,%
+        ]%
+      \fi%
+    }{%
+      \if@tud@univers%
+        \renewcommand*\sfdefault{\tud@univers}%
+        \renewcommand*\ttdefault{\tud@univers t}%
+        \ifnum\tud@cdfont=\@ne\relax%
+          \renewcommand*\bfdefault{m}%
+          \renewcommand*\mddefault{l}%
+          \if@tud@mweights%
+            \def\bfseries@rm{m}%
+            \def\bfseries@sf{m}%
+            \def\bfseries@tt{m}%
+            \def\mdseries@rm{l}%
+            \def\mdseries@sf{l}%
+            \def\mdseries@tt{l}%
+          \fi%
+        \else%
+          \renewcommand*\bfdefault{b}%
+          \renewcommand*\mddefault{m}%
+          \if@tud@mweights%
+            \def\bfseries@rm{b}%
+            \def\bfseries@sf{b}%
+            \def\bfseries@tt{b}%
+            \def\mdseries@rm{m}%
+            \def\mdseries@sf{m}%
+            \def\mdseries@tt{m}%
+          \fi%
+        \fi%
+      \fi%
+    }%
+    \renewcommand*\rmdefault{\sfdefault}%
+    \renewcommand*\familydefault{\sfdefault}%
+    \renewcommand*\seriesdefault{\mddefault}%
+    \renewcommand*\shapedefault{\updefault}%
+  \fi%
+  \if@tud@mweights%
+    \edef\rmdef@ult{\rmdefault}%
+    \edef\sfdef@ult{\sfdefault}%
+    \edef\ttdef@ult{\ttdefault}%
+    \edef\bfdef@ult{\bfdefault}%
+    \edef\mddef@ult{\mddefault}%
+  \fi%
+  \normalfont\selectfont%
+  \tud@ifverlower{2.04}{}{\tud@font@size@set}%
+  \tud@font@math@set%
+  \if@atdocument\tud@layout@process\fi%
+}
+\newcommand*\tud@font@size@set{% §§§
+  \setlength\smallskipamount{3\p@ \@plus 1\p@ \@minus 1\p@}
+  \setlength\medskipamount{6\p@ \@plus 2\p@ \@minus 2\p@}
+  \setlength\bigskipamount{12\p@ \@plus 4\p@ \@minus 4\p@}
+  \setlength{\abovecaptionskip}{10\p@}
+  \setlength{\belowcaptionskip}{0\p@}
+  \setlength\@tempdima{\@ptsize\p@}
+  \addtolength{\@tempdima}{10\p@}%
+  \edef\@tempa{\noexpand\KOMAoptions{fontsize=\strip@pt\@tempdima}}%
+%  \@tempa%
+}
 \newcommand*{\tud@changefontsizes}[2][\dimexpr5\@tempdima/4\relax]{%
   \ClassWarning{\tudcls@name}%
     {Calculating font sizes for basic size `#2'}%
@@ -1340,437 +1710,42 @@
   \setlength\abovecaptionskip{\dimexpr4\@tempdimb/5\relax}
   \setlength\belowcaptionskip{0\p@}
 }
-\LoadClass{\scrcls@name}[2013/12/19]
-\RequirePackage{environ}[2013/04/01]
-\AtEndPreamble{%
-  \@ifpackageloaded{graphicx}{}{%
-    \@ifpackageloaded{graphics}{%
-      \ClassWarningNoLine{\tudcls@name}{%
-        The package `graphics' was superseded by `graphicx'%
-      }%
-    }{}%
-  }%
-  \RequirePackage{graphicx}[1999/02/16]%
-  \RequirePackage{tudscrcolor}[\TUDVersion]%
-}
-%%% From File: tudscr-fonts.dtx
-\AtEndPreamble{%
-  \tud@iffontspec{%
-    \edef\@tempa{%
-      \lowercase{\noexpand\IfFileExists{OT1\tud@univers.fd}}%
-    }%
-    \edef\@tempb{%
-      \lowercase{\noexpand\IfFileExists{OT1\tud@dinbold.fd}}%
-    }%
-    \def\@tempc#1{%
-      \ClassWarningNoLine{\tudcls@name}{%
-        `#1' fonts for math typesetting not found\MessageBreak%
-        Please use one of the installation scripts for the\MessageBreak%
-        tudscr-bundle mentioned in the manual.\MessageBreak%
-      }%
-    }%
-  }{%
-    \edef\@tempa{%
-      \lowercase{\noexpand\IfFileExists{\encodingdefault\tud@univers.fd}}%
-    }%
-    \edef\@tempb{%
-      \lowercase{\noexpand\IfFileExists{\encodingdefault\tud@dinbold.fd}}%
-    }%
-    \def\@tempc#1{%
-      \@tempswafalse%
-      \ifstr{OT1}{\encodingdefault}{\@tempswatrue}{}
-      \ifstr{T1}{\encodingdefault}{\@tempswatrue}{}
-      \ClassWarningNoLine{\tudcls@name}{%
-        `#1' fonts not found for encoding `\encodingdefault'.\MessageBreak%
-        \if@tempswa%
-          Please use one of the installation scripts for the\MessageBreak%
-          tudscr-bundle mentioned in the manual.\MessageBreak%
-        \else%
-          Please choose a possible encoding (`OT1' or `T1').\MessageBreak%
-        \fi%
-        A fallback layout is used%
-      }%
-    }%
-  }%
-  \@tempa{\@tud@universtrue}{\@tempc{Univers}}%
-  \@tempb{\@tud@dinboldtrue}{\@tempc{DIN Bold}}%
-  \tud@iffontspec{%
-    \newfontface\univln{Univers Light}[NFSSFamily=UniversLight]%
-    \newfontface\univrn{Univers}[NFSSFamily=UniversRegular]%
-    \newfontface\univbn{Univers Bold}[NFSSFamily=UniversBold]%
-    \newfontface\univxn{Univers Black}[NFSSFamily=UniversBlack]%
-    \newfontface\univls{Univers Light Oblique}[NFSSFamily=UniversLightOblique]%
-    \newfontface\univrs{Univers Oblique}[NFSSFamily=UniversRegularOblique]%
-    \newfontface\univbs{Univers Bold Oblique}[NFSSFamily=UniversBoldOblique]%
-    \newfontface\univxs{Univers Black Oblique}[NFSSFamily=UniversBlackOblique]%
-    \newcommand*\textuln[1]{{\univln#1}}%
-    \newcommand*\texturn[1]{{\univrn#1}}%
-    \newcommand*\textubn[1]{{\univbn#1}}%
-    \newcommand*\textuxn[1]{{\univxn#1}}%
-    \newcommand*\textuls[1]{{\univls#1}}%
-    \newcommand*\texturs[1]{{\univrs#1}}%
-    \newcommand*\textubs[1]{{\univbs#1}}%
-    \newcommand*\textuxs[1]{{\univxs#1}}%
-  }{%
-    \if@tud@univers%
-      \newcommand*\univln{\usefont{\encodingdefault}{\tud@univers}{l}{n}}%
-      \newcommand*\univrn{\usefont{\encodingdefault}{\tud@univers}{m}{n}}%
-      \newcommand*\univbn{\usefont{\encodingdefault}{\tud@univers}{b}{n}}%
-      \newcommand*\univxn{\usefont{\encodingdefault}{\tud@univers}{eb}{n}}%
-      \newcommand*\univls{\usefont{\encodingdefault}{\tud@univers}{l}{sl}}%
-      \newcommand*\univrs{\usefont{\encodingdefault}{\tud@univers}{m}{sl}}%
-      \newcommand*\univbs{\usefont{\encodingdefault}{\tud@univers}{b}{sl}}%
-      \newcommand*\univxs{\usefont{\encodingdefault}{\tud@univers}{eb}{sl}}%
-    \else%
-      \newcommand*\univln{}%
-      \newcommand*\univrn{}%
-      \newcommand*\univbn{}%
-      \newcommand*\univxn{}%
-      \newcommand*\univls{}%
-      \newcommand*\univrs{}%
-      \newcommand*\univbs{}%
-      \newcommand*\univxs{}%
-    \fi%
-    \newcommand*\textuln{}%
-    \newcommand*\texturn{}%
-    \newcommand*\textubn{}%
-    \newcommand*\textuxn{}%
-    \newcommand*\textuls{}%
-    \newcommand*\texturs{}%
-    \newcommand*\textubs{}%
-    \newcommand*\textuxs{}%
-    \DeclareTextFontCommand{\textuln}{\univln}%
-    \DeclareTextFontCommand{\texturn}{\univrn}%
-    \DeclareTextFontCommand{\textubn}{\univbn}%
-    \DeclareTextFontCommand{\textuxn}{\univxn}%
-    \DeclareTextFontCommand{\textuls}{\univls}%
-    \DeclareTextFontCommand{\texturs}{\univrs}%
-    \DeclareTextFontCommand{\textubs}{\univbs}%
-    \DeclareTextFontCommand{\textuxs}{\univxs}%
-  }%
-  \tud@iffontspec{%
-    \newfontface\@dinbn{DIN Bold}[NFSSFamily=DINBold,BoldFont = DIN Bold]%
-    \newcommand*\dinbn{\@dinbn\if@tud@dinbold\mathversion{dinbold}\fi}%
-    \newcommand*\textdbn[1]{{\dinbn#1}}%
-  }{%
-    \if@tud@dinbold%
-      \newcommand*\dinbn{%
-        \usefont{\encodingdefault}{\tud@dinbold}{b}{n}%
-        \mathversion{dinbold}%
-      }%
-    \else%
-      \let\dinbn\sectfont%
-    \fi%
-    \newcommand*\textdbn{}%
-    \DeclareTextFontCommand{\textdbn}{\dinbn}%
-  }%
-  \AtBeginDocument{%
-    \DeclareMathVersion{univers}%
-    \DeclareMathVersion{universbold}%
-    \SetSymbolFont{operators}{univers}{OT1}{\tud@univers}{l}{n}%
-    \SetSymbolFont{letters}{univers}{OML}{\tud@univers}{l}{sl}%
-    \SetSymbolFont{symbols}{univers}{OMS}{\tud@univers}{l}{n}%
-    \SetSymbolFont{largesymbols}{univers}{OMX}{iwona}{m}{n}%
-    \SetSymbolFont{operators}{universbold}{OT1}{\tud@univers}{b}{n}%
-    \SetSymbolFont{letters}{universbold}{OML}{\tud@univers}{b}{sl}%
-    \SetSymbolFont{symbols}{universbold}{OMS}{\tud@univers}{b}{n}%
-    \SetSymbolFont{largesymbols}{universbold}{OMX}{iwona}{b}{n}%
-    \SetMathAlphabet{\mathbf}{univers}{OT1}{\tud@univers}{b}{n}%
-    \SetMathAlphabet{\mathsf}{univers}{OT1}{\tud@univers}{l}{n}%
-    \SetMathAlphabet{\mathit}{univers}{OT1}{\tud@univers}{l}{sl}%
-    \SetMathAlphabet{\mathtt}{univers}{OT1}{\tud@univers t}{l}{n}%
-    \SetMathAlphabet{\mathbf}{universbold}{OT1}{\tud@univers}{eb}{n}%
-    \SetMathAlphabet{\mathsf}{universbold}{OT1}{\tud@univers}{b}{n}%
-    \SetMathAlphabet{\mathit}{universbold}{OT1}{\tud@univers}{b}{sl}%
-    \SetMathAlphabet{\mathtt}{universbold}{OT1}{\tud@univers t}{b}{n}%
-    \DeclareMathVersion{dinbold}%
-    \SetSymbolFont{operators}{dinbold}{OT1}{\tud@dinbold}{b}{n}%
-    \SetSymbolFont{letters}{dinbold}{OML}{\tud@dinbold}{b}{sl}%
-    \SetSymbolFont{symbols}{dinbold}{OMS}{\tud@dinbold}{b}{n}%
-    \SetSymbolFont{largesymbols}{dinbold}{OMX}{iwona}{ebc}{n}%
-    \SetMathAlphabet{\mathbf}{dinbold}{OT1}{\tud@dinbold}{b}{n}%
-    \SetMathAlphabet{\mathsf}{dinbold}{OT1}{\tud@dinbold}{b}{n}%
-    \SetMathAlphabet{\mathit}{dinbold}{OT1}{\tud@dinbold}{b}{sl}%
-% §§§ vorher mit tud@ prefix definieren und mit \let beim Umschalten zuweisen
-% §§§ \let\upOmega\tud@upOmega, ebenso für slantedgreek
-    \DeclareMathSymbol{\upDelta}{\mathalpha}{operators}{1}%
-    \DeclareMathSymbol{\upOmega}{\mathalpha}{operators}{10}%
-    \DeclareMathSymbol{\upGamma}{\mathalpha}{operators}{0}%
-    \DeclareMathSymbol{\upDelta}{\mathalpha}{operators}{1}%
-    \DeclareMathSymbol{\upTheta}{\mathalpha}{operators}{2}%
-    \DeclareMathSymbol{\upLambda}{\mathalpha}{operators}{3}%
-    \DeclareMathSymbol{\upXi}{\mathalpha}{operators}{4}%
-    \DeclareMathSymbol{\upPi}{\mathalpha}{operators}{5}%
-    \DeclareMathSymbol{\upSigma}{\mathalpha}{operators}{6}%
-    \DeclareMathSymbol{\upUpsilon}{\mathalpha}{operators}{7}%
-    \DeclareMathSymbol{\upPhi}{\mathalpha}{operators}{8}%
-    \DeclareMathSymbol{\upPsi}{\mathalpha}{operators}{9}%
-    \DeclareMathSymbol{\upOmega}{\mathalpha}{operators}{10}%
-    \DeclareMathSymbol{\varGamma}{\mathalpha}{letters}{0}%
-    \DeclareMathSymbol{\varDelta}{\mathalpha}{letters}{1}%
-    \DeclareMathSymbol{\varTheta}{\mathalpha}{letters}{2}%
-    \DeclareMathSymbol{\varLambda}{\mathalpha}{letters}{3}%
-    \DeclareMathSymbol{\varXi}{\mathalpha}{letters}{4}%
-    \DeclareMathSymbol{\varPi}{\mathalpha}{letters}{5}%
-    \DeclareMathSymbol{\varSigma}{\mathalpha}{letters}{6}%
-    \DeclareMathSymbol{\varUpsilon}{\mathalpha}{letters}{7}%
-    \DeclareMathSymbol{\varPhi}{\mathalpha}{letters}{8}%
-    \DeclareMathSymbol{\varPsi}{\mathalpha}{letters}{9}%
-    \DeclareMathSymbol{\varOmega}{\mathalpha}{letters}{10}%
-    \DeclareMathSymbol{0}{\mathalpha}{operators}{`0}
-    \DeclareMathSymbol{1}{\mathalpha}{operators}{`1}
-    \DeclareMathSymbol{2}{\mathalpha}{operators}{`2}
-    \DeclareMathSymbol{3}{\mathalpha}{operators}{`3}
-    \DeclareMathSymbol{4}{\mathalpha}{operators}{`4}
-    \DeclareMathSymbol{5}{\mathalpha}{operators}{`5}
-    \DeclareMathSymbol{6}{\mathalpha}{operators}{`6}
-    \DeclareMathSymbol{7}{\mathalpha}{operators}{`7}
-    \DeclareMathSymbol{8}{\mathalpha}{operators}{`8}
-    \DeclareMathSymbol{9}{\mathalpha}{operators}{`9}
-    \@ifpackageloaded{amsfonts}{%
-% §§§ bei Schriftinstallation einbinden?
-% sowohl AMSa/b als auch mathfrac, mathbb und mathcal
-      \DeclareFontFamily{U}{\tud@univers a}{}%
-      \DeclareFontShape{U}{\tud@univers a}{m}{n}{%
-        <-9>cmbras8%
-        <9-10>cmbras9%
-        <10->cmbras10%
-      }{}%
-      \SetSymbolFont{AMSa}{univers}{U}{\tud@univers a}{m}{n}%
-      \SetSymbolFont{AMSa}{universbold}{U}{\tud@univers a}{m}{n}%
-      \DeclareFontFamily{U}{\tud@univers b}{}%
-      \DeclareFontShape{U}{\tud@univers b}{m}{n}{%
-        <-9>cmbrbs8%
-        <9-10>cmbrbs9%
-        <10->cmbrbs10%
-      }{}%
-      \SetSymbolFont{AMSb}{univers}{U}{\tud@univers b}{m}{n}%
-      \SetSymbolFont{AMSb}{universbold}{U}{\tud@univers b}{m}{n}%
-%      \IfFileExists{untxmia.fd}{%
-%        \ifcsname iftx@libertine\endcsname\else
-%          \newif\iftx@libertine
-%        \fi
-%        \tx@libertinefalse
-%        \ifcsname iftx@minion\endcsname\else
-%          \newif\iftx@minion
-%        \fi
-%        \tx@minionfalse
-%        \SetMathAlphabet{\mathfrak}{univers}{U}{ntxmia}{m}{it}%
-%        \SetMathAlphabet{\mathfrak}{universbold}{U}{ntxmia}{b}{it}%
-%      }{%
-%        % §§§ Warnung
-%      }%
-%      \IfFileExists{untxsyb.fd}{%
-%        \SetMathAlphabet{\mathbb}{univers}{U}{ntxsyb}{m}{n}%
-%        \SetMathAlphabet{\mathbb}{universbold}{U}{ntxsyb}{b}{n}%
-%      }{%
-%        % §§§ Warnung
-%      }%
-    }{}%
-%    \IfFileExists{ueus.fd}{%
-%      \SetMathAlphabet{\mathcal}{univers}{U}{eus}{m}{n}%
-%      \SetMathAlphabet{\mathcal}{universbold}{U}{eus}{b}{n}%
-%    }{%
-%      % §§§ Warnung
-%    }%
-  }%
-}
-\newif\if@tud@mweights
-\AfterPackage*{mweights}{\@tud@mweightstrue}
-\newcommand*\tud@font@set{%
-  \if@tud@mweights%
-    \ifdef{\bfseries@rm}{}{\edef\mdseries@rm{\bfdefault}}%
-    \ifdef{\bfseries@sf}{}{\edef\bfseries@sf{\bfdefault}}%
-    \ifdef{\bfseries@tt}{}{\edef\bfseries@tt{\bfdefault}}%
-    \ifdef{\mdseries@rm}{}{\edef\mdseries@rm{\mddefault}}%
-    \ifdef{\mdseries@sf}{}{\edef\mdseries@sf{\mddefault}}%
-    \ifdef{\mdseries@tt}{}{\edef\mdseries@tt{\mddefault}}%
-  \fi%
-  \ifcase\tud@cdfont\relax%
-    \tud@cmd@restore{rmdefault}%
-    \tud@cmd@restore{sfdefault}%
-    \tud@cmd@restore{ttdefault}%
-    \tud@cmd@restore{bfdefault}%
-    \tud@cmd@restore{mddefault}%
-    \tud@cmd@restore{itdefault}%
-    \tud@cmd@restore{familydefault}%
-    \tud@cmd@restore{seriesdefault}%
-    \tud@cmd@restore{shapedefault}%
-    \if@tud@mweights%
-      \tud@cmd@restore{bfseries@rm}%
-      \tud@cmd@restore{bfseries@sf}%
-      \tud@cmd@restore{bfseries@tt}%
-      \tud@cmd@restore{mdseries@rm}%
-      \tud@cmd@restore{mdseries@sf}%
-      \tud@cmd@restore{mdseries@tt}%
-    \fi%
-    % §§§
-    \tud@ifverlower{2.04}{}{%
-%      \tud@cmd@restore{@fontsizefilebase}%
-%      \let\changefontsizes\simple@changefontsizes%
-    }%
-    \bool@std@lock{@tud@cdmath}{false}%
-    \cs@std@lock{tud@head@font}{0}%
-  \else%
-    \tud@cmd@store{rmdefault}%
-    \tud@cmd@store{sfdefault}%
-    \tud@cmd@store{ttdefault}%
-    \tud@cmd@store{bfdefault}%
-    \tud@cmd@store{mddefault}%
-    \tud@cmd@store{itdefault}%
-    \tud@cmd@store{familydefault}%
-    \tud@cmd@store{seriesdefault}%
-    \tud@cmd@store{shapedefault}%
-    \if@tud@mweights%
-      \tud@cmd@store{bfseries@rm}%
-      \tud@cmd@store{bfseries@sf}%
-      \tud@cmd@store{bfseries@tt}%
-      \tud@cmd@store{mdseries@rm}%
-      \tud@cmd@store{mdseries@sf}%
-      \tud@cmd@store{mdseries@tt}%
-    \fi%
-    \tud@ifverlower{2.04}{}{%
-%      \tud@cmd@store{@fontsizefilebase}%
-%      \tud@cmd@store{changefontsizes}%
-%      \renewcommand*\@fontsizefilebase{tudscrsize}%
-%      \let\changefontsizes\tud@changefontsizes%
-    }%
-    \bool@std@lock{@tud@cdmath}{true}%
-    \cs@std@lock{tud@head@font}{\tud@cdfont}%
-    \tud@iffontspec{%
-      \ifnum\tud@cdfont=\@ne\relax%
-        \setsansfont{Univers Light}[%
-          BoldFont = Univers,%
-          ItalicFont = Univers Light Oblique,%
-          BoldItalicFont = Univers Oblique,%
-        ]%
-        \setmonofont{LMMonoLt10-Regular}[%
-          BoldFont = LMMono10-Regular,%
-          ItalicFont = LMMonoLt10-Oblique,%
-          BoldItalicFont = LMMonoSlant10-Regular,%
-        ]%
-      \else%
-        \setsansfont{Univers}[%
-          BoldFont = Univers Bold,%
-          ItalicFont = Univers Oblique,%
-          BoldItalicFont = Univers Bold Oblique,%
-        ]%
-        \setmonofont{LMMono10-Regular}[%
-          BoldFont = LMMonoLt10-Bold,%
-          ItalicFont = LMMonoSlant10-Regular,%
-          BoldItalicFont = LMMonoLt10-BoldOblique,%
-        ]%
-      \fi%
-    }{%
-      \if@tud@univers%
-        \renewcommand*\sfdefault{\tud@univers}%
-        \renewcommand*\ttdefault{\tud@univers t}%
-        \ifnum\tud@cdfont=\@ne\relax%
-          \renewcommand*\bfdefault{m}%
-          \renewcommand*\mddefault{l}%
-          \if@tud@mweights%
-            \def\bfseries@rm{m}%
-            \def\bfseries@sf{m}%
-            \def\bfseries@tt{m}%
-            \def\mdseries@rm{l}%
-            \def\mdseries@sf{l}%
-            \def\mdseries@tt{l}%
-          \fi%
-        \else%
-          \renewcommand*\bfdefault{b}%
-          \renewcommand*\mddefault{m}%
-          \if@tud@mweights%
-            \def\bfseries@rm{b}%
-            \def\bfseries@sf{b}%
-            \def\bfseries@tt{b}%
-            \def\mdseries@rm{m}%
-            \def\mdseries@sf{m}%
-            \def\mdseries@tt{m}%
-          \fi%
-        \fi%
-      \fi%
-    }%
-    \renewcommand*\rmdefault{\sfdefault}%
-    \renewcommand*\familydefault{\sfdefault}%
-    \renewcommand*\seriesdefault{\mddefault}%
-    \renewcommand*\shapedefault{\updefault}%
-  \fi%
-  \if@tud@mweights%
-    \edef\rmdef@ult{\rmdefault}%
-    \edef\sfdef@ult{\sfdefault}%
-    \edef\ttdef@ult{\ttdefault}%
-    \edef\bfdef@ult{\bfdefault}%
-    \edef\mddef@ult{\mddefault}%
-  \fi%
-  \normalfont\selectfont%
-  \tud@ifverlower{2.04}{}{\tud@setfontsize}%
-  \tud@font@math@set%
-  \if@atdocument\tud@layout@process\fi%
-}
 \newcommand*\tud@font@math@set{%
   \if@tud@univers%
     \if@tud@cdmath%
-%      \tud@cmd@store{Omega}%
-%      \let\Omega\tud@Omega%
       \tud@cmd@store{mv@normal}%
       \tud@cmd@store{mv@bold}%
       \let\mv@normal\mv@univers%
       \let\mv@bold\mv@universbold%
+      \tud@font@greek@loop\tud@font@greek@set%
     \else%
-%      \tud@cmd@store{Omega}%
       \tud@cmd@restore{mv@normal}%
       \tud@cmd@restore{mv@bold}%
+      \tud@font@greek@loop\tud@font@greek@reset%
     \fi%
   \fi%
-  % §§§ \let\Omega\upOmega bzw. \let\Omega\varOmega
   \if@tud@slantedgreek%
-    \tud@font@greek@slanted%
+    \tud@font@greek@loop\tud@font@greek@slanted%
   \else%
-    \tud@font@greek@upright%
+    \tud@font@greek@loop\tud@font@greek@upright%
   \fi%
   \mathversion{normal}%
 }
-\newcommand*\tud@setfontsize{% §§§
-  \setlength\smallskipamount{3\p@ \@plus 1\p@ \@minus 1\p@}
-  \setlength\medskipamount{6\p@ \@plus 2\p@ \@minus 2\p@}
-  \setlength\bigskipamount{12\p@ \@plus 4\p@ \@minus 4\p@}
-  \setlength{\abovecaptionskip}{10\p@}
-  \setlength{\belowcaptionskip}{0\p@}
-  \setlength\@tempdima{\@ptsize\p@}
-  \addtolength{\@tempdima}{10\p@}%
-  \edef\@tempa{\noexpand\KOMAoptions{fontsize=\strip@pt\@tempdima}}%
-%  \@tempa%
+\newcommand*\tud@font@greek@set[1]{%
+  \tud@cmd@store{#1}%
+  \tud@cmd@store{up#1}%
+  \tud@cmd@store{var#1}%
+  \csletcs{#1}{tud@#1}
+  \csletcs{up#1}{tud@up#1}
+  \csletcs{var#1}{tud@var#1}
 }
-\newcount\tud@font@greek@upGamma
-\tud@font@greek@upGamma\Gamma
-\newcount\tud@font@greek@offset
-\let\@tempa\relax
-\DeclareMathSymbol{\@tempa}{\mathalpha}{letters}{0}
-\tud@font@greek@offset\@tempa
-\advance\tud@font@greek@offset-\Gamma
-\newcommand*\tud@font@greek@slanted{%
-  \ifnum\Gamma=\tud@font@greek@upGamma\relax\tud@font@greek@changeshape\fi%
+\newcommand*\tud@font@greek@reset[1]{%
+  \tud@cmd@restore{#1}%
+  \tud@cmd@restore{up#1}%
+  \tud@cmd@restore{var#1}%
 }
-\newcommand*\tud@font@greek@upright{%
-  \ifnum\Gamma>\tud@font@greek@upGamma%
-    \tud@font@greek@offset=-\tud@font@greek@offset%
-    \tud@font@greek@changeshape%
-    \tud@font@greek@offset=-\tud@font@greek@offset%
-  \fi%
-}
-\newcommand*\tud@font@greek@def[2]{%
-  \expandafter\@tempcnta\csname #1\endcsname%
-  \advance\@tempcnta#2%
-  \expandafter\mathchardef\csname #1\endcsname\@tempcnta%
-}
-\newcommand*\tud@font@greek@uc{%
-  Gamma,Delta,Theta,Lambda,Xi,Pi,Sigma,Upsilon,Phi,Psi,Omega%
-}
-\newcommand*\tud@font@greek@changeshape{%
-  \@for\@tempa:=\tud@font@greek@uc\do{%
-    \@expandtwoargs\tud@font@greek@def{\@tempa}{\tud@font@greek@offset}%
-  }%
-}
+\newcommand*\tud@font@greek@slanted[1]{\csletcs{#1}{var#1}}
+\newcommand*\tud@font@greek@upright[1]{\csletcs{#1}{up#1}}
 \newcommand*\tud@head@font@bold{}
 \newcommand*\tud@head@font@light{}
 \newcommand*\tud@head@font@set{%
@@ -2229,6 +2204,13 @@
   \tud@locale@english{\@dotswap}{.}%
 }
 %%% From File: tudscr-pagestyle.dtx
+\newcommand*\tud@ifsacrop{%
+  \ifcsdef{ifsa@crop}{%
+    \ifbool{sa@crop}{\@firstoftwo}{\@secondoftwo}%
+  }{%
+    \@secondoftwo%
+  }%
+}
 \newlength\tud@dim@widemargin
 \newlength\tud@dim@slimmargin
 \newlength\tud@dim@both
@@ -2290,268 +2272,256 @@
     \dimexpr\tud@dim@widemargin-.6\tud@dim@topmargin\relax%
   }%
 }
-% §§§ überarbeiten
-\newcommand*\tud@ifsacrop{%
-  \ifcsdef{ifsa@crop}{%
-    \ifbool{sa@crop}{\@firstoftwo}{\@secondoftwo}%
-  }{%
-    \@secondoftwo%
-  }%
-}
-\AtEndPreamble{% §§§ notwendig?
-  \tud@ifsacrop{%
-    \PreventPackageFromLoading{scrlayer-scrpage}%
-    \pagestyle{empty}%
-    \hoffset=-72.27pt%
-    \voffset=-72.27pt%
-    \topmargin=0pt%
-    \headheight=0pt%
-    \headsep=0pt%
-    \marginparsep=0pt%
-    \marginparwidth=0pt%
-    \footskip=0pt%
-    \marginparpush=0pt%
-    \oddsidemargin=0pt%
-    \evensidemargin=0pt%
-    \topskip=0pt%
-    \textheight=\maxdimen%
-  }{}%
-}
-\AtEndPreamble{% §§§ notwendig?
-  \RequirePackage{scrlayer-scrpage}[2013/12/14]%
-  \AfterPackage*{scrlayer-scrpage}{%
-    \DeclareNewLayer[%
-      background,headsep,%
-      voffset=\tud@dim@logoy,%
-      contents={%
-        \hspace*{\dimexpr\tud@dim@logox-\tud@dim@widemargin\relax}%
-        \tud@mainlogo%
-      },%
-    ]{tudheadings.head.mainlogo}%
-    \DeclareNewLayer[%
-      background,headsep,%
-      voffset=\tud@dim@logoy,%
-      contents={\hfill\tud@headlogo},%
-    ]{tudheadings.head.logo}%
-    \DeclareNewLayer[%
-      background,%
-      contents={%
-        \ifnum\tud@head@bar>\@ne\relax%
-          \color{HKS41}%
-          \rule{\layerwidth}{\tud@dim@topmargin}%
-        \fi%
-      },%
-    ]{tudheadings.head.back}%
-    \DeclareNewLayer[%
-      background,%
-      voffset=\tud@dim@topmargin,%
-      contents={%
-        \ifnum\tud@head@bar>\@ne\relax%
-          \color{HKS41!80}%
-          \rule{\layerwidth}{\tud@dim@barheight}%
-        \fi%
-      },%
-    ]{tudheadings.head.bar}%
-    \DeclareNewLayer[%
-      background,headsep,%
-      voffset=\dimexpr\tud@dim@topmargin+\tud@dim@line\relax,%
-      contents={\tud@head@text@box},%
-    ]{tudheadings.head.text}%
-    \DeclareNewLayer[%
-      background,headsep,%
-      voffset=\dimexpr\tud@dim@topmargin-.5\tud@dim@line\relax,%
-      contents={%
-        \ifnum\tud@head@bar<\tw@\relax\if@tud@head@widebar\else%
-          \tud@head@rule{\textwidth}%
-        \fi\fi%
-      },%
-    ]{tudheadings.head.upperline}%
-    \DeclareNewLayer[%
-      background,headsep,%
-      voffset=\dimexpr\tud@dim@topmargin+\tud@dim@barheight%
-        -.5\tud@dim@line\relax,%
-      contents={%
-        \ifnum\tud@head@bar<\tw@\relax\if@tud@head@widebar\else%
-          \tud@head@rule{\textwidth}%
-        \fi\fi%
-      },%
-    ]{tudheadings.head.lowerline}%
-    \DeclareNewLayer[%
-      background,%
-      voffset=\dimexpr\tud@dim@topmargin-.5\tud@dim@line\relax,%
-      contents={%
-        \ifnum\tud@head@bar<\tw@\relax\if@tud@head@widebar%
-          \tud@head@rule{\paperwidth}%
-        \fi\fi%
-      },%
-    ]{tudheadings.head.upperwideline}%
-    \DeclareNewLayer[%
-      background,%
-      voffset=\dimexpr\tud@dim@topmargin+\tud@dim@barheight%
-        -.5\tud@dim@line\relax,%
-      contents={%
-        \ifnum\tud@head@bar<\tw@\relax\if@tud@head@widebar%
-          \tud@head@rule{\paperwidth}%
-        \fi\fi%
-      },%
-    ]{tudheadings.head.lowerwideline}%
-    \DeclareNewLayer[%
-      background,foot,%
-      height=\dimexpr\paperheight-\layeryoffset\relax,%
-      contents={%
-        \ifdim\footlogoheight>\z@\relax\else%
-          \settoheight\footlogoheight{\tud@mainlogo}%
-          \tud@ifverlower{2.03}{%
-            \setlength\footlogoheight{.6\tud@dim@topmargin}%
-          }{}%
-        \fi%
-        \setlength\@tempdima{%
-          \dimexpr\footlogoheight-\layerheight+\dp\strutbox\relax%
-        }%
-        \ifdim\@tempdima>\vfuzz\relax%
-          \ClassWarning{\tudcls@name}{%
-            The chosen `\string\footlogoheight'
-            (\the\footlogoheight)\MessageBreak%
-            is \the\@tempdima\space higher than recommended. You\MessageBreak%
-            should decrease this length
-            \ifcase\tud@geometry\relax\else%
-              or alternatively\MessageBreak%
-              enlarge the bottom margin by using option\MessageBreak%
-              `extrabottommargin'%
-            \fi%
-          }%
-        \fi%
-        \let\@tempa\relax%
-        \@for\@tempb:=\tud@@footlogo\do{%
-          \@tempa%
-          \ifx\@tempb\@empty\else%
-            \expandafter\tud@footlogo\expandafter{\@tempb}%
+\tud@ifsacrop{%
+  \PreventPackageFromLoading{scrlayer-scrpage}%
+  \pagestyle{empty}%
+  \hoffset=-72.27pt%
+  \voffset=-72.27pt%
+  \topmargin=0pt%
+  \headheight=0pt%
+  \headsep=0pt%
+  \marginparsep=0pt%
+  \marginparwidth=0pt%
+  \footskip=0pt%
+  \marginparpush=0pt%
+  \oddsidemargin=0pt%
+  \evensidemargin=0pt%
+  \topskip=0pt%
+  \textheight=\maxdimen%
+}{}%
+\RequirePackage{scrlayer-scrpage}[2013/12/14]%
+\AfterPackage*{scrlayer-scrpage}{%
+  \DeclareNewLayer[%
+    background,headsep,%
+    voffset=\tud@dim@logoy,%
+    contents={%
+      \hspace*{\dimexpr\tud@dim@logox-\tud@dim@widemargin\relax}%
+      \tud@mainlogo%
+    },%
+  ]{tudheadings.head.mainlogo}%
+  \DeclareNewLayer[%
+    background,headsep,%
+    voffset=\tud@dim@logoy,%
+    contents={\hfill\tud@headlogo},%
+  ]{tudheadings.head.logo}%
+  \DeclareNewLayer[%
+    background,%
+    contents={%
+      \ifnum\tud@head@bar>\@ne\relax%
+        \color{HKS41}%
+        \rule{\layerwidth}{\tud@dim@topmargin}%
+      \fi%
+    },%
+  ]{tudheadings.head.back}%
+  \DeclareNewLayer[%
+    background,%
+    voffset=\tud@dim@topmargin,%
+    contents={%
+      \ifnum\tud@head@bar>\@ne\relax%
+        \color{HKS41!80}%
+        \rule{\layerwidth}{\tud@dim@barheight}%
+      \fi%
+    },%
+  ]{tudheadings.head.bar}%
+  \DeclareNewLayer[%
+    background,headsep,%
+    voffset=\dimexpr\tud@dim@topmargin+\tud@dim@line\relax,%
+    contents={\tud@head@text@box},%
+  ]{tudheadings.head.text}%
+  \DeclareNewLayer[%
+    background,headsep,%
+    voffset=\dimexpr\tud@dim@topmargin-.5\tud@dim@line\relax,%
+    contents={%
+      \ifnum\tud@head@bar<\tw@\relax\if@tud@head@widebar\else%
+        \tud@head@rule{\textwidth}%
+      \fi\fi%
+    },%
+  ]{tudheadings.head.upperline}%
+  \DeclareNewLayer[%
+    background,headsep,%
+    voffset=\dimexpr\tud@dim@topmargin+\tud@dim@barheight%
+      -.5\tud@dim@line\relax,%
+    contents={%
+      \ifnum\tud@head@bar<\tw@\relax\if@tud@head@widebar\else%
+        \tud@head@rule{\textwidth}%
+      \fi\fi%
+    },%
+  ]{tudheadings.head.lowerline}%
+  \DeclareNewLayer[%
+    background,%
+    voffset=\dimexpr\tud@dim@topmargin-.5\tud@dim@line\relax,%
+    contents={%
+      \ifnum\tud@head@bar<\tw@\relax\if@tud@head@widebar%
+        \tud@head@rule{\paperwidth}%
+      \fi\fi%
+    },%
+  ]{tudheadings.head.upperwideline}%
+  \DeclareNewLayer[%
+    background,%
+    voffset=\dimexpr\tud@dim@topmargin+\tud@dim@barheight%
+      -.5\tud@dim@line\relax,%
+    contents={%
+      \ifnum\tud@head@bar<\tw@\relax\if@tud@head@widebar%
+        \tud@head@rule{\paperwidth}%
+      \fi\fi%
+    },%
+  ]{tudheadings.head.lowerwideline}%
+  \DeclareNewLayer[%
+    background,foot,%
+    height=\dimexpr\paperheight-\layeryoffset\relax,%
+    contents={%
+      \ifdim\footlogoheight>\z@\relax\else%
+        \settoheight\footlogoheight{\tud@mainlogo}%
+        \tud@ifverlower{2.03}{%
+          \setlength\footlogoheight{.6\tud@dim@topmargin}%
+        }{}%
+      \fi%
+      \setlength\@tempdima{%
+        \dimexpr\footlogoheight-\layerheight+\dp\strutbox\relax%
+      }%
+      \ifdim\@tempdima>\vfuzz\relax%
+        \ClassWarning{\tudcls@name}{%
+          The chosen `\string\footlogoheight'
+          (\the\footlogoheight)\MessageBreak%
+          is \the\@tempdima\space higher than recommended. You\MessageBreak%
+          should decrease this length
+          \ifcase\tud@geometry\relax\else%
+            or alternatively\MessageBreak%
+            enlarge the bottom margin by using option\MessageBreak%
+            `extrabottommargin'%
           \fi%
-          \let\@tempa\footlogosep%
         }%
-        \tud@ddclogo%
-      },%
+      \fi%
+      \let\@tempa\relax%
+      \@for\@tempb:=\tud@@footlogo\do{%
+        \@tempa%
+        \ifx\@tempb\@empty\else%
+          \expandafter\tud@footlogo\expandafter{\@tempb}%
+        \fi%
+        \let\@tempa\footlogosep%
+      }%
+      \tud@ddclogo%
+    },%
+  ]{tudheadings.foot.logo}%
+  \tud@ifverlower{2.03}{%
+    \ModifyLayer[%
+      voffset=\dimexpr\topmargin+1in+\headheight+\headsep+\textheight%
+        +\footskip-\footheight-\tud@dim@ddcdiff%
+        \ifcase\tud@geometry\relax\else+\ht\strutbox+\dp\strutbox\fi%
+        \relax,%
+      height=\dimexpr.6\tud@dim@topmargin+\dp\strutbox\relax,%
     ]{tudheadings.foot.logo}%
-    \tud@ifverlower{2.03}{%
-      \ModifyLayer[%
-        voffset=\dimexpr\topmargin+1in+\headheight+\headsep+\textheight%
-          +\footskip-\footheight-\tud@dim@ddcdiff%
-          \ifcase\tud@geometry\relax\else+\ht\strutbox+\dp\strutbox\fi%
-          \relax,%
-        height=\dimexpr.6\tud@dim@topmargin+\dp\strutbox\relax,%
-      ]{tudheadings.foot.logo}%
-    }{}%
-    \DeclareNewLayer[%
-      background,%
-      hoffset=0pt,%
-      width=\paperwidth,%
-      voffset=\dimexpr\@nameuse{scr@l@tudheadings.foot.logo@y}%
-        -\dp\strutbox\relax,%
-      height=\dimexpr\paperheight-\layeryoffset\relax,%
-      contents={%
-        \if@tud@footcolor%
-          \let\@tempc\relax%
-          \ifnum\tud@head@bar>\@ne\def\@tempc{\color{HKS41}}\fi%
-          \ifstr{\tud@pagecolor}{HKS41}{\def\@tempc{\color{HKS41!80}}}{}%
-          \ifx\@tempc\relax\else%
-            \tud@ifverlower{2.03}{%
-              \tud@ddc@check%
-              \ifcase\@tempb\relax%
-                \vbox to \layerheight{%
-                  \vfil\@tempc%
-                  \rule{\layerwidth}{%
-                    \dimexpr\layerheight-\tud@dim@ddcdiff+\ht\strutbox\relax%
-                  }%
+  }{}%
+  \DeclareNewLayer[%
+    background,%
+    hoffset=0pt,%
+    width=\paperwidth,%
+    voffset=\dimexpr\@nameuse{scr@l@tudheadings.foot.logo@y}%
+      -\dp\strutbox\relax,%
+    height=\dimexpr\paperheight-\layeryoffset\relax,%
+    contents={%
+      \if@tud@footcolor%
+        \let\@tempc\relax%
+        \ifnum\tud@head@bar>\@ne\def\@tempc{\color{HKS41}}\fi%
+        \ifstr{\tud@pagecolor}{HKS41}{\def\@tempc{\color{HKS41!80}}}{}%
+        \ifx\@tempc\relax\else%
+          \tud@ifverlower{2.03}{%
+            \tud@ddc@check%
+            \ifcase\@tempb\relax%
+              \vbox to \layerheight{%
+                \vfil\@tempc%
+                \rule{\layerwidth}{%
+                  \dimexpr\layerheight-\tud@dim@ddcdiff+\ht\strutbox\relax%
                 }%
-              \else%
-                \@tempc\rule{\layerwidth}{\layerheight}%
-              \fi%
-            }{\@tempc\rule{\layerwidth}{\layerheight}}%
-          \fi%
+              }%
+            \else%
+              \@tempc\rule{\layerwidth}{\layerheight}%
+            \fi%
+          }{\@tempc\rule{\layerwidth}{\layerheight}}%
         \fi%
-      },%
-    ]{tudheadings.foot.back}%
-    \DeclareNewPageStyleByLayers[%
-      onselect=\tud@ps@onselect,onbackground=\tud@ps@onbackground%
-    ]{tudheadings}{%
-      tudheadings.head.back,%
-      tudheadings.head.mainlogo,%
-      tudheadings.head.logo,%
-      tudheadings.head.bar,%
-      tudheadings.head.text,%
-      tudheadings.head.upperline,%
-      tudheadings.head.lowerline,%
-      tudheadings.head.upperwideline,%
-      tudheadings.head.lowerwideline,%
-      tudheadings.foot.back,%
-      tudheadings.foot.logo,%
-      scrheadings.foot.odd,%
-      scrheadings.foot.even,%
-      scrheadings.foot.oneside,%
-      scrheadings.foot.above.line,%
-      scrheadings.foot.below.line%
-    }%
-    \DeclareNewPageStyleAlias{tud}{tudheadings}%
-    \DeclareNewPageStyleAlias{tudscr}{tudheadings}%
-    \DeclareNewPageStyleAlias{tudscrheadings}{tudheadings}%
-    \DeclareNewPageStyleByLayers[%
-      onselect=\tud@ps@onselect,onbackground=\tud@ps@onbackground%
-    ]{plain.tudheadings}{%
-      tudheadings.head.back,%
-      tudheadings.head.mainlogo,%
-      tudheadings.head.logo,%
-      tudheadings.head.bar,%
-      tudheadings.head.text,%
-      tudheadings.head.upperline,%
-      tudheadings.head.lowerline,%
-      tudheadings.head.upperwideline,%
-      tudheadings.head.lowerwideline,%
-      tudheadings.foot.back,%
-      tudheadings.foot.logo,%
-      plain.scrheadings.foot.odd,%
-      plain.scrheadings.foot.even,%
-      plain.scrheadings.foot.oneside,%
-      plain.scrheadings.foot.above.line,%
-      plain.scrheadings.foot.below.line%
-    }%
-    \DeclareNewPageStyleAlias{plain.tudscrheadings}{plain.tudheadings}%
-    \DeclareNewPageStyleAlias{tudplain}{plain.tudheadings}%
-    \DeclareNewPageStyleAlias{tudscrplain}{plain.tudheadings}%
-    \DeclareNewPageStyleAlias{tudheadingsplain}{plain.tudheadings}%
-    \DeclareNewPageStyleAlias{tudscrheadingsplain}{plain.tudheadings}%
-    \DeclareNewPageStyleByLayers[%
-      onselect=\tud@ps@onselect,onbackground=\tud@ps@onbackground%
-    ]{empty.tudheadings}{%
-      tudheadings.head.back,%
-      tudheadings.head.mainlogo,%
-      tudheadings.head.logo,%
-      tudheadings.head.bar,%
-      tudheadings.head.text,%
-      tudheadings.head.upperline,%
-      tudheadings.head.lowerline,%
-      tudheadings.head.upperwideline,%
-      tudheadings.head.lowerwideline,%
-      tudheadings.foot.back,%
-      tudheadings.foot.logo,%
-    }%
-    \DeclareNewPageStyleAlias{empty.tudscrheadings}{empty.tudheadings}%
-    \DeclareNewPageStyleAlias{tudempty}{empty.tudheadings}%
-    \DeclareNewPageStyleAlias{tudscrempty}{empty.tudheadings}%
-    \DeclareNewPageStyleAlias{tudheadingsempty}{empty.tudheadings}%
-    \DeclareNewPageStyleAlias{tudscrheadingsempty}{empty.tudheadings}%
-    \DeclareNewLayer[
-      background,page,%
-      contents={%
-        \ifdefvoid{\tud@pagecolor}{}{%
-          \color{\tud@pagecolor}%
-          \rule{\layerwidth}{\layerheight}%
-        }%
-      },%
-    ]{tudheadings.pagecolor}
-    \AddLayersToPageStyle{@everystyle@}{tudheadings.pagecolor}%
-    \BeforeSelectAnyPageStyle{\tud@beforeselectanypagestyle{#1}}%
+      \fi%
+    },%
+  ]{tudheadings.foot.back}%
+  \DeclareNewPageStyleByLayers[%
+    onselect=\tud@ps@onselect,onbackground=\tud@ps@onbackground%
+  ]{tudheadings}{%
+    tudheadings.head.back,%
+    tudheadings.head.mainlogo,%
+    tudheadings.head.logo,%
+    tudheadings.head.bar,%
+    tudheadings.head.text,%
+    tudheadings.head.upperline,%
+    tudheadings.head.lowerline,%
+    tudheadings.head.upperwideline,%
+    tudheadings.head.lowerwideline,%
+    tudheadings.foot.back,%
+    tudheadings.foot.logo,%
+    scrheadings.foot.odd,%
+    scrheadings.foot.even,%
+    scrheadings.foot.oneside,%
+    scrheadings.foot.above.line,%
+    scrheadings.foot.below.line%
   }%
-}
+  \DeclareNewPageStyleAlias{tud}{tudheadings}%
+  \DeclareNewPageStyleAlias{tudscr}{tudheadings}%
+  \DeclareNewPageStyleAlias{tudscrheadings}{tudheadings}%
+  \DeclareNewPageStyleByLayers[%
+    onselect=\tud@ps@onselect,onbackground=\tud@ps@onbackground%
+  ]{plain.tudheadings}{%
+    tudheadings.head.back,%
+    tudheadings.head.mainlogo,%
+    tudheadings.head.logo,%
+    tudheadings.head.bar,%
+    tudheadings.head.text,%
+    tudheadings.head.upperline,%
+    tudheadings.head.lowerline,%
+    tudheadings.head.upperwideline,%
+    tudheadings.head.lowerwideline,%
+    tudheadings.foot.back,%
+    tudheadings.foot.logo,%
+    plain.scrheadings.foot.odd,%
+    plain.scrheadings.foot.even,%
+    plain.scrheadings.foot.oneside,%
+    plain.scrheadings.foot.above.line,%
+    plain.scrheadings.foot.below.line%
+  }%
+  \DeclareNewPageStyleAlias{plain.tudscrheadings}{plain.tudheadings}%
+  \DeclareNewPageStyleAlias{tudplain}{plain.tudheadings}%
+  \DeclareNewPageStyleAlias{tudscrplain}{plain.tudheadings}%
+  \DeclareNewPageStyleAlias{tudheadingsplain}{plain.tudheadings}%
+  \DeclareNewPageStyleAlias{tudscrheadingsplain}{plain.tudheadings}%
+  \DeclareNewPageStyleByLayers[%
+    onselect=\tud@ps@onselect,onbackground=\tud@ps@onbackground%
+  ]{empty.tudheadings}{%
+    tudheadings.head.back,%
+    tudheadings.head.mainlogo,%
+    tudheadings.head.logo,%
+    tudheadings.head.bar,%
+    tudheadings.head.text,%
+    tudheadings.head.upperline,%
+    tudheadings.head.lowerline,%
+    tudheadings.head.upperwideline,%
+    tudheadings.head.lowerwideline,%
+    tudheadings.foot.back,%
+    tudheadings.foot.logo,%
+  }%
+  \DeclareNewPageStyleAlias{empty.tudscrheadings}{empty.tudheadings}%
+  \DeclareNewPageStyleAlias{tudempty}{empty.tudheadings}%
+  \DeclareNewPageStyleAlias{tudscrempty}{empty.tudheadings}%
+  \DeclareNewPageStyleAlias{tudheadingsempty}{empty.tudheadings}%
+  \DeclareNewPageStyleAlias{tudscrheadingsempty}{empty.tudheadings}%
+  \DeclareNewLayer[
+    background,page,%
+    contents={%
+      \ifdefvoid{\tud@pagecolor}{}{%
+        \color{\tud@pagecolor}%
+        \rule{\layerwidth}{\layerheight}%
+      }%
+    },%
+  ]{tudheadings.pagecolor}
+  \AddLayersToPageStyle{@everystyle@}{tudheadings.pagecolor}%
+  \BeforeSelectAnyPageStyle{\tud@beforeselectanypagestyle{#1}}%
+}%
 \newcommand*\tud@ps@onselect{%
   \DeclarePageStyleAlias{plain}{plain.tudheadings}%
   \DeclarePageStyleAlias{headings}{tudheadings}%
@@ -2902,18 +2872,19 @@
   \fi%
   \let\Gm@restore@org\tud@geometry@restore%
 }
-\newcommand*\tud@geometry@hmargin{}
-\newcommand*\tud@geometry@vmargin{}
-\newcommand*\tud@geometry@tudmargin{}
-\tud@ifverlower{2.03}{\newcommand*\tud@geometry@ddcmargin{}}{}
-\AtEndPreamble{% §§§ notwendig?
+\AtEndPreamble{%
   \tud@ifsacrop{}{%
     \recalctypearea%
-    \RequirePackage{geometry}[2010/09/12]%
     \tud@geometry@process%
     \expandafter\pagestyle\expandafter{\currentpagestyle}%
   }%
 }
+\newcommand*\tud@geometry@hmargin{}
+\newcommand*\tud@geometry@vmargin{}
+\newcommand*\tud@geometry@tudmargin{}
+\tud@ifverlower{2.03}{\newcommand*\tud@geometry@ddcmargin{}}{}
+\tud@ifsacrop{\PreventPackageFromLoading{geometry}}{}%
+\RequirePackage{geometry}[2010/09/12]%
 \newcommand*\tud@geometry@process{%
   \tud@geometry@set%
   \ifcase\tud@geometry\relax%
@@ -3326,8 +3297,6 @@
     \let\@@makechapterhead\tud@@@makechapterhead%
   \fi%
 }
-% §§§ fontspec mit math-Option prüfen
-\AtEndPreamble{\tud@font@set\tud@layout@process}
 \newcommand*\tud@partheadstartvskip{%
   \def\tud@part@fontcolor{black}%
   \ifcase\tud@layout@part\relax\or\or%

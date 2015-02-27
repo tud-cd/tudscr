@@ -1,4 +1,4 @@
-% \CheckSum{3554}
+% \CheckSum{3553}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -92,8 +92,8 @@
 % \changes{v2.02}{2014/09/30}{\pkg{tudscrfonts} Nutzung alter tud-Klassen 
 %   mit neuen Schriftfamilien ermöglicht}%^^A
 % \changes{v2.04}{2015/02/17}{Eigene Schriftgrößendateien}%^^A
-% \changes{v2.04}{2015/02/19}{Schriftschnitte für \cs{mathcal} (\pkg{eulervm}) 
-%   und \cs{mathfrak} sowie \cs{mathbb} (\pkg{newtx}) hinzugefügt}%^^A
+% \changes{v2.04}{2015/02/27}{Interaktion mit Paketen insbesondere für 
+%   den Mathematiksatz verbessert}%^^A
 % \ToDo{Lösung für Option \opt{fontsize} finden}[v2.04]
 %
 % \section{Schriften des \CDs}
@@ -222,9 +222,9 @@
 % \begin{macro}{\tud@mathenc}
 % \changes{v2.03a}{2015/02/19}{entfernt}%^^A
 % Mit der Option \opt{fontspec} kann die explizite Verwendung des Paketes 
-% \pkg{fontspec} aktiviert werden. Nur so ist eine vollständige Anpassung der 
-% Schriften an die Funktionalitäten des Paketes möglich. Zu Beginn werden 
-% Schalter und Hilfsmakros definiert.
+% \pkg{fontspec} aktiviert werden. Alternativ kann das Paket auch durch den 
+% Nutzer selbst geladen werden. Zu Beginn werden Schalter und Hilfsmakros
+% definiert.
 %    \begin{macrocode}
 \newif\if@tud@univers
 \newif\if@tud@dinbold
@@ -235,6 +235,10 @@
 %    \begin{macrocode}
 \newif\if@tud@fontspec
 \TUD@key{fontspec}[true]{%
+  \ClassWarning{\tudcls@name}{%
+    The option key `fontspec' is deprecated.\MessageBreak%
+    You should load the package `fontspec' manually
+  }%
   \TUD@set@ifkey{fontspec}{@tud@fontspec}{#1}%
 }
 %    \end{macrocode}
@@ -278,100 +282,28 @@
   }{}
 %</package>
   \if@tud@fontspec%
-    \PreventPackageFromLoading[%
-%<*class>
-      \ClassWarning{\tudcls@name}%
-%</class>
-%<*package>
-      \PackageWarning{tudscrfonts}%
-%</package>
-      {%
-        You must not load the package `fontspec' as it is\MessageBreak%
-        loaded automatically at the end of the preamble.\MessageBreak%
-        If you want to pass options to `fontspec' use\MessageBreak%
-        `\string\PassOptionsToPackage{<option list>}{fontspec}'
-      }%
-    ]{fontspec}
-  \fi%
-}
-%    \end{macrocode}
-% Anschließend erfolgt die Verarbeitung der Option am Ende der Klasse. Zu 
-% allererst wird die Kodierung der Mathematikschriften für den weiteren Verlauf 
-% festgelegt. Da es so gut wie keine freien OpenType"=Schriften für den 
-% mathmatischen Formelsatz gibt, werden unabhängig vom Status der Option 
-% \opt{fontspec} \emph{immer} die PostScript"=Schriften verwendet, falls diese 
-% installiert sind.
-%    \begin{macrocode}
-\AtEndPreamble{%
-%    \end{macrocode}
-% Es wird überprüft, ob die PostScript"=Schriften installiert sind. Wird das 
-% Paket \pkg{fontspec} verwendet, werden diese nur für die Mathematikschriften 
-% verwendet. Sollte diese nicht vorhanden sein, wird eine Warnung ausgegeben. 
-% Ist die Option \opt{fontspec} nicht aktiviert, wird beim Nichtvorhandensein
-% der Schriften eine Warnung ausgegeben und eine Rückfallebene definiert.
-%    \begin{macrocode}
-  \if@tud@fontspec%
-    \edef\@tempa{%
-      \lowercase{\noexpand\InputIfFileExists{OT1\tud@univers.fd}}%
-    }%
-    \def\@tempb#1{%
-%<*class>
-      \ClassInfoNoLine{\tudcls@name}{%
-%</class>
-%<*package>
-      \PackageInfoNoLine{tudscrfonts}{%
-%</package>
-        `#1' fonts not found for math typesetting%
-      }%
-    }%
-  \else%
-    \edef\@tempa{%
-      \lowercase{\noexpand\InputIfFileExists{\encodingdefault\tud@univers.fd}}%
-    }%
-    \def\@tempb#1{%
-%<*class>
-      \ClassWarningNoLine{\tudcls@name}{%
-%</class>
-%<*package>
-      \PackageWarningNoLine{tudscrfonts}{%
-%</package>
-        `#1' fonts not found for encoding `\encodingdefault'.\MessageBreak%
-        Please use on of the installation scripts out of the\MessageBreak%
-        tudscr-bundle, which suits to your OS or choose a\MessageBreak%
-        possible encoding. A fallback layout is used%
-      }%
-    }%
-  \fi%
-  \@tempa{\@tud@universtrue}{\@tempb{Univers}}%
-%    \end{macrocode}
-% Ebenso wie bei der Univers"=Schriftfamilie wird auch bei DIN~Bold verfahren.
-%    \begin{macrocode}
-  \if@tud@fontspec%
-    \edef\@tempa{%
-      \lowercase{\noexpand\InputIfFileExists{OT1\tud@dinbold.fd}}%
-    }%
-  \else%
-    \edef\@tempa{%
-      \lowercase{\noexpand\InputIfFileExists{\encodingdefault\tud@dinbold.fd}}%
-    }%
-  \fi%
-  \@tempa{\@tud@dinboldtrue}{\@tempb{DIN Bold}}%
-%    \end{macrocode}
-% Nachdem auf die Schriften geprüft wurde, kommt nun die Umsetzung der Option. 
-% Sollten die PostScript"=Schriften installiert sein, wird \pkg{fontspec} darin 
-% gehindert, die Mathematikschriften von sich aus anzupassen.
-%    \begin{macrocode}
-  \if@tud@fontspec%
-    \UnPreventPackageFromLoading{fontspec}%
-    \if@tud@univers\if@tud@dinbold%
-      \PassOptionsToPackage{no-math}{fontspec}%
-    \fi\fi%
     \RequirePackage{fontspec}[2014/06/21]%
   \fi%
-%    \end{macrocode}
-% Damit ist die Verarbeitung der Option \opt{fontspec} abgeschlossen.
-%    \begin{macrocode}
 }
+%    \end{macrocode}
+% \begin{macro}{\tud@iffontspec}
+% \changes{v2.04}{2014/02/27}{neu}%^^A
+% Das Makro \cs{tud@iffontspec} führt abhängig von der Option \opt{fontspec} 
+% das erste oder zweite Argument aus.
+%    \begin{macrocode}
+\AtEndPreamble{%
+  \if@tud@fontspec%
+    \newcommand*\tud@iffontspec{\@firstoftwo}%
+  \else%
+    \newcommand*\tud@iffontspec{\@secondoftwo}%
+  \fi%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@iffontspec
+% Sibald das Paket \opt{fontspec} manuell geladen wurde, wird auch der passende 
+% Schlüssel gesetzt.
+%    \begin{macrocode}
+\AfterPackage*{fontspec}{\@tud@fontspectrue}
 %    \end{macrocode}
 % \end{macro}^^A \tud@mathenc
 % \end{macro}^^A \tud@dinbold
@@ -386,6 +318,66 @@
 %<*(class|package)&body>
 % \fi
 %
+% Am Ende der Präambel wird überprüft, ob die relevanten PostScript"=Schriften 
+% installiert sind. Wird das Paket \pkg{fontspec} verwendet, werden diese nur
+% für die Mathematikschriften verwendet. Sollte diese nicht vorhanden sein,
+% wird eine Warnung ausgegeben. Ist die Option \opt{fontspec} nicht aktiviert,
+% wird beim Nichtvorhandensein der Schriften eine Warnung ausgegeben und eine
+% Rückfallebene definiert.
+%    \begin{macrocode}
+\AtEndPreamble{%
+  \tud@iffontspec{%
+    \edef\@tempa{%
+      \lowercase{\noexpand\IfFileExists{OT1\tud@univers.fd}}%
+    }%
+    \def\@tempb#1{%
+%<*class>
+      \ClassInfoNoLine{\tudcls@name}{%
+%</class>
+%<*package>
+      \PackageInfoNoLine{tudscrfonts}{%
+%</package>
+        `#1' fonts not found for math typesetting%
+      }%
+    }%
+  }{%
+    \edef\@tempa{%
+      \lowercase{\noexpand\IfFileExists{\encodingdefault\tud@univers.fd}}%
+    }%
+    \def\@tempb#1{%
+%<*class>
+      \ClassWarningNoLine{\tudcls@name}{%
+%</class>
+%<*package>
+      \PackageWarningNoLine{tudscrfonts}{%
+%</package>
+        `#1' fonts not found for encoding `\encodingdefault'.\MessageBreak%
+        Please use on of the installation scripts out of the\MessageBreak%
+        tudscr-bundle, which suits to your OS or choose a\MessageBreak%
+        possible encoding. A fallback layout is used%
+      }%
+    }%
+  }%
+  \@tempa{\@tud@universtrue}{\@tempb{Univers}}%
+%    \end{macrocode}
+% Ebenso wie bei der Univers"=Schriftfamilie wird auch bei DIN~Bold verfahren.
+%    \begin{macrocode}
+  \if@tud@fontspec%
+    \edef\@tempa{%
+      \lowercase{\noexpand\IfFileExists{OT1\tud@dinbold.fd}}%
+    }%
+  \else%
+    \edef\@tempa{%
+      \lowercase{\noexpand\IfFileExists{\encodingdefault\tud@dinbold.fd}}%
+    }%
+  \fi%
+  \@tempa{\@tud@dinboldtrue}{\@tempb{DIN Bold}}%
+%    \end{macrocode}
+% Nachdem auf die Schriften geprüft wurde, erfolgt die Verarbeitung der Option 
+% \pkg{fontspec}. Da es so gut wie keine freien OpenType"=Schriften für den
+% mathmatischen Formelsatz gibt, werden unabhängig vom Status der Option 
+% \emph{immer} die PostScript"=Schriften verwendet, falls diese installiert
+% sind.
 % \begin{macro}{\univln}
 % \begin{macro}{\univrn}
 % \begin{macro}{\univbn}
@@ -399,11 +391,8 @@
 % Univers~65~Bold, Univers~75~Black, Univers~45~Light~Oblique,
 % Univers~55~Regular~Oblique, Univers~65~Bold~Oblique sowie
 % Univers~75~Black~Oblique definiert. Diese können so im Dokument unabhängig 
-% von der Option \opt{cdfont} genutzt werden
-%    \begin{macrocode}
-\AtEndPreamble{%
-%    \end{macrocode}
-% Dies geschieht abhängig von der Option \opt{fontspec}.
+% von der Option \opt{cdfont} genutzt werden. Dies geschieht abhängig von der
+% Option \opt{fontspec}.
 %    \begin{macrocode}
   \if@tud@fontspec%
 %    \end{macrocode}
@@ -898,7 +887,7 @@
 % Die Auswahl der Schriftgrößendateien und die Berechnung nicht vorhandener 
 % Größen wird zurückgesetzt.
 %    \begin{macrocode}
-    \iftudscrverlower{2.04}{}{%
+    \tud@ifverlower{2.04}{}{%
       \tud@cmd@restore{@fontsizefilebase}%
       \tud@cmd@restore{changefontsizes}%
     }%
@@ -933,7 +922,7 @@
 % Schriftgrößen geändert und ein adaptiertes Makro zur Berechnung dieser 
 % aktiviert.
 %    \begin{macrocode}
-    \iftudscrverlower{2.04}{}{%
+    \tud@ifverlower{2.04}{}{%
       \tud@cmd@store{@fontsizefilebase}%
       \tud@cmd@store{changefontsizes}%
       \renewcommand*\@fontsizefilebase{tudscrsize}%
@@ -1027,7 +1016,7 @@
 % Schluss wird das Layout erneut gesetzt.
 %    \begin{macrocode}
   \normalfont\selectfont%
-  \iftudscrverlower{2.04}{}{\tud@setfontsize}%
+  \tud@ifverlower{2.04}{}{\tud@setfontsize}%
   \tud@font@math@set%
 %<*class>
   \if@atdocument\tud@layout@process\fi%
@@ -1446,11 +1435,9 @@
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax%
       \bool@set@lock{@tud@cdmath}{false}%
-      \TUD@std@ifkey@lock{slantedgreek}{false}%
       \if@atdocument\tud@font@math@set\fi%
     \or%
       \bool@set@lock{@tud@cdmath}{true}%
-      \TUD@std@ifkey@lock{slantedgreek}{true}%
       \if@atdocument\tud@font@math@set\fi%
     \or
       \TUDoptions{slantedgreek=false}%
@@ -1464,20 +1451,25 @@
 % \end{macro}^^A \if@tud@cdmath
 % \end{option}^^A cdmath
 % \begin{option}{slantedgreek}
+% \begin{option}{slantedGreek}
+% \changes{v2.04}{2015/02/27}{neu}%^^A
 % \begin{macro}{\if@tud@slantedgreek}
 % \begin{macro}{\if@tud@slantedgreek@locked}
 % Mit dieser Option kann die Neigung der griechischen Majuskeln geändert werden.
 %    \begin{macrocode}
-\newif\if@tud@slantedgreek
-\TUD@key@lock{slantedgreek}[true]{%
-  \TUD@set@ifkey@lock{slantedgreek}{@tud@slantedgreek}{#1}%
+\bool@lock{@tud@slantedgreek}
+\TUD@key{slantedgreek}[true]{%
+  \TUD@set@ifkey{slantedgreek}{@tud@slantedgreek}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \bool@set@lock{@tud@slantedgreek}{#1}%
     \if@atdocument\tud@font@math@set\fi%
   \fi%
 }
+\TUD@key{slantedGreek}[true]{\TUDoptions{slantedgreek=#1}}
 %    \end{macrocode}
 % \end{macro}^^A \if@tud@slantedgreek@locked
 % \end{macro}^^A \if@tud@slantedgreek
+% \end{option}^^A slantedGreek
 % \end{option}^^A slantedgreek
 %
 % \iffalse
