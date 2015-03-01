@@ -70,7 +70,7 @@
       \fi%
     }%
   \fi%
-  \@TUDVersion{2015/02/20 v2.04 BETA TUD-KOMA-Script}%
+  \@TUDVersion{2015/03/01 v2.04 BETA TUD-KOMA-Script}%
 \endgroup%
 \providecommand*\tudscrmail{tudscr@gmail.com}
 \newcommand*\cls@name{report}
@@ -78,7 +78,7 @@
 \newcommand*\tudcls@name{tudscrreprt}
 \NeedsTeXFormat{LaTeX2e}[2011/06/27]
 \ProvidesClass{\tudcls@name}[%
-  2015/02/20 v2.04 BETA TUD-KOMA-Script
+  2015/03/01 v2.04 BETA TUD-KOMA-Script
   document class (\cls@name)%
 ]
 \typeout{The Corporate Design of Technische Universitaet Dresden}
@@ -1143,10 +1143,10 @@
       \lowercase{\noexpand\IfFileExists{OT1\tud@dinbold.fd}}%
     }%
     \def\@tempc#1{%
-      \ClassWarningNoLine{\tudcls@name}{%
+      \ClassInfoNoLine{\tudcls@name}{%
         `#1' fonts for math typesetting not found\MessageBreak%
         Please use one of the installation scripts for the\MessageBreak%
-        tudscr-bundle mentioned in the manual.\MessageBreak%
+        tudscr-bundle mentioned in the manual%
       }%
     }%
   }{%
@@ -1273,19 +1273,9 @@
     \SetMathAlphabet{\mathbf}{dinbold}{OT1}{\tud@dinbold}{b}{n}%
     \SetMathAlphabet{\mathsf}{dinbold}{OT1}{\tud@dinbold}{b}{n}%
     \SetMathAlphabet{\mathit}{dinbold}{OT1}{\tud@dinbold}{b}{sl}%
-    \DeclareMathSymbol{0}{\mathalpha}{operators}{`0}
-    \DeclareMathSymbol{1}{\mathalpha}{operators}{`1}
-    \DeclareMathSymbol{2}{\mathalpha}{operators}{`2}
-    \DeclareMathSymbol{3}{\mathalpha}{operators}{`3}
-    \DeclareMathSymbol{4}{\mathalpha}{operators}{`4}
-    \DeclareMathSymbol{5}{\mathalpha}{operators}{`5}
-    \DeclareMathSymbol{6}{\mathalpha}{operators}{`6}
-    \DeclareMathSymbol{7}{\mathalpha}{operators}{`7}
-    \DeclareMathSymbol{8}{\mathalpha}{operators}{`8}
-    \DeclareMathSymbol{9}{\mathalpha}{operators}{`9}
     \@ifpackageloaded{amsfonts}{%
       \DeclareFontFamily{U}{\tud@univers a}{}%
-      \DeclareFontShape{U}{\tud@univers a}{m}{n}{<-> cmbras10}{}%
+      \DeclareFontShape{U}{\tud@univers a}{m}{n}{<->cmbras10}{}%
       \SetSymbolFont{AMSa}{univers}{U}{\tud@univers a}{m}{n}%
       \SetSymbolFont{AMSa}{universbold}{U}{\tud@univers a}{m}{n}%
       \DeclareFontFamily{U}{\tud@univers b}{}%
@@ -1302,9 +1292,9 @@
     \@tempswafalse%
     \ifnum\Gamma=\@tempb\relax\@tempswatrue\fi%
     \ifnum\Gamma=\@tempc\relax\@tempswatrue\fi%
-    \if@tempswa
+    \if@tempswa%
       \bool@std@lock{@tud@slantedgreek}{true}%
-    \fi
+    \fi%
     \tud@font@greek@loop\tud@font@greek@init%
     \tud@font@set%
   }%
@@ -1457,7 +1447,8 @@
   \tud@font@math@set%
   \if@atdocument\tud@layout@process\fi%
 }
-\newcommand*\tud@font@size@set{% §§§
+% §§§
+\newcommand*\tud@font@size@set{%
   \setlength\smallskipamount{3\p@ \@plus 1\p@ \@minus 1\p@}
   \setlength\medskipamount{6\p@ \@plus 2\p@ \@minus 2\p@}
   \setlength\bigskipamount{12\p@ \@plus 4\p@ \@minus 4\p@}
@@ -1466,10 +1457,10 @@
   \setlength\@tempdima{\@ptsize\p@}
   \addtolength{\@tempdima}{10\p@}%
   \edef\@tempa{\noexpand\KOMAoptions{fontsize=\strip@pt\@tempdima}}%
-%  \@tempa%
+  \@tempa%
 }
 \newcommand*{\tud@changefontsizes}[2][\dimexpr5\@tempdima/4\relax]{%
-  \ClassWarning{\tudcls@name}%
+  \ClassInfo{\tudcls@name}%
     {Calculating font sizes for basic size `#2'}%
   \@defaultunits\@tempdima#2pt\relax\@nnil
   \setlength{\@tempdimc}{\@tempdima}%
@@ -2204,13 +2195,6 @@
   \tud@locale@english{\@dotswap}{.}%
 }
 %%% From File: tudscr-pagestyle.dtx
-\newcommand*\tud@ifsacrop{%
-  \ifcsdef{ifsa@crop}{%
-    \ifbool{sa@crop}{\@firstoftwo}{\@secondoftwo}%
-  }{%
-    \@secondoftwo%
-  }%
-}
 \newlength\tud@dim@widemargin
 \newlength\tud@dim@slimmargin
 \newlength\tud@dim@both
@@ -2270,6 +2254,13 @@
   \setlength\tud@dim@logowidth{\dimexpr1.9\tud@dim@widemargin\relax}%
   \setlength\tud@dim@footsep{%
     \dimexpr\tud@dim@widemargin-.6\tud@dim@topmargin\relax%
+  }%
+}
+\newcommand*\tud@ifsacrop{%
+  \ifcsdef{ifsa@crop}{%
+    \ifbool{sa@crop}{\@firstoftwo}{\@secondoftwo}%
+  }{%
+    \@secondoftwo%
   }%
 }
 \tud@ifsacrop{%
@@ -2521,7 +2512,7 @@
   ]{tudheadings.pagecolor}
   \AddLayersToPageStyle{@everystyle@}{tudheadings.pagecolor}%
   \BeforeSelectAnyPageStyle{\tud@beforeselectanypagestyle{#1}}%
-}%
+}
 \newcommand*\tud@ps@onselect{%
   \DeclarePageStyleAlias{plain}{plain.tudheadings}%
   \DeclarePageStyleAlias{headings}{tudheadings}%
@@ -2872,6 +2863,12 @@
   \fi%
   \let\Gm@restore@org\tud@geometry@restore%
 }
+\tud@ifsacrop{\PreventPackageFromLoading{geometry}}{}%
+\RequirePackage{geometry}[2010/09/12]%
+\newcommand*\tud@geometry@hmargin{}
+\newcommand*\tud@geometry@vmargin{}
+\newcommand*\tud@geometry@tudmargin{}
+\tud@ifverlower{2.03}{\newcommand*\tud@geometry@ddcmargin{}}{}
 \AtEndPreamble{%
   \tud@ifsacrop{}{%
     \recalctypearea%
@@ -2879,12 +2876,6 @@
     \expandafter\pagestyle\expandafter{\currentpagestyle}%
   }%
 }
-\newcommand*\tud@geometry@hmargin{}
-\newcommand*\tud@geometry@vmargin{}
-\newcommand*\tud@geometry@tudmargin{}
-\tud@ifverlower{2.03}{\newcommand*\tud@geometry@ddcmargin{}}{}
-\tud@ifsacrop{\PreventPackageFromLoading{geometry}}{}%
-\RequirePackage{geometry}[2010/09/12]%
 \newcommand*\tud@geometry@process{%
   \tud@geometry@set%
   \ifcase\tud@geometry\relax%

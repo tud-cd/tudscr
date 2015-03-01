@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-pagestyle.dtx}[%
-  2015/02/20 v2.04 TUD-KOMA-Script (pagestyle)%
+  2015/03/01 v2.04 TUD-KOMA-Script (pagestyle)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -276,7 +276,7 @@
 % der Verwendung mit den \TUDScript-Klassen nicht in die Quere kommen, müssen 
 % für einige Einstellungen unterdrückt werden.
 %
-% \begin{macro}{\ifstandalonecrop}
+% \begin{macro}{\tud@ifsacrop}
 % \changes{v2.02}{2014/09/08}{neu}%^^A
 % Mit diesem Makro kann die Verwendung der Option \opt{crop} mit der Klasse 
 % \cls{standalone} geprüft werden. Das erste Argument wird ausgeführt, wenn 
@@ -284,7 +284,7 @@
 % ausgeführt, wenn entweder die Option \opt{crop} deaktiviert ist oder die 
 % Klasse \cls{standalone} gar nicht geladen wurde.
 %    \begin{macrocode}
-\newcommand*\ifstandalonecrop{%
+\newcommand*\tud@ifsacrop{%
   \ifcsdef{ifsa@crop}{%
     \ifbool{sa@crop}{\@firstoftwo}{\@secondoftwo}%
   }{%
@@ -292,32 +292,30 @@
   }%
 }
 %    \end{macrocode}
-% \end{macro}^^A \ifstandalonecrop
+% \end{macro}^^A \tud@ifsacrop
 %
 % Ist die Klasse \cls{standalone} zusammen mit der Option \opt{crop} aktiv,
 % werden die Seitenränder auf die Einstellungen dieser Klasse gesetzt und das
 % Laden von \pkg{scrlayer-scrpage} verhindert.
 %
 %    \begin{macrocode}
-\AtEndPreamble{%
-  \ifstandalonecrop{%
-    \PreventPackageFromLoading{scrlayer-scrpage}%
-    \pagestyle{empty}%
-    \hoffset=-72.27pt%
-    \voffset=-72.27pt%
-    \topmargin=0pt%
-    \headheight=0pt%
-    \headsep=0pt%
-    \marginparsep=0pt%
-    \marginparwidth=0pt%
-    \footskip=0pt%
-    \marginparpush=0pt%
-    \oddsidemargin=0pt%
-    \evensidemargin=0pt%
-    \topskip=0pt%
-    \textheight=\maxdimen%
-  }{}%
-}
+\tud@ifsacrop{%
+  \PreventPackageFromLoading{scrlayer-scrpage}%
+  \pagestyle{empty}%
+  \hoffset=-72.27pt%
+  \voffset=-72.27pt%
+  \topmargin=0pt%
+  \headheight=0pt%
+  \headsep=0pt%
+  \marginparsep=0pt%
+  \marginparwidth=0pt%
+  \footskip=0pt%
+  \marginparpush=0pt%
+  \oddsidemargin=0pt%
+  \evensidemargin=0pt%
+  \topskip=0pt%
+  \textheight=\maxdimen%
+}{}%
 %    \end{macrocode}
 %
 % \subsection{Definition des Seitenstils mittels \pkg{scrlayer-scrpage}}
@@ -345,17 +343,12 @@
 %
 % Für das Erzeugen der Seitenstile wird das Paket \pkg{scrlayer-scrpage} 
 % genutzt. Mit diesem können verschiedene Ebenen erstellt werden, aus welchen 
-% anschließend der eigentliche Seitenstil zusammengesetzt wird.
+% anschließend der eigentliche Seitenstil zusammengesetzt wird. Dabei werden 
+% verschiedene, sogenannte Layers respektive Ebenen für die einzelnen Elemente
+% auf einer Seite erstellt.
 %    \begin{macrocode}
-\AtEndPreamble{%
-%    \end{macrocode}
-% Damit der Anwender beliebige Optionen an \pkg{scrlayer-scrpage} übergeben 
-% kann, wird das Paket erst zum Ende der Präambel geladen, wenn dies nicht 
-% bereits vorher geschehen ist. Anschließend werden verschiedene, sogeannte 
-% Layers respektive Ebenen für die einzelnen Elemente auf einer Seite erstellt.
-%    \begin{macrocode}
-  \RequirePackage{scrlayer-scrpage}[2013/12/14]%
-  \AfterPackage*{scrlayer-scrpage}{%
+\RequirePackage{scrlayer-scrpage}[2013/12/14]%
+\AfterPackage*{scrlayer-scrpage}{%
 %    \end{macrocode}
 % \begin{layer}{tudheadings.head.mainlogo}
 % \changes{v2.02}{2014/06/23}{neu}%^^A
@@ -363,22 +356,22 @@
 % \changes{v2.02}{2014/06/23}{neu}%^^A
 % Dies sind das links aus dem Satzspiegel verschobene Logo der \TnUD, \dots
 %    \begin{macrocode}
-    \DeclareNewLayer[%
-      background,headsep,%
-      voffset=\tud@dim@logoy,%
-      contents={%
-        \hspace*{\dimexpr\tud@dim@logox-\tud@dim@widemargin\relax}%
-        \tud@mainlogo%
-      },%
-    ]{tudheadings.head.mainlogo}%
+  \DeclareNewLayer[%
+    background,headsep,%
+    voffset=\tud@dim@logoy,%
+    contents={%
+      \hspace*{\dimexpr\tud@dim@logox-\tud@dim@widemargin\relax}%
+      \tud@mainlogo%
+    },%
+  ]{tudheadings.head.mainlogo}%
 %    \end{macrocode}
 % \dots und das Zweitlogo.
 %    \begin{macrocode}
-    \DeclareNewLayer[%
-      background,headsep,%
-      voffset=\tud@dim@logoy,%
-      contents={\hfill\tud@headlogo},%
-    ]{tudheadings.head.logo}%
+  \DeclareNewLayer[%
+    background,headsep,%
+    voffset=\tud@dim@logoy,%
+    contents={\hfill\tud@headlogo},%
+  ]{tudheadings.head.logo}%
 %    \end{macrocode}
 % \end{layer}^^A tudheadings.head.logo
 % \end{layer}^^A tudheadings.head.mainlogo
@@ -389,25 +382,25 @@
 % Außerdem gibt es eine Variante ohne Querbalken-Outline. Stattdessen werden
 % der Querbalken und der darüberliegende Kopf farbig abgesetzt. 
 %    \begin{macrocode}
-    \DeclareNewLayer[%
-      background,%
-      contents={%
-        \ifnum\tud@head@bar>\@ne\relax%
-          \color{HKS41}%
-          \rule{\layerwidth}{\tud@dim@topmargin}%
-        \fi%
-      },%
-    ]{tudheadings.head.back}%
-    \DeclareNewLayer[%
-      background,%
-      voffset=\tud@dim@topmargin,%
-      contents={%
-        \ifnum\tud@head@bar>\@ne\relax%
-          \color{HKS41!80}%
-          \rule{\layerwidth}{\tud@dim@barheight}%
-        \fi%
-      },%
-    ]{tudheadings.head.bar}%
+  \DeclareNewLayer[%
+    background,%
+    contents={%
+      \ifnum\tud@head@bar>\@ne\relax%
+        \color{HKS41}%
+        \rule{\layerwidth}{\tud@dim@topmargin}%
+      \fi%
+    },%
+  ]{tudheadings.head.back}%
+  \DeclareNewLayer[%
+    background,%
+    voffset=\tud@dim@topmargin,%
+    contents={%
+      \ifnum\tud@head@bar>\@ne\relax%
+        \color{HKS41!80}%
+        \rule{\layerwidth}{\tud@dim@barheight}%
+      \fi%
+    },%
+  ]{tudheadings.head.bar}%
 %    \end{macrocode}
 % \end{layer}^^A tudheadings.head.bar
 % \end{layer}^^A tudheadings.head.back
@@ -415,11 +408,11 @@
 % \changes{v2.02}{2014/06/23}{neu}%^^A
 % Fakultät, Einrichtung, Institut und Lehrstuhl als Inhalt des Querbalkens.
 %    \begin{macrocode}
-    \DeclareNewLayer[%
-      background,headsep,%
-      voffset=\dimexpr\tud@dim@topmargin+\tud@dim@line\relax,%
-      contents={\tud@head@text@box},%
-    ]{tudheadings.head.text}%
+  \DeclareNewLayer[%
+    background,headsep,%
+    voffset=\dimexpr\tud@dim@topmargin+\tud@dim@line\relax,%
+    contents={\tud@head@text@box},%
+  ]{tudheadings.head.text}%
 %    \end{macrocode}
 % \end{layer}^^A tudheadings.head.text
 % \begin{layer}{tudheadings.head.upperline}
@@ -436,44 +429,44 @@
 % horizontale Versatz beachtet werden. Dafür wird ggf. der Parameter \val{head} 
 % von \pkg{scrlayer-scrpage} verwendet. Darauf folgt \dots
 %    \begin{macrocode}
-    \DeclareNewLayer[%
-      background,headsep,%
-      voffset=\dimexpr\tud@dim@topmargin-.5\tud@dim@line\relax,%
-      contents={%
-        \ifnum\tud@head@bar<\tw@\relax\if@tud@head@widebar\else%
-          \tud@head@rule{\textwidth}%
-        \fi\fi%
-      },%
-    ]{tudheadings.head.upperline}%
-    \DeclareNewLayer[%
-      background,headsep,%
-      voffset=\dimexpr\tud@dim@topmargin+\tud@dim@barheight%
-        -.5\tud@dim@line\relax,%
-      contents={%
-        \ifnum\tud@head@bar<\tw@\relax\if@tud@head@widebar\else%
-          \tud@head@rule{\textwidth}%
-        \fi\fi%
-      },%
-    ]{tudheadings.head.lowerline}%
-    \DeclareNewLayer[%
-      background,%
-      voffset=\dimexpr\tud@dim@topmargin-.5\tud@dim@line\relax,%
-      contents={%
-        \ifnum\tud@head@bar<\tw@\relax\if@tud@head@widebar%
-          \tud@head@rule{\paperwidth}%
-        \fi\fi%
-      },%
-    ]{tudheadings.head.upperwideline}%
-    \DeclareNewLayer[%
-      background,%
-      voffset=\dimexpr\tud@dim@topmargin+\tud@dim@barheight%
-        -.5\tud@dim@line\relax,%
-      contents={%
-        \ifnum\tud@head@bar<\tw@\relax\if@tud@head@widebar%
-          \tud@head@rule{\paperwidth}%
-        \fi\fi%
-      },%
-    ]{tudheadings.head.lowerwideline}%
+  \DeclareNewLayer[%
+    background,headsep,%
+    voffset=\dimexpr\tud@dim@topmargin-.5\tud@dim@line\relax,%
+    contents={%
+      \ifnum\tud@head@bar<\tw@\relax\if@tud@head@widebar\else%
+        \tud@head@rule{\textwidth}%
+      \fi\fi%
+    },%
+  ]{tudheadings.head.upperline}%
+  \DeclareNewLayer[%
+    background,headsep,%
+    voffset=\dimexpr\tud@dim@topmargin+\tud@dim@barheight%
+      -.5\tud@dim@line\relax,%
+    contents={%
+      \ifnum\tud@head@bar<\tw@\relax\if@tud@head@widebar\else%
+        \tud@head@rule{\textwidth}%
+      \fi\fi%
+    },%
+  ]{tudheadings.head.lowerline}%
+  \DeclareNewLayer[%
+    background,%
+    voffset=\dimexpr\tud@dim@topmargin-.5\tud@dim@line\relax,%
+    contents={%
+      \ifnum\tud@head@bar<\tw@\relax\if@tud@head@widebar%
+        \tud@head@rule{\paperwidth}%
+      \fi\fi%
+    },%
+  ]{tudheadings.head.upperwideline}%
+  \DeclareNewLayer[%
+    background,%
+    voffset=\dimexpr\tud@dim@topmargin+\tud@dim@barheight%
+      -.5\tud@dim@line\relax,%
+    contents={%
+      \ifnum\tud@head@bar<\tw@\relax\if@tud@head@widebar%
+        \tud@head@rule{\paperwidth}%
+      \fi\fi%
+    },%
+  ]{tudheadings.head.lowerwideline}%
 %    \end{macrocode}
 % \end{layer}^^A tudheadings.head.lowerwideline
 % \end{layer}^^A tudheadings.head.upperwideline
@@ -491,102 +484,102 @@
 % Ab Version~v2.03 wird der Satzspiegel so gewählt, dass das \DDC-Logo in den 
 % normalen Seitenfuß passt.
 %    \begin{macrocode}
-    \DeclareNewLayer[%
-      background,foot,%
-      height=\dimexpr\paperheight-\layeryoffset\relax,%
-      contents={%
+  \DeclareNewLayer[%
+    background,foot,%
+    height=\dimexpr\paperheight-\layeryoffset\relax,%
+    contents={%
 %    \end{macrocode}
 % Falls die Höhe der Logos im Fuß nicht durch den Anwender festgelegt wurden, 
 % werden passende Standardwerte gesetzt.
 %    \begin{macrocode}
-        \ifdim\footlogoheight>\z@\relax\else%
-          \settoheight\footlogoheight{\tud@mainlogo}%
-          \tud@ifverlower{2.03}{%
-            \setlength\footlogoheight{.6\tud@dim@topmargin}%
-          }{}%
-        \fi%
+      \ifdim\footlogoheight>\z@\relax\else%
+        \settoheight\footlogoheight{\tud@mainlogo}%
+        \tud@ifverlower{2.03}{%
+          \setlength\footlogoheight{.6\tud@dim@topmargin}%
+        }{}%
+      \fi%
 %    \end{macrocode}
 % Die gesetzt Größe der Logos im Fuß wird geprüft. Sollten diese zu groß sein, 
 % wird eine Warnug ausgegeben.
 %    \begin{macrocode}
-        \setlength\@tempdima{%
-          \dimexpr\footlogoheight-\layerheight+\dp\strutbox\relax%
+      \setlength\@tempdima{%
+        \dimexpr\footlogoheight-\layerheight+\dp\strutbox\relax%
+      }%
+      \ifdim\@tempdima>\vfuzz\relax%
+        \ClassWarning{\tudcls@name}{%
+          The chosen `\string\footlogoheight' 
+          (\the\footlogoheight)\MessageBreak%
+          is \the\@tempdima\space higher than recommended. You\MessageBreak%
+          should decrease this length
+          \ifcase\tud@geometry\relax\else%
+            or alternatively\MessageBreak%
+            enlarge the bottom margin by using option\MessageBreak%
+            `extrabottommargin'%
+          \fi%
         }%
-        \ifdim\@tempdima>\vfuzz\relax%
-          \ClassWarning{\tudcls@name}{%
-            The chosen `\string\footlogoheight' 
-            (\the\footlogoheight)\MessageBreak%
-            is \the\@tempdima\space higher than recommended. You\MessageBreak%
-            should decrease this length
-            \ifcase\tud@geometry\relax\else%
-              or alternatively\MessageBreak%
-              enlarge the bottom margin by using option\MessageBreak%
-              `extrabottommargin'%
-            \fi%
-          }%
-        \fi%
+      \fi%
 %    \end{macrocode}
 % Hier erfolgt die eigentliche Ausgabe der Logos. Dabei werden ggf. zuerst die 
 % mit \cs{footlogo} angegeben wurden, anschließend wird das \DDC-Logo gesetzt, 
 % fall dies gefordert ist.
 %    \begin{macrocode}
-        \let\@tempa\relax%
-        \@for\@tempb:=\tud@@footlogo\do{%
-          \@tempa%
-          \ifx\@tempb\@empty\else%
-            \expandafter\tud@footlogo\expandafter{\@tempb}%
-          \fi%
-          \let\@tempa\footlogosep%
-        }%
-        \tud@ddclogo%
-      },%
-    ]{tudheadings.foot.logo}%
+      \let\@tempa\relax%
+      \@for\@tempb:=\tud@@footlogo\do{%
+        \@tempa%
+        \ifx\@tempb\@empty\else%
+          \expandafter\tud@footlogo\expandafter{\@tempb}%
+        \fi%
+        \let\@tempa\footlogosep%
+      }%
+      \tud@ddclogo%
+    },%
+  ]{tudheadings.foot.logo}%
 %    \end{macrocode}
 % Bis zur Version~v2.02 wurde für die Verwendung des \DDC-Logos der Satzspiegel
 % geändert. Hier wird dem Rechnung getragen.
 %    \begin{macrocode}
-    \tud@ifverlower{2.03}{%
-      \ModifyLayer[%
-        voffset=\dimexpr\topmargin+1in+\headheight+\headsep+\textheight%
-          +\footskip-\footheight-\tud@dim@ddcdiff%
-          \ifcase\tud@geometry\relax\else+\ht\strutbox+\dp\strutbox\fi%
-          \relax,%
-        height=\dimexpr.6\tud@dim@topmargin+\dp\strutbox\relax,%
-      ]{tudheadings.foot.logo}%
-    }{}%
+  \tud@ifverlower{2.03}{%
+    \ModifyLayer[%
+      voffset=\dimexpr\topmargin+1in+\headheight+\headsep+\textheight%
+        +\footskip-\footheight-\tud@dim@ddcdiff%
+        \ifcase\tud@geometry\relax\else+\ht\strutbox+\dp\strutbox\fi%
+        \relax,%
+      height=\dimexpr.6\tud@dim@topmargin+\dp\strutbox\relax,%
+    ]{tudheadings.foot.logo}%
+  }{}%
 %    \end{macrocode}
 % Diese Ebene wird als Hintergrund für den Fußbereich definiert.
 %    \begin{macrocode}
-    \DeclareNewLayer[%
-      background,%
-      hoffset=0pt,%
-      width=\paperwidth,%
-      voffset=\dimexpr\@nameuse{scr@l@tudheadings.foot.logo@y}%
-        -\dp\strutbox\relax,%
-      height=\dimexpr\paperheight-\layeryoffset\relax,%
-      contents={%
-        \if@tud@footcolor%
-          \let\@tempc\relax%
-          \ifnum\tud@head@bar>\@ne\def\@tempc{\color{HKS41}}\fi%
-          \ifstr{\tud@pagecolor}{HKS41}{\def\@tempc{\color{HKS41!80}}}{}%
-          \ifx\@tempc\relax\else%
-            \tud@ifverlower{2.03}{%
-              \tud@ddc@check%
-              \ifcase\@tempb\relax%
-                \vbox to \layerheight{%
-                  \vfil\@tempc%
-                  \rule{\layerwidth}{%
-                    \dimexpr\layerheight-\tud@dim@ddcdiff+\ht\strutbox\relax%
-                  }%
+  \DeclareNewLayer[%
+    background,%
+    hoffset=0pt,%
+    width=\paperwidth,%
+    voffset=\dimexpr\@nameuse{scr@l@tudheadings.foot.logo@y}%
+      -\dp\strutbox\relax,%
+    height=\dimexpr\paperheight-\layeryoffset\relax,%
+    contents={%
+      \if@tud@footcolor%
+        \let\@tempc\relax%
+        \ifnum\tud@head@bar>\@ne\def\@tempc{\color{HKS41}}\fi%
+        \ifstr{\tud@pagecolor}{HKS41}{\def\@tempc{\color{HKS41!80}}}{}%
+        \ifx\@tempc\relax\else%
+          \tud@ifverlower{2.03}{%
+            \tud@ddc@check%
+            \ifcase\@tempb\relax%
+              \vbox to \layerheight{%
+                \vfil\@tempc%
+                \rule{\layerwidth}{%
+                  \dimexpr\layerheight-\tud@dim@ddcdiff+\ht\strutbox\relax%
                 }%
-              \else%
-                \@tempc\rule{\layerwidth}{\layerheight}%
-              \fi%
-            }{\@tempc\rule{\layerwidth}{\layerheight}}%
-          \fi%
+              }%
+            \else%
+              \@tempc\rule{\layerwidth}{\layerheight}%
+            \fi%
+          }{\@tempc\rule{\layerwidth}{\layerheight}}%
         \fi%
-      },%
-    ]{tudheadings.foot.back}%
+      \fi%
+    },%
+  ]{tudheadings.foot.back}%
 %    \end{macrocode}
 % \end{layer}^^A tudheadings.foot.back
 % \end{layer}^^A tudheadings.foot.logo
@@ -599,85 +592,85 @@
 % weiterhin durch den Anwender verwendet werden kann, werden wie erwähnt die
 % entsprechenden \pgs{scrheadings}-Ebenen verwendet. 
 %    \begin{macrocode}
-    \DeclareNewPageStyleByLayers[%
-      onselect=\tud@ps@onselect,onbackground=\tud@ps@onbackground%
-    ]{tudheadings}{%
-      tudheadings.head.back,%
-      tudheadings.head.mainlogo,%
-      tudheadings.head.logo,%
-      tudheadings.head.bar,%
-      tudheadings.head.text,%
-      tudheadings.head.upperline,%
-      tudheadings.head.lowerline,%
-      tudheadings.head.upperwideline,%
-      tudheadings.head.lowerwideline,%
-      tudheadings.foot.back,%
-      tudheadings.foot.logo,%
-      scrheadings.foot.odd,%
-      scrheadings.foot.even,%
-      scrheadings.foot.oneside,%
-      scrheadings.foot.above.line,%
-      scrheadings.foot.below.line%
-    }%
+  \DeclareNewPageStyleByLayers[%
+    onselect=\tud@ps@onselect,onbackground=\tud@ps@onbackground%
+  ]{tudheadings}{%
+    tudheadings.head.back,%
+    tudheadings.head.mainlogo,%
+    tudheadings.head.logo,%
+    tudheadings.head.bar,%
+    tudheadings.head.text,%
+    tudheadings.head.upperline,%
+    tudheadings.head.lowerline,%
+    tudheadings.head.upperwideline,%
+    tudheadings.head.lowerwideline,%
+    tudheadings.foot.back,%
+    tudheadings.foot.logo,%
+    scrheadings.foot.odd,%
+    scrheadings.foot.even,%
+    scrheadings.foot.oneside,%
+    scrheadings.foot.above.line,%
+    scrheadings.foot.below.line%
+  }%
 %    \end{macrocode}
 % Zuletzt werden Aliasnamen für den Seitenstil definiert.
 %    \begin{macrocode}
-    \DeclareNewPageStyleAlias{tud}{tudheadings}%
-    \DeclareNewPageStyleAlias{tudscr}{tudheadings}%
-    \DeclareNewPageStyleAlias{tudscrheadings}{tudheadings}%
+  \DeclareNewPageStyleAlias{tud}{tudheadings}%
+  \DeclareNewPageStyleAlias{tudscr}{tudheadings}%
+  \DeclareNewPageStyleAlias{tudscrheadings}{tudheadings}%
 %    \end{macrocode}
 % Für den \pgs{plain}-Seitenstil wird ebenso verfahren. Hier werden für die 
 % Fußzeilenebenen des Seitenstils \pgs{plain.scrheadings} hinzugefügt.
 %    \begin{macrocode}
-    \DeclareNewPageStyleByLayers[%
-      onselect=\tud@ps@onselect,onbackground=\tud@ps@onbackground%
-    ]{plain.tudheadings}{%
-      tudheadings.head.back,%
-      tudheadings.head.mainlogo,%
-      tudheadings.head.logo,%
-      tudheadings.head.bar,%
-      tudheadings.head.text,%
-      tudheadings.head.upperline,%
-      tudheadings.head.lowerline,%
-      tudheadings.head.upperwideline,%
-      tudheadings.head.lowerwideline,%
-      tudheadings.foot.back,%
-      tudheadings.foot.logo,%
-      plain.scrheadings.foot.odd,%
-      plain.scrheadings.foot.even,%
-      plain.scrheadings.foot.oneside,%
-      plain.scrheadings.foot.above.line,%
-      plain.scrheadings.foot.below.line%
-    }%
-    \DeclareNewPageStyleAlias{plain.tudscrheadings}{plain.tudheadings}%
-    \DeclareNewPageStyleAlias{tudplain}{plain.tudheadings}%
-    \DeclareNewPageStyleAlias{tudscrplain}{plain.tudheadings}%
-    \DeclareNewPageStyleAlias{tudheadingsplain}{plain.tudheadings}%
-    \DeclareNewPageStyleAlias{tudscrheadingsplain}{plain.tudheadings}%
+  \DeclareNewPageStyleByLayers[%
+    onselect=\tud@ps@onselect,onbackground=\tud@ps@onbackground%
+  ]{plain.tudheadings}{%
+    tudheadings.head.back,%
+    tudheadings.head.mainlogo,%
+    tudheadings.head.logo,%
+    tudheadings.head.bar,%
+    tudheadings.head.text,%
+    tudheadings.head.upperline,%
+    tudheadings.head.lowerline,%
+    tudheadings.head.upperwideline,%
+    tudheadings.head.lowerwideline,%
+    tudheadings.foot.back,%
+    tudheadings.foot.logo,%
+    plain.scrheadings.foot.odd,%
+    plain.scrheadings.foot.even,%
+    plain.scrheadings.foot.oneside,%
+    plain.scrheadings.foot.above.line,%
+    plain.scrheadings.foot.below.line%
+  }%
+  \DeclareNewPageStyleAlias{plain.tudscrheadings}{plain.tudheadings}%
+  \DeclareNewPageStyleAlias{tudplain}{plain.tudheadings}%
+  \DeclareNewPageStyleAlias{tudscrplain}{plain.tudheadings}%
+  \DeclareNewPageStyleAlias{tudheadingsplain}{plain.tudheadings}%
+  \DeclareNewPageStyleAlias{tudscrheadingsplain}{plain.tudheadings}%
 %    \end{macrocode}
 % Des Weiteren gibt es einen selbstständigen \enquote{leeren} Seitenstil, der 
 % lediglich aus dem Kopf besteht und einen lerren Seitenfuß hat.
 %    \begin{macrocode}
-    \DeclareNewPageStyleByLayers[%
-      onselect=\tud@ps@onselect,onbackground=\tud@ps@onbackground%
-    ]{empty.tudheadings}{%
-      tudheadings.head.back,%
-      tudheadings.head.mainlogo,%
-      tudheadings.head.logo,%
-      tudheadings.head.bar,%
-      tudheadings.head.text,%
-      tudheadings.head.upperline,%
-      tudheadings.head.lowerline,%
-      tudheadings.head.upperwideline,%
-      tudheadings.head.lowerwideline,%
-      tudheadings.foot.back,%
-      tudheadings.foot.logo,%
-    }%
-    \DeclareNewPageStyleAlias{empty.tudscrheadings}{empty.tudheadings}%
-    \DeclareNewPageStyleAlias{tudempty}{empty.tudheadings}%
-    \DeclareNewPageStyleAlias{tudscrempty}{empty.tudheadings}%
-    \DeclareNewPageStyleAlias{tudheadingsempty}{empty.tudheadings}%
-    \DeclareNewPageStyleAlias{tudscrheadingsempty}{empty.tudheadings}%
+  \DeclareNewPageStyleByLayers[%
+    onselect=\tud@ps@onselect,onbackground=\tud@ps@onbackground%
+  ]{empty.tudheadings}{%
+    tudheadings.head.back,%
+    tudheadings.head.mainlogo,%
+    tudheadings.head.logo,%
+    tudheadings.head.bar,%
+    tudheadings.head.text,%
+    tudheadings.head.upperline,%
+    tudheadings.head.lowerline,%
+    tudheadings.head.upperwideline,%
+    tudheadings.head.lowerwideline,%
+    tudheadings.foot.back,%
+    tudheadings.foot.logo,%
+  }%
+  \DeclareNewPageStyleAlias{empty.tudscrheadings}{empty.tudheadings}%
+  \DeclareNewPageStyleAlias{tudempty}{empty.tudheadings}%
+  \DeclareNewPageStyleAlias{tudscrempty}{empty.tudheadings}%
+  \DeclareNewPageStyleAlias{tudheadingsempty}{empty.tudheadings}%
+  \DeclareNewPageStyleAlias{tudscrheadingsempty}{empty.tudheadings}%
 %    \end{macrocode}
 % \begin{layer}{tudheadings.pagecolor}
 % \changes{v2.03}{2015/01/09}{neu}%^^A
@@ -686,23 +679,22 @@
 % \val{tudheadings.pagecolor} definiert, die \emph{allen} Seitenstilen
 % hinzugefügt wird.
 %    \begin{macrocode}
-    \DeclareNewLayer[
-      background,page,%
-      contents={%
-        \ifdefvoid{\tud@pagecolor}{}{%
-          \color{\tud@pagecolor}%
-          \rule{\layerwidth}{\layerheight}%
-        }%
-      },%
-    ]{tudheadings.pagecolor}
-    \AddLayersToPageStyle{@everystyle@}{tudheadings.pagecolor}%
+  \DeclareNewLayer[
+    background,page,%
+    contents={%
+      \ifdefvoid{\tud@pagecolor}{}{%
+        \color{\tud@pagecolor}%
+        \rule{\layerwidth}{\layerheight}%
+      }%
+    },%
+  ]{tudheadings.pagecolor}
+  \AddLayersToPageStyle{@everystyle@}{tudheadings.pagecolor}%
 %    \end{macrocode}
 % \end{layer}^^A tudheadings.pagecolor
 % Der Kopf im \CD der \TnUD erfordert einen eigenen Satzspiegel, der ggf. durch 
 % \cs{tud@beforeselectanypagestyle} aktiviert bzw. deaktiviert wird.
 %    \begin{macrocode}
-    \BeforeSelectAnyPageStyle{\tud@beforeselectanypagestyle{#1}}%
-  }%
+  \BeforeSelectAnyPageStyle{\tud@beforeselectanypagestyle{#1}}%
 }
 %    \end{macrocode}
 % \end{pagestyle}^^A empty.tudheadings
@@ -1941,6 +1933,12 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@geometry@restore
+% Das Paket \pkg{geometry} erlaubt eine genaue Vorgabe des Satzspiegels und
+% der Seitenränder, wie es vom \CD der TU~Dresden verlangt wird. 
+%    \begin{macrocode}
+\tud@ifsacrop{\PreventPackageFromLoading{geometry}}{}%
+\RequirePackage{geometry}[2010/09/12]%
+%    \end{macrocode}
 % \begin{macro}{\tud@geometry@hmargin}
 % \begin{macro}{\tud@geometry@vmargin}
 % \begin{macro}{\tud@geometry@tudmargin}
@@ -1962,21 +1960,17 @@
 % \end{macro}^^A \tud@geometry@tudmargin
 % \end{macro}^^A \tud@geometry@vmargin
 % \end{macro}^^A \tud@geometry@hmargin
-% \changes{v2.02}{2014/06/29}{\pkg{geometry} Laden verzögert}%^^A
-% Das Paket \pkg{geometry} erlaubt eine genaue Vorgabe des Satzspiegels und
-% der Seitenränder, wie es vom \CD der TU~Dresden verlangt wird. Damit dieses
-% alle Satzspiegeleinstellungen korrekt vornimmt und auch alle Klassenoptionen 
-% korrekt verarbeitet, wird das Laden mit \cs{AtEndPreamble} bis ans Ende der
-% Präambel verzögert und vorher der Satzspiegel neu berechnet. Anschließend 
-% erstellt \cs{tud@geometry@process} alle benötigten Satzspiegel. Durch das 
-% Setzen des Seitenstils wird der richtige Satzspiegel ausgewählt. Dies 
-% geschieht \emph{nicht}, wenn die \cls{standalone}-Klasse mit der Option
+% Damit dieses alle Satzspiegeleinstellungen korrekt vornimmt und auch alle
+% Klassenoptionen korrekt verarbeitet, wird die Berechnung des Satzspiegels
+% erstmalig mit \cs{AtEndPreamble} am Ende der Präambel ausgeführt. 
+% Anschließend erstellt \cs{tud@geometry@process} alle benötigten Satzspiegel.
+% Durch das Setzen des Seitenstils wird der richtige Satzspiegel ausgewählt.
+% Dies geschieht \emph{nicht}, wenn die \cls{standalone}-Klasse mit der Option
 % \opt{crop} geladen wurde, um die Seitenränder nicht zu ändern.
 %    \begin{macrocode}
 \AtEndPreamble{%
-  \ifstandalonecrop{}{%
+  \tud@ifsacrop{}{%
     \recalctypearea%
-    \RequirePackage{geometry}[2010/09/12]%
     \tud@geometry@process%
     \expandafter\pagestyle\expandafter{\currentpagestyle}%
   }%
