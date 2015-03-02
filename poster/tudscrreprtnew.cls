@@ -225,12 +225,13 @@
     \or%
       \TUDoptions{fontspec=false}%
     \fi%
+  \else%
+    \TUDoptions{cdfontsize=#1}%
   \fi%
 }
 % §§§ in tudscrfonts integrieren
 % §§§ Zusammenspiel mit fontspec prüfen
 \newcommand*\tud@font@size{\@ptsize}
-% §§§ evtl. \@ptsize für typearea direkt definieren 
 \TUD@key{cdfontsize}{%
   \expandafter\@defaultunits\expandafter\@tempdima#1 pt\relax\@nnil
   \addtolength{\@tempdima}{-10\p@}%
@@ -240,6 +241,9 @@
     \tud@font@size@set%
   %%%
   \else%
+% Zusammenspiel mit typearea passt nicht 
+%    \BeforePackage{typearea}{\edef\@ptsize{\tud@font@size}}%
+%    \AfterClass{\scrcls@name}{\edef\@ptsize{\tud@font@size}}%
   %%%
   \fi
   \FamilyKeyStateProcessed%
