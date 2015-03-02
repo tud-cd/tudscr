@@ -227,6 +227,28 @@
     \fi%
   \fi%
 }
+% §§§ in tudscrfonts integrieren
+% §§§ Zusammenspiel mit fontspec prüfen
+\newcommand*\tud@font@size{\@ptsize}
+% §§§ evtl. \@ptsize für typearea direkt definieren 
+\TUD@key{cdfontsize}{%
+  \expandafter\@defaultunits\expandafter\@tempdima#1 pt\relax\@nnil
+  \addtolength{\@tempdima}{-10\p@}%
+  \edef\tud@font@size{\strip@pt\@tempdima}%
+  \typeout{+++++ \tud@font@size}
+  \if@atdocument%
+    \tud@font@size@set%
+  %%%
+  \else%
+  %%%
+  \fi
+  \FamilyKeyStateProcessed%
+}
+% §§§ notwendig?
+\DefineFamilyMember{KOMA}
+\DefineFamilyKey{KOMA}{fontsize}{%
+  \AtEndOfFamilyOptions{\let\tud@font@size\@ptsize}%
+}
 \bool@lock{@tud@cdmath}
 \TUD@key{cdmath}[true]{%
   \TUD@set@numkey{cdmath}{@tempa}{%
@@ -735,6 +757,16 @@
 \newif\if@tud@clearcolor
 \TUD@ifkey{clearcolor}{@tud@clearcolor}
 \TUD@ifkey{clearcolour}{@tud@clearcolor}
+\newcommand*\tud@font@koma@set[2]{%
+  \ifcsdef{tud@font@koma@#1}{}{\addtokomafont{#1}{\@nameuse{tud@font@koma@#1}}}%
+  \@namedef{tud@font@koma@#1}{#2\nobreak}%
+}
+\newcommand*\tud@font@koma@reset[1]{%
+  \addtokomafont{#1}{\@nameuse{tud@font@koma@#1}}%
+}
+\newcommand*\tud@font@koma@unset[1]{%
+  \ifcsdef{tud@font@koma@#1}{\@namedef{tud@font@koma@#1}{\relax}}{}%
+}
 %%% From File: tudscr-frontmatter.dtx
 \newcommand*\tud@fm@switch{%
   {section}{2},{sect}{2},{sec}{2},{addsec}{2},%
@@ -866,94 +898,86 @@
 \newif\if@tud@bookmarks
 \TUD@ifkey{tudbookmarks}{@tud@bookmarks}
 %%% From File: tudscr-comp.dtx
-\newcommand*\tud@deprecated@key[2]{%
+\newcommand*\TUD@deprecated@key[2]{%
   \ClassWarning{\tudcls@name}%
   {%
     The option key `#1' is deprecated.\MessageBreak%
-    It's recommended to use `#2' instead%
+    It's recommended to use `#2'\MessageBreak%
+    instead%
   }%
+  \TUDoptions{#2}%
 }
 \TUD@key{cdfonts}[true]{%
   \TUD@set@ifkey{cdfonts}{@tempswa}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \tud@deprecated@key{cdfonts}{cdfont}%
     \if@tempswa%
-      \TUDoptions{cdfont=true}%
+      \TUD@deprecated@key{cdfonts=#1}{cdfont=true}%
     \else%
-      \TUDoptions{cdfont=false}%
+      \TUD@deprecated@key{cdfonts=#1}{cdfont=false}%
     \fi%
   \fi%
 }
 \TUD@key{tudfonts}[true]{%
   \TUD@set@ifkey{tudfonts}{@tempswa}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \tud@deprecated@key{tudfonts}{cdfont}%
     \if@tempswa%
-      \TUDoptions{cdfont=true}%
+      \TUD@deprecated@key{tudfonts=#1}{cdfont=true}%
     \else%
-      \TUDoptions{cdfont=false}%
+      \TUD@deprecated@key{tudfonts=#1}{cdfont=false}%
     \fi%
   \fi%
 }
 \TUD@key{heavyfont}[true]{%
   \TUD@set@ifkey{heavyfont}{@tempswa}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \tud@deprecated@key{heavyfont}{cdfont}%
     \if@tempswa%
-      \TUDoptions{cdfont=heavy}%
+      \TUD@deprecated@key{heavyfont}{cdfont=heavy}%
     \else%
-      \TUDoptions{cdfont=true}%
+      \TUD@deprecated@key{heavyfont=#1}{cdfont=true}%
     \fi%
   \fi%
 }
 \TUD@key{din}[true]{%
   \TUD@set@ifkey{din}{@tempswa}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \tud@deprecated@key{din}{cdfont}%
     \if@tempswa%
-      \TUDoptions{cdfont=din}%
+      \TUD@deprecated@key{din}{cdfont=din}%
     \else%
-      \TUDoptions{cdfont=nodin}%
+      \TUD@deprecated@key{din=#1}{cdfont=nodin}%
     \fi%
   \fi%
 }
 \TUD@key{nodin}[true]{%
   \TUD@set@ifkey{nodin}{@tempswa}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \tud@deprecated@key{nodin}{cdfont}%
     \if@tempswa%
-      \TUDoptions{cdfont=nodin}%
+      \TUD@deprecated@key{nodin}{cdfont=nodin}%
     \else%
-      \TUDoptions{cdfont=din}%
+      \TUD@deprecated@key{nodin=#1}{cdfont=din}%
     \fi%
   \fi%
 }
 \TUD@key{sansmath}[true]{%
   \TUD@set@ifkey{sansmath}{@tempswa}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \tud@deprecated@key{sansmath}{cdmath}%
     \if@tempswa%
-      \TUDoptions{cdmath=true}%
+      \TUD@deprecated@key{sansmath}{cdmath=true}%
     \else%
-      \TUDoptions{cdmath=false}%
+      \TUD@deprecated@key{sansmath=#1}{cdmath=false}%
     \fi%
   \fi%
 }
 \TUD@key{serifmath}[true]{%
   \TUD@set@ifkey{serifmath}{@tempswa}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \tud@deprecated@key{sansmath}{cdmath}%
     \if@tempswa%
-      \TUDoptions{cdmath=false}%
+      \TUD@deprecated@key{serifmath}{cdmath=false}%
     \else%
-      \TUDoptions{cdmath=true}%
+      \TUD@deprecated@key{serifmath=#1}{cdmath=true}%
     \fi%
   \fi%
 }
-\TUD@key{geometry}[true]{%
-  \tud@deprecated@key{geometry}{cdgeometry}%
-  \TUDoptions{cdgeometry=#1}%
-}
+\TUD@key{geometry}[true]{\TUD@deprecated@key{geometry=#1}{cdgeometry=#1}}
 \TUD@key{barfont}[true]{%
   \TUD@set@numkey{barfont}{@tempa}{%
     \TUD@numkey@bool,%
@@ -963,35 +987,32 @@
     {heavy}{2},{heavyfont}{2}%
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \tud@deprecated@key{barfont}{cdhead}%
     \ifcase\@tempa\relax%
-      \TUDoptions{cdhead=false}%
+      \TUD@deprecated@key{barfont=#1}{cdhead=false}%
     \or%
-      \TUDoptions{cdhead=true}%
+      \TUD@deprecated@key{barfont=#1}{cdhead=true}%
     \or%
-      \TUDoptions{cdhead=heavy}%
+      \TUD@deprecated@key{barfont=#1}{cdhead=heavy}%
     \fi%
   \fi%
 }
 \TUD@key{widehead}[true]{%
   \TUD@set@ifkey{widehead}{@tempswa}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \tud@deprecated@key{widehead}{cdhead}%
     \if@tempswa%
-      \TUDoptions{cdhead=paperwidth}%
+      \TUD@deprecated@key{widehead}{cdhead=paperwidth}%
     \else%
-      \TUDoptions{cdhead=textwidth}%
+      \TUD@deprecated@key{widehead=#1}{cdhead=textwidth}%
     \fi%
   \fi%
 }
 \TUD@key{tudfoot}[true]{%
   \TUD@set@ifkey{tudfoot}{@tempswa}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \tud@deprecated@key{tudfoot}{cdfoot}%
     \if@tempswa%
-      \TUDoptions{cdfoot=true}%
+      \TUD@deprecated@key{tudfoot}{cdfoot=true}%
     \else%
-      \TUDoptions{cdfoot=false}%
+      \TUD@deprecated@key{tudfoot=#1}{cdfoot=false}%
     \fi%
   \fi%
 }
@@ -999,27 +1020,26 @@
   \TUD@set@numkey{color}{@tempa}{%
     \TUD@numkey@bool,%
     {nocolor}{0},{nocolour}{0},{monochrome}{0},{monochromatic}{0},%
-    {lite}{1},{light}{1},{pale}{1},%
-    {colorlite}{1},{litecolor}{1},{colourlite}{1},{litecolour}{1},%
-    {colorlight}{1},{lightcolor}{1},{colourlight}{1},{lightcolour}{1},%
-    {colorpale}{1},{palecolor}{1},{colourpale}{1},{palecolour}{1},%
-    {bicolor}{2},{bicolour}{2},{twocolor}{2},{twocolour}{2},%
-    {bichrome}{2},{bichromatic}{2},{dichrome}{2},{dichromatic}{2},%
-    {color}{3},{colour}{3},%
+    {color}{1},{colour}{1},%
+    {lite}{2},{light}{2},{pale}{2},%
+    {colorlite}{2},{litecolor}{2},{colourlite}{2},{litecolour}{2},%
+    {colorlight}{2},{lightcolor}{2},{colourlight}{2},{lightcolour}{2},%
+    {colorpale}{2},{palecolor}{2},{colourpale}{2},{palecolour}{2},%
+    {bicolor}{3},{bicolour}{3},{twocolor}{3},{twocolour}{3},%
+    {bichrome}{3},{bichromatic}{3},{dichrome}{3},{dichromatic}{3},%
     {full}{4},{colorfull}{4},{fullcolor}{4},{colourfull}{4},{fullcolour}{4}%
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \tud@deprecated@key{color}{cd}%
     \ifcase\@tempa\relax%
-      \TUDoptions{cd=true}%
+      \TUD@deprecated@key{color=#1}{cd=true}%
     \or%
-      \TUDoptions{cd=pale}%
+      \TUD@deprecated@key{color=#1}{cd=color}%
     \or%
-      \TUDoptions{cd=bicolor}%
+      \TUD@deprecated@key{color=#1}{cd=pale}%
     \or%
-      \TUDoptions{cd=color}%
+      \TUD@deprecated@key{color=#1}{cd=bicolor}%
     \or%
-      \TUDoptions{cd=fullcolor}%
+      \TUD@deprecated@key{color=#1}{cd=fullcolor}%
     \fi%
   \fi%
 }
@@ -1084,20 +1104,7 @@
     \expandafter\@secondoftwo%
   \fi%
 }
-% §§§ evtl. auch Wert merken und mit tud@font@size@set ausführen
-% §§§ in tudscrfonts integrieren
-%\TUD@key{fontsize}{%
-%  \if@atdocument%
-%    \KOMAoptions{fontsize=#1}%
-%  \else%
-%    \AtEndPreamble{%
-%      \KOMAoptions{fontsize=#1}%
-%%      \recalctypearea% AfterCalculatingTypearea überarbeiten
-%    }
-%  \fi%
-%}
 %%% From File: tudscr-base.dtx
-\tud@ifverlower{2.04}{}{\PassOptionsToClass{parskip=relative}{\scrcls@name}}
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{\scrcls@name}}
 \TUDExecuteOptions{cd,cdfont,tudbookmarks}
 \TUDProcessOptions\relax
@@ -1244,6 +1251,7 @@
     \newcommand*\textdbn{}%
     \DeclareTextFontCommand{\textdbn}{\dinbn}%
   }%
+  \tud@font@set[nomath]%
   \AtBeginDocument{%
     \DeclareMathVersion{univers}%
     \DeclareMathVersion{universbold}%
@@ -1296,7 +1304,7 @@
       \bool@std@lock{@tud@slantedgreek}{true}%
     \fi%
     \tud@font@greek@loop\tud@font@greek@init%
-    \tud@font@set%
+    \tud@font@math@set%
   }%
 }
 \newcommand*\tud@font@greek@init[1]{%
@@ -1317,7 +1325,7 @@
 }
 \newif\if@tud@mweights
 \AfterPackage*{mweights}{\@tud@mweightstrue}
-\newcommand*\tud@font@set{%
+\newcommand*\tud@font@set[1][]{%
   \if@tud@mweights%
     \ifdef{\bfseries@rm}{}{\edef\mdseries@rm{\bfdefault}}%
     \ifdef{\bfseries@sf}{}{\edef\bfseries@sf{\bfdefault}}%
@@ -1344,11 +1352,6 @@
       \tud@cmd@restore{mdseries@sf}%
       \tud@cmd@restore{mdseries@tt}%
     \fi%
-    % §§§
-    \tud@ifverlower{2.04}{}{%
-%      \tud@cmd@restore{@fontsizefilebase}%
-%      \let\changefontsizes\simple@changefontsizes%
-    }%
     \bool@std@lock{@tud@cdmath}{false}%
     \cs@std@lock{tud@head@font}{0}%
   \else%
@@ -1369,12 +1372,6 @@
       \tud@cmd@store{mdseries@sf}%
       \tud@cmd@store{mdseries@tt}%
     \fi%
-    \tud@ifverlower{2.04}{}{%
-%      \tud@cmd@store{@fontsizefilebase}%
-%      \tud@cmd@store{changefontsizes}%
-%      \renewcommand*\@fontsizefilebase{tudscrsize}%
-%      \let\changefontsizes\tud@changefontsizes%
-    }%
     \bool@std@lock{@tud@cdmath}{true}%
     \cs@std@lock{tud@head@font}{\tud@cdfont}%
     \tud@iffontspec{%
@@ -1444,23 +1441,40 @@
   \fi%
   \normalfont\selectfont%
   \tud@ifverlower{2.04}{}{\tud@font@size@set}%
-  \tud@font@math@set%
-  \if@atdocument\tud@layout@process\fi%
+  \ifstr{#1}{nomath}{}{\tud@font@math@set}%
+  \tud@layout@process%
 }
-% §§§
 \newcommand*\tud@font@size@set{%
-  \setlength\smallskipamount{3\p@ \@plus 1\p@ \@minus 1\p@}
-  \setlength\medskipamount{6\p@ \@plus 2\p@ \@minus 2\p@}
-  \setlength\bigskipamount{12\p@ \@plus 4\p@ \@minus 4\p@}
-  \setlength{\abovecaptionskip}{10\p@}
-  \setlength{\belowcaptionskip}{0\p@}
-  \setlength\@tempdima{\@ptsize\p@}
+  \typeout{+++++ \tud@font@size}
+  \ifcase\tud@cdfont\relax%
+    \tud@skip@restore{smallskipamount}%
+    \tud@skip@restore{medskipamount}%
+    \tud@skip@restore{bigskipamount}%
+    \tud@skip@restore{abovecaptionskip}%
+    \tud@skip@restore{belowcaptionskip}%
+    \tud@cmd@restore{@fontsizefilebase}%
+    \tud@cmd@restore{changefontsizes}%
+    \edef\@tempa{\@ptsize}%
+  \else%
+    \tud@skip@store{smallskipamount}%
+    \tud@skip@store{medskipamount}%
+    \tud@skip@store{bigskipamount}%
+    \tud@skip@store{abovecaptionskip}%
+    \tud@skip@store{belowcaptionskip}%
+    \tud@cmd@store{@fontsizefilebase}%
+    \tud@cmd@store{changefontsizes}%
+    \renewcommand*\@fontsizefilebase{tudscrsize}%
+    \let\changefontsizes\tud@changefontsizes%
+    \edef\@tempa{\tud@font@size}%
+  \fi%
+  % §§§ alles nochmal prüfen
+  \setlength\@tempdima{\@tempa\p@}
   \addtolength{\@tempdima}{10\p@}%
   \edef\@tempa{\noexpand\KOMAoptions{fontsize=\strip@pt\@tempdima}}%
   \@tempa%
 }
 \newcommand*{\tud@changefontsizes}[2][\dimexpr5\@tempdima/4\relax]{%
-  \ClassInfo{\tudcls@name}%
+  \ClassWarning{\tudcls@name}%
     {Calculating font sizes for basic size `#2'}%
   \@defaultunits\@tempdima#2pt\relax\@nnil
   \setlength{\@tempdimc}{\@tempdima}%
@@ -3604,16 +3618,6 @@
     \fi%
     \tud@makeuppercase{#1}%
   \endgroup%
-}
-\newcommand*\tud@font@koma@set[2]{%
-  \ifcsdef{tud@font@koma@#1}{}{\addtokomafont{#1}{\@nameuse{tud@font@koma@#1}}}%
-  \@namedef{tud@font@koma@#1}{#2\nobreak}%
-}
-\newcommand*\tud@font@koma@reset[1]{%
-  \addtokomafont{#1}{\@nameuse{tud@font@koma@#1}}%
-}
-\newcommand*\tud@font@koma@unset[1]{%
-  \ifcsdef{tud@font@koma@#1}{\@namedef{tud@font@koma@#1}{\relax}}{}%
 }
 %%% From File: tudscr-frontmatter.dtx
 \newcommand*\tud@fm@check[2]{%

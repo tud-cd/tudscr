@@ -1,4 +1,4 @@
-% \CheckSum{297}
+% \CheckSum{326}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-base.dtx}[%
-  2015/03/01 v2.04 TUD-KOMA-Script\space%
+  2015/03/02 v2.04 TUD-KOMA-Script\space%
 %</driver>
 %<package>\NeedsTeXFormat{LaTeX2e}[2011/06/27]
 %<package>\ProvidesPackage{tudscrbase}[%
@@ -445,6 +445,43 @@
 % \end{macro}^^A \tud@cmd@reset
 % \end{macro}^^A \tud@cmd@restore
 % \end{macro}^^A \tud@cmd@store
+% \begin{macro}{\tud@skip@store}
+% \changes{v2.04}{2015/03/02}{neu}%^^A
+% \begin{macro}{\tud@skip@restore}
+% \changes{v2.04}{2015/03/02}{neu}%^^A
+% \begin{macro}{\tud@skip@check}
+% \changes{v2.04}{2015/03/02}{neu}%^^A
+% Hiermit können~-- äquivalent zum Sichern und Wiederherstellen von Befehlen~-- 
+% Längenregister abgespeichert werden.
+%    \begin{macrocode}
+\newcommand*\tud@skip@store[1]{%
+  \tud@skip@check{#1}%
+  \ifcsdef{@@tud@skip@#1}{}{%
+    \csedef{@@tud@skip@#1}{\expandafter\the\csname #1\endcsname}%
+  }%
+}
+\newcommand*\tud@skip@restore[1]{%
+  \tud@skip@check{#1}%
+  \ifcsdef{@@tud@skip@#1}{%
+    \csname #1\endcsname=\csname @@tud@skip@#1\endcsname%
+    \csundef{@@tud@skip@#1}%
+  }{}%
+}
+\newcommand*\tud@skip@check[1]{%
+  \ifisskip{\csname #1\endcsname}{}{%
+    \PackageError{tudscrbase}{%
+      `\@backslashchar#1' is not defined%
+    }{%
+      The skip `\@backslashchar#1' was never defined.\MessageBreak%
+      Please contact the TUD-KOMA-Script maintainer\MessageBreak%
+      via \tudscrmail. A bugfix is urgently required
+    }%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@skip@check
+% \end{macro}^^A \tud@skip@restore
+% \end{macro}^^A \tud@skip@store
 % \begin{macro}{\tud@patch@wrn}
 % Dieses Makro wird verwendet, wenn mit den Mitteln von \pkg{etoolbox} bereits
 % vorhandene Befehle angepasst werden sollen (\cs{apptocmd}, \cs{pretocmd},
@@ -619,7 +656,6 @@
 % Durchreichen aller Klassenoptionen an die \KOMAScript-Klasse bzw. an die
 % genutzte \TUDScript-Elternklasse.
 %    \begin{macrocode}
-\tud@ifverlower{2.04}{}{\PassOptionsToClass{parskip=relative}{\scrcls@name}}
 %<*!inherit>
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{\scrcls@name}}
 %</!inherit>
