@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-fonts.dtx}[%
-  2015/03/02 v2.04 TUD-KOMA-Script\space%
+  2015/03/03 v2.04 TUD-KOMA-Script\space%
 %</driver>
 %<package&identify>\NeedsTeXFormat{LaTeX2e}[2011/06/27]
 %<package&identify>\ProvidesPackage{%
@@ -235,7 +235,13 @@
 %    \begin{macrocode}
 \newif\if@tud@fontspec
 \TUD@key{fontspec}[true]{%
-  \ClassWarning{\tudcls@name}{%
+%<*class>
+  \ClassWarning{\tudcls@name}%
+%</class>
+%<*package>
+  \PackageWarning{tudscrfonts}
+%</package>
+  {%
     The option key `fontspec' is deprecated.\MessageBreak%
     You should load the package `fontspec' manually
   }%
@@ -273,14 +279,6 @@
     }%
     \FamilyKeyStateProcessed%
   }%
-%<*package>
-  \@ifpackageloaded{fontspec}{%
-    \PackageError{tudscrfonts}{Package `fontspec' too early}{%
-      When using the option `fontspec' you must not load\MessageBreak%
-      the package `fontspec' before `tudscrfonts'.%
-    }%
-  }{}
-%</package>
   \if@tud@fontspec%
     \RequirePackage{fontspec}[2014/06/21]%
   \fi%
@@ -620,6 +618,17 @@
     \DeclareTextFontCommand{\textdbn}{\dinbn}%
   }%
 %    \end{macrocode}
+% Damit die Schrift im Dokument später noch umgestellt werden kann, werden
+% sämtliche Einstellungen erst am Ende der Präambel gesichert. Deshalb wird
+% der dafür verantwortliche Befehl \cs{tud@font@set} hier zum ersten Mal
+% verwendet. Damit ist es möglich, die Schriften eventuell geladener Pakete wie
+% \pkg{lmodern} oder \pkg{libertine} vorher zu sichern und später wieder zu
+% aktivieren. Die Einstellungen für den Mathematiksatz erfolgen erst zu Beginn 
+% des Dokumentes, um insbesondere auf Einstellungen des Paketes \pkg{fontspec} 
+% reagieren zu können.
+%    \begin{macrocode}
+  \tud@font@set[nomath]%
+%    \end{macrocode}
 % \end{macro}^^A \textdbn
 % \end{macro}^^A \@dinbn
 % \end{macro}^^A \dinbn
@@ -628,7 +637,7 @@
 % \begin{macro}{\mv@dinbold}
 % \changes{v2.02}{2014/06/27}{Symbole \val{symbols} werden aus Schriftart 
 %   DIN~Bold verwendet}%^^A
-% Für die Mathematikschriften im Fließtext werden für die lateineischen Lettern
+% Für die Mathematikschriften im Fließtext werden für die lateinischen Lettern
 % die Univers"=Schriften des \CDs verwendet. Darin enthalten sind die auch die
 % griechischen Buchstaben aus dem Paket \pkg{cmbright}. Zusätzlich werden aus
 % dem \pkg{iwona}"~Paket die mathematische Symbole verwendet. Es werden zwei
@@ -707,15 +716,10 @@
     \fi%
     \tud@font@greek@loop\tud@font@greek@init%
 %    \end{macrocode}
-% Damit die Schrift im Dokument später noch umgestellt werden kann, werden
-% sämtliche Einstellungen erst zu Beginn des Dokumentes gesichert. Deshalb wird
-% der dafür verantwortliche Befehl \cs{tud@font@set} hier zum ersten Mal
-% verwendet. Damit ist es möglich, die Schriften eventuell geladener Pakete wie
-% \pkg{lmodern} oder \pkg{libertine} vorher zu sichern und später wieder zu
-% aktivieren. Auch die Einstellungen für den Mathematiksatz werden erstmalig 
-% durch \cs{tud@font@math@set} gesetzt.
+% Zum Schluss werden abhängig von der gewählten Einstellung für die Schriftart 
+% der Option \opt{cdfont} die benötigten Mathematikversionen geladen.
 %    \begin{macrocode}
-    \tud@font@set%
+    \tud@font@math@set%
   }%
 }
 %    \end{macrocode}
@@ -899,11 +903,61 @@
     \or%
       \TUDoptions{fontspec=false}%
     \fi%
+%    \end{macrocode}
+% Wird kein gültiger Wert für die Option angegeben, so wird davon ausgegangen, 
+% dass es sich bei diesem um die gewünschte Schriftgröße handelt.
+%    \begin{macrocode}
+  \else%
+    \TUDoptions{cdfontsize=#1}%
+    \ifcase\tud@cdfont\relax%
+      \def\tud@cdfont{1}%
+      \if@atdocument\tud@font@set\fi%
+    \fi%
   \fi%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@cdfont
 % \end{option}^^A cdfont
+% \begin{option}{cdfontsize}
+% \changes{v2.02}{2014/07/08}{Schlüsselwerte für \opt{cdhead}}%^^A
+% \changes{v2.02}{2014/08/29}{Schlüsselwerte für \opt{fontspec}}%^^A
+% \begin{macro}{\tud@ptsize}
+% \begin{option}{fontsize}
+% \begin{macro}{\tud@font@koma@updatesize}
+% Mit der Option \opt{cdfontsize} kann die Schriftgröße für die Schriften des 
+% \CDs eingestellt werden. Im Makro \cs{tud@ptsize} wird diese gespeichert. Die 
+% eigentliche Schriftgrößenänderung erfolgt durch \cs{tud@font@size@set}.
+%    \begin{macrocode}
+\newcommand*\tud@ptsize{\@ptsize}
+\TUD@key{cdfontsize}{%
+  \expandafter\@defaultunits\expandafter\@tempdima#1 pt\relax\@nnil%
+  \addtolength{\@tempdima}{-10\p@}%
+  \edef\tud@ptsize{\strip@pt\@tempdima}%
+  \if@atdocument\tud@font@size@set\fi%
+  \FamilyKeyStateProcessed%
+}
+%    \end{macrocode}
+% Das Makro \cs{tud@font@size@set} nutzt für das Festlegen der Schriftgröße die
+% Möglichkeiten der \KOMAScript-Option \opt{fontsize}. Um unterscheiden zu 
+% können, ob die Änderung der Schriftgröße intern über dieses Makro oder durch 
+% den Anwender im Dokument via \cs{KOMAoptions} erfolgte, wird das Hilfsmakro
+% \cs{tud@font@koma@updatesize} definiert. Dessen Definition wird durch 
+% \cs{tud@font@size@set} temporär geändert.
+%    \begin{macrocode}
+\newcommand*\tud@font@koma@updatesize{}
+\DefineFamilyMember{KOMA}
+\DefineFamilyKey{KOMA}{fontsize}{%
+  \AtEndOfFamilyOptions{%
+    \let\tud@ptsize\@ptsize%
+    \tud@font@koma@updatesize%
+  }%
+  \FamilyKeyStateProcessed%
+}
+%    \end{macrocode}
+% \end{macro}^^A \font@koma@updatesize
+% \end{option}^^A fontsize
+% \end{macro}^^A \tud@ptsize
+% \end{option}^^A cdfontsize
 %
 % \iffalse
 %</(class|package)&option>
@@ -918,7 +972,7 @@
 %    \begin{macrocode}
 \newif\if@tud@mweights
 \AfterPackage*{mweights}{\@tud@mweightstrue}
-\newcommand*\tud@font@set{%
+\newcommand*\tud@font@set[1][]{%
   \if@tud@mweights%
     \ifdef{\bfseries@rm}{}{\edef\mdseries@rm{\bfdefault}}%
     \ifdef{\bfseries@sf}{}{\edef\bfseries@sf{\bfdefault}}%
@@ -949,14 +1003,6 @@
       \tud@cmd@restore{mdseries@sf}%
       \tud@cmd@restore{mdseries@tt}%
     \fi%
-%    \end{macrocode}
-% Die Auswahl der Schriftgrößendateien und die Berechnung nicht vorhandener 
-% Größen wird zurückgesetzt.
-%    \begin{macrocode}
-    \tud@ifverlower{2.04}{}{%
-      \tud@cmd@restore{@fontsizefilebase}%
-      \tud@cmd@restore{changefontsizes}%
-    }%
 %    \end{macrocode}
 % Die Mathematikschriften werden auf ihr Standardverhalten zurückgesetzt. 
 %    \begin{macrocode}
@@ -990,18 +1036,6 @@
       \tud@cmd@store{mdseries@sf}%
       \tud@cmd@store{mdseries@tt}%
     \fi%
-%    \end{macrocode}
-% Die Auswahl der Schriftgrößendateien und die Berechnung nicht vorhandener 
-% Größen wird gespeichert. Anschließend wird der Standardname der Dateien für 
-% Schriftgrößen geändert und ein adaptiertes Makro zur Berechnung dieser 
-% aktiviert.
-%    \begin{macrocode}
-    \tud@ifverlower{2.04}{}{%
-      \tud@cmd@store{@fontsizefilebase}%
-      \tud@cmd@store{changefontsizes}%
-      \renewcommand*\@fontsizefilebase{tudscrsize}%
-      \let\changefontsizes\tud@changefontsizes%
-    }%
 %    \end{macrocode}
 % Die Mathematikschriften werden bei der Verwendung der Schriften des \CDs~--
 % falls nicht anders durch den Anwender definiert~-- auf Serifenlose gesetzt.
@@ -1110,13 +1144,13 @@
 %    \end{macrocode}
 % Zum Ende wird die gewählte Standardschrift aktiviert und die Schriftgröße 
 % ausgewählt. Danach erfolgt die Behandlung der Mathematikschriften. Ganz zum
-% Schluss wird das Layout erneut gesetzt.
+% Schluss wird das Layout erneuert.
 %    \begin{macrocode}
   \normalfont\selectfont%
   \tud@ifverlower{2.04}{}{\tud@font@size@set}%
-  \tud@font@math@set%
+  \ifstr{#1}{nomath}{}{\tud@font@math@set}%
 %<*class>
-  \if@atdocument\tud@layout@process\fi%
+  \tud@layout@process%
 %</class>
 }
 %    \end{macrocode}
@@ -1125,26 +1159,77 @@
 % \changes{v2.04}{2015/02/17}{neu}%^^A
 % Mit diesem Befehl wird nach der Auswahl der Schriftart die Schriftgröße 
 % definiert. Dies ist notwendig, weil die Schriften des \CDs andere Dateien für 
-% die Schriftgrößen verwenden, die geladen bzw. zurückgesetzt werden müssen.
+% die Schriftgrößen verwenden, die geladen bzw. zurückgesetzt werden müssen. 
+% Auch die automatische Berechnung der Schriftgrößen für den Fall, dass keine 
+% passende \val{.clo}-Dateien vorhanden sind mit \cs{tud@changefontsizes},
+% unterscheidet sich von der \KOMAScript-Variante.
 %    \begin{macrocode}
 \newcommand*\tud@font@size@set{%
 %    \end{macrocode}
-% Zu Beginn die Standardeinstelunngen für die folgenden Längen, damit beim 
-% Zurückschalten auch alles seine Ordnung hat.
+% Um festzustellen, ob eine Berechnung der Schriftgröße notwendig ist, wird die 
+% aktuelle Definition des Befehl \cs{changefontsizes} im Makro \cs{@tempswa} 
+% gesichert. Sollte sich diese aufgrund einer Änderung der Schriften durch die
+% Option \opt{cdfont} ändern, ist in jedem Fall eine Neuberechnung notwendig.
+% Hierfür wird im weiteren Verlauf ggf. der Schalter \cs{@tempswa} gesetzt.
 %    \begin{macrocode}
-  \setlength\smallskipamount{3\p@ \@plus 1\p@ \@minus 1\p@}
-  \setlength\medskipamount{6\p@ \@plus 2\p@ \@minus 2\p@}
-  \setlength\bigskipamount{12\p@ \@plus 4\p@ \@minus 4\p@}
-  \setlength{\abovecaptionskip}{10\p@}
-  \setlength{\belowcaptionskip}{0\p@}
+  \let\@tempa\changefontsizes%
+  \@tempswafalse%
 %    \end{macrocode}
-% Anschließend wird die Schriftgröße mit der \KOMAScript-Option \opt{fontsize}
-% gesetzt.
+% Danach werden die Standardeinstellungen abhängig von \opt{cdfont} entweder 
+% wiederhergestellt oder gesichert und neu definiert. Im Makro \cs{@tempb} wird 
+% abhängig von der gewählten Schrift, die gewünschte Schriftgröße expandiert.
 %    \begin{macrocode}
-  \setlength\@tempdima{\@ptsize\p@}
-  \addtolength{\@tempdima}{10\p@}%
-  \edef\@tempa{\noexpand\KOMAoptions{fontsize=\strip@pt\@tempdima}}%
-  \@tempa%
+  \ifcase\tud@cdfont\relax%
+    \tud@skip@restore{smallskipamount}%
+    \tud@skip@restore{medskipamount}%
+    \tud@skip@restore{bigskipamount}%
+    \tud@skip@restore{abovecaptionskip}%
+    \tud@skip@restore{belowcaptionskip}%
+    \tud@cmd@restore{@fontsizefilebase}%
+    \tud@cmd@restore{changefontsizes}%
+    \tud@cmd@restore{@ptsize}%
+    \edef\@tempb{\@ptsize}%
+  \else%
+    \tud@skip@store{smallskipamount}%
+    \tud@skip@store{medskipamount}%
+    \tud@skip@store{bigskipamount}%
+    \tud@skip@store{abovecaptionskip}%
+    \tud@skip@store{belowcaptionskip}%
+    \tud@cmd@store{@fontsizefilebase}%
+    \tud@cmd@store{changefontsizes}%
+    \tud@cmd@store{@ptsize}%
+    \renewcommand*\@fontsizefilebase{tudscrsize}%
+    \let\changefontsizes\tud@changefontsizes%
+    \edef\@tempb{\tud@ptsize}%
+%    \end{macrocode}
+% Unterscheidet sich die über die Option \opt{cdfontsize} gesetzte Schriftgröße 
+% im Makro \cs{tud@ptsize} von der Standardschriftgröße \cs{@ptsize}, so muss 
+% eine Neuberechnung erfolgen\dots
+%    \begin{macrocode}
+    \ifx\@tempb\@ptsize\relax\else\@tempswatrue\fi%
+  \fi%
+%    \end{macrocode}
+% \dots genauso wie bei der Änderung der automatischen Schriftgrößenberechnung.
+%    \begin{macrocode}
+  \ifx\@tempa\changefontsizes\relax\else\@tempswatrue\fi%
+%    \end{macrocode}
+% Sollte eine Neuberechnung der Schriftgröße notwendig sein, so wird diese mit 
+% der \KOMAScript-Option \opt{fontsize} gesetzt.
+%    \begin{macrocode}
+  \if@tempswa%
+    \setlength\@tempdima{\@tempb\p@}%
+    \addtolength{\@tempdima}{10\p@}%
+%    \end{macrocode}
+% Normalerweise soll bei der Verwendung der \KOMAScript-Option \opt{fontsize} 
+% durch den Anwender die gesciherte Schriftgröße aktualisiert werden. Wird 
+% diese Option jedoch intern verwendet, soll dies unterbleiben. Deshalb wird 
+% der Befehl \cs{tud@font@koma@updatesize} kurzzeitig deaktivert.
+%    \begin{macrocode}
+    \let\tud@font@koma@updatesize\relax%
+    \edef\@tempa{\noexpand\KOMAoptions{fontsize=\strip@pt\@tempdima pt}}%
+    \@tempa%
+    \def\tud@font@koma@updatesize{\tud@cmd@update{@ptsize}}%
+  \fi%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@font@size@set

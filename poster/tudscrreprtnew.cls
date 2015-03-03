@@ -227,31 +227,29 @@
     \fi%
   \else%
     \TUDoptions{cdfontsize=#1}%
+    \ifcase\tud@cdfont\relax%
+      \def\tud@cdfont{1}%
+      \if@atdocument\tud@font@set\fi%
+    \fi%
   \fi%
 }
 % §§§ in tudscrfonts integrieren
-% §§§ Zusammenspiel mit fontspec prüfen
-\newcommand*\tud@font@size{\@ptsize}
+\newcommand*\tud@ptsize{\@ptsize}
 \TUD@key{cdfontsize}{%
-  \expandafter\@defaultunits\expandafter\@tempdima#1 pt\relax\@nnil
+  \expandafter\@defaultunits\expandafter\@tempdima#1 pt\relax\@nnil%
   \addtolength{\@tempdima}{-10\p@}%
-  \edef\tud@font@size{\strip@pt\@tempdima}%
-  \typeout{+++++ \tud@font@size}
-  \if@atdocument%
-    \tud@font@size@set%
-  %%%
-  \else%
-% Zusammenspiel mit typearea passt nicht 
-%    \BeforePackage{typearea}{\edef\@ptsize{\tud@font@size}}%
-%    \AfterClass{\scrcls@name}{\edef\@ptsize{\tud@font@size}}%
-  %%%
-  \fi
+  \edef\tud@ptsize{\strip@pt\@tempdima}%
+  \if@atdocument\tud@font@size@set\fi%
   \FamilyKeyStateProcessed%
 }
-% §§§ notwendig?
+\newcommand*\tud@font@koma@updatesize{}
 \DefineFamilyMember{KOMA}
 \DefineFamilyKey{KOMA}{fontsize}{%
-  \AtEndOfFamilyOptions{\let\tud@font@size\@ptsize}%
+  \AtEndOfFamilyOptions{%
+    \let\tud@ptsize\@ptsize%
+    \tud@font@koma@updatesize%
+  }%
+  \FamilyKeyStateProcessed%
 }
 \bool@lock{@tud@cdmath}
 \TUD@key{cdmath}[true]{%
@@ -1449,7 +1447,8 @@
   \tud@layout@process%
 }
 \newcommand*\tud@font@size@set{%
-  \typeout{+++++ \tud@font@size}
+  \let\@tempa\changefontsizes%
+  \@tempswafalse%
   \ifcase\tud@cdfont\relax%
     \tud@skip@restore{smallskipamount}%
     \tud@skip@restore{medskipamount}%
@@ -1458,7 +1457,8 @@
     \tud@skip@restore{belowcaptionskip}%
     \tud@cmd@restore{@fontsizefilebase}%
     \tud@cmd@restore{changefontsizes}%
-    \edef\@tempa{\@ptsize}%
+    \tud@cmd@restore{@ptsize}%
+    \edef\@tempb{\@ptsize}%
   \else%
     \tud@skip@store{smallskipamount}%
     \tud@skip@store{medskipamount}%
@@ -1467,18 +1467,24 @@
     \tud@skip@store{belowcaptionskip}%
     \tud@cmd@store{@fontsizefilebase}%
     \tud@cmd@store{changefontsizes}%
+    \tud@cmd@store{@ptsize}%
     \renewcommand*\@fontsizefilebase{tudscrsize}%
     \let\changefontsizes\tud@changefontsizes%
-    \edef\@tempa{\tud@font@size}%
+    \edef\@tempb{\tud@ptsize}%
+    \ifx\@tempb\@ptsize\relax\else\@tempswatrue\fi%
   \fi%
-  % §§§ alles nochmal prüfen
-  \setlength\@tempdima{\@tempa\p@}
-  \addtolength{\@tempdima}{10\p@}%
-  \edef\@tempa{\noexpand\KOMAoptions{fontsize=\strip@pt\@tempdima}}%
-  \@tempa%
+  \ifx\@tempa\changefontsizes\relax\else\@tempswatrue\fi%
+  \if@tempswa%
+    \setlength\@tempdima{\@tempb\p@}%
+    \addtolength{\@tempdima}{10\p@}%
+    \let\tud@font@koma@updatesize\relax%
+    \edef\@tempa{\noexpand\KOMAoptions{fontsize=\strip@pt\@tempdima pt}}%
+    \@tempa%
+    \def\tud@font@koma@updatesize{\tud@cmd@update{@ptsize}}%
+  \fi%
 }
 \newcommand*{\tud@changefontsizes}[2][\dimexpr5\@tempdima/4\relax]{%
-  \ClassWarning{\tudcls@name}%
+  \ClassInfo{\tudcls@name}%
     {Calculating font sizes for basic size `#2'}%
   \@defaultunits\@tempdima#2pt\relax\@nnil
   \setlength{\@tempdimc}{\@tempdima}%
@@ -4163,7 +4169,7 @@
             }{%
               \ClassWarning{\tudcls@name}{%
                 `\string\date' was not given.\MessageBreak%
-                 It's substituted by the given due date%
+                It's substituted by the given due date%
               }%
               \let\@date\@duedate%
             }%
@@ -4698,12 +4704,12 @@
   \AtBeginDocument{%
     \ifcsdef{#1}{}{%
       \expandafter\newrobustcmd\csname #1\endcsname{%
-  \ClassWarning{\tudcls@name}{%
-    The command `\@backslashchar#1' is deprecated.\MessageBreak%
-    It's recommended to use `\@backslashchar#2' instead%
-  }%
-  \csletcs{#1}{#2}%
-  \@nameuse{#2}%
+        \ClassWarning{\tudcls@name}{%
+          The command `\@backslashchar#1' is deprecated.\MessageBreak%
+          It's recommended to use `\@backslashchar#2' instead%
+        }%
+        \csletcs{#1}{#2}%
+        \@nameuse{#2}%
       }%
     }%
   }%
