@@ -108,7 +108,8 @@
 \newcommand*\tud@dinbold{0m6}
 \newif\if@tud@fontspec
 \TUD@key{fontspec}[true]{%
-  \ClassWarning{\tudcls@name}{%
+  \ClassWarning{\tudcls@name}%
+  {%
     The option key `fontspec' is deprecated.\MessageBreak%
     You should load the package `fontspec' manually
   }%
@@ -233,7 +234,6 @@
     \fi%
   \fi%
 }
-% §§§ in tudscrfonts integrieren
 \newcommand*\tud@ptsize{\@ptsize}
 \TUD@key{cdfontsize}{%
   \expandafter\@defaultunits\expandafter\@tempdima#1 pt\relax\@nnil%
@@ -2305,7 +2305,7 @@
   \textheight=\maxdimen%
 }{}%
 \RequirePackage{scrlayer-scrpage}[2013/12/14]%
-\AfterPackage*{scrlayer-scrpage}{%
+\AfterPackage{scrlayer-scrpage}{%
   \DeclareNewLayer[%
     background,headsep,%
     voffset=\tud@dim@logoy,%
@@ -2888,7 +2888,7 @@
   \let\Gm@restore@org\tud@geometry@restore%
 }
 \tud@ifsacrop{\PreventPackageFromLoading{geometry}}{}%
-\RequirePackage{geometry}[2010/09/12]%
+\RequirePackage{geometry}[2010/09/12]% §§§ welche Befehle?
 \newcommand*\tud@geometry@hmargin{}
 \newcommand*\tud@geometry@vmargin{}
 \newcommand*\tud@geometry@tudmargin{}
@@ -4728,7 +4728,7 @@
 \tud@deprecated@cmd{birthday}{dateofbirth}
 \tud@deprecated@cmd{logofile}{headlogo}
 \tud@deprecated@cmd{logofilename}{headlogo}
-\AfterPackage*{tudscrsupervisor}{%
+\AfterPackage{tudscrsupervisor}{%
   \tud@deprecated@cmd{startdate}{issuedate}%
   \tud@deprecated@cmd{finaldate}{duedate}%
   \tud@deprecated@cmd{maturitydate}{duedate}%

@@ -1,4 +1,4 @@
-% \CheckSum{434}
+% \CheckSum{508}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-comp.dtx}[%
-  2015/03/02 v2.04 TUD-KOMA-Script\space%
+  2015/03/04 v2.04 TUD-KOMA-Script\space%
 %</driver>
 %<package&identify>\NeedsTeXFormat{LaTeX2e}[2011/06/27]
 %<package&identify>\ProvidesPackage{tudscrcomp}[%
@@ -218,7 +218,7 @@
     \providecommand*{\glossaryname}{Glossar}
     \newenvironment{theglossary}[1][]{%
       \ClassWarning{\tudcls@name}{%
-        Using the environment theglossary is not\MessageBreak%
+        Using the environment `theglossary' is not\MessageBreak%
         recommended. You should rather use an appropriate\MessageBreak%
         package such as glossaries%
       }%
@@ -326,8 +326,57 @@
 % \iffalse
 %</package&body>
 %</comp>
+%<*package&(body|fonts)>
 % \fi
 %
+% \subsection{Kompatibilität zu \cls{tudposter} und \cls{tudmathposter}}
+%
+% \begin{macro}{\cdfont}
+% \begin{macro}{\tudfont}
+% \begin{macro}{\tud@trimfontname}
+% \begin{macro}{\tud@@trimfontname}
+% Die Klassen \cls{tudposter} und \cls{tudmathposter} definieren den Befehl 
+% \cs{tudfont}, mit welchem die Schriften des \CDs der \TnUD auch mit Klarnamen
+% ausgewählt werden können. Zur kompatibilität wird der Befehl \cs{cdfont} 
+% definiert, welcher die gleiche Funktionalität bereitstellt.
+%    \begin{macrocode}
+\newcommand*\cdfont[1]{%
+  \tud@trimfontname{#1}%
+  \ifstr{\@tempa}{universce45light}{\univln}{%
+  \ifstr{\@tempa}{universce55}{\univrn}{%
+  \ifstr{\@tempa}{universce60}{\univbn}{%
+  \ifstr{\@tempa}{universce75black}{\univxn}{%
+  \ifstr{\@tempa}{universce45lightoblique}{\univls}{%
+  \ifstr{\@tempa}{universce55oblique}{\univrs}{%
+  \ifstr{\@tempa}{universce60oblique}{\univbs}{%
+  \ifstr{\@tempa}{universce75blackoblique}{\univxs}{%
+  \ifstr{\@tempa}{dinbold}{\dinbn}{%
+    \PackageWarning{tudscrfonts}{The font `#1' is unknown}%
+  }}}}}}}}}%
+}
+\providecommand*\tudfont{\cdfont}
+\newcommand*\tud@trimfontname[1]{%
+  \edef\@tempa{\trim@spaces{#1}}%
+  \expandafter\tud@@trimfontname\expandafter{\@tempa}{ }%
+  \expandafter\tud@@trimfontname\expandafter{\@tempa}{-}%
+  \expandafter\tud@@trimfontname\expandafter{\@tempa}{}%
+  \tud@lowerstring{\@tempa}{\@tempa}%
+}
+\newcommand*\tud@@trimfontname[2]{%
+  \def\@tempc##1#2##2\relax{\def\@tempa{##1##2}}%
+  \@expandtwoargs\in@{#2}{\@tempa}%
+  \@whilesw\ifin@\fi{%
+    \expandafter\@tempc\@tempa\relax%
+    \@expandtwoargs\in@{#2}{\@tempa}%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@@trimfontname
+% \end{macro}^^A \tud@trimfontname
+% \end{macro}^^A \tudfont
+% \end{macro}^^A \cdfont
+
+
 % \subsection{Kompatibilität zu früheren \TUDScript-Versionen}
 %
 % Neben den Optionen und Befehlen im Paket \pkg{tudscrcomp} gibt es weitere 
@@ -341,6 +390,7 @@
 % Hiermit wird alles dafür vorbereitet.
 %
 % \iffalse
+%</package&(body|fonts)>
 %<*class|package&fonts>
 % \fi
 %
@@ -842,7 +892,7 @@
 % Für das Paket \pkg{tudscrsupervisor} sind auch einige Befehle als veraltet 
 % anzusehen.
 %    \begin{macrocode}
-\AfterPackage*{tudscrsupervisor}{%
+\AfterPackage{tudscrsupervisor}{%
   \tud@deprecated@cmd{startdate}{issuedate}%
   \tud@deprecated@cmd{finaldate}{duedate}%
   \tud@deprecated@cmd{maturitydate}{duedate}%
