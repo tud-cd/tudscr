@@ -436,6 +436,8 @@
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax%
+      % §§§ \TUD@AfterPackage nur ausführen, wenn Paket geladen wurde
+      % §§§ Hilfsmakro erstellen!
       \TUD@AfterPackage{scrlayer-scrpage}{%
         \tud@ps@restore{scrheadings}%
         \tud@ps@restore{plain.scrheadings}%
@@ -2303,9 +2305,9 @@
   \evensidemargin=0pt%
   \topskip=0pt%
   \textheight=\maxdimen%
-}{}%
-\RequirePackage{scrlayer-scrpage}[2013/12/14]%
-\AfterPackage{scrlayer-scrpage}{%
+}%
+{%
+  \RequirePackage{scrlayer-scrpage}[2013/12/14]%
   \DeclareNewLayer[%
     background,headsep,%
     voffset=\tud@dim@logoy,%
@@ -2887,8 +2889,9 @@
   \fi%
   \let\Gm@restore@org\tud@geometry@restore%
 }
+% §§§ welche Befehle sind betroffen? aquivalent zu scrlayer umsetzen
 \tud@ifsacrop{\PreventPackageFromLoading{geometry}}{}%
-\RequirePackage{geometry}[2010/09/12]% §§§ welche Befehle?
+\RequirePackage{geometry}[2010/09/12]%
 \newcommand*\tud@geometry@hmargin{}
 \newcommand*\tud@geometry@vmargin{}
 \newcommand*\tud@geometry@tudmargin{}
