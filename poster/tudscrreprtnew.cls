@@ -424,6 +424,7 @@
     \fi%
   \fi%
 }
+\TUD@AfterPackage@Set{scrlayer-scrpage}
 \newif\if@tud@footcolor
 \TUD@key{cdfoot}[true]{%
   \TUD@set@numkey{cdfoot}{@tempa}{%
@@ -436,8 +437,6 @@
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax%
-      % §§§ \TUD@AfterPackage nur ausführen, wenn Paket geladen wurde
-      % §§§ Hilfsmakro erstellen!
       \TUD@AfterPackage{scrlayer-scrpage}{%
         \tud@ps@restore{scrheadings}%
         \tud@ps@restore{plain.scrheadings}%
@@ -2305,9 +2304,10 @@
   \evensidemargin=0pt%
   \topskip=0pt%
   \textheight=\maxdimen%
-}%
-{%
-  \RequirePackage{scrlayer-scrpage}[2013/12/14]%
+}{%
+  \AtEndPreamble{\RequirePackage{scrlayer-scrpage}[2013/12/14]}%
+}
+\AfterPackage!{scrlayer-scrpage}{%
   \DeclareNewLayer[%
     background,headsep,%
     voffset=\tud@dim@logoy,%
@@ -2868,6 +2868,8 @@
 \newlength\tud@ta@footskip
 \newlength\tud@ta@headdiff
 \newcommand*\tud@geometry@restore{}
+% §§§ den Teil überarbeiten, \AtEndPreamble macht Kacke
+% das verzögerte Laden von geometry beachten!
 \AfterCalculatingTypearea{%
   \setlength\tud@ta@textheight{\textheight}%
   \setlength\tud@ta@topmargin{\topmargin}%
@@ -2879,230 +2881,301 @@
     \setlength\tud@ta@footheight{\ta@fh}%
   }%
   \setlength\tud@ta@footskip{\footskip}%
-% §§§ den Teil überarbeiten, \AtEndPreamble macht Kacke
   \let\tud@geometry@restore\Gm@restore@org%
   \if@atdocument%
     \let\Gm@restore@org\relax%
     \tud@geometry@process%
     \gdef\tud@currentgeometry{}%
     \expandafter\pagestyle\expandafter{\currentpagestyle}%
+  \else%
   \fi%
   \let\Gm@restore@org\tud@geometry@restore%
 }
-% §§§ welche Befehle sind betroffen? aquivalent zu scrlayer umsetzen
-\tud@ifsacrop{\PreventPackageFromLoading{geometry}}{}%
-\RequirePackage{geometry}[2010/09/12]%
-\newcommand*\tud@geometry@hmargin{}
-\newcommand*\tud@geometry@vmargin{}
-\newcommand*\tud@geometry@tudmargin{}
-\tud@ifverlower{2.03}{\newcommand*\tud@geometry@ddcmargin{}}{}
+%  \if@ta@usegeometry
+%    \@ifundefined{Gm@save}{%
+%      \if@atdocument\else
+%        \edef\scr@geometryargs{%
+%          paperwidth=\the\paperwidth,paperheight=\the\paperheight,%
+%          \scr@geometryargs
+%        }%
+%        \PassOptionsToPackage{\scr@geometryargs}{geometry}%
+%      \fi
+%    }{%
+%      \edef\Gm@restore@org{\Gm@restore}%
+%      \if@atdocument
+%        \expandafter\newgeometry\expandafter{\scr@geometryargs}%
+%      \else
+%        \edef\scr@geometryargs{%
+%          paperwidth=\the\paperwidth,paperheight=\the\paperheight,%
+%          \scr@geometryargs
+%        }%
+%        \expandafter\geometry\expandafter{\scr@geometryargs}%
+%      \fi
+%    }%
+%  \fi
+\tud@ifsacrop{%
+  \PreventPackageFromLoading{geometry}%
+}{%
+  \AtEndPreamble{\RequirePackage{geometry}[2010/09/12]}%
+}
+\AfterPackage!{geometry}{%
+  \newcommand*\tud@geometry@hmargin{}
+  \newcommand*\tud@geometry@vmargin{}
+  \newcommand*\tud@geometry@tudmargin{}
+  \tud@ifverlower{2.03}{\newcommand*\tud@geometry@ddcmargin{}}{}
+  \newcommand*\tud@geometry@process{%
+    \tud@geometry@set%
+    \ifcase\tud@geometry\relax%
+      \setlength\tud@ta@headdiff{%
+        \dimexpr\tud@dim@topmargin+\tud@dim@barheight+\tud@dim@headsep%
+          -\tud@ta@topmargin-\tud@ta@headheight-\tud@ta@headsep-1in\relax%
+      }%
+      \ifdim\tud@ta@headdiff<\z@\relax%
+        \addtolength\tud@dim@headsep{-\tud@ta@headdiff}%
+      \fi%
+      \edef\tud@geometry@hmargin{%
+        bindingoffset=\the\ta@bcor,%
+        left=\the\dimexpr\oddsidemargin+1in-\ta@bcor\relax,%
+        textwidth=\the\textwidth,%
+        \tud@geometry@mpincl,%
+        marginparwidth=\the\dimexpr\evensidemargin+1in-\tud@ta@headsep\relax,%
+        \if@reversemargin%
+          reversemarginpar=true,%
+          \if@twoside
+            marginparwidth=\the\dimexpr\oddsidemargin+1in%
+              -\tud@ta@headsep\relax,%
+          \fi%
+        \else%
+          reversemarginpar=false,%
+        \fi%
+        marginparsep=\the\dimexpr.5\tud@ta@headsep\relax%
+      }%
+      \edef\tud@geometry@vmargin{%
+        \if@hincl%
+          includehead=true,%
+          top=\the\dimexpr\tud@ta@topmargin+1in\relax,%
+        \else%
+          includehead=false,%
+          top=\the\dimexpr\tud@ta@topmargin+\tud@ta@headheight+\tud@ta@headsep%
+            +1in\relax,%
+        \fi%
+        headheight=\the\tud@ta@headheight,%
+        headsep=\the\tud@ta@headsep,%
+        textheight=\the\tud@ta@textheight,%
+        \tud@geometry@fincl,%
+        footskip=\the\tud@ta@footskip%
+      }%
+      \ifdim\tud@ta@headdiff<\z@\relax%
+        \setlength\@tempdima{\z@}%
+      \else%
+        \setlength\@tempdima{\tud@ta@headdiff}%
+      \fi%
+      \edef\tud@geometry@tudmargin{%
+        top=\the\dimexpr\tud@dim@topmargin+\tud@dim@barheight%
+          +\tud@dim@headsep\relax,%
+        headheight=\the\dimexpr\tud@dim@topmargin+\tud@dim@barheight%
+          -\tud@dim@logoy\relax,%
+        headsep=\the\tud@dim@headsep,%
+        textheight=\the\dimexpr\tud@ta@textheight-\@tempdima\relax,%
+        ignorehead%
+      }%
+      \tud@ifverlower{2.03}{%
+        \setlength\tud@dim@ddcdiff{%
+          \dimexpr.6\tud@dim@topmargin-\tud@ta@footskip+\tud@dim@headsep%
+            +\tud@ta@footheight-1.25\baselineskip\relax%
+        }%
+        \edef\tud@geometry@ddcmargin{%
+          textheight=\the\dimexpr\tud@ta@textheight-\tud@ta@headdiff%
+            -\tud@dim@ddcdiff\relax,%
+          footskip=\the\dimexpr\tud@ta@footskip+\tud@dim@ddcdiff\relax%
+        }%
+      }{}%
+      \ifdim\tud@dim@extrabottommargin=\z@\relax\else%
+        \ClassWarning{\tudcls@name}{%
+          Option `extrabottommargin' is ineffective when\MessageBreak%
+          package typearea is used (`cdgeometry=no')%
+        }%
+      \fi%
+    \else%
+      \ifcase\tud@geometry\or%
+        \edef\tud@geometry@hmargin{%
+          bindingoffset=\the\ta@bcor,%
+          left=\the\tud@dim@widemargin,%
+          textwidth=\the\dimexpr\paperwidth-\tud@dim@both-\ta@bcor\relax,%
+          \if@twoside asymmetric,\fi%
+          \tud@geometry@mpincl,%
+          \if@reversemargin%
+            reversemarginpar=true,%
+            marginparwidth=\the\dimexpr\tud@dim@widemargin%
+              -\tud@ta@headsep\relax,%
+          \else%
+            reversemarginpar=false,%
+            marginparwidth=\the\dimexpr\tud@dim@slimmargin%
+              -\tud@ta@headsep\relax,%
+          \fi%
+          marginparsep=\the\dimexpr.5\tud@ta@headsep\relax%
+        }%
+      \or%
+        \edef\tud@geometry@hmargin{%
+          bindingoffset=\the\ta@bcor,%
+          left=\the\dimexpr.5\tud@dim@both\relax,%
+          textwidth=\the\dimexpr\paperwidth-\tud@dim@both-\ta@bcor\relax,%
+          \tud@geometry@mpincl,%
+          \if@reversemargin%
+            reversemarginpar=true,%
+          \else%
+            reversemarginpar=false,%
+          \fi%
+          marginparwidth=\the\dimexpr.5\tud@dim@both-\tud@ta@headsep\relax,%
+          marginparsep=\the\dimexpr.5\tud@ta@headsep\relax%
+        }%
+      \or%
+        \edef\tud@geometry@hmargin{%
+          bindingoffset=\the\ta@bcor,%
+          \if@twoside%
+            left=\the\dimexpr.4\tud@dim@both\relax,%
+            twoside,%
+          \else%
+            left=\the\dimexpr.5\tud@dim@both\relax,%
+          \fi%
+          textwidth=\the\dimexpr\paperwidth-\tud@dim@both-\ta@bcor\relax,%
+          \tud@geometry@mpincl,%
+          marginparwidth=\the\dimexpr.5\tud@dim@both-\tud@ta@headsep\relax,%
+          \if@reversemargin%
+            reversemarginpar=true,%
+            \if@twoside%
+              marginparwidth=\the\dimexpr.4\tud@dim@both%
+                -\tud@ta@headsep\relax,%
+            \fi%
+          \else%
+            reversemarginpar=false,%
+            \if@twoside%
+              marginparwidth=\the\dimexpr.6\tud@dim@both%
+                -\tud@ta@headsep\relax,%
+            \fi%
+          \fi%
+          marginparsep=\the\dimexpr.5\tud@ta@headsep\relax%
+        }%
+      \fi%
+      \tud@ifverlower{2.03}{%
+        \edef\tud@geometry@vmargin{%
+          top=\the\dimexpr.5\tud@dim@both\relax,%
+          headheight=\the\tud@ta@headheight,%
+          headsep=\the\tud@dim@headsep,%
+          bottom=\the\dimexpr.5\tud@dim@both+\tud@dim@extrabottommargin\relax,%
+          footskip=\the\dimexpr\tud@dim@headsep+\tud@ta@footheight%
+            -1.25\baselineskip\relax,%
+          \tud@geometry@hincl,%
+          \tud@geometry@fincl%
+        }%
+      }{%
+        \edef\tud@geometry@vmargin{%
+          top=\the\tud@dim@slimmargin,%
+          headheight=\the\tud@ta@headheight,%
+          headsep=\the\tud@ta@headsep,%
+          bottom=\the\dimexpr\tud@dim@widemargin%
+            +\tud@dim@extrabottommargin\relax,%
+          footskip=\the\dimexpr\tud@dim@footsep+\tud@ta@footheight\relax,%
+          \tud@geometry@hincl,%
+          \tud@geometry@fincl%
+        }%
+      }%
+      \edef\tud@geometry@tudmargin{%
+        top=\the\dimexpr\tud@dim@topmargin+\tud@dim@barheight%
+          +\tud@dim@headsep\relax,%
+        headheight=\the\dimexpr\tud@dim@topmargin+\tud@dim@barheight%
+          -\tud@dim@logoy\relax,%
+        headsep=\the\tud@dim@headsep,%
+        ignorehead%
+      }%
+      \setlength\tud@ta@headdiff{%
+        \dimexpr\tud@dim@topmargin+\tud@dim@barheight+\tud@dim@headsep%
+          -\tud@dim@slimmargin\relax%
+      }%
+      \tud@ifverlower{2.03}{%
+        \setlength\tud@ta@headdiff{%
+          \dimexpr\tud@dim@topmargin+\tud@dim@barheight+\tud@dim@headsep%
+            -.5\tud@dim@both\relax%
+        }%
+        \setlength\tud@dim@ddcdiff{.6\tud@dim@topmargin}%
+        \edef\tud@geometry@ddcmargin{%
+          \if@fincl%
+            bottom=\the\dimexpr.5\tud@dim@both+\tud@dim@extrabottommargin%
+              +\tud@dim@ddcdiff+\tud@dim@headsep+\tud@ta@footheight%
+              -1.25\baselineskip\relax,%
+          \else%
+            bottom=\the\dimexpr.5\tud@dim@both+\tud@dim@extrabottommargin%
+              +\tud@dim@ddcdiff\relax,%
+          \fi%
+          footskip=\the\dimexpr\tud@dim@headsep+\tud@ta@footheight%
+            -1.25\baselineskip+\tud@dim@ddcdiff\relax,%
+        }%
+      }{}%
+    \fi%
+    \ifdim\tud@ta@headdiff<\z@\relax\setlength\tud@ta@headdiff{\z@}\fi%
+    \global\tud@ta@headdiff=\tud@ta@headdiff%
+    \setlength\tud@dim@headingsvskip{.6\tud@dim@topmargin}%
+    \global\tud@dim@headingsvskip=\tud@dim@headingsvskip%
+    \tud@ifverlower{2.03}{%
+      \ifdim\tud@dim@ddcdiff<\z@\relax\setlength\tud@dim@ddcdiff{\z@}\fi%
+      \global\tud@dim@ddcdiff=\tud@dim@ddcdiff%
+    }{}%
+    \tud@geometry@@process%
+  }
+  \newcommand*\tud@geometry@@process{%
+    \tud@ifverlower{2.03}{%
+      \edef\@tempa{%
+        \tud@geometry@hmargin,%
+        \tud@geometry@vmargin,%
+        \tud@geometry@tudmargin,%
+        \tud@geometry@ddcmargin,%
+        ignorehead,ignorefoot%
+      }%
+      \expandafter\newgeometry\expandafter{\@tempa}%
+      \savegeometry{tudareaddc}%
+    }{}%
+    \edef\@tempa{%
+      \tud@geometry@hmargin,%
+      \tud@geometry@vmargin,%
+      \tud@geometry@tudmargin%
+    }%
+    \expandafter\newgeometry\expandafter{\@tempa}%
+    \savegeometry{tudarea}%
+    \edef\@tempa{%
+      \tud@geometry@hmargin,%
+      \tud@geometry@vmargin%
+    }%
+    \expandafter\newgeometry\expandafter{\@tempa}%
+    \savegeometry{typearea}%
+  }
+  \newcommand*\tud@geometry@hincl{%
+    \if@hincl%
+      includehead=true%
+    \else%
+      includehead=false%
+    \fi%
+  }
+  \newcommand*\tud@geometry@fincl{%
+    \if@fincl%
+      includefoot=true%
+    \else%
+      includefoot=false%
+    \fi%
+  }
+  \newcommand*\tud@geometry@mpincl{%
+    \if@mincl%
+      includemp=true%
+    \else%
+      includemp=false%
+    \fi%
+  }
+}
 \AtEndPreamble{%
   \tud@ifsacrop{}{%
     \recalctypearea%
     \tud@geometry@process%
     \expandafter\pagestyle\expandafter{\currentpagestyle}%
   }%
-}
-\newcommand*\tud@geometry@process{%
-  \tud@geometry@set%
-  \ifcase\tud@geometry\relax%
-    \def\tud@geometry@hmargin{%
-      left=\dimexpr\oddsidemargin+1in\relax,%
-      width=\textwidth,%
-      marginparwidth=\dimexpr\evensidemargin+1in-\tud@ta@headsep\relax,%
-      \if@twoside\if@reversemargin%
-        marginparwidth=\dimexpr\oddsidemargin+1in-\tud@ta@headsep\relax,%
-      \fi\fi%
-      marginparsep=.5\tud@ta@headsep,%
-    }%
-    \def\tud@geometry@vmargin{%
-      top=\dimexpr\tud@ta@topmargin+\tud@ta@headheight+\tud@ta@headsep%
-        +1in\relax,%
-      headheight=\tud@ta@headheight,%
-      headsep=\tud@ta@headsep,%
-      textheight=\tud@ta@textheight,%
-      footskip=\tud@ta@footskip,%
-    }%
-    \def\tud@geometry@tudmargin{%
-      top=\dimexpr\tud@dim@topmargin+\tud@dim@barheight%
-        +\tud@dim@headsep\relax,%
-      headheight=\dimexpr\tud@dim@topmargin+\tud@dim@barheight%
-        -\tud@dim@logoy\relax,%
-      headsep=\tud@dim@headsep,%
-      textheight=\dimexpr\tud@ta@textheight-\tud@ta@headdiff\relax,%
-      ignorehead,%
-    }%
-    \setlength\tud@ta@headdiff{%
-      \dimexpr\tud@dim@topmargin+\tud@dim@barheight+\tud@dim@headsep%
-        -\tud@ta@topmargin-\tud@ta@headheight-\tud@ta@headsep-1in\relax%
-    }%
-    \ifdim\tud@ta@headdiff<\z@\relax%
-      \addtolength\tud@dim@headsep{-\tud@ta@headdiff}%
-    \fi%
-    \tud@ifverlower{2.03}{%
-      \setlength\tud@dim@ddcdiff{%
-        \dimexpr.6\tud@dim@topmargin-\tud@ta@footskip+\tud@dim@headsep%
-          +\tud@ta@footheight-1.25\baselineskip\relax%
-      }%
-      \def\tud@geometry@ddcmargin{%
-        textheight=\dimexpr\tud@ta@textheight-\tud@ta@headdiff%
-          -\tud@dim@ddcdiff\relax,%
-        footskip=\dimexpr\tud@ta@footskip+\tud@dim@ddcdiff\relax,%
-      }%
-    }{}%
-    \ifdim\tud@dim@extrabottommargin=\z@\relax\else%
-      \ClassWarning{\tudcls@name}{%
-        Option `extrabottommargin' is ineffective when\MessageBreak%
-        package typearea is used (`cdgeometry=no')%
-      }%
-    \fi%
-  \else%
-    \ifcase\tud@geometry\or%
-      \def\tud@geometry@hmargin{%
-        left=\tud@dim@widemargin,%
-        textwidth=\dimexpr\paperwidth-\tud@dim@both-\ta@bcor\relax,%
-        \if@reversemargin%
-          marginparwidth=\dimexpr\tud@dim@widemargin-\tud@ta@headsep\relax,%
-        \else%
-          marginparwidth=\dimexpr\tud@dim@slimmargin-\tud@ta@headsep\relax,%
-        \fi%
-        marginparsep=.5\tud@ta@headsep,%
-        bindingoffset=\ta@bcor,%
-        \if@twoside asymmetric,\fi%
-      }%
-    \or%
-      \def\tud@geometry@hmargin{%
-        left=.5\tud@dim@both,%
-        textwidth=\dimexpr\paperwidth-\tud@dim@both-\ta@bcor\relax,%
-        marginparwidth=\dimexpr.5\tud@dim@both-\tud@ta@headsep\relax,%
-        marginparsep=.5\tud@ta@headsep,%
-        bindingoffset=\ta@bcor,%
-      }%
-    \or%
-      \def\tud@geometry@hmargin{%
-        \if@twoside%
-          left=.4\tud@dim@both,%
-          twoside,%
-        \else%
-          left=.5\tud@dim@both,%
-        \fi%
-        textwidth=\dimexpr\paperwidth-\tud@dim@both-\ta@bcor\relax,%
-        \if@twoside%
-          \if@reversemargin%
-            marginparwidth=\dimexpr.4\tud@dim@both-\tud@ta@headsep\relax,%
-          \else%
-            marginparwidth=\dimexpr.6\tud@dim@both-\tud@ta@headsep\relax,%
-          \fi%
-        \else%
-          marginparwidth=\dimexpr.5\tud@dim@both-\tud@ta@headsep\relax,%
-        \fi%
-        marginparsep=.5\tud@ta@headsep,%
-        bindingoffset=\ta@bcor,%
-      }%
-    \fi%
-    \tud@ifverlower{2.03}{%
-      \def\tud@geometry@vmargin{%
-        top=.5\tud@dim@both,%
-        headheight=\tud@ta@headheight,%
-        headsep=\tud@dim@headsep,%
-        bottom=\dimexpr.5\tud@dim@both+\tud@dim@extrabottommargin\relax,%
-        footskip=\dimexpr\tud@dim@headsep+\tud@ta@footheight%
-          -1.25\baselineskip\relax,%
-        \tud@geometry@hincl,%
-        \tud@geometry@fincl,%
-      }%
-    }{%
-      \def\tud@geometry@vmargin{%
-        top=\tud@dim@slimmargin,%
-        headheight=\tud@ta@headheight,%
-        headsep=\tud@ta@headsep,%
-        bottom=\dimexpr\tud@dim@widemargin+\tud@dim@extrabottommargin\relax,%
-        footskip=\dimexpr\tud@dim@footsep+\tud@ta@footheight\relax,%
-        \tud@geometry@hincl,%
-        \tud@geometry@fincl,%
-      }%
-    }%
-    \def\tud@geometry@tudmargin{%
-      top=\dimexpr\tud@dim@topmargin+\tud@dim@barheight%
-        +\tud@dim@headsep\relax,%
-      headheight=\dimexpr\tud@dim@topmargin+\tud@dim@barheight%
-        -\tud@dim@logoy\relax,%
-      headsep=\tud@dim@headsep,%
-      ignorehead,%
-    }%
-    \setlength\tud@ta@headdiff{%
-      \dimexpr\tud@dim@topmargin+\tud@dim@barheight+\tud@dim@headsep%
-        -\tud@dim@slimmargin\relax%
-    }%
-    \tud@ifverlower{2.03}{%
-      \setlength\tud@ta@headdiff{%
-        \dimexpr\tud@dim@topmargin+\tud@dim@barheight+\tud@dim@headsep%
-          -.5\tud@dim@both\relax%
-      }%
-      \setlength\tud@dim@ddcdiff{.6\tud@dim@topmargin}%
-      \def\tud@geometry@ddcmargin{%
-        \if@fincl%
-          bottom=\dimexpr.5\tud@dim@both+\tud@dim@extrabottommargin%
-            +\tud@dim@ddcdiff+\tud@dim@headsep+\tud@ta@footheight%
-            -1.25\baselineskip\relax,%
-        \else%
-          bottom=\dimexpr.5\tud@dim@both+\tud@dim@extrabottommargin%
-            +\tud@dim@ddcdiff\relax,%
-        \fi%
-        footskip=\dimexpr\tud@dim@headsep+\tud@ta@footheight%
-          -1.25\baselineskip+\tud@dim@ddcdiff\relax,%
-      }%
-    }{}%
-  \fi%
-  \ifdim\tud@ta@headdiff<\z@\relax\setlength\tud@ta@headdiff{\z@}\fi%
-  \global\tud@ta@headdiff=\tud@ta@headdiff%
-  \setlength\tud@dim@headingsvskip{.6\tud@dim@topmargin}%
-  \global\tud@dim@headingsvskip=\tud@dim@headingsvskip%
-  \tud@ifverlower{2.03}{%
-    \ifdim\tud@dim@ddcdiff<\z@\relax\setlength\tud@dim@ddcdiff{\z@}\fi%
-    \global\tud@dim@ddcdiff=\tud@dim@ddcdiff%
-  }{}%
-  \tud@geometry@@process%
-}
-\newcommand*\tud@geometry@@process{%
-  \tud@ifverlower{2.03}{%
-    \edef\@tempa{%
-      \tud@geometry@hmargin,%
-      \tud@geometry@vmargin,%
-      \tud@geometry@tudmargin,%
-      \tud@geometry@ddcmargin,%
-      ignorehead,ignorefoot,%
-    }%
-    \expandafter\newgeometry\expandafter{\@tempa}%
-    \savegeometry{tudareaddc}%
-  }{}%
-  \edef\@tempa{%
-    \tud@geometry@hmargin,%
-    \tud@geometry@vmargin,%
-    \tud@geometry@tudmargin,%
-  }%
-  \expandafter\newgeometry\expandafter{\@tempa}%
-  \savegeometry{tudarea}%
-  \edef\@tempa{%
-    \tud@geometry@hmargin,%
-    \tud@geometry@vmargin,%
-  }%
-  \expandafter\newgeometry\expandafter{\@tempa}%
-  \savegeometry{typearea}%
-}
-\newcommand*\tud@geometry@hincl{%
-  \if@hincl%
-    includehead,%
-  \else%
-    ignorehead,%
-  \fi%
-}
-\newcommand*\tud@geometry@fincl{%
-  \if@fincl%
-    includefoot,%
-  \else%
-    ignorefoot,%
-  \fi%
 }
 \newcommand*\tud@ps{tudheadings}
 \newcommand*\tud@ps@select{%

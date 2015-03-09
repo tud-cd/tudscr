@@ -1,4 +1,4 @@
-% \CheckSum{331}
+% \CheckSum{347}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-base.dtx}[%
-  2015/03/03 v2.04 TUD-KOMA-Script\space%
+  2015/03/09 v2.04 TUD-KOMA-Script\space%
 %</driver>
 %<package>\NeedsTeXFormat{LaTeX2e}[2011/06/27]
 %<package>\ProvidesPackage{tudscrbase}[%
@@ -167,7 +167,7 @@
 %    \end{macrocode}
 % \end{macro}^^A \ifstrbool
 %
-% \subsubsection{Schlüssel und Parameter für die Wrapper-Klassen}
+% \subsubsection{Schlüssel und Parameter für \TUDScript}
 %
 % \begin{macro}{\TUDProcessOptions}
 % \begin{macro}{\TUDExecuteOptions}
@@ -631,17 +631,34 @@
 %
 % Ab und an ist es notwendig, bestimmten Quelltext erst gezielt nach einem 
 % Paket auszuführen.
+% \begin{macro}{\TUD@AfterPackage@Set}
+% \changes{v2.04}{2015/03/09}{neu}%^^A
 % \begin{macro}{\TUD@AfterPackage}
 % \changes{v2.03}{2015/02/15}{neu}%^^A
-% Im ersten Argument wird das Paket angegeben, im zweiten der Quellcode. Dabei 
-% ist zu beachten, dass dieser im Dokument auch ausgeführt wird, wenn das Paket 
-% \emph{nicht} geladen wurde.
+% Im ersten Argument wird das Paket angegeben, im zweiten der Quellcode.
 %    \begin{macrocode}
+\newcommand*\TUD@AfterPackage@Set[1]{%
+  \newbool{@tud@#1@loaded}%
+  \AfterPackage!{#1}{\booltrue{@tud@#1@loaded}}
+}
 \newcommand*\TUD@AfterPackage[2]{%
-  \if@atdocument#2\else\AfterPackage!{#1}{#2}\fi%
+  \ifcsdef{if@tud@#1@loaded}{%
+    \if@atdocument%
+      \ifbool{@tud@#1@loaded}{#2}{}%
+    \else%
+      \AfterPackage!{#1}{#2}%
+    \fi%
+  }{%
+    \PackageError{tudscrbase}{\string\TUD@AfterPackage@Set{#1} missing}{%
+      You have to set \string\TUD@AfterPackage@Set{#1} before\MessageBreak%
+      the usage of \string\TUD@AfterPackage{#1}{<code>} is\MessageBreak%
+      possible%
+    }%
+  }%
 }
 %    \end{macrocode}
 % \end{macro}^^A \TUD@AfterPackage
+% \end{macro}^^A \TUD@AfterPackage@Set
 %
 % \iffalse
 %</package>
