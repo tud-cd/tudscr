@@ -1,4 +1,4 @@
-% \CheckSum{2062}
+% \CheckSum{2065}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-pagestyle.dtx}[%
-  2015/03/09 v2.04 TUD-KOMA-Script (pagestyle)%
+  2015/03/10 v2.04 TUD-KOMA-Script (pagestyle)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -347,7 +347,7 @@
 % verschiedene, sogenannte Layers respektive Ebenen für die einzelnen Elemente
 % auf einer Seite erstellt.
 %    \begin{macrocode}
-\AfterPackage!{scrlayer-scrpage}{%
+\AfterPackage{scrlayer-scrpage}{%
 %    \end{macrocode}
 % \begin{layer}{tudheadings.head.mainlogo}
 % \changes{v2.02}{2014/06/23}{neu}%^^A
@@ -690,10 +690,8 @@
   \AddLayersToPageStyle{@everystyle@}{tudheadings.pagecolor}%
 %    \end{macrocode}
 % \end{layer}^^A tudheadings.pagecolor
-% Der Kopf im \CD der \TnUD erfordert einen eigenen Satzspiegel, der ggf. durch 
-% \cs{tud@beforeselectanypagestyle} aktiviert bzw. deaktiviert wird.
+% Damit wurden alle Ebenen und die darauf aufbauenden Seitenstile deklariert.
 %    \begin{macrocode}
-  \BeforeSelectAnyPageStyle{\tud@beforeselectanypagestyle{#1}}%
 }
 %    \end{macrocode}
 % \end{pagestyle}^^A empty.tudheadings
@@ -773,170 +771,7 @@
   \xdef\@specialstyle{\GetRealPageStyle{#1}}
 }{}{\tud@patch@wrn{thispagestyle}}
 %    \end{macrocode}
-% \end{macro}^^A \tud@beforeselectanypagestyle
-% \begin{macro}{\tud@beforeselectanypagestyle}
-% \changes{v2.02}{2014/06/23}{neu}%^^A
-% \begin{macro}{\tud@currentgeometry}
-% \changes{v2.02}{2014/06/23}{neu}%^^A
-% Mit \cs{tud@beforeselectanypagestyle} wird beim Umschalten des Seitenstils
-% gegebenfalls der Satzspiegel geändert. Dabei wird der aktivierte Satzspiegel
-% in dem Makro \cs{tud@currentgeometry} gesichert, um darauf zu einem späteren
-% Zeitpunkt prüfen zu können.
-%
-% Für den Fall, dass das Dokument nicht ausschließlich mit dem Kopf im \CD
-% auf jeder Seite gesetzt wird, muss der komplette vertikale Satzspiegel
-% angepasst werden, sonst wäre der obere Rand optisch viel zu groß. Hierfür
-% wird das Paket \pkg{geometry} genutzt. Durch \cs{tud@geometry@process} 
-% werden zwei~-- für die KOmpatibilitätsvariante drei~-- Layouts erstellt.
-% Diese können mit \cs{loadgeometry}\marg{Stil} geladen werden.
-%    \begin{macrocode}
-\newcommand*\tud@currentgeometry{}
-\newcommand*\tud@beforeselectanypagestyle[1]{%
-%    \end{macrocode}
-% Der \pgs{tudheadings}-Seitenstil wird mit dem Befehl \cs{newpairofpagestyles}
-% derart definiert, dass zwischen \pgs{tudheadings} und \pgs{plain.tudheadings}
-% auch mit \LaTeX-Standardseitenstilen \pgs{headings} bzw. \pgs{plain} 
-% umgeschaltet werden kann. Dies wird hiermit beachtet.
-%    \begin{macrocode}
-  \ifstr{#1}{\GetRealPageStyle{#1}}{%
-    \def\@tempa{#1}%
-%    \end{macrocode}
-% Vor der \KOMAScript-Version~v3.15 wurden die Seitenstile \pgs{headings} und 
-% \pgs{plain} nicht als Alias definiert. Dieses Problem wird hiermit behoben.
-%    \begin{macrocode}
-    \ifcsdef{scr@v@3.15}{}{%
-      \ifstr{\sls@currentheadings}{tudheadings}{%
-        \ifstr{#1}{headings}{\def\@tempa{tudheadings}}{}%
-        \ifstr{#1}{plain}{\def\@tempa{plain.tudheadings}}{}%
-      }{}%
-    }%
-%    \end{macrocode}
-% Für den Fall, das ein \pgs{tudheadings}-Seitenstil geladen werden soll, muss 
-% der dazugehörige Satzspiegel ausgewählt werden\dots
-%    \begin{macrocode}
-    \tud@iftudps{\@tempa}{%
-%    \end{macrocode}
-% \dots wobei in der Version~v2.02 zwei unterschiedliche existierten, und 
-% abhängig von der Verwendung des \DDC-Logos im Fuß waren.
-%    \begin{macrocode}
-      \tud@ifverlower{2.03}{%
-%    \end{macrocode}
-% In diesem Fall werden die Seitenfußeinstellungen mit \cs{tud@ddc@check} in
-% \cs{@tempb} geschrieben und abhängig davon der richtige Satzspiegel geladen. 
-% Dabei wird zuvor mit dem Wert aus \cs{tud@currentgeometry} geprüft, ob dies 
-% überhaupt notwendig ist.
-%    \begin{macrocode}
-        \tud@ddc@check%
-%    \end{macrocode}
-% Das \DDC-Logo im Fuß ist nicht aktiviert.
-%    \begin{macrocode}
-        \ifcase\@tempb\relax%
-          \ifstr{\tud@currentgeometry}{tudarea}{}{%
-            \loadgeometry{tudarea}%
-            \gdef\tud@currentgeometry{tudarea}%
-          }%
-%    \end{macrocode}
-% Das \DDC-Logo im Fuß ist aktiviert.
-%    \begin{macrocode}
-        \else%
-          \ifstr{\tud@currentgeometry}{tudareaddc}{}{%
-            \loadgeometry{tudareaddc}%
-            \gdef\tud@currentgeometry{tudareaddc}%
-          }%
-        \fi%
-%    \end{macrocode}
-% Ab der Version~v2.03 ist nur noch ein Satzspiegel vonnöten.
-%    \begin{macrocode}
-      }{%
-        \ifstr{\tud@currentgeometry}{tudarea}{}{%
-          \loadgeometry{tudarea}%
-          \gdef\tud@currentgeometry{tudarea}%
-        }%
-      }%
-%    \end{macrocode}
-% Die Länge \cs{tud@dim@headdiff} gibt an, wie groß die Differenz zwischen 
-% Kopfhöhe zwischen aktuellem und dem speziellen \pgs{tudheadings}-Seitenstil 
-% ist. Da diese in diesem Fall identisch sind, wird die Länge zu \cs{z@} 
-% gesetzt.
-%    \begin{macrocode}
-      \setlength\tud@dim@headdiff{\z@}%
-%    \end{macrocode}
-% Hier ist der Fall, wenn kein \pgs{tudheadings}-Seitenstil geladen werden soll.
-% Zusätzlich zum Satzspeigel wird außerdem der Seitenstil \pgs{empty} 
-% zurückgesetzt.
-%    \begin{macrocode}
-    }{%
-      \ifstr{\tud@currentgeometry}{typearea}{}{%
-        \loadgeometry{typearea}%
-        \gdef\tud@currentgeometry{typearea}%
-      }%
-%    \end{macrocode}
-% Die Länge \cs{tud@dim@headdiff} wird auf den berechneten Wert gesetzt. Nur 
-% für den Fall, dass die Kopfzeile zum Satzspiegel gerechnet wird und dieser
-% nicht durch \pkg{typearea} berechnet wurde, muss diese Länge etwas angepasst 
-% werden.
-%    \begin{macrocode}
-      \setlength\tud@dim@headdiff{\tud@ta@headdiff}%
-      \ifcase\tud@geometry\relax\else%
-        \if@hincl%
-          \addtolength\tud@dim@headdiff{%
-            \dimexpr-\tud@ta@headheight-\tud@dim@headsep\relax%
-          }%
-        \fi%
-      \fi%
-    }%
-%    \end{macrocode}
-% Die Länge \cs{tud@dim@headdiff} wird vorsichtshalber global gesetzt.
-%    \begin{macrocode}
-    \global\tud@dim@headdiff=\tud@dim@headdiff%
-  }{}%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@currentgeometry
-% \end{macro}^^A \tud@beforeselectanypagestyle
-% \begin{macro}{\cleardoubleoddpageusingstyle}
-% \begin{macro}{\cleardoubleevenpageusingstyle}
-% \begin{macro}{\cleardoublepageusingstyle}
-% Damit die Satzspiegelumstellungen nicht durchgeführt werden, wenn durch die 
-% folgenden \KOMAScript-Befehle Leerseiten erzeugt werden, müssen diese minimal
-% angepasst werden.
-%    \begin{macrocode}
-\patchcmd{\cleardoubleoddpageusingstyle}{\pagestyle}{%
-  \let\tud@beforeselectanypagestyle\@gobble\pagestyle%
-}{}{\tud@patch@wrn{cleardoubleoddpageusingstyle}}
-\patchcmd{\cleardoubleevenpageusingstyle}{\pagestyle}{%
-  \let\tud@beforeselectanypagestyle\@gobble\pagestyle%
-}{}{\tud@patch@wrn{cleardoubleevenpageusingstyle}}
-\patchcmd{\cleardoublepageusingstyle}{\pagestyle}{%
-  \let\tud@beforeselectanypagestyle\@gobble\pagestyle%
-}{}{\tud@patch@wrn{cleardoublepageusingstyle}}
-%    \end{macrocode}
-% \end{macro}^^A \cleardoublepageusingstyle
-% \end{macro}^^A \cleardoubleevenpageusingstyle
-% \end{macro}^^A \cleardoubleoddpageusingstyle
-% \begin{macro}{\tud@ddc@enlargepage}
-% \changes{v2.02}{2014/06/23}{neu}%^^A
-% Der Befehl wird nur für den Kompatibilitätsmodus zur Version~v2.02 benötigt 
-% und für die Titelkopf- und Kapitelseiten verwendet. Er verkleinert die
-% entsprechenden Seiten, wenn für diese mit dem Befehl \cs{thispagestyle} einer
-% der \pgs{tudheadings}"=Seitenstile gewählt wird \emph{und} das \DDC-Logo im
-% Fuß gesetzt werden soll. Der entsprechende Seitenstil kann im optionalen
-% Argument angegeben werden, wenn der Befehl bedingt ausgeführt werden soll.
-%    \begin{macrocode}
-\tud@ifverlower{2.03}{%
-  \newcommand*\tud@ddc@enlargepage[1][]{%
-    \tud@iftudps{#1}{%
-      \ifstr{\tud@currentgeometry}{tudareaddc}{}{%
-        \tud@ddc@check%
-        \ifcase\@tempb\relax\else%
-          \enlargethispage{-\tud@dim@ddcdiff}%
-        \fi%
-      }%
-    }{}%
-  }%
-}{}
-%    \end{macrocode}
-% \end{macro}^^A \tud@ddc@enlargepage
+% \end{macro}^^A \thispagestyle
 % \begin{macro}{\tud@head@text}
 % \begin{macro}{\tud@head@text@first}
 % \begin{macro}{\tud@head@text@second}
@@ -1218,7 +1053,7 @@
 % Abschließend wird der aktuelle Seitenstil erneut aufgerufen, um bei einem
 % geänderten Fuß den notwendigen Satzspiegel zu laden. Dies ist jedoch nur 
 % notwendig, wenn die Option innerhalb des Dokumentes verwendet wurde. Siehe
-% \cs{tud@beforeselectanypagestyle}.
+% \cs{tud@BeforeSelectAnyPageStyle}.
 %    \begin{macrocode}
     \if@atdocument\expandafter\pagestyle\expandafter{\currentpagestyle}\fi%
   \fi%
@@ -1836,7 +1671,7 @@
     \TUD@numkey@bool,%
     {typearea}{0},%
     {tud}{1},{asymmetric}{1},{cd}{1},%
-    {symmetric}{2},{centred}{2},{centered}{2},%
+    {symmetric}{2},{centred}{2},{centered}{2},{normal}{2},%
     {twoside}{3},{balanced}{3}%
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
@@ -1853,91 +1688,6 @@
 %<*class&body>
 % \fi
 %
-% \begin{length}{\tud@ta@textheight}
-% \begin{length}{\tud@ta@topmargin}
-% \begin{length}{\tud@ta@headheight}
-% \begin{length}{\tud@ta@headsep}
-% \begin{length}{\tud@ta@footheight}
-% \changes{v2.03}{2015/01/09}{neu, für entsprechende \pkg{typearea}-Option}%^^A
-% \begin{length}{\tud@ta@footskip}
-% Diese Längen werden benötigt, um einen mit \pkg{typearea} berechneten
-% Satzspiegel an \pkg{geometry} weiterzureichen und die unterschiedlichen, vom
-% Satzspiegel abhängigen Seitenlayouts zu erstelen.
-%    \begin{macrocode}
-\newlength\tud@ta@textheight
-\newlength\tud@ta@topmargin
-\newlength\tud@ta@headheight
-\newlength\tud@ta@headsep
-\newlength\tud@ta@footheight
-\newlength\tud@ta@footskip
-%    \end{macrocode}
-% \end{length}^^A \tud@ta@footskip
-% \end{length}^^A \tud@ta@footheight
-% \end{length}^^A \tud@ta@headsep
-% \end{length}^^A \tud@ta@headheight
-% \end{length}^^A \tud@ta@topmargin
-% \end{length}^^A \tud@ta@textheight
-% \begin{length}{\tud@ta@headdiff}
-% \begin{length}{\tud@ta@footdiff}
-% \changes{v2.02}{2014/06/23}{entfernt}%^^A
-% Eine Länge für den Ausgleich zwischen normalem und benötigtem Satzspiegel für 
-% das spezielle Layout des \CDs. Die Differenz zwischen den unterschiedlichen 
-% Kopfhöhen der Satzspiegelvarianten wird bei der Ausführung von
-% \cs{tud@geometry@process} berechnet und in \cs{tud@ta@headdiff} gespeichert. 
-% Dabei muss unterschieden werden, ober der Satzspiegel genutzt wird, der durch
-% das \CD vorgegeben ist oder der durch \pkg{typearea} berechnete. Die Länge
-% \cs{tud@ta@footdiff} wurde mit der \TUDScript-Version~v2.02 entfernt.
-%    \begin{macrocode}
-\newlength\tud@ta@headdiff
-%    \end{macrocode}
-% \end{length}^^A \tud@ta@footdiff
-% \end{length}^^A \tud@ta@headdiff
-% \begin{macro}{\tud@geometry@restore}
-% \changes{v2.02}{2014/06/27}{neu}%^^A
-% Der Befehl \cs{AfterCalculatingTypearea} wird durch das Paket \pkg{typearea}
-% bereitgestellt. Die durch \pkg{typearea} berechneten Längenwerte für den
-% Satzspiegel werden zur Weiterverarbeitung gesichert. Für die Erstellung des
-% Satzspiegels wird das Paket \pkg{geometry} verwendet. Bei der entsprechenden
-% Option (\opt{geometry=no}) wird jedoch der von \pkg{typearea} berechnete
-% Satzspiegel an \pkg{geometry} weitergereicht. Somit wird es möglich,
-% unabhängig vom genutzten Paket\footnote{\pkg{typearea} oder \pkg{geometry}}
-% zur Festlegung des Satzspiegels, diesen innerhalb des Dokumentes zu ändern.
-% Damit auch Änderungen an der Papiergröße möglich sind, muss ein einzelnes
-% Makro (\cs{Gm@restore@org}) aus \pkg{geometry} temporär deaktiviert werden.
-%    \begin{macrocode}
-\newcommand*\tud@geometry@restore{}
-\AfterCalculatingTypearea{%
-  \setlength\tud@ta@textheight{\textheight}%
-  \setlength\tud@ta@topmargin{\topmargin}%
-  \setlength\tud@ta@headheight{\headheight}%
-  \setlength\tud@ta@headsep{\headsep}%
-  \ifcsvoid{ta@fh}{%
-    \setlength\tud@ta@footheight{\footheight}%
-  }{%
-    \setlength\tud@ta@footheight{\ta@fh}%
-  }%
-  \setlength\tud@ta@footskip{\footskip}%
-%    \end{macrocode}
-% \ToDo{Den Kram neu aufziehen, mit \cs{AfterPackage} arbeiten}[v2.04]
-%    \begin{macrocode}
-  \let\tud@geometry@restore\Gm@restore@org%
-  \if@atdocument%
-    \let\Gm@restore@org\relax%
-    \tud@geometry@process%
-%    \end{macrocode}
-% Damit Änderungen am Satzspiegel im Dokument sicher übernommen werden, wird 
-% das Setzen des Satzspiegels forciert. Dafür wird \cs{tud@currentgeometry} 
-% zurückgesetzt und anschließend der aktuelle Seitenstil erneut geladen, um das 
-% erneute und korrekte Ausführen von \cs{tud@beforeselectanypagestyle} zu 
-% erzwingen.
-%    \begin{macrocode}
-    \gdef\tud@currentgeometry{}%
-    \expandafter\pagestyle\expandafter{\currentpagestyle}%
-  \fi%
-  \let\Gm@restore@org\tud@geometry@restore%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@geometry@restore
 % Das Paket \pkg{geometry} erlaubt eine genaue Vorgabe des Satzspiegels und
 % der Seitenränder, wie es vom \CD der TU~Dresden verlangt wird. 
 %    \begin{macrocode}
@@ -1946,7 +1696,7 @@
 }{%
   \AtEndPreamble{\RequirePackage{geometry}[2010/09/12]}%
 }
-\AfterPackage!{geometry}{%
+\AfterPackage{geometry}{%
 %    \end{macrocode}
 % \begin{macro}{\tud@geometry@hmargin}
 % \begin{macro}{\tud@geometry@vmargin}
@@ -1960,10 +1710,10 @@
 % Gesetzt werden diese in Abhängigkeit von der Option \opt{cdgeometry} im
 % Makro \cs{tud@geometry@process} bzw. \cs{tud@geometry@@process}.
 %    \begin{macrocode}
-  \newcommand*\tud@geometry@hmargin{}
-  \newcommand*\tud@geometry@vmargin{}
-  \newcommand*\tud@geometry@tudmargin{}
-  \tud@ifverlower{2.03}{\newcommand*\tud@geometry@ddcmargin{}}{}
+  \newcommand*\tud@geometry@hmargin{}%
+  \newcommand*\tud@geometry@vmargin{}%
+  \newcommand*\tud@geometry@tudmargin{}%
+  \tud@ifverlower{2.03}{\newcommand*\tud@geometry@ddcmargin{}}{}%
 %    \end{macrocode}
 % \end{macro}^^A \tud@geometry@ddcmargin
 % \end{macro}^^A \tud@geometry@tudmargin
@@ -2264,7 +2014,7 @@
 % erstellen.
 %    \begin{macrocode}
     \tud@geometry@@process%
-  }
+  }%
 %    \end{macrocode}
 % Der Befehl \cs{tud@geometry@@process} setzt mit den zuvor definierten
 % Hilfsmakros die \pkg{geometry}"=Optionen für sowohl die seitlichen als auch
@@ -2311,7 +2061,7 @@
     }%
     \expandafter\newgeometry\expandafter{\@tempa}%
     \savegeometry{typearea}%
-  }
+  }%
 %    \end{macrocode}
 % \end{macro}^^A \tud@geometry@@process
 % \end{macro}^^A \tud@geometry@process
@@ -2329,25 +2079,281 @@
     \else%
       includehead=false%
     \fi%
-  }
+  }%
   \newcommand*\tud@geometry@fincl{%
     \if@fincl%
       includefoot=true%
     \else%
       includefoot=false%
     \fi%
-  }
+  }%
   \newcommand*\tud@geometry@mpincl{%
     \if@mincl%
       includemp=true%
     \else%
       includemp=false%
     \fi%
-  }
+  }%
 %    \end{macrocode}
 % \end{macro}^^A \tud@geometry@mpincl
 % \end{macro}^^A \tud@geometry@fincl
 % \end{macro}^^A \tud@geometry@hincl
+% Damit sind alle notwendigen Satzspiegel für die unterschiedlichen Seitenstile 
+% definiert.
+%    \begin{macrocode}
+}
+%    \end{macrocode}
+% \begin{macro}{\tud@BeforeSelectAnyPageStyle}
+% \changes{v2.02}{2014/06/23}{neu}%^^A
+% \begin{macro}{\tud@currentgeometry}
+% \changes{v2.02}{2014/06/23}{neu}%^^A
+% Mit \cs{tud@BeforeSelectAnyPageStyle} wird beim Umschalten des Seitenstils
+% gegebenfalls der Satzspiegel geändert. Dabei wird der aktivierte Satzspiegel
+% in dem Makro \cs{tud@currentgeometry} gesichert, um darauf zu einem späteren
+% Zeitpunkt prüfen zu können.
+%
+% Für den Fall, dass das Dokument nicht ausschließlich mit dem Kopf im \CD
+% auf jeder Seite gesetzt wird, muss der komplette vertikale Satzspiegel
+% angepasst werden, sonst wäre der obere Rand optisch viel zu groß. Hierfür
+% wird das Paket \pkg{geometry} genutzt. Durch \cs{tud@geometry@process} 
+% werden zwei~-- für die KOmpatibilitätsvariante drei~-- Layouts erstellt.
+% Diese können mit \cs{loadgeometry}\marg{Stil} geladen werden.
+%    \begin{macrocode}
+\newcommand*\tud@currentgeometry{}
+\newcommand*\tud@BeforeSelectAnyPageStyle[1]{%
+%    \end{macrocode}
+% Der \pgs{tudheadings}-Seitenstil wird mit dem Befehl \cs{newpairofpagestyles}
+% derart definiert, dass zwischen \pgs{tudheadings} und \pgs{plain.tudheadings}
+% auch mit \LaTeX-Standardseitenstilen \pgs{headings} bzw. \pgs{plain} 
+% umgeschaltet werden kann. Dies wird hiermit beachtet.
+%    \begin{macrocode}
+  \ifstr{#1}{\GetRealPageStyle{#1}}{%
+    \def\@tempa{#1}%
+%    \end{macrocode}
+% Vor der \KOMAScript-Version~v3.15 wurden die Seitenstile \pgs{headings} und 
+% \pgs{plain} nicht als Alias definiert. Dieses Problem wird hiermit behoben.
+%    \begin{macrocode}
+    \ifcsdef{scr@v@3.15}{}{%
+      \ifstr{\sls@currentheadings}{tudheadings}{%
+        \ifstr{#1}{headings}{\def\@tempa{tudheadings}}{}%
+        \ifstr{#1}{plain}{\def\@tempa{plain.tudheadings}}{}%
+      }{}%
+    }%
+%    \end{macrocode}
+% Für den Fall, das ein \pgs{tudheadings}-Seitenstil geladen werden soll, muss 
+% der dazugehörige Satzspiegel ausgewählt werden\dots
+%    \begin{macrocode}
+    \tud@iftudps{\@tempa}{%
+%    \end{macrocode}
+% \dots wobei in der Version~v2.02 zwei unterschiedliche existierten, und 
+% abhängig von der Verwendung des \DDC-Logos im Fuß waren.
+%    \begin{macrocode}
+      \tud@ifverlower{2.03}{%
+%    \end{macrocode}
+% In diesem Fall werden die Seitenfußeinstellungen mit \cs{tud@ddc@check} in
+% \cs{@tempb} geschrieben und abhängig davon der richtige Satzspiegel geladen. 
+% Dabei wird zuvor mit dem Wert aus \cs{tud@currentgeometry} geprüft, ob dies 
+% überhaupt notwendig ist.
+%    \begin{macrocode}
+        \tud@ddc@check%
+%    \end{macrocode}
+% Das \DDC-Logo im Fuß ist nicht aktiviert.
+%    \begin{macrocode}
+        \ifcase\@tempb\relax%
+          \ifstr{\tud@currentgeometry}{tudarea}{}{%
+            \loadgeometry{tudarea}%
+            \gdef\tud@currentgeometry{tudarea}%
+          }%
+%    \end{macrocode}
+% Das \DDC-Logo im Fuß ist aktiviert.
+%    \begin{macrocode}
+        \else%
+          \ifstr{\tud@currentgeometry}{tudareaddc}{}{%
+            \loadgeometry{tudareaddc}%
+            \gdef\tud@currentgeometry{tudareaddc}%
+          }%
+        \fi%
+%    \end{macrocode}
+% Ab der Version~v2.03 ist nur noch ein Satzspiegel vonnöten.
+%    \begin{macrocode}
+      }{%
+        \ifstr{\tud@currentgeometry}{tudarea}{}{%
+          \loadgeometry{tudarea}%
+          \gdef\tud@currentgeometry{tudarea}%
+        }%
+      }%
+%    \end{macrocode}
+% Die Länge \cs{tud@dim@headdiff} gibt an, wie groß die Differenz zwischen 
+% Kopfhöhe zwischen aktuellem und dem speziellen \pgs{tudheadings}-Seitenstil 
+% ist. Da diese in diesem Fall identisch sind, wird die Länge zu \cs{z@} 
+% gesetzt.
+%    \begin{macrocode}
+      \setlength\tud@dim@headdiff{\z@}%
+%    \end{macrocode}
+% Hier ist der Fall, wenn kein \pgs{tudheadings}-Seitenstil geladen werden soll.
+% Zusätzlich zum Satzspeigel wird außerdem der Seitenstil \pgs{empty} 
+% zurückgesetzt.
+%    \begin{macrocode}
+    }{%
+      \ifstr{\tud@currentgeometry}{typearea}{}{%
+        \loadgeometry{typearea}%
+        \gdef\tud@currentgeometry{typearea}%
+      }%
+%    \end{macrocode}
+% Die Länge \cs{tud@dim@headdiff} wird auf den berechneten Wert gesetzt. Nur 
+% für den Fall, dass die Kopfzeile zum Satzspiegel gerechnet wird und dieser
+% nicht durch \pkg{typearea} berechnet wurde, muss diese Länge etwas angepasst 
+% werden.
+%    \begin{macrocode}
+      \setlength\tud@dim@headdiff{\tud@ta@headdiff}%
+      \ifcase\tud@geometry\relax\else%
+        \if@hincl%
+          \addtolength\tud@dim@headdiff{%
+            \dimexpr-\tud@ta@headheight-\tud@dim@headsep\relax%
+          }%
+        \fi%
+      \fi%
+    }%
+%    \end{macrocode}
+% Die Länge \cs{tud@dim@headdiff} wird vorsichtshalber global gesetzt.
+%    \begin{macrocode}
+    \global\tud@dim@headdiff=\tud@dim@headdiff%
+  }{}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@currentgeometry
+% \end{macro}^^A \tud@BeforeSelectAnyPageStyle
+% \begin{macro}{\cleardoubleoddpageusingstyle}
+% \begin{macro}{\cleardoubleevenpageusingstyle}
+% \begin{macro}{\cleardoublepageusingstyle}
+% Damit die Satzspiegelumstellungen nicht durchgeführt werden, wenn durch die 
+% folgenden \KOMAScript-Befehle Leerseiten erzeugt werden, müssen diese minimal
+% angepasst werden.
+%    \begin{macrocode}
+\patchcmd{\cleardoubleoddpageusingstyle}{\pagestyle}{%
+  \let\tud@BeforeSelectAnyPageStyle\@gobble\pagestyle%
+}{}{\tud@patch@wrn{cleardoubleoddpageusingstyle}}
+\patchcmd{\cleardoubleevenpageusingstyle}{\pagestyle}{%
+  \let\tud@BeforeSelectAnyPageStyle\@gobble\pagestyle%
+}{}{\tud@patch@wrn{cleardoubleevenpageusingstyle}}
+\patchcmd{\cleardoublepageusingstyle}{\pagestyle}{%
+  \let\tud@BeforeSelectAnyPageStyle\@gobble\pagestyle%
+}{}{\tud@patch@wrn{cleardoublepageusingstyle}}
+%    \end{macrocode}
+% \end{macro}^^A \cleardoublepageusingstyle
+% \end{macro}^^A \cleardoubleevenpageusingstyle
+% \end{macro}^^A \cleardoubleoddpageusingstyle
+% \begin{macro}{\tud@ddc@enlargepage}
+% \changes{v2.02}{2014/06/23}{neu}%^^A
+% Der Befehl wird nur für den Kompatibilitätsmodus zur Version~v2.02 benötigt 
+% und für die Titelkopf- und Kapitelseiten verwendet. Er verkleinert die
+% entsprechenden Seiten, wenn für diese mit dem Befehl \cs{thispagestyle} einer
+% der \pgs{tudheadings}"=Seitenstile gewählt wird \emph{und} das \DDC-Logo im
+% Fuß gesetzt werden soll. Der entsprechende Seitenstil kann im optionalen
+% Argument angegeben werden, wenn der Befehl bedingt ausgeführt werden soll.
+%    \begin{macrocode}
+\tud@ifverlower{2.03}{%
+  \newcommand*\tud@ddc@enlargepage[1][]{%
+    \tud@iftudps{#1}{%
+      \ifstr{\tud@currentgeometry}{tudareaddc}{}{%
+        \tud@ddc@check%
+        \ifcase\@tempb\relax\else%
+          \enlargethispage{-\tud@dim@ddcdiff}%
+        \fi%
+      }%
+    }{}%
+  }%
+}{}
+%    \end{macrocode}
+% \end{macro}^^A \tud@ddc@enlargepage
+% \begin{length}{\tud@ta@textheight}
+% \begin{length}{\tud@ta@topmargin}
+% \begin{length}{\tud@ta@headheight}
+% \begin{length}{\tud@ta@headsep}
+% \begin{length}{\tud@ta@footheight}
+% \changes{v2.03}{2015/01/09}{neu, für entsprechende \pkg{typearea}-Option}%^^A
+% \begin{length}{\tud@ta@footskip}
+% Diese Längen werden benötigt, um einen mit \pkg{typearea} berechneten
+% Satzspiegel an \pkg{geometry} weiterzureichen und die unterschiedlichen, vom
+% Satzspiegel abhängigen Seitenlayouts zu erstelen.
+%    \begin{macrocode}
+\newlength\tud@ta@textheight
+\newlength\tud@ta@topmargin
+\newlength\tud@ta@headheight
+\newlength\tud@ta@headsep
+\newlength\tud@ta@footheight
+\newlength\tud@ta@footskip
+%    \end{macrocode}
+% \end{length}^^A \tud@ta@footskip
+% \end{length}^^A \tud@ta@footheight
+% \end{length}^^A \tud@ta@headsep
+% \end{length}^^A \tud@ta@headheight
+% \end{length}^^A \tud@ta@topmargin
+% \end{length}^^A \tud@ta@textheight
+% \begin{length}{\tud@ta@headdiff}
+% \begin{length}{\tud@ta@footdiff}
+% \changes{v2.02}{2014/06/23}{entfernt}%^^A
+% Eine Länge für den Ausgleich zwischen normalem und benötigtem Satzspiegel für 
+% das spezielle Layout des \CDs. Die Differenz zwischen den unterschiedlichen 
+% Kopfhöhen der Satzspiegelvarianten wird bei der Ausführung von
+% \cs{tud@geometry@process} berechnet und in \cs{tud@ta@headdiff} gespeichert. 
+% Dabei muss unterschieden werden, ober der Satzspiegel genutzt wird, der durch
+% das \CD vorgegeben ist oder der durch \pkg{typearea} berechnete. Die Länge
+% \cs{tud@ta@footdiff} wurde mit der \TUDScript-Version~v2.02 entfernt.
+%    \begin{macrocode}
+\newlength\tud@ta@headdiff
+%    \end{macrocode}
+% \end{length}^^A \tud@ta@footdiff
+% \end{length}^^A \tud@ta@headdiff
+% \begin{macro}{\tud@AfterCalculatingTypearea}
+% \changes{v2.04}{2015/03/10}{neu}%^^A
+% \begin{macro}{\tud@geometry@restore}
+% \changes{v2.02}{2014/06/27}{neu}%^^A
+% Der Befehl \cs{AfterCalculatingTypearea} wird durch das Paket \pkg{typearea}
+% bereitgestellt. Die durch \pkg{typearea} berechneten Längenwerte für den
+% Satzspiegel werden zur Weiterverarbeitung gesichert. Für die Erstellung des
+% Satzspiegels wird das Paket \pkg{geometry} verwendet. Bei der entsprechenden
+% Option (\opt{geometry=no}) wird jedoch der von \pkg{typearea} berechnete
+% Satzspiegel an \pkg{geometry} weitergereicht. Somit wird es möglich,
+% unabhängig vom genutzten Paket\footnote{\pkg{typearea} oder \pkg{geometry}}
+% zur Festlegung des Satzspiegels, diesen innerhalb des Dokumentes zu ändern.
+% Damit auch Änderungen an der Papiergröße möglich sind, muss ein einzelnes
+% Makro (\cs{Gm@restore@org}) aus \pkg{geometry} temporär deaktiviert werden.
+%    \begin{macrocode}
+\newcommand*\tud@geometry@restore{}
+\newcommand*\tud@AfterCalculatingTypearea{%
+  \setlength\tud@ta@textheight{\textheight}%
+  \setlength\tud@ta@topmargin{\topmargin}%
+  \setlength\tud@ta@headheight{\headheight}%
+  \setlength\tud@ta@headsep{\headsep}%
+  \ifcsvoid{ta@fh}{%
+    \setlength\tud@ta@footheight{\footheight}%
+  }{%
+    \setlength\tud@ta@footheight{\ta@fh}%
+  }%
+  \setlength\tud@ta@footskip{\footskip}%
+%    \end{macrocode}
+% \ToDo{Den Kram neu aufziehen, mit \cs{AfterPackage} arbeiten}[v2.04]
+%    \begin{macrocode}
+  \let\tud@geometry@restore\Gm@restore@org%
+  \if@atdocument%
+    \let\Gm@restore@org\relax%
+    \tud@geometry@process%
+%    \end{macrocode}
+% Damit Änderungen am Satzspiegel im Dokument sicher übernommen werden, wird 
+% das Setzen des Satzspiegels forciert. Dafür wird \cs{tud@currentgeometry} 
+% zurückgesetzt und anschließend der aktuelle Seitenstil erneut geladen, um das 
+% erneute und korrekte Ausführen von \cs{tud@BeforeSelectAnyPageStyle} zu 
+% erzwingen.
+%    \begin{macrocode}
+    \gdef\tud@currentgeometry{}%
+    \expandafter\pagestyle\expandafter{\currentpagestyle}%
+  \fi%
+  \let\Gm@restore@org\tud@geometry@restore%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@geometry@restore
+% \end{macro}^^A \tud@AfterCalculatingTypearea
 % Damit alle Satzspiegeleinstellungen korrekt vorgenommen und auch alle
 % Klassenoptionen korrekt verarbeitet werden, wird die Satzspiegelberechnung
 % erstmalig mit \cs{AtEndPreamble} am Ende der Präambel ausgeführt. Nachfolgend 
@@ -2356,9 +2362,18 @@
 % ausgewählt. Dies geschieht \emph{nicht}, wenn die \cls{standalone}-Klasse mit
 % der Option \opt{crop} geladen wurde, um die Seitenränder nicht zu ändern.
 %    \begin{macrocode}
-}
 \AtEndPreamble{%
   \tud@ifsacrop{}{%
+%    \end{macrocode}
+% Nach einer Neuberechnung durch \pkg{typearea} werden die für die Seitenstile 
+% benötigten Satzspiegel mit \pkg{geometry} neu erstellt.
+%    \begin{macrocode}
+    \AfterCalculatingTypearea{\tud@AfterCalculatingTypearea}%
+%    \end{macrocode}
+% Der Kopf im \CD der \TnUD erfordert einen eigenen Satzspiegel, der ggf. durch 
+% \cs{tud@BeforeSelectAnyPageStyle} aktiviert bzw. deaktiviert wird.
+%    \begin{macrocode}
+    \BeforeSelectAnyPageStyle{\tud@BeforeSelectAnyPageStyle{#1}}%
     \recalctypearea%
     \tud@geometry@process%
     \expandafter\pagestyle\expandafter{\currentpagestyle}%

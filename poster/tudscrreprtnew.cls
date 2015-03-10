@@ -131,13 +131,6 @@
     \RequirePackage{fontspec}[2014/06/21]%
   \fi%
 }
-\AtEndPreamble{%
-  \if@tud@fontspec%
-    \newcommand*\tud@iffontspec{\@firstoftwo}%
-  \else%
-    \newcommand*\tud@iffontspec{\@secondoftwo}%
-  \fi%
-}
 \AfterPackage*{fontspec}{\@tud@fontspectrue}
 \RequirePackage{textcase}[2004/10/07]
 \newcommand*\tud@uclcnotmath{%
@@ -508,7 +501,7 @@
     \TUD@numkey@bool,%
     {typearea}{0},%
     {tud}{1},{asymmetric}{1},{cd}{1},%
-    {symmetric}{2},{centred}{2},{centered}{2},%
+    {symmetric}{2},{centred}{2},{centered}{2},{normal}{2},%
     {twoside}{3},{balanced}{3}%
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
@@ -1144,8 +1137,13 @@
 }
 \@tempcnta=0
 \tud@font@greek@loop\tud@font@greek@declare
+\newcommand*\tud@font@init{%
+  \undef\tud@font@init@fontspec%
+  \undef\tud@font@init@nfss%
+  \undef\tud@font@init%
+}
 \AtEndPreamble{%
-  \tud@iffontspec{%
+  \if@tud@fontspec%
     \edef\@tempa{%
       \lowercase{\noexpand\IfFileExists{OT1\tud@univers.fd}}%
     }%
@@ -1153,13 +1151,15 @@
       \lowercase{\noexpand\IfFileExists{OT1\tud@dinbold.fd}}%
     }%
     \def\@tempc#1{%
-      \ClassInfoNoLine{\tudcls@name}{%
+      \ClassInfoNoLine{\tudcls@name}%
+      {%
         `#1' fonts for math typesetting not found\MessageBreak%
         Please use one of the installation scripts for the\MessageBreak%
         tudscr-bundle mentioned in the manual%
       }%
     }%
-  }{%
+    \preto\tud@font@init\tud@font@init@fontspec%
+  \else%
     \edef\@tempa{%
       \lowercase{\noexpand\IfFileExists{\encodingdefault\tud@univers.fd}}%
     }%
@@ -1170,7 +1170,8 @@
       \@tempswafalse%
       \ifstr{OT1}{\encodingdefault}{\@tempswatrue}{}
       \ifstr{T1}{\encodingdefault}{\@tempswatrue}{}
-      \ClassWarningNoLine{\tudcls@name}{%
+      \ClassWarningNoLine{\tudcls@name}%
+      {%
         `#1' fonts not found for encoding `\encodingdefault'.\MessageBreak%
         \if@tempswa%
           Please use one of the installation scripts for the\MessageBreak%
@@ -1181,81 +1182,86 @@
         A fallback layout is used%
       }%
     }%
-  }%
+    \preto\tud@font@init\tud@font@init@nfss%
+  \fi%
   \@tempa{\@tud@universtrue}{\@tempc{Univers}}%
   \@tempb{\@tud@dinboldtrue}{\@tempc{DIN Bold}}%
-  \tud@iffontspec{%
-    \newfontface\univln{Univers Light}[NFSSFamily=UniversLight]%
-    \newfontface\univrn{Univers}[NFSSFamily=UniversRegular]%
-    \newfontface\univbn{Univers Bold}[NFSSFamily=UniversBold]%
-    \newfontface\univxn{Univers Black}[NFSSFamily=UniversBlack]%
-    \newfontface\univls{Univers Light Oblique}[NFSSFamily=UniversLightOblique]%
-    \newfontface\univrs{Univers Oblique}[NFSSFamily=UniversRegularOblique]%
-    \newfontface\univbs{Univers Bold Oblique}[NFSSFamily=UniversBoldOblique]%
-    \newfontface\univxs{Univers Black Oblique}[NFSSFamily=UniversBlackOblique]%
-    \newcommand*\textuln[1]{{\univln#1}}%
-    \newcommand*\texturn[1]{{\univrn#1}}%
-    \newcommand*\textubn[1]{{\univbn#1}}%
-    \newcommand*\textuxn[1]{{\univxn#1}}%
-    \newcommand*\textuls[1]{{\univls#1}}%
-    \newcommand*\texturs[1]{{\univrs#1}}%
-    \newcommand*\textubs[1]{{\univbs#1}}%
-    \newcommand*\textuxs[1]{{\univxs#1}}%
-  }{%
-    \if@tud@univers%
-      \newcommand*\univln{\usefont{\encodingdefault}{\tud@univers}{l}{n}}%
-      \newcommand*\univrn{\usefont{\encodingdefault}{\tud@univers}{m}{n}}%
-      \newcommand*\univbn{\usefont{\encodingdefault}{\tud@univers}{b}{n}}%
-      \newcommand*\univxn{\usefont{\encodingdefault}{\tud@univers}{eb}{n}}%
-      \newcommand*\univls{\usefont{\encodingdefault}{\tud@univers}{l}{sl}}%
-      \newcommand*\univrs{\usefont{\encodingdefault}{\tud@univers}{m}{sl}}%
-      \newcommand*\univbs{\usefont{\encodingdefault}{\tud@univers}{b}{sl}}%
-      \newcommand*\univxs{\usefont{\encodingdefault}{\tud@univers}{eb}{sl}}%
-    \else%
-      \newcommand*\univln{}%
-      \newcommand*\univrn{}%
-      \newcommand*\univbn{}%
-      \newcommand*\univxn{}%
-      \newcommand*\univls{}%
-      \newcommand*\univrs{}%
-      \newcommand*\univbs{}%
-      \newcommand*\univxs{}%
-    \fi%
-    \newcommand*\textuln{}%
-    \newcommand*\texturn{}%
-    \newcommand*\textubn{}%
-    \newcommand*\textuxn{}%
-    \newcommand*\textuls{}%
-    \newcommand*\texturs{}%
-    \newcommand*\textubs{}%
-    \newcommand*\textuxs{}%
-    \DeclareTextFontCommand{\textuln}{\univln}%
-    \DeclareTextFontCommand{\texturn}{\univrn}%
-    \DeclareTextFontCommand{\textubn}{\univbn}%
-    \DeclareTextFontCommand{\textuxn}{\univxn}%
-    \DeclareTextFontCommand{\textuls}{\univls}%
-    \DeclareTextFontCommand{\texturs}{\univrs}%
-    \DeclareTextFontCommand{\textubs}{\univbs}%
-    \DeclareTextFontCommand{\textuxs}{\univxs}%
-  }%
-  \tud@iffontspec{%
-    \newfontface\@dinbn{DIN Bold}[NFSSFamily=DINBold,BoldFont = DIN Bold]%
-    \newcommand*\dinbn{\@dinbn\if@tud@dinbold\mathversion{dinbold}\fi}%
-    \newcommand*\textdbn[1]{{\dinbn#1}}%
-  }{%
-    \if@tud@dinbold%
-      \newcommand*\dinbn{%
-        \usefont{\encodingdefault}{\tud@dinbold}{b}{n}%
-        \mathversion{dinbold}%
-      }%
-    \else%
-      \let\dinbn\sectfont%
-    \fi%
-    \newcommand*\textdbn{}%
-    \DeclareTextFontCommand{\textdbn}{\dinbn}%
-  }%
+  \tud@font@init%
   \tud@font@set[nomath]%
-  \AtBeginDocument{%
+}
+\newcommand*\tud@font@init@fontspec{%
+  \newfontface\univln{Univers Light}[NFSSFamily=UniversLight]%
+  \newfontface\univrn{Univers}[NFSSFamily=UniversRegular]%
+  \newfontface\univbn{Univers Bold}[NFSSFamily=UniversBold]%
+  \newfontface\univxn{Univers Black}[NFSSFamily=UniversBlack]%
+  \newfontface\univls{Univers Light Oblique}[NFSSFamily=UniversLightOblique]%
+  \newfontface\univrs{Univers Oblique}[NFSSFamily=UniversRegularOblique]%
+  \newfontface\univbs{Univers Bold Oblique}[NFSSFamily=UniversBoldOblique]%
+  \newfontface\univxs{Univers Black Oblique}[NFSSFamily=UniversBlackOblique]%
+  \newcommand*\textuln[1]{{\univln##1}}%
+  \newcommand*\texturn[1]{{\univrn##1}}%
+  \newcommand*\textubn[1]{{\univbn##1}}%
+  \newcommand*\textuxn[1]{{\univxn##1}}%
+  \newcommand*\textuls[1]{{\univls##1}}%
+  \newcommand*\texturs[1]{{\univrs##1}}%
+  \newcommand*\textubs[1]{{\univbs##1}}%
+  \newcommand*\textuxs[1]{{\univxs##1}}%
+  \newfontface\@dinbn{DIN Bold}[NFSSFamily=DINBold,BoldFont = DIN Bold]%
+  \newcommand*\dinbn{\@dinbn\if@tud@dinbold\mathversion{dinbold}\fi}%
+  \newcommand*\textdbn[1]{{\dinbn##1}}%
+}
+\newcommand*\tud@font@init@nfss{%
+  \if@tud@univers%
+    \newcommand*\univln{\usefont{\encodingdefault}{\tud@univers}{l}{n}}%
+    \newcommand*\univrn{\usefont{\encodingdefault}{\tud@univers}{m}{n}}%
+    \newcommand*\univbn{\usefont{\encodingdefault}{\tud@univers}{b}{n}}%
+    \newcommand*\univxn{\usefont{\encodingdefault}{\tud@univers}{eb}{n}}%
+    \newcommand*\univls{\usefont{\encodingdefault}{\tud@univers}{l}{sl}}%
+    \newcommand*\univrs{\usefont{\encodingdefault}{\tud@univers}{m}{sl}}%
+    \newcommand*\univbs{\usefont{\encodingdefault}{\tud@univers}{b}{sl}}%
+    \newcommand*\univxs{\usefont{\encodingdefault}{\tud@univers}{eb}{sl}}%
+  \else%
+    \newcommand*\univln{}%
+    \newcommand*\univrn{}%
+    \newcommand*\univbn{}%
+    \newcommand*\univxn{}%
+    \newcommand*\univls{}%
+    \newcommand*\univrs{}%
+    \newcommand*\univbs{}%
+    \newcommand*\univxs{}%
+  \fi%
+  \newcommand*\textuln{}%
+  \newcommand*\texturn{}%
+  \newcommand*\textubn{}%
+  \newcommand*\textuxn{}%
+  \newcommand*\textuls{}%
+  \newcommand*\texturs{}%
+  \newcommand*\textubs{}%
+  \newcommand*\textuxs{}%
+  \DeclareTextFontCommand{\textuln}{\univln}%
+  \DeclareTextFontCommand{\texturn}{\univrn}%
+  \DeclareTextFontCommand{\textubn}{\univbn}%
+  \DeclareTextFontCommand{\textuxn}{\univxn}%
+  \DeclareTextFontCommand{\textuls}{\univls}%
+  \DeclareTextFontCommand{\texturs}{\univrs}%
+  \DeclareTextFontCommand{\textubs}{\univbs}%
+  \DeclareTextFontCommand{\textuxs}{\univxs}%
+  \if@tud@dinbold%
+    \newcommand*\dinbn{%
+      \usefont{\encodingdefault}{\tud@dinbold}{b}{n}%
+      \mathversion{dinbold}%
+    }%
+  \else%
+    \let\dinbn\sectfont%
+  \fi%
+  \newcommand*\textdbn{}%
+  \DeclareTextFontCommand{\textdbn}{\dinbn}%
+}
+\newcommand*\mv@univers{}%
+\newcommand*\mv@universbold{}%
+\newcommand*\mv@dinbold{}%
+\newcommand*\tud@font@math@init{%
+  \if@tud@univers%
     \DeclareMathVersion{univers}%
     \DeclareMathVersion{universbold}%
     \SetSymbolFont{operators}{univers}{OT1}{\tud@univers}{l}{n}%
@@ -1276,14 +1282,6 @@
     \SetMathAlphabet{\mathsf}{universbold}{OT1}{\tud@univers}{b}{n}%
     \SetMathAlphabet{\mathit}{universbold}{OT1}{\tud@univers}{b}{sl}%
     \SetMathAlphabet{\mathtt}{universbold}{OT1}{\tud@univers t}{b}{n}%
-    \DeclareMathVersion{dinbold}%
-    \SetSymbolFont{operators}{dinbold}{OT1}{\tud@dinbold}{b}{n}%
-    \SetSymbolFont{letters}{dinbold}{OML}{\tud@dinbold}{b}{sl}%
-    \SetSymbolFont{symbols}{dinbold}{OMS}{\tud@dinbold}{b}{n}%
-    \SetSymbolFont{largesymbols}{dinbold}{OMX}{iwona}{ebc}{n}%
-    \SetMathAlphabet{\mathbf}{dinbold}{OT1}{\tud@dinbold}{b}{n}%
-    \SetMathAlphabet{\mathsf}{dinbold}{OT1}{\tud@dinbold}{b}{n}%
-    \SetMathAlphabet{\mathit}{dinbold}{OT1}{\tud@dinbold}{b}{sl}%
     \@ifpackageloaded{amsfonts}{%
       \DeclareFontFamily{U}{\tud@univers a}{}%
       \DeclareFontShape{U}{\tud@univers a}{m}{n}{<->cmbras10}{}%
@@ -1296,20 +1294,32 @@
       \SetMathAlphabet{\mathfrak}{univers}{U}{euf}{m}{n}
       \SetMathAlphabet{\mathfrak}{universbold}{U}{euf}{b}{n}
     }{}%
-    \let\@tempb\relax%
-    \let\@tempc\relax%
-    \DeclareMathSymbol{\@tempb}{\mathalpha}{letters}{0}%
-    \DeclareMathSymbol{\@tempc}{\mathord}{letters}{0}%
-    \@tempswafalse%
-    \ifnum\Gamma=\@tempb\relax\@tempswatrue\fi%
-    \ifnum\Gamma=\@tempc\relax\@tempswatrue\fi%
-    \if@tempswa%
-      \bool@std@lock{@tud@slantedgreek}{true}%
-    \fi%
-    \tud@font@greek@loop\tud@font@greek@init%
-    \tud@font@math@set%
-  }%
+  \fi%
+  \if@tud@dinbold%
+    \DeclareMathVersion{dinbold}%
+    \SetSymbolFont{operators}{dinbold}{OT1}{\tud@dinbold}{b}{n}%
+    \SetSymbolFont{letters}{dinbold}{OML}{\tud@dinbold}{b}{sl}%
+    \SetSymbolFont{symbols}{dinbold}{OMS}{\tud@dinbold}{b}{n}%
+    \SetSymbolFont{largesymbols}{dinbold}{OMX}{iwona}{ebc}{n}%
+    \SetMathAlphabet{\mathbf}{dinbold}{OT1}{\tud@dinbold}{b}{n}%
+    \SetMathAlphabet{\mathsf}{dinbold}{OT1}{\tud@dinbold}{b}{n}%
+    \SetMathAlphabet{\mathit}{dinbold}{OT1}{\tud@dinbold}{b}{sl}%
+  \fi%
+  \let\@tempb\relax%
+  \let\@tempc\relax%
+  \DeclareMathSymbol{\@tempb}{\mathalpha}{letters}{0}%
+  \DeclareMathSymbol{\@tempc}{\mathord}{letters}{0}%
+  \@tempswafalse%
+  \ifnum\Gamma=\@tempb\relax\@tempswatrue\fi%
+  \ifnum\Gamma=\@tempc\relax\@tempswatrue\fi%
+  \if@tempswa%
+    \bool@std@lock{@tud@slantedgreek}{true}%
+  \fi%
+  \tud@font@greek@loop\tud@font@greek@init%
+  \tud@font@math@set%
+  \undef\tud@font@math@init%
 }
+\AtEndPreamble{\AtBeginDocument{\tud@font@math@init}}%
 \newcommand*\tud@font@greek@init[1]{%
   \ifcsdef{up#1}{}{%
     \if@tempswa%
@@ -1377,7 +1387,7 @@
     \fi%
     \bool@std@lock{@tud@cdmath}{true}%
     \cs@std@lock{tud@head@font}{\tud@cdfont}%
-    \tud@iffontspec{%
+    \if@tud@fontspec%
       \ifnum\tud@cdfont=\@ne\relax%
         \setsansfont{Univers Light}[%
           BoldFont = Univers,%
@@ -1401,7 +1411,7 @@
           BoldItalicFont = LMMonoLt10-BoldOblique,%
         ]%
       \fi%
-    }{%
+    \else%
       \if@tud@univers%
         \renewcommand*\sfdefault{\tud@univers}%
         \renewcommand*\ttdefault{\tud@univers t}%
@@ -1429,7 +1439,7 @@
           \fi%
         \fi%
       \fi%
-    }%
+    \fi%
     \renewcommand*\rmdefault{\sfdefault}%
     \renewcommand*\familydefault{\sfdefault}%
     \renewcommand*\seriesdefault{\mddefault}%
@@ -1786,7 +1796,7 @@
     \@tempswatrue%
   \fi%
   \if@tempswa%
-    \tud@iffontspec{%
+    \if@tud@fontspec%
       \DeclareFixedFont{\tud@head@font@bold}{\encodingdefault}%
         {UniversBold}{m}{n}{\tud@head@font@size}%
       \ifcase\tud@head@font\relax\or%
@@ -1796,7 +1806,7 @@
         \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
           {UniversRegular}{m}{n}{\tud@head@font@size}%
       \fi%
-    }{%
+    \else%
       \if@tud@univers%
         \DeclareFixedFont{\tud@head@font@bold}{\encodingdefault}%
           {\tud@univers}{b}{n}{\tud@head@font@size}%
@@ -1808,7 +1818,7 @@
             {\tud@univers}{m}{n}{\tud@head@font@size}%
         \fi%
       \fi%
-    }%
+    \fi%
   \fi%
 }
 \newrobustcmd*\ifdin{%
@@ -2307,7 +2317,7 @@
 }{%
   \AtEndPreamble{\RequirePackage{scrlayer-scrpage}[2013/12/14]}%
 }
-\AfterPackage!{scrlayer-scrpage}{%
+\AfterPackage{scrlayer-scrpage}{%
   \DeclareNewLayer[%
     background,headsep,%
     voffset=\tud@dim@logoy,%
@@ -2537,7 +2547,6 @@
     },%
   ]{tudheadings.pagecolor}
   \AddLayersToPageStyle{@everystyle@}{tudheadings.pagecolor}%
-  \BeforeSelectAnyPageStyle{\tud@beforeselectanypagestyle{#1}}%
 }
 \newcommand*\tud@ps@onselect{%
   \DeclarePageStyleAlias{plain}{plain.tudheadings}%
@@ -2568,75 +2577,6 @@
 \patchcmd{\thispagestyle}{\gdef\@specialstyle{#1}}{%
   \xdef\@specialstyle{\GetRealPageStyle{#1}}
 }{}{\tud@patch@wrn{thispagestyle}}
-\newcommand*\tud@currentgeometry{}
-\newcommand*\tud@beforeselectanypagestyle[1]{%
-  \ifstr{#1}{\GetRealPageStyle{#1}}{%
-    \def\@tempa{#1}%
-    \ifcsdef{scr@v@3.15}{}{%
-      \ifstr{\sls@currentheadings}{tudheadings}{%
-        \ifstr{#1}{headings}{\def\@tempa{tudheadings}}{}%
-        \ifstr{#1}{plain}{\def\@tempa{plain.tudheadings}}{}%
-      }{}%
-    }%
-    \tud@iftudps{\@tempa}{%
-      \tud@ifverlower{2.03}{%
-        \tud@ddc@check%
-        \ifcase\@tempb\relax%
-          \ifstr{\tud@currentgeometry}{tudarea}{}{%
-            \loadgeometry{tudarea}%
-            \gdef\tud@currentgeometry{tudarea}%
-          }%
-        \else%
-          \ifstr{\tud@currentgeometry}{tudareaddc}{}{%
-            \loadgeometry{tudareaddc}%
-            \gdef\tud@currentgeometry{tudareaddc}%
-          }%
-        \fi%
-      }{%
-        \ifstr{\tud@currentgeometry}{tudarea}{}{%
-          \loadgeometry{tudarea}%
-          \gdef\tud@currentgeometry{tudarea}%
-        }%
-      }%
-      \setlength\tud@dim@headdiff{\z@}%
-    }{%
-      \ifstr{\tud@currentgeometry}{typearea}{}{%
-        \loadgeometry{typearea}%
-        \gdef\tud@currentgeometry{typearea}%
-      }%
-      \setlength\tud@dim@headdiff{\tud@ta@headdiff}%
-      \ifcase\tud@geometry\relax\else%
-        \if@hincl%
-          \addtolength\tud@dim@headdiff{%
-            \dimexpr-\tud@ta@headheight-\tud@dim@headsep\relax%
-          }%
-        \fi%
-      \fi%
-    }%
-    \global\tud@dim@headdiff=\tud@dim@headdiff%
-  }{}%
-}
-\patchcmd{\cleardoubleoddpageusingstyle}{\pagestyle}{%
-  \let\tud@beforeselectanypagestyle\@gobble\pagestyle%
-}{}{\tud@patch@wrn{cleardoubleoddpageusingstyle}}
-\patchcmd{\cleardoubleevenpageusingstyle}{\pagestyle}{%
-  \let\tud@beforeselectanypagestyle\@gobble\pagestyle%
-}{}{\tud@patch@wrn{cleardoubleevenpageusingstyle}}
-\patchcmd{\cleardoublepageusingstyle}{\pagestyle}{%
-  \let\tud@beforeselectanypagestyle\@gobble\pagestyle%
-}{}{\tud@patch@wrn{cleardoublepageusingstyle}}
-\tud@ifverlower{2.03}{%
-  \newcommand*\tud@ddc@enlargepage[1][]{%
-    \tud@iftudps{#1}{%
-      \ifstr{\tud@currentgeometry}{tudareaddc}{}{%
-        \tud@ddc@check%
-        \ifcase\@tempb\relax\else%
-          \enlargethispage{-\tud@dim@ddcdiff}%
-        \fi%
-      }%
-    }{}%
-  }%
-}{}
 \newcommand*\tud@head@text{}
 \newcommand*\tud@head@text@first{}
 \newcommand*\tud@head@text@second{}
@@ -2860,69 +2800,16 @@
     \hfill\tud@footlogo{\tud@@ddclogo}%
   \fi%
 }
-\newlength\tud@ta@textheight
-\newlength\tud@ta@topmargin
-\newlength\tud@ta@headheight
-\newlength\tud@ta@headsep
-\newlength\tud@ta@footheight
-\newlength\tud@ta@footskip
-\newlength\tud@ta@headdiff
-\newcommand*\tud@geometry@restore{}
-% §§§ den Teil überarbeiten, \AtEndPreamble macht Kacke
-% das verzögerte Laden von geometry beachten!
-\AfterCalculatingTypearea{%
-  \setlength\tud@ta@textheight{\textheight}%
-  \setlength\tud@ta@topmargin{\topmargin}%
-  \setlength\tud@ta@headheight{\headheight}%
-  \setlength\tud@ta@headsep{\headsep}%
-  \ifcsvoid{ta@fh}{%
-    \setlength\tud@ta@footheight{\footheight}%
-  }{%
-    \setlength\tud@ta@footheight{\ta@fh}%
-  }%
-  \setlength\tud@ta@footskip{\footskip}%
-  \let\tud@geometry@restore\Gm@restore@org%
-  \if@atdocument%
-    \let\Gm@restore@org\relax%
-    \tud@geometry@process%
-    \gdef\tud@currentgeometry{}%
-    \expandafter\pagestyle\expandafter{\currentpagestyle}%
-  \else%
-  \fi%
-  \let\Gm@restore@org\tud@geometry@restore%
-}
-%  \if@ta@usegeometry
-%    \@ifundefined{Gm@save}{%
-%      \if@atdocument\else
-%        \edef\scr@geometryargs{%
-%          paperwidth=\the\paperwidth,paperheight=\the\paperheight,%
-%          \scr@geometryargs
-%        }%
-%        \PassOptionsToPackage{\scr@geometryargs}{geometry}%
-%      \fi
-%    }{%
-%      \edef\Gm@restore@org{\Gm@restore}%
-%      \if@atdocument
-%        \expandafter\newgeometry\expandafter{\scr@geometryargs}%
-%      \else
-%        \edef\scr@geometryargs{%
-%          paperwidth=\the\paperwidth,paperheight=\the\paperheight,%
-%          \scr@geometryargs
-%        }%
-%        \expandafter\geometry\expandafter{\scr@geometryargs}%
-%      \fi
-%    }%
-%  \fi
 \tud@ifsacrop{%
   \PreventPackageFromLoading{geometry}%
 }{%
   \AtEndPreamble{\RequirePackage{geometry}[2010/09/12]}%
 }
-\AfterPackage!{geometry}{%
-  \newcommand*\tud@geometry@hmargin{}
-  \newcommand*\tud@geometry@vmargin{}
-  \newcommand*\tud@geometry@tudmargin{}
-  \tud@ifverlower{2.03}{\newcommand*\tud@geometry@ddcmargin{}}{}
+\AfterPackage{geometry}{%
+  \newcommand*\tud@geometry@hmargin{}%
+  \newcommand*\tud@geometry@vmargin{}%
+  \newcommand*\tud@geometry@tudmargin{}%
+  \tud@ifverlower{2.03}{\newcommand*\tud@geometry@ddcmargin{}}{}%
   \newcommand*\tud@geometry@process{%
     \tud@geometry@set%
     \ifcase\tud@geometry\relax%
@@ -3121,7 +3008,7 @@
       \global\tud@dim@ddcdiff=\tud@dim@ddcdiff%
     }{}%
     \tud@geometry@@process%
-  }
+  }%
   \newcommand*\tud@geometry@@process{%
     \tud@ifverlower{2.03}{%
       \edef\@tempa{%
@@ -3147,31 +3034,156 @@
     }%
     \expandafter\newgeometry\expandafter{\@tempa}%
     \savegeometry{typearea}%
-  }
+  }%
   \newcommand*\tud@geometry@hincl{%
     \if@hincl%
       includehead=true%
     \else%
       includehead=false%
     \fi%
-  }
+  }%
   \newcommand*\tud@geometry@fincl{%
     \if@fincl%
       includefoot=true%
     \else%
       includefoot=false%
     \fi%
-  }
+  }%
   \newcommand*\tud@geometry@mpincl{%
     \if@mincl%
       includemp=true%
     \else%
       includemp=false%
     \fi%
-  }
+  }%
+}
+\newcommand*\tud@currentgeometry{}
+\newcommand*\tud@BeforeSelectAnyPageStyle[1]{%
+  \ifstr{#1}{\GetRealPageStyle{#1}}{%
+    \def\@tempa{#1}%
+    \ifcsdef{scr@v@3.15}{}{%
+      \ifstr{\sls@currentheadings}{tudheadings}{%
+        \ifstr{#1}{headings}{\def\@tempa{tudheadings}}{}%
+        \ifstr{#1}{plain}{\def\@tempa{plain.tudheadings}}{}%
+      }{}%
+    }%
+    \tud@iftudps{\@tempa}{%
+      \tud@ifverlower{2.03}{%
+        \tud@ddc@check%
+        \ifcase\@tempb\relax%
+          \ifstr{\tud@currentgeometry}{tudarea}{}{%
+            \loadgeometry{tudarea}%
+            \gdef\tud@currentgeometry{tudarea}%
+          }%
+        \else%
+          \ifstr{\tud@currentgeometry}{tudareaddc}{}{%
+            \loadgeometry{tudareaddc}%
+            \gdef\tud@currentgeometry{tudareaddc}%
+          }%
+        \fi%
+      }{%
+        \ifstr{\tud@currentgeometry}{tudarea}{}{%
+          \loadgeometry{tudarea}%
+          \gdef\tud@currentgeometry{tudarea}%
+        }%
+      }%
+      \setlength\tud@dim@headdiff{\z@}%
+    }{%
+      \ifstr{\tud@currentgeometry}{typearea}{}{%
+        \loadgeometry{typearea}%
+        \gdef\tud@currentgeometry{typearea}%
+      }%
+      \setlength\tud@dim@headdiff{\tud@ta@headdiff}%
+      \ifcase\tud@geometry\relax\else%
+        \if@hincl%
+          \addtolength\tud@dim@headdiff{%
+            \dimexpr-\tud@ta@headheight-\tud@dim@headsep\relax%
+          }%
+        \fi%
+      \fi%
+    }%
+    \global\tud@dim@headdiff=\tud@dim@headdiff%
+  }{}%
+}
+\patchcmd{\cleardoubleoddpageusingstyle}{\pagestyle}{%
+  \let\tud@BeforeSelectAnyPageStyle\@gobble\pagestyle%
+}{}{\tud@patch@wrn{cleardoubleoddpageusingstyle}}
+\patchcmd{\cleardoubleevenpageusingstyle}{\pagestyle}{%
+  \let\tud@BeforeSelectAnyPageStyle\@gobble\pagestyle%
+}{}{\tud@patch@wrn{cleardoubleevenpageusingstyle}}
+\patchcmd{\cleardoublepageusingstyle}{\pagestyle}{%
+  \let\tud@BeforeSelectAnyPageStyle\@gobble\pagestyle%
+}{}{\tud@patch@wrn{cleardoublepageusingstyle}}
+\tud@ifverlower{2.03}{%
+  \newcommand*\tud@ddc@enlargepage[1][]{%
+    \tud@iftudps{#1}{%
+      \ifstr{\tud@currentgeometry}{tudareaddc}{}{%
+        \tud@ddc@check%
+        \ifcase\@tempb\relax\else%
+          \enlargethispage{-\tud@dim@ddcdiff}%
+        \fi%
+      }%
+    }{}%
+  }%
+}{}
+% §§§ den Teil überarbeiten, \AtEndPreamble macht Kacke
+% das verzögerte Laden von geometry beachten!
+%  \if@ta@usegeometry
+%    \@ifundefined{Gm@save}{%
+%      \if@atdocument\else
+%        \edef\scr@geometryargs{%
+%          paperwidth=\the\paperwidth,paperheight=\the\paperheight,%
+%          \scr@geometryargs
+%        }%
+%        \PassOptionsToPackage{\scr@geometryargs}{geometry}%
+%      \fi
+%    }{%
+%      \edef\Gm@restore@org{\Gm@restore}%
+%      \if@atdocument
+%        \expandafter\newgeometry\expandafter{\scr@geometryargs}%
+%      \else
+%        \edef\scr@geometryargs{%
+%          paperwidth=\the\paperwidth,paperheight=\the\paperheight,%
+%          \scr@geometryargs
+%        }%
+%        \expandafter\geometry\expandafter{\scr@geometryargs}%
+%      \fi
+%    }%
+%  \fi
+\newlength\tud@ta@textheight
+\newlength\tud@ta@topmargin
+\newlength\tud@ta@headheight
+\newlength\tud@ta@headsep
+\newlength\tud@ta@footheight
+\newlength\tud@ta@footskip
+\newlength\tud@ta@headdiff
+\newcommand*\tud@geometry@restore{}
+\newcommand*\tud@AfterCalculatingTypearea{%
+  \setlength\tud@ta@textheight{\textheight}%
+  \setlength\tud@ta@topmargin{\topmargin}%
+  \setlength\tud@ta@headheight{\headheight}%
+  \setlength\tud@ta@headsep{\headsep}%
+  \ifcsvoid{ta@fh}{%
+    \setlength\tud@ta@footheight{\footheight}%
+  }{%
+    \setlength\tud@ta@footheight{\ta@fh}%
+  }%
+  \setlength\tud@ta@footskip{\footskip}%
+  \let\tud@geometry@restore\Gm@restore@org%
+  \if@atdocument%
+    \let\Gm@restore@org\relax%
+    \tud@geometry@process%
+    \gdef\tud@currentgeometry{}%
+    \expandafter\pagestyle\expandafter{\currentpagestyle}%
+  \else%
+    % ��� zwischen \geometry und \newgeometry unterscheiden?
+  \fi%
+  \let\Gm@restore@org\tud@geometry@restore%
 }
 \AtEndPreamble{%
   \tud@ifsacrop{}{%
+    \AfterCalculatingTypearea{\tud@AfterCalculatingTypearea}%
+    \BeforeSelectAnyPageStyle{\tud@BeforeSelectAnyPageStyle{#1}}%
     \recalctypearea%
     \tud@geometry@process%
     \expandafter\pagestyle\expandafter{\currentpagestyle}%
