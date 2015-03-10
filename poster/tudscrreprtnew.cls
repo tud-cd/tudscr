@@ -1137,12 +1137,7 @@
 }
 \@tempcnta=0
 \tud@font@greek@loop\tud@font@greek@declare
-\newcommand*\tud@font@init{%
-  \undef\tud@font@init@fontspec%
-  \undef\tud@font@init@nfss%
-  \undef\tud@font@init%
-}
-\AtEndPreamble{%
+\newcommand*\tud@font@check{%
   \if@tud@fontspec%
     \edef\@tempa{%
       \lowercase{\noexpand\IfFileExists{OT1\tud@univers.fd}}%
@@ -1150,15 +1145,14 @@
     \edef\@tempb{%
       \lowercase{\noexpand\IfFileExists{OT1\tud@dinbold.fd}}%
     }%
-    \def\@tempc#1{%
+    \def\@tempc##1{%
       \ClassInfoNoLine{\tudcls@name}%
       {%
-        `#1' fonts for math typesetting not found\MessageBreak%
+        `##1' fonts for math typesetting not found\MessageBreak%
         Please use one of the installation scripts for the\MessageBreak%
         tudscr-bundle mentioned in the manual%
       }%
     }%
-    \preto\tud@font@init\tud@font@init@fontspec%
   \else%
     \edef\@tempa{%
       \lowercase{\noexpand\IfFileExists{\encodingdefault\tud@univers.fd}}%
@@ -1166,13 +1160,13 @@
     \edef\@tempb{%
       \lowercase{\noexpand\IfFileExists{\encodingdefault\tud@dinbold.fd}}%
     }%
-    \def\@tempc#1{%
+    \def\@tempc##1{%
       \@tempswafalse%
       \ifstr{OT1}{\encodingdefault}{\@tempswatrue}{}
       \ifstr{T1}{\encodingdefault}{\@tempswatrue}{}
       \ClassWarningNoLine{\tudcls@name}%
       {%
-        `#1' fonts not found for encoding `\encodingdefault'.\MessageBreak%
+        `##1' fonts not found for encoding `\encodingdefault'.\MessageBreak%
         \if@tempswa%
           Please use one of the installation scripts for the\MessageBreak%
           tudscr-bundle mentioned in the manual.\MessageBreak%
@@ -1182,12 +1176,15 @@
         A fallback layout is used%
       }%
     }%
-    \preto\tud@font@init\tud@font@init@nfss%
   \fi%
   \@tempa{\@tud@universtrue}{\@tempc{Univers}}%
   \@tempb{\@tud@dinboldtrue}{\@tempc{DIN Bold}}%
-  \tud@font@init%
-  \tud@font@set[nomath]%
+  \undef\tud@font@check%
+}
+\newcommand*\tud@font@init{%
+  \undef\tud@font@init@fontspec%
+  \undef\tud@font@init@nfss%
+  \undef\tud@font@init%
 }
 \newcommand*\tud@font@init@fontspec{%
   \newfontface\univln{Univers Light}[NFSSFamily=UniversLight]%
@@ -1319,7 +1316,17 @@
   \tud@font@math@set%
   \undef\tud@font@math@init%
 }
-\AtEndPreamble{\AtBeginDocument{\tud@font@math@init}}%
+\AtEndPreamble{%
+  \tud@font@check%
+  \if@tud@fontspec%
+    \preto\tud@font@init\tud@font@init@fontspec%
+  \else%
+    \preto\tud@font@init\tud@font@init@nfss%
+  \fi%
+  \tud@font@init%
+  \tud@font@set[nomath]%
+  \AtBeginDocument{\tud@font@math@init}%
+}
 \newcommand*\tud@font@greek@init[1]{%
   \ifcsdef{up#1}{}{%
     \if@tempswa%
