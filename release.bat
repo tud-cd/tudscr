@@ -74,6 +74,7 @@ echo =========================================================================
 echo  Erzeugen der Installationdateien
 echo =========================================================================
 cd ..\install
+tex tud-install.ins
 tex tudscr-install.ins
 rename *.bxt *.bat
 setlocal enabledelayedexpansion
@@ -91,7 +92,7 @@ cd %~dp0
 mkdir release-%version%\temp
 mkdir release-%version%\GitHub
 copy *.md                                   release-%version%\temp\
-xcopy addon release-%version%\temp\ /s
+xcopy addon                                 release-%version%\temp\ /s
 copy development\fonts\*.*                  release-%version%\temp\
 copy development\tools\*.*                  release-%version%\temp\
 copy temp\doc\latex\tudscr\tudscr.pdf       release-%version%\temp\
@@ -131,7 +132,6 @@ xcopy ..\temp\doc\latex\tudscr\*.*      CTAN\tudscr\doc\    /s
 xcopy ..\temp\source\latex\tudscr\*.*   CTAN\tudscr\source\ /s
 xcopy ..\temp\tex\latex\tudscr\logo\*.* CTAN\tudscr\logo\   /s
 move  CTAN\tudscr\doc\README            CTAN\tudscr\README
-echo %cd%
 echo Set objArgs = WScript.Arguments > winzip.vbs
 echo InputFolder = objArgs(0) >> winzip.vbs
 echo ZipFile = objArgs(1) >> winzip.vbs
@@ -141,6 +141,17 @@ echo Set source = objShell.NameSpace(InputFolder).Items >> winzip.vbs
 echo objShell.NameSpace(ZipFile).CopyHere(source) >> winzip.vbs
 echo wScript.Sleep 2000 >> winzip.vbs
 CScript  winzip.vbs  %cd%\CTAN  %cd%\tudscr.zip
+echo =========================================================================
+echo  Aktualisierung des Releases der Version v1.0 fuer GitHub
+echo =========================================================================
+cd %~dp0
+mkdir release-%version%\GitHub-tudscrold
+copy development\tudscrold\*.*               release-%version%\temp\
+cd release-%version%\temp
+7za a -tzip .\..\TUD-KOMA-Script_v1.0old.zip @7za_files_old.txt
+cd..
+move TUD-KOMA-Script_v1.0old.zip             GitHub-tudscrold\
+move temp\tudfonts_install.*                 GitHub-tudscrold\
 echo =========================================================================
 echo  Loeschen aller temporaeren Dateien
 echo =========================================================================
