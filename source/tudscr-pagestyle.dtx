@@ -1,4 +1,4 @@
-% \CheckSum{2089}
+% \CheckSum{2088}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -1705,9 +1705,7 @@
 \tud@ifsacrop{%
   \PreventPackageFromLoading{geometry}%
 }{%
-  \AtEndPreamble{\RequirePackage{geometry}[2010/09/12]}%
-}
-\AfterPackage{geometry}{%
+  \RequirePackage{geometry}[2010/09/12]%
 %    \end{macrocode}
 % \begin{macro}{\tud@geometry@hmargin}
 % \begin{macro}{\tud@geometry@vmargin}
@@ -1730,6 +1728,23 @@
 % \end{macro}^^A \tud@geometry@tudmargin
 % \end{macro}^^A \tud@geometry@vmargin
 % \end{macro}^^A \tud@geometry@hmargin
+% \begin{macro}{\tud@newgeometry}
+% \changes{v2.04}{2015/03/12}{neu}^^A
+% mit diesem Befehl wird abhängig davon, ob er in der Präambel oder im Dokument 
+% durch \cs{tud@geometry@process} ausgeführt wird, entweder \cs{geometry} oder 
+% \cs{newgeometry} aufgerufen.
+%    \begin{macrocode}
+  \newcommand*\tud@newgeometry[1]{%
+    \if@atdocument%
+      \edef\@tempa{#1}%
+      \expandafter\newgeometry\expandafter{#1}%
+    \else%
+      \edef\@tempa{paperwidth=\the\paperwidth,paperheight=\the\paperheight,#1}%
+      \expandafter\geometry\expandafter{\@tempa}%
+    \fi%
+  }%
+%    \end{macrocode}
+% \end{macro}^^A \tud@newgeometry
 % \begin{macro}{\tud@geometry@process}
 % \changes{v2.02}{2014/06/23}{diverse Anpassungen an \pkg{scrlayer-scrpage}}^^A
 % \changes{v2.03}{2015/01/09}{Satzspiegel des \CDs angepasst}^^A
@@ -2042,6 +2057,7 @@
 % den Satzspiegel erfolgt nicht ggf. über die Option \opt{includefoot} sondern 
 % manuell bei der Definition von \cs{tud@geometry@ddcmargin}.
 %    \begin{macrocode}
+    \edef\Gm@restore@org{\Gm@restore}%
     \tud@ifverlower{2.03}{%
       \edef\@tempa{%
         \tud@geometry@hmargin,%
@@ -2050,7 +2066,7 @@
         \tud@geometry@ddcmargin,%
         ignorehead,ignorefoot%
       }%
-      \expandafter\newgeometry\expandafter{\@tempa}%
+      \tud@newgeometry{\@tempa}%
       \savegeometry{tudareaddc}%
     }{}%
 %    \end{macrocode}
@@ -2061,7 +2077,7 @@
       \tud@geometry@vmargin,%
       \tud@geometry@tudmargin%
     }%
-    \expandafter\newgeometry\expandafter{\@tempa}%
+    \tud@newgeometry{\@tempa}%
     \savegeometry{tudarea}%
 %    \end{macrocode}
 % Als letztes wird der Standardsatzspiegel erstellt.
@@ -2070,7 +2086,7 @@
       \tud@geometry@hmargin,%
       \tud@geometry@vmargin%
     }%
-    \expandafter\newgeometry\expandafter{\@tempa}%
+    \tud@newgeometry{\@tempa}%
     \savegeometry{typearea}%
   }%
 %    \end{macrocode}
@@ -2343,13 +2359,7 @@
     \setlength\tud@ta@footheight{\ta@fh}%
   }%
   \setlength\tud@ta@footskip{\footskip}%
-%    \end{macrocode}
-% \ToDo{Den Kram neu aufziehen, mit \cs{AfterPackage} arbeiten}[v2.04]
-%    \begin{macrocode}
-  \let\tud@geometry@restore\Gm@restore@org%
-  \if@atdocument%
-    \let\Gm@restore@org\relax%
-    \tud@geometry@process%
+  \tud@geometry@process%
 %    \end{macrocode}
 % Damit Änderungen am Satzspiegel im Dokument sicher übernommen werden, wird 
 % das Setzen des Satzspiegels forciert. Dafür wird \cs{tud@currentgeometry} 
@@ -2357,10 +2367,8 @@
 % erneute und korrekte Ausführen von \cs{tud@BeforeSelectAnyPageStyle} zu 
 % erzwingen.
 %    \begin{macrocode}
-    \gdef\tud@currentgeometry{}%
-    \expandafter\pagestyle\expandafter{\currentpagestyle}%
-  \fi%
-  \let\Gm@restore@org\tud@geometry@restore%
+  \gdef\tud@currentgeometry{}%
+  \expandafter\pagestyle\expandafter{\currentpagestyle}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@geometry@restore
@@ -2386,8 +2394,6 @@
 %    \begin{macrocode}
     \BeforeSelectAnyPageStyle{\tud@BeforeSelectAnyPageStyle{#1}}%
     \recalctypearea%
-    \tud@geometry@process%
-    \expandafter\pagestyle\expandafter{\currentpagestyle}%
   }%
 }
 %    \end{macrocode}

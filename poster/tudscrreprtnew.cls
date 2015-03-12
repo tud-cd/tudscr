@@ -2809,13 +2809,20 @@
 \tud@ifsacrop{%
   \PreventPackageFromLoading{geometry}%
 }{%
-  \AtEndPreamble{\RequirePackage{geometry}[2010/09/12]}%
-}
-\AfterPackage{geometry}{%
+  \RequirePackage{geometry}[2010/09/12]%
   \newcommand*\tud@geometry@hmargin{}%
   \newcommand*\tud@geometry@vmargin{}%
   \newcommand*\tud@geometry@tudmargin{}%
   \tud@ifverlower{2.03}{\newcommand*\tud@geometry@ddcmargin{}}{}%
+  \newcommand*\tud@newgeometry[1]{%
+    \if@atdocument%
+      \edef\@tempa{#1}%
+      \expandafter\newgeometry\expandafter{#1}%
+    \else%
+      \edef\@tempa{paperwidth=\the\paperwidth,paperheight=\the\paperheight,#1}%
+      \expandafter\geometry\expandafter{\@tempa}%
+    \fi%
+  }%
   \newcommand*\tud@geometry@process{%
     \tud@geometry@set%
     \ifcase\tud@geometry\relax% false
@@ -3016,6 +3023,7 @@
     \tud@geometry@@process%
   }%
   \newcommand*\tud@geometry@@process{%
+    \edef\Gm@restore@org{\Gm@restore}%
     \tud@ifverlower{2.03}{%
       \edef\@tempa{%
         \tud@geometry@hmargin,%
@@ -3024,7 +3032,7 @@
         \tud@geometry@ddcmargin,%
         ignorehead,ignorefoot%
       }%
-      \expandafter\newgeometry\expandafter{\@tempa}%
+      \tud@newgeometry{\@tempa}%
       \savegeometry{tudareaddc}%
     }{}%
     \edef\@tempa{%
@@ -3032,13 +3040,13 @@
       \tud@geometry@vmargin,%
       \tud@geometry@tudmargin%
     }%
-    \expandafter\newgeometry\expandafter{\@tempa}%
+    \tud@newgeometry{\@tempa}%
     \savegeometry{tudarea}%
     \edef\@tempa{%
       \tud@geometry@hmargin,%
       \tud@geometry@vmargin%
     }%
-    \expandafter\newgeometry\expandafter{\@tempa}%
+    \tud@newgeometry{\@tempa}%
     \savegeometry{typearea}%
   }%
   \newcommand*\tud@geometry@hincl{%
@@ -3132,30 +3140,6 @@
     }{}%
   }%
 }{}
-% Â§Â§Â§ den Teil Ã¼berarbeiten, \AtEndPreamble macht Kacke
-% das verzÃ¶gerte Laden von geometry beachten!
-%  \if@ta@usegeometry
-%    \@ifundefined{Gm@save}{%
-%      \if@atdocument\else
-%        \edef\scr@geometryargs{%
-%          paperwidth=\the\paperwidth,paperheight=\the\paperheight,%
-%          \scr@geometryargs
-%        }%
-%        \PassOptionsToPackage{\scr@geometryargs}{geometry}%
-%      \fi
-%    }{%
-%      \edef\Gm@restore@org{\Gm@restore}%
-%      \if@atdocument
-%        \expandafter\newgeometry\expandafter{\scr@geometryargs}%
-%      \else
-%        \edef\scr@geometryargs{%
-%          paperwidth=\the\paperwidth,paperheight=\the\paperheight,%
-%          \scr@geometryargs
-%        }%
-%        \expandafter\geometry\expandafter{\scr@geometryargs}%
-%      \fi
-%    }%
-%  \fi
 \newlength\tud@ta@textheight
 \newlength\tud@ta@topmargin
 \newlength\tud@ta@headheight
@@ -3175,24 +3159,15 @@
     \setlength\tud@ta@footheight{\ta@fh}%
   }%
   \setlength\tud@ta@footskip{\footskip}%
-  \let\tud@geometry@restore\Gm@restore@org%
-  \if@atdocument%
-    \let\Gm@restore@org\relax%
-    \tud@geometry@process%
-    \gdef\tud@currentgeometry{}%
-    \expandafter\pagestyle\expandafter{\currentpagestyle}%
-  \else%
-    % §§§ zwischen \geometry und \newgeometry unterscheiden?
-  \fi%
-  \let\Gm@restore@org\tud@geometry@restore%
+  \tud@geometry@process%
+  \gdef\tud@currentgeometry{}%
+  \expandafter\pagestyle\expandafter{\currentpagestyle}%
 }
 \AtEndPreamble{%
   \tud@ifsacrop{}{%
     \AfterCalculatingTypearea{\tud@AfterCalculatingTypearea}%
     \BeforeSelectAnyPageStyle{\tud@BeforeSelectAnyPageStyle{#1}}%
     \recalctypearea%
-    \tud@geometry@process%
-    \expandafter\pagestyle\expandafter{\currentpagestyle}%
   }%
 }
 \newcommand*\tud@ps{tudheadings}
