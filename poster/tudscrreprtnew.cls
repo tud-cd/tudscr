@@ -15,7 +15,6 @@
 %% tudscr-comp.dtx  (with options: `class,report,option')
 %% tudscr-base.dtx  (with options: `execute')
 %% tudscr-fonts.dtx  (with options: `class,body')
-%% tudscr-color.dtx  (with options: `class,body')
 %% tudscr-fields.dtx  (with options: `class,body')
 %% tudscr-locale.dtx  (with options: `class,report,body')
 %% tudscr-pagestyle.dtx  (with options: `class,report,body')
@@ -70,7 +69,7 @@
       \fi%
     }%
   \fi%
-  \@TUDVersion{2015/03/01 v2.04 BETA TUD-KOMA-Script}%
+  \@TUDVersion{2015/03/12 v2.04 BETA TUD-KOMA-Script}%
 \endgroup%
 \providecommand*\tudscrmail{tudscr@gmail.com}
 \newcommand*\cls@name{report}
@@ -78,7 +77,7 @@
 \newcommand*\tudcls@name{tudscrreprt}
 \NeedsTeXFormat{LaTeX2e}[2011/06/27]
 \ProvidesClass{\tudcls@name}[%
-  2015/03/01 v2.04 BETA TUD-KOMA-Script
+  2015/03/12 v2.04 BETA TUD-KOMA-Script
   document class (\cls@name)%
 ]
 \typeout{The Corporate Design of Technische Universitaet Dresden}
@@ -111,15 +110,15 @@
   \ClassWarning{\tudcls@name}%
   {%
     The option key `fontspec' is deprecated.\MessageBreak%
-    You should load the package `fontspec' manually
+    You should load the package `fontspec' manually%
   }%
   \TUD@set@ifkey{fontspec}{@tud@fontspec}{#1}%
 }
 \AtEndOfClass%
 {%
-  \TUD@key{fontspec}[]
+  \TUD@key{fontspec}[]%
   {%
-    \ClassError{\tudcls@name}
+    \ClassError{\tudcls@name}%
       {Option `fontspec' too late}{%
       Option `fontspec' can only be set while loading the\MessageBreak%
       class `\tudcls@name'
@@ -184,44 +183,44 @@
     {upgreek}{10},{upright}{10},{uprightgreek}{10},{uprightGreek}{10},%
     {slgreek}{11},{slanted}{11},{slantedgreek}{11},{slantedGreek}{11},%
     {fontspec}{12},{luatex}{12},{lualatex}{12}{xetex}{12},{xelatex}{12},%
-    {nofontspec}{13},{pdftex}{13},{pdflatex}{13}%
+    {nofontspec}{13},{nfss}{13},{pdftex}{13},{pdflatex}{13}%
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \ifcase\@tempa\relax%
+    \ifcase\@tempa\relax% false
       \def\tud@cdfont{0}%
       \if@atdocument\tud@font@set\fi%
-    \or%
+    \or% true
       \def\tud@cdfont{1}%
       \if@atdocument\tud@font@set\fi%
-    \or%
+    \or% heavy
       \def\tud@cdfont{2}%
       \if@atdocument\tud@font@set\fi%
-    \or%
+    \or% nodin
       \renewcommand*\tud@font@heading{\tud@RaggedRight}%
-    \or%
-      \renewcommand*\tud@font@heading{\dinbn\tud@raggedright}
-    \or%
+    \or% din
+      \renewcommand*\tud@font@heading{\dinbn\tud@raggedright}%
+    \or% nohead
       \TUDoptions{cdhead=false}%
-    \or%
+    \or% head
       \TUDoptions{cdhead=true}%
-    \or%
+    \or% heavyhead
       \TUDoptions{cdhead=heavy}%
-    \or%
+    \or% nomath
       \TUDoptions{cdmath=false}%
-    \or%
+    \or% math
       \TUDoptions{cdmath=true}%
-    \or%
+    \or% upgreek
       \TUDoptions{slantedgreek=false}%
-    \or%
+    \or% slgreek
       \TUDoptions{slantedgreek=true}%
-    \or%
+    \or% fontspec
       \TUDoptions{fontspec=true}%
-    \or%
+    \or% nofontspec
       \TUDoptions{fontspec=false}%
     \fi%
   \else%
     \TUDoptions{cdfontsize=#1}%
-    \ifcase\tud@cdfont\relax%
+    \ifcase\tud@cdfont\relax% false to true
       \def\tud@cdfont{1}%
       \if@atdocument\tud@font@set\fi%
     \fi%
@@ -250,19 +249,19 @@
     \TUD@numkey@bool,%
     {serifmath}{0},{serif}{0},{nosansmath}{0},{nosans}{0},%
     {sansmath}{1},{sans}{1},%
-    {upright}{2},{upgreek}{2},{uprightgreek}{2},{uprightGreek}{2},%
-    {slanted}{3},{slgreek}{3},{slantedgreek}{3},{slantedGreek}{3}%
+    {upgreek}{2},{upright}{2},{uprightgreek}{2},{uprightGreek}{2},%
+    {slgreek}{3},{slanted}{3},{slantedgreek}{3},{slantedGreek}{3}%
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \ifcase\@tempa\relax%
+    \ifcase\@tempa\relax% false
       \bool@set@lock{@tud@cdmath}{false}%
       \if@atdocument\tud@font@math@set\fi%
-    \or%
+    \or% true
       \bool@set@lock{@tud@cdmath}{true}%
       \if@atdocument\tud@font@math@set\fi%
-    \or
+    \or% upgreek
       \TUDoptions{slantedgreek=false}%
-    \or
+    \or% slgreek
       \TUDoptions{slantedgreek=true}%
     \fi%
   \fi%
@@ -296,9 +295,9 @@
   \TUD@set@numkey{ddc}{tud@ddc}{\tud@ddc@switch}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \if@atdocument\tud@iftudps{\currentpagestyle}{\clearpage}{}\fi%
-    \ifcase\tud@ddc\relax%
+    \ifcase\tud@ddc\relax% false
       \@tud@ddc@autosetfalse%
-    \else%
+    \else% !false
       \@tud@ddc@autosettrue%
     \fi%
     \if@atdocument\expandafter\pagestyle\expandafter{\currentpagestyle}\fi%
@@ -315,9 +314,9 @@
         \if@atdocument\tud@iftudps{\currentpagestyle}{\clearpage}{}\fi%
       \endgroup%
     \fi%
-    \ifcase\tud@ddc@head\relax%
+    \ifcase\tud@ddc@head\relax% false
       \if@atdocument\expandafter\pagestyle\expandafter{\currentpagestyle}\fi%
-    \else%
+    \else% !false
       \@tud@ddc@savefalse%
       \TUDoptions{ddc=false}%
       \TUDoptions{ddcfoot=false}%
@@ -336,9 +335,9 @@
         \if@atdocument\tud@iftudps{\currentpagestyle}{\clearpage}{}\fi%
       \endgroup%
     \fi%
-    \ifcase\tud@ddc@foot\relax%
+    \ifcase\tud@ddc@foot\relax% false
       \if@atdocument\expandafter\pagestyle\expandafter{\currentpagestyle}\fi%
-    \else%
+    \else% !false
       \@tud@ddc@savefalse%
       \TUDoptions{ddc=false}%
       \TUDoptions{ddchead=false}%
@@ -398,21 +397,21 @@
     {paperwidth}{7},{wide}{7},{widehead}{7}%
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \ifcase\@tempa\relax%
+    \ifcase\@tempa\relax% false
       \cs@set@lock{tud@head@font}{0}%
-    \or%
+    \or% true
       \cs@set@lock{tud@head@font}{1}%
-    \or%
+    \or% heavy
       \cs@set@lock{tud@head@font}{2}%
-    \or%
+    \or% nocolor
       \def\tud@head@bar{0}%
-    \or%
+    \or% litecolor
       \def\tud@head@bar{1}%
-    \or%
+    \or% color
       \def\tud@head@bar{2}%
-    \or%
+    \or% textwidth
       \bool@set@lock{@tud@head@widebar}{false}%
-    \or%
+    \or% paperwidth
       \bool@set@lock{@tud@head@widebar}{true}%
     \fi%
   \fi%
@@ -429,13 +428,13 @@
     {full}{3},{colorfull}{3},{fullcolor}{3},{colourfull}{3},{fullcolour}{3}%
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \ifcase\@tempa\relax%
+    \ifcase\@tempa\relax% false
       \TUD@AfterPackage{scrlayer-scrpage}{%
         \tud@ps@restore{scrheadings}%
         \tud@ps@restore{plain.scrheadings}%
         \tud@font@koma@unset{pageheadfoot}%
       }%
-    \or%
+    \or% true
       \TUD@AfterPackage{scrlayer-scrpage}{%
         \tud@ps@store{scrheadings}%
         \tud@ps@store{plain.scrheadings}%
@@ -447,9 +446,9 @@
           \if@twoside\ifodd\value{page}\quad\pagemark\fi\else\quad\pagemark\fi%
         }%
       }%
-    \or%
+    \or% nocolor
       \@tud@footcolorfalse%
-    \or%
+    \or% color
       \@tud@footcolortrue%
     \fi%
   \else%
@@ -500,7 +499,7 @@
   \TUD@set@numkey@lock{cdgeometry}{tud@geometry}{%
     \TUD@numkey@bool,%
     {typearea}{0},%
-    {tud}{1},{asymmetric}{1},{cd}{1},%
+    {cd}{1},{tud}{1},{asymmetric}{1},%
     {symmetric}{2},{centred}{2},{centered}{2},{normal}{2},%
     {twoside}{3},{balanced}{3}%
   }{#1}%
@@ -529,37 +528,37 @@
 \TUD@key{cd}[true]{%
   \TUD@set@numkey{cd}{tud@cd}{\tud@layout@switch}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \ifcase\tud@cd\relax%
+    \ifcase\tud@cd\relax% false
       \cs@std@lock{tud@layout@cover}{0}%
       \cs@std@lock{tud@layout@title}{0}%
       \cs@std@lock{tud@layout@part}{0}%
       \cs@std@lock{tud@layout@chapter}{0}%
       \TUD@std@ifkey@lock{chapterpage}{false}%
-    \or%
+    \or% true
       \cs@std@lock{tud@layout@cover}{1}%
       \cs@std@lock{tud@layout@title}{1}%
       \cs@std@lock{tud@layout@part}{1}%
       \cs@std@lock{tud@layout@chapter}{1}%
       \TUD@std@ifkey@lock{chapterpage}{false}%
-    \or%
+    \or% lite
       \cs@std@lock{tud@layout@cover}{1}%
       \cs@std@lock{tud@layout@title}{2}%
       \cs@std@lock{tud@layout@part}{2}%
       \cs@std@lock{tud@layout@chapter}{2}%
       \TUD@std@ifkey@lock{chapterpage}{false}%
-    \or%
+    \or% bicolor
       \cs@std@lock{tud@layout@cover}{1}%
       \cs@std@lock{tud@layout@title}{3}%
       \cs@std@lock{tud@layout@part}{3}%
       \cs@std@lock{tud@layout@chapter}{3}%
       \TUD@std@ifkey@lock{chapterpage}{false}%
-    \or%
+    \or% color
       \cs@std@lock{tud@layout@cover}{1}%
       \cs@std@lock{tud@layout@title}{4}%
       \cs@std@lock{tud@layout@part}{4}%
       \cs@std@lock{tud@layout@chapter}{4}%
       \TUD@std@ifkey@lock{chapterpage}{true}%
-    \or%
+    \or% full
       \cs@std@lock{tud@layout@cover}{1}%
       \cs@std@lock{tud@layout@title}{5}%
       \cs@std@lock{tud@layout@part}{5}%
@@ -569,9 +568,9 @@
     \if@atdocument%
       \tud@layout@process%
     \else%
-      \ifcase\tud@cd\relax%
+      \ifcase\tud@cd\relax% false
         \TUD@std@numkey@lock{cdgeometry}{false}%
-      \else%
+      \else% !false
         \TUD@std@numkey@lock{cdgeometry}{true}%
       \fi%
     \fi%
@@ -580,17 +579,17 @@
 \TUD@key{cdcover}[true]{%
   \TUD@set@numkey{cdcover}{@tempa}{\tud@layout@switch}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \ifcase\@tempa\relax%
+    \ifcase\@tempa\relax% false
       \cs@set@lock{tud@layout@cover}{0}%
-    \or%
+    \or% true
       \cs@set@lock{tud@layout@cover}{1}%
-    \or%
+    \or% lite
       \cs@set@lock{tud@layout@cover}{2}%
-    \or%
+    \or% bicolor
       \cs@set@lock{tud@layout@cover}{3}%
-    \or%
+    \or% color
       \cs@set@lock{tud@layout@cover}{4}%
-    \or%
+    \or% full
       \cs@set@lock{tud@layout@cover}{5}%
     \fi%
     \if@atdocument\tud@layout@process\fi%
@@ -599,17 +598,17 @@
 \TUD@key{cdtitle}[true]{%
   \TUD@set@numkey{cdtitle}{@tempa}{\tud@layout@switch}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \ifcase\@tempa\relax%
+    \ifcase\@tempa\relax% false
       \cs@set@lock{tud@layout@title}{0}%
-    \or%
+    \or% true
       \cs@set@lock{tud@layout@title}{1}%
-    \or%
+    \or% lite
       \cs@set@lock{tud@layout@title}{2}%
-    \or%
+    \or% bicolor
       \cs@set@lock{tud@layout@title}{3}%
-    \or%
+    \or% color
       \cs@set@lock{tud@layout@title}{4}%
-    \or%
+    \or% full
       \cs@set@lock{tud@layout@title}{5}%
     \fi%
     \if@atdocument\tud@layout@process\fi%
@@ -618,17 +617,17 @@
 \TUD@key{cdpart}[true]{%
   \TUD@set@numkey{cdpart}{@tempa}{\tud@layout@switch}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \ifcase\@tempa\relax%
+    \ifcase\@tempa\relax% false
       \cs@set@lock{tud@layout@part}{0}%
-    \or%
+    \or% true
       \cs@set@lock{tud@layout@part}{1}%
-    \or%
+    \or% lite
       \cs@set@lock{tud@layout@part}{2}%
-    \or%
+    \or% bicolor
       \cs@set@lock{tud@layout@part}{3}%
-    \or%
+    \or% color
       \cs@set@lock{tud@layout@part}{4}%
-    \or%
+    \or% full
       \cs@set@lock{tud@layout@part}{5}%
     \fi%
     \if@atdocument\tud@layout@process\fi%
@@ -637,22 +636,22 @@
 \TUD@key{cdchapter}[true]{%
   \TUD@set@numkey{cdchapter}{@tempa}{\tud@layout@switch}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \ifcase\@tempa\relax%
+    \ifcase\@tempa\relax% false
       \cs@set@lock{tud@layout@chapter}{0}%
       \TUD@std@ifkey@lock{chapterpage}{false}%
-    \or%
+    \or% true
       \cs@set@lock{tud@layout@chapter}{1}%
       \TUD@std@ifkey@lock{chapterpage}{false}%
-    \or%
+    \or% lite
       \cs@set@lock{tud@layout@chapter}{2}%
       \TUD@std@ifkey@lock{chapterpage}{false}%
-    \or%
+    \or% bicolor
       \cs@set@lock{tud@layout@chapter}{3}%
       \TUD@std@ifkey@lock{chapterpage}{false}%
-    \or%
+    \or% color
       \cs@set@lock{tud@layout@chapter}{4}%
       \TUD@std@ifkey@lock{chapterpage}{true}%
-    \or%
+    \or% full
       \cs@set@lock{tud@layout@chapter}{5}%
       \TUD@std@ifkey@lock{chapterpage}{true}%
     \fi%
@@ -667,11 +666,11 @@
     \let\tud@font@heading@size\size@part%
     \if@atdocument%
       \tud@layout@process%
-      \ifcase\tud@layout@part\relax\else%
+      \ifcase\tud@layout@part\relax\else% !false
         \tud@font@koma@reset{part}%
         \tud@font@koma@reset{partnumber}%
       \fi%
-      \ifcase\tud@layout@chapter\relax\else%
+      \ifcase\tud@layout@chapter\relax\else% !false
         \tud@font@koma@reset{chapter}%
         \tud@font@koma@reset{chapterprefix}%
         \tud@font@koma@reset{section}%
@@ -773,7 +772,7 @@
   {nottotoc}{6},{notoc}{6},%
   {markboth}{7},{mark}{7},%
   {nomarkboth}{8},{nomark}{8},%
-  {one}{9},{simple}{9},{single}{9},%
+  {single}{9},{one}{9},{simple}{9},%
   {multi}{10},{multiple}{10},{all}{10},{two}{10},{both}{10},{double}{10},%
   {nofil}{11},{nofill}{11},{novfil}{11},{novfill}{11},%
   {fil}{12},{fill}{12},{vfil}{12},{vfill}{12}%
@@ -789,37 +788,37 @@
   \edef\@tempb{\TUD@numkey@bool,\tud@fm@switch}%
   \TUD@set@numkey{abstract}{@tempa}{\@tempb}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \ifcase\@tempa\relax%
+    \ifcase\@tempa\relax% false
       \def\tud@abstract@level{0}%
       \bool@std@lock{@tud@abstract@toc}{false}%
-    \or%
+    \or% true
       \def\tud@abstract@level{1}%
       \bool@std@lock{@tud@abstract@toc}{false}%
-    \or%
+    \or% section
       \def\tud@abstract@level{2}%
       \bool@std@lock{@tud@abstract@toc}{true}%
-    \or%
+    \or% chapter
       \def\tud@abstract@level{3}%
       \bool@std@lock{@tud@abstract@toc}{true}%
-    \or%
+    \or% totoc
       \bool@set@lock{@tud@abstract@toc}{true}%
       \@tud@abstract@toc@leveldownfalse%
-    \or%
+    \or% totocleveldown
       \bool@set@lock{@tud@abstract@toc}{true}%
       \@tud@abstract@toc@leveldowntrue%
-    \or%
+    \or% nottotoc
       \bool@set@lock{@tud@abstract@toc}{false}%
-    \or%
+    \or% markboth
       \@tud@abstract@markbothtrue%
-    \or%
+    \or% nomarkboth
       \@tud@abstract@markbothfalse%
-    \or%
+    \or% single
       \@tud@abstract@multifalse%
-    \or%
+    \or% multi
       \@tud@abstract@multitrue%
-    \or%
+    \or% nofil
       \@tud@abstract@filfalse%
-    \or%
+    \or% fil
       \@tud@abstract@filtrue%
     \fi%
   \fi%
@@ -836,37 +835,37 @@
   \edef\@tempb{\TUD@numkey@bool,\tud@fm@switch}%
   \TUD@set@numkey{declaration}{@tempa}{\@tempb}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \ifcase\@tempa\relax%
+    \ifcase\@tempa\relax% false
       \def\tud@declaration@level{0}%
       \bool@std@lock{@tud@declaration@toc}{false}%
-    \or%
+    \or% true
       \def\tud@declaration@level{1}%
       \bool@std@lock{@tud@declaration@toc}{false}%
-    \or%
+    \or% section
       \def\tud@declaration@level{2}%
       \bool@std@lock{@tud@declaration@toc}{true}%
-    \or%
+    \or% chapter
       \def\tud@declaration@level{3}%
       \bool@std@lock{@tud@declaration@toc}{true}%
-    \or%
+    \or% totoc
       \bool@set@lock{@tud@declaration@toc}{true}%
       \@tud@declaration@toc@leveldownfalse%
-    \or%
+    \or% totocleveldown
       \bool@set@lock{@tud@declaration@toc}{true}%
       \@tud@declaration@toc@leveldowntrue%
-    \or%
+    \or% nottotoc
       \bool@set@lock{@tud@declaration@toc}{false}%
-    \or%
+    \or% markboth
       \@tud@declaration@markbothtrue%
-    \or%
+    \or% nomarkboth
       \@tud@declaration@markbothfalse%
-    \or%
+    \or% single
       \@tud@declaration@multifalse%
-    \or%
+    \or% multi
       \@tud@declaration@multitrue%
-    \or%
+    \or% nofil
       \@tud@declaration@filfalse%
-    \or%
+    \or% fil
       \@tud@declaration@filtrue%
     \fi%
   \fi%
@@ -884,9 +883,9 @@
     {symbolheadings}{1}%
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \ifcase\@tempa\relax%
+    \ifcase\@tempa\relax% nosymbolheadings
       \@tud@symbolheadingsfalse%
-    \or%
+    \or% symbolheadings
       \@tud@symbolheadingstrue%
     \fi%
   \fi%
@@ -983,11 +982,11 @@
     {heavy}{2},{heavyfont}{2}%
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \ifcase\@tempa\relax%
+    \ifcase\@tempa\relax% false
       \TUD@deprecated@key{barfont=#1}{cdhead=false}%
-    \or%
+    \or% true
       \TUD@deprecated@key{barfont=#1}{cdhead=true}%
-    \or%
+    \or% heavy
       \TUD@deprecated@key{barfont=#1}{cdhead=heavy}%
     \fi%
   \fi%
@@ -1026,15 +1025,15 @@
     {full}{4},{colorfull}{4},{fullcolor}{4},{colourfull}{4},{fullcolour}{4}%
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \ifcase\@tempa\relax%
+    \ifcase\@tempa\relax% false
       \TUD@deprecated@key{color=#1}{cd=true}%
-    \or%
+    \or% true
       \TUD@deprecated@key{color=#1}{cd=color}%
-    \or%
+    \or% lite
       \TUD@deprecated@key{color=#1}{cd=pale}%
-    \or%
+    \or% bicolor
       \TUD@deprecated@key{color=#1}{cd=bicolor}%
-    \or%
+    \or% full
       \TUD@deprecated@key{color=#1}{cd=fullcolor}%
     \fi%
   \fi%
@@ -1135,7 +1134,7 @@
   \csletcs{tud@#1}{tud@up#1}%
   \advance \@tempcnta by 1%
 }
-\@tempcnta=0
+\@tempcnta=\z@
 \tud@font@greek@loop\tud@font@greek@declare
 \newcommand*\tud@font@check{%
   \if@tud@fontspec%
@@ -1288,8 +1287,8 @@
       \DeclareFontShape{U}{\tud@univers b}{m}{n}{<->cmbrbs10}{}%
       \SetSymbolFont{AMSb}{univers}{U}{\tud@univers b}{m}{n}%
       \SetSymbolFont{AMSb}{universbold}{U}{\tud@univers b}{m}{n}%
-      \SetMathAlphabet{\mathfrak}{univers}{U}{euf}{m}{n}
-      \SetMathAlphabet{\mathfrak}{universbold}{U}{euf}{b}{n}
+      \SetMathAlphabet{\mathfrak}{univers}{U}{euf}{m}{n}%
+      \SetMathAlphabet{\mathfrak}{universbold}{U}{euf}{b}{n}%
     }{}%
   \fi%
   \if@tud@dinbold%
@@ -1354,7 +1353,7 @@
     \ifdef{\mdseries@sf}{}{\edef\mdseries@sf{\mddefault}}%
     \ifdef{\mdseries@tt}{}{\edef\mdseries@tt{\mddefault}}%
   \fi%
-  \ifcase\tud@cdfont\relax%
+  \ifcase\tud@cdfont\relax% false
     \tud@cmd@restore{rmdefault}%
     \tud@cmd@restore{sfdefault}%
     \tud@cmd@restore{ttdefault}%
@@ -1374,7 +1373,7 @@
     \fi%
     \bool@std@lock{@tud@cdmath}{false}%
     \cs@std@lock{tud@head@font}{0}%
-  \else%
+  \else% true/heavy
     \tud@cmd@store{rmdefault}%
     \tud@cmd@store{sfdefault}%
     \tud@cmd@store{ttdefault}%
@@ -1395,7 +1394,7 @@
     \bool@std@lock{@tud@cdmath}{true}%
     \cs@std@lock{tud@head@font}{\tud@cdfont}%
     \if@tud@fontspec%
-      \ifnum\tud@cdfont=\@ne\relax%
+      \ifnum\tud@cdfont=\@ne\relax% true
         \setsansfont{Univers Light}[%
           BoldFont = Univers,%
           ItalicFont = Univers Light Oblique,%
@@ -1406,7 +1405,7 @@
           ItalicFont = LMMonoLt10-Oblique,%
           BoldItalicFont = LMMonoSlant10-Regular,%
         ]%
-      \else%
+      \else% heavy
         \setsansfont{Univers}[%
           BoldFont = Univers Bold,%
           ItalicFont = Univers Oblique,%
@@ -1422,7 +1421,7 @@
       \if@tud@univers%
         \renewcommand*\sfdefault{\tud@univers}%
         \renewcommand*\ttdefault{\tud@univers t}%
-        \ifnum\tud@cdfont=\@ne\relax%
+        \ifnum\tud@cdfont=\@ne\relax% true
           \renewcommand*\bfdefault{m}%
           \renewcommand*\mddefault{l}%
           \if@tud@mweights%
@@ -1433,7 +1432,7 @@
             \def\mdseries@sf{l}%
             \def\mdseries@tt{l}%
           \fi%
-        \else%
+        \else% heavy
           \renewcommand*\bfdefault{b}%
           \renewcommand*\mddefault{m}%
           \if@tud@mweights%
@@ -1467,7 +1466,7 @@
 \newcommand*\tud@font@size@set{%
   \let\@tempa\changefontsizes%
   \@tempswafalse%
-  \ifcase\tud@cdfont\relax%
+  \ifcase\tud@cdfont\relax% false
     \tud@skip@restore{smallskipamount}%
     \tud@skip@restore{medskipamount}%
     \tud@skip@restore{bigskipamount}%
@@ -1477,7 +1476,7 @@
     \tud@cmd@restore{changefontsizes}%
     \tud@cmd@restore{@ptsize}%
     \edef\@tempb{\@ptsize}%
-  \else%
+  \else% true/heavy
     \tud@skip@store{smallskipamount}%
     \tud@skip@store{medskipamount}%
     \tud@skip@store{bigskipamount}%
@@ -1504,14 +1503,14 @@
 \newcommand*{\tud@changefontsizes}[2][\dimexpr5\@tempdima/4\relax]{%
   \ClassInfo{\tudcls@name}%
     {Calculating font sizes for basic size `#2'}%
-  \@defaultunits\@tempdima#2pt\relax\@nnil
+  \@defaultunits\@tempdima#2pt\relax\@nnil%
   \setlength{\@tempdimc}{\@tempdima}%
   \addtolength{\@tempdimc}{-10\p@}%
   \edef\@ptsize{\strip@pt\@tempdimc}%
   \setlength{\@tempdimb}{#1}%
   \setlength{\@tempdimc}{\dimexpr (100\@tempdimb / \@tempdima * \p@)}%
   \edef\@tempa{\strip@pt\@tempdimc}%
-  \@defaultunits\@tempdimb\dimexpr\@tempa\@tempdima/100\relax pt\relax\@nnil
+  \@defaultunits\@tempdimb\dimexpr\@tempa\@tempdima/100\relax pt\relax\@nnil%
   \setlength{\@tempdimc}{\@tempdima}%
   \scr@setlength{\abovedisplayskip}{\dimexpr4\@tempdimb/5\relax}%
     {\dimexpr\@tempdimb/5\relax}{\dimexpr2\@tempdimb/5\relax}%
@@ -1521,13 +1520,13 @@
     {\dimexpr6\@tempdimb/25\relax}{\dimexpr6\@tempdimb/25\relax}%
   \setlength{\belowdisplayskip}{\abovedisplayskip}%
   \edef\normalsize{%
-    \noexpand\@setfontsize\noexpand\normalsize
+    \noexpand\@setfontsize\noexpand\normalsize%
     {\the\@tempdima}{\the\@tempdimb}%
-    \abovedisplayskip \the\abovedisplayskip
-    \abovedisplayshortskip \the\abovedisplayshortskip
-    \belowdisplayskip \the\belowdisplayskip
-    \belowdisplayshortskip \the\belowdisplayshortskip
-    \let\noexpand\@listi\noexpand\@listI
+    \abovedisplayskip \the\abovedisplayskip%
+    \abovedisplayshortskip \the\abovedisplayshortskip%
+    \belowdisplayskip \the\belowdisplayskip%
+    \belowdisplayshortskip \the\belowdisplayshortskip%
+    \let\noexpand\@listi\noexpand\@listI%
   }%
   \setlength{\@tempdima}{\dimexpr9\@tempdimc/10\relax}%
   \setlength{\@tempdimb}{\dimexpr\@tempa\@tempdima/100\relax}%
@@ -1539,13 +1538,13 @@
     {\dimexpr6\@tempdimb/25\relax}{\dimexpr6\@tempdimb/25\relax}%
   \setlength{\belowdisplayskip}{\abovedisplayskip}%
   \edef\small{%
-    \noexpand\@setfontsize\noexpand\small
+    \noexpand\@setfontsize\noexpand\small%
     {\the\@tempdima}{\the\@tempdimb}%
-    \abovedisplayskip \the\abovedisplayskip
-    \abovedisplayshortskip \the\abovedisplayshortskip
-    \belowdisplayskip \the\belowdisplayskip
-    \belowdisplayshortskip \the\belowdisplayshortskip
-    \let\noexpand\@listi\noexpand\@listi@small
+    \abovedisplayskip \the\abovedisplayskip%
+    \abovedisplayshortskip \the\abovedisplayshortskip%
+    \belowdisplayskip \the\belowdisplayskip%
+    \belowdisplayshortskip \the\belowdisplayshortskip%
+    \let\noexpand\@listi\noexpand\@listi@small%
   }%
   \setlength{\@tempdima}{\dimexpr4\@tempdimc/5\relax}%
   \setlength{\@tempdimb}{\dimexpr\@tempa\@tempdima/100\relax}%
@@ -1557,164 +1556,164 @@
     {\dimexpr6\@tempdimb/25\relax}{\dimexpr6\@tempdimb/25\relax}%
   \setlength{\belowdisplayskip}{\abovedisplayskip}%
   \edef\footnotesize{%
-    \noexpand\@setfontsize\noexpand\footnotesize
+    \noexpand\@setfontsize\noexpand\footnotesize%
     {\the\@tempdima}{\the\@tempdimb}%
-    \abovedisplayskip \the\abovedisplayskip
-    \abovedisplayshortskip \the\abovedisplayshortskip
-    \belowdisplayskip \the\belowdisplayskip
-    \belowdisplayshortskip \the\belowdisplayshortskip
-    \let\noexpand\@listi\noexpand\@listi@footnotesize
+    \abovedisplayskip \the\abovedisplayskip%
+    \abovedisplayshortskip \the\abovedisplayshortskip%
+    \belowdisplayskip \the\belowdisplayskip%
+    \belowdisplayshortskip \the\belowdisplayshortskip%
+    \let\noexpand\@listi\noexpand\@listi@footnotesize%
   }%
   \setlength{\@tempdima}{\dimexpr13\@tempdimc/20\relax}%
   \setlength{\@tempdimb}{\dimexpr\@tempa\@tempdima/100\relax}%
   \edef\scriptsize{%
-    \noexpand\@setfontsize\noexpand\scriptsize
+    \noexpand\@setfontsize\noexpand\scriptsize%
     {\the\@tempdima}{\the\@tempdimb}%
   }%
   \setlength{\@tempdima}{\dimexpr\@tempdimc/2\relax}%
   \setlength{\@tempdimb}{\dimexpr\@tempa\@tempdima/100\relax}%
   \edef\tiny{%
-    \noexpand\@setfontsize\noexpand\tiny
+    \noexpand\@setfontsize\noexpand\tiny%
     {\the\@tempdima}{\the\@tempdimb}%
   }%
   \setlength{\@tempdima}{\dimexpr11\@tempdimc/10\relax}%
   \setlength{\@tempdimb}{\dimexpr\@tempa\@tempdima/100\relax}%
   \edef\large{%
-    \noexpand\@setfontsize\noexpand\large
+    \noexpand\@setfontsize\noexpand\large%
     {\the\@tempdima}{\the\@tempdimb}%
   }%
   \setlength{\@tempdima}{\dimexpr13\@tempdimc/10\relax}%
   \setlength{\@tempdimb}{\dimexpr\@tempa\@tempdima/100\relax}%
   \edef\Large{%
-    \noexpand\@setfontsize\noexpand\Large
+    \noexpand\@setfontsize\noexpand\Large%
     {\the\@tempdima}{\the\@tempdimb}%
   }%
   \setlength{\@tempdima}{\dimexpr16\@tempdimc/10\relax}%
   \setlength{\@tempdimb}{\dimexpr\@tempa\@tempdima/100\relax}%
   \edef\LARGE{%
-    \noexpand\@setfontsize\noexpand\LARGE
+    \noexpand\@setfontsize\noexpand\LARGE%
     {\the\@tempdima}{\the\@tempdimb}%
   }%
   \setlength{\@tempdima}{\dimexpr19\@tempdimc/10\relax}%
   \setlength{\@tempdimb}{\dimexpr\@tempa\@tempdima/100\relax}%
   \edef\huge{%
-    \noexpand\@setfontsize\noexpand\huge
+    \noexpand\@setfontsize\noexpand\huge%
     {\the\@tempdima}{\the\@tempdimb}%
   }%
   \setlength{\@tempdima}{\dimexpr22\@tempdimc/10\relax}%
   \setlength{\@tempdimb}{\dimexpr\@tempa\@tempdima/100\relax}%
   \edef\Huge{%
-    \noexpand\@setfontsize\noexpand\Huge
+    \noexpand\@setfontsize\noexpand\Huge%
     {\the\@tempdima}{\the\@tempdimb}%
   }%
-  \normalsize
+  \normalsize%
   \setlength{\@tempdimb}{\f@baselineskip}%
   \scr@setlength{\topsep}{\dimexpr16\@tempdimb/25\relax}%
-    {\dimexpr4\@tempdimb/25\relax}{\dimexpr8\@tempdimb/25\relax}
+    {\dimexpr4\@tempdimb/25\relax}{\dimexpr8\@tempdimb/25\relax}%
   \scr@setlength{\parsep}{\dimexpr8\@tempdimb/25\relax}%
     {\dimexpr4\@tempdimb/25\relax}{\dimexpr2\@tempdimb/25\relax}%
-  \@tempswafalse
-  \begingroup
+  \@tempswafalse%
+  \begingroup%
     \def\@list@extra{\aftergroup\@tempswatrue}%
-    \csname @listi\endcsname
-  \endgroup
-  \edef\@listi{\leftmargin\leftmargini
-    \topsep \the\topsep
-    \parsep \the\parsep
-    \itemsep \parsep
-    \if@tempswa\noexpand\@list@extra\fi
+    \csname @listi\endcsname%
+  \endgroup%
+  \edef\@listi{\leftmargin\leftmargini%
+    \topsep \the\topsep%
+    \parsep \the\parsep%
+    \itemsep \parsep%
+    \if@tempswa\noexpand\@list@extra\fi%
   }%
-  \let\@listI\@listi
+  \let\@listI\@listi%
   \scr@setlength{\topsep}{\dimexpr12\@tempdimb/25\relax}%
     {\dimexpr4\@tempdimb/25\relax}{\dimexpr6\@tempdimb/25\relax}%
   \scr@setlength{\parsep}{\dimexpr6\@tempdimb/25\relax}%
     {\dimexpr3\@tempdimb/25\relax}{\dimexpr2\@tempdimb/25\relax}%
-  \@tempswafalse
-  \begingroup
+  \@tempswafalse%
+  \begingroup%
     \def\@list@extra{\aftergroup\@tempswatrue}%
-    \csname @listi\endcsname
-  \endgroup
-  \edef\@listi@small{\leftmargin\leftmargini
-    \topsep \the\topsep
-    \parsep \the\parsep
-    \itemsep \parsep
-    \if@tempswa\noexpand\@list@extra\fi
+    \csname @listi\endcsname%
+  \endgroup%
+  \edef\@listi@small{\leftmargin\leftmargini%
+    \topsep \the\topsep%
+    \parsep \the\parsep%
+    \itemsep \parsep%
+    \if@tempswa\noexpand\@list@extra\fi%
   }%
   \scr@setlength{\topsep}{\dimexpr36\@tempdimb/100\relax}%
     {\dimexpr12\@tempdimb/100\relax}{\dimexpr18\@tempdimb/100\relax}%
   \scr@setlength{\parsep}{\dimexpr18\@tempdimb/100\relax}%
     {\dimexpr9\@tempdimb/100\relax}{\dimexpr6\@tempdimb/100\relax}%
-  \@tempswafalse
-  \begingroup
+  \@tempswafalse%
+  \begingroup%
     \def\@list@extra{\aftergroup\@tempswatrue}%
-    \csname @listi\endcsname
-  \endgroup
-  \edef\@listi@footnotesize{\leftmargin\leftmargini
-    \topsep \the\topsep
-    \parsep \the\parsep
-    \itemsep \parsep
-    \if@tempswa\noexpand\@list@extra\fi
+    \csname @listi\endcsname%
+  \endgroup%
+  \edef\@listi@footnotesize{\leftmargin\leftmargini%
+    \topsep \the\topsep%
+    \parsep \the\parsep%
+    \itemsep \parsep%
+    \if@tempswa\noexpand\@list@extra\fi%
   }%
   \scr@setlength{\topsep}{\dimexpr8\@tempdimb/25\relax}%
     {\dimexpr4\@tempdimb/25\relax}{\dimexpr2\@tempdimb/25\relax}%
   \scr@setlength{\parsep}{\dimexpr4\@tempdimb/25\relax}%
     {\dimexpr2\@tempdimb/25\relax}{\dimexpr2\@tempdimb/25\relax}%
-  \@tempswafalse
-  \begingroup
+  \@tempswafalse%
+  \begingroup%
     \def\@list@extra{\aftergroup\@tempswatrue}%
-    \csname @listii\endcsname
-  \endgroup
-  \edef\@listii{\leftmargin\leftmarginii
-    \labelwidth=\dimexpr \leftmargin-\labelsep
-    \topsep \the\topsep
-    \parsep \the\parsep
-    \itemsep \parsep
-    \if@tempswa\noexpand\@list@extra\fi
+    \csname @listii\endcsname%
+  \endgroup%
+  \edef\@listii{\leftmargin\leftmarginii%
+    \labelwidth=\dimexpr \leftmargin-\labelsep%
+    \topsep \the\topsep%
+    \parsep \the\parsep%
+    \itemsep \parsep%
+    \if@tempswa\noexpand\@list@extra\fi%
   }%
   \scr@setlength{\topsep}{\dimexpr4\@tempdimb/25\relax}%
     {\dimexpr2\@tempdimb/25\relax}{\dimexpr2\@tempdimb/25\relax}%
   \setlength{\partopsep}{\z@ \@plus\z@ \@minus\p@}%
-  \@tempswafalse
-  \begingroup
+  \@tempswafalse%
+  \begingroup%
     \def\@list@extra{\aftergroup\@tempswatrue}%
-    \csname @listiii\endcsname
-  \endgroup
-  \edef\@listiii{\leftmargin\leftmarginiii
-    \labelwidth=\dimexpr \leftmargin-\labelsep
-    \topsep \the\topsep
-    \parsep \z@
-    \partopsep \the\partopsep
-    \itemsep \topsep
-    \if@tempswa\noexpand\@list@extra\fi
+    \csname @listiii\endcsname%
+  \endgroup%
+  \edef\@listiii{\leftmargin\leftmarginiii%
+    \labelwidth=\dimexpr \leftmargin-\labelsep%
+    \topsep \the\topsep%
+    \parsep \z@%
+    \partopsep \the\partopsep%
+    \itemsep \topsep%
+    \if@tempswa\noexpand\@list@extra\fi%
   }%
-  \@tempswafalse
-  \begingroup
+  \@tempswafalse%
+  \begingroup%
     \def\@list@extra{\aftergroup\@tempswatrue}%
-    \csname @listiv\endcsname
-  \endgroup
-  \edef\@listiv{\leftmargin\leftmarginiv
-    \labelwidth=\dimexpr \leftmargin-\labelsep\relax
-    \if@tempswa\noexpand\@list@extra\fi
+    \csname @listiv\endcsname%
+  \endgroup%
+  \edef\@listiv{\leftmargin\leftmarginiv%
+    \labelwidth=\dimexpr \leftmargin-\labelsep\relax%
+    \if@tempswa\noexpand\@list@extra\fi%
   }%
-  \@tempswafalse
-  \begingroup
+  \@tempswafalse%
+  \begingroup%
     \def\@list@extra{\aftergroup\@tempswatrue}%
-    \csname @listv\endcsname
-  \endgroup
-  \edef\@listv{\leftmargin\leftmarginv
-    \labelwidth=\dimexpr \leftmargin-\labelsep\relax
-    \if@tempswa\noexpand\@list@extra\fi
+    \csname @listv\endcsname%
+  \endgroup%
+  \edef\@listv{\leftmargin\leftmarginv%
+    \labelwidth=\dimexpr \leftmargin-\labelsep\relax%
+    \if@tempswa\noexpand\@list@extra\fi%
   }%
-  \@tempswafalse
-  \begingroup
+  \@tempswafalse%
+  \begingroup%
     \def\@list@extra{\aftergroup\@tempswatrue}%
-    \csname @listvi\endcsname
-  \endgroup
-  \edef\@listvi{\leftmargin\leftmarginvi
-    \labelwidth=\dimexpr \leftmargin-\labelsep\relax
-    \if@tempswa\noexpand\@list@extra\fi
+    \csname @listvi\endcsname%
+  \endgroup%
+  \edef\@listvi{\leftmargin\leftmarginvi%
+    \labelwidth=\dimexpr \leftmargin-\labelsep\relax%
+    \if@tempswa\noexpand\@list@extra\fi%
   }%
-  \@listi
+  \@listi%
   \setlength{\@tempdimb}{\f@baselineskip}%
   \setlength{\footnotesep}{\dimexpr14\@tempdimb/25\relax}%
   \scr@setlength{\skip\footins}{\dimexpr18\@tempdimb/25\relax}%
@@ -1734,14 +1733,14 @@
   \setlength{\@dblfpbot}{\@fptop}%
   \scr@setlength{\partopsep}{\dimexpr\@tempdimb/5\relax}%
     {\dimexpr\@tempdimb/10\relax}{\dimexpr\@tempdimb/10\relax}%
-  \scr@setlength\smallskipamount{\dimexpr\@tempdimb/4\relax}
-    {\dimexpr\@tempdimb/10\relax}{\dimexpr\@tempdimb/10\relax}
-  \scr@setlength\medskipamount{\dimexpr\@tempdimb/2\relax}
-    {\dimexpr\@tempdimb/5\relax}{\dimexpr\@tempdimb/5\relax}
-  \scr@setlength\bigskipamount{\@tempdimb}
-    {\dimexpr2\@tempdimb/5\relax}{\dimexpr2\@tempdimb/5\relax}
-  \setlength\abovecaptionskip{\dimexpr4\@tempdimb/5\relax}
-  \setlength\belowcaptionskip{0\p@}
+  \scr@setlength\smallskipamount{\dimexpr\@tempdimb/4\relax}%
+    {\dimexpr\@tempdimb/10\relax}{\dimexpr\@tempdimb/10\relax}%
+  \scr@setlength\medskipamount{\dimexpr\@tempdimb/2\relax}%
+    {\dimexpr\@tempdimb/5\relax}{\dimexpr\@tempdimb/5\relax}%
+  \scr@setlength\bigskipamount{\@tempdimb}%
+    {\dimexpr2\@tempdimb/5\relax}{\dimexpr2\@tempdimb/5\relax}%
+  \setlength\abovecaptionskip{\dimexpr4\@tempdimb/5\relax}%
+  \setlength\belowcaptionskip{0\p@}%
 }
 \newcommand*\tud@font@math@set{%
   \if@tud@univers%
@@ -1768,9 +1767,9 @@
   \tud@cmd@store{#1}%
   \tud@cmd@store{up#1}%
   \tud@cmd@store{var#1}%
-  \csletcs{#1}{tud@#1}
-  \csletcs{up#1}{tud@up#1}
-  \csletcs{var#1}{tud@var#1}
+  \csletcs{#1}{tud@#1}%
+  \csletcs{up#1}{tud@up#1}%
+  \csletcs{var#1}{tud@var#1}%
 }
 \newcommand*\tud@font@greek@reset[1]{%
   \tud@cmd@restore{#1}%
@@ -1791,25 +1790,25 @@
   \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
     {\sfdefault}{\mddefault}{n}{\tud@head@font@size}%
   \@tempswafalse%
-  \ifcase\tud@head@font\relax%
-    \ifnum\tud@cdfont>\z@\relax%
+  \ifcase\tud@head@font\relax% false
+    \ifnum\tud@cdfont>\z@\relax% true/heavy
       \ClassWarning{\tudcls@name}{%
         It isn't possible to use `cdhead=false'\MessageBreak%
         together with `cdfont=true'%
       }%
       \@tempswatrue%
     \fi%
-  \else%
+  \else% true/heavy
     \@tempswatrue%
   \fi%
-  \if@tempswa%
+  \if@tempswa% true/heavy
     \if@tud@fontspec%
       \DeclareFixedFont{\tud@head@font@bold}{\encodingdefault}%
         {UniversBold}{m}{n}{\tud@head@font@size}%
-      \ifcase\tud@head@font\relax\or%
+      \ifcase\tud@head@font\relax\or% true
         \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
           {UniversLight}{m}{n}{\tud@head@font@size}%
-      \or%
+      \or% heavy
         \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
           {UniversRegular}{m}{n}{\tud@head@font@size}%
       \fi%
@@ -1817,10 +1816,10 @@
       \if@tud@univers%
         \DeclareFixedFont{\tud@head@font@bold}{\encodingdefault}%
           {\tud@univers}{b}{n}{\tud@head@font@size}%
-        \ifcase\tud@head@font\relax\or%
+        \ifcase\tud@head@font\relax\or% true
           \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
             {\tud@univers}{l}{n}{\tud@head@font@size}%
-        \or%
+        \or% heavy
           \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
             {\tud@univers}{m}{n}{\tud@head@font@size}%
         \fi%
@@ -1847,9 +1846,6 @@
   }{}%
   \renewcommand*\tud@RaggedRight{\RaggedRight}%
 }
-%%% From File: tudscr-color.dtx
-\newcommand*\tud@pagecolor{}
-\AfterPackage*{pdfpages}{\AtEndPreamble{\nopagecolor}}
 %%% From File: tudscr-fields.dtx
 \RequirePackage{trimspaces}[2009/09/17]
 \newcommand*\@faculty{}
@@ -2341,7 +2337,7 @@
   \DeclareNewLayer[%
     background,%
     contents={%
-      \ifnum\tud@head@bar>\@ne\relax%
+      \ifnum\tud@head@bar>\@ne\relax% color
         \color{HKS41}%
         \rule{\layerwidth}{\tud@dim@topmargin}%
       \fi%
@@ -2351,7 +2347,7 @@
     background,%
     voffset=\tud@dim@topmargin,%
     contents={%
-      \ifnum\tud@head@bar>\@ne\relax%
+      \ifnum\tud@head@bar>\@ne\relax% color
         \color{HKS41!80}%
         \rule{\layerwidth}{\tud@dim@barheight}%
       \fi%
@@ -2366,9 +2362,9 @@
     background,headsep,%
     voffset=\dimexpr\tud@dim@topmargin-.5\tud@dim@line\relax,%
     contents={%
-      \ifnum\tud@head@bar<\tw@\relax\if@tud@head@widebar\else%
-        \tud@head@rule{\textwidth}%
-      \fi\fi%
+      \ifnum\tud@head@bar<\tw@\relax% nocolor/litecolor
+        \if@tud@head@widebar\else\tud@head@rule{\textwidth}\fi%
+      \fi%
     },%
   ]{tudheadings.head.upperline}%
   \DeclareNewLayer[%
@@ -2376,18 +2372,18 @@
     voffset=\dimexpr\tud@dim@topmargin+\tud@dim@barheight%
       -.5\tud@dim@line\relax,%
     contents={%
-      \ifnum\tud@head@bar<\tw@\relax\if@tud@head@widebar\else%
-        \tud@head@rule{\textwidth}%
-      \fi\fi%
+      \ifnum\tud@head@bar<\tw@\relax% nocolor/litecolor
+        \if@tud@head@widebar\else\tud@head@rule{\textwidth}\fi%
+      \fi%
     },%
   ]{tudheadings.head.lowerline}%
   \DeclareNewLayer[%
     background,%
     voffset=\dimexpr\tud@dim@topmargin-.5\tud@dim@line\relax,%
     contents={%
-      \ifnum\tud@head@bar<\tw@\relax\if@tud@head@widebar%
-        \tud@head@rule{\paperwidth}%
-      \fi\fi%
+      \ifnum\tud@head@bar<\tw@\relax% nocolor/litecolor
+        \if@tud@head@widebar\tud@head@rule{\paperwidth}\fi%
+      \fi%
     },%
   ]{tudheadings.head.upperwideline}%
   \DeclareNewLayer[%
@@ -2395,9 +2391,9 @@
     voffset=\dimexpr\tud@dim@topmargin+\tud@dim@barheight%
       -.5\tud@dim@line\relax,%
     contents={%
-      \ifnum\tud@head@bar<\tw@\relax\if@tud@head@widebar%
-        \tud@head@rule{\paperwidth}%
-      \fi\fi%
+      \ifnum\tud@head@bar<\tw@\relax% nocolor/litecolor
+        \if@tud@head@widebar\tud@head@rule{\paperwidth}\fi%
+      \fi%
     },%
   ]{tudheadings.head.lowerwideline}%
   \DeclareNewLayer[%
@@ -2419,7 +2415,7 @@
           (\the\footlogoheight)\MessageBreak%
           is \the\@tempdima\space higher than recommended. You\MessageBreak%
           should decrease this length
-          \ifcase\tud@geometry\relax\else%
+          \ifcase\tud@geometry\relax\else% true/symmetric/twoside
             or alternatively\MessageBreak%
             enlarge the bottom margin by using option\MessageBreak%
             `extrabottommargin'%
@@ -2456,19 +2452,21 @@
     contents={%
       \if@tud@footcolor%
         \let\@tempc\relax%
-        \ifnum\tud@head@bar>\@ne\def\@tempc{\color{HKS41}}\fi%
+        \ifnum\tud@head@bar>\@ne% color
+          \def\@tempc{\color{HKS41}}%
+        \fi%
         \ifstr{\tud@pagecolor}{HKS41}{\def\@tempc{\color{HKS41!80}}}{}%
         \ifx\@tempc\relax\else%
           \tud@ifverlower{2.03}{%
             \tud@ddc@check%
-            \ifcase\@tempb\relax%
+            \ifcase\@tempb\relax% \tud@ddc@foot=false
               \vbox to \layerheight{%
                 \vfil\@tempc%
                 \rule{\layerwidth}{%
                   \dimexpr\layerheight-\tud@dim@ddcdiff+\ht\strutbox\relax%
                 }%
               }%
-            \else%
+            \else% \tud@ddc@foot!=false
               \@tempc\rule{\layerwidth}{\layerheight}%
             \fi%
           }{\@tempc\rule{\layerwidth}{\layerheight}}%
@@ -2544,7 +2542,8 @@
   \DeclareNewPageStyleAlias{tudscrempty}{empty.tudheadings}%
   \DeclareNewPageStyleAlias{tudheadingsempty}{empty.tudheadings}%
   \DeclareNewPageStyleAlias{tudscrheadingsempty}{empty.tudheadings}%
-  \DeclareNewLayer[
+  \newcommand*\tud@pagecolor{}%
+  \DeclareNewLayer[%
     background,page,%
     contents={%
       \ifdefvoid{\tud@pagecolor}{}{%
@@ -2552,7 +2551,7 @@
         \rule{\layerwidth}{\layerheight}%
       }%
     },%
-  ]{tudheadings.pagecolor}
+  ]{tudheadings.pagecolor}%
   \AddLayersToPageStyle{@everystyle@}{tudheadings.pagecolor}%
 }
 \newcommand*\tud@ps@onselect{%
@@ -2564,13 +2563,13 @@
 \newcommand*\tud@head@logocolor{black}
 \newcommand*\tud@foot@logocolor{black}
 \newcommand*\tud@ps@onbackground{%
-  \ifcase\tud@head@bar\relax%
+  \ifcase\tud@head@bar\relax% cdhead=nocolor
     \def\tud@head@logocolor{black}%
     \def\tud@foot@logocolor{black}%
-  \or%
+  \or% cdhead=litecolor
     \def\tud@head@logocolor{HKS41}%
     \def\tud@foot@logocolor{HKS41}%
-  \or%
+  \or% cdhead=color
     \def\tud@head@logocolor{white}%
     \if@tud@footcolor%
       \def\tud@foot@logocolor{white}%
@@ -2648,7 +2647,7 @@
     \linespread{0}\selectfont%
     \color{\tud@head@logocolor}%
     \tud@head@text@write{\tud@head@text@first}%
-    \ifnum\tud@head@bar>\@ne%
+    \ifnum\tud@head@bar>\@ne% color
       \ifdefvoid{\tud@pagecolor}{\color{HKS41}}{%
         \ifstr{\tud@pagecolor}{HKS41}{\color{white}}{\color{HKS41}}%
       }%
@@ -2710,24 +2709,24 @@
 \newcommand*\tud@headlogo{%
   \tud@ddc@check%
   \ifx\tud@@headlogo\@empty\else%
-    \ifnum\@tempa>\z@\relax\tud@headlogo@wrn\fi%
+    \ifnum\@tempa>\z@\relax\tud@headlogo@wrn\fi% \tud@ddc@head!=false
   \fi%
-  \ifcase\@tempa\relax\or%
+  \ifcase\@tempa\relax\or% \tud@ddc@head=true
     \def\tud@@headlogo{DDC-24}%
     \ifstr{\tud@head@logocolor}{HKS41}{\def\tud@@headlogo{DDC-27}}{}%
     \ifstr{\tud@head@logocolor}{cddarkblue}{\def\tud@@headlogo{DDC-27}}{}%
     \ifstr{\tud@head@logocolor}{white}{\def\tud@@headlogo{DDC-30}}{}%
-  \or%
+  \or% \tud@ddc@head=color
     \def\tud@@headlogo{DDC-03}%
-  \or%
+  \or% \tud@ddc@head=colorblack
     \def\tud@@headlogo{DDC-09}%
-  \or%
+  \or% \tud@ddc@head=gray
     \def\tud@@headlogo{DDC-21}%
-  \or%
+  \or% \tud@ddc@head=black
     \def\tud@@headlogo{DDC-24}%
-  \or%
+  \or% \tud@ddc@head=blue
     \def\tud@@headlogo{DDC-27}%
-  \or%
+  \or% \tud@ddc@head=white
     \def\tud@@headlogo{DDC-30}%
   \fi%
   \ifx\tud@@headlogo\@empty\else%
@@ -2784,22 +2783,22 @@
 \newcommand*\tud@@ddclogo{}
 \newcommand*\tud@ddclogo{%
   \tud@ddc@check%
-  \ifcase\@tempb\relax\or%
+  \ifcase\@tempb\relax\or% \tud@ddc@foot=true
     \def\tud@@ddclogo{DDC-22}%
     \ifstr{\tud@foot@logocolor}{HKS41}{\def\tud@@ddclogo{DDC-25}}{}%
     \ifstr{\tud@foot@logocolor}{cddarkblue}{\def\tud@@ddclogo{DDC-25}}{}%
     \ifstr{\tud@foot@logocolor}{white}{\def\tud@@ddclogo{DDC-28}}{}%
-  \or%
+  \or% \tud@ddc@foot=color
     \def\tud@@ddclogo{DDC-01}%
-  \or%
+  \or% \tud@ddc@foot=colorblack
     \def\tud@@ddclogo{DDC-07}%
-  \or%
+  \or% \tud@ddc@foot=gray
     \def\tud@@ddclogo{DDC-19}%
-  \or%
+  \or% \tud@ddc@foot=black
     \def\tud@@ddclogo{DDC-22}%
-  \or%
+  \or% \tud@ddc@foot=blue
     \def\tud@@ddclogo{DDC-25}%
-  \or%
+  \or% \tud@ddc@foot=white
     \def\tud@@ddclogo{DDC-28}%
   \fi%
   \ifx\tud@@ddclogo\@empty\else%
@@ -2819,7 +2818,7 @@
   \tud@ifverlower{2.03}{\newcommand*\tud@geometry@ddcmargin{}}{}%
   \newcommand*\tud@geometry@process{%
     \tud@geometry@set%
-    \ifcase\tud@geometry\relax%
+    \ifcase\tud@geometry\relax% false
       \setlength\tud@ta@headdiff{%
         \dimexpr\tud@dim@topmargin+\tud@dim@barheight+\tud@dim@headsep%
           -\tud@ta@topmargin-\tud@ta@headheight-\tud@ta@headsep-1in\relax%
@@ -2835,7 +2834,7 @@
         marginparwidth=\the\dimexpr\evensidemargin+1in-\tud@ta@headsep\relax,%
         \if@reversemargin%
           reversemarginpar=true,%
-          \if@twoside
+          \if@twoside%
             marginparwidth=\the\dimexpr\oddsidemargin+1in%
               -\tud@ta@headsep\relax,%
           \fi%
@@ -2890,8 +2889,8 @@
           package typearea is used (`cdgeometry=no')%
         }%
       \fi%
-    \else%
-      \ifcase\tud@geometry\or%
+    \else%  true/symmetric/twoside
+      \ifcase\tud@geometry\or%  true
         \edef\tud@geometry@hmargin{%
           bindingoffset=\the\ta@bcor,%
           left=\the\tud@dim@widemargin,%
@@ -2909,7 +2908,7 @@
           \fi%
           marginparsep=\the\dimexpr.5\tud@ta@headsep\relax%
         }%
-      \or%
+      \or% symmetric
         \edef\tud@geometry@hmargin{%
           bindingoffset=\the\ta@bcor,%
           left=\the\dimexpr.5\tud@dim@both\relax,%
@@ -2923,7 +2922,7 @@
           marginparwidth=\the\dimexpr.5\tud@dim@both-\tud@ta@headsep\relax,%
           marginparsep=\the\dimexpr.5\tud@ta@headsep\relax%
         }%
-      \or%
+      \or% twoside
         \edef\tud@geometry@hmargin{%
           bindingoffset=\the\ta@bcor,%
           \if@twoside%
@@ -3077,12 +3076,12 @@
     \tud@iftudps{\@tempa}{%
       \tud@ifverlower{2.03}{%
         \tud@ddc@check%
-        \ifcase\@tempb\relax%
+        \ifcase\@tempb\relax% \tud@ddc@foot=false
           \ifstr{\tud@currentgeometry}{tudarea}{}{%
             \loadgeometry{tudarea}%
             \gdef\tud@currentgeometry{tudarea}%
           }%
-        \else%
+        \else% \tud@ddc@foot!=false
           \ifstr{\tud@currentgeometry}{tudareaddc}{}{%
             \loadgeometry{tudareaddc}%
             \gdef\tud@currentgeometry{tudareaddc}%
@@ -3101,7 +3100,7 @@
         \gdef\tud@currentgeometry{typearea}%
       }%
       \setlength\tud@dim@headdiff{\tud@ta@headdiff}%
-      \ifcase\tud@geometry\relax\else%
+      \ifcase\tud@geometry\relax\else% true/symmetric/twoside
         \if@hincl%
           \addtolength\tud@dim@headdiff{%
             \dimexpr-\tud@ta@headheight-\tud@dim@headsep\relax%
@@ -3126,7 +3125,7 @@
     \tud@iftudps{#1}{%
       \ifstr{\tud@currentgeometry}{tudareaddc}{}{%
         \tud@ddc@check%
-        \ifcase\@tempb\relax\else%
+        \ifcase\@tempb\relax\else% \tud@ddc@foot!=false
           \enlargethispage{-\tud@dim@ddcdiff}%
         \fi%
       }%
@@ -3231,11 +3230,11 @@
   \TUD@parameter@set{tudpage}{#1}%
   \tud@ps@select%
   \tud@multicols@check%
-  \ifnum\tud@multicols>1\relax%
+  \ifnum\tud@multicols>\@ne\relax%
     \begin{multicols}{\tud@multicols}%
   \fi%
   \BODY%
-  \ifnum\tud@multicols>1\relax%
+  \ifnum\tud@multicols>\@ne\relax%
     \end{multicols}%
   \fi%
 }[%
@@ -3291,12 +3290,12 @@
   \vspace*{\dimexpr-\dp\strutbox-\ht\strutbox-\ht0\relax}%
 }
 \newcommand*\tud@layout@process{%
-  \ifcase\tud@layout@cover\relax%
+  \ifcase\tud@layout@cover\relax% false
     \bool@std@lock{@tud@cover@cdgeometry}{false}%
-  \else%
+  \else% !false
     \bool@std@lock{@tud@cover@cdgeometry}{true}%
   \fi%
-  \ifcase\tud@layout@title\relax%
+  \ifcase\tud@layout@title\relax% false
     \tud@cmd@restore{maketitle}%
     \tud@cmd@restore{@maketitle}%
     \tud@cmd@restore{titlepagestyle}%
@@ -3307,7 +3306,7 @@
     \tud@font@koma@unset{author}%
     \tud@font@koma@unset{date}%
     \tud@font@koma@unset{publishers}%
-  \else%
+  \else% !false
     \tud@cmd@store{maketitle}%
     \tud@cmd@store{@maketitle}%
     \tud@cmd@store{titlepagestyle}%
@@ -3335,7 +3334,7 @@
     \let\maketitle\tud@maketitle%
     \renewcommand*\titlepagestyle{plain.tudheadings}%
   \fi%
-  \ifcase\tud@layout@part\relax%
+  \ifcase\tud@layout@part\relax% false
     \tud@cmd@restore{partheadstartvskip}%
     \tud@cmd@restore{partheadmidvskip}%
     \tud@cmd@restore{partheadendvskip}%
@@ -3345,7 +3344,7 @@
     \tud@cmd@restore{@spart}%
     \tud@sectioning@reset[addpart]{part}%
     \tud@font@koma@unset{partnumber}%
-  \else%
+  \else% !false
     \tud@cmd@store{partheadstartvskip}%
     \tud@cmd@store{partheadmidvskip}%
     \tud@cmd@store{partheadendvskip}%
@@ -3375,7 +3374,7 @@
     \let\@part\tud@@part%
     \let\@spart\tud@@spart%
   \fi%
-  \ifcase\tud@layout@chapter\relax%
+  \ifcase\tud@layout@chapter\relax% false
     \tud@cmd@restore{chapterheadstartvskip}%
     \tud@cmd@restore{chapterformat}%
     \tud@cmd@restore{@chapter}%
@@ -3387,7 +3386,7 @@
     \tud@sectioning@reset{subsection}%
     \tud@sectioning@reset{subsubsection}%
     \tud@sectioning@reset{minisec}%
-  \else%
+  \else% !false
     \tud@cmd@store{chapterheadstartvskip}%
     \tud@cmd@store{chapterformat}%
     \tud@cmd@store{@chapter}%
@@ -3408,14 +3407,14 @@
   \fi%
 }
 \newcommand*\tud@partheadstartvskip{%
-  \def\tud@part@fontcolor{black}%
-  \ifcase\tud@layout@part\relax\or\or%
+  \def\tud@part@fontcolor{black}% false/true
+  \ifcase\tud@layout@part\relax\or\or% lite
     \def\tud@part@fontcolor{HKS41}%
-  \or%
+  \or% bicolor
     \def\tud@part@fontcolor{HKS41}%
-  \or%
+  \or% color
     \def\tud@part@fontcolor{HKS41!30}%
-  \or%
+  \or% full
     \def\tud@part@fontcolor{HKS41!30}%
   \fi%
   \begingroup%
@@ -3435,7 +3434,7 @@
         \else%
           \tud@makeuppercase{\@@title}%
         \fi%
-        \par\nobreak
+        \par\nobreak%
         {\usekomafont{titlepage}\vskip 2ex\@plus1ex\@minus1ex}%
       \endgroup%
     \else%
@@ -3447,19 +3446,19 @@
 \newcommand*\tud@partheadendvskip{%
   \tud@cleardoublespecialpage{%
     \def\tud@pagecolor{}%
-    \ifcase\tud@layout@part\relax\or%
+    \ifcase\tud@layout@part\relax\or% true
       \def\tud@head@bar{0}%
-    \or%
+    \or% lite
       \def\tud@head@bar{1}%
-    \or%
+    \or% bicolor
       \def\tud@head@bar{2}%
-    \or%
+    \or% color
       \def\tud@pagecolor{HKS41}%
       \def\tud@head@bar{-1}%
       \def\tud@head@logocolor{white}%
       \def\tud@foot@logocolor{white}%
       \bool@std@lock{@tud@head@widebar}{true}%
-    \or%
+    \or% full
       \def\tud@pagecolor{HKS41}%
       \def\tud@head@bar{2}%
     \fi%
@@ -3497,7 +3496,7 @@
   \size@part%
 }{}{\tud@patch@wrn{@spart}}
 \newcommand*\tud@partpreamble{%
-  \ifnum\tud@abstract@level>1\relax\def\tud@abstract@level{1}\fi%
+  \ifnum\tud@abstract@level>\@ne\relax\def\tud@abstract@level{1}\fi% sec/chap
   \KOMAoptions{titlepage=false}%
   \addtokomafont{disposition}{\color{\tud@part@fontcolor}}%
   \addtokomafont{dictumtext}{\color{\tud@part@fontcolor}}%
@@ -3507,7 +3506,7 @@
 }
 \newcommand*\tud@chapterheadstartvskip{%
   \def\tud@chapter@fontcolor{black}%
-  \ifcase\tud@layout@chapter\relax\or\else%
+  \ifcase\tud@layout@chapter\relax\or\else% lite/bicolor/color/full
     \def\tud@chapter@fontcolor{HKS41}%
   \fi%
   \ifcsdef{scr@v@3.15}{%
@@ -3531,10 +3530,10 @@
   \patchcmd{\tud@@@makechapterhead}{\chapterformat\chapterheadmidvskip}{%
     \tud@headmidvskip@neg%
     \tud@makeuppercase{\chapterformat}\tud@headmidvskip
-  }{}{\tud@patch@wrn{@@makechapterhead}}
+  }{}{\tud@patch@wrn{@@makechapterhead}}%
   \patchcmd{\tud@@@makechapterhead}{\IfUsePrefixLine{}{\raggedchapter}}{%
     \IfUsePrefixLine{\IfUseNumber{\setlength\parskip{\z@}}{}}{\raggedchapter}%
-  }{}{\tud@patch@wrn{@@makechapterhead}}
+  }{}{\tud@patch@wrn{@@makechapterhead}}%
 }{%
   \patchcmd{\tud@@@makechapterhead}{\chapterheadstartvskip}{%
     \chapterheadstartvskip%
@@ -3546,24 +3545,24 @@
         \endgroup%
       \fi%
     }{}%
-  }{}{\tud@patch@wrn{@@makechapterhead}}
+  }{}{\tud@patch@wrn{@@makechapterhead}}%
   \patchcmd{\tud@@@makechapterhead}{\chapterformat}{%
     \tud@makeuppercase{\chapterformat}%
-  }{}{\tud@patch@wrn{@@makechapterhead}}
+  }{}{\tud@patch@wrn{@@makechapterhead}}%
   \patchcmd{\tud@@@makechapterhead}{\endgraf\nobreak\vskip.5\baselineskip}{%
     \tud@headmidvskip
-  }{}{\tud@patch@wrn{@@makechapterhead}}
+  }{}{\tud@patch@wrn{@@makechapterhead}}%
   \patchcmd{\tud@@@makechapterhead}{\interlinepenalty}{%
     \ifnumbered{chapter}{\setlength\parskip{\z@}}{}\interlinepenalty
-  }{}{\tud@patch@wrn{@@makechapterhead}}
+  }{}{\tud@patch@wrn{@@makechapterhead}}%
 }
 \newcommand*\tud@chapterpreamble{%
-  \ifnum\tud@abstract@level>1\relax\def\tud@abstract@level{1}\fi%
+  \ifnum\tud@abstract@level>\@ne\relax\def\tud@abstract@level{1}\fi% sec/chap
   \KOMAoptions{titlepage=false}%
   \if@tud@chapterpage%
-    \ifcase\tud@cdfont\relax\or%
+    \ifcase\tud@cdfont\relax\or% true
       \TUDoptions{cdfont=true}%
-    \or%
+    \or% heavy
       \TUDoptions{cdfont=heavy}%
     \fi%
     \addtokomafont{disposition}{\color{\tud@chapter@fontcolor}}%
@@ -3592,19 +3591,19 @@
   \if@tud@chapterpage%
     \tud@cleardoublespecialpage{%
       \def\tud@pagecolor{}%
-      \ifcase\tud@layout@chapter\relax\or%
+      \ifcase\tud@layout@chapter\relax\or% true
         \def\tud@head@bar{0}%
-      \or%
+      \or% lite
         \def\tud@head@bar{1}%
-      \or%
+      \or% bicolor
         \def\tud@head@bar{2}%
-      \or%
+      \or% color
         \def\tud@pagecolor{HKS41!10}%
         \def\tud@head@bar{-1}%
         \def\tud@head@logocolor{HKS41}%
         \def\tud@foot@logocolor{HKS41}%
         \bool@std@lock{@tud@head@widebar}{true}%
-      \or%
+      \or% fullcolor
         \def\tud@pagecolor{HKS41!10}%
         \def\tud@head@bar{2}%
       \fi%
@@ -3627,19 +3626,22 @@
   \global\let\tud@clearcolor@wrn\relax%
 }
 \ifcsdef{scr@v@3.14}{}{%
-  \providecommand*\SecDef[2]{\@ifstar{#2}{\scr@section@dblarg{#1}}}
+  \providecommand*\SecDef[2]{\@ifstar{#2}{\scr@section@dblarg{#1}}}%
   \providecommand\scr@section@dblarg[1]{%
     \kernel@ifnextchar[%]
       {#1}%
       {\scr@section@xdblarg{#1}}%
-  }
+  }%
   \providecommand\scr@section@xdblarg[2]{%
-    \begingroup
+    \begingroup%
       \edef\reserved@a{%
-        \unexpanded{\endgroup\let\scr@osectarg\z@#1[{#2}]{#2}\def\scr@osectarg}%
-        {\scr@osectarg}}%
-    \reserved@a
-  }
+        \unexpanded{%
+          \endgroup\let\scr@osectarg\z@#1[{#2}]{#2}\def\scr@osectarg%
+        }%
+        {\scr@osectarg}%
+      }%
+    \reserved@a%
+  }%
 }
 \newcommand*\tud@part{}
 \newcommand*\tud@spart{}
@@ -3726,11 +3728,11 @@
 }
 %%% From File: tudscr-frontmatter.dtx
 \newcommand*\tud@fm@check[2]{%
-  \ifnumless{\@nameuse{tud@#1@level}}{3}{%
+  \ifnumless{\@nameuse{tud@#1@level}}{3}{% false/true/section
     \@tempswatrue%
     \ifboolexpr{bool {@tud@#1@fil} and bool {@tud@#1@multi}}{%
       \setbox0\vbox{%
-        \ifcase\@nameuse{tud@#1@level}\relax\or\or%
+        \ifnum\@nameuse{tud@#1@level}=\tw@\relax% section
           \vspace*{-\parskip}%
           {\usekomafont{section}\vspace*{-\baselineskip}}%
         \fi%
@@ -3751,7 +3753,7 @@
   #2%
 }
 \newcommand*\tud@fm@set[3]{%
-  \ifnumless{\@nameuse{tud@#1@level}}{3}{}{%
+  \ifnumless{\@nameuse{tud@#1@level}}{3}{}{% chapter
     \boolfalse{@tud@#1@multi}%
     \boolfalse{@tud@#1@fil}%
   }%
@@ -3761,7 +3763,7 @@
     \if@titlepage%
       \ifbool{@tud@#1@multi}{}{\clearpage}%
       \ifbool{@tud@#1@fil}{%
-        \ifcase\@nameuse{tud@#1@level}\relax\or\or%
+        \ifnum\@nameuse{tud@#1@level}=\tw@\relax% section
           \vspace*{-\parskip}%
           {\usekomafont{section}\vspace*{-2\baselineskip}}%
         \fi%
@@ -3770,33 +3772,33 @@
       \tud@fm@body{#1}{#2}{#3}%
       \ifbool{@tud@#1@fil}{\vspace*{\z@ \@plus 2fil}}{}%
     \else%
-      \ifnum\@nameuse{tud@#1@level}<2\begin{\tud@quoting}\fi%
+      \ifnum\@nameuse{tud@#1@level}<\tw@\begin{\tud@quoting}\fi% false/true
       \tud@fm@body{#1}{#2}{#3}%
-      \ifnum\@nameuse{tud@#1@level}<2\end{\tud@quoting}\fi%
+      \ifnum\@nameuse{tud@#1@level}<\tw@\end{\tud@quoting}\fi% false/true
     \fi%
   \fi%
 }
 \newcommand*\tud@fm@body[3]{%
-  \ifnum\tud@multicols>1\relax%
+  \ifnum\tud@multicols>\@ne\relax%
     \begin{multicols}{\tud@multicols}[{\tud@fm@head{#1}{#2}}]%
   \else%
     \ifbool{@tud@#1@multi}{%
-      \ifcase\@nameuse{tud@#1@level}\relax\or%
+      \ifnum\@nameuse{tud@#1@level}=\@ne\relax% true
         \vspace{\dimexpr\bigskipamount-\parskip\relax}%
       \fi%
     }{}%
     \tud@fm@head{#1}{#2}%
   \fi%
   #3\par%
-  \ifnum\tud@multicols>1\relax%
+  \ifnum\tud@multicols>\@ne\relax%
     \end{multicols}%
   \fi%
 }
 \newcommand*\tud@fm@head[2]{%
-  \ifcase\@nameuse{tud@#1@level}\relax%
+  \ifcase\@nameuse{tud@#1@level}\relax% false
     \if@titlepage\endgraf\fi%
     \csname phantomsection\endcsname%
-  \or%
+  \or% true
     \if@titlepage\endgraf\fi%
     \csname phantomsection\endcsname%
     \@afterindentfalse%
@@ -3809,10 +3811,10 @@
     \nopagebreak%
     \vskip\dimexpr\bigskipamount-\parskip\relax%
     \@afterheading%
-  \or%
+  \or% section
     \section*{#2}%
     \ifx\@mkboth\@gobbletwo\else\markright{\MakeMarkcase{#2}}\fi%
-  \or%
+  \or% chapter
     \chapter*{#2}%
     \@mkdouble{\MakeMarkcase{#2}}%
   \fi%
@@ -3838,7 +3840,7 @@
         \ifbool{@tud@#1@multi}{}{%
           \vspace*{\z@ \@plus 1fil}%
           \clearpage%
-          \ifcase\@nameuse{tud@#1@level}\relax\or\or%
+          \ifnum\@nameuse{tud@#1@level}=\tw@\relax% section
             \vspace*{-\parskip}%
             {\usekomafont{section}\vspace*{-2\baselineskip}}%
           \fi%
@@ -3846,7 +3848,7 @@
         }%
       }{\ifbool{@tud@#1@multi}{}{\clearpage}}%
     \else%
-      \ifnum\@nameuse{tud@#1@level}<2%
+      \ifnum\@nameuse{tud@#1@level}<\tw@% false/true
         \end{\tud@quoting}%
         \begin{\tud@quoting}%
       \fi%
@@ -3874,7 +3876,7 @@
 \csundef{abstract}
 \csundef{endabstract}
 \NewEnviron{abstract}[1][]{%
-  \ifnumless{\@nameuse{tud@abstract@level}}{3}{}{\@titlepagetrue}%
+  \ifnum\@nameuse{tud@abstract@level}>\tw@\relax\@titlepagetrue\fi% chapter
   \let\tud@ps\relax%
   \TUD@parameter@set{abstract}{#1}%
   \tud@multicols@check%
@@ -3912,17 +3914,17 @@
   \TUD@parameter@sethandler{\TUD@parameter@defaulthandler{abstract}{#1}}%
 }
 \newcommand*\nextabstract[1][]{%
-  \ifnum\tud@multicols>1\relax%
+  \ifnum\tud@multicols>\@ne\relax%
     \end{multicols}%
   \else%
     \ifbool{@tud@abstract@multi}{%
-      \ifcase\@nameuse{tud@abstract@level}\relax\or%
+      \ifnum\@nameuse{tud@abstract@level}=\@ne\relax% true
         \vspace{\dimexpr\bigskipamount-\parskip\relax}%
       \fi%
     }{}%
   \fi%
   \tud@fm@next{abstract}{#1}%
-  \ifnum\tud@multicols>1\relax%
+  \ifnum\tud@multicols>\@ne\relax%
     \begin{multicols}{\tud@multicols}[{\tud@fm@head{abstract}{\abstractname}}]%
   \else%
     \tud@fm@head{abstract}{\abstractname}%
@@ -3931,7 +3933,7 @@
 \newif\if@tud@declarations
 \NewEnviron{declarations}[1][]{%
   \@tud@declarationstrue%
-  \ifnumless{\@nameuse{tud@declaration@level}}{3}{}{\@titlepagetrue}%
+  \ifnum\@nameuse{tud@declaration@level}>\tw@\relax\@titlepagetrue\fi% chapter
   \let\tud@ps\relax%
   \TUD@parameter@set{declaration}{#1}%
   \tud@multicols@check%
@@ -3942,11 +3944,11 @@
     \tud@ps@select%
   \fi%
   \tud@fm@check{declaration}{%
-    \ifnum\tud@multicols>1\relax%
+    \ifnum\tud@multicols>\@ne\relax%
       \begin{multicols}{\tud@multicols}%
     \fi%
     \BODY%
-    \ifnum\tud@multicols>1\relax%
+    \ifnum\tud@multicols>\@ne\relax%
       \end{multicols}%
     \fi%
   }%
@@ -3982,7 +3984,7 @@
   \TUD@parameter@sethandler{\TUD@parameter@defaulthandler{declaration}{#1}}%
 }
 \newcommand*\declaration[1][]{%
-  \ifnum\tud@multicols>1\relax%
+  \ifnum\tud@multicols>\@ne\relax%
     \end{multicols}%
   \fi%
   \ifbool{@tud@declarations}{%
@@ -3997,12 +3999,12 @@
       \tud@fm@blocking%
     \end{declarations}%
   }%
-  \ifnum\tud@multicols>1\relax%
+  \ifnum\tud@multicols>\@ne\relax%
     \begin{multicols}{\tud@multicols}%
   \fi%
 }
 \newcommand*\confirmation[1][]{%
-  \ifnum\tud@multicols>1\relax%
+  \ifnum\tud@multicols>\@ne\relax%
     \end{multicols}%
   \fi%
   \TUD@parameter@sethandler[declaration]{%
@@ -4021,7 +4023,7 @@
   \TUD@parameter@sethandler[declaration]{%
     \TUD@parameter@defaulthandler{declaration}{##1}%
   }%
-  \ifnum\tud@multicols>1\relax%
+  \ifnum\tud@multicols>\@ne\relax%
     \begin{multicols}{\tud@multicols}%
   \fi%
 }
@@ -4033,7 +4035,7 @@
   }%
 }
 \newcommand*\blocking[1][]{%
-  \ifnum\tud@multicols>1\relax%
+  \ifnum\tud@multicols>\@ne\relax%
     \end{multicols}%
   \fi%
   \TUD@parameter@sethandler[declaration]{%
@@ -4052,7 +4054,7 @@
   \TUD@parameter@sethandler[declaration]{%
     \TUD@parameter@defaulthandler{declaration}{##1}%
   }%
-  \ifnum\tud@multicols>1\relax%
+  \ifnum\tud@multicols>\@ne\relax%
     \begin{multicols}{\tud@multicols}%
   \fi%
 }
@@ -4075,15 +4077,15 @@
 \newcommand*\tud@maketitle[1][]{%
   \begingroup%
     \TUD@parameter@set{title}{#1}%
-    \ifcase\tud@layout@title\relax%
+    \ifcase\tud@layout@title\relax% false
       \ifx\tud@titlepagenumber\relax\gdef\tud@titlepagenumber{1}\fi%
       \tud@cmd@use{maketitle}[\tud@titlepagenumber]%
-    \else%
+    \else% !false
       \if@titlepage%
         \tud@maketitlepage%
       \else%
         \def\tud@title@fontcolor{black}%
-        \ifcase\tud@layout@title\relax\or\else%
+        \ifcase\tud@layout@title\relax\or\else% lite/bicolor/color/full
           \def\tud@title@fontcolor{HKS41}%
         \fi%
         \let\@maketitle\tud@@maketitle%
@@ -4109,13 +4111,13 @@
 \newcommand*\tud@titleback{}%
 \newcommand*\tud@maketitlepage{%
   \def\tud@title@fontcolor{black}%
-  \ifcase\tud@layout@title\relax\or\or%
+  \ifcase\tud@layout@title\relax\or\or% lite
     \def\tud@title@fontcolor{HKS41}%
-  \or%
+  \or% bicolor
     \def\tud@title@fontcolor{HKS41}%
-  \or%
+  \or% color
     \def\tud@title@fontcolor{HKS41!30}%
-  \or%
+  \or% full
     \def\tud@title@fontcolor{HKS41!30}%
   \fi%
   \begin{titlepage}%
@@ -4308,19 +4310,19 @@
     \fi%
     \def\@tempa{%
       \def\tud@pagecolor{}%
-      \ifcase\tud@layout@title\relax\or%
+      \ifcase\tud@layout@title\relax\or% true
         \def\tud@head@bar{0}%
-      \or%
+      \or% lite
         \def\tud@head@bar{1}%
-      \or%
+      \or% color
         \def\tud@head@bar{2}%
-      \or%
+      \or% bicolor
         \def\tud@pagecolor{HKS41}%
         \def\tud@head@bar{-1}%
         \def\tud@head@logocolor{white}%
         \def\tud@foot@logocolor{white}%
         \bool@std@lock{@tud@head@widebar}{true}%
-      \or%
+      \or% full
         \def\tud@pagecolor{HKS41}%
         \def\tud@head@bar{2}%
       \fi%
@@ -4560,7 +4562,7 @@
   \setlength\@tempdima{\textheight}%
   \tud@ifverlower{2.03}{%
     \tud@ddc@check%
-    \ifcase\@tempb\relax\else%
+    \ifcase\@tempb\relax\else% \tud@ddc@foot!=false
       \setlength\@tempdima{\dimexpr\textheight-\tud@dim@ddcdiff\relax}%
       \@tempswatrue%
     \fi%
@@ -4638,7 +4640,7 @@
         \def\coverpagebottommargin{.5\tud@dim@both}%
       }{}%
     \fi%
-    \ifcase\tud@layout@cover\relax%
+    \ifcase\tud@layout@cover\relax% false
       \KOMAoptions{titlepage=firstiscover}%
       \let\@extratitle\@empty%
       \let\@uppertitleback\@empty%
@@ -4646,7 +4648,7 @@
       \let\@dedication\@empty%
       \ifx\tud@titlepagenumber\relax\gdef\tud@titlepagenumber{1}\fi%
       \tud@cmd@use{maketitle}[\tud@titlepagenumber]%
-    \else%
+    \else% !false
       \@tud@covertrue%
       \@titlepagetrue%
       \edef\titlepage@restore{%
@@ -4772,7 +4774,7 @@
 \newcommand*\tud@multicols{1}
 \newcommand*\tud@multicols@check{%
   \ifdef{\multicols}{}{%
-    \ifnum\tud@multicols>1\relax%
+    \ifnum\tud@multicols>\@ne\relax%
       \ClassWarning{\tudcls@name}{%
         The option `columns=\tud@multicols' is only supported,\MessageBreak%
         when package `multicol' is loaded%
