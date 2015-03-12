@@ -1,4 +1,4 @@
-% \CheckSum{2753}
+% \CheckSum{2779}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -2348,6 +2348,7 @@
 % \begin{macro}{\tud@item@pkg}
 % \changes{v2.02}{2014/10/08}{\cs{DeclarePackage} entfernt}^^A
 % \changes{v2.02}{2014/10/09}{optionales Argument für CTAN-Link}^^A
+% \changes{v2.04}{2015/03/12}{optionales Argument für weitere Pakete}^^A
 % \begin{macro}{\before@packages}
 % Ähnlich wie für die Auflistung von Werten eines Schlüssels wird auch mit der 
 % Charakterisierung von Paketen verfahren. Diese werden in der Auflistung 
@@ -2365,16 +2366,27 @@
     \let\item\tud@item@pkg%
   }{}%
 }
-\NewDocumentCommand\tud@item@pkg{od()}{%
+\NewDocumentCommand\tud@item@pkg{ood()}{%
   \itempackages[{%
     \IfValueT{#1}{%
       \manualhyperdef{files:#1}%
-      \IfValueTF{#2}{%
-        \def\@tempa{http://www.ctan.org/pkg/#2}%
+      \IfValueTF{#3}{%
+        \def\@tempa{http://www.ctan.org/pkg/#3}%
       }{%
         \def\@tempa{http://www.ctan.org/pkg/#1}%
       }%
       \href{\@tempa}{\Package{#1}'none'|!|}%
+      \IfValueT{#2}{%
+        \quad(%
+        \let\@tempb\relax%
+        \@for\@tempa:=#2\do{%
+          \@tempb%
+          \manualhyperdef{files:\@tempa}%
+          \expandafter\Package\expandafter{\@tempa}'none'|!|%
+          \def\@tempb{, }%
+        }%
+        )%
+      }%
     }%
   }]%
 }
