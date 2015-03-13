@@ -780,6 +780,7 @@
 \newcommand*\tud@abstract@level{0}
 \bool@lock{@tud@abstract@toc}
 \newif\if@tud@abstract@toc@leveldown
+\newif\if@tud@abstract@toc@aggregate
 \newif\if@tud@abstract@markboth
 \newif\if@tud@abstract@multi
 \newif\if@tud@abstract@fil
@@ -826,6 +827,7 @@
 \newcommand*\tud@declaration@level{1}
 \bool@lock{@tud@declaration@toc}
 \newif\if@tud@declaration@toc@leveldown
+\newif\if@tud@declaration@toc@aggregate
 \newif\if@tud@declaration@markboth
 \newif\if@tud@declaration@multi
 \newif\if@tud@declaration@fil
@@ -1257,6 +1259,15 @@
 \newcommand*\mv@universbold{}%
 \newcommand*\mv@dinbold{}%
 \newcommand*\tud@font@math@init{%
+  \if@tud@fontspec\if@tud@univers\if@tud@dinbold%
+    \@ifpackagewith{fontspec}{nomath}{}{%
+      \ClassWarning{\tudcls@name}%
+      {%
+        It's recommended to load package `fontspec' with\MessageBreak%
+        option `nomath'%
+      }%
+    }%
+  \fi\fi\fi%
   \if@tud@univers%
     \DeclareMathVersion{univers}%
     \DeclareMathVersion{universbold}%
@@ -3702,6 +3713,8 @@
   \endgroup%
 }
 %%% From File: tudscr-frontmatter.dtx
+\newcommand*\tud@fm@toc@delim{}
+\newcommand*\tud@fm@toc@aggregate{}
 \newcommand*\tud@fm@check[2]{%
   \ifnumless{\@nameuse{tud@#1@level}}{3}{% false/true/section
     \@tempswatrue%
@@ -3723,6 +3736,28 @@
         }%
         \@tempswafalse%
       \fi%
+      % §§§ option einfügen
+%      \ifbool{@tud@#1@toc@aggregate}{%
+        \begingroup%
+          \let\tud@fm@tocdelim\@empty%
+          \renewcommand*\tud@fm@head[2]{%
+            \ifbool{@tud@#1@toc}{% anderer Schalter
+              \edef\@tempa{##2}%
+              \xdef\tud@fm@toc@aggregate{\tud@fm@toc@delim\@tempa}%
+              \edef\tud@fm@toc@delim{\tud@fm@toc@aggregate/}%
+            }{}%
+          }%
+          \setbox1\hbox{#2}%
+          \def\@tempa{%
+            \endgroup%
+            \ifbool{@tud@#1@toc@leveldown}{%
+              \addsectiontocentry{}{aaa\tud@fm@toc@aggregate}%
+            }{%
+              \addchaptertocentry{}{bbb\tud@fm@toc@aggregate}%
+            }%
+          }%
+        \@tempa%
+%      }{}%
     }{}%
   }{}%
   #2%
