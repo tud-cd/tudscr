@@ -767,52 +767,42 @@
   {section}{2},{sect}{2},{sec}{2},{addsec}{2},%
   {chapter}{3},{chap}{3},{addchap}{3},%
   {new}{3},{standard}{3},{heading}{3},%
-  {totoc}{4},{toc}{4},{totoclevelup}{4},{toclevelup}{4},{levelup}{4},%
-  {totocleveldown}{5},{tocleveldown}{5},{leveldown}{5},%
-  {nottotoc}{6},{notoc}{6},%
-  {markboth}{7},{mark}{7},%
-  {nomarkboth}{8},{nomark}{8},%
-  {single}{9},{one}{9},{simple}{9},%
-  {multi}{10},{multiple}{10},{all}{10},{two}{10},{both}{10},{double}{10},%
-  {nofil}{11},{nofill}{11},{novfil}{11},{novfill}{11},%
-  {fil}{12},{fill}{12},{vfil}{12},{vfill}{12}%
+  {single}{4},{one}{4},{simple}{4},%
+  {multi}{5},{multiple}{5},{all}{5},{aggregate}{5},%
+  {two}{5},{both}{5},{double}{5},%
+  {nofil}{6},{nofill}{6},{novfil}{6},{novfill}{6},%
+  {fil}{7},{fill}{7},{vfil}{7},{vfill}{7},%
+  {markboth}{8},{mark}{8},%
+  {nomarkboth}{9},{nomark}{9},%
+  {nottotoc}{10},{notoc}{10},%
+  {totoc}{11},{toc}{11},{totoclevelup}{11},{toclevelup}{11},{levelup}{11},%
+  {totocleveldown}{12},{tocleveldown}{12},{leveldown}{12},%
+  {totocaggregate}{13},{totocmulti}{13},{totocmultiple}{13},{totocall}{13},%
+  {tocaggregate}{13},{tocmulti}{13},{tocmultiple}{13},{tocall}{13}%
 }
 \newcommand*\tud@abstract@level{0}
-\bool@lock{@tud@abstract@toc}
-\newif\if@tud@abstract@toc@leveldown
-\newif\if@tud@abstract@toc@aggregate
-\newif\if@tud@abstract@markboth
+\cs@lock{tud@abstract@toc}{0}
 \newif\if@tud@abstract@multi
+\@tud@abstract@multitrue
 \newif\if@tud@abstract@fil
 \@tud@abstract@filtrue
+\newif\if@tud@abstract@markboth
 \TUD@key{abstract}[true]{%
   \edef\@tempb{\TUD@numkey@bool,\tud@fm@switch}%
   \TUD@set@numkey{abstract}{@tempa}{\@tempb}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax% false
       \def\tud@abstract@level{0}%
-      \bool@std@lock{@tud@abstract@toc}{false}%
+      \cs@std@lock{tud@abstract@toc}{0}%
     \or% true
       \def\tud@abstract@level{1}%
-      \bool@std@lock{@tud@abstract@toc}{false}%
+      \cs@std@lock{tud@abstract@toc}{0}%
     \or% section
       \def\tud@abstract@level{2}%
-      \bool@std@lock{@tud@abstract@toc}{true}%
+      \cs@std@lock{tud@abstract@toc}{1}%
     \or% chapter
       \def\tud@abstract@level{3}%
-      \bool@std@lock{@tud@abstract@toc}{true}%
-    \or% totoc
-      \bool@set@lock{@tud@abstract@toc}{true}%
-      \@tud@abstract@toc@leveldownfalse%
-    \or% totocleveldown
-      \bool@set@lock{@tud@abstract@toc}{true}%
-      \@tud@abstract@toc@leveldowntrue%
-    \or% nottotoc
-      \bool@set@lock{@tud@abstract@toc}{false}%
-    \or% markboth
-      \@tud@abstract@markbothtrue%
-    \or% nomarkboth
-      \@tud@abstract@markbothfalse%
+      \cs@std@lock{tud@abstract@toc}{1}%
     \or% single
       \@tud@abstract@multifalse%
     \or% multi
@@ -821,46 +811,61 @@
       \@tud@abstract@filfalse%
     \or% fil
       \@tud@abstract@filtrue%
+    \or% markboth
+      \@tud@abstract@markbothtrue%
+    \or% nomarkboth
+      \@tud@abstract@markbothfalse%
+    \or% nottotoc
+      \cs@set@lock{tud@abstract@toc}{0}%
+    \or% totoc
+      \ifnum\tud@abstract@toc<\thr@@\relax%
+        \cs@set@lock{tud@abstract@toc}{1}%
+      \else%
+        \cs@set@lock{tud@abstract@toc}{3}%
+      \fi%
+    \or% totocleveldown
+      \ifnum\tud@abstract@toc<\thr@@\relax%
+        \cs@set@lock{tud@abstract@toc}{2}%
+      \else%
+        \cs@set@lock{tud@abstract@toc}{4}%
+      \fi%
+    \or% totocaggregate
+      \ifnum\tud@abstract@toc=\z@\relax%
+        \cs@set@lock{tud@abstract@toc}{1}%
+      \fi%
+      \ifnum\tud@abstract@toc<\thr@@\relax%
+        \edef\@tempa{%
+          \noexpand\cs@set@lock{tud@abstract@toc}{%
+            \the\numexpr\tud@abstract@toc+2\relax%
+          }%
+        }\@tempa%
+      \fi%
     \fi%
   \fi%
 }
 \newcommand*\tud@declaration@level{1}
-\bool@lock{@tud@declaration@toc}
-\newif\if@tud@declaration@toc@leveldown
-\newif\if@tud@declaration@toc@aggregate
-\newif\if@tud@declaration@markboth
+\cs@lock{tud@declaration@toc}{0}
 \newif\if@tud@declaration@multi
-\newif\if@tud@declaration@fil
 \@tud@declaration@multitrue
+\newif\if@tud@declaration@fil
 \@tud@declaration@filtrue
+\newif\if@tud@declaration@markboth
 \TUD@key{declaration}[true]{%
   \edef\@tempb{\TUD@numkey@bool,\tud@fm@switch}%
   \TUD@set@numkey{declaration}{@tempa}{\@tempb}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax% false
       \def\tud@declaration@level{0}%
-      \bool@std@lock{@tud@declaration@toc}{false}%
+      \cs@std@lock{tud@declaration@toc}{0}%
     \or% true
       \def\tud@declaration@level{1}%
-      \bool@std@lock{@tud@declaration@toc}{false}%
+      \cs@std@lock{tud@declaration@toc}{0}%
     \or% section
       \def\tud@declaration@level{2}%
-      \bool@std@lock{@tud@declaration@toc}{true}%
+      \cs@std@lock{tud@declaration@toc}{1}%
     \or% chapter
       \def\tud@declaration@level{3}%
-      \bool@std@lock{@tud@declaration@toc}{true}%
-    \or% totoc
-      \bool@set@lock{@tud@declaration@toc}{true}%
-      \@tud@declaration@toc@leveldownfalse%
-    \or% totocleveldown
-      \bool@set@lock{@tud@declaration@toc}{true}%
-      \@tud@declaration@toc@leveldowntrue%
-    \or% nottotoc
-      \bool@set@lock{@tud@declaration@toc}{false}%
-    \or% markboth
-      \@tud@declaration@markbothtrue%
-    \or% nomarkboth
-      \@tud@declaration@markbothfalse%
+      \cs@std@lock{tud@declaration@toc}{1}%
     \or% single
       \@tud@declaration@multifalse%
     \or% multi
@@ -869,6 +874,35 @@
       \@tud@declaration@filfalse%
     \or% fil
       \@tud@declaration@filtrue%
+    \or% markboth
+      \@tud@declaration@markbothtrue%
+    \or% nomarkboth
+      \@tud@declaration@markbothfalse%
+    \or% nottotoc
+      \cs@set@lock{tud@declaration@toc}{0}%
+    \or% totoc
+      \ifnum\tud@declaration@toc<\thr@@\relax%
+        \cs@set@lock{tud@declaration@toc}{1}%
+      \else%
+        \cs@set@lock{tud@declaration@toc}{3}%
+      \fi%
+    \or% totocleveldown
+      \ifnum\tud@declaration@toc<\thr@@\relax%
+        \cs@set@lock{tud@declaration@toc}{2}%
+      \else%
+        \cs@set@lock{tud@declaration@toc}{4}%
+      \fi%
+    \or% totocaggregate
+      \ifnum\tud@declaration@toc=\z@\relax%
+        \cs@set@lock{tud@declaration@toc}{1}%
+      \fi%
+      \ifnum\tud@declaration@toc<\thr@@\relax%
+        \edef\@tempa{%
+          \noexpand\cs@set@lock{tud@declaration@toc}{%
+            \the\numexpr\tud@declaration@toc+2\relax%
+          }%
+        }\@tempa%
+      \fi%
     \fi%
   \fi%
 }
@@ -1261,7 +1295,7 @@
 \newcommand*\tud@font@math@init{%
   \if@tud@fontspec\if@tud@univers\if@tud@dinbold%
     \@ifpackagewith{fontspec}{nomath}{}{%
-      \ClassWarning{\tudcls@name}%
+      \ClassWarningNoLine{\tudcls@name}%
       {%
         It's recommended to load package `fontspec' with\MessageBreak%
         option `nomath'%
@@ -3713,8 +3747,8 @@
   \endgroup%
 }
 %%% From File: tudscr-frontmatter.dtx
-\newcommand*\tud@fm@toc@delim{}
-\newcommand*\tud@fm@toc@aggregate{}
+\newcommand*\tud@fm@tocaggregate{}
+\newcommand*\tud@fm@tocdelim{}
 \newcommand*\tud@fm@check[2]{%
   \ifnumless{\@nameuse{tud@#1@level}}{3}{% false/true/section
     \@tempswatrue%
@@ -3736,37 +3770,52 @@
         }%
         \@tempswafalse%
       \fi%
-      % §§§ option einfügen
-%      \ifbool{@tud@#1@toc@aggregate}{%
-        \begingroup%
-          \let\tud@fm@tocdelim\@empty%
-          \renewcommand*\tud@fm@head[2]{%
-            \ifbool{@tud@#1@toc}{% anderer Schalter
-              \edef\@tempa{##2}%
-              \xdef\tud@fm@toc@aggregate{\tud@fm@toc@delim\@tempa}%
-              \edef\tud@fm@toc@delim{\tud@fm@toc@aggregate/}%
-            }{}%
-          }%
-          \setbox1\hbox{#2}%
-          \def\@tempa{%
-            \endgroup%
-            \ifbool{@tud@#1@toc@leveldown}{%
-              \addsectiontocentry{}{aaa\tud@fm@toc@aggregate}%
-            }{%
-              \addchaptertocentry{}{bbb\tud@fm@toc@aggregate}%
-            }%
-          }%
-        \@tempa%
-%      }{}%
     }{}%
-  }{}%
-  #2%
-}
-\newcommand*\tud@fm@set[3]{%
-  \ifnumless{\@nameuse{tud@#1@level}}{3}{}{% chapter
+  }{% chapter
     \boolfalse{@tud@#1@multi}%
     \boolfalse{@tud@#1@fil}%
   }%
+  \ifbool{@tud@#1@multi}{%
+    \ifnum\@nameuse{tud@#1@toc}>\tw@\relax%
+      \begingroup%
+        \renewcommand*\tud@fm@head[2]{%
+          \protected@edef\@tempa{##2}%
+          \protected@xdef\tud@fm@tocaggregate{\tud@fm@tocdelim\@tempa}%
+          \protected@xdef\tud@fm@tocdelim{\tud@fm@tocaggregate/}%
+        }%
+        \let\clearpage\relax%
+        \setbox0\vbox{#2}%
+        \protected@edef\@tempa{%
+          \noexpand\endgroup%
+          \noexpand\ifnumodd{\csname tud@#1@toc\endcsname}{%
+            \noexpand\addchaptertocentry{}{\tud@fm@tocaggregate}%
+          }{%
+            \noexpand\addsectiontocentry{}{\tud@fm@tocaggregate}%
+          }%
+        }%
+      \@tempa%
+      \global\let\tud@fm@tocaggregate\@empty%
+      \global\let\tud@fm@tocdelim\@empty%
+    \fi%
+  }{%
+    \ifnum\@nameuse{tud@#1@toc}>\tw@\relax%
+      \ClassWarning{\tudcls@name}{%
+        It isn't possible to use `#1=single'
+        or `#1=chapter'%
+        \MessageBreak%
+        with `#1=tocaggregate'%
+      }%
+      \edef\@tempa{%
+        \noexpand\cs@set@lock{tud@#1@toc}{%
+          \the\numexpr\@nameuse{tud@#1@toc}-2\relax%
+        }%
+      }%
+      \@tempa%
+    \fi%
+  }%
+  #2%
+}
+\newcommand*\tud@fm@set[3]{%
   \if@twocolumn%
     \tud@fm@body{#1}{#2}{#3}%
   \else%
@@ -3831,13 +3880,15 @@
   \ifbool{@tud@#1@markboth}{%
     \markboth{\MakeMarkcase{#2}}{\MakeMarkcase{#2}}%
   }{}%
-  \ifbool{@tud@#1@toc}{%
-    \ifbool{@tud@#1@toc@leveldown}{%
-      \addsectiontocentry{}{#2}%
-    }{%
-      \addchaptertocentry{}{#2}%
-    }%
-  }{}%
+  \ifnum\@nameuse{tud@#1@toc}>\z@\relax%
+    \ifnum\@nameuse{tud@#1@toc}<\thr@@\relax%
+      \ifnumodd{\csname tud@#1@toc\endcsname}{%
+        \addchaptertocentry{}{#2}%
+      }{%
+        \addsectiontocentry{}{#2}%
+      }%
+    \fi%
+  \fi%
 }
 \newcommand*\tud@fm@next[2]{%
   \TUD@parameter@set{#1}{#2}%
@@ -4038,10 +4089,8 @@
   \fi%
 }
 \newcommand*\tud@fm@confirmation{%
-  \tud@fm@check{declaration}{%
-    \tud@fm@set{declaration}{\confirmationname}{%
-      \confirmationtext\vskip\z@\@confirmationclosing%
-    }%
+  \tud@fm@set{declaration}{\confirmationname}{%
+    \confirmationtext\vskip\z@\@confirmationclosing%
   }%
 }
 \newcommand*\blocking[1][]{%
@@ -4069,9 +4118,7 @@
   \fi%
 }
 \newcommand*\tud@fm@blocking{%
-  \tud@fm@check{declaration}{%
-    \tud@fm@set{declaration}{\blockingname}{\blockingtext}%
-  }%
+  \tud@fm@set{declaration}{\blockingname}{\blockingtext}%
 }
 %%% From File: tudscr-title.dtx
 \newkomafont{thesis}{\usekomafont{title}\LARGE}

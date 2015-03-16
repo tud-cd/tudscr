@@ -1,4 +1,4 @@
-% \CheckSum{655}
+% \CheckSum{800}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-frontmatter.dtx}[%
-  2015/03/12 v2.04 TUD-KOMA-Script (frontmatter)%
+  2015/03/16 v2.04 TUD-KOMA-Script (frontmatter)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -75,7 +75,8 @@
 % \changes{v2.02}{2014/07/08}{Optionen nutzen \cs{FamilyKeyState}}^^A
 %
 % \ToDo{%
-%  Gesammelten Eintrag ins Inhaltsverzeichnis für alle Abschnitte\\
+%  Gesammelten Eintrag ins Inhaltsverzeichnis für alle Abschnitte für 
+%  \cls{tudscrartcl} testen\\
 %  \url{http://latex.wcms-file3.tu-dresden.de/phpBB3/viewtopic.php?f=11\&t=385}
 % }[v2.04]
 %
@@ -98,10 +99,18 @@
 %
 % \begin{macro}{\tud@fm@check}
 % \changes{v2.02}{2014/07/18}{neu}^^A
+% \begin{macro}{\tud@fm@tocaggregate}
+% \changes{v2.04}{2015/03/16}{neu}^^A
+% \begin{macro}{\tud@fm@tocdelim}
+% \changes{v2.04}{2015/03/16}{neu}^^A
 % Mit diesem Befehl wird für den Fall, dass eine oder mehrerer Erklräungen auf
 % einer einzelnen Seite gesetzt werden sollen geprüft, ob dies überhaupt 
 % möglich ist. Sollte dies nicht der Fall sein, wird eine Warnung ausgegeben.
+% Ist die Einstellung \val{tocaggregate} aktiv, wird der gesammelte Eintrag ins 
+% Inhaltsverzeichnis generiert.
 %    \begin{macrocode}
+\newcommand*\tud@fm@tocaggregate{}
+\newcommand*\tud@fm@tocdelim{}
 \newcommand*\tud@fm@check[2]{%
   \ifnumless{\@nameuse{tud@#1@level}}{3}{% false/true/section
     \@tempswatrue%
@@ -124,10 +133,75 @@
         \@tempswafalse%
       \fi%
     }{}%
-  }{}%
+  }{% chapter
+%    \end{macrocode}
+% Sollte die Gliederungsebene der Erklärung einem Kapitel entsprechen, wird
+% jede Erklärung immer auf eine neue Seite gesetzt. Die Optionen zum vertikalen 
+% Zentrieren wird ignoriert. Auf eine Warnung für den Anwender wird verzichtet.
+%    \begin{macrocode}
+%<*book|report>
+    \boolfalse{@tud@#1@multi}%
+    \boolfalse{@tud@#1@fil}%
+%</book|report>
+  }%
+%    \end{macrocode}
+% Der gesammelte Eintrag aller Überschriften ins Inhaltsverzeichnis.
+%    \begin{macrocode}
+  \ifbool{@tud@#1@multi}{%
+    \ifnum\@nameuse{tud@#1@toc}>\tw@\relax%
+      \begingroup%
+        \renewcommand*\tud@fm@head[2]{%
+          \protected@edef\@tempa{##2}%
+          \protected@xdef\tud@fm@tocaggregate{\tud@fm@tocdelim\@tempa}%
+          \protected@xdef\tud@fm@tocdelim{\tud@fm@tocaggregate/}%
+        }%
+        \let\clearpage\relax%
+        \setbox0\vbox{#2}%
+        \protected@edef\@tempa{%
+          \noexpand\endgroup%
+          \noexpand\ifnumodd{\csname tud@#1@toc\endcsname}{%
+%<*book|report>
+            \noexpand\addchaptertocentry{}{\tud@fm@tocaggregate}%
+%</book|report>
+%<*article>
+            \noexpand\addsectiontocentry{}{\tud@fm@tocaggregate}%
+%</article>
+          }{%
+%<*book|report>
+            \noexpand\addsectiontocentry{}{\tud@fm@tocaggregate}%
+%</book|report>
+%<*article>
+            \noexpand\addsubsectiontocentry{}{\tud@fm@tocaggregate}%
+%</article>
+          }%
+        }%
+      \@tempa%
+      \global\let\tud@fm@tocaggregate\@empty%
+      \global\let\tud@fm@tocdelim\@empty%
+    \fi%
+  }{%
+    \ifnum\@nameuse{tud@#1@toc}>\tw@\relax%
+      \ClassWarning{\tudcls@name}{%
+        It isn't possible to use `#1=single'
+%<*book|report>
+        or `#1=chapter'%
+%</book|report>
+        \MessageBreak%
+        with `#1=tocaggregate'%
+      }%
+      \edef\@tempa{%
+        \noexpand\cs@set@lock{tud@#1@toc}{%
+          \the\numexpr\@nameuse{tud@#1@toc}-2\relax%
+        }%
+      }%
+      \@tempa%
+    \fi%
+  }%
   #2%
 }
 %    \end{macrocode}
+% \end{macro}^^A \tud@fm@tocdelim
+% \end{macro}^^A \tud@fm@tocaggregate
 % \end{macro}^^A \tud@fm@check
 % \begin{macro}{\tud@fm@set}
 % \changes{v2.02}{2014/07/18}{Neuimplementierung für \pkg{scrlayer-scrpage}}^^A
@@ -139,17 +213,6 @@
 % \cs{tud@fm@set}\marg{Erklärungstyp}\marg{Überschrift}\marg{Inhalt}
 %    \begin{macrocode}
 \newcommand*\tud@fm@set[3]{%
-%    \end{macrocode}
-% Sollte die Gliederungsebene der Erklärung einem Kapitel entsprechen, wird
-% jede Erklärung immer auf eine neue Seite gesetzt. Die Optionen zum vertikalen 
-% Zentrieren wird ignoriert. Auf eine Warnung für den Anwender wird verzichtet.
-%    \begin{macrocode}
-%<*book|report>
-  \ifnumless{\@nameuse{tud@#1@level}}{3}{}{% chapter
-    \boolfalse{@tud@#1@multi}%
-    \boolfalse{@tud@#1@fil}%
-  }%
-%</book|report>
 %    \end{macrocode}
 % Im Zweispaltensatz wird der Inhalt der Umgebung einfach ausgegeben, eine 
 % vertikale Zentrierung findet nicht statt.
@@ -248,6 +311,7 @@
 % der für \cls{tudscrbook} und \cls{tudscrreprt} dem eines Kapitels.%
 % \footnote{sonst sieht das Inhaltsverzeichnis recht bescheiden aus}
 % Mit der Eintellung \val{tocleveldown} kann der Eintrag um eine Ebene 
+% reduziert werden.
 %    \begin{macrocode}
 \newcommand*\tud@fm@head[2]{%
   \ifcase\@nameuse{tud@#1@level}\relax% false
@@ -278,23 +342,25 @@
   \ifbool{@tud@#1@markboth}{%
     \markboth{\MakeMarkcase{#2}}{\MakeMarkcase{#2}}%
   }{}%
-  \ifbool{@tud@#1@toc}{%
-    \ifbool{@tud@#1@toc@leveldown}{%
+  \ifnum\@nameuse{tud@#1@toc}>\z@\relax%
+    \ifnum\@nameuse{tud@#1@toc}<\thr@@\relax%
+      \ifnumodd{\csname tud@#1@toc\endcsname}{%
 %<*book|report>
-      \addsectiontocentry{}{#2}%
+        \addchaptertocentry{}{#2}%
 %</book|report>
 %<*article>
-      \addsubsectiontocentry{}{#2}%
+        \addsectiontocentry{}{#2}%
 %</article>
-    }{%
+      }{%
 %<*book|report>
-      \addchaptertocentry{}{#2}%
+        \addsectiontocentry{}{#2}%
 %</book|report>
 %<*article>
-      \addsectiontocentry{}{#2}%
+        \addsubsectiontocentry{}{#2}%
 %</article>
-    }%
-  }{}%
+      }%
+    \fi%
+  \fi%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@fm@head
@@ -416,15 +482,18 @@
   {chapter}{3},{chap}{3},{addchap}{3},%
   {new}{3},{standard}{3},{heading}{3},%
 %</book|report>
-  {totoc}{4},{toc}{4},{totoclevelup}{4},{toclevelup}{4},{levelup}{4},%
-  {totocleveldown}{5},{tocleveldown}{5},{leveldown}{5},%
-  {nottotoc}{6},{notoc}{6},%
-  {markboth}{7},{mark}{7},%
-  {nomarkboth}{8},{nomark}{8},%
-  {single}{9},{one}{9},{simple}{9},%
-  {multi}{10},{multiple}{10},{all}{10},{two}{10},{both}{10},{double}{10},%
-  {nofil}{11},{nofill}{11},{novfil}{11},{novfill}{11},%
-  {fil}{12},{fill}{12},{vfil}{12},{vfill}{12}%
+  {single}{4},{one}{4},{simple}{4},%
+  {multi}{5},{multiple}{5},{all}{5},{aggregate}{5},%
+  {two}{5},{both}{5},{double}{5},%
+  {nofil}{6},{nofill}{6},{novfil}{6},{novfill}{6},%
+  {fil}{7},{fill}{7},{vfil}{7},{vfill}{7},%
+  {markboth}{8},{mark}{8},%
+  {nomarkboth}{9},{nomark}{9},%
+  {nottotoc}{10},{notoc}{10},%
+  {totoc}{11},{toc}{11},{totoclevelup}{11},{toclevelup}{11},{levelup}{11},%
+  {totocleveldown}{12},{tocleveldown}{12},{leveldown}{12},%
+  {totocaggregate}{13},{totocmulti}{13},{totocmultiple}{13},{totocall}{13},%
+  {tocaggregate}{13},{tocmulti}{13},{tocmultiple}{13},{tocall}{13}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@fm@switch
@@ -435,49 +504,46 @@
 % in den neuen \cls{tudscr}-Klassen die Sprache der Zusammenfassung leicht
 % eingestellt und auch zwei Zusammenfassungen auf eine Seite gesetzt werden.
 % \begin{macro}{\tud@abstract@level}
-% \begin{macro}{\if@tud@abstract@toc}
-% \begin{macro}{\if@tud@abstract@toc@locked}
+% \begin{macro}{\tud@abstract@toc}
+% \begin{macro}{\tud@abstract@toc@locked}
+% \begin{macro}{\if@tud@abstract@toc@leveldown}
+% \changes{v2.04}{2015/03/16}{entfernt, siehe \cs{tud@abstract@toc}}^^A
 % Der Befehl \cs{tud@abstract@level} beschreibt die Gliederungsebene der
 % Überschrift der Zusammenfassung numerisch und wird über die Schlüssel der
 % Option \opt{abstract} gesetzt. Über \opt{abstract=toc/notoc} wird festgelegt,
 % ob die Zusammenfassung einen eigenen Eintrag ins Inhaltsverzeichnis bekommt.
-% Da unterschiedliche Gliederungsebenen der Überschriften möglich sind, wird das
-% Standardverhalten in Abhängigkeit dieser gewählt. Initial erscheint für
+% Da unterschiedliche Gliederungsebenen der Überschriften möglich sind, wird 
+% das Standardverhalten in Abhängigkeit dieser gewählt. Initial erscheint für
 % \cls{tudscrreprt} und \cls{tudscrartcl}~-- wie in \KOMAScript{} auch~-- keine
 % Überschrift und kein Eintrag im Inhaltsverzeichnis. In \cls{tudscrbook} wird
 % standardmäßig eine Überschrift in Form eines Kapitels mit Eintrag ins
 % Inhaltsverzeichnis gesetzt.
+%
+% Mit \cs{tud@abstract@toc} wird die Gestalt des Inhaltsverzeichniseintrag 
+% festgelegt. Folgende Werte sind möglich:
+% \begin{description}
+%   \item[0] kein Eintrag ins Inhaltverzeichnis
+%   \item[1] Individuelle Einträge auf der obersten Gliederungsebene
+%   \item[2] Ein gesammelter Eintrag auf der obersten Gliederungsebene
+%   \item[3] Individuelle Einträge auf der zweithöchsten Gliederungsebene
+%   \item[4] Ein gesammelter Eintrag auf der zweithöchsten Gliederungsebene
+% \end{description}
+% Die oberste Gliederungsebene ist \cs{chapter} für \cls{tudscrbook} und 
+% \cls{tudscrreprt} sowie \cs{section} für \cls{tudscrartcl}.
 %    \begin{macrocode}
 %<*report|article>
 \newcommand*\tud@abstract@level{0}
-\bool@lock{@tud@abstract@toc}
+\cs@lock{tud@abstract@toc}{0}
 %</report|article>
 %<*book>
 \newcommand*\tud@abstract@level{3}
-\bool@lock[true]{@tud@abstract@toc}
+\cs@lock{tud@abstract@toc}{1}
 %</book>
 %    \end{macrocode}
-% \end{macro}^^A \if@tud@abstract@toc@locked
-% \end{macro}^^A \if@tud@abstract@toc
-% \end{macro}^^A \tud@abstract@level
-% \begin{macro}{\if@tud@abstract@toc@leveldown}
-% \changes{v2.02}{2014/11/05}{neu}^^A
-% Dieser Schalter bestimmt, ob der Eintrag in das Inhaltsverzeichnis in der
-% obersten Gliederungsebene~-- \cs{chapter} für die Klassen \cls{tudscrbook}
-% und \cls{tudscrreprt} sowie \cs{section} für \cls{tudscrartcl}~-- oder in der
-% darunterliegenden erfolgt.
-%    \begin{macrocode}
-\newif\if@tud@abstract@toc@leveldown
-%    \end{macrocode}
 % \end{macro}^^A \if@tud@abstract@toc@leveldown
-% \begin{macro}{\if@tud@abstract@markboth}
-% \changes{v2.02}{2014/11/05}{neu}^^A
-% Dieser Schalter setzt rechten und linken Kolumnentitel automatisch auf die
-% verwendete Überschrift.
-%    \begin{macrocode}
-\newif\if@tud@abstract@markboth
-%    \end{macrocode}
-% \end{macro}^^A \if@tud@abstract@markboth
+% \end{macro}^^A \tud@abstract@toc@locked
+% \end{macro}^^A \tud@abstract@toc
+% \end{macro}^^A \tud@abstract@level
 % \begin{macro}{\if@tud@abstract@multi}
 % Is dieser Schalter aktiviert, wird eine durch \cs{nextabstract} angegebene 
 % zweite~-- wahrscheinlich in einer Fremdsprache verfasste~-- Zusammenfassung
@@ -485,6 +551,7 @@
 % die Option \opt{abstract=single/multi}.
 %    \begin{macrocode}
 \newif\if@tud@abstract@multi
+\@tud@abstract@multitrue
 %    \end{macrocode}
 % \end{macro}^^A \if@tud@abstract@multi
 % \begin{macro}{\if@tud@abstract@fil}
@@ -496,6 +563,14 @@
 \@tud@abstract@filtrue
 %    \end{macrocode}
 % \end{macro}^^A \if@tud@abstract@fil
+% \begin{macro}{\if@tud@abstract@markboth}
+% \changes{v2.02}{2014/11/05}{neu}^^A
+% Dieser Schalter setzt rechten und linken Kolumnentitel automatisch auf die
+% verwendete Überschrift.
+%    \begin{macrocode}
+\newif\if@tud@abstract@markboth
+%    \end{macrocode}
+% \end{macro}^^A \if@tud@abstract@markboth
 % \begin{option}{abstract}
 % Alle Klassen unterstützen die Werte, welche in \cs{tud@fm@switch} definiert 
 % wurden. Die beiden Klassen \cls{tudscrartcl} und\ cls{tudscrreprt} adaptieren 
@@ -520,40 +595,27 @@
     \ifcase\@tempa\relax% false
 %<*report|article>
       \def\tud@abstract@level{0}%
-      \bool@std@lock{@tud@abstract@toc}{false}%
+      \cs@std@lock{tud@abstract@toc}{0}%
 %</report|article>
     \or% true
 %<*report|article>
       \def\tud@abstract@level{1}%
-      \bool@std@lock{@tud@abstract@toc}{false}%
+      \cs@std@lock{tud@abstract@toc}{0}%
 %</report|article>
     \or% section
       \def\tud@abstract@level{2}%
-      \bool@std@lock{@tud@abstract@toc}{true}%
+      \cs@std@lock{tud@abstract@toc}{1}%
     \or% chapter
 %<*book|report>
       \def\tud@abstract@level{3}%
-      \bool@std@lock{@tud@abstract@toc}{true}%
+      \cs@std@lock{tud@abstract@toc}{1}%
 %</book|report>
 %    \end{macrocode}
 % Neben den Einstellungen für die Art der Gliederungsebene der Überschrift für
 % die Zusammenfassung können außerdem noch die Optionen gesetzt werden, ob
 % versucht werden soll, eine mögliche Zusammenfassung in einer anderen Sprache
-% auf die gleiche Seite wie die erste zu setzen (\opt{abstract=multi}) und ob
-% die Zusammenfassung einen Eintrag ins Inhaltsverzeichnis bekommen soll.
+% auf die gleiche Seite wie die erste zu setzen (\opt{abstract=multi}).
 %    \begin{macrocode}
-    \or% totoc
-      \bool@set@lock{@tud@abstract@toc}{true}%
-      \@tud@abstract@toc@leveldownfalse%
-    \or% totocleveldown
-      \bool@set@lock{@tud@abstract@toc}{true}%
-      \@tud@abstract@toc@leveldowntrue%
-    \or% nottotoc
-      \bool@set@lock{@tud@abstract@toc}{false}%
-    \or% markboth
-      \@tud@abstract@markbothtrue%
-    \or% nomarkboth
-      \@tud@abstract@markbothfalse%
     \or% single
       \@tud@abstract@multifalse%
     \or% multi
@@ -562,6 +624,38 @@
       \@tud@abstract@filfalse%
     \or% fil
       \@tud@abstract@filtrue%
+    \or% markboth
+      \@tud@abstract@markbothtrue%
+    \or% nomarkboth
+      \@tud@abstract@markbothfalse%
+% Bei den Einstellungen für das Inhaltsverzeichnis werden die unterschiedlichen 
+% Möglichkeiten im Makro \cs{tud@abstract@toc} zusammengefasst.
+%    \begin{macrocode}
+    \or% nottotoc
+      \cs@set@lock{tud@abstract@toc}{0}%
+    \or% totoc
+      \ifnum\tud@abstract@toc<\thr@@\relax%
+        \cs@set@lock{tud@abstract@toc}{1}%
+      \else%
+        \cs@set@lock{tud@abstract@toc}{3}%
+      \fi%
+    \or% totocleveldown
+      \ifnum\tud@abstract@toc<\thr@@\relax%
+        \cs@set@lock{tud@abstract@toc}{2}%
+      \else%
+        \cs@set@lock{tud@abstract@toc}{4}%
+      \fi%
+    \or% totocaggregate
+      \ifnum\tud@abstract@toc=\z@\relax%
+        \cs@set@lock{tud@abstract@toc}{1}%
+      \fi%
+      \ifnum\tud@abstract@toc<\thr@@\relax%
+        \edef\@tempa{%
+          \noexpand\cs@set@lock{tud@abstract@toc}{%
+            \the\numexpr\tud@abstract@toc+2\relax%
+          }%
+        }\@tempa%
+      \fi%
     \fi%
   \fi%
 }
@@ -715,37 +809,36 @@
 % äquivalent zur \env{abstract}-Umgebung mit den gleichen Optionen
 % ausgestattet.
 % \begin{macro}{\tud@declaration@level}
-% \begin{macro}{\if@tud@declaration@toc}
-% \begin{macro}{\if@tud@declaration@toc@locked}
+% \begin{macro}{\tud@declaration@toc}
+% \begin{macro}{\tud@declaration@toc@locked}
 % \begin{macro}{\if@tud@declaration@toc@leveldown}
-% \changes{v2.02}{2014/11/05}{}^^A
-% \begin{macro}{\if@tud@declaration@markboth}
-% \changes{v2.02}{2014/11/05}{neu}^^A
+% \changes{v2.04}{2015/03/16}{entfernt, siehe \cs{tud@declaration@toc}}^^A
 % \begin{macro}{\if@tud@declaration@multi}
 % \begin{macro}{\if@tud@declaration@fil}
+% \begin{macro}{\if@tud@declaration@markboth}
+% \changes{v2.02}{2014/11/05}{neu}^^A
 % Siehe die Option \opt{abstract}.
 %    \begin{macrocode}
 %<*report|article>
 \newcommand*\tud@declaration@level{1}
-\bool@lock{@tud@declaration@toc}
+\cs@lock{tud@declaration@toc}{0}
 %</report|article>
 %<*book>
 \newcommand*\tud@declaration@level{3}
-\bool@lock[true]{@tud@declaration@toc}
+\cs@lock{tud@declaration@toc}{1}
 %</book>
-\newif\if@tud@declaration@toc@leveldown
-\newif\if@tud@declaration@markboth
 \newif\if@tud@declaration@multi
-\newif\if@tud@declaration@fil
 \@tud@declaration@multitrue
+\newif\if@tud@declaration@fil
 \@tud@declaration@filtrue
+\newif\if@tud@declaration@markboth
 %    \end{macrocode}
+% \end{macro}^^A \if@tud@declaration@markboth
 % \end{macro}^^A \if@tud@declaration@fil
 % \end{macro}^^A \if@tud@declaration@multi
-% \end{macro}^^A \if@tud@declaration@markboth
 % \end{macro}^^A \if@tud@declaration@toc@leveldown
-% \end{macro}^^A \if@tud@declaration@toc@locked
-% \end{macro}^^A \if@tud@declaration@toc
+% \end{macro}^^A \tud@declaration@toc@locked
+% \end{macro}^^A \tud@declaration@toc
 % \end{macro}^^A \tud@declaration@level
 % \begin{option}{declaration}
 % Siehe die Option \opt{abstract}.
@@ -761,30 +854,18 @@
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax% false
       \def\tud@declaration@level{0}%
-      \bool@std@lock{@tud@declaration@toc}{false}%
+      \cs@std@lock{tud@declaration@toc}{0}%
     \or% true
       \def\tud@declaration@level{1}%
-      \bool@std@lock{@tud@declaration@toc}{false}%
+      \cs@std@lock{tud@declaration@toc}{0}%
     \or% section
       \def\tud@declaration@level{2}%
-      \bool@std@lock{@tud@declaration@toc}{true}%
+      \cs@std@lock{tud@declaration@toc}{1}%
     \or% chapter
 %<*book|report>
       \def\tud@declaration@level{3}%
-      \bool@std@lock{@tud@declaration@toc}{true}%
+      \cs@std@lock{tud@declaration@toc}{1}%
 %</book|report>
-    \or% totoc
-      \bool@set@lock{@tud@declaration@toc}{true}%
-      \@tud@declaration@toc@leveldownfalse%
-    \or% totocleveldown
-      \bool@set@lock{@tud@declaration@toc}{true}%
-      \@tud@declaration@toc@leveldowntrue%
-    \or% nottotoc
-      \bool@set@lock{@tud@declaration@toc}{false}%
-    \or% markboth
-      \@tud@declaration@markbothtrue%
-    \or% nomarkboth
-      \@tud@declaration@markbothfalse%
     \or% single
       \@tud@declaration@multifalse%
     \or% multi
@@ -793,6 +874,35 @@
       \@tud@declaration@filfalse%
     \or% fil
       \@tud@declaration@filtrue%
+    \or% markboth
+      \@tud@declaration@markbothtrue%
+    \or% nomarkboth
+      \@tud@declaration@markbothfalse%
+    \or% nottotoc
+      \cs@set@lock{tud@declaration@toc}{0}%
+    \or% totoc
+      \ifnum\tud@declaration@toc<\thr@@\relax%
+        \cs@set@lock{tud@declaration@toc}{1}%
+      \else%
+        \cs@set@lock{tud@declaration@toc}{3}%
+      \fi%
+    \or% totocleveldown
+      \ifnum\tud@declaration@toc<\thr@@\relax%
+        \cs@set@lock{tud@declaration@toc}{2}%
+      \else%
+        \cs@set@lock{tud@declaration@toc}{4}%
+      \fi%
+    \or% totocaggregate
+      \ifnum\tud@declaration@toc=\z@\relax%
+        \cs@set@lock{tud@declaration@toc}{1}%
+      \fi%
+      \ifnum\tud@declaration@toc<\thr@@\relax%
+        \edef\@tempa{%
+          \noexpand\cs@set@lock{tud@declaration@toc}{%
+            \the\numexpr\tud@declaration@toc+2\relax%
+          }%
+        }\@tempa%
+      \fi%
     \fi%
   \fi%
 }
@@ -980,10 +1090,8 @@
 % Dies ist der eigentliche Inhalt des Befehls \cs{confirmation}.
 %    \begin{macrocode}
 \newcommand*\tud@fm@confirmation{%
-  \tud@fm@check{declaration}{%
-    \tud@fm@set{declaration}{\confirmationname}{%
-      \confirmationtext\vskip\z@\@confirmationclosing%
-    }%
+  \tud@fm@set{declaration}{\confirmationname}{%
+    \confirmationtext\vskip\z@\@confirmationclosing%
   }%
 }
 %    \end{macrocode}
@@ -1026,9 +1134,7 @@
 % Dies ist der eigentliche Inhalt des Befehls \cs{blocking}.
 %    \begin{macrocode}
 \newcommand*\tud@fm@blocking{%
-  \tud@fm@check{declaration}{%
-    \tud@fm@set{declaration}{\blockingname}{\blockingtext}%
-  }%
+  \tud@fm@set{declaration}{\blockingname}{\blockingtext}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@fm@blocking
