@@ -69,7 +69,7 @@
       \fi%
     }%
   \fi%
-  \@TUDVersion{2015/03/12 v2.04 BETA TUD-KOMA-Script}%
+  \@TUDVersion{2015/03/17 v2.04 BETA TUD-KOMA-Script}%
 \endgroup%
 \providecommand*\tudscrmail{tudscr@gmail.com}
 \newcommand*\cls@name{report}
@@ -77,7 +77,7 @@
 \newcommand*\tudcls@name{tudscrreprt}
 \NeedsTeXFormat{LaTeX2e}[2011/06/27]
 \ProvidesClass{\tudcls@name}[%
-  2015/03/12 v2.04 BETA TUD-KOMA-Script
+  2015/03/17 v2.04 BETA TUD-KOMA-Script
   document class (\cls@name)%
 ]
 \typeout{The Corporate Design of Technische Universitaet Dresden}
@@ -768,7 +768,7 @@
   {chapter}{3},{chap}{3},{addchap}{3},%
   {new}{3},{standard}{3},{heading}{3},%
   {single}{4},{one}{4},{simple}{4},%
-  {multi}{5},{multiple}{5},{all}{5},{aggregate}{5},%
+  {multiple}{5},{multi}{5},{all}{5},{aggregate}{5},%
   {two}{5},{both}{5},{double}{5},%
   {nofil}{6},{nofill}{6},{novfil}{6},{novfill}{6},%
   {fil}{7},{fill}{7},{vfil}{7},{vfill}{7},%
@@ -777,8 +777,8 @@
   {nottotoc}{10},{notoc}{10},%
   {totoc}{11},{toc}{11},{totoclevelup}{11},{toclevelup}{11},{levelup}{11},%
   {totocleveldown}{12},{tocleveldown}{12},{leveldown}{12},%
-  {totocaggregate}{13},{totocmulti}{13},{totocmultiple}{13},{totocall}{13},%
-  {tocaggregate}{13},{tocmulti}{13},{tocmultiple}{13},{tocall}{13}%
+  {totocmultiple}{13},{totocmulti}{13},{totocall}{13},{totocaggregate}{13},%
+  {tocmultiple}{13},{tocmulti}{13},{tocall}{13},{tocaggregate}{13}%
 }
 \newcommand*\tud@abstract@level{0}
 \cs@lock{tud@abstract@toc}{0}
@@ -805,7 +805,7 @@
       \cs@std@lock{tud@abstract@toc}{1}%
     \or% single
       \@tud@abstract@multifalse%
-    \or% multi
+    \or% multiple
       \@tud@abstract@multitrue%
     \or% nofil
       \@tud@abstract@filfalse%
@@ -829,7 +829,7 @@
       \else%
         \cs@set@lock{tud@abstract@toc}{4}%
       \fi%
-    \or% totocaggregate
+    \or% totocmutliple
       \ifnum\tud@abstract@toc=\z@\relax%
         \cs@set@lock{tud@abstract@toc}{1}%
       \fi%
@@ -868,7 +868,7 @@
       \cs@std@lock{tud@declaration@toc}{1}%
     \or% single
       \@tud@declaration@multifalse%
-    \or% multi
+    \or% multiple
       \@tud@declaration@multitrue%
     \or% nofil
       \@tud@declaration@filfalse%
@@ -892,7 +892,7 @@
       \else%
         \cs@set@lock{tud@declaration@toc}{4}%
       \fi%
-    \or% totocaggregate
+    \or% totocmutliple
       \ifnum\tud@declaration@toc=\z@\relax%
         \cs@set@lock{tud@declaration@toc}{1}%
       \fi%
@@ -2149,10 +2149,10 @@
   Diese \ifx\@@thesis\@empty Arbeit \else\@@thesis{} \fi
   \ifx\@@title\@empty\else mit dem Titel \emph{\@@title} \fi
   enth\"alt vertrauliche Informationen\ifx\@company\@empty\else
-  , offengelegt durch \@company{}\fi. Ver\"offentlichungen,
+  , offengelegt durch \emph{\@company}\fi. Ver\"offentlichungen,
   Vervielf\"altigungen und Einsichtnahme~-- auch nur auszugsweise~--
   sind ohne ausdr\"uckliche Genehmigung \ifx\@company\@empty\else
-  durch \@company{} \fi nicht gestattet, ebenso wie
+  durch \emph{\@company} \fi nicht gestattet, ebenso wie
   Ver\"offentlichungen \"uber den Inhalt dieser Arbeit. Die
   vorliegende Arbeit ist nur dem Betreuer an der Technischen
   Universit\"at Dresden, den Gutachtern sowie den Mitgliedern des
@@ -2246,9 +2246,9 @@
   This \ifx\@@thesis\@empty thesis \else\@@thesis{} \fi
   \ifx\@@title\@empty\else entitled \emph{\@@title} \fi
   contains confidential data\ifx\@company\@empty\else
-  , disclosed by \@company{}\fi. Publications, duplications and
+  , disclosed by \emph{\@company}\fi. Publications, duplications and
   inspections---even in part---are prohibited without explicit
-  permission\ifx\@company\@empty\else\space by \@company{}\fi,
+  permission\ifx\@company\@empty\else\space by \emph{\@company}\fi,
   as well as publications about the content of this thesis.
   This thesis may only be made accessible to the supervisor at
   Technische Universit\"at Dresden, the reviewers and also the
@@ -3279,7 +3279,7 @@
 }
 \TUD@parameter{tudpage}{%
   \TUD@parameter@define{language}{\selectlanguage{#1}}%
-  \TUD@parameter@define{columns}{\def\tud@multicols{#1}}%
+  \TUD@parameter@define{columns}{\cs@std@lock{tud@multicols}{#1}}%
   \TUD@parameter@define{pagestyle}{%
     \tud@iftudps{#1}{\renewcommand*\tud@ps{#1}}{%
       \ifstr{#1}{empty}{\renewcommand*\tud@ps{empty.tudheadings}}{%
@@ -3747,19 +3747,13 @@
   \endgroup%
 }
 %%% From File: tudscr-frontmatter.dtx
-\newcommand*\tud@fm@tocaggregate{}
-\newcommand*\tud@fm@tocdelim{}
 \newcommand*\tud@fm@check[2]{%
+  \let\tud@fm@set\tud@fm@first%
   \ifnumless{\@nameuse{tud@#1@level}}{3}{% false/true/section
-    \@tempswatrue%
-    \ifboolexpr{bool {@tud@#1@fil} and bool {@tud@#1@multi}}{%
-      \setbox0\vbox{%
-        \ifnum\@nameuse{tud@#1@level}=\tw@\relax% section
-          \vspace*{-\parskip}%
-          {\usekomafont{section}\vspace*{-\baselineskip}}%
-        \fi%
-        #2%
-      }%
+    \ifboolexpr{%
+      bool {@titlepage} and bool {@tud@#1@fil} and bool {@tud@#1@multi}
+    }{%
+      \setbox0\vbox{#2}%
       \ifdim\textheight<\dimexpr\ht0+\dp0\relax%
         \ClassWarning{\tudcls@name}{%
           The given content within the `#1'\MessageBreak%
@@ -3768,90 +3762,110 @@
           `#1=nofill' would be a solution. You\MessageBreak%
           could also use multiple `#1' environments%
         }%
-        \@tempswafalse%
+        \boolfalse{@tud@#1@fil}%
       \fi%
     }{}%
   }{% chapter
     \boolfalse{@tud@#1@multi}%
     \boolfalse{@tud@#1@fil}%
   }%
-  \ifbool{@tud@#1@multi}{%
-    \ifnum\@nameuse{tud@#1@toc}>\tw@\relax%
-      \begingroup%
-        \renewcommand*\tud@fm@head[2]{%
-          \protected@edef\@tempa{##2}%
-          \protected@xdef\tud@fm@tocaggregate{\tud@fm@tocdelim\@tempa}%
-          \protected@xdef\tud@fm@tocdelim{\tud@fm@tocaggregate/}%
-        }%
-        \let\clearpage\relax%
-        \setbox0\vbox{#2}%
-        \protected@edef\@tempa{%
-          \noexpand\endgroup%
-          \noexpand\ifnumodd{\csname tud@#1@toc\endcsname}{%
-            \noexpand\addchaptertocentry{}{\tud@fm@tocaggregate}%
-          }{%
-            \noexpand\addsectiontocentry{}{\tud@fm@tocaggregate}%
-          }%
-        }%
-      \@tempa%
-      \global\let\tud@fm@tocaggregate\@empty%
-      \global\let\tud@fm@tocdelim\@empty%
-    \fi%
-  }{%
-    \ifnum\@nameuse{tud@#1@toc}>\tw@\relax%
-      \ClassWarning{\tudcls@name}{%
-        It isn't possible to use `#1=single'
-        or `#1=chapter'%
-        \MessageBreak%
-        with `#1=tocaggregate'%
-      }%
-      \edef\@tempa{%
-        \noexpand\cs@set@lock{tud@#1@toc}{%
-          \the\numexpr\@nameuse{tud@#1@toc}-2\relax%
-        }%
-      }%
-      \@tempa%
-    \fi%
-  }%
+  \ifnum\@nameuse{tud@#1@toc}>\tw@\relax%
+    \tud@fm@toc{#1}{#2}%
+  \fi%
   #2%
 }
-\newcommand*\tud@fm@set[3]{%
-  \if@twocolumn%
-    \tud@fm@body{#1}{#2}{#3}%
-  \else%
+\newcommand*\tud@fm@@toc{}
+\newcommand*\tud@fm@@@toc{}
+\newcommand*\tud@fm@toc[2]{%
+  \ifbool{@tud@#1@multi}{%
+    \begingroup%
+      \let\tud@fm@@@toc\@empty%
+      \renewcommand*\tud@fm@head[2]{%
+        \protected@edef\@tempa{##2}%
+        \protected@xdef\tud@fm@@toc{\tud@fm@@@toc\@tempa}%
+        \protected@xdef\tud@fm@@@toc{\tud@fm@@toc/}%
+      }%
+      \let\clearpage\relax%
+      \setbox0\vbox{#2}%
+      \protected@edef\@tempa{%
+        \noexpand\endgroup%
+        \noexpand\ifnumodd{\csname tud@#1@toc\endcsname}{%
+          \noexpand\addchaptertocentry{}{\tud@fm@@toc}%
+        }{%
+          \noexpand\addsectiontocentry{}{\tud@fm@@toc}%
+        }%
+      }%
+    \@tempa%
+  }{%
+    \ClassWarning{\tudcls@name}{%
+      It isn't possible to use `#1=single'\MessageBreak%
+      or `#1=chapter'
+      with `#1=tocmultiple'%
+    }%
+    \edef\@tempa{%
+      \noexpand\cs@set@lock{tud@#1@toc}{%
+        \the\numexpr\@nameuse{tud@#1@toc}-2\relax%
+      }%
+    }%
+    \@tempa%
+  }%
+}
+\newcommand\tud@fm@set[1]{}
+\newcommand\tud@fm@first[1]{%
+  \let\tud@fm@set\tud@fm@next%
+  \if@twocolumn\else%
     \if@titlepage%
-      \ifbool{@tud@#1@multi}{}{\clearpage}%
       \ifbool{@tud@#1@fil}{%
+        \null\vfil%
         \ifnum\@nameuse{tud@#1@level}=\tw@\relax% section
-          \vspace*{-\parskip}%
-          {\usekomafont{section}\vspace*{-2\baselineskip}}%
+          \vspace{\dimexpr-\parskip-\baselineskip\relax}%
+          {\usekomafont{section}\vspace{-\baselineskip}}%
         \fi%
-        \if@tempswa\vspace*{\z@ \@plus 1fil}\fi%
       }{}%
-      \tud@fm@body{#1}{#2}{#3}%
-      \ifbool{@tud@#1@fil}{\vspace*{\z@ \@plus 2fil}}{}%
-    \else%
-      \ifnum\@nameuse{tud@#1@level}<\tw@\begin{\tud@quoting}\fi% false/true
-      \tud@fm@body{#1}{#2}{#3}%
-      \ifnum\@nameuse{tud@#1@level}<\tw@\end{\tud@quoting}\fi% false/true
     \fi%
   \fi%
 }
-\newcommand*\tud@fm@body[3]{%
-  \ifnum\tud@multicols>\@ne\relax%
-    \begin{multicols}{\tud@multicols}[{\tud@fm@head{#1}{#2}}]%
+\newcommand\tud@fm@next[1]{%
+  \if@twocolumn%
+    \ifbool{@tud@#1@multi}{\par}{\newpage}%
   \else%
-    \ifbool{@tud@#1@multi}{%
-      \ifnum\@nameuse{tud@#1@level}=\@ne\relax% true
-        \vspace{\dimexpr\bigskipamount-\parskip\relax}%
-      \fi%
-    }{}%
-    \tud@fm@head{#1}{#2}%
+    \if@titlepage%
+      \ifbool{@tud@#1@multi}{%
+        \ifbool{@tud@#1@fil}{\vfil}{}%
+      }{%
+        \ifbool{@tud@#1@fil}{\null\clearpage\null\vfil}{\clearpage}%
+      }%
+    \fi%
   \fi%
-  #3\par%
+}
+\newcommand*\tud@fm@body@start[3]{%
+  \begingroup%
+  \TUD@parameter@set{#1}{#2}%
+  \tud@fm@set{#1}%
+  \if@twocolumn\else\if@titlepage\else\relax%
+    \ifnum\@nameuse{tud@#1@level}<\tw@\begin{\tud@quoting}\fi%
+  \fi\fi%
+  \ifnum\tud@multicols>\@ne\relax%
+    \ifdef{\main@language}{%
+      \expandafter\selectlanguage\expandafter{\languagename}%
+    }{%
+      \vskip\z@%
+    }%
+    \begin{multicols}{\tud@multicols}[{\tud@fm@head{#1}{#3}}]%
+  \else%
+    \tud@fm@head{#1}{#3}%
+  \fi%
+}
+\newcommand*\tud@fm@body@end[1]{%
   \ifnum\tud@multicols>\@ne\relax%
     \end{multicols}%
+  \else%
+    \par%
   \fi%
+  \if@twocolumn\else\if@titlepage\else\relax%
+    \ifnum\@nameuse{tud@#1@level}<\tw@\end{\tud@quoting}\fi%
+  \fi\fi%
+  \endgroup%
 }
 \newcommand*\tud@fm@head[2]{%
   \ifcase\@nameuse{tud@#1@level}\relax% false
@@ -3861,8 +3875,11 @@
     \if@titlepage\endgraf\fi%
     \csname phantomsection\endcsname%
     \@afterindentfalse%
+    \ifnum\tud@multicols=\@ne\relax%
+      \vskip\dimexpr\bigskipamount-\parskip\relax%
+    \fi%
     \begingroup%
-      \centering%
+      \noindent\centering%
       \normalfont\sectfont\nobreak#2%
       \@endparpenalty\@M%
       \endgraf%
@@ -3888,33 +3905,7 @@
         \addsectiontocentry{}{#2}%
       }%
     \fi%
-  \fi%
-}
-\newcommand*\tud@fm@next[2]{%
-  \TUD@parameter@set{#1}{#2}%
-  \if@twocolumn%
-    \ifbool{@tud@#1@multi}{\par}{\newpage}%
-  \else%
-    \if@titlepage%
-      \ifbool{@tud@#1@fil}{%
-        \vspace*{\z@ \@plus 1fil}%
-        \ifbool{@tud@#1@multi}{}{%
-          \vspace*{\z@ \@plus 1fil}%
-          \clearpage%
-          \ifnum\@nameuse{tud@#1@level}=\tw@\relax% section
-            \vspace*{-\parskip}%
-            {\usekomafont{section}\vspace*{-2\baselineskip}}%
-          \fi%
-          \vspace*{\z@ \@plus 1fil}%
-        }%
-      }{\ifbool{@tud@#1@multi}{}{\clearpage}}%
-    \else%
-      \ifnum\@nameuse{tud@#1@level}<\tw@% false/true
-        \end{\tud@quoting}%
-        \begin{\tud@quoting}%
-      \fi%
-    \fi%
-  \fi%
+  \fi%\begin{
 }
 \newcommand*\tud@fm@pagestyle[2]{%
   \if@titlepage%
@@ -3947,16 +3938,25 @@
     \clearpage%
     \tud@ps@select%
   \fi%
-  \tud@fm@check{abstract}{\tud@fm@set{abstract}{\abstractname}{\BODY}}%
+  \renewcommand*\nextabstract[1][]{%
+    \tud@fm@body@end{abstract}%
+    \tud@fm@body@start{abstract}{##1}{\abstractname}%
+  }%
+  \tud@fm@check{abstract}{%
+    \tud@fm@body@start{abstract}{#1}{\abstractname}
+    \BODY%
+    \tud@fm@body@end{abstract}%
+  }%
 }[%
   \if@titlepage%
+    \if@tud@abstract@fil\vfil\null\fi%
     \aftergroup\tud@currentpagestyle@reset%
     \clearpage%
   \fi%
 ]
 \TUD@parameter{abstract}{%
   \TUD@parameter@define{language}{\selectlanguage{#1}}%
-  \TUD@parameter@define{columns}{\def\tud@multicols{#1}}%
+  \TUD@parameter@define{columns}{\cs@std@lock{tud@multicols}{#1}}%
   \TUD@parameter@define{pagestyle}{\tud@fm@pagestyle{abstract}{#1}}%
   \TUD@parameter@define{markboth}[true]{%
     \ifstrbool{#1}{%
@@ -3975,21 +3975,10 @@
   \TUD@parameter@sethandler{\TUD@parameter@defaulthandler{abstract}{#1}}%
 }
 \newcommand*\nextabstract[1][]{%
-  \ifnum\tud@multicols>\@ne\relax%
-    \end{multicols}%
-  \else%
-    \ifbool{@tud@abstract@multi}{%
-      \ifnum\@nameuse{tud@abstract@level}=\@ne\relax% true
-        \vspace{\dimexpr\bigskipamount-\parskip\relax}%
-      \fi%
-    }{}%
-  \fi%
-  \tud@fm@next{abstract}{#1}%
-  \ifnum\tud@multicols>\@ne\relax%
-    \begin{multicols}{\tud@multicols}[{\tud@fm@head{abstract}{\abstractname}}]%
-  \else%
-    \tud@fm@head{abstract}{\abstractname}%
-  \fi%
+  \ClassError{\tudcls@name}{Incorrect usage of `\string\nextabstract'}{%
+    The command `\string\nextabstract' can only be used within\MessageBreak%
+    the environment `abstract'%
+  }%
 }
 \newif\if@tud@declarations
 \NewEnviron{declarations}[1][]{%
@@ -4004,24 +3993,17 @@
     \clearpage%
     \tud@ps@select%
   \fi%
-  \tud@fm@check{declaration}{%
-    \ifnum\tud@multicols>\@ne\relax%
-      \begin{multicols}{\tud@multicols}%
-    \fi%
-    \BODY%
-    \ifnum\tud@multicols>\@ne\relax%
-      \end{multicols}%
-    \fi%
-  }%
+  \tud@fm@check{declaration}{\BODY}%
 }[%
   \if@titlepage%
+    \if@tud@declaration@fil\vfil\null\fi%
     \aftergroup\tud@currentpagestyle@reset%
     \clearpage%
   \fi%
 ]
 \TUD@parameter{declaration}{%
   \TUD@parameter@define{language}{\selectlanguage{#1}}%
-  \TUD@parameter@define{columns}{\def\tud@multicols{#1}}%
+  \TUD@parameter@define{columns}{\cs@std@lock{tud@multicols}{#1}}%
   \TUD@parameter@define{pagestyle}{\tud@fm@pagestyle{declaration}{#1}}%
   \TUD@parameter@define{markboth}[true]{%
     \ifstrbool{#1}{%
@@ -4045,80 +4027,71 @@
   \TUD@parameter@sethandler{\TUD@parameter@defaulthandler{declaration}{#1}}%
 }
 \newcommand*\declaration[1][]{%
-  \ifnum\tud@multicols>\@ne\relax%
-    \end{multicols}%
-  \fi%
   \ifbool{@tud@declarations}{%
-    \begingroup%
-      \TUD@parameter@set{declaration}{#1}%
-      \tud@fm@confirmation%
-      \tud@fm@blocking%
-    \endgroup%
+    \tud@fm@confirmation{#1}%
+    \tud@fm@blocking{#1}%
   }{%
-    \begin{declarations}[#1]%
-      \tud@fm@confirmation%
-      \tud@fm@blocking%
+    \begin{declarations}%
+      \tud@fm@confirmation{#1}%
+      \tud@fm@blocking{#1}%
     \end{declarations}%
   }%
-  \ifnum\tud@multicols>\@ne\relax%
-    \begin{multicols}{\tud@multicols}%
-  \fi%
+}
+\newcommand*\nextdeclaration[3][]{%
+  \ifbool{@tud@declarations}{%
+    \tud@fm@body@start{declaration}{#1}{#2}
+    #3%
+    \tud@fm@body@end{declaration}%
+  }{%
+    \ClassError{\tudcls@name}{Incorrect usage of `\string\nextdeclaration'}{%
+      The command `\string\nextdeclaration' can only be used\MessageBreak%
+      within the environment `declarations'%
+    }%
+  }%
 }
 \newcommand*\confirmation[1][]{%
-  \ifnum\tud@multicols>\@ne\relax%
-    \end{multicols}%
-  \fi%
   \TUD@parameter@sethandler[declaration]{%
     \TUD@parameter@set{declaration}{supporter=##1}%
   }%
   \ifbool{@tud@declarations}{%
     \begingroup%
-      \TUD@parameter@set{declaration}{#1}%
-      \tud@fm@confirmation%
+      \tud@fm@confirmation{#1}%
     \endgroup%
   }{%
-    \begin{declarations}[#1]%
-      \tud@fm@confirmation%
+    \begin{declarations}%
+      \tud@fm@confirmation{#1}%
     \end{declarations}%
   }%
   \TUD@parameter@sethandler[declaration]{%
     \TUD@parameter@defaulthandler{declaration}{##1}%
   }%
-  \ifnum\tud@multicols>\@ne\relax%
-    \begin{multicols}{\tud@multicols}%
-  \fi%
 }
-\newcommand*\tud@fm@confirmation{%
-  \tud@fm@set{declaration}{\confirmationname}{%
-    \confirmationtext\vskip\z@\@confirmationclosing%
-  }%
+\newcommand*\tud@fm@confirmation[1]{%
+  \tud@fm@body@start{declaration}{#1}{\confirmationname}
+  \confirmationtext\vskip\z@\@confirmationclosing%
+  \tud@fm@body@end{declaration}%
 }
 \newcommand*\blocking[1][]{%
-  \ifnum\tud@multicols>\@ne\relax%
-    \end{multicols}%
-  \fi%
   \TUD@parameter@sethandler[declaration]{%
     \TUD@parameter@set{declaration}{company=##1}%
   }%
   \ifbool{@tud@declarations}{%
     \begingroup%
-      \TUD@parameter@set{declaration}{#1}%
-      \tud@fm@blocking%
+      \tud@fm@blocking{#1}%
     \endgroup%
   }{%
-    \begin{declarations}[#1]%
-      \tud@fm@blocking%
+    \begin{declarations}%
+      \tud@fm@blocking{#1}%%
     \end{declarations}%
   }%
   \TUD@parameter@sethandler[declaration]{%
     \TUD@parameter@defaulthandler{declaration}{##1}%
   }%
-  \ifnum\tud@multicols>\@ne\relax%
-    \begin{multicols}{\tud@multicols}%
-  \fi%
 }
-\newcommand*\tud@fm@blocking{%
-  \tud@fm@set{declaration}{\blockingname}{\blockingtext}%
+\newcommand*\tud@fm@blocking[1]{%
+  \tud@fm@body@start{declaration}{#1}{\blockingname}
+  \blockingtext%
+  \tud@fm@body@end{declaration}%
 }
 %%% From File: tudscr-title.dtx
 \newkomafont{thesis}{\usekomafont{title}\LARGE}
@@ -4828,7 +4801,7 @@
     \fi%
   }%
 }
-\newcommand*\tud@multicols{1}
+\cs@lock{tud@multicols}{1}
 \newcommand*\tud@multicols@check{%
   \ifdef{\multicols}{}{%
     \ifnum\tud@multicols>\@ne\relax%
@@ -4836,7 +4809,7 @@
         The option `columns=\tud@multicols' is only supported,\MessageBreak%
         when package `multicol' is loaded%
       }%
-      \def\tud@multicols{1}%
+      \cs@set@lock{tud@multicols}{1}
     \fi%
   }%
 }
