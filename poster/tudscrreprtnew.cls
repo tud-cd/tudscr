@@ -11,8 +11,8 @@
 %% tudscr-layout.dtx  (with options: `class,report,option')
 %% tudscr-frontmatter.dtx  (with options: `class,report,option')
 %% tudscr-title.dtx  (with options: `class,report,option')
-%% tudscr-misc.dtx  (with options: `class,report,option')
 %% tudscr-comp.dtx  (with options: `class,report,option')
+%% tudscr-misc.dtx  (with options: `class,book')
 %% tudscr-base.dtx  (with options: `execute')
 %% tudscr-fonts.dtx  (with options: `class,body')
 %% tudscr-fields.dtx  (with options: `class,body')
@@ -21,7 +21,6 @@
 %% tudscr-layout.dtx  (with options: `class,report,body')
 %% tudscr-frontmatter.dtx  (with options: `class,report,body')
 %% tudscr-title.dtx  (with options: `class,report,body')
-%% tudscr-misc.dtx  (with options: `class,report,body')
 %% tudscr-comp.dtx  (with options: `class,report,body')
 %% 
 %% ============================================================================
@@ -777,8 +776,8 @@
   {nottotoc}{10},{notoc}{10},%
   {totoc}{11},{toc}{11},{totoclevelup}{11},{toclevelup}{11},{levelup}{11},%
   {totocleveldown}{12},{tocleveldown}{12},{leveldown}{12},%
-  {totocmultiple}{13},{totocmulti}{13},{totocall}{13},{totocaggregate}{13},%
-  {tocmultiple}{13},{tocmulti}{13},{tocall}{13},{tocaggregate}{13}%
+  {tocmultiple}{13},{tocmulti}{13},{tocall}{13},{tocaggregate}{13},%
+  {totocmultiple}{13},{totocmulti}{13},{totocall}{13},{totocaggregate}{13}%
 }
 \newcommand*\tud@abstract@level{0}
 \cs@lock{tud@abstract@toc}{0}
@@ -911,23 +910,6 @@
 \TUD@key@lock{subjectthesis}[true]{%
   \TUD@set@ifkey@lock{subjectthesis}{@tud@subjectthesis}{#1}%
 }
-%%% From File: tudscr-misc.dtx
-\newif\if@tud@symbolheadings
-\TUD@key{footnotes}{%
-  \TUD@set@numkey{footnotes}{@tempa}{%
-    {nosymbolheadings}{0},{numberheadings}{0},%
-    {symbolheadings}{1}%
-  }{#1}%
-  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \ifcase\@tempa\relax% nosymbolheadings
-      \@tud@symbolheadingsfalse%
-    \or% symbolheadings
-      \@tud@symbolheadingstrue%
-    \fi%
-  \fi%
-}
-\newif\if@tud@bookmarks
-\TUD@ifkey{tudbookmarks}{@tud@bookmarks}
 %%% From File: tudscr-comp.dtx
 \newcommand*\TUD@deprecated@key[2]{%
   \ClassWarning{\tudcls@name}%
@@ -1134,6 +1116,92 @@
   \else%
     \expandafter\@secondoftwo%
   \fi%
+}
+%%% From File: tudscr-misc.dtx
+\newif\if@tud@symbolheadings
+\TUD@key{footnotes}{%
+  \TUD@set@numkey{footnotes}{@tempa}{%
+    {nosymbolheadings}{0},{numberheadings}{0},%
+    {symbolheadings}{1}%
+  }{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \ifcase\@tempa\relax% nosymbolheadings
+      \@tud@symbolheadingsfalse%
+    \or% symbolheadings
+      \@tud@symbolheadingstrue%
+    \fi%
+  \fi%
+}
+\newcounter{symbolheadings}[chapter]
+\newif\if@tud@bookmarks
+\TUD@ifkey{tudbookmarks}{@tud@bookmarks}
+\newcommand*\tudbookmark[1][]{\@gobbletwo}
+\newcommand*\tud@footnote@unhyper{}
+\AfterPackage{hyperref}{%
+  \renewcommand*\tudbookmark[3][]{%
+    \relax%
+    \if@tud@bookmarks%
+      \phantomsection%
+      \ifblank{#1}{\pdfbookmark{#2}{#3}}{\pdfbookmark[#1]{#2}{#3}}%
+    \fi%
+  }%
+  \renewcommand*\tud@footnote@unhyper{%
+    \let\Hy@saved@footnotemark\@footnotemark%
+    \let\Hy@saved@footnotetext\@footnotetext%
+    \let\@footnotemark\H@@footnotemark%
+    \let\@footnotetext\H@@footnotetext%
+  }%
+  \pdfstringdefDisableCommands{\let\NoCaseChange\@firstofone}%
+}
+\pretocmd{\maketitle}{%
+  \if@tud@bookmarks%
+    \ifdef{\bookmarksetup}{\bookmarksetup{startatroot}}{}%
+  \fi%
+  \tudbookmark[0]{\titlepagename}{title}%
+}{}{\tud@patch@wrn{maketitle}}
+\pretocmd{\tableofcontents}{%
+  \if@tud@bookmarks%
+    \ifdef{\bookmarksetup}{\bookmarksetup{startatroot}}{}%
+  \fi%
+  \tudbookmark[0]{\contentsname}{toc}%
+}{}{\tud@patch@wrn{tableofcontents}}
+\newcommand*\TUD@parameter@defaulthandler[2]{%
+  \def\@tempa{#2}%
+  \@for\@tempb:=\@tempa\do{%
+    \ifx\@tempb\@empty\else%
+      \ifstr{\@tempb}{twocolumn}{\def\@tempb{2}}{}%
+      \ifxnumber{\@tempb}{%
+        \TUD@parameter@set{#1}{columns=\@tempb}%
+      }{%
+        \TUD@parameter@set{#1}{language=\@tempb}%
+      }%
+    \fi%
+  }%
+}
+\cs@lock{tud@multicols}{1}
+\newcommand*\tud@multicols@check{%
+  \ifdef{\multicols}{}{%
+    \ifnum\tud@multicols>\@ne\relax%
+      \ClassWarning{\tudcls@name}{%
+        The option `columns=\tud@multicols' is only supported,\MessageBreak%
+        when package `multicol' is loaded%
+      }%
+      \cs@set@lock{tud@multicols}{1}%
+    \fi%
+  }%
+}
+\newcommand*\tud@makeuppercase[1]{%
+  \ifdin{\begingroup\MakeTextUppercase{#1}\endgroup}{#1}%
+  \protect\vphantom{\"A\"O\"U}%
+}
+\newcommand*\tud@lowerstring[2]{%
+  \protected@edef#1{#2}%
+  \lowercase\expandafter{%
+    \expandafter\gdef\expandafter #1\expandafter{#1}%
+  }%
+}
+\providecommand*\protected@expandtwoargs[3]{%
+  \protected@edef\reserved@a{\noexpand#1{#2}{#3}}\reserved@a%
 }
 %%% From File: tudscr-base.dtx
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{\scrcls@name}}
@@ -3751,7 +3819,7 @@
   \let\tud@fm@set\tud@fm@first%
   \ifnumless{\@nameuse{tud@#1@level}}{3}{% false/true/section
     \ifboolexpr{%
-      bool {@titlepage} and bool {@tud@#1@fil} and bool {@tud@#1@multi}
+      bool {@titlepage} and bool {@tud@#1@fil} and bool {@tud@#1@multi}%
     }{%
       \setbox0\vbox{#2}%
       \ifdim\textheight<\dimexpr\ht0+\dp0\relax%
@@ -3840,31 +3908,31 @@
 }
 \newcommand*\tud@fm@body@start[3]{%
   \begingroup%
-  \TUD@parameter@set{#1}{#2}%
-  \tud@fm@set{#1}%
-  \if@twocolumn\else\if@titlepage\else\relax%
-    \ifnum\@nameuse{tud@#1@level}<\tw@\begin{\tud@quoting}\fi%
-  \fi\fi%
-  \ifnum\tud@multicols>\@ne\relax%
-    \ifdef{\main@language}{%
-      \expandafter\selectlanguage\expandafter{\languagename}%
-    }{%
-      \vskip\z@%
-    }%
-    \begin{multicols}{\tud@multicols}[{\tud@fm@head{#1}{#3}}]%
-  \else%
-    \tud@fm@head{#1}{#3}%
-  \fi%
+    \TUD@parameter@set{#1}{#2}%
+    \tud@fm@set{#1}%
+    \if@twocolumn\else\if@titlepage\else\relax%
+      \ifnum\@nameuse{tud@#1@level}<\tw@\begin{\tud@quoting}\fi% false/true
+    \fi\fi%
+    \ifnum\tud@multicols>\@ne\relax%
+      \ifdef{\main@language}{%
+        \expandafter\selectlanguage\expandafter{\languagename}%
+      }{%
+        \vskip\z@%
+      }%
+      \begin{multicols}{\tud@multicols}[{\tud@fm@head{#1}{#3}}]%
+    \else%
+      \tud@fm@head{#1}{#3}%
+    \fi%
 }
 \newcommand*\tud@fm@body@end[1]{%
-  \ifnum\tud@multicols>\@ne\relax%
-    \end{multicols}%
-  \else%
-    \par%
-  \fi%
-  \if@twocolumn\else\if@titlepage\else\relax%
-    \ifnum\@nameuse{tud@#1@level}<\tw@\end{\tud@quoting}\fi%
-  \fi\fi%
+    \ifnum\tud@multicols>\@ne\relax%
+      \end{multicols}%
+    \else%
+      \par%
+    \fi%
+    \if@twocolumn\else\if@titlepage\else\relax%
+      \ifnum\@nameuse{tud@#1@level}<\tw@\end{\tud@quoting}\fi% false/true
+    \fi\fi%
   \endgroup%
 }
 \newcommand*\tud@fm@head[2]{%
@@ -3905,7 +3973,7 @@
         \addsectiontocentry{}{#2}%
       }%
     \fi%
-  \fi%\begin{
+  \fi%
 }
 \newcommand*\tud@fm@pagestyle[2]{%
   \if@titlepage%
@@ -3943,8 +4011,8 @@
     \tud@fm@body@start{abstract}{##1}{\abstractname}%
   }%
   \tud@fm@check{abstract}{%
-    \tud@fm@body@start{abstract}{#1}{\abstractname}
-    \BODY%
+    \tud@fm@body@start{abstract}{#1}{\abstractname}%
+      \BODY%
     \tud@fm@body@end{abstract}%
   }%
 }[%
@@ -4040,7 +4108,7 @@
 \newcommand*\nextdeclaration[3][]{%
   \ifbool{@tud@declarations}{%
     \tud@fm@body@start{declaration}{#1}{#2}
-    #3%
+      #3%
     \tud@fm@body@end{declaration}%
   }{%
     \ClassError{\tudcls@name}{Incorrect usage of `\string\nextdeclaration'}{%
@@ -4067,8 +4135,8 @@
   }%
 }
 \newcommand*\tud@fm@confirmation[1]{%
-  \tud@fm@body@start{declaration}{#1}{\confirmationname}
-  \confirmationtext\vskip\z@\@confirmationclosing%
+  \tud@fm@body@start{declaration}{#1}{\confirmationname}%
+    \confirmationtext\vskip\z@\@confirmationclosing%
   \tud@fm@body@end{declaration}%
 }
 \newcommand*\blocking[1][]{%
@@ -4081,7 +4149,7 @@
     \endgroup%
   }{%
     \begin{declarations}%
-      \tud@fm@blocking{#1}%%
+      \tud@fm@blocking{#1}%
     \end{declarations}%
   }%
   \TUD@parameter@sethandler[declaration]{%
@@ -4089,8 +4157,8 @@
   }%
 }
 \newcommand*\tud@fm@blocking[1]{%
-  \tud@fm@body@start{declaration}{#1}{\blockingname}
-  \blockingtext%
+  \tud@fm@body@start{declaration}{#1}{\blockingname}%
+    \blockingtext%
   \tud@fm@body@end{declaration}%
 }
 %%% From File: tudscr-title.dtx
@@ -4755,76 +4823,6 @@
       \TUD@parameter@set{cover}{cdgeometry=#1}%
     }%
   }%
-}
-%%% From File: tudscr-misc.dtx
-\newcounter{symbolheadings}[chapter]
-\newcommand*\tudbookmark[1][]{\@gobbletwo}
-\newcommand*\tud@footnote@unhyper{}
-\AfterPackage{hyperref}{%
-  \renewcommand*\tudbookmark[3][]{%
-    \relax%
-    \if@tud@bookmarks%
-      \phantomsection%
-      \ifblank{#1}{\pdfbookmark{#2}{#3}}{\pdfbookmark[#1]{#2}{#3}}%
-    \fi%
-  }%
-  \renewcommand*\tud@footnote@unhyper{%
-    \let\Hy@saved@footnotemark\@footnotemark%
-    \let\Hy@saved@footnotetext\@footnotetext%
-    \let\@footnotemark\H@@footnotemark%
-    \let\@footnotetext\H@@footnotetext%
-  }%
-  \pdfstringdefDisableCommands{\let\NoCaseChange\@firstofone}%
-}
-\pretocmd{\maketitle}{%
-  \if@tud@bookmarks%
-    \ifdef{\bookmarksetup}{\bookmarksetup{startatroot}}{}%
-  \fi%
-  \tudbookmark[0]{\titlepagename}{title}%
-}{}{\tud@patch@wrn{maketitle}}
-\pretocmd{\tableofcontents}{%
-  \if@tud@bookmarks%
-    \ifdef{\bookmarksetup}{\bookmarksetup{startatroot}}{}%
-  \fi%
-  \tudbookmark[0]{\contentsname}{toc}%
-}{}{\tud@patch@wrn{tableofcontents}}
-\newcommand*\TUD@parameter@defaulthandler[2]{%
-  \def\@tempa{#2}%
-  \@for\@tempb:=\@tempa\do{%
-    \ifx\@tempb\@empty\else%
-      \ifstr{\@tempb}{twocolumn}{\def\@tempb{2}}{}%
-      \ifxnumber{\@tempb}{%
-        \TUD@parameter@set{#1}{columns=\@tempb}%
-      }{%
-        \TUD@parameter@set{#1}{language=\@tempb}%
-      }%
-    \fi%
-  }%
-}
-\cs@lock{tud@multicols}{1}
-\newcommand*\tud@multicols@check{%
-  \ifdef{\multicols}{}{%
-    \ifnum\tud@multicols>\@ne\relax%
-      \ClassWarning{\tudcls@name}{%
-        The option `columns=\tud@multicols' is only supported,\MessageBreak%
-        when package `multicol' is loaded%
-      }%
-      \cs@set@lock{tud@multicols}{1}
-    \fi%
-  }%
-}
-\newcommand*\tud@makeuppercase[1]{%
-  \ifdin{\begingroup\MakeTextUppercase{#1}\endgroup}{#1}%
-  \protect\vphantom{\"A\"O\"U}%
-}
-\newcommand*\tud@lowerstring[2]{%
-  \protected@edef#1{#2}%
-  \lowercase\expandafter{%
-    \expandafter\gdef\expandafter #1\expandafter{#1}%
-  }%
-}
-\providecommand*\protected@expandtwoargs[3]{%
-  \protected@edef\reserved@a{\noexpand#1{#2}{#3}}\reserved@a%
 }
 %%% From File: tudscr-comp.dtx
 \newcommand*\tud@deprecated@cmd[2]{%
