@@ -1,6 +1,30 @@
 \input docstrip.tex
+\begingroup
+\catcode`\%=12 \catcode`\*=14
+\gdef\processLineX%#1{*
+  \ifcase\ifx%#10\else
+         \ifx<#11\else
+         \ifx!#12\else 3\fi\fi\fi\relax
+    \expandafter\putMetaComment\or
+    \expandafter\checkOption\or
+    \expandafter\expandVariable\or
+    \expandafter\removeComment\fi
+  #1}
+\endgroup
+\def\expandVariable!#1\endLine{%
+  \advance\codeLinesPassed\@ne
+  \maybeMsg{x}%
+  \edef\inLine{\csname #1\endcsname}%
+  \let\do\putline@do
+  \activefiles
+}
+\@@input ../tudscr-version.dtx
+\edef\echoTUDVersion{echo \TUDVersion}
+
 \keepsilent
+
 \askforoverwritefalse
+
 \generate{
   \nopreamble\nopostamble
   \file{tudscrfonts_install.bxt}      {\from{tudscr-scripts.dtx}{win,font}}
