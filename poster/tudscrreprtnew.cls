@@ -12,7 +12,7 @@
 %% tudscr-frontmatter.dtx  (with options: `class,report,option')
 %% tudscr-title.dtx  (with options: `class,report,option')
 %% tudscr-comp.dtx  (with options: `class,report,option')
-%% tudscr-misc.dtx  (with options: `class,book')
+%% tudscr-misc.dtx  (with options: `class,report')
 %% tudscr-base.dtx  (with options: `execute')
 %% tudscr-fonts.dtx  (with options: `class,body')
 %% tudscr-fields.dtx  (with options: `class,body')
@@ -1132,7 +1132,9 @@
     \fi%
   \fi%
 }
-\newcounter{symbolheadings}[chapter]
+\AfterClass{\scrcls@name}{%
+  \newcounter{symbolheadings}[chapter]%
+}
 \newif\if@tud@bookmarks
 \TUD@ifkey{tudbookmarks}{@tud@bookmarks}
 \newcommand*\tudbookmark[1][]{\@gobbletwo}
@@ -1153,18 +1155,20 @@
   }%
   \pdfstringdefDisableCommands{\let\NoCaseChange\@firstofone}%
 }
-\pretocmd{\maketitle}{%
-  \if@tud@bookmarks%
-    \ifdef{\bookmarksetup}{\bookmarksetup{startatroot}}{}%
-  \fi%
-  \tudbookmark[0]{\titlepagename}{title}%
-}{}{\tud@patch@wrn{maketitle}}
-\pretocmd{\tableofcontents}{%
-  \if@tud@bookmarks%
-    \ifdef{\bookmarksetup}{\bookmarksetup{startatroot}}{}%
-  \fi%
-  \tudbookmark[0]{\contentsname}{toc}%
-}{}{\tud@patch@wrn{tableofcontents}}
+\AfterClass{\scrcls@name}{%
+  \pretocmd{\maketitle}{%
+    \if@tud@bookmarks%
+      \ifdef{\bookmarksetup}{\bookmarksetup{startatroot}}{}%
+    \fi%
+    \tudbookmark[0]{\titlepagename}{title}%
+  }{}{\tud@patch@wrn{maketitle}}%
+  \pretocmd{\tableofcontents}{%
+    \if@tud@bookmarks%
+      \ifdef{\bookmarksetup}{\bookmarksetup{startatroot}}{}%
+    \fi%
+    \tudbookmark[0]{\contentsname}{toc}%
+  }{}{\tud@patch@wrn{tableofcontents}}%
+}
 \newcommand*\TUD@parameter@defaulthandler[2]{%
   \def\@tempa{#2}%
   \@for\@tempb:=\@tempa\do{%

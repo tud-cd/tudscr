@@ -1,4 +1,4 @@
-% \CheckSum{286}
+% \CheckSum{290}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-misc.dtx}[%
-  2015/03/20 v2.04 TUD-KOMA-Script (miscellaneous)%
+  2015/03/23 v2.04 TUD-KOMA-Script (miscellaneous)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -82,7 +82,7 @@
 % \StopEventually{\PrintIndex\PrintChanges}
 %
 % \iffalse
-%<*class&!doc>
+%<*class&!(doc|manual)>
 % \fi
 %
 % \subsection{Fußnoten in Überschriften}
@@ -119,12 +119,10 @@
 % Dieser Zähler wird bei aktivierter Option \opt{footnotes=symbolheadings} für 
 % die Symboleauswahl von Fußnoten in Überschirften inkrementiert.
 %    \begin{macrocode}
-%<*book|report>
-\newcounter{symbolheadings}[chapter]
-%</book|report>
-%<*article>
-\newcounter{symbolheadings}
-%</article>
+\AfterClass{\scrcls@name}{%
+%<book|report>  \newcounter{symbolheadings}[chapter]%
+%<article>  \newcounter{symbolheadings}%
+}
 %    \end{macrocode}
 % \end{counter}^^A symbolheadings
 %
@@ -180,28 +178,30 @@
 % \begin{macro}{\tableofcontents}
 % Für den Titel und das Inhaltsverzeichnis werden Outline-Einträge erzeugt.
 %    \begin{macrocode}
-\pretocmd{\maketitle}{%
-  \if@tud@bookmarks%
-    \ifdef{\bookmarksetup}{\bookmarksetup{startatroot}}{}%
-  \fi%
+\AfterClass{\scrcls@name}{%
+  \pretocmd{\maketitle}{%
+    \if@tud@bookmarks%
+      \ifdef{\bookmarksetup}{\bookmarksetup{startatroot}}{}%
+    \fi%
 %<*book|report>
-  \tudbookmark[0]{\titlepagename}{title}%
+    \tudbookmark[0]{\titlepagename}{title}%
 %</book|report>
 %<*article>
-  \tudbookmark[1]{\titlepagename}{title}%
+    \tudbookmark[1]{\titlepagename}{title}%
 %</article>
-}{}{\tud@patch@wrn{maketitle}}
-\pretocmd{\tableofcontents}{%
-  \if@tud@bookmarks%
-    \ifdef{\bookmarksetup}{\bookmarksetup{startatroot}}{}%
-  \fi%
+  }{}{\tud@patch@wrn{maketitle}}%
+  \pretocmd{\tableofcontents}{%
+    \if@tud@bookmarks%
+      \ifdef{\bookmarksetup}{\bookmarksetup{startatroot}}{}%
+    \fi%
 %<*book|report>
-  \tudbookmark[0]{\contentsname}{toc}%
+    \tudbookmark[0]{\contentsname}{toc}%
 %</book|report>
 %<*article>
-  \tudbookmark[1]{\contentsname}{toc}%
+    \tudbookmark[1]{\contentsname}{toc}%
 %</article>
-}{}{\tud@patch@wrn{tableofcontents}}
+  }{}{\tud@patch@wrn{tableofcontents}}%
+}
 %    \end{macrocode}
 % \end{macro}^^A \tableofcontents
 % \end{macro}^^A \maketitle
@@ -316,7 +316,7 @@
 % \end{macro}^^A \protected@expandtwoargs
 %
 % \iffalse
-%</class&!doc>
+%</class&!(doc|manual)>
 %<*manual|doc>
 % \fi
 %
