@@ -3584,10 +3584,21 @@
 }%
 \newcommand*\tud@@@makechapterhead{}
 \let\tud@@@makechapterhead\@@makechapterhead
+\ifcsdef{scr@v@3.17}{%
+  \patchcmd{\tud@@@makechapterhead}{%
+    \chapterformat
+    \setlength{\@tempskipa}{\scr@chapter@chapterinnerskip}%
+    \chapterheadmidvskip
+  }{%
+    \tud@headmidvskip@neg\tud@makeuppercase{\chapterformat}\tud@headmidvskip%
+  }{}{\tud@patch@wrn{@@makechapterhead}}%
+  \patchcmd{\tud@@@makechapterhead}{\IfUsePrefixLine{}{\raggedchapter}}{%
+    \IfUsePrefixLine{\IfUseNumber{\setlength\parskip{\z@}}{}}{\raggedchapter}%
+  }{}{\tud@patch@wrn{@@makechapterhead}}%
+}{%
 \ifcsdef{scr@v@3.15}{%
   \patchcmd{\tud@@@makechapterhead}{\chapterformat\chapterheadmidvskip}{%
-    \tud@headmidvskip@neg%
-    \tud@makeuppercase{\chapterformat}\tud@headmidvskip
+    \tud@headmidvskip@neg\tud@makeuppercase{\chapterformat}\tud@headmidvskip%
   }{}{\tud@patch@wrn{@@makechapterhead}}%
   \patchcmd{\tud@@@makechapterhead}{\IfUsePrefixLine{}{\raggedchapter}}{%
     \IfUsePrefixLine{\IfUseNumber{\setlength\parskip{\z@}}{}}{\raggedchapter}%
@@ -3613,7 +3624,7 @@
   \patchcmd{\tud@@@makechapterhead}{\interlinepenalty}{%
     \ifnumbered{chapter}{\setlength\parskip{\z@}}{}\interlinepenalty
   }{}{\tud@patch@wrn{@@makechapterhead}}%
-}
+}}
 \newcommand*\tud@chapterpreamble{%
   \ifnum\tud@abstract@level>\@ne\relax\def\tud@abstract@level{1}\fi% sec/chap
   \KOMAoptions{titlepage=false}%

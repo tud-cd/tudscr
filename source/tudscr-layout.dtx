@@ -1,4 +1,4 @@
-% \CheckSum{1081}
+% \CheckSum{1105}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-layout.dtx}[%
-  2015/03/17 v2.04 TUD-KOMA-Script (layout)%
+  2015/03/24 v2.04 TUD-KOMA-Script (layout)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -1118,12 +1118,27 @@
 \newcommand*\tud@@@makechapterhead{}
 \let\tud@@@makechapterhead\@@makechapterhead
 %    \end{macrocode}
-% Die Patches für \KOMAScript~v3.15.
+% Die Patches ab \KOMAScript~v3.17.
+% \ToDo{Nach Release prüfen, ob notwendig}[v3.17]
 %    \begin{macrocode}
+\ifcsdef{scr@v@3.17}{%
+  \patchcmd{\tud@@@makechapterhead}{%
+    \chapterformat
+    \setlength{\@tempskipa}{\scr@chapter@chapterinnerskip}%
+    \chapterheadmidvskip
+  }{%
+    \tud@headmidvskip@neg\tud@makeuppercase{\chapterformat}\tud@headmidvskip%
+  }{}{\tud@patch@wrn{@@makechapterhead}}%
+  \patchcmd{\tud@@@makechapterhead}{\IfUsePrefixLine{}{\raggedchapter}}{%
+    \IfUsePrefixLine{\IfUseNumber{\setlength\parskip{\z@}}{}}{\raggedchapter}%
+  }{}{\tud@patch@wrn{@@makechapterhead}}%
+%    \end{macrocode}
+% Die Patches ab \KOMAScript~v3.15.
+%    \begin{macrocode}
+}{%
 \ifcsdef{scr@v@3.15}{%
   \patchcmd{\tud@@@makechapterhead}{\chapterformat\chapterheadmidvskip}{%
-    \tud@headmidvskip@neg%
-    \tud@makeuppercase{\chapterformat}\tud@headmidvskip
+    \tud@headmidvskip@neg\tud@makeuppercase{\chapterformat}\tud@headmidvskip%
   }{}{\tud@patch@wrn{@@makechapterhead}}%
   \patchcmd{\tud@@@makechapterhead}{\IfUsePrefixLine{}{\raggedchapter}}{%
     \IfUsePrefixLine{\IfUseNumber{\setlength\parskip{\z@}}{}}{\raggedchapter}%
@@ -1152,7 +1167,7 @@
   \patchcmd{\tud@@@makechapterhead}{\interlinepenalty}{%
     \ifnumbered{chapter}{\setlength\parskip{\z@}}{}\interlinepenalty
   }{}{\tud@patch@wrn{@@makechapterhead}}%
-}
+}}
 %    \end{macrocode}
 % \end{macro}^^A \@@makechapterhead
 % \end{macro}^^A \tud@@@makechapterhead
