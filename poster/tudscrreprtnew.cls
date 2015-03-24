@@ -12,8 +12,8 @@
 %% tudscr-frontmatter.dtx  (with options: `class,report,option')
 %% tudscr-title.dtx  (with options: `class,report,option')
 %% tudscr-comp.dtx  (with options: `class,report,option')
-%% tudscr-misc.dtx  (with options: `class,report')
-%% tudscr-base.dtx  (with options: `execute')
+%% tudscr-misc.dtx  (with options: `class,report,option')
+%% tudscr-base.dtx  (with options: `class,execute')
 %% tudscr-fonts.dtx  (with options: `class,body')
 %% tudscr-fields.dtx  (with options: `class,body')
 %% tudscr-locale.dtx  (with options: `class,report,body')
@@ -22,6 +22,7 @@
 %% tudscr-frontmatter.dtx  (with options: `class,report,body')
 %% tudscr-title.dtx  (with options: `class,report,body')
 %% tudscr-comp.dtx  (with options: `class,report,body')
+%% tudscr-misc.dtx  (with options: `class,report,body')
 %% 
 %% ============================================================================
 %% 
@@ -1132,42 +1133,24 @@
     \fi%
   \fi%
 }
-\AfterClass{\scrcls@name}{%
-  \newcounter{symbolheadings}[chapter]%
-}
 \newif\if@tud@bookmarks
 \TUD@ifkey{tudbookmarks}{@tud@bookmarks}
-\newcommand*\tudbookmark[1][]{\@gobbletwo}
-\newcommand*\tud@footnote@unhyper{}
-\AfterPackage{hyperref}{%
-  \renewcommand*\tudbookmark[3][]{%
-    \relax%
-    \if@tud@bookmarks%
-      \phantomsection%
-      \ifblank{#1}{\pdfbookmark{#2}{#3}}{\pdfbookmark[#1]{#2}{#3}}%
-    \fi%
+%%% From File: tudscr-base.dtx
+\DeclareOption*{\PassOptionsToClass{\CurrentOption}{\scrcls@name}}
+\TUDExecuteOptions{cd,cdfont,tudbookmarks}
+\TUDProcessOptions\relax
+\LoadClass{\scrcls@name}[2013/12/19]
+\RequirePackage{environ}[2013/04/01]
+\AtEndPreamble{%
+  \@ifpackageloaded{graphicx}{}{%
+    \@ifpackageloaded{graphics}{%
+      \ClassWarningNoLine{\tudcls@name}{%
+        The package `graphics' was superseded by `graphicx'%
+      }%
+    }{}%
   }%
-  \renewcommand*\tud@footnote@unhyper{%
-    \let\Hy@saved@footnotemark\@footnotemark%
-    \let\Hy@saved@footnotetext\@footnotetext%
-    \let\@footnotemark\H@@footnotemark%
-    \let\@footnotetext\H@@footnotetext%
-  }%
-  \pdfstringdefDisableCommands{\let\NoCaseChange\@firstofone}%
-}
-\AfterClass{\scrcls@name}{%
-  \pretocmd{\maketitle}{%
-    \if@tud@bookmarks%
-      \ifdef{\bookmarksetup}{\bookmarksetup{startatroot}}{}%
-    \fi%
-    \tudbookmark[0]{\titlepagename}{title}%
-  }{}{\tud@patch@wrn{maketitle}}%
-  \pretocmd{\tableofcontents}{%
-    \if@tud@bookmarks%
-      \ifdef{\bookmarksetup}{\bookmarksetup{startatroot}}{}%
-    \fi%
-    \tudbookmark[0]{\contentsname}{toc}%
-  }{}{\tud@patch@wrn{tableofcontents}}%
+  \RequirePackage{graphicx}[1999/02/16]%
+  \RequirePackage{tudscrcolor}[\TUDVersion]%
 }
 \newcommand*\TUD@parameter@defaulthandler[2]{%
   \def\@tempa{#2}%
@@ -1206,23 +1189,6 @@
 }
 \providecommand*\protected@expandtwoargs[3]{%
   \protected@edef\reserved@a{\noexpand#1{#2}{#3}}\reserved@a%
-}
-%%% From File: tudscr-base.dtx
-\DeclareOption*{\PassOptionsToClass{\CurrentOption}{\scrcls@name}}
-\TUDExecuteOptions{cd,cdfont,tudbookmarks}
-\TUDProcessOptions\relax
-\LoadClass{\scrcls@name}[2013/12/19]
-\RequirePackage{environ}[2013/04/01]
-\AtEndPreamble{%
-  \@ifpackageloaded{graphicx}{}{%
-    \@ifpackageloaded{graphics}{%
-      \ClassWarningNoLine{\tudcls@name}{%
-        The package `graphics' was superseded by `graphicx'%
-      }%
-    }{}%
-  }%
-  \RequirePackage{graphicx}[1999/02/16]%
-  \RequirePackage{tudscrcolor}[\TUDVersion]%
 }
 %%% From File: tudscr-fonts.dtx
 \newcommand*\tud@font@greek@loop[1]{%
@@ -4862,6 +4828,38 @@
   \tud@deprecated@cmd{finaldate}{duedate}%
   \tud@deprecated@cmd{maturitydate}{duedate}%
 }
+%%% From File: tudscr-misc.dtx
+\newcounter{symbolheadings}[chapter]%
+\newcommand*\tudbookmark[1][]{\@gobbletwo}
+\newcommand*\tud@footnote@unhyper{}
+\AfterPackage{hyperref}{%
+  \renewcommand*\tudbookmark[3][]{%
+    \relax%
+    \if@tud@bookmarks%
+      \phantomsection%
+      \ifblank{#1}{\pdfbookmark{#2}{#3}}{\pdfbookmark[#1]{#2}{#3}}%
+    \fi%
+  }%
+  \renewcommand*\tud@footnote@unhyper{%
+    \let\Hy@saved@footnotemark\@footnotemark%
+    \let\Hy@saved@footnotetext\@footnotetext%
+    \let\@footnotemark\H@@footnotemark%
+    \let\@footnotetext\H@@footnotetext%
+  }%
+  \pdfstringdefDisableCommands{\let\NoCaseChange\@firstofone}%
+}
+\pretocmd{\maketitle}{%
+  \if@tud@bookmarks%
+    \ifdef{\bookmarksetup}{\bookmarksetup{startatroot}}{}%
+  \fi%
+  \tudbookmark[0]{\titlepagename}{title}%
+}{}{\tud@patch@wrn{maketitle}}
+\pretocmd{\tableofcontents}{%
+  \if@tud@bookmarks%
+    \ifdef{\bookmarksetup}{\bookmarksetup{startatroot}}{}%
+  \fi%
+  \tudbookmark[0]{\contentsname}{toc}%
+}{}{\tud@patch@wrn{tableofcontents}}
 \endinput
 %%
 %% End of file `tudscrreprt.cls'.

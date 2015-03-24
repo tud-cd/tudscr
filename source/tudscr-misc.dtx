@@ -1,4 +1,4 @@
-% \CheckSum{290}
+% \CheckSum{222}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-misc.dtx}[%
-  2015/03/23 v2.04 TUD-KOMA-Script (miscellaneous)%
+  2015/03/24 v2.04 TUD-KOMA-Script (miscellaneous)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -82,7 +82,7 @@
 % \StopEventually{\PrintIndex\PrintChanges}
 %
 % \iffalse
-%<*class&!(doc|manual)>
+%<*class&option>
 % \fi
 %
 % \subsection{Fußnoten in Überschriften}
@@ -114,17 +114,25 @@
 % \end{macro}^^A \if@tud@bookmarks
 % \end{option}^^A symbolheadings
 %
+% \iffalse
+%</class&option>
+%<*class&body>
+% \fi
+%
 % \begin{counter}{symbolheadings}
 % \changes{v2.02}{2014/06/27}{neu}^^A
 % Dieser Zähler wird bei aktivierter Option \opt{footnotes=symbolheadings} für 
 % die Symboleauswahl von Fußnoten in Überschirften inkrementiert.
 %    \begin{macrocode}
-\AfterClass{\scrcls@name}{%
-%<book|report>  \newcounter{symbolheadings}[chapter]%
-%<article>  \newcounter{symbolheadings}%
-}
+%<book|report>\newcounter{symbolheadings}[chapter]%
+%<article>\newcounter{symbolheadings}%
 %    \end{macrocode}
 % \end{counter}^^A symbolheadings
+%
+% \iffalse
+%</class&body>
+%<*class&option>
+% \fi
 %
 % \subsection{Sprungmarken}
 %
@@ -139,6 +147,11 @@
 %    \end{macrocode}
 % \end{macro}^^A \if@tud@bookmarks
 % \end{option}^^A tudbookmarks
+%
+% \iffalse
+%</class&option>
+%<*class&body>
+% \fi
 %
 % \begin{macro}{\tudbookmark}
 % \begin{macro}{\tud@footnote@unhyper}
@@ -178,145 +191,34 @@
 % \begin{macro}{\tableofcontents}
 % Für den Titel und das Inhaltsverzeichnis werden Outline-Einträge erzeugt.
 %    \begin{macrocode}
-\AfterClass{\scrcls@name}{%
-  \pretocmd{\maketitle}{%
-    \if@tud@bookmarks%
-      \ifdef{\bookmarksetup}{\bookmarksetup{startatroot}}{}%
-    \fi%
+\pretocmd{\maketitle}{%
+  \if@tud@bookmarks%
+    \ifdef{\bookmarksetup}{\bookmarksetup{startatroot}}{}%
+  \fi%
 %<*book|report>
-    \tudbookmark[0]{\titlepagename}{title}%
+  \tudbookmark[0]{\titlepagename}{title}%
 %</book|report>
 %<*article>
-    \tudbookmark[1]{\titlepagename}{title}%
+  \tudbookmark[1]{\titlepagename}{title}%
 %</article>
-  }{}{\tud@patch@wrn{maketitle}}%
-  \pretocmd{\tableofcontents}{%
-    \if@tud@bookmarks%
-      \ifdef{\bookmarksetup}{\bookmarksetup{startatroot}}{}%
-    \fi%
+}{}{\tud@patch@wrn{maketitle}}
+\pretocmd{\tableofcontents}{%
+  \if@tud@bookmarks%
+    \ifdef{\bookmarksetup}{\bookmarksetup{startatroot}}{}%
+  \fi%
 %<*book|report>
-    \tudbookmark[0]{\contentsname}{toc}%
+  \tudbookmark[0]{\contentsname}{toc}%
 %</book|report>
 %<*article>
-    \tudbookmark[1]{\contentsname}{toc}%
+  \tudbookmark[1]{\contentsname}{toc}%
 %</article>
-  }{}{\tud@patch@wrn{tableofcontents}}%
-}
+}{}{\tud@patch@wrn{tableofcontents}}
 %    \end{macrocode}
 % \end{macro}^^A \tableofcontents
 % \end{macro}^^A \maketitle
 %
-% \subsection{Parameter für Umgebungen und mehrspaltige Texte}
-%
-% Diese Befehle dienen dazu, bei Umgebungen die Sprache über einen Parameter
-% anzugeben sowie das Paket \pkg{multicol} verwenden zu können.
-% \begin{macro}{\TUD@parameter@defaulthandler}
-% Hiermit kann sowohl die zu verwendende Sprache als auch die Anzahl der
-% gewünschten Spalten für bestimmte Umgebungen ohne die explizite Angabe eines
-% Schlüssels festgelegt werden. Momentan betrifft das die beiden Umgebungen
-% \env{abstract} und \env{tudpage}.
-%    \begin{macrocode}
-\newcommand*\TUD@parameter@defaulthandler[2]{%
-  \def\@tempa{#2}%
-  \@for\@tempb:=\@tempa\do{%
-    \ifx\@tempb\@empty\else%
-      \ifstr{\@tempb}{twocolumn}{\def\@tempb{2}}{}%
-      \ifxnumber{\@tempb}{%
-        \TUD@parameter@set{#1}{columns=\@tempb}%
-      }{%
-        \TUD@parameter@set{#1}{language=\@tempb}%
-      }%
-    \fi%
-  }%
-}
-%    \end{macrocode}
-% \end{macro}^^A \TUD@parameter@defaulthandler
-% \begin{macro}{\tud@multicols}
-% \begin{macro}{\tud@multicols@check}
-% Im Makro \cs{tud@multicols} wird die Anzahl der gewünschten Spalten in einer
-% Umgebung für die Verwendung des \pkg{multicol}"=Paketes gespeichert.
-%    \begin{macrocode}
-\cs@lock{tud@multicols}{1}
-%    \end{macrocode}
-% Der Befehl \cs{tud@multicols@check} prüft, ob das Paket \pkg{multicol} 
-% geladen wurde. Falls dies nicht der Fall ist, wird eine Warnung ausgegeben 
-% und die Änderung des Wertes über einen Parameter der Umgebungen \env{tudpage} 
-% repsektive \env{abstract} sowie \env{declarations} über \cs{set@set@lock} 
-% verhindert.
-%    \begin{macrocode}
-\newcommand*\tud@multicols@check{%
-  \ifdef{\multicols}{}{%
-    \ifnum\tud@multicols>\@ne\relax%
-      \ClassWarning{\tudcls@name}{%
-        The option `columns=\tud@multicols' is only supported,\MessageBreak%
-        when package `multicol' is loaded%
-      }%
-      \cs@set@lock{tud@multicols}{1}%
-    \fi%
-  }%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@multicols@check
-% \end{macro}^^A \tud@multicols
-%
-% \subsection{Bedingte Majuskeln für Überschriften}
-%
-% Überschriften sollen bloß in Großbuchstaben gesetzt werden, wenn auch 
-% tatsächlich die Schrift DIN~Bold verwendet wird.
-% \begin{macro}{\tud@makeuppercase}
-% Der Befehl führt \cs{MakeTextUppercase}\marg{Text} deshalb nur aus, wenn die 
-% richtige Schriftfamilie verwendet wird. 
-%    \begin{macrocode}
-\newcommand*\tud@makeuppercase[1]{%
-  \ifdin{\begingroup\MakeTextUppercase{#1}\endgroup}{#1}%
-%    \end{macrocode}
-% Aufgrund eines Fehlers im \LaTeX-Kernels liegt die Grundlinie für die beiden
-% Gliederungsebenen \cs{section} und \cs{subsection} zu hoch. Mit dem Einfügen
-% des vertikalen Freiraums für die Umlaute wird diese automatisch nach unten
-% verschoben. Allerdings ist das ein ziemlich übler Hack.
-%^^A \addtokomafont{section}{\strut\ignorespaces}%
-%    \begin{macrocode}
-  \protect\vphantom{\"A\"O\"U}%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@makeuppercase
-%
-% \subsection{Erzwungene Minuskeln für Strings}
-%
-% Um angegebene Werte bei Schlüssel-Wert-Paaren oder Schlüsselwörter in
-% bestimmten Feldern mit Sicherheit erkennen zu können, werden diese zwingend 
-% in Kleinbuchstaben geschieben.
-% \begin{macro}{\tud@lowerstring}
-% Das Makro wird mit \cs{tud@lowerstring}\marg{Zielmakro}\marg{String} bennutzt.
-%    \begin{macrocode}
-\newcommand*\tud@lowerstring[2]{%
-  \protected@edef#1{#2}%
-  \lowercase\expandafter{%
-    \expandafter\gdef\expandafter #1\expandafter{#1}%
-  }%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@lowerstring
-%
-% \subsection{Expansion geschützter Makros}
-%
-% Im \LaTeX-Kernel wird der Befehl \cs{@expandtwoargs} definiert, welcher zwei 
-% Argumente in ein angegebenes Makro vollständig expandiert. Dabei erfolgt die 
-% Expansion der beiden Argumente aufgrund der standardmäßigen Verwendung von 
-% \cs{edef} allerdings vollständig und ohne die Beachtung von \cs{protect}.
-% \begin{macro}{\protected@expandtwoargs}
-% \changes{v2.02}{2014/11/13}{neu}^^A
-% Der Befehl \cs{protected@expandtwoargs} kann äquivalent genutzt werden, 
-% lässt dabei aber mit \cs{protect} geschützte Makros unberührt.
-%    \begin{macrocode}
-\providecommand*\protected@expandtwoargs[3]{%
-  \protected@edef\reserved@a{\noexpand#1{#2}{#3}}\reserved@a%
-}
-%    \end{macrocode}
-% \end{macro}^^A \protected@expandtwoargs
-%
 % \iffalse
-%</class&!(doc|manual)>
+%</class&body>
 %<*manual|doc>
 % \fi
 %
