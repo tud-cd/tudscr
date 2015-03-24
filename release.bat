@@ -31,10 +31,11 @@ makeindex -s gglo.ist -o tudscrsource.gls tudscrsource.glo
 makeindex -s gind.ist -o tudscrsource.ind tudscrsource.idx
 pdflatex "\def\tudfinalflag{}\input{tudscrsource.tex}"
 pdflatex "\def\tudfinalflag{}\input{tudscrsource.tex}"
-move  *.dtx            source\latex\tudscr\
-move  tudscr.ins       source\latex\tudscr\
-move  tudscrsource.tex source\latex\tudscr\
-xcopy doc              source\latex\tudscr\doc\ /s
+copy  tudscr-version.dtx  install\
+move  *.dtx               source\latex\tudscr\
+move  tudscr.ins          source\latex\tudscr\
+move  tudscrsource.tex    source\latex\tudscr\
+xcopy doc                 source\latex\tudscr\doc\ /s
 del source\latex\tudscr\test.tex /s > nul
 for /f %%f in ('dir /b ..\*.md') do copy ..\%%f doc\latex\tudscr\%%~nf
 move tudscrsource.pdf doc\latex\tudscr\
