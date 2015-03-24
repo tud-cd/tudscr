@@ -2728,6 +2728,7 @@
   \fi%
   \vbox{%
     \linespread{0}\selectfont%
+    \offinterlineskip%
     \color{\tud@head@logocolor}%
     \tud@head@text@write{\tud@head@text@first}%
     \ifnum\tud@head@bar>\@ne% color
@@ -2736,11 +2737,11 @@
       }%
     \fi%
     \ifx\tud@head@text@second\@empty%
-      \newline\tud@head@font@light\tud@head@text@write{\@extraheadline}%
+      \newline\tud@head@text@write{\tud@head@font@light\@extraheadline}%
     \else%
       \newline\tud@head@text@write{\tud@head@text@second}%
       \ifx\@extraheadline\@empty\else%
-        \vspace{-\tud@dim@line}\newline\tud@head@font@light\@extraheadline%
+        \newline\vbox{\tud@head@font@light\@extraheadline}%
       \fi%
     \fi%
   }%
@@ -2748,7 +2749,7 @@
 \newcommand*\tud@head@text@write[1]{%
   \raisebox{\dimexpr(\tud@dim@barheight+2\tud@dim@line-\totalheight)/2\relax}[%
     \dimexpr\tud@dim@barheight-\depth\relax%
-  ][\depth]{#1\vphantom{gjpqy\"A\"O\"U}}%
+  ][\dimexpr\depth+2\tud@dim@line\relax]{#1\vphantom{gjpqy\"A\"O\"U}}%
 }
 \newcommand\tud@head@text@wrn[1]{%
   \ClassWarning{\tudcls@name}{%
