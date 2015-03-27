@@ -1690,6 +1690,9 @@
     {\the\@tempdima}{\the\@tempdimb}%
   }%
   \normalsize%
+  \ifcsdef{scr@v@3.17}{%
+    \expandafter\ifnum\scr@v@is@ge{3.17}\par@updaterelative\fi%
+  }{}%
   \setlength{\@tempdimb}{\f@baselineskip}%
   \scr@setlength{\topsep}{\dimexpr16\@tempdimb/25\relax}%
     {\dimexpr4\@tempdimb/25\relax}{\dimexpr8\@tempdimb/25\relax}%

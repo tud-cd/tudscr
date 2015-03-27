@@ -1,4 +1,4 @@
-% \CheckSum{253}
+% \CheckSum{263}
 % \iffalse meta-comment
 % ======================================================================
 %
@@ -46,7 +46,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-scripts.dtx}[%
-  2015/03/20 v2.04 TUD-KOMA-Script installation scripts%
+  2015/03/27 v2.04 TUD-KOMA-Script installation scripts%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -101,9 +101,11 @@ rem TeX Live 2014
 rem
 echo.
 echo  =====================================================================
+%<convert>echo   Konvertieren der TUD-CD-Schriften unter Windows
 %<full>echo   Installation TUD-KOMA-Script + TUD-CD-Schriften unter Windows
 %<update>echo   Update TUD-KOMA-Script unter Windows
 %<font>echo   Installation TUD-CD-Schriften unter Windows
+%<convfont>echo   Installation der konvertierten TUD-CD-Schriften unter Windows
 %<uninstall>echo   Deinstallation TUD-KOMA-Script unter Windows
 %<old>echo   fuer obsolete Klassen und Pakete
 %!echoTUDVersion
@@ -139,19 +141,20 @@ call:checkfile "7za.exe"
 %<full|update>call:checkfile "tudscr_%version%.zip"
 %
 % \iffalse
-%<*full|font>
+%<*full|font|convert>
 % \fi
 %
 call:checkfile "Univers_PS.zip"
 call:checkfile "DIN_Bd_PS.zip"
-%<!old>call:checkfile "tudscrfonts.zip"
 call:checkpackage "fontinst.sty"
+%<!old>call:checkfile "tudscr_fonts_install.zip"
 %
 % \iffalse
-%</full|font>
+%</full|font|convert>
 %<*!old>
 % \fi
 %
+%<convfont>call:checkfile "tudscr_fonts_converted.zip"
 call:checkpackage "lmodern.sty"
 call:checkpackage "cmbright.sty"
 call:checkpackage "iwona.sty"
@@ -161,6 +164,11 @@ call:checkpackage "iwona.sty"
 % \fi
 %
 if "%missing%" == "true" goto :abort
+%
+% \iffalse
+%<*!convert>
+% \fi
+%
 set distrib=
 tex --version> distrib.tmp
 set /p distrib=< distrib.tmp
@@ -237,6 +245,7 @@ if "%texmfpath%"=="" (
 %<full>  echo   Installation des TUD-KOMA-Script-Bundles
 %<update>  echo   Update des TUD-KOMA-Script-Bundles
 %<font>  echo   Installation der TUD-CD-Schriften
+%<convfont>  echo   Installation der konvertierten TUD-CD-Schriften
   echo.
   echo   Es sollte ein Verzeichnis jenseits der Distributionsordnerstruktur
   if "%portable%" == "true" (
@@ -277,6 +286,7 @@ if "%texmfpath%"=="" (
 %<full>  echo   Installation des TUD-KOMA-Script-Bundles in:
 %<update>  echo   Update des TUD-KOMA-Script-Bundles in:
 %<font>  echo   Installation der TUD-CD-Schriften in:
+%<convfont>  echo   Installation der konvertierten TUD-CD-Schriften in:
   echo   %texmfpath%
   echo  =====================================================================
   echo.
@@ -284,6 +294,19 @@ if "%texmfpath%"=="" (
   if not exist "%texmfpath%" mkdir "%texmfpath%"
 %
 % \iffalse
+%</!convert>
+%<*convert>
+% \fi
+%
+set texmfpath=%~dp0
+echo.
+echo  =====================================================================
+echo   Erzeugen der TUD-CD-Schriften
+echo  =====================================================================
+echo.
+%
+% \iffalse
+%</convert>
 %</!uninstall>
 %<*uninstall>
 % \fi
@@ -341,14 +364,15 @@ exit /b 0
 %
   cd /d %~dp0
 %<full|update>  7za x tudscr_%version%.zip -o"%texmfpath%" -y
+%<convfont>  7za x tudscr_fonts_converted.zip -o"%texmfpath%" -y
 %
 % \iffalse
-%<*full|font>
+%<*full|font|convert>
 % \fi
 %
   7za e Univers_PS.zip -o"tudscrtemp" -y
   7za e DIN_Bd_PS.zip -o"tudscrtemp" -y
-%<!old>  7za e tudscrfonts.zip -o"tudscrtemp\converted" -y
+%<!old>  7za e tudscr_fonts_install.zip -o"tudscrtemp\converted" -y
   cd tudscrtemp
 %
 % \iffalse
@@ -473,6 +497,7 @@ exit /b 0
   echo \input record.tex>> createoldmap.tex
   echo \donedrivers>> createoldmap.tex
   echo \bye>> createoldmap.tex
+%
 % \iffalse
 %</old>
 % \fi
@@ -516,7 +541,8 @@ exit /b 0
   copy /y *.map "%texmfpath%\fonts\map\pdftex\%localfolder%"
 %
 % \iffalse
-%</full|font>
+%</full|font|convert>
+%<*!convert>
 % \fi
 %
   if %distrib%=="MiKTeX" goto :MiKTeXHash
@@ -526,7 +552,8 @@ exit /b 0
   texhash --update-fndb=%texmfpath%
 %
 % \iffalse
-%<*full|font>
+%</!convert>
+%<*full|font|convfont>
 % \fi
 %
   updmap
@@ -565,19 +592,20 @@ exit /b 0
   initexmf --mkmaps
 %
 % \iffalse
-%</full|font>
+%</full|font|convfont>
+%<*!convert>
 % \fi
 %
   goto :end
 :TeXLiveHash
   texhash
 %<(full|font)&old>  updmap-sys --enable Map=tud.map
-%<(full|font)&!old>  updmap-sys --enable Map=tudscr.map
+%<(full|font|convfont)&!old>  updmap-sys --enable Map=tudscr.map
   goto :end
 :end
   echo.
   echo  =====================================================================
-%<full|font>  echo   Die Installation wird beendet.
+%<full|font|convfont>  echo   Die Installation wird beendet.
 %<update>  echo   Das Update wird beendet.
   echo   Der Ordner mitsamt aller temporaeren Dateien wird geloescht.
   echo  =====================================================================
@@ -597,6 +625,11 @@ exit /b 0
 %
   echo.
   pause
+%
+% \iffalse
+%</!convert>
+% \fi
+%
   cd /d %~dp0
   if exist tudscrtemp rmdir /s /q tudscrtemp> nul
   echo.
@@ -756,9 +789,11 @@ abort()
 %
 echo
 echo  =====================================================================
+%<convert>echo   Konvertieren der TUD-CD-Schriften unter Unix
 %<full>echo   Installation TUD-KOMA-Script + TUD-CD-Schriften unter Unix
 %<update>echo   Update TUD-KOMA-Script unter Unix
 %<font>echo   Installation TUD-CD-Schriften unter Unix
+%<convfont>echo   Installation der konvertierten TUD-CD-Schriften unter Unix
 %<uninstall>echo   Deinstallation TUD-KOMA-Script unter Unix
 %<old>echo   fuer obsolete Klassen und Pakete
 %!echoTUDVersion
@@ -781,19 +816,20 @@ missing=false
 %<full|update>checkfile "tudscr_$version.zip"
 %
 % \iffalse
-%<*full|font>
+%<*full|font|convert>
 % \fi
 %
 checkfile "Univers_PS.zip"
 checkfile "DIN_Bd_PS.zip"
-%<!old>checkfile "tudscrfonts.zip"
 checkpackage "fontinst.sty"
+%<!old>checkfile "tudscr_fonts_install.zip"
 %
 % \iffalse
-%</full|font>
+%</full|font|convert>
 %<*!old>
 % \fi
 %
+%<convfont>checkfile "tudscr_fonts_converted.zip"
 checkpackage "lmodern.sty"
 checkpackage "cmbright.sty"
 checkpackage "iwona.sty"
@@ -805,6 +841,13 @@ checkpackage "iwona.sty"
 if $missing ; then
   abort
 fi
+rm -rf tudscrtemp
+mkdir -p tudscrtemp/converted
+%
+% \iffalse
+%<*!convert>
+% \fi
+%
 texmfpath=$(kpsewhich --var-value=TEXMFHOME)
 if [ -z "$texmfpath" ]; then
   texmfpath=$(kpsewhich --var-value=TEXMFLOCAL)
@@ -812,15 +855,28 @@ fi
 %<full>echo   Installation des TUD-KOMA-Script-Bundles
 %<update>echo   Update des TUD-KOMA-Script-Bundles
 %<font>echo   Installation der TUD-CD-Schriften
+%<convfont>echo   Installation der konvertierten TUD-CD-Schriften
 echo   in den lokalen Benutzerpfad:
 echo
 echo   $texmfpath
 echo
 echo  =====================================================================
-rm -rf tudscrtemp
-mkdir -p tudscrtemp/converted
+%
 %
 % \iffalse
+%</!convert>
+%<*convert>
+% \fi
+%
+texmfpath=$""
+echo
+echo  =====================================================================
+echo   Erzeugen der TUD-CD-Schriften
+echo  =====================================================================
+echo
+%
+% \iffalse
+%</convert>
 %</!uninstall>
 %<*uninstall>
 % \fi
@@ -876,14 +932,15 @@ exit 0
 % \fi
 %
 %<full|update>unzip -o tudscr_$version.zip -d $texmfpath
+%<convfont>unzip -o tudscr_fonts_converted.zip -d $texmfpath
 %
 % \iffalse
-%<*full|font>
+%<*full|font|convert>
 % \fi
 %
 unzip Univers_PS.zip -d tudscrtemp
 unzip DIN_Bd_PS.zip -d tudscrtemp
-%<!old>unzip tudscrfonts.zip -d tudscrtemp/converted
+%<!old>unzip tudscr_fonts_install.zip -d tudscrtemp/converted
 cd tudscrtemp
 %
 % \iffalse
@@ -1040,15 +1097,16 @@ cp -f *.map $texmfpath/fonts/map/dvips/$localfolder
 cp -f *.map $texmfpath/fonts/map/pdftex/$localfolder
 %
 % \iffalse
-%</full|font>
+%</full|font|convert>
+%<*!convert>
 % \fi
 %
 texhash
 %<(full|font)&old>updmap --enable Map=tud.map
-%<(full|font)&!old>updmap --enable Map=tudscr.map
+%<(full|font|convfont)&!old>updmap --enable Map=tudscr.map
 echo
 echo  =====================================================================
-%<full|font>echo   Die Installation wird beendet.
+%<full|font|convfont>echo   Die Installation wird beendet.
 %<update>echo   Das Update wird beendet.
 echo   Der Ordner mitsamt aller temporaeren Dateien wird geloescht.
 echo  =====================================================================
@@ -1064,6 +1122,7 @@ echo  =====================================================================
 %
 % \iffalse
 %</!old>
+%</!convert>
 % \fi
 %
 cd ../..
