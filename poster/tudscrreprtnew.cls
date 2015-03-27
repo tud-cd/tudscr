@@ -69,7 +69,7 @@
       \fi%
     }%
   \fi%
-  \@TUDVersion{2015/03/17 v2.04 BETA TUD-KOMA-Script}%
+  \@TUDVersion{2015/03/27 v2.04 BETA TUD-KOMA-Script}%
 \endgroup%
 \providecommand*\tudscrmail{tudscr@gmail.com}
 \newcommand*\cls@name{report}
@@ -77,7 +77,7 @@
 \newcommand*\tudcls@name{tudscrreprt}
 \NeedsTeXFormat{LaTeX2e}[2011/06/27]
 \ProvidesClass{\tudcls@name}[%
-  2015/03/17 v2.04 BETA TUD-KOMA-Script
+  2015/03/27 v2.04 BETA TUD-KOMA-Script
   document class (\cls@name)%
 ]
 \typeout{The Corporate Design of Technische Universitaet Dresden}
@@ -219,29 +219,19 @@
       \TUDoptions{fontspec=false}%
     \fi%
   \else%
-    \TUDoptions{cdfontsize=#1}%
+    \KOMAoptions{fontsize=#1}%
     \ifcase\tud@cdfont\relax% false to true
       \def\tud@cdfont{1}%
       \if@atdocument\tud@font@set\fi%
     \fi%
   \fi%
 }
-\newcommand*\tud@ptsize{\@ptsize}
-\TUD@key{cdfontsize}{%
-  \expandafter\@defaultunits\expandafter\@tempdima#1 pt\relax\@nnil%
-  \addtolength{\@tempdima}{-10\p@}%
-  \edef\tud@ptsize{\strip@pt\@tempdima}%
-  \if@atdocument\tud@font@size@set\fi%
-  \FamilyKeyStateProcessed%
-}
-\newcommand*\tud@font@koma@updatesize{}
 \DefineFamilyMember{KOMA}
 \DefineFamilyKey{KOMA}{fontsize}{%
   \AtEndOfFamilyOptions{%
-    \let\tud@ptsize\@ptsize%
-    \tud@font@koma@updatesize%
+    \tud@ifverlower{2.04}{}{\if@atdocument\tud@font@skip@set\fi}%
   }%
-  \FamilyKeyStateProcessed%
+%  \FamilyKeyStateProcessed%
 }
 \bool@lock{@tud@cdmath}
 \TUD@key{cdmath}[true]{%
@@ -1542,289 +1532,34 @@
     \edef\mddef@ult{\mddefault}%
   \fi%
   \normalfont\selectfont%
-  \tud@ifverlower{2.04}{}{\tud@font@size@set}%
+  \tud@ifverlower{2.04}{}{\tud@font@skip@set}%
   \ifstr{#1}{nomath}{}{\tud@font@math@set}%
   \tud@layout@process%
 }
-\newcommand*\tud@font@size@set{%
-  \let\@tempa\changefontsizes%
-  \@tempswafalse%
+\newcommand*\tud@font@skip@set{%
   \ifcase\tud@cdfont\relax% false
     \tud@skip@restore{smallskipamount}%
     \tud@skip@restore{medskipamount}%
     \tud@skip@restore{bigskipamount}%
     \tud@skip@restore{abovecaptionskip}%
     \tud@skip@restore{belowcaptionskip}%
-    \tud@cmd@restore{@fontsizefilebase}%
-    \tud@cmd@restore{changefontsizes}%
-    \tud@cmd@restore{@ptsize}%
-    \edef\@tempb{\@ptsize}%
   \else% true/heavy
     \tud@skip@store{smallskipamount}%
     \tud@skip@store{medskipamount}%
     \tud@skip@store{bigskipamount}%
     \tud@skip@store{abovecaptionskip}%
     \tud@skip@store{belowcaptionskip}%
-    \tud@cmd@store{@fontsizefilebase}%
-    \tud@cmd@store{changefontsizes}%
-    \tud@cmd@store{@ptsize}%
-    \renewcommand*\@fontsizefilebase{tudscrsize}%
-    \let\changefontsizes\tud@changefontsizes%
-    \edef\@tempb{\tud@ptsize}%
-    \ifx\@tempb\@ptsize\relax\else\@tempswatrue\fi%
-  \fi%
-  \ifx\@tempa\changefontsizes\relax\else\@tempswatrue\fi%
-  \if@tempswa%
-    \setlength\@tempdima{\@tempb\p@}%
-    \addtolength{\@tempdima}{10\p@}%
-    \let\tud@font@koma@updatesize\relax%
-    \edef\@tempa{\noexpand\KOMAoptions{fontsize=\strip@pt\@tempdima pt}}%
-    \@tempa%
-    \def\tud@font@koma@updatesize{\tud@cmd@update{@ptsize}}%
+    \tud@font@skip@@set%
   \fi%
 }
-\newcommand*{\tud@changefontsizes}[2][\dimexpr5\@tempdima/4\relax]{%
-  \ClassInfo{\tudcls@name}%
-    {Calculating font sizes for basic size `#2'}%
-  \@defaultunits\@tempdima#2pt\relax\@nnil%
-  \setlength{\@tempdimc}{\@tempdima}%
-  \addtolength{\@tempdimc}{-10\p@}%
-  \edef\@ptsize{\strip@pt\@tempdimc}%
-  \setlength{\@tempdimb}{#1}%
-  \setlength{\@tempdimc}{\dimexpr (100\@tempdimb / \@tempdima * \p@)}%
-  \edef\@tempa{\strip@pt\@tempdimc}%
-  \@defaultunits\@tempdimb\dimexpr\@tempa\@tempdima/100\relax pt\relax\@nnil%
-  \setlength{\@tempdimc}{\@tempdima}%
-  \scr@setlength{\abovedisplayskip}{\dimexpr4\@tempdimb/5\relax}%
-    {\dimexpr\@tempdimb/5\relax}{\dimexpr2\@tempdimb/5\relax}%
-  \scr@setlength{\abovedisplayshortskip}{\z@}%
-    {\dimexpr6\@tempdimb/25\relax}{\z@}%
-  \scr@setlength{\belowdisplayshortskip}{\dimexpr12\@tempdimb/25\relax}%
-    {\dimexpr6\@tempdimb/25\relax}{\dimexpr6\@tempdimb/25\relax}%
-  \setlength{\belowdisplayskip}{\abovedisplayskip}%
-  \edef\normalsize{%
-    \noexpand\@setfontsize\noexpand\normalsize%
-    {\the\@tempdima}{\the\@tempdimb}%
-    \abovedisplayskip \the\abovedisplayskip%
-    \abovedisplayshortskip \the\abovedisplayshortskip%
-    \belowdisplayskip \the\belowdisplayskip%
-    \belowdisplayshortskip \the\belowdisplayshortskip%
-    \let\noexpand\@listi\noexpand\@listI%
-  }%
-  \setlength{\@tempdima}{\dimexpr9\@tempdimc/10\relax}%
-  \setlength{\@tempdimb}{\dimexpr\@tempa\@tempdima/100\relax}%
-  \scr@setlength{\abovedisplayskip}{\dimexpr4\@tempdimb/5\relax}%
-    {\dimexpr\@tempdimb/5\relax}{\dimexpr2\@tempdimb/5\relax}%
-  \scr@setlength{\abovedisplayshortskip}{\z@}%
-    {\dimexpr6\@tempdimb/25\relax}{\z@}%
-  \scr@setlength{\belowdisplayshortskip}{\dimexpr12\@tempdimb/25\relax}%
-    {\dimexpr6\@tempdimb/25\relax}{\dimexpr6\@tempdimb/25\relax}%
-  \setlength{\belowdisplayskip}{\abovedisplayskip}%
-  \edef\small{%
-    \noexpand\@setfontsize\noexpand\small%
-    {\the\@tempdima}{\the\@tempdimb}%
-    \abovedisplayskip \the\abovedisplayskip%
-    \abovedisplayshortskip \the\abovedisplayshortskip%
-    \belowdisplayskip \the\belowdisplayskip%
-    \belowdisplayshortskip \the\belowdisplayshortskip%
-    \let\noexpand\@listi\noexpand\@listi@small%
-  }%
-  \setlength{\@tempdima}{\dimexpr4\@tempdimc/5\relax}%
-  \setlength{\@tempdimb}{\dimexpr\@tempa\@tempdima/100\relax}%
-  \scr@setlength{\abovedisplayskip}{\dimexpr4\@tempdimb/5\relax}%
-    {\dimexpr\@tempdimb/5\relax}{\dimexpr2\@tempdimb/5\relax}%
-  \scr@setlength{\abovedisplayshortskip}{\z@}%
-    {\dimexpr6\@tempdimb/25\relax}{\z@}%
-  \scr@setlength{\belowdisplayshortskip}{\dimexpr12\@tempdimb/25\relax}%
-    {\dimexpr6\@tempdimb/25\relax}{\dimexpr6\@tempdimb/25\relax}%
-  \setlength{\belowdisplayskip}{\abovedisplayskip}%
-  \edef\footnotesize{%
-    \noexpand\@setfontsize\noexpand\footnotesize%
-    {\the\@tempdima}{\the\@tempdimb}%
-    \abovedisplayskip \the\abovedisplayskip%
-    \abovedisplayshortskip \the\abovedisplayshortskip%
-    \belowdisplayskip \the\belowdisplayskip%
-    \belowdisplayshortskip \the\belowdisplayshortskip%
-    \let\noexpand\@listi\noexpand\@listi@footnotesize%
-  }%
-  \setlength{\@tempdima}{\dimexpr13\@tempdimc/20\relax}%
-  \setlength{\@tempdimb}{\dimexpr\@tempa\@tempdima/100\relax}%
-  \edef\scriptsize{%
-    \noexpand\@setfontsize\noexpand\scriptsize%
-    {\the\@tempdima}{\the\@tempdimb}%
-  }%
-  \setlength{\@tempdima}{\dimexpr\@tempdimc/2\relax}%
-  \setlength{\@tempdimb}{\dimexpr\@tempa\@tempdima/100\relax}%
-  \edef\tiny{%
-    \noexpand\@setfontsize\noexpand\tiny%
-    {\the\@tempdima}{\the\@tempdimb}%
-  }%
-  \setlength{\@tempdima}{\dimexpr11\@tempdimc/10\relax}%
-  \setlength{\@tempdimb}{\dimexpr\@tempa\@tempdima/100\relax}%
-  \edef\large{%
-    \noexpand\@setfontsize\noexpand\large%
-    {\the\@tempdima}{\the\@tempdimb}%
-  }%
-  \setlength{\@tempdima}{\dimexpr13\@tempdimc/10\relax}%
-  \setlength{\@tempdimb}{\dimexpr\@tempa\@tempdima/100\relax}%
-  \edef\Large{%
-    \noexpand\@setfontsize\noexpand\Large%
-    {\the\@tempdima}{\the\@tempdimb}%
-  }%
-  \setlength{\@tempdima}{\dimexpr16\@tempdimc/10\relax}%
-  \setlength{\@tempdimb}{\dimexpr\@tempa\@tempdima/100\relax}%
-  \edef\LARGE{%
-    \noexpand\@setfontsize\noexpand\LARGE%
-    {\the\@tempdima}{\the\@tempdimb}%
-  }%
-  \setlength{\@tempdima}{\dimexpr19\@tempdimc/10\relax}%
-  \setlength{\@tempdimb}{\dimexpr\@tempa\@tempdima/100\relax}%
-  \edef\huge{%
-    \noexpand\@setfontsize\noexpand\huge%
-    {\the\@tempdima}{\the\@tempdimb}%
-  }%
-  \setlength{\@tempdima}{\dimexpr22\@tempdimc/10\relax}%
-  \setlength{\@tempdimb}{\dimexpr\@tempa\@tempdima/100\relax}%
-  \edef\Huge{%
-    \noexpand\@setfontsize\noexpand\Huge%
-    {\the\@tempdima}{\the\@tempdimb}%
-  }%
-  \normalsize%
-  \ifcsdef{scr@v@3.17}{%
-    \expandafter\ifnum\scr@v@is@ge{3.17}\par@updaterelative\fi%
-  }{}%
+\newcommand*\tud@font@skip@@set{%
   \setlength{\@tempdimb}{\f@baselineskip}%
-  \scr@setlength{\topsep}{\dimexpr16\@tempdimb/25\relax}%
-    {\dimexpr4\@tempdimb/25\relax}{\dimexpr8\@tempdimb/25\relax}%
-  \scr@setlength{\parsep}{\dimexpr8\@tempdimb/25\relax}%
-    {\dimexpr4\@tempdimb/25\relax}{\dimexpr2\@tempdimb/25\relax}%
-  \@tempswafalse%
-  \begingroup%
-    \def\@list@extra{\aftergroup\@tempswatrue}%
-    \csname @listi\endcsname%
-  \endgroup%
-  \edef\@listi{\leftmargin\leftmargini%
-    \topsep \the\topsep%
-    \parsep \the\parsep%
-    \itemsep \parsep%
-    \if@tempswa\noexpand\@list@extra\fi%
-  }%
-  \let\@listI\@listi%
-  \scr@setlength{\topsep}{\dimexpr12\@tempdimb/25\relax}%
-    {\dimexpr4\@tempdimb/25\relax}{\dimexpr6\@tempdimb/25\relax}%
-  \scr@setlength{\parsep}{\dimexpr6\@tempdimb/25\relax}%
-    {\dimexpr3\@tempdimb/25\relax}{\dimexpr2\@tempdimb/25\relax}%
-  \@tempswafalse%
-  \begingroup%
-    \def\@list@extra{\aftergroup\@tempswatrue}%
-    \csname @listi\endcsname%
-  \endgroup%
-  \edef\@listi@small{\leftmargin\leftmargini%
-    \topsep \the\topsep%
-    \parsep \the\parsep%
-    \itemsep \parsep%
-    \if@tempswa\noexpand\@list@extra\fi%
-  }%
-  \scr@setlength{\topsep}{\dimexpr36\@tempdimb/100\relax}%
-    {\dimexpr12\@tempdimb/100\relax}{\dimexpr18\@tempdimb/100\relax}%
-  \scr@setlength{\parsep}{\dimexpr18\@tempdimb/100\relax}%
-    {\dimexpr9\@tempdimb/100\relax}{\dimexpr6\@tempdimb/100\relax}%
-  \@tempswafalse%
-  \begingroup%
-    \def\@list@extra{\aftergroup\@tempswatrue}%
-    \csname @listi\endcsname%
-  \endgroup%
-  \edef\@listi@footnotesize{\leftmargin\leftmargini%
-    \topsep \the\topsep%
-    \parsep \the\parsep%
-    \itemsep \parsep%
-    \if@tempswa\noexpand\@list@extra\fi%
-  }%
-  \scr@setlength{\topsep}{\dimexpr8\@tempdimb/25\relax}%
-    {\dimexpr4\@tempdimb/25\relax}{\dimexpr2\@tempdimb/25\relax}%
-  \scr@setlength{\parsep}{\dimexpr4\@tempdimb/25\relax}%
-    {\dimexpr2\@tempdimb/25\relax}{\dimexpr2\@tempdimb/25\relax}%
-  \@tempswafalse%
-  \begingroup%
-    \def\@list@extra{\aftergroup\@tempswatrue}%
-    \csname @listii\endcsname%
-  \endgroup%
-  \edef\@listii{\leftmargin\leftmarginii%
-    \labelwidth=\dimexpr \leftmargin-\labelsep%
-    \topsep \the\topsep%
-    \parsep \the\parsep%
-    \itemsep \parsep%
-    \if@tempswa\noexpand\@list@extra\fi%
-  }%
-  \scr@setlength{\topsep}{\dimexpr4\@tempdimb/25\relax}%
-    {\dimexpr2\@tempdimb/25\relax}{\dimexpr2\@tempdimb/25\relax}%
-  \setlength{\partopsep}{\z@ \@plus\z@ \@minus\p@}%
-  \@tempswafalse%
-  \begingroup%
-    \def\@list@extra{\aftergroup\@tempswatrue}%
-    \csname @listiii\endcsname%
-  \endgroup%
-  \edef\@listiii{\leftmargin\leftmarginiii%
-    \labelwidth=\dimexpr \leftmargin-\labelsep%
-    \topsep \the\topsep%
-    \parsep \z@%
-    \partopsep \the\partopsep%
-    \itemsep \topsep%
-    \if@tempswa\noexpand\@list@extra\fi%
-  }%
-  \@tempswafalse%
-  \begingroup%
-    \def\@list@extra{\aftergroup\@tempswatrue}%
-    \csname @listiv\endcsname%
-  \endgroup%
-  \edef\@listiv{\leftmargin\leftmarginiv%
-    \labelwidth=\dimexpr \leftmargin-\labelsep\relax%
-    \if@tempswa\noexpand\@list@extra\fi%
-  }%
-  \@tempswafalse%
-  \begingroup%
-    \def\@list@extra{\aftergroup\@tempswatrue}%
-    \csname @listv\endcsname%
-  \endgroup%
-  \edef\@listv{\leftmargin\leftmarginv%
-    \labelwidth=\dimexpr \leftmargin-\labelsep\relax%
-    \if@tempswa\noexpand\@list@extra\fi%
-  }%
-  \@tempswafalse%
-  \begingroup%
-    \def\@list@extra{\aftergroup\@tempswatrue}%
-    \csname @listvi\endcsname%
-  \endgroup%
-  \edef\@listvi{\leftmargin\leftmarginvi%
-    \labelwidth=\dimexpr \leftmargin-\labelsep\relax%
-    \if@tempswa\noexpand\@list@extra\fi%
-  }%
-  \@listi%
-  \setlength{\@tempdimb}{\f@baselineskip}%
-  \setlength{\footnotesep}{\dimexpr14\@tempdimb/25\relax}%
-  \scr@setlength{\skip\footins}{\dimexpr18\@tempdimb/25\relax}%
-    {\dimexpr8\@tempdimb/25\relax}{\dimexpr4\@tempdimb/25\relax}%
-  \scr@setlength{\floatsep}{\@tempdimb}%
-    {\dimexpr\@tempdimb/5\relax}{\dimexpr\@tempdimb/5\relax}%
-  \scr@setlength{\textfloatsep}{\dimexpr8\@tempdimb/5\relax}%
-    {\dimexpr\@tempdimb/5\relax}{\dimexpr2\@tempdimb/5\relax}%
-  \setlength{\intextsep}{\floatsep}%
-  \setlength{\dblfloatsep}{\floatsep}%
-  \setlength{\dbltextfloatsep}{\textfloatsep}%
-  \setlength{\@fptop}{\z@ \@plus 1fil}%
-  \setlength{\@fpsep}{\dimexpr3\@tempdimb/5\relax \@plus 2fil}%
-  \setlength{\@fpbot}{\@fptop}%
-  \setlength{\@dblfptop}{\@fptop}%
-  \setlength{\@dblfpsep}{\@fpsep}%
-  \setlength{\@dblfpbot}{\@fptop}%
-  \scr@setlength{\partopsep}{\dimexpr\@tempdimb/5\relax}%
-    {\dimexpr\@tempdimb/10\relax}{\dimexpr\@tempdimb/10\relax}%
   \scr@setlength\smallskipamount{\dimexpr\@tempdimb/4\relax}%
-    {\dimexpr\@tempdimb/10\relax}{\dimexpr\@tempdimb/10\relax}%
+    {\dimexpr\@tempdimb/12\relax}{\dimexpr\@tempdimb/12\relax}%
   \scr@setlength\medskipamount{\dimexpr\@tempdimb/2\relax}%
-    {\dimexpr\@tempdimb/5\relax}{\dimexpr\@tempdimb/5\relax}%
+    {\dimexpr\@tempdimb/6\relax}{\dimexpr\@tempdimb/6\relax}%
   \scr@setlength\bigskipamount{\@tempdimb}%
-    {\dimexpr2\@tempdimb/5\relax}{\dimexpr2\@tempdimb/5\relax}%
+    {\dimexpr\@tempdimb/3\relax}{\dimexpr\@tempdimb/3\relax}%
   \setlength\abovecaptionskip{\dimexpr4\@tempdimb/5\relax}%
   \setlength\belowcaptionskip{0\p@}%
 }
@@ -3529,22 +3264,44 @@
   }%
 }
 \let\tud@@part\@part
-\patchcmd{\tud@@part}{%
-  \ifnumbered{part}{%
-    \size@partnumber{\partformat}%
-    \partheadmidvskip%
-  }{}%
-}{%
-  \ifnumbered{part}{%
-    \size@partnumber{\tud@makeuppercase{\partformat}}%
-    \partheadmidvskip%
-  }{%
-    \if@tud@parttitle\else%
-      \size@partnumber{\vphantom{\partname}}%
+\ifcsdef{scr@v@3.17}{%
+  \patchcmd{\tud@@part}{%
+    \ifnumbered{part}{%
+      \size@partnumber{\partformat}%
+      \setlength{\@tempskipa}{\scr@part@innerskip}%
       \partheadmidvskip%
-    \fi%
-  }%
-}{}{\tud@patch@wrn{@part}}%
+    }{}%
+  }{%
+    \ifnumbered{part}{%
+      \size@partnumber{\tud@makeuppercase{\partformat}}%
+      \setlength{\@tempskipa}{\scr@part@innerskip}%
+      \partheadmidvskip%
+    }{%
+      \if@tud@parttitle\else%
+        \size@partnumber{\vphantom{\partname}}%
+        \setlength{\@tempskipa}{\scr@part@innerskip}%
+        \partheadmidvskip%
+      \fi%
+    }%
+  }{}{\tud@patch@wrn{@part}}%
+}{%
+  \patchcmd{\tud@@part}{%
+    \ifnumbered{part}{%
+      \size@partnumber{\partformat}%
+      \partheadmidvskip%
+    }{}%
+  }{%
+    \ifnumbered{part}{%
+      \size@partnumber{\tud@makeuppercase{\partformat}}%
+      \partheadmidvskip%
+    }{%
+      \if@tud@parttitle\else%
+        \size@partnumber{\vphantom{\partname}}%
+        \partheadmidvskip%
+      \fi%
+    }%
+  }{}{\tud@patch@wrn{@part}}%
+}
 \let\tud@@spart\@spart
 \patchcmd{\tud@@spart}{%
   \normalfont
@@ -3591,7 +3348,7 @@
 \ifcsdef{scr@v@3.17}{%
   \patchcmd{\tud@@@makechapterhead}{%
     \chapterformat
-    \setlength{\@tempskipa}{\scr@chapter@chapterinnerskip}%
+    \setlength{\@tempskipa}{\scr@chapter@innerskip}%
     \chapterheadmidvskip
   }{%
     \tud@headmidvskip@neg\tud@makeuppercase{\chapterformat}\tud@headmidvskip%
