@@ -1,4 +1,4 @@
-% \CheckSum{1105}
+% \CheckSum{1142}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-layout.dtx}[%
-  2015/03/25 v2.04 TUD-KOMA-Script (layout)%
+  2015/04/01 v2.04 TUD-KOMA-Script (layout)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -441,8 +441,8 @@
 %   auf Beginn des Dokumentes verzögert}^^A
 % \begin{macro}{\tud@cleardoublepage}
 % \begin{macro}{\tud@cleardoublespecialpage}
-% \changes{v2.03}{2015/01/09}{Verwendung von \pkg{scrlayer-scrpage} für 
-%   Seitenhintergrund, \cs{tud@restorepagecolor} überflüssig}^^A
+% \changes{v2.03}{2015/01/09}{Makro \cs{tud@restorepagecolor} ist aufgrund der 
+%   Nutzung von \pkg{scrlayer-scrpage} für Seitenhintergrund überflüssig}^^A
 % Für Klassen mit separaten Teileseiten und Kapiteln wird eine zusätzliche
 % Option definiert, welche nur bei zweiseitigem Satz (\opt{twoside}) und
 % zusätzlich immer auf nur der rechten Seite öffnenden Teilen bzw. Kapiteln
@@ -947,20 +947,20 @@
   \tud@cleardoublespecialpage{%
     \def\tud@pagecolor{}%
     \ifcase\tud@layout@part\relax\or% true
-      \def\tud@head@bar{0}%
+      \cs@std@lock{tud@head@bar}{0}%
     \or% lite
-      \def\tud@head@bar{1}%
+      \cs@set@lock{tud@head@bar}{1}%
     \or% bicolor
-      \def\tud@head@bar{2}%
+      \cs@set@lock{tud@head@bar}{2}%
     \or% color
       \def\tud@pagecolor{HKS41}%
-      \def\tud@head@bar{-1}%
+      \cs@set@lock{tud@head@bar}{-1}%
       \def\tud@head@logocolor{white}%
       \def\tud@foot@logocolor{white}%
       \bool@std@lock{@tud@head@widebar}{true}%
     \or% full
       \def\tud@pagecolor{HKS41}%
-      \def\tud@head@bar{2}%
+      \cs@set@lock{tud@head@bar}{2}%
     \fi%
     \addtokomafont{pagenumber}{\sffamily\color{\tud@part@fontcolor}}%
     \clearpage%
@@ -1000,22 +1000,44 @@
 %    \begin{macrocode}
 %<*book|report>
 \let\tud@@part\@part
-\patchcmd{\tud@@part}{%
-  \ifnumbered{part}{%
-    \size@partnumber{\partformat}%
-    \partheadmidvskip%
-  }{}%
-}{%
-  \ifnumbered{part}{%
-    \size@partnumber{\tud@makeuppercase{\partformat}}%
-    \partheadmidvskip%
-  }{%
-    \if@tud@parttitle\else%
-      \size@partnumber{\vphantom{\partname}}%
+\ifcsdef{scr@v@3.17}{%
+  \patchcmd{\tud@@part}{%
+    \ifnumbered{part}{%
+      \size@partnumber{\partformat}%
+      \setlength{\@tempskipa}{\scr@part@innerskip}%
       \partheadmidvskip%
-    \fi%
-  }%
-}{}{\tud@patch@wrn{@part}}%
+    }{}%
+  }{%
+    \ifnumbered{part}{%
+      \size@partnumber{\tud@makeuppercase{\partformat}}%
+      \setlength{\@tempskipa}{\scr@part@innerskip}%
+      \partheadmidvskip%
+    }{%
+      \if@tud@parttitle\else%
+        \size@partnumber{\vphantom{\partname}}%
+        \setlength{\@tempskipa}{\scr@part@innerskip}%
+        \partheadmidvskip%
+      \fi%
+    }%
+  }{}{\tud@patch@wrn{@part}}%
+}{%
+  \patchcmd{\tud@@part}{%
+    \ifnumbered{part}{%
+      \size@partnumber{\partformat}%
+      \partheadmidvskip%
+    }{}%
+  }{%
+    \ifnumbered{part}{%
+      \size@partnumber{\tud@makeuppercase{\partformat}}%
+      \partheadmidvskip%
+    }{%
+      \if@tud@parttitle\else%
+        \size@partnumber{\vphantom{\partname}}%
+        \partheadmidvskip%
+      \fi%
+    }%
+  }{}{\tud@patch@wrn{@part}}%
+}
 %</book|report>
 %    \end{macrocode}
 % \end{macro}^^A \@part
@@ -1127,7 +1149,7 @@
 \ifcsdef{scr@v@3.17}{%
   \patchcmd{\tud@@@makechapterhead}{%
     \chapterformat
-    \setlength{\@tempskipa}{\scr@chapter@chapterinnerskip}%
+    \setlength{\@tempskipa}{\scr@chapter@innerskip}%
     \chapterheadmidvskip
   }{%
     \tud@headmidvskip@neg\tud@makeuppercase{\chapterformat}\tud@headmidvskip%
@@ -1248,7 +1270,28 @@
   \fi%
 }
 \newcommand*\tud@chapter@app{%
-  \if@tud@chapterpage%
+%    \end{macrocode}
+% Unabhängig von der Verwendung einer Kapitelseite, wird die Einstellung der 
+% Option \opt{cdchapter} für die Gestalt des TUD-Kopfes beachtet, falls dieser
+% zum Einsatz kommt. Dabei wird die Einstellung für die Gestalt des Kopfes im 
+% restlichen Dokument (\cs{tud@head@bar}) gesichert, um diese nach der Ausgabe
+% der Kapitelüberschrift auf der darauffolgenden Seite wieder anwenden bzw. 
+% zurücksetzen zu können.
+%    \begin{macrocode}
+  \ifx\tud@head@bar@store\relax%
+    \edef\tud@head@bar@store{\tud@head@bar}%
+  \fi%
+  \ifcase\tud@layout@chapter\relax\or% true
+    \cs@std@lock{tud@head@bar}{0}%
+  \or% lite
+    \cs@set@lock{tud@head@bar}{1}%
+  \or% bicolor
+    \cs@set@lock{tud@head@bar}{2}%
+  \or% color
+    \cs@set@lock{tud@head@bar}{1}%
+  \or% fullcolor
+    \cs@set@lock{tud@head@bar}{2}%
+  \fi%
 %    \end{macrocode}
 % Nach dem Setzen der Kapitelüberschrift selbst werden die Farbe für den 
 % Hintergrund, die Seitenzahl und den ggf. verwendeten TUD-Kopf angewendet.
@@ -1259,23 +1302,18 @@
 % die Option \opt{cleardoublespecialpage} bezüglich des Seitenstils der
 % Rückseite beachtet. Umgesetzt wird dies mit \cs{tud@cleardoublespecialpage}.
 %    \begin{macrocode}
+  \if@tud@chapterpage%
     \tud@cleardoublespecialpage{%
       \def\tud@pagecolor{}%
-      \ifcase\tud@layout@chapter\relax\or% true
-        \def\tud@head@bar{0}%
-      \or% lite
-        \def\tud@head@bar{1}%
-      \or% bicolor
-        \def\tud@head@bar{2}%
-      \or% color
+      \ifcase\tud@layout@chapter\relax\or\or\or\or% color
         \def\tud@pagecolor{HKS41!10}%
-        \def\tud@head@bar{-1}%
+        \cs@set@lock{tud@head@bar}{-1}%
         \def\tud@head@logocolor{HKS41}%
         \def\tud@foot@logocolor{HKS41}%
         \bool@std@lock{@tud@head@widebar}{true}%
       \or% fullcolor
         \def\tud@pagecolor{HKS41!10}%
-        \def\tud@head@bar{2}%
+        \cs@set@lock{tud@head@bar}{2}%
       \fi%
       \addtokomafont{pagenumber}{\sffamily\color{\tud@chapter@fontcolor}}%
       \clearpage%

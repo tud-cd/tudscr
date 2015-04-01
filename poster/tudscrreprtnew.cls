@@ -69,7 +69,7 @@
       \fi%
     }%
   \fi%
-  \@TUDVersion{2015/03/27 v2.04 BETA TUD-KOMA-Script}%
+  \@TUDVersion{2015/04/01 v2.04 BETA TUD-KOMA-Script}%
 \endgroup%
 \providecommand*\tudscrmail{tudscr@gmail.com}
 \newcommand*\cls@name{report}
@@ -77,7 +77,7 @@
 \newcommand*\tudcls@name{tudscrreprt}
 \NeedsTeXFormat{LaTeX2e}[2011/06/27]
 \ProvidesClass{\tudcls@name}[%
-  2015/03/27 v2.04 BETA TUD-KOMA-Script
+  2015/04/01 v2.04 BETA TUD-KOMA-Script
   document class (\cls@name)%
 ]
 \typeout{The Corporate Design of Technische Universitaet Dresden}
@@ -231,7 +231,7 @@
   \AtEndOfFamilyOptions{%
     \tud@ifverlower{2.04}{}{\if@atdocument\tud@font@skip@set\fi}%
   }%
-%  \FamilyKeyStateProcessed%
+  \FamilyKeyStateProcessed%
 }
 \bool@lock{@tud@cdmath}
 \TUD@key{cdmath}[true]{%
@@ -366,7 +366,7 @@
   \fi%
 }
 \cs@lock{tud@head@font}{0}
-\newcommand*\tud@head@bar{0}
+\cs@lock{tud@head@bar}{0}
 \bool@lock{@tud@head@widebar}
 \TUD@key{cdhead}[true]{%
   \TUD@set@numkey{cdhead}{@tempa}{%
@@ -394,11 +394,11 @@
     \or% heavy
       \cs@set@lock{tud@head@font}{2}%
     \or% nocolor
-      \def\tud@head@bar{0}%
+      \cs@set@lock{tud@head@bar}{0}%
     \or% litecolor
-      \def\tud@head@bar{1}%
+      \cs@set@lock{tud@head@bar}{1}%
     \or% color
-      \def\tud@head@bar{2}%
+      \cs@set@lock{tud@head@bar}{2}%
     \or% textwidth
       \bool@set@lock{@tud@head@widebar}{false}%
     \or% paperwidth
@@ -2382,8 +2382,21 @@
   \def\sls@currentplain{plain.tudheadings}%
 }
 \newcommand*\tud@head@logocolor{black}
+\newcommand*\tud@head@bar@store{}%
+\let\tud@head@bar@store\relax%
+\newcommand*\tud@head@bar@restore{}%
+\let\tud@head@bar@restore\relax%
 \newcommand*\tud@foot@logocolor{black}
 \newcommand*\tud@ps@onbackground{%
+  \ifx\tud@head@bar@store\relax%
+    \tud@head@bar@restore%
+  \else%
+    \xdef\tud@head@bar@restore{%
+      \gdef\noexpand\tud@head@bar{\tud@head@bar@store}%
+      \global\let\tud@head@bar@restore\relax%
+    }%
+    \global\let\tud@head@bar@store\relax%
+  \fi%
   \ifcase\tud@head@bar\relax% cdhead=nocolor
     \def\tud@head@logocolor{black}%
     \def\tud@foot@logocolor{black}%
@@ -3244,20 +3257,20 @@
   \tud@cleardoublespecialpage{%
     \def\tud@pagecolor{}%
     \ifcase\tud@layout@part\relax\or% true
-      \def\tud@head@bar{0}%
+      \cs@std@lock{tud@head@bar}{0}%
     \or% lite
-      \def\tud@head@bar{1}%
+      \cs@set@lock{tud@head@bar}{1}%
     \or% bicolor
-      \def\tud@head@bar{2}%
+      \cs@set@lock{tud@head@bar}{2}%
     \or% color
       \def\tud@pagecolor{HKS41}%
-      \def\tud@head@bar{-1}%
+      \cs@set@lock{tud@head@bar}{-1}%
       \def\tud@head@logocolor{white}%
       \def\tud@foot@logocolor{white}%
       \bool@std@lock{@tud@head@widebar}{true}%
     \or% full
       \def\tud@pagecolor{HKS41}%
-      \def\tud@head@bar{2}%
+      \cs@set@lock{tud@head@bar}{2}%
     \fi%
     \addtokomafont{pagenumber}{\sffamily\color{\tud@part@fontcolor}}%
     \clearpage%
@@ -3418,24 +3431,32 @@
   \fi%
 }
 \newcommand*\tud@chapter@app{%
+  \ifx\tud@head@bar@store\relax%
+    \edef\tud@head@bar@store{\tud@head@bar}%
+  \fi%
+  \ifcase\tud@layout@chapter\relax\or% true
+    \cs@std@lock{tud@head@bar}{0}%
+  \or% lite
+    \cs@set@lock{tud@head@bar}{1}%
+  \or% bicolor
+    \cs@set@lock{tud@head@bar}{2}%
+  \or% color
+    \cs@set@lock{tud@head@bar}{1}%
+  \or% fullcolor
+    \cs@set@lock{tud@head@bar}{2}%
+  \fi%
   \if@tud@chapterpage%
     \tud@cleardoublespecialpage{%
       \def\tud@pagecolor{}%
-      \ifcase\tud@layout@chapter\relax\or% true
-        \def\tud@head@bar{0}%
-      \or% lite
-        \def\tud@head@bar{1}%
-      \or% bicolor
-        \def\tud@head@bar{2}%
-      \or% color
+      \ifcase\tud@layout@chapter\relax\or\or\or\or% color
         \def\tud@pagecolor{HKS41!10}%
-        \def\tud@head@bar{-1}%
+        \cs@set@lock{tud@head@bar}{-1}%
         \def\tud@head@logocolor{HKS41}%
         \def\tud@foot@logocolor{HKS41}%
         \bool@std@lock{@tud@head@widebar}{true}%
       \or% fullcolor
         \def\tud@pagecolor{HKS41!10}%
-        \def\tud@head@bar{2}%
+        \cs@set@lock{tud@head@bar}{2}%
       \fi%
       \addtokomafont{pagenumber}{\sffamily\color{\tud@chapter@fontcolor}}%
       \clearpage%
@@ -4151,20 +4172,20 @@
     \def\@tempa{%
       \def\tud@pagecolor{}%
       \ifcase\tud@layout@title\relax\or% true
-        \def\tud@head@bar{0}%
+        \cs@std@lock{tud@head@bar}{0}%
       \or% lite
-        \def\tud@head@bar{1}%
+        \cs@set@lock{tud@head@bar}{1}%
       \or% color
-        \def\tud@head@bar{2}%
+        \cs@set@lock{tud@head@bar}{2}%
       \or% bicolor
         \def\tud@pagecolor{HKS41}%
-        \def\tud@head@bar{-1}%
+        \cs@set@lock{tud@head@bar}{-1}%
         \def\tud@head@logocolor{white}%
         \def\tud@foot@logocolor{white}%
         \bool@std@lock{@tud@head@widebar}{true}%
       \or% full
         \def\tud@pagecolor{HKS41}%
-        \def\tud@head@bar{2}%
+        \cs@set@lock{tud@head@bar}{2}%
       \fi%
       \color{\tud@title@fontcolor}%
       \addtokomafont{pagenumber}{\sffamily\color{\tud@title@fontcolor}}%

@@ -1,4 +1,4 @@
-% \CheckSum{2090}
+% \CheckSum{2119}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-pagestyle.dtx}[%
-  2015/03/24 v2.04 TUD-KOMA-Script (pagestyle)%
+  2015/04/01 v2.04 TUD-KOMA-Script (pagestyle)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -473,7 +473,6 @@
 % \end{layer}^^A tudheadings.head.upperline
 % \begin{layer}{tudheadings.foot.logo}
 % \changes{v2.02}{2014/06/23}{neu}^^A
-% \changes{v2.03}{2015/01/13}{Ebenendeklaration ist kompatibilitätsabhängig}^^A
 % \begin{layer}{tudheadings.foot.back}
 % \changes{v2.03}{2015/02/15}{neu}^^A
 % Außerdem wird eine weitere Ebene für Drittlogos sowie das \DDC-Logo im
@@ -536,6 +535,7 @@
 %    \end{macrocode}
 % Bis zur Version~v2.02 wurde für die Verwendung des \DDC-Logos der Satzspiegel
 % geändert. Hier wird dem Rechnung getragen.
+% \ToDo{addvoffset verwenden}[v3.17]
 %    \begin{macrocode}
   \tud@ifverlower{2.03}{%
     \ModifyLayer[%
@@ -713,6 +713,10 @@
 % \begin{macro}{\tud@ps@onbackground}
 % \changes{v2.03}{2015/02/14}{neu}^^A
 % \begin{macro}{\tud@head@logocolor}
+% \begin{macro}{\tud@head@bar@store}
+% \changes{v2.04}{2015/04/01}{neu}^^A
+% \begin{macro}{\tud@head@bar@restore}
+% \changes{v2.04}{2015/04/01}{neu}^^A
 % \begin{macro}{\tud@foot@logocolor}
 % \changes{v2.03}{2015/02/15}{neu}^^A
 % Diese Befehle werden bei der Initialiserung der Seitenstile beziehungsweise
@@ -736,12 +740,38 @@
 % Das Makro \cs{tud@head@logocolor} enthält die Farbe des Kopfes. Die Gestalt 
 % des Querbalkens kann über die Option \opt{cdhead} geändert werden. Für Titel, 
 % Teil und Kapitel gibt es speziell dazugehörige Optionen, womit das Aussehen
-% des Kopfes ggf. angepasst werden kann. Mit \cs{tud@foot@logocolor} erfolgt 
-% dies gleichermaßen für ein etwaiges \DDC-Logo.
+% des Kopfes ggf. angepasst werden kann. Um die Gestalt des Kopfes auch für 
+% Kapitel ohne die Verwendung als Kapitelseite (\opt{chapterpage}) anpassen zu
+% können, sind die Makros \cs{tud@head@bar@store} und \cs{tud@head@bar@restore} 
+% notwendig. Mit \cs{tud@foot@logocolor} kann gleichermaßen die Farbe eines 
+% etwaigen \DDC-Logo festgelegt werden.
 %    \begin{macrocode}
 \newcommand*\tud@head@logocolor{black}
+\newcommand*\tud@head@bar@store{}%
+\let\tud@head@bar@store\relax%
+\newcommand*\tud@head@bar@restore{}%
+\let\tud@head@bar@restore\relax%
 \newcommand*\tud@foot@logocolor{black}
 \newcommand*\tud@ps@onbackground{%
+%    \end{macrocode}
+% Mit dem Hilfsmakro \cs{tud@head@bar@store} wird der Wert \cs{tud@head@bar} 
+% zwischengespeichert, falls dies nur einmalig geändert werden soll. Wurde es
+% mit dem entsprechenden Wert gesetzt, wird das Makro \cs{tud@head@bar@restore} 
+% definiert, welches beim folgenden Aufruf des Hakens \cs{tud@ps@onbackground} 
+% aufgerufen wird und ggf. den gesicherten Wert wiederherstellt.
+%    \begin{macrocode}
+  \ifx\tud@head@bar@store\relax%
+    \tud@head@bar@restore%
+  \else%
+    \xdef\tud@head@bar@restore{%
+      \gdef\noexpand\tud@head@bar{\tud@head@bar@store}%
+      \global\let\tud@head@bar@restore\relax%
+    }%
+    \global\let\tud@head@bar@store\relax%
+  \fi%
+%    \end{macrocode}
+% es folgt die Verarbeitung des gesetzten Wertes für \cs{tud@head@bar}.
+%    \begin{macrocode}
   \ifcase\tud@head@bar\relax% cdhead=nocolor
     \def\tud@head@logocolor{black}%
     \def\tud@foot@logocolor{black}%
@@ -765,6 +795,8 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@foot@logocolor
+% \end{macro}^^A \tud@head@bar@restore
+% \end{macro}^^A \tud@head@bar@store
 % \end{macro}^^A \tud@head@logocolor
 % \end{macro}^^A \tud@ps@onbackground
 % \end{macro}^^A \tud@ps@onselect
@@ -942,7 +974,7 @@
 % \begin{macro}{\tud@head@text@write}
 % \changes{v2.02}{2014/06/23}{Vertikaler Freiraum für Ober- und Unterlängen 
 %   mit \cs{vphantom} eingefügt}^^A
-% \changes{v2.02}{2014/12/04}{optische Zentrierung des Zeilentextes}^^A
+% \changes{v2.02}{2014/12/04}{Zentrierung des Zeilentextes}^^A
 % Befehl zur Ausgabe der ersten und evtl. zweiten Textzeile im TUD-Kopf
 %    \begin{macrocode}
 \newcommand*\tud@head@text@write[1]{%
@@ -1460,6 +1492,8 @@
 % \changes{v2.03}{2015/02/04}{neu}^^A
 % \begin{macro}{\tud@head@bar}
 % \changes{v2.03}{2015/02/04}{neu}^^A
+% \begin{macro}{\tud@head@bar@lock}
+% \changes{v2.04}{2015/04/01}{neu}^^A
 % \begin{macro}{\if@tud@head@widebar}
 % \changes{v2.03}{2015/02/14}{neu}^^A
 % \begin{macro}{\if@tud@head@widebar@locked}
@@ -1471,7 +1505,7 @@
 % Querbalkens bzw. die Farbe einstellbar.
 %    \begin{macrocode}
 \cs@lock{tud@head@font}{0}
-\newcommand*\tud@head@bar{0}
+\cs@lock{tud@head@bar}{0}
 \bool@lock{@tud@head@widebar}
 \TUD@key{cdhead}[true]{%
   \TUD@set@numkey{cdhead}{@tempa}{%
@@ -1499,11 +1533,11 @@
     \or% heavy
       \cs@set@lock{tud@head@font}{2}%
     \or% nocolor
-      \def\tud@head@bar{0}%
+      \cs@set@lock{tud@head@bar}{0}%
     \or% litecolor
-      \def\tud@head@bar{1}%
+      \cs@set@lock{tud@head@bar}{1}%
     \or% color
-      \def\tud@head@bar{2}%
+      \cs@set@lock{tud@head@bar}{2}%
     \or% textwidth
       \bool@set@lock{@tud@head@widebar}{false}%
     \or% paperwidth
@@ -1514,6 +1548,7 @@
 %    \end{macrocode}
 % \end{macro}^^A \if@tud@head@widebar@locked
 % \end{macro}^^A \if@tud@head@widebar
+% \end{macro}^^A \tud@head@bar@lock
 % \end{macro}^^A \tud@head@bar
 % \end{macro}^^A \if@tud@head@font@locked
 % \end{macro}^^A \tud@head@font
@@ -1747,7 +1782,7 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@newgeometry
 % \begin{macro}{\tud@geometry@process}
-% \changes{v2.02}{2014/06/23}{Änderungen für \pkg{scrlayer-scrpage}}^^A
+% \changes{v2.02}{2014/06/23}{Anpassungen für \pkg{scrlayer-scrpage}}^^A
 % \changes{v2.03}{2015/01/09}{Satzspiegel des \CDs angepasst}^^A
 % \changes{v2.03}{2015/01/09}{intiale Festlegung der Länge \cs{marginpar}}^^A
 % \changes{v2.03}{2015/01/13}{Satzspiegel kompatibilitätsabhängig}^^A
