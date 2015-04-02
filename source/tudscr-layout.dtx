@@ -1,4 +1,4 @@
-% \CheckSum{1142}
+% \CheckSum{1167}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-layout.dtx}[%
-  2015/04/01 v2.04 TUD-KOMA-Script (layout)%
+  2015/04/02 v2.04 TUD-KOMA-Script (layout)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -1251,9 +1251,14 @@
 % \end{macro}^^A \set@@@@preamble
 % \begin{macro}{\tud@chapter@pre}
 % \begin{macro}{\tud@chapter@app}
-% Diese beiden Makros dienen zur Behandlung der Besonderheiten von spearaten 
-% Kapitelseiten (Option~\opt{chapterpage}). Eingefügt werden sie für die 
-% die Gliederungsbefehle der Kapitel innerhalb von \cs{tud@sectioning@case}.
+% \begin{macro}{\tud@head@bar@store}
+% \changes{v2.04}{2015/04/01}{neu}^^A
+% \begin{macro}{\tud@head@bar@restore}
+% \changes{v2.04}{2015/04/01}{neu}^^A
+% Diese Makros dienen zur Behandlung der Besonderheiten von Kapiteln. Dies gilt 
+% sowohl für normale Kapitelüberschriften als auch für separate Kapitelseiten
+% (Option~\opt{chapterpage}). Eingefügt werden sie für die Gliederungsbefehle
+% der Kapitel (\cs{chapter} und \cs{addchap}) durch \cs{tud@sectioning@case}.
 %    \begin{macrocode}
 \newcommand*\tud@chapter@pre{%
   \if@tud@chapterpage%
@@ -1269,29 +1274,16 @@
     \if@twocolumn\@restonecoltrue\onecolumn\fi%
   \fi%
 }
-\newcommand*\tud@chapter@app{%
 %    \end{macrocode}
 % Unabhängig von der Verwendung einer Kapitelseite, wird die Einstellung der 
 % Option \opt{cdchapter} für die Gestalt des TUD-Kopfes beachtet, falls dieser
-% zum Einsatz kommt. Dabei wird die Einstellung für die Gestalt des Kopfes im 
-% restlichen Dokument (\cs{tud@head@bar}) gesichert, um diese nach der Ausgabe
-% der Kapitelüberschrift auf der darauffolgenden Seite wieder anwenden bzw. 
-% zurücksetzen zu können.
+% zum Einsatz kommt.
 %    \begin{macrocode}
-  \ifx\tud@head@bar@store\relax%
-    \edef\tud@head@bar@store{\tud@head@bar}%
-  \fi%
-  \ifcase\tud@layout@chapter\relax\or% true
-    \cs@std@lock{tud@head@bar}{0}%
-  \or% lite
-    \cs@set@lock{tud@head@bar}{1}%
-  \or% bicolor
-    \cs@set@lock{tud@head@bar}{2}%
-  \or% color
-    \cs@set@lock{tud@head@bar}{1}%
-  \or% fullcolor
-    \cs@set@lock{tud@head@bar}{2}%
-  \fi%
+\newcommand*\tud@head@bar@store{}%
+\let\tud@head@bar@store\relax%
+\newcommand*\tud@head@bar@restore{}%
+\let\tud@head@bar@restore\relax%
+\newcommand*\tud@chapter@app{%
 %    \end{macrocode}
 % Nach dem Setzen der Kapitelüberschrift selbst werden die Farbe für den 
 % Hintergrund, die Seitenzahl und den ggf. verwendeten TUD-Kopf angewendet.
@@ -1305,7 +1297,13 @@
   \if@tud@chapterpage%
     \tud@cleardoublespecialpage{%
       \def\tud@pagecolor{}%
-      \ifcase\tud@layout@chapter\relax\or\or\or\or% color
+      \ifcase\tud@layout@chapter\relax\or% true
+        \cs@std@lock{tud@head@bar}{0}%
+      \or% lite
+        \cs@set@lock{tud@head@bar}{1}%
+      \or% bicolor
+        \cs@set@lock{tud@head@bar}{2}%
+      \or% color
         \def\tud@pagecolor{HKS41!10}%
         \cs@set@lock{tud@head@bar}{-1}%
         \def\tud@head@logocolor{HKS41}%
@@ -1323,10 +1321,34 @@
 %    \begin{macrocode}
     \if@restonecol\twocolumn\fi%
 %    \end{macrocode}
-% Sollten keine reinen Kapitelseiten verwendet werden, muss gegebenenfalls im
-% Kompatibilitätsmodus genügend Freiraum für das \DDC-Logo gelassen werden.
+% Sollten keine reinen Kapitelseiten verwendet werden, wird die Einstellung für
+% die Gestalt des Kopfes im restlichen Dokument (\cs{tud@head@bar}) im Makro 
+% \cs{tud@head@bar@store} gesichert und das Makro \cs{tud@head@bar@restore} 
+% definiert, welches beim Ausführen der Ebene \pgs{tudheadings.last} den 
+% gesicherten Wert für die darauffolgenden Seite wiederherstellt.
 %    \begin{macrocode}
   \else%
+    \edef\tud@head@bar@store{\tud@head@bar}%
+    \edef\tud@head@bar@restore{%
+      \gdef\noexpand\tud@head@bar{\tud@head@bar@store}%
+      \global\let\noexpand\tud@head@bar@store\relax%
+      \global\let\noexpand\tud@head@bar@restore\relax%
+    }%
+    \ifcase\tud@layout@chapter\relax\or% true
+      \cs@std@lock{tud@head@bar}{0}%
+    \or% lite
+      \cs@set@lock{tud@head@bar}{1}%
+    \or% bicolor
+      \cs@set@lock{tud@head@bar}{2}%
+    \or% color
+      \cs@set@lock{tud@head@bar}{1}%
+    \or% fullcolor
+      \cs@set@lock{tud@head@bar}{2}%
+    \fi%
+%    \end{macrocode}
+% Im Kompatibilitätsmodus muss gegebenenfalls zusätzlich genügend Freiraum für
+% das \DDC-Logo gelassen werden.
+%    \begin{macrocode}
     \tud@ifverlower{2.03}{\tud@ddc@enlargepage[\chapterpagestyle]}{}%
   \fi%
 %    \end{macrocode}
@@ -1338,6 +1360,8 @@
   \fi%
 }
 %    \end{macrocode}
+% \end{macro}^^A \tud@head@bar@restore
+% \end{macro}^^A \tud@head@bar@store
 % \end{macro}^^A \tud@chapter@pre
 % \end{macro}^^A \tud@chapter@app
 % \begin{macro}{\tud@clearcolor@wrn}

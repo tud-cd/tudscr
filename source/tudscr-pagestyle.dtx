@@ -1,4 +1,4 @@
-% \CheckSum{2119}
+% \CheckSum{2088}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-pagestyle.dtx}[%
-  2015/04/01 v2.04 TUD-KOMA-Script (pagestyle)%
+  2015/04/02 v2.04 TUD-KOMA-Script (pagestyle)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -471,16 +471,53 @@
 % \end{layer}^^A tudheadings.head.upperwideline
 % \end{layer}^^A tudheadings.head.lowerline
 % \end{layer}^^A tudheadings.head.upperline
-% \begin{layer}{tudheadings.foot.logo}
-% \changes{v2.02}{2014/06/23}{neu}^^A
 % \begin{layer}{tudheadings.foot.back}
 % \changes{v2.03}{2015/02/15}{neu}^^A
-% Außerdem wird eine weitere Ebene für Drittlogos sowie das \DDC-Logo im
-% Seitenfuß erstellt. Dabei wird die Ebene in Abhängigkeit vom gewählten 
-% Kompatibilitätsmodus unterschiedlich definiert. 
-% 
-% Ab Version~v2.03 wird der Satzspiegel so gewählt, dass das \DDC-Logo in den 
-% normalen Seitenfuß passt.
+% \begin{layer}{tudheadings.foot.logo}
+% \changes{v2.02}{2014/06/23}{neu}^^A
+% \changes{v2.03}{2015/02/15}{überarbeitetet}^^A
+% Die folgenden beiden Ebenen dienen für die Ausgabe des Fußbereiches. Dieser 
+% kann mit einem farbigen Hintergrund und zusätzlichen Logos erstellt werden. 
+% Dabei werden die Ebenen in Abhängigkeit vom gewählten Kompatibilitätsmodus
+% unterschiedlich definiert. Die erste Ebene bestimmt die Hintergrundgestaltung
+% des Fußbereiches. 
+%    \begin{macrocode}
+  \DeclareNewLayer[%
+    background,%
+    hoffset=0pt,%
+    width=\paperwidth,%
+    voffset=\dimexpr\@nameuse{scr@l@tudheadings.foot.logo@y}%
+      -\dp\strutbox\relax,%
+    height=\dimexpr\paperheight-\layeryoffset\relax,%
+    contents={%
+      \if@tud@footcolor%
+        \let\@tempc\relax%
+        \ifnum\tud@head@bar>\@ne% color
+          \def\@tempc{\color{HKS41}}%
+        \fi%
+        \ifstr{\tud@pagecolor}{HKS41}{\def\@tempc{\color{HKS41!80}}}{}%
+        \ifx\@tempc\relax\else%
+          \tud@ifverlower{2.03}{%
+            \tud@ddc@check%
+            \ifcase\@tempb\relax% \tud@ddc@foot=false
+              \vbox to \layerheight{%
+                \vfil\@tempc%
+                \rule{\layerwidth}{%
+                  \dimexpr\layerheight-\tud@dim@ddcdiff+\ht\strutbox\relax%
+                }%
+              }%
+            \else% \tud@ddc@foot!=false
+              \@tempc\rule{\layerwidth}{\layerheight}%
+            \fi%
+          }{\@tempc\rule{\layerwidth}{\layerheight}}%
+        \fi%
+      \fi%
+    },%
+  ]{tudheadings.foot.back}%
+%    \end{macrocode}
+% Die zweite Ebene wird für die Ausgabe von Drittlogos und des \DDC-Logos im
+% Seitenfuß erstellt. Ab der Version~v2.03 wird der Satzspiegel so gewählt, 
+% dass das \DDC-Logo in den normalen Seitenfuß passt.
 %    \begin{macrocode}
   \DeclareNewLayer[%
     background,foot,%
@@ -547,43 +584,26 @@
     ]{tudheadings.foot.logo}%
   }{}%
 %    \end{macrocode}
-% Diese Ebene wird als Hintergrund für den Fußbereich definiert.
+% \end{layer}^^A tudheadings.foot.logo
+% \end{layer}^^A tudheadings.foot.back
+% \begin{layer}{tudheadings.last}
+% \changes{v2.04}{2015/04/02}{neu}^^A
+% Die letzte Ebene dient nicht der Ausgabe eines bestimmten Inhaltes sondern 
+% wird für evtl. notwendige Aufräumarbeiten etc. bereitgehalten.
 %    \begin{macrocode}
   \DeclareNewLayer[%
     background,%
-    hoffset=0pt,%
-    width=\paperwidth,%
-    voffset=\dimexpr\@nameuse{scr@l@tudheadings.foot.logo@y}%
-      -\dp\strutbox\relax,%
-    height=\dimexpr\paperheight-\layeryoffset\relax,%
-    contents={%
-      \if@tud@footcolor%
-        \let\@tempc\relax%
-        \ifnum\tud@head@bar>\@ne% color
-          \def\@tempc{\color{HKS41}}%
-        \fi%
-        \ifstr{\tud@pagecolor}{HKS41}{\def\@tempc{\color{HKS41!80}}}{}%
-        \ifx\@tempc\relax\else%
-          \tud@ifverlower{2.03}{%
-            \tud@ddc@check%
-            \ifcase\@tempb\relax% \tud@ddc@foot=false
-              \vbox to \layerheight{%
-                \vfil\@tempc%
-                \rule{\layerwidth}{%
-                  \dimexpr\layerheight-\tud@dim@ddcdiff+\ht\strutbox\relax%
-                }%
-              }%
-            \else% \tud@ddc@foot!=false
-              \@tempc\rule{\layerwidth}{\layerheight}%
-            \fi%
-          }{\@tempc\rule{\layerwidth}{\layerheight}}%
-        \fi%
-      \fi%
-    },%
-  ]{tudheadings.foot.back}%
 %    \end{macrocode}
-% \end{layer}^^A tudheadings.foot.back
-% \end{layer}^^A tudheadings.foot.logo
+% Falls ein Kapitel ohne die Option \opt{chapterpage} gesetzt wird und dennoch 
+% die Gestalt des Kopfes des \pgs{tudheadings}-Seitenstils sich vom restlichen 
+% Dokument unterscheiden soll (\opt{cd} bzw. \opt{cdchapter}), so dient das 
+% Makro \cs{tud@head@bar@restore} zum Zurücksetzen auf das normale Verhalten. 
+% Siehe \cs{tud@chapter@app}.
+%    \begin{macrocode}
+    contents=\tud@head@bar@restore,%
+  ]{tudheadings.last}%
+%    \end{macrocode}
+% \end{layer}^^A tudheadings.last
 % Aus den zuvor erstellten Ebenen werden jetzt die eigentlichen Seitenstile 
 % zusammengesetzt. Als erstes wird der \pgs{headings}-Seitenstil definiert.
 % Dieser verwendet den TUD-Kopf und die Fußzeilenebenen des Seitenstils
@@ -607,6 +627,7 @@
     tudheadings.head.lowerwideline,%
     tudheadings.foot.back,%
     tudheadings.foot.logo,%
+    tudheadings.last,%
     scrheadings.foot.odd,%
     scrheadings.foot.even,%
     scrheadings.foot.oneside,%
@@ -637,6 +658,7 @@
     tudheadings.head.lowerwideline,%
     tudheadings.foot.back,%
     tudheadings.foot.logo,%
+    tudheadings.last,%
     plain.scrheadings.foot.odd,%
     plain.scrheadings.foot.even,%
     plain.scrheadings.foot.oneside,%
@@ -666,6 +688,7 @@
     tudheadings.head.lowerwideline,%
     tudheadings.foot.back,%
     tudheadings.foot.logo,%
+    tudheadings.last%
   }%
   \DeclareNewPageStyleAlias{empty.tudscrheadings}{empty.tudheadings}%
   \DeclareNewPageStyleAlias{tudempty}{empty.tudheadings}%
@@ -713,10 +736,6 @@
 % \begin{macro}{\tud@ps@onbackground}
 % \changes{v2.03}{2015/02/14}{neu}^^A
 % \begin{macro}{\tud@head@logocolor}
-% \begin{macro}{\tud@head@bar@store}
-% \changes{v2.04}{2015/04/01}{neu}^^A
-% \begin{macro}{\tud@head@bar@restore}
-% \changes{v2.04}{2015/04/01}{neu}^^A
 % \begin{macro}{\tud@foot@logocolor}
 % \changes{v2.03}{2015/02/15}{neu}^^A
 % Diese Befehle werden bei der Initialiserung der Seitenstile beziehungsweise
@@ -740,38 +759,12 @@
 % Das Makro \cs{tud@head@logocolor} enthält die Farbe des Kopfes. Die Gestalt 
 % des Querbalkens kann über die Option \opt{cdhead} geändert werden. Für Titel, 
 % Teil und Kapitel gibt es speziell dazugehörige Optionen, womit das Aussehen
-% des Kopfes ggf. angepasst werden kann. Um die Gestalt des Kopfes auch für 
-% Kapitel ohne die Verwendung als Kapitelseite (\opt{chapterpage}) anpassen zu
-% können, sind die Makros \cs{tud@head@bar@store} und \cs{tud@head@bar@restore} 
-% notwendig. Mit \cs{tud@foot@logocolor} kann gleichermaßen die Farbe eines 
-% etwaigen \DDC-Logo festgelegt werden.
+% des Kopfes ggf. angepasst werden kann. Mit \cs{tud@foot@logocolor} kann
+% gleichermaßen die Farbe eines etwaigen \DDC-Logo festgelegt werden.
 %    \begin{macrocode}
 \newcommand*\tud@head@logocolor{black}
-\newcommand*\tud@head@bar@store{}%
-\let\tud@head@bar@store\relax%
-\newcommand*\tud@head@bar@restore{}%
-\let\tud@head@bar@restore\relax%
 \newcommand*\tud@foot@logocolor{black}
 \newcommand*\tud@ps@onbackground{%
-%    \end{macrocode}
-% Mit dem Hilfsmakro \cs{tud@head@bar@store} wird der Wert \cs{tud@head@bar} 
-% zwischengespeichert, falls dies nur einmalig geändert werden soll. Wurde es
-% mit dem entsprechenden Wert gesetzt, wird das Makro \cs{tud@head@bar@restore} 
-% definiert, welches beim folgenden Aufruf des Hakens \cs{tud@ps@onbackground} 
-% aufgerufen wird und ggf. den gesicherten Wert wiederherstellt.
-%    \begin{macrocode}
-  \ifx\tud@head@bar@store\relax%
-    \tud@head@bar@restore%
-  \else%
-    \xdef\tud@head@bar@restore{%
-      \gdef\noexpand\tud@head@bar{\tud@head@bar@store}%
-      \global\let\tud@head@bar@restore\relax%
-    }%
-    \global\let\tud@head@bar@store\relax%
-  \fi%
-%    \end{macrocode}
-% es folgt die Verarbeitung des gesetzten Wertes für \cs{tud@head@bar}.
-%    \begin{macrocode}
   \ifcase\tud@head@bar\relax% cdhead=nocolor
     \def\tud@head@logocolor{black}%
     \def\tud@foot@logocolor{black}%
@@ -795,8 +788,6 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@foot@logocolor
-% \end{macro}^^A \tud@head@bar@restore
-% \end{macro}^^A \tud@head@bar@store
 % \end{macro}^^A \tud@head@logocolor
 % \end{macro}^^A \tud@ps@onbackground
 % \end{macro}^^A \tud@ps@onselect

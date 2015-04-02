@@ -2218,6 +2218,38 @@
     },%
   ]{tudheadings.head.lowerwideline}%
   \DeclareNewLayer[%
+    background,%
+    hoffset=0pt,%
+    width=\paperwidth,%
+    voffset=\dimexpr\@nameuse{scr@l@tudheadings.foot.logo@y}%
+      -\dp\strutbox\relax,%
+    height=\dimexpr\paperheight-\layeryoffset\relax,%
+    contents={%
+      \if@tud@footcolor%
+        \let\@tempc\relax%
+        \ifnum\tud@head@bar>\@ne% color
+          \def\@tempc{\color{HKS41}}%
+        \fi%
+        \ifstr{\tud@pagecolor}{HKS41}{\def\@tempc{\color{HKS41!80}}}{}%
+        \ifx\@tempc\relax\else%
+          \tud@ifverlower{2.03}{%
+            \tud@ddc@check%
+            \ifcase\@tempb\relax% \tud@ddc@foot=false
+              \vbox to \layerheight{%
+                \vfil\@tempc%
+                \rule{\layerwidth}{%
+                  \dimexpr\layerheight-\tud@dim@ddcdiff+\ht\strutbox\relax%
+                }%
+              }%
+            \else% \tud@ddc@foot!=false
+              \@tempc\rule{\layerwidth}{\layerheight}%
+            \fi%
+          }{\@tempc\rule{\layerwidth}{\layerheight}}%
+        \fi%
+      \fi%
+    },%
+  ]{tudheadings.foot.back}%
+  \DeclareNewLayer[%
     background,foot,%
     height=\dimexpr\paperheight-\layeryoffset\relax,%
     contents={%
@@ -2265,36 +2297,8 @@
   }{}%
   \DeclareNewLayer[%
     background,%
-    hoffset=0pt,%
-    width=\paperwidth,%
-    voffset=\dimexpr\@nameuse{scr@l@tudheadings.foot.logo@y}%
-      -\dp\strutbox\relax,%
-    height=\dimexpr\paperheight-\layeryoffset\relax,%
-    contents={%
-      \if@tud@footcolor%
-        \let\@tempc\relax%
-        \ifnum\tud@head@bar>\@ne% color
-          \def\@tempc{\color{HKS41}}%
-        \fi%
-        \ifstr{\tud@pagecolor}{HKS41}{\def\@tempc{\color{HKS41!80}}}{}%
-        \ifx\@tempc\relax\else%
-          \tud@ifverlower{2.03}{%
-            \tud@ddc@check%
-            \ifcase\@tempb\relax% \tud@ddc@foot=false
-              \vbox to \layerheight{%
-                \vfil\@tempc%
-                \rule{\layerwidth}{%
-                  \dimexpr\layerheight-\tud@dim@ddcdiff+\ht\strutbox\relax%
-                }%
-              }%
-            \else% \tud@ddc@foot!=false
-              \@tempc\rule{\layerwidth}{\layerheight}%
-            \fi%
-          }{\@tempc\rule{\layerwidth}{\layerheight}}%
-        \fi%
-      \fi%
-    },%
-  ]{tudheadings.foot.back}%
+    contents=\tud@head@bar@restore,%
+  ]{tudheadings.last}%
   \DeclareNewPageStyleByLayers[%
     onselect=\tud@ps@onselect,onbackground=\tud@ps@onbackground%
   ]{tudheadings}{%
@@ -2309,6 +2313,7 @@
     tudheadings.head.lowerwideline,%
     tudheadings.foot.back,%
     tudheadings.foot.logo,%
+    tudheadings.last,%
     scrheadings.foot.odd,%
     scrheadings.foot.even,%
     scrheadings.foot.oneside,%
@@ -2332,6 +2337,7 @@
     tudheadings.head.lowerwideline,%
     tudheadings.foot.back,%
     tudheadings.foot.logo,%
+    tudheadings.last,%
     plain.scrheadings.foot.odd,%
     plain.scrheadings.foot.even,%
     plain.scrheadings.foot.oneside,%
@@ -2357,6 +2363,7 @@
     tudheadings.head.lowerwideline,%
     tudheadings.foot.back,%
     tudheadings.foot.logo,%
+    tudheadings.last%
   }%
   \DeclareNewPageStyleAlias{empty.tudscrheadings}{empty.tudheadings}%
   \DeclareNewPageStyleAlias{tudempty}{empty.tudheadings}%
@@ -2382,21 +2389,8 @@
   \def\sls@currentplain{plain.tudheadings}%
 }
 \newcommand*\tud@head@logocolor{black}
-\newcommand*\tud@head@bar@store{}%
-\let\tud@head@bar@store\relax%
-\newcommand*\tud@head@bar@restore{}%
-\let\tud@head@bar@restore\relax%
 \newcommand*\tud@foot@logocolor{black}
 \newcommand*\tud@ps@onbackground{%
-  \ifx\tud@head@bar@store\relax%
-    \tud@head@bar@restore%
-  \else%
-    \xdef\tud@head@bar@restore{%
-      \gdef\noexpand\tud@head@bar{\tud@head@bar@store}%
-      \global\let\tud@head@bar@restore\relax%
-    }%
-    \global\let\tud@head@bar@store\relax%
-  \fi%
   \ifcase\tud@head@bar\relax% cdhead=nocolor
     \def\tud@head@logocolor{black}%
     \def\tud@foot@logocolor{black}%
@@ -3430,25 +3424,21 @@
     \if@twocolumn\@restonecoltrue\onecolumn\fi%
   \fi%
 }
+\newcommand*\tud@head@bar@store{}%
+\let\tud@head@bar@store\relax%
+\newcommand*\tud@head@bar@restore{}%
+\let\tud@head@bar@restore\relax%
 \newcommand*\tud@chapter@app{%
-  \ifx\tud@head@bar@store\relax%
-    \edef\tud@head@bar@store{\tud@head@bar}%
-  \fi%
-  \ifcase\tud@layout@chapter\relax\or% true
-    \cs@std@lock{tud@head@bar}{0}%
-  \or% lite
-    \cs@set@lock{tud@head@bar}{1}%
-  \or% bicolor
-    \cs@set@lock{tud@head@bar}{2}%
-  \or% color
-    \cs@set@lock{tud@head@bar}{1}%
-  \or% fullcolor
-    \cs@set@lock{tud@head@bar}{2}%
-  \fi%
   \if@tud@chapterpage%
     \tud@cleardoublespecialpage{%
       \def\tud@pagecolor{}%
-      \ifcase\tud@layout@chapter\relax\or\or\or\or% color
+      \ifcase\tud@layout@chapter\relax\or% true
+        \cs@std@lock{tud@head@bar}{0}%
+      \or% lite
+        \cs@set@lock{tud@head@bar}{1}%
+      \or% bicolor
+        \cs@set@lock{tud@head@bar}{2}%
+      \or% color
         \def\tud@pagecolor{HKS41!10}%
         \cs@set@lock{tud@head@bar}{-1}%
         \def\tud@head@logocolor{HKS41}%
@@ -3463,6 +3453,23 @@
     }%
     \if@restonecol\twocolumn\fi%
   \else%
+    \edef\tud@head@bar@store{\tud@head@bar}%
+    \edef\tud@head@bar@restore{%
+      \gdef\noexpand\tud@head@bar{\tud@head@bar@store}%
+      \global\let\noexpand\tud@head@bar@store\relax%
+      \global\let\noexpand\tud@head@bar@restore\relax%
+    }%
+    \ifcase\tud@layout@chapter\relax\or% true
+      \cs@std@lock{tud@head@bar}{0}%
+    \or% lite
+      \cs@set@lock{tud@head@bar}{1}%
+    \or% bicolor
+      \cs@set@lock{tud@head@bar}{2}%
+    \or% color
+      \cs@set@lock{tud@head@bar}{1}%
+    \or% fullcolor
+      \cs@set@lock{tud@head@bar}{2}%
+    \fi%
     \tud@ifverlower{2.03}{\tud@ddc@enlargepage[\chapterpagestyle]}{}%
   \fi%
   \if@twocolumn%
@@ -3859,12 +3866,14 @@
 }
 \newcommand*\declaration[1][]{%
   \ifbool{@tud@declarations}{%
-    \tud@fm@confirmation{#1}%
-    \tud@fm@blocking{#1}%
+    \begingroup%
+      \tud@fm@confirmation[#1]%
+      \tud@fm@blocking[#1]%
+    \endgroup%
   }{%
-    \begin{declarations}%
-      \tud@fm@confirmation{#1}%
-      \tud@fm@blocking{#1}%
+    \begin{declarations}[#1]%
+      \tud@fm@confirmation%
+      \tud@fm@blocking%
     \end{declarations}%
   }%
 }
@@ -3886,18 +3895,18 @@
   }%
   \ifbool{@tud@declarations}{%
     \begingroup%
-      \tud@fm@confirmation{#1}%
+      \tud@fm@confirmation[#1]%
     \endgroup%
   }{%
-    \begin{declarations}%
-      \tud@fm@confirmation{#1}%
+    \begin{declarations}[#1]%
+      \tud@fm@confirmation%
     \end{declarations}%
   }%
   \TUD@parameter@sethandler[declaration]{%
     \TUD@parameter@defaulthandler{declaration}{##1}%
   }%
 }
-\newcommand*\tud@fm@confirmation[1]{%
+\newcommand*\tud@fm@confirmation[1][]{%
   \tud@fm@body@start{declaration}{#1}{\confirmationname}%
     \confirmationtext\vskip\z@\@confirmationclosing%
   \tud@fm@body@end{declaration}%
@@ -3908,18 +3917,18 @@
   }%
   \ifbool{@tud@declarations}{%
     \begingroup%
-      \tud@fm@blocking{#1}%
+      \tud@fm@blocking[#1]%
     \endgroup%
   }{%
-    \begin{declarations}%
-      \tud@fm@blocking{#1}%
+    \begin{declarations}[#1]%
+      \tud@fm@blocking%
     \end{declarations}%
   }%
   \TUD@parameter@sethandler[declaration]{%
     \TUD@parameter@defaulthandler{declaration}{##1}%
   }%
 }
-\newcommand*\tud@fm@blocking[1]{%
+\newcommand*\tud@fm@blocking[1][]{%
   \tud@fm@body@start{declaration}{#1}{\blockingname}%
     \blockingtext%
   \tud@fm@body@end{declaration}%
@@ -4653,6 +4662,14 @@
   \fi%
   \tudbookmark[0]{\contentsname}{toc}%
 }{}{\tud@patch@wrn{tableofcontents}}
+\BeforePackage{tocloft}{%
+  \ClassWarning{\tudcls@name}{%
+    It is not recommended to use package `tocloft'.\MessageBreak%
+    Loading the package will certainly lead to problems\MessageBreak%
+    with table of contents and any list of floats. You\MessageBreak%
+    should use the appropriate options of KOMA-Script%
+  }%
+}
 \endinput
 %%
 %% End of file `tudscrreprt.cls'.
