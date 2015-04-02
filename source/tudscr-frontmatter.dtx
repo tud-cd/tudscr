@@ -1,4 +1,4 @@
-% \CheckSum{729}
+% \CheckSum{731}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-frontmatter.dtx}[%
-  2015/04/01 v2.04 TUD-KOMA-Script (frontmatter)%
+  2015/04/02 v2.04 TUD-KOMA-Script (frontmatter)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -1053,12 +1053,14 @@
 %    \begin{macrocode}
 \newcommand*\declaration[1][]{%
   \ifbool{@tud@declarations}{%
-    \tud@fm@confirmation{#1}%
-    \tud@fm@blocking{#1}%
+    \begingroup%
+      \tud@fm@confirmation[#1]%
+      \tud@fm@blocking[#1]%
+    \endgroup%
   }{%
-    \begin{declarations}%
-      \tud@fm@confirmation{#1}%
-      \tud@fm@blocking{#1}%
+    \begin{declarations}[#1]%
+      \tud@fm@confirmation%
+      \tud@fm@blocking%
     \end{declarations}%
   }%
 }
@@ -1103,11 +1105,11 @@
   }%
   \ifbool{@tud@declarations}{%
     \begingroup%
-      \tud@fm@confirmation{#1}%
+      \tud@fm@confirmation[#1]%
     \endgroup%
   }{%
-    \begin{declarations}%
-      \tud@fm@confirmation{#1}%
+    \begin{declarations}[#1]%
+      \tud@fm@confirmation%
     \end{declarations}%
   }%
 %    \end{macrocode}
@@ -1120,7 +1122,7 @@
 %    \end{macrocode}
 % Dies ist der eigentliche Inhalt des Befehls \cs{confirmation}.
 %    \begin{macrocode}
-\newcommand*\tud@fm@confirmation[1]{%
+\newcommand*\tud@fm@confirmation[1][]{%
   \tud@fm@body@start{declaration}{#1}{\confirmationname}%
     \confirmationtext\vskip\z@\@confirmationclosing%
   \tud@fm@body@end{declaration}%
@@ -1143,11 +1145,11 @@
   }%
   \ifbool{@tud@declarations}{%
     \begingroup%
-      \tud@fm@blocking{#1}%
+      \tud@fm@blocking[#1]%
     \endgroup%
   }{%
-    \begin{declarations}%
-      \tud@fm@blocking{#1}%
+    \begin{declarations}[#1]%
+      \tud@fm@blocking%
     \end{declarations}%
   }%
   \TUD@parameter@sethandler[declaration]{%
@@ -1157,7 +1159,7 @@
 %    \end{macrocode}
 % Dies ist der eigentliche Inhalt des Befehls \cs{blocking}.
 %    \begin{macrocode}
-\newcommand*\tud@fm@blocking[1]{%
+\newcommand*\tud@fm@blocking[1][]{%
   \tud@fm@body@start{declaration}{#1}{\blockingname}%
     \blockingtext%
   \tud@fm@body@end{declaration}%
