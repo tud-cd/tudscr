@@ -1334,22 +1334,22 @@
     \DeclareMathVersion{univers}%
     \DeclareMathVersion{universbold}%
     \SetSymbolFont{operators}{univers}{OT1}{\tud@univers}{l}{n}%
-    \SetSymbolFont{letters}{univers}{OML}{\tud@univers}{l}{sl}%
-    \SetSymbolFont{symbols}{univers}{OMS}{\tud@univers}{l}{n}%
-    \SetSymbolFont{largesymbols}{univers}{OMX}{iwona}{m}{n}%
     \SetSymbolFont{operators}{universbold}{OT1}{\tud@univers}{b}{n}%
+    \SetSymbolFont{letters}{univers}{OML}{\tud@univers}{l}{sl}%
     \SetSymbolFont{letters}{universbold}{OML}{\tud@univers}{b}{sl}%
+    \SetSymbolFont{symbols}{univers}{OMS}{\tud@univers}{l}{n}%
     \SetSymbolFont{symbols}{universbold}{OMS}{\tud@univers}{b}{n}%
+    \SetSymbolFont{largesymbols}{univers}{OMX}{iwona}{m}{n}%
     \SetSymbolFont{largesymbols}{universbold}{OMX}{iwona}{b}{n}%
     \SetMathAlphabet{\mathcal}{univers}{OMS}{lmsy}{m}{n}%
-    \SetMathAlphabet{\mathbf}{univers}{OT1}{\tud@univers}{b}{n}%
-    \SetMathAlphabet{\mathsf}{univers}{OT1}{\tud@univers}{l}{n}%
-    \SetMathAlphabet{\mathit}{univers}{OT1}{\tud@univers}{l}{sl}%
-    \SetMathAlphabet{\mathtt}{univers}{OT1}{\tud@univers t}{l}{n}%
     \SetMathAlphabet{\mathcal}{universbold}{OMS}{lmsy}{b}{n}%
+    \SetMathAlphabet{\mathbf}{univers}{OT1}{\tud@univers}{b}{n}%
     \SetMathAlphabet{\mathbf}{universbold}{OT1}{\tud@univers}{eb}{n}%
+    \SetMathAlphabet{\mathsf}{univers}{OT1}{\tud@univers}{l}{n}%
     \SetMathAlphabet{\mathsf}{universbold}{OT1}{\tud@univers}{b}{n}%
+    \SetMathAlphabet{\mathit}{univers}{OT1}{\tud@univers}{l}{sl}%
     \SetMathAlphabet{\mathit}{universbold}{OT1}{\tud@univers}{b}{sl}%
+    \SetMathAlphabet{\mathtt}{univers}{OT1}{\tud@univers t}{l}{n}%
     \SetMathAlphabet{\mathtt}{universbold}{OT1}{\tud@univers t}{b}{n}%
     \@ifpackageloaded{amsfonts}{%
       \DeclareFontFamily{U}{\tud@univers a}{}%
@@ -3411,7 +3411,9 @@
 \patchcmd{\set@@@@preamble}{%
   \hbox to\hsize{#4\parbox[{#2}]{#3}{#6\par}#5\par}%
 }{%
-  \def\@tempa####1@####2{\@nameuse{tud@####1preamble}}%
+  \def\@tempa####1@####2{%
+    \@nameuse{tud@####1preamble}%
+  }%
   \hbox to\hsize{%
     \let\@parboxrestore\relax%
     \let\phantomsection\relax%
