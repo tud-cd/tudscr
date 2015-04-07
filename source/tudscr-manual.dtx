@@ -1,4 +1,4 @@
-% \CheckSum{2779}
+% \CheckSum{2821}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-manual.dtx}[%
-  2015/04/01 v2.04 TUD-KOMA-Script\space%
+  2015/04/07 v2.04 TUD-KOMA-Script\space%
 %</driver>
 %<identify>\NeedsTeXFormat{LaTeX2e}[2011/06/27]
 %<class&identify>\ProvidesClass{tudscrman}[%
@@ -68,7 +68,7 @@
 \usepackage{selinput}\SelectInputMappings{adieresis={ä},germandbls={ß}}
 \usepackage[T1]{fontenc}
 \usepackage{babel}
-\usepackage{tudscrfonts} % only load this package, if the fonts are installed
+%\usepackage{tudscrfonts} % only load this package, if the fonts are installed
 \KOMAoptions{parskip=half-}
 \CodelineIndex
 \RecordChanges
@@ -366,7 +366,9 @@
 % für angehängte \enquote{f.} sowie \enquote{ff.} einstellen. Diese würden 
 % deshalb bei kursiven oder fetten Seitenzahlen trotzdem in normaler Schrift
 % erscheinen, weshalb auf die Auszeichnung folgender Seiten verzichtet wird.
-%^^A\write\tud@write@i{(require "ff-ranges.xdy")}
+%    \begin{macrocode}
+%\write\tud@write@i{(require "ff-ranges.xdy")}
+%    \end{macrocode}
 %
 % Seitenbereiche werden sofort zusammengefasst, wobei als Trennzeichen ein
 % Halbgeviertstrich verwendet wird.
@@ -388,33 +390,39 @@
 % selbst, nicht jedoch die Argumente verworfen werden. Leider werden die 
 % manuell erstellten RegExp-Regeln durch \texttt{texindy} zu spät genutzt 
 % (\url{http://sourceforge.net/p/xindy/bugs/22/}).
-%^^A\write\tud@write@i{(merge-rule "\\hyperidx\{(.*)\}\{(.*)\}" "/2" :eregexp)}
-%^^A\write\tud@write@i{(merge-rule "\\hologo\{(.*)\}" "/1" :eregexp)}
-%^^A\write\tud@write@i{(merge-rule "\\texttt\{(.*)\}" "/1" :eregexp)}
-%^^A\write\tud@write@i{(merge-rule "\\textsbn\{(.*)\}" "/1" :eregexp)}
-%^^A\write\tud@write@i{(merge-rule "\\textsbs\{(.*)\}" "/1" :eregexp)}
-% 
+%    \begin{macrocode}
+%\write\tud@write@i{(merge-rule "\\hyperidx\{(.*)\}\{(.*)\}" "/2" :eregexp)}
+%\write\tud@write@i{(merge-rule "\\hologo\{(.*)\}" "/1" :eregexp)}
+%\write\tud@write@i{(merge-rule "\\texttt\{(.*)\}" "/1" :eregexp)}
+%\write\tud@write@i{(merge-rule "\\textsbn\{(.*)\}" "/1" :eregexp)}
+%\write\tud@write@i{(merge-rule "\\textsbs\{(.*)\}" "/1" :eregexp)}
+%    \end{macrocode}
 % Es werden die Attribute \emph{declare} mit der Abkürzung \emph{!} sowie
 % \emph{important} mit der Abkürzung \emph{?} und \emph{default} definiert, 
 % welche hierarchisch gleichgestellt sind.
 %    \begin{macrocode}
 \write\tud@write@i{%
-  (define-attributes (("declare" "!" "important" "?" "deprecated" "default")))%
+(define-attributes (("declare" "!" "important" "?" "deprecated" "default")))%
 }
 %    \end{macrocode}
 % Eine Alternative wäre, diese in der Hierarchie zu unterscheiden, allerdings
 % war eine Bildung von zufriedenstellenden Seitenbereichen dabei nicht möglich
 % und wurde deshalb verworfen.
-%^^A\write\tud@write@i{(markup-attribute-group-list :sep ", ")}
-%^^A\write\tud@write@i{%
-%^^A(define-attributes (("declare" "!") ("important" "?")("default")))%
-%^^A}
-%
-% Einträge, die als wichtig deklariert wurden, können auch für normale zur 
-% Bereichsbildung verwendet werden.
 %    \begin{macrocode}
-\write\tud@write@i{(merge-to "important" "default")}
-\write\tud@write@i{(merge-to "?" "default")}
+%\write\tud@write@i{(markup-attribute-group-list :sep ", ")}
+%\write\tud@write@i{%
+%(define-attributes (("declare" "!") ("important" "?")("default")))%
+%}
+%    \end{macrocode}
+% Einträge, die als wichtig oder als Deklaration festgelegt wurden, könnten
+% auch für normale Indexeinträge zur Bereichsbildung verwendet werden. 
+% Allerdings führt dies auch zur Erzeugung redundanter Einträge, falls es sich 
+% bei den Sondereinträgen bereits um einen Seitenbereich handelt.
+%    \begin{macrocode}
+%\write\tud@write@i{(merge-to "declare" "default")}
+%\write\tud@write@i{(merge-to "!" "default")}
+%\write\tud@write@i{(merge-to "important" "default")}
+%\write\tud@write@i{(merge-to "?" "default")}
 %    \end{macrocode}
 % Hier erfolgt die Definition der Auszeichnugen der Attribute. Deklarationen 
 % werden fett gedruckt, wichtige Einträge erscheinen kursiv. Außerdem wird ein
@@ -422,51 +430,51 @@
 %    \begin{macrocode}
 \write\tud@write@i{%
 (markup-locref^^J%
-\space\space :open "\string\textbf{\string\hyperpage{"^^J%
-\space\space :close "}}"^^J%
 \space\space :attr "declare"^^J%
-)%
-}
-\write\tud@write@i{%
-(markup-locref^^J%
 \space\space :open "\string\textbf{\string\hyperpage{"^^J%
 \space\space :close "}}"^^J%
+)%
+}
+\write\tud@write@i{%
+(markup-locref^^J%
 \space\space :attr "!"^^J%
+\space\space :open "\string\textbf{\string\hyperpage{"^^J%
+\space\space :close "}}"^^J%
 )%
 }
 \write\tud@write@i{%
 (markup-locref^^J%
-\space\space :open "\string\textsl{\string\hyperpage{"^^J%
-\space\space :close "}}"^^J%
 \space\space :attr "important"^^J%
-)%
-}
-\write\tud@write@i{%
-(markup-locref^^J%
 \space\space :open "\string\textsl{\string\hyperpage{"^^J%
 \space\space :close "}}"^^J%
-\space\space :attr "?"^^J%
 )%
 }
 \write\tud@write@i{%
 (markup-locref^^J%
+\space\space :attr "?"^^J%
+\space\space :open "\string\textsl{\string\hyperpage{"^^J%
+\space\space :close "}}"^^J%
+)%
+}
+\write\tud@write@i{%
+(markup-locref^^J%
+\space\space :attr "default"^^J%
 \space\space :open "\string\hyperpage{"^^J%
 \space\space :close "}"^^J%
-\space\space :attr "default"^^J%
 )%
 }
 %    \end{macrocode}
 % Für die Änderungsliste wird ein separates Attribut erstellt. Mit diesem wird 
 % es möglich, die Seitenangabe für Optionen und Befehle zu unterdrücken, welche 
-% aus \TUDScript entfernt oder veraltet wurden, wenn mit \cs{Replace} eine 
+% aus \TUDScript entfernt wurden oder veraltet sind, wenn mit \cs{Replace} eine 
 % Alternative eingeführt wurde. Dafür wird der Befehl \cs{deprecatedhyperpage} 
 % verwendet, welcher im Bedarfsball auf \cs{@gobble} gesetzt wird.
 %    \begin{macrocode}
 \write\tud@write@i{%
 (markup-locref^^J%
+\space\space :attr "deprecated"^^J%
 \space\space :open "\string\deprecatedhyperpage{"^^J%
 \space\space :close "}"^^J%
-\space\space :attr "deprecated"^^J%
 )%
 }
 %    \end{macrocode}
@@ -973,8 +981,8 @@
 % \subsubsection{Kleinkram}
 % 
 % \begin{macro}{\bsc}
-% \changes{v2.02}{2014/07/22}{\cs{DeclareRobustCommand} ersetzt mit
-%   \cs{newrobustcmd} aus \pkg{etoolbox}}^^A
+% \changes{v2.02}{2014/07/22}{\cs{newrobustcmd} aus \pkg{etoolbox} anstelle von 
+%   \cs{DeclareRobustCommand}}^^A
 % Eine einfacher zu verwendende Kurzform.
 %    \begin{macrocode}
 \newrobustcmd*\bsc{\@backslashchar}
