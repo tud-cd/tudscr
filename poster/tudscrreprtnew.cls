@@ -229,7 +229,9 @@
 \DefineFamilyMember{KOMA}
 \DefineFamilyKey{KOMA}{fontsize}{%
   \AtEndOfFamilyOptions{%
-    \tud@ifverlower{2.04}{}{\if@atdocument\tud@font@skip@set\fi}%
+    \tud@ifverlower{2.04}{}{%
+      \if@atdocument\tud@font@skip@set\fi
+    }%
   }%
   \FamilyKeyStateProcessed%
 }
@@ -1180,6 +1182,22 @@
 \providecommand*\protected@expandtwoargs[3]{%
   \protected@edef\reserved@a{\noexpand#1{#2}{#3}}\reserved@a%
 }
+\newcommand*\tud@divide[3]{%
+  \@defaultunits\@tempdima #2pt\relax\@nnil%
+  \@defaultunits\@tempdimb #3pt\relax\@nnil%
+  \ifdim\@tempdima>\@tempdimb\relax%
+    \setlength\@tempdimc{\@tempdima}%
+  \else%
+    \setlength\@tempdimc{\@tempdimb}%
+  \fi%
+  \@tempcnta=1%
+  \@whiledim\dimexpr\@tempdimc*\@tempcnta\relax<\dimexpr\maxdimen/10\relax\do{%
+    \multiply\@tempcnta by 10\relax%
+  }%
+  \setlength{\@tempdimc}{\dimexpr (\@tempcnta\@tempdima / \@tempdimb * \p@)}%
+  \setlength{\@tempdimc}{\dimexpr \@tempdimc/\@tempcnta\relax}%
+  \edef#1{\strip@pt\@tempdimc}%
+}
 %%% From File: tudscr-fonts.dtx
 \newcommand*\tud@font@greek@loop[1]{%
   \@for\@tempa:={%
@@ -1551,6 +1569,11 @@
     \tud@skip@store{belowcaptionskip}%
     \tud@font@skip@@set%
   \fi%
+  \tud@ifverlower{2.04}{}{%
+    \@defaultunits\@tempdima\@ptsize pt\relax\@nnil%
+    \setlength\@tempdima{\dimexpr\@tempdima+10\p@\relax}%
+    \setlength\columnsep{1.5\baselineskip}%
+  }%
 }
 \newcommand*\tud@font@skip@@set{%
   \setlength{\@tempdimb}{\f@baselineskip}%
@@ -2286,6 +2309,17 @@
       \tud@ddclogo%
     },%
   ]{tudheadings.foot.logo}%
+  \DeclareNewLayer[%
+    background,foot,%
+    height=\dimexpr\paperheight-\layeryoffset\relax,%
+    contents={%
+      \vbox to \dimexpr\layerheight-\dp\strutbox\relax{%
+        \vfil
+        \tud@foot@layer%
+        \vfil\vfil%
+      }%
+    },%
+  ]{tudheadings.foot.content}%
   \tud@ifverlower{2.03}{%
     \ModifyLayer[%
       voffset=\dimexpr\topmargin+1in+\headheight+\headsep+\textheight%
@@ -2294,6 +2328,13 @@
         \relax,%
       height=\dimexpr.6\tud@dim@topmargin+\dp\strutbox\relax,%
     ]{tudheadings.foot.logo}%
+    \ModifyLayer[%§§§
+      voffset=\dimexpr\topmargin+1in+\headheight+\headsep+\textheight%
+        +\footskip-\footheight-\tud@dim@ddcdiff%
+        \ifcase\tud@geometry\relax\else+\ht\strutbox+\dp\strutbox\fi%
+        \relax,%
+      height=\dimexpr.6\tud@dim@topmargin+\dp\strutbox\relax,%
+    ]{tudheadings.foot.content}%
   }{}%
   \DeclareNewLayer[%
     background,%
@@ -2312,6 +2353,7 @@
     tudheadings.head.upperwideline,%
     tudheadings.head.lowerwideline,%
     tudheadings.foot.back,%
+    tudheadings.foot.content,%
     tudheadings.foot.logo,%
     tudheadings.last,%
     scrheadings.foot.odd,%
@@ -2336,6 +2378,7 @@
     tudheadings.head.upperwideline,%
     tudheadings.head.lowerwideline,%
     tudheadings.foot.back,%
+    tudheadings.foot.content,%
     tudheadings.foot.logo,%
     tudheadings.last,%
     plain.scrheadings.foot.odd,%
@@ -2362,6 +2405,7 @@
     tudheadings.head.upperwideline,%
     tudheadings.head.lowerwideline,%
     tudheadings.foot.back,%
+    tudheadings.foot.content,%
     tudheadings.foot.logo,%
     tudheadings.last%
   }%
@@ -2421,7 +2465,7 @@
   \rule[\ht\strutbox]{#1}{\tud@dim@line}%
 }
 \newcommand*\tud@head@text@add[3][, ]{%
-  \edef\tud@head@text{#3}%
+  \protected@edef\tud@head@text{#3}%
   \ifx\tud@head@text\@empty%
     \def\tud@head@text@delimiter{}%
   \else%
@@ -2440,11 +2484,11 @@
       \@tempswatrue%
       \def\tud@head@text@delimiter{}%
     \else%
-      \edef\tud@head@text@first{\@tempa}%
+      \protected@edef\tud@head@text@first{\@tempa}%
     \fi%
   \fi%
   \if@tempswa%
-    \edef\tud@head@text@second{%
+    \protected@edef\tud@head@text@second{%
       \tud@head@text@second%
       \tud@head@text@delimiter%
       #2%
@@ -2472,8 +2516,7 @@
     \hfuzz=\@tempdima%
   \fi%
   \vbox{%
-    \linespread{0}\selectfont%
-    \offinterlineskip%
+    \linespread{0}\selectfont\offinterlineskip%
     \color{\tud@head@logocolor}%
     \tud@head@text@write{\tud@head@text@first}%
     \ifnum\tud@head@bar>\@ne% color
@@ -2574,6 +2617,30 @@
   }%
   \global\let\tud@headlogo@wrn\relax%
 }
+\newcommand*\footcontent{%
+  \@ifstar{%
+    \let\tud@foot@@layer\relax%
+    \@footcontent%
+  }{%
+    \def\tud@foot@@layer{%
+      \color{\tud@foot@logocolor}%
+      \tud@divide\@tempa{\tud@head@font@size}{\f@size}%
+      \linespread{\@tempa}%
+      \selectfont%
+      \tud@head@font@light%
+    }%
+    \@footcontent%
+  }%
+}
+\newcommand\@footcontent[1]{%
+  \def\tud@foot@layer{%
+    \tud@foot@@layer%
+    \ifdef{\multicols}{\setlength\multicolsep{-\baselineskip}}{}%
+    #1%
+  }%
+}
+\newcommand*\tud@foot@layer{}
+\newcommand*\tud@foot@@layer{}
 \newlength\footlogoheight
 \newcommand*\footlogosep{\hfill}
 \newcommand*\footlogo[2][]{%
@@ -3686,6 +3753,7 @@
       \ifnum\@nameuse{tud@#1@level}<\tw@\begin{\tud@quoting}\fi% false/true
     \fi\fi%
     \ifnum\tud@multicols>\@ne\relax%
+% §§§ \ifdef{\multicols}{\setlength\multicolsep{-\baselineskip}}{}%
       \ifdef{\main@language}{%
         \expandafter\selectlanguage\expandafter{\languagename}%
       }{%
