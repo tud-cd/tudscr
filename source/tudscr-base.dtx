@@ -1,4 +1,4 @@
-% \CheckSum{418}
+% \CheckSum{469}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-base.dtx}[%
-  2015/04/07 v2.04 TUD-KOMA-Script\space%
+  2015/04/09 v2.04 TUD-KOMA-Script\space%
 %</driver>
 %<package>\NeedsTeXFormat{LaTeX2e}[2011/06/27]
 %<package>\ProvidesPackage{tudscrbase}[%
@@ -865,6 +865,51 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \protected@expandtwoargs
+%
+% \subsection{Division für rationale Zahlen}
+%
+% Mit \LaTeXe kann~-- ohne die Verwendung zusätzlichr Pakete~-- nicht ohne 
+% Weiteres eine Division durchgeführt werden, die als Ergenis eine rationale 
+% Zahl liefert. Dem wird hier Abhilfe geleistet.
+% \begin{macro}{\tud@divide}
+% \changes{v2.04}{2015/04/09}{neu}^^A
+% Der Befehl erwartet im ersten Argument das Makro, in welches das Ergebnis 
+% der Division expandiert werden soll, danach folgen Dividend und Divisor.
+%    \begin{macrocode}
+\newcommand*\tud@divide[3]{%
+%    \end{macrocode}
+% Die Division wird über temporäre Längenregister durchgeführt. Die zu 
+% teilenden Zahlen werden normiert, wodurch auch Längen mit unterschiedlichen 
+% Einheiten geteilt werden können.
+%    \begin{macrocode}
+  \@defaultunits\@tempdima #2pt\relax\@nnil%
+  \@defaultunits\@tempdimb #3pt\relax\@nnil%
+%    \end{macrocode}
+% Danach wird mit der größeren der beiden Zahlen der größtmögliche, durch
+% \val{2} teilbare Faktor zur Berechnung ermittelt.
+%    \begin{macrocode}
+  \ifdim\@tempdima>\@tempdimb\relax%
+    \setlength\@tempdimc{\@tempdima}%
+  \else%
+    \setlength\@tempdimc{\@tempdimb}%
+  \fi%
+  \@tempcnta=1%
+  \@whiledim\dimexpr\@tempdimc*\@tempcnta\relax<\dimexpr\maxdimen/10\relax\do{%
+    \multiply\@tempcnta by 10\relax%
+  }%
+%    \end{macrocode}
+% Mit dem im temporären Zählerregister \cs{@tempcnta} gespeicherten Faktor 
+% wird der Dividend erweitert und der berechnete Quotient wieder gekürzt.
+%    \begin{macrocode}
+  \setlength{\@tempdimc}{\dimexpr (\@tempcnta\@tempdima / \@tempdimb * \p@)}%
+  \setlength{\@tempdimc}{\dimexpr \@tempdimc/\@tempcnta\relax}%
+%    \end{macrocode}
+% Das Ergebnis wird in das angegebene Makro expandiert.
+%    \begin{macrocode}
+  \edef#1{\strip@pt\@tempdimc}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@divide
 %
 % \iffalse
 %</!inherit>
