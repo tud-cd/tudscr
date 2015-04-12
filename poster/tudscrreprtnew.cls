@@ -1572,7 +1572,9 @@
   \tud@ifverlower{2.04}{}{%
     \@defaultunits\@tempdima\@ptsize pt\relax\@nnil%
     \setlength\@tempdima{\dimexpr\@tempdima+10\p@\relax}%
-    \setlength\columnsep{1.5\baselineskip}%
+    \@defaultunits\@tempdima\f@size pt\relax\@nnil%
+    \setlength\columnsep{1.5\@tempdima}%
+    
   }%
 }
 \newcommand*\tud@font@skip@@set{%
