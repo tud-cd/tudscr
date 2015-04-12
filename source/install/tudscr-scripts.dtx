@@ -1,4 +1,4 @@
-% \CheckSum{263}
+% \CheckSum{258}
 % \iffalse meta-comment
 % ======================================================================
 %
@@ -67,6 +67,7 @@
 %
 % \changes{v2.03}{2015/01/23}{\pkg{mweights} unnötig}^^A
 % \changes{v2.04}{2015/03/11}{MiKTeX Portable wird unterstützt}^^A
+% \changes{v2.04}{2015/04/12}{Bugfix für Windowspfade mit Leerzeichen}^^A
 %
 % \section{Installationsskripte}
 %
@@ -259,13 +260,16 @@ if "%texmfpath%"=="" (
 :proof_userinput
   echo  =====================================================================
   echo.
+  set /p texmfpath=< texmfpath.tmp
+  set "texmfpath=%texmfpath:/=\%"
+  if "%texmfpath:~-1%"=="\" set texmfpath=%texmfpath:~,-1%
+  echo %texmfpath%> texmfpath.tmp
   echo   Soll das Verzeichnis %texmfpath% genutzt werden?
   if not exist "%texmfpath%" (
     echo   Der angegebene Ordner existiert nicht, wird jedoch erstellt.
   )
   echo   [j]a (ENTER) / [n]ein:
   echo.
-  set /p texmfpath=< texmfpath.tmp
   set w=
   set /p w=
   echo.
@@ -542,6 +546,11 @@ exit /b 0
 %
 % \iffalse
 %</full|font|convert>
+% \fi
+%
+  set "texmfpath=%texmfpath:\=/%"
+%
+% \iffalse
 %<*!convert>
 % \fi
 %
@@ -557,14 +566,14 @@ exit /b 0
 % \fi
 %
   updmap
-  set mapcfg=%texmfpath%\miktex\config\updmap.cfg
-  if exist "%mapcfg%" goto :updatemap
+  set mapcfg="%texmfpath%/miktex/config/updmap.cfg"
+  if exist %mapcfg% goto :updatemap
   :newmap
-    if not exist "%texmfpath%\miktex\config" (
-      mkdir "%texmfpath%\miktex\config"
+    if not exist "%texmfpath%/miktex/config" (
+      mkdir "%texmfpath%/miktex/config"
     )
-%<old>    echo Map tud.map> "%mapcfg%"
-%<!old>    echo Map tudscr.map> "%mapcfg%"
+%<old>    echo Map tud.map> %mapcfg%
+%<!old>    echo Map tudscr.map> %mapcfg%
     goto :endmap
   :updatemap
     set /p var=< %mapcfg%
@@ -615,7 +624,7 @@ exit /b 0
 % \fi
 %
   echo   Dokumentation und Beispiele fuer das TUD-KOMA-Script-Bundle sind
-%<full|update>  echo   unter '%texmfpath%\doc\latex\tudscr' oder
+%<full|update>  echo   unter '%texmfpath%/doc/latex/tudscr' oder
   echo   ueber den Konsolenaufruf 'texdoc tudscr' zu finden.
   echo  =====================================================================
 %
