@@ -651,29 +651,6 @@
     \if@atdocument\tud@layout@process\fi%
   \fi%
 }
-\newcommand*\tud@font@heading@size{}
-\AtEndOfClass{\let\tud@font@heading@size\size@part}
-\DefineFamilyMember{KOMA}
-\DefineFamilyKey{KOMA}{headings}{%
-  \AtEndOfFamilyOptions{%
-    \let\tud@font@heading@size\size@part%
-    \if@atdocument%
-      \tud@layout@process%
-      \ifcase\tud@layout@part\relax\else% !false
-        \tud@font@koma@reset{part}%
-        \tud@font@koma@reset{partnumber}%
-      \fi%
-      \ifcase\tud@layout@chapter\relax\else% !false
-        \tud@font@koma@reset{chapter}%
-        \tud@font@koma@reset{chapterprefix}%
-        \tud@font@koma@reset{section}%
-        \tud@font@koma@reset{subsection}%
-        \tud@font@koma@reset{subsubsection}%
-        \tud@font@koma@reset{minisec}%
-      \fi%
-    \fi%
-  }%
-}
 \newif\if@tud@parttitle
 \TUD@key{parttitle}[true]{%
   \TUD@set@ifkey{parttitle}{@tud@parttitle}{#1}%
@@ -754,6 +731,29 @@
 }
 \newcommand*\tud@font@koma@unset[1]{%
   \ifcsdef{tud@font@koma@#1}{\@namedef{tud@font@koma@#1}{\relax}}{}%
+}
+\newcommand*\tud@font@heading@size{}
+\AtEndOfClass{\let\tud@font@heading@size\size@part}
+\DefineFamilyMember{KOMA}
+\DefineFamilyKey{KOMA}{headings}{%
+  \AtEndOfFamilyOptions{%
+    \let\tud@font@heading@size\size@part%
+    \if@atdocument%
+      \tud@layout@process%
+      \ifcase\tud@layout@part\relax\else% !false
+        \tud@font@koma@reset{part}%
+        \tud@font@koma@reset{partnumber}%
+      \fi%
+      \ifcase\tud@layout@chapter\relax\else% !false
+        \tud@font@koma@reset{chapter}%
+        \tud@font@koma@reset{chapterprefix}%
+        \tud@font@koma@reset{section}%
+        \tud@font@koma@reset{subsection}%
+        \tud@font@koma@reset{subsubsection}%
+        \tud@font@koma@reset{minisec}%
+      \fi%
+    \fi%
+  }%
 }
 %%% From File: tudscr-frontmatter.dtx
 \newcommand*\tud@fm@switch{%
@@ -2435,26 +2435,32 @@
 \newcommand*\tud@foot@fontcolor{}
 % §§§
 \newcommand*\tud@ps@onbackground{%
+%  \def\tud@foot@fontcolor{green}% §§§ TEST
   \ifcase\tud@head@bar\relax% cdhead=nocolor
     \def\tud@head@logocolor{black}%
     \def\tud@foot@logocolor{black}%
-    \gdef\tud@foot@fontcolor{}%
+    \def\tud@foot@fontcolor{}%
   \or% cdhead=litecolor
     \def\tud@head@logocolor{HKS41}%
     \def\tud@foot@logocolor{HKS41}%
-    \gdef\tud@foot@fontcolor{HKS41}%
+    \def\tud@foot@fontcolor{HKS41}%
+%    \def\tud@foot@fontcolor{red}% §§§ TEST
   \or% cdhead=color
     \def\tud@head@logocolor{white}%
     \if@tud@foot@colored%
       \def\tud@foot@logocolor{white}%
-      \gdef\tud@foot@fontcolor{white}%
+        \def\tud@foot@fontcolor{white}%
+%        \def\tud@foot@fontcolor{green}% §§§ TEST
     \else%
       \def\tud@foot@logocolor{HKS41}%
-      \gdef\tud@foot@fontcolor{HKS41}%
+        \def\tud@foot@fontcolor{HKS41}%
+%        \def\tud@foot@fontcolor{yellow}% §§§ TEST
     \fi%
   \fi%
   \let\tud@dim@line\tud@dim@thinline%
   \ifstr{\tud@head@logocolor}{white}{\let\tud@dim@line\tud@dim@heavyline}{}%
+  \gdef\tud@foot@fontcolor{red}%
+  \typeout{+++++ onbackground: \meaning\tud@foot@fontcolor}%
 }
 \patchcmd{\thispagestyle}{\gdef\@specialstyle{#1}}{%
   \xdef\@specialstyle{\GetRealPageStyle{#1}}
@@ -3002,6 +3008,7 @@
         }%
       }%
       \setlength\tud@dim@headdiff{\z@}%
+% §§§
       \tud@font@koma@set{pagefoot}{\usekomafont{tudheadings}}%
       \tud@font@koma@set{pagenumber}{\usekomafont{tudheadings}}%
     }{%
@@ -3017,8 +3024,9 @@
           }%
         \fi%
       \fi%
-      \tud@font@koma@unset{pagefoot}%
-      \tud@font@koma@unset{pagenumber}%
+% §§§
+%      \tud@font@koma@unset{pagefoot}%
+%      \tud@font@koma@unset{pagenumber}%
     }%
     \global\tud@dim@headdiff=\tud@dim@headdiff%
   }{}%
@@ -3155,7 +3163,11 @@
 }
 %%% From File: tudscr-layout.dtx
 \newcommand*\tud@font@color[1]{\ifdefvoid{#1}{}{\color{#1}}}
-\newkomafont{tudheadings}{\tud@font@color{\tud@foot@fontcolor}\typeout{*****}}
+\newkomafont{tudheadings}{%
+  \sffamily%
+%  \color{red}%
+  \tud@font@color{\tud@foot@fontcolor}
+}
 \newcommand*\tud@part@fontcolor{}
 \newcommand*\tud@chapter@fontcolor{}
 \newkomafont{parttitle}{%
@@ -3287,6 +3299,24 @@
     \let\@@makechapterhead\tud@@@makechapterhead%
   \fi%
 }
+\newcommand*\tud@layout@specialpage@set[1]{%
+% §§§ über LAyer tudscrheadings.last evtl. sinnvoll?
+  \tud@font@koma@set{footnote}{%
+    \sffamily%
+    \edef\@tempa{%
+      \noexpand\tud@font@color{%
+        \expandafter\noexpand\csname tud@#1@fontcolor\endcsname%
+      }%
+    }\@tempa%
+  }%
+  \tud@cmd@store{footnoterule}%
+  \let\footnoterule\relax%
+}
+\newcommand*\tud@layout@specialpage@unset{%
+  \tud@font@koma@unset{footnote}%
+  \tud@cmd@restore{footnoterule}%
+  \@tud@layout@specialpagefalse%
+}
 \newcommand*\tud@partheadstartvskip{%
   \def\tud@part@fontcolor{}% false/true
   \ifcase\tud@layout@part\relax\or\or% lite
@@ -3298,6 +3328,25 @@
   \or% full
     \def\tud@part@fontcolor{HKS41!30}%
   \fi%
+  \tud@layout@specialpage@set{part}%
+% §§§
+%      \def\tud@foot@fontcolor{\tud@part@fontcolor}%
+%       §§§ ahängig von fußfarbe
+%       wahrscheinlich zwei separate makros zu den Schriftelementen und alles 
+%       nach Teil-/Kapitel-/Titelseite zurücksetzen bzw. auf relax...?!
+%       footnoterule beachten!
+%      \addtokomafont{pagefoot}{%
+%        \sffamily%
+%        \tud@font@color{\tud@foot@fontcolor}%
+%      }%
+%      \addtokomafont{pagenumber}{%
+%        \sffamily%
+%        \tud@font@color{\tud@foot@fontcolor}%
+%      }%
+%        \addtokomafont{footnote}{%
+%          \sffamily%
+%          \tud@font@color{\tud@part@fontcolor}%
+%        }%
   \begingroup%
     \vspace*{%
       \dimexpr\tud@dim@headdiff+\tud@dim@headingsvskip-\baselineskip%
@@ -3321,7 +3370,7 @@
     \else%
       \usekomafont{partnumber}{\tud@headmidvskip@neg}%
     \fi%
-  \endgroup%
+    \endgroup%
 }
 \newcommand*\tud@partheadendvskip{%
   \tud@cleardoublespecialpage{%
@@ -3346,26 +3395,16 @@
     \or% full
       \def\tud@pagecolor{HKS41}%
       \cs@set@lock{tud@head@bar}{2}%
+% §§§
+%      \if@tud@foot@colored%
+%        \def\tud@foot@fontcolor{yellow}%
+%      \else%
+%        \def\tud@foot@fontcolor{\tud@part@fontcolor}%
+%      \fi%
     \fi%
-%    \def\tud@foot@fontcolor{\tud@part@fontcolor}%
-    % §§§ ahängig von fußfarbe
-    % wahrscheinlich zwei separate makros zu den Schriftelementen und alles 
-    % nach Teil-/Kapitel-/Titelseite zurücksetzen bzw. auf relax...?!
-    % footnoterule beachten!
-    \addtokomafont{pagefoot}{%
-      \sffamily%
-      \tud@font@color{\tud@part@fontcolor}%
-    }%
-    \addtokomafont{pagenumber}{%
-      \sffamily%
-      \tud@font@color{\tud@part@fontcolor}%
-    }%
-    \addtokomafont{footnote}{%
-      \sffamily%
-      \tud@font@color{\tud@part@fontcolor}%
-    }%
     \clearpage%
   }%
+  \tud@layout@specialpage@unset%
 }
 \let\tud@@part\@part
 \ifcsdef{scr@v@3.17}{%
@@ -3432,6 +3471,7 @@
   \ifcase\tud@layout@chapter\relax\or\else% lite/bicolor/color/full
     \def\tud@chapter@fontcolor{HKS41}%
   \fi%
+%  \def\tud@chapter@fontcolor{HKS07}% §§§ TEST
   \ifcsdef{scr@v@3.15}{%
     \vspace*{%
       \dimexpr\tud@dim@headdiff+\tud@dim@headingsvskip+\parskip\relax%
@@ -3520,6 +3560,20 @@
   \if@tud@chapterpage%
     \@restonecolfalse%
     \if@twocolumn\@restonecoltrue\onecolumn\fi%
+    \tud@layout@specialpage@set{chapter}%
+%      % §§§ ahängig von fußfarbe
+%      \addtokomafont{pagefoot}{%
+%        \sffamily%
+%        \tud@font@color{\tud@chapter@fontcolor}%
+%      }%
+%      \addtokomafont{pagenumber}{%
+%        \sffamily%
+%        \tud@font@color{\tud@chapter@fontcolor}%
+%      }%
+%      \addtokomafont{footnote}{%
+%        \sffamily%
+%        \tud@font@color{\tud@chapter@fontcolor}%
+%      }%
   \fi%
 }
 \newcommand*\tud@head@bar@store{}%
@@ -3541,27 +3595,15 @@
         \cs@set@lock{tud@head@bar}{-1}%
         \def\tud@head@logocolor{HKS41}%
         \def\tud@foot@logocolor{HKS41}%
-        \def\tud@foot@fontcolor{\tud@chapter@fontcolor}%
+%        \def\tud@foot@fontcolor{\tud@chapter@fontcolor}%
         \bool@std@lock{@tud@head@widebar}{true}%
       \or% fullcolor
         \def\tud@pagecolor{HKS41!10}%
         \cs@set@lock{tud@head@bar}{2}%
       \fi%
-      % §§§ ahängig von fußfarbe
-      \addtokomafont{pagefoot}{%
-        \sffamily%
-        \tud@font@color{\tud@chapter@fontcolor}%
-      }%
-      \addtokomafont{pagenumber}{%
-        \sffamily%
-        \tud@font@color{\tud@chapter@fontcolor}%
-      }%
-      \addtokomafont{footnote}{%
-        \sffamily%
-        \tud@font@color{\tud@chapter@fontcolor}%
-      }%
       \clearpage%
     }%
+    \tud@layout@specialpage@unset%
     \if@restonecol\twocolumn\fi%
   \else%
     \edef\tud@head@bar@store{\tud@head@bar}%
@@ -4303,11 +4345,11 @@
         \cs@set@lock{tud@head@bar}{-1}%
         \def\tud@head@logocolor{white}%
         \def\tud@foot@logocolor{white}%
-        \if@tud@foot@colored%
-          \def\tud@foot@fontcolor{white}%
-        \else%
-          \def\tud@foot@fontcolor{\tud@title@fontcolor}%
-        \fi%
+%        \if@tud@foot@colored%
+%          \def\tud@foot@fontcolor{white}%
+%        \else%
+%          \def\tud@foot@fontcolor{\tud@title@fontcolor}%
+%        \fi%
         \bool@std@lock{@tud@head@widebar}{true}%
       \or% full
         \def\tud@pagecolor{HKS41}%
@@ -4322,10 +4364,10 @@
 %        \sffamily%
 %        \tud@font@color{\tud@title@fontcolor}%
 %      }%
-      \addtokomafont{footnote}{%
-        \sffamily%
-        \tud@font@color{\tud@title@fontcolor}%
-      }%
+%      \addtokomafont{footnote}{%
+%        \sffamily%
+%        \tud@font@color{\tud@title@fontcolor}%
+%      }%
       \thispagestyle{empty.tudheadings}%
       \tud@ifverlower{2.03}{\tud@ddc@enlargepage}{}%
     }%
