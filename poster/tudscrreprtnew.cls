@@ -1405,7 +1405,7 @@
   \fi%
   \tud@font@greek@loop\tud@font@greek@init%
   \tud@font@math@set%
-  \setbox0\hbox{\dinbn$ $}%
+  \setbox\z@\hbox{\dinbn$ $}%
   \undef\tud@font@math@init%
 }
 \AtEndPreamble{%
@@ -1720,7 +1720,7 @@
     \global\let\tud@thanks\relax%
     \def\thanks##1{\gdef\tud@thanks{##1}}%
     \let\footnote\thanks%
-    \setbox0\hbox{#2}%
+    \setbox\z@\hbox{#2}%
     \let\thanks\@gobble%
     \let\footnote\@gobble%
     \tud@lowerstring{\@tempa}{#2}%
@@ -1884,7 +1884,7 @@
     \protecting{%
       \global\@tempswafalse%
       \def\and{\global\@tempswatrue}%
-      \savebox0{\@referee}%
+      \sbox\z@{\@referee}%
     }%
   \endgroup%
   \if@tempswa%
@@ -1901,7 +1901,7 @@
     \protecting{%
       \global\@tempswafalse%
       \def\and{\global\@tempswatrue}%
-      \savebox0{\@professor}%
+      \sbox\z@{\@professor}%
     }%
   \endgroup%
   \if@tempswa%
@@ -1981,7 +1981,7 @@
     \protecting{%
       \global\@tempswafalse%
       \def\and{\global\@tempswatrue}%
-      \savebox0{\@referee}%
+      \sbox\z@{\@referee}%
     }%
   \endgroup%
   \if@tempswa%
@@ -1998,7 +1998,7 @@
     \protecting{%
       \global\@tempswafalse%
       \def\and{\global\@tempswatrue}%
-      \savebox0{\@professor}%
+      \sbox\z@{\@professor}%
     }%
   \endgroup%
   \if@tempswa%
@@ -3155,7 +3155,6 @@
 }
 %%% From File: tudscr-layout.dtx
 \newcommand*\tud@font@color[1]{\ifdefvoid{#1}{}{\color{#1}}}
-% §§§ ahängig von fußfarbe
 \newkomafont{tudheadings}{\tud@font@color{\tud@foot@fontcolor}\typeout{*****}}
 \newcommand*\tud@part@fontcolor{}
 \newcommand*\tud@chapter@fontcolor{}
@@ -3168,8 +3167,8 @@
 \newlength\headingsvskip
 \newcommand*\tud@headmidvskip{\par\nobreak\vspace{.5\baselineskip}}
 \newcommand*\tud@headmidvskip@neg{%
-  \setbox0\vbox{\tud@headmidvskip}%
-  \vspace*{\dimexpr-\dp\strutbox-\ht\strutbox-\ht0\relax}%
+  \setbox\z@\vbox{\tud@headmidvskip}%
+  \vspace*{\dimexpr-\dp\strutbox-\ht\strutbox-\ht\z@\relax}%
 }
 \newcommand*\tud@layout@process{%
   \ifcase\tud@layout@cover\relax% false
@@ -3431,8 +3430,7 @@
 \newcommand*\tud@chapterheadstartvskip{%
   \def\tud@chapter@fontcolor{}%
   \ifcase\tud@layout@chapter\relax\or\else% lite/bicolor/color/full
-    \def\tud@chapter@fontcolor{HKS41}% §§§ wieder rein
-    \def\tud@chapter@fontcolor{HKS07}% §§§ nur für Test
+    \def\tud@chapter@fontcolor{HKS41}%
   \fi%
   \ifcsdef{scr@v@3.15}{%
     \vspace*{%
@@ -3543,6 +3541,7 @@
         \cs@set@lock{tud@head@bar}{-1}%
         \def\tud@head@logocolor{HKS41}%
         \def\tud@foot@logocolor{HKS41}%
+        \def\tud@foot@fontcolor{\tud@chapter@fontcolor}%
         \bool@std@lock{@tud@head@widebar}{true}%
       \or% fullcolor
         \def\tud@pagecolor{HKS41!10}%
@@ -3703,8 +3702,8 @@
     \ifboolexpr{%
       bool {@titlepage} and bool {@tud@#1@fil} and bool {@tud@#1@multi}%
     }{%
-      \setbox0\vbox{#2}%
-      \ifdim\textheight<\dimexpr\ht0+\dp0\relax%
+      \sbox\z@{\vbox{#2}}%
+      \ifdim\textheight<\dimexpr\ht\z@+\dp\z@\relax%
         \ClassWarning{\tudcls@name}{%
           The given content within the `#1'\MessageBreak%
           environment is too large, so it wasn't possible\MessageBreak%
@@ -3736,7 +3735,7 @@
         \protected@xdef\tud@fm@@@toc{\tud@fm@@toc/}%
       }%
       \let\clearpage\relax%
-      \setbox0\vbox{#2}%
+      \sbox\z@{\vbox{#2}}%
       \protected@edef\@tempa{%
         \noexpand\endgroup%
         \noexpand\ifnumodd{\csname tud@#1@toc\endcsname}{%
@@ -4175,21 +4174,21 @@
       \usekomafont{titlepage}%
       \setlength\@tempdima{\z@}%
       \ifx\@titlehead\@empty\else%
-        \setbox0\vbox{%
+        \sbox\z@{\vbox{%
           \begin{minipage}[t]{\textwidth}%
             {\usekomafont{titlehead}{\@titlehead\par\null}}%
           \end{minipage}\newline\null%
-        }%
-        \addtolength\@tempdima{\dimexpr\ht0+\dp0\relax}%
+        }}%
+        \addtolength\@tempdima{\dimexpr\ht\z@+\dp\z@\relax}%
       \fi%
       \tud@letsubjectthesis%
       \ifx\@subject\@empty\else%
-        \setbox1\vbox{{\usekomafont{subject}{\@subject\par\null}}}%
-        \addtolength\@tempdima{\dimexpr\ht1+\dp1+1pt\relax}%
+        \sbox\@ne{\vbox{{\usekomafont{subject}{\@subject\par\null}}}}%
+        \addtolength\@tempdima{\dimexpr\ht\@ne+\dp\@ne+1pt\relax}%
       \fi%
       \vspace*{-\@tempdima}%
-      \ifx\@titlehead\@empty\else\usebox0\par\fi%
-      \ifx\@subject\@empty\else\usebox1\par\fi%
+      \ifx\@titlehead\@empty\else\usebox\z@\par\fi%
+      \ifx\@subject\@empty\else\usebox\@ne\par\fi%
       {\usekomafont{title}{\tud@title@uppercase{\@title}\par}}%
       \vskip 2ex\@plus1ex\@minus1ex%
       \ifx\@subtitle\@empty\else%
@@ -4362,7 +4361,7 @@
   \begingroup%
     \def\thanks##1{\gdef\@tempa{##1}}%
     \let\footnote\thanks%
-    \setbox0\hbox{#1}%
+    \sbox\z@{\hbox{#1}}%
     \let\thanks\@gobble%
     \let\footnote\@gobble%
     \tud@makeuppercase{#1}%
@@ -4399,22 +4398,22 @@
     \tud@footnote@unhyper%
     \setlength\@tempdima{\z@}%
     \ifx\@titlehead\@empty\else%
-      \setbox0\vbox{%
+      \sbox\z@{\vbox{%
         \begin{minipage}[t]{\textwidth}%
           {\usekomafont{titlehead}{\@titlehead\par\null}}%
         \end{minipage}\newline\null%
-      }%
-      \addtolength\@tempdima{\dimexpr\ht0+\dp0\relax}%
+      }}%
+      \addtolength\@tempdima{\dimexpr\ht\z@+\dp\z@\relax}%
     \fi%
     \TUDoptions{subjectthesis=true}%
     \tud@letsubjectthesis%
     \ifx\@subject\@empty\else%
-      \setbox1\vbox{{\usekomafont{subject}{\@subject\par\null}}}%
-      \addtolength\@tempdima{\dimexpr\ht1+\dp1+1pt\relax}%
+      \sbox\@ne{\vbox{{\usekomafont{subject}{\@subject\par\null}}}}%
+      \addtolength\@tempdima{\dimexpr\ht\@ne+\dp\@ne+1pt\relax}%
     \fi%
     \vspace*{-\@tempdima}%
-    \ifx\@titlehead\@empty\else\usebox0\par\fi%
-    \ifx\@subject\@empty\else\usebox1\par\fi%
+    \ifx\@titlehead\@empty\else\usebox\z@\par\fi%
+    \ifx\@subject\@empty\else\usebox\@ne\par\fi%
     {\usekomafont{title}{\tud@title@uppercase{\@title}\par}}%
     \vskip 2ex\@plus1ex\@minus1ex%
     \ifx\@subtitle\@empty\else%
@@ -4477,7 +4476,7 @@
   \begingroup%
     \let\thanks\@gobble%
     \let\footnote\@gobble%
-    \setbox0\hbox{#2}%
+    \sbox\z@{#2}%
   \endgroup%
 }
 \newcommand*\tud@newline{}
