@@ -2278,12 +2278,7 @@
     background,foot,%
     height=\dimexpr\paperheight-\layeryoffset\relax,%
     contents={%
-      \ifdim\footlogoheight>\z@\relax\else%
-        \settoheight\footlogoheight{\tud@mainlogo}%
-        \tud@ifverlower{2.03}{%
-          \setlength\footlogoheight{.6\tud@dim@topmargin}%
-        }{}%
-      \fi%
+      \tud@footlogoheight@default%
       \setlength\@tempdima{%
         \dimexpr\footlogoheight-\layerheight+\dp\strutbox\relax%
       }%
@@ -2650,31 +2645,70 @@
   }%
   \global\let\tud@headlogo@wrn\relax%
 }
-\newcommand*\footcontent{%
+\newcommand*\tud@foot@layer{}
+\newcommand*\tud@foot@font{}
+\newcommand*\tudheadingsfoot{%
   \@ifstar{%
-    \let\tud@foot@@layer\relax%
-    \@footcontent%
+    \let\tud@foot@font\relax%
+    \@tudheadingsfoot%
   }{%
-    \def\tud@foot@@layer{%
+    \def\tud@foot@font{%
       \usekomafont{tudheadings}%
       \tud@divide\@tempa{\tud@head@font@size}{\f@size}%
       \linespread{\@tempa}%
       \selectfont%
       \tud@head@font@light%
     }%
-    \@footcontent%
+    \@tudheadingsfoot%
   }%
 }
-\newcommand\@footcontent[1]{%
+\newcommand\@tudheadingsfoot[1]{%
+  \kernel@ifnextchar[%]
+    {\@@tudheadingsfoot{#1}}%
+    {\@@tudheadingsfoot{#1}[]}%
+}
+\newcommand*\@@tudheadingsfoot{}%
+\def\@@tudheadingsfoot#1[#2]{%
   \def\tud@foot@layer{%
-    \tud@foot@@layer%
+    \tud@foot@font%
     \ifdef{\multicols}{\setlength\multicolsep{-.9\baselineskip}}{}%
-    #1%
+    \tud@footlogoheight@default%
+    \ifcase\tud@ddc@foot%
+      \setlength\@tempdima{\z@}%
+    \else%
+      \settowidth\@tempdima{%
+        \includegraphics[keepaspectratio,totalheight=\footlogoheight]{DDC-22}%
+      }%
+      \addtolength\@tempdima{\columnsep}%
+    \fi%
+  }%
+  \ifstr{#2}{}{%
+    \appto\tud@foot@layer{%
+      \begin{minipage}[t]{\dimexpr(\textwidth-\columnsep)/2-\@tempdima\relax}%
+        #1%
+      \end{minipage}%
+    }%
+  }{%
+    \appto\tud@foot@layer{%
+      \begin{minipage}[t]{\dimexpr (\textwidth-\columnsep)/2\relax}%
+        #1%
+      \end{minipage}%
+      \hspace*{\columnsep}%
+      \begin{minipage}[t]{\dimexpr(\textwidth-\columnsep)/2-\@tempdima\relax}%
+        #2%
+      \end{minipage}%
+    }%
   }%
 }
-\newcommand*\tud@foot@layer{}
-\newcommand*\tud@foot@@layer{}
 \newlength\footlogoheight
+\newcommand*\tud@footlogoheight@default{%
+  \ifdim\footlogoheight>\z@\relax\else%
+    \settoheight\footlogoheight{\tud@mainlogo}%
+    \tud@ifverlower{2.03}{%
+      \setlength\footlogoheight{.6\tud@dim@topmargin}%
+    }{}%
+  \fi%
+}
 \newcommand*\footlogosep{\hfill}
 \newcommand*\footlogo[2][]{%
   \if@atdocument\tud@iftudps{\currentpagestyle}{\clearpage}{}\fi%
@@ -3225,7 +3259,7 @@
     \tud@cmd@store{titlepagestyle}%
     \tud@font@koma@set{titlehead}{\usekomafont{titlepage}}%
     \tud@font@koma@set{title}{%
-      \usekomafont{disposition}{}%
+      \usekomafont{disposition}%
       \tud@font@heading%
       \tud@font@heading@size%
       \tud@font@color{\tud@title@fontcolor}%
@@ -3370,7 +3404,7 @@
     \else%
       \usekomafont{partnumber}{\tud@headmidvskip@neg}%
     \fi%
-    \endgroup%
+  \endgroup%
 }
 \newcommand*\tud@partheadendvskip{%
   \tud@cleardoublespecialpage{%
