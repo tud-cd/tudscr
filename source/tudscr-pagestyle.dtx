@@ -1,4 +1,4 @@
-% \CheckSum{2088}
+% \CheckSum{2236}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-pagestyle.dtx}[%
-  2015/04/14 v2.04 TUD-KOMA-Script (pagestyle)%
+  2015/04/21 v2.04 TUD-KOMA-Script (pagestyle)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -476,7 +476,9 @@
 % \begin{layer}{tudheadings.foot.logo}
 % \changes{v2.02}{2014/06/23}{neu}^^A
 % \changes{v2.03}{2015/02/15}{überarbeitetet}^^A
-% Die folgenden beiden Ebenen dienen für die Ausgabe des Fußbereiches. Dieser 
+% \begin{layer}{tudheadings.foot.content}
+% \changes{v2.04}{2015/04/21}{neu}^^A
+% Die folgenden drei Ebenen dienen für die Ausgabe des Fußbereiches. Dieser 
 % kann mit einem farbigen Hintergrund und zusätzlichen Logos erstellt werden. 
 % Dabei werden die Ebenen in Abhängigkeit vom gewählten Kompatibilitätsmodus
 % unterschiedlich definiert. Die erste Ebene bestimmt die Hintergrundgestaltung
@@ -490,12 +492,16 @@
       -\dp\strutbox\relax,%
     height=\dimexpr\paperheight-\layeryoffset\relax,%
     contents={%
-      \if@tud@footcolor%
+      \if@tud@foot@colored%
         \let\@tempc\relax%
-        \ifnum\tud@head@bar>\@ne% color
+        \ifdefvoid{\tud@pagecolor}{%
+          \ifnum\tud@head@bar>\@ne% color
+            \def\@tempc{\color{HKS41}}%
+          \fi%
+        }{%
           \def\@tempc{\color{HKS41}}%
-        \fi%
-        \ifstr{\tud@pagecolor}{HKS41}{\def\@tempc{\color{HKS41!80}}}{}%
+          \ifstr{\tud@pagecolor}{HKS41}{\def\@tempc{\color{HKS41!80}}}{}%
+        }%
         \ifx\@tempc\relax\else%
           \tud@ifverlower{2.03}{%
             \tud@ddc@check%
@@ -527,12 +533,7 @@
 % Falls die Höhe der Logos im Fuß nicht durch den Anwender festgelegt wurden, 
 % werden passende Standardwerte gesetzt.
 %    \begin{macrocode}
-      \ifdim\footlogoheight>\z@\relax\else%
-        \settoheight\footlogoheight{\tud@mainlogo}%
-        \tud@ifverlower{2.03}{%
-          \setlength\footlogoheight{.6\tud@dim@topmargin}%
-        }{}%
-      \fi%
+      \tud@footlogoheight@default%
 %    \end{macrocode}
 % Die gesetzt Größe der Logos im Fuß wird geprüft. Sollten diese zu groß sein, 
 % wird eine Warnug ausgegeben.
@@ -577,13 +578,27 @@
   \tud@ifverlower{2.03}{%
     \ModifyLayer[%
       voffset=\dimexpr\topmargin+1in+\headheight+\headsep+\textheight%
-        +\footskip-\footheight-\tud@dim@ddcdiff%
-        \ifcase\tud@geometry\relax\else+\ht\strutbox+\dp\strutbox\fi%
-        \relax,%
+        +\footskip-\footheight-\tud@dim@ddcdiff+\dp\strutbox\relax,%
       height=\dimexpr.6\tud@dim@topmargin+\dp\strutbox\relax,%
     ]{tudheadings.foot.logo}%
   }{}%
 %    \end{macrocode}
+% Die letzte Ebene setzt den Seitenfußinhalt der \pgs{tudheadings}-Seitenstile,
+% welcher mit \cs{tudheadingsfoot} definiert wird.
+%    \begin{macrocode}
+  \DeclareNewLayer[%
+    background,foot,%
+    height=\dimexpr\paperheight-\layeryoffset\relax,%
+    contents={%
+      \vbox to \dimexpr\layerheight-\dp\strutbox\relax{%
+        \vfil%
+        \tudheadingsfootcontent%
+        \vfil\vfil%
+      }%
+    },%
+  ]{tudheadings.foot.content}%
+%    \end{macrocode}
+% \end{layer}^^A tudheadings.foot.content
 % \end{layer}^^A tudheadings.foot.logo
 % \end{layer}^^A tudheadings.foot.back
 % \begin{layer}{tudheadings.last}
@@ -627,6 +642,7 @@
     tudheadings.head.lowerwideline,%
     tudheadings.foot.back,%
     tudheadings.foot.logo,%
+    tudheadings.foot.content,%
     tudheadings.last,%
     scrheadings.foot.odd,%
     scrheadings.foot.even,%
@@ -658,6 +674,7 @@
     tudheadings.head.lowerwideline,%
     tudheadings.foot.back,%
     tudheadings.foot.logo,%
+    tudheadings.foot.content,%
     tudheadings.last,%
     plain.scrheadings.foot.odd,%
     plain.scrheadings.foot.even,%
@@ -688,6 +705,7 @@
     tudheadings.head.lowerwideline,%
     tudheadings.foot.back,%
     tudheadings.foot.logo,%
+    tudheadings.foot.content,%
     tudheadings.last%
   }%
   \DeclareNewPageStyleAlias{empty.tudscrheadings}{empty.tudheadings}%
@@ -735,9 +753,13 @@
 % \changes{v2.03}{2015/01/09}{neu}^^A
 % \begin{macro}{\tud@ps@onbackground}
 % \changes{v2.03}{2015/02/14}{neu}^^A
+% \changes{v2.04}{2015/04/21}{Kopf- und Fußeinstellungen abhängig von der Farbe 
+%   des Seitenhintergrunds}^^A
 % \begin{macro}{\tud@head@logocolor}
 % \begin{macro}{\tud@foot@logocolor}
 % \changes{v2.03}{2015/02/15}{neu}^^A
+% \begin{macro}{\tud@foot@fontcolor}
+% \changes{v2.04}{2015/04/21}{neu}^^A
 % Diese Befehle werden bei der Initialiserung der Seitenstile beziehungsweise
 % zu Beginn der Ebenenausgabe aufgerufen.
 %    \begin{macrocode}
@@ -760,25 +782,67 @@
 % des Querbalkens kann über die Option \opt{cdhead} geändert werden. Für Titel, 
 % Teil und Kapitel gibt es speziell dazugehörige Optionen, womit das Aussehen
 % des Kopfes ggf. angepasst werden kann. Mit \cs{tud@foot@logocolor} kann
-% gleichermaßen die Farbe eines etwaigen \DDC-Logo festgelegt werden.
+% gleichermaßen die Farbe eines etwaigen \DDC-Logo festgelegt werden, in 
+% \cs{tud@foot@fontcolor} wird ggf. die Schriftfarbe für den Fuß gespeichert.
 %    \begin{macrocode}
 \newcommand*\tud@head@logocolor{black}
 \newcommand*\tud@foot@logocolor{black}
+\newcommand*\tud@foot@fontcolor{}
 \newcommand*\tud@ps@onbackground{%
-  \ifcase\tud@head@bar\relax% cdhead=nocolor
-    \def\tud@head@logocolor{black}%
-    \def\tud@foot@logocolor{black}%
-  \or% cdhead=litecolor
-    \def\tud@head@logocolor{HKS41}%
-    \def\tud@foot@logocolor{HKS41}%
-  \or% cdhead=color
-    \def\tud@head@logocolor{white}%
-    \if@tud@footcolor%
-      \def\tud@foot@logocolor{white}%
-    \else%
+%    \end{macrocode}
+% Zunächst die Einstellungen für Seiten ohne spezielle Hintergrundfarbe.
+%    \begin{macrocode}
+  \ifdefvoid{\tud@pagecolor}{%
+    \ifcase\tud@head@bar\relax% cdhead=nocolor
+      \def\tud@head@logocolor{black}%
+      \def\tud@foot@logocolor{black}%
+      \gdef\tud@foot@fontcolor{}%
+    \or% cdhead=litecolor
+      \def\tud@head@logocolor{HKS41}%
       \def\tud@foot@logocolor{HKS41}%
+      \gdef\tud@foot@fontcolor{HKS41}%
+    \or% cdhead=color
+      \def\tud@head@logocolor{white}%
+      \if@tud@foot@colored%
+        \def\tud@foot@logocolor{white}%
+        \gdef\tud@foot@fontcolor{white}%
+      \else%
+        \def\tud@foot@logocolor{HKS41}%
+        \gdef\tud@foot@fontcolor{HKS41}%
+      \fi%
     \fi%
-  \fi%
+  }{%
+%    \end{macrocode}
+% Die Einstellungen für Seiten mit Hintergrundfarbe variieren davon. Zuerst die 
+% für farbige Titel- und Teileseiten\dots
+%    \begin{macrocode}
+    \ifstr{\tud@pagecolor}{HKS41}{%
+      \def\tud@head@logocolor{white}%
+      \def\tud@foot@logocolor{white}%
+      \if@tud@foot@colored%
+        \gdef\tud@foot@fontcolor{white}%
+      \else%
+        \gdef\tud@foot@fontcolor{HKS41!30}%
+      \fi%
+      \bool@std@lock{@tud@head@widebar}{true}%
+%    \end{macrocode}
+% \dots sowie die für die farbigen Kapitelseiten.
+%    \begin{macrocode}
+    }{%
+      \def\tud@head@logocolor{HKS41}%
+      \def\tud@foot@logocolor{HKS41}%
+      \ifcase\tud@head@bar\relax\or\or% cdhead=color
+        \def\tud@head@logocolor{white}%
+        \def\tud@foot@logocolor{white}%
+      \fi%
+      \if@tud@foot@colored%
+        \gdef\tud@foot@fontcolor{white}%
+      \else%
+        \gdef\tud@foot@fontcolor{HKS41}%
+      \fi%
+      \bool@std@lock{@tud@head@widebar}{true}%
+    }%
+  }%
 %    \end{macrocode}
 % In Abhängigkeit von der eingestzten Hintergrundfarbe der Seite wird die 
 % Linienstärke des Querbalkens gesetzt.
@@ -787,6 +851,7 @@
   \ifstr{\tud@head@logocolor}{white}{\let\tud@dim@line\tud@dim@heavyline}{}%
 }
 %    \end{macrocode}
+% \end{macro}^^A \tud@foot@fontcolor
 % \end{macro}^^A \tud@foot@logocolor
 % \end{macro}^^A \tud@head@logocolor
 % \end{macro}^^A \tud@ps@onbackground
@@ -935,8 +1000,7 @@
 % \cs{tud@head@text@write} sowie einer möglichen Extrazeile.
 %    \begin{macrocode}
   \vbox{%
-    \linespread{0}\selectfont%
-    \offinterlineskip%
+    \linespread{0}\selectfont\offinterlineskip%
 %    \end{macrocode}
 % Die Farbe des Textes der ersten Zeile entspricht immer der des Kopfes\dots
 %    \begin{macrocode}
@@ -972,7 +1036,7 @@
 \newcommand*\tud@head@text@write[1]{%
   \raisebox{\dimexpr(\tud@dim@barheight+2\tud@dim@line-\totalheight)/2\relax}[%
     \dimexpr\tud@dim@barheight-\depth\relax%
-  ][\dimexpr\depth+2\tud@dim@line\relax]{#1\vphantom{gjpqy\"A\"O\"U}}%
+  ][\dimexpr\depth+\tud@dim@heavyline\relax]{#1\vphantom{gjpqy\"A\"O\"U}}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@head@text@write
@@ -1346,12 +1410,99 @@
 % \end{macro}^^A \tud@@headlogo
 % \end{macro}^^A \tud@headlogo
 % \end{macro}^^A \headlogo
+% \begin{KOMAfont}{tudheadings}
+% \changes{v2.04}{2015/04/21}{neu}^^A
+% \begin{macro}{\tudheadingsfoot}
+% \changes{v2.04}{2015/04/21}{neu}^^A
+% \begin{macro}{\@tudheadingsfoot}
+% \changes{v2.04}{2015/04/21}{neu}^^A
+% \begin{macro}{\@@tudheadingsfoot}
+% \changes{v2.04}{2015/04/21}{neu}^^A
+% \begin{macro}{\tudheadingsfootcontent}
+% \changes{v2.04}{2015/04/21}{neu}^^A
+% Mit dem Befehl \cs{tudheadingsfoot} kann der Inhalt für den Fußbereich der 
+% Seiten im Stil \pgs{tudheadings} festgelegt werden. Dieser wird mit passenden 
+% Schrifteinstellungen entweder einspaltig oder zweispaltig gesetzt. Die 
+% Sternversion des Befehls nimmt keinerlei Einstellungen für die Schrift vor.
+%    \begin{macrocode}
+\newkomafont{tudheadings}{%
+  \sffamily%
+  \tud@color{\tud@foot@fontcolor}%
+}
+\newcommand*\tudheadingsfoot{%
+  \@ifstar{%
+    \@tempswafalse%
+    \@tudheadingsfoot%
+  }{%
+    \@tempswatrue%
+    \@tudheadingsfoot%
+  }%
+}
+%    \end{macrocode}
+% Normalerweise wird der Inhalt vollständig über die verfügbare Seitenfußbreite 
+% gesetzt. Wird das optionale Argument \emph{nach} dem obligatorischen genutzt, 
+% so erfolgt die Ausgabe zweispaltig.
+%    \begin{macrocode}
+\newcommand*\@tudheadingsfoot[2][]{%
+  \kernel@ifnextchar[%]
+    {\@@tudheadingsfoot{#1}{#2}}%
+    {\@@tudheadingsfoot{#1}{#2}[]}%
+}
+\newcommand*\@@tudheadingsfoot{}%
+\newcommand*\tudheadingsfootcontent{}
+\def\@@tudheadingsfoot#1#2[#3]{%
+  \def\tudheadingsfootcontent{%
+    \if@tempswa%
+      \usekomafont{tudheadings}%
+      \tud@divide\@tempa{\tud@head@font@size}{\f@size}%
+      \linespread{\@tempa}%
+      \selectfont%
+      \tud@head@font@light%
+    \fi%
+    #1%
+    \tud@footlogoheight@default%
+    \tud@ddc@check%
+    \ifcase\@tempb%
+      \setlength\@tempdima{\z@}%
+    \else%
+      \settowidth\@tempdima{%
+        \includegraphics[keepaspectratio,totalheight=\footlogoheight]{DDC-22}%
+      }%
+      \addtolength\@tempdima{\columnsep}%
+    \fi%
+  }%
+  \ifstr{#3}{}{%
+    \appto\tudheadingsfootcontent{%
+      \begin{minipage}[t]{\dimexpr\textwidth-\@tempdima\relax}%
+        #2%
+      \end{minipage}%
+    }%
+  }{%
+    \appto\tudheadingsfootcontent{%
+      \begin{minipage}[t]{\dimexpr (\textwidth-\columnsep)/2\relax}%
+        #2%
+      \end{minipage}%
+      \hspace*{\columnsep}%
+      \begin{minipage}[t]{\dimexpr(\textwidth-\columnsep)/2-\@tempdima\relax}%
+        #3%
+      \end{minipage}%
+    }%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tudheadingsfootcontent
+% \end{macro}^^A \@@tudheadingsfoot
+% \end{macro}^^A \@tudheadingsfoot
+% \end{macro}^^A \tudheadingsfoot
+% \end{KOMAfont}^^A tudheadings
 % \begin{macro}{\footlogo}
 % \changes{v2.03}{2015/01/27}{neu}^^A
 % \begin{macro}{\footlogosep}
 % \changes{v2.03}{2015/01/27}{neu}^^A
 % \begin{length}{\footlogoheight}
 % \changes{v2.03}{2015/01/27}{neu}^^A
+% \begin{macro}{\tud@footlogoheight@default}
+% \changes{v2.04}{2015/04/21}{neu}^^A
 % \begin{macro}{\tud@footlogo}
 % \changes{v2.03}{2015/01/27}{neu}^^A
 % \changes{v2.03}{2015/02/02}{optionale Parameter für unterschiedliche Dateien 
@@ -1366,6 +1517,14 @@
 % Fuß angegeben werden, die mit \cs{footlogosep} voneinander getrennt werden.
 %    \begin{macrocode}
 \newlength\footlogoheight
+\newcommand*\tud@footlogoheight@default{%
+  \ifdim\footlogoheight>\z@\relax\else%
+    \settoheight\footlogoheight{\tud@mainlogo}%
+    \tud@ifverlower{2.03}{%
+      \setlength\footlogoheight{.6\tud@dim@topmargin}%
+    }{}%
+  \fi%
+}
 \newcommand*\footlogosep{\hfill}
 \newcommand*\footlogo[2][]{%
   \if@atdocument\tud@iftudps{\currentpagestyle}{\clearpage}{}\fi%
@@ -1423,6 +1582,7 @@
 % \end{macro}^^A \tud@@footlogo
 % \end{macro}^^A \tud@footlogo@parser
 % \end{macro}^^A \tud@footlogo
+% \end{macro}^^A \tud@footlogoheight@default
 % \end{length}^^A \footlogoheight
 % \end{macro}^^A \footlogosep
 % \end{macro}^^A \footlogo
@@ -1548,7 +1708,8 @@
 % \begin{option}{cdfoot}
 % \changes{v2.03}{2015/02/02}{Option \opt{extrabottommargin} bei Längenangabe 
 %   indirekt nutzbar}^^A
-% \begin{macro}{\if@tud@footcolor}
+% \begin{macro}{\if@tud@foot@colored}
+% \changes{v2.03}{2015/02/15}{neu}^^A
 % \begin{macro}{\tud@ps@store}
 % \changes{v2.02}{2014/06/23}{neu}^^A
 % \begin{macro}{\tud@@ps@store}
@@ -1568,7 +1729,7 @@
 % wurde. Hierfür ist die Initialisierung mit \cs{TUD@AfterPackage@Set} nötig.
 %    \begin{macrocode}
 \TUD@AfterPackage@Set{scrlayer-scrpage}
-\newif\if@tud@footcolor
+\newif\if@tud@foot@colored
 \TUD@key{cdfoot}[true]{%
   \TUD@set@numkey{cdfoot}{@tempa}{%
     \TUD@numkey@bool,%
@@ -1612,9 +1773,9 @@
 % Hier kann die Hintergrundfarbe des Fußes aktiviert bzw. deaktiviert werden.
 %    \begin{macrocode}
     \or% nocolor
-      \@tud@footcolorfalse%
+      \@tud@foot@coloredfalse%
     \or% color
-      \@tud@footcolortrue%
+      \@tud@foot@coloredtrue%
     \fi%
 %    \end{macrocode}
 % Außerdem kann mit der Option \opt{extrabottommargin} gesetzt werden.
@@ -1674,7 +1835,7 @@
 % \end{macro}^^A \tud@ps@restore
 % \end{macro}^^A \tud@@ps@store
 % \end{macro}^^A \tud@ps@store
-% \end{macro}^^A \if@tud@footcolor
+% \end{macro}^^A \if@tud@foot@colored
 % \end{option}^^A cdfoot
 % \begin{macro}{\tud@ps@headings}
 % \changes{v2.02}{2014/06/23}{entfernt}^^A
@@ -2160,6 +2321,7 @@
 %    \end{macrocode}
 % \begin{macro}{\tud@BeforeSelectAnyPageStyle}
 % \changes{v2.02}{2014/06/23}{neu}^^A
+% \changes{v2.04}{2015/04/21}{Auswahl der Schriften für Fußbereich ergänzt}^^A
 % \begin{macro}{\tud@currentgeometry}
 % \changes{v2.02}{2014/06/23}{neu}^^A
 % Mit \cs{tud@BeforeSelectAnyPageStyle} wird beim Umschalten des Seitenstils
@@ -2245,7 +2407,13 @@
 %    \begin{macrocode}
       \setlength\tud@dim@headdiff{\z@}%
 %    \end{macrocode}
-% Hier ist der Fall, wenn kein \pgs{tudheadings}-Seitenstil geladen werden soll.
+% Im Seitenfuß wird für die Seitenzahl und ggf. die Kolumnentitel die passende 
+% Schrift verwendet.
+%    \begin{macrocode}
+      \tud@font@koma@set{pagefoot}{\usekomafont{tudheadings}}%
+      \tud@font@koma@set{pagenumber}{\usekomafont{tudheadings}}%
+%    \end{macrocode}
+% Dies ist der Fall, wenn kein \pgs{tudheadings}-Seitenstil geladen werden soll.
 % Zusätzlich zum Satzspeigel wird außerdem der Seitenstil \pgs{empty} 
 % zurückgesetzt.
 %    \begin{macrocode}
@@ -2268,6 +2436,11 @@
           }%
         \fi%
       \fi%
+%    \end{macrocode}
+% Die Schriften für Seitenzahl und Kolumnentitel werden zurückgesetzt.
+%    \begin{macrocode}
+      \tud@font@koma@unset{pagefoot}%
+      \tud@font@koma@unset{pagenumber}%
     }%
 %    \end{macrocode}
 % Die Länge \cs{tud@dim@headdiff} wird vorsichtshalber global gesetzt.

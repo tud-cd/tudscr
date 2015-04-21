@@ -69,7 +69,7 @@
       \fi%
     }%
   \fi%
-  \@TUDVersion{2015/04/01 v2.04 BETA TUD-KOMA-Script}%
+  \@TUDVersion{2015/04/21 v2.04 BETA TUD-KOMA-Script}%
 \endgroup%
 \providecommand*\tudscrmail{tudscr@gmail.com}
 \newcommand*\cls@name{report}
@@ -77,7 +77,7 @@
 \newcommand*\tudcls@name{tudscrreprt}
 \NeedsTeXFormat{LaTeX2e}[2011/06/27]
 \ProvidesClass{\tudcls@name}[%
-  2015/04/01 v2.04 BETA TUD-KOMA-Script
+  2015/04/21 v2.04 BETA TUD-KOMA-Script
   document class (\cls@name)%
 ]
 \typeout{The Corporate Design of Technische Universitaet Dresden}
@@ -229,9 +229,7 @@
 \DefineFamilyMember{KOMA}
 \DefineFamilyKey{KOMA}{fontsize}{%
   \AtEndOfFamilyOptions{%
-    \tud@ifverlower{2.04}{}{%
-      \if@atdocument\tud@font@skip@set\fi
-    }%
+    \tud@ifverlower{2.04}{}{\if@atdocument\tud@font@skip@set\fi}%
   }%
   \FamilyKeyStateProcessed%
 }
@@ -432,7 +430,6 @@
         \tud@ps@store{plain.scrheadings}%
         \tud@font@koma@set{pageheadfoot}{\upshape}%
         \clearpairofpagestyles%
-        % §§§ Abhängig von cdhead auf univers schalten?!
         \ofoot[\pagemark]{%
           \if@twoside\ifodd\value{page}\else\pagemark\quad\fi\fi%
           {\footnotesize\headmark}%
@@ -1405,7 +1402,7 @@
   \fi%
   \tud@font@greek@loop\tud@font@greek@init%
   \tud@font@math@set%
-  \setbox\z@\hbox{\dinbn$ $}%
+  \sbox\z@{\dinbn$ $}%
   \undef\tud@font@math@init%
 }
 \AtEndPreamble{%
@@ -1563,15 +1560,16 @@
     \tud@skip@restore{bigskipamount}%
     \tud@skip@restore{abovecaptionskip}%
     \tud@skip@restore{belowcaptionskip}%
+    \tud@skip@restore{columnsep}%
   \else% true/heavy
     \tud@skip@store{smallskipamount}%
     \tud@skip@store{medskipamount}%
     \tud@skip@store{bigskipamount}%
     \tud@skip@store{abovecaptionskip}%
     \tud@skip@store{belowcaptionskip}%
+    \tud@skip@store{columnsep}%
     \tud@font@skip@@set%
   \fi%
-  \tud@ifverlower{2.04}{}{\setlength\columnsep{1.1\baselineskip}}%
 }
 \newcommand*\tud@font@skip@@set{%
   \setlength{\@tempdimb}{\f@baselineskip}%
@@ -1582,7 +1580,8 @@
   \scr@setlength\bigskipamount{\@tempdimb}%
     {\dimexpr\@tempdimb/3\relax}{\dimexpr\@tempdimb/3\relax}%
   \setlength\abovecaptionskip{\dimexpr4\@tempdimb/5\relax}%
-  \setlength\belowcaptionskip{0\p@}%
+  \setlength\belowcaptionskip{\z@}%
+  \setlength\columnsep{1.1\baselineskip}%
 }
 \newcommand*\tud@font@math@set{%
   \if@tud@univers%
@@ -1720,7 +1719,7 @@
     \global\let\tud@thanks\relax%
     \def\thanks##1{\gdef\tud@thanks{##1}}%
     \let\footnote\thanks%
-    \setbox\z@\hbox{#2}%
+    \sbox\z@{#2}%
     \let\thanks\@gobble%
     \let\footnote\@gobble%
     \tud@lowerstring{\@tempa}{#2}%
@@ -2306,33 +2305,24 @@
       \tud@ddclogo%
     },%
   ]{tudheadings.foot.logo}%
+  \tud@ifverlower{2.03}{%
+    \ModifyLayer[%
+      voffset=\dimexpr\topmargin+1in+\headheight+\headsep+\textheight%
+        +\footskip-\footheight-\tud@dim@ddcdiff+\dp\strutbox\relax,%
+      height=\dimexpr.6\tud@dim@topmargin+\dp\strutbox\relax,%
+    ]{tudheadings.foot.logo}%
+  }{}%
   \DeclareNewLayer[%
     background,foot,%
     height=\dimexpr\paperheight-\layeryoffset\relax,%
     contents={%
       \vbox to \dimexpr\layerheight-\dp\strutbox\relax{%
         \vfil%
-        \tud@foot@layer%
+        \tudheadingsfootcontent%
         \vfil\vfil%
       }%
     },%
   ]{tudheadings.foot.content}%
-  \tud@ifverlower{2.03}{%
-    \ModifyLayer[%
-      voffset=\dimexpr\topmargin+1in+\headheight+\headsep+\textheight%
-        +\footskip-\footheight-\tud@dim@ddcdiff%
-        \ifcase\tud@geometry\relax\else+\ht\strutbox+\dp\strutbox\fi%
-        \relax,%
-      height=\dimexpr.6\tud@dim@topmargin+\dp\strutbox\relax,%
-    ]{tudheadings.foot.logo}%
-    \ModifyLayer[%§§§ Testen!
-      voffset=\dimexpr\topmargin+1in+\headheight+\headsep+\textheight%
-        +\footskip-\footheight-\tud@dim@ddcdiff%
-        \ifcase\tud@geometry\relax\else+\ht\strutbox+\dp\strutbox\fi%
-        \relax,%
-      height=\dimexpr.6\tud@dim@topmargin+\dp\strutbox\relax,%
-    ]{tudheadings.foot.content}%
-  }{}%
   \DeclareNewLayer[%
     background,%
     contents=\tud@head@bar@restore,%
@@ -2350,8 +2340,8 @@
     tudheadings.head.upperwideline,%
     tudheadings.head.lowerwideline,%
     tudheadings.foot.back,%
-    tudheadings.foot.content,%
     tudheadings.foot.logo,%
+    tudheadings.foot.content,%
     tudheadings.last,%
     scrheadings.foot.odd,%
     scrheadings.foot.even,%
@@ -2375,8 +2365,8 @@
     tudheadings.head.upperwideline,%
     tudheadings.head.lowerwideline,%
     tudheadings.foot.back,%
-    tudheadings.foot.content,%
     tudheadings.foot.logo,%
+    tudheadings.foot.content,%
     tudheadings.last,%
     plain.scrheadings.foot.odd,%
     plain.scrheadings.foot.even,%
@@ -2402,8 +2392,8 @@
     tudheadings.head.upperwideline,%
     tudheadings.head.lowerwideline,%
     tudheadings.foot.back,%
-    tudheadings.foot.content,%
     tudheadings.foot.logo,%
+    tudheadings.foot.content,%
     tudheadings.last%
   }%
   \DeclareNewPageStyleAlias{empty.tudscrheadings}{empty.tudheadings}%
@@ -2645,35 +2635,39 @@
   }%
   \global\let\tud@headlogo@wrn\relax%
 }
-\newcommand*\tud@foot@layer{}
-\newcommand*\tud@foot@font{}
+\newkomafont{tudheadings}{%
+  \sffamily%
+  \tud@color{\tud@foot@fontcolor}%
+}
 \newcommand*\tudheadingsfoot{%
   \@ifstar{%
-    \let\tud@foot@font\relax%
+    \@tempswafalse%
     \@tudheadingsfoot%
   }{%
-    \def\tud@foot@font{%
+    \@tempswatrue%
+    \@tudheadingsfoot%
+  }%
+}
+\newcommand*\@tudheadingsfoot[2][]{%
+  \kernel@ifnextchar[%]
+    {\@@tudheadingsfoot{#1}{#2}}%
+    {\@@tudheadingsfoot{#1}{#2}[]}%
+}
+\newcommand*\@@tudheadingsfoot{}%
+\newcommand*\tudheadingsfootcontent{}
+\def\@@tudheadingsfoot#1#2[#3]{%
+  \def\tudheadingsfootcontent{%
+    \if@tempswa%
       \usekomafont{tudheadings}%
       \tud@divide\@tempa{\tud@head@font@size}{\f@size}%
       \linespread{\@tempa}%
       \selectfont%
       \tud@head@font@light%
-    }%
-    \@tudheadingsfoot%
-  }%
-}
-\newcommand\@tudheadingsfoot[1]{%
-  \kernel@ifnextchar[%]
-    {\@@tudheadingsfoot{#1}}%
-    {\@@tudheadingsfoot{#1}[]}%
-}
-\newcommand*\@@tudheadingsfoot{}%
-\def\@@tudheadingsfoot#1[#2]{%
-  \def\tud@foot@layer{%
-    \tud@foot@font%
-    \ifdef{\multicols}{\setlength\multicolsep{-.9\baselineskip}}{}%
+    \fi%
+    #1%
     \tud@footlogoheight@default%
-    \ifcase\tud@ddc@foot%
+    \tud@ddc@check%
+    \ifcase\@tempb%
       \setlength\@tempdima{\z@}%
     \else%
       \settowidth\@tempdima{%
@@ -2682,20 +2676,20 @@
       \addtolength\@tempdima{\columnsep}%
     \fi%
   }%
-  \ifstr{#2}{}{%
-    \appto\tud@foot@layer{%
-      \begin{minipage}[t]{\dimexpr(\textwidth-\columnsep)/2-\@tempdima\relax}%
-        #1%
+  \ifstr{#3}{}{%
+    \appto\tudheadingsfootcontent{%
+      \begin{minipage}[t]{\dimexpr\textwidth-\@tempdima\relax}%
+        #2%
       \end{minipage}%
     }%
   }{%
-    \appto\tud@foot@layer{%
+    \appto\tudheadingsfootcontent{%
       \begin{minipage}[t]{\dimexpr (\textwidth-\columnsep)/2\relax}%
-        #1%
+        #2%
       \end{minipage}%
       \hspace*{\columnsep}%
       \begin{minipage}[t]{\dimexpr(\textwidth-\columnsep)/2-\@tempdima\relax}%
-        #2%
+        #3%
       \end{minipage}%
     }%
   }%
@@ -3217,16 +3211,11 @@
   \TUD@parameter@sethandler{\TUD@parameter@defaulthandler{tudpage}{#1}}%
 }
 %%% From File: tudscr-layout.dtx
-\newcommand*\tud@font@color[1]{\ifdefvoid{#1}{}{\color{#1}}}
-\newkomafont{tudheadings}{%
-  \sffamily%
-  \tud@font@color{\tud@foot@fontcolor}%
-}
 \newcommand*\tud@part@fontcolor{}
 \newcommand*\tud@chapter@fontcolor{}
 \newkomafont{parttitle}{%
   \tud@font@heading%
-  \tud@font@color{\tud@part@fontcolor}%
+  \tud@color{\tud@part@fontcolor}%
   \usesizeofkomafont{section}%
 }
 \newlength\pageheadingsvskip
@@ -3262,18 +3251,18 @@
       \usekomafont{disposition}%
       \tud@font@heading%
       \tud@font@heading@size%
-      \tud@font@color{\tud@title@fontcolor}%
+      \tud@color{\tud@title@fontcolor}%
     }%
     \tud@font@koma@set{subtitle}{%
       \tud@font@heading%
       \usesizeofkomafont{section}%
-      \tud@font@color{\tud@title@fontcolor}%
+      \tud@color{\tud@title@fontcolor}%
     }%
     \tud@font@koma@set{subject}{%
       \fontfamily{\sfdefault}%
       \fontseries{\bfdefault}%
       \selectfont%
-      \tud@font@color{\tud@title@fontcolor}%
+      \tud@color{\tud@title@fontcolor}%
     }%
     \tud@font@koma@set{author}{\usekomafont{subject}}%
     \tud@font@koma@set{date}{\usekomafont{titlepage}}%
@@ -3306,11 +3295,11 @@
     \else%
       \tud@sectioning@set[addpart]{part}{%
         \tud@font@heading%
-        \tud@font@color{\tud@part@fontcolor}%
+        \tud@color{\tud@part@fontcolor}%
       }%
       \tud@font@koma@set{partnumber}{%
         \tud@font@heading%
-        \tud@font@color{\tud@part@fontcolor}%
+        \tud@color{\tud@part@fontcolor}%
       }%
       \let\partheadmidvskip\tud@headmidvskip%
     \fi%
@@ -3342,7 +3331,7 @@
     \tud@sectioning@set[addchap]{chapter}{%
       \tud@font@heading%
       \tud@font@heading@size%
-      \tud@font@color{\tud@chapter@fontcolor}%
+      \tud@color{\tud@chapter@fontcolor}%
     }%
     \tud@font@koma@set{chapterprefix}{\usesizeofkomafont{partnumber}}%
     \tud@sectioning@set[addsec]{section}{\tud@font@heading}%
@@ -3355,9 +3344,8 @@
 }
 \newcommand*\tud@layout@specialpage@set[1]{%
   \tud@font@koma@set{footnote}{%
-    \sffamily%
     \edef\@tempa{%
-      \noexpand\tud@font@color{%
+      \noexpand\tud@color{%
         \expandafter\noexpand\csname tud@#1@fontcolor\endcsname%
       }%
     }\@tempa%
@@ -3392,7 +3380,7 @@
       \begingroup%
         \tud@font@heading%
         \tud@font@heading@size%
-        \tud@font@color{\tud@part@fontcolor}%
+        \tud@color{\tud@part@fontcolor}%
         \ifx\@@title\@empty%
           \tud@makeuppercase{\strut}%
         \else%
@@ -3482,9 +3470,9 @@
 \newcommand*\tud@partpreamble{%
   \ifnum\tud@abstract@level>\@ne\relax\def\tud@abstract@level{1}\fi% sec/chap
   \KOMAoptions{titlepage=false}%
-  \addtokomafont{disposition}{\tud@font@color{\tud@part@fontcolor}}%
-  \addtokomafont{dictumtext}{\tud@font@color{\tud@part@fontcolor}}%
-  \tud@font@color{\tud@part@fontcolor}%
+  \addtokomafont{disposition}{\tud@color{\tud@part@fontcolor}}%
+  \addtokomafont{dictumtext}{\tud@color{\tud@part@fontcolor}}%
+  \tud@color{\tud@part@fontcolor}%
   \vskip\dimexpr\topskip+.9\baselineskip\relax%
   \@afterindentfalse\@afterheading%
 }
@@ -3559,9 +3547,9 @@
     \or% heavy
       \TUDoptions{cdfont=heavy}%
     \fi%
-    \addtokomafont{disposition}{\tud@font@color{\tud@chapter@fontcolor}}%
-    \addtokomafont{dictumtext}{\tud@font@color{\tud@chapter@fontcolor}}%
-    \tud@font@color{\tud@chapter@fontcolor}%
+    \addtokomafont{disposition}{\tud@color{\tud@chapter@fontcolor}}%
+    \addtokomafont{dictumtext}{\tud@color{\tud@chapter@fontcolor}}%
+    \tud@color{\tud@chapter@fontcolor}%
   \fi%
   \@afterindentfalse\@afterheading%
 }
@@ -3745,7 +3733,7 @@
 }
 %%% From File: tudscr-frontmatter.dtx
 \newcommand*\tud@fm@check[2]{%
-  \let\tud@fm@set\tud@fm@first%
+  \global\let\tud@fm@set\tud@fm@first%
   \ifnumless{\@nameuse{tud@#1@level}}{3}{% false/true/section
     \ifboolexpr{%
       bool {@titlepage} and bool {@tud@#1@fil} and bool {@tud@#1@multi}%
@@ -3809,7 +3797,7 @@
 }
 \newcommand\tud@fm@set[1]{}
 \newcommand\tud@fm@first[1]{%
-  \let\tud@fm@set\tud@fm@next%
+  \global\let\tud@fm@set\tud@fm@next%
   \if@twocolumn\else%
     \if@titlepage%
       \ifbool{@tud@#1@fil}{%
@@ -3832,6 +3820,10 @@
       }{%
         \ifbool{@tud@#1@fil}{\null\clearpage\null\vfil}{\clearpage}%
       }%
+    \else%
+      \ifnum\@nameuse{tud@#1@level}=\z@%
+        \ifdef{\main@language}{\vspace*{-\baselineskip}}{}%
+      \fi%
     \fi%
   \fi%
 }
@@ -3843,12 +3835,7 @@
       \ifnum\@nameuse{tud@#1@level}<\tw@\begin{\tud@quoting}\fi% false/true
     \fi\fi%
     \ifnum\tud@multicols>\@ne\relax%
-% §§§ \ifdef{\multicols}{\setlength\multicolsep{-.9\baselineskip}}{}%
-      \ifdef{\main@language}{%
-        \expandafter\selectlanguage\expandafter{\languagename}%
-      }{%
-        \vskip\z@%
-      }%
+      \setlength\multicolsep{\z@}%
       \begin{multicols}{\tud@multicols}[{\tud@fm@head{#1}{#3}}]%
     \else%
       \tud@fm@head{#1}{#3}%
@@ -3861,7 +3848,7 @@
       \par%
     \fi%
     \if@twocolumn\else\if@titlepage\else\relax%
-      \ifnum\@nameuse{tud@#1@level}<\tw@\end{\tud@quoting}\fi% false/true
+      \ifnum\@nameuse{tud@#1@level}<\tw@\end{\tud@quoting}\par\fi% false/true
     \fi\fi%
   \endgroup%
 }
@@ -3869,13 +3856,20 @@
   \ifcase\@nameuse{tud@#1@level}\relax% false
     \if@titlepage\endgraf\fi%
     \csname phantomsection\endcsname%
+    \ifstr{\@currenvir}{\tud@quoting}{}{%
+      \if@twocolumn%
+        \vskip\dimexpr\smallskipamount-\parskip\relax%
+      \else%
+        \vskip\dimexpr\bigskipamount-\parskip\relax%
+      \fi%
+    }%
   \or% true
     \if@titlepage\endgraf\fi%
     \csname phantomsection\endcsname%
     \@afterindentfalse%
-    \ifnum\tud@multicols=\@ne\relax%
+    \ifstr{\@currenvir}{\tud@quoting}{}{%
       \vskip\dimexpr\bigskipamount-\parskip\relax%
-    \fi%
+    }%
     \begingroup%
       \noindent\centering%
       \normalfont\sectfont\nobreak#2%
@@ -3883,7 +3877,7 @@
       \endgraf%
     \endgroup%
     \nopagebreak%
-    \vskip\dimexpr\bigskipamount-\parskip\relax%
+    \vskip\dimexpr\medskipamount-\parskip\relax%
     \@afterheading%
   \or% section
     \section*{#2}%
@@ -4233,7 +4227,7 @@
       \tud@letsubjectthesis%
       \ifx\@subject\@empty\else%
         \sbox\@ne{\vbox{{\usekomafont{subject}{\@subject\par\null}}}}%
-        \addtolength\@tempdima{\dimexpr\ht\@ne+\dp\@ne+1pt\relax}%
+        \addtolength\@tempdima{\dimexpr\ht\@ne+\dp\@ne+\p@\relax}%
       \fi%
       \vspace*{-\@tempdima}%
       \ifx\@titlehead\@empty\else\usebox\z@\par\fi%
@@ -4354,6 +4348,7 @@
         \def\tud@pagecolor{HKS41}%
         \cs@set@lock{tud@head@bar}{2}%
       \fi%
+      \tud@color{\tud@title@fontcolor}%
       \addtokomafont{pagenumber}{\usekomafont{tudheadings}}%
       \addtokomafont{pagefoot}{\usekomafont{tudheadings}}%
       \thispagestyle{empty.tudheadings}%
@@ -4391,7 +4386,7 @@
   \begingroup%
     \def\thanks##1{\gdef\@tempa{##1}}%
     \let\footnote\thanks%
-    \sbox\z@{\hbox{#1}}%
+    \sbox\z@{#1}%
     \let\thanks\@gobble%
     \let\footnote\@gobble%
     \tud@makeuppercase{#1}%
@@ -4439,7 +4434,7 @@
     \tud@letsubjectthesis%
     \ifx\@subject\@empty\else%
       \sbox\@ne{\vbox{{\usekomafont{subject}{\@subject\par\null}}}}%
-      \addtolength\@tempdima{\dimexpr\ht\@ne+\dp\@ne+1pt\relax}%
+      \addtolength\@tempdima{\dimexpr\ht\@ne+\dp\@ne+\p@\relax}%
     \fi%
     \vspace*{-\@tempdima}%
     \ifx\@titlehead\@empty\else\usebox\z@\par\fi%

@@ -1,4 +1,4 @@
-% \CheckSum{1170}
+% \CheckSum{1186}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-layout.dtx}[%
-  2015/04/07 v2.04 TUD-KOMA-Script (layout)%
+  2015/04/21 v2.04 TUD-KOMA-Script (layout)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -362,42 +362,6 @@
 %</book|report>
 %    \end{macrocode}
 % \end{option}^^A cdchapter
-% \begin{option}{headings}
-% \begin{macro}{\tud@font@heading@size}
-% Die \KOMAScript-Option \opt{headings} setzt die Formatierung aller 
-% Überschriften zurück. Damit die Einstellungen für das \CD aktiv bleiben, 
-% werden nach der Ausführung der Option die mit \cs{tud@font@koma@set} 
-% definierten Makros \cs{tud@font@koma@\meta{Element}} erneut an die 
-% entsprechenden Schriftelemente angehängt.
-%    \begin{macrocode}
-\newcommand*\tud@font@heading@size{}
-\AtEndOfClass{\let\tud@font@heading@size\size@part}
-\DefineFamilyMember{KOMA}
-\DefineFamilyKey{KOMA}{headings}{%
-  \AtEndOfFamilyOptions{%
-    \let\tud@font@heading@size\size@part%
-    \if@atdocument%
-      \tud@layout@process%
-      \ifcase\tud@layout@part\relax\else% !false
-        \tud@font@koma@reset{part}%
-        \tud@font@koma@reset{partnumber}%
-%<*book|report>
-      \fi%
-      \ifcase\tud@layout@chapter\relax\else% !false
-        \tud@font@koma@reset{chapter}%
-        \tud@font@koma@reset{chapterprefix}%
-%</book|report>
-        \tud@font@koma@reset{section}%
-        \tud@font@koma@reset{subsection}%
-        \tud@font@koma@reset{subsubsection}%
-        \tud@font@koma@reset{minisec}%
-      \fi%
-    \fi%
-  }%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@font@heading@size
-% \end{option}^^A headings
 %
 % \iffalse
 %<*book|report>
@@ -563,6 +527,86 @@
 %
 % \iffalse
 %</book|report>
+% \fi
+%
+% \begin{macro}{\tud@font@koma@set}
+% \begin{macro}{\tud@font@koma@reset}
+% \changes{v2.02}{2014/08/24}{neu}^^A
+% \begin{macro}{\tud@font@koma@unset}
+% Es wird die Möglichkeit geschaffen, bestimmten Schriftelementen weitere
+% Eigenschaften mitzugeben. Damit dies optionsabhängig geschehen kann und
+% \cs{addtokomafont} nur einmalig verwendete werden muss, wird im Zweifelsfall
+% einem Schriftelement ein Hilfsmakro \cs{tud@font@koma@\meta{Element}} 
+% zugewiesen, welches intern angepasst werden kann. Mit \cs{tud@font@koma@set} 
+% werden dem angegebenen Element die gewünschten Schriftattribute zugeteilt.
+%    \begin{macrocode}
+\newcommand*\tud@font@koma@set[2]{%
+  \ifcsdef{tud@font@koma@#1}{}{\addtokomafont{#1}{\@nameuse{tud@font@koma@#1}}}%
+  \@namedef{tud@font@koma@#1}{#2\nobreak}%
+}
+%    \end{macrocode}
+% Durch die Option \opt{headings} werden die Schriftelemente zurückgesetzt. 
+% Mit dem hier definierten Befehl \cs{tud@font@koma@reset} kann diesen das
+% Hilfsmakro abermals zugewiesen 
+% werden.
+%    \begin{macrocode}
+\newcommand*\tud@font@koma@reset[1]{%
+  \addtokomafont{#1}{\@nameuse{tud@font@koma@#1}}%
+}
+%    \end{macrocode}
+% Mit \cs{tud@font@koma@unset} kann das angegebene Element wieder zurückgesetzt
+% werden. Dabei wird das zuvor hinzugefügte Makro auf \cs{relax} gesetzt.
+%    \begin{macrocode}
+\newcommand*\tud@font@koma@unset[1]{%
+  \ifcsdef{tud@font@koma@#1}{\@namedef{tud@font@koma@#1}{\relax}}{}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@font@koma@unset
+% \end{macro}^^A \tud@font@koma@reset
+% \end{macro}^^A \tud@font@koma@set
+% \begin{macro}{\usesizeofkomafont}
+% \changes{v2.02}{2014/05/17}{entfernt}^^A
+% Mit \TUDScript~v2.02 wurde die Bereitstellung dieses Befehls aufgrund der
+% zwingenden Verwendung von \KOMAScript{}~v3.12 entfernt.
+% \end{macro}^^A \usesizeofkomafont
+% \begin{option}{headings}
+% \begin{macro}{\tud@font@heading@size}
+% Die \KOMAScript-Option \opt{headings} setzt die Formatierung aller 
+% Überschriften zurück. Damit die Einstellungen für das \CD aktiv bleiben, 
+% werden nach der Ausführung der Option die mit \cs{tud@font@koma@set} 
+% definierten Makros \cs{tud@font@koma@\meta{Element}} erneut an die 
+% entsprechenden Schriftelemente angehängt.
+%    \begin{macrocode}
+\newcommand*\tud@font@heading@size{}
+\AtEndOfClass{\let\tud@font@heading@size\size@part}
+\DefineFamilyMember{KOMA}
+\DefineFamilyKey{KOMA}{headings}{%
+  \AtEndOfFamilyOptions{%
+    \let\tud@font@heading@size\size@part%
+    \if@atdocument%
+      \tud@layout@process%
+      \ifcase\tud@layout@part\relax\else% !false
+        \tud@font@koma@reset{part}%
+        \tud@font@koma@reset{partnumber}%
+%<*book|report>
+      \fi%
+      \ifcase\tud@layout@chapter\relax\else% !false
+        \tud@font@koma@reset{chapter}%
+        \tud@font@koma@reset{chapterprefix}%
+%</book|report>
+        \tud@font@koma@reset{section}%
+        \tud@font@koma@reset{subsection}%
+        \tud@font@koma@reset{subsubsection}%
+        \tud@font@koma@reset{minisec}%
+      \fi%
+    \fi%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@font@heading@size
+% \end{option}^^A headings
+%
+% \iffalse
 %</class&option>
 %<*class&body>
 % \fi
@@ -577,9 +621,9 @@
 % \begin{macro}{\tud@chapter@fontcolor}
 % Die Makros werden für die Farbe der Überschriften verwendet.
 %    \begin{macrocode}
-\newcommand*\tud@part@fontcolor{black}
+\newcommand*\tud@part@fontcolor{}
 %<*book|report>
-\newcommand*\tud@chapter@fontcolor{black}
+\newcommand*\tud@chapter@fontcolor{}
 %</book|report>
 %    \end{macrocode}
 % \end{macro}^^A \tud@chapter@fontcolor
@@ -602,7 +646,7 @@
 %    \begin{macrocode}
 \newkomafont{parttitle}{%
   \tud@font@heading%
-  \color{\tud@part@fontcolor}%
+  \tud@color{\tud@part@fontcolor}%
   \usesizeofkomafont{section}%
 }
 %    \end{macrocode}
@@ -647,8 +691,8 @@
 %<*book|report>
 \newcommand*\tud@headmidvskip{\par\nobreak\vspace{.5\baselineskip}}
 \newcommand*\tud@headmidvskip@neg{%
-  \setbox0\vbox{\tud@headmidvskip}%
-  \vspace*{\dimexpr-\dp\strutbox-\ht\strutbox-\ht0\relax}%
+  \setbox\z@\vbox{\tud@headmidvskip}%
+  \vspace*{\dimexpr-\dp\strutbox-\ht\strutbox-\ht\z@\relax}%
 }
 %</book|report>
 %    \end{macrocode}
@@ -697,18 +741,18 @@
       \usekomafont{disposition}%
       \tud@font@heading%
       \tud@font@heading@size%
-      \color{\tud@title@fontcolor}%
+      \tud@color{\tud@title@fontcolor}%
     }%
     \tud@font@koma@set{subtitle}{%
       \tud@font@heading%
       \usesizeofkomafont{section}%
-      \color{\tud@title@fontcolor}%
+      \tud@color{\tud@title@fontcolor}%
     }%
     \tud@font@koma@set{subject}{%
       \fontfamily{\sfdefault}%
       \fontseries{\bfdefault}%
       \selectfont%
-      \color{\tud@title@fontcolor}%
+      \tud@color{\tud@title@fontcolor}%
     }%
     \tud@font@koma@set{author}{\usekomafont{subject}}%
     \tud@font@koma@set{date}{\usekomafont{titlepage}}%
@@ -762,11 +806,11 @@
 %</book|report>
       \tud@sectioning@set[addpart]{part}{%
         \tud@font@heading%
-        \color{\tud@part@fontcolor}%
+        \tud@color{\tud@part@fontcolor}%
       }%
       \tud@font@koma@set{partnumber}{%
         \tud@font@heading%
-        \color{\tud@part@fontcolor}%
+        \tud@color{\tud@part@fontcolor}%
       }%
       \let\partheadmidvskip\tud@headmidvskip%
 %<*book|report>
@@ -831,7 +875,7 @@
     \tud@sectioning@set[addchap]{chapter}{%
       \tud@font@heading%
       \tud@font@heading@size%
-      \color{\tud@chapter@fontcolor}%
+      \tud@color{\tud@chapter@fontcolor}%
     }%
     \tud@font@koma@set{chapterprefix}{\usesizeofkomafont{partnumber}}%
 %</book|report>
@@ -850,6 +894,32 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@layout@process
+% \begin{macro}{\tud@layout@specialpage@set}
+% \begin{macro}{\tud@layout@specialpage@unset}
+% Diese beiden Hilfsmakros werden für Titel- Teile und separate Kapitelseite 
+% benötigt, um die Fußnoten auf diesen speziellen Seiten in der gleichen Farbe 
+% wie den Rest der verwendeten Schriften zu setzen.
+%    \begin{macrocode}
+%<*book|report>
+\newcommand*\tud@layout@specialpage@set[1]{%
+  \tud@font@koma@set{footnote}{%
+    \edef\@tempa{%
+      \noexpand\tud@color{%
+        \expandafter\noexpand\csname tud@#1@fontcolor\endcsname%
+      }%
+    }\@tempa%
+  }%
+  \tud@cmd@store{footnoterule}%
+  \let\footnoterule\relax%
+}
+\newcommand*\tud@layout@specialpage@unset{%
+  \tud@font@koma@unset{footnote}%
+  \tud@cmd@restore{footnoterule}%
+}
+%</book|report>
+%    \end{macrocode}
+% \end{macro}^^A \tud@layout@specialpage@unset
+% \end{macro}^^A \tud@layout@specialpage@set
 % \begin{macro}{\tud@partheadstartvskip}
 % \changes{v2.02}{2014/11/05}{Nutzung der Option \opt{parttitle} verbessert}^^A
 % \changes{v2.03}{2015/01/21}{Bei Verwendung der Option \opt{parttitle}:
@@ -868,7 +938,7 @@
 \newcommand*\tud@partheadstartvskip{}
 \let\tud@partheadstartvskip\partheadstartvskip%
 \pretocmd{\tud@partheadstartvskip}{%
-  \def\tud@part@fontcolor{black}% false/true
+  \def\tud@part@fontcolor{}% false/true
   \ifcase\tud@layout@part\relax\or\else% lite/bicolor/color/full
     \def\tud@part@fontcolor{HKS41}%
   \fi%
@@ -880,7 +950,7 @@
 %    \begin{macrocode}
 %<*book|report>
 \newcommand*\tud@partheadstartvskip{%
-  \def\tud@part@fontcolor{black}% false/true
+  \def\tud@part@fontcolor{}% false/true
   \ifcase\tud@layout@part\relax\or\or% lite
     \def\tud@part@fontcolor{HKS41}%
   \or% bicolor
@@ -890,6 +960,7 @@
   \or% full
     \def\tud@part@fontcolor{HKS41!30}%
   \fi%
+  \tud@layout@specialpage@set{part}%
   \begingroup%
     \vspace*{%
       \dimexpr\tud@dim@headdiff+\tud@dim@headingsvskip-\baselineskip%
@@ -906,7 +977,7 @@
       \begingroup%
         \tud@font@heading%
         \tud@font@heading@size%
-        \color{\tud@part@fontcolor}%
+        \tud@color{\tud@part@fontcolor}%
         \ifx\@@title\@empty%
           \tud@makeuppercase{\strut}%
         \else%
@@ -917,11 +988,10 @@
 % Titelseite ausgegeben.
 %    \begin{macrocode}
         \par\nobreak%
-        {\usekomafont{titlepage}\vskip 2ex\@plus1ex\@minus1ex}%
+        {\usekomafont{titlepage}{\vskip 2ex\@plus1ex\@minus1ex}}%
       \endgroup%
     \else%
-      \usekomafont{partnumber}%
-      \tud@headmidvskip@neg%
+      \usekomafont{partnumber}{\tud@headmidvskip@neg}%
     \fi%
   \endgroup%
 }
@@ -954,17 +1024,16 @@
       \cs@set@lock{tud@head@bar}{2}%
     \or% color
       \def\tud@pagecolor{HKS41}%
-      \cs@set@lock{tud@head@bar}{-1}%
-      \def\tud@head@logocolor{white}%
-      \def\tud@foot@logocolor{white}%
-      \bool@std@lock{@tud@head@widebar}{true}%
+      \cs@set@lock{tud@head@bar}{1}%
     \or% full
       \def\tud@pagecolor{HKS41}%
       \cs@set@lock{tud@head@bar}{2}%
     \fi%
-    \addtokomafont{pagenumber}{\sffamily\color{\tud@part@fontcolor}}%
+    \addtokomafont{pagenumber}{\usekomafont{tudheadings}}%
+    \addtokomafont{pagefoot}{\usekomafont{tudheadings}}%
     \clearpage%
   }%
+  \tud@layout@specialpage@unset%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@partheadendvskip
@@ -1080,9 +1149,9 @@
 \newcommand*\tud@partpreamble{%
   \ifnum\tud@abstract@level>\@ne\relax\def\tud@abstract@level{1}\fi% sec/chap
   \KOMAoptions{titlepage=false}%
-  \addtokomafont{disposition}{\color{\tud@part@fontcolor}}%
-  \addtokomafont{dictumtext}{\color{\tud@part@fontcolor}}%
-  \color{\tud@part@fontcolor}%
+  \addtokomafont{disposition}{\tud@color{\tud@part@fontcolor}}%
+  \addtokomafont{dictumtext}{\tud@color{\tud@part@fontcolor}}%
+  \tud@color{\tud@part@fontcolor}%
 %    \end{macrocode}
 % Hiermit wird der unterschiedliche Abstand bei Teil- und Kapitelpräambeln 
 % ausgeglichen.
@@ -1100,7 +1169,7 @@
 % für die jeweilig gewählte Option ausgewählt.
 %    \begin{macrocode}
 \newcommand*\tud@chapterheadstartvskip{%
-  \def\tud@chapter@fontcolor{black}%
+  \def\tud@chapter@fontcolor{}%
   \ifcase\tud@layout@chapter\relax\or\else% lite/bicolor/color/full
     \def\tud@chapter@fontcolor{HKS41}%
   \fi%
@@ -1177,8 +1246,7 @@
     \ifnumbered{chapter}{%
       \if@chapterprefix%
         \begingroup%
-          \usekomafont{chapterprefix}%
-          \tud@headmidvskip@neg%
+          \usekomafont{chapterprefix}{\tud@headmidvskip@neg}%
         \endgroup%
       \fi%
     }{}%
@@ -1214,9 +1282,9 @@
     \or% heavy
       \TUDoptions{cdfont=heavy}%
     \fi%
-    \addtokomafont{disposition}{\color{\tud@chapter@fontcolor}}%
-    \addtokomafont{dictumtext}{\color{\tud@chapter@fontcolor}}%
-    \color{\tud@chapter@fontcolor}%
+    \addtokomafont{disposition}{\tud@color{\tud@chapter@fontcolor}}%
+    \addtokomafont{dictumtext}{\tud@color{\tud@chapter@fontcolor}}%
+    \tud@color{\tud@chapter@fontcolor}%
   \fi%
   \@afterindentfalse\@afterheading%
 }
@@ -1277,6 +1345,7 @@
 %    \begin{macrocode}
     \@restonecolfalse%
     \if@twocolumn\@restonecoltrue\onecolumn\fi%
+    \tud@layout@specialpage@set{chapter}%
   \fi%
 }
 %    \end{macrocode}
@@ -1310,17 +1379,16 @@
         \cs@set@lock{tud@head@bar}{2}%
       \or% color
         \def\tud@pagecolor{HKS41!10}%
-        \cs@set@lock{tud@head@bar}{-1}%
-        \def\tud@head@logocolor{HKS41}%
-        \def\tud@foot@logocolor{HKS41}%
-        \bool@std@lock{@tud@head@widebar}{true}%
+        \cs@set@lock{tud@head@bar}{1}%
       \or% fullcolor
         \def\tud@pagecolor{HKS41!10}%
         \cs@set@lock{tud@head@bar}{2}%
       \fi%
-      \addtokomafont{pagenumber}{\sffamily\color{\tud@chapter@fontcolor}}%
+      \addtokomafont{pagenumber}{\usekomafont{tudheadings}}%
+      \addtokomafont{pagefoot}{\usekomafont{tudheadings}}%
       \clearpage%
     }%
+    \tud@layout@specialpage@unset%
 %    \end{macrocode}
 % Außerdem wird für den Zweispaltensatz auf normales Verhalten zurückgestellt.
 %    \begin{macrocode}
@@ -1679,52 +1747,6 @@
 %
 % \iffalse
 %</class&body>
-%<*class&option>
-% \fi
-%
-% \begin{macro}{\tud@font@koma@set}
-% \begin{macro}{\tud@font@koma@reset}
-% \changes{v2.02}{2014/08/24}{neu}^^A
-% \begin{macro}{\tud@font@koma@unset}
-% Es wird die Möglichkeit geschaffen, bestimmten Schriftelementen weitere
-% Eigenschaften mitzugeben. Damit dies optionsabhängig geschehen kann und
-% \cs{addtokomafont} nur einmalig verwendete werden muss, wird im Zweifelsfall
-% einem Schriftelement ein Hilfsmakro \cs{tud@font@koma@\meta{Element}} 
-% zugewiesen, welches intern angepasst werden kann. Mit \cs{tud@font@koma@set} 
-% werden dem angegebenen Element die gewünschten Schriftattribute zugeteilt.
-%    \begin{macrocode}
-\newcommand*\tud@font@koma@set[2]{%
-  \ifcsdef{tud@font@koma@#1}{}{\addtokomafont{#1}{\@nameuse{tud@font@koma@#1}}}%
-  \@namedef{tud@font@koma@#1}{#2\nobreak}%
-}
-%    \end{macrocode}
-% Durch die Option \opt{headings} werden die Schriftelemente zurückgesetzt. 
-% Mit dem hier definierten Befehl \cs{tud@font@koma@reset} kann diesen das
-% Hilfsmakro abermals zugewiesen 
-% werden.
-%    \begin{macrocode}
-\newcommand*\tud@font@koma@reset[1]{%
-  \addtokomafont{#1}{\@nameuse{tud@font@koma@#1}}%
-}
-%    \end{macrocode}
-% Mit \cs{tud@font@koma@unset} kann das angegebene Element wieder zurückgesetzt
-% werden. Dabei wird das zuvor hinzugefügte Makro auf \cs{relax} gesetzt.
-%    \begin{macrocode}
-\newcommand*\tud@font@koma@unset[1]{%
-  \ifcsdef{tud@font@koma@#1}{\@namedef{tud@font@koma@#1}{\relax}}{}%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@font@koma@unset
-% \end{macro}^^A \tud@font@koma@reset
-% \end{macro}^^A \tud@font@koma@set
-% \begin{macro}{\usesizeofkomafont}
-% \changes{v2.02}{2014/05/17}{entfernt}^^A
-% Mit \TUDScript~v2.02 wurde die Bereitstellung dieses Befehls aufgrund der
-% zwingenden Verwendung von \KOMAScript{}~v3.12 entfernt.
-% \end{macro}^^A \usesizeofkomafont
-%
-% \iffalse
-%</class&option>
 % \fi
 %
 % \Finale

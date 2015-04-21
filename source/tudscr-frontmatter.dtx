@@ -1,4 +1,4 @@
-% \CheckSum{731}
+% \CheckSum{756}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-frontmatter.dtx}[%
-  2015/04/07 v2.04 TUD-KOMA-Script (frontmatter)%
+  2015/04/21 v2.04 TUD-KOMA-Script (frontmatter)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -102,7 +102,7 @@
 % Das Makro \cs{tud@fm@set} wird zur erstmaligen Verwendung in jedem Fall auf
 % die Definition von \cs{tud@fm@first} gesetzt.
 %    \begin{macrocode}
-  \let\tud@fm@set\tud@fm@first%
+  \global\let\tud@fm@set\tud@fm@first%
 %    \end{macrocode}
 % Danach erfolgt ggf. die Prüfung der resultierenden Seitenhöhe.
 %    \begin{macrocode}
@@ -110,8 +110,8 @@
     \ifboolexpr{%
       bool {@titlepage} and bool {@tud@#1@fil} and bool {@tud@#1@multi}%
     }{%
-      \setbox0\vbox{#2}%
-      \ifdim\textheight<\dimexpr\ht0+\dp0\relax%
+      \sbox\z@{\vbox{#2}}%
+      \ifdim\textheight<\dimexpr\ht\z@+\dp\z@\relax%
         \ClassWarning{\tudcls@name}{%
           The given content within the `#1'\MessageBreak%
           environment is too large, so it wasn't possible\MessageBreak%
@@ -168,7 +168,7 @@
         \protected@xdef\tud@fm@@@toc{\tud@fm@@toc/}%
       }%
       \let\clearpage\relax%
-      \setbox0\vbox{#2}%
+      \sbox\z@{\vbox{#2}}%
       \protected@edef\@tempa{%
         \noexpand\endgroup%
         \noexpand\ifnumodd{\csname tud@#1@toc\endcsname}{%
@@ -214,7 +214,7 @@
 % \begin{macro}{\tud@fm@first}
 % \changes{v2.04}{2015/03/20}{neu}^^A
 % \begin{macro}{\tud@fm@next}
-% \changes{v2.02}{2014/07/19}{mit \pkg{scrlayer-scrpage} eingeführt}^^A
+% \changes{v2.02}{2014/07/19}{neu}^^A
 % \changes{v2.04}{2015/03/20}{Reimplementierung}^^A
 % Mit diesen Makros werden bei der Ausgabe der einzelnen Erklärungen alle
 % relevanten Optionen%
@@ -233,7 +233,7 @@
 %    \begin{macrocode}
 \newcommand\tud@fm@set[1]{}
 \newcommand\tud@fm@first[1]{%
-  \let\tud@fm@set\tud@fm@next%
+  \global\let\tud@fm@set\tud@fm@next%
 %    \end{macrocode}
 % Im Zweispaltensatz wird der Inhalt der Umgebung einfach ausgegeben, eine 
 % vertikale Zentrierung findet nicht statt. Beim einspaltigen Satz wird die 
@@ -251,7 +251,7 @@
         \null\vfil%
         \ifnum\@nameuse{tud@#1@level}=\tw@\relax% section
           \vspace{\dimexpr-\parskip-\baselineskip\relax}%
-          {\usekomafont{section}\vspace{-\baselineskip}}%
+          {\usekomafont{section}{\vspace{-\baselineskip}}}%
         \fi%
       }{}%
     \fi%
@@ -282,6 +282,15 @@
       }{%
         \ifbool{@tud@#1@fil}{\null\clearpage\null\vfil}{\clearpage}%
       }%
+%    \end{macrocode}
+% Werden weder Titelseite noch Überschriften verwendet, so führt die Auswahl 
+% einer Sprache mit \cs{selectlanguage} zu einem zusätzlichen vertikalen 
+% Abstand. Dieser wird hiermit negiert.
+%    \begin{macrocode}
+    \else%
+      \ifnum\@nameuse{tud@#1@level}=\z@%
+        \ifdef{\main@language}{\vspace*{-\baselineskip}}{}%
+      \fi%
     \fi%
   \fi%
 }
@@ -318,17 +327,11 @@
 % Sollte das Paket \pkg{multicol} Verwendung finden, wird die entsprechende
 % Umgebung gestartet. Für das Setzen der Überschrift und der Kolumnentitel wird
 % \cs{tud@fm@head} verwendet, welches abhängig von den gewählten Optionen die
-% Gliederungsebene der Überschrift setzt. Da bei der Auswahl einer Sprache mit 
-% \cs{selectlanguage} innerhalb der Umgebung \env{multicols} eine Leerzeile 
-% eingefügt wird, erfolgt diese jedesmal, um eine einheitliches Aussehen aller 
-% Inhalte zu garantieren.
+% Gliederungsebene der Überschrift und die dazugehörigen Abstände setzt. Daher 
+% wird die Länge \cs{multicolsep} auf Null gesetzt.
 %    \begin{macrocode}
     \ifnum\tud@multicols>\@ne\relax%
-      \ifdef{\main@language}{%
-        \expandafter\selectlanguage\expandafter{\languagename}%
-      }{%
-        \vskip\z@%
-      }%
+      \setlength\multicolsep{\z@}%
       \begin{multicols}{\tud@multicols}[{\tud@fm@head{#1}{#3}}]%
     \else%
 %    \end{macrocode}
@@ -349,7 +352,7 @@
       \par%
     \fi%
     \if@twocolumn\else\if@titlepage\else\relax%
-      \ifnum\@nameuse{tud@#1@level}<\tw@\end{\tud@quoting}\fi% false/true
+      \ifnum\@nameuse{tud@#1@level}<\tw@\end{\tud@quoting}\par\fi% false/true
     \fi\fi%
   \endgroup%
 }
@@ -360,6 +363,7 @@
 % \changes{v2.02}{2014/07/18}{an \pkg{scrlayer-scrpage} angepasst}^^A
 % \changes{v2.02}{2014/10/09}{Bugfix für Kolumnentitel}^^A
 % \changes{v2.02}{2014/11/05}{Bugfix Kolumnentitel und Inhaltsverzeichnis}^^A
+% \changes{v2.04}{2015/04/21}{Abstände nur, wenn keine Zitatumgebung aktiv}^^A
 % Dieses Makro dient zur Ausgabe der Erklärungsüberschrift auf der gewünschten
 % Gliederungsebene. Die gewählte Ebene ist in \cs{tud@\meta{Typ}@level}
 % gespeichert. Verwendet wird das Makro folgendermaßen:
@@ -379,13 +383,20 @@
   \ifcase\@nameuse{tud@#1@level}\relax% false
     \if@titlepage\endgraf\fi%
     \csname phantomsection\endcsname%
+    \ifstr{\@currenvir}{\tud@quoting}{}{%
+      \if@twocolumn%
+        \vskip\dimexpr\smallskipamount-\parskip\relax%
+      \else%
+        \vskip\dimexpr\bigskipamount-\parskip\relax%
+      \fi%
+    }%
   \or% true
     \if@titlepage\endgraf\fi%
     \csname phantomsection\endcsname%
     \@afterindentfalse%
-    \ifnum\tud@multicols=\@ne\relax%
+    \ifstr{\@currenvir}{\tud@quoting}{}{%
       \vskip\dimexpr\bigskipamount-\parskip\relax%
-    \fi%
+    }%
     \begingroup%
       \noindent\centering%
       \normalfont\sectfont\nobreak#2%
@@ -393,7 +404,7 @@
       \endgraf%
     \endgroup%
     \nopagebreak%
-    \vskip\dimexpr\bigskipamount-\parskip\relax%
+    \vskip\dimexpr\medskipamount-\parskip\relax%
     \@afterheading%
   \or% section
     \section*{#2}%
