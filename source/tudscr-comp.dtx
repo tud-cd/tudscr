@@ -1,4 +1,4 @@
-% \CheckSum{519}
+% \CheckSum{520}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -326,48 +326,60 @@
 % \iffalse
 %</package&body>
 %</comp>
-%<*package&(body|fonts)>
+%<*package&body>
 % \fi
 %
 % \subsection{Kompatibilität zu \cls{tudposter} und \cls{tudmathposter}}
 %
 % \begin{macro}{\cdfont}
+% \changes{v2.04}{2015/03/04}{neu}^^A
 % \begin{macro}{\tudfont}
+% \changes{v2.04}{2015/03/04}{neu}^^A
 % \begin{macro}{\tud@trimfontname}
+% \changes{v2.04}{2015/03/04}{neu}^^A
 % \begin{macro}{\tud@@trimfontname}
+% \changes{v2.04}{2015/03/04}{neu}^^A
 % Die Klassen \cls{tudposter} und \cls{tudmathposter} definieren den Befehl 
 % \cs{tudfont}, mit welchem die Schriften des \CDs der \TnUD auch mit Klarnamen
 % ausgewählt werden können. Zur kompatibilität wird der Befehl \cs{cdfont} 
 % definiert, welcher die gleiche Funktionalität bereitstellt.
 %    \begin{macrocode}
+\RequirePackage{trimspaces}[2009/09/17]
 \newcommand*\cdfont[1]{%
-  \tud@trimfontname{#1}%
-  \ifstr{\@tempa}{universce45light}{\univln}{%
-  \ifstr{\@tempa}{universce55}{\univrn}{%
-  \ifstr{\@tempa}{universce60}{\univbn}{%
-  \ifstr{\@tempa}{universce75black}{\univxn}{%
-  \ifstr{\@tempa}{universce45lightoblique}{\univls}{%
-  \ifstr{\@tempa}{universce55oblique}{\univrs}{%
-  \ifstr{\@tempa}{universce60oblique}{\univbs}{%
-  \ifstr{\@tempa}{universce75blackoblique}{\univxs}{%
+  \tud@trimfontname\@tempa{#1}%
+  \ifstr{\@tempa}{univers45}{\univln}{%
+  \ifstr{\@tempa}{univers55}{\univrn}{%
+  \ifstr{\@tempa}{univers60}{\univbn}{%
+  \ifstr{\@tempa}{univers75}{\univxn}{%
+  \ifstr{\@tempa}{univers45oblique}{\univls}{%
+  \ifstr{\@tempa}{univers55oblique}{\univrs}{%
+  \ifstr{\@tempa}{univers60oblique}{\univbs}{%
+  \ifstr{\@tempa}{univers75oblique}{\univxs}{%
   \ifstr{\@tempa}{dinbold}{\dinbn}{%
     \PackageWarning{tudscrfonts}{The font `#1' is unknown}%
   }}}}}}}}}%
 }
 \providecommand*\tudfont{\cdfont}
-\newcommand*\tud@trimfontname[1]{%
-  \edef\@tempa{\trim@spaces{#1}}%
-  \expandafter\tud@@trimfontname\expandafter{\@tempa}{ }%
-  \expandafter\tud@@trimfontname\expandafter{\@tempa}{-}%
-  \expandafter\tud@@trimfontname\expandafter{\@tempa}{}%
+\newcommand*\tud@trimfontname[2]{%
+  \protected@edef\@tempa{\trim@spaces{#2}}%
   \tud@lowerstring{\@tempa}{\@tempa}%
+  \tud@@trimfontname{ }{}%
+  \tud@@trimfontname{-}{}%
+  \tud@@trimfontname{_}{}%
+  \tud@@trimfontname{~}{}%
+  \tud@@trimfontname{ce}{}%
+  \tud@@trimfontname{light}{}%
+  \tud@@trimfontname{black}{}%
+  \tud@@trimfontname{italic}{oblique}%
+  \tud@@trimfontname{slanted}{oblique}%
+  \let#1\@tempa%
 }
 \newcommand*\tud@@trimfontname[2]{%
-  \def\@tempc##1#2##2\relax{\def\@tempa{##1##2}}%
-  \@expandtwoargs\in@{#2}{\@tempa}%
+  \def\@tempb##1#1##2\relax{\def\@tempa{##1#2##2}}%
+  \@expandtwoargs\in@{#1}{\@tempa}%
   \@whilesw\ifin@\fi{%
-    \expandafter\@tempc\@tempa\relax%
-    \@expandtwoargs\in@{#2}{\@tempa}%
+    \expandafter\@tempb\@tempa\relax%
+    \@expandtwoargs\in@{#1}{\@tempa}%
   }%
 }
 %    \end{macrocode}
@@ -375,8 +387,7 @@
 % \end{macro}^^A \tud@trimfontname
 % \end{macro}^^A \tudfont
 % \end{macro}^^A \cdfont
-
-
+%
 % \subsection{Kompatibilität zu früheren \TUDScript-Versionen}
 %
 % Neben den Optionen und Befehlen im Paket \pkg{tudscrcomp} gibt es weitere 
@@ -390,7 +401,7 @@
 % Hiermit wird alles dafür vorbereitet.
 %
 % \iffalse
-%</package&(body|fonts)>
+%</package&body>
 %<*class|package&fonts>
 % \fi
 %
@@ -423,7 +434,7 @@
 % Bei alten Befehlen wird nach der Warnung die Definition des neuen Befehls auf 
 % den alten überschrieben.
 %    \begin{macrocode}
-%<*body>
+%<*class&body>
 \newcommand*\tud@deprecated@cmd[2]{%
   \AtBeginDocument{%
     \ifcsdef{#1}{}{%
@@ -438,7 +449,7 @@
     }%
   }%
 }
-%</body>
+%</class&body>
 %    \end{macrocode}
 % \end{macro}^^A \tud@deprecated@cmd
 % \end{macro}^^A \TUD@deprecated@key
