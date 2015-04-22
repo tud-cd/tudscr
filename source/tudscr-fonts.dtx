@@ -1,4 +1,4 @@
-% \CheckSum{1330}
+% \CheckSum{1383}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-fonts.dtx}[%
-  2015/04/21 v2.04 TUD-KOMA-Script\space%
+  2015/04/22 v2.04 TUD-KOMA-Script\space%
 %</driver>
 %<package&identify>\NeedsTeXFormat{LaTeX2e}[2011/06/27]
 %<package&identify>\ProvidesPackage{%
@@ -89,10 +89,12 @@
 % \changes{v2.02}{2014/07/08}{Optionen nutzen \cs{FamilyKeyState}}^^A
 % \changes{v2.02}{2014/08/29}{Verwendung von \pkg{mweights} entfernt}^^A
 % \changes{v2.02}{2014/08/29}{Unterstützung für \pkg{fontspec}}^^A
-% \changes{v2.02}{2014/09/30}{\pkg{tudscrfonts} Nutzung alter tud-Klassen 
+% \changes{v2.02}{2014/09/30}{\pkg{tudscrfonts}: Nutzung alter tud-Klassen 
 %   mit neuen Schriftfamilien ermöglicht}^^A
 % \changes{v2.04}{2015/02/27}{Interaktion mit Paketen insbesondere für 
 %   den Mathematiksatz verbessert}^^A
+% \changes{v2.04}{2015/04/22}{\pkg{tudscrfonts}: Unterstützung veralteter 
+%   Posterklassen}^^A
 %
 % \section{Schriften des \CDs}
 %
@@ -141,7 +143,6 @@
 %    \end{macrocode}
 % Wenn eine der alten Klassen aus den Vorlagen von Klaus Bergmann geladen 
 % wurde, wird dies für spätere Anpassungen registriert.
-% \ToDo{Klasse tudbeamer einpflegen}[v2.xx]
 %    \begin{macrocode}
 \@ifclassloaded{tudbook}{\@tud@oldclasstrue}{}%
 \@ifclassloaded{tudbeamer}{\@tud@oldclasstrue}{}%
@@ -149,6 +150,12 @@
 \@ifclassloaded{tudform}{\@tud@oldclasstrue}{}%
 \@ifclassloaded{tudhaus}{\@tud@oldclasstrue}{}%
 \@ifclassloaded{tudletter}{\@tud@oldclasstrue}{}%
+%    \end{macrocode}
+% Die alten Posterklassen werden ebenfalls unterstützt.
+% \ToDo{Klasse tudbeamer einpflegen}[v2.xx]
+%    \begin{macrocode}
+\@ifclassloaded{tudposter}{\@tud@oldclasstrue}{}%
+\@ifclassloaded{tudmathposter}{\@tud@oldclasstrue}{}%
 %    \end{macrocode}
 % Soll das Paket \pkg{tudscrfonts} mit den \TUDScript-Klassen der Version~v1.0
 % genutzt werden, muss Sorge dafür getragen werden, dass einige veraltete 
@@ -1569,12 +1576,18 @@
       \SetSymbolFont{aunLetters}{bold}{OT1}{\tud@univers}{b}{sl}%
       \DeclareSymbolFont{aunOperators}{OT1}{\tud@univers}{l}{n}%
       \SetSymbolFont{aunOperators}{bold}{OT1}{\tud@univers}{b}{n}%
+      \DeclareSymbolFont{aunUpright}{OT1}{\tud@univers}{l}{n}%
+      \SetSymbolFont{aunUpright}{bold}{OT1}{\tud@univers}{b}{n}%
       \DeclareSymbolFontAlphabet{\mathsf}{aunOperators}%
       \DeclareSymbolFontAlphabet{\mathnormal}{aunLetters}%
       \DeclareMathAlphabet\mathbf{OT1}{\tud@univers}{b}{n}%
       \SetMathAlphabet\mathbf{bold}{OT1}{\tud@univers}{b}{n}%
       \DeclareMathAlphabet\mathit{OT1}{\tud@univers}{l}{sl}%
       \SetMathAlphabet\mathit{bold}{OT1}{\tud@univers}{l}{sl}%
+      \@ifpackageloaded{tudfonts}{%
+        \let\mv@normal\mv@univers%
+        \let\mv@bold\mv@universbold%
+      }{}%
     \fi%
     \let\dinBold\dinbn%
     \let\dinfamily\dinbn%
@@ -1664,6 +1677,43 @@
 % \end{macro}^^A \section
 % \end{macro}^^A \@makeschapterhead
 % \end{macro}^^A \@makechapterhead
+% \begin{KOMAfont}{title}
+% \begin{macro}{\subtitlefont}
+% \begin{macro}{\sectionfont}
+% \begin{macro}{\subsectionfont}
+% 
+% Auch für die beiden Posterklassen \cls{tudmathposter} und \cls{tudposter}
+% sowie das Paket \pkg{tudfonts} sind kleine Anpassungen notwendig.
+%    \begin{macrocode}
+\@ifclassloaded{tudposter}{%
+  \let\if@sansmath\if@tudposter@sansmath%
+}{}
+\@ifclassloaded{tudmathposter}{%
+  \setkomafont{title}{\bfseries\tud@font@heading\Huge}%
+  \renewcommand*\subtitlefont{\fontseries{m}\tud@font@heading\huge}%
+  \if@mathevorgabe%
+    \renewcommand*\sectionfont{\univbn\LARGE}%
+    \renewcommand*\subsectionfont{\univbn\large}%
+  \fi%
+}{}
+\@ifpackageloaded{tudfonts}{%
+  \let\if@sansmath\if@tudfonts@sansmath%
+  \let\tudfont\cdfont%
+  \if@sansmath%
+    \if@tudfonts@eulermath%
+      \PackageWarningNoLine{tudscrfonts}{%
+        You're using non-serif fonts in math mode. It's\MessageBreak%
+        recommended to pass the option `noeulermath' to\MessageBreak%
+        package `tudfonts'%
+      }%
+    \fi%
+  \fi%
+}{}
+%    \end{macrocode}
+% \end{macro}^^A \subsectionfont
+% \end{macro}^^A \sectionfont
+% \end{macro}^^A \subtitlefont
+% \end{KOMAfont}^^A title
 %
 % \iffalse
 %</package&body>
