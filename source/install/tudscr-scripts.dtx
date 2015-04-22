@@ -1,4 +1,4 @@
-% \CheckSum{258}
+% \CheckSum{266}
 % \iffalse meta-comment
 % ======================================================================
 %
@@ -46,7 +46,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-scripts.dtx}[%
-  2015/04/07 v2.04 TUD-KOMA-Script installation scripts%
+  2015/04/22 v2.04 TUD-KOMA-Script installation scripts%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -68,6 +68,7 @@
 % \changes{v2.03}{2015/01/23}{\pkg{mweights} unnötig}^^A
 % \changes{v2.04}{2015/03/11}{MiKTeX Portable wird unterstützt}^^A
 % \changes{v2.04}{2015/04/12}{Bugfix für Windowspfade mit Leerzeichen}^^A
+% \changes{v2.04}{2015/04/22}{Bugfix für MiKTeX-Maps}^^A
 %
 % \section{Installationsskripte}
 %
@@ -555,7 +556,11 @@ exit /b 0
 % \fi
 %
   if %distrib%=="MiKTeX" goto :MiKTeXHash
-  goto :TeXLiveHash
+:TeXLiveHash
+  texhash
+%<(full|font)&old>  updmap-sys --enable Map=tud.map
+%<(full|font|convfont)&!old>  updmap-sys --enable Map=tudscr.map
+  goto :end
 :MiKTeXHash
   initexmf --register-root="%texmfpath%"
   initexmf --update-fndb="%texmfpath%"
@@ -566,38 +571,36 @@ exit /b 0
 % \fi
 %
   updmap
-  set mapcfg="%texmfpath%/miktex/config/updmap.cfg"
-  if exist %mapcfg% goto :updatemap
-  :newmap
-    if not exist "%texmfpath%/miktex/config" (
-      mkdir "%texmfpath%/miktex/config"
+  set "texmfpath=%texmfpath:/=\%"
+  set mapcfg=%texmfpath%\miktex\config\updmap.cfg
+  if not exist "%mapcfg%" (
+    if not exist "%texmfpath%\miktex\config" (
+      mkdir "%texmfpath%\miktex\config"
     )
-%<old>    echo Map tud.map> %mapcfg%
-%<!old>    echo Map tudscr.map> %mapcfg%
-    goto :endmap
-  :updatemap
-    set /p var=< %mapcfg%
+%<old>    echo Map tud.map> "%mapcfg%"
+%<!old>    echo Map tudscr.map> "%mapcfg%"
+  ) else (
 %
 % \iffalse
 %<*old>
 % \fi
 %
-    echo %var% | find "Map tud.map"> nul
-    if errorlevel 1 echo Map tud.map>> %mapcfg%
+    find "Map tud.map" "%mapcfg%"> nul
+    if errorlevel 1 echo Map tud.map>> "%mapcfg%"
 %
 % \iffalse
 %</old>
 %<*!old>
 % \fi
 %
-    echo %var% | find "Map tudscr.map"> nul
-    if errorlevel 1 echo Map tudscr.map>> %mapcfg%
+    find "Map tudscr.map" "%mapcfg%"> nul
+    if errorlevel 1 echo Map tudscr.map>> "%mapcfg%"
 %
 % \iffalse
 %</!old>
 % \fi
 %
-  :endmap
+  )
   initexmf --mkmaps
 %
 % \iffalse
@@ -605,12 +608,6 @@ exit /b 0
 %<*!convert>
 % \fi
 %
-  goto :end
-:TeXLiveHash
-  texhash
-%<(full|font)&old>  updmap-sys --enable Map=tud.map
-%<(full|font|convfont)&!old>  updmap-sys --enable Map=tudscr.map
-  goto :end
 :end
   echo.
   echo  =====================================================================

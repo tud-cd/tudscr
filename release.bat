@@ -33,7 +33,6 @@ makeindex -s gglo.ist -o tudscrsource.gls tudscrsource.glo
 makeindex -s gind.ist -o tudscrsource.ind tudscrsource.idx
 pdflatex "\def\tudfinalflag{}\input{tudscrsource.tex}"
 pdflatex "\def\tudfinalflag{}\input{tudscrsource.tex}"
-copy  tudscr-version.dtx  install\
 move  *.dtx               source\latex\tudscr\
 move  tudscr.ins          source\latex\tudscr\
 move  tudscrsource.tex    source\latex\tudscr\
@@ -81,6 +80,7 @@ echo  Erzeugen der Installationdateien
 echo =========================================================================
 echo.
 cd ..\install
+copy  ..\source\latex\tudscr\tudscr-version.dtx ..\.
 tex tud-install.ins
 tex tudscr-install.ins
 rename *.bxt *.bat
@@ -92,6 +92,7 @@ for %%a in (*.*) do (
   rename "%%a" "!file:%pattern%=%replace%!"
 )
 endlocal
+del ..\tudscr-version.dtx
 echo.
 echo =========================================================================
 echo  Release fuer GitHub
