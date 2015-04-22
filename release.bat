@@ -172,7 +172,7 @@ cd release-%version%\temp
 7za a -tzip .\..\TUD-KOMA-Script_v1.0old.zip @7za_files_old.txt
 cd..
 move TUD-KOMA-Script_v1.0old.zip             GitHub-tudscrold\
-move temp\tudfonts_install.*                 GitHub-tudscrold\
+move temp\tud_fonts_install.*                GitHub-tudscrold\
 echo.
 echo =========================================================================
 echo  Loeschen aller temporaeren Dateien
