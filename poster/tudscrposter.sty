@@ -52,7 +52,7 @@
       \fi%
     }%
   \fi%
-  \@TUDVersion{2015/04/01 v2.04 BETA TUD-KOMA-Script}%
+  \@TUDVersion{2015/04/24 v2.04 BETA TUD-KOMA-Script}%
 \endgroup%
 \providecommand*\tudscrmail{tudscr@gmail.com}
 \@ifundefined{TUDScript}{%
@@ -105,6 +105,57 @@
 \TUDExecuteOptions{cdstyle}
 \TUDProcessOptions\relax
 
+\tud@locale@define{\contactname}
+\tud@locale@german{\contactname}{Kontakt}%
+\tud@locale@english{\contactname}{Contact}%
+% §§§ Konflikt mit tudscrsupervisor
+\tud@locale@define{\authorname}
+\tud@locale@german{\authorname}{Autor}%
+\tud@locale@english{\authorname}{Author}%
+\newcommand*\@contactperson{}
+\newcommand*\contactperson[1]{\gdef\@contactperson{#1}}
+\tud@locale@define{\contactpersonname}
+\tud@locale@german{\contactpersonname}{Ansprechpartner}%
+\tud@locale@english{\contactpersonname}{Contact}%
+
+\footcontent{%
+  \ifx\contactname\@empty\else{\tud@head@font@bold\contactname}\newline\fi%
+  Technische Universit\"at Dresden%
+  \ifx\@institute\@empty\else\newline\@institute\fi%
+  \ifx\@chair\@empty\else\newline\@chair\fi%
+  \ifx\@professor\@empty\else\newline\@professor\fi%
+}%
+[%
+  \begingroup%
+    \protecting{%
+      \ifpatchable{\@author}{\@latex@warning@no@line}{%
+        \let\@tempa\@empty%
+      }{%
+        \let\@tempa\@author%
+      }%
+    \let\and\newline%
+    % §§§ split für weitere felder?!
+    \@tempswafalse%
+    \ifx\@tempa\@empty\else%
+      \ifx\authorname\@empty\else{\tud@head@font@bold\authorname}\newline\fi%
+      \@tempa%
+      \@tempswatrue%
+    \fi%
+    % §§§ split für weitere felder?!
+    \ifx\@contactperson\@empty\else%
+      \if@tempswa\newline\fi%
+      \ifx\contactpersonname\@empty\else%
+        {\tud@head@font@bold\contactpersonname}\newline%
+      \fi%
+      \@contactperson%
+    \fi%
+    }%
+  \endgroup
+]
+%\webpage{}
+
+
+
 %\AtEndPreamble{%
 %  \KOMAoptions{fontsize=14}
 %  \recalctypearea
@@ -112,6 +163,7 @@
 %  \expandafter\pagestyle\expandafter{\currentpagestyle}%
 %}
 
-% §§§ cdfootcontent für Klassen, Sternversion löscht Schrifteinstellungen
+
+% §§§ Farbe nur für Querbalken (cdhead=barcolor)?!
 % §§§ vorgegebene Felder für tudscrposter
 % §§§ Hinweis auf manuelle Anpassung des passenden Layers in die Doku

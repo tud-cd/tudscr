@@ -1,4 +1,4 @@
-% \CheckSum{2236}
+% \CheckSum{2239}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-pagestyle.dtx}[%
-  2015/04/21 v2.04 TUD-KOMA-Script (pagestyle)%
+  2015/04/24 v2.04 TUD-KOMA-Script (pagestyle)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -395,7 +395,7 @@
     voffset=\tud@dim@topmargin,%
     contents={%
       \ifnum\tud@head@bar>\@ne\relax% color
-        \color{HKS41!80}%
+        \color{HKS41!60}%
         \rule{\layerwidth}{\tud@dim@barheight}%
       \fi%
     },%
@@ -500,7 +500,7 @@
           \fi%
         }{%
           \def\@tempc{\color{HKS41}}%
-          \ifstr{\tud@pagecolor}{HKS41}{\def\@tempc{\color{HKS41!80}}}{}%
+          \ifstr{\tud@pagecolor}{HKS41}{\def\@tempc{\color{HKS41!60}}}{}%
         }%
         \ifx\@tempc\relax\else%
           \tud@ifverlower{2.03}{%
@@ -584,7 +584,7 @@
   }{}%
 %    \end{macrocode}
 % Die letzte Ebene setzt den Seitenfußinhalt der \pgs{tudheadings}-Seitenstile,
-% welcher mit \cs{tudheadingsfoot} definiert wird.
+% welcher mit \cs{footcontent} definiert wird.
 %    \begin{macrocode}
   \DeclareNewLayer[%
     background,foot,%
@@ -592,7 +592,7 @@
     contents={%
       \vbox to \dimexpr\layerheight-\dp\strutbox\relax{%
         \vfil%
-        \tudheadingsfootcontent%
+        \footlayer%
         \vfil\vfil%
       }%
     },%
@@ -1412,15 +1412,15 @@
 % \end{macro}^^A \headlogo
 % \begin{KOMAfont}{tudheadings}
 % \changes{v2.04}{2015/04/21}{neu}^^A
-% \begin{macro}{\tudheadingsfoot}
+% \begin{macro}{\footcontent}
 % \changes{v2.04}{2015/04/21}{neu}^^A
-% \begin{macro}{\@tudheadingsfoot}
+% \begin{macro}{\@footcontent}
 % \changes{v2.04}{2015/04/21}{neu}^^A
-% \begin{macro}{\@@tudheadingsfoot}
+% \begin{macro}{\@@footcontent}
 % \changes{v2.04}{2015/04/21}{neu}^^A
-% \begin{macro}{\tudheadingsfootcontent}
+% \begin{macro}{\footlayer}
 % \changes{v2.04}{2015/04/21}{neu}^^A
-% Mit dem Befehl \cs{tudheadingsfoot} kann der Inhalt für den Fußbereich der 
+% Mit dem Befehl \cs{footcontent} kann der Inhalt für den Fußbereich der 
 % Seiten im Stil \pgs{tudheadings} festgelegt werden. Dieser wird mit passenden 
 % Schrifteinstellungen entweder einspaltig oder zweispaltig gesetzt. Die 
 % Sternversion des Befehls nimmt keinerlei Einstellungen für die Schrift vor.
@@ -1429,13 +1429,13 @@
   \sffamily%
   \tud@color{\tud@foot@fontcolor}%
 }
-\newcommand*\tudheadingsfoot{%
+\newcommand*\footcontent{%
   \@ifstar{%
     \@tempswafalse%
-    \@tudheadingsfoot%
+    \@footcontent%
   }{%
     \@tempswatrue%
-    \@tudheadingsfoot%
+    \@footcontent%
   }%
 }
 %    \end{macrocode}
@@ -1443,22 +1443,26 @@
 % gesetzt. Wird das optionale Argument \emph{nach} dem obligatorischen genutzt, 
 % so erfolgt die Ausgabe zweispaltig.
 %    \begin{macrocode}
-\newcommand*\@tudheadingsfoot[2][]{%
+\newcommand*\@footcontent[2][]{%
   \kernel@ifnextchar[%]
-    {\@@tudheadingsfoot{#1}{#2}}%
-    {\@@tudheadingsfoot{#1}{#2}[]}%
+    {\@@footcontent{#1}{#2}}%
+    {\@@footcontent{#1}{#2}[]}%
 }
-\newcommand*\@@tudheadingsfoot{}%
-\newcommand*\tudheadingsfootcontent{}
-\def\@@tudheadingsfoot#1#2[#3]{%
-  \def\tudheadingsfootcontent{%
-    \if@tempswa%
+\newcommand*\@@footcontent{}%
+\newcommand*\footlayer{}
+\def\@@footcontent#1#2[#3]{%
+  \if@tempswa%
+    \def\footlayer{%
       \usekomafont{tudheadings}%
       \tud@divide\@tempa{\tud@head@font@size}{\f@size}%
       \linespread{\@tempa}%
       \selectfont%
       \tud@head@font@light%
-    \fi%
+    }%
+  \else%
+    \def\footlayer{}%
+  \fi%
+  \appto\footlayer{%
     #1%
     \tud@footlogoheight@default%
     \tud@ddc@check%
@@ -1472,13 +1476,13 @@
     \fi%
   }%
   \ifstr{#3}{}{%
-    \appto\tudheadingsfootcontent{%
+    \appto\footlayer{%
       \begin{minipage}[t]{\dimexpr\textwidth-\@tempdima\relax}%
         #2%
       \end{minipage}%
     }%
   }{%
-    \appto\tudheadingsfootcontent{%
+    \appto\footlayer{%
       \begin{minipage}[t]{\dimexpr (\textwidth-\columnsep)/2\relax}%
         #2%
       \end{minipage}%
@@ -1490,10 +1494,10 @@
   }%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tudheadingsfootcontent
-% \end{macro}^^A \@@tudheadingsfoot
-% \end{macro}^^A \@tudheadingsfoot
-% \end{macro}^^A \tudheadingsfoot
+% \end{macro}^^A \footlayer
+% \end{macro}^^A \@@footcontent
+% \end{macro}^^A \@footcontent
+% \end{macro}^^A \footcontent
 % \end{KOMAfont}^^A tudheadings
 % \begin{macro}{\footlogo}
 % \changes{v2.03}{2015/01/27}{neu}^^A
@@ -2535,8 +2539,6 @@
 % \end{length}^^A \tud@ta@headdiff
 % \begin{macro}{\tud@AfterCalculatingTypearea}
 % \changes{v2.04}{2015/03/10}{neu}^^A
-% \begin{macro}{\tud@geometry@restore}
-% \changes{v2.02}{2014/06/27}{neu}^^A
 % Der Befehl \cs{AfterCalculatingTypearea} wird durch das Paket \pkg{typearea}
 % bereitgestellt. Die durch \pkg{typearea} berechneten Längenwerte für den
 % Satzspiegel werden zur Weiterverarbeitung gesichert. Für die Erstellung des
@@ -2545,10 +2547,7 @@
 % Satzspiegel an \pkg{geometry} weitergereicht. Somit wird es möglich,
 % unabhängig vom genutzten Paket\footnote{\pkg{typearea} oder \pkg{geometry}}
 % zur Festlegung des Satzspiegels, diesen innerhalb des Dokumentes zu ändern.
-% Damit auch Änderungen an der Papiergröße möglich sind, muss ein einzelnes
-% Makro (\cs{Gm@restore@org}) aus \pkg{geometry} temporär deaktiviert werden.
 %    \begin{macrocode}
-\newcommand*\tud@geometry@restore{}
 \newcommand*\tud@AfterCalculatingTypearea{%
   \setlength\tud@ta@textheight{\textheight}%
   \setlength\tud@ta@topmargin{\topmargin}%
@@ -2572,7 +2571,6 @@
   \expandafter\pagestyle\expandafter{\currentpagestyle}%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@geometry@restore
 % \end{macro}^^A \tud@AfterCalculatingTypearea
 % Damit alle Satzspiegeleinstellungen korrekt vorgenommen und auch alle
 % Klassenoptionen korrekt verarbeitet werden, wird die Berechnung erstmalig mit
