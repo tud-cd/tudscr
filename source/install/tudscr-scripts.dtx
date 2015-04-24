@@ -46,7 +46,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-scripts.dtx}[%
-  2015/04/22 v2.04 TUD-KOMA-Script installation scripts%
+  2015/04/24 v2.04 TUD-KOMA-Script installation scripts%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -69,6 +69,7 @@
 % \changes{v2.04}{2015/03/11}{MiKTeX Portable wird unterstützt}^^A
 % \changes{v2.04}{2015/04/12}{Bugfix für Windowspfade mit Leerzeichen}^^A
 % \changes{v2.04}{2015/04/22}{Bugfix für MiKTeX-Maps}^^A
+% \changes{v2.04}{2015/04/24}{Tex Live Portable wird unterstützt}^^A
 %
 % \section{Installationsskripte}
 %
@@ -177,43 +178,27 @@ set /p distrib=< distrib.tmp
 set texmfpath=
 kpsewhich --var-value=TEXMFHOME> texmfpath.tmp
 set /p texmfpath=< texmfpath.tmp
-set portable=false
 %    \end{macrocode}
 % Die Variable \val{TEXMFHOME} wird momentan nur von TeX~Live bereitgestellt. 
-% Für MiKTeX wird daher ein alternativer Pfad vorgeschlagen.
+% Für MiKTeX wird daher für einen lokalen LaTeX-Ordner als alternativer Pfad 
+% das Nutzerverzeichnis empfohlen.
 %    \begin{macrocode}
 if "%texmfpath%"=="" (
+  echo %USERPROFILE%\texmf> texmfpath.tmp
+  set /p texmfpath=< texmfpath.tmp
+)
 %    \end{macrocode}
-% Dabei wird unterschieden, ob es sich um eine normale oder eine portable 
+% Außerdem wird unterschieden, ob es sich um eine normale oder eine portable 
 % Installation handelt. Mit \val{wmic} werden alle vorhandenen Laufwerke und 
-% deren Typ ausgegeben. In der Schleife wird geprüft, ob MiKTeX auf der HDD 
+% deren Typ ausgegeben. In der Schleife wird geprüft, ob \LaTeX auf der HDD 
 % oder einem USB-Stick installiert ist. 
 %    \begin{macrocode}
-  for /f "usebackq tokens=1,2" %%a in (
-    `wmic logicaldisk get caption^,drivetype`
-  ) do (
-    if "%%a"=="%texpath:~,2%" (
-      setlocal enabledelayedexpansion
-%    \end{macrocode}
-% Bei einer normalen Installation wird das Nutzerverzeichnis für einen lokalen 
-% LaTeX-Ordner empfohlen.
-%    \begin{macrocode}
-      set texmfpath=%USERPROFILE%\texmf
-%    \end{macrocode}
-% Für eine portable Installation wird als lokaler LaTeX-Ordner einer auf der
-% gleichen Ebene wie die MiKTeX-Installation selbst vorgeschlagen.
-%    \begin{macrocode}
-      if %%b==2 (
-        pushd !cd!
-        cd /d !texpath:~,2!
-        cd !texpath:~,-10!\..\..\..
-        set texmfpath=!cd!\texmf
-        popd
-      )
-      echo !texmfpath!> texmfpath.tmp
-      endlocal & if %%b==2 set portable=true
-      set /p texmfpath=< texmfpath.tmp
-    )
+set portable=false
+for /f "usebackq tokens=1,2" %%a in (
+  `wmic logicaldisk get caption^,drivetype`
+) do (
+  if "%%a"=="%texpath:~,2%" (
+    if %%b==2 set portable=true
   )
 )
 :MiKTeX
@@ -221,6 +206,19 @@ if "%texmfpath%"=="" (
   if errorlevel 1 goto :TeXLive
   set distrib="MiKTeX"
   if "%portable%" == "true" (
+%    \end{macrocode}
+% Für eine portable MiKTeX-Installation wird als lokaler LaTeX-Pfad einer auf
+% der gleichen Ordnerebene vorgeschlagen.
+%    \begin{macrocode}
+    setlocal enabledelayedexpansion
+      pushd !cd!
+      cd /d !texpath:~,2!
+      cd !texpath:~,-10!\..\..\..
+      set texmfpath=!cd!\texmf
+      popd
+      echo !texmfpath!> texmfpath.tmp
+    endlocal
+    set /p texmfpath=< texmfpath.tmp
     echo   LaTeX-Distribution MiKTeX Portable gefunden
   ) else (
     echo   LaTeX-Distribution MiKTeX gefunden
@@ -232,12 +230,16 @@ if "%texmfpath%"=="" (
   echo %distrib% | find "TeX Live"> nul
   if errorlevel 1 goto :nothing
   set distrib="TeXLive"
-  echo   LaTeX-Distribution TeX Live gefunden
+  if "%portable%" == "true" (
+    echo   LaTeX-Distribution TeX Live Portable gefunden
+  ) else (
+    echo   LaTeX-Distribution TeX Live gefunden
+  )
   echo  =====================================================================
   echo.
   goto :resume
 :nothing
-  echo   TeX Live, MiKTeX oder MiKTeX Portable wurden nicht gefunden
+  echo   TeX Live oder MiKTeX wurden nicht gefunden
   echo  =====================================================================
   echo.
   goto :abort
