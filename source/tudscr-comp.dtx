@@ -1,4 +1,4 @@
-% \CheckSum{520}
+% \CheckSum{851}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-comp.dtx}[%
-  2015/04/22 v2.04 TUD-KOMA-Script\space%
+  2015/04/27 v2.04 TUD-KOMA-Script\space%
 %</driver>
 %<package&identify>\NeedsTeXFormat{LaTeX2e}[2011/06/27]
 %<package&identify>\ProvidesPackage{tudscrcomp}[%
@@ -67,7 +67,7 @@
 \usepackage{selinput}\SelectInputMappings{adieresis={ä},germandbls={ß}}
 \usepackage[T1]{fontenc}
 \usepackage{babel}
-\usepackage{tudscrfonts} % only load this package, if the fonts are installed
+%\usepackage{tudscrfonts} % only load this package, if the fonts are installed
 \KOMAoptions{parskip=half-}
 \CodelineIndex
 \RecordChanges
@@ -81,328 +81,31 @@
 %
 % \selectlanguage{ngerman}
 %
-% \section{Kompatibilität für die \cls{tudbook}-Klasse und frühere Versionen}
+% \changes{v2.02}{2014/09/30}{\pkg{tudscrfonts}: Nutzung alter tud-Klassen 
+%   mit neuen Schriftfamilien ermöglicht}^^A
+% \changes{v2.04}{2015/04/22}{\pkg{tudscrfonts}: Unterstützung veralteter 
+%   Posterklassen}^^A
 %
-% Diese Paket stellt für die \cls{tudscr}-Klassen eine Schnittstelle bereit,
-% die es ermöglicht, die in der alten \cls{tudbook}-Klasse und dem dazugehörigen
-% \pkg{tudthesis}-Paket definierten Befehle hier zu benutzen, um alte Dokumente
-% mit den neuen Klassen zu setzen.
+% \section{Kompatibilität zu früheren Versionen und Klassen}
+%
+% Hiermit werden sowohl veraltete Befehle und Optionen aus früheren Versionen
+% von \TUDScript als auch \enquote{veraltete} Klassen und Pakete, welche das 
+% \CD der \TnUD mehr oder weniger gut umsetzen, unterstützt.
 %
 % \StopEventually{\PrintIndex\PrintChanges}
 %
-% \iffalse
-%<*comp>
-%<*package&body>
-% \fi
-%
-% \subsection{Das Paket \pkg{tudscrcomp} -- \cls{tudbook}-Kompatibilität}
-%
-% \begin{macro}{\einrichtung}
-% \begin{macro}{\fachrichtung}
-% \begin{macro}{\institut}
-% \begin{macro}{\professur}
-% \begin{macro}{\moreauthor}
-% \begin{macro}{\submitdate}
-% \begin{macro}{\supervisorII}
-% \begin{macro}{\supervisedby}
-% \begin{macro}{\supervisedIIby}
-% \begin{macro}{\submittedon}
-% Es werden Aliasbefehle für die Eingabefelder definiert.
-%    \begin{macrocode}
-\newcommand*\einrichtung{}
-\let\einrichtung\faculty
-\newcommand*\fachrichtung{}
-\let\fachrichtung\department
-\newcommand*\institut{}
-\let\institut\institute
-\newcommand*\professur{}
-\let\professur\chair
-\newcommand*\moreauthor{}
-\let\moreauthor\authormore
-\newcommand*\submitdate{}
-\let\submitdate\date
-\newcommand*\supervisorII[1]{%
-  \expandafter\gdef\expandafter\@supervisor\expandafter{\@supervisor\and #1}%
-}
-\newcommand*\supervisedby[1]{\gdef\supervisorname{#1}}
-\newcommand*\supervisedIIby[1]{\gdef\supervisorothername{#1}}
-\newcommand*\submittedon[1]{\gdef\datetext{#1}}
-%    \end{macrocode}
-% \end{macro}^^A \submittedon
-% \end{macro}^^A \supervisedIIby
-% \end{macro}^^A \supervisedby
-% \end{macro}^^A \supervisorII
-% \end{macro}^^A \submitdate
-% \end{macro}^^A \moreauthor
-% \end{macro}^^A \professur
-% \end{macro}^^A \institut
-% \end{macro}^^A \fachrichtung
-% \end{macro}^^A \einrichtung}
-% \begin{macro}{\dissertation}
-% Bei der Definition des Typs der Abschlussarbeit mit \cs{dissertation} wird
-% die Lokalisierungsvariable \cs{dissertationname} verwendet und die Feldnamen
-% angepasst.
-%    \begin{macrocode}
-\newcommand*\dissertation{%
-  \thesis{\dissertationname}%
-  \let\supervisorname\refereename%
-  \let\supervisorothername\refereeothername%
-}
-%    \end{macrocode}
-% \end{macro}^^A \dissertation
-%
-% \iffalse
-%</package&body>
-%<*package&option>
-% \fi
-%
-% \begin{option}{colortitle}
-% \begin{option}{nocolortitle}
-% Für farbige Einstellungen wird von \cls{tudbook} die Option \opt{color} 
-% definiert. Soll die Titelseite konträr dazu gesetzt werden, muss sich mit den
-% Schlüsseln \opt{colortitle} und \opt{nocolortitle} beholfen werden.
-%    \begin{macrocode}
-\TUD@key{colortitle}[true]{%
-  \TUD@set@ifkey{colortitle}{@tempswa}{#1}%
-  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \if@tempswa%
-      \TUDoptions{cdtitle=color}%
-    \else%
-      \TUDoptions{cdtitle=true}%
-    \fi%
-  \fi%
-}
-\TUD@key{nocolortitle}[true]{%
-  \TUD@set@ifkey{nocolortitle}{@tempswa}{#1}%
-  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \if@tempswa%
-      \TUDoptions{cdtitle=true}%
-    \else%
-      \TUDoptions{cdtitle=color}%
-    \fi%
-  \fi%
-}
-%    \end{macrocode}
-% \end{option}^^A nocolortitle
-% \end{option}^^A colortitle
-% \begin{option}{ddcfooter}
-% Außer der Option \opt{ddc} gibt es bei der alten \cls{tudbook}-Klasse noch
-% den Schlüssel \opt{ddcfooter}. Dieser wird auf die Option \opt{ddcfoot} 
-% gelegt.
-%    \begin{macrocode}
-\TUD@key{ddcfooter}[true]{%
-  \TUD@set@ifkey{ddcfooter}{@tempswa}{#1}%
-  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \if@tempswa%
-      \TUDoptions{ddcfoot=true}%
-    \else%
-      \TUDoptions{ddcfoot=false}%
-    \fi%
-  \fi%
-}
-%    \end{macrocode}
-% \end{option}^^A ddcfooter
-%
-% \iffalse
-%</package&option>
-%<*package&body>
-% \fi
-%
-% \begin{environment}{theglossary}
-% \begin{macro}{\glossaryname}
-% \begin{macro}{\glossitem}
-% Eine rudimentäre Umgebung für ein Glossar.
-%    \begin{macrocode}
-\AtBeginDocument{%
-  \ifdef{\theglossary}{}{%
-    \providecommand*{\glossaryname}{Glossar}
-    \newenvironment{theglossary}[1][]{%
-      \ClassWarning{\tudcls@name}{%
-        Using the environment `theglossary' is not\MessageBreak%
-        recommended. You should rather use an appropriate\MessageBreak%
-        package such as glossaries%
-      }%
-      \let\bibname\glossaryname%
-      \bib@heading%
-      #1%
-      \list{}{%
-        \setlength\labelsep{\z@}%
-        \setlength\labelwidth{\z@}%
-        \setlength\itemindent{-\leftmargin}%
-      }%
-    }{\endlist}
-    \newcommand\glossitem[1]{\item[] #1\par}%
-  }%
-}
-%    \end{macrocode}
-% \end{macro}^^A \glossitem
-% \end{macro}^^A \glossaryname
-% \end{environment}^^A theglossary
-% \begin{macro}{\chapterpage}
-% \begin{macro}{\if@tud@chapterpage@temp}
-% \begin{macro}{\tud@chapterpage@set}
-% \begin{macro}{\tud@chapterpage@unset}
-% \begin{macro}{\tud@chapterpage@wrn}
-% Die alte \cls{tudbook}-Klasse stellt den Befehl \cs{chapterpage} bereit.
-% Mit diesem ist es möglich, das Verhalten der Kapitelseiten~-- welches durch
-% die Option \opt{chapterpage} gesteuert wird~-- temporär umzuschalten, also
-% statt Kapitelseiten lediglich Überschriften zu setzen und umgekehrt. Dies ist
-% typographisch durchaus zu hinterfragen, allerdings sollen die neuen Klassen
-% möglichst kompatibel zu der alten sein, weshalb diese Funktionalität trotzdem
-% implementiert wird. Der Befehl \cs{chapterpage} setzt den globalen Schalter
-% \cs{if@tud@chapterpage@temp}. Der Befehl \cs{tud@chapterpage@set} setzt für 
-% Kapitel das komplementäre Verhalten zur eigentlich gewählten
-% \opt{chapterpage}"=Option. Nach dem Setzen der entsprechenden Überschrift
-% wird \cs{tud@chapterpage@set} nochmals aufgerufen, das Verhalten auf den
-% ursprünglichen Zustand geschaltet und der globale Schalter
-% \cs{if@tud@chapterpage@temp} zurückgesetzt.
-%    \begin{macrocode}
-\newif\if@tud@chapterpage@temp
-\newcommand*\chapterpage{%
-  \global\@tud@chapterpage@temptrue%
-  \tud@chapterpage@wrn%
-}
-\newcommand*\tud@chapterpage@set[1][]{%
-  \if@tud@chapterpage@temp%
-    \if@tud@chapterpage%
-      \TUDoptions{chapterpage=false}%
-    \else%
-      \TUDoptions{chapterpage=true}%
-    \fi%
-  \fi%
-}
-\newcommand*\tud@chapterpage@unset[1][]{%
-  \tud@chapterpage@set%
-  \global\@tud@chapterpage@tempfalse%
-}
-%    \end{macrocode}
-% Da wie bereits beschrieben das Vorgehen äußerst fragwürdig ist, wird bei der
-% Verwendung von \cs{chapterpage} zumindest einmalig eine Warnung ausgegeben.
-%    \begin{macrocode}
-\newcommand*\tud@chapterpage@wrn{%
-  \ClassWarning{\tudcls@name}{%
-    The command \string\chapterpage\space is not\MessageBreak%
-    recommended. You should use the same style for\MessageBreak%
-    chapters throughout the document
-  }%
-  \global\let\tud@chapterpage@wrn\relax%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@chapterpage@wrn
-% \end{macro}^^A \tud@chapterpage@unset
-% \end{macro}^^A \tud@chapterpage@set
-% \end{macro}^^A \if@tud@chapterpage@temp
-% \end{macro}^^A \chapterpage
-% \begin{macro}{\tud@chapter}
-% \begin{macro}{\tud@schapter}
-% \begin{macro}{\tud@addchap}
-% \begin{macro}{\tud@saddchap}
-% Hier erfolgt die notwendige Anpassungen der internen Gliederungsbefehle.
-%    \begin{macrocode}
-\AtEndPreamble{%
-  \pretocmd{\tud@chapter}{\tud@chapterpage@set}%
-    {}{\tud@patch@wrn{tud@nchapter}}%
-  \apptocmd{\tud@chapter}{\tud@chapterpage@unset}%
-    {}{\tud@patch@wrn{tud@nchapter}}%
-  \pretocmd{\tud@schapter}{\tud@chapterpage@set}%
-    {}{\tud@patch@wrn{tud@schapter}}%
-  \apptocmd{\tud@schapter}{\tud@chapterpage@unset}%
-    {}{\tud@patch@wrn{tud@schapter}}%
-  \pretocmd{\tud@addchap}{\tud@chapterpage@set}%
-    {}{\tud@patch@wrn{tud@naddchap}}%
-  \apptocmd{\tud@addchap}{\tud@chapterpage@unset}%
-    {}{\tud@patch@wrn{tud@naddchap}}%
-  \pretocmd{\tud@saddchap}{\tud@chapterpage@set}%
-    {}{\tud@patch@wrn{tud@saddchap}}%
-  \apptocmd{\tud@saddchap}{\tud@chapterpage@unset}%
-    {}{\tud@patch@wrn{tud@saddchap}}%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@saddchap
-% \end{macro}^^A \tud@addchap
-% \end{macro}^^A \tud@schapter
-% \end{macro}^^A \tud@chapter
-%
-% \iffalse
-%</package&body>
-%</comp>
-%<*package&body>
-% \fi
-%
-% \subsection{Kompatibilität zu \cls{tudposter} und \cls{tudmathposter}}
-%
-% \begin{macro}{\cdfont}
-% \changes{v2.04}{2015/03/04}{neu}^^A
-% \begin{macro}{\tudfont}
-% \changes{v2.04}{2015/03/04}{neu}^^A
-% \begin{macro}{\tud@trimfontname}
-% \changes{v2.04}{2015/03/04}{neu}^^A
-% \begin{macro}{\tud@@trimfontname}
-% \changes{v2.04}{2015/03/04}{neu}^^A
-% Die Klassen \cls{tudposter} und \cls{tudmathposter} definieren den Befehl 
-% \cs{tudfont}, mit welchem die Schriften des \CDs der \TnUD auch mit Klarnamen
-% ausgewählt werden können. Zur kompatibilität wird der Befehl \cs{cdfont} 
-% definiert, welcher die gleiche Funktionalität bereitstellt.
-%    \begin{macrocode}
-\RequirePackage{trimspaces}[2009/09/17]
-\newcommand*\cdfont[1]{%
-  \tud@trimfontname\@tempa{#1}%
-  \ifstr{\@tempa}{univers45}{\univln}{%
-  \ifstr{\@tempa}{univers55}{\univrn}{%
-  \ifstr{\@tempa}{univers60}{\univbn}{%
-  \ifstr{\@tempa}{univers75}{\univxn}{%
-  \ifstr{\@tempa}{univers45oblique}{\univls}{%
-  \ifstr{\@tempa}{univers55oblique}{\univrs}{%
-  \ifstr{\@tempa}{univers60oblique}{\univbs}{%
-  \ifstr{\@tempa}{univers75oblique}{\univxs}{%
-  \ifstr{\@tempa}{dinbold}{\dinbn}{%
-    \PackageWarning{tudscrfonts}{The font `#1' is unknown}%
-  }}}}}}}}}%
-}
-\providecommand*\tudfont{\cdfont}
-\newcommand*\tud@trimfontname[2]{%
-  \protected@edef\@tempa{\trim@spaces{#2}}%
-  \tud@lowerstring{\@tempa}{\@tempa}%
-  \tud@@trimfontname{ }{}%
-  \tud@@trimfontname{-}{}%
-  \tud@@trimfontname{_}{}%
-  \tud@@trimfontname{~}{}%
-  \tud@@trimfontname{ce}{}%
-  \tud@@trimfontname{light}{}%
-  \tud@@trimfontname{black}{}%
-  \tud@@trimfontname{italic}{oblique}%
-  \tud@@trimfontname{slanted}{oblique}%
-  \let#1\@tempa%
-}
-\newcommand*\tud@@trimfontname[2]{%
-  \def\@tempb##1#1##2\relax{\def\@tempa{##1#2##2}}%
-  \@expandtwoargs\in@{#1}{\@tempa}%
-  \@whilesw\ifin@\fi{%
-    \expandafter\@tempb\@tempa\relax%
-    \@expandtwoargs\in@{#1}{\@tempa}%
-  }%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@@trimfontname
-% \end{macro}^^A \tud@trimfontname
-% \end{macro}^^A \tudfont
-% \end{macro}^^A \cdfont
-%
 % \subsection{Kompatibilität zu früheren \TUDScript-Versionen}
 %
-% Neben den Optionen und Befehlen im Paket \pkg{tudscrcomp} gibt es weitere 
-% veraltete, die jedoch direkt in den Klassen vorgehalten werden. Deren Maßgabe 
-% ist es, die Kompatibilität zu älteren \TUDScript-Versionen zu erhalten. 
-%
-% Mit der Version v2.02 wurde eine Menge~-- teilweise sehr tiefgreifend~-- 
-% geändert. Die Kompatibilität zu früheren Versionen wird nicht verfolgt.
-% In Zukunft wird es wohl noch die ein oder andere Änderung geben. Hierfür soll 
-% jedoch allerdings sehr wohl ein Kompatibilitätsmodus zur Verfügung stehen. 
-% Hiermit wird alles dafür vorbereitet.
+% Mit der Version v2.02 wurde eine Menge~-- teilweise sehr tiefgreifend~-- an 
+% der Benutzerschnittstelle in \TUDScript geändert. Dabei wird versucht, die
+% Kompatibilität zu früheren Versionen so weit es geht aufrecht zu erhalten und
+% veraltete Optionen und Befehle zumindest weiter bereitzustellen, wobei bei
+% der Verwendung dieser der Anwender darüber informiert wird. Die Vorkehrungen 
+% betreffen sowohl die Klassen selber als auch die zusätzlich bereitgestellten 
+% Pakete.
 %
 % \iffalse
-%</package&body>
-%<*class|package&fonts>
+%<*class|(package&fonts)>
 % \fi
 %
 % \begin{macro}{\TUD@deprecated@key}
@@ -574,7 +277,7 @@
 % \end{option}^^A sansmath
 %
 % \iffalse
-%<*!fonts>
+%<*class>
 % \fi
 %
 % \begin{option}{geometry}
@@ -682,7 +385,7 @@
 % \end{option}^^A color
 %
 % \iffalse
-%</!fonts>
+%</class>
 % \fi
 %
 % \begin{option}{tudscrver}
@@ -826,7 +529,12 @@
 %
 % \iffalse
 %</option>
-%</class|package&fonts>
+%</class|(package&fonts)>
+% \fi
+%
+% Jetzt folgen noch einige veraltete Befehle für die \TUDScript-Klassen.
+%
+% \iffalse
 %<*class&body>
 % \fi
 %
@@ -929,6 +637,587 @@
 %
 % \iffalse
 %</class&body>
+%<*!fonts>
+%<*package&option>
+% \fi
+%
+% \subsection{Das Paket \pkg{tudscrcomp} -- Kompatibilität veralteter Klassen}
+%
+% Neben den \TUDScript-Klassen gibt es zahlreiche andere \LaTeX-Umsetzungen des 
+% \CDs. Um dem Anwender eine Migration von diesen \enquote{veralteten} Klassen
+% zu erleichtern, wird das Paket \pkg{tudscrcomp} bereitgestellt. Mit diesem 
+% können bei der Verwendung von \TUDScript die meisten Optionen und Befehle 
+% genutzt werden, welche vormals durch die Klassen die \TUDScript-Klassen in 
+% der Version~v1.0 sowie durch die Klassen \cls{tudbook}, \cls{tudmathposter} % 
+% etc. bereitgestellt wurden.
+%
+% \begin{option}{colortitle}
+% \begin{option}{nocolortitle}
+% Für farbige Einstellungen wird von \cls{tudbook} die Option \opt{color} 
+% definiert. Soll die Titelseite konträr dazu gesetzt werden, muss sich mit den
+% Schlüsseln \opt{colortitle} und \opt{nocolortitle} beholfen werden.
+%    \begin{macrocode}
+\TUD@key{colortitle}[true]{%
+  \TUD@set@ifkey{colortitle}{@tempswa}{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \if@tempswa%
+      \TUDoptions{cdtitle=color}%
+    \else%
+      \TUDoptions{cdtitle=true}%
+    \fi%
+  \fi%
+}
+\TUD@key{nocolortitle}[true]{%
+  \TUD@set@ifkey{nocolortitle}{@tempswa}{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \if@tempswa%
+      \TUDoptions{cdtitle=true}%
+    \else%
+      \TUDoptions{cdtitle=color}%
+    \fi%
+  \fi%
+}
+%    \end{macrocode}
+% \end{option}^^A nocolortitle
+% \end{option}^^A colortitle
+% \begin{option}{ddcfooter}
+% Außer der Option \opt{ddc} gibt es bei der alten \cls{tudbook}-Klasse noch
+% den Schlüssel \opt{ddcfooter}. Dieser wird auf die Option \opt{ddcfoot} 
+% gelegt.
+%    \begin{macrocode}
+\TUD@key{ddcfooter}[true]{%
+  \TUD@set@ifkey{ddcfooter}{@tempswa}{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \if@tempswa%
+      \TUDoptions{ddcfoot=true}%
+    \else%
+      \TUDoptions{ddcfoot=false}%
+    \fi%
+  \fi%
+}
+%    \end{macrocode}
+% \end{option}^^A ddcfooter
+%
+% \iffalse
+%</package&option>
+%<*package&body>
+% \fi
+%
+% \begin{macro}{\einrichtung}
+% \begin{macro}{\fachrichtung}
+% \begin{macro}{\institut}
+% \begin{macro}{\professur}
+% \begin{macro}{\moreauthor}
+% \begin{macro}{\submitdate}
+% \begin{macro}{\supervisorII}
+% \begin{macro}{\supervisedby}
+% \begin{macro}{\supervisedIIby}
+% \begin{macro}{\submittedon}
+% Es werden Aliasbefehle für die Eingabefelder definiert.
+%    \begin{macrocode}
+\newcommand*\einrichtung{}
+\let\einrichtung\faculty
+\newcommand*\fachrichtung{}
+\let\fachrichtung\department
+\newcommand*\institut{}
+\let\institut\institute
+\newcommand*\professur{}
+\let\professur\chair
+\newcommand*\moreauthor{}
+\let\moreauthor\authormore
+\newcommand*\submitdate{}
+\let\submitdate\date
+\newcommand*\supervisorII[1]{%
+  \expandafter\gdef\expandafter\@supervisor\expandafter{\@supervisor\and #1}%
+}
+\newcommand*\supervisedby[1]{\gdef\supervisorname{#1}}
+\newcommand*\supervisedIIby[1]{\gdef\supervisorothername{#1}}
+\newcommand*\submittedon[1]{\gdef\datetext{#1}}
+%    \end{macrocode}
+% \end{macro}^^A \submittedon
+% \end{macro}^^A \supervisedIIby
+% \end{macro}^^A \supervisedby
+% \end{macro}^^A \supervisorII
+% \end{macro}^^A \submitdate
+% \end{macro}^^A \moreauthor
+% \end{macro}^^A \professur
+% \end{macro}^^A \institut
+% \end{macro}^^A \fachrichtung
+% \end{macro}^^A \einrichtung}
+% \begin{macro}{\dissertation}
+% Bei der Definition des Typs der Abschlussarbeit mit \cs{dissertation} wird
+% die Lokalisierungsvariable \cs{dissertationname} verwendet und die Feldnamen
+% angepasst.
+%    \begin{macrocode}
+\newcommand*\dissertation{%
+  \thesis{\dissertationname}%
+  \let\supervisorname\refereename%
+  \let\supervisorothername\refereeothername%
+}
+%    \end{macrocode}
+% \end{macro}^^A \dissertation
+% \begin{environment}{theglossary}
+% \begin{macro}{\glossaryname}
+% \begin{macro}{\glossitem}
+% Eine rudimentäre Umgebung für ein Glossar.
+%    \begin{macrocode}
+\AtBeginDocument{%
+  \ifdef{\theglossary}{}{%
+    \providecommand*{\glossaryname}{Glossar}
+    \newenvironment{theglossary}[1][]{%
+      \ClassWarning{\tudcls@name}{%
+        Using the environment `theglossary' is not\MessageBreak%
+        recommended. You should rather use an appropriate\MessageBreak%
+        package such as glossaries%
+      }%
+      \let\bibname\glossaryname%
+      \bib@heading%
+      #1%
+      \list{}{%
+        \setlength\labelsep{\z@}%
+        \setlength\labelwidth{\z@}%
+        \setlength\itemindent{-\leftmargin}%
+      }%
+    }{\endlist}
+    \newcommand\glossitem[1]{\item[] #1\par}%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \glossitem
+% \end{macro}^^A \glossaryname
+% \end{environment}^^A theglossary
+% \begin{macro}{\chapterpage}
+% \begin{macro}{\if@tud@chapterpage@temp}
+% \begin{macro}{\tud@chapterpage@set}
+% \begin{macro}{\tud@chapterpage@unset}
+% \begin{macro}{\tud@chapterpage@wrn}
+% Die alte \cls{tudbook}-Klasse stellt den Befehl \cs{chapterpage} bereit.
+% Mit diesem ist es möglich, das Verhalten der Kapitelseiten~-- welches durch
+% die Option \opt{chapterpage} gesteuert wird~-- temporär umzuschalten, also
+% statt Kapitelseiten lediglich Überschriften zu setzen und umgekehrt. Dies ist
+% typographisch durchaus zu hinterfragen, allerdings sollen die neuen Klassen
+% möglichst kompatibel zu der alten sein, weshalb diese Funktionalität trotzdem
+% implementiert wird. Der Befehl \cs{chapterpage} setzt den globalen Schalter
+% \cs{if@tud@chapterpage@temp}. Der Befehl \cs{tud@chapterpage@set} setzt für 
+% Kapitel das komplementäre Verhalten zur eigentlich gewählten
+% \opt{chapterpage}"=Option. Nach dem Setzen der entsprechenden Überschrift
+% wird \cs{tud@chapterpage@set} nochmals aufgerufen, das Verhalten auf den
+% ursprünglichen Zustand geschaltet und der globale Schalter
+% \cs{if@tud@chapterpage@temp} zurückgesetzt.
+%    \begin{macrocode}
+\newif\if@tud@chapterpage@temp
+\newcommand*\chapterpage{%
+  \global\@tud@chapterpage@temptrue%
+  \tud@chapterpage@wrn%
+}
+\newcommand*\tud@chapterpage@set[1][]{%
+  \if@tud@chapterpage@temp%
+    \if@tud@chapterpage%
+      \TUDoptions{chapterpage=false}%
+    \else%
+      \TUDoptions{chapterpage=true}%
+    \fi%
+  \fi%
+}
+\newcommand*\tud@chapterpage@unset[1][]{%
+  \tud@chapterpage@set%
+  \global\@tud@chapterpage@tempfalse%
+}
+%    \end{macrocode}
+% Da wie bereits beschrieben das Vorgehen äußerst fragwürdig ist, wird bei der
+% Verwendung von \cs{chapterpage} zumindest einmalig eine Warnung ausgegeben.
+%    \begin{macrocode}
+\newcommand*\tud@chapterpage@wrn{%
+  \ClassWarning{\tudcls@name}{%
+    The command \string\chapterpage\space is not\MessageBreak%
+    recommended. You should use the same style for\MessageBreak%
+    chapters throughout the document
+  }%
+  \global\let\tud@chapterpage@wrn\relax%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@chapterpage@wrn
+% \end{macro}^^A \tud@chapterpage@unset
+% \end{macro}^^A \tud@chapterpage@set
+% \end{macro}^^A \if@tud@chapterpage@temp
+% \end{macro}^^A \chapterpage
+% \begin{macro}{\tud@chapter}
+% \begin{macro}{\tud@schapter}
+% \begin{macro}{\tud@addchap}
+% \begin{macro}{\tud@saddchap}
+% Hier erfolgt die notwendige Anpassungen der internen Gliederungsbefehle.
+%    \begin{macrocode}
+\AtEndPreamble{%
+  \pretocmd{\tud@chapter}{\tud@chapterpage@set}%
+    {}{\tud@patch@wrn{tud@nchapter}}%
+  \apptocmd{\tud@chapter}{\tud@chapterpage@unset}%
+    {}{\tud@patch@wrn{tud@nchapter}}%
+  \pretocmd{\tud@schapter}{\tud@chapterpage@set}%
+    {}{\tud@patch@wrn{tud@schapter}}%
+  \apptocmd{\tud@schapter}{\tud@chapterpage@unset}%
+    {}{\tud@patch@wrn{tud@schapter}}%
+  \pretocmd{\tud@addchap}{\tud@chapterpage@set}%
+    {}{\tud@patch@wrn{tud@naddchap}}%
+  \apptocmd{\tud@addchap}{\tud@chapterpage@unset}%
+    {}{\tud@patch@wrn{tud@naddchap}}%
+  \pretocmd{\tud@saddchap}{\tud@chapterpage@set}%
+    {}{\tud@patch@wrn{tud@saddchap}}%
+  \apptocmd{\tud@saddchap}{\tud@chapterpage@unset}%
+    {}{\tud@patch@wrn{tud@saddchap}}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@saddchap
+% \end{macro}^^A \tud@addchap
+% \end{macro}^^A \tud@schapter
+% \end{macro}^^A \tud@chapter
+%
+% \iffalse
+%</package&body>
+%</!fonts>
+% \fi
+%
+% \iffalse
+%<*package&body>
+% \fi
+%
+% \subsection{Das Paket \pkg{tudscrfonts} -- Die Schriften des \CDs}
+%
+% Für \TUDScript werden die Schriften des \CDs der \TnUD genutzt. Diese müssen 
+% durch den Anwender installiert werden. Im Vergleich zur Installation bei den 
+% alten Klassen werden dabei fehlende Glyphen ergänzt und Probleme beim Kerning 
+% behoben. Damit diese Schriften mit anderen Klassen verwendet werden können, 
+% wird das Paket \pkg{tudscrfonts} bereitgestellt.
+%
+%    \begin{macrocode}
+\RequirePackage{trimspaces}[2009/09/17]
+%    \end{macrocode}
+% \begin{macro}{\cdfont}
+% \changes{v2.04}{2015/03/04}{neu}^^A
+% \begin{macro}{\tudfont}
+% \changes{v2.04}{2015/03/04}{neu}^^A
+% \begin{macro}{\tud@trimfontname}
+% \changes{v2.04}{2015/03/04}{neu}^^A
+% \begin{macro}{\tud@@trimfontname}
+% \changes{v2.04}{2015/03/04}{neu}^^A
+% Die Klassen \cls{tudposter} und \cls{tudmathposter} definieren den Befehl 
+% \cs{tudfont}, mit welchem die Schriften des \CDs der \TnUD auch mit Klarnamen
+% ausgewählt werden können. Zur Kompatibilität wird der Befehl \cs{cdfont} 
+% definiert, welcher die gleiche Funktionalität bereitstellt.
+%    \begin{macrocode}
+\newcommand*\cdfont[1]{%
+  \tud@trimfontname\@tempa{#1}%
+  \ifstr{\@tempa}{univers45}{\univln}{%
+  \ifstr{\@tempa}{univers55}{\univrn}{%
+  \ifstr{\@tempa}{univers60}{\univbn}{%
+  \ifstr{\@tempa}{univers75}{\univxn}{%
+  \ifstr{\@tempa}{univers45oblique}{\univls}{%
+  \ifstr{\@tempa}{univers55oblique}{\univrs}{%
+  \ifstr{\@tempa}{univers60oblique}{\univbs}{%
+  \ifstr{\@tempa}{univers75oblique}{\univxs}{%
+  \ifstr{\@tempa}{dinbold}{\dinbn}{%
+    \PackageWarning{tudscrfonts}{The font `#1' is unknown}%
+  }}}}}}}}}%
+}
+\newcommand*\tud@trimfontname[2]{%
+  \protected@edef\@tempa{\trim@spaces{#2}}%
+  \tud@lowerstring{\@tempa}{\@tempa}%
+  \tud@@trimfontname{ }{}%
+  \tud@@trimfontname{-}{}%
+  \tud@@trimfontname{_}{}%
+  \tud@@trimfontname{~}{}%
+  \tud@@trimfontname{ce}{}%
+  \tud@@trimfontname{light}{}%
+  \tud@@trimfontname{black}{}%
+  \tud@@trimfontname{italic}{oblique}%
+  \tud@@trimfontname{slanted}{oblique}%
+  \let#1\@tempa%
+}
+\newcommand*\tud@@trimfontname[2]{%
+  \def\@tempb##1#1##2\relax{\def\@tempa{##1#2##2}}%
+  \@expandtwoargs\in@{#1}{\@tempa}%
+  \@whilesw\ifin@\fi{%
+    \expandafter\@tempb\@tempa\relax%
+    \@expandtwoargs\in@{#1}{\@tempa}%
+  }%
+}
+\providecommand*\tudfont[1]{\cdfont{#1}}
+%    \end{macrocode}
+% \end{macro}^^A \tud@@trimfontname
+% \end{macro}^^A \tud@trimfontname
+% \end{macro}^^A \tudfont
+% \end{macro}^^A \cdfont
+%
+% \iffalse
+%<*fonts>
+% \fi
+%
+% \subsection{Neue Schriftfamilien für alte TUD-Klassen}
+%
+% Wird das Paket \pkg{tudscrfonts} mit den alten TUD-Klassen \cls{tudbook}, 
+% \cls{tudmathposter} etc. oder \TUDScript in der Version~v1.0 verwendet,
+% müssen einige Kompatibilitätseinstellungen vorgenmommen werden. Hierfür sind
+% einige Patches notwendig.
+%
+% \begin{macro}{\if@tud@oldclass}
+% \changes{v2.02}{2014/08/29}{neu}^^A
+% Wenn eine der alten Klassen aus den Vorlagen von Klaus Bergmann geladen 
+% wurde, wird dies für spätere Anpassungen registriert. Die alten Posterklassen
+% werden ebenfalls unterstützt.
+% \ToDo{Klasse tudbeamer einpflegen}[v2.xx]
+%    \begin{macrocode}
+\newif\if@tud@oldclass
+\@ifclassloaded{tudbook}{\@tud@oldclasstrue}{}%
+\@ifclassloaded{tudbeamer}{\@tud@oldclasstrue}{}%
+\@ifclassloaded{tudfax}{\@tud@oldclasstrue}{}%
+\@ifclassloaded{tudform}{\@tud@oldclasstrue}{}%
+\@ifclassloaded{tudhaus}{\@tud@oldclasstrue}{}%
+\@ifclassloaded{tudletter}{\@tud@oldclasstrue}{}%
+\@ifclassloaded{tudposter}{\@tud@oldclasstrue}{}%
+\@ifclassloaded{tudmathposter}{\@tud@oldclasstrue}{}%
+%    \end{macrocode}
+% \end{macro}^^A if@tud@oldclass
+% Wird das Paket \pkg{tudscrfonts} mit einer der alten TUD-Klassen verwendet, 
+% müssen einige Kompatibilitätseinstellungen vorgenmommen werden. Dies betrifft
+% insbesondere die Mathematikschriften sowie allerhand darin definierter, fixer 
+% Schriften.
+%    \begin{macrocode}
+\ifbool{@tud@oldclass}{%
+  \AtBeginDocument{%
+    \if@tud@fontspec%
+      \DeclareFixedFont{\univLightVII}{\encodingdefault}%
+        {UniversLight}{m}{n}{7}%
+      \DeclareFixedFont{\univLightObliqueVII}{\encodingdefault}%
+        {UniversLightOblique}{m}{n}{7}%
+      \DeclareFixedFont{\univBoldVII}{\encodingdefault}%
+        {UniversBold}{m}{n}{7}%
+      \DeclareFixedFont{\univLightIX}{\encodingdefault}%
+        {UniversLight}{m}{n}{9}%
+      \DeclareFixedFont{\univLightObliqueIX}{\encodingdefault}%
+        {UniversLightOblique}{m}{n}{9}%
+      \DeclareFixedFont{\univBoldIX}{\encodingdefault}%
+        {UniversBold}{m}{n}{9}%
+      \DeclareFixedFont{\univLightXI}{\encodingdefault}%
+        {UniversLight}{m}{n}{11}%
+      \DeclareFixedFont{\univLightObliqueXI}{\encodingdefault}%
+        {UniversLightOblique}{m}{n}{11}%
+      \DeclareFixedFont{\univBoldXI}{\encodingdefault}%
+        {UniversBold}{m}{n}{11}%
+      \DeclareFixedFont{\univLightXV}{\encodingdefault}%
+        {UniversLight}{m}{n}{15}%
+      \DeclareFixedFont{\univLightObliqueXV}{\encodingdefault}%
+        {UniversLightOblique}{m}{n}{15}%
+      \DeclareFixedFont{\univBoldXV}{\encodingdefault}%
+        {UniversBold}{m}{n}{15}%
+    \else%
+      \if@tud@univers%
+        \DeclareFixedFont{\univLightVII}{\encodingdefault}%
+          {\tud@univers}{l}{n}{7}%
+        \DeclareFixedFont{\univLightObliqueVII}{\encodingdefault}%
+          {\tud@univers}{l}{sl}{7}%
+        \DeclareFixedFont{\univBoldVII}{\encodingdefault}%
+          {\tud@univers}{b}{n}{7}%
+        \DeclareFixedFont{\univLightIX}{\encodingdefault}%
+          {\tud@univers}{l}{n}{9}%
+        \DeclareFixedFont{\univLightObliqueIX}{\encodingdefault}%
+          {\tud@univers}{l}{sl}{9}%
+        \DeclareFixedFont{\univBoldIX}{\encodingdefault}%
+          {\tud@univers}{b}{n}{9}%
+        \DeclareFixedFont{\univLightXI}{\encodingdefault}%
+          {\tud@univers}{l}{n}{11}%
+        \DeclareFixedFont{\univLightObliqueXI}{\encodingdefault}%
+          {\tud@univers}{l}{sl}{11}%
+        \DeclareFixedFont{\univBoldXI}{\encodingdefault}%
+          {\tud@univers}{b}{n}{11}%
+        \DeclareFixedFont{\univLightXV}{\encodingdefault}%
+          {\tud@univers}{l}{n}{15}%
+        \DeclareFixedFont{\univLightObliqueXV}{\encodingdefault}%
+          {\tud@univers}{l}{sl}{15}%
+        \DeclareFixedFont{\univBoldXV}{\encodingdefault}%
+          {\tud@univers}{b}{n}{15}%
+      \fi%
+    \fi%
+    \if@sansmath%
+      \DeclareSymbolFont{aunLetters}{OT1}{\tud@univers}{l}{sl}%
+      \SetSymbolFont{aunLetters}{bold}{OT1}{\tud@univers}{b}{sl}%
+      \DeclareSymbolFont{aunOperators}{OT1}{\tud@univers}{l}{n}%
+      \SetSymbolFont{aunOperators}{bold}{OT1}{\tud@univers}{b}{n}%
+      \DeclareSymbolFont{aunUpright}{OT1}{\tud@univers}{l}{n}%
+      \SetSymbolFont{aunUpright}{bold}{OT1}{\tud@univers}{b}{n}%
+      \DeclareSymbolFontAlphabet{\mathsf}{aunOperators}%
+      \DeclareSymbolFontAlphabet{\mathnormal}{aunLetters}%
+      \DeclareMathAlphabet\mathbf{OT1}{\tud@univers}{b}{n}%
+      \SetMathAlphabet\mathbf{bold}{OT1}{\tud@univers}{b}{n}%
+      \DeclareMathAlphabet\mathit{OT1}{\tud@univers}{l}{sl}%
+      \SetMathAlphabet\mathit{bold}{OT1}{\tud@univers}{l}{sl}%
+      \@ifpackageloaded{tudfonts}{%
+        \let\mv@normal\mv@univers%
+        \let\mv@bold\mv@universbold%
+      }{}%
+    \fi%
+    \let\dinBold\dinbn%
+    \let\dinfamily\dinbn%
+  }%
+}{}
+%    \end{macrocode}
+%
+% \subsubsection{Patches für die Klasse \cls{tudbook}}
+%
+% Die notwendigen Anpassungen der Klasse \cls{tudbook} betreffen die
+% Schriftauswahl bei Überschriften.
+%
+% \begin{macro}{\@makechapterhead}
+% \begin{macro}{\@makeschapterhead}
+% \begin{macro}{\section}
+% \begin{macro}{\showtitle}
+% Die Überschriften sollen abhängig von der Option \opt{cdfont} und nicht immer 
+% zwingend in DIN~Bold gesetzt werden.
+%    \begin{macrocode}
+\@ifclassloaded{tudbook}{%
+  \patchcmd{\@makechapterhead}{\dinBold\Huge\bfseries}%
+    {\bfseries\tud@font@heading\Huge}{}{\tud@patch@wrn{@makechapterhead}}%
+  \patchcmd{\@makeschapterhead}{\dinBold\Huge\bfseries}%
+    {\bfseries\tud@font@heading\Huge}{}{\tud@patch@wrn{@makeschapterhead}}%
+  \patchcmd{\section}{\dinBold\Large\bfseries}%
+    {\bfseries\tud@font@heading\Large}{}{\tud@patch@wrn{section}}%
+  \patchcmd{\showtitle}{\dinBold\Huge\bfseries}%
+    {\bfseries\tud@font@heading\Huge}{}{\tud@patch@wrn{showtitle}}%
+}{}
+%    \end{macrocode}
+% \end{macro}^^A \showtitle
+% \end{macro}^^A \section
+% \end{macro}^^A \@makeschapterhead
+% \end{macro}^^A \@makechapterhead
+%
+% \subsubsection{Patches für \cls{tudposter} und \cls{tudmathposter}}
+%
+% Auch für die beiden Posterklassen \cls{tudmathposter} und \cls{tudposter}
+% sowie das Paket \pkg{tudfonts} sind kleine Anpassungen notwendig.
+%
+% \begin{KOMAfont}{title}
+% \changes{v2.04}{2015/04/24}{\cls{tudmathposter} wird unterstützt}^^A
+% \begin{macro}{\subtitlefont}
+% \changes{v2.04}{2015/04/24}{\cls{tudmathposter} wird unterstützt}^^A
+% \begin{macro}{\sectionfont}
+% \changes{v2.04}{2015/04/24}{\cls{tudmathposter} wird unterstützt}^^A
+% \begin{macro}{\subsectionfont}
+% \changes{v2.04}{2015/04/24}{\cls{tudmathposter} wird unterstützt}^^A
+% \begin{macro}{\if@sansmath}
+% \changes{v2.04}{2015/04/24}{\cls{tudmathposter} wird unterstützt}^^A
+% \begin{macro}{\tudfont}
+% \changes{v2.04}{2015/04/24}{\cls{tudmathposter} wird unterstützt}^^A
+% Es werden einige Einstellungen für die Überschriften angepasst.
+%    \begin{macrocode}
+\@ifclassloaded{tudmathposter}{%
+  \setkomafont{title}{\bfseries\tud@font@heading\Huge}%
+  \renewcommand*\subtitlefont{\fontseries{m}\tud@font@heading\huge}%
+  \if@mathevorgabe%
+    \renewcommand*\sectionfont{\univbn\LARGE}%
+    \renewcommand*\subsectionfont{\univbn\large}%
+  \fi%
+}{}
+\@ifpackageloaded{tudfonts}{%
+  \let\if@sansmath\if@tudfonts@sansmath%
+  \renewcommand*\tudfont[1]{\cdfont{#1}}%
+  \if@sansmath%
+    \if@tudfonts@eulermath%
+      \PackageWarningNoLine{tudscrfonts}{%
+        You're using non-serif fonts in math mode. It's\MessageBreak%
+        recommended to pass the option `noeulermath' to\MessageBreak%
+        package `tudfonts'%
+      }%
+    \fi%
+  \fi%
+}{%
+  \newif\if@tudfonts@nodin%
+  \@ifundefined{if@sansmath}{\newif\if@sansmath}{}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tudfont
+% \end{macro}^^A \if@sansmath
+% \end{macro}^^A \subsectionfont
+% \end{macro}^^A \sectionfont
+% \end{macro}^^A \subtitlefont
+% \end{KOMAfont}^^A title
+%
+% Für die Klasse \cls{tudposter} muss lediglich ein Schalter übernommen werden.
+%
+%    \begin{macrocode}
+\@ifclassloaded{tudposter}{%
+  \let\if@sansmath\if@tudposter@sansmath%
+}{}
+%    \end{macrocode}
+%
+% \subsection{Neue Schriftfamilien für die \TUDScript-Klassen~v1.0}
+%
+% Für die Verwendung des Paketes \pkg{tudscrfonts} mit den \TUDScript-Klassen
+% in der Version~v1.0 sind ebenfalls einige Anpassungen notwendig.
+%
+% \begin{macro}{\if@tud@oldscrclass}
+% \changes{v2.02}{2014/08/29}{neu}^^A
+% Soll das Paket \pkg{tudscrfonts} mit den \TUDScript-Klassen der Version~v1.0
+% genutzt werden, sind ebenfalls einige Anpassungen notwendig.
+%    \begin{macrocode}
+\newif\if@tud@oldscrclass
+\@ifclassloaded{tudscrbookold}{\@tud@oldscrclasstrue}{}%
+\@ifclassloaded{tudscrreprtold}{\@tud@oldscrclasstrue}{}%
+\@ifclassloaded{tudscrartclold}{\@tud@oldscrclasstrue}{}%
+%    \end{macrocode}
+% \end{macro}^^A if@tud@oldclass
+% Es muss Sorge dafür getragen werden, dass einige veraltete Befehle
+% aktualisiert werden. Hierfür müssen diese \enquote{unschädlich} gemacht
+% werden, noch bevor das Paket selbst in Erscheinung tritt.
+%    \begin{macrocode}
+\ifbool{@tud@oldscrclass}{%
+  \let\univln\relax%
+  \let\univrn\relax%
+  \let\univbn\relax%
+  \let\univxn\relax%
+  \let\univls\relax%
+  \let\univrs\relax%
+  \let\univbs\relax%
+  \let\univxs\relax%
+  \let\dinbn\relax%
+  \let\textuln\relax%
+  \let\texturn\relax%
+  \let\textubn\relax%
+  \let\textuxn\relax%
+  \let\textuls\relax%
+  \let\texturs\relax%
+  \let\textubs\relax%
+  \let\textuxs\relax%
+  \let\textdbn\relax%
+  \AtBeginDocument{%
+    \cmd@restore{rmdefault}%
+    \cmd@restore{sfdefault}%
+    \cmd@restore{bfdefault}%
+    \cmd@restore{mddefault}%
+    \cmd@restore{familydefault}%
+    \cmd@restore{seriesdefault}%
+    \cmd@restore{shapedefault}%
+    \cmd@restore{rmfamily}%
+    \cmd@restore{sffamily}%
+    \cmd@restore{ttfamily}%
+    \DeclareSymbolFontAlphabet{\mathrm}{operators}
+    \if@tud@fontspec%
+      \DeclareFixedFont{\univLightHead}{\encodingdefault}%
+        {UniversLight}{m}{n}{\tud@head@fntsz}%
+      \DeclareFixedFont{\univBoldHead}{\encodingdefault}%
+        {UniversBold}{m}{n}{\tud@head@fntsz}%
+    \else%
+      \if@tud@univers%
+        \DeclareFixedFont{\univLightHead}{\encodingdefault}%
+          {\tud@univers}{l}{n}{\tud@head@fntsz}%
+        \DeclareFixedFont{\univBoldHead}{\encodingdefault}%
+          {\tud@univers}{b}{n}{\tud@head@fntsz}%
+      \fi%
+    \fi%
+  }%
+}{}
+%    \end{macrocode}
+%
+% \iffalse
+%</fonts>
+%</package&body>
 % \fi
 %
 % \Finale

@@ -1,4 +1,4 @@
-% \CheckSum{1406}
+% \CheckSum{1096}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-fonts.dtx}[%
-  2015/04/24 v2.04 TUD-KOMA-Script\space%
+  2015/04/27 v2.04 TUD-KOMA-Script\space%
 %</driver>
 %<package&identify>\NeedsTeXFormat{LaTeX2e}[2011/06/27]
 %<package&identify>\ProvidesPackage{%
@@ -89,12 +89,8 @@
 % \changes{v2.02}{2014/07/08}{Optionen nutzen \cs{FamilyKeyState}}^^A
 % \changes{v2.02}{2014/08/29}{Verwendung von \pkg{mweights} entfernt}^^A
 % \changes{v2.02}{2014/08/29}{Unterstützung für \pkg{fontspec}}^^A
-% \changes{v2.02}{2014/09/30}{\pkg{tudscrfonts}: Nutzung alter tud-Klassen 
-%   mit neuen Schriftfamilien ermöglicht}^^A
 % \changes{v2.04}{2015/02/27}{Interaktion mit Paketen insbesondere für 
 %   den Mathematiksatz verbessert}^^A
-% \changes{v2.04}{2015/04/22}{\pkg{tudscrfonts}: Unterstützung veralteter 
-%   Posterklassen}^^A
 %
 % \section{Schriften des \CDs}
 %
@@ -105,6 +101,10 @@
 % einer anderen Schrift als der restliche Text gesetzt werden, so sollten
 % anstatt der einfachen Schalter wie beispielsweise \cs{univ\dots} besser die
 % Befehle \cs{text\dots}\marg{Auszeichnungstext} verwendet werden.
+%
+% Die Schriften des \CDs können nicht nur mit den \TUDScript-Klassen sondern 
+% auch mit anderen \LaTeX-Dokumentklassen verwendet werden. Hierfür wird das
+% Paket \pkg{tudscrfonts} bereitgestellt.
 %
 % \StopEventually{\PrintIndex\PrintChanges}
 %
@@ -128,60 +128,6 @@
 %</class&option>
 %<*package&identify>
 % \fi
-%
-% \subsection{Nutzung des Paketes mit alten TUD-Klassen oder \TUDScript~v1.0}
-%
-% Das Paket kann genutzt werden, um alle möglichen veralteten Klassen mit den
-% neuen Schriftfamilien zu verwenden.
-% \begin{macro}{\if@tud@oldclass}
-% \changes{v2.02}{2014/08/29}{neu}^^A
-% \begin{macro}{\if@tud@oldscrclass}
-% \changes{v2.02}{2014/08/29}{neu}^^A
-%    \begin{macrocode}
-\newif\if@tud@oldclass
-\newif\if@tud@oldscrclass
-%    \end{macrocode}
-% Wenn eine der alten Klassen aus den Vorlagen von Klaus Bergmann geladen 
-% wurde, wird dies für spätere Anpassungen registriert.
-%    \begin{macrocode}
-\@ifclassloaded{tudbook}{\@tud@oldclasstrue}{}%
-\@ifclassloaded{tudbeamer}{\@tud@oldclasstrue}{}%
-\@ifclassloaded{tudfax}{\@tud@oldclasstrue}{}%
-\@ifclassloaded{tudform}{\@tud@oldclasstrue}{}%
-\@ifclassloaded{tudhaus}{\@tud@oldclasstrue}{}%
-\@ifclassloaded{tudletter}{\@tud@oldclasstrue}{}%
-%    \end{macrocode}
-% Die alten Posterklassen werden ebenfalls unterstützt.
-% \ToDo{Klasse tudbeamer einpflegen}[v2.xx]
-%    \begin{macrocode}
-\@ifclassloaded{tudposter}{\@tud@oldclasstrue}{}%
-\@ifclassloaded{tudmathposter}{\@tud@oldclasstrue}{}%
-%    \end{macrocode}
-% Soll das Paket \pkg{tudscrfonts} mit den \TUDScript-Klassen der Version~v1.0
-% genutzt werden, muss Sorge dafür getragen werden, dass einige veraltete 
-% Befehle aktualisiert werden. Hierfür müssen diese \enquote{unschädlich}
-% gemacht werden, noch bevor das Paket selbst in Erscheinung tritt.
-%    \begin{macrocode}
-\@ifclassloaded{tudscrbookold}{\@tud@oldscrclasstrue}{}%
-\@ifclassloaded{tudscrreprtold}{\@tud@oldscrclasstrue}{}%
-\@ifclassloaded{tudscrartclold}{\@tud@oldscrclasstrue}{}%
-\if@tud@oldscrclass
-  \let\TUDoptions\relax
-  \let\TUDoption\relax
-  \let\univln\relax
-  \let\univrn\relax
-  \let\univbn\relax
-  \let\univxn\relax
-  \let\univls\relax
-  \let\univrs\relax
-  \let\univbs\relax
-  \let\univxs\relax
-  \let\dinbn\relax
-\fi
-%    \end{macrocode}
-% \end{macro}^^A if@tud@oldscrclass
-% \end{macro}^^A if@tud@oldclass
-%
 %
 % \subsection{Nutzung des Paketes mit den Standardklassen}
 %
@@ -787,7 +733,9 @@
 % das Setzen der Mathematikschriften druch \cs{AtBeginDocument} innerhalb von 
 % \cs{AtEndPreamble} am Ende \emph{aller} \cs{AtBeginDocument}.
 %    \begin{macrocode}
-\AtEndPreamble{%
+%<class>\AtEndPreamble%
+%<package>\AtBeginDocument%
+{%
   \tud@font@check%
 %    \end{macrocode}
 % Es erfolgt das optionsabhängige Voranstellen von \cs{tud@font@init@fontspec}
@@ -821,7 +769,8 @@
 % reagieren zu können.
 %    \begin{macrocode}
   \tud@font@set[nomath]%
-  \AtBeginDocument{\tud@font@math@init}%
+%<class>  \AtBeginDocument{\tud@font@math@init}%
+%<package>  \tud@font@math@init%
 }
 %    \end{macrocode}
 % \begin{macro}{\tud@font@greek@init}
@@ -1517,19 +1466,6 @@
 %
 % \iffalse
 %</(class|package)&option>
-%<*package&execute>
-% \fi
-%
-% Für das Paket \pkg{tudscrfonts} werden die Schriften aktiviert und die an das
-% Paket übergebenen Optionen ausgeführt.
-%    \begin{macrocode}
-\DeclareOption*{\KOMAoptions{\CurrentOption}}
-\TUDExecuteOptions{cdfont=true}
-\TUDProcessOptions\relax
-%    \end{macrocode}
-%
-% \iffalse
-%</package&execute>
 %<*class&body>
 % \fi
 %
@@ -1648,117 +1584,6 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \ifdin
-% Wird das Paket \pkg{tudscrfonts} mit den alten TUD-Klassen oder \TUDScript in 
-% der Version~v1.0 verwendet, müssen einige Kompatibilitätseinstellungen 
-% vorgenmommen werden. Dies betrifft insbesondere allerhand darin definierter,
-% fixer Schriften sowie die Mathematikschriften.
-%    \begin{macrocode}
-%<*package>
-\AtBeginDocument{%
-  \ifbool{@tud@oldclass}{%
-    \if@tud@fontspec%
-      \DeclareFixedFont{\univLightVII}{\encodingdefault}%
-        {UniversLight}{m}{n}{7}%
-      \DeclareFixedFont{\univLightObliqueVII}{\encodingdefault}%
-        {UniversLightOblique}{m}{n}{7}%
-      \DeclareFixedFont{\univBoldVII}{\encodingdefault}%
-        {UniversBold}{m}{n}{7}%
-      \DeclareFixedFont{\univLightIX}{\encodingdefault}%
-        {UniversLight}{m}{n}{9}%
-      \DeclareFixedFont{\univLightObliqueIX}{\encodingdefault}%
-        {UniversLightOblique}{m}{n}{9}%
-      \DeclareFixedFont{\univBoldIX}{\encodingdefault}%
-        {UniversBold}{m}{n}{9}%
-      \DeclareFixedFont{\univLightXI}{\encodingdefault}%
-        {UniversLight}{m}{n}{11}%
-      \DeclareFixedFont{\univLightObliqueXI}{\encodingdefault}%
-        {UniversLightOblique}{m}{n}{11}%
-      \DeclareFixedFont{\univBoldXI}{\encodingdefault}%
-        {UniversBold}{m}{n}{11}%
-      \DeclareFixedFont{\univLightXV}{\encodingdefault}%
-        {UniversLight}{m}{n}{15}%
-      \DeclareFixedFont{\univLightObliqueXV}{\encodingdefault}%
-        {UniversLightOblique}{m}{n}{15}%
-      \DeclareFixedFont{\univBoldXV}{\encodingdefault}%
-        {UniversBold}{m}{n}{15}%
-    \else%
-      \if@tud@univers%
-        \DeclareFixedFont{\univLightVII}{\encodingdefault}%
-          {\tud@univers}{l}{n}{7}%
-        \DeclareFixedFont{\univLightObliqueVII}{\encodingdefault}%
-          {\tud@univers}{l}{sl}{7}%
-        \DeclareFixedFont{\univBoldVII}{\encodingdefault}%
-          {\tud@univers}{b}{n}{7}%
-        \DeclareFixedFont{\univLightIX}{\encodingdefault}%
-          {\tud@univers}{l}{n}{9}%
-        \DeclareFixedFont{\univLightObliqueIX}{\encodingdefault}%
-          {\tud@univers}{l}{sl}{9}%
-        \DeclareFixedFont{\univBoldIX}{\encodingdefault}%
-          {\tud@univers}{b}{n}{9}%
-        \DeclareFixedFont{\univLightXI}{\encodingdefault}%
-          {\tud@univers}{l}{n}{11}%
-        \DeclareFixedFont{\univLightObliqueXI}{\encodingdefault}%
-          {\tud@univers}{l}{sl}{11}%
-        \DeclareFixedFont{\univBoldXI}{\encodingdefault}%
-          {\tud@univers}{b}{n}{11}%
-        \DeclareFixedFont{\univLightXV}{\encodingdefault}%
-          {\tud@univers}{l}{n}{15}%
-        \DeclareFixedFont{\univLightObliqueXV}{\encodingdefault}%
-          {\tud@univers}{l}{sl}{15}%
-        \DeclareFixedFont{\univBoldXV}{\encodingdefault}%
-          {\tud@univers}{b}{n}{15}%
-      \fi%
-    \fi%
-    \if@sansmath%
-      \DeclareSymbolFont{aunLetters}{OT1}{\tud@univers}{l}{sl}%
-      \SetSymbolFont{aunLetters}{bold}{OT1}{\tud@univers}{b}{sl}%
-      \DeclareSymbolFont{aunOperators}{OT1}{\tud@univers}{l}{n}%
-      \SetSymbolFont{aunOperators}{bold}{OT1}{\tud@univers}{b}{n}%
-      \DeclareSymbolFont{aunUpright}{OT1}{\tud@univers}{l}{n}%
-      \SetSymbolFont{aunUpright}{bold}{OT1}{\tud@univers}{b}{n}%
-      \DeclareSymbolFontAlphabet{\mathsf}{aunOperators}%
-      \DeclareSymbolFontAlphabet{\mathnormal}{aunLetters}%
-      \DeclareMathAlphabet\mathbf{OT1}{\tud@univers}{b}{n}%
-      \SetMathAlphabet\mathbf{bold}{OT1}{\tud@univers}{b}{n}%
-      \DeclareMathAlphabet\mathit{OT1}{\tud@univers}{l}{sl}%
-      \SetMathAlphabet\mathit{bold}{OT1}{\tud@univers}{l}{sl}%
-      \@ifpackageloaded{tudfonts}{%
-        \let\mv@normal\mv@univers%
-        \let\mv@bold\mv@universbold%
-      }{}%
-    \fi%
-    \let\dinBold\dinbn%
-    \let\dinfamily\dinbn%
-  }{}%
-  \ifbool{@tud@oldscrclass}{%
-    \cmd@restore{rmdefault}%
-    \cmd@restore{sfdefault}%
-    \cmd@restore{bfdefault}%
-    \cmd@restore{mddefault}%
-    \cmd@restore{familydefault}%
-    \cmd@restore{seriesdefault}%
-    \cmd@restore{shapedefault}%
-    \cmd@restore{rmfamily}%
-    \cmd@restore{sffamily}%
-    \cmd@restore{ttfamily}%
-    \DeclareSymbolFontAlphabet{\mathrm}{operators}
-    \if@tud@fontspec%
-      \DeclareFixedFont{\univLightHead}{\encodingdefault}%
-        {UniversLight}{m}{n}{\tud@head@fntsz}%
-      \DeclareFixedFont{\univBoldHead}{\encodingdefault}%
-        {UniversBold}{m}{n}{\tud@head@fntsz}%
-    \else%
-      \if@tud@univers%
-        \DeclareFixedFont{\univLightHead}{\encodingdefault}%
-          {\tud@univers}{l}{n}{\tud@head@fntsz}%
-        \DeclareFixedFont{\univBoldHead}{\encodingdefault}%
-          {\tud@univers}{b}{n}{\tud@head@fntsz}%
-      \fi%
-    \fi%
-  }{}%
-}
-%</package>
-%    \end{macrocode}
 %
 % \subsection{Bedingte Majuskeln für Überschriften}
 %
@@ -1828,82 +1653,6 @@
 %
 % \iffalse
 %</(class|package)&body>
-%<*package&body>
-% \fi
-%
-% \subsection{Kompatibilität zu alten Klassen und Paketen}
-%
-% \begin{macro}{\@makechapterhead}
-% \begin{macro}{\@makeschapterhead}
-% \begin{macro}{\section}
-% \begin{macro}{\showtitle}
-% Ganz zum Schluss merden für das Paket \pkg{tudscrfonts} noch ein paar 
-% Anpassungen für die \cls{tudbook}-Klasse gemacht.
-%    \begin{macrocode}
-\@ifclassloaded{tudbook}{%
-  \patchcmd{\@makechapterhead}{\dinBold\Huge\bfseries}%
-    {\bfseries\tud@font@heading\Huge}{}{\tud@patch@wrn{@makechapterhead}}%
-  \patchcmd{\@makeschapterhead}{\dinBold\Huge\bfseries}%
-    {\bfseries\tud@font@heading\Huge}{}{\tud@patch@wrn{@makeschapterhead}}%
-  \patchcmd{\section}{\dinBold\Large\bfseries}%
-    {\bfseries\tud@font@heading\Large}{}{\tud@patch@wrn{section}}%
-  \patchcmd{\showtitle}{\dinBold\Huge\bfseries}%
-    {\bfseries\tud@font@heading\Huge}{}{\tud@patch@wrn{showtitle}}%
-}{}
-%    \end{macrocode}
-% \end{macro}^^A \showtitle
-% \end{macro}^^A \section
-% \end{macro}^^A \@makeschapterhead
-% \end{macro}^^A \@makechapterhead
-% \begin{KOMAfont}{title}
-% \changes{v2.04}{2015/04/24}{\cls{tudmathposter} wird unterstützt}^^A
-% \begin{macro}{\subtitlefont}
-% \changes{v2.04}{2015/04/24}{\cls{tudmathposter} wird unterstützt}^^A
-% \begin{macro}{\sectionfont}
-% \changes{v2.04}{2015/04/24}{\cls{tudmathposter} wird unterstützt}^^A
-% \begin{macro}{\subsectionfont}
-% \changes{v2.04}{2015/04/24}{\cls{tudmathposter} wird unterstützt}^^A
-% \begin{macro}{\if@sansmath}
-% \changes{v2.04}{2015/04/24}{\cls{tudmathposter} wird unterstützt}^^A
-% \begin{macro}{\tudfont}
-% \changes{v2.04}{2015/04/24}{\cls{tudmathposter} wird unterstützt}^^A
-% Auch für die beiden Posterklassen \cls{tudmathposter} und \cls{tudposter}
-% sowie das Paket \pkg{tudfonts} sind kleine Anpassungen notwendig.
-%    \begin{macrocode}
-\@ifclassloaded{tudposter}{%
-  \let\if@sansmath\if@tudposter@sansmath%
-}{}
-\@ifclassloaded{tudmathposter}{%
-  \setkomafont{title}{\bfseries\tud@font@heading\Huge}%
-  \renewcommand*\subtitlefont{\fontseries{m}\tud@font@heading\huge}%
-  \if@mathevorgabe%
-    \renewcommand*\sectionfont{\univbn\LARGE}%
-    \renewcommand*\subsectionfont{\univbn\large}%
-  \fi%
-}{}
-\@ifpackageloaded{tudfonts}{%
-  \let\if@sansmath\if@tudfonts@sansmath%
-  \let\tudfont\cdfont%
-  \if@sansmath%
-    \if@tudfonts@eulermath%
-      \PackageWarningNoLine{tudscrfonts}{%
-        You're using non-serif fonts in math mode. It's\MessageBreak%
-        recommended to pass the option `noeulermath' to\MessageBreak%
-        package `tudfonts'%
-      }%
-    \fi%
-  \fi%
-}{}
-%    \end{macrocode}
-% \end{macro}^^A \tudfont
-% \end{macro}^^A \if@sansmath
-% \end{macro}^^A \subsectionfont
-% \end{macro}^^A \sectionfont
-% \end{macro}^^A \subtitlefont
-% \end{KOMAfont}^^A title
-%
-% \iffalse
-%</package&body>
 %</!fontsizes>
 % \fi
 %
