@@ -1,4 +1,4 @@
-% \CheckSum{1096}
+% \CheckSum{1234}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-fonts.dtx}[%
-  2015/04/27 v2.04 TUD-KOMA-Script\space%
+  2015/04/28 v2.04 TUD-KOMA-Script\space%
 %</driver>
 %<package&identify>\NeedsTeXFormat{LaTeX2e}[2011/06/27]
 %<package&identify>\ProvidesPackage{%
@@ -104,7 +104,10 @@
 %
 % Die Schriften des \CDs können nicht nur mit den \TUDScript-Klassen sondern 
 % auch mit anderen \LaTeX-Dokumentklassen verwendet werden. Hierfür wird das
-% Paket \pkg{tudscrfonts} bereitgestellt.
+% Paket \pkg{tudscrfonts} bereitgestellt. Damit kann auf die Installtion der 
+% Schriftfamilien für die alten Klassen verzichtet werden. Im Vergleich zu 
+% dieser Installation werden dabei fehlende Glyphen ergänzt und Probleme beim
+% Kerning behoben. 
 %
 % \StopEventually{\PrintIndex\PrintChanges}
 %
@@ -113,7 +116,7 @@
 %<*class&option>
 % \fi
 %
-% \subsection{Verwendbarkeit des Paketes \pkg{tudscrfonts}}
+% \subsection{Verwendbarkeit und Nutzung des Paketes \pkg{tudscrfonts}}
 %
 %    \begin{macrocode}
 \PreventPackageFromLoading[%
@@ -129,14 +132,14 @@
 %<*package&identify>
 % \fi
 %
-% \subsection{Nutzung des Paketes mit den Standardklassen}
-%
 % Sollte keine \KOMAScript-Klasse genutzt werden, wird zusätzlich das Paket
-% \pkg{scrextend} benötigt.
+% \pkg{scrextend} benötigt. Das Paket \pkg{trimspaces} ist für die alternative 
+% Schriftauswahl mit \cs{cdfont} bzw. \cs{textcdfont} notwendig.
 %    \begin{macrocode}
 \ifcsname KOMAClassName\endcsname\else%
   \RequirePackage{scrextend}[2013/12/19]%
 \fi
+\RequirePackage{trimspaces}[2009/09/17]
 %    \end{macrocode}
 %
 % \iffalse
@@ -610,6 +613,91 @@
 % \end{macro}^^A \univbn
 % \end{macro}^^A \univrn
 % \end{macro}^^A \univln
+% \begin{macro}{\cdfont}
+% \changes{v2.04}{2015/03/04}{neu}^^A
+% \begin{macro}{\textcdfont}
+% \changes{v2.04}{2015/03/04}{neu}^^A
+% \begin{macro}{\@cdfont}
+% \changes{v2.04}{2015/03/04}{neu}^^A
+% \begin{macro}{\tud@trimfontname}
+% \changes{v2.04}{2015/03/04}{neu}^^A
+% \begin{macro}{\tud@@trimfontname}
+% \changes{v2.04}{2015/03/04}{neu}^^A
+% Die Klassen \cls{tudposter} und \cls{tudmathposter} definieren den Befehl 
+% \cs{tudfont}, mit welchem die Schriften des \CDs der \TnUD auch mit Klarnamen
+% ausgewählt werden können. Zur Kompatibilität wird der Befehl \cs{cdfont} 
+% definiert, welcher die gleiche Funktionalität bereitstellt. Zusätzlich wird 
+% der Befehl \cs{textcdfont} bereitgestellt, der die Auswahl der Schrift als 
+% Textbefehl ermöglicht.
+%    \begin{macrocode}
+\newcommand*\cdfont[1]{%
+  \@cdfont{#1}%
+  \ifx\@tempc\relax\else%
+    \ifstr{\@tempc}{dinbn}{\dinbn}{\@nameuse{univ\@tempc}}%
+  \fi%
+}
+\newcommand*\textcdfont[2]{%
+  \@cdfont{#1}%
+  \ifx\@tempc\relax\else%
+    \ifstr{\@tempc}{dinbn}{\textdbn{#2}}{\@nameuse{textu\@tempc}{#2}}%
+  \fi%
+}
+\newcommand*\@cdfont[1]{%
+  \tud@trimfontname\@tempa{#1}%
+  \ifstr{\@tempa}{univers45}{\def\@tempc{ln}}{%
+  \ifstr{\@tempa}{univers55}{\def\@tempc{rn}}{%
+  \ifstr{\@tempa}{univers65}{\def\@tempc{bn}}{%
+  \ifstr{\@tempa}{univers75}{\def\@tempc{xn}}{%
+  \ifstr{\@tempa}{univers45oblique}{\def\@tempc{ls}}{%
+  \ifstr{\@tempa}{univers55oblique}{\def\@tempc{rs}}{%
+  \ifstr{\@tempa}{univers65oblique}{\def\@tempc{bs}}{%
+  \ifstr{\@tempa}{univers75oblique}{\def\@tempc{xs}}{%
+  \ifstr{\@tempa}{universoblique45}{\def\@tempc{ls}}{%
+  \ifstr{\@tempa}{universoblique55}{\def\@tempc{rs}}{%
+  \ifstr{\@tempa}{universoblique65}{\def\@tempc{bs}}{%
+  \ifstr{\@tempa}{universoblique75}{\def\@tempc{xs}}{%
+  \ifstr{\@tempa}{din}{\def\@tempc{dinbn}}{%
+  \ifstr{\@tempa}{din65}{\def\@tempc{dinbn}}{%
+    \let\@tempc\relax%
+    \PackageWarning{tudscrfonts}{The font `#1' is unknown}%
+  }}}}}}}}}}}}}}%
+}
+\newcommand*\tud@trimfontname[2]{%
+  \protected@edef\@tempa{\trim@spaces{#2}}%
+  \tud@lowerstring{\@tempa}{\@tempa}%
+  \tud@@trimfontname{ }{}%
+  \tud@@trimfontname{-}{}%
+  \tud@@trimfontname{_}{}%
+  \tud@@trimfontname{~}{}%
+  \tud@@trimfontname{ce}{}%
+  \tud@@trimfontname{ff}{}%
+  \tud@@trimfontname{60}{65}%
+  \tud@@trimfontname{light}{45}%
+  \tud@@trimfontname{regular}{55}%
+  \tud@@trimfontname{bold}{65}%
+  \tud@@trimfontname{black}{75}%
+  \tud@@trimfontname{4545}{45}%
+  \tud@@trimfontname{5555}{55}%
+  \tud@@trimfontname{6565}{65}%
+  \tud@@trimfontname{7575}{75}%
+  \tud@@trimfontname{italic}{oblique}%
+  \tud@@trimfontname{slanted}{oblique}%
+  \let#1\@tempa%
+}
+\newcommand*\tud@@trimfontname[2]{%
+  \def\@tempb##1#1##2\relax{\def\@tempa{##1#2##2}}%
+  \@expandtwoargs\in@{#1}{\@tempa}%
+  \@whilesw\ifin@\fi{%
+    \expandafter\@tempb\@tempa\relax%
+    \@expandtwoargs\in@{#1}{\@tempa}%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@@trimfontname
+% \end{macro}^^A \tud@trimfontname
+% \end{macro}^^A \@cdfont
+% \end{macro}^^A \textcdfont
+% \end{macro}^^A \cdfont
 % \begin{macro}{\tud@font@math@init}
 % \changes{v2.04}{2014/03/10}{neu}^^A
 % \begin{macro}{\mv@univers}
