@@ -1,4 +1,4 @@
-% \CheckSum{1186}
+% \CheckSum{1091}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-layout.dtx}[%
-  2015/04/24 v2.04 TUD-KOMA-Script (layout)%
+  2015/04/30 v2.04 TUD-KOMA-Script (layout)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -461,7 +461,7 @@
         }{%
           \ClassError{\tudcls@name}{`#1' is no valid pagestyle}{%
             You tried to use `#1' as a pagestyle for option\MessageBreak%
-            `cleardoublespecialpage', but it was never defined%
+            `cleardoublespecialpage', but it was never defined.%
           }%
         }%
       }%
@@ -685,9 +685,6 @@
 % Kapiteltitel. Das Makro \cs{tud@headmidvskip@neg} wird benötigt, um ggf. 
 % vorher um den eingefügten Abstand nach oben zu verschieben.
 %    \begin{macrocode}
-%<*article>
-\newcommand*\tud@headmidvskip{\par\nobreak}
-%</article>
 %<*book|report>
 \newcommand*\tud@headmidvskip{\par\nobreak\vspace{.5\baselineskip}}
 \newcommand*\tud@headmidvskip@neg{%
@@ -765,7 +762,6 @@
 %    \begin{macrocode}
   \ifcase\tud@layout@part\relax% false
     \tud@cmd@restore{partheadstartvskip}%
-    \tud@cmd@restore{partheadmidvskip}%
 %<*book|report>
     \tud@cmd@restore{partheadendvskip}%
     \tud@cmd@restore{partheademptypage}%
@@ -782,7 +778,6 @@
 %    \begin{macrocode}
   \else% !false
     \tud@cmd@store{partheadstartvskip}%
-    \tud@cmd@store{partheadmidvskip}%
 %<*book|report>
     \tud@cmd@store{partheadendvskip}%
     \tud@cmd@store{partheademptypage}%
@@ -801,7 +796,6 @@
     \if@tud@parttitle%
       \tud@sectioning@set[addpart]{part}{\usekomafont{parttitle}}%
       \tud@font@koma@set{partnumber}{\usekomafont{parttitle}}%
-      \renewcommand*\partheadmidvskip{\enskip}%
     \else%
 %</book|report>
       \tud@sectioning@set[addpart]{part}{%
@@ -812,7 +806,6 @@
         \tud@font@heading%
         \tud@color{\tud@part@fontcolor}%
       }%
-      \let\partheadmidvskip\tud@headmidvskip%
 %<*book|report>
     \fi%
 %</book|report>
@@ -981,6 +974,10 @@
         \tud@font@heading@size%
         \tud@color{\tud@part@fontcolor}%
         \ifx\@@title\@empty%
+          \ClassWarning{\tudcls@name}{%
+            You activated the option `parttitle' but\MessageBreak%
+            no title was given%
+          }%
           \tud@makeuppercase{\strut}%
         \else%
           \tud@makeuppercase{\@@title}%
@@ -1053,7 +1050,6 @@
 % Damit auch das Präfix der Teile in Majuskeln erscheint, wird dem Befehl
 % \cs{partformat}, welcher das Präfix enthält, für die \cls{tudscrartcl}-Klasse
 % der entsprechende Befehl vorangestellt.
-% \ToDo{Für \cs{DeclareSectionCommand} überprüfen}[v3.17]
 %    \begin{macrocode}
 %<*article>
 \let\tud@@part\@part
@@ -1067,48 +1063,30 @@
 % nötig. Für separate Teileseiten muss dafür Sorge getragen werden, dass die
 % Überschrift unabhängig von der Tiefe der Nummerierung immer an der gleichen
 % Position steht.
-% \ToDo{Für \cs{DeclareSectionCommand} überprüfen}[v3.17]
 %    \begin{macrocode}
 %<*book|report>
 \let\tud@@part\@part
-\ifcsdef{scr@v@3.17}{%
-  \patchcmd{\tud@@part}{%
-    \ifnumbered{part}{%
-      \size@partnumber{\partformat}%
-      \setlength{\@tempskipa}{\scr@part@innerskip}%
-      \partheadmidvskip%
-    }{}%
-  }{%
-    \ifnumbered{part}{%
-      \size@partnumber{\tud@makeuppercase{\partformat}}%
-      \setlength{\@tempskipa}{\scr@part@innerskip}%
-      \partheadmidvskip%
-    }{%
-      \if@tud@parttitle\else%
-        \size@partnumber{\vphantom{\partname}}%
-        \setlength{\@tempskipa}{\scr@part@innerskip}%
-        \partheadmidvskip%
-      \fi%
-    }%
-  }{}{\tud@patch@wrn{@part}}%
+\patchcmd{\tud@@part}{%
+  \ifnumbered{part}{%
+    \size@partnumber{\partformat}%
+    \setlength{\@tempskipa}{\scr@part@innerskip}%
+    \partheadmidvskip%
+  }{}%
 }{%
-  \patchcmd{\tud@@part}{%
-    \ifnumbered{part}{%
-      \size@partnumber{\partformat}%
-      \partheadmidvskip%
-    }{}%
+  \ifnumbered{part}{%
+    \size@partnumber{\tud@makeuppercase{\partformat}}%
+    \if@tud@parttitle%
+      \enskip%
+    \else%
+      \tud@headmidvskip%
+    \fi%
   }{%
-    \ifnumbered{part}{%
-      \size@partnumber{\tud@makeuppercase{\partformat}}%
-      \partheadmidvskip%
-    }{%
-      \if@tud@parttitle\else%
-        \size@partnumber{\vphantom{\partname}}%
-        \partheadmidvskip%
-      \fi%
-    }%
-  }{}{\tud@patch@wrn{@part}}%
-}
+    \if@tud@parttitle\else%
+      \size@partnumber{\vphantom{\partname}}%
+      \tud@headmidvskip%
+    \fi%
+  }%
+}{}{\tud@patch@wrn{@part}}%
 %</book|report>
 %    \end{macrocode}
 % \end{macro}^^A \@part
@@ -1123,7 +1101,6 @@
 % Bei den Teile-Befehlen ohne Gliederungsnummerierung muss zusätzlich der
 % Freiraum vorgehalten werden, damit alle Überschriften auf der gleichen
 % vertikalen Position liegen.
-% \ToDo{Für \cs{DeclareSectionCommand} überprüfen}[v3.17]
 %    \begin{macrocode}
 \let\tud@@spart\@spart
 \patchcmd{\tud@@spart}{%
@@ -1133,8 +1110,8 @@
   \normalfont\sectfont\nobreak%
   \if@tud@parttitle\else%
     \size@partnumber{\vphantom{\partname}}%
+    \tud@headmidvskip\nobreak%
   \fi%
-  \partheadmidvskip\unskip%
   \size@part%
 }{}{\tud@patch@wrn{@spart}}
 %    \end{macrocode}
@@ -1175,14 +1152,8 @@
   \ifcase\tud@layout@chapter\relax\or\else% lite/bicolor/color/full
     \def\tud@chapter@fontcolor{HKS41}%
   \fi%
-  \ifcsdef{scr@v@3.15}{%
-    \vspace*{%
-      \dimexpr\tud@dim@headdiff+\tud@dim@headingsvskip+\parskip\relax%
-    }%
-  }{%
-    \vspace*{%
-      \dimexpr\tud@dim@headdiff+\tud@dim@headingsvskip-\baselineskip\relax%
-    }%
+  \vspace*{%
+    \dimexpr\tud@dim@headdiff+\tud@dim@headingsvskip+\parskip\relax%
   }%
   \if@tud@chapterpage%
     \vspace*{\pageheadingsvskip}%
@@ -1215,54 +1186,19 @@
 \let\tud@@@makechapterhead\@@makechapterhead
 %    \end{macrocode}
 % Die Patches ab \KOMAScript~v3.17.
-% \ToDo{Für \cs{DeclareSectionCommand} überprüfen}[v3.17]
 %    \begin{macrocode}
-\ifcsdef{scr@v@3.17}{%
-  \patchcmd{\tud@@@makechapterhead}{%
-    \chapterformat
-    \setlength{\@tempskipa}{\scr@chapter@innerskip}%
-    \chapterheadmidvskip
-  }{%
-    \tud@headmidvskip@neg\tud@makeuppercase{\chapterformat}\tud@headmidvskip%
-  }{}{\tud@patch@wrn{@@makechapterhead}}%
-  \patchcmd{\tud@@@makechapterhead}{\IfUsePrefixLine{}{\raggedchapter}}{%
-    \IfUsePrefixLine{\IfUseNumber{\setlength\parskip{\z@}}{}}{\raggedchapter}%
-  }{}{\tud@patch@wrn{@@makechapterhead}}%
-%    \end{macrocode}
-% Die Patches ab \KOMAScript~v3.15.
-%    \begin{macrocode}
+\patchcmd{\tud@@@makechapterhead}{%
+  \chapterformat
+  \setlength{\@tempskipa}{\scr@chapter@innerskip}%
+  \chapterheadmidvskip
 }{%
-\ifcsdef{scr@v@3.15}{%
-  \patchcmd{\tud@@@makechapterhead}{\chapterformat\chapterheadmidvskip}{%
-    \tud@headmidvskip@neg\tud@makeuppercase{\chapterformat}\tud@headmidvskip%
-  }{}{\tud@patch@wrn{@@makechapterhead}}%
-  \patchcmd{\tud@@@makechapterhead}{\IfUsePrefixLine{}{\raggedchapter}}{%
-    \IfUsePrefixLine{\IfUseNumber{\setlength\parskip{\z@}}{}}{\raggedchapter}%
-  }{}{\tud@patch@wrn{@@makechapterhead}}%
-%    \end{macrocode}
-% Die Patches für \KOMAScript~v3.14 und früher.
-%    \begin{macrocode}
-}{%
-  \patchcmd{\tud@@@makechapterhead}{\chapterheadstartvskip}{%
-    \chapterheadstartvskip%
-    \ifnumbered{chapter}{%
-      \if@chapterprefix%
-        \begingroup%
-          \usekomafont{chapterprefix}{\tud@headmidvskip@neg}%
-        \endgroup%
-      \fi%
-    }{}%
-  }{}{\tud@patch@wrn{@@makechapterhead}}%
-  \patchcmd{\tud@@@makechapterhead}{\chapterformat}{%
-    \tud@makeuppercase{\chapterformat}%
-  }{}{\tud@patch@wrn{@@makechapterhead}}%
-  \patchcmd{\tud@@@makechapterhead}{\endgraf\nobreak\vskip.5\baselineskip}{%
-    \tud@headmidvskip
-  }{}{\tud@patch@wrn{@@makechapterhead}}%
-  \patchcmd{\tud@@@makechapterhead}{\interlinepenalty}{%
-    \ifnumbered{chapter}{\setlength\parskip{\z@}}{}\interlinepenalty
-  }{}{\tud@patch@wrn{@@makechapterhead}}%
-}}
+  \tud@headmidvskip@neg%
+  \tud@makeuppercase{\chapterformat}%
+  \tud@headmidvskip%
+}{}{\tud@patch@wrn{@@makechapterhead}}%
+\patchcmd{\tud@@@makechapterhead}{\IfUsePrefixLine{}{\raggedchapter}}{%
+  \IfUsePrefixLine{\IfUseNumber{\setlength\parskip{\z@}}{}}{\raggedchapter}%
+}{}{\tud@patch@wrn{@@makechapterhead}}%
 %    \end{macrocode}
 % \end{macro}^^A \@@makechapterhead
 % \end{macro}^^A \tud@@@makechapterhead
