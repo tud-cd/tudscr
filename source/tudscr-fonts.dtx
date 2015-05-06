@@ -1,4 +1,4 @@
-% \CheckSum{1234}
+% \CheckSum{1244}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -783,23 +783,32 @@
     \SetMathAlphabet{\mathit}{dinbold}{OT1}{\tud@dinbold}{b}{sl}%
   \fi%
 %    \end{macrocode}
+% Wird das Paket \pkg{unicode-math} verwendet, werden keine Einstellungen für 
+% die Mathematikschriften vorgenommen\dots
+%    \begin{macrocode}
+  \@ifpackageloaded{unicode-math}{%
+    \let\tud@font@greek@loop\@gobble%
+    \bool@set@lock{@tud@cdmath}{false}%
+  }{%
+%    \end{macrocode}
 % Für die griechischen Buchstaben wird geprüft, ob durch ein Paket diese auf 
 % die kursive Variante gesetzt wurden. Ist dies der Fall, wird der Standardwert 
 % für die Option \opt{slantedgreek} auf \val{true} gesetzt. Anschließend 
 % erfolgt die \emph{Intialisierung} der griechischen Großbuchstaben mit dem
 % Befehl \cs{tud@font@greek@init}.
 %    \begin{macrocode}
-  \let\@tempb\relax%
-  \let\@tempc\relax%
-  \DeclareMathSymbol{\@tempb}{\mathalpha}{letters}{0}%
-  \DeclareMathSymbol{\@tempc}{\mathord}{letters}{0}%
-  \@tempswafalse%
-  \ifnum\Gamma=\@tempb\relax\@tempswatrue\fi%
-  \ifnum\Gamma=\@tempc\relax\@tempswatrue\fi%
-  \if@tempswa%
-    \bool@std@lock{@tud@slantedgreek}{true}%
-  \fi%
-  \tud@font@greek@loop\tud@font@greek@init%
+    \let\@tempb\relax%
+    \let\@tempc\relax%
+    \DeclareMathSymbol{\@tempb}{\mathalpha}{letters}{0}%
+    \DeclareMathSymbol{\@tempc}{\mathord}{letters}{0}%
+    \@tempswafalse%
+    \ifnum\Gamma=\@tempb\relax\@tempswatrue\fi%
+    \ifnum\Gamma=\@tempc\relax\@tempswatrue\fi%
+    \if@tempswa%
+      \bool@std@lock{@tud@slantedgreek}{true}%
+    \fi%
+    \tud@font@greek@loop\tud@font@greek@init%
+  }%
 %    \end{macrocode}
 % Zum Schluss werden abhängig von der gewählten Einstellung für die Schriftart 
 % der Option \opt{cdfont} die benötigten Mathematikversionen geladen. Daran
@@ -1738,6 +1747,19 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@ragged2e
 % \end{macro}^^A \tud@raggedright
+%
+% \subsection{Anpassungen für das Paket \pkg{siunitx}}
+%
+% \begin{macro}{\lseries}
+% Das Paket \pkg{siunitx} nutzt den Befehl \cs{lseries} für den Fall, dass für
+% den Fließtext eine Schrift die Serie \val{l} verwendet. Dem wird hier 
+% Rechnung getragen.
+%    \begin{macrocode}
+\AfterPackage*{siunitx}{%
+  \providecommand*\lseries{\fontseries{l}\selectfont}
+}
+%    \end{macrocode}
+% \end{macro}^^A \lseries
 %
 % \iffalse
 %</(class|package)&body>
