@@ -52,9 +52,18 @@
       \fi%
     }%
   \fi%
-  \@TUDVersion{2015/04/27 v2.04 BETA TUD-KOMA-Script}%
+  \@TUDVersion{2015/04/30 v2.04 BETA TUD-KOMA-Script}%
 \endgroup%
 \providecommand*\tudscrmail{tudscr@gmail.com}
+\@ifundefined{tudcls@name}{%
+  \PackageError{%
+    tudscrposter%
+  }{Unsupported class found}{%
+    This package can only be used with a class out of the\MessageBreak%
+    tudscr bundle (tudscrartcl, tudscrreprt, tudscrbook).%
+  }
+  \endinput
+}{}
 \@ifundefined{TUDScript}{%
   \DeclareRobustCommand{\TUDScript}{%
     \ifdin{TUD-KOMA-SCRIPT}{%
@@ -104,26 +113,58 @@
 \DeclareOption*{\TUDoptions{\CurrentOption}}
 \TUDExecuteOptions{cdstyle}
 \TUDProcessOptions\relax
-
+% §§§ evtl. tudscrposter und tudscrsupervisor in ein Paket zusammenführen
 \tud@locale@define{\contactname}
 \tud@locale@german{\contactname}{Kontakt}%
 \tud@locale@english{\contactname}{Contact}%
-% §§§ Konflikt mit tudscrsupervisor
 \tud@locale@define{\authorname}
 \tud@locale@german{\authorname}{Autor}%
 \tud@locale@english{\authorname}{Author}%
+\BeforePackage{%
+  tudscrsupervisor%
+}{%
+  \undef\@contactperson%
+  \undef\contactperson%
+}
 \newcommand*\@contactperson{}
 \newcommand*\contactperson[1]{\gdef\@contactperson{#1}}
 \tud@locale@define{\contactpersonname}
 \tud@locale@german{\contactpersonname}{Ansprechpartner}%
 \tud@locale@english{\contactpersonname}{Contact}%
 
+
+\newcommand*\@faculty@foot{}
+\renewcommand*\faculty[2][\@empty]{\tud@foot@line@add{faculty}{#2}{#1}}
+\newcommand*\@department@foot{}
+\renewcommand*\department[2][\@empty]{\tud@foot@line@add{department}{#2}{#1}}
+\newcommand*\@institute@foot{}
+\renewcommand*\institute[2][\@empty]{\tud@foot@line@add{institute}{#2}{#1}}
+\newcommand*\@chair@foot{}
+\renewcommand*\chair[2][\@empty]{\tud@foot@line@add{chair}{#2}{#1}}
+\newcommand*\@professor@foot{}
+\renewcommand*\professor[2][\@empty]{\tud@foot@line@add{professor}{#2}{#1}}
+
+\newcommand*\tud@foot@line@add[3]{%
+  \csgdef{@#1}{\trim@spaces{#2}}%
+  \ifx#3\@empty\relax%
+    \global\csletcs{@#1@foot}{@#1}%
+  \else%
+    \csgdef{@#1@foot}{\trim@spaces{#3}}%
+  \fi%
+}
+\newcommand*\tud@foot@line@write[1]{%
+  \protected@edef\@tempa{\csuse{@#1@foot}}%
+  \ifx\@tempa\@empty\else\newline\csuse{@#1@foot}\fi%
+}
+
 \footcontent{%
   \ifx\contactname\@empty\else{\tud@head@font@bold\contactname}\newline\fi%
   Technische Universit\"at Dresden%
-  \ifx\@institute\@empty\else\newline\@institute\fi%
-  \ifx\@chair\@empty\else\newline\@chair\fi%
-  \ifx\@professor\@empty\else\newline\@professor\fi%
+  \tud@foot@line@write{faculty}%
+  \tud@foot@line@write{department}%
+  \tud@foot@line@write{institute}%
+  \tud@foot@line@write{chair}%
+  \tud@foot@line@write{professor}%
 }%
 [%
   \begingroup%
