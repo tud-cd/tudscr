@@ -1,4 +1,4 @@
-% \CheckSum{1383}
+% \CheckSum{1285}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-title.dtx}[%
-  2015/05/06 v2.04 TUD-KOMA-Script (title)%
+  2015/05/12 v2.04 TUD-KOMA-Script (title)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -471,7 +471,7 @@
 %    \end{macrocode}
 % Ausgabe eines Autors oder mehrerer Autoren ggf. mit Zusatzinformationen.
 %    \begin{macrocode}
-      \tud@check@author%
+      \let\tud@split@author\tud@split@author@title%
       \tud@multiple@split{@author}\par%
       \vskip 2ex\@plus1ex\@minus1ex%
 %    \end{macrocode}
@@ -483,7 +483,7 @@
         \if@tud@cover\else%
           \ifx\@date\@empty\else%
             \vskip 2ex\@plus.1fill%
-            {\usekomafont{date}{\@date\space\@datemore\par}}%
+            {\usekomafont{date}{\@date\nobreakspace\@datemore\par}}%
           \fi%
         \fi%
         \vskip 2ex\@plus.25fill%
@@ -509,7 +509,7 @@
           \ifx\@graduation\@empty\else%
             \def\@tempc{%
               \@graduation%
-              \ifx\@graduationabbr\@empty\else\space\@graduationabbr\fi%
+              \ifx\@graduationabbr\@empty\else\nobreakspace\@graduationabbr\fi%
             }%
             {\usekomafont{titlepage}{\graduationtext\par}}%
             \vskip 2ex\@plus1ex\@minus1ex%
@@ -547,7 +547,7 @@
           \ifx\@date\@empty\else%
             \vskip 2ex\@plus1ex\@minus1ex%
             \ifstr{\datetext}{}{}{\datetext\@titledelim}%
-            {\usekomafont{date}{\@date\space\@datemore\par}}%
+            {\usekomafont{date}{\@date\nobreakspace\@datemore\par}}%
 %    \end{macrocode}
 % Zusätzlich kann noch ein Datum der mündlichen Verteidigung angegeben werden.
 %    \begin{macrocode}
@@ -798,13 +798,13 @@
 %    \end{macrocode}
 % Ausgabe eines Autors oder mehrerer Autoren ggf. mit Zusatzinformationen.
 %    \begin{macrocode}
-    \tud@check@author%
+    \let\tud@split@author\tud@split@author@title%
     \tud@multiple@split{@author}\par%
     \vskip 2ex\@plus1ex\@minus1ex%
 %    \end{macrocode}
 % Ausgabe von Datum, Verlag und Danksagung wie im Original.
 %    \begin{macrocode}
-    {\usekomafont{date}{\@date\space\@datemore\par}}%
+    {\usekomafont{date}{\@date\nobreakspace\@datemore\par}}%
     \ifx\@publishers\@empty\else%
       \vskip 2ex\@plus1ex\@minus1ex%
       {\usekomafont{publishers}{\@publishers\par}}%
@@ -834,121 +834,19 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@@maketitle
-% Es wird die Angabe einer kollaborativen Autorenschaft ermöglicht, wo für
-% jeden einzelnen Autor weitere Angaben (Matrikelnummer etc.) gemacht werden
-% können. Hierfür ist eine spezielle Art der Eingabe im Dokument notwendig.
-% \begin{macro}{\tud@multiple@split}
-% \begin{macro}{\tud@multiple@@split}
-% \begin{macro}{\tud@multiple@@@split}
-% \begin{macro}{\tud@multiple@field}
-% Mehrere Autoren werden durch \cs{and} voneinander getrennt. Damit alle
-% zusätzlichen Felder für alle Autoren einzeln nutzbar sind, muss der Inhalt
-% des Feldes \cs{@author} an jedem \cs{and}-Befehl getrennt und für jeden Teil
-% separat ausgewertet. Dafür wird der Befehl \cs{tud@multiple@@split} definiert,
-% welcher allgemein gehalten ist um diesen auch für andere Felder nutzen zu 
-% können. Das obligatorische Argument ist dabei das Feld mit dem auszuwertenden 
-% Inhalt, der jeweils an \cs{and} getrennt werden soll. Dieses wird in 
-% \cs{tud@multiple@field} gespeichert.
-%    \begin{macrocode}
-\newcommand*\tud@multiple@field{}
-\newcommand*\tud@multiple@split[1]{%
-  \gdef\tud@multiple@field{#1}%
-  \begingroup%
-    \let\and\relax%
-%    \end{macrocode}
-% Das Feld wird mit \cs{and} terminiert, um der Definition von
-% \cs{tud@multiple@@split} in jedem Fall zu entsprechen.
-%    \begin{macrocode}
-    \edef\@tempa{\csname#1\endcsname\and}%
-  \expandafter\endgroup%
-  \expandafter\tud@multiple@@split\@tempa\relax%
-}
-%    \end{macrocode}
-% Das Makro \cs{tud@multiple@@split} wird so definiert, dass der Befehl 
-% \cs{and} als Separator für die einzelnen Argumente dient. Mit den beiden
-% freigestellten Argumenten kann das Makro zur eigentlichen Ausgabe aufgerufen
-% werden, welches aus dem gegebenen Feld (\cs{tud@multiple@field}) konstruiert
-% wird (\cs{tud@split\meta{Feld}}). An dieses wird der jeweils aktuelle Autor 
-% im ersten Argument und die restlichen im zweiten Argument übergeben.
-%    \begin{macrocode}
-\newcommand*\tud@multiple@@split{}%
-\def\tud@multiple@@split#1\and#2\relax{%
-  \expandafter\csname tud@split\tud@multiple@field\endcsname{#1}{#2}%
-}
-%    \end{macrocode}
-% Der Befehl \cs{tud@multiple@@@split} prüft zum Schluss, ob noch weitere
-% Autoren angegeben sind. Sollte dies der Fall sein, so wird der Inhalt des
-% zweiten Argumentes ausgeführt und \cs{tud@multiple@@split} ein weiteres Mal
-% aufgerufen, um so sequentiell alle Autoren abzuarbeiten. Dafür muss 
-% \cs{tud@multiple@@@split} innerhalb des verarbeitenden Makro
-% (\cs{tud@split\meta{Feld}}) aufgerufen werden.
-%    \begin{macrocode}
-\newcommand*\tud@multiple@@@split[2]{%
-  \ifx\relax#1\relax%
-    \def\@tempb{}%
-  \else%
-    \def\@tempb{#2\tud@multiple@@split#1\relax}%
-  \fi%
-  \@tempb%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@multiple@field
-% \end{macro}^^A \tud@multiple@@@split
-% \end{macro}^^A \tud@multiple@@split
-% \end{macro}^^A \tud@multiple@split
-% \begin{macro}{\tud@multiple@setfields}
-% Der Befehl \cs{tud@multiple@setfields}\marg{Initialisierung}\marg{Teilinhalt}
-% wird verwendet, um innerhalb des Feldes \cs{@tud@multiple@field} zu prüfen, ob
-% sich darin bestimmte Befehle aus \cs{tud@split\\meta{Feld}@list} zum Setzen
-% zusätzlicher Informationen befinden. Sollte dies der Fall sein, so werden 
-% diese mit \meta{Initialisierung} initialisiert. Anschließend wird der 
-% übergebene Teilinhalt mit \cs{sbox}\cs{z@}\marg{\#2} in eine Box expandiert.
-% Dieser Trick führt dazu, dass die Felder bereits gesetzt werden, ohne eine
-% Ausgabe zu erzeugen.
-%    \begin{macrocode}
-\newcommand*\tud@multiple@setfields[2]{%
-  \letcs\@tempa{tud@split\tud@multiple@field @list}%
-  \let\and\relax%
-  \@for\@tempb:=\@tempa\do{%
-    \ifx\@tempb\@empty\else%
-      \begingroup%
-        \protected@expandtwoargs\in@{\@tempb}{\@nameuse{\tud@multiple@field}}%
-        \ifin@ \@tempb{#1}\fi%
-      \endgroup%
-    \fi%
-  }%
-  \begingroup%
-    \let\thanks\@gobble%
-    \let\footnote\@gobble%
-    \sbox\z@{#2}%
-  \endgroup%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@multiple@setfields
-% \begin{macro}{\tud@check@author}
-% \changes{v2.02}{2014/08/17}{neu}^^A
-% \begin{macro}{\tud@split@author}
-% \changes{v2.02}{2014/07/25}{neu, aus Umbenennung \cs{tud@split@@author}}^^A
-% \begin{macro}{\tud@split@author@list}
-% \changes{v2.02}{2014/07/25}{neu, Umbenennung \cs{tud@split@@author@list}}^^A
+% \begin{macro}{\tud@split@author@title}
+% \changes{v2.04}{2015/05/12}{neu}^^A
 % \begin{macro}{\tud@newline}
 % Das Makro \cs{tud@split@author} dient der formatierten Ausgabe aller 
-% Informationen für mehrere Autoren auf der Titelseite. Falls das Autorenfeld 
-% nicht gesetzt wurde, wird mit \cs{tud@check@author} die standardmäßig 
-% vorhandene Warnung ausgegeben und danach das Feld als leer definiert.
+% Informationen für mehrere Autoren auf der Titelseite.
 %    \begin{macrocode}
 \newcommand*\tud@newline{}
-\newcommand*\tud@check@author{%
-  \ifpatchable{\@author}{\@latex@warning@no@line}{\@author\gdef\@author{}}{}%
-}
-\newcommand*\tud@split@author[2]{%
+\newcommand*\tud@split@author@title[2]{%
 %    \end{macrocode}
-% Zu Beginn werden alle Felder, welche innerhalb des \meta{Feld}-Argumentes
-% angegeben sind, initial gelöscht (erstes Argument \cs{tud@multiple@setfields})
-% Anschließend werden die Felder des aktuellen Teils gefüllt (zweites Argument 
-% \cs{tud@multiple@setfields}). 
+% Zu Beginn werden alle Felder, welche innerhalb von \cs{@author} angegeben
+% sind, gesichert. 
 %    \begin{macrocode}
-  \tud@multiple@setfields{}{#1}%
+  \tud@multiple@fields@store{@author}{#1}%
 %    \end{macrocode}
 % Um die Abstände definiert zu setzen, wird \cs{tud@newline} verwendet. Sobald
 % auch nur eine zusätzliche Information ausgegeben werden soll, wird ein etwas
@@ -978,7 +876,7 @@
         \ifstr{\dateofbirthtext}{}%
           {}{\dateofbirthtext\@titledelim}\@dateofbirth%
         \ifx\@placeofbirth\@empty\else%
-          \space\placeofbirthtext\unskip\space\@placeofbirth%
+          \nobreakspace\placeofbirthtext\nobreakspace\@placeofbirth%
         \fi%
       \else%
         \tud@title@wrn{dateofbirth}%
@@ -1006,26 +904,16 @@
     \fi%
   \fi%
 %    \end{macrocode}
-% Durch den Aufruf von \cs{tud@multiple@@@split} wird das übergebene \meta{Feld}
-% sukzessive abgearbeitet.
+% Zunächst werden die zuvor bestehenden Feldinhalte wiederhergestellt. Danach 
+% wird durch den Aufruf von \cs{tud@multiple@@@split} wird das übergebene
+% \meta{Feld} sukzessive abgearbeitet.
 %    \begin{macrocode}
+  \tud@multiple@fields@restore{@author}%
   \tud@multiple@@@split{#2}{\vskip 2ex}%
 }
 %    \end{macrocode}
-% Innerhalb von \cs{tud@split@author@list} werden die Feldbefehle hinterlegt, 
-% die durch \cs{tud@multiple@setfield} geprüft und ggf. initialisert werden 
-% sollen.
-%    \begin{macrocode}
-\newcommand*\tud@split@author@list{%
-  \authormore,\matriculationyear,\enrolmentyear,%
-  \matriculationnumber,\studentid,\matriculationid,%
-  \placeofbirth,\birthplace,\dateofbirth,\birthday,%
-}
-%    \end{macrocode}
 % \end{macro}^^A \tud@newline
-% \end{macro}^^A \tud@split@author@list
-% \end{macro}^^A \tud@split@author
-% \end{macro}^^A \tud@check@author
+% \end{macro}^^A \tud@split@author@title
 % \begin{macro}{\maketitleonecolumn}
 % \changes{v2.02}{2014/08/16}{einspaltiger Text obligatorisch}^^A
 % \begin{macro}{\@maketitleonecolumn}
