@@ -50,7 +50,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-scripts.dtx}[%
-  2015/04/28 v2.04 TUD-KOMA-Script installation scripts%
+  2015/05/12 v2.04 TUD-KOMA-Script installation scripts%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -76,6 +76,7 @@
 % \changes{v2.04}{2015/04/12}{Bugfix für Windowspfade mit Leerzeichen}^^A
 % \changes{v2.04}{2015/04/22}{Bugfix für MiKTeX-Maps}^^A
 % \changes{v2.04}{2015/04/24}{Tex Live Portable wird unterstützt}^^A
+% \changes{v2.04}{2015/05/12}{Pakete für T1-Kodierung obligatorisch}^^A
 %
 % \section{Installationsskripte}
 %
@@ -145,6 +146,10 @@ set /p texpath=<texpath.tmp
 if "%texpath%"=="" (
  goto :nothing
 )
+echo  =====================================================================
+echo.
+echo   Notwendige Dateien und Pakete werden gesucht.
+echo.
 set missing=false
 call:checkfile "7za.exe"
 %<full|update>call:checkfile "tudscr_%version%.zip"
@@ -164,8 +169,10 @@ call:checkpackage "fontinst.sty"
 % \fi
 %
 %<convfont>call:checkfile "tudscr_fonts_converted.zip"
+call:checkpackage "type1ec.sty"
 call:checkpackage "lmodern.sty"
 call:checkpackage "cmbright.sty"
+call:checkpackage "hfbright.map"
 call:checkpackage "iwona.sty"
 %
 % \iffalse
@@ -173,6 +180,11 @@ call:checkpackage "iwona.sty"
 % \fi
 %
 if "%missing%" == "true" goto :abort
+echo.
+echo   Es wurden alle notwendigen Dateien und Pakete gefunden.
+echo.
+echo  =====================================================================
+echo.
 %
 % \iffalse
 %<*!convert>
@@ -229,8 +241,6 @@ for /f "usebackq tokens=1,2" %%a in (
   ) else (
     echo   LaTeX-Distribution MiKTeX gefunden
   )
-  echo  =====================================================================
-  echo.
   goto :resume
 :TeXLive
   echo %distrib% | find "TeX Live"> nul
@@ -241,10 +251,9 @@ for /f "usebackq tokens=1,2" %%a in (
   ) else (
     echo   LaTeX-Distribution TeX Live gefunden
   )
-  echo  =====================================================================
-  echo.
   goto :resume
 :nothing
+  echo.
   echo   TeX Live oder MiKTeX wurden nicht gefunden
   echo  =====================================================================
   echo.
@@ -675,7 +684,9 @@ exit /b 0
   goto:eof
 :checkpackage
   set package=
-  kpsewhich %~1> nul
+  @echo on
+  kpsewhich %~1
+  @echo off
   kpsewhich %~1> package.tmp
   set /p package=< package.tmp
   if "%package%"=="" (
@@ -826,6 +837,10 @@ version=$(echo $version|rev|cut -c12-|rev)
 %</full|update>
 % \fi
 %
+echo  =====================================================================
+echo
+echo   Notwendige Dateien und Pakete werden gesucht.
+echo
 missing=false
 %<full|update>checkfile "tudscr_$version.zip"
 %
@@ -844,8 +859,10 @@ checkpackage "fontinst.sty"
 % \fi
 %
 %<convfont>checkfile "tudscr_fonts_converted.zip"
+checkpackage "type1ec.sty"
 checkpackage "lmodern.sty"
 checkpackage "cmbright.sty"
+checkpackage "hfbright.map"
 checkpackage "iwona.sty"
 %
 % \iffalse
@@ -855,6 +872,11 @@ checkpackage "iwona.sty"
 if $missing ; then
   abort
 fi
+echo
+echo   Es wurden alle notwendigen Dateien und Pakete gefunden.
+echo
+echo  =====================================================================
+echo
 rm -rf tudscrtemp
 mkdir -p tudscrtemp/converted
 %
