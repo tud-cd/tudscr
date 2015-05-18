@@ -1,4 +1,4 @@
-% \CheckSum{2232}
+% \CheckSum{2259}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-pagestyle.dtx}[%
-  2015/05/12 v2.04 TUD-KOMA-Script (pagestyle)%
+  2015/05/18 v2.04 TUD-KOMA-Script (pagestyle)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -384,7 +384,7 @@
   \DeclareNewLayer[%
     background,%
     contents={%
-      \ifnum\tud@head@bar>\@ne\relax% color
+      \ifnum\tud@head@bar>\tw@\relax% cdhead=color
         \color{HKS41}%
         \rule{\layerwidth}{\tud@dim@topmargin}%
       \fi%
@@ -394,7 +394,7 @@
     background,%
     voffset=\tud@dim@topmargin,%
     contents={%
-      \ifnum\tud@head@bar>\@ne\relax% color
+      \ifnum\tud@head@bar>\@ne\relax% cdhead=barcolor/color
         \color{HKS41!60}%
         \rule{\layerwidth}{\tud@dim@barheight}%
       \fi%
@@ -432,7 +432,7 @@
     background,headsep,%
     voffset=\dimexpr\tud@dim@topmargin-.5\tud@dim@line\relax,%
     contents={%
-      \ifnum\tud@head@bar<\tw@\relax% nocolor/litecolor
+      \ifnum\tud@head@bar<\tw@\relax% cdhead=nocolor/litecolor
         \if@tud@head@widebar\else\tud@head@rule{\textwidth}\fi%
       \fi%
     },%
@@ -442,7 +442,7 @@
     voffset=\dimexpr\tud@dim@topmargin+\tud@dim@barheight%
       -.5\tud@dim@line\relax,%
     contents={%
-      \ifnum\tud@head@bar<\tw@\relax% nocolor/litecolor
+      \ifnum\tud@head@bar<\tw@\relax% cdhead=nocolor/litecolor
         \if@tud@head@widebar\else\tud@head@rule{\textwidth}\fi%
       \fi%
     },%
@@ -451,7 +451,7 @@
     background,%
     voffset=\dimexpr\tud@dim@topmargin-.5\tud@dim@line\relax,%
     contents={%
-      \ifnum\tud@head@bar<\tw@\relax% nocolor/litecolor
+      \ifnum\tud@head@bar<\tw@\relax% cdhead=nocolor/litecolor
         \if@tud@head@widebar\tud@head@rule{\paperwidth}\fi%
       \fi%
     },%
@@ -461,7 +461,7 @@
     voffset=\dimexpr\tud@dim@topmargin+\tud@dim@barheight%
       -.5\tud@dim@line\relax,%
     contents={%
-      \ifnum\tud@head@bar<\tw@\relax% nocolor/litecolor
+      \ifnum\tud@head@bar<\tw@\relax% cdhead=nocolor/litecolor
         \if@tud@head@widebar\tud@head@rule{\paperwidth}\fi%
       \fi%
     },%
@@ -495,7 +495,9 @@
       \if@tud@foot@colored%
         \let\@tempc\relax%
         \ifdefvoid{\tud@pagecolor}{%
-          \ifnum\tud@head@bar>\@ne% color
+          \ifcase\tud@head@bar\relax\or\or% cdhead=barcolor
+            \def\@tempc{\color{HKS41!60}}%
+          \or% cdhead=color
             \def\@tempc{\color{HKS41}}%
           \fi%
         }{%
@@ -756,6 +758,8 @@
 % \changes{v2.04}{2015/04/21}{Kopf- und Fußeinstellungen abhängig von der Farbe 
 %   des Seitenhintergrunds}^^A
 % \begin{macro}{\tud@head@logocolor}
+% \begin{macro}{\tud@head@fontcolor}
+% \changes{v2.04}{2015/05/18}{neu}^^A
 % \begin{macro}{\tud@foot@logocolor}
 % \changes{v2.03}{2015/02/15}{neu}^^A
 % \begin{macro}{\tud@foot@fontcolor}
@@ -770,7 +774,7 @@
 % Seitenstil, die Seitenstile \pgs{headings} und \pgs{plain} als Aliase für 
 % \pgs{\meta{Seitenstil}} und \pgs{plain.\meta{Seitenstil}} festgelegt. 
 % Allerdings definiert dieser Befehl zusätzliche Ebenen für Kopf- und Fußzeile, 
-% weshalb auf die Verwendung verziichtet wird. Das automatische Umschalten soll 
+% weshalb auf die Verwendung verzichtet wird. Das automatische Umschalten soll 
 % dennoch ermöglicht werden.
 %    \begin{macrocode}
   \DeclarePageStyleAlias{plain}{plain.tudheadings}%
@@ -786,6 +790,7 @@
 % \cs{tud@foot@fontcolor} wird ggf. die Schriftfarbe für den Fuß gespeichert.
 %    \begin{macrocode}
 \newcommand*\tud@head@logocolor{black}
+\newcommand*\tud@head@fontcolor{}
 \newcommand*\tud@foot@logocolor{black}
 \newcommand*\tud@foot@fontcolor{}
 \newcommand*\tud@ps@onbackground{%
@@ -795,14 +800,27 @@
   \ifdefvoid{\tud@pagecolor}{%
     \ifcase\tud@head@bar\relax% cdhead=nocolor
       \def\tud@head@logocolor{black}%
+      \gdef\tud@head@fontcolor{}%
       \def\tud@foot@logocolor{black}%
       \gdef\tud@foot@fontcolor{}%
     \or% cdhead=litecolor
       \def\tud@head@logocolor{HKS41}%
+      \gdef\tud@head@fontcolor{HKS41}%
       \def\tud@foot@logocolor{HKS41}%
       \gdef\tud@foot@fontcolor{HKS41}%
+    \or% cdhead=barcolor
+      \def\tud@head@logocolor{HKS41}%
+      \gdef\tud@head@fontcolor{white}%
+      \if@tud@foot@colored%
+        \def\tud@foot@logocolor{white}%
+        \gdef\tud@foot@fontcolor{white}%
+      \else%
+        \def\tud@foot@logocolor{HKS41}%
+        \gdef\tud@foot@fontcolor{HKS41}%
+      \fi%
     \or% cdhead=color
       \def\tud@head@logocolor{white}%
+      \gdef\tud@head@fontcolor{white}%
       \if@tud@foot@colored%
         \def\tud@foot@logocolor{white}%
         \gdef\tud@foot@fontcolor{white}%
@@ -818,6 +836,7 @@
 %    \begin{macrocode}
     \ifstr{\tud@pagecolor}{HKS41}{%
       \def\tud@head@logocolor{white}%
+      \gdef\tud@head@fontcolor{white}%
       \def\tud@foot@logocolor{white}%
       \if@tud@foot@colored%
         \gdef\tud@foot@fontcolor{white}%
@@ -830,14 +849,16 @@
 %    \begin{macrocode}
     }{%
       \def\tud@head@logocolor{HKS41}%
-      \def\tud@foot@logocolor{HKS41}%
-      \ifcase\tud@head@bar\relax\or\or% cdhead=color
+      \gdef\tud@head@fontcolor{HKS41}%
+      \ifcase\tud@head@bar\relax\or\or\or% cdhead=color
         \def\tud@head@logocolor{white}%
-        \def\tud@foot@logocolor{white}%
+        \gdef\tud@head@fontcolor{white}%
       \fi%
       \if@tud@foot@colored%
+        \def\tud@foot@logocolor{white}%
         \gdef\tud@foot@fontcolor{white}%
       \else%
+        \def\tud@foot@logocolor{HKS41}%
         \gdef\tud@foot@fontcolor{HKS41}%
       \fi%
       \bool@std@lock{@tud@head@widebar}{true}%
@@ -848,11 +869,12 @@
 % Linienstärke des Querbalkens gesetzt.
 %    \begin{macrocode}
   \let\tud@dim@line\tud@dim@thinline%
-  \ifstr{\tud@head@logocolor}{white}{\let\tud@dim@line\tud@dim@heavyline}{}%
+  \ifstr{\tud@head@fontcolor}{white}{\let\tud@dim@line\tud@dim@heavyline}{}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@foot@fontcolor
 % \end{macro}^^A \tud@foot@logocolor
+% \end{macro}^^A \tud@head@fontcolor
 % \end{macro}^^A \tud@head@logocolor
 % \end{macro}^^A \tud@ps@onbackground
 % \end{macro}^^A \tud@ps@onselect
@@ -898,7 +920,7 @@
 % über \cs{tud@dim@line} definierter Dicke.
 %    \begin{macrocode}
 \newcommand*\tud@head@rule[1]{%
-  \color{\tud@head@logocolor}%
+  \tud@color{\tud@head@fontcolor}%
   \rule[\ht\strutbox]{#1}{\tud@dim@line}%
 }
 %    \end{macrocode}
@@ -1004,13 +1026,13 @@
 %    \end{macrocode}
 % Die Farbe des Textes der ersten Zeile entspricht immer der des Kopfes.
 %    \begin{macrocode}
-    \color{\tud@head@logocolor}%
+    \tud@color{\tud@head@fontcolor}%
     \tud@head@text@write{\tud@head@text@first}%
 %    \end{macrocode}
 % Die zweite und dritte Zeile sind bei zweifarbigen Kopf normalerweise blau, 
 % nur für einen dunklen Seitenhintergrund weiß.
 %    \begin{macrocode}
-    \ifnum\tud@head@bar>\@ne% color
+    \ifnum\tud@head@bar>\@ne% cdhead=barcolor/color
       \ifdefvoid{\tud@pagecolor}{\color{HKS41}}{%
         \ifstr{\tud@pagecolor}{HKS41}{\color{white}}{\color{HKS41}}%
       }%
@@ -1331,7 +1353,6 @@
 %    \begin{macrocode}
   \def\tud@@mainlogo{TUD-black}%
   \ifstr{\tud@head@logocolor}{HKS41}{\def\tud@@mainlogo{TUD-blue}}{}%
-  \ifstr{\tud@head@logocolor}{cddarkblue}{\def\tud@@mainlogo{TUD-blue}}{}%
   \ifstr{\tud@head@logocolor}{white}{\def\tud@@mainlogo{TUD-white}}{}%
   \includegraphics[keepaspectratio,width=\tud@dim@logowidth]{\tud@@mainlogo}%
 }
@@ -1357,14 +1378,14 @@
 % gespeichert, damit diese später über \cs{tud@headlogo} an den Befehl
 % \cs{includegraphics} weitergereicht werden können.
 %    \begin{macrocode}
+\newcommand*\tud@@headlogo{}
+\newcommand*\tud@@@headlogo{}
 \newcommand*\headlogo[2][]{%
   \if@atdocument\tud@iftudps{\currentpagestyle}{\clearpage}{}\fi%
   \def\tud@@headlogo{#2}%
   \def\tud@@@headlogo{#1}%
   \if@atdocument\expandafter\pagestyle\expandafter{\currentpagestyle}\fi%
 }
-\newcommand*\tud@@headlogo{}
-\newcommand*\tud@@@headlogo{}
 \newcommand*\tud@headlogo{%
   \tud@ddc@check%
   \ifx\tud@@headlogo\@empty\else%
@@ -1373,7 +1394,6 @@
   \ifcase\@tempa\relax\or% \tud@ddc@head=true
     \def\tud@@headlogo{DDC-24}%
     \ifstr{\tud@head@logocolor}{HKS41}{\def\tud@@headlogo{DDC-27}}{}%
-    \ifstr{\tud@head@logocolor}{cddarkblue}{\def\tud@@headlogo{DDC-27}}{}%
     \ifstr{\tud@head@logocolor}{white}{\def\tud@@headlogo{DDC-30}}{}%
   \or% \tud@ddc@head=color
     \def\tud@@headlogo{DDC-03}%
@@ -1448,7 +1468,7 @@
     {\@@footcontent{#1}{#2}}%
     {\@@footcontent{#1}{#2}[\@empty]}%
 }
-\newcommand*\@@footcontent{}%
+\newcommand*\@@footcontent{}
 \newcommand*\footlayer{}
 \def\@@footcontent#1#2[#3]{%
   \if@tempswa%
@@ -1530,14 +1550,14 @@
   \fi%
 }
 \newcommand*\footlogosep{\hfill}
+\newcommand*\tud@@footlogo{}
+\newcommand*\tud@@@footlogo{}
 \newcommand*\footlogo[2][]{%
   \if@atdocument\tud@iftudps{\currentpagestyle}{\clearpage}{}\fi%
   \def\tud@@footlogo{#2}%
   \def\tud@@@footlogo{#1}%
   \if@atdocument\expandafter\pagestyle\expandafter{\currentpagestyle}\fi%
 }
-\newcommand*\tud@@footlogo{}
-\newcommand*\tud@@@footlogo{}
 %    \end{macrocode}
 % Der Befehl \cs{tud@footlogo} wird genutzt, um die Logos für den Fuß innerhalb 
 % der Ebene \val{tudheadings.foot.logo} auszugeben.
@@ -1604,7 +1624,6 @@
   \ifcase\@tempb\relax\or% \tud@ddc@foot=true
     \def\tud@@ddclogo{DDC-22}%
     \ifstr{\tud@foot@logocolor}{HKS41}{\def\tud@@ddclogo{DDC-25}}{}%
-    \ifstr{\tud@foot@logocolor}{cddarkblue}{\def\tud@@ddclogo{DDC-25}}{}%
     \ifstr{\tud@foot@logocolor}{white}{\def\tud@@ddclogo{DDC-28}}{}%
   \or% \tud@ddc@foot=color
     \def\tud@@ddclogo{DDC-01}%
@@ -1642,6 +1661,7 @@
 %
 % \begin{option}{cdhead}
 % \changes{v2.03}{2015/01/29}{neu}^^A
+% \changes{v2.04}{2015/05/18}{Wert \val{barcolor} neu}^^A
 % \begin{macro}{\tud@head@font}
 % \changes{v2.03}{2015/02/04}{neu}^^A
 % \begin{macro}{\if@tud@head@font@locked}
@@ -1674,12 +1694,13 @@
     {colorlite}{4},{litecolor}{4},{colourlite}{4},{litecolour}{4},%
     {colorlight}{4},{lightcolor}{4},{colourlight}{4},{lightcolour}{4},%
     {pale}{4},{colorpale}{4},{palecolor}{4},{colourpale}{4},{palecolour}{4},%
-    {bicolor}{5},{bicolour}{5},{twocolor}{5},{twocolour}{5},%
-    {bichrome}{5},{bichromatic}{5},{dichrome}{5},{dichromatic}{5},%
-    {color}{5},{colour}{5},%
-    {full}{5},{colorfull}{5},{fullcolor}{5},{colourfull}{5},{fullcolour}{5},%
-    {textwidth}{6},{slim}{6},{slimhead}{6},{nowide}{6},{nowidehead}{6},%
-    {paperwidth}{7},{wide}{7},{widehead}{7}%
+    {colorbar}{5},{barcolor}{5},{colourbar}{5},{barcolour}{5},%
+    {bicolor}{6},{bicolour}{6},{twocolor}{6},{twocolour}{6},%
+    {bichrome}{6},{bichromatic}{6},{dichrome}{6},{dichromatic}{6},%
+    {color}{6},{colour}{6},%
+    {full}{6},{colorfull}{6},{fullcolor}{6},{colourfull}{6},{fullcolour}{6},%
+    {textwidth}{7},{slim}{7},{slimhead}{7},{nowide}{7},{nowidehead}{7},%
+    {paperwidth}{8},{wide}{8},{widehead}{8}%
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax% false
@@ -1692,8 +1713,10 @@
       \cs@set@lock{tud@head@bar}{0}%
     \or% litecolor
       \cs@set@lock{tud@head@bar}{1}%
-    \or% color
+    \or% barcolor
       \cs@set@lock{tud@head@bar}{2}%
+    \or% color
+      \cs@set@lock{tud@head@bar}{3}%
     \or% textwidth
       \bool@set@lock{@tud@head@widebar}{false}%
     \or% paperwidth
