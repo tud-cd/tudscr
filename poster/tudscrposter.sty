@@ -58,7 +58,7 @@
       \fi%
     }%
   \fi%
-  \@TUDVersion{2015/05/12 v2.04 BETA TUD-KOMA-Script}%
+  \@TUDVersion{2015/05/18 v2.04 BETA TUD-KOMA-Script}%
 \endgroup%
 \providecommand*\tudscrmail{tudscr@gmail.com}
 \@ifundefined{tudcls@name}{%
@@ -80,18 +80,37 @@
 %%% From File: tudscr-poster.dtx
 \NeedsTeXFormat{LaTeX2e}[2011/06/27]
 \ProvidesPackage{tudscrposter}[%
-  2015/04/30 v2.04 BETA TUD-KOMA-Script
+  2015/05/18 v2.04 BETA TUD-KOMA-Script
   package
   (corporate design posters)%
 ]
 %%% From File: tudscr-base.dtx
 \RequirePackage{tudscrbase}[\TUDVersion]
 %%% From File: tudscr-poster.dtx
+\newcommand*\tud@foot@poster{}
 \TUD@key{cdstyle}[true]{%
   \TUD@set@numkey{cdstyle}{@tempa}{\tud@layout@switch}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax% false
-      % §§§ Optionen?
+      \if@atdocument%
+        \pagestyle{empty}%
+      \else%
+        \def\tud@currentpagestyle{empty}%
+      \fi%
+      \renewcommand*\tud@foot@poster{\footcontent{}}%
+    \else% !false
+      \if@atdocument%
+        \pagestyle{empty.tudheadings}%
+      \else%
+        \def\tud@currentpagestyle{empty.tudheadings}%
+      \fi%
+      \renewcommand*\tud@foot@poster{%
+        \footcontent{\tud@foot@poster@left}[\tud@foot@poster@right]%
+      }%
+    \fi%
+    \if@atdocument\tud@foot@poster\fi%
+    \ifcase\@tempa\relax% false
+      \TUDoptions{cdhead=nocolor,cdfoot=false}%
     \or% true
       \TUDoptions{cdhead=nocolor,cdfoot=true}%
     \or% lite
@@ -99,23 +118,10 @@
     \else% bicolor/color/full
       \TUDoptions{cdhead=bicolor,cdfoot=bicolor}%
     \fi%
-    \ifcase\@tempa\relax% false
-      \if@atdocument
-        \pagestyle{empty}%
-      \else%
-        \def\tud@currentpagestyle{empty}%
-      \fi%
-    \else% !false
-      \if@atdocument
-        \pagestyle{empty.tudheadings}%
-      \else%
-        \def\tud@currentpagestyle{empty.tudheadings}%
-      \fi%
-    \fi%
   \fi%
 }
 \TUD@key{style}[true]{\TUDoptions{cdstyle=#1}}
-\AtBeginDocument{\tud@currentpagestyle@reset}
+\AtBeginDocument{\tud@currentpagestyle@reset\tud@foot@poster}
 %%% From File: tudscr-misc.dtx
 \DeclareOption*{\TUDoptions{\CurrentOption}}
 \TUDExecuteOptions{cdstyle=true}
@@ -126,18 +132,14 @@
   \ifx#3\@empty\relax%
     \global\csletcs{@#1@foot}{@#1}%
   \else%
-    \csgdef{@#1@foot}{#3}%
+    \csgdef{@#1@foot}{\trim@spaces{#3}}%
   \fi%
 }
 \newcommand*\tud@foot@line@write[1]{%
   \protected@edef\@tempa{\csuse{@#1@foot}}%
   \ifx\@tempa\@empty\else\newline{\csuse{@#1@foot}}\fi%
 }
-\patchcmd{\tud@split@author@list}{authormore}{%
-  authormore,office,telephone,emailaddress%
-}{}{\tud@patch@wrn{tud@split@author@list}}
-% §§§ evtl. (internes) Makro für Rückfallebene?
-\footcontent{%
+\newcommand*\tud@foot@poster@left{%
   \ifx\contactname\@empty\else{\tud@head@font@bold\contactname}\newline\fi%
   Technische Universit\"at Dresden%
   \tud@foot@line@write{faculty}%
@@ -145,58 +147,56 @@
   \tud@foot@line@write{institute}%
   \tud@foot@line@write{chair}%
   \tud@foot@line@write{professor}%
-}%
-[%
-  \begingroup%
-    \def\tud@newline{%
-      \ifx\@office\@empty\else\newline\@office\fi%
-      \ifx\@telephone\@empty\else\newline\@telephone\fi%
-      \ifx\@emailaddress\@empty\else\newline\@emailaddress\fi%
+}
+\newcommand*\tud@foot@poster@right{%
+  \def\tud@newline{%
+    \ifx\@office\@empty\else\newline\@office\fi%
+    \ifx\@telephone\@empty\else\newline\@telephone\fi%
+    \ifx\@emailaddress\@empty\else\newline\@emailaddress\fi%
+  }%
+  \ifpatchable{\@author}{\@latex@warning@no@line}{%
+    \let\@tempa\@empty%
+  }{%
+    \let\@tempa\@author%
+  }%
+  \@tempswafalse%
+  \ifx\@tempa\@empty\else%
+    \ifx\authorname\@empty\else%
+      {\tud@head@font@bold\authorname}\newline%
+    \fi%
+    \renewcommand*\tud@split@author[2]{%
+      \tud@multiple@fields@store{@author}{##1}%
+      \tud@multiple@fields@preset{@author}{*}{##1}%
+      \ignorespaces##1\tud@newline%
+      \tud@multiple@fields@restore{@author}%
+      \tud@multiple@@@split{##2}{\newline}%
     }%
-    \protecting{%
-      \ifpatchable{\@author}{\@latex@warning@no@line}{%
-        \let\@tempa\@empty%
-      }{%
-        \let\@tempa\@author%
-      }%
-      \@tempswafalse%
-      \ifx\@tempa\@empty\else%
-        \ifx\authorname\@empty\else%
-          {\tud@head@font@bold\authorname}\newline%
-        \fi%
-        \renewcommand*\tud@split@author[2]{%
-          \tud@multiple@fields@store{@author}{#1}%
-          \tud@multiple@fields@preset{@author}{*}{#1}%
-          \ignorespaces#1\tud@newline%
-          \tud@multiple@fields@restore{@author}%
-          \tud@multiple@@@split{#2}{\newline}%
-        }%
-        \noindent\tud@multiple@split{@author}%
-        \tud@multiple@fields@restore{@author}%
-        \tud@newline%
-        \@tempswatrue%
-      \fi%
-      \ifx\@contactperson\@empty\else%
-        \if@tempswa\newline\fi%
-        \ifx\contactpersonname\@empty\else%
-          {\tud@head@font@bold\contactpersonname}\newline%
-        \fi%
-        \renewcommand*\tud@split@contactperson[2]{%
-          \tud@multiple@fields@store{@contactperson}{#1}%
-          \tud@multiple@fields@preset{@contactperson}{}{#1}%
-          \ignorespaces#1\tud@newline%
-          \tud@multiple@fields@restore{@contactperson}%
-          \tud@multiple@@@split{#2}{\newline}%
-        }%
-        \noindent\tud@multiple@split{@contactperson}%
-        \tud@multiple@fields@restore{@contactperson}%
-        \tud@newline%
-      \fi%
+    \noindent\tud@multiple@split{@author}%
+    \tud@multiple@fields@restore{@author}%
+    \tud@newline%
+    \@tempswatrue%
+  \fi%
+  \ifx\@contactperson\@empty\else%
+    \if@tempswa\newline\fi%
+    \ifx\contactpersonname\@empty\else%
+      {\tud@head@font@bold\contactpersonname}\newline%
+    \fi%
+    \renewcommand*\tud@split@contactperson[2]{%
+      \tud@multiple@fields@store{@contactperson}{##1}%
+      \tud@multiple@fields@preset{@contactperson}{*}{##1}%
+      \ignorespaces##1\tud@newline%
+      \tud@multiple@fields@restore{@contactperson}%
+      \tud@multiple@@@split{##2}{\newline}%
     }%
-  \endgroup
-]
-% §§§
-%\webpage{}
+    \noindent\tud@multiple@split{@contactperson}%
+    \tud@multiple@fields@restore{@contactperson}%
+    \tud@newline%
+  \fi%
+  \ifx\@webpage\@empty\else\newline\@webpage\fi%
+}
+\patchcmd{\tud@split@author@list}{authormore}{%
+  authormore,office,telephone,emailaddress%
+}{}{\tud@patch@wrn{tud@split@author@list}}
 %%% From File: tudscr-fields.dtx
 \newcommand*\@faculty@foot{}
 \renewcommand*\faculty[2][\@empty]{\tud@foot@line@add{faculty}{#2}{#1}}
@@ -256,6 +256,18 @@
   \newcommand*\tud@split@contactperson[2]{}
   \newcommand*\tud@split@contactperson@list{office,telephone,emailaddress}
 }
+\newcommand*\@webpage{}
+\newcommand*\webpage[2][]{\gdef\@webpage{#2}}
+\AfterPackage*{hyperref}{%
+  \renewcommand*\webpage[2][hidelinks]{%
+    \gdef\@webpage{%
+      \begingroup%
+        \hypersetup{#1}%
+        \href{#2}{#2}%
+      \endgroup%
+    }%
+  }%
+}%
 %%% From File: tudscr-locale.dtx
 \tud@locale@define{\authorname}
 \tud@locale@define{\contactname}
