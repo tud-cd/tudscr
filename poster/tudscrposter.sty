@@ -87,46 +87,37 @@
 %%% From File: tudscr-base.dtx
 \RequirePackage{tudscrbase}[\TUDVersion]
 %%% From File: tudscr-poster.dtx
-\newcommand*\tud@foot@poster{}
+\newcommand*\tud@cdstyle{0}
 \TUD@key{cdstyle}[true]{%
-  \TUD@set@numkey{cdstyle}{@tempa}{\tud@layout@switch}{#1}%
+  \TUD@set@numkey{cdstyle}{tud@cdstyle}{\tud@layout@switch}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \ifcase\@tempa\relax% false
-      \if@atdocument%
-        \pagestyle{empty}%
-      \else%
-        \def\tud@currentpagestyle{empty}%
-      \fi%
-      \renewcommand*\tud@foot@poster{\footcontent{}}%
-    \else% !false
-      \if@atdocument%
-        \pagestyle{empty.tudheadings}%
-      \else%
-        \def\tud@currentpagestyle{empty.tudheadings}%
-      \fi%
-      \renewcommand*\tud@foot@poster{%
-        \footcontent{\tud@foot@poster@left}[\tud@foot@poster@right]%
-      }%
-    \fi%
-    \if@atdocument\tud@foot@poster\fi%
-    \ifcase\@tempa\relax% false
-      \TUDoptions{cdhead=nocolor,cdfoot=false}%
-    \or% true
+    \if@atdocument\tud@style@set\fi%
+  \fi%
+}
+\TUD@key{style}[true]{\TUDoptions{cdstyle=#1}}
+%%% From File: tudscr-misc.dtx
+\DeclareOption*{\TUDoptions{\CurrentOption}}
+\TUDExecuteOptions{cdstyle=bicolor}
+\TUDProcessOptions\relax
+%%% From File: tudscr-poster.dtx
+\newcommand*\tud@cdstyle@set{%
+  \ifcase\tud@cdstyle\relax% false
+    \footcontent{}%
+  \else% !false
+    \pagestyle{empty.tudheadings}%
+    \footcontent{\tud@foot@poster@left}[\tud@foot@poster@right]%
+    \ifcase\tud@cdstyle\relax\or% true
       \TUDoptions{cdhead=nocolor,cdfoot=true}%
-    \or% lite
+    \or% litecolor
       \TUDoptions{cdhead=litecolor,cdfoot=true}%
+    \or% barcolor
+      \TUDoptions{cdhead=barcolor,cdfoot=true}%
     \else% bicolor/color/full
       \TUDoptions{cdhead=bicolor,cdfoot=bicolor}%
     \fi%
   \fi%
 }
-\TUD@key{style}[true]{\TUDoptions{cdstyle=#1}}
-\AtBeginDocument{\tud@currentpagestyle@reset\tud@foot@poster}
-%%% From File: tudscr-misc.dtx
-\DeclareOption*{\TUDoptions{\CurrentOption}}
-\TUDExecuteOptions{cdstyle=true}
-\TUDProcessOptions\relax
-%%% From File: tudscr-poster.dtx
+\AtBeginDocument{\tud@cdstyle@set}
 \newcommand*\tud@foot@line@add[3]{%
   \csgdef{@#1}{\trim@spaces{#2}}%
   \ifx#3\@empty\relax%

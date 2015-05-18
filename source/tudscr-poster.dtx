@@ -1,4 +1,4 @@
-% \CheckSum{195}
+% \CheckSum{182}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -50,7 +50,7 @@
 %%% From File: tudscr-poster.dtx
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
-\ProvidesFile{tudscr-supervisor.dtx}[%
+\ProvidesFile{tudscr-poster.dtx}[%
   2015/05/18 v2.04 TUD-KOMA-Script\space%
 %</driver>
 %<package&identify>\NeedsTeXFormat{LaTeX2e}[2011/06/27]
@@ -71,7 +71,7 @@
 \KOMAoptions{parskip=half-}
 \CodelineIndex
 \RecordChanges
-\GetFileInfo{tudscr-supervisor.dtx}
+\GetFileInfo{tudscr-poster.dtx}
 \begin{document}
   \maketitle
   \DocInput{\filename}
@@ -98,56 +98,29 @@
 % \changes{v2.04}{2015/05/12}{neu}^^A
 % \begin{option}{style}
 % \changes{v2.04}{2015/05/12}{neu}^^A
-% \begin{macro}{\tud@foot@poster}
+% \begin{macro}{\tud@cdstyle}
 % \changes{v2.04}{2015/05/12}{neu}^^A
 % Mit dieser Option wird festgelegt, in welcher farbigen Ausprägung das Poster 
 % erstellt wird. Dabei sind alle Werte gültig, die auch für die meisten anderen
 % Layouteinstellungen verwendet werden können. Abhängig vom gewählten Wert, 
 % wird der Seitenstil, die Ausprägung der Fußzeile sowie die farbliche Gestalt 
-% von Kopf- und Fußzeile festgelegt.
+% von Kopf- und Fußzeile festgelegt. Da dabei unter anderem auch gegebenenfalls 
+% der Seitenstil auf einen vom Typ \pgs{tudheadings} festgelegt wird, erfolgt 
+% die Ausführung der Option frühestens zu Beginn des Dokumentes.
 %    \begin{macrocode}
-\newcommand*\tud@foot@poster{}
+\newcommand*\tud@cdstyle{0}
 \TUD@key{cdstyle}[true]{%
-  \TUD@set@numkey{cdstyle}{@tempa}{\tud@layout@switch}{#1}%
+  \TUD@set@numkey{cdstyle}{tud@cdstyle}{\tud@layout@switch}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \ifcase\@tempa\relax% false
-      \if@atdocument%
-        \pagestyle{empty}%
-      \else%
-        \def\tud@currentpagestyle{empty}%
-      \fi%
-      \renewcommand*\tud@foot@poster{\footcontent{}}%
-    \else% !false
-      \if@atdocument%
-        \pagestyle{empty.tudheadings}%
-      \else%
-        \def\tud@currentpagestyle{empty.tudheadings}%
-      \fi%
-      \renewcommand*\tud@foot@poster{%
-        \footcontent{\tud@foot@poster@left}[\tud@foot@poster@right]%
-      }%
-    \fi%
-    \if@atdocument\tud@foot@poster\fi%
-    \ifcase\@tempa\relax% false
-      \TUDoptions{cdhead=nocolor,cdfoot=false}%
-    \or% true
-      \TUDoptions{cdhead=nocolor,cdfoot=true}%
-    \or% lite
-      \TUDoptions{cdhead=litecolor,cdfoot=true}%
-    \else% bicolor/color/full
-      \TUDoptions{cdhead=bicolor,cdfoot=bicolor}%
-    \fi%
+    \if@atdocument\tud@style@set\fi%
   \fi%
 }
 %    \end{macrocode}
-% Der Schlüssel \opt{style} wird als Alias bereitgehalten. Die Einstellungen 
-% für die Fußzeile sowie den Seitenstil werden auf den Anfang des Dokumentes 
-% verzögert.
+% Der Schlüssel \opt{style} wird als Alias bereitgehalten.
 %    \begin{macrocode}
 \TUD@key{style}[true]{\TUDoptions{cdstyle=#1}}
-\AtBeginDocument{\tud@currentpagestyle@reset\tud@foot@poster}
 %    \end{macrocode}
-% \end{macro}^^A \tud@foot@poster
+% \end{macro}^^A \tud@cdstyle
 % \end{option}^^A style
 % \end{option}^^A cdstyle
 %
@@ -156,6 +129,30 @@
 %<*package&body>
 % \fi
 %
+% \begin{macro}{\tud@cdstyle@set}
+% \changes{v2.04}{2015/05/18}{neu}^^A
+% Mit diesem Makro erfolgt die Zuweisung des Seitenstils.
+%    \begin{macrocode}
+\newcommand*\tud@cdstyle@set{%
+  \ifcase\tud@cdstyle\relax% false
+    \footcontent{}%
+  \else% !false
+    \pagestyle{empty.tudheadings}%
+    \footcontent{\tud@foot@poster@left}[\tud@foot@poster@right]%
+    \ifcase\tud@cdstyle\relax\or% true
+      \TUDoptions{cdhead=nocolor,cdfoot=true}%
+    \or% litecolor
+      \TUDoptions{cdhead=litecolor,cdfoot=true}%
+    \or% barcolor
+      \TUDoptions{cdhead=barcolor,cdfoot=true}%
+    \else% bicolor/color/full
+      \TUDoptions{cdhead=bicolor,cdfoot=bicolor}%
+    \fi%
+  \fi%
+}
+\AtBeginDocument{\tud@cdstyle@set}
+%    \end{macrocode}
+% \end{macro}^^A \tud@cdstyle@set
 % \begin{macro}{\tud@foot@line@add}
 % \changes{v2.04}{2015/05/12}{neu}^^A
 % \begin{macro}{\tud@foot@line@write}
@@ -193,6 +190,9 @@
 % \changes{v2.04}{2015/05/12}{neu}^^A
 % \begin{macro}{\tud@foot@poster@right}
 % \changes{v2.04}{2015/05/12}{neu}^^A
+% \begin{macro}{\tud@newline}
+% \begin{macro}{\tud@split@author}
+% \begin{macro}{\tud@split@contactperson}
 % Mit diesen beiden Hilfsmakros werden die linke und die rechte Spalte des 
 % Standard-Seitenfußes eines Posters festgelegt. In der linken Spalte werden 
 % dabei Fakultät, Einrichtung, Institut und Lehrstuhl sowie der Professor 
@@ -287,6 +287,9 @@
   \ifx\@webpage\@empty\else\newline\@webpage\fi%
 }
 %    \end{macrocode}
+% \end{macro}^^A \tud@split@contactperson
+% \end{macro}^^A \tud@split@author
+% \end{macro}^^A \tud@newline
 % \end{macro}^^A \tud@foot@poster@right
 % \end{macro}^^A \tud@foot@poster@left
 % \begin{macro}{\tud@split@author@list}
