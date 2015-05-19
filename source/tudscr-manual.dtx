@@ -704,11 +704,10 @@
 % mit \pkg{auto-pst-pdf} funktioniert.
 %    \begin{macrocode}
 \AfterPackage*{pstricks}{%
-  \ifnum\pdfshellescape=\@ne\relax
-    \RequirePackage{auto-pst-pdf}[2009/04/26]
-  \else
-    \RequirePackage[off]{auto-pst-pdf}[2009/04/26]
-  \fi
+  \ifnum\pdfshellescape=\@ne\relax\else%
+    \PassOptionsToPackage{off}{auto-pst-pdf}%
+  \fi%
+  \RequirePackage{auto-pst-pdf}[2009/04/26]%
 }
 %    \end{macrocode}
 %
@@ -799,9 +798,10 @@
       \immediate\write\tud@write@i{%
         cd tutorials^^J%
         pdflatex -shell-escape #2^^J%
-        biber #2^^J%
-        makeglossaries #2^^J%
         pdflatex #2^^J%
+        biber #2^^J%
+        pdflatex -shell-escape #2^^J%
+        makeglossaries #2^^J%
         pdflatex #2%
       }%
       \immediate\closeout\tud@write@i%
@@ -863,7 +863,6 @@
   \ifnum\pdfshellescape=\@ne\relax%
     \filemodCmp{examples/#1.pdf}{examples/#1.tex}{}{%
       \immediate\write18{%
-        pdflatex -shell-escape -output-directory examples examples/#1.tex
         pdflatex -output-directory examples examples/#1.tex
         pdflatex -output-directory examples examples/#1.tex
       }%
