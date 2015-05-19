@@ -1,4 +1,4 @@
-% \CheckSum{1122}
+% \CheckSum{1096}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-layout.dtx}[%
-  2015/05/18 v2.04 TUD-KOMA-Script (layout)%
+  2015/05/19 v2.04 TUD-KOMA-Script (layout)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -1208,15 +1208,9 @@
 % Einstellmöglichkieten der \opt{parskip}-Option immer auf exakt der selben
 % Höhe liegen und auch die Abstände zwischen den ggf. genutzten Präfixen
 % identisch sind.
-%
-% Da der Quelltext sich bei \KOMAScript~v3.15 stark geändert hat, wird der 
-% Befehl \cs{@@makechapterhead} versionsabhängig angepasst.
 %    \begin{macrocode}
 \newcommand*\tud@@@makechapterhead{}
 \let\tud@@@makechapterhead\@@makechapterhead
-%    \end{macrocode}
-% Die Patches ab \KOMAScript~v3.17.
-%    \begin{macrocode}
 \patchcmd{\tud@@@makechapterhead}{%
   \chapterformat
   \setlength{\@tempskipa}{\scr@chapter@innerskip}%
@@ -1269,21 +1263,15 @@
 % nicht zu verändern. Alternativ zu \cs{let}\cs{@parboxrestore}\cs{relax} 
 % müsste innerhalb des Argumentes von \cs{parbox} die \KOMAScript-Option 
 % \opt{parbox} neu gesetzt werden.
-% \ToDo{Einfügen für neue \KOMAScript-Version?}[v3.17]
 %    \begin{macrocode}
 \patchcmd{\set@@@@preamble}{%
   \hbox to\hsize{#4\parbox[{#2}]{#3}{#6\par}#5\par}%
 }{%
   \def\@tempa####1@####2{%
     \@nameuse{tud@####1preamble}%
-%    \end{macrocode}
-% Anschließend müsste die \KOMAScript-Option \opt{parskip} neu gesetzt werden.
-%    \begin{macrocode}
-%    \KOMAoptionOf[\KOMAoption{parskip}]{\KOMAClassFileName}{parskip}%
+    \KOMAoptionOf[\KOMAoption{parskip}]{\KOMAClassFileName}{parskip}%
   }%
   \hbox to\hsize{%
-% kann raus ab v3.17
-    \let\@parboxrestore\relax%
     \let\phantomsection\relax%
     #4\parbox[{#2}]{#3}{\@tempa#1#6\par}#5\par%
   }%
@@ -1430,40 +1418,6 @@
 %</book|report>
 % \fi
 %
-% \begin{macro}{\SecDef}
-% \changes{v2.02}{2014/09/12}{neu}^^A
-% \begin{macro}{\scr@section@dblarg}
-% \changes{v2.02}{2014/09/12}{neu}^^A
-% \begin{macro}{\scr@section@xdblarg}
-% \changes{v2.02}{2014/09/12}{neu}^^A
-% Diese Befehle werden ab der \KOMAScript-Version~v3.14 eingeführt. Damit 
-% werden obligatorische Argumente der Gliederungsebenen besser auf das 
-% optionale Argument dupliziert, falls dieses nicht angegeben wurde. Damit das 
-% auch mit der Version~v3.12 funktioniert, werden die entsprechenden Befehle 
-% hier bereitgehalten.
-%    \begin{macrocode}
-\ifcsdef{scr@v@3.14}{}{%
-  \providecommand*\SecDef[2]{\@ifstar{#2}{\scr@section@dblarg{#1}}}%
-  \providecommand\scr@section@dblarg[1]{%
-    \kernel@ifnextchar[%]
-      {#1}%
-      {\scr@section@xdblarg{#1}}%
-  }%
-  \providecommand\scr@section@xdblarg[2]{%
-    \begingroup%
-      \edef\reserved@a{%
-        \unexpanded{%
-          \endgroup\let\scr@osectarg\z@#1[{#2}]{#2}\def\scr@osectarg%
-        }%
-        {\scr@osectarg}%
-      }%
-    \reserved@a%
-  }%
-}
-%    \end{macrocode}
-% \end{macro}^^A \scr@section@xdblarg
-% \end{macro}^^A \scr@section@dblarg
-% \end{macro}^^A \SecDef
 % \begin{macro}{\tud@part}
 % \begin{macro}{\tud@spart}
 % \begin{macro}{\tud@addpart}
