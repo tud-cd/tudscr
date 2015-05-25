@@ -2744,25 +2744,25 @@
   }%
   \global\let\tud@head@text@wrn\@gobble%
 }
-\newcommand*\tud@newlogobox[1]{%
+\newcommand*\tud@newlayerbox[1]{%
   \expandafter\newsavebox\csname tud@logo@#1\endcsname%
 }
-\newcommand*\tud@savelogobox[1]{%
+\newcommand*\tud@savelayerbox[1]{%
   \global\expandafter\sbox\csname tud@logo@#1\endcsname%
 }
-\newcommand*\tud@uselogobox[1]{%
+\newcommand*\tud@uselayerbox[1]{%
   \expandafter\usebox\csname tud@logo@#1\endcsname%
 }
-\tud@newlogobox{main@black}
-\tud@newlogobox{main@HKS41}
-\tud@newlogobox{main@white}
+\tud@newlayerbox{main@black}
+\tud@newlayerbox{main@HKS41}
+\tud@newlayerbox{main@white}
 \newif\if@tud@mainlogo@set
 \newlength\tud@mainlogoheight
 \newcommand*\tud@mainlogo@set{%
   \def\@tempa{\includegraphics[keepaspectratio,width=\tud@dim@logowidth]}%
-  \tud@savelogobox{main@black}{\@tempa{TUD-black}}%
-  \tud@savelogobox{main@HKS41}{\@tempa{TUD-blue}}%
-  \tud@savelogobox{main@white}{\@tempa{TUD-white}}%
+  \tud@savelayerbox{main@black}{\@tempa{TUD-black}}%
+  \tud@savelayerbox{main@HKS41}{\@tempa{TUD-blue}}%
+  \tud@savelayerbox{main@white}{\@tempa{TUD-white}}%
   \setlength\tud@mainlogoheight{\ht\tud@logo@main@black}%
   \global\tud@mainlogoheight=\tud@mainlogoheight%
   \global\@tud@mainlogo@setfalse%
@@ -2772,7 +2772,7 @@
     \dimexpr\oddsidemargin+1in+\tud@dim@logox-\tud@dim@widemargin\relax%
   }%
   \ifdim\@tempdima<\ta@bcor\relax\tud@mainlogo@wrn{\the\@tempdima}\fi%
-  \tud@uselogobox{main@\tud@head@logocolor}%
+  \tud@uselayerbox{main@\tud@head@logocolor}%
 }
 \newcommand*\tud@mainlogo@wrn[1]{%
   \ClassWarning{\tudcls@name}{%
@@ -2785,31 +2785,31 @@
   }%
   \global\let\tud@mainlogo@wrn\@gobble%
 }
-\tud@newlogobox{head@ddc@black}
-\tud@newlogobox{head@ddc@HKS41}
-\tud@newlogobox{head@ddc@white}
-\tud@newlogobox{head@ddc@option}
+\tud@newlayerbox{head@ddc@black}
+\tud@newlayerbox{head@ddc@HKS41}
+\tud@newlayerbox{head@ddc@white}
+\tud@newlayerbox{head@ddc@option}
 \newif\if@tud@head@ddclogo@set
 \newcommand*\tud@head@ddclogo@set{%
   \def\@tempa{%
     \includegraphics[keepaspectratio,totalheight=\tud@mainlogoheight]%
   }%
-  \tud@savelogobox{head@ddc@black}{\@tempa{DDC-24}}%
-  \tud@savelogobox{head@ddc@HKS41}{\@tempa{DDC-27}}%
-  \tud@savelogobox{head@ddc@white}{\@tempa{DDC-30}}%
+  \tud@savelayerbox{head@ddc@black}{\@tempa{DDC-24}}%
+  \tud@savelayerbox{head@ddc@HKS41}{\@tempa{DDC-27}}%
+  \tud@savelayerbox{head@ddc@white}{\@tempa{DDC-30}}%
   \global\@tud@head@ddclogo@setfalse%
   \tud@head@ddclogo@@set%
 }
 \newif\if@tud@head@ddclogo@@set
 \newcommand*\tud@head@ddclogo@@set{%
   \def\@tempc##1##2{%
-    \tud@savelogobox{head@ddc@option}{%
+    \tud@savelayerbox{head@ddc@option}{%
       \includegraphics[%
         keepaspectratio,totalheight=\tud@mainlogoheight,##2%
       ]{\trim@spaces{##1}}%
     }%
   }%
-  \tud@savelogobox{head@ddc@option}{}%
+  \tud@savelayerbox{head@ddc@option}{}%
   \tud@ddc@check%
   \ifcase\@tempa\relax% \tud@ddc@head=false
     \ifdefvoid{\tud@@headlogo}{}{%
@@ -2848,9 +2848,9 @@
     \ifdefvoid{\tud@@headlogo}{}{\tud@headlogo@wrn}%
   \fi%
   \ifnum\@tempa=\@ne\relax% \tud@ddc@head=true
-    \tud@uselogobox{head@ddc@\tud@head@logocolor}%
+    \tud@uselayerbox{head@ddc@\tud@head@logocolor}%
   \else%
-    \tud@uselogobox{head@ddc@option}%
+    \tud@uselayerbox{head@ddc@option}%
   \fi%
 }
 \newcommand*\tud@headlogo@wrn{%
@@ -2870,9 +2870,9 @@
     }{}%
   \fi%
 }
-\tud@newlogobox{foot@ddc@black}
-\tud@newlogobox{foot@ddc@HKS41}
-\tud@newlogobox{foot@ddc@white}
+\tud@newlayerbox{foot@ddc@black}
+\tud@newlayerbox{foot@ddc@HKS41}
+\tud@newlayerbox{foot@ddc@white}
 \newif\if@tud@foot@ddclogo@set
 \newcommand*\tud@foot@ddclogo@set[1]{%
   \tud@foot@ddclogo@@@set{black}{DDC-22}{#1}%
@@ -2881,7 +2881,7 @@
   \global\@tud@foot@ddclogo@setfalse%
   \tud@foot@ddclogo@@set{#1}%
 }
-\tud@newlogobox{foot@ddc@option}
+\tud@newlayerbox{foot@ddc@option}
 \newif\if@tud@foot@ddclogo@@set
 \newcommand*\tud@foot@ddclogo@@set[1]{%
   \tud@ddc@check%
@@ -2903,45 +2903,37 @@
 \newcommand*\tud@foot@ddclogo@@@set[3]{%
   \begingroup%
     \tud@get@footlogoheight%
-    \tud@savelogobox{foot@ddc@#1}{%
+    \tud@savelayerbox{foot@ddc@#1}{%
       \vbox to #3{\vfil\hbox{%
         \includegraphics[keepaspectratio,totalheight=\footlogoheight]{#2}%
       }\vfil\vfil}%
     }%
   \endgroup%
 }
-\tud@newlogobox{foot@ddc@false}
-\tud@newlogobox{foot@ddc@true}
-\newif\if@tud@foot@logo@set
 \newcommand*\footlogosep{\hfill}
+\tud@newlayerbox{foot@logo@ddcfalse}
+\tud@newlayerbox{foot@logo@ddctrue}
+\newif\if@tud@foot@logo@set
 \newcommand*\tud@foot@logo@set[2]{%
-    \def\@tempc##1##2##3{%
-      \hbox to ##1{%
-        \let\@tempa\relax%
-        \@for\@tempb:=\tud@@footlogo\do{%
-          \edef\@tempb{\expandafter\trim@spaces\expandafter{\@tempb}}%
-          \@tempa%
-          \ifx\@tempb\@empty\else%
-            \expandafter\tud@@footlogo@set\expandafter{\@tempb}{##2}%
-          \fi%
-          \let\@tempa\footlogosep%
-        }%
-        \ifx\@nnil##3\relax%\else%
-          \@tempa\hphantom{\tud@uselogobox{foot@ddc@black}}%
-        \fi
+  \def\@tempc##1##2##3{%
+    \hbox to ##1{%
+      \let\@tempa\relax%
+      \@for\@tempb:=\tud@@footlogo\do{%
+        \edef\@tempb{\expandafter\trim@spaces\expandafter{\@tempb}}%
+        \@tempa%
+        \ifx\@tempb\@empty\else%
+          \expandafter\tud@@footlogo@set\expandafter{\@tempb}{##2}%
+        \fi%
+        \let\@tempa\footlogosep%
       }%
+      \ifx\@nnil##3\relax%\else%
+        \@tempa\hphantom{\tud@uselayerbox{foot@ddc@black}}%
+      \fi
     }%
-    \tud@savelogobox{foot@ddc@false}{%\fbox
-    {%
-      \@tempc{#1}{#2}{}%
-    }%
-    }%
-    \tud@savelogobox{foot@ddc@true}{%\fbox
-    {%
-      \@tempc{#1}{#2}{\@nnil}%
-    }%
-    }%
-    \global\@tud@foot@logo@setfalse%
+  }%
+  \tud@savelayerbox{foot@logo@ddcfalse}{\@tempc{#1}{#2}{}}%
+  \tud@savelayerbox{foot@logo@ddctrue}{\@tempc{#1}{#2}{\@nnil}}%
+  \global\@tud@foot@logo@setfalse%
 }
 \DeclareListParser{\tud@footlogo@parser}{:}%
 \newcommand*\tud@@footlogo@set[2]{%
@@ -2967,18 +2959,13 @@
     \vbox to #2{\vfil\hbox{\@tempc}\vfil\vfil}%
   \endgroup%
 }
-
-
-
-
-
 \newcommand*\tud@footlogo@ddc[1]{%
   \tud@ddc@check%
   \ifcase\@tempb\relax\or% \tud@ddc@foot=true
-    \tud@uselogobox{foot@ddc@\tud@foot@logocolor}%
+    \tud@uselayerbox{foot@ddc@\tud@foot@logocolor}%
     \tud@footlogo@wrn{#1}%
   \else%
-    \tud@uselogobox{foot@ddc@option}%
+    \tud@uselayerbox{foot@ddc@option}%
     \tud@footlogo@wrn{#1}%
   \fi%
 }
@@ -2990,15 +2977,16 @@
   \def\tud@@@footlogo{#1}%
   \global\@tud@head@ddclogo@@settrue%
   \global\@tud@foot@ddclogo@@settrue%
+  \global\@tud@foot@logo@settrue%
   \tud@ifverlower{2.04}{\tud@pagestyle@iftudps}{}%
 }
 \newcommand*\tud@footlogo[1]{%
   \ifdefvoid{\tud@@footlogo}{}{%
     \tud@ddc@check%
     \ifcase\@tempb\relax% \tud@ddc@foot=false
-      \tud@uselogobox{foot@ddc@false}%
+      \tud@uselayerbox{foot@logo@ddcfalse}%
     \else% \tud@ddc@foot=!false
-      \tud@uselogobox{foot@ddc@true}%
+      \tud@uselayerbox{foot@logo@ddctrue}%
     \fi%
     \tud@footlogo@wrn{#1}%
   }%
@@ -3023,10 +3011,18 @@
     \fi%
   \endgroup%
 }
+% §§§ an neue Logo-Geschichte anpassen
+% §§§ zwei Boxen erzeugen und bei Bedarf Größe anpassen?
+% §§§ \footlayer kann raus, lieber hilfsmakro
+%\tud@newlayerbox{foot@content@ddcfalse}
+%\tud@newlayerbox{foot@content@ddctrue}
+%\newif\if@tud@foot@content@set
+%\newcommand*\tud@foot@content@set[2]{}%
 \newkomafont{tudheadings}{%
   \sffamily%
   \tud@color{\tud@foot@fontcolor}%
 }
+\newcommand*\footlayer{}
 \newcommand*\footcontent{%
   \@ifstar{%
     \@tempswafalse%
@@ -3042,9 +3038,7 @@
     {\@@footcontent{#1}{#2}[\@nnil]}%
 }
 \newcommand*\@@footcontent{}
-\newcommand*\footlayer{}
-% §§§ an neue Logo-Geschichte anpassen
-% §§§ evtl. auch eine Box erzeugen und bei Bedarf Größe anpassen?
+%\newcommand*\@@@footcontent{}
 \def\@@footcontent#1#2[#3]{%
   \if@tempswa%
     \def\footlayer{%
@@ -3063,7 +3057,7 @@
     \ifcase\@tempb%
       \setlength\@tempdima{\z@}%
     \else%
-      \settowidth\@tempdima{\tud@uselogobox{foot@ddc@black}}%
+      \settowidth\@tempdima{\tud@uselayerbox{foot@ddc@black}}%
       \addtolength\@tempdima{\columnsep}%
     \fi%
   }%
@@ -3085,13 +3079,7 @@
     }%
   \fi%
 }
-
-
-
-
-
-
-
+% §§§ an neue Logo-Geschichte anpassen ENDE
 \tud@ifsacrop{%
   \PreventPackageFromLoading{geometry}%
 }{%
