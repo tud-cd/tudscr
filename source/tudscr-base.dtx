@@ -1,4 +1,4 @@
-% \CheckSum{454}
+% \CheckSum{480}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-base.dtx}[%
-  2015/05/19 v2.04 TUD-KOMA-Script\space%
+  2015/05/28 v2.04 TUD-KOMA-Script\space%
 %</driver>
 %<package>\NeedsTeXFormat{LaTeX2e}[2011/06/27]
 %<package>\ProvidesPackage{tudscrbase}[%
@@ -191,40 +191,55 @@
 % Zahl liefert. Dem wird hier Abhilfe geleistet.
 % \begin{macro}{\tud@divide}
 % \changes{v2.04}{2015/04/09}{neu}^^A
+% \changes{v2.04}{2015/05/27}{Ausführung in Gruppe}^^A
 % Der Befehl erwartet im ersten Argument das Makro, in welches das Ergebnis 
-% der Division expandiert werden soll, danach folgen Dividend und Divisor.
+% der Division expandiert werden soll, danach folgen Dividend und Divisor. Die 
+% Berechnung erfolgt in einer Gruppe, damit die benötigten Längenregister nach 
+% dieser erhalten bleiben.
 %    \begin{macrocode}
 \newcommand*\tud@divide[3]{%
+  \begingroup%
 %    \end{macrocode}
 % Die Division wird über temporäre Längenregister durchgeführt. Die zu 
 % teilenden Zahlen werden normiert, wodurch auch Längen mit unterschiedlichen 
 % Einheiten geteilt werden können.
 %    \begin{macrocode}
-  \@defaultunits\@tempdima #2pt\relax\@nnil%
-  \@defaultunits\@tempdimb #3pt\relax\@nnil%
+    \@defaultunits\@tempdima #2pt\relax\@nnil%
+    \@defaultunits\@tempdimb #3pt\relax\@nnil%
 %    \end{macrocode}
 % Danach wird mit der größeren der beiden Zahlen der größtmögliche, durch
 % \val{2} teilbare Faktor zur Berechnung ermittelt.
 %    \begin{macrocode}
-  \ifdim\@tempdima>\@tempdimb\relax%
-    \setlength\@tempdimc{\@tempdima}%
-  \else%
-    \setlength\@tempdimc{\@tempdimb}%
-  \fi%
-  \@tempcnta=1%
-  \@whiledim\dimexpr\@tempdimc*\@tempcnta\relax<\dimexpr\maxdimen/10\relax\do{%
-    \multiply\@tempcnta by 10\relax%
-  }%
+    \ifdim\@tempdima>\@tempdimb\relax%
+      \@whiledim\@tempdimb>1pt\relax\do{%
+        \setlength\@tempdima{.1\@tempdima}%
+        \setlength\@tempdimb{.1\@tempdimb}%
+      }%
+      \setlength\@tempdimc{\@tempdima}%
+    \else%
+      \@whiledim\@tempdima>1pt\relax\do{%
+        \setlength\@tempdima{.1\@tempdima}%
+        \setlength\@tempdimb{.1\@tempdimb}%
+      }%
+      \setlength\@tempdimc{\@tempdimb}%
+    \fi%
+    \@tempcnta=1\relax%
+    \@whiledim\dimexpr\@tempcnta\@tempdimc\relax<.01\maxdimen\do{%
+      \multiply\@tempcnta by 10\relax%
+    }%
 %    \end{macrocode}
 % Mit dem im temporären Zählerregister \cs{@tempcnta} gespeicherten Faktor 
 % wird der Dividend erweitert und der berechnete Quotient wieder gekürzt.
 %    \begin{macrocode}
-  \setlength{\@tempdimc}{\dimexpr (\@tempcnta\@tempdima / \@tempdimb * \p@)}%
-  \setlength{\@tempdimc}{\dimexpr \@tempdimc/\@tempcnta\relax}%
+    \setlength{\@tempdimc}{%
+      \dimexpr(\@tempcnta\@tempdima / \@tempdimb * \p@)\relax%
+    }%
+    \setlength{\@tempdimc}{\dimexpr \@tempdimc/\@tempcnta\relax}%
 %    \end{macrocode}
 % Das Ergebnis wird in das angegebene Makro expandiert.
 %    \begin{macrocode}
-  \edef#1{\strip@pt\@tempdimc}%
+    \edef\@tempa{\endgroup\def\noexpand#1{\strip@pt\@tempdimc}}%
+  \@tempa%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@divide
