@@ -279,7 +279,7 @@
 }
 \newcommand*\tud@ddc@save{}
 \newif\if@tud@ddc@internal
-\newif\if@tud@ddc@autoset
+\newif\if@tud@ddc@auto
 \newcommand*\tud@ddc{0}
 \newcommand*\tud@clearpage@iftudps{%
   \if@atdocument\tud@iftudps{\currentpagestyle}{\clearpage}{}\fi%
@@ -296,16 +296,16 @@
   \TUD@set@numkey{ddc}{tud@ddc}{\tud@ddc@switch}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \if@tud@ddc@internal%
-      \@tud@ddc@autosetfalse%
+      \@tud@ddc@autofalse%
     \else%
       \@tud@ddc@internaltrue%
       \TUDoptions{ddchead=false}%
       \TUDoptions{ddcfoot=false}%
       \@tud@ddc@internalfalse%
-      \@tud@ddc@autosettrue%
+      \@tud@ddc@autotrue%
     \fi%
-    \global\@tud@head@ddclogo@@settrue%
-    \global\@tud@foot@ddclogo@@settrue%
+    \global\@tud@headlogo@option@settrue%
+    \global\@tud@footlogo@option@settrue%
   \fi%
   \tud@ifverlower{2.04}{\tud@pagestyle@iftudps}{}%
 }
@@ -340,8 +340,8 @@
 \newcommand*\tud@ddc@check{%
   \let\@tempa\tud@ddc@head%
   \let\@tempb\tud@ddc@foot%
-  \if@tud@ddc@autoset%
-    \ifdefvoid{\tud@@headlogo}{%
+  \if@tud@ddc@auto%
+    \ifdefvoid{\@headlogo}{%
       \let\@tempa\tud@ddc%
       \let\@tempb\z@%
     }{%
@@ -351,7 +351,7 @@
   \fi%
   \tud@ifverlower{2.03}{%
     \ifcase\@tempb\relax%
-      \ifdefvoid{\tud@@footlogo}{}{\let\@tempb\m@ne}%
+      \ifdefvoid{\@footlogo}{}{\let\@tempb\m@ne}%
     \fi%
   }{}%
 }
@@ -497,7 +497,8 @@
     \TUD@numkey@bool,%
     {typearea}{0},%
     {cd}{1},{tud}{1},{asymmetric}{1},%
-    {symmetric}{2},{centred}{2},{centered}{2},{normal}{2},%
+    {symmetric}{2},{centred}{2},{centered}{2},%
+    {normal}{2},{standard}{2},{std}{2},%
     {twoside}{3},{balanced}{3}%
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
@@ -1169,7 +1170,8 @@
   \@ifpackageloaded{graphicx}{}{%
     \@ifpackageloaded{graphics}{%
       \ClassWarningNoLine{\tudcls@name}{%
-        The package `graphics' was superseded by `graphicx'%
+        The package `graphics' was superseded by `graphicx' and\MessageBreak%
+        will be loaded automatically%
       }%
     }{}%
   }%
@@ -1219,7 +1221,7 @@
   \csletcs{tud@#1}{tud@up#1}%
   \advance \@tempcnta by 1%
 }
-\@tempcnta=\z@
+\@tempcnta=\z@\relax%
 \tud@font@greek@loop\tud@font@greek@declare
 \newcommand*\tud@font@check{%
   \if@tud@fontspec%
@@ -2321,24 +2323,6 @@
 }
 \AfterPackage{scrlayer-scrpage}{%
   \DeclareNewLayer[%
-    background,headsep,%
-    voffset=\tud@dim@logoy,%
-    contents={%
-      \if@tud@mainlogo@set\tud@mainlogo@set\fi%
-      \hspace*{\dimexpr\tud@dim@logox-\tud@dim@widemargin\relax}%
-      \tud@mainlogo%
-    },%
-  ]{tudheadings.head.mainlogo}%
-  \DeclareNewLayer[%
-    background,headsep,%
-    voffset=\tud@dim@logoy,%
-    contents={%
-      \if@tud@head@ddclogo@set\tud@head@ddclogo@set\fi%
-      \if@tud@head@ddclogo@@set\tud@head@ddclogo@@set\fi%
-      \hfill\tud@headlogo%
-    },%
-  ]{tudheadings.head.ddclogo}%
-  \DeclareNewLayer[%
     background,%
     contents={%
       \ifnum\tud@head@bar>\tw@\relax% cdhead=color
@@ -2347,6 +2331,16 @@
       \fi%
     },%
   ]{tudheadings.head.back}%
+  \DeclareNewLayer[%
+    background,headsep,%
+    voffset=\tud@dim@logoy,%
+    contents={%
+      \if@tud@mainlogo@set\tud@mainlogo@set\fi%
+      \if@tud@headlogo@option@set\tud@headlogo@option@set\fi%
+      \hspace*{\dimexpr\tud@dim@logox-\tud@dim@widemargin\relax}%
+      \tud@mainlogo@use\hfill\tud@headlogo@use%
+    },%
+  ]{tudheadings.head.content}%
   \DeclareNewLayer[%
     background,%
     voffset=\tud@dim@topmargin,%
@@ -2441,46 +2435,24 @@
     background,foot,%
     height=\dimexpr\paperheight-\layeryoffset\relax,%
     contents={%
+      \tud@footlogoheight@set%
       \setlength\@tempdima{\dimexpr\layerheight-\dp\strutbox\relax}%
-      \if@tud@foot@ddclogo@set\tud@foot@ddclogo@set{\@tempdima}\fi%
-      \if@tud@foot@ddclogo@@set\tud@foot@ddclogo@@set{\@tempdima}\fi%
-      \hfill\tud@footlogo@ddc{\@tempdima}%
-    },%
-  ]{tudheadings.foot.ddclogo}%
-  \tud@ifverlower{2.03}{%
-    \ModifyLayer[%
-      addvoffset=-\tud@dim@ddcdiff+\ht\strutbox+\dp\strutbox,%
-      height=\dimexpr.6\tud@dim@topmargin+\dp\strutbox\relax,%
-    ]{tudheadings.foot.ddclogo}%
-  }{}%
-  \DeclareNewLayer[%
-    background,foot,%
-    height=\dimexpr\paperheight-\layeryoffset\relax,%
-    contents={%
-      \setlength\@tempdima{\dimexpr\layerheight-\dp\strutbox\relax}%
-      \if@tud@foot@logo@set%
-        \tud@foot@logo@set{\layerwidth}{\@tempdima}%
+      \if@tud@footlogo@option@set\tud@footlogo@option@set\fi%
+      \if@tud@footlogo@user@set%
+        \tud@footlogo@user@set{\layerwidth}{\@tempdima}%
       \fi%
-      \tud@footlogo{\@tempdima}%
-    },%
-  ]{tudheadings.foot.logo}%
-  \tud@ifverlower{2.03}{%
-    \ModifyLayer[%
-      addvoffset=-\tud@dim@ddcdiff+\ht\strutbox+\dp\strutbox,%
-      height=\dimexpr.6\tud@dim@topmargin+\dp\strutbox\relax,%
-    ]{tudheadings.foot.logo}%
-  }{}%
-  \DeclareNewLayer[%
-    background,foot,%
-    height=\dimexpr\paperheight-\layeryoffset\relax,%
-    contents={%
-      \vbox to \dimexpr\layerheight-\dp\strutbox\relax{%
-        \vfil%
-        \footlayer%
-        \vfil\vfil%
-      }%
+      \tud@footcontent@use{\layerwidth}{\@tempdima}\hspace*{-\layerwidth}%
+      \tud@footlogo@use\hspace*{-\layerwidth}%
+      \hfill\tud@footlogo@ddc@use{\@tempdima}%
+      \tud@footlogo@wrn{\@tempdima}%
     },%
   ]{tudheadings.foot.content}%
+  \tud@ifverlower{2.03}{%
+    \ModifyLayer[%
+      addvoffset=-\tud@dim@ddcdiff+\ht\strutbox+\dp\strutbox,%
+      height=\dimexpr.6\tud@dim@topmargin+\dp\strutbox\relax,%
+    ]{tudheadings.foot.content}%
+  }{}%
   \DeclareNewLayer[%
     background,%
     contents=\tud@head@bar@restore,%
@@ -2489,8 +2461,7 @@
     onselect=\tud@ps@onselect,onbackground=\tud@ps@onbackground%
   ]{tudheadings}{%
     tudheadings.head.back,%
-    tudheadings.head.mainlogo,%
-    tudheadings.head.ddclogo,%
+    tudheadings.head.content,%
     tudheadings.head.bar,%
     tudheadings.head.text,%
     tudheadings.head.upperline,%
@@ -2498,8 +2469,6 @@
     tudheadings.head.upperwideline,%
     tudheadings.head.lowerwideline,%
     tudheadings.foot.back,%
-    tudheadings.foot.ddclogo,%
-    tudheadings.foot.logo,%
     tudheadings.foot.content,%
     tudheadings.last,%
     scrheadings.foot.odd,%
@@ -2515,8 +2484,7 @@
     onselect=\tud@ps@onselect,onbackground=\tud@ps@onbackground%
   ]{plain.tudheadings}{%
     tudheadings.head.back,%
-    tudheadings.head.mainlogo,%
-    tudheadings.head.ddclogo,%
+    tudheadings.head.content,%
     tudheadings.head.bar,%
     tudheadings.head.text,%
     tudheadings.head.upperline,%
@@ -2524,8 +2492,6 @@
     tudheadings.head.upperwideline,%
     tudheadings.head.lowerwideline,%
     tudheadings.foot.back,%
-    tudheadings.foot.ddclogo,%
-    tudheadings.foot.logo,%
     tudheadings.foot.content,%
     tudheadings.last,%
     plain.scrheadings.foot.odd,%
@@ -2543,8 +2509,7 @@
     onselect=\tud@ps@onselect,onbackground=\tud@ps@onbackground%
   ]{empty.tudheadings}{%
     tudheadings.head.back,%
-    tudheadings.head.mainlogo,%
-    tudheadings.head.ddclogo,%
+    tudheadings.head.content,%
     tudheadings.head.bar,%
     tudheadings.head.text,%
     tudheadings.head.upperline,%
@@ -2552,8 +2517,6 @@
     tudheadings.head.upperwideline,%
     tudheadings.head.lowerwideline,%
     tudheadings.foot.back,%
-    tudheadings.foot.ddclogo,%
-    tudheadings.foot.logo,%
     tudheadings.foot.content,%
     tudheadings.last%
   }%
@@ -2764,57 +2727,79 @@
   \tud@savelayerbox{main@HKS41}{\@tempa{TUD-blue}}%
   \tud@savelayerbox{main@white}{\@tempa{TUD-white}}%
   \setlength\tud@mainlogoheight{\ht\tud@logo@main@black}%
+  \def\tud@mainlogo@wrn##1{%
+    \ifdim##1<\ta@bcor\relax%
+      \ClassWarning{\tudcls@name}{%
+        The selected page layout means that the\MessageBreak%
+        logo of TUD extends beyond the printing area.\MessageBreak%
+        The inner margin is smaller than BCOR\MessageBreak%
+        (`BCOR=\the\ta@bcor', inner margin is \the##1)\MessageBreak%
+        Maybe you should decrease the current value\MessageBreak%
+        of DIV (`DIV=\the\ta@div')%
+      }%
+      \global\let\tud@mainlogo@wrn\@gobble%
+    \fi%
+  }%
   \global\tud@mainlogoheight=\tud@mainlogoheight%
   \global\@tud@mainlogo@setfalse%
+  \tud@headlogo@set%
+  \tud@footlogo@set%
 }
-\newcommand*\tud@mainlogo{%
-  \setlength\@tempdima{%
+\newcommand*\tud@mainlogo@use{%
+  \tud@mainlogo@wrn{%
     \dimexpr\oddsidemargin+1in+\tud@dim@logox-\tud@dim@widemargin\relax%
   }%
-  \ifdim\@tempdima<\ta@bcor\relax\tud@mainlogo@wrn{\the\@tempdima}\fi%
   \tud@uselayerbox{main@\tud@head@logocolor}%
 }
-\newcommand*\tud@mainlogo@wrn[1]{%
-  \ClassWarning{\tudcls@name}{%
-    The selected page layout means that the\MessageBreak%
-    logo of TUD extends beyond the printing area.\MessageBreak%
-    The inner margin is smaller than BCOR\MessageBreak%
-    (`BCOR=\the\ta@bcor', inner margin is #1)\MessageBreak%
-    Maybe you should decrease the current value\MessageBreak%
-    of DIV (`DIV=\the\ta@div')%
-  }%
-  \global\let\tud@mainlogo@wrn\@gobble%
+\newcommand*\tud@mainlogo@wrn[1]{}
+\tud@newlayerbox{head@black}
+\tud@newlayerbox{head@HKS41}
+\tud@newlayerbox{head@white}
+\tud@newlayerbox{head@option}
+\newcommand*\@headlogo{}
+\newcommand*\@@headlogo{}
+\newcommand*\tud@headlogo@wrn{}
+\newcommand*\headlogo[2][]{%
+  \tud@ifverlower{2.04}{\tud@clearpage@iftudps}{}%
+  \def\@headlogo{#2}%
+  \def\@@headlogo{#1}%
+  \def\tud@headlogo@wrn{%
+    \ClassWarning{\tudcls@name}{%
+      The secondary logo `\string\headlogo{\@headlogo}' is\MessageBreak%
+      overwritten with DDC logo. Maybe you should use\MessageBreak%
+      `ddcfoot' or better `ddc' instead of `ddchead'%
+    }%
+    \global\let\tud@headlogo@wrn\relax%
+  }
+  % dtx-Doku: für farbige Optionen und \headlogo
+  \global\@tud@headlogo@option@settrue%
+  \global\@tud@footlogo@option@settrue%
+  \tud@ifverlower{2.04}{\tud@pagestyle@iftudps}{}%
 }
-\tud@newlayerbox{head@ddc@black}
-\tud@newlayerbox{head@ddc@HKS41}
-\tud@newlayerbox{head@ddc@white}
-\tud@newlayerbox{head@ddc@option}
-\newif\if@tud@head@ddclogo@set
-\newcommand*\tud@head@ddclogo@set{%
+\newcommand*\tud@headlogo@set{%
   \def\@tempa{%
     \includegraphics[keepaspectratio,totalheight=\tud@mainlogoheight]%
   }%
-  \tud@savelayerbox{head@ddc@black}{\@tempa{DDC-24}}%
-  \tud@savelayerbox{head@ddc@HKS41}{\@tempa{DDC-27}}%
-  \tud@savelayerbox{head@ddc@white}{\@tempa{DDC-30}}%
-  \global\@tud@head@ddclogo@setfalse%
-  \tud@head@ddclogo@@set%
+  \tud@savelayerbox{head@black}{\@tempa{DDC-24}}%
+  \tud@savelayerbox{head@HKS41}{\@tempa{DDC-27}}%
+  \tud@savelayerbox{head@white}{\@tempa{DDC-30}}%
+  \tud@headlogo@option@set%
 }
-\newif\if@tud@head@ddclogo@@set
-\newcommand*\tud@head@ddclogo@@set{%
+\newif\if@tud@headlogo@option@set
+\newcommand*\tud@headlogo@option@set{%
   \def\@tempc##1##2{%
-    \tud@savelayerbox{head@ddc@option}{%
+    \tud@savelayerbox{head@option}{%
       \includegraphics[%
         keepaspectratio,totalheight=\tud@mainlogoheight,##2%
       ]{\trim@spaces{##1}}%
     }%
   }%
-  \tud@savelayerbox{head@ddc@option}{}%
+  \tud@savelayerbox{head@option}{}%
   \tud@ddc@check%
   \ifcase\@tempa\relax% \tud@ddc@head=false
-    \ifdefvoid{\tud@@headlogo}{}{%
+    \ifdefvoid{\@headlogo}{}{%
       \protected@edef\@tempb{%
-        \noexpand\@tempc{\tud@@headlogo}{\tud@@@headlogo}%
+        \noexpand\@tempc{\@headlogo}{\@@headlogo}%
       }\@tempb%
     }%
   \or\or% \tud@ddc@head=color
@@ -2830,113 +2815,91 @@
   \or% \tud@ddc@head=white
     \@tempc{DDC-30}{}%
   \fi%
-  \global\@tud@head@ddclogo@@setfalse%
+  \global\@tud@headlogo@option@setfalse%
 }
-\newcommand*\tud@@headlogo{}
-\newcommand*\tud@@@headlogo{}
-\newcommand*\headlogo[2][]{%
+\newcommand*\tud@headlogo@use{%
+  \tud@ddc@check%
+  \vbox to \tud@mainlogoheight{%
+    \vfil%
+    \hbox{%
+      \ifnum\@tempa=\@ne\relax% \tud@ddc@head=true
+        \tud@uselayerbox{head@\tud@head@logocolor}%
+      \else%
+        \tud@uselayerbox{head@option}%
+      \fi%
+    }%
+    \vfil%
+  }%
+  \ifdefvoid{\@headlogo}{}{\ifnum\@tempa>\z@\relax\tud@headlogo@wrn\fi}%
+}
+\tud@newlayerbox{foot@black}
+\tud@newlayerbox{foot@HKS41}
+\tud@newlayerbox{foot@white}
+\tud@newlayerbox{foot@option}
+\tud@newlayerbox{foot@user}
+\newcommand*\@footlogo{}
+\newcommand*\@@footlogo{}
+\newcommand*\footlogo[2][]{%
   \tud@ifverlower{2.04}{\tud@clearpage@iftudps}{}%
-  \def\tud@@headlogo{#2}%
-  \def\tud@@@headlogo{#1}%
-  \global\@tud@head@ddclogo@@settrue%
-  \global\@tud@foot@ddclogo@@settrue%
+  \def\@footlogo{#2}%
+  \def\@@footlogo{#1}%
+  \global\@tud@footlogo@user@settrue%
   \tud@ifverlower{2.04}{\tud@pagestyle@iftudps}{}%
 }
-\newcommand*\tud@headlogo{%
-  \tud@ddc@check%
-  \ifnum\@tempa>\z@\relax% \tud@ddc@head!=false
-    \ifdefvoid{\tud@@headlogo}{}{\tud@headlogo@wrn}%
-  \fi%
-  \ifnum\@tempa=\@ne\relax% \tud@ddc@head=true
-    \tud@uselayerbox{head@ddc@\tud@head@logocolor}%
-  \else%
-    \tud@uselayerbox{head@ddc@option}%
-  \fi%
-}
-\newcommand*\tud@headlogo@wrn{%
-  \ClassWarning{\tudcls@name}{%
-    The secondary logo `\string\headlogo{\tud@@headlogo}' is\MessageBreak%
-    overwritten with DDC logo. Maybe you should use\MessageBreak%
-    `ddcfoot' or better `ddc' instead of `ddchead'%
-  }%
-  \global\let\tud@headlogo@wrn\relax%
-}
-\newlength\footlogoheight
-\newcommand*\tud@get@footlogoheight{%
-  \ifdim\footlogoheight>\z@\relax\else%
-    \setlength\footlogoheight{\tud@mainlogoheight}%
-    \tud@ifverlower{2.03}{%
-      \setlength\footlogoheight{.6\tud@dim@topmargin}%
-    }{}%
-  \fi%
-}
-\tud@newlayerbox{foot@ddc@black}
-\tud@newlayerbox{foot@ddc@HKS41}
-\tud@newlayerbox{foot@ddc@white}
-\newif\if@tud@foot@ddclogo@set
-\newcommand*\tud@foot@ddclogo@set[1]{%
-  \tud@foot@ddclogo@@@set{black}{DDC-22}{#1}%
-  \tud@foot@ddclogo@@@set{HKS41}{DDC-25}{#1}%
-  \tud@foot@ddclogo@@@set{white}{DDC-28}{#1}%
-  \global\@tud@foot@ddclogo@setfalse%
-  \tud@foot@ddclogo@@set{#1}%
-}
-\tud@newlayerbox{foot@ddc@option}
-\newif\if@tud@foot@ddclogo@@set
-\newcommand*\tud@foot@ddclogo@@set[1]{%
-  \tud@ddc@check%
-  \ifcase\@tempb\relax\or\or% \tud@ddc@foot=color
-    \tud@foot@ddclogo@@@set{option}{DDC-01}{#1}%
-  \or% \tud@ddc@foot=colorblack
-    \tud@foot@ddclogo@@@set{option}{DDC-07}{#1}%
-  \or% \tud@ddc@foot=gray
-    \tud@foot@ddclogo@@@set{option}{DDC-19}{#1}%
-  \or% \tud@ddc@foot=black
-    \tud@foot@ddclogo@@@set{option}{DDC-22}{#1}%
-  \or% \tud@ddc@foot=blue
-    \tud@foot@ddclogo@@@set{option}{DDC-25}{#1}%
-  \or% \tud@ddc@foot=white
-    \tud@foot@ddclogo@@@set{option}{DDC-28}{#1}%
-  \fi%
-  \global\@tud@foot@ddclogo@@setfalse%
-}
-\newcommand*\tud@foot@ddclogo@@@set[3]{%
-  \begingroup%
-    \tud@get@footlogoheight%
-    \tud@savelayerbox{foot@ddc@#1}{%
-      \vbox to #3{\vfil\hbox{%
-        \includegraphics[keepaspectratio,totalheight=\footlogoheight]{#2}%
-      }\vfil\vfil}%
-    }%
-  \endgroup%
-}
 \newcommand*\footlogosep{\hfill}
-\tud@newlayerbox{foot@logo@ddcfalse}
-\tud@newlayerbox{foot@logo@ddctrue}
-\newif\if@tud@foot@logo@set
-\newcommand*\tud@foot@logo@set[2]{%
-  \def\@tempc##1##2##3{%
-    \hbox to ##1{%
+\newlength\footlogoheight
+\newlength\tud@footlogoheight
+\newcommand*\tud@footlogo@wrn[1]{}
+\newcommand*\tud@footlogoheight@set{%
+  \ifdim\footlogoheight=\z@\relax%
+    \setlength\tud@footlogoheight{\tud@mainlogoheight}%
+    \tud@ifverlower{2.03}{%
+      \setlength\tud@footlogoheight{.6\tud@dim@topmargin}%
+    }{}%
+  \else%
+    \ifdim\footlogoheight=\tud@footlogoheight\relax\else%
+      \setlength\tud@footlogoheight{\footlogoheight}%
+      \global\@tud@footlogo@option@settrue%
+      \def\tud@footlogo@wrn##1{%
+        \ifdim\dimexpr\tud@footlogoheight-##1\relax>\z@\relax%
+          \ClassWarning{\tudcls@name}{%
+            The `\string\footlogoheight' (\the\footlogoheight)
+            is \the\dimexpr\tud@footlogoheight-##1\relax\space\MessageBreak%
+            higher than recommended. You should decrease this\MessageBreak%
+            length%
+            \ifcase\tud@geometry\relax\else% true/symmetric/twoside
+              \space or alternatively enlarge the bottom margin\MessageBreak%
+               by using option `extrabottommargin'%
+            \fi%
+          }%
+          \global\let\tud@footlogo@wrn\@gobble%
+        \fi%
+      }
+     \fi%
+  \fi%
+  \global\tud@footlogoheight=\tud@footlogoheight%
+}
+\newif\if@tud@footlogo@user@set
+\newcommand*\tud@footlogo@user@set[2]{%
+  \tud@footlogoheight@set%
+  \tud@savelayerbox{foot@user}{%
+    \hbox to #1{%
       \let\@tempa\relax%
-      \@for\@tempb:=\tud@@footlogo\do{%
+      \@for\@tempb:=\@footlogo\do{%
         \edef\@tempb{\expandafter\trim@spaces\expandafter{\@tempb}}%
         \@tempa%
         \ifx\@tempb\@empty\else%
-          \expandafter\tud@@footlogo@set\expandafter{\@tempb}{##2}%
+          \expandafter\tud@footlogo@user@@set\expandafter{\@tempb}{#2}%
         \fi%
         \let\@tempa\footlogosep%
       }%
-      \ifx\@nnil##3\relax%\else%
-        \@tempa\hphantom{\tud@uselayerbox{foot@ddc@black}}%
-      \fi
+      \hss%
     }%
   }%
-  \tud@savelayerbox{foot@logo@ddcfalse}{\@tempc{#1}{#2}{}}%
-  \tud@savelayerbox{foot@logo@ddctrue}{\@tempc{#1}{#2}{\@nnil}}%
-  \global\@tud@foot@logo@setfalse%
+  \global\@tud@footlogo@user@setfalse%
 }
 \DeclareListParser{\tud@footlogo@parser}{:}%
-\newcommand*\tud@@footlogo@set[2]{%
+\newcommand*\tud@footlogo@user@@set[2]{%
   \begingroup%
     \def\@tempa{}%
     \def\@tempb{}%
@@ -2949,80 +2912,71 @@
         \expandafter\def\expandafter\@tempb\expandafter{\@tempb,##1}%
       \fi%
     }%
-    \tud@get@footlogoheight%
     \tud@footlogo@parser{#1}%
-    \preto\tud@@@footlogo{%
-      keepaspectratio,totalheight=\footlogoheight,%
+    \preto\@@footlogo{%
+      keepaspectratio,totalheight=\tud@footlogoheight,%
     }%
-    \appto\tud@@@footlogo{\@tempb}%
-    \protected@edef\@tempc{\noexpand\includegraphics[\tud@@@footlogo]{\@tempa}}%
+    \appto\@@footlogo{\@tempb}%
+    \protected@edef\@tempc{\noexpand\includegraphics[\@@footlogo]{\@tempa}}%
     \vbox to #2{\vfil\hbox{\@tempc}\vfil\vfil}%
   \endgroup%
 }
-\newcommand*\tud@footlogo@ddc[1]{%
+\newcommand*\tud@footlogo@use{\tud@uselayerbox{foot@user}}%
+% §§§ reihenfolge der definitionen prüfen
+\newcommand*\tud@footlogo@set{%
+  \tud@footlogo@ddc@set{black}{DDC-22}%
+  \tud@footlogo@ddc@set{HKS41}{DDC-25}%
+  \tud@footlogo@ddc@set{white}{DDC-28}%
+  \tud@footlogo@option@set%
+}
+\newif\if@tud@footlogo@option@set
+\newcommand*\tud@footlogo@option@set{%
   \tud@ddc@check%
-  \ifcase\@tempb\relax\or% \tud@ddc@foot=true
-    \tud@uselayerbox{foot@ddc@\tud@foot@logocolor}%
-    \tud@footlogo@wrn{#1}%
-  \else%
-    \tud@uselayerbox{foot@ddc@option}%
-    \tud@footlogo@wrn{#1}%
+  \ifcase\@tempb\relax\or\or% \tud@ddc@foot=color
+    \tud@footlogo@ddc@set{option}{DDC-01}%
+  \or% \tud@ddc@foot=colorblack
+    \tud@footlogo@ddc@set{option}{DDC-07}%
+  \or% \tud@ddc@foot=gray
+    \tud@footlogo@ddc@set{option}{DDC-19}%
+  \or% \tud@ddc@foot=black
+    \tud@footlogo@ddc@set{option}{DDC-22}%
+  \or% \tud@ddc@foot=blue
+    \tud@footlogo@ddc@set{option}{DDC-25}%
+  \or% \tud@ddc@foot=white
+    \tud@footlogo@ddc@set{option}{DDC-28}%
   \fi%
+  \global\@tud@footlogo@option@setfalse%
+  \global\@tud@footlogo@user@settrue%
 }
-\newcommand*\tud@@footlogo{}
-\newcommand*\tud@@@footlogo{}
-\newcommand*\footlogo[2][]{%
-  \tud@ifverlower{2.04}{\tud@clearpage@iftudps}{}%
-  \def\tud@@footlogo{#2}%
-  \def\tud@@@footlogo{#1}%
-  \global\@tud@head@ddclogo@@settrue%
-  \global\@tud@foot@ddclogo@@settrue%
-  \global\@tud@foot@logo@settrue%
-  \tud@ifverlower{2.04}{\tud@pagestyle@iftudps}{}%
-}
-\newcommand*\tud@footlogo[1]{%
-  \ifdefvoid{\tud@@footlogo}{}{%
-    \tud@ddc@check%
-    \ifcase\@tempb\relax% \tud@ddc@foot=false
-      \tud@uselayerbox{foot@logo@ddcfalse}%
-    \else% \tud@ddc@foot=!false
-      \tud@uselayerbox{foot@logo@ddctrue}%
-    \fi%
-    \tud@footlogo@wrn{#1}%
+\newcommand*\tud@footlogo@ddc@set[2]{%
+  \tud@footlogoheight@set%
+  \tud@savelayerbox{foot@#1}{%
+    \includegraphics[keepaspectratio,totalheight=\tud@footlogoheight]{#2}%
   }%
 }
-\newcommand*\tud@footlogo@wrn[1]{%
-  \begingroup%
-    \tud@get@footlogoheight%
-    \setlength\@tempdima{\dimexpr\footlogoheight-#1\relax}%
-    \ifdim\@tempdima>\vfuzz\relax%
-      \ClassWarning{\tudcls@name}{%
-        The chosen `\string\footlogoheight'
-        (\the\footlogoheight)\MessageBreak%
-        is \the\@tempdima\space higher than recommended. You\MessageBreak%
-        should decrease this length
-        \ifcase\tud@geometry\relax\else% true/symmetric/twoside
-          or alternatively\MessageBreak%
-          enlarge the bottom margin by using option\MessageBreak%
-          `extrabottommargin'%
-        \fi%
-      }%
-      \global\let\tud@footlogo@wrn\@gobble%
-    \fi%
-  \endgroup%
+\newcommand*\tud@footlogo@ddc@use[1]{%
+  \vbox to #1{%
+    \vfil%
+    \hbox{%
+      \tud@ddc@check%
+      \ifcase\@tempb\relax\or% \tud@ddc@foot=true
+        \tud@uselayerbox{foot@\tud@foot@logocolor}%
+      \else%
+        \tud@uselayerbox{foot@option}%
+      \fi%
+    }%
+    \vfil\vfil%
+    \vss%
+  }%
 }
-% §§§ an neue Logo-Geschichte anpassen
-% §§§ zwei Boxen erzeugen und bei Bedarf Größe anpassen?
-% §§§ \footlayer kann raus, lieber hilfsmakro
-%\tud@newlayerbox{foot@content@ddcfalse}
-%\tud@newlayerbox{foot@content@ddctrue}
-%\newif\if@tud@foot@content@set
-%\newcommand*\tud@foot@content@set[2]{}%
 \newkomafont{tudheadings}{%
   \sffamily%
   \tud@color{\tud@foot@fontcolor}%
 }
-\newcommand*\footlayer{}
+\newcommand*\tud@footcontent@font{}
+\newcommand*\tud@footcontent@left{}
+\newcommand*\tud@footcontent@right{}
+\newcommand*\tud@footcontent@wrn[1]{}
 \newcommand*\footcontent{%
   \@ifstar{%
     \@tempswafalse%
@@ -3038,48 +2992,68 @@
     {\@@footcontent{#1}{#2}[\@nnil]}%
 }
 \newcommand*\@@footcontent{}
-%\newcommand*\@@@footcontent{}
 \def\@@footcontent#1#2[#3]{%
   \if@tempswa%
-    \def\footlayer{%
+    \def\tud@footcontent@font{%
       \usekomafont{tudheadings}%
       \tud@divide\@tempa{\tud@head@font@size}{\f@size}%
       \linespread{\@tempa}%
       \selectfont%
       \tud@head@font@light%
+      #1%
     }%
   \else%
-    \def\footlayer{}%
+    \def\tud@footcontent@font{#1}%
   \fi%
-  \appto\footlayer{%
-    #1%
-    \tud@ddc@check%
-    \ifcase\@tempb%
-      \setlength\@tempdima{\z@}%
-    \else%
-      \settowidth\@tempdima{\tud@uselayerbox{foot@ddc@black}}%
-      \addtolength\@tempdima{\columnsep}%
+  \def\tud@footcontent@left{#2}%
+  \def\tud@footcontent@right{#3}%
+  \def\tud@footcontent@wrn##1{%
+    \ifdim##1>\z@\relax%
+      \ClassWarning{\tudcls@name}{%
+        The content for the footer (`\string\footcontent')\MessageBreak%
+        is \the##1\space higher than recommended and exceeds\MessageBreak%
+        it's maximum height. You should reduce the content\MessageBreak%
+        or lower the fontsize%
+        \ifcase\tud@geometry\relax\else% true/symmetric/twoside
+          .\space Alternatively you can\MessageBreak%
+          enlarge the bottom margin by using option\MessageBreak%
+          `extrabottommargin'%
+        \fi%
+      }%
+      \global\let\tud@footcontent@wrn\@gobble%
     \fi%
   }%
-  \ifx\@nnil#3\relax%
-    \appto\footlayer{%
-      \begin{minipage}[t]{\dimexpr\textwidth-\@tempdima\relax}%
-        #2%
-      \end{minipage}%
-    }%
-  \else%
-    \appto\footlayer{%
-      \begin{minipage}[t]{\dimexpr (\textwidth-\columnsep)/2\relax}%
-        #2%
-      \end{minipage}%
-      \hspace*{\columnsep}%
-      \begin{minipage}[t]{\dimexpr(\textwidth-\columnsep)/2-\@tempdima\relax}%
-        #3%
-      \end{minipage}%
-    }%
-  \fi%
 }
-% §§§ an neue Logo-Geschichte anpassen ENDE
+\newcommand*\tud@footcontent@use[2]{%
+  \tud@ddc@check%
+  \ifcase\@tempb%
+    \setlength\@tempdimc{\z@}%
+  \else%
+    \settowidth\@tempdimc{\tud@uselayerbox{foot@black}}%
+    \addtolength\@tempdimc{\columnsep}%
+  \fi%
+  \sbox\z@{%
+    \tud@footcontent@font%
+    \expandafter\ifx\tud@footcontent@right\@nnil\relax%
+      \vtop{%
+        \hsize=\dimexpr#1-\@tempdimc\relax%
+        \strut\ignorespaces\tud@footcontent@left\strut%
+      }%
+    \else%
+      \vtop{%
+        \hsize=\dimexpr(#1-\columnsep)/2\relax%
+        \strut\ignorespaces\tud@footcontent@left\strut%
+      }%
+      \hspace{\columnsep}%
+      \vtop{%
+        \hsize=\dimexpr(#1-\columnsep)/2-\@tempdimc\relax%
+        \strut\ignorespaces\tud@footcontent@right\strut%
+      }%
+    \fi%
+  }%
+  \tud@footcontent@wrn{\dimexpr\ht\z@+\dp\z@-#2\relax}%
+  \vbox to #2{\vss\box\z@\vss\vss}%
+}
 \tud@ifsacrop{%
   \PreventPackageFromLoading{geometry}%
 }{%
@@ -3431,9 +3405,6 @@
   \setlength\tud@ta@footskip{\footskip}%
   \tud@geometry@process%
   \global\@tud@mainlogo@settrue%
-  \global\@tud@head@ddclogo@settrue%
-  \global\@tud@foot@ddclogo@settrue%
-  \global\@tud@foot@logo@settrue%
   \gdef\tud@currentgeometry{}%
   \expandafter\pagestyle\expandafter{\currentpagestyle}%
 }
@@ -4810,7 +4781,7 @@
       \ClassWarning{\tudcls@name}{%
         You are using a two-column title along with\MessageBreak%
         the DDC-logo. Unfortunately in this case, the\MessageBreak%
-        type area hast to be adjusted manually. Please\MessageBreak%
+        type area has to be adjusted manually. Please\MessageBreak%
         use `\string\enlargethispage{-\the\tud@dim@ddcdiff}'\MessageBreak%
         in both columns after the title%
       }%
