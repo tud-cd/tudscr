@@ -137,7 +137,7 @@ move *.zip GitHub\
 attrib -h *_converted*.zip
 attrib -h *_all.zip
 move temp\tudscr_%version%_full.zip  GitHub\tudscr_%version%.zip
-move temp\tudscr_uninstall.*         GitHub\
+copy temp\tudscr_uninstall.*         GitHub\
 echo.
 echo =========================================================================
 echo  Release fuer CTAN
@@ -167,12 +167,20 @@ echo =========================================================================
 echo.
 cd %~dp0
 mkdir release-%version%\GitHub-tudscrold
-copy development\tudscrold\*.*               release-%version%\temp\
+mkdir release-%version%\temp\tudscrold\doc\latex\tudscrold
+mkdir release-%version%\temp\tudscrold\source\latex\tudscrold
+mkdir release-%version%\temp\tudscrold\tex\latex\tudscrold
+xcopy ..\tudscrold\bundle\doc\*.*    release-%version%\temp\tudscrold\doc\latex\tudscrold\ /s
+xcopy ..\tudscrold\bundle\source\*.* release-%version%\temp\tudscrold\source\latex\tudscrold\ /s
+xcopy ..\tudscrold\bundle\tex\*.*    release-%version%\temp\tudscrold\tex\latex\tudscrold\ /s
 cd release-%version%\temp
+copy tudscrold\doc\latex\tudscrold\tudscrold.pdf .
+7za a -tzip tudscr_v1.0old.zip   .\tudscrold\*
 7za a -tzip .\..\TUD-KOMA-Script_v1.0old.zip @7za_files_old.txt
 cd..
-move TUD-KOMA-Script_v1.0old.zip             GitHub-tudscrold\
-move temp\tud_fonts_install.*                GitHub-tudscrold\
+move TUD-KOMA-Script_v1.0old.zip     GitHub-tudscrold\
+move temp\tudscr_v1.0old.zip         GitHub-tudscrold\
+move temp\tud_fonts_install.*        GitHub-tudscrold\
 echo.
 echo =========================================================================
 echo  Loeschen aller temporaeren Dateien
