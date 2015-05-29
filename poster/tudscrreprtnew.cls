@@ -2321,6 +2321,13 @@
 }{%
   \AtEndPreamble{\RequirePackage{scrlayer-scrpage}[2013/12/14]}%
 }
+\PreventPackageFromLoading[%
+  \ClassWarning{\tudcls@name}{%
+    The package `fancyhdr' must not be used with a\MessageBreak%
+    TUD-KOMA-Script class. You should make use of the\MessageBreak%
+    capabilities of package `scrlayer-scrpage' instead%
+  }%
+]{fancyhdr}
 \AfterPackage{scrlayer-scrpage}{%
   \DeclareNewLayer[%
     background,%
@@ -2438,13 +2445,12 @@
       \tud@footlogoheight@set%
       \setlength\@tempdima{\dimexpr\layerheight-\dp\strutbox\relax}%
       \if@tud@footlogo@option@set\tud@footlogo@option@set\fi%
-      \if@tud@footlogo@user@set%
-        \tud@footlogo@user@set{\layerwidth}{\@tempdima}%
+      \if@tud@footlogo@cmd@set%
+        \tud@footlogo@cmd@set{\@tempdima}{\layerwidth}%
       \fi%
-      \tud@footcontent@use{\layerwidth}{\@tempdima}\hspace*{-\layerwidth}%
-      \tud@footlogo@use\hspace*{-\layerwidth}%
+      \tud@footcontent@use{\@tempdima}{\layerwidth}\hspace*{-\layerwidth}%
+      \tud@footlogo@cmd@use\hspace*{-\layerwidth}%
       \hfill\tud@footlogo@ddc@use{\@tempdima}%
-      \tud@footlogo@wrn{\@tempdima}%
     },%
   ]{tudheadings.foot.content}%
   \tud@ifverlower{2.03}{%
@@ -2716,18 +2722,32 @@
 \newcommand*\tud@uselayerbox[1]{%
   \expandafter\usebox\csname tud@logo@#1\endcsname%
 }
+\newcommand*\tud@vlayerbox[3]{%
+  \begingroup%
+    \setbox\z@\vbox{#2}%
+    \setlength\@tempdimb{\dimexpr\ht\z@+\dp\z@\relax}%
+    \ifdim\@tempdimb>#1\relax%
+      \ClassWarning{\tudcls@name}{%
+        #3\MessageBreak%
+        The maximum height is exceeded by \the\dimexpr\@tempdimb-#1\relax%
+      }%
+    \fi%
+    \vbox to #1{#2}%
+  \endgroup%
+}
 \tud@newlayerbox{main@black}
 \tud@newlayerbox{main@HKS41}
 \tud@newlayerbox{main@white}
 \newif\if@tud@mainlogo@set
 \newlength\tud@mainlogoheight
+\newcommand*\tud@mainlogo@wrn[1]{}
 \newcommand*\tud@mainlogo@set{%
   \def\@tempa{\includegraphics[keepaspectratio,width=\tud@dim@logowidth]}%
   \tud@savelayerbox{main@black}{\@tempa{TUD-black}}%
   \tud@savelayerbox{main@HKS41}{\@tempa{TUD-blue}}%
   \tud@savelayerbox{main@white}{\@tempa{TUD-white}}%
   \setlength\tud@mainlogoheight{\ht\tud@logo@main@black}%
-  \def\tud@mainlogo@wrn##1{%
+  \gdef\tud@mainlogo@wrn##1{%
     \ifdim##1<\ta@bcor\relax%
       \ClassWarning{\tudcls@name}{%
         The selected page layout means that the\MessageBreak%
@@ -2751,7 +2771,6 @@
   }%
   \tud@uselayerbox{main@\tud@head@logocolor}%
 }
-\newcommand*\tud@mainlogo@wrn[1]{}
 \tud@newlayerbox{head@black}
 \tud@newlayerbox{head@HKS41}
 \tud@newlayerbox{head@white}
@@ -2763,7 +2782,7 @@
   \tud@ifverlower{2.04}{\tud@clearpage@iftudps}{}%
   \def\@headlogo{#2}%
   \def\@@headlogo{#1}%
-  \def\tud@headlogo@wrn{%
+  \gdef\tud@headlogo@wrn{%
     \ClassWarning{\tudcls@name}{%
       The secondary logo `\string\headlogo{\@headlogo}' is\MessageBreak%
       overwritten with DDC logo. Maybe you should use\MessageBreak%
@@ -2819,8 +2838,8 @@
 }
 \newcommand*\tud@headlogo@use{%
   \tud@ddc@check%
-  \vbox to \tud@mainlogoheight{%
-    \vfil%
+  \tud@vlayerbox{\tud@mainlogoheight}{%
+    \vss%
     \hbox{%
       \ifnum\@tempa=\@ne\relax% \tud@ddc@head=true
         \tud@uselayerbox{head@\tud@head@logocolor}%
@@ -2828,28 +2847,19 @@
         \tud@uselayerbox{head@option}%
       \fi%
     }%
-    \vfil%
-  }%
+    \vss%
+  }{%
+    The given `\string\headlogo{\@headlogo}' is to large.%
+  }
   \ifdefvoid{\@headlogo}{}{\ifnum\@tempa>\z@\relax\tud@headlogo@wrn\fi}%
 }
 \tud@newlayerbox{foot@black}
 \tud@newlayerbox{foot@HKS41}
 \tud@newlayerbox{foot@white}
 \tud@newlayerbox{foot@option}
-\tud@newlayerbox{foot@user}
-\newcommand*\@footlogo{}
-\newcommand*\@@footlogo{}
-\newcommand*\footlogo[2][]{%
-  \tud@ifverlower{2.04}{\tud@clearpage@iftudps}{}%
-  \def\@footlogo{#2}%
-  \def\@@footlogo{#1}%
-  \global\@tud@footlogo@user@settrue%
-  \tud@ifverlower{2.04}{\tud@pagestyle@iftudps}{}%
-}
-\newcommand*\footlogosep{\hfill}
+\tud@newlayerbox{foot@cmd}
 \newlength\footlogoheight
 \newlength\tud@footlogoheight
-\newcommand*\tud@footlogo@wrn[1]{}
 \newcommand*\tud@footlogoheight@set{%
   \ifdim\footlogoheight=\z@\relax%
     \setlength\tud@footlogoheight{\tud@mainlogoheight}%
@@ -2859,70 +2869,11 @@
   \else%
     \ifdim\footlogoheight=\tud@footlogoheight\relax\else%
       \setlength\tud@footlogoheight{\footlogoheight}%
-      \global\@tud@footlogo@option@settrue%
-      \def\tud@footlogo@wrn##1{%
-        \ifdim\dimexpr\tud@footlogoheight-##1\relax>\z@\relax%
-          \ClassWarning{\tudcls@name}{%
-            The `\string\footlogoheight' (\the\footlogoheight)
-            is \the\dimexpr\tud@footlogoheight-##1\relax\space\MessageBreak%
-            higher than recommended. You should decrease this\MessageBreak%
-            length%
-            \ifcase\tud@geometry\relax\else% true/symmetric/twoside
-              \space or alternatively enlarge the bottom margin\MessageBreak%
-               by using option `extrabottommargin'%
-            \fi%
-          }%
-          \global\let\tud@footlogo@wrn\@gobble%
-        \fi%
-      }
+      \global\@tud@footlogo@option@settrue% 
      \fi%
   \fi%
   \global\tud@footlogoheight=\tud@footlogoheight%
 }
-\newif\if@tud@footlogo@user@set
-\newcommand*\tud@footlogo@user@set[2]{%
-  \tud@footlogoheight@set%
-  \tud@savelayerbox{foot@user}{%
-    \hbox to #1{%
-      \let\@tempa\relax%
-      \@for\@tempb:=\@footlogo\do{%
-        \edef\@tempb{\expandafter\trim@spaces\expandafter{\@tempb}}%
-        \@tempa%
-        \ifx\@tempb\@empty\else%
-          \expandafter\tud@footlogo@user@@set\expandafter{\@tempb}{#2}%
-        \fi%
-        \let\@tempa\footlogosep%
-      }%
-      \hss%
-    }%
-  }%
-  \global\@tud@footlogo@user@setfalse%
-}
-\DeclareListParser{\tud@footlogo@parser}{:}%
-\newcommand*\tud@footlogo@user@@set[2]{%
-  \begingroup%
-    \def\@tempa{}%
-    \def\@tempb{}%
-    \@tempswatrue%
-    \def\do##1{%
-      \if@tempswa%
-        \def\@tempa{##1}%
-        \@tempswafalse%
-      \else%
-        \expandafter\def\expandafter\@tempb\expandafter{\@tempb,##1}%
-      \fi%
-    }%
-    \tud@footlogo@parser{#1}%
-    \preto\@@footlogo{%
-      keepaspectratio,totalheight=\tud@footlogoheight,%
-    }%
-    \appto\@@footlogo{\@tempb}%
-    \protected@edef\@tempc{\noexpand\includegraphics[\@@footlogo]{\@tempa}}%
-    \vbox to #2{\vfil\hbox{\@tempc}\vfil\vfil}%
-  \endgroup%
-}
-\newcommand*\tud@footlogo@use{\tud@uselayerbox{foot@user}}%
-% §§§ reihenfolge der definitionen prüfen
 \newcommand*\tud@footlogo@set{%
   \tud@footlogo@ddc@set{black}{DDC-22}%
   \tud@footlogo@ddc@set{HKS41}{DDC-25}%
@@ -2946,7 +2897,7 @@
     \tud@footlogo@ddc@set{option}{DDC-28}%
   \fi%
   \global\@tud@footlogo@option@setfalse%
-  \global\@tud@footlogo@user@settrue%
+  \global\@tud@footlogo@cmd@settrue%
 }
 \newcommand*\tud@footlogo@ddc@set[2]{%
   \tud@footlogoheight@set%
@@ -2955,8 +2906,8 @@
   }%
 }
 \newcommand*\tud@footlogo@ddc@use[1]{%
-  \vbox to #1{%
-    \vfil%
+  \tud@vlayerbox{#1}{%
+    \vss%
     \hbox{%
       \tud@ddc@check%
       \ifcase\@tempb\relax\or% \tud@ddc@foot=true
@@ -2965,10 +2916,73 @@
         \tud@uselayerbox{foot@option}%
       \fi%
     }%
-    \vfil\vfil%
-    \vss%
+    \vss\vss%
+  }{%
+    The `\string\footlogoheight' (\the\footlogoheight) is too\MessageBreak%
+    high. You should either reduce this length%
+    \ifcase\tud@geometry\relax\else% true/symmetric/twoside
+      \space or\MessageBreak%
+      alternatively enlarge the bottom margin by\MessageBreak%
+      using option `extrabottommargin'%
+    \fi%
   }%
 }
+\newcommand*\@footlogo{}
+\newcommand*\@@footlogo{}
+\newcommand*\footlogo[2][]{%
+  \tud@ifverlower{2.04}{\tud@clearpage@iftudps}{}%
+  \def\@footlogo{#2}%
+  \def\@@footlogo{#1}%
+  \global\@tud@footlogo@cmd@settrue%
+  \tud@ifverlower{2.04}{\tud@pagestyle@iftudps}{}%
+}
+\newcommand*\footlogosep{\hfill}
+\newif\if@tud@footlogo@cmd@set
+\newcommand*\tud@footlogo@cmd@set[2]{%
+  \tud@footlogoheight@set%
+  \tud@savelayerbox{foot@cmd}{%
+    \hbox to #2{%
+      \let\@tempa\relax%
+      \@for\@tempb:=\@footlogo\do{%
+        \edef\@tempb{\expandafter\trim@spaces\expandafter{\@tempb}}%
+        \@tempa%
+        \ifx\@tempb\@empty\else%
+          \expandafter\tud@footlogo@cmd@@set\expandafter{\@tempb}{#1}%
+        \fi%
+        \let\@tempa\footlogosep%
+      }%
+      \hss%
+    }%
+  }%
+  \global\@tud@footlogo@cmd@setfalse%
+}
+\newcommand*\tud@footlogo@cmd@@set[2]{%
+  \begingroup%
+    \def\@tempa{}%
+    \def\@tempb{}%
+    \@tempswatrue%
+    \def\do##1{%
+      \if@tempswa%
+        \def\@tempa{##1}%
+        \@tempswafalse%
+      \else%
+        \expandafter\def\expandafter\@tempb\expandafter{\@tempb,##1}%
+      \fi%
+    }%
+    \let\@tempc\relax%
+    \DeclareListParser{\@tempc}{:}%
+    \@tempc{#1}%
+    \preto\@@footlogo{%
+      keepaspectratio,totalheight=\tud@footlogoheight,%
+    }%
+    \appto\@@footlogo{\@tempb}%
+    \protected@edef\@tempc{\noexpand\includegraphics[\@@footlogo]{\@tempa}}%
+    \tud@vlayerbox{#2}{\vss\hbox{\@tempc}\vss\vss}{%
+      The given `\string\footlogo{\@tempa}' is to large.
+    }%
+  \endgroup%
+}
+\newcommand*\tud@footlogo@cmd@use{\tud@uselayerbox{foot@cmd}}%
 \newkomafont{tudheadings}{%
   \sffamily%
   \tud@color{\tud@foot@fontcolor}%
@@ -2976,7 +2990,6 @@
 \newcommand*\tud@footcontent@font{}
 \newcommand*\tud@footcontent@left{}
 \newcommand*\tud@footcontent@right{}
-\newcommand*\tud@footcontent@wrn[1]{}
 \newcommand*\footcontent{%
   \@ifstar{%
     \@tempswafalse%
@@ -3007,22 +3020,6 @@
   \fi%
   \def\tud@footcontent@left{#2}%
   \def\tud@footcontent@right{#3}%
-  \def\tud@footcontent@wrn##1{%
-    \ifdim##1>\z@\relax%
-      \ClassWarning{\tudcls@name}{%
-        The content for the footer (`\string\footcontent')\MessageBreak%
-        is \the##1\space higher than recommended and exceeds\MessageBreak%
-        it's maximum height. You should reduce the content\MessageBreak%
-        or lower the fontsize%
-        \ifcase\tud@geometry\relax\else% true/symmetric/twoside
-          .\space Alternatively you can\MessageBreak%
-          enlarge the bottom margin by using option\MessageBreak%
-          `extrabottommargin'%
-        \fi%
-      }%
-      \global\let\tud@footcontent@wrn\@gobble%
-    \fi%
-  }%
 }
 \newcommand*\tud@footcontent@use[2]{%
   \tud@ddc@check%
@@ -3032,27 +3029,38 @@
     \settowidth\@tempdimc{\tud@uselayerbox{foot@black}}%
     \addtolength\@tempdimc{\columnsep}%
   \fi%
-  \sbox\z@{%
-    \tud@footcontent@font%
-    \expandafter\ifx\tud@footcontent@right\@nnil\relax%
-      \vtop{%
-        \hsize=\dimexpr#1-\@tempdimc\relax%
-        \strut\ignorespaces\tud@footcontent@left\strut%
-      }%
-    \else%
-      \vtop{%
-        \hsize=\dimexpr(#1-\columnsep)/2\relax%
-        \strut\ignorespaces\tud@footcontent@left\strut%
-      }%
-      \hspace{\columnsep}%
-      \vtop{%
-        \hsize=\dimexpr(#1-\columnsep)/2-\@tempdimc\relax%
-        \strut\ignorespaces\tud@footcontent@right\strut%
-      }%
+  \tud@vlayerbox{#1}{%
+    \vss%
+    \hbox to #2{%
+      \tud@footcontent@font%
+      \expandafter\ifx\tud@footcontent@right\@nnil\relax%
+        \vtop{%
+          \hsize=\dimexpr#2-\@tempdimc\relax%
+          \strut\ignorespaces\tud@footcontent@left\strut%
+        }%
+      \else%
+        \vtop{%
+          \hsize=\dimexpr(#2-\columnsep)/2\relax%
+          \strut\ignorespaces\tud@footcontent@left\strut%
+        }%
+        \hspace{\columnsep}%
+        \vtop{%
+          \hsize=\dimexpr(#2-\columnsep)/2-\@tempdimc\relax%
+          \strut\ignorespaces\tud@footcontent@right\strut%
+        }%
+      \fi%
+      \hss%
+    }%
+    \vss\vss%
+  }{%
+    The content for the footer (`\string\footcontent')\MessageBreak%
+    is too hig. You should reduce the content or lower\MessageBreak%
+    the fontsize%
+    \ifcase\tud@geometry\relax\else% true/symmetric/twoside
+      .\space Alternatively you can enlarge the\MessageBreak%
+      bottom margin by using option `extrabottommargin'%
     \fi%
   }%
-  \tud@footcontent@wrn{\dimexpr\ht\z@+\dp\z@-#2\relax}%
-  \vbox to #2{\vss\box\z@\vss\vss}%
 }
 \tud@ifsacrop{%
   \PreventPackageFromLoading{geometry}%
