@@ -1,4 +1,4 @@
-% \CheckSum{766}
+% \CheckSum{702}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-comp.dtx}[%
-  2015/05/19 v2.04 TUD-KOMA-Script\space%
+  2015/05/29 v2.04 TUD-KOMA-Script\space%
 %</driver>
 %<package&identify>\NeedsTeXFormat{LaTeX2e}[2011/06/27]
 %<package&identify>\ProvidesPackage{tudscrcomp}[%
@@ -530,11 +530,6 @@
 % \iffalse
 %</option>
 %</class|(package&fonts)>
-% \fi
-%
-% Jetzt folgen noch einige veraltete Befehle für die \TUDScript-Klassen.
-%
-% \iffalse
 %<*class&body>
 % \fi
 %
@@ -631,7 +626,7 @@
 %
 % \iffalse
 %</class&body>
-%<*package&option&!fonts>
+%<*package&preset>
 % \fi
 %
 % \subsection{Das Paket \pkg{tudscrcomp} -- Kompatibilität veralteter Klassen}
@@ -647,6 +642,48 @@
 % \ToDo{%
 %   Optionen für \cls{tudbook} und \cls{tudmathposter}\val{=Mathematik(A0)}%
 % }[v2.04]
+%
+% Zunächst sollten vor der Definition der Kompatibilitätseinstellungen passende 
+% Makros zur Fallunterscheidung definiert werden.
+%
+% \begin{macro}{\if@tud@oldclass}
+% \changes{v2.02}{2014/08/29}{neu}^^A
+% Wenn eine der alten Klassen aus den Vorlagen von Klaus Bergmann geladen 
+% wurde, wird dies für spätere Anpassungen registriert. Die alten Posterklassen
+% werden ebenfalls unterstützt.
+% \ToDo{Klasse tudbeamer und beamer-Stil tud einpflegen}[v2.xx]
+%    \begin{macrocode}
+\newif\if@tud@oldclass
+\@ifclassloaded{tudbook}{\@tud@oldclasstrue}{}%
+\@ifclassloaded{tudbeamer}{\@tud@oldclasstrue}{}%
+\@ifclassloaded{tudfax}{\@tud@oldclasstrue}{}%
+\@ifclassloaded{tudform}{\@tud@oldclasstrue}{}%
+\@ifclassloaded{tudhaus}{\@tud@oldclasstrue}{}%
+\@ifclassloaded{tudletter}{\@tud@oldclasstrue}{}%
+\@ifclassloaded{tudposter}{\@tud@oldclasstrue}{}%
+\@ifclassloaded{tudmathposter}{\@tud@oldclasstrue}{}%
+%    \end{macrocode}
+% \end{macro}^^A if@tud@oldclass
+% \begin{macro}{\if@tud@oldscrclass}
+% \changes{v2.02}{2014/08/29}{neu}^^A
+% Soll das Paket \pkg{tudscrfonts} mit den \TUDScript-Klassen der Version~v1.0
+% genutzt werden, sind ebenfalls einige Anpassungen notwendig.
+%    \begin{macrocode}
+\newif\if@tud@oldscrclass
+\@ifclassloaded{tudscrbookold}{\@tud@oldscrclasstrue}{}%
+\@ifclassloaded{tudscrreprtold}{\@tud@oldscrclasstrue}{}%
+\@ifclassloaded{tudscrartclold}{\@tud@oldscrclasstrue}{}%
+%    \end{macrocode}
+% \end{macro}^^A if@tud@oldclass
+%
+%
+% Jetzt folgen noch einige veraltete Befehle für die \TUDScript-Klassen.
+%
+% \iffalse
+%</package&preset>
+%<*package&option&!fonts>
+% \fi
+%
 %
 % \subsubsection{Kompatibilität zu \cls{tudbook}}
 %
@@ -900,28 +937,8 @@
 % Wird das Paket \pkg{tudscrfonts} mit den alten TUD-Klassen \cls{tudbook}, 
 % \cls{tudmathposter} etc. oder \TUDScript in der Version~v1.0 verwendet,
 % müssen einige Kompatibilitätseinstellungen vorgenmommen werden. Hierfür sind
-% einige Patches notwendig.
-%
-% \begin{macro}{\if@tud@oldclass}
-% \changes{v2.02}{2014/08/29}{neu}^^A
-% Wenn eine der alten Klassen aus den Vorlagen von Klaus Bergmann geladen 
-% wurde, wird dies für spätere Anpassungen registriert. Die alten Posterklassen
-% werden ebenfalls unterstützt.
-% \ToDo{Klasse tudbeamer und beamer-Stil tud einpflegen}[v2.xx]
-%    \begin{macrocode}
-\newif\if@tud@oldclass
-\@ifclassloaded{tudbook}{\@tud@oldclasstrue}{}%
-\@ifclassloaded{tudbeamer}{\@tud@oldclasstrue}{}%
-\@ifclassloaded{tudfax}{\@tud@oldclasstrue}{}%
-\@ifclassloaded{tudform}{\@tud@oldclasstrue}{}%
-\@ifclassloaded{tudhaus}{\@tud@oldclasstrue}{}%
-\@ifclassloaded{tudletter}{\@tud@oldclasstrue}{}%
-\@ifclassloaded{tudposter}{\@tud@oldclasstrue}{}%
-\@ifclassloaded{tudmathposter}{\@tud@oldclasstrue}{}%
-%    \end{macrocode}
-% \end{macro}^^A if@tud@oldclass
-% Wird das Paket \pkg{tudscrfonts} mit einer der alten TUD-Klassen verwendet, 
-% müssen einige Kompatibilitätseinstellungen vorgenmommen werden. Dies betrifft
+% einige Patches notwendig. Bei den alten TUD-Klassen, müssen in erster Linie
+% einige Kompatibilitätseinstellungen vorgenmommen werden. Dies betrifft
 % insbesondere die Mathematikschriften sowie allerhand darin definierter, fixer 
 % Schriften.
 %    \begin{macrocode}
@@ -1098,51 +1115,12 @@
 % Für die Verwendung des Paketes \pkg{tudscrfonts} mit den \TUDScript-Klassen
 % in der Version~v1.0 sind ebenfalls einige Anpassungen notwendig.
 %
-% \begin{macro}{\if@tud@oldscrclass}
-% \changes{v2.02}{2014/08/29}{neu}^^A
-% Soll das Paket \pkg{tudscrfonts} mit den \TUDScript-Klassen der Version~v1.0
-% genutzt werden, sind ebenfalls einige Anpassungen notwendig.
-%    \begin{macrocode}
-\newif\if@tud@oldscrclass
-\@ifclassloaded{tudscrbookold}{\@tud@oldscrclasstrue}{}%
-\@ifclassloaded{tudscrreprtold}{\@tud@oldscrclasstrue}{}%
-\@ifclassloaded{tudscrartclold}{\@tud@oldscrclasstrue}{}%
-%    \end{macrocode}
-% \end{macro}^^A if@tud@oldclass
 % Es muss Sorge dafür getragen werden, dass einige veraltete Befehle
 % aktualisiert werden. Hierfür müssen diese \enquote{unschädlich} gemacht
 % werden, noch bevor das Paket selbst in Erscheinung tritt.
 %    \begin{macrocode}
 \ifbool{@tud@oldscrclass}{%
-  \let\univln\relax%
-  \let\univrn\relax%
-  \let\univbn\relax%
-  \let\univxn\relax%
-  \let\univls\relax%
-  \let\univrs\relax%
-  \let\univbs\relax%
-  \let\univxs\relax%
-  \let\dinbn\relax%
-  \let\textuln\relax%
-  \let\texturn\relax%
-  \let\textubn\relax%
-  \let\textuxn\relax%
-  \let\textuls\relax%
-  \let\texturs\relax%
-  \let\textubs\relax%
-  \let\textuxs\relax%
-  \let\textdbn\relax%
   \AtBeginDocument{%
-    \cmd@restore{rmdefault}%
-    \cmd@restore{sfdefault}%
-    \cmd@restore{bfdefault}%
-    \cmd@restore{mddefault}%
-    \cmd@restore{familydefault}%
-    \cmd@restore{seriesdefault}%
-    \cmd@restore{shapedefault}%
-    \cmd@restore{rmfamily}%
-    \cmd@restore{sffamily}%
-    \cmd@restore{ttfamily}%
     \DeclareSymbolFontAlphabet{\mathrm}{operators}
     \if@tud@fontspec%
       \DeclareFixedFont{\univLightHead}{\encodingdefault}%
