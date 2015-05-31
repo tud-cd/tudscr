@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-pagestyle.dtx}[%
-  2015/05/18 v2.04 TUD-KOMA-Script (pagestyle)%
+  2015/05/31 v2.04 TUD-KOMA-Script (pagestyle)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -349,31 +349,35 @@
 %    \begin{macrocode}
 \AfterPackage{scrlayer-scrpage}{%
 %    \end{macrocode}
+% \begin{layer}{tudheadings.head.content}
+% \changes{v2.04}{2015/05/31}{neu}^^A
 % \begin{layer}{tudheadings.head.mainlogo}
 % \changes{v2.02}{2014/06/23}{neu}^^A
+% \changes{v2.04}{2015/05/31}{entfernt}^^A
 % \begin{layer}{tudheadings.head.logo}
 % \changes{v2.02}{2014/06/23}{neu}^^A
-% Dies sind das links aus dem Satzspiegel verschobene Logo der \TnUD, \dots
+% \changes{v2.04}{2015/05/31}{entfernt}^^A
+% Dies sind das links aus dem Satzspiegel verschobene Logo der \TnUD und das 
+% Zweitlogo. Diese werden seit der Version~v2.04 nicht mehr in zwei getrennten 
+% sondern in einer gemeinsamen Ebene gesetzt.
 %    \begin{macrocode}
   \DeclareNewLayer[%
     background,headsep,%
     voffset=\tud@dim@logoy,%
     contents={%
-      \hspace*{\dimexpr\tud@dim@logox-\tud@dim@widemargin\relax}%
-      \tud@mainlogo%
-    },%
-  ]{tudheadings.head.mainlogo}%
 %    \end{macrocode}
-% \dots und das Zweitlogo.
+% Vor der Ausgabe der Logoboxen werden diese im Bedarfsfall neu gesetzt.
 %    \begin{macrocode}
-  \DeclareNewLayer[%
-    background,headsep,%
-    voffset=\tud@dim@logoy,%
-    contents={\hfill\tud@headlogo},%
-  ]{tudheadings.head.logo}%
+      \if@tud@mainlogo@set\tud@mainlogo@set\fi%
+      \if@tud@headlogo@option@set\tud@headlogo@option@set\fi%
+      \hspace*{\dimexpr\tud@dim@logox-\tud@dim@widemargin\relax}%
+      \tud@mainlogo@use\hfill\tud@headlogo@use%
+    },%
+  ]{tudheadings.head.content}%
 %    \end{macrocode}
 % \end{layer}^^A tudheadings.head.logo
 % \end{layer}^^A tudheadings.head.mainlogo
+% \end{layer}^^A tudheadings.head.content
 % \begin{layer}{tudheadings.head.back}
 % \changes{v2.03}{2015/02/14}{neu}^^A
 % \begin{layer}{tudheadings.head.bar}
@@ -475,21 +479,22 @@
 % \changes{v2.03}{2015/02/15}{neu}^^A
 % \begin{layer}{tudheadings.foot.logo}
 % \changes{v2.02}{2014/06/23}{neu}^^A
+% \changes{v2.04}{2015/05/31}{neu}^^A
 % \changes{v2.03}{2015/02/15}{überarbeitetet}^^A
 % \begin{layer}{tudheadings.foot.content}
 % \changes{v2.04}{2015/04/21}{neu}^^A
-% Die folgenden drei Ebenen dienen für die Ausgabe des Fußbereiches. Dieser 
-% kann mit einem farbigen Hintergrund und zusätzlichen Logos erstellt werden. 
+% Die folgenden Ebenen dienen für die Ausgabe des Fußbereiches. Dieser kann mit
+% einem farbigen Hintergrund und zusätzlichen Logos (\cs{footlogo}) sowie frei 
+% wählbare Inhalte ein- oder zweispaltig mit \cs{footcontent} erstellt werden.  
 % Dabei werden die Ebenen in Abhängigkeit vom gewählten Kompatibilitätsmodus
 % unterschiedlich definiert. Die erste Ebene bestimmt die Hintergrundgestaltung
-% des Fußbereiches. 
+% des Fußbereiches.
 %    \begin{macrocode}
   \DeclareNewLayer[%
-    background,%
+    background,foot,%
     hoffset=0pt,%
     width=\paperwidth,%
-    voffset=\dimexpr\@nameuse{scr@l@tudheadings.foot.logo@y}%
-      -\dp\strutbox\relax,%
+    addvoffset=-\dp\strutbox,%
     height=\dimexpr\paperheight-\layeryoffset\relax,%
     contents={%
       \if@tud@foot@colored%
@@ -523,9 +528,10 @@
     },%
   ]{tudheadings.foot.back}%
 %    \end{macrocode}
-% Die zweite Ebene wird für die Ausgabe von Drittlogos und des \DDC-Logos im
-% Seitenfuß erstellt. Ab der Version~v2.03 wird der Satzspiegel so gewählt, 
-% dass das \DDC-Logo in den normalen Seitenfuß passt.
+% Die zweite Ebene wird für die Ausgabe von Drittlogos und des \DDC-Logos sowie 
+% freien Inhalten im Seitenfuß erstellt. Ab Version~v2.03 wird der Satzspiegel
+% so gewählt, dass das \DDC-Logo und andere Inhalten in den normalen Seitenfuß
+% passen.
 %    \begin{macrocode}
   \DeclareNewLayer[%
     background,foot,%
@@ -533,45 +539,27 @@
     contents={%
 %    \end{macrocode}
 % Falls die Höhe der Logos im Fuß nicht durch den Anwender festgelegt wurden, 
-% werden passende Standardwerte gesetzt.
+% werden passende Standardwerte gesetzt. Außerdem wird die genutzte Höhe des
+% Layers nicht vollständig genutzt, um bei einem farbigen Fußbereich einen 
+% gewissen Abstand vom Inhalt zur Kante zu erhalten.
 %    \begin{macrocode}
-      \tud@footlogoheight@default%
+      \tud@footlogoheight@set%
+      \setlength\@tempdima{\dimexpr\layerheight-\dp\strutbox\relax}%
 %    \end{macrocode}
-% Die gesetzt Größe der Logos im Fuß wird geprüft. Sollten diese zu groß sein, 
-% wird eine Warnug ausgegeben.
+% Im Bedarfsfall werden die Boxen vor der Ausgabe neu gesetzt. Danach erfolgt 
+% die Ausgabe, wobei die boxen übereinander gelegt werden.
 %    \begin{macrocode}
-      \setlength\@tempdima{%
-        \dimexpr\footlogoheight-\layerheight+\dp\strutbox\relax%
-      }%
-      \ifdim\@tempdima>\vfuzz\relax%
-        \ClassWarning{\tudcls@name}{%
-          The chosen `\string\footlogoheight' 
-          (\the\footlogoheight)\MessageBreak%
-          is \the\@tempdima\space higher than recommended. You\MessageBreak%
-          should decrease this length
-          \ifcase\tud@geometry\relax\else% true/symmetric/twoside
-            or alternatively\MessageBreak%
-            enlarge the bottom margin by using option\MessageBreak%
-            `extrabottommargin'%
-          \fi%
-        }%
+      \if@tud@footlogo@option@set\tud@footlogo@option@set\fi%
+      \if@tud@footlogo@cmd@set%
+        \tud@footlogo@cmd@set{\@tempdima}{\layerwidth}%
       \fi%
-%    \end{macrocode}
-% Hier erfolgt die eigentliche Ausgabe der Logos. Dabei werden ggf. zuerst die 
-% mit \cs{footlogo} angegeben wurden, anschließend wird das \DDC-Logo gesetzt, 
-% fall dies gefordert ist.
-%    \begin{macrocode}
-      \let\@tempa\relax%
-      \@for\@tempb:=\tud@@footlogo\do{%
-        \@tempa%
-        \ifx\@tempb\@empty\else%
-          \expandafter\tud@footlogo\expandafter{\@tempb}%
-        \fi%
-        \let\@tempa\footlogosep%
-      }%
-      \tud@ddclogo%
+      \tud@footcontent@use{\@tempdima}{\layerwidth}%
+      \hspace*{-\layerwidth}%
+      \tud@footlogo@cmd@use%
+      \hspace*{-\layerwidth}%
+      \hfill\tud@footlogo@ddc@use{\@tempdima}%
     },%
-  ]{tudheadings.foot.logo}%
+  ]{tudheadings.foot.content}%
 %    \end{macrocode}
 % Bis zur Version~v2.02 wurde für die Verwendung des \DDC-Logos der Satzspiegel
 % geändert. Hier wird dem Rechnung getragen.
@@ -580,23 +568,8 @@
     \ModifyLayer[%
       addvoffset=-\tud@dim@ddcdiff+\ht\strutbox+\dp\strutbox,%
       height=\dimexpr.6\tud@dim@topmargin+\dp\strutbox\relax,%
-    ]{tudheadings.foot.logo}%
+    ]{tudheadings.foot.content}%
   }{}%
-%    \end{macrocode}
-% Die letzte Ebene setzt den Seitenfußinhalt der \pgs{tudheadings}-Seitenstile,
-% welcher mit \cs{footcontent} definiert wird.
-%    \begin{macrocode}
-  \DeclareNewLayer[%
-    background,foot,%
-    height=\dimexpr\paperheight-\layeryoffset\relax,%
-    contents={%
-      \vbox to \dimexpr\layerheight-\dp\strutbox\relax{%
-        \vfil%
-        \footlayer%
-        \vfil\vfil%
-      }%
-    },%
-  ]{tudheadings.foot.content}%
 %    \end{macrocode}
 % \end{layer}^^A tudheadings.foot.content
 % \end{layer}^^A tudheadings.foot.logo
@@ -632,8 +605,7 @@
     onselect=\tud@ps@onselect,onbackground=\tud@ps@onbackground%
   ]{tudheadings}{%
     tudheadings.head.back,%
-    tudheadings.head.mainlogo,%
-    tudheadings.head.logo,%
+    tudheadings.head.content,%
     tudheadings.head.bar,%
     tudheadings.head.text,%
     tudheadings.head.upperline,%
@@ -641,7 +613,6 @@
     tudheadings.head.upperwideline,%
     tudheadings.head.lowerwideline,%
     tudheadings.foot.back,%
-    tudheadings.foot.logo,%
     tudheadings.foot.content,%
     tudheadings.last,%
     scrheadings.foot.odd,%
@@ -664,8 +635,7 @@
     onselect=\tud@ps@onselect,onbackground=\tud@ps@onbackground%
   ]{plain.tudheadings}{%
     tudheadings.head.back,%
-    tudheadings.head.mainlogo,%
-    tudheadings.head.logo,%
+    tudheadings.head.content,%
     tudheadings.head.bar,%
     tudheadings.head.text,%
     tudheadings.head.upperline,%
@@ -673,7 +643,6 @@
     tudheadings.head.upperwideline,%
     tudheadings.head.lowerwideline,%
     tudheadings.foot.back,%
-    tudheadings.foot.logo,%
     tudheadings.foot.content,%
     tudheadings.last,%
     plain.scrheadings.foot.odd,%
@@ -695,8 +664,7 @@
     onselect=\tud@ps@onselect,onbackground=\tud@ps@onbackground%
   ]{empty.tudheadings}{%
     tudheadings.head.back,%
-    tudheadings.head.mainlogo,%
-    tudheadings.head.logo,%
+    tudheadings.head.content,%
     tudheadings.head.bar,%
     tudheadings.head.text,%
     tudheadings.head.upperline,%
@@ -704,7 +672,6 @@
     tudheadings.head.upperwideline,%
     tudheadings.head.lowerwideline,%
     tudheadings.foot.back,%
-    tudheadings.foot.logo,%
     tudheadings.foot.content,%
     tudheadings.last%
   }%
@@ -742,9 +709,18 @@
 % \end{macro}^^A \tud@restorepagecolor
 % \end{macro}^^A \tud@pagecolor
 % \end{layer}^^A tudheadings.pagecolor
-% Damit wurden alle Ebenen und die darauf aufbauenden Seitenstile deklariert.
+% Damit wurden alle Ebenen und die darauf aufbauenden Seitenstile deklariert. 
+% Mit der Nutzung von \pkg{scrlayer-scrpage} ist die parallele Verwendung des 
+% Paketes \pkg{fancyhdr} nicht möglich.
 %    \begin{macrocode}
 }
+\PreventPackageFromLoading[%
+  \ClassWarning{\tudcls@name}{%
+    The package `fancyhdr' must not be used with a\MessageBreak%
+    TUD-KOMA-Script class. You should make use of the\MessageBreak%
+    capabilities of package `scrlayer-scrpage' instead%
+  }%
+]{fancyhdr}
 %    \end{macrocode}
 % \end{pagestyle}^^A empty.tudheadings
 % \end{pagestyle}^^A plain.tudheadings
@@ -1076,24 +1052,56 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@head@text@wrn
-% \begin{macro}{\tud@mainlogo@wrn}
-% \changes{v2.02}{2014/06/23}{Umbenennen von \cs{tud@head@logo@wrn}}^^A
-% Warnung für den Fall, dass die Kopfinformationen breiter werden, als die
-% Textbreite, was bei besonders kleinen Papierformaten geschehen kann.
+% \begin{macro}{\tud@newlayerbox}
+% \changes{v2.04}{2015/05/31}{neu}^^A
+% \begin{macro}{\tud@savelayerbox}
+% \changes{v2.04}{2015/05/31}{neu}^^A
+% \begin{macro}{\tud@uselayerbox}
+% \changes{v2.04}{2015/05/31}{neu}^^A
+% Die Inhalte für Kopf und Fuß der \pgs{tudheadings}-Seitenstile~-- sprich das 
+% Logo der \TnUD, die \DDC-Logos, ein mögliches Zweilogo sowie die Logos und 
+% Inhalte im Fuß werden in Boxen gesetzt, um die Anzahl der benötigten Aufrufe
+% von \cs{includegraphics} möglichst gering zu halten.
 %    \begin{macrocode}
-\newcommand*\tud@mainlogo@wrn[1]{%
-  \ClassWarning{\tudcls@name}{%
-    The selected page layout means that the\MessageBreak%
-    logo of TUD extends beyond the printing area.\MessageBreak%
-    The inner margin is smaller than BCOR\MessageBreak%
-    (`BCOR=\the\ta@bcor', inner margin is #1)\MessageBreak%
-    Maybe you should decrease the current value\MessageBreak%
-    of DIV (`DIV=\the\ta@div')%
-  }%
-  \global\let\tud@mainlogo@wrn\@gobble%
+\newcommand*\tud@newlayerbox[1]{%
+  \expandafter\newsavebox\csname tud@logo@#1\endcsname%
+}
+\newcommand*\tud@savelayerbox[1]{%
+  \global\expandafter\sbox\csname tud@logo@#1\endcsname%
+}
+\newcommand*\tud@uselayerbox[1]{%
+  \expandafter\usebox\csname tud@logo@#1\endcsname%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@mainlogo@wrn
+% \end{macro}^^A \tud@uselayerbox
+% \end{macro}^^A \tud@savelayerbox
+% \end{macro}^^A \tud@newlayerbox
+% \begin{macro}{\tud@vlayerbox}
+% \changes{v2.04}{2015/05/31}{neu}^^A
+% Für die Ausgabe der Logos und Inhalte wird dieser Befehl definiert. Dieser 
+% setzt die im zweiten Argument angegebenen Inhalte in eine vertikale Box, 
+% deren gewünschte Höhe im ersten Argument angegeben wird. Für den Fall, dass 
+% die gewünschten Inhalte die maximale Höhe überschreiten, wird eine Warnung 
+% erzeugt. Der Inhalt dieser Warnung wird im dritten Argument angegeben. Damit
+% soll dem Anwender geholfen werden, in diesem Fall die richtigen Maßnahmen zu
+% ergreifen und nicht lediglich eine Meldung einer zu übervollen \cs{vbox} zu
+% erhalten.
+%    \begin{macrocode}
+\newcommand*\tud@vlayerbox[3]{%
+  \begingroup%
+    \setbox\z@\vbox{#2}%
+    \setlength\@tempdima{\dimexpr\ht\z@+\dp\z@-#1\relax}%
+    \ifdim\@tempdima>\z@\relax%
+      \ClassWarning{\tudcls@name}{%
+        #3\MessageBreak%
+        The maximum height is exceeded by \the\@tempdima%
+      }%
+    \fi%
+  \endgroup%
+  \vbox to #1{#2}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@vlayerbox
 %
 % \iffalse
 %</class&body>
@@ -1115,9 +1123,44 @@
 % Mit der Option \opt{ddc} wird das Logo nur in den Kopf gesetzt, wenn kein 
 % Zweitlogo angegeben ist. Ist dies jedoch der Fall, wird das Logo stattdessen 
 % im Fuß ausgegeben.
+% \begin{macro}{\if@tud@ddc@internal}
+% \changes{v2.02}{2014/07/08}{neu}^^A
+% \begin{macro}{\tud@clearpage@iftudps}
+% \changes{v2.04}{2015/05/31}{neu}^^A
+% \begin{macro}{\tud@pagestyle@iftudps}
+% \changes{v2.04}{2015/05/31}{neu}^^A
+% Dieser Schalter wird intern von den Optionen \opt{ddc}, \opt{ddchead} und 
+% \opt{ddcfoot} verwendet, um rekursive Aufrufe der optionen zu verhindern.
+%    \begin{macrocode}
+\newif\if@tud@ddc@internal
+%    \end{macrocode}
+% Bis zur Version~v2.02 wurden unterschiedliche Satzsiegel für den Seitenfuß 
+% mit und ohne \DDC-Logo verwendet. Damit dieser im Zweifelsfall umgestellt 
+% werden kann, wurde vor dem Ausführen der entsprechenden Optionen ein 
+% Seitenumbruch erzwungen und nach dem Verarbeiten der Optionen der aktuelle 
+% Seitenstil erneut aufgerufen. Die beiden folgenden Makros werden für dieses 
+% Unterfangen definiert, jedoch beider Abarbeitung der Optionen nur noch im 
+% Kompatibilitätmodus ausgeführt.
+%    \begin{macrocode}
+\newcommand*\tud@clearpage@iftudps{%
+  \if@tud@ddc@internal\else\if@atdocument%
+    \tud@iftudps{\currentpagestyle}{\clearpage}{}%
+  \fi\fi%
+}
+\newcommand*\tud@pagestyle@iftudps{%
+  \if@tud@ddc@internal\else\if@atdocument%
+    \tud@iftudps{\currentpagestyle}{%
+      \expandafter\pagestyle\expandafter{\currentpagestyle}%
+    }{}%
+  \fi\fi%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@clearpage@iftudps
+% \end{macro}^^A \tud@pagestyle@iftudps
+% \end{macro}^^A \if@tud@ddc@internal
 % \begin{macro}{\tud@ddc@switch}
 % \changes{v2.02}{2014/06/23}{neu}^^A
-% Dieser Befehl enthält die gültigen Werte für die Optionen \opt{ddc}, 
+% Dieses Makro definiert die gültigen Werte für die \DDC-Optionen \opt{ddc}, 
 % \opt{ddchead} sowie \opt{ddcfoot}.
 %    \begin{macrocode}
 \newcommand*\tud@ddc@switch{}
@@ -1132,55 +1175,56 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@ddc@switch
-% \begin{macro}{\tud@ddc@save}
-% \changes{v2.02}{2014/07/08}{neu}^^A
-% \begin{macro}{\if@tud@ddc@save}
-% \changes{v2.02}{2014/07/08}{neu}^^A
-% Diese beiden Befehle werden von den Optionen \opt{ddchead} und \opt{ddcfoot} 
-% benötigt, um nach dem Setzen der Option den vorherigen Wert vor dem möglichen 
-% Beenden einer Seite mit \cs{clearpage} wiederherstellen zu können.
-%    \begin{macrocode}
-\newcommand*\tud@ddc@save{}
-\newif\if@tud@ddc@save
-\@tud@ddc@savetrue
-%    \end{macrocode}
-% \end{macro}^^A \if@tud@ddc@save
-% \end{macro}^^A \tud@ddc@save
 % \begin{macro}{\tud@ddc}
 % \changes{v2.02}{2014/06/23}{neu}^^A
-% \begin{macro}{\if@tud@ddc@autoset}
+% \begin{macro}{\if@tud@ddc@auto}
 % \changes{v2.02}{2014/06/23}{neu}^^A
 % Die Option \opt{ddc}.
 %    \begin{macrocode}
+\newif\if@tud@ddc@auto
 \newcommand*\tud@ddc{0}
-\newif\if@tud@ddc@autoset
 \TUD@key{ddc}[true]{%
 %    \end{macrocode}
-% Sollte diese innerhalb des Dokumentes aufgerufen werden, so wird für den Fall,
-% dass ein \pgs{tudheadings}-Seitenstil gewählt ist, ein \cs{clearpage} 
-% ausgeführt, da eventuell eine Änderung des Layers sowie des Satzspeigels 
-% notwendig ist. Anschließend wird der Schalter \cs{if@tud@ddc@autoset}
-% entsprechend des angegebenen Wertes gesetzt.
+% Im Kompatibiltätsmodus wird ein Seitenumbruch erzwungen. Anschließend wird 
+% die Option abgearbeitet.
 %    \begin{macrocode}
+  \tud@ifverlower{2.04}{\tud@clearpage@iftudps}{}%
   \TUD@set@numkey{ddc}{tud@ddc}{\tud@ddc@switch}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \if@atdocument\tud@iftudps{\currentpagestyle}{\clearpage}{}\fi%
-    \ifcase\tud@ddc\relax% false
-      \@tud@ddc@autosetfalse%
-    \else% !false
-      \@tud@ddc@autosettrue%
+%    \end{macrocode}
+% Wurde die Option \opt{ddc} intern durch \opt{ddchead} oder \opt{ddcfoot} 
+% aufgerufen, wird die automatische Auswahl des \DDC-Logos deaktiviert.
+%    \begin{macrocode}
+    \if@tud@ddc@internal%
+      \@tud@ddc@autofalse%
+    \else%
+%    \end{macrocode}
+% Andernfalls wird die automatische Auswahl aktiviert und die beiden Optionen
+% \opt{ddchead} sowie \opt{ddcfoot} intern zurückgesetzt.
+%    \begin{macrocode}
+      \@tud@ddc@autotrue%
+      \@tud@ddc@internaltrue%
+      \TUDoptions{ddchead=false}%
+      \TUDoptions{ddcfoot=false}%
+      \@tud@ddc@internalfalse%
     \fi%
 %    \end{macrocode}
-% Abschließend wird der aktuelle Seitenstil erneut aufgerufen, um bei einem
-% geänderten Fuß den notwendigen Satzspiegel zu laden. Dies ist nur notwendig,
-% wenn die Option innerhalb des Dokumentes verwendet wurde.
-% Siehe \cs{tud@BeforeSelectAnyPageStyle}.
+% Sowohl die \DDC-Logos als auch ein mögliches Zweilogo (\cs{headlogo}) werden
+% in den entsprechenden Layern durch Boxen ausgegeben. Die beiden Schalter 
+% führen zum Erneuern der Logoboxen. Siehe \cs{tud@headlogo@option@set} sowie 
+% \cs{tud@footlogo@option@set}.
 %    \begin{macrocode}
-    \if@atdocument\expandafter\pagestyle\expandafter{\currentpagestyle}\fi%
+    \global\@tud@headlogo@option@settrue%
+    \global\@tud@footlogo@option@settrue%
   \fi%
+%    \end{macrocode}
+% Abschließend wird im Kompatibilitätsmodus der aktuelle Seitenstil aufgerufen,
+% um bei einem geänderten Fuß den notwendigen Satzspiegel zu laden.
+%    \begin{macrocode}
+  \tud@ifverlower{2.04}{\tud@pagestyle@iftudps}{}%
 }
 %    \end{macrocode}
-% \end{macro}^^A \if@tud@ddc@autoset
+% \end{macro}^^A \if@tud@ddc@auto
 % \end{macro}^^A \tud@ddc
 % \begin{macro}{\tud@ddc@head}
 % \changes{v2.03}{2015/01/22}{Bugfix Seitenstilauswahl bei Deaktivierung}^^A
@@ -1190,35 +1234,28 @@
 \newcommand*\tud@ddc@head{0}
 \TUD@key{ddchead}[true]{%
 %    \end{macrocode}
-% Der aktuelle Zustand des Schlüssels wird gesichert. Anschließend wird der 
-% Schlüssel mit dem neuen Wert gesetzt.
+% Der Seitenumbruch im Kompatibilitätsmodus.
 %    \begin{macrocode}
-  \if@tud@ddc@save\let\tud@ddc@save\tud@ddc@head\fi%
+  \tud@ifverlower{2.04}{\tud@clearpage@iftudps}{}%
   \TUD@set@numkey{ddchead}{tud@ddc@head}{\tud@ddc@switch}{#1}%
 %    \end{macrocode}
-% Sollte ein gültiger Wert für den Schlüssel übergeben worden sein, wird dieser
-% lokal auf den alten Wert gesetzt, um ggf. eine neue Seite zu erzeugen.
+% Beim internen Aufruf soll lediglich der Wert des Schlüssels geändert werden. 
+% Wurde die Option durch den Anwender genutzt, werden die korrespondierenden 
+% Optionen zurückgesetzt. Der Aufruf der Option \opt{ddc} führt zum erneuten 
+% setzen der Logoboxen.
 %    \begin{macrocode}
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \if@tud@ddc@save%
-      \begingroup%
-        \let\tud@ddc@head\tud@ddc@save%
-        \if@atdocument\tud@iftudps{\currentpagestyle}{\clearpage}{}\fi%
-      \endgroup%
-    \fi%
-%    \end{macrocode}
-% Danach werden die sich ausschließenden Optionen deaktiviert, ohne eine 
-% Sicherung der Werte vorzunehmen.
-%    \begin{macrocode}
-    \ifcase\tud@ddc@head\relax% false
-      \if@atdocument\expandafter\pagestyle\expandafter{\currentpagestyle}\fi%
-    \else% !false
-      \@tud@ddc@savefalse%
-      \TUDoptions{ddc=false}%
+    \if@tud@ddc@internal\else%
+      \@tud@ddc@internaltrue%
       \TUDoptions{ddcfoot=false}%
-      \@tud@ddc@savetrue%
+      \TUDoptions{ddc=false}%
+      \@tud@ddc@internalfalse%
     \fi%
   \fi%
+%    \end{macrocode}
+% Das Setzen des Seitenstils im Kompatibilitätsmodus.
+%    \begin{macrocode}
+  \tud@ifverlower{2.04}{\tud@pagestyle@iftudps}{}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@ddc@head
@@ -1230,50 +1267,62 @@
 %    \begin{macrocode}
 \newcommand*\tud@ddc@foot{0}
 \TUD@key{ddcfoot}[true]{%
-  \if@tud@ddc@save\let\tud@ddc@save\tud@ddc@foot\fi%
+%    \end{macrocode}
+% Der Seitenumbruch im Kompatibilitätsmodus.
+%    \begin{macrocode}
+  \tud@ifverlower{2.04}{\tud@clearpage@iftudps}{}%
   \TUD@set@numkey{ddcfoot}{tud@ddc@foot}{\tud@ddc@switch}{#1}%
+%    \end{macrocode}
+% Beim internen Aufruf soll lediglich der Wert des Schlüssels geändert werden. 
+% Wurde die Option durch den Anwender genutzt, werden die korrespondierenden 
+% Optionen zurückgesetzt. Der Aufruf der Option \opt{ddc} führt zum erneuten 
+% setzen der Logoboxen.
+%    \begin{macrocode}
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \if@tud@ddc@save%
-      \begingroup%
-        \let\tud@ddc@foot\tud@ddc@save%
-        \if@atdocument\tud@iftudps{\currentpagestyle}{\clearpage}{}\fi%
-      \endgroup%
-    \fi%
-    \ifcase\tud@ddc@foot\relax% false
-      \if@atdocument\expandafter\pagestyle\expandafter{\currentpagestyle}\fi%
-    \else% !false
-      \@tud@ddc@savefalse%
-      \TUDoptions{ddc=false}%
+    \if@tud@ddc@internal\else%
+      \@tud@ddc@internaltrue%
       \TUDoptions{ddchead=false}%
-      \@tud@ddc@savetrue%
+      \TUDoptions{ddc=false}%
+      \@tud@ddc@internalfalse%
     \fi%
   \fi%
+%    \end{macrocode}
+% Das Setzen des Seitenstils im Kompatibilitätsmodus.
+%    \begin{macrocode}
+  \tud@ifverlower{2.04}{\tud@pagestyle@iftudps}{}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@ddc@foot
 % \begin{macro}{\tud@ddc@check}
 % \changes{v2.02}{2014/06/23}{neu}^^A
-% Dieses Hilfsmakro wird aufgerufen, wenn geprüft werden soll, welche 
-% Einstellungen für Kopf und Fuß des Seitenstiles \pgs{tudheadings} zum Tragen 
-% kommen sollen. Dabei wird insbesondere geprüft, ob die automatischen Auswahl 
-% des \DDC-Logos aktiviert ist. Die jeweils gültige Auswahl für Kopf bzw. Fuß 
-% wird in \cs{@tempa} bzw. \cs{@tempb} geschrieben und kann anschließend 
-% ausgewertet werden.
+% Dieses Hilfsmakro wird aufgerufen, wenn geprüft wird, welche Einstellungen
+% für Kopf und Fuß des Seitenstiles \pgs{tudheadings} zum Tragen kommen sollen.
+% Dabei wird über den Schalter \cs{if@tud@ddc@auto}festgelegt, ob die Auswahl  
+% des \DDC-Logos automatisch erfolgen soll~-- Option \opt{ddc} wurde verwendet.
+% Ist dies der Fall, wird das Logo standardmäßig im Kopf gesetzt. Ist jedoch
+% durch den Befehl \cs{headlogo} ein Zweitlogo angegeben worde, wird dieses in
+% der Fußzeile ausgegeben. Die Verwendung einer der Optionen \opt{ddchead} bzw. 
+% \opt{ddcfoot} forciert die Ausgabe des \DDC-Logos an der gewünschten Stelle.
+% Die jeweils gültige Auswahl für Kopf bzw. Fuß wird in den Makros \cs{@tempa} 
+% bzw. \cs{@tempb} geschrieben und kann anschließend ausgewertet werden.
 %    \begin{macrocode}
 \newcommand*\tud@ddc@check{%
   \let\@tempa\tud@ddc@head%
   \let\@tempb\tud@ddc@foot%
-  \if@tud@ddc@autoset%
-    \ifx\tud@@headlogo\@empty%
+  \if@tud@ddc@auto%
+    \ifdefvoid{\@headlogo}{%
       \let\@tempa\tud@ddc%
       \let\@tempb\z@%
-    \else%
+    }{%
       \let\@tempa\z@%
       \let\@tempb\tud@ddc%
-    \fi%
+    }%
   \fi%
+%    \end{macrocode}
+% \ToDo{checken und Doku}[v2.04]
+%    \begin{macrocode}
   \tud@ifverlower{2.03}{%
-    \ifcase\@tempb\relax\ifx\tud@@footlogo\@empty\else\let\@tempb\m@ne\fi\fi%
+    \ifcase\@tempb\relax\ifdefvoid{\@footlogo}{}{\let\@tempb\m@ne}\fi%
   }{}%
 }
 %    \end{macrocode}
@@ -1324,112 +1373,430 @@
 %<*class&body>
 % \fi
 %
-% \begin{macro}{\tud@mainlogo}
-% \changes{v2.02}{2014/08/04}{Dateinamen der TUD-Logos geändert}^^A
-% \begin{macro}{\tud@@mainlogo}
-% Mit diesem Makro wird das Logo der TU~Dresden eingebunden. Bei der Verwendung
-% von pdf\LaTeX{} kann wird Farbe des Logos an die Kopffarbe angepasst. Wird
-% der klassische Weg über dvi gewählt, so muss abhängig von der gewählten
-% Kopffarbe das entsprechend gefärbte Logo eingebunden werden.
-%
+% \begin{macro}{\tud@logo@main@black}
+% \changes{v2.04}{2015/05/31}{neu}^^A
+% \begin{macro}{\tud@logo@main@HKS41}
+% \changes{v2.04}{2015/05/31}{neu}^^A
+% \begin{macro}{\tud@logo@main@white}
+% \changes{v2.04}{2015/05/31}{neu}^^A
+% Diese drei Boxen werden für das Logo der \TnUD reserviert. Abhängig von der 
+% gewählten Option des Layouts und der Seitenfarbe wird eine der Logos in der 
+% notwendigen Farbe ausgewählt.
 %    \begin{macrocode}
-\newcommand*\tud@@mainlogo{}
-\newcommand*\tud@mainlogo{%
+\tud@newlayerbox{main@black}
+\tud@newlayerbox{main@HKS41}
+\tud@newlayerbox{main@white}
+%    \end{macrocode}
+% \end{macro}^^A \tud@logo@main@white
+% \end{macro}^^A \tud@logo@main@HKS41
+% \end{macro}^^A \tud@logo@main@black
+% \begin{macro}{\tud@mainlogo@set}
+% \changes{v2.02}{2014/08/04}{Dateinamen der TUD-Logos geändert}^^A
+% \changes{v2.04}{2015/05/31}{neu}^^A
+% \begin{macro}{\if@tud@mainlogo@wrn}
+% \changes{v2.04}{2015/05/31}{neu}^^A
+% \begin{length}{\tud@mainlogoheight}
+% \changes{v2.04}{2015/05/31}{neu}^^A
+% \begin{macro}{\tud@mainlogo@wrn}
+% \changes{v2.02}{2014/06/23}{Umbenennen von \cs{tud@head@logo@wrn}}^^A
+%    \begin{macrocode}
+\newlength\tud@mainlogoheight
+\newcommand*\tud@mainlogo@wrn[1]{}
+%    \end{macrocode}
+% Dieses Makro setzt zu einen das Logo der \TnUD als auch~-- durch den Aufruf 
+% der entsprechenden Befehle zum Schluss~-- alle weiteren Logos und Inhalte im 
+% Kopf und Fuß. Dies geschieht nach jeder Satzspiegeländerung beim Ausführen 
+% der einzelnen Seitenstil-Layer. Dafür wird \cs{if@tud@mainlogo@set} gesetzt.
+%    \begin{macrocode}
+\newif\if@tud@mainlogo@set
+\newcommand*\tud@mainlogo@set{%
+  \def\@tempa{\includegraphics[keepaspectratio,width=\tud@dim@logowidth]}%
+  \tud@savelayerbox{main@black}{\@tempa{TUD-black}}%
+  \tud@savelayerbox{main@HKS41}{\@tempa{TUD-blue}}%
+  \tud@savelayerbox{main@white}{\@tempa{TUD-white}}%
+  \setlength\tud@mainlogoheight{\ht\tud@logo@main@black}%
+  \global\tud@mainlogoheight=\tud@mainlogoheight%
+  \global\@tud@mainlogo@setfalse%
 %    \end{macrocode}
 % Es soll sichergestellt werden, dass das bei der Verwendung von \pkg{typearea}
 % über den Satzspiegel in den Seitenrand hinausragende TUD-Logo nicht außerhalb
-% des Druckrandes liegt. Dies kann beispielsweise bei zweiseitigem Satz
-% und/oder einem zu großen \opt{DIV}-Wertes passieren. Es wird in diesem Fall
-% eine Warnung ausgegeben, damit das Problem durch den Anwender behoben werden
-% kann.
+% des Druckrandes liegt. Dies kann beispielsweise bei kleinen Papierformaten, 
+% zweiseitigem Satz und/oder einem zu großen \opt{DIV}-Wertes passieren. Es
+% wird in diesem Fall eine Warnung ausgegeben, damit das Problem durch den
+% Anwender behoben werden kann.
 %    \begin{macrocode}
-  \setlength\@tempdima{%
+  \gdef\tud@mainlogo@wrn##1{%
+    \ifdim##1<\ta@bcor\relax%
+      \ClassWarning{\tudcls@name}{%
+        The selected page layout means that the\MessageBreak%
+        logo of TUD extends beyond the printing area.\MessageBreak%
+        The inner margin is smaller than BCOR\MessageBreak%
+        (`BCOR=\the\ta@bcor', inner margin is \the##1)\MessageBreak%
+        Maybe you should decrease the current value\MessageBreak%
+        of DIV (`DIV=\the\ta@div')%
+      }%
+      \global\let\tud@mainlogo@wrn\@gobble%
+    \fi%
+  }%
+%    \end{macrocode}
+% Hier werden die beiden Makros aufgerufen, um die Inhalte von Kopf und Fuß in 
+% den Boxen in der richtigen Größe neu zu setzen.
+%    \begin{macrocode}
+  \tud@headlogo@set%
+  \tud@footlogo@set%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@mainlogo@wrn
+% \end{length}^^A \tud@mainlogoheight
+% \end{macro}^^A \if@tud@mainlogo@set
+% \end{macro}^^A \tud@mainlogo@set
+% \begin{macro}{\tud@mainlogo@use}
+% \changes{v2.04}{2015/05/31}{neu}^^A
+% \begin{macro}{\tud@mainlogo}
+% \changes{v2.04}{2015/05/31}{entfernt}^^A
+% \begin{macro}{\tud@@mainlogo}
+% \changes{v2.04}{2015/05/31}{entfernt}^^A
+% Hiermit erfolgt die Ausgabe der gespeicherten Boxen für das Logo der \TnUD, 
+% wobei \cs{tud@head@logocolor} die Farbe festlegt.
+%    \begin{macrocode}
+\newcommand*\tud@mainlogo@use{%
+  \tud@mainlogo@wrn{%
     \dimexpr\oddsidemargin+1in+\tud@dim@logox-\tud@dim@widemargin\relax%
   }%
-  \ifdim\@tempdima<\ta@bcor\relax\tud@mainlogo@wrn{\the\@tempdima}\fi%
-%    \end{macrocode}
-% Es wird das Standardlogo festgelegt und dieses ggf. für eine andere Kopffarbe 
-% geändert.
-%    \begin{macrocode}
-  \def\tud@@mainlogo{TUD-black}%
-  \ifstr{\tud@head@logocolor}{HKS41}{\def\tud@@mainlogo{TUD-blue}}{}%
-  \ifstr{\tud@head@logocolor}{white}{\def\tud@@mainlogo{TUD-white}}{}%
-  \includegraphics[keepaspectratio,width=\tud@dim@logowidth]{\tud@@mainlogo}%
+  \tud@uselayerbox{main@\tud@head@logocolor}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@@mainlogo
 % \end{macro}^^A \tud@mainlogo
+% \end{macro}^^A \tud@mainlogo@use
+% \begin{macro}{\tud@logo@head@black}
+% \changes{v2.04}{2015/05/31}{neu}^^A
+% \begin{macro}{\tud@logo@head@HKS41}
+% \changes{v2.04}{2015/05/31}{neu}^^A
+% \begin{macro}{\tud@logo@head@white}
+% \changes{v2.04}{2015/05/31}{neu}^^A
+% \begin{macro}{\tud@logo@head@option}
+% \changes{v2.04}{2015/05/31}{neu}^^A
+% Diese Boxen werden für das \DDC-Logo und das Zweitlogo im Kopf definiert. Der 
+% Box \cs{tud@logo@head@option} fäält dabei die Rolle zu, entweder ein~-- per 
+% Option gewähltes~-- \DDC-Logo oder aber das mit \cs{headlogo} angegebene 
+% Zweitlogo zusichern und auszugeben. Die anderen drei Boxen speichern das Logo 
+% von \DDC in den drei für die unterschiedlichen Layoutausprägung benötigten 
+% Varianten.
+%    \begin{macrocode}
+\tud@newlayerbox{head@black}
+\tud@newlayerbox{head@HKS41}
+\tud@newlayerbox{head@white}
+\tud@newlayerbox{head@option}
+%    \end{macrocode}
+% \end{macro}^^A \tud@logo@head@option
+% \end{macro}^^A \tud@logo@head@white
+% \end{macro}^^A \tud@logo@head@HKS41
+% \end{macro}^^A \tud@logo@head@black
 % \begin{macro}{\headlogo}
 % \changes{v2.02}{2014/06/23}{Anpassung an automatische Wahl des \DDC-Logos}^^A
-% \begin{macro}{\tud@headlogo}
-% \changes{v2.02}{2014/06/23}{\cs{tud@head@logo} umbenannt}^^A
-% \changes{v2.02}{2014/06/23}{von \cs{tud@ddc@sethead} wurde die Auswahl des 
-%   \DDC-Logos übernommen und erweitert}^^A
-% \begin{macro}{\tud@@headlogo}
+% \begin{macro}{\@headlogo}
 % \changes{v2.02}{2014/06/23}{\cs{tud@head@@logo} umbenannt}^^A
-% \begin{macro}{\tud@@@headlogo}
+% \begin{macro}{\@@headlogo}
 % \changes{v2.02}{2014/06/23}{Umbenennen des Befehls \cs{tud@head@@@logo}}^^A
 % \begin{macro}{\tud@headlogo@wrn}
 % \changes{v2.02}{2014/06/23}{neu}^^A
 % Diese Befehle dienen zum Einbinden eines Zweitlogos im Kopf bündig zum
 % rechten Seitenrand. Bei der Angabe des Logos mit
 % \cs{headlogo}\oarg{Optionsliste}\marg{Dateiname} wird der Dateiname in
-% \cs{tud@@headlogo} und das optionale Argument in \cs{tud@@@headlogo}
+% \cs{@headlogo} und das optionale Argument in \cs{@@headlogo}
 % gespeichert, damit diese später über \cs{tud@headlogo} an den Befehl
 % \cs{includegraphics} weitergereicht werden können.
 %    \begin{macrocode}
-\newcommand*\tud@@headlogo{}
-\newcommand*\tud@@@headlogo{}
+\newcommand*\@headlogo{}
+\newcommand*\@@headlogo{}
+\newcommand*\tud@headlogo@wrn{}
 \newcommand*\headlogo[2][]{%
-  \if@atdocument\tud@iftudps{\currentpagestyle}{\clearpage}{}\fi%
-  \def\tud@@headlogo{#2}%
-  \def\tud@@@headlogo{#1}%
-  \if@atdocument\expandafter\pagestyle\expandafter{\currentpagestyle}\fi%
-}
-\newcommand*\tud@headlogo{%
-  \tud@ddc@check%
-  \ifx\tud@@headlogo\@empty\else%
-    \ifnum\@tempa>\z@\relax\tud@headlogo@wrn\fi% \tud@ddc@head!=false
-  \fi%
-  \ifcase\@tempa\relax\or% \tud@ddc@head=true
-    \def\tud@@headlogo{DDC-24}%
-    \ifstr{\tud@head@logocolor}{HKS41}{\def\tud@@headlogo{DDC-27}}{}%
-    \ifstr{\tud@head@logocolor}{white}{\def\tud@@headlogo{DDC-30}}{}%
-  \or% \tud@ddc@head=color
-    \def\tud@@headlogo{DDC-03}%
-  \or% \tud@ddc@head=colorblack
-    \def\tud@@headlogo{DDC-09}%
-  \or% \tud@ddc@head=gray
-    \def\tud@@headlogo{DDC-21}%
-  \or% \tud@ddc@head=black
-    \def\tud@@headlogo{DDC-24}%
-  \or% \tud@ddc@head=blue
-    \def\tud@@headlogo{DDC-27}%
-  \or% \tud@ddc@head=white
-    \def\tud@@headlogo{DDC-30}%
-  \fi%
-  \ifx\tud@@headlogo\@empty\else%
-    \settoheight\@tempdima{\tud@mainlogo}%
-    \protected@epreto\tud@@@headlogo{%
-      keepaspectratio,totalheight=\the\@tempdima,%
+  \tud@ifverlower{2.04}{\tud@clearpage@iftudps}{}%
+  \def\@headlogo{#2}%
+  \def\@@headlogo{#1}%
+%    \end{macrocode}
+% Nachdem Setzen des Zweitlogos müssen die entsprechenden Boxen mit den Logos 
+% von \DDC neu gesetzt werden. Weil dieses dabei vom Kopf in den Fuß oder
+% umgekehrt wandern könnte, werden beide relevanten Makros ausgeführt.
+%    \begin{macrocode}
+  \global\@tud@headlogo@option@settrue%
+  \global\@tud@footlogo@option@settrue%
+  \gdef\tud@headlogo@wrn{%
+    \ClassWarning{\tudcls@name}{%
+      The secondary logo `\string\headlogo{\@headlogo}' is\MessageBreak%
+      overwritten with DDC logo. Maybe you should use\MessageBreak%
+      `ddcfoot' or better `ddc' instead of `ddchead'%
     }%
-    \expandafter\includegraphics\expandafter[\tud@@@headlogo]{\tud@@headlogo}%
-  \fi%
-}
-\newcommand*\tud@headlogo@wrn{%
-  \ClassWarning{\tudcls@name}{%
-    The secondary logo given with `\string\headlogo' is\MessageBreak%
-    overwritten with DDC logo. Maybe you should use\MessageBreak%
-    `ddcfoot' or better `ddc' instead of `ddchead'%
+    \global\let\tud@headlogo@wrn\relax%
   }%
-  \global\let\tud@headlogo@wrn\relax%
+  \tud@ifverlower{2.04}{\tud@pagestyle@iftudps}{}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@headlogo@wrn
-% \end{macro}^^A \tud@@@headlogo
-% \end{macro}^^A \tud@@headlogo
-% \end{macro}^^A \tud@headlogo
+% \end{macro}^^A \@@headlogo
+% \end{macro}^^A \@headlogo
 % \end{macro}^^A \headlogo
+% \begin{macro}{\tud@headlogo@set}
+% \changes{v2.02}{2014/06/23}{\cs{tud@head@logo} umbenannt}^^A
+% \changes{v2.02}{2014/06/23}{von \cs{tud@ddc@sethead} wurde die Auswahl des 
+%   \DDC-Logos übernommen und erweitert}^^A
+% \begin{macro}{\tud@headlogo@option@set}
+% \changes{v2.04}{2015/05/31}{neu}^^A
+% \begin{macro}{\if@tud@headlogo@option@set}
+% \changes{v2.04}{2015/05/31}{neu}^^A
+% Wie beim Logo der \TnUD werdenauch für das \DDC-Logo drei Varianten erstellt. 
+%    \begin{macrocode}
+\newcommand*\tud@headlogo@set{%
+  \def\@tempa{%
+    \includegraphics[keepaspectratio,totalheight=\tud@mainlogoheight]%
+  }%
+  \tud@savelayerbox{head@black}{\@tempa{DDC-24}}%
+  \tud@savelayerbox{head@HKS41}{\@tempa{DDC-27}}%
+  \tud@savelayerbox{head@white}{\@tempa{DDC-30}}%
+  \tud@headlogo@option@set%
+}
+%    \end{macrocode}
+% Hiermit werden die \DDC-Optionen \opt{ddc} bzw. \opt{ddchead} abgearbeitet 
+% sowie ein ggf. gegebenes Zweitlogo gespeichert. Dies geschieht beim Aufruf 
+% des passenden Layers, falls der Schalter \cs{if@tud@headlogo@option@set} 
+% gesetzt wurde.
+%    \begin{macrocode}
+\newif\if@tud@headlogo@option@set
+\newcommand*\tud@headlogo@option@set{%
+  \def\@tempc##1##2{%
+    \tud@savelayerbox{head@option}{%
+      \includegraphics[%
+        keepaspectratio,totalheight=\tud@mainlogoheight,##2%
+      ]{\trim@spaces{##1}}%
+    }%
+  }%
+  \tud@savelayerbox{head@option}{}%
+  \tud@ddc@check%
+  \ifcase\@tempa\relax% \tud@ddc@head=false
+    \ifdefvoid{\@headlogo}{}{%
+      \protected@edef\@tempb{\noexpand\@tempc{\@headlogo}{\@@headlogo}}%
+      \@tempb%
+    }%
+  \or\or% \tud@ddc@head=color
+    \@tempc{DDC-03}{}%
+  \or% \tud@ddc@head=colorblack
+    \@tempc{DDC-09}{}%
+  \or% \tud@ddc@head=gray
+    \@tempc{DDC-21}{}%
+  \or% \tud@ddc@head=black
+    \@tempc{DDC-24}{}%
+  \or% \tud@ddc@head=blue
+    \@tempc{DDC-27}{}%
+  \or% \tud@ddc@head=white
+    \@tempc{DDC-30}{}%
+  \fi%
+  \global\@tud@headlogo@option@setfalse%
+}
+%    \end{macrocode}
+% \end{macro}^^A \if@tud@headlogo@option@set
+% \end{macro}^^A \tud@headlogo@option@set
+% \end{macro}^^A \tud@headlogo@set
+% \begin{macro}{\tud@headlogo@use}
+% \changes{v2.04}{2015/05/31}{neu}^^A
+% Die Ausgabe von \DDC- oder Zweitlogo im Kopf erfolgt mit diesem Makro. Dabei 
+% werden diese in einer Box vertikal zentriert.
+%    \begin{macrocode}
+\newcommand*\tud@headlogo@use{%
+  \tud@vlayerbox{\tud@mainlogoheight}{%
+    \vss%
+    \hbox{%
+      \tud@ddc@check%
+      \ifnum\@tempa=\@ne\relax% \tud@ddc@head=true
+        \tud@uselayerbox{head@\tud@head@logocolor}%
+      \else%
+        \tud@uselayerbox{head@option}%
+      \fi%
+    }%
+    \vss%
+  }{%
+    The given `\string\headlogo{\@headlogo}' is too large.%
+  }
+  \ifdefvoid{\@headlogo}{}{%
+    \tud@ddc@check%
+    \ifnum\@tempa>\z@\relax\tud@headlogo@wrn\fi%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@headlogo@use
+
+
+
+
+
+
+
+% \begin{macro}{\footlogo}
+% \changes{v2.03}{2015/01/27}{neu}^^A
+% \begin{macro}{\footlogosep}
+% \changes{v2.03}{2015/01/27}{neu}^^A
+% \begin{length}{\footlogoheight}
+% \changes{v2.03}{2015/01/27}{neu}^^A
+% \begin{macro}{\tud@footlogoheight@set}
+% \changes{v2.04}{2015/04/21}{neu}^^A
+% \begin{macro}{\tud@footlogo}
+% \changes{v2.03}{2015/01/27}{neu}^^A
+% \changes{v2.03}{2015/02/02}{optionale Parameter für unterschiedliche Dateien 
+% individuell nutzbar}^^A
+% \begin{macro}{\tud@footlogo@parser}
+% \changes{v2.03}{2015/02/02}{neu}^^A
+% \begin{macro}{\@footlogo}
+% \changes{v2.03}{2015/01/27}{neu}^^A
+% \begin{macro}{\@@footlogo}
+% \changes{v2.03}{2015/01/27}{neu}^^A
+% Mit dem Befehl \cs{footlogo} kann eine kommasparierte Liste für Logos im 
+% Fuß angegeben werden, die mit \cs{footlogosep} voneinander getrennt werden.
+%    \begin{macrocode}
+\newlength\footlogoheight
+\newcommand*\tud@footlogoheight@set{%
+  \ifdim\footlogoheight>\z@\relax\else%
+    \settoheight\footlogoheight{\tud@mainlogo}%
+    \tud@ifverlower{2.03}{%
+      \setlength\footlogoheight{.6\tud@dim@topmargin}%
+    }{}%
+  \fi%
+}
+\newcommand*\footlogosep{\hfill}
+
+
+      \ifdim\@tempdima>\vfuzz\relax%
+        \ClassWarning{\tudcls@name}{%
+          The chosen `\string\footlogoheight' 
+          (\the\footlogoheight)\MessageBreak%
+          is \the\@tempdima\space higher than recommended. You\MessageBreak%
+          should decrease this length
+          \ifcase\tud@geometry\relax\else% true/symmetric/twoside
+            or alternatively\MessageBreak%
+            enlarge the bottom margin by using option\MessageBreak%
+            `extrabottommargin'%
+          \fi%
+        }%
+      \fi%
+      
+%    \end{macrocode}
+% Hier erfolgt die eigentliche Ausgabe der Logos. Dabei werden ggf. zuerst die 
+% mit \cs{footlogo} angegeben wurden, anschließend wird das \DDC-Logo gesetzt, 
+% fall dies gefordert ist.
+%    \begin{macrocode}
+      \let\@tempa\relax%
+      \@for\@tempb:=\@footlogo\do{%
+        \@tempa%
+        \ifx\@tempb\@empty\else%
+          \expandafter\tud@footlogo\expandafter{\@tempb}%
+        \fi%
+        \let\@tempa\footlogosep%
+      }%
+      \tud@ddclogo%
+
+
+\newcommand*\@footlogo{}
+\newcommand*\@@footlogo{}
+\newcommand*\footlogo[2][]{%
+  \if@atdocument\tud@iftudps{\currentpagestyle}{\clearpage}{}\fi%
+  \def\@footlogo{#2}%
+  \def\@@footlogo{#1}%
+  \if@atdocument\expandafter\pagestyle\expandafter{\currentpagestyle}\fi%
+}
+%    \end{macrocode}
+% Der Befehl \cs{tud@footlogo} wird genutzt, um die Logos für den Fuß innerhalb 
+% der Ebene \val{tudheadings.foot.content} auszugeben.
+%    \begin{macrocode}
+\DeclareListParser{\tud@footlogo@parser}{:}%
+\newcommand*\tud@footlogo[1]{%
+  \begingroup%
+%    \end{macrocode}
+% Dabei soll es möglich sein, optionale Parameter an \cs{includegraphics} zu 
+% übergeben. Dies soll zum einen global für alle Dateien als auch individuell 
+% für einzelne Logos möglich sein. Zu diesem Zweck wird die Schnittstelle für 
+% den Anwender so gestaltet, dass individuelle Parameter mit einem Doppelpunkt
+% direkt an den Dateinamen angehangen werden können.
+%    \begin{macrocode}
+    \def\@tempa{}%
+    \def\@tempb{}%
+    \@tempswatrue%
+    \def\do##1{%
+      \if@tempswa%
+        \def\@tempa{##1}%
+        \@tempswafalse%
+      \else%
+        \expandafter\def\expandafter\@tempb\expandafter{\@tempb,##1}%
+      \fi%
+    }%
+    \tud@footlogo@parser{#1}%
+%    \end{macrocode}
+% Wurden tatsächlich inidviduelle Parameter übergeben, so werden diese als 
+% letztes ausgeführt, um vorige Einstellungen überschreiben zu können.
+%    \begin{macrocode}
+    \protected@eappto\@@footlogo{\@tempb}%
+%    \end{macrocode}
+% In jedem Fall werden die Grundeinstellungen als erstes ausgeführt.
+%    \begin{macrocode}
+    \protected@epreto\@@footlogo{%
+      keepaspectratio,totalheight=\the\footlogoheight,%
+    }%
+    \protected@edef\@tempc{\noexpand\includegraphics[\@@footlogo]{\@tempa}}%
+    \vbox to \dimexpr\layerheight-\dp\strutbox\relax{%
+      \vfil\hbox{\@tempc}\vfil\vfil%
+    }%
+  \endgroup%
+}
+%    \end{macrocode}
+% \end{macro}^^A \@@footlogo
+% \end{macro}^^A \@footlogo
+% \end{macro}^^A \tud@footlogo@parser
+% \end{macro}^^A \tud@footlogo
+% \end{macro}^^A \tud@footlogoheight@set
+% \end{length}^^A \footlogoheight
+% \end{macro}^^A \footlogosep
+% \end{macro}^^A \footlogo
+% \begin{macro}{\tud@ddclogo}
+% \changes{v2.02}{2014/06/23}{neu}^^A
+% \begin{macro}{\tud@@ddclogo}
+% \changes{v2.02}{2014/06/23}{\cs{tud@foot@logo} umbenannt}^^A
+% \changes{v2.03}{2015/01/13}{Größe des Logos kompatibilitätsabhängig}^^A
+% Diese Befehle dienen zum Einbinden des \DDC-Logos im Fuß der Seiten im Stil 
+% \pgs{tudheadings}.
+%    \begin{macrocode}
+\newcommand*\tud@@ddclogo{}
+\newcommand*\tud@ddclogo{%
+  \tud@ddc@check%
+  \ifcase\@tempb\relax\or% \tud@ddc@foot=true
+    \def\tud@@ddclogo{DDC-22}%
+    \ifstr{\tud@foot@logocolor}{HKS41}{\def\tud@@ddclogo{DDC-25}}{}%
+    \ifstr{\tud@foot@logocolor}{white}{\def\tud@@ddclogo{DDC-28}}{}%
+  \or% \tud@ddc@foot=color
+    \def\tud@@ddclogo{DDC-01}%
+  \or% \tud@ddc@foot=colorblack
+    \def\tud@@ddclogo{DDC-07}%
+  \or% \tud@ddc@foot=gray
+    \def\tud@@ddclogo{DDC-19}%
+  \or% \tud@ddc@foot=black
+    \def\tud@@ddclogo{DDC-22}%
+  \or% \tud@ddc@foot=blue
+    \def\tud@@ddclogo{DDC-25}%
+  \or% \tud@ddc@foot=white
+    \def\tud@@ddclogo{DDC-28}%
+  \fi%
+  \ifx\tud@@ddclogo\@empty\else%
+    \let\@@footlogo\relax%
+    \hfill\tud@footlogo{\tud@@ddclogo}%
+  \fi%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@@ddclogo
+% \end{macro}^^A \tud@ddclogo
+% \begin{macro}{\tud@ddc@sethead}
+% \changes{v2.02}{2014/06/23}{entfernt}^^A
+% \begin{macro}{\tud@ddc@setfoot}
+% \changes{v2.02}{2014/06/23}{entfernt}^^A
+% Diese Befehle wurden mit der \TUDScript-Version~v2.02 entfernt.
+% \end{macro}^^A \tud@ddc@setfoot
+% \end{macro}^^A \tud@ddc@sethead
 % \begin{KOMAfont}{tudheadings}
 % \changes{v2.04}{2015/04/21}{neu}^^A
 % \begin{macro}{\footcontent}
@@ -1484,7 +1851,7 @@
   \fi%
   \appto\footlayer{%
     #1%
-    \tud@footlogoheight@default%
+    \tud@footlogoheight@set%
     \tud@ddc@check%
     \ifcase\@tempb%
       \setlength\@tempdima{\z@}%
@@ -1519,140 +1886,6 @@
 % \end{macro}^^A \@footcontent
 % \end{macro}^^A \footcontent
 % \end{KOMAfont}^^A tudheadings
-% \begin{macro}{\footlogo}
-% \changes{v2.03}{2015/01/27}{neu}^^A
-% \begin{macro}{\footlogosep}
-% \changes{v2.03}{2015/01/27}{neu}^^A
-% \begin{length}{\footlogoheight}
-% \changes{v2.03}{2015/01/27}{neu}^^A
-% \begin{macro}{\tud@footlogoheight@default}
-% \changes{v2.04}{2015/04/21}{neu}^^A
-% \begin{macro}{\tud@footlogo}
-% \changes{v2.03}{2015/01/27}{neu}^^A
-% \changes{v2.03}{2015/02/02}{optionale Parameter für unterschiedliche Dateien 
-% individuell nutzbar}^^A
-% \begin{macro}{\tud@footlogo@parser}
-% \changes{v2.03}{2015/02/02}{neu}^^A
-% \begin{macro}{\tud@@footlogo}
-% \changes{v2.03}{2015/01/27}{neu}^^A
-% \begin{macro}{\tud@@@footlogo}
-% \changes{v2.03}{2015/01/27}{neu}^^A
-% Mit dem Befehl \cs{footlogo} kann eine kommasparierte Liste für Logos im 
-% Fuß angegeben werden, die mit \cs{footlogosep} voneinander getrennt werden.
-%    \begin{macrocode}
-\newlength\footlogoheight
-\newcommand*\tud@footlogoheight@default{%
-  \ifdim\footlogoheight>\z@\relax\else%
-    \settoheight\footlogoheight{\tud@mainlogo}%
-    \tud@ifverlower{2.03}{%
-      \setlength\footlogoheight{.6\tud@dim@topmargin}%
-    }{}%
-  \fi%
-}
-\newcommand*\footlogosep{\hfill}
-\newcommand*\tud@@footlogo{}
-\newcommand*\tud@@@footlogo{}
-\newcommand*\footlogo[2][]{%
-  \if@atdocument\tud@iftudps{\currentpagestyle}{\clearpage}{}\fi%
-  \def\tud@@footlogo{#2}%
-  \def\tud@@@footlogo{#1}%
-  \if@atdocument\expandafter\pagestyle\expandafter{\currentpagestyle}\fi%
-}
-%    \end{macrocode}
-% Der Befehl \cs{tud@footlogo} wird genutzt, um die Logos für den Fuß innerhalb 
-% der Ebene \val{tudheadings.foot.logo} auszugeben.
-%    \begin{macrocode}
-\DeclareListParser{\tud@footlogo@parser}{:}%
-\newcommand*\tud@footlogo[1]{%
-  \begingroup%
-%    \end{macrocode}
-% Dabei soll es möglich sein, optionale Parameter an \cs{includegraphics} zu 
-% übergeben. Dies soll zum einen global für alle Dateien als auch individuell 
-% für einzelne Logos möglich sein. Zu diesem Zweck wird die Schnittstelle für 
-% den Anwender so gestaltet, dass individuelle Parameter mit einem Doppelpunkt
-% direkt an den Dateinamen angehangen werden können.
-%    \begin{macrocode}
-    \def\@tempa{}%
-    \def\@tempb{}%
-    \@tempswatrue%
-    \def\do##1{%
-      \if@tempswa%
-        \def\@tempa{##1}%
-        \@tempswafalse%
-      \else%
-        \expandafter\def\expandafter\@tempb\expandafter{\@tempb,##1}%
-      \fi%
-    }%
-    \tud@footlogo@parser{#1}%
-%    \end{macrocode}
-% Wurden tatsächlich inidviduelle Parameter übergeben, so werden diese als 
-% letztes ausgeführt, um vorige Einstellungen überschreiben zu können.
-%    \begin{macrocode}
-    \protected@eappto\tud@@@footlogo{\@tempb}%
-%    \end{macrocode}
-% In jedem Fall werden die Grundeinstellungen als erstes ausgeführt.
-%    \begin{macrocode}
-    \protected@epreto\tud@@@footlogo{%
-      keepaspectratio,totalheight=\the\footlogoheight,%
-    }%
-    \protected@edef\@tempc{\noexpand\includegraphics[\tud@@@footlogo]{\@tempa}}%
-    \vbox to \dimexpr\layerheight-\dp\strutbox\relax{%
-      \vfil\hbox{\@tempc}\vfil\vfil%
-    }%
-  \endgroup%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@@@footlogo
-% \end{macro}^^A \tud@@footlogo
-% \end{macro}^^A \tud@footlogo@parser
-% \end{macro}^^A \tud@footlogo
-% \end{macro}^^A \tud@footlogoheight@default
-% \end{length}^^A \footlogoheight
-% \end{macro}^^A \footlogosep
-% \end{macro}^^A \footlogo
-% \begin{macro}{\tud@ddclogo}
-% \changes{v2.02}{2014/06/23}{neu}^^A
-% \begin{macro}{\tud@@ddclogo}
-% \changes{v2.02}{2014/06/23}{\cs{tud@foot@logo} umbenannt}^^A
-% \changes{v2.03}{2015/01/13}{Größe des Logos kompatibilitätsabhängig}^^A
-% Diese Befehle dienen zum Einbinden des \DDC-Logos im Fuß der Seiten im Stil 
-% \pgs{tudheadings}.
-%    \begin{macrocode}
-\newcommand*\tud@@ddclogo{}
-\newcommand*\tud@ddclogo{%
-  \tud@ddc@check%
-  \ifcase\@tempb\relax\or% \tud@ddc@foot=true
-    \def\tud@@ddclogo{DDC-22}%
-    \ifstr{\tud@foot@logocolor}{HKS41}{\def\tud@@ddclogo{DDC-25}}{}%
-    \ifstr{\tud@foot@logocolor}{white}{\def\tud@@ddclogo{DDC-28}}{}%
-  \or% \tud@ddc@foot=color
-    \def\tud@@ddclogo{DDC-01}%
-  \or% \tud@ddc@foot=colorblack
-    \def\tud@@ddclogo{DDC-07}%
-  \or% \tud@ddc@foot=gray
-    \def\tud@@ddclogo{DDC-19}%
-  \or% \tud@ddc@foot=black
-    \def\tud@@ddclogo{DDC-22}%
-  \or% \tud@ddc@foot=blue
-    \def\tud@@ddclogo{DDC-25}%
-  \or% \tud@ddc@foot=white
-    \def\tud@@ddclogo{DDC-28}%
-  \fi%
-  \ifx\tud@@ddclogo\@empty\else%
-    \let\tud@@@footlogo\relax%
-    \hfill\tud@footlogo{\tud@@ddclogo}%
-  \fi%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@@ddclogo
-% \end{macro}^^A \tud@ddclogo
-% \begin{macro}{\tud@ddc@sethead}
-% \changes{v2.02}{2014/06/23}{entfernt}^^A
-% \begin{macro}{\tud@ddc@setfoot}
-% \changes{v2.02}{2014/06/23}{entfernt}^^A
-% Diese Befehle wurden mit der \TUDScript-Version~v2.02 entfernt.
-% \end{macro}^^A \tud@ddc@setfoot
-% \end{macro}^^A \tud@ddc@sethead
 %
 % \iffalse
 %</class&body>
@@ -1898,7 +2131,8 @@
     \TUD@numkey@bool,%
     {typearea}{0},%
     {cd}{1},{tud}{1},{asymmetric}{1},%
-    {symmetric}{2},{centred}{2},{centered}{2},{normal}{2},%
+    {symmetric}{2},{centred}{2},{centered}{2},%
+    {normal}{2},{standard}{2},{std}{2},%
     {twoside}{3},{balanced}{3}%
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
@@ -2549,7 +2783,7 @@
 %    \end{macrocode}
 % \end{length}^^A \tud@ta@footdiff
 % \end{length}^^A \tud@ta@headdiff
-% \begin{macro}{\tud@AfterCalculatingTypearea}
+% \begin{macro}{\tud@AfterChangingArea}
 % \changes{v2.04}{2015/03/10}{neu}^^A
 % Der Befehl \cs{AfterCalculatingTypearea} wird durch das Paket \pkg{typearea}
 % bereitgestellt. Die durch \pkg{typearea} berechneten Längenwerte für den
@@ -2560,7 +2794,7 @@
 % unabhängig vom genutzten Paket\footnote{\pkg{typearea} oder \pkg{geometry}}
 % zur Festlegung des Satzspiegels, diesen innerhalb des Dokumentes zu ändern.
 %    \begin{macrocode}
-\newcommand*\tud@AfterCalculatingTypearea{%
+\newcommand*\tud@AfterChangingArea{%
   \setlength\tud@ta@textheight{\textheight}%
   \setlength\tud@ta@topmargin{\topmargin}%
   \setlength\tud@ta@headheight{\headheight}%
@@ -2573,6 +2807,10 @@
   \setlength\tud@ta@footskip{\footskip}%
   \tud@geometry@process%
 %    \end{macrocode}
+% Nachder Änderung desSatzspiegels werden alle Logoboxen neu erstellt.
+%    \begin{macrocode}
+  \global\@tud@mainlogo@settrue%
+%    \end{macrocode}
 % Damit Änderungen am Satzspiegel im Dokument sicher übernommen werden, wird 
 % das Setzen des Satzspiegels forciert. Dafür wird \cs{tud@currentgeometry} 
 % zurückgesetzt und anschließend der aktuelle Seitenstil erneut geladen, um das 
@@ -2583,7 +2821,7 @@
   \expandafter\pagestyle\expandafter{\currentpagestyle}%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@AfterCalculatingTypearea
+% \end{macro}^^A \tud@AfterChangingArea
 % Damit alle Satzspiegeleinstellungen korrekt vorgenommen und auch alle
 % Klassenoptionen korrekt verarbeitet werden, wird die Berechnung erstmalig mit
 % \cs{AtEndPreamble} am Ende der Präambel ausgeführt. Nachfolgend erstellt
@@ -2595,10 +2833,14 @@
 \AtEndPreamble{%
   \tud@ifsacrop{}{%
 %    \end{macrocode}
-% Nach einer Neuberechnung durch \pkg{typearea} werden die für die Seitenstile 
-% benötigten Satzspiegel mit \pkg{geometry} neu erstellt.
+% Nach einer Neuberechnung oder Änderung des Satzspiegels durch \pkg{typearea} 
+% werden die für die Seitenstile benötigten Satzspiegel mit \pkg{geometry} neu
+% erstellt.
+% \ToDo[\cs{AfterRestoreareas} einfügen]{v3.18}
 %    \begin{macrocode}
-    \AfterCalculatingTypearea{\tud@AfterCalculatingTypearea}%
+    \AfterCalculatingTypearea{\tud@AfterChangingArea}%
+    \AfterSettingArea{\tud@AfterChangingArea}%
+%    \AfterRestoreareas{\tud@AfterChangingArea}%
 %    \end{macrocode}
 % Der Kopf im \CD der \TnUD erfordert einen eigenen Satzspiegel, der ggf. durch 
 % \cs{tud@BeforeSelectAnyPageStyle} aktiviert bzw. deaktiviert wird.

@@ -70,7 +70,7 @@
       \fi%
     }%
   \fi%
-  \@TUDVersion{2015/05/18 v2.04 BETA TUD-KOMA-Script}%
+  \@TUDVersion{2015/05/31 v2.04 BETA TUD-KOMA-Script}%
 \endgroup%
 \providecommand*\tudscrmail{tudscr@gmail.com}
 \newcommand*\cls@name{report}
@@ -78,7 +78,7 @@
 \newcommand*\tudcls@name{tudscrreprt}
 \NeedsTeXFormat{LaTeX2e}[2011/06/27]
 \ProvidesClass{\tudcls@name}[%
-  2015/05/18 v2.04 BETA TUD-KOMA-Script
+  2015/05/31 v2.04 BETA TUD-KOMA-Script
   document class (\cls@name)%
 ]
 \typeout{The Corporate Design of Technische Universitaet Dresden}
@@ -267,6 +267,19 @@
 }
 \TUD@key{slantedGreek}[true]{\TUDoptions{slantedgreek=#1}}
 %%% From File: tudscr-pagestyle.dtx
+\newif\if@tud@ddc@internal
+\newcommand*\tud@clearpage@iftudps{%
+  \if@tud@ddc@internal\else\if@atdocument%
+    \tud@iftudps{\currentpagestyle}{\clearpage}{}%
+  \fi\fi%
+}
+\newcommand*\tud@pagestyle@iftudps{%
+  \if@tud@ddc@internal\else\if@atdocument%
+    \tud@iftudps{\currentpagestyle}{%
+      \expandafter\pagestyle\expandafter{\currentpagestyle}%
+    }{}%
+  \fi\fi%
+}
 \newcommand*\tud@ddc@switch{}
 \edef\tud@ddc@switch{%
   \TUD@numkey@bool,%
@@ -277,20 +290,8 @@
   {blue}{6},{HKS41}{6},{cdblue}{6},{cddarkblue}{6},%
   {white}{7},{cdwhite}{7}%
 }
-\newcommand*\tud@ddc@save{}
-\newif\if@tud@ddc@internal
 \newif\if@tud@ddc@auto
 \newcommand*\tud@ddc{0}
-\newcommand*\tud@clearpage@iftudps{%
-  \if@atdocument\tud@iftudps{\currentpagestyle}{\clearpage}{}\fi%
-}
-\newcommand*\tud@pagestyle@iftudps{%
-  \if@atdocument%
-    \tud@iftudps{\currentpagestyle}{%
-      \expandafter\pagestyle\expandafter{\currentpagestyle}%
-    }{}%
-  \fi%
-}
 \TUD@key{ddc}[true]{%
   \tud@ifverlower{2.04}{\tud@clearpage@iftudps}{}%
   \TUD@set@numkey{ddc}{tud@ddc}{\tud@ddc@switch}{#1}%
@@ -298,11 +299,11 @@
     \if@tud@ddc@internal%
       \@tud@ddc@autofalse%
     \else%
+      \@tud@ddc@autotrue%
       \@tud@ddc@internaltrue%
       \TUDoptions{ddchead=false}%
       \TUDoptions{ddcfoot=false}%
       \@tud@ddc@internalfalse%
-      \@tud@ddc@autotrue%
     \fi%
     \global\@tud@headlogo@option@settrue%
     \global\@tud@footlogo@option@settrue%
@@ -316,8 +317,8 @@
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \if@tud@ddc@internal\else%
       \@tud@ddc@internaltrue%
-      \TUDoptions{ddc=false}%
       \TUDoptions{ddcfoot=false}%
+      \TUDoptions{ddc=false}%
       \@tud@ddc@internalfalse%
     \fi%
   \fi%
@@ -330,8 +331,8 @@
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \if@tud@ddc@internal\else%
       \@tud@ddc@internaltrue%
-      \TUDoptions{ddc=false}%
       \TUDoptions{ddchead=false}%
+      \TUDoptions{ddc=false}%
       \@tud@ddc@internalfalse%
     \fi%
   \fi%
@@ -350,9 +351,7 @@
     }%
   \fi%
   \tud@ifverlower{2.03}{%
-    \ifcase\@tempb\relax%
-      \ifdefvoid{\@footlogo}{}{\let\@tempb\m@ne}%
-    \fi%
+    \ifcase\@tempb\relax\ifdefvoid{\@footlogo}{}{\let\@tempb\m@ne}\fi%
   }{}%
 }
 \newcommand*\tud@iftudps[3]{%
@@ -1170,8 +1169,8 @@
   \@ifpackageloaded{graphicx}{}{%
     \@ifpackageloaded{graphics}{%
       \ClassWarningNoLine{\tudcls@name}{%
-        The package `graphics' was superseded by `graphicx' and\MessageBreak%
-        will be loaded automatically%
+        The package `graphics' was superseded by `graphicx',\MessageBreak%
+        which is automatically loaded%
       }%
     }{}%
   }%
@@ -1221,7 +1220,7 @@
   \csletcs{tud@#1}{tud@up#1}%
   \advance \@tempcnta by 1%
 }
-\@tempcnta=\z@\relax%
+\@tempcnta=\z@\relax
 \tud@font@greek@loop\tud@font@greek@declare
 \newcommand*\tud@font@check{%
   \if@tud@fontspec%
@@ -2321,23 +2320,7 @@
 }{%
   \AtEndPreamble{\RequirePackage{scrlayer-scrpage}[2013/12/14]}%
 }
-\PreventPackageFromLoading[%
-  \ClassWarning{\tudcls@name}{%
-    The package `fancyhdr' must not be used with a\MessageBreak%
-    TUD-KOMA-Script class. You should make use of the\MessageBreak%
-    capabilities of package `scrlayer-scrpage' instead%
-  }%
-]{fancyhdr}
 \AfterPackage{scrlayer-scrpage}{%
-  \DeclareNewLayer[%
-    background,%
-    contents={%
-      \ifnum\tud@head@bar>\tw@\relax% cdhead=color
-        \color{HKS41}%
-        \rule{\layerwidth}{\tud@dim@topmargin}%
-      \fi%
-    },%
-  ]{tudheadings.head.back}%
   \DeclareNewLayer[%
     background,headsep,%
     voffset=\tud@dim@logoy,%
@@ -2348,6 +2331,15 @@
       \tud@mainlogo@use\hfill\tud@headlogo@use%
     },%
   ]{tudheadings.head.content}%
+  \DeclareNewLayer[%
+    background,%
+    contents={%
+      \ifnum\tud@head@bar>\tw@\relax% cdhead=color
+        \color{HKS41}%
+        \rule{\layerwidth}{\tud@dim@topmargin}%
+      \fi%
+    },%
+  ]{tudheadings.head.back}%
   \DeclareNewLayer[%
     background,%
     voffset=\tud@dim@topmargin,%
@@ -2405,6 +2397,9 @@
     background,foot,%
     hoffset=0pt,%
     width=\paperwidth,%
+    % §§§ kompatibilität
+%    voffset=\dimexpr\@nameuse{scr@l@tudheadings.foot.logo@y}%
+%      -\dp\strutbox\relax,%
     addvoffset=-\dp\strutbox,%
     height=\dimexpr\paperheight-\layeryoffset\relax,%
     contents={%
@@ -2421,6 +2416,7 @@
           \ifstr{\tud@pagecolor}{HKS41}{\def\@tempc{\color{HKS41!60}}}{}%
         }%
         \ifx\@tempc\relax\else%
+          % §§§ Kompatibilitätsmodus passt nicht
           \tud@ifverlower{2.03}{%
             \tud@ddc@check%
             \ifcase\@tempb\relax% \tud@ddc@foot=false
@@ -2448,8 +2444,10 @@
       \if@tud@footlogo@cmd@set%
         \tud@footlogo@cmd@set{\@tempdima}{\layerwidth}%
       \fi%
-      \tud@footcontent@use{\@tempdima}{\layerwidth}\hspace*{-\layerwidth}%
-      \tud@footlogo@cmd@use\hspace*{-\layerwidth}%
+      \tud@footcontent@use{\@tempdima}{\layerwidth}%
+      \hspace*{-\layerwidth}%
+      \tud@footlogo@cmd@use%
+      \hspace*{-\layerwidth}%
       \hfill\tud@footlogo@ddc@use{\@tempdima}%
     },%
   ]{tudheadings.foot.content}%
@@ -2543,6 +2541,13 @@
   ]{tudheadings.pagecolor}%
   \AddLayersToPageStyle{@everystyle@}{tudheadings.pagecolor}%
 }
+\PreventPackageFromLoading[%
+  \ClassWarning{\tudcls@name}{%
+    The package `fancyhdr' must not be used with a\MessageBreak%
+    TUD-KOMA-Script class. You should make use of the\MessageBreak%
+    capabilities of package `scrlayer-scrpage' instead%
+  }%
+]{fancyhdr}
 \newcommand*\tud@ps@onselect{%
   \DeclarePageStyleAlias{plain}{plain.tudheadings}%
   \DeclarePageStyleAlias{headings}{tudheadings}%
@@ -2725,28 +2730,30 @@
 \newcommand*\tud@vlayerbox[3]{%
   \begingroup%
     \setbox\z@\vbox{#2}%
-    \setlength\@tempdimb{\dimexpr\ht\z@+\dp\z@\relax}%
-    \ifdim\@tempdimb>#1\relax%
+    \setlength\@tempdima{\dimexpr\ht\z@+\dp\z@-#1\relax}%
+    \ifdim\@tempdima>\z@\relax%
       \ClassWarning{\tudcls@name}{%
         #3\MessageBreak%
-        The maximum height is exceeded by \the\dimexpr\@tempdimb-#1\relax%
+        The maximum height is exceeded by \the\@tempdima%
       }%
     \fi%
-    \vbox to #1{#2}%
   \endgroup%
+  \vbox to #1{#2}%
 }
 \tud@newlayerbox{main@black}
 \tud@newlayerbox{main@HKS41}
 \tud@newlayerbox{main@white}
-\newif\if@tud@mainlogo@set
 \newlength\tud@mainlogoheight
 \newcommand*\tud@mainlogo@wrn[1]{}
+\newif\if@tud@mainlogo@set
 \newcommand*\tud@mainlogo@set{%
   \def\@tempa{\includegraphics[keepaspectratio,width=\tud@dim@logowidth]}%
   \tud@savelayerbox{main@black}{\@tempa{TUD-black}}%
   \tud@savelayerbox{main@HKS41}{\@tempa{TUD-blue}}%
   \tud@savelayerbox{main@white}{\@tempa{TUD-white}}%
   \setlength\tud@mainlogoheight{\ht\tud@logo@main@black}%
+  \global\tud@mainlogoheight=\tud@mainlogoheight%
+  \global\@tud@mainlogo@setfalse%
   \gdef\tud@mainlogo@wrn##1{%
     \ifdim##1<\ta@bcor\relax%
       \ClassWarning{\tudcls@name}{%
@@ -2760,8 +2767,6 @@
       \global\let\tud@mainlogo@wrn\@gobble%
     \fi%
   }%
-  \global\tud@mainlogoheight=\tud@mainlogoheight%
-  \global\@tud@mainlogo@setfalse%
   \tud@headlogo@set%
   \tud@footlogo@set%
 }
@@ -2782,6 +2787,8 @@
   \tud@ifverlower{2.04}{\tud@clearpage@iftudps}{}%
   \def\@headlogo{#2}%
   \def\@@headlogo{#1}%
+  \global\@tud@headlogo@option@settrue%
+  \global\@tud@footlogo@option@settrue%
   \gdef\tud@headlogo@wrn{%
     \ClassWarning{\tudcls@name}{%
       The secondary logo `\string\headlogo{\@headlogo}' is\MessageBreak%
@@ -2789,10 +2796,7 @@
       `ddcfoot' or better `ddc' instead of `ddchead'%
     }%
     \global\let\tud@headlogo@wrn\relax%
-  }
-  % dtx-Doku: für farbige Optionen und \headlogo
-  \global\@tud@headlogo@option@settrue%
-  \global\@tud@footlogo@option@settrue%
+  }%
   \tud@ifverlower{2.04}{\tud@pagestyle@iftudps}{}%
 }
 \newcommand*\tud@headlogo@set{%
@@ -2817,9 +2821,8 @@
   \tud@ddc@check%
   \ifcase\@tempa\relax% \tud@ddc@head=false
     \ifdefvoid{\@headlogo}{}{%
-      \protected@edef\@tempb{%
-        \noexpand\@tempc{\@headlogo}{\@@headlogo}%
-      }\@tempb%
+      \protected@edef\@tempb{\noexpand\@tempc{\@headlogo}{\@@headlogo}}%
+      \@tempb%
     }%
   \or\or% \tud@ddc@head=color
     \@tempc{DDC-03}{}%
@@ -2837,10 +2840,10 @@
   \global\@tud@headlogo@option@setfalse%
 }
 \newcommand*\tud@headlogo@use{%
-  \tud@ddc@check%
   \tud@vlayerbox{\tud@mainlogoheight}{%
     \vss%
     \hbox{%
+      \tud@ddc@check%
       \ifnum\@tempa=\@ne\relax% \tud@ddc@head=true
         \tud@uselayerbox{head@\tud@head@logocolor}%
       \else%
@@ -2849,9 +2852,12 @@
     }%
     \vss%
   }{%
-    The given `\string\headlogo{\@headlogo}' is to large.%
+    The given `\string\headlogo{\@headlogo}' is too large.%
   }
-  \ifdefvoid{\@headlogo}{}{\ifnum\@tempa>\z@\relax\tud@headlogo@wrn\fi}%
+  \ifdefvoid{\@headlogo}{}{%
+    \tud@ddc@check%
+    \ifnum\@tempa>\z@\relax\tud@headlogo@wrn\fi%
+  }%
 }
 \tud@newlayerbox{foot@black}
 \tud@newlayerbox{foot@HKS41}
@@ -2978,7 +2984,7 @@
     \appto\@@footlogo{\@tempb}%
     \protected@edef\@tempc{\noexpand\includegraphics[\@@footlogo]{\@tempa}}%
     \tud@vlayerbox{#2}{\vss\hbox{\@tempc}\vss\vss}{%
-      The given `\string\footlogo{\@tempa}' is to large.
+      The given `\string\footlogo{\@tempa}' is too large.
     }%
   \endgroup%
 }
@@ -3420,8 +3426,6 @@
   \tud@ifsacrop{}{%
     \AfterCalculatingTypearea{\tud@AfterChangingArea}%
     \AfterSettingArea{\tud@AfterChangingArea}%
-% §§§ in v3.18
-%    \AfterRestoreareas{\tud@AfterChangingArea}%
     \BeforeSelectAnyPageStyle{\tud@BeforeSelectAnyPageStyle{#1}}%
     \recalctypearea%
   }%
