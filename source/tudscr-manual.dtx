@@ -1,4 +1,4 @@
-% \CheckSum{2962}
+% \CheckSum{2972}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-manual.dtx}[%
-  2015/06/02 v2.04 TUD-KOMA-Script\space%
+  2015/06/03 v2.04 TUD-KOMA-Script\space%
 %</driver>
 %<identify>\NeedsTeXFormat{LaTeX2e}
 %<class&identify>\ProvidesClass{tudscrman}[%
@@ -1693,7 +1693,7 @@
       \IfValueTF{#6}{\edef\@tempa{#5:#6:#8}}{\edef\@tempa{#5:#8}}%
 %    \end{macrocode}
 % Für die Deklaration veralteter Optionen, Befehle etc. kann die Sternvariante 
-% des Auszeichnungsbefehle verwendet werden, um das Erzeugen eines Labels zu 
+% des Auszeichnungsbefehls verwendet werden, um das Erzeugen eines Labels zu 
 % unterbinden.
 %    \begin{macrocode}
       \if@deprecated%
@@ -1701,29 +1701,42 @@
           \manualhyperdef{\@tempa}%
         }%
 %    \end{macrocode}
-% Wird zur Deklaration die Umgebung \env{Declaration*} genutzt, so wird der 
-% Hyperlink ein ganzes Stück nach oben verschoben. Hintergrund ist, dass diese 
-% Umgebung eigentlich nur zum Deklarieren von Klassen und Paketen gedacht ist 
-% und direkt nach einer Gliederungsüberschrift folgen sollte.
+% Wurde die Sternversion eines Auszeichnungsbefehls innerhalb der Umgebung 
+% \env{Declaration} genutzt, wird lediglich ein Label aber kein Eintrag im 
+% Index erzeugt.
 %    \begin{macrocode}
       \else%
-        \ifx\@IndexFormat\@empty\else%
-          \ClassWarning{tudscrman}{%
-            It is not possible to use any indexing format\MessageBreak%
-            like |\@IndexFormat| within the arguments of the\MessageBreak%
-            environment `Declaration'%
-          }%
-        \fi%
-        \if@stareddeclare%
-          \manualhyperdef'{\@tempa}%
-        \else%
+        \expandafter\IfBooleanTF\expandafter{\@IndexFormat}{%
+          \manualhyperdef{\@tempa}%
+%    \end{macrocode}
+% Andernfalls werden Label bzw. Hyperlinkanker und ein Eintrag in den Index 
+% erzeugt, wobei die Formatierung dieses Eintrags fest vorgegeben ist.
+%    \begin{macrocode}
+        }{%
+          \ifx\@IndexFormat\@empty\else%
+            \ClassWarning{tudscrman}{%
+              It is not possible to use any indexing format\MessageBreak%
+              like |\@IndexFormat| within the arguments of the\MessageBreak%
+              environment `Declaration'%
+            }%
+          \fi%
+%    \end{macrocode}
+% Wird zur Deklaration die Umgebung \env{Declaration*} genutzt, so wird der 
+% Hyperlink ein ganzes Stück nach oben verschoben. Hintergrund ist, dass diese 
+% Umgebung nur zum Deklarieren von Klassen und Paketen gedacht ist und direkt
+% nach einer Gliederungsüberschrift folgen sollte.
+%    \begin{macrocode}
+          \if@stareddeclare%
+            \manualhyperdef'{\@tempa}%
 %    \end{macrocode}
 % Andernfalls wird der normale Hyperlink gesetzt. Das Label zum Prüfen wird 
 % implizit durch \cs{manualhyperdef} gesetzt.
 %    \begin{macrocode}
-          \manualhyperdef{\@tempa}%
-        \fi%
-        \@HyperIndex{#5}{#6}{#7}{#8}{#9}{(declare}%
+          \else%
+            \manualhyperdef{\@tempa}%
+          \fi%
+          \@HyperIndex{#5}{#6}{#7}{#8}{#9}{(declare}%
+        }%
       \fi%
 %    \end{macrocode}
 % Die \env{Declaration*}"=Umgebung erzeugt keine direkte Ausgabe sondern nur 
@@ -1733,9 +1746,14 @@
       \if@stareddeclare\else%
         #1\IfValueT{#2}{#2}%
       \fi%
+%    \end{macrocode}
+% Zum Ende der \env{Declaration}"=Umgebung wird der Indexeintrag beendet.
+%    \begin{macrocode}
     \else%
       \if@deprecated\else%
-        \@HyperIndex{#5}{#6}{#7}{#8}{#9}{declare)}%
+        \expandafter\IfBooleanF\expandafter{\@IndexFormat}{%
+          \@HyperIndex{#5}{#6}{#7}{#8}{#9}{declare)}%
+        }%
       \fi%
     \fi%
   \else%
