@@ -182,14 +182,69 @@ beeinflussen:
 \ChangedAt{v2.02,v2.04}
 Normalerweise kommen die Schriften des \CDs im PostScript"=Format zum Einsatz, 
 wenn diese wie unter \autoref{sec:install} beschrieben installiert wurden.
-Wird das Paket \Package{fontspec} geladen so werden die Schriften des \CDs im 
-OpenType"=Format verwendet. Hierfür müssen diese für das Betriebssystem nutzbar 
-sein und entweder \hologo{LuaLaTeX} oder \hologo{XeLaTeX} als Dokumentprozessor 
-verwendet werden. Allerdings sollte dies nur in Ausnahmefällen geschehen, wobei 
-die Hinweise in \fullref{sec:fonts:fontspec} unbedingt zu beachten sind.
+Wird entweder \hologo{LuaLaTeX} oder \hologo{XeLaTeX} als Dokumentprozessor 
+verwendet und das Paket \Package{fontspec} geladen, so werden die Schriften des 
+\CDs im OpenType"=Format verwendet. Hierfür sind die Hinweise in 
+\fullref{sec:fonts:fontspec} unbedingt zu beachten.
 \end{Declaration}
 
+
+\subsubsection{Auszeichnungen in Überschriften}
+\index{Schriftelemente}
+Für die Schriftauswahl der Überschriften aller Gliederungsebenen sind die durch 
+\KOMAScript{} bereitgestellten Schriftelemente verantwortlich. Mehr dazu ist in 
+\autoref{sec:fonts:elements} zu finden. Da die Überschriften der obersten 
+Gliederungsebenen bis einschließlich \Macro{subsubsection} normalerweise in 
+Majuskeln gesetzt werden, bestehen für den Anwender mit den folgenden Befehlen 
+gewisse Einflussmöglichkeiten, deren Ausprägung anzupassen.
+
+\begin{Declaration}{\Macro{ifdin}\Parameter{Dann-Teil}\Parameter{Sonst-Teil}}%
+\printdeclarationlist%
+\index{Überschriften}\index{Schrift!Überschriften}\index{Schriftauszeichnung}%
+\index{Kolumnentitel}\index{Layout!Kolumnentitel}
+%
+Der Befehl \Macro{ifdin} prüft, ob die Schriftfamilie \DIN aktiv ist und führt 
+in diesem Fall \Parameter{Dann-Teil} aus, andernfalls \Parameter{Sonst-Teil}. 
+Dies ist beispielsweise bei Überschriften sinnvoll, wenn innerhalb des 
+obligatorischen Argumentes zwischen der Ausgabe im Dokument selber und dem 
+Eintrag für das Inhaltsverzeichnis sowie der Ausprägung der automatischen 
+Kolumnentitel unterschieden werden soll.
+\end{Declaration}
+
+\begin{Declaration}{\Macro{MakeTextUppercase}\Parameter{Text}}%
+\begin{Declaration}{\Macro{NoCaseChange}\Parameter{Text}}%
+\printdeclarationlist%
+\index{Überschriften}\index{Schrift!Überschriften}\index{Schriftauszeichnung}%
+%
+Der Befehl \Macro{MakeTextUppercase} stammt aus dem Paket \Package{textcase} 
+und setzt den Text seines Argumentes in Majuskeln. Die Überschriften der 
+Gliederungsebenen bis einschließlich \Macro{subsubsection} werden damit in 
+Großbuchstaben der Schrift \DIN gesetzt, wenn das Layout des \CDs nicht 
+deaktiviert wurde (\Option{cd}[false]). Sollen in einer Überschrift bestimmte 
+Kleinbuchstaben erhalten bleiben, ist der Befehl \Macro{NoCaseChange} zu 
+nutzen, welcher ebenfalls von besagtem Paket bereitgestellt wird.
+\end{Declaration}
+\end{Declaration}
+%
+\begin{Example}
+In einer Kapitelüberschrift wird ein einzelnes Wort in Kleinbuchstaben 
+geschrieben:
+\begin{Code}[escapechar=§]
+\chapter{§Ü§berschrift mit \NoCaseChange{kleinem} Wort}
+\end{Code}
+\end{Example}
+
 \subsubsection{Auszeichnungen im Text}
+\index{Schrift!Befehle}\index{Schrift!Schalter}%
+%
+Unabhängig davon, welche Schriftfamilie verwendet wird, können die Schriften 
+des \CDs jederzeit entweder mit einem der hier aufgeführten Textschalter oder 
+Textkommandos innerhalb des Dokumentes genutzt werden. Ein Textschalter wirkt 
+sich~-- wenn er nicht in einer Gruppe oder einer Umgebung verwendet und damit 
+lokal begrenzt wird~-- global auf das Dokument aus. Bei einem Textkommando 
+hingegen erfolgt die Änderung der Schriftart nur für das angegebene Argument. 
+Deshalb ist die Nutzung der letzteren Variante vorzuziehen. 
+%
 \begin{Declaration}{\Macro{univln}}
 \begin{Declaration}{\Macro{textuln}\Parameter{Text}}
 \begin{Declaration}{\Macro{univrn}}
@@ -247,19 +302,10 @@ die Hinweise in \fullref{sec:fonts:fontspec} unbedingt zu beachten sind.
   \end{tabularm}%
   \end{minipage}%
 )%
-\index{Schrift!Befehle}\index{Schrift!Schalter}%
-%
-Unabhängig davon, welche Schriftfamilie verwendet wird, können die Schriften 
-des \CDs jederzeit entweder mit einem der hier aufgeführten Textschalter oder 
-Textkommandos innerhalb des Dokumentes genutzt werden. Ein Textschalter wirkt 
-sich~-- wenn er nicht in einer Gruppe oder einer Umgebung verwendet und damit 
-lokal begrenzt wird~-- global auf das Dokument aus. Bei einem Textkommando 
-hingegen erfolgt die Änderung der Schriftart nur für das angegebene Argument. 
-Deshalb ist die Nutzung der letzteren Variante vorzuziehen. 
-\ChangedAt{v2.04} Alternativ zu den genannten Textschaltern und -befehlen 
-können seit der Version~v2.04 auch die beiden Befehle \Macro{cdfont} und 
-\Macro{textcdfont} verwendet werden, die sich in der Anwendung etwas 
-unterscheiden, allerdings die gleiche Funktionalität bereitstellen.
+Alternativ zu den beschriebenen Textschaltern und -kommandos können seit der 
+Version~v2.04 auch die beiden Befehle \Macro{cdfont} und \Macro{textcdfont} 
+verwendet werden, welche die gleiche Funktionalität wesentlich komfortabler 
+bereitstellen.
 \end{Declaration}
 \end{Declaration}
 \end{Declaration}
@@ -284,18 +330,23 @@ unterscheiden, allerdings die gleiche Funktionalität bereitstellen.
   \Macro{textcdfont}\Parameter{Schriftart}\Parameter{Text}%
 }
 \printdeclarationlist
-Diese beiden Befehle können alternativ zu den zuvor beschriebenen verwendet 
-werden. Dabei muss im ersten obligatorischen Argument für \PName{Schriftart} 
-der Name der zu verwendenden Schriftart des \CDs angegeben werden. Dieser ist 
-der Tabelle zu entnehmen, wobei der Vorsatz \emph{Univers} entfallen kann und 
-für die Wahl der Schriftstärke entweder die Bezeichnung oder die Zahl allein 
-ausreichend ist. Der Befehl \Macro{cdfont} entspricht einem Textschalter und 
-ändert die aktuell verwendete Schriftart, wohingegen \Macro{textcdfont} als 
-Textkommando fungiert und den im zweiten Argument gegebenen \PName{Text} in der 
-gewünschten \PName{Schriftart} setzt.
-\end{Declaration}
-\end{Declaration}
+Diese beiden Befehle dienen ebenfalls zu gezielten Auswahl einer Schriftart des 
+\CDs in Stärke und Schnitt. Dabei muss im ersten obligatorischen Argument der 
+Name der zu verwendenden Schriftart angegeben werden. Dieser ist der Tabelle zu 
+entnehmen. Dabei muss zum einen der Vorsatz \emph{Univers} nicht zwingend 
+verwendet werden, zum anderen sind weder Leerzeichen noch die passende Groß- 
+und Kleinschreibung notwendig. Für die Wahl der Schriftstärke ist entweder die 
+Bezeichnung\footnote{Light, Regular, Bold, Black} oder die entsprechende Zahl 
+allein ausreichend. Für die geneigten Schriftschnitte sind für das Suffix 
+\enquote{Oblique} auch \enquote{Italic} oder \enquote{Slanted} als Alias 
+möglich.
 
+Der Befehl \Macro{cdfont} entspricht einem Textschalter und ändert die aktuell 
+verwendete Schriftart, wohingegen \Macro{textcdfont} als Textkommando fungiert 
+und den im zweiten Argument gegebenen \PName{Text} in der gewünschten 
+\PName{Schriftart} setzt.
+\end{Declaration}
+\end{Declaration}
 
 
 \subsection{Schriften für den Mathematiksatz}
@@ -312,7 +363,7 @@ so werden zu den Hausschriften passende im Mathematikmodus genutzt, mit
 Umschalten innerhalb des Dokumentes ist~-- beispielsweise für Abbildungen oder 
 Tabellen~-- durch \Macro{TUDoptions}\PParameter{\Option{cdmath}[true/false]} 
 möglich. Mit \Macro{boldmath} kann auf fette Mathematikschriften umgeschaltet 
-werden.
+werden. Gültige Werte für die Option \Option{cdmath} sind:
 %
 \begin{values}
 \itemfalse
@@ -332,28 +383,10 @@ werden.
 \end{Declaration}
 
 \subsubsection{Griechischen Buchstaben}
+\vskip-\lastskip%
 \label{sec:greek}%
-%
-\begin{Declaration}{\Option{slantedgreek}[\PBoolean]}[false]
-\printdeclarationlist%
 \index{Schrift!Griechische Buchstaben}\index{Griechische Buchstaben}%
 %
-Die Option ändert die standardmäßige Neigung der griechischen Großbuchstaben im 
-Mathematikmodus bei der Verwendung der Befehle \Macro*{Delta}, \Macro*{Theta}, 
-\Macro*{Lambda}, \Macro*{Xi}, \Macro*{Pi}, \Macro*{Sigma}, \Macro*{Upsilon}, 
-\Macro*{Phi}, \Macro*{Psi} und \Macro*{Omega}. Wie unabhängig von der Option 
-\Option{slantedgreek} gezielt kursive und aufrechte Buchstaben gesetzt werden 
-können, wird nachfolgend beschrieben.
-%
-\begin{values}
-\itemfalse
-  Die griechischen Majuskeln werden wie bei den Standardklassen aufrecht 
-  gesetzt.
-\itemtrue*
-  Die Ausgabe der griechischen Großbuchstaben erfolgt kursiv.
-\end{values}
-\end{Declaration}
-
 \begin{Declaration}{\Macro{varDelta}}
 \begin{Declaration}{\Macro{varTheta}}
 \begin{Declaration}{\Macro{varLambda}}
@@ -430,6 +463,26 @@ griechischen Minuskeln sind leider nur in der kursiven Variante verfügbar.
 \end{Declaration}
 \end{Declaration}
 
+\begin{Declaration}{\Option{slantedgreek}[\PBoolean]}[false]
+\printdeclarationlist%
+%
+Die Option ändert die standardmäßige Neigung der griechischen Großbuchstaben im 
+Mathematikmodus bei der Verwendung der Befehle \Macro*{Delta}, \Macro*{Theta}, 
+\Macro*{Lambda}, \Macro*{Xi}, \Macro*{Pi}, \Macro*{Sigma}, \Macro*{Upsilon}, 
+\Macro*{Phi}, \Macro*{Psi} und \Macro*{Omega}. Wie unabhängig von der Option 
+\Option{slantedgreek} gezielt kursive und aufrechte Buchstaben gesetzt werden 
+können, wird \vpageref{sec:greek} beschrieben.
+%
+\begin{values}
+\itemfalse
+  Die griechischen Majuskeln werden wie bei den Standardklassen aufrecht 
+  gesetzt.
+\itemtrue*
+  Die Ausgabe der griechischen Großbuchstaben erfolgt kursiv.
+\end{values}
+\end{Declaration}
+
+
 \subsubsection{Zusätzliche Hinweise zum Mathematiksatz}
 Weitere Hinweise zum typographisch guten Mathematiksatz sind außerdem in 
 \autoref{sec:exmpl:mathswap} sowie \autoref{sec:exmpl:mathtype} zu finden.
@@ -467,6 +520,7 @@ möglich ist beziehungsweise \hologo{LuaLaTeX} oder \hologo{XeLaTeX} zwingend
 genutzt werden müssen. Hierfür ist es~-- nach der systemweiten Installation der 
 OpenType"=Schriften~-- ausreichend, das Paket \Package{fontspec} zu laden.
 \index{Schrift|?)}%
+
 
 
 \section{Das Layout des \CDs}
@@ -526,6 +580,7 @@ Sie hat Einfluss auf die Ausprägung von Titel"~, Teil"~, und Kapitelseiten.
 \end{values}
 \end{Declaration}
 
+
 \subsubsection{Einstellungen für Titel, Umschlagseite, Teile und Kapitel}
 Das Verhalten aller für das Layout relevanten Elemente wird von der eben zuvor 
 erläuterten Option \Option{cd}[\PSet] bestimmt. Dies betrifft zum einen sowohl 
@@ -571,7 +626,7 @@ der Titelseite wird diese immer mit \Macro{maketitle} erzeugt.
   v2.04!farbiger Querbalken möglich (\PValue{barcolor})%
 ]{\Option{cdcover}[\PSet]}
 \printdeclarationlist%
-\index{Umschlagseite|!}\index{Layout!Umschlagseite}%
+\index{Umschlagseite|!}\index{Titel!Umschlagseite}\index{Layout!Umschlagseite}%
 %
 Die \TUDScript-Klassen führen zusätzlich den Befehl \Macro{makecover} ein, mit 
 dem sich neben dem Titel eine separate Umschlagseite erzeugen lässt. Diese ist 
@@ -642,63 +697,6 @@ verschoben, wobei darauf geachtet werden sollte, dass diese sich danach noch
 innerhalb des Satzspiegels befinden. Positive Werte setzen die Überschriften 
 dementsprechend tiefer.
 \end{Declaration}
-\end{Declaration}
-
-
-\subsubsection{Verwendung von Schriftelementen}
-\index{Schriftelemente}
-Für die Schriftauswahl der Überschriften aller Gliederungsebenen sind die durch 
-\KOMAScript{} bereitgestellten Schriftelemente verantwortlich. Genaueres hierzu 
-ist im \KOMAScript"=Handbuch \scrguide im Abschnitt \emph{Textauszeichnungen} 
-zu finden.
-
-Mit \Macro{addtokomafont}\Parameter{Schriftelement}\Parameter{Einstellungen} 
-lassen sich sowohl die durch \KOMAScript{} definierten als auch alle in diesem 
-Handbuch zusätzlich aufgeführten Schriftelemente individuell durch den Anwender 
-anpassen.
-
-
-\subsubsection{Auszeichnung von Überschriften}
-\begin{Declaration}{\Macro{MakeTextUppercase}\Parameter{Text}}%
-\begin{Declaration}{\Macro{NoCaseChange}\Parameter{Text}}%
-\printdeclarationlist%
-\index{Überschriften}\index{Schrift!Überschriften}\index{Schriftauszeichnung}%
-%
-Diese beiden Befehle stammen aus dem Paket \Package{textcase}. Der Befehl 
-\Macro{MakeTextUppercase} setzt den Text seines Argumentes in Majuskeln. Die 
-Überschriften der Gliederungsebenen bis einschließlich \Macro{subsubsection} 
-werden damit in Großbuchstaben der Schrift \DIN gesetzt. Sollen bestimmte 
-Kleinbuchstaben erhalten bleiben, ist der Befehl \Macro{NoCaseChange} zu nutzen.
-\end{Declaration}
-\end{Declaration}
-%
-\begin{Example}
-In einer Kapitelüberschrift wird ein einzelnes Wort in Kleinbuchstaben 
-geschrieben:
-\begin{Code}[escapechar=§]
-\chapter{§Ü§berschrift mit \NoCaseChange{kleinem} Wort}
-\end{Code}
-\end{Example}
-
-\begin{Declaration}[v2.02]{\Font{parttitle}}
-\printdeclarationlist%
-\index{Schriftelemente}
-%
-Die \TUDScript-Klassen definieren das Schriftelement~\Font{parttitle}. Mit 
-diesem lässt sich~-- bei aktivierter \Option{parttitle}-Option~-- die Schrift 
-für die Bezeichnung des Teils beeinflussen.
-\end{Declaration}
-
-\begin{Declaration}{\Macro{ifdin}\Parameter{Dann-Teil}\Parameter{Sonst-Teil}}%
-\printdeclarationlist%
-\index{Überschriften}\index{Schrift!Überschriften}\index{Schriftauszeichnung}%
-\index{Kolumnentitel}\index{Layout!Kolumnentitel}
-%
-Der Befehl \Macro{ifdin} prüft, ob die Schriftfamilie \DIN aktiv ist und führt 
-in diesem Fall \Parameter{Dann-Teil} aus, andernfalls \Parameter{Sonst-Teil}. 
-Dies ist beispielsweise bei Überschriften sinnvoll, wenn zwischen der Ausgabe 
-im Fließtext und dem Eintrag für das Inhaltsverzeichnis sowie der Ausprägung 
-der automatischen Kolumnentitel unterschieden werden soll.
 \end{Declaration}
 
 
@@ -849,7 +847,7 @@ beziehungsweise \PageStyle{plain.scrheadings} aktiviert werden.
 
 \Attention{%
   Die beschriebenen Seitenstile werden erst \emph{nach} dem Laden des Paketes 
-  \Package{scrlayer-scrpage} definiert. Wird es nicht durch den Anwender 
+  \Package{scrlayer-scrpage} definiert. Wird dieses nicht durch den Anwender 
   geladen, sollte \Macro{pagestyle}\Parameter{Seitenstil} erst nach 
   \Macro*{begin}\PParameter{document} verwendet werden.
 }%
@@ -866,7 +864,8 @@ Schriftelement~\Font{tudheadings} verwendet. Dieses wirkt sich auf die
 Seitenzahlen, den Kolumnentitel und die mit \Macro{footcontent} angegebenen 
 Inhalte aus. Hierüber wird die Wahl der richtigen Schriftfarbe in Abhängigkeit 
 vom Seitenhintergrund und den Einstellungen für die Optionen \Option{cdhead} 
-sowie \Option{cdfoot} realisiert. 
+sowie \Option{cdfoot} realisiert. Wie \Font{tudheadings} angepasst werden kann, 
+ist in \autoref{sec:fonts:elements} zu finden.
 \end{Declaration}
 
 \begin{Declaration}{\Macro{faculty}\Parameter{Fakultät}}
@@ -917,9 +916,9 @@ der Schriftart im Balken verwendet werden:
   den Serifenlosen der genutzten Schrift gesetzt. Sind die Hausschriften 
   aktiviert, hat diese Einstellung keinen Einfluss.
 \itemtrue*[light/lightfont/noheavyfont]
-  Im Querbalken wird \textubn{Univers~65~Bold} für \Macro{faculty} verwendet, 
+  Im Querbalken wird für \Macro{faculty} \textubn{Univers~65~Bold} verwendet, 
   die Felder \Macro{department}, \Macro{institute}, \Macro{chair} und 
-  \Macro{extraheadline} werden mit \textuln{Univers~45~Light} gesetzt.
+  \Macro{extraheadline} kommt \textuln{Univers~45~Light} zum Einsatz.
 \item[heavy/heavyfont]
   Der Inhalt von \Macro{faculty} wird weiterhin in \textubn{Univers~65~Bold} 
   gesetzt, für die restlichen Felder wird \texturn{Univers~55~Regular} genutzt.
@@ -949,8 +948,8 @@ abgesetzt wird.
   Außenlinien der Querbalkens entfallen.
 \end{values}
 %
-Für den Fall, dass der Querbalken lediglich über Außenlinien realisiert wird, 
-kann zusätzlich dessen Laufweite festgelegt werden:
+Für den Fall, dass der Querbalken lediglich mit zwei Außenlinien dargestellt 
+wird, kann zusätzlich dessen Laufweite festgelegt werden:
 %
 \begin{values}
 \item[textwidth/slim]
@@ -1019,7 +1018,7 @@ Verwendung von \Option{extrabottommargin}.
 
 \begin{Declaration}{\Macro{headlogo}\LParameter\Parameter{Dateiname}}
 \printdeclarationlist%
-\index{Kopfzeile}\index{Layout!Kopfzeile}
+\index{Kopfzeile}\index{Layout!Kopfzeile}%
 \index{Zweitlogo|?}\index{Layout!Zweitlogo}\index{\DDC-Logo}%
 %
 Neben dem Logo der \TnUD darf zusätzlich ein Zweitlogo im Kopf verwendet 
@@ -1070,9 +1069,9 @@ Argumente sind der Dokumentation des \Package{graphicx}-Paketes zu entnehmen.
 
 Ohne die Angabe eines optionalen Argumentes für die Größe werden alle Logos im 
 Fuß auf die auf die Höhe des Logos der \TnUD skaliert. Der Anwender kann dies 
-ändern, indem der Wert der Länge \Length{footlogoheight} auf einen von 
-\PValue{0pt} verschiedenen mit \Macro*{setlength} gesetzt wird. Sollte die Höhe 
-des Fußbereiches nicht ausreichen, um alle Logos in der gewünschten Größe 
+ändern, indem der Wert der Länge \Length{footlogoheight} mit \Macro*{setlength} 
+auf einen von \PValue{0pt} verschiedenen gesetzt wird. Sollte die Höhe des 
+Fußbereiches nicht ausreichen, um alle Logos in der gewünschten Größe 
 darstellen zu können, kann diese über die Option \Option{extrabottommargin} 
 beziehungsweise \Option{cdfoot} angepasst werden.
 \end{Declaration}
@@ -1088,15 +1087,15 @@ beziehungsweise \Option{cdfoot} angepasst werden.
 \printdeclarationlist%
 \index{Fußzeile}\index{Layout!Fußzeile}%
 %
-Mit diesem Befehl kann durch den Anwender beliebiger Inhalt für den Fußbereich 
-der \PageStyle{tudheadings}"=Seitenstile definiert werden. Dabei gibt es zwei 
-unterschiedliche Varianten. Wird der Befehl mit einem Argument in der Form
-\Macro{footcontent}\Parameter{Inhalt} verwendet, so erscheint der Inhalt über 
-die komplette Textbreite im Fuß. Soll der Fußbereich zweispaltig erscheinen, so 
-muss \emph{nach} dem obligatorischen Argument zusätzlich das optionale folgen. 
-In diesem Fall wird der Inhalt aus dem ersten Argument in der linken Fußspalte 
-gesetzt, der Inhalt aus dem zweiten entsprechend in der rechten Fußspalte
-(\Macro{footcontent}\Parameter{linker Inhalt}\OParameter{rechter Inhalt}).
+Mit diesem Befehl kann beliebiger Inhalt entweder einspaltig oder zweispaltig 
+im Fußbereich der \PageStyle{tudheadings}"=Seitenstile gesetzt werden. In der 
+Form \Macro{footcontent}\Parameter{Inhalt} wird der Inhalt über die komplette 
+Textbreite im Fuß ausgegeben. Wird der Befehl jedoch in der zweiten Variante 
+\Macro{footcontent}\Parameter{linker Inhalt}\OParameter{rechter Inhalt} mit 
+einem optionalen \emph{nach} dem obligatorischen Argument verwendet, so 
+erscheint der Fußbereich zweispaltig, wobei der Inhalt aus dem ersten, 
+obligatorischen Argument in der linken und der Inhalt aus dem zweiten, 
+optionalen Argument entsprechend in der rechten Fußspalte gesetzt wird.
 
 Im Normalfall wird das Schriftelement \Font{tudheadings} für die Schrift im 
 Fußbereich verwendet. Mit dem ersten optionalen Argument können weitere 
@@ -1108,7 +1107,6 @@ das optionale Argument vorgenommen werden.
 \end{Declaration}
 \end{Declaration}
 
-% §§§ Hier geht's weiter
 \begin{Declaration}[%
   v2.02!\protect\DDC-Logo automatisch in Kopf oder Fuß%
 ]{\Option{ddc}[\PSet]}[false]
@@ -1165,17 +1163,19 @@ lässt sich die Größe allerdings über die Länge \Length{footlogoheight} änd
 Sollte nach einer Vergrößerung der Darstellung die Höhe des Fußbereiches nicht 
 ausreichen, so kann diese über die Option \Option{cdfoot} beziehungsweise 
 \Option{extrabottommargin} angepasst werden.
-
 \end{Declaration}
 \end{Declaration}
 \end{Declaration}
 
 \ToDo[imp,nxt]{%
   Spezialseite zur freien Gestaltung mit Hintergrundebene für Bilder und Texte  
-  (CD-Handbuch S. 80 ff.) über \Package{scrlayer-scrpage} bereitstellen. 
-  Seitenstil: \PageStyle{special.tudheadings}
+  (CD-Handbuch S. 80 ff.); Seitenstil: \PageStyle{special.tudheadings}
 }[v2.xx]
 
+\ToDo[imp,nxt]{%
+  \Environment{tudpage} als obsolet deklarieren und in \File{tudscr-obsolete}
+  dokumentieren
+}[v2.xx]
 
 \begin{Declaration}[%
   v2.02!\Key{\Environment{tudpage}}{head} \emph{entfällt},
@@ -1369,8 +1369,8 @@ Im zweispaltigen Satz (\Option{twocolumn}) wird mit \Macro{maketitle} die
 Titelseite selbst immer einspaltig gesetzt. Direkt nach dem Titel folgt 
 normalerweise der zweispaltige Fließtext. Mit dem \TUDScript-Befehl 
 \Macro{maketitleonecolumn} kann nach dem Titel zusätzlich noch weiterer 
-Inhalt~-- beispielsweise eine Zusammenfassung respektive Kurfassung~-- 
-einspaltig gesetzt werden.
+Inhalt~-- beispielsweise eine Zusammenfassung beziehungsweise eine 
+Kurfassung~-- einspaltig gesetzt werden.
 
 Wird der Befehl bei einer Titelseite (\Option{titlepage}[true]) verwendet, wird 
 der Inhalt des Argumentes (\PName{Einspaltentext}) direkt nach dieser auf einer 
@@ -1456,8 +1456,9 @@ Außerdem kann mit dem optionalen Argument die Seitenzahl der Umschlagseite
 geändert werden. Diese wird jedoch nicht ausgegeben, sondern beeinflusst 
 lediglich die Zählung. Sie sollten hier unbedingt eine ungerade Zahl wählen, da 
 sonst die gesamte Zählung durcheinander gerät. Die weiterhin aufgeführten 
-Parameter entsprechen in ihrem Verhalten den gleichnamigen Optionen respektive 
-Befehlen, wirken sich jedoch nur lokal und einzig auf die Umschlagseite aus.
+Parameter entsprechen in ihrem Verhalten beziehungsweise ihrer Funktion den 
+gleichnamigen Optionen respektive Befehlen, wirken sich jedoch nur lokal und 
+einzig auf die Umschlagseite aus.
 
 \end{Declaration}
 \end{Declaration}
@@ -1498,7 +1499,7 @@ Mit dem Befehl \Macro{author} wird der Autor angegeben. Innerhalb des
 Argumentes können auch mehrere Autoren aufgeführt werden, wobei diese in diesem 
 Fall jeweils mit \Macro{and} zu trennen sind. Alle weiteren hier vorgestellten 
 Befehle können selbst im Argument von \Macro{author} verwendet werden, wodurch 
-für jeden Autor individuelle Angaben gemacht werden können.
+für jeden Autor individuelle Angaben möglich sind.
 
 Mit \Macro{authormore} wird unter dem Autor eine Zeile ausgegeben, welche 
 durch den Anwender frei belegt werden kann. Sollte das Paket \Package{isodate} 
@@ -1661,25 +1662,6 @@ diesem Fall ignoriert.
 \end{values}
 \end{Declaration}
 
-\begin{Declaration}[v2.02]{\Font{titlepage}}
-\begin{Declaration}[v2.02]{\Font{thesis}}
-\printdeclarationlist%
-\index{Schriftelemente}
-%
-Die \TUDScript-Klassen definieren mit \Macro{newkomafont} diese neuen 
-Schriftelemente. Dabei wird \Font{titlepage} auf der Titelseite für alle 
-Felder verwendet, welche kein spezielles Schriftelement verwenden, welches 
-ohnehin durch \KOMAScript{} bereitgestellt wird. Das mit \Macro{thesis} 
-angegebene Feld, in welchem der Typ einer Abschlussarbeit angegeben wird, nutzt 
-das Schriftelement~\Font{thesis}. Mehr dazu ist in \see*{\autoref{sec:title}} 
-zu finden. Sowohl die bereits durch \KOMAScript{} definierten als auch alle 
-hier 
-genannten Schriftelemente lassen sich durch den Anwender über den Befehl 
-\Macro{addtokomafont}\Parameter{Schriftelement}\Parameter{Einstellungen} 
-anpassen.
-\end{Declaration}
-\end{Declaration}
-
 \begin{Declaration}[v2.02]{\Macro{graduation}\OParameter{Kurzform}\Parameter{Grad}}
 \printdeclarationlist%
 \index{Titel!Felder}%
@@ -1727,7 +1709,7 @@ Mit \Macro{date} kann das Datum angegeben werden. Das optionale Argument
 erlaubt eine zusätzliche Anmerkung, welche nach dem Datum ausgegeben wird. Das 
 Datum wird bei normalen Dokumenten direkt nach dem Autor beziehungsweise den 
 Autoren ausgegeben. Bei Abschlussarbeiten~-- aktiviert durch die Verwendung von 
-\Macro{thesis} uder \Option{subjectthesis}~-- erscheint dieses am Ende der 
+\Macro{thesis} oder \Option{subjectthesis}~-- erscheint dieses am Ende der 
 Titelseite als Abgabedatum. Außerdem kann in diesem Fall mit  dem Befehl
 \Macro{defensedate} das Datum der Verteidigung angegeben werden, wie es 
 beispielsweise bei dem Druck von Dissertationen üblich ist.
@@ -1773,7 +1755,7 @@ in Majuskeln und \DIN gesetzt werden. Der mit dem Befehl \Macro{publishers}
 definierte Inhalt muss nicht zwingende einen Verlag bezeichnen sondern kann 
 auch andere Informationen beinhalten, welche am Ende der Titelseite ausgegeben 
 werden sollen.
-%
+
 Fußnoten werden auf dem Titel nicht mit \Macro{footnote}, sondern mit der 
 Anweisung \Macro{thanks} erzeugt. Diese dienen in der Regel für Anmerkungen bei 
 Titel oder den Autoren. Als Fußnotenzeichen werden dabei Symbole statt Zahlen 
@@ -1786,18 +1768,33 @@ Im doppelseitigen Druck lässt sich die Rückseite der Haupttitelseite für
 weitere Angaben nutzen. Sowohl den Titelrückseitenkopf als auch den
 Titelrückseitenfuß kann der Anwender mit \Macro{uppertitleback} und 
 \Macro{lowertitleback} frei gestalten.
+
+Mit \Macro{dedication} lässt eine separate Widmungsseite zentriert und in etwas 
+größerer Schrift setzen. Die Rückseite ist~-- wie auch die des Schmutztitels~-- 
+grundsätzlich leer. Die Widmung wird mit der restlichen Titelei ausgegeben und 
+muss daher vor der Nutzung von \Macro{maketitle} angegeben werden.
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+
+\begin{Declaration}[v2.02]{\Font{titlepage}}
+\begin{Declaration}[v2.02]{\Font{thesis}}
+\printdeclarationlist%
+\index{Schriftelemente}
 %
-Mit \Macro{dedication} kann eine eigene Widmungsseite zentriert und in etwas 
-größerer Schrift gesetzt werden. Die Rückseite ist wie die des Schmutztitels 
-grundsätzlich leer. Die Widmung wird zusammen mit der restlichen Titelei durch 
-\Macro{maketitle} ausgegeben und muss daher vor dieser Anweisung definiert sein.
-\end{Declaration}
-\end{Declaration}
-\end{Declaration}
-\end{Declaration}
-\end{Declaration}
-\end{Declaration}
-\end{Declaration}
+Die \TUDScript-Klassen definieren diese neuen Schriftelemente. Dabei wird 
+\Font{titlepage} auf der Titelseite für alle Felder verwendet, welche kein 
+spezielles Schriftelement verwenden, welches ohnehin durch \KOMAScript{} 
+bereitgestellt wird. Das mit \Macro{thesis} angegebene Feld, in welchem der Typ 
+einer Abschlussarbeit angegeben wird, nutzt das Schriftelement~\Font{thesis}. 
+Wie diese Elemente angepasst werden können, ist in \autoref{sec:fonts:elements} 
+zu finden. 
 \end{Declaration}
 \end{Declaration}
 \index{Titel|!)}
@@ -1833,6 +1830,16 @@ Layout"=Variante findet sich im Handbuch für das \CD der \TnUD. \notudscrartcl
   Der Titel wird in großer Auszeichnung auf der Teileseite gesetzt, die 
   Bezeichnung des Teils selber in kleinerer.
 \end{values}
+\end{Declaration}
+
+\begin{Declaration}[v2.02]{\Font{parttitle}}
+\printdeclarationlist%
+\index{Schriftelemente}
+%
+Mit dem Schriftelement~\Font{parttitle} lässt sich~-- bei aktivierter 
+\Option{parttitle}-Option~-- die Schrift für die Bezeichnung des Teils 
+beeinflussen. In \autoref{sec:fonts:elements} ist zu finden, wie dieses 
+angepasst werden kann.
 \end{Declaration}
 
 
@@ -1946,15 +1953,21 @@ durch \Package{typearea}. Die damit berechneten Werte werden anschließend an
 %
 Mit dieser Option kann die Größe des unteren Seitenrandes angepasst werden, 
 wenn der Satzspiegel des \CDs (\Option{cdgeometry}[true/symmetric/balanced]) 
-verwendet wird. Insbesondere für den Fall, dass Drittlogos im Fußbereich der 
-Seiten im Stil \PageStyle{tudheadings} verwendet werden, kann dieser unter 
-Umständen etwas zu klein sein. Dabei wird der Fußbereich durch positive Werte 
-vergrößert, negative Werte verkleinern diesen entsprechend. Es spielt dabei 
+verwendet wird. Insbesondere für den Fall, dass im Fußbereich der Seiten im 
+Stil \PageStyle{tudheadings} entweder mit \Macro{footlogo} Drittlogos verwendet 
+werden und diese über das optionale Argument oder via \Length{footlogoheight} 
+über die Standardhöhe hinaus vergrößert wurden oder mit \Macro{footcontent} ein 
+übergroßer Inhalt angegeben wurde, kann dieser unter Umständen etwas zu klein 
+sein. Mit der Option \Option{extrabottommargin} wird der Fußbereich durch 
+positive Werte vergrößert, negative Werte verkleinern diesen entsprechend. 
+
+Alternativ zu \Option{extrabottommargin} kann auch die Option \Option{cdfoot} 
+mit einer Längenangabe verwendet werden. Dabei spielt es für beide Optionen 
 keine Rolle, ob eine \hologo{LaTeX}-Länge, ein \hologo{TeX}-Abstand oder eine 
 \hologo{TeX}-Ausdehnung als Länge bei der Wertzuweisung verwendet wird.
 \end{Declaration}
 
-\subsubsection{Kopf"~ und Fußzeile im Zusammenspiel mit dem Satzspiegel}
+\minisec{Kopf"~ und Fußzeile im Zusammenspiel mit dem Satzspiegel}
 \index{Kopfzeile|?}\index{Layout!Kopfzeile}%
 \index{Fußzeile|?}\index{Layout!Fußzeile}%
 Da im \CD nicht festgelegt ist, wie die Gestaltung der Kopf"~ und Fußzeilen in 
@@ -1971,7 +1984,7 @@ beiden \KOMAScript"=Optionen \Option{headinclude}[\PBoolean] sowie
 Einstellung zur Satzspiegelgestaltung für die Option \Option{cdgeometry}~-- 
 verwendet werden.
 
-\subsubsection{Bindekorrektur}
+\minisec{Bindekorrektur}
 \index{Bindekorrektur|!}\index{Layout!Bindekorrektur}%
 %
 Zu erwähnen im Zusammenhang mit Seitenrändern und Satzspiegel ist die durch 
@@ -2000,6 +2013,19 @@ Dementsprechend wäre eine Bindekorrektur von \Option{BCOR}[5mm] beziehungsweise
 \Option{BCOR}[6mm] bei diesem Beispiel zu wählen.
 \end{Example}
 \index{Satzspiegel|)}\index{Layout!Satzspiegel|)}%
+
+
+\subsection{Verwendung von Schriftelementen}
+\label{sec:fonts:elements}%
+\index{Schriftelemente}
+Von \TUDScript werden weitere Schriftelemente~-- in Ergänzung zu den bereits
+durch \KOMAScript bereitgestellten~-- definiert. Dies sind \Font{titlepage}, 
+\Font{thesis}, \Font{tudheadings} sowie \Font{parttitle}. Sowohl die bereits 
+durch \KOMAScript{} definierten als auch alle hier genannten Schriftelemente 
+und später erläuterten sollten im Bedarfsfall durch den Anwender über den 
+Befehl \Macro{addtokomafont}\Parameter{Schriftelement}\Parameter{Einstellungen}
+angepasst werden. Mehr dazu ist im \KOMAScript"=Handbuch \scrguide im 
+Abschnitt \emph{Textauszeichnungen} zu finden.
 
 
 \subsection{Die Farben des \CDs}
@@ -2075,20 +2101,6 @@ die Zusammenfassung außerdem in Gestalt eines \sectionautorefname{}s oder für
   \Class{tudscrartcl} entspricht dies \Option{abstract}[section], bei 
   \Class{tudscrreprt} und \Class{tudscrbook} \Option{abstract}[chapter].
 \end{values}
-%
-Über den \KOMAScript-Befehl \Macro{renewcaptionname} kann der Bezeichner~-- 
-sprich der Inhalt~-- der Überschrift verändert werden. Mehr dazu ist in 
-\autoref{sec:localization} zu finden.
-%
-\begin{Example}
-Die Überschrift der \Environment{abstract}-Umgebung soll für die Sprache 
-\PValue{ngerman} von \enquote{\abstractname} in \enquote{Kurzfassung} umbenannt 
-werden. Der Befehl \Macro{renewcaptionname} erwartet die drei obligatorischen 
-Argumente \Parameter{Sprache}\Parameter{Makro}\Parameter{Inhalt}:
-\begin{Code}[escapechar=§]
-\renewcaptionname{ngerman}{\abstractname}{Kurzfassung}
-\end{Code}
-\end{Example}
 %
 Abhängig von der gewählten Gliederungsebene der Überschrift wird das Verhalten 
 für das Setzen eines Eintrages ins Inhaltsverzeichnis festgelegt. Ohne oder mit 
@@ -2260,6 +2272,23 @@ ist~-- \emph{immer} in Textgröße und zentriert gesetzt.
 \end{Declaration}
 \end{Declaration}
 \end{Declaration}
+
+\minisec{Umbenennung der \abstractname}
+Mit dem \KOMAScript-Befehl \Macro{renewcaptionname} kann der Bezeichner~-- 
+sprich der Wortlaut~-- der für die \Environment{abstract}-Umgebung verwendeten 
+Überschrift verändert werden. Mehr dazu ist in \autoref{sec:localization} zu 
+finden.
+%
+\begin{Example}
+Die Überschrift der \Environment{abstract}-Umgebung soll für die Sprache 
+\PValue{ngerman} von \enquote{\abstractname} in \enquote{Kurzfassung} umbenannt 
+werden. Der Befehl \Macro{renewcaptionname} erwartet die drei obligatorischen 
+Argumente \Parameter{Sprache}\Parameter{Makro}\Parameter{Inhalt}:
+\begin{Code}[escapechar=§]
+\renewcaptionname{ngerman}{\abstractname}{Kurzfassung}
+\end{Code}
+\end{Example}
+%
 \index{Zusammenfassung|!)}%
 
 
@@ -2382,6 +2411,7 @@ wird.
 \end{values}
 \end{Declaration}
 
+% §§§ Hier geht's weiter
 \begin{Declaration}[v2.02]{\Environment{declarations}[\LParameter]}
 \begin{Declaration}[v2.04]{\Macro{nextdeclaration}\OParameter{Sprache}}
 \begin{Declaration}{\Key{\Environment{declarations}}{language}[\PName{Sprache}]}
@@ -2649,8 +2679,7 @@ Kapitels zurückgesetzt wird.
 \begin{Declaration}{\Option{tudbookmarks}[\PBoolean]}[true]%
 \printdeclarationlist%
 \index{Lesezeichen}%
-\index{Titel}\index{Umschlagseite}%
-\index{Inhaltsverzeichnis}%
+\index{Titel}\index{Umschlagseite}\index{Inhaltsverzeichnis}%
 \index{Aufgabenstellung}\index{Gutachten}\index{Aushang}%
 %
 Diese Option wird wirksam, wenn \Package{hyperref} geladen wurde. Es werden für 
@@ -2909,8 +2938,7 @@ angezeigt.
 \begin{Declaration}{\Term{coverpagename}}
 \begin{Declaration}{\Term{titlepagename}}
 \printdeclarationlist%
-\index{Lesezeichen}%
-\index{Titel}\index{Umschlagseite}%
+\index{Lesezeichen}\index{Titel}\index{Umschlagseite}%
 %
 Diese beiden Bezeichner werden bei aktivierter \Option{tudbookmarks} für das 
 Eintragen von Lesezeichen in ein PDF"=Dokument genutzt.
@@ -2943,21 +2971,21 @@ dies jedoch bei einer erneuten Kompilierung unter Umständen eher unerwünscht.
 \printdeclarationlist%
 \index{Kompatibilität|!}%
 %
-Mit der Option \Option{tudscrver} wird es möglich, auf das Verhalten einer 
-älteren Version von \TUDScript umzuschalten, um nach der Kompilierung das 
-erwartete Ergebnis zu erhalten. Neue Möglichkeiten, die sich nicht auf den 
-Umbruch oder das Layout auswirken, sind auch für den Fall verfügbar, dass per 
-Option die Kompatibilität zu einer älteren Version ausgewählt wurde. 
+Mit dieser Option wird es möglich, auf das Verhalten einer älteren Version von 
+\TUDScript umzuschalten, um nach der Kompilierung das erwartete Ergebnis zu 
+erhalten. Neue Möglichkeiten, die sich nicht auf den Umbruch oder das Layout 
+auswirken, sind auch für den Fall verfügbar, dass per Option die Kompatibilität 
+zu einer älteren Version ausgewählt wurde. 
 
 Bei der Angabe einer unbekannten Version als Wert wird eine Warnung ausgegeben 
 und \Option{tudscrver}[first] angenommen. Mit \Option{tudscrver}[last] wird die 
 jeweils aktuell verfügbare Version ausgewählt und folglich auf die zukünftige 
-Kompatibilität des Dokumentes zu der genutzten Version verzichtet. Dieses 
-Verhalten entspricht der Voreinstellung. Es ist zu beachten, dass die Nutzung 
-von \Option{tudscrver} nur als Klassenoption möglich ist.
+Kompatibilität des Dokumentes zu der aktuell genutzten Version verzichtet. 
+Dieses Verhalten entspricht der Voreinstellung. Es ist zu beachten, dass die 
+Nutzung von \Option{tudscrver} nur als Klassenoption möglich ist.
 %
 \begin{values}
-\item[\PValue{v2.02}\textOR\PValue{last}]
+\item[\PValue{v2.02}\textOR\PValue{first}]
   \ChangedAt{%
     v2.03!Satzspiegel im \CD geändert{,} das \protect\DDC-Logo im Fußbereich 
     wird ohne vergrößerten Seitenrand verwendet
