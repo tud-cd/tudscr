@@ -1,4 +1,4 @@
-% \CheckSum{2972}
+% \CheckSum{2982}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-manual.dtx}[%
-  2015/06/03 v2.04 TUD-KOMA-Script\space%
+  2015/06/09 v2.04 TUD-KOMA-Script\space%
 %</driver>
 %<identify>\NeedsTeXFormat{LaTeX2e}
 %<class&identify>\ProvidesClass{tudscrman}[%
@@ -2236,7 +2236,7 @@
 % \end{environment}^^A tabularm
 % \begin{environment}{values}
 % \begin{macro}{\before@values}
-% \begin{macro}{\item@values}
+% \begin{macro}{\itemvalues}
 % \begin{macro}{\itemtrue}
 % \begin{macro}{\itemfalse}
 % \begin{macro}{\tud@item@val}
@@ -2258,9 +2258,13 @@
 % Zu Beginn der Umgebung wird die Definition des \cs{item}-Befehls gesichert 
 % und anschließend geändert.
 %    \begin{macrocode}
+\newcommand*\itemvalues{}
 \newcommand*\before@values{%
-  \let\item@values\item%
-  \let\item\tud@item%
+  \ifdefvoid{\itemvalues}{%
+    \let\itemvalues\item%
+    \let\item\tud@item%
+    \setlength\changedatskip{-\baselineskip}%
+  }{}%
 }
 %    \end{macrocode}
 % Die folgenden beiden Befehle enthalten die Standardwerte für boolsche 
@@ -2272,7 +2276,6 @@
 % Mit der neuen Definition kann der Säumniswert mit \cs{item*} explizit in der 
 % Liste hervorgehoben werden.
 %    \begin{macrocode}
-\newcommand*\item@values{}
 \newcommand*\tud@item@val{}
 \newcommand*\tud@item@add{}
 \newcommand*\tud@item@format{}
@@ -2306,7 +2309,7 @@
 % von \cs{item} angegeben, so wird der gesicherte Befehl ausgeführt. Ansonsten 
 % folgt die dritte Instanz.
 %    \begin{macrocode}
-  \ifstr{\@tempa}{}{\item@values}{\tud@@@item}%
+  \ifstr{\@tempa}{}{\itemvalues}{\tud@@@item}%
 }
 %    \end{macrocode}
 % Der gesicherte Befehl wird mit den aufbereiteten Formatierungen genutzt.
@@ -2319,7 +2322,7 @@
       \appto\tud@item@add{~#1}%
     \fi%
   }%
-  \item@values[%
+  \itemvalues[%
     \tud@item@format{\@tempa:}%
     \ifx\tud@item@add\relax\else%
       {\normalfont\space\footnotesize\tud@item@add}%
@@ -2335,7 +2338,7 @@
 % \end{macro}^^A \tud@item@val
 % \end{macro}^^A \itemfalse
 % \end{macro}^^A \itemtrue
-% \end{macro}^^A \item@values
+% \end{macro}^^A \itemvalues
 % \end{macro}^^A \before@values
 % \end{environment}^^A values
 %
@@ -2406,6 +2409,7 @@
   \ifdefvoid{\itempackages}{%
     \let\itempackages\item%
     \let\item\tud@item@pkg%
+    \setlength\changedatskip{-\baselineskip}%
   }{}%
 }
 \NewDocumentCommand\tud@item@pkg{ood()}{%
@@ -2538,6 +2542,8 @@
 % \begin{macro}{\ChangedAt}
 % \changes{v2.02}{2014/07/25}{erweitert}^^A
 % \changes{v2.02}{2014/10/15}{Sternversion neu (keine Randnotiz)}^^A
+% \begin{length}{\changedatskip}
+% \changes{v2.04}{2015/06/08}{neu}^^A
 % An den Befehl \cs{ChangedAt} kann eine kommagetrente Liste mit verschiedenen
 % Versionsnummern und dazugehörigen Änderungen übergeben werden. Er wird in der 
 % Form: \cs{ChangedAt}\verb|{|\meta{Version}\verb|!|\meta{Beschreibung}\verb|}| 
@@ -2548,13 +2554,16 @@
 %
 % Alle übergegebenen Versionsnummern werden als Liste mit einmaligen Einträgen 
 % in einer Randnotiz gesetzt. Mit dem optionalen Argument kann ein vertikaler 
-% dieser angegeben werden. Die Sternversion unterdrückt stattdessen die Ausgabe
-% dieser Randnotiz.
+% dieser angegeben werden. Die Version mit einem Apostroph verschiebt die 
+% Randnotiz um den Grundlinienabstand nach oben, die Sternversion unterdrückt
+% stattdessen die Ausgabe dieser vollständig.
 %    \begin{macrocode}
-\NewDocumentCommand\ChangedAt{sO{\z@}mO{Allgemein}}{%
+\newlength\changedatskip
+\NewDocumentCommand\ChangedAt{sO{\changedatskip}mO{Allgemein}}{%
   \ChangedAt@Process[#1]{#2}[#4]{#3}%
 }
 %    \end{macrocode}
+% \end{length}^^A \changedatskip
 % \end{macro}^^A \ChangedAt
 % \begin{macro}{\ChangedAt@Process}
 % \changes{v2.02}{2014/09/02}{neu}^^A
