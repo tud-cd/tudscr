@@ -1,4 +1,4 @@
-% \CheckSum{1090}
+% \CheckSum{1130}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-layout.dtx}[%
-  2015/02/15 v2.03 TUD-KOMA-Script (layout)%
+  2015/06/11 v2.03a TUD-KOMA-Script (layout)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -1009,22 +1009,46 @@
 %    \begin{macrocode}
 %<*book|report>
 \let\tud@@part\@part
-\patchcmd{\tud@@part}{%
-  \ifnumbered{part}{%
-    \size@partnumber{\partformat}%
-    \partheadmidvskip%
-  }{}%
-}{%
-  \ifnumbered{part}{%
-    \size@partnumber{\tud@makeuppercase{\partformat}}%
-    \partheadmidvskip%
-  }{%
-    \if@tud@parttitle\else%
-      \size@partnumber{\vphantom{\partname}}%
+\ifcsdef{scr@v@3.17}{%
+  \patchcmd{\tud@@part}{%
+    \ifnumbered{part}{%
+      \size@partnumber{\partformat}%
+      \setlength{\@tempskipa}{\scr@part@innerskip}%
       \partheadmidvskip%
-    \fi%
-  }%
-}{}{\tud@patch@wrn{@part}}%
+    }{}%
+  }{%
+    \ifnumbered{part}{%
+      \size@partnumber{\tud@makeuppercase{\partformat}}%
+      \if@tud@parttitle%
+        \enskip%
+      \else%
+        \tud@headmidvskip%
+      \fi%
+    }{%
+      \if@tud@parttitle\else%
+        \size@partnumber{\vphantom{\partname}}%
+        \tud@headmidvskip%
+      \fi%
+    }%
+  }{}{\tud@patch@wrn{@part}}%
+}{%
+  \patchcmd{\tud@@part}{%
+    \ifnumbered{part}{%
+      \size@partnumber{\partformat}%
+      \partheadmidvskip%
+    }{}%
+  }{%
+    \ifnumbered{part}{%
+      \size@partnumber{\tud@makeuppercase{\partformat}}%
+      \partheadmidvskip%
+    }{%
+      \if@tud@parttitle\else%
+        \size@partnumber{\vphantom{\partname}}%
+        \partheadmidvskip%
+      \fi%
+    }%
+  }{}{\tud@patch@wrn{@part}}%
+}
 %</book|report>
 %    \end{macrocode}
 % \end{macro}^^A \@part
@@ -1129,16 +1153,28 @@
 \newcommand*\tud@@@makechapterhead{}
 \let\tud@@@makechapterhead\@@makechapterhead
 %    \end{macrocode}
-% Die Patches für \KOMAScript~v3.15.
+% Die Patches für \KOMAScript~v3.15 und v3.17.
 %    \begin{macrocode}
 \ifcsdef{scr@v@3.15}{%
-  \patchcmd{\tud@@@makechapterhead}{\chapterformat\chapterheadmidvskip}{%
-    \tud@headmidvskip@neg%
-    \tud@makeuppercase{\chapterformat}\tud@headmidvskip
-  }{}{\tud@patch@wrn{@@makechapterhead}}
+  \ifcsdef{scr@v@3.17}{%
+    \patchcmd{\tud@@@makechapterhead}{%
+      \chapterformat
+      \setlength{\@tempskipa}{\scr@chapter@innerskip}%
+      \chapterheadmidvskip
+    }{%
+      \tud@headmidvskip@neg%
+      \tud@makeuppercase{\chapterformat}%
+      \tud@headmidvskip%
+    }{}{\tud@patch@wrn{@@makechapterhead}}%
+  }{%
+    \patchcmd{\tud@@@makechapterhead}{\chapterformat\chapterheadmidvskip}{%
+      \tud@headmidvskip@neg%
+      \tud@makeuppercase{\chapterformat}\tud@headmidvskip
+    }{}{\tud@patch@wrn{@@makechapterhead}}%
+  }%
   \patchcmd{\tud@@@makechapterhead}{\IfUsePrefixLine{}{\raggedchapter}}{%
     \IfUsePrefixLine{\IfUseNumber{\setlength\parskip{\z@}}{}}{\raggedchapter}%
-  }{}{\tud@patch@wrn{@@makechapterhead}}
+  }{}{\tud@patch@wrn{@@makechapterhead}}%
 %    \end{macrocode}
 % Die Patches für \KOMAScript~v3.14 und früher.
 %    \begin{macrocode}
