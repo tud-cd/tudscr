@@ -1,4 +1,4 @@
-% \CheckSum{643}
+% \CheckSum{647}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-fields.dtx}[%
-  2015/06/01 v2.04 TUD-KOMA-Script (input fields)%
+  2015/06/11 v2.04 TUD-KOMA-Script (input fields)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -456,6 +456,7 @@
 % \begin{macro}{\confirmationclosing}
 % \begin{field}{\@confirmationclosing}
 % \changes{v2.02}{2014/07/25}{\cs{@@date} durch \cs{@date} ersetzt}^^A
+% \changes{v2.04}{2015/06/10}{Verwendung von \cs{tud@split@author}}^^A
 % Als Abschluss der Selbstständigkeitserklärung für Ort und Unterschrift.
 %    \begin{macrocode}
 \newcommand*\@confirmationclosing{%
@@ -466,10 +467,15 @@
   \fi%
   \vskip\tud@signatureskip\noindent%
   \begingroup%
-    \let\and\hfil%
     \let\thanks\@gobble%
     \let\footnote\@gobble%
-    \@author%
+    \renewcommand*\tud@split@author[2]{%
+      \tud@multiple@fields@store{@author}{##1}%
+      \ignorespaces##1%
+      \tud@multiple@fields@restore{@author}%
+      \tud@multiple@@@split{##2}{\hfil}%
+    }%
+    \tud@multiple@split{@author}%
     \hfil%
   \endgroup%
 }
