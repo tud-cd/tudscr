@@ -513,11 +513,67 @@ Mitteln von \KOMAScript{} geändert werden kann.
 \end{Code}
 \end{Example}
 
-
-
 \ToDo[doc,nxt]{Schnittmarken mit \Package{crop} dokumentieren}[v2.04]
 %\section{Schnittmarken}
 
+
+\section{Vermeiden des Skalierens einer PDF-Datei beim Druck}
+%
+\ChangedAt{v2.04!\TaT: Vermeiden des Skalierens einer PDF-Datei beim Druck}
+%
+Beim Erzeugen eines Druckauftrages einer PDF-Datei kann es unter Umständen dazu 
+führen, dass diese durch den verwendeten PDF-Betrachter unnötigerweise vorher 
+skaliert wird und dabei die Seitenränder vergrößert werden. Um dieses Verhalten 
+für Dokumente, die mit \hologo{pdfTeX} erzeugt werden, zu unterdrücken, gibt es 
+zwei Möglichkeiten:
+%
+\begin{enumerate}
+\item Es kann \Macro*{hypersetup}\PParameter{pdfprintscaling=None} verwendet 
+  werden, wenn im Dokument ohnehin das Paket \Package{hyperref} geladen wird.
+\item Mit dem Low-Level-Befehl
+  \Macro*{pdfcatalog}\PParameter{/ViewerPreferences<</PrintScaling/None>>}  
+  lässt sich auch ohne das Paket das gleiche Verhalten erreichen.
+\end{enumerate}
+%
+Weitere Informationen dazu sind unter \url{http://www.komascript.de/node/1897} 
+zu finden.
+
+
+\section{Warnung bei der Schriftgrößenwahl}
+%
+\ChangedAt{v2.04!\TaT: Warnung bei der Schriftgrößenwahl}
+%
+Die im Dokument verwendete Schriftgröße kann bei den \KOMAScript-Klassen sehr 
+einfach über die Option~\Option{fontsize} eingestellt werden, wobei diese immer 
+als Klassenoption angegeben werden sollte. Bei relativ großen und kleinen 
+Schriftgrößen kann dabei eine Warnung in der Gestalt 
+%
+\begin{quoting}
+\begin{Code}[escapechar=§]
+LaTeX Font Warning: Font shape `§\dots§' in size <xx> not available
+\end{Code}
+\end{quoting}
+%
+auftreten. Dies daran, dass zum Zeitpunkt des Ladens einer Klasse immer nach 
+den Computer-Modern-Standardschriften gesucht wird, unabhängig davon, ob im 
+Nachhinein ein anderes Schriftpaket geladen wird. Diese sind de-facto nicht in 
+alle Größen skalierbar. Um die Warnungen zu beseitigen, sollte das Paket 
+\Package{fix-cm} mit \Macro*{RequirePackage} \emph{vor} der Dokumentklasse 
+geladen werden: 
+\begin{quoting}
+\begin{Code}[escapechar=§]
+\RequirePackage{fix-cm}
+\documentclass[<Optionen>]{<Klasse>}
+\usepackage{selinput}\SelectInputMappings{adieresis={ä},germandbls={ß}}
+\usepackage[T1]{fontenc}
+§\dots§
+\begin{document}
+§\dots§
+\end{document}
+\end{Code}
+\end{quoting}
+%
+Damit werden die Warnungen behoben.
 
 
 \section{Platzierung von Gleitobjekten}
@@ -668,8 +724,8 @@ der Verwendung von \Distribution{\hologo{MiKTeX}} mit \Path{-{}-enable-write18}
 zwingend notwendig. Außerdem muss der Pfad zur Datei \File{inkscape.exe} dem 
 System bekannt sein.%
 \footnote{%
-  Genauer gesagt, muss der Pfad zu \File{inkscape.exe} in der Umgebungsvariable 
-  \Path{PATH} des Betriebssystems enthalten sein.
+  Der Pfad zu \File{inkscape.exe} in der Umgebungsvariable \Path{PATH} des 
+  Betriebssystems enthalten sein.
 }
 Bei der Verwendung des Befehls \Macro{includesvg} \emph{muss} der Dateiname 
 \emph{ohne Endung} angegeben werden. Die einzubindende SVG"~Datei sollte sich 
@@ -773,15 +829,3 @@ ist.
 \fi
 \end{Code}
 \end{quoting}
-
-\ToDo[doc]{Vermeiden des Skalierens einer PDF-Datei beim Druck}[v2.04]
-\url{http://www.komascript.de/node/1897}
-% Einstellung der Skalierung der Druckausgabe abhängig vom PDF-Betrachter
-% um Skalierung zu unterdrücken gibt es zwei Varianten
-% 1.
-% \usepackage{hyperref}
-% \hypersetup{pdfprintscaling=AppDefault}
-% 2.
-% \pdfcatalog{/ViewerPreferences<</PrintScaling/None>>} 
-\ToDo[doc]{Verwendung des Paketes \Package{fix-cm} erläutern}[v2.04]
-% Hinweis auf Option fontsize, \index{Schriftgröße|!}
