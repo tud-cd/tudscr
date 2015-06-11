@@ -1,4 +1,4 @@
-% \CheckSum{583}
+% \CheckSum{581}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,9 +51,9 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-supervisor.dtx}[%
-  2015/01/30 v2.03 TUD-KOMA-Script\space%
+  2015/06/03 v2.04 TUD-KOMA-Script\space%
 %</driver>
-%<package>\NeedsTeXFormat{LaTeX2e}[2011/06/27]
+%<package>\NeedsTeXFormat{LaTeX2e}
 %<package>\ProvidesPackage{tudscrsupervisor}[%
 %<*driver|package>
 %!TUDVersion
@@ -83,8 +83,9 @@
 %
 % \section{Aufgabenstellung}
 %
-% Diese Paket stellt für die \cls{tudscr}-Klassen eine Umgebung für die
-% Aufgabenstellung einer Abschlussarbeit bereit.
+% Diese Paket stellt für die \cls{tudscr}-Klassen mehrere Umgebungen und
+% Befehle zur Erstellung der Aufgabenstellung einer Abschlussarbeit sowie
+% eines Gutachtens und eines Aushangs bereit.
 %
 % \StopEventually{\PrintIndex\PrintChanges}
 %
@@ -95,8 +96,8 @@
 % \subsection{Das Paket \pkg{tudscrsupervisor}}
 %
 % \begin{environment}{task}
-% \changes{v2.03}{2015/01/05}{Bugfix für initialen Seitenstil}%^^A
-% \changes{v2.03}{2015/01/05}{Bugfix für Seitenstil im zweiseitigen Satz}%^^A
+% \changes{v2.03}{2015/01/05}{Bugfix für initialen Seitenstil}^^A
+% \changes{v2.03}{2015/01/05}{Bugfix für Seitenstil im zweiseitigen Satz}^^A
 % Die Umgebung für die Aufgabenstellung nutzt die \env{tudpage}-Umgebung. Sie
 % wird auf einer neuen (rechten) Seite gesetzt. Es wird zu Beginn eine Tabelle 
 % mit Informationen zum Autor gesetzt. Zum Abschluss werden Betreuer,
@@ -140,7 +141,7 @@
     \ifx\supervisorothername\@empty\else\supervisorothername\@titledelim\fi%
       & \def\and{\tabularnewline &}%
   }%
-  \vskip-\lastskip%
+  \removelastskip%
   \ifdim\parskip>\z@\vskip\parskip\else\vskip\topsep\fi\medskip%
   \begingroup%
   \setparsizes{\z@}{\z@}{\z@\@plus 1fil}\par@updaterelative%
@@ -156,7 +157,7 @@
 % in einer Tabelle ausgegeben. Die \env{tudpage}-Umgebung wird beendet, und
 % eine neue (rechte) Seite geöffnet.
 %    \begin{macrocode}
-  \vskip 15mm plus 10mm minus 10mm%
+  \vskip\tud@signatureskip\noindent%
   \ifx\@chairman\@empty\else%
     \begin{tabular}{@{}l@{}}%
       \@chairman\tabularnewline%
@@ -184,7 +185,7 @@
 %    \begin{macrocode}
 \newcommand\taskform[3][]{%
   \begin{task}[#1]
-    \vskip-\lastskip%
+    \removelastskip%
     \ifxblank{#2}{}{\minisec{\objectivesname}#2}%
     \ifxblank{#3}{}{%
       \minisec{\focusname}%
@@ -197,7 +198,7 @@
 %    \end{macrocode}
 % \end{macro}^^A \taskform
 % \begin{environment}{evaluation}
-% \changes{v2.03}{2015/01/05}{Bugfix für Seitenstil im zweiseitigen Satz}%^^A
+% \changes{v2.03}{2015/01/05}{Bugfix für Seitenstil im zweiseitigen Satz}^^A
 % Die Umgebung für das Gutachten nutzt ebenfalls die \env{tudpage}-Umgebung. Sie
 % wird auf einer neuen (rechten) Seite gesetzt. Es wird zu Beginn eine Tabelle 
 % mit Informationen zum Autor gesetzt. Zum Abschluss werden Ort, Datum und 
@@ -233,19 +234,19 @@
 %    \end{macrocode}
 % Die gegebenen Note sowie Ort und Datum werden am Ende ggf. ausgegeben.
 %    \begin{macrocode}
-  \vskip-\lastskip%
+  \removelastskip%
   \ifdim\parskip>\z@\vskip\parskip\else\vskip\topsep\fi%
-  \medskip%
+  \setlength{\@tempskipa}{\smallskipamount}%
   \ifx\@grade\@empty\else%
-    \noindent\gradetext%
-    \vskip\bigskipamount%
+    \vskip\@tempskipa\noindent%
+    \gradetext%
+    \setlength{\@tempskipa}{\bigskipamount}%
   \fi%
   \ifx\@date\@empty\else%
-    \noindent%
-    \ifx\@place\@empty\else\@place,~\fi\@date%
-    \vskip\bigskipamount%
+    \vskip\@tempskipa\noindent%
+    \ifx\@place\@empty\else\@place,\nobreakspace\fi\@date%
   \fi%
-  \bigskip\bigskip\noindent%
+  \vskip\tud@signatureskip\noindent%
 %    \end{macrocode}
 % Der Befehl \cs{and} wird für einen möglichen Zweitgutachter angepasst. Das 
 % Hilfsmakro \cs{@tempa} dient zur Übernahme des richtigen Bezeichners für
@@ -281,7 +282,7 @@
 %    \begin{macrocode}
 \newcommand\evaluationform[5][]{%
   \begin{evaluation}[#1]
-    \vskip-\lastskip%
+    \removelastskip%
     \ifxblank{#2}{}{\minisec{\taskname}#2}%
     \ifxblank{#3}{}{\minisec{\contentname}#3}%
     \ifxblank{#4}{}{\minisec{\assessmentname}#4}%
@@ -290,8 +291,14 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \evaluationform
+% \begin{macro}{\student}
+% Der Befehl \cs{student} kann als Alias für \cs{author} genutzt werden.
+%    \begin{macrocode}
+\newcommand*\student{\author}
+%    \end{macrocode}
+% \end{macro}^^A \student
 % \begin{macro}{\tud@author@table}
-% \changes{v2.01b}{2014/06/04}{Probleme mit \pkg{calc} behoben}%^^A
+% \changes{v2.01b}{2014/06/04}{Probleme mit \pkg{calc} behoben}^^A
 % \begin{length}{\tud@dim@table}
 % Der Befehl \cs{tud@author@table} dient zur Ausgabe einer Tabelle mit
 % Informationen zum Autor/zu den Autoren\footnote{Matrikelnummer, Jahrgang,
@@ -299,50 +306,9 @@
 %    \begin{macrocode}
 \newlength\tud@dim@table%
 \newcommand*\tud@author@table{%
-  \tud@check@author%
   \begingroup%
   \let\thanks\@gobble%
   \let\footnote\@gobble%
-%    \end{macrocode}
-% Der Befehl \cs{tud@split@author} ist original aus den \cls{tudscr}-Klassen
-% und dient zur formatierten Ausgabe von mehreren Autoren, welche durch
-% \cs{author}\marg{Autor(en)} angegeben und mit \cs{and} getrennt wurden.
-% Er wird hier auf die Ausgabe der Autoren mit den jeweils zusätzlich gegebenen
-% Informationen in einer Tabelle angepasst.
-%    \begin{macrocode}
-  \renewcommand*\tud@split@author[2]{%
-%    \end{macrocode}
-% Weil alle Autoren in einer Tabelle gesetzt werden wird geprüft, welche Felder
-% individuell via \cs{author} angegeben wurden. Damit die Tabellen die gleiche
-% Höhe haben, auch wenn für einen Autor ein Feld ausgelassen wurde, werden alle
-% insgesamt angegebenen Felder mit via \cs{tud@multiple@setfields} mit \cs{null}
-% initialisiert. Anschließend werden für den aktuellen Autor angegebenen Felder
-% gesetzt.
-%    \begin{macrocode}
-    \tud@multiple@setfields{\null}{##1}%
-%    \end{macrocode}
-% Nach viel Geplänkel kommt nun die eigentliche Tabelle mit ggf. zusätzlichen
-% Informationen zum Autor.
-%    \begin{macrocode}
-    \begin{tabular}{l@{}}%
-      \ifx\@course\@empty\else\@course\tabularnewline\fi%
-      \ifx\@discipline\@empty\else\@discipline\tabularnewline\fi%
-      \textsf{\textbf{\ignorespaces##1}}\tabularnewline%
-      \ifx\@matriculationnumber\@empty\else%
-        \@matriculationnumber\tabularnewline%
-      \fi%
-      \ifx\@matriculationyear\@empty\else%
-        \@matriculationyear\tabularnewline%
-      \fi%
-    \end{tabular}%
-%    \end{macrocode}
-% Sollte ein weiterer Autor folgen, wird \cs{tabcolsep} zusätzlich eingefügt,
-% um den Standardabstand bei Tabellen zu sichern, da die Tabelle vorher ohne
-% rechten \enquote{Rand} gesetzt wurde, um die letzte Tabelle ggf. genau bis
-% zum rechten Rand setzen zu können.
-%    \begin{macrocode}
-    \tud@multiple@@@split{##2}{~~\hspace{\tabcolsep}}
-  }%
 %    \end{macrocode}
 % Zu Beginn wird eine Tabelle mit den Bezeichnern aller genutzten Feldern
 % ausgegeben. Danach folgen alle Autoren. Damit ein einheitliches Layout
@@ -350,19 +316,19 @@
 % gleiche Breite haben wie im oberen Teil, ist die Bestimmung einer festen
 % Spaltenbreite notwendig, die so breit wie der längste Bezeichner ist.
 % Dafür muss festgestellt werden, welche optionalen Felder denn nun überhaupt
-% genutzt werden. Dafür wird \cs{tud@multiple@setfields} mit \cs{null} als
+% genutzt werden. Dafür wird \cs{tud@multiple@fields@preset} mit \cs{null} als
 % Argument aufgerufen, um alle potentiellen Felder erkennen zu können.
 %    \begin{macrocode}
+  \tud@multiple@split{@author}%
+  \tud@multiple@fields@preset{@author}{\null}{}%
   \setlength\tud@dim@table{2em}%
-  \gdef\tud@multiple@field{@author}%
-  \tud@multiple@setfields{\null}{}%
 %    \end{macrocode}
 % Anschließend werden die Bezeichner sowohl der obligatorischen als auch der
 % genutzten, optionalen Felder expandiert. Anschließend wir mit dieser Liste
 % der längste bestimmt und in \cs{tud@dim@table} gespeichert.
 %    \begin{macrocode}
   \edef\@tempa{%
-    \authorname,\titlename,\supervisorname,\supervisorothername,%
+    \namesname,\titlename,\supervisorname,\supervisorothername,%
     \issuedatetext,\duedatetext,%
     \expandafter\ifx\@matriculationnumber\@empty\else%
       \matriculationnumbername%
@@ -394,7 +360,7 @@
     \ifx\@discipline\@empty\else%
       \disciplinename\@titledelim\tabularnewline%
     \fi%
-    \authorname\@titledelim\tabularnewline%
+    \namesname\@titledelim\tabularnewline%
     \ifx\@matriculationnumber\@empty\else%
       \matriculationnumbername\@titledelim\tabularnewline%
     \fi%
@@ -403,13 +369,54 @@
     \fi%
   \end{tabular}%
 %    \end{macrocode}
-% Folgend werden die Autoren wie schon bei \cs{maketitle} mit den gleichen
-% Makros gesplittet und separat ausgegeben.
+% Der Befehl \cs{tud@split@author} wird innerhalb der \cls{tudscr}-Klassen zur 
+% formatierten Ausgabe von mehreren Autoren auf der Titelseite verwendet, 
+% welche durch\cs{author}\marg{Autor(en)} angegeben und mit \cs{and} getrennt 
+% wurden. Er wird hier auf die Ausgabe der Autoren mit den jeweils zusätzlich
+% gegebenen Informationen in einer Tabelle angepasst.
+%    \begin{macrocode}
+  \renewcommand*\tud@split@author[2]{%
+%    \end{macrocode}
+% Weil alle Autoren in einer Tabelle gesetzt werden wird geprüft, welche Felder
+% individuell via \cs{author} angegeben wurden. Damit die Tabellen die gleiche
+% Höhe haben, auch wenn für einen Autor ein Feld ausgelassen wurde, werden alle
+% insgesamt angegebenen Felder mit via \cs{tud@multiple@fields@preset} mit
+% \cs{null} initialisiert. Anschließend werden die für den aktuellen Autor
+% angegebenen Felder gesetzt.
+%    \begin{macrocode}
+    \tud@multiple@fields@store{@author}{##1}%
+    \tud@multiple@fields@preset{@author}{\null}{##1}%
+%    \end{macrocode}
+% Nach viel Geplänkel kommt nun die eigentliche Tabelle mit ggf. zusätzlichen
+% Informationen zum Autor.
+%    \begin{macrocode}
+    \begin{tabular}{l@{}}%
+      \ifx\@course\@empty\else\@course\tabularnewline\fi%
+      \ifx\@discipline\@empty\else\@discipline\tabularnewline\fi%
+      \textsf{\textbf{\ignorespaces##1}}\tabularnewline%
+      \ifx\@matriculationnumber\@empty\else%
+        \@matriculationnumber\tabularnewline%
+      \fi%
+      \ifx\@matriculationyear\@empty\else%
+        \@matriculationyear\tabularnewline%
+      \fi%
+    \end{tabular}%
+%    \end{macrocode}
+% Sollte ein weiterer Autor folgen, wird \cs{tabcolsep} zusätzlich eingefügt,
+% um den Standardabstand bei Tabellen zu sichern, da die Tabelle vorher ohne
+% rechten \enquote{Rand} gesetzt wurde, um die letzte Tabelle ggf. genau bis
+% zum rechten Rand setzen zu können.
+%    \begin{macrocode}
+    \tud@multiple@fields@restore{@author}%
+    \tud@multiple@@@split{##2}{\enskip\hspace{\tabcolsep}}%
+  }%
+%    \end{macrocode}
+% Hier erfolgt die eigentliche Ausgabe.
 %    \begin{macrocode}
   \tud@multiple@split{@author}%
 %    \end{macrocode}
 % Nach den Autoren wird der Titel über die komplette Textbreite ausgegeben.
-% Danach wird der Inhalt der Aufgabenstellung ausgegeben.
+% Danach wird der Inhalt der Aufgabenstellung gesetzt.
 %    \begin{macrocode}
   \vskip\smallskipamount%
   \begin{tabular}{@{}p{\tud@dim@table}%
@@ -429,12 +436,14 @@
 % Der Befehl \cs{tud@split@author@list} wird um die hier im Paket zusätzlich
 % definierten Felder erweitert.
 %    \begin{macrocode}
-\patchcmd{\tud@split@author@list}{\authormore}%
-  {\authormore,\course,\discipline}{}{\tud@patch@wrn{tud@split@author@list}}
+\patchcmd{\tud@split@author@list}{authormore}{%
+  authormore,course,discipline%
+}{}{\tud@patch@wrn{tud@split@author@list}}
 %    \end{macrocode}
 % \end{macro}^^A \tud@split@author@list
 % \begin{environment}{notice}
-% \changes{v2.03}{2015/01/05}{Bugfix für Seitenstil im zweiseitigen Satz}%^^A
+% \changes{v2.03}{2015/01/05}{Bugfix für Seitenstil im zweiseitigen Satz}^^A
+% \begin{macro}{\tud@split@contactperson}
 % Die Umgebung für Aushänge nutzt ebenfalls die \env{tudpage}-Umgebung. Sie wird
 % auf einer neuen (rechten) Seite gesetzt. Die Überschrift wird in der 
 % Voreinstellung auf den sprachabhängigen Bezeichner \cs{noticename} gesetzt, 
@@ -474,8 +483,20 @@
 %    \begin{macrocode}
   \ifx\@contactperson\@empty\let\@contactperson\@supervisor\fi%
   \ifx\@contactperson\@empty\else%
-    \vskip-\lastskip%
+    \removelastskip%
     \ifdim\parskip>\z@\vskip\parskip\else\vskip\topsep\fi%
+    \renewcommand*\tud@split@contactperson[2]{%
+      \tud@multiple@fields@store{@contactperson}{##1}%
+      \tud@multiple@fields@preset{@contactperson}{}{##1}%
+      \begin{tabular}[t]{@{}l@{}}%
+        \ignorespaces##1\tabularnewline%
+        \ifx\@office\@empty\else\@office\tabularnewline\fi%
+        \ifx\@telephone\@empty\else\@telephone\tabularnewline\fi%
+        \ifx\@emailaddress\@empty\else\@emailaddress\tabularnewline\fi%
+      \end{tabular}%
+      \tud@multiple@fields@restore{@contactperson}%
+      \tud@multiple@@@split{##2}{\hfill}%
+    }%
     \subsection*{\contactpersonname}%
     \noindent\tud@multiple@split{@contactperson}\hfill\null%
   \fi%
@@ -483,6 +504,7 @@
   \aftergroup\cleardoublepage%
 }
 %    \end{macrocode}
+% \end{macro}^^A \tud@split@contactperson
 % \end{environment}^^A notice
 % \begin{macro}{\noticeform}
 % Dies soll die Standardform eines Aushangs für eine Abschlussarbeit sein. Im
@@ -491,7 +513,7 @@
 %    \begin{macrocode}
 \newcommand\noticeform[3][]{%
   \begin{notice}[#1]
-    \vskip-\lastskip%
+    \removelastskip%
     \ifxblank{#2}{}{%
       \ifx\@@title\@empty\else%
         \minisec{\expandonce{\@@title}}%
@@ -508,25 +530,6 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \noticeform
-% \begin{macro}{\tud@split@contactperson}
-% \begin{macro}{\tud@split@contactperson@list}
-% Mit diesem Befehl werden für einen Aushang die Daten für einen oder mehrere 
-% Kontaktpersonen ausgegeben.
-%    \begin{macrocode}
-\newcommand*\tud@split@contactperson[2]{%
-  \tud@multiple@setfields{\null}{#1}%
-  \begin{tabular}{@{}l@{}}%
-    \ignorespaces#1\tabularnewline%
-    \ifx\@office\@empty\else\@office\tabularnewline\fi%
-    \ifx\@telephone\@empty\else\@telephone\tabularnewline\fi%
-    \ifx\@emailaddress\@empty\else\@emailaddress\tabularnewline\fi%
-  \end{tabular}%
-  \tud@multiple@@@split{#2}{\hfill}%
-}
-\newcommand*\tud@split@contactperson@list{\office,\telephone,\emailaddress}
-%    \end{macrocode}
-% \end{macro}^^A \tud@split@contactperson@list
-% \end{macro}^^A \tud@split@contactperson
 %
 % \iffalse
 %</package>

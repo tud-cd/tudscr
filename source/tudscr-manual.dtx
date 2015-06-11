@@ -1,4 +1,4 @@
-% \CheckSum{2750}
+% \CheckSum{2982}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,9 +51,9 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-manual.dtx}[%
-  2015/02/15 v2.03 TUD-KOMA-Script\space%
+  2015/06/09 v2.04 TUD-KOMA-Script\space%
 %</driver>
-%<identify>\NeedsTeXFormat{LaTeX2e}[2011/06/27]
+%<identify>\NeedsTeXFormat{LaTeX2e}
 %<class&identify>\ProvidesClass{tudscrman}[%
 %<package&identify>\ProvidesPackage{tudscrman}[%
 %<*driver|(class|package)&identify>
@@ -82,9 +82,9 @@
 %
 % \selectlanguage{ngerman}
 %
-% \changes{v2.02}{2014/11/18}{\cls{tudscrman} Index für Tutorials möglich}%^^A
+% \changes{v2.02}{2014/11/18}{\cls{tudscrman} Index für Tutorials möglich}^^A
 % \changes{v2.02}{2014/12/17}{\cls{tudscrman} xindy-Stildatei wird bei der 
-%   Kompilierung erzeugt}%^^A
+%   Kompilierung erzeugt}^^A
 %
 % \section{Klasse und Paket für die Anwenderdokumentation von \TUDScript}
 %
@@ -96,6 +96,7 @@
 % \StopEventually{\PrintIndex\PrintChanges}
 %
 % \iffalse
+%<*!doc>
 %<*body>
 % \fi
 %
@@ -116,10 +117,6 @@
 %    \begin{macrocode}
 \RequirePackage{textcomp}[2005/09/27]
 %    \end{macrocode}
-% Verbesserungen am \LaTeX-Kernel.
-%    \begin{macrocode}
-\RequirePackage{fixltx2e}[2014/06/10]
-%    \end{macrocode}
 % Vergrößerung des Durchschusses.
 %    \begin{macrocode}
 \RequirePackage{setspace}[2011/12/19]
@@ -134,7 +131,13 @@
 \AfterPackage*{inputenc}{\RequirePackage{csquotes}[2011/10/22]}
 \AtBeginDocument{%
   \@ifpackageloaded{csquotes}{}{%
-    \ClassWarning{\tudcls@name}{Package `csquotes' not loaded}%
+%<*class>
+  \ClassWarning%
+%</class>
+%<*package>
+  \PackageWarning%
+%</package>
+  {tudscrman}{Package `csquotes' not loaded}%
     \providecommand\enquote[1]{\glqg#1\grqq{}}%
   }%
 }
@@ -271,9 +274,9 @@
 % \end{macro}^^A \@autorefname
 % \end{macro}^^A \autorefname
 % \begin{macro}{\manualhyperdef}
-% \changes{v2.02}{2014/10/27}{neu}%^^A
+% \changes{v2.02}{2014/10/27}{neu}^^A
 % \begin{macro}{\manualhyperref}
-% \changes{v2.02}{2014/10/27}{neu}%^^A
+% \changes{v2.02}{2014/10/27}{neu}^^A
 % Diese beiden Befehle dienen zum Defnieren von Textankern im Handbuch und zum
 % Referenzieren auf diese. Bei der Erstelung des Ankers mit \cs{manualhyperdef} 
 % wird zusätzlich auch noch ein Label (\cs{label}) erzeugt. Die Sternversion 
@@ -329,11 +332,11 @@
 \newcommand*\xdyopt{-M tudscrman-temp.xdy -L german-din}
 %    \end{macrocode}
 % \begin{macro}{\tud@write@i}
-% \changes{v2.02}{2014/10/22}{neu}%^^A
+% \changes{v2.02}{2014/10/22}{neu}^^A
 % \begin{macro}{\tud@write@ii}
-% \changes{v2.02}{2014/11/02}{neu}%^^A
+% \changes{v2.02}{2014/11/02}{neu}^^A
 % \begin{macro}{\tud@read}
-% \changes{v2.02}{2014/08/19}{neu}%^^A
+% \changes{v2.02}{2014/08/19}{neu}^^A
 % Für die Erstellung der Indizes wird zum Sortieren das Programm \pkg{xindy} 
 % genutzt. Für dieses wird eine eigene Stildatei verwendet, welche zur Laufzeit 
 % erzeugt wofür zuerst ein Ausgabestream reserviert wird.
@@ -366,7 +369,9 @@
 % für angehängte \enquote{f.} sowie \enquote{ff.} einstellen. Diese würden 
 % deshalb bei kursiven oder fetten Seitenzahlen trotzdem in normaler Schrift
 % erscheinen, weshalb auf die Auszeichnung folgender Seiten verzichtet wird.
-%^^A\write\tud@write@i{(require "ff-ranges.xdy")}
+%    \begin{macrocode}
+%\write\tud@write@i{(require "ff-ranges.xdy")}
+%    \end{macrocode}
 %
 % Seitenbereiche werden sofort zusammengefasst, wobei als Trennzeichen ein
 % Halbgeviertstrich verwendet wird.
@@ -382,39 +387,47 @@
 % Indexbefehlen genutzt, um die nicht beachteten RegExp-Regeln auszugleichen, 
 % siehe den nächsten Absatz.
 %    \begin{macrocode}
-\write\tud@write@i{(merge-rule "\[(.*)\]" "" :eregexp)}
+\write\tud@write@i{%
+(merge-rule "\@backslashchar[(.*)\@backslashchar]" "" :eregexp)%
+}
 %    \end{macrocode}
 % Innerhalb ausgewählter Auszeichnungs- und Textbefehle sollten die Befehle
 % selbst, nicht jedoch die Argumente verworfen werden. Leider werden die 
 % manuell erstellten RegExp-Regeln durch \texttt{texindy} zu spät genutzt 
 % (\url{http://sourceforge.net/p/xindy/bugs/22/}).
-%^^A\write\tud@write@i{(merge-rule "\\hyperidx\{(.*)\}\{(.*)\}" "/2" :eregexp)}
-%^^A\write\tud@write@i{(merge-rule "\\hologo\{(.*)\}" "/1" :eregexp)}
-%^^A\write\tud@write@i{(merge-rule "\\texttt\{(.*)\}" "/1" :eregexp)}
-%^^A\write\tud@write@i{(merge-rule "\\textsbn\{(.*)\}" "/1" :eregexp)}
-%^^A\write\tud@write@i{(merge-rule "\\textsbs\{(.*)\}" "/1" :eregexp)}
-% 
+%    \begin{macrocode}
+%\write\tud@write@i{(merge-rule "\\hyperidx\{(.*)\}\{(.*)\}" "/2" :eregexp)}
+%\write\tud@write@i{(merge-rule "\\hologo\{(.*)\}" "/1" :eregexp)}
+%\write\tud@write@i{(merge-rule "\\texttt\{(.*)\}" "/1" :eregexp)}
+%\write\tud@write@i{(merge-rule "\\textsbn\{(.*)\}" "/1" :eregexp)}
+%\write\tud@write@i{(merge-rule "\\textsbs\{(.*)\}" "/1" :eregexp)}
+%    \end{macrocode}
 % Es werden die Attribute \emph{declare} mit der Abkürzung \emph{!} sowie
 % \emph{important} mit der Abkürzung \emph{?} und \emph{default} definiert, 
 % welche hierarchisch gleichgestellt sind.
 %    \begin{macrocode}
 \write\tud@write@i{%
-  (define-attributes (("declare" "!" "important" "?" "deprecated" "default")))%
+(define-attributes (("declare" "!" "important" "?" "deprecated" "default")))%
 }
 %    \end{macrocode}
 % Eine Alternative wäre, diese in der Hierarchie zu unterscheiden, allerdings
 % war eine Bildung von zufriedenstellenden Seitenbereichen dabei nicht möglich
 % und wurde deshalb verworfen.
-%^^A\write\tud@write@i{(markup-attribute-group-list :sep ", ")}
-%^^A\write\tud@write@i{%
-%^^A(define-attributes (("declare" "!") ("important" "?")("default")))%
-%^^A}
-%
-% Einträge, die als wichtig deklariert wurden, können auch für normale zur 
-% Bereichsbildung verwendet werden.
 %    \begin{macrocode}
-\write\tud@write@i{(merge-to "important" "default")}
-\write\tud@write@i{(merge-to "?" "default")}
+%\write\tud@write@i{(markup-attribute-group-list :sep ", ")}
+%\write\tud@write@i{%
+%(define-attributes (("declare" "!") ("important" "?")("default")))%
+%}
+%    \end{macrocode}
+% Einträge, die als wichtig oder als Deklaration festgelegt wurden, könnten
+% auch für normale Indexeinträge zur Bereichsbildung verwendet werden. 
+% Allerdings führt dies auch zur Erzeugung redundanter Einträge, falls es sich 
+% bei den Sondereinträgen bereits um einen Seitenbereich handelt.
+%    \begin{macrocode}
+%\write\tud@write@i{(merge-to "declare" "default")}
+%\write\tud@write@i{(merge-to "!" "default")}
+%\write\tud@write@i{(merge-to "important" "default")}
+%\write\tud@write@i{(merge-to "?" "default")}
 %    \end{macrocode}
 % Hier erfolgt die Definition der Auszeichnugen der Attribute. Deklarationen 
 % werden fett gedruckt, wichtige Einträge erscheinen kursiv. Außerdem wird ein
@@ -422,51 +435,51 @@
 %    \begin{macrocode}
 \write\tud@write@i{%
 (markup-locref^^J%
-\space\space :open "\string\textbf{\string\hyperpage{"^^J%
-\space\space :close "}}"^^J%
 \space\space :attr "declare"^^J%
-)%
-}
-\write\tud@write@i{%
-(markup-locref^^J%
 \space\space :open "\string\textbf{\string\hyperpage{"^^J%
 \space\space :close "}}"^^J%
+)%
+}
+\write\tud@write@i{%
+(markup-locref^^J%
 \space\space :attr "!"^^J%
+\space\space :open "\string\textbf{\string\hyperpage{"^^J%
+\space\space :close "}}"^^J%
 )%
 }
 \write\tud@write@i{%
 (markup-locref^^J%
-\space\space :open "\string\textsl{\string\hyperpage{"^^J%
-\space\space :close "}}"^^J%
 \space\space :attr "important"^^J%
-)%
-}
-\write\tud@write@i{%
-(markup-locref^^J%
 \space\space :open "\string\textsl{\string\hyperpage{"^^J%
 \space\space :close "}}"^^J%
-\space\space :attr "?"^^J%
 )%
 }
 \write\tud@write@i{%
 (markup-locref^^J%
+\space\space :attr "?"^^J%
+\space\space :open "\string\textsl{\string\hyperpage{"^^J%
+\space\space :close "}}"^^J%
+)%
+}
+\write\tud@write@i{%
+(markup-locref^^J%
+\space\space :attr "default"^^J%
 \space\space :open "\string\hyperpage{"^^J%
 \space\space :close "}"^^J%
-\space\space :attr "default"^^J%
 )%
 }
 %    \end{macrocode}
 % Für die Änderungsliste wird ein separates Attribut erstellt. Mit diesem wird 
 % es möglich, die Seitenangabe für Optionen und Befehle zu unterdrücken, welche 
-% aus \TUDScript entfernt oder veraltet wurden, wenn mit \cs{Replace} eine 
+% aus \TUDScript entfernt wurden oder veraltet sind, wenn mit \cs{Replace} eine 
 % Alternative eingeführt wurde. Dafür wird der Befehl \cs{deprecatedhyperpage} 
 % verwendet, welcher im Bedarfsball auf \cs{@gobble} gesetzt wird.
 %    \begin{macrocode}
 \write\tud@write@i{%
 (markup-locref^^J%
+\space\space :attr "deprecated"^^J%
 \space\space :open "\string\deprecatedhyperpage{"^^J%
 \space\space :close "}"^^J%
-\space\space :attr "deprecated"^^J%
 )%
 }
 %    \end{macrocode}
@@ -571,6 +584,10 @@
 %    \begin{macrocode}
 \RequirePackage{tudscrsupervisor}[\TUDVersion]
 %    \end{macrocode}
+% Befehle für die Dokumentation des Pakets \pkg{tudscrposter}.
+%    \begin{macrocode}
+\RequirePackage[cdstyle=false]{tudscrposter}[\TUDVersion]
+%    \end{macrocode}
 %
 % \iffalse
 %</class>
@@ -609,11 +626,11 @@
 % Hier werden die Optionen für Klasse und Paket definiert.
 %
 % \begin{option}{ToDo}
-% \changes{v2.02}{2014/07/10}{neu}%^^A
+% \changes{v2.02}{2014/07/10}{neu}^^A
 % \begin{macro}{\if@tud@todo}
-% \changes{v2.02}{2014/07/10}{neu}%^^A
+% \changes{v2.02}{2014/07/10}{neu}^^A
 % \begin{macro}{\tud@todo@type}
-% \changes{v2.03}{2015/01/25}{neu}%^^A
+% \changes{v2.03}{2015/01/25}{neu}^^A
 % Diese Option ist verantwortlich für den Schalter \cs{if@tud@todo}. Über 
 % diesen wird gesteuert, ob ToDo-Notizen ausgegeben werden sollen.
 %    \begin{macrocode}
@@ -689,11 +706,10 @@
 % mit \pkg{auto-pst-pdf} funktioniert.
 %    \begin{macrocode}
 \AfterPackage*{pstricks}{%
-  \ifnum\pdfshellescape=1\relax
-    \RequirePackage{auto-pst-pdf}[2009/04/26]
-  \else
-    \RequirePackage[off]{auto-pst-pdf}[2009/04/26]
-  \fi
+  \ifnum\pdfshellescape=\@ne\relax\else%
+    \PassOptionsToPackage{off}{auto-pst-pdf}%
+  \fi%
+  \RequirePackage{auto-pst-pdf}[2009/04/26]%
 }
 %    \end{macrocode}
 %
@@ -715,7 +731,7 @@
 % \begin{macro}{\PName}
 % \begin{macro}{\PBoolean}
 % \begin{macro}{\PBName}
-% \changes{v2.02}{2014/11/12}{neu}%^^A
+% \changes{v2.02}{2014/11/12}{neu}^^A
 % \begin{macro}{\PSet}
 % \begin{macro}{\Parameter}
 % \begin{macro}{\OParameter}
@@ -725,7 +741,7 @@
 % \begin{macro}{\PParameter}
 % \begin{macro}{\POParameter}
 % \begin{macro}{\textOR}
-% \changes{v2.02}{2015/01/25}{neu}%^^A
+% \changes{v2.02}{2015/01/25}{neu}^^A
 % Diese Befehle dienen zum Auszeichnen von obligatorischen und optionalen 
 % Parametern und Befehlen oder bestimmten Wertzuweisungen.
 %    \begin{macrocode}
@@ -760,10 +776,10 @@
 % \subsubsection{Kompilieren von externen Dateien und Querverweise auf diese}
 %
 % \begin{macro}{\Tutorial}
-% \changes{v2.02}{2014/08/22}{neu}%^^A
-% \changes{v2.02}{2014/10/22}{Reimplementierung}%^^A
+% \changes{v2.02}{2014/08/22}{neu}^^A
+% \changes{v2.02}{2014/10/22}{Reimplementierung}^^A
 % \begin{macro}{\hypertut}
-% \changes{v2.02}{2014/09/02}{neu}%^^A
+% \changes{v2.02}{2014/09/02}{neu}^^A
 % Die gegebenenfalls notwendige Kompilierung und die Referenzierung eines 
 % Tutorials aus dem Handbuch erfolgt mit \cs{Tutorial}. Außerdem erfolgt mit
 % \cs{hypertut} ein verlinkter Eintrag in den Index.
@@ -773,7 +789,7 @@
   \hyperref{tutorials/#1.pdf}{\jobname}{tutorials:#1}{\textsbn{#1.pdf}#2}%
 }
 \NewDocumentCommand\Tutorial{smd||}{%
-  \ifnum\pdfshellescape=1\relax%
+  \ifnum\pdfshellescape=\@ne\relax%
 %    \end{macrocode}
 % Um mit den verschachtelten Aufrufen von pdf\LaTeX{} umgehen zu können, wird 
 % das ganze Prozedere in ein Skript ausgelagert. Somit können die Aufrufe von
@@ -784,9 +800,10 @@
       \immediate\write\tud@write@i{%
         cd tutorials^^J%
         pdflatex -shell-escape #2^^J%
-        biber #2^^J%
-        makeglossaries #2^^J%
         pdflatex #2^^J%
+        biber #2^^J%
+        pdflatex -shell-escape #2^^J%
+        makeglossaries #2^^J%
         pdflatex #2%
       }%
       \immediate\closeout\tud@write@i%
@@ -832,8 +849,8 @@
 % \fi
 %
 % \begin{macro}{\IncludeExample}
-% \changes{v2.02}{2014/07/25}{Skalierung der eingefügten Seiten}%^^A
-% \changes{v2.02}{2014/10/14}{Reimplementierung}%^^A
+% \changes{v2.02}{2014/07/25}{Skalierung der eingefügten Seiten}^^A
+% \changes{v2.02}{2014/10/14}{Reimplementierung}^^A
 % Mit diesem Befehl wird eine \LaTeX-Datei ggf. übersetzt und anschließend als
 % PDF"~Datei wieder eingebunden. Zuvor wird der dazugehörige Quelltext mittels
 % \cs{lstinputlisting} im Dokument ausgegeben. Dieser Befehl wird lediglich für 
@@ -845,10 +862,9 @@
 % Die Beispiele werden nur erneut kompiliert, wenn sich diese geändert haben 
 % oder noch gar kein entsprechendes PDF"~Dokument existiert.
 %    \begin{macrocode}
-  \ifnum\pdfshellescape=1\relax%
+  \ifnum\pdfshellescape=\@ne\relax%
     \filemodCmp{examples/#1.pdf}{examples/#1.tex}{}{%
       \immediate\write18{%
-        pdflatex -shell-escape -output-directory examples examples/#1.tex
         pdflatex -output-directory examples examples/#1.tex
         pdflatex -output-directory examples examples/#1.tex
       }%
@@ -878,12 +894,12 @@
 % \subsubsection{ToDo-Liste}
 %
 % \begin{macro}{\ToDo}
-% \changes{v2.02}{2014/07/10}{Verwendung von \pkg{todonotes}}%^^A
-% \changes{v2.03}{2015/01/25}{Ausgabe auf bestimmten Typ beschränkbar}%^^A
+% \changes{v2.02}{2014/07/10}{Verwendung von \pkg{todonotes}}^^A
+% \changes{v2.03}{2015/01/25}{Ausgabe auf bestimmten Typ beschränkbar}^^A
 % \begin{macro}{\@ToDo}
-% \changes{v2.02}{2014/07/10}{neu}%^^A
+% \changes{v2.02}{2014/07/10}{neu}^^A
 % \begin{macro}{\ListOfToDo}
-% \changes{v2.02}{2014/07/10}{neu}%^^A
+% \changes{v2.02}{2014/07/10}{neu}^^A
 % Mit dem Befehl \cs{ToDo}\oarg{options}\marg{inline text}\oarg{marginnote}
 % kann bei aktivierter Option \opt{ToDo} eine Notiz mit einer offenen Ausgabe
 % erstellt werden. Das vorangestellte Argument kann Optionen beinhalten, welche
@@ -935,7 +951,9 @@
 %    \begin{macrocode}
      \@tempswafalse
      \ifdefvoid{\tud@todo@type}{\@tempswatrue}{}%
-     \IfValueT{#2}{\ifstr{#2}{\tud@todo@type}{\@tempswatrue}{}}%
+     \IfValueT{#2}{%
+       \@for\@tempa:=#2\do{\ifstr{\@tempa}{\tud@todo@type}{\@tempswatrue}{}}%
+     }%
 %    \end{macrocode}
 % Vor der Ausgabe ist eine vertikale Verschiebung um den durch \pkg{todonotes} 
 % definierten Leerraum notwendig.
@@ -973,21 +991,27 @@
 % \subsubsection{Kleinkram}
 % 
 % \begin{macro}{\bsc}
-% \changes{v2.02}{2014/07/22}{\cs{DeclareRobustCommand} ersetzt mit
-%   \cs{newrobustcmd} aus \pkg{etoolbox}}%^^A
+% \changes{v2.02}{2014/07/22}{\cs{newrobustcmd} aus \pkg{etoolbox} anstelle von 
+%   \cs{DeclareRobustCommand}}^^A
 % Eine einfacher zu verwendende Kurzform.
 %    \begin{macrocode}
 \newrobustcmd*\bsc{\@backslashchar}
 %    \end{macrocode}
 % \end{macro}^^A \bsc
 % \begin{macro}{\tud@shellescape@wrn}
-% \changes{v2.02}{2014/10/14}{neu}%^^A
+% \changes{v2.02}{2014/10/14}{neu}^^A
 % Dieses Makro wird verwendet, wenn eine gesuchte Datei nicht gefunden wurde, 
 % weil das Dokument noch nicht mit der Option \opt{--shell-escape} kompiliert 
 % wurde.
 %    \begin{macrocode}
 \newcommand*\tud@shellescape@wrn{%
-  \ClassWarning{\tudcls@name}{%
+%<*class>
+  \ClassWarning%
+%</class>
+%<*package>
+  \PackageWarning%
+%</package>
+  {tudscrman}{%
     You have to recompile this document with\MessageBreak%
     activated shell escape option%
   }%
@@ -996,9 +1020,9 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@shellescape@wrn
 % \begin{macro}{\pdfexpandableoutline}
-% \changes{v2.02}{2014/11/04}{neu}%^^A
+% \changes{v2.02}{2014/11/04}{neu}^^A
 % \begin{macro}{\@TUDScript}
-% \changes{v2.02}{2014/08/16}{neu}%^^A
+% \changes{v2.02}{2014/08/16}{neu}^^A
 % Für die PDF-Outline-Einträge müssen einige Befehle durch eine expandierbare
 % Version ersetzt werden. Der Befehl \cs{pdfexpandableoutline} wird definiert, 
 % um dies möglichst einfach zu gestalten.
@@ -1040,7 +1064,7 @@
 % die formatierte Ausgabe sowie evtl. eine Sternversion, die einen Querverweis
 % auf das Handbuch erzeugt.
 % \begin{macro}{\Application}
-% \changes{v2.02}{2014/10/08}{überarbeitet}%^^A
+% \changes{v2.02}{2014/10/08}{überarbeitet}^^A
 % \begin{macro}{\@Application}
 % Die Auszeichnung und der Indexeintrag einer Anwendungssoftware.
 %    \begin{macrocode}
@@ -1064,7 +1088,7 @@
 % \end{macro}^^A \@Application
 % \end{macro}^^A \Application
 % \begin{macro}{\Distribution}
-% \changes{v2.02}{2014/10/08}{überarbeitet}%^^A
+% \changes{v2.02}{2014/10/08}{überarbeitet}^^A
 % Die Auszeichnung und der Indexeintrag einer \LaTeX-Distribution.
 %    \begin{macrocode}
 %<*class>
@@ -1085,14 +1109,14 @@
 % \end{macro}^^A \Distribution
 % \begin{macro}{\Path}
 % \changes{v2.02}{2014/07/22}{\cs{DeclareRobustCommand} ersetzt durch
-%   \cs{newrobustcmd} aus \pkg{etoolbox}}%^^A
+%   \cs{newrobustcmd} aus \pkg{etoolbox}}^^A
 % Die Auszeichnung eines Dateipfades.
 %    \begin{macrocode}
 \newrobustcmd*\Path[1]{\mbox{\texttt{#1}}}
 %    \end{macrocode}
 % \end{macro}^^A \Path
 % \begin{macro}{\File}
-% \changes{v2.02}{2014/10/08}{überarbeitet}%^^A
+% \changes{v2.02}{2014/10/08}{überarbeitet}^^A
 % Die Auszeichnung und der Indexeintrag einer Datei.
 %    \begin{macrocode}
 %<*class>
@@ -1112,12 +1136,12 @@
 %    \end{macrocode}
 % \end{macro}^^A \File
 % \begin{macro}{\Class}
-% \changes{v2.02}{2014/10/08}{überarbeitet}%^^A
+% \changes{v2.02}{2014/10/08}{überarbeitet}^^A
 % \begin{macro}{\@Class}
 % \begin{macro}{\@TempClass}
-% \changes{v2.02}{2014/10/08}{entfernt}%^^A
+% \changes{v2.02}{2014/10/08}{entfernt}^^A
 % \begin{macro}{\DeclareClass}
-% \changes{v2.02}{2014/10/09}{entfernt}%^^A
+% \changes{v2.02}{2014/10/09}{entfernt}^^A
 % Die Auszeichnung und der Indexeintrag einer Klasse. Sollte gerade DIN~Bold 
 % verwendet werden~-- der Befehl wird innerhalb einer Überschrift genutzt~-- 
 % wird lediglich das Hauptargument ausgegeben. Das optionale Argument zwischen 
@@ -1159,12 +1183,12 @@
 % \end{macro}^^A \@Class
 % \end{macro}^^A \Class
 % \begin{macro}{\Package}
-% \changes{v2.02}{2014/07/10}{Ausgabe für ChangeLog hinzugefügt}%^^A
-% \changes{v2.02}{2014/10/08}{überarbeitet}%^^A
+% \changes{v2.02}{2014/07/10}{Ausgabe für ChangeLog hinzugefügt}^^A
+% \changes{v2.02}{2014/10/08}{überarbeitet}^^A
 % \begin{macro}{\@Package}
 % \begin{macro}{\@TempPackage}
 % \begin{macro}{\DeclarePackage}
-% \changes{v2.02}{2014/10/09}{entfernt}%^^A
+% \changes{v2.02}{2014/10/09}{entfernt}^^A
 % Für die Auszeichnungen von Paketen gelten vorherigen Aussagen äquivalent. 
 % Für Pakete wird ergänzend ein Hyperlink auf CTAN erzeugt, wenn für dieses 
 % kein Label im Dokument besteht, wo dieses genauer erläutert wird. Mit dem 
@@ -1212,9 +1236,9 @@
 % \end{macro}^^A \@Package
 % \end{macro}^^A \Package
 % \begin{macro}{\Option}
-% \changes{v2.02}{2014/10/08}{überarbeitet}%^^A
+% \changes{v2.02}{2014/10/08}{überarbeitet}^^A
 % \begin{macro}{\@Option}
-% \changes{v2.02}{2014/11/02}{neu}%^^A
+% \changes{v2.02}{2014/11/02}{neu}^^A
 % \begin{macro}{\@TempOption}
 % Im Gegensatz zu den vorherigen Befehlen gibt es ein ordinäres optionales 
 % Argument nach dem Hauptargument. Damit kann der Option im Handbuch ein Wert
@@ -1252,9 +1276,9 @@
 % \end{macro}^^A \@Option
 % \end{macro}^^A \Option
 % \begin{macro}{\Environment}
-% \changes{v2.02}{2014/10/08}{überarbeitet}%^^A
+% \changes{v2.02}{2014/10/08}{überarbeitet}^^A
 % \begin{macro}{\@Environment}
-% \changes{v2.02}{2014/11/02}{neu}%^^A
+% \changes{v2.02}{2014/11/02}{neu}^^A
 % \begin{macro}{\@TempEnvironment}
 % Auch hier wird für die Änderungsliste unterschieden und für Tutorials ein 
 % Befehl definiert, welcher auf das Handbuch referenziert.
@@ -1304,9 +1328,9 @@
 % \end{macro}^^A \@Environment
 % \end{macro}^^A \Environment
 % \begin{macro}{\Macro}
-% \changes{v2.02}{2014/10/08}{überarbeitet}%^^A
+% \changes{v2.02}{2014/10/08}{überarbeitet}^^A
 % \begin{macro}{\@Macro}
-% \changes{v2.02}{2014/11/02}{neu}%^^A
+% \changes{v2.02}{2014/11/02}{neu}^^A
 % Die Auszeichnung und der Indexeintrag eines Befehls sowie für das Paket 
 % \pkg{tudscrman} der Hyperlink auf das Handbuch.
 %    \begin{macrocode}
@@ -1337,9 +1361,9 @@
 % \end{macro}^^A \@Macro
 % \end{macro}^^A \Macro
 % \begin{macro}{\Length}
-% \changes{v2.02}{2014/10/08}{überarbeitet}%^^A
+% \changes{v2.02}{2014/10/08}{überarbeitet}^^A
 % \begin{macro}{\@TempLength}
-% \changes{v2.02}{2014/10/08}{entfernt}%^^A
+% \changes{v2.02}{2014/10/08}{entfernt}^^A
 % Die Auszeichnung und der Indexeintrag einer \LaTeX-Länge.
 %    \begin{macrocode}
 %<*class>
@@ -1378,7 +1402,7 @@
 % definiert.
 %
 % \begin{macro}{\Key}
-% \changes{v2.02}{2014/10/08}{überarbeitet}%^^A
+% \changes{v2.02}{2014/10/08}{überarbeitet}^^A
 % \begin{macro}{\@TempKey}
 % Die Auszeichnung und der Indexeintrag eines Parameters für Umgebungen und 
 % Befehle. Das erste Argument ist die Umgebung oder der Befehl, wofür der 
@@ -1409,7 +1433,7 @@
 % \end{macro}^^A \@TempKey
 % \end{macro}^^A \Key
 % \begin{macro}{\PageStyle}
-% \changes{v2.02}{2014/07/25}{neu}%^^A
+% \changes{v2.02}{2014/07/25}{neu}^^A
 % Die Auszeichnung und der Indexeintrag eines Seitenstils.
 %    \begin{macrocode}
 \NewDocumentCommand\PageStyle{smd''d||}{%
@@ -1424,9 +1448,9 @@
 %    \end{macrocode}
 % \end{macro}^^A \PageStyle
 % \begin{macro}{\Counter}
-% \changes{v2.02}{2014/10/08}{überarbeitet}%^^A
+% \changes{v2.02}{2014/10/08}{überarbeitet}^^A
 % \begin{macro}{\@TempCounter}
-% \changes{v2.02}{2014/10/08}{entfernt}%^^A
+% \changes{v2.02}{2014/10/08}{entfernt}^^A
 % Die Auszeichnung und der Indexeintrag einer \LaTeX-Zählers.
 %    \begin{macrocode}
 \NewDocumentCommand\Counter{smd''d||}{%
@@ -1442,9 +1466,9 @@
 % \end{macro}^^A \@TempCounter
 % \end{macro}^^A \Counter
 % \begin{macro}{\Term}
-% \changes{v2.02}{2014/10/08}{überarbeitet}%^^A
+% \changes{v2.02}{2014/10/08}{überarbeitet}^^A
 % \begin{macro}{\@TempTerm}
-% \changes{v2.02}{2014/10/08}{entfernt}%^^A
+% \changes{v2.02}{2014/10/08}{entfernt}^^A
 % Die Auszeichnung und der Indexeintrag eines sprachabhängigen Bezeichners.
 %    \begin{macrocode}
 \NewDocumentCommand\Term{smd''d||}{%
@@ -1506,9 +1530,9 @@
 % \end{macro}^^A \@TermTable
 % \end{macro}^^A \TermTable
 % \begin{macro}{\Font}
-% \changes{v2.02}{2014/10/08}{überarbeitet}%^^A
+% \changes{v2.02}{2014/10/08}{überarbeitet}^^A
 % \begin{macro}{\@TempFont}
-% \changes{v2.02}{2014/10/08}{entfernt}%^^A
+% \changes{v2.02}{2014/10/08}{entfernt}^^A
 % Die Auszeichnung und der Indexeintrag eines Schriftelementes.
 %    \begin{macrocode}
 \NewDocumentCommand\Font{smd''d||}{%
@@ -1524,9 +1548,9 @@
 % \end{macro}^^A \@TempFont
 % \end{macro}^^A \Font
 % \begin{macro}{\Color}
-% \changes{v2.02}{2014/10/08}{überarbeitet}%^^A
+% \changes{v2.02}{2014/10/08}{überarbeitet}^^A
 % \begin{macro}{\@TempColor}
-% \changes{v2.02}{2014/10/08}{entfernt}%^^A
+% \changes{v2.02}{2014/10/08}{entfernt}^^A
 % Die Auszeichnung und der Indexeintrag einer Farbe des \CDs.
 %    \begin{macrocode}
 \NewDocumentCommand\Color{smod''d||}{%
@@ -1559,11 +1583,11 @@
 % für das Paket benötigt wird.
 %
 % \begin{macro}{\CheckIndexFormat}
-% \changes{v2.02}{2014/10/08}{neu}%^^A
+% \changes{v2.02}{2014/10/08}{neu}^^A
 % \begin{macro}{\SetIndexFormat}
-% \changes{v2.02}{2014/10/08}{neu}%^^A
+% \changes{v2.02}{2014/10/08}{neu}^^A
 % \begin{macro}{\@IndexFormat}
-% \changes{v2.02}{2014/10/08}{neu}%^^A
+% \changes{v2.02}{2014/10/08}{neu}^^A
 % Zuerst werden jedoch einige Hilfsmakros erstellt mit denen überprüft wird, ob
 % die Sternversion der zuvor definierten Auszeichnung"=Befehle zusammen mit
 % einer Indexformatierung \val{|idxformat|} genutzt wurde, was sich natürlich
@@ -1574,7 +1598,7 @@
 \newcommand*\CheckIndexFormat[2]{%
   \IfBooleanT{#1}{%
     \IfValueT{#2}{%
-      \ClassWarning{\tudcls@name}{%
+      \ClassWarning{tudscrman}{%
         You've used the starred version so no entry for\MessageBreak%
         the index is created and the optional argument\MessageBreak%
         |#2| will be ignored%
@@ -1600,7 +1624,7 @@
 % \end{macro}^^A \CheckIndexFormat
 % \begin{macro}{\if@declare}
 % \begin{macro}{\if@stareddeclare}
-% \changes{v2.02}{2014/10/09}{neu}%^^A
+% \changes{v2.02}{2014/10/09}{neu}^^A
 % \begin{macro}{\if@openindex}
 % \begin{macro}{\if@deprecated}
 % Dies sin ein paar Hilfsmakros zur Steuerung des Markup sowie der Ausgabe von
@@ -1624,8 +1648,8 @@
 % werden als Argument der Umgebung \env{Declaration} genutzt.
 %
 % \begin{macro}{\@ProcessOutput}
-% \changes{v2.02}{2014/10/08}{Markup für Index und Fließtext getrennt}%^^A
-% \changes{v2.02}{2014/10/09}{Anpassung für Umgebung \env{Declaration*}}%^^A
+% \changes{v2.02}{2014/10/08}{Markup für Index und Fließtext getrennt}^^A
+% \changes{v2.02}{2014/10/09}{Anpassung für Umgebung \env{Declaration*}}^^A
 % Der Befehl \cs{@ProcessOutput} ist das Herzstück der Auszeichnungen aller
 % Elemente. Das erste obligatorische Argument ist der übergebene Wert, welcher 
 % in einer bestimmten Form ausgezeichnet werden soll. Darauf folgen die ein 
@@ -1657,7 +1681,7 @@
   \if@declare%
     \if@openindex%
       \IfValueT{#3}{%
-        \ClassWarning{\tudcls@name}{%
+        \ClassWarning{tudscrman}{%
           It is not possible to use any cross-reference\MessageBreak%
           shorthand like '#3' within the arguments of\MessageBreak% 
           the environment `Declaration'%
@@ -1669,7 +1693,7 @@
       \IfValueTF{#6}{\edef\@tempa{#5:#6:#8}}{\edef\@tempa{#5:#8}}%
 %    \end{macrocode}
 % Für die Deklaration veralteter Optionen, Befehle etc. kann die Sternvariante 
-% des Auszeichnungsbefehle verwendet werden, um das Erzeugen eines Labels zu 
+% des Auszeichnungsbefehls verwendet werden, um das Erzeugen eines Labels zu 
 % unterbinden.
 %    \begin{macrocode}
       \if@deprecated%
@@ -1677,29 +1701,42 @@
           \manualhyperdef{\@tempa}%
         }%
 %    \end{macrocode}
-% Wird zur Deklaration die Umgebung \env{Declaration*} genutzt, so wird der 
-% Hyperlink ein ganzes Stück nach oben verschoben. Hintergrund ist, dass diese 
-% Umgebung eigentlich nur zum Deklarieren von Klassen und Paketen gedacht ist 
-% und direkt nach einer Gliederungsüberschrift folgen sollte.
+% Wurde die Sternversion eines Auszeichnungsbefehls innerhalb der Umgebung 
+% \env{Declaration} genutzt, wird lediglich ein Label aber kein Eintrag im 
+% Index erzeugt.
 %    \begin{macrocode}
       \else%
-        \ifx\@IndexFormat\@empty\else%
-          \ClassWarning{\tudcls@name}{%
-            It is not possible to use any indexing format\MessageBreak%
-            like |\@IndexFormat| within the arguments of the\MessageBreak%
-            environment `Declaration'%
-          }%
-        \fi%
-        \if@stareddeclare%
-          \manualhyperdef'{\@tempa}%
-        \else%
+        \expandafter\IfBooleanTF\expandafter{\@IndexFormat}{%
+          \manualhyperdef{\@tempa}%
+%    \end{macrocode}
+% Andernfalls werden Label bzw. Hyperlinkanker und ein Eintrag in den Index 
+% erzeugt, wobei die Formatierung dieses Eintrags fest vorgegeben ist.
+%    \begin{macrocode}
+        }{%
+          \ifx\@IndexFormat\@empty\else%
+            \ClassWarning{tudscrman}{%
+              It is not possible to use any indexing format\MessageBreak%
+              like |\@IndexFormat| within the arguments of the\MessageBreak%
+              environment `Declaration'%
+            }%
+          \fi%
+%    \end{macrocode}
+% Wird zur Deklaration die Umgebung \env{Declaration*} genutzt, so wird der 
+% Hyperlink ein ganzes Stück nach oben verschoben. Hintergrund ist, dass diese 
+% Umgebung nur zum Deklarieren von Klassen und Paketen gedacht ist und direkt
+% nach einer Gliederungsüberschrift folgen sollte.
+%    \begin{macrocode}
+          \if@stareddeclare%
+            \manualhyperdef'{\@tempa}%
 %    \end{macrocode}
 % Andernfalls wird der normale Hyperlink gesetzt. Das Label zum Prüfen wird 
 % implizit durch \cs{manualhyperdef} gesetzt.
 %    \begin{macrocode}
-          \manualhyperdef{\@tempa}%
-        \fi%
-        \@HyperIndex{#5}{#6}{#7}{#8}{#9}{(declare}%
+          \else%
+            \manualhyperdef{\@tempa}%
+          \fi%
+          \@HyperIndex{#5}{#6}{#7}{#8}{#9}{(declare}%
+        }%
       \fi%
 %    \end{macrocode}
 % Die \env{Declaration*}"=Umgebung erzeugt keine direkte Ausgabe sondern nur 
@@ -1709,9 +1746,14 @@
       \if@stareddeclare\else%
         #1\IfValueT{#2}{#2}%
       \fi%
+%    \end{macrocode}
+% Zum Ende der \env{Declaration}"=Umgebung wird der Indexeintrag beendet.
+%    \begin{macrocode}
     \else%
       \if@deprecated\else%
-        \@HyperIndex{#5}{#6}{#7}{#8}{#9}{declare)}%
+        \expandafter\IfBooleanF\expandafter{\@IndexFormat}{%
+          \@HyperIndex{#5}{#6}{#7}{#8}{#9}{declare)}%
+        }%
       \fi%
     \fi%
   \else%
@@ -1721,8 +1763,8 @@
 % wurde, mit \cs{@HyperIndex} ein Eintrag im dazugehörigen Index erzeugt.
 %    \begin{macrocode}
     \ifx\@IndexFormat\relax%
-      \ClassError{\tudcls@name}{\string\SetIndexFormat\space unused}{%
-        It seems you have forgotten to use \string\SetIndexFormat%
+      \ClassError{tudscrman}{\string\SetIndexFormat\space unused}{%
+        It seems you have forgotten to use \string\SetIndexFormat.%
       }%
     \else%
       \expandafter\IfBooleanF\expandafter{\@IndexFormat}{%
@@ -1748,7 +1790,7 @@
       \def\@tempc{\mbox{\hyperref{}{\jobname}{\@tempa}{#1}\IfValueT{#2}{#2}}}%
       \IfValueT{#3}{%
         \def\@tempb{%
-          \ClassWarning{\tudcls@name}{%
+          \ClassWarning{tudscrman}{%
             You've used the unknown cross-reference\MessageBreak%
             shorthand '#3'. Only 'auto', 'page'\MessageBreak%
             and 'full' as well as 'none' are valid%
@@ -1770,7 +1812,7 @@
 % Label, wird eine Warnung ausgegeben.
 %    \begin{macrocode}
       \IfValueT{#3}{%
-        \ClassWarning{\tudcls@name}{%
+        \ClassWarning{tudscrman}{%
           No cross-reference created, label \@tempa\space is missing%
         }%
       }%
@@ -1781,7 +1823,9 @@
 % Fall aus dem ersten obligatorischen und ggf. dem ersten optionalen Argument.
 %    \begin{macrocode}
       \IfValueTF{#4}{%
-        \href{http://www.ctan.org/pkg/#4}{\mbox{#1\IfValueT{#2}{#2}}}%
+        \ifstr{#4}{}{\mbox{#1\IfValueT{#2}{#2}}}{%
+          \href{http://www.ctan.org/pkg/#4}{\mbox{#1\IfValueT{#2}{#2}}}%
+        }%
       }{%
         \mbox{#1\IfValueT{#2}{#2}}%
       }%
@@ -1795,7 +1839,7 @@
 %    \end{macrocode}
 % \end{macro}^^A \@ProcessOutput
 % \begin{macro}{\hyperidx}
-% \changes{v2.02}{2014/08/16}{neu}%^^A
+% \changes{v2.02}{2014/08/16}{neu}^^A
 % Aufgrund der Nichtbeachtung von RegExp"=Ausdrücken durch den Indexprozessor
 % \texttt{texindy} (\url{http://sourceforge.net/p/xindy/bugs/22/}) muss hierfür
 % etwas getrickst werden. Der Befehl \cs{hyperidx} hat ein optionales Argument, 
@@ -1808,7 +1852,7 @@
 %    \end{macrocode}
 % \end{macro}^^A hyperidx
 % \begin{macro}{\@HyperIndex}
-% \changes{v2.02}{2014/10/08}{überarbeitet}%^^A
+% \changes{v2.02}{2014/10/08}{überarbeitet}^^A
 % Dieser Befehl sorgt für die eigentlichen Indexeinträge. Dabei werden für 
 % Einträge, welche innerhalb der \env{Declaration}-Umgebung deklariert wurden, 
 % ein Hyperlink im Index erstellt. Das erste Argument \marg{Index} enthält den 
@@ -1897,8 +1941,8 @@
 % \begin{macro}{\@additionallist}
 % \begin{macro}{\if@additionallist}
 % \begin{macro}{\@gobbleparameters}
-% \changes{v2.02}{2014/10/09}{neu}%^^A
-% \changes{v2.03}{2015/02/02}{Makro \cs{relax} mit \cs{@empty} ersetzt}%^^A
+% \changes{v2.02}{2014/10/09}{neu}^^A
+% \changes{v2.03}{2015/02/02}{Makro \cs{relax} mit \cs{@empty} ersetzt}^^A
 % Es werden einige Hilfsmakros für die Ausgabe einer Deklaration sowie der 
 % dazugehörigen Änderungsliste initialisiert.
 %    \begin{macrocode}
@@ -1984,7 +2028,7 @@
 % die Angabe obligatorischer und optionaler Parameter lokal umdefiniert.
 %    \begin{macrocode}
   \ifx\@declarationlist\relax\else%
-    \ClassError{\tudcls@name}{\string\printdeclarationlist\space is missing}{%
+    \ClassError{tudscrman}{\string\printdeclarationlist\space is missing}{%
       \string\@declarationlist\space is not empty. Did you forget\MessageBreak%
       to print this list with \string\printdeclarationlist?%
     }%
@@ -2027,7 +2071,7 @@
 %    \begin{macrocode}
     \IfValueT{#2}{%
       \if@additionallist%
-        \ClassWarning{\tudcls@name}{%
+        \ClassWarning{tudscrman}{%
           It is not possible to use the optional argument\MessageBreak%
           of \string\printdeclarationlist due to the given\MessageBreak%
           additional information as argument of the\MessageBreak%
@@ -2078,7 +2122,7 @@
       \if@presetlist%
         \qquad%
         \texttt{%
-          \begin{tabular}{l}%
+          \begin{tabular}{l@{}}%
             \forlistloop\@tempa{\@presetlist}%
           \end{tabular}%
         }%
@@ -2127,7 +2171,7 @@
 % \end{macro}^^A \printdeclarationlist
 % \end{environment}^^A Declaration
 % \begin{environment}{Declaration*}
-% \changes{v2.02}{2014/10/09}{neu}%^^A
+% \changes{v2.02}{2014/10/09}{neu}^^A
 % Die Sternversion der Umgebung \env{Declaration*} ist für die vereinfachte 
 % Deklaration von Klassen, Paketen etc. gedacht, bei denen keine Ausgabe 
 % sondern lediglich Hyperlink, Indexeintrag und Änderungsnotiz erzeugt werden 
@@ -2143,7 +2187,7 @@
   \@stareddeclarefalse%
 }{%
   \ifx\@changedatdeclarelist\relax\else%
-    \ClassError{\tudcls@name}{\string\printchangedatlist\space is missing}{%
+    \ClassError{tudscrman}{\string\printchangedatlist\space is missing}{%
       \string\@changedatdeclarelist\space is not empty. Did you\MessageBreak%
       forget to print this list with \string\printchangedatlist?%
     }%
@@ -2192,7 +2236,7 @@
 % \end{environment}^^A tabularm
 % \begin{environment}{values}
 % \begin{macro}{\before@values}
-% \begin{macro}{\item@values}
+% \begin{macro}{\itemvalues}
 % \begin{macro}{\itemtrue}
 % \begin{macro}{\itemfalse}
 % \begin{macro}{\tud@item@val}
@@ -2214,9 +2258,13 @@
 % Zu Beginn der Umgebung wird die Definition des \cs{item}-Befehls gesichert 
 % und anschließend geändert.
 %    \begin{macrocode}
+\newcommand*\itemvalues{}
 \newcommand*\before@values{%
-  \let\item@values\item%
-  \let\item\tud@item%
+  \ifdefvoid{\itemvalues}{%
+    \let\itemvalues\item%
+    \let\item\tud@item%
+    \setlength\changedatskip{-\baselineskip}%
+  }{}%
 }
 %    \end{macrocode}
 % Die folgenden beiden Befehle enthalten die Standardwerte für boolsche 
@@ -2228,7 +2276,6 @@
 % Mit der neuen Definition kann der Säumniswert mit \cs{item*} explizit in der 
 % Liste hervorgehoben werden.
 %    \begin{macrocode}
-\newcommand*\item@values{}
 \newcommand*\tud@item@val{}
 \newcommand*\tud@item@add{}
 \newcommand*\tud@item@format{}
@@ -2262,7 +2309,7 @@
 % von \cs{item} angegeben, so wird der gesicherte Befehl ausgeführt. Ansonsten 
 % folgt die dritte Instanz.
 %    \begin{macrocode}
-  \ifstr{\@tempa}{}{\item@values}{\tud@@@item}%
+  \ifstr{\@tempa}{}{\itemvalues}{\tud@@@item}%
 }
 %    \end{macrocode}
 % Der gesicherte Befehl wird mit den aufbereiteten Formatierungen genutzt.
@@ -2275,7 +2322,7 @@
       \appto\tud@item@add{~#1}%
     \fi%
   }%
-  \item@values[%
+  \itemvalues[%
     \tud@item@format{\@tempa:}%
     \ifx\tud@item@add\relax\else%
       {\normalfont\space\footnotesize\tud@item@add}%
@@ -2291,7 +2338,7 @@
 % \end{macro}^^A \tud@item@val
 % \end{macro}^^A \itemfalse
 % \end{macro}^^A \itemtrue
-% \end{macro}^^A \item@values
+% \end{macro}^^A \itemvalues
 % \end{macro}^^A \before@values
 % \end{environment}^^A values
 %
@@ -2344,8 +2391,9 @@
 % \begin{environment}{packages}
 % \begin{macro}{\itempackages}
 % \begin{macro}{\tud@item@pkg}
-% \changes{v2.02}{2014/10/08}{\cs{DeclarePackage} entfernt}%^^A
-% \changes{v2.02}{2014/10/09}{optionales Argument für CTAN-Link}%^^A
+% \changes{v2.02}{2014/10/08}{\cs{DeclarePackage} entfernt}^^A
+% \changes{v2.02}{2014/10/09}{optionales Argument für CTAN-Link}^^A
+% \changes{v2.04}{2015/03/12}{optionales Argument für weitere Pakete}^^A
 % \begin{macro}{\before@packages}
 % Ähnlich wie für die Auflistung von Werten eines Schlüssels wird auch mit der 
 % Charakterisierung von Paketen verfahren. Diese werden in der Auflistung 
@@ -2361,18 +2409,30 @@
   \ifdefvoid{\itempackages}{%
     \let\itempackages\item%
     \let\item\tud@item@pkg%
+    \setlength\changedatskip{-\baselineskip}%
   }{}%
 }
-\NewDocumentCommand\tud@item@pkg{od()}{%
+\NewDocumentCommand\tud@item@pkg{ood()}{%
   \itempackages[{%
     \IfValueT{#1}{%
       \manualhyperdef{files:#1}%
-      \IfValueTF{#2}{%
-        \def\@tempa{http://www.ctan.org/pkg/#2}%
+      \IfValueTF{#3}{%
+        \def\@tempa{http://www.ctan.org/pkg/#3}%
       }{%
         \def\@tempa{http://www.ctan.org/pkg/#1}%
       }%
       \href{\@tempa}{\Package{#1}'none'|!|}%
+      \IfValueT{#2}{%
+        \quad(%
+        \let\@tempb\relax%
+        \@for\@tempa:=#2\do{%
+          \@tempb%
+          \manualhyperdef{files:\@tempa}%
+          \expandafter\Package\expandafter{\@tempa}'none'|!|%
+          \def\@tempb{, }%
+        }%
+        )%
+      }%
     }%
   }]%
 }
@@ -2395,12 +2455,11 @@
 % }[?]
 %
 % \begin{macro}{\@changedatdeclare}
-% \changes{v2.02}{2014/10/09}{neu}%^^A
-% \changes{v2.03}{2015/01/31}{Ersetzungen ermöglicht}%^^A
+% \changes{v2.02}{2014/10/09}{neu}^^A
 % \begin{macro}{\@changedatdeclaredefault}
-% \changes{v2.02}{2014/10/09}{neu}%^^A
+% \changes{v2.02}{2014/10/09}{neu}^^A
 % \begin{macro}{\@changedatdeclarelist}
-% \changes{v2.02}{2014/07/25}{neu}%^^A
+% \changes{v2.02}{2014/07/25}{neu}^^A
 % \begin{macro}{\ChangedAt@Split}
 % \begin{macro}{\ChangedAt@@Split}
 % Um für Änderungsnotizen die dazugehörige Option, Befehl etc. bei einer 
@@ -2457,7 +2516,7 @@
 % \end{macro}^^A \@changedatdeclaredefault
 % \end{macro}^^A \@changedatdeclare
 % \begin{macro}{\printchangedatlist}
-% \changes{v2.02}{2014/10/09}{neu}%^^A
+% \changes{v2.02}{2014/10/09}{neu}^^A
 % Die Einträge in der Änderungsliste sowie die dazugehörige Randnotiz werden 
 % mit dem Makro \cs{ChangedAt@Process} abgearbeitet, sortiert und erstellt. Bei
 % \cs{printchangedatlist} wird mit dem optionalen Argument der Versatz für die 
@@ -2481,8 +2540,10 @@
 %    \end{macrocode}
 % \end{macro}^^A \printchangedatlist
 % \begin{macro}{\ChangedAt}
-% \changes{v2.02}{2014/07/25}{erweitert}%^^A
-% \changes{v2.02}{2014/10/15}{Sternversion neu (keine Randnotiz)}%^^A
+% \changes{v2.02}{2014/07/25}{erweitert}^^A
+% \changes{v2.02}{2014/10/15}{Sternversion neu (keine Randnotiz)}^^A
+% \begin{length}{\changedatskip}
+% \changes{v2.04}{2015/06/08}{neu}^^A
 % An den Befehl \cs{ChangedAt} kann eine kommagetrente Liste mit verschiedenen
 % Versionsnummern und dazugehörigen Änderungen übergeben werden. Er wird in der 
 % Form: \cs{ChangedAt}\verb|{|\meta{Version}\verb|!|\meta{Beschreibung}\verb|}| 
@@ -2493,33 +2554,36 @@
 %
 % Alle übergegebenen Versionsnummern werden als Liste mit einmaligen Einträgen 
 % in einer Randnotiz gesetzt. Mit dem optionalen Argument kann ein vertikaler 
-% dieser angegeben werden. Die Sternversion unterdrückt stattdessen die Ausgabe
-% dieser Randnotiz.
+% dieser angegeben werden. Die Version mit einem Apostroph verschiebt die 
+% Randnotiz um den Grundlinienabstand nach oben, die Sternversion unterdrückt
+% stattdessen die Ausgabe dieser vollständig.
 %    \begin{macrocode}
-\NewDocumentCommand\ChangedAt{sO{\z@}mO{Allgemein}}{%
+\newlength\changedatskip
+\NewDocumentCommand\ChangedAt{sO{\changedatskip}mO{Allgemein}}{%
   \ChangedAt@Process[#1]{#2}[#4]{#3}%
 }
 %    \end{macrocode}
+% \end{length}^^A \changedatskip
 % \end{macro}^^A \ChangedAt
 % \begin{macro}{\ChangedAt@Process}
-% \changes{v2.02}{2014/09/02}{neu}%^^A
+% \changes{v2.02}{2014/09/02}{neu}^^A
 % \begin{macro}{\ChangedAt@@Process}
-% \changes{v2.02}{2014/09/02}{neu}%^^A
+% \changes{v2.02}{2014/09/02}{neu}^^A
 % \begin{macro}{\ChangedAt@@@Process}
-% \changes{v2.02}{2014/09/02}{neu}%^^A
-% \changes{v2.02}{2014/10/16}{Unterteilung Änderungsliste in Bereiche}%^^A
+% \changes{v2.02}{2014/09/02}{neu}^^A
+% \changes{v2.02}{2014/10/16}{Unterteilung Änderungsliste in Bereiche}^^A
 % \begin{macro}{\ChangedAt@Default}
-% \changes{v2.02}{2014/09/02}{neu}%^^A
+% \changes{v2.02}{2014/09/02}{neu}^^A
 % \begin{macro}{\ChangedAt@Process@Split}
-% \changes{v2.02}{2014/09/02}{neu}%^^A
+% \changes{v2.02}{2014/09/02}{neu}^^A
 % \begin{macro}{\@changedatlist}
-% \changes{v2.02}{2014/09/02}{neu}%^^A
+% \changes{v2.02}{2014/09/02}{neu}^^A
 % \begin{macro}{\@changedatversionlist}
-% \changes{v2.02}{2014/09/02}{neu}%^^A
+% \changes{v2.02}{2014/09/02}{neu}^^A
 % Mit diesen Befehlen wird die Änderungshistorie in Form eines Index erstellt. 
 % Der Befehl \cs{ChangedAt@Process} setzt eine kommagetrennte Liste in eine 
-% im Format von \pkg{etoolbox} um. Anschließend wird diese für die Liste der
-% Änderungen mit \cs{ChangedAt@Process@Split} aufgespalten. Die einzelnen 
+% im Format von \pkg{etoolbox} um. Anschließend wird diese für die 
+% Änderungsliste mit \cs{ChangedAt@Process@Split} aufgespalten. Die einzelnen 
 % Einträge werden mit \cs{ChangedAt@@Process} weiter verarbeitet.
 %    \begin{macrocode}
 \newcommand*\@changedatlist{}
@@ -2656,8 +2720,8 @@
 % \end{macro}^^A \ChangedAt@@Process
 % \end{macro}^^A \ChangedAt@Process
 % \begin{macro}{\Replace}
-% \changes{v2.02}{2014/07/25}{neu}%^^A
-% \changes{v2.03}{2015/02/02}{auf mehrere Einträge erweitert}%^^A
+% \changes{v2.02}{2014/07/25}{neu}^^A
+% \changes{v2.03}{2015/02/02}{auf mehrere Einträge erweitert}^^A
 % Der Befehl \cs{Replace} erzeugt einen Eintrag in der Änderungshistorie sowie 
 % einen Eintrag im gewünschten Index mit einem Verweis auf den neuen Befehl.
 %    \begin{macrocode}
@@ -2685,8 +2749,8 @@
 %    \end{macrocode}
 % \end{macro}^^A \Replace
 % \begin{macro}{\@ProcessChangedAt}
-% \changes{v2.02}{2014/07/25}{erweitert}%^^A
-% \changes{v2.02}{2014/10/08}{Sternversion ergänzt}%^^A
+% \changes{v2.02}{2014/07/25}{erweitert}^^A
+% \changes{v2.02}{2014/10/08}{Sternversion ergänzt}^^A
 % Die Änderungsliste erhält ebenfalls einen Hyperlink zur Deklaration. Für
 % Umgebungs- und Befehlsparameter wird mit dem zweiten optionalen Argument ein
 % Untereintrag für die dazugehörige Umgebung beziehungsweise den dazugehörigen
@@ -2711,13 +2775,13 @@
 %    \end{macrocode}
 % \end{macro}^^A \@ProcessChangedAt
 % \begin{macro}{\sortlist}
-% \changes{v2.02}{2014/07/25}{neu}%^^A
+% \changes{v2.02}{2014/07/25}{neu}^^A
 % \begin{macro}{\@sortlist}
-% \changes{v2.02}{2014/07/25}{neu}%^^A
+% \changes{v2.02}{2014/07/25}{neu}^^A
 % \begin{macro}{\@sortedlist}
-% \changes{v2.02}{2014/07/25}{neu}%^^A
+% \changes{v2.02}{2014/07/25}{neu}^^A
 % \begin{macro}{\if@listsorted}
-% \changes{v2.02}{2014/07/25}{neu}%^^A
+% \changes{v2.02}{2014/07/25}{neu}^^A
 % Der Befehl \cs{sortlist} erwartet eine \pkg{etoolbox}-Liste und sortiert diese
 % mit \cs{@sortlist} in alphabetischer Reihenfolge in eine kommagetrennte 
 % Auflistung. Diese wird anschließend wieder in eine \pkg{etoolbox}-Liste 
@@ -2766,7 +2830,7 @@
 % eine Sonderbehandlung erfolgen. Anschließend wird \cs{@listsortedtrue} 
 % gesetzt.
 %    \begin{macrocode}
-        \expandafter\ifnum\pdfstrcmp{#1}{\@tempa}<0\relax%
+        \expandafter\ifnum\pdfstrcmp{#1}{\@tempa}<\z@\relax%
           \ifx\@tempb\@empty%
             \expandafter\edef\expandafter\@tempb\expandafter{%
               #1,\@tempa%
@@ -2844,11 +2908,11 @@
 % hinzugefügt. So werden die im Dokumentes gesetzten Quelltextauszüge für ein 
 % Copy"~\&"~Paste"~Beispiel gesammelt und mit \cs{FinishTutorial} ausgegeben.
 % \begin{environment}{Preamble}
-% \changes{v2.02}{2014/11/02}{neu}%^^A
+% \changes{v2.02}{2014/11/02}{neu}^^A
 % \begin{environment}{Preamble*}
-% \changes{v2.02}{2014/11/03}{neu}%^^A
+% \changes{v2.02}{2014/11/03}{neu}^^A
 % \begin{environment}{Preamble+}
-% \changes{v2.02}{2014/11/03}{neu}%^^A
+% \changes{v2.02}{2014/11/03}{neu}^^A
 % Die Umgebung \env{Preamble} dient für die Ausgabe von Quelltexten, welche in 
 % einem \LaTeXe-Dokument in der Präambel verwendet werden müssen oder sollten. 
 % Die in ihr gesetzten Inhalte werden für das Copy"~\&"~Paste-Beispiel vor den 
@@ -2889,13 +2953,13 @@
 % \end{environment}^^A Preamble*
 % \end{environment}^^A Preamble
 % \begin{environment}{Trunk}
-% \changes{v2.02}{2014/08/16}{neu}%^^A
+% \changes{v2.02}{2014/08/16}{neu}^^A
 % \begin{environment}{Trunk*}
-% \changes{v2.02}{2014/08/19}{neu}%^^A
+% \changes{v2.02}{2014/08/19}{neu}^^A
 % \begin{environment}{Trunk+}
-% \changes{v2.02}{2014/11/03}{neu}%^^A
+% \changes{v2.02}{2014/11/03}{neu}^^A
 % \begin{environment}{Trunk!}
-% \changes{v2.02}{2014/10/07}{neu}%^^A
+% \changes{v2.02}{2014/10/07}{neu}^^A
 % Die Umgebung \env{Trunk} dient zur Ausgabe von exemplarischen Quelltexten, 
 % welche in einem \LaTeXe-Dokument innerhalb der \env{document}-Umgebung
 % verwendet werden müssen oder sollten. Für das Copy"~\&"~Paste-Beispiel werden 
@@ -2956,13 +3020,13 @@
 % \end{environment}^^A Trunk*
 % \end{environment}^^A Trunk
 % \begin{environment}{Hint}
-% \changes{v2.02}{2014/09/16}{neu}%^^A
+% \changes{v2.02}{2014/09/16}{neu}^^A
 % \begin{environment}{Hint*}
-% \changes{v2.02}{2014/10/13}{neu}%^^A
+% \changes{v2.02}{2014/10/13}{neu}^^A
 % \begin{environment}{Hint?}
-% \changes{v2.02}{2014/12/09}{neu}%^^A
+% \changes{v2.02}{2014/12/09}{neu}^^A
 % \begin{environment}{Hint!}
-% \changes{v2.02}{2014/11/13}{neu}%^^A
+% \changes{v2.02}{2014/11/13}{neu}^^A
 % Um Quelltextausschnitte zur weiterführenden Information anzugeben, wird die
 % Umgebung \env{Hint} definiert. Der Inhalt wird ausgegben und~-- falls die
 % Sternversion genutzt wurde~-- auch ausgeführt, allerdings nicht in das 
@@ -3015,7 +3079,7 @@
 % \end{environment}^^A Hint*
 % \end{environment}^^A Hint
 % \begin{macro}{\@StandaloneFile}
-% \changes{v2.02}{2014/08/19}{neu}%^^A
+% \changes{v2.02}{2014/08/19}{neu}^^A
 % Die Umgebungen \env{Trunk!} und \env{Hint!} erzeugen nach der Ausgabe des
 % Quelltextes mit dem Makro \cs{tud@tut@pdf} eine PDF-Datei, welche mit
 % \cs{IncludeStandalone} in das Tutorial eingebunden werden kann.
@@ -3025,9 +3089,9 @@
 %    \end{macrocode}
 % \end{macro}^^A \@StandaloneFile
 % \begin{macro}{\tud@tut@pre}
-% \changes{v2.02}{2014/08/19}{neu}%^^A
+% \changes{v2.02}{2014/08/19}{neu}^^A
 % \begin{macro}{\tud@tut@post}
-% \changes{v2.02}{2014/08/19}{neu}%^^A
+% \changes{v2.02}{2014/08/19}{neu}^^A
 % Dies sind die Hilfsmakros, welche zu Beginn und Ende der Quelltextumgebungen 
 % \env{Preamble}, \env{Trunk} und \env{Hint} für das Sichern der Inhalte in
 % eine Hilfsdatei verantwortlich zeichnen.
@@ -3044,7 +3108,7 @@
 % \end{macro}^^A \tud@tut@post
 % \end{macro}^^A \tud@tut@pre
 % \begin{macro}{\tud@tut@lst}
-% \changes{v2.02}{2014/10/07}{neu}%^^A
+% \changes{v2.02}{2014/10/07}{neu}^^A
 % Damit wird der Quelltext eingezogen ausgegeben.
 %    \begin{macrocode}
 \newcommand*\tud@tut@lst{%
@@ -3055,15 +3119,15 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@tut@lst
 % \begin{macro}{\tud@tut@input}
-% \changes{v2.02}{2014/10/13}{neu}%^^A
+% \changes{v2.02}{2014/10/13}{neu}^^A
 % \begin{macro}{\CodePreamble}
-% \changes{v2.02}{2014/08/20}{neu}%^^A
+% \changes{v2.02}{2014/08/20}{neu}^^A
 % \begin{macro}{\@CodePreamble}
-% \changes{v2.02}{2014/10/22}{neu}%^^A
+% \changes{v2.02}{2014/10/22}{neu}^^A
 % \begin{macro}{\CodeHook}
-% \changes{v2.02}{2014/10/11}{neu}%^^A
+% \changes{v2.02}{2014/10/11}{neu}^^A
 % \begin{macro}{\@CodeHook}
-% \changes{v2.02}{2014/10/11}{neu}%^^A
+% \changes{v2.02}{2014/10/11}{neu}^^A
 % Bereitstellung von Hilfsmakros für die formatierte Ausgabe von Quelltexten.
 %    \begin{macrocode}
 \newcommand\@CodePreamble{}
@@ -3131,7 +3195,7 @@
 % \end{macro}^^A \CodePreamble
 % \end{macro}^^A \tud@tut@input
 % \begin{macro}{\InputCode}
-% \changes{v2.02}{2014/10/21}{neu}%^^A
+% \changes{v2.02}{2014/10/21}{neu}^^A
 % Mit \cs{InputCode} kann der Inhalt der letzen \env{Trunk}"=Umgebung 
 % direkt ausgeführt werden, ohne diesen zuvor mit \cs{tud@tut@input} zu prüfen 
 % und zu formatieren.
@@ -3140,7 +3204,7 @@
 %    \end{macrocode}
 % \end{macro}^^A \InputCode
 % \begin{macro}{\tud@tut@pdf}
-% \changes{v2.02}{2014/10/22}{neu}%^^A
+% \changes{v2.02}{2014/10/22}{neu}^^A
 % Die Umgebung \env{Trunk!} verwendet nach der Ausgabe des Quelltextes diesen
 % abermals, um daraus eine PDF-Datei zu erzeugen. Dafür wird mithilfe einer
 % \env{filecontents}"=Umgebung eine temporäre \LaTeX-Datei erzeugt. Diese 
@@ -3151,7 +3215,7 @@
 % dieser wird über die Optionen von pdf\LaTeX{} der verwendete \cs{jobname}
 % angepasst (siehe \cs{tud@tut@pdf}).
 %    \begin{macrocode}
-\ifnum\pdfshellescape=1\relax%
+\ifnum\pdfshellescape=\@ne\relax%
 \ActivateWarningFilters[Tutorial]%
 \begin{filecontents*}{tutorial-temp.tex}
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
@@ -3181,7 +3245,7 @@
 % in \cs{\meta{Argument}-temp.pdf} umbenannt.
 %    \begin{macrocode}
 \newcommand*\tud@tut@pdf{%
-  \ifnum\pdfshellescape=1\relax%
+  \ifnum\pdfshellescape=\@ne\relax%
     \immediate\write18{%
       pdflatex -jobname=\jobname-temp tutorial-temp.tex
       pdflatex -jobname=\jobname-temp tutorial-temp.tex
@@ -3198,7 +3262,7 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@tut@pdf
 % \begin{macro}{\IncludeStandalone}
-% \changes{v2.02}{2014/09/10}{neu}%^^A
+% \changes{v2.02}{2014/09/10}{neu}^^A
 % Der Befehl \cs{IncludeStandalone} bindet die durch \env{Trunk!} generierten
 % PDF-Dateien ein. Das angehängte optionale Argument dient zur Angabe der
 % einzubindenden Seiten der PDF-Datei, wobei diese automatisch auf die passende
@@ -3208,7 +3272,7 @@
   \IfFileExists{#2-temp.pdf}{%
     \@tempcnta\z@%
     \@for\@tempa:=#3\do{\advance\@tempcnta\@ne}%
-    \ifnum\@tempcnta>\z@%
+    \ifnum\@tempcnta>\z@\relax%
       \setlength\@tempdima{\textwidth}%
       \divide\@tempdima\@tempcnta%
       \advance\@tempcnta\m@ne%
@@ -3221,7 +3285,7 @@
           \IfValueT{#1}{#1}%
         }
         \fbox{\expandafter\includegraphics\expandafter[\@tempb]{#2-temp.pdf}}%
-        \ifnum\@tempcnta>\z@\hfill\fi%
+        \ifnum\@tempcnta>\z@\relax\hfill\fi%
       }%
     \fi%
   }{%
@@ -3231,9 +3295,9 @@
 %    \end{macrocode}
 % \end{macro}^^A \IncludeStandalone
 % \begin{macro}{\StartTutorial}
-% \changes{v2.02}{2014/08/21}{neu}%^^A
+% \changes{v2.02}{2014/08/21}{neu}^^A
 % \begin{macro}{\FinishTutorial}
-% \changes{v2.02}{2014/08/21}{neu}%^^A
+% \changes{v2.02}{2014/08/21}{neu}^^A
 % Mit \cs{StartTutorial} wird ein Hyperlink für den Querverweis aus dem 
 % Handbuch definiert. Außerdem wird gleich der Titel und ein einleitender Satz 
 % gesetzt.
@@ -3280,13 +3344,13 @@
 % \end{macro}^^A \FinishTutorial
 % \end{macro}^^A \StartTutorial
 % \begin{macro}{\tud@tut@readtostream}
-% \changes{v2.02}{2014/12/16}{neu}%^^A
+% \changes{v2.02}{2014/12/16}{neu}^^A
 % \begin{macro}{\tud@tut@line}
-% \changes{v2.02}{2014/08/19}{neu}%^^A
+% \changes{v2.02}{2014/08/19}{neu}^^A
 % \begin{macro}{\tud@tut@append}
-% \changes{v2.02}{2014/08/19}{neu}%^^A
+% \changes{v2.02}{2014/08/19}{neu}^^A
 % \begin{macro}{\tud@tut@collect}
-% \changes{v2.02}{2014/12/16}{neu}%^^A
+% \changes{v2.02}{2014/12/16}{neu}^^A
 % Bei den Tutorials soll zum Schluss ein komplett kompilierbares Beispiel für
 % Copy~\&~Paste gegeben werden. Um dieses zusammenzubauen, werden alle im 
 % Dokument innerhalb der Varianten der \env{Trunk}"=Umgebungen gegebenen
@@ -3383,15 +3447,15 @@
 % \end{macro}^^A \idxfont
 % \begin{macro}{\PrintIndex}
 % \begin{macro}{\PrintIndexPrologue}
-% \changes{v2.02}{2014/08/20}{neu}%^^A
+% \changes{v2.02}{2014/08/20}{neu}^^A
 % \begin{macro}{\@printindexprologue}
-% \changes{v2.02}{2014/08/20}{neu}%^^A
+% \changes{v2.02}{2014/08/20}{neu}^^A
 % \begin{macro}{\@printindexskip}
-% \changes{v2.02}{2014/09/02}{neu}%^^A
+% \changes{v2.02}{2014/09/02}{neu}^^A
 % \begin{macro}{\Index}
 % \begin{macro}{\seeidx}
 % \begin{macro}{\@printindex}
-% \changes{v2.02}{2014/07/25}{neu}%^^A
+% \changes{v2.02}{2014/07/25}{neu}^^A
 % Der Befehl \cs{PrintIndex} ist die Zusammenfassung für die Ausgabe aller 
 % Indexe.
 %    \begin{macrocode}
@@ -3426,7 +3490,9 @@
 % Durch die Verwendung der \env{multicols}"=Umgebung werden zu große vertikale 
 % Abstände gesetzt. Dies wird mit diesem Befehl rückgängig gemacht.
 %    \begin{macrocode}
-\newcommand*\@printindexskip{\ifnum\imki@columns>\@ne\vspace{-\multicolsep}\fi}
+\newcommand*\@printindexskip{%
+  \ifnum\imki@columns>\@ne\relax\vspace{-\multicolsep}\fi%
+}
 %    \end{macrocode}
 % Der Befehl \cs{@printindex} setzt vor jedem Unterindex ein referenzierbares
 % Label und gibt diesen danach aus.
@@ -3486,9 +3552,9 @@
 % \begin{macro}{\PrintChangelog}
 % \begin{macro}{\if@changelog}
 % \begin{macro}{\Changelog}
-% \changes{v2.02}{2014/08/20}{neu}%^^A
+% \changes{v2.02}{2014/08/20}{neu}^^A
 % \begin{macro}{\deprecatedhyperpage}
-% \changes{v2.03}{2015/02/05}{neu}%^^A
+% \changes{v2.03}{2015/02/05}{neu}^^A
 % Ähnlich wie für den Index wird auch für die Änderungsliste verfahren. Mit dem 
 % Makro \cs{deprecatedhyperpage} wird die Ausgabe der Seitenzahlen unterdrückt, 
 % wenn zusätzlich ein mit \cs{see} gesetzter Querverweis existiert.
@@ -3523,9 +3589,9 @@
 % \fi
 %
 % \begin{macro}{\see}
-% \changes{v2.03}{2015/02/06}{neu}%^^A
+% \changes{v2.03}{2015/02/06}{neu}^^A
 % \begin{macro}{\seealso}
-% \changes{v2.03}{2015/02/06}{neu}%^^A
+% \changes{v2.03}{2015/02/06}{neu}^^A
 % Diese Befehle werden zum einen so definiert, dass zwischen \cs{seename} und 
 % dem Argument ein geschütztes Leerzeichen verwendet wird. Die Sternversion 
 % benötigt kein zweites, leeres Argument.
@@ -3546,6 +3612,159 @@
 %    \end{macrocode}
 % \end{macro}^^A \seealso
 % \end{macro}^^A \see
+%
+% \iffalse
+%</body>
+%</!doc>
+%<*body|doc>
+% \fi
+%
+% \section{Verschiedenes für die Dokumentationklassen}
+%
+% \begin{macro}{\vTUDScript}
+% \begin{macro}{\vKOMAScript}
+% \begin{macro}{\CD}
+% \begin{macro}{\CDs}
+% \begin{macro}{\TUD}
+% \begin{macro}{\TnUD}
+% \begin{macro}{\DDC}
+% Diese Befehle stellen regelmäßig in der Quelltextdokumentatuion und im 
+% Handbuch genutzte Textbausteine bereit. Dazu wird der Befehl \cs{xspace} aus 
+% dem \pkg{xspace}-Paket genutzt.
+%    \begin{macrocode}
+\RequirePackage{xspace}[2009/10/20]
+\xspaceaddexceptions{"=}
+%    \end{macrocode}
+% Der Befehl \cs{vTUDScript} enthält die aktuelle \TUDScript"=Versionsnummer.
+%    \begin{macrocode}
+\newcommand*\vTUDScript{}
+\AtBeginDocument{%
+  \def\@tempb#1 #2 #3\relax#4\relax{\def\vTUDScript{#2}}%
+  \edef\@tempa{\TUDVersion}%
+  \expandafter\@tempb\@tempa\relax? ? \relax\relax%
+}
+\newcommand*\vKOMAScript{v3.17\xspace}
+%    \end{macrocode}
+% Ganz zum Schluss noch Bugfixes für unterschiedliche Pakete.
+%    \begin{macrocode}
+\RequirePackage{scrhack}[2014/02/27]
+%    \end{macrocode}
+% \dots und der Rest.
+%    \begin{macrocode}
+\newcommand*\CD{Corporate Design\xspace}
+\newcommand*\CDs{Corporate Designs\xspace}
+\newcommand*\TUD{Technische Universit\"at Dresden\xspace}
+\newcommand*\TnUD{Technischen Universit\"at Dresden\xspace}
+\newcommand*\DDC{%
+  \mbox{D\kern.05em R\kern.05em E\kern.05em S\kern.05em D\kern.05em E\kern.05em 
+  N\kern.1em-\kern.1em concept}\xspace%
+}
+\AfterPackage*{babel}{%
+  \@expandtwoargs\in@{,english,}{,\bbl@loaded,}%
+  \ifin@%
+    \renewcommand*\CD{\foreignlanguage{english}{Corporate Design}\xspace}
+    \renewcommand*\CDs{\foreignlanguage{english}{Corporate Designs}\xspace}
+  \fi
+}
+%    \end{macrocode}
+% \end{macro}^^A \DDC
+% \end{macro}^^A \TnUD
+% \end{macro}^^A \TUD
+% \end{macro}^^A \CDs
+% \end{macro}^^A \CD
+% \end{macro}^^A \vKOMAScript
+% \end{macro}^^A \vTUDScript
+%
+% \iffalse
+%</body|doc>
+%<*body>
+% \fi
+%
+% \begin{macro}{\Univers}
+% \begin{macro}{\DIN}
+% \begin{macro}{\Attention}
+% \changes{v2.02}{2014/08/16}{neu}^^A
+% \begin{macro}{\Forum}
+% \begin{macro}{\GitHubRepo}
+% \changes{v2.02}{2014/08/16}{neu}^^A
+% \begin{macro}{\textsbn}
+% \changes{v2.02}{2014/08/16}{neu}^^A
+% \begin{macro}{\sbnfont}
+% \changes{v2.02}{2014/08/16}{neu}^^A
+% \begin{macro}{\textsbs}
+% \changes{v2.02}{2014/08/16}{neu}^^A
+% \begin{macro}{\sbsfont}
+% \changes{v2.02}{2014/08/16}{neu}^^A
+% \begin{macro}{\notudscrartcl}
+% \begin{length}{\tempdim}
+% \changes{v2.02}{2014/08/16}{neu}^^A
+% \begin{macro}{\hrfn}
+% \changes{v2.02}{2014/08/16}{neu}^^A
+% \changes{v2.04}{2015/02/18}{Schriftgröße mit \cs{scalebox}}^^A
+% \begin{macro}{\scrguide}
+% \changes{v2.02}{2014/09/04}{neu}^^A
+% Für die Anwenderdokumentation werden mehr Auszeichnungsbefehle vorgehalten.
+%    \begin{macrocode}
+\newcommand*\Univers{\textubn{Univers}\xspace}
+\newcommand*\DIN{\textdbn{DIN~BOLD}\xspace}
+\newcommand*\textsbn{}
+\newcommand*\sbnfont{\sffamily\bfseries\upshape}
+\DeclareTextFontCommand\textsbn{\sffamily\bfseries\upshape}
+\newcommand*\textsbs{}
+\newcommand*\sbsfont{\sffamily\bfseries\slshape}
+\DeclareTextFontCommand\textsbs{\sffamily\bfseries\slshape}
+\newcommand*\Attention[1]{\marginnote{\fbox{Achtung!}}\emph{#1}}
+\NewDocumentCommand\Forum{s}{%
+  \IfBooleanTF{#1}{%
+    \url{http://latex.wcms-file3.tu-dresden.de/phpBB3/}%
+  }{%
+    \hrfn{http://latex.wcms-file3.tu-dresden.de/phpBB3/}{TUD-\LaTeX-Forum}%
+  }%
+  \xspace%
+}
+%<*class>
+\NewDocumentCommand\GitHubRepo{s}{%
+  \def\@tempc{%
+    https://github.com/tud-cd/tudscr/releases%
+  }%
+  \IfBooleanTF{#1}{%
+    \href{\@tempc}{GitHub-Repository~\File*{tudscr}}%
+  }{%
+    \hrfn{\@tempc}{GitHub-Repository~\File*{tudscr}}%
+  }%
+  \xspace%
+}
+\newcommand*\notudscrartcl{%
+  F\"ur die Klasse \Class{tudscrartcl} ist diese Einstellung nicht verf\"ugbar.
+}
+\newlength\tempdim
+%</class>
+\newcommand*\hrfn[2]{\href{#1}{#2}\footnote{\scalebox{0.97}{\url{#1}}}}
+\NewDocumentCommand\scrguide{s}{%
+  \def\@tempc{%
+    http://mirrors.ctan.org/macros/latex/contrib/koma-script/doc/scrguide.pdf%
+  }%
+  \IfBooleanTF{#1}{%
+    \href{\@tempc}{\File{scrguide.pdf}}%
+  }{%
+    \hrfn{\@tempc}{\File{scrguide.pdf}}%
+  }%
+  \xspace%
+}
+%    \end{macrocode}
+% \end{macro}^^A \scrguide
+% \end{macro}^^A \hrfn
+% \end{length}^^A \tempdim
+% \end{macro}^^A \notudscrartcl
+% \end{macro}^^A \sbsfont
+% \end{macro}^^A \textsbs
+% \end{macro}^^A \sbnfont
+% \end{macro}^^A \textsbn
+% \end{macro}^^A \GitHubRepo
+% \end{macro}^^A \Forum
+% \end{macro}^^A \Attention
+% \end{macro}^^A \DIN
+% \end{macro}^^A \Univers
 %
 % \iffalse
 %</body>

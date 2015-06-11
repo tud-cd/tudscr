@@ -1,4 +1,4 @@
-% \CheckSum{293}
+% \CheckSum{106}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-misc.dtx}[%
-  2015/02/15 v2.03 TUD-KOMA-Script (miscellaneous)%
+  2015/05/18 v2.04 TUD-KOMA-Script (miscellaneous)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -72,8 +72,8 @@
 %
 % \selectlanguage{ngerman}
 %
-% \changes{v2.02}{2014/06/23}{Unterstützung für \pkg{titlepage} entfernt}%^^A
-% \changes{v2.02}{2014/07/08}{Optionen nutzen \cs{FamilyKeyState}}%^^A
+% \changes{v2.02}{2014/06/23}{Unterstützung für \pkg{titlepage} entfernt}^^A
+% \changes{v2.02}{2014/07/08}{Optionen nutzen \cs{FamilyKeyState}}^^A
 %
 % \section{Verschiedenes für die Hauptklassen}
 %
@@ -85,28 +85,12 @@
 %<*class&option>
 % \fi
 %
-% \subsection{Ausführung von paketspezifischem Quellcode}
-%
-% Ab und an ist es notwendig, bestimmten Quelltext erst gezielt nach einem 
-% Paket auszuführen.
-% \begin{macro}{\TUD@parameter@defaulthandler}
-% \changes{v2.03}{2015/02/15}{neu}%^^A
-% Im ersten Argument wird das paket angegeben, im zweiten der Quellcode. Dabei 
-% ist zu beachten, dass dieser im Dokument auch ausgeführt wird, wenn das Paket 
-% \emph{nicht} geladen wurde.
-%    \begin{macrocode}
-\newcommand*\TUD@AfterPackage[2]{%
-  \if@atdocument#2\else\AfterPackage!{#1}{#2}\fi%
-}
-%    \end{macrocode}
-% \end{macro}^^A \TUD@parameter@defaulthandler
-%
 % \subsection{Fußnoten in Überschriften}
 %
 % \begin{option}{footnotes}
-% \changes{v2.02}{2014/06/27}{neu}%^^A
+% \changes{v2.02}{2014/06/27}{neu}^^A
 % \begin{macro}{\if@tud@symbolheadings}
-% \changes{v2.02}{2014/06/27}{neu}%^^A
+% \changes{v2.02}{2014/06/27}{neu}^^A
 % Die \KOMAScript-Option \opt{footnotes} wird um den Schlüssel 
 % \val{symbolheadings} erweitert, mit welchem eingestellt werden kann, ob in den
 % Überschriften Symbole für die Fußnoten anstelle von Zahlen verwendet werden
@@ -119,9 +103,9 @@
     {symbolheadings}{1}%
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \ifcase\@tempa\relax%
+    \ifcase\@tempa\relax% nosymbolheadings
       \@tud@symbolheadingsfalse%
-    \or%
+    \or% symbolheadings
       \@tud@symbolheadingstrue%
     \fi%
   \fi%
@@ -136,16 +120,12 @@
 % \fi
 %
 % \begin{counter}{symbolheadings}
-% \changes{v2.02}{2014/06/27}{neu}%^^A
+% \changes{v2.02}{2014/06/27}{neu}^^A
 % Dieser Zähler wird bei aktivierter Option \opt{footnotes=symbolheadings} für 
 % die Symboleauswahl von Fußnoten in Überschirften inkrementiert.
 %    \begin{macrocode}
-%<*book|report>
-\newcounter{symbolheadings}[chapter]
-%</book|report>
-%<*article>
-\newcounter{symbolheadings}
-%</article>
+%<book|report>\newcounter{symbolheadings}[chapter]%
+%<article>\newcounter{symbolheadings}%
 %    \end{macrocode}
 % \end{counter}^^A symbolheadings
 %
@@ -176,7 +156,7 @@
 % \begin{macro}{\tudbookmark}
 % \begin{macro}{\tud@footnote@unhyper}
 % \begin{macro}{\tud@footnote@rehyper}
-% \changes{v2.02}{2014/11/13}{entfernt}%^^A
+% \changes{v2.02}{2014/11/13}{entfernt}^^A
 % Die Befehle zum Eintragen der Sprungmarken. Im Dokument kann auch der Befehl
 % \cs{tudbookmark} vom Anwender genutzt werden, um manuell weitere Lesezeichen
 % zu erzeugen.
@@ -236,244 +216,73 @@
 %    \end{macrocode}
 % \end{macro}^^A \tableofcontents
 % \end{macro}^^A \maketitle
-%
-% \subsection{Parameter für Umgebungen und mehrspaltige Texte}
-%
-% Diese Befehle dienen dazu, bei Umgebungen die Sprache über einen Parameter
-% anzugeben sowie das Paket \pkg{multicol} verwenden zu können.
-% \begin{macro}{\TUD@parameter@defaulthandler}
-% Hiermit kann sowohl die zu verwendende Sprache als auch die Anzahl der
-% gewünschten Spalten für bestimmte Umgebungen ohne die explizite Angabe eines
-% Schlüssels festgelegt werden. Momentan betrifft das die beiden Umgebungen
-% \env{abstract} und \env{tudpage}.
+% Das Paket \pkg{tocloft} verursacht allerlei Probleme. Wird es geladen, so 
+% erscheint eine entsprechende Warnung.
 %    \begin{macrocode}
-\newcommand*\TUD@parameter@defaulthandler[2]{%
-  \def\@tempa{#2}%
-  \@for\@tempb:=\@tempa\do{%
-    \ifx\@tempb\@empty\else%
-      \ifstr{\@tempb}{twocolumn}{\def\@tempb{2}}{}%
-      \ifxnumber{\@tempb}{%
-        \TUD@parameter@set{#1}{columns=\@tempb}%
-      }{%
-        \TUD@parameter@set{#1}{language=\@tempb}%
-      }%
-    \fi%
+\BeforePackage{tocloft}{%
+  \ClassWarning{\tudcls@name}{%
+    It is not recommended to use package `tocloft'.\MessageBreak%
+    Loading the package will certainly lead to problems\MessageBreak%
+    with table of contents and any list of floats. You\MessageBreak%
+    should use the appropriate options of KOMA-Script%
   }%
 }
 %    \end{macrocode}
-% \end{macro}^^A \TUD@parameter@defaulthandler
-% \begin{macro}{\tud@multicols}
-% \begin{macro}{\tud@multicols@check}
-% Im Makro \cs{tud@multicols} wird die Anzahl der gewünschten Spalten in einer
-% Umgebung für die Verwendung des \pkg{multicol}"=Paketes gespeichert.
-%    \begin{macrocode}
-\newcommand*\tud@multicols{1}
-%    \end{macrocode}
-% Der Befehl \cs{tud@multicols@check} prüft, ob das Paket \pkg{multicol} 
-% geladen wurde. Falls dies nicht der Fall ist, wird eine Warnung ausgegeben.
-%    \begin{macrocode}
-\newcommand*\tud@multicols@check{%
-  \ifdef{\multicols}{}{%
-    \ifnum\tud@multicols>1\relax%
-      \ClassWarning{\tudcls@name}{%
-        The option `columns=\tud@multicols' is only supported,\MessageBreak%
-        when package `multicol' is loaded%
-      }%
-      \def\tud@multicols{1}%
-    \fi%
-  }%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@multicols@check
-% \end{macro}^^A \tud@multicols
-%
-% \subsection{Bedingte Majuskeln für Überschriften}
-%
-% Überschriften sollen bloß in Großbuchstaben gesetzt werden, wenn auch 
-% tatsächlich die Schrift DIN~Bold verwendet wird.
-% \begin{macro}{\tud@makeuppercase}
-% Der Befehl führt \cs{MakeTextUppercase}\marg{Text} deshalb nur aus, wenn die 
-% richtige Schriftfamilie verwendet wird. 
-%    \begin{macrocode}
-\newcommand*\tud@makeuppercase[1]{%
-  \ifdin{\begingroup\MakeTextUppercase{#1}\endgroup}{#1}%
-%    \end{macrocode}
-% Aufgrund eines Fehlers im \LaTeX-Kernels liegt die Grundlinie für die beiden
-% Gliederungsebenen \cs{section} und \cs{subsection} zu hoch. Mit dem Einfügen
-% des vertikalen Freiraums für die Umlaute wird diese automatisch nach unten
-% verschoben. Allerdings ist das ein ziemlich übler Hack.
-%^^A \addtokomafont{section}{\strut\ignorespaces}%
-%    \begin{macrocode}
-  \protect\vphantom{\"A\"O\"U}%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@makeuppercase
-%
-% \subsection{Erzwungene Minuskeln für Strings}
-%
-% Um angegebene Werte bei Schlüssel-Wert-Paaren oder Schlüsselwörter in
-% bestimmten Feldern mit Sicherheit erkennen zu können, werden diese zwingend 
-% in Kleinbuchstaben geschieben.
-% \begin{macro}{\tud@lowerstring}
-% Das Makro wird mit \cs{tud@lowerstring}\marg{Zielmakro}\marg{String} bennutzt.
-%    \begin{macrocode}
-\newcommand*\tud@lowerstring[2]{%
-  \protected@edef#1{#2}%
-  \lowercase\expandafter{%
-    \expandafter\gdef\expandafter #1\expandafter{#1}%
-  }%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@lowerstring
-%
-% \subsection{Expansion geschützter Makros}
-%
-% Im \LaTeX-Kernel wird der Befehl \cs{@expandtwoargs} definiert, welcher zwei 
-% Argumente in ein angegebenes Makro vollständig expandiert. Dabei erfolgt die 
-% Expansion der beiden Argumente aufgrund der standardmäßigen Verwendung von 
-% \cs{edef} allerdings vollständig und ohne die Beachtung von \cs{protect}.
-% \begin{macro}{\protected@expandtwoargs}
-% \changes{v2.02}{2014/11/13}{neu}%^^A
-% Der Befehl \cs{protected@expandtwoargs} kann äquivalent genutzt werden, 
-% lässt dabei aber mit \cs{protect} geschützte Makros unberührt.
-%    \begin{macrocode}
-\providecommand*\protected@expandtwoargs[3]{%
-  \protected@edef\reserved@a{\noexpand#1{#2}{#3}}\reserved@a%
-}
-%    \end{macrocode}
-% \end{macro}^^A \protected@expandtwoargs
 %
 % \iffalse
 %</class&body>
-%<*manual|doc>
+%<*execute>
 % \fi
 %
-% \section{Verschiedenes für die Dokumentationklassen}
+% \subsection{Durchreichen von Optionen und Standardoptionen}
 %
-% \begin{macro}{\vTUDScript}
-% \begin{macro}{\vKOMAScript}
-% \begin{macro}{\Attention}
-% \changes{v2.02}{2014/08/16}{neu}%^^A
-% \begin{macro}{\Forum}
-% \begin{macro}{\notudscrartcl}
-% \begin{length}{\tempdim}
-% \begin{macro}{\hrfn}
-% \begin{macro}{\scrguide}
-% \changes{v2.02}{2014/09/04}{neu}%^^A
-% \begin{macro}{\CD}
-% \begin{macro}{\CDs}
-% \begin{macro}{\TUD}
-% \begin{macro}{\TnUD}
-% \begin{macro}{\DDC}
-% \begin{macro}{\Univers}
-% \begin{macro}{\DIN}
-% Diese Befehle stellen regelmäßig in der Quelltextdokumentatuion und im 
-% Handbuch genutzte Textbausteine bereit. Dazu wird der Befehl \cs{xspace} aus 
-% dem \pkg{xspace}-Paket genutzt.
+% Durchreichen aller Klassenoptionen an die \KOMAScript-Klasse bzw. an die
+% genutzte \TUDScript-Elternklasse.
 %    \begin{macrocode}
-\RequirePackage{xspace}[2009/10/20]
-\xspaceaddexceptions{"=}
+%<*class&!inherit>
+\DeclareOption*{\PassOptionsToClass{\CurrentOption}{\scrcls@name}}
+%</class&!inherit>
+%<*class&inherit>
+\DeclareOption*{\PassOptionsToClass{\CurrentOption}{\tudinh@name}}
+%</class&inherit>
+%<*package&fonts>
+\DeclareOption*{\KOMAoptions{\CurrentOption}}
+%</package&fonts>
+%<*package&poster>
+\DeclareOption*{\TUDoptions{\CurrentOption}}
+%</package&poster>
 %    \end{macrocode}
-% Der Befehl \cs{vTUDScript} enthält die aktuelle \TUDScript"=Versionsnummer.
+% Es werden die Standardoptionen ausgeführt. Die Ausführung selbst wird durch
+% den Befehl \cs{TUD@noworlater} innerhalb von \cs{TUD@key} auf das Ende der
+% \KOMAScript-Klasse verzögert.
 %    \begin{macrocode}
-\newcommand*\vTUDScript{}
-\AtBeginDocument{%
-  \def\@tempb#1 #2 #3\relax#4\relax{\def\vTUDScript{#2}}%
-  \edef\@tempa{\TUDVersion}%
-  \expandafter\@tempb\@tempa\relax? ? \relax\relax%
-}
-\newcommand*\vKOMAScript{v3.12\xspace}
+%<*class&!inherit>
+\TUDExecuteOptions{cd=true,cdfont=true,tudbookmarks=true}
+%</class&!inherit>
 %    \end{macrocode}
-% Ganz zum Schluss noch Bugfixes für unterschiedliche Pakete.
+% Für das Paket \pkg{tudscrfonts} werden die Schriften aktiviert.
 %    \begin{macrocode}
-\RequirePackage{scrhack}[2014/02/27]
+%<*package&fonts>
+\TUDExecuteOptions{cdfont=true}
+%</package&fonts>
+%<*package&poster>
+\TUDExecuteOptions{cdstyle=bicolor}
+%</package&poster>
+\TUDProcessOptions\relax
 %    \end{macrocode}
-% \dots und der Rest.
+% Die korrespindierende \KOMAScript-Klasse bzw. \TUDScript-Elternklasse wird 
+% geladen.
 %    \begin{macrocode}
-%<*manual>
-\newcommand*\Attention[1]{\marginnote{\fbox{Achtung!}}\emph{#1}}
-\NewDocumentCommand\Forum{s}{%
-  \IfBooleanTF{#1}{%
-    \url{http://latex.wcms-file3.tu-dresden.de/phpBB3/}%
-  }{%
-    \hrfn{http://latex.wcms-file3.tu-dresden.de/phpBB3/}{TUD-\LaTeX-Forum}%
-  }%
-  \xspace%
-}
-\newcommand*\hrfn[2]{\href{#1}{#2}\footnote{\scriptsize\url{#1}}}
-\NewDocumentCommand\scrguide{s}{%
-  \def\@tempc{%
-    http://mirrors.ctan.org/macros/latex/contrib/koma-script/doc/scrguide.pdf%
-  }%
-  \IfBooleanTF{#1}{%
-    \href{\@tempc}{\File{scrguide.pdf}}%
-  }{%
-    \hrfn{\@tempc}{\File{scrguide.pdf}}%
-  }%
-  \xspace%
-}
-%<*manual&class>
-\NewDocumentCommand\GitHubRepo{s}{%
-  \def\@tempc{%
-    https://github.com/tud-cd/tudscr/releases%
-  }%
-  \IfBooleanTF{#1}{%
-    \href{\@tempc}{GitHub-Repository~\File*{tudscr}}%
-  }{%
-    \hrfn{\@tempc}{GitHub-Repository~\File*{tudscr}}%
-  }%
-  \xspace%
-}
-\newcommand*\notudscrartcl{%
-  F\"ur die Klasse \Class{tudscrartcl} ist diese Einstellung nicht verf\"ugbar.
-}
-\newlength\tempdim
-%</manual&class>
-%</manual>
-\newcommand*\CD{Corporate Design\xspace}
-\newcommand*\CDs{Corporate Designs\xspace}
-\newcommand*\TUD{Technische Universit\"at Dresden\xspace}
-\newcommand*\TnUD{Technischen Universit\"at Dresden\xspace}
-\newcommand*\DDC{%
-  \mbox{D\kern.05em R\kern.05em E\kern.05em S\kern.05em D\kern.05em E\kern.05em 
-  N\kern.1em-\kern.1em concept}\xspace%
-}
-\AfterPackage*{babel}{%
-  \@expandtwoargs\in@{,english,}{,\bbl@loaded,}%
-  \ifin@%
-    \renewcommand*\CD{\foreignlanguage{english}{Corporate Design}\xspace}
-    \renewcommand*\CDs{\foreignlanguage{english}{Corporate Designs}\xspace}
-  \fi
-}
-%<*manual>
-\newcommand*\Univers{\textubn{Univers}\xspace}
-\newcommand*\DIN{\textdbn{DIN~BOLD}\xspace}
-\newcommand*\sbnfont{\sffamily\bfseries\upshape}
-\newcommand*\sbsfont{\sffamily\bfseries\slshape}
-\newcommand*\textsbn{}
-\newcommand*\textsbs{}
-\DeclareTextFontCommand\textsbn{\sffamily\bfseries\upshape}
-\DeclareTextFontCommand\textsbs{\sffamily\bfseries\slshape}
-%</manual>
+%<*class&!inherit>
+\LoadClass{\scrcls@name}[2015/04/23]
+%</class&!inherit>
+%<*class&inherit>
+\LoadClass{\tudinh@name}
+%</class&inherit>
 %    \end{macrocode}
-% \end{macro}^^A \DIN
-% \end{macro}^^A \Univers
-% \end{macro}^^A \DDC
-% \end{macro}^^A \TnUD
-% \end{macro}^^A \TUD
-% \end{macro}^^A \CDs
-% \end{macro}^^A \CD
-% \end{macro}^^A \scrguide
-% \end{macro}^^A \hrfn
-% \end{length}^^A \tempdim
-% \end{macro}^^A \notudscrartcl
-% \end{macro}^^A \Forum
-% \end{macro}^^A \Attention
-% \end{macro}^^A \vKOMAScript
-% \end{macro}^^A \vTUDScript
 %
 % \iffalse
-%</manual|doc>
+%</execute>
 % \fi
 %
 % \Finale

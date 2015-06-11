@@ -1,0 +1,356 @@
+%% LaTeX-Paket für Preprint-Deckblätter am Institut für Algebra.
+%%
+%% Autor: Mike Behrisch (mike.behrisch@mailbox.tu-dresden.de)
+%% Anregungen und Vorlagen: 
+%% Tobias Schlemmer (tobias.schlemmer@mailbox.tu-dresden.de)
+%% Sebastian Liebscher (sebastian.liebscher@tu-dresden.de)
+%% 
+%%
+%% Dokumentation: Siehe testpreprint.tex
+%%
+\NeedsTeXFormat{LaTeX2e}[1994/12/01]%
+\ProvidesPackage{algpreprint}[2011/07/25 v0.9 preprints for the Institut of Algebra TU Dresden]%
+%%%%%%%%%%%%%%%%%%%%%
+%% options %%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%
+%tudfonts         ---> Benutzung der TUD-Schriftarten (Univers und Din bold), diese müssen dazu installiert sein (wie Befehl \TUFfonts)
+%noheader         ---> kein TU-Logo oben auf der Seite
+%nofooter         ---> kein Schriftzug "PREPRINT" (bzw. "TECHNICAL REPORT") im Seitenfuß
+%technicalreport  ---> "TECHNICAL REPORT" anstelle von "PREPRINT" im Seitenfuß (nur wenn "nofooter" nicht benutzt wird) (wie Befehl \TechnicalReport)
+
+%%%%%%%%%%%%%%%%%%%%%
+%% user commands %%%%
+%%%%%%%%%%%%%%%%%%%%%
+
+%\Titel                   --> Titel definieren. (optionales Argument setzt einen expliziten Kurztitel, default = langer Titel)
+%\Autor                   --> Autor angeben (erforderlich)
+%\Nummer                  --> Nummer des Preprints setzen (erforderlich)
+%\MathAlNummer            --> Nummer des Preprints setzen (Institut für Algebra) (erforderlich)
+%\AlsManuskriptGedruckt   --> "Als Manuskript gedruckt" erscheint oben rechts.
+%\TitelFussnote           --> Fußnotentext zum Titel angeben, Default = leer, d. h. keine Fußnote
+%\ZusaetzlicheBefehle     --> Befehle angeben, die am Ende der Titelseite ausgeführt werden (z. B. Fußnoten zu den Autoren); Default = leer
+%\Jahr                    --> Jahr definieren. Default = Systemjahr
+%\Monat                   --> Monat definieren. Default = Systemmonat in deutscher Sprache
+%\SetzeHoffset            --> horizontale Verschiebung auf der Titelseite definieren (zur Druckerkorrektur) 
+%                             [bei A5 und Konversion entspricht dies einer negativen vertikalen Verschiebung]
+%\SetzeVoffset            --> vertikale Verschiebung auf der Titelseite definieren (zur Druckerkorrektur) 
+%                             [bei A5 und Konversion entspricht dies einer horizontalen Verschiebung]
+%\Offsetmessung           --> Drucke eine Box zur Bestimmung der Werte für Voffset und Hoffset; dabei wird nur die Titelseite und eine anschließende Vakatseite gedruckt.
+%\TechnicalReport         --> Ersetze "PREPRINT" durch "TECHNICAL REPORT"
+%\TUDfonts                --> Aktiviere Benutzung der TUD-Schriftarten (Univers und Din bold), müssen dazu installiert sein, Default = keine TUD-Fonts
+%\Kurztitel               --> den Kurztitel zurückgeben
+%\Preprintname            --> Text umdefinieren, der ganz unten steht, Default = PREPRINT
+%\Manuskript              --> Text definieren, der oben rechts erscheint ("Als Manuskript gedruckt"), Default = leer
+%
+%
+%------------- required packages ----------------------------
+%
+%geometry
+%calc
+%graphicx
+%ifpdf
+%
+% ------------- internal commands for layout -------------------
+\def\algpreprint@Jahr{\the\year}
+\def\algpreprint@Monat{{\ifcase\month \or
+   Januar\or Februar\or M{\"a}rz\or April\or Mai\or Juni\or
+   Juli\or August\or September\or Oktober\or November\or Dezember\fi} \algpreprint@Jahr}
+\def\algpreprint@Nummer{MATH--AL--Nummer--\algpreprint@Jahr}
+\def\algpreprint@Titel{Der Titel}
+\def\algpreprint@Kurztitel{}
+\def\algpreprint@Autor{N.N.}
+\def\algpreprint@additionalCommands{}
+\def\algpreprint@Manuskript{}
+\def\algpreprint@TitelFussnote{}
+\newlength{\algpreprint@hoffset}%
+\newlength{\algpreprint@voffset}%
+\setlength{\algpreprint@hoffset}{0pt}%
+\setlength{\algpreprint@voffset}{0pt}%
+\def\algpreprint@PreprintName{PREPRINT}
+\newif\ifalgpreprint@FussnoteZumTitel\algpreprint@FussnoteZumTitelfalse%
+\newif\ifalgpreprint@Manuskriptnotiz\algpreprint@Manuskriptnotizfalse%
+\newif\ifalgpreprint@tudfonts\algpreprint@tudfontsfalse%
+\newif\ifalgpreprint@afourpaperdetected\algpreprint@afourpaperdetectedfalse%
+\newif\ifalgpreprint@landscapeoptiondetected\algpreprint@landscapeoptiondetectedfalse%
+\newif\ifalgpreprint@Afouroptiondetected\algpreprint@Afouroptiondetectedfalse%
+\newif\ifalgpreprint@Afiveoptiondetected\algpreprint@Afiveoptiondetectedfalse%
+\newif\ifalgpreprint@nofooter\algpreprint@nofooterfalse%
+\newif\ifalgpreprint@noheader\algpreprint@noheaderfalse%
+\newif\ifalgpreprint@offsetmessung\algpreprint@offsetmessungfalse%
+%
+%------------- options --------------------------------------
+\DeclareOption{tudfonts}{\algpreprint@tudfontstrue}
+\DeclareOption{technicalreport}{\def\algpreprint@PreprintName{TECHNICAL REPORT}}
+\DeclareOption{nofooter}{\algpreprint@nofootertrue}
+\DeclareOption{noheader}{\algpreprint@noheadertrue}
+% NEVER use the following options explicitly for the package. 
+% They are supposed to be set by the surrounding documentclass.
+\DeclareOption{landscape}{\algpreprint@landscapeoptiondetectedtrue}
+\DeclareOption{a4paper}{\algpreprint@Afouroptiondetectedtrue}
+\DeclareOption{a5paper}{\algpreprint@Afiveoptiondetectedtrue}
+\ProcessOptions\relax
+%
+%
+% ------------- user commands -------------------
+%
+\newcommand{\Titel}[2][\@empty]{%
+% first argument is optional = short title, if it is empty, then the short title equals the full title
+% second argument = full title
+  \def\algpreprint@Titel{#2}
+  \ifx\@empty#1
+    {}\def\algpreprint@Kurztitel{#2}
+    \typeout{Package algpreprint: using long title as short title.}
+  \else%
+    {}\def\algpreprint@Kurztitel{#1}
+  \fi%
+  \@ifundefined{lehead}{}{\lehead{\algpreprint@Kurztitel}}%  scrpage2-stuff
+  \@ifundefined{lhead}{}{\lhead{\algpreprint@Kurztitel}}%  fancyhdr-stuff
+%                         
+}
+\newcommand{\Autor}[1]{\def\algpreprint@Autor{#1}}
+\newcommand{\Nummer}[1]{\def\algpreprint@Nummer{{#1}--\algpreprint@Jahr}}
+\newcommand{\MathAlNummer}[1]{\Nummer{MATH--AL--{#1}}}
+\newcommand{\AlsManuskriptGedruckt}{\Manuskript{Als Manuskript gedruckt}}
+\newcommand{\TitelFussnote}[1]{\def\algpreprint@TitelFussnote{#1}\algpreprint@FussnoteZumTiteltrue}
+\newcommand{\ZusaetzlicheBefehle}[1]{\def\algpreprint@additionalCommands{#1}}
+\newcommand{\Jahr}[1]{\def\algpreprint@Jahr{#1}}
+\newcommand{\Monat}[1]{\def\algpreprint@Monat{{#1} \algpreprint@Jahr}}
+\newcommand{\SetzeHoffset}[1]{\setlength{\algpreprint@hoffset}{#1}}
+\newcommand{\SetzeVoffset}[1]{\setlength{\algpreprint@voffset}{#1}}
+\newcommand{\Kurztitel}{\algpreprint@Kurztitel}
+\newcommand{\Preprintname}[1]{\def\algpreprint@PreprintName{#1}}
+\newcommand{\Manuskript}[1]{\def\algpreprint@Manuskript{#1}\algpreprint@Manuskriptnotiztrue}
+\newcommand{\TUDfonts}{\algpreprint@tudfontstrue}
+\newcommand{\TechnicalReport}{\Preprintname{TECHNICAL REPORT}}
+\newcommand{\Offsetmessung}{\algpreprint@offsetmessungtrue}
+%
+%------------- other necessary stuff ------------------------
+
+\AtBeginDocument{%
+\PassOptionsToPackage{pass}{geometry}%
+\RequirePackage{geometry}%
+\RequirePackage{calc}%
+\RequirePackage{graphicx}%
+\RequirePackage{ifpdf}%
+\ifpdf% pdfTEX is running in pdf mode 
+  \@ifundefined{pdfmapfile}{}{%
+    \pdfmapfile{+univers.map}%
+    \pdfmapfile{+dinbold.map}%
+  }
+\else% TEX or pdfTEX in dvi mode 
+\fi%
+%------------- internal commands ----------------------------
+
+\bgroup% %keep these definitions local
+\newlength{\algpreprint@lengthepsilontolerance}
+\newlength{\algpreprint@breiteAfuenf}
+\newlength{\algpreprint@hoeheAfuenf}
+\newlength{\algpreprint@breiteAvier}
+\newlength{\algpreprint@hoeheAvier}
+\newlength{\algpreprint@differenzbreite}
+\newlength{\algpreprint@differenzhoehe}
+%
+\setlength{\algpreprint@lengthepsilontolerance}{0.001pt}% this is 0.35 micro meters 
+\setlength{\algpreprint@breiteAfuenf}{421.10078pt}
+\setlength{\algpreprint@hoeheAfuenf}{597.50787pt}
+\setlength{\algpreprint@breiteAvier}{597.50787pt}
+\setlength{\algpreprint@hoeheAvier}{845.04684pt}
+\newif\ifalgpreprint@AbweichungAfuenf\algpreprint@AbweichungAfuenffalse%
+\newif\ifalgpreprint@AbweichungAvier\algpreprint@AbweichungAvierfalse%
+%
+\setlength{\algpreprint@differenzbreite}{\paperwidth-\algpreprint@breiteAfuenf}
+\setlength{\algpreprint@differenzhoehe}{\paperheight-\algpreprint@hoeheAfuenf}
+\ifdim\algpreprint@differenzhoehe>\the\algpreprint@lengthepsilontolerance%
+  {}\algpreprint@AbweichungAfuenftrue%
+%   \typeout{height > A5}
+\fi%
+\ifdim\algpreprint@differenzhoehe<-\the\algpreprint@lengthepsilontolerance%
+  {}\algpreprint@AbweichungAfuenftrue%
+%   \typeout{height < A5}
+\fi%
+\ifdim\algpreprint@differenzbreite>\the\algpreprint@lengthepsilontolerance%
+  {}\algpreprint@AbweichungAfuenftrue%
+%   \typeout{width > A5}
+\fi%
+\ifdim\algpreprint@differenzbreite<-\the\algpreprint@lengthepsilontolerance%
+  {}\algpreprint@AbweichungAfuenftrue%
+%   \typeout{width < A5}
+\fi%
+%
+\setlength{\algpreprint@differenzbreite}{\paperwidth-\algpreprint@breiteAvier}
+\setlength{\algpreprint@differenzhoehe}{\paperheight-\algpreprint@hoeheAvier}
+\ifdim\algpreprint@differenzhoehe>\the\algpreprint@lengthepsilontolerance
+  {}\algpreprint@AbweichungAviertrue%
+%   \typeout{height > A4}
+\fi
+\ifdim\algpreprint@differenzhoehe<-\the\algpreprint@lengthepsilontolerance
+  {}\algpreprint@AbweichungAviertrue%
+%   \typeout{height < A4}
+\fi
+\ifdim\algpreprint@differenzbreite>\the\algpreprint@lengthepsilontolerance%
+  {}\algpreprint@AbweichungAviertrue%
+%   \typeout{width > A4}
+\fi%
+\ifdim\algpreprint@differenzbreite<-\the\algpreprint@lengthepsilontolerance%
+  {}\algpreprint@AbweichungAviertrue%
+%   \typeout{width < A4}
+\fi%
+
+\ifalgpreprint@AbweichungAfuenf%
+  \ifalgpreprint@AbweichungAvier%
+    % Abweichung von beiden.
+    \PackageError{algpreprint}%
+                 {Your page dimensions do neither match a4 nor a5 within a tolerance of \the\algpreprint@lengthepsilontolerance}%
+                 {Try to use the a4paper or a5paper option of your documentclass, if it does not have one, good luck.}%
+    \typeout{(algpreprint)  paperheight = \the\paperheight, I expected about \the\algpreprint@hoeheAvier\space (A4) or \the\algpreprint@hoeheAfuenf\space (A5)}
+    \typeout{(algpreprint)  paperwidth = \the\paperwidth, I expected about \the\algpreprint@breiteAvier\space (A4) or \the\algpreprint@breiteAfuenf\space (A5)}
+    \ifalgpreprint@landscapeoptiondetected%
+      \typeout{(algpreprint)  Maybe you should try to remove the global landscape option of your documentclass?}
+    \fi
+  \else
+    %A4 Hochformat    
+    \typeout{Package algpreprint Info: A4 paper detected.}
+    \global\algpreprint@afourpaperdetectedtrue
+    \ifalgpreprint@Afiveoptiondetected%
+      {}\PackageWarning{algpreprint}{Warning: Page dimensions are A4, but option a5paper found}%
+      \typeout{(algpreprint)  Use the option a4paper for your documentclass to get rid of this warning.}%
+      \typeout{(algpreprint)  If it does not have one, use another documentclass.}%
+    \fi
+  \fi
+\else
+  %A5 Hochformat
+  \typeout{Package algpreprint Info: A5 paper detected.}
+  \ifalgpreprint@Afouroptiondetected%
+    {}\PackageWarning{algpreprint}{Warning: Page dimensions are A5, but option a4paper found}
+    \typeout{(algpreprint)  Use the option a5paper for your documentclass to get rid of this warning.}
+    \typeout{(algpreprint)  If it does not have one, use another documentclass.}%
+  \fi
+\fi
+\egroup% %end of scope for local definitions
+%
+%
+%
+%
+%
+\newcommand{\Deckblatt}{%
+  \savegeometry{usergeometry}%
+  \bgroup% %keep length changes and definitions local
+  \setlength{\parindent}{0pt}%
+  \setlength{\parindent}{0pt}%
+  \newlength{\algpreprint@Xunit}%
+  \setlength{\algpreprint@Xunit}{0.01\paperwidth}%
+  \newlength{\algpreprint@Yunit}%
+  \setlength{\algpreprint@Yunit}{0.01\paperheight}%  
+  \ifalgpreprint@afourpaperdetected%
+    \def\algpreprint@pagefactor{1.41421356237}%    %sqrt(2)
+  \else%
+    \def\algpreprint@pagefactor{1}%
+  \fi%
+  \newgeometry{left=20.27027\algpreprint@Xunit,% %=3.0cm 
+               right=8.10809\algpreprint@Xunit,%
+               top=6.19049\algpreprint@Yunit,%
+               bottom=11.90476\algpreprint@Yunit,%
+               voffset=\algpreprint@pagefactor\algpreprint@voffset,%
+               hoffset=\algpreprint@pagefactor\algpreprint@hoffset}%
+  \thispagestyle{empty}%
+  \ifalgpreprint@tudfonts%
+    \def\algpreprint@logofontfamily{aun}%
+    \def\rmdefault{aun}%
+    \def\algpreprint@footerfontfamily{din}%
+  \else%
+    \def\algpreprint@logofontfamily{cmss}%
+    \def\rmdefault{cmr}%
+    \def\algpreprint@footerfontfamily{cmss}%
+  \fi%
+  \ifalgpreprint@afourpaperdetected%
+    \setlength\footnotesep{9.82\p@}%
+    \setlength{\skip\footins}{12.73\p@ \@plus 4\p@ \@minus 2\p@}%
+    \setlength\footskip{30\p@}%
+    \def\algpreprint@choosenormalsizebutdonotselect{\fontsize{14.14pt}{16.97pt}}
+    \renewcommand{\footnotesize}{\fontsize{11.31pt}{13.576pt}\selectfont}
+    \renewcommand{\large}{\fontsize{16.97pt}{20.36pt}\selectfont}
+  \else% %default = a5
+    %-- copied from tex/latex/base/size10.clo
+    \setlength\footnotesep{6.65\p@}%
+    \setlength{\skip\footins}{9\p@ \@plus 4\p@ \@minus 2\p@}%
+    \setlength\footskip{30\p@}%
+    %-- end of copy
+    \def\algpreprint@choosenormalsizebutdonotselect{\fontsize{10pt}{12pt}}
+    \renewcommand{\footnotesize}{\fontsize{8pt}{9.6pt}\selectfont}
+    \renewcommand{\large}{\fontsize{12pt}{14.4pt}\selectfont}
+  \fi
+  \renewcommand{\normalsize}{\algpreprint@choosenormalsizebutdonotselect\selectfont}
+  \algpreprint@choosenormalsizebutdonotselect%
+  \usefont{\encodingdefault}{\rmdefault}{m}{n}%
+  \ifalgpreprint@noheader%
+    \vspace*{9.673513\algpreprint@Yunit}% =57.8pt
+  \else% use the TU-Logo
+    %----------- TU-Logo ------------------
+    \hspace*{-12.83780\algpreprint@Xunit}\parbox{12.83780\algpreprint@Xunit+\linewidth}{\includegraphics[width=38.51349\algpreprint@Xunit]{TU_Logo_SW}%
+    \vspace*{2.85717\algpreprint@Yunit}%
+    \hrule%
+    \hspace*{12.83780\algpreprint@Xunit}{\algpreprint@choosenormalsizebutdonotselect\usefont{\encodingdefault}{\algpreprint@logofontfamily}{m}{n}www.tu-dresden.de\rule[-0.41687\algpreprint@Yunit]{0pt}{2.21359\algpreprint@Yunit}}%
+    \hrule%
+    }\\%
+  \fi
+  %----- end of parbox for TU-logo ------
+  %
+  \ifalgpreprint@offsetmessung%
+  \bgroup%
+    \hbadness=0%10000
+    \makebox[0pt]{\makebox[146.146091\algpreprint@Xunit][r]{\raisebox{13.39524\algpreprint@Yunit}[0pt][0pt]{\fbox{\parbox[t]{0.58\linewidth}{%
+    \fontsize{6.65pt}{7.98pt}\usefont{\encodingdefault}{cmr}{m}{n}%
+     Dieser Text sollte 1cm Abstand von beiden Rändern, oben und rechts, besitzen. Messen Sie die tatsächlichen Abstände auf diesem Ausdruck!
+     Sei $r$ der Abstand zum rechten und $o$ der Abstand zum oberen Rand. Die Werte für Hoffset und Voffset ergeben sich dann zu
+     \[{\rm Hoffset} = r - 1\, {\rm cm,}\]
+     \[{\rm Voffset} = 1\, {\rm cm} - o.\]}}}}}%
+  \egroup%
+  \fi%
+  \parbox[t][11.11974\algpreprint@Yunit][t]{\linewidth}{\vskip 1.50626\algpreprint@Yunit%
+                                                        \hfill{\footnotesize\strut\ifalgpreprint@Manuskriptnotiz\algpreprint@Manuskript\fi}}\\%
+  \hspace*{-0.675676\algpreprint@Xunit}%
+  \parbox[t][16.66667\algpreprint@Yunit][t]{62.16214\algpreprint@Xunit}{\footnotesize\centering Technische Universit{\"a}t Dresden\\Herausgeber: Der Rektor}\\%
+  \hspace*{-0.675676\algpreprint@Xunit}%
+  \parbox[t][25.23811\algpreprint@Yunit][c]{62.16214\algpreprint@Xunit}{%Titel etc.
+    \normalsize%
+    ~\par
+    \vfill
+    {%
+    \centering
+    {\large\textbf{\algpreprint@Titel\ifalgpreprint@FussnoteZumTitel\footnotemark[1]\fi}}  
+    \vfill\vfill%
+    \textsc{\normalsize\algpreprint@Autor}\\
+    \vfill\vfill%
+    }%
+    {\footnotesize\hspace*{2em}\algpreprint@Nummer \hfill \algpreprint@Monat\hspace*{2em}}%
+    ~\par
+  }\\
+  \ifalgpreprint@nofooter\else%
+    \raisebox{-16.09524\algpreprint@Yunit}[0pt][0pt]{\parbox[t]{\linewidth}{\hrule\vskip 1.285714\algpreprint@Yunit%
+                                                                            \ifalgpreprint@afourpaperdetected%
+                                                                              \scalebox{1.178419}{%
+                                                                                \fontsize{35.8272pt}{42.996pt}%
+                                                                                \usefont{\encodingdefault}{\algpreprint@footerfontfamily}{b}{n}%
+                                                                                \algpreprint@PreprintName}%
+                                                                            \else%
+                                                                              \fontsize{29.856pt}{35.8272pt}%
+                                                                              \usefont{\encodingdefault}{\algpreprint@footerfontfamily}{b}{n}%
+                                                                              \algpreprint@PreprintName%
+                                                                            \fi}}%
+  \fi                                                                          
+  \ifalgpreprint@FussnoteZumTitel\footnotetext[1]{\algpreprint@TitelFussnote}\fi%
+  \algpreprint@additionalCommands%
+  \renewcommand{\thepage}{}% % suppress page numbering in the standard classes on void pages
+  \clearpage~\cleardoublepage% % We enforce a free page, even if "oneside" was chosen as an option
+  \thispagestyle{empty}%
+  \egroup% % end of local changes
+  \ifalgpreprint@offsetmessung%
+    \end{document}%
+  \else%
+    \setcounter{page}{1}%
+    \loadgeometry{usergeometry}%
+  \fi%
+}%end of Deckblatt
+}%end of AtBeginDocument
+%
+\endinput
