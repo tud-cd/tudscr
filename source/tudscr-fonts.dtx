@@ -1,4 +1,4 @@
-% \CheckSum{1301}
+% \CheckSum{1303}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-fonts.dtx}[%
-  2015/06/02 v2.04 TUD-KOMA-Script\space%
+  2015/06/11 v2.04 TUD-KOMA-Script\space%
 %</driver>
 %<package&identify>\NeedsTeXFormat{LaTeX2e}
 %<package&identify>\ProvidesPackage{%
@@ -615,6 +615,8 @@
 % \end{macro}^^A \univln
 % \begin{macro}{\cdfont}
 % \changes{v2.04}{2015/03/04}{neu}^^A
+% \begin{macro}{\tudfont}
+% \changes{v2.04}{2015/04/24}{\cls{tudmathposter} wird unterstützt}^^A
 % \begin{macro}{\textcdfont}
 % \changes{v2.04}{2015/03/04}{neu}^^A
 % \begin{macro}{\@cdfont}
@@ -636,6 +638,7 @@
     \ifstr{\@tempc}{dinbn}{\dinbn}{\@nameuse{univ\@tempc}}%
   \fi%
 }
+\providecommand*\tudfont[1]{\cdfont{#1}}
 \newcommand*\textcdfont[2]{%
   \@cdfont{#1}%
   \ifx\@tempc\relax\else%
@@ -698,6 +701,7 @@
 % \end{macro}^^A \tud@trimfontname
 % \end{macro}^^A \@cdfont
 % \end{macro}^^A \textcdfont
+% \end{macro}^^A \tudfont
 % \end{macro}^^A \cdfont
 % \begin{macro}{\tud@font@math@init}
 % \changes{v2.04}{2014/03/10}{neu}^^A
@@ -1161,9 +1165,7 @@
 %    \begin{macrocode}
 \DefineFamilyMember{KOMA}
 \DefineFamilyKey{KOMA}{fontsize}{%
-  \AtEndOfFamilyOptions{%
-    \tud@ifverlower{2.04}{}{\if@atdocument\tud@font@skip@set\fi}%
-  }%
+  \AtEndOfFamilyOptions{\if@atdocument\tud@font@skip@set\fi}%
   \FamilyKeyStateProcessed%
 }
 %    \end{macrocode}
@@ -1375,10 +1377,11 @@
     \edef\mddef@ult{\mddefault}%
   \fi%
 %    \end{macrocode}
-% Zum Ende wird die gewählte Standardschrift aktiviert Danach erfolgt die 
-% Behandlung der Mathematikschriften. Zum Schluss wird das Layout erneuert.
+% Zum Ende werden einige Abstände abhängig von der gewählten Schriftgröße 
+% definiert. Danach erfolgt die Behandlung der Mathematikschriften und die 
+% gewählte Standardschrift aktiviert. Zum Schluss wird das Layout erneuert.
 %    \begin{macrocode}
-  \tud@ifverlower{2.04}{}{\tud@font@skip@set}%
+  \tud@font@skip@set%
   \ifstr{#1}{nomath}{}{\tud@font@math@set}%
   \normalfont\selectfont%
 %<*class>
@@ -1423,22 +1426,24 @@
 % Es werden die Standardeinstellungen abhängig von \opt{cdfont} entweder 
 % wiederhergestellt oder gesichert und neu definiert.
 %    \begin{macrocode}
-  \ifcase\tud@cdfont\relax% false
-    \tud@skip@restore{smallskipamount}%
-    \tud@skip@restore{medskipamount}%
-    \tud@skip@restore{bigskipamount}%
-    \tud@skip@restore{abovecaptionskip}%
-    \tud@skip@restore{belowcaptionskip}%
-    \tud@skip@restore{columnsep}%
-  \else% true/heavy
-    \tud@skip@store{smallskipamount}%
-    \tud@skip@store{medskipamount}%
-    \tud@skip@store{bigskipamount}%
-    \tud@skip@store{abovecaptionskip}%
-    \tud@skip@store{belowcaptionskip}%
-    \tud@skip@store{columnsep}%
-    \tud@font@skip@@set%
-  \fi%
+  \tud@ifverlower{2.04}{}{%
+    \ifcase\tud@cdfont\relax% false
+      \tud@skip@restore{smallskipamount}%
+      \tud@skip@restore{medskipamount}%
+      \tud@skip@restore{bigskipamount}%
+      \tud@skip@restore{abovecaptionskip}%
+      \tud@skip@restore{belowcaptionskip}%
+      \tud@skip@restore{columnsep}%
+    \else% true/heavy
+      \tud@skip@store{smallskipamount}%
+      \tud@skip@store{medskipamount}%
+      \tud@skip@store{bigskipamount}%
+      \tud@skip@store{abovecaptionskip}%
+      \tud@skip@store{belowcaptionskip}%
+      \tud@skip@store{columnsep}%
+      \tud@font@skip@@set%
+    \fi%
+  }%
 }
 %    \end{macrocode}
 % Hiermit erfolgt das eigentliche Setzen der Abstände.
