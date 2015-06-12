@@ -53,6 +53,11 @@ Das Bundle beinhaltet:
 Versionen
 ---------
 
+**v2.03a** (2015/06/11)
+
++ Anpassungen an KOMA-Script v3.17
++ Fehlerkorrektur für Auswahl der Mathematikschriften
+
 
 **v2.03** (2015/02/15)
 
@@ -153,6 +158,11 @@ The bundle offers:
 Versions
 --------
 
+**v2.03a** (2015/06/11)
+
++ adjustments to KOMA-Script v3.17
++ bug fix for math font selecting
+
 
 **v2.03** (2015/02/15)
 
@@ -160,7 +170,7 @@ Versions
 + improvement of the corporate design type area
 + colored head and foot possible
 + including logos in the foot for the title etc.
-+ a few little bux fixes
++ a few little bug fixes
 
 
 **v2.02** (2014/12/17)
