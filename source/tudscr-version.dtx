@@ -1,4 +1,4 @@
-% \CheckSum{101}
+% \CheckSum{99}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -115,7 +115,7 @@
 %<*!(package|class)>
   \fi%
 %</!(package|class)>
-  \@TUDVersion{2015/06/02 v2.04 BETA TUD-KOMA-Script}%
+  \@TUDVersion{2015/06/12 v2.04 BETA TUD-KOMA-Script}%
 \endgroup%
 %    \end{macrocode}
 % \end{macro}^^A \@TUDVersion
@@ -153,63 +153,83 @@
 %<*class>
 % \fi
 %
-% \begin{macro}{\cls@name}
-% \begin{macro}{\scrcls@name}
-% \begin{macro}{\tudcls@name}
+% \begin{macro}{\TUDClassName@Set}
+% \begin{macro}{\TUDClassName}
+% \begin{macro}{\TUDClassName@Parent}
+% \begin{macro}{\TUDClassName@KOMA}
 % Für die \TUDScript-Klassen werden hier einmalig die Namen der jeweiligen
-% Klassen definiert.
+% Klassen definiert. Hierfür wird \cs{TUDClassName@Set} definiert. Dieses Makro 
+% setzt die entsprechenden Klassennamen. Dabei können innerhalb von \TUDScript 
+% mit dem optionalen Argument auch Wrapper-Klassen definiert werden.
+%    \begin{macrocode}
+\providecommand*\TUDClassName@Set[3][]{%
+  \ifx\relax#1\relax%
+    \@ifundefined{TUDClassName@Parent}{%
+      \newcommand*\TUDClassName{#2}%
+      \newcommand*\TUDClassName@KOMA{#3}%
+    }{}%
+  \else%
+      \newcommand*\TUDClassName{#2}%
+      \newcommand*\TUDClassName@Parent{#1}%
+      \newcommand*\TUDClassName@KOMA{#3}%
+  \fi%
+}
+%    \end{macrocode}
+% Hier erfolgt die eigentliche Zuweisung der Klassennamen.
 %    \begin{macrocode}
 %<*article>
-\newcommand*\cls@name{article}
-\newcommand*\scrcls@name{scrartcl}
-\newcommand*\tudcls@name{tudscrartcl}
+\TUDClassName@Set{tudscrartcl}{scrartcl}
 %</article>
 %<*report>
-\newcommand*\cls@name{report}
-\newcommand*\scrcls@name{scrreprt}
-\newcommand*\tudcls@name{tudscrreprt}
+\TUDClassName@Set{tudscrreprt}{scrreprt}
 %</report>
 %<*book>
-\newcommand*\cls@name{book}
-\newcommand*\scrcls@name{scrbook}
-\newcommand*\tudcls@name{tudscrbook}
+\TUDClassName@Set{tudscrbook}{scrbook}
 %</book>
 %<*doc>
-\newcommand*\cls@name{doc}
-\newcommand*\scrcls@name{scrdoc}
-\newcommand*\tudcls@name{tudscrdoc}
+\TUDClassName@Set{tudscrdoc}{scrdoc}
 %</doc>
-%<*inherit>
-\newcommand*\tudinh@name{tudscrreprt}
-%</inherit>
+%<*poster>
+\TUDClassName@Set[tudscrartcl]{tudscrposter}{scrartcl}
+%</poster>
+%<*manual>
+\TUDClassName@Set[tudscrreprt]{tudscrman}{scrreprt}
+%</manual>
 %    \end{macrocode}
-% \end{macro}^^A \tudcls@name
-% \end{macro}^^A \scrcls@name
-% \end{macro}^^A \cls@name
+% \end{macro}^^A \TUDClassName@KOMA
+% \end{macro}^^A \TUDClassName@Parent
+% \end{macro}^^A \TUDClassName
+% \end{macro}^^A \TUDClassName@Set
+%
 % Der Quelltext für das Bereitstellen der Klassen. Es wird als Basis die
 % korrespondierende \KOMAScript-Klasse geladen.
 %    \begin{macrocode}
-%<*article|book|report>
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{\tudcls@name}[%
+\ProvidesClass{\TUDClassName}[%
 %!TUDVersion
-  document class (\cls@name)%
+%<book>  document class (book)%
+%<report>  document class (report)%
+%<article>  document class (article)%
+%<poster>  poster class%
+%<manual>  internal manual class%
+%<doc>  internal source code documentation class%
 ]
 %    \end{macrocode}
 % Beim Verwenden der Klassen wird in der log-Datei ein Vermerk mit \cs{typeout} 
 % erstellt.
 %    \begin{macrocode}
+%<*book|report|article>
 \typeout{The Corporate Design of Technische Universitaet Dresden}
-\typeout{Class: \tudcls@name}
+\typeout{Class: \TUDClassName}
 \typeout{Version: \TUDVersion}
 \typeout{Author: Falk Hanisch (\tudscrmail)}
 \typeout{http://latex.wcms-file3.tu-dresden.de/phpBB3/index.php}
-%</article|book|report>
+%</book|report|article>
 %    \end{macrocode}
 %
 % \iffalse
 %</class>
-%<*package&tudscr>
+%<*package&(supervisor|comp|manual)>
 % \fi
 %
 % \subsection{Verwendbarkeit von \TUDScript-Paketen}
@@ -217,22 +237,21 @@
 % Einige Pakete sind nur mit den \TUDScript-Klassen verwendbar. Diese erzeugen 
 % einen Fehler, wenn sie nicht mit diesen verwendet werden.
 %    \begin{macrocode}
-\@ifundefined{tudcls@name}{%
+\@ifundefined{TUDClassName}{%
   \PackageError{%
+%<supervisor>    tudscrsupervisor%
 %<comp>    tudscrcomp%
 %<manual>    tudscrman%
-%<supervisor>    tudscrsupervisor%
-%<poster>    tudscrposter%
   }{Unsupported class found}{%
     This package can only be used with a class out of the\MessageBreak%
-    tudscr bundle (tudscrartcl, tudscrreprt, tudscrbook).%
+    tudscr bundle (tudscrbook, tudscrreprt, tudscrartcl).%
   }
   \endinput
 }{}
 %    \end{macrocode}
 %
 % \iffalse
-%</package&tudscr>
+%</package&(supervisor|comp|manual)>
 % \fi
 %
 % \subsection{Das \TUDScript-Logo}
