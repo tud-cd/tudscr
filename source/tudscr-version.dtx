@@ -1,4 +1,4 @@
-% \CheckSum{98}
+% \CheckSum{100}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -114,7 +114,7 @@
 %<*!(package|class)>
   \fi%
 %</!(package|class)>
-  \@TUDVersion{2015/06/12 v2.04 BETA TUD-KOMA-Script}%
+  \@TUDVersion{2015/06/13 v2.04 BETA TUD-KOMA-Script}%
 \endgroup%
 %    \end{macrocode}
 % \ToDo{Version eintragen}[Release]
@@ -154,83 +154,86 @@
 %<*class>
 % \fi
 %
-% \begin{macro}{\@TUDClassName}
-% \changes{v2.04}{2015/06/12}{neu}^^A
+% \begin{macro}{\TUD@ProvidesClass}
+% \changes{v2.04}{2015/06/13}{neu}^^A
+% \begin{macro}{\TUD@ProvidesWrapperClass}
+% \changes{v2.04}{2015/06/13}{neu}^^A
 % \begin{macro}{\TUDClassName}
 % \changes{v2.04}{2015/06/12}{neu}^^A
 % \begin{macro}{\TUDClassName@Parent}
 % \changes{v2.04}{2015/06/12}{neu}^^A
 % \begin{macro}{\TUDClassName@KOMA}
 % \changes{v2.04}{2015/06/12}{neu}^^A
-% Für die \TUDScript-Klassen werden hier einmalig die Namen der jeweiligen
-% Klassen definiert. Hierfür wird \cs{@TUDClassName} definiert. Dieses Makro 
-% setzt die entsprechenden Klassennamen. Dabei können innerhalb von \TUDScript 
-% mit dem optionalen Argument auch Wrapper-Klassen definiert werden.
+% \begin{macro}{\TUD@ClassInfo}
+% \changes{v2.04}{2015/06/13}{neu}^^A
+% Mit diesen Befehlen erfolgt die Versionsangabe der \TUDScript-Klassen beim
+% Laden. Dabei werden hier einmalig die Namen der jeweiligen Klassen definiert. 
+% Hierfür werden die Befehle \cs{TUD@ProvidesClass} für die Hauptklassen und 
+% \cs{TUD@ProvidesWrapperClass} für auf diesen aufbauende Wrapper-Klassen 
+% genutzt. Das erste Argument ist die zu definierende Klasse, das zweite 
+% Argument entspricht der Basis-Klasse. Das dritte Argument enthält eine kurze 
+% Beschreibung.
 %    \begin{macrocode}
-\providecommand*\@TUDClassName[3][]{%
-  \ifx\relax#1\relax%
-    \@ifundefined{TUDClassName@Parent}{%
-      \newcommand*\TUDClassName{#2}%
-      \newcommand*\TUDClassName@KOMA{#3}%
-    }{}%
-  \else%
-      \newcommand*\TUDClassName{#2}%
-      \newcommand*\TUDClassName@Parent{#1}%
-      \newcommand*\TUDClassName@KOMA{#3}%
-  \fi%
-}
-%    \end{macrocode}
-% Hier erfolgt die eigentliche Zuweisung der Klassennamen.
-%    \begin{macrocode}
-%<*article>
-\@TUDClassName{tudscrartcl}{scrartcl}
-%</article>
-%<*report>
-\@TUDClassName{tudscrreprt}{scrreprt}
-%</report>
-%<*book>
-\@TUDClassName{tudscrbook}{scrbook}
-%</book>
-%<*doc>
-\@TUDClassName{tudscrdoc}{scrdoc}
-%</doc>
-%<*poster>
-\@TUDClassName[tudscrartcl]{tudscrposter}{scrartcl}
-%</poster>
-%<*manual>
-\@TUDClassName[tudscrreprt]{tudscrman}{scrreprt}
-%</manual>
-%    \end{macrocode}
-% \end{macro}^^A \TUDClassName@KOMA
-% \end{macro}^^A \TUDClassName@Parent
-% \end{macro}^^A \TUDClassName
-% \end{macro}^^A \@TUDClassName
-%
-% Der Quelltext für das Bereitstellen der Klassen. Es wird als Basis die
-% korrespondierende \KOMAScript-Klasse geladen.
-%    \begin{macrocode}
-\NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{\TUDClassName}[%
+%<*book|report|article|doc>
+\newcommand*\TUD@ProvidesClass[3]{%
+  \newcommand*\TUDClassName@KOMA{#2}%
+  \@ifundefined{TUDClassName@Parent}{\newcommand*\TUDClassName{#1}}{}%
+  \ProvidesClass{#1}[%
 %!TUDVersion
-%<book>  document class (book)%
-%<report>  document class (report)%
-%<article>  document class (article)%
-%<poster>  poster class%
-%<manual>  internal manual class%
-%<doc>  internal source code documentation class%
-]
+    ^^J#3 (#2)%
+  ]%
+  \@ifundefined{TUDClassName@Parent}{\TUD@ClassInfo}{}%
+}
+%</book|report|article|doc>
+%<*poster|manual>
+\newcommand*\TUD@ProvidesWrapperClass[3]{%
+  \newcommand*\TUDClassName@Parent{#2}%
+  \newcommand*\TUDClassName{#1}%
+  \ProvidesClass{#1}[%
+%!TUDVersion
+    ^^J#3 (#2)%
+  ]%
+  \TUD@ClassInfo%
+}
+%</poster|manual>
 %    \end{macrocode}
 % Beim Verwenden der Klassen wird in der log-Datei ein Vermerk mit \cs{typeout} 
 % erstellt.
 %    \begin{macrocode}
-%<*book|report|article>
-\typeout{The Corporate Design of Technische Universitaet Dresden}
-\typeout{Class: \TUDClassName}
-\typeout{Version: \TUDVersion}
-\typeout{Author: Falk Hanisch (\tudscrmail)}
-\typeout{http://latex.wcms-file3.tu-dresden.de/phpBB3/index.php}
-%</book|report|article>
+\providecommand*\TUD@ClassInfo{%
+  \typeout{+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++}
+  \typeout{ The Corporate Design of Technische Universitaet Dresden}
+  \typeout{ Class: \TUDClassName}
+  \typeout{ Version: \TUDVersion}
+  \typeout{ Author: Falk Hanisch (\tudscrmail)}
+  \typeout{ Forum: http://latex.wcms-file3.tu-dresden.de/phpBB3/index.php}
+  \typeout{+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++}
+}
 %    \end{macrocode}
+% Hier erfolgt die Indentifizierung und die Zuweisung der Klassennamen.
+%    \begin{macrocode}
+\NeedsTeXFormat{LaTeX2e}
+%<book>\TUD@ProvidesClass{tudscrbook}{scrbook}{document class}
+%<report>\TUD@ProvidesClass{tudscrreprt}{scrreprt}{document class}
+%<article>\TUD@ProvidesClass{tudscrartcl}{scrartcl}{document class}
+%<*doc>
+\TUD@ProvidesClass{tudscrdoc}{scrdoc}{%
+  internal source code documentation class%
+}
+%</doc>
+%<poster>\TUD@ProvidesWrapperClass{tudscrposter}{tudscrartcl}{poster class}
+%<*manual>
+\TUD@ProvidesWrapperClass{tudscrman}{tudscrreprt}{%
+  internal manual class%
+}
+%</manual>
+%    \end{macrocode}
+% \end{macro}^^A \TUD@ClassInfo
+% \end{macro}^^A \TUDClassName@KOMA
+% \end{macro}^^A \TUDClassName@Parent
+% \end{macro}^^A \TUDClassName
+% \end{macro}^^A \TUD@ProvidesWrapperClass
+% \end{macro}^^A \TUD@ProvidesClass
 %
 % \iffalse
 %</class>
