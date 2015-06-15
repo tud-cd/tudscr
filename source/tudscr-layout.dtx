@@ -1,4 +1,4 @@
-% \CheckSum{1096}
+% \CheckSum{1230}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-layout.dtx}[%
-  2015/06/12 v2.04 TUD-KOMA-Script (layout)%
+  2015/06/15 v2.04 TUD-KOMA-Script (layout)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -670,11 +670,13 @@
 % \changes{v2.02}{2014/08/24}{entfernt}^^A
 % Es wird das Schriftelement für die Option \opt{parttitle} erstellt.
 %    \begin{macrocode}
+%<*book|report>
 \newkomafont{parttitle}{%
   \tud@font@heading%
   \tud@color{\tud@part@fontcolor}%
   \usesizeofkomafont{section}%
 }
+%</book|report>
 %    \end{macrocode}
 % \end{macro}^^A \tud@font@chapter
 % \end{macro}^^A \tud@font@part@title
@@ -785,6 +787,7 @@
   \fi%
 %    \end{macrocode}
 % Das gleiche für die Teileseiten.
+% \ToDo{Reimplementierung mit \cs{DeclareSectionCommand}}[v2.05]
 %    \begin{macrocode}
   \ifcase\tud@layout@part\relax% false
     \tud@cmd@restore{partheadstartvskip}%
@@ -793,14 +796,22 @@
     \tud@cmd@restore{partheademptypage}%
     \tud@cmd@restore{partpagestyle}%
 %</book|report>
-    \tud@cmd@restore{@part}%
+    \ifcsdef{scr@v@3.18}{%
+      \tud@cmd@restore{scr@@startpart}%
 %<*book|report>
-    \tud@cmd@restore{@spart}%
+      \tud@cmd@restore{scr@@startspart}%
 %</book|report>
+    }{%
+      \tud@cmd@restore{@part}%
+%<*book|report>
+      \tud@cmd@restore{@spart}%
+%</book|report>
+    }%
     \tud@sectioning@reset[addpart]{part}%
     \tud@font@koma@unset{partnumber}%
 %    \end{macrocode}
 % Es werden die Standardbefehle gesichert und für das \CD angepasst.
+% \ToDo{Reimplementierung mit \cs{DeclareSectionCommand}}[v2.05]
 %    \begin{macrocode}
   \else% !false
     \tud@cmd@store{partheadstartvskip}%
@@ -809,10 +820,17 @@
     \tud@cmd@store{partheademptypage}%
     \tud@cmd@store{partpagestyle}%
 %</book|report>
-    \tud@cmd@store{@part}%
+    \ifcsdef{scr@v@3.18}{%
+      \tud@cmd@store{scr@@startpart}%
 %<*book|report>
-    \tud@cmd@store{@spart}%
+      \tud@cmd@store{scr@@startspart}%
 %</book|report>
+    }{%
+      \tud@cmd@store{@part}%
+%<*book|report>
+      \tud@cmd@store{@spart}%
+%</book|report>
+    }%
 %    \end{macrocode}
 % Es wird die Schriftfarbe, "~größe und "~art angepasst, je nachdem ob der
 % Titel des Dokumentes auf den Teileseiten auftauchen soll oder eben nicht.
@@ -843,6 +861,7 @@
 % die Originaldefinition zurückschalten zu können, wird so verfahren. Die
 % angepassten Befehle selbst und die dazugehörige Beschreibung sind etwas
 % weiter unten im Quelltext zu finden.
+% \ToDo{Reimplementierung mit \cs{DeclareSectionCommand}}[v2.05]
 %    \begin{macrocode}
     \let\partheadstartvskip\tud@partheadstartvskip%
 %<*book|report>
@@ -850,10 +869,17 @@
     \let\partheademptypage\relax%
     \renewcommand*\partpagestyle{plain.tudheadings}%
 %</book|report>
-    \let\@part\tud@@part%
+    \ifcsdef{scr@v@3.18}{%
+      \let\scr@@startpart\tud@@startpart%
 %<*book|report>
-    \let\@spart\tud@@spart%
+      \let\scr@@startspart\tud@@startspart%
 %</book|report>
+    }{%
+      \let\@part\tud@@part%
+%<*book|report>
+      \let\@spart\tud@@spart%
+%</book|report>
+    }%
   \fi%
 %    \end{macrocode}
 % Die Einstellungen für die Kapitel bzw. die folgenden Gliederungsebenen. Auch
@@ -862,6 +888,7 @@
 % der Anteil für die Kapitel weg. Das Verhalten der nachgelagerten
 % Gliederungsebenen orientiert für diese Klasse an den Einstellungen für die
 % Teileseiten.
+% \ToDo{Reimplementierung mit \cs{DeclareSectionCommand}}[v2.05]
 %    \begin{macrocode}
 %<*article>
   \ifcase\tud@layout@part\relax% false
@@ -872,7 +899,11 @@
     \tud@cmd@restore{chapterformat}%
     \tud@cmd@restore{@chapter}%
     \tud@cmd@restore{@schapter}%
-    \tud@cmd@restore{@@makechapterhead}%
+    \ifcsdef{scr@v@3.18}{%
+      \tud@cmd@restore{scr@@makechapterhead}%
+    }{%
+      \tud@cmd@restore{@@makechapterhead}%
+    }%
     \tud@sectioning@reset[addchap]{chapter}%
     \tud@font@koma@unset{chapterprefix}%
 %</book|report>
@@ -883,6 +914,7 @@
 %    \end{macrocode}
 % Auch hier werden die Standardbefehle für ein mögliches Deaktivieren der
 % Optionen gesichert und anschließend geändert.
+% \ToDo{Reimplementierung mit \cs{DeclareSectionCommand}}[v2.05]
 %    \begin{macrocode}
   \else% !false
 %<*book|report>
@@ -890,7 +922,11 @@
     \tud@cmd@store{chapterformat}%
     \tud@cmd@store{@chapter}%
     \tud@cmd@store{@schapter}%
-    \tud@cmd@store{@@makechapterhead}%
+    \ifcsdef{scr@v@3.18}{%
+      \tud@cmd@store{scr@@makechapterhead}%
+    }{%
+      \tud@cmd@store{@@makechapterhead}%
+    }%
     \tud@sectioning@set[addchap]{chapter}{%
       \tud@font@heading%
       \tud@font@heading@size%
@@ -907,7 +943,11 @@
 %    \begin{macrocode}
 %<*book|report>
     \let\chapterheadstartvskip\tud@chapterheadstartvskip%
-    \let\@@makechapterhead\tud@@@makechapterhead%
+    \ifcsdef{scr@v@3.18}{%
+      \let\scr@@makechapterhead\tud@@@makechapterhead%
+    }{%
+      \let\@@makechapterhead\tud@@@makechapterhead%
+    }%
 %</book|report>
   \fi%
 }
@@ -1074,19 +1114,30 @@
 %</book|report>
 % \fi
 %
-% \begin{macro}{\tud@@part}
-% \changes{v2.03}{2015/01/21}{Korrektur bei der Position der Überschrift}^^A
-% \begin{macro}{\@part}
+% Für Teile ist zur Formatierung etwas Patcherei notwendig. Zuerst die Patches 
+% für für \KOMAScript~v3.18:
+% \ToDo{Reimplementierung mit \cs{DeclareSectionCommand}}[v2.05]
+%    \begin{macrocode}
+\@tempswafalse
+\ifcsdef{scr@v@3.18}{\@tempswatrue}{}%
+\if@tempswa
+%    \end{macrocode}
+%
+% \begin{macro}{\tud@@startpart}
+% \changes{v2.04}{2015/06/15}{\KOMAScript~v3.18}^^A
+% \begin{macro}{\scr@@startpart}
+% \changes{v2.04}{2015/06/15}{\KOMAScript~v3.18}^^A
 % Damit auch das Präfix der Teile in Majuskeln erscheint, wird dem Befehl
 % \cs{partformat}, welcher das Präfix enthält, für die \cls{tudscrartcl}-Klasse
-% der entsprechende Befehl vorangestellt.
+% der entsprechende Befehl vorangestellt. Die Patches 
 %    \begin{macrocode}
 %<*article>
-\let\tud@@part\@part
-\patchcmd{\tud@@part}%
-  {\size@partnumber{\partformat}}%
-  {\size@partnumber{\tud@makeuppercase{\partformat}}}%
-  {}{\tud@patch@wrn{@part}}%
+  \newcommand*\tud@@startpart{}%
+  \let\tud@@startpart\scr@@startpart%
+  \patchcmd{\tud@@startpart}%
+    {\usekomafont{#1prefix}{\@nameuse{#1format}}}%
+    {\usekomafont{#1prefix}{\tud@makeuppercase{\@nameuse{#1format}}}}%
+    {}{\tud@patch@wrn{scr@@startpart}}%
 %</article>
 %    \end{macrocode}
 % Für \cls{tudscrbook}- und \cls{tudscrreprt}-Klasse ist etwas mehr Arbeit
@@ -1095,58 +1146,134 @@
 % Position steht.
 %    \begin{macrocode}
 %<*book|report>
-\let\tud@@part\@part
-\patchcmd{\tud@@part}{%
-  \ifnumbered{part}{%
-    \size@partnumber{\partformat}%
-    \setlength{\@tempskipa}{\scr@part@innerskip}%
-    \partheadmidvskip%
-  }{}%
-}{%
-  \ifnumbered{part}{%
-    \size@partnumber{\tud@makeuppercase{\partformat}}%
-    \if@tud@parttitle%
-      \enskip%
-    \else%
-      \tud@headmidvskip%
-    \fi%
+  \newcommand*\tud@@startpart{}%
+  \let\tud@@startpart\scr@@startpart%
+  \patchcmd{\tud@@startpart}{%
+    \ifnumbered{#1}{%
+      \usekomafont{#1prefix}{\@nameuse{#1format}}%
+      \setlength{\@tempskipa}{\@nameuse{scr@#1@innerskip}}%
+      \partheadmidvskip
+    }{}%
   }{%
+    \ifnumbered{#1}{%
+      \usekomafont{#1prefix}{\tud@makeuppercase{\@nameuse{#1format}}}%
+      \if@tud@parttitle%
+        \enskip%
+      \else%
+        \tud@headmidvskip%
+      \fi%
+    }{%
+      \if@tud@parttitle\else%
+        \usekomafont{#1prefix}{\vphantom{\partname}}%
+        \tud@headmidvskip%
+      \fi%
+    }%
+  }{}{\tud@patch@wrn{scr@startpart}}%
+%</book|report>
+%    \end{macrocode}
+% \end{macro}^^A \scr@@startpart
+% \end{macro}^^A \tud@@startpart
+% \begin{macro}{\tud@@startspart}
+% \changes{v2.04}{2015/06/15}{\KOMAScript~v3.18}^^A
+% \begin{macro}{\scr@@startspart}
+% \changes{v2.04}{2015/06/15}{\KOMAScript~v3.18}^^A
+% Bei den Teile-Befehlen ohne Gliederungsnummerierung muss zusätzlich der
+% Freiraum vorgehalten werden, damit alle Überschriften auf der gleichen
+% vertikalen Position liegen.
+%    \begin{macrocode}
+%<*book|report>
+  \newcommand*\tud@@startspart{}%
+  \let\tud@@startspart\scr@@startspart%
+  \patchcmd{\tud@@startspart}{%
+    \normalfont
+    \sectfont\nobreak
+  }{%
+    \normalfont\sectfont\nobreak%
     \if@tud@parttitle\else%
       \size@partnumber{\vphantom{\partname}}%
-      \tud@headmidvskip%
+      \tud@headmidvskip\nobreak%
     \fi%
-  }%
-}{}{\tud@patch@wrn{@part}}%
+  }{}{\tud@patch@wrn{scr@@startspart}}%
+%</book|report>
+%    \end{macrocode}
+% \end{macro}^^A \scr@@startspart
+% \end{macro}^^A \tud@@startspart
+%
+% Und nun das Gleiche für \KOMAScript~v3.17:
+%    \begin{macrocode}
+\else
+%    \end{macrocode}
+% \begin{macro}{\tud@@part}
+% \changes{v2.03}{2015/01/21}{Korrektur bei der Position der Überschrift}^^A
+% \begin{macro}{\@part}
+%    \begin{macrocode}
+  \newcommand*\tud@@part{}%
+%<*article>
+  \let\tud@@part\@part
+  \patchcmd{\tud@@part}%
+    {\size@partnumber{\partformat}}%
+    {\size@partnumber{\tud@makeuppercase{\partformat}}}%
+    {}{\tud@patch@wrn{@part}}%
+%</article>
+%<*book|report>
+  \let\tud@@part\@part
+  \patchcmd{\tud@@part}{%
+    \ifnumbered{part}{%
+      \size@partnumber{\partformat}%
+      \setlength{\@tempskipa}{\scr@part@innerskip}%
+      \partheadmidvskip%
+    }{}%
+  }{%
+    \ifnumbered{part}{%
+      \size@partnumber{\tud@makeuppercase{\partformat}}%
+      \if@tud@parttitle%
+        \enskip%
+      \else%
+        \tud@headmidvskip%
+      \fi%
+    }{%
+      \if@tud@parttitle\else%
+        \size@partnumber{\vphantom{\partname}}%
+        \tud@headmidvskip%
+      \fi%
+    }%
+  }{}{\tud@patch@wrn{@part}}%
 %</book|report>
 %    \end{macrocode}
 % \end{macro}^^A \@part
 % \end{macro}^^A \tud@@part
+% \begin{macro}{\tud@@spart}
+% \begin{macro}{\@spart}
+%    \begin{macrocode}
+%<*book|report>
+  \newcommand*\tud@@spart{}%
+  \let\tud@@spart\@spart
+  \patchcmd{\tud@@spart}{%
+    \normalfont
+    \sectfont\nobreak\size@part
+  }{%
+    \normalfont\sectfont\nobreak%
+    \if@tud@parttitle\else%
+      \size@partnumber{\vphantom{\partname}}%
+      \tud@headmidvskip\nobreak%
+    \fi%
+    \size@part%
+  }{}{\tud@patch@wrn{@spart}}
+%</book|report>
+%    \end{macrocode}
+% \end{macro}^^A \@spart
+% \end{macro}^^A \tud@@spart
+%
+% Damit ist die Patcherei beendet.
+% \ToDo{Reimplementierung mit \cs{DeclareSectionCommand}}[v2.05]
+%    \begin{macrocode}
+\fi
+%    \end{macrocode}
 %
 % \iffalse
 %<*book|report>
 % \fi
 %
-% \begin{macro}{\tud@@spart}
-% \begin{macro}{\@spart}
-% Bei den Teile-Befehlen ohne Gliederungsnummerierung muss zusätzlich der
-% Freiraum vorgehalten werden, damit alle Überschriften auf der gleichen
-% vertikalen Position liegen.
-%    \begin{macrocode}
-\let\tud@@spart\@spart
-\patchcmd{\tud@@spart}{%
-  \normalfont
-  \sectfont\nobreak\size@part
-}{%
-  \normalfont\sectfont\nobreak%
-  \if@tud@parttitle\else%
-    \size@partnumber{\vphantom{\partname}}%
-    \tud@headmidvskip\nobreak%
-  \fi%
-  \size@part%
-}{}{\tud@patch@wrn{@spart}}
-%    \end{macrocode}
-% \end{macro}^^A \@spart
-% \end{macro}^^A \tud@@spart
 % \begin{macro}{\tud@partpreamble}
 % Um die \KOMAScript-Befehle für die Teilepräambel auch für das farbige Layout
 % nutzen zu können, müssen diese leicht angepasst werden. Für die Präambeln wird
@@ -1193,8 +1320,18 @@
 }%
 %    \end{macrocode}
 % \end{macro}^^A \tud@chapterheadstartvskip
+%
+% Für die Kapitel ist zur Formatierung ebenfalls etwas Patcherei notwendig.
+% Zuerst die Patches für für \KOMAScript~v3.18:
+% \ToDo{Reimplementierung mit \cs{DeclareSectionCommand}}[v2.05]
+%    \begin{macrocode}
+\@tempswafalse
+\ifcsdef{scr@v@3.18}{\@tempswatrue}{}%
+\if@tempswa
+%    \end{macrocode}
+%
 % \begin{macro}{\tud@@@makechapterhead}
-% \begin{macro}{\@@makechapterhead}
+% \begin{macro}{\scr@@makechapterhead}
 % Für das Präfix des Kapitels bei der gegebenenfalls aktivierten Option
 % \opt{chapterprefix} ist einiges an Anpassungen notwendig, um die eigentliche 
 % Überschrift auf der gewünschten Position erscheinen zu lassen.
@@ -1209,23 +1346,58 @@
 % Höhe liegen und auch die Abstände zwischen den ggf. genutzten Präfixen
 % identisch sind.
 %    \begin{macrocode}
-\newcommand*\tud@@@makechapterhead{}
-\let\tud@@@makechapterhead\@@makechapterhead
-\patchcmd{\tud@@@makechapterhead}{%
-  \chapterformat
-  \setlength{\@tempskipa}{\scr@chapter@innerskip}%
-  \chapterheadmidvskip
-}{%
-  \tud@headmidvskip@neg%
-  \tud@makeuppercase{\chapterformat}%
-  \tud@headmidvskip%
-}{}{\tud@patch@wrn{@@makechapterhead}}%
-\patchcmd{\tud@@@makechapterhead}{\IfUsePrefixLine{}{\raggedchapter}}{%
-  \IfUsePrefixLine{\IfUseNumber{\setlength\parskip{\z@}}{}}{\raggedchapter}%
-}{}{\tud@patch@wrn{@@makechapterhead}}%
+  \newcommand*\tud@@@makechapterhead{}
+  \let\tud@@@makechapterhead\scr@@makechapterhead
+  \patchcmd{\tud@@@makechapterhead}{%
+    \csname #1format\endcsname
+    \setlength{\@tempskipa}{%
+      \csname scr@#1@innerskip\endcsname
+    }%
+    \chapterheadmidvskip
+  }{%
+    \tud@headmidvskip@neg%
+    \tud@makeuppercase{\csname #1format\endcsname}%
+    \tud@headmidvskip%
+  }{}{\tud@patch@wrn{scr@@makechapterhead}}%
+  \patchcmd{\tud@@@makechapterhead}{\IfUsePrefixLine{}{\raggedchapter}}{%
+    \IfUsePrefixLine{\IfUseNumber{\setlength\parskip{\z@}}{}}{\raggedchapter}%
+  }{}{\tud@patch@wrn{scr@@makechapterhead}}%
 %    \end{macrocode}
 % \end{macro}^^A \@@makechapterhead
 % \end{macro}^^A \tud@@@makechapterhead
+%
+% Und nun das Gleiche für \KOMAScript~v3.17:
+%    \begin{macrocode}
+\else
+%    \end{macrocode}
+%
+% \begin{macro}{\tud@@@makechapterhead}
+% \begin{macro}{\@@makechapterhead}
+%    \begin{macrocode}
+  \newcommand*\tud@@@makechapterhead{}
+  \let\tud@@@makechapterhead\@@makechapterhead
+  \patchcmd{\tud@@@makechapterhead}{%
+    \chapterformat
+    \setlength{\@tempskipa}{\scr@chapter@innerskip}%
+    \chapterheadmidvskip
+  }{%
+    \tud@headmidvskip@neg%
+    \tud@makeuppercase{\chapterformat}%
+    \tud@headmidvskip%
+  }{}{\tud@patch@wrn{@@makechapterhead}}%
+  \patchcmd{\tud@@@makechapterhead}{\IfUsePrefixLine{}{\raggedchapter}}{%
+    \IfUsePrefixLine{\IfUseNumber{\setlength\parskip{\z@}}{}}{\raggedchapter}%
+  }{}{\tud@patch@wrn{@@makechapterhead}}%
+%    \end{macrocode}
+% \end{macro}^^A \@@makechapterhead
+% \end{macro}^^A \tud@@@makechapterhead
+%
+% Damit ist die Patcherei beendet.
+% \ToDo{Reimplementierung mit \cs{DeclareSectionCommand}}[v2.05]
+%    \begin{macrocode}
+\fi
+%    \end{macrocode}
+%
 % \begin{macro}{\tud@chapterpreamble}
 % Um die \KOMAScript-Befehle für die Kapitelpräambel auch für das farbige Layout
 % nutzen zu können, müssen diese leicht angepasst werden. Für die Präambeln der
