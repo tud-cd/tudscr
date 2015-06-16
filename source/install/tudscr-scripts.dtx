@@ -98,7 +98,6 @@ rem
 rem Autor: Falk Hanisch
 rem
 rem getestet auf:
-rem Microsoft Windows Vista Business
 rem Microsoft Windows 7 Professional x64
 rem Microsoft Windows 8 Pro x64
 rem
@@ -106,16 +105,17 @@ rem in Kombination mit:
 rem MiKTeX 2.9 32-bit
 rem MiKTeX Portable 2.9 32-bit
 rem MiKTeX 2.9 64-bit
-rem TeX Live 2013
-rem TeX Live 2014
+rem TeX Live 2015
+rem TeX Live 2015 Portable
 rem
 echo.
 echo  =====================================================================
+echo.
 %<convert>echo   Konvertieren der TUD-CD-Schriften unter Windows
 %<full>echo   Installation TUD-KOMA-Script + TUD-CD-Schriften unter Windows
 %<update>echo   Update TUD-KOMA-Script unter Windows
 %<font>echo   Installation TUD-CD-Schriften unter Windows
-%<convfont>echo   Installation der konvertierten TUD-CD-Schriften unter Windows
+%<converted>echo   Installation der konvertierten TUD-CD-Schriften unter Windows
 %<uninstall>echo   Deinstallation TUD-KOMA-Script unter Windows
 %<old>echo   fuer obsolete Klassen und Pakete
 %!echoTUDVersion
@@ -141,39 +141,42 @@ cd tudscrtemp
 % Als erstes wird nach einer LaTeX-Distribution gesucht.
 %    \begin{macrocode}
 set texpath=
-where latex.exe> nul 2> nul> texpath.tmp
+where tex> nul 2> nul> texpath.tmp
 set /p texpath=<texpath.tmp
 if "%texpath%"=="" (
- goto :nothing
+  goto :nothing
 )
 echo  =====================================================================
 echo.
 echo   Notwendige Dateien und Pakete werden gesucht.
+echo   Dies kann einen Moment dauern.
 echo.
 set missing=false
-call:checkfile "7za.exe"
+call:checkfile    "7za.exe"
 %<full|update>call:checkfile "tudscr_%version%.zip"
 %
 % \iffalse
 %<*full|font|convert>
 % \fi
 %
-call:checkfile "Univers_PS.zip"
-call:checkfile "DIN_Bd_PS.zip"
+call:checkfile    "Univers_PS.zip"
+call:checkfile    "DIN_Bd_PS.zip"
+%<!old>call:checkfile    "tudscr_fonts_install.zip"
+call:checkscript  "pltotf"
+call:checkscript  "vptovf"
 call:checkpackage "fontinst.sty"
-%<!old>call:checkfile "tudscr_fonts_install.zip"
 %
 % \iffalse
 %</full|font|convert>
 %<*!old>
 % \fi
 %
-%<convfont>call:checkfile "tudscr_fonts_converted.zip"
 call:checkpackage "type1ec.sty"
 call:checkpackage "lmodern.sty"
 call:checkpackage "cmbright.sty"
 call:checkpackage "hfbright.map"
 call:checkpackage "iwona.sty"
+%<converted>call:checkfile    "tudscr_fonts_converted.zip"
 %
 % \iffalse
 %</!old>
@@ -255,34 +258,36 @@ for /f "usebackq tokens=1,2" %%a in (
 :nothing
   echo.
   echo   TeX Live oder MiKTeX wurden nicht gefunden
+  echo.
   echo  =====================================================================
   echo.
   goto :abort
 :resume
   echo.
   echo  =====================================================================
+  echo.
 %<full>  echo   Installation des TUD-KOMA-Script-Bundles
 %<update>  echo   Update des TUD-KOMA-Script-Bundles
 %<font>  echo   Installation der TUD-CD-Schriften
-%<convfont>  echo   Installation der konvertierten TUD-CD-Schriften
+%<converted>  echo   Installation der konvertierten TUD-CD-Schriften
   echo.
-  echo   Es sollte ein Verzeichnis jenseits der Distributionsordnerstruktur
+  echo   Das Verzeichnis muss sich jenseits der Distributionsordnerstruktur
   if "%portable%" == "true" (
-    echo   auf dem USB-Stick verwendet werden:
+    echo   auf dem USB-Stick befinden.
   ) else (
-    echo   im lokalen Benutzerpfad verwendet werden:
+    echo   in einem lokalen Benutzerpfad befinden.
   )
-  echo.
-  echo   %texmfpath%
   echo.
 :proof_userinput
   echo  =====================================================================
-  echo.
   set /p texmfpath=< texmfpath.tmp
   set "texmfpath=%texmfpath:/=\%"
   if "%texmfpath:~-1%"=="\" set texmfpath=%texmfpath:~,-1%
   echo %texmfpath%> texmfpath.tmp
-  echo   Soll das Verzeichnis %texmfpath% genutzt werden?
+  echo.
+  echo   %texmfpath%
+  echo.
+  echo   Soll dieser Pfad genutzt werden?
   if not exist "%texmfpath%" (
     echo   Der angegebene Ordner existiert nicht, wird jedoch erstellt.
   )
@@ -301,6 +306,7 @@ for /f "usebackq tokens=1,2" %%a in (
   echo.
   set /p texmfpath=
   echo %texmfpath%> texmfpath.tmp
+  echo.
   goto proof_userinput
 :install
   echo.
@@ -308,7 +314,7 @@ for /f "usebackq tokens=1,2" %%a in (
 %<full>  echo   Installation des TUD-KOMA-Script-Bundles in:
 %<update>  echo   Update des TUD-KOMA-Script-Bundles in:
 %<font>  echo   Installation der TUD-CD-Schriften in:
-%<convfont>  echo   Installation der konvertierten TUD-CD-Schriften in:
+%<converted>  echo   Installation der konvertierten TUD-CD-Schriften in:
   echo   %texmfpath%
   echo  =====================================================================
   echo.
@@ -317,6 +323,7 @@ for /f "usebackq tokens=1,2" %%a in (
 %
 % \iffalse
 %</!convert>
+%<*full|font|convert>
 %<*convert>
 % \fi
 %
@@ -329,6 +336,31 @@ echo.
 %
 % \iffalse
 %</convert>
+% \fi
+%
+%<old>  set localfolder=tud
+%<!old>  set localfolder=tudscr
+  if not exist "%texmfpath%\tex\latex\%localfolder%\fonts" (
+    mkdir "%texmfpath%\tex\latex\%localfolder%\fonts"
+  )
+  if not exist "%texmfpath%\fonts\tfm\%localfolder%" (
+    mkdir "%texmfpath%\fonts\tfm\%localfolder%"
+  )
+  if not exist "%texmfpath%\fonts\afm\%localfolder%" (
+    mkdir "%texmfpath%\fonts\afm\%localfolder%"
+  )
+  if not exist "%texmfpath%\fonts\vf\%localfolder%" (
+    mkdir "%texmfpath%\fonts\vf\%localfolder%"
+  )
+  if not exist "%texmfpath%\fonts\type1\%localfolder%" (
+    mkdir "%texmfpath%\fonts\type1\%localfolder%"
+  )
+  if not exist "%texmfpath%\fonts\map\dvips\%localfolder%" (
+    mkdir "%texmfpath%\fonts\map\dvips\%localfolder%"
+  )
+%
+% \iffalse
+%</full|font|convert>
 %</!uninstall>
 %<*uninstall>
 % \fi
@@ -386,7 +418,7 @@ exit /b 0
 %
   cd /d %~dp0
 %<full|update>  7za x tudscr_%version%.zip -o"%texmfpath%" -y
-%<convfont>  7za x tudscr_fonts_converted.zip -o"%texmfpath%" -y
+%<converted>  7za x tudscr_fonts_converted.zip -o"%texmfpath%" -y
 %
 % \iffalse
 %<*full|font|convert>
@@ -531,26 +563,6 @@ exit /b 0
   echo   Konvertierung abgeschlossen.
   echo  =====================================================================
   echo.
-%<old>  set localfolder=tud
-%<!old>  set localfolder=tudscr
-  if not exist "%texmfpath%\tex\latex\%localfolder%\fonts" (
-    mkdir "%texmfpath%\tex\latex\%localfolder%\fonts"
-  )
-  if not exist "%texmfpath%\fonts\tfm\%localfolder%" (
-    mkdir "%texmfpath%\fonts\tfm\%localfolder%"
-  )
-  if not exist "%texmfpath%\fonts\afm\%localfolder%" (
-    mkdir "%texmfpath%\fonts\afm\%localfolder%"
-  )
-  if not exist "%texmfpath%\fonts\vf\%localfolder%" (
-    mkdir "%texmfpath%\fonts\vf\%localfolder%"
-  )
-  if not exist "%texmfpath%\fonts\type1\%localfolder%" (
-    mkdir "%texmfpath%\fonts\type1\%localfolder%"
-  )
-  if not exist "%texmfpath%\fonts\map\dvips\%localfolder%" (
-    mkdir "%texmfpath%\fonts\map\dvips\%localfolder%"
-  )
   copy /y *.fd  "%texmfpath%\tex\latex\%localfolder%\fonts"
   copy /y *.tfm "%texmfpath%\fonts\tfm\%localfolder%"
   copy /y *.afm "%texmfpath%\fonts\afm\%localfolder%"
@@ -572,7 +584,7 @@ exit /b 0
 :TeXLiveHash
   texhash
 %<(full|font)&old>  updmap-sys --enable Map=tud.map
-%<(full|font|convfont)&!old>  updmap-sys --enable Map=tudscr.map
+%<(full|font|converted)&!old>  updmap-sys --enable Map=tudscr.map
   goto :end
 :MiKTeXHash
   initexmf --register-root="%texmfpath%"
@@ -580,7 +592,7 @@ exit /b 0
 %
 % \iffalse
 %</!convert>
-%<*full|font|convfont>
+%<*full|font|converted>
 % \fi
 %
   updmap
@@ -617,14 +629,14 @@ exit /b 0
   initexmf --mkmaps
 %
 % \iffalse
-%</full|font|convfont>
+%</full|font|converted>
 %<*!convert>
 % \fi
 %
 :end
   echo.
   echo  =====================================================================
-%<full|font|convfont>  echo   Die Installation wird beendet.
+%<full|font|converted>  echo   Die Installation wird beendet.
 %<update>  echo   Das Update wird beendet.
   echo   Der Ordner mitsamt aller temporaeren Dateien wird geloescht.
   echo  =====================================================================
@@ -667,6 +679,8 @@ exit /b 0
   if not exist ../%~1 (
     set missing=true
     call:missingfile %~1
+  ) else (
+    echo   Datei %~1 gefunden
   )
   goto:eof
 :missingfile
@@ -688,14 +702,37 @@ exit /b 0
   if "%package%"=="" (
     set missing=true
     call:missingpackage %~1
+  ) else (
+    echo   Paket %~1 gefunden
   )
   goto:eof
 :missingpackage
   echo  =====================================================================
   echo.
-  echo   Das LaTeX-Paket %~1 wurde nicht gefunden. Dieses wird fuer
-  echo   die Schriftinstallation zwingend benoetigt. Bitte %~1
+  echo   Das LaTeX-Paket %~1 wurde nicht gefunden. Dieses wird fuer die
+  echo   Schriftinstallation zwingend benoetigt. Bitte %~1
   echo   installieren und danach dieses Skript abermals ausfuehren.
+  echo.
+  echo  =====================================================================
+  goto:eof
+:checkscript
+  set script=
+  where %~1> nul 2> nul> script.tmp
+  set /p script=<script.tmp
+  if "%script%"=="" (
+    set missing=true
+    call:missingscript %~1
+  ) else (
+    echo   Skript %~1 gefunden
+  )
+  goto:eof
+:missingscript
+  echo  =====================================================================
+  echo.
+  echo   Das Skript %~1 wurde nicht gefunden. Dieses wird im Normalfall von 
+  echo   der LaTeX-Distribution bereitgestellt und zur Schriftinstallation 
+  echo   zwingend benoetigt. Bitte %~1 ueber die Distribution installieren 
+  echo   und danach dieses Skript abermals ausfuehren.
   echo.
   echo  =====================================================================
   goto:eof
@@ -721,44 +758,49 @@ exit /b 0
 #
 # getestet auf:
 # Ubuntu 14.04
+# Ubuntu 15.04
 #
 # in Kombination mit:
-# TeX Live 2013
-# TeX Live 2014
+# TeX Live 2015
 #
 %
 % \iffalse
 %<*!uninstall>
 % \fi
 %
-# Vorausgesetzte Tools:
+# Notwendige Tools:
 # unzip        (Ubuntu package unzip)
 #
-# Voraussetzte LaTeX Pakete:
-# fontinst.sty (Ubuntu package texlive-font-utils)
-# lmodern.sty  (Ubuntu package lmodern)
-# cmbright.sty (Ubuntu package texlive-fonts-extra)
-# iwona.sty    (Ubuntu package texlive-fonts-extra)
+# Vorausgesetzte LaTeX Pakete:
+# fontinst (Ubuntu package texlive-font-utils)
+# lmodern  (Ubuntu package lmodern)
+# cm-super (Ubuntu package cm-super)
+# cmbright (Ubuntu package texlive-fonts-extra)
+# hfbright (Ubuntu package texlive-fonts-extra)
+# iwona    (Ubuntu package texlive-fonts-extra)
 #
-# Benoetigte Schriften (im gleichen Verzeichnis):
-# DIN_Bd_PS.zip, Univers_PS.zip
-#
-# Hinweis!!!!!!
-# Die Vorlagen und Schriften werden im lokalen Benutzerverzeichnis installiert:
-# unter Linux in ~/.texmf und unter Mac OS in ~/Library/texmf.
-# Nach Aenderungen an den globalen LaTeX Schriften (z.B. Updates) muss der
-# Befehl 'updmap' aufgerufen werden damit die lokalen Schriften gefunden werden.
-# Automatisch auf Mac OS geht das mit "TeX Live Utility.app":
-# "Preferences..."->"Automatically enable fonts in my home directory."
-#
-# TODOs:
-# lokale oder globale Installation
+# Benoetigte Archive (im Verzeichnis des Installationsskriptes):
+# DIN_Bd_PS.zip
+# Univers_PS.zip
+# 
+# Die Installation erfolgt in das lokale Benutzerverzeichnis $TEXMFHOME. Dies 
+# ist unter Linux in ~/.texmf und unter Mac OS in ~/Library/texmf. Der Nutzer 
+# kann dabei im Installationsprozess auswaehlen, ob die Schriften mit dem
+# Befehl 'updmap' lokal fuer den aktuellen Benutzer oder mit 'updmap-sys' 
+# systemweit registriert werden sollen. Die zweite Variante benoetigt hierfuer
+# Root-Rechte. Wird die erste Variante gewaehlt, muss der Anwender 
+# zukuenftig nach Aenderungen an den globalen oder lokalen LaTeX-Schriften
+# (z.B. Updates) den Befehl 'updmap' manuell aufrufen, damit die lokalen
+# Schriften gefunden werden. Mit Mac OS geht dies mit "TeX Live Utility.app": 
+# "Preferences..." -> "Automatically enable fonts in my home directory."
 #
 checkfile()
 {
   if [ ! -f "$1" ]; then
     missing=true
     missingfile "$1"
+  else
+    echo   Datei $1 gefunden
   fi
 }
 missingfile()
@@ -771,12 +813,35 @@ missingfile()
   echo
   echo  =====================================================================
 }
+checkscript()
+{
+  script=$(which $1)
+  if [ -z "$script" ]; then
+    missing=true
+    missingscript "$1"
+  else
+    echo   Skript $1 gefunden
+  fi
+}
+missingscript()
+{
+  echo  =====================================================================
+  echo
+  echo   Das Skript $1 wurde nicht gefunden. Dieses wird im Normalfall von 
+  echo   der LaTeX-Distribution bereitgestellt und zur Schriftinstallation 
+  echo   zwingend benoetigt. Bitte $1 über die Distribution installieren 
+  echo   und danach dieses Skript abermals ausfuehren.
+  echo
+  echo  =====================================================================
+}
 checkpackage()
 {
   package=$(kpsewhich $1)
   if [ -z "$package" ]; then
     missing=true
-    missingpackage $1
+    missingpackage "$1"
+  else
+    echo   Paket $1 gefunden
   fi
 }
 missingpackage()
@@ -789,6 +854,34 @@ missingpackage()
   echo
   echo  =====================================================================
 }
+proof_userinput()
+{
+  echo
+  echo  =====================================================================
+  echo
+  echo   $texmfpath
+  echo
+  echo   Soll dieser Pfad genutzt werden?
+  if [ ! -d $texmfpath ]; then
+    echo "Der angegebene Ordner existiert nicht, wird jedoch erstellt."
+  fi
+  select yn in "Ja" "Nein"; do
+    case $yn in
+      "Ja") break;;
+      "Nein")
+        set_texmfpath
+        break;;
+      *) echo invalid option;;
+    esac
+  done
+}
+set_texmfpath()
+{
+  echo
+  echo   Geben Sie das Installationsverzeichnis an:
+  read texmfpath
+  proof_userinput
+}
 abort()
 {
   echo
@@ -796,9 +889,20 @@ abort()
   echo   Abbruch der Installation, temporaere Dateien werden geloescht.
   echo  =====================================================================
   echo
-  cd ..
+  read -n1 -r -p "Druecken Sie eine beliebige Taste . . . "
+  echo
   rm -rf tudscrtemp
   exit 0
+}
+mkvaldir()
+{
+  mkdir -p $1
+  if [ $? -ne 0 ] ; then
+    echo Keine Schreibberechtigung fuer den Pfad
+    echo $1
+    echo "Versuchen Sie das Ausfuehren mit 'sudo bash <Skriptname>'"
+    abort
+  fi
 }
 #
 #
@@ -810,11 +914,12 @@ abort()
 %
 echo
 echo  =====================================================================
+echo
 %<convert>echo   Konvertieren der TUD-CD-Schriften unter Unix
 %<full>echo   Installation TUD-KOMA-Script + TUD-CD-Schriften unter Unix
 %<update>echo   Update TUD-KOMA-Script unter Unix
 %<font>echo   Installation TUD-CD-Schriften unter Unix
-%<convfont>echo   Installation der konvertierten TUD-CD-Schriften unter Unix
+%<converted>echo   Installation der konvertierten TUD-CD-Schriften unter Unix
 %<uninstall>echo   Deinstallation TUD-KOMA-Script unter Unix
 %<old>echo   fuer obsolete Klassen und Pakete
 %!echoTUDVersion
@@ -833,6 +938,15 @@ version=$(echo $version|rev|cut -c12-|rev)
 %</full|update>
 % \fi
 %
+rm -rf tudscrtemp
+mkvaldir tudscrtemp/converted
+texpath=$(which tex)
+if [ -z "$texpath" ]; then
+  echo Es wurde keine LaTeX-Distribution gefunden.
+  echo Moeglicherweise hilft der Aufruf des Skriptes mit:
+  echo "'sudo env \"PATH=\$PATH\" bash <Skriptname>'"
+  abort
+fi
 echo  =====================================================================
 echo
 echo   Notwendige Dateien und Pakete werden gesucht.
@@ -846,20 +960,22 @@ missing=false
 %
 checkfile "Univers_PS.zip"
 checkfile "DIN_Bd_PS.zip"
-checkpackage "fontinst.sty"
 %<!old>checkfile "tudscr_fonts_install.zip"
+checkscript "pltotf"
+checkscript "vptovf"
+checkpackage "fontinst.sty"
 %
 % \iffalse
 %</full|font|convert>
 %<*!old>
 % \fi
 %
-%<convfont>checkfile "tudscr_fonts_converted.zip"
 checkpackage "type1ec.sty"
 checkpackage "lmodern.sty"
 checkpackage "cmbright.sty"
 checkpackage "hfbright.map"
 checkpackage "iwona.sty"
+%<converted>checkfile "tudscr_fonts_converted.zip"
 %
 % \iffalse
 %</!old>
@@ -873,8 +989,9 @@ echo   Es wurden alle notwendigen Dateien und Pakete gefunden.
 echo
 echo  =====================================================================
 echo
-rm -rf tudscrtemp
-mkdir -p tudscrtemp/converted
+echo   LaTeX-Distribution gefunden unter:
+echo   "$texpath"
+echo
 %
 % \iffalse
 %<*!convert>
@@ -884,19 +1001,27 @@ texmfpath=$(kpsewhich --var-value=TEXMFHOME)
 if [ -z "$texmfpath" ]; then
   texmfpath=$(kpsewhich --var-value=TEXMFLOCAL)
 fi
+echo  =====================================================================
+echo
 %<full>echo   Installation des TUD-KOMA-Script-Bundles
 %<update>echo   Update des TUD-KOMA-Script-Bundles
 %<font>echo   Installation der TUD-CD-Schriften
-%<convfont>echo   Installation der konvertierten TUD-CD-Schriften
-echo   in den lokalen Benutzerpfad:
-echo
-echo   $texmfpath
+%<converted>echo   Installation der konvertierten TUD-CD-Schriften
+proof_userinput
 echo
 echo  =====================================================================
+%<full>echo   Installation des TUD-KOMA-Script-Bundles in:
+%<update>echo   Update des TUD-KOMA-Script-Bundles in:
+%<font>echo   Installation der TUD-CD-Schriften in:
+%<converted>echo   Installation der konvertierten TUD-CD-Schriften in:
+echo   $texmfpath
+echo  =====================================================================
+echo
 %
 %
 % \iffalse
 %</!convert>
+%<*full|font|convert>
 %<*convert>
 % \fi
 %
@@ -909,6 +1034,19 @@ echo
 %
 % \iffalse
 %</convert>
+% \fi
+%
+%<old>localfolder=tud
+%<!old>localfolder=tudscr
+mkvaldir $texmfpath/tex/latex/$localfolder/fonts
+mkvaldir $texmfpath/fonts/tfm/$localfolder
+mkvaldir $texmfpath/fonts/afm/$localfolder
+mkvaldir $texmfpath/fonts/vf/$localfolder
+mkvaldir $texmfpath/fonts/type1/$localfolder
+mkvaldir $texmfpath/fonts/map/dvips/$localfolder
+%
+% \iffalse
+%</full|font|convert>
 %</!uninstall>
 %<*uninstall>
 % \fi
@@ -940,10 +1078,10 @@ while read -r line; do
     echo   $texmftemp
     echo  =====================================================================
     echo
-    select yn in "Yes" "No"; do
+    select yn in "Ja" "Nein"; do
       case $yn in
-        Yes ) uninstall $texmftemp; break;;
-        No )  break;;
+        Ja ) uninstall $texmftemp; break;;
+        Nein )  break;;
       esac
     done <&4;
     echo
@@ -964,7 +1102,7 @@ exit 0
 % \fi
 %
 %<full|update>unzip -o tudscr_$version.zip -d $texmfpath
-%<convfont>unzip -o tudscr_fonts_converted.zip -d $texmfpath
+%<converted>unzip -o tudscr_fonts_converted.zip -d $texmfpath
 %
 % \iffalse
 %<*full|font|convert>
@@ -1111,14 +1249,6 @@ echo  =====================================================================
 echo   Konvertierung abgeschlossen.
 echo  =====================================================================
 echo
-%<old>localfolder=tud
-%<!old>localfolder=tudscr
-mkdir -p $texmfpath/tex/latex/$localfolder/fonts
-mkdir -p $texmfpath/fonts/tfm/$localfolder
-mkdir -p $texmfpath/fonts/afm/$localfolder
-mkdir -p $texmfpath/fonts/vf/$localfolder
-mkdir -p $texmfpath/fonts/type1/$localfolder
-mkdir -p $texmfpath/fonts/map/dvips/$localfolder
 cp -f *.fd  $texmfpath/tex/latex/$localfolder/fonts
 cp -f *.tfm $texmfpath/fonts/tfm/$localfolder
 cp -f *.afm $texmfpath/fonts/afm/$localfolder
@@ -1132,11 +1262,14 @@ cp -f *.map $texmfpath/fonts/map/dvips/$localfolder
 % \fi
 %
 texhash
+%    \end{macrocode}
+% \ToDo{Unterscheidung/Auswahl von updmap oder updmap-sys}
+%    \begin{macrocode}
 %<(full|font)&old>updmap --enable Map=tud.map
-%<(full|font|convfont)&!old>updmap --enable Map=tudscr.map
+%<(full|font|converted)&!old>updmap --enable Map=tudscr.map
 echo
 echo  =====================================================================
-%<full|font|convfont>echo   Die Installation wird beendet.
+%<full|font|converted>echo   Die Installation wird beendet.
 %<update>echo   Das Update wird beendet.
 echo   Der Ordner mitsamt aller temporaeren Dateien wird geloescht.
 echo  =====================================================================
@@ -1156,6 +1289,8 @@ echo  =====================================================================
 % \fi
 %
 cd ../..
+read -n1 -r -p "Druecken Sie eine beliebige Taste . . . "
+echo
 rm -rf tudscrtemp
 exit 0
 %
