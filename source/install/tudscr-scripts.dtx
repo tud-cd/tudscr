@@ -1077,14 +1077,34 @@ updmapsys=true
 if [ -d "$(kpsewhich --var-value=TEXMFVAR)/fonts/map/" ]; then
   updmapsys=false
 else
-  texdir=$(kpsewhich --var-value=TEXMFLOCAL)
-  texdir=$(echo $texdir|rev|cut -d/ -f2-|rev)
   iamuser=$(whoami)
-  if [ ! -w "$texdir" ]; then
+  texdirarray=(
+    $(kpsewhich --var-value=TEXMFSYSVAR)
+    $(kpsewhich --var-value=TEXMFSYSCONFIG)
+    $(kpsewhich --var-value=TEXMFHOME)
+  )
+  looptexdirarray()
+  {
+    for d in "${texdirarray[@]}"; do
+      if [ ! -w "$d" ]; then
+        if [ "$1" == "use" ]; then
+          eval ${@:2} $d;
+        else
+          eval $@;
+        fi
+      fi
+    done
+  }
+  texdirpermitted=false
+  looptexdirarray texdirpermitted=true
+  if $texdirpermitted ; then
     echo Fuer das systemweite Registrieren der Schriften ist das Ausfuehren
     echo von \'updmap-sys\' erforderlich, wofuer Root-Rechte notwendig sind.
-    echo Dieses Vorgehen wird empfohlen. Dazu mussen die Zugriffsrechte des
-    echo Ordners $texdir fuer den Nutzer \'$iamuser\' gesetzt werden. 
+    echo Dieses Vorgehen wird empfohlen. Dazu muessen die Zugriffsrechte der
+    echo folgenden Ordner fuer den Nutzer \'$iamuser\' gesetzt werden:
+    echo
+    looptexdirarray use echo
+    echo
     echo Andernfalls wird lediglich \'updmap\' aufgerufen, wodurch der Befehl
     echo \'updmap-sys\' ab diesem Zeitpunkt wirkungslos wird und der Anwender
     echo ab sofort nach Aenderungen an den LaTeX-Schriften \(z.B. Updates\) 
@@ -1093,8 +1113,11 @@ else
     select yn in "Zugriffsrechte setzen (empfohlen)" "'updmap' verwenden"; do
       case $yn in
         "Zugriffsrechte setzen (empfohlen)")
-          sudo -k chown -R $iamuser $texdir
-          if [ ! -w "$texdir" ]; then
+          looptexdirarray use sudo chown -R $iamuser
+          sudo -k
+          texdirpermitted=false
+          looptexdirarray texdirpermitted=true
+          if $texdirpermitted ; then
             echo
             echo Setzen der Zugriffsrechte gescheitert
             abort
