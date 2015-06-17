@@ -1,4 +1,4 @@
-% \CheckSum{297}
+% \CheckSum{301}
 % \iffalse meta-comment
 %
 % ============================================================================
@@ -1077,7 +1077,6 @@ updmapsys=true
 if [ -d "$(kpsewhich --var-value=TEXMFVAR)/fonts/map/" ]; then
   updmapsys=false
 else
-  iamuser=$(whoami)
   texdirarray=(
     $(kpsewhich --var-value=TEXMFSYSVAR)
     $(kpsewhich --var-value=TEXMFSYSCONFIG)
@@ -1086,7 +1085,7 @@ else
   looptexdirarray()
   {
     for d in "${texdirarray[@]}"; do
-      if [ ! -w "$d" ]; then
+      if [ -d "$d" ] && [ ! -w "$d" ]; then
         if [ "$1" == "use" ]; then
           eval ${@:2} $d;
         else
@@ -1099,9 +1098,10 @@ else
   looptexdirarray texdirpermitted=true
   if $texdirpermitted ; then
     echo Fuer das systemweite Registrieren der Schriften ist das Ausfuehren
-    echo von \'updmap-sys\' erforderlich, wofuer Root-Rechte notwendig sind.
-    echo Dieses Vorgehen wird empfohlen. Dazu muessen die Zugriffsrechte der
-    echo folgenden Ordner fuer den Nutzer \'$iamuser\' gesetzt werden:
+    echo von \'updmap-sys\' erforderlich. Dazu muessen fuer die nachfolgend
+    echo aufgelisteten Ordner fuer alle anderen Benutzer \(\'other\'\) mit
+    echo \'sudo chmod -R o+w\' Schreibrechte gesetzt werden. Dieses Vorgehen
+    echo wird empfohlen. 
     echo
     looptexdirarray use echo
     echo
@@ -1110,16 +1110,16 @@ else
     echo ab sofort nach Aenderungen an den LaTeX-Schriften \(z.B. Updates\) 
     echo den Befehl \'updmap\' manuell aufrufen muss, damit neue repsektive
     echo aktualisierte Schriften registriert werden.
-    select yn in "Zugriffsrechte setzen (empfohlen)" "'updmap' verwenden"; do
+    select yn in "Schreibrechte setzen (empfohlen)" "'updmap' verwenden"; do
       case $yn in
-        "Zugriffsrechte setzen (empfohlen)")
-          looptexdirarray use sudo chown -R $iamuser
+        "Schreibrechte setzen (empfohlen)")
+          looptexdirarray use sudo chmod -R o+w
           sudo -k
           texdirpermitted=false
           looptexdirarray texdirpermitted=true
           if $texdirpermitted ; then
             echo
-            echo Setzen der Zugriffsrechte gescheitert
+            echo Setzen der Schreibrechte gescheitert
             abort
           fi
           break;;
