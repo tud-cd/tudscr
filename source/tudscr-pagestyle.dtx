@@ -1,4 +1,4 @@
-% \CheckSum{2413}
+% \CheckSum{2473}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-pagestyle.dtx}[%
-  2015/06/15 v2.04 TUD-KOMA-Script (pagestyle)%
+  2015/06/18 v2.04 TUD-KOMA-Script (pagestyle)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -328,6 +328,62 @@
   \AtEndPreamble{\RequirePackage{scrlayer-scrpage}[2013/12/14]}%
 }
 %    \end{macrocode}
+% \begin{macro}{\ps@tudheadings}
+% \begin{macro}{\ps@plain.tudheadings}
+% \begin{macro}{\ps@empty.tudheadings}
+% \begin{macro}{\currentpagestyle}
+% \begin{macro}{\BeforeSelectAnyPageStyle}
+% \begin{macro}{\GetRealPageStyle}
+% Um die rudimentäre Verwendung der Klassen auch zu ermöglichen, wenn das Paket 
+% \pkg{scrlayer-scrpage} nicht geladen wurde, werden einige notwendige Makros 
+% definiert und vor dem Laden des Paketes wieder als \cs{undefined} gesetzt.
+%    \begin{macrocode}
+\tud@cmd@store{pagestyle}
+\cslet{ps@tudheadings}{\ps@headings}%
+\cslet{ps@plain.tudheadings}{\ps@plain}%
+\cslet{ps@empty.tudheadings}{\ps@empty}%
+\providecommand*\currentpagestyle{plain}
+\providecommand*\BeforeSelectAnyPageStyle[1]{}
+\providecommand*\GetRealPageStyle[1]{#1}
+\BeforePackage{scrlayer-scrpage}{%
+  \tud@cmd@restore{pagestyle}%
+  \csundef{ps@tudheadings}%
+  \csundef{ps@plain.tudheadings}%
+  \csundef{ps@empty.tudheadings}%
+  \undef\currentpagestyle%
+  \undef\BeforeSelectAnyPageStyle%
+  \undef\GetRealPageStyle%
+}
+%    \end{macrocode}
+%
+% \changes{v2.03}{2015/06/18}{Auswahl der Seitenstile \pgs{tudheadings} vor
+%   möglich \pkg{scrlayer-scrpage}}^^A
+%
+% Damit die neuen Seitenstile auch vor dem Laden von \pkg{scrlayer-scrpage} 
+% bereits durch den Anwender ausgewählt werden können, wird \cs{pagestyle} 
+% temporär zurechtgebogen. Die Definition des Makros wird gesichert und direkt 
+% vor dem Laden des Paketes~-- oder ggf. spätestens am Ende der Präambel etwas 
+% angepasst~--  wiederhergestellt. Die Redefinition führt zum Ausführen des
+% Seitenstils erst nachdem diese auch tatsächlich erstellt wurden.
+%    \begin{macrocode}
+\let\tud@pagestyle\pagestyle
+\apptocmd{\tud@pagestyle}{%
+  \edef\currentpagestyle{#1}%
+}{}{\tud@patch@wrn{pagestyle}}%
+\renewcommand*\pagestyle[1]{\AfterPackage!{scrlayer-scrpage}{\pagestyle{#1}}}
+\AtEndPreamble{%
+  \@ifpackageloaded{scrlayer-scrpage}{}{%
+    \let\pagestyle\tud@pagestyle%
+    \undef\tud@pagestyle%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \GetRealPageStyle
+% \end{macro}^^A \BeforeSelectAnyPageStyle
+% \end{macro}^^A \currentpagestyle
+% \end{macro}^^A \ps@empty.tudheadings
+% \end{macro}^^A \ps@plain.tudheadings
+% \end{macro}^^A \ps@tudheadings
 % \begin{pagestyle}{tudheadings}
 % \changes{v2.02}{2014/06/23}{neu}^^A
 % \begin{pagestyle}{plain.tudheadings}
@@ -645,6 +701,7 @@
     scrheadings.foot.above.line,%
     scrheadings.foot.below.line%
   }%
+  \listadd\tud@ps@list{tudheadings}%
 %    \end{macrocode}
 % Zuletzt werden Aliasnamen für den Seitenstil definiert.
 %    \begin{macrocode}
@@ -675,6 +732,7 @@
     plain.scrheadings.foot.above.line,%
     plain.scrheadings.foot.below.line%
   }%
+  \listadd\tud@ps@list{plain.tudheadings}%
   \DeclareNewPageStyleAlias{plain.tudscrheadings}{plain.tudheadings}%
   \DeclareNewPageStyleAlias{tudplain}{plain.tudheadings}%
   \DeclareNewPageStyleAlias{tudscrplain}{plain.tudheadings}%
@@ -699,6 +757,7 @@
     tudheadings.foot.content,%
     tudheadings.last%
   }%
+  \listadd\tud@ps@list{empty.tudheadings}%
   \DeclareNewPageStyleAlias{empty.tudscrheadings}{empty.tudheadings}%
   \DeclareNewPageStyleAlias{tudempty}{empty.tudheadings}%
   \DeclareNewPageStyleAlias{tudscrempty}{empty.tudheadings}%
@@ -734,6 +793,7 @@
 % \end{macro}^^A \tud@pagecolor
 % \end{layer}^^A tudheadings.pagecolor
 % Damit wurden alle Ebenen und die darauf aufbauenden Seitenstile deklariert. 
+%
 % Mit der Nutzung von \pkg{scrlayer-scrpage} ist die parallele Verwendung des 
 % Paketes \pkg{fancyhdr} nicht möglich.
 %    \begin{macrocode}
@@ -1135,6 +1195,25 @@
 %
 % \subsection{Befehle, Optionen und Umsetzung der Seitenstilvarianten}
 %
+% \begin{macro}{\tud@iftudps}
+% \changes{v2.02}{2014/06/23}{neu}^^A
+% \begin{macro}{\tud@ps@list}
+% \changes{v2.02}{2014/06/23}{neu}^^A
+% Mit dem Befehl \cs{tud@iftudps} wird geprüft, ob der im ersten Argument 
+% gegebene Seitenstil~-- was auch das Makro \cs{currentpagestyle} sein kann,
+% welches durch das Paket \pkg{scrlayer-scrpage} definiert wird und den
+% aktuellen Seitenstil beinhaltet~-- einem aus der Liste \cs{tud@ps@list}
+% entspricht. Ist dies der Fall, wird das zweite Argument ausgeführt, 
+% anderfalls das dritte. Die Liste \cs{tud@ps@list} wird bei der Definition der 
+% Seitenstile selbst gesetzt.
+%    \begin{macrocode}
+\newcommand*\tud@ps@list{}
+\newcommand*\tud@iftudps[3]{%
+  \xifinlist{\GetRealPageStyle{#1}}{\tud@ps@list}{#2}{#3}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@ps@list
+% \end{macro}^^A \tud@iftudps
 % \begin{option}{ddc}
 % \changes{v2.02}{2014/06/23}{automatische Logowahl}^^A
 % \begin{option}{ddchead}
@@ -1359,27 +1438,6 @@
 % \end{option}^^A ddcfoot
 % \end{option}^^A ddchead
 % \end{option}^^A ddc
-% \begin{macro}{\tud@iftudps}
-% \changes{v2.02}{2014/06/23}{neu}^^A
-% \begin{macro}{\tud@ps@list}
-% \changes{v2.02}{2014/06/23}{neu}^^A
-% Mit dem Befehl \cs{tud@iftudps} wird geprüft, ob der im ersten Argument 
-% gegebene Seitenstil~-- was auch das Makro \cs{currentpagestyle} sein kann,
-% welches durch das Paket \pkg{scrlayer-scrpage} definiert wird und den
-% aktuellen Seitenstil beinhaltet~-- einem aus der Liste \cs{tud@ps@list}
-% entspricht. Ist dies der Fall, wird das zweite Argument ausgeführt, 
-% anderfalls das dritte.
-%    \begin{macrocode}
-\newcommand*\tud@iftudps[3]{%
-  \xifinlist{\GetRealPageStyle{#1}}{\tud@ps@list}{#2}{#3}%
-}
-\newcommand*\tud@ps@list{}
-\forcsvlist{\listadd\tud@ps@list}{%
-  tudheadings,plain.tudheadings,empty.tudheadings%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@ps@list
-% \end{macro}^^A \tud@iftudps
 % \begin{option}{extrabottommargin}
 % \begin{length}{\tud@dim@extrabottommargin}
 % Diese Option dient dazu, die Höhe des Fußes anzupassen. Dies ist jedoch nur 
@@ -1687,7 +1745,7 @@
 % Für den Anwender besteht mit der Länge \cs{footlogoheight} die Möglichkeit, 
 % die Höhe aller Logos im Fußbereich~-- also \DDC-Logo sowie weitere, mit dem 
 % Befehl \cs{footlogo} angegebene Logos~-- zentral festzulegen. Dabei wird 
-% diese Länge nicht direkt genutzt, sondern intern \cs{tud@footlogoheight} 
+% die Länge nicht direkt genutzt, sondern intern \cs{tud@footlogoheight} 
 % verwendet. mit \cs{tud@footlogoheight@set} wird geprüft, ob der Anwender 
 % \cs{footlogoheight} tatsächlich angepasst hat. Sollte dies der Fall sein, 
 % wird \cs{tud@footlogoheight@set} auf diesen Wert gesetzt, andernfalls werden 
@@ -2178,6 +2236,7 @@
 % \begin{option}{cdfoot}
 % \changes{v2.03}{2015/02/02}{Option \opt{extrabottommargin} bei Längenangabe 
 %   indirekt nutzbar}^^A
+% \changes{v2.04}{2015/06/18}{bedingtes Setzen der Option \opt{automark}}^^A
 % \begin{macro}{\if@tud@foot@colored}
 % \changes{v2.03}{2015/02/15}{neu}^^A
 % \begin{macro}{\tud@ps@store}
@@ -2222,10 +2281,10 @@
         \tud@font@koma@unset{pageheadfoot}%
       }%
 %    \end{macrocode}
-% Die ursprünglichen Kopf- und Fußzeilen werden mit \cs{tud@ps@store} 
+% Die ursprünglichen Kopf- und Fußzeilen werden mit dem Makro \cs{tud@ps@store} 
 % gesichert, um gegebenenfalls zurückschalten zu können. Anschließend werden
 % diese mit dem neuen Stil überschrieben. Dies wird allerdings frühestens nach 
-% dem Laden von \pkg{scrlayer-scrpage} durchgeführt.
+% dem Laden von \pkg{scrlayer-scrpage} durchgeführt. 
 %    \begin{macrocode}
     \or% true
       \TUD@AfterPackage{scrlayer-scrpage}{%
@@ -2238,6 +2297,7 @@
           {\footnotesize\headmark}%
           \if@twoside\ifodd\value{page}\quad\pagemark\fi\else\quad\pagemark\fi%
         }%
+        \ifx\@mkdouble\@gobble\else\KOMAoptions{automark}\fi%
       }%
 %    \end{macrocode}
 % Hier kann die Hintergrundfarbe des Fußes aktiviert bzw. deaktiviert werden.
@@ -2360,8 +2420,15 @@
 % \fi
 %
 % Das Paket \pkg{geometry} erlaubt eine genaue Vorgabe des Satzspiegels und
-% der Seitenränder, wie es vom \CD der TU~Dresden verlangt wird. 
+% der Seitenränder, wie es vom \CD der \TnUD verlangt wird. Sollte das Laden 
+% des Paketes verhindert werden, sind einige wenige Befehle vorzuhalten.
 %    \begin{macrocode}
+\AtEndPreamble{%
+  \@ifpackageloaded{geometry}{}{%
+    \def\tud@geometry@process{\tud@geometry@set}%
+    \let\tud@BeforeSelectAnyPageStyle\@gobble%
+  }%
+}
 \tud@ifsacrop{%
   \PreventPackageFromLoading{geometry}%
 }{%
