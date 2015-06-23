@@ -6,9 +6,13 @@ echo =========================================================================
 echo.
 for /f "tokens=1,2,3 delims= " %%a in (
   'findstr /r \@TUDVersion{[0-9][0-9][0-9][0-9]/[0-9][0-9]/[0-9][0-9] source\tudscr-version.dtx'
-) do set version=%%b
-set /p append=%version%
-set version=%version%%append%
+) do (
+  if "%%c" == "TUD-KOMA-Script}%%" (
+    set version=%%b
+  ) else (
+    set version=%%b-%%c
+  )
+)
 if exist temp rmdir temp /s /q > nul
 if exist release-%version% rmdir release-%version% /s /q > nul
 echo.
