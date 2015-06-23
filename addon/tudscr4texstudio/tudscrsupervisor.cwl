@@ -24,7 +24,7 @@
 \emailaddress{text}
 \taskname#S
 \tasktext#S
-\authorname#S
+\namesname#S
 \titlename#S
 \coursename#S
 \disciplinename#S
