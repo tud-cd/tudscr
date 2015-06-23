@@ -50,7 +50,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-scripts.dtx}[%
-  2015/06/17 v2.04 TUD-KOMA-Script installation scripts%
+  2015/06/23 v2.04 TUD-KOMA-Script installation scripts%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -322,7 +322,6 @@ for /f "usebackq tokens=1,2" %%a in (
 %
 % \iffalse
 %</!convert>
-%<*full|font|convert>
 %<*convert>
 % \fi
 %
@@ -335,18 +334,19 @@ echo.
 %
 % \iffalse
 %</convert>
-%<*!convert>
+%<*full|font|converted>
 % \fi
 %
+  set updmapsys=true
   kpsewhich --var-value=TEXMFVAR> texmfvar.tmp
   set /p texmfvar=< texmfvar.tmp
-  set updmapsys=true
   if exist "%texmfvar%\fonts\map" (
     set updmapsys=false
   )
 %
 % \iffalse
-%</!convert>
+%</full|font|converted>
+%<*full|font|convert>
 % \fi
 %
 %<old>  set localfolder=tud
@@ -817,22 +817,33 @@ exit /b 0
 # Univers_PS.zip
 # 
 # Die Installation erfolgt in Normalfall in das lokale Benutzerverzeichnis
-# $TEXMFHOME, wenn der Nutzer nichts anders auswaehlt. Dies ist unter Linux in
-# '~/texmf' und unter Mac OS in '~/Library/texmf'. Im Installationsprozess wird 
+# $TEXMFHOME. Dieses entspricht unter Linux in '~/texmf' und unter Mac OS in 
+# '~/Library/texmf'. Wird das Skript mit 'sudo' ausgefuehrt, erfolgt die 
+# systemweite Installation fuer alle Nutzer in $TEXMFLOCAL. 
+#
+% \iffalse
+%<*full|font|converted>
+% \fi
+%
+# Fuer die lokale Benutzerinstallation wird waehrend des Installationsprozesses 
 # geprueft, ob die Schriften mit dem Befehl 'updmap-sys' systemweit registriert
 # werden koennen oder ob dies im Zweifelsfall mit 'updmap' fuer den aktuellen
-# Benutzer lokal geschehen muss. Die erste Variante benoetigt Zugriffsrechte 
-# auf den Installationsordner der Distribution. Wird die zweite Variante
-# gewaehlt, wird der Befehl 'updmap-sys' ab diesem Zeitpunkt wirkungslos und 
-# der Anwender muss ab sofort den Befehl 'updmap' nach Aenderungen an den
-# LaTeX-Schriften (z.B. Updates) manuell aufrufen, damit neue repsektive 
-# aktualisierte Schriften registriert werden. Mit Mac OS geht dies mit 
-# "TeX Live Utility.app": "Preferences..." -> "Automatically enable fonts in 
-# my home directory."
+# Benutzer lokal geschehen muss. Die erste Variante benoetigt Zugriffsrechte
+# auf den Installationsordner der Distribution, welche im Zweifelsfall durch 
+# das Skript efragt werden. Wird die zweite Variante gewaehlt, wird der Befehl
+# 'updmap-sys' wirkungslos und der Anwender muss ab sofort den Befehl 'updmap'
+# nach Aenderungen an den systemweiten LaTeX-Schriften (z.B. Updates) manuell
+# aufrufen, damit neue respektive aktualisierte Schriften registriert werden.
+# Bei Mac OS kann dies automatisch mit "TeX Live Utility.app": "Preferences..." 
+# -> "Automatically enable fonts in my home directory." erfolgen.
 #
+% \iffalse
+%</full|font|converted>
+% \fi
+%
 checkfile()
 {
-  if [ ! -f "$1" ]; then
+  if [ ! -f "$1" ] ; then
     missing=true
     missingfile "$1"
   else
@@ -852,7 +863,7 @@ missingfile()
 checkscript()
 {
   script=$(which $1)
-  if [ -z "$script" ]; then
+  if [ -z "$script" ] ; then
     missing=true
     missingscript "$1"
   else
@@ -873,7 +884,7 @@ missingscript()
 checkpackage()
 {
   package=$(kpsewhich $1)
-  if [ -z "$package" ]; then
+  if [ -z "$package" ] ; then
     missing=true
     missingpackage "$1"
   else
@@ -890,6 +901,11 @@ missingpackage()
   echo
   echo  =====================================================================
 }
+%
+% \iffalse
+%<*!convert>
+% \fi
+%
 proof_userinput()
 {
   echo
@@ -898,7 +914,7 @@ proof_userinput()
   echo   $texmfpath
   echo
   echo   Soll dieser Pfad genutzt werden?
-  if [ ! -d $texmfpath ]; then
+  if [ ! -d $texmfpath ] ; then
     echo Der angegebene Ordner existiert nicht, wird jedoch erstellt.
   fi
   select yn in "Ja (empfohlen)" "Nein"; do
@@ -917,6 +933,11 @@ set_texmfpath()
   read texmfpath
   proof_userinput
 }
+%
+% \iffalse
+%</!convert>
+% \fi
+%
 abort()
 {
   echo
@@ -976,10 +997,10 @@ version=$(echo $version|rev|cut -c12-|rev)
 rm -rf tudscrtemp
 mkvaldir tudscrtemp/converted
 texpath=$(which tex)
-if [ -z "$texpath" ]; then
+if [ -z "$texpath" ] ; then
   echo Es wurde keine LaTeX-Distribution gefunden.
   echo Moeglicherweise hilft der Aufruf des Skriptes mit:
-  echo \'sudo -k env \"PATH=\$PATH\" bash <Skriptname>\'
+  echo "'sudo -k env \"PATH=\$PATH\" bash $0'"
   abort
 fi
 echo  =====================================================================
@@ -1034,7 +1055,7 @@ echo
 % \fi
 %
 texmfpath=$(kpsewhich --var-value=TEXMFHOME)
-if [ -z "$texmfpath" ]; then
+if [ -z "$texmfpath" ] || [ "$EUID" -eq 0 ] ; then
   texmfpath=$(kpsewhich --var-value=TEXMFLOCAL)
 fi
 echo  =====================================================================
@@ -1057,7 +1078,6 @@ echo
 %
 % \iffalse
 %</!convert>
-%<*full|font|convert>
 %<*convert>
 % \fi
 %
@@ -1070,11 +1090,11 @@ echo
 %
 % \iffalse
 %</convert>
-%<*!convert>
+%<*full|font|converted>
 % \fi
 %
 updmapsys=true
-if [ -d "$(kpsewhich --var-value=TEXMFVAR)/fonts/map/" ]; then
+if [ -d "$(kpsewhich --var-value=TEXMFVAR)/fonts/map/" ] ; then
   updmapsys=false
 else
   texdirarray=(
@@ -1085,8 +1105,8 @@ else
   looptexdirarray()
   {
     for d in "${texdirarray[@]}"; do
-      if [ -d "$d" ] && [ ! -w "$d" ]; then
-        if [ "$1" == "use" ]; then
+      if [ -d "$d" ] && [ ! -w "$d" ] ; then
+        if [ "$1" == "use" ] ; then
           eval ${@:2} $d;
         else
           eval $@;
@@ -1132,9 +1152,9 @@ else
 fi
 %
 % \iffalse
-%</!convert>
+%</full|font|converted>
+%<*full|font|convert>
 % \fi
-%
 %<old>localfolder=tud
 %<!old>localfolder=tudscr
 mkvaldir $texmfpath/tex/latex/$localfolder/fonts
@@ -1143,7 +1163,6 @@ mkvaldir $texmfpath/fonts/afm/$localfolder
 mkvaldir $texmfpath/fonts/vf/$localfolder
 mkvaldir $texmfpath/fonts/type1/$localfolder
 mkvaldir $texmfpath/fonts/map/dvips/$localfolder
-%
 % \iffalse
 %</full|font|convert>
 %</!uninstall>
@@ -1153,24 +1172,24 @@ mkvaldir $texmfpath/fonts/map/dvips/$localfolder
 uninstall()
 {
   cd $1
-  if [ -d logo ]; then
+  if [ -d logo ] ; then
     rm -rf logo
   fi
   rm -f *.clo
   rm -f *.cls
   rm -f *.sty
   cd ../../..
-  if [ -d doc/latex/tudscr ]; then
+  if [ -d doc/latex/tudscr ] ; then
     rm -rf doc/latex/tudscr
   fi
-  if [ -d source/latex/tudscr ]; then
+  if [ -d source/latex/tudscr ] ; then
     rm -rf source/latex/tudscr
   fi
 }
 texmfdist=$(kpsewhich --var-value=TEXMFDIST)
 texmfpath=$(kpsewhich tudscrbase.sty --all)
 while read -r line; do
-  if [[ $line != *"$texmfdist"* ]]; then
+  if [[ $line != *"$texmfdist"* ]] ; then
     texmftemp=$(echo $line|rev|cut -c15-|rev)
     echo  =====================================================================
     echo   Soll TUD-KOMA-Script aus folgendem Pfad entfernt werden?
