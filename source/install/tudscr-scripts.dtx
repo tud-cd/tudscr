@@ -1,4 +1,4 @@
-% \CheckSum{301}
+% \CheckSum{323}
 % \iffalse meta-comment
 %
 % ============================================================================
@@ -50,7 +50,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-scripts.dtx}[%
-  2015/06/23 v2.04 TUD-KOMA-Script installation scripts%
+  2015/06/24 v2.04 TUD-KOMA-Script installation scripts%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -150,8 +150,23 @@ echo.
 echo   Notwendige Dateien und Pakete werden gesucht.
 echo   Dies kann einen Moment dauern.
 echo.
+if not exist 7za.exe (
+  (
+    echo With WScript
+    echo   ZipFile = .Arguments^(0^) 
+    echo   Folder = .Arguments^(1^) 
+    echo End With
+    echo With CreateObject^("Scripting.FileSystemObject"^) 
+    echo   If Not .FolderExists^(Folder^) Then
+    echo     .CreateFolder^(Folder^)
+    echo   End If
+    echo End With
+    echo With CreateObject^("Shell.Application"^)
+    echo   .NameSpace^(Folder^).CopyHere .NameSpace^(ZipFile^).Items, 272
+    echo End With
+  ) > winunzip.vbs
+)
 set missing=false
-call:checkfile    "7za.exe"
 %<full|update>call:checkfile "tudscr_%version%.zip"
 %
 % \iffalse
@@ -161,6 +176,7 @@ call:checkfile    "7za.exe"
 call:checkfile    "Univers_PS.zip"
 call:checkfile    "DIN_Bd_PS.zip"
 %<!old>call:checkfile    "tudscr_fonts_install.zip"
+if "%missing%" == "true" goto :abort
 call:checkscript  "pltotf"
 call:checkscript  "vptovf"
 call:checkpackage "fontinst.sty"
@@ -428,16 +444,16 @@ exit /b 0
 % \fi
 %
   cd /d %~dp0
-%<full|update>  7za x tudscr_%version%.zip -o"%texmfpath%" -y
-%<converted>  7za x tudscr_fonts_converted.zip -o"%texmfpath%" -y
+%<full|update>  call:unzip tudscr_%version%.zip %texmfpath%
+%<converted>  call:unzip tudscr_fonts_converted.zip %texmfpath%
 %
 % \iffalse
 %<*full|font|convert>
 % \fi
 %
-  7za e Univers_PS.zip -o"tudscrtemp" -y
-  7za e DIN_Bd_PS.zip -o"tudscrtemp" -y
-%<!old>  7za e tudscr_fonts_install.zip -o"tudscrtemp\converted" -y
+  call:unzip Univers_PS.zip tudscrtemp
+  call:unzip DIN_Bd_PS.zip tudscrtemp
+%<!old>  call:unzip tudscr_fonts_install.zip tudscrtemp\converted
   cd tudscrtemp
 %
 % \iffalse
@@ -709,7 +725,7 @@ exit /b 0
   if exist tudscrtemp rmdir /s /q tudscrtemp> nul
   exit /b 0
 :checkfile
-  if not exist ../%~1 (
+  if not exist ..\%~1 (
     set missing=true
     call:missingfile %~1
   ) else (
@@ -768,6 +784,17 @@ exit /b 0
   echo   und danach dieses Skript abermals ausfuehren.
   echo.
   echo  =====================================================================
+  goto:eof
+:unzip
+  if exist 7za.exe (
+    7za x %~1 -o"%~2" -y
+  ) else (
+    if exist %cd%\%~2 (
+      CScript tudscrtemp\winunzip.vbs %cd%\%~1 %cd%\%~2
+    ) else (
+      CScript tudscrtemp\winunzip.vbs %cd%\%~1 %~2
+    )
+  )
   goto:eof
 %
 % \iffalse
@@ -1018,6 +1045,9 @@ missing=false
 checkfile "Univers_PS.zip"
 checkfile "DIN_Bd_PS.zip"
 %<!old>checkfile "tudscr_fonts_install.zip"
+if $missing ; then
+  abort
+fi
 checkscript "pltotf"
 checkscript "vptovf"
 checkpackage "fontinst.sty"
@@ -1046,8 +1076,7 @@ echo   Es wurden alle notwendigen Dateien und Pakete gefunden.
 echo
 echo  =====================================================================
 echo
-echo   LaTeX-Distribution gefunden unter:
-echo   "$texpath"
+echo   LaTeX-Distribution gefunden: "$texpath"
 echo
 %
 % \iffalse
@@ -1385,13 +1414,14 @@ texhash
 %<*full|font|converted>
 % \fi
 %
-if $updmapsys ; then
+if $updmapsys || [ "$EUID" -eq 0 ] ; then
   echo  =====================================================================
   echo   Aufruf von \'updmap-sys\'
   echo  =====================================================================
 %<old>  updmap-sys --enable Map=tud.map --force
 %<!old>  updmap-sys --enable Map=tudscr.map --force
-else
+fi
+if ! $updmapsys ; then
   echo  =====================================================================
   echo   Aufruf von \'updmap\'
   echo  =====================================================================
