@@ -114,13 +114,13 @@ copy temp\doc\latex\tudscr\tudscr_print.pdf release-%version%\temp\
 move temp\install\*.*                       release-%version%\temp\
 rmdir temp\install /s /q > nul
 cd release-%version%\temp
-for /f %%f in ('dir /b *.bat') do unix2dos %%f
+for /f %%f in ('dir /b *.bat') do unix2dos -k %%f
 7za a -tzip tudscr_%version%_full.zip   .\..\..\temp\*
 7za a -tzip tudscr_%version%_update.zip .\..\..\temp\* -xr!logo
 7za a -tzip tudscr_fonts_install.zip                                              @7za_files_metrics.txt
 call tudscr_fonts_convert.bat
 7za a -tzip tudscr_fonts_converted.zip                                            @7za_files_fonts.txt
-for /f %%f in ('dir /b *.md') do unix2dos -n %%f %%~nf.txt
+for /f %%f in ('dir /b *.md') do unix2dos -n -k %%f %%~nf.txt
 7za a -tzip .\..\TUD-KOMA-Script_%version%_Windows_all.zip    -x!*.sh             @7za_files_full.txt @7za_files_postscript.txt
 7za a -tzip .\..\TUD-KOMA-Script_%version%_Windows_full.zip   -x!*.sh             @7za_files_full.txt
 7za a -tzip .\..\TUD-KOMA-Script_%version%_Windows_update.zip -x!*.sh             @7za_files_update.txt
@@ -154,15 +154,20 @@ xcopy ..\temp\doc\latex\tudscr\*.*      CTAN\tudscr\doc\    /s
 xcopy ..\temp\source\latex\tudscr\*.*   CTAN\tudscr\source\ /s
 xcopy ..\temp\tex\latex\tudscr\logo\*.* CTAN\tudscr\logo\   /s
 move  CTAN\tudscr\doc\README            CTAN\tudscr\README
-echo Set objArgs = WScript.Arguments > winzip.vbs
-echo InputFolder = objArgs(0) >> winzip.vbs
-echo ZipFile = objArgs(1) >> winzip.vbs
-echo CreateObject("Scripting.FileSystemObject").CreateTextFile(ZipFile, True).Write "PK" ^& Chr(5) ^& Chr(6) ^& String(18, vbNullChar) >> winzip.vbs
-echo Set objShell = CreateObject("Shell.Application") >> winzip.vbs
-echo Set source = objShell.NameSpace(InputFolder).Items >> winzip.vbs
-echo objShell.NameSpace(ZipFile).CopyHere(source) >> winzip.vbs
-echo wScript.Sleep 2000 >> winzip.vbs
-CScript  winzip.vbs  %cd%\CTAN  %cd%\tudscr.zip
+cd temp
+(
+  echo With WScript
+  echo   ZipFile = .Arguments^(0^) 
+  echo   Folder = .Arguments^(1^) 
+  echo End With
+  echo CreateObject^("Scripting.FileSystemObject"^).CreateTextFile^(ZipFile, True^).Write "PK" ^& Chr^(5^) ^& Chr^(6^) ^& String^(18, vbNullChar^) 
+  echo With CreateObject^("Shell.Application"^) 
+  echo   .NameSpace^(ZipFile^).CopyHere .NameSpace^(Folder^).Items
+  echo End With
+  echo wScript.Sleep 2000 
+) > winzip.vbs
+cd ..
+CScript  temp\winzip.vbs %cd%\tudscr.zip %cd%\CTAN
 move %cd%\tudscr.zip %cd%\CTAN\
 echo.
 echo =========================================================================
