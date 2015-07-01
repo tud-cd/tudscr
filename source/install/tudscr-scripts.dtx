@@ -1,4 +1,4 @@
-% \CheckSum{194}
+% \CheckSum{205}
 % \iffalse meta-comment
 %
 % ============================================================================
@@ -50,7 +50,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-scripts.dtx}[%
-  2015/06/30 v2.04 TUD-KOMA-Script installation scripts%
+  2015/07/01 v2.04 TUD-KOMA-Script installation scripts%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -85,9 +85,9 @@
 % automatisch generiert. Das wichtigste ist das Skript zur Installation der 
 % Schriften, welches mit dem Tag \texttt{<font>} versehen ist. Das Skript zur 
 % automatisierten lokalen Benutzerinstallation der Schriften \emph{und} der 
-% Klassen und Pakete ist mit \texttt{<full>} markiert. Für ein Update der
-% lokalen Benutzerinstallation ist das mit \texttt{<update>} gekennzeichnete
-% Skript zuständig. Zur Deinstallation der lokalen Installation wird ein
+% Klassen und Pakete ist mit \texttt{<full>} markiert. Für ein Update der 
+% lokalen Benutzerinstallation ist das mit \texttt{<update>} gekennzeichnete 
+% Skript zuständig. Zur Deinstallation der lokalen Installation wird ein 
 % separates, weitgehend unabhängiges Skript mit \texttt{<uninstall>} erzeugt.
 %
 % Für die interne Verwendung gibt es außerdem noch \texttt{<convert>}, womit 
@@ -217,10 +217,10 @@ goto :resume
 if not exist 7za.exe (
   (
     echo With WScript
-    echo   ZipFile = .Arguments^(0^) 
-    echo   Folder = .Arguments^(1^) 
+    echo   ZipFile = .Arguments^(0^)
+    echo   Folder = .Arguments^(1^)
     echo End With
-    echo With CreateObject^("Scripting.FileSystemObject"^) 
+    echo With CreateObject^("Scripting.FileSystemObject"^)
     echo   If Not .FolderExists^(Folder^) Then
     echo     .CreateFolder^(Folder^)
     echo   End If
@@ -240,6 +240,11 @@ echo.
 echo   Notwendige Dateien und Pakete werden gesucht.
 echo   Dies kann einen Moment dauern.
 echo.
+%    \end{macrocode}
+% Da die automatische Installation notwendiger Pakete von MiK\TeX{} nicht
+% fehlerfrei funktioniert, wird diese deaktiviert.
+%    \begin{macrocode}
+set MIKTEX_KPSEWHICH_MPM_AUTOINSTALL=no
 set missing=false
 %    \end{macrocode}
 % Für die lokale Installation von \TUDScript ist die gewünschte Versionsnummer 
@@ -260,20 +265,20 @@ call :checkfile    "Univers_PS.zip"
 call :checkfile    "DIN_Bd_PS.zip"
 %<!old>call :checkfile    "tudscr_fonts_install.zip"
 if "%missing%" == "true" goto :abort
-call :checkscript  "pltotf"
-call :checkscript  "vptovf"
-call :checkpackage "fontinst.sty"
+call :checkscript  "pltotf"       "fontware"
+call :checkscript  "vptovf"       "fontware"
+call :checkpackage "fontinst.sty" "fontinst"
 %</full|font|convert>
 %    \end{macrocode}
 % Für die Schriftfamilien im Stil von \TUDScript werden einige zusätzliche 
 % Pakete benötigt.
 %    \begin{macrocode}
 %<*!old>
-call :checkpackage "type1ec.sty"
-call :checkpackage "lmodern.sty"
-call :checkpackage "cmbright.sty"
-call :checkpackage "hfbright.map"
-call :checkpackage "iwona.sty"
+call :checkpackage "type1ec.sty"  "cm-super"
+call :checkpackage "lmodern.sty"  "lm"
+call :checkpackage "cmbright.sty" "cmbright"
+call :checkpackage "hfbright.map" "hfbright"
+call :checkpackage "iwona.sty"    "iwona"
 %</!old>
 %    \end{macrocode}
 % Wenn auch nur eine benötigte Datei nicht vorhanden ist, wird die Installation 
@@ -284,6 +289,7 @@ echo.
 echo   Es wurden alle notwendigen Dateien und Pakete gefunden.
 echo.
 echo  =====================================================================
+echo  =====================================================================
 echo.
 %    \end{macrocode}
 % Als nächstes wird der Installationspfad bestimmt. Dabei wird unterschieden, 
@@ -291,33 +297,41 @@ echo.
 %    \begin{macrocode}
 %<*!convert>
 net session >nul 2>&1
-if %errorLevel%==0 (
+if %errorlevel%==0 (
   set admin=true
 ) else (
   set admin=false
 )
+%    \end{macrocode}
+% Die Variablen \val{TEXMFLOCAL} und \val{TEXMFHOME} werden momentan nur von
+% \TeX~Live sinnvoll bereitgestellt. Für MiK\TeX{} werden daher die Variablen 
+% \val{TEXMFSYSVAR} bzw. \val{TEXMFVAR} verwendet und als Pfade empfohlen.
+%    \begin{macrocode}
 set texmfpath=
 if "%admin%" == "true" (
-  kpsewhich --var-value=TEXMFLOCAL> texmfpath.tmp
-) else (
-  kpsewhich --var-value=TEXMFHOME> texmfpath.tmp
-)
-set /p texmfpath=< texmfpath.tmp
-%    \end{macrocode}
-% Die Variable \val{TEXMFHOME} wird momentan nur von \TeX~Live bereitgestellt. 
-% Für MiK\TeX{} wird daher für einen lokalen \LaTeX-Ordner als alternativer
-% Pfad das Nutzerverzeichnis empfohlen.
-% \ToDo{Für MiKTeX anpassen}[v2.04]
-%    \begin{macrocode}
-if %texdistrib%=="MiKTeX" (
-  if "%texmfpath%"=="" (
-    echo %USERPROFILE%\texmf> texmfpath.tmp
-    set /p texmfpath=< texmfpath.tmp
+  if %texdistrib%=="MiKTeX" (
+    kpsewhich --var-value=TEXMFSYSVAR> texmfpath.tmp
+  ) else (
+    kpsewhich --var-value=TEXMFLOCAL> texmfpath.tmp
   )
+  echo   Administratorinstallation fuer alle Nutzer.
+) else (
+  if %texdistrib%=="MiKTeX" (
+    kpsewhich --var-value=TEXMFVAR> texmfpath.tmp
+  ) else (
+    kpsewhich --var-value=TEXMFHOME> texmfpath.tmp
+  )
+  echo   Einzelnutzerinstallation.
+)
+echo.
+echo  =====================================================================
+echo  =====================================================================
+echo.
 %    \end{macrocode}
 % Für eine portable MiK\TeX-Installation wird als lokaler \LaTeX-Pfad einer auf
 % der gleichen Ordnerebene vorgeschlagen.
 %    \begin{macrocode}
+if %texdistrib%=="MiKTeX" (
   if "%portable%" == "true" (
     setlocal enabledelayedexpansion
       pushd !cd!
@@ -327,14 +341,13 @@ if %texdistrib%=="MiKTeX" (
       popd
       echo !texmfpath!> texmfpath.tmp
     endlocal
-    set /p texmfpath=< texmfpath.tmp
   )
 )
+set /p texmfpath=< texmfpath.tmp
 %    \end{macrocode}
-% Folgend wird der Installationsordner festgelegt, wobei dieser mit dem zuvor
-% ermittelten und empfohlenen Pfad vorgeschlagen wird.
+% Folgend wird der Installationsordner durch den Nutzer festgelegt, wobei
+% dieser mit dem zuvor ermittelten und empfohlenen Pfad vorgeschlagen wird.
 %    \begin{macrocode}
-echo.
 echo   Bitte geben Sie das gewuenschte Installationsverzeichnis an.
 echo   Dieses sollte sich jenseits der Distributionsordnerstruktur
 if "%portable%" == "true" (
@@ -389,7 +402,6 @@ echo   Installation in folgenden Pfad:
 echo   %texmfpath%
 echo  =====================================================================
 echo.
-if not exist "%texmfpath%" mkdir "%texmfpath%"
 %</!convert>
 %    \end{macrocode}
 % Die ledigliche Konvertierung~-- ohne Installation~-- der Schriften erfolgt 
@@ -406,16 +418,14 @@ echo.
 %    \end{macrocode}
 % Für die notwendige Registrierung der Schriften nach der Installtion wird 
 % geprüft, ob dies für alle Nutzer mit \textbf{updmap-sys} erfolgen kann oder 
-% ob die nutzerindividuelle Variante mit \textbf{updmap} notwendig ist.
-% \ToDo{Unterscheidung/Auswahl von updmap oder updmap-sys bei MiKTeX}
+% ob die nutzerindividuelle Variante mit \textbf{updmap} notwendig ist. Dies 
+% ist jedoch lediglich für \TeX~Live relevant.
 %    \begin{macrocode}
 %<*full|font|converted>
 set updmapsys=true
 kpsewhich --var-value=TEXMFVAR> texmfvar.tmp
 set /p texmfvar=< texmfvar.tmp
-if exist "%texmfvar%\fonts\map" (
-  set updmapsys=false
-)
+if exist "%texmfvar%\fonts\map" set updmapsys=false
 %</full|font|converted>
 %    \end{macrocode}
 % Die benötigten Verzeichnisse für die konvertierten Schriften werden erzeugt.
@@ -606,33 +616,31 @@ copy /y *.map "%texmfpath%\fonts\map\dvips\%localfolder%"
 % \fi
 %
 % Abhängig von der aktiven Distribution werden jetzt die Schriften registriert.
-% \ToDo{Unterscheidung/Auswahl von updmap oder updmap-sys bei MiKTeX}
 %    \begin{macrocode}
 set "texmfpath=%texmfpath:\=/%"
 if %texdistrib%=="MiKTeX" goto :MiKTeXHash
 :TeXLiveHash
 texhash
 %<*full|font|converted>
-if "%updmapsys%" == "true" (
-  echo  =====================================================================
-  echo   Aufruf von 'updmap-sys'
-  echo  =====================================================================
-%<old>  updmap-sys --enable Map=tud.map --force
-%<!old>  updmap-sys --enable Map=tudscr.map --force
-) else (
-  echo  =====================================================================
-  echo   Aufruf von 'updmap'
-  echo  =====================================================================
-%<old>  updmap --enable Map=tud.map --force
-%<!old>  updmap --enable Map=tudscr.map --force
-)
+if "%admin%" == "true"      goto :TeXLiveSysMap
+if "%updmapsys%" == "false" goto :TeXLiveUserMap
+:TeXLiveSysMap
+echo  =====================================================================
+echo   Aufruf von 'updmap-sys'
+echo  =====================================================================
+%<old>updmap-sys --enable Map=tud.map --force
+%<!old>updmap-sys --enable Map=tudscr.map --force
+if "%updmapsys%" == "true"  goto :end
+:TeXLiveUserMap
+echo  =====================================================================
+echo   Aufruf von 'updmap'
+echo  =====================================================================
+%<old>updmap --enable Map=tud.map --force
+%<!old>updmap --enable Map=tudscr.map --force
 %</full|font|converted>
 goto :end
 :MiKTeXHash
-initexmf --register-root="%texmfpath%"
-initexmf --update-fndb="%texmfpath%"
 %<*full|font|converted>
-updmap
 set "texmfpath=%texmfpath:/=\%"
 set mapcfg=%texmfpath%\miktex\config\updmap.cfg
 if not exist "%mapcfg%" (
@@ -651,8 +659,15 @@ if not exist "%mapcfg%" (
   if errorlevel 1 echo Map tudscr.map>> "%mapcfg%"
 %</!old>
 )
-initexmf --mkmaps
 %</full|font|converted>
+if "%admin%" == "true" (
+  initexmf --admin --update-fndb="%texmfpath%"
+%<full|font|converted>  initexmf --admin --mkmaps
+) else (
+  initexmf --update-fndb="%texmfpath%"
+%<full|font|converted>  initexmf --mkmaps
+)
+set "texmfpath=%texmfpath:\=/%"
 goto :end
 %    \end{macrocode}
 % Damit ist die Installation abgeschlossen. 
@@ -739,26 +754,22 @@ goto :end
   goto :eof
 :checkpackage
   set package=
-  if %texdistrib%=="MiKTeX" (
-    @echo on
-    kpsewhich %~1
-    @echo off
-  )
   kpsewhich %~1> package.tmp
   set /p package=< package.tmp
   if "%package%"=="" (
     set missing=true
-    call :missingpackage %~1
+    call :missingpackage %~1 %~2
   ) else (
-    echo   Paket %~1 gefunden
+    echo   Paket %~2 ^(%~1^) gefunden
   )
   goto :eof
 :missingpackage
   echo  =====================================================================
   echo.
-  echo   Das LaTeX-Paket %~1 wurde nicht gefunden. Dieses wird fuer die
-  echo   Schriftinstallation zwingend benoetigt. Bitte %~1
-  echo   installieren und danach dieses Skript abermals ausfuehren.
+  echo   Das LaTeX-Paket %~2 ^(%~1^) wurde nicht gefunden.
+  echo   Dieses wird fuer die Schriftinstallation zwingend benoetigt.
+  echo   Bitte das Paket '%~2' ueber die Distribution installieren und
+  echo   danach dieses Skript abermals ausfuehren.
   echo.
   echo  =====================================================================
   goto :eof
@@ -768,18 +779,19 @@ goto :end
   set /p script=<script.tmp
   if "%script%"=="" (
     set missing=true
-    call :missingscript %~1
+    call :missingscript %~1 %~2
   ) else (
-    echo   Skript %~1 gefunden
+    echo   Skript %~1 aus Paket %~2 gefunden
   )
   goto :eof
 :missingscript
   echo  =====================================================================
   echo.
-  echo   Das Skript %~1 wurde nicht gefunden. Dieses wird im Normalfall von 
-  echo   der LaTeX-Distribution bereitgestellt und zur Schriftinstallation 
-  echo   zwingend benoetigt. Bitte %~1 ueber die Distribution installieren 
-  echo   und danach dieses Skript abermals ausfuehren.
+  echo   Das ausfuehrbare Skript %~1 aus dem Paket %~2 wurde nicht
+  echo   gefunden. Dieses wird im Normalfall von der LaTeX-Distribution
+  echo   bereitgestellt und zur Schriftinstallation zwingend benoetigt.
+  echo   Bitte das Paket '%~2' ueber die Distribution installieren und
+  echo   danach dieses Skript abermals ausfuehren.
   echo.
   echo  =====================================================================
   goto :eof
@@ -790,11 +802,14 @@ goto :end
   if exist 7za.exe (
     7za x %~1 -o"%~2" -y
   ) else (
-    if exist %cd%\%~2 (
-      CScript tudscrtemp\winunzip.vbs %cd%\%~1 %cd%\%~2
-    ) else (
-      CScript tudscrtemp\winunzip.vbs %cd%\%~1 %~2
-    )
+    setlocal enabledelayedexpansion
+      set zipfile=%cd%\%~1
+      set "zipfile=!zipfile:\\=\!"
+      set unzipfolder=%cd%\%~2
+      set "unzipfolder=!unzipfolder:\\=\!"
+      if not exist !unzipfolder! set unzipfolder=%~2
+      CScript tudscrtemp\winunzip.vbs !zipfile! !unzipfolder!
+    endlocal
   )
   goto :eof
 %</!uninstall>
@@ -832,7 +847,7 @@ goto :end
   echo  =====================================================================
 %</!old>
   echo.
-  pause 
+  pause
 %</!convert>
   cd /d %~dp0
   if exist tudscrtemp rmdir /s /q tudscrtemp> nul
@@ -878,7 +893,7 @@ goto :end
 # Benoetigte Archive (im Verzeichnis des Installationsskriptes):
 # DIN_Bd_PS.zip
 # Univers_PS.zip
-# 
+#
 # Die Installation erfolgt in Normalfall in das lokale Benutzerverzeichnis
 # $TEXMFHOME. Dieses entspricht unter Linux in '~/texmf' und unter Mac OS in 
 # '~/Library/texmf'. Wird das Skript mit 'sudo' ausgefuehrt, erfolgt die 
@@ -944,18 +959,19 @@ checkpackage()
   package=$(kpsewhich $1)
   if [ -z "$package" ] ; then
     missing=true
-    missingpackage "$1"
+    missingpackage "$1" "$2"
   else
-    echo   Paket $1 gefunden
+    echo   Paket $2 \($1\) gefunden
   fi
 }
 missingpackage()
 {
   echo  =====================================================================
   echo
-  echo   Das LaTeX-Paket $1 wurde nicht gefunden. Dieses wird fuer
-  echo   die Schriftinstallation zwingend benoetigt. Bitte $1
-  echo   installieren und danach dieses Skript abermals ausfuehren.
+  echo   Das LaTeX-Paket $2 \($1\) wurde nicht gefunden.
+  echo   Dieses wird fuer die Schriftinstallation zwingend benoetigt.
+  echo   Bitte das Paket \'$2\' ueber die Distribution installieren und
+  echo   danach dieses Skript abermals ausfuehren.
   echo
   echo  =====================================================================
 }
@@ -964,19 +980,20 @@ checkscript()
   script=$(which $1)
   if [ -z "$script" ] ; then
     missing=true
-    missingscript "$1"
+    missingscript "$1" "$2"
   else
-    echo   Skript $1 gefunden
+    echo   Skript $1 aus Paket $2 gefunden
   fi
 }
 missingscript()
 {
   echo  =====================================================================
   echo
-  echo   Das Skript $1 wurde nicht gefunden. Dieses wird im Normalfall von 
-  echo   der LaTeX-Distribution bereitgestellt und zur Schriftinstallation 
-  echo   zwingend benoetigt. Bitte $1 ueber die Distribution installieren 
-  echo   und danach dieses Skript abermals ausfuehren.
+  echo   Das ausfuehrbare Skript $1 aus dem Paket $2 wurde nicht
+  echo   gefunden. Dieses wird im Normalfall von der LaTeX-Distribution
+  echo   bereitgestellt und zur Schriftinstallation zwingend benoetigt.
+  echo   Bitte das Paket \'$2\' ueber die Distribution installieren und
+  echo   danach dieses Skript abermals ausfuehren.
   echo
   echo  =====================================================================
 }
@@ -1093,20 +1110,20 @@ checkfile "DIN_Bd_PS.zip"
 if $missing ; then
   abort
 fi
-checkscript "pltotf"
-checkscript "vptovf"
-checkpackage "fontinst.sty"
+checkscript "pltotf"        "fontware"
+checkscript "vptovf"        "fontware"
+checkpackage "fontinst.sty" "fontinst"
 %</full|font|convert>
 %    \end{macrocode}
 % Für die Schriftfamilien im Stil von \TUDScript werden einige zusätzliche 
 % Pakete benötigt.
 %    \begin{macrocode}
 %<*!old>
-checkpackage "type1ec.sty"
-checkpackage "lmodern.sty"
-checkpackage "cmbright.sty"
-checkpackage "hfbright.map"
-checkpackage "iwona.sty"
+checkpackage "type1ec.sty"  "cm-super"
+checkpackage "lmodern.sty"  "lm"
+checkpackage "cmbright.sty" "cmbright"
+checkpackage "hfbright.map" "hfbright"
+checkpackage "iwona.sty"    "iwona"
 %</!old>
 %    \end{macrocode}
 % Wenn auch nur eine benötigte Datei nicht vorhanden ist, wird die Installation 
@@ -1119,16 +1136,27 @@ echo
 echo   Es wurden alle notwendigen Dateien und Pakete gefunden.
 echo
 echo  =====================================================================
+echo  =====================================================================
 echo
 %    \end{macrocode}
 % Als nächstes wird der Installationspfad bestimmt.
 %    \begin{macrocode}
 %<*!convert>
-texmfpath=$(kpsewhich --var-value=TEXMFHOME)
-if [ -z "$texmfpath" ] || [ "$EUID" -eq 0 ] ; then
+if [ "$EUID" -eq 0 ] ; then
   texmfpath=$(kpsewhich --var-value=TEXMFLOCAL)
+  echo   Administratorinstallation fuer alle Nutzer.
+else
+  texmfpath=$(kpsewhich --var-value=TEXMFHOME)
+  echo   Einzelnutzerinstallation.
 fi
 echo
+echo  =====================================================================
+echo  =====================================================================
+echo
+%    \end{macrocode}
+% Folgend wird der Installationsordner durch den Nutzer festgelegt, wobei
+% dieser mit dem zuvor ermittelten und empfohlenen Pfad vorgeschlagen wird.
+%    \begin{macrocode}
 echo   Bitte geben Sie das gewuenschte Installationsverzeichnis an.
 echo   Dieses sollte sich jenseits der Distributionsordnerstruktur
 echo   in einem lokalen Benutzerpfad befinden.
@@ -1199,13 +1227,13 @@ else
     echo von \'updmap-sys\' erforderlich. Dazu muessen fuer die nachfolgend
     echo aufgelisteten Ordner fuer alle anderen Benutzer \(\'other\'\) mit
     echo \'sudo chmod -R o+w\' Schreibrechte gesetzt werden. Dieses Vorgehen
-    echo wird empfohlen. 
+    echo wird empfohlen.
     echo
     looptexdirarray use echo
     echo
     echo Andernfalls wird lediglich \'updmap\' aufgerufen, wodurch der Befehl
     echo \'updmap-sys\' ab diesem Zeitpunkt wirkungslos wird und der Anwender
-    echo ab sofort nach Aenderungen an den LaTeX-Schriften \(z.B. Updates\) 
+    echo ab sofort nach Aenderungen an den LaTeX-Schriften \(z.B. Updates\)
     echo den Befehl \'updmap\' manuell aufrufen muss, damit neue repsektive
     echo aktualisierte Schriften registriert werden.
     select yn in "Schreibrechte setzen (empfohlen)" "'updmap' verwenden"; do
