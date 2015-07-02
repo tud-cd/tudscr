@@ -53,11 +53,6 @@ Das Bundle beinhaltet:
 Versionen
 ---------
 
-**v2.03a** (2015/06/11)
-
-+ Anpassungen an KOMA-Script v3.17
-+ Fehlerkorrektur für Auswahl der Mathematikschriften
-
 
 **v2.04** (2015/07/02)
 
@@ -66,6 +61,12 @@ Versionen
 + verbesserte Installationsroutine der Schriften für portable Distributionen
 + alleinstehender farbiger Querbalken im Kopfbereich
 + freier Inhalt im Fußbereich möglich
+
+
+**v2.03a** (2015/06/11)
+
++ Anpassungen an KOMA-Script v3.17
++ Fehlerkorrektur für Auswahl der Mathematikschriften
 
 
 **v2.03** (2015/02/15)
@@ -167,11 +168,6 @@ The bundle offers:
 Versions
 --------
 
-**v2.03a** (2015/06/11)
-
-+ adjustments to KOMA-Script v3.17
-+ bug fix for math font selecting
-
 
 **v2.04** (2015/07/02)
 
@@ -180,6 +176,12 @@ Versions
 + improved installation routine for portable distributions
 + solitary colored head bar
 + customisable content in the foot possible
+
+
+**v2.03a** (2015/06/11)
+
++ adjustments to KOMA-Script v3.17
++ bug fix for math font selecting
 
 
 **v2.03** (2015/02/15)
