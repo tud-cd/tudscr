@@ -1,29 +1,33 @@
-% \CheckSum{1187}
+% \CheckSum{1198}
 % \iffalse meta-comment
-% ======================================================================
 %
-% Das Corporate Design der TU Dresden auf Basis der KOMA-Script-Klassen
+% ============================================================================
+% 
+%  TUD-KOMA-Script
+%  Copyright (c) Falk Hanisch <tudscr@gmail.com>, 2012-2015
+% 
+% ============================================================================
+% 
+%  This work may be distributed and/or modified under the conditions of the
+%  LaTeX Project Public License, version 1.3c of the license. The latest
+%  version of this license is in http://www.latex-project.org/lppl.txt and 
+%  version 1.3c or later is part of all distributions of LaTeX 2005/12/01
+%  or later and of this work. This work has the LPPL maintenance status 
+%  "author-maintained". The current maintainer and author of this work
+%  is Falk Hanisch.
+% 
+% ----------------------------------------------------------------------------
+% 
+% Dieses Werk darf nach den Bedingungen der LaTeX Project Public Lizenz
+% in der Version 1.3c, verteilt und/oder veraendert werden. Die aktuelle 
+% Version dieser Lizenz ist http://www.latex-project.org/lppl.txt und 
+% Version 1.3c oder spaeter ist Teil aller Verteilungen von LaTeX 2005/12/01 
+% oder spaeter und dieses Werks. Dieses Werk hat den LPPL-Verwaltungs-Status 
+% "author-maintained", wird somit allein durch den Autor verwaltet. Der 
+% aktuelle Verwalter und Autor dieses Werkes ist Falk Hanisch.
+% 
+% ============================================================================
 %
-% ======================================================================
-% This work may be distributed and/or modified under the conditions of
-% the LaTeX Project Public License, version 1.3c of the license.
-% The latest version of this license is in
-%     http://www.latex-project.org/lppl.txt
-% and version 1.3c or later is part of all distributions of LaTeX
-% version 2005/12/01 or later and of this work.
-% This work has the LPPL maintenance status "author-maintained".
-% The current maintainer and author of this work is Falk Hanisch.
-% ----------------------------------------------------------------------
-% Dieses Werk darf nach den Bedingungen der LaTeX Project Public Lizenz,
-% Version 1.3c, verteilt und/oder veraendert werden.
-% Die neuste Version dieser Lizenz ist
-%     http://www.latex-project.org/lppl.txt
-% und Version 1.3c ist Teil aller Verteilungen von LaTeX
-% Version 2005/12/01 oder spaeter und dieses Werks.
-% Dieses Werk hat den LPPL-Verwaltungs-Status "author-maintained"
-% (allein durch den Autor verwaltet).
-% Der aktuelle Verwalter und Autor dieses Werkes ist Falk Hanisch.
-% ======================================================================
 % \fi
 %
 % \CharacterTable
@@ -46,12 +50,14 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-metrics.dtx}[%
-  2015/01/22 v2.03 TUD-KOMA-Script font metrics%
+  2015/04/28 v2.04 TUD-KOMA-Script font metrics%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
 \usepackage{selinput}\SelectInputMappings{adieresis={ä},germandbls={ß}}
+\usepackage[T1]{fontenc}
 \usepackage{babel}
+\usepackage{tudscrfonts} % only load this package, if the fonts are installed
 \KOMAoptions{parskip=half-}
 \CodelineIndex
 \RecordChanges
@@ -64,6 +70,8 @@
 % \fi
 %
 % \selectlanguage{ngerman}
+%
+% \changes{v2.04}{2015/04/22}{Fix für \cs{substitutesilent}}^^A
 %
 % \section{Routinen und Metriken für die Schriftinstallation}
 %
@@ -89,6 +97,7 @@
 % in das .pl-Format gewandelt wurden, in das .mtx-Format von \pkg{fontinst}
 % gewandelt.
 %    \begin{macrocode}
+\typeout{installfonts.tex: generalpltomtx}
 \generalpltomtx{cmbr10}{cmbr10}{pl}{ot1}
 \generalpltomtx{cmbrsl10}{cmbrsl10}{pl}{ot1}
 \generalpltomtx{cmbrbx10}{cmbrbx10}{pl}{ot1}
@@ -109,20 +118,9 @@
 \generalpltomtx{mi-iwonachi}{mi-iwonachi}{pl}{oml}
 \generalpltomtx{sy-iwonachz}{sy-iwonachz}{pl}{oms}
 %    \end{macrocode}
-% Danach werden die Schriften installiert. Dabei kommen unterschiedliche 
-% Metriken zum Einsatz. Als erstes die Schriftfamilie der Univers \texttt{lun}
-% in den gebräuchlichsten Kodierungen.
+% Die Schriften aus dem .afm-Format werden in das .mtx-Format transformiert. 
 %    \begin{macrocode}
-\installfonts
-\installfamily{OT1}{lun}{\hyphenchar\font=45}
-\installfamily{T1}{lun}{\hyphenchar\font=127}
-\installfamily{TS1}{lun}{\hyphenchar\font=-1}
-\installfamily{OML}{lun}{\skewchar\font=127}
-\installfamily{OMS}{lun}{\skewchar\font=48}
-%    \end{macrocode}
-% Die Schriften aus dem .afm-Format werden sowohl in ein .mtx-Format als auch
-% ein .pl-Format transformiert.
-%    \begin{macrocode}
+\typeout{installfonts.tex: transformfont lun}
 \transformfont{lunl8r}{\reencodefont{8r}{\fromafm{lunl8a}}}
 \transformfont{lunlo8r}{\reencodefont{8r}{\fromafm{lunlo8a}}}
 \transformfont{lunr8r}{\reencodefont{8r}{\fromafm{lunr8a}}}
@@ -132,10 +130,23 @@
 \transformfont{lunc8r}{\reencodefont{8r}{\fromafm{lunc8a}}}
 \transformfont{lunco8r}{\reencodefont{8r}{\fromafm{lunco8a}}}
 %    \end{macrocode}
+% Danach werden die Schriften installiert. Dabei kommen unterschiedliche 
+% Metriken zum Einsatz. Als erstes die Schriftfamilie der Univers \texttt{lun}
+% in den gebräuchlichsten Kodierungen.
+%    \begin{macrocode}
+\typeout{installfonts.tex: installfamily lun}
+\installfonts
+\installfamily{OT1}{lun}{\hyphenchar\font=45}
+\installfamily{T1}{lun}{\hyphenchar\font=127}
+\installfamily{TS1}{lun}{\hyphenchar\font=-1}
+\installfamily{OML}{lun}{\skewchar\font=127}
+\installfamily{OMS}{lun}{\skewchar\font=48}
+%    \end{macrocode}
 % Anschließennd wird das erzeugte .pl-Format verfeinert. Dabei werden mit der 
 % Metrik \texttt{ligature.mtx} fehlende Ligaturen ergänzt sowie Kerning bei den 
 % Ziffern entfernt.
 %    \begin{macrocode}
+\typeout{installfonts.tex: installrawfont}
 \installrawfont{lunl8r}{lunl8r,ligature,8r}{8r}{8r}{lun}{l}{n}{}
 \installrawfont{lunlo8r}{lunlo8r,ligature,8r}{8r}{8r}{lun}{l}{sl}{}
 \installrawfont{lunr8r}{lunr8r,ligature,8r}{8r}{8r}{lun}{m}{n}{}
@@ -152,7 +163,10 @@
 % ersetzt. Zusätzlich wird für jede der Kodierungen \texttt{OT1}, \texttt{T1} 
 % und \texttt{TS1} eine spiezielle Metrik \texttt{lun\meta{Kodierung}.mtx} für 
 % die Univers genutzt.
+%\begingroup
+%\hfuzz=50pt
 %    \begin{macrocode}
+\typeout{installfonts.tex: installfont lun}
 \installfont{lunl7t}{lunl8r,lunot1,cmbr10,newlatin}{OT1}{OT1}{lun}{l}{n}{}
 \installfont{lunl8t}{lunl8r,lunt1,newlatin}{T1}{T1}{lun}{l}{n}{}
 \installfont{lunl8c}{lunl8r,lunts1,tbmr10,textcomp}{TS1}{TS1}{lun}{l}{n}{}
@@ -185,16 +199,22 @@
 \installfont{lunco8c}{lunco8r,lunts1,tbbx10,textcomp}{TS1}{TS1}{lun}{eb}{sl}{}
 \installfont{luncc7t}{lunc8r,lunot1,cmbrbx10,newlatin}{OT1c}{OT1}{lun}{eb}{sc}{}
 \installfont{luncc8t}{lunc8r,lunt1,newlatin}{T1c}{T1}{lun}{eb}{sc}{}
+\substitutesilent{l}{l}
 %    \end{macrocode}
+%\endgroup
 % Für die Kodierung der Mathematikschrift werden die Kursiven als Basisschrift 
 % genutzt. Allerdings werden aufrechte Ziffern benötigt. Die griechischen 
 % Buchstaben kommen aus dem Paket \pkg{cmbright}.
+%\begingroup
+%\hfuzz=70pt
 %    \begin{macrocode}
 \installfont{lunl7m}{lunlo8r,unsetnum,lunl8r,lunoml,cmbrmi10,mathit}{OML}{OML}{lun}{l}{sl}{}
 \installfont{lunr7m}{lunro8r,unsetnum,lunr8r,lunoml,cmbrmi10,mathit}{OML}{OML}{lun}{m}{sl}{}
 \installfont{lunb7m}{lunbo8r,unsetnum,lunb8r,lunoml,cmbrmb10,mathit}{OML}{OML}{lun}{b}{sl}{}
 \installfont{lunc7m}{lunco8r,unsetnum,lunc8r,lunoml,cmbrmb10,mathit}{OML}{OML}{lun}{eb}{sl}{}
+\substitutesilent{l}{l}
 %    \end{macrocode}
+%\endgroup
 % Unbekannte Symbole in der Univers werden aus dem Paket \pkg{iwona} ergänzt.
 %    \begin{macrocode}
 \installfont{lunl7y}{lunl8r,lunoms,sy-iwonamz,mathsy}{OMS}{OMS}{lun}{l}{n}{}
@@ -207,6 +227,7 @@
 % Zum Schluss werden aus dem Paket \pkg{lmodern} die Schreibmaschinenschriften 
 % entnommen.
 %    \begin{macrocode}
+\typeout{installfonts.tex: installfamily lunt}
 \installfonts
 \installfamily{OT1}{lunt}{\hyphenchar\font=-1}
 \installfamily{T1}{lunt}{\hyphenchar\font=-1}
@@ -235,6 +256,7 @@
 %    \end{macrocode}
 % Nach der Univers folgt DIN~Bold.
 %    \begin{macrocode}
+\typeout{installfonts.tex: installfamily 0m6}
 \installfonts
 \installfamily{OT1}{0m6}{\hyphenchar\font=45}
 \installfamily{T1}{0m6}{\hyphenchar\font=127}
@@ -244,8 +266,10 @@
 %    \end{macrocode}
 % Auch werden die Schriften erst transformiert und anschließend verfeinert.
 %    \begin{macrocode}
+\typeout{installfonts.tex: transformfont 0m6}
 \transformfont{0m6b8r}{\reencodefont{8r}{\fromafm{0m6b8a}}}
 \transformfont{0m6bo8r}{\slantfont{167}{\frommtx{0m6b8r}}}
+\typeout{installfonts.tex: installrawfont 0m6}
 \installrawfont{0m6b8r}{0m6b8r,ligature,8r}{8r}{8r}{0m6}{b}{n}{}
 \installrawfont{0m6bo8r}{0m6bo8r,ligature,8r}{8r}{8r}{0m6}{b}{sl}{}
 %    \end{macrocode}
@@ -254,7 +278,10 @@
 % die DIN~Bold aus dem Paket \pkg{iwona} ergänzt. Für die DIN~Bold muss 
 % zusätzlich das Kerning bei einigen Buchstabenkombinationen angepasst werden, 
 % da dieses in der Ausgangsschrift fehlerhaft ist.
+%\begingroup
+%\hfuzz=80pt
 %    \begin{macrocode}
+\typeout{installfonts.tex: installfont 0m6}
 \installfont{0m6b7t}{0m6bkern,0m6b8r,0m6ot1,rm-iwonach,newlatin}{OT1}{OT1}{0m6}{b}{n}{}
 \installfont{0m6b8t}{0m6bkern,0m6b8r,0m6t1,newlatin}{T1}{T1}{0m6}{b}{n}{}
 \installfont{0m6b8c}{0m6bkern,0m6b8r,0m6ts1,ts1-iwonach,textcomp}{TS1}{TS1}{0m6}{b}{n}{}
@@ -265,11 +292,11 @@
 \installfont{0m6bc8t}{0m6bkern,0m6b8r,0m6t1,newlatin}{T1c}{T1}{0m6}{b}{sc}{}
 \installfont{0m6b7m}{0m6bo8r,unsetnum,0m6b8r,0m6oml,mi-iwonachi,mathit}{OML}{OML}{0m6}{b}{sl}{}
 \installfont{0m6b7y}{0m6b8r,0m6oms,sy-iwonachz,mathsy}{OMS}{OMS}{0m6}{b}{n}{}
-\substitutesilent{b}{l}
-\substitutesilent{b}{m}
+\substitutesilent{eb}{b}
 \endinstallfonts
 \bye
 %    \end{macrocode}
+%\endgroup
 %
 % \iffalse
 %</install>
@@ -524,6 +551,8 @@
 % Für die \texttt{TS1}-Kodierung wird enormer Aufwand getrieben. In dieser 
 % befinden sich viele, buchstabenähnliche Symbole, die im Folgenden nachgeahmt
 % werden.
+%\begingroup
+%\hfuzz=60pt
 %    \begin{macrocode}
 \relax
 \metrics
@@ -697,6 +726,7 @@
 \endsetglyph
 \endmetrics
 %    \end{macrocode}
+%\endgroup
 %
 % \iffalse
 %</TS1>
@@ -706,8 +736,9 @@
 % \paragraph{OML-Kodierung}
 %
 % Für das Setzen der Akzente im Mathematikmodus wird das Kerning definert. Dazu
-% wurde bei der Initialisierung der Schriftfamilie die Glyphe \texttt{tie} mit
-% \cs{skewchar}\cs{font}\texttt{=127} gesetzt.
+% wurde bei der Initialisierung der beiden Schriftfamilien \texttt{lun} und 
+% \texttt{0m6} die Glyphe \texttt{tie} mit \cs{skewchar}\cs{font}\texttt{=127}
+% gesetzt.
 %    \begin{macrocode}
 \relax
 \metrics
@@ -876,6 +907,8 @@
 %
 % Ähnlich wie bei Univers wird auch bei DIN~Bold in der \texttt{TS1}-Kodierung
 % eine Menge an buchstabenähnliche Glyphen imitiert.
+%\begingroup
+%\hfuzz=60pt
 %    \begin{macrocode}
 \relax
 \metrics
@@ -1040,6 +1073,7 @@
 \endsetglyph
 \endmetrics
 %    \end{macrocode}
+%\endgroup
 %
 % \iffalse
 %</TS1>

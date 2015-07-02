@@ -6,9 +6,13 @@ echo =========================================================================
 echo.
 for /f "tokens=1,2,3 delims= " %%a in (
   'findstr /r \@TUDVersion{[0-9][0-9][0-9][0-9]/[0-9][0-9]/[0-9][0-9] source\tudscr-version.dtx'
-) do set version=%%b
-set /p append=%version%
-set version=%version%%append%
+) do (
+  if "%%c" == "TUD-KOMA-Script}%%" (
+    set version=%%b
+  ) else (
+    set version=%%b-%%c
+  )
+)
 if exist temp rmdir temp /s /q > nul
 if exist release-%version% rmdir release-%version% /s /q > nul
 echo.
@@ -110,20 +114,24 @@ copy temp\doc\latex\tudscr\tudscr_print.pdf release-%version%\temp\
 move temp\install\*.*                       release-%version%\temp\
 rmdir temp\install /s /q > nul
 cd release-%version%\temp
-for /f %%f in ('dir /b *.bat') do unix2dos %%f
+for /f %%f in ('dir /b *.bat') do unix2dos -k %%f
 7za a -tzip tudscr_%version%_full.zip   .\..\..\temp\*
 7za a -tzip tudscr_%version%_update.zip .\..\..\temp\* -xr!logo
-7za a -tzip tudscrfonts.zip                                                       @7za_files_metrics.txt
-for /f %%f in ('dir /b *.md') do unix2dos -n %%f %%~nf.txt
+7za a -tzip tudscr_fonts_install.zip                                              @7za_files_metrics.txt
+call tudscr_fonts_convert.bat
+7za a -tzip tudscr_fonts_converted.zip                                            @7za_files_fonts.txt
+for /f %%f in ('dir /b *.md') do unix2dos -n -k %%f %%~nf.txt
 7za a -tzip .\..\TUD-KOMA-Script_%version%_Windows_all.zip    -x!*.sh             @7za_files_full.txt @7za_files_postscript.txt
 7za a -tzip .\..\TUD-KOMA-Script_%version%_Windows_full.zip   -x!*.sh             @7za_files_full.txt
 7za a -tzip .\..\TUD-KOMA-Script_%version%_Windows_update.zip -x!*.sh             @7za_files_update.txt
 7za a -tzip .\..\TUD-KOMA-Script_fonts_Windows.zip            -x!*.sh             @7za_files_fonts_install.txt
+7za a -tzip .\..\TUD-KOMA-Script_fonts_converted_Windows.zip  -x!*.sh             @7za_files_fonts_converted.txt
 for /f %%f in ('dir /b *.md') do copy %%f %%~nf.txt
 7za a -tzip .\..\TUD-KOMA-Script_%version%_Unix_all.zip       -x!*.bat -x!7za.exe @7za_files_full.txt @7za_files_postscript.txt
 7za a -tzip .\..\TUD-KOMA-Script_%version%_Unix_full.zip      -x!*.bat -x!7za.exe @7za_files_full.txt
 7za a -tzip .\..\TUD-KOMA-Script_%version%_Unix_update.zip    -x!*.bat -x!7za.exe @7za_files_update.txt
 7za a -tzip .\..\TUD-KOMA-Script_fonts_Unix.zip               -x!*.bat -x!7za.exe @7za_files_fonts_install.txt
+7za a -tzip .\..\TUD-KOMA-Script_fonts_converted_Unix.zip     -x!*.bat -x!7za.exe @7za_files_fonts_converted.txt
 7za a -tzip .\..\tudscr4lyx.zip       .\tudscr4lyx\*
 7za a -tzip .\..\tudscr4texstudio.zip .\tudscr4texstudio\*
 cd..
@@ -146,24 +154,49 @@ xcopy ..\temp\doc\latex\tudscr\*.*      CTAN\tudscr\doc\    /s
 xcopy ..\temp\source\latex\tudscr\*.*   CTAN\tudscr\source\ /s
 xcopy ..\temp\tex\latex\tudscr\logo\*.* CTAN\tudscr\logo\   /s
 move  CTAN\tudscr\doc\README            CTAN\tudscr\README
-echo Set objArgs = WScript.Arguments > winzip.vbs
-echo InputFolder = objArgs(0) >> winzip.vbs
-echo ZipFile = objArgs(1) >> winzip.vbs
-echo CreateObject("Scripting.FileSystemObject").CreateTextFile(ZipFile, True).Write "PK" ^& Chr(5) ^& Chr(6) ^& String(18, vbNullChar) >> winzip.vbs
-echo Set objShell = CreateObject("Shell.Application") >> winzip.vbs
-echo Set source = objShell.NameSpace(InputFolder).Items >> winzip.vbs
-echo objShell.NameSpace(ZipFile).CopyHere(source) >> winzip.vbs
-echo wScript.Sleep 2000 >> winzip.vbs
-CScript  winzip.vbs  %cd%\CTAN  %cd%\tudscr.zip
+cd temp
+(
+  echo With WScript
+  echo   ZipFile = .Arguments^(0^) 
+  echo   Folder = .Arguments^(1^) 
+  echo End With
+  echo CreateObject^("Scripting.FileSystemObject"^).CreateTextFile^(ZipFile, True^).Write "PK" ^& Chr^(5^) ^& Chr^(6^) ^& String^(18, vbNullChar^) 
+  echo With CreateObject^("Shell.Application"^) 
+  echo   .NameSpace^(ZipFile^).CopyHere .NameSpace^(Folder^).Items
+  echo End With
+  echo wScript.Sleep 2000 
+) > winzip.vbs
+cd ..
+CScript  temp\winzip.vbs %cd%\tudscr.zip %cd%\CTAN
 move %cd%\tudscr.zip %cd%\CTAN\
+echo.
+echo =========================================================================
+echo  Aktualisierung des Releases der Version v1.0 fuer GitHub
+echo =========================================================================
+echo.
+cd %~dp0
+mkdir release-%version%\GitHub-tudscrold
+mkdir release-%version%\temp\tudscrold\doc\latex\tudscrold
+mkdir release-%version%\temp\tudscrold\source\latex\tudscrold
+mkdir release-%version%\temp\tudscrold\tex\latex\tudscrold
+xcopy ..\tudscrold\bundle\doc\*.*    release-%version%\temp\tudscrold\doc\latex\tudscrold\ /s
+xcopy ..\tudscrold\bundle\source\*.* release-%version%\temp\tudscrold\source\latex\tudscrold\ /s
+xcopy ..\tudscrold\bundle\tex\*.*    release-%version%\temp\tudscrold\tex\latex\tudscrold\ /s
+cd release-%version%\temp
+copy tudscrold\doc\latex\tudscrold\tudscrold.pdf .
+7za a -tzip tudscr_v1.0old.zip   .\tudscrold\*
+7za a -tzip .\..\TUD-KOMA-Script_v1.0old.zip @7za_files_old.txt
+cd..
+move TUD-KOMA-Script_v1.0old.zip     GitHub-tudscrold\
+move temp\tudscr_v1.0old.zip         GitHub-tudscrold\
+move temp\tud_fonts_install.*        GitHub-tudscrold\
 echo.
 echo =========================================================================
 echo  Loeschen aller temporaeren Dateien
 echo =========================================================================
 echo.
 pause.
-del winzip.vbs /q > nul
-if exist CTAN\tudscr rmdir CTAN\tudscr /s /q > nul
 cd %~dp0
-if exist temp rmdir temp /s /q > nul
-if exist release-%version%\temp rmdir release-%version%\temp /s /q > nul
+if exist release-%version%\temp        rmdir release-%version%\temp /s /q > nul
+if exist release-%version%\CTAN\tudscr rmdir release-%version%\CTAN\tudscr /s /q > nul
+if exist temp                          rmdir temp /s /q > nul

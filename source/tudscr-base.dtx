@@ -1,4 +1,4 @@
-% \CheckSum{291}
+% \CheckSum{480}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,9 +51,9 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-base.dtx}[%
-  2015/02/12 v2.03 TUD-KOMA-Script\space%
+  2015/06/15 v2.04 TUD-KOMA-Script\space%
 %</driver>
-%<package>\NeedsTeXFormat{LaTeX2e}[2011/06/27]
+%<package>\NeedsTeXFormat{LaTeX2e}
 %<package>\ProvidesPackage{tudscrbase}[%
 %<*driver|package>
 %!TUDVersion
@@ -81,7 +81,7 @@
 %
 % \selectlanguage{ngerman}
 %
-% \changes{v2.02}{2014/06/23}{Unterstützung für \pkg{titlepage} entfernt}%^^A
+% \changes{v2.02}{2014/06/23}{Unterstützung für \pkg{titlepage} entfernt}^^A
 %
 % \section{Grundlegende Befehle und Pakete}
 %
@@ -141,7 +141,7 @@
 % \subsubsection{Test auf booleschen Ausdruck in Form eines Strings}
 %
 % \begin{macro}{\ifstrbool}
-% \changes{v2.03}{2015/01/09}{neu}%^^A
+% \changes{v2.03}{2015/01/09}{neu}^^A
 % Dieser Befehl dient zum Testen, ob ein gegebener String als boolescher 
 % Ausdruck interpretiert werden kann. Ist der String als \enquote{wahr} 
 % interpretierbar, wird das zweite Argument ausgeführt. Kann der String als 
@@ -167,7 +167,101 @@
 %    \end{macrocode}
 % \end{macro}^^A \ifstrbool
 %
-% \subsubsection{Schlüssel und Parameter für die Wrapper-Klassen}
+% \subsubsection{Expansion geschützter Makros}
+%
+% Im \LaTeX-Kernel wird der Befehl \cs{@expandtwoargs} definiert, welcher zwei 
+% Argumente in ein angegebenes Makro vollständig expandiert. Dabei erfolgt die 
+% Expansion der beiden Argumente aufgrund der standardmäßigen Verwendung von 
+% \cs{edef} allerdings vollständig und ohne die Beachtung von \cs{protect}.
+% \begin{macro}{\protected@expandtwoargs}
+% \changes{v2.02}{2014/11/13}{neu}^^A
+% Der Befehl \cs{protected@expandtwoargs} kann äquivalent genutzt werden, 
+% lässt dabei aber mit \cs{protect} geschützte Makros unberührt.
+%    \begin{macrocode}
+\providecommand*\protected@expandtwoargs[3]{%
+  \protected@edef\reserved@a{\noexpand#1{#2}{#3}}\reserved@a%
+}
+%    \end{macrocode}
+% \end{macro}^^A \protected@expandtwoargs
+%
+% \subsubsection{Division für rationale Zahlen}
+%
+% Mit \LaTeXe kann~-- ohne die Verwendung zusätzlicher Pakete~-- nicht ohne 
+% Weiteres eine Division durchgeführt werden, die als Ergenis eine rationale 
+% Zahl liefert. Dem wird hier Abhilfe geleistet.
+% \begin{macro}{\tud@divide}
+% \changes{v2.04}{2015/04/09}{neu}^^A
+% \changes{v2.04}{2015/05/27}{Ausführung in Gruppe}^^A
+% Der Befehl erwartet im ersten Argument das Makro, in welches das Ergebnis 
+% der Division expandiert werden soll, danach folgen Dividend und Divisor. Die 
+% Berechnung erfolgt in einer Gruppe, damit die benötigten Längenregister nach 
+% dieser erhalten bleiben.
+%    \begin{macrocode}
+\newcommand*\tud@divide[3]{%
+  \begingroup%
+%    \end{macrocode}
+% Die Division wird über temporäre Längenregister durchgeführt. Die zu 
+% teilenden Zahlen werden normiert, wodurch auch Längen mit unterschiedlichen 
+% Einheiten geteilt werden können.
+%    \begin{macrocode}
+    \@defaultunits\@tempdima #2pt\relax\@nnil%
+    \@defaultunits\@tempdimb #3pt\relax\@nnil%
+%    \end{macrocode}
+% Danach wird mit der größeren der beiden Zahlen der größtmögliche, durch
+% \val{2} teilbare Faktor zur Berechnung ermittelt.
+%    \begin{macrocode}
+    \ifdim\@tempdima>\@tempdimb\relax%
+      \@whiledim\@tempdimb>1pt\relax\do{%
+        \setlength\@tempdima{.1\@tempdima}%
+        \setlength\@tempdimb{.1\@tempdimb}%
+      }%
+      \setlength\@tempdimc{\@tempdima}%
+    \else%
+      \@whiledim\@tempdima>1pt\relax\do{%
+        \setlength\@tempdima{.1\@tempdima}%
+        \setlength\@tempdimb{.1\@tempdimb}%
+      }%
+      \setlength\@tempdimc{\@tempdimb}%
+    \fi%
+    \@tempcnta=1\relax%
+    \@whiledim\dimexpr\@tempcnta\@tempdimc\relax<.01\maxdimen\do{%
+      \multiply\@tempcnta by 10\relax%
+    }%
+%    \end{macrocode}
+% Mit dem im temporären Zählerregister \cs{@tempcnta} gespeicherten Faktor 
+% wird der Dividend erweitert und der berechnete Quotient wieder gekürzt.
+%    \begin{macrocode}
+    \setlength{\@tempdimc}{%
+      \dimexpr(\@tempcnta\@tempdima / \@tempdimb * \p@)\relax%
+    }%
+    \setlength{\@tempdimc}{\dimexpr \@tempdimc/\@tempcnta\relax}%
+%    \end{macrocode}
+% Das Ergebnis wird in das angegebene Makro expandiert.
+%    \begin{macrocode}
+    \edef\@tempa{\endgroup\def\noexpand#1{\strip@pt\@tempdimc}}%
+  \@tempa%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@divide
+%
+% \subsubsection{Erzwungene Kleinschreibung von Strings}
+%
+% Um angegebene Werte bei Schlüssel-Wert-Paaren oder Schlüsselwörter in
+% bestimmten Feldern mit Sicherheit erkennen zu können, werden diese zwingend 
+% in Kleinbuchstaben geschieben.
+% \begin{macro}{\tud@lowerstring}
+% Das Makro wird mit \cs{tud@lowerstring}\marg{Zielmakro}\marg{String} benutzt.
+%    \begin{macrocode}
+\newcommand*\tud@lowerstring[2]{%
+  \protected@edef#1{#2}%
+  \lowercase\expandafter{%
+    \expandafter\def\expandafter #1\expandafter{#1}%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@lowerstring
+%
+% \subsubsection{Schlüssel und Parameter für \TUDScript}
 %
 % \begin{macro}{\TUDProcessOptions}
 % \begin{macro}{\TUDExecuteOptions}
@@ -181,11 +275,11 @@
 % \begin{macro}{\TUD@set@ifkey}
 % \begin{macro}{\TUD@numkey}
 % \begin{macro}{\TUD@numkey@bool}
-% \changes{v2.03}{2015/01/09}{neu}%^^A
+% \changes{v2.03}{2015/01/09}{neu}^^A
 % \begin{macro}{\TUD@set@numkey}
-% \changes{v2.02}{2014/11/05}{neu}%^^A
+% \changes{v2.02}{2014/11/05}{neu}^^A
 % \begin{macro}{\TUD@lengthkey}
-% \changes{v2.03}{2015/01/09}{neu}%^^A
+% \changes{v2.03}{2015/01/09}{neu}^^A
 % \begin{macro}{\TUD@set@lengthkey}
 % \begin{macro}{\TUD@unknown@keyval}
 % In Anlehnung an \KOMAScript{} werden hier Befehle zur Definition und
@@ -212,9 +306,11 @@
   \kernel@ifnextchar[%]
     {\TUD@@key[#1]{#2}}{\TUD@@@key[#1]{#2}}%
 }
+\newcommand*\TUD@@key{}
 \def\TUD@@key[#1]#2[#3]#4{%
   \DefineFamilyKey[#1]{TUD}{#2}[{#3}]{\TUD@noworlater{#4}}%
 }
+\newcommand*\TUD@@@key{}
 \def\TUD@@@key[#1]#2#3{%
   \DefineFamilyKey[#1]{TUD}{#2}{\TUD@noworlater{#3}}%
 }
@@ -338,7 +434,7 @@
 % bzw. \cs{TUD@std@numkey@lock} und \cs{TUD@set@numkey@lock}
 %    \begin{macrocode}
 \newcommand*\cs@lock[2]{%
-  \csdef{#1}{#2}%
+  \expandafter\newcommand\expandafter*\csname#1\endcsname{#2}%
   \newbool{#1@locked}%
 }
 \newcommand*\cs@std@lock[2]{%
@@ -381,11 +477,13 @@
 % \end{macro}^^A \bool@std@lock
 % \end{macro}^^A \bool@lock
 % \begin{macro}{\tud@cmd@store}
-% \begin{macro}{\tud@cmd@reset}
-% \begin{macro}{\tud@cmd@use}
 % \begin{macro}{\tud@cmd@restore}
+% \begin{macro}{\tud@cmd@reset}
+% \begin{macro}{\tud@cmd@update}
+% \changes{v2.04}{2015/03/03}{neu}^^A
+% \begin{macro}{\tud@cmd@use}
 % \begin{macro}{\tud@cmd@check}
-% \changes{v2.03}{2015/01/09}{neu}%^^A
+% \changes{v2.03}{2015/01/09}{neu}^^A
 % Mit diesen Befehlen wird es möglich, Originalbefehle sichern, nutzen und
 % wiederherstellen zu können. Dies wird benötigt, um zwischen den einzelnen
 % Layouts über Optionseinstellungen zu wechseln und dabei von einem definierten
@@ -397,33 +495,35 @@
 % Zeitpunkt auf den Orginalzustand zurücksetzen, kann hierfür jederzeit der 
 % Befehl \cs{tud@cmd@reset}\marg{Befehlsname} verwendet werden. Durch das Makro
 % \cs{tud@cmd@restore}\marg{Befehlsname} wird das mit \cs{tud@cmd@store}
-% erstellte Hilfsmakro zusätzlich noch  gelöscht. Der Originalbefehl kann als 
-% solcher mit \cs{tud@cmd@use}\marg{Befehlsname} weiterhin genutzt werden. 
+% erstellte Hilfsmakro zusätzlich noch  gelöscht. Der ursprüngliche Befehl kann
+% als solcher mit \cs{tud@cmd@use}\marg{Befehlsname} weiterhin genutzt werden.
+% Durch das Makro \cs{tud@cmd@update}\marg{Befehlsname} wird ein gesichter
+% Befehl aktualisiert.
 %    \begin{macrocode}
 \newcommand*\tud@cmd@store[1]{%
-  \ifcsdef{@@tud@#1}{}{%
-    \tud@cmd@check{#1}%
-    \csletcs{@@tud@#1}{#1}%
-  }%
-}
-\newcommand*\tud@cmd@reset[1]{%
-  \ifcsdef{@@tud@#1}{%
-    \tud@cmd@check{#1}%
-    \csletcs{#1}{@@tud@#1}%
-  }{}%
+  \tud@cmd@check{#1}%
+  \ifcsdef{@@tud@#1}{}{\csletcs{@@tud@#1}{#1}}%
 }
 \newcommand*\tud@cmd@restore[1]{%
+  \tud@cmd@check{#1}%
   \ifcsdef{@@tud@#1}{%
-    \tud@cmd@check{#1}%
     \csletcs{#1}{@@tud@#1}%
     \csundef{@@tud@#1}%
   }{}%
 }
+\newcommand*\tud@cmd@reset[1]{%
+  \tud@cmd@check{#1}%
+  \ifcsdef{@@tud@#1}{\csletcs{#1}{@@tud@#1}}{}%
+}
+\newcommand*\tud@cmd@update[1]{%
+  \tud@cmd@check{#1}%
+  \ifcsdef{@@tud@#1}{\csletcs{@@tud@#1}{#1}}{}%
+}
 \newcommand*\tud@cmd@use[1]{%
+  \tud@cmd@check{#1}%
   \ifcsdef{@@tud@#1}{%
     \@nameuse{@@tud@#1}%
   }{%
-    \tud@cmd@check{#1}%
     \@nameuse{#1}%
   }%
 }
@@ -439,16 +539,56 @@
     }{%
       The command `\@backslashchar#1' was never defined.\MessageBreak%
       Please contact the TUD-KOMA-Script maintainer\MessageBreak%
-      via \tudscrmail. A bugfix is urgently required
+      via \tudscrmail. A bugfix is urgently required.%
     }%
   }%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@cmd@check
-% \end{macro}^^A \tud@cmd@restore
 % \end{macro}^^A \tud@cmd@use
+% \end{macro}^^A \tud@cmd@update
 % \end{macro}^^A \tud@cmd@reset
+% \end{macro}^^A \tud@cmd@restore
 % \end{macro}^^A \tud@cmd@store
+% \begin{macro}{\tud@skip@store}
+% \changes{v2.04}{2015/03/02}{neu}^^A
+% \begin{macro}{\tud@skip@restore}
+% \changes{v2.04}{2015/03/02}{neu}^^A
+% \begin{macro}{\tud@skip@set}
+% \changes{v2.04}{2015/05/05}{neu}^^A
+% Hiermit können~-- äquivalent zum Sichern und Wiederherstellen von Befehlen~-- 
+% Längenregister abgespeichert werden.
+%    \begin{macrocode}
+\newcommand*\tud@skip@store[1]{%
+  \ifcsdef{@@tud@skip@#1}{}{%
+    \@tempswafalse%
+    \ifisskip{\csname #1\endcsname}{\@tempswatrue}{}%
+    \ifisdimen{\csname #1\endcsname}{\@tempswatrue}{}%
+    \if@tempswa%
+      \csedef{@@tud@skip@#1}{\expandafter\the\csname #1\endcsname}%
+    \fi%
+  }%
+}
+\newcommand*\tud@skip@restore[1]{%
+  \ifcsdef{@@tud@skip@#1}{%
+    \csname #1\endcsname=\csname @@tud@skip@#1\endcsname%
+    \csundef{@@tud@skip@#1}%
+  }{}%
+}
+\newcommand*\tud@skip@set[2]{%
+  \ifdef{#1}{%
+    \@tempswafalse%
+    \ifisskip{#1}{\@tempswatrue}{}%
+    \ifisdimen{#1}{\@tempswatrue}{}%
+    \if@tempswa%
+      \setlength#1{#2}%
+    \fi%
+  }{}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@skip@set
+% \end{macro}^^A \tud@skip@restore
+% \end{macro}^^A \tud@skip@store
 % \begin{macro}{\tud@patch@wrn}
 % Dieses Makro wird verwendet, wenn mit den Mitteln von \pkg{etoolbox} bereits
 % vorhandene Befehle angepasst werden sollen (\cs{apptocmd}, \cs{pretocmd},
@@ -492,11 +632,11 @@
 \newcommand*\TUD@parameter@checkfamily[1]{%
   \ifx\TUD@parameter@family\relax%
     \PackageError{tudscrbase}{%
-      No family for keys given.
+      No family for keys given%
     }{%
       You have to use \string#1\space within the\MessageBreak%
       second argument of \string\TUD@parameter. The first \MessageBreak%
-      argument of \string\TUD@parameter\space has to be a unique family name.
+      argument of \string\TUD@parameter\space has to be a unique family name.%
     }%
   \fi%
 }
@@ -506,7 +646,7 @@
 % \end{macro}^^A \TUD@parameter
 % \begin{macro}{\TUD@parameter@define}
 % \begin{macro}{\TUD@parameter@let}
-% \changes{v2.02}{2014/07/25}{Beachtung der gegebenen Standardwerte}%^^A
+% \changes{v2.02}{2014/07/25}{Beachtung der gegebenen Standardwerte}^^A
 % \begin{macro}{\TUD@parameter@sethandler}
 % \cs{TUD@parameter@define}\marg{Name}\oarg{Säumniswert}\marg{Verarbeitung}
 % nutzt \cs{define@key} aus dem \pkg{keyval}"=Paket, um einen Schlüssel und
@@ -586,6 +726,39 @@
 %    \end{macrocode}
 % \end{macro}^^A \TUD@parameter@error
 %
+% \subsubsection{Ausführung von paketspezifischem Quellcode}
+%
+% Ab und an ist es notwendig, bestimmten Quelltext erst gezielt nach einem 
+% Paket auszuführen.
+% \begin{macro}{\TUD@AfterPackage@Set}
+% \changes{v2.04}{2015/03/09}{neu}^^A
+% \begin{macro}{\TUD@AfterPackage}
+% \changes{v2.03}{2015/02/15}{neu}^^A
+% Im ersten Argument wird das Paket angegeben, im zweiten der Quellcode.
+%    \begin{macrocode}
+\newcommand*\TUD@AfterPackage@Set[1]{%
+  \newbool{@tud@#1@loaded}%
+  \AfterPackage!{#1}{\booltrue{@tud@#1@loaded}}
+}
+\newcommand*\TUD@AfterPackage[2]{%
+  \ifcsdef{if@tud@#1@loaded}{%
+    \if@atdocument%
+      \ifbool{@tud@#1@loaded}{#2}{}%
+    \else%
+      \AfterPackage!{#1}{#2}%
+    \fi%
+  }{%
+    \PackageError{tudscrbase}{\string\TUD@AfterPackage@Set{#1} missing}{%
+      You have to set \string\TUD@AfterPackage@Set{#1} before\MessageBreak%
+      the usage of \string\TUD@AfterPackage{#1}{<code>} is\MessageBreak%
+      possible.%
+    }%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \TUD@AfterPackage
+% \end{macro}^^A \TUD@AfterPackage@Set
+%
 % \iffalse
 %</package>
 %<*load>
@@ -599,49 +772,13 @@
 %
 % \iffalse
 %</load>
-%<*execute>
-% \fi
-%
-% \subsection{Durchreichen von Optionen und Standardoptionen}
-%
-% Durchreichen aller Klassenoptionen an die \KOMAScript-Klasse bzw. an die
-% genutzte \TUDScript-Elternklasse.
-%    \begin{macrocode}
-%<*!inherit>
-\DeclareOption*{\PassOptionsToClass{\CurrentOption}{\scrcls@name}}
-%</!inherit>
-%<*inherit>
-\DeclareOption*{\PassOptionsToClass{\CurrentOption}{\tudinh@name}}
-%</inherit>
-%    \end{macrocode}
-% Es werden die Standardoptionen ausgeführt. Die Ausführung selbst wird durch
-% den Befehl \cs{TUD@noworlater} innerhalb von \cs{TUD@key} auf das Ende der
-% \KOMAScript-Klasse verzögert.
-%    \begin{macrocode}
-%<*!inherit>
-\TUDExecuteOptions{cd,cdfont,tudbookmarks}
-%</!inherit>
-\TUDProcessOptions\relax
-%    \end{macrocode}
-% Die korrespindierende \KOMAScript-Klasse bzw. \TUDScript-Elternklasse wird 
-% geladen.
-%    \begin{macrocode}
-%<*!inherit>
-\LoadClass{\scrcls@name}[2013/12/19]
-%</!inherit>
-%<*inherit>
-\LoadClass{\tudinh@name}
-%</inherit>
-%    \end{macrocode}
-%
-% \iffalse
-%<*!inherit>
+%<*class&body>
 % \fi
 %
 % \subsection{Externe Pakete}
 %
-% \changes{v2.01}{2014/04/24}{Versionsanforderungen bei benötigten Paketen}%^^A
-% \changes{v2.02}{2014/07/08}{\pkg{graphics} Warnung bei Verwendung}%^^A
+% \changes{v2.01}{2014/04/24}{Versionsanforderungen bei benötigten Paketen}^^A
+% \changes{v2.02}{2014/07/08}{\pkg{graphics} Warnung bei Verwendung}^^A
 %
 % Für die Verwendung der hier erstellten \KOMAScript-Wrapper-Klassen werden
 % einige wenige Pakete eingebunden. Dabei wurde versucht, die Anzahl der
@@ -667,8 +804,9 @@
 %    \begin{macrocode}
   \@ifpackageloaded{graphicx}{}{%
     \@ifpackageloaded{graphics}{%
-      \ClassWarningNoLine{\tudcls@name}{%
-        The package `graphics' was superseded by `graphicx'%
+      \ClassWarningNoLine{\TUDClassName}{%
+        The package `graphics' was superseded by `graphicx',\MessageBreak%
+        which is automatically loaded%
       }%
     }{}%
   }%
@@ -681,9 +819,61 @@
 }
 %    \end{macrocode}
 %
+% \subsection{Parameter für Umgebungen und mehrspaltige Texte}
+%
+% Diese Befehle dienen dazu, bei Umgebungen die Sprache über einen Parameter
+% anzugeben sowie das Paket \pkg{multicol} verwenden zu können.
+% \begin{macro}{\TUD@parameter@defaulthandler}
+% Hiermit kann sowohl die zu verwendende Sprache als auch die Anzahl der
+% gewünschten Spalten für bestimmte Umgebungen ohne die explizite Angabe eines
+% Schlüssels festgelegt werden. Momentan betrifft das die beiden Umgebungen
+% \env{abstract} und \env{tudpage}.
+%    \begin{macrocode}
+\newcommand*\TUD@parameter@defaulthandler[2]{%
+  \def\@tempa{#2}%
+  \@for\@tempb:=\@tempa\do{%
+    \ifx\@tempb\@empty\else%
+      \ifstr{\@tempb}{twocolumn}{\def\@tempb{2}}{}%
+      \ifxnumber{\@tempb}{%
+        \TUD@parameter@set{#1}{columns=\@tempb}%
+      }{%
+        \TUD@parameter@set{#1}{language=\@tempb}%
+      }%
+    \fi%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \TUD@parameter@defaulthandler
+% \begin{macro}{\tud@multicols}
+% \begin{macro}{\tud@multicols@check}
+% Im Makro \cs{tud@multicols} wird die Anzahl der gewünschten Spalten in einer
+% Umgebung für die Verwendung des \pkg{multicol}"=Paketes gespeichert.
+%    \begin{macrocode}
+\cs@lock{tud@multicols}{1}
+%    \end{macrocode}
+% Der Befehl \cs{tud@multicols@check} prüft, ob das Paket \pkg{multicol} 
+% geladen wurde. Falls dies nicht der Fall ist, wird eine Warnung ausgegeben 
+% und die Änderung des Wertes über einen Parameter der Umgebungen \env{tudpage} 
+% repsektive \env{abstract} sowie \env{declarations} über \cs{set@set@lock} 
+% verhindert.
+%    \begin{macrocode}
+\newcommand*\tud@multicols@check{%
+  \ifdef{\multicols}{}{%
+    \ifnum\tud@multicols>\@ne\relax%
+      \ClassWarning{\TUDClassName}{%
+        The option `columns=\tud@multicols' is only supported,\MessageBreak%
+        when package `multicol' is loaded%
+      }%
+      \cs@set@lock{tud@multicols}{1}%
+    \fi%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@multicols@check
+% \end{macro}^^A \tud@multicols
+%
 % \iffalse
-%</!inherit>
-%</execute>
+%</class&body>
 % \fi
 %
 % \Finale

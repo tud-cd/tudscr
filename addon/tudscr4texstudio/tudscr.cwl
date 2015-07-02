@@ -1,8 +1,13 @@
 \TUDoption{option}{values}
 \TUDoptions{options}
+\TUDClassName#S
+\TUDScript#S
+\TUDVersion#S
 \MakeTextUppercase{text}
 \NoCaseChange{text}
 \ifdin{true}{false}
+\cdfont{font}
+\textcdfont{font}{text}
 \univbn#S
 \univbs#S
 \univln#S
@@ -53,6 +58,14 @@
 \footlogo[parameters]{file(s)}
 \footlogosep
 \footlogoheight
+\footcontent{text}
+\footcontent*{text}#S
+\footcontent[fontsettings]{text}
+\footcontent*[fontsettings]{text}#S
+\footcontent{left}[right]
+\footcontent*{left}[right]#S
+\footcontent[fontsettings]{left}[right]
+\footcontent*[fontsettings]{left}[right]#S
 \begin{tudpage}
 \begin{tudpage}[parameter]
 \end{tudpage}
@@ -98,6 +111,8 @@
 \begin{declarations}
 \begin{declarations}[parameter]
 \end{declarations}
+\nextdeclaration
+\nextdeclaration[parameter]
 \declaration
 \declaration[parameter]
 \confirmation

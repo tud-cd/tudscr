@@ -51,9 +51,9 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-mathswap.dtx}[%
-  2015/01/24 v2.03 TUD-KOMA-Script\space%
+  2015/06/02 v2.04 TUD-KOMA-Script\space%
 %</driver>
-%<package>\NeedsTeXFormat{LaTeX2e}[2011/06/27]
+%<package>\NeedsTeXFormat{LaTeX2e}
 %<package>\ProvidesPackage{mathswap}[%
 %<*driver|package>
 %!TUDVersion
@@ -82,7 +82,7 @@
 % \selectlanguage{ngerman}
 %
 % \changes{v2.02}{2014/08/18}{\pkg{mathswap} Schalter zum Aktivieren und
-%   Deaktivieren der Funktionalität}%^^A
+%   Deaktivieren der Funktionalität}^^A
 %
 % \section{Aktive Trennzeichen im mathematischen Satz}
 %
@@ -178,16 +178,18 @@
 % \end{macro}^^A \ms@commachar
 % \end{macro}^^A \ms@comma
 % \begin{macro}{\mathswapon}
-% \changes{v2.02}{2014/08/18}{neu}%^^A
+% \changes{v2.02}{2014/08/18}{neu}^^A
 % \begin{macro}{\mathswapoff}
-% \changes{v2.02}{2014/08/18}{neu}%^^A
+% \changes{v2.02}{2014/08/18}{neu}^^A
 % \begin{macro}{\ms@commaswap}
-% \changes{v2.02}{2014/08/18}{neu}%^^A
+% \changes{v2.02}{2014/08/18}{neu}^^A
 % \begin{macro}{\ms@dotswap}
-% \changes{v2.02}{2014/08/18}{neu}%^^A
+% \changes{v2.02}{2014/08/18}{neu}^^A
 % Mit den Befehlen \cs{mathswapon} und \cs{mathswapoff} kann die Funktionalität 
 % des Paketes innerhalb des Dokumentes aktiviert und deaktiviert werden.
 %    \begin{macrocode}
+\newcommand*\ms@commaswap{}
+\newcommand*\ms@dotswap{}
 \newcommand*\mathswapon{%
   \def\ms@commaswap{\@commaswap}%
   \def\ms@dotswap{\@dotswap}%
@@ -196,13 +198,46 @@
   \def\ms@commaswap{\ms@commachar}%
   \def\ms@dotswap{\ms@dotchar}%
 }
-\newcommand*\ms@commaswap{}
-\newcommand*\ms@dotswap{}
 %    \end{macrocode}
 % \end{macro}^^A \ms@dotswap
 % \end{macro}^^A \ms@commaswap
 % \end{macro}^^A \mathswapoff
 % \end{macro}^^A \mathswapon
+% \begin{macro}{\ms@ifnum}
+% \begin{macro}{\ms@@ifnum}
+% Der Befehl \cs{ms@ifnum} reicht das erste Argument an \cs{ms@@ifnum} weiter,
+% falls der Inhalt von \cs{ms@token} zu einer Ziffer expandiert. Andernfalls
+% wird das zweite Argument ausgeführt.
+%    \begin{macrocode}
+\newcommand*\ms@ifnum[2]{%
+  \ifx\ms@token0\ms@@ifnum{#1}\else%
+  \ifx\ms@token1\ms@@ifnum{#1}\else%
+  \ifx\ms@token2\ms@@ifnum{#1}\else%
+  \ifx\ms@token3\ms@@ifnum{#1}\else%
+  \ifx\ms@token4\ms@@ifnum{#1}\else%
+  \ifx\ms@token5\ms@@ifnum{#1}\else%
+  \ifx\ms@token6\ms@@ifnum{#1}\else%
+  \ifx\ms@token7\ms@@ifnum{#1}\else%
+  \ifx\ms@token8\ms@@ifnum{#1}\else%
+  \ifx\ms@token9\ms@@ifnum{#1}\else%
+  #2%
+  \fi\fi\fi\fi\fi\fi\fi\fi\fi\fi%
+}
+%    \end{macrocode}
+% Wurde eine nachfolgende Ziffer erkannt, so wird die Definition von Punkt und 
+% Komma auf die eines normalen Textzeichens gesetzt und anschließend die mit 
+% \cs{commaswap} bzw. \cs{dotswap} angegebene Ersetzung ausgegeben.
+%    \begin{macrocode}
+\newcommand*\ms@@ifnum[1]{%
+  \begingroup%
+    \mathcode\expandafter`,=\the\ms@comma%
+    \mathcode\expandafter`.=\the\ms@dot%
+    #1%
+  \endgroup%
+}
+%    \end{macrocode}
+% \end{macro}^^A \ms@@ifnum
+% \end{macro}^^A \ms@ifnum
 % \begin{macro}{\ms@token}
 % \begin{macro}{\ms@smartcomma}
 % \begin{macro}{\ms@smartdot}
@@ -222,47 +257,12 @@
   \catcode`.=\active%
   \gdef.{\futurelet\ms@token\ms@smartdot}%
 \endgroup%
-\def\ms@smartcomma{\ms@ifnum{\ms@commaswap}{\ms@commachar}}
-\def\ms@smartdot{\ms@ifnum{\ms@dotswap}{\ms@dotchar}}
+\newcommand*\ms@smartcomma{\ms@ifnum{\ms@commaswap}{\ms@commachar}}
+\newcommand*\ms@smartdot{\ms@ifnum{\ms@dotswap}{\ms@dotchar}}
 %    \end{macrocode}
 % \end{macro}^^A \ms@smartdot
 % \end{macro}^^A \ms@smartcomma
 % \end{macro}^^A \ms@token
-% \begin{macro}{\ms@ifnum}
-% \begin{macro}{\ms@@ifnum}
-% Der Befehl \cs{ms@ifnum} reicht das erste Argument an \cs{ms@@ifnum} weiter,
-% falls der Inhalt von \cs{ms@token} zu einer Ziffer expandiert. Andernfalls
-% wird das zweite Argument ausgeführt.
-%    \begin{macrocode}
-\def\ms@ifnum#1#2{%
-  \ifx\ms@token0\ms@@ifnum{#1}\else%
-  \ifx\ms@token1\ms@@ifnum{#1}\else%
-  \ifx\ms@token2\ms@@ifnum{#1}\else%
-  \ifx\ms@token3\ms@@ifnum{#1}\else%
-  \ifx\ms@token4\ms@@ifnum{#1}\else%
-  \ifx\ms@token5\ms@@ifnum{#1}\else%
-  \ifx\ms@token6\ms@@ifnum{#1}\else%
-  \ifx\ms@token7\ms@@ifnum{#1}\else%
-  \ifx\ms@token8\ms@@ifnum{#1}\else%
-  \ifx\ms@token9\ms@@ifnum{#1}\else%
-  #2%
-  \fi\fi\fi\fi\fi\fi\fi\fi\fi\fi%
-}
-%    \end{macrocode}
-% Wurde eine nachfolgende Ziffer erkannt, so wird die Definition von Punkt und 
-% Komma auf die eines normalen Textzeichens gesetzt und anschließend die mit 
-% \cs{commaswap} bzw. \cs{dotswap} angegebene Ersetzung ausgegeben.
-%    \begin{macrocode}
-\def\ms@@ifnum#1{%
-  \begingroup%
-  \mathcode\expandafter`,=\the\ms@comma%
-  \mathcode\expandafter`.=\the\ms@dot%
-  #1%
-  \endgroup%
-}
-%    \end{macrocode}
-% \end{macro}^^A \ms@@ifnum
-% \end{macro}^^A \ms@ifnum
 %
 % \iffalse
 %</package>

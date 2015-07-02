@@ -1,29 +1,33 @@
-% \CheckSum{439}
+% \CheckSum{209}
 % \iffalse meta-comment
-% ======================================================================
 %
-% Das Corporate Design der TU Dresden auf Basis der KOMA-Script-Klassen
+% ============================================================================
+% 
+%  TUD-KOMA-Script
+%  Copyright (c) Falk Hanisch <tudscr@gmail.com>, 2012-2015
+% 
+% ============================================================================
+% 
+%  This work may be distributed and/or modified under the conditions of the
+%  LaTeX Project Public License, version 1.3c of the license. The latest
+%  version of this license is in http://www.latex-project.org/lppl.txt and 
+%  version 1.3c or later is part of all distributions of LaTeX 2005/12/01
+%  or later and of this work. This work has the LPPL maintenance status 
+%  "author-maintained". The current maintainer and author of this work
+%  is Falk Hanisch.
+% 
+% ----------------------------------------------------------------------------
+% 
+% Dieses Werk darf nach den Bedingungen der LaTeX Project Public Lizenz
+% in der Version 1.3c, verteilt und/oder veraendert werden. Die aktuelle 
+% Version dieser Lizenz ist http://www.latex-project.org/lppl.txt und 
+% Version 1.3c oder spaeter ist Teil aller Verteilungen von LaTeX 2005/12/01 
+% oder spaeter und dieses Werks. Dieses Werk hat den LPPL-Verwaltungs-Status 
+% "author-maintained", wird somit allein durch den Autor verwaltet. Der 
+% aktuelle Verwalter und Autor dieses Werkes ist Falk Hanisch.
+% 
+% ============================================================================
 %
-% ======================================================================
-% This work may be distributed and/or modified under the conditions of
-% the LaTeX Project Public License, version 1.3c of the license.
-% The latest version of this license is in
-%     http://www.latex-project.org/lppl.txt
-% and version 1.3c or later is part of all distributions of LaTeX
-% version 2005/12/01 or later and of this work.
-% This work has the LPPL maintenance status "author-maintained".
-% The current maintainer and author of this work is Falk Hanisch.
-% ----------------------------------------------------------------------
-% Dieses Werk darf nach den Bedingungen der LaTeX Project Public Lizenz,
-% Version 1.3c, verteilt und/oder veraendert werden.
-% Die neuste Version dieser Lizenz ist
-%     http://www.latex-project.org/lppl.txt
-% und Version 1.3c ist Teil aller Verteilungen von LaTeX
-% Version 2005/12/01 oder spaeter und dieses Werks.
-% Dieses Werk hat den LPPL-Verwaltungs-Status "author-maintained"
-% (allein durch den Autor verwaltet).
-% Der aktuelle Verwalter und Autor dieses Werkes ist Falk Hanisch.
-% ======================================================================
 % \fi
 %
 % \CharacterTable
@@ -46,12 +50,14 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-scripts.dtx}[%
-  2015/02/12 v2.03 TUD-KOMA-Script installation scripts%
+  2015/07/02 v2.04 TUD-KOMA-Script installation scripts%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
 \usepackage{selinput}\SelectInputMappings{adieresis={ä},germandbls={ß}}
+\usepackage[T1]{fontenc}
 \usepackage{babel}
+\usepackage{tudscrfonts} % only load this package, if the fonts are installed
 \KOMAoptions{parskip=half-}
 \CodelineIndex
 \RecordChanges
@@ -65,242 +71,600 @@
 %
 % \selectlanguage{ngerman}
 %
-% \changes{v2.03}{2015/01/23}{\pkg{mweights} unnötig}%^^A
+% \changes{v2.03}{2015/01/23}{\pkg{mweights} unnötig}^^A
+% \changes{v2.04}{2015/03/11}{MiKTeX Portable wird unterstützt}^^A
+% \changes{v2.04}{2015/04/12}{Bugfix für Windowspfade mit Leerzeichen}^^A
+% \changes{v2.04}{2015/04/22}{Bugfix für MiKTeX-Maps}^^A
+% \changes{v2.04}{2015/04/24}{TeX Live Portable wird unterstützt}^^A
+% \changes{v2.04}{2015/05/12}{Pakete für T1-Kodierung obligatorisch}^^A
+% \changes{v2.04}{2015/06/17}{Unix-Bash-Skripte verbessert}^^A
+% \changes{v2.04}{2015/07/02}{Windows-Batch-Skripte verbessert}^^A
 %
 % \section{Installationsskripte}
 %
-% Hier werden die Installationsskripte für Windows und Linux automatisch 
-% generiert.
+% Es werden mehrere Varianten von Installationsskripte für Windows und Linux 
+% automatisch generiert. Das wichtigste ist das Skript zur Installation der 
+% Schriften, welches mit dem Tag \texttt{<font>} versehen ist. Das Skript zur 
+% automatisierten lokalen Benutzerinstallation der Schriften \emph{und} der 
+% Klassen und Pakete ist mit \texttt{<full>} markiert. Für ein Update der 
+% lokalen Benutzerinstallation ist das mit \texttt{<update>} gekennzeichnete 
+% Skript zuständig. Zur Deinstallation der lokalen Installation wird ein 
+% separates, weitgehend unabhängiges Skript mit \texttt{<uninstall>} erzeugt.
+%
+% Für die interne Verwendung gibt es außerdem noch \texttt{<convert>}, womit 
+% die konvertierten Schriften zwar erzeugt, aber nicht installiert werden. 
+% Dieses Skript generiert ein Archiv mit diesen Schriften. Diese können mit dem 
+% Skript \texttt{<converted>} installiert werden.
 %
 % \StopEventually{\PrintIndex\PrintChanges}
 %
-% \subsection{Installationsskripte für Windows}
 %
-%    \begin{macrocode}
 % \iffalse
 %<*win>
 % \fi
+%
+% \subsection{Batch-Skripte für Windows}
+% \subsubsection{Identifikation}
+%
+% Zuerst wird die Ausgabe der Befehlszeilen mit \val{@echo off} deaktiviert, 
+% darauf folgen ein paar Kommentare im Skript und daran anschließend die
+% erfolgt Ausgabe der Identifikation des jeweiligen Skriptes.
+%
+%    \begin{macrocode}
 @echo off
-rem
-% \iffalse
-%<*full>
-% \fi
-rem Installation TUD-KOMA-Script-Bundle + TUD-CD-Schriften unter Windows
-% \iffalse
-%</full>
-%<*update>
-% \fi
-rem Update TUD-KOMA-Script-Bundle unter Windows
-% \iffalse
-%</update>
-%<*font>
-% \fi
-rem Installation TUD-CD-Schriften unter Windows
-% \iffalse
-%</font>
-%<*uninstall>
-% \fi
-rem Deinstallation TUD-KOMA-Script-Bundle unter Windows
-% \iffalse
-%</uninstall>
-% \fi
-rem
-rem Autor: Falk Hanisch
-rem
-rem getestet auf:
-rem Microsoft Windows Vista Business
-rem Microsoft Windows 7 Professional x64
-rem Microsoft Windows 8 Pro x64
-rem
-rem in Kombination mit:
-rem MiKTeX 2.9 32-bit
-rem Tex Live 2013
-rem Tex Live 2014
-rem
+::
+:: Autor: Falk Hanisch
+::
+:: getestet auf:
+:: Microsoft Windows 7 Professional x64
+:: Microsoft Windows 8 Pro x64
+::
+:: in Kombination mit:
+:: MiKTeX 2.9 32-bit
+:: MiKTeX Portable 2.9 32-bit
+:: MiKTeX 2.9 64-bit
+:: TeX Live 2015
+:: TeX Live 2015 Portable
+::
 echo.
 echo  =====================================================================
-% \iffalse
-%<*full>
-% \fi
-echo   Installation TUD-KOMA-Script + TUD-CD-Schriften unter Windows
-% \iffalse
-%</full>
-%<*update>
-% \fi
-echo   Update TUD-KOMA-Script unter Windows
-% \iffalse
-%</update>
-%<*font>
-% \fi
-echo   Installation TUD-CD-Schriften unter Windows
-% \iffalse
-%</font>
-%<*uninstall>
-% \fi
-echo   Deinstallation TUD-KOMA-Script unter Windows
-% \iffalse
-%</uninstall>
-% \fi
+echo.
+%<convert>echo   Konvertieren der TUD-CD-Schriften unter Windows
+%<full>echo   Installation TUD-KOMA-Script + TUD-CD-Schriften unter Windows
+%<update>echo   Update TUD-KOMA-Script unter Windows
+%<font>echo   Installation TUD-CD-Schriften unter Windows
+%<converted>echo   Installation der konvertierten TUD-CD-Schriften unter Windows
+%<uninstall>echo   Deinstallation TUD-KOMA-Script unter Windows
+%<old>echo   fuer obsolete Klassen und Pakete
+%!echoTUDVersion
 echo.
 cd /d %~dp0
-% \iffalse
-%<*!uninstall>
-%<*full|update>
-% \fi
-set version=%~n0
-set version=%version:~7,-8%
-% \iffalse
-%</full|update>
-% \fi
-set missing=false
+%    \end{macrocode}
+% Für das Batch-Skript wird ein temporärer Ordner angelegt, der am Ende wieder 
+% gelöscht wird.
+%    \begin{macrocode}
 if exist tudscrtemp rmdir /s /q tudscrtemp> nul
 mkdir tudscrtemp\converted
 cd tudscrtemp
-call:checkfile "7za.exe"
+%    \end{macrocode}
+% Als erstes wird nach der \LaTeX-Distribution gesucht. Falls keine auffindbar 
+% ist, wird die Installation abgebrochen.
+%    \begin{macrocode}
+set texpath=
+where tex> nul 2> nul> texpath.tmp
+set /p texpath=<texpath.tmp
+if "%texpath%"=="" goto :nothing
+%    \end{macrocode}
+%
 % \iffalse
-%<*full|update>
+%<*!uninstall>
 % \fi
-call:checkfile "tudscr_%version%.zip"
-% \iffalse
-%</full|update>
-%<*full|font>
-% \fi
-call:checkfile "Univers_PS.zip"
-call:checkfile "DIN_Bd_PS.zip"
-% \iffalse
-%<*!old>
-% \fi 
-call:checkfile "tudscrfonts.zip"
-% \iffalse
-%</!old>
-% \fi 
-call:checkpackage "fontinst.sty"
-% \iffalse
-%</full|font>
-%<*!old>
-% \fi 
-call:checkpackage "cmbright.sty"
-call:checkpackage "iwona.sty"
-% \iffalse
-%</!old>
-% \fi
-if "%missing%" == "true" goto :abort
-tex --version> distrib.tmp
-set /p distrib=< distrib.tmp
-kpsewhich --var-value=TEXMFHOME> texmfpath.tmp
-set /p texmfpath=< texmfpath.tmp
-if "%texmfpath%"=="" (
-  set texmfpath=%USERPROFILE%\texmf
-  setlocal enabledelayedexpansion
-  echo !texmfpath!> texmfpath.tmp
-  endlocal
-)
-:MiKTeX
-  echo %distrib% | find "MiKTeX"> nul
-  if errorlevel 1 goto :TeXLive
-  set distrib="MiKTeX"
-  echo   MiKTeX-Distribution aktiv
-  echo  =====================================================================
-  echo.
-  goto :resume
-:TeXLive
-  echo %distrib% | find "TeX Live"> nul
-  if errorlevel 1 goto :nothing
-  set distrib="TeXLive"
-  echo   TeX Live-Distribution aktiv
-  echo  =====================================================================
-  echo.
-  goto :resume
-:nothing
-  echo   weder TeX Live noch MiKTeX gefunden, Abbruch der Installation
-  echo  =====================================================================
-  echo.
-  goto :end
-:resume
-  echo.
-  echo  =====================================================================
-% \iffalse
-%<*full>
-% \fi
-  echo   Installation des TUD-KOMA-Script-Bundles in lokales Verzeichnis.
-  echo.
-  echo   Es wird empfohlen, das TUD-KOMA-Script-Bundle in ein separates
-  echo   Verzeichnis im lokalen Benutzerpfad zu installieren:
-% \iffalse
-%</full>
-%<*update>
-% \fi
-  echo   Update des TUD-KOMA-Script-Bundles in lokales Verzeichnis.
-  echo.
-  echo   Es wird empfohlen, das TUD-KOMA-Script-Bundle in einem separaten
-  echo   Verzeichnis im lokalen Benutzerpfad zu aktualisieren:
-% \iffalse
-%</update>
-%<*font>
-% \fi
-  echo   Installation der TUD-CD-Schriften in lokales Verzeichnis.
-  echo.
-  echo   Es wird empfohlen, die TUD-CD-Schriften in ein separates
-  echo   Verzeichnis im lokalen Benutzerpfad zu installieren:
-% \iffalse
-%</font>
-% \fi
-  echo.
-  echo   %texmfpath%
-  echo.
-:proof_userinput
-  echo  =====================================================================
-  echo.
-  echo   Soll das Verzeichnis %texmfpath% genutzt werden?
-  if not exist "%texmfpath%" (
-    echo   Das angegebene Verzeichnis existiert nicht, wird aber erstellt.
+%
+% \subsubsection{Installationsskripte für Windows}
+%
+% Die Batch-Skripte werden für die Schriftinstallation sowie für eine lokale
+% Installation von \TUDScript unter Windows angeboten.
+%
+% Es wird unterschieden, ob es sich um eine normale oder eine portable 
+% Installation handelt. Mit \val{wmic} werden alle vorhandenen Laufwerke und 
+% deren Typ ausgegeben. In der Schleife wird geprüft, ob \LaTeX{} auf der HDD 
+% oder einem USB-Stick installiert ist.
+%
+%    \begin{macrocode}
+set portable=false
+for /f "usebackq tokens=1,2" %%a in (
+  `wmic logicaldisk get caption^,drivetype`
+) do (
+  if "%%a"=="%texpath:~,2%" (
+    if %%b==2 set portable=true
   )
-  echo   [j]a (ENTER) / [n]ein:
-  echo.
-  set /p texmfpath=< texmfpath.tmp
-  set w=
-  set /p w=
-  echo.
-  if /i "%w%"=="" goto install
-  if /i "%w%"=="j" goto install
-  if /i "%w%"=="n" goto set_texmfpath
-  goto proof_userinput
+)
+%    \end{macrocode}
+% Für Windows muss erkannt werden, ob \TeX~Live oder MiK\TeX{} installiert und
+% aktiv ist. Die gefundene Distribution wird zur Information ausgegeben.
+%    \begin{macrocode}
+set texdistrib=
+tex --version> texdistrib.tmp
+set /p texdistrib=< texdistrib.tmp
+:TeXLive
+echo %texdistrib% | find "TeX Live"> nul
+if errorlevel 1 goto :MiKTeX
+set texdistrib="TeXLive"
+if "%portable%" == "true" (
+  echo   LaTeX-Distribution TeX Live Portable gefunden in:
+) else (
+  echo   LaTeX-Distribution TeX Live gefunden in:
+)
+goto :resume
+:MiKTeX
+echo %texdistrib% | find "MiKTeX"> nul
+if errorlevel 1 goto :nothing
+set texdistrib="MiKTeX"
+if "%portable%" == "true" (
+  echo   LaTeX-Distribution MiKTeX Portable gefunden in:
+) else (
+  echo   LaTeX-Distribution MiKTeX gefunden in:
+)
+goto :resume
+:resume
+echo   '%texpath%'
+%    \end{macrocode}
+% Vor der eigentlichen Installation wird geprüft, ob auch alle benötigeten 
+% Archive, Skripte und \LaTeX-Pakete vorhanden sind.
+%    \begin{macrocode}
+echo  =====================================================================
+echo.
+echo   Notwendige Dateien und Pakete werden gesucht.
+echo   Dies kann einen Moment dauern.
+echo.
+%    \end{macrocode}
+% Da die automatische Installation notwendiger Pakete von MiK\TeX{} nicht
+% fehlerfrei funktioniert, wird diese deaktiviert.
+%    \begin{macrocode}
+%set MIKTEX_KPSEWHICH_MPM_AUTOINSTALL=no
+set missing=false
+%    \end{macrocode}
+% Für die lokale Installation von \TUDScript ist die gewünschte Versionsnummer 
+% im Dateinamen des Skriptes hinterlegt. Das dazugehörige Archiv wird mit 
+% dieser gesucht.
+%    \begin{macrocode}
+%<*full|update>
+set version=%~n0
+set version=%version:~7,-8%
+call :checkfile    "tudscr_%version%.zip"
+%</full|update>
+%    \end{macrocode}
+% Die Archive, Skripte und Pakete für die Schriftumwandlung werden gesucht.
+%    \begin{macrocode}
+%<converted>call :checkfile    "tudscr_fonts_converted.zip"
+%<*full|font|convert>
+call :checkfile    "Univers_PS.zip"
+call :checkfile    "DIN_Bd_PS.zip"
+%<!old>call :checkfile    "tudscr_fonts_install.zip"
+if "%missing%" == "true" goto :abort
+call :checkscript  "pltotf"       "fontware"
+call :checkscript  "vptovf"       "fontware"
+call :checkpackage "fontinst.sty" "fontinst"
+%</full|font|convert>
+%    \end{macrocode}
+% Für die Schriftfamilien im Stil von \TUDScript werden einige zusätzliche 
+% Pakete benötigt.
+%    \begin{macrocode}
+%<*!old>
+call :checkpackage "type1ec.sty"  "cm-super"
+call :checkpackage "lmodern.sty"  "lm"
+call :checkpackage "cmbright.sty" "cmbright"
+call :checkpackage "hfbright.map" "hfbright"
+call :checkpackage "iwona.sty"    "iwona"
+%</!old>
+%    \end{macrocode}
+% Wenn auch nur eine benötigte Datei nicht vorhanden ist, wird die Installation 
+% abgebrochen.
+%    \begin{macrocode}
+if "%missing%" == "true" goto :abort
+echo.
+echo   Es wurden alle notwendigen Dateien und Pakete gefunden.
+echo.
+echo  =====================================================================
+echo  =====================================================================
+echo.
+%    \end{macrocode}
+% Als nächstes wird der Installationspfad bestimmt. Dabei wird unterschieden, 
+% ob das Skript normal oder als Administrator ausgeführt wird.
+%    \begin{macrocode}
+%<*!convert>
+net session >nul 2>&1
+if %errorlevel%==0 (
+  set admin=true
+) else (
+  set admin=false
+)
+%    \end{macrocode}
+% Die Variablen \val{TEXMFLOCAL} und \val{TEXMFHOME} werden momentan nur von
+% \TeX~Live sinnvoll bereitgestellt. Für MiK\TeX{} werden daher die Variablen 
+% \val{TEXMFSYSVAR} bzw. \val{TEXMFVAR} verwendet und als Pfade empfohlen.
+%    \begin{macrocode}
+set texmfpath=
+if "%admin%" == "true" (
+  if %texdistrib%=="MiKTeX" (
+    kpsewhich --var-value=TEXMFSYSVAR> texmfpath.tmp
+  ) else (
+    kpsewhich --var-value=TEXMFLOCAL> texmfpath.tmp
+  )
+  echo   Mehrbenutzerinstallation ^(Administrator^).
+) else (
+  if %texdistrib%=="MiKTeX" (
+    kpsewhich --var-value=TEXMFVAR> texmfpath.tmp
+  ) else (
+    kpsewhich --var-value=TEXMFHOME> texmfpath.tmp
+  )
+  echo   Einzelbenutzerinstallation.
+)
+echo.
+echo  =====================================================================
+echo  =====================================================================
+echo.
+%    \end{macrocode}
+% Für eine portable MiK\TeX-Installation wird als lokaler \LaTeX-Pfad einer auf
+% der gleichen Ordnerebene vorgeschlagen.
+%    \begin{macrocode}
+if %texdistrib%=="MiKTeX" (
+  if "%portable%" == "true" (
+    setlocal enabledelayedexpansion
+      pushd !cd!
+      cd /d !texpath:~,2!
+      cd !texpath:~,-10!\..\..\..
+      set texmfpath=!cd!\texmf
+      popd
+      echo !texmfpath!> texmfpath.tmp
+    endlocal
+  )
+)
+set /p texmfpath=< texmfpath.tmp
+%    \end{macrocode}
+% Folgend wird der Installationsordner durch den Nutzer festgelegt, wobei
+% dieser mit dem zuvor ermittelten und empfohlenen Pfad vorgeschlagen wird.
+%    \begin{macrocode}
+echo   Bitte geben Sie das gewuenschte Installationsverzeichnis an.
+echo   Dieses sollte sich jenseits der Distributionsordnerstruktur
+if "%portable%" == "true" (
+  echo   auf dem USB-Stick befinden.
+) else (
+  if "%admin%" == "true" (
+    echo   in einem Pfad mit Lese-Zugriff fuer alle Benutzer befinden.
+  ) else (
+    echo   in einem lokalen Benutzerpfad befinden.
+  )
+)
+echo.
+echo   Sie sollten den voreingestellten Standardpfad verwenden.
+:proof_userinput
+echo.
+echo  =====================================================================
+set /p texmfpath=< texmfpath.tmp
+set "texmfpath=%texmfpath:/=\%"
+if "%texmfpath:~-1%"=="\" set texmfpath=%texmfpath:~,-1%
+echo %texmfpath%> texmfpath.tmp
+echo.
+echo   %texmfpath%
+echo.
+echo   Soll dieser Pfad genutzt werden?
+if not exist "%texmfpath%" (
+  echo   Der angegebene Ordner existiert nicht, wird jedoch erstellt.
+)
+echo   [j]a ^(ENTER^) / [n]ein:
+echo.
+set w=
+set /p w=
+echo.
+%    \end{macrocode}
+% Dennoch kann der Installationsordner auch manuell festgelegt werden.
+%    \begin{macrocode}
+if /i "%w%"=="" goto :install
+if /i "%w%"=="j" goto :install
+if /i "%w%"=="n" goto :set_texmfpath
+goto :proof_userinput
 :set_texmfpath
-  set texmfpath=
-  echo   Geben Sie das Installationsverzeichnis an (ohne Anfuerungszeichen):
-  echo.
-  set /p texmfpath=
-  echo %texmfpath%> texmfpath.tmp
-  goto proof_userinput
+set texmfpath=
+echo   Geben Sie das Installationsverzeichnis an ^(ohne Anfuerungszeichen^):
+echo.
+set /p texmfpath=
+echo %texmfpath%> texmfpath.tmp
+echo.
+goto :proof_userinput
+%    \end{macrocode}
+% Nach der Festlegung des installationspfades beginnt nun die eigentliche 
+% Installationsroutine.
+%    \begin{macrocode}
 :install
-  echo.
-  echo  =====================================================================
+echo.
+echo  =====================================================================
+echo   Installation in folgenden Pfad:
+echo   %texmfpath%
+echo  =====================================================================
+echo.
+%</!convert>
+%    \end{macrocode}
+% Die ledigliche Konvertierung~-- ohne Installation~-- der Schriften erfolgt 
+% direkt im Pfad des Skriptes.
+%    \begin{macrocode}
+%<*convert>
+set texmfpath=%~dp0
+echo.
+echo  =====================================================================
+echo   Erzeugen der konvertierten TUD-CD-Schriften
+echo  =====================================================================
+echo.
+%</convert>
+%    \end{macrocode}
+% Für die notwendige Registrierung der Schriften nach der Installtion wird 
+% geprüft, ob dies für alle Nutzer mit \textbf{updmap-sys} erfolgen kann oder 
+% ob die nutzerindividuelle Variante mit \textbf{updmap} notwendig ist. Dies 
+% ist jedoch lediglich für \TeX~Live relevant.
+%    \begin{macrocode}
+%<*full|font|converted>
+set updmapsys=true
+kpsewhich --var-value=TEXMFVAR> texmfvar.tmp
+set /p texmfvar=< texmfvar.tmp
+if exist "%texmfvar%\fonts\map" set updmapsys=false
+%</full|font|converted>
+%    \end{macrocode}
+% Die benötigten Verzeichnisse für die konvertierten Schriften werden erzeugt.
+%    \begin{macrocode}
+%<*full|font|convert>
+%<old>set localfolder=tud
+%<!old>set localfolder=tudscr
+if not exist "%texmfpath%\tex\latex\%localfolder%\fonts" (
+  mkdir "%texmfpath%\tex\latex\%localfolder%\fonts"
+)
+if not exist "%texmfpath%\fonts\tfm\%localfolder%" (
+  mkdir "%texmfpath%\fonts\tfm\%localfolder%"
+)
+if not exist "%texmfpath%\fonts\afm\%localfolder%" (
+  mkdir "%texmfpath%\fonts\afm\%localfolder%"
+)
+if not exist "%texmfpath%\fonts\vf\%localfolder%" (
+  mkdir "%texmfpath%\fonts\vf\%localfolder%"
+)
+if not exist "%texmfpath%\fonts\type1\%localfolder%" (
+  mkdir "%texmfpath%\fonts\type1\%localfolder%"
+)
+if not exist "%texmfpath%\fonts\map\dvips\%localfolder%" (
+  mkdir "%texmfpath%\fonts\map\dvips\%localfolder%"
+)
+%</full|font|convert>
+%    \end{macrocode}
+% Für Komplettinstallationen wird das \TUDScript-Bundle in den eingestellten 
+% Pfad entpackt.
+%    \begin{macrocode}
+cd /d %~dp0
+%<full|update>call :unzip tudscr_%version%.zip %texmfpath%
+%<converted>call :unzip tudscr_fonts_converted.zip %texmfpath%
+%    \end{macrocode}
+% Anschließend werden die PostScript-Schriften für die Konvertierung in den 
+% temporären Ordner extrahiert.
+%    \begin{macrocode}
+%<*full|font|convert>
+call :unzip Univers_PS.zip tudscrtemp
+call :unzip DIN_Bd_PS.zip tudscrtemp
+%<!old>call :unzip tudscr_fonts_install.zip tudscrtemp\converted
+cd tudscrtemp
+%    \end{macrocode}
+% Dies ist die Konvertierungsroutine für die alten Schriftfamilien.
+%    \begin{macrocode}
+%<*old>
+copy uvcel___.pfb converted\aunl8a.pfb> nul
+copy uvcel___.afm converted\aunl8a.afm> nul
+copy uvxlo___.pfb converted\aunlo8a.pfb> nul
+copy uvxlo___.afm converted\aunlo8a.afm> nul
+copy uvce____.pfb converted\aunr8a.pfb> nul
+copy uvce____.afm converted\aunr8a.afm> nul
+copy uvceo___.pfb converted\aunro8a.pfb> nul
+copy uvceo___.afm converted\aunro8a.afm> nul
+copy uvceb___.pfb converted\aunb8a.pfb> nul
+copy uvceb___.afm converted\aunb8a.afm> nul
+copy uvxbo___.pfb converted\aunbo8a.pfb> nul
+copy uvxbo___.afm converted\aunbo8a.afm> nul
+copy uvcz____.pfb converted\aubr8a.pfb> nul
+copy uvcz____.afm converted\aubr8a.afm> nul
+copy uvczo___.pfb converted\aubro8a.pfb> nul
+copy uvczo___.afm converted\aubro8a.afm> nul
+copy DINBd___.pfb converted\dinb8a.pfb> nul
+copy DINBd___.afm converted\dinb8a.afm> nul
+cd converted
+echo \input fontinst.sty> installoldfonts.tex
+echo \needsfontinstversion{1.933}>> installoldfonts.tex
+echo \recordtransforms{record.tex}>> installoldfonts.tex
+echo \latinfamily{aun}{}>> installoldfonts.tex
+echo \latinfamily{aub}{}>> installoldfonts.tex
+echo \latinfamily{din}{}>> installoldfonts.tex
+echo \endrecordtransforms>> installoldfonts.tex
+echo \bye>> installoldfonts.tex
+latex installoldfonts.tex
+%</old>
+%    \end{macrocode}
+% Die neuen \TUDScript-Schriftfamilien ergänzen die fehlenden Glyphen durch~-- 
+% einigermaßen passende~-- aus freien \LaTeX-Schriften.
+%    \begin{macrocode}
+%<*!old>
+copy uvcel___.pfb converted\lunl8a.pfb> nul
+copy uvcel___.afm converted\lunl8a.afm> nul
+copy uvxlo___.pfb converted\lunlo8a.pfb> nul
+copy uvxlo___.afm converted\lunlo8a.afm> nul
+copy uvce____.pfb converted\lunr8a.pfb> nul
+copy uvce____.afm converted\lunr8a.afm> nul
+copy uvceo___.pfb converted\lunro8a.pfb> nul
+copy uvceo___.afm converted\lunro8a.afm> nul
+copy uvceb___.pfb converted\lunb8a.pfb> nul
+copy uvceb___.afm converted\lunb8a.afm> nul
+copy uvxbo___.pfb converted\lunbo8a.pfb> nul
+copy uvxbo___.afm converted\lunbo8a.afm> nul
+copy uvcz____.pfb converted\lunc8a.pfb> nul
+copy uvcz____.afm converted\lunc8a.afm> nul
+copy uvczo___.pfb converted\lunco8a.pfb> nul
+copy uvczo___.afm converted\lunco8a.afm> nul
+copy DINBd___.pfb converted\0m6b8a.pfb> nul
+copy DINBd___.afm converted\0m6b8a.afm> nul
+echo.
+echo  =====================================================================
+echo   Virtuelle Schriften erzeugen. ^(Dies kann einen Moment dauern^)
+echo  =====================================================================
+echo.
+cd converted
+echo 00/19
+tftopl cmbr10.tfm cmbr10.pl
+echo 01/19
+tftopl cmbrsl10.tfm cmbrsl10.pl
+echo 02/19
+tftopl cmbrbx10.tfm cmbrbx10.pl
+echo 03/19
+tftopl tbmr10.tfm tbmr10.pl
+echo 04/19
+tftopl tbmo10.tfm tbmo10.pl
+echo 05/19
+tftopl tbsr10.tfm tbsr10.pl
+echo 06/19
+tftopl tbso10.tfm tbso10.pl
+echo 07/19
+tftopl tbbx10.tfm tbbx10.pl
+echo 08/19
+tftopl cmbrmi10.tfm cmbrmi10.pl
+echo 09/19
+tftopl cmbrmb10.tfm cmbrmb10.pl
+echo 10/19
+tftopl cmbrsy10.tfm cmbrsy10.pl
+echo 11/19
+tftopl sy-iwonamz.tfm sy-iwonamz.pl
+echo 12/19
+tftopl sy-iwonahz.tfm sy-iwonahz.pl
+echo 13/19
+tftopl rm-iwonach.tfm rm-iwonach.pl
+echo 14/19
+tftopl rm-iwonachi.tfm rm-iwonachi.pl
+echo 15/19
+tftopl ts1-iwonach.tfm ts1-iwonach.pl
+echo 16/19
+tftopl ts1-iwonachi.tfm ts1-iwonachi.pl
+echo 17/19
+tftopl mi-iwonachi.tfm mi-iwonachi.pl
+echo 18/19
+tftopl sy-iwonachz.tfm sy-iwonachz.pl
+echo 19/19
+latex installfonts.tex
+%</!old>
+%    \end{macrocode}
+% Nachdem alle Schriften erstellt wurden, werden diese noch mit den passenden 
+% Skripten in die benötigten Dateiformate gewandelt.
+%    \begin{macrocode}
+dir /b *.pl> files.txt
+for /f "delims=. " %%i in (files.txt) do pltotf %%i.pl %%i.tfm
+dir /b *.vpl> files.txt
+for /f "delims=. " %%i in (files.txt) do vptovf %%i.vpl %%i.vf %%i.tfm
+%    \end{macrocode}
+% Danach werden die notwendigen Map-Dateien erstellt.
+%    \begin{macrocode}
+%<*old>
+echo \input finstmsc.sty> createoldmap.tex
+echo \resetstr{PSfontsuffix}{.pfb}>> createoldmap.tex
+echo \adddriver{dvips}{tud.map}>> createoldmap.tex
+echo \input record.tex>> createoldmap.tex
+echo \donedrivers>> createoldmap.tex
+echo \bye>> createoldmap.tex
+latex createoldmap.tex
+%</old>
+%<!old>latex createmap.tex
+%    \end{macrocode}
+% Die erzeugten Schriftdateien werden anschließend in die Ordnerstruktur im 
+% Installationspfad kopiert.
+%    \begin{macrocode}
+echo.
+echo  =====================================================================
+echo   Konvertierung abgeschlossen.
+echo  =====================================================================
+echo.
+copy /y *.fd  "%texmfpath%\tex\latex\%localfolder%\fonts"
+copy /y *.tfm "%texmfpath%\fonts\tfm\%localfolder%"
+copy /y *.afm "%texmfpath%\fonts\afm\%localfolder%"
+copy /y *.vf  "%texmfpath%\fonts\vf\%localfolder%"
+copy /y *.pfb "%texmfpath%\fonts\type1\%localfolder%"
+copy /y *.map "%texmfpath%\fonts\map\dvips\%localfolder%"
+%<convert>goto :end
+%</full|font|convert>
+%    \end{macrocode}
+%
 % \iffalse
-%<*full>
+%<*!convert>
 % \fi
-  echo   Installation des TUD-KOMA-Script-Bundles in:
+%
+% Abhängig von der aktiven Distribution werden jetzt die Schriften registriert.
+%    \begin{macrocode}
+set "texmfpath=%texmfpath:\=/%"
+if %texdistrib%=="MiKTeX" goto :MiKTeXHash
+:TeXLiveHash
+texhash
+%<*full|font|converted>
+if "%admin%" == "true"      goto :TeXLiveSysMap
+if "%updmapsys%" == "false" goto :TeXLiveUserMap
+:TeXLiveSysMap
+echo  =====================================================================
+echo   Aufruf von 'updmap-sys'
+echo  =====================================================================
+%<old>updmap-sys --enable Map=tud.map --force
+%<!old>updmap-sys --enable Map=tudscr.map --force
+if "%updmapsys%" == "true"  goto :end
+:TeXLiveUserMap
+echo  =====================================================================
+echo   Aufruf von 'updmap'
+echo  =====================================================================
+%<old>updmap --enable Map=tud.map --force
+%<!old>updmap --enable Map=tudscr.map --force
+%</full|font|converted>
+goto :end
+:MiKTeXHash
+%<*full|font|converted>
+set "texmfpath=%texmfpath:/=\%"
+set mapcfg=%texmfpath%\miktex\config\updmap.cfg
+if not exist "%mapcfg%" (
+  if not exist "%texmfpath%\miktex\config" (
+    mkdir "%texmfpath%\miktex\config"
+  )
+%<old>  echo Map tud.map> "%mapcfg%"
+%<!old>  echo Map tudscr.map> "%mapcfg%"
+) else (
+%<*old>
+  find "Map tud.map" "%mapcfg%"> nul
+  if errorlevel 1 echo Map tud.map>> "%mapcfg%"
+%</old>
+%<*!old>
+  find "Map tudscr.map" "%mapcfg%"> nul
+  if errorlevel 1 echo Map tudscr.map>> "%mapcfg%"
+%</!old>
+)
+%</full|font|converted>
+if "%admin%" == "true" (
+  initexmf --admin --update-fndb="%texmfpath%"
+%<full|font|converted>  initexmf --admin --mkmaps
+) else (
+  initexmf --update-fndb="%texmfpath%"
+%<full|font|converted>  initexmf --mkmaps
+)
+set "texmfpath=%texmfpath:\=/%"
+goto :end
+%    \end{macrocode}
+% Damit ist die Installation abgeschlossen. 
+%
 % \iffalse
-%</full>
-%<*update>
-% \fi
-  echo   Update des TUD-KOMA-Script-Bundles in:
-% \iffalse
-%</update>
-%<*font>
-% \fi
-  echo   Installation der TUD-CD-Schriften in:
-% \iffalse
-%</font>
-% \fi
-  echo   %texmfpath%
-  echo  =====================================================================
-  echo.
-  set /p texmfpath=< texmfpath.tmp
-  if not exist "%texmfpath%" mkdir "%texmfpath%"
-% \iffalse
+%</!convert>
 %</!uninstall>
 %<*uninstall>
 % \fi
+%
+% \subsubsection{Deinstallationsskript für Windows}
+%
+% Dieses Skript kann zum Deinstallieren lokalen Benutzerinstallation von 
+% \TUDScript genutzt werden.
+%
+%    \begin{macrocode}
 kpsewhich --var-value=TEXMFDIST> texmfpath.tmp
 set /p texmfdist=< texmfpath.tmp
 kpsewhich tudscrbase.sty --all> texmfpath.tmp
@@ -309,374 +673,57 @@ for /f "tokens=*" %%f in (texmfpath.tmp) do (
   set "texmfpath=%%f"
   if "%%f"=="!texmfpath:%texmfdist%=!" (
     set texmfpath=!texmfpath:tudscrbase.sty=!
-    echo =====================================================================
+    echo  =====================================================================
     echo   Soll TUD-KOMA-Script aus folgendem Pfad entfernt werden?
     echo   !texmfpath!
-    echo =====================================================================
+    echo  =====================================================================
     echo.
     echo   [j]a ^(ENTER^) / [n]ein:
     echo.
     set /p w=
-    if /i "!w!"=="" call:uninstall "!texmfpath!"
-    if /i "!w!"=="j" call:uninstall "!texmfpath!"
+    if /i "!w!"=="" call :uninstall "!texmfpath!"
+    if /i "!w!"=="j" call :uninstall "!texmfpath!"
     echo.
   )
 )
 endlocal
 del texmfpath.tmp> nul
 texhash
-echo  =====================================================================
-echo   Es wurde keine (weitere) lokale Nutzerinstallation von 
-echo   TUD-KOMA-Script gefunden. Die Deinstallation wird beendet.
-echo  =====================================================================
-echo.
-pause
-echo.
-exit 0
+goto :end
 :uninstall
+  pushd %cd%
+  cd /d %~d1
   cd %~1
   if exist logo rmdir /s /q logo> nul
+%  del *.clo> nul
   del *.cls> nul
   del *.sty> nul
   cd ..\..\..
   if exist doc\latex\tudscr rmdir /s /q doc\latex\tudscr> nul
   if exist source\latex\tudscr rmdir /s /q source\latex\tudscr> nul
-  goto:eof
+  popd
+  goto :eof
+%    \end{macrocode}
+%
 % \iffalse
 %</uninstall>
+% \fi
+%
+% \subsubsection{Funktionen innerhalb der Skripte}
+%
+% Hier werden die für die Skripte gleichermaßen verwendeten Funktionen 
+% definiert.
+%
+%    \begin{macrocode}
 %<*!uninstall>
-% \fi
-  cd /d %~dp0
-% \iffalse
-%<*full|update>
-% \fi
-  7za x tudscr_%version%.zip -o"%texmfpath%" -y
-% \iffalse
-%</full|update>
-%<*full|font>
-% \fi
-  7za e Univers_PS.zip -o"tudscrtemp" -y
-  7za e DIN_Bd_PS.zip -o"tudscrtemp" -y
-% \iffalse
-%<*old>
-% \fi
-  cd tudscrtemp
-  copy uvcel___.pfb converted\aunl8a.pfb> nul
-  copy uvcel___.afm converted\aunl8a.afm> nul
-  copy uvxlo___.pfb converted\aunlo8a.pfb> nul
-  copy uvxlo___.afm converted\aunlo8a.afm> nul
-  copy uvce____.pfb converted\aunr8a.pfb> nul
-  copy uvce____.afm converted\aunr8a.afm> nul
-  copy uvceo___.pfb converted\aunro8a.pfb> nul
-  copy uvceo___.afm converted\aunro8a.afm> nul
-  copy uvceb___.pfb converted\aunb8a.pfb> nul
-  copy uvceb___.afm converted\aunb8a.afm> nul
-  copy uvxbo___.pfb converted\aunbo8a.pfb> nul
-  copy uvxbo___.afm converted\aunbo8a.afm> nul
-  copy uvcz____.pfb converted\aubr8a.pfb> nul
-  copy uvcz____.afm converted\aubr8a.afm> nul
-  copy uvczo___.pfb converted\aubro8a.pfb> nul
-  copy uvczo___.afm converted\aubro8a.afm> nul
-  copy DINBd___.pfb converted\dinb8a.pfb> nul
-  copy DINBd___.afm converted\dinb8a.afm> nul
-  cd converted
-  echo \input fontinst.sty> installoldfonts.tex
-  echo \needsfontinstversion{1.933}>> installoldfonts.tex
-  echo \recordtransforms{record.tex}>> installoldfonts.tex
-  echo \latinfamily{aun}{}>> installoldfonts.tex
-  echo \latinfamily{aub}{}>> installoldfonts.tex
-  echo \latinfamily{din}{}>> installoldfonts.tex
-  echo \endrecordtransforms>> installoldfonts.tex
-  echo \bye>> installoldfonts.tex
-  latex installoldfonts.tex
-% \iffalse
-%</old>
-%<*!old>
-% \fi
-  7za e tudscrfonts.zip -o"tudscrtemp\converted" -y
-  cd tudscrtemp
-  copy uvcel___.pfb converted\lunl8a.pfb> nul
-  copy uvcel___.afm converted\lunl8a.afm> nul
-  copy uvxlo___.pfb converted\lunlo8a.pfb> nul
-  copy uvxlo___.afm converted\lunlo8a.afm> nul
-  copy uvce____.pfb converted\lunr8a.pfb> nul
-  copy uvce____.afm converted\lunr8a.afm> nul
-  copy uvceo___.pfb converted\lunro8a.pfb> nul
-  copy uvceo___.afm converted\lunro8a.afm> nul
-  copy uvceb___.pfb converted\lunb8a.pfb> nul
-  copy uvceb___.afm converted\lunb8a.afm> nul
-  copy uvxbo___.pfb converted\lunbo8a.pfb> nul
-  copy uvxbo___.afm converted\lunbo8a.afm> nul
-  copy uvcz____.pfb converted\lunc8a.pfb> nul
-  copy uvcz____.afm converted\lunc8a.afm> nul
-  copy uvczo___.pfb converted\lunco8a.pfb> nul
-  copy uvczo___.afm converted\lunco8a.afm> nul
-  copy DINBd___.pfb converted\0m6b8a.pfb> nul
-  copy DINBd___.afm converted\0m6b8a.afm> nul
-  echo.
-  echo  =====================================================================
-  echo   Virtuelle Schriften erzeugen. (Dies kann einen Moment dauern)
-  echo  =====================================================================
-  echo.
-  cd converted
-  echo 00/19
-  tftopl cmbr10.tfm cmbr10.pl
-  echo 01/19
-  tftopl cmbrsl10.tfm cmbrsl10.pl
-  echo 02/19
-  tftopl cmbrbx10.tfm cmbrbx10.pl
-  echo 03/19
-  tftopl tbmr10.tfm tbmr10.pl
-  echo 04/19
-  tftopl tbmo10.tfm tbmo10.pl
-  echo 05/19
-  tftopl tbsr10.tfm tbsr10.pl
-  echo 06/19
-  tftopl tbso10.tfm tbso10.pl
-  echo 07/19
-  tftopl tbbx10.tfm tbbx10.pl
-  echo 08/19
-  tftopl cmbrmi10.tfm cmbrmi10.pl
-  echo 09/19
-  tftopl cmbrmb10.tfm cmbrmb10.pl
-  echo 10/19
-  tftopl cmbrsy10.tfm cmbrsy10.pl
-  echo 11/19
-  tftopl sy-iwonamz.tfm sy-iwonamz.pl
-  echo 12/19
-  tftopl sy-iwonahz.tfm sy-iwonahz.pl
-  echo 13/19
-  tftopl rm-iwonach.tfm rm-iwonach.pl
-  echo 14/19
-  tftopl rm-iwonachi.tfm rm-iwonachi.pl
-  echo 15/19
-  tftopl ts1-iwonach.tfm ts1-iwonach.pl
-  echo 16/19
-  tftopl ts1-iwonachi.tfm ts1-iwonachi.pl
-  echo 17/19
-  tftopl mi-iwonachi.tfm mi-iwonachi.pl
-  echo 18/19
-  tftopl sy-iwonachz.tfm sy-iwonachz.pl
-  echo 19/19
-  latex installfonts.tex
-% \iffalse
-%</!old>
-% \fi 
-  dir /b *.pl> files.txt
-  for /f "delims=. " %%i in (files.txt) do pltotf %%i.pl %%i.tfm
-  dir /b *.vpl> files.txt
-  for /f "delims=. " %%i in (files.txt) do vptovf %%i.vpl %%i.vf %%i.tfm
-% \iffalse
-%<*old>
-% \fi
-  echo \input finstmsc.sty> createoldmap.tex
-  echo \resetstr{PSfontsuffix}{.pfb}>> createoldmap.tex
-  echo \adddriver{dvips}{tud.map}>> createoldmap.tex
-  echo \input record.tex>> createoldmap.tex
-  echo \donedrivers>> createoldmap.tex
-  echo \bye>> createoldmap.tex
-  latex createoldmap.tex
-% \iffalse
-%</old>
-%<*!old>
-% \fi
-  latex createmap.tex
-% \iffalse
-%</!old>
-% \fi
-  echo.
-  echo  =====================================================================
-  echo   Konvertierung abgeschlossen.
-  echo  =====================================================================
-  echo.
-% \iffalse
-%<*old>
-% \fi
-  if not exist "%texmfpath%\tex\latex\tud\fonts" (
-    mkdir "%texmfpath%\tex\latex\tud\fonts"
-  )
-  if not exist "%texmfpath%\fonts\tfm\tud" (
-    mkdir "%texmfpath%\fonts\tfm\tud"
-  )
-  if not exist "%texmfpath%\fonts\afm\tud" (
-    mkdir "%texmfpath%\fonts\afm\tud"
-  )
-  if not exist "%texmfpath%\fonts\vf\tud" (
-    mkdir "%texmfpath%\fonts\vf\tud"
-  )
-  if not exist "%texmfpath%\fonts\type1\tud" (
-    mkdir "%texmfpath%\fonts\type1\tud"
-  )
-  if not exist "%texmfpath%\fonts\map\dvips\tud" (
-    mkdir "%texmfpath%\fonts\map\dvips\tud"
-  )
-  if not exist "%texmfpath%\fonts\map\pdftex\tud" (
-    mkdir "%texmfpath%\fonts\map\pdftex\tud"
-  )
-  copy /y *.fd  "%texmfpath%\tex\latex\tud\fonts"
-  copy /y *.tfm "%texmfpath%\fonts\tfm\tud"
-  copy /y *.afm "%texmfpath%\fonts\afm\tud"
-  copy /y *.vf  "%texmfpath%\fonts\vf\tud"
-  copy /y *.pfb "%texmfpath%\fonts\type1\tud"
-  copy /y *.map "%texmfpath%\fonts\map\dvips\tud"
-  copy /y *.map "%texmfpath%\fonts\map\pdftex\tud"
-% \iffalse
-%</old>
-%<*!old>
-% \fi
-  if not exist "%texmfpath%\tex\latex\tudscr\fonts" (
-    mkdir "%texmfpath%\tex\latex\tudscr\fonts"
-  )
-  if not exist "%texmfpath%\fonts\tfm\tudscr" (
-    mkdir "%texmfpath%\fonts\tfm\tudscr"
-  )
-  if not exist "%texmfpath%\fonts\afm\tudscr" (
-    mkdir "%texmfpath%\fonts\afm\tudscr"
-  )
-  if not exist "%texmfpath%\fonts\vf\tudscr" (
-    mkdir "%texmfpath%\fonts\vf\tudscr"
-  )
-  if not exist "%texmfpath%\fonts\type1\tudscr" (
-    mkdir "%texmfpath%\fonts\type1\tudscr"
-  )
-  if not exist "%texmfpath%\fonts\map\dvips\tudscr" (
-    mkdir "%texmfpath%\fonts\map\dvips\tudscr"
-  )
-  if not exist "%texmfpath%\fonts\map\pdftex\tudscr" (
-    mkdir "%texmfpath%\fonts\map\pdftex\tudscr"
-  )
-  copy /y *.fd  "%texmfpath%\tex\latex\tudscr\fonts"
-  copy /y *.tfm "%texmfpath%\fonts\tfm\tudscr"
-  copy /y *.afm "%texmfpath%\fonts\afm\tudscr"
-  copy /y *.vf  "%texmfpath%\fonts\vf\tudscr"
-  copy /y *.pfb "%texmfpath%\fonts\type1\tudscr"
-  copy /y *.map "%texmfpath%\fonts\map\dvips\tudscr"
-  copy /y *.map "%texmfpath%\fonts\map\pdftex\tudscr"
-% \iffalse
-%</!old>
-%</full|font>
-% \fi
-  if %distrib%=="MiKTeX" goto :MiKTeXHash
-  goto :TeXLiveHash
-:MiKTeXHash
-  initexmf --register-root=%texmfpath%
-  texhash --update-fndb=%texmfpath%
-% \iffalse
-%<*full|font>
-% \fi
-  updmap
-  set mapcfg=%texmfpath%/miktex/config/updmap.cfg
-  if exist "%mapcfg%" goto :updatemap
-  :newmap
-    if not exist "%texmfpath%/miktex/config" (
-      mkdir "%texmfpath%/miktex/config"
-    )
-% \iffalse
-%<*old>
-% \fi
-    echo Map tud.map> "%mapcfg%"
-% \iffalse
-%</old>
-%<*!old>
-% \fi
-    echo Map tudscr.map> "%mapcfg%"
-% \iffalse
-%</!old>
-% \fi
-    goto :endmap
-  :updatemap
-    set /p var=< %mapcfg%
-% \iffalse
-%<*old>
-% \fi
-    echo %var% | find "Map tud.map"> nul
-    if errorlevel 1 echo Map tud.map>> %mapcfg%
-% \iffalse
-%</old>
-%<*!old>
-% \fi
-    echo %var% | find "Map tudscr.map"> nul
-    if errorlevel 1 echo Map tudscr.map>> %mapcfg%
-% \iffalse
-%</!old>
-% \fi
-  :endmap
-  initexmf --mkmaps
-% \iffalse
-%</full|font>
-% \fi
-  goto :end
-:TeXLiveHash
-  texhash
-% \iffalse
-%<*full|font>
-%<*old>
-% \fi
-  updmap-sys --enable Map=tud.map
-% \iffalse
-%</old>
-%<*!old>
-% \fi
-  updmap-sys --enable Map=tudscr.map
-% \iffalse
-%</!old>
-%</full|font>
-% \fi
-  goto :end
-:end
-  echo.
-  echo  =====================================================================
-% \iffalse
-%<*full|font>
-% \fi
-  echo   Die Installation wird beendet, temporaere Dateien werden geloescht.
-% \iffalse
-%</full|font>
-%<*update>
-% \fi
-  echo   Das Update wird beendet, temporaere Dateien werden geloescht.
-% \iffalse
-%</update>
-% \fi
-  echo  =====================================================================
-% \iffalse
-%<*!old>
-% \fi
-  echo   Dokumentation und Beispiele fuer das TUD-KOMA-Script-Bundle sind
-% \iffalse
-%<*full|update>
-% \fi
-  echo   unter '%texmfpath%/doc/latex/tudscr' oder
-% \iffalse
-%</full|update>
-% \fi
-  echo   ueber den Konsolenaufruf 'texdoc tudscr' zu finden.
-  echo  =====================================================================
-% \iffalse
-%</!old>
-% \fi
-  echo.
-  pause
-  cd /d %~dp0
-  rmdir /s/q tudscrtemp
-  echo.
-  exit 0
-:abort
-  echo.
-  echo  =====================================================================
-  echo   Abbruch der Installation, temporaere Dateien werden geloescht.
-  echo  =====================================================================
-  echo.
-  pause
-  cd /d %~dp0
-  rmdir /s/q tudscrtemp
-  exit 0
 :checkfile
-  if not exist ../%~1 (
+  if not exist ..\%~1 (
     set missing=true
-    call:missingfile %~1
+    call :missingfile %~1
+  ) else (
+    echo   Datei %~1 gefunden.
   )
-  goto:eof
+  goto :eof
 :missingfile
   echo  =====================================================================
   echo.
@@ -685,100 +732,234 @@ exit 0
   echo   in das Verzeichnis des Skriptes und fuehren dieses abermals aus.
   echo.
   echo  =====================================================================
-  goto:eof
+  goto :eof
+%    \end{macrocode}
+% Es wird -- wenn möglich -- die automatische Paketinstallation von MiK\TeX{} 
+% verwendet.
+%    \begin{macrocode}
 :checkpackage
-  kpsewhich %~1> package.tmp
+  setlocal enabledelayedexpansion
+    if %texdistrib%=="MiKTeX" (
+      mpm --verify=%~2 >nul 2>nul
+      if !errorlevel! neq 0 kpsewhich %~1
+      set MIKTEX_KPSEWHICH_MPM_AUTOINSTALL=no
+    )
+    kpsewhich %~1> package.tmp
+  endlocal
+  set package=
+%  kpsewhich %~1> package.tmp
   set /p package=< package.tmp
   if "%package%"=="" (
     set missing=true
-    call:missingpackage %~1
+    call :missingpackage %~1 %~2
+  ) else (
+    echo   Paket %~2 ^(%~1^) gefunden.
   )
-  goto:eof
+  goto :eof
 :missingpackage
   echo  =====================================================================
   echo.
-  echo   Das LaTeX-Paket %~1 wurde nicht gefunden. Dieses wird fuer
-  echo   die Schriftinstallation zwingend benoetigt. Bitte %~1
-  echo   installieren und danach dieses Skript abermals ausfuehren.
+  echo   Das LaTeX-Paket %~2 ^(%~1^) wurde nicht gefunden.
+  echo   Dieses wird fuer die Schriftinstallation zwingend benoetigt.
+  echo   Bitte das Paket '%~2' ueber die Distribution installieren und
+  echo   danach dieses Skript abermals ausfuehren.
   echo.
   echo  =====================================================================
-  goto:eof
-% \iffalse
+  goto :eof
+:checkscript
+  set script=
+  where %~1> nul 2> nul> script.tmp
+  set /p script=<script.tmp
+  if "%script%"=="" (
+    set missing=true
+    call :missingscript %~1 %~2
+  ) else (
+    echo   Skript %~1 aus Paket %~2 gefunden.
+  )
+  goto :eof
+:missingscript
+  echo  =====================================================================
+  echo.
+  echo   Das ausfuehrbare Skript %~1 aus dem Paket %~2 wurde nicht
+  echo   gefunden. Dieses wird im Normalfall von der LaTeX-Distribution
+  echo   bereitgestellt und zur Schriftinstallation zwingend benoetigt.
+  echo   Bitte das Paket '%~2' ueber die Distribution installieren und
+  echo   danach dieses Skript abermals ausfuehren.
+  echo.
+  echo  =====================================================================
+  goto :eof
+%    \end{macrocode}
+% Da das Entpacken von zip-Archiven nicht direkt mit Windows-Boardmitteln 
+% möglich ist, wird dies über \textbf{VBScript} erledigt. Hierfür wird das 
+% notwendige Skript beim Ausführen der Batch-Datei erstellt und aufgerufen. 
+% Sollte sich im aktuellen Pfad die Standalone-Variante von \textbf{7zip} 
+% befinden, wird diese verwendet. Dies war bis zur Version~v2.04 zwingend 
+% notwendig.
+%    \begin{macrocode}
+:unzip
+  echo  =====================================================================
+  echo   Entpacken von %~1
+  echo  =====================================================================
+  if exist 7za.exe (
+    7za x %~1 -o"%~2" -y
+  ) else (
+    if not exist tudscrtemp\winunzip.vbs (
+      (
+        echo With WScript
+        echo   ZipFile = .Arguments^(0^)
+        echo   Folder = .Arguments^(1^)
+        echo End With
+        echo With CreateObject^("Scripting.FileSystemObject"^)
+        echo   If Not .FolderExists^(Folder^) Then
+        echo     .CreateFolder^(Folder^)
+        echo   End If
+        echo End With
+        echo With CreateObject^("Shell.Application"^)
+        echo   .NameSpace^(Folder^).CopyHere .NameSpace^(ZipFile^).Items, 272
+        echo End With
+        echo wScript.Sleep 2000
+      ) > tudscrtemp\winunzip.vbs
+    )
+    setlocal enabledelayedexpansion
+      set zipfile=%cd%\%~1
+      set "zipfile=!zipfile:\\=\!"
+      set unzipfolder=%cd%\%~2
+      set "unzipfolder=!unzipfolder:\\=\!"
+      if not exist !unzipfolder! set unzipfolder=%~2
+      CScript tudscrtemp\winunzip.vbs !zipfile! !unzipfolder!
+    endlocal
+  )
+  goto :eof
 %</!uninstall>
-%</win>
-% \fi
+:nothing
+  echo.
+  echo   TeX Live oder MiKTeX wurden nicht gefunden.
+  echo.
+  echo  =====================================================================
+  echo.
+  goto :abort
+:abort
+  echo.
+  echo  =====================================================================
+  echo   Abbruch der Installation, temporaere Dateien werden geloescht.
+  echo  =====================================================================
+  echo.
+  pause
+  cd /d %~dp0
+  if exist tudscrtemp rmdir /s /q tudscrtemp> nul
+  exit /b 0
+:end
+%<*!convert>
+  echo.
+  echo  =====================================================================
+%<full|font|converted>  echo   Die Installation wird beendet.
+%<update>  echo   Das Update wird beendet.
+%<uninstall>  echo   Es wurde keine ^(weitere^) lokale Nutzerinstallation von
+%<uninstall>  echo   TUD-KOMA-Script gefunden. Die Deinstallation wird beendet.
+  echo   Der Ordner mitsamt aller temporaeren Dateien wird geloescht.
+  echo  =====================================================================
+%<*!old>
+  echo   Dokumentation und Beispiele fuer das TUD-KOMA-Script-Bundle sind
+%<full|update>  echo   unter '%texmfpath%/doc/latex/tudscr' oder
+  echo   ueber den Konsolenaufruf 'texdoc tudscr' zu finden.
+  echo  =====================================================================
+%</!old>
+  echo.
+  pause
+%</!convert>
+  cd /d %~dp0
+  if exist tudscrtemp rmdir /s /q tudscrtemp> nul
+  echo.
+  exit /b 0
 %    \end{macrocode}
 %
-% \subsection{Installationsskripte für Unix-Systeme}
-%
-%    \begin{macrocode}
 % \iffalse
+%</win>
 %<*unix>
 % \fi
+%
+% \subsection{Bash-Skripte für Unix-Systeme}
+% \subsubsection{Identifikation}
+%
+% Auch hier erfolgt nach einigen Kommentaren die Ausgabe der Identifikation des
+% jeweiligen Skriptes.
+%
+%    \begin{macrocode}
 #!/bin/bash
-#
-% \iffalse
-%<*full>
-% \fi
-# Installation TUD-KOMA-Script-Bundle + TUD-CD-Schriften unter Unix
-% \iffalse
-%</full>
-%<*update>
-% \fi
-# Update TUD-KOMA-Script-Bundle unter Unix
-% \iffalse
-%</update>
-%<*font>
-% \fi
-# Installation TUD-CD-Schriften unter Unix
-% \iffalse
-%</font>
-%<*uninstall>
-% \fi
-# Deinstallation TUD-KOMA-Script-Bundle unter Unix
-% \iffalse
-%</uninstall>
-% \fi
 #
 # Autor: Falk Hanisch, Jons-Tobias Wamhoff
 #
 # getestet auf:
 # Ubuntu 14.04
+# Ubuntu 15.04
 #
 # in Kombination mit:
-# Tex Live 2013
-# Tex Live 2014
+# TeX Live 2015
 #
-% \iffalse
 %<*!uninstall>
-% \fi
-# Vorausgesetzte Tools:
+# Notwendige Tools:
 # unzip        (Ubuntu package unzip)
 #
-# Voraussetzte LaTeX Pakete:
-# fontinst.sty (Ubuntu package texlive-font-utils)
-# cmbright.sty (Ubuntu package texlive-fonts-extra)
-# iwona.sty    (Ubuntu package texlive-fonts-extra)
+# Vorausgesetzte LaTeX Pakete:
+# fontinst (Ubuntu package texlive-font-utils)
+# lmodern  (Ubuntu package lmodern)
+# cm-super (Ubuntu package cm-super)
+# cmbright (Ubuntu package texlive-fonts-extra)
+# hfbright (Ubuntu package texlive-fonts-extra)
+# iwona    (Ubuntu package texlive-fonts-extra)
 #
-# Benoetigte Schriften (im gleichen Verzeichnis):
-# DIN_Bd_PS.zip, Univers_PS.zip
+# Benoetigte Archive (im Verzeichnis des Installationsskriptes):
+# DIN_Bd_PS.zip
+# Univers_PS.zip
 #
-# Hinweis!!!!!!
-# Die Vorlagen und Schriften werden im lokalen Benutzerverzeichnis installiert:
-# unter Linux in ~/.texmf und unter Mac OS in ~/Library/texmf.
-# Nach Aenderungen an den globalen LaTeX Schriften (z.B. Updates) muss der
-# Befehl 'updmap' aufgerufen werden damit die lokalen Schriften gefunden werden.
-# Automatisch auf Mac OS geht das mit "TeX Live Utility.app":
-# "Preferences..."->"Automatically enable fonts in my home directory."
+# Die Installation erfolgt in Normalfall in das lokale Benutzerverzeichnis
+# $TEXMFHOME. Dieses entspricht unter Linux in '~/texmf' und unter Mac OS in 
+# '~/Library/texmf'. Wird das Skript mit 'sudo' ausgefuehrt, erfolgt die 
+# systemweite Installation fuer alle Nutzer in $TEXMFLOCAL. 
 #
-# TODOs:
-# lokale oder globale Installation
+%<*full|font|converted>
+# Fuer die lokale Benutzerinstallation wird waehrend des Installationsprozesses 
+# geprueft, ob die Schriften mit dem Befehl 'updmap-sys' systemweit registriert
+# werden koennen oder ob dies im Zweifelsfall mit 'updmap' fuer den aktuellen
+# Benutzer lokal geschehen muss. Die erste Variante benoetigt Zugriffsrechte
+# auf den Installationsordner der Distribution, welche im Zweifelsfall durch 
+# das Skript efragt werden. Wird die zweite Variante gewaehlt, wird der Befehl
+# 'updmap-sys' wirkungslos und der Anwender muss ab sofort den Befehl 'updmap'
+# nach Aenderungen an den systemweiten LaTeX-Schriften (z.B. Updates) manuell
+# aufrufen, damit neue respektive aktualisierte Schriften registriert werden.
+# Bei Mac OS kann dies automatisch mit "TeX Live Utility.app": "Preferences..." 
+# -> "Automatically enable fonts in my home directory." erfolgen.
 #
+%</full|font|converted>
+%</!uninstall>
+echo
+echo  =====================================================================
+echo
+%<convert>echo   Konvertieren der TUD-CD-Schriften unter Unix
+%<full>echo   Installation TUD-KOMA-Script + TUD-CD-Schriften unter Unix
+%<update>echo   Update TUD-KOMA-Script unter Unix
+%<font>echo   Installation TUD-CD-Schriften unter Unix
+%<converted>echo   Installation der konvertierten TUD-CD-Schriften unter Unix
+%<uninstall>echo   Deinstallation TUD-KOMA-Script unter Unix
+%<old>echo   fuer obsolete Klassen und Pakete
+%!echoTUDVersion
+echo
+%    \end{macrocode}
+%
+% \subsubsection{Funktionen innerhalb der Skripte}
+%
+% Hier werden die für die Skripte gleichermaßen verwendeten Funktionen 
+% definiert.
+%
+%    \begin{macrocode}
+%<*!uninstall>
 checkfile()
 {
-  if [ ! -f "$1" ]; then
+  if [ ! -f "$1" ] ; then
     missing=true
     missingfile "$1"
+  else
+    echo   Datei $1 gefunden.
   fi
 }
 missingfile()
@@ -794,21 +975,86 @@ missingfile()
 checkpackage()
 {
   package=$(kpsewhich $1)
-  if [ -z "$package" ]; then
+  if [ -z "$package" ] ; then
     missing=true
-    missingpackage $1
+    missingpackage "$1" "$2"
+  else
+    echo   Paket $2 \($1\) gefunden.
   fi
 }
 missingpackage()
 {
   echo  =====================================================================
   echo
-  echo   Das LaTeX-Paket $1 wurde nicht gefunden. Dieses wird fuer
-  echo   die Schriftinstallation zwingend benoetigt. Bitte $1
-  echo   installieren und danach dieses Skript abermals ausfuehren.
+  echo   Das LaTeX-Paket $2 \($1\) wurde nicht gefunden.
+  echo   Dieses wird fuer die Schriftinstallation zwingend benoetigt.
+  echo   Bitte das Paket \'$2\' ueber die Distribution installieren und
+  echo   danach dieses Skript abermals ausfuehren.
   echo
   echo  =====================================================================
 }
+checkscript()
+{
+  script=$(which $1)
+  if [ -z "$script" ] ; then
+    missing=true
+    missingscript "$1" "$2"
+  else
+    echo   Skript $1 aus Paket $2 gefunden.
+  fi
+}
+missingscript()
+{
+  echo  =====================================================================
+  echo
+  echo   Das ausfuehrbare Skript $1 aus dem Paket $2 wurde nicht
+  echo   gefunden. Dieses wird im Normalfall von der LaTeX-Distribution
+  echo   bereitgestellt und zur Schriftinstallation zwingend benoetigt.
+  echo   Bitte das Paket \'$2\' ueber die Distribution installieren und
+  echo   danach dieses Skript abermals ausfuehren.
+  echo
+  echo  =====================================================================
+}
+%<*!convert>
+proof_userinput()
+{
+  echo
+  echo  =====================================================================
+  echo
+  echo   $texmfpath
+  echo
+  echo   Soll dieser Pfad genutzt werden?
+  if [ ! -d $texmfpath ] ; then
+    echo   Der angegebene Ordner existiert nicht, wird jedoch erstellt.
+  fi
+  select yn in "Ja (empfohlen)" "Nein"; do
+    case $yn in
+      "Ja (empfohlen)") break;;
+      "Nein")
+        set_texmfpath
+        break;;
+    esac
+  done
+}
+set_texmfpath()
+{
+  echo
+  echo   Geben Sie das Installationsverzeichnis an:
+  read texmfpath
+  proof_userinput
+}
+%</!convert>
+mkvaldir()
+{
+  mkdir -p $1
+  if [ $? -ne 0 ] ; then
+    echo Keine Schreibberechtigung fuer folgenden Pfad:
+    echo $1
+    echo Versuchen Sie das Ausfuehren mit \'sudo -k bash <Skriptname>\'
+    abort
+  fi
+}
+%</!uninstall>
 abort()
 {
   echo
@@ -816,172 +1062,256 @@ abort()
   echo   Abbruch der Installation, temporaere Dateien werden geloescht.
   echo  =====================================================================
   echo
-  cd ..
+  read -n1 -r -p "Druecken Sie eine beliebige Taste . . . "
+  echo
   rm -rf tudscrtemp
   exit 0
 }
-#
-#
-#
-% \iffalse
-%</!uninstall>
-% \fi
+%    \end{macrocode}
+% Nach der Defiition der Funktionen wird geprüft, ob eine \LaTeX-Distribution 
+% vorhanden ist.
+%    \begin{macrocode}
+texpath=$(which tex)
+if [ -z "$texpath" ] ; then
+  echo Es wurde keine LaTeX-Distribution gefunden.
+  echo Moeglicherweise hilft der Aufruf des Skriptes mit:
+  echo "'sudo -k env \"PATH=\$PATH\" bash $0'"
+  abort
+fi
+echo
+echo   LaTeX-Distribution gefunden in: 
+echo   \'$texpath\'
 echo
 echo  =====================================================================
-% \ifflse
-%<*full>
-% \fi
-echo   Installation TUD-KOMA-Script + TUD-CD-Schriften unter Unix
-% \iffalse
-%</full>
-%<*update>
-% \fi
-echo   Update TUD-KOMA-Script unter Unix
-% \iffalse
-%</update>
-%<*font>
-% \fi
-echo   Installation TUD-CD-Schriften unter Unix
-% \iffalse
-%</font>
-%<*uninstall>
-% \fi
-echo   Deinstallation TUD-KOMA-Script unter Unix
-% \iffalse
-%</uninstall>
-% \fi
 echo
+%    \end{macrocode}
+%
 % \iffalse
 %<*!uninstall>
-%<*full|update>
 % \fi
-version="$(basename $0)" 
+%
+% \subsubsection{Installationsskripte für Unix-Systeme}
+%
+% Die Bash-Skripte werden für die Schriftinstallation sowie für eine lokale
+% Installation von \TUDScript unter unixartigen Betriebssystemen angeboten.
+%
+% Es wird ein temporärer Ordner angelegt, der am Ende wieder gelöscht wird. 
+% Danach wird auf alle benötigten Archive, Skripte und Pakete geprüft.
+%
+%    \begin{macrocode}
+rm -rf tudscrtemp
+mkvaldir tudscrtemp/converted
+echo  =====================================================================
+echo
+echo   Notwendige Dateien und Pakete werden gesucht.
+echo   Dies kann einen Moment dauern.
+echo
+missing=false
+%    \end{macrocode}
+% Für die lokale Installation von \TUDScript ist die gewünschte Versionsnummer 
+% im Dateinamen des Skriptes hinterlegt. Das dazugehörige Archiv wird mit 
+% dieser gesucht.
+%    \begin{macrocode}
+%<*full|update>
+version="$(basename $0)"
 version=$(echo $version|cut -c8-)
 version=$(echo $version|rev|cut -c12-|rev)
-% \iffalse
-%</full|update>
-% \fi
-missing=false
-% \iffalse
-%<*full|update>
-% \fi
 checkfile "tudscr_$version.zip"
-% \iffalse
 %</full|update>
-%<*full|font>
-% \fi
+%    \end{macrocode}
+% Die Archive, Skripte und Pakete für die Schriftumwandlung werden gesucht.
+%    \begin{macrocode}
+%<converted>checkfile "tudscr_fonts_converted.zip"
+%<*full|font|convert>
 checkfile "Univers_PS.zip"
 checkfile "DIN_Bd_PS.zip"
-% \iffalse
-%<*!old>
-% \fi 
-checkfile "tudscrfonts.zip"
-% \iffalse
-%</!old>
-% \fi
-checkpackage "fontinst.sty"
-% \iffalse
-%</full|font>
-%<*!old>
-% \fi 
-checkpackage "cmbright.sty"
-checkpackage "iwona.sty"
-% \iffalse
-%</!old>
-% \fi
+%<!old>checkfile "tudscr_fonts_install.zip"
 if $missing ; then
   abort
 fi
-texmfpath=$(kpsewhich --var-value=TEXMFHOME)
-if [ -z "$texmfpath" ]; then
-  texmfpath=$(kpsewhich --var-value=TEXMFLOCAL)
+checkscript "pltotf"        "fontware"
+checkscript "vptovf"        "fontware"
+checkpackage "fontinst.sty" "fontinst"
+%</full|font|convert>
+%    \end{macrocode}
+% Für die Schriftfamilien im Stil von \TUDScript werden einige zusätzliche 
+% Pakete benötigt.
+%    \begin{macrocode}
+%<*!old>
+checkpackage "type1ec.sty"  "cm-super"
+checkpackage "lmodern.sty"  "lm"
+checkpackage "cmbright.sty" "cmbright"
+checkpackage "hfbright.map" "hfbright"
+checkpackage "iwona.sty"    "iwona"
+%</!old>
+%    \end{macrocode}
+% Wenn auch nur eine benötigte Datei nicht vorhanden ist, wird die Installation 
+% abgebrochen.
+%    \begin{macrocode}
+if $missing ; then
+  abort
 fi
-% \iffalse
-%<*full>
-% \fi
-echo   Installation des TUD-KOMA-Script-Bundles in den lokalen Benutzerpfad:
-% \iffalse
-%</full>
-%<*update>
-% \fi
-echo   Update des TUD-KOMA-Script-Bundles in den lokalen Benutzerpfad:
-% \iffalse
-%</update>
-%<*font>
-% \fi
-echo   Installation der TUD-CD-Schriften in den lokalen Benutzerpfad:
-% \iffalse
-%</font>
-% \fi
 echo
+echo   Es wurden alle notwendigen Dateien und Pakete gefunden.
+echo
+echo  =====================================================================
+echo  =====================================================================
+echo
+%    \end{macrocode}
+% Als nächstes wird der Installationspfad bestimmt.
+%    \begin{macrocode}
+%<*!convert>
+if [ "$EUID" -eq 0 ] ; then
+  texmfpath=$(kpsewhich --var-value=TEXMFLOCAL)
+  echo   Mehrbenutzerinstallation \(Administrator\).
+else
+  texmfpath=$(kpsewhich --var-value=TEXMFHOME)
+  echo   Einzelbenutzerinstallation.
+fi
+echo
+echo  =====================================================================
+echo  =====================================================================
+echo
+%    \end{macrocode}
+% Folgend wird der Installationsordner durch den Nutzer festgelegt, wobei
+% dieser mit dem zuvor ermittelten und empfohlenen Pfad vorgeschlagen wird.
+%    \begin{macrocode}
+echo   Bitte geben Sie das gewuenschte Installationsverzeichnis an.
+echo   Dieses sollte sich jenseits der Distributionsordnerstruktur
+if [ "$EUID" -eq 0 ] ; then
+  echo   in einem Pfad mit Lese-Zugriff fuer alle Benutzer befinden.
+else
+  echo   in einem lokalen Benutzerpfad befinden.
+fi
+echo
+echo   Sie sollten den voreingestellten Standardpfad verwenden.
+proof_userinput
+echo
+echo  =====================================================================
+echo   Installation in folgenden Pfad:
 echo   $texmfpath
+echo  =====================================================================
+echo
+%</!convert>
+%<*convert>
+texmfpath=$""
 echo
 echo  =====================================================================
-rm -rf tudscrtemp
-mkdir -p tudscrtemp/converted
-% \iffalse
-%</!uninstall>
-%<*uninstall>
-% \fi
-uninstall()
-{
-  cd $1
-  if [ -d logo ]; then
-    rm -rf logo
-  fi
-  rm -f *.cls
-  rm -f *.sty
-  cd ../../..
-  if [ -d doc/latex/tudscr ]; then
-    rm -rf doc/latex/tudscr
-  fi
-  if [ -d source/latex/tudscr ]; then
-    rm -rf source/latex/tudscr
-  fi
-}
-texmfdist=$(kpsewhich --var-value=TEXMFDIST)
-texmfpath=$(kpsewhich tudscrbase.sty --all)
-while read -r line; do
-  if [[ $line != *"$texmfdist"* ]]; then
-    texmftemp=$(echo $line|rev|cut -c15-|rev)
-    echo  =====================================================================
-    echo   Soll TUD-KOMA-Script aus folgendem Pfad entfernt werden?
-    echo   $texmftemp
-    echo  =====================================================================
+echo   Erzeugen der konvertierten TUD-CD-Schriften
+echo  =====================================================================
+echo
+%</convert>
+%    \end{macrocode}
+% Für die notwendige Registrierung der Schriften nach der Installtion wird 
+% geprüft, ob dies für alle Nutzer mit \textbf{updmap-sys} erfolgen kann oder 
+% ob die nutzerindividuelle Variante mit \textbf{updmap} notwendig ist.
+%    \begin{macrocode}
+%<*full|font|converted>
+updmapsys=true
+if [ -d "$(kpsewhich --var-value=TEXMFVAR)/fonts/map/" ] ; then
+  updmapsys=false
+%    \end{macrocode}
+% Da für die systemweite Installation erweiterte Zugriffsrechte auf bestimmte 
+% Installationspfade benötigt werden, wird entsprechend darauf geprüft. 
+%    \begin{macrocode}
+else
+%    \end{macrocode}
+% Dafür wird als erstes ein Array mit den notwendigen Pfaden erstellt. Mit der 
+% Funktion \val{looptexdirarray} wird dieses Feld durchlaufen und für den Fall, 
+% dass der aktuelle Pfad nicht beschreibbar ist, der nachfolgend angegebene
+% Befehl ausgeführt.
+%    \begin{macrocode}
+  texdirarray=(
+    $(kpsewhich --var-value=TEXMFSYSVAR)
+    $(kpsewhich --var-value=TEXMFSYSCONFIG)
+    $(kpsewhich --var-value=TEXMFHOME)
+  )
+  looptexdirarray()
+  {
+    for d in "${texdirarray[@]}"; do
+      if [ -d "$d" ] && [ ! -w "$d" ] ; then
+        if [ "$1" == "use" ] ; then
+          eval ${@:2} $d;
+        else
+          eval $@;
+        fi
+      fi
+    done
+  }
+  texdirpermitted=false
+  looptexdirarray texdirpermitted=true
+%    \end{macrocode}
+% Sollte der nutzer auf einen der Ordner keine Schreibrechte besitzen, werden 
+% diese entweder gesetzt oder die Schriften werden nur für den aktuellen Nutzer 
+% installiert.
+%    \begin{macrocode}
+  if $texdirpermitted ; then
+    echo Fuer das systemweite Registrieren der Schriften ist das Ausfuehren
+    echo von \'updmap-sys\' erforderlich. Dazu muessen fuer die nachfolgend
+    echo aufgelisteten Ordner fuer alle anderen Benutzer \(\'other\'\) mit
+    echo \'sudo chmod -R o+w\' Schreibrechte gesetzt werden. Dieses Vorgehen
+    echo wird empfohlen.
     echo
-    select yn in "Yes" "No"; do
-      case $yn in 
-        Yes ) uninstall $texmftemp; break;;
-        No )  break;;
+    looptexdirarray use echo
+    echo
+    echo Andernfalls wird lediglich \'updmap\' aufgerufen, wodurch der Befehl
+    echo \'updmap-sys\' ab diesem Zeitpunkt wirkungslos wird und der Anwender
+    echo ab sofort nach Aenderungen an den LaTeX-Schriften \(z.B. Updates\)
+    echo den Befehl \'updmap\' manuell aufrufen muss, damit neue repsektive
+    echo aktualisierte Schriften registriert werden.
+    select yn in "Schreibrechte setzen (empfohlen)" "'updmap' verwenden"; do
+      case $yn in
+        "Schreibrechte setzen (empfohlen)")
+          looptexdirarray use sudo chmod -R o+w
+          sudo -k
+          texdirpermitted=false
+          looptexdirarray texdirpermitted=true
+          if $texdirpermitted ; then
+            echo
+            echo Setzen der Schreibrechte gescheitert!
+            abort
+          fi
+          break;;
+        "'updmap' verwenden")
+          updmapsys=false
+          break;;
       esac
-    done <&4;
-    echo
+    done
   fi
-done 4<&0 <<< "$texmfpath"
-texhash
-echo
-echo  =====================================================================
-echo   Es wurde keine \(weitere\) lokale Nutzerinstallation von 
-echo   TUD-KOMA-Script gefunden. Die Deinstallation wird beendet.
-echo  =====================================================================
-echo
-exit 0
-% \iffalse
-%</uninstall>
-%<*!uninstall>
-%<*full|update>
-% \fi
-unzip -o tudscr_$version.zip -d $texmfpath
-% \iffalse
-%</full|update>
-%<*full|font>
-% \fi
+fi
+%</full|font|converted>
+%    \end{macrocode}
+% Die benötigten Verzeichnisse für die konvertierten Schriften werden erzeugt.
+%    \begin{macrocode}
+%<*full|font|convert>
+%<old>localfolder=tud
+%<!old>localfolder=tudscr
+mkvaldir $texmfpath/tex/latex/$localfolder/fonts
+mkvaldir $texmfpath/fonts/tfm/$localfolder
+mkvaldir $texmfpath/fonts/afm/$localfolder
+mkvaldir $texmfpath/fonts/vf/$localfolder
+mkvaldir $texmfpath/fonts/type1/$localfolder
+mkvaldir $texmfpath/fonts/map/dvips/$localfolder
+%</full|font|convert>
+%    \end{macrocode}
+% Für Komplettinstallationen wird das \TUDScript-Bundle in den eingestellten 
+% Pfad entpackt.
+%    \begin{macrocode}
+%<full|update>unzip -o tudscr_$version.zip -d $texmfpath
+%<converted>unzip -o tudscr_fonts_converted.zip -d $texmfpath
+%    \end{macrocode}
+% Anschließend werden die PostScript-Schriften für die Konvertierung in den 
+% temporären Ordner extrahiert.
+%    \begin{macrocode}
+%<*full|font|convert>
 unzip Univers_PS.zip -d tudscrtemp
 unzip DIN_Bd_PS.zip -d tudscrtemp
-% \iffalse
-%<*old>
-% \fi
+%<!old>unzip tudscr_fonts_install.zip -d tudscrtemp/converted
 cd tudscrtemp
+%    \end{macrocode}
+% Dies ist die Konvertierungsroutine für die alten Schriftfamilien.
+%    \begin{macrocode}
+%<*old>
 cp uvcel___.pfb converted/aunl8a.pfb
 cp uvcel___.afm converted/aunl8a.afm
 cp uvxlo___.pfb converted/aunlo8a.pfb
@@ -1010,12 +1340,12 @@ echo "\latinfamily{din}{}">> installoldfonts.tex
 echo "\endrecordtransforms">> installoldfonts.tex
 echo "\bye">> installoldfonts.tex
 latex installoldfonts.tex
-% \iffalse
 %</old>
+%    \end{macrocode}
+% Die neuen \TUDScript-Schriftfamilien ergänzen die fehlenden Glyphen durch~-- 
+% einigermaßen passende~-- aus freien \LaTeX-Schriften.
+%    \begin{macrocode}
 %<*!old>
-% \fi
-unzip tudscrfonts.zip -d tudscrtemp/converted
-cd tudscrtemp
 cp uvcel___.pfb converted/lunl8a.pfb
 cp uvcel___.afm converted/lunl8a.afm
 cp uvxlo___.pfb converted/lunlo8a.pfb
@@ -1080,18 +1410,21 @@ echo 18/19
 tftopl sy-iwonachz.tfm sy-iwonachz.pl
 echo 19/19
 latex installfonts.tex
-% \iffalse
 %</!old>
-% \fi
+%    \end{macrocode}
+% Nachdem alle Schriften erstellt wurden, werden diese noch mit den passenden 
+% Skripten in die benötigten Dateiformate gewandelt.
+%    \begin{macrocode}
 for f in $(ls *.pl) ; do
   pltotf $f
 done
 for f in $(ls *.vpl) ; do
   vptovf $f
 done
-% \iffalse
+%    \end{macrocode}
+% Danach werden die notwendigen Map-Dateien erstellt.
+%    \begin{macrocode}
 %<*old>
-% \fi
 echo "\input finstmsc.sty"> createoldmap.tex
 echo "\resetstr{PSfontsuffix}{.pfb}">> createoldmap.tex
 echo "\adddriver{dvips}{tud.map}">> createoldmap.tex
@@ -1099,112 +1432,129 @@ echo "\input record.tex">> createoldmap.tex
 echo "\donedrivers">> createoldmap.tex
 echo "\bye">> createoldmap.tex
 latex createoldmap.tex
-% \iffalse
 %</old>
-%<*!old>
-% \fi
-latex createmap.tex
-% \iffalse
-%</!old>
-% \fi
+%<!old>latex createmap.tex
+%    \end{macrocode}
+% Die erzeugten Schriftdateien werden anschließend in die Ordnerstruktur im 
+% Installationspfad kopiert.
+%    \begin{macrocode}
 echo
 echo  =====================================================================
 echo   Konvertierung abgeschlossen.
 echo  =====================================================================
 echo
-% \iffalse
-%<*old>
-% \fi
-mkdir -p $texmfpath/tex/latex/tud/fonts
-mkdir -p $texmfpath/fonts/tfm/tud
-mkdir -p $texmfpath/fonts/afm/tud
-mkdir -p $texmfpath/fonts/vf/tud
-mkdir -p $texmfpath/fonts/type1/tud
-mkdir -p $texmfpath/fonts/map/dvips/tud
-mkdir -p $texmfpath/fonts/map/pdftex/tud
-cp -f *.fd  $texmfpath/tex/latex/tud/fonts
-cp -f *.tfm $texmfpath/fonts/tfm/tud
-cp -f *.afm $texmfpath/fonts/afm/tud
-cp -f *.vf  $texmfpath/fonts/vf/tud
-cp -f *.pfb $texmfpath/fonts/type1/tud
-cp -f *.map $texmfpath/fonts/map/dvips/tud
-cp -f *.map $texmfpath/fonts/map/pdftex/tud
-% \iffalse
-%</old>
-%<*!old>
-% \fi
-mkdir -p $texmfpath/tex/latex/tudscr/fonts
-mkdir -p $texmfpath/fonts/tfm/tudscr
-mkdir -p $texmfpath/fonts/afm/tudscr
-mkdir -p $texmfpath/fonts/vf/tudscr
-mkdir -p $texmfpath/fonts/type1/tudscr
-mkdir -p $texmfpath/fonts/map/dvips/tudscr
-mkdir -p $texmfpath/fonts/map/pdftex/tudscr
-cp -f *.fd  $texmfpath/tex/latex/tudscr/fonts
-cp -f *.tfm $texmfpath/fonts/tfm/tudscr
-cp -f *.afm $texmfpath/fonts/afm/tudscr
-cp -f *.vf  $texmfpath/fonts/vf/tudscr
-cp -f *.pfb $texmfpath/fonts/type1/tudscr
-cp -f *.map $texmfpath/fonts/map/dvips/tudscr
-cp -f *.map $texmfpath/fonts/map/pdftex/tudscr
-% \iffalse
-%</!old>
-%</full|font>
-% \fi
+cp -f *.fd  $texmfpath/tex/latex/$localfolder/fonts
+cp -f *.tfm $texmfpath/fonts/tfm/$localfolder
+cp -f *.afm $texmfpath/fonts/afm/$localfolder
+cp -f *.vf  $texmfpath/fonts/vf/$localfolder
+cp -f *.pfb $texmfpath/fonts/type1/$localfolder
+cp -f *.map $texmfpath/fonts/map/dvips/$localfolder
+%</full|font|convert>
+%    \end{macrocode}
+% Nun werden die Schriften registriert.
+%    \begin{macrocode}
+%<*!convert>
 texhash
-% \iffalse
-%<*full|font>
-%<*old>
-% \fi
-updmap --enable Map=tud.map
-% \iffalse
-%</old>
-%<*!old>
-% \fi
-updmap --enable Map=tudscr.map
-% \iffalse
-%</!old>
-%</full|font>
-% \fi
+%<*full|font|converted>
+if $updmapsys || [ "$EUID" -eq 0 ] ; then
+  echo  =====================================================================
+  echo   Aufruf von \'updmap-sys\'
+  echo  =====================================================================
+%<old>  updmap-sys --enable Map=tud.map --force
+%<!old>  updmap-sys --enable Map=tudscr.map --force
+fi
+if ! $updmapsys ; then
+  echo  =====================================================================
+  echo   Aufruf von \'updmap\'
+  echo  =====================================================================
+%<old>  updmap --enable Map=tud.map --force
+%<!old>  updmap --enable Map=tudscr.map --force
+fi
+%</full|font|converted>
+%    \end{macrocode}
+% Damit ist die Installation abgeschlossen. 
+%    \begin{macrocode}
 echo
 echo  =====================================================================
-% \iffalse
-%<*full|font>
-% \fi
-echo   Die Installation wird beendet, temporaere Dateien werden geloescht.
-% \iffalse
-%</full|font>
-%<*update>
-% \fi
-echo   Das Update wird beendet, temporaere Dateien werden geloescht.
-% \iffalse
-%</update>
-% \fi
+%<full|font|converted>echo   Die Installation wird beendet.
+%<update>echo   Das Update wird beendet.
+echo   Der Ordner mitsamt aller temporaeren Dateien wird geloescht.
 echo  =====================================================================
-% \iffalse
 %<*!old>
-% \fi
 echo   Dokumentation und Beispiele fuer das TUD-KOMA-Script-Bundle sind
-% \iffalse
-%<*full|update>
-% \fi
-echo   unter $texmfpath/doc/latex/tudscr oder
-% \iffalse
-%</full|update>
-% \fi
-echo   ueber den Konsolenaufruf texdoc tudscr zu finden.
+%<full|update>echo   unter $texmfpath/doc/latex/tudscr oder
+echo   ueber den Terminalaufruf \'texdoc tudscr\' zu finden.
 echo  =====================================================================
-% \iffalse
 %</!old>
-% \fi
+%</!convert>
 cd ../..
+read -n1 -r -p "Druecken Sie eine beliebige Taste . . . "
+echo
 rm -rf tudscrtemp
 exit 0
+%    \end{macrocode}
+%
 % \iffalse
 %</!uninstall>
+%<*uninstall>
+% \fi
+%
+% \subsubsection{Deinstallationsskript für Unix-Systeme}
+%
+% Dieses Skript kann zum Deinstallieren lokalen Benutzerinstallation von 
+% \TUDScript genutzt werden.
+%
+%    \begin{macrocode}
+uninstall()
+{
+  cd $1
+  if [ -d logo ] ; then
+    rm -rf logo
+  fi
+%  rm -f *.clo
+  rm -f *.cls
+  rm -f *.sty
+  cd ../../..
+  if [ -d doc/latex/tudscr ] ; then
+    rm -rf doc/latex/tudscr
+  fi
+  if [ -d source/latex/tudscr ] ; then
+    rm -rf source/latex/tudscr
+  fi
+}
+texmfdist=$(kpsewhich --var-value=TEXMFDIST)
+texmfpath=$(kpsewhich tudscrbase.sty --all)
+while read -r line; do
+  if [[ $line != *"$texmfdist"* ]] ; then
+    texmftemp=$(echo $line|rev|cut -c15-|rev)
+    echo  =====================================================================
+    echo   Soll TUD-KOMA-Script aus folgendem Pfad entfernt werden?
+    echo   $texmftemp
+    echo  =====================================================================
+    echo
+    select yn in "Ja" "Nein"; do
+      case $yn in
+        Ja ) uninstall $texmftemp; break;;
+        Nein )  break;;
+      esac
+    done <&4;
+    echo
+  fi
+done 4<&0 <<< "$texmfpath"
+texhash
+echo
+echo  =====================================================================
+echo   Es wurde keine \(weitere\) lokale Nutzerinstallation von
+echo   TUD-KOMA-Script gefunden. Die Deinstallation wird beendet.
+echo  =====================================================================
+echo
+exit 0
+%    \end{macrocode}
+%
+% \iffalse
+%</uninstall>
 %</unix>
 % \fi
-%    \end{macrocode}
 %
 % \Finale
 %
