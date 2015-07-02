@@ -8,7 +8,7 @@ cd temp
 echo \BaseDirectory{.}> docstrip.cfg
 echo \UseTDS>> docstrip.cfg
 tex tudscr.ins
-kpsewhich --var-value=TEXMFHOME> texmfpath.tmp
+kpsewhich --var-value=TEXMFLOCAL> texmfpath.tmp
 set /p texmfpath=< texmfpath.tmp	
 xcopy tex "%texmfpath%\tex\" /s /y
 cd %~dp0
