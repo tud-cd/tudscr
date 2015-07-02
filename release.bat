@@ -196,8 +196,7 @@ echo  Loeschen aller temporaeren Dateien
 echo =========================================================================
 echo.
 pause.
-del winzip.vbs /q > nul
-if exist CTAN\tudscr rmdir CTAN\tudscr /s /q > nul
 cd %~dp0
-if exist temp rmdir temp /s /q > nul
-if exist release-%version%\temp rmdir release-%version%\temp /s /q > nul
+if exist release-%version%\temp        rmdir release-%version%\temp /s /q > nul
+if exist release-%version%\CTAN\tudscr rmdir release-%version%\CTAN\tudscr /s /q > nul
+if exist temp                          rmdir temp /s /q > nul
