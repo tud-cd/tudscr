@@ -5,8 +5,8 @@
 %% The original source files were:
 %%
 %% tudscr-version.dtx  (with options: `class,poster')
-%% tudscr-base.dtx  (with options: `load')
-%% tudscr-poster.dtx  (with options: `class,option')
+%% tudscr-base.dtx  (with options: `class,load')
+%% tudscr-layout.dtx  (with options: `class,poster,option')
 %% tudscr-misc.dtx  (with options: `class,inherit,execute,poster')
 %% tudscr-poster.dtx  (with options: `class,body')
 %% tudscr-fields.dtx  (with options: `class,inherit,poster')
@@ -89,15 +89,27 @@
 }{}
 %%% From File: tudscr-base.dtx
 \RequirePackage{tudscrbase}[\TUDVersion]
-%%% From File: tudscr-poster.dtx
+%%% From File: tudscr-layout.dtx
+\newcommand*\tud@layout@switch{}
+\edef\tud@layout@switch{%
+  \TUD@numkey@bool,%
+  {nocolor}{1},{nocolour}{1},{monochrome}{1},{monochromatic}{1},%
+  {lite}{2},{colorlite}{2},{litecolor}{2},{colourlite}{2},{litecolour}{2},%
+  {light}{2},{colorlight}{2},{lightcolor}{2},{colourlight}{2},{lightcolour}{2},%
+  {pale}{2},{colorpale}{2},{palecolor}{2},{colourpale}{2},{palecolour}{2},%
+  {colorbar}{3},{barcolor}{3},{colourbar}{3},{barcolour}{3},%
+  {bicolor}{4},{bicolour}{4},{twocolor}{4},{twocolour}{4},%
+  {bichrome}{4},{bichromatic}{4},{dichrome}{4},{dichromatic}{4},%
+  {color}{5},{colour}{5},%
+  {full}{6},{colorfull}{6},{fullcolor}{6},{colourfull}{6},{fullcolour}{6}%
+}
+\BeforeClass{\TUDClassName@Parent}{\undef{\tud@layout@switch}}
 \newcommand*\tud@cdstyle{0}
 \TUD@key{cdstyle}[true]{%
-  \AfterClass+{\TUDClassName@Parent}{%
-    \TUD@set@numkey{cdstyle}{tud@cdstyle}{\tud@layout@switch}{#1}%
-    \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-      \if@atdocument\tud@style@set\fi%
-    \fi%
-  }%
+  \TUD@set@numkey{cdstyle}{tud@cdstyle}{\tud@layout@switch}{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \if@atdocument\tud@style@set\fi%
+  \fi%
 }
 \TUD@key{style}[true]{\TUDoptions{cdstyle=#1}}
 %%% From File: tudscr-misc.dtx
@@ -106,6 +118,7 @@
 \TUDProcessOptions\relax
 \LoadClass{\TUDClassName@Parent}
 %%% From File: tudscr-poster.dtx
+% §§§ verschieben in Layout?
 \newcommand*\tud@cdstyle@set{%
   \ifcase\tud@cdstyle\relax% false
     \footcontent{}%
@@ -191,6 +204,7 @@
   \fi%
   \ifx\@webpage\@empty\else\newline\@webpage\fi%
 }
+% §§§ Befehl fuer tudscrsupervisor und tudscrposter in fields.dtx
 \patchcmd{\tud@split@author@list}{authormore}{%
   authormore,office,telephone,emailaddress%
 }{}{\tud@patch@wrn{tud@split@author@list}}
@@ -205,6 +219,7 @@
 \renewcommand*\chair[2][\@empty]{\tud@foot@line@add{chair}{#2}{#1}}
 \newcommand*\@professor@foot{}
 \renewcommand*\professor[2][\@empty]{\tud@foot@line@add{professor}{#2}{#1}}
+% §§§ Trennung von tudscrsupervisor und tudscrposter
 \@ifpackageloaded{%
   tudscrsupervisor%
 }{}{%
@@ -255,7 +270,7 @@
 }
 \newcommand*\@webpage{}
 \newcommand*\webpage[2][]{\gdef\@webpage{#2}}
-\AfterPackage*{hyperref}{%
+\AfterPackage{hyperref}{%
   \renewcommand*\webpage[2][hidelinks]{%
     \gdef\@webpage{%
       \begingroup%
@@ -264,7 +279,7 @@
       \endgroup%
     }%
   }%
-}%
+}
 %%% From File: tudscr-locale.dtx
 \tud@locale@define{\authorname}
 \tud@locale@define{\contactname}

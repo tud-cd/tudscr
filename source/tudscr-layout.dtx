@@ -1,4 +1,4 @@
-% \CheckSum{1230}
+% \CheckSum{1248}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -89,6 +89,46 @@
 %
 % \subsection{Optionen}
 %
+% Ein zentraler Teil der Wrapper-Klassen ist die Auswahl der Darstellung des
+% \CDs. Dabei kann gewählt werden, ob es einfarbig, mit leichtem oder aber mit
+% starkem Farbeinsatz genutzt werden soll. Die folgenden Optionen sind hierfür 
+% zuständig.
+%
+% \begin{macro}{\tud@layout@switch}
+% Dies sind die Standardoptionen für alle einzelnen Einstellungen des Layouts.
+% Es gibt die Varianten monochrom~(1), leichter~(2) und voller Farbeinsatz~(5)
+% sowie die Möglichkeit, das \CD vollständig zu deaktivieren~(0). Außerdem kann
+% die farbige Ausprägung des Querbalkens im Zusammenspiel mit dem Seitenkopf
+% festgelegt werden (farbiger Querbalken~(3), farbiger Kopf~(4) und voller 
+% Farbeinsatz mit hervorgehobenem Querbalken~(6)).
+%    \begin{macrocode}
+\newcommand*\tud@layout@switch{}
+\edef\tud@layout@switch{%
+  \TUD@numkey@bool,%
+  {nocolor}{1},{nocolour}{1},{monochrome}{1},{monochromatic}{1},%
+  {lite}{2},{colorlite}{2},{litecolor}{2},{colourlite}{2},{litecolour}{2},%
+  {light}{2},{colorlight}{2},{lightcolor}{2},{colourlight}{2},{lightcolour}{2},%
+  {pale}{2},{colorpale}{2},{palecolor}{2},{colourpale}{2},{palecolour}{2},%
+  {colorbar}{3},{barcolor}{3},{colourbar}{3},{barcolour}{3},%
+  {bicolor}{4},{bicolour}{4},{twocolor}{4},{twocolour}{4},%
+  {bichrome}{4},{bichromatic}{4},{dichrome}{4},{dichromatic}{4},%
+  {color}{5},{colour}{5},%
+  {full}{6},{colorfull}{6},{fullcolor}{6},{colourfull}{6},{fullcolour}{6}%
+}
+%    \end{macrocode}
+% Damit der Schalter für die \cls{tudscrposter}-Wrapperklasse doppelt definiert 
+% werden würde, erfolgt beim Laden der Elternklasse das Zurücksetzen.
+%    \begin{macrocode}
+%<*poster>
+\BeforeClass{\TUDClassName@Parent}{\undef{\tud@layout@switch}}
+%</poster>
+%    \end{macrocode}
+% \end{macro}^^A \tud@layout@switch
+%
+% \iffalse
+%<*!poster>
+% \fi
+%
 % \begin{option}{cd}
 % \changes{v2.04}{2015/05/18}{Wert \val{barcolor} neu}^^A
 % \begin{macro}{\tud@cd}
@@ -102,10 +142,8 @@
 % \begin{macro}{\if@tud@layout@part@locked}
 % \begin{macro}{\tud@layout@chapter}
 % \begin{macro}{\if@tud@layout@chapter@locked}
-% \begin{macro}{\tud@layout@switch}
-% Ein zentraler Teil der Wrapper-Klassen ist die Auswahl der Darstellung des
-% \CDs. Dabei kann gewählt werden, ob es einfarbig, mit leichtem oder aber mit
-% starkem Farbeinsatz genutzt werden soll. Diese Option dient zur globalen
+
+% Diese Option dient zur globalen
 % Einstellung für Cover- Titel-, Teil- und Kapitelseiten. Mit dem Schalter
 % werden die gleichen Einstellungen für alle drei Komponenten gesetzt. Die
 % Standardfarbe des Kopfes der \env{tudpage}"=Seite ist schwarz und wird für
@@ -124,24 +162,6 @@
 %<*book|report>
 \cs@lock{tud@layout@chapter}{0}
 %</book|report>
-%    \end{macrocode}
-% Dies sind die Standardoptionen für alle einzelnen Einstellungen des Layouts.
-% Es gibt die Varianten monochrom~(1), leichter~(2) und voller Farbeinsatz~(3)
-% sowie die Möglichkeit, das \CD vollständig zu deaktivieren (0).
-%    \begin{macrocode}
-\newcommand*\tud@layout@switch{}
-\edef\tud@layout@switch{%
-  \TUD@numkey@bool,%
-  {nocolor}{1},{nocolour}{1},{monochrome}{1},{monochromatic}{1},%
-  {lite}{2},{colorlite}{2},{litecolor}{2},{colourlite}{2},{litecolour}{2},%
-  {light}{2},{colorlight}{2},{lightcolor}{2},{colourlight}{2},{lightcolour}{2},%
-  {pale}{2},{colorpale}{2},{palecolor}{2},{colourpale}{2},{palecolour}{2},%
-  {colorbar}{3},{barcolor}{3},{colourbar}{3},{barcolour}{3},%
-  {bicolor}{4},{bicolour}{4},{twocolor}{4},{twocolour}{4},%
-  {bichrome}{4},{bichromatic}{4},{dichrome}{4},{dichromatic}{4},%
-  {color}{5},{colour}{5},%
-  {full}{6},{colorfull}{6},{fullcolor}{6},{colourfull}{6},{fullcolour}{6}%
-}
 %    \end{macrocode}
 % Es folgt die eigentliche Option.
 %    \begin{macrocode}
@@ -256,7 +276,6 @@
   \fi%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@layout@switch
 % \end{macro}^^A \if@tud@layout@chapter@locked
 % \end{macro}^^A \tud@layout@chapter
 % \end{macro}^^A \if@tud@layout@part@locked
@@ -390,6 +409,43 @@
 % \end{option}^^A cdchapter
 %
 % \iffalse
+%</!poster>
+%<*poster>
+% \fi
+%
+% \begin{option}{cdstyle}
+% \changes{v2.04}{2015/05/12}{neu}^^A
+% \begin{option}{style}
+% \changes{v2.04}{2015/05/12}{neu}^^A
+% \begin{macro}{\tud@cdstyle}
+% \changes{v2.04}{2015/05/12}{neu}^^A
+% Mit dieser Option wird festgelegt, in welcher farbigen Ausprägung ein Poster 
+% erstellt wird. Dabei sind alle Werte gültig, die auch für die meisten anderen
+% Layouteinstellungen verwendet werden können. Abhängig vom gewählten Wert, 
+% wird der Seitenstil, die Ausprägung der Fußzeile sowie die farbliche Gestalt 
+% von Kopf- und Fußzeile festgelegt. Da dabei unter anderem auch gegebenenfalls 
+% der Seitenstil auf einen vom Typ \pgs{tudheadings} festgelegt wird, erfolgt 
+% die Ausführung der Option frühestens zu Beginn des Dokumentes.
+%    \begin{macrocode}
+\newcommand*\tud@cdstyle{0}
+\TUD@key{cdstyle}[true]{%
+  \TUD@set@numkey{cdstyle}{tud@cdstyle}{\tud@layout@switch}{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \if@atdocument\tud@style@set\fi%
+  \fi%
+}
+%    \end{macrocode}
+% Der Schlüssel \opt{style} wird als Alias bereitgehalten.
+%    \begin{macrocode}
+\TUD@key{style}[true]{\TUDoptions{cdstyle=#1}}
+%    \end{macrocode}
+% \end{macro}^^A \tud@cdstyle
+% \end{option}^^A style
+% \end{option}^^A cdstyle
+%
+% \iffalse
+%</poster>
+%<*!poster>
 %<*book|report>
 % \fi
 %
@@ -633,6 +689,7 @@
 % \end{option}^^A headings
 %
 % \iffalse
+%</!poster>
 %</class&option>
 %<*class&body>
 % \fi
@@ -1316,7 +1373,7 @@
   \else%
     \vspace*{\headingsvskip}%
   \fi%
-}%
+}
 %    \end{macrocode}
 % \end{macro}^^A \tud@chapterheadstartvskip
 %
