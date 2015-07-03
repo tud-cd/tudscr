@@ -1,4 +1,4 @@
-% \CheckSum{480}
+% \CheckSum{494}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-base.dtx}[%
-  2015/06/15 v2.04 TUD-KOMA-Script\space%
+  2015/07/03 v2.05 TUD-KOMA-Script\space%
 %</driver>
 %<package>\NeedsTeXFormat{LaTeX2e}
 %<package>\ProvidesPackage{tudscrbase}[%
@@ -91,6 +91,17 @@
 % \StopEventually{\PrintIndex\PrintChanges}
 %
 % \iffalse
+%<*load>
+% \fi
+%
+% \subsection{Laden des Paketes}
+% Die Klassen sowie einige Pakete benötigen das Paket und laden dieses auch.
+%    \begin{macrocode}
+\RequirePackage{tudscrbase}[\TUDVersion]
+%    \end{macrocode}
+%
+% \iffalse
+%</load>
 %<*package>
 % \fi
 %
@@ -263,14 +274,31 @@
 %
 % \subsubsection{Schlüssel und Parameter für \TUDScript}
 %
+% In Anlehnung an \KOMAScript{} werden hier Befehle zur Definition und
+% Ausführung unterschiedlicher Klassenoptionen mithilfe der Funktionen aus
+% dem \pkg{scrbase}-Paket erstellt. 
+%
 % \begin{macro}{\TUDProcessOptions}
 % \begin{macro}{\TUDExecuteOptions}
 % \begin{macro}{\TUDoptions}
 % \begin{macro}{\TUDoption}
-% \begin{macro}{\TUD@noworlater}
+% Zuerst ein paar Makros zur einfacheren Verwendung.
+%    \begin{macrocode}
+\DefineFamily{TUD}
+\newcommand*\TUDProcessOptions{\FamilyProcessOptions{TUD}}
+\newcommand*\TUDExecuteOptions{\FamilyExecuteOptions{TUD}}
+\newcommand*\TUDoptions{\FamilyOptions{TUD}}
+\newcommand*\TUDoption{\FamilyOption{TUD}}
+%    \end{macrocode}
+% \end{macro}^^A \TUDoption
+% \end{macro}^^A \TUDoptions
+% \end{macro}^^A \TUDExecuteOptions
+% \end{macro}^^A \TUDProcessOptions
 % \begin{macro}{\TUD@key}
 % \begin{macro}{\TUD@@key}
+% \changes{v2.05}{2015/07/03}{entfernt}^^A
 % \begin{macro}{\TUD@@@key}
+% \changes{v2.05}{2015/07/03}{entfernt}^^A
 % \begin{macro}{\TUD@ifkey}
 % \begin{macro}{\TUD@set@ifkey}
 % \begin{macro}{\TUD@numkey}
@@ -282,37 +310,15 @@
 % \changes{v2.03}{2015/01/09}{neu}^^A
 % \begin{macro}{\TUD@set@lengthkey}
 % \begin{macro}{\TUD@unknown@keyval}
-% In Anlehnung an \KOMAScript{} werden hier Befehle zur Definition und
-% Ausführung unterschiedlicher Klassenoptionen mithilfe der Funktionen aus
-% dem \pkg{scrbase}-Paket erstellt. Klassenoptionen können entweder als
-% Schalter (\cs{TUD@ifkey}) oder aber mit mehreren möglichen Werten
-% (\cs{TUD@numkey}) definiert werden.
+% Dies sind die Befehle zur Definition der Optionen. Klassenoptionen können
+% entweder als Schalter (\cs{TUD@ifkey}) oder aber mit mehreren möglichen
+% Werten (\cs{TUD@numkey}) definiert werden. Prinzipiell ist auch eine freie
+% Definition mit anschließender Abarbeitung ohne die zuvor genannten Befehle
+% möglich.
 %    \begin{macrocode}
-\DefineFamily{TUD}
-\newcommand*\TUDProcessOptions{\FamilyProcessOptions{TUD}}
-\newcommand*\TUDExecuteOptions{\FamilyExecuteOptions{TUD}}
-\newcommand*\TUDoptions{\FamilyOptions{TUD}}
-\newcommand*\TUDoption{\FamilyOption{TUD}}
-%    \end{macrocode}
-% Hiermit wird die Abarbeitung der Optionen an das Ende der Klasse verzögert.
-%    \begin{macrocode}
-\newcommand*\TUD@noworlater{\AtEndOfClass}
-\AtEndOfClass{\let\TUD@noworlater\@firstofone}
-%    \end{macrocode}
-% Dies sind die Befehle zur Definition einer Standardoption.
-%    \begin{macrocode}
-\newcommand*\TUD@key[2][.\@currname.\@currext]{%
+\newcommand*\TUD@key[1][.\@currname.\@currext]{%
   \DefineFamilyMember{TUD}%
-  \kernel@ifnextchar[%]
-    {\TUD@@key[#1]{#2}}{\TUD@@@key[#1]{#2}}%
-}
-\newcommand*\TUD@@key{}
-\def\TUD@@key[#1]#2[#3]#4{%
-  \DefineFamilyKey[#1]{TUD}{#2}[{#3}]{\TUD@noworlater{#4}}%
-}
-\newcommand*\TUD@@@key{}
-\def\TUD@@@key[#1]#2#3{%
-  \DefineFamilyKey[#1]{TUD}{#2}{\TUD@noworlater{#3}}%
+  \DefineFamilyKey[#1]{TUD}%
 }
 %    \end{macrocode}
 % Dies sind die Befehle zur Definition einer booleschen Option.
@@ -346,8 +352,9 @@
 }
 \newcommand*\TUD@set@lengthkey{\FamilySetLength{TUD}}
 %    \end{macrocode}
-% Dieser Befehl wird lediglich pro forma definiert. Derzeit wird er durch 
-% \KOMAScript nicht abgearbeitet.
+% Dieser Befehl wird lediglich pro forma definiert. An diesen kann eine Liste 
+% möglicher Wertzuweisungen übergeben werden, welche durch \KOMAScript derzeit 
+% jedoch nicht abgearbeitet und ausgegeben wird.
 %    \begin{macrocode}
 \newcommand*\TUD@unknown@keyval{\FamilyUnknownKeyValue{TUD}}
 %    \end{macrocode}
@@ -362,11 +369,6 @@
 % \end{macro}^^A \TUD@@@key
 % \end{macro}^^A \TUD@@key
 % \end{macro}^^A \TUD@key
-% \end{macro}^^A \TUD@noworlater
-% \end{macro}^^A \TUDoption
-% \end{macro}^^A \TUDoptions
-% \end{macro}^^A \TUDExecuteOptions
-% \end{macro}^^A \TUDProcessOptions
 % \begin{macro}{\TUD@key@lock}
 % \begin{macro}{\TUD@std@ifkey@lock}
 % \begin{macro}{\TUD@std@numkey@lock}
@@ -423,6 +425,64 @@
 % \end{macro}^^A \TUD@std@numkey@lock
 % \end{macro}^^A \TUD@std@ifkey@lock
 % \end{macro}^^A \TUD@key@lock
+%
+% \iffalse
+%</package>
+% \fi
+%
+% \begin{macro}{\TUD@noworlater}
+% \begin{macro}{\TUD@noworlater@simple}
+% Hiermit kann die Abarbeitung der Optionen an das Ende der verwendeten Klasse 
+% bzw. des Paketes verzögert werden. Aufgrund der Besonderheiten der Befehle 
+% \cs{AtEndOfClass} und \cs{AtEndOfPackage} können diese nicht innerhalb von
+% \pkg{tudscrbase} sondern erst außerhalb nach dem Laden definiert werden. 
+% Damit keine Probleme dabei auftreten, falls das Paket geladen wird ohne daran 
+% anschließend die notwendigen Redefinitionen durchzuführen, werden die beiden 
+% Varianten des Befehls \cs{TUD@noworlater} im Paket definiert. 
+%
+% Im ersten Argument von \cs{TUD@noworlater} wird einer der wertzuweisenden
+% Befehle (\cs{TUD@set@\dots}) erwartet. Dieser wird in jedem Fall ausgeführt, 
+% um ungültige Wertzuweisungen einer Option, welche als globale Klassenoption
+% angegeben wurde, über die \LaTeX-Standardroutine als Warnung auszugeben. Bei
+% der späteren, eigentlichen~-- sprich verzögerten~-- Ausführung der Option
+% wird die Wertzuweisung abermals ausgeführt, gefolgt von der im zweiten 
+% Argument definierten Abarbeitung dieser.
+%    \begin{macrocode}
+%<*package>
+\newcommand*\TUD@noworlater[2]{}
+\newcommand*\TUD@noworlater@simple[2]{%
+  \PackageWarning{tudscrbase}{%
+    The content of \string\TUD@noworlater will be executed immediately
+  }%
+  #1#2%
+}
+\let\TUD@noworlater\TUD@noworlater@simple
+%</package>
+%    \end{macrocode}
+% Nach dem Laden des Paketes wird geprüft, ob die ursprüngliche Definition des 
+% Befehls aus dem Paket noch besteht. Ist dies der Fall, wird der Befehl zur 
+% Verzögerung an das Ende der Klasse bzw. des Paketes umdefiniert.
+%    \begin{macrocode}
+%<*load>
+\ifx\TUD@noworlater\TUD@noworlater@simple
+%<*class>
+  \renewcommand*{\TUD@noworlater}[2]{#1\AtEndOfClass{#1#2}}%
+  \AtEndOfClass{\renewcommand*\TUD@noworlater[2]{#1#2}}%
+%</class>
+%<*!class>
+  \renewcommand*{\TUD@noworlater}[2]{#1\AtEndOfPackage{#1#2}}%
+  \AtEndOfPackage{\renewcommand*\TUD@noworlater[2]{#1#2}}%
+%</!class>
+\fi
+%</load>
+%    \end{macrocode}
+% \end{macro}^^A \TUD@noworlater@simple
+% \end{macro}^^A \TUD@noworlater
+%
+% \iffalse
+%<*package>
+% \fi
+%
 % \begin{macro}{\cs@lock}
 % \begin{macro}{\cs@std@lock}
 % \begin{macro}{\cs@set@lock}
@@ -451,31 +511,48 @@
 % \end{macro}^^A \cs@set@lock
 % \end{macro}^^A \cs@std@lock
 % \end{macro}^^A \cs@lock
+% \begin{macro}{\tud@setbool}
+% \changes{v2.05}{2015/07/03}{neu}^^A
 % \begin{macro}{\bool@lock}
 % \begin{macro}{\bool@std@lock}
 % \begin{macro}{\bool@set@lock}
 % Diese Makros dienen in Anlehnung an die vorherigen zum Definieren und Setzen
-% von sperrbaren booleschen Schaltern.
+% von sperrbaren booleschen Schaltern. Dabei wird \cs{tud@setbool} definiert, 
+% um nicht nur \val{true} und \val{false} sondern auch alle anderen bekannten 
+% boolschen Zuweisungen (\val{yes} und \val{on} sowie \val{no} und \val{off})
+% mit diesen Befehlen verwenden zu können.
 %    \begin{macrocode}
+\newcommand*\tud@setbool[2]{%
+  \ifstrbool{#2}{\booltrue{#1}}{\boolfalse{#1}}{%
+    \PackageError{tudscrbase}{%
+      `#2' is not a valid boolean expression%
+    }{%
+      You tried to set the boolean switch `\@backslashchar if#1'\MessageBreak%
+      to value `#2' but only `true' `on' and `yes' as well as \MessageBreak%
+      `false' `no' and `off' are valid values.
+    }%
+  }%
+}
 \newcommand*\bool@lock[2][false]{%
   \newbool{#2}%
   \newbool{#2@locked}%
-  \setbool{#2}{#1}%
+  \tud@setbool{#2}{#1}%
 }
 \newcommand*\bool@std@lock[2]{%
   \ifbool{#1@locked}{}{%
-    \setbool{#1}{#2}%
+    \tud@setbool{#1}{#2}%
     \boolfalse{#1@locked}%
   }%
 }
 \newcommand*\bool@set@lock[2]{%
-  \setbool{#1}{#2}%
+  \tud@setbool{#1}{#2}%
   \booltrue{#1@locked}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \bool@set@lock
 % \end{macro}^^A \bool@std@lock
 % \end{macro}^^A \bool@lock
+% \end{macro}^^A \tud@setbool
 % \begin{macro}{\tud@cmd@store}
 % \begin{macro}{\tud@cmd@restore}
 % \begin{macro}{\tud@cmd@reset}
@@ -761,17 +838,6 @@
 %
 % \iffalse
 %</package>
-%<*load>
-% \fi
-%
-% \subsection{Laden des Paketes}
-% Die Klassen benötigen das Paket und laden dieses auch.
-%    \begin{macrocode}
-\RequirePackage{tudscrbase}[\TUDVersion]
-%    \end{macrocode}
-%
-% \iffalse
-%</load>
 %<*class&body>
 % \fi
 %
