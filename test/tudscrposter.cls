@@ -1,17 +1,16 @@
 %%
-%% This is file `tudscrposter.sty',
+%% This is file `tudscrposter.cls',
 %% generated with the docstrip utility.
 %%
 %% The original source files were:
 %%
-%% tudscr-version.dtx  (with options: `package,tudscr,poster')
-%% tudscr-poster.dtx  (with options: `package,identify')
+%% tudscr-version.dtx  (with options: `class,poster')
 %% tudscr-base.dtx  (with options: `load')
-%% tudscr-poster.dtx  (with options: `package,option')
-%% tudscr-misc.dtx  (with options: `package,execute,poster')
-%% tudscr-poster.dtx  (with options: `package,body')
-%% tudscr-fields.dtx  (with options: `package,poster')
-%% tudscr-locale.dtx  (with options: `package,poster')
+%% tudscr-poster.dtx  (with options: `class,option')
+%% tudscr-misc.dtx  (with options: `class,inherit,execute,poster')
+%% tudscr-poster.dtx  (with options: `class,body')
+%% tudscr-fields.dtx  (with options: `class,inherit,poster')
+%% tudscr-locale.dtx  (with options: `class,inherit,poster')
 %% 
 %% ============================================================================
 %% 
@@ -58,18 +57,29 @@
       \fi%
     }%
   \fi%
-  \@TUDVersion{2015/06/02 v2.04 BETA TUD-KOMA-Script}%
+  \@TUDVersion{2015/07/03 v2.05 BETA TUD-KOMA-Script}%
 \endgroup%
 \providecommand*\tudscrmail{tudscr@gmail.com}
-\@ifundefined{tudcls@name}{%
-  \PackageError{%
-    tudscrposter%
-  }{Unsupported class found}{%
-    This package can only be used with a class out of the\MessageBreak%
-    tudscr bundle (tudscrartcl, tudscrreprt, tudscrbook).%
-  }
-  \endinput
-}{}
+\newcommand*\TUD@ProvidesWrapperClass[3]{%
+  \newcommand*\TUDClassName@Parent{#2}%
+  \newcommand*\TUDClassName{#1}%
+  \ProvidesClass{#1}[%
+  2015/07/03 v2.05 BETA TUD-KOMA-Script
+    ^^J#3 (#2)%
+  ]%
+  \TUD@ClassInfo%
+}
+\providecommand*\TUD@ClassInfo{%
+  \typeout{+---------------------------------------------------------------}
+  \typeout{| The Corporate Design of Technische Universitaet Dresden}
+  \typeout{| Class: \TUDClassName}
+  \typeout{| Version: \TUDVersion}
+  \typeout{| Author: Falk Hanisch (\tudscrmail)}
+  \typeout{| Forum: http://latex.wcms-file3.tu-dresden.de/phpBB3/index.php}
+  \typeout{+---------------------------------------------------------------}
+}
+\NeedsTeXFormat{LaTeX2e}
+\TUD@ProvidesWrapperClass{tudscrposter}{tudscrartcl}{poster class}
 \@ifundefined{TUDScript}{%
   \DeclareRobustCommand{\TUDScript}{%
     \ifdin{TUD-KOMA-SCRIPT}{%
@@ -77,28 +87,24 @@
     }\csname xspace\endcsname%
   }%
 }{}
-%%% From File: tudscr-poster.dtx
-\NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{tudscrposter}[%
-  2015/06/02 v2.04 BETA TUD-KOMA-Script
-  package
-  (corporate design posters)%
-]
 %%% From File: tudscr-base.dtx
 \RequirePackage{tudscrbase}[\TUDVersion]
 %%% From File: tudscr-poster.dtx
 \newcommand*\tud@cdstyle{0}
 \TUD@key{cdstyle}[true]{%
-  \TUD@set@numkey{cdstyle}{tud@cdstyle}{\tud@layout@switch}{#1}%
-  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \if@atdocument\tud@style@set\fi%
-  \fi%
+  \AfterClass+{\TUDClassName@Parent}{%
+    \TUD@set@numkey{cdstyle}{tud@cdstyle}{\tud@layout@switch}{#1}%
+    \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+      \if@atdocument\tud@style@set\fi%
+    \fi%
+  }%
 }
 \TUD@key{style}[true]{\TUDoptions{cdstyle=#1}}
 %%% From File: tudscr-misc.dtx
-\DeclareOption*{\TUDoptions{\CurrentOption}}
+\DeclareOption*{\PassOptionsToClass{\CurrentOption}{\TUDClassName@Parent}}
 \TUDExecuteOptions{cdstyle=bicolor}
 \TUDProcessOptions\relax
+\LoadClass{\TUDClassName@Parent}
 %%% From File: tudscr-poster.dtx
 \newcommand*\tud@cdstyle@set{%
   \ifcase\tud@cdstyle\relax% false
@@ -271,4 +277,4 @@
 \tud@locale@english{\contactpersonname}{Contact}%
 \endinput
 %%
-%% End of file `tudscrposter.sty'.
+%% End of file `tudscrposter.cls'.
