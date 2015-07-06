@@ -1,4 +1,4 @@
-% \CheckSum{2473}
+% \CheckSum{2482}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-pagestyle.dtx}[%
-  2015/06/18 v2.04 TUD-KOMA-Script (pagestyle)%
+  2015/07/06 v2.05 TUD-KOMA-Script (pagestyle)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -1450,14 +1450,19 @@
 % \begin{length}{\tud@dim@extrabottommargin}
 % Diese Option dient dazu, die Höhe des Fußes anzupassen. Dies ist jedoch nur 
 % möglich, wenn der Satzspiegel des \CDs verwendet wird. Kommt \pkg{typearea} 
-% zum Einsatz, ist die Option wirkungslos.
+% zum Einsatz, ist die Option wirkungslos. Da für die Länge ggf. auch Werte 
+% angegeben werden können, die abhängig von der Schriftgröße sind, wird die 
+% Ausführung dieser Option verzögert.
 %    \begin{macrocode}
 \newlength\tud@dim@extrabottommargin
 \TUD@key{extrabottommargin}{%
-  \TUD@set@lengthkey{extrabottommargin}{\tud@dim@extrabottommargin}{#1}%
-  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \if@atdocument\tud@geometry@process\fi%
-  \fi%
+  \TUD@noworlater{%
+    \TUD@set@lengthkey{extrabottommargin}{\tud@dim@extrabottommargin}{#1}%
+  }{%
+    \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+      \if@atdocument\tud@geometry@process\fi%
+    \fi%
+  }%
 }
 %    \end{macrocode}
 % \end{length}^^A \tud@dim@extrabottommargin
@@ -2815,6 +2820,15 @@
     }%
     \tud@newgeometry{\@tempa}%
     \savegeometry{typearea}%
+%    \end{macrocode}
+% Falls die (abermalige) Erstellung der Satzspiegel im Dokument erfolgt, sollte 
+% anschließend auch der richtige Satzspiegel wieder ausgewählt werden.
+%    \begin{macrocode}
+    \if@atdocument%
+      \ifstr{\tud@currentgeometry}{typearea}{}{%
+        \expandafter\loadgeometry\expandafter{\tud@currentgeometry}%
+      }%
+    \fi%
   }%
 %    \end{macrocode}
 % \end{macro}^^A \tud@geometry@@process
