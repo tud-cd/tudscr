@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-locale.dtx}[%
-  2015/07/03 v2.05 TUD-KOMA-Script (localization)%
+  2015/07/06 v2.05 TUD-KOMA-Script (localization)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -87,7 +87,34 @@
 % \begin{macro}{\tud@locale@define}
 %
 % \iffalse
-%<*class&!inherit>
+%<*class>
+% \fi
+%
+% Die neu definierten Bezeichner werden mit einer Fehlermeldung initialisiert.
+% Wird eine unterstützte Dokumentsprache~-- momentan sind dies lediglich
+% Deutsch und Englisch~-- in der Präambel des Dokumentes geladen, so werden die
+% Bezeichner sprachspezifisch überschrieben. Andernfalls bekommt der Anwender
+% eine Fehlermeldung mit Hinweisen, wie er selbst die Bezeichner für die
+% gewählte Sprache manuell definieren muss.
+%    \begin{macrocode}
+\newcommand*\tud@locale@define[1]{%
+  \providecommand*#1{%
+    \ClassError{\TUDClassName}{%
+      `\string#1' not defined for language `\languagename'%
+    }{%
+      Currently the class `\TUDClassName' only supports the\MessageBreak%
+      languages german and english an its dialects. You must\MessageBreak%
+      define single patterns by yourself, e.g.:\MessageBreak%
+      `\string\providecaptionname{\languagename}\string#1{<text>}'\MessageBreak%
+      You can send your definitions to \tudscrmail\space in\MessageBreak% 
+      order to implement support for additional languages.
+    }%
+  }%
+}
+%    \end{macrocode}
+%
+% \iffalse
+%<*book|report|article>
 % \fi
 %
 % \begin{locale}{\graduationtext}
@@ -133,27 +160,7 @@
 % \begin{locale}{\logname}
 % \begin{locale}{\internshipname}
 % \begin{locale}{\reportname}
-% Die neu definierten Bezeichner werden mit einer Fehlermeldung initialisiert.
-% Wird eine unterstützte Dokumentsprache~-- momentan sind dies lediglich
-% Deutsch und Englisch~-- in der Präambel des Dokumentes geladen, so werden die
-% Bezeichner sprachspezifisch überschrieben. Andernfalls bekommt der Anwender
-% eine Fehlermeldung mit Hinweisen, wie er selbst die Bezeichner für die
-% gewählte Sprache manuell definieren muss.
 %    \begin{macrocode}
-\newcommand*\tud@locale@define[1]{%
-  \providecommand*#1{%
-    \ClassError{\TUDClassName}{%
-      `\string#1' not defined for language `\languagename'%
-    }{%
-      Currently the class `\TUDClassName' only supports the\MessageBreak%
-      languages german and english an its dialects. You must\MessageBreak%
-      define single patterns by yourself, e.g.:\MessageBreak%
-      `\string\providecaptionname{\languagename}\string#1{<text>}'\MessageBreak%
-      You can send your definitions to \tudscrmail\space in\MessageBreak% 
-      order to implement support for additional languages.
-    }%
-  }%
-}
 \tud@locale@define{\graduationtext}
 \tud@locale@define{\supervisorname}
 \tud@locale@define{\supervisorothername}
@@ -229,14 +236,14 @@
 % \end{locale}^^A \graduationtext
 %
 % \iffalse
-%</class&!inherit>
-%<*class&inherit&poster>
+%</book|report|article>
+%<*poster>
 % \fi
 %
 % \begin{locale}{\authorname}
-% \changes{v2.04}{2015/05/12}{neu}^^A
+% \changes{v2.05}{2015/07/06}{neu}^^A
 % \begin{locale}{\contactname}
-% \changes{v2.04}{2015/05/12}{neu}^^A
+% \changes{v2.05}{2015/07/06}{neu}^^A
 % \begin{locale}{\contactpersonname}
 % Die für \pkg{tudscrsupervisor} definierten Bezeichner werden durch
 % \cs{tud@locale@define} mit einer Fehlermeldung initialisiert.
@@ -250,7 +257,8 @@
 % \end{locale}^^A \authorname
 %
 % \iffalse
-%</class&inherit&poster>
+%</poster>
+%</class>
 %<*package&supervisor>
 % \fi
 %
@@ -325,7 +333,7 @@
 % \subsection{Deutschsprachige Bezeichner}
 %
 % \iffalse
-%<*class&!inherit>
+%<*class>
 % \fi
 %
 % \begin{macro}{\tud@locale@german}
@@ -343,6 +351,11 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@locale@german
+%
+% \iffalse
+%<*book|report|article>
+% \fi
+%
 % Hier erfolgt die eigentliche Definition der sprachabhängigen Bezeichner für 
 % die deutsche Sprache und ihre Dialekte.
 %    \begin{macrocode}
@@ -444,11 +457,11 @@
 %    \end{macrocode}
 %
 % \iffalse
-%</class&!inherit>
-%<*class&inherit&poster>
+%</book|report|article>
+%<*poster>
 % \fi
 %
-% Hier erfolgen für das Paket \pkg{tudscrposter} weitere Definitionen.
+% Hier erfolgen für die Klasse \cls{tudscrposter} weitere Definitionen.
 %    \begin{macrocode}
 \tud@locale@german{\authorname}{Autor}%
 \tud@locale@german{\contactname}{Kontakt}%
@@ -456,7 +469,8 @@
 %    \end{macrocode}
 %
 % \iffalse
-%</class&inherit&poster>
+%</poster>
+%</class>
 %<*package&supervisor>
 % \fi
 %
@@ -486,7 +500,7 @@
 %
 % \iffalse
 %</package&supervisor>
-%<*class&!inherit>
+%<*class>
 % \fi
 %
 % \subsection{Englischsprachige Bezeichner}
@@ -506,6 +520,11 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@locale@english
+%
+% \iffalse
+%<*book|report|article>
+% \fi
+%
 % Hier erfolgt die eigentliche Definition der sprachabhängigen Bezeichner für 
 % die deutsche Sprache und ihre Dialekte.
 %    \begin{macrocode}
@@ -606,11 +625,11 @@
 %    \end{macrocode}
 %
 % \iffalse
-%</class&!inherit>
-%<*class&inherit&poster>
+%</book|report|article>
+%<*poster>
 % \fi
 %
-% Hier erfolgen für das Paket \pkg{tudscrposter} weitere Definitionen.
+% Hier erfolgen für die Klasse \cls{tudscrposter} weitere Definitionen.
 %    \begin{macrocode}
 \tud@locale@english{\authorname}{Author}%
 \tud@locale@english{\contactname}{Contact}%
@@ -618,7 +637,8 @@
 %    \end{macrocode}
 %
 % \iffalse
-%</class&inherit&poster>
+%</poster>
+%</class>
 %<*package&supervisor>
 % \fi
 %
@@ -648,7 +668,7 @@
 %
 % \iffalse
 %</package&supervisor>
-%<*class&!inherit>
+%<*class>
 % \fi
 %
 % \subsection{Unterstützung des Paketes \pkg{listings}}
@@ -675,7 +695,7 @@
 %    \end{macrocode}
 %
 % \iffalse
-%</class&!inherit>
+%</class>
 % \fi
 %
 % \Finale
