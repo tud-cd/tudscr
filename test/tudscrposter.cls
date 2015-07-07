@@ -71,14 +71,14 @@
       \fi%
     }%
   \fi%
-  \@TUDVersion{2015/07/03 v2.05 BETA TUD-KOMA-Script}%
+  \@TUDVersion{2015/07/06 v2.05 BETA TUD-KOMA-Script}%
 \endgroup%
 \providecommand*\tudscrmail{tudscr@gmail.com}
 \newcommand*\TUD@ProvidesClass[3]{%
   \newcommand*\TUDClassName@KOMA{#2}%
   \@ifundefined{TUDClassName@Parent}{\newcommand*\TUDClassName{#1}}{}%
   \ProvidesClass{#1}[%
-  2015/07/03 v2.05 BETA TUD-KOMA-Script
+  2015/07/06 v2.05 BETA TUD-KOMA-Script
     ^^J#3 (#2)%
   ]%
   \@ifundefined{TUDClassName@Parent}{\TUD@ClassInfo}{}%
@@ -538,80 +538,72 @@
 \AtEndOfClass{\let\tud@font@heading@size\size@part}
 \DefineFamilyMember{KOMA}
 \DefineFamilyKey{KOMA}{headings}{%
-  \AtEndOfFamilyOptions{%
-    \let\tud@font@heading@size\size@part%
-    \if@atdocument%
-      \tud@layout@process%
-      \ifcase\tud@cd\relax\else% !false
-        \tud@font@koma@reset{part}%
-        \tud@font@koma@reset{partnumber}%
-        \tud@font@koma@reset{section}%
-        \tud@font@koma@reset{subsection}%
-        \tud@font@koma@reset{subsubsection}%
+  \TUD@set@numkey{headings}{@tempa}{%
+    {big}{0},%
+    {normal}{1},%
+    {small}{2},%
+    {standardclasses}{13}%
+  }{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \AtEndOfFamilyOptions{%
+      \let\tud@font@heading@size\size@part%
+      \if@atdocument%
+        \tud@layout@process%
+        \ifcase\tud@cd\relax\else% !false
+          \tud@font@koma@reset{part}%
+          \tud@font@koma@reset{partnumber}%
+          \tud@font@koma@reset{section}%
+          \tud@font@koma@reset{subsection}%
+          \tud@font@koma@reset{subsubsection}%
+        \fi%
       \fi%
-    \fi%
-  }%
+    }%
+  \fi%
 }
 %%% From File: tudscr-title.dtx
+\DefineFamilyMember{KOMA}
+\DefineFamilyKey{KOMA}{titlepage}[true]{%
+  \TUD@set@numkey{titlepage}{@tempa}{\TUD@numkey@bool,{firstiscover}{2}}{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \AtEndOfFamilyOptions{\tud@titlepage@deactivate}%
+  \fi%
+}
+\newcommand*\tud@titlepage@deactivate{%
+  \if@titlepage%
+    \KOMAoptions{titlepage=false}%
+    \ClassWarning{\TUDClassName}{%
+      The class `\TUDClassName' can't be used with\MessageBreak%
+      activated titlepage option. It will be enforced to\MessageBreak%
+      `titlepage=false'%
+    }%
+    \renewcommand*\tud@titlepage@deactivate{%
+      \if@titlepage\KOMAoptions{titlepage=false}\fi%
+    }%
+  \fi%
+}
+\AtBeginDocument{\tud@titlepage@deactivate}
 %%% From File: tudscr-frontmatter.dtx
 \newcommand*\tud@fm@switch{%
   {section}{2},{sect}{2},{sec}{2},{addsec}{2},%
   {new}{2},{standard}{2},{heading}{2},%
-  {nottotoc}{10},{notoc}{10},%
-  {totoc}{11},{toc}{11},{totoclevelup}{11},{toclevelup}{11},{levelup}{11},%
-  {totocleveldown}{12},{tocleveldown}{12},{leveldown}{12},%
-  {tocmultiple}{13},{tocmulti}{13},{tocall}{13},{tocaggregate}{13},%
-  {totocmultiple}{13},{totocmulti}{13},{totocall}{13},{totocaggregate}{13}%
 }
 \newcommand*\tud@abstract@level{0}
-\cs@lock{tud@abstract@toc}{0}
 \TUD@key{abstract}[true]{%
   \edef\@tempb{\TUD@numkey@bool,\tud@fm@switch}%
   \TUD@set@numkey{abstract}{@tempa}{\@tempb}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax% false
       \def\tud@abstract@level{0}%
-      \cs@std@lock{tud@abstract@toc}{0}%
     \or% true
       \def\tud@abstract@level{1}%
-      \cs@std@lock{tud@abstract@toc}{0}%
     \or% section
       \def\tud@abstract@level{2}%
-      \cs@std@lock{tud@abstract@toc}{1}%
-    \or% chapter
-    \or% single
-    \or% multiple
-    \or% nofil
-    \or% fil
-    \or% markboth
-    \or% nomarkboth
-    \or% nottotoc
-      \cs@set@lock{tud@abstract@toc}{0}%
-    \or% totoc
-      \ifnum\tud@abstract@toc<\thr@@\relax%
-        \cs@set@lock{tud@abstract@toc}{1}%
-      \else%
-        \cs@set@lock{tud@abstract@toc}{3}%
-      \fi%
-    \or% totocleveldown
-      \ifnum\tud@abstract@toc<\thr@@\relax%
-        \cs@set@lock{tud@abstract@toc}{2}%
-      \else%
-        \cs@set@lock{tud@abstract@toc}{4}%
-      \fi%
-    \or% totocmutliple
-      \ifnum\tud@abstract@toc=\z@\relax%
-        \cs@set@lock{tud@abstract@toc}{1}%
-      \fi%
-      \ifnum\tud@abstract@toc<\thr@@\relax%
-        \edef\@tempa{%
-          \noexpand\cs@set@lock{tud@abstract@toc}{%
-            \the\numexpr\tud@abstract@toc+2\relax%
-          }%
-        }\@tempa%
-      \fi%
     \fi%
   \fi%
+}
+\DefineFamilyMember{KOMA}
+\DefineFamilyKey{KOMA}{abstract}[true]{%
+  \TUDoptions{abstract=#1}%
 }
 %%% From File: tudscr-comp.dtx
 \newcommand*\TUD@deprecated@key[2]{%
@@ -899,14 +891,14 @@
 \newcommand*\TUD@parameter@defaulthandler[2]{%
   \def\@tempa{#2}%
   \@for\@tempb:=\@tempa\do{%
-    \ifx\@tempb\@empty\else%
+    \ifx\@tempb\@empty\else\ifx\@tempb\space\else%
       \ifstr{\@tempb}{twocolumn}{\def\@tempb{2}}{}%
       \ifxnumber{\@tempb}{%
         \TUD@parameter@set{#1}{columns=\@tempb}%
       }{%
         \TUD@parameter@set{#1}{language=\@tempb}%
       }%
-    \fi%
+    \fi\fi%
   }%
 }
 \cs@lock{tud@multicols}{1}
@@ -1518,7 +1510,8 @@
     \protected@xdef\@@title{\trim@spaces{#1}}%
   \endgroup%
 }
-\providecommand*\publisher[1]{\publishers{#1}}
+\newcommand*\@authormore{}
+\newrobustcmd*\authormore[1]{\gdef\@authormore{#1}}
 \newcommand*\@professor{}
 \newcommand*\@professor@foot{}
 \newcommand*\professor[2][\@empty]{\tud@foot@line@add{professor}{#2}{#1}}
@@ -1537,39 +1530,24 @@
     }%
   }%
 }
-\newcommand*\printdate[1]{#1}
-\BeforePackage{isodate}{\undef\printdate}
-\newcommand*\tud@printdate[2]{%
-  \ifx\today#2\relax%
-    \gdef#1{#2}%
-  \else%
-    \ifxblank{#2}%
-      {\gdef#1{}}%
-      {\gdef#1{\printdate{#2}}}%
-  \fi%
-}
-\newcommand*\tud@datecheck{%
-  \ifdefvoid{\@duedate}{%
-    \ClassWarning{\TUDClassName}{%
-      `\string\date' was not given.\MessageBreak%
-      Since a thesis is a self-contained work, an end\MessageBreak%
-      date should be specified by the author.\MessageBreak%
-      Nevertheless, today's date is used%
+\newcommand*\@contactperson{}
+\newcommand*\contactperson[1]{\gdef\@contactperson{#1}}
+\let\supervisor\contactperson
+\newcommand*\@office{}
+\newrobustcmd*\office[1]{\gdef\@office{#1}}
+\newcommand*\@telephone{}
+\newrobustcmd*\telephone[1]{\gdef\@telephone{#1}}
+\newcommand*\@emailaddress{}
+\newrobustcmd*\emailaddress[2][]{\gdef\@emailaddress{#2}}
+\AfterPackage*{hyperref}{%
+  \renewrobustcmd*\emailaddress[2][hidelinks]{%
+    \gdef\@emailaddress{%
+      \begingroup%
+        \hypersetup{#1}%
+        \href{mailto:#2}{#2}%
+      \endgroup%
     }%
-  }{%
-    \ClassWarning{\TUDClassName}{%
-      `\string\date' was not given.\MessageBreak%
-      It's substituted by the given due date%
-    }%
-    \global\let\@date\@duedate%
   }%
-  \global\let\tud@datecheck\relax%
-}
-\newcommand*\@datemore{}
-\renewcommand*\date[2][]{%
-  \gdef\@datemore{\trim@spaces{#1}}%
-  \tud@printdate{\@date}{#2}%
-  \global\let\tud@datecheck\relax%
 }
 \newcommand*\tud@multiple@@split{}%
 \newcommand*\tud@multiple@split[1]{%
@@ -1597,9 +1575,9 @@
   \letcs\@tempa{tud@split#1@list}%
   \let\and\relax%
   \@for\@tempb:=\@tempa\do{%
-    \ifx\@tempb\@empty\else%
+    \ifx\@tempb\@empty\else\ifx\@tempb\space\else%
       \ifcsdef{@\@tempb}{\tud@cmd@store{@\@tempb}}{}%
-    \fi%
+    \fi\fi%
   }%
   \begingroup%
     \let\thanks\@gobble%
@@ -1611,44 +1589,23 @@
   \letcs\@tempa{tud@split#1@list}%
   \let\and\relax%
   \@for\@tempb:=\@tempa\do{%
-    \ifx\@tempb\@empty\else%
+    \ifx\@tempb\@empty\else\ifx\@tempb\space\else%
       \ifcsdef{@\@tempb}{%
         \tud@cmd@restore{@\@tempb}%
         \global\csletcs{@\@tempb}{@\@tempb}%
       }{}%
-    \fi%
+    \fi\fi%
   }%
 }
 \newcommand*\tud@split@author[2]{}
 \newcommand*\tud@split@author@list{%
-  authormore,matriculationyear,enrolmentyear,%
-  matriculationnumber,studentid,matriculationid,%
-  placeofbirth,birthplace,dateofbirth,birthday,%
-}
-\newcommand*\@contactperson{}
-\newcommand*\contactperson[1]{\gdef\@contactperson{#1}}
-\let\supervisor\contactperson
-\newcommand*\@office{}
-\newrobustcmd*\office[1]{\gdef\@office{#1}}
-\newcommand*\@telephone{}
-\newrobustcmd*\telephone[1]{\gdef\@telephone{#1}}
-\newcommand*\@emailaddress{}
-\newrobustcmd*\emailaddress[2][]{\gdef\@emailaddress{#2}}
-\AfterPackage*{hyperref}{%
-  \renewrobustcmd*\emailaddress[2][hidelinks]{%
-    \gdef\@emailaddress{%
-      \begingroup%
-        \hypersetup{#1}%
-        \href{mailto:#2}{#2}%
-      \endgroup%
-    }%
-  }%
+  authormore,office,telephone,emailaddress%
 }
 \newcommand*\tud@multiple@fields@preset[3]{%
   \letcs\@tempa{tud@split#1@list}%
   \let\and\relax%
   \@for\@tempb:=\@tempa\do{%
-    \ifx\@tempb\@empty\else%
+    \ifx\@tempb\@empty\else\ifx\@tempb\space\else%
       \edef\@tempc{\@nameuse{\@tempb}}%
       \ifstr{#2}{*}{%
         \@namedef{@\@tempb}{}%
@@ -1660,7 +1617,7 @@
           \fi%
         \endgroup%
       }%
-    \fi%
+    \fi\fi%
   }%
   \begingroup%
     \let\thanks\@gobble%
@@ -2974,97 +2931,16 @@
     \recalctypearea%
   }%
 }
-\newcommand*\tud@ps{tudheadings}
-\newcommand*\tud@ps@select{%
-  \expandafter\pagestyle\expandafter{\tud@ps}%
-  \ifstr{\GetRealPageStyle{\tud@ps}}{empty}{%
-    \renewcommand*\titlepagestyle{empty}%
-    \renewcommand*\indexpagestyle{empty}%
-  }{}%
-  \ifstr{\GetRealPageStyle{\tud@ps}}{empty.tudheadings}{%
-    \renewcommand*\titlepagestyle{empty.tudheadings}%
-    \renewcommand*\indexpagestyle{empty.tudheadings}%
-  }{}%
-}
-\newcommand*\tud@currentpagestyle{}
-\newcommand*\tud@currentpagestyle@set{%
-  \ifdefvoid{\tud@currentpagestyle}{%
-    \xdef\tud@currentpagestyle{\currentpagestyle}%
-  }{}%
-}
-\newcommand*\tud@currentpagestyle@reset{%
-  \ifdefvoid{\tud@currentpagestyle}{}{%
-    \expandafter\pagestyle\expandafter{\tud@currentpagestyle}%
-    \let\tud@currentpagestyle\relax%
-  }%
-}
-\NewEnviron{tudpage}[1][]{%
-  \tud@currentpagestyle@set%
-  \clearpage%
-  \def\tud@ps{tudheadings}%
-  \TUD@parameter@set{tudpage}{#1}%
-  \tud@ps@select%
-  \tud@multicols@check%
-  \ifnum\tud@multicols>\@ne\relax%
-    \begin{multicols}{\tud@multicols}%
-  \fi%
-  \BODY%
-  \ifnum\tud@multicols>\@ne\relax%
-    \end{multicols}%
-  \fi%
-}[%
-  \aftergroup\tud@currentpagestyle@reset%
-  \clearpage%
-]
-\newcommand*\TUD@parameter@define@ps[1]{%
-  \TUD@parameter@define{cdfont}[true]{\TUDoption{cdfont}{#1}}%
-  \TUD@parameter@define{cdhead}[true]{\TUDoption{cdhead}{#1}}%
-  \TUD@parameter@define{cdfoot}[true]{\TUDoption{cdfoot}{#1}}%
-  \TUD@parameter@define{headlogo}{\headlogo{#1}}%
-  \TUD@parameter@define{footlogo}{\footlogo{#1}}%
-  \TUD@parameter@define{ddc}[true]{\TUDoption{ddc}{#1}}%
-  \TUD@parameter@define{ddchead}[true]{\TUDoption{ddchead}{#1}}%
-  \TUD@parameter@define{ddcfoot}[true]{\TUDoption{ddcfoot}{#1}}%
-  \TUD@parameter@define{cdfonts}[true]{\TUDoption{cdfonts}{#1}}%
-  \TUD@parameter@define{tudfonts}[true]{\TUDoption{tudfonts}{#1}}%
-  \TUD@parameter@define{barfont}[true]{\TUDoption{barfont}{#1}}%
-  \TUD@parameter@define{widehead}[true]{\TUDoption{widehead}{#1}}%
-  \TUD@parameter@define{tudfoot}[true]{\TUDoption{tudfoot}{#1}}%
-  \TUD@parameter@let{logo}{headlogo}%
-}
-\TUD@parameter{tudpage}{%
-  \TUD@parameter@define{language}{\selectlanguage{#1}}%
-  \TUD@parameter@define{columns}{\cs@std@lock{tud@multicols}{#1}}%
-  \TUD@parameter@define{pagestyle}{%
-    \tud@iftudps{#1}{\renewcommand*\tud@ps{#1}}{%
-      \ifstr{#1}{empty}{\renewcommand*\tud@ps{empty.tudheadings}}{%
-      \ifstr{#1}{plain}{\renewcommand*\tud@ps{plain.tudheadings}}{%
-      \ifstr{#1}{headings}{\renewcommand*\tud@ps{tudheadings}}{%
-        \TUD@parameter@error{pagestyle}{%
-          headings, plain, empty or any tudheadings page style type%
-        }%
-      }}}%
-    }%
-  }%
-  \TUD@parameter@define@ps{#1}%
-  \TUD@parameter@sethandler{\TUD@parameter@defaulthandler{tudpage}{#1}}%
-}
 %%% From File: tudscr-layout.dtx
 \newcommand*\tud@part@fontcolor{}
 \newlength\pageheadingsvskip
 \newlength\headingsvskip
 \newcommand*\tud@layout@process{%
   \ifcase\tud@cd\relax% false
-    \tud@cmd@restore{maketitle}%
-    \tud@cmd@restore{@maketitle}%
-    \tud@cmd@restore{titlepagestyle}%
     \tud@font@koma@unset{titlehead}%
     \tud@font@koma@unset{title}%
     \tud@font@koma@unset{subtitle}%
     \tud@font@koma@unset{subject}%
-    \tud@font@koma@unset{author}%
-    \tud@font@koma@unset{date}%
-    \tud@font@koma@unset{publishers}%
     \tud@cmd@restore{partheadstartvskip}%
     \ifcsdef{scr@v@3.18}{%
       \tud@cmd@restore{scr@@startpart}%
@@ -3079,9 +2955,6 @@
     \tud@sectioning@reset{minisec}%
     \footcontent{}%
   \else% !false
-    \tud@cmd@store{maketitle}%
-    \tud@cmd@store{@maketitle}%
-    \tud@cmd@store{titlepagestyle}%
     \tud@font@koma@set{titlehead}{\usekomafont{titlepage}}%
     \tud@font@koma@set{title}{%
       \usekomafont{disposition}%
@@ -3100,11 +2973,6 @@
       \selectfont%
       \tud@color{\tud@title@fontcolor}%
     }%
-    \tud@font@koma@set{author}{\usekomafont{subject}}%
-    \tud@font@koma@set{date}{\usekomafont{titlepage}}%
-    \tud@font@koma@set{publishers}{\usekomafont{author}}%
-    \let\maketitle\tud@maketitle%
-    \renewcommand*\titlepagestyle{plain.tudheadings}%
     \tud@cmd@store{partheadstartvskip}%
     \ifcsdef{scr@v@3.18}{%
       \tud@cmd@store{scr@@startpart}%
@@ -3258,8 +3126,10 @@
   \tud@foot@line@write{chair}%
   \tud@foot@line@write{professor}%
 }
+\newcommand*\tud@poster@newline{}
 \newcommand*\tud@foot@poster@right{%
-  \def\tud@newline{%
+  \def\tud@poster@newline{%
+    \ifx\@authormore\@empty\else\newline\@authormore\fi%
     \ifx\@office\@empty\else\newline\@office\fi%
     \ifx\@telephone\@empty\else\newline\@telephone\fi%
     \ifx\@emailaddress\@empty\else\newline\@emailaddress\fi%
@@ -3277,13 +3147,13 @@
     \renewcommand*\tud@split@author[2]{%
       \tud@multiple@fields@store{@author}{##1}%
       \tud@multiple@fields@preset{@author}{*}{##1}%
-      \ignorespaces##1\tud@newline%
+      \ignorespaces##1\tud@poster@newline%
       \tud@multiple@fields@restore{@author}%
       \tud@multiple@@@split{##2}{\newline}%
     }%
     \noindent\tud@multiple@split{@author}%
     \tud@multiple@fields@restore{@author}%
-    \tud@newline%
+    \tud@poster@newline%
     \@tempswatrue%
   \fi%
   \ifx\@contactperson\@empty\else%
@@ -3294,24 +3164,18 @@
     \renewcommand*\tud@split@contactperson[2]{%
       \tud@multiple@fields@store{@contactperson}{##1}%
       \tud@multiple@fields@preset{@contactperson}{*}{##1}%
-      \ignorespaces##1\tud@newline%
+      \ignorespaces##1\tud@poster@newline%
       \tud@multiple@fields@restore{@contactperson}%
       \tud@multiple@@@split{##2}{\newline}%
     }%
     \noindent\tud@multiple@split{@contactperson}%
     \tud@multiple@fields@restore{@contactperson}%
-    \tud@newline%
+    \tud@poster@newline%
   \fi%
   \ifx\@webpage\@empty\else\newline\@webpage\fi%
 }
-% §§§ Befehl fuer tudscrsupervisor und tudscrposter in fields.dtx
-\patchcmd{\tud@split@author@list}{authormore}{%
-  authormore,office,telephone,emailaddress%
-}{}{\tud@patch@wrn{tud@split@author@list}}
 %%% From File: tudscr-title.dtx
 % §§§ \maketitle komplett neu
-% §§§ Warnung bei \if@titlepagetrue
-\newkomafont{thesis}{\usekomafont{title}\LARGE}
 \newkomafont{titlepage}{%
   \usekomafont{subject}%
   \fontseries{\mddefault}%
@@ -3328,11 +3192,8 @@
       \ifx\tud@titlepagenumber\relax\gdef\tud@titlepagenumber{1}\fi%
       \tud@cmd@use{maketitle}[\tud@titlepagenumber]%
     \else% !false
-      \if@titlepage%
-        \tud@maketitlepage%
-      \else%
         \def\tud@title@fontcolor{}%
-        \ifcase\tud@layout@title\relax\or\else% *color
+        \ifcase\tud@cd\relax\or\else% *color
           \def\tud@title@fontcolor{HKS41}%
         \fi%
         \let\@maketitle\tud@@maketitle%
@@ -3342,253 +3203,15 @@
         \else%
           \tud@cmd@use{maketitle}[\tud@titlepagenumber]%
         \fi%
-      \fi%
     \fi%
   \endgroup%
 }
 \TUD@parameter{title}{%
-  \TUD@parameter@define{cdtitle}[true]{\TUDoption{cdtitle}{#1}}%
-  \TUD@parameter@let{cd}{cdtitle}%
   \TUD@parameter@define{pagenumber}{\def\tud@titlepagenumber{#1}}%
-  \TUD@parameter@define@ps{#1}%
   \TUD@parameter@sethandler{\TUD@parameter@set{title}{pagenumber=#1}}%
 }
 \robustify{\thanks}%
 \robustify{\footnotemark}%
-\newcommand*\tud@titleback{}%
-\newcommand*\tud@maketitlepage{%
-  \def\tud@title@fontcolor{}%
-  \ifcase\tud@layout@title\relax\or\or% litecolor
-    \def\tud@title@fontcolor{HKS41}%
-  \or% barcolor
-    \def\tud@title@fontcolor{HKS41}%
-  \or% bicolor
-    \def\tud@title@fontcolor{HKS41}%
-  \or% color
-    \def\tud@title@fontcolor{HKS41!30}%
-  \or% full
-    \def\tud@title@fontcolor{HKS41!30}%
-  \fi%
-  \begin{titlepage}%
-    \tud@layout@specialpage@set{title}%
-    \ifx\tud@titlepagenumber\relax\else%
-      \setcounter{page}{\tud@titlepagenumber}%
-    \fi%
-    \if@tud@cover\else%
-      \let\footnotesize\small%
-      \let\footnoterule\relax%
-      \let\footnote\thanks%
-      \renewcommand*\thefootnote{\@fnsymbol\c@footnote}%
-      \let\@oldmakefnmark\@makefnmark%
-      \renewcommand*\@makefnmark{\rlap\@oldmakefnmark}%
-      \tud@footnote@unhyper%
-      \ifx\@extratitle\@empty%
-        \if@titlepageiscoverpage%
-          \ClassWarning{\TUDClassName}{%
-            Using option `titlepage=firstiscover' is only\MessageBreak%
-            possible with an extra title. Alternatively you can\MessageBreak%
-            create a cover with `\string\makecover'%
-          }%
-        \fi%
-      \else%
-        \if@titlepageiscoverpage%
-          \edef\titlepage@restore{%
-            \noexpand\endgroup%
-            \noexpand\global\noexpand\@colht\the\@colht%
-            \noexpand\global\noexpand\@colroom\the\@colroom%
-            \noexpand\global\vsize\the\vsize%
-            \noexpand\global\noexpand\@titlepageiscoverpagefalse%
-            \noexpand\let\noexpand\titlepage@restore\noexpand\relax%
-          }%
-          \begingroup%
-          \topmargin=\dimexpr\coverpagetopmargin-1in\relax%
-          \oddsidemargin=\dimexpr\coverpageleftmargin-1in\relax%
-          \evensidemargin=\dimexpr\coverpageleftmargin-1in\relax%
-          \textwidth=\dimexpr\paperwidth-\coverpageleftmargin%
-            -\coverpagerightmargin\relax%
-          \textheight=\dimexpr\paperheight-\coverpagetopmargin%
-            -\coverpagebottommargin\relax%
-          \headheight=0pt%
-          \headsep=0pt%
-          \footskip=\baselineskip%
-          \@colht=\textheight%
-          \@colroom=\textheight%
-          \vsize=\textheight%
-          \columnwidth=\textwidth%
-          \hsize=\columnwidth%
-          \linewidth=\hsize%
-        \else%
-          \let\titlepage@restore\relax%
-        \fi%
-        \noindent\@extratitle\next@tdpage%
-      \fi%
-    \fi%
-    \if@tud@bookmarks%
-      \if@tud@cover%
-        \ifdef{\bookmarksetup}{\bookmarksetup{startatroot}}{}%
-      \else%
-        \ifdef{\bookmarksetup}{\bookmarksetup{startatroot}}{}%
-      \fi%
-    \fi%
-    \vspace*{%
-      \dimexpr\tud@dim@headdiff+\tud@dim@headingsvskip-\baselineskip%
-        +\parskip\relax%
-    }%
-    \vspace*{\pageheadingsvskip}%
-    \setparsizes{\z@}{\z@}{\z@\@plus1fil}\par@updaterelative%
-    \begingroup%
-      \usekomafont{titlepage}%
-      \setlength\@tempdima{\z@}%
-      \ifx\@titlehead\@empty\else%
-        \sbox\z@{\vbox{%
-          \begin{minipage}[t]{\textwidth}%
-            {\usekomafont{titlehead}{\@titlehead\par\null}}%
-          \end{minipage}\newline\null%
-        }}%
-        \addtolength\@tempdima{\dimexpr\ht\z@+\dp\z@\relax}%
-      \fi%
-      \tud@letsubjectthesis%
-      \ifx\@subject\@empty\else%
-        \sbox\@ne{\vbox{{\usekomafont{subject}{\@subject\par\null}}}}%
-        \addtolength\@tempdima{\dimexpr\ht\@ne+\dp\@ne+\p@\relax}%
-      \fi%
-      \vspace*{-\@tempdima}%
-      \ifx\@titlehead\@empty\else\usebox\z@\par\fi%
-      \ifx\@subject\@empty\else\usebox\@ne\par\fi%
-      {\usekomafont{title}{\tud@title@uppercase{\@title}\par}}%
-      \vskip 2ex\@plus1ex\@minus1ex%
-      \ifx\@subtitle\@empty\else%
-        {\usekomafont{subtitle}{\tud@title@uppercase{\@subtitle}\par}}%
-        \vskip 2ex\@plus1ex\@minus1ex%
-      \fi%
-      \vskip 2\bigskipamount%
-      \let\tud@split@author\tud@split@author@title%
-      \tud@multiple@split{@author}\par%
-      \vskip 2ex\@plus1ex\@minus1ex%
-      \ifx\@thesis\@empty%
-        \if@tud@cover\else%
-          \ifx\@date\@empty\else%
-            \vskip 2ex\@plus.1fill%
-            {\usekomafont{date}{\@date\nobreakspace\@datemore\par}}%
-          \fi%
-        \fi%
-        \vskip 2ex\@plus.25fill%
-      \else%
-        \vskip 2ex\@plus.25fill%
-        \if@tud@subjectthesis\else%
-          {\usekomafont{thesis}{\tud@title@uppercase{\@thesis}\par}}%
-          \vskip 2ex\@plus1ex\@minus1ex%
-        \fi%
-        \if@tud@cover\else%
-          \ifx\@graduation\@empty\else%
-            \def\@tempc{%
-              \@graduation%
-              \ifx\@graduationabbr\@empty\else\nobreakspace\@graduationabbr\fi%
-            }%
-            {\usekomafont{titlepage}{\graduationtext\par}}%
-            \vskip 2ex\@plus1ex\@minus1ex%
-            \if@tud@subjectthesis%
-              {\usekomafont{subject}{\@tempc\par}}%
-            \else%
-              {\usekomafont{thesis}{\tud@title@uppercase{\@tempc}\par}}%
-            \fi%
-            \vskip 3ex\@plus1ex\@minus1ex%
-          \fi%
-        \fi%
-        \vskip 2ex\@plus.5fill%
-      \fi%
-      \if@tud@cover\else%
-        \tud@title@names{supervisor}%
-        \tud@title@names{referee}%
-        \tud@title@names{advisor}%
-        \tud@title@names{professor}%
-        \ifx\@thesis\@empty\else%
-          \tud@datecheck%
-          \ifx\@date\@empty\else%
-            \vskip 2ex\@plus1ex\@minus1ex%
-            \ifstr{\datetext}{}{}{\datetext\@titledelim}%
-            {\usekomafont{date}{\@date\nobreakspace\@datemore\par}}%
-            \ifx\@defensedate\@empty\else%
-              \ifstr{\defensedatetext}{}{}{\defensedatetext\@titledelim}%
-              {\usekomafont{date}{\@defensedate\par}}%
-            \fi%
-          \fi%
-        \fi%
-      \fi%
-      \ifx\@publishers\@empty\else%
-        \vskip 2ex\@plus.25fill%
-        {\usekomafont{publishers}{\@publishers\par}}%
-        \vskip\z@\@plus.25fill%
-      \fi%
-    \endgroup%
-    \let\tud@titleback\relax%
-    \if@twoside%
-      \@tempswatrue%
-      \ifx\@uppertitleback\@empty\ifx\@lowertitleback\@empty%
-        \@tempswafalse%
-      \fi\fi%
-      \if@tempswa%
-        \gdef\tud@titleback{%
-          \next@tpage%
-          \begin{minipage}[t]{\textwidth}%
-            \@uppertitleback%
-          \end{minipage}\par%
-          \vfill%
-          \begin{minipage}[b]{\textwidth}%
-            \@lowertitleback%
-          \end{minipage}\par%
-          \@thanks\let\@thanks\@empty%
-        }%
-      \fi%
-    \fi%
-    \def\@tempa{%
-      \def\tud@pagecolor{}%
-      \ifcase\tud@layout@title\relax\or% true
-        \cs@std@lock{tud@head@bar}{0}%
-      \or% litecolor
-        \cs@set@lock{tud@head@bar}{1}%
-      \or% barcolor
-        \cs@set@lock{tud@head@bar}{2}%
-      \or% bicolor
-        \cs@set@lock{tud@head@bar}{3}%
-      \or% color
-        \def\tud@pagecolor{HKS41}%
-        \cs@set@lock{tud@head@bar}{1}%
-      \or% full
-        \def\tud@pagecolor{HKS41}%
-        \cs@set@lock{tud@head@bar}{3}%
-      \fi%
-      \tud@color{\tud@title@fontcolor}%
-      \addtokomafont{pagenumber}{\usekomafont{tudheadings}}%
-      \addtokomafont{pagefoot}{\usekomafont{tudheadings}}%
-      \thispagestyle{empty.tudheadings}%
-      \tud@ifverlower{2.03}{\tud@ddc@enlargepage}{}%
-    }%
-    \if@tud@cover%
-      \begingroup%
-        \@tempa%
-        \cleardoubleemptypage%
-      \endgroup%
-    \else%
-        \@tempa%
-        \begingroup%
-          \let\thispagestyle\@gobble%
-          \next@tpage%
-        \endgroup%
-      \ifx\@dedication\@empty\else%
-        \next@tdpage\null\vfill%
-        {\centering\usekomafont{dedication}{\@dedication\par}}%
-        \vskip\z@\@plus3fill%
-        \@thanks\let\@thanks\@empty%
-        \cleardoubleemptypage%
-      \fi%
-    \fi%
-  \end{titlepage}%
-  \if@tud@cover\else%
-    \setcounter{footnote}{0}%
-    \global\let\and\relax%
-  \fi%
-}
 \newcommand*\tud@title@uppercase[1]{%
   \let\@tempa\relax%
   \begingroup%
@@ -3601,24 +3224,7 @@
   \endgroup%
   \ifx\@tempa\relax\else\thanks\@tempa\fi%
 }
-\newcommand*\tud@title@names[1]{%
-  \letcs\@tempa{@#1}%
-  \ifx\@tempa\@empty\else%
-    \def\and{%
-      \ifcsvoid{#1othername}{\par}{%
-        \vskip 1ex\@plus.5ex\@minus.5ex%
-        {\usekomafont{titlepage}{\@nameuse{#1othername}\par}}%
-      }%
-      \let\and\par%
-    }%
-    \vskip 1ex\@plus.5ex\@minus.5ex%
-    {\usekomafont{titlepage}{\@nameuse{#1name}\par}}%
-    {\usekomafont{author}{\@nameuse{@#1}\par}}%
-  \fi%
-}
-\newcommand*\@titledelim{:\nobreakspace}
-\newcommand*\titledelimiter[1]{\gdef\@titledelim{#1}}
-\newcommand*\tud@@maketitle{%
+\renewcommand*\maketitle{%
   \global\@topnum=\z@%
   \vspace*{%
     \dimexpr\tud@dim@headdiff+\tud@dim@headingsvskip-\baselineskip%
@@ -3673,52 +3279,6 @@
     \vskip 2\bigskipamount%
     \tud@ifverlower{2.03}{\tud@ddc@enlargepage[\titlepagestyle]}{}%
   \endgroup%
-}
-\newcommand*\tud@newline{}
-\newcommand*\tud@split@author@title[2]{%
-  \tud@multiple@fields@store{@author}{#1}%
-  \def\tud@newline{\vskip .5ex\let\tud@newline\newline}%
-  {\usekomafont{author}{\ignorespaces#1}}%
-  \if@tud@cover\else%
-    \ifx\@authormore\@empty\else%
-      \tud@newline%
-      \@authormore%
-    \fi%
-    \ifx\@dateofbirth\@empty\else%
-      \if@titlepage%
-        \tud@newline%
-        \ifstr{\dateofbirthtext}{}%
-          {}{\dateofbirthtext\@titledelim}\@dateofbirth%
-        \ifx\@placeofbirth\@empty\else%
-          \nobreakspace\placeofbirthtext\nobreakspace\@placeofbirth%
-        \fi%
-      \else%
-        \tud@title@wrn{dateofbirth}%
-      \fi%
-    \fi%
-    \ifx\@matriculationnumber\@empty\else%
-      \if@titlepage%
-        \tud@newline%
-        \ifstr{\matriculationnumbername}{}%
-          {}{\matriculationnumbername\@titledelim}%
-        \@matriculationnumber%
-      \else%
-        \tud@title@wrn{matriculationnumber}%
-      \fi%
-    \fi%
-    \ifx\@matriculationyear\@empty\else%
-      \if@titlepage%
-        \tud@newline%
-        \ifstr{\matriculationyearname}{}%
-          {}{\matriculationyearname\@titledelim}%
-        \@matriculationyear%
-      \else%
-        \tud@title@wrn{matriculationyear}%
-      \fi%
-    \fi%
-  \fi%
-  \tud@multiple@fields@restore{@author}%
-  \tud@multiple@@@split{#2}{\vskip 2ex}%
 }
 \newcommand\maketitleonecolumn[2][]{%
   \if@twocolumn%
@@ -3777,54 +3337,14 @@
     \fi%
   }{}%
 }
-\newcommand*\tud@letsubjectthesis{%
-  \if@tud@subjectthesis\ifx\@thesis\@empty\else%
-    \ifx\@subject\@empty\else%
-      \ClassWarning{\TUDClassName}{%
-        The option `subjectthesis' was activated.\MessageBreak%
-        The field `subject' will be overwritten with the\MessageBreak%
-        given thesis%
-      }%
-    \fi%
-    \let\@subject\@thesis%
-  \fi\fi%
-}
-\newcommand*\tud@title@wrn[1]{%
-  \ClassWarning{\TUDClassName}{%
-    `\@backslashchar#1' has to be used with\MessageBreak%
-    activated titlepage option%
-  }%
-}
 %%% From File: tudscr-frontmatter.dtx
 \newcommand*\tud@fm@check[2]{%
-  \ifnum\@nameuse{tud@#1@toc}>\tw@\relax%
-    \tud@fm@toc{#1}{#2}%
-  \fi%
   \global\let\tud@fm@set\tud@fm@first%
   #2%
 }
-\newcommand*\tud@fm@@toc{}
-\newcommand*\tud@fm@@@toc{}
-\newcommand*\tud@fm@toc[2]{%
-    \begingroup%
-      \let\tud@fm@@@toc\@empty%
-      \renewcommand*\tud@fm@head[2]{%
-        \protected@edef\@tempa{##2}%
-        \protected@xdef\tud@fm@@toc{\tud@fm@@@toc\@tempa}%
-        \protected@xdef\tud@fm@@@toc{\tud@fm@@toc/}%
-      }%
-      \let\clearpage\relax%
-      \sbox\z@{\vbox{#2}}%
-      \protected@edef\@tempa{%
-        \noexpand\endgroup%
-        \noexpand\ifnumodd{\csname tud@#1@toc\endcsname}{%
-        }{%
-        }%
-      }%
-    \@tempa%
-}
 \newcommand\tud@fm@set[1]{}
 \newcommand\tud@fm@first[1]{%
+  \global\let\tud@fm@set\tud@fm@next%
 }
 \newcommand\tud@fm@next[1]{%
   \if@twocolumn%
@@ -3835,7 +3355,6 @@
       \fi%
   \fi%
 }
-% §§§ Ausmisten
 \newcommand*\tud@fm@body@start[3]{%
   \begingroup%
     \TUD@parameter@set{#1}{#2}%
@@ -3890,30 +3409,6 @@
     \@afterheading%
   \or% section
     \section*{#2}%
-    \ifx\@mkboth\@gobbletwo\else\markright{\MakeMarkcase{#2}}\fi%
-  \fi%
-  \ifbool{@tud@#1@markboth}{%
-    \markboth{\MakeMarkcase{#2}}{\MakeMarkcase{#2}}%
-  }{}%
-  \ifnum\@nameuse{tud@#1@toc}>\z@\relax%
-    \ifnum\@nameuse{tud@#1@toc}<\thr@@\relax%
-      \ifnumodd{\csname tud@#1@toc\endcsname}{%
-      }{%
-      }%
-    \fi%
-  \fi%
-}
-\newcommand*\tud@fm@pagestyle[2]{%
-  \if@titlepage%
-    \ifcsdef{ps@#2}{\def\tud@ps{#2}}{%
-      \ClassError{\TUDClassName}{`#2' is no valid pagestyle}{%
-        You tried to use `#2' as a pagestyle for the\MessageBreak%
-        `#1' environment, but it was never defined.%
-      }%
-    }%
-  \else%
-    \ClassWarning{\TUDClassName}{%
-    }%
   \fi%
 }
 \newcommand*\tud@quoting{quotation}
@@ -3921,16 +3416,8 @@
 \csundef{abstract}
 \csundef{endabstract}
 \NewEnviron{abstract}[1][]{%
-  \ifnum\@nameuse{tud@abstract@level}>\tw@\relax\@titlepagetrue\fi% chapter
-  \let\tud@ps\relax%
   \TUD@parameter@set{abstract}{#1}%
   \tud@multicols@check%
-  \if@titlepage%
-    \tud@currentpagestyle@set%
-    \ifx\tud@ps\relax\def\tud@ps{empty}\fi%
-    \clearpage%
-    \tud@ps@select%
-  \fi%
   \renewcommand*\nextabstract[1][]{%
     \tud@fm@body@end{abstract}%
     \tud@fm@body@start{abstract}{##1}{\abstractname}%
@@ -3941,28 +3428,13 @@
     \tud@fm@body@end{abstract}%
   }%
 }[%
-  \if@titlepage%
-    \if@tud@abstract@fil\vfil\null\fi%
-    \aftergroup\tud@currentpagestyle@reset%
-    \clearpage%
-  \fi%
+    \ifnum\tud@abstract@level=\tw@%
+      \vskip\dimexpr\bigskipamount-\parskip\relax%
+    \fi%
 ]
 \TUD@parameter{abstract}{%
   \TUD@parameter@define{language}{\selectlanguage{#1}}%
   \TUD@parameter@define{columns}{\cs@std@lock{tud@multicols}{#1}}%
-  \TUD@parameter@define{pagestyle}{\tud@fm@pagestyle{abstract}{#1}}%
-  \TUD@parameter@define{markboth}[true]{%
-    \ifstrbool{#1}{%
-      \@tud@abstract@markbothtrue%
-      \ifx\tud@ps\relax\def\tud@ps{headings}\fi%
-    }{%
-      \@tud@abstract@markbothfalse%
-    }{%
-      \@tud@abstract@markbothfalse%
-      \ifx\tud@ps\relax\def\tud@ps{headings}\fi%
-      \manualmark\markboth{#1}{#1}%
-    }%
-  }%
   \TUD@parameter@define{abstract}{\TUDoption{abstract}{#1}}%
   \TUD@parameter@let{option}{abstract}%
   \TUD@parameter@sethandler{\TUD@parameter@defaulthandler{abstract}{#1}}%
@@ -3988,16 +3460,7 @@
     }%
   }%
 }
-% §§§ Ausmisten
-\tud@deprecated@cmd{professorship}{chair}
-\tud@deprecated@cmd{studentid}{matriculationnumber}
-\tud@deprecated@cmd{matriculationid}{matriculationnumber}
-\tud@deprecated@cmd{enrolmentyear}{matriculationyear}%
-\tud@deprecated@cmd{birthplace}{placeofbirth}
 \tud@deprecated@cmd{location}{place}
-\tud@deprecated@cmd{submissiondate}{date}
-\tud@deprecated@cmd{oralexaminationdate}{defensedate}%
-\tud@deprecated@cmd{birthday}{dateofbirth}
 \tud@deprecated@cmd{logofile}{headlogo}
 \tud@deprecated@cmd{logofilename}{headlogo}
 \AfterPackage{tudscrsupervisor}{%

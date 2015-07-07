@@ -1,4 +1,4 @@
-% \CheckSum{142}
+% \CheckSum{148}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-poster.dtx}[%
-  2015/07/06 v2.05 TUD-KOMA-Script (corporate design posters)%
+  2015/07/07 v2.05 TUD-KOMA-Script (corporate design posters)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -127,7 +127,7 @@
 % \changes{v2.05}{2015/07/06}{neu}^^A
 % \begin{macro}{\tud@foot@poster@right}
 % \changes{v2.05}{2015/07/06}{neu}^^A
-% \begin{macro}{\tud@newline}
+% \begin{macro}{\tud@poster@newline}
 % \begin{macro}{\tud@split@author}
 % \begin{macro}{\tud@split@contactperson}
 % Mit diesen beiden Hilfsmakros werden die linke und die rechte Spalte des 
@@ -152,8 +152,10 @@
 % individuelle Angaben bzgl. Büro, Telefonnummer und E-Mail-Adresse gemacht 
 % werden. 
 %    \begin{macrocode}
+\newcommand*\tud@poster@newline{}
 \newcommand*\tud@foot@poster@right{%
-  \def\tud@newline{%
+  \def\tud@poster@newline{%
+    \ifx\@authormore\@empty\else\newline\@authormore\fi%
     \ifx\@office\@empty\else\newline\@office\fi%
     \ifx\@telephone\@empty\else\newline\@telephone\fi%
     \ifx\@emailaddress\@empty\else\newline\@emailaddress\fi%
@@ -186,7 +188,7 @@
     \renewcommand*\tud@split@author[2]{%
       \tud@multiple@fields@store{@author}{##1}%
       \tud@multiple@fields@preset{@author}{*}{##1}%
-      \ignorespaces##1\tud@newline%
+      \ignorespaces##1\tud@poster@newline%
       \tud@multiple@fields@restore{@author}%
       \tud@multiple@@@split{##2}{\newline}%
     }%
@@ -196,7 +198,7 @@
 % Wurde gültige Felder außerhalb von \cs{@author} global angegeben, so werden 
 % diese \emph{nach} allen Autoren ausgegeben.
 %    \begin{macrocode}
-    \tud@newline%
+    \tud@poster@newline%
     \@tempswatrue%
   \fi%
 %    \end{macrocode}
@@ -210,13 +212,13 @@
     \renewcommand*\tud@split@contactperson[2]{%
       \tud@multiple@fields@store{@contactperson}{##1}%
       \tud@multiple@fields@preset{@contactperson}{*}{##1}%
-      \ignorespaces##1\tud@newline%
+      \ignorespaces##1\tud@poster@newline%
       \tud@multiple@fields@restore{@contactperson}%
       \tud@multiple@@@split{##2}{\newline}%
     }%
     \noindent\tud@multiple@split{@contactperson}%
     \tud@multiple@fields@restore{@contactperson}%
-    \tud@newline%
+    \tud@poster@newline%
   \fi%
 %    \end{macrocode}
 % Zu guter letzt noch eine mögliche Homepage.
@@ -226,18 +228,9 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@split@contactperson
 % \end{macro}^^A \tud@split@author
-% \end{macro}^^A \tud@newline
+% \end{macro}^^A \tud@poster@newline
 % \end{macro}^^A \tud@foot@poster@right
 % \end{macro}^^A \tud@foot@poster@left
-% \begin{macro}{\tud@split@author@list}
-% Der Befehl \cs{tud@split@author@list} wird um die in der Poster-Klasse 
-% \cls{tudscrposter} zusätzlich definierten Felder erweitert.
-%    \begin{macrocode}
-\patchcmd{\tud@split@author@list}{authormore}{%
-  authormore,office,telephone,emailaddress%
-}{}{\tud@patch@wrn{tud@split@author@list}}
-%    \end{macrocode}
-% \end{macro}^^A \tud@split@author@list
 %
 % \iffalse
 %</class&body>
