@@ -1,4 +1,4 @@
-% \CheckSum{2482}
+% \CheckSum{2605}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -1778,7 +1778,7 @@
 %    \begin{macrocode}
     \ifdim\footlogoheight=\tud@footlogoheight\relax\else%
       \setlength\tud@footlogoheight{\footlogoheight}%
-      \global\@tud@footlogo@option@settrue% 
+      \global\@tud@footlogo@option@settrue%
     \fi%
   \fi%
   \global\tud@footlogoheight=\tud@footlogoheight%
@@ -2029,11 +2029,11 @@
 % \changes{v2.04}{2015/04/21}{neu}^^A
 % \begin{macro}{\@@footcontent}
 % \changes{v2.04}{2015/04/21}{neu}^^A
-% \begin{macro}{\footcontent@font}
+% \begin{macro}{\tud@footcontent@font}
 % \changes{v2.04}{2015/06/01}{neu}^^A
-% \begin{macro}{\footcontent@left}
+% \begin{macro}{\tud@footcontent@left}
 % \changes{v2.04}{2015/06/01}{neu}^^A
-% \begin{macro}{\footcontent@right}
+% \begin{macro}{\tud@footcontent@right}
 % \changes{v2.04}{2015/06/01}{neu}^^A
 % Mit dem Befehl \cs{footcontent} kann der Inhalt für den Fußbereich der 
 % Seiten im Stil \pgs{tudheadings} festgelegt werden. Dieser wird mit passenden 
@@ -2089,13 +2089,127 @@
   \def\tud@footcontent@right{#3}%
 }
 %    \end{macrocode}
-% \end{macro}^^A \footcontent@right
-% \end{macro}^^A \footcontent@left
-% \end{macro}^^A \footcontent@font
+% \end{macro}^^A \tud@footcontent@right
+% \end{macro}^^A \tud@footcontent@left
+% \end{macro}^^A \tud@footcontent@font
 % \end{macro}^^A \@@footcontent
 % \end{macro}^^A \@footcontent
 % \end{macro}^^A \footcontent
 % \end{KOMAfont}^^A tudheadings
+%
+% \iffalse
+%<*class&poster>
+% \fi
+%
+% \begin{macro}{\tud@footcontent@left@poster}
+% \changes{v2.05}{2015/07/06}{neu}^^A
+% \begin{macro}{\tud@footcontent@right@poster}
+% \changes{v2.05}{2015/07/06}{neu}^^A
+% \begin{macro}{\tud@newline@poster}
+% Mit diesen beiden Hilfsmakros werden die linke und die rechte Spalte des 
+% Standard-Seitenfußes eines Posters festgelegt. In der linken Spalte werden 
+% dabei Fakultät, Einrichtung, Institut und Lehrstuhl sowie der Professor 
+% ausgegeben, wobei die Angaben über das optionale Argument der entsprechenden 
+% Feldbefehle, die in den Klassen normalerweise nur für den Seitenkopf genutzt 
+% werden, variiert werden können.
+%    \begin{macrocode}
+\newcommand*\tud@newline@poster{}
+\newcommand*\tud@footcontent@left@poster{%
+  \ifx\contactname\@empty\else{\tud@head@font@bold\contactname}\newline\fi%
+  Technische Universit\"at Dresden%
+  \tud@foot@line@write{faculty}%
+  \tud@foot@line@write{department}%
+  \tud@foot@line@write{institute}%
+  \tud@foot@line@write{chair}%
+  \tud@foot@line@write{professor}%
+}
+%    \end{macrocode}
+% In der rechten Spalte werden der Autor oder die Autoren (\cs{author}) und 
+% die Kontaktperson(en) (\cs{contactperson}) ausgegeben. Zu jeder Person können
+% individuelle Angaben bzgl. Büro, Telefonnummer und E-Mail-Adresse gemacht 
+% werden. 
+%    \begin{macrocode}
+\newcommand*\tud@footcontent@right@poster{%
+  \def\tud@newline@poster{%
+    \ifx\@authormore\@empty\else\newline\@authormore\fi%
+    \ifx\@office\@empty\else\newline\@office\fi%
+    \ifx\@telephone\@empty\else\newline\@telephone\fi%
+    \ifx\@emailaddress\@empty\else\newline\@emailaddress\fi%
+  }%
+%    \end{macrocode}
+% Wurde kein Autor angegeben, wird in diesem Fall die normalerweise erzeugte 
+% Warnung bei der Verwendung des Feldes \cs{@author} unterdrückt.
+%    \begin{macrocode}
+  \ifpatchable{\@author}{\@latex@warning@no@line}{%
+    \let\@tempa\@empty%
+  }{%
+    \let\@tempa\@author%
+  }%
+%    \end{macrocode}
+% Der temporäre Schalter wird verwendet, um die gleichzeitige Angabe von Autor 
+% und Kontaktperson zu erkennen und zwischen den Angaben eine Leerzeile 
+% einzufügen.
+%    \begin{macrocode}
+  \@tempswafalse%
+  \ifx\@tempa\@empty\else%
+    \ifx\authorname\@empty\else%
+      {\tud@head@font@bold\authorname}\newline%
+    \fi%
+%    \end{macrocode}
+% Das Makro zum Aufteilen der Autorenangaben wird für die hier benötigte Form 
+% definiert. Dabei wird die Ausgabe aller nicht \emph{lokal} angegebenen Felder
+% unterdrückt, indem der Befehl \cs{tud@multiple@fields@preset} im zweiten 
+% Argument mit einem \val{*} aufgerufen wird.
+%    \begin{macrocode}
+    \renewcommand*\tud@split@author[2]{%
+      \tud@multiple@fields@store{@author}{##1}%
+      \tud@multiple@fields@preset{@author}{*}{##1}%
+      \ignorespaces##1\tud@newline@poster%
+      \tud@multiple@fields@restore{@author}%
+      \tud@multiple@@@split{##2}{\newline}%
+    }%
+    \noindent\tud@multiple@split{@author}%
+    \tud@multiple@fields@restore{@author}%
+%    \end{macrocode}
+% Wurde gültige Felder außerhalb von \cs{@author} global angegeben, so werden 
+% diese \emph{nach} allen Autoren ausgegeben.
+%    \begin{macrocode}
+    \tud@newline@poster%
+    \@tempswatrue%
+  \fi%
+%    \end{macrocode}
+% Die Ausgabe der Kontaktperson(en) erfolgt analog zu der Autorenausgabe.
+%    \begin{macrocode}
+  \ifx\@contactperson\@empty\else%
+    \if@tempswa\newline\fi%
+    \ifx\contactpersonname\@empty\else%
+      {\tud@head@font@bold\contactpersonname}\newline%
+    \fi%
+    \renewcommand*\tud@split@contactperson[2]{%
+      \tud@multiple@fields@store{@contactperson}{##1}%
+      \tud@multiple@fields@preset{@contactperson}{*}{##1}%
+      \ignorespaces##1\tud@newline@poster%
+      \tud@multiple@fields@restore{@contactperson}%
+      \tud@multiple@@@split{##2}{\newline}%
+    }%
+    \noindent\tud@multiple@split{@contactperson}%
+    \tud@multiple@fields@restore{@contactperson}%
+    \tud@newline@poster%
+  \fi%
+%    \end{macrocode}
+% Zu guter letzt noch eine mögliche Homepage.
+%    \begin{macrocode}
+  \ifx\@webpage\@empty\else\newline\@webpage\fi%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@newline@poster
+% \end{macro}^^A \tud@footcontent@right@poster
+% \end{macro}^^A \tud@footcontent@left@poster
+%
+% \iffalse
+%</class&poster>
+% \fi
+%
 % \begin{macro}{\tud@footcontent@use}
 % \changes{v2.04}{2015/06/01}{neu}^^A
 % Mit \cs{tud@footcontent@use} erfolgt die Ausgabe der mit \cs{footcontent} 
@@ -2148,8 +2262,8 @@
     \vss\vss%
   }{%
     The content for the footer (`\string\footcontent')\MessageBreak%
-    is too high. You should either reduce the content or\MessageBreak%
-    lower the fontsize via the optional argument.%
+    is too high. You should either reduce the content\MessageBreak%
+    or lower the fontsize via the optional argument.%
     \ifcase\tud@geometry\relax\else% true/symmetric/twoside
       \MessageBreak%
       Alternatively you can enlarge the bottom margin\MessageBreak%

@@ -1,4 +1,4 @@
-% \CheckSum{1284}
+% \CheckSum{1300}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -689,21 +689,21 @@
     \DeclareMathVersion{univers}%
     \DeclareMathVersion{universbold}%
     \SetSymbolFont{operators}{univers}{OT1}{\tud@univers}{l}{n}%
-    \SetSymbolFont{operators}{universbold}{OT1}{\tud@univers}{b}{n}%    
+    \SetSymbolFont{operators}{universbold}{OT1}{\tud@univers}{b}{n}%
     \SetSymbolFont{letters}{univers}{OML}{\tud@univers}{l}{sl}%
-    \SetSymbolFont{letters}{universbold}{OML}{\tud@univers}{b}{sl}%    
+    \SetSymbolFont{letters}{universbold}{OML}{\tud@univers}{b}{sl}%
     \SetSymbolFont{symbols}{univers}{OMS}{\tud@univers}{l}{n}%
     \SetSymbolFont{symbols}{universbold}{OMS}{\tud@univers}{b}{n}%
     \SetSymbolFont{largesymbols}{univers}{OMX}{iwona}{m}{n}%
     \SetSymbolFont{largesymbols}{universbold}{OMX}{iwona}{b}{n}%
     \SetMathAlphabet{\mathcal}{univers}{OMS}{lmsy}{m}{n}%
-    \SetMathAlphabet{\mathcal}{universbold}{OMS}{lmsy}{b}{n}%    
+    \SetMathAlphabet{\mathcal}{universbold}{OMS}{lmsy}{b}{n}%
     \SetMathAlphabet{\mathbf}{univers}{OT1}{\tud@univers}{b}{n}%
-    \SetMathAlphabet{\mathbf}{universbold}{OT1}{\tud@univers}{eb}{n}%    
+    \SetMathAlphabet{\mathbf}{universbold}{OT1}{\tud@univers}{eb}{n}%
     \SetMathAlphabet{\mathsf}{univers}{OT1}{\tud@univers}{l}{n}%
-    \SetMathAlphabet{\mathsf}{universbold}{OT1}{\tud@univers}{b}{n}%    
+    \SetMathAlphabet{\mathsf}{universbold}{OT1}{\tud@univers}{b}{n}%
     \SetMathAlphabet{\mathit}{univers}{OT1}{\tud@univers}{l}{sl}%
-    \SetMathAlphabet{\mathit}{universbold}{OT1}{\tud@univers}{b}{sl}%    
+    \SetMathAlphabet{\mathit}{universbold}{OT1}{\tud@univers}{b}{sl}%
     \SetMathAlphabet{\mathtt}{univers}{OT1}{\tud@univers t}{l}{n}%
     \SetMathAlphabet{\mathtt}{universbold}{OT1}{\tud@univers t}{b}{n}%
 %    \end{macrocode}
@@ -1098,11 +1098,24 @@
 % dass es sich bei diesem um die gewünschte Schriftgröße handelt.
 %    \begin{macrocode}
   \else%
-    \KOMAoptions{fontsize=#1}%
-    \ifcase\tud@cdfont\relax% false to true
-      \def\tud@cdfont{1}%
-      \if@atdocument\tud@font@set\fi%
-    \fi%
+    \ifisdimension{#1}{%
+      \ifdim#1>\z@\relax%
+%<*class>
+        \@ifclassloaded{\TUDClassName@KOMA}{%
+%</class>
+          \KOMAoptions{fontsize=#1}%
+%<*class>
+        }{%
+          \PassOptionsToClass{fontsize=#1}{\TUDClassName@KOMA}%
+        }%
+%</class>
+        \ifcase\tud@cdfont\relax% false to true
+          \def\tud@cdfont{1}%
+          \if@atdocument\tud@font@set\fi%
+        \fi%
+        \FamilyKeyStateProcessed%
+      \fi%
+    }{}%
   \fi%
 }
 %    \end{macrocode}
@@ -1194,10 +1207,15 @@
 %    \begin{macrocode}
     \bool@std@lock{@tud@cdmath}{false}%
 %    \end{macrocode}
-% Innerhalb der Klassen wird auch die Schrift im Querbalken zurückgsetzt.
+% Innerhalb der Klassen wird auch die Schrift im Querbalken zurückgsetzt, wenn 
+% kein Layout im \CD genutzt wird.
 %    \begin{macrocode}
 %<*class>
-    \cs@std@lock{tud@head@font}{0}%
+    \ifcase\tud@cd\relax% false
+      \cs@std@lock{tud@head@font}{0}%
+    \else% !false
+      \cs@std@lock{tud@head@font}{1}%
+    \fi%
 %</class>
 %    \end{macrocode}
 % Ist die Verwendung der Schriften des \CDs gewünscht, werden die Schnitte der 
