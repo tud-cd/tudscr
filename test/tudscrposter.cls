@@ -20,7 +20,6 @@
 %% tudscr-locale.dtx  (with options: `class,poster,body')
 %% tudscr-pagestyle.dtx  (with options: `class,poster,body')
 %% tudscr-layout.dtx  (with options: `class,poster,body')
-%% tudscr-poster.dtx  (with options: `class,body')
 %% tudscr-title.dtx  (with options: `class,poster,body')
 %% tudscr-frontmatter.dtx  (with options: `class,poster,body')
 %% tudscr-comp.dtx  (with options: `class,poster,body')
@@ -208,11 +207,20 @@
       \TUDoptions{fontspec=false}%
     \fi%
   \else%
-    \KOMAoptions{fontsize=#1}%
-    \ifcase\tud@cdfont\relax% false to true
-      \def\tud@cdfont{1}%
-      \if@atdocument\tud@font@set\fi%
-    \fi%
+    \ifisdimension{#1}{%
+      \ifdim#1>\z@\relax%
+        \@ifclassloaded{\TUDClassName@KOMA}{%
+          \KOMAoptions{fontsize=#1}%
+        }{%
+          \PassOptionsToClass{fontsize=#1}{\TUDClassName@KOMA}%
+        }%
+        \ifcase\tud@cdfont\relax% false to true
+          \def\tud@cdfont{1}%
+          \if@atdocument\tud@font@set\fi%
+        \fi%
+        \FamilyKeyStateProcessed%
+      \fi%
+    }{}%
   \fi%
 }
 \DefineFamilyMember{KOMA}
@@ -509,10 +517,42 @@
   {color}{5},{colour}{5},%
   {full}{6},{colorfull}{6},{fullcolor}{6},{colourfull}{6},{fullcolour}{6}%
 }
+\cs@lock{tud@layout@title}{0}
+\cs@lock{tud@layout@part}{0}
+\cs@lock{tud@layout@section}{0}
 \newcommand*\tud@cd{0}
 \TUD@key{cd}[true]{%
   \TUD@set@numkey{cd}{tud@cd}{\tud@layout@switch}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \ifcase\tud@cd\relax% false
+      \cs@std@lock{tud@layout@title}{0}%
+      \cs@std@lock{tud@layout@part}{0}%
+      \cs@std@lock{tud@layout@section}{0}%
+    \or% true
+      \cs@std@lock{tud@layout@title}{1}%
+      \cs@std@lock{tud@layout@part}{1}%
+      \cs@std@lock{tud@layout@section}{1}%
+    \or% litecolor
+      \cs@std@lock{tud@layout@title}{2}%
+      \cs@std@lock{tud@layout@part}{2}%
+      \cs@std@lock{tud@layout@section}{2}%
+    \or% barcolor
+      \cs@std@lock{tud@layout@title}{3}%
+      \cs@std@lock{tud@layout@part}{3}%
+      \cs@std@lock{tud@layout@section}{2}%
+    \or% bicolor
+      \cs@std@lock{tud@layout@title}{4}%
+      \cs@std@lock{tud@layout@part}{4}%
+      \cs@std@lock{tud@layout@section}{2}%
+    \or% color
+      \cs@std@lock{tud@layout@title}{5}%
+      \cs@std@lock{tud@layout@part}{5}%
+      \cs@std@lock{tud@layout@section}{2}%
+    \or% full
+      \cs@std@lock{tud@layout@title}{6}%
+      \cs@std@lock{tud@layout@part}{6}%
+      \cs@std@lock{tud@layout@section}{2}%
+    \fi%
     \if@atdocument%
       \tud@layout@process%
     \else%
@@ -522,6 +562,61 @@
         \TUD@std@numkey@lock{cdgeometry}{true}%
       \fi%
     \fi%
+  \fi%
+}
+\TUD@key{cdtitle}[true]{%
+  \TUD@set@numkey{cdtitle}{@tempa}{\tud@layout@switch}{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \ifcase\@tempa\relax% false
+      \cs@set@lock{tud@layout@title}{0}%
+    \or% true
+      \cs@set@lock{tud@layout@title}{1}%
+    \or% litecolor
+      \cs@set@lock{tud@layout@title}{2}%
+    \or% barcolor
+      \cs@set@lock{tud@layout@title}{3}%
+    \or% bicolor
+      \cs@set@lock{tud@layout@title}{4}%
+    \or% color
+      \cs@set@lock{tud@layout@title}{5}%
+    \or% full
+      \cs@set@lock{tud@layout@title}{6}%
+    \fi%
+    \if@atdocument\tud@layout@process\fi%
+  \fi%
+}
+\TUD@key{cdpart}[true]{%
+  \TUD@set@numkey{cdpart}{@tempa}{\tud@layout@switch}{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \ifcase\@tempa\relax% false
+      \cs@set@lock{tud@layout@part}{0}%
+    \or% true
+      \cs@set@lock{tud@layout@part}{1}%
+    \or% litecolor
+      \cs@set@lock{tud@layout@part}{2}%
+    \or% barcolor
+      \cs@set@lock{tud@layout@part}{3}%
+    \or% bicolor
+      \cs@set@lock{tud@layout@part}{4}%
+    \or% color
+      \cs@set@lock{tud@layout@part}{5}%
+    \or% full
+      \cs@set@lock{tud@layout@part}{6}%
+    \fi%
+    \if@atdocument\tud@layout@process\fi%
+  \fi%
+}
+\TUD@key{cdsection}[true]{%
+  \TUD@set@numkey{cdsection}{@tempa}{\tud@layout@switch}{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \ifcase\@tempa\relax% false
+      \cs@set@lock{tud@layout@section}{0}%
+    \or% true
+      \cs@set@lock{tud@layout@section}{1}%
+    \else% *color
+      \cs@set@lock{tud@layout@section}{2}%
+    \fi%
+    \if@atdocument\tud@layout@process\fi%
   \fi%
 }
 \newcommand*\tud@font@koma@set[2]{%
@@ -549,9 +644,11 @@
       \let\tud@font@heading@size\size@part%
       \if@atdocument%
         \tud@layout@process%
-        \ifcase\tud@cd\relax\else% !false
+        \ifcase\tud@layout@part\relax\else% !false
           \tud@font@koma@reset{part}%
           \tud@font@koma@reset{partnumber}%
+        \fi%
+        \ifcase\tud@layout@section\relax\else% !false
           \tud@font@koma@reset{section}%
           \tud@font@koma@reset{subsection}%
           \tud@font@koma@reset{subsubsection}%
@@ -1250,7 +1347,11 @@
       \tud@cmd@restore{mdseries@tt}%
     \fi%
     \bool@std@lock{@tud@cdmath}{false}%
-    \cs@std@lock{tud@head@font}{0}%
+    \ifcase\tud@cd\relax% false
+      \cs@std@lock{tud@head@font}{0}%
+    \else% !false
+      \cs@std@lock{tud@head@font}{1}%
+    \fi%
   \else% true/heavy
     \tud@cmd@store{rmdefault}%
     \tud@cmd@store{sfdefault}%
@@ -1597,10 +1698,6 @@
     \fi\fi%
   }%
 }
-\newcommand*\tud@split@author[2]{}
-\newcommand*\tud@split@author@list{%
-  authormore,office,telephone,emailaddress%
-}
 \newcommand*\tud@multiple@fields@preset[3]{%
   \letcs\@tempa{tud@split#1@list}%
   \let\and\relax%
@@ -1625,8 +1722,24 @@
     \sbox\z@{#3}%
   \endgroup%
 }
+\newcommand*\tud@split@author[2]{}
+\newcommand*\tud@split@author@list{%
+  authormore,office,telephone,emailaddress%
+}
 \newcommand*\tud@split@contactperson[2]{}
 \newcommand*\tud@split@contactperson@list{office,telephone,emailaddress}
+\newcommand*\tud@foot@line@add[3]{%
+  \csgdef{@#1}{\trim@spaces{#2}}%
+  \ifx\@empty#3\relax%
+    \global\csletcs{@#1@foot}{@#1}%
+  \else%
+    \csgdef{@#1@foot}{\trim@spaces{#3}}%
+  \fi%
+}
+\newcommand*\tud@foot@line@write[1]{%
+  \protected@edef\@tempa{\csuse{@#1@foot}}%
+  \ifx\@tempa\@empty\else\newline{\csuse{@#1@foot}}\fi%
+}
 %%% From File: tudscr-locale.dtx
 \newcommand*\tud@locale@define[1]{%
   \providecommand*#1{%
@@ -2516,6 +2629,63 @@
   \def\tud@footcontent@left{#2}%
   \def\tud@footcontent@right{#3}%
 }
+\newcommand*\tud@newline@poster{}
+\newcommand*\tud@footcontent@left@poster{%
+  \ifx\contactname\@empty\else{\tud@head@font@bold\contactname}\newline\fi%
+  Technische Universit\"at Dresden%
+  \tud@foot@line@write{faculty}%
+  \tud@foot@line@write{department}%
+  \tud@foot@line@write{institute}%
+  \tud@foot@line@write{chair}%
+  \tud@foot@line@write{professor}%
+}
+\newcommand*\tud@footcontent@right@poster{%
+  \def\tud@newline@poster{%
+    \ifx\@authormore\@empty\else\newline\@authormore\fi%
+    \ifx\@office\@empty\else\newline\@office\fi%
+    \ifx\@telephone\@empty\else\newline\@telephone\fi%
+    \ifx\@emailaddress\@empty\else\newline\@emailaddress\fi%
+  }%
+  \ifpatchable{\@author}{\@latex@warning@no@line}{%
+    \let\@tempa\@empty%
+  }{%
+    \let\@tempa\@author%
+  }%
+  \@tempswafalse%
+  \ifx\@tempa\@empty\else%
+    \ifx\authorname\@empty\else%
+      {\tud@head@font@bold\authorname}\newline%
+    \fi%
+    \renewcommand*\tud@split@author[2]{%
+      \tud@multiple@fields@store{@author}{##1}%
+      \tud@multiple@fields@preset{@author}{*}{##1}%
+      \ignorespaces##1\tud@newline@poster%
+      \tud@multiple@fields@restore{@author}%
+      \tud@multiple@@@split{##2}{\newline}%
+    }%
+    \noindent\tud@multiple@split{@author}%
+    \tud@multiple@fields@restore{@author}%
+    \tud@newline@poster%
+    \@tempswatrue%
+  \fi%
+  \ifx\@contactperson\@empty\else%
+    \if@tempswa\newline\fi%
+    \ifx\contactpersonname\@empty\else%
+      {\tud@head@font@bold\contactpersonname}\newline%
+    \fi%
+    \renewcommand*\tud@split@contactperson[2]{%
+      \tud@multiple@fields@store{@contactperson}{##1}%
+      \tud@multiple@fields@preset{@contactperson}{*}{##1}%
+      \ignorespaces##1\tud@newline@poster%
+      \tud@multiple@fields@restore{@contactperson}%
+      \tud@multiple@@@split{##2}{\newline}%
+    }%
+    \noindent\tud@multiple@split{@contactperson}%
+    \tud@multiple@fields@restore{@contactperson}%
+    \tud@newline@poster%
+  \fi%
+  \ifx\@webpage\@empty\else\newline\@webpage\fi%
+}
 \newcommand*\tud@footcontent@use[2]{%
   \tud@ddc@check%
   \ifcase\@tempb%
@@ -2549,8 +2719,8 @@
     \vss\vss%
   }{%
     The content for the footer (`\string\footcontent')\MessageBreak%
-    is too high. You should either reduce the content or\MessageBreak%
-    lower the fontsize via the optional argument.%
+    is too high. You should either reduce the content\MessageBreak%
+    or lower the fontsize via the optional argument.%
     \ifcase\tud@geometry\relax\else% true/symmetric/twoside
       \MessageBreak%
       Alternatively you can enlarge the bottom margin\MessageBreak%
@@ -2933,27 +3103,15 @@
 }
 %%% From File: tudscr-layout.dtx
 \newcommand*\tud@part@fontcolor{}
+\newcommand*\tud@section@fontcolor{}
 \newlength\pageheadingsvskip
 \newlength\headingsvskip
 \newcommand*\tud@layout@process{%
-  \ifcase\tud@cd\relax% false
+  \ifcase\tud@layout@title\relax% false
     \tud@font@koma@unset{titlehead}%
     \tud@font@koma@unset{title}%
     \tud@font@koma@unset{subtitle}%
     \tud@font@koma@unset{subject}%
-    \tud@cmd@restore{partheadstartvskip}%
-    \ifcsdef{scr@v@3.18}{%
-      \tud@cmd@restore{scr@@startpart}%
-    }{%
-      \tud@cmd@restore{@part}%
-    }%
-    \tud@sectioning@reset[addpart]{part}%
-    \tud@font@koma@unset{partnumber}%
-    \tud@sectioning@reset[addsec]{section}%
-    \tud@sectioning@reset{subsection}%
-    \tud@sectioning@reset{subsubsection}%
-    \tud@sectioning@reset{minisec}%
-    \footcontent{}%
   \else% !false
     \tud@font@koma@set{titlehead}{\usekomafont{titlepage}}%
     \tud@font@koma@set{title}{%
@@ -2973,11 +3131,25 @@
       \selectfont%
       \tud@color{\tud@title@fontcolor}%
     }%
+  \fi%
+  \ifcase\tud@layout@part\relax% false
+    \tud@cmd@restore{partheadstartvskip}%
+    \ifcsdef{scr@v@3.18}{%
+      \tud@cmd@restore{scr@@startpart}%
+    }{%
+      \tud@cmd@restore{@part}%
+    }%
+    \tud@sectioning@reset[addpart]{part}%
+    \tud@font@koma@unset{partnumber}%
+  \else% !false
     \tud@cmd@store{partheadstartvskip}%
+    \let\partheadstartvskip\tud@partheadstartvskip%
     \ifcsdef{scr@v@3.18}{%
       \tud@cmd@store{scr@@startpart}%
+      \let\scr@@startpart\tud@@startpart%
     }{%
       \tud@cmd@store{@part}%
+      \let\@part\tud@@part%
     }%
       \tud@sectioning@set[addpart]{part}{%
         \tud@font@heading%
@@ -2987,19 +3159,52 @@
         \tud@font@heading%
         \tud@color{\tud@part@fontcolor}%
       }%
-    \let\partheadstartvskip\tud@partheadstartvskip%
-    \ifcsdef{scr@v@3.18}{%
-      \let\scr@@startpart\tud@@startpart%
-    }{%
-      \let\@part\tud@@part%
+  \fi%
+  \ifcase\tud@layout@section\relax% false
+    \tud@sectioning@reset[addsec]{section}%
+    \tud@sectioning@reset{subsection}%
+    \tud@sectioning@reset{subsubsection}%
+    \tud@sectioning@reset{minisec}%
+    \tud@sectioning@reset{paragraph}%
+    \tud@sectioning@reset{subparagraph}%
+  \else% !false
+    \def\tud@section@fontcolor{}%
+    \ifcase\tud@layout@section\relax\or\else% *color
+      \def\tud@section@fontcolor{HKS41}%
+    \fi%
+    \tud@sectioning@set[addsec]{section}{%
+      \tud@font@heading%
+      \tud@color{\tud@section@fontcolor}%
     }%
-    \tud@sectioning@set[addsec]{section}{\tud@font@heading}%
-    \tud@sectioning@set{subsection}{\tud@font@heading}%
-    \tud@sectioning@set{subsubsection}{\tud@font@heading}%
-    \tud@sectioning@set{minisec}{\tud@font@heading}%
-    % §§§ Eher auf Beginn des Dokumentes schieben, bei entsprechender Option
+    \tud@sectioning@set{subsection}{%
+      \tud@font@heading%
+      \tud@color{\tud@section@fontcolor}%
+    }%
+    \tud@sectioning@set{subsubsection}{%
+      \tud@font@heading%
+      \tud@color{\tud@section@fontcolor}%
+    }%
+    \tud@sectioning@set{minisec}{%
+      \tud@font@heading%
+      \tud@color{\tud@section@fontcolor}%
+    }%
+    \tud@sectioning@set{paragraph}{%
+      \tud@color{\tud@section@fontcolor}%
+    }%
+    \tud@sectioning@set{subparagraph}{%
+      \tud@color{\tud@section@fontcolor}%
+    }%
+  \fi%
+  \ifcase\tud@cd\relax% false
+    \pagestyle{empty}%
+  \else% !false
     \pagestyle{empty.tudheadings}%
-    \footcontent{\tud@foot@poster@left}[\tud@foot@poster@right]%
+    \@tempswatrue
+    \ifx\tud@footcontent@left\@empty\relax\else\@tempswafalse\fi%
+    \ifx\tud@footcontent@right\@empty\relax\else\@tempswafalse\fi%
+    \if@tempswa%
+      \footcontent{\tud@footcontent@left@poster}[\tud@footcontent@right@poster]%
+    \fi%
     \ifcase\tud@cd\relax\or% true
       \TUDoptions{cdhead=nocolor,cdfoot=true}%
     \or% litecolor
@@ -3009,14 +3214,13 @@
     \else% bicolor/color/full
       \TUDoptions{cdhead=bicolor,cdfoot=bicolor}%
     \fi%
-    % §§§ ENDE
   \fi%
 }
 \newcommand*\tud@partheadstartvskip{}
 \let\tud@partheadstartvskip\partheadstartvskip%
 \pretocmd{\tud@partheadstartvskip}{%
   \def\tud@part@fontcolor{}% false/true
-  \ifcase\tud@cd\relax\or\else% *color
+  \ifcase\tud@layout@part\relax\or\else% *color
     \def\tud@part@fontcolor{HKS41}%
   \fi%
 }{}{\tud@patch@wrn{tud@partheadstartvskip}}
@@ -3103,77 +3307,6 @@
     \tud@makeuppercase{#1}%
   \endgroup%
 }
-%%% From File: tudscr-poster.dtx
-% §§§ verschieben in Layout?
-\newcommand*\tud@foot@line@add[3]{%
-  \csgdef{@#1}{\trim@spaces{#2}}%
-  \ifx\@empty#3\relax%
-    \global\csletcs{@#1@foot}{@#1}%
-  \else%
-    \csgdef{@#1@foot}{\trim@spaces{#3}}%
-  \fi%
-}
-\newcommand*\tud@foot@line@write[1]{%
-  \protected@edef\@tempa{\csuse{@#1@foot}}%
-  \ifx\@tempa\@empty\else\newline{\csuse{@#1@foot}}\fi%
-}
-\newcommand*\tud@foot@poster@left{%
-  \ifx\contactname\@empty\else{\tud@head@font@bold\contactname}\newline\fi%
-  Technische Universit\"at Dresden%
-  \tud@foot@line@write{faculty}%
-  \tud@foot@line@write{department}%
-  \tud@foot@line@write{institute}%
-  \tud@foot@line@write{chair}%
-  \tud@foot@line@write{professor}%
-}
-\newcommand*\tud@poster@newline{}
-\newcommand*\tud@foot@poster@right{%
-  \def\tud@poster@newline{%
-    \ifx\@authormore\@empty\else\newline\@authormore\fi%
-    \ifx\@office\@empty\else\newline\@office\fi%
-    \ifx\@telephone\@empty\else\newline\@telephone\fi%
-    \ifx\@emailaddress\@empty\else\newline\@emailaddress\fi%
-  }%
-  \ifpatchable{\@author}{\@latex@warning@no@line}{%
-    \let\@tempa\@empty%
-  }{%
-    \let\@tempa\@author%
-  }%
-  \@tempswafalse%
-  \ifx\@tempa\@empty\else%
-    \ifx\authorname\@empty\else%
-      {\tud@head@font@bold\authorname}\newline%
-    \fi%
-    \renewcommand*\tud@split@author[2]{%
-      \tud@multiple@fields@store{@author}{##1}%
-      \tud@multiple@fields@preset{@author}{*}{##1}%
-      \ignorespaces##1\tud@poster@newline%
-      \tud@multiple@fields@restore{@author}%
-      \tud@multiple@@@split{##2}{\newline}%
-    }%
-    \noindent\tud@multiple@split{@author}%
-    \tud@multiple@fields@restore{@author}%
-    \tud@poster@newline%
-    \@tempswatrue%
-  \fi%
-  \ifx\@contactperson\@empty\else%
-    \if@tempswa\newline\fi%
-    \ifx\contactpersonname\@empty\else%
-      {\tud@head@font@bold\contactpersonname}\newline%
-    \fi%
-    \renewcommand*\tud@split@contactperson[2]{%
-      \tud@multiple@fields@store{@contactperson}{##1}%
-      \tud@multiple@fields@preset{@contactperson}{*}{##1}%
-      \ignorespaces##1\tud@poster@newline%
-      \tud@multiple@fields@restore{@contactperson}%
-      \tud@multiple@@@split{##2}{\newline}%
-    }%
-    \noindent\tud@multiple@split{@contactperson}%
-    \tud@multiple@fields@restore{@contactperson}%
-    \tud@poster@newline%
-  \fi%
-  \ifx\@webpage\@empty\else\newline\@webpage\fi%
-}
 %%% From File: tudscr-title.dtx
 % §§§ \maketitle komplett neu
 \newkomafont{titlepage}{%
@@ -3183,33 +3316,6 @@
   \large%
 }
 \newcommand*\tud@title@fontcolor{}
-\newcommand*\tud@titlepagenumber{}%
-\let\tud@titlepagenumber\relax%
-\newcommand*\tud@maketitle[1][]{%
-  \begingroup%
-    \TUD@parameter@set{title}{#1}%
-    \ifcase\tud@layout@title\relax% false
-      \ifx\tud@titlepagenumber\relax\gdef\tud@titlepagenumber{1}\fi%
-      \tud@cmd@use{maketitle}[\tud@titlepagenumber]%
-    \else% !false
-        \def\tud@title@fontcolor{}%
-        \ifcase\tud@cd\relax\or\else% *color
-          \def\tud@title@fontcolor{HKS41}%
-        \fi%
-        \let\@maketitle\tud@@maketitle%
-        \ifx\tud@titlepagenumber\relax\gdef\tud@titlepagenumber{1}\fi%
-        \if@twocolumn%
-          \tud@title@twocolumn{\tud@cmd@use{maketitle}[\tud@titlepagenumber]}%
-        \else%
-          \tud@cmd@use{maketitle}[\tud@titlepagenumber]%
-        \fi%
-    \fi%
-  \endgroup%
-}
-\TUD@parameter{title}{%
-  \TUD@parameter@define{pagenumber}{\def\tud@titlepagenumber{#1}}%
-  \TUD@parameter@sethandler{\TUD@parameter@set{title}{pagenumber=#1}}%
-}
 \robustify{\thanks}%
 \robustify{\footnotemark}%
 \newcommand*\tud@title@uppercase[1]{%
@@ -3224,13 +3330,52 @@
   \endgroup%
   \ifx\@tempa\relax\else\thanks\@tempa\fi%
 }
-\renewcommand*\maketitle{%
+
+\newcommand*\tud@titlepagenumber{}%
+\let\tud@titlepagenumber\relax%
+\renewcommand*\maketitle[1][]{%
+  \begingroup%
+    \TUD@parameter@set{title}{#1}%
+    \ifx\tud@titlepagenumber\relax%
+      \gdef\tud@titlepagenumber{1}%
+    \else%
+      \ClassWarning{\TUDClassName}{%
+        It isn't reasonable to set a pagenumber for a poster%
+      }% 
+    \fi%
+    \def\tud@title@fontcolor{}%
+    % §§§ Unterscheidung des Titels notwendig?
+    \ifcase\tud@layout@title\relax% false
+      \@maketitle%
+%      \tud@cmd@use{maketitle}[\tud@titlepagenumber]%
+    \else% !false
+      \ifcase\tud@layout@title\relax\or\else% *color
+        \def\tud@title@fontcolor{HKS41}%
+      \fi%
+      % §§§ zweispaltig lassen und maketitleonecolumn anbieten
+%      \if@twocolumn%
+%        \tud@title@twocolumn{\tud@cmd@use{maketitle}[\tud@titlepagenumber]}%
+%      \else%
+%        \tud@cmd@use{maketitle}[\tud@titlepagenumber]%
+%      \fi%
+      \@maketitle%
+    \fi%
+  \endgroup%
+}
+\TUD@parameter{title}{%
+  \TUD@parameter@define{cdtitle}[true]{\TUDoption{cdtitle}{#1}}%
+  \TUD@parameter@let{cd}{cdtitle}%
+  \TUD@parameter@define{pagenumber}{\def\tud@titlepagenumber{#1}}%
+%  \TUD@parameter@define@ps{#1}%
+  \TUD@parameter@sethandler{\TUD@parameter@set{title}{pagenumber=#1}}%
+}
+\renewcommand*\@maketitle{%
   \global\@topnum=\z@%
-  \vspace*{%
-    \dimexpr\tud@dim@headdiff+\tud@dim@headingsvskip-\baselineskip%
-      +\parskip\relax%
-  }%
-  \vspace*{\headingsvskip}%
+%  \vspace*{%
+%    \dimexpr\tud@dim@headdiff+\tud@dim@headingsvskip-\baselineskip%
+%      +\parskip\relax%
+%  }%
+%  \vspace*{\headingsvskip}%
   \setparsizes{\z@}{\z@}{\z@\@plus1fil}\par@updaterelative%
   \begingroup%
     \usekomafont{titlepage}%
@@ -3244,13 +3389,13 @@
       }}%
       \addtolength\@tempdima{\dimexpr\ht\z@+\dp\z@\relax}%
     \fi%
-    \TUDoptions{subjectthesis=true}%
-    \tud@letsubjectthesis%
+%    \TUDoptions{subjectthesis=true}%
+%    \tud@letsubjectthesis%
     \ifx\@subject\@empty\else%
       \sbox\@ne{\vbox{{\usekomafont{subject}{\@subject\par\null}}}}%
       \addtolength\@tempdima{\dimexpr\ht\@ne+\dp\@ne+\p@\relax}%
     \fi%
-    \vspace*{-\@tempdima}%
+%    \vspace*{-\@tempdima}%
     \ifx\@titlehead\@empty\else\usebox\z@\par\fi%
     \ifx\@subject\@empty\else\usebox\@ne\par\fi%
     {\usekomafont{title}{\tud@title@uppercase{\@title}\par}}%
@@ -3259,24 +3404,24 @@
       {\usekomafont{subtitle}{\tud@title@uppercase{\@subtitle}\par}}%
       \vskip 2ex\@plus1ex\@minus1ex%
     \fi%
-    \vskip 2\bigskipamount%
-    \let\tud@split@author\tud@split@author@title%
-    \tud@multiple@split{@author}\par%
-    \vskip 2ex\@plus1ex\@minus1ex%
-    {\usekomafont{date}{\@date\nobreakspace\@datemore\par}}%
-    \ifx\@publishers\@empty\else%
-      \vskip 2ex\@plus1ex\@minus1ex%
-      {\usekomafont{publishers}{\@publishers\par}}%
-    \fi%
-    \ifx\@dedication\@empty\else%
-      \vskip 2ex\@plus1ex\@minus1ex%
-      {\centering\usekomafont{dedication}{\@dedication\par}}%
-    \fi%
-    \ifx\@graduation\@empty\else\tud@title@wrn{graduation}\fi%
-    \ifx\@supervisor\@empty\else\tud@title@wrn{supervisor}\fi%
-    \ifx\@referee\@empty\else\tud@title@wrn{referee}\fi%
-    \ifx\@professor\@empty\else\tud@title@wrn{professor}\fi%
-    \vskip 2\bigskipamount%
+%    \vskip 2\bigskipamount%
+%    \let\tud@split@author\tud@split@author@title%
+%    \tud@multiple@split{@author}\par%
+%    \vskip 2ex\@plus1ex\@minus1ex%
+%    {\usekomafont{date}{\@date\nobreakspace\@datemore\par}}%
+%    \ifx\@publishers\@empty\else%
+%      \vskip 2ex\@plus1ex\@minus1ex%
+%      {\usekomafont{publishers}{\@publishers\par}}%
+%    \fi%
+%    \ifx\@dedication\@empty\else%
+%      \vskip 2ex\@plus1ex\@minus1ex%
+%      {\centering\usekomafont{dedication}{\@dedication\par}}%
+%    \fi%
+%    \ifx\@graduation\@empty\else\tud@title@wrn{graduation}\fi%
+%    \ifx\@supervisor\@empty\else\tud@title@wrn{supervisor}\fi%
+%    \ifx\@referee\@empty\else\tud@title@wrn{referee}\fi%
+%    \ifx\@professor\@empty\else\tud@title@wrn{professor}\fi%
+%    \vskip 2\bigskipamount%
     \tud@ifverlower{2.03}{\tud@ddc@enlargepage[\titlepagestyle]}{}%
   \endgroup%
 }

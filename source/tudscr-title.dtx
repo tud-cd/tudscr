@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-title.dtx}[%
-  2015/07/07 v2.05 TUD-KOMA-Script (title)%
+  2015/07/08 v2.05 TUD-KOMA-Script (title)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -168,7 +168,9 @@
 % allerdings etwas kleiner. \opt{titlepage} für alle Zusatzinformationen wie
 % Autor, Datum etc.
 %    \begin{macrocode}
-%<book|report|article>\newkomafont{thesis}{\usekomafont{title}\LARGE}
+%<*book|report|article>
+\newkomafont{thesis}{\usekomafont{title}\LARGE}
+%</book|report|article>
 \newkomafont{titlepage}{%
   \usekomafont{subject}%
   \fontseries{\mddefault}%
@@ -228,11 +230,11 @@
 % \end{macro}^^A \titledelimiter
 % \begin{macro}{\tud@split@author@title}
 % \changes{v2.04}{2015/05/12}{neu}^^A
-% \begin{macro}{\tud@title@newline}
+% \begin{macro}{\tud@newline@title}
 % Das Makro \cs{tud@split@author} dient der formatierten Ausgabe aller 
 % Informationen für mehrere Autoren auf der Titelseite.
 %    \begin{macrocode}
-\newcommand*\tud@title@newline{}
+\newcommand*\tud@newline@title{}
 \newcommand*\tud@split@author@title[2]{%
 %    \end{macrocode}
 % Zu Beginn werden alle Felder, welche innerhalb von \cs{@author} angegeben
@@ -240,12 +242,12 @@
 %    \begin{macrocode}
   \tud@multiple@fields@store{@author}{#1}%
 %    \end{macrocode}
-% Um die Abstände definiert zu setzen, wird \cs{tud@title@newline} verwendet. 
+% Um die Abstände definiert zu setzen, wird \cs{tud@newline@title} verwendet. 
 % Sobald auch nur eine zusätzliche Information ausgegeben werden soll, wird ein
 % etwas kleiner Abstand eingefügt. Anschließend wird jede Information einfach 
 % in einer neuen Zeile ausgegeben.
 %    \begin{macrocode}
-  \def\tud@title@newline{\vskip .5ex\let\tud@title@newline\newline}%
+  \def\tud@newline@title{\vskip .5ex\let\tud@newline@title\newline}%
 %    \end{macrocode}
 % Die Felder \cs{@author} und ggf. \cs{@authormore} werden sowohl auf der
 % Titelseite als auch im Titelkopf jedoch nicht auf der Umschlagseite 
@@ -254,7 +256,7 @@
   {\usekomafont{author}{\ignorespaces#1}}%
   \if@tud@cover\else%
     \ifx\@authormore\@empty\else%
-      \tud@title@newline%
+      \tud@newline@title%
       \@authormore%
     \fi%
 %    \end{macrocode}
@@ -264,7 +266,7 @@
 %    \begin{macrocode}
     \ifx\@dateofbirth\@empty\else%
       \if@titlepage%
-        \tud@title@newline%
+        \tud@newline@title%
         \ifstr{\dateofbirthtext}{}%
           {}{\dateofbirthtext\@titledelim}\@dateofbirth%
         \ifx\@placeofbirth\@empty\else%
@@ -276,7 +278,7 @@
     \fi%
     \ifx\@matriculationnumber\@empty\else%
       \if@titlepage%
-        \tud@title@newline%
+        \tud@newline@title%
         \ifstr{\matriculationnumbername}{}%
           {}{\matriculationnumbername\@titledelim}%
         \@matriculationnumber%
@@ -286,7 +288,7 @@
     \fi%
     \ifx\@matriculationyear\@empty\else%
       \if@titlepage%
-        \tud@title@newline%
+        \tud@newline@title%
         \ifstr{\matriculationyearname}{}%
           {}{\matriculationyearname\@titledelim}%
         \@matriculationyear%
@@ -304,7 +306,7 @@
   \tud@multiple@@@split{#2}{\vskip 2ex}%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@title@newline
+% \end{macro}^^A \tud@newline@title
 % \end{macro}^^A \tud@split@author@title
 % \begin{macro}{\tud@title@wrn}
 % Bei der Nutzung eines Titelkopfes wird bloß eine reduzierte Menge an
@@ -396,6 +398,7 @@
 % gleichzeitig dabei den TUD-Kopf zu verwenden, wird der interne Befehl 
 % \cs{tud@title@twocolumn} verwendet. Damit wird der Titel selber einspaltig 
 % gesetzt und direkt danach der zweispaltige Satz begonnen.
+% \ToDo{Ist das wirklich sinnvoll?}[v2.05]
 %    \begin{macrocode}
         \if@twocolumn%
           \tud@title@twocolumn{\tud@cmd@use{maketitle}[\tud@titlepagenumber]}%
@@ -1008,6 +1011,7 @@
 % Beim der Verwendung einer Titelseite wird lediglich der Titel sowie
 % anschließend ggf. \meta{Inhalt} einspaltig ausgegeben. Beim Satz eines
 % Titelkopfes wird der Befehl \cs{tud@title@twocolumn} zur Ausgabe genutzt.
+% \ToDo{\cs{maketitleonecolumn} mit \opt{cdtitle=false}}[v2.05]
 %    \begin{macrocode}
 \newcommand\maketitleonecolumn[2][]{%
 %    \end{macrocode}
