@@ -1,4 +1,4 @@
-% \CheckSum{103}
+% \CheckSum{111}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-misc.dtx}[%
-  2015/07/09 v2.05 TUD-KOMA-Script (miscellaneous)%
+  2015/07/10 v2.05 TUD-KOMA-Script (miscellaneous)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -216,6 +216,14 @@
 %    \end{macrocode}
 % \end{macro}^^A \tableofcontents
 % \end{macro}^^A \maketitle
+%
+% \subsection{Bugfixing}
+%
+% Hier taucht alles auf, was bei der Verwendung von \TUDScript mit anderen 
+% Paketen zu Problemen führen kann.
+%
+% \subsubsection{Das Paket \pkg{tocloft}}
+%
 % Das Paket \pkg{tocloft} verursacht allerlei Probleme. Wird es geladen, so 
 % erscheint eine entsprechende Warnung.
 %    \begin{macrocode}
@@ -226,6 +234,18 @@
     with table of contents and any list of floats. You\MessageBreak%
     should use the appropriate options of KOMA-Script%
   }%
+}
+%    \end{macrocode}
+%
+% \subsubsection{Das Paket \pkg{multicol}}
+%
+% Das Paket \pkg{multicol} ändert setzt den internen Zähler \cs{col@number} auf 
+% \cs{@ne}, wird jedoch der Befehl \cs{twocolumn} verwendet, so wird dieser 
+% wieder auf \cs{tw@} gesetzt, was unter Umständen zu Problemen führt.
+%    \begin{macrocode}
+\AfterPackage{multicol}{%
+  \patchcmd{\twocolumn}{\col@number \tw@}{\col@number \@ne}
+    {}{\tud@patch@wrn{twocolumn}}%
 }
 %    \end{macrocode}
 %
@@ -254,13 +274,13 @@
 %    \begin{macrocode}
 %<*class>
 %<book|report|article>\TUDExecuteOptions{cd=true,cdfont=din,tudbookmarks=true}
-%<poster>\TUDExecuteOptions{cd=bicolor,cdfont=true,tudbookmarks=false}
+%<poster>\TUDExecuteOptions{cd=bicolor,cdfont=din,tudbookmarks=false}
 %</class>
 %    \end{macrocode}
 % Für das Paket \pkg{tudscrfonts} werden die Schriften aktiviert.
 %    \begin{macrocode}
 %<*package&fonts>
-\TUDExecuteOptions{cdfont=true}
+\TUDExecuteOptions{cdfont=din}
 %</package&fonts>
 \TUDProcessOptions\relax
 %    \end{macrocode}
