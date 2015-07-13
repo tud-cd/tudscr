@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-pagestyle.dtx}[%
-  2015/07/07 v2.05 TUD-KOMA-Script (pagestyle)%
+  2015/07/13 v2.05 TUD-KOMA-Script (pagestyle)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -82,6 +82,7 @@
 % andere als glücklich gewählt. Insbesondere für den doppelseitigen Satz ist
 % das Standardlayout nicht gut nutzbar. Für die \TUDScript"=Klassen wird 
 % deshalb die Abweichung vom sonst fest vorgegebenen Satzspiegel ermöglicht.
+% \ToDo{Option für Schrift- und Papiergröße bei Poster vorbelegen}[v2.05]
 %
 % \StopEventually{\PrintIndex\PrintChanges}
 %
@@ -1640,7 +1641,7 @@
 % \end{macro}^^A \@headlogo
 % \end{macro}^^A \headlogo
 % \begin{macro}{\tud@headlogo@set}
-% \changes{v2.04}{2015/05/31}{neu}^^A%   \DDC-Logos übernommen und erweitert}^^A
+% \changes{v2.04}{2015/05/31}{neu}^^A
 % \begin{macro}{\tud@headlogo@option@set}
 % \changes{v2.04}{2015/05/31}{neu}^^A
 % Äquivalent zum Logo der \TnUD werden auch für das Logo von \DDC drei
@@ -3255,6 +3256,91 @@
   }%
 }
 %    \end{macrocode}
+% \begin{macro}{\TUD@parameter@define@ps}
+% Im Folgenden werden die einzelnen Parameter für die \env{tudpage}"=Umgebung
+% definiert. Die Parameter für Kopf- und Fußzeile werden nicht nur für die 
+% \env{tudpage}-Umgebung sondern auch noch für Titel und Umschlagseite
+% verwendet, weshalb deren Definitionen zur einfacheren Wiederverwendung in das
+% Makro \cs{TUD@parameter@define@ps} ausgelagert werden.
+%    \begin{macrocode}
+\newcommand*\TUD@parameter@define@ps[1]{%
+%    \end{macrocode}
+% \begin{parameter}{cdfont}
+% Die Option \opt{cdfont} bestimmt, ob die Schriften des \CDs oder aber die
+% standardmäßigen Serifenlosen für die Auszeichnugen in der Kopfzeile und
+% Serifen im Inhalt verwendet werden.
+%    \begin{macrocode}
+  \TUD@parameter@define{cdfont}[true]{\TUDoption{cdfont}{#1}}%
+%    \end{macrocode}
+% \end{parameter}^^A cdfont
+% \begin{parameter}{cdhead}
+% \changes{v2.03}{2015/01/28}{\val{barfont} und \val{widehead} überlagert}^^A
+% Mit dem Parameter \val{cdhead} kann die Verwendung der Schriften des \CDs
+% aktiviert werden, wenn diese im Fließtext nicht zum Einsatz kommen. Die
+% Breite des Querbalkens kann über diesen Parameter ebenfalls geändert werden.
+%    \begin{macrocode}
+  \TUD@parameter@define{cdhead}[true]{\TUDoption{cdhead}{#1}}%
+%    \end{macrocode}
+% \end{parameter}^^A cdhead
+% \begin{parameter}{cdfoot}
+% \changes{v2.03}{2015/01/30}{neu}^^A
+% Über \val{cdfoot} kann gg. die Hintergrundfarbe sowie die Standardfußzeile 
+% des \CDs aktiviert werden.
+%    \begin{macrocode}
+  \TUD@parameter@define{cdfoot}[true]{\TUDoption{cdfoot}{#1}}%
+%    \end{macrocode}
+% \end{parameter}^^A cdfoot
+% \begin{parameter}{headlogo}
+% \changes{v2.03}{2015/01/28}{neu}^^A
+% \begin{parameter}{footlogo}
+% \changes{v2.03}{2015/01/28}{neu}^^A
+% Das Zweit- und die Drittlogos können ebenfalls lokal geändert werden.
+%    \begin{macrocode}
+  \TUD@parameter@define{headlogo}{\headlogo{#1}}%
+  \TUD@parameter@define{footlogo}{\footlogo{#1}}%
+%    \end{macrocode}
+% \end{parameter}^^A footlogo
+% \end{parameter}^^A headlogo
+% \begin{parameter}{ddc}
+% \changes{v2.02}{2014/08/16}{neu}^^A
+% \begin{parameter}{ddchead}
+% \begin{parameter}{ddcfoot}
+% Mit diesen Parametern kann das \DDC-Logo im Kopf bzw. Fuß eingeblendet werden.
+%    \begin{macrocode}
+  \TUD@parameter@define{ddc}[true]{\TUDoption{ddc}{#1}}%
+  \TUD@parameter@define{ddchead}[true]{\TUDoption{ddchead}{#1}}%
+  \TUD@parameter@define{ddcfoot}[true]{\TUDoption{ddcfoot}{#1}}%
+%    \end{macrocode}
+% \end{parameter}^^A ddcfoot
+% \end{parameter}^^A ddchead
+% \end{parameter}^^A ddc
+% \begin{parameter}{cdfonts}
+% \begin{parameter}{tudfonts}
+% \begin{parameter}{barfont}
+% \begin{parameter}{widehead}
+% \begin{parameter}{tudfoot}
+% \begin{parameter}{logo}
+% Für die Kompatibilität werden auch veraltete Parameter bereitgestellt.
+%    \begin{macrocode}
+  \TUD@parameter@define{cdfonts}[true]{\TUDoption{cdfonts}{#1}}%
+  \TUD@parameter@define{tudfonts}[true]{\TUDoption{tudfonts}{#1}}%
+  \TUD@parameter@define{barfont}[true]{\TUDoption{barfont}{#1}}%
+  \TUD@parameter@define{widehead}[true]{\TUDoption{widehead}{#1}}%
+  \TUD@parameter@define{tudfoot}[true]{\TUDoption{tudfoot}{#1}}%
+  \TUD@parameter@let{logo}{headlogo}%
+%    \end{macrocode}
+% \end{parameter}^^A logo
+% \end{parameter}^^A tudfoot
+% \end{parameter}^^A widehead
+% \end{parameter}^^A barfont
+% \end{parameter}^^A tudfonts
+% \end{parameter}^^A cdfonts
+% Damit sind alle notwendigen Parameter für die Kopf- und Fußzeile der Seiten
+% im Stil \pgs{tudheadings} definiert.
+%    \begin{macrocode}
+}
+%    \end{macrocode}
+% \end{macro}^^A \TUD@parameter@define@ps
 %
 % \iffalse
 %<*book|report|article>
@@ -3359,91 +3445,6 @@
 % \end{macro}^^A \tud@ps@select
 % \end{macro}^^A \tud@ps
 % \end{environment}^^A tudpage
-% \begin{macro}{\TUD@parameter@define@ps}
-% Im Folgenden werden die einzelnen Parameter für die \env{tudpage}"=Umgebung
-% definiert. Die Parameter für Kopf- und Fußzeile werden nicht nur für die 
-% \env{tudpage}-Umgebung sondern auch noch für Titel und Umschlagseite
-% verwendet, weshalb deren Definitionen zur einfacheren Wiederverwendung in das
-% Makro \cs{TUD@parameter@define@ps} ausgelagert werden.
-%    \begin{macrocode}
-\newcommand*\TUD@parameter@define@ps[1]{%
-%    \end{macrocode}
-% \begin{parameter}{cdfont}
-% Die Option \opt{cdfont} bestimmt, ob die Schriften des \CDs oder aber die
-% standardmäßigen Serifenlosen für die Auszeichnugen in der Kopfzeile und
-% Serifen im Inhalt verwendet werden.
-%    \begin{macrocode}
-  \TUD@parameter@define{cdfont}[true]{\TUDoption{cdfont}{#1}}%
-%    \end{macrocode}
-% \end{parameter}^^A cdfont
-% \begin{parameter}{cdhead}
-% \changes{v2.03}{2015/01/28}{\val{barfont} und \val{widehead} überlagert}^^A
-% Mit dem Parameter \val{cdhead} kann die Verwendung der Schriften des \CDs
-% aktiviert werden, wenn diese im Fließtext nicht zum Einsatz kommen. Die
-% Breite des Querbalkens kann über diesen Parameter ebenfalls geändert werden.
-%    \begin{macrocode}
-  \TUD@parameter@define{cdhead}[true]{\TUDoption{cdhead}{#1}}%
-%    \end{macrocode}
-% \end{parameter}^^A cdhead
-% \begin{parameter}{cdfoot}
-% \changes{v2.03}{2015/01/30}{neu}^^A
-% Über \val{cdfoot} kann gg. die Hintergrundfarbe sowie die Standardfußzeile 
-% des \CDs aktiviert werden.
-%    \begin{macrocode}
-  \TUD@parameter@define{cdfoot}[true]{\TUDoption{cdfoot}{#1}}%
-%    \end{macrocode}
-% \end{parameter}^^A cdfoot
-% \begin{parameter}{headlogo}
-% \changes{v2.03}{2015/01/28}{neu}^^A
-% \begin{parameter}{footlogo}
-% \changes{v2.03}{2015/01/28}{neu}^^A
-% Das Zweit- und die Drittlogos können ebenfalls lokal geändert werden.
-%    \begin{macrocode}
-  \TUD@parameter@define{headlogo}{\headlogo{#1}}%
-  \TUD@parameter@define{footlogo}{\footlogo{#1}}%
-%    \end{macrocode}
-% \end{parameter}^^A footlogo
-% \end{parameter}^^A headlogo
-% \begin{parameter}{ddc}
-% \changes{v2.02}{2014/08/16}{neu}^^A
-% \begin{parameter}{ddchead}
-% \begin{parameter}{ddcfoot}
-% Mit diesen Parametern kann das \DDC-Logo im Kopf bzw. Fuß eingeblendet werden.
-%    \begin{macrocode}
-  \TUD@parameter@define{ddc}[true]{\TUDoption{ddc}{#1}}%
-  \TUD@parameter@define{ddchead}[true]{\TUDoption{ddchead}{#1}}%
-  \TUD@parameter@define{ddcfoot}[true]{\TUDoption{ddcfoot}{#1}}%
-%    \end{macrocode}
-% \end{parameter}^^A ddcfoot
-% \end{parameter}^^A ddchead
-% \end{parameter}^^A ddc
-% \begin{parameter}{cdfonts}
-% \begin{parameter}{tudfonts}
-% \begin{parameter}{barfont}
-% \begin{parameter}{widehead}
-% \begin{parameter}{tudfoot}
-% \begin{parameter}{logo}
-% Für die Kompatibilität werden auch veraltete Parameter bereitgestellt.
-%    \begin{macrocode}
-  \TUD@parameter@define{cdfonts}[true]{\TUDoption{cdfonts}{#1}}%
-  \TUD@parameter@define{tudfonts}[true]{\TUDoption{tudfonts}{#1}}%
-  \TUD@parameter@define{barfont}[true]{\TUDoption{barfont}{#1}}%
-  \TUD@parameter@define{widehead}[true]{\TUDoption{widehead}{#1}}%
-  \TUD@parameter@define{tudfoot}[true]{\TUDoption{tudfoot}{#1}}%
-  \TUD@parameter@let{logo}{headlogo}%
-%    \end{macrocode}
-% \end{parameter}^^A logo
-% \end{parameter}^^A tudfoot
-% \end{parameter}^^A widehead
-% \end{parameter}^^A barfont
-% \end{parameter}^^A tudfonts
-% \end{parameter}^^A cdfonts
-% Damit sind alle notwendigen Parameter für die Kopf- und Fußzeile der Seiten
-% im Stil \pgs{tudheadings} definiert.
-%    \begin{macrocode}
-}
-%    \end{macrocode}
-% \end{macro}^^A \TUD@parameter@define@ps
 % Mit \cs{TUD@parameter}\marg{Family}\marg{\dots} wird die Parameterfamilie
 % festgelegt und anschließend die Definitionen getätigt.
 %    \begin{macrocode}
