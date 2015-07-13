@@ -1,4 +1,4 @@
-% \CheckSum{730}
+% \CheckSum{741}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -475,6 +475,7 @@
 % Version geschaltet werden. Die eingestellte Kompatibilität wird als Zahl in 
 % \cs{tud@v@comp} gespeichert. In den Makros \cs{tud@v@\meta{Version}} werden
 % die zugehörigen Nummern gespeichert.
+% \ToDo{Kompatibilität v2.02 bei Postern}[v2.05]
 %    \begin{macrocode}
 \newcommand*\tud@v@comp{\tud@v@last}
 \TUD@key{tudscrver}[last]{%
@@ -711,7 +712,8 @@
 %
 % \iffalse
 %</class&body>
-%<*package&preset>
+%<*package&!fonts>
+%<*body>
 % \fi
 %
 % \subsection{Das Paket \pkg{tudscrcomp} -- Kompatibilität veralteter Klassen}
@@ -725,50 +727,43 @@
 % Posterklassen \cls{tudmathposter} bzw. \cls{tudposter} bereitgestellt wurden.
 %
 % \ToDo{%
-%   Optionen für \cls{tudbook} und \cls{tudmathposter}\val{=Mathematik(A0)}%
+%   Optionen für \cls{tudbook} und \cls{tudmathposter}\val{=Mathematik(A0)}; 
+%   überprüfen, ob passende Klasse geladen wurde. %
 % }[v2.05]
 %
-% Zunächst sollten vor der Definition der Kompatibilitätseinstellungen passende 
-% Makros zur Fallunterscheidung definiert werden.
-%
-% \begin{macro}{\if@tud@oldclass}
-% \changes{v2.02}{2014/08/29}{neu}^^A
-% Wenn eine der alten Klassen aus den Vorlagen von Klaus Bergmann geladen 
-% wurde, wird dies für spätere Anpassungen registriert. Die alten Posterklassen
-% werden ebenfalls unterstützt.
-% \ToDo{Klasse tudbeamer und beamer-Stil tud einpflegen}[v2.xx]
+% \begin{macro}{\einrichtung}
+% \begin{macro}{\fachrichtung}
+% \begin{macro}{\institut}
+% \begin{macro}{\professur}
+% Es werden Aliasbefehle für die Eingabefelder definiert.
 %    \begin{macrocode}
-\newif\if@tud@oldclass
-\@ifclassloaded{tudbook}{\@tud@oldclasstrue}{}%
-\@ifclassloaded{tudbeamer}{\@tud@oldclasstrue}{}%
-\@ifclassloaded{tudfax}{\@tud@oldclasstrue}{}%
-\@ifclassloaded{tudform}{\@tud@oldclasstrue}{}%
-\@ifclassloaded{tudhaus}{\@tud@oldclasstrue}{}%
-\@ifclassloaded{tudletter}{\@tud@oldclasstrue}{}%
-\@ifclassloaded{tudposter}{\@tud@oldclasstrue}{}%
-\@ifclassloaded{tudmathposter}{\@tud@oldclasstrue}{}%
+\newcommand*\einrichtung{\faculty}
+\newcommand*\fachrichtung{\department}
+\newcommand*\institut{\institute}
+\newcommand*\professur{\chair}
 %    \end{macrocode}
-% \end{macro}^^A if@tud@oldclass
-% \begin{macro}{\if@tud@oldscrclass}
-% \changes{v2.02}{2014/08/29}{neu}^^A
-% Soll das Paket \pkg{tudscrfonts} mit den \TUDScript-Klassen der Version~v1.0
-% genutzt werden, sind ebenfalls einige Anpassungen notwendig.
+% \end{macro}^^A \professur
+% \end{macro}^^A \institut
+% \end{macro}^^A \fachrichtung
+% \end{macro}^^A \einrichtung
+% \begin{macro}{\dinBold}
+% \begin{macro}{\dinfamily}
+% Für die explizite Schriftauswahl gibt es ebenfalls zwei ältere Befehle.
 %    \begin{macrocode}
-\newif\if@tud@oldscrclass
-\@ifclassloaded{tudscrbookold}{\@tud@oldscrclasstrue}{}%
-\@ifclassloaded{tudscrreprtold}{\@tud@oldscrclasstrue}{}%
-\@ifclassloaded{tudscrartclold}{\@tud@oldscrclasstrue}{}%
+\newcommand*\dinBold{}
+\newcommand*\dinfamily{}
+\AtBeginDocument{%
+  \let\dinBold\dinbn%
+  \let\dinfamily\dinbn%
+}
 %    \end{macrocode}
-% \end{macro}^^A if@tud@oldclass
-%
-%
-% Jetzt folgen noch einige veraltete Befehle für die \TUDScript-Klassen.
+% \end{macro}^^A \dinfamily
+% \end{macro}^^A \dinBold
 %
 % \iffalse
-%</package&preset>
-%<*package&option&!fonts>
+%</body>
+%<*option>
 % \fi
-%
 %
 % \subsubsection{Kompatibilität zu \cls{tudbook}}
 %
@@ -823,26 +818,19 @@
 % \end{option}^^A ddcfooter
 %
 % \iffalse
-%</package&option&!fonts>
-%<*package&body&!fonts>
+%</option>
+%<*body>
 % \fi
 %
-% \begin{macro}{\einrichtung}
-% \begin{macro}{\fachrichtung}
-% \begin{macro}{\institut}
-% \begin{macro}{\professur}
 % \begin{macro}{\moreauthor}
 % \begin{macro}{\submitdate}
 % \begin{macro}{\supervisorII}
 % \begin{macro}{\supervisedby}
 % \begin{macro}{\supervisedIIby}
 % \begin{macro}{\submittedon}
-% Es werden Aliasbefehle für die Eingabefelder definiert.
+% Es werden weitere Aliasbefehle für die Eingabefelder der \cls{tudbook}-Klasse 
+% definiert.
 %    \begin{macrocode}
-\newcommand*\einrichtung{\faculty}
-\newcommand*\fachrichtung{\department}
-\newcommand*\institut{\institute}
-\newcommand*\professur{\chair}
 \newcommand*\moreauthor{\authormore}
 \newcommand*\submitdate{\date}
 \newcommand*\supervisorII[1]{%
@@ -858,10 +846,6 @@
 % \end{macro}^^A \supervisorII
 % \end{macro}^^A \submitdate
 % \end{macro}^^A \moreauthor
-% \end{macro}^^A \professur
-% \end{macro}^^A \institut
-% \end{macro}^^A \fachrichtung
-% \end{macro}^^A \einrichtung}
 % \begin{macro}{\dissertation}
 % Bei der Definition des Typs der Abschlussarbeit mit \cs{dissertation} wird
 % die Lokalisierungsvariable \cs{dissertationname} verwendet und die Feldnamen
@@ -1008,16 +992,60 @@
 %   \item Umgebungen \env{tablehere} und \env{figurehere}
 %   \item \cs{multicolsep}
 %   \item Optionen \opt{Mathematik} und \opt{MathematikA0}
+%   \item \cs{pagestyle}\val{\{tudposter\}}
+%   \item \option{bluebg}
 % \end{itemize}%
 % Testen mit \file{beispiel-utf8-serifmath.tex}
 % }[v2.05]
 %
 % \iffalse
-%</package&body&!fonts>
-%<*package&body&fonts>
+%</body>
+%</package&!fonts>
+%<*package&fonts>
+%<*option>
 % \fi
 %
-% \subsection{Neue Schriftfamilien für alte TUD-Klassen}
+% \subsection{Das Paket \pkg{tudscrfonts} -- Schriftfamilien für alte Klassen}
+%
+% Das Paket \pkg{tudscrfonts} versucht, die \TUDScript-Schriftfamilien für
+% die veralteten Klassen von Klaus Bergmann sowie die Posterklassen anzubieten. 
+% Hierfür werden zunächst vor der Definition der Kompatibilitätseinstellungen 
+% passende Makros zur Fallunterscheidung definiert.
+%
+% \begin{macro}{\if@tud@oldclass}
+% \changes{v2.02}{2014/08/29}{neu}^^A
+% Wenn eine der alten Klassen aus den Vorlagen von Klaus Bergmann geladen 
+% wurde, wird dies für spätere Anpassungen registriert. Die alten Posterklassen
+% werden ebenfalls unterstützt.
+% \ToDo{Klasse tudbeamer und beamer-Stil tud einpflegen}[v2.xx]
+%    \begin{macrocode}
+\newif\if@tud@oldclass
+\@ifclassloaded{tudbook}{\@tud@oldclasstrue}{}%
+\@ifclassloaded{tudbeamer}{\@tud@oldclasstrue}{}%
+\@ifclassloaded{tudfax}{\@tud@oldclasstrue}{}%
+\@ifclassloaded{tudform}{\@tud@oldclasstrue}{}%
+\@ifclassloaded{tudhaus}{\@tud@oldclasstrue}{}%
+\@ifclassloaded{tudletter}{\@tud@oldclasstrue}{}%
+\@ifclassloaded{tudposter}{\@tud@oldclasstrue}{}%
+\@ifclassloaded{tudmathposter}{\@tud@oldclasstrue}{}%
+%    \end{macrocode}
+% \end{macro}^^A if@tud@oldclass
+% \begin{macro}{\if@tud@oldscrclass}
+% \changes{v2.02}{2014/08/29}{neu}^^A
+% Soll das Paket \pkg{tudscrfonts} mit den \TUDScript-Klassen der Version~v1.0
+% genutzt werden, sind ebenfalls einige Anpassungen notwendig.
+%    \begin{macrocode}
+\newif\if@tud@oldscrclass
+\@ifclassloaded{tudscrbookold}{\@tud@oldscrclasstrue}{}%
+\@ifclassloaded{tudscrreprtold}{\@tud@oldscrclasstrue}{}%
+\@ifclassloaded{tudscrartclold}{\@tud@oldscrclasstrue}{}%
+%    \end{macrocode}
+% \end{macro}^^A if@tud@oldclass
+%
+% \iffalse
+%</option>
+%<*body>
+% \fi
 %
 % Wird das Paket \pkg{tudscrfonts} mit den alten TUD-Klassen \cls{tudbook}, 
 % \cls{tudmathposter} etc. oder \TUDScript in der Version~v1.0 verwendet,
@@ -1230,7 +1258,8 @@
 %    \end{macrocode}
 %
 % \iffalse
-%</package&body&fonts>
+%</body>
+%</package&fonts>
 % \fi
 %
 % \Finale
