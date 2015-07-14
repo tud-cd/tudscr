@@ -1,32 +1,45 @@
+%\RequirePackage{silence}
+%\WarningFilter[typearea]{typearea}{Bad type area settings!}
+%\ActivateWarningFilters[typearea]%
 \RequirePackage{fix-cm}
+%\RequirePackage{scrlfile}\BeforePackage{typearea}{\RequirePackage{tudscrfonts}}
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
+\newcount\testmulticols
+\testmulticols=1
 \documentclass[%
   english,ngerman,%
-  paper=a0,pagesize,%
-  DIV=6,%
+%  cd=barcolor,
+  paper=b4,pagesize,%
+  DIV=11,%
+  BCOR=4.5pt,
+  fontsize=12pt,%
 %  cdgeometry=false,
-%  cdfoot=96pt,
-  fontsize=36pt,%
-%  ddchead,%ddcfoot,%
+%  cdfoot=6pt,
+%  ddchead,%
+%  ddcfoot,%
 %  tudscrver=2.02
 %  cdhead=litecolor,
 %  cdfoot=bicolor,
+%parskip=full
+%twocolumn,
 ]%
 %{tudmathposter}
 %{tudbook}
 %{tudscrbook}
 %{tudscrreprt}
 %{tudscrartcl}
-{tudscrposter}
-%{scrreprt}
+%{tudscrposter}
+{scrreprt}
 %{scrartcl}
 %{article}
 %
 \usepackage{selinput}\SelectInputMappings{adieresis={ä},germandbls={ß}}
 \usepackage[T1]{fontenc}
+\usepackage{lmodern}
 \usepackage{babel}
 \usepackage[math]{blindtext}
-%\usepackage{multicol}
+\usepackage{showframe}
+\usepackage{multicol}
 
 % §§§ tudscrcomp
 %\footlogo{,,,,,mathelogo}
@@ -35,38 +48,85 @@
 %\KOMAoptions{fontsize=32}
 %\usepackage[cam,b4]{crop}
 %
-\TUDoptions{cd=pale,cdtitle=no}
-\TUDoptions{cdhead=barcolor}% geht nicht! §§§
+%\TUDoptions{cd=nocolor,cdfoot=nocolor}
+%\KOMAoptions{DIV=6}
+%\TUDoptions{cdhead=barcolor,cdfoot=nocolor}% geht nicht! §§§
 
 \usepackage{hyperref}
 \begin{document}
-\faculty[]{Fakultät Verkehrswissenschaften „Friedrich List“}
-\institute{Institut für Automobiltechnik Dresden -- IAD}
-\chair[Lehrstuhl für Fahrzeugmechatronik]{}
-\professor{Prof. Dr. Bla Blubb}
-\supervisor{Ziemlich Schlau \and Äußerst Clever}
+
+\makeatletter
+\newlength{\tud@dim@widemargin}
+\newlength{\tud@dim@both}
+  \ifdim\paperheight<148.1mm\relax%
+    \setlength\tud@dim@widemargin{15mm}%
+  \else\ifdim\paperheight<297.1mm\relax%
+    \setlength\tud@dim@widemargin{30mm}%
+  \else\ifdim\paperheight<420.1mm\relax%
+    \setlength\tud@dim@widemargin{42.426407mm}%
+  \else\ifdim\paperheight<594.1mm\relax%
+    \setlength\tud@dim@widemargin{60mm}%
+  \else\ifdim\paperheight<841.1mm\relax%
+    \setlength\tud@dim@widemargin{84.852814mm}%
+  \else%
+    \setlength\tud@dim@widemargin{120mm}%
+  \fi\fi\fi\fi\fi%
+  \setlength\tud@dim@both{\dimexpr5\tud@dim@widemargin/3\relax}%
+  \setlength{\@tempdima}{\dimexpr \oddsidemargin+\evensidemargin+2in\relax}
+  
+\the\tud@dim@both\par
+\the\@tempdima
+
+\tud@divide\@tempa{\@tempdima}{\tud@dim@both}%
+\meaning\@tempa
+
+\makeatother
+
+\ifnum\testmulticols>1
+\begin{multicols}{\testmulticols}
+\Blindtext\Blindtext\Blindtext
+\end{multicols}
+\else
+\Blindtext\Blindtext\Blindtext
+\fi
+
+\end{document}
+
+%\faculty[]{Fakultät Vekehrswissenschaften „Friedrich List“}
+%\institute{Institut für Automobiltechnik Dresden -- IAD}
+%\chair[Lehrstuhl für Fahrzeugmechatronik]{}
+%%\professor{Prof. Dr. Bla Blubb}
+%\supervisor{Ziemlich Schlau \and Äußerst Clever}
+
+
+
+\blinddocument
 
 \title{Die Klasse „tudscrposter“}
 \author{names}
+
+
+
 %\subtitle{Eine \LaTeX-Klasse für Evaluationsposter}
 %\subject{Betreff}
 %\titlehead{Titelkopf}
-\extratitle{\textcolor{red}{\Blindtext}}
-
-\KOMAoptions{titlepage}
-
-\maketitle[cdhead=full]%[3]
+%\maketitle
+%\maketitle[cdhead=full]%[3]
 %\begin{multicols}{2}
+
+%\TUDoptions{}
+
 \section*{Bla}
 \blindtext[3]
 \section*{Blubb}
 \blindtext[4]
+
 \section*{BlaFoo}
 \blindtext[5]
 
 \blindtext[5]
 
 \blindtext[5]
-%\end{multicols}
+
 
 \end{document}
