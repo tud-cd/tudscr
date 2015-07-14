@@ -1,4 +1,4 @@
-% \CheckSum{782}
+% \CheckSum{770}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-frontmatter.dtx}[%
-  2015/07/08 v2.05 TUD-KOMA-Script (frontmatter)%
+  2015/07/14 v2.05 TUD-KOMA-Script (frontmatter)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -73,17 +73,20 @@
 % \selectlanguage{ngerman}
 %
 % \changes{v2.02}{2014/07/08}{Optionen nutzen \cs{FamilyKeyState}}^^A
+% \changes{v2.05}{2015/07/07}{Umgebung \env{abstract} für Poster}^^A
 %
 % \section{Befehle und Umgebungen für den Vorspann}
 %
-% Im Vorspann des Dokumentes kann der Benutzer eine Zusammenfassung angegeben.
-% Außerdem kann eine Selbstständigkeitserklärung sowie ein Sperrvermerk
-% hinzugefügt werden. Damit für diese das Layout möglichst individuell gewählt
-% werden kann, werden hier entsprechende Optionen und die dafür notwendige
-% Ausgabe definiert. Im weiteren Verlauf der Dokumentation wird der Begriff
-% \enquote{Erklärung} für die unterschiedlichen Elemente verwendet. Die
-% verwendeten Schalter und Befehle zum Setzen der Optionen heißen entweder
-% \cs{tud@abstract@\dots} oder aber \cs{tud@declaration@\dots} je nach Element.
+% Im Vorspann des Dokumentes kann der Benutzer eine Zusammenfassung oder auch 
+% Kurzfassung angegeben. Des Weiteren kann eine Selbstständigkeitserklärung
+% sowie ein Sperrvermerk hinzugefügt werden. Damit sich für diese das Layout
+% möglichst individuell wählen lässt, werden hier entsprechende Optionen und
+% die dafür notwendige Ausgabe definiert. Im weiteren Verlauf der Dokumentation
+% werden die Begriffe \enquote{Zusammenfassung}, \enquote{Kurzfassung} sowie
+% \enquote{Erklärung} für die unterschiedlichen Elemente als gleichwertige 
+% Synonyme verwendet. Die Schalter und Befehle zum Setzen der Optionen heißen
+% entweder \cs{tud@abstract@\dots} oder aber \cs{tud@declaration@\dots} je nach
+% Element.
 %
 % \StopEventually{\PrintIndex\PrintChanges}
 %
@@ -234,6 +237,7 @@
 % \begin{macro}{\tud@fm@next}
 % \changes{v2.02}{2014/07/19}{neu}^^A
 % \changes{v2.04}{2015/03/20}{Reimplementierung}^^A
+% \changes{v2.05}{2015/07/14}{Bugfix bei vertikaler Zentrierung}^^A
 % Mit diesen Makros werden bei der Ausgabe der einzelnen Erklärungen alle
 % relevanten Optionen%
 % \footnote{%
@@ -261,13 +265,7 @@
 % diese ggf. vertikal auf der Seite ausgerichtet.
 %    \begin{macrocode}
     \if@titlepage%
-      \ifbool{@tud@#1@fil}{%
-        \null\vfil%
-        \ifnum\@nameuse{tud@#1@level}=\tw@\relax% section
-          \vspace{\dimexpr-\parskip-\baselineskip\relax}%
-          {\usekomafont{section}{\vspace{-\baselineskip}}}%
-        \fi%
-      }{}%
+      \ifbool{@tud@#1@fil}{\null\vfil}{}%
     \fi%
   \fi%
 %</book|report|article>
@@ -303,7 +301,7 @@
       \ifbool{@tud@#1@multi}{%
         \ifbool{@tud@#1@fil}{\vfil}{}%
       }{%
-        \ifbool{@tud@#1@fil}{\null\clearpage\null\vfil}{\clearpage}%
+        \ifbool{@tud@#1@fil}{\vfil\null\clearpage\null\vfil}{\clearpage}%
       }%
     \else%
 %</book|report|article>
@@ -1068,12 +1066,19 @@
     \tud@ps@select%
   \fi%
 %    \end{macrocode}
-% Im Gegensatz zu \env{abstract} werden in der \env{declarations}-Umgebung alle 
-% Erklärungen in einer \emph{geschlossenen} Variante verwendet, um diese mit 
-% einzelnen nacheinander angeben zu gönnen. Jedes der möglichen Makros
+% Im Gegensatz zur \env{abstract}-Umgebung werden in der Umgebung 
+% \env{declarations} alle Erklärungen als \emph{geschlossene} Variante genutzt,
+% um diese einzeln und nacheinander anzugeben. Jedes hierfür nutzbare Makro
 % (\cs{declaration}, \cs{nextdeclaration}, \cs{blocking} und \cs{confirmation})
-% führt intern die beiden notwendigen Makros \cs{tud@fm@body@start} sowie 
-% \cs{tud@fm@body@end} selbstständig aus.
+% kann so innerhalb der Umgebung verwendet werden und führt intern die beiden
+% Makros \cs{tud@fm@body@start} und \cs{tud@fm@body@end} selbstständig aus.
+% Alternativ dazu müsste relativ umständlich geprüft werden, ob der Aufruf von
+% \cs{tud@fm@body@start} bereits erfolgte \emph{und} danach auch schon Text
+% ausgegeben wurde. Einen Mehrwert bei der Nutzung hätte dies jedoch nicht
+% gehabt außer der äquivalenten Verwendung von \cs{nextdeclaration} und 
+% \cs{nextabstract}, worauf der Einfachheit halber gerne verzichtet wurde, 
+% insbesondere da die erwartete Nutzung des Befehls \cs{nextdeclaration} als 
+% sehr gering einzustufen ist.
 %    \begin{macrocode}
   \tud@fm@check{declaration}{\BODY}%
 }[%
