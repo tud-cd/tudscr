@@ -1,4 +1,4 @@
-% \CheckSum{2605}
+% \CheckSum{2667}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-pagestyle.dtx}[%
-  2015/07/13 v2.05 TUD-KOMA-Script (pagestyle)%
+  2015/07/14 v2.05 TUD-KOMA-Script (pagestyle)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -74,6 +74,7 @@
 %
 % \changes{v2.02}{2014/06/23}{Unterstützung für \pkg{titlepage} entfernt}^^A
 % \changes{v2.02}{2014/07/08}{Optionen nutzen \cs{FamilyKeyState}}^^A
+% \changes{v2.05}{2015/07/06}{Seitenstil für Poster}^^A
 %
 % \section{Der Seitenstil des \CDs}
 %
@@ -356,10 +357,17 @@
   \undef\GetRealPageStyle%
 }
 %    \end{macrocode}
+% \end{macro}^^A \GetRealPageStyle
+% \end{macro}^^A \BeforeSelectAnyPageStyle
+% \end{macro}^^A \currentpagestyle
+% \end{macro}^^A \ps@empty.tudheadings
+% \end{macro}^^A \ps@plain.tudheadings
+% \end{macro}^^A \ps@tudheadings
 %
-% \changes{v2.03}{2015/06/18}{Auswahl der Seitenstile \pgs{tudheadings} vor
-%   möglich \pkg{scrlayer-scrpage}}^^A
-%
+% \changes{v2.05}{2015/06/18}{Aktivierung der Seitenstile \pgs{tudheadings} vor
+%   \pkg{scrlayer-scrpage} möglich}^^A
+% \begin{macro}{\tud@pagestyle}
+% \changes{v2.05}{2015/06/18}{neu}
 % Damit die neuen Seitenstile auch vor dem Laden von \pkg{scrlayer-scrpage} 
 % bereits durch den Anwender ausgewählt werden können, wird \cs{pagestyle} 
 % temporär zurechtgebogen. Die Definition des Makros wird gesichert und direkt 
@@ -379,12 +387,7 @@
   }%
 }
 %    \end{macrocode}
-% \end{macro}^^A \GetRealPageStyle
-% \end{macro}^^A \BeforeSelectAnyPageStyle
-% \end{macro}^^A \currentpagestyle
-% \end{macro}^^A \ps@empty.tudheadings
-% \end{macro}^^A \ps@plain.tudheadings
-% \end{macro}^^A \ps@tudheadings
+% \end{macro}^^A \tud@pagestyle
 % \begin{pagestyle}{tudheadings}
 % \changes{v2.02}{2014/06/23}{neu}^^A
 % \begin{pagestyle}{plain.tudheadings}
@@ -540,6 +543,7 @@
 % \changes{v2.03}{2015/02/15}{überarbeitetet}^^A
 % \begin{layer}{tudheadings.foot.content}
 % \changes{v2.04}{2015/04/21}{neu}^^A
+% \changes{v2.05}{2015/07/06}{Bugfix für Kompatibilitätsmodus}^^A
 % Die folgenden Ebenen dienen für die Ausgabe des Fußbereiches. Dieser kann mit
 % einem farbigen Hintergrund und zusätzlichen Logos (\cs{footlogo}) sowie frei 
 % wählbare Inhalte ein- oder zweispaltig mit \cs{footcontent} erstellt werden.  
@@ -557,7 +561,9 @@
       \if@tud@foot@colored%
         \let\@tempc\relax%
         \ifdefvoid{\tud@pagecolor}{%
-          \ifcase\tud@head@bar\relax\or\or% cdhead=barcolor
+          \ifcase\tud@head@bar\relax\or% cdhead=litecolor
+            \def\@tempc{\color{HKS41!60}}%
+          \or% cdhead=barcolor
             \def\@tempc{\color{HKS41!60}}%
           \or% cdhead=color
             \def\@tempc{\color{HKS41}}%
@@ -648,7 +654,22 @@
   \tud@ifverlower{2.03}{%
     \ModifyLayer[%
       addvoffset=-\tud@dim@ddcdiff+\ht\strutbox,%
-      height=\dimexpr.6\tud@dim@topmargin+\dp\strutbox\relax,%
+      contents={%
+        \tud@footlogoheight@set%
+        \setlength\@tempdima{\dimexpr\layerheight-\dp\strutbox\relax}%
+        \tud@footlogo@option@set%
+        \tud@ddc@check%
+        \ifcase\@tempb\relax% \tud@ddc@foot=false
+          \addtolength\@tempdima{\dimexpr\ht\strutbox-\tud@dim@ddcdiff\relax}%
+          \vskip\dimexpr\tud@dim@ddcdiff-\ht\strutbox-\baselineskip\relax
+        \fi%
+        \tud@footlogo@cmd@set{\@tempdima}{\layerwidth}%
+        \tud@footcontent@use{\@tempdima}{\layerwidth}%
+        \hspace*{-\layerwidth}%
+        \tud@footlogo@cmd@use%
+        \hspace*{-\layerwidth}%
+        \hfill\tud@footlogo@ddc@use{\@tempdima}%
+      },%
     ]{tudheadings.foot.content}%
   }{}%
 %    \end{macrocode}
@@ -855,32 +876,36 @@
 \newcommand*\tud@foot@fontcolor{}
 \newcommand*\tud@ps@onbackground{%
 %    \end{macrocode}
-% Zunächst die Einstellungen für Seiten ohne spezielle Hintergrundfarbe.
+% Zunächst die Einstellungen für Seiten ohne spezielle Hintergrundfarbe für den 
+% Kopf\dots
 %    \begin{macrocode}
   \ifdefvoid{\tud@pagecolor}{%
     \ifcase\tud@head@bar\relax% cdhead=nocolor
       \def\tud@head@logocolor{black}%
       \def\tud@head@fontcolor{}%
-      \def\tud@foot@logocolor{black}%
-      \def\tud@foot@fontcolor{}%
     \or% cdhead=litecolor
       \def\tud@head@logocolor{HKS41}%
       \def\tud@head@fontcolor{HKS41}%
-      \def\tud@foot@logocolor{HKS41}%
-      \def\tud@foot@fontcolor{HKS41}%
     \or% cdhead=barcolor
       \def\tud@head@logocolor{HKS41}%
       \def\tud@head@fontcolor{white}%
-      \if@tud@foot@colored%
-        \def\tud@foot@logocolor{white}%
-        \def\tud@foot@fontcolor{white}%
-      \else%
-        \def\tud@foot@logocolor{HKS41}%
-        \def\tud@foot@fontcolor{HKS41}%
-      \fi%
     \or% cdhead=color
       \def\tud@head@logocolor{white}%
       \def\tud@head@fontcolor{white}%
+    \fi%
+%    \end{macrocode}
+% \dots und den Fuß.
+%    \begin{macrocode}
+    \ifcase\tud@head@bar\relax% cdhead=nocolor
+      \def\tud@foot@logocolor{black}%
+      \def\tud@foot@fontcolor{}%
+      \if@tud@foot@colored%
+        \ClassWarning{\TUDClassName}{%
+          It isn't possible to use a colored foot together\MessageBreak%
+          with a non-colored head (`cdhead=nocolor')%
+        }%
+      \fi%
+    \else% cdhead=*color
       \if@tud@foot@colored%
         \def\tud@foot@logocolor{white}%
         \def\tud@foot@fontcolor{white}%
@@ -1180,7 +1205,7 @@
     \ifdim\@tempdima>\z@\relax%
       \ClassWarning{\TUDClassName}{%
         #3\MessageBreak%
-        The maximum height is exceeded by \the\@tempdima%
+        The maximum height is exceeded by \the\@tempdima\MessageBreak%
       }%
     \fi%
   \endgroup%
@@ -1447,27 +1472,6 @@
 % \end{option}^^A ddcfoot
 % \end{option}^^A ddchead
 % \end{option}^^A ddc
-% \begin{option}{extrabottommargin}
-% \begin{length}{\tud@dim@extrabottommargin}
-% Diese Option dient dazu, die Höhe des Fußes anzupassen. Dies ist jedoch nur 
-% möglich, wenn der Satzspiegel des \CDs verwendet wird. Kommt \pkg{typearea} 
-% zum Einsatz, ist die Option wirkungslos. Da für die Länge ggf. auch Werte 
-% angegeben werden können, die abhängig von der Schriftgröße sind, wird die 
-% Ausführung dieser Option verzögert.
-%    \begin{macrocode}
-\newlength\tud@dim@extrabottommargin
-\TUD@key{extrabottommargin}{%
-  \TUD@noworlater{%
-    \TUD@set@lengthkey{extrabottommargin}{\tud@dim@extrabottommargin}{#1}%
-  }{%
-    \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-      \if@atdocument\tud@geometry@process\fi%
-    \fi%
-  }%
-}
-%    \end{macrocode}
-% \end{length}^^A \tud@dim@extrabottommargin
-% \end{option}^^A extrabottommargin
 %
 % \iffalse
 %</class&option>
@@ -1862,7 +1866,7 @@
   }{%
     The `\string\footlogoheight' (\the\footlogoheight) is too\MessageBreak%
     high. You should reduce this length.%
-    \ifcase\tud@geometry\relax\else% true/symmetric/twoside
+    \ifcase\tud@geometry\else% true/symmetric/twoside
       \MessageBreak%
       Alternatively you can enlarge the bottom margin\MessageBreak%
       by using option `extrabottommargin'.%
@@ -2263,10 +2267,6 @@
     \vss\vss%
 %    \end{macrocode}
 % Sollte der Inhalt für den Fußbereich zu groß sein, wird eine Warnung erzeugt.
-% \ToDo{%
-%   Warnung bei der Verwendung von \cs{footcontent} definieren und einmalig
-%   ausgeben.%
-% }[v2.05]
 %    \begin{macrocode}
   }{%
     The content for the footer (`\string\footcontent')\MessageBreak%
@@ -2366,6 +2366,8 @@
 % \changes{v2.04}{2015/06/18}{bedingtes Setzen der Option \opt{automark}}^^A
 % \begin{macro}{\if@tud@foot@colored}
 % \changes{v2.03}{2015/02/15}{neu}^^A
+% \begin{macro}{\if@tud@foot@colored@locked}
+% \changes{v2.05}{2015/07/14}{neu}^^A
 % \begin{macro}{\tud@ps@store}
 % \changes{v2.02}{2014/06/23}{neu}^^A
 % \begin{macro}{\tud@@ps@store}
@@ -2385,7 +2387,7 @@
 % wurde. Hierfür ist die Initialisierung mit \cs{TUD@AfterPackage@Set} nötig.
 %    \begin{macrocode}
 \TUD@AfterPackage@Set{scrlayer-scrpage}
-\newif\if@tud@foot@colored
+\bool@lock{@tud@foot@colored}
 \TUD@key{cdfoot}[true]{%
   \TUD@set@numkey{cdfoot}{@tempa}{%
     \TUD@numkey@bool,%
@@ -2430,9 +2432,9 @@
 % Hier kann die Hintergrundfarbe des Fußes aktiviert bzw. deaktiviert werden.
 %    \begin{macrocode}
     \or% nocolor
-      \@tud@foot@coloredfalse%
+      \bool@set@lock{@tud@foot@colored}{false}%
     \or% color
-      \@tud@foot@coloredtrue%
+      \bool@set@lock{@tud@foot@colored}{true}%
     \fi%
 %    \end{macrocode}
 % Außerdem kann mit der Option \opt{extrabottommargin} gesetzt werden.
@@ -2492,6 +2494,7 @@
 % \end{macro}^^A \tud@ps@restore
 % \end{macro}^^A \tud@@ps@store
 % \end{macro}^^A \tud@ps@store
+% \end{macro}^^A \if@tud@foot@colored@locked
 % \end{macro}^^A \if@tud@foot@colored
 % \end{option}^^A cdfoot
 % \begin{macro}{\tud@ps@headings}
@@ -2533,6 +2536,17 @@
     {twoside}{3},{balanced}{3}%
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \ifnum\tud@geometry=\thr@@\relax%
+      \if@atdocument%
+        \KOMAoptions{twoside=true}%
+      \else%
+        \@ifclassloaded{\TUDClassName@KOMA}{%
+          \KOMAoptions{twoside=true}%
+        }{%
+          \PassOptionsToClass{twoside=true}{\TUDClassName@KOMA}%
+        }%
+      \fi%
+    \fi%
     \if@atdocument\recalctypearea\fi%
   \fi%
 }
@@ -2540,6 +2554,44 @@
 % \end{macro}^^A \if@tud@geometry@locked
 % \end{macro}^^A \tud@geometry
 % \end{option}^^A cdgeometry
+% \begin{option}{extrabottommargin}
+% \begin{length}{\tud@dim@extrabottommargin}
+% Diese Option dient dazu, die Höhe des Fußes anzupassen. Dies ist jedoch nur 
+% möglich, wenn der Satzspiegel des \CDs verwendet wird. Kommt \pkg{typearea} 
+% zum Einsatz, ist die Option wirkungslos. Da für die Länge ggf. auch Werte 
+% angegeben werden können, die abhängig von der Schriftgröße sind, wird die 
+% Ausführung dieser Option verzögert.
+%    \begin{macrocode}
+\newlength\tud@dim@extrabottommargin
+\TUD@key{extrabottommargin}{%
+  \TUD@noworlater{%
+    \TUD@set@lengthkey{extrabottommargin}{\tud@dim@extrabottommargin}{#1}%
+  }{%
+    \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+      \if@atdocument\tud@geometry@process\fi%
+    \fi%
+  }%
+}
+%    \end{macrocode}
+% \end{length}^^A \tud@dim@extrabottommargin
+% \end{option}^^A extrabottommargin
+% \begin{option}{twoside}
+% \begin{option}{twocolumn}
+% Sollte einer der beiden \KOMAScript-Optionen im Dokument nach der Präambel 
+% verwendet werden, erfolgt die Anpassung des Satzspiegels.
+%    \begin{macrocode}
+\DefineFamilyMember{KOMA}
+\DefineFamilyKey{KOMA}{twoside}{%
+  \AtEndOfFamilyOptions{\if@atdocument\tud@geometry@process\fi}%
+  \FamilyKeyStateProcessed%
+}
+\DefineFamilyKey{KOMA}{twocolumn}{%
+  \AtEndOfFamilyOptions{\if@atdocument\tud@geometry@process\fi}%
+  \FamilyKeyStateProcessed%
+}
+%    \end{macrocode}
+% \end{option}^^A twocolumn
+% \end{option}^^A twoside
 %
 % \iffalse
 %</class&option>
