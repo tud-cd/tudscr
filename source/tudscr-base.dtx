@@ -1,4 +1,4 @@
-% \CheckSum{499}
+% \CheckSum{526}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-base.dtx}[%
-  2015/07/14 v2.05 TUD-KOMA-Script\space%
+  2015/07/17 v2.05 TUD-KOMA-Script\space%
 %</driver>
 %<package>\NeedsTeXFormat{LaTeX2e}
 %<package>\ProvidesPackage{tudscrbase}[%
@@ -839,6 +839,50 @@
 %
 % \iffalse
 %</package>
+% \fi
+%
+% \begin{macro}{\TUD@KOMAoptions}
+% \changes{v2.05}{2015/07/17}{neu}^^A
+% Dieses Makro wird verwendet, um innerhalb der \TUDScript-Klassen zu 
+% unterschieden, wie eine \KOMAScript-Option auszuführen ist. Wurde bereits 
+% das Paket \pkg{scrextend} oder eine \KOMAScript-Klasse geladen, erfolgt die 
+% Ausführung des Arguments direkt über \cs{KOMAoptions}. Andernfalls wird das 
+% angegebene Argument an die zuladende Klasse durchgereicht.
+%    \begin{macrocode}
+%<*package>
+\newcommand*\TUD@KOMAoptions[1]{%
+  \PackageWarning{tudscrbase}{%
+    The content of \string\TUD@noworlater will be executed immediately
+  }%
+}%
+\ifcsname KOMAClassName\endcsname%
+  \let\TUD@KOMAoptions\KOMAoptions%
+\else%
+  \AfterPackage*{scrextend}{\let\TUD@KOMAoptions\KOMAoptions}%
+\fi%
+%</package>
+%    \end{macrocode}
+% Nach dem Laden des Paketes wird geprüft, ob die ursprüngliche Definition 
+% des Befehls aus dem Paket noch besteht. Ist dies der Fall, wird der Befehl
+% zur Verzögerung an das Ende der Klasse bzw. des Paketes umdefiniert.
+%    \begin{macrocode}
+%<*load&class>
+\renewcommand*\TUD@KOMAoptions[1]{%
+  \if@atdocument%
+    \KOMAoptions{#1}%
+  \else%
+    \@ifclassloaded{\TUDClassName@KOMA}{%
+      \KOMAoptions{#1}%
+    }{%
+      \PassOptionsToClass{#1}{\TUDClassName@KOMA}%
+    }%
+  \fi%
+}
+%</load&class>
+%    \end{macrocode}
+% \end{macro}^^A \TUD@KOMAoptions
+%
+% \iffalse
 %<*class&body>
 % \fi
 %

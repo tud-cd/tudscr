@@ -1,4 +1,4 @@
-% \CheckSum{2667}
+% \CheckSum{2686}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-pagestyle.dtx}[%
-  2015/07/15 v2.05 TUD-KOMA-Script (pagestyle)%
+  2015/07/17 v2.05 TUD-KOMA-Script (pagestyle)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -327,6 +327,10 @@
   \evensidemargin=0pt%
   \topskip=0pt%
   \textheight=\maxdimen%
+  \scr@ifundefinedorrelax{if@chapter}{%
+    \newif\if@chapter%
+    \scr@ifundefinedorrelax{chapter}{\@chapterfalse}{\@chaptertrue}%
+  }{}%
 }{%
   \AtEndPreamble{\RequirePackage{scrlayer-scrpage}[2013/12/14]}%
 }
@@ -2538,17 +2542,11 @@
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifnum\tud@geometry=\thr@@\relax%
-      \if@atdocument%
-        \KOMAoptions{twoside=true}%
-      \else%
-        \@ifclassloaded{\TUDClassName@KOMA}{%
-          \KOMAoptions{twoside=true}%
-        }{%
-          \PassOptionsToClass{twoside=true}{\TUDClassName@KOMA}%
-        }%
-      \fi%
+      \TUD@KOMAoptions{twoside=true}%
     \fi%
-    \if@atdocument\recalctypearea\fi%
+    \if@atdocument%
+      \ifnum\tud@geometry<\thr@@\relax\recalctypearea\fi%
+    \fi%
   \fi%
 }
 %    \end{macrocode}
@@ -2593,6 +2591,25 @@
 %    \end{macrocode}
 % \end{option}^^A twocolumn
 % \end{option}^^A twoside
+%
+% Sollte das Paket \pkg{silence} vorhanden sein wird es geladen, um die vom 
+% Paket \pkg{typearea} erzeugten Warnungen beim Laden einer \TUDScript-Klasse 
+% zu unterdrücken, da im Normalfall das Paket gar nicht für die Berechnung des 
+% Satzspiegels zum Einsatz kommt. Sollte dies vom Anwender so eingestellt 
+% werden, wird vor dem Beginn des Dokumentes \cs{recalctypearea} aufgerufen und 
+% die entsprechenden Warnungen werden etwas später und in Abhängigkeit der 
+% verwendeten Schriftart erzeugt.
+%    \begin{macrocode}
+\IfFileExists{silence.sty}{%
+  \RequirePackage{silence}%
+  \WarningFilter[typearea]{typearea}{DIV for}
+  \WarningFilter[typearea]{typearea}{Bad type area settings!}
+  \WarningFilter[typearea]{typearea}{Maybe no optimal type area settings!}
+  \WarningFilter[typearea]{typearea}{Very low DIV value!}
+  \BeforePackage{typearea}{\ActivateWarningFilters[typearea]}%
+  \AfterPackage{typearea}{\DeactivateWarningFilters[typearea]}%
+}{}
+%    \end{macrocode}
 %
 % \iffalse
 %</class&option>
@@ -3312,7 +3329,14 @@
 % \cs{tud@BeforeSelectAnyPageStyle} aktiviert bzw. deaktiviert wird.
 %    \begin{macrocode}
     \BeforeSelectAnyPageStyle{\tud@BeforeSelectAnyPageStyle{#1}}%
-    \recalctypearea%
+%    \end{macrocode}
+% \ToDo{Zusammenspiel zwischen \opt{paper} und \opt{fontsize}?}[v2.05]
+%    \begin{macrocode}
+    \ifcase\tud@geometry\relax%
+      \recalctypearea%
+    \else%
+      \tud@AfterChangingArea%
+    \fi%
   }%
 }
 %    \end{macrocode}
