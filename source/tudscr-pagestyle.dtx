@@ -1,4 +1,4 @@
-% \CheckSum{2686}
+% \CheckSum{2721}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-pagestyle.dtx}[%
-  2015/07/17 v2.05 TUD-KOMA-Script (pagestyle)%
+  2015/07/21 v2.05 TUD-KOMA-Script (pagestyle)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -208,7 +208,6 @@
 % \changes{v2.03}{2015/01/23}{Längenberechnung für den Satzspiegel an 
 %   Referenzlänge \cs{tud@dim@widemargin} gekoppelt}^^A
 % \changes{v2.05}{2015/07/15}{Fallunterscheidung an DIN-B-Reihe angepasst}^^A
-% \begin{macro}{\tud@head@font@size}
 % Hiermit werden in Abhängigkeit der gewählten Papiergröße die Maße für die
 % Größe der Kopfzeile, die Position des Logos, die Seitenränder sowie die
 % Schriftgröße in der Kopfzeile definiert. Aufgerufen wird der Befehl durch
@@ -217,7 +216,6 @@
 % anderen Papiermaße unterscheiden sich um den Faktor~$\sqrt{2}$, wobei das 
 % Format DIN~A5 nach den Vorgaben des \CDs übersprungen wird.
 %    \begin{macrocode}
-\newcommand*\tud@head@font@size{}
 \newcommand*\tud@geometry@set{%
   \ifdim\paperheight<176.1mm\relax%
     \setlength\tud@dim@widemargin{15mm}%
@@ -266,7 +264,6 @@
   }%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@head@font@size
 % \end{macro}^^A \tud@geometry@set
 %
 % \subsection{Unterstützung der \cls{standalone}-Klasse}
@@ -2041,6 +2038,8 @@
 % \changes{v2.04}{2015/04/21}{neu}^^A
 % \begin{macro}{\tud@footcontent@font}
 % \changes{v2.04}{2015/06/01}{neu}^^A
+% \changes{v2.05}{2015/07/21}{Bugfix für die Schriftgröße und den Durchschuss 
+%   bei einer entsprechenden Anpassung der Schriftart \val{tudheadings}}^^A
 % \begin{macro}{\tud@footcontent@left}
 % \changes{v2.04}{2015/06/01}{neu}^^A
 % \begin{macro}{\tud@footcontent@right}
@@ -2085,10 +2084,37 @@
 \def\@@footcontent#1#2[#3]{%
   \if@tempswa%
     \def\tud@footcontent@font{%
+%    \end{macrocode}
+% Vor der Verwendung der Schrift \val{tudheadings} wird der ursprüngliche Wert 
+% der Schriftgröße gesichert und der gewünschte Wert voreingestellt.
+%    \begin{macrocode}
+      \let\@tempa\f@size%
+      \let\@tempb\relax%
+      \let\f@size\tud@head@font@size%
       \usekomafont{tudheadings}%
-      \tud@divide\@tempa{\tud@head@font@size}{\f@size}%
-      \linespread{\@tempa}%
-      \selectfont%
+%    \end{macrocode}
+% Erfolgt durch Verwendung der Schriftart keine Änderung der Schriftgröße, so 
+% muss der Durchschuss angepasst werden.
+%    \begin{macrocode}
+      \ifx\f@size\tud@head@font@size\relax%
+        \tud@divide\@tempb{\tud@head@font@size}{\@tempa}%
+%    \end{macrocode}
+% Andernfalls wird die Schriftgröße auf die gewünschte Zielgröße angepasst.
+%    \begin{macrocode}
+      \else%
+        \let\tud@head@font@size\f@size%
+        \ifdim\f@baselineskip=\baselineskip\relax\else%
+          \tud@divide\@tempb{\f@baselineskip}{\baselineskip}%
+        \fi%
+      \fi%
+%    \end{macrocode}
+% Anschließend werden die gewünschten Einstellungen aktiviert.
+%    \begin{macrocode}
+      \ifx\@tempb\relax\relax\else%
+        \linespread{\@tempb}%
+        \selectfont%
+      \fi%
+      \tud@head@font@set%
       \tud@head@font@light%
       #1%
     }%
@@ -2125,7 +2151,9 @@
 %    \begin{macrocode}
 \newcommand*\tud@newline@poster{}
 \newcommand*\tud@footcontent@left@poster{%
-  \ifx\contactname\@empty\else{\tud@head@font@bold\contactname}\newline\fi%
+  \ifx\contactname\@empty\else%
+    {\tud@head@font@bold\contactname}\newline%
+  \fi%
   Technische Universit\"at Dresden%
   \tud@foot@line@write{faculty}%
   \tud@foot@line@write{department}%
