@@ -1,4 +1,4 @@
-% \CheckSum{2721}
+% \CheckSum{2841}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -212,42 +212,92 @@
 % Größe der Kopfzeile, die Position des Logos, die Seitenränder sowie die
 % Schriftgröße in der Kopfzeile definiert. Aufgerufen wird der Befehl durch
 % \cs{tud@geometry@process}. Dabei fungiert \cs{tud@dim@widemargin} als 
-% Bezugslänge. Die maßgebliche Papiergröße ist DIN~A4. Die Längen für alle
-% anderen Papiermaße unterscheiden sich um den Faktor~$\sqrt{2}$, wobei das 
-% Format DIN~A5 nach den Vorgaben des \CDs übersprungen wird.
+% Bezugslänge. Die maßgebliche Papiergröße ist DIN~A4 bzw. DIN~b4. Die Längen
+% für alle anderen Papiermaße unterscheiden sich um den Faktor~$\sqrt{2}$,
+% wobei das Format DIN~A5 nach den Vorgaben des \CDs übersprungen wird.
 %    \begin{macrocode}
 \newcommand*\tud@geometry@set{%
-  \ifdim\paperheight<176.1mm\relax%
+  \tud@ifverlower{2.05}{%
+    \ifdim\paperheight<\dimexpr148mm+1.5mm\relax%
+      \def\@tempa{0}%
+    \else\ifdim\paperheight<\dimexpr297mm+2mm\relax%
+      \def\@tempa{1}%
+    \else\ifdim\paperheight<\dimexpr420mm+2mm\relax%
+      \def\@tempa{2}%
+    \else\ifdim\paperheight<\dimexpr594mm+2mm\relax%
+      \def\@tempa{3}%
+    \else\ifdim\paperheight<\dimexpr841mm+3mm\relax%
+      \def\@tempa{4}%
+    \else\ifdim\paperheight<\dimexpr1189mm+3mm\relax%%
+      \def\@tempa{5}%
+    \else%
+      \def\@tempa{6}%
+    \fi\fi\fi\fi\fi\fi%
+  }{%
+    \ifdim\paperheight<\dimexpr176mm+2mm\relax%
+      \def\@tempa{0}%
+    \else\ifdim\paperheight<\dimexpr353mm+2mm\relax%
+      \def\@tempa{1}%
+    \else\ifdim\paperheight<\dimexpr500mm+2mm\relax%
+      \def\@tempa{2}%
+    \else\ifdim\paperheight<\dimexpr707mm+3mm\relax%
+      \def\@tempa{3}%
+    \else\ifdim\paperheight<\dimexpr1000mm+3mm\relax%
+      \def\@tempa{4}%
+    \else\ifdim\paperheight<\dimexpr1414mm+3mm\relax%
+      \def\@tempa{5}%
+    \else%
+      \def\@tempa{6}%
+    \fi\fi\fi\fi\fi\fi%
+  }
+  \ifcase\@tempa\relax% <=A6/B6
     \setlength\tud@dim@widemargin{15mm}%
     \setlength\tud@dim@heavyline{0.5pt}%
     \setlength\tud@dim@thinline{0.25pt}%
     \def\tud@head@font@size{4.5}%
-  \else\ifdim\paperheight<353.1mm\relax%
+  \or% <=A4/B4
     \setlength\tud@dim@widemargin{30mm}%
     \setlength\tud@dim@heavyline{1pt}%
     \setlength\tud@dim@thinline{0.5pt}%
     \def\tud@head@font@size{9}%
-  \else\ifdim\paperheight<500.1mm\relax%
+  \or% <=A3/B3
     \setlength\tud@dim@widemargin{42.426407mm}%
     \setlength\tud@dim@heavyline{1.414214pt}%
     \setlength\tud@dim@thinline{0.707107pt}%
     \def\tud@head@font@size{12.727922}%
-  \else\ifdim\paperheight<707.1mm\relax%
+  \or% <=A2/B2
     \setlength\tud@dim@widemargin{60mm}%
     \setlength\tud@dim@heavyline{2pt}%
     \setlength\tud@dim@thinline{1pt}%
     \def\tud@head@font@size{18}%
-  \else\ifdim\paperheight<1000.1mm\relax%
+  \or% <=A1/B1
     \setlength\tud@dim@widemargin{84.852814mm}%
     \setlength\tud@dim@heavyline{2.828427pt}%
     \setlength\tud@dim@thinline{1.414214pt}%
     \def\tud@head@font@size{25.455844}%
-  \else%
+  \or% <=A0/B0
     \setlength\tud@dim@widemargin{120mm}%
     \setlength\tud@dim@heavyline{4pt}%
     \setlength\tud@dim@thinline{2pt}%
     \def\tud@head@font@size{36}%
-  \fi\fi\fi\fi\fi%
+  \else% >A0/B0
+    \ClassWarning{\TUDClassName}{%
+      There's no type area defined for such a huge\MessageBreak%
+      paper height. It is recommended to reduce the\MessageBreak%
+      paper size. Nevertheless, it will be tried to\MessageBreak%
+      calculate a proper type area%
+    }%
+    \tud@divide\@tempa{\paperheight}{1189mm}%
+    \setlength\tud@dim@widemargin{120mm}%
+    \setlength\tud@dim@widemargin{\@tempa\tud@dim@widemargin}%
+    \setlength\tud@dim@heavyline{4pt}%
+    \setlength\tud@dim@heavyline{\@tempa\tud@dim@heavyline}%
+    \setlength\tud@dim@thinline{2pt}%
+    \setlength\tud@dim@thinline{\@tempa\tud@dim@thinline}%
+    \setlength{\@tempdima}{36pt}%
+    \setlength{\@tempdima}{\@tempa\@tempdima}%
+    \edef\tud@head@font@size{\strip@pt\@tempdima}%
+  \fi%
 %    \end{macrocode}
 % Zum Schluss werden die restlichen Längen aus der Referenzlänge berechnet.
 %    \begin{macrocode}
