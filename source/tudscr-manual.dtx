@@ -1,4 +1,4 @@
-% \CheckSum{3013}
+% \CheckSum{3076}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -313,10 +313,13 @@
 }
 %    \end{macrocode}
 % Für die Erstellung des Indexes wird das Paket \pkg{imakeidx} zusammen mit 
-% \pkg{xindy} verwendet. Zuerst ein paar kleinere Einstellungen für das Layout.
+% \pkg{xindy} verwendet. 
 %    \begin{macrocode}
 \PassOptionsToPackage{xindy,splitindex}{imakeidx}
 \RequirePackage{imakeidx}[2013/07/11]%
+%    \end{macrocode}
+% Zuerst ein paar kleinere Einstellungen für das Layout\dots
+%    \begin{macrocode}
 \indexsetup{%
 %<*class>
   level=\addsec,%
@@ -328,6 +331,51 @@
   othercode={\renewcommand*\subitem{\@idxitem\hspace*{15\p@}}}%
 }
 \newcommand*\xdyopt{-M tudscrman-temp.xdy -L german-din}
+%    \end{macrocode}
+
+% \dots gefolgt von einem Patch für die Umgebung \env{theindex}, um unschöne 
+% Seitenumbrüche direkt nach Überschriften zu vermeiden.
+%    \begin{macrocode}
+\@ifpackagelater{imakeidx}{2013/07/12}{%
+%<*class>
+  \ClassWarning%
+%</class>
+%<*package>
+  \PackageWarning%
+%</package>
+  {tudscrman}{%
+    Package `imakeidx' was updated so the patch for the\MessageBreak%
+    environment `theindex' is maybe outdated.%
+  }%
+}{%
+  \ifimki@original\else%
+    \renewenvironment{theindex}
+      {\imki@maybeaddtotoc%
+       \imki@indexheaders%
+       \thispagestyle{\imki@firstpagestyle}%
+       \ifnum\imki@columns>\@ne%
+         \columnsep \imki@columnsep%
+         \ifx\imki@idxprologue\relax%
+           \begin{multicols}{\imki@columns}[\imki@indexlevel{\indexname}]%
+         \else%
+           \begin{multicols}{\imki@columns}[%
+             \imki@indexlevel{\indexname}%
+             \imki@idxprologue%
+           ]%
+         \fi%
+       \else%
+         \imki@indexlevel{\indexname}\imki@idxprologue%
+       \fi%
+       \global\let\imki@idxprologue\relax%
+       \parindent\z@%
+       \parskip\z@ \@plus .3\p@\relax%
+       \columnseprule \ifKV@imki@columnseprule.4\p@\else\z@\fi%
+       \raggedright%
+       \let\item\@idxitem%
+       \imki@othercode}%
+      {\ifnum\imki@columns>\@ne\end{multicols}\fi}%
+  \fi%
+}
 %    \end{macrocode}
 % \begin{macro}{\tud@write@i}
 % \changes{v2.02}{2014/10/22}{neu}^^A
@@ -1695,7 +1743,7 @@
           \manualhyperdef{\@tempa}%
         }%
 %    \end{macrocode}
-% Wurde die Sternversion eines Auszeichnungsbefehls innerhalb der Umgebung 
+% Wurde die Sternversion eines Auszeichnungsbefehls in der Umgebung 
 % \env{Declaration} genutzt, wird lediglich ein Label aber kein Eintrag im 
 % Index erzeugt.
 %    \begin{macrocode}
