@@ -1,4 +1,4 @@
-% \CheckSum{111}
+% \CheckSum{225}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-misc.dtx}[%
-  2015/07/14 v2.05 TUD-KOMA-Script (miscellaneous)%
+  2015/07/24 v2.05 TUD-KOMA-Script (miscellaneous)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -83,6 +83,147 @@
 % \StopEventually{\PrintIndex\PrintChanges}
 %
 % \iffalse
+%<*class&option>
+% \fi
+%
+% \subsection{Papierformat und Schriftgröße}
+%
+% Insbesondere für Poster aber auch für alle anderen \TUDScript-Klassen wird
+% überprüft, ob nach einer Änderung des Standardpapierformates auch die
+% Schriftgröße durch den Anwender angepasst wurde. Diese wird jedoch nicht auf
+% Plausibilität geprüft, da der Aufwand hierfür relativ hoch wäre. Vielmehr 
+% wird davon ausgegangen, dass die explizite Angabe der Schriftgröße bewusst 
+% und dem Papierformat sowie den verwendeten Textspalten entsprechend erfolgt.
+%
+% Die nachfolgend definierten Optionen und Befehle orientieren sich dabei stark 
+% an internen \KOMAScript-Makros.
+%
+% \begin{option}{paper}
+% \changes{v2.05}{2015/07/24}{neu}^^A
+% \begin{macro}{\if@tud@paper@set}
+% \changes{v2.05}{2014/07/24}{neu}^^A
+% Da die \KOMAScript-Option \opt{paper} eine Menge an Einstellmöglichkeiten 
+% bietet, müssen die relevanten hier abgefangen werden.
+%    \begin{macrocode}
+\newif\if@tud@paper@set
+\TUD@key{paper}{%
+  \tud@lowerstring{\@tempa}{#1}%
+%    \end{macrocode}
+% Sowohl ISO/DIN-Formate\dots
+%    \begin{macrocode}
+  \def\@tempb##1##2\@nil{%
+    \@tempswafalse%
+    \if ##1a\@tempswatrue%
+      \else\if ##1b\@tempswatrue%
+        \else\if ##1c\@tempswatrue%
+          \else\if ##1d\@tempswatrue%
+    \fi\fi\fi\fi%
+    \if@tempswa%
+      \ifnumber{##2}{}{\@tempswafalse}%
+    \fi%
+  }%
+  \expandafter\@tempb\@tempa\@nil%
+%    \end{macrocode}
+% \dots als auch frei gewählte Papierformate werden erkannt.
+%    \begin{macrocode}
+  \if@tempswa\else%
+    \def\@tempb##1:##2:##3\@nil{%
+      \edef\@tempc{##1}%
+      \ifx\@tempc\@empty\@tempswafalse\else%
+        \edef\@tempc{##2}%
+        \ifx\@tempc\@empty\@tempswafalse\else\@tempswatrue\fi%
+      \fi%
+    }%
+    \expandafter\@tempb\@tempa::\@nil%
+  \fi%
+%    \end{macrocode}
+% Die Standardpapiergröße spielt allerdings keine Rolle für eine Warnung.
+%    \begin{macrocode}
+  \if@tempswa%
+    \ifstr{\@tempa}{a4}{\@tud@paper@setfalse}{\@tud@paper@settrue}%
+    \FamilyKeyStateProcessed%
+  \else%
+    \FamilyKeyStateUnknownValue%
+  \fi%
+}
+%    \end{macrocode}
+% \end{macro}^^A \if@tud@paper@set
+% \end{option}^^A paper
+% \begin{option}{fontsize}
+% \changes{v2.05}{2015/07/24}{neu}^^A
+% \begin{macro}{\if@tud@fontsize@set}
+% \changes{v2.05}{2014/07/24}{neu}^^A
+% Bei der Schriftgröße ist das bloße Erkennen der Option mehr oder weniger 
+% ausreichend.
+%    \begin{macrocode}
+\newif\if@tud@fontsize@set
+\TUD@key{fontsize}{%
+  \ifdimen{#1}{%
+    \@tud@fontsize@settrue%
+    \FamilyKeyStateProcessed%
+  }{%
+    \@tud@fontsize@setfalse%
+    \FamilyKeyStateUnknownValue%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \if@tud@fontsize@set
+% \end{option}^^A fontsize
+% Die Schlüssel sollen lediglich beim Laden der Dokumentklasse die angegebenen 
+% Optionen abfangen. Wurde das Papierformat jedoch nciht die Schriftgröße 
+% geändert, wird nun eine Warnung erzeugt.
+%    \begin{macrocode}
+\AtEndOfClass{%
+  \RelaxFamilyKey{TUD}{paper}%
+  \RelaxFamilyKey{TUD}{fontsize}%
+  \ifboolexpr{bool {@tud@paper@set} or bool {@landscape}}{%
+    \if@tud@fontsize@set\else%
+      \ClassWarningNoLine{\TUDClassName}{%
+        You've set a paper size, which is different from the\MessageBreak%
+        default (paper=a4, paper=portrait). Therefore you\MessageBreak%
+        should additionally specify an explicit font size.\MessageBreak%
+        See the manual for further information.
+      }%
+    \fi%
+  }{}%
+}
+%    \end{macrocode}
+%
+% \iffalse
+%</class&option>
+%<*class&execute&!inherit>
+% \fi
+%
+% \begin{macro}{\tud@x@paper}
+% \changes{v2.05}{2014/07/24}{neu}^^A
+% \begin{macro}{\tud@x@@paper}
+% \changes{v2.05}{2014/07/24}{neu}^^A
+% Um die Änderung des Papierformats auch über die \LaTeX-Standardoptionen wie 
+% beispielsweise \opt{a5paper} abfangen zu können, müssen auch die äquivalent 
+% zu \KOMAScript{} ausgewertet werden.
+%    \begin{macrocode}
+\newcommand*{\tud@x@paper}{%
+  \expandafter\tud@x@@paper\CurrentOption paper\tud@x@@paper%
+}
+\newcommand*{\tud@x@@paper}{}
+\def\tud@x@@paper #1#2paper#3\tud@x@@paper{%
+  \@tempswafalse%
+  \ifstr{#3}{paper}{\ifnumber{#2}{%
+      \ifstr{#1}{a}{\@tempswatrue}{%
+      \ifstr{#1}{b}{\@tempswatrue}{%
+      \ifstr{#1}{c}{\@tempswatrue}{%
+      \ifstr{#1}{d}{\@tempswatrue}{%
+      }}}}%
+  }{}}{}%
+  \if@tempswa\TUDExecuteOptions{#3=#1#2}\fi%
+  \PassOptionsToClass{\CurrentOption}{\TUDClassName@KOMA}
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@x@@paper
+% \end{macro}^^A \tud@x@paper
+%
+% \iffalse
+%</class&execute&!inherit>
 %<*class&option>
 % \fi
 %
@@ -258,17 +399,14 @@
 % \subsection{Durchreichen von Optionen und Standardoptionen}
 %
 % Durchreichen aller Klassenoptionen an die \KOMAScript-Klasse bzw. an die
-% genutzte \TUDScript-Elternklasse.
+% genutzte \TUDScript-Elternklasse. Für Klassen wird vor dem Durchreichen noch 
+% geprüft, ob ein spezielles Papierformat angegeben wurde.
 %    \begin{macrocode}
-%<*class&!inherit>
-\DeclareOption*{\PassOptionsToClass{\CurrentOption}{\TUDClassName@KOMA}}
-%</class&!inherit>
+%<class&!inherit>\DeclareOption*{\tud@x@paper}
 %<*class&inherit>
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{\TUDClassName@Parent}}
 %</class&inherit>
-%<*package&fonts>
-\DeclareOption*{\KOMAoptions{\CurrentOption}}
-%</package&fonts>
+%<package&fonts>\DeclareOption*{\KOMAoptions{\CurrentOption}}
 %    \end{macrocode}
 % Es werden die Standardoptionen ausgeführt. Für die Klasse \cls{tudscrposter} 
 % werden die Farben aktiviert.

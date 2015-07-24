@@ -1,4 +1,4 @@
-% \CheckSum{2841}
+% \CheckSum{2859}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-pagestyle.dtx}[%
-  2015/07/21 v2.05 TUD-KOMA-Script (pagestyle)%
+  2015/07/24 v2.05 TUD-KOMA-Script (pagestyle)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -83,7 +83,6 @@
 % andere als glücklich gewählt. Insbesondere für den doppelseitigen Satz ist
 % das Standardlayout nicht gut nutzbar. Für die \TUDScript"=Klassen wird 
 % deshalb die Abweichung vom sonst fest vorgegebenen Satzspiegel ermöglicht.
-% \ToDo{Option für Schrift- und Papiergröße bei Poster vorbelegen}[v2.05]
 %
 % \StopEventually{\PrintIndex\PrintChanges}
 %
@@ -494,6 +493,7 @@
 % \changes{v2.03}{2015/02/14}{neu}^^A
 % \begin{layer}{tudheadings.head.bar}
 % \changes{v2.03}{2015/02/14}{neu}^^A
+% \changes{v2.05}{2015/02/14}{Bugfix verschobener Balken}^^A
 % Außerdem gibt es eine Variante ohne Querbalken-Outline. Stattdessen werden
 % der Querbalken und der darüberliegende Kopf farbig abgesetzt. 
 %    \begin{macrocode}
@@ -512,7 +512,9 @@
     contents={%
       \ifnum\tud@head@bar>\@ne\relax% cdhead=barcolor/color
         \color{HKS41!60}%
-        \rule{\layerwidth}{\tud@dim@barheight}%
+        \setlength{\@tempdima}{\dimexpr\ht\strutbox-\tud@dim@barheight\relax}%
+        \ifdim\@tempdima<\z@\relax\setlength\@tempdima{\z@}\fi%
+        \raisebox{\@tempdima}{\rule{\layerwidth}{\tud@dim@barheight}}%
       \fi%
     },%
   ]{tudheadings.head.bar}%
@@ -3407,8 +3409,6 @@
 % \cs{tud@BeforeSelectAnyPageStyle} aktiviert bzw. deaktiviert wird.
 %    \begin{macrocode}
     \BeforeSelectAnyPageStyle{\tud@BeforeSelectAnyPageStyle{#1}}%
-%    \end{macrocode}
-% \ToDo{Zusammenspiel zwischen \opt{paper} und \opt{fontsize}?}[v2.05]
 %    \begin{macrocode}
     \ifcase\tud@geometry\relax%
       \recalctypearea%
