@@ -53,10 +53,14 @@ Das Bundle beinhaltet:
 Versionen
 ---------
 
-
 **v2.05** (2015/xx/xx)
 
 + 
+
+
+**v2.04a** (2015/07/24)
+
++ Bugfix für Option `ddc`
 
 
 **v2.04** (2015/07/02)
@@ -173,10 +177,14 @@ The bundle offers:
 Versions
 --------
 
-
 **v2.05** (2015/xx/xx)
 
 + 
+
+
+**v2.04a** (2015/07/24)
+
++ Bugfix for option `ddc`
 
 
 **v2.04** (2015/07/02)
