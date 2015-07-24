@@ -2,7 +2,7 @@
 TUD-KOMA-Script
 ===============
 
-TUD-KOMA-Script 2015/07/02 v2.04
+TUD-KOMA-Script 2015/07/24 v2.04a
 Copyright (c) Falk Hanisch <tudscr@gmail.com>, 2012-2015
 
 This material is subject to the LaTeX Project Public License version 1.3c or 
@@ -53,10 +53,9 @@ Das Bundle beinhaltet:
 Versionen
 ---------
 
-**v2.03a** (2015/06/11)
+**v2.04a** (2015/07/24)
 
-+ Anpassungen an KOMA-Script v3.17
-+ Fehlerkorrektur für Auswahl der Mathematikschriften
++ Bugfix für Option `ddc`
 
 
 **v2.04** (2015/07/02)
@@ -66,6 +65,12 @@ Versionen
 + verbesserte Installationsroutine der Schriften für portable Distributionen
 + alleinstehender farbiger Querbalken im Kopfbereich
 + freier Inhalt im Fußbereich möglich
+
+
+**v2.03a** (2015/06/11)
+
++ Anpassungen an KOMA-Script v3.17
++ Fehlerkorrektur für Auswahl der Mathematikschriften
 
 
 **v2.03** (2015/02/15)
@@ -167,10 +172,9 @@ The bundle offers:
 Versions
 --------
 
-**v2.03a** (2015/06/11)
+**v2.04a** (2015/07/24)
 
-+ adjustments to KOMA-Script v3.17
-+ bug fix for math font selecting
++ Bugfix for option `ddc`
 
 
 **v2.04** (2015/07/02)
@@ -180,6 +184,12 @@ Versions
 + improved installation routine for portable distributions
 + solitary colored head bar
 + customisable content in the foot possible
+
+
+**v2.03a** (2015/06/11)
+
++ adjustments to KOMA-Script v3.17
++ bug fix for math font selecting
 
 
 **v2.03** (2015/02/15)
