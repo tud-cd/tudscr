@@ -1,4 +1,4 @@
-% \CheckSum{2859}
+% \CheckSum{2864}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-pagestyle.dtx}[%
-  2015/07/24 v2.05 TUD-KOMA-Script (pagestyle)%
+  2015/07/28 v2.05 TUD-KOMA-Script (pagestyle)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -1485,6 +1485,15 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@ddc@foot
+% \end{option}^^A ddcfoot
+% \end{option}^^A ddchead
+% \end{option}^^A ddc
+%
+% \iffalse
+%</class&option>
+%<*class&body>
+% \fi
+%
 % \begin{macro}{\tud@ddc@check}
 % \changes{v2.02}{2014/06/23}{neu}^^A
 % Dieses Hilfsmakro wird aufgerufen, wenn geprüft wird, welche Einstellungen
@@ -1523,15 +1532,6 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@ddc@check
-% \end{option}^^A ddcfoot
-% \end{option}^^A ddchead
-% \end{option}^^A ddc
-%
-% \iffalse
-%</class&option>
-%<*class&body>
-% \fi
-%
 % \begin{macro}{\tud@logo@main@black}
 % \changes{v2.04}{2015/05/31}{neu}^^A
 % \begin{macro}{\tud@logo@main@HKS41}
@@ -1702,6 +1702,7 @@
 % \changes{v2.04}{2015/05/31}{neu}^^A
 % \begin{macro}{\tud@headlogo@option@set}
 % \changes{v2.04}{2015/05/31}{neu}^^A
+% \changes{v2.05}{2015/07/27}{Bugfix für Dateien in Unterordnern}^^A
 % Äquivalent zum Logo der \TnUD werden auch für das Logo von \DDC drei
 % Farbvarianten erstellt. 
 %    \begin{macrocode}
@@ -1726,13 +1727,16 @@
       \tud@savelayerbox{head@option}{%
         \includegraphics[%
           keepaspectratio,totalheight=\tud@mainlogoheight,##2%
-        ]{\trim@spaces{##1}}%
+        ]{##1}%
       }%
     }%
     \tud@savelayerbox{head@option}{}%
     \tud@ddc@check%
     \ifcase\@tempa\relax% \tud@ddc@head=false
       \ifdefvoid{\@headlogo}{}{%
+        \protected@edef\@headlogo{%
+          \expandafter\trim@spaces\expandafter{\@headlogo}%
+        }%
         \protected@edef\@tempb{\noexpand\@tempc{\@headlogo}{\@@headlogo}}%
         \@tempb%
       }%
