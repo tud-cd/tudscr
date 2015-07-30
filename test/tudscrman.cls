@@ -501,6 +501,31 @@
 }
 \newcommand*\@TUDScript{TUD-KOMA-Script}
 \pdfexpandableoutline{TUDScript}
+\newcommand*\@IndexFormat{}
+\let\@IndexFormat\relax
+\newcommand*\CheckIndexFormat[2]{%
+  \IfBooleanT{#1}{%
+    \IfValueT{#2}{%
+      \ClassWarning{tudscrman}{%
+        You've used the starred version so no entry for\MessageBreak%
+        the index is created and the optional argument\MessageBreak%
+        |#2| will be ignored%
+      }%
+    }%
+  }%
+}
+\newcommand*\SetIndexFormat[2]{%
+  \CheckIndexFormat{#1}{#2}%
+  \IfBooleanTF{#1}{%
+    \def\@IndexFormat{#1}%
+  }{%
+    \IfValueTF{#2}{\def\@IndexFormat{#2}}{\def\@IndexFormat{}}%
+  }%
+}
+\newcommand*\@CTANLink{}
+\let\@CTANLink\relax
+\newcommand*\@crossdeclaration{}
+\let\@crossdeclaration\relax
 \NewDocumentCommand\Application{smd||}{%
   \ifdin{#2}{%
     \mbox{\textsbs{#2}}%
@@ -544,15 +569,16 @@
 }
 \DeclareExpandableDocumentCommand\@Class{sm}{#2}
 \pdfexpandableoutline{Class}
-\newcommand*\@TempPackage{}
 \NewDocumentCommand\Package{smd''d()d||}{%
   \if@changelog%
     \@ProcessChangedAt{#1}{files}{\protect\sbnfont}{#2}{Paket}%
   \else%
     \ifdin{#2}{%
-      \IfValueTF{#4}{\def\@TempPackage{#4}}{\def\@TempPackage{#2}}%
+      \IfValueTF{#4}{%
+        \ifstr{#4}{}{\let\@CTANLink\relax}{\def\@CTANLink{pkg/#4}}%
+      }{\def\@CTANLink{pkg/#2}}%
       \SetIndexFormat{#1}{#5}%
-      \@ProcessOutput{\textsbn{#2}}'#3'(\@TempPackage)%
+      \@ProcessOutput{\textsbn{#2}}'#3'%
         {files}[\protect\sbnfont]{#2}[~{\idxfont(Paket)}]%
     }%
   \fi%
@@ -560,13 +586,13 @@
 \DeclareExpandableDocumentCommand\@Package{sm}{#2}
 \pdfexpandableoutline{Package}
 \newcommand*\@TempOption{}
-\NewDocumentCommand\Option{smod''d||}{%
+\NewDocumentCommand\Option{smod''D(){\@crossdeclaration}d||}{%
   \if@changelog%
     \@ProcessChangedAt{#1}{options}{\ttfamily}{#2}{Option}%
   \else%
     \IfValueTF{#3}{\gdef\@TempOption{\texttt{=#3}}}{\gdef\@TempOption{}}%
-    \SetIndexFormat{#1}{#5}%
-    \@ProcessOutput{\texttt{#2}}[\@TempOption]'#4'{options}[\ttfamily]{#2}%
+    \SetIndexFormat{#1}{#6}%
+    \@ProcessOutput{\texttt{#2}}[\@TempOption]'#4'(#5){options}[\ttfamily]{#2}%
   \fi%
 }
 \DeclareExpandableDocumentCommand\@Option{sm}{#2}
@@ -641,7 +667,7 @@
     \@ProcessChangedAt{#1}{macros}{\ttfamily}{#2}{Z\"ahler}%
   \else%
     \SetIndexFormat{#1}{#4}%
-    \@ProcessOutput{\texttt{#2}}[\if@declare~{\idxfont(Z\"ahler)}\fi]%
+    \@ProcessOutput{\texttt{#2}}[\if@declare~{\idxfont(Z\"ahler)}\fi]'#3'%
       {macros}[\ttfamily]{#2}[~{\idxfont(Z\"ahler)}]%
   \fi%
 }
@@ -669,8 +695,8 @@
     \setlength\@tempdimc{\z@}%
     \begin{tabular}{lll}\@TermTable\end{tabular}%
   }%
+  \newline\null%
   \let\@termlist\relax%
-  \newline%
 }
 \newcommand*\@TermTable{%
   \toprule%
@@ -690,7 +716,7 @@
     \@ProcessChangedAt{#1}{fonts}{\ttfamily}{#2}{Schriftelement}%
   \else%
     \SetIndexFormat{#1}{#4}%
-    \@ProcessOutput{\texttt{#2}\if@declare~{\idxfont(Schriftelement)}\fi}%
+    \@ProcessOutput{\texttt{#2}\if@declare~{\idxfont(Schriftelement)}\fi}'#3'%
       {fonts}[\ttfamily]{#2}%
   \fi%
 }
@@ -704,31 +730,11 @@
     ]'#4'{colors}[\ttfamily]{#2}%
   \fi%
 }
-\newcommand*\@IndexFormat{}
-\let\@IndexFormat\relax
-\newcommand*\CheckIndexFormat[2]{%
-  \IfBooleanT{#1}{%
-    \IfValueT{#2}{%
-      \ClassWarning{tudscrman}{%
-        You've used the starred version so no entry for\MessageBreak%
-        the index is created and the optional argument\MessageBreak%
-        |#2| will be ignored%
-      }%
-    }%
-  }%
-}
-\newcommand*\SetIndexFormat[2]{%
-  \CheckIndexFormat{#1}{#2}%
-  \IfBooleanTF{#1}{%
-    \def\@IndexFormat{#1}%
-  }{%
-    \IfValueTF{#2}{\def\@IndexFormat{#2}}{\def\@IndexFormat{}}%
-  }%
-}
 \newif\if@declare
 \newif\if@stareddeclare
 \newif\if@openindex
 \newif\if@deprecated
+% §§§ Argumente dokumentieren?
 \NewDocumentCommand\@ProcessOutput{mod''d()md()omo}{%
   \if@declare%
     \if@openindex%
@@ -740,6 +746,11 @@
         }%
       }%
       \IfValueTF{#6}{\edef\@tempa{#5:#6:#8}}{\edef\@tempa{#5:#8}}%
+      \IfValueT{#4}{%
+        \ifx\relax#4\relax\else%
+          \IfValueTF{#6}{\edef\@tempa{#4:#5:#6:#8}}{\edef\@tempa{#4:#5:#8}}%
+        \fi%
+      }%
       \if@deprecated%
         \expandafter\IfBooleanF\expandafter{\@IndexFormat}{%
           \manualhyperdef{\@tempa}%
@@ -784,45 +795,55 @@
       }%
     \fi%
     \IfValueTF{#6}{\edef\@tempa{#5:#6:#8}}{\edef\@tempa{#5:#8}}%
+    \IfValueT{#4}{%
+      \ifx\relax#4\relax\else%
+         \ifstr{#4}{main}{}{%
+           \IfValueTF{#6}{\edef\@tempa{#4:#5:#6:#8}}{\edef\@tempa{#4:#5:#8}}%
+         }%
+      \fi%
+    }%
     \ifcsdef{r@\@tempa}{%
-      \let\@tempb\relax%
-      \def\@tempc{\mbox{\hyperref{}{\jobname}{\@tempa}{#1}\IfValueT{#2}{#2}}}%
+      \def\@tempb{\mbox{\hyperref{}{\jobname}{\@tempa}{#1}\IfValueT{#2}{#2}}}%
+      \let\@tempc\relax%
       \IfValueT{#3}{%
-        \def\@tempb{%
+        \def\@tempc{%
           \ClassWarning{tudscrman}{%
             You've used the unknown cross-reference\MessageBreak%
             shorthand '#3'. Only 'auto', 'page'\MessageBreak%
             and 'full' as well as 'none' are valid%
           }%
         }%
-        \ifstr{#3}{auto}{\def\@tempb{ in \autoref{\@tempa}}}{}%
-        \ifstr{#3}{page}{\def\@tempb{ \vpageref{\@tempa}}}{}%
-        \ifstr{#3}{ppage}{\def\@tempb{ \reftextfaraway{\@tempa}}}{}%
-        \ifstr{#3}{full}{\def\@tempb{ in \fullref{\@tempa}}}{}%
+        \ifstr{#3}{auto}{\def\@tempc{ in \autoref{\@tempa}}}{}%
+        \ifstr{#3}{page}{\def\@tempc{ \vpageref{\@tempa}}}{}%
+        \ifstr{#3}{ppage}{\def\@tempc{ \reftextfaraway{\@tempa}}}{}%
+        \ifstr{#3}{full}{\def\@tempc{ in \fullref{\@tempa}}}{}%
         \ifstr{#3}{none}{%
-          \let\@tempb\relax%
-          \def\@tempc{\mbox{#1\IfValueT{#2}{#2}}}%
+          \def\@tempb{\mbox{#1\IfValueT{#2}{#2}}}%
+          \let\@tempc\relax%
         }{}%
       }%
-      \@tempc\@tempb%
+      \@tempb\@tempc%
     }{%
-      \IfValueT{#3}{%
-        \ClassWarning{tudscrman}{%
-          No cross-reference created, label \@tempa\space is missing%
-        }%
-      }%
-      \IfValueTF{#4}{%
-        \ifstr{#4}{}{\mbox{#1\IfValueT{#2}{#2}}}{%
-          \href{http://www.ctan.org/pkg/#4}{\mbox{#1\IfValueT{#2}{#2}}}%
-        }%
+      \IfValueTF{#3}{%
+        \def\@tempb##1{\ClassWarning{tudscrman}{##1}}%
       }{%
-        \mbox{#1\IfValueT{#2}{#2}}%
+        \def\@tempb##1{\ClassInfo{tudscrman}{##1}}%
       }%
+      \@tempb{No cross-reference created, label \@tempa\space is missing}%
+% §§§ Ausgabe im Zweifel mit Hinweis auf Klasse/Paket, wenn angegeben?
+      \def\@tempc{\mbox{#1\IfValueT{#2}{#2}}}%
+      \ifx\@CTANLink\relax%
+        \@tempc%
+      \else%
+        \href{http://www.ctan.org/\@CTANLink}{\@tempc}%
+      \fi%
     }%
   \fi%
   \let\@IndexFormat\relax%
+  \let\@CTANLink\relax%
 }
 \newrobustcmd*\hyperidx[2][]{\manualhyperref{#1}{#2}}
+% §§§ prüfen/ändern
 \NewDocumentCommand\@HyperIndex{mmmmmm}{%
   \IfValueTF{#3}{\def\@tempa{#3}}{\def\@tempa{}}%
   \IfValueTF{#5}{\def\@tempb{#5}}{\def\@tempb{}}%
@@ -998,7 +1019,6 @@
     \@afterindentfalse\@afterheading%
   \fi%
 }
-% §§§ ToDo: Declaration' ???
 \NewDocumentEnvironment{Declaration*}{om}{%
   \@changedatdeclare{#1}{#2}%
   \@stareddeclaretrue%
@@ -1015,6 +1035,35 @@
   \global\@deprecatedfalse%
   \@gobbleparameters%
   \@declaretrue\@openindexfalse#2\@declarefalse%
+}
+\NewDocumentEnvironment{Declaration!}{om}{%
+  \@changedatdeclare{#1}{#2}%
+  \@stareddeclaretrue%
+  \global\@deprecatedfalse%
+  \@declaretrue\@openindextrue#2\@declarefalse%
+  \@stareddeclarefalse%
+  \ifx\@crossdeclaration\relax%
+    \begingroup%
+      \let\Class\@firstofone%
+      \let\Package\@firstofone%
+      \xdef\@crossdeclaration{#2}%
+    \endgroup%
+  \else%
+    \ClassError{tudscrman}{Nested environment `Declaration*'}{%
+      It is not possible to nest this environment.%
+    }%
+  \fi%
+}{%
+  \ifx\@changedatdeclarelist\relax\else%
+    \ClassError{tudscrman}{\string\printchangedatlist\space is missing}{%
+      \string\@changedatdeclarelist\space is not empty. Did you\MessageBreak%
+      forget to print this list with \string\printchangedatlist?%
+    }%
+  \fi%
+  \global\@deprecatedfalse%
+  \@gobbleparameters%
+  \@declaretrue\@openindexfalse#2\@declarefalse%
+  \global\let\@crossdeclaration\relax%
 }
 \newsavebox\tabularm@box
 \newlength\tabularm@wd
@@ -1282,6 +1331,7 @@
     \let\textsbs\@firstofone%
     \let\Environment\@firstofone%
     \let\Macro\@firstofone%
+% §§§ prüfen/ändern, zusätzliches Argument...
     \IfValueTF{#3}{\xdef\@tempa{#2:#3:#5}}{\xdef\@tempa{#2:#5}}%
   \endgroup%
   \IfBooleanTF{#1}{%
