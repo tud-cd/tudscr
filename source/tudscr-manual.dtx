@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-manual.dtx}[%
-  2015/08/04 v2.05 TUD-KOMA-Script\space%
+  2015/08/05 v2.05 TUD-KOMA-Script\space%
 %</driver>
 %<package&identify>\NeedsTeXFormat{LaTeX2e}
 %<package&identify>\ProvidesPackage{tudscrman}[%
@@ -762,6 +762,15 @@
 %
 % Als erstes werden für Klasse und Paket einige Hilfmakros definiert.
 %
+% \begin{macro}{\idxfont}
+% Für zusätzliche Informationen im Index nach dem eigentlichen Eintrag wird 
+% eine etwas kleinere Schrift verwendet.
+%    \begin{macrocode}
+\newcommand*\idxfont{}
+\let\idxfont\footnotesize
+\robustify{\idxfont}
+%    \end{macrocode}
+% \end{macro}^^A \idxfont
 % \begin{macro}{\bsc}
 % \changes{v2.02}{2014/07/22}{\cs{newrobustcmd} aus \pkg{etoolbox} anstelle von 
 %   \cs{DeclareRobustCommand}}^^A
@@ -860,15 +869,6 @@
 % \end{macro}^^A \@IndexFormat
 % \end{macro}^^A \SetIndexFormat
 % \end{macro}^^A \CheckIndexFormat
-% \begin{macro}{\idxfont}
-% Für zusätzliche Informationen im Index nach dem eigentlichen Eintrag wird 
-% eine etwas kleinere Schrift verwendet.
-%    \begin{macrocode}
-\newcommand*\idxfont{}
-\let\idxfont\footnotesize
-\robustify{\idxfont}
-%    \end{macrocode}
-% \end{macro}^^A \idxfont
 % \begin{macro}{\if@declare}
 % \begin{macro}{\if@stareddeclare}
 % \changes{v2.02}{2014/10/09}{neu}^^A
@@ -1463,16 +1463,25 @@
     \setlength\changedatskip{-\baselineskip}%
   }{}%
 }
-\NewDocumentCommand\tud@item@pkg{od()od''}{%
+\NewDocumentCommand\tud@item@pkg{od<>d()}{%
   \itempackages[{%
     \IfValueT{#1}{%
-      \manualhyperdef{files:#1}%
-      \IfValueTF{#2}{%
-        \def\@tempa{http://www.ctan.org/pkg/#2}%
-      }{%
-        \def\@tempa{http://www.ctan.org/pkg/#1}%
+%      \manualhyperdef{files:#1}%
+%      \href{\@tempa}{\Package{#1}'none'|!|}%
+      \let\@tempb\relax%
+      \@for\@tempa:=#1\do{%
+        \ifx\@tempa\@empty\else\ifx\@tempa\space\else%
+          \@tempb%
+          \manualhyperdef{files:\@tempa}%
+          \IfValueTF{#2}{%
+            \edef\@tempc{http://www.ctan.org/pkg/#2}%
+          }{%
+            \edef\@tempc{http://www.ctan.org/pkg/\@tempa}%
+          }%
+          \href{\@tempc}{\expandafter\Package\expandafter{\@tempa}'none'|!|}%
+          \def\@tempb{, }%
+        \fi\fi%
       }%
-      \href{\@tempa}{\Package{#1}'none'|!|}%
       \IfValueT{#3}{%
         \quad(%
         \let\@tempb\relax%
@@ -1480,19 +1489,6 @@
           \@tempb%
           \manualhyperdef{files:\@tempa}%
           \expandafter\Package\expandafter{\@tempa}'none'|!|%
-          \def\@tempb{, }%
-        }%
-        )%
-      }%
-      \IfValueT{#4}{%
-        \quad(%
-        \let\@tempb\relax%
-        \@for\@tempa:=#4\do{%
-          \@tempb%
-          \manualhyperdef{files:\@tempa}%
-          \href{http://www.ctan.org/pkg/\@tempa}{%
-            \expandafter\Package\expandafter{\@tempa}'none'|!|%
-          }%
           \def\@tempb{, }%
         }%
         )%
@@ -2248,7 +2244,7 @@
 %<*class>
 \newcommand*\@CTANLink{}
 \let\@CTANLink\relax
-\NewDocumentCommand\Package{smd''d()d||}{%
+\NewDocumentCommand\Package{smd''d<>d||}{%
   \if@changelog%
     \@ProcessChangedAt{#1}{files}{\protect\sbnfont}{#2}{Paket}%
   \else%
@@ -2264,7 +2260,7 @@
 }
 %</class>
 %<*package>
-\NewDocumentCommand\Package{smd()}{%
+\NewDocumentCommand\Package{smd<>}{%
   \ifdin{#2}{%
     \IfBooleanTF{#1}{%
       \manualhyperref{files:#2}{\textsbn{#2}}%
@@ -2438,7 +2434,7 @@
 \newcommand*\@TempKey{}
 \NewDocumentCommand\Key{smmod''D(){\@splitdeclare}d||}{%
   \if@changelog%
-    \@ProcessChangedAt{#1}(#6){macros}<#2>{\ttfamily}{#3}{Parameter}%
+    \@ProcessChangedAt{#1}(#6){macros}!#2!{\ttfamily}{#3}{Parameter}%
   \else%
     \IfValueTF{#4}{%
       \gdef\@TempKey{%
@@ -2449,7 +2445,7 @@
     }%
     \SetIndexFormat{#1}{#7}%
     \@ProcessOutput{\texttt{#3}}[\@TempKey]'#5'(#6)%
-      {macros}<#2>[\ttfamily]{#3}[\nobreakspace{\idxfont(Parameter)}]%
+      {macros}!#2![\ttfamily]{#3}[\nobreakspace{\idxfont(Parameter)}]%
   \fi%
 }
 %    \end{macrocode}
@@ -2661,7 +2657,7 @@
 % \marg{Index}\parg{Haupteintrag}\oarg{Vorsatz}\marg{Eintrag}\oarg{Anhang}
 % \endgroup
 %    \begin{macrocode}
-\NewDocumentCommand\@ProcessOutput{mod''d()md<>omo}{%
+\NewDocumentCommand\@ProcessOutput{mod''d()md!!omo}{%
 %    \end{macrocode}
 % Als erstes wird das zu verwendende Label wird definiert. Für Parameter muss
 % der Hyperlink dabei aufgrund des definierten Haupteintrag anders ausgeführt
@@ -3260,7 +3256,7 @@
 % Untereintrag für die dazugehörige Umgebung beziehungsweise den dazugehörigen
 % Befehl erzeugt.
 %    \begin{macrocode}
-\NewDocumentCommand\@ProcessChangedAt{md()md<>mmm}{%
+\NewDocumentCommand\@ProcessChangedAt{md()md!!mmm}{%
   \IfValueTF{#4}{%
     \@createlabel\@templabel{#3:#4:#6}{#2}%
   }{%
