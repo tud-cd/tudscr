@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-layout.dtx}[%
-  2015/07/24 v2.05 TUD-KOMA-Script (layout)%
+  2015/08/05 v2.05 TUD-KOMA-Script (layout)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -524,9 +524,9 @@
 %    \begin{macrocode}
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \if@tempswa%
-      \def\tud@cleardoublepage{\cleardoubleoddpage}%
+      \renewcommand*\tud@cleardoublepage{\cleardoubleoddpage}%
     \else%
-      \def\tud@cleardoublepage{\null\thispagestyle{empty}\newpage}%
+      \renewcommand*\tud@cleardoublepage{\null\thispagestyle{empty}\newpage}%
     \fi%
   \else%
 %    \end{macrocode}
@@ -538,7 +538,7 @@
 % Außerdem kann ein Seitenstil gezielt ausgewählt werden.
 %    \begin{macrocode}
     \ifstr{#1}{current}{%
-      \def\tud@cleardoublepage{\cleardoubleoddstandardpage}%
+      \renewcommand*\tud@cleardoublepage{\cleardoubleoddstandardpage}%
       \FamilyKeyStateProcessed%
     }{%
 %    \end{macrocode}
@@ -549,7 +549,7 @@
 %    \begin{macrocode}
       \AfterPreamble{%
         \ifcsdef{ps@#1}{%
-          \def\tud@cleardoublepage{\cleardoubleoddpageusingstyle{#1}}%
+          \renewcommand*\tud@cleardoublepage{\cleardoubleoddpageusingstyle{#1}}%
         }{%
           \ClassError{\TUDClassName}{`#1' is no valid pagestyle}{%
             You tried to use `#1' as a pagestyle for option\MessageBreak%
@@ -1021,9 +1021,9 @@
 % \ToDo{Reimplementierung mit \cs{DeclareSectionCommand}}[v2.05]
 %    \begin{macrocode}
   \else% !false
-    \def\tud@section@fontcolor{}%
+    \renewcommand*\tud@section@fontcolor{}%
     \ifcase\tud@layout@section\relax\or\else% *color
-      \def\tud@section@fontcolor{HKS41}%
+      \renewcommand*\tud@section@fontcolor{HKS41}%
     \fi%
     \tud@sectioning@set[addsec]{section}{%
       \tud@font@heading%
@@ -1127,9 +1127,9 @@
 \newcommand*\tud@partheadstartvskip{}
 \let\tud@partheadstartvskip\partheadstartvskip%
 \pretocmd{\tud@partheadstartvskip}{%
-  \def\tud@part@fontcolor{}% false/true
+  \renewcommand*\tud@part@fontcolor{}% false/true
   \ifcase\tud@layout@part\relax\or\else% *color
-    \def\tud@part@fontcolor{HKS41}%
+    \renewcommand*\tud@part@fontcolor{HKS41}%
   \fi%
 }{}{\tud@patch@wrn{tud@partheadstartvskip}}
 %</article|poster>
@@ -1139,17 +1139,17 @@
 %    \begin{macrocode}
 %<*book|report>
 \newcommand*\tud@partheadstartvskip{%
-  \def\tud@part@fontcolor{}% false/true
+  \renewcommand*\tud@part@fontcolor{}% false/true
   \ifcase\tud@layout@part\relax\or\or% litecolor
-    \def\tud@part@fontcolor{HKS41}%
+    \renewcommand*\tud@part@fontcolor{HKS41}%
   \or% barcolor
-    \def\tud@part@fontcolor{HKS41}%
+    \renewcommand*\tud@part@fontcolor{HKS41}%
   \or% bicolor
-    \def\tud@part@fontcolor{HKS41}%
+    \renewcommand*\tud@part@fontcolor{HKS41}%
   \or% color
-    \def\tud@part@fontcolor{HKS41!30}%
+    \renewcommand*\tud@part@fontcolor{HKS41!30}%
   \or% full
-    \def\tud@part@fontcolor{HKS41!30}%
+    \renewcommand*\tud@part@fontcolor{HKS41!30}%
   \fi%
   \tud@layout@specialpage@set{part}%
   \begingroup%
@@ -1210,7 +1210,7 @@
 %    \begin{macrocode}
 \newcommand*\tud@partheadendvskip{%
   \tud@cleardoublespecialpage{%
-    \def\tud@pagecolor{}%
+    \renewcommand*\tud@pagecolor{}%
     \ifcase\tud@layout@part\relax\or% true
       \cs@std@lock{tud@head@bar}{0}%
     \or% litecolor
@@ -1220,10 +1220,10 @@
     \or% bicolor
       \cs@set@lock{tud@head@bar}{3}%
     \or% color
-      \def\tud@pagecolor{HKS41}%
+      \renewcommand*\tud@pagecolor{HKS41}%
       \cs@set@lock{tud@head@bar}{1}%
     \or% full
-      \def\tud@pagecolor{HKS41}%
+      \renewcommand*\tud@pagecolor{HKS41}%
       \cs@set@lock{tud@head@bar}{3}%
     \fi%
     \addtokomafont{pagenumber}{\usekomafont{tudheadings}}%
@@ -1407,7 +1407,9 @@
 % gepatchte Version von \cs{set@@@@preamble}.
 %    \begin{macrocode}
 \newcommand*\tud@partpreamble{%
-  \ifnum\tud@abstract@level>\@ne\relax\def\tud@abstract@level{1}\fi% sec/chap
+  \ifnum\tud@abstract@level>\@ne\relax% sec/chap
+    \renewcommand*\tud@abstract@level{1}%
+  \fi%
   \KOMAoptions{titlepage=false}%
   \addtokomafont{disposition}{\tud@color{\tud@part@fontcolor}}%
   \addtokomafont{dictumtext}{\tud@color{\tud@part@fontcolor}}%
@@ -1429,9 +1431,9 @@
 % für die jeweilig gewählte Option ausgewählt.
 %    \begin{macrocode}
 \newcommand*\tud@chapterheadstartvskip{%
-  \def\tud@chapter@fontcolor{}%
+  \renewcommand*\tud@chapter@fontcolor{}%
   \ifcase\tud@layout@chapter\relax\or\else% *color
-    \def\tud@chapter@fontcolor{HKS41}%
+    \renewcommand*\tud@chapter@fontcolor{HKS41}%
   \fi%
   \vspace*{%
     \dimexpr\tud@dim@headdiff+\tud@dim@headingsvskip+\parskip\relax%
@@ -1528,7 +1530,9 @@
 % Ausführung des Befehls durch die gepatchte Version von \cs{set@@@@preamble}.
 %    \begin{macrocode}
 \newcommand*\tud@chapterpreamble{%
-  \ifnum\tud@abstract@level>\@ne\relax\def\tud@abstract@level{1}\fi% sec/chap
+  \ifnum\tud@abstract@level>\@ne\relax% sec/chap
+    \renewcommand*\tud@abstract@level{1}%
+  \fi%
   \KOMAoptions{titlepage=false}%
 %    \end{macrocode}
 % Die Farb- und Schrifteinstellungen sind nur für reine Kapitelseiten notwendig.
@@ -1621,7 +1625,7 @@
 %    \begin{macrocode}
   \if@tud@chapterpage%
     \tud@cleardoublespecialpage{%
-      \def\tud@pagecolor{}%
+      \renewcommand*\tud@pagecolor{}%
       \let\tud@foot@fontcolor\tud@chapter@fontcolor%
       \ifcase\tud@layout@chapter\relax\or% true
         \cs@std@lock{tud@head@bar}{0}%
@@ -1632,10 +1636,10 @@
       \or% bicolor
         \cs@set@lock{tud@head@bar}{3}%
       \or% color
-        \def\tud@pagecolor{HKS41!10}%
+        \renewcommand*\tud@pagecolor{HKS41!10}%
         \cs@set@lock{tud@head@bar}{1}%
       \or% fullcolor
-        \def\tud@pagecolor{HKS41!10}%
+        \renewcommand*\tud@pagecolor{HKS41!10}%
         \cs@set@lock{tud@head@bar}{3}%
       \fi%
       \addtokomafont{pagenumber}{\usekomafont{tudheadings}}%
