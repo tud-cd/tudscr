@@ -1,4 +1,4 @@
-% \CheckSum{225}
+% \CheckSum{258}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -329,35 +329,97 @@
 % \end{macro}^^A \tud@footnote@rehyper
 % \end{macro}^^A \tud@footnote@unhyper
 % \end{macro}^^A \tudbookmark
-% \begin{macro}{\maketitle}
-% \begin{macro}{\tableofcontents}
-% Für den Titel und das Inhaltsverzeichnis werden Outline-Einträge erzeugt.
+% \begin{macro}{\tud@bookmark@startatroot}
+% \changes{v2.05}{2015/08/05}{neu}^^A
+% Wird das Paket \pkg{bookmark} geladen, können die erzeugten Outlines gezielt 
+% auf der obersten Ebene erzeugt werden.
 %    \begin{macrocode}
-\pretocmd{\maketitle}{%
-  \if@tud@bookmarks%
-    \ifdef{\bookmarksetup}{\bookmarksetup{startatroot}}{}%
-  \fi%
-%<*book|report>
-  \tudbookmark[0]{\titlepagename}{title}%
-%</book|report>
-%<*article|poster>
-  \tudbookmark[1]{\titlepagename}{title}%
-%</article|poster>
-}{}{\tud@patch@wrn{maketitle}}
-\pretocmd{\tableofcontents}{%
-  \if@tud@bookmarks%
-    \ifdef{\bookmarksetup}{\bookmarksetup{startatroot}}{}%
-  \fi%
-%<*book|report>
-  \tudbookmark[0]{\contentsname}{toc}%
-%</book|report>
-%<*article|poster>
-  \tudbookmark[1]{\contentsname}{toc}%
-%</article|poster>
-}{}{\tud@patch@wrn{tableofcontents}}
+\newcommand*\tud@bookmark@startatroot{}
+\let\tud@bookmark@startatroot\relax
+\AfterPackage{bookmark}{%
+  \def\tud@bookmark@startatroot{%
+    \if@tud@bookmarks\bookmarksetup{startatroot}\fi%
+  }%
+}
 %    \end{macrocode}
+% \end{macro}^^A \tud@bookmark@startatroot
+% \begin{environment}{titlepage}
+% \changes{v2.05}{2015/08/05}{neu}^^A
+% \begin{macro}{\@maketitle}
+% \changes{v2.05}{2015/08/05}{neu}^^A
+% \begin{macro}{\tud@@maketitlehead}
+% \changes{v2.05}{2015/08/05}{neu}^^A
+% Ist die Option \opt{tudbookmarks} aktiviert, werden für Umschlag- und 
+% Titelseite PDF"=Lesezeichen bzw. Outline-Einträge erzeugt.
+%    \begin{macrocode}
+%<*book|report|article>
+\apptocmd{\titlepage}{%
+  \tud@bookmark@startatroot%
+  \if@tud@cover%
+    \tudbookmark[%
+%<book|report>    0%
+%<article>    1%
+    ]{\coverpagename}{cover}%
+  \else%
+    \tudbookmark[%
+%<book|report>    0%
+%<article>    1%
+    ]{\titlepagename}{title}%
+  \fi%
+%</book|report|article>
+}{}{\tud@patch@wrn{titlepage}}
+%    \end{macrocode}
+% Dies geschieht außerdem auch für die Titelköpfe.
+%    \begin{macrocode}
+\pretocmd{\tud@maketitlehead}{%
+  \tud@bookmark@startatroot%
+  \tudbookmark[%
+%<book|report>  0%
+%<article|poster>  1%
+  ]{\titlename}{title}%
+}{}{\tud@patch@wrn{tud@maketitlehead}}
+\pretocmd{\@maketitle}{%
+  \tud@bookmark@startatroot%
+  \tudbookmark[%
+%<book|report>  0%
+%<article|poster>  1%
+  ]{\titlename}{title}%
+}{}{\tud@patch@wrn{@maketitle}}
+%    \end{macrocode}
+% \end{macro}^^A \tud@@maketitlehead
+% \end{macro}^^A \@maketitle
+% \end{environment}^^A titlepage
+% \begin{macro}{\tableofcontents}
+% \begin{macro}{\listoffigures}
+% \begin{macro}{\listoftables}
+% Für die Verzeichnisse geschieht dies auch. Für das Inhaltsverzeichnis ist 
+% hierfür etwas mehr Aufwand notwendig. Für dieses wird im Normalfall keine 
+% PDF-Outline erzeugt. Deshalb ist hier ein wenig Trickserei notwendig, um zwar 
+% einen solchen Eintrag so erzeugen, dieses dabei aber nicht in sich selbst 
+% einzutragen.
+%    \begin{macrocode}
+\BeforeTOCHead[toc]{%
+  \tud@bookmark@startatroot%
+  \let\@tempc\relax%
+  \iftocfeature{toc}{totoc}{}{%
+    \if@tud@bookmarks%
+      \setuptoc{toc}{totoc}%
+      \tud@cmd@store{addtocontents}%
+      \def\@tempc{%
+        \unsettoc{toc}{totoc}%
+        \tud@cmd@restore{addtocontents}%
+      }%
+      \let\addtocontents\@gobbletwo%
+    \fi%
+  }%
+}
+\AfterTOCHead[toc]{\@tempc}
+\BeforeTOCHead[lof]{\tud@bookmark@startatroot}%
+\BeforeTOCHead[lot]{\tud@bookmark@startatroot}%
+%    \end{macrocode}
+% \end{macro}^^A \listoftables
+% \end{macro}^^A \listoffigures
 % \end{macro}^^A \tableofcontents
-% \end{macro}^^A \maketitle
 %
 % \subsection{Bugfixing}
 %
