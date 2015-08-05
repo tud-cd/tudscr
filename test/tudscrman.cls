@@ -238,7 +238,6 @@
   othercode={\renewcommand*\subitem{\@idxitem\hspace*{15\p@}}}%
 }
 \newcommand*\xdyopt{-M tudscrman-temp.xdy -L german-din}
-
 \@ifpackagelater{imakeidx}{2013/07/12}{%
   \ClassWarning%
   {tudscrman}{%
@@ -369,6 +368,9 @@
 \RequirePackage{tikz}[2013/12/13]
 \RequirePackage{pdfpages}[2013/08/25]
 \RequirePackage{units}[1998/08/04]
+\newcommand*\idxfont{}
+\let\idxfont\footnotesize
+\robustify{\idxfont}
 \newrobustcmd*\bsc{\@backslashchar}
 \newcommand*\tud@shellescape@wrn{%
   \ClassWarning%
@@ -404,9 +406,6 @@
     \IfValueTF{#2}{\def\@IndexFormat{#2}}{\def\@IndexFormat{}}%
   }%
 }
-\newcommand*\idxfont{}
-\let\idxfont\footnotesize
-\robustify{\idxfont}
 \newif\if@declare
 \newif\if@stareddeclare
 \newif\if@openindex
@@ -539,18 +538,9 @@
     \@afterindentfalse\@afterheading%
   \fi%
 }
-\newcommand*\@splitdeclare{mainclasses}
+\newcommand*\@subdeclare{mainclasses}
 \NewDocumentEnvironment{Declaration*}{omt!}{%
-  \IfBooleanT{#3}{%
-    \ifstr{\@splitdeclare}{mainclasses}{%
-      \gdef\@splitdeclare{#2}%
-    }{%
-      \ClassError{tudscrman}{Nested environment `Declaration*{...}!'}{%
-        It is not possible to nest this environment, when\MessageBreak%
-        a cross-label was given before.%
-      }%
-    }%
-  }%
+  \IfBooleanT{#3}{\SubDeclaration{#2}}%
   \@changedatdeclare{#1}{#2}%
   \@stareddeclaretrue%
   \global\@deprecatedfalse%
@@ -566,15 +556,26 @@
   \global\@deprecatedfalse%
   \@gobbleparameters%
   \@declaretrue\@openindexfalse#2\@declarefalse%
-  \IfBooleanT{#3}{\gdef\@splitdeclare{mainclasses}}%
+  \IfBooleanT{#3}{\endSubDeclaration}%
 }
-\newcommand*\tud@ifsplitdeclare[3]{%
+
+\newenvironment{SubDeclaration}[1]{%
+  \ifstr{\@subdeclare}{mainclasses}{%
+    \gdef\@subdeclare{#1}%
+  }{%
+    \ClassError{tudscrman}{Nested environment `Declaration*{...}!'}{%
+      It is not possible to nest this environment, when\MessageBreak%
+      a cross-label was given before.%
+    }%
+  }%
+}{\gdef\@subdeclare{mainclasses}}
+\newcommand*\tud@ifsubdeclare[3]{%
   \@tempswafalse%
   \IfValueT{#1}{\ifstr{#1}{}{}{\ifstr{#1}{mainclasses}{}{\@tempswatrue}}}%
   \if@tempswa#2\else#3\fi%
 }
 \newcommand*\@templabel{}
-\newcommand*\@createlabel[3]{%
+\NewDocumentCommand\@createlabel{smmm}{%
   \begingroup%
     \let\Class\@firstofone%
     \let\Package\@firstofone%
@@ -583,23 +584,27 @@
     \let\texttt\@firstofone%
     \let\textsbn\@firstofone%
     \let\textsbs\@firstofone%
-    \tud@ifsplitdeclare{#3}{%
+    \tud@ifsubdeclare{#4}{%
+      \@tempswatrue%
+      \IfBooleanT{#1}{\ifcsdef{r@#4:#3}{}{\@tempswafalse}}%
+    }{\@tempswafalse}%
+    \if@tempswa%
       \edef\@tempa{%
         \noexpand\endgroup%
-        \noexpand\edef\noexpand#1{#3:#2}%
+        \noexpand\edef\noexpand#2{#4:#3}%
       }%
-    }{%
+    \else
       \edef\@tempa{%
         \noexpand\endgroup%
-        \noexpand\edef\noexpand#1{#2}%
+        \noexpand\edef\noexpand#2{#3}%
       }%
-    }%
+    \fi%
   \@tempa%
 }
 \newcommand*\@tempentry{}
 \newcommand*\@tempkeyentry{}
 \newcommand*\@createentry[3]{%
-  \tud@ifsplitdeclare{#3}{%
+  \tud@ifsubdeclare{#3}{%
     \edef#1{#2\noexpand\nobreakspace{\idxfont(#3)}}%
   }{%
     \edef#1{#2}%
@@ -702,17 +707,23 @@
     \setlength\changedatskip{-\baselineskip}%
   }{}%
 }
-% §§§ Argument für Link mit "!"
-\NewDocumentCommand\tud@item@pkg{od()od''}{%
+\NewDocumentCommand\tud@item@pkg{od<>d()}{%
   \itempackages[{%
     \IfValueT{#1}{%
-      \manualhyperdef{files:#1}%
-      \IfValueTF{#2}{%
-        \def\@tempa{http://www.ctan.org/pkg/#2}%
-      }{%
-        \def\@tempa{http://www.ctan.org/pkg/#1}%
+      \let\@tempb\relax%
+      \@for\@tempa:=#1\do{%
+        \ifx\@tempa\@empty\else\ifx\@tempa\space\else%
+          \@tempb%
+          \manualhyperdef{files:\@tempa}%
+          \IfValueTF{#2}{%
+            \edef\@tempc{http://www.ctan.org/pkg/#2}%
+          }{%
+            \edef\@tempc{http://www.ctan.org/pkg/\@tempa}%
+          }%
+          \href{\@tempc}{\expandafter\Package\expandafter{\@tempa}'none'|!|}%
+          \def\@tempb{, }%
+        \fi\fi%
       }%
-      \href{\@tempa}{\Package{#1}'none'|!|}%
       \IfValueT{#3}{%
         \quad(%
         \let\@tempb\relax%
@@ -720,19 +731,6 @@
           \@tempb%
           \manualhyperdef{files:\@tempa}%
           \expandafter\Package\expandafter{\@tempa}'none'|!|%
-          \def\@tempb{, }%
-        }%
-        )%
-      }%
-      \IfValueT{#4}{%
-        \quad(%
-        \let\@tempb\relax%
-        \@for\@tempa:=#4\do{%
-          \@tempb%
-          \manualhyperdef{files:\@tempa}%
-          \href{http://www.ctan.org/pkg/\@tempa}{%
-            \expandafter\Package\expandafter{\@tempa}'none'|!|%
-          }%
           \def\@tempb{, }%
         }%
         )%
@@ -794,12 +792,11 @@
 \pdfexpandableoutline{Class}
 \newcommand*\@CTANLink{}
 \let\@CTANLink\relax
-\NewDocumentCommand\Package{smd''d()d||}{%
+\NewDocumentCommand\Package{smd''d<>d||}{%
   \if@changelog%
     \@ProcessChangedAt{#1}{files}{\protect\sbnfont}{#2}{Paket}%
   \else%
     \ifdin{#2}{%
-      % §§§ Argument für Link mit !
       \IfValueTF{#4}{%
         \ifstr{#4}{}{\let\@CTANLink\relax}{\def\@CTANLink{pkg/#4}}%
       }{\def\@CTANLink{pkg/#2}}%
@@ -812,7 +809,7 @@
 \DeclareExpandableDocumentCommand\@Package{sm}{#2}
 \pdfexpandableoutline{Package}
 \newcommand*\@TempOption{}
-\NewDocumentCommand\Option{smod''D(){\@splitdeclare}d||}{%
+\NewDocumentCommand\Option{smod''D(){\@subdeclare}d||}{%
   \if@changelog%
     \@ProcessChangedAt{#1}(#5){options}{\ttfamily}{#2}{Option}%
   \else%
@@ -824,7 +821,7 @@
 \DeclareExpandableDocumentCommand\@Option{sm}{#2}
 \pdfexpandableoutline{Option}
 \newcommand*\@TempEnvironment{}
-\NewDocumentCommand\Environment{smod''D(){\@splitdeclare}d||}{%
+\NewDocumentCommand\Environment{smod''D(){\@subdeclare}d||}{%
   \if@changelog%
     \@ProcessChangedAt{#1}(#5){macros}{\ttfamily}{#2}{Umgebung}%
   \else%
@@ -843,7 +840,7 @@
 }
 \DeclareExpandableDocumentCommand\@Environment{sm}{#2}
 \pdfexpandableoutline{Environment}%
-\NewDocumentCommand\Macro{smd''D(){\@splitdeclare}d||}{%
+\NewDocumentCommand\Macro{smd''D(){\@subdeclare}d||}{%
   \if@changelog%
     \@ProcessChangedAt{#1}(#4){macros}{\ttfamily\bsc}{#2}{Befehl}%
   \else%
@@ -853,9 +850,9 @@
 }
 \DeclareExpandableDocumentCommand\@Macro{sm}{#2}
 \newcommand*\@TempKey{}
-\NewDocumentCommand\Key{smmod''D(){\@splitdeclare}d||}{%
+\NewDocumentCommand\Key{smmod''D(){\@subdeclare}d||}{%
   \if@changelog%
-    \@ProcessChangedAt{#1}(#6){macros}<#2>{\ttfamily}{#3}{Parameter}%
+    \@ProcessChangedAt{#1}(#6){macros}!#2!{\ttfamily}{#3}{Parameter}%
   \else%
     \IfValueTF{#4}{%
       \gdef\@TempKey{%
@@ -866,10 +863,10 @@
     }%
     \SetIndexFormat{#1}{#7}%
     \@ProcessOutput{\texttt{#3}}[\@TempKey]'#5'(#6)%
-      {macros}<#2>[\ttfamily]{#3}[\nobreakspace{\idxfont(Parameter)}]%
+      {macros}!#2![\ttfamily]{#3}[\nobreakspace{\idxfont(Parameter)}]%
   \fi%
 }
-\NewDocumentCommand\Term{smd''D(){\@splitdeclare}d||}{%
+\NewDocumentCommand\Term{smd''D(){\@subdeclare}d||}{%
   \if@changelog%
     \@ProcessChangedAt{#1}(#4){terms}{\ttfamily\bsc}{#2}{Bezeichner}%
   \else%
@@ -908,7 +905,7 @@
   \Term{#1} & \@nameuse{#1} & %
     \selectlanguage{english}\vspace*{\@tempdimc}\@nameuse{#1}\tabularnewline%
 }
-\NewDocumentCommand\Font{smd''D(){\@splitdeclare}d||}{%
+\NewDocumentCommand\Font{smd''D(){\@subdeclare}d||}{%
   \if@changelog%
     \@ProcessChangedAt{#1}(#4){fonts}{\ttfamily}{#2}{Schriftelement}%
   \else%
@@ -918,18 +915,21 @@
     ]'#3'(#4){fonts}[\ttfamily]{#2}%
   \fi%
 }
-\NewDocumentCommand\Color{smod''D(){\@splitdeclare}d||}{%
+\newcommand*\@TempColor{}
+\NewDocumentCommand\Color{smod''D(){\@subdeclare}d||}{%
+  \def\@TempColor{#5}%
+  \ifstr{\@TempColor}{mainclasses}{\def\@TempColor{\Package{tudscrcolor}}}{}%
   \if@changelog%
-    \@ProcessChangedAt{#1}(#5){colors}{\ttfamily}{#2}{Farbe}%
+    \@ProcessChangedAt{#1}(\@TempColor){colors}{\ttfamily}{#2}{Farbe}%
   \else%
     \SetIndexFormat{#1}{#6}%
     \@ProcessOutput{\texttt{#2}}[%
       \IfValueT{#3}{\nobreakspace\texttt{(#3)}}%
       \if@declare\nobreakspace{\idxfont(Farbe)}\fi%
-    ]'#4'(#5){colors}[\ttfamily]{#2}%
+    ]'#4'(\@TempColor){colors}[\ttfamily]{#2}%
   \fi%
 }
-\NewDocumentCommand\PageStyle{smd''D(){\@splitdeclare}d||}{%
+\NewDocumentCommand\PageStyle{smd''D(){\@subdeclare}d||}{%
   \if@changelog%
     \@ProcessChangedAt{#1}(#4){macros}{\ttfamily}{#2}{Seitenstil}%
   \else%
@@ -939,7 +939,7 @@
     ]'#3'(#4){macros}[\ttfamily]{#2}[\nobreakspace{\idxfont(Seitenstil)}]%
   \fi%
 }
-\NewDocumentCommand\Counter{smd''D(){\@splitdeclare}d||}{%
+\NewDocumentCommand\Counter{smd''D(){\@subdeclare}d||}{%
   \if@changelog%
     \@ProcessChangedAt{#1}(#4){macros}{\ttfamily}{#2}{Z\"ahler}%
   \else%
@@ -949,7 +949,7 @@
     ]'#3'(#4){macros}[\ttfamily]{#2}[\nobreakspace{\idxfont(Z\"ahler)}]%
   \fi%
 }
-\NewDocumentCommand\Length{smd''D(){\@splitdeclare}d||}{%
+\NewDocumentCommand\Length{smd''D(){\@subdeclare}d||}{%
   \if@changelog%
     \@ProcessChangedAt{#1}(#4){macros}{\ttfamily\bsc}{#2}{L\"ange}%
   \else%
@@ -959,12 +959,25 @@
     ]'#3'(#4){macros}[\ttfamily\bsc]{#2}[\nobreakspace{\idxfont(L\"ange)}]%
   \fi%
 }
-\NewDocumentCommand\@ProcessOutput{mod''d()md<>omo}{%
-  \IfValueTF{#6}{%
-    \@createlabel\@templabel{#5:#6:#8}{#4}%
-  }{%
-    \@createlabel\@templabel{#5:#8}{#4}%
+% §§§ ToDo parallel Liste mit erzeugten Labels erstellen und vergleichen
+% §§§ \@subdeclaration mit einbeziehen, evtl. ebenfalls eine Liste führen
+\newcommand*\tud@addto@labellist[1]{}
+\newcommand*\tracinglabels{%
+  \newcommand*\@missinglabellist{}
+  \renewcommand*\tud@addto@labellist[1]{%
+    \typeout{+++++ label ##1 missing on line \the\inputlineno}%
+    \expandafter\ifinlist\expandafter{##1}{\@missinglabellist}{}{%
+      \listxadd\@missinglabellist{##1}%
+    }%
   }%
+  \AfterEndDocument{%
+    \sortlist{\@missinglabellist}%
+    \typeout{+++++ missing labels sorted +++++}%
+    \def\@tempa##1{\typeout{##1}}%
+    \forlistloop\@tempa{\@missinglabellist}%
+  }%
+}\@onlypreamble\tracinglabels
+\NewDocumentCommand\@ProcessOutput{mod''d()md!!omo}{%
   \if@declare%
     \if@openindex%
       \IfValueT{#3}{%
@@ -973,6 +986,11 @@
           shorthand like '#3' within the arguments of\MessageBreak%
           the environment `Declaration'%
         }%
+      }%
+      \IfValueTF{#6}{%
+        \@createlabel\@templabel{#5:#6:#8}{#4}%
+      }{%
+        \@createlabel\@templabel{#5:#8}{#4}%
       }%
       \if@deprecated%
         \expandafter\IfBooleanF\expandafter{\@IndexFormat}{%
@@ -1017,6 +1035,11 @@
         \@HyperIndex{#5}{#6}{#7}{#8}{#9}{#4}{\@IndexFormat}%
       }%
     \fi%
+    \IfValueTF{#6}{%
+      \@createlabel*\@templabel{#5:#6:#8}{#4}%
+    }{%
+      \@createlabel*\@templabel{#5:#8}{#4}%
+    }%
     \ifcsdef{r@\@templabel}{%
       \def\@tempa{%
         \mbox{\hyperref{}{\jobname}{\@templabel}{#1}\IfValueT{#2}{#2}}%
@@ -1042,15 +1065,13 @@
       \@tempa\@tempb%
     }{%
       \def\@tempa{\mbox{#1\IfValueT{#2}{#2}}}%
-      \IfValueTF{#3}{%
-        \def\@tempb##1{\ClassWarning{tudscrman}{##1}}%
-      }{%
-        \def\@tempb##1{\ClassInfo{tudscrman}{##1}}%
+      \IfValueT{#3}{%
+        \ClassWarning{tudscrman}{%
+          No cross-reference created, label \@templabel\MessageBreak%
+          is missing%
+        }%
       }%
-      \@tempb{%
-        No cross-reference created, label \@templabel\MessageBreak%
-        is missing%
-      }%
+      \tud@addto@labellist{\@templabel}%
       \ifx\@CTANLink\relax%
         \@tempa%
       \else%
@@ -1067,7 +1088,7 @@
   \IfValueTF{#5}{\def\@tempb{#5}}{\def\@tempb{}}%
   \IfValueTF{#7}{\edef\@tempc{|#7}}{\def\@tempc{}}%
   \IfValueTF{#2}{%
-    \@createlabel\@templabel{#1:#2:#4}{#6}%
+    \@createlabel*\@templabel{#1:#2:#4}{#6}%
     \@createentry\@tempentry{%
       \begingroup\expandonce\@tempa#4\endgroup\expandonce\@tempb%
     }{#6}%
@@ -1087,7 +1108,7 @@
       \index[keys]{\expandonce\@tempkeyentry\expandonce\@tempc}%
     }%
   }{%
-    \@createlabel\@templabel{#1:#4}{#6}%
+    \@createlabel*\@templabel{#1:#4}{#6}%
     \@createentry\@tempentry{%
       \begingroup\expandonce\@tempa#4\endgroup\expandonce\@tempb%
     }{#6}%
@@ -1119,17 +1140,16 @@
 \newcommand*\ChangedAt@@Split[3]{%
   \in@{*}{#1}%
   \ifin@%
-    \tud@ifsplitdeclare{\@splitdeclare}{%
-      \protected@edef\@tempa{Allgemein\nobreakspace\@splitdeclare!#2}%
+    \tud@ifsubdeclare{\@subdeclare}{%
+      \protected@edef\@tempa{Allgemein\nobreakspace\@subdeclare!#2}%
     }{%
       \protected@edef\@tempa{Allgemein!#2}%
     }%
   \else%
-    \tud@ifsplitdeclare{\@splitdeclare}{%
+    \tud@ifsubdeclare{\@subdeclare}{%
       \protected@edef\@tempa{%
-        Implementierung\nobreakspace\@splitdeclare!#2!%
-        \IfValueTF{#3}{#3}{\noexpand\@changedatdeclaredefault}!%
-        #1(\@splitdeclare)%
+        Implementierung\nobreakspace\@subdeclare!#2!%
+        \IfValueTF{#3}{#3}{\noexpand\@changedatdeclaredefault}!#1(\@subdeclare)%
       }%
     }{%
       \protected@edef\@tempa{%
@@ -1156,8 +1176,8 @@
 }
 \newlength\changedatskip
 \NewDocumentCommand\ChangedAt{sO{\changedatskip}mO{Allgemein}}{%
-  \tud@ifsplitdeclare{\@splitdeclare}{%
-    \ChangedAt@Process[#1]{#2}[#4\nobreakspace\@splitdeclare]{#3}%
+  \tud@ifsubdeclare{\@subdeclare}{%
+    \ChangedAt@Process[#1]{#2}[#4\nobreakspace\@subdeclare]{#3}%
   }{%
     \ChangedAt@Process[#1]{#2}[#4]{#3}%
   }%
@@ -1233,21 +1253,26 @@
 \NewDocumentCommand\Replace{ommm}{%
   \@for\@tempa:={,#4}\do{%
     \ifx\@tempa\@empty\else\ifx\@tempa\space\else%
-      \protected@edef\@tempb{%
-        Implementierung!#2!\emph{entf\"allt}|see{#3}!\@tempa%
+      \def\@tempb{#3}%
+      \tud@ifsubdeclare{\@subdeclare}{%
+        \edef\@tempa{\expandonce\@tempa(\@subdeclare)}
+        \edef\@tempb{\expandonce\@tempb(\@subdeclare)}
+      }{}%
+      \protected@edef\@tempc{%
+        Implementierung!#2!\emph{entf\"allt}|see{\@tempb}!\@tempa%
       }%
       \expandafter\listadd\expandafter\@changedatdeclarelist\expandafter{%
-        \@tempb%
+        \@tempc%
       }%
-      \IfValueT{#1}{\index[#1]{\@tempa|see{#3}}}%
+      \IfValueT{#1}{\index[#1]{\@tempa|see{\@tempb}}}%
     \fi\fi%
   }%
 }
-\NewDocumentCommand\@ProcessChangedAt{md()md<>mmm}{%
+\NewDocumentCommand\@ProcessChangedAt{md()md!!mmm}{%
   \IfValueTF{#4}{%
-    \@createlabel\@templabel{#3:#4:#6}{#2}%
+    \@createlabel*\@templabel{#3:#4:#6}{#2}%
   }{%
-    \@createlabel\@templabel{#3:#6}{#2}%
+    \@createlabel*\@templabel{#3:#6}{#2}%
   }%
   \IfBooleanTF{#1}{%
     \def\@tempa{\begingroup#5#6\endgroup}%

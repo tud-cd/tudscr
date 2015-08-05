@@ -333,7 +333,6 @@
 }
 \newcommand*\xdyopt{-M tudscrman-temp.xdy -L german-din}
 %    \end{macrocode}
-
 % \dots gefolgt von einem Patch für die Umgebung \env{theindex}, um unschöne 
 % Seitenumbrüche direkt nach Überschriften zu vermeiden.
 %    \begin{macrocode}
@@ -1134,9 +1133,9 @@
 % \begin{environment}{Declaration*}
 % \changes{v2.02}{2014/10/09}{neu}^^A
 % \changes{v2.05}{2015/08/04}{Unterteilung für Klassen und Pakete}^^A
-% \begin{macro}{\@splitdeclare}
+% \begin{macro}{\@subdeclare}
 % \changes{v2.05}{2015/08/04}{neu}^^A
-% \begin{macro}{\tud@ifsplitdeclare}
+% \begin{macro}{\tud@ifsubdeclare}
 % \changes{v2.05}{2015/08/04}{neu}^^A
 % Die Sternversion der Umgebung \env{Declaration*} ist für die vereinfachte 
 % Deklaration von Klassen, Paketen etc. gedacht, bei denen keine Ausgabe 
@@ -1149,11 +1148,11 @@
 % kann genutzt werden, um getrennte Ausgaben im Index und in der Änderungsliste 
 % für die jeweilige Klasse bzw. Paket zu erhalten.
 %    \begin{macrocode}
-\newcommand*\@splitdeclare{mainclasses}
+\newcommand*\@subdeclare{mainclasses}
 \NewDocumentEnvironment{Declaration*}{omt!}{%
   \IfBooleanT{#3}{%
-    \ifstr{\@splitdeclare}{mainclasses}{%
-      \gdef\@splitdeclare{#2}%
+    \ifstr{\@subdeclare}{mainclasses}{%
+      \gdef\@subdeclare{#2}%
     }{%
       \ClassError{tudscrman}{Nested environment `Declaration*{...}!'}{%
         It is not possible to nest this environment, when\MessageBreak%
@@ -1176,21 +1175,21 @@
   \global\@deprecatedfalse%
   \@gobbleparameters%
   \@declaretrue\@openindexfalse#2\@declarefalse%
-  \IfBooleanT{#3}{\gdef\@splitdeclare{mainclasses}}%
+  \IfBooleanT{#3}{\gdef\@subdeclare{mainclasses}}%
 }
 %    \end{macrocode}
 % Das angegebene Argument wird geprüft. Sollte registriert werden, dass dieses 
 % nicht der Deklaration der Hauptklassen entspricht, wird das zweite Argument 
 % ausgeführt, andernfalls das dritte.
 %    \begin{macrocode}
-\newcommand*\tud@ifsplitdeclare[3]{%
+\newcommand*\tud@ifsubdeclare[3]{%
   \@tempswafalse%
   \IfValueT{#1}{\ifstr{#1}{}{}{\ifstr{#1}{mainclasses}{}{\@tempswatrue}}}%
   \if@tempswa#2\else#3\fi%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@ifsplitdeclare
-% \end{macro}^^A \@splitdeclare
+% \end{macro}^^A \tud@ifsubdeclare
+% \end{macro}^^A \@subdeclare
 % \end{environment}^^A Declaration*
 % \begin{macro}{\@createlabel}
 % \changes{v2.05}{2015/08/04}{neu}^^A
@@ -1210,7 +1209,7 @@
     \let\texttt\@firstofone%
     \let\textsbn\@firstofone%
     \let\textsbs\@firstofone%
-    \tud@ifsplitdeclare{#3}{%
+    \tud@ifsubdeclare{#3}{%
       \edef\@tempa{%
         \noexpand\endgroup%
         \noexpand\edef\noexpand#1{#3:#2}%
@@ -1238,7 +1237,7 @@
 \newcommand*\@tempentry{}
 \newcommand*\@tempkeyentry{}
 \newcommand*\@createentry[3]{%
-  \tud@ifsplitdeclare{#3}{%
+  \tud@ifsubdeclare{#3}{%
     \edef#1{#2\noexpand\nobreakspace{\idxfont(#3)}}%
   }{%
     \edef#1{#2}%
@@ -2299,7 +2298,7 @@
 %    \begin{macrocode}
 %<*class>
 \newcommand*\@TempOption{}
-\NewDocumentCommand\Option{smod''D(){\@splitdeclare}d||}{%
+\NewDocumentCommand\Option{smod''D(){\@subdeclare}d||}{%
   \if@changelog%
     \@ProcessChangedAt{#1}(#5){options}{\ttfamily}{#2}{Option}%
   \else%
@@ -2339,7 +2338,7 @@
 %    \begin{macrocode}
 %<*class>
 \newcommand*\@TempEnvironment{}
-\NewDocumentCommand\Environment{smod''D(){\@splitdeclare}d||}{%
+\NewDocumentCommand\Environment{smod''D(){\@subdeclare}d||}{%
   \if@changelog%
     \@ProcessChangedAt{#1}(#5){macros}{\ttfamily}{#2}{Umgebung}%
   \else%
@@ -2391,7 +2390,7 @@
 % oder einer anderen Klasse aus dem \TUDScript-Bundle.
 %    \begin{macrocode}
 %<*class>
-\NewDocumentCommand\Macro{smd''D(){\@splitdeclare}d||}{%
+\NewDocumentCommand\Macro{smd''D(){\@subdeclare}d||}{%
   \if@changelog%
     \@ProcessChangedAt{#1}(#4){macros}{\ttfamily\bsc}{#2}{Befehl}%
   \else%
@@ -2436,7 +2435,7 @@
 % Fließtext.
 %    \begin{macrocode}
 \newcommand*\@TempKey{}
-\NewDocumentCommand\Key{smmod''D(){\@splitdeclare}d||}{%
+\NewDocumentCommand\Key{smmod''D(){\@subdeclare}d||}{%
   \if@changelog%
     \@ProcessChangedAt{#1}(#6){macros}!#2!{\ttfamily}{#3}{Parameter}%
   \else%
@@ -2461,7 +2460,7 @@
 % \changes{v2.02}{2014/10/08}{entfernt}^^A
 % Die Auszeichnung und der Indexeintrag eines sprachabhängigen Bezeichners.
 %    \begin{macrocode}
-\NewDocumentCommand\Term{smd''D(){\@splitdeclare}d||}{%
+\NewDocumentCommand\Term{smd''D(){\@subdeclare}d||}{%
   \if@changelog%
     \@ProcessChangedAt{#1}(#4){terms}{\ttfamily\bsc}{#2}{Bezeichner}%
   \else%
@@ -2525,7 +2524,7 @@
 % \changes{v2.02}{2014/10/08}{entfernt}^^A
 % Die Auszeichnung und der Indexeintrag eines Schriftelementes.
 %    \begin{macrocode}
-\NewDocumentCommand\Font{smd''D(){\@splitdeclare}d||}{%
+\NewDocumentCommand\Font{smd''D(){\@subdeclare}d||}{%
   \if@changelog%
     \@ProcessChangedAt{#1}(#4){fonts}{\ttfamily}{#2}{Schriftelement}%
   \else%
@@ -2544,7 +2543,7 @@
 % \changes{v2.02}{2014/10/08}{entfernt}^^A
 % Die Auszeichnung und der Indexeintrag einer Farbe des \CDs.
 %    \begin{macrocode}
-\NewDocumentCommand\Color{smod''D(){\@splitdeclare}d||}{%
+\NewDocumentCommand\Color{smod''D(){\@subdeclare}d||}{%
   \if@changelog%
     \@ProcessChangedAt{#1}(#5){colors}{\ttfamily}{#2}{Farbe}%
   \else%
@@ -2562,7 +2561,7 @@
 % \changes{v2.02}{2014/07/25}{neu}^^A
 % Die Auszeichnung und der Indexeintrag eines Seitenstils.
 %    \begin{macrocode}
-\NewDocumentCommand\PageStyle{smd''D(){\@splitdeclare}d||}{%
+\NewDocumentCommand\PageStyle{smd''D(){\@subdeclare}d||}{%
   \if@changelog%
     \@ProcessChangedAt{#1}(#4){macros}{\ttfamily}{#2}{Seitenstil}%
   \else%
@@ -2580,7 +2579,7 @@
 % \changes{v2.02}{2014/10/08}{entfernt}^^A
 % Die Auszeichnung und der Indexeintrag einer \LaTeX-Zählers.
 %    \begin{macrocode}
-\NewDocumentCommand\Counter{smd''D(){\@splitdeclare}d||}{%
+\NewDocumentCommand\Counter{smd''D(){\@subdeclare}d||}{%
   \if@changelog%
     \@ProcessChangedAt{#1}(#4){macros}{\ttfamily}{#2}{Z\"ahler}%
   \else%
@@ -2605,7 +2604,7 @@
 % Die Auszeichnung und der Indexeintrag einer \LaTeX-Länge.
 %    \begin{macrocode}
 %<*class>
-\NewDocumentCommand\Length{smd''D(){\@splitdeclare}d||}{%
+\NewDocumentCommand\Length{smd''D(){\@subdeclare}d||}{%
   \if@changelog%
     \@ProcessChangedAt{#1}(#4){macros}{\ttfamily\bsc}{#2}{L\"ange}%
   \else%
@@ -2990,17 +2989,17 @@
 \newcommand*\ChangedAt@@Split[3]{%
   \in@{*}{#1}%
   \ifin@%
-    \tud@ifsplitdeclare{\@splitdeclare}{%
-      \protected@edef\@tempa{Allgemein\nobreakspace\@splitdeclare!#2}%
+    \tud@ifsubdeclare{\@subdeclare}{%
+      \protected@edef\@tempa{Allgemein\nobreakspace\@subdeclare!#2}%
     }{%
       \protected@edef\@tempa{Allgemein!#2}%
     }%
   \else%
-    \tud@ifsplitdeclare{\@splitdeclare}{%
+    \tud@ifsubdeclare{\@subdeclare}{%
       \protected@edef\@tempa{%
-        Implementierung\nobreakspace\@splitdeclare!#2!%
+        Implementierung\nobreakspace\@subdeclare!#2!%
         \IfValueTF{#3}{#3}{\noexpand\@changedatdeclaredefault}!%
-        #1(\@splitdeclare)%
+        #1(\@subdeclare)%
       }%
     }{%
       \protected@edef\@tempa{%
@@ -3062,8 +3061,8 @@
 %    \begin{macrocode}
 \newlength\changedatskip
 \NewDocumentCommand\ChangedAt{sO{\changedatskip}mO{Allgemein}}{%
-  \tud@ifsplitdeclare{\@splitdeclare}{%
-    \ChangedAt@Process[#1]{#2}[#4\nobreakspace\@splitdeclare]{#3}%
+  \tud@ifsubdeclare{\@subdeclare}{%
+    \ChangedAt@Process[#1]{#2}[#4\nobreakspace\@subdeclare]{#3}%
   }{%
     \ChangedAt@Process[#1]{#2}[#4]{#3}%
   }%
