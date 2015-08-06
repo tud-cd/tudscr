@@ -581,6 +581,7 @@
     \let\Package\@firstofone%
     \let\Environment\@firstofone%
     \let\Macro\@firstofone%
+    \let\ttfamily\relax%
     \let\texttt\@firstofone%
     \let\textsbn\@firstofone%
     \let\textsbs\@firstofone%
@@ -601,6 +602,7 @@
     \fi%
   \@tempa%
 }
+% §§§ Subeintrag nur, wenn label auch dahin zielt!
 \newcommand*\@tempentry{}
 \newcommand*\@tempkeyentry{}
 \newcommand*\@createentry[3]{%
@@ -610,6 +612,25 @@
     \edef#1{#2}%
   }%
 }
+% §§§ ToDo parallel Liste mit erzeugten Labels erstellen und vergleichen
+% §§§ \@subdeclaration mit einbeziehen, evtl. ebenfalls eine Liste führen
+\newcommand*\tud@trace@addlabel[1]{}
+\newcommand*\tracinglabels{%
+  \RequirePackage{currfile}%
+  \newcommand*\@missinglabellist{}
+  \renewcommand*\tud@trace@addlabel[1]{%
+    \typeout{+++++ label ##1 missing in \currfilename on line \the\inputlineno}%
+    \expandafter\ifinlist\expandafter{##1}{\@missinglabellist}{}{%
+      \listxadd\@missinglabellist{##1}%
+    }%
+  }%
+  \AfterEndDocument{%
+    \sortlist{\@missinglabellist}%
+    \typeout{+++++ missing labels sorted +++++}%
+    \def\@tempa##1{\typeout{##1}}%
+    \forlistloop\@tempa{\@missinglabellist}%
+  }%
+}\@onlypreamble\tracinglabels
 \newsavebox\tabularm@box
 \newlength\tabularm@wd
 \newcommand*\tabularm@num{1}
@@ -959,24 +980,6 @@
     ]'#3'(#4){macros}[\ttfamily\bsc]{#2}[\nobreakspace{\idxfont(L\"ange)}]%
   \fi%
 }
-% §§§ ToDo parallel Liste mit erzeugten Labels erstellen und vergleichen
-% §§§ \@subdeclaration mit einbeziehen, evtl. ebenfalls eine Liste führen
-\newcommand*\tud@addto@labellist[1]{}
-\newcommand*\tracinglabels{%
-  \newcommand*\@missinglabellist{}
-  \renewcommand*\tud@addto@labellist[1]{%
-    \typeout{+++++ label ##1 missing on line \the\inputlineno}%
-    \expandafter\ifinlist\expandafter{##1}{\@missinglabellist}{}{%
-      \listxadd\@missinglabellist{##1}%
-    }%
-  }%
-  \AfterEndDocument{%
-    \sortlist{\@missinglabellist}%
-    \typeout{+++++ missing labels sorted +++++}%
-    \def\@tempa##1{\typeout{##1}}%
-    \forlistloop\@tempa{\@missinglabellist}%
-  }%
-}\@onlypreamble\tracinglabels
 \NewDocumentCommand\@ProcessOutput{mod''d()md!!omo}{%
   \if@declare%
     \if@openindex%
@@ -1071,7 +1074,7 @@
           is missing%
         }%
       }%
-      \tud@addto@labellist{\@templabel}%
+      \tud@trace@addlabel{\@templabel}%
       \ifx\@CTANLink\relax%
         \@tempa%
       \else%
@@ -1082,13 +1085,25 @@
   \let\@IndexFormat\relax%
   \let\@CTANLink\relax%
 }
+\newcommand\@TempSimpleKey{}
+\NewDocumentCommand\SimpleKey{m}{%
+  \begingroup%
+    \renewcommand*\Environment[1]{\noexpand\ttfamily##1}%
+    \renewcommand*\Macro[1]{\ttfamily\bsc##1}%
+    \xdef\@TempSimpleKey{\begingroup#1\endgroup}%
+  \endgroup%
+  \let\ProcessedArgument\@TempSimpleKey%{#1}%\relax%
+  \typeout{00000#1 \meaning\ProcessedArgument\meaning\@TempSimpleKey}%
+}
 \newrobustcmd*\hyperidx[2][]{\manualhyperref{#1}{#2}}
-\NewDocumentCommand\@HyperIndex{mmmmmmm}{%
+\NewDocumentCommand\@HyperIndex{m>{\SimpleKey}mmmmmm}{%
   \IfValueTF{#3}{\def\@tempa{#3}}{\def\@tempa{}}%
   \IfValueTF{#5}{\def\@tempb{#5}}{\def\@tempb{}}%
   \IfValueTF{#7}{\edef\@tempc{|#7}}{\def\@tempc{}}%
   \IfValueTF{#2}{%
     \@createlabel*\@templabel{#1:#2:#4}{#6}%
+%    \@createentry\@tempentry{#2}{#6}%
+%    \typeout{----- \meaning\@tempentry #2}%
     \@createentry\@tempentry{%
       \begingroup\expandonce\@tempa#4\endgroup\expandonce\@tempb%
     }{#6}%
@@ -1096,6 +1111,8 @@
       \begingroup\expandonce\@tempa#4\endgroup%
       \noexpand\nobreakspace{\idxfont(#2)}%
     }{#6}%
+    \typeout{***** \meaning\@tempentry}%
+    \typeout{***** \meaning\@tempkeyentry}%
     \ifcsdef{r@\@templabel}{%
       \index[#1]{%
         #2!\hyperidx[\@templabel]{\expandonce\@tempentry}\expandonce\@tempc%
@@ -1112,6 +1129,8 @@
     \@createentry\@tempentry{%
       \begingroup\expandonce\@tempa#4\endgroup\expandonce\@tempb%
     }{#6}%
+%    \typeout{----- #4 -----}
+    \typeout{///// \meaning\@tempentry}%
     \ifcsdef{r@\@templabel}{%
       \index[#1]{%
         \hyperidx[\@templabel]{\expandonce\@tempentry}\expandonce\@tempc%
