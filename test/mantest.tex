@@ -1,98 +1,243 @@
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
-\documentclass[english,ngerman]{tudscrman}
+\documentclass[english,ngerman]{tudscrman2}
 \usepackage{selinput}\SelectInputMappings{adieresis={ä},germandbls={ß}}
 \usepackage[T1]{fontenc}
 \usepackage{blindtext}
+\lstset{%
+  inputencoding=utf8,extendedchars=true,
+  literate=%
+    {ä}{{\"a}}1 {ö}{{\"o}}1 {ü}{{\"u}}1
+    {Ä}{{\"A}}1 {Ö}{{\"O}}1 {Ü}{{\"U}}1
+    {~}{{\textasciitilde}}1 {ß}{{\ss}}1
+}
+% §§§ überarbeiten
+%\tracinglabels
 \begin{document}
 
-\begin{Declaration*}{\Class{testclass}}!
-\begin{Declaration}[v2.05]{\Term{contactname}}
-\begin{Declaration}{\Term{contactpersonname}}
-\printdeclarationlist%
-\TermTable{authorname,contactname,contactpersonname}
-\end{Declaration}
-\end{Declaration}
-
-\begin{Declaration}{\Option{cdfont}[\PSet]}[true]%
-\printdeclarationlist%
-\blindtext
-\end{Declaration}
-
-\blindtext
-
-\Option{cdfont}
-
-\Option{cdfont}(\Class{testclass})
-
-\Option{cdfont}()
-
-\ChangedAt{v2.03!Bla}
-
-\end{Declaration*}
-\Blindtext\Blindtext
-
-\makeatletter
-\meaning\bla
-aaa\csuse{bla}bbb
-\meaning\bla
-\makeatother
-
-\begin{Declaration}[v2.05]{\Term{contactname}}
-\begin{Declaration}{\Term{contactpersonname}}
-\printdeclarationlist%
-\TermTable{authorname,contactname,contactpersonname}
-\end{Declaration}
-\end{Declaration}
-
-\begin{Declaration}{\Option{cdfont}[\PSet]}[true]%
-\printdeclarationlist%
-\blindtext
-\end{Declaration}
-
-\begin{Declaration}{\Option{xxx}[\PSet]}[true]%
-\printdeclarationlist%
-\blindtext
-\end{Declaration}
-
-\blindtext
-
-\Option{cdfont}
-
-\Option{cdfont}(testclass)
-
-\Option{cdfont}()
-
-\ChangedAt{v2.06!Blubb}
-
-\Replace{v2.00}{\Option{abstract}}{%
-  \Option{abstracttotoc},\Option{abstractdouble}%
+\def\bla{%
+\begin{Declaration}{\Environment{evaluation}[\OLParameter{Überschrift}]}{%
+  \Environment{tudpage}'auto'%
 }
-\begin{Declaration}[v2.00]{\Option{abstracttotoc}[\PBoolean]}
-\begin{Declaration}[v2.00]{\Option{abstractdouble}[\PBoolean]}
-\printdeclarationlist*[\emph{entfällt}, \see*{\Option*{abstract}'page'}]%
+\begin{Declaration}{%
+  \Key{\Environment{evaluation}}{headline}[\PName{Überschrift}]%
+}
+\begin{Declaration}{\Key{\Environment{evaluation}}{grade}[\PName{Note}]}
+\printdeclarationlist%
+\index{Gutachten|!(}%
 %
-Beide Optionen wurden in die Option \Option*{abstract} integriert und sind 
-deshalb überflüssig.
+Diese Umgebung wird für das Erstellen eines Gutachtens einer wissenschaftlichen 
+Arbeit bereitgestellt. Auch diese unterstützt alle Parameter, welche für die 
+Umgebung \Environment{tudpage}'full' beschrieben wurden.
+
+Für ein Gutachten wird gewöhnlich eine Überschrift aus \Term{evaluationname} 
+und~-- falls der Abschlussarbeitstyp angegeben wurde~-- \Term{evaluationtext} 
+sowie \Macro{thesis} generiert. Diese automatisch generierte Überschrift kann 
+mit dem Parameter \Key{\Environment{evaluation}}{headline} ersetzt werden. Am 
+Ende des Gutachtens wird die mit \Key{\Environment{evaluation}}{grade} 
+gegebene Note in fetter Schrift ausgezeichnet.
+
+Am Anfang der \Environment{evaluation}"=Umgebung wird die gleiche Tabelle mit 
+Autorenangaben ausgegeben, wie dies bei der \Environment{task}"=Umgebung der 
+Fall ist. Nach dem Tabellenkopf folgt auch hier der eigentliche Inhalt, sprich 
+das Gutachten der Abschlussarbeit. Abgeschlossen wird die Umgebung mit der 
+gegebenen Note~-- welche innerhalb von \Term{gradetext} ausgegeben wird~-- 
+sowie der Orts- und Datumsangabe (\Macro{place}, \Macro{date}) und der 
+darauffolgenden Unterschriftzeile für den oder die Gutachter (\Macro{referee}), 
+welche wiederum mit den entsprechenden sprachabhängigen Bezeichner 
+(\Term{refereename}, \Term{refereeothername}) ergänzt werden.
+\end{Declaration}
 \end{Declaration}
 \end{Declaration}
 
-%\begin{Declaration}[v2.05]{\Term{contactname}}
-%\begin{Declaration}{\Term{contactpersonname}}
-%\printdeclarationlist%
-%\TermTable{authorname,contactname,contactpersonname}
-%\end{Declaration}
-%\end{Declaration}
+\begin{Declaration}{\Macro{evaluationform}\LParameter%
+  \Parameter{Aufgabe}\Parameter{Inhalt}\Parameter{Bewertung}\Parameter{Note}%
+}
+\printdeclarationlist%
+%
+Neben der individuell nutzbaren Umgebung \Environment{evaluation} wird ein 
+separater Befehl zur Erstellung eines standardisierten Gutachtens 
+bereitgestellt. Dieser strukturiert die Ausgabe in die vier Bereiche 
+\emph{Aufgabe}, \emph{Inhalt}, \emph{Bewertung} und \emph{Note} und versieht 
+diese jeweils mit der dazugehörigen Überschrift beziehungsweise Textausgabe 
+(\Term{taskname}, \Term{contentname}, \Term{assessmentname} und 
+\Term{gradetext}). Das optionale Argument unterstützt alle Parameter der 
+\Environment{evaluation}"=Umgebung.
+\index{Gutachten|!)}%
+\end{Declaration}
+%
+\begin{Example}
+Die empfohlene Verwendung des Befehls \Macro{evaluationform} ist wie folgt:
+\begin{Code}[escapechar=§]
+\evaluationform{%
+  Kurzbeschreibung der Aufgabenstellung§\dots§
+}{%
+  Zusammenfassung von Inhalt und Struktur§\dots§
+}{%
+  Bewertung der schriftlichen Abschlussarbeit§\dots§
+}{%
+  Zahl (Note)
+}
+\end{Code}
+Hierzu sei auch auf das Minimalbeispiel in \autoref{sec:exmpl:evaluation} 
+verwiesen.
+\end{Example}
 
-\blindtext
+\begin{Declaration}{\Macro{grade}\Parameter{Note}}
+\printdeclarationlist%
+%
+Neben der Angabe der Note für ein Gutachten über den Parameter 
+\Key{\Environment{evaluation}}{grade} kann dafür auch dieser global wirkende 
+Befehl verwendet werden.
+\end{Declaration}
+}
+%\bla
+
+\begin{Declaration*}{\Package{tudscrsupervisor}}!
+\begin{Declaration}{\Environment{evaluation}[\OLParameter{Überschrift}]}{%
+  \Environment{tudpage}'auto'%
+}
+\begin{Declaration}{%
+  \Key{\Environment{evaluation}}{headline}[\PName{Überschrift}]%
+}
+\begin{Declaration}{\Key{\Environment{evaluation}}{grade}[\PName{Note}]}
+\printdeclarationlist%
+\index{Gutachten|!(}%
+%
+Diese Umgebung wird für das Erstellen eines Gutachtens einer wissenschaftlichen 
+Arbeit bereitgestellt. Auch diese unterstützt alle Parameter, welche für die 
+Umgebung \Environment{tudpage}'full' beschrieben wurden.
+
+Für ein Gutachten wird gewöhnlich eine Überschrift aus \Term{evaluationname} 
+und~-- falls der Abschlussarbeitstyp angegeben wurde~-- \Term{evaluationtext} 
+sowie \Macro{thesis} generiert. Diese automatisch generierte Überschrift kann 
+mit dem Parameter \Key{\Environment{evaluation}}{headline} ersetzt werden. Am 
+Ende des Gutachtens wird die mit \Key{\Environment{evaluation}}{grade} 
+gegebene Note in fetter Schrift ausgezeichnet.
+
+Am Anfang der \Environment{evaluation}"=Umgebung wird die gleiche Tabelle mit 
+Autorenangaben ausgegeben, wie dies bei der \Environment{task}"=Umgebung der 
+Fall ist. Nach dem Tabellenkopf folgt auch hier der eigentliche Inhalt, sprich 
+das Gutachten der Abschlussarbeit. Abgeschlossen wird die Umgebung mit der 
+gegebenen Note~-- welche innerhalb von \Term{gradetext} ausgegeben wird~-- 
+sowie der Orts- und Datumsangabe (\Macro{place}, \Macro{date}) und der 
+darauffolgenden Unterschriftzeile für den oder die Gutachter (\Macro{referee}), 
+welche wiederum mit den entsprechenden sprachabhängigen Bezeichner 
+(\Term{refereename}, \Term{refereeothername}) ergänzt werden.
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+
+\begin{Declaration}{\Macro{evaluationform}\LParameter%
+  \Parameter{Aufgabe}\Parameter{Inhalt}\Parameter{Bewertung}\Parameter{Note}%
+}
+\printdeclarationlist%
+%
+Neben der individuell nutzbaren Umgebung \Environment{evaluation} wird ein 
+separater Befehl zur Erstellung eines standardisierten Gutachtens 
+bereitgestellt. Dieser strukturiert die Ausgabe in die vier Bereiche 
+\emph{Aufgabe}, \emph{Inhalt}, \emph{Bewertung} und \emph{Note} und versieht 
+diese jeweils mit der dazugehörigen Überschrift beziehungsweise Textausgabe 
+(\Term{taskname}, \Term{contentname}, \Term{assessmentname} und 
+\Term{gradetext}). Das optionale Argument unterstützt alle Parameter der 
+\Environment{evaluation}"=Umgebung.
+\index{Gutachten|!)}%
+\end{Declaration}
+%
+\begin{Example}
+Die empfohlene Verwendung des Befehls \Macro{evaluationform} ist wie folgt:
+\begin{Code}[escapechar=§]
+\evaluationform{%
+  Kurzbeschreibung der Aufgabenstellung§\dots§
+}{%
+  Zusammenfassung von Inhalt und Struktur§\dots§
+}{%
+  Bewertung der schriftlichen Abschlussarbeit§\dots§
+}{%
+  Zahl (Note)
+}
+\end{Code}
+Hierzu sei auch auf das Minimalbeispiel in \autoref{sec:exmpl:evaluation} 
+verwiesen.
+\end{Example}
+
+\begin{Declaration}{\Macro{grade}\Parameter{Note}}
+\printdeclarationlist%
+%
+Neben der Angabe der Note für ein Gutachten über den Parameter 
+\Key{\Environment{evaluation}}{grade} kann dafür auch dieser global wirkende 
+Befehl verwendet werden.
+\end{Declaration}
+
+\begin{Declaration}{\Option{grade}\Parameter{Note}}
+\begin{Declaration}{\Option{gradetwo}[bbb]\Parameter{Note}}
+\printdeclarationlist%
+%
+Neben der Angabe der Note für ein Gutachten über den Parameter 
+\Key{\Environment{evaluation}}{grade} kann dafür auch dieser global wirkende 
+Befehl verwendet werden.
+\end{Declaration}
+\end{Declaration}
+\end{Declaration*}
+
+\Option{option}
+
+\Option{optiontwo}[aus]
+
+\begin{Declaration}{\Environment{evaluation}[\OLParameter{Überschrift}]}{%
+  \Environment{tudpage}'auto'%
+}
+\begin{Declaration}{%
+  \Key{\Environment{evaluation}}{headline}[\PName{Überschrift}]%
+}
+\begin{Declaration}{\Key{\Environment{evaluation}}{grade}[\PName{Note}]}
+\printdeclarationlist%
+\index{Gutachten|!(}%
+%
+Diese Umgebung wird für das Erstellen eines Gutachtens einer wissenschaftlichen 
+Arbeit bereitgestellt. Auch diese unterstützt alle Parameter, welche für die 
+Umgebung \Environment{tudpage}'full' beschrieben wurden.
+
+Für ein Gutachten wird gewöhnlich eine Überschrift aus \Term{evaluationname} 
+und~-- falls der Abschlussarbeitstyp angegeben wurde~-- \Term{evaluationtext} 
+sowie \Macro{thesis} generiert. Diese automatisch generierte Überschrift kann 
+mit dem Parameter \Key{\Environment{evaluation}}{headline} ersetzt werden. Am 
+Ende des Gutachtens wird die mit \Key{\Environment{evaluation}}{grade} 
+gegebene Note in fetter Schrift ausgezeichnet.
+
+Am Anfang der \Environment{evaluation}"=Umgebung wird die gleiche Tabelle mit 
+Autorenangaben ausgegeben, wie dies bei der \Environment{task}"=Umgebung der 
+Fall ist. Nach dem Tabellenkopf folgt auch hier der eigentliche Inhalt, sprich 
+das Gutachten der Abschlussarbeit. Abgeschlossen wird die Umgebung mit der 
+gegebenen Note~-- welche innerhalb von \Term{gradetext} ausgegeben wird~-- 
+sowie der Orts- und Datumsangabe (\Macro{place}, \Macro{date}) und der 
+darauffolgenden Unterschriftzeile für den oder die Gutachter (\Macro{referee}), 
+welche wiederum mit den entsprechenden sprachabhängigen Bezeichner 
+(\Term{refereename}, \Term{refereeothername}) ergänzt werden.
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+
+
+\index{bla}
+
+\index{\texttt{blubb}}
 
 \addchap{\indexname}
 \makeatletter
   \begingroup%
+    \@printindex%
     \@printindex[options]%
-%    \@printindex[macros]%
-    \@printindex[terms]%
+    \@printindex[macros]%
+    \@printindex[keys]%
+%    \@printindex[terms]%
+%    \@printindex[fonts]%
+%    \begingroup%
+%      \let\lettergroup\@gobble%
+%      \let\indexspace\par%
+%      \@printindex[colors]%
+%    \endgroup%
+%    \@printindex[files]%
   \endgroup%
 \makeatother
 \PrintChangelog
-
 \end{document}

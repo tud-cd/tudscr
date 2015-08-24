@@ -606,6 +606,8 @@
 \newcommand*\@tempentry{}
 \newcommand*\@tempkeyentry{}
 \newcommand*\@createentry[3]{%
+      \typeout{///// #2}%
+      \typeout{///// #3}%
   \tud@ifsubdeclare{#3}{%
     \edef#1{#2\noexpand\nobreakspace{\idxfont(#3)}}%
   }{%
@@ -759,6 +761,8 @@
     }%
   }]%
 }
+\newcommand*\@CTANLink{}
+\let\@CTANLink\relax
 \NewDocumentCommand\Application{smd||}{%
   \ifdin{#2}{%
     \mbox{\textsbs{#2}}%
@@ -811,8 +815,6 @@
 }
 \DeclareExpandableDocumentCommand\@Class{sm}{#2}
 \pdfexpandableoutline{Class}
-\newcommand*\@CTANLink{}
-\let\@CTANLink\relax
 \NewDocumentCommand\Package{smd''d<>d||}{%
   \if@changelog%
     \@ProcessChangedAt{#1}{files}{\protect\sbnfont}{#2}{Paket}%
@@ -829,34 +831,37 @@
 }
 \DeclareExpandableDocumentCommand\@Package{sm}{#2}
 \pdfexpandableoutline{Package}
-\newcommand*\@TempOption{}
 \NewDocumentCommand\Option{smod''D(){\@subdeclare}d||}{%
   \if@changelog%
     \@ProcessChangedAt{#1}(#5){options}{\ttfamily}{#2}{Option}%
   \else%
-    \IfValueTF{#3}{\gdef\@TempOption{\texttt{=#3}}}{\gdef\@TempOption{}}%
+    \toks@{\@ProcessOutput{\texttt{#2}}}%
+    \IfValueT{#3}{\addto@hook\toks@{[\texttt{=#3}]}}%
+    \addto@hook\toks@{'#4'(#5){options}[\ttfamily]{#2}}%
     \SetIndexFormat{#1}{#6}%
-    \@ProcessOutput{\texttt{#2}}[\@TempOption]'#4'(#5){options}[\ttfamily]{#2}%
+    \the\toks@%
   \fi%
 }
 \DeclareExpandableDocumentCommand\@Option{sm}{#2}
 \pdfexpandableoutline{Option}
-\newcommand*\@TempEnvironment{}
 \NewDocumentCommand\Environment{smod''D(){\@subdeclare}d||}{%
   \if@changelog%
     \@ProcessChangedAt{#1}(#5){macros}{\ttfamily}{#2}{Umgebung}%
   \else%
     \if@declare%
-      \gdef\@TempEnvironment{%
-        \texttt{\bsc{}begin\{#2\}\IfValueT{#3}{#3}}\tabularnewline%
-        \texttt{\dots}\tabularnewline%
-        \texttt{\bsc{}end\{#2\}}%
+      \toks@{%
+        \@ProcessOutput{%
+          \texttt{\bsc{}begin\{#2\}\IfValueT{#3}{#3}}\tabularnewline%
+          \texttt{\dots}\tabularnewline%
+          \texttt{\bsc{}end\{#2\}}%
+        }%
       }%
     \else%
-      \gdef\@TempEnvironment{\texttt{#2}}%
+      \toks@{\@ProcessOutput{\texttt{#2}}}%
     \fi%
+    \addto@hook\toks@{'#4'(#5){macros}[\ttfamily]{#2}}%
     \SetIndexFormat{#1}{#6}%
-    \@ProcessOutput{\@TempEnvironment}'#4'(#5){macros}[\ttfamily]{#2}%
+    \the\toks@%
   \fi%
 }
 \DeclareExpandableDocumentCommand\@Environment{sm}{#2}
@@ -870,21 +875,29 @@
   \fi%
 }
 \DeclareExpandableDocumentCommand\@Macro{sm}{#2}
-\newcommand*\@TempKey{}
 \NewDocumentCommand\Key{smmod''D(){\@subdeclare}d||}{%
   \if@changelog%
     \@ProcessChangedAt{#1}(#6){macros}!#2!{\ttfamily}{#3}{Parameter}%
   \else%
     \IfValueTF{#4}{%
-      \gdef\@TempKey{%
-        \texttt{=#4}\if@declare\nobreakspace{\idxfont(Parameter)}\fi%
+      \toks@{%
+        \@ProcessOutput{%
+          \texttt{#3}\texttt{=#4}%
+          \if@declare\nobreakspace{\idxfont(Parameter)}\fi%
+        }%
       }%
     }{%
-      \gdef\@TempKey{\if@declare\nobreakspace{\idxfont(Parameter)}\fi}%
+      \toks@{%
+        \@ProcessOutput{%
+          \texttt{#3}\if@declare\nobreakspace{\idxfont(Parameter)}\fi%
+        }%
+      }%
+    }%
+    \addto@hook\toks@{%
+      '#5'(#6){macros}!#2![\ttfamily]{#3}[\nobreakspace{\idxfont(Parameter)}]%
     }%
     \SetIndexFormat{#1}{#7}%
-    \@ProcessOutput{\texttt{#3}}[\@TempKey]'#5'(#6)%
-      {macros}!#2![\ttfamily]{#3}[\nobreakspace{\idxfont(Parameter)}]%
+    \the\toks@%
   \fi%
 }
 \NewDocumentCommand\Term{smd''D(){\@subdeclare}d||}{%
@@ -944,10 +957,14 @@
     \@ProcessChangedAt{#1}(\@TempColor){colors}{\ttfamily}{#2}{Farbe}%
   \else%
     \SetIndexFormat{#1}{#6}%
-    \@ProcessOutput{\texttt{#2}}[%
-      \IfValueT{#3}{\nobreakspace\texttt{(#3)}}%
-      \if@declare\nobreakspace{\idxfont(Farbe)}\fi%
-    ]'#4'(\@TempColor){colors}[\ttfamily]{#2}%
+    \toks@{%
+      \@ProcessOutput{\texttt{#2}}[%
+        \IfValueT{#3}{\nobreakspace\texttt{(#3)}}%
+        \if@declare\nobreakspace{\idxfont(Farbe)}\fi%
+      ]'#4'
+    }%
+    \expandafter\addto@hook\expandafter\toks@\expandafter{(\@TempColor)}%
+    \addto@hook\toks@{{colors}[\ttfamily]{#2}}%
   \fi%
 }
 \NewDocumentCommand\PageStyle{smd''D(){\@subdeclare}d||}{%
@@ -1084,39 +1101,57 @@
   \fi%
   \let\@IndexFormat\relax%
   \let\@CTANLink\relax%
+  \typeout{++++++++++++++++++++++++++++++++++++}%
+  \def\@tempa{#1}\typeout{\#1: \meaning\@tempa}%
+  \def\@tempa{#2}\typeout{\#2: \meaning\@tempa}%
+  \def\@tempa{#3}\typeout{\#3: \meaning\@tempa}%
+  \def\@tempa{#4}\typeout{\#4: \meaning\@tempa}%
+  \def\@tempa{#5}\typeout{\#5: \meaning\@tempa}%
+  \def\@tempa{#6}\typeout{\#6: \meaning\@tempa}%
+  \def\@tempa{#7}\typeout{\#7: \meaning\@tempa}%
+  \def\@tempa{#8}\typeout{\#8: \meaning\@tempa}%
+  \def\@tempa{#9}\typeout{\#9: \meaning\@tempa}%
+  \typeout{++++++++++++++++++++++++++++++++++++}%
 }
 \newcommand\@TempSimpleKey{}
 \NewDocumentCommand\SimpleKey{m}{%
-  \begingroup%
-    \renewcommand*\Environment[1]{\noexpand\ttfamily##1}%
-    \renewcommand*\Macro[1]{\ttfamily\bsc##1}%
-    \xdef\@TempSimpleKey{\begingroup#1\endgroup}%
-  \endgroup%
-  \let\ProcessedArgument\@TempSimpleKey%{#1}%\relax%
-  \typeout{00000#1 \meaning\ProcessedArgument\meaning\@TempSimpleKey}%
+%  \begingroup%
+%    \renewcommand*\Environment[1]{\noexpand\ttfamily##1}%
+%    \renewcommand*\Macro[1]{\ttfamily\bsc##1}%
+%    \xdef\@TempSimpleKey{\begingroup#1\endgroup}%
+%  \endgroup%
+%  \let\ProcessedArgument\@TempSimpleKey%{#1}%\relax%
+%  \typeout{00000#1 \meaning\ProcessedArgument\meaning\@TempSimpleKey}%
 }
 \newrobustcmd*\hyperidx[2][]{\manualhyperref{#1}{#2}}
-\NewDocumentCommand\@HyperIndex{m>{\SimpleKey}mmmmmm}{%
+% §§§ Auszeichnung übernehmen statt opt. argumente
+%\NewDocumentCommand\@HyperIndex{m>{\SimpleKey}mmmmmm}{%
+\NewDocumentCommand\@HyperIndex{mmmmmmm}{%
   \IfValueTF{#3}{\def\@tempa{#3}}{\def\@tempa{}}%
   \IfValueTF{#5}{\def\@tempb{#5}}{\def\@tempb{}}%
   \IfValueTF{#7}{\edef\@tempc{|#7}}{\def\@tempc{}}%
   \IfValueTF{#2}{%
     \@createlabel*\@templabel{#1:#2:#4}{#6}%
-%    \@createentry\@tempentry{#2}{#6}%
-%    \typeout{----- \meaning\@tempentry #2}%
     \@createentry\@tempentry{%
       \begingroup\expandonce\@tempa#4\endgroup\expandonce\@tempb%
-    }{#6}%
+    }{}%
     \@createentry\@tempkeyentry{%
       \begingroup\expandonce\@tempa#4\endgroup%
       \noexpand\nobreakspace{\idxfont(#2)}%
     }{#6}%
-    \typeout{***** \meaning\@tempentry}%
+    \typeout{***** #2!\meaning\@tempentry}%
     \typeout{***** \meaning\@tempkeyentry}%
     \ifcsdef{r@\@templabel}{%
-      \index[#1]{%
-        #2!\hyperidx[\@templabel]{\expandonce\@tempentry}\expandonce\@tempc%
-      }%
+        \tud@ifsubdeclare{#6}{%
+          \index[#1]{%
+            #2\nobreakspace{\idxfont(#6)}!%
+              \hyperidx[\@templabel]{\expandonce\@tempentry}\expandonce\@tempc%
+          }%
+        }{%
+          \index[#1]{%
+            #2!\hyperidx[\@templabel]{\expandonce\@tempentry}\expandonce\@tempc%
+          }%
+        }
       \index[keys]{%
         \hyperidx[\@templabel]{\expandonce\@tempkeyentry}\expandonce\@tempc%
       }%
@@ -1129,8 +1164,6 @@
     \@createentry\@tempentry{%
       \begingroup\expandonce\@tempa#4\endgroup\expandonce\@tempb%
     }{#6}%
-%    \typeout{----- #4 -----}
-    \typeout{///// \meaning\@tempentry}%
     \ifcsdef{r@\@templabel}{%
       \index[#1]{%
         \hyperidx[\@templabel]{\expandonce\@tempentry}\expandonce\@tempc%
@@ -1246,6 +1279,7 @@
   }%
   \xifinlist{#2}{\@changedatversionlist}{}{\listeadd\@changedatversionlist{#2}}%
 }
+\newcommand*\@TempKey{}% §§§ raus
 \newcommand*\ChangedAt@@@Process[3]{%
   \begingroup%
     \def\@tempa{#3}%
