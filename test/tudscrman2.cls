@@ -71,13 +71,13 @@
   \TUD@ClassInfo%
 }
 \providecommand*\TUD@ClassInfo{%
-  \typeout{+---------------------------------------------------------------}
-  \typeout{| The Corporate Design of Technische Universitaet Dresden}
-  \typeout{| Class: \TUDClassName}
-  \typeout{| Version: \TUDVersion}
-  \typeout{| Author: Falk Hanisch (\tudscrmail)}
-  \typeout{| Forum: http://latex.wcms-file3.tu-dresden.de/phpBB3/index.php}
-  \typeout{+---------------------------------------------------------------}
+  \typeout{+---------------------------------------------------------------}%
+  \typeout{| The Corporate Design of Technische Universitaet Dresden}%
+  \typeout{| Class: \TUDClassName}%
+  \typeout{| Version: \TUDVersion}%
+  \typeout{| Author: Falk Hanisch (\tudscrmail)}%
+  \typeout{| Forum: http://latex.wcms-file3.tu-dresden.de/phpBB3/index.php}%
+  \typeout{+---------------------------------------------------------------}%
 }
 \NeedsTeXFormat{LaTeX2e}
 \TUD@ProvidesWrapperClass{tudscrman}{tudscrreprt}{manual class}
@@ -246,8 +246,8 @@
   }%
 }{%
   \ifimki@original\else%
-    \renewenvironment{theindex}
-      {\imki@maybeaddtotoc%
+    \renewenvironment{theindex}{%
+      \imki@maybeaddtotoc%
        \imki@indexheaders%
        \thispagestyle{\imki@firstpagestyle}%
        \ifnum\imki@columns>\@ne%
@@ -269,8 +269,8 @@
        \columnseprule \ifKV@imki@columnseprule.4\p@\else\z@\fi%
        \raggedright%
        \let\item\@idxitem%
-       \imki@othercode}%
-      {\ifnum\imki@columns>\@ne\end{multicols}\fi}%
+       \imki@othercode%
+     }{\ifnum\imki@columns>\@ne\end{multicols}\fi}%
   \fi%
 }
 \newcommand*\tud@write@i{}
@@ -354,7 +354,7 @@
 \makeindex[title={\"Anderungsliste},name=changelog,columns=1,options=\xdyopt]%
 \RequirePackage{enumitem}[2011/09/28]
 \setlist{noitemsep}
-\AtBeginDocument{
+\AtBeginDocument{%
   \RequirePackage{ellipsis}[2004/9/28]
   \let\ellipsispunctuation\relax
 }
@@ -363,7 +363,7 @@
 \RequirePackage{chngcntr}[2009/09/02]
 \counterwithout{footnote}{chapter}
 \RequirePackage{booktabs}[2005/04/14]
-\RequirePackage{varioref}[2011/10/02]%
+\RequirePackage{varioref}[2011/10/02]
 \renewcommand*\fullref[1]{\hyperref[#1]{\autoref*{#1} \vpageref{#1}}}
 \RequirePackage{tikz}[2013/12/13]
 \RequirePackage{pdfpages}[2013/08/25]
@@ -381,7 +381,7 @@
   \global\let\tud@shellescape@wrn\relax%
 }
 \newcommand*\pdfexpandableoutline[1]{%
-  \AfterPackage*{hyperref}{\pdfstringdefDisableCommands{\csletcs{#1}{@#1}}}
+  \AfterPackage*{hyperref}{\pdfstringdefDisableCommands{\csletcs{#1}{@#1}}}%
 }
 \newcommand*\@TUDScript{TUD-KOMA-Script}
 \pdfexpandableoutline{TUDScript}
@@ -558,7 +558,6 @@
   \@declaretrue\@openindexfalse#2\@declarefalse%
   \IfBooleanT{#3}{\endSubDeclaration}%
 }
-
 \newenvironment{SubDeclaration}[1]{%
   \ifstr{\@subdeclare}{mainclasses}{%
     \gdef\@subdeclare{#1}%
@@ -574,27 +573,31 @@
   \IfValueT{#1}{\ifstr{#1}{}{}{\ifstr{#1}{mainclasses}{}{\@tempswatrue}}}%
   \if@tempswa#2\else#3\fi%
 }
+% Sternversion zum Erzeugen des Labels, ohne Stern zur Nutzung
+\newcommand*\@gobblemarkup{%
+  \let\Class\@firstofone%
+  \let\Package\@firstofone%
+  \let\Environment\@firstofone%
+  \let\Macro\@firstofone%
+  \let\ttfamily\relax%
+  \let\texttt\@firstofone%
+  \let\textsbn\@firstofone%
+  \let\textsbs\@firstofone%
+}
 \newcommand*\@templabel{}
 \NewDocumentCommand\@createlabel{smmm}{%
   \begingroup%
-    \let\Class\@firstofone%
-    \let\Package\@firstofone%
-    \let\Environment\@firstofone%
-    \let\Macro\@firstofone%
-    \let\ttfamily\relax%
-    \let\texttt\@firstofone%
-    \let\textsbn\@firstofone%
-    \let\textsbs\@firstofone%
+    \@gobblemarkup%
     \tud@ifsubdeclare{#4}{%
       \@tempswatrue%
-      \IfBooleanT{#1}{\ifcsdef{r@#4:#3}{}{\@tempswafalse}}%
+      \IfBooleanF{#1}{\ifcsdef{r@#4:#3}{}{\@tempswafalse}}%
     }{\@tempswafalse}%
     \if@tempswa%
       \edef\@tempa{%
         \noexpand\endgroup%
         \noexpand\edef\noexpand#2{#4:#3}%
       }%
-    \else
+    \else%
       \edef\@tempa{%
         \noexpand\endgroup%
         \noexpand\edef\noexpand#2{#3}%
@@ -605,11 +608,30 @@
 % §§§ Subeintrag nur, wenn label auch dahin zielt!
 \newcommand*\@tempentry{}
 \newcommand*\@tempkeyentry{}
-\newcommand*\@createentry[3]{%
-      \typeout{///// #2}%
-      \typeout{///// #3}%
-  \tud@ifsubdeclare{#3}{%
-    \edef#1{#2\noexpand\nobreakspace{\idxfont(#3)}}%
+\newcommand*\@createentry[4]{%
+%  \begingroup%
+%    \@gobblemarkup%
+%    \tud@ifsubdeclare{#4}{%
+%      \ifcsdef{r@#4:#3}{\@tempswatrue}{\@tempswafalse}%
+%    }{\@tempswafalse}%
+%    \if@tempswa%
+%      \edef\@tempa{%
+%        \noexpand\endgroup%
+%        \noexpand\edef\noexpand#1{#2\noexpand\nobreakspace{\idxfont(#4)}}%
+%      }%
+%    \else%
+%      \edef\@tempa{%
+%        \noexpand\endgroup%
+%        \noexpand\edef\noexpand#1{#2}%
+%      }%
+%    \fi%
+%  \@tempa%
+%  \typeout{----- \meaning\@tempa}\endgroup%
+%      \typeout{///// \meaning\@templabel}%
+%      \typeout{///// #2}%
+%      \typeout{///// #3}%
+  \tud@ifsubdeclare{#4}{%
+    \edef#1{#2\noexpand\nobreakspace{\idxfont(#4)}}%
   }{%
     \edef#1{#2}%
   }%
@@ -619,7 +641,7 @@
 \newcommand*\tud@trace@addlabel[1]{}
 \newcommand*\tracinglabels{%
   \RequirePackage{currfile}%
-  \newcommand*\@missinglabellist{}
+  \newcommand*\@missinglabellist{}%
   \renewcommand*\tud@trace@addlabel[1]{%
     \typeout{+++++ label ##1 missing in \currfilename on line \the\inputlineno}%
     \expandafter\ifinlist\expandafter{##1}{\@missinglabellist}{}{%
@@ -835,11 +857,9 @@
   \if@changelog%
     \@ProcessChangedAt{#1}(#5){options}{\ttfamily}{#2}{Option}%
   \else%
-    \toks@{\@ProcessOutput{\texttt{#2}}}%
-    \IfValueT{#3}{\addto@hook\toks@{[\texttt{=#3}]}}%
-    \addto@hook\toks@{'#4'(#5){options}[\ttfamily]{#2}}%
     \SetIndexFormat{#1}{#6}%
-    \the\toks@%
+    \@ProcessOutput{\texttt{#2}}[\IfValueT{#3}{\texttt{=#3}}]%
+      '#4'(#5){options}[\ttfamily]{#2}%
   \fi%
 }
 \DeclareExpandableDocumentCommand\@Option{sm}{#2}
@@ -848,6 +868,7 @@
   \if@changelog%
     \@ProcessChangedAt{#1}(#5){macros}{\ttfamily}{#2}{Umgebung}%
   \else%
+    \SetIndexFormat{#1}{#6}%
     \if@declare%
       \toks@{%
         \@ProcessOutput{%
@@ -860,7 +881,6 @@
       \toks@{\@ProcessOutput{\texttt{#2}}}%
     \fi%
     \addto@hook\toks@{'#4'(#5){macros}[\ttfamily]{#2}}%
-    \SetIndexFormat{#1}{#6}%
     \the\toks@%
   \fi%
 }
@@ -879,25 +899,11 @@
   \if@changelog%
     \@ProcessChangedAt{#1}(#6){macros}!#2!{\ttfamily}{#3}{Parameter}%
   \else%
-    \IfValueTF{#4}{%
-      \toks@{%
-        \@ProcessOutput{%
-          \texttt{#3}\texttt{=#4}%
-          \if@declare\nobreakspace{\idxfont(Parameter)}\fi%
-        }%
-      }%
-    }{%
-      \toks@{%
-        \@ProcessOutput{%
-          \texttt{#3}\if@declare\nobreakspace{\idxfont(Parameter)}\fi%
-        }%
-      }%
-    }%
-    \addto@hook\toks@{%
-      '#5'(#6){macros}!#2![\ttfamily]{#3}[\nobreakspace{\idxfont(Parameter)}]%
-    }%
     \SetIndexFormat{#1}{#7}%
-    \the\toks@%
+    \@ProcessOutput{\texttt{#3}}[%
+      \IfValueT{#4}{\texttt{=#4}}%
+      \if@declare\nobreakspace{\idxfont(Parameter)}\fi%
+    ]'#5'(#6){macros}!#2![\ttfamily]{#3}[\nobreakspace{\idxfont(Parameter)}]%
   \fi%
 }
 \NewDocumentCommand\Term{smd''D(){\@subdeclare}d||}{%
@@ -925,8 +931,8 @@
     \setlength\@tempdimc{\z@}%
     \begin{tabular}{lll}\@TermTable\end{tabular}%
   }%
-  \newline\null%
   \let\@termlist\relax%
+  \par\addvspace{\baselineskipglue}%
 }
 \newcommand*\@TermTable{%
   \toprule%
@@ -961,10 +967,11 @@
       \@ProcessOutput{\texttt{#2}}[%
         \IfValueT{#3}{\nobreakspace\texttt{(#3)}}%
         \if@declare\nobreakspace{\idxfont(Farbe)}\fi%
-      ]'#4'
+      ]'#4'%
     }%
     \expandafter\addto@hook\expandafter\toks@\expandafter{(\@TempColor)}%
     \addto@hook\toks@{{colors}[\ttfamily]{#2}}%
+    \the\toks@%
   \fi%
 }
 \NewDocumentCommand\PageStyle{smd''D(){\@subdeclare}d||}{%
@@ -1008,9 +1015,9 @@
         }%
       }%
       \IfValueTF{#6}{%
-        \@createlabel\@templabel{#5:#6:#8}{#4}%
+        \@createlabel*\@templabel{#5:#6:#8}{#4}%
       }{%
-        \@createlabel\@templabel{#5:#8}{#4}%
+        \@createlabel*\@templabel{#5:#8}{#4}%
       }%
       \if@deprecated%
         \expandafter\IfBooleanF\expandafter{\@IndexFormat}{%
@@ -1056,9 +1063,9 @@
       }%
     \fi%
     \IfValueTF{#6}{%
-      \@createlabel*\@templabel{#5:#6:#8}{#4}%
+      \@createlabel\@templabel{#5:#6:#8}{#4}%
     }{%
-      \@createlabel*\@templabel{#5:#8}{#4}%
+      \@createlabel\@templabel{#5:#8}{#4}%
     }%
     \ifcsdef{r@\@templabel}{%
       \def\@tempa{%
@@ -1101,17 +1108,17 @@
   \fi%
   \let\@IndexFormat\relax%
   \let\@CTANLink\relax%
-  \typeout{++++++++++++++++++++++++++++++++++++}%
-  \def\@tempa{#1}\typeout{\#1: \meaning\@tempa}%
-  \def\@tempa{#2}\typeout{\#2: \meaning\@tempa}%
-  \def\@tempa{#3}\typeout{\#3: \meaning\@tempa}%
-  \def\@tempa{#4}\typeout{\#4: \meaning\@tempa}%
-  \def\@tempa{#5}\typeout{\#5: \meaning\@tempa}%
-  \def\@tempa{#6}\typeout{\#6: \meaning\@tempa}%
-  \def\@tempa{#7}\typeout{\#7: \meaning\@tempa}%
-  \def\@tempa{#8}\typeout{\#8: \meaning\@tempa}%
-  \def\@tempa{#9}\typeout{\#9: \meaning\@tempa}%
-  \typeout{++++++++++++++++++++++++++++++++++++}%
+%  \typeout{++++++++++++++++++++++++++++++++++++}%
+%  \def\@tempa{#1}\typeout{\#1: \meaning\@tempa}%
+%  \def\@tempa{#2}\typeout{\#2: \meaning\@tempa}%
+%  \def\@tempa{#3}\typeout{\#3: \meaning\@tempa}%
+%  \def\@tempa{#4}\typeout{\#4: \meaning\@tempa}%
+%  \def\@tempa{#5}\typeout{\#5: \meaning\@tempa}%
+%  \def\@tempa{#6}\typeout{\#6: \meaning\@tempa}%
+%  \def\@tempa{#7}\typeout{\#7: \meaning\@tempa}%
+%  \def\@tempa{#8}\typeout{\#8: \meaning\@tempa}%
+%  \def\@tempa{#9}\typeout{\#9: \meaning\@tempa}%
+%  \typeout{++++++++++++++++++++++++++++++++++++}%
 }
 \newcommand\@TempSimpleKey{}
 \NewDocumentCommand\SimpleKey{m}{%
@@ -1131,14 +1138,14 @@
   \IfValueTF{#5}{\def\@tempb{#5}}{\def\@tempb{}}%
   \IfValueTF{#7}{\edef\@tempc{|#7}}{\def\@tempc{}}%
   \IfValueTF{#2}{%
-    \@createlabel*\@templabel{#1:#2:#4}{#6}%
+    \@createlabel\@templabel{#1:#2:#4}{#6}%
     \@createentry\@tempentry{%
       \begingroup\expandonce\@tempa#4\endgroup\expandonce\@tempb%
-    }{}%
+    }{#1:#2:#4}{}%
     \@createentry\@tempkeyentry{%
       \begingroup\expandonce\@tempa#4\endgroup%
       \noexpand\nobreakspace{\idxfont(#2)}%
-    }{#6}%
+    }{#1:#2:#4}{#6}%
     \typeout{***** #2!\meaning\@tempentry}%
     \typeout{***** \meaning\@tempkeyentry}%
     \ifcsdef{r@\@templabel}{%
@@ -1151,7 +1158,7 @@
           \index[#1]{%
             #2!\hyperidx[\@templabel]{\expandonce\@tempentry}\expandonce\@tempc%
           }%
-        }
+        }%
       \index[keys]{%
         \hyperidx[\@templabel]{\expandonce\@tempkeyentry}\expandonce\@tempc%
       }%
@@ -1160,10 +1167,10 @@
       \index[keys]{\expandonce\@tempkeyentry\expandonce\@tempc}%
     }%
   }{%
-    \@createlabel*\@templabel{#1:#4}{#6}%
+    \@createlabel\@templabel{#1:#4}{#6}%
     \@createentry\@tempentry{%
       \begingroup\expandonce\@tempa#4\endgroup\expandonce\@tempb%
-    }{#6}%
+    }{#1:#4}{#6}%
     \ifcsdef{r@\@templabel}{%
       \index[#1]{%
         \hyperidx[\@templabel]{\expandonce\@tempentry}\expandonce\@tempc%
@@ -1308,8 +1315,8 @@
     \ifx\@tempa\@empty\else\ifx\@tempa\space\else%
       \def\@tempb{#3}%
       \tud@ifsubdeclare{\@subdeclare}{%
-        \edef\@tempa{\expandonce\@tempa(\@subdeclare)}
-        \edef\@tempb{\expandonce\@tempb(\@subdeclare)}
+        \edef\@tempa{\expandonce\@tempa(\@subdeclare)}%
+        \edef\@tempb{\expandonce\@tempb(\@subdeclare)}%
       }{}%
       \protected@edef\@tempc{%
         Implementierung!#2!\emph{entf\"allt}|see{\@tempb}!\@tempa%
@@ -1321,11 +1328,12 @@
     \fi\fi%
   }%
 }
+% §§§ Reihenfolge der Argumente anpassen
 \NewDocumentCommand\@ProcessChangedAt{md()md!!mmm}{%
   \IfValueTF{#4}{%
-    \@createlabel*\@templabel{#3:#4:#6}{#2}%
+    \@createlabel\@templabel{#3:#4:#6}{#2}%
   }{%
-    \@createlabel*\@templabel{#3:#6}{#2}%
+    \@createlabel\@templabel{#3:#6}{#2}%
   }%
   \IfBooleanTF{#1}{%
     \def\@tempa{\begingroup#5#6\endgroup}%
@@ -1436,8 +1444,8 @@
   \ifnum\pdfshellescape=\@ne\relax%
     \filemodCmp{examples/#1.pdf}{examples/#1.tex}{}{%
       \immediate\write18{%
-        pdflatex -output-directory examples examples/#1.tex
-        pdflatex -output-directory examples examples/#1.tex
+        pdflatex -output-directory examples examples/#1.tex%
+        pdflatex -output-directory examples examples/#1.tex%
       }%
     }%
   \fi%
@@ -1475,7 +1483,7 @@
       \renewcommand*\marginpar[2][]{%
         \marginnote[##1]{##2}[\dimexpr-1.6ex+1pt\relax]%
       }%
-     \@tempswafalse
+     \@tempswafalse%
      \ifdefvoid{\tud@todo@type}{\@tempswatrue}{}%
      \IfValueT{#2}{%
        \@for\@tempa:=#2\do{\ifstr{\@tempa}{\tud@todo@type}{\@tempswatrue}{}}%
@@ -1590,15 +1598,17 @@
 \newcommand*\TUD{Technische Universit\"at Dresden\xspace}
 \newcommand*\TnUD{Technischen Universit\"at Dresden\xspace}
 \newcommand*\DDC{%
-  \mbox{D\kern.05em R\kern.05em E\kern.05em S\kern.05em D\kern.05em E\kern.05em
-  N\kern.1em-\kern.1em concept}\xspace%
+  \mbox{%
+    D\kern.05em R\kern.05em E\kern.05em S\kern.05em D\kern.05em E\kern.05em
+    N\kern.1em-\kern.1em concept%
+  }\xspace%
 }
 \AfterPackage*{babel}{%
   \@expandtwoargs\in@{,english,}{,\bbl@loaded,}%
   \ifin@%
-    \renewcommand*\CD{\foreignlanguage{english}{Corporate Design}\xspace}
-    \renewcommand*\CDs{\foreignlanguage{english}{Corporate Designs}\xspace}
-  \fi
+    \renewcommand*\CD{\foreignlanguage{english}{Corporate Design}\xspace}%
+    \renewcommand*\CDs{\foreignlanguage{english}{Corporate Designs}\xspace}%
+  \fi%
 }
 \newcommand*\Univers{\textubn{Univers}\xspace}
 \newcommand*\DIN{\textdbn{DIN\nobreakspace{}BOLD}\xspace}
