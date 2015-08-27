@@ -144,6 +144,7 @@
 \TUDProcessOptions\relax
 \LoadClass{\TUDClassName@Parent}
 %%% From File: tudscr-manual.dtx
+\PassOptionsToPackage{log-declarations=false}{xparse}
 \RequirePackage{xparse}[2013/12/31]
 \RequirePackage{textcomp}[2005/09/27]
 \RequirePackage{setspace}[2011/12/19]
@@ -157,7 +158,12 @@
     \providecommand\enquote[1]{\glqg#1\grqq{}}%
   }%
 }
-\AfterPackage*{hyperref}{\RequirePackage[babel]{microtype}[2013/05/23]}
+\AfterPackage*{hyperref}{%
+  \RequirePackage[babel]{microtype}[2013/05/23]%
+  \patchcmd{\pdfstringdef}{\csname HyPsd@babel@}{%
+    \let\bbl@info\@gobble\csname HyPsd@babel@%
+  }{}{\tud@patch@wrn{pdfstringdef}}%
+}
 \newlength\baselineskipglue
 \AtBeginDocument{%
   \setlength\baselineskipglue{%
@@ -168,6 +174,7 @@
 \RequirePackage{quoting}[2014/01/28]
 \RequirePackage{isodate}[2010/01/03]
 \RequirePackage{hologo}[2012/04/26]
+\PassOptionsToPackage{quiet}{marginnote}
 \RequirePackage{marginnote}[2012/03/29]
 \RequirePackage{listings}[2014/03/04]
 \lstdefinestyle{tudscr}{%
@@ -190,6 +197,28 @@
 \fi
 \WarningFilter*{ifplatform}{^^J \space\space\space shell escape is disabled}
 \RequirePackage{ifplatform}[2010/10/22]
+\newcommand*\tud@trace@addlabel[1]{}
+\newcommand*\tracinglabels{%
+  \RequirePackage{currfile}%
+  \newcommand*\@missinglabellist{}%
+  \renewcommand*\tud@trace@addlabel[1]{%
+    \expandafter\IfBooleanF\expandafter{\@IndexFormat}{%
+      \typeout{%
+        +++++ label ##1 is missing^^J%
+        +++++ in \currfilename\space on line \the\inputlineno%
+      }%
+      \expandafter\ifinlist\expandafter{##1}{\@missinglabellist}{}{%
+        \listxadd\@missinglabellist{##1}%
+      }%
+    }%
+  }%
+  \AfterEndDocument{%
+    \sortlist{\@missinglabellist}%
+    \typeout{+++++ missing labels sorted +++++}%
+    \def\@tempa##1{\typeout{##1}}%
+    \forlistloop\@tempa{\@missinglabellist}%
+  }%
+}\@onlypreamble\tracinglabels
 \PassOptionsToPackage{hyperindex=false,colorlinks,linkcolor=blue}{hyperref}
 \PassOptionsToPackage{open,openlevel=0}{bookmark}
 \AtBeginDocument{%
@@ -226,7 +255,10 @@
       \Hy@raisedlink{\hyperdef{\jobname}{#3}{}}%
       \ignorespaces%
     }%
-    \IfBooleanF{#1}{\label{#3}}%
+    \IfBooleanTF{#1}{%
+      \in@{:}{#3}%
+      \ifin@\else\phantomsection\addxcontentsline{toc}{subsection}{#3}\fi%
+    }{\label{#3}}%
   }
   \newcommand*\manualhyperref[2]{\hyperref{}{\jobname}{#1}{#2}}
 }
@@ -237,7 +269,7 @@
   noclearpage,firstpagestyle=headings,headers={\indexname}{\indexname},%
   othercode={\renewcommand*\subitem{\@idxitem\hspace*{15\p@}}}%
 }
-\newcommand*\xdyopt{-M tudscrman-temp.xdy -L german-din}
+\newcommand*\xdyopt{-M \jobname-temp.xdy -L german-din}
 \@ifpackagelater{imakeidx}{2013/07/12}{%
   \ClassWarning%
   {tudscrman}{%
@@ -275,7 +307,7 @@
 }
 \newcommand*\tud@write@i{}
 \newwrite\tud@write@i
-\openout\tud@write@i=tudscrman-temp.xdy
+\openout\tud@write@i=\jobname-temp.xdy
 \write\tud@write@i{(require "texindy.xdy")}
 \write\tud@write@i{%
 (define-location-class^^J%
@@ -371,6 +403,7 @@
 \newcommand*\idxfont{}
 \let\idxfont\footnotesize
 \robustify{\idxfont}
+\newcommand*\idxsuffix[1]{\noexpand~\begingroup\idxfont(#1)\endgroup}
 \newrobustcmd*\bsc{\@backslashchar}
 \newcommand*\tud@shellescape@wrn{%
   \ClassWarning%
@@ -501,13 +534,13 @@
     \@afterindentfalse\@afterheading%
     \def\@tempa##1{\ignorespaces##1\tabularnewline}%
     \edef\HyperRaiseLinkDefault{\the\baselineskip}%
-    \setbox0\hbox{%
+    \setbox\z@\hbox{%
       \begin{tabular}{|l|}%
         \hline%
         \forlistloop\@tempa{\@declarationlist}%
         \hline%
       \end{tabular}%
-    }\usebox0%
+    }\usebox\z@%
     \@declarefalse%
     \ifboolexpr{bool {@presetlist} or bool {@additionallist}}{%
       \if@presetlist%
@@ -538,6 +571,10 @@
     \@afterindentfalse\@afterheading%
   \fi%
 }
+% §§§ Declaration*[!] und SuDeclaration in einer Umgebung zusammenfassen?!
+% §§§
+% §§§ optionales Argument für Änderungsliste überarbeiten (s. tudscrfonts)
+% §§§ Eintrag sollte in Allgemein
 \newcommand*\@subdeclare{mainclasses}
 \NewDocumentEnvironment{Declaration*}{omt!}{%
   \IfBooleanT{#3}{\SubDeclaration{#2}}%
@@ -573,7 +610,7 @@
   \IfValueT{#1}{\ifstr{#1}{}{}{\ifstr{#1}{mainclasses}{}{\@tempswatrue}}}%
   \if@tempswa#2\else#3\fi%
 }
-% Sternversion zum Erzeugen des Labels, ohne Stern zur Nutzung
+% Doku: Sternversion zum Erzeugen des Labels, ohne Stern zur Nutzung
 \newcommand*\@templabel{}
 \NewDocumentCommand\@CreateLabel{smmm}{%
   \@@CreateLabel[#1]{#3}{#4}%
@@ -601,7 +638,6 @@
       \IfBooleanF{#1}{\ifcsdef{r@#3:#2}{}{\@tempswafalse}}%
     }{\@tempswafalse}%
 }
-% §§§ Subeintrag nur, wenn label auch dahin zielt!
 \newcommand*\@tempentry{}
 \newcommand*\@tempkeyentry{}
 \newcommand*\@CreateEntry[4]{%
@@ -609,35 +645,11 @@
     \global\let\if@tempswa=\if@tempswa%
   \endgroup%
   \if@tempswa%
-    \edef#1{#4\noexpand\nobreakspace{\idxfont(#3)}}%
+    \edef#1{#4\idxsuffix{#3}}%
   \else%
     \edef#1{#4}%
   \fi%
 }
-% §§§ ToDo parallel Liste mit erzeugten Labels erstellen und vergleichen
-% §§§ \@subdeclaration mit einbeziehen, evtl. ebenfalls eine Liste führen
-\newcommand*\tud@trace@addlabel[1]{}
-\newcommand*\tracinglabels{%
-  \RequirePackage{currfile}%
-  \newcommand*\@missinglabellist{}%
-  \renewcommand*\tud@trace@addlabel[1]{%
-    \expandafter\IfBooleanF\expandafter{\@IndexFormat}{%
-      \typeout{%
-        +++++ label ##1 is missing^^J%
-        +++++ in \currfilename\space on line \the\inputlineno%
-      }%
-      \expandafter\ifinlist\expandafter{##1}{\@missinglabellist}{}{%
-        \listxadd\@missinglabellist{##1}%
-      }%
-    }%
-  }%
-  \AfterEndDocument{%
-    \sortlist{\@missinglabellist}%
-    \typeout{+++++ missing labels sorted +++++}%
-    \def\@tempa##1{\typeout{##1}}%
-    \forlistloop\@tempa{\@missinglabellist}%
-  }%
-}\@onlypreamble\tracinglabels
 \newsavebox\tabularm@box
 \newlength\tabularm@wd
 \newcommand*\tabularm@num{1}
@@ -698,7 +710,7 @@
     \ifx\tud@item@add\relax%
       \def\tud@item@add{#1}%
     \else%
-      \appto\tud@item@add{\nobreakspace#1}%
+      \appto\tud@item@add{~#1}%
     \fi%
   }%
   \itemvalues[%
@@ -773,24 +785,18 @@
     \mbox{\textsbs{#2}}%
     \CheckIndexFormat{#1}{#3}%
     \IfBooleanF{#1}{%
-      \index{%
-        \textsbs{#2}\nobreakspace{\idxfont(Anwendungssoftware)}%
-        \IfValueT{#3}{|#3}%
-      }%
+      \index{\textsbs{#2}\idxsuffix{Anwendungssoftware}\IfValueT{#3}{|#3}}%
     }%
   }%
 }
 \DeclareExpandableDocumentCommand\@Application{sm}{#2}
 \pdfexpandableoutline{Application}
 \NewDocumentCommand\Distribution{smod||}{%
-  \ifdin{#2\IfValueT{#3}{\nobreakspace#3}}{%
-    \mbox{\textsbn{#2\IfValueT{#3}{\nobreakspace#3}}}%
+  \ifdin{#2\IfValueT{#3}{~#3}}{%
+    \mbox{\textsbn{#2\IfValueT{#3}{~#3}}}%
     \CheckIndexFormat{#1}{#4}%
     \IfBooleanF{#1}{%
-      \index{%
-        \textsbn{#2}\nobreakspace{\idxfont(Distribution)}%
-        \IfValueT{#4}{|#4}%
-      }%
+      \index{\textsbn{#2}\idxsuffix{Distribution}\IfValueT{#4}{|#4}}%
     }%
   }%
 }
@@ -802,23 +808,23 @@
     \mbox{\textsbn{#2}}%
     \CheckIndexFormat{#1}{#3}%
     \IfBooleanF{#1}{%
-      \index[files]{%
-        \textsbn{#2}\nobreakspace{\idxfont(Datei)}%
-        \IfValueT{#3}{|#3}%
-      }%
+      \index[files]{\textsbn{#2}\idxsuffix{Datei}\IfValueT{#3}{|#3}}%
     }%
   }%
 }
 \DeclareExpandableDocumentCommand\@File{sm}{#2}
 \pdfexpandableoutline{File}
+% §§§ Argumente von \@ProcessOutput für Auszeichung in Fließtext und Index 
+% §§§ zusammenführen, evtl. noch einmal Delimiter der opt. Arg. überarbeiten
+% §§§
+% §§§ Auszeichnung für \if@declare als optionales Argument?!
 \NewDocumentCommand\Class{smd''d||}{%
   \if@changelog%
     \@ProcessChangedAt{#1}{files}{\protect\sbnfont}{#2}{Klasse}%
   \else%
     \ifdin{#2}{%
       \SetIndexFormat{#1}{#4}%
-      \@ProcessOutput{\textsbn{#2}}'#3'%
-        {files}[\protect\sbnfont]{#2}[Klasse]%
+      \@ProcessOutput{\textsbn{#2}}'#3'{files}[\protect\sbnfont]{#2}[Klasse]%
     }%
   \fi%
 }
@@ -851,6 +857,7 @@
 }
 \DeclareExpandableDocumentCommand\@Option{sm}{#2}
 \pdfexpandableoutline{Option}
+% §§§ hier wird's etwas tricky
 \NewDocumentCommand\Environment{smod''D(){\@subdeclare}d||}{%
   \if@changelog%
     \@ProcessChangedAt{#1}(#5){macros}{\ttfamily}{#2}{Umgebung}%
@@ -890,7 +897,7 @@
     \SetIndexFormat{#1}{#7}%
     \@ProcessOutput{\texttt{#3}}[%
       \IfValueT{#4}{\texttt{=#4}}%
-      \if@declare\nobreakspace{\idxfont(Parameter)}\fi%
+      \if@declare\idxsuffix{Parameter}\fi%
     ]'#5'(#6){macros}!#2![\ttfamily]{#3}[Parameter]%
   \fi%
 }
@@ -902,7 +909,7 @@
   \else%
     \SetIndexFormat{#1}{#5}%
     \@ProcessOutput{\texttt{\bsc#2}}[%
-      \if@declare\nobreakspace{\idxfont(Bezeichner)}\fi%
+      \if@declare\idxsuffix{Bezeichner}\fi%
     ]'#3'(#4){terms}[\ttfamily\bsc]{#2}%
   \fi%
 }
@@ -943,7 +950,7 @@
   \else%
     \SetIndexFormat{#1}{#5}%
     \@ProcessOutput{\texttt{#2}}[%
-      \if@declare\nobreakspace{\idxfont(Schriftelement)}\fi%
+      \if@declare\idxsuffix{Schriftelement}\fi%
     ]'#3'(#4){fonts}[\ttfamily]{#2}%
   \fi%
 }
@@ -960,7 +967,7 @@
     \toks@{%
       \@ProcessOutput{\texttt{#2}}[%
         \IfValueT{#3}{\nobreakspace\texttt{(#3)}}%
-        \if@declare\nobreakspace{\idxfont(Farbe)}\fi%
+        \if@declare\idxsuffix{Farbe}\fi%
       ]'#4'%
     }%
     \expandafter\addto@hook\expandafter\toks@\expandafter{(\@TempColor)}%
@@ -976,7 +983,7 @@
   \else%
     \SetIndexFormat{#1}{#5}%
     \@ProcessOutput{\texttt{#2}}[%
-      \if@declare\nobreakspace{\idxfont(Seitenstil)}\fi%
+      \if@declare\idxsuffix{Seitenstil}\fi%
     ]'#3'(#4){macros}[\ttfamily]{#2}[Seitenstil]%
   \fi%
 }
@@ -988,7 +995,7 @@
   \else%
     \SetIndexFormat{#1}{#5}%
     \@ProcessOutput{\texttt{#2}}[%
-      \if@declare\nobreakspace{\idxfont(Z\"ahler)}\fi%
+      \if@declare\idxsuffix{Z\"ahler}\fi%
     ]'#3'(#4){macros}[\ttfamily]{#2}[Z\"ahler]%
   \fi%
 }
@@ -1000,12 +1007,13 @@
   \else%
     \SetIndexFormat{#1}{#5}%
     \@ProcessOutput{\texttt{\bsc#2}}[%
-      \if@declare\nobreakspace{\idxfont(L\"ange)}\fi%
+      \if@declare\idxsuffix{L\"ange}\fi%
     ]'#3'(#4){macros}[\ttfamily\bsc]{#2}[L\"ange]%
   \fi%
 }
 \DeclareExpandableDocumentCommand\@Length{sm}{#2}
 \pdfexpandableoutline{Length}%
+% §§§ Reihenfolge und Delimiter der (optionalen) Argumente anpassen
 \NewDocumentCommand\@ProcessOutput{mod''d()md!!omo}{%
   \if@declare%
     \if@openindex%
@@ -1110,34 +1118,17 @@
   \fi%
   \let\@IndexFormat\relax%
   \let\@CTANLink\relax%
-%  \typeout{++++++++++++++++++++++++++++++++++++}%
-%  \def\@tempa{#1}\typeout{\#1: \meaning\@tempa}%
-%  \def\@tempa{#2}\typeout{\#2: \meaning\@tempa}%
-%  \def\@tempa{#3}\typeout{\#3: \meaning\@tempa}%
-%  \def\@tempa{#4}\typeout{\#4: \meaning\@tempa}%
-%  \def\@tempa{#5}\typeout{\#5: \meaning\@tempa}%
-%  \def\@tempa{#6}\typeout{\#6: \meaning\@tempa}%
-%  \def\@tempa{#7}\typeout{\#7: \meaning\@tempa}%
-%  \def\@tempa{#8}\typeout{\#8: \meaning\@tempa}%
-%  \def\@tempa{#9}\typeout{\#9: \meaning\@tempa}%
-%  \typeout{++++++++++++++++++++++++++++++++++++}%
 }
-\newcommand\@TempSimpleKey{}
-\NewDocumentCommand\SimpleKey{m}{%
-%  \begingroup%
-%    \renewcommand*\Environment[1]{\noexpand\ttfamily##1}%
-%    \renewcommand*\Macro[1]{\ttfamily\bsc##1}%
-%    \xdef\@TempSimpleKey{\begingroup#1\endgroup}%
-%  \endgroup%
-%  \let\ProcessedArgument\@TempSimpleKey%{#1}%\relax%
-%  \typeout{00000#1 \meaning\ProcessedArgument\meaning\@TempSimpleKey}%
+\newrobustcmd*\hyperidx[2][]{%
+  \begingroup%
+    \renewcommand*\tud@trace@addlabel[1]{}%
+    \manualhyperref{#1}{#2}%
+  \endgroup%
 }
-\newrobustcmd*\hyperidx[2][]{\manualhyperref{#1}{#2}}
-% §§§ Auszeichnung übernehmen statt opt. argumente
-%\NewDocumentCommand\@HyperIndex{m>{\SimpleKey}mmmmmm}{%
+% §§§ Auszeichnung optionaler Argumente übernehmen statt obligatorischer
 \NewDocumentCommand\@HyperIndex{mmmmmmm}{%
   \IfValueTF{#3}{\def\@tempa{#3}}{\def\@tempa{}}%
-  \IfValueTF{#5}{\def\@tempb{\nobreakspace{\idxfont(#5)}}}{\def\@tempb{}}%
+  \IfValueTF{#5}{\def\@tempb{\idxsuffix{#5}}}{\def\@tempb{}}%
   \IfValueTF{#7}{\edef\@tempc{|#7}}{\def\@tempc{}}%
   \IfValueTF{#2}{%
     \@CreateLabel\@templabel{#1:#2:#4}{#6}%
@@ -1146,21 +1137,19 @@
     }%
     \@CreateEntry\@tempkeyentry{#1:#2:#4}{#6}{%
       \begingroup\expandonce\@tempa#4\endgroup%
-      \noexpand\nobreakspace{\idxfont(#2)}%
+      \idxsuffix{#2}%
     }%
-    \typeout{***** #2!\meaning\@tempentry}%
-    \typeout{***** \meaning\@tempkeyentry}%
     \ifcsdef{r@\@templabel}{%
-        \tud@ifsubdeclare{#6}{%
-          \index[#1]{%
-            #2\nobreakspace{\idxfont(#6)}!%
-              \hyperidx[\@templabel]{\expandonce\@tempentry}\expandonce\@tempc%
-          }%
-        }{%
-          \index[#1]{%
-            #2!\hyperidx[\@templabel]{\expandonce\@tempentry}\expandonce\@tempc%
-          }%
+      \tud@ifsubdeclare{#6}{%
+        \index[#1]{%
+          #2\idxsuffix{#6}!%
+            \hyperidx[\@templabel]{\expandonce\@tempentry}\expandonce\@tempc%
         }%
+      }{%
+        \index[#1]{%
+          #2!\hyperidx[\@templabel]{\expandonce\@tempentry}\expandonce\@tempc%
+        }%
+      }%
       \index[keys]{%
         \hyperidx[\@templabel]{\expandonce\@tempkeyentry}\expandonce\@tempc%
       }%
@@ -1182,6 +1171,7 @@
     }%
   }%
 }
+% §§§ Änderungsliste: Markup komplett überarbeiten
 \newcommand*\@changedatdeclarelist{}
 \let\@changedatdeclarelist\relax
 \newcommand*\@changedatdeclaredefault{\emph{neu}}
@@ -1198,6 +1188,7 @@
 \NewDocumentCommand\ChangedAt@Split{>{\SplitArgument{2}{!}}m}{%
   \ChangedAt@@Split#1%
 }
+% §§§ Leerzeichen durch \@subdeclare?!
 \newcommand*\ChangedAt@@Split[3]{%
   \in@{*}{#1}%
   \ifin@%
@@ -1219,6 +1210,7 @@
       }%
     }%
   \fi%
+  \typeout{+++++ \meaning\@tempa}
   \listeadd\@changedatdeclarelist{\expandonce\@tempa}%
 }
 \NewDocumentCommand\printchangedatlist{sO{\z@}}{%
@@ -1300,7 +1292,7 @@
     \ifin@%
       \begingroup%
         \RenewDocumentCommand\Key{sommo}{\xdef\@TempKey{##3:}}%
-        \setbox0\hbox{#3}%
+        \setbox\z@\hbox{#3}%
       \endgroup%
       \index[changelog]{%
         #1\manualhyperdef*{#1}!\manualhyperdef*{#1:#2}#2!\@TempKey\ #3%
@@ -1333,9 +1325,9 @@
 % §§§ Reihenfolge der Argumente anpassen
 \NewDocumentCommand\@ProcessChangedAt{md()md!!mmm}{%
   \IfBooleanTF{#1}{%
-    \def\@tempa{\begingroup#5#6\endgroup}%
+    \protected@edef\@tempa{\begingroup#5#6\endgroup}%
   }{%
-    \def\@tempa{\begingroup#5#6\endgroup\nobreakspace{\idxfont(#7)}}%
+    \protected@edef\@tempa{\begingroup#5#6\idxsuffix{#7}\endgroup}%
   }%
   \IfValueTF{#4}{%
     \@CreateLabel\@templabel{#3:#4:#6}{#2}%
@@ -1437,7 +1429,8 @@
   }%
   \IfBooleanF{#1}{%
     \index[files]{%
-      \hypertut{#2}{\nobreakspace{\idxfont(Tutorial)}}\IfValueT{#3}{|#3}%
+      \hypertut{#2}{\idxsuffix{Tutorial}}%
+      \IfValueT{#3}{|#3}%
     }%
   }%
 }
@@ -1614,7 +1607,7 @@
   \fi%
 }
 \newcommand*\Univers{\textubn{Univers}\xspace}
-\newcommand*\DIN{\textdbn{DIN\nobreakspace{}BOLD}\xspace}
+\newcommand*\DIN{\textdbn{DIN~BOLD}\xspace}
 \newcommand*\textsbn{}
 \newcommand*\sbnfont{\sffamily\bfseries\upshape}
 \DeclareTextFontCommand\textsbn{\sffamily\bfseries\upshape}
@@ -1635,9 +1628,9 @@
     https://github.com/tud-cd/tudscr/releases%
   }%
   \IfBooleanTF{#1}{%
-    \href{\@tempc}{GitHub-Repository\nobreakspace\File*{tudscr}}%
+    \href{\@tempc}{GitHub-Repository~\File*{tudscr}}%
   }{%
-    \hrfn{\@tempc}{GitHub-Repository\nobreakspace\File*{tudscr}}%
+    \hrfn{\@tempc}{GitHub-Repository~\File*{tudscr}}%
   }%
   \xspace%
 }
@@ -1763,8 +1756,3 @@
 \endinput
 %%
 %% End of file `tudscrman.cls'.
-
-% §§§ tudscr-keys.ind
-%macros:evaluation
-%macros:notice
-%macros:task
