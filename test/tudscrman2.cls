@@ -58,7 +58,7 @@
       \fi%
     }%
   \fi%
-  \@TUDVersion{2015/07/17 v2.05 BETA TUD-KOMA-Script}%
+  \@TUDVersion{2015/08/26 v2.05 BETA TUD-KOMA-Script}%
 \endgroup%
 \providecommand*\tudscrmail{tudscr@gmail.com}
 \newcommand*\TUD@ProvidesWrapperClass[3]{%
@@ -574,24 +574,9 @@
   \if@tempswa#2\else#3\fi%
 }
 % Sternversion zum Erzeugen des Labels, ohne Stern zur Nutzung
-\newcommand*\@gobblemarkup{%
-  \let\Class\@firstofone%
-  \let\Package\@firstofone%
-  \let\Environment\@firstofone%
-  \let\Macro\@firstofone%
-  \let\ttfamily\relax%
-  \let\texttt\@firstofone%
-  \let\textsbn\@firstofone%
-  \let\textsbs\@firstofone%
-}
 \newcommand*\@templabel{}
-\NewDocumentCommand\@createlabel{smmm}{%
-  \begingroup%
-    \@gobblemarkup%
-    \tud@ifsubdeclare{#4}{%
-      \@tempswatrue%
-      \IfBooleanF{#1}{\ifcsdef{r@#4:#3}{}{\@tempswafalse}}%
-    }{\@tempswafalse}%
+\NewDocumentCommand\@CreateLabel{smmm}{%
+  \@@CreateLabel[#1]{#3}{#4}%
     \if@tempswa%
       \edef\@tempa{%
         \noexpand\endgroup%
@@ -605,36 +590,29 @@
     \fi%
   \@tempa%
 }
+\NewDocumentCommand\@@CreateLabel{omm}{%
+  \begingroup%
+    \let\Class\@Class%
+    \let\Package\@Package%
+    \let\Environment\@Environment%
+    \let\Macro\@Macro%
+    \tud@ifsubdeclare{#3}{%
+      \@tempswatrue%
+      \IfBooleanF{#1}{\ifcsdef{r@#3:#2}{}{\@tempswafalse}}%
+    }{\@tempswafalse}%
+}
 % §§§ Subeintrag nur, wenn label auch dahin zielt!
 \newcommand*\@tempentry{}
 \newcommand*\@tempkeyentry{}
-\newcommand*\@createentry[4]{%
-%  \begingroup%
-%    \@gobblemarkup%
-%    \tud@ifsubdeclare{#4}{%
-%      \ifcsdef{r@#4:#3}{\@tempswatrue}{\@tempswafalse}%
-%    }{\@tempswafalse}%
-%    \if@tempswa%
-%      \edef\@tempa{%
-%        \noexpand\endgroup%
-%        \noexpand\edef\noexpand#1{#2\noexpand\nobreakspace{\idxfont(#4)}}%
-%      }%
-%    \else%
-%      \edef\@tempa{%
-%        \noexpand\endgroup%
-%        \noexpand\edef\noexpand#1{#2}%
-%      }%
-%    \fi%
-%  \@tempa%
-%  \typeout{----- \meaning\@tempa}\endgroup%
-%      \typeout{///// \meaning\@templabel}%
-%      \typeout{///// #2}%
-%      \typeout{///// #3}%
-  \tud@ifsubdeclare{#4}{%
-    \edef#1{#2\noexpand\nobreakspace{\idxfont(#4)}}%
-  }{%
-    \edef#1{#2}%
-  }%
+\newcommand*\@CreateEntry[4]{%
+  \@@CreateLabel{#2}{#3}%
+    \global\let\if@tempswa=\if@tempswa%
+  \endgroup%
+  \if@tempswa%
+    \edef#1{#4\noexpand\nobreakspace{\idxfont(#3)}}%
+  \else%
+    \edef#1{#4}%
+  \fi%
 }
 % §§§ ToDo parallel Liste mit erzeugten Labels erstellen und vergleichen
 % §§§ \@subdeclaration mit einbeziehen, evtl. ebenfalls eine Liste führen
@@ -643,9 +621,14 @@
   \RequirePackage{currfile}%
   \newcommand*\@missinglabellist{}%
   \renewcommand*\tud@trace@addlabel[1]{%
-    \typeout{+++++ label ##1 missing in \currfilename on line \the\inputlineno}%
-    \expandafter\ifinlist\expandafter{##1}{\@missinglabellist}{}{%
-      \listxadd\@missinglabellist{##1}%
+    \expandafter\IfBooleanF\expandafter{\@IndexFormat}{%
+      \typeout{%
+        +++++ label ##1 is missing^^J%
+        +++++ in \currfilename\space on line \the\inputlineno%
+      }%
+      \expandafter\ifinlist\expandafter{##1}{\@missinglabellist}{}{%
+        \listxadd\@missinglabellist{##1}%
+      }%
     }%
   }%
   \AfterEndDocument{%
@@ -811,6 +794,8 @@
     }%
   }%
 }
+\DeclareExpandableDocumentCommand\@Distribution{sm}{#2}
+\pdfexpandableoutline{Distribution}
 \newrobustcmd*\Path[1]{\mbox{\texttt{#1}}}
 \NewDocumentCommand\File{smd||}{%
   \ifdin{#2}{%
@@ -824,6 +809,8 @@
     }%
   }%
 }
+\DeclareExpandableDocumentCommand\@File{sm}{#2}
+\pdfexpandableoutline{File}
 \NewDocumentCommand\Class{smd''d||}{%
   \if@changelog%
     \@ProcessChangedAt{#1}{files}{\protect\sbnfont}{#2}{Klasse}%
@@ -831,7 +818,7 @@
     \ifdin{#2}{%
       \SetIndexFormat{#1}{#4}%
       \@ProcessOutput{\textsbn{#2}}'#3'%
-        {files}[\protect\sbnfont]{#2}[\nobreakspace{\idxfont(Klasse)}]%
+        {files}[\protect\sbnfont]{#2}[Klasse]%
     }%
   \fi%
 }
@@ -847,7 +834,7 @@
       }{\def\@CTANLink{pkg/#2}}%
       \SetIndexFormat{#1}{#5}%
       \@ProcessOutput{\textsbn{#2}}'#3'%
-        {files}[\protect\sbnfont]{#2}[\nobreakspace{\idxfont(Paket)}]%
+        {files}[\protect\sbnfont]{#2}[Paket]%
     }%
   \fi%
 }
@@ -895,6 +882,7 @@
   \fi%
 }
 \DeclareExpandableDocumentCommand\@Macro{sm}{#2}
+\pdfexpandableoutline{Macro}%
 \NewDocumentCommand\Key{smmod''D(){\@subdeclare}d||}{%
   \if@changelog%
     \@ProcessChangedAt{#1}(#6){macros}!#2!{\ttfamily}{#3}{Parameter}%
@@ -903,9 +891,11 @@
     \@ProcessOutput{\texttt{#3}}[%
       \IfValueT{#4}{\texttt{=#4}}%
       \if@declare\nobreakspace{\idxfont(Parameter)}\fi%
-    ]'#5'(#6){macros}!#2![\ttfamily]{#3}[\nobreakspace{\idxfont(Parameter)}]%
+    ]'#5'(#6){macros}!#2![\ttfamily]{#3}[Parameter]%
   \fi%
 }
+\DeclareExpandableDocumentCommand\@Key{smm}{#3}
+\pdfexpandableoutline{Key}
 \NewDocumentCommand\Term{smd''D(){\@subdeclare}d||}{%
   \if@changelog%
     \@ProcessChangedAt{#1}(#4){terms}{\ttfamily\bsc}{#2}{Bezeichner}%
@@ -916,6 +906,8 @@
     ]'#3'(#4){terms}[\ttfamily\bsc]{#2}%
   \fi%
 }
+\DeclareExpandableDocumentCommand\@Term{sm}{#2}
+\pdfexpandableoutline{Term}%
 \newcommand\@termlist{}
 \let\@termlist\relax
 \NewDocumentCommand\TermTable{smg}{%
@@ -955,6 +947,8 @@
     ]'#3'(#4){fonts}[\ttfamily]{#2}%
   \fi%
 }
+\DeclareExpandableDocumentCommand\@Font{sm}{#2}
+\pdfexpandableoutline{Font}%
 \newcommand*\@TempColor{}
 \NewDocumentCommand\Color{smod''D(){\@subdeclare}d||}{%
   \def\@TempColor{#5}%
@@ -974,6 +968,8 @@
     \the\toks@%
   \fi%
 }
+\DeclareExpandableDocumentCommand\@Color{sm}{#2}
+\pdfexpandableoutline{Color}%
 \NewDocumentCommand\PageStyle{smd''D(){\@subdeclare}d||}{%
   \if@changelog%
     \@ProcessChangedAt{#1}(#4){macros}{\ttfamily}{#2}{Seitenstil}%
@@ -981,9 +977,11 @@
     \SetIndexFormat{#1}{#5}%
     \@ProcessOutput{\texttt{#2}}[%
       \if@declare\nobreakspace{\idxfont(Seitenstil)}\fi%
-    ]'#3'(#4){macros}[\ttfamily]{#2}[\nobreakspace{\idxfont(Seitenstil)}]%
+    ]'#3'(#4){macros}[\ttfamily]{#2}[Seitenstil]%
   \fi%
 }
+\DeclareExpandableDocumentCommand\@PageStyle{sm}{#2}
+\pdfexpandableoutline{PageStyle}%
 \NewDocumentCommand\Counter{smd''D(){\@subdeclare}d||}{%
   \if@changelog%
     \@ProcessChangedAt{#1}(#4){macros}{\ttfamily}{#2}{Z\"ahler}%
@@ -991,9 +989,11 @@
     \SetIndexFormat{#1}{#5}%
     \@ProcessOutput{\texttt{#2}}[%
       \if@declare\nobreakspace{\idxfont(Z\"ahler)}\fi%
-    ]'#3'(#4){macros}[\ttfamily]{#2}[\nobreakspace{\idxfont(Z\"ahler)}]%
+    ]'#3'(#4){macros}[\ttfamily]{#2}[Z\"ahler]%
   \fi%
 }
+\DeclareExpandableDocumentCommand\@Counter{sm}{#2}
+\pdfexpandableoutline{Counter}%
 \NewDocumentCommand\Length{smd''D(){\@subdeclare}d||}{%
   \if@changelog%
     \@ProcessChangedAt{#1}(#4){macros}{\ttfamily\bsc}{#2}{L\"ange}%
@@ -1001,9 +1001,11 @@
     \SetIndexFormat{#1}{#5}%
     \@ProcessOutput{\texttt{\bsc#2}}[%
       \if@declare\nobreakspace{\idxfont(L\"ange)}\fi%
-    ]'#3'(#4){macros}[\ttfamily\bsc]{#2}[\nobreakspace{\idxfont(L\"ange)}]%
+    ]'#3'(#4){macros}[\ttfamily\bsc]{#2}[L\"ange]%
   \fi%
 }
+\DeclareExpandableDocumentCommand\@Length{sm}{#2}
+\pdfexpandableoutline{Length}%
 \NewDocumentCommand\@ProcessOutput{mod''d()md!!omo}{%
   \if@declare%
     \if@openindex%
@@ -1015,9 +1017,9 @@
         }%
       }%
       \IfValueTF{#6}{%
-        \@createlabel*\@templabel{#5:#6:#8}{#4}%
+        \@CreateLabel*\@templabel{#5:#6:#8}{#4}%
       }{%
-        \@createlabel*\@templabel{#5:#8}{#4}%
+        \@CreateLabel*\@templabel{#5:#8}{#4}%
       }%
       \if@deprecated%
         \expandafter\IfBooleanF\expandafter{\@IndexFormat}{%
@@ -1063,9 +1065,9 @@
       }%
     \fi%
     \IfValueTF{#6}{%
-      \@createlabel\@templabel{#5:#6:#8}{#4}%
+      \@CreateLabel\@templabel{#5:#6:#8}{#4}%
     }{%
-      \@createlabel\@templabel{#5:#8}{#4}%
+      \@CreateLabel\@templabel{#5:#8}{#4}%
     }%
     \ifcsdef{r@\@templabel}{%
       \def\@tempa{%
@@ -1135,17 +1137,17 @@
 %\NewDocumentCommand\@HyperIndex{m>{\SimpleKey}mmmmmm}{%
 \NewDocumentCommand\@HyperIndex{mmmmmmm}{%
   \IfValueTF{#3}{\def\@tempa{#3}}{\def\@tempa{}}%
-  \IfValueTF{#5}{\def\@tempb{#5}}{\def\@tempb{}}%
+  \IfValueTF{#5}{\def\@tempb{\nobreakspace{\idxfont(#5)}}}{\def\@tempb{}}%
   \IfValueTF{#7}{\edef\@tempc{|#7}}{\def\@tempc{}}%
   \IfValueTF{#2}{%
-    \@createlabel\@templabel{#1:#2:#4}{#6}%
-    \@createentry\@tempentry{%
+    \@CreateLabel\@templabel{#1:#2:#4}{#6}%
+    \@CreateEntry\@tempentry{#1:#2:#4}{}{%
       \begingroup\expandonce\@tempa#4\endgroup\expandonce\@tempb%
-    }{#1:#2:#4}{}%
-    \@createentry\@tempkeyentry{%
+    }%
+    \@CreateEntry\@tempkeyentry{#1:#2:#4}{#6}{%
       \begingroup\expandonce\@tempa#4\endgroup%
       \noexpand\nobreakspace{\idxfont(#2)}%
-    }{#1:#2:#4}{#6}%
+    }%
     \typeout{***** #2!\meaning\@tempentry}%
     \typeout{***** \meaning\@tempkeyentry}%
     \ifcsdef{r@\@templabel}{%
@@ -1167,10 +1169,10 @@
       \index[keys]{\expandonce\@tempkeyentry\expandonce\@tempc}%
     }%
   }{%
-    \@createlabel\@templabel{#1:#4}{#6}%
-    \@createentry\@tempentry{%
+    \@CreateLabel\@templabel{#1:#4}{#6}%
+    \@CreateEntry\@tempentry{#1:#4}{#6}{%
       \begingroup\expandonce\@tempa#4\endgroup\expandonce\@tempb%
-    }{#1:#4}{#6}%
+    }%
     \ifcsdef{r@\@templabel}{%
       \index[#1]{%
         \hyperidx[\@templabel]{\expandonce\@tempentry}\expandonce\@tempc%
@@ -1330,15 +1332,15 @@
 }
 % §§§ Reihenfolge der Argumente anpassen
 \NewDocumentCommand\@ProcessChangedAt{md()md!!mmm}{%
-  \IfValueTF{#4}{%
-    \@createlabel\@templabel{#3:#4:#6}{#2}%
-  }{%
-    \@createlabel\@templabel{#3:#6}{#2}%
-  }%
   \IfBooleanTF{#1}{%
     \def\@tempa{\begingroup#5#6\endgroup}%
   }{%
     \def\@tempa{\begingroup#5#6\endgroup\nobreakspace{\idxfont(#7)}}%
+  }%
+  \IfValueTF{#4}{%
+    \@CreateLabel\@templabel{#3:#4:#6}{#2}%
+  }{%
+    \@CreateLabel\@templabel{#3:#6}{#2}%
   }%
   \ifcsdef{r@\@templabel}{\hyperidx[\@templabel]{\@tempa}}{\@tempa}%
 }
@@ -1511,6 +1513,7 @@
   \begingroup%
     \@printindex%
     \@printindex[options]%
+    \clearpage%
     \@printindex[macros]%
     \@printindex[keys]%
     \@printindex[terms]%
@@ -1760,3 +1763,8 @@
 \endinput
 %%
 %% End of file `tudscrman.cls'.
+
+% §§§ tudscr-keys.ind
+%macros:evaluation
+%macros:notice
+%macros:task
