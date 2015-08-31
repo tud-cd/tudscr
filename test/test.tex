@@ -12,24 +12,21 @@
 % §§§ überarbeiten
 \begin{document}
 \makeatletter
-
-%      \edef\@tempa{%
-%        \noexpand\endgroup%
-%        \noexpand\edef\noexpand#2{#4:#3}%
-%      }%
-
-\def\blubb#1{abc: #1}
-
-\edef\bla#1#2{%
-  \noexpand\edef\noexpand#1{#2}%
+\DeclareDocumentCommand\foo{s>{\ProcessorValue}m}{%
+  \meaning\ProcessedArgument%
 }
-
-\meaning\bla
-%\bla\hallo{\blubb{dorte}}
-
-\meaning\hallo
-
-
+\newcommand\ProcessorValue[1]{%
+  \in@{=}{#1}%
+  \ifin@%
+    \def\@tempa##1=##2\@nil{\toks@{{##1}[=##2]}}%
+  \else%
+    \def\@tempa##1\@nil{\toks@{{##1}}}%
+  \fi%
+  \@tempa#1\@nil%
+  \edef\ProcessedArgument{\the\toks@}%
+}
+\foo*{aaa=blubb}%[bla]
+\foo{bbb}
 \makeatother
 \end{document}
 %
