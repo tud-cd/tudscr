@@ -13,7 +13,12 @@
 \begin{document}
 \makeatletter
 \DeclareDocumentCommand\foo{s>{\ProcessorValue}m}{%
-  \meaning\ProcessedArgument%
+%  \meaning\ProcessedArgument\par\smallskip%
+  \toks@{#2}%
+  \the\toks@\par
+  \expandafter\test#2
+  \bigskip
+%  #1\par#2\par#3\par\bigskip
 }
 \newcommand\ProcessorValue[1]{%
   \in@{=}{#1}%
@@ -25,9 +30,19 @@
   \@tempa#1\@nil%
   \edef\ProcessedArgument{\the\toks@}%
 }
+\DeclareDocumentCommand\test{mo}{%
+  Ausgabe: #1 optional: \IfValueTF{#2}{#2}{nothing}
+}
 \foo*{aaa=blubb}%[bla]
+
 \foo{bbb}
+
+\foo{ccc}[]
+
+\foo{ddd}[eee]
 \makeatother
+
+
 \end{document}
 %
 \RequirePackage{fix-cm}
