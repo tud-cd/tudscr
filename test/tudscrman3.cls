@@ -197,9 +197,10 @@
 \fi
 \WarningFilter*{ifplatform}{^^J \space\space\space shell escape is disabled}
 \RequirePackage{ifplatform}[2010/10/22]
-\newcommand*\tud@trace@label[1]{}
+
 % §§§ \tud@trace@label@created \tud@trace@label@missing
 % §§§ überarbeiten \@IndexFormat
+\newcommand*\tud@trace@label[1]{}
 \newcommand*\tracinglabels{%
   \RequirePackage{currfile}%
   \newcommand*\@missinglabellist{}%
@@ -209,9 +210,7 @@
         +++++ label ##1 is missing^^J%
         +++++ in \currfilename\space on line \the\inputlineno%
       }%
-      \expandafter\ifinlist\expandafter{##1}{\@missinglabellist}{}{%
-        \listxadd\@missinglabellist{##1}%
-      }%
+      \xifinlist{##1}{\@missinglabellist}{}{\listxadd\@missinglabellist{##1}}%
     }%
   }%
   \AfterEndDocument{%
@@ -230,10 +229,29 @@
 \@onlypreamble\tracingmarkup
 % §§§ implementieren
 %\newcommand*\tud@trace@index[1]{#1}
-\newcommand*\tracingindex{%
+%\newcommand*\tracingindex{%
 %  \renewcommand*\tud@trace@index[1]{\typeout{+++++ index:^^J##1^^J}##1}%
+%}
+%\@onlypreamble\tracingindex
+\newcommand*\tud@trace@subdeclare[1]{}
+\newcommand*\@subdeclarelist{}
+\newcommand*\tracingsubdeclare{%
+  \renewcommand*\tud@trace@subdeclare[1]{%
+    \begingroup%
+      \def\Class####1{class:####1}%
+      \def\Package####1{package:####1}%
+      \xifinlist{##1}{\@subdeclarelist}{}{\listxadd\@subdeclarelist{##1}}%
+    \endgroup%
+  }%
+  \AfterEndDocument{%
+    \typeout{+++++ subdeclarelist +++++}%
+    \def\@tempa##1{\typeout{##1}}%
+    \forlistloop\@tempa{\@subdeclarelist}%
+  }%
 }
-\@onlypreamble\tracingindex
+\@onlypreamble\tracingsubdeclare
+\tracingsubdeclare
+
 
 
 \PassOptionsToPackage{hyperindex=false,colorlinks,linkcolor=blue}{hyperref}
@@ -448,7 +466,7 @@
 \newcommand*\idxfont{}
 \let\idxfont\footnotesize
 \robustify{\idxfont}
-\newcommand*\idxsuffix[1]{\noexpand~\begingroup\idxfont(#1)\endgroup}
+\newcommand*\idxsuffix[1]{\begingroup\idxfont\noexpand~(#1)\endgroup}
 \newrobustcmd*\hyperidx[2][]{%
 %  \begingroup%
 %    \renewcommand*\tud@trace@label[1]{}%
@@ -627,9 +645,9 @@
       a cross-label was given before.%
     }%
   \fi%
-}{\global\let\@subdeclare\@subdeclaredefault}
+  \ignorespaces%
+}{\global\let\@subdeclare\@subdeclaredefault\aftergroup\ignorespaces}
 \newcommand*\tud@ifsubdeclare[3]{%
-  % §§§ alle Argumente #1 in unique-list specihern und auswerten
   \@tempswafalse%
   \def\@tempd{#2}%
   \def\@tempe{#2}%
@@ -683,8 +701,7 @@
 \pdfexpandableoutline{File}
 % §§§ Argumente von \@ProcessOutput für Auszeichung in Fließtext und Index 
 % §§§ zusammenführen, evtl. noch einmal Delimiter der opt. Arg. überarbeiten
-% §§§
-% §§§ Auszeichnung \if@declare als opt. Argument bzw. Split der Ausgabe?!
+% §§§ ProcessChangedAt ebenfalls anpassen
 \NewDocumentCommand\Class{smd''d||}{%
   \if@changelog%
     \@ProcessChangedAt{#1}{files}{\protect\sbnfont}{#2}{Klasse}%
@@ -701,7 +718,6 @@
 \newcommand*\@CTANLink{}
 \let\@CTANLink\relax
 \NewDocumentCommand\Package{smd''d<>d||}{%
-%
   \SetMarkupFormat{\sbnfont}%
   \@Process@toks{#1}{files}{#2}%
   \if@changelog%
@@ -748,7 +764,6 @@
 }
 \DeclareExpandableDocumentCommand\@Option{sd()m}{#3}
 \pdfexpandableoutline{Option}
-% §§§ hier wird's etwas tricky
 \NewDocumentCommand\Environment{sd()mod''d()d||}{%
 % §§§ Debug
 % §§§ #6 raus und stattdessen #2 verwenden
@@ -860,7 +875,7 @@
 % §§§ optionales Argument mit Warnung zum Ändern in der Doku!
 \NewDocumentCommand\Color{smod''D(){\@subdeclare}d||}{%
   \def\@TempColor{#5}%
-  % §§§ geht das anders als mit tudscr?
+  % §§§ geht das anders als mit tudscr? bei argumentdeklaration
   \ifstr{\@TempColor}{\@subdeclaredefault}{%
     \def\@TempColor{\Package{tudscrcolor}}%
   }{}%
@@ -1144,6 +1159,7 @@
 \newcommand*\eaddto@hook[2]{%
   \expandafter\addto@hook\expandafter#1\expandafter{#2}%
 }
+% Debug
 % {#1}: Stern?
 % (#2): Subdeclaration
 % {#3}: Ziellabel/Zielindex
@@ -1154,8 +1170,10 @@
   \tud@toks{{#1}}%
   \IfValueTF{#2}{%
     \addto@hook\tud@toks{(#2)}%
+    \tud@trace@subdeclare{#2}%
   }{%
     \eaddto@hook\tud@toks{\expandafter(\@subdeclare)}%
+    \expandafter\tud@trace@subdeclare\expandafter{\@subdeclare}%
   }%
   \addto@hook\tud@toks{{#3}}%
   \IfValueT{#4}{\addto@hook\tud@toks{!#4!}}%
@@ -1236,12 +1254,6 @@
     \fi%
   \else%
     \@Process@label\tud@label(#2){#3}!#4!{#5}%
-      % §§§ kann raus
-    \IfValueTF{#4}{%
-      \@CreateLabel\@templabel{#3:#4:#5}{#2}%
-    }{%
-      \@CreateLabel\@templabel{#3:#5}{#2}%
-    }%
     \def\@tempc{\mbox{\@MarkupFormat#5\IfValueT{#6}{#6}}}%
     \ifcsdef{r@\tud@label}{%
       \def\@tempa{\hyperref{}{\jobname}{\tud@label}{\@tempc}}%
@@ -1325,8 +1337,6 @@
     \else%
       \IfValueTF{#8}{\def\@tempc{|#8}}{\def\@tempc{}}%
     \fi%
-%    
-%    
     \@Process@label\tud@label(#2){#3}!#4!{#5}[@tempswa]%
     \IfValueTF{#7}{\def\@tempa{\idxsuffix{#7}}}{\def\@tempa{}}%
     \if@tempswa%
@@ -1334,13 +1344,12 @@
     \fi%
     \edef\@tempentry{%
       \begingroup%
-        \expandonce\@MarkupFormat#5%
-        \IfValueT{#6}{#6}%
-        \@tempa%
+        \expandonce\@MarkupFormat#5\IfValueT{#6}{#6}%
       \endgroup%
+      \@tempa%
     }%
     % §§§ Paketen im Index fehlt der hyperlink
-    \typeout{***** #2: #5 #7^^J\meaning\@tempentry^^J\meaning\tud@label}%
+%    \typeout{***** #2: #5 #7^^J\meaning\@tempentry^^J\meaning\tud@label}%
 %     \fi%
 %    \tud@ifsubdeclare{#2}{%
 %      \eappto\@tempentry{\idxsuffix{#2}}%
@@ -1356,8 +1365,6 @@
     }{%
       \index[#3]{\expandonce\@tempentry\expandonce\@tempc}%
     }%
-%    
-%    
   \fi%
 }
 
@@ -1403,7 +1410,6 @@
 %}
 \newcommand*\@MarkupFormat{}
 \newcommand*\@MarkupDeclare[1]{}
-% §§§ überarbeiten
 \NewDocumentCommand\SetMarkupFormat{md()o}{%
   \tud@toks{}%
   \gdef\@MarkupFormat{#1}%
@@ -1427,7 +1433,6 @@
 \newcommand*\ClearMarkupFormat{%
   \global\let\@MarkupFormat\relax%
   \global\let\@MarkupDeclare\@gobble%
-  \global\let\tud@label\relax%
 }
 \ClearMarkupFormat
 
@@ -1757,13 +1762,15 @@
   }{}%
 }
 \NewDocumentCommand\tud@item@pkg{od<>d()}{%
+  % §§§ \Package<>|!| aufrufen, \manualhyperdef mit richtigem argument nutzen
+  % evtl. letztes \tud@label verwenden
   \itempackages[{%
     \IfValueT{#1}{%
       \let\@tempb\relax%
       \@for\@tempa:=#1\do{%
         \ifx\@tempa\@empty\else\ifx\@tempa\space\else%
           \@tempb%
-          \manualhyperdef{files:\@tempa}%
+          \manualhyperdef{tudscr:files:\@tempa}%
           \IfValueTF{#2}{%
             \edef\@tempc{http://www.ctan.org/pkg/#2}%
           }{%
@@ -1778,7 +1785,7 @@
         \let\@tempb\relax%
         \@for\@tempa:=#3\do{%
           \@tempb%
-          \manualhyperdef{files:\@tempa}%
+          \manualhyperdef{tudscr:files:\@tempa}%
           \expandafter\Package\expandafter{\@tempa}'none'|!|%
           \def\@tempb{, }%
         }%
