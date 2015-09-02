@@ -1508,7 +1508,7 @@
     \@printindex[options]%
     \clearpage%
     \@printindex[macros]%
-    \@printindex[keys]%
+%    \@printindex[keys]%
     \@printindex[terms]%
     \@printindex[fonts]%
     \begingroup%
