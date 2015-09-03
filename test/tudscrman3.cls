@@ -197,7 +197,7 @@
 \fi
 \WarningFilter*{ifplatform}{^^J \space\space\space shell escape is disabled}
 \RequirePackage{ifplatform}[2010/10/22]
-
+%
 % §§§ \tud@trace@label@created \tud@trace@label@missing
 % §§§ überarbeiten \@IndexFormat
 \newcommand*\tud@trace@label[1]{}
@@ -462,11 +462,12 @@
 }
 \newcommand*\@TUDScript{TUD-KOMA-Script}
 \pdfexpandableoutline{TUDScript}
-
-\newcommand*\idxfont{}
-\let\idxfont\footnotesize
-\robustify{\idxfont}
-\newcommand*\idxsuffix[1]{\begingroup\idxfont\noexpand~(#1)\endgroup}
+%
+%\newcommand*\idxfont{}
+%\let\idxfont\footnotesize
+%\robustify{\idxfont}
+%\newcommand*\idxsuffix[1]{\begingroup\idxfont\noexpand~(#1)\endgroup}
+\newrobustcmd*\idxsuffix[1]{\begingroup\footnotesize~(#1)\endgroup}
 \newrobustcmd*\hyperidx[2][]{%
 %  \begingroup%
 %    \renewcommand*\tud@trace@label[1]{}%
@@ -519,7 +520,7 @@
   \IfValueTF{#5}{%
     \@additionallisttrue%
     \listadd\@additionallist{\hspace*{\tabcolsep}\small(#5)}%
-    % §§§ checken, ob das anders geht
+% §§§ checken, ob das anders geht
     \in@{\Environment}{#2}%
     \ifin@\listadd\@additionallist{\tabularnewline}\fi%
   }{%
@@ -653,35 +654,34 @@
   \def\@tempe{#2}%
   \IfValueTF{#1}{%
     \ifstr{#1}{}{%
-%      \typeout{**************** leer:^^J2:\meaning\@tempd^^J3:\meaning\@tempe}%
+%      \typeout{************* leer:^^J2:\meaning\@tempd^^J3:\meaning\@tempe}%§§§
     }{%
       \ifstr{#1}{\@subdeclaredefault}{}{\@tempswatrue}%
     }%
   }{%
-%    \typeout{**************** #1:^^J2:\meaning\@tempd^^J3:\meaning\@tempe}%
+%    \typeout{************* #1:^^J2:\meaning\@tempd^^J3:\meaning\@tempe}%§§§
   }%
   \if@tempswa#2\else#3\fi%
 }
 \NewDocumentCommand\Application{smd||}{%
   \ifdin{#2}{%
-    \mbox{\textsbs{#2}}%
-    \CheckIndexFormat{#1}{#3}%
-    % §§§ \@ProcessIndex?
-    \IfBooleanF{#1}{%
-      \index{\textsbs{#2}\idxsuffix{Anwendungssoftware}\IfValueT{#3}{|#3}}%
-    }%
+    \SetMarkupFormat{\sbsfont}%
+    \@Process@toks{#1}{\jobname}{#2}%
+    \@ProcessMarkup@toks%
+    \@ProcessIndex@toks<Anwendungssoftware>|#3|%
+    \ClearMarkupFormat%
   }%
 }
+% §§§ alle DeclareExpand überprüfen
 \DeclareExpandableDocumentCommand\@Application{sm}{#2}
 \pdfexpandableoutline{Application}
 \NewDocumentCommand\Distribution{smod||}{%
   \ifdin{#2\IfValueT{#3}{~#3}}{%
-    \mbox{\textsbn{#2\IfValueT{#3}{~#3}}}%
-    \CheckIndexFormat{#1}{#4}%
-    % §§§ \@ProcessIndex?
-    \IfBooleanF{#1}{%
-      \index{\textsbn{#2}\idxsuffix{Distribution}\IfValueT{#4}{|#4}}%
-    }%
+    \SetMarkupFormat{\sbnfont}%
+    \@Process@toks{#1}{\jobname}{#2}%
+    \@ProcessMarkup@toks[#3](~#3)%
+    \@ProcessIndex@toks<Distribution>|#4|%
+    \ClearMarkupFormat%
   }%
 }
 \DeclareExpandableDocumentCommand\@Distribution{sm}{#2}
@@ -689,52 +689,52 @@
 \newrobustcmd*\Path[1]{\mbox{\texttt{#1}}}
 \NewDocumentCommand\File{smd||}{%
   \ifdin{#2}{%
-    \mbox{\textsbn{#2}}%
-    \CheckIndexFormat{#1}{#3}%
-    % §§§ \@ProcessIndex?
-    \IfBooleanF{#1}{%
-      \index[files]{\textsbn{#2}\idxsuffix{Datei}\IfValueT{#3}{|#3}}%
-    }%
+    \SetMarkupFormat{\sbnfont}%
+    \@Process@toks{#1}{files}{#2}%
+    \@ProcessMarkup@toks%
+    \@ProcessIndex@toks<Datei>|#3|%
+    \ClearMarkupFormat%
   }%
 }
 \DeclareExpandableDocumentCommand\@File{sm}{#2}
 \pdfexpandableoutline{File}
-% §§§ Argumente von \@ProcessOutput für Auszeichung in Fließtext und Index 
-% §§§ zusammenführen, evtl. noch einmal Delimiter der opt. Arg. überarbeiten
-% §§§ ProcessChangedAt ebenfalls anpassen
 \NewDocumentCommand\Class{smd''d||}{%
-  \if@changelog%
-    \@ProcessChangedAt{#1}{files}{\protect\sbnfont}{#2}{Klasse}%
-  \else%
-    \ifdin{#2}{%
-      \SetIndexFormat{#1}{#4}%
-      \@ProcessOutput{#2}'#3'{files}[\protect\sbnfont]{#2}[Klasse]%
-    }%
-  \fi%
+  \ifdin{#2}{%
+    \SetMarkupFormat{\sbnfont}%
+    \@Process@toks{#1}{files}{#2}%
+    \if@changelog%
+      \@ProcessChangedAt{#1}{files}{\sbnfont}{#2}{Klasse}%
+    \else%
+        \@ProcessMarkup@toks'#3'%
+        \@ProcessIndex@toks<Klasse>|#4|%
+    \fi%
+    \ClearMarkupFormat%
+  }%
 }
 \DeclareExpandableDocumentCommand\@Class{sm}{#2}
 \pdfexpandableoutline{Class}
-% §§§ \@CTANLink als Argument für ProcessOutput?!
-\newcommand*\@CTANLink{}
-\let\@CTANLink\relax
 \NewDocumentCommand\Package{smd''d<>d||}{%
-  \SetMarkupFormat{\sbnfont}%
-  \@Process@toks{#1}{files}{#2}%
-  \if@changelog%
-    \@ProcessChangedAt{#1}{files}{\sbnfont}{#2}{Paket}%
-  \else%
-    % §§§ wo kommt das vor? mit \typeout{msg} prüfen
-    \ifdin{#2}{%
-      \@ProcessMarkup@toks'#3'%
+  \ifdin{#2}{%
+    \SetMarkupFormat{\sbnfont}%
+    \@Process@toks{#1}{files}{#2}%
+    \if@changelog%
+      \@ProcessChangedAt{#1}{files}{\sbnfont}{#2}{Paket}%
+    \else%
+      \let\@tempa\relax%
+      \IfValueTF{#4}{%
+        \ifstr{#4}{}{}{\def\@tempa{http://www.ctan.org/pkg/#4}}%
+      }{%
+        \def\@tempa{http://www.ctan.org/pkg/#2}%
+      }%
+      \ifx\@tempa\relax%
+        \@ProcessMarkup@toks'#3'%
+      \else%
+        \@ProcessMarkup@toks'#3'<\@tempa>%
+      \fi%
       \@ProcessIndex@toks<Paket>|#5|%
-%      \IfValueTF{#4}{%
-%        \ifstr{#4}{}{\let\@CTANLink\relax}{\def\@CTANLink{pkg/#4}}%
-%      }{\def\@CTANLink{pkg/#2}}%
-%      \SetIndexFormat{#1}{#5}%
-%      \@ProcessOutput{#2}'#3'{files}[\sbnfont]{#2}[Paket]%
-    }%
-  \fi%
-  \ClearMarkupFormat%
+    \fi%
+    \ClearMarkupFormat%
+  }%
 }
 \DeclareExpandableDocumentCommand\@Package{sm}{#2}
 \pdfexpandableoutline{Package}
@@ -771,15 +771,12 @@
 %    \ClassWarning{tudscrman}{please move the subdeclaration}%
 %  }%
 % §§§ Debug Ende
-% §§§ evtl. Warnung bei optionalem Argument #2 wenn nicht declare
-% §§§ evtl. noch etwas anpassen....
-  \SetMarkupFormat{\ttfamily}%
-  (%
+  \SetMarkupFormat{\ttfamily}(%
     \ttfamily \bsc{}begin\{##1\}\IfValueT{#4}{#4}\tabularnewline%
     \ttfamily \dots\tabularnewline%
     \ttfamily\bsc{}end\{##1\}%
   )%
-  \@Process@toks{#1}(#6){macros}{#3}%[#4]%
+  \@Process@toks{#1}(#6){macros}{#3}%
   \if@changelog%
     \@ProcessChangedAt{#1}(#6){macros}{\ttfamily}{#3}{Umgebung}%
   \else%
@@ -790,43 +787,73 @@
 }
 \DeclareExpandableDocumentCommand\@Environment{sd()m}{#3}
 \pdfexpandableoutline{Environment}%
-\NewDocumentCommand\Macro{smd''D(){\@subdeclare}d||}{%
+\NewDocumentCommand\Macro{sd()md''d()d||}{%
+%% §§§ Debug
+%% §§§ #5 raus und stattdessen #2 verwenden
+%%  \IfValueT{#5}{%
+%%    \ClassWarning{tudscrman}{please move the subdeclaration}%
+%%  }%
+%% §§§ Debug Ende
+  \SetMarkupFormat{\ttfamily\bsc}%
+  \@Process@toks{#1}(#5){macros}{#3}%
   \if@changelog%
-    \@ProcessChangedAt{#1}(#4){macros}{\ttfamily\bsc}{#2}{Befehl}%
+    \@ProcessChangedAt{#1}(#5){macros}{\ttfamily\bsc}{#3}{Befehl}%
   \else%
-    \SetIndexFormat{#1}{#5}%
-    \@ProcessOutput{#2}'#3'(#4){macros}[\ttfamily\bsc]{#2}%
+    \@ProcessMarkup@toks'#4'%
+    \@ProcessIndex@toks|#6|%
   \fi%
+  \ClearMarkupFormat%
+%
+%
+%  \if@changelog%
+%    \@ProcessChangedAt{#1}(#5){macros}{\ttfamily\bsc}{#3}{Befehl}%
+%  \else%
+%    \SetIndexFormat{#1}{#6}%
+%    \@ProcessOutput{#3}'#4'(#5){macros}[\ttfamily\bsc]{#3}%
+%  \fi%
 }
-\DeclareExpandableDocumentCommand\@Macro{sm}{#2}
+\DeclareExpandableDocumentCommand\@Macro{sd()m}{#3}
 \pdfexpandableoutline{Macro}%
 % §§§ suchen nach \\Key\*?\{.*\}\{.*\}\[.*\]
 % §§§ \Key(*){cmd}{key}[value] in \Key(*){cmd}{key=value}
 % §§§ optionales Argument mit Warnung zum Ändern in der Doku!
-\NewDocumentCommand\Key{smmod''D(){\@subdeclare}d||}{%
+\NewDocumentCommand\Key{sd()mmod''d()d||}{%
+%% §§§ Debug
+%% §§§ #7 raus und stattdessen #2 verwenden
+%%  \IfValueT{#7}{%
+%%    \ClassWarning{tudscrman}{please move the subdeclaration}%
+%%  }%
+%% §§§ Debug Ende
+  \SetMarkupFormat{\ttfamily}[Parameter]%
+  \@Process@toks{#1}(#7){macros}!#3!{#4}%
   \if@changelog%
-    \@ProcessChangedAt{#1}(#6){macros}!#2!{\ttfamily}{#3}{Parameter}%
+    \@ProcessChangedAt{#1}(#7){macros}!#3!{\ttfamily}{#4}{Parameter}%
   \else%
-    \SetIndexFormat{#1}{#7}%
-    \@ProcessOutput{#3}[%
-      \IfValueT{#4}{\texttt{=#4}}%
-      \if@declare\idxsuffix{Parameter}\fi%
-    ]'#5'(#6){macros}!#2![\ttfamily]{#3}[Parameter]%
+    \@ProcessMarkup@toks[#5](=#5)'#6'%
+    \@ProcessIndex@toks[Parameter]|#8|%
   \fi%
+  \ClearMarkupFormat%
 }
-\DeclareExpandableDocumentCommand\@Key{smm}{#3}
+\DeclareExpandableDocumentCommand\@Key{sd()mm}{#4}
 \pdfexpandableoutline{Key}
-\NewDocumentCommand\Term{smd''D(){\@subdeclare}d||}{%
+\NewDocumentCommand\Term{sd()md''d()d||}{%
+% §§§ Debug
+% §§§ #5 raus und stattdessen #2 verwenden
+%  \IfValueT{#5}{%
+%    \ClassWarning{tudscrman}{please move the subdeclaration}%
+%  }%
+% §§§ Debug Ende
+  \SetMarkupFormat{\ttfamily\bsc}[Bezeichner]%
+  \@Process@toks{#1}(#5){terms}{#3}%
   \if@changelog%
-    \@ProcessChangedAt{#1}(#4){terms}{\ttfamily\bsc}{#2}{Bezeichner}%
+    \@ProcessChangedAt{#1}(#5){terms}{\ttfamily\bsc}{#3}{Bezeichner}%
   \else%
-    \SetIndexFormat{#1}{#5}%
-    \@ProcessOutput{#2}[%
-      \if@declare\idxsuffix{Bezeichner}\fi%
-    ]'#3'(#4){terms}[\ttfamily\bsc]{#2}%
+    \@ProcessMarkup@toks'#4'%
+    \@ProcessIndex@toks|#6|%
   \fi%
+  \ClearMarkupFormat%
 }
-\DeclareExpandableDocumentCommand\@Term{sm}{#2}
+\DeclareExpandableDocumentCommand\@Term{sd()m}{#3}
 \pdfexpandableoutline{Term}%
 \newcommand\@termlist{}
 \let\@termlist\relax
@@ -857,84 +884,104 @@
   \Term{#1} & \@nameuse{#1} & %
     \selectlanguage{english}\vspace*{\@tempdimc}\@nameuse{#1}\tabularnewline%
 }
-\NewDocumentCommand\Font{smd''D(){\@subdeclare}d||}{%
+\NewDocumentCommand\Font{sd()md''d()d||}{%
+% §§§ Debug
+% §§§ #5 raus und stattdessen #2 verwenden
+%  \IfValueT{#5}{%
+%    \ClassWarning{tudscrman}{please move the subdeclaration}%
+%  }%
+% §§§ Debug Ende
+  \SetMarkupFormat{\ttfamily}[Schriftelement]%
+  \@Process@toks{#1}(#5){fonts}{#3}%
   \if@changelog%
-    \@ProcessChangedAt{#1}(#4){fonts}{\ttfamily}{#2}{Schriftelement}%
+    \@ProcessChangedAt{#1}(#5){fonts}{\ttfamily}{#3}{Schriftelement}%
   \else%
-    \SetIndexFormat{#1}{#5}%
-    \@ProcessOutput{#2}[%
-      \if@declare\idxsuffix{Schriftelement}\fi%
-    ]'#3'(#4){fonts}[\ttfamily]{#2}%
+    \@ProcessMarkup@toks'#4'%
+    \@ProcessIndex@toks|#6|%
   \fi%
+  \ClearMarkupFormat%
 }
-\DeclareExpandableDocumentCommand\@Font{sm}{#2}
+\DeclareExpandableDocumentCommand\@Font{sd()m}{#3}
 \pdfexpandableoutline{Font}%
 \newcommand*\@TempColor{}
-% §§§ suchen nach \\Color\*?\{.*\}\[.*\]
-% §§§ ??? \Color(*){color}[alternative] in \Color(*){color}(alternative)
-% §§§ optionales Argument mit Warnung zum Ändern in der Doku!
-\NewDocumentCommand\Color{smod''D(){\@subdeclare}d||}{%
-  \def\@TempColor{#5}%
-  % §§§ geht das anders als mit tudscr? bei argumentdeklaration
-  \ifstr{\@TempColor}{\@subdeclaredefault}{%
-    \def\@TempColor{\Package{tudscrcolor}}%
-  }{}%
+\NewDocumentCommand\Color{sD(){\Package{tudscrcolor}}mod''D(){\Package{tudscrcolor}}d||}{%
+% §§§ #5 raus und stattdessen #2 verwenden
+%  \IfValueT{#6}{%
+%    \ClassWarning{tudscrman}{please move the subdeclaration}%
+%  }%
+% §§§ Debug Ende
+% §§§ argumentdeklaration subdeclare: \Package{tudscrcolor}
+  \SetMarkupFormat{\ttfamily}(%
+    \begingroup\ttfamily##1\IfValueT{#4}{\,(#4)}\endgroup%
+  )[Farbe]%
+  \@Process@toks{#1}(#6){colors}{#3}%
   \if@changelog%
-    \@ProcessChangedAt{#1}(\@TempColor){colors}{\ttfamily}{#2}{Farbe}%
+    \@ProcessChangedAt{#1}(#6){colors}{\ttfamily}{#3}{Farbe}%
   \else%
-    \SetIndexFormat{#1}{#6}%
-    \toks@{%
-      \@ProcessOutput{#2}[%
-        \IfValueT{#3}{\nobreakspace\texttt{(#3)}}%
-        \if@declare\idxsuffix{Farbe}\fi%
-      ]'#4'%
-    }%
-    \expandafter\addto@hook\expandafter\toks@\expandafter{(\@TempColor)}%
-    \addto@hook\toks@{{colors}[\ttfamily]{#2}}%
-    \the\toks@%
+    \@ProcessMarkup@toks'#5'%
+    \@ProcessIndex@toks|#7|%
   \fi%
+  \ClearMarkupFormat%
 }
-\DeclareExpandableDocumentCommand\@Color{sm}{#2}
+\DeclareExpandableDocumentCommand\@Color{sd()m}{#3}
 \pdfexpandableoutline{Color}%
 % §§§ Index pagestyles
-\NewDocumentCommand\PageStyle{smd''D(){\@subdeclare}d||}{%
+\NewDocumentCommand\PageStyle{sd()md''d()d||}{%
+% §§§ #5 raus und stattdessen #2 verwenden
+%  \IfValueT{#6}{%
+%    \ClassWarning{tudscrman}{please move the subdeclaration}%
+%  }%
+  \SetMarkupFormat{\ttfamily}[Seitenstil]%
+  \@Process@toks{#1}(#5){macros}{#3}%
   \if@changelog%
-    \@ProcessChangedAt{#1}(#4){macros}{\ttfamily}{#2}{Seitenstil}%
+    \@ProcessChangedAt{#1}(#5){macros}{\ttfamily}{#3}{Seitenstil}%
   \else%
-    \SetIndexFormat{#1}{#5}%
-    \@ProcessOutput{#2}[%
-      \if@declare\idxsuffix{Seitenstil}\fi%
-    ]'#3'(#4){macros}[\ttfamily]{#2}[Seitenstil]%
+    \@ProcessMarkup@toks'#4'%
+    \@ProcessIndex@toks|#6|%
   \fi%
+  \ClearMarkupFormat%
 }
-\DeclareExpandableDocumentCommand\@PageStyle{sm}{#2}
+\DeclareExpandableDocumentCommand\@PageStyle{sd()m}{#3}
 \pdfexpandableoutline{PageStyle}%
 % §§§ Index lenghts
-\NewDocumentCommand\Length{smd''D(){\@subdeclare}d||}{%
+\NewDocumentCommand\Length{sd()md''d()d||}{%
+% §§§ #5 raus und stattdessen #2 verwenden
+%  \IfValueT{#6}{%
+%    \ClassWarning{tudscrman}{please move the subdeclaration}%
+%  }%
+  \SetMarkupFormat{\ttfamily\bsc}[L\"ange]%
+  \@Process@toks{#1}(#5){macros}{#3}%
   \if@changelog%
-    \@ProcessChangedAt{#1}(#4){macros}{\ttfamily\bsc}{#2}{L\"ange}%
+    \@ProcessChangedAt{#1}(#5){macros}{\ttfamily\bsc}{#3}{L\"ange}%
   \else%
-    \SetIndexFormat{#1}{#5}%
-    \@ProcessOutput{#2}[%
-      \if@declare\idxsuffix{L\"ange}\fi%
-    ]'#3'(#4){macros}[\ttfamily\bsc]{#2}[L\"ange]%
+    \@ProcessMarkup@toks'#4'%
+    \@ProcessIndex@toks|#6|%
   \fi%
+  \ClearMarkupFormat%
 }
-\DeclareExpandableDocumentCommand\@Length{sm}{#2}
+\DeclareExpandableDocumentCommand\@Length{sd()m}{#3}
 \pdfexpandableoutline{Length}%
 % §§§ Index counter
-\NewDocumentCommand\Counter{smd''D(){\@subdeclare}d||}{%
+\NewDocumentCommand\Counter{sd()md''d()d||}{%
+% §§§ #5 raus und stattdessen #2 verwenden
+%  \IfValueT{#6}{%
+%    \ClassWarning{tudscrman}{please move the subdeclaration}%
+%  }%
+  \SetMarkupFormat{\ttfamily}[Z\"ahler]%
+  \@Process@toks{#1}(#5){macros}{#3}%
   \if@changelog%
-    \@ProcessChangedAt{#1}(#4){macros}{\ttfamily}{#2}{Z\"ahler}%
+    \@ProcessChangedAt{#1}(#5){macros}{\ttfamily}{#3}{Z\"ahler}%
   \else%
-    \SetIndexFormat{#1}{#5}%
-    \@ProcessOutput{#2}[%
-      \if@declare\idxsuffix{Z\"ahler}\fi%
-    ]'#3'(#4){macros}[\ttfamily]{#2}[Z\"ahler]%
+    \@ProcessMarkup@toks'#4'%
+    \@ProcessIndex@toks|#6|%
   \fi%
+  \ClearMarkupFormat%
 }
-\DeclareExpandableDocumentCommand\@Counter{sm}{#2}
+\DeclareExpandableDocumentCommand\@Counter{sd()m}{#3}
 \pdfexpandableoutline{Counter}%
+% §§§ Raus Anfang
+\newcommand*\@CTANLink{}
+\let\@CTANLink\relax
 \NewDocumentCommand\@ProcessOutput{mod''d()md!!omo}{%
   \if@declare%
     \if@openindex%
@@ -946,7 +993,8 @@
         }%
       }%
       \IfValueTF{#6}{%
-        \@CreateLabel*\@templabel{#5:#6:#1}{#4}%%
+        \@CreateLabel*\@templabel{#5:#6:#1}{#4}%
+        \typeout{+++++ \meaning\@templabel}%
       }{%
         \@CreateLabel*\@templabel{#5:#1}{#4}%
       }%
@@ -1106,9 +1154,7 @@
     \IfValueTF{#2}{\def\@IndexFormat{#2}}{\def\@IndexFormat{}}%
   }%
 }
-% Doku: Sternversion zum Erzeugen des Labels, ohne Stern zur Nutzung
 \newcommand*\@templabel{}
-% \tud@lowerstring einbinden
 \NewDocumentCommand\@CreateLabel{smmm}{%
   \@@CreateLabel[#1]{#3}{#4}%
     \if@tempswa%
@@ -1123,11 +1169,6 @@
       }%
     \fi%
   \@tempa%
-%  \IfBooleanTF{#1}{%
-%     \typeout{/////! \meaning#2}%
-%  }{%
-%     \typeout{////// \meaning#2}%
-%  }%
 }
 \NewDocumentCommand\@@CreateLabel{omm}{%
   \begingroup%
@@ -1152,9 +1193,7 @@
     \edef#1{#4}%
   \fi%
 }
-
-
-
+% §§§ Raus Ende
 \newtoks\tud@toks
 \newcommand*\eaddto@hook[2]{%
   \expandafter\addto@hook\expandafter#1\expandafter{#2}%
@@ -1181,7 +1220,7 @@
   \global\tud@toks=\tud@toks%
 }
 % Argumente #1 und #2 sauber dokumentieren
-\NewDocumentCommand\@ProcessMarkup@toks{od()r''}{%
+\NewDocumentCommand\@ProcessMarkup@toks{od()d''d<>}{%
   \toks@{\@ProcessMarkup}%
   \eaddto@hook\toks@{\the\tud@toks}%
   \IfValueT{#1}{%
@@ -1192,6 +1231,7 @@
     }%
   }%
   \IfValueT{#3}{\addto@hook\toks@{'#3'}}%
+  \IfValueT{#4}{\eaddto@hook\toks@{\expandafter<#4>}}%
   \tud@trace@markup[output]{\the\toks@}%
 }
 % Argumente #1 und #2 sauber dokumentieren
@@ -1217,7 +1257,7 @@
 % {#5}: Hauptargument
 % [#6]: optionaler Suffix Ausgabe
 % '#7': Querverweis
-\NewDocumentCommand\@ProcessMarkup{mr()md!!mod''}{%
+\NewDocumentCommand\@ProcessMarkup{mr()md!!mod''d<>}{%
   \CheckMarkupFormat%
   \if@declare%
     \if@openindex%
@@ -1229,8 +1269,8 @@
         }%
       }%
       \@Process@label*\tud@label(#2){#3}!#4!{#5}%
-%      % §§§ suffix an \tud@label, wie mit Änderngsliste umgehen?
 %%      \if@deprecated%
+%%      % §§§ suffix an \tud@label, wie mit Änderngsliste umgehen?
 %%        \appto{\tud@label}{:old}
 %%      \fi%
 %%      \if@deprecated%
@@ -1273,11 +1313,6 @@
         \ifstr{#7}{none}{\let\@tempa\@tempc\let\@tempb\relax}{}}}}}%
       }%
     }{%
-%      \ifx\@CTANLink\relax%
-        \let\@tempa\@tempc%
-%      \else%
-%        \def\@tempa{\href{http://www.ctan.org/\@CTANLink}{\@tempc}}%
-%      \fi%
       \let\@tempb\relax%
       \IfValueT{#7}{%
         \def\@tempb{%
@@ -1287,14 +1322,13 @@
           }%
         }%
       }%
+      \let\@tempa\@tempc%
+      \IfValueT{#8}{\def\@tempa{\href{#8}{\@tempc}}}%
       \tud@trace@label{\tud@label}%
     }%
     \@tempa\@tempb%
   \fi%
-%  \let\@IndexFormat\relax%
-%  \let\@CTANLink\relax%
 }
-
 % {#1}: Stern?
 % (#2): Subdeclaration
 % {#3}: Ziellabel/Zielindex
@@ -1314,8 +1348,8 @@
     \@tempswafalse%
     \IfValueT{#8}{%
       \ClassWarning{tudscrman}{%
-        You've used the starred version so no entry for\MessageBreak%
-        the index is created and the optional argument\MessageBreak%
+        You've used the starred version. No index entry\MessageBreak%
+        for #5 is created. The optional argument\MessageBreak%
         |#8| will be ignored%
       }%
     }%
@@ -1342,22 +1376,14 @@
     \if@tempswa%
       \tud@ifsubdeclare{#2}{\preto\@tempa{\idxsuffix{#2}}}{}%
     \fi%
-    \edef\@tempentry{%
+    \protected@edef\@tempentry{%
       \begingroup%
         \expandonce\@MarkupFormat#5\IfValueT{#6}{#6}%
       \endgroup%
       \@tempa%
     }%
-    % §§§ Paketen im Index fehlt der hyperlink
-%    \typeout{***** #2: #5 #7^^J\meaning\@tempentry^^J\meaning\tud@label}%
-%     \fi%
-%    \tud@ifsubdeclare{#2}{%
-%      \eappto\@tempentry{\idxsuffix{#2}}%
-%      \typeout{***** #5}%
-%    }{}%
-%
 %    \typeout{***** \meaning\@tempentry}%
-    % §§§ über toks, damit tracebar
+%    % §§§ über toks, damit tracebar
     \ifcsdef{r@\tud@label}{%
       \index[#3]{%
         \hyperidx[\tud@label]{\expandonce\@tempentry}\expandonce\@tempc%
@@ -1367,8 +1393,6 @@
     }%
   \fi%
 }
-
-
 % Doku: Sternversion zum Erzeugen des Labels, ohne Stern zur Nutzung
 \newcommand*\tud@label{}
 \NewDocumentCommand\@Process@label{smr()mr!!mo}{%
@@ -1383,12 +1407,22 @@
 }
 \NewDocumentCommand\@@Process@label{mr()mr!!m}{%
   \begingroup%
+    \let\Application\@Application%
+    \let\Distribution\@Distribution%
+    \let\File\@File%
     \let\Class\@Class%
     \let\Package\@Package%
+    \let\Option\@Option%
     \let\Environment\@Environment%
     \let\Macro\@Macro%
+    \let\hologoRobust\@firstofone%
+    \def\_{-}%
+    \def~{-}%
     \IfValueTF{#4}{%
-      \ClassError{tudscrman}{not implemented #4}{ToDo}%
+      \edef\@tempa{%
+        \noexpand\endgroup%
+        \noexpand\edef\noexpand#1{#2:#3:#4:#5}%
+      }%
     }{%
       \edef\@tempa{%
         \noexpand\endgroup%
@@ -1414,12 +1448,16 @@
   \tud@toks{}%
   \gdef\@MarkupFormat{#1}%
   \IfValueTF{#2}{%
-    \gdef\@MarkupDeclare##1{#2}%
+    \IfValueTF{#3}{%
+      \gdef\@MarkupDeclare##1{#2\idxsuffix{#3}}%
+    }{%
+      \gdef\@MarkupDeclare##1{#2}%
+    }%
   }{%
     \IfValueTF{#3}{%
-      \gdef\@MarkupDeclare##1{#1##1\idxsuffix{#3}}%
+      \gdef\@MarkupDeclare##1{\begingroup#1##1\endgroup\idxsuffix{#3}}%
     }{%
-      \gdef\@MarkupDeclare##1{#1##1}%
+      \gdef\@MarkupDeclare##1{\begingroup#1##1\endgroup}%
     }%
   }%
 }
@@ -1435,23 +1473,9 @@
   \global\let\@MarkupDeclare\@gobble%
 }
 \ClearMarkupFormat
-
-
-
-
-%\newcommand*\tud@indexentry{}
-%\newcommand*\@Process@indexentry[4]{%
-%  \@@Process@label{#2}{#3}%
-%    \global\let\if@tempswa=\if@tempswa%
-%  \endgroup%
-%  \if@tempswa%
-%    \edef#1{#4\idxsuffix{#3}}%
-%  \else%
-%    \edef#1{#4}%
-%  \fi%
-%}
-
-% §§§ Änderungsliste: Markup komplett überarbeiten
+%
+% §§§ Änderungsliste: Markup komplett überarbeiten §§§
+%
 \newcommand*\@changedatdeclarelist{}
 \let\@changedatdeclarelist\relax
 \newcommand*\@changedatdeclaredefault{\emph{neu}}
@@ -1762,8 +1786,8 @@
   }{}%
 }
 \NewDocumentCommand\tud@item@pkg{od<>d()}{%
-  % §§§ \Package<>|!| aufrufen, \manualhyperdef mit richtigem argument nutzen
-  % evtl. letztes \tud@label verwenden
+% §§§ \Package<>|!| aufrufen, \manualhyperdef mit richtigem argument nutzen
+% evtl. letztes \tud@label verwenden
   \itempackages[{%
     \IfValueT{#1}{%
       \let\@tempb\relax%
@@ -1797,17 +1821,17 @@
 
 
 \newrobustcmd*\textOR{\,\textbardbl\,}
-\newrobustcmd*\PName[1]{\mbox{\texttt{\textsl{<#1>}}}}
+\newrobustcmd*\PValue[1]{\mbox{\texttt{#1}}}
+\newrobustcmd*\PName[1]{\PValue{\textsl{<#1>}}}
+\newrobustcmd*\PSet{\PName{Einstellung}}
 \newrobustcmd*\PBoolean{\PName{Ein-Aus-Wert}}
 \newrobustcmd*\PBName[1]{\PBoolean\textOR\PName{#1}}
-\newrobustcmd*\PSet{\PName{Einstellung}}
 \newrobustcmd*\Parameter[1]{\mbox{\texttt{\{}\PName{#1}\texttt{\}}}}
 \newrobustcmd*\OParameter[1]{\mbox{\texttt{[}\PName{#1}\texttt{]}}}
 \newrobustcmd*\LParameter{\mbox{\texttt{[}\PName{Parameterliste}\texttt{]}}}
 \newrobustcmd*\OLParameter[1]{%
   \mbox{\texttt{[}\PName{#1}\textOR\PName{Parameterliste}\texttt{]}}%
 }
-\newrobustcmd*\PValue[1]{\mbox{\texttt{#1}}}
 \newrobustcmd*\PParameter[1]{\mbox{\texttt{\{#1\}}}}
 \newrobustcmd*\POParameter[1]{\mbox{\texttt{[#1]}}}
 \newrobustcmd*\hypertut[2]{%
@@ -1921,21 +1945,27 @@
 \newcommand*\PrintIndex{%
   \begingroup%
     \@printindex%
+    \clearpage%
     \@printindex[options]%
     \clearpage%
     \@printindex[macros]%
+    \clearpage%
 %    \@printindex[keys]% §§§ raus
     \@printindex[terms]%
+    \clearpage%
 %    \@printindex[pagestyles]%
 %    \@printindex[lengths]%
 %    \@printindex[counters]%
     \@printindex[fonts]%
+    \clearpage%
     \begingroup%
       \let\lettergroup\@gobble%
       \let\indexspace\par%
       \@printindex[colors]%
     \endgroup%
+    \clearpage%
     \@printindex[files]%
+    \clearpage%
   \endgroup%
 }
 \newcommand*\PrintIndexPrologue[1]{\long\gdef\@printindexprologue{#1}}
@@ -1987,6 +2017,7 @@
     \manualhyperref{idx:changelog}{\"Anderungsliste}|seeidx{changelog}%
   }%
 }
+% §§§ evtl. \seelink um fehlende cross-ref-class zu vermeiden
 \renewrobustcmd*\see[2]{%
   \ifstr{#1}{*}%
     {\emph{\seename}\nobreakspace#2}%
