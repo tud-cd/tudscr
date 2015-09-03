@@ -997,7 +997,7 @@
     \@afterindentfalse\@afterheading%
   \fi%
 }
-\NewDocumentEnvironment{Declaration*}{om}{%
+\NewDocumentEnvironment{Declaration*}{omt!}{%
   \@changedatdeclare{#1}{#2}%
   \@stareddeclaretrue%
   \global\@deprecatedfalse%

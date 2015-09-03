@@ -479,8 +479,10 @@
 
 
 \newif\if@declare
-\newif\if@stareddeclare
 \newif\if@openindex
+\newif\if@stareddeclare
+% §§§ Sternversion von \printdeclarationlist* sinnlos,
+% §§§ besser die Sternversionim Argument von Declaration nutzen
 \newif\if@deprecated
 \newcommand*\@declarationlist{}
 \let\@declarationlist\relax
@@ -537,7 +539,10 @@
   \fi%
   \@gobbleparameters%
   \vskip-\lastskip%
-  \@declaretrue\@openindexfalse#2\@declarefalse%
+  \@declaretrue%
+  \@openindexfalse%
+  #2%
+  \@declarefalse%
   \pagebreak[0]%
 }
 \NewDocumentCommand\printdeclarationlist{sod()}{%
@@ -546,10 +551,10 @@
     \addpenalty{\@beginparpenalty}%
     \addvspace{1.5\baselineskipglue}%
     \IfBooleanTF{#1}{%
-      \global\@deprecatedtrue%
+%      \global\@deprecatedtrue%
       \renewcommand*\@changedatdeclaredefault{\emph{entf\"allt}|deprecated}%
     }{%
-      \global\@deprecatedfalse%
+%      \global\@deprecatedfalse%
     }%
     \IfValueT{#2}{%
       \if@additionallist%
@@ -606,6 +611,7 @@
       \dimexpr.5\ht\strutbox+.5\dp\strutbox-.5\ht0-.5\dp0\relax%
     ]%
     \IfValueT{#3}{#3}%
+%    \global\@deprecatedfalse%
     \par\nobreak%
     \vskip 1.5\baselineskipglue%
     \@afterindentfalse\@afterheading%
@@ -621,7 +627,7 @@
 \NewDocumentEnvironment{Declaration*}{omt!}{%
   \@changedatdeclare{#1}{#2}%
   \@stareddeclaretrue%
-  \global\@deprecatedfalse% §§§ warum?
+%  \global\@deprecatedfalse% §§§ warum?
   \@declaretrue\@openindextrue#2\@declarefalse%
   \@stareddeclarefalse%
   \IfBooleanT{#3}{\SubDeclaration{#2}}%
@@ -633,7 +639,7 @@
       forget to print this list with \string\printchangedatlist?%
     }%
   \fi%
-  \global\@deprecatedfalse% §§§ warum?
+%  \global\@deprecatedfalse% §§§ warum?
   \@gobbleparameters%
   \@declaretrue\@openindexfalse#2\@declarefalse%
 }
@@ -980,221 +986,6 @@
 }
 \DeclareExpandableDocumentCommand\@Counter{sd()m}{#3}
 \pdfexpandableoutline{Counter}%
-% §§§ Raus Anfang
-\newcommand*\@CTANLink{}
-\let\@CTANLink\relax
-\NewDocumentCommand\@ProcessOutput{mod''d()md!!omo}{%
-  \if@declare%
-    \if@openindex%
-      \IfValueT{#3}{%
-        \ClassWarning{tudscrman}{%
-          It is not possible to use any cross-reference\MessageBreak%
-          shorthand like '#3' within the arguments of\MessageBreak%
-          the environment `Declaration'%
-        }%
-      }%
-      \IfValueTF{#6}{%
-        \@CreateLabel*\@templabel{#5:#6:#1}{#4}%
-        \typeout{+++++ \meaning\@templabel}%
-      }{%
-        \@CreateLabel*\@templabel{#5:#1}{#4}%
-      }%
-      \if@deprecated%
-        \expandafter\IfBooleanF\expandafter{\@IndexFormat}{%
-          \manualhyperdef{\@templabel}%
-        }%
-      \else%
-        \expandafter\IfBooleanTF\expandafter{\@IndexFormat}{%
-          \manualhyperdef{\@templabel}%
-        }{%
-          \ifx\@IndexFormat\@empty\else%
-            \ClassWarning{tudscrman}{%
-              It is not possible to use any indexing format\MessageBreak%
-              like |\@IndexFormat| within the arguments of the\MessageBreak%
-              environment `Declaration'%
-            }%
-          \fi%
-          \if@stareddeclare%
-            \manualhyperdef'{\@templabel}%
-          \else%
-            \manualhyperdef{\@templabel}%
-          \fi%
-          \@HyperIndex{#5}{#6}{#7}{#1}{#9}{#4}{(declare}%
-        }%
-      \fi%
-      \if@stareddeclare\else%
-        \mbox{#7#1\IfValueT{#2}{#2}}%
-      \fi%
-    \else%
-      \if@deprecated\else%
-        \expandafter\IfBooleanF\expandafter{\@IndexFormat}{%
-          \@HyperIndex{#5}{#6}{#7}{#1}{#9}{#4}{declare)}%
-        }%
-      \fi%
-    \fi%
-  \else%
-    \IfValueTF{#6}{%
-      \@CreateLabel\@templabel{#5:#6:#1}{#4}%
-    }{%
-      \@CreateLabel\@templabel{#5:#1}{#4}%
-    }%
-    \ifcsdef{r@\@templabel}{%
-      \def\@tempa{%
-        \mbox{\hyperref{}{\jobname}{\@templabel}{#7#1}\IfValueT{#2}{#2}}%
-      }%
-      \let\@tempb\relax%
-      \IfValueT{#3}{%
-        \def\@tempb{%
-          \ClassWarning{tudscrman}{%
-            You've used the unknown cross-reference\MessageBreak%
-            shorthand '#3'. Only 'auto', 'page'\MessageBreak%
-            and 'full' as well as 'none' are valid%
-          }%
-        }%
-        \ifstr{#3}{auto}{\def\@tempb{ in \autoref{\@templabel}}}{}%
-        \ifstr{#3}{page}{\def\@tempb{ \vpageref{\@templabel}}}{}%
-        \ifstr{#3}{ppage}{\def\@tempb{ \reftextfaraway{\@templabel}}}{}%
-        \ifstr{#3}{full}{\def\@tempb{ in \fullref{\@templabel}}}{}%
-        \ifstr{#3}{none}{%
-          \def\@tempa{\mbox{#7#1\IfValueT{#2}{#2}}}%
-          \let\@tempb\relax%
-        }{}%
-      }%
-      \@tempa\@tempb%
-    }{%
-      \def\@tempa{\mbox{#7#1\IfValueT{#2}{#2}}}%
-      \IfValueT{#3}{%
-        \ClassWarning{tudscrman}{%
-          No cross-reference created, label \@templabel\MessageBreak%
-          is missing%
-        }%
-      }%
-      \ifx\@CTANLink\relax%
-        \@tempa%
-      \else%
-        \href{http://www.ctan.org/\@CTANLink}{\@tempa}%
-      \fi%
-%      \tud@trace@label{\@templabel}%
-    }%
-    \ifx\@IndexFormat\relax%
-      \ClassError{tudscrman}{\string\SetIndexFormat\space unused}{%
-        It seems you have forgotten to use \string\SetIndexFormat.%
-      }%
-    \else%
-      \expandafter\IfBooleanF\expandafter{\@IndexFormat}{%
-        \@HyperIndex{#5}{#6}{#7}{#1}{#9}{#4}{\@IndexFormat}%
-      }%
-    \fi%
-  \fi%
-  \let\@IndexFormat\relax%
-  \let\@CTANLink\relax%
-}
-\NewDocumentCommand\@HyperIndex{mmmmmmm}{%
-  \IfValueTF{#3}{\def\@tempa{#3}}{\def\@tempa{}}%
-  \IfValueTF{#5}{\def\@tempb{\idxsuffix{#5}}}{\def\@tempb{}}%
-  \IfValueTF{#7}{\edef\@tempc{|#7}}{\def\@tempc{}}%
-  \IfValueTF{#2}{%
-    \@CreateLabel\@templabel{#1:#2:#4}{#6}%
-    \@CreateEntry\@tempentry{#1:#2:#4}{}{%
-      \begingroup\expandonce\@tempa#4\endgroup\expandonce\@tempb%
-    }%
-    \@CreateEntry\@tempkeyentry{#1:#2:#4}{#6}{%
-      \begingroup\expandonce\@tempa#4\endgroup%
-      \idxsuffix{#2}%
-    }%
-    \ifcsdef{r@\@templabel}{%
-      \tud@ifsubdeclare{#6}{%
-        \index[#1]{%
-          #2\idxsuffix{#6}!%
-            \hyperidx[\@templabel]{\expandonce\@tempentry}\expandonce\@tempc%
-        }%
-      }{%
-        \index[#1]{%
-          #2!\hyperidx[\@templabel]{\expandonce\@tempentry}\expandonce\@tempc%
-        }%
-      }%
-      \index[keys]{%
-        \hyperidx[\@templabel]{\expandonce\@tempkeyentry}\expandonce\@tempc%
-      }%
-    }{%
-      \index[#1]{#2!\expandonce\@tempentry\expandonce\@tempc}%
-      \index[keys]{\expandonce\@tempkeyentry\expandonce\@tempc}%
-    }%
-  }{%
-    \@CreateLabel\@templabel{#1:#4}{#6}%
-    \@CreateEntry\@tempentry{#1:#4}{#6}{%
-      \begingroup\expandonce\@tempa#4\endgroup\expandonce\@tempb%
-    }%
-    \ifcsdef{r@\@templabel}{%
-      \index[#1]{%
-        \hyperidx[\@templabel]{\expandonce\@tempentry}\expandonce\@tempc%
-      }%
-    }{%
-      \index[#1]{\expandonce\@tempentry\expandonce\@tempc}%
-    }%
-  }%
-}
-\newcommand*\@IndexFormat{}
-\let\@IndexFormat\relax
-\newcommand*\CheckIndexFormat[2]{%
-  \IfBooleanT{#1}{%
-    \IfValueT{#2}{%
-      \ClassWarning{tudscrman}{%
-        You've used the starred version so no entry for\MessageBreak%
-        the index is created and the optional argument\MessageBreak%
-        |#2| will be ignored%
-      }%
-    }%
-  }%
-}
-\newcommand*\SetIndexFormat[2]{%
-  \CheckIndexFormat{#1}{#2}%
-  \IfBooleanTF{#1}{%
-    \def\@IndexFormat{#1}%
-  }{%
-    \IfValueTF{#2}{\def\@IndexFormat{#2}}{\def\@IndexFormat{}}%
-  }%
-}
-\newcommand*\@templabel{}
-\NewDocumentCommand\@CreateLabel{smmm}{%
-  \@@CreateLabel[#1]{#3}{#4}%
-    \if@tempswa%
-      \edef\@tempa{%
-        \noexpand\endgroup%
-        \noexpand\edef\noexpand#2{#4:#3}%
-      }%
-    \else%
-      \edef\@tempa{%
-        \noexpand\endgroup%
-        \noexpand\edef\noexpand#2{#3}%
-      }%
-    \fi%
-  \@tempa%
-}
-\NewDocumentCommand\@@CreateLabel{omm}{%
-  \begingroup%
-    \let\Class\@Class%
-    \let\Package\@Package%
-    \let\Environment\@Environment%
-    \let\Macro\@Macro%
-    \tud@ifsubdeclare{#3}{%
-      \@tempswatrue%
-      \IfBooleanF{#1}{\ifcsdef{r@#3:#2}{}{\@tempswafalse}}%
-    }{\@tempswafalse}%
-}
-\newcommand*\@tempentry{}
-\newcommand*\@tempkeyentry{}
-\newcommand*\@CreateEntry[4]{%
-  \@@CreateLabel{#2}{#3}%
-    \global\let\if@tempswa=\if@tempswa%
-  \endgroup%
-  \if@tempswa%
-    \edef#1{#4\idxsuffix{#3}}%
-  \else%
-    \edef#1{#4}%
-  \fi%
-}
-% §§§ Raus Ende
 \newtoks\tud@toks
 \newcommand*\eaddto@hook[2]{%
   \expandafter\addto@hook\expandafter#1\expandafter{#2}%
@@ -1515,7 +1306,7 @@
       }%
     }%
   \fi%
-%  \typeout{+++++ \meaning\@tempa}
+%  \typeout{+++++ \meaning\@tempa}%
   \listeadd\@changedatdeclarelist{\expandonce\@tempa}%
 }
 \NewDocumentCommand\printchangedatlist{sO{\z@}}{%
@@ -1643,6 +1434,35 @@
   }%
   \ifcsdef{r@\@templabel}{\hyperidx[\@templabel]{\@tempa}}{\@tempa}%
 }
+% §§§ RausAnfang
+\newcommand*\@templabel{}
+\NewDocumentCommand\@CreateLabel{smmm}{%
+  \@@CreateLabel[#1]{#3}{#4}%
+    \if@tempswa%
+      \edef\@tempa{%
+        \noexpand\endgroup%
+        \noexpand\edef\noexpand#2{#4:#3}%
+      }%
+    \else%
+      \edef\@tempa{%
+        \noexpand\endgroup%
+        \noexpand\edef\noexpand#2{#3}%
+      }%
+    \fi%
+  \@tempa%
+}
+\NewDocumentCommand\@@CreateLabel{omm}{%
+  \begingroup%
+    \let\Class\@Class%
+    \let\Package\@Package%
+    \let\Environment\@Environment%
+    \let\Macro\@Macro%
+    \tud@ifsubdeclare{#3}{%
+      \@tempswatrue%
+      \IfBooleanF{#1}{\ifcsdef{r@#3:#2}{}{\@tempswafalse}}%
+    }{\@tempswafalse}%
+}
+% §§§ RausEnde
 \newif\if@listsorted
 \newcommand*\@sortedlist{}
 \newcommand*\sortlist[1]{%
