@@ -1505,18 +1505,24 @@
 \newcommand*\PrintIndex{%
   \begingroup%
     \@printindex%
+    \clearpage%
     \@printindex[options]%
     \clearpage%
     \@printindex[macros]%
+    \clearpage%
 %    \@printindex[keys]%
     \@printindex[terms]%
+    \clearpage%
     \@printindex[fonts]%
+    \clearpage%
     \begingroup%
       \let\lettergroup\@gobble%
       \let\indexspace\par%
       \@printindex[colors]%
+      \clearpage%
     \endgroup%
     \@printindex[files]%
+    \clearpage%
   \endgroup%
 }
 \newcommand*\PrintIndexPrologue[1]{\long\gdef\@printindexprologue{#1}}
