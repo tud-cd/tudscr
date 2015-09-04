@@ -197,27 +197,56 @@
 \fi
 \WarningFilter*{ifplatform}{^^J \space\space\space shell escape is disabled}
 \RequirePackage{ifplatform}[2010/10/22]
-%
-% §§§ \tud@trace@label@created \tud@trace@label@missing
-% §§§ überarbeiten \@IndexFormat
-\newcommand*\tud@trace@label[1]{}
-\newcommand*\tracinglabels{%
+\newcommand*\tud@trace@lbl@created[1]{}
+\newcommand*\tud@trace@lbl@missing[2]{}
+\newcommand*\tracinglabels[1][missing]{%
   \RequirePackage{currfile}%
-  \newcommand*\@missinglabellist{}%
-  \renewcommand*\tud@trace@label[1]{%
-    \expandafter\IfBooleanF\expandafter{\@IndexFormat}{%
+  \newcommand*\lbl@created@list{}%
+  \newcommand*\lbl@missing@list{}%
+  \newcommand*\lbl@noindex@list{}%
+  \@tempswafalse%
+  \ifstr{#1}{created}{\@tempswatrue}{}%
+  \ifstr{#1}{all}{\@tempswatrue}{}%
+  \if@tempswa%
+    \renewcommand*\tud@trace@lbl@created[1]{%
       \typeout{%
-        +++++ label ##1 is missing^^J%
+        +++++ label created: ##1^^J%
         +++++ in \currfilename\space on line \the\inputlineno%
       }%
-      \xifinlist{##1}{\@missinglabellist}{}{\listxadd\@missinglabellist{##1}}%
+      \xifinlist{##1}{\lbl@created@list}{}{\listxadd\lbl@created@list{##1}}%
     }%
-  }%
+  \fi%
+  \@tempswafalse%
+  \ifstr{#1}{missing}{\@tempswatrue}{}%
+  \ifstr{#1}{all}{\@tempswatrue}{}%
+  \if@tempswa%
+    \renewcommand*\tud@trace@lbl@missing[2]{%
+      \IfBooleanTF{##2}{%
+        \typeout{%
+          +++++ label noindex: ##1^^J%
+          +++++ in \currfilename\space on line \the\inputlineno%
+        }%
+        \xifinlist{##1}{\lbl@noindex@list}{}{\listxadd\lbl@noindex@list{##1}}%
+      }{%
+        \typeout{%
+          +++++ label missing: ##1^^J%
+          +++++ in \currfilename\space on line \the\inputlineno%
+        }%
+        \xifinlist{##1}{\lbl@missing@list}{}{\listxadd\lbl@missing@list{##1}}%
+      }%
+    }%
+  \fi%
   \AfterEndDocument{%
-    \sortlist{\@missinglabellist}%
-    \typeout{+++++ missing labels sorted +++++}%
-    \def\@tempa##1{\typeout{##1}}%
-    \forlistloop\@tempa{\@missinglabellist}%
+    \def\lbl@typeout##1{\typeout{##1}}%
+    \typeout{+++++ labels missing (sorted) +++++}%
+    \sortlist{\lbl@missing@list}%
+    \forlistloop\lbl@typeout{\lbl@missing@list}%
+    \typeout{+++++ labels noindex (sorted) +++++}%
+    \sortlist{\lbl@noindex@list}%
+    \forlistloop\lbl@typeout{\lbl@noindex@list}%
+    \typeout{+++++ labels created (sorted) +++++}%
+    \sortlist{\lbl@created@list}%
+    \forlistloop\lbl@typeout{\lbl@created@list}%
   }%
 }\@onlypreamble\tracinglabels
 \newcommand*\tud@trace@markup[2][]{#2}
@@ -227,12 +256,6 @@
   }%
 }
 \@onlypreamble\tracingmarkup
-% §§§ implementieren
-%\newcommand*\tud@trace@index[1]{#1}
-%\newcommand*\tracingindex{%
-%  \renewcommand*\tud@trace@index[1]{\typeout{+++++ index:^^J##1^^J}##1}%
-%}
-%\@onlypreamble\tracingindex
 \newcommand*\tud@trace@subdeclare[1]{}
 \newcommand*\@subdeclarelist{}
 \newcommand*\tracingsubdeclare{%
@@ -467,13 +490,8 @@
 %\let\idxfont\footnotesize
 %\robustify{\idxfont}
 %\newcommand*\idxsuffix[1]{\begingroup\idxfont\noexpand~(#1)\endgroup}
-\newrobustcmd*\idxsuffix[1]{\begingroup~\footnotesize(#1)\endgroup}
-\newrobustcmd*\hyperidx[2][]{%
-%  \begingroup%
-%    \renewcommand*\tud@trace@label[1]{}%
-    \manualhyperref{#1}{#2}%
-%  \endgroup%
-}
+\newcommand*\idxsuffix[1]{\begingroup~\protect\footnotesize(#1)\endgroup}
+\newrobustcmd*\hyperidx[2][]{\manualhyperref{#1}{#2}}
 \newrobustcmd*\bsc{\@backslashchar}
 
 
@@ -482,7 +500,7 @@
 \newif\if@openindex
 \newif\if@stareddeclare
 % §§§ Sternversion von \printdeclarationlist* sinnlos,
-% §§§ besser die Sternversionim Argument von Declaration nutzen
+% §§§ besser die Sternversion im Argument von Declaration nutzen
 \newif\if@deprecated
 \newcommand*\@declarationlist{}
 \let\@declarationlist\relax
@@ -552,6 +570,7 @@
     \addvspace{1.5\baselineskipglue}%
     \IfBooleanTF{#1}{%
 %      \global\@deprecatedtrue%
+      \typeout{*****^^J\meaning\@declarationlist}%
       \renewcommand*\@changedatdeclaredefault{\emph{entf\"allt}|deprecated}%
     }{%
 %      \global\@deprecatedfalse%
@@ -836,7 +855,8 @@
     \@ProcessChangedAt{#1}(#7){macros}!#3!{\ttfamily}{#4}{Parameter}%
   \else%
     \@ProcessMarkup@toks[#5](=#5)'#6'%
-    \@ProcessIndex@toks[Parameter]|#8|%
+    % §§§ ToDo!
+%    \@ProcessIndex@toks<Parameter>|#8|%
   \fi%
   \ClearMarkupFormat%
 }
@@ -1022,9 +1042,28 @@
       \addto@hook\toks@{[#1]}%
     }%
   }%
-  \IfValueT{#3}{\addto@hook\toks@{'#3'}}%
-  \IfValueT{#4}{\eaddto@hook\toks@{\expandafter<#4>}}%
-  \tud@trace@markup[output]{\the\toks@}%
+  \if@declare%
+    \IfValueT{#3}{%
+      \ClassWarning{tudscrman}{%
+        It is not possible to use any cross-reference\MessageBreak%
+        shorthand like '#3' within the arguments of\MessageBreak%
+        the environment `Declaration'%
+      }%
+    }%
+    \if@openindex%
+      \addto@hook\toks@{!}%
+      \@tempswatrue%
+    \else%
+      \@tempswafalse%
+    \fi%
+  \else%
+    \IfValueT{#3}{\addto@hook\toks@{'#3'}}%
+    \IfValueT{#4}{\eaddto@hook\toks@{\expandafter<#4>}}%
+    \@tempswatrue%
+  \fi%
+  \if@tempswa%
+    \tud@trace@markup[output]{\the\toks@}%
+  \fi%
 }
 % Argumente #1 und #2 sauber dokumentieren
 % optionales Argument <#3> in [#3], sobald das mit \@ProcessIndex geht
@@ -1039,7 +1078,22 @@
     }%
   }%
   \IfValueT{#3}{\addto@hook\toks@{<#3>}}%
-  \IfValueT{#4}{\addto@hook\toks@{|#4|}}%
+  \if@declare%
+    \if@openindex%
+      \IfValueT{#4}{%
+        \ClassWarning{tudscrman}{%
+          It is not possible to use any indexing format\MessageBreak%
+          like |#4| within the arguments of the\MessageBreak%
+          environment `Declaration'%
+        }%
+      }%
+      \addto@hook\toks@{|(declare|}%
+    \else%
+      \addto@hook\toks@{|declare)|}%
+    \fi%
+  \else%
+    \IfValueT{#4}{\addto@hook\toks@{|#4|}}%
+  \fi%
   \tud@trace@markup[index]{\the\toks@}%
 }
 % {#1}: Stern?
@@ -1049,43 +1103,22 @@
 % {#5}: Hauptargument
 % [#6]: optionaler Suffix Ausgabe
 % '#7': Querverweis
-\NewDocumentCommand\@ProcessMarkup{mr()md!!mod''d<>}{%
+\NewDocumentCommand\@ProcessMarkup{mr()md!!mod''d<>t!}{%
   \CheckMarkupFormat%
-  \if@declare%
-    \if@openindex%
-      \IfValueT{#7}{%
-        \ClassWarning{tudscrman}{%
-          It is not possible to use any cross-reference\MessageBreak%
-          shorthand like '#7' within the arguments of\MessageBreak%
-          the environment `Declaration'%
-        }%
-      }%
-      \@Process@label*\tud@label(#2){#3}!#4!{#5}%
-%%      \if@deprecated%
-%%      % §§§ suffix an \tud@label, wie mit Änderngsliste umgehen?
-%%        \appto{\tud@label}{:old}
-%%      \fi%
-%%      \if@deprecated%
-%%        \IfBooleanF{#1}{%
-%%          \manualhyperdef{\tud@label}%
-%%        }%
-%%      \else%
-%        \IfBooleanTF{#1}{%
-%          \manualhyperdef{\tud@label}%
-%        }{%
-          \if@stareddeclare%
-            \manualhyperdef'{\tud@label}%
-          \else%
-            \manualhyperdef{\tud@label}%
-          \fi%
-%        }%
-%%      \fi%
-      \if@stareddeclare\else%
-        \@MarkupDeclare{#5\IfValueT{#6}{#6}}%
-      \fi%
+  \IfBooleanTF{#9}{%
+    \@Process@label*\tud@label{#1}(#2){#3}!#4!{#5}%
+%    \if@deprecated%
+%    % §§§ suffix an \tud@label, wie mit Änderngsliste umgehen?
+%      \appto{\tud@label}{:old}%
+%    \fi%
+    \if@stareddeclare%
+      \manualhyperdef'{\tud@label}%
+    \else%
+      \manualhyperdef{\tud@label}%
+      \@MarkupDeclare{#5\IfValueT{#6}{#6}}%
     \fi%
-  \else%
-    \@Process@label\tud@label(#2){#3}!#4!{#5}%
+  }{%
+    \@Process@label\tud@label{#1}(#2){#3}!#4!{#5}%
     \def\@tempc{\mbox{\@MarkupFormat#5\IfValueT{#6}{#6}}}%
     \ifcsdef{r@\tud@label}{%
       \def\@tempa{\hyperref{}{\jobname}{\tud@label}{\@tempc}}%
@@ -1116,10 +1149,9 @@
       }%
       \let\@tempa\@tempc%
       \IfValueT{#8}{\def\@tempa{\href{#8}{\@tempc}}}%
-      \tud@trace@label{\tud@label}%
     }%
     \@tempa\@tempb%
-  \fi%
+  }%
 }
 % {#1}: Stern?
 % (#2): Subdeclaration
@@ -1131,11 +1163,12 @@
 % |#8|: Indexformatierung
 % optionales Argument <#7> in [#7], sobald [#6] nicht mehr notwendig
 \NewDocumentCommand\@ProcessIndex{mr()md!!mod<>d||}{%
+  % §§§ Formatierung über @ und \textsl{#} etc.
   \CheckMarkupFormat%
   % §§§ wie mit den alten Sachen (\if@deprecated) umgehen?
   \@tempswatrue%
-  % §§§ so global ist das scheiße
-  \if@deprecated\@tempswafalse\fi%
+%  % §§§ so global ist das scheiße
+%  \if@deprecated\@tempswafalse\fi%
   \IfBooleanT{#1}{%
     \@tempswafalse%
     \IfValueT{#8}{%
@@ -1147,23 +1180,44 @@
     }%
   }%
   \if@tempswa%
-    \if@declare%
-      \if@openindex%
-        \IfValueT{#8}{%
-          \ClassWarning{tudscrman}{%
-            It is not possible to use any indexing format\MessageBreak%
-            like |#8| within the arguments of the\MessageBreak%
-            environment `Declaration'%
-          }%
-        }%
-        \def\@tempc{|(declare}%
-      \else%
-        \def\@tempc{|declare)}%
-      \fi%
-    \else%
-      \IfValueTF{#8}{\def\@tempc{|#8}}{\def\@tempc{}}%
-    \fi%
-    \@Process@label\tud@label(#2){#3}!#4!{#5}[@tempswa]%
+    \@Process@label\tud@label{#1}(#2){#3}!#4!{#5}[@tempswa]%
+%
+    \typeout{^^J}%
+    \def\bla{abc!def@ghi}%
+    \tudreplace\bla{!}{ttt}%
+    \typeout{+++++ \meaning\bla}
+    
+    \def\bla{abc!def@ghi}%
+    \tudreplace\bla{@}{atatat}%
+    \typeout{+++++ \meaning\bla}
+    
+    \makeatother
+    \def\bla{#5}%
+    \tudreplace\bla{@}{atatat}%
+    \typeout{+++++ \meaning\bla}
+%
+%
+%    \begingroup
+%%      \makeatletter%
+%%      \makeatother
+%      \edef\tempentry{#5\IfValueT{#6}{#6}}%
+%      \typeout{/////* \meaning\tempentry #5}%
+%      \tudreplace\tempentry{@}{aaa}%
+%      \typeout{/////* \meaning\tempentry}%
+%    \endgroup%
+%    \makeatletter%
+%    \if@tempswa%
+%      \tud@ifsubdeclare{#2}{%
+%        \appto\@tempentry{\idxsuffix{#2}}%
+%      }{}%
+%    \fi%
+%    \IfValueT{#7}{\appto\@tempentry{\idxsuffix{#7}}}%
+%    \IfValueT{#8}{%
+%      \typeout{/////*}%
+%      \appto\@tempentry{|#8}%
+%    }%
+%    \typeout{/////* \meaning\@tempentry}%
+%
     \IfValueTF{#7}{\def\@tempa{\idxsuffix{#7}}}{\def\@tempa{}}%
     \if@tempswa%
       \tud@ifsubdeclare{#2}{\preto\@tempa{\idxsuffix{#2}}}{}%
@@ -1174,8 +1228,9 @@
       \endgroup%
       \@tempa%
     }%
-%    \typeout{***** \meaning\@tempentry}%
 %    % §§§ über toks, damit tracebar
+    \IfValueTF{#8}{\def\@tempc{|#8}}{\def\@tempc{}}%
+%    \typeout{///// \meaning\@tempentry\@tempc}%
     \ifcsdef{r@\tud@label}{%
       \index[#3]{%
         \hyperidx[\tud@label]{\expandonce\@tempentry}\expandonce\@tempc%
@@ -1187,13 +1242,16 @@
 }
 % Doku: Sternversion zum Erzeugen des Labels, ohne Stern zur Nutzung
 \newcommand*\tud@label{}
-\NewDocumentCommand\@Process@label{smr()mr!!mo}{%
-  \@@Process@label#2(#3){#4}!#5!{#6}%
-  \IfValueT{#7}{\booltrue{#7}}%
-  \IfBooleanF{#1}{%
+\NewDocumentCommand\@Process@label{smmr()mr!!mo}{%
+  \@@Process@label#2(#4){#5}!#6!{#7}%
+  \IfValueT{#8}{\booltrue{#8}}%
+  \IfBooleanTF{#1}{%
+    \tud@trace@lbl@created{#2}%
+  }{%
     \ifcsdef{r@#2}{}{%
-      \@@Process@label#2(\@subdeclaredefault){#4}!#5!{#6}%
-      \IfValueT{#7}{\boolfalse{#7}}%
+      \@@Process@label#2(\@subdeclaredefault){#5}!#6!{#7}%
+      \IfValueT{#8}{\boolfalse{#8}}%
+      \ifcsdef{r@#2}{}{\tud@trace@lbl@missing{#2}{#3}}%
     }%
   }%
 }
@@ -1223,6 +1281,54 @@
     }%
   \@tempa%
 }
+% §§§ !!! Hier geht'S weiter
+\makeatother
+\newcommand*\tudreplace[3]{%
+  \begingroup%
+    \edef\tempa{#1}%
+    \expandafter\toks2\expandafter{\tempa}%
+    \def#1{}%
+    \def\tempb##1#2##2\relax{\tempc{##1}{##2}}%
+    \def\tempc##1##2{%
+      \ifx\relax##2\relax%
+        \appto#1{##1}%
+        \let\tempa\relax%
+      \else%
+        \appto#1{##1#3}%
+        \def\tempa{\tempb##2\relax}%
+      \fi%
+      \tempa%
+    }%
+    \expandafter\tempb\the\toks2#2\relax%
+    \edef\tempa{%
+      \noexpand\endgroup%
+      \def\noexpand#1{#1}%
+    }%
+%    \typeout{""""" \meaning\tempa}
+  \tempa%
+%  \endgroup%
+%  \typeout{""""" \meaning\tempa}
+}
+\makeatletter
+%\newcommand*\tud@replace[3]{%
+%  \edef\@tempa{#1}%
+%  \def#1{}%
+%  \def\@tempb##1#2##2\@nil{\@tempc{##1}{##2}}%
+%  \def\@tempc##1##2{%
+%    \ifx\@nil##2\@nil%
+%      \appto#1{##1}%
+%      \let\@tempa\relax%
+%    \else%
+%      \appto#1{##1#3}%
+%      \def\@tempa{\@tempb##2\@nil}%
+%    \fi%
+%    \@tempa%
+%  }%
+%  \expandafter\@tempb\@tempa#2\@nil%
+%}
+%
+%
+%
 % §§§ implementieren in \@MarkupFormat
 %\newcommand\ProcessorValue[1]{%
 %  \in@{=}{#1}%
@@ -1237,6 +1343,7 @@
 \newcommand*\@MarkupFormat{}
 \newcommand*\@MarkupDeclare[1]{}
 \NewDocumentCommand\SetMarkupFormat{md()o}{%
+  % §§§ Formatierung über @ und \textsl{#} etc.
   \tud@toks{}%
   \gdef\@MarkupFormat{#1}%
   \IfValueTF{#2}{%
