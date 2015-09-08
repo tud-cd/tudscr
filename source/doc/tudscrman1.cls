@@ -503,10 +503,13 @@
 \pdfexpandableoutline{TUDScript}
 \NewDocumentCommand\Application{smd||}{%
   \ifdin{#2}{%
-    \mbox{\textsbs{#2}}%
+    \mbox{\sbsfont#2}%
     \CheckIndexFormat{#1}{#3}%
     \IfBooleanF{#1}{%
-      \index{\textsbs{#2}~{\idxfont(Anwendungssoftware)}\IfValueT{#3}{|#3}}%
+      \index{%
+        \begingroup\sbsfont#2\endgroup~{\idxfont(Anwendungssoftware)}%
+        \IfValueT{#3}{|#3}%
+      }%
     }%
   }%
 }
@@ -514,20 +517,26 @@
 \pdfexpandableoutline{Application}
 \NewDocumentCommand\Distribution{smod||}{%
   \ifdin{#2\IfValueT{#3}{~#3}}{%
-    \mbox{\textsbn{#2\IfValueT{#3}{~#3}}}%
+    \mbox{\sbnfont#2\IfValueT{#3}{~#3}}%
     \CheckIndexFormat{#1}{#4}%
     \IfBooleanF{#1}{%
-      \index{\textsbn{#2}~{\idxfont(Distribution)}\IfValueT{#4}{|#4}}%
+      \index{%
+        \begingroup\sbnfont#2\endgroup~{\idxfont(Distribution)}%
+        \IfValueT{#4}{|#4}%
+      }%
     }%
   }%
 }
 \newrobustcmd*\Path[1]{\mbox{\texttt{#1}}}
 \NewDocumentCommand\File{smd||}{%
   \ifdin{#2}{%
-    \mbox{\textsbn{#2}}%
+    \mbox{\sbnfont#2}%
     \CheckIndexFormat{#1}{#3}%
     \IfBooleanF{#1}{%
-      \index[files]{\textsbn{#2}~{\idxfont(Datei)}\IfValueT{#3}{|#3}}%
+      \index[files]{%
+        \begingroup\sbnfont#2\endgroup~{\idxfont(Datei)}%
+        \IfValueT{#3}{|#3}%
+      }%
     }%
   }%
 }
@@ -560,19 +569,19 @@
 \DeclareExpandableDocumentCommand\@Package{sm}{#2}
 \pdfexpandableoutline{Package}
 \newcommand*\@TempOption{}
-\NewDocumentCommand\Option{smod''d||}{%
+\NewDocumentCommand\Option{smod''d()d||}{%
   \if@changelog%
     \@ProcessChangedAt{#1}{options}{\ttfamily}{#2}{Option}%
   \else%
     \IfValueTF{#3}{\gdef\@TempOption{\texttt{=#3}}}{\gdef\@TempOption{}}%
-    \SetIndexFormat{#1}{#5}%
+    \SetIndexFormat{#1}{#6}%
     \@ProcessOutput{\texttt{#2}}[\@TempOption]'#4'{options}[\ttfamily]{#2}%
   \fi%
 }
 \DeclareExpandableDocumentCommand\@Option{sm}{#2}
 \pdfexpandableoutline{Option}
 \newcommand*\@TempEnvironment{}
-\NewDocumentCommand\Environment{smod''d||}{%
+\NewDocumentCommand\Environment{smod''d()d||}{%
   \if@changelog%
     \@ProcessChangedAt{#1}{macros}{\ttfamily}{#2}{Umgebung}%
   \else%
@@ -585,32 +594,32 @@
     \else%
       \gdef\@TempEnvironment{\texttt{#2}}%
     \fi%
-    \SetIndexFormat{#1}{#5}%
+    \SetIndexFormat{#1}{#6}%
     \@ProcessOutput{\@TempEnvironment}'#4'{macros}[\ttfamily]{#2}%
   \fi%
 }
 \DeclareExpandableDocumentCommand\@Environment{sm}{#2}
 \pdfexpandableoutline{Environment}%
-\NewDocumentCommand\Macro{smd''d||}{%
+\NewDocumentCommand\Macro{smd''d()d||}{%
   \if@changelog%
     \@ProcessChangedAt{#1}{macros}{\ttfamily\bsc}{#2}{Befehl}%
   \else%
-    \SetIndexFormat{#1}{#4}%
+    \SetIndexFormat{#1}{#5}%
     \@ProcessOutput{\texttt{\bsc#2}}'#3'{macros}[\ttfamily\bsc]{#2}%
   \fi%
 }
 \DeclareExpandableDocumentCommand\@Macro{sm}{#2}
-\NewDocumentCommand\Length{smd''d||}{%
+\NewDocumentCommand\Length{smd''d()d||}{%
   \if@changelog%
     \@ProcessChangedAt{#1}{macros}{\ttfamily\bsc}{#2}{L\"ange}%
   \else%
-    \SetIndexFormat{#1}{#4}%
+    \SetIndexFormat{#1}{#5}%
     \@ProcessOutput{\texttt{\bsc#2}}[\if@declare~{\idxfont(L\"ange)}\fi]'#3'%
       {macros}[\ttfamily\bsc]{#2}[~{\idxfont(L\"ange)}]%
   \fi%
 }
 \newcommand*\@TempKey{}
-\NewDocumentCommand\Key{smmod''d||}{%
+\NewDocumentCommand\Key{smmod''d()d||}{%
   \if@changelog%
     \@ProcessChangedAt{#1}{macros}(#2){\ttfamily}{#3}{Parameter}%
   \else%
@@ -622,34 +631,34 @@
       }{%
         \gdef\@TempKey{\if@declare~{\idxfont(Parameter)}\fi}%
       }%
-      \SetIndexFormat{#1}{#6}%
+      \SetIndexFormat{#1}{#7}%
       \@ProcessOutput{\texttt{#3}}[\@TempKey]'#5'{macros}(#2)[\ttfamily]{#3}%
     \endgroup%
   \fi%
 }
-\NewDocumentCommand\PageStyle{smd''d||}{%
+\NewDocumentCommand\PageStyle{smd''d()d||}{%
   \if@changelog%
     \@ProcessChangedAt{#1}{macros}{\ttfamily}{#2}{Seitenstil}%
   \else%
-    \SetIndexFormat{#1}{#4}%
+    \SetIndexFormat{#1}{#5}%
     \@ProcessOutput{\texttt{#2}\if@declare~{\idxfont(Seitenstil)}\fi}'#3'%
       {macros}[\ttfamily]{#2}[~{\idxfont(Seitenstil)}]%
   \fi%
 }
-\NewDocumentCommand\Counter{smd''d||}{%
+\NewDocumentCommand\Counter{smd''d()d||}{%
   \if@changelog%
     \@ProcessChangedAt{#1}{macros}{\ttfamily}{#2}{Z\"ahler}%
   \else%
-    \SetIndexFormat{#1}{#4}%
+    \SetIndexFormat{#1}{#5}%
     \@ProcessOutput{\texttt{#2}}[\if@declare~{\idxfont(Z\"ahler)}\fi]%
       {macros}[\ttfamily]{#2}[~{\idxfont(Z\"ahler)}]%
   \fi%
 }
-\NewDocumentCommand\Term{smd''d||}{%
+\NewDocumentCommand\Term{smd''d()d||}{%
   \if@changelog%
     \@ProcessChangedAt{#1}{terms}{\ttfamily\bsc}{#2}{Bezeichner}%
   \else%
-    \SetIndexFormat{#1}{#4}%
+    \SetIndexFormat{#1}{#5}%
     \@ProcessOutput{\texttt{\bsc#2}}[\if@declare~{\idxfont(Bezeichner)}\fi]'#3'%
       {terms}[\ttfamily\bsc]{#2}%
   \fi%
@@ -684,20 +693,20 @@
   \selectlanguage{english}\vspace*{\@tempdimc}%
   \ifstr{\@nameuse{#1}}{}{\PName{empty}}{\@nameuse{#1}}\tabularnewline%
 }
-\NewDocumentCommand\Font{smd''d||}{%
+\NewDocumentCommand\Font{smd''d()d||}{%
   \if@changelog%
     \@ProcessChangedAt{#1}{fonts}{\ttfamily}{#2}{Schriftelement}%
   \else%
-    \SetIndexFormat{#1}{#4}%
+    \SetIndexFormat{#1}{#5}%
     \@ProcessOutput{\texttt{#2}\if@declare~{\idxfont(Schriftelement)}\fi}%
       {fonts}[\ttfamily]{#2}%
   \fi%
 }
-\NewDocumentCommand\Color{smod''d||}{%
+\NewDocumentCommand\Color{smod''d()d||}{%
   \if@changelog%
     \@ProcessChangedAt{#1}{colors}{\ttfamily}{#2}{Farbe}%
   \else%
-    \SetIndexFormat{#1}{#5}%
+    \SetIndexFormat{#1}{#6}%
     \@ProcessOutput{\texttt{#2}}[%
       \IfValueT{#3}{~\texttt{(#3)}}\if@declare~{\idxfont(Farbe)}\fi%
     ]'#4'{colors}[\ttfamily]{#2}%
@@ -830,8 +839,10 @@
     \ifcsdef{r@#1:#2:#4}{%
       \edef\@tempb{#1:#2:#4}%
       \index[#1]{%
-        #2!\hyperidx[\@tempb]{\begingroup\expandonce\@tempa#4\endgroup}%
-        ~{\idxfont(Parameter)}\expandonce\@tempc%
+        #2!\hyperidx[\@tempb]{%
+          \begingroup\expandonce\@tempa#4\endgroup%
+          ~{\idxfont(Parameter)}%
+        }\expandonce\@tempc%
       }%
       \begingroup%
         \let\Environment\@firstofone%
