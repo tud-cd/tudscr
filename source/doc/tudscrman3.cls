@@ -234,10 +234,10 @@
       \ignorespaces%
     }%
     % §§§ für Änderungsliste überarbeiten?!
-    \IfBooleanT{#1}{%
-      \in@{:}{#3}%
-      \ifin@\else\phantomsection\addxcontentsline{toc}{subsection}{#3}\fi%
-    }%
+%    \IfBooleanT{#1}{%
+%      \in@{:}{#3}%
+%      \ifin@\else\phantomsection\addxcontentsline{toc}{subsection}{#3}\fi%
+%    }%
     \IfBooleanF{#1}{\label{#3}}%
   }
   \newcommand*\manualhyperref[2]{\hyperref{}{\jobname}{#1}{#2}}
@@ -438,6 +438,15 @@
   \let\PParameter\@gobble%
   \let\POParameter\@gobble%
 }
+\newcommand*\@gobblemarkup{%
+  \let\Class\@Class%
+  \let\Package\@Package%
+  \let\Environment\@Environment%
+  \let\Macro\@Macro%
+  \let\hologoRobust\@firstofone%
+  \def\_{-}%
+  \def~{-}%
+}
 \NewDocumentEnvironment{Declaration}{omoog}{%
   \listadd\list@Declaration{#2}%
   \@changedatdeclare{#1}{#2}%
@@ -486,7 +495,7 @@
       \def\@tempa##1{\addtocounter{deprecateddeclare}{\@ne}}%
       \forlistloop\@tempa{\list@Declaration}%
       \global\@deprecatedtrue% $$$ raus
-      % §§§ noch sinnvoll oder lieber woanders?
+      % §§§ noch sinnvoll oder lieber woanders? $$$ raus
       \renewcommand*\@changedatdeclaredefault{\emph{entf\"allt}|deprecated}%
     }{%
       \global\@deprecatedfalse% $$$ raus
@@ -593,7 +602,7 @@
   \def\@tempd{#2}%
   \def\@tempe{#2}%
   \IfValueTF{#1}{%
-    \ifstr{#1}{}{%
+    \ifblank{#1}{%
 %      \typeout{************* leer:^^J2:\meaning\@tempd^^J3:\meaning\@tempe}%§§§
     }{%
       \ifstr{#1}{\@subdeclaredefault}{}{\@tempswatrue}%
@@ -606,6 +615,7 @@
 %\newcommand*\idxfont{}
 %\let\idxfont\footnotesize
 %\robustify{\idxfont}
+% §§§ \idxsuffix muss nie expandiert werden
 \newcommand*\idxsuffix[1]{\begingroup~\protect\footnotesize(#1)\endgroup}
 \newrobustcmd*\hyperidx[2][]{\manualhyperref{#1}{#2}}
 \newrobustcmd*\bsc{\@backslashchar}
@@ -667,7 +677,7 @@
     \else%
       \let\@tempa\relax%
       \IfValueTF{#4}{%
-        \ifstr{#4}{}{}{\def\@tempa{http://www.ctan.org/pkg/#4}}%
+        \ifblank{#4}{}{\def\@tempa{http://www.ctan.org/pkg/#4}}%
       }{%
         \def\@tempa{http://www.ctan.org/pkg/#2}%
       }%
@@ -685,9 +695,9 @@
 \pdfexpandableoutline{Package}
 % !!! suchen nach \\Option\*?\{.*\}\[.*\]
 % !!! \Option(*){option}[value] in \Option(*){option=value}
+% §§§ Implementierung? optionaler Wert durch '=' getrennt
 \NewDocumentCommand\Option{sd()mod''d()d||}{%
 % !!! Debug
-%   §§§ Implementierung? optionaler Wert durch '=' getrennt
 %  \IfValueT{#4}{%
 %    \ClassWarning{tudscrman}{please change the optional argument}%
 %  }%
@@ -758,9 +768,9 @@
 \pdfexpandableoutline{Macro}%
 % !!! suchen nach \\Key\*?\{.*\}\{.*\}\[.*\]
 % !!! \Key(*){cmd}{key}[value] in \Key(*){cmd}{key=value}
+% §§§ Implementierung? optionaler Wert durch '=' getrennt
 \NewDocumentCommand\Key{sd()mmod''d()d||}{%
 %% !!! Debug
-%%  % §§§ Implementierung? optionaler Wert durch '=' getrennt
 %%  \IfValueT{#5}{%
 %%    \ClassWarning{tudscrman}{please change the optional argument}%
 %%  }%
@@ -945,6 +955,8 @@
 \newcommand*\eaddto@hook[2]{%
   \expandafter\addto@hook\expandafter#1\expandafter{#2}%
 }
+\newcommand*\@tempentry{}
+\newcommand*\@tempformat{}
 % Debug
 % {#1}: Stern?
 % (#2): Subdeclaration
@@ -1104,7 +1116,6 @@
 % |#8|: Indexformatierung
 % optionales Argument <#7> in [#7], sobald [#6] nicht mehr notwendig
 \NewDocumentCommand\@ProcessIndex{mr()md!!mod<>d||}{%
-% §§§ \@tempentry und \@tempformat durch \@tempa und \@tempb ersetzen
   \@CheckMarkupFormat%
   \IfBooleanTF{#1}{%
     \if@declare\else%
@@ -1119,29 +1130,32 @@
   }{%
     \@Process@label\tud@label{#1}(#2){#3}!#4!{#5}[@tempswa]%
     \protected@edef\@tempentry{#5\IfValueT{#6}{#6}}%
-    \tud@replace\@tempentry{@}{"@}%
     \protected@edef\@tempformat{%
       \begingroup%
         \expandonce\@MarkupOutput\@tempentry%
       \endgroup%
     }%
     \IfValueT{#4}{%
-      \protected@epreto\@tempentry{#4!}%
-      \tud@replace\@tempentry{@}{"@}%
+      \begingroup%
+        \@gobblemarkup%
+        \xpreto\@tempentry{#4!}%
+      \endgroup%
     }%
     % $$$ Rein
 %    \if@tempswa%
 %      \tud@ifsubdeclare{#2}{%
-%        \addto\@tempformat{\idxsuffix{#2}}%
+%        \appto\@tempformat{\idxsuffix{#2}}%
 %      }{}%
 %    \fi%
-    \IfValueT{#7}{\addto\@tempformat{\idxsuffix{#7}}}%
+    \IfValueT{#7}{\appto\@tempformat{\idxsuffix{#7}}}%
     \ifcsdef{r@\tud@label}{%
       \protected@edef\@tempformat{%
-        \hyperidx[\tud@label]{\@tempformat}%
+        \hyperidx[\tud@label]{\expandonce\@tempformat}%
       }%
     }{}%
-    \IfValueT{#8}{\addto\@tempformat{|#8}}%
+    \IfValueT{#8}{\appto\@tempformat{|#8}}%
+    \tud@replace\@tempentry{@}{"@}%
+    \tud@replace\@tempformat{@}{"@}%
     \index[#3]{\@tempentry @\@tempformat}%
   }%
 }
@@ -1162,26 +1176,58 @@
 % |#8|: Indexformatierung
 \NewDocumentCommand\@ProcessChangedAt{mr()md!!mo}{%
   \@Process@label\tud@label{#1}(#2){#3}!#4!{#5}[@tempswa]%
-  \protected@edef\@tempa{%
-    \begingroup%
-      \expandonce\@MarkupOutput#5%
-    \endgroup%
-    % §§§ Stern zur Unterdrückung des suffix sinnfrei, 
-    \IfBooleanF{#1}{\IfValueT{#6}{\idxsuffix{#6}}}%
-  }%
-  % $$$ Rein
-%  \if@tempswa%
-%    \tud@ifsubdeclare{#2}{%
-%      \addto\@tempa{\idxsuffix{#2}}%
-%    }{}%
-%  \fi%
-  \ifcsdef{r@\tud@label}{%
-    \protected@edef\@tempa{\hyperidx[\tud@label]{\@tempa}}%
-  }{}%
-  \tud@toks@changedat{#5@}%
-  \eaddto@hook\tud@toks@changedat{\@tempa}%
-  \global\tud@toks@changedat=\tud@toks@changedat%
-  \if@changelogold\@tempa\fi% $$$ raus
+  \tud@toks@changedat{}%
+  \def\@tempentry{}%
+  \def\@tempformat{}%
+  \if@changelogold% $$$ raus
+    \protected@edef\@tempa{%
+      \begingroup%
+        \expandonce\@MarkupOutput#5%
+      \endgroup%
+      % §§§ Stern zur Unterdrückung des suffix sinnfrei, 
+      \IfBooleanF{#1}{\IfValueT{#6}{\noexpand\idxsuffix{#6}}}%
+    }%
+    \ifcsdef{r@\tud@label}{%
+      \protected@edef\@tempa{\hyperidx[\tud@label]{\@tempa}}%
+    }{}%
+    \@tempa%
+  \else%
+    \IfValueT{#4}{%
+      \begingroup%
+        #4%
+        \gappto\@tempentry{: }%
+        \gappto\@tempformat{: }%
+      \endgroup%
+    }%
+    \@Process@label\tud@label{#1}(#2){#3}!#4!{#5}[@tempswa]%
+    \protected@edef\@tempa{#5}%
+    \protected@edef\@tempb{%
+      \begingroup%
+        \expandonce\@MarkupOutput#5%
+      \endgroup%
+    }%
+    \IfValueT{#6}{%
+      \appto\@tempa{\idxsuffix{#6}}%
+      \appto\@tempb{\idxsuffix{#6}}%
+    }%
+    \ifcsdef{r@\tud@label}{%
+      \protected@edef\@tempb{%
+        \hyperidx[\tud@label]{\expandonce\@tempb}%
+      }%
+    }{}%
+    \protected@eappto\@tempentry{\expandonce\@tempa}%
+    \protected@eappto\@tempformat{\expandonce\@tempb}%
+    % $$$ Rein
+%    \if@tempswa%
+%      \tud@ifsubdeclare{#2}{%
+%        \appto\@tempformat{\idxsuffix{#2}}%
+%      }{}%
+%    \fi%
+    \tud@replace\@tempentry{@}{"@}%
+    \tud@replace\@tempformat{@}{"@}%
+    \edef\@tempa{\expandonce\@tempentry!\expandonce\@tempformat}%
+    \expandafter\global\expandafter\tud@toks@changedat\expandafter{\@tempa}%
+  \fi%
 }
 % Doku: Sternversion zum Erzeugen des Labels, ohne Stern zur Nutzung
 \newcommand*\tud@label{}
@@ -1202,13 +1248,7 @@
 }
 \NewDocumentCommand\@@Process@label{smr()mr!!m}{%
   \begingroup%
-    \let\Class\@Class%
-    \let\Package\@Package%
-    \let\Environment\@Environment%
-    \let\Macro\@Macro%
-    \let\hologoRobust\@firstofone%
-    \def\_{-}%
-    \def~{-}%
+    \@gobblemarkup%
     \IfValueTF{#5}{%
       \edef\@tempa{#3:#4:#5:#6}%
     }{%
@@ -1278,20 +1318,21 @@
 \newcommand*\@MarkupOutput{}
 \newcommand*\@MarkupDeclare[1]{}
 \NewDocumentCommand\@SetMarkupFormat{md()o}{%
-  \gdef\@MarkupOutput{#1}%
+  \def\@MarkupOutput{#1}%
   \IfValueTF{#2}{%
     \IfValueTF{#3}{%
-      \gdef\@MarkupDeclare##1{#2\idxsuffix{#3}}%
+      \def\@MarkupDeclare##1{#2\idxsuffix{#3}}%
     }{%
-      \gdef\@MarkupDeclare##1{#2}%
+      \def\@MarkupDeclare##1{#2}%
     }%
   }{%
     \IfValueTF{#3}{%
-      \gdef\@MarkupDeclare##1{\begingroup#1##1\endgroup\idxsuffix{#3}}%
+      \def\@MarkupDeclare##1{\begingroup#1##1\endgroup\idxsuffix{#3}}%
     }{%
-      \gdef\@MarkupDeclare##1{\begingroup#1##1\endgroup}%
+      \def\@MarkupDeclare##1{\begingroup#1##1\endgroup}%
     }%
   }%
+  \apptocmd{\@MarkupDeclare}{\def\@MarkupOutput{#1}}{}{}%
 }
 \newcommand*\@CheckMarkupFormat{%
   \ifx\@MarkupOutput\relax%
@@ -1301,8 +1342,8 @@
   \fi%
 }
 \newcommand*\@ClearMarkupFormat{%
-  \global\let\@MarkupOutput\relax%
-  \global\let\@MarkupDeclare\@gobble%
+  \let\@MarkupOutput\relax%
+  \let\@MarkupDeclare\@gobble%
 }
 \@ClearMarkupFormat
 %
@@ -1312,8 +1353,9 @@
 \newcommand*\@changedatdeclaredefault{\emph{neu}}
 \newcommand*\@changedatdeclare[2]{%
   \IfValueT{#1}{%
-    \@ChangedAt@CreateList{Implementierung}{#2}{#1}%
-%    \typeout{///// \meaning\list@ChangedAt}%
+    %
+    \@ChangedAt@CreateList[#2]{#1}%
+    %
     \@for\@tempa:=#1\do{%
       \ifx\@tempa\@empty\else\ifx\@tempa\space\else%
         \preto{\@tempa}{#2!}%
@@ -1324,27 +1366,38 @@
   }%
 }
 \newcommand*\list@ChangedAt{}
+\let\list@ChangedAt\relax%
 % $$$ Listentrennzeichen zu ';' ändern, dafür !!! Debug einfügen
 \DeclareListParser*{\forssvlist}{,}%
-\newcommand*\@ChangedAt@CreateList[3]{%
-  \global\let\list@ChangedAt\relax%
-  \forssvlist{\@ChangedAt@@CreateList{#1}{#2}}{#3}%
+\NewDocumentCommand\@ChangedAt@CreateList{om}{%
+  \forssvlist{\@ChangedAt@@CreateList[#1]}{#2}%
 }
 % §§§ durch ':' ersetzen, dafür !!! Debug einfügen
-\NewDocumentCommand\@ChangedAt@@CreateList{mm>{\SplitArgument{1}{!}}m}{%
-  \@ChangedAt@@@CreateList{#1}{#2}#3%
+\NewDocumentCommand\@ChangedAt@@CreateList{r[]>{\SplitArgument{1}{!}}m}{%
+  \@ChangedAt@@@CreateList[#1]#2%
 }
-\NewDocumentCommand\@ChangedAt@@@CreateList{mmmm}{%
-  \begingroup%
-    \@gobbleparameters%
-    \@changelogtrue%
-    #2%
-  \endgroup%
-  \toks@{#3!#1!}%
-  \eaddto@hook\toks@{\the\tud@toks@changedat}%
-  \IfValueT{#4}{\addto@hook\toks@{!#4}}%
-  \listxadd{\list@ChangedAt}{\the\toks@}%
+\NewDocumentCommand\@ChangedAt@@@CreateList{r[]mm}{%
+  \IfValueTF{#1}{%
+    \toks@{#2!Implementierung!}%
+    \begingroup%
+      \@gobbleparameters%
+      \@changelogtrue%
+      #1%
+    \endgroup%
+    \eaddto@hook\toks@{\the\tud@toks@changedat!#3}%
+%    \typeout{***** #3}%
+  }{%
+    \toks@{#2!Allgemein!#3}%
+  }%
+%  \IfValueT{#4}{%
+%    \addto@hook\toks@{!#4}%
+%    \IfValueF{#2}{\addto@hook\toks@{!}}%
+%  }%
+  \listeadd{\list@ChangedAt}{\the\toks@}%
+%  \typeout{***** \the\toks@}%
 }
+%
+%
 %
 %\NewDocumentCommand\@Debug@Split{>{\SplitArgument{2}{!}}m}{%
 %  \Debug@@Split#1%
@@ -1366,11 +1419,10 @@
 %
 %
 %
-%
 \NewDocumentCommand\printchangedatlist{sO{\z@}}{%
-  \ifx\list@ChangedAt\relax\else%
-    \forlistloop\ChangedAt@ProcessList{\list@ChangedAt}%
-  \fi%
+%
+%
+  \ChangedAt@ProcessList%
 %
 %
   \ifx\list@changedat@declare\relax\else%
@@ -1386,30 +1438,88 @@
     }%
   \fi%
 }
-\newcommand*\deprecated{\emph{entf\"allt}}%
-\NewDocumentCommand\ChangedAt@ProcessList{>{\SplitArgument{3}{!}}m}{%
-  \ChangedAt@@ProcessList#1%
+%
+%
+%
+\newcommand*\changedat@new{\emph{neu}}%
+\newcommand*\changedat@deprecated{\emph{entf\"allt}}%
+\newcommand*\ChangedAt@ProcessList{%
+  \ifx\list@ChangedAt\relax\else%
+    \typeout{///// \meaning\list@ChangedAt}%
+    \forlistloop\ChangedAt@@ProcessList{\list@ChangedAt}%
+    \global\let\list@ChangedAt\relax%
+  \fi%
 }
-\newcommand*\ChangedAt@@ProcessList[4]{%
-  \IfValueTF{#4}{%
-    \toks@{#1!#2!#3:~#4}%
-  }{%
-    \ifnum\value{deprecateddeclare}>\z@%
-      \toks@{#1!#2!#3:~\deprecated|deprecated}%
-    \else%
-      \toks@{#1!#2!#3:~<LEER>}%
-    \fi%
+\NewDocumentCommand\ChangedAt@@ProcessList{>{\SplitArgument{4}{!}}m}{%
+  \ChangedAt@@@ProcessList#1%
+}
+\newcommand*\ChangedAt@@@ProcessList[5]{%
+  \IfValueT{#3}{%
+    \IfValueTF{#4}{%
+      \toks@{#1!#2!}%
+      \def\@tempentry{#3: }%
+      \def\@tempformat{#4: }%
+      \IfValueTF{#5}{%
+        \def\@tempa{#5}%
+      }{%
+        \ifnum\value{deprecateddeclare}>\z@%
+%        % §§§ wie mit |deprecated umgehen?
+          \def\@tempa{\changedat@deprecated}%|deprecated}%
+        \else%
+          \def\@tempa{\changedat@new}%
+        \fi%
+      }%
+      \eappto\@tempentry{\expandonce\@tempa}%
+      \eappto\@tempformat{\expandonce\@tempa}%
+      \eaddto@hook\toks@{\@tempentry @}%
+      \eaddto@hook\toks@{\@tempformat}%
+      \typeout{++++++ \the\toks@}%
+      \index[changelognew]{\the\toks@}%
+    }{%
+      \index[changelognew]{#1!#2!#3}%
+    }%
+%    \typeout{++++++ \the\toks@}%
+%    \index[changelognew]{\the\toks@}%
   }%
-  % §§§ Einträge fehlen
-  \index[changelognew]{\the\toks@}%
 }
+% !!! Debug
+\NewDocumentCommand\ChangedAt@CreateList@Debug{m}{%
+  \forssvlist{\ChangedAt@CreateList@@Debug}{#1}%
+}
+\NewDocumentCommand\ChangedAt@CreateList@@Debug{>{\SplitArgument{2}{!}}m}{%
+  \ChangedAt@CreateList@@@Debug#1%
+}
+\NewDocumentCommand\ChangedAt@CreateList@@@Debug{mmm}{%
+  \IfValueTF{#3}{%
+    \typeout{***************************************** #3}%
+    \@ChangedAt@CreateList[#3]{#1!#2}%
+  }{%
+    \@ChangedAt@CreateList{#1!#2}%
+  }
+}
+%  !!! Debug Ende
 %
 %
 %
-%
-%
+% §§§ Soll 
+% - v2.xx -> kein Eintrag
+% - v2.xx!Bla -> Eintrag in Allgemein
+% - v2.xx!\Macro{Blubb}!Bla -> Eintrag in Implementierung
 \newlength\changedatskip
 \NewDocumentCommand\ChangedAt{sO{\changedatskip}mO{Allgemein}}{%
+%
+%
+%  !!! Debug: optionale Argumente ohne Vorbelegeung
+%  \IfValueT{#2}{\typeout{***** #2}}%
+%  \IfValueT{#4}{\typeout{***** #4}}%
+%  !!! Debug Ende
+%  \typeout{--------------}%
+  \ChangedAt@CreateList@Debug{#3}%
+%  \@ChangedAt@CreateList{#4}{#3}%
+  \ChangedAt@ProcessList%
+%  \typeout{--------------}%
+%
+%
   \ChangedAt@Process[#1]{#2}[#4]{#3}%
 }
 \newcommand*\ChangedAt@Default{}
@@ -1484,24 +1594,25 @@
   \endgroup%
 }
 % §§§ ToDo: überarbeiten, SubDeclaration beachten, richtige labels verwenden
+% §§§ Zusammenspiel mit \see verbessern
 \NewDocumentCommand\Replace{ommm}{%
 % §§§ \cs{@for} durch \cs{forcsvlist} ersetzen
-%  \@for\@tempa:={,#4}\do{%
-%    \ifx\@tempa\@empty\else\ifx\@tempa\space\else%
-%      \def\@tempb{#3}%
-%%      \tud@ifsubdeclare{\@subdeclare}{%
-%%        \edef\@tempa{\expandonce\@tempa(\@subdeclare)}%
-%%        \edef\@tempb{\expandonce\@tempb(\@subdeclare)}%
-%%      }{}%
-%      \protected@edef\@tempc{%
-%        Implementierung!#2!\emph{entf\"allt}|see{\@tempb}!\@tempa%
-%      }%
-%      \expandafter\listadd\expandafter\list@changedat@declare\expandafter{%
-%        \@tempc%
-%      }%
-%      \IfValueT{#1}{\index[#1]{\@tempa|see{\@tempb}}}%
-%    \fi\fi%
-%  }%
+  \@for\@tempa:={,#4}\do{%
+    \ifx\@tempa\@empty\else\ifx\@tempa\space\else%
+      \def\@tempb{#3}%
+%      \tud@ifsubdeclare{\@subdeclare}{%
+%        \edef\@tempa{\expandonce\@tempa(\@subdeclare)}%
+%        \edef\@tempb{\expandonce\@tempb(\@subdeclare)}%
+%      }{}%
+      \protected@edef\@tempc{%
+        Implementierung!#2!\emph{entf\"allt}|see{\@tempb}!\@tempa%
+      }%
+      \expandafter\listadd\expandafter\list@changedat@declare\expandafter{%
+        \@tempc%
+      }%
+      \IfValueT{#1}{\index[#1]{\@tempa|see{\@tempb}}}%
+    \fi\fi%
+  }%
 }
 \newif\if@sorted@list
 \newcommand*\list@sorted{}
