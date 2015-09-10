@@ -338,7 +338,7 @@
 \write\tud@write@i{%
 (markup-locref^^J%
 \space\space :attr "deprecated"^^J%
-\space\space :open "\string\deprecatedhyperpage{"^^J%
+\space\space :open "\string\hyperpagedeprecated{"^^J%
 \space\space :close "}"^^J%
 )%
 }
@@ -412,6 +412,7 @@
 \newif\if@declare
 \newif\if@openindex
 \newif\if@stareddeclare
+\newif\if@changelog
 \newif\if@deprecated% $$$ raus
 \newcounter{deprecateddeclare}
 \newcommand*\list@Declaration{}
@@ -940,6 +941,7 @@
 \DeclareExpandableDocumentCommand\@Counter{sd()m}{#3}
 \pdfexpandableoutline{Counter}%
 \newtoks\tud@toks@
+\newtoks\tud@toks@changedat
 \newcommand*\eaddto@hook[2]{%
   \expandafter\addto@hook\expandafter#1\expandafter{#2}%
 }
@@ -1145,7 +1147,7 @@
 }
 % §§§ evtl auch mit \@ProcessMarkup@toks darstellbar?
 \NewDocumentCommand\@ProcessChangedAt@toks{o}{%
-  \toks@{\@ProcessMarkup@ChangedAt}%
+  \toks@{\@ProcessChangedAt}%
   \eaddto@hook\toks@{\the\tud@toks@}%
   \IfValueT{#1}{\addto@hook\toks@{[#1]}}%
   \tud@trace@markup[changelog]{\the\toks@}%
@@ -1158,7 +1160,7 @@
 % [#6]: optionaler Suffix Ausgabe
 % <#7>: Indexsuffix
 % |#8|: Indexformatierung
-\NewDocumentCommand\@ProcessMarkup@ChangedAt{mr()md!!mo}{%
+\NewDocumentCommand\@ProcessChangedAt{mr()md!!mo}{%
   \@Process@label\tud@label{#1}(#2){#3}!#4!{#5}[@tempswa]%
   \protected@edef\@tempa{%
     \begingroup%
@@ -1173,7 +1175,13 @@
 %      \addto\@tempa{\idxsuffix{#2}}%
 %    }{}%
 %  \fi%
-  \ifcsdef{r@\tud@label}{\hyperidx[\tud@label]{\@tempa}}{\@tempa}%
+  \ifcsdef{r@\tud@label}{%
+    \protected@edef\@tempa{\hyperidx[\tud@label]{\@tempa}}%
+  }{}%
+  \tud@toks@changedat{#5@}%
+  \eaddto@hook\tud@toks@changedat{\@tempa}%
+  \global\tud@toks@changedat=\tud@toks@changedat%
+  \if@changelogold\@tempa\fi% $$$ raus
 }
 % Doku: Sternversion zum Erzeugen des Labels, ohne Stern zur Nutzung
 \newcommand*\tud@label{}
@@ -1304,10 +1312,8 @@
 \newcommand*\@changedatdeclaredefault{\emph{neu}}
 \newcommand*\@changedatdeclare[2]{%
   \IfValueT{#1}{%
-    \typeout{^^J//////////////////////////////////}%
     \@ChangedAt@CreateList{Implementierung}{#2}{#1}%
 %    \typeout{///// \meaning\list@ChangedAt}%
-    %
     \@for\@tempa:=#1\do{%
       \ifx\@tempa\@empty\else\ifx\@tempa\space\else%
         \preto{\@tempa}{#2!}%
@@ -1321,6 +1327,7 @@
 % $$$ Listentrennzeichen zu ';' ändern, dafür !!! Debug einfügen
 \DeclareListParser*{\forssvlist}{,}%
 \newcommand*\@ChangedAt@CreateList[3]{%
+  \global\let\list@ChangedAt\relax%
   \forssvlist{\@ChangedAt@@CreateList{#1}{#2}}{#3}%
 }
 % §§§ durch ':' ersetzen, dafür !!! Debug einfügen
@@ -1328,14 +1335,15 @@
   \@ChangedAt@@@CreateList{#1}{#2}#3%
 }
 \NewDocumentCommand\@ChangedAt@@@CreateList{mmmm}{%
-  \toks@{#3!#1!#2:#4}%
-  \typeout{***** \the\toks@}%
-  \@changelogtrue%
-    \expandafter\protected@edef\expandafter\@tempa\expandafter{#2}%
-    \expandafter\toks@\expandafter{\@tempa}%
-  \@changelogfalse%
-  \typeout{***** \the\toks@}%
-  \listadd\list@ChangedAt{#3!#1!#2:#4}%
+  \begingroup%
+    \@gobbleparameters%
+    \@changelogtrue%
+    #2%
+  \endgroup%
+  \toks@{#3!#1!}%
+  \eaddto@hook\toks@{\the\tud@toks@changedat}%
+  \IfValueT{#4}{\addto@hook\toks@{!#4}}%
+  \listxadd{\list@ChangedAt}{\the\toks@}%
 }
 %
 %\NewDocumentCommand\@Debug@Split{>{\SplitArgument{2}{!}}m}{%
@@ -1347,8 +1355,6 @@
 %
 %
 %
-%
-%
 \NewDocumentCommand\ChangedAt@Split{>{\SplitArgument{2}{!}}m}{%
   \ChangedAt@@Split#1%
 }
@@ -1357,7 +1363,16 @@
     Implementierung!#2!\IfValueTF{#3}{#3}{\@changedatdeclaredefault}!#1%
   }%
 }
+%
+%
+%
+%
 \NewDocumentCommand\printchangedatlist{sO{\z@}}{%
+  \ifx\list@ChangedAt\relax\else%
+    \forlistloop\ChangedAt@ProcessList{\list@ChangedAt}%
+  \fi%
+%
+%
   \ifx\list@changedat@declare\relax\else%
     \if@deprecated%
       \ChangedAt@Process[#1]{#2}{\list@changedat@declare}%
@@ -1371,6 +1386,28 @@
     }%
   \fi%
 }
+\newcommand*\deprecated{\emph{entf\"allt}}%
+\NewDocumentCommand\ChangedAt@ProcessList{>{\SplitArgument{3}{!}}m}{%
+  \ChangedAt@@ProcessList#1%
+}
+\newcommand*\ChangedAt@@ProcessList[4]{%
+  \IfValueTF{#4}{%
+    \toks@{#1!#2!#3:~#4}%
+  }{%
+    \ifnum\value{deprecateddeclare}>\z@%
+      \toks@{#1!#2!#3:~\deprecated|deprecated}%
+    \else%
+      \toks@{#1!#2!#3:~<LEER>}%
+    \fi%
+  }%
+  % §§§ Einträge fehlen
+  \index[changelognew]{\the\toks@}%
+}
+%
+%
+%
+%
+%
 \newlength\changedatskip
 \NewDocumentCommand\ChangedAt{sO{\changedatskip}mO{Allgemein}}{%
   \ChangedAt@Process[#1]{#2}[#4]{#3}%
@@ -1821,18 +1858,18 @@
     \manualhyperref{idx:#3}{Index der \IfValueTF{#2}{#2}{#1}}|seeidx{#3}%
   }%
 }
-\newcommand*\deprecatedhyperpage{}
-\newif\if@changelog
+\newcommand*\hyperpagedeprecated{}
+\newif\if@changelogold% $$$ raus
 \newcommand*\PrintChangelog{%
   \begingroup%
     \let\lettergroup\@gobble%
-    \@changelogtrue%
-    \let\deprecatedhyperpage\hyperpage%
-    \preto\item{\let\deprecatedhyperpage\hyperpage}%
-    \preto\subitem{\let\deprecatedhyperpage\hyperpage}%
-    \preto\subsubitem{\let\deprecatedhyperpage\hyperpage}%
+    \@changelogtrue\@changelogoldtrue% $$$ beides raus?!
+    \let\hyperpagedeprecated\hyperpage%
+    \preto\item{\let\hyperpagedeprecated\hyperpage}%
+    \preto\subitem{\let\hyperpagedeprecated\hyperpage}%
+    \preto\subsubitem{\let\hyperpagedeprecated\hyperpage}%
     \@printindex[changelog]%
-    \@printindex[changelognew]% $$$ raus
+    \clearpage\@printindex[changelognew]% $$$ raus
   \endgroup%
 }
 \NewDocumentCommand\Changelog{m}{%
@@ -1847,7 +1884,7 @@
   \ifstr{#1}{*}%
     {\emph{\seename}\nobreakspace#2}%
     {\emph{\seename}\nobreakspace#1}%
-  \if@changelog\let\deprecatedhyperpage\@gobble\fi%
+  \if@changelog\let\hyperpagedeprecated\@gobble\fi%
 }
 \renewrobustcmd*\seealso[2]{%
   \ifstr{#1}{*}%
