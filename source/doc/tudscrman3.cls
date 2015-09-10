@@ -615,8 +615,8 @@
 %\newcommand*\idxfont{}
 %\let\idxfont\footnotesize
 %\robustify{\idxfont}
-% §§§ \idxsuffix muss nie expandiert werden
-\newcommand*\idxsuffix[1]{\begingroup~\protect\footnotesize(#1)\endgroup}
+% §§§ \suffix muss nie expandiert werden
+\newcommand*\suffix[1]{\begingroup~\footnotesize(#1)\endgroup}
 \newrobustcmd*\hyperidx[2][]{\manualhyperref{#1}{#2}}
 \newrobustcmd*\bsc{\@backslashchar}
 \NewDocumentCommand\Application{smd||}{%
@@ -1144,10 +1144,10 @@
     % $$$ Rein
 %    \if@tempswa%
 %      \tud@ifsubdeclare{#2}{%
-%        \appto\@tempformat{\idxsuffix{#2}}%
+%        \appto\@tempformat{\suffix{#2}}%
 %      }{}%
 %    \fi%
-    \IfValueT{#7}{\appto\@tempformat{\idxsuffix{#7}}}%
+    \IfValueT{#7}{\appto\@tempformat{\suffix{#7}}}%
     \ifcsdef{r@\tud@label}{%
       \protected@edef\@tempformat{%
         \hyperidx[\tud@label]{\expandonce\@tempformat}%
@@ -1185,7 +1185,7 @@
         \expandonce\@MarkupOutput#5%
       \endgroup%
       % §§§ Stern zur Unterdrückung des suffix sinnfrei, 
-      \IfBooleanF{#1}{\IfValueT{#6}{\noexpand\idxsuffix{#6}}}%
+      \IfBooleanF{#1}{\IfValueT{#6}{\noexpand\suffix{#6}}}%
     }%
     \ifcsdef{r@\tud@label}{%
       \protected@edef\@tempa{\hyperidx[\tud@label]{\@tempa}}%
@@ -1195,7 +1195,7 @@
     \IfValueT{#4}{%
       \begingroup%
         #4%
-        \gappto\@tempentry{: }%
+        \gappto\@tempentry{:"|}%
         \gappto\@tempformat{: }%
       \endgroup%
     }%
@@ -1207,8 +1207,8 @@
       \endgroup%
     }%
     \IfValueT{#6}{%
-      \appto\@tempa{\idxsuffix{#6}}%
-      \appto\@tempb{\idxsuffix{#6}}%
+      \appto\@tempa{ \suffix{#6}}%
+      \appto\@tempb{\suffix{#6}}%
     }%
     \ifcsdef{r@\tud@label}{%
       \protected@edef\@tempb{%
@@ -1220,7 +1220,7 @@
     % $$$ Rein
 %    \if@tempswa%
 %      \tud@ifsubdeclare{#2}{%
-%        \appto\@tempformat{\idxsuffix{#2}}%
+%        \appto\@tempformat{\suffix{#2}}%
 %      }{}%
 %    \fi%
     \tud@replace\@tempentry{@}{"@}%
@@ -1321,13 +1321,13 @@
   \def\@MarkupOutput{#1}%
   \IfValueTF{#2}{%
     \IfValueTF{#3}{%
-      \def\@MarkupDeclare##1{#2\idxsuffix{#3}}%
+      \def\@MarkupDeclare##1{#2\suffix{#3}}%
     }{%
       \def\@MarkupDeclare##1{#2}%
     }%
   }{%
     \IfValueTF{#3}{%
-      \def\@MarkupDeclare##1{\begingroup#1##1\endgroup\idxsuffix{#3}}%
+      \def\@MarkupDeclare##1{\begingroup#1##1\endgroup\suffix{#3}}%
     }{%
       \def\@MarkupDeclare##1{\begingroup#1##1\endgroup}%
     }%
@@ -1348,7 +1348,7 @@
 \@ClearMarkupFormat
 %
 % §§§ Änderungsliste: Markup komplett überarbeiten
-% §§§ \emph{entfällt} irgendwie ersetzen
+% §§§ \emph{entfällt} irgendwie ersetzen obsolete
 %
 \newcommand*\@changedatdeclaredefault{\emph{neu}}
 \newcommand*\@changedatdeclare[2]{%
@@ -1459,18 +1459,20 @@
       \toks@{#1!#2!}%
       \def\@tempentry{#3: }%
       \def\@tempformat{#4: }%
+      \def\@tempc{}%
       \IfValueTF{#5}{%
         \def\@tempa{#5}%
       }{%
         \ifnum\value{deprecateddeclare}>\z@%
-%        % §§§ wie mit |deprecated umgehen?
-          \def\@tempa{\changedat@deprecated}%|deprecated}%
+%        % §§§ wie mit |deprecated umgehen? kann raus, besser über Replace!
+          \def\@tempa{\changedat@deprecated}%
+          \def\@tempc{|deprecated}%
         \else%
           \def\@tempa{\changedat@new}%
         \fi%
       }%
       \eappto\@tempentry{\expandonce\@tempa}%
-      \eappto\@tempformat{\expandonce\@tempa}%
+      \eappto\@tempformat{\expandonce\@tempa\expandonce\@tempc}%
       \eaddto@hook\toks@{\@tempentry @}%
       \eaddto@hook\toks@{\@tempformat}%
       \typeout{++++++ \the\toks@}%
@@ -1478,8 +1480,6 @@
     }{%
       \index[changelognew]{#1!#2!#3}%
     }%
-%    \typeout{++++++ \the\toks@}%
-%    \index[changelognew]{\the\toks@}%
   }%
 }
 % !!! Debug
@@ -1495,7 +1495,7 @@
     \@ChangedAt@CreateList[#3]{#1!#2}%
   }{%
     \@ChangedAt@CreateList{#1!#2}%
-  }
+  }%
 }
 %  !!! Debug Ende
 %
@@ -1841,7 +1841,7 @@
     \tud@shellescape@wrn%
   }%
   \IfBooleanF{#1}{%
-    \index[files]{\hypertut{#2}{\idxsuffix{Tutorial}}\IfValueT{#3}{|#3}}%
+    \index[files]{\hypertut{#2}{\protect\suffix{Tutorial}}\IfValueT{#3}{|#3}}%
   }%
 }
 \newcommand*\IncludeExample[1]{%

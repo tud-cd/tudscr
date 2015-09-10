@@ -542,7 +542,7 @@
 \newcommand*\idxfont{}
 \let\idxfont\footnotesize
 \robustify{\idxfont}
-\newcommand*\idxsuffix[1]{\begingroup~\protect\footnotesize(#1)\endgroup}
+\newcommand*\suffix[1]{\begingroup~\protect\footnotesize(#1)\endgroup}
 \newrobustcmd*\hyperidx[2][]{\manualhyperref{#1}{#2}}
 \newrobustcmd*\bsc{\@backslashchar}
 \NewDocumentCommand\Application{smd||}{%
