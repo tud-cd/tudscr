@@ -243,7 +243,6 @@
   othercode={\renewcommand*\subitem{\@idxitem\hspace*{15\p@}}}%
 }
 \newcommand*\xdyopt{-M tudscrman-temp.xdy -L german-din}
-
 \@ifpackagelater{imakeidx}{2013/07/12}{%
   \ClassWarning%
   {tudscrman}{%
@@ -333,7 +332,7 @@
 \write\tud@write@i{%
 (markup-locref^^J%
 \space\space :attr "deprecated"^^J%
-\space\space :open "\string\deprecatedhyperpage{"^^J%
+\space\space :open "\string\hyperpagedeprecated{"^^J%
 \space\space :close "}"^^J%
 )%
 }
@@ -392,14 +391,14 @@
 \newif\if@openindex
 \newif\if@stareddeclare
 \newif\if@deprecated
-\newcommand*\@declarationlist{}
-\let\@declarationlist\relax
-\newcommand*\@presetlist{}
-\let\@presetlist\relax
-\newif\if@presetlist
-\newcommand*\@additionallist{}
-\let\@additionallist\relax
-\newif\if@additionallist
+\newcommand*\list@Declaration{}
+\let\list@Declaration\relax
+\newcommand*\list@Preset{}
+\let\list@Preset\relax
+\newif\if@preset@list
+\newcommand*\list@Additional{}
+\let\list@Additional\relax
+\newif\if@additional@list
 \newcommand*\@gobbleparameters{%
   \let\PName\@gobble%
   \let\PBoolean\@empty%
@@ -414,33 +413,33 @@
   \let\POParameter\@gobble%
 }
 \NewDocumentEnvironment{Declaration}{omoog}{%
-  \listadd\@declarationlist{#2}%
+  \listadd\list@Declaration{#2}%
   \@changedatdeclare{#1}{#2}%
   \IfValueTF{#3}{%
-    \@presetlisttrue%
+    \@preset@listtrue%
     \IfValueTF{#4}{%
       \def\@tempa[##1:##2]{##1:\,##2}%
-      \listeadd\@presetlist{preset:\,#3\,|\,\expandonce{\@tempa[#4]}}%
+      \listeadd\list@Preset{preset:\,#3\,|\,\expandonce{\@tempa[#4]}}%
     }{%
-      \listadd\@presetlist{preset:\,#3}%
+      \listadd\list@Preset{preset:\,#3}%
     }%
   }{%
-    \listadd\@presetlist{\relax}%
+    \listadd\list@Preset{\relax}%
   }%
   \IfValueTF{#5}{%
-    \@additionallisttrue%
-    \listadd\@additionallist{\hspace*{\tabcolsep}\small(#5)}%
+    \@additional@listtrue%
+    \listadd\list@Additional{\hspace*{\tabcolsep}\small(#5)}%
     \in@{\Environment}{#2}%
-    \ifin@\listadd\@additionallist{\tabularnewline}\fi%
+    \ifin@\listadd\list@Additional{\tabularnewline}\fi%
   }{%
-    \listadd\@additionallist{\relax}%
+    \listadd\list@Additional{\relax}%
     \in@{\Environment}{#2}%
-    \ifin@\listadd\@additionallist{\relax}\listadd\@additionallist{\relax}\fi%
+    \ifin@\listadd\list@Additional{\relax}\listadd\list@Additional{\relax}\fi%
   }%
 }{%
-  \ifx\@declarationlist\relax\else%
+  \ifx\list@Declaration\relax\else%
     \ClassError{tudscrman}{\string\printdeclarationlist\space is missing}{%
-      \string\@declarationlist\space is not empty. Did you forget\MessageBreak%
+      \string\list@Declaration\space is not empty. Did you forget\MessageBreak%
       to print this list with \string\printdeclarationlist?%
     }%
   \fi%
@@ -450,7 +449,7 @@
   \pagebreak[0]%
 }
 \NewDocumentCommand\printdeclarationlist{sod()}{%
-  \ifx\@declarationlist\relax\else%
+  \ifx\list@Declaration\relax\else%
     \ifvmode\else\par\fi%
     \addpenalty{\@beginparpenalty}%
     \addvspace{1.5\baselineskipglue}%
@@ -461,7 +460,7 @@
       \global\@deprecatedfalse%
     }%
     \IfValueT{#2}{%
-      \if@additionallist%
+      \if@additional@list%
         \ClassWarning{tudscrman}{%
           It is not possible to use the optional argument\MessageBreak%
           of \string\printdeclarationlist due to the given\MessageBreak%
@@ -469,14 +468,14 @@
           environment `Declaration'%
         }%
       \else%
-        \@additionallisttrue%
-        \let\@additionallist\relax%
+        \@additional@listtrue%
+        \let\list@Additional\relax%
         \protected@edef\@tempa{#2}%
         \protected@edef\@tempb{\hspace*{\tabcolsep}\protect\small}%
         \def\@tempc##1{%
-          \listeadd\@additionallist{\expandonce\@tempb(\expandonce\@tempa)}%
+          \listeadd\list@Additional{\expandonce\@tempb(\expandonce\@tempa)}%
         }%
-        \forlistloop\@tempc{\@declarationlist}%
+        \forlistloop\@tempc{\list@Declaration}%
       \fi%
     }%
     \@declaretrue\@openindextrue%
@@ -486,31 +485,31 @@
     \setbox\z@\hbox{%
       \begin{tabular}{|l|}%
         \hline%
-        \forlistloop\@tempa{\@declarationlist}%
+        \forlistloop\@tempa{\list@Declaration}%
         \hline%
       \end{tabular}%
     }\usebox\z@%
     \@declarefalse%
-    \ifboolexpr{bool {@presetlist} or bool {@additionallist}}{%
-      \if@presetlist%
+    \ifboolexpr{bool {@preset@list} or bool {@additional@list}}{%
+      \if@preset@list%
         \qquad%
         \texttt{%
           \begin{tabular}{l@{}}%
-            \forlistloop\@tempa{\@presetlist}%
+            \forlistloop\@tempa{\list@Preset}%
           \end{tabular}%
         }%
       \fi%
-      \if@additionallist%
+      \if@additional@list%
         \begin{tabular}{@{}l@{}}%
-          \forlistloop\@tempa{\@additionallist}%
+          \forlistloop\@tempa{\list@Additional}%
         \end{tabular}%
       \fi%
     }{}%
-    \global\let\@declarationlist\relax%
-    \global\let\@presetlist\relax%
-    \global\@presetlistfalse%
-    \global\let\@additionallist\relax%
-    \global\@additionallistfalse%
+    \global\let\list@Declaration\relax%
+    \global\let\list@Preset\relax%
+    \global\let\list@Additional\relax%
+    \global\@preset@listfalse%
+    \global\@additional@listfalse%
     \printchangedatlist*[%
       \dimexpr.5\ht\strutbox+.5\dp\strutbox-.5\ht0-.5\dp0\relax%
     ]%
@@ -539,10 +538,13 @@
 }
 \newenvironment{SubDeclaration}[1]{}{%
 }
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newcommand*\idxfont{}
 \let\idxfont\footnotesize
 \robustify{\idxfont}
-\newcommand*\suffix[1]{\begingroup~\protect\footnotesize(#1)\endgroup}
+\newcommand*\suffix[1]{\begingroup~\footnotesize(#1)\endgroup}
 \newrobustcmd*\hyperidx[2][]{\manualhyperref{#1}{#2}}
 \newrobustcmd*\bsc{\@backslashchar}
 \NewDocumentCommand\Application{smd||}{%
@@ -951,20 +953,9 @@
     }%
   }%
 }
-
-\newcommand*\@changedatdeclarelist{}
-\let\@changedatdeclarelist\relax
-\newcommand*\@changedatdeclaredefault{\emph{neu}}
-\newcommand*\@changedatdeclare[2]{%
-  \IfValueT{#1}{%
-    \@for\@tempa:=#1\do{%
-      \ifx\@tempa\@empty\else\ifx\@tempa\space\else%
-        \preto{\@tempa}{#2!}%
-        \expandafter\ChangedAt@Split\expandafter{\@tempa}%
-      \fi\fi%
-    }%
-  }%
-}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \NewDocumentCommand\ChangedAt@Split{>{\SplitArgument{2}{!}}m}{%
   \ChangedAt@@Split#1%
 }
@@ -977,6 +968,19 @@
       Implementierung!#2!\IfValueTF{#3}{#3}{\@changedatdeclaredefault}!#1%
     }%
   \fi%
+}
+\newcommand*\@changedatdeclarelist{}
+\let\@changedatdeclarelist\relax
+\newcommand*\@changedatdeclaredefault{\emph{neu}}
+\newcommand*\@changedatdeclare[2]{%
+  \IfValueT{#1}{%
+    \@for\@tempa:=#1\do{%
+      \ifx\@tempa\@empty\else\ifx\@tempa\space\else%
+        \preto{\@tempa}{#2!}%
+        \expandafter\ChangedAt@Split\expandafter{\@tempa}%
+      \fi\fi%
+    }%
+  }%
 }
 \NewDocumentCommand\printchangedatlist{sO{\z@}}{%
   \ifx\@changedatdeclarelist\relax\else%
@@ -1077,22 +1081,25 @@
     \fi\fi%
   }%
 }
-\newif\if@listsorted
-\newcommand*\@sortedlist{}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newif\if@sorted@list
+\newcommand*\list@sorted{}
 \newcommand*\sortlist[1]{%
-  \let\@sortedlist\relax%
+  \let\list@sorted\relax%
   \forlistloop\@sortlist{#1}%
   \let#1\relax%
-  \@for\@tempa:=\@sortedlist\do{\listeadd{#1}{\@tempa}}%
+  \@for\@tempa:=\list@sorted\do{\listeadd{#1}{\@tempa}}%
 }
 \newcommand*\@sortlist[1]{%
-  \ifx\@sortedlist\relax%
-    \def\@sortedlist{#1}%
+  \ifx\list@sorted\relax%
+    \def\list@sorted{#1}%
   \else%
-    \@listsortedfalse%
+    \@sorted@listfalse%
     \let\@tempb\@empty%
-    \@for\@tempa:=\@sortedlist\do{%
-      \if@listsorted%
+    \@for\@tempa:=\list@sorted\do{%
+      \if@sorted@list%
         \expandafter\edef\expandafter\@tempb\expandafter{\@tempb,\@tempa}%
       \else%
         \expandafter\ifnum\pdfstrcmp{#1}{\@tempa}<\z@\relax%
@@ -1105,7 +1112,7 @@
               \@tempb,#1,\@tempa%
             }%
           \fi%
-          \@listsortedtrue%
+          \@sorted@listtrue%
         \else%
           \ifx\@tempb\@empty%
             \expandafter\edef\expandafter\@tempb\expandafter{\@tempa}%
@@ -1115,10 +1122,10 @@
         \fi%
       \fi%
     }%
-    \if@listsorted\else%
+    \if@sorted@list\else%
       \expandafter\edef\expandafter\@tempb\expandafter{\@tempb,#1}%
     \fi%
-    \let\@sortedlist\@tempb%
+    \let\list@sorted\@tempb%
   \fi%
 }
 \newsavebox\tabularm@box
@@ -1297,7 +1304,7 @@
     \tud@shellescape@wrn%
   }%
   \IfBooleanF{#1}{%
-    \index[files]{\hypertut{#2}{~{\idxfont(Tutorial)}}\IfValueT{#3}{|#3}}%
+    \index[files]{\hypertut{#2}{\protect\suffix{Tutorial}}\IfValueT{#3}{|#3}}%
   }%
 }
 \newcommand*\IncludeExample[1]{%
@@ -1421,16 +1428,16 @@
     \manualhyperref{idx:#3}{Index der \IfValueTF{#2}{#2}{#1}}|seeidx{#3}%
   }%
 }
-\newcommand*\deprecatedhyperpage{}
+\newcommand*\hyperpagedeprecated{}
 \newif\if@changelog
 \newcommand*\PrintChangelog{%
   \begingroup%
     \let\lettergroup\@gobble%
     \@changelogtrue%
-    \let\deprecatedhyperpage\hyperpage%
-    \preto\item{\let\deprecatedhyperpage\hyperpage}%
-    \preto\subitem{\let\deprecatedhyperpage\hyperpage}%
-    \preto\subsubitem{\let\deprecatedhyperpage\hyperpage}%
+    \let\hyperpagedeprecated\hyperpage%
+    \preto\item{\let\hyperpagedeprecated\hyperpage}%
+    \preto\subitem{\let\hyperpagedeprecated\hyperpage}%
+    \preto\subsubitem{\let\hyperpagedeprecated\hyperpage}%
     \@printindex[changelog]%
   \endgroup%
 }
@@ -1444,7 +1451,7 @@
   \ifstr{#1}{*}%
     {\emph{\seename}~#2}%
     {\emph{\seename}~#1}%
-  \if@changelog\let\deprecatedhyperpage\@gobble\fi%
+  \if@changelog\let\hyperpagedeprecated\@gobble\fi%
 }
 \renewrobustcmd*\seealso[2]{%
   \ifstr{#1}{*}%
