@@ -331,6 +331,7 @@
 \space\space :close "}"^^J%
 )%
 }
+% $$$ raus
 \write\tud@write@i{%
 (markup-locref^^J%
 \space\space :attr "deprecated"^^J%
@@ -407,8 +408,7 @@
 \newif\if@declare
 \newif\if@openindex
 \newif\if@stareddeclare
-\newif\if@changelog
-\newif\if@deprecated% $$$ raus
+\newif\if@changedat
 % §§§ evtl auch nciht nötig, wenn die indexsache anders geht
 \newcounter{deprecateddeclare}
 \newcommand*\list@Declaration{}
@@ -485,12 +485,9 @@
     \ifvmode\else\par\fi%
     \addpenalty{\@beginparpenalty}%
     \addvspace{1.5\baselineskipglue}%
-    \IfBooleanTF{#1}{%
+    \IfBooleanT{#1}{%
       \def\@tempa##1{\addtocounter{deprecateddeclare}{\@ne}}%
       \forlistloop\@tempa{\list@Declaration}%
-      \global\@deprecatedtrue% $$$ raus
-    }{%
-      \global\@deprecatedfalse% $$$ raus
     }%
     \IfValueT{#2}{%
       \if@additional@list%
@@ -562,7 +559,6 @@
 \NewDocumentEnvironment{Declaration*}{omt!}{%
   \@ChangedAt@CreateList[#2]{#1}%
   \@stareddeclaretrue%
-  \global\@deprecatedfalse% $$$ raus
   \@declaretrue\@openindextrue#2\@declarefalse%
   \@stareddeclarefalse%
   \IfBooleanT{#3}{\SubDeclaration{#2}}%
@@ -574,7 +570,6 @@
       forget to print this list with \string\printchangedatlist?%
     }%
   \fi%
-  \global\@deprecatedfalse% $$$ raus
   \@gobbleparameters%
   \@declaretrue\@openindexfalse#2\@declarefalse%
 }
@@ -614,6 +609,8 @@
 \newcommand*\@tempformat{}
 \newcommand*\@templist{}
 \let\@templist\relax%
+% §§§ ToDo: Index- und Änderungseinträge nicht expandieren!
+% §§§ lediglich expandiertenEintrag@Markup verwenden
 \NewDocumentCommand\Application{smd||}{%
   \ifdin{#2}{%
     \@SetMarkupFormat{\sbsfont}%
@@ -652,7 +649,7 @@
   \ifdin{#2}{%
     \@SetMarkupFormat{\sbnfont}%
     \@Process@toks{#1}{files}{#2}%
-    \if@changelog%
+    \if@changedat%
       \@ProcessChangedAt@toks[Klasse]%
     \else%
       \@ProcessMarkup@toks'#3'%
@@ -667,7 +664,7 @@
   \ifdin{#2}{%
     \@SetMarkupFormat{\sbnfont}%
     \@Process@toks{#1}{files}{#2}%
-    \if@changelog%
+    \if@changedat%
       \@ProcessChangedAt@toks[Paket]%
     \else%
       \let\@tempa\relax%
@@ -703,7 +700,7 @@
 % !!! Debug Ende
   \@SetMarkupFormat{\ttfamily}%
   \@Process@toks{#1}(#6){options}{#3}%
-  \if@changelog%
+  \if@changedat%
     \@ProcessChangedAt@toks[Option]%
   \else%
     \@ProcessMarkup@toks[#4](=)'#5'%
@@ -726,7 +723,7 @@
     \ttfamily\bsc{}end\{##1\}%
   )%
   \@Process@toks{#1}(#6){macros}{#3}%
-  \if@changelog%
+  \if@changedat%
     \@ProcessChangedAt@toks[Umgebung]%
   \else%
     \@ProcessMarkup@toks'#5'%
@@ -748,7 +745,7 @@
 %% !!! Debug Ende
   \@SetMarkupFormat{\ttfamily\bsc}%
   \@Process@toks{#1}(#5){macros}{#3}%
-  \if@changelog%
+  \if@changedat%
     % $$$ raus
     \@ProcessChangedAt@toks[Befehl]%
     % $$$ rein
@@ -776,7 +773,7 @@
 %% !!! Debug Ende
   \@SetMarkupFormat{\ttfamily}[Parameter]%
   \@Process@toks{#1}(#7){macros}!#3!{#4}%
-  \if@changelog%
+  \if@changedat%
     \@ProcessChangedAt@toks[Parameter]%
   \else%
     \@ProcessMarkup@toks[#5](=)'#6'%
@@ -795,7 +792,7 @@
 % !!! Debug Ende
   \@SetMarkupFormat{\ttfamily\bsc}[Bezeichner]%
   \@Process@toks{#1}(#5){terms}{#3}%
-  \if@changelog%
+  \if@changedat%
     \@ProcessChangedAt@toks[Bezeichner]%
   \else%
     \@ProcessMarkup@toks'#4'%
@@ -843,7 +840,7 @@
 % !!! Debug Ende
   \@SetMarkupFormat{\ttfamily}[Schriftelement]%
   \@Process@toks{#1}(#5){fonts}{#3}%
-  \if@changelog%
+  \if@changedat%
     \@ProcessChangedAt@toks[Schriftelement]%
   \else%
     \@ProcessMarkup@toks'#4'%
@@ -864,7 +861,7 @@
     \begingroup\ttfamily##1\IfValueT{#4}{\,(#4)}\endgroup%
   )[Farbe]%
   \@Process@toks{#1}(#6){colors}{#3}%
-  \if@changelog%
+  \if@changedat%
     \@ProcessChangedAt@toks[Farbe]%
   \else%
     \@ProcessMarkup@toks'#5'%
@@ -884,7 +881,7 @@
 % !!! Debug Ende
   \@SetMarkupFormat{\ttfamily}[Seitenstil]%
   \@Process@toks{#1}(#5){macros}{#3}%
-  \if@changelog%
+  \if@changedat%
     \@ProcessChangedAt@toks[Seitenstil]%
   \else%
     \@ProcessMarkup@toks'#4'%
@@ -907,7 +904,7 @@
 % !!! Debug Ende
   \@SetMarkupFormat{\ttfamily\bsc}[L\"ange]%
   \@Process@toks{#1}(#5){macros}{#3}%
-  \if@changelog%
+  \if@changedat%
     \@ProcessChangedAt@toks[L\"ange]%
   \else%
     \@ProcessMarkup@toks'#4'%
@@ -930,7 +927,7 @@
 % !!! Debug Ende
   \@SetMarkupFormat{\ttfamily}[Z\"ahler]%
   \@Process@toks{#1}(#5){macros}{#3}%
-  \if@changelog%
+  \if@changedat%
     \@ProcessChangedAt@toks[Z\"ahler]%
   \else%
     \@ProcessMarkup@toks'#4'%
@@ -948,13 +945,34 @@
 \newcommand*\eaddto@hook[2]{%
   \expandafter\addto@hook\expandafter#1\expandafter{#2}%
 }
-% Debug
+%%% §§§ ToDo: Nochmals über Argumente nachdenken!
+%%% (#1): Subdeclaration
+%%% {#2}: Ziellabel/Zielindex
+%%% !#3!: Untereintrag für Key in Index und Label
+%%% {#4}: Hauptargument
+%%{\ttfamily}[Parameter]
+%%% [#6]: optionaler Suffix Ausgabe
+%%% '#7': Querverweis
+%%% <#8>: URL
+%%\NewDocumentCommand\New@ProcessMarkup@toks{d()md!!m}{od()d''d<>}{%
+%%                                          mr()md!!m  o   d''d<>
+%%  \tud@toks@{}%
+%%  \IfValueTF{#1}{%
+%%    \addto@hook\tud@toks@{(#1)}%
+%%    \tud@trace@subdeclare{#1}% §§§ \tud@trace@subdeclare auf (#1) umstellen
+%%  }{%
+%%    \eaddto@hook\tud@toks@{\expandafter(\@subdeclare)}%
+%%    \expandafter\tud@trace@subdeclare\expandafter{\@subdeclare}%
+%%  }%
+%%  \addto@hook\tud@toks@{{#2}}%
+%%  \IfValueT{#3}{\addto@hook\tud@toks@{!#3!}}%
+%%  \addto@hook\tud@toks@{{#4}}%
+%%}
 % {#1}: Stern?
 % (#2): Subdeclaration
 % {#3}: Ziellabel/Zielindex
 % !#4!: Untereintrag für Key in Index und Label
 % {#5}: Hauptargument
-% [#6]: optionaler Suffix Ausgabe
 \NewDocumentCommand\@Process@toks{md()md!!m}{%
   \tud@toks@{{#1}}%
   \IfValueTF{#2}{%
@@ -1162,8 +1180,6 @@
 % !#4!: Untereintrag für Key in Index und Label
 % {#5}: Hauptargument
 % [#6]: optionaler Suffix Ausgabe
-% <#7>: Indexsuffix
-% |#8|: Indexformatierung
 \NewDocumentCommand\@ProcessChangedAt{mr()md!!mo}{%
   \@Process@label\tud@label{#1}(#2){#3}!#4!{#5}[@tempswa]%
   \tud@toks@changedat{}%
@@ -1351,22 +1367,29 @@
   \@ChangedAt@@@CreateList[#1]#2%
 }
 \NewDocumentCommand\@ChangedAt@@@CreateList{r[]mmm}{%
+  \typeout{!!!!!!!!!!!}%
+  \typeout{1: #1}%
+  \typeout{2: #2}%
+  \typeout{3: #3}%
+  \typeout{4: #4}%
   \IfValueTF{#1}{%
     \toks@{#2!Implementierung!}%
     \begingroup%
       \@gobbleparameters%
-      \@changelogtrue%
+      \@changedattrue%
       #1%
     \endgroup%
     \eaddto@hook\toks@{\the\tud@toks@changedat!#3}%
-    \IfValueT{#4}{\addto@hook\toks@{!#4}}%
+    % !!! Debug
+    \IfValueT{#4}{%
+      \typeout{****************************** create ^^J #4 \the\inputlineno}
+      \addto@hook\toks@{!#4}%
+    }%
   }{%
     \toks@{#2!Allgemein!#3}%
   }%
   \listeadd{\list@ChangedAt}{\the\toks@}%
 }
-\newcommand*\list@Version{}
-\let\list@Version\relax%
 \newcommand*\changedat@new{\emph{neu}}%
 \newcommand*\changedat@deprecated{\emph{entf\"allt}}%
 \NewDocumentCommand\@ChangedAt@ProcessList{mm}{%
@@ -1418,16 +1441,17 @@
       \eappto\@tempformat{\expandonce\@tempa\expandonce\@tempc}%
       \eaddto@hook\toks@{\@tempentry @}%
       \eaddto@hook\toks@{\@tempformat}%
-      \IfValueT{#6}{\addto@hook\toks@{|#6}}%
+      \IfValueT{#6}{%
+        % !!! Debug
+        \typeout{****************************** process ^^J #6 \the\inputlineno}
+        \addto@hook\toks@{|#6}%
+      }%
       \index[changelog]{\the\toks@}%
     }{%
       \index[changelog]{#1!#2!#3}%
     }%
   }%
-  \ifinlist{#1}{\@templist}{}{%
-    \listadd\@templist{#1}%
-    \ifinlist{#1}{\list@Version}{}{\listadd\list@Version{#1}}
-  }%
+  \ifinlist{#1}{\@templist}{}{\listadd\@templist{#1}}%
 }
 % !!! Debug
 \NewDocumentCommand\@ChangedAt@CreateList@Debug{m}{%
@@ -1438,7 +1462,7 @@
 }
 \NewDocumentCommand\@ChangedAt@CreateList@@@Debug{mmm}{%
   \IfValueTF{#3}{%
-%    \typeout{***************************************** #3}%
+    \typeout{!!!***************************************** ^^J#3: #1!#2}%
     \@ChangedAt@CreateList[#3]{#1!#2}%
   }{%
     \@ChangedAt@CreateList{#1!#2}%
@@ -1451,12 +1475,13 @@
 % - v2.xx!\Macro{Blubb}!Bla -> Eintrag in Implementierung
 \newlength\changedatskip
 \NewDocumentCommand\ChangedAt{sO{\changedatskip}mO{Allgemein}}{%
-  \ifhmode\unskip\fi%
+%  \ifhmode\unskip\fi%
 %  !!! Debug: optionales Argument kann raus
 %  \IfValueT{#4}{\typeout{*********************** #4}}%
   \@ChangedAt@CreateList@Debug{#3}%
 %  !!! Debug Ende
-  \@ChangedAt@CreateList{#3}%
+% $$$ rein
+%  \@ChangedAt@CreateList{#3}%
   \@ChangedAt@ProcessList{#1}{#2}%
 }
 \NewDocumentCommand\printchangedatlist{sO{\z@}}{%
@@ -1464,10 +1489,12 @@
 }
 % §§§ ToDo: überarbeiten, SubDeclaration beachten, richtige labels verwenden
 % §§§ Zusammenspiel mit \see und \printdeclarationlist* verbessern
+\NewDocumentCommand\ReplacedBy{m}{#1}
 \NewDocumentCommand\Replace{ommm}{\forcsvlist{\@Replace[#1]{#2}{#3}}{#4}}
 \NewDocumentCommand\@Replace{r[]mmm}{%
-  % §§§ Seiteneintrag in Änderungsliste erhalten, neue Option im Text
-  \@ChangedAt@CreateList[#4]{#2!\changedat@deprecated!see{#3}}%
+  % §§§ Seiteneintrag in Änderungsliste nicht unterdrücken, neue Option/Befehl
+  % etc. im beschriebenden Text
+%  \@ChangedAt@CreateList[#4]{#2!\changedat@deprecated!see{#3}}%
   % Ursache für \vskip-\lastskip, evtl hier zurücksetzen
   \IfValueT{#1}{\index[#1]{#4|see{#3}}}%
 }
@@ -1780,6 +1807,16 @@
 }
 \newcommand*\ListOfToDo{\if@tud@todo\listoftodos\fi}
 \reversemarginpar
+\newcommand*\seeidx[2]{\pageref{idx:#1}}
+\NewDocumentCommand\Index{mom}{%
+  \def\@tempa##1##2##3{%
+    \index{%
+      ##3!\textrightarrow{}\space%
+      \manualhyperref{idx:##1}{Index der \IfValueTF{##2}{##2}{##3}}|seeidx{##1}%
+    }%
+  }%
+  \forcsvlist{\@tempa{#1}{#2}}{#3}%
+}
 \newcommand*\PrintIndex{%
   \begingroup%
     \@printindex%
@@ -1830,56 +1867,57 @@
     \printindex[#1]\@printindexskip%
   }%
 }
-\newcommand*\seeidx[2]{\pageref{idx:#1}}
-\NewDocumentCommand\Index{mom}{%
-  \index{%
-    #1!\textrightarrow{}\space%
-    \manualhyperref{idx:#3}{Index der \IfValueTF{#2}{#2}{#1}}|seeidx{#3}%
-  }%
-}
-% §§§ notwendig?
-\newcommand*\hyperpagedeprecated{}
 \newcommand*\PrintChangelog{%
-  \sortlist\list@Version%
-  % §§§ ToDo: fertig machen!
-  \def\@tempa##1{%
-    \index[changelog]{%
-      \manualhyperdef{##1}%
-    }%
-    ##1%
-  }%
-  \forlistloop\@tempa{\list@Version}%
-    % §§§ manualhyperref
-    % §§§ für Änderungsliste überarbeiten?!
-%    Eintrag mit \manualhyperdef*{#1} zu Beginn der Änderungsliste
-%    \IfBooleanT{#1}{%
-%      \in@{:}{#3}%
-%      \ifin@\else\phantomsection\addxcontentsline{toc}{subsection}{#3}\fi%
-%    }%
   \begingroup%
-    \let\lettergroup\@gobble%
-    \@changelogtrue% $$$ raus?!
+    \def\lettergroup##1{%
+      \let\item@orig\item
+      \renewcommand*\item{%
+        \begingroup%
+          \escapechar=`\\%
+          \catcode\endlinechar=\active%
+          \csname\string\item\endcsname%
+      }%
+      \begingroup%
+      \escapechar=`\\%
+      \lccode`\~=\endlinechar%
+      \lowercase{%
+        \expandafter\endgroup
+        \expandafter\def\csname\string\item\endcsname####1~%
+      }{%
+        \endgroup%
+        \item@orig####1%
+        \phantomsection\addxcontentsline{toc}{subsection}{####1}%
+        \manualhyperdef{####1}%
+      }%
+    }%
+    % $$$ raus
+    \@deprecatedtrue%
     \let\hyperpagedeprecated\hyperpage%
     \preto\item{\let\hyperpagedeprecated\hyperpage}%
     \preto\subitem{\let\hyperpagedeprecated\hyperpage}%
     \preto\subsubitem{\let\hyperpagedeprecated\hyperpage}%
+    % $$$ raus ende
     \@printindex[changelog]%
-
   \endgroup%
 }
 \NewDocumentCommand\Changelog{m}{%
-  \index{%
-    #1!\textrightarrow{}\space%
-    \manualhyperref{idx:changelog}{\"Anderungsliste}|seeidx{changelog}%
+  \def\@tempa##1{
+    \index{%
+      ##1!\textrightarrow{}\space%
+      \manualhyperref{idx:changelog}{\"Anderungsliste}|seeidx{changelog}%
+    }%
   }%
+  \forcsvlist\@tempa{#1}%
 }
+\newif\if@deprecated% $$$ raus
+\newcommand*\hyperpagedeprecated{}% $$$ raus
 % §§§ evtl. \seelink um fehlende cross-ref-class zu vermeiden
 % §§§ notwendige Argument prüfen
 \renewrobustcmd*\see[2]{%
   \ifstr{#1}{*}%
     {\emph{\seename}\nobreakspace#2}%
     {\emph{\seename}\nobreakspace#1}%
-  \if@changelog\let\hyperpagedeprecated\@gobble\fi%
+  \if@deprecated\let\hyperpagedeprecated\@gobble\fi%
 }
 \renewrobustcmd*\seealso[2]{%
   \ifstr{#1}{*}%

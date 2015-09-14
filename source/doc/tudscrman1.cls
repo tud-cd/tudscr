@@ -242,7 +242,7 @@
   noclearpage,firstpagestyle=headings,headers={\indexname}{\indexname},%
   othercode={\renewcommand*\subitem{\@idxitem\hspace*{15\p@}}}%
 }
-\newcommand*\xdyopt{-M tudscrman-temp.xdy -L german-din}
+\newcommand*\xdyopt{-M \jobname-temp.xdy -L german-din}
 \@ifpackagelater{imakeidx}{2013/07/12}{%
   \ClassWarning%
   {tudscrman}{%
@@ -1375,6 +1375,16 @@
 }
 \newcommand*\ListOfToDo{\if@tud@todo\listoftodos\fi}
 \reversemarginpar
+\newcommand*\seeidx[2]{\pageref{idx:#1}}
+\NewDocumentCommand\Index{mom}{%
+  \def\@tempa##1##2##3{%
+    \index{%
+      ##3!\textrightarrow{}\space%
+      \manualhyperref{idx:##1}{Index der \IfValueTF{##2}{##2}{##3}}|seeidx{##1}%
+    }%
+  }%
+  \forcsvlist{\@tempa{#1}{#2}}{#3}%
+}
 \newcommand*\PrintIndex{%
   \begingroup%
     \@printindex%
@@ -1421,37 +1431,35 @@
     \printindex[#1]\@printindexskip%
   }%
 }
-\newcommand*\seeidx[2]{\pageref{idx:#1}}
-\NewDocumentCommand\Index{mom}{%
-  \index{%
-    #1!\textrightarrow{}\space%
-    \manualhyperref{idx:#3}{Index der \IfValueTF{#2}{#2}{#1}}|seeidx{#3}%
-  }%
-}
 \newcommand*\hyperpagedeprecated{}
 \newif\if@changelog
+\NewDocumentCommand\Changelog{m}{%
+  \def\@tempa##1{
+    \index{%
+      ##1!\textrightarrow{}\space%
+      \manualhyperref{idx:changelog}{\"Anderungsliste}|seeidx{changelog}%
+    }%
+  }%
+  \forcsvlist\@tempa{#1}%
+}
 \newcommand*\PrintChangelog{%
   \begingroup%
     \let\lettergroup\@gobble%
-    \@changelogtrue%
-    \let\hyperpagedeprecated\hyperpage%
-    \preto\item{\let\hyperpagedeprecated\hyperpage}%
-    \preto\subitem{\let\hyperpagedeprecated\hyperpage}%
-    \preto\subsubitem{\let\hyperpagedeprecated\hyperpage}%
+    \@changelogtrue\let\hyperpagedeprecated\hyperpage%
+    \preto\item{\@changelogtrue\let\hyperpagedeprecated\hyperpage}%
+    \preto\subitem{\@changelogtrue\let\hyperpagedeprecated\hyperpage}%
+    \preto\subsubitem{\@changelogtrue\let\hyperpagedeprecated\hyperpage}%
     \@printindex[changelog]%
   \endgroup%
 }
-\NewDocumentCommand\Changelog{m}{%
-  \index{%
-    #1!\textrightarrow{}\space%
-    \manualhyperref{idx:changelog}{\"Anderungsliste}|seeidx{changelog}%
-  }%
-}
 \renewrobustcmd*\see[2]{%
+  \if@changelog%
+    \let\hyperpagedeprecated\@gobble%
+    \@changelogfalse%
+  \fi%
   \ifstr{#1}{*}%
     {\emph{\seename}~#2}%
     {\emph{\seename}~#1}%
-  \if@changelog\let\hyperpagedeprecated\@gobble\fi%
 }
 \renewrobustcmd*\seealso[2]{%
   \ifstr{#1}{*}%
