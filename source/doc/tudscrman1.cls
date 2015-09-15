@@ -914,8 +914,7 @@
       \index[#1]{%
         #2!\hyperidx[\@tempb]{%
           \begingroup\expandonce\@tempa#4\endgroup%
-          ~{\idxfont(Parameter)}%
-        }\expandonce\@tempc%
+        }~{\idxfont(Parameter)}\expandonce\@tempc%
       }%
       \begingroup%
         \let\Environment\@firstofone%
@@ -941,8 +940,9 @@
     \ifcsdef{r@#1:#4}{%
       \index[#1]{%
         \hyperidx[#1:#4]{%
-          \begingroup\expandonce\@tempa#4\endgroup\expandonce\@tempb%
+          \begingroup\expandonce\@tempa#4\endgroup%
         }%
+        \expandonce\@tempb%
         \expandonce\@tempc%
       }%
     }{%

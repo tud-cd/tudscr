@@ -1133,12 +1133,12 @@
 %        \appto\@tempformat{\suffix{#2}}%
 %      }{}%
 %    \fi%
-    \IfValueT{#7}{\appto\@tempformat{\suffix{#7}}}%
     \ifcsdef{r@\tud@label}{%
       \protected@edef\@tempformat{%
         \hyperidx[\tud@label]{\expandonce\@tempformat}%
       }%
     }{}%
+    \IfValueT{#7}{\appto\@tempformat{\suffix{#7}}}%
     \IfValueT{#8}{\appto\@tempformat{|#8}}%
     \tud@replace\@tempentry{@}{"@}%
     \tud@replace\@tempformat{@}{"@}%
@@ -1785,6 +1785,15 @@
   }%
   \forcsvlist{\@tempa{#1}{#2}}{#3}%
 }
+\NewDocumentCommand\Changelog{m}{%
+  \def\@tempa##1{%
+    \index{%
+      ##1!\textrightarrow{}\space%
+      \manualhyperref{idx:changelog}{\"Anderungsliste}|seeidx{changelog}%
+    }%
+  }%
+  \forcsvlist\@tempa{#1}%
+}
 \newcommand*\PrintIndex{%
   \begingroup%
     \@printindex%
@@ -1867,15 +1876,6 @@
     % $$$ raus ende
     \@printindex[changelog]%
   \endgroup%
-}
-\NewDocumentCommand\Changelog{m}{%
-  \def\@tempa##1{
-    \index{%
-      ##1!\textrightarrow{}\space%
-      \manualhyperref{idx:changelog}{\"Anderungsliste}|seeidx{changelog}%
-    }%
-  }%
-  \forcsvlist\@tempa{#1}%
 }
 \newif\if@deprecated% $$$ raus
 \newcommand*\hyperpagedeprecated{}% $$$ raus
