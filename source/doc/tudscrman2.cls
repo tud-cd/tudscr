@@ -1213,7 +1213,7 @@
     }{%
       \IfValueT{#8}{\boolfalse{#8}}%
       \@@Process@label#2(\@subdeclaredefault){#5}!#6!{#7}%
-      \ifcsdef{r@#2}{}{\tud@trace@lbl@missing{#2}{#3}}%
+      \ifcsdef{r@#2}{}{\tud@trace@lbl@missing{#2}}%
     }%
   }%
 }
@@ -1964,12 +1964,11 @@
   \xspace%
 }
 \newcommand*\tud@trace@lbl@created[1]{}
-\newcommand*\tud@trace@lbl@missing[2]{}
+\newcommand*\tud@trace@lbl@missing[1]{}
 \NewDocumentCommand\tracinglabels{sO{missing}}{%
   \RequirePackage{currfile}%
   \newcommand*\list@lbl@created{}%
   \newcommand*\list@lbl@missing{}%
-  \newcommand*\list@lbl@noindex{}%
   \newcommand*\lbl@typeout[1]{\typeout{##1}}%
   \@tempswafalse%
   \ifstr{#2}{created}{\@tempswatrue}{}%
@@ -1994,29 +1993,18 @@
   \ifstr{#2}{missing}{\@tempswatrue}{}%
   \ifstr{#2}{all}{\@tempswatrue}{}%
   \if@tempswa%
-    \renewcommand*\tud@trace@lbl@missing[2]{%
-      \IfBooleanTF{##2}{%
-        \typeout{%
-          +++++ label noindex: ##1^^J%
-          +++++ in \currfilename\space on line \the\inputlineno%
-        }%
-        \xifinlist{##1}{\list@lbl@noindex}{}{\listxadd\list@lbl@noindex{##1}}%
-      }{%
-        \typeout{%
-          +++++ label missing: ##1^^J%
-          +++++ in \currfilename\space on line \the\inputlineno%
-        }%
-        \xifinlist{##1}{\list@lbl@missing}{}{\listxadd\list@lbl@missing{##1}}%
+    \renewcommand*\tud@trace@lbl@missing[1]{%
+      \typeout{%
+        +++++ label missing: ##1^^J%
+        +++++ in \currfilename\space on line \the\inputlineno%
       }%
+      \xifinlist{##1}{\list@lbl@missing}{}{\listxadd\list@lbl@missing{##1}}%
     }%
     \IfBooleanF{#1}{%
       \AfterEndDocument{%
         \typeout{+++++ labels missing (sorted) +++++}%
         \sortlist\list@lbl@missing%
         \forlistloop\lbl@typeout{\list@lbl@missing}%
-        \typeout{+++++ labels noindex (sorted) +++++}%
-        \sortlist\list@lbl@noindex%
-        \forlistloop\lbl@typeout{\list@lbl@noindex}%
       }%
     }%
   \fi%
