@@ -897,12 +897,12 @@
     \let\Macro\@firstofone%
     \IfValueTF{#3}{\xdef\@tempa{#2:#3:#5}}{\xdef\@tempa{#2:#5}}%
   \endgroup%
-  \IfBooleanTF{#1}{%
-    \def\@tempb{\begingroup#4#5\endgroup}%
+  \def\@tempb{\begingroup#4#5\endgroup}%
+  \ifcsdef{r@\@tempa}{%
+    \hyperidx[\@tempa]{\@tempb}\IfBooleanF{#1}{~{\idxfont(#6)}}%
   }{%
-    \def\@tempb{\begingroup#4#5\endgroup~{\idxfont(#6)}}%
+    \@tempb\IfBooleanF{#1}{~{\idxfont(#6)}}%
   }%
-  \ifcsdef{r@\@tempa}{\hyperidx[\@tempa]{\@tempb}}{\@tempb}%
 }
 \NewDocumentCommand\@HyperIndex{mmmmmm}{%
   \IfValueTF{#3}{\def\@tempa{#3}}{\def\@tempa{}}%

@@ -1178,15 +1178,15 @@
       \expandonce\@MarkupOutput#5%
     \endgroup%
   }%
-  \IfValueT{#6}{%
-    \appto\@tempa{ \suffix{#6}}%
-    \appto\@tempb{\suffix{#6}}%
-  }%
   \ifcsdef{r@\tud@label}{%
     \protected@edef\@tempb{%
       \hyperidx[\tud@label]{\expandonce\@tempb}%
     }%
   }{}%
+  \IfValueT{#6}{%
+    \appto\@tempa{ \suffix{#6}}%
+    \appto\@tempb{\suffix{#6}}%
+  }%
   \protected@eappto\@tempentry{\expandonce\@tempa}%
   \protected@eappto\@tempformat{\expandonce\@tempb}%
   % $$$ Rein
