@@ -565,6 +565,22 @@
 %   bzw. Declaration! als eigentständige Umgebung
 % - optionales Argument für Änderungsliste überarbeiten, Eintrag sollte in
 %   Allgemein (s. tudscrfonts)
+% - Declaration+ in Declaration* und Declaration* in Declaration!
+\NewDocumentEnvironment{Declaration+}{om}{%
+  \@ChangedAt@CreateList[#2]{#1}%
+  % $$$ anders lösen
+  \def\@MarkupOutput##1[##2]{}%
+  \@declaretrue\@openindextrue#2\@declarefalse%
+}{%
+  \ifx\list@ChangedAt\relax\else%
+    \ClassError{tudscrman}{\string\printchangedatlist\space is missing}{%
+      \string\list@ChangedAt\space is not empty. Did you\MessageBreak%
+      forget to print this list with \string\printchangedatlist?%
+    }%
+  \fi%
+  \@gobbleparameters%
+  \@declaretrue\@openindexfalse#2\@declarefalse%
+}
 \newcommand*\@subdeclare{}
 \newcommand*\@subdeclaredefault{tudscr}
 \let\@subdeclare\@subdeclaredefault
@@ -1053,7 +1069,7 @@
 % (#3): optionale Subdeclaration
 % [#4]: optionaler Suffix in der Index-Ausgabe
 % |#5|: optionale Indexformatierung
-\NewDocumentCommand\@@ProcessIndex{mr()r[]r||}{%
+\NewDocumentCommand\@@ProcessIndex{md()d[]d||}{%
   \@getformatandentry\@tempformat\@tempentry{#1}(#2)[#3]%
   \if@declare%
     \if@openindex%
@@ -1152,7 +1168,7 @@
     \the\toks@%
   }%
 }
-\NewDocumentCommand\@getformatandentry{mmmr()r[]}{%
+\NewDocumentCommand\@getformatandentry{mmmd()d[]}{%
   \let\@tempsubdeclare\@subdeclaredefault%
   \IfValueTF{#4}{%
     \def\@tempsubdeclare{#4}%
@@ -1170,8 +1186,6 @@
 %%    % $$$ rein
 %    \appto#1{(\@tempsubdeclare)\protect\suffix{\@tempsubdeclare}}%
   \fi%
-  \IfValueT{#5}{\appto#1{\protect\suffix{#5}}}%
-  \protected@edef#1{#1}%
   \begingroup%
     \@gobblemarkup%
     \edef\tud@reserved{%
@@ -1184,6 +1198,11 @@
 %      \fi%
     }%
   \tud@reserved%
+  \IfValueT{#5}{%
+    \appto#1{\protect\suffix{#5}}%
+    \appto#2{ #5}%
+  }%
+  \protected@edef#1{#1}%
   \tud@replace#2{@}{"@}%
 }
 \newcommand*\tud@replace[3]{%
@@ -1275,10 +1294,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-% §§§ Änderungsliste: Markup komplett überarbeiten
-% §§§ \emph{entfällt} irgendwie ersetzen obsolete
-%
 \newcommand*\list@ChangedAt{}
 \let\list@ChangedAt\relax%
 \DeclareListParser*{\forssvlist}{,}%
@@ -1295,10 +1310,12 @@
 }
 % $$$ durch ':' ersetzen, dafür Debug einfügen
 % $$$ generell das Markup in der Liste verbessern, Indexzusatz mit '|' etc.
-\NewDocumentCommand\@ChangedAt@@CreateList{r[]>{\SplitArgument{1}{!}}m}{%
+\NewDocumentCommand\@ChangedAt@@CreateList{r[]>{\SplitArgument{2}{!}}m}{%
   \@ChangedAt@@@CreateList[#1]#2%
 }
-\NewDocumentCommand\@ChangedAt@@@CreateList{r[]mm}{%
+\NewDocumentCommand\@ChangedAt@@@CreateList{r[]mmm}{%
+  % !!! Debug
+%  \IfValueT{#4}{\typeout{***************************************** #4}}
   \IfValueTF{#1}{%
     \begingroup%
       \@gobbleparameters%
@@ -1309,9 +1326,9 @@
       }%
     \tud@reserved%
     \IfValueTF{#3}{%
-      \addto@hook\toks@{#3}%
+      \addto@hook\toks@{#3!#4}%
     }{%
-      \eaddto@hook\toks@{}%
+      \eaddto@hook\toks@{!#4}%
     }%
   }{%
     \toks@{#2!Allgemein!#3}%
@@ -1342,39 +1359,56 @@
     }%
   \fi%
 }
-\NewDocumentCommand\@ChangedAt@CreateEntry{>{\SplitArgument{5}{!}}m}{%
+\NewDocumentCommand\@ChangedAt@CreateEntry{>{\SplitArgument{4}{!}}m}{%
   \@ChangedAt@@CreateEntry#1%
 }
-\newcommand*\@ChangedAt@@CreateEntry[6]{%
+\newcommand*\@ChangedAt@@CreateEntry[5]{%
+  % !!! Debug
+%  \IfValueT{#5}{\typeout{***************************************** #4}}
   \IfValueT{#3}{%
     \IfValueTF{#4}{%
+%      \typeout{*****}%
+%      \typeout{1: #1}%
+%      \typeout{2: #2}%
+%      \typeout{3: #3}%
+%      \typeout{4: #4}%
       \@changedattrue%
       #3%
       \@changedatfalse%
-      \tud@replace\@tempentry{!}{ }%
       % $$$ raus wenn \PrintChangelog neu
       \in@{\Key}{#3}%
       \ifin@%
         \begingroup%
-          \RenewDocumentCommand\Key{smmod()d''d||}{##2}%
+          \RenewDocumentCommand\Key{smmod()d''d||}{##2\gdef\@tempd{##3}}%
           \@changedattrue%
           #3%
           \@changedatfalse%
-          \global\let\@tempa\@tempformat%
+          \global\let\@tempa\@tempentry%
+          \global\let\@tempb\@tempformat%
         \endgroup%
-        \preto\@tempformat{\@tempa: }%
+        \edef\@tempentry{\expandonce\@tempa:"|\expandonce\@tempd}%
+        \epreto\@tempformat{\expandonce\@tempb: }%
       \fi%
-      % TODO §§§ Sortierung passt noch nicht ganz, #4 muss zu \@tempentry
+      % $$$ raus ende
       % §§§ wie mit |deprecated umgehen? kann raus, besser über Replace!
+      \def\@tempc{}%
       \ifstr{#4}{}{%
         \ifnum\value{deprecated}>\z@%
+          \appto\@tempentry{ \changedat@deprecated}%
           \appto\@tempformat{: \changedat@deprecated}%
-%          \def\@tempc{|deprecated}%
+          \def\@tempc{|deprecated}%
         \else%
+          \appto\@tempentry{ \changedat@new}%
           \appto\@tempformat{: \changedat@new}%
         \fi%
       }{%
+        \appto\@tempentry{ #4}%
         \appto\@tempformat{: #4}%
+      }%
+      \IfValueTF{#5}{%
+        \appto\@tempformat{|#5}%
+      }{%
+        \appto\@tempformat{\@tempc}%
       }%
       \index[changelog]{#1!#2!\@tempentry @\@tempformat}%
     }{%
@@ -1421,11 +1455,25 @@
 % §§§ Zusammenspiel mit \see und \printdeclarationlist* verbessern
 \NewDocumentCommand\Replace{ommm}{\forcsvlist{\@Replace[#1]{#2}{#3}}{#4}}
 \NewDocumentCommand\@Replace{r[]mmm}{%
-%  % $$$ Seiteneintrag in Änderungsliste nicht unterdrücken, neue Option/Befehl
-%  % etc. im beschriebenden Text
+  % $$$ Seiteneintrag in Änderungsliste nicht unterdrücken, neue Option/Befehl
+  % etc. im beschriebenden Text
+  \@getformatandentry\@tempformat\@tempentry{#3}%
+  \def\@tempa{#2!\changedat@deprecated}
+  \eappto\@tempa{!see{\expandonce\@tempformat}}%
+  \toks@{\@ChangedAt@CreateList[#4]}%
+  \eaddto@hook\toks@{\expandafter{\@tempa}}%
+  \typeout{+++++ \the\toks@}%
+  \the\toks@%
 %  \@ChangedAt@CreateList[#4]{#2!\changedat@deprecated!see{#3}}%
-%  % Ursache für \vskip-\lastskip, evtl hier zurücksetzen
-%  \IfValueT{#1}{\index[#1]{#4|see{#3}}}%
+  \IfValueT{#1}{%
+    \@getformatandentry\@tempformat\@tempentry{#3}%
+    \let\@tempa\@tempformat%
+    \@getformatandentry\@tempformat\@tempentry{#4}%
+    \eappto\@tempformat{|see{\expandonce\@tempa}}%
+    \@getsublabel\@templabel{#4}%
+% $$$ Ursache für \vskip-\lastskip, evtl hier zurücksetzen
+    \index[\@templabel]{\@tempentry @\@tempformat}%
+  }%
 }
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
