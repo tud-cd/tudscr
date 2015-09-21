@@ -519,6 +519,24 @@
     \@afterindentfalse\@afterheading%
   \fi%
 }
+\NewDocumentEnvironment{Declaration+}{om}{%
+  \@changedatdeclare{#1}{#2}%
+  \global\@deprecatedtrue%
+  \@stareddeclaretrue%
+  \@declaretrue\@openindextrue#2\@declarefalse%
+  \global\@deprecatedfalse%
+  \@stareddeclarefalse%
+}{%
+  \ifx\@changedatdeclarelist\relax\else%
+    \ClassError{tudscrman}{\string\printchangedatlist\space is missing}{%
+      \string\@changedatdeclarelist\space is not empty. Did you\MessageBreak%
+      forget to print this list with \string\printchangedatlist?%
+    }%
+  \fi%
+  \global\@deprecatedfalse%
+  \@gobbleparameters%
+  \@declaretrue\@openindexfalse#2\@declarefalse%
+}
 \NewDocumentEnvironment{Declaration*}{omt!}{%
   \@changedatdeclare{#1}{#2}%
   \@stareddeclaretrue%
@@ -587,7 +605,7 @@
   }%
 }
 \NewDocumentCommand\Class{smd''d||}{%
-  \if@changelog%
+  \ifchangelog%
     \@ProcessChangedAt{#1}{files}{\protect\sbnfont}{#2}{Klasse}%
   \else%
     \ifdin{#2}{%
@@ -601,7 +619,7 @@
 \pdfexpandableoutline{Class}
 \newcommand*\@TempPackage{}
 \NewDocumentCommand\Package{smd''d<>d||}{%
-  \if@changelog%
+  \ifchangelog%
     \@ProcessChangedAt{#1}{files}{\protect\sbnfont}{#2}{Paket}%
   \else%
     \ifdin{#2}{%
@@ -616,7 +634,7 @@
 \pdfexpandableoutline{Package}
 \newcommand*\@TempOption{}
 \NewDocumentCommand\Option{smod''d()d||}{%
-  \if@changelog%
+  \ifchangelog%
     \@ProcessChangedAt{#1}{options}{\ttfamily}{#2}{Option}%
   \else%
     \IfValueTF{#3}{\gdef\@TempOption{\texttt{=#3}}}{\gdef\@TempOption{}}%
@@ -628,7 +646,7 @@
 \pdfexpandableoutline{Option}
 \newcommand*\@TempEnvironment{}
 \NewDocumentCommand\Environment{smod''d()d||}{%
-  \if@changelog%
+  \ifchangelog%
     \@ProcessChangedAt{#1}{macros}{\ttfamily}{#2}{Umgebung}%
   \else%
     \if@declare%
@@ -647,7 +665,7 @@
 \DeclareExpandableDocumentCommand\@Environment{sm}{#2}
 \pdfexpandableoutline{Environment}%
 \NewDocumentCommand\Macro{smd''d()d||}{%
-  \if@changelog%
+  \ifchangelog%
     \@ProcessChangedAt{#1}{macros}{\ttfamily\bsc}{#2}{Befehl}%
   \else%
     \SetIndexFormat{#1}{#5}%
@@ -658,7 +676,7 @@
 \pdfexpandableoutline{Macro}%
 \newcommand*\@TempKey{}
 \NewDocumentCommand\Key{smmod''d()d||}{%
-  \if@changelog%
+  \ifchangelog%
     \@ProcessChangedAt{#1}{macros}(#2){\ttfamily}{#3}{Parameter}%
   \else%
     \begingroup%
@@ -677,7 +695,7 @@
 \DeclareExpandableDocumentCommand\@Key{smm}{#3}
 \pdfexpandableoutline{Key}
 \NewDocumentCommand\Term{smd''d()d||}{%
-  \if@changelog%
+  \ifchangelog%
     \@ProcessChangedAt{#1}{terms}{\ttfamily\bsc}{#2}{Bezeichner}%
   \else%
     \SetIndexFormat{#1}{#5}%
@@ -719,7 +737,7 @@
   \ifstr{\@nameuse{#1}}{}{\PName{empty}}{\@nameuse{#1}}\tabularnewline%
 }
 \NewDocumentCommand\Font{smd''d()d||}{%
-  \if@changelog%
+  \ifchangelog%
     \@ProcessChangedAt{#1}{fonts}{\ttfamily}{#2}{Schriftelement}%
   \else%
     \SetIndexFormat{#1}{#5}%
@@ -730,7 +748,7 @@
 \DeclareExpandableDocumentCommand\@Font{sm}{#2}
 \pdfexpandableoutline{Font}%
 \NewDocumentCommand\Color{smod''d()d||}{%
-  \if@changelog%
+  \ifchangelog%
     \@ProcessChangedAt{#1}{colors}{\ttfamily}{#2}{Farbe}%
   \else%
     \SetIndexFormat{#1}{#6}%
@@ -742,7 +760,7 @@
 \DeclareExpandableDocumentCommand\@Color{sm}{#2}
 \pdfexpandableoutline{Color}%
 \NewDocumentCommand\PageStyle{smd''d()d||}{%
-  \if@changelog%
+  \ifchangelog%
     \@ProcessChangedAt{#1}{macros}{\ttfamily}{#2}{Seitenstil}%
   \else%
     \SetIndexFormat{#1}{#5}%
@@ -753,7 +771,7 @@
 \DeclareExpandableDocumentCommand\@PageStyle{sm}{#2}
 \pdfexpandableoutline{PageStyle}%
 \NewDocumentCommand\Length{smd''d()d||}{%
-  \if@changelog%
+  \ifchangelog%
     \@ProcessChangedAt{#1}{macros}{\ttfamily\bsc}{#2}{L\"ange}%
   \else%
     \SetIndexFormat{#1}{#5}%
@@ -764,7 +782,7 @@
 \DeclareExpandableDocumentCommand\@Length{sm}{#2}
 \pdfexpandableoutline{Length}%
 \NewDocumentCommand\Counter{smd''d()d||}{%
-  \if@changelog%
+  \ifchangelog%
     \@ProcessChangedAt{#1}{macros}{\ttfamily}{#2}{Z\"ahler}%
   \else%
     \SetIndexFormat{#1}{#5}%
@@ -1062,8 +1080,14 @@
         #1\manualhyperdef*{#1}!\manualhyperdef*{#1:#2}#2!\@TempKey\ #3%
       }%
     \else%
-      \index[changelog]{%
-        #1\manualhyperdef*{#1}!\manualhyperdef*{#1:#2}#2!#3%
+      \ifstr{#2}{Allgemein}{%
+        \index[changelog]{%
+          #1\manualhyperdef*{#1}!\manualhyperdef*{#1:#2}#2!\protect\changelogfalse#3\protect\changelogtrue%
+        }%
+      }{%
+        \index[changelog]{%
+          #1\manualhyperdef*{#1}!\manualhyperdef*{#1:#2}#2!#3%
+        }%
       }%
     \fi%
   \endgroup%
@@ -1432,7 +1456,7 @@
   }%
 }
 \newcommand*\hyperpagedeprecated{}
-\newif\if@changelog
+\newif\ifchangelog
 \NewDocumentCommand\Changelog{m}{%
   \def\@tempa##1{
     \index{%
@@ -1445,17 +1469,17 @@
 \newcommand*\PrintChangelog{%
   \begingroup%
     \let\lettergroup\@gobble%
-    \@changelogtrue\let\hyperpagedeprecated\hyperpage%
-    \preto\item{\@changelogtrue\let\hyperpagedeprecated\hyperpage}%
-    \preto\subitem{\@changelogtrue\let\hyperpagedeprecated\hyperpage}%
-    \preto\subsubitem{\@changelogtrue\let\hyperpagedeprecated\hyperpage}%
+    \changelogtrue\let\hyperpagedeprecated\hyperpage%
+    \preto\item{\changelogtrue\let\hyperpagedeprecated\hyperpage}%
+    \preto\subitem{\changelogtrue\let\hyperpagedeprecated\hyperpage}%
+    \preto\subsubitem{\changelogtrue\let\hyperpagedeprecated\hyperpage}%
     \@printindex[changelog]%
   \endgroup%
 }
 \renewrobustcmd*\see[2]{%
-  \if@changelog%
+  \ifchangelog%
     \let\hyperpagedeprecated\@gobble%
-    \@changelogfalse%
+    \changelogfalse%
   \fi%
   \ifstr{#1}{*}%
     {\emph{\seename}~#2}%
