@@ -619,8 +619,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newif\if@changedat
 \newrobustcmd*\bsc{\@backslashchar}
-% $$$ allen Befehlen optionale Argumente zur Verwendung im Fließtext geben, wie 
-%     mit der Formatierung umgehen?
+% $$$ allen Befehlen optionale Argumente zur Verwendung im Fließtext geben?!
+% $$$ wie dann mit der Formatierung umgehen?
 \DeclareExpandableDocumentCommand\@Application{sm}{#2}
 \NewDocumentCommand\Application{smd||}{%
   \ifdin{#2}{%
@@ -708,20 +708,14 @@
     \@ProcessChangedAt{\Environment{#2}}(#4)[Umgebung]%
   \else%
     \@ProcessMarkup{\Environment{#2}}(#4)'#5'%
-%    % $$$ Rein
-%    \@ProcessIndex{\Environment{#2}}(#4)[Umgebung]|#6|{#1}%
-    % $$$ Raus
-    \@ProcessIndex{\Environment{#2}}(#4)|#6|{#1}%
+    \@ProcessIndex{\Environment{#2}}(#4)[Umgebung]|#6|{#1}%
   \fi%
 }
 \DeclareExpandableDocumentCommand\@Macro{sm}{#2}
 \NewDocumentCommand\Macro{smd()d''d||}{%
   \@SetMarkupFormat{\ttfamily\bsc}%
   \if@changedat%
-%    % $$$ raus
-%    \@ProcessChangedAt{\Macro{#2}}(#3)%
-%    % $$$ rein
-    \@ProcessChangedAt{\Macro{#2}}(#3)[Befehl]%
+    \@ProcessChangedAt{\Macro{#2}}(#3)%
   \else%
     \@ProcessMarkup{\Macro{#2}}(#3)'#4'%
     \@ProcessIndex{\Macro{#2}}(#3)|#5|{#1}%
@@ -897,13 +891,6 @@
 % '#6': Querverweis
 % $$$ Argumente #2 und #3 tauschen, sobald #4 nicht mehr notwendig
 \NewDocumentCommand\@ProcessMarkup{md()od()d<>d''}{%
-  \typeout{***** markup}%
-  \typeout{1: #1}%
-  \IfValueT{#2}{\typeout{2: #2}}%
-  \IfValueT{#3}{\typeout{3: #3}}%
-  \IfValueT{#4}{\typeout{4: #4}}%
-  \IfValueT{#5}{\typeout{5: #5}}%
-  \IfValueT{#6}{\typeout{6: #6}}%
   \if@declare%
     \@getlabel*\@templabel{\@subdeclare:#1}%
     \tud@toks@{\ProcessMarkup@Declare}%
@@ -1359,11 +1346,6 @@
 %  \IfValueT{#5}{\typeout{***************************************** #4}}
   \IfValueT{#3}{%
     \IfValueTF{#4}{%
-%      \typeout{*****}%
-%      \typeout{1: #1}%
-%      \typeout{2: #2}%
-%      \typeout{3: #3}%
-%      \typeout{4: #4}%
       \@changedattrue%
       #3%
       \@changedatfalse%
@@ -1796,28 +1778,20 @@
 \newcommand*\PrintIndex{%
   \begingroup%
     \@printindex%
-    \clearpage%
     \@printindex[options]%
-    \clearpage%
     \@printindex[macros]%
-    \clearpage%
-%    \@printindex[keys]% $$$ raus
     \@printindex[terms]%
-    \clearpage%
     % $$$ rein
 %    \@printindex[pagestyles]%
 %    \@printindex[lengths]%
 %    \@printindex[counters]%
     \@printindex[fonts]%
-    \clearpage%
     \begingroup%
       \let\lettergroup\@gobble%
       \let\indexspace\par%
       \@printindex[colors]%
-      \clearpage%
     \endgroup%
     \@printindex[files]%
-    \clearpage%
   \endgroup%
 }
 \newcommand*\@printindexprologue{}
