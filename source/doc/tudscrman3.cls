@@ -293,6 +293,10 @@
      }{\ifnum\imki@columns>\@ne\end{multicols}\fi}%
   \fi%
 }
+% §§§ auch noch mal anfassen
+%\AtBeginEnvironment{theindex}{%
+%  \providecommand*\subsubsubitem{\@idxitem \hspace *{40\p@ }}
+%}
 \newcommand*\tud@write@i{}
 \newwrite\tud@write@i
 \openout\tud@write@i=\jobname-temp.xdy
@@ -362,6 +366,9 @@
 \space\space :class "seeidx" :open "\string\seeidx{" :sep "; " :close "}{}"^^J%
 )%
 }
+\write\tud@write@i{%
+(markup-indexentry :open "~n        \string\subsubsubitem " :depth 3)
+}%
 \closeout\tud@write@i
 \NewDocumentCommand\makexindyindex{omo}{%
   \protected@edef\@tempa{%
@@ -377,18 +384,13 @@
   \expandafter\makeindex\expandafter[\@tempa]%
 }
 \makexindyindex{Allgemeiner Index}
+\makexindyindex{Klassen, Pakete und Dateien}[files]
 \makexindyindex{Klassen- und Paketoptionen}[options]
-%\makexindyindex{Befehle und Umgebungen}[macros]% $$$ rein
-\makexindyindex{Umgebungen, Befehle und Seitenstile}[macros]% $$$ raus
-\makexindyindex{Umgebungs- und Befehlsparameter}[keys]% $$$ raus
-\makexindyindex{Sprachabh\"angige Bezeichner}[terms]%
-%\makexindyindex{Seitenstile}[pagestyles]%
-%\makexindyindex{L\"angen}[lengths]%
-%\makexindyindex{Z\"ahler}[counters]%
-\makexindyindex{Schriftelemente}[fonts]%
-\makexindyindex{Farben}[colors]%
-\makexindyindex{Klassen, Pakete und Dateien}[files]%
-\makexindyindex[columns=1]{\"Anderungsliste}[changelog]%
+\makexindyindex{Befehle und Umgebungen}[macros]
+\makexindyindex{Sprachabh\"angige Bezeichner}[terms]
+\makexindyindex{Seitenstile, Schriftelemente und Farben}[elements]
+\makexindyindex{L\"angen und Z\"ahler}[misc]
+\makexindyindex[columns=1]{\"Anderungsliste}[changelog]
 \undef\makexindyindex
 \RequirePackage{enumitem}[2011/09/28]
 \setlist{noitemsep}
@@ -717,6 +719,7 @@
     \@ProcessChangedAt{\Environment{#2}}(#4)[Umgebung]%
   \else%
     \@ProcessMarkup{\Environment{#2}}(#4)'#5'%
+% $$$ Wie mit \Keys umgehen?
 %    \@ProcessIndex{\Environment{#2}}(#4)[Umgebung]|#6|{#1}%
     \@ProcessIndex{\Environment{#2}}(#4)|#6|{#1}%
   \fi%
@@ -763,6 +766,16 @@
     \@ProcessIndex{\Term{#2}}(#3)|#5|{#1}%
   \fi%
 }
+\DeclareExpandableDocumentCommand\@PageStyle{sm}{#2}
+\NewDocumentCommand\PageStyle{smd()d''d||}{%
+  \@SetMarkupFormat{\ttfamily}[Seitenstil]%
+  \if@changedat%
+    \@ProcessChangedAt{\PageStyle{#2}}(#3)[Seitenstil]%
+  \else%
+    \@ProcessMarkup{\PageStyle{#2}}(#3)'#4'%
+    \@ProcessIndex{\PageStyle{#2}}(#3)[Seitenstil]|#5|{#1}%
+  \fi%
+}
 \DeclareExpandableDocumentCommand\@Font{sm}{#2}
 \NewDocumentCommand\Font{smd()d''d||}{%
   \@SetMarkupFormat{\ttfamily}[Schriftelement]%
@@ -770,7 +783,7 @@
     \@ProcessChangedAt{\Font{#2}}(#3)[Schriftelement]%
   \else%
     \@ProcessMarkup{\Font{#2}}(#3)'#4'%
-    \@ProcessIndex{\Font{#2}}(#3)|#5|{#1}%
+    \@ProcessIndex{\Font{#2}}(#3)[Schriftelement]|#5|{#1}%
   \fi%
 }
 \DeclareExpandableDocumentCommand\@Color{sm}{#2}
@@ -783,48 +796,26 @@
     \@ProcessChangedAt{\Color{#2}}(#4)[Farbe]%
   \else%
     \@ProcessMarkup{\Color{#2}}(#4)'#5'%
-    \@ProcessIndex{\Color{#2}}(#4)|#6|{#1}%
-  \fi%
-}
-\DeclareExpandableDocumentCommand\@PageStyle{sm}{#2}
-% $$$ Index pagestyles
-\NewDocumentCommand\PageStyle{smd()d''d||}{%
-  \@SetMarkupFormat{\ttfamily}[Seitenstil]%
-  \if@changedat%
-    \@ProcessChangedAt{\PageStyle{#2}}(#3)[Seitenstil]%
-  \else%
-    \@ProcessMarkup{\PageStyle{#2}}(#3)'#4'%
-%    % $$$ Rein
-%    \@ProcessIndex{\PageStyle{#2}}(#3)|#5|{#1}%
-    % $$$ Raus
-    \@ProcessIndex{\PageStyle{#2}}(#3)[Seitenstil]|#5|{#1}%
+    \@ProcessIndex{\Color{#2}}(#4)[Farbe]|#6|{#1}%
   \fi%
 }
 \DeclareExpandableDocumentCommand\@Length{sm}{#2}
-% $$$ Index lenghts
 \NewDocumentCommand\Length{smd()d''d||}{%
   \@SetMarkupFormat{\ttfamily\bsc}[L\"ange]%
   \if@changedat%
     \@ProcessChangedAt{\Length{#2}}(#3)[L\"ange]%
   \else%
     \@ProcessMarkup{\Length{#2}}(#3)'#4'%
-%    % $$$ Rein
-%    \@ProcessIndex{\Length{#2}}(#3)|#5|{#1}%
-    % $$$ Raus
     \@ProcessIndex{\Length{#2}}(#3)[L\"ange]|#5|{#1}%
   \fi%
 }
 \DeclareExpandableDocumentCommand\@Counter{sm}{#2}
-% $$$ Index counter
 \NewDocumentCommand\Counter{smd()d''d||}{%
   \@SetMarkupFormat{\ttfamily}[Z\"ahler]%
   \if@changedat%
     \@ProcessChangedAt{\Counter{#2}}(#3)[Z\"ahler]%
   \else%
     \@ProcessMarkup{\Counter{#2}}(#3)'#4'%
-%    % $$$ Rein
-%    \@ProcessIndex{\Counter{#2}}(#3)|#5|{#1}%
-    % $$$ Raus
     \@ProcessIndex{\Counter{#2}}(#3)[Z\"ahler]|#5|{#1}%
   \fi%
 }
@@ -852,9 +843,9 @@
   \let\Macro\@Macro%
   \let\Key\@Key%
   \let\Term\@Term%
+  \let\PageStyle\@PageStyle%
   \let\Font\@Font%
   \let\Color\@Color%
-  \let\PageStyle\@PageStyle%
   \let\Length\@Length%
   \let\Counter\@Counter%
   \IfBooleanF{#1}{%
@@ -867,6 +858,7 @@
 \AfterPackage{hyperref}{%
   \expandafter\pdfstringdefDisableCommands\expandafter{\@gobblemarkup}%
 }
+% §§§ unterschiedliche Varianten für Index und Label
 \newcommand*\@getsublabel[2]{%
   \begingroup%
     \def\Application##1{\edef\@tempa{\jobname}}%
@@ -880,12 +872,11 @@
     % $$$ nur noch ein Argument!
     \def\Key##1##2{\edef\@tempa{macros}}%
     \def\Term##1{\edef\@tempa{terms}}%
-    \def\Font##1{\edef\@tempa{fonts}}%
-    \def\Color##1{\edef\@tempa{colors}}%
-    % §§§ neue Indexe
-    \def\PageStyle##1{\edef\@tempa{macros}}%
-    \def\Length##1{\edef\@tempa{macros}}%
-    \def\Counter##1{\edef\@tempa{macros}}%
+    \def\PageStyle##1{\edef\@tempa{elements}}%
+    \def\Font##1{\edef\@tempa{elements}}%
+    \def\Color##1{\edef\@tempa{elements}}%
+    \def\Length##1{\edef\@tempa{misc}}%
+    \def\Counter##1{\edef\@tempa{misc}}%
     #2%
     \edef\@tempb{%
       \noexpand\endgroup%
@@ -1172,7 +1163,7 @@
     \@gobblemarkup%
     \edef\tud@reserved{%
       \noexpand\endgroup%
-%      % $$$ rein
+%      % §§§ rein
 %      \ifx\@tempsubdeclare\@subdeclaredefault%
         \def\noexpand#1{#3}%
 %      \else%
@@ -1182,9 +1173,9 @@
   \tud@reserved%
   \def#2{#3}%
   \ifx\@tempsubdeclare\@subdeclaredefault\else%
-%    % $$$ raus
+    % §§§ raus
     \appto#2{(\@tempsubdeclare)}%
-%%    % $$$ rein
+%    % §§§ rein
 %    \appto#2{(\@tempsubdeclare)\protect\suffix{\@tempsubdeclare}}%
   \fi%
   \IfValueT{#5}{%
@@ -1359,7 +1350,7 @@
       \@changedattrue%
       #3%
       \@changedatfalse%
-      % $$$ raus wenn \PrintChangelog neu
+%      % §§§ raus wenn \PrintChangelog neu
       \in@{\Key}{#3}%
       \ifin@%
         \begingroup%
@@ -1373,7 +1364,7 @@
         \edef\@tempentry{\expandonce\@tempa:"|\expandonce\@tempd}%
         \epreto\@tempformat{\expandonce\@tempb: }%
       \fi%
-      % $$$ raus ende
+%      % §§§ raus ende
       % $$$ wie mit |deprecated umgehen? kann raus, besser über Replace!
       \def\@tempc{}%
       \ifstr{#4}{}{%
@@ -1448,10 +1439,12 @@
   \eaddto@hook\toks@{\expandafter{\@tempa}}%
   \the\toks@%
   \IfValueT{#1}{%
-    \@getentryandformat\@tempentry\@tempformat{#3}%
-    \let\@tempa\@tempformat%
+%    \@getentryandformat\@tempentry\@tempformat{#3}%
+%    \let\@tempa\@tempformat%
+%    \@getentryandformat\@tempentry\@tempformat{#4}%
+%    \eappto\@tempformat{|see{\expandonce\@tempa}}%
     \@getentryandformat\@tempentry\@tempformat{#4}%
-    \eappto\@tempformat{|see{\expandonce\@tempa}}%
+    \appto\@tempformat{|see{#3}}%
     \@getsublabel\@templabel{#4}%
 % $$$ Ursache für \vskip-\lastskip, evtl hier zurücksetzen
     \index[\@templabel]{\@tempentry @\@tempformat}%
@@ -1703,7 +1696,7 @@
   \ifnum\pdfshellescape=\@ne\relax%
     \filemodCmp{examples/#1.pdf}{examples/#1.tex}{}{%
       \immediate\write18{%
-        pdflatex -output-directory examples examples/#1.tex%
+        pdflatex -output-directory examples examples/#1.tex^^J%
         pdflatex -output-directory examples examples/#1.tex%
       }%
     }%
@@ -1748,6 +1741,10 @@
         \@for\@tempa:=#2\do{\ifstr{\@tempa}{\tud@todo@type}{\@tempswatrue}{}}%
       }%
       \if@tempswa%
+        \def\@tempa{\@ifnextchar v{\@tempb}{\@tempb v}}%
+        \def\@tempb v##1\@nnil{\def\@tempc{##1}}%
+        \@tempa #4\@nnil%
+        \ifcsdef{tud@v@\@tempc}{}{\appto\@ToDo{,nxt}}%
         \vskip.8ex%
         \IfValueT{#4}{%
           \settowidth\marginparwidth{#4}%
@@ -1791,16 +1788,8 @@
     \@printindex[options]%
     \@printindex[macros]%
     \@printindex[terms]%
-    % $$$ rein
-%    \@printindex[pagestyles]%
-%    \@printindex[lengths]%
-%    \@printindex[counters]%
-    \@printindex[fonts]%
-    \begingroup%
-      \let\lettergroup\@gobble%
-      \let\indexspace\par%
-      \@printindex[colors]%
-    \endgroup%
+    \@printindex[elements]%
+    \@printindex[misc]%
     \@printindex[files]%
   \endgroup%
 }
@@ -1828,38 +1817,41 @@
     \indexprologue[\@printindexskip]{\manualhyperdef*{idx:#1}}%
     \printindex[#1]\@printindexskip%
   }%
-  \clearpage%
 }
 \newcommand*\PrintChangelog{%
   % §§§ \item als subsection und \let\subitem\item etc.
   \begingroup%
-    \def\lettergroup##1{%
-      \let\item@orig\item
-      \renewcommand*\item{%
-        \begingroup%
-          \escapechar=`\\%
-          \catcode\endlinechar=\active%
-          \csname\string\item\endcsname%
-      }%
-      \begingroup%
-      \escapechar=`\\%
-      \lccode`\~=\endlinechar%
-      \lowercase{%
-        \expandafter\endgroup
-        \expandafter\def\csname\string\item\endcsname####1~%
-      }{%
-        \endgroup%
-        \item@orig####1%
-        \phantomsection\addxcontentsline{toc}{subsection}{####1}%
-        \manualhyperdef{####1}%
-      }%
-    }%
+    \def\lettergroup##1{\meaning\subsubsubitem}%
+%    \AtBeginEnvironment{theindex}{%
+%      \let\subsubsubitem\subsubitem%
+%      \let\subsubitem\subitem%
+%      \let\subitem\item%
+%      \renewcommand*\item{%
+%        \begingroup%
+%          \escapechar=`\\%
+%          \catcode\endlinechar=\active%
+%          \csname\string\item\endcsname%
+%      }%
+%      \begingroup%
+%      \escapechar=`\\%
+%      \lccode`\~=\endlinechar%
+%      \lowercase{%
+%        \expandafter\endgroup
+%        \expandafter\def\csname\string\item\endcsname##1~%
+%      }{%
+%        \endgroup%
+%        \subsection*{##1}%
+%        \addsubsectiontocentry{}{##1}
+%        \manualhyperdef{##1}%
+%      }%
+%    }%
     % $$$ raus
     \@deprecatedtrue%
     \let\hyperpagedeprecated\hyperpage%
     \preto\item{\let\hyperpagedeprecated\hyperpage}%
     \preto\subitem{\let\hyperpagedeprecated\hyperpage}%
     \preto\subsubitem{\let\hyperpagedeprecated\hyperpage}%
+%    \preto\subsubsubitem{\let\hyperpagedeprecated\hyperpage}%
     % $$$ raus ende
     \@printindex[changelog]%
   \endgroup%

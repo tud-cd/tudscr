@@ -140,13 +140,13 @@
 \PassOptionsToPackage{automark}{scrlayer-scrpage}
 \DeclareOption{final}{\let\tudfinalflag\relax}
 \DeclareOption{print}{\let\tudprintflag\relax}
-\AtBeginDocument{%
+%\AtEndPreamble{%
   \ifdef{\tudfinalflag}{\TUDoptions{ToDo=false}}{}%
   \ifdef{\tudprintflag}{%
     \TUDoptions{color=no}%
     \PassOptionsToPackage{hidelinks}{hyperref}%
   }{}%
-}
+%}
 %%% From File: tudscr-misc.dtx
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{\TUDClassName@Parent}}
 \TUDProcessOptions\relax
@@ -158,19 +158,22 @@
 \RequirePackage{setspace}[2011/12/19]
 \setstretch{1.1}
 \RequirePackage{babel}[2014/03/24]
-\AfterPackage*{inputenc}{\RequirePackage{csquotes}[2011/10/22]}
-\AtBeginDocument{%
-  \@ifpackageloaded{csquotes}{}{%
-  \ClassWarning%
-  {tudscrman}{Package `csquotes' not loaded}%
-    \providecommand\enquote[1]{\glqg#1\grqq{}}%
-  }%
-}
-\AfterPackage*{hyperref}{%
-  \RequirePackage[babel]{microtype}[2013/05/23]%
+\AfterPackage{inputenc}{\RequirePackage{csquotes}[2011/10/22]}
+\AfterPackage{hyperref}{%
+  \RequirePackage[babel]{microtype}[2013/05/23]
   \patchcmd{\pdfstringdef}{\csname HyPsd@babel@}{%
     \let\bbl@info\@gobble\csname HyPsd@babel@%
-  }{}{\tud@patch@wrn{pdfstringdef}}%
+  }{}{\tud@patch@wrn{pdfstringdef}}
+}
+\AtBeginDocument{%
+  \@ifpackageloaded{csquotes}{}{%
+    \ClassWarning%
+      {tudscrman}{Package `csquotes' not loaded}%
+    \providecommand\enquote[1]{\glqg#1\grqq{}}%
+  }%
+  \@ifpackageloaded{hyperref}{}{%
+    \RequirePackage[babel]{microtype}[2013/05/23]%
+  }%
 }
 \newlength\baselineskipglue
 \AtBeginDocument{%
@@ -207,14 +210,29 @@
 \RequirePackage{ifplatform}[2010/10/22]
 \PassOptionsToPackage{hyperindex=false,colorlinks,linkcolor=blue}{hyperref}
 \PassOptionsToPackage{open,openlevel=0}{bookmark}
-\AtBeginDocument{%
-  \RequirePackage{hyperref}[2012/11/06]
-  \RequirePackage{bookmark}[2011/12/02]
-  \newcommand*\Email[1]{\href{mailto:#1}{\nolinkurl{#1}}}
+\newcommand*\Email[1]{\mbox{#1}}
+\newcommand*\manualhyperref[2]{#2}
+\newrobustcmd*\hyperidx[2][]{\manualhyperref{#1}{#2}}
+\NewDocumentCommand\manualhyperdef{sm}{}
+\newcommand*\autorefname[1][]{??\xspace}
+\AfterPackage{hyperref}{%
+  \renewcommand*\Email[1]{\href{mailto:#1}{\nolinkurl{#1}}}
+  \renewcommand*\manualhyperref[2]{\hyperref{}{\jobname}{#1}{#2}}
   \renewcaptionname{ngerman}{\sectionautorefname}{Unterkapitel}
   \renewcaptionname{ngerman}{\subsectionautorefname}{Abschnitt}
   \renewcaptionname{ngerman}{\subsubsectionautorefname}{Unterabschnitt}
-  \newcommand*\autorefname[1][current]{%
+  \RenewDocumentCommand\manualhyperdef{sm}{%
+    \IfBooleanTF{#1}{%
+      \raisebox{4\baselineskip}[0pt][0pt]{\hyperdef{\jobname}{#2}{}}%
+      \par\nobreak\vskip\dimexpr-\parskip-\baselineskip\relax%
+      \@afterindentfalse\@afterheading%
+    }{%
+      \Hy@raisedlink{\hyperdef{\jobname}{#2}{}}%
+      \ignorespaces%
+    }%
+    \label{#2}%
+  }
+  \renewcommand*\autorefname[1][current]{%
     \ifstr{#1}{current}{%
       \expandafter\HyPsd@@autorefname\@currentHref\@nil%
     }{%
@@ -232,22 +250,9 @@
   }
   \newcommand*\@@autorefname{}
   \def\@@autorefname#1#2#3#4#5\@nil#6\@nil{#6#4.\@nil}
-  \NewDocumentCommand\manualhyperdef{sm}{%
-    \IfBooleanTF{#1}{%
-      \raisebox{4\baselineskip}[0pt][0pt]{\hyperdef{\jobname}{#2}{}}%
-      \par\nobreak\vskip\dimexpr-\parskip-\baselineskip\relax%
-      \@afterindentfalse\@afterheading%
-    }{%
-      \Hy@raisedlink{\hyperdef{\jobname}{#2}{}}%
-      \ignorespaces%
-    }%
-    \label{#2}%
-  }
-  \newcommand*\manualhyperref[2]{\hyperref{}{\jobname}{#1}{#2}}
-  \newrobustcmd*\hyperidx[2][]{\manualhyperref{#1}{#2}}
 }
 \PassOptionsToPackage{xindy,splitindex}{imakeidx}
-\RequirePackage{imakeidx}[2013/07/11]%
+\RequirePackage{imakeidx}[2013/07/11]
 \indexsetup{%
   level=\addsec,%
   noclearpage,firstpagestyle=headings,headers={\indexname}{\indexname},%
@@ -372,22 +377,17 @@
   \expandafter\makeindex\expandafter[\@tempa]%
 }
 \makexindyindex{Allgemeiner Index}
+\makexindyindex{Klassen, Pakete und Dateien}[files]
 \makexindyindex{Klassen- und Paketoptionen}[options]
-%\makexindyindex{Befehle und Umgebungen}[macros]% $$$ rein
-\makexindyindex{Umgebungen, Befehle und Seitenstile}[macros]% $$$ raus
-\makexindyindex{Umgebungs- und Befehlsparameter}[keys]% $$$ raus
-\makexindyindex{Sprachabh\"angige Bezeichner}[terms]%
-%\makexindyindex{Seitenstile}[pagestyles]%
-%\makexindyindex{L\"angen}[lengths]%
-%\makexindyindex{Z\"ahler}[counters]%
-\makexindyindex{Schriftelemente}[fonts]%
-\makexindyindex{Farben}[colors]%
-\makexindyindex{Klassen, Pakete und Dateien}[files]%
-\makexindyindex[columns=1]{\"Anderungsliste}[changelog]%
+\makexindyindex{Befehle und Umgebungen}[macros]
+\makexindyindex{Sprachabh\"angige Bezeichner}[terms]
+\makexindyindex{Seitenstile, Schriftelemente und Farben}[elements]
+\makexindyindex{L\"angen und Z\"ahler}[misc]
+\makexindyindex[columns=1]{\"Anderungsliste}[changelog]
 \undef\makexindyindex
 \RequirePackage{enumitem}[2011/09/28]
 \setlist{noitemsep}
-\AtBeginDocument{%
+\AtEndPreamble{%
   \RequirePackage{ellipsis}[2004/9/28]
   \let\ellipsispunctuation\relax
 }
@@ -633,8 +633,12 @@
 \NewDocumentCommand\Distribution{smod||}{%
   \ifdin{#2\IfValueT{#3}{~#3}}{%
     \@SetMarkupFormat{\sbnfont}%
+%    \if@changedat%
+%      \@ProcessChangedAt{\Distribution{#2}}[Distribution]%
+%    \else%
     \@ProcessMarkup{\Distribution{#2}}[#3]%
     \@ProcessIndex{\Distribution{#2}}[Distribution]|#4|{#1}%
+%    \fi%
   }%
 }
 \DeclareExpandableDocumentCommand\@File{sm}{#2}
@@ -708,9 +712,8 @@
     \@ProcessChangedAt{\Environment{#2}}(#4)[Umgebung]%
   \else%
     \@ProcessMarkup{\Environment{#2}}(#4)'#5'%
-%    % $$$ Rein
+% §§§
 %    \@ProcessIndex{\Environment{#2}}(#4)[Umgebung]|#6|{#1}%
-    % $$$ Raus
     \@ProcessIndex{\Environment{#2}}(#4)|#6|{#1}%
   \fi%
 }
@@ -756,6 +759,16 @@
     \@ProcessIndex{\Term{#2}}(#3)|#5|{#1}%
   \fi%
 }
+\DeclareExpandableDocumentCommand\@PageStyle{sm}{#2}
+\NewDocumentCommand\PageStyle{smd()d''d||}{%
+  \@SetMarkupFormat{\ttfamily}[Seitenstil]%
+  \if@changedat%
+    \@ProcessChangedAt{\PageStyle{#2}}(#3)[Seitenstil]%
+  \else%
+    \@ProcessMarkup{\PageStyle{#2}}(#3)'#4'%
+    \@ProcessIndex{\PageStyle{#2}}(#3)[Seitenstil]|#5|{#1}%
+  \fi%
+}
 \DeclareExpandableDocumentCommand\@Font{sm}{#2}
 \NewDocumentCommand\Font{smd()d''d||}{%
   \@SetMarkupFormat{\ttfamily}[Schriftelement]%
@@ -763,7 +776,7 @@
     \@ProcessChangedAt{\Font{#2}}(#3)[Schriftelement]%
   \else%
     \@ProcessMarkup{\Font{#2}}(#3)'#4'%
-    \@ProcessIndex{\Font{#2}}(#3)|#5|{#1}%
+    \@ProcessIndex{\Font{#2}}(#3)[Schriftelement]|#5|{#1}%
   \fi%
 }
 \DeclareExpandableDocumentCommand\@Color{sm}{#2}
@@ -776,48 +789,26 @@
     \@ProcessChangedAt{\Color{#2}}(#4)[Farbe]%
   \else%
     \@ProcessMarkup{\Color{#2}}(#4)'#5'%
-    \@ProcessIndex{\Color{#2}}(#4)|#6|{#1}%
-  \fi%
-}
-\DeclareExpandableDocumentCommand\@PageStyle{sm}{#2}
-% $$$ Index pagestyles
-\NewDocumentCommand\PageStyle{smd()d''d||}{%
-  \@SetMarkupFormat{\ttfamily}[Seitenstil]%
-  \if@changedat%
-    \@ProcessChangedAt{\PageStyle{#2}}(#3)[Seitenstil]%
-  \else%
-    \@ProcessMarkup{\PageStyle{#2}}(#3)'#4'%
-%    % $$$ Rein
-%    \@ProcessIndex{\PageStyle{#2}}(#3)|#5|{#1}%
-    % $$$ Raus
-    \@ProcessIndex{\PageStyle{#2}}(#3)[Seitenstil]|#5|{#1}%
+    \@ProcessIndex{\Color{#2}}(#4)[Farbe]|#6|{#1}%
   \fi%
 }
 \DeclareExpandableDocumentCommand\@Length{sm}{#2}
-% $$$ Index lenghts
 \NewDocumentCommand\Length{smd()d''d||}{%
   \@SetMarkupFormat{\ttfamily\bsc}[L\"ange]%
   \if@changedat%
     \@ProcessChangedAt{\Length{#2}}(#3)[L\"ange]%
   \else%
     \@ProcessMarkup{\Length{#2}}(#3)'#4'%
-%    % $$$ Rein
-%    \@ProcessIndex{\Length{#2}}(#3)|#5|{#1}%
-    % $$$ Raus
     \@ProcessIndex{\Length{#2}}(#3)[L\"ange]|#5|{#1}%
   \fi%
 }
 \DeclareExpandableDocumentCommand\@Counter{sm}{#2}
-% $$$ Index counter
 \NewDocumentCommand\Counter{smd()d''d||}{%
   \@SetMarkupFormat{\ttfamily}[Z\"ahler]%
   \if@changedat%
     \@ProcessChangedAt{\Counter{#2}}(#3)[Z\"ahler]%
   \else%
     \@ProcessMarkup{\Counter{#2}}(#3)'#4'%
-%    % $$$ Rein
-%    \@ProcessIndex{\Counter{#2}}(#3)|#5|{#1}%
-    % $$$ Raus
     \@ProcessIndex{\Counter{#2}}(#3)[Z\"ahler]|#5|{#1}%
   \fi%
 }
@@ -845,9 +836,9 @@
   \let\Macro\@Macro%
   \let\Key\@Key%
   \let\Term\@Term%
+  \let\PageStyle\@PageStyle%
   \let\Font\@Font%
   \let\Color\@Color%
-  \let\PageStyle\@PageStyle%
   \let\Length\@Length%
   \let\Counter\@Counter%
   \IfBooleanF{#1}{%
@@ -857,7 +848,7 @@
     \protected\def~{~}%
   }%
 }
-\AfterPackage*{hyperref}{%
+\AfterPackage{hyperref}{%
   \expandafter\pdfstringdefDisableCommands\expandafter{\@gobblemarkup}%
 }
 \newcommand*\@getsublabel[2]{%
@@ -873,12 +864,11 @@
     % $$$ nur noch ein Argument!
     \def\Key##1##2{\edef\@tempa{macros}}%
     \def\Term##1{\edef\@tempa{terms}}%
-    \def\Font##1{\edef\@tempa{fonts}}%
-    \def\Color##1{\edef\@tempa{colors}}%
-    % §§§ neue Indexe
-    \def\PageStyle##1{\edef\@tempa{macros}}%
-    \def\Length##1{\edef\@tempa{macros}}%
-    \def\Counter##1{\edef\@tempa{macros}}%
+    \def\PageStyle##1{\edef\@tempa{elements}}%
+    \def\Font##1{\edef\@tempa{elements}}%
+    \def\Color##1{\edef\@tempa{elements}}%
+    \def\Length##1{\edef\@tempa{misc}}%
+    \def\Counter##1{\edef\@tempa{misc}}%
     #2%
     \edef\@tempb{%
       \noexpand\endgroup%
@@ -1696,7 +1686,7 @@
   \ifnum\pdfshellescape=\@ne\relax%
     \filemodCmp{examples/#1.pdf}{examples/#1.tex}{}{%
       \immediate\write18{%
-        pdflatex -output-directory examples examples/#1.tex%
+        pdflatex -output-directory examples examples/#1.tex^^J%
         pdflatex -output-directory examples examples/#1.tex%
       }%
     }%
@@ -1735,22 +1725,26 @@
       \renewcommand*\marginpar[2][]{%
         \marginnote[##1]{##2}[\dimexpr-1.6ex+1pt\relax]%
       }%
-     \@tempswafalse%
-     \ifdefvoid{\tud@todo@type}{\@tempswatrue}{}%
-     \IfValueT{#2}{%
-       \@for\@tempa:=#2\do{\ifstr{\@tempa}{\tud@todo@type}{\@tempswatrue}{}}%
-     }%
+      \@tempswafalse%
+      \ifdefvoid{\tud@todo@type}{\@tempswatrue}{}%
+      \IfValueT{#2}{%
+        \@for\@tempa:=#2\do{\ifstr{\@tempa}{\tud@todo@type}{\@tempswatrue}{}}%
+      }%
       \if@tempswa%
+        \def\@tempa{\@ifnextchar v{\@tempb}{\@tempb v}}%
+        \def\@tempb v##1\@nnil{\def\@tempc{##1}}%
+        \@tempa #4\@nnil%
+        \ifcsdef{tud@v@\@tempc}{}{\appto\@ToDo{,nxt}}%
         \vskip.8ex%
         \IfValueT{#4}{%
           \settowidth\marginparwidth{#4}%
           \addtolength\marginparwidth{\dimexpr1.6ex+1pt\relax}%
           \let\par\relax\noindent%
           \edef\@tempa{\noexpand\todo[\@ToDo,noline,nolist]}%
-          \@tempa{#4}%
+          \@tempa{#4\unskip}%
         }%
         \edef\@tempa{\noexpand\todo[\@ToDo,inline]}%
-        \@tempa{#3}%
+        \@tempa{#3\unskip}%
       \fi%
     \endgroup%
     \par\noindent%
@@ -1784,16 +1778,8 @@
     \@printindex[options]%
     \@printindex[macros]%
     \@printindex[terms]%
-    % $$$ rein
-%    \@printindex[pagestyles]%
-%    \@printindex[lengths]%
-%    \@printindex[counters]%
-    \@printindex[fonts]%
-    \begingroup%
-      \let\lettergroup\@gobble%
-      \let\indexspace\par%
-      \@printindex[colors]%
-    \endgroup%
+    \@printindex[elements]%
+    \@printindex[misc]%
     \@printindex[files]%
   \endgroup%
 }
@@ -1821,7 +1807,6 @@
     \indexprologue[\@printindexskip]{\manualhyperdef*{idx:#1}}%
     \printindex[#1]\@printindexskip%
   }%
-  \clearpage%
 }
 \newcommand*\PrintChangelog{%
   % §§§ \item als subsection und \let\subitem\item etc.
@@ -1861,6 +1846,7 @@
 \newcommand*\hyperpagedeprecated{}% $$$ raus
 % $$$ evtl. \seelink um fehlende cross-ref-class zu vermeiden
 % $$$ notwendige Argument prüfen
+%$$${\emph{\seename}\nobreakspace\begingroup\@changedattrue#1\meaning\@tempformat\endgroup}%
 \renewrobustcmd*\see[2]{%
   \ifstr{#1}{*}%
     {\emph{\seename}\nobreakspace#2}%
@@ -1892,7 +1878,7 @@
     N\kern.1em-\kern.1em concept%
   }\xspace%
 }
-\AfterPackage*{babel}{%
+\AfterPackage{babel}{%
   \@expandtwoargs\in@{,english,}{,\bbl@loaded,}%
   \ifin@%
     \renewcommand*\CD{\foreignlanguage{english}{Corporate Design}\xspace}%
@@ -1908,7 +1894,7 @@
 \newrobustcmd*\sbsfont{\sffamily\bfseries\slshape}
 \DeclareTextFontCommand\textsbs{\sbsfont}
 \newlength\tempdim
-\newcommand*\Attention[1]{\marginnote{\fbox{Achtung!}}\emph{#1}\unskip}
+\newcommand*\Attention[1]{\marginnote{\fbox{Achtung!}}\emph{#1\unskip}}
 \newcommand*\hrfn[2]{\href{#1}{#2}\footnote{\scalebox{0.97}{\url{#1}}}}
 \NewDocumentCommand\Forum{s}{%
   \IfBooleanTF{#1}{%
@@ -1946,7 +1932,6 @@
 \newcommand*\tud@trace@lbl@created[1]{}
 \newcommand*\tud@trace@lbl@missing[1]{}
 \NewDocumentCommand\tracinglabels{sO{missing}}{%
-  \RequirePackage{currfile}%
   \newcommand*\list@lbl@created{}%
   \newcommand*\list@lbl@missing{}%
   \newcommand*\lbl@typeout[1]{\typeout{##1}}%
@@ -1956,8 +1941,7 @@
   \if@tempswa%
     \renewcommand*\tud@trace@lbl@created[1]{%
       \typeout{%
-        +++++ label created: ##1^^J\space\space\space\space\space\space%
-        in \currfilename\space on line \the\inputlineno%
+        +++++ label created: ##1 on page \thepage%
       }%
       \xifinlist{##1}{\list@lbl@created}{}{\listxadd\list@lbl@created{##1}}%
     }%
@@ -1975,8 +1959,7 @@
   \if@tempswa%
     \renewcommand*\tud@trace@lbl@missing[1]{%
       \typeout{%
-        +++++ label missing: ##1^^J\space\space\space\space\space\space%
-        in \currfilename\space on line \the\inputlineno%
+        +++++ label missing: ##1 on page \thepage%
       }%
       \xifinlist{##1}{\list@lbl@missing}{}{\listxadd\list@lbl@missing{##1}}%
     }%
@@ -2037,7 +2020,7 @@
 \newrobustcmd*\telephone[1]{\gdef\@telephone{#1}}
 \newcommand*\@emailaddress{}
 \newrobustcmd*\emailaddress[2][]{\gdef\@emailaddress{#2}}
-\AfterPackage*{hyperref}{%
+\AfterPackage{hyperref}{%
   \renewrobustcmd*\emailaddress[2][hidelinks]{%
     \gdef\@emailaddress{%
       \begingroup%
