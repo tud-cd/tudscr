@@ -293,10 +293,6 @@
      }{\ifnum\imki@columns>\@ne\end{multicols}\fi}%
   \fi%
 }
-% §§§ auch noch mal anfassen
-%\AtBeginEnvironment{theindex}{%
-%  \providecommand*\subsubsubitem{\@idxitem \hspace *{40\p@ }}
-%}
 \newcommand*\tud@write@i{}
 \newwrite\tud@write@i
 \openout\tud@write@i=\jobname-temp.xdy
@@ -1819,39 +1815,37 @@
   }%
 }
 \newcommand*\PrintChangelog{%
-  % §§§ \item als subsection und \let\subitem\item etc.
   \begingroup%
-    \def\lettergroup##1{\meaning\subsubsubitem}%
-%    \AtBeginEnvironment{theindex}{%
-%      \let\subsubsubitem\subsubitem%
-%      \let\subsubitem\subitem%
-%      \let\subitem\item%
-%      \renewcommand*\item{%
-%        \begingroup%
-%          \escapechar=`\\%
-%          \catcode\endlinechar=\active%
-%          \csname\string\item\endcsname%
-%      }%
-%      \begingroup%
-%      \escapechar=`\\%
-%      \lccode`\~=\endlinechar%
-%      \lowercase{%
-%        \expandafter\endgroup
-%        \expandafter\def\csname\string\item\endcsname##1~%
-%      }{%
-%        \endgroup%
-%        \subsection*{##1}%
-%        \addsubsectiontocentry{}{##1}
-%        \manualhyperdef{##1}%
-%      }%
-%    }%
+    \def\lettergroup##1{}%
+    \apptocmd{\theindex}{%
+      \let\subsubsubitem\subsubitem%
+      \let\subsubitem\subitem%
+      \let\subitem\item%
+      \renewcommand*\item{%
+        \begingroup%
+          \escapechar=`\\%
+          \catcode\endlinechar=\active%
+          \csname\string\item\endcsname%
+      }%
+      \begingroup%
+      \escapechar=`\\%
+      \lccode`\~=\endlinechar%
+      \lowercase{%
+        \expandafter\endgroup
+        \expandafter\def\csname\string\item\endcsname##1~%
+      }{%
+        \endgroup%
+        \subsection*{\NoCaseChange{##1}}%
+        \addsubsectiontocentry{}{##1}%
+        \manualhyperdef{##1}%
+      }%
+    }{}{\tud@patch@wrn{theindex}}%
     % $$$ raus
     \@deprecatedtrue%
     \let\hyperpagedeprecated\hyperpage%
     \preto\item{\let\hyperpagedeprecated\hyperpage}%
     \preto\subitem{\let\hyperpagedeprecated\hyperpage}%
     \preto\subsubitem{\let\hyperpagedeprecated\hyperpage}%
-%    \preto\subsubsubitem{\let\hyperpagedeprecated\hyperpage}%
     % $$$ raus ende
     \@printindex[changelog]%
   \endgroup%
