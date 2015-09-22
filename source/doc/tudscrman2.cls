@@ -718,9 +718,6 @@
 \NewDocumentCommand\Macro{smd()d''d||}{%
   \@SetMarkupFormat{\ttfamily\bsc}%
   \if@changedat%
-%    % $$$ raus
-%    \@ProcessChangedAt{\Macro{#2}}(#3)%
-%    % $$$ rein
     \@ProcessChangedAt{\Macro{#2}}(#3)[Befehl]%
   \else%
     \@ProcessMarkup{\Macro{#2}}(#3)'#4'%
@@ -1824,6 +1821,7 @@
     \indexprologue[\@printindexskip]{\manualhyperdef*{idx:#1}}%
     \printindex[#1]\@printindexskip%
   }%
+  \clearpage%
 }
 \newcommand*\PrintChangelog{%
   % §§§ \item als subsection und \let\subitem\item etc.
@@ -1910,7 +1908,7 @@
 \newrobustcmd*\sbsfont{\sffamily\bfseries\slshape}
 \DeclareTextFontCommand\textsbs{\sbsfont}
 \newlength\tempdim
-\newcommand*\Attention[1]{\marginnote{\fbox{Achtung!}}\emph{#1}}
+\newcommand*\Attention[1]{\marginnote{\fbox{Achtung!}}\emph{#1}\unskip}
 \newcommand*\hrfn[2]{\href{#1}{#2}\footnote{\scalebox{0.97}{\url{#1}}}}
 \NewDocumentCommand\Forum{s}{%
   \IfBooleanTF{#1}{%
