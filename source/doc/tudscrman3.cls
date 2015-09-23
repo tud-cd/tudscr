@@ -140,18 +140,16 @@
 \PassOptionsToPackage{automark}{scrlayer-scrpage}
 \DeclareOption{final}{\let\tudfinalflag\relax}
 \DeclareOption{print}{\let\tudprintflag\relax}
-%\AtEndPreamble{%
-  \ifdef{\tudfinalflag}{\TUDoptions{ToDo=false}}{}%
-  \ifdef{\tudprintflag}{%
-    \TUDoptions{color=no}%
-    \PassOptionsToPackage{hidelinks}{hyperref}%
-  }{}%
-%}
 %%% From File: tudscr-misc.dtx
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{\TUDClassName@Parent}}
 \TUDProcessOptions\relax
 \LoadClass{\TUDClassName@Parent}
 %%% From File: tudscr-manual.dtx
+\ifdef{\tudfinalflag}{\TUDoptions{ToDo=false}}{}%
+\ifdef{\tudprintflag}{%
+  \TUDoptions{color=no}%
+  \PassOptionsToPackage{hidelinks}{hyperref}%
+}{}%
 \PassOptionsToPackage{log-declarations=false}{xparse}
 \RequirePackage{xparse}[2013/12/31]
 \RequirePackage{textcomp}[2005/09/27]
@@ -827,7 +825,7 @@
 }
 % $$$ \DeclareExpandableDocumentCommand und \@gobblemarkup automatisiert über 
 %     eine Liste erzeugen, sobald \Key nur noch ein Argument annimmt
-% $$$ \@getsubsabel und \@Key dementsprechend anpassen
+% $$$ \@getsublabel und \@Key dementsprechend anpassen
 \NewDocumentCommand\@gobblemarkup{s}{%
   \let\Application\@Application%
   \let\Distribution\@Distribution%
@@ -854,31 +852,37 @@
 \AfterPackage{hyperref}{%
   \expandafter\pdfstringdefDisableCommands\expandafter{\@gobblemarkup}%
 }
-% §§§ unterschiedliche Varianten für Index und Label
-\newcommand*\@getsublabel[2]{%
+\NewDocumentCommand\@getsublabel{smm}{%
   \begingroup%
-    \def\Application##1{\edef\@tempa{\jobname}}%
-    \def\Distribution##1{\edef\@tempa{\jobname}}%
-    \def\File##1{\edef\@tempa{files}}%
-    \def\Class##1{\edef\@tempa{files}}%
-    \def\Package##1{\edef\@tempa{files}}%
-    \def\Option##1{\edef\@tempa{options}}%
-    \def\Environment##1{\edef\@tempa{macros}}%
-    \def\Macro##1{\edef\@tempa{macros}}%
-    % $$$ nur noch ein Argument!
-    \def\Key##1##2{\edef\@tempa{macros}}%
-    \def\Term##1{\edef\@tempa{terms}}%
-    \def\PageStyle##1{\edef\@tempa{elements}}%
-    \def\Font##1{\edef\@tempa{elements}}%
-    \def\Color##1{\edef\@tempa{elements}}%
-    \def\Length##1{\edef\@tempa{misc}}%
-    \def\Counter##1{\edef\@tempa{misc}}%
-    #2%
-    \edef\@tempb{%
-      \noexpand\endgroup%
-      \def\noexpand#1{\@tempa}%
+    \def\@tempa##1##2##3{%
+      \def##1####1{%
+        \edef\@tempb{\IfBooleanTF{#1}{##2}{##3}}%
+      }%
     }%
-  \@tempb%
+    \@tempa\Application{\jobname}{app}%
+    \@tempa\Distribution{\jobname}{dist}%
+    \@tempa\File{files}{file}%
+    \@tempa\Class{files}{cls}%
+    \@tempa\Package{files}{pkg}%
+    \@tempa\Option{options}{opt}%
+    \@tempa\Environment{macros}{env}%
+    \@tempa\Macro{macros}{cmd}%
+    % $$$ nur noch ein Argument!
+    \def\Key##1##2{%
+      \edef\@tempb{\IfBooleanTF{#1}{macros}{key}}%
+    }%
+    \@tempa\Term{terms}{term}%
+    \@tempa\PageStyle{elements}{pgs}%
+    \@tempa\Font{elements}{font}%
+    \@tempa\Color{elements}{clr}%
+    \@tempa\Length{misc}{len}%
+    \@tempa\Counter{misc}{cnt}%
+    #3%
+    \edef\tud@reserved{%
+      \noexpand\endgroup%
+      \def\noexpand#2{\@tempb}%
+    }%
+  \tud@reserved%
 }
 % {#1}: Markup für Ausgabe
 % (#2): optionale Subdeclaration
@@ -1056,7 +1060,7 @@
   \else%
     \IfValueT{#4}{\appto\@tempformat{|#4}}%
   \fi%
-  \@getsublabel\@templabel{#1}%
+  \@getsublabel*\@templabel{#1}%
   \index[\@templabel]{\@tempentry @\@tempformat}%
 }
 % {#1}: Markup für Änderungsliste
@@ -1323,7 +1327,9 @@
       \strut%
       \marginnote{%
         \def\@tempa####1{%
-          \ignorespaces\manualhyperref{####1}{####1}\tabularnewline%
+          \ignorespaces%
+          \manualhyperref{idx:changelog:####1}{####1}%
+          \tabularnewline%
         }%
         \begin{tabular}{|l|}%
           \hline%
@@ -1434,17 +1440,6 @@
   \toks@{\@ChangedAt@CreateList[#4]}%
   \eaddto@hook\toks@{\expandafter{\@tempa}}%
   \the\toks@%
-  \IfValueT{#1}{%
-%    \@getentryandformat\@tempentry\@tempformat{#3}%
-%    \let\@tempa\@tempformat%
-%    \@getentryandformat\@tempentry\@tempformat{#4}%
-%    \eappto\@tempformat{|see{\expandonce\@tempa}}%
-    \@getentryandformat\@tempentry\@tempformat{#4}%
-    \appto\@tempformat{|see{#3}}%
-    \@getsublabel\@templabel{#4}%
-% $$$ Ursache für \vskip-\lastskip, evtl hier zurücksetzen
-    \index[\@templabel]{\@tempentry @\@tempformat}%
-  }%
 }
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1813,6 +1808,7 @@
     \indexprologue[\@printindexskip]{\manualhyperdef*{idx:#1}}%
     \printindex[#1]\@printindexskip%
   }%
+  \clearpage%
 }
 \newcommand*\PrintChangelog{%
   \begingroup%
@@ -1835,9 +1831,9 @@
         \expandafter\def\csname\string\item\endcsname##1~%
       }{%
         \endgroup%
-        \subsection*{\NoCaseChange{##1}}%
+        \phantomsection\manualhyperdef{idx:changelog:##1}%
+        \minisec{\TUDScript \NoCaseChange{##1}}%
         \addsubsectiontocentry{}{##1}%
-        \manualhyperdef{##1}%
       }%
     }{}{\tud@patch@wrn{theindex}}%
     % $$$ raus

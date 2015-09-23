@@ -140,18 +140,16 @@
 \PassOptionsToPackage{automark}{scrlayer-scrpage}
 \DeclareOption{final}{\let\tudfinalflag\relax}
 \DeclareOption{print}{\let\tudprintflag\relax}
-%\AtEndPreamble{%
-  \ifdef{\tudfinalflag}{\TUDoptions{ToDo=false}}{}%
-  \ifdef{\tudprintflag}{%
-    \TUDoptions{color=no}%
-    \PassOptionsToPackage{hidelinks}{hyperref}%
-  }{}%
-%}
 %%% From File: tudscr-misc.dtx
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{\TUDClassName@Parent}}
 \TUDProcessOptions\relax
 \LoadClass{\TUDClassName@Parent}
 %%% From File: tudscr-manual.dtx
+\ifdef{\tudfinalflag}{\TUDoptions{ToDo=false}}{}%
+\ifdef{\tudprintflag}{%
+  \TUDoptions{color=no}%
+  \PassOptionsToPackage{hidelinks}{hyperref}%
+}{}%
 \PassOptionsToPackage{log-declarations=false}{xparse}
 \RequirePackage{xparse}[2013/12/31]
 \RequirePackage{textcomp}[2005/09/27]
@@ -362,6 +360,9 @@
 \space\space :class "seeidx" :open "\string\seeidx{" :sep "; " :close "}{}"^^J%
 )%
 }
+\write\tud@write@i{%
+(markup-indexentry :open "~n        \string\subsubsubitem " :depth 3)
+}%
 \closeout\tud@write@i
 \NewDocumentCommand\makexindyindex{omo}{%
   \protected@edef\@tempa{%
@@ -712,7 +713,7 @@
     \@ProcessChangedAt{\Environment{#2}}(#4)[Umgebung]%
   \else%
     \@ProcessMarkup{\Environment{#2}}(#4)'#5'%
-% §§§
+% $$$ Wie mit \Keys umgehen?
 %    \@ProcessIndex{\Environment{#2}}(#4)[Umgebung]|#6|{#1}%
     \@ProcessIndex{\Environment{#2}}(#4)|#6|{#1}%
   \fi%
@@ -824,7 +825,7 @@
 }
 % $$$ \DeclareExpandableDocumentCommand und \@gobblemarkup automatisiert über 
 %     eine Liste erzeugen, sobald \Key nur noch ein Argument annimmt
-% $$$ \@getsubsabel und \@Key dementsprechend anpassen
+% $$$ \@getsublabel und \@Key dementsprechend anpassen
 \NewDocumentCommand\@gobblemarkup{s}{%
   \let\Application\@Application%
   \let\Distribution\@Distribution%
@@ -851,30 +852,37 @@
 \AfterPackage{hyperref}{%
   \expandafter\pdfstringdefDisableCommands\expandafter{\@gobblemarkup}%
 }
-\newcommand*\@getsublabel[2]{%
+\NewDocumentCommand\@getsublabel{smm}{%
   \begingroup%
-    \def\Application##1{\edef\@tempa{\jobname}}%
-    \def\Distribution##1{\edef\@tempa{\jobname}}%
-    \def\File##1{\edef\@tempa{files}}%
-    \def\Class##1{\edef\@tempa{files}}%
-    \def\Package##1{\edef\@tempa{files}}%
-    \def\Option##1{\edef\@tempa{options}}%
-    \def\Environment##1{\edef\@tempa{macros}}%
-    \def\Macro##1{\edef\@tempa{macros}}%
-    % $$$ nur noch ein Argument!
-    \def\Key##1##2{\edef\@tempa{macros}}%
-    \def\Term##1{\edef\@tempa{terms}}%
-    \def\PageStyle##1{\edef\@tempa{elements}}%
-    \def\Font##1{\edef\@tempa{elements}}%
-    \def\Color##1{\edef\@tempa{elements}}%
-    \def\Length##1{\edef\@tempa{misc}}%
-    \def\Counter##1{\edef\@tempa{misc}}%
-    #2%
-    \edef\@tempb{%
-      \noexpand\endgroup%
-      \def\noexpand#1{\@tempa}%
+    \def\@tempa##1##2##3{%
+      \def##1####1{%
+        \edef\@tempb{\IfBooleanTF{#1}{##2}{##3}}%
+      }%
     }%
-  \@tempb%
+    \@tempa\Application{\jobname}{app}%
+    \@tempa\Distribution{\jobname}{dist}%
+    \@tempa\File{files}{file}%
+    \@tempa\Class{files}{cls}%
+    \@tempa\Package{files}{pkg}%
+    \@tempa\Option{options}{opt}%
+    \@tempa\Environment{macros}{env}%
+    \@tempa\Macro{macros}{cmd}%
+    % $$$ nur noch ein Argument!
+    \def\Key##1##2{%
+      \edef\@tempb{\IfBooleanTF{#1}{macros}{key}}%
+    }%
+    \@tempa\Term{terms}{term}%
+    \@tempa\PageStyle{elements}{pgs}%
+    \@tempa\Font{elements}{font}%
+    \@tempa\Color{elements}{clr}%
+    \@tempa\Length{misc}{len}%
+    \@tempa\Counter{misc}{cnt}%
+    #3%
+    \edef\tud@reserved{%
+      \noexpand\endgroup%
+      \def\noexpand#2{\@tempb}%
+    }%
+  \tud@reserved%
 }
 % {#1}: Markup für Ausgabe
 % (#2): optionale Subdeclaration
@@ -1052,7 +1060,7 @@
   \else%
     \IfValueT{#4}{\appto\@tempformat{|#4}}%
   \fi%
-  \@getsublabel\@templabel{#1}%
+  \@getsublabel*\@templabel{#1}%
   \index[\@templabel]{\@tempentry @\@tempformat}%
 }
 % {#1}: Markup für Änderungsliste
@@ -1155,7 +1163,7 @@
     \@gobblemarkup%
     \edef\tud@reserved{%
       \noexpand\endgroup%
-%      % $$$ rein
+%      % §§§ rein
 %      \ifx\@tempsubdeclare\@subdeclaredefault%
         \def\noexpand#1{#3}%
 %      \else%
@@ -1165,9 +1173,9 @@
   \tud@reserved%
   \def#2{#3}%
   \ifx\@tempsubdeclare\@subdeclaredefault\else%
-%    % $$$ raus
+    % §§§ raus
     \appto#2{(\@tempsubdeclare)}%
-%%    % $$$ rein
+%    % §§§ rein
 %    \appto#2{(\@tempsubdeclare)\protect\suffix{\@tempsubdeclare}}%
   \fi%
   \IfValueT{#5}{%
@@ -1319,7 +1327,9 @@
       \strut%
       \marginnote{%
         \def\@tempa####1{%
-          \ignorespaces\manualhyperref{####1}{####1}\tabularnewline%
+          \ignorespaces%
+          \manualhyperref{idx:changelog:####1}{####1}%
+          \tabularnewline%
         }%
         \begin{tabular}{|l|}%
           \hline%
@@ -1342,7 +1352,7 @@
       \@changedattrue%
       #3%
       \@changedatfalse%
-      % $$$ raus wenn \PrintChangelog neu
+%      % §§§ raus wenn \PrintChangelog neu
       \in@{\Key}{#3}%
       \ifin@%
         \begingroup%
@@ -1356,7 +1366,7 @@
         \edef\@tempentry{\expandonce\@tempa:"|\expandonce\@tempd}%
         \epreto\@tempformat{\expandonce\@tempb: }%
       \fi%
-      % $$$ raus ende
+%      % §§§ raus ende
       % $$$ wie mit |deprecated umgehen? kann raus, besser über Replace!
       \def\@tempc{}%
       \ifstr{#4}{}{%
@@ -1430,15 +1440,6 @@
   \toks@{\@ChangedAt@CreateList[#4]}%
   \eaddto@hook\toks@{\expandafter{\@tempa}}%
   \the\toks@%
-  \IfValueT{#1}{%
-    \@getentryandformat\@tempentry\@tempformat{#3}%
-    \let\@tempa\@tempformat%
-    \@getentryandformat\@tempentry\@tempformat{#4}%
-    \eappto\@tempformat{|see{\expandonce\@tempa}}%
-    \@getsublabel\@templabel{#4}%
-% $$$ Ursache für \vskip-\lastskip, evtl hier zurücksetzen
-    \index[\@templabel]{\@tempentry @\@tempformat}%
-  }%
 }
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1807,12 +1808,15 @@
     \indexprologue[\@printindexskip]{\manualhyperdef*{idx:#1}}%
     \printindex[#1]\@printindexskip%
   }%
+  \clearpage%
 }
 \newcommand*\PrintChangelog{%
-  % §§§ \item als subsection und \let\subitem\item etc.
   \begingroup%
-    \def\lettergroup##1{%
-      \let\item@orig\item
+    \def\lettergroup##1{}%
+    \apptocmd{\theindex}{%
+      \let\subsubsubitem\subsubitem%
+      \let\subsubitem\subitem%
+      \let\subitem\item%
       \renewcommand*\item{%
         \begingroup%
           \escapechar=`\\%
@@ -1824,14 +1828,14 @@
       \lccode`\~=\endlinechar%
       \lowercase{%
         \expandafter\endgroup
-        \expandafter\def\csname\string\item\endcsname####1~%
+        \expandafter\def\csname\string\item\endcsname##1~%
       }{%
         \endgroup%
-        \item@orig####1%
-        \phantomsection\addxcontentsline{toc}{subsection}{####1}%
-        \manualhyperdef{####1}%
+        \phantomsection\manualhyperdef{idx:changelog:##1}%
+        \minisec{\TUDScript \NoCaseChange{##1}}%
+        \addsubsectiontocentry{}{##1}%
       }%
-    }%
+    }{}{\tud@patch@wrn{theindex}}%
     % $$$ raus
     \@deprecatedtrue%
     \let\hyperpagedeprecated\hyperpage%
