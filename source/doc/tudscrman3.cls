@@ -171,6 +171,7 @@
   }%
   \@ifpackageloaded{hyperref}{}{%
     \RequirePackage[babel]{microtype}[2013/05/23]%
+    \providecommand*\hyperpage[1]{#1}%
   }%
 }
 \newlength\baselineskipglue
@@ -209,17 +210,17 @@
 \PassOptionsToPackage{hyperindex=false,colorlinks,linkcolor=blue}{hyperref}
 \PassOptionsToPackage{open,openlevel=0}{bookmark}
 \newcommand*\Email[1]{\mbox{#1}}
-\newcommand*\manualhyperref[2]{#2}
-\newrobustcmd*\hyperidx[2][]{\manualhyperref{#1}{#2}}
-\NewDocumentCommand\manualhyperdef{sm}{}
+\newcommand*\tudhyperref[2]{#2}
+\newrobustcmd*\hyperidx[2][]{\tudhyperref{#1}{#2}}
+\NewDocumentCommand\tudhyperdef{sm}{}
 \newcommand*\autorefname[1][]{??\xspace}
 \AfterPackage{hyperref}{%
   \renewcommand*\Email[1]{\href{mailto:#1}{\nolinkurl{#1}}}
-  \renewcommand*\manualhyperref[2]{\hyperref{}{\jobname}{#1}{#2}}
+  \renewcommand*\tudhyperref[2]{\hyperref{}{\jobname}{#1}{#2}}
   \renewcaptionname{ngerman}{\sectionautorefname}{Unterkapitel}
   \renewcaptionname{ngerman}{\subsectionautorefname}{Abschnitt}
   \renewcaptionname{ngerman}{\subsubsectionautorefname}{Unterabschnitt}
-  \RenewDocumentCommand\manualhyperdef{sm}{%
+  \RenewDocumentCommand\tudhyperdef{sm}{%
     \IfBooleanTF{#1}{%
       \raisebox{4\baselineskip}[0pt][0pt]{\hyperdef{\jobname}{#2}{}}%
       \par\nobreak\vskip\dimexpr-\parskip-\baselineskip\relax%
@@ -291,78 +292,90 @@
      }{\ifnum\imki@columns>\@ne\end{multicols}\fi}%
   \fi%
 }
+% $$$ evtl. \seelink um fehlende cross-ref-class zu vermeiden
+% $$$ notwendige Argument prüfen
+\newcommand*\@see{}
+\renewrobustcmd{\see}{\@see}
+\renewrobustcmd{\seealso}{%
+  \ClassWarning{tudscrman}{You should use `see' instead of `seealso'}%
+  \@see%
+}
+\def\@see#1#2#3\relax{%
+  \if\relax\detokenize{#3}\relax%
+    \emph{\seename\space#1}%
+  \else%
+    #3, \emph{\alsoname\space#1}%
+  \fi%
+}
+\NewDocumentCommand\seeref{sm}{%
+  \emph{\IfBooleanTF{#1}{\alsoname}{\seename}\space#2}%
+}
+\newcommand*\seeidx[2]{\pageref{idx:#1}}
 \newcommand*\tud@write@i{}
 \newwrite\tud@write@i
 \openout\tud@write@i=\jobname-temp.xdy
-\write\tud@write@i{(require "texindy.xdy")}
 \write\tud@write@i{%
+(require "texindy.xdy")^^J%
 (define-location-class^^J%
 \space\space "arabic-page-numbers" ("arabic-numbers") :min-range-length 1^^J%
-)%
-}
-\write\tud@write@i{(markup-range :sep "--")}
-\write\tud@write@i{%
-(merge-rule "\@backslashchar[(.*)\@backslashchar]" "" :eregexp)%
-}
+)^^J%
+(markup-range :sep "--")^^J%
+(markup-locclass-list^^J%
+\space\space :open "\string\,\string\dotfill\string\,"^^J%
+\space\space :close "\string\relax"^^J%
+)^^J%
+(markup-crossref-layer-list^^J%
+\space\space :class "see" ^^J%
+\space\space :sep "\string\,\string\textbar\string\,"^^J%
+)^^J%
+(define-crossref-class "seeidx" :unverified)^^J%
+(markup-crossref-list^^J%
+\space\space :class "seeidx"^^J%
+\space\space :open "\string\seeidx{" :sep "; " :close "}{}"^^J%
+)^^J%
+(define-location-class-order^^J%
+\space (^^J%
+\space\space "see" "seealso" "seeidx"^^J%
+\space\space "roman-page-numbers" "arabic-page-numbers" "alpha-page-numbers"^^J%
+\space\space "Roman-page-numbers" "Alpha-page-numbers"^^J%
+\space )^^J%
+)^^J%
+(markup-indexentry :open "~n        \string\subsubsubitem " :depth 3)^^J%
+(merge-rule "\@backslashchar[(.*)\@backslashchar]" "" :eregexp)^^J%
 % $$$ deprecated kann wahrscheinlich raus
-\write\tud@write@i{%
-(define-attributes (("declare" "!" "important" "?" "deprecated" "default")))%
-}
-\write\tud@write@i{%
+(define-attributes (("declare" "!" "important" "?" "deprecated" "default")))^^J%
 (markup-locref^^J%
 \space\space :attr "declare"^^J%
 \space\space :open "\string\textbf{\string\hyperpage{"^^J%
 \space\space :close "}}"^^J%
-)%
-}
-\write\tud@write@i{%
+)^^J%
 (markup-locref^^J%
 \space\space :attr "!"^^J%
 \space\space :open "\string\textbf{\string\hyperpage{"^^J%
 \space\space :close "}}"^^J%
-)%
-}
-\write\tud@write@i{%
+)^^J%
 (markup-locref^^J%
 \space\space :attr "important"^^J%
 \space\space :open "\string\textsl{\string\hyperpage{"^^J%
 \space\space :close "}}"^^J%
-)%
-}
-\write\tud@write@i{%
+)^^J%%
 (markup-locref^^J%
 \space\space :attr "?"^^J%
 \space\space :open "\string\textsl{\string\hyperpage{"^^J%
 \space\space :close "}}"^^J%
-)%
-}
-\write\tud@write@i{%
+)^^J%
 (markup-locref^^J%
 \space\space :attr "default"^^J%
 \space\space :open "\string\hyperpage{"^^J%
 \space\space :close "}"^^J%
-)%
-}
+)^^J%
 % $$$ raus
-\write\tud@write@i{%
 (markup-locref^^J%
 \space\space :attr "deprecated"^^J%
 \space\space :open "\string\hyperpagedeprecated{"^^J%
 \space\space :close "}"^^J%
 )%
 }
-\write\tud@write@i{%
-  (markup-locclass-list :open "\string\,\string\dotfill\string\,")%
-}
-\write\tud@write@i{(define-crossref-class "seeidx")}
-\write\tud@write@i{%
-(markup-crossref-list^^J%
-\space\space :class "seeidx" :open "\string\seeidx{" :sep "; " :close "}{}"^^J%
-)%
-}
-\write\tud@write@i{%
-(markup-indexentry :open "~n        \string\subsubsubitem " :depth 3)
-}%
 \closeout\tud@write@i
 \NewDocumentCommand\makexindyindex{omo}{%
   \protected@edef\@tempa{%
@@ -954,14 +967,14 @@
 % $$$ optionaler suffix weg, alles über einziges Argument
 %  \IfValueT{#3}{\typeout{!!!!! #2:#3}}%
   \ifcase\tud@declare%
-    \manualhyperdef{#1}%
+    \tudhyperdef{#1}%
     \@MarkupOutput{#2}[#3]%
   \or%
     \@MarkupOutput{#2}[#3]%
   \or%
-    \manualhyperdef{#1}%
+    \tudhyperdef{#1}%
   \or%
-    \manualhyperdef*{#1}%
+    \tudhyperdef*{#1}%
   \fi%
   \@ClearMarkupFormat%
 }
@@ -1193,6 +1206,7 @@
     \addto@hook\toks@{##2\relax{\@tempb{##1}{##2}}}%
     \the\toks@%
     \def\@tempb##1##2{%
+      % §§§ \if\relax\detokenize{#1}\relax?
       \ifx\relax##2\relax%
         \appto#1{##1}%
         \let\@tempc\relax%
@@ -1328,7 +1342,7 @@
       \marginnote{%
         \def\@tempa####1{%
           \ignorespaces%
-          \manualhyperref{idx:changelog:####1}{####1}%
+          \tudhyperref{idx:changelog:####1}{####1}%
           \tabularnewline%
         }%
         \begin{tabular}{|l|}%
@@ -1628,7 +1642,7 @@
   \def\@tempa##1{%
     \@tempb%
     \@getlabel\@templabel{\@subdeclare:\Package{##1}}%
-    \manualhyperdef{\@templabel}%
+    \tudhyperdef{\@templabel}%
     \Package{##1}<#2>'url'|!|%
     \def\@tempb{, }%
   }%
@@ -1638,7 +1652,7 @@
       \forcsvlist{\@tempa}{#1}%
       \IfValueT{#3}{%
         \@getlabel\@templabel{\@subdeclare:\Package{#3}}%
-        \quad(\manualhyperdef{\@templabel}\Package{#3}'none'|!|)%
+        \quad(\tudhyperdef{\@templabel}\Package{#3}'none'|!|)%
       }%
     }%
   }]%
@@ -1754,24 +1768,15 @@
 }
 \newcommand*\ListOfToDo{\if@tud@todo\listoftodos\fi}
 \reversemarginpar
-\newcommand*\seeidx[2]{\pageref{idx:#1}}
-\NewDocumentCommand\Index{mom}{%
+\NewDocumentCommand\CrossIndex{smom}{%
   \def\@tempa##1##2##3{%
     \index{%
-      ##3!\textrightarrow{}\space%
-      \manualhyperref{idx:##1}{Index der \IfValueTF{##2}{##2}{##3}}|seeidx{##1}%
+      \IfBooleanTF{#1}{##3@##3}{##3!"|@}%
+      \,\textrightarrow\,%
+      \tudhyperref{idx:##1}{\IfValueTF{##2}{##2}{Index der ##3}}|seeidx{##1}%
     }%
   }%
-  \forcsvlist{\@tempa{#1}{#2}}{#3}%
-}
-\NewDocumentCommand\Changelog{m}{%
-  \def\@tempa##1{%
-    \index{%
-      ##1!\textrightarrow{}\space%
-      \manualhyperref{idx:changelog}{\"Anderungsliste}|seeidx{changelog}%
-    }%
-  }%
-  \forcsvlist\@tempa{#1}%
+  \forcsvlist{\@tempa{#2}{#3}}{#4}%
 }
 \newcommand*\PrintIndex{%
   \begingroup%
@@ -1795,17 +1800,20 @@
   \@tud@indextrue%
   \ifblank{#1}{%
     \ifx\@printindexprologue\@empty%
-      \indexprologue[\@printindexskip]{\manualhyperdef*{idx:main}}%
+      \indexprologue[\@printindexskip]{\tudhyperdef*{idx:main}}%
     \else%
       \indexprologue{%
-        \manualhyperdef*{idx:main}%
-        \@printindexprologue%
+        \tudhyperdef*{idx:main}%
+        \begingroup%
+          \let\footnote\@gobble%
+          \@printindexprologue%
+        \endgroup%
       }%
     \fi%
     \printindex\@printindexskip%
     \let\@printindexprologue\@empty%
   }{%
-    \indexprologue[\@printindexskip]{\manualhyperdef*{idx:#1}}%
+    \indexprologue[\@printindexskip]{\tudhyperdef*{idx:#1}}%
     \printindex[#1]\@printindexskip%
   }%
   \clearpage%
@@ -1831,8 +1839,8 @@
         \expandafter\def\csname\string\item\endcsname##1~%
       }{%
         \endgroup%
-        \phantomsection\manualhyperdef{idx:changelog:##1}%
-        \minisec{\TUDScript \NoCaseChange{##1}}%
+        \subsection*{\TUDScript \NoCaseChange{##1}}%
+        \tudhyperdef{idx:changelog:##1}%
         \addsubsectiontocentry{}{##1}%
       }%
     }{}{\tud@patch@wrn{theindex}}%
@@ -1848,20 +1856,6 @@
 }
 \newif\if@deprecated% $$$ raus
 \newcommand*\hyperpagedeprecated{}% $$$ raus
-% $$$ evtl. \seelink um fehlende cross-ref-class zu vermeiden
-% $$$ notwendige Argument prüfen
-%$$${\emph{\seename}\nobreakspace\begingroup\@changedattrue#1\meaning\@tempformat\endgroup}%
-\renewrobustcmd*\see[2]{%
-  \ifstr{#1}{*}%
-    {\emph{\seename}\nobreakspace#2}%
-    {\emph{\seename}\nobreakspace#1}%
-  \if@deprecated\let\hyperpagedeprecated\@gobble\fi%
-}
-\renewrobustcmd*\seealso[2]{%
-  \ifstr{#1}{*}%
-    {\emph{\alsoname}\nobreakspace#2}%
-    {\emph{\alsoname}\nobreakspace#1}%
-}
 \RequirePackage{xspace}[2009/10/20]
 \xspaceaddexceptions{"=}
 \newcommand*\vTUDScript{}
