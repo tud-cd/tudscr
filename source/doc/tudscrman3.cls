@@ -302,13 +302,13 @@
 }
 \def\@see#1#2#3\relax{%
   \if\relax\detokenize{#3}\relax%
-    \emph{\seename\space#1}%
+    \emph{\seename}\space#1%
   \else%
-    #3, \emph{\alsoname\space#1}%
+    #3, \emph{\alsoname}\space#1%
   \fi%
 }
 \NewDocumentCommand\seeref{sm}{%
-  \emph{\IfBooleanTF{#1}{\alsoname}{\seename}\space#2}%
+  \emph{\IfBooleanTF{#1}{\alsoname}{\seename}}\space#2%
 }
 \newcommand*\seeidx[2]{\pageref{idx:#1}}
 \newcommand*\tud@write@i{}
@@ -503,13 +503,13 @@
       to print this list with \string\printdeclarationlist?%
     }%
   \fi%
-  \@gobbleparameters%
-  \vskip-\lastskip%
-  \@declaretrue\@openindexfalse#2\@declarefalse%
   \ifnum\value{deprecated}>\z@%
     \addtocounter{deprecated}{\m@ne}%
   \fi%
-  \pagebreak[0]%
+  \vskip-\lastskip%
+  \@gobbleparameters%
+  \@declaretrue\@openindexfalse#2\@declarefalse%
+  \pagebreak[1]%
 }
 \NewDocumentCommand\printdeclarationlist{sod()}{%
   \ifx\list@Declaration\relax\else%
@@ -1449,7 +1449,8 @@
   % $$$ Seiteneintrag in Änderungsliste nicht unterdrücken, neue Option/Befehl
   % etc. im beschriebenden Text
   \@getentryandformat\@tempentry\@tempformat{#3}%
-  \def\@tempa{#2!\changedat@deprecated}
+  \def\@tempa{#2!\changedat@deprecated}%
+  % §§§ see und deprecated geht so nicht
   \eappto\@tempa{!see{\expandonce\@tempformat}}%
   \toks@{\@ChangedAt@CreateList[#4]}%
   \eaddto@hook\toks@{\expandafter{\@tempa}}%
@@ -1816,6 +1817,7 @@
     \indexprologue[\@printindexskip]{\tudhyperdef*{idx:#1}}%
     \printindex[#1]\@printindexskip%
   }%
+  % $$$ raus
   \clearpage%
 }
 \newcommand*\PrintChangelog{%
