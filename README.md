@@ -2,7 +2,7 @@
 TUD-KOMA-Script
 ===============
 
-TUD-KOMA-Script 2015/07/24 v2.04a
+TUD-KOMA-Script 2015/10/06 v2.04b
 Copyright (c) Falk Hanisch <tudscr@gmail.com>, 2012-2015
 
 This material is subject to the LaTeX Project Public License version 1.3c or 
@@ -52,6 +52,11 @@ Das Bundle beinhaltet:
 
 Versionen
 ---------
+
+**v2.04b** (2015/10/06)
+
++ Bugfix für KOMA-Script v3.19
+
 
 **v2.04a** (2015/07/24)
 
@@ -172,9 +177,14 @@ The bundle offers:
 Versions
 --------
 
+**v2.04b** (2015/10/06)
+
++ bug fix for KOMA-Script v3.19
+
+
 **v2.04a** (2015/07/24)
 
-+ Bugfix for option `ddc`
++ bug fix for option `ddc`
 
 
 **v2.04** (2015/07/02)
