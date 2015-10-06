@@ -58,6 +58,11 @@ Versionen
 + 
 
 
+**v2.04b** (2015/10/06)
+
++ Bugfix für KOMA-Script v3.19
+
+
 **v2.04a** (2015/07/24)
 
 + Bugfix für Option `ddc`
@@ -182,9 +187,14 @@ Versions
 + 
 
 
+**v2.04b** (2015/10/06)
+
++ bug fix for KOMA-Script v3.19
+
+
 **v2.04a** (2015/07/24)
 
-+ Bugfix for option `ddc`
++ bug fix for option `ddc`
 
 
 **v2.04** (2015/07/02)
