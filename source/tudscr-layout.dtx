@@ -1,4 +1,4 @@
-% \CheckSum{1334}
+% \CheckSum{1316}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-layout.dtx}[%
-  2015/09/22 v2.05 TUD-KOMA-Script (layout)%
+  2015/10/06 v2.05 TUD-KOMA-Script (layout)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -1462,31 +1462,26 @@
 % \opt{chapterprefix} ist einiges an Anpassungen notwendig, um die eigentliche 
 % Überschrift auf der gewünschten Position erscheinen zu lassen.
 %
-% Zunächst muss die Überschrift um die Höhe des Präfixes nach oben verschoben 
-% werden. Der Befehl \cs{chapterformat} enthält das Präfix slbst. Damit dieses 
-% in Majuskeln erscheint, wird \cs{chapterformat} im Argument des Makros 
-% \cs{tud@makeuppercase} verwendet. Zuletzt wird der Abstand zwischen Präfix 
-% und Kapiteltitel auf \cs{tud@headmidvskip} gesetzt. Weiterhin wird die Länge 
-% \cs{parskip} auf \cs{z@} gesetzt, damit die Überschriften für alle
-% Einstellmöglichkieten der \opt{parskip}-Option immer auf exakt der selben
-% Höhe liegen und auch die Abstände zwischen den ggf. genutzten Präfixen
-% identisch sind.
+% Zunächst muss die Überschrift um die Höhe des Präfixes und ggf. der Länge 
+% \cs{parskip} nach oben verschoben werden. Der Befehl \cs{chapterformat}
+% enthält das Präfix selbst. Damit dieses in Majuskeln erscheint, wird
+% \cs{chapterformat} im Argument des Makros \cs{tud@makeuppercase} verwendet.
+% Zuletzt wird der Abstand zwischen dem Präfix und dem Kapiteltitel auf
+% \cs{tud@headmidvskip} gesetzt. Somit liegen die Kapitelüberschriften für alle 
+% Einstellmöglichkieten der \opt{parskip}-Option immer auf exakt der selben 
+% Höhe.
 %    \begin{macrocode}
   \newcommand*\tud@@@makechapterhead{}%
   \let\tud@@@makechapterhead\scr@@makechapterhead%
   \patchcmd{\tud@@@makechapterhead}{%
-    \csname #1format\endcsname
-    \setlength{\@tempskipa}{%
-      \csname scr@#1@innerskip\endcsname
-    }%
+    \csname #1format\endcsname%
+    \setlength{\@tempskipa}{\csname scr@#1@innerskip\endcsname}%
     \chapterheadmidvskip
   }{%
     \tud@headmidvskip@neg%
+    \vskip-\parskip%
     \tud@makeuppercase{\csname #1format\endcsname}%
     \tud@headmidvskip%
-  }{}{\tud@patch@wrn{scr@@makechapterhead}}%
-  \patchcmd{\tud@@@makechapterhead}{\IfUsePrefixLine{}{\raggedchapter}}{%
-    \IfUsePrefixLine{\IfUseNumber{\setlength\parskip{\z@}}{}}{\raggedchapter}%
   }{}{\tud@patch@wrn{scr@@makechapterhead}}%
 %    \end{macrocode}
 % \end{macro}^^A \@@makechapterhead
@@ -1508,11 +1503,9 @@
     \chapterheadmidvskip
   }{%
     \tud@headmidvskip@neg%
+    \vskip-\parskip%
     \tud@makeuppercase{\chapterformat}%
     \tud@headmidvskip%
-  }{}{\tud@patch@wrn{@@makechapterhead}}%
-  \patchcmd{\tud@@@makechapterhead}{\IfUsePrefixLine{}{\raggedchapter}}{%
-    \IfUsePrefixLine{\IfUseNumber{\setlength\parskip{\z@}}{}}{\raggedchapter}%
   }{}{\tud@patch@wrn{@@makechapterhead}}%
 %    \end{macrocode}
 % \end{macro}^^A \@@makechapterhead

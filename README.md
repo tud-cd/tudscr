@@ -53,10 +53,19 @@ Das Bundle beinhaltet:
 Versionen
 ---------
 
-
 **v2.05** (2015/xx/xx)
 
 + 
+
+
+**v2.04b** (2015/10/06)
+
++ Bugfix für KOMA-Script v3.19
+
+
+**v2.04a** (2015/07/24)
+
++ Bugfix für Option `ddc`
 
 
 **v2.04** (2015/07/02)
@@ -173,10 +182,19 @@ The bundle offers:
 Versions
 --------
 
-
 **v2.05** (2015/xx/xx)
 
 + 
+
+
+**v2.04b** (2015/10/06)
+
++ bug fix for KOMA-Script v3.19
+
+
+**v2.04a** (2015/07/24)
+
++ bug fix for option `ddc`
 
 
 **v2.04** (2015/07/02)
