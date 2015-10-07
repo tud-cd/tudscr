@@ -897,6 +897,8 @@
 % <#5>: URL
 % '#6': Querverweis
 % $$$ Argumente #2 und #3 tauschen, sobald #4 nicht mehr notwendig
+\newcommand*\@suppressoutput{\let\@ProcessMarkup\@@ProcessMarkup}
+\NewDocumentCommand\@@ProcessMarkup{md()od()d<>d''}{}%
 \NewDocumentCommand\@ProcessMarkup{md()od()d<>d''}{%
   \if@declare%
     \@getlabel*\@templabel{\@subdeclare:#1}%
@@ -1159,8 +1161,8 @@
   }%
 }
 % §§§ notwendig?
-\newcommand*\@getentry[3]{%
-  \edef#1{#2}%
+%\newcommand*\@getentry[3]{%
+%  \edef#1{#2}%
 %  % §§§ rein
 %  \ifx\@tempsubdeclare\@subdeclaredefault\else%
 %    \expandafter\@@getentry\expandafter#1\expandafter{#1}{#3}%
@@ -1184,8 +1186,19 @@
     }{}%
   }%
   \begingroup%
-    \@gobblemarkup%
-    \@getentry\@tempa{#3}{\@tempsubdeclare}%
+    \in@{\Key}{#3}%
+    \ifin@%
+      \@suppressoutput%
+      \let\Key\@firstoftwo%
+      \edef\@tempa{#3}%
+      \let\typeout\@gobble% §§§ raus
+      \@tempa%
+      \let\Key\@secondoftwo%
+      \edef\@tempa{#1!#3}%
+    \else%
+      \@gobblemarkup%
+      \edef\@tempa{#3}%
+    \fi%
     \edef\tud@reserved{%
       \noexpand\endgroup%
       \def\noexpand#1{\@tempa}%
@@ -1194,13 +1207,17 @@
   \def#2{#3}%
   \ifx\@tempsubdeclare\@subdeclaredefault\else%
     \appto#2{(\@tempsubdeclare)}%
-%    % §§§ rein
-%    \appto#2{\protect\suffix{\@tempsubdeclare}}%
   \fi%
   \IfValueT{#5}{%
     \appto#1{ #5}%
     \appto#2{\protect\suffix{#5}}%
   }%
+  \ifx\@tempsubdeclare\@subdeclaredefault\else%
+    \in@{\Key}{#3}%
+    \ifin@\else%
+      \appto#2{\protect\suffix{\@tempsubdeclare}}%
+    \fi%
+  \fi%
   \tud@replace#1{@}{"@}%
   \protected@edef#2{#2}%
 }
@@ -1375,21 +1392,21 @@
       \@changedattrue%
       #3%
       \@changedatfalse%
-%      % §§§ raus wenn \PrintChangelog neu
-      \in@{\Key}{#3}%
-      \ifin@%
-        \begingroup%
-          \RenewDocumentCommand\Key{smmod()d''d||}{##2\gdef\@tempd{##3}}%
-          \@changedattrue%
-          #3%
-          \@changedatfalse%
-          \global\let\@tempa\@tempentry%
-          \global\let\@tempb\@tempformat%
-        \endgroup%
-        \edef\@tempentry{\expandonce\@tempa:"|\expandonce\@tempd}%
-        \epreto\@tempformat{\expandonce\@tempb: }%
-      \fi%
-%      % §§§ raus ende
+%%      % §§§ raus wenn \PrintChangelog neu
+%      \in@{\Key}{#3}%
+%      \ifin@%
+%        \begingroup%
+%          \RenewDocumentCommand\Key{smmod()d''d||}{##2\gdef\@tempd{##3}}%
+%          \@changedattrue%
+%          #3%
+%          \@changedatfalse%
+%          \global\let\@tempa\@tempentry%
+%          \global\let\@tempb\@tempformat%
+%        \endgroup%
+%        \edef\@tempentry{\expandonce\@tempa:"|\expandonce\@tempd}%
+%        \epreto\@tempformat{\expandonce\@tempb: }%
+%      \fi%
+%%      % §§§ raus ende
       % $$$ wie mit |deprecated umgehen? kann raus, besser über Replace(dBy)
       \def\@tempc{}%
       \ifstr{#4}{}{%
@@ -1983,6 +2000,11 @@
   }%
 }
 \@onlypreamble\tracingsubdeclare
+\newcommand*\typeoutargs[1]{%
+  \begingroup%
+    \toks@{#1}\typeout{\the\toks@}%
+  \endgroup%
+}
 %%% From File: tudscr-fields.dtx
 \newcommand*\@course{}
 \newrobustcmd*\course[1]{\gdef\@course{#1}}
