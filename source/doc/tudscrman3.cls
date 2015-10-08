@@ -1358,20 +1358,21 @@
     }%
   \fi%
 }
-\NewDocumentCommand\@ChangedAt@CreateEntry{>{\SplitArgument{4}{!}}m}{%
+\NewDocumentCommand\@ChangedAt@CreateEntry{>{\SplitArgument{5}{!}}m}{%
   \@ChangedAt@@CreateEntry#1%
 }
-\newcommand*\@ChangedAt@@CreateEntry[5]{%
+\newcommand*\@ChangedAt@@CreateEntry[6]{%
   % !!! Debug
 %  \IfValueT{#5}{\typeout{***************************************** #4}}
-  \typeout{^^J*****}%
-  \typeout{1: #1}%
-  \typeout{2: #2}%
-  \typeout{3: #3}%
-  \typeout{4: #4}%
-  \typeout{5: #5}%
+%  \typeout{^^J*****}%
+%  \typeout{1: #1}%
+%  \typeout{2: #2}%
+%  \typeout{3: #3}%
+%  \typeout{4: #4}%
+%  \typeout{5: #5}%
   \IfValueT{#3}{%
     \IfValueTF{#4}{%
+      % \@ProcessChangedAt wird durch Markup aufgerufen
       \@changedattrue%
       #3%
       \@changedatfalse%
@@ -1431,17 +1432,19 @@
 }
 % $$$ ersetzen durch Argument in Änderungseintrag (\ReplacedBy oder so)
 % $$$ Zusammenspiel mit \see und \printdeclarationlist* verbessern
-\NewDocumentCommand\Replace{ommm}{\forcsvlist{\@Replace[#1]{#2}{#3}}{#4}}
+\NewDocumentCommand\Replace{ommm}{%
+  \forcsvlist{\@Replace[#1]{#2}{#3}}{#4}
+}
 \NewDocumentCommand\@Replace{r[]mmm}{%
-%  % $$$ Seiteneintrag in Änderungsliste nicht unterdrücken, neue Option/Befehl
-%  % etc. im beschriebenden Text
-%  \@getentryandformat\@tempentry\@tempformat{#3}%
-%  \def\@tempa{#2!\changedat@deprecated}%
-%  % §§§ see und deprecated geht so nicht
-%  \eappto\@tempa{!see{\expandonce\@tempformat}}%
-%  \toks@{\@ChangedAt@CreateList[#4]}%
-%  \eaddto@hook\toks@{\expandafter{\@tempa}}%
-%  \the\toks@%
+  % $$$ Seiteneintrag in Änderungsliste nicht unterdrücken, neue Option/Befehl
+  % etc. im beschriebenden Text
+  \@getentryandformat\@tempentry\@tempformat{#3}%
+  \def\@tempa{#2!\changedat@deprecated}%
+  % §§§ see und deprecated geht so nicht
+  \eappto\@tempa{!see{\expandonce\@tempformat}}%
+  \toks@{\@ChangedAt@CreateList[#4]}%
+  \eaddto@hook\toks@{\expandafter{\@tempa}}%
+  \the\toks@%
 }
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
