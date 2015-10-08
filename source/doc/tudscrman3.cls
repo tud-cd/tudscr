@@ -341,7 +341,7 @@
 )^^J%
 (markup-indexentry :open "~n        \string\subsubsubitem " :depth 3)^^J%
 (merge-rule "\@backslashchar[(.*)\@backslashchar]" "" :eregexp)^^J%
-% $$$ deprecated kann wahrscheinlich raus
+% §§§ deprecated kann wahrscheinlich raus
 (define-attributes (("declare" "!" "important" "?" "deprecated" "default")))^^J%
 (markup-locref^^J%
 \space\space :attr "declare"^^J%
@@ -368,7 +368,7 @@
 \space\space :open "\string\hyperpage{"^^J%
 \space\space :close "}"^^J%
 )^^J%
-% $$$ raus
+% §§§ raus
 (markup-locref^^J%
 \space\space :attr "deprecated"^^J%
 \space\space :open "\string\hyperpagedeprecated{"^^J%
@@ -454,6 +454,7 @@
 \newrobustcmd*\suffix[1]{\begingroup~\footnotesize(#1)\endgroup}
 \newif\if@declare
 \newif\if@openindex
+% TODO ///// Obsolete vollständig umsetzen
 \newcounter{deprecated}
 % 0: normales Verhalten (label und Ausgabe)
 % 1: kein label, nur Ausgabe
@@ -531,6 +532,7 @@
   \pagebreak[1]%
 }
 % §§§ optionales Argument bei Obsolete besser nutzen oder implizit ersetzen
+% $$$ Zusammenspiel mit \see und \printdeclarationlist* verbessern
 \NewDocumentCommand\printdeclarationlist{sod()}{%
   \ifx\list@Declaration\relax\else%
     \IfBooleanT{#1}{%
@@ -600,15 +602,14 @@
     \@afterindentfalse\@afterheading%
   \fi%
 }
-% $$$ in bundle
+% §§§ in bundle
 \newcommand*\@subdeclare{}
 \newcommand*\@subdeclaredefault{tudscr}
 \let\@subdeclare\@subdeclaredefault
 \newcommand*\tud@ifsubdeclare[2]{%
   \ifstr{\@subdeclare}{\@subdeclaredefault}{#2}{#1}%
 }
-% $$$ obligatorisches Argument in runden Klammern
-% $$$ in Bundle
+% §§§ in Bundle, obligatorisches Argument in runden Klammern
 \newenvironment{SubDeclaration}[1]{%
   \tud@ifsubdeclare{%
     \ClassError{tudscrman}{Nested environment `SubDeclaration'}{%
@@ -746,9 +747,7 @@
     \@ProcessChangedAt{\Environment{#2}}(#4)[Umgebung]%
   \else%
     \@ProcessMarkup{\Environment{#2}}(#4)'#5'%
-% §§§ rein
-%    \@ProcessIndex{\Environment{#2}}(#4)[Umgebung]|#6|{#1}%
-    \@ProcessIndex{\Environment{#2}}(#4)|#6|{#1}%
+    \@ProcessIndex{\Environment{#2}}(#4)[Umgebung]|#6|{#1}%
   \fi%
 }
 \NewExpandableDocumentCommand\@Macro{sm}{#2}
@@ -849,7 +848,7 @@
 \newcommand*\@tempentry{}
 \newcommand*\@tempformat{}
 \newcommand*\@tempkey{}
-% $$$ in bundle
+% §§§ in bundle
 \newcommand*\@tempsubdeclare{}
 \newcommand*\@templist{}
 \let\@templist\relax%
@@ -1107,10 +1106,6 @@
 % [#3]: optionaler Suffix in der Ausgabe der Änderungsliste
 \NewDocumentCommand\@ProcessChangedAt{md()o}{%
   \@getindexentry\@tempentry\@tempformat\@tempkey{#1}(#2)[#3]%
-  \typeout{^^J+++++}%
-  \typeout{entry:\space\space\expandonce\@tempentry}%
-  \typeout{format:\space\expandonce\@tempformat}%
-  \typeout{+++++^^J}%
 }
 \NewDocumentCommand\@Label{m}{\@@Label#1}
 \NewDocumentCommand\@@Label{mmm}{%
@@ -1244,11 +1239,10 @@
   }%
   \if@changedat\else%
     \ifx\@tempsubdeclare\@subdeclaredefault\else%
-    % §§§ rein
-%      \in@{\Key}{#4}%
-%      \ifin@\else%
-%        \appto#2{\suffix{\@tempsubdeclare}}%
-%      \fi%
+      \in@{\Key}{#4}%
+      \ifin@\else%
+        \appto#2{\suffix{\@tempsubdeclare}}%
+      \fi%
     \fi%
   \fi%
   \tud@replace#1{@}{"@}%
@@ -1347,14 +1341,13 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % TODO §§§ Änderungsliste in einzelne Pakete unterteilen (subdeclare)
-% §§§ wie mit fehlenden Elterneinträgen für Key umgehen?
 \newcommand*\list@ChangedAt{}
 \let\list@ChangedAt\relax%
 \DeclareListParser*{\forssvlist}{;}%
 \NewDocumentCommand\@ChangedAt@CreateList{om}{%
   \IfValueT{#2}{\forssvlist{\@ChangedAt@@CreateList[#1]}{#2}}%
 }
-% $$$ generell das Markup in der Liste verbessern, Indexzusatz mit '|' etc.
+% §§§ generell das Markup in der Liste verbessern, Indexzusatz mit '|' etc.
 \NewDocumentCommand\@ChangedAt@@CreateList{r[]>{\SplitArgument{1}{:}}m}{%
   \@ChangedAt@@@CreateList[#1]#2%
 }
@@ -1396,7 +1389,6 @@
   }{%
     \toks@{#2!Allgemein!#3}%
   }%
-  \typeout{-----\the\toks@}%
   \listeadd{\list@ChangedAt}{\the\toks@}%
 }
 %\newcommand*\changedat@new{\emph{neu}}%
@@ -1497,22 +1489,7 @@
 \NewDocumentCommand\printchangedatlist{sO{\z@}}{%
   \@ChangedAt@ProcessList{#1}{#2}%
 }
-% $$$ ersetzen durch Argument in Änderungseintrag (\ReplacedBy oder so)
-% $$$ Zusammenspiel mit \see und \printdeclarationlist* verbessern
-\NewDocumentCommand\Replace{ommm}{%
-  \ClassWarning{tudscrman}{raus}%
-}
-\NewDocumentCommand\@Replace{r[]mmm}{%
-%  % $$$ Seiteneintrag in Änderungsliste nicht unterdrücken, neue Option/Befehl
-%  % etc. im beschriebenden Text
-%  \@getindexentry\@tempentry\@tempformat{#3}%
-%  \def\@tempa{#2!\changedat@deprecated}%
-%  % §§§ see und deprecated geht so nicht
-%  \eappto\@tempa{!see{\expandonce\@tempformat}}%
-%  \toks@{\@ChangedAt@CreateList[#4]}%
-%  \eaddto@hook\toks@{\expandafter{\@tempa}}%
-%  \the\toks@%
-}
+\NewDocumentCommand\Replace{ommm}{\ClassWarning{tudscrman}{raus}}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1907,18 +1884,18 @@
         \addsubsectiontocentry{}{##1}%
       }%
     }{}{\tud@patch@wrn{theindex}}%
-    % $$$ raus
+    % §§§ raus
     \@deprecatedtrue%
     \let\hyperpagedeprecated\hyperpage%
     \preto\item{\let\hyperpagedeprecated\hyperpage}%
     \preto\subitem{\let\hyperpagedeprecated\hyperpage}%
     \preto\subsubitem{\let\hyperpagedeprecated\hyperpage}%
-    % $$$ raus ende
+    % §§§ raus ende
     \@printindex[changelog]%
   \endgroup%
 }
-\newif\if@deprecated% $$$ raus
-\newcommand*\hyperpagedeprecated{}% $$$ raus
+\newif\if@deprecated% §§§ raus
+\newcommand*\hyperpagedeprecated{}% §§§ raus
 \RequirePackage{xspace}[2009/10/20]
 \xspaceaddexceptions{"=}
 \newcommand*\vTUDScript{}
