@@ -725,8 +725,8 @@
   \else%
     \@ProcessMarkup{\Environment{#2}}(#4)'#5'%
 % §§§ rein
-%    \@ProcessIndex{\Environment{#2}}(#4)[Umgebung]|#6|{#1}%
-    \@ProcessIndex{\Environment{#2}}(#4)|#6|{#1}%
+    \@ProcessIndex{\Environment{#2}}(#4)[Umgebung]|#6|{#1}%
+%    \@ProcessIndex{\Environment{#2}}(#4)|#6|{#1}%
   \fi%
 }
 \NewExpandableDocumentCommand\@Macro{sm}{#2}
@@ -825,6 +825,7 @@
 }
 \newcommand*\@templabel{}
 \newcommand*\@tempentry{}
+\newcommand*\@tempkey{}
 \newcommand*\@tempformat{}
 \newcommand*\@tempsubdeclare{}
 \newcommand*\@templist{}
@@ -897,7 +898,10 @@
 % <#5>: URL
 % '#6': Querverweis
 % $$$ Argumente #2 und #3 tauschen, sobald #4 nicht mehr notwendig
-\newcommand*\@suppressoutput{\let\@ProcessMarkup\@@ProcessMarkup}
+\newcommand*\@suppressoutput{%
+  \let\@ProcessMarkup\@@ProcessMarkup
+  \renewcommand*\index[2][]{}%
+}
 \NewDocumentCommand\@@ProcessMarkup{md()od()d<>d''}{}%
 \NewDocumentCommand\@ProcessMarkup{md()od()d<>d''}{%
   \if@declare%
@@ -1052,6 +1056,7 @@
 % |#4|: optionale Indexformatierung
 \NewDocumentCommand\@@ProcessIndex{md()d[]d||}{%
   \@getentryandformat\@tempentry\@tempformat{#1}(#2)[#3]%
+  \let\@tempa\@empty%
   \if@declare%
     \if@openindex%
       \IfValueT{#4}{%
@@ -1061,15 +1066,18 @@
           environments `Declaration' or `Declaration*'%
         }%
       }%
-      \appto\@tempformat{|(declare}%
+      \def\@tempa{|(declare}%
     \else%
-      \appto\@tempformat{|declare)}%
+      \def\@tempa{|declare)}%
     \fi%
   \else%
-    \IfValueT{#4}{\appto\@tempformat{|#4}}%
+    \IfValueT{#4}{\def\@tempa{|#4}}%
   \fi%
   \@getsublabel*\@templabel{#1}%
-  \index[\@templabel]{\@tempentry @\@tempformat}%
+  \index[\@templabel]{%
+    \ifx\@tempkey\@empty\else\@tempkey!\fi%
+    \@tempentry @\@tempformat\@tempa%
+  }%
 }
 % {#1}: Markup für Änderungsliste
 % (#2): optionale Subdeclaration
@@ -1190,18 +1198,17 @@
     \ifin@%
       \@suppressoutput%
       \let\Key\@firstoftwo%
-      \edef\@tempa{#3}%
-      \let\typeout\@gobble% §§§ raus
-      \@tempa%
+      #3%
+      \def\@tempkey{\expandonce#1@\expandonce#2}%
       \let\Key\@secondoftwo%
-      \edef\@tempa{#1!#3}%
     \else%
       \@gobblemarkup%
-      \edef\@tempa{#3}%
+      \let\@tempkey\@empty%
     \fi%
     \edef\tud@reserved{%
       \noexpand\endgroup%
-      \def\noexpand#1{\@tempa}%
+      \def\noexpand#1{#3}%
+      \def\noexpand\@tempkey{\@tempkey}%
     }%
   \tud@reserved%
   \def#2{#3}%
@@ -1212,10 +1219,12 @@
     \appto#1{ #5}%
     \appto#2{\protect\suffix{#5}}%
   }%
-  \ifx\@tempsubdeclare\@subdeclaredefault\else%
-    \in@{\Key}{#3}%
-    \ifin@\else%
-      \appto#2{\protect\suffix{\@tempsubdeclare}}%
+  \if@changedat\else%
+    \ifx\@tempsubdeclare\@subdeclaredefault\else%
+      \in@{\Key}{#3}%
+      \ifin@\else%
+        \appto#2{\protect\suffix{\@tempsubdeclare}}%
+      \fi%
     \fi%
   \fi%
   \tud@replace#1{@}{"@}%
@@ -1331,7 +1340,15 @@
   \IfValueTF{#1}{%
     \begingroup%
       \@gobbleparameters%
-      \protected@edef\@tempa{#2!Implementierung!#1!}%
+      % §§§ strukturieren!!!
+%      \tud@ifsubdeclare{%
+%        \@changedattrue%
+%        \@subdeclare%
+%        \@changedatfalse%
+%        \protected@edef\@tempa{#2!Implementierung \@tempformat!#1!}%
+%      }{%
+%        \protected@edef\@tempa{#2!Implementierung!#1!}%
+%      }%
       \edef\tud@reserved{%
         \noexpand\endgroup%
         \toks@{\expandonce\@tempa}%
@@ -1381,32 +1398,18 @@
 \newcommand*\@ChangedAt@@CreateEntry[5]{%
   % !!! Debug
 %  \IfValueT{#5}{\typeout{***************************************** #4}}
-  \typeout{^^J+++++}%
-  \typeout{1: #1}%
-  \typeout{2: #2}%
-  \typeout{3: #3}%
-  \typeout{4: #4}%
-  \typeout{5: #5}%
+%  \typeout{^^J*****}%
+%  \typeout{1: #1}%
+%  \typeout{2: #2}%
+%  \typeout{3: #3}%
+%  \typeout{4: #4}%
+%  \typeout{5: #5}%
   \IfValueT{#3}{%
     \IfValueTF{#4}{%
+      % aus getentryandformt
       \@changedattrue%
       #3%
       \@changedatfalse%
-%%      % §§§ raus wenn \PrintChangelog neu
-%      \in@{\Key}{#3}%
-%      \ifin@%
-%        \begingroup%
-%          \RenewDocumentCommand\Key{smmod()d''d||}{##2\gdef\@tempd{##3}}%
-%          \@changedattrue%
-%          #3%
-%          \@changedatfalse%
-%          \global\let\@tempa\@tempentry%
-%          \global\let\@tempb\@tempformat%
-%        \endgroup%
-%        \edef\@tempentry{\expandonce\@tempa:"|\expandonce\@tempd}%
-%        \epreto\@tempformat{\expandonce\@tempb: }%
-%      \fi%
-%%      % §§§ raus ende
       % $$$ wie mit |deprecated umgehen? kann raus, besser über Replace(dBy)
       \def\@tempc{}%
       \ifstr{#4}{}{%
@@ -1427,7 +1430,11 @@
       }{%
         \appto\@tempformat{\@tempc}%
       }%
-      \index[changelog]{#1!#2!\@tempentry @\@tempformat}%
+      \index[changelog]{%
+        #1!#2!%
+        \ifx\@tempkey\@empty\else\@tempkey:!\fi%
+        \@tempentry @\@tempformat%
+      }%
     }{%
       \index[changelog]{#1!#2!#3}%
     }%

@@ -1165,7 +1165,7 @@
 %  \ifx\@tempsubdeclare\@subdeclaredefault\else%
 %    \expandafter\@@getentry\expandafter#1\expandafter{#1}{#3}%
 %  \fi%
-%}
+}
 %\NewDocumentCommand\@@getentry{m>{\SplitArgument{1}{!}}mm}{%
 %  \@@@getentry#1#2{#3}%
 %}
@@ -1364,7 +1364,7 @@
 \newcommand*\@ChangedAt@@CreateEntry[5]{%
   % !!! Debug
 %  \IfValueT{#5}{\typeout{***************************************** #4}}
-  \typeout{^^J+++++}%
+  \typeout{^^J*****}%
   \typeout{1: #1}%
   \typeout{2: #2}%
   \typeout{3: #3}%
