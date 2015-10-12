@@ -566,7 +566,7 @@
   \pagebreak[1]%
 }
 \newcommand*\tud@declare@special@start[3]{%
-  \@ChangedAt@CreateSpecialList{#2}{#1}%
+  \@ChangedAt@CreateList(#2){#1}%
   \def\tud@declare{#3}%
   \@declaretrue\@openindextrue#2\@declarefalse%
   \def\tud@declare{0}%
@@ -701,7 +701,7 @@
 \NewExpandableDocumentCommand\@Option{sm}{#2}
 % !!! suchen nach \\Option\*?\{.*\}\[.*\]
 % !!! \Option(*){option}[value] in \Option(*){option=value}
-% $$$ Implementierung? optionaler Wert durch '=' im Hauptargument getrennt
+% §§§ Implementierung? optionaler Wert durch '=' im Hauptargument getrennt
 \NewDocumentCommand\Option{smod()d''d||}{%
 % !!! Debug
 %  \IfValueT{#3}{%
@@ -743,7 +743,7 @@
 }
 % !!! suchen nach \\Key\*?\{.*\}\{.*\}\[.*\]
 % !!! \Key(*){cmd}{key}[value] in \Key(*){cmd}{key=value}
-% $$$ Implementierung? optionaler Wert durch '=' im Hauptargument #3 getrennt
+% §§§ Implementierung? optionaler Wert durch '=' im Hauptargument #3 getrennt
 \NewExpandableDocumentCommand\@Key{smm}{#2!#3}
 \NewDocumentCommand\Key{smmod()d''d||}{%
 % !!! Debug
@@ -1246,7 +1246,7 @@
 %
 %
 %
-% $$$ implementieren in \@MarkupOutput
+% §§§ implementieren in \@MarkupOutput
 %\newcommand\ProcessorValue[1]{%
 %  \in@{=}{#1}%
 %  \ifin@%
@@ -1308,14 +1308,14 @@
 \newcommand*\list@ChangedAt{}
 \let\list@ChangedAt\relax%
 \DeclareListParser*{\forssvlist}{;}%
-\NewDocumentCommand\@ChangedAt@CreateList{om}{%
-  \IfValueT{#2}{\forssvlist{\@ChangedAt@@CreateList[#1]}{#2}}%
+\NewDocumentCommand\@ChangedAt@CreateList{od()m}{%
+  \IfValueT{#3}{\forssvlist{\@ChangedAt@@CreateList[#1](#2)}{#3}}%
 }
-\NewDocumentCommand\@ChangedAt@@CreateList{o>{\SplitArgument{1}{:}}m}{%
-  \@ChangedAt@@@CreateList[#1]#2%
+\NewDocumentCommand\@ChangedAt@@CreateList{r[]r()>{\SplitArgument{1}{:}}m}{%
+  \@ChangedAt@@@CreateList[#1](#2)#3%
 }
 % $$$ optionale Argumente bei \Option etc. beachten
-\NewDocumentCommand\@ChangedAt@@@CreateList{omm}{%
+\NewDocumentCommand\@ChangedAt@@@CreateList{r[]r()mm}{%
   \IfValueTF{#1}{%
     \begingroup%
       \@gobbleparameters%
@@ -1323,9 +1323,9 @@
         \@changedattrue%
         \@bundle%
         \@changedatfalse%
-        \protected@edef\@tempa{#2!Implementierung \@tempformat!#1!}%
+        \protected@edef\@tempa{#3!Implementierung \@tempformat!#1!}%
       }{%
-        \protected@edef\@tempa{#2!Implementierung Hauptklassen!#1!}%
+        \protected@edef\@tempa{#3!Implementierung Hauptklassen!#1!}%
       }%
       \edef\tud@reserved{%
         \noexpand\endgroup%
@@ -1333,28 +1333,25 @@
       }%
     \tud@reserved%
     \if@obsolete\else%
-      \IfValueT{#3}{\addto@hook\toks@{#3}}%
+      \IfValueT{#4}{\addto@hook\toks@{#4}}%
     \fi%
   }{%
-    \toks@{#2!Allgemein!#3}%
+    \IfValueTF{#2}{%
+      \@changedattrue%
+      #2%
+      \@changedatfalse%
+      \toks@{#3!Allgemein!}%
+      \eaddto@hook\toks@{\@tempformat:\space}%
+      \IfValueTF{#4}{%
+        \addto@hook\toks@{#4}%
+      }{%
+        \addto@hook\toks@{\emph{neu}}%
+      }%
+    }{%
+      \toks@{#3!Allgemein!#4}%
+    }%
   }%
   \listeadd{\list@ChangedAt}{\the\toks@}%
-}
-\NewDocumentCommand\@ChangedAt@CreateSpecialList{mm}{%
-  \IfValueT{#2}{\forssvlist{\@ChangedAt@@CreateSpecialList{#1}}{#2}}%
-}
-\NewDocumentCommand\@ChangedAt@@CreateSpecialList{m>{\SplitArgument{1}{:}}m}{%
-  \@ChangedAt@@@CreateSpecialList{#1}#2%
-}
-\NewDocumentCommand\@ChangedAt@@@CreateSpecialList{mmm}{%
-  \@changedattrue%
-  #1%
-  \@changedatfalse%
-  \IfValueTF{#3}{%
-    \@ChangedAt@@@CreateList{#2}{\@tempformat:\space#3}%
-  }{%
-    \@ChangedAt@@@CreateList{#2}{\@tempformat:\space\emph{neu}}%
-  }%
 }
 \NewDocumentCommand\@ChangedAt@ProcessList{mm}{%
   \ifx\list@ChangedAt\relax\else%
@@ -1384,11 +1381,6 @@
   \@ChangedAt@@CreateEntry#1%
 }
 \newcommand*\@ChangedAt@@CreateEntry[4]{%
-  \typeout{^^J*****}%
-  \typeoutargs{#1}%
-  \typeoutargs{#2}%
-  \typeoutargs{#3}%
-  \typeoutargs{#4}%
   \IfValueT{#3}{%
     \IfValueTF{#4}{%
       % \@ProcessChangedAt wird durch Markup aufgerufen
@@ -1532,58 +1524,41 @@
   \multicolumn{\tabularm@num}{@{}p{\tabularm@wd}@{}}{#1}%
 }
 \newcommand*\stditem{}
-\newlist{values}{description}{1}
-\setlist[values]{%
-  topsep=.5\baselineskipglue,labelwidth=\columnwidth,labelsep=0pt,%
-  font=\normalfont\ttfamily,before*=\before@values%
-}
-\newcommand*\before@values{%
+\newcommand*\before@item[1]{%
   \ifdefvoid{\stditem}{%
     \let\stditem\item%
-    \let\item\tud@item%
+    \letcs\item{tud@item@#1}%
     \setlength\changedatskip{-\baselineskip}%
   }{}%
 }
-\newcommand*\itemfalse{\def\tud@item@val{false/off/no}\item}
-\newcommand*\itemtrue{\def\tud@item@val{true/on/yes}\item}
-\newcommand*\tud@item@val{}
-\newcommand*\tud@item@add{}
-\newcommand*\tud@item@format{}
-\newcommand*\tud@item{%
-  \@ifstar{%
-    \def\tud@item@add{(S\"aumniswert)}%
-    \let\tud@item@format\emph%
-    \tud@@item%
-  }{%
-    \let\tud@item@add\relax%
-    \let\tud@item@format\relax%
-    \tud@@item%
-  }%
+\newlist{values}{description}{1}
+\setlist[values]{%
+  topsep=.5\baselineskipglue,labelwidth=\columnwidth,labelsep=0pt,%
+  font=\normalfont\ttfamily,before=\before@item{values}%
 }
-\newcommand*\tud@@item[1][]{%
-  \ifblank{#1}%
-    {\edef\@tempa{\tud@item@val}}%
-    {\ifstr{\tud@item@val}{}%
-      {\edef\@tempa{#1}}%
-      {\edef\@tempa{\tud@item@val/#1}}%
+\NewDocumentCommand\tud@item@values{sood()}{%
+  \IfValueTF{#2}{%
+    \toks@{}%
+    \IfBooleanTF{#1}{%
+      \def\@tempa{\emph{#2}\normalfont\suffix{S\"aumniswert}}%
+    }{%
+      \def\@tempa{#2\normalfont\IfValueT{#3}{\suffix{S\"aumniswert f\"ur #3}}}%
     }%
-  \def\tud@item@val{}%
-  \ifstr{\@tempa}{}{\stditem}{\tud@@@item}%
-}
-\newcommand*\tud@@@item[1][]{%
-  \ifblank{#1}{}{%
-    \ifx\tud@item@add\relax%
-      \def\tud@item@add{#1}%
-    \else%
-      \appto\tud@item@add{~#1}%
-    \fi%
+    \stditem[\@tempa\IfValueT{#4}{\suffix{#4}}]%
+  }{%
+    \stditem%
   }%
-  \stditem[%
-    \tud@item@format{\@tempa:}%
-    \ifx\tud@item@add\relax\else%
-      {\normalfont\space\footnotesize\tud@item@add}%
-    \fi%
-  ]%
+}
+\NewDocumentCommand\itemfalse{sood()}{\item@bool{#1}{false/off/no}[#2][#3](#4)}
+\NewDocumentCommand\itemtrue{sood()}{\item@bool{#1}{true/on/yes}[#2][#3](#4)}
+\NewDocumentCommand\item@bool{mmr[]r[]r()}{%
+  \toks@{\item}%
+  \IfBooleanT{#1}{\addto@hook\toks@{*}}%
+  \protected@edef\@tempa{#2\IfValueT{#3}{/#3}}%
+  \eaddto@hook\toks@{\expandafter[\@tempa]}%
+  \IfValueT{#4}{\addto@hook\toks@{[#4]}}%
+  \IfValueT{#5}{\addto@hook\toks@{(#5)}}%
+  \the\toks@%
 }
 \newenvironment{Example}{\@nameuse{Example*}}{%
   \@nameuse{endExample*}%
@@ -1602,18 +1577,9 @@
 \newlist{packages}{description}{2}
 \setlist[packages]{%
   topsep=\medskipamount,labelwidth=\linewidth,labelsep=0pt,font=\normalfont,%
-  parsep=\parskip,listparindent=\parindent,before=\before@packages%
+  parsep=\parskip,listparindent=\parindent,before=\before@item{packages}%
 }
-% $$$ in \stditem
-\newcommand*\itempackages{}
-\newcommand*\before@packages{%
-  \ifdefvoid{\stditem}{%
-    \let\stditem\item%
-    \let\item\tud@item@pkg%
-    \setlength\changedatskip{-\baselineskip}%
-  }{}%
-}
-\NewDocumentCommand\tud@item@pkg{od<>d()}{%
+\NewDocumentCommand\tud@item@packages{od<>d()}{%
   \def\@tempa##1{%
     \@tempb%
     \@getlabel\@templabel{\@bundle:\Package{##1}}%
@@ -1634,8 +1600,6 @@
     }%
   }]%
 }
-%
-%
 \newrobustcmd*\hypertut[2]{%
   \hyperref{tutorials/#1.pdf}{\jobname}{tutorials:#1}{\File*{#1.pdf}#2}%
 }
@@ -1804,6 +1768,7 @@
       \let\subsubitem\subitem%
       \let\subitem\item%
       \renewcommand*\item{%
+        % $$$ raus
         \clearpage%
         \begingroup%
           \escapechar=`\\%
