@@ -292,7 +292,6 @@
      }{\ifnum\imki@columns>\@ne\end{multicols}\fi}%
   \fi%
 }
-% $$$ evtl. \seelink um fehlende cross-ref-class zu vermeiden
 \newcommand*\@see{}
 \renewrobustcmd{\see}{\@see}
 \renewrobustcmd{\seealso}{%
@@ -641,6 +640,21 @@
   \NewDocumentCommand#1{#2}{#3}%
   \DeclareExpandableDocumentCommand#1{#2}{#3}%
 }
+\newcommand*\ProcessorKeyVal[1]{%
+  \begingroup%
+    \in@{=}{#1}%
+    \ifin@%
+      \def\@tempa##1=##2\@nil{\toks@{{##1}[=##2]}}%
+    \else%
+      \def\@tempa##1\@nil{\toks@{{##1}}}%
+    \fi%
+    \@tempa#1\@nil%
+    \edef\tud@reserved{%
+      \noexpand\endgroup%
+      \def\noexpand\ProcessedArgument{\the\toks@}%
+    }%
+  \tud@reserved%
+}
 \NewExpandableDocumentCommand\@Application{sm}{#2}
 \NewDocumentCommand\Application{smd||}{%
   \ifdin{#2}{%
@@ -652,14 +666,9 @@
 \NewExpandableDocumentCommand\@Distribution{sm}{#2}
 \NewDocumentCommand\Distribution{smod||}{%
   \ifdin{#2\IfValueT{#3}{~#3}}{%
-% $$$ für Indexquerverweis
-%    \if@changedat%
-%      \@ProcessChangedAt{\Distribution{#2}}[Distribution]%
-%    \else%
     \@SetMarkupFormat{\sbnfont}%
-    \@ProcessMarkup{\Distribution{#2}}[#3]%
+    \@ProcessMarkup{\Distribution{#2}}[\IfValueT{#3}{~#3}]%
     \@ProcessIndex{\Distribution{#2}}[Distribution]|#4|{#1}%
-%    \fi%
   }%
 }
 \NewExpandableDocumentCommand\@File{sm}{#2}
@@ -699,33 +708,32 @@
   }%
 }
 \NewExpandableDocumentCommand\@Option{sm}{#2}
-% !!! suchen nach \\Option\*?\{.*\}\[.*\]
-% !!! \Option(*){option}[value] in \Option(*){option=value}
-% §§§ Implementierung? optionaler Wert durch '=' im Hauptargument getrennt
-\NewDocumentCommand\Option{smod()d''d||}{%
-% !!! Debug
-%  \IfValueT{#3}{%
-%    \ClassWarning{tudscrman}{please change the optional argument}%
-%  }%
-% !!! Debug Ende
+\NewDocumentCommand\Option{s>{\ProcessorKeyVal}md()d''d||}{%
+  \Option@Value{#1}#2(#3)'#4'|#5|%
+}
+\NewDocumentCommand\Option@Value{mmod()d''d||}{%
   \if@changedat%
     \@ProcessChangedAt{\Option{#2}}(#4)[Option]%
   \else%
     \@SetMarkupFormat{\ttfamily}%
-    \@ProcessMarkup{\Option{#2}}(#4)[#3](=)'#5'%
+    \@ProcessMarkup{\Option{#2}}[#3](#4)'#5'%
     \@ProcessIndex{\Option{#2}}(#4)|#6|{#1}%
   \fi%
 }
 \NewExpandableDocumentCommand\@Environment{sm}{#2}
-% $$$ Warnung für #3, wenn nicht declare
 \NewDocumentCommand\Environment{smod()d''d||}{%
   \if@changedat%
     \@ProcessChangedAt{\Environment{#2}}(#4)[Umgebung]%
   \else%
+    \IfValueT{#3}{%
+      \if@declare\else%
+        \ClassWarning{tudscrman}{You can use [#3] only within a declaration}%
+      \fi%
+    }%
     \@SetMarkupFormat{\ttfamily}(%
-      \ttfamily \bsc{}begin\{##1\}\IfValueT{#3}{#3}\tabularnewline%
+      \ttfamily \bsc{}begin\{#2\}\IfValueT{#3}{#3}\tabularnewline%
       \ttfamily \dots\tabularnewline%
-      \ttfamily\bsc{}end\{##1\}%
+      \ttfamily \bsc{}end\{#2\}%
     )%
     \@ProcessMarkup{\Environment{#2}}(#4)'#5'%
     \@ProcessIndex{\Environment{#2}}(#4)[Umgebung]|#6|{#1}%
@@ -741,24 +749,16 @@
     \@ProcessIndex{\Macro{#2}}(#3)|#5|{#1}%
   \fi%
 }
-% !!! suchen nach \\Key\*?\{.*\}\{.*\}\[.*\]
-% !!! \Key(*){cmd}{key}[value] in \Key(*){cmd}{key=value}
-% §§§ Implementierung? optionaler Wert durch '=' im Hauptargument #3 getrennt
 \NewExpandableDocumentCommand\@Key{smm}{#2!#3}
-\NewDocumentCommand\Key{smmod()d''d||}{%
-% !!! Debug
-%  \IfValueT{#3}{% #3 als g
-%    \ClassWarning{tudscrman}{please change markup}%
-%  }%
-%  \IfValueT{#4}{%
-%    \ClassWarning{tudscrman}{please change the optional argument}%
-%  }%
-% !!! Debug Ende
+\NewDocumentCommand\Key{sm>{\ProcessorKeyVal}md()d''d||}{%
+  \Key@Value{#1}{#2}#3(#4)'#5'|#6|%
+}
+\NewDocumentCommand\Key@Value{mmmod()d''d||}{%
   \if@changedat%
     \@ProcessChangedAt{\Key{#2}{#3}}(#5)[Parameter]%
   \else%
     \@SetMarkupFormat{\ttfamily}[Parameter]%
-    \@ProcessMarkup{\Key{#2}{#3}}(#5)[#4](=)'#6'%
+    \@ProcessMarkup{\Key{#2}{#3}}[#4](#5)'#6'%
     \@ProcessIndex{\Key{#2}{#3}}(#5)[Parameter]|#7|{#1}%
   \fi%
 }
@@ -793,16 +793,20 @@
   \fi%
 }
 \NewExpandableDocumentCommand\@Color{sm}{#2}
-% $$$ Warnung für #3, wenn nicht declare
 \NewDocumentCommand\Color{smoD(){\Package{tudscrcolor}}d''d||}{%
   \if@changedat%
     \@ProcessChangedAt{\Color{#2}}(#4)[Farbe]%
   \else%
-    \@SetMarkupFormat{\ttfamily}(%
-      \begingroup\ttfamily##1\IfValueT{#3}{\,(#3)}\endgroup\suffix{Farbe}%
+    \IfValueT{#3}{%
+      \if@declare\else%
+        \ClassWarning{tudscrman}{You can use [#3] only within a declaration}%
+      \fi%
+    }%
+    \@SetMarkupFormat{\ttfamily}[Farbe](%
+      \begingroup\@MarkupFormat#2\IfValueT{#3}{\,(#3)}\endgroup%
     )%
     \@ProcessMarkup{\Color{#2}}(#4)'#5'%
-    \@ProcessIndex{\Color{#2}}(#4)[Farbe]|#6|{#1}%
+    \@ProcessIndex{\Color{#2}}(#4)[Farbe]|#5|{#1}%
   \fi%
 }
 \NewExpandableDocumentCommand\@Length{sm}{#2}
@@ -836,7 +840,7 @@
 \newcommand*\eaddto@hook[2]{%
   \expandafter\addto@hook\expandafter#1\expandafter{#2}%
 }
-\NewDocumentCommand\@gobblemarkup{s}{%
+\NewDocumentCommand\@suppressmarkup{s}{%
   \let\Application\@Application%
   \let\Distribution\@Distribution%
   \let\File\@File%
@@ -860,7 +864,7 @@
   }%
 }
 \AfterPackage{hyperref}{%
-  \expandafter\pdfstringdefDisableCommands\expandafter{\@gobblemarkup}%
+  \expandafter\pdfstringdefDisableCommands\expandafter{\@suppressmarkup}%
 }
 \NewDocumentCommand\@getsublabel{smm}{%
   \begingroup%
@@ -894,28 +898,25 @@
   \tud@reserved%
 }
 \newcommand*\@suppressoutput{%
-  \let\@ProcessMarkup\@@ProcessMarkup%
-  % $$$ notwendig?
+  \let\@ProcessMarkup\@GobbleMarkup%
   \renewcommand*\index[2][]{}%
 }
 % {#1}: Markup für Ausgabe
-% (#2): optionale Subdeclaration
-% [#3]: optionaler Suffix für Ausgabe
-% (#4): optionaler Formatierung der Suffix-Ausgabe
-% <#5>: URL
-% '#6': Querverweis
-% $$$ Argumente #2 und #3 tauschen, sobald #4 nicht mehr notwendig
-\NewDocumentCommand\@@ProcessMarkup{md()od()d<>d''}{}%
-\NewDocumentCommand\@ProcessMarkup{md()od()d<>d''}{%
+% [#2]: optionaler Suffix für Ausgabe
+% (#3): optionale Subdeclaration
+% <#4>: URL
+% '#5': Querverweis
+\NewDocumentCommand\@GobbleMarkup{mod()d<>d''}{}%
+\NewDocumentCommand\@ProcessMarkup{mod()d<>d''}{%
   \if@declare%
     \@getlabel*\@templabel{\@bundle:#1}%
     \tud@toks@{\ProcessMarkup@Declare}%
   \else%
-    \@getlabel\@templabel{#2:#1}%
+    \@getlabel\@templabel{#3:#1}%
     \tud@toks@{\ProcessMarkup@Output}%
   \fi%
   \begingroup%
-    \@gobblemarkup*%
+    \@suppressmarkup*%
     \edef\tud@reserved{%
       \noexpand\endgroup%
       \def\noexpand\@tempentry{#1}%
@@ -923,21 +924,13 @@
   \tud@reserved%
   \eaddto@hook\tud@toks@{\expandafter{\@templabel}}%
   \eaddto@hook\tud@toks@{\expandafter{\@tempentry}}%
-% Argument #3 sauber dokumentieren bzw. überprüfen, ob notwendig
-% $$$ #4 kann raus, sobald Optionen mit '=' im ersten Argument funktionieren
-  \IfValueT{#3}{%
-    \IfValueTF{#4}{%
-      \addto@hook\tud@toks@{[#4#3]}%
-    }{%
-      \addto@hook\tud@toks@{[~#3]}%
-    }%
-  }%
+  \IfValueT{#2}{\addto@hook\tud@toks@{[#2]}}%
   \if@declare%
     \if@openindex%
-      \IfValueT{#6}{%
+      \IfValueT{#5}{%
         \ClassWarning{tudscrman}{%
           It is not possible to use any cross-reference\MessageBreak%
-          shorthand like '#6' within the arguments of\MessageBreak%
+          shorthand like '#5' within the arguments of\MessageBreak%
           the environment `Declaration'%
         }%
       }%
@@ -945,18 +938,18 @@
     \fi%
   \else%
     \if@tud@index\else%
-      \IfValueT{#5}{%
-        \ifstr{#5}{}{}{\addto@hook\tud@toks@{<http://www.ctan.org/pkg/#5>}}%
+      \IfValueT{#4}{%
+        \ifstr{#4}{}{}{\addto@hook\tud@toks@{<http://www.ctan.org/pkg/#4>}}%
       }%
-      \IfValueT{#6}{\addto@hook\tud@toks@{'#6'}}%
+      \IfValueT{#5}{\addto@hook\tud@toks@{'#5'}}%
     \fi%
     \tud@trace@markup[output]{\the\tud@toks@}%
   \fi%
-  \IfValueT{#2}{%
-    \ifstr{#2}{}{}{%
-      \tud@trace@bundle{#2}%
+  \IfValueT{#3}{%
+    \ifstr{#3}{}{}{%
+      \tud@trace@bundle{#3}%
       \tud@iflabelexists{\@templabel}{}{%
-        \ClassWarning{tudscrman}{No existing label \@templabel\space for #2}%
+        \ClassWarning{tudscrman}{No existing label \@templabel\space for #3}%
       }%
     }%
   }%
@@ -966,8 +959,6 @@
 % [#3]: optionaler Suffix Ausgabe
 \NewDocumentCommand\ProcessMarkup@Declare{mmo}{%
   \@CheckMarkupFormat%
-% $$$ optionaler suffix weg, alles über einziges Argument
-%  \IfValueT{#3}{\typeout{!!!!! #2:#3}}%
   \ifcase\tud@declare%
     \tudhyperdef{#1}%
     \@MarkupOutput{#2}[#3]%
@@ -987,8 +978,6 @@
 % '#5': Querverweis
 \NewDocumentCommand\ProcessMarkup@Output{mmod<>d''}{%
   \@CheckMarkupFormat%
-% $$$ optionaler suffix weg, alles über einziges Argument
-%  \IfValueT{#3}{\typeout{!!!!! #2:#3}}%
   \begingroup%
     \def\@tempc{\@MarkupOutput{#2}[#3]}%
     \tud@iflabelexists{#1}{%
@@ -1033,7 +1022,7 @@
 % [#3]: optionaler Suffix in der Index-Ausgabe
 % |#4|: optionale Indexformatierung
 % {#5}: Stern?
-% $$$ optionales Argument für Optionen (key=value) als subentry
+% TODO §§§ optionales Argument für Optionen (key=value) als subentry
 \NewDocumentCommand\@ProcessIndex{md()od||m}{%
   \ifboolexpr{%
     bool {@tud@index} or bool {@obsolete}%
@@ -1089,7 +1078,7 @@
 \NewDocumentCommand\@Label{m}{\@@Label#1}
 \NewDocumentCommand\@@Label{mmm}{%
   \begingroup%
-    \@gobblemarkup%
+    \@suppressmarkup%
     \IfValueTF{#3}{%
       \IfValueTF{#1}{%
         \edef\@tempa{#1:#2:#3}%
@@ -1185,7 +1174,7 @@
       \def\@tempkey{\expandonce#1@\expandonce#2}%
       \let\Key\@secondoftwo%
     \else%
-      \@gobblemarkup%
+      \@suppressmarkup%
       \let\@tempkey\@empty%
     \fi%
     \edef\tud@reserved{%
@@ -1243,50 +1232,35 @@
     }%
   \tud@reserved%
 }
-%
-%
-%
-% §§§ implementieren in \@MarkupOutput
-%\newcommand\ProcessorValue[1]{%
-%  \in@{=}{#1}%
-%  \ifin@%
-%    \def\@tempa##1=##2\@nil{\toks@{{##1}[=##2]}}%
-%  \else%
-%    \def\@tempa##1\@nil{\toks@{{##1}}}%
-%  \fi%
-%  \@tempa#1\@nil%
-%  \edef\ProcessedArgument{\the\toks@}%
-%}
-%
-%
-%
-% $$$ optionales Argument notwendig?
 \newcommand*\@MarkupFormat{}
 \newcommand*\@MarkupDeclare{}
 \newcommand*\@MarkupSuffix{}
 \NewDocumentCommand\@MarkupOutput{>{\SplitArgument{1}{!}}mo}{%
+  \@@MarkupOutput#1[#2]%
+}
+\NewDocumentCommand\@@MarkupOutput{mmo}{%
   \if@declare%
-    \@MarkupDeclare#1[#2]%
+    \tud@toks@{\@MarkupDeclare}%
   \else%
-    \@MarkupInline#1[#2]%
+    \tud@toks@{\@MarkupInline}%
   \fi%
+  \IfValueTF{#2}{%
+    \def\@tempa{#2}%
+  }{%
+    \def\@tempa{#1}%
+  }%
+  \IfValueT{#3}{\appto\@tempa{#3}}%
+  \eaddto@hook\tud@toks@{\expandafter{\@tempa}}%
+  \the\tud@toks@%
 }
-\NewDocumentCommand\@MarkupInline{mmr[]}{%
-  \mbox{\@MarkupFormat\IfValueTF{#2}{#2}{#1}\IfValueT{#3}{#3}}%
+\newcommand*\@MarkupInline[1]{\mbox{\@MarkupFormat#1}}
+\newcommand*\@MarkupDeclare@Default[1]{%
+  \begingroup\@MarkupFormat#1\endgroup\@MarkupSuffix%
 }
-\NewDocumentCommand\@MarkupDeclare@Default{mmr[]}{%
-  \begingroup%
-    \@MarkupFormat%
-    \IfValueTF{#2}{#2}{#1}%
-    \IfValueT{#3}{#3}%
-  \endgroup%
-  \@MarkupSuffix%
-}
-% $$$ optionales Argument direkt bei \Environment etc.?
 \NewDocumentCommand\@SetMarkupFormat{mod()}{%
   \def\@MarkupFormat{#1}%
   \IfValueT{#2}{\def\@MarkupSuffix{\suffix{#2}}}%
-  \IfValueT{#3}{\RenewDocumentCommand\@MarkupDeclare{mmr[]}{#3}}%
+  \IfValueT{#3}{\renewcommand*\@MarkupDeclare[1]{#3\@MarkupSuffix}}%
 %  \apptocmd{\@MarkupDeclare}{\def\@MarkupFormat{#1}}{}{}%
 }
 \newcommand*\@ClearMarkupFormat{%
@@ -1314,7 +1288,8 @@
 \NewDocumentCommand\@ChangedAt@@CreateList{r[]r()>{\SplitArgument{1}{:}}m}{%
   \@ChangedAt@@@CreateList[#1](#2)#3%
 }
-% $$$ optionale Argumente bei \Option etc. beachten
+% $$$ optionale Argumente bei \Option etc. beachten (cd=alternative)
+% $$$ Links in Liste überprüfen (cd=alternative), evtl '.obsolete' bevorzugen?
 \NewDocumentCommand\@ChangedAt@@@CreateList{r[]r()mm}{%
   \IfValueTF{#1}{%
     \begingroup%
@@ -1531,23 +1506,38 @@
     \setlength\changedatskip{-\baselineskip}%
   }{}%
 }
-\newlist{values}{description}{1}
-\setlist[values]{%
+% §§§ Umgebung values mit Argument für Option=value etc.
+% §§§ ersten Wert für Indexeintrag verwenden, an '/' splitten
+% §§§ Indexeintrag als |declare?!
+\newcommand*\tud@values{}
+\NewDocumentEnvironment{values}{go}{%
+  \IfValueTF{#1}{\def\tud@values{#1'none'=}}{%
+%    \ClassWarning{tudscrman}{argument for values is missing}%
+  }%
+  \@values%
+}{%
+  \end@values%
+}
+\newlist{@values}{description}{1}
+\setlist[@values]{%
   topsep=.5\baselineskipglue,labelwidth=\columnwidth,labelsep=0pt,%
   font=\normalfont\ttfamily,before=\before@item{values}%
 }
 \NewDocumentCommand\tud@item@values{sood()}{%
-  \IfValueTF{#2}{%
+  \let\@tempa\@empty%
+  % §§§ rein
+%  \let\@tempa\tud@values%
+  \IfValueT{#2}{%
     \toks@{}%
     \IfBooleanTF{#1}{%
-      \def\@tempa{\emph{#2}\normalfont\suffix{S\"aumniswert}}%
+      \appto\@tempa{\emph{#2}\normalfont\suffix{S\"aumniswert}}%
     }{%
-      \def\@tempa{#2\normalfont\IfValueT{#3}{\suffix{S\"aumniswert f\"ur #3}}}%
+      \appto\@tempa{#2\normalfont}
+      \IfValueT{#3}{\appto\@tempa{\suffix{S\"aumniswert f\"ur #3}}}%
     }%
-    \stditem[\@tempa\IfValueT{#4}{\suffix{#4}}]%
-  }{%
-    \stditem%
+    \IfValueT{#4}{\appto\@tempa{\suffix{#4}}}
   }%
+  \stditem[\@tempa]%
 }
 \NewDocumentCommand\itemfalse{sood()}{\item@bool{#1}{false/off/no}[#2][#3](#4)}
 \NewDocumentCommand\itemtrue{sood()}{\item@bool{#1}{true/on/yes}[#2][#3](#4)}
@@ -1718,6 +1708,16 @@
     }%
   }%
   \forcsvlist{\@tempa{#2}{#3}}{#4}%
+}
+\newcommand*\SeeRef[2]{%
+  \begingroup%
+    \@suppressoutput%
+    \@nameuse{#1}{#2}%
+    \protected@edef\tud@reserved{%
+      \noexpand\endgroup%
+      \noexpand\index{#1!\@nameuse{#1}{#2}|see{\@tempformat}}%
+    }%
+  \tud@reserved%
 }
 \newcommand*\PrintIndex{%
   \begingroup%
@@ -1931,7 +1931,8 @@
 \@onlypreamble\tracingbundle
 \newcommand*\typeoutargs[1]{%
   \begingroup%
-    \toks@{#1}\typeout{\the\toks@}%
+    \def\@tempa##1{\toks@{##1}\typeout{\the\toks@}}%
+    \forcsvlist{\@tempa}{#1}%
   \endgroup%
 }
 %%% From File: tudscr-fields.dtx
