@@ -660,7 +660,7 @@
   \ifdin{#2}{%
     \@SetMarkupFormat{\sbsfont}%
     \@ProcessMarkup{\Application{#2}}%
-    \@ProcessIndex{\Application{#2}}[Anwendungssoftware]|#3|{#1}%
+    \@ProcessIndex{\Application{#2}}{#1}|#3|[Anwendungssoftware]%
   }%
 }
 \NewExpandableDocumentCommand\@Distribution{sm}{#2}
@@ -668,7 +668,7 @@
   \ifdin{#2\IfValueT{#3}{~#3}}{%
     \@SetMarkupFormat{\sbnfont}%
     \@ProcessMarkup{\Distribution{#2}}[\IfValueT{#3}{~#3}]%
-    \@ProcessIndex{\Distribution{#2}}[Distribution]|#4|{#1}%
+    \@ProcessIndex{\Distribution{#2}}{#1}|#4|[Distribution]%
   }%
 }
 \NewExpandableDocumentCommand\@File{sm}{#2}
@@ -676,7 +676,7 @@
   \ifdin{#2}{%
     \@SetMarkupFormat{\sbnfont}%
     \@ProcessMarkup{\File{#2}}%
-    \@ProcessIndex{\File{#2}}[Datei]|#3|{#1}%
+    \@ProcessIndex{\File{#2}}{#1}|#3|[Datei]%
   }%
 }
 \NewExpandableDocumentCommand\@Class{sm}{#2}
@@ -687,7 +687,7 @@
     \else%
       \@SetMarkupFormat{\sbnfont}%
       \@ProcessMarkup{\Class{#2}}'#3'%
-      \@ProcessIndex{\Class{#2}}[Klasse]|#4|{#1}%
+      \@ProcessIndex{\Class{#2}}{#1}|#4|[Klasse]%
     \fi%
   }%
 }
@@ -703,7 +703,7 @@
       }{%
         \@ProcessMarkup{\Package{#2}}<#2>'#4'%
       }%
-      \@ProcessIndex{\Package{#2}}[Paket]|#5|{#1}%
+      \@ProcessIndex{\Package{#2}}{#1}|#5|[Paket]%
     \fi%
   }%
 }
@@ -717,7 +717,7 @@
   \else%
     \@SetMarkupFormat{\ttfamily}%
     \@ProcessMarkup{\Option{#2}}[#3](#4)'#5'%
-    \@ProcessIndex{\Option{#2}}(#4)|#6|{#1}%
+    \@ProcessIndex{\Option{#2}}[#3](#4){#1}|#6|%
   \fi%
 }
 \NewExpandableDocumentCommand\@Environment{sm}{#2}
@@ -736,7 +736,7 @@
       \ttfamily \bsc{}end\{#2\}%
     )%
     \@ProcessMarkup{\Environment{#2}}(#4)'#5'%
-    \@ProcessIndex{\Environment{#2}}(#4)[Umgebung]|#6|{#1}%
+    \@ProcessIndex{\Environment{#2}}(#4){#1}|#6|[Umgebung]%
   \fi%
 }
 \NewExpandableDocumentCommand\@Macro{sm}{#2}
@@ -746,7 +746,7 @@
   \else%
     \@SetMarkupFormat{\ttfamily\bsc}%
     \@ProcessMarkup{\Macro{#2}}(#3)'#4'%
-    \@ProcessIndex{\Macro{#2}}(#3)|#5|{#1}%
+    \@ProcessIndex{\Macro{#2}}(#3){#1}|#5|%
   \fi%
 }
 \NewExpandableDocumentCommand\@Key{smm}{#2!#3}
@@ -759,7 +759,7 @@
   \else%
     \@SetMarkupFormat{\ttfamily}[Parameter]%
     \@ProcessMarkup{\Key{#2}{#3}}[#4](#5)'#6'%
-    \@ProcessIndex{\Key{#2}{#3}}(#5)[Parameter]|#7|{#1}%
+    \@ProcessIndex{\Key{#2}{#3}}[#4](#5){#1}|#7|[Parameter]%
   \fi%
 }
 \NewExpandableDocumentCommand\@Term{sm}{#2}
@@ -769,7 +769,7 @@
   \else%
     \@SetMarkupFormat{\ttfamily\bsc}[Bezeichner]%
     \@ProcessMarkup{\Term{#2}}(#3)'#4'%
-    \@ProcessIndex{\Term{#2}}(#3)|#5|{#1}%
+    \@ProcessIndex{\Term{#2}}(#3){#1}|#5|%
   \fi%
 }
 \NewExpandableDocumentCommand\@PageStyle{sm}{#2}
@@ -779,7 +779,7 @@
   \else%
     \@SetMarkupFormat{\ttfamily}[Seitenstil]%
     \@ProcessMarkup{\PageStyle{#2}}(#3)'#4'%
-    \@ProcessIndex{\PageStyle{#2}}(#3)[Seitenstil]|#5|{#1}%
+    \@ProcessIndex{\PageStyle{#2}}(#3){#1}|#5|[Seitenstil]%
   \fi%
 }
 \NewExpandableDocumentCommand\@Font{sm}{#2}
@@ -789,7 +789,7 @@
   \else%
     \@SetMarkupFormat{\ttfamily}[Schriftelement]%
     \@ProcessMarkup{\Font{#2}}(#3)'#4'%
-    \@ProcessIndex{\Font{#2}}(#3)[Schriftelement]|#5|{#1}%
+    \@ProcessIndex{\Font{#2}}(#3){#1}|#5|[Schriftelement]%
   \fi%
 }
 \NewExpandableDocumentCommand\@Color{sm}{#2}
@@ -806,7 +806,7 @@
       \begingroup\@MarkupFormat#2\IfValueT{#3}{\,(#3)}\endgroup%
     )%
     \@ProcessMarkup{\Color{#2}}(#4)'#5'%
-    \@ProcessIndex{\Color{#2}}(#4)[Farbe]|#5|{#1}%
+    \@ProcessIndex{\Color{#2}}(#4){#1}|#5|[Farbe]%
   \fi%
 }
 \NewExpandableDocumentCommand\@Length{sm}{#2}
@@ -816,7 +816,7 @@
   \else%
     \@SetMarkupFormat{\ttfamily\bsc}[L\"ange]%
     \@ProcessMarkup{\Length{#2}}(#3)'#4'%
-    \@ProcessIndex{\Length{#2}}(#3)[L\"ange]|#5|{#1}%
+    \@ProcessIndex{\Length{#2}}(#3){#1}|#5|[L\"ange]%
   \fi%
 }
 \NewExpandableDocumentCommand\@Counter{sm}{#2}
@@ -826,7 +826,7 @@
   \else%
     \@SetMarkupFormat{\ttfamily}[Z\"ahler]%
     \@ProcessMarkup{\Counter{#2}}(#3)'#4'%
-    \@ProcessIndex{\Counter{#2}}(#3)[Z\"ahler]|#5|{#1}%
+    \@ProcessIndex{\Counter{#2}}(#3){#1}|#5|[Z\"ahler]%
   \fi%
 }
 \newcommand*\@templabel{}
@@ -1018,34 +1018,36 @@
   \@ClearMarkupFormat%
 }
 % {#1}: Markup für Index
-% (#2): optionale Subdeclaration
-% [#3]: optionaler Suffix in der Index-Ausgabe
-% |#4|: optionale Indexformatierung
-% {#5}: Stern?
+% [#2]: optionaler Subentry
+% (#3): optionale Subdeclaration
+% {#4}: Stern?
+% |#5|: optionale Indexformatierung
+% [#6]: optionaler Suffix in der Index-Ausgabe
 % TODO §§§ optionales Argument für Optionen (key=value) als subentry
-\NewDocumentCommand\@ProcessIndex{md()od||m}{%
+\NewDocumentCommand\@ProcessIndex{mod()md||o}{%
   \ifboolexpr{%
     bool {@tud@index} or bool {@obsolete}%
   }{}{%
-    \IfBooleanTF{#5}{%
-      \IfValueT{#4}{%
+    \IfBooleanTF{#4}{%
+      \IfValueT{#5}{%
         \ClassWarning{tudscrman}{%
           You've used the starred version. No index entry\MessageBreak%
           for #1 is created. The\MessageBreak%
-          optional argument |#4| is ignored%
+          optional argument |#5| is ignored%
         }%
       }%
     }{%
-      \@@ProcessIndex{#1}(#2)[#3]|#4|%
+      \@@ProcessIndex{#1}[#2](#3)|#5|[#6]%
     }%
   }%
 }
 % {#1}: Markup für Index
-% (#2): optionale Subdeclaration
-% [#3]: optionaler Suffix in der Index-Ausgabe
+% [#2]: optionaler Subentry
+% (#3): optionale Subdeclaration
 % |#4|: optionale Indexformatierung
-\NewDocumentCommand\@@ProcessIndex{md()d[]d||}{%
-  \@getindexentry\@tempentry\@tempformat\@tempkey{#1}(#2)[#3]%
+% [#5]: optionaler Suffix in der Index-Ausgabe
+\NewDocumentCommand\@@ProcessIndex{mr[]r()r||r[]}{%
+  \@getindexentry\@tempentry\@tempformat\@tempkey{#1}(#3)[#5]%
   \let\@tempa\@empty%
   \if@declare%
     \if@openindex%
