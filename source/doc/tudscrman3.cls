@@ -393,7 +393,7 @@
 \makexindyindex{Allgemeiner Index}
 \makexindyindex*{Klassen, Pakete und Dateien}[files]
 \makexindyindex*{Klassen- und Paketoptionen}[options]
-\makexindyindex*{Befehle und Umgebungen}[macros]
+\makexindyindex*{Befehle und Umgebungen mit dazugeh\"origen Parametern}[macros]
 \makexindyindex*{Sprachabh\"angige Bezeichner}[terms]
 \makexindyindex*{Seitenstile, Schriftelemente und Farben}[elements]
 \makexindyindex*{L\"angen und Z\"ahler}[misc]
@@ -423,6 +423,7 @@
   }%
   \global\let\tud@shellescape@wrn\relax%
 }
+\newrobustcmd*\Path[1]{\mbox{\texttt{#1}}}
 \newrobustcmd*\textOR{\,\textbardbl\,}
 \newrobustcmd*\PValue[1]{\mbox{\texttt{#1}}}
 \newrobustcmd*\PName[1]{\PValue{\textsl{<#1>}}}
@@ -437,7 +438,6 @@
 }
 \newrobustcmd*\PParameter[1]{\mbox{\texttt{\{#1\}}}}
 \newrobustcmd*\POParameter[1]{\mbox{\texttt{[#1]}}}
-\newrobustcmd*\Path[1]{\mbox{\texttt{#1}}}
 \newcommand*\@gobbleparameters{%
   \let\PValue\@gobble%
   \let\PName\@gobble%
@@ -568,7 +568,6 @@
     }%
   \fi%
   \vskip-\lastskip%
-  % TODO §§§  das muss anders gelöst werden, index funktioniert so nicht
   \@gobbleparameters%
   \@declaretrue\@openindexfalse#1\@declarefalse%
   \pagebreak[1]%
@@ -586,7 +585,6 @@
       forget to print this list with \string\printchangedatlist?%
     }%
   \fi%
-  % TODO §§§  das muss anders gelöst werden, index funktioniert so nicht
   \@gobbleparameters%
   \@declaretrue\@openindexfalse#1\@declarefalse%
 }
@@ -610,6 +608,7 @@
     \ifboolexpr{bool {@preset@list} or bool {@additional@list}}{%
       \if@preset@list%
         \qquad%
+        % $$$ statt \texttt besser mit \PValue beim Erstellen der Liste
         \texttt{%
           \begin{tabular}{l@{}}%
             \forlistloop\@tempa{\list@Preset}%
@@ -765,11 +764,12 @@
 }
 \NewDocumentCommand\Key@Value{mmmod()d''d||}{%
   \if@changedat%
+    % $$$ statt [Parameter] das optionale Argument in Liste
     \@ProcessChangedAt{\Key{#2}{#3}}(#5)[Parameter]%
   \else%
     \@SetMarkupFormat{\ttfamily}[Parameter]%
     \@ProcessMarkup{\Key{#2}{#3}}[#4](#5)'#6'%
-    \@ProcessIndex{\Key{#2}{#3}}[#4](#5){#1}|#7|[Parameter]%
+    \@ProcessIndex{\Key{#2}{#3}}[#4](#5){#1}|#7|%
   \fi%
 }
 \NewExpandableDocumentCommand\@Term{sm}{#2}
@@ -1076,7 +1076,7 @@
   \else%
     \index[\@templabel]{\@tempkey\@tempentry @\@tempformat\IfValueT{#4}{|#4}}%
   \fi%
-%
+% $$$ noch nötig?
 %  \IfValueT{#2}{%
 %    \typeoutargs{#2}%
 %    \if@declare%
@@ -1202,12 +1202,12 @@
       \def\noexpand#3{#3}%
     }%
   \tud@reserved%
+  \tud@replace#1{@}{"@}%
   \def#2{#4}%
   \ifx\@tempbundle\@bundledefault\else%
     \appto#2{(\@tempbundle)}%
   \fi%
-  % TODO §§§
-%  \IfValueT{#5}{\appto#2{#5}}%
+  \IfValueT{#5}{\appto#2{\protecting{#5}}}%
   \IfValueT{#7}{%
     \appto#1{ #7}%
     \appto#2{\suffix{#7}}%
@@ -1220,8 +1220,6 @@
       \fi%
     \fi%
   \fi%
-  \tud@replace#1{@}{"@}%
-  \protected@edef#2{#2}%
 }
 \newcommand*\tud@replace[3]{%
   \begingroup%
@@ -1744,6 +1742,7 @@
   \begingroup%
     \@printindex%
     \@printindex[options]%
+    % $$$ indexprologue mit hinweis auf darstellung der parameter
     \@printindex[macros]%
     \@printindex[terms]%
     \@printindex[elements]%
@@ -1952,7 +1951,7 @@
 \@onlypreamble\tracingbundle
 \newcommand*\typeoutargs[1]{%
   \begingroup%
-    \typeout{:::::}%
+    \typeout{^^J:::::}%
     \def\@tempa##1{\toks@{##1}\typeout{\the\toks@}}%
     \forcsvlist{\@tempa}{#1}%
   \endgroup%
