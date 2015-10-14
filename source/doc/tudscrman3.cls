@@ -368,27 +368,35 @@
 )^^J%
 }
 \closeout\tud@write@i
-\NewDocumentCommand\makexindyindex{omo}{%
+\NewDocumentCommand\makexindyindex{somo}{%
+  \let\@tempb\@empty%
+  \IfBooleanT{#1}{%
+    \def\@tempc{\jobname-#4-declare.idx}%
+    \makeindex[name={#4-declare}]%
+    \IfFileExists{\@tempc}{%
+      \edef\@tempb{-o \jobname-#4.ind \@tempc}%
+    }{\ClassWarning{tudscrman}{File \@tempc\space not found}}%
+  }%
   \protected@edef\@tempa{%
-    title={#2},%
-    \IfValueTF{#3}{%
-      options={-M \jobname-temp.xdy -L german-din -t \jobname-#3.xlg},%
-      name={#3},%
+    title={#3},%
+    columnsep=\noexpand\the\columnsep,%
+    \IfValueTF{#4}{%
+      name={#4},%
+      options={-M \jobname-temp.xdy -L german-din -t \jobname-#4.xlg \@tempb},%
     }{%
       options={-M \jobname-temp.xdy -L german-din -t \jobname.xlg},%
     }%
-    columnsep=\noexpand\the\columnsep,%
-    \IfValueT{#1}{#1}%
+    \IfValueT{#2}{#2}%
   }%
   \expandafter\makeindex\expandafter[\@tempa]
 }
 \makexindyindex{Allgemeiner Index}
-\makexindyindex{Klassen, Pakete und Dateien}[files]
-\makexindyindex{Klassen- und Paketoptionen}[options]
-\makexindyindex{Befehle und Umgebungen}[macros]
-\makexindyindex{Sprachabh\"angige Bezeichner}[terms]
-\makexindyindex{Seitenstile, Schriftelemente und Farben}[elements]
-\makexindyindex{L\"angen und Z\"ahler}[misc]
+\makexindyindex*{Klassen, Pakete und Dateien}[files]
+\makexindyindex*{Klassen- und Paketoptionen}[options]
+\makexindyindex*{Befehle und Umgebungen}[macros]
+\makexindyindex*{Sprachabh\"angige Bezeichner}[terms]
+\makexindyindex*{Seitenstile, Schriftelemente und Farben}[elements]
+\makexindyindex*{L\"angen und Z\"ahler}[misc]
 \makexindyindex[columns=1]{\"Anderungsliste}[changelog]
 \undef\makexindyindex
 \RequirePackage{enumitem}[2011/09/28]
@@ -560,6 +568,7 @@
     }%
   \fi%
   \vskip-\lastskip%
+  % TODO §§§  das muss anders gelöst werden, index funktioniert so nicht
   \@gobbleparameters%
   \@declaretrue\@openindexfalse#1\@declarefalse%
   \pagebreak[1]%
@@ -577,6 +586,7 @@
       forget to print this list with \string\printchangedatlist?%
     }%
   \fi%
+  % TODO §§§  das muss anders gelöst werden, index funktioniert so nicht
   \@gobbleparameters%
   \@declaretrue\@openindexfalse#1\@declarefalse%
 }
@@ -644,7 +654,7 @@
   \begingroup%
     \in@{=}{#1}%
     \ifin@%
-      \def\@tempa##1=##2\@nil{\toks@{{##1}[=##2]}}%
+      \def\@tempa##1=##2\@nil{\toks@{{##1}[=\PValue{##2}]}}%
     \else%
       \def\@tempa##1\@nil{\toks@{{##1}}}%
     \fi%
@@ -1047,8 +1057,9 @@
 % |#4|: optionale Indexformatierung
 % [#5]: optionaler Suffix in der Index-Ausgabe
 \NewDocumentCommand\@@ProcessIndex{mr[]r()r||r[]}{%
-  \@getindexentry\@tempentry\@tempformat\@tempkey{#1}(#3)[#5]%
-  \let\@tempa\@empty%
+  \@getindexentry\@tempentry\@tempformat\@tempkey{#1}[#2](#3)[#5]%
+  \ifx\@tempkey\@empty\else\appto\@tempkey{!}\fi%
+  \@getsublabel*\@templabel{#1}%
   \if@declare%
     \if@openindex%
       \IfValueT{#4}{%
@@ -1058,18 +1069,24 @@
           environments `Declaration' or `Declaration*'%
         }%
       }%
-      \def\@tempa{|(declare}%
+      \index[\@templabel-declare]{\@tempkey\@tempentry @\@tempformat|(declare}%
     \else%
-      \def\@tempa{|declare)}%
+      \index[\@templabel-declare]{\@tempkey\@tempentry|declare)}%
     \fi%
   \else%
-    \IfValueT{#4}{\def\@tempa{|#4}}%
+    \index[\@templabel]{\@tempkey\@tempentry @\@tempformat\IfValueT{#4}{|#4}}%
   \fi%
-  \@getsublabel*\@templabel{#1}%
-  \index[\@templabel]{%
-    \ifx\@tempkey\@empty\else\@tempkey!\fi%
-    \@tempentry @\@tempformat\@tempa%
-  }%
+%
+%  \IfValueT{#2}{%
+%    \typeoutargs{#2}%
+%    \if@declare%
+%      \typeout{declare}%
+%    \else%
+%      \typeout{not}%
+%    \fi%
+%    \typeout{\@tempentry}%
+%    \typeout{\@tempformat}%
+%  }%
 }
 % {#1}: Markup für Änderungsliste
 % (#2): optionale Subdeclaration
@@ -1156,10 +1173,10 @@
     \the\toks@%
   }%
 }
-\NewDocumentCommand\@getindexentry{mmmmd()d[]}{%
+\NewDocumentCommand\@getindexentry{mmmmor()r[]}{%
   \let\@tempbundle\@bundledefault%
-  \IfValueTF{#5}{%
-    \def\@tempbundle{#5}%
+  \IfValueTF{#6}{%
+    \def\@tempbundle{#6}%
   }{%
     \tud@ifbundle{%
       \tud@iflabelexists*{\@bundle:#4}{%
@@ -1173,25 +1190,27 @@
       \@suppressoutput%
       \let\Key\@firstoftwo%
       #4%
-      \def\@tempkey{\expandonce#1@\expandonce#2}%
+      \def#3{\expandonce#1@\expandonce#2}%
       \let\Key\@secondoftwo%
     \else%
       \@suppressmarkup%
-      \let\@tempkey\@empty%
+      \let#3\@empty%
     \fi%
     \edef\tud@reserved{%
       \noexpand\endgroup%
       \def\noexpand#1{#4}%
-      \def\noexpand\@tempkey{\@tempkey}%
+      \def\noexpand#3{#3}%
     }%
   \tud@reserved%
   \def#2{#4}%
   \ifx\@tempbundle\@bundledefault\else%
     \appto#2{(\@tempbundle)}%
   \fi%
-  \IfValueT{#6}{%
-    \appto#1{ #6}%
-    \appto#2{\suffix{#6}}%
+  % TODO §§§
+%  \IfValueT{#5}{\appto#2{#5}}%
+  \IfValueT{#7}{%
+    \appto#1{ #7}%
+    \appto#2{\suffix{#7}}%
   }%
   \if@changedat\else%
     \ifx\@tempbundle\@bundledefault\else%
@@ -1933,6 +1952,7 @@
 \@onlypreamble\tracingbundle
 \newcommand*\typeoutargs[1]{%
   \begingroup%
+    \typeout{:::::}%
     \def\@tempa##1{\toks@{##1}\typeout{\the\toks@}}%
     \forcsvlist{\@tempa}{#1}%
   \endgroup%
