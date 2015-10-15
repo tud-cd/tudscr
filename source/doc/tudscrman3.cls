@@ -423,34 +423,6 @@
   }%
   \global\let\tud@shellescape@wrn\relax%
 }
-\newrobustcmd*\Path[1]{\mbox{\texttt{#1}}}
-\newrobustcmd*\textOR{\,\textbardbl\,}
-\newrobustcmd*\PValue[1]{\mbox{\texttt{#1}}}
-\newrobustcmd*\PName[1]{\PValue{\textsl{<#1>}}}
-\newrobustcmd*\PSet{\PName{Einstellung}}
-\newrobustcmd*\PBoolean{\PName{Ein-Aus-Wert}}
-\newrobustcmd*\PBName[1]{\PBoolean\PValue{\textOR}\PName{#1}}
-\newrobustcmd*\Parameter[1]{\mbox{\texttt{\{}\PName{#1}\texttt{\}}}}
-\newrobustcmd*\OParameter[1]{\mbox{\texttt{[}\PName{#1}\texttt{]}}}
-\newrobustcmd*\LParameter{\mbox{\texttt{[}\PName{Parameterliste}\texttt{]}}}
-\newrobustcmd*\OLParameter[1]{%
-  \mbox{\texttt{[}\PName{#1}\PValue{\textOR}\PName{Parameterliste}\texttt{]}}%
-}
-\newrobustcmd*\PParameter[1]{\mbox{\texttt{\{#1\}}}}
-\newrobustcmd*\POParameter[1]{\mbox{\texttt{[#1]}}}
-\newcommand*\@gobbleparameters{%
-  \let\PValue\@gobble%
-  \let\PName\@gobble%
-  \let\PSet\@empty%
-  \let\PBoolean\@empty%
-  \let\PBName\@gobble%
-  \let\Parameter\@gobble%
-  \let\OParameter\@gobble%
-  \let\LParameter\@empty%
-  \let\OLParameter\@gobble%
-  \let\PParameter\@gobble%
-  \let\POParameter\@gobble%
-}
 \newrobustcmd*\suffix[1]{\begingroup~\footnotesize(#1)\endgroup}
 \newif\if@declare
 \newif\if@openindex
@@ -653,7 +625,8 @@
   \begingroup%
     \in@{=}{#1}%
     \ifin@%
-      \def\@tempa##1=##2\@nil{\toks@{{##1}[=\PValue{##2}]}}%
+      % §§§ \PValue raus?
+      \def\@tempa##1=##2\@nil{\toks@{{##1}[\PValue{=##2}]}}%
     \else%
       \def\@tempa##1\@nil{\toks@{{##1}}}%
     \fi%
@@ -764,7 +737,8 @@
 }
 \NewDocumentCommand\Key@Value{mmmod()d''d||}{%
   \if@changedat%
-    % $$$ statt [Parameter] das optionale Argument in Liste
+    % $$$ statt Suffix [Parameter] lieber das optionale Argument in Liste?
+    % $$$ spezielle/neue Werte in Liste aufführen?!
     \@ProcessChangedAt{\Key{#2}{#3}}(#5)[Parameter]%
   \else%
     \@SetMarkupFormat{\ttfamily}[Parameter]%
@@ -839,16 +813,33 @@
     \@ProcessIndex{\Counter{#2}}(#3){#1}|#5|[Z\"ahler]%
   \fi%
 }
-\newcommand*\@templabel{}
-\newcommand*\@tempentry{}
-\newcommand*\@tempformat{}
-\newcommand*\@tempkey{}
-\newcommand*\@tempbundle{}
-\newcommand*\@templist{}
-\let\@templist\relax%
-\newtoks\tud@toks@
-\newcommand*\eaddto@hook[2]{%
-  \expandafter\addto@hook\expandafter#1\expandafter{#2}%
+\newrobustcmd*\Path[1]{\mbox{\texttt{#1}}}
+\newrobustcmd*\textOR{\,\textbardbl\,}
+\newrobustcmd*\PValue[1]{\mbox{\texttt{#1}}}
+\newrobustcmd*\PName[1]{\PValue{\textsl{<#1>}}}
+\newrobustcmd*\PSet{\PName{Einstellung}}
+\newrobustcmd*\PBoolean{\PName{Ein-Aus-Wert}}
+\newrobustcmd*\PBName[1]{\PBoolean\PValue{\textOR}\PName{#1}}
+\newrobustcmd*\Parameter[1]{\mbox{\texttt{\{}\PName{#1}\texttt{\}}}}
+\newrobustcmd*\OParameter[1]{\mbox{\texttt{[}\PName{#1}\texttt{]}}}
+\newrobustcmd*\LParameter{\mbox{\texttt{[}\PName{Parameterliste}\texttt{]}}}
+\newrobustcmd*\OLParameter[1]{%
+  \mbox{\texttt{[}\PName{#1}\PValue{\textOR}\PName{Parameterliste}\texttt{]}}%
+}
+\newrobustcmd*\PParameter[1]{\mbox{\texttt{\{#1\}}}}
+\newrobustcmd*\POParameter[1]{\mbox{\texttt{[#1]}}}
+\newcommand*\@gobbleparameters{%
+  \let\PValue\@gobble%
+  \let\PName\@gobble%
+  \let\PSet\@empty%
+  \let\PBoolean\@empty%
+  \let\PBName\@gobble%
+  \let\Parameter\@gobble%
+  \let\OParameter\@gobble%
+  \let\LParameter\@empty%
+  \let\OLParameter\@gobble%
+  \let\PParameter\@gobble%
+  \let\POParameter\@gobble%
 }
 \NewDocumentCommand\@suppressmarkup{s}{%
   \let\Application\@Application%
@@ -867,6 +858,17 @@
   \let\Length\@Length%
   \let\Counter\@Counter%
   \IfBooleanF{#1}{%
+    \let\PValue\@firstofone%
+    \let\PName\@firstofone%
+    \let\PSet\relax%
+    \let\PBoolean\relax%
+    \let\PBName\@firstofone%
+    \let\Parameter\@firstofone%
+    \let\OParameter\@firstofone%
+    \let\LParameter\relax%
+    \let\OLParameter\@firstofone%
+    \let\PParameter\@firstofone%
+    \let\POParameter\@firstofone%
     \let\hologoRobust\@firstofone%
     \let\TUDScript\@TUDScript%
     \def\_{-}%
@@ -875,6 +877,17 @@
 }
 \AfterPackage{hyperref}{%
   \expandafter\pdfstringdefDisableCommands\expandafter{\@suppressmarkup}%
+}
+\newcommand*\@templabel{}
+\newcommand*\@tempentry{}
+\newcommand*\@tempformat{}
+\newcommand*\@tempkey{}
+\newcommand*\@tempbundle{}
+\newcommand*\@templist{}
+\let\@templist\relax%
+\newtoks\tud@toks@
+\newcommand*\eaddto@hook[2]{%
+  \expandafter\addto@hook\expandafter#1\expandafter{#2}%
 }
 \NewDocumentCommand\@getsublabel{smm}{%
   \begingroup%
@@ -1033,7 +1046,6 @@
 % {#4}: Stern?
 % |#5|: optionale Indexformatierung
 % [#6]: optionaler Suffix in der Index-Ausgabe
-% TODO §§§ optionales Argument für Optionen (key=value) als subentry
 \NewDocumentCommand\@ProcessIndex{mod()md||o}{%
   \ifboolexpr{%
     bool {@tud@index} or bool {@obsolete}%
@@ -1057,8 +1069,7 @@
 % |#4|: optionale Indexformatierung
 % [#5]: optionaler Suffix in der Index-Ausgabe
 \NewDocumentCommand\@@ProcessIndex{mr[]r()r||r[]}{%
-  \@getindexentry\@tempentry\@tempformat\@tempkey{#1}[#2](#3)[#5]%
-  \ifx\@tempkey\@empty\else\appto\@tempkey{!}\fi%
+  \@getindex\@tempentry\@tempformat\@tempkey{#1}[#2](#3)[#5]%
   \@getsublabel*\@templabel{#1}%
   \if@declare%
     \if@openindex%
@@ -1074,26 +1085,33 @@
       \index[\@templabel-declare]{\@tempkey\@tempentry|declare)}%
     \fi%
   \else%
+    \IfValueT{#2}{%
+      \begingroup%
+        \@gobbleparameters%
+        \let\PValue\@firstofone%
+        \@getlabel\@templabel{#3:#1}%
+        \def\tud@reserved{\endgroup}%
+        \tud@iflabelexists{\@templabel}{%
+          \ifstr{#2}{=}{}{%
+            \edef\tud@reserved{%
+              \noexpand\endgroup%
+              \def\noexpand\@tempentry{\@tempentry!\@tempentry #2}%
+            }%
+          }%
+        }{}%
+      \tud@reserved%
+    }%
     \index[\@templabel]{\@tempkey\@tempentry @\@tempformat\IfValueT{#4}{|#4}}%
   \fi%
-% $$$ noch nötig?
-%  \IfValueT{#2}{%
-%    \typeoutargs{#2}%
-%    \if@declare%
-%      \typeout{declare}%
-%    \else%
-%      \typeout{not}%
-%    \fi%
-%    \typeout{\@tempentry}%
-%    \typeout{\@tempformat}%
-%  }%
 }
 % {#1}: Markup für Änderungsliste
 % (#2): optionale Subdeclaration
 % [#3]: optionaler Suffix in der Ausgabe der Änderungsliste
+% [#4]: Suffix für Änderungsliste
 \NewDocumentCommand\@ProcessChangedAt{md()o}{%
-  \@getindexentry\@tempentry\@tempformat\@tempkey{#1}(#2)[#3]%
+  \@getindex\@tempentry\@tempformat\@tempkey{#1}(#2)[#3][Parameter angepasst]%
 }
+% Verwendung dokumentieren!
 \NewDocumentCommand\@Label{m}{\@@Label#1}
 \NewDocumentCommand\@@Label{mmm}{%
   \begingroup%
@@ -1123,6 +1141,7 @@
   \@tempc%
   \tud@replace\ProcessedArgument{@}{<at>}%
 }
+% Verwendung dokumentieren!
 \NewDocumentCommand\tud@iflabelexists{s>{\@Label}>{\SplitArgument{2}{:}}m}{%
   \ifcsdef{r@#2}{%
     \expandafter\@firstoftwo%
@@ -1138,6 +1157,7 @@
     }%
   }%
 }
+% Verwendung dokumentieren!
 \NewDocumentCommand\@getlabel{sm>{\@Label}>{\SplitArgument{2}{:}}m}{%
   \def#2{#3}%
   \IfBooleanTF{#1}{%
@@ -1173,7 +1193,7 @@
     \the\toks@%
   }%
 }
-\NewDocumentCommand\@getindexentry{mmmmor()r[]}{%
+\NewDocumentCommand\@getindex{mmmmor()r[]o}{%
   \let\@tempbundle\@bundledefault%
   \IfValueTF{#6}{%
     \def\@tempbundle{#6}%
@@ -1190,7 +1210,7 @@
       \@suppressoutput%
       \let\Key\@firstoftwo%
       #4%
-      \def#3{\expandonce#1@\expandonce#2}%
+      \def#3{\expandonce#1@\expandonce#2\IfValueT{#8}{: #8}!}%
       \let\Key\@secondoftwo%
     \else%
       \@suppressmarkup%
@@ -1391,11 +1411,7 @@
         \appto\@tempentry{ #4}%
         \appto\@tempformat{: #4}%
       }%
-      \index[changelog]{%
-        #1!#2!%
-        \ifx\@tempkey\@empty\else\@tempkey: Parameter angepasst!\fi%
-        \@tempentry @\@tempformat%
-      }%
+      \index[changelog]{#1!#2!\@tempkey\@tempentry @\@tempformat}%
     }{%
       \index[changelog]{#1!#2!#3}%
     }%
@@ -1741,9 +1757,19 @@
 \newcommand*\PrintIndex{%
   \begingroup%
     \@printindex%
+    % ///
+    \begingroup%
+      \def\lettergroup##1{%
+          \null\clearpage\textbf{##1}\par%
+          \nopagebreak%
+      }%
+    % \\\
     \@printindex[options]%
     % $$$ indexprologue mit hinweis auf darstellung der parameter
     \@printindex[macros]%
+    % ///
+    \endgroup%
+    % \\\
     \@printindex[terms]%
     \@printindex[elements]%
     \@printindex[misc]%
@@ -1777,8 +1803,9 @@
     \indexprologue[\@printindexskip]{\tudhyperdef*{idx:#1}}%
     \printindex[#1]\@printindexskip%
   }%
-  % $$$ raus
+  % ///
   \clearpage%
+  % \\\
 }
 \newcommand*\PrintChangelog{%
   \begingroup%
@@ -1788,8 +1815,9 @@
       \let\subsubitem\subitem%
       \let\subitem\item%
       \renewcommand*\item{%
-        % $$$ raus
+        % ///
         \clearpage%
+        % \\\
         \begingroup%
           \escapechar=`\\%
           \catcode\endlinechar=\active%
