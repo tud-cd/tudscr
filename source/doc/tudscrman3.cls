@@ -319,6 +319,7 @@
 )^^J%
 (markup-range :sep "--")^^J%
 (markup-locclass-list^^J%
+% §§§ halbe Abstände raus?
 \space\space :open "\string\,\string\dotfill\string\,"^^J%
 \space\space :close "\string\relax"^^J%
 )^^J%
@@ -1086,21 +1087,19 @@
       \index[\@templabel-declare]{\@tempkey\@tempentry|declare)}%
     \fi%
   \else%
-    % TODO §§§ gleiche Option mit mehreren unterschiedlichen Werten ohne Label?
     \IfValueT{#2}{%
       \begingroup%
         \@gobbleparameters%
         \let\PValue\@firstofone%
         \@getlabel\@templabel{#3:#1}%
-        \def\tud@reserved{\endgroup}%
-        \tud@iflabelexists{\@templabel}{%
-          \ifstr{#2}{}{}{%
-            \protected@edef\tud@reserved{%
-              \noexpand\endgroup%
-              \def\noexpand\@tempentry{\@tempentry!\@tempentry #2}%
-            }%
+        \ifstr{#2}{}{%
+          \def\tud@reserved{\endgroup}%
+        }{%
+          \protected@edef\tud@reserved{%
+            \noexpand\endgroup%
+            \def\noexpand\@tempentry{\@tempentry!\@tempentry=#2}%
           }%
-        }{}%
+        }%
       \tud@reserved%
     }%
     \index[\@templabel]{\@tempkey\@tempentry @\@tempformat\IfValueT{#4}{|#4}}%
