@@ -814,6 +814,7 @@
 \newrobustcmd*\textOR{\,\textbardbl\,}
 \newrobustcmd*\PValue[1]{\mbox{\texttt{#1}}}
 \newrobustcmd*\PName[1]{\PValue{\textsl{<#1>}}}
+\newrobustcmd*\PValueName[1]{\PName{#1}}
 \newrobustcmd*\PSet{\PName{Einstellung}}
 \newrobustcmd*\PBoolean{\PName{Ein-Aus-Wert}}
 \newrobustcmd*\PBName[1]{\PBoolean\PValue{\textOR}\PName{#1}}
@@ -828,6 +829,7 @@
 \newcommand*\@gobbleparameters{%
   \let\PValue\@gobble%
   \let\PName\@gobble%
+  \let\PValueName\@gobble%
   \let\PSet\@empty%
   \let\PBoolean\@empty%
   \let\PBName\@gobble%
@@ -857,6 +859,7 @@
   \IfBooleanF{#1}{%
     \let\PValue\@firstofone%
     \let\PName\@firstofone%
+    \let\PValueName\@firstofone%
     \let\PSet\relax%
     \let\PBoolean\relax%
     \let\PBName\@firstofone%
@@ -1091,6 +1094,7 @@
       \begingroup%
         \@gobbleparameters%
         \let\PValue\@firstofone%
+        \let\PValueName\@firstofone%
         \@getlabel\@templabel{#3:#1}%
         \ifstr{#2}{}{%
           \def\tud@reserved{\endgroup}%
@@ -1102,7 +1106,14 @@
         }%
       \tud@reserved%
     }%
-    \index[\@templabel]{\@tempkey\@tempentry @\@tempformat\IfValueT{#4}{|#4}}%
+    \IfValueT{#4}{%
+      \ifstr{#4}{declare}{%
+        \appto\@templabel{-declare}%
+      }{%
+        \appto\@tempformat{|#4}%
+      }%
+    }%
+    \index[\@templabel]{\@tempkey\@tempentry @\@tempformat}%
   \fi%
 }
 % {#1}: Markup für Änderungsliste
@@ -1856,6 +1867,8 @@
 \newcommand*\CDs{Corporate Designs\xspace}
 \newcommand*\TUD{Technische Universit\"at Dresden\xspace}
 \newcommand*\TnUD{Technischen Universit\"at Dresden\xspace}
+\newcommand*\TUDCD{\CD der \TnUD}%
+\newcommand*\TUDCDs{\CDs der \TnUD}%
 \newcommand*\DDC{%
   \mbox{%
     D\kern.05em R\kern.05em E\kern.05em S\kern.05em D\kern.05em E\kern.05em
@@ -1879,7 +1892,9 @@
 \DeclareTextFontCommand\textsbs{\sbsfont}
 \newlength\tempdim
 \newcommand*\Attention[1]{\marginnote{\fbox{Achtung!}}\emph{#1\unskip}}
-\newcommand*\hrfn[2]{\href{#1}{#2}\footnote{\strut\scalebox{0.95}{\url{#1}}}}
+\newcommand*\hrfn[2]{%
+  \href{#1}{\trim@spaces{#2}}\footnote{\strut\scalebox{0.95}{\url{#1}}}%
+}
 \NewDocumentCommand\Forum{s}{%
   \IfBooleanTF{#1}{%
     \url{http://latex.wcms-file3.tu-dresden.de/phpBB3/}%
