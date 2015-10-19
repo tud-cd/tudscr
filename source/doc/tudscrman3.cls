@@ -319,7 +319,6 @@
 )^^J%
 (markup-range :sep "--")^^J%
 (markup-locclass-list^^J%
-% §§§ halbe Abstände raus?
 \space\space :open "\string\,\string\dotfill\string\,"^^J%
 \space\space :close "\string\relax"^^J%
 )^^J%
@@ -733,8 +732,8 @@
 }
 \NewDocumentCommand\Key@Value{mmmd==d==d()d''d||}{%
   \if@changedat%
-    % $$$ statt Suffix [Parameter] lieber das optionale Argument in Liste?
-    % $$$ spezielle/neue Werte in Liste aufführen?!
+    % §§§ statt Suffix [Parameter] lieber das optionale Argument in Änd-Liste?
+    % §§§ spezielle/neue Werte in Liste aufführen?!
     \@ProcessChangedAt{\Key{#2}{#3}}(#6)[Parameter]%
   \else%
     \@SetMarkupFormat{\ttfamily}[Parameter]%
@@ -1099,8 +1098,12 @@
         \ifstr{#2}{}{%
           \def\tud@reserved{\endgroup}%
         }{%
+          \def\@tempa{%
+            \@getindex*\@tempentry\@tempformat\@tempkey{#1}=#2=(#3)[#5]%
+          }%
           \protected@edef\tud@reserved{%
             \noexpand\endgroup%
+            \expandonce\@tempa%
             \def\noexpand\@tempentry{\@tempentry!\@tempentry=#2}%
           }%
         }%
@@ -1109,6 +1112,7 @@
     \IfValueT{#4}{%
       \ifstr{#4}{declare}{%
         \appto\@templabel{-declare}%
+        \appto\@tempformat{|declare}%
       }{%
         \appto\@tempformat{|#4}%
       }%
@@ -1121,6 +1125,7 @@
 % [#3]: optionaler Suffix in der Ausgabe der Änderungsliste
 % [#4]: Suffix für Änderungsliste
 \NewDocumentCommand\@ProcessChangedAt{md()o}{%
+  % \getindex*? $$$
   \@getindex\@tempentry\@tempformat\@tempkey{#1}(#2)[#3]!Parameter angepasst!%
 }
 % Verwendung dokumentieren!
@@ -1170,7 +1175,6 @@
   }%
 }
 % Verwendung dokumentieren!
-% $$$ separates Label für option=value aus Liste?!
 \NewDocumentCommand\@getlabel{sm>{\@Label}>{\SplitArgument{2}{:}}m}{%
   \def#2{#3}%
   \IfBooleanTF{#1}{%
@@ -1206,60 +1210,60 @@
     \the\toks@%
   }%
 }
-\NewDocumentCommand\@getindex{mmmmd==r()r[]d!!}{%
+\NewDocumentCommand\@getindex{smmmmd==r()r[]d!!}{%
   \let\@tempbundle\@bundledefault%
-  \IfValueTF{#6}{%
-    \def\@tempbundle{#6}%
+  \IfValueTF{#7}{%
+    \def\@tempbundle{#7}%
   }{%
     \tud@ifbundle{%
-      \tud@iflabelexists*{\@bundle:#4}{%
+      \tud@iflabelexists*{\@bundle:#5}{%
         \edef\@tempbundle{\expandonce\@bundle}%
       }{}%
     }{}%
   }%
   \begingroup%
-    \in@{\Key}{#4}%
+    \in@{\Key}{#5}%
     \ifin@%
       \@suppressoutput%
       \let\Key\@firstoftwo%
-      #4%
-      \def#3{\expandonce#1@\expandonce#2\IfValueT{#8}{: #8}!}%
+      #5%
+      \def#4{\expandonce#2@\expandonce#3\IfValueT{#9}{: #9}!}%
       \let\Key\@secondoftwo%
     \else%
       \@suppressmarkup%
-      \let#3\@empty%
+      \let#4\@empty%
     \fi%
     \edef\tud@reserved{%
       \noexpand\endgroup%
-      \def\noexpand#1{#4}%
-      \def\noexpand#3{#3}%
+      \def\noexpand#2{#5}%
+      \def\noexpand#4{#4}%
     }%
   \tud@reserved%
-  \tud@replace#1{@}{"@}%
-  \def#2{#4}%
-  \IfValueT{#5}{\appto#2{=\protecting{#5}=}}%
+  \tud@replace#2{@}{"@}%
+  \def#3{#5}%
+  \IfValueT{#6}{\appto#3{=\protecting{#6}=}}%
   \ifx\@tempbundle\@bundledefault\else%
-    \appto#2{(\@tempbundle)}%
+    \appto#3{(\@tempbundle)}%
   \fi%
-  \IfValueT{#7}{%
-    \appto#1{ #7}%
-    \appto#2{\suffix{#7}}%
+  \IfValueT{#8}{%
+    \appto#2{ #8}%
+    \appto#3{\suffix{#8}}%
   }%
-  \if@changedat\else%
-    \ifx\@tempbundle\@bundledefault\else%
-      \in@{\Key}{#4}%
-      \ifin@\else%
-        \appto#2{\suffix{\@tempbundle}}%
-      \fi%
-    \fi%
+  \@tempswatrue%
+  \if@changedat\@tempswafalse\fi%
+  \ifx\@tempbundle\@bundledefault\@tempswafalse\fi%
+  \in@{\Key}{#5}\ifin@\@tempswafalse\fi%
+  \IfBooleanT{#1}{\@tempswafalse}%
+  \if@tempswa%
+    \appto#3{\suffix{\@tempbundle}}%
   \fi%
 }
 \newcommand*\tud@replace[3]{%
   \begingroup%
-    % Ergebnis: \def\@tempa##1@##2\relax{\@tempb{##1}{##2}}%
+    % Ergebnis: \def\@tempa##1@##2\@nnil{\@tempb{##1}{##2}}%
     \toks@{\def\@tempa##1}%
     \eaddto@hook\toks@{\detokenize{#2}}%
-    \addto@hook\toks@{##2\relax{\@tempb{##1}{##2}}}%
+    \addto@hook\toks@{##2\@nnil{\@tempb{##1}{##2}}}%
     \the\toks@%
     \def\@tempb##1##2{%
       \if\relax\detokenize{##2}\relax%
@@ -1267,15 +1271,15 @@
         \let\@tempc\relax%
       \else%
         \appto#1{##1#3}%
-        \def\@tempc{\@tempa##2\relax}%
+        \def\@tempc{\@tempa##2\@nnil}%
       \fi%
       \@tempc%
     }%
-    % Ergebnis: \@tempa #1@relax%
+    % Ergebnis: \@tempa #1@\@nnil%
     \toks@{\@tempa}%
     \edef\@tempc{\expandafter\detokenize\expandafter{#1}}%
     \eaddto@hook\toks@{\@tempc}%
-    \eaddto@hook\toks@{\detokenize{#2}\relax}%
+    \eaddto@hook\toks@{\detokenize{#2}\@nnil}%
     \def#1{}%
     \the\toks@%
     \edef\tud@reserved{%
@@ -1341,8 +1345,8 @@
 \NewDocumentCommand\@ChangedAt@@CreateList{r[]r()>{\SplitArgument{1}{:}}m}{%
   \@ChangedAt@@@CreateList[#1](#2)#3%
 }
-% $$$ optionale Argumente bei \Option etc. beachten (cd=alternative)
-% $$$ Links in Liste überprüfen (cd=alternative), evtl '.obsolete' bevorzugen?
+% §§§ optionale Argumente bei \Option etc. beachten (cd=alternative)
+% §§§ Links in Liste überprüfen (cd=alternative), evtl '.obsolete' bevorzugen?
 \NewDocumentCommand\@ChangedAt@@@CreateList{r[]r()mm}{%
   \IfValueTF{#1}{%
     \begingroup%
@@ -1555,13 +1559,12 @@
     \setlength\changedatskip{-\baselineskip}%
   }{}%
 }
-% §§§ Umgebung values mit Argument für Option=value etc.
-% §§§ ersten Wert für Indexeintrag verwenden, an '/' splitten
-% §§§ Indexeintrag als |declare?!
 \newcommand*\tud@values{}
 \NewDocumentEnvironment{values}{go}{%
-  \IfValueTF{#1}{\def\tud@values{#1'none'=}}{%
-%    \ClassWarning{tudscrman}{argument for values is missing}%
+  \def\tud@values{#1}%
+  \IfValueF{#1}{%
+    \let\tud@values\@empty%
+    \ClassWarning{tudscrman}{argument for values is missing}%
   }%
   \@values%
 }{%
@@ -1572,21 +1575,38 @@
   topsep=.5\baselineskipglue,labelwidth=\columnwidth,labelsep=0pt,%
   font=\normalfont\ttfamily,before=\before@item{values}%
 }
+\DeclareListParser*{\forslashlist}{/}%
 \NewDocumentCommand\tud@item@values{sood()}{%
   \let\@tempa\@empty%
-  % §§§ rein
-%  \let\@tempa\tud@values%
   \IfValueT{#2}{%
-    \toks@{}%
-    \IfBooleanTF{#1}{%
-      \appto\@tempa{\emph{#2}\normalfont\suffix{S\"aumniswert}}%
-    }{%
-      \appto\@tempa{#2\normalfont}
-      \IfValueT{#3}{\appto\@tempa{\suffix{S\"aumniswert f\"ur #3}}}%
+    \def\@tempa##1{%
+      \if@tempswa%
+        \appto\@tempc{/##1}%
+      \else%
+        \@tempswatrue%
+        \def\@tempb{##1}%
+        \let\@tempc\@empty%
+      \fi%
     }%
-    \IfValueT{#4}{\appto\@tempa{\suffix{#4}}}
+    \@tempswafalse%
+    \forslashlist{\@tempa}{#2}%
+    \edef\@tempb{%
+      =\IfBooleanTF{#1}{\noexpand\emph}{\@firstofone}{\@tempb}='none'|declare|%
+    }%
+    \edef\@tempc{%
+      \noexpand\normalfont%
+      \IfBooleanTF{#1}{\noexpand\emph}{\@firstofone}{%
+        \noexpand\PValue{\@tempc}\noexpand\normalfont%
+      }%
+    }%
+    \IfBooleanTF{#1}{%
+      \appto\@tempc{\suffix{S\"aumniswert}}%
+    }{%
+      \IfValueT{#3}{\appto\@tempc{\suffix{S\"aumniswert f\"ur #3}}}%
+    }%
+    \IfValueT{#4}{\appto\@tempc{\suffix{#4}}}%
   }%
-  \stditem[\@tempa]%
+  \stditem[\expandafter\tud@values\@tempb\@tempc]%
 }
 \NewDocumentCommand\itemfalse{sood()}{\item@bool{#1}{false/off/no}[#2][#3](#4)}
 \NewDocumentCommand\itemtrue{sood()}{\item@bool{#1}{true/on/yes}[#2][#3](#4)}
