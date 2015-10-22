@@ -158,10 +158,10 @@
 \RequirePackage{babel}[2014/03/24]
 \AfterPackage{inputenc}{\RequirePackage{csquotes}[2011/10/22]}
 \AfterPackage{hyperref}{%
-  \RequirePackage[babel]{microtype}[2013/05/23]
+  \RequirePackage[babel]{microtype}[2013/05/23]%
   \patchcmd{\pdfstringdef}{\csname HyPsd@babel@}{%
     \let\bbl@info\@gobble\csname HyPsd@babel@%
-  }{}{\tud@patch@wrn{pdfstringdef}}
+  }{}{\tud@patch@wrn{pdfstringdef}}%
 }
 \AtBeginDocument{%
   \@ifpackageloaded{csquotes}{}{%
@@ -215,11 +215,11 @@
 \NewDocumentCommand\tudhyperdef{sm}{}
 \newcommand*\autorefname[1][]{??\xspace}
 \AfterPackage{hyperref}{%
-  \renewcommand*\Email[1]{\href{mailto:#1}{\nolinkurl{#1}}}
-  \renewcommand*\tudhyperref[2]{\hyperref{}{\jobname}{#1}{#2}}
-  \renewcaptionname{ngerman}{\sectionautorefname}{Unterkapitel}
-  \renewcaptionname{ngerman}{\subsectionautorefname}{Abschnitt}
-  \renewcaptionname{ngerman}{\subsubsectionautorefname}{Unterabschnitt}
+  \renewcommand*\Email[1]{\href{mailto:#1}{\nolinkurl{#1}}}%
+  \renewcommand*\tudhyperref[2]{\hyperref{}{\jobname}{#1}{#2}}%
+  \renewcaptionname{ngerman}{\sectionautorefname}{Unterkapitel}%
+  \renewcaptionname{ngerman}{\subsectionautorefname}{Abschnitt}%
+  \renewcaptionname{ngerman}{\subsubsectionautorefname}{Unterabschnitt}%
   \RenewDocumentCommand\tudhyperdef{sm}{%
     \IfBooleanTF{#1}{%
       \raisebox{4\baselineskip}[0pt][0pt]{\hyperdef{\jobname}{#2}{}}%
@@ -230,7 +230,7 @@
       \ignorespaces%
     }%
     \label{#2}%
-  }
+  }%
   \renewcommand*\autorefname[1][current]{%
     \ifstr{#1}{current}{%
       \expandafter\HyPsd@@autorefname\@currentHref\@nil%
@@ -238,7 +238,7 @@
       \@autorefname\HyPsd@@autorefname{#1}%
     }%
     \unskip\xspace%
-  }
+  }%
   \newcommand*\@autorefname[2]{%
     \expandafter\ifx\csname r@#2\endcsname\relax%
       ??%
@@ -246,9 +246,9 @@
       \expandafter\expandafter\expandafter\@@autorefname%
           \csname r@#2\endcsname{}{}{}{}\@nil#1\@nil%
     \fi%
-  }
-  \newcommand*\@@autorefname{}
-  \def\@@autorefname#1#2#3#4#5\@nil#6\@nil{#6#4.\@nil}
+  }%
+  \newcommand*\@@autorefname{}%
+  \def\@@autorefname#1#2#3#4#5\@nil#6\@nil{#6#4.\@nil}%
 }
 \PassOptionsToPackage{xindy,splitindex}{imakeidx}
 \RequirePackage{imakeidx}[2013/07/11]
@@ -388,7 +388,7 @@
     }%
     \IfValueT{#2}{#2}%
   }%
-  \expandafter\makeindex\expandafter[\@tempa]
+  \expandafter\makeindex\expandafter[\@tempa]%
 }
 \makexindyindex{Allgemeiner Index}
 \makexindyindex*{Klassen, Pakete und Dateien}[files]
@@ -402,8 +402,8 @@
 \RequirePackage{enumitem}[2011/09/28]
 \setlist{noitemsep}
 \AtEndPreamble{%
-  \RequirePackage{ellipsis}[2004/9/28]
-  \let\ellipsispunctuation\relax
+  \RequirePackage{ellipsis}[2004/9/28]%
+  \let\ellipsispunctuation\relax%
 }
 \RequirePackage{tabularx}[1999/01/07]
 \RequirePackage{ragged2e}[2009/05/21]
@@ -512,12 +512,12 @@
   \@ChangedAt@CreateList[#2]{#1}%
   \IfValueTF{#3}{%
     \@preset@listtrue%
-    \IfValueTF{#4}{%
-      \def\@tempa[##1:##2]{##1:\,##2}%
-      \listeadd\list@Preset{preset:\,#3\,|\,\expandonce{\@tempa[#4]}}%
-    }{%
-      \listadd\list@Preset{preset:\,#3}%
+    \def\@tempa{Voreinstellung: \PValue{#3}}%
+    \IfValueT{#4}{%
+      \def\@tempb[##1:##2]{##1: \PValue{##2}}%
+      \eappto\@tempa{ | \expandonce{\@tempb[#4]}}%
     }%
+    \listeadd\list@Preset{\expandonce\@tempa}%
   }{%
     \listadd\list@Preset{\relax}%
   }%
@@ -540,7 +540,7 @@
     }%
   \fi%
   \vskip-\lastskip%
-  \@gobbleparameters%
+  \@gobbleparameters% §§§ ???
   \@declaretrue\@openindexfalse#1\@declarefalse%
   \pagebreak[1]%
 }
@@ -557,7 +557,7 @@
       forget to print this list with \string\printchangedatlist?%
     }%
   \fi%
-  \@gobbleparameters%
+  \@gobbleparameters% §§§ ???
   \@declaretrue\@openindexfalse#1\@declarefalse%
 }
 \NewDocumentCommand\printdeclarationlist{sd()}{%
@@ -579,13 +579,10 @@
     \@declarefalse%
     \ifboolexpr{bool {@preset@list} or bool {@additional@list}}{%
       \if@preset@list%
-        \qquad%
-        % $$$ statt \texttt besser mit \PValue beim Erstellen der Liste
-        \texttt{%
-          \begin{tabular}{l@{}}%
-            \forlistloop\@tempa{\list@Preset}%
-          \end{tabular}%
-        }%
+        \quad%
+        \begin{tabular}{l@{}}%
+          \forlistloop\@tempa{\list@Preset}%
+        \end{tabular}%
       \fi%
       \if@additional@list%
         \begin{tabular}{@{}l@{}}%
@@ -599,7 +596,7 @@
     \global\@preset@listfalse%
     \global\@additional@listfalse%
     \@ChangedAt@ProcessList{#1}{%
-      \dimexpr.5\ht\strutbox+.5\dp\strutbox-.5\ht0-.5\dp0\relax
+      \dimexpr.5\ht\strutbox+.5\dp\strutbox-.5\ht0-.5\dp0\relax%
     }%
     \IfValueT{#2}{#2}%
     \par\nobreak%
@@ -638,7 +635,7 @@
 }
 \newcommand*\tud@keyval@error{%
   \ClassError{tudscrman}{Wrong usage of optional argument for value}{%
-    There are two optional arguments for a value!
+    There are two optional arguments for a value!%
   }%
 }
 \NewExpandableDocumentCommand\@Application{sm}{#2}
@@ -650,7 +647,11 @@
 \NewExpandableDocumentCommand\@Distribution{sm}{#2}
 \NewDocumentCommand\Distribution{smod||}{%
   \@SetMarkupFormat{\sbnfont}%
-  \@ProcessMarkup{\Distribution{#2}}[#3]%
+  \IfValueTF{#3}{%
+    \@ProcessMarkup{\Distribution{#2}}[~#3]%
+  }{%
+    \@ProcessMarkup{\Distribution{#2}}%
+  }%
   \@ProcessIndex{\Distribution{#2}}{#1}|#4|[Distribution]%
 }
 \NewExpandableDocumentCommand\@File{sm}{#2}
@@ -689,7 +690,7 @@
 }
 \NewDocumentCommand\Option@Value{mmd==d==d()d''d||}{%
   \if@changedat%
-    \@ProcessChangedAt{\Option{#2}}(#5)[Option]%
+    \@ProcessChangedAt{\Option{#2}}=#3=(#5)[Option]%
   \else%
     \@SetMarkupFormat{\ttfamily}%
     \@ProcessMarkup{\Option{#2}}=#3=(#5)'#6'%
@@ -702,28 +703,23 @@
   \if@changedat%
     \@ProcessChangedAt{\Environment{#2}}(#4)[Umgebung]%
   \else%
-    \IfValueT{#3}{%
-      \if@declare\else%
-        \ClassWarning{tudscrman}{You can use [#3] only within a declaration}%
-      \fi%
-    }%
     \@SetMarkupFormat{\ttfamily}(%
       \ttfamily \bsc{}begin\{#2\}\IfValueT{#3}{#3}\tabularnewline%
       \ttfamily \dots\tabularnewline%
       \ttfamily \bsc{}end\{#2\}%
     )%
-    \@ProcessMarkup{\Environment{#2}}(#4)'#5'%
+    \@ProcessMarkup{\Environment{#2}}[#3](#4)'#5'%
     \@ProcessIndex{\Environment{#2}}(#4){#1}|#6|[Umgebung]%
   \fi%
 }
 \NewExpandableDocumentCommand\@Macro{sm}{#2}
-\NewDocumentCommand\Macro{smd()d''d||}{%
+\NewDocumentCommand\Macro{smod()d''d||}{%
   \if@changedat%
-    \@ProcessChangedAt{\Macro{#2}}(#3)[Befehl]%
+    \@ProcessChangedAt{\Macro{#2}}(#4)[Befehl]%
   \else%
     \@SetMarkupFormat{\ttfamily\bsc}%
-    \@ProcessMarkup{\Macro{#2}}(#3)'#4'%
-    \@ProcessIndex{\Macro{#2}}(#3){#1}|#5|%
+    \@ProcessMarkup{\Macro{#2}}[#3](#4)'#5'%
+    \@ProcessIndex{\Macro{#2}}(#4){#1}|#6|%
   \fi%
 }
 \NewExpandableDocumentCommand\@Key{smm}{#2!#3}
@@ -734,7 +730,7 @@
   \if@changedat%
     % §§§ statt Suffix [Parameter] lieber das optionale Argument in Änd-Liste?
     % §§§ spezielle/neue Werte in Liste aufführen?!
-    \@ProcessChangedAt{\Key{#2}{#3}}(#6)[Parameter]%
+    \@ProcessChangedAt{\Key{#2}{#3}}=#4=(#6)[Parameter]%
   \else%
     \@SetMarkupFormat{\ttfamily}[Parameter]%
     \@ProcessMarkup{\Key{#2}{#3}}=#4=(#6)'#7'%
@@ -777,15 +773,10 @@
   \if@changedat%
     \@ProcessChangedAt{\Color{#2}}(#4)[Farbe]%
   \else%
-    \IfValueT{#3}{%
-      \if@declare\else%
-        \ClassWarning{tudscrman}{You can use [#3] only within a declaration}%
-      \fi%
-    }%
     \@SetMarkupFormat{\ttfamily}[Farbe](%
-      \begingroup\@MarkupFormat#2\IfValueT{#3}{\,(#3)}\endgroup%
+      \begingroup\@MarkupFormat#2\IfValueT{#3}{~(#3)}\endgroup%
     )%
-    \@ProcessMarkup{\Color{#2}}(#4)'#5'%
+    \@ProcessMarkup{\Color{#2}}[#3](#4)'#5'%
     \@ProcessIndex{\Color{#2}}(#4){#1}|#5|[Farbe]%
   \fi%
 }
@@ -810,18 +801,18 @@
   \fi%
 }
 \newrobustcmd*\Path[1]{\mbox{\texttt{#1}}}
-\newrobustcmd*\textOR{\,\textbardbl\,}
 \newrobustcmd*\PValue[1]{\mbox{\texttt{#1}}}
 \newrobustcmd*\PName[1]{\PValue{\textsl{<#1>}}}
 \newrobustcmd*\PValueName[1]{\PName{#1}}
+\newrobustcmd*\textOR{\PValue{\,\textbardbl\,}}
 \newrobustcmd*\PSet{\PName{Einstellung}}
 \newrobustcmd*\PBoolean{\PName{Ein-Aus-Wert}}
-\newrobustcmd*\PBName[1]{\PBoolean\PValue{\textOR}\PName{#1}}
+\newrobustcmd*\PBName[1]{\PBoolean\textOR\PName{#1}}
 \newrobustcmd*\Parameter[1]{\mbox{\texttt{\{}\PName{#1}\texttt{\}}}}
 \newrobustcmd*\OParameter[1]{\mbox{\texttt{[}\PName{#1}\texttt{]}}}
 \newrobustcmd*\LParameter{\mbox{\texttt{[}\PName{Parameterliste}\texttt{]}}}
 \newrobustcmd*\OLParameter[1]{%
-  \mbox{\texttt{[}\PName{#1}\PValue{\textOR}\PName{Parameterliste}\texttt{]}}%
+  \mbox{\texttt{[}\PName{#1}\textOR\PName{Parameterliste}\texttt{]}}%
 }
 \newrobustcmd*\PParameter[1]{\mbox{\texttt{\{#1\}}}}
 \newrobustcmd*\POParameter[1]{\mbox{\texttt{[#1]}}}
@@ -1091,10 +1082,9 @@
   \else%
     \IfValueT{#2}{%
       \begingroup%
-        \@gobbleparameters%
+        \@gobbleparameters% §§§ anders lösbar ???
         \let\PValue\@firstofone%
         \let\PValueName\@firstofone%
-        \@getlabel\@templabel{#3:#1}%
         \ifstr{#2}{}{%
           \def\tud@reserved{\endgroup}%
         }{%
@@ -1121,12 +1111,12 @@
   \fi%
 }
 % {#1}: Markup für Änderungsliste
-% (#2): optionale Subdeclaration
-% [#3]: optionaler Suffix in der Ausgabe der Änderungsliste
-% [#4]: Suffix für Änderungsliste
-\NewDocumentCommand\@ProcessChangedAt{md()o}{%
-  % \getindex*? $$$
-  \@getindex\@tempentry\@tempformat\@tempkey{#1}(#2)[#3]!Parameter angepasst!%
+% =#2=: optionaler Wert für Option und Key für Änderungsliste
+% (#3): optionale Subdeclaration
+% [#4]: optionaler Suffix in der Änderungsliste
+\NewDocumentCommand\@ProcessChangedAt{md==d()o}{%
+  \@getindex*\@tempentry\@tempformat\@tempkey{#1}%=#2= §§§
+    (#3)[#4]!Parameter angepasst!%
 }
 % Verwendung dokumentieren!
 \NewDocumentCommand\@Label{m}{\@@Label#1}
@@ -1250,7 +1240,6 @@
     \appto#3{\suffix{#8}}%
   }%
   \@tempswatrue%
-  \if@changedat\@tempswafalse\fi%
   \ifx\@tempbundle\@bundledefault\@tempswafalse\fi%
   \in@{\Key}{#5}\ifin@\@tempswafalse\fi%
   \IfBooleanT{#1}{\@tempswafalse}%
@@ -1306,7 +1295,7 @@
     \def\@tempa{#1}%
   }%
   \IfValueT{#3}{\appto\@tempa{=#3}}%
-  \IfValueT{#4}{\appto\@tempa{~#4}}%
+  \IfValueT{#4}{\appto\@tempa{#4}}%
   \eaddto@hook\tud@toks@{\expandafter{\@tempa}}%
   \the\tud@toks@%
 }
@@ -1350,7 +1339,7 @@
 \NewDocumentCommand\@ChangedAt@@@CreateList{r[]r()mm}{%
   \IfValueTF{#1}{%
     \begingroup%
-      \@gobbleparameters%
+      \@gobbleparameters% §§§ ???
       \tud@ifbundle{%
         \@changedattrue%
         \@bundle%
@@ -1788,30 +1777,44 @@
     }%
   \tud@reserved%
 }
+\newcommand*\tud@indexprologue{}
 \newcommand*\PrintIndex{%
   \begingroup%
+    \renewcommand\tud@indexprologue{%
+      Die aufgelisteten Schlagworte sollen sowohl Antworten bei generellen 
+      Fragen als auch L\"osungen f\"ur typische Probleme beim Umgang mit 
+      \hologo{LaTeXe} sowie dem \TUDScript-Bundle liefern. Falls ein gesuchter 
+      Begriff hier nicht auftaucht, sollte das \Forum erster Anlaufpunkt sein, 
+      um Fragen bei der Nutzung von \TUDScript zu beantworten.
+    }%
     \@printindex%
-    % ///
-    \begingroup%
-      \def\lettergroup##1{%
-          \null\clearpage\textbf{##1}\par%
-          \nopagebreak%
-      }%
-    % \\\
+    \clearpage%
+    \renewcommand\tud@indexprologue{%
+      Dies ist der Index allre im Handbuch erl\"auterten sowie erw\"ahnten 
+      Optionen, wobei bei den meisten auch Untereintr\"age mit Seitenangeben 
+      f\"ur spezielle Wertzuweisungen existieren.
+    }%
     \@printindex[options]%
-    % $$$ indexprologue mit hinweis auf darstellung der parameter
+    \renewcommand\tud@indexprologue{%
+      Hier werden alle im Handbuch erl\"auterten sowie erw\"ahnten Befehle und 
+      Umgebungen aufgelistet, wobei bei einigen auch Untereintr\"age f\"ur 
+      Schl\"ussel-Wert-Parameter existieren, die im optionalen Argument der 
+      jeweiligen Anweisung verwendet werden k\"onnen. Bei einigen Parametern 
+      gibt es zus\"atzlich eine weitere Unterebene, in der Seitenverweise zu 
+      expliziten Wertzuweisungen an diese Parameter gegeben werden.
+    }%
     \@printindex[macros]%
-    % ///
-    \endgroup%
-    % \\\
+    \renewcommand\tud@indexprologue{%
+      Dies sind alle von \TUDScript definierten, sprachabh\"angigen Bezeichner. 
+      Informationen zur Verwendung sowie den Anpassungsm\"oglichkeiten sind in 
+      \autoref{sec:localization} zu finden. 
+    }%
     \@printindex[terms]%
     \@printindex[elements]%
     \@printindex[misc]%
     \@printindex[files]%
   \endgroup%
 }
-\newcommand*\@printindexprologue{}
-\newcommand*\PrintIndexPrologue[1]{\renewcommand\@printindexprologue{#1}}
 \newcommand*\@printindexskip{%
   \ifnum\imki@columns>\@ne\relax\vspace{-\multicolsep}\fi%
 }
@@ -1819,27 +1822,22 @@
 \newcommand*\@printindex[1][]{%
   \pagebreak[3]%
   \@tud@indextrue%
-  \ifblank{#1}{%
-    \ifx\@printindexprologue\@empty%
-      \indexprologue[\@printindexskip]{\tudhyperdef*{idx:main}}%
-    \else%
-      \indexprologue{%
-        \tudhyperdef*{idx:main}%
-        \begingroup%
-          \let\footnote\@gobble%
-          \@printindexprologue%
-        \endgroup%
-      }%
-    \fi%
-    \printindex\@printindexskip%
-    \let\@printindexprologue\@empty%
-  }{%
-    \indexprologue[\@printindexskip]{\tudhyperdef*{idx:#1}}%
-    \printindex[#1]\@printindexskip%
-  }%
-  % ///
-  \clearpage%
-  % \\\
+  \ifx\tud@indexprologue\@empty%
+    \indexprologue[\@printindexskip]{%
+      \ifblank{#1}{\tudhyperdef*{idx:main}}{\tudhyperdef*{idx:#1}}%
+    }%
+  \else%
+    \indexprologue{%
+      \ifblank{#1}{\tudhyperdef*{idx:main}}{\tudhyperdef*{idx:#1}}%
+      \begingroup%
+        \let\footnote\@gobble%
+        \tud@indexprologue%
+      \endgroup%
+    }%
+  \fi%
+  \ifblank{#1}{\printindex}{\printindex[#1]}%
+  \@printindexskip%
+  \let\tud@indexprologue\@empty%
 }
 \newcommand*\PrintChangelog{%
   \begingroup%
@@ -1861,7 +1859,7 @@
       \escapechar=`\\%
       \lccode`\~=\endlinechar%
       \lowercase{%
-        \expandafter\endgroup
+        \expandafter\endgroup%
         \expandafter\def\csname\string\item\endcsname##1~%
       }{%
         \endgroup%
@@ -1891,8 +1889,8 @@
 \newcommand*\TUDCDs{\CDs der \TnUD}%
 \newcommand*\DDC{%
   \mbox{%
-    D\kern.05em R\kern.05em E\kern.05em S\kern.05em D\kern.05em E\kern.05em
-    N\kern.1em-\kern.1em concept%
+    D\kern.05em R\kern.05em E\kern.05em S\kern.05em %
+    D\kern.05em E\kern.05em N\kern.1em-\kern.1em concept%
   }\xspace%
 }
 \AfterPackage{babel}{%
@@ -1935,7 +1933,7 @@
   \xspace%
 }
 \newcommand*\notudscrartcl{%
-  F\"ur die Klasse \Class{tudscrartcl} ist diese Einstellung nicht verf\"ugbar.
+  F\"ur die Klasse \Class{tudscrartcl} ist diese Option nicht verf\"ugbar.%
 }
 \NewDocumentCommand\scrguide{sO{\KOMAScript-Handbuch}}{%
   \def\@tempc{%
@@ -1990,7 +1988,8 @@
       }%
     }%
   \fi%
-}\@onlypreamble\tracinglabels
+}
+\@onlypreamble\tracinglabels
 \newcommand*\tud@trace@markup[2][]{#2}
 \newcommand*\tracingmarkup{%
   \renewcommand*\tud@trace@markup[2][]{%

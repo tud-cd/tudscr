@@ -276,30 +276,24 @@ Schriftart nur für das nachfolgend angegebene Argument, wie zum Beispiel bei
 \addtolength\tempdim{\dimexpr 2\tabcolsep+2\arrayrulewidth-\textwidth}%
 \printdeclarationlist(%
   \begin{minipage}{-\tempdim}%
+  \newcommand*\listfonts[3]{%
+    \csuse{#3}{#1} & \Macro{#2} & \Macro{#3}[\Parameter{Text}]\tabularnewline
+  }%
   \centering%
   \begin{tabularm}{3}%
     \toprule%
-    \textbf{Schriftart}                  & \textbf{Schalter}
-      & \textbf{Textkommando}\tabularnewline
+    \textbf{Schriftart} & \textbf{Schalter} & \textbf{Textkommando} 
+    \tabularnewline
     \midrule
-    \textuln{Univers 45 Light}           & \Macro{univln}{}
-      & \Macro{textuln}\Parameter{Text}\tabularnewline
-    \texturn{Univers 55 Regular}         & \Macro{univrn}{}
-      & \Macro{texturn}\Parameter{Text}\tabularnewline
-    \textubn{Univers 65 Bold}            & \Macro{univbn}{}
-      & \Macro{textubn}\Parameter{Text}\tabularnewline
-    \textuxn{Univers 75 Black}           & \Macro{univxn}{}
-      & \Macro{textuxn}\Parameter{Text}\tabularnewline
-    \textuls{Univers 45 Light Oblique}   & \Macro{univls}{}
-      & \Macro{textuls}\Parameter{Text}\tabularnewline
-    \texturs{Univers 55 Regular Oblique} & \Macro{univrs}{}
-      & \Macro{texturs}\Parameter{Text}\tabularnewline
-    \textubs{Univers 65 Bold Oblique}    & \Macro{univbs}{}
-      & \Macro{textubs}\Parameter{Text}\tabularnewline
-    \textuxs{Univers 75 Black Oblique}   & \Macro{univxs}{}
-      & \Macro{textuxs}\Parameter{Text}\tabularnewline
-    \DIN & \Macro{dinbn}{}
-      & \Macro{textdbn}\Parameter{Text}\tabularnewline
+    \listfonts{Univers 45 Light}{univln}{textuln}
+    \listfonts{Univers 55 Regular}{univrn}{texturn}
+    \listfonts{Univers 65 Bold}{univbn}{textubn}
+    \listfonts{Univers 75 Black}{univxn}{textuxn}
+    \listfonts{Univers 45 Light Oblique}{univls}{textuls}
+    \listfonts{Univers 55 Regular Oblique}{univrs}{texturs}
+    \listfonts{Univers 65 Bold Oblique}{univbs}{textubs}
+    \listfonts{Univers 75 Black Oblique}{univxs}{textuxs}
+    \listfonts{DIN BOLD}{dinbn}{textdbn}
     \bottomrule%
     \allcolumnpar{\footnotesize\vskip0pt%
        Die Schrift \DIN darf laut \CD nur mit Majuskeln (Großbuchstaben) 
@@ -1035,11 +1029,15 @@ beziehungsweise \Option{cdfoot=\PValueName{Höhe}} angepasst werden.
 \end{Declaration}
 \end{Declaration}
 
-\begin{Declaration}[v2.04]{\Macro{footcontent}%
-  \OParameter{Anweisungen}\Parameter{Inhalt}\OParameter{Inhalt}%
-}
-\begin{Declaration}[v2.04]{\Macro{footcontent*}
+\begin{Declaration}[v2.04]{%
+  \Macro{footcontent}[%
     \OParameter{Anweisungen}\Parameter{Inhalt}\OParameter{Inhalt}%
+  ]%
+}
+\begin{Declaration}[v2.04]{%
+  \Macro{footcontent*}[%
+    \OParameter{Anweisungen}\Parameter{Inhalt}\OParameter{Inhalt}%
+  ]%
 }
 \printdeclarationlist%
 \index{Layout!Fußzeile}%
@@ -1067,25 +1065,20 @@ das optionale Argument vorgenommen werden.
 \begin{Declaration}[%
   v2.02:\protect\DDC-Logo automatisch in Kopf oder Fuß%
 ]{\Option{ddc=\PSet}}[false]
-\begin{Declaration}[v2.02]{\Option{ddchead=\PSet}}[false]
-\begin{Declaration}[%
-  v2.02:neue Werte für die Farbwahl des Logos von \protect\DDC%
-]{\Option{ddcfoot=\PSet}}[false]
 \printdeclarationlist%
 \index{Layout!Fußzeile}%
 \index{Layout!Kopfzeile}%
 \index{Layout!Zweitlogo}%
 \index{Layout!Dresden-concept-Logo@\DDC-Logo}%
 %
-Diese Optionen fügen das Logo von \DDC entweder im Kopf oder im Fuß der Seiten
-mit dem Stil \PageStyle{tudheadings} ein. Mit \Option{ddc} wird dieses 
-automatisch entweder im Kopf oder~-- falls ein Zweitlogo mit \Macro{headlogo} 
-angegeben wurde~-- im Fuß gesetzt. Die anderen beiden Optionen setzen das Logo 
-zwingend entweder im Kopf (\Option{ddchead}) oder im Fuß (\Option{ddcfoot}), 
-wobei erstgenannte ein optionales Zweitlogo dabei unterdrückt. Die Verwendung 
-einer der drei Optionen führt zur Deaktivierung der anderen beiden, sie 
-schließen sich folglich gegenseitig aus. Die möglichen Werte für diese Optionen 
-sind:
+Diese Option fügt das Logo von \DDC entweder im Kopf oder Fuß der Seiten mit 
+dem Stil \PageStyle{tudheadings} ein. Diese wird automatisch entweder im Kopf 
+oder~-- falls mit \Macro{headlogo} ein Zweitlogo angegeben wurde~-- im Fuß 
+gesetzt. Alternativ dazu können die Optionen \Option{ddchead} beziehungsweise 
+\Option{ddcfoot} genutzt werden, welche das Logo zwingend entweder im Kopf oder 
+Fuß setzen. Die Verwendung einer der drei Optionen führt zur Deaktivierung der 
+anderen beiden, sie schließen sich folglich gegenseitig aus. Die möglichen 
+Werte für diese Optionen sind:
 %
 \begin{values}{\Option{ddc}}
 \itemfalse
@@ -1095,8 +1088,9 @@ sind:
   Farbe des Logos geschieht passend zur farblichen Ausprägung der Seite selbst.
 \end{values}
 %
-Soll die Farbe des \DDC-Logos manuell erfolgen, können folgende Werte verwendet 
-werden:
+Die Farbe des \DDC-Logos wird normalerweise in Abhängigkeit von der Einstellung 
+für die farbliche Ausprägung (Option \Option{cd}) automtisch gewählt. Soll dies 
+manuell erfolgen, können folgende Werte verwendet werden:
 %
 \begin{values}{\Option{ddc}}
 \item[color]
@@ -1124,6 +1118,21 @@ Sollte nach einer Vergrößerung der Darstellung die Höhe des Fußbereiches nic
 ausreichen, so kann diese über \Option{extrabottommargin=\PName{Höhe}} 
 respektive \Option{cdfoot=\PValueName{Höhe}} angepasst werden.
 \end{Declaration}
+
+\begin{Declaration}[v2.02]{\Option{ddchead=\PSet}}[false]
+\begin{Declaration}[%
+  v2.02:neue Werte für die Farbwahl des Logos von \protect\DDC%
+]{\Option{ddcfoot=\PSet}}[false]
+\printdeclarationlist%
+\index{Layout!Fußzeile}%
+\index{Layout!Kopfzeile}%
+\index{Layout!Zweitlogo}%
+\index{Layout!Dresden-concept-Logo@\DDC-Logo}%
+%
+Mit diesen beiden Optionen wird das Logo von \DDC explizit im Kopf oder Fuß 
+verwendet. Dabei wird durch \Option{ddchead} ein mit \Macro{headlogo} 
+angegebenes Zweitlogo definitiv unterdrückt. Die möglichen Werte der beiden 
+Optionen entsprechen denen der Option \Option{ddc}.
 \end{Declaration}
 \end{Declaration}
 
@@ -1558,38 +1567,36 @@ und \Macro{subject}\Parameter{Wert} zu \Option{subjectthesis=true}.
 }
 \label{tab:thesis}%
 \centering%
-\makeatletter%
-\def\@tempa#1{%
-  \Term{#1} & \@nameuse{#1} & \selectlanguage{english}\@nameuse{#1}%
+\newcommand*\typecast[2]{%
+  \PValue{#1} & \Term{#2} & \csuse{#2} & \selectlanguage{english}\csuse{#2}
   \tabularnewline%
 }%
 \begin{tabular}{llll}
   \toprule
-  \textbf{Wert} & \textbf{Bezeichner}
-    & \textbf{Deutsch} & \textbf{Englisch} \tabularnewline
+  \textbf{Wert} & \textbf{Bezeichner} & \textbf{Deutsch} & \textbf{Englisch}
+  \tabularnewline
   \midrule
-  diss & \@tempa{dissertationname}
-  doctoral & \@tempa{dissertationname}
-  phd & \@tempa{dissertationname}
-  diploma & \@tempa{diplomathesisname}
-  master & \@tempa{masterthesisname}
-  bachelor & \@tempa{bachelorthesisname}
-  student & \@tempa{studentresearchname}
-  project & \@tempa{projectpapername}
-  seminar & \@tempa{seminarpapername}
-  research & \@tempa{researchname}
-  log & \@tempa{logname}
-  report & \@tempa{reportname}
-  internship & \@tempa{internshipname}
+  \typecast{diss}{dissertationname}
+  \typecast{doctoral}{dissertationname}
+  \typecast{phd}{dissertationname}
+  \typecast{diploma}{diplomathesisname}
+  \typecast{master}{masterthesisname}
+  \typecast{bachelor}{bachelorthesisname}
+  \typecast{student}{studentresearchname}
+  \typecast{project}{projectpapername}
+  \typecast{seminar}{seminarpapername}
+  \typecast{research}{researchname}
+  \typecast{log}{logname}
+  \typecast{report}{reportname}
+  \typecast{internship}{internshipname}
   \bottomrule
 \end{tabular}
-\makeatother%
 \end{table}
 \end{Declaration}
 \end{Declaration}
 
 \begin{Declaration}{\Option{subjectthesis=\PBoolean}}%
-  [false][\Macro{subject}\Parameter{\autoref{tab:thesis}}:true]
+  [false][\Macro{subject}\PParameter{\autoref{tab:thesis}}:true]
 \printdeclarationlist%
 %
 Der Befehl \Macro{thesis} dient den \TUDScript"=Hauptklassen zur Unterscheidung 
@@ -1841,17 +1848,18 @@ standardmäßig aktiviert. \notudscrartcl
 \ChangedAt[\Macro{chapterpagestyle}]{%
   v2.02:nicht mehr abhängig von \Macro{partpagestyle}
 }
-Mit \Macro*{renewcommand*}\PParameter{\Macro{chapterpagestyle}}%
-\Parameter{Seitenstil} lässt sich übrigens~-- unabhängig von der Option 
-\Option{chapterpage}~-- der Seitenstil von Kapiteln anpassen. Bei der 
-Verwendung von Kapitelseiten mit \Option{chapterpage=true} ist außerdem das 
-Aktivieren der \KOMAScript-Option \Option{chapterprefix=\PBoolean}|declare| 
-empfehlenswert. Damit werden die Kapitelüberschriften mit einer Vorsatzzeile 
-gesetzt. Wird ein nummeriertes Kapitel erzeugt, so wird zunächst in einer Zeile 
-\enquote{Kapitel} gefolgt von der aktuellen Kapitelnummer ausgegeben, in der 
-nächsten Zeile wird anschließend die eigentliche Überschrift in linksbündigem 
-Flattersatz ausgegeben. Mehr dazu ist der \scrguide[\KOMAScript-Dokumentation]
-zu entnehmen.
+Mit \Macro*{renewcommand*}[%
+  \PParameter{\Macro{chapterpagestyle}}\Parameter{Seitenstil}%
+]
+lässt sich übrigens~-- unabhängig von der Option \Option{chapterpage}~-- der 
+Seitenstil von Kapiteln anpassen. Bei der Verwendung von Kapitelseiten mit 
+\Option{chapterpage=true} ist außerdem das Aktivieren der \KOMAScript-Option 
+\Option{chapterprefix=\PBoolean}|declare| empfehlenswert. Damit werden die 
+Kapitelüberschriften mit einer Vorsatzzeile gesetzt. Wird ein nummeriertes 
+Kapitel erzeugt, so wird zunächst in einer Zeile \enquote{Kapitel} gefolgt von 
+der aktuellen Kapitelnummer ausgegeben, in der nächsten Zeile wird anschließend 
+die eigentliche Überschrift in linksbündigem Flattersatz ausgegeben. Mehr dazu 
+ist der \scrguide[\KOMAScript-Dokumentation] zu entnehmen.
 \end{Declaration}
 
 
@@ -2491,8 +2499,9 @@ eine Titelseite verwendet wird.
 
 \begin{Declaration}[v2.02]{\Environment{declarations}[\OLParameter{Sprache}]}
 \begin{Declaration}[v2.04]{%
-  \Macro{nextdeclaration}%
-  \OLParameter{Sprache}\Parameter{Überschrift}\Parameter{Erklärung}
+  \Macro{nextdeclaration}[%
+    \OLParameter{Sprache}\Parameter{Überschrift}\Parameter{Erklärung}%
+  ]%
 }
 \begin{Declaration}{\Key{\Environment{declarations}}{language=\PName{Sprache}}}
 \begin{Declaration}[v2.02]{\Key{\Environment{declarations}}{markboth=\PSet}}
