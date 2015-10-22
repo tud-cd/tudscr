@@ -267,29 +267,29 @@
   \ifimki@original\else%
     \renewenvironment{theindex}{%
       \imki@maybeaddtotoc%
-       \imki@indexheaders%
-       \thispagestyle{\imki@firstpagestyle}%
-       \ifnum\imki@columns>\@ne%
-         \columnsep \imki@columnsep%
-         \ifx\imki@idxprologue\relax%
-           \begin{multicols}{\imki@columns}[\imki@indexlevel{\indexname}]%
-         \else%
-           \begin{multicols}{\imki@columns}[%
-             \imki@indexlevel{\indexname}%
-             \imki@idxprologue%
-           ]%
-         \fi%
-       \else%
-         \imki@indexlevel{\indexname}\imki@idxprologue%
-       \fi%
-       \global\let\imki@idxprologue\relax%
-       \parindent\z@%
-       \parskip\z@ \@plus .3\p@\relax%
-       \columnseprule \ifKV@imki@columnseprule.4\p@\else\z@\fi%
-       \raggedright%
-       \let\item\@idxitem%
-       \imki@othercode%
-     }{\ifnum\imki@columns>\@ne\end{multicols}\fi}%
+      \imki@indexheaders%
+      \thispagestyle{\imki@firstpagestyle}%
+      \ifnum\imki@columns>\@ne%
+        \columnsep \imki@columnsep%
+        \ifx\imki@idxprologue\relax%
+          \begin{multicols}{\imki@columns}[\imki@indexlevel{\indexname}]%
+        \else%
+          \begin{multicols}{\imki@columns}[%
+            \imki@indexlevel{\indexname}%
+            \imki@idxprologue%
+          ]%
+        \fi%
+      \else%
+        \imki@indexlevel{\indexname}\imki@idxprologue%
+      \fi%
+      \global\let\imki@idxprologue\relax%
+      \parindent\z@%
+      \parskip\z@ \@plus .3\p@\relax%
+      \columnseprule \ifKV@imki@columnseprule.4\p@\else\z@\fi%
+      \raggedright%
+      \let\item\@idxitem%
+      \imki@othercode%
+    }{\ifnum\imki@columns>\@ne\end{multicols}\fi}%
   \fi%
 }
 \newcommand*\@see{}
@@ -540,7 +540,6 @@
     }%
   \fi%
   \vskip-\lastskip%
-  \@gobbleparameters% §§§ ???
   \@declaretrue\@openindexfalse#1\@declarefalse%
   \pagebreak[1]%
 }
@@ -557,7 +556,6 @@
       forget to print this list with \string\printchangedatlist?%
     }%
   \fi%
-  \@gobbleparameters% §§§ ???
   \@declaretrue\@openindexfalse#1\@declarefalse%
 }
 \NewDocumentCommand\printdeclarationlist{sd()}{%
@@ -1082,7 +1080,7 @@
   \else%
     \IfValueT{#2}{%
       \begingroup%
-        \@gobbleparameters% §§§ anders lösbar ???
+        \@gobbleparameters%
         \let\PValue\@firstofone%
         \let\PValueName\@firstofone%
         \ifstr{#2}{}{%
@@ -1115,7 +1113,7 @@
 % (#3): optionale Subdeclaration
 % [#4]: optionaler Suffix in der Änderungsliste
 \NewDocumentCommand\@ProcessChangedAt{md==d()o}{%
-  \@getindex*\@tempentry\@tempformat\@tempkey{#1}%=#2= §§§
+  \@getindex*\@tempentry\@tempformat\@tempkey{#1}%=#2=% §§§
     (#3)[#4]!Parameter angepasst!%
 }
 % Verwendung dokumentieren!
@@ -1339,7 +1337,7 @@
 \NewDocumentCommand\@ChangedAt@@@CreateList{r[]r()mm}{%
   \IfValueTF{#1}{%
     \begingroup%
-      \@gobbleparameters% §§§ ???
+%      \@gobbleparameters% §§§ ???
       \tud@ifbundle{%
         \@changedattrue%
         \@bundle%
