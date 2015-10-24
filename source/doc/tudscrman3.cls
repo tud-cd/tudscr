@@ -737,8 +737,6 @@
 }
 \NewDocumentCommand\Key@Value{mmmd==d==d()d''d||}{%
   \if@changedat%
-    % §§§ statt Suffix [Parameter] lieber das optionale Argument in Änd-Liste?
-    % §§§ spezielle/neue Werte in Liste aufführen?!
     \@ProcessChangedAt{\Key{#2}{#3}}=#4=(#6)[Parameter]%
   \else%
     \@SetMarkupFormat{\ttfamily}[Parameter]%
@@ -873,7 +871,6 @@
     \let\TUDScript\@TUDScript%
     \def\_{-}%
     \protected\def~{~}%
-%    \def~{ }% §§§§ ???
   }%
 }
 \AfterPackage{hyperref}{%
@@ -1035,7 +1032,7 @@
       \IfValueT{#6}{%
         \def\@tempb{%
           \ClassWarning{tudscrman}{%
-            The label #1\MessageBreak%
+            Label #1\MessageBreak%
             is missing, no cross-reference created.%
           }%
         }%
@@ -1125,17 +1122,14 @@
 % [#4]: optionaler Suffix in der Änderungsliste
 \NewDocumentCommand\@ProcessChangedAt{md==d()o}{%
   \@getindex*\@tempentry\@tempformat\@tempkey{#1}=#2=(#3)[#4]%
-    !Parameter~angepasst!%
+    !Parameter angepasst!%
 }
 % Verwendung dokumentieren!
 \NewDocumentCommand\@Label{m}{\@@Label#1}
 \NewDocumentCommand\@@Label{mmm}{%
-%  \typeout{^^J::::::}%
-%  \typeout{1: #1}%
-%  \typeout{2: #2}%
-%  \typeout{3: #3}%
   \begingroup%
     \@suppressmarkup%
+    \def~{-}%
     \IfValueTF{#3}{%
       \IfValueTF{#1}{%
         \edef\@tempa{#1:#2:#3}%
@@ -1180,10 +1174,6 @@
 }
 % Verwendung dokumentieren!
 \NewDocumentCommand\@getlabel{sm>{\@Label}>{\SplitArgument{2}{:}}md==}{%
-%  \typeout{^^J::::::}%
-%  \typeout{1: #1}%
-%  \typeout{2: #2}%
-%  \typeout{3: #3}%
   \def#2{#3}%
   \IfValueT{#4}{%
     \begingroup%
@@ -1193,7 +1183,7 @@
       }{%
         \edef\tud@reserved{%
           \noexpand\endgroup%
-          \appto\noexpand#2{=#4}%
+          \lowercase{\appto\noexpand#2{=#4}}%
         }%
       }%
     \tud@reserved
@@ -1212,7 +1202,6 @@
       }%
     }%
   }%
-  \typeout{::::: #2}%
 }
 \NewDocumentCommand\@@getlabel{m>{\SplitArgument{2}{:}}m}{%
   \@@@getlabel{#1}#2%
@@ -1363,7 +1352,7 @@
   \@ChangedAt@@@@CreateList[#1](#2)#3{#4}%
 }
 % §§§ optionale Argumente bei \Option etc. beachten (cd=alternative)
-% §§§ Links in Liste überprüfen (cd=alternative), evtl '.obsolete' bevorzugen?
+% §§§ Markup ändern
 \NewDocumentCommand\@ChangedAt@@@@CreateList{r[]r()mmm}{%
   \IfValueTF{#1}{%
     \begingroup%
@@ -1615,7 +1604,6 @@
   font=\normalfont\ttfamily,before=\before@item{values}%
 }
 \DeclareListParser*{\forslashlist}{/}%
-% §§§ Label deklarieren!
 \NewDocumentCommand\tud@item@values{sood()}{%
   \let\@tempa\@empty%
   \IfValueT{#2}{%
@@ -1630,6 +1618,7 @@
     }%
     \@tempswafalse%
     \forslashlist{\@tempa}{#2}%
+    \@getlabel*\@templabel{\@bundle:\tud@values}=\@tempb=%
     \edef\@tempb{%
       =\IfBooleanTF{#1}{\noexpand\emph}{\@firstofone}{\@tempb}='none'|declare|%
     }%
@@ -1646,7 +1635,7 @@
     }%
     \IfValueT{#4}{\appto\@tempc{\suffix{#4}}}%
   }%
-  \stditem[\expandafter\tud@values\@tempb\@tempc]%
+  \stditem[\tudhyperdef{\@templabel}\expandafter\tud@values\@tempb\@tempc]%
 }
 \NewDocumentCommand\itemfalse{sood()}{\item@bool{#1}{false/off/no}[#2][#3](#4)}
 \NewDocumentCommand\itemtrue{sood()}{\item@bool{#1}{true/on/yes}[#2][#3](#4)}
