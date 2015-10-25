@@ -1030,10 +1030,12 @@
       \IfValueT{#5}{\def\@tempa{\href{#5}{\@tempc}}}%
       \let\@tempb\relax%
       \IfValueT{#6}{%
-        \def\@tempb{%
-          \ClassWarning{tudscrman}{%
-            Label #1\MessageBreak%
-            is missing, no cross-reference created.%
+        \ifstr{#6}{none}{}{%
+          \def\@tempb{%
+            \ClassWarning{tudscrman}{%
+              Label #1\MessageBreak%
+              is missing, no cross-reference created.%
+            }%
           }%
         }%
       }%
@@ -1476,7 +1478,6 @@
 \NewDocumentCommand\printchangedatlist{sO{\z@}}{%
   \@ChangedAt@ProcessList{#1}{#2}%
 }
-\NewDocumentCommand\Replace{ommm}{\ClassWarning{tudscrman}{raus}}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

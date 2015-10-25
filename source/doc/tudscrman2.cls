@@ -737,8 +737,6 @@
 }
 \NewDocumentCommand\Key@Value{mmmd==d==d()d''d||}{%
   \if@changedat%
-    % §§§ statt Suffix [Parameter] lieber das optionale Argument in Änd-Liste?
-    % §§§ spezielle/neue Werte in Liste aufführen?!
     \@ProcessChangedAt{\Key{#2}{#3}}=#4=(#6)[Parameter]%
   \else%
     \@SetMarkupFormat{\ttfamily}[Parameter]%
@@ -873,7 +871,6 @@
     \let\TUDScript\@TUDScript%
     \def\_{-}%
     \protected\def~{~}%
-%    \def~{ }% §§§§ ???
   }%
 }
 \AfterPackage{hyperref}{%
@@ -934,10 +931,10 @@
 \NewDocumentCommand\@GobbleMarkup{md==od()d<>d''}{}%
 \NewDocumentCommand\@ProcessMarkup{md==od()d<>d''}{%
   \if@declare%
-    \@getlabel*\@templabel{\@bundle:#1}=#2=%
+    \@getlabel*\@templabel{\@bundle:#1}%
     \tud@toks@{\ProcessMarkup@Declare}%
   \else%
-    \@getlabel\@templabel{#4:#1}=#2=%
+    \@getlabel\@templabel{#4:#1}%
     \tud@toks@{\ProcessMarkup@Output}%
   \fi%
   \eaddto@hook\tud@toks@{\expandafter{\@templabel}}%
@@ -1033,10 +1030,12 @@
       \IfValueT{#5}{\def\@tempa{\href{#5}{\@tempc}}}%
       \let\@tempb\relax%
       \IfValueT{#6}{%
-        \def\@tempb{%
-          \ClassWarning{tudscrman}{%
-            The label #1\MessageBreak%
-            is missing, no cross-reference created.%
+        \ifstr{#6}{none}{}{%
+          \def\@tempb{%
+            \ClassWarning{tudscrman}{%
+            Label #1\MessageBreak%
+              is missing, no cross-reference created.%
+            }%
           }%
         }%
       }%
@@ -1125,17 +1124,14 @@
 % [#4]: optionaler Suffix in der Änderungsliste
 \NewDocumentCommand\@ProcessChangedAt{md==d()o}{%
   \@getindex*\@tempentry\@tempformat\@tempkey{#1}=#2=(#3)[#4]%
-    !Parameter~angepasst!%
+    !Parameter angepasst!%
 }
 % Verwendung dokumentieren!
 \NewDocumentCommand\@Label{m}{\@@Label#1}
 \NewDocumentCommand\@@Label{mmm}{%
-%  \typeout{^^J::::::}%
-%  \typeout{1: #1}%
-%  \typeout{2: #2}%
-%  \typeout{3: #3}%
   \begingroup%
     \@suppressmarkup%
+    \def~{-}%
     \IfValueTF{#3}{%
       \IfValueTF{#1}{%
         \edef\@tempa{#1:#2:#3}%
@@ -1180,10 +1176,6 @@
 }
 % Verwendung dokumentieren!
 \NewDocumentCommand\@getlabel{sm>{\@Label}>{\SplitArgument{2}{:}}md==}{%
-%  \typeout{^^J::::::}%
-%  \typeout{1: #1}%
-%  \typeout{2: #2}%
-%  \typeout{3: #3}%
   \def#2{#3}%
   \IfValueT{#4}{%
     \begingroup%
@@ -1193,7 +1185,7 @@
       }{%
         \edef\tud@reserved{%
           \noexpand\endgroup%
-          \appto\noexpand#2{=#4}%
+          \lowercase{\appto\noexpand#2{=#4}}%
         }%
       }%
     \tud@reserved
@@ -1212,7 +1204,6 @@
       }%
     }%
   }%
-  \typeout{::::: #2}%
 }
 \NewDocumentCommand\@@getlabel{m>{\SplitArgument{2}{:}}m}{%
   \@@@getlabel{#1}#2%
@@ -1363,7 +1354,7 @@
   \@ChangedAt@@@@CreateList[#1](#2)#3{#4}%
 }
 % §§§ optionale Argumente bei \Option etc. beachten (cd=alternative)
-% §§§ Links in Liste überprüfen (cd=alternative), evtl '.obsolete' bevorzugen?
+% §§§ Markup ändern
 \NewDocumentCommand\@ChangedAt@@@@CreateList{r[]r()mmm}{%
   \IfValueTF{#1}{%
     \begingroup%
@@ -1487,7 +1478,6 @@
 \NewDocumentCommand\printchangedatlist{sO{\z@}}{%
   \@ChangedAt@ProcessList{#1}{#2}%
 }
-\NewDocumentCommand\Replace{ommm}{\ClassWarning{tudscrman}{raus}}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
