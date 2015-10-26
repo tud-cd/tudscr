@@ -1125,13 +1125,32 @@
 \NewDocumentCommand\@ProcessChangedAt{md==d()o}{%
   \@getindex*\@tempentry\@tempformat\@tempkey{#1}=#2=(#3)[#4]%
     !Parameter angepasst!%
+  \IfValueT{#2}{%
+    \begingroup%
+      \@getPValue%
+      \ifstr{#2}{}{%
+        \def\tud@reserved{\endgroup}%
+      }{%
+        \protected@edef\tud@reserved{%
+          \noexpand\endgroup%
+          \def\noexpand\@tempentry{\@tempentry=#2}%
+        }%
+      }%
+    \tud@reserved%
+  }%
+}
+\newcommand*\tud@label{%
+  \let\IeC\@firstofone%
+  \def~{-}%
+  \def\"##1{##1e}%
+  \def\ss{ss}%
 }
 % Verwendung dokumentieren!
 \NewDocumentCommand\@Label{m}{\@@Label#1}
 \NewDocumentCommand\@@Label{mmm}{%
   \begingroup%
     \@suppressmarkup%
-    \def~{-}%
+    \tud@label%
     \IfValueTF{#3}{%
       \IfValueTF{#1}{%
         \edef\@tempa{#1:#2:#3}%
@@ -1158,61 +1177,61 @@
   \tud@replace\ProcessedArgument{@}{<at>}%
   \tud@lowerstring{\ProcessedArgument}{\ProcessedArgument}%
 }
+\NewDocumentCommand\@@@Label{mmd==}{%
+  \def#1{#2}%
+  \IfValueT{#3}{%
+    \begingroup%
+      \@getPValue%
+      \tud@label%
+      \ifstr{#3}{}{%
+        \def\tud@reserved{\endgroup}%
+      }{%
+        \protected@edef\tud@reserved{%
+          \noexpand\endgroup%
+          \lowercase{\appto\noexpand#1{=#3}}%
+        }%
+      }%
+    \tud@reserved%
+  }%
+}
 % Verwendung dokumentieren!
-\NewDocumentCommand\tud@iflabelexists{s>{\@Label}>{\SplitArgument{2}{:}}m}{%
-  \ifcsdef{r@#2}{%
+\NewDocumentCommand\tud@iflabelexists{>{\@Label}>{\SplitArgument{2}{:}}md==}{%
+  \@@@Label\tud@reserved{#1}=#2=%
+  \ifcsdef{r@\tud@reserved}{%
     \expandafter\@firstoftwo%
   }{%
-    \IfBooleanTF{#1}{%
-      \ifcsdef{r@#2.obsolete}{%
-        \expandafter\@firstoftwo%
-      }{%
-        \expandafter\@secondoftwo%
-      }%
+    \@@@Label\tud@reserved{#1}%
+    \ifcsdef{r@\tud@reserved}{%
+      \expandafter\@firstoftwo%
     }{%
-      \expandafter\@secondoftwo%
+     \expandafter\@secondoftwo%
     }%
   }%
 }
 % Verwendung dokumentieren!
 \NewDocumentCommand\@getlabel{sm>{\@Label}>{\SplitArgument{2}{:}}md==}{%
-  \def#2{#3}%
-  \IfValueT{#4}{%
-    \begingroup%
-      \@getPValue%
-      \ifstr{#4}{}{%
-        \def\tud@reserved{\endgroup}%
-      }{%
-        \edef\tud@reserved{%
-          \noexpand\endgroup%
-          \lowercase{\appto\noexpand#2{=#4}}%
-        }%
-      }%
-    \tud@reserved
-  }%
-  \IfBooleanTF{#1}{%
-    \if@obsolete%
-      \appto#2{.obsolete}%
-    \fi%
-  }{%
+  \@@@Label#2{#3}=#4=%
+  \IfBooleanF{#1}{%
     \tud@iflabelexists{#2}{}{%
-      \edef\tud@reserved{#2.obsolete}%
+      \@@@Label\tud@reserved{#3}%
       \tud@iflabelexists{\tud@reserved}{%
+        \IfValueT{#4}{\typeout{::::: Label \tud@reserved=#4}}%
         \let#2\tud@reserved%
       }{%
-        \tud@ifbundle{\@@getlabel#2{#3}}{}%
+        \tud@ifbundle{\@@getlabel#2{#3}=#4=}{}%
       }%
     }%
   }%
 }
-\NewDocumentCommand\@@getlabel{m>{\SplitArgument{2}{:}}m}{%
-  \@@@getlabel{#1}#2%
+\NewDocumentCommand\@@getlabel{m>{\SplitArgument{2}{:}}mr==}{%
+  \@@@getlabel{#1}#2=#3=%
 }
-\NewDocumentCommand\@@@getlabel{mmmm}{%
+\NewDocumentCommand\@@@getlabel{mmmmr==}{%
   \edef\tud@reserved{\expandafter\detokenize\expandafter{\@bundledefault}}%
   \ifstr{\tud@reserved}{#2}{}{%
     \toks@{\@getlabel#1}%
     \eaddto@hook\toks@{\expandafter{\@bundledefault:#3:#4}}%
+    \IfValueT{#5}{\addto@hook\toks@{=#5=}}%
     \the\toks@%
   }%
 }
@@ -1222,7 +1241,7 @@
     \def\@tempbundle{#7}%
   }{%
     \tud@ifbundle{%
-      \tud@iflabelexists*{\@bundle:#5}{%
+      \tud@iflabelexists{\@bundle:#5}=#6={%
         \edef\@tempbundle{\expandonce\@bundle}%
       }{}%
     }{}%
@@ -1233,7 +1252,10 @@
       \@suppressoutput%
       \let\Key\@firstoftwo%
       #5%
-      \def#4{\expandonce#2@\expandonce#3\IfValueT{#9}{: #9}!}%
+      \def#4{%
+        \expandonce#2\IfValueT{#9}{: #9}@%
+        \expandonce#3\IfValueT{#9}{: #9}!%
+      }%
       \let\Key\@secondoftwo%
     \else%
       \@suppressmarkup%
@@ -1356,40 +1378,47 @@
 % §§§ optionale Argumente bei \Option etc. beachten (cd=alternative)
 % §§§ Markup ändern
 \NewDocumentCommand\@ChangedAt@@@@CreateList{r[]r()mmm}{%
+  \begingroup%
+    \def\@tempb##1{%
+      \@changedattrue%
+      ##1%
+      \@changedatfalse%
+      \let\@tempa\@tempformat%
+    }%
+    \let\@tempa\@empty%
+    \tud@ifbundle{%
+      \@tempb{\@bundle}%
+    }{%
+      \IfValueT{#2}{\@tempb{#2}}%
+    }%
+    \protected@edef\tud@reserved{%
+      \noexpand\endgroup%
+      \def\noexpand\@tempa{\@tempa}%
+    }%
+  \tud@reserved%
   \IfValueTF{#1}{%
-    \begingroup%
-      \tud@ifbundle{%
-        \@changedattrue%
-        \@bundle%
-        \@changedatfalse%
-        \protected@edef\@tempa{#3!Implementierung \@tempformat!#1!}%
-      }{%
-        \protected@edef\@tempa{#3!Implementierung Hauptklassen!#1!}%
-      }%
-      \edef\tud@reserved{%
-        \noexpand\endgroup%
-        \toks@{\expandonce\@tempa}%
-      }%
-    \tud@reserved%
+    \toks@{#3!Implementierung }%
+    \eaddto@hook\toks@{\@tempa}%
+    \addto@hook\toks@{!#1!}%
     \IfValueT{#4}{\addto@hook\toks@{#4}}%
     \addto@hook\toks@{!}%
     \if@obsolete\else%
       \IfValueT{#5}{\addto@hook\toks@{#5}}%
     \fi%
   }{%
+    \toks@{#3!Allgemein }%
     \IfValueTF{#2}{%
-      \@changedattrue%
-      #2%
-      \@changedatfalse%
-      \toks@{#3!Allgemein!}%
-      \eaddto@hook\toks@{\@tempformat:\space}%
+      \addto@hook\toks@{!}%
+      \eaddto@hook\toks@{\@tempa:\space}%
       \IfValueTF{#5}{%
         \addto@hook\toks@{#5}%
       }{%
         \addto@hook\toks@{\emph{neu}}%
       }%
     }{%
-      \toks@{#3!Allgemein!#5}%
+      \eaddto@hook\toks@{\@tempa}%
+      \addto@hook\toks@{!}%
+      \addto@hook\toks@{#5}%
     }%
     \IfValueT{#4}{%
       \ClassError{tudscrman}{Using !#4 isn't allowed for a change notice}{%
@@ -1435,7 +1464,8 @@
       \@changedatfalse%
       \ifstr{#4}{}{}{%
         \eappto\@tempkey{%
-          \expandonce\@tempentry @\expandonce\@tempformat: Werte angepasst!%
+          \expandonce\@tempentry: Werte angepasst@%
+          \expandonce\@tempformat: Werte angepasst!%
         }%
         \begingroup
           \@changedattrue%
@@ -1620,7 +1650,7 @@
     \@tempswafalse%
     \forslashlist{\@tempa}{#2}%
     \@getlabel*\@templabel{\@bundle:\tud@values}=\@tempb=%
-    \edef\@tempb{%
+    \protected@edef\@tempb{%
       =\IfBooleanTF{#1}{\noexpand\emph}{\@firstofone}{\@tempb}='none'|declare|%
     }%
     \edef\@tempc{%
@@ -1930,7 +1960,7 @@
 \newcommand*\TnUD{Technischen Universit\"at Dresden\xspace}
 \newcommand*\TUDCD{\CD der \TnUD}%
 \newcommand*\TUDCDs{\CDs der \TnUD}%
-\newcommand*\DDC{%
+\newrobustcmd*\DDC{%
   \mbox{%
     D\kern.05em R\kern.05em E\kern.05em S\kern.05em %
     D\kern.05em E\kern.05em N\kern.1em-\kern.1em concept%
