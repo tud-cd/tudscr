@@ -10,6 +10,8 @@
 %% tudscr-manual.dtx  (with options: `class,option')
 %% tudscr-misc.dtx  (with options: `class,inherit,execute')
 %% tudscr-manual.dtx  (with options: `class,body')
+%% tudscr-fields.dtx  (with options: `class,manual,body')
+%% tudscr-locale.dtx  (with options: `class,manual,body')
 %% 
 %% ============================================================================
 %% 
@@ -56,12 +58,12 @@
       \fi%
     }%
   \fi%
-  \@TUDVersion{2015/08/26 v2.05 BETA TUD-KOMA-Script}%
+  \@TUDVersion{2015/10/06 v2.05 BETA TUD-KOMA-Script}%
 \endgroup%
 \providecommand*\tudscrmail{tudscr@gmail.com}
 \newcommand*\TUD@ProvidesWrapperClass[3]{%
   \ProvidesClass{#1}[%
-  2015/08/26 v2.05 BETA TUD-KOMA-Script
+  2015/10/06 v2.05 BETA TUD-KOMA-Script
     ^^J#3 (#2)%
   ]%
   \newcommand*\TUDClassName@Parent{#2}%
@@ -130,13 +132,6 @@
 \PassOptionsToPackage{automark}{scrlayer-scrpage}
 \DeclareOption{final}{\let\tudfinalflag\relax}
 \DeclareOption{print}{\let\tudprintflag\relax}
-\AtBeginDocument{%
-  \ifdef{\tudfinalflag}{\TUDoptions{ToDo=false}}{}%
-  \ifdef{\tudprintflag}{%
-    \TUDoptions{color=no}%
-    \PassOptionsToPackage{hidelinks}{hyperref}%
-  }{}%
-}
 %%% From File: tudscr-misc.dtx
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{\TUDClassName@Parent}}
 \TUDProcessOptions\relax
@@ -148,19 +143,22 @@
 \RequirePackage{setspace}[2011/12/19]
 \setstretch{1.1}
 \RequirePackage{babel}[2014/03/24]
-\AfterPackage*{inputenc}{\RequirePackage{csquotes}[2011/10/22]}
-\AtBeginDocument{%
-  \@ifpackageloaded{csquotes}{}{%
-  \ClassWarning%
-  {tudscrman}{Package `csquotes' not loaded}%
-    \providecommand\enquote[1]{\glqg#1\grqq{}}%
-  }%
-}
-\AfterPackage*{hyperref}{%
-  \RequirePackage[babel]{microtype}[2013/05/23]%
+\AfterPackage{hyperref}{%
   \patchcmd{\pdfstringdef}{\csname HyPsd@babel@}{%
     \let\bbl@info\@gobble\csname HyPsd@babel@%
   }{}{\tud@patch@wrn{pdfstringdef}}%
+}
+\AfterPackage{inputenc}{\RequirePackage{csquotes}[2011/10/22]}
+\AtBeginDocument{%
+  \@ifpackageloaded{csquotes}{}{%
+    \ClassWarning%
+      {tudscrman}{Package `csquotes' not loaded}%
+    \providecommand\enquote[1]{\glqg#1\grqq{}}%
+  }%
+}
+\AfterPackage{hyperref}{\RequirePackage[babel]{microtype}[2013/05/23]}
+\AtBeginDocument{%
+  \@ifpackageloaded{hyperref}{}{\RequirePackage[babel]{microtype}[2013/05/23]}%
 }
 \newlength\baselineskipglue
 \AtBeginDocument{%
@@ -197,32 +195,12 @@
 \RequirePackage{ifplatform}[2010/10/22]
 \PassOptionsToPackage{hyperindex=false,colorlinks,linkcolor=blue}{hyperref}
 \PassOptionsToPackage{open,openlevel=0}{bookmark}
-\AtBeginDocument{%
-  \RequirePackage{hyperref}[2012/11/06]
-  \RequirePackage{bookmark}[2011/12/02]
-  \newcommand*\Email[1]{\href{mailto:#1}{\nolinkurl{#1}}}
-  \renewcaptionname{ngerman}{\sectionautorefname}{Unterkapitel}
-  \renewcaptionname{ngerman}{\subsectionautorefname}{Abschnitt}
-  \renewcaptionname{ngerman}{\subsubsectionautorefname}{Unterabschnitt}
-  \newcommand*\autorefname[1][current]{%
-    \ifstr{#1}{current}{%
-      \expandafter\HyPsd@@autorefname\@currentHref\@nil%
-    }{%
-      \@autorefname\HyPsd@@autorefname{#1}%
-    }%
-    \unskip\xspace%
-  }
-  \newcommand*\@autorefname[2]{%
-    \expandafter\ifx\csname r@#2\endcsname\relax%
-      ??%
-    \else%
-      \expandafter\expandafter\expandafter\@@autorefname%
-          \csname r@#2\endcsname{}{}{}{}\@nil#1\@nil%
-    \fi%
-  }
-  \newcommand*\@@autorefname{}
-  \def\@@autorefname#1#2#3#4#5\@nil#6\@nil{#6#4.\@nil}
-  \NewDocumentCommand\manualhyperdef{st'm}{%
+\AfterPackage{hyperref}{%
+  \renewcommand*\Email[1]{\href{mailto:#1}{\nolinkurl{#1}}}%
+  \renewcaptionname{ngerman}{\sectionautorefname}{Unterkapitel}%
+  \renewcaptionname{ngerman}{\subsectionautorefname}{Abschnitt}%
+  \renewcaptionname{ngerman}{\subsubsectionautorefname}{Unterabschnitt}%
+  \NewDocumentCommand\tudhyperdef{st'm}{%
     \IfBooleanTF{#2}{%
       \raisebox{4\baselineskip}[0pt][0pt]{\hyperdef{\jobname}{#3}{}}%
       \par\nobreak\vskip\dimexpr-\parskip-\baselineskip\relax%
@@ -233,10 +211,28 @@
     }%
     \IfBooleanF{#1}{\label{#3}}%
   }
-  \newcommand*\manualhyperref[2]{\hyperref{}{\jobname}{#1}{#2}}
+  \newcommand*\tudhyperref[2]{\hyperref{}{\jobname}{#1}{#2}}
+  \renewcommand*\autorefname[1][current]{%
+    \ifstr{#1}{current}{%
+      \expandafter\HyPsd@@autorefname\@currentHref\@nil%
+    }{%
+      \@autorefname\HyPsd@@autorefname{#1}%
+    }%
+    \unskip\xspace%
+  }%
+  \newcommand*\@autorefname[2]{%
+    \expandafter\ifx\csname r@#2\endcsname\relax%
+      ??%
+    \else%
+      \expandafter\expandafter\expandafter\@@autorefname%
+          \csname r@#2\endcsname{}{}{}{}\@nil#1\@nil%
+    \fi%
+  }%
+  \newcommand*\@@autorefname{}%
+  \def\@@autorefname#1#2#3#4#5\@nil#6\@nil{#6#4.\@nil}%
 }
 \PassOptionsToPackage{xindy,splitindex}{imakeidx}
-\RequirePackage{imakeidx}[2013/07/11]%
+\RequirePackage{imakeidx}[2013/07/11]
 \indexsetup{%
   level=\addsec,%
   noclearpage,firstpagestyle=headings,headers={\indexname}{\indexname},%
@@ -359,9 +355,9 @@
 \makeindex[title={\"Anderungsliste},name=changelog,columns=1,options=\xdyopt]%
 \RequirePackage{enumitem}[2011/09/28]
 \setlist{noitemsep}
-\AtBeginDocument{%
-  \RequirePackage{ellipsis}[2004/9/28]
-  \let\ellipsispunctuation\relax
+\AtEndPreamble{%
+  \RequirePackage{ellipsis}[2004/9/28]%
+  \let\ellipsispunctuation\relax%
 }
 \RequirePackage{tabularx}[1999/01/07]
 \RequirePackage{ragged2e}[2009/05/21]
@@ -373,7 +369,16 @@
 \RequirePackage{tikz}[2013/12/13]
 \RequirePackage{pdfpages}[2013/08/25]
 \RequirePackage{units}[1998/08/04]
-\RequirePackage{tudscrsupervisor}[\TUDVersion]
+\ifdef{\tudfinalflag}{\TUDoptions{ToDo=false}}{}
+\ifdef{\tudprintflag}{%
+  \TUDoptions{color=no}%
+  \PassOptionsToPackage{hidelinks}{hyperref}%
+}{}
+\newcommand*\idxfont{}
+\let\idxfont\footnotesize
+\robustify{\idxfont}
+\newrobustcmd*\bsc{\@backslashchar}
+\newcommand*\suffix[1]{\begingroup~\footnotesize(#1)\endgroup}
 \newcommand*\tud@shellescape@wrn{%
   \ClassWarning%
   {tudscrman}{%
@@ -387,6 +392,27 @@
 }
 \newcommand*\@TUDScript{TUD-KOMA-Script}
 \pdfexpandableoutline{TUDScript}
+\newcommand*\@IndexFormat{}
+\let\@IndexFormat\relax
+\newcommand*\CheckIndexFormat[2]{%
+  \IfBooleanT{#1}{%
+    \IfValueT{#2}{%
+      \ClassWarning{tudscrman}{%
+        You've used the starred version so no entry for\MessageBreak%
+        the index is created and the optional argument\MessageBreak%
+        |#2| will be ignored%
+      }%
+    }%
+  }%
+}
+\newcommand*\SetIndexFormat[2]{%
+  \CheckIndexFormat{#1}{#2}%
+  \IfBooleanTF{#1}{%
+    \def\@IndexFormat{#1}%
+  }{%
+    \IfValueTF{#2}{\def\@IndexFormat{#2}}{\def\@IndexFormat{}}%
+  }%
+}
 \newif\if@declare
 \newif\if@openindex
 \newif\if@stareddeclare
@@ -399,19 +425,6 @@
 \newcommand*\list@Additional{}
 \let\list@Additional\relax
 \newif\if@additional@list
-\newcommand*\@gobbleparameters{%
-  \let\PName\@gobble%
-  \let\PBoolean\@empty%
-  \let\PBName\@gobble%
-  \let\PSet\@empty%
-  \let\PValue\@gobble%
-  \let\Parameter\@gobble%
-  \let\OParameter\@gobble%
-  \let\LParameter\@empty%
-  \let\OLParameter\@gobble%
-  \let\PParameter\@gobble%
-  \let\POParameter\@gobble%
-}
 \NewDocumentEnvironment{Declaration}{omoog}{%
   \listadd\list@Declaration{#2}%
   \@changedatdeclare{#1}{#2}%
@@ -447,6 +460,40 @@
   \vskip-\lastskip%
   \@declaretrue\@openindexfalse#2\@declarefalse%
   \pagebreak[0]%
+}
+\NewDocumentEnvironment{Declaration*}{omt!}{%
+  \IfBooleanT{#3}{%
+    \ifstr{\@subdeclare}{mainclasses}{%
+      \gdef\@subdeclare{#2}%
+    }{%
+      \ClassError{tudscrman}{Nested environment `Declaration*{...}!'}{%
+        It is not possible to nest this environment, when\MessageBreak%
+        a cross-label was given before.%
+      }%
+    }%
+  }%
+  \@changedatdeclare{#1}{#2}%
+  \@stareddeclaretrue%
+  \global\@deprecatedfalse%
+  \@declaretrue\@openindextrue#2\@declarefalse%
+  \@stareddeclarefalse%
+}{%
+  \ifx\@changedatdeclarelist\relax\else%
+    \ClassError{tudscrman}{\string\printchangedatlist\space is missing}{%
+      \string\@changedatdeclarelist\space is not empty. Did you\MessageBreak%
+      forget to print this list with \string\printchangedatlist?%
+    }%
+  \fi%
+  \global\@deprecatedfalse%
+  \@gobbleparameters%
+  \@declaretrue\@openindexfalse#2\@declarefalse%
+  \IfBooleanT{#3}{\gdef\@subdeclare{mainclasses}}%
+}
+\newcommand*\@subdeclare{mainclasses}
+\newcommand*\tud@ifsubdeclare[3]{%
+  \@tempswafalse%
+  \IfValueT{#1}{\ifstr{#1}{}{}{\ifstr{#1}{mainclasses}{}{\@tempswatrue}}}%
+  \if@tempswa#2\else#3\fi%
 }
 \NewDocumentCommand\printdeclarationlist{sod()}{%
   \ifx\list@Declaration\relax\else%
@@ -519,59 +566,45 @@
     \@afterindentfalse\@afterheading%
   \fi%
 }
-\NewDocumentEnvironment{Declaration+}{om}{%
-  \@changedatdeclare{#1}{#2}%
-  \global\@deprecatedtrue%
-  \@stareddeclaretrue%
-  \@declaretrue\@openindextrue#2\@declarefalse%
-  \global\@deprecatedfalse%
-  \@stareddeclarefalse%
-}{%
-  \ifx\@changedatdeclarelist\relax\else%
-    \ClassError{tudscrman}{\string\printchangedatlist\space is missing}{%
-      \string\@changedatdeclarelist\space is not empty. Did you\MessageBreak%
-      forget to print this list with \string\printchangedatlist?%
+\newcommand*\@templabel{}
+\newcommand*\@createlabel[3]{%
+  \begingroup%
+    \let\Class\@firstofone%
+    \let\Package\@firstofone%
+    \let\Environment\@firstofone%
+    \let\Macro\@firstofone%
+    \let\texttt\@firstofone%
+    \let\textsbn\@firstofone%
+    \let\textsbs\@firstofone%
+    \tud@ifsubdeclare{#3}{%
+      \edef\@tempa{%
+        \noexpand\endgroup%
+        \noexpand\edef\noexpand#1{#3:#2}%
+      }%
+    }{%
+      \edef\@tempa{%
+        \noexpand\endgroup%
+        \noexpand\edef\noexpand#1{#2}%
+      }%
     }%
-  \fi%
-  \global\@deprecatedfalse%
-  \@gobbleparameters%
-  \@declaretrue\@openindexfalse#2\@declarefalse%
+  \@tempa%
 }
-\NewDocumentEnvironment{Declaration*}{omt!}{%
-  \@changedatdeclare{#1}{#2}%
-  \@stareddeclaretrue%
-  \global\@deprecatedfalse%
-  \@declaretrue\@openindextrue#2\@declarefalse%
-  \@stareddeclarefalse%
-}{%
-  \ifx\@changedatdeclarelist\relax\else%
-    \ClassError{tudscrman}{\string\printchangedatlist\space is missing}{%
-      \string\@changedatdeclarelist\space is not empty. Did you\MessageBreak%
-      forget to print this list with \string\printchangedatlist?%
-    }%
-  \fi%
-  \global\@deprecatedfalse%
-  \@gobbleparameters%
-  \@declaretrue\@openindexfalse#2\@declarefalse%
+\newcommand*\@tempentry{}
+\newcommand*\@tempkeyentry{}
+\newcommand*\@createentry[3]{%
+  \tud@ifsubdeclare{#3}{%
+    \edef#1{#2\noexpand\nobreakspace{\idxfont(#3)}}%
+  }{%
+    \edef#1{#2}%
+  }%
 }
-\newenvironment{SubDeclaration}[1]{}{%
-}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\newcommand*\idxfont{}
-\let\idxfont\footnotesize
-\robustify{\idxfont}
-\newcommand*\suffix[1]{\begingroup~\footnotesize(#1)\endgroup}
-\newrobustcmd*\hyperidx[2][]{\manualhyperref{#1}{#2}}
-\newrobustcmd*\bsc{\@backslashchar}
 \NewDocumentCommand\Application{smd||}{%
   \ifdin{#2}{%
-    \mbox{\sbsfont#2}%
+    \mbox{\textsbs{#2}}%
     \CheckIndexFormat{#1}{#3}%
     \IfBooleanF{#1}{%
       \index{%
-        \begingroup\sbsfont#2\endgroup~{\idxfont(Anwendungssoftware)}%
+        \textsbs{#2}\nobreakspace{\idxfont(Anwendungssoftware)}%
         \IfValueT{#3}{|#3}%
       }%
     }%
@@ -580,74 +613,76 @@
 \DeclareExpandableDocumentCommand\@Application{sm}{#2}
 \pdfexpandableoutline{Application}
 \NewDocumentCommand\Distribution{smod||}{%
-  \ifdin{#2\IfValueT{#3}{~#3}}{%
-    \mbox{\sbnfont#2\IfValueT{#3}{~#3}}%
+  \ifdin{#2\IfValueT{#3}{\nobreakspace#3}}{%
+    \mbox{\textsbn{#2\IfValueT{#3}{\nobreakspace#3}}}%
     \CheckIndexFormat{#1}{#4}%
     \IfBooleanF{#1}{%
       \index{%
-        \begingroup\sbnfont#2\endgroup~{\idxfont(Distribution)}%
+        \textsbn{#2}\nobreakspace{\idxfont(Distribution)}%
         \IfValueT{#4}{|#4}%
       }%
     }%
   }%
 }
-\newrobustcmd*\Path[1]{\mbox{\texttt{#1}}}
 \NewDocumentCommand\File{smd||}{%
   \ifdin{#2}{%
-    \mbox{\sbnfont#2}%
+    \mbox{\textsbn{#2}}%
     \CheckIndexFormat{#1}{#3}%
     \IfBooleanF{#1}{%
       \index[files]{%
-        \begingroup\sbnfont#2\endgroup~{\idxfont(Datei)}%
+        \textsbn{#2}\nobreakspace{\idxfont(Datei)}%
         \IfValueT{#3}{|#3}%
       }%
     }%
   }%
 }
 \NewDocumentCommand\Class{smd''d||}{%
-  \ifchangelog%
+  \if@changelog%
     \@ProcessChangedAt{#1}{files}{\protect\sbnfont}{#2}{Klasse}%
   \else%
     \ifdin{#2}{%
       \SetIndexFormat{#1}{#4}%
       \@ProcessOutput{\textsbn{#2}}'#3'%
-        {files}[\protect\sbnfont]{#2}[~{\idxfont(Klasse)}]%
+        {files}[\protect\sbnfont]{#2}[\nobreakspace{\idxfont(Klasse)}]%
     }%
   \fi%
 }
 \DeclareExpandableDocumentCommand\@Class{sm}{#2}
 \pdfexpandableoutline{Class}
-\newcommand*\@TempPackage{}
+\newcommand*\@CTANLink{}
+\let\@CTANLink\relax
 \NewDocumentCommand\Package{smd''d<>d||}{%
-  \ifchangelog%
+  \if@changelog%
     \@ProcessChangedAt{#1}{files}{\protect\sbnfont}{#2}{Paket}%
   \else%
     \ifdin{#2}{%
-      \IfValueTF{#4}{\def\@TempPackage{#4}}{\def\@TempPackage{#2}}%
+      \IfValueTF{#4}{%
+        \ifstr{#4}{}{\let\@CTANLink\relax}{\def\@CTANLink{pkg/#4}}%
+      }{\def\@CTANLink{pkg/#2}}%
       \SetIndexFormat{#1}{#5}%
-      \@ProcessOutput{\textsbn{#2}}'#3'(\@TempPackage)%
-        {files}[\protect\sbnfont]{#2}[~{\idxfont(Paket)}]%
+      \@ProcessOutput{\textsbn{#2}}'#3'%
+        {files}[\protect\sbnfont]{#2}[\nobreakspace{\idxfont(Paket)}]%
     }%
   \fi%
 }
 \DeclareExpandableDocumentCommand\@Package{sm}{#2}
 \pdfexpandableoutline{Package}
 \newcommand*\@TempOption{}
-\NewDocumentCommand\Option{smod''d()d||}{%
-  \ifchangelog%
-    \@ProcessChangedAt{#1}{options}{\ttfamily}{#2}{Option}%
+\NewDocumentCommand\Option{smod''D(){\@subdeclare}d||}{%
+  \if@changelog%
+    \@ProcessChangedAt{#1}(#5){options}{\ttfamily}{#2}{Option}%
   \else%
     \IfValueTF{#3}{\gdef\@TempOption{\texttt{=#3}}}{\gdef\@TempOption{}}%
     \SetIndexFormat{#1}{#6}%
-    \@ProcessOutput{\texttt{#2}}[\@TempOption]'#4'{options}[\ttfamily]{#2}%
+    \@ProcessOutput{\texttt{#2}}[\@TempOption]'#4'(#5){options}[\ttfamily]{#2}%
   \fi%
 }
 \DeclareExpandableDocumentCommand\@Option{sm}{#2}
 \pdfexpandableoutline{Option}
 \newcommand*\@TempEnvironment{}
-\NewDocumentCommand\Environment{smod''d()d||}{%
-  \ifchangelog%
-    \@ProcessChangedAt{#1}{macros}{\ttfamily}{#2}{Umgebung}%
+\NewDocumentCommand\Environment{smod''D(){\@subdeclare}d||}{%
+  \if@changelog%
+    \@ProcessChangedAt{#1}(#5){macros}{\ttfamily}{#2}{Umgebung}%
   \else%
     \if@declare%
       \gdef\@TempEnvironment{%
@@ -659,161 +694,146 @@
       \gdef\@TempEnvironment{\texttt{#2}}%
     \fi%
     \SetIndexFormat{#1}{#6}%
-    \@ProcessOutput{\@TempEnvironment}'#4'{macros}[\ttfamily]{#2}%
+    \@ProcessOutput{\@TempEnvironment}'#4'(#5){macros}[\ttfamily]{#2}%
   \fi%
 }
 \DeclareExpandableDocumentCommand\@Environment{sm}{#2}
 \pdfexpandableoutline{Environment}%
-\NewDocumentCommand\Macro{smd''d()d||}{%
-  \ifchangelog%
-    \@ProcessChangedAt{#1}{macros}{\ttfamily\bsc}{#2}{Befehl}%
+\NewDocumentCommand\Macro{smd''D(){\@subdeclare}d||}{%
+  \if@changelog%
+    \@ProcessChangedAt{#1}(#4){macros}{\ttfamily\bsc}{#2}{Befehl}%
   \else%
     \SetIndexFormat{#1}{#5}%
-    \@ProcessOutput{\texttt{\bsc#2}}'#3'{macros}[\ttfamily\bsc]{#2}%
+    \@ProcessOutput{\texttt{\bsc#2}}'#3'(#4){macros}[\ttfamily\bsc]{#2}%
   \fi%
 }
 \DeclareExpandableDocumentCommand\@Macro{sm}{#2}
-\pdfexpandableoutline{Macro}%
 \newcommand*\@TempKey{}
-\NewDocumentCommand\Key{smmod''d()d||}{%
-  \ifchangelog%
-    \@ProcessChangedAt{#1}{macros}(#2){\ttfamily}{#3}{Parameter}%
+\NewDocumentCommand\Key{smmod''D(){\@subdeclare}d||}{%
+  \if@changelog%
+    \@ProcessChangedAt{#1}(#6){macros}!#2!{\ttfamily}{#3}{Parameter}%
   \else%
-    \begingroup%
-      \let\Environment\@firstofone%
-      \let\Macro\@firstofone%
       \IfValueTF{#4}{%
-        \gdef\@TempKey{\texttt{=#4}\if@declare~{\idxfont(Parameter)}\fi}%
+      \gdef\@TempKey{%
+        \texttt{=#4}\if@declare\nobreakspace{\idxfont(Parameter)}\fi%
+      }%
       }{%
-        \gdef\@TempKey{\if@declare~{\idxfont(Parameter)}\fi}%
+      \gdef\@TempKey{\if@declare\nobreakspace{\idxfont(Parameter)}\fi}%
       }%
       \SetIndexFormat{#1}{#7}%
-      \@ProcessOutput{\texttt{#3}}[\@TempKey]'#5'{macros}(#2)[\ttfamily]{#3}%
-    \endgroup%
+    \@ProcessOutput{\texttt{#3}}[\@TempKey]'#5'(#6)%
+      {macros}!#2![\ttfamily]{#3}[\nobreakspace{\idxfont(Parameter)}]%
   \fi%
 }
 \DeclareExpandableDocumentCommand\@Key{smm}{#3}
 \pdfexpandableoutline{Key}
-\NewDocumentCommand\Term{smd''d()d||}{%
-  \ifchangelog%
-    \@ProcessChangedAt{#1}{terms}{\ttfamily\bsc}{#2}{Bezeichner}%
+\NewDocumentCommand\Term{smd''D(){\@subdeclare}d||}{%
+  \if@changelog%
+    \@ProcessChangedAt{#1}(#4){terms}{\ttfamily\bsc}{#2}{Bezeichner}%
   \else%
     \SetIndexFormat{#1}{#5}%
-    \@ProcessOutput{\texttt{\bsc#2}}[\if@declare~{\idxfont(Bezeichner)}\fi]'#3'%
-      {terms}[\ttfamily\bsc]{#2}%
+    \@ProcessOutput{\texttt{\bsc#2}}[%
+      \if@declare\nobreakspace{\idxfont(Bezeichner)}\fi%
+    ]'#3'(#4){terms}[\ttfamily\bsc]{#2}%
   \fi%
 }
 \DeclareExpandableDocumentCommand\@Term{sm}{#2}
 \pdfexpandableoutline{Term}%
-\newcommand\@termlist{}
-\let\@termlist\relax
-\NewDocumentCommand\TermTable{smg}{%
-  \forcsvlist{\listadd\@termlist}{#2}%
-  \ifvmode\else\par\fi%
-  \vskip\baselineskipglue%
-  \@afterindentfalse\@afterheading%
-  \IfBooleanTF{#1}{%
-    \IfValueTF{#3}{\setlength\@tempdima{#3}}{\setlength\@tempdima{\linewidth}}%
-    \setlength\@tempdimc{-.7\baselineskip}%
-    \begin{tabularx}{\@tempdima}{lXX}\@TermTable\end{tabularx}%
-  }{%
-    \setlength\@tempdimc{\z@}%
-    \begin{tabular}{lll}\@TermTable\end{tabular}%
-  }%
-  \let\@termlist\relax%
-  \par\addvspace{\baselineskipglue}%
-}
-\newcommand*\@TermTable{%
-  \toprule%
-  \textbf{Bezeichner} & \textbf{Deutsch} & \textbf{Englisch}\tabularnewline%
-  \midrule%
-  \forlistloop\@@TermTable{\@termlist}%
-  \bottomrule%
-}
-\newcommand*\@@TermTable[1]{%
-  \Term{#1} & %
-  \ifstr{\@nameuse{#1}}{}{\PName{leer}}{\@nameuse{#1}} & %
-  \selectlanguage{english}\vspace*{\@tempdimc}%
-  \ifstr{\@nameuse{#1}}{}{\PName{empty}}{\@nameuse{#1}}\tabularnewline%
-}
-\NewDocumentCommand\Font{smd''d()d||}{%
-  \ifchangelog%
-    \@ProcessChangedAt{#1}{fonts}{\ttfamily}{#2}{Schriftelement}%
+\NewDocumentCommand\Font{smd''D(){\@subdeclare}d||}{%
+  \if@changelog%
+    \@ProcessChangedAt{#1}(#4){fonts}{\ttfamily}{#2}{Schriftelement}%
   \else%
     \SetIndexFormat{#1}{#5}%
-    \@ProcessOutput{\texttt{#2}\if@declare~{\idxfont(Schriftelement)}\fi}%
-      {fonts}[\ttfamily]{#2}%
+    \@ProcessOutput{\texttt{#2}}[%
+      \if@declare\nobreakspace{\idxfont(Schriftelement)}\fi%
+    ]'#3'(#4){fonts}[\ttfamily]{#2}%
   \fi%
 }
 \DeclareExpandableDocumentCommand\@Font{sm}{#2}
 \pdfexpandableoutline{Font}%
-\NewDocumentCommand\Color{smod''d()d||}{%
-  \ifchangelog%
-    \@ProcessChangedAt{#1}{colors}{\ttfamily}{#2}{Farbe}%
+\NewDocumentCommand\Color{smod''D(){\@subdeclare}d||}{%
+  \if@changelog%
+    \@ProcessChangedAt{#1}(#5){colors}{\ttfamily}{#2}{Farbe}%
   \else%
     \SetIndexFormat{#1}{#6}%
     \@ProcessOutput{\texttt{#2}}[%
-      \IfValueT{#3}{~\texttt{(#3)}}\if@declare~{\idxfont(Farbe)}\fi%
-    ]'#4'{colors}[\ttfamily]{#2}%
+      \IfValueT{#3}{\nobreakspace\texttt{(#3)}}%
+      \if@declare\nobreakspace{\idxfont(Farbe)}\fi%
+    ]'#4'(#5){colors}[\ttfamily]{#2}%
   \fi%
 }
 \DeclareExpandableDocumentCommand\@Color{sm}{#2}
 \pdfexpandableoutline{Color}%
-\NewDocumentCommand\PageStyle{smd''d()d||}{%
-  \ifchangelog%
-    \@ProcessChangedAt{#1}{macros}{\ttfamily}{#2}{Seitenstil}%
+\NewDocumentCommand\PageStyle{smd''D(){\@subdeclare}d||}{%
+  \if@changelog%
+    \@ProcessChangedAt{#1}(#4){macros}{\ttfamily}{#2}{Seitenstil}%
   \else%
     \SetIndexFormat{#1}{#5}%
-    \@ProcessOutput{\texttt{#2}\if@declare~{\idxfont(Seitenstil)}\fi}'#3'%
-      {macros}[\ttfamily]{#2}[~{\idxfont(Seitenstil)}]%
+    \@ProcessOutput{\texttt{#2}}[%
+      \if@declare\nobreakspace{\idxfont(Seitenstil)}\fi%
+    ]'#3'(#4){macros}[\ttfamily]{#2}[\nobreakspace{\idxfont(Seitenstil)}]%
   \fi%
 }
 \DeclareExpandableDocumentCommand\@PageStyle{sm}{#2}
 \pdfexpandableoutline{PageStyle}%
-\NewDocumentCommand\Length{smd''d()d||}{%
-  \ifchangelog%
-    \@ProcessChangedAt{#1}{macros}{\ttfamily\bsc}{#2}{L\"ange}%
+\NewDocumentCommand\Counter{smd''D(){\@subdeclare}d||}{%
+  \if@changelog%
+    \@ProcessChangedAt{#1}(#4){macros}{\ttfamily}{#2}{Z\"ahler}%
   \else%
     \SetIndexFormat{#1}{#5}%
-    \@ProcessOutput{\texttt{\bsc#2}}[\if@declare~{\idxfont(L\"ange)}\fi]'#3'%
-      {macros}[\ttfamily\bsc]{#2}[~{\idxfont(L\"ange)}]%
-  \fi%
-}
-\DeclareExpandableDocumentCommand\@Length{sm}{#2}
-\pdfexpandableoutline{Length}%
-\NewDocumentCommand\Counter{smd''d()d||}{%
-  \ifchangelog%
-    \@ProcessChangedAt{#1}{macros}{\ttfamily}{#2}{Z\"ahler}%
-  \else%
-    \SetIndexFormat{#1}{#5}%
-    \@ProcessOutput{\texttt{#2}}[\if@declare~{\idxfont(Z\"ahler)}\fi]%
-      {macros}[\ttfamily]{#2}[~{\idxfont(Z\"ahler)}]%
+    \@ProcessOutput{\texttt{#2}}[%
+      \if@declare\nobreakspace{\idxfont(Z\"ahler)}\fi%
+    ]'#3'(#4){macros}[\ttfamily]{#2}[\nobreakspace{\idxfont(Z\"ahler)}]%
   \fi%
 }
 \DeclareExpandableDocumentCommand\@Counter{sm}{#2}
 \pdfexpandableoutline{Counter}%
-\newcommand*\@IndexFormat{}
-\let\@IndexFormat\relax
-\newcommand*\CheckIndexFormat[2]{%
-  \IfBooleanT{#1}{%
-    \IfValueT{#2}{%
-      \ClassWarning{tudscrman}{%
-        You've used the starred version so no entry for\MessageBreak%
-        the index is created and the optional argument\MessageBreak%
-        |#2| will be ignored%
-      }%
-    }%
-  }%
+\NewDocumentCommand\Length{smd''D(){\@subdeclare}d||}{%
+  \if@changelog%
+    \@ProcessChangedAt{#1}(#4){macros}{\ttfamily\bsc}{#2}{L\"ange}%
+  \else%
+    \SetIndexFormat{#1}{#5}%
+    \@ProcessOutput{\texttt{\bsc#2}}[%
+      \if@declare\nobreakspace{\idxfont(L\"ange)}\fi%
+    ]'#3'(#4){macros}[\ttfamily\bsc]{#2}[\nobreakspace{\idxfont(L\"ange)}]%
+  \fi%
 }
-\newcommand*\SetIndexFormat[2]{%
-  \CheckIndexFormat{#1}{#2}%
-  \IfBooleanTF{#1}{%
-    \def\@IndexFormat{#1}%
+\DeclareExpandableDocumentCommand\@Length{sm}{#2}
+\pdfexpandableoutline{Length}%
+\newrobustcmd*\Path[1]{\mbox{\texttt{#1}}}
+\newrobustcmd*\textOR{\,\textbardbl\,}
+\newrobustcmd*\PValue[1]{\mbox{\texttt{#1}}}
+\newrobustcmd*\PName[1]{\PValue{\textsl{<#1>}}}
+\newrobustcmd*\PSet{\PName{Einstellung}}
+\newrobustcmd*\PBoolean{\PName{Ein-Aus-Wert}}
+\newrobustcmd*\PBName[1]{\PBoolean\textOR\PName{#1}}
+\newrobustcmd*\Parameter[1]{\mbox{\texttt{\{}\PName{#1}\texttt{\}}}}
+\newrobustcmd*\OParameter[1]{\mbox{\texttt{[}\PName{#1}\texttt{]}}}
+\newrobustcmd*\LParameter{\mbox{\texttt{[}\PName{Parameterliste}\texttt{]}}}
+\newrobustcmd*\OLParameter[1]{%
+  \mbox{\texttt{[}\PName{#1}\textOR\PName{Parameterliste}\texttt{]}}%
+}
+\newrobustcmd*\PParameter[1]{\mbox{\texttt{\{#1\}}}}
+\newrobustcmd*\POParameter[1]{\mbox{\texttt{[#1]}}}
+\newcommand*\@gobbleparameters{%
+  \let\PName\@gobble%
+  \let\PBoolean\@empty%
+  \let\PBName\@gobble%
+  \let\PSet\@empty%
+  \let\PValue\@gobble%
+  \let\Parameter\@gobble%
+  \let\OParameter\@gobble%
+  \let\LParameter\@empty%
+  \let\OLParameter\@gobble%
+  \let\PParameter\@gobble%
+  \let\POParameter\@gobble%
+}
+\NewDocumentCommand\@ProcessOutput{mod''d()md!!omo}{%
+  \IfValueTF{#6}{%
+    \@createlabel\@templabel{#5:#6:#8}{#4}%
   }{%
-    \IfValueTF{#2}{\def\@IndexFormat{#2}}{\def\@IndexFormat{}}%
+    \@createlabel\@templabel{#5:#8}{#4}%
   }%
-}
-\NewDocumentCommand\@ProcessOutput{mod''d()md()omo}{%
   \if@declare%
     \if@openindex%
       \IfValueT{#3}{%
@@ -823,14 +843,13 @@
           the environment `Declaration'%
         }%
       }%
-      \IfValueTF{#6}{\edef\@tempa{#5:#6:#8}}{\edef\@tempa{#5:#8}}%
       \if@deprecated%
         \expandafter\IfBooleanF\expandafter{\@IndexFormat}{%
-          \manualhyperdef{\@tempa}%
+          \tudhyperdef{\@templabel}%
         }%
       \else%
         \expandafter\IfBooleanTF\expandafter{\@IndexFormat}{%
-          \manualhyperdef{\@tempa}%
+          \tudhyperdef{\@templabel}%
         }{%
           \ifx\@IndexFormat\@empty\else%
             \ClassWarning{tudscrman}{%
@@ -840,11 +859,11 @@
             }%
           \fi%
           \if@stareddeclare%
-            \manualhyperdef'{\@tempa}%
+            \tudhyperdef'{\@templabel}%
           \else%
-            \manualhyperdef{\@tempa}%
+            \tudhyperdef{\@templabel}%
           \fi%
-          \@HyperIndex{#5}{#6}{#7}{#8}{#9}{(declare}%
+          \@HyperIndex{#5}{#6}{#7}{#8}{#9}{#4}{(declare}%
         }%
       \fi%
       \if@stareddeclare\else%
@@ -853,7 +872,7 @@
     \else%
       \if@deprecated\else%
         \expandafter\IfBooleanF\expandafter{\@IndexFormat}{%
-          \@HyperIndex{#5}{#6}{#7}{#8}{#9}{declare)}%
+          \@HyperIndex{#5}{#6}{#7}{#8}{#9}{#4}{declare)}%
         }%
       \fi%
     \fi%
@@ -864,13 +883,14 @@
       }%
     \else%
       \expandafter\IfBooleanF\expandafter{\@IndexFormat}{%
-        \@HyperIndex{#5}{#6}{#7}{#8}{#9}{\@IndexFormat}%
+        \@HyperIndex{#5}{#6}{#7}{#8}{#9}{#4}{\@IndexFormat}%
       }%
     \fi%
-    \IfValueTF{#6}{\edef\@tempa{#5:#6:#8}}{\edef\@tempa{#5:#8}}%
-    \ifcsdef{r@\@tempa}{%
+    \ifcsdef{r@\@templabel}{%
+      \def\@tempa{%
+        \mbox{\hyperref{}{\jobname}{\@templabel}{#1}\IfValueT{#2}{#2}}%
+      }%
       \let\@tempb\relax%
-      \def\@tempc{\mbox{\hyperref{}{\jobname}{\@tempa}{#1}\IfValueT{#2}{#2}}}%
       \IfValueT{#3}{%
         \def\@tempb{%
           \ClassWarning{tudscrman}{%
@@ -879,113 +899,88 @@
             and 'full' as well as 'none' are valid%
           }%
         }%
-        \ifstr{#3}{auto}{\def\@tempb{ in \autoref{\@tempa}}}{}%
-        \ifstr{#3}{page}{\def\@tempb{ \vpageref{\@tempa}}}{}%
-        \ifstr{#3}{ppage}{\def\@tempb{ \reftextfaraway{\@tempa}}}{}%
-        \ifstr{#3}{full}{\def\@tempb{ in \fullref{\@tempa}}}{}%
+        \ifstr{#3}{auto}{\def\@tempb{ in \autoref{\@templabel}}}{}%
+        \ifstr{#3}{page}{\def\@tempb{ \vpageref{\@templabel}}}{}%
+        \ifstr{#3}{ppage}{\def\@tempb{ \reftextfaraway{\@templabel}}}{}%
+        \ifstr{#3}{full}{\def\@tempb{ in \fullref{\@templabel}}}{}%
         \ifstr{#3}{none}{%
+          \def\@tempa{\mbox{#1\IfValueT{#2}{#2}}}%
           \let\@tempb\relax%
-          \def\@tempc{\mbox{#1\IfValueT{#2}{#2}}}%
         }{}%
       }%
-      \@tempc\@tempb%
+      \@tempa\@tempb%
     }{%
-      \IfValueT{#3}{%
-        \ClassWarning{tudscrman}{%
-          No cross-reference created, label \@tempa\space is missing%
-        }%
-      }%
-      \IfValueTF{#4}{%
-        \ifstr{#4}{}{\mbox{#1\IfValueT{#2}{#2}}}{%
-          \href{http://www.ctan.org/pkg/#4}{\mbox{#1\IfValueT{#2}{#2}}}%
-        }%
+      \def\@tempa{\mbox{#1\IfValueT{#2}{#2}}}%
+      \IfValueTF{#3}{%
+        \def\@tempb##1{\ClassWarning{tudscrman}{##1}}%
       }{%
-        \mbox{#1\IfValueT{#2}{#2}}%
+        \def\@tempb##1{\ClassInfo{tudscrman}{##1}}%
+        }%
+      \@tempb{%
+        No cross-reference created, label \@templabel\MessageBreak%
+        is missing%
       }%
+      \ifx\@CTANLink\relax%
+        \@tempa%
+      \else%
+        \href{http://www.ctan.org/\@CTANLink}{\@tempa}%
+      \fi%
     }%
   \fi%
   \let\@IndexFormat\relax%
+  \let\@CTANLink\relax%
 }
-\NewDocumentCommand\@ProcessChangedAt{mmd()mmm}{%
-  \begingroup%
-    \let\texttt\@firstofone%
-    \let\textsbn\@firstofone%
-    \let\textsbs\@firstofone%
-    \let\Environment\@firstofone%
-    \let\Macro\@firstofone%
-    \IfValueTF{#3}{\xdef\@tempa{#2:#3:#5}}{\xdef\@tempa{#2:#5}}%
-  \endgroup%
-  \def\@tempb{\begingroup#4#5\endgroup}%
-  \ifcsdef{r@\@tempa}{%
-    \hyperidx[\@tempa]{\@tempb}\IfBooleanF{#1}{~{\idxfont(#6)}}%
-  }{%
-    \@tempb\IfBooleanF{#1}{~{\idxfont(#6)}}%
-  }%
-}
-\NewDocumentCommand\@HyperIndex{mmmmmm}{%
+\newrobustcmd*\hyperidx[2][]{\tudhyperref{#1}{#2}}
+\NewDocumentCommand\@HyperIndex{mmmmmmm}{%
   \IfValueTF{#3}{\def\@tempa{#3}}{\def\@tempa{}}%
   \IfValueTF{#5}{\def\@tempb{#5}}{\def\@tempb{}}%
-  \IfValueTF{#6}{\edef\@tempc{|#6}}{\def\@tempc{}}%
+  \IfValueTF{#7}{\edef\@tempc{|#7}}{\def\@tempc{}}%
   \IfValueTF{#2}{%
-    \ifcsdef{r@#1:#2:#4}{%
-      \edef\@tempb{#1:#2:#4}%
-      \index[#1]{%
-        #2!\hyperidx[\@tempb]{%
+    \@createlabel\@templabel{#1:#2:#4}{#6}%
+    \@createentry\@tempentry{%
+      \begingroup\expandonce\@tempa#4\endgroup\expandonce\@tempb%
+    }{#6}%
+    \@createentry\@tempkeyentry{%
           \begingroup\expandonce\@tempa#4\endgroup%
-        }~{\idxfont(Parameter)}\expandonce\@tempc%
-      }%
-      \begingroup%
-        \let\Environment\@firstofone%
-        \def\Macro##1{\bsc##1}%
-        \index[keys]{%
-          \hyperidx[\@tempb]{%
-            \begingroup\expandonce\@tempa#4\endgroup~{\idxfont(\texttt{#2})}%
-          }%
-          \expandonce\@tempc%
-        }%
-      \endgroup%
-    }{%
+      \noexpand\nobreakspace{\idxfont(#2)}%
+    }{#6}%
+    \ifcsdef{r@\@templabel}{%
       \index[#1]{%
-        #2!\begingroup\expandonce\@tempa#4\endgroup%
-        ~{\idxfont(Parameter)}\expandonce\@tempc%
+        #2!\hyperidx[\@templabel]{\expandonce\@tempentry}\expandonce\@tempc%
       }%
       \index[keys]{%
-        \begingroup\expandonce\@tempa#4\endgroup~{\idxfont(\texttt{#2})}%
-        \expandonce\@tempc%
-      }%
+        \hyperidx[\@templabel]{\expandonce\@tempkeyentry}\expandonce\@tempc%
     }%
   }{%
-    \ifcsdef{r@#1:#4}{%
-      \index[#1]{%
-        \hyperidx[#1:#4]{%
-          \begingroup\expandonce\@tempa#4\endgroup%
-        }%
-        \expandonce\@tempb%
-        \expandonce\@tempc%
+      \index[#1]{#2!\expandonce\@tempentry\expandonce\@tempc}%
+      \index[keys]{\expandonce\@tempkeyentry\expandonce\@tempc}%
       }%
     }{%
+    \@createlabel\@templabel{#1:#4}{#6}%
+    \@createentry\@tempentry{%
+      \begingroup\expandonce\@tempa#4\endgroup\expandonce\@tempb%
+    }{#6}%
+    \ifcsdef{r@\@templabel}{%
       \index[#1]{%
-        \begingroup\expandonce\@tempa#4\endgroup%
-        \expandonce\@tempb\expandonce\@tempc%
+        \hyperidx[\@templabel]{\expandonce\@tempentry}\expandonce\@tempc%
       }%
+    }{%
+      \index[#1]{\expandonce\@tempentry\expandonce\@tempc}%
     }%
   }%
 }
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\NewDocumentCommand\ChangedAt@Split{>{\SplitArgument{2}{!}}m}{%
-  \ChangedAt@@Split#1%
-}
-\newcommand*\ChangedAt@@Split[3]{%
-  \in@{*}{#1}%
-  \ifin@%
-    \listadd\@changedatdeclarelist{Allgemein!#2}%
-  \else%
-    \listadd\@changedatdeclarelist{%
-      Implementierung!#2!\IfValueTF{#3}{#3}{\@changedatdeclaredefault}!#1%
-    }%
-  \fi%
+\NewDocumentCommand\@ProcessChangedAt{md()md!!mmm}{%
+  \IfValueTF{#4}{%
+    \@createlabel\@templabel{#3:#4:#6}{#2}%
+  }{%
+    \@createlabel\@templabel{#3:#6}{#2}%
+  }%
+  \IfBooleanTF{#1}{%
+    \def\@tempa{\begingroup#5#6\endgroup}%
+  }{%
+    \def\@tempa{\begingroup#5#6\endgroup\nobreakspace{\idxfont(#7)}}%
+  }%
+  \ifcsdef{r@\@templabel}{\hyperidx[\@templabel]{\@tempa}}{\@tempa}%
 }
 \newcommand*\@changedatdeclarelist{}
 \let\@changedatdeclarelist\relax
@@ -999,6 +994,33 @@
       \fi\fi%
     }%
   }%
+}
+\NewDocumentCommand\ChangedAt@Split{>{\SplitArgument{2}{!}}m}{%
+  \ChangedAt@@Split#1%
+}
+\newcommand*\ChangedAt@@Split[3]{%
+  \in@{*}{#1}%
+  \ifin@%
+    \tud@ifsubdeclare{\@subdeclare}{%
+      \protected@edef\@tempa{Allgemein\nobreakspace\@subdeclare!#2}%
+    }{%
+      \protected@edef\@tempa{Allgemein!#2}%
+    }%
+  \else%
+    \tud@ifsubdeclare{\@subdeclare}{%
+      \protected@edef\@tempa{%
+        Implementierung\nobreakspace\@subdeclare!#2!%
+        \IfValueTF{#3}{#3}{\noexpand\@changedatdeclaredefault}!%
+        #1(\@subdeclare)%
+      }%
+    }{%
+      \protected@edef\@tempa{%
+        Implementierung!#2!%
+        \IfValueTF{#3}{#3}{\noexpand\@changedatdeclaredefault}!#1%
+      }%
+    }%
+  \fi%
+  \listeadd\@changedatdeclarelist{\expandonce\@tempa}%
 }
 \NewDocumentCommand\printchangedatlist{sO{\z@}}{%
   \ifx\@changedatdeclarelist\relax\else%
@@ -1016,7 +1038,11 @@
 }
 \newlength\changedatskip
 \NewDocumentCommand\ChangedAt{sO{\changedatskip}mO{Allgemein}}{%
+  \tud@ifsubdeclare{\@subdeclare}{%
+    \ChangedAt@Process[#1]{#2}[#4\nobreakspace\@subdeclare]{#3}%
+  }{%
   \ChangedAt@Process[#1]{#2}[#4]{#3}%
+  }%
 }
 \newcommand*\@changedatlist{}
 \newcommand*\ChangedAt@Default{}
@@ -1037,7 +1063,7 @@
     \strut%
     \marginnote{%
       \def\@tempa####1{%
-        \ignorespaces\manualhyperref{####1}{####1}\tabularnewline%
+        \ignorespaces\tudhyperref{####1}{####1}\tabularnewline%
       }%
       \begin{tabular}{|l|}%
         \hline%
@@ -1077,18 +1103,12 @@
         \setbox\z@\hbox{#3}%
       \endgroup%
       \index[changelog]{%
-        #1\manualhyperdef*{#1}!\manualhyperdef*{#1:#2}#2!\@TempKey\ #3%
+        #1\tudhyperdef*{#1}!\tudhyperdef*{#1:#2}#2!\@TempKey\ #3%
       }%
     \else%
-      \ifstr{#2}{Allgemein}{%
         \index[changelog]{%
-          #1\manualhyperdef*{#1}!\manualhyperdef*{#1:#2}#2!\protect\changelogfalse#3\protect\changelogtrue%
+          #1\tudhyperdef*{#1}!\tudhyperdef*{#1:#2}#2!#3%
         }%
-      }{%
-        \index[changelog]{%
-          #1\manualhyperdef*{#1}!\manualhyperdef*{#1:#2}#2!#3%
-        }%
-      }%
     \fi%
   \endgroup%
 }
@@ -1105,9 +1125,6 @@
     \fi\fi%
   }%
 }
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newif\if@sorted@list
 \newcommand*\list@sorted{}
 \newcommand*\sortlist[1]{%
@@ -1151,6 +1168,37 @@
     \fi%
     \let\list@sorted\@tempb%
   \fi%
+}
+\newcommand\@termlist{}
+\let\@termlist\relax
+\NewDocumentCommand\TermTable{smg}{%
+  \forcsvlist{\listadd\@termlist}{#2}%
+  \ifvmode\else\par\fi%
+  \vskip\baselineskipglue%
+  \@afterindentfalse\@afterheading%
+  \IfBooleanTF{#1}{%
+    \IfValueTF{#3}{\setlength\@tempdima{#3}}{\setlength\@tempdima{\linewidth}}%
+    \setlength\@tempdimc{-.7\baselineskip}%
+    \begin{tabularx}{\@tempdima}{lXX}\@TermTable\end{tabularx}%
+  }{%
+    \setlength\@tempdimc{\z@}%
+    \begin{tabular}{lll}\@TermTable\end{tabular}%
+  }%
+  \let\@termlist\relax%
+  \par\addvspace{\baselineskipglue}%
+}
+\newcommand*\@TermTable{%
+  \toprule%
+  \textbf{Bezeichner} & \textbf{Deutsch} & \textbf{Englisch}\tabularnewline%
+  \midrule%
+  \forlistloop\@@TermTable{\@termlist}%
+  \bottomrule%
+}
+\newcommand*\@@TermTable[1]{%
+  \Term{#1} & %
+  \ifstr{\@nameuse{#1}}{}{\PName{leer}}{\@nameuse{#1}} & %
+  \selectlanguage{english}\vspace*{\@tempdimc}%
+  \ifstr{\@nameuse{#1}}{}{\PName{empty}}{\@nameuse{#1}}\tabularnewline%
 }
 \newsavebox\tabularm@box
 \newlength\tabularm@wd
@@ -1212,7 +1260,7 @@
     \ifx\tud@item@add\relax%
       \def\tud@item@add{#1}%
     \else%
-      \appto\tud@item@add{~#1}%
+      \appto\tud@item@add{\nobreakspace#1}%
     \fi%
   }%
   \itemvalues[%
@@ -1256,7 +1304,7 @@
       \@for\@tempa:=#1\do{%
         \ifx\@tempa\@empty\else\ifx\@tempa\space\else%
           \@tempb%
-          \manualhyperdef{files:\@tempa}%
+          \tudhyperdef{files:\@tempa}%
           \IfValueTF{#2}{%
             \edef\@tempc{http://www.ctan.org/pkg/#2}%
           }{%
@@ -1271,7 +1319,7 @@
         \let\@tempb\relax%
         \@for\@tempa:=#3\do{%
           \@tempb%
-          \manualhyperdef{files:\@tempa}%
+          \tudhyperdef{files:\@tempa}%
           \expandafter\Package\expandafter{\@tempa}'none'|!|%
           \def\@tempb{, }%
         }%
@@ -1280,20 +1328,6 @@
     }%
   }]%
 }
-\newrobustcmd*\textOR{\,\textbardbl\,}
-\newrobustcmd*\PValue[1]{\mbox{\texttt{#1}}}
-\newrobustcmd*\PName[1]{\PValue{\textsl{<#1>}}}
-\newrobustcmd*\PSet{\PName{Einstellung}}
-\newrobustcmd*\PBoolean{\PName{Ein-Aus-Wert}}
-\newrobustcmd*\PBName[1]{\PBoolean\PValue{\textOR}\PName{#1}}
-\newrobustcmd*\Parameter[1]{\mbox{\texttt{\{}\PName{#1}\texttt{\}}}}
-\newrobustcmd*\OParameter[1]{\mbox{\texttt{[}\PName{#1}\texttt{]}}}
-\newrobustcmd*\LParameter{\mbox{\texttt{[}\PName{Parameterliste}\texttt{]}}}
-\newrobustcmd*\OLParameter[1]{%
-  \mbox{\texttt{[}\PName{#1}\PValue{\textOR}\PName{Parameterliste}\texttt{]}}%
-}
-\newrobustcmd*\PParameter[1]{\mbox{\texttt{\{#1\}}}}
-\newrobustcmd*\POParameter[1]{\mbox{\texttt{[#1]}}}
 \newrobustcmd*\hypertut[2]{%
   \hyperref{tutorials/#1.pdf}{\jobname}{tutorials:#1}{\File*{#1.pdf}#2}%
 }
@@ -1328,7 +1362,9 @@
     \tud@shellescape@wrn%
   }%
   \IfBooleanF{#1}{%
-    \index[files]{\hypertut{#2}{\protect\suffix{Tutorial}}\IfValueT{#3}{|#3}}%
+    \index[files]{%
+      \hypertut{#2}{\nobreakspace{\idxfont(Tutorial)}}\IfValueT{#3}{|#3}%
+    }%
   }%
 }
 \newcommand*\IncludeExample[1]{%
@@ -1399,37 +1435,20 @@
 }
 \newcommand*\ListOfToDo{\if@tud@todo\listoftodos\fi}
 \reversemarginpar
-\newcommand*\seeidx[2]{\pageref{idx:#1}}
-\NewDocumentCommand\Index{mom}{%
-  \def\@tempa##1##2##3{%
-    \index{%
-      ##3!\textrightarrow{}\space%
-      \manualhyperref{idx:##1}{Index der \IfValueTF{##2}{##2}{##3}}|seeidx{##1}%
-    }%
-  }%
-  \forcsvlist{\@tempa{#1}{#2}}{#3}%
-}
 \newcommand*\PrintIndex{%
   \begingroup%
     \@printindex%
-    \clearpage%
     \@printindex[options]%
-    \clearpage%
     \@printindex[macros]%
-    \clearpage%
-%    \@printindex[keys]%
+    \@printindex[keys]%
     \@printindex[terms]%
-    \clearpage%
     \@printindex[fonts]%
-    \clearpage%
     \begingroup%
       \let\lettergroup\@gobble%
       \let\indexspace\par%
       \@printindex[colors]%
-      \clearpage%
     \endgroup%
     \@printindex[files]%
-    \clearpage%
   \endgroup%
 }
 \newcommand*\PrintIndexPrologue[1]{\long\gdef\@printindexprologue{#1}}
@@ -1441,27 +1460,37 @@
   \pagebreak[3]%
   \ifblank{#1}{%
     \ifx\@printindexprologue\@empty%
-      \indexprologue[\@printindexskip]{\manualhyperdef'{idx:main}}%
+      \indexprologue[\@printindexskip]{\tudhyperdef'{idx:main}}%
     \else%
       \indexprologue{%
-        \manualhyperdef'{idx:main}%
+        \tudhyperdef'{idx:main}%
         \@printindexprologue%
       }%
     \fi%
     \printindex\@printindexskip%
     \let\@printindexprologue\@empty%
   }{%
-    \indexprologue[\@printindexskip]{\manualhyperdef'{idx:#1}}%
+    \indexprologue[\@printindexskip]{\tudhyperdef'{idx:#1}}%
     \printindex[#1]\@printindexskip%
   }%
 }
+\newcommand*\seeidx[2]{\pageref{idx:#1}}
+\NewDocumentCommand\CrossIndex{mom}{%
+  \def\@tempa##1##2##3{%
+    \index{%
+      ##3!\textrightarrow{}\space%
+      \tudhyperref{idx:##1}{Index der \IfValueTF{##2}{##2}{##3}}|seeidx{##1}%
+    }%
+  }%
+  \forcsvlist{\@tempa{#1}{#2}}{#3}%
+}
 \newcommand*\hyperpagedeprecated{}
-\newif\ifchangelog
+\newif\if@changelog
 \NewDocumentCommand\Changelog{m}{%
-  \def\@tempa##1{
+  \def\@tempa##1{%
     \index{%
       ##1!\textrightarrow{}\space%
-      \manualhyperref{idx:changelog}{\"Anderungsliste}|seeidx{changelog}%
+      \tudhyperref{idx:changelog}{\"Anderungsliste}|seeidx{changelog}%
     }%
   }%
   \forcsvlist\@tempa{#1}%
@@ -1469,26 +1498,24 @@
 \newcommand*\PrintChangelog{%
   \begingroup%
     \let\lettergroup\@gobble%
-    \changelogtrue\let\hyperpagedeprecated\hyperpage%
-    \preto\item{\changelogtrue\let\hyperpagedeprecated\hyperpage}%
-    \preto\subitem{\changelogtrue\let\hyperpagedeprecated\hyperpage}%
-    \preto\subsubitem{\changelogtrue\let\hyperpagedeprecated\hyperpage}%
+    \@changelogtrue%
+    \let\hyperpagedeprecated\hyperpage%
+    \preto\item{\let\hyperpagedeprecated\hyperpage}%
+    \preto\subitem{\let\hyperpagedeprecated\hyperpage}%
+    \preto\subsubitem{\let\hyperpagedeprecated\hyperpage}%
     \@printindex[changelog]%
   \endgroup%
 }
 \renewrobustcmd*\see[2]{%
-  \ifchangelog%
-    \let\hyperpagedeprecated\@gobble%
-    \changelogfalse%
-  \fi%
   \ifstr{#1}{*}%
-    {\emph{\seename}~#2}%
-    {\emph{\seename}~#1}%
+    {\emph{\seename}\nobreakspace#2}%
+    {\emph{\seename}\nobreakspace#1}%
+  \if@changelog\let\hyperpagedeprecated\@gobble\fi%
 }
 \renewrobustcmd*\seealso[2]{%
   \ifstr{#1}{*}%
-    {\emph{\alsoname}~#2}%
-    {\emph{\alsoname}~#1}%
+    {\emph{\alsoname}\nobreakspace#2}%
+    {\emph{\alsoname}\nobreakspace#1}%
 }
 \RequirePackage{xspace}[2009/10/20]
 \xspaceaddexceptions{"=}
@@ -1518,7 +1545,7 @@
   \fi%
 }
 \newcommand*\Univers{\textubn{Univers}\xspace}
-\newcommand*\DIN{\textdbn{DIN~BOLD}\xspace}
+\newcommand*\DIN{\textdbn{DIN\nobreakspace{}BOLD}\xspace}
 \newcommand*\textsbn{}
 \newrobustcmd*\sbnfont{\sffamily\bfseries\upshape}
 \DeclareTextFontCommand\textsbn{\sbnfont}
@@ -1539,9 +1566,9 @@
     https://github.com/tud-cd/tudscr/releases%
   }%
   \IfBooleanTF{#1}{%
-    \href{\@tempc}{GitHub-Repository~\Distribution*{tudscr}}%
+    \href{\@tempc}{GitHub-Repository\nobreakspace\Distribution*{tudscr}}%
   }{%
-    \hrfn{\@tempc}{GitHub-Repository~\Distribution*{tudscr}}%
+    \hrfn{\@tempc}{GitHub-Repository\nobreakspace\Distribution*{tudscr}}%
   }%
   \xspace%
 }
@@ -1561,6 +1588,109 @@
   }%
   \xspace%
 }
+%%% From File: tudscr-fields.dtx
+\newcommand*\@course{}
+\newrobustcmd*\course[1]{\gdef\@course{#1}}
+\newcommand*\@discipline{}
+\newrobustcmd*\discipline[1]{\gdef\@discipline{#1}}
+\newcommand*\@chairman{}
+\newcommand*\chairman[1]{\gdef\@chairman{#1}}
+\newcommand*\@grade{}
+\newcommand*\grade[1]{\gdef\@grade{#1}}
+\newcommand*\@headline{}
+\newcommand*\@issuedate{}
+\newcommand*\issuedate[1]{\tud@printdate{\@issuedate}{#1}}
+\newcommand*\@duedate{}
+\newcommand*\duedate[1]{\tud@printdate{\@duedate}{#1}}
+\newcommand*\finaldate{}
+\newcommand*\maturitydate{}
+\newcommand*\@contactperson{}
+\newcommand*\contactperson[1]{\gdef\@contactperson{#1}}
+\newcommand*\@office{}
+\newrobustcmd*\office[1]{\gdef\@office{#1}}
+\newcommand*\@telephone{}
+\newrobustcmd*\telephone[1]{\gdef\@telephone{#1}}
+\newcommand*\@emailaddress{}
+\newrobustcmd*\emailaddress[2][]{\gdef\@emailaddress{#2}}
+\AfterPackage*{hyperref}{%
+  \renewrobustcmd*\emailaddress[2][hidelinks]{%
+    \gdef\@emailaddress{%
+      \begingroup%
+        \hypersetup{#1}%
+        \urlstyle{same}%
+        \href{mailto:#2}{\nolinkurl{#2}}%
+      \endgroup%
+    }%
+  }%
+}
+%%% From File: tudscr-locale.dtx
+\tud@locale@define{\authorname}
+\tud@locale@define{\contactname}
+\tud@locale@define{\contactpersonname}
+\tud@locale@define{\taskname}
+\tud@locale@define{\tasktext}
+\tud@locale@define{\namesname}
+\tud@locale@define{\titlename}
+\tud@locale@define{\coursename}
+\tud@locale@define{\disciplinename}
+\tud@locale@define{\issuedatetext}
+\tud@locale@define{\duedatetext}
+\tud@locale@define{\chairmanname}
+\tud@locale@define{\focusname}
+\tud@locale@define{\objectivesname}
+\tud@locale@define{\evaluationname}
+\tud@locale@define{\evaluationtext}
+\tud@locale@define{\contentname}
+\tud@locale@define{\assessmentname}
+\tud@locale@define{\gradetext}
+\tud@locale@define{\noticename}
+\tud@locale@define{\contactpersonname}
+\tud@locale@german{\authorname}{Autor}%
+\tud@locale@german{\contactname}{Kontakt}%
+\tud@locale@german{\contactpersonname}{Ansprechpartner}%
+\tud@locale@german{\taskname}{Aufgabenstellung}%
+\tud@locale@german{\tasktext}{f\"ur die Anfertigung einer}%
+\tud@locale@german{\namesname}{Name}%
+\tud@locale@german{\titlename}{Titel}%
+\tud@locale@german{\coursename}{Studiengang}%
+\tud@locale@german{\disciplinename}{Studienrichtung}%
+\tud@locale@german{\issuedatetext}{Ausgeh\"andigt am}%
+\tud@locale@german{\duedatetext}{Einzureichen am}%
+\tud@locale@german{\chairmanname}{Pr\"ufungsausschussvorsitzender}%
+\tud@locale@german{\focusname}{Schwerpunkte der Arbeit}%
+\tud@locale@german{\objectivesname}{Ziele der Arbeit}%
+\tud@locale@german{\evaluationname}{Gutachten}%
+\tud@locale@german{\evaluationtext}{f\"ur die}%
+\tud@locale@german{\contentname}{Inhalt}%
+\tud@locale@german{\assessmentname}{Bewertung}%
+\tud@locale@german{\gradetext}{%
+  Die Arbeit wird mit der Note \textbf{\@grade} bewertet.%
+}
+\tud@locale@german{\noticename}{Aushang}%
+\tud@locale@german{\contactpersonname}{Ansprechpartner}%
+\tud@locale@english{\authorname}{Author}%
+\tud@locale@english{\contactname}{Contact}%
+\tud@locale@english{\contactpersonname}{Contact}%
+\tud@locale@english{\taskname}{Task}%
+\tud@locale@english{\tasktext}{for the preparation of a}%
+\tud@locale@english{\namesname}{Name}%
+\tud@locale@english{\titlename}{Title}%
+\tud@locale@english{\coursename}{Course}%
+\tud@locale@english{\disciplinename}{Discipline}%
+\tud@locale@english{\issuedatetext}{Issued on}%
+\tud@locale@english{\duedatetext}{Due date for submission}%
+\tud@locale@english{\chairmanname}{Chairman of the Audit Committee}%
+\tud@locale@english{\focusname}{Focus of work}%
+\tud@locale@english{\objectivesname}{Objectives of work}%
+\tud@locale@english{\evaluationname}{Evaluation}%
+\tud@locale@english{\evaluationtext}{for the}%
+\tud@locale@english{\contentname}{Content}%
+\tud@locale@english{\assessmentname}{Assessment}%
+\tud@locale@english{\gradetext}{%
+  The thesis is evaluated with a grade of \textbf{\@grade}.%
+}
+\tud@locale@english{\noticename}{Notice}%
+\tud@locale@english{\contactpersonname}{Contact}%
 \endinput
 %%
 %% End of file `tudscrman.cls'.
