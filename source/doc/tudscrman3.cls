@@ -1215,7 +1215,6 @@
     \tud@iflabelexists{#2}{}{%
       \@@@Label\tud@reserved{#3}%
       \tud@iflabelexists{\tud@reserved}{%
-        \IfValueT{#4}{\typeout{::::: Label \tud@reserved=#4}}%
         \let#2\tud@reserved%
       }{%
         \tud@ifbundle{\@@getlabel#2{#3}=#4=}{}%
@@ -1778,6 +1777,7 @@
 \newcommand*\@ToDo{}
 \NewDocumentCommand\ToDo{somo}{%
   \ifbool{@tud@todo}{%
+    \global\let\tud@currentHref\@currentHref%
     \begingroup%
       \define@boolkey{todonotes}{doc}[true]{%
         \ifbool{KV@todonotes@doc}{\setkeys{todonotes}{color=HKS41!10}}{}%
@@ -1822,6 +1822,7 @@
         \@tempa{#3\unskip}%
       \fi%
     \endgroup%
+    \global\let\@currentHref\tud@currentHref%
     \par\noindent%
   }{}%
   \ignorespaces%
@@ -1920,9 +1921,6 @@
       \let\subsubitem\subitem%
       \let\subitem\item%
       \renewcommand*\item{%
-        % ///
-        \clearpage%
-        % \\\
         \begingroup%
           \escapechar=`\\%
           \catcode\endlinechar=\active%
