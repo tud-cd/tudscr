@@ -91,10 +91,6 @@
     }\csname xspace\endcsname%
   }%
 }{}
-% $$$ erzeugte Befehle nach code conventions durchsuchen
-%     ommand\*?\\(@)*[a-z] def\*?\\(@)*[a-z]
-%     ommand\*?\\(@)*[A-Z] def\*?\\(@)*[A-Z]
-% $$$ Verwendung von \@temp[abc] zu \tud@reserved@[abc], wo notwendig
 %%% From File: tudscr-manual.dtx
 %%% From File: tudscr-base.dtx
 \RequirePackage{tudscrbase}[\TUDVersion]
@@ -297,12 +293,12 @@
     }{\ifnum\imki@columns>\@ne\end{multicols}\fi}%
   \fi%
 }
-\newcommand*\@see{}
 \renewrobustcmd{\see}{\@see}
 \renewrobustcmd{\seealso}{%
   \ClassWarning{tudscrman}{You should use `see' instead of `seealso'}%
   \@see%
 }
+\newcommand*\@see{}
 \def\@see#1#2#3\relax{%
   \if\relax\detokenize{#3}\relax%
     \emph{\seename}\space#1%
@@ -446,16 +442,16 @@
 % 2: normales label, keine Ausgabe
 % 3: verschobenes label, keine Ausgabe
 \newcommand*\tud@declare{0}
-\newcommand*\list@Declaration{}
-\let\list@Declaration\relax
-\newcommand*\list@Preset{}
-\let\list@Preset\relax
+\newcommand*\list@declaration{}
+\let\list@declaration\relax
+\newcommand*\list@preset{}
+\let\list@preset\relax
 \newif\if@preset@list
-\newcommand*\list@Additional{}
-\let\list@Additional\relax
+\newcommand*\list@additional{}
+\let\list@additional\relax
 \newif\if@additional@list
 \NewDocumentEnvironment{Declaration}{omoog}{%
-  \listadd\list@Declaration{#2}%
+  \listadd\list@declaration{#2}%
   \tud@declare@start[#1]{#2}{#3}{#4}{#5}%
 }{%
   \tud@declare@end{#2}{\printdeclarationlist}%
@@ -464,14 +460,14 @@
 \NewDocumentEnvironment{Obsolete}{momoog}{%
   \@obsoletetrue%
   \ifstr{#1}{}{%
-    \listadd\list@Declaration{%
+    \listadd\list@declaration{%
       \def\tud@declare{1}%
       #3%
       \def\tud@declare{0}%
     }%
     \tud@declare@start{#3}{#4}{#5}{#6}%
   }{%
-    \listadd\list@Declaration{#3}%
+    \listadd\list@declaration{#3}%
     \IfValueTF{#2}{%
       \@ChangedAt@CreateList[#2]{#1!#3}%
     }{%
@@ -540,25 +536,25 @@
       \def\@tempb[##1:##2]{##1: \PValue{##2}}%
       \eappto\@tempa{ | \expandonce{\@tempb[#4]}}%
     }%
-    \listeadd\list@Preset{\expandonce\@tempa}%
+    \listeadd\list@preset{\expandonce\@tempa}%
   }{%
-    \listadd\list@Preset{\relax}%
+    \listadd\list@preset{\relax}%
   }%
   \IfValueTF{#5}{%
     \@additional@listtrue%
-    \listadd\list@Additional{(#5)}%
+    \listadd\list@additional{(#5)}%
     \in@{\Environment}{#2}%
-    \ifin@\listadd\list@Additional{\tabularnewline}\fi%
+    \ifin@\listadd\list@additional{\tabularnewline}\fi%
   }{%
-    \listadd\list@Additional{\relax}%
+    \listadd\list@additional{\relax}%
     \in@{\Environment}{#2}%
-    \ifin@\listadd\list@Additional{\relax}\listadd\list@Additional{\relax}\fi%
+    \ifin@\listadd\list@additional{\relax}\listadd\list@additional{\relax}\fi%
   }%
 }
 \newcommand*\tud@declare@end[2]{%
-  \ifx\list@Declaration\relax\else%
+  \ifx\list@declaration\relax\else%
     \ClassError{tudscrman}{\string#2\space is missing}{%
-      \string\list@Declaration\space is not empty. Did you forget\MessageBreak%
+      \string\list@declaration\space is not empty. Did you forget\MessageBreak%
       to print this list with \string#2?%
     }%
   \fi%
@@ -582,7 +578,7 @@
   \@declaretrue\@openindexfalse#1\@declarefalse%
 }
 \NewDocumentCommand\printdeclarationlist{sd()}{%
-  \ifx\list@Declaration\relax\else%
+  \ifx\list@declaration\relax\else%
     \ifvmode\else\par\fi%
     \addpenalty{\@beginparpenalty}%
     \addvspace{1.5\baselineskipglue}%
@@ -593,7 +589,7 @@
     \sbox\z@{%
       \begin{tabular}{|l|}%
         \hline%
-        \forlistloop\@tempa{\list@Declaration}%
+        \forlistloop\@tempa{\list@declaration}%
         \hline%
       \end{tabular}%
     }\usebox\z@%
@@ -603,19 +599,19 @@
       \qquad%
       \if@preset@list%
         \begin{tabular}{@{}l@{}}%
-          \forlistloop\@tempa{\list@Preset}%
+          \forlistloop\@tempa{\list@preset}%
         \end{tabular}%
         \hspace{\tabcolsep}%
       \fi%
       \if@additional@list%
         \begin{tabular}{@{}l@{}}%
-          \forlistloop\@tempa{\list@Additional}%
+          \forlistloop\@tempa{\list@additional}%
         \end{tabular}%
       \fi%
     }{}%
-    \global\let\list@Declaration\relax%
-    \global\let\list@Preset\relax%
-    \global\let\list@Additional\relax%
+    \global\let\list@declaration\relax%
+    \global\let\list@preset\relax%
+    \global\let\list@additional\relax%
     \global\@preset@listfalse%
     \global\@additional@listfalse%
     \@ChangedAt@ProcessList{#1}{%
@@ -1326,8 +1322,8 @@
   \tud@reserved%
 }
 \newcommand*\@MarkupFormat{}
-\newcommand*\@MarkupDeclare{}
 \newcommand*\@MarkupSuffix{}
+\newcommand*\@MarkupDeclare{}
 \NewDocumentCommand\@MarkupOutput{>{\SplitArgument{1}{!}}md==o}{%
   \@@MarkupOutput#1=#2=[#3]%
 }
@@ -1355,7 +1351,6 @@
   \def\@MarkupFormat{\ifdin{}{#1}}%
   \IfValueT{#2}{\def\@MarkupSuffix{\suffix{#2}}}%
   \IfValueT{#3}{\renewcommand*\@MarkupDeclare[1]{#3\@MarkupSuffix}}%
-%  \apptocmd{\@MarkupDeclare}{\def\@MarkupFormat{#1}}{}{}%
 }
 \newcommand*\@ClearMarkupFormat{%
   \let\@MarkupFormat\relax%
