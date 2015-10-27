@@ -1,4 +1,4 @@
-% \CheckSum{3271}
+% \CheckSum{3274}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-manual.dtx}[%
-  2015/09/23 v2.05 TUD-KOMA-Script\space%
+  2015/10/27 v2.05 TUD-KOMA-Script\space%
 %</driver>
 %<package&identify>\NeedsTeXFormat{LaTeX2e}
 %<package&identify>\ProvidesPackage{tudscrman}[%
@@ -144,12 +144,12 @@
 \AtBeginDocument{%
   \@ifpackageloaded{csquotes}{}{%
 %<*class>
-  \ClassWarning%
+    \ClassWarning%
 %</class>
 %<*package>
-  \PackageWarning%
+    \PackageWarning%
 %</package>
-  {tudscrman}{Package `csquotes' not loaded}%
+      {tudscrman}{Package `csquotes' not loaded}%
     \providecommand\enquote[1]{\glqg#1\grqq{}}%
   }%
 }
@@ -222,15 +222,17 @@
 \RequirePackage{filemod}[2011/09/19]
 %    \end{macrocode}
 % Sollte \pkg{auto-pst-pdf} aktiv sein, so wird das Laden von \pkg{todonotes}
-% unterdrückt, da dieses wiederum das Paket \pkg{tikz} lädt, was zu Problem bei 
-% der automatisierten Erstellung von \env{pstricks}"=Grafiken führt.
+% und die Ausgabe von ToDO-Notizen unterdrückt, da dieses wiederum das Paket
+% \pkg{tikz} lädt, was zu Problem bei der automatisierten Erstellung von
+% \env{pstricks}"=Grafiken führt.
 %    \begin{macrocode}
 \RequirePackage{ifpdf}[2011/01/30]
 \ifpdf
   \PassOptionsToPackage{colorinlistoftodos,obeyFinal,color=HKS92!10}{todonotes}
   \RequirePackage{todonotes}[2012/07/25]
+  \TUDoptions{ToDo=true}
 \else
-  \TUDoptions{ToDo=false}
+  \let\tudfinalflag\relax
 \fi
 %    \end{macrocode}
 % Um die \cs{write18} sowohl für Windows als auch für unixoide Betriebssysteme 
@@ -246,61 +248,62 @@
 %    \begin{macrocode}
 \PassOptionsToPackage{hyperindex=false,colorlinks,linkcolor=blue}{hyperref}
 \PassOptionsToPackage{open,openlevel=0}{bookmark}
-\AtBeginDocument{%
-  \RequirePackage{hyperref}[2012/11/06]
-  \RequirePackage{bookmark}[2011/12/02]
 %    \end{macrocode}
-% Es folgen einige Befehle, die an das Paket \pkg{hyperref} gekoppelt sind.
-% \begin{macro}{\hyperpage}
-% Hyperlink für die Angabe einer Seitenzahl.
+% Es folgen einige Befehle, die an das Paket \pkg{hyperref} gekoppelt sind. 
+% Diese werden vor dem Laden als Dummy definiert. 
 %    \begin{macrocode}
-  \providecommand*\hyperpage[1]{#1}%
+\newcommand*\Email[1]{\mbox{#1}}
+\newcommand*\tudhyperpage[1]{#1}
+\NewDocumentCommand\tudhyperdef{sm}{}
+\newcommand*\tudhyperref[2]{#2 ??}
+\newcommand*\autorefname[1][]{??\xspace}
 %    \end{macrocode}
-% \end{macro}^^A \hyperpage
+% Sobald das Paket aktiv ist, werden die Dummyfunktionen mit der jeweiligen 
+% Funktionalität belegt.
+%    \begin{macrocode}
+\AfterPackage{hyperref}{%
+%    \end{macrocode}
 % \begin{macro}{\Email}
-% Hyperlink für die Angabe einer E-Mail-Adresse.
+% \begin{macro}{\tudhyperpage}
+% Mit diesen beiden Befehlen werden Hyperlinks für eine Seitenzahl bzw. eine
+% E-Mail-Adresse erzeugt.
 %    \begin{macrocode}
-  \newcommand*\Email[1]{\href{mailto:#1}{\nolinkurl{#1}}}
+  \renewcommand*\Email[1]{\href{mailto:#1}{\nolinkurl{#1}}}%
+  \let\tudhyperpage\hyperpage%
 %    \end{macrocode}
+% \end{macro}^^A \tudhyperpage
 % \end{macro}^^A \Email
-% Die Bezeichner für die Abschnittsebenen werden umbenannt.
-%    \begin{macrocode}
-  \renewcaptionname{ngerman}{\sectionautorefname}{Unterkapitel}
-  \renewcaptionname{ngerman}{\subsectionautorefname}{Abschnitt}
-  \renewcaptionname{ngerman}{\subsubsectionautorefname}{Unterabschnitt}
-%    \end{macrocode}
 % \begin{macro}{\tudhyperdef}
 % \changes{v2.02}{2014/10/27}{neu}^^A
 % \begin{macro}{\tudhyperref}
 % \changes{v2.02}{2014/10/27}{neu}^^A
 % Diese beiden Befehle dienen zum Defnieren von Textankern im Handbuch und zum
 % Referenzieren auf diese. Bei der Erstelung des Ankers mit \cs{tudhyperdef} 
-% wird zusätzlich auch noch ein Label (\cs{label}) erzeugt. Die Sternversion 
-% des Befehls unterdrückt dies. Der Anker wird mit \cs{Hy@raisedlink}~-- wie es 
-% auch bei normalen \pkg{hyperref}-Labels geschieht~-- über die Grundlinie
-% gehoben. Die Version mit Apostroph kann nach Überschriften verwendet werden 
-% und verschiebt die vertikale Position des Ankers noch weiter nach oben.
+% wird zusätzlich auch noch ein Label (\cs{label}) erzeugt. Der Anker wird mit 
+% \cs{Hy@raisedlink}~-- wie es bei normalen \pkg{hyperref}-Labels geschieht~--
+% über die Grundlinie gehoben. Die Sternversion sollte nach Überschriften
+% verwendet werden und verschiebt die vertikale Position des Ankers noch weiter
+% nach oben.
 %    \begin{macrocode}
 %<*class>
-  \NewDocumentCommand\tudhyperdef{st'm}{%
-    \IfBooleanTF{#2}{%
-      \raisebox{4\baselineskip}[0pt][0pt]{\hyperdef{\jobname}{#3}{}}%
+  \RenewDocumentCommand\tudhyperdef{sm}{%
+    \IfBooleanTF{#1}{%
+      \raisebox{4\baselineskip}[0pt][0pt]{\hyperdef{\jobname}{#2}{}}%
       \par\nobreak\vskip\dimexpr-\parskip-\baselineskip\relax%
       \@afterindentfalse\@afterheading%
     }{%
-      \Hy@raisedlink{\hyperdef{\jobname}{#3}{}}%
-      \ignorespaces%
+      \Hy@raisedlink{\hyperdef{\jobname}{#2}{}}\ignorespaces%
     }%
-    \IfBooleanF{#1}{\label{#3}}%
-  }
-  \newcommand*\tudhyperref[2]{\hyperref{}{\jobname}{#1}{#2}}
+    \label{#2}%
+  }%
+  \renewcommand*\tudhyperref[2]{\hyperref{}{\jobname}{#1}{#2}}%
 %</class>
 %    \end{macrocode}
 % Aus einem Tutorial erfolgen alle Querverweise mit \cs{tudhyperref} auf das 
 % Anwenderhandbuch \enquote{tudscr}.
 %    \begin{macrocode}
 %<*package>
-  \newcommand*\tudhyperref[2]{\hyperref{../tudscr}{tudscr}{#1}{#2}}
+  \renewcommand*\tudhyperref[2]{\hyperref{../tudscr}{tudscr}{#1}{#2}}%
 %</package>
 %    \end{macrocode}
 % \end{macro}^^A \tudhyperref
@@ -314,7 +317,7 @@
 %\footnote{\url{http://tex.stackexchange.com/q/33776/}} wurde das Prinzip 
 % vorgestellt und hier übernommen.
 %    \begin{macrocode}
-  \newcommand*\autorefname[1][current]{%
+  \renewcommand*\autorefname[1][current]{%
     \ifstr{#1}{current}{%
       \expandafter\HyPsd@@autorefname\@currentHref\@nil%
     }{%
@@ -336,6 +339,12 @@
 % \end{macro}^^A \@@autorefname
 % \end{macro}^^A \@autorefname
 % \end{macro}^^A \autorefname
+% Die Bezeichner für die Abschnittsebenen werden umbenannt.
+%    \begin{macrocode}
+  \renewcaptionname{ngerman}{\sectionautorefname}{Unterkapitel}%
+  \renewcaptionname{ngerman}{\subsectionautorefname}{Abschnitt}%
+  \renewcaptionname{ngerman}{\subsubsectionautorefname}{Unterabschnitt}%
+%    \end{macrocode}
 % Damit sind die Ausführungen für das Paket \pkg{hyperref} \emph{fast} beendet. 
 % Etwas später wird noch der Befehl \cs{pdfexpandableoutline} definiert.
 %    \begin{macrocode}
@@ -359,7 +368,6 @@
   noclearpage,firstpagestyle=headings,headers={\indexname}{\indexname},%
   othercode={\renewcommand*\subitem{\@idxitem\hspace*{15\p@}}}%
 }
-\newcommand*\xdyopt{-M \jobname-temp.xdy -L german-din}
 %    \end{macrocode}
 % \dots gefolgt von einem Patch für die Umgebung \env{theindex}, um unschöne 
 % Seitenumbrüche direkt nach Überschriften zu vermeiden.
@@ -377,31 +385,31 @@
   }%
 }{%
   \ifimki@original\else%
-    \renewenvironment{theindex}
-      {\imki@maybeaddtotoc%
-       \imki@indexheaders%
-       \thispagestyle{\imki@firstpagestyle}%
-       \ifnum\imki@columns>\@ne%
-         \columnsep \imki@columnsep%
-         \ifx\imki@idxprologue\relax%
-           \begin{multicols}{\imki@columns}[\imki@indexlevel{\indexname}]%
-         \else%
-           \begin{multicols}{\imki@columns}[%
-             \imki@indexlevel{\indexname}%
-             \imki@idxprologue%
-           ]%
-         \fi%
-       \else%
-         \imki@indexlevel{\indexname}\imki@idxprologue%
-       \fi%
-       \global\let\imki@idxprologue\relax%
-       \parindent\z@%
-       \parskip\z@ \@plus .3\p@\relax%
-       \columnseprule \ifKV@imki@columnseprule.4\p@\else\z@\fi%
-       \raggedright%
-       \let\item\@idxitem%
-       \imki@othercode}%
-      {\ifnum\imki@columns>\@ne\end{multicols}\fi}%
+    \renewenvironment{theindex}{%
+      \imki@maybeaddtotoc%
+      \imki@indexheaders%
+      \thispagestyle{\imki@firstpagestyle}%
+      \ifnum\imki@columns>\@ne%
+        \columnsep \imki@columnsep%
+        \ifx\imki@idxprologue\relax%
+          \begin{multicols}{\imki@columns}[\imki@indexlevel{\indexname}]%
+        \else%
+          \begin{multicols}{\imki@columns}[%
+            \imki@indexlevel{\indexname}%
+            \imki@idxprologue%
+          ]%
+        \fi%
+      \else%
+        \imki@indexlevel{\indexname}\imki@idxprologue%
+      \fi%
+      \global\let\imki@idxprologue\relax%
+      \parindent\z@%
+      \parskip\z@ \@plus .3\p@\relax%
+      \columnseprule \ifKV@imki@columnseprule.4\p@\else\z@\fi%
+      \raggedright%
+      \let\item\@idxitem%
+      \imki@othercode%
+    }{\ifnum\imki@columns>\@ne\end{multicols}\fi}%
   \fi%
 }
 %    \end{macrocode}
@@ -414,6 +422,7 @@
 % Für die Erstellung der Indizes wird zum Sortieren das Programm \pkg{xindy} 
 % genutzt. Für dieses wird eine eigene Stildatei verwendet, welche zur Laufzeit 
 % erzeugt wofür zuerst ein Ausgabestream reserviert wird.
+% \ToDo{Kann die Kompilierung von Tutorials beschleunigt werden?}[v2.05]
 %    \begin{macrocode}
 \newcommand*\tud@write@i{}
 \newwrite\tud@write@i
@@ -434,114 +443,116 @@
 % Nachfolgend wird die zu erstellenden \pkg{xindy}-Stildatei kurz beschrieben.
 %    \begin{macrocode}
 \openout\tud@write@i=\jobname-temp.xdy
+\write\tud@write@i{%
 %    \end{macrocode}
 % Als erstes wird Standard-\LaTeX-Modul geladen.
 %    \begin{macrocode}
-\write\tud@write@i{(require "texindy.xdy")}
+(require "texindy.xdy")^^J%
 %    \end{macrocode}
 % Leider lässt sich für Seitenzahlbereiche via \val{:attr} (noch) kein Markup 
 % für angehängte \enquote{f.} sowie \enquote{ff.} einstellen. Diese würden 
 % deshalb bei kursiven oder fetten Seitenzahlen trotzdem in normaler Schrift
 % erscheinen, weshalb auf die Auszeichnung folgender Seiten verzichtet wird.
 %    \begin{macrocode}
-%\write\tud@write@i{(require "ff-ranges.xdy")}
+%(require "ff-ranges.xdy")^^J%
 %    \end{macrocode}
 %
 % Seitenbereiche werden sofort zusammengefasst, wobei als Trennzeichen ein
 % Halbgeviertstrich verwendet wird.
 %    \begin{macrocode}
-\write\tud@write@i{%
 (define-location-class^^J%
 \space\space "arabic-page-numbers" ("arabic-numbers") :min-range-length 1^^J%
-)%
-}
-\write\tud@write@i{(markup-range :sep "--")}
+)^^J%
+(markup-range :sep "--")^^J%
+%    \end{macrocode}
+% Punkte zwischen Eintrag und Seitenzahl. Das schließende \cs{relax} wird für 
+% die smarte Redefinition des Befehls \cs{see} benötigt.
+%    \begin{macrocode}
+(markup-locclass-list^^J%
+\space\space :open "\string\,\string\dotfill\string\,"^^J%
+\space\space :close "\string\relax"^^J%
+)^^J%
+%    \end{macrocode}
+% Dieser Querverweistyp wird speziell im allgemeinen Index verwendet, um auf 
+% einen Spezialindex zu verweisen. Dabei dient \texttt{:unverified} zum 
+% Unterdrücken von Warnungen durch \texttt{texindy} aufgrund eines fehlenden 
+% Ziels für den Querverweis.
+%    \begin{macrocode}
+(define-crossref-class "seeidx" :unverified)^^J%
+(markup-crossref-list^^J%
+\space\space :class "seeidx"^^J%
+\space\space :open "\string\seeidx{" :sep "; " :close "}{}"^^J%
+)^^J%
 %    \end{macrocode}
 % Alle Argumente in eckigen Klammern werden ignoriert. Dies wird bei einigen
 % Indexbefehlen genutzt, um die nicht beachteten RegExp-Regeln auszugleichen, 
 % siehe den nächsten Absatz.
 %    \begin{macrocode}
-\write\tud@write@i{%
-(merge-rule "\@backslashchar[(.*)\@backslashchar]" "" :eregexp)%
-}
+(merge-rule "\@backslashchar[(.*)\@backslashchar]" "" :eregexp)^^J%
 %    \end{macrocode}
 % Innerhalb ausgewählter Auszeichnungs- und Textbefehle sollten die Befehle
 % selbst, nicht jedoch die Argumente verworfen werden. Leider werden die 
 % manuell erstellten RegExp-Regeln durch \texttt{texindy} zu spät genutzt 
 % (\url{http://sourceforge.net/p/xindy/bugs/22/}).
 %    \begin{macrocode}
-%\write\tud@write@i{(merge-rule "\\hyperidx\{(.*)\}\{(.*)\}" "/2" :eregexp)}
-%\write\tud@write@i{(merge-rule "\\hologo\{(.*)\}" "/1" :eregexp)}
-%\write\tud@write@i{(merge-rule "\\texttt\{(.*)\}" "/1" :eregexp)}
-%\write\tud@write@i{(merge-rule "\\textsbn\{(.*)\}" "/1" :eregexp)}
-%\write\tud@write@i{(merge-rule "\\textsbs\{(.*)\}" "/1" :eregexp)}
+%(merge-rule "\\hyperidx\{(.*)\}\{(.*)\}" "/2" :eregexp)^^J%
+%(merge-rule "\\hologo\{(.*)\}" "/1" :eregexp)^^J%
+%(merge-rule "\\texttt\{(.*)\}" "/1" :eregexp)^^J%
+%(merge-rule "\\textsbn\{(.*)\}" "/1" :eregexp)^^J%
+%(merge-rule "\\textsbs\{(.*)\}" "/1" :eregexp)^^J%
 %    \end{macrocode}
 % Es werden die Attribute \emph{declare} mit der Abkürzung \emph{!} sowie
 % \emph{important} mit der Abkürzung \emph{?} und \emph{default} definiert, 
 % welche hierarchisch gleichgestellt sind.
 %    \begin{macrocode}
-\write\tud@write@i{%
-(define-attributes (("declare" "!" "important" "?" "deprecated" "default")))%
-}
+(define-attributes (("declare" "!" "important" "?" "deprecated" "default")))^^J%
 %    \end{macrocode}
 % Eine Alternative wäre, diese in der Hierarchie zu unterscheiden, allerdings
 % war eine Bildung von zufriedenstellenden Seitenbereichen dabei nicht möglich
 % und wurde deshalb verworfen.
 %    \begin{macrocode}
-%\write\tud@write@i{(markup-attribute-group-list :sep ", ")}
-%\write\tud@write@i{%
-%(define-attributes (("declare" "!") ("important" "?")("default")))%
-%}
+%(markup-attribute-group-list :sep ", ")^^J%
+%(define-attributes (("declare" "!") ("important" "?")("default")))^^J%
 %    \end{macrocode}
 % Einträge, die als wichtig oder als Deklaration festgelegt wurden, könnten
 % auch für normale Indexeinträge zur Bereichsbildung verwendet werden. 
 % Allerdings führt dies auch zur Erzeugung redundanter Einträge, falls es sich 
 % bei den Sondereinträgen bereits um einen Seitenbereich handelt.
 %    \begin{macrocode}
-%\write\tud@write@i{(merge-to "declare" "default")}
-%\write\tud@write@i{(merge-to "!" "default")}
-%\write\tud@write@i{(merge-to "important" "default")}
-%\write\tud@write@i{(merge-to "?" "default")}
+%(merge-to "declare" "default")^^J%
+%(merge-to "!" "default")^^J%
+%(merge-to "important" "default")^^J%
+%(merge-to "?" "default")^^J%
 %    \end{macrocode}
 % Hier erfolgt die Definition der Auszeichnugen der Attribute. Deklarationen 
 % werden fett gedruckt, wichtige Einträge erscheinen kursiv. Außerdem wird ein
 % entsprechnder Link auf die Seite eingefügt.
 %    \begin{macrocode}
-\write\tud@write@i{%
 (markup-locref^^J%
 \space\space :attr "declare"^^J%
-\space\space :open "\string\textbf{\string\hyperpage{"^^J%
+\space\space :open "\string\textbf{\string\tudhyperpage{"^^J%
 \space\space :close "}}"^^J%
-)%
-}
-\write\tud@write@i{%
+)^^J%
 (markup-locref^^J%
 \space\space :attr "!"^^J%
-\space\space :open "\string\textbf{\string\hyperpage{"^^J%
+\space\space :open "\string\textbf{\string\tudhyperpage{"^^J%
 \space\space :close "}}"^^J%
-)%
-}
-\write\tud@write@i{%
+)^^J%
 (markup-locref^^J%
 \space\space :attr "important"^^J%
-\space\space :open "\string\textsl{\string\hyperpage{"^^J%
+\space\space :open "\string\textsl{\string\tudhyperpage{"^^J%
 \space\space :close "}}"^^J%
-)%
-}
-\write\tud@write@i{%
+)^^J%
 (markup-locref^^J%
 \space\space :attr "?"^^J%
-\space\space :open "\string\textsl{\string\hyperpage{"^^J%
+\space\space :open "\string\textsl{\string\tudhyperpage{"^^J%
 \space\space :close "}}"^^J%
-)%
-}
-\write\tud@write@i{%
+)^^J%
 (markup-locref^^J%
 \space\space :attr "default"^^J%
-\space\space :open "\string\hyperpage{"^^J%
+\space\space :open "\string\tudhyperpage{"^^J%
 \space\space :close "}"^^J%
-)%
-}
+)^^J%
 %    \end{macrocode}
 % Für die Änderungsliste wird ein separates Attribut erstellt. Mit diesem wird 
 % es möglich, die Seitenangabe für Optionen und Befehle zu unterdrücken, welche 
@@ -549,28 +560,11 @@
 % Alternative eingeführt wurde. Dafür wird der Befehl \cs{hyperpagedeprecated} 
 % verwendet, welcher im Bedarfsball auf \cs{@gobble} gesetzt wird.
 %    \begin{macrocode}
-\write\tud@write@i{%
 (markup-locref^^J%
 \space\space :attr "deprecated"^^J%
 \space\space :open "\string\hyperpagedeprecated{"^^J%
 \space\space :close "}"^^J%
-)%
-}
-%    \end{macrocode}
-% Punkte zwischen Eintrag und Seitenzahl.
-%    \begin{macrocode}
-\write\tud@write@i{%
-  (markup-locclass-list :open "\string\,\string\dotfill\string\,")%
-}
-%    \end{macrocode}
-% Dieser Querverweistyp wird speziell im allgemeinen Index verwendet, um auf 
-% einen Spezialindex zu verweisen.
-%    \begin{macrocode}
-\write\tud@write@i{(define-crossref-class "seeidx")}
-\write\tud@write@i{%
-(markup-crossref-list^^J%
-\space\space :class "seeidx" :open "\string\seeidx{" :sep "; " :close "}{}"^^J%
-)%
+)^^J%
 }
 %    \end{macrocode}
 % Damit ist die \pkg{xindy}-Stildatei fertig.
@@ -579,6 +573,7 @@
 %    \end{macrocode}
 % Nun können die einzelnen Indizes erstellt werden.
 %    \begin{macrocode}
+\newcommand*\xdyopt{-M \jobname-temp.xdy -L german-din}
 %<*class>
 \makeindex[title={Allgemeiner Index},options=\xdyopt]%
 %</class>
@@ -693,33 +688,91 @@
 %
 % \begin{option}{ToDo}
 % \changes{v2.02}{2014/07/10}{neu}^^A
+% \changes{v2.05}{2015/10/27}{Nutzung von Positiv- und Negativ-Liste}^^A
 % \begin{macro}{\if@tud@todo}
 % \changes{v2.02}{2014/07/10}{neu}^^A
-% \begin{macro}{\tud@todo@type}
-% \changes{v2.03}{2015/01/25}{neu}^^A
+% \begin{macro}{\tud@todo@type@pos}
+% \changes{v2.05}{2015/10/27}{neu}^^A
+% \begin{macro}{\tud@todo@type@neg}
+% \changes{v2.05}{2015/10/27}{neu}^^A
 % Diese Option ist verantwortlich für den Schalter \cs{if@tud@todo}. Über 
 % diesen wird gesteuert, ob ToDo-Notizen ausgegeben werden sollen.
 %    \begin{macrocode}
 \newif\if@tud@todo
-\@tud@todotrue
-\newcommand*\tud@todo@type{}
+\newcommand*\tud@todo@type@pos{}
+\let\tud@todo@type@pos\relax
+\newcommand*\tud@todo@type@neg{}
+\let\tud@todo@type@neg\relax
 \TUD@key{ToDo}[true]{%
   \TUD@set@ifkey{ToDo}{@tud@todo}{#1}%
-  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \let\tud@todo@type\relax%
-  \else%
-    \def\tud@todo@type{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed\else%
+%    \end{macrocode}
+% Wird die Option nicht mit einem booleschen Wert verwendet, so kann über diese 
+% gezielt der Typ einer (nicht) auszugebenden ToDo-Notiz angegeben werden. So 
+% können bestimmte Typen von Notizen entweder ausschließlich ausgegeben oder 
+% aber unterdrückt werden, wobei für letztere Variante das Suffix \texttt{not} 
+% vor dem eigentlichen Typen verwendet werden muss.
+%    \begin{macrocode}
+    \def\@tempa not##1##2##3##4\@nil{%
+      \ifstr{##1##2##3}{not}{%
+        \if\relax##4\relax\else%
+          \listeadd\tud@todo@type@neg{##4}%
+        \fi%
+      }{%
+        \if\relax##1\relax\else%
+          \listeadd\tud@todo@type@pos{##1##2##3##4}%
+        \fi%
+      }%
+    }%
+    \edef\@tempb{not\trim@spaces{#1}}%
+    \expandafter\@tempa\@tempb\relax\@empty\@empty\@nil%
     \@tud@todotrue%
     \FamilyKeyStateProcessed%
   \fi%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@todo@type
+% \end{macro}^^A \tud@todo@type@neg
+% \end{macro}^^A \tud@todo@type@pos
 % \end{macro}^^A \if@tud@todo
 % \end{option}^^A ToDo
+% \begin{option}{final}
+% \begin{option}{print}
+% \begin{macro}{\tudfinalflag}
+% \begin{macro}{\tudprintflag}
+% Diese beiden Optionen dienen zur finalen und/oder unbunten Ausgabe.
+%    \begin{macrocode}
+\DeclareOption{final}{\let\tudfinalflag\relax}
+\DeclareOption{print}{\let\tudprintflag\relax}
+%    \end{macrocode}
+% \end{macro}^^A \tudprintflag
+% \end{macro}^^A \tudfinalflag
+% \end{option}^^A print
+% \end{option}^^A final
 %
 % \iffalse
 %</option>
+%<*body>
+% \fi
+%
+% Wurde eine oder beide der Optionen \opt{final} oder \opt{print} gesetzt bzw.
+% durch einen externen pdf\LaTeX-Aufruf die Flags \cs{tudfinalflag} und/oder
+% \cs{tudprintflag} definiert, werden die entsprechenden Einstellungen zur 
+% finalen Ausgabe und/oder unbunten Druck vorgenommen und anschließend die 
+% entsprechenden Optionen unschädlich gemacht.
+%    \begin{macrocode}
+\ifdef{\tudfinalflag}{%
+  \TUDoptions{ToDo=false}%
+  \TUD@key{ToDo}{}%
+}{}
+\ifdef{\tudprintflag}{%
+  \TUDoptions{cd=true}%
+  \TUD@key{cd}{}%
+  \PassOptionsToPackage{hidelinks}{hyperref}%
+}{}
+%    \end{macrocode}
+%
+% \iffalse
+%</body>
 %<*class&option>
 % \fi
 %
@@ -737,33 +790,9 @@
 }{\TUDClassName@Parent}
 \PassOptionsToPackage{automark}{scrlayer-scrpage}
 %    \end{macrocode}
-% \begin{macro}{\tudfinalflag}
-% \begin{macro}{\tudprintflag}
-% Außerdem wird geprüft, ob durch einen externen pdf\LaTeX-Aufruf die Flags
-% \cs{tudfinalflag} und/oder \cs{tudprintflag} definiert wurde. In diesem Fall
-% werden Optionen zur finalen Ausgabe und/oder unbunten Druck aktiviert.
-%    \begin{macrocode}
-\DeclareOption{final}{\let\tudfinalflag\relax}
-\DeclareOption{print}{\let\tudprintflag\relax}
-%    \end{macrocode}
-% \end{macro}^^A \tudprintflag
-% \end{macro}^^A \tudfinalflag
 %
 % \iffalse
 %</class&option>
-%<*class&body>
-% \fi
-%
-%    \begin{macrocode}
-\ifdef{\tudfinalflag}{\TUDoptions{ToDo=false}}{}
-\ifdef{\tudprintflag}{%
-  \TUDoptions{color=no}%
-  \PassOptionsToPackage{hidelinks}{hyperref}%
-}{}
-%    \end{macrocode}
-%
-% \iffalse
-%</class&body>
 %<*package&option>
 % \fi
 %

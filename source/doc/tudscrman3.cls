@@ -81,9 +81,6 @@
 }
 \NeedsTeXFormat{LaTeX2e}
 \TUD@ProvidesWrapperClass{tudscrman}{tudscrreprt}{manual class}
-\@ifundefined{@TUDScript}{%
-  \newcommand*\@TUDScript{TUD-KOMA-Script}%
-}{}
 \@ifundefined{TUDScript}{%
   \DeclareRobustCommand{\TUDScript}{%
     \ifdin{TUD-KOMA-SCRIPT}{%
@@ -119,18 +116,25 @@
 \TUD@key{ToDo}[true]{%
   \TUD@set@ifkey{ToDo}{@tud@todo}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed\else%
-    \@tud@todotrue%
     \def\@tempa not##1##2##3##4\@nil{%
       \ifstr{##1##2##3}{not}{%
-        \listadd\tud@todo@type@neg{##4}%
+        \if\relax##4\relax\else%
+          \listeadd\tud@todo@type@neg{##4}%
+        \fi%
       }{%
-        \listadd\tud@todo@type@pos{##1##2##3##4}%
+        \if\relax##1\relax\else%
+          \listeadd\tud@todo@type@pos{##1##2##3##4}%
+        \fi%
       }%
     }%
-    \@tempa not#1\@nil%
+    \edef\@tempb{not\trim@spaces{#1}}%
+    \expandafter\@tempa\@tempb\relax\@empty\@empty\@nil%
+    \@tud@todotrue%
     \FamilyKeyStateProcessed%
   \fi%
 }
+\DeclareOption{final}{\let\tudfinalflag\relax}
+\DeclareOption{print}{\let\tudprintflag\relax}
 \PassOptionsToClass{%
   cdfoot=true,%
   chapterpage=true,%
@@ -141,8 +145,6 @@
   cd=color,%
 }{\TUDClassName@Parent}
 \PassOptionsToPackage{automark}{scrlayer-scrpage}
-\DeclareOption{final}{\let\tudfinalflag\relax}
-\DeclareOption{print}{\let\tudprintflag\relax}
 %%% From File: tudscr-misc.dtx
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{\TUDClassName@Parent}}
 \TUDProcessOptions\relax
@@ -169,10 +171,7 @@
 }
 \AfterPackage{hyperref}{\RequirePackage[babel]{microtype}[2013/05/23]}
 \AtBeginDocument{%
-  \@ifpackageloaded{hyperref}{}{%
-    \RequirePackage[babel]{microtype}[2013/05/23]%
-    \providecommand*\hyperpage[1]{#1}%
-  }%
+  \@ifpackageloaded{hyperref}{}{\RequirePackage[babel]{microtype}[2013/05/23]}%
 }
 \newlength\baselineskipglue
 \AtBeginDocument{%
@@ -202,24 +201,22 @@
 \ifpdf
   \PassOptionsToPackage{colorinlistoftodos,obeyFinal,color=HKS92!10}{todonotes}
   \RequirePackage{todonotes}[2012/07/25]
-  \TUDoptions{ToDo=true}%
+  \TUDoptions{ToDo=true}
 \else
-  \let\tudfinalflag\relax%
+  \let\tudfinalflag\relax
 \fi
 \WarningFilter*{ifplatform}{^^J \space\space\space shell escape is disabled}
 \RequirePackage{ifplatform}[2010/10/22]
 \PassOptionsToPackage{hyperindex=false,colorlinks,linkcolor=blue}{hyperref}
 \PassOptionsToPackage{open,openlevel=0}{bookmark}
 \newcommand*\Email[1]{\mbox{#1}}
-\newcommand*\tudhyperref[2]{#2}
-\newrobustcmd*\hyperidx[2][]{\tudhyperref{#1}{#2}}
+\newcommand*\tudhyperpage[1]{#1}
 \NewDocumentCommand\tudhyperdef{sm}{}
+\newcommand*\tudhyperref[2]{#2 ??}
 \newcommand*\autorefname[1][]{??\xspace}
 \AfterPackage{hyperref}{%
   \renewcommand*\Email[1]{\href{mailto:#1}{\nolinkurl{#1}}}%
-  \renewcaptionname{ngerman}{\sectionautorefname}{Unterkapitel}%
-  \renewcaptionname{ngerman}{\subsectionautorefname}{Abschnitt}%
-  \renewcaptionname{ngerman}{\subsubsectionautorefname}{Unterabschnitt}%
+  \let\tudhyperpage\hyperpage%
   \RenewDocumentCommand\tudhyperdef{sm}{%
     \IfBooleanTF{#1}{%
       \raisebox{4\baselineskip}[0pt][0pt]{\hyperdef{\jobname}{#2}{}}%
@@ -250,6 +247,9 @@
   }%
   \newcommand*\@@autorefname{}%
   \def\@@autorefname#1#2#3#4#5\@nil#6\@nil{#6#4.\@nil}%
+  \renewcaptionname{ngerman}{\sectionautorefname}{Unterkapitel}%
+  \renewcaptionname{ngerman}{\subsectionautorefname}{Abschnitt}%
+  \renewcaptionname{ngerman}{\subsubsectionautorefname}{Unterabschnitt}%
 }
 \PassOptionsToPackage{xindy,splitindex}{imakeidx}
 \RequirePackage{imakeidx}[2013/07/11]
@@ -339,33 +339,33 @@
 \space\space "Roman-page-numbers" "Alpha-page-numbers"^^J%
 \space )^^J%
 )^^J%
-(markup-indexentry :open "~n        \string\subsubsubitem " :depth 3)^^J%
-(markup-indexentry :open "~n        \string\subsubsubsubitem " :depth 4)^^J%
+(markup-indexentry :open "~n \string\subsubsubitem " :depth 3)^^J%
+(markup-indexentry :open "~n \string\subsubsubsubitem " :depth 4)^^J%
 (merge-rule "\@backslashchar[(.*)\@backslashchar]" "" :eregexp)^^J%
 (define-attributes (("declare" "!" "important" "?" "default")))^^J%
 (markup-locref^^J%
 \space\space :attr "declare"^^J%
-\space\space :open "\string\textbf{\string\hyperpage{"^^J%
+\space\space :open "\string\textbf{\string\tudhyperpage{"^^J%
 \space\space :close "}}"^^J%
 )^^J%
 (markup-locref^^J%
 \space\space :attr "!"^^J%
-\space\space :open "\string\textbf{\string\hyperpage{"^^J%
+\space\space :open "\string\textbf{\string\tudhyperpage{"^^J%
 \space\space :close "}}"^^J%
 )^^J%
 (markup-locref^^J%
 \space\space :attr "important"^^J%
-\space\space :open "\string\textsl{\string\hyperpage{"^^J%
+\space\space :open "\string\textsl{\string\tudhyperpage{"^^J%
 \space\space :close "}}"^^J%
-)^^J%%
+)^^J%
 (markup-locref^^J%
 \space\space :attr "?"^^J%
-\space\space :open "\string\textsl{\string\hyperpage{"^^J%
+\space\space :open "\string\textsl{\string\tudhyperpage{"^^J%
 \space\space :close "}}"^^J%
 )^^J%
 (markup-locref^^J%
 \space\space :attr "default"^^J%
-\space\space :open "\string\hyperpage{"^^J%
+\space\space :open "\string\tudhyperpage{"^^J%
 \space\space :close "}"^^J%
 )^^J%
 }
@@ -420,12 +420,12 @@
 \ifdef{\tudfinalflag}{%
   \TUDoptions{ToDo=false}%
   \TUD@key{ToDo}{}%
-}{}%
+}{}
 \ifdef{\tudprintflag}{%
   \TUDoptions{cd=true}%
   \TUD@key{cd}{}%
   \PassOptionsToPackage{hidelinks}{hyperref}%
-}{}%
+}{}
 \newcommand*\tud@shellescape@wrn{%
   \ClassWarning%
   {tudscrman}{%
@@ -845,6 +845,7 @@
   \let\POParameter\@gobble%
   \let\emph\@firstofone%
 }
+\newcommand*\@TUDScript{TUD-KOMA-Script}%
 \NewDocumentCommand\@suppressmarkup{s}{%
   \let\Application\@Application%
   \let\Distribution\@Distribution%
