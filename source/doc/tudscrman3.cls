@@ -63,7 +63,7 @@
 \providecommand*\tudscrmail{tudscr@gmail.com}
 \newcommand*\TUD@ProvidesWrapperClass[3]{%
   \ProvidesClass{#1}[%
-  2015/07/17 v2.05 BETA TUD-KOMA-Script
+  2015/10/06 v2.05 BETA TUD-KOMA-Script
     ^^J#3 (#2)%
   ]%
   \newcommand*\TUDClassName@Parent{#2}%
@@ -116,15 +116,22 @@
 }
 %%% From File: tudscr-manual.dtx
 \newif\if@tud@todo
-\@tud@todotrue
-\newcommand*\tud@todo@type{}
+\newcommand*\tud@todo@type@pos{}
+\let\tud@todo@type@pos\relax
+\newcommand*\tud@todo@type@neg{}
+\let\tud@todo@type@neg\relax
 \TUD@key{ToDo}[true]{%
   \TUD@set@ifkey{ToDo}{@tud@todo}{#1}%
-  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \let\tud@todo@type\relax%
-  \else%
-    \def\tud@todo@type{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed\else%
     \@tud@todotrue%
+    \def\@tempa not##1##2##3##4\@nil{%
+      \ifstr{##1##2##3}{not}{%
+        \listadd\tud@todo@type@neg{##4}%
+      }{%
+        \listadd\tud@todo@type@pos{##1##2##3##4}%
+      }%
+    }%
+    \@tempa not#1\@nil%
     \FamilyKeyStateProcessed%
   \fi%
 }
@@ -145,30 +152,27 @@
 \TUDProcessOptions\relax
 \LoadClass{\TUDClassName@Parent}
 %%% From File: tudscr-manual.dtx
-\ifdef{\tudfinalflag}{\TUDoptions{ToDo=false}}{}%
-\ifdef{\tudprintflag}{%
-  \TUDoptions{color=no}%
-  \PassOptionsToPackage{hidelinks}{hyperref}%
-}{}%
 \PassOptionsToPackage{log-declarations=false}{xparse}
 \RequirePackage{xparse}[2013/12/31]
 \RequirePackage{textcomp}[2005/09/27]
 \RequirePackage{setspace}[2011/12/19]
 \setstretch{1.1}
 \RequirePackage{babel}[2014/03/24]
-\AfterPackage{inputenc}{\RequirePackage{csquotes}[2011/10/22]}
 \AfterPackage{hyperref}{%
-  \RequirePackage[babel]{microtype}[2013/05/23]%
   \patchcmd{\pdfstringdef}{\csname HyPsd@babel@}{%
     \let\bbl@info\@gobble\csname HyPsd@babel@%
   }{}{\tud@patch@wrn{pdfstringdef}}%
 }
+\AfterPackage{inputenc}{\RequirePackage{csquotes}[2011/10/22]}
 \AtBeginDocument{%
   \@ifpackageloaded{csquotes}{}{%
     \ClassWarning%
       {tudscrman}{Package `csquotes' not loaded}%
     \providecommand\enquote[1]{\glqg#1\grqq{}}%
   }%
+}
+\AfterPackage{hyperref}{\RequirePackage[babel]{microtype}[2013/05/23]}
+\AtBeginDocument{%
   \@ifpackageloaded{hyperref}{}{%
     \RequirePackage[babel]{microtype}[2013/05/23]%
     \providecommand*\hyperpage[1]{#1}%
@@ -202,8 +206,9 @@
 \ifpdf
   \PassOptionsToPackage{colorinlistoftodos,obeyFinal,color=HKS92!10}{todonotes}
   \RequirePackage{todonotes}[2012/07/25]
+  \TUDoptions{ToDo=true}%
 \else
-  \TUDoptions{ToDo=false}
+  \let\tudfinalflag\relax%
 \fi
 \WarningFilter*{ifplatform}{^^J \space\space\space shell escape is disabled}
 \RequirePackage{ifplatform}[2010/10/22]
@@ -216,7 +221,6 @@
 \newcommand*\autorefname[1][]{??\xspace}
 \AfterPackage{hyperref}{%
   \renewcommand*\Email[1]{\href{mailto:#1}{\nolinkurl{#1}}}%
-  \renewcommand*\tudhyperref[2]{\hyperref{}{\jobname}{#1}{#2}}%
   \renewcaptionname{ngerman}{\sectionautorefname}{Unterkapitel}%
   \renewcaptionname{ngerman}{\subsectionautorefname}{Abschnitt}%
   \renewcaptionname{ngerman}{\subsubsectionautorefname}{Unterabschnitt}%
@@ -231,6 +235,7 @@
     \label{#2}%
     \tud@trace@lbl@created{#2}%
   }%
+  \renewcommand*\tudhyperref[2]{\hyperref{}{\jobname}{#1}{#2}}%
   \renewcommand*\autorefname[1][current]{%
     \ifstr{#1}{current}{%
       \expandafter\HyPsd@@autorefname\@currentHref\@nil%
@@ -416,6 +421,15 @@
 \RequirePackage{tikz}[2013/12/13]
 \RequirePackage{pdfpages}[2013/08/25]
 \RequirePackage{units}[1998/08/04]
+\ifdef{\tudfinalflag}{%
+  \TUDoptions{ToDo=false}%
+  \TUD@key{ToDo}{}%
+}{}%
+\ifdef{\tudprintflag}{%
+  \TUDoptions{cd=true}%
+  \TUD@key{cd}{}%
+  \PassOptionsToPackage{hidelinks}{hyperref}%
+}{}%
 \newcommand*\tud@shellescape@wrn{%
   \ClassWarning%
   {tudscrman}{%
@@ -618,9 +632,6 @@
   \printdeclarationlist*%
   \@obsoletefalse%
 }
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newif\if@changedat
 \newrobustcmd*\bsc{\@backslashchar}
 \newcommand*\NewExpandableDocumentCommand[3]{%
@@ -1215,7 +1226,6 @@
     \tud@iflabelexists{#2}{}{%
       \@@@Label\tud@reserved{#3}%
       \tud@iflabelexists{\tud@reserved}{%
-        \IfValueT{#4}{\typeout{::::: Label \tud@reserved=#4}}%
         \let#2\tud@reserved%
       }{%
         \tud@ifbundle{\@@getlabel#2{#3}=#4=}{}%
@@ -1360,9 +1370,6 @@
     }%
   \fi%
 }
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newcommand*\list@ChangedAt{}
 \let\list@ChangedAt\relax%
 \DeclareListParser*{\forssvlist}{;}%
@@ -1508,9 +1515,6 @@
 \NewDocumentCommand\printchangedatlist{sO{\z@}}{%
   \@ChangedAt@ProcessList{#1}{#2}%
 }
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newif\if@sorted@list
 \newcommand*\sortlist[1]{%
   \ifdefvoid{#1}{%
@@ -1775,54 +1779,85 @@
     \tud@shellescape@wrn%
   }%
 }
-\newcommand*\@ToDo{}
+\@ifpackageloaded{todonotes}{%
+  \define@boolkey{todonotes}{doc}[true]{%
+    \ifbool{KV@todonotes@doc}{\setkeys{todonotes}{color=HKS41!30}}{}%
+  }%
+  \define@boolkey{todonotes}{rls}[true]{%
+    \ifbool{KV@todonotes@rls}{\setkeys{todonotes}{color=HKS44!50}}{}%
+  }%
+  \define@boolkey{todonotes}{imp}[true]{%
+    \ifbool{KV@todonotes@imp}{\setkeys{todonotes}{color=HKS57!50}}{}%
+  }%
+  \define@boolkey{todonotes}{urg}[true]{%
+    \ifbool{KV@todonotes@urg}{\setkeys{todonotes}{color=HKS07!50}}{}%
+  }%
+  \define@boolkey{todonotes}{nxt}[true]{%
+    \ifbool{KV@todonotes@nxt}{\setkeys{todonotes}{color=HKS92!30}}{}%
+  }%
+}{}
 \NewDocumentCommand\ToDo{somo}{%
   \ifbool{@tud@todo}{%
+    \global\let\tud@currentHref\@currentHref%
     \begingroup%
-      \define@boolkey{todonotes}{doc}[true]{%
-        \ifbool{KV@todonotes@doc}{\setkeys{todonotes}{color=HKS41!10}}{}%
-      }%
-      \define@boolkey{todonotes}{rls}[true]{%
-        \ifbool{KV@todonotes@rls}{\setkeys{todonotes}{color=HKS44!50}}{}%
-      }%
-      \define@boolkey{todonotes}{imp}[true]{%
-        \ifbool{KV@todonotes@imp}{\setkeys{todonotes}{color=HKS07!50}}{}%
-      }%
-      \define@boolkey{todonotes}{nxt}[true]{%
-        \ifbool{KV@todonotes@nxt}{\setkeys{todonotes}{color=HKS57!50}}{}%
-      }%
-      \def\@ToDo{}%
-      \IfValueTF{#2}{%
-        \IfBooleanTF{#1}{\edef\@ToDo{#2,nolist}}{\edef\@ToDo{#2}}%
-      }{%
-        \IfBooleanT{#1}{\edef\@ToDo{nolist}}%
-      }%
-      \renewcommand*\marginpar[2][]{%
-        \marginnote[##1]{##2}[\dimexpr-1.6ex+1pt\relax]%
-      }%
-      \@tempswafalse%
-      \ifdefvoid{\tud@todo@type}{\@tempswatrue}{}%
-      \IfValueT{#2}{%
-        \@for\@tempa:=#2\do{\ifstr{\@tempa}{\tud@todo@type}{\@tempswatrue}{}}%
-      }%
-      \if@tempswa%
+      \let\@tempa\@empty%
+      \IfValueT{#4}{%
         \def\@tempa{\@ifnextchar v{\@tempb}{\@tempb v}}%
         \def\@tempb v##1\@nnil{\def\@tempc{##1}}%
         \@tempa #4\@nnil%
-        \ifcsdef{tud@v@\@tempc}{}{\appto\@ToDo{,nxt}}%
-        \vskip.8ex%
-        \IfValueT{#4}{%
-          \settowidth\marginparwidth{#4}%
-          \addtolength\marginparwidth{\dimexpr1.6ex+1pt\relax}%
-          \let\par\relax\noindent%
-          \edef\@tempa{\noexpand\todo[\@ToDo,noline,nolist]}%
-          \@tempa{#4\unskip}%
+        \ifcsdef{tud@v@\@tempc}{%
+          \def\@tempa##1v##2.##3##4##5\@nnil{\def\@tempb{##2.##3##4}}%
+          \expandafter\@tempa\TUDVersion\@nnil%
+          \def\@tempa##1.##2\@nnil{##1##2}%
+          \edef\@tempb{\expandafter\@tempa\@tempb\@nnil}%
+          \edef\@tempc{\expandafter\@tempa\@tempc\@nnil}%
+          \ifnum\@tempb>\@tempc\relax%
+            \def\@tempa{urg}%
+          \else%
+            \let\@tempa\@empty%
+          \fi%
+        }{%
+          \def\@tempa##1.##2##3##4\@nnil{##1##2##3}%
+          \edef\@tempc{\expandafter\@tempa\@tempc.000\@nnil}%
+          \ifxnumber{\@tempc}{\def\@tempa{nxt}}{\let\@tempa\@empty}%
         }%
-        \edef\@tempa{\noexpand\todo[\@ToDo,inline]}%
-        \@tempa{#3\unskip}%
+      }%
+      \IfValueT{#2}{\preto\@tempa{#2,}}%
+      \@tempswafalse%
+      \ifx\tud@todo@type@pos\relax\@tempswatrue\fi%
+      \toks@{\forcsvlist{\@tempb}}%
+      \eaddto@hook\toks@{\expandafter{\@tempa}}%
+      \let\@tempa\@empty%
+      \def\@tempb##1{%
+        \eappto\@tempa{##1,}%
+        \ifinlist{##1}{\tud@todo@type@pos}{\@tempswatrue}{}%
+        \ifinlist{##1}{\tud@todo@type@neg}{\@tempswafalse}{}%
+      }%
+      \the\toks@%
+      \if@tempswa%
+        \ifvmode\vspace{\baselineskipglue}\fi%
+        \let\par\relax\noindent%
+        \toks@\expandafter{\@tempa inline}%
+        \IfBooleanT{#1}{\addto@hook\toks@{,nolist}}%
+        \sbox\z@{%
+          \expandafter\todo\expandafter[\the\toks@]{\trim@spaces{#3}\strut}%
+        }\usebox\z@%
+        \renewcommand*\marginpar[2][]{%
+          \marginnote[##1]{##2}[\dimexpr-\ht\z@+1.6ex+1.75pt\relax]%
+        }%
+        \toks@\expandafter{\@tempa noline,nolist}%
+        \IfValueTF{#4}{%
+          \def\@tempb{\trim@spaces{#4}\strut}%
+        }{%
+          \def\@tempb{ToDo\strut}%
+        }%
+        \settowidth\marginparwidth{\@tempb}%
+        \addtolength\marginparwidth{\dimexpr1.6ex+1pt\relax}%
+        \expandafter\todo\expandafter[\the\toks@]{\@tempb}%
+        \aftergroup\par\aftergroup\noindent%
       \fi%
     \endgroup%
-    \par\noindent%
+    \global\let\@currentHref\tud@currentHref%
   }{}%
   \ignorespaces%
 }
@@ -1903,11 +1938,11 @@
       \begingroup%
         \let\footnote\@gobble%
         \tud@indexprologue%
+        \@printindexskip%
       \endgroup%
     }%
   \fi%
   \ifblank{#1}{\printindex}{\printindex[#1]}%
-  \@printindexskip%
   \let\tud@indexprologue\@empty%
 }
 \newcommand*\PrintChangelog{%
@@ -1920,9 +1955,6 @@
       \let\subsubitem\subitem%
       \let\subitem\item%
       \renewcommand*\item{%
-        % ///
-        \clearpage%
-        % \\\
         \begingroup%
           \escapechar=`\\%
           \catcode\endlinechar=\active%
@@ -1941,6 +1973,7 @@
         \addsubsectiontocentry{}{##1}%
       }%
     }{}{\tud@patch@wrn{theindex}}%
+    \clearpage%
     \@printindex[changelog]%
   \endgroup%
 }
@@ -1982,7 +2015,7 @@
 \newrobustcmd*\sbsfont{\sffamily\bfseries\slshape}
 \DeclareTextFontCommand\textsbs{\sbsfont}
 \newlength\tempdim
-\newcommand*\Attention[1]{\marginnote{\fbox{Achtung!}}\emph{#1\unskip}}
+\newcommand*\Attention[1]{\marginnote{\fbox{Achtung!}}\emph{\trim@spaces{#1}}}
 \newcommand*\hrfn[2]{%
   \href{#1}{\trim@spaces{#2}}\footnote{\strut\scalebox{0.95}{\url{#1}}}%
 }
