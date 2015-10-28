@@ -175,6 +175,8 @@
 \AtBeginDocument{%
   \@ifpackageloaded{hyperref}{}{%
     \RequirePackage[babel]{microtype}[2013/05/23]%
+    \RequirePackage{url}[2013/05/23]%
+    \robustify\url%
     \providecommand*\hyperpage[1]{#1}%
   }%
 }
@@ -218,7 +220,17 @@
 \newcommand*\tudhyperref[2]{#2}
 \newrobustcmd*\hyperidx[2][]{\tudhyperref{#1}{#2}}
 \NewDocumentCommand\tudhyperdef{sm}{}
-\newcommand*\autorefname[1][]{??\xspace}
+%\newcommand*\autorefname[1][]{??\xspace}
+%\newcommand*\href[2]{#2}
+%\newcommand*\hyperref{%
+%  \@ifnextchar[{\@hyperref}{\@@hyperref}%
+%}
+%\newcommand*\@hyperref[2][]{#2}
+%\newcommand*\@@hyperref[4]{#4}
+%\newcommand*\autoref[1]{\ref{#1}}
+%\newcommand*\hypersetup[1]{}
+%\newcommand*\chapterautorefname{}
+%\newcommand*\sectionautorefname{}
 \AfterPackage{hyperref}{%
   \renewcommand*\Email[1]{\href{mailto:#1}{\nolinkurl{#1}}}%
   \renewcaptionname{ngerman}{\sectionautorefname}{Unterkapitel}%
