@@ -1,4 +1,4 @@
-% \CheckSum{528}
+% \CheckSum{540}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-base.dtx}[%
-  2015/10/27 v2.05 TUD-KOMA-Script\space%
+  2015/10/28 v2.05 TUD-KOMA-Script\space%
 %</driver>
 %<package>\NeedsTeXFormat{LaTeX2e}
 %<package>\ProvidesPackage{tudscrbase}[%
@@ -818,13 +818,26 @@
 %
 % \subsubsection{Ausführung von paketspezifischem Quellcode}
 %
-% Ab und an ist es notwendig, bestimmten Quelltext erst gezielt nach einem 
-% Paket auszuführen.
-% \begin{macro}{\TUD@AfterPackage@Set}
-% \changes{v2.04}{2015/03/09}{neu}^^A
+% Ab und an ist es notwendig, bestimmten Quelltext gezielt in Abhängigkeit vom
+% Ladezustand eines Pakets auszuführen.
+% \begin{macro}{\TUD@UnwindPackage}
+% \changes{v2.05}{2015/10/28}{neu}^^A
+% Dieser Befehl dient zur Ausführung von Quelltext, falls ein Paket bis zum 
+% Ende der Dokumentpräambel nicht geladen wurde. Im ersten obligatorischen
+% Argument wird das Paket angegeben, im zweiten der Quellcode.
+%    \begin{macrocode}
+\newcommand*\TUD@UnwindPackage[2]{\AtEndPreamble{\@ifpackageloaded{#1}{}{#2}}}
+%    \end{macrocode}
+% \end{macro}^^A \TUD@@UnwindPackage
+% \end{macro}^^A \TUD@UnwindPackage
 % \begin{macro}{\TUD@AfterPackage}
 % \changes{v2.03}{2015/02/15}{neu}^^A
-% Im ersten Argument wird das Paket angegeben, im zweiten der Quellcode.
+% \begin{macro}{\TUD@AfterPackage@Set}
+% \changes{v2.04}{2015/03/09}{neu}^^A
+% Mit diesen beiden Befehlen wird die Ausführung von Quellcode erst nach dem 
+% Laden des gewünschten Paketes oder~-- falls das Paket geladen wurde~--  
+% direkt im Dokument ausgeführt. Im ersten Argument wird das Paket angegeben, 
+% im zweiten der Quellcode.
 %    \begin{macrocode}
 \newcommand*\TUD@AfterPackage@Set[1]{%
   \newbool{@tud@#1@loaded}%
@@ -846,8 +859,8 @@
   }%
 }
 %    \end{macrocode}
-% \end{macro}^^A \TUD@AfterPackage
 % \end{macro}^^A \TUD@AfterPackage@Set
+% \end{macro}^^A \TUD@AfterPackage
 %
 % \iffalse
 %</package>
@@ -929,7 +942,7 @@
     \@ifpackageloaded{graphics}{%
       \ClassWarningNoLine{\TUDClassName}{%
         The package `graphics' was superseded by `graphicx',\MessageBreak%
-        which is automatically loaded%
+        which now will be loaded automatically%
       }%
     }{}%
   }%

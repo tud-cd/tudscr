@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-pagestyle.dtx}[%
-  2015/10/27 v2.05 TUD-KOMA-Script (pagestyle)%
+  2015/10/28 v2.05 TUD-KOMA-Script (pagestyle)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -382,6 +382,36 @@
   \AtEndPreamble{\RequirePackage{scrlayer-scrpage}[2013/12/14]}%
 }
 %    \end{macrocode}
+% \begin{macro}{\pagestyle}
+% \changes{v2.04}{2015/06/18}{Aktivierung der Seitenstile \pgs{tudheadings} vor
+%   \pkg{scrlayer-scrpage} möglich}^^A
+% \begin{macro}{\tud@pagestyle}
+% \changes{v2.04}{2015/06/18}{neu}
+% Für den Fall, dass das Paket \pkg{scrlayer-scrpage} nicht geladen wird und 
+% dennoch das Makro \cs{currentpagestyle} wie erwartet definiert ist, wird der 
+% originale Befehl etwas angepasst.
+%    \begin{macrocode}
+\newcommand*\tud@pagestyle{}
+\let\tud@pagestyle\pagestyle
+\pretocmd{\tud@pagestyle}{%
+  \edef\currentpagestyle{#1}%
+}{}{\tud@patch@wrn{pagestyle}}
+%    \end{macrocode}
+% Damit die neuen Seitenstile auch vor dem Laden von \pkg{scrlayer-scrpage} 
+% bereits durch den Anwender ausgewählt werden können, wird \cs{pagestyle} 
+% temporär zurechtgebogen. Die Definition des Makros wird gesichert und direkt 
+% vor dem Laden des Paketes wiederhergestellt. Damit werden die Seitenstile
+% erst aktiviert, nachdem diese auch tatsächlich erstellt wurden.
+%    \begin{macrocode}
+\tud@cmd@store{pagestyle}
+\renewcommand*\pagestyle[1]{\AfterPackage!{scrlayer-scrpage}{\pagestyle{#1}}}
+\BeforePackage{scrlayer-scrpage}{%
+  \tud@cmd@restore{pagestyle}%
+  \undef\tud@pagestyle%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@pagestyle
+% \end{macro}^^A \pagestyle
 % \begin{macro}{\ps@tudheadings}
 % \begin{macro}{\ps@plain.tudheadings}
 % \begin{macro}{\ps@empty.tudheadings}
@@ -389,24 +419,22 @@
 % \begin{macro}{\BeforeSelectAnyPageStyle}
 % \begin{macro}{\GetRealPageStyle}
 % Um die rudimentäre Verwendung der Klassen auch zu ermöglichen, wenn das Paket 
-% \pkg{scrlayer-scrpage} nicht geladen wurde, werden einige notwendige Makros 
-% definiert und vor dem Laden des Paketes wieder als \cs{undefined} gesetzt.
+% \pkg{scrlayer-scrpage} nicht geladen wurde, werden für diesen Fall einige 
+% notwendige Makros definiert.
 %    \begin{macrocode}
-\tud@cmd@store{pagestyle}
-\cslet{ps@tudheadings}{\ps@headings}%
-\cslet{ps@plain.tudheadings}{\ps@plain}%
-\cslet{ps@empty.tudheadings}{\ps@empty}%
-\providecommand*\currentpagestyle{plain}
-\providecommand*\BeforeSelectAnyPageStyle[1]{}
-\providecommand*\GetRealPageStyle[1]{#1}
-\BeforePackage{scrlayer-scrpage}{%
-  \tud@cmd@restore{pagestyle}%
-  \csundef{ps@tudheadings}%
-  \csundef{ps@plain.tudheadings}%
-  \csundef{ps@empty.tudheadings}%
-  \undef\currentpagestyle%
-  \undef\BeforeSelectAnyPageStyle%
-  \undef\GetRealPageStyle%
+\TUD@UnwindPackage{scrlayer-scrpage}{%
+  \cslet{ps@tudheadings}{\ps@headings}%
+  \cslet{ps@plain.tudheadings}{\ps@plain}%
+  \cslet{ps@empty.tudheadings}{\ps@empty}%
+  \providecommand*\currentpagestyle{plain}%
+  \providecommand*\BeforeSelectAnyPageStyle[1]{}%
+  \providecommand*\GetRealPageStyle[1]{#1}%
+%    \end{macrocode}
+% Außerdem wird die angepasste Definition von \cs{pagestyle} verwendet. 
+%    \begin{macrocode}
+  \let\pagestyle\tud@pagestyle%
+  \undef\tud@pagestyle%
+  \expandafter\pagestyle\expandafter{\currentpagestyle}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \GetRealPageStyle
@@ -416,32 +444,6 @@
 % \end{macro}^^A \ps@plain.tudheadings
 % \end{macro}^^A \ps@tudheadings
 %
-% \changes{v2.05}{2015/06/18}{Aktivierung der Seitenstile \pgs{tudheadings} vor
-%   \pkg{scrlayer-scrpage} möglich}^^A
-% \begin{macro}{\tud@pagestyle}
-% \changes{v2.05}{2015/06/18}{neu}
-% Damit die neuen Seitenstile auch vor dem Laden von \pkg{scrlayer-scrpage} 
-% bereits durch den Anwender ausgewählt werden können, wird \cs{pagestyle} 
-% temporär zurechtgebogen. Die Definition des Makros wird gesichert und direkt 
-% vor dem Laden des Paketes~-- oder ggf. spätestens am Ende der Präambel etwas 
-% angepasst~--  wiederhergestellt. Die Redefinition führt zum Ausführen der
-% Seitenstile erst nachdem diese auch tatsächlich erstellt wurden.
-%    \begin{macrocode}
-\newcommand*\tud@pagestyle{}
-\let\tud@pagestyle\pagestyle
-\apptocmd{\tud@pagestyle}{%
-  \edef\currentpagestyle{#1}%
-}{}{\tud@patch@wrn{pagestyle}}%
-\renewcommand*\pagestyle[1]{\AfterPackage!{scrlayer-scrpage}{\pagestyle{#1}}}
-\AtEndPreamble{%
-  \@ifpackageloaded{scrlayer-scrpage}{}{%
-    \let\pagestyle\tud@pagestyle%
-    \expandafter\pagestyle\expandafter{\currentpagestyle}%
-  }%
-  \undef\tud@pagestyle%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@pagestyle
 % \begin{pagestyle}{tudheadings}
 % \changes{v2.02}{2014/06/23}{neu}^^A
 % \begin{pagestyle}{plain.tudheadings}
@@ -496,7 +498,7 @@
 % \changes{v2.03}{2015/02/14}{neu}^^A
 % \begin{layer}{tudheadings.head.bar}
 % \changes{v2.03}{2015/02/14}{neu}^^A
-% \changes{v2.05}{2015/02/14}{Bugfix verschobener Balken}^^A
+% \changes{v2.05}{2015/07/14}{Bugfix verschobener Balken}^^A
 % Außerdem gibt es eine Variante ohne Querbalken-Outline. Stattdessen werden
 % der Querbalken und der darüberliegende Kopf farbig abgesetzt. 
 %    \begin{macrocode}
@@ -2711,11 +2713,9 @@
 % der Seitenränder, wie es vom \CD der \TnUD verlangt wird. Sollte das Laden 
 % des Paketes verhindert werden, sind einige wenige Befehle vorzuhalten.
 %    \begin{macrocode}
-\AtEndPreamble{%
-  \@ifpackageloaded{geometry}{}{%
-    \newcommand*\tud@geometry@process{\tud@geometry@set}%
-    \let\tud@BeforeSelectAnyPageStyle\@gobble%
-  }%
+\TUD@UnwindPackage{geometry}{%
+  \newcommand*\tud@geometry@process{\tud@geometry@set}%
+  \let\tud@BeforeSelectAnyPageStyle\@gobble%
 }
 \tud@ifsacrop{%
   \PreventPackageFromLoading{geometry}%
