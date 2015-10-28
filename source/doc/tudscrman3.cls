@@ -91,7 +91,6 @@
 %%% From File: tudscr-manual.dtx
 %%% From File: tudscr-base.dtx
 \RequirePackage{tudscrbase}[\TUDVersion]
-\providecommand*\tud@reserved{}
 \ifx\TUD@noworlater\TUD@noworlater@simple
   \renewcommand*{\TUD@noworlater}[2]{#1\AtEndOfClass{#1#2}}%
   \AtEndOfClass{\renewcommand*\TUD@noworlater[2]{#1#2}}%
@@ -162,20 +161,18 @@
   }{}{\tud@patch@wrn{pdfstringdef}}%
 }
 \AfterPackage{inputenc}{\RequirePackage{csquotes}[2011/10/22]}
-\AtBeginDocument{%
-  \@ifpackageloaded{csquotes}{}{%
-    \ClassWarning%
-      {tudscrman}{Package `csquotes' not loaded}%
-    \providecommand\enquote[1]{\glqg#1\grqq{}}%
-  }%
+\TUD@UnwindPackage{csquotes}{%
+  \ClassWarning%
+    {tudscrman}{Package `csquotes' not loaded}%
+  \providecommand\enquote[1]{\glqg#1\grqq{}}%
 }
 \AfterPackage{hyperref}{\RequirePackage[babel]{microtype}[2013/05/23]}
-\AtBeginDocument{%
-  \@ifpackageloaded{hyperref}{}{\RequirePackage[babel]{microtype}[2013/05/23]}%
-}
+\TUD@UnwindPackage{hyperref}{\RequirePackage[babel]{microtype}[2013/05/23]}%
 \newlength\baselineskipglue
 \AtBeginDocument{%
   \setlength\baselineskipglue{%
+%§§§
+%    .6\baselineskip plus .3\baselineskip minus .3\baselineskip%
     .4\baselineskip plus .4\baselineskip minus .2\baselineskip%
   }%
 }
@@ -209,25 +206,9 @@
 \RequirePackage{ifplatform}[2010/10/22]
 \PassOptionsToPackage{hyperindex=false,colorlinks,linkcolor=blue}{hyperref}
 \PassOptionsToPackage{open,openlevel=0}{bookmark}
-\newcommand*\Email[1]{\mbox{#1}}
-\newcommand*\tudhyperpage[1]{#1}
-\NewDocumentCommand\tudhyperdef{sm}{}
-\newcommand*\tudhyperref[2]{#2 ??}
-\newcommand*\autorefname[1][]{??\xspace}
-%\newcommand*\href[2]{#2}
-%\newcommand*\hyperref{%
-%  \@ifnextchar[{\@hyperref}{\@@hyperref}%
-%}
-%\newcommand*\@hyperref[2][]{#2}
-%\newcommand*\@@hyperref[4]{#4}
-%\newcommand*\autoref[1]{\ref{#1}}
-%\newcommand*\hypersetup[1]{}
-%\newcommand*\chapterautorefname{}
-%\newcommand*\sectionautorefname{}
 \AfterPackage{hyperref}{%
-  \renewcommand*\Email[1]{\href{mailto:#1}{\nolinkurl{#1}}}%
-  \let\tudhyperpage\hyperpage%
-  \RenewDocumentCommand\tudhyperdef{sm}{%
+  \newcommand*\Email[1]{\href{mailto:#1}{\nolinkurl{#1}}}%
+  \NewDocumentCommand\tudhyperdef{sm}{%
     \IfBooleanTF{#1}{%
       \raisebox{4\baselineskip}[0pt][0pt]{\hyperdef{\jobname}{#2}{}}%
       \par\nobreak\vskip\dimexpr-\parskip-\baselineskip\relax%
@@ -238,8 +219,8 @@
     \label{#2}%
     \tud@trace@lbl@created{#2}%
   }%
-  \renewcommand*\tudhyperref[2]{\hyperref{}{\jobname}{#1}{#2}}%
-  \renewcommand*\autorefname[1][current]{%
+  \newcommand*\tudhyperref[2]{\hyperref{}{\jobname}{#1}{#2}}%
+  \newcommand*\autorefname[1][current]{%
     \ifstr{#1}{current}{%
       \expandafter\HyPsd@@autorefname\@currentHref\@nil%
     }{%
@@ -260,6 +241,37 @@
   \renewcaptionname{ngerman}{\sectionautorefname}{Unterkapitel}%
   \renewcaptionname{ngerman}{\subsectionautorefname}{Abschnitt}%
   \renewcaptionname{ngerman}{\subsubsectionautorefname}{Unterabschnitt}%
+}
+\TUD@UnwindPackage{hyperref}{%
+  \ClassWarning{tudscrman}{%
+    It is strongly recommended to load package `hyperref'.\MessageBreak%
+    Nevertheless, essential commands are rudimentarily\MessageBreak%
+    defined. At least the package `url' is loaded.
+  }%
+  \RequirePackage{url}[2013/09/16]%
+  \robustify\url%
+  \providecommand*\hypersetup[1]{}%
+  \providecommand*\autoref{?? \@ifstar{\ref}{\ref}}%
+  \providecommand*\autorefname[1][]{??\xspace}%
+  \providecommand*\hyperpage[1]{#1}%
+  \providecommand*\hyperdef[3]{\label{#1.#2}#3}%
+  \providerobustcmd*\hyperref{\@ifnextchar[{\tud@hyperref}{\tud@@hyperref}}
+  \newcommand*\tud@hyperref[2][]{#2}
+  \newcommand*\tud@@hyperref[4]{#4}
+  \providecommand*\href[3][]{#3}%
+  \providecommand*\Email[1]{\mbox{#1}}%
+  \ProvideDocumentCommand\tudhyperdef{sm}{\label{#2}}%
+  \providecommand*\tudhyperref[2]{#2}%
+  \tud@locale@german{\partautorefname}{Teil}%
+  \tud@locale@german{\chapterautorefname}{Kapitel}%
+  \tud@locale@german{\sectionautorefname}{Unterkapitel}%
+  \tud@locale@german{\subsectionautorefname}{Abschnitt}%
+  \tud@locale@german{\subsubsectionautorefname}{Unterabschnitt}%
+  \tud@locale@english{\partautorefname}{Part}%
+  \tud@locale@english{\chapterautorefname}{chapter}%
+  \tud@locale@english{\sectionautorefname}{section}%
+  \tud@locale@english{\subsectionautorefname}{subsection}%
+  \tud@locale@english{\subsubsectionautorefname}{subsubsection}%
 }
 \PassOptionsToPackage{xindy,splitindex}{imakeidx}
 \RequirePackage{imakeidx}[2013/07/11]
@@ -355,27 +367,27 @@
 (define-attributes (("declare" "!" "important" "?" "default")))^^J%
 (markup-locref^^J%
 \space\space :attr "declare"^^J%
-\space\space :open "\string\textbf{\string\tudhyperpage{"^^J%
+\space\space :open "\string\textbf{\string\hyperpage{"^^J%
 \space\space :close "}}"^^J%
 )^^J%
 (markup-locref^^J%
 \space\space :attr "!"^^J%
-\space\space :open "\string\textbf{\string\tudhyperpage{"^^J%
+\space\space :open "\string\textbf{\string\hyperpage{"^^J%
 \space\space :close "}}"^^J%
 )^^J%
 (markup-locref^^J%
 \space\space :attr "important"^^J%
-\space\space :open "\string\textsl{\string\tudhyperpage{"^^J%
+\space\space :open "\string\textsl{\string\hyperpage{"^^J%
 \space\space :close "}}"^^J%
 )^^J%
 (markup-locref^^J%
 \space\space :attr "?"^^J%
-\space\space :open "\string\textsl{\string\tudhyperpage{"^^J%
+\space\space :open "\string\textsl{\string\hyperpage{"^^J%
 \space\space :close "}}"^^J%
 )^^J%
 (markup-locref^^J%
 \space\space :attr "default"^^J%
-\space\space :open "\string\tudhyperpage{"^^J%
+\space\space :open "\string\hyperpage{"^^J%
 \space\space :close "}"^^J%
 )^^J%
 }
@@ -587,8 +599,32 @@
   \fi%
   \@declaretrue\@openindexfalse#1\@declarefalse%
 }
+% TODO: Das irgendwie hinbiegen §§§
+%\newskip\tud@skip
+%\pretocmd\index{\tud@skip=\lastskip}{}{\tud@patch@wrn{index}}
+%\pretocmd\label{\tud@skip=\lastskip}{}{\tud@patch@wrn{label}}
 \NewDocumentCommand\printdeclarationlist{sd()}{%
   \ifx\list@declaration\relax\else%
+%    \typeout{::::: \the\tud@skip}%
+%    \ifhmode%
+%      \tud@skip=\z@%
+%      \par%
+%    \else%
+%%      \tud@skip=\glueexpr\the\tud@skip+\ht\strutbox+\dp\strutbox\relax%\z@%
+%    \fi%
+%    \typeout{::::: \the\tud@skip}%
+%%    \addpenalty{\@beginparpenalty}%
+%%    \addvspace{1.5\baselineskipglue}%
+%    \ifdim\lastskip=\z@\relax%
+%      \@tempskipb=\glueexpr\baselineskipglue-\tud@skip\relax%
+%      \ifdim\@tempskipb>\z@\relax\vspace{\@tempskipb}\fi%
+%    \else%
+%      \addpenalty{\@beginparpenalty}%
+%      \addvspace{\glueexpr\baselineskipglue\relax}%
+%    \fi%
+%    \global\tud@skip=\z@%
+%%    \typeout{::::: \the\tud@skip}%
+%%    \typeout{::::: \the\lastskip}%
     \ifvmode\else\par\fi%
     \addpenalty{\@beginparpenalty}%
     \addvspace{1.5\baselineskipglue}%
@@ -628,6 +664,8 @@
       \dimexpr.5\ht\strutbox+.5\dp\strutbox-.5\ht0-.5\dp0\relax%
     }%
     \IfValueT{#2}{#2}%
+    % §§§
+%    \vskip\baselineskipglue%
     \par\nobreak%
     \vskip 1.5\baselineskipglue%
     \@afterindentfalse\@afterheading%
@@ -1388,8 +1426,6 @@
 \NewDocumentCommand\@ChangedAt@@@CreateList{r[]r()>{\SplitArgument{1}{!}}mm}{%
   \@ChangedAt@@@@CreateList[#1](#2)#3{#4}%
 }
-% §§§ optionale Argumente bei \Option etc. beachten (cd=alternative)
-% §§§ Markup ändern
 \NewDocumentCommand\@ChangedAt@@@@CreateList{r[]r()mmm}{%
   \begingroup%
     \def\@tempb##1{%
@@ -1785,7 +1821,7 @@
     \tud@shellescape@wrn%
   }%
 }
-\@ifpackageloaded{todonotes}{%
+\AfterPackage*{todonotes}{%
   \define@boolkey{todonotes}{doc}[true]{%
     \ifbool{KV@todonotes@doc}{\setkeys{todonotes}{color=HKS41!30}}{}%
   }%
@@ -1801,7 +1837,7 @@
   \define@boolkey{todonotes}{nxt}[true]{%
     \ifbool{KV@todonotes@nxt}{\setkeys{todonotes}{color=HKS92!30}}{}%
   }%
-}{}
+}
 \NewDocumentCommand\ToDo{somo}{%
   \ifbool{@tud@todo}{%
     \global\let\tud@currentHref\@currentHref%
@@ -2023,7 +2059,14 @@
 \newlength\tempdim
 \newcommand*\Attention[1]{\marginnote{\fbox{Achtung!}}\emph{\trim@spaces{#1}}}
 \newcommand*\hrfn[2]{%
-  \href{#1}{\trim@spaces{#2}}\footnote{\strut\scalebox{0.95}{\url{#1}}}%
+  \href{#1}{\trim@spaces{#2}}%
+  \footnote{%
+    \scalebox{0.95}{%
+      \def\_{_}%
+      \edef\@tempa{#1}%
+      \strut\expandafter\url\expandafter{\@tempa}%
+    }%
+  }%
 }
 \NewDocumentCommand\Forum{s}{%
   \IfBooleanTF{#1}{%
