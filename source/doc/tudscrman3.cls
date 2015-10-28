@@ -214,6 +214,16 @@
 \NewDocumentCommand\tudhyperdef{sm}{}
 \newcommand*\tudhyperref[2]{#2 ??}
 \newcommand*\autorefname[1][]{??\xspace}
+%\newcommand*\href[2]{#2}
+%\newcommand*\hyperref{%
+%  \@ifnextchar[{\@hyperref}{\@@hyperref}%
+%}
+%\newcommand*\@hyperref[2][]{#2}
+%\newcommand*\@@hyperref[4]{#4}
+%\newcommand*\autoref[1]{\ref{#1}}
+%\newcommand*\hypersetup[1]{}
+%\newcommand*\chapterautorefname{}
+%\newcommand*\sectionautorefname{}
 \AfterPackage{hyperref}{%
   \renewcommand*\Email[1]{\href{mailto:#1}{\nolinkurl{#1}}}%
   \let\tudhyperpage\hyperpage%
