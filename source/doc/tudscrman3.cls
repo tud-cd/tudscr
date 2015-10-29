@@ -168,27 +168,20 @@
 }
 \AfterPackage{hyperref}{\RequirePackage[babel]{microtype}[2013/05/23]}
 \TUD@UnwindPackage{hyperref}{\RequirePackage[babel]{microtype}[2013/05/23]}%
-\newlength\baselineskipglue
-\AtBeginDocument{%
-  \setlength\baselineskipglue{%
-%§§§
-%    .6\baselineskip plus .3\baselineskip minus .3\baselineskip%
-    .4\baselineskip plus .4\baselineskip minus .2\baselineskip%
-  }%
-}
-\PassOptionsToPackage{vskip=.5\baselineskipglue}{quoting}
+\PassOptionsToPackage{vskip=\smallskipamount}{quoting}
 \RequirePackage{quoting}[2014/01/28]
 \RequirePackage{isodate}[2010/01/03]
 \RequirePackage{hologo}[2012/04/26]
 \PassOptionsToPackage{quiet}{marginnote}
 \RequirePackage{marginnote}[2012/03/29]
 \RequirePackage{listings}[2014/03/04]
+% eher in body?!
 \lstdefinestyle{tudscr}{%
   basicstyle=\ttfamily\setstretch{1},%
   keywordstyle=,%
   columns=fullflexible,keepspaces,%
-  aboveskip=.5\baselineskipglue,%
-  belowskip=.5\baselineskipglue,%
+  aboveskip=\smallskipamount,%
+  belowskip=\smallskipamount,%
   language=[LaTeX]TeX,%
   texcl,%
 }
@@ -599,35 +592,21 @@
   \fi%
   \@declaretrue\@openindexfalse#1\@declarefalse%
 }
-% TODO: Das irgendwie hinbiegen §§§
-%\newskip\tud@skip
-%\pretocmd\index{\tud@skip=\lastskip}{}{\tud@patch@wrn{index}}
-%\pretocmd\label{\tud@skip=\lastskip}{}{\tud@patch@wrn{label}}
+\newskip\tud@lastskip
+\pretocmd\index{\tud@lastskip=\lastskip}{}{\tud@patch@wrn{index}}
+\pretocmd\label{\tud@lastskip=\lastskip}{}{\tud@patch@wrn{label}}
 \NewDocumentCommand\printdeclarationlist{sd()}{%
   \ifx\list@declaration\relax\else%
-%    \typeout{::::: \the\tud@skip}%
-%    \ifhmode%
-%      \tud@skip=\z@%
-%      \par%
-%    \else%
-%%      \tud@skip=\glueexpr\the\tud@skip+\ht\strutbox+\dp\strutbox\relax%\z@%
-%    \fi%
-%    \typeout{::::: \the\tud@skip}%
-%%    \addpenalty{\@beginparpenalty}%
-%%    \addvspace{1.5\baselineskipglue}%
-%    \ifdim\lastskip=\z@\relax%
-%      \@tempskipb=\glueexpr\baselineskipglue-\tud@skip\relax%
-%      \ifdim\@tempskipb>\z@\relax\vspace{\@tempskipb}\fi%
-%    \else%
-%      \addpenalty{\@beginparpenalty}%
-%      \addvspace{\glueexpr\baselineskipglue\relax}%
-%    \fi%
-%    \global\tud@skip=\z@%
-%%    \typeout{::::: \the\tud@skip}%
-%%    \typeout{::::: \the\lastskip}%
-    \ifvmode\else\par\fi%
-    \addpenalty{\@beginparpenalty}%
-    \addvspace{1.5\baselineskipglue}%
+    \ifhmode%
+      \vskip\medskipamount%
+    \else%
+      \@tempskipa=\glueexpr\medskipamount-\tud@lastskip\relax%
+      \ifdim\@tempskipa>\z@%
+        \addpenalty{\@beginparpenalty}%
+        \addvspace{\@tempskipa}%
+      \fi%
+    \fi%
+    \global\tud@lastskip=\z@%
     \@afterindentfalse\@afterheading%
     \@declaretrue\@openindextrue%
     \def\@tempa##1{\ignorespaces##1\tabularnewline}%
@@ -664,10 +643,8 @@
       \dimexpr.5\ht\strutbox+.5\dp\strutbox-.5\ht0-.5\dp0\relax%
     }%
     \IfValueT{#2}{#2}%
-    % §§§
-%    \vskip\baselineskipglue%
     \par\nobreak%
-    \vskip 1.5\baselineskipglue%
+    \vskip\medskipamount%
     \@afterindentfalse\@afterheading%
   \fi%
 }
@@ -1614,8 +1591,8 @@
 \NewDocumentCommand\TermTable{smg}{%
   \let\@templist\relax%
   \forcsvlist{\listadd\@templist}{#2}%
-  \ifvmode\else\par\fi%
-  \vskip\baselineskipglue%
+  \ifhmode\par\fi%
+  \vskip\medskipamount%
   \@afterindentfalse\@afterheading%
   \IfBooleanTF{#1}{%
     \IfValueTF{#3}{\setlength\@tempdima{#3}}{\setlength\@tempdima{\linewidth}}%
@@ -1625,7 +1602,7 @@
     \setlength\@tempdimc{\z@}%
     \begin{tabular}{lll}\@TermTable\end{tabular}%
   }%
-  \par\addvspace{\baselineskipglue}%
+  \par\addvspace{\medskipamount}%
 }
 \newcommand*\@TermTable{%
   \toprule%
@@ -1677,7 +1654,7 @@
 }
 \newlist{@values}{description}{1}
 \setlist[@values]{%
-  topsep=.5\baselineskipglue,labelwidth=\columnwidth,labelsep=0pt,%
+  topsep=\smallskipamount,labelwidth=\columnwidth,labelsep=0pt,%
   font=\normalfont\ttfamily,before=\before@item{values}%
 }
 \DeclareListParser*{\forslashlist}{/}%
@@ -1877,8 +1854,10 @@
       }%
       \the\toks@%
       \if@tempswa%
-        \ifvmode\vspace{\baselineskipglue}\fi%
-        \let\par\relax\noindent%
+        \ifhmode\par\fi%
+        \let\par\relax%
+        \vskip\medskipamount%
+        \noindent%
         \toks@\expandafter{\@tempa inline}%
         \IfBooleanT{#1}{\addto@hook\toks@{,nolist}}%
         \sbox\z@{%
