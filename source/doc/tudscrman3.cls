@@ -107,6 +107,43 @@
   \fi%
 }
 %%% From File: tudscr-manual.dtx
+\TUD@key{final}[true]{%
+  \TUD@set@ifkey{final}{@tempswa}{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \if@tempswa%
+      \let\tudfinalflag\relax%
+    \fi%
+  \fi%
+}
+\TUD@key{print}[true]{%
+  \TUD@set@ifkey{print}{@tempswa}{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \if@tempswa%
+      \let\tudprintflag\relax%
+    \fi%
+  \fi%
+}
+\AtEndPreamble{%
+  \ifdef{\tudfinalflag}{%
+    \TUDoptions{ToDo=false}%
+    \TUD@key{ToDo}{}%
+  }{}%
+  \ifdef{\tudprintflag}{%
+    \TUDoptions{cd=true}%
+    \TUD@key{cd}{}%
+    \ifdef{\hypersetup}{\hypersetup{hidelinks}}{}%
+  }{}%
+}
+\PassOptionsToClass{%
+  cdfoot=true,%
+  chapterpage=true,%
+  chapterprefix=true,%
+  headings=optiontoheadandtoc,%
+  captions=tableheading,%
+  numbers=noenddot,%
+  cd=color,%
+}{\TUDClassName@Parent}
+\PassOptionsToPackage{automark}{scrlayer-scrpage}
 \newif\if@tud@todo
 \newcommand*\tud@todo@type@pos{}
 \let\tud@todo@type@pos\relax
@@ -132,18 +169,6 @@
     \FamilyKeyStateProcessed%
   \fi%
 }
-\DeclareOption{final}{\let\tudfinalflag\relax}
-\DeclareOption{print}{\let\tudprintflag\relax}
-\PassOptionsToClass{%
-  cdfoot=true,%
-  chapterpage=true,%
-  chapterprefix=true,%
-  headings=optiontoheadandtoc,%
-  captions=tableheading,%
-  numbers=noenddot,%
-  cd=color,%
-}{\TUDClassName@Parent}
-\PassOptionsToPackage{automark}{scrlayer-scrpage}
 %%% From File: tudscr-misc.dtx
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{\TUDClassName@Parent}}
 \TUDProcessOptions\relax
@@ -155,19 +180,19 @@
 \RequirePackage{setspace}[2011/12/19]
 \setstretch{1.1}
 \RequirePackage{babel}[2014/03/24]
-\AfterPackage{hyperref}{%
+\AfterPackage*{hyperref}{%
   \patchcmd{\pdfstringdef}{\csname HyPsd@babel@}{%
     \let\bbl@info\@gobble\csname HyPsd@babel@%
   }{}{\tud@patch@wrn{pdfstringdef}}%
 }
-\AfterPackage{inputenc}{\RequirePackage{csquotes}[2011/10/22]}
+\AfterPackage*{inputenc}{\RequirePackage{csquotes}[2011/10/22]}
 \TUD@UnwindPackage{csquotes}{%
   \ClassWarning%
     {tudscrman}{Package `csquotes' not loaded}%
   \providecommand\enquote[1]{\glqg#1\grqq{}}%
 }
-\AfterPackage{hyperref}{\RequirePackage[babel]{microtype}[2013/05/23]}
-\TUD@UnwindPackage{hyperref}{\RequirePackage[babel]{microtype}[2013/05/23]}%
+\AfterPackage*{hyperref}{\RequirePackage[babel]{microtype}[2013/05/23]}
+\TUD@UnwindPackage{hyperref}{\RequirePackage[babel]{microtype}[2013/05/23]}
 \PassOptionsToPackage{vskip=\smallskipamount}{quoting}
 \RequirePackage{quoting}[2014/01/28]
 \RequirePackage{isodate}[2010/01/03]
@@ -175,7 +200,6 @@
 \PassOptionsToPackage{quiet}{marginnote}
 \RequirePackage{marginnote}[2012/03/29]
 \RequirePackage{listings}[2014/03/04]
-% eher in body?!
 \lstdefinestyle{tudscr}{%
   basicstyle=\ttfamily\setstretch{1},%
   keywordstyle=,%
@@ -187,19 +211,14 @@
 }
 \RequirePackage{silence}[2012/07/02]
 \RequirePackage{filemod}[2011/09/19]
-\RequirePackage{ifpdf}[2011/01/30]
-\ifpdf
-  \PassOptionsToPackage{colorinlistoftodos,obeyFinal,color=HKS92!10}{todonotes}
-  \RequirePackage{todonotes}[2012/07/25]
-  \TUDoptions{ToDo=true}
-\else
-  \let\tudfinalflag\relax
-\fi
 \WarningFilter*{ifplatform}{^^J \space\space\space shell escape is disabled}
 \RequirePackage{ifplatform}[2010/10/22]
 \PassOptionsToPackage{hyperindex=false,colorlinks,linkcolor=blue}{hyperref}
 \PassOptionsToPackage{open,openlevel=0}{bookmark}
-\AfterPackage{hyperref}{%
+\AfterPackage*{hyperref}{%
+  \renewcaptionname{ngerman}{\sectionautorefname}{Unterkapitel}%
+  \renewcaptionname{ngerman}{\subsectionautorefname}{Abschnitt}%
+  \renewcaptionname{ngerman}{\subsubsectionautorefname}{Unterabschnitt}%
   \newcommand*\Email[1]{\href{mailto:#1}{\nolinkurl{#1}}}%
   \NewDocumentCommand\tudhyperdef{sm}{%
     \IfBooleanTF{#1}{%
@@ -231,9 +250,6 @@
   }%
   \newcommand*\@@autorefname{}%
   \def\@@autorefname#1#2#3#4#5\@nil#6\@nil{#6#4.\@nil}%
-  \renewcaptionname{ngerman}{\sectionautorefname}{Unterkapitel}%
-  \renewcaptionname{ngerman}{\subsectionautorefname}{Abschnitt}%
-  \renewcaptionname{ngerman}{\subsubsectionautorefname}{Unterabschnitt}%
 }
 \TUD@UnwindPackage{hyperref}{%
   \ClassWarning{tudscrman}{%
@@ -244,17 +260,13 @@
   \RequirePackage{url}[2013/09/16]%
   \robustify\url%
   \providecommand*\hypersetup[1]{}%
-  \providecommand*\autoref{?? \@ifstar{\ref}{\ref}}%
-  \providecommand*\autorefname[1][]{??\xspace}%
-  \providecommand*\hyperpage[1]{#1}%
   \providecommand*\hyperdef[3]{\label{#1.#2}#3}%
   \providerobustcmd*\hyperref{\@ifnextchar[{\tud@hyperref}{\tud@@hyperref}}
   \newcommand*\tud@hyperref[2][]{#2}
   \newcommand*\tud@@hyperref[4]{#4}
   \providecommand*\href[3][]{#3}%
-  \providecommand*\Email[1]{\mbox{#1}}%
-  \ProvideDocumentCommand\tudhyperdef{sm}{\label{#2}}%
-  \providecommand*\tudhyperref[2]{#2}%
+  \providecommand*\hyperpage[1]{#1}%
+  \providecommand*\autoref{??\xspace\@ifstar{\ref}{\ref}}%
   \tud@locale@german{\partautorefname}{Teil}%
   \tud@locale@german{\chapterautorefname}{Kapitel}%
   \tud@locale@german{\sectionautorefname}{Unterkapitel}%
@@ -265,6 +277,10 @@
   \tud@locale@english{\sectionautorefname}{section}%
   \tud@locale@english{\subsectionautorefname}{subsection}%
   \tud@locale@english{\subsubsectionautorefname}{subsubsection}%
+  \providecommand*\Email[1]{\mbox{#1}}%
+  \ProvideDocumentCommand\tudhyperdef{sm}{\label{#2}}%
+  \providecommand*\tudhyperref[2]{#2}%
+  \providecommand*\autorefname[1][]{??\xspace}%
 }
 \PassOptionsToPackage{xindy,splitindex}{imakeidx}
 \RequirePackage{imakeidx}[2013/07/11]
@@ -338,24 +354,6 @@
 \space\space :open "\string\,\string\dotfill\string\,"^^J%
 \space\space :close "\string\relax"^^J%
 )^^J%
-(markup-crossref-layer-list^^J%
-\space\space :class "see" ^^J%
-\space\space :sep "\string\,\string\textbar\string\,"^^J%
-)^^J%
-(define-crossref-class "seeidx" :unverified)^^J%
-(markup-crossref-list^^J%
-\space\space :class "seeidx"^^J%
-\space\space :open "\string\seeidx{" :sep "; " :close "}{}"^^J%
-)^^J%
-(define-location-class-order^^J%
-\space (^^J%
-\space\space "see" "seealso" "seeidx"^^J%
-\space\space "roman-page-numbers" "arabic-page-numbers" "alpha-page-numbers"^^J%
-\space\space "Roman-page-numbers" "Alpha-page-numbers"^^J%
-\space )^^J%
-)^^J%
-(markup-indexentry :open "~n \string\subsubsubitem " :depth 3)^^J%
-(markup-indexentry :open "~n \string\subsubsubsubitem " :depth 4)^^J%
 (merge-rule "\@backslashchar[(.*)\@backslashchar]" "" :eregexp)^^J%
 (define-attributes (("declare" "!" "important" "?" "default")))^^J%
 (markup-locref^^J%
@@ -383,6 +381,24 @@
 \space\space :open "\string\hyperpage{"^^J%
 \space\space :close "}"^^J%
 )^^J%
+(markup-crossref-layer-list^^J%
+\space\space :class "see" ^^J%
+\space\space :sep "\string\,\string\textbar\string\,"^^J%
+)^^J%
+(define-crossref-class "seeidx" :unverified)^^J%
+(markup-crossref-list^^J%
+\space\space :class "seeidx"^^J%
+\space\space :open "\string\seeidx{" :sep "; " :close "}{}"^^J%
+)^^J%
+(define-location-class-order^^J%
+\space (^^J%
+\space\space "see" "seealso" "seeidx"^^J%
+\space\space "roman-page-numbers" "arabic-page-numbers" "alpha-page-numbers"^^J%
+\space\space "Roman-page-numbers" "Alpha-page-numbers"^^J%
+\space )^^J%
+)^^J%
+(markup-indexentry :open "~n \string\subsubsubitem " :depth 3)^^J%
+(markup-indexentry :open "~n \string\subsubsubsubitem " :depth 4)^^J%
 }
 \closeout\tud@write@i
 \NewDocumentCommand\makexindyindex{somo}{%
@@ -432,15 +448,6 @@
 \RequirePackage{tikz}[2013/12/13]
 \RequirePackage{pdfpages}[2013/08/25]
 \RequirePackage{units}[1998/08/04]
-\ifdef{\tudfinalflag}{%
-  \TUDoptions{ToDo=false}%
-  \TUD@key{ToDo}{}%
-}{}
-\ifdef{\tudprintflag}{%
-  \TUDoptions{cd=true}%
-  \TUD@key{cd}{}%
-  \PassOptionsToPackage{hidelinks}{hyperref}%
-}{}
 \newcommand*\tud@shellescape@wrn{%
   \ClassWarning%
   {tudscrman}{%
@@ -990,7 +997,8 @@
           the environment `Declaration'%
         }%
       }%
-      \tud@trace@markup[declare]{\the\tud@toks@}%
+      \tud@trace@markup{declare}{\the\tud@toks@}%
+      \the\tud@toks@%
     \fi%
   \else%
     \if@tud@index\else%
@@ -999,7 +1007,8 @@
       }%
       \IfValueT{#6}{\addto@hook\tud@toks@{'#6'}}%
     \fi%
-    \tud@trace@markup[output]{\the\tud@toks@}%
+    \tud@trace@markup{output}{\the\tud@toks@}%
+    \the\tud@toks@%
   \fi%
   \IfValueT{#4}{%
     \ifstr{#4}{}{}{%
@@ -1798,22 +1807,33 @@
     \tud@shellescape@wrn%
   }%
 }
+\RequirePackage{ifpdf}[2011/01/30]
+\ifpdf
+  \PassOptionsToPackage{obeyFinal}{todonotes}
+  \ifdef{\tudprintflag}{%
+    \PassOptionsToPackage{color=white}{todonotes}%
+  }{%
+    \PassOptionsToPackage{colorinlistoftodos,color=HKS92!10}{todonotes}%
+  }
+  \RequirePackage{todonotes}[2012/07/25]
+  \TUDoptions{ToDo=true}
+\else
+  \TUDoptions{final=true}
+\fi
 \AfterPackage*{todonotes}{%
-  \define@boolkey{todonotes}{doc}[true]{%
-    \ifbool{KV@todonotes@doc}{\setkeys{todonotes}{color=HKS41!30}}{}%
+  \newcommand*\tud@type@color[2]{%
+    \define@boolkey{todonotes}{#1}[true]{%
+      \ifdef{\tudprintflag}{}{%
+        \ifbool{KV@todonotes@#1}{\setkeys{todonotes}{color=#2}}{}%
+      }%
+    }%
   }%
-  \define@boolkey{todonotes}{rls}[true]{%
-    \ifbool{KV@todonotes@rls}{\setkeys{todonotes}{color=HKS44!50}}{}%
-  }%
-  \define@boolkey{todonotes}{imp}[true]{%
-    \ifbool{KV@todonotes@imp}{\setkeys{todonotes}{color=HKS57!50}}{}%
-  }%
-  \define@boolkey{todonotes}{urg}[true]{%
-    \ifbool{KV@todonotes@urg}{\setkeys{todonotes}{color=HKS07!50}}{}%
-  }%
-  \define@boolkey{todonotes}{nxt}[true]{%
-    \ifbool{KV@todonotes@nxt}{\setkeys{todonotes}{color=HKS92!30}}{}%
-  }%
+  \tud@type@color{doc}{HKS41!30}%
+  \tud@type@color{rls}{HKS44!50}%
+  \tud@type@color{imp}{HKS57!50}%
+  \tud@type@color{urg}{HKS07!50}%
+  \tud@type@color{nxt}{HKS92!30}%
+  \undef\tud@type@color%
 }
 \NewDocumentCommand\ToDo{somo}{%
   \ifbool{@tud@todo}{%
@@ -1998,6 +2018,78 @@
     \@printindex[changelog]%
   \endgroup%
 }
+\newcommand*\tud@trace@lbl@created[1]{}
+\newcommand*\tud@trace@lbl@missing[1]{}
+\NewDocumentCommand\tracinglabels{sO{missing}}{%
+  \newcommand*\tud@trace@lbl@list@created{}%
+  \newcommand*\tud@trace@lbl@list@missing{}%
+  \@tempswafalse%
+  \ifstr{#2}{created}{\@tempswatrue}{}%
+  \ifstr{#2}{all}{\@tempswatrue}{}%
+  \if@tempswa%
+    \renewcommand*\tud@trace@lbl@created[1]{%
+      \typeout{%
+        +++++ label created: ##1 on page \thepage%
+      }%
+      \xifinlist{##1}{\tud@trace@lbl@list@created}{}{%
+        \listxadd\tud@trace@lbl@list@created{##1}%
+      }%
+    }%
+    \IfBooleanF{#1}{%
+      \AfterEndDocument{%
+        \typeout{+++++ labels created (sorted) +++++}%
+        \sortlist\tud@trace@lbl@list@created%
+        \forlistloop\typeout{\tud@trace@lbl@list@created}%
+      }%
+    }%
+  \fi%
+  \@tempswafalse%
+  \ifstr{#2}{missing}{\@tempswatrue}{}%
+  \ifstr{#2}{all}{\@tempswatrue}{}%
+  \if@tempswa%
+    \renewcommand*\tud@trace@lbl@missing[1]{%
+      \typeout{%
+        +++++ label missing: ##1 on page \thepage%
+      }%
+      \xifinlist{##1}{\tud@trace@lbl@list@missing}{}{%
+        \listxadd\tud@trace@lbl@list@missing{##1}%
+      }%
+    }%
+    \IfBooleanF{#1}{%
+      \AfterEndDocument{%
+        \typeout{+++++ labels missing (sorted) +++++}%
+        \sortlist\tud@trace@lbl@list@missing%
+        \forlistloop\typeout{\tud@trace@lbl@list@missing}%
+      }%
+    }%
+  \fi%
+}
+\@onlypreamble\tracinglabels
+\newcommand*\tud@trace@markup[2]{}
+\newcommand*\tracingmarkup{%
+  \renewcommand*\tud@trace@markup[2]{%
+    \typeout{+++++ markup ##1 on page \thepage^^J##2}%
+  }%
+}
+\@onlypreamble\tracingmarkup
+\newcommand*\tud@trace@bundle[1]{}
+\newcommand*\tud@trace@bundle@list{}
+\newcommand*\tracingbundle{%
+  \renewcommand*\tud@trace@bundle[1]{%
+    \begingroup%
+      \def\Class####1{class:####1}%
+      \def\Package####1{package:####1}%
+      \xifinlist{##1}{\tud@trace@bundle@list}{}{%
+        \listxadd\tud@trace@bundle@list{##1}%
+      }%
+    \endgroup%
+  }%
+  \AfterEndDocument{%
+    \typeout{+++++ bundle list +++++}%
+    \forlistloop\typeout{\tud@trace@bundle@list}%
+  }%
+}
+\@onlypreamble\tracingbundle
 \RequirePackage{xspace}[2009/10/20]
 \xspaceaddexceptions{"=}
 \newcommand*\vTUDScript{}
@@ -2080,87 +2172,6 @@
   }%
   \xspace%
 }
-\newcommand*\tud@trace@lbl@created[1]{}
-\newcommand*\tud@trace@lbl@missing[1]{}
-\NewDocumentCommand\tracinglabels{sO{missing}}{%
-  \newcommand*\list@lbl@created{}%
-  \newcommand*\list@lbl@missing{}%
-  \newcommand*\lbl@typeout[1]{\typeout{##1}}%
-  \@tempswafalse%
-  \ifstr{#2}{created}{\@tempswatrue}{}%
-  \ifstr{#2}{all}{\@tempswatrue}{}%
-  \if@tempswa%
-    \renewcommand*\tud@trace@lbl@created[1]{%
-      \typeout{%
-        +++++ label created: ##1 on page \thepage%
-      }%
-      \xifinlist{##1}{\list@lbl@created}{}{\listxadd\list@lbl@created{##1}}%
-    }%
-    \IfBooleanF{#1}{%
-      \AfterEndDocument{%
-        \typeout{+++++ labels created (sorted) +++++}%
-        \sortlist\list@lbl@created%
-        \forlistloop\lbl@typeout{\list@lbl@created}%
-      }%
-    }%
-  \fi%
-  \@tempswafalse%
-  \ifstr{#2}{missing}{\@tempswatrue}{}%
-  \ifstr{#2}{all}{\@tempswatrue}{}%
-  \if@tempswa%
-    \renewcommand*\tud@trace@lbl@missing[1]{%
-      \typeout{%
-        +++++ label missing: ##1 on page \thepage%
-      }%
-      \xifinlist{##1}{\list@lbl@missing}{}{\listxadd\list@lbl@missing{##1}}%
-    }%
-    \IfBooleanF{#1}{%
-      \AfterEndDocument{%
-        \typeout{+++++ labels missing (sorted) +++++}%
-        \sortlist\list@lbl@missing%
-        \forlistloop\lbl@typeout{\list@lbl@missing}%
-      }%
-    }%
-  \fi%
-}
-\@onlypreamble\tracinglabels
-\newcommand*\tud@trace@markup[2][]{#2}
-\newcommand*\tracingmarkup{%
-  \renewcommand*\tud@trace@markup[2][]{%
-    \typeout{+++++ markup ##1 on page \thepage^^J##2}##2%
-  }%
-}
-\@onlypreamble\tracingmarkup
-\newcommand*\tud@trace@bundle[1]{}
-\newcommand*\@bundlelist{}
-\newcommand*\tracingbundle{%
-  \renewcommand*\tud@trace@bundle[1]{%
-    \begingroup%
-      \def\Class####1{class:####1}%
-      \def\Package####1{package:####1}%
-      \xifinlist{##1}{\@bundlelist}{}{\listxadd\@bundlelist{##1}}%
-    \endgroup%
-  }%
-  \AfterEndDocument{%
-    \typeout{+++++ bundlelist +++++}%
-    \def\@tempa##1{\typeout{##1}}%
-    \forlistloop\@tempa{\@bundlelist}%
-  }%
-}
-\@onlypreamble\tracingbundle
-\newcounter{typeoutargs}
-\newcommand*\typeoutargs[2][:::::]{%
-  \begingroup%
-    \setcounter{typeoutargs}{0}%
-    \typeout{^^J#1}%
-    \def\@tempa##1{%
-      \stepcounter{typeoutargs}%
-      \toks@{##1}%
-      \typeout{\the\value{typeoutargs}: \the\toks@}%
-    }%
-    \forcsvlist{\@tempa}{#2}%
-  \endgroup%
-}
 %%% From File: tudscr-fields.dtx
 \newcommand*\@course{}
 \newrobustcmd*\course[1]{\gdef\@course{#1}}
@@ -2185,7 +2196,7 @@
 \newrobustcmd*\telephone[1]{\gdef\@telephone{#1}}
 \newcommand*\@emailaddress{}
 \newrobustcmd*\emailaddress[2][]{\gdef\@emailaddress{#2}}
-\AfterPackage{hyperref}{%
+\AfterPackage*{hyperref}{%
   \renewrobustcmd*\emailaddress[2][hidelinks]{%
     \gdef\@emailaddress{%
       \begingroup%

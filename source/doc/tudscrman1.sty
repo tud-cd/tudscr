@@ -8,7 +8,7 @@
 %% tudscr-manual.dtx  (with options: `package,identify')
 %% tudscr-base.dtx  (with options: `load')
 %% tudscr-manual.dtx  (with options: `package,option')
-%% tudscr-misc.dtx 
+%% tudscr-misc.dtx  (with options: `package,execute')
 %% tudscr-manual.dtx  (with options: `package,body')
 %% tudscr-fields.dtx  (with options: `package,manual,body')
 %% tudscr-locale.dtx  (with options: `package,manual,body')
@@ -90,18 +90,32 @@
   \AtEndOfPackage{\renewcommand*\TUD@noworlater[2]{#1#2}}%
 \fi
 %%% From File: tudscr-manual.dtx
-\newif\if@tud@todo
-\@tud@todotrue
-\newcommand*\tud@todo@type{}
-\TUD@key{ToDo}[true]{%
-  \TUD@set@ifkey{ToDo}{@tud@todo}{#1}%
+\TUD@key{final}[true]{%
+  \TUD@set@ifkey{final}{@tempswa}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \let\tud@todo@type\relax%
-  \else%
-    \def\tud@todo@type{#1}%
-    \@tud@todotrue%
-    \FamilyKeyStateProcessed%
+    \if@tempswa%
+      \let\tudfinalflag\relax%
+    \fi%
   \fi%
+}
+\TUD@key{print}[true]{%
+  \TUD@set@ifkey{print}{@tempswa}{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \if@tempswa%
+      \let\tudprintflag\relax%
+    \fi%
+  \fi%
+}
+\AtEndPreamble{%
+  \ifdef{\tudfinalflag}{%
+    \TUDoptions{ToDo=false}%
+    \TUD@key{ToDo}{}%
+  }{}%
+  \ifdef{\tudprintflag}{%
+    \TUDoptions{cd=true}%
+    \TUD@key{cd}{}%
+    \ifdef{\hypersetup}{\hypersetup{hidelinks}}{}%
+  }{}%
 }
 \KOMAoptions{headings=small}
 \TUDoptions{cd=true,cdfoot=true}
@@ -111,7 +125,33 @@
   \fi%
   \RequirePackage{auto-pst-pdf}[2009/04/26]%
 }
+\newif\if@tud@todo
+\newcommand*\tud@todo@type@pos{}
+\let\tud@todo@type@pos\relax
+\newcommand*\tud@todo@type@neg{}
+\let\tud@todo@type@neg\relax
+\TUD@key{ToDo}[true]{%
+  \TUD@set@ifkey{ToDo}{@tud@todo}{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed\else%
+    \def\@tempa not##1##2##3##4\@nil{%
+      \ifstr{##1##2##3}{not}{%
+        \if\relax##4\relax\else%
+          \listeadd\tud@todo@type@neg{##4}%
+        \fi%
+      }{%
+        \if\relax##1\relax\else%
+          \listeadd\tud@todo@type@pos{##1##2##3##4}%
+        \fi%
+      }%
+    }%
+    \edef\@tempb{not\trim@spaces{#1}}%
+    \expandafter\@tempa\@tempb\relax\@empty\@empty\@nil%
+    \@tud@todotrue%
+    \FamilyKeyStateProcessed%
+  \fi%
+}
 %%% From File: tudscr-misc.dtx
+\TUDProcessOptions\relax
 %%% From File: tudscr-manual.dtx
 \PassOptionsToPackage{log-declarations=false}{xparse}
 \RequirePackage{xparse}[2013/12/31]
@@ -119,30 +159,20 @@
 \RequirePackage{setspace}[2011/12/19]
 \setstretch{1.1}
 \RequirePackage{babel}[2014/03/24]
-\AfterPackage{hyperref}{%
+\AfterPackage*{hyperref}{%
   \patchcmd{\pdfstringdef}{\csname HyPsd@babel@}{%
     \let\bbl@info\@gobble\csname HyPsd@babel@%
   }{}{\tud@patch@wrn{pdfstringdef}}%
 }
-\AfterPackage{inputenc}{\RequirePackage{csquotes}[2011/10/22]}
-\AtBeginDocument{%
-  \@ifpackageloaded{csquotes}{}{%
+\AfterPackage*{inputenc}{\RequirePackage{csquotes}[2011/10/22]}
+\TUD@UnwindPackage{csquotes}{%
   \PackageWarning%
-  {tudscrman}{Package `csquotes' not loaded}%
-    \providecommand\enquote[1]{\glqg#1\grqq{}}%
-  }%
+    {tudscrman}{Package `csquotes' not loaded}%
+  \providecommand\enquote[1]{\glqg#1\grqq{}}%
 }
-\AfterPackage{hyperref}{\RequirePackage[babel]{microtype}[2013/05/23]}
-\AtBeginDocument{%
-  \@ifpackageloaded{hyperref}{}{\RequirePackage[babel]{microtype}[2013/05/23]}%
-}
-\newlength\baselineskipglue
-\AtBeginDocument{%
-  \setlength\baselineskipglue{%
-    .4\baselineskip plus .4\baselineskip minus .2\baselineskip%
-  }%
-}
-\PassOptionsToPackage{vskip=.5\baselineskipglue}{quoting}
+\AfterPackage*{hyperref}{\RequirePackage[babel]{microtype}[2013/05/23]}
+\TUD@UnwindPackage{hyperref}{\RequirePackage[babel]{microtype}[2013/05/23]}
+\PassOptionsToPackage{vskip=\smallskipamount}{quoting}
 \RequirePackage{quoting}[2014/01/28]
 \RequirePackage{isodate}[2010/01/03]
 \RequirePackage{hologo}[2012/04/26]
@@ -153,32 +183,23 @@
   basicstyle=\ttfamily\setstretch{1},%
   keywordstyle=,%
   columns=fullflexible,keepspaces,%
-  aboveskip=.5\baselineskipglue,%
-  belowskip=.5\baselineskipglue,%
+  aboveskip=\smallskipamount,%
+  belowskip=\smallskipamount,%
   language=[LaTeX]TeX,%
   texcl,%
 }
 \RequirePackage{silence}[2012/07/02]
 \RequirePackage{filemod}[2011/09/19]
-\RequirePackage{ifpdf}[2011/01/30]
-\ifpdf
-  \PassOptionsToPackage{colorinlistoftodos,obeyFinal,color=HKS92!10}{todonotes}
-  \RequirePackage{todonotes}[2012/07/25]
-\else
-  \TUDoptions{ToDo=false}
-\fi
 \WarningFilter*{ifplatform}{^^J \space\space\space shell escape is disabled}
 \RequirePackage{ifplatform}[2010/10/22]
 \PassOptionsToPackage{hyperindex=false,colorlinks,linkcolor=blue}{hyperref}
 \PassOptionsToPackage{open,openlevel=0}{bookmark}
-\AtBeginDocument{%
-  \RequirePackage{hyperref}[2012/11/06]
-  \RequirePackage{bookmark}[2011/12/02]
-  \newcommand*\Email[1]{\href{mailto:#1}{\nolinkurl{#1}}}
-  \renewcaptionname{ngerman}{\sectionautorefname}{Unterkapitel}
-  \renewcaptionname{ngerman}{\subsectionautorefname}{Abschnitt}
-  \renewcaptionname{ngerman}{\subsubsectionautorefname}{Unterabschnitt}
-  \newcommand*\tudhyperref[2]{\hyperref{../tudscr}{tudscr}{#1}{#2}}
+\AfterPackage*{hyperref}{%
+  \renewcaptionname{ngerman}{\sectionautorefname}{Unterkapitel}%
+  \renewcaptionname{ngerman}{\subsectionautorefname}{Abschnitt}%
+  \renewcaptionname{ngerman}{\subsubsectionautorefname}{Unterabschnitt}%
+  \newcommand*\Email[1]{\href{mailto:#1}{\nolinkurl{#1}}}%
+  \newcommand*\tudhyperref[2]{\hyperref{../tudscr}{tudscr}{#1}{#2}}%
   \newcommand*\autorefname[1][current]{%
     \ifstr{#1}{current}{%
       \expandafter\HyPsd@@autorefname\@currentHref\@nil%
@@ -198,6 +219,36 @@
   \newcommand*\@@autorefname{}%
   \def\@@autorefname#1#2#3#4#5\@nil#6\@nil{#6#4.\@nil}%
 }
+\TUD@UnwindPackage{hyperref}{%
+  \ClassWarning{tudscrman}{%
+    It is strongly recommended to load package `hyperref'.\MessageBreak%
+    Nevertheless, essential commands are rudimentarily\MessageBreak%
+    defined. At least the package `url' is loaded.
+  }%
+  \RequirePackage{url}[2013/09/16]%
+  \robustify\url%
+  \providecommand*\hypersetup[1]{}%
+  \providecommand*\hyperdef[3]{\label{#1.#2}#3}%
+  \providerobustcmd*\hyperref{\@ifnextchar[{\tud@hyperref}{\tud@@hyperref}}
+  \newcommand*\tud@hyperref[2][]{#2}
+  \newcommand*\tud@@hyperref[4]{#4}
+  \providecommand*\href[3][]{#3}%
+  \providecommand*\hyperpage[1]{#1}%
+  \providecommand*\autoref{??\xspace\@ifstar{\ref}{\ref}}%
+  \tud@locale@german{\partautorefname}{Teil}%
+  \tud@locale@german{\chapterautorefname}{Kapitel}%
+  \tud@locale@german{\sectionautorefname}{Unterkapitel}%
+  \tud@locale@german{\subsectionautorefname}{Abschnitt}%
+  \tud@locale@german{\subsubsectionautorefname}{Unterabschnitt}%
+  \tud@locale@english{\partautorefname}{Part}%
+  \tud@locale@english{\chapterautorefname}{chapter}%
+  \tud@locale@english{\sectionautorefname}{section}%
+  \tud@locale@english{\subsectionautorefname}{subsection}%
+  \tud@locale@english{\subsubsectionautorefname}{subsubsection}%
+  \providecommand*\Email[1]{\mbox{#1}}%
+  \providecommand*\tudhyperref[2]{#2}%
+  \providecommand*\autorefname[1][]{??\xspace}%
+}
 \PassOptionsToPackage{xindy,splitindex}{imakeidx}
 \RequirePackage{imakeidx}[2013/07/11]
 \indexsetup{%
@@ -205,7 +256,6 @@
   noclearpage,firstpagestyle=headings,headers={\indexname}{\indexname},%
   othercode={\renewcommand*\subitem{\@idxitem\hspace*{15\p@}}}%
 }
-\newcommand*\xdyopt{-M \jobname-temp.xdy -L german-din}
 \@ifpackagelater{imakeidx}{2013/07/12}{%
   \PackageWarning%
   {tudscrman}{%
@@ -214,31 +264,31 @@
   }%
 }{%
   \ifimki@original\else%
-    \renewenvironment{theindex}
-      {\imki@maybeaddtotoc%
-       \imki@indexheaders%
-       \thispagestyle{\imki@firstpagestyle}%
-       \ifnum\imki@columns>\@ne%
-         \columnsep \imki@columnsep%
-         \ifx\imki@idxprologue\relax%
-           \begin{multicols}{\imki@columns}[\imki@indexlevel{\indexname}]%
-         \else%
-           \begin{multicols}{\imki@columns}[%
-             \imki@indexlevel{\indexname}%
-             \imki@idxprologue%
-           ]%
-         \fi%
-       \else%
-         \imki@indexlevel{\indexname}\imki@idxprologue%
-       \fi%
-       \global\let\imki@idxprologue\relax%
-       \parindent\z@%
-       \parskip\z@ \@plus .3\p@\relax%
-       \columnseprule \ifKV@imki@columnseprule.4\p@\else\z@\fi%
-       \raggedright%
-       \let\item\@idxitem%
-       \imki@othercode}%
-      {\ifnum\imki@columns>\@ne\end{multicols}\fi}%
+    \renewenvironment{theindex}{%
+      \imki@maybeaddtotoc%
+      \imki@indexheaders%
+      \thispagestyle{\imki@firstpagestyle}%
+      \ifnum\imki@columns>\@ne%
+        \columnsep \imki@columnsep%
+        \ifx\imki@idxprologue\relax%
+          \begin{multicols}{\imki@columns}[\imki@indexlevel{\indexname}]%
+        \else%
+          \begin{multicols}{\imki@columns}[%
+            \imki@indexlevel{\indexname}%
+            \imki@idxprologue%
+          ]%
+        \fi%
+      \else%
+        \imki@indexlevel{\indexname}\imki@idxprologue%
+      \fi%
+      \global\let\imki@idxprologue\relax%
+      \parindent\z@%
+      \parskip\z@ \@plus .3\p@\relax%
+      \columnseprule \ifKV@imki@columnseprule.4\p@\else\z@\fi%
+      \raggedright%
+      \let\item\@idxitem%
+      \imki@othercode%
+    }{\ifnum\imki@columns>\@ne\end{multicols}\fi}%
   \fi%
 }
 \newcommand*\tud@write@i{}
@@ -248,71 +298,50 @@
 \newcommand*\tud@read{}
 \newread\tud@read
 \openout\tud@write@i=\jobname-temp.xdy
-\write\tud@write@i{(require "texindy.xdy")}
 \write\tud@write@i{%
+(require "texindy.xdy")^^J%
 (define-location-class^^J%
 \space\space "arabic-page-numbers" ("arabic-numbers") :min-range-length 1^^J%
-)%
-}
-\write\tud@write@i{(markup-range :sep "--")}
-\write\tud@write@i{%
-(merge-rule "\@backslashchar[(.*)\@backslashchar]" "" :eregexp)%
-}
-\write\tud@write@i{%
-(define-attributes (("declare" "!" "important" "?" "deprecated" "default")))%
-}
-\write\tud@write@i{%
+)^^J%
+(markup-range :sep "--")^^J%
+(markup-locclass-list^^J%
+\space\space :open "\string\,\string\dotfill\string\,"^^J%
+\space\space :close "\string\relax"^^J%
+)^^J%
+(merge-rule "\@backslashchar[(.*)\@backslashchar]" "" :eregexp)^^J%
+(define-attributes (("declare" "!" "important" "?" "default")))^^J%
 (markup-locref^^J%
 \space\space :attr "declare"^^J%
 \space\space :open "\string\textbf{\string\hyperpage{"^^J%
 \space\space :close "}}"^^J%
-)%
-}
-\write\tud@write@i{%
+)^^J%
 (markup-locref^^J%
 \space\space :attr "!"^^J%
 \space\space :open "\string\textbf{\string\hyperpage{"^^J%
 \space\space :close "}}"^^J%
-)%
-}
-\write\tud@write@i{%
+)^^J%
 (markup-locref^^J%
 \space\space :attr "important"^^J%
 \space\space :open "\string\textsl{\string\hyperpage{"^^J%
 \space\space :close "}}"^^J%
-)%
-}
-\write\tud@write@i{%
+)^^J%
 (markup-locref^^J%
 \space\space :attr "?"^^J%
 \space\space :open "\string\textsl{\string\hyperpage{"^^J%
 \space\space :close "}}"^^J%
-)%
-}
-\write\tud@write@i{%
+)^^J%
 (markup-locref^^J%
 \space\space :attr "default"^^J%
 \space\space :open "\string\hyperpage{"^^J%
 \space\space :close "}"^^J%
-)%
-}
-\write\tud@write@i{%
-(markup-locref^^J%
-\space\space :attr "deprecated"^^J%
-\space\space :open "\string\hyperpagedeprecated{"^^J%
-\space\space :close "}"^^J%
-)%
-}
-\write\tud@write@i{%
-  (markup-locclass-list :open "\string\,\string\dotfill\string\,")%
-}
-\write\tud@write@i{(define-crossref-class "seeidx")}
-\write\tud@write@i{%
-(markup-crossref-list^^J%
-\space\space :class "seeidx" :open "\string\seeidx{" :sep "; " :close "}{}"^^J%
-)%
+)^^J%
+(markup-crossref-layer-list^^J%
+\space\space :class "see" ^^J%
+\space\space :sep "\string\,\string\textbar\string\,"^^J%
+)^^J%
 }
 \closeout\tud@write@i
+\newcommand*\xdyopt{-M \jobname-temp.xdy -L german-din}
 \makeindex[title={Klassen- und Paketoptionen},name=options,options=\xdyopt]%
 \makeindex[%
   title={Umgebungen, Befehle und Seitenstile},name=macros,options=\xdyopt%
@@ -475,7 +504,7 @@
       \setbox\@tempboxa\box\voidb@x%
       \ifdim\@tempdima>\z@\relax%
         \endgraf%
-        \vspace{\baselineskipglue}%
+        \vspace{\medskipamount}%
         \noindent\ignorespaces%
       \fi%
     \endgroup%
@@ -708,6 +737,19 @@
 \newrobustcmd*\PParameter[1]{\mbox{\texttt{\{#1\}}}}
 \newrobustcmd*\POParameter[1]{\mbox{\texttt{[#1]}}}
 \newcommand*\Tutorial[1]{\href{#1.pdf}{\textsbn{#1.pdf}}}
+\RequirePackage{ifpdf}[2011/01/30]
+\ifpdf
+  \PassOptionsToPackage{obeyFinal}{todonotes}
+  \ifdef{\tudprintflag}{%
+    \PassOptionsToPackage{color=white}{todonotes}%
+  }{%
+    \PassOptionsToPackage{colorinlistoftodos,color=HKS92!10}{todonotes}%
+  }
+  \RequirePackage{todonotes}[2012/07/25]
+  \TUDoptions{ToDo=true}
+\else
+  \TUDoptions{final=true}
+\fi
 \newcommand*\@ToDo{}
 \NewDocumentCommand\ToDo{somo}{%
   \ifbool{@tud@todo}{%
@@ -755,7 +797,7 @@
   }{}%
   \ignorespaces%
 }
-\newcommand*\ListOfToDo{\if@tud@todo\listoftodos\fi}
+\newcommand*\ListOfToDo{\if@tud@todo\clearpage\listoftodos\fi}
 \reversemarginpar
 \newcommand*\PrintIndex{%
   \begingroup%
