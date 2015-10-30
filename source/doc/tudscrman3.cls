@@ -176,43 +176,134 @@
 %%% From File: tudscr-manual.dtx
 \PassOptionsToPackage{log-declarations=false}{xparse}
 \RequirePackage{xparse}[2013/12/31]
-\RequirePackage{textcomp}[2005/09/27]
-\RequirePackage{setspace}[2011/12/19]
-\setstretch{1.1}
-\RequirePackage{babel}[2014/03/24]
-\AfterPackage*{hyperref}{%
-  \patchcmd{\pdfstringdef}{\csname HyPsd@babel@}{%
-    \let\bbl@info\@gobble\csname HyPsd@babel@%
-  }{}{\tud@patch@wrn{pdfstringdef}}%
+\RequirePackage{xspace}[2009/10/20]
+\xspaceaddexceptions{"=}
+\newif\if@sorted@list
+\newcommand*\sortlist[1]{%
+  \ifdefvoid{#1}{%
+    \ClassWarning{tudscrman}{%
+      The given list \string#1\space\MessageBreak%
+      is empty, nothing to sort here%
+    }%
+  }{%
+    \let\@tempc#1%
+    \let\@templist\relax%
+    \forlistloop\@sortlist{\@tempc}%
+    \let\@tempc\relax%
+    \@for\@tempa:=\@templist\do{\listeadd\@tempc{\@tempa}}%
+    \let#1\@tempc%
+  }%
 }
-\AfterPackage*{inputenc}{\RequirePackage{csquotes}[2011/10/22]}
-\TUD@UnwindPackage{csquotes}{%
-  \ClassWarning%
-    {tudscrman}{Package `csquotes' not loaded}%
-  \providecommand\enquote[1]{\glqg#1\grqq{}}%
+\newcommand*\@sortlist[1]{%
+  \ifx\@templist\relax%
+    \def\@templist{#1}%
+  \else%
+    \@sorted@listfalse%
+    \let\@tempb\@empty%
+    \@for\@tempa:=\@templist\do{%
+      \if@sorted@list%
+        \expandafter\edef\expandafter\@tempb\expandafter{\@tempb,\@tempa}%
+      \else%
+        \expandafter\ifnum\pdfstrcmp{#1}{\@tempa}<\z@\relax%
+          \ifx\@tempb\@empty%
+            \expandafter\edef\expandafter\@tempb\expandafter{%
+              #1,\@tempa%
+            }%
+          \else%
+            \expandafter\edef\expandafter\@tempb\expandafter{%
+              \@tempb,#1,\@tempa%
+            }%
+          \fi%
+          \@sorted@listtrue%
+        \else%
+          \ifx\@tempb\@empty%
+            \expandafter\edef\expandafter\@tempb\expandafter{\@tempa}%
+          \else%
+            \expandafter\edef\expandafter\@tempb\expandafter{\@tempb,\@tempa}%
+          \fi%
+        \fi%
+      \fi%
+    }%
+    \if@sorted@list\else%
+      \expandafter\edef\expandafter\@tempb\expandafter{\@tempb,#1}%
+    \fi%
+    \let\@templist\@tempb%
+  \fi%
 }
-\AfterPackage*{hyperref}{\RequirePackage[babel]{microtype}[2013/05/23]}
-\TUD@UnwindPackage{hyperref}{\RequirePackage[babel]{microtype}[2013/05/23]}
-\PassOptionsToPackage{vskip=\smallskipamount}{quoting}
-\RequirePackage{quoting}[2014/01/28]
-\RequirePackage{isodate}[2010/01/03]
-\RequirePackage{hologo}[2012/04/26]
-\PassOptionsToPackage{quiet}{marginnote}
-\RequirePackage{marginnote}[2012/03/29]
-\RequirePackage{listings}[2014/03/04]
-\lstdefinestyle{tudscr}{%
-  basicstyle=\ttfamily\setstretch{1},%
-  keywordstyle=,%
-  columns=fullflexible,keepspaces,%
-  aboveskip=\smallskipamount,%
-  belowskip=\smallskipamount,%
-  language=[LaTeX]TeX,%
-  texcl,%
+\newcommand*\tud@trace@lbl@created[1]{}
+\newcommand*\tud@trace@lbl@missing[1]{}
+\NewDocumentCommand\tracinglabels{sO{missing}}{%
+  \newcommand*\tud@trace@lbl@list@created{}%
+  \newcommand*\tud@trace@lbl@list@missing{}%
+  \@tempswafalse%
+  \ifstr{#2}{created}{\@tempswatrue}{}%
+  \ifstr{#2}{all}{\@tempswatrue}{}%
+  \if@tempswa%
+    \renewcommand*\tud@trace@lbl@created[1]{%
+      \typeout{%
+        +++++ label created: ##1 on page \thepage%
+      }%
+      \xifinlist{##1}{\tud@trace@lbl@list@created}{}{%
+        \listxadd\tud@trace@lbl@list@created{##1}%
+      }%
+    }%
+    \IfBooleanF{#1}{%
+      \AfterEndDocument{%
+        \typeout{+++++ labels created (sorted) +++++}%
+        \sortlist\tud@trace@lbl@list@created%
+        \forlistloop\typeout{\tud@trace@lbl@list@created}%
+      }%
+    }%
+  \fi%
+  \@tempswafalse%
+  \ifstr{#2}{missing}{\@tempswatrue}{}%
+  \ifstr{#2}{all}{\@tempswatrue}{}%
+  \if@tempswa%
+    \renewcommand*\tud@trace@lbl@missing[1]{%
+      \typeout{%
+        +++++ label missing: ##1 on page \thepage%
+      }%
+      \xifinlist{##1}{\tud@trace@lbl@list@missing}{}{%
+        \listxadd\tud@trace@lbl@list@missing{##1}%
+      }%
+    }%
+    \IfBooleanF{#1}{%
+      \AfterEndDocument{%
+        \typeout{+++++ labels missing (sorted) +++++}%
+        \sortlist\tud@trace@lbl@list@missing%
+        \forlistloop\typeout{\tud@trace@lbl@list@missing}%
+      }%
+    }%
+  \fi%
 }
-\RequirePackage{silence}[2012/07/02]
-\RequirePackage{filemod}[2011/09/19]
-\WarningFilter*{ifplatform}{^^J \space\space\space shell escape is disabled}
-\RequirePackage{ifplatform}[2010/10/22]
+\@onlypreamble\tracinglabels
+\newcommand*\tud@trace@markup[2]{}
+\newcommand*\tracingmarkup{%
+  \renewcommand*\tud@trace@markup[2]{%
+    \typeout{+++++ markup ##1 on page \thepage^^J##2}%
+  }%
+}
+\@onlypreamble\tracingmarkup
+\newcommand*\tud@trace@bundle[1]{}
+\newcommand*\tud@trace@bundle@list{}
+\newcommand*\tracingbundle{%
+  \renewcommand*\tud@trace@bundle[1]{%
+    \begingroup%
+      \def\Class####1{class:####1}%
+      \def\Package####1{package:####1}%
+      \xifinlist{##1}{\tud@trace@bundle@list}{}{%
+        \listxadd\tud@trace@bundle@list{##1}%
+      }%
+    \endgroup%
+  }%
+  \AfterEndDocument{%
+    \typeout{+++++ bundle list +++++}%
+    \forlistloop\typeout{\tud@trace@bundle@list}%
+  }%
+}
+\@onlypreamble\tracingbundle
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \PassOptionsToPackage{hyperindex=false,colorlinks,linkcolor=blue}{hyperref}
 \PassOptionsToPackage{open,openlevel=0}{bookmark}
 \AfterPackage*{hyperref}{%
@@ -282,6 +373,14 @@
   \providecommand*\tudhyperref[2]{#2}%
   \providecommand*\autorefname[1][]{??\xspace}%
 }
+\RequirePackage{babel}[2014/03/24]
+\AfterPackage*{hyperref}{%
+  \patchcmd{\pdfstringdef}{\csname HyPsd@babel@}{%
+    \let\bbl@info\@gobble\csname HyPsd@babel@%
+  }{}{\tud@patch@wrn{pdfstringdef}}%
+}
+\AfterPackage*{hyperref}{\RequirePackage[babel]{microtype}[2013/05/23]}
+\TUD@UnwindPackage{hyperref}{\RequirePackage[babel]{microtype}[2013/05/23]}
 \PassOptionsToPackage{xindy,splitindex}{imakeidx}
 \RequirePackage{imakeidx}[2013/07/11]
 \indexsetup{%
@@ -324,17 +423,15 @@
     }{\ifnum\imki@columns>\@ne\end{multicols}\fi}%
   \fi%
 }
-\renewrobustcmd{\see}{\@see}
-\renewrobustcmd{\seealso}{%
-  \ClassWarning{tudscrman}{You should use `see' instead of `seealso'}%
-  \@see%
-}
-\newcommand*\@see{}
-\def\@see#1#2#3\relax{%
+% TODO §§§ Kombination aus beiden möglich?
+\newrobustcmd\cleversee{\@cleversee{\seename}}
+\newrobustcmd\cleverseealso{\@cleversee{\alsoname}}
+\newcommand*\@cleversee{}
+\def\@cleversee#1#2#3\relax{%
   \if\relax\detokenize{#3}\relax%
-    \emph{\seename}\space#1%
+    \emph{#1}\space#2%
   \else%
-    #3, \emph{\alsoname}\space#1%
+    #3, \emph{\alsoname}\space#2%
   \fi%
 }
 \NewDocumentCommand\seeref{sm}{%
@@ -350,10 +447,6 @@
 \space\space "arabic-page-numbers" ("arabic-numbers") :min-range-length 1^^J%
 )^^J%
 (markup-range :sep "--")^^J%
-(markup-locclass-list^^J%
-\space\space :open "\string\,\string\dotfill\string\,"^^J%
-\space\space :close "\string\relax"^^J%
-)^^J%
 (merge-rule "\@backslashchar[(.*)\@backslashchar]" "" :eregexp)^^J%
 (define-attributes (("declare" "!" "important" "?" "default")))^^J%
 (markup-locref^^J%
@@ -381,8 +474,24 @@
 \space\space :open "\string\hyperpage{"^^J%
 \space\space :close "}"^^J%
 )^^J%
+(markup-locclass-list^^J%
+\space\space :open "\string\,\string\dotfill\string\,"^^J%
+\space\space :close "\string\relax"^^J%
+)^^J%
+(markup-crossref-list^^J%
+\space\space :class "see"^^J%
+\space\space :open "\string\cleversee{" :sep "; " :close "}"^^J%
+)^^J%
 (markup-crossref-layer-list^^J%
 \space\space :class "see" ^^J%
+\space\space :sep "\string\,\string\textbar\string\,"^^J%
+)^^J%
+(markup-crossref-list^^J%
+\space\space :class "seealso"^^J%
+\space\space :open "\string\cleverseealso{" :sep "; " :close "}"^^J%
+)^^J%
+(markup-crossref-layer-list^^J%
+\space\space :class "seealso" ^^J%
 \space\space :sep "\string\,\string\textbar\string\,"^^J%
 )^^J%
 (define-crossref-class "seeidx" :unverified)^^J%
@@ -432,31 +541,18 @@
 \makexindyindex*{L\"angen und Z\"ahler}[misc]
 \makexindyindex[columns=1]{\"Anderungsliste}[changelog]
 \undef\makexindyindex
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \RequirePackage{enumitem}[2011/09/28]
 \setlist{noitemsep}
-\AtEndPreamble{%
-  \RequirePackage{ellipsis}[2004/9/28]%
-  \let\ellipsispunctuation\relax%
-}
-\RequirePackage{tabularx}[1999/01/07]
-\RequirePackage{ragged2e}[2009/05/21]
-\RequirePackage{chngcntr}[2009/09/02]
-\counterwithout{footnote}{chapter}
-\RequirePackage{booktabs}[2005/04/14]
-\RequirePackage{varioref}[2011/10/02]
-\renewcommand*\fullref[1]{\hyperref[#1]{\autoref*{#1} \vpageref{#1}}}
-\RequirePackage{tikz}[2013/12/13]
-\RequirePackage{pdfpages}[2013/08/25]
-\RequirePackage{units}[1998/08/04]
-\newcommand*\tud@shellescape@wrn{%
-  \ClassWarning%
-  {tudscrman}{%
-    You have to recompile this document with\MessageBreak%
-    activated shell escape option%
-  }%
-  \global\let\tud@shellescape@wrn\relax%
-}
+\PassOptionsToPackage{quiet}{marginnote}
+\RequirePackage{marginnote}[2012/03/29]
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newrobustcmd*\suffix[1]{\begingroup~\footnotesize(#1)\endgroup}
+\newrobustcmd*\bsc{\@backslashchar}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newif\if@declare
 \newif\if@openindex
 % 0: normales Verhalten (label und Ausgabe)
@@ -660,8 +756,16 @@
   \printdeclarationlist*%
   \@obsoletefalse%
 }
+
+
+
+
+
 \newif\if@changedat
-\newrobustcmd*\bsc{\@backslashchar}
+
+
+
+
 \newcommand*\NewExpandableDocumentCommand[3]{%
   \NewDocumentCommand#1{#2}{#3}%
   \DeclareExpandableDocumentCommand#1{#2}{#3}%
@@ -913,9 +1017,11 @@
     \protected\def~{~}%
   }%
 }
-\AfterPackage{hyperref}{%
+\AfterPackage*{hyperref}{%
   \expandafter\pdfstringdefDisableCommands\expandafter{\@suppressmarkup}%
 }
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newcommand*\@templabel{}
 \newcommand*\@tempentry{}
 \newcommand*\@tempformat{}
@@ -958,6 +1064,8 @@
     }%
   \tud@reserved%
 }
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newcommand*\@suppressoutput{%
   \let\@ProcessMarkup\@GobbleMarkup%
   \renewcommand*\index[2][]{}%
@@ -1181,6 +1289,8 @@
     \tud@reserved%
   }%
 }
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newcommand*\tud@label{%
   \let\IeC\@firstofone%
   \def~{-}%
@@ -1326,6 +1436,8 @@
     \appto#3{\suffix{\@tempbundle}}%
   \fi%
 }
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newcommand*\tud@replace[3]{%
   \begingroup%
     % Ergebnis: \def\@tempa##1@##2\@nnil{\@tempb{##1}{##2}}%
@@ -1356,6 +1468,8 @@
     }%
   \tud@reserved%
 }
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newcommand*\@MarkupFormat{}
 \newcommand*\@MarkupSuffix{}
 \newcommand*\@MarkupDeclare{}
@@ -1400,6 +1514,8 @@
     }%
   \fi%
 }
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newcommand*\list@ChangedAt{}
 \let\list@ChangedAt\relax%
 \DeclareListParser*{\forssvlist}{;}%
@@ -1543,105 +1659,8 @@
 \NewDocumentCommand\printchangedatlist{sO{\z@}}{%
   \@ChangedAt@ProcessList{#1}{#2}%
 }
-\newif\if@sorted@list
-\newcommand*\sortlist[1]{%
-  \ifdefvoid{#1}{%
-    \ClassWarning{tudscrman}{%
-      The given list \string#1\space\MessageBreak%
-      is empty, nothing to sort here%
-    }%
-  }{%
-    \let\@tempc#1%
-    \let\@templist\relax%
-    \forlistloop\@sortlist{\@tempc}%
-    \let\@tempc\relax%
-    \@for\@tempa:=\@templist\do{\listeadd\@tempc{\@tempa}}%
-    \let#1\@tempc%
-  }%
-}
-\newcommand*\@sortlist[1]{%
-  \ifx\@templist\relax%
-    \def\@templist{#1}%
-  \else%
-    \@sorted@listfalse%
-    \let\@tempb\@empty%
-    \@for\@tempa:=\@templist\do{%
-      \if@sorted@list%
-        \expandafter\edef\expandafter\@tempb\expandafter{\@tempb,\@tempa}%
-      \else%
-        \expandafter\ifnum\pdfstrcmp{#1}{\@tempa}<\z@\relax%
-          \ifx\@tempb\@empty%
-            \expandafter\edef\expandafter\@tempb\expandafter{%
-              #1,\@tempa%
-            }%
-          \else%
-            \expandafter\edef\expandafter\@tempb\expandafter{%
-              \@tempb,#1,\@tempa%
-            }%
-          \fi%
-          \@sorted@listtrue%
-        \else%
-          \ifx\@tempb\@empty%
-            \expandafter\edef\expandafter\@tempb\expandafter{\@tempa}%
-          \else%
-            \expandafter\edef\expandafter\@tempb\expandafter{\@tempb,\@tempa}%
-          \fi%
-        \fi%
-      \fi%
-    }%
-    \if@sorted@list\else%
-      \expandafter\edef\expandafter\@tempb\expandafter{\@tempb,#1}%
-    \fi%
-    \let\@templist\@tempb%
-  \fi%
-}
-%
-%
-\NewDocumentCommand\TermTable{smg}{%
-  \let\@templist\relax%
-  \forcsvlist{\listadd\@templist}{#2}%
-  \ifhmode\par\fi%
-  \vskip\medskipamount%
-  \@afterindentfalse\@afterheading%
-  \IfBooleanTF{#1}{%
-    \IfValueTF{#3}{\setlength\@tempdima{#3}}{\setlength\@tempdima{\linewidth}}%
-    \setlength\@tempdimc{-.7\baselineskip}%
-    \begin{tabularx}{\@tempdima}{lXX}\@TermTable\end{tabularx}%
-  }{%
-    \setlength\@tempdimc{\z@}%
-    \begin{tabular}{lll}\@TermTable\end{tabular}%
-  }%
-  \par\addvspace{\medskipamount}%
-}
-\newcommand*\@TermTable{%
-  \toprule%
-  \textbf{Bezeichner} & \textbf{Deutsch} & \textbf{Englisch}\tabularnewline%
-  \midrule%
-  \forlistloop\@@TermTable{\@templist}%
-  \bottomrule%
-}
-\newcommand*\@@TermTable[1]{%
-  \Term{#1} & %
-  \ifstr{\@nameuse{#1}}{}{\PName{leer}}{\@nameuse{#1}} & %
-  \selectlanguage{english}\vspace*{\@tempdimc}%
-  \ifstr{\@nameuse{#1}}{}{\PName{empty}}{\@nameuse{#1}}\tabularnewline%
-}
-\newsavebox\tabularm@box
-\newlength\tabularm@wd
-\newcommand*\tabularm@num{1}
-\NewEnviron{tabularm}[1]{%
-  \begin{lrbox}{\tabularm@box}%
-    \let\allcolumnpar\@gobble%
-    \begin{tabular}{*{#1}l}\BODY\end{tabular}%
-  \end{lrbox}%
-  \setlength\tabularm@wd{\wd\tabularm@box}%
-  \def\tabularm@num{#1}%
-  \let\allcolumnpar\@allcolumnpar%
-  \begin{tabular}{*{#1}l}\BODY\end{tabular}%
-}
-\newcommand*\@allcolumnpar[1]{%
-  \multicolumn{\tabularm@num}{@{}p{\tabularm@wd}@{}}{#1}%
-}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newcommand*\stditem{}
 \newcommand*\before@item[1]{%
   \ifdefvoid{\stditem}{%
@@ -1711,6 +1730,18 @@
   \IfValueT{#5}{\addto@hook\toks@{(#5)}}%
   \the\toks@%
 }
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\RequirePackage{listings}[2014/03/04]
+\lstdefinestyle{tudscr}{%
+  basicstyle=\ttfamily\ifdef{\setstretch}{\setstretch{1}}{},%
+  keywordstyle=,%
+  columns=fullflexible,keepspaces,%
+  aboveskip=\smallskipamount,%
+  belowskip=\smallskipamount,%
+  language=[LaTeX]TeX,%
+  texcl,%
+}
 \newenvironment{Example}{\@nameuse{Example*}}{%
   \@nameuse{endExample*}%
   \addvspace{-\topsep}%
@@ -1751,8 +1782,20 @@
     }%
   }]%
 }
+\RequirePackage{filemod}[2011/09/19]
+%\RequirePackage{silence}[2012/07/02]
+%\WarningFilter*{ifplatform}{^^J \space\space\space shell escape is disabled}
+\RequirePackage{ifplatform}[2010/10/22]
 \newrobustcmd*\hypertut[2]{%
   \hyperref{tutorials/#1.pdf}{\jobname}{tutorials:#1}{\File*{#1.pdf}#2}%
+}
+\newcommand*\tud@shellescape@wrn{%
+  \ClassWarning%
+  {tudscrman}{%
+    You have to recompile this document with\MessageBreak%
+    activated shell escape option%
+  }%
+  \global\let\tud@shellescape@wrn\relax%
 }
 \NewDocumentCommand\Tutorial{smd||}{%
   \ifnum\pdfshellescape=\@ne\relax%
@@ -1807,6 +1850,8 @@
     \tud@shellescape@wrn%
   }%
 }
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \RequirePackage{ifpdf}[2011/01/30]
 \ifpdf
   \PassOptionsToPackage{obeyFinal}{todonotes}
@@ -1904,6 +1949,8 @@
 }
 \newcommand*\ListOfToDo{\if@tud@todo\listoftodos\fi}
 \reversemarginpar
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \NewDocumentCommand\CrossIndex{smom}{%
   \def\@tempa##1##2##3{%
     \index{%
@@ -2018,80 +2065,35 @@
     \@printindex[changelog]%
   \endgroup%
 }
-\newcommand*\tud@trace@lbl@created[1]{}
-\newcommand*\tud@trace@lbl@missing[1]{}
-\NewDocumentCommand\tracinglabels{sO{missing}}{%
-  \newcommand*\tud@trace@lbl@list@created{}%
-  \newcommand*\tud@trace@lbl@list@missing{}%
-  \@tempswafalse%
-  \ifstr{#2}{created}{\@tempswatrue}{}%
-  \ifstr{#2}{all}{\@tempswatrue}{}%
-  \if@tempswa%
-    \renewcommand*\tud@trace@lbl@created[1]{%
-      \typeout{%
-        +++++ label created: ##1 on page \thepage%
-      }%
-      \xifinlist{##1}{\tud@trace@lbl@list@created}{}{%
-        \listxadd\tud@trace@lbl@list@created{##1}%
-      }%
-    }%
-    \IfBooleanF{#1}{%
-      \AfterEndDocument{%
-        \typeout{+++++ labels created (sorted) +++++}%
-        \sortlist\tud@trace@lbl@list@created%
-        \forlistloop\typeout{\tud@trace@lbl@list@created}%
-      }%
-    }%
-  \fi%
-  \@tempswafalse%
-  \ifstr{#2}{missing}{\@tempswatrue}{}%
-  \ifstr{#2}{all}{\@tempswatrue}{}%
-  \if@tempswa%
-    \renewcommand*\tud@trace@lbl@missing[1]{%
-      \typeout{%
-        +++++ label missing: ##1 on page \thepage%
-      }%
-      \xifinlist{##1}{\tud@trace@lbl@list@missing}{}{%
-        \listxadd\tud@trace@lbl@list@missing{##1}%
-      }%
-    }%
-    \IfBooleanF{#1}{%
-      \AfterEndDocument{%
-        \typeout{+++++ labels missing (sorted) +++++}%
-        \sortlist\tud@trace@lbl@list@missing%
-        \forlistloop\typeout{\tud@trace@lbl@list@missing}%
-      }%
-    }%
-  \fi%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\RequirePackage{setspace}[2011/12/19]
+\setstretch{1.1}
+\RequirePackage{textcomp}[2005/09/27]
+\AfterPackage*{inputenc}{\RequirePackage{csquotes}[2011/10/22]}
+\TUD@UnwindPackage{csquotes}{%
+  \ClassWarning%
+    {tudscrman}{Package `csquotes' not loaded}%
+  \providecommand\enquote[1]{\glqg#1\grqq{}}%
 }
-\@onlypreamble\tracinglabels
-\newcommand*\tud@trace@markup[2]{}
-\newcommand*\tracingmarkup{%
-  \renewcommand*\tud@trace@markup[2]{%
-    \typeout{+++++ markup ##1 on page \thepage^^J##2}%
-  }%
+\PassOptionsToPackage{vskip=\smallskipamount}{quoting}
+\RequirePackage{quoting}[2014/01/28]
+\RequirePackage{isodate}[2010/01/03]
+\RequirePackage{hologo}[2012/04/26]
+\RequirePackage{tabularx}[1999/01/07]
+\RequirePackage{ragged2e}[2009/05/21]
+\RequirePackage{chngcntr}[2009/09/02]
+\counterwithout{footnote}{chapter}
+\RequirePackage{booktabs}[2005/04/14]
+\RequirePackage{varioref}[2011/10/02]
+\renewcommand*\fullref[1]{\hyperref[#1]{\autoref*{#1} \vpageref{#1}}}
+\RequirePackage{tikz}[2013/12/13]
+\RequirePackage{pdfpages}[2013/08/25]
+\RequirePackage{units}[1998/08/04]
+\AtEndPreamble{%
+  \RequirePackage{ellipsis}[2004/9/28]%
+  \let\ellipsispunctuation\relax%
 }
-\@onlypreamble\tracingmarkup
-\newcommand*\tud@trace@bundle[1]{}
-\newcommand*\tud@trace@bundle@list{}
-\newcommand*\tracingbundle{%
-  \renewcommand*\tud@trace@bundle[1]{%
-    \begingroup%
-      \def\Class####1{class:####1}%
-      \def\Package####1{package:####1}%
-      \xifinlist{##1}{\tud@trace@bundle@list}{}{%
-        \listxadd\tud@trace@bundle@list{##1}%
-      }%
-    \endgroup%
-  }%
-  \AfterEndDocument{%
-    \typeout{+++++ bundle list +++++}%
-    \forlistloop\typeout{\tud@trace@bundle@list}%
-  }%
-}
-\@onlypreamble\tracingbundle
-\RequirePackage{xspace}[2009/10/20]
-\xspaceaddexceptions{"=}
 \newcommand*\vTUDScript{}
 \AtBeginDocument{%
   \def\@tempb#1 #2 #3\relax#4\relax{\def\vTUDScript{#2}}%
@@ -2100,6 +2102,51 @@
 }
 \newcommand*\vKOMAScript{v3.17\xspace}
 \RequirePackage{scrhack}[2014/02/27]
+\NewDocumentCommand\TermTable{smg}{%
+  \let\@templist\relax%
+  \forcsvlist{\listadd\@templist}{#2}%
+  \ifhmode\par\fi%
+  \vskip\medskipamount%
+  \@afterindentfalse\@afterheading%
+  \IfBooleanTF{#1}{%
+    \IfValueTF{#3}{\setlength\@tempdima{#3}}{\setlength\@tempdima{\linewidth}}%
+    \setlength\@tempdimc{-.7\baselineskip}%
+    \begin{tabularx}{\@tempdima}{lXX}\@TermTable\end{tabularx}%
+  }{%
+    \setlength\@tempdimc{\z@}%
+    \begin{tabular}{lll}\@TermTable\end{tabular}%
+  }%
+  \par\addvspace{\medskipamount}%
+}
+\newcommand*\@TermTable{%
+  \toprule%
+  \textbf{Bezeichner} & \textbf{Deutsch} & \textbf{Englisch}\tabularnewline%
+  \midrule%
+  \forlistloop\@@TermTable{\@templist}%
+  \bottomrule%
+}
+\newcommand*\@@TermTable[1]{%
+  \Term{#1} & %
+  \ifstr{\@nameuse{#1}}{}{\PName{leer}}{\@nameuse{#1}} & %
+  \selectlanguage{english}\vspace*{\@tempdimc}%
+  \ifstr{\@nameuse{#1}}{}{\PName{empty}}{\@nameuse{#1}}\tabularnewline%
+}
+\newsavebox\tabularm@box
+\newlength\tabularm@wd
+\newcommand*\tabularm@num{1}
+\NewEnviron{tabularm}[1]{%
+  \begin{lrbox}{\tabularm@box}%
+    \let\allcolumnpar\@gobble%
+    \begin{tabular}{*{#1}l}\BODY\end{tabular}%
+  \end{lrbox}%
+  \setlength\tabularm@wd{\wd\tabularm@box}%
+  \def\tabularm@num{#1}%
+  \let\allcolumnpar\@allcolumnpar%
+  \begin{tabular}{*{#1}l}\BODY\end{tabular}%
+}
+\newcommand*\@allcolumnpar[1]{%
+  \multicolumn{\tabularm@num}{@{}p{\tabularm@wd}@{}}{#1}%
+}
 \newcommand*\CD{Corporate Design\xspace}
 \newcommand*\CDs{Corporate Designs\xspace}
 \newcommand*\TUD{Technische Universit\"at Dresden\xspace}
@@ -2112,7 +2159,7 @@
     D\kern.05em E\kern.05em N\kern.1em-\kern.1em concept%
   }\xspace%
 }
-\AfterPackage{babel}{%
+\AfterPackage*{babel}{%
   \@expandtwoargs\in@{,english,}{,\bbl@loaded,}%
   \ifin@%
     \renewcommand*\CD{\foreignlanguage{english}{Corporate Design}\xspace}%
