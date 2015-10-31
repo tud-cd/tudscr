@@ -92,20 +92,50 @@
 % Tutorials erzeugt. Da es zwischen der Klasse und dem Paket es eine große
 % Menge an Überschneidungen gibt, basieren diese auf der gleichen Quelldatei.
 %
+% \ToDo{\cs{@for} mit \cs{forcsvlist} ersetzen}[2.05]
+%
 % \StopEventually{\PrintIndex\PrintChanges}
 %
 % \iffalse
+%<*body|doc>
+% \fi
+%
+% \subsection{Grundlegende Befehle für die Anwenderdokumentation}
+%
+% Basis für die Handbuchklasse \cls{tudscrman} ist die \cls{tudscrreprt}. 
+% Zusätzlich wird das Paket \pkg{tudscrman} erstellt, um an das Handbuch
+% angelehnte Tutorials in einem Unterordner zu erstellen. Sowohl für die Klasse
+% als auch das Paket werden einige Pakete geladen, um Einstellungen vorzunehmen 
+% und nützliche Befehle zu definieren.
+%
+% Das Paket für intelligente Leerzeichen am Ende von Makros mit \cs{xspace}.
+%    \begin{macrocode}
+\RequirePackage{xspace}[2009/10/20]
+\xspaceaddexceptions{"=}
+%    \end{macrocode}
+% \begin{macro}{\vTUDScript}
+% \begin{macro}{\vKOMAScript}
+% Diese beiden Befehle werden für die aktuelle \TUDScript-Versionsnummer sowie 
+% die mindestens notwendige Version von \KOMAScript{} in der Dokumentation
+% verwendet.
+% \ToDo{Warum AtBeginDocument?}[v2.05]
+%    \begin{macrocode}
+\newcommand*\vTUDScript{}
+\AtBeginDocument{%
+  \def\@tempb#1 #2 #3\relax#4\relax{\def\vTUDScript{#2}}%
+  \edef\@tempa{\TUDVersion}%
+  \expandafter\@tempb\@tempa\relax? ? \relax\relax%
+}
+\newcommand*\vKOMAScript{v3.17\xspace}
+%    \end{macrocode}
+% \end{macro}^^A \vKOMAScript
+% \end{macro}^^A \vTUDScript
+%
+% \iffalse
+%</body|doc>
 %<*!doc>
 %<*body>
 % \fi
-%
-% \subsection{Benötigte Pakete für die Anwenderdokumentation}
-%
-% Basis für das Handbuch ist die Klasse \cls{tudscrreprt}. An diese werden alle 
-% Klassenoptionen weitergereicht. Sie wird für das Setzen des Anwenderhandbuchs
-% genutzt. Zusätzlich wird das Paket \pkg{tudscrman} erstellt, um an das 
-% Handbuch angelehnte Tutorials in einem Unterordner zu erstellen. Sowohl für 
-% die Klasse als auch das Paket werden einige Pakete geladen.
 %
 % Das Paket \pkg{xparse} erlaubt eine sehr freie Deklaration von Makros mit
 % nahezu beliebig arrangierbaren (optionalen) Argumenten.
@@ -113,16 +143,258 @@
 \PassOptionsToPackage{log-declarations=false}{xparse}
 \RequirePackage{xparse}[2013/12/31]
 %    \end{macrocode}
-% Für den Fließtext werden Pfeile u.\,ä. durch \pkg{textcomp} bereitgestellt.
+%
+% \iffalse
+%<*class>
+% \fi
+%
+% \begin{macro}{\sortlist}
+% \changes{v2.02}{2014/07/25}{neu}^^A
+% \begin{macro}{\@sortlist}
+% \changes{v2.02}{2014/07/25}{neu}^^A
+% \begin{macro}{\@templist}
+% \changes{v2.02}{2014/07/25}{neu}^^A
+% \begin{macro}{\if@sorted@list}
+% \changes{v2.02}{2014/07/25}{neu}^^A
+% Der Befehl \cs{sortlist} erwartet eine \pkg{etoolbox}-Liste und sortiert diese
+% mit \cs{@sortlist} in alphabetischer Reihenfolge in eine kommagetrennte 
+% Auflistung. Diese wird anschließend wieder in eine \pkg{etoolbox}-Liste 
+% umgewandelt.
 %    \begin{macrocode}
-\RequirePackage{textcomp}[2005/09/27]
+\newcommand*\@templist{}
+\let\@templist\relax%
+\newcommand*\sortlist[1]{%
+  \ifdefvoid{#1}{%
+    \ClassWarning{tudscrman}{%
+      The given list \string#1\space\MessageBreak%
+      is empty, nothing to sort here%
+    }%
+  }{%
+    \let\tud@reserved#1%
+    \let\@templist\relax%
+    \forlistloop\@sortlist{\tud@reserved}%
+    \let\tud@reserved\relax%
+    \@for\@tempa:=\@templist\do{\listeadd\tud@reserved{\@tempa}}%
+    \let#1\tud@reserved%
+  }%
+}
 %    \end{macrocode}
-% Vergrößerung des Durchschusses.
+% Hier erfolgt die eigentliche Sortierung der Liste.
 %    \begin{macrocode}
-\RequirePackage{setspace}[2011/12/19]
-\setstretch{1.1}
+\newif\if@sorted@list
+\newcommand*\@sortlist[1]{%
 %    \end{macrocode}
-% Sprachunterstützung.
+% Der erste Eintrag wird direkt der Liste hinzugefügt.
+%    \begin{macrocode}
+  \ifx\@templist\relax%
+    \def\@templist{#1}%
+%    \end{macrocode}
+% Weitere Einräge werden mit \cs{pdfstrcmp} an der richtigen Stelle eingefügt.
+% Dabei wird die kommagetrennte Liste \cs{@templist} mit \cs{@for} durchlaufen
+% und \cs{@tempb} als Hilfsmakro verwendet, in welches die aktuelle Liste 
+% innerhalb der \cs{@for}-Schelife stückweise expandiert wird. Der Schalter
+% \cs{if@sorted@list} wird gesetzt, wenn das aktuelle Element an der richtigen
+% Stelle eingesetzt wurde.
+%    \begin{macrocode}
+  \else%
+    \@sorted@listfalse%
+    \let\@tempb\@empty%
+    \@for\@tempa:=\@templist\do{%
+%    \end{macrocode}
+% Ist der Eintrag bereits erfolgt, wird der verbliebene Teil der Liste 
+% angehängt.
+%    \begin{macrocode}
+      \if@sorted@list%
+        \expandafter\edef\expandafter\@tempb\expandafter{\@tempb,\@tempa}%
+      \else%
+%    \end{macrocode}
+% Liegt der Eintrag in alphabetischer Reihenfolge vor dem aktuellen der 
+% durchlaufenenen Liste, so wird dieser davor eingefügt. Dabei muss der Fall, 
+% dass das Element der erste Eintrag in der temporären Liste \cs{@tempb} ist, 
+% eine Sonderbehandlung erfolgen. Anschließend wird \cs{@sorted@listtrue} 
+% gesetzt.
+%    \begin{macrocode}
+        \expandafter\ifnum\pdfstrcmp{#1}{\@tempa}<\z@\relax%
+          \ifx\@tempb\@empty%
+            \expandafter\edef\expandafter\@tempb\expandafter{%
+              #1,\@tempa%
+            }%
+          \else%
+            \expandafter\edef\expandafter\@tempb\expandafter{%
+              \@tempb,#1,\@tempa%
+            }%
+          \fi%
+          \@sorted@listtrue%
+        \else%
+%    \end{macrocode}
+% Ist Eintrag in alphabetischer Reihenfolge nach dem aktuellen der geprüften 
+% Liste, so wird dieser (noch) nicht eingefügt. Der Sonderfall des ersten
+% Elementes wird abgedeckt.
+%    \begin{macrocode}
+          \ifx\@tempb\@empty%
+            \expandafter\edef\expandafter\@tempb\expandafter{\@tempa}%
+          \else%
+            \expandafter\edef\expandafter\@tempb\expandafter{\@tempb,\@tempa}%
+          \fi%
+        \fi%
+      \fi%
+    }%
+%    \end{macrocode}
+% Wurde der Eintrag nach dem Durchlaufen der Liste nicht eingefügt, so erfolgt 
+% dies hier am Ende der Liste.
+%    \begin{macrocode}
+    \if@sorted@list\else%
+      \expandafter\edef\expandafter\@tempb\expandafter{\@tempb,#1}%
+    \fi%
+%    \end{macrocode}
+% Die temporäre Liste \cs{@tempb} wird auf \cs{@templist} überschrieben.
+%    \begin{macrocode}
+    \let\@templist\@tempb%
+  \fi%
+}
+%    \end{macrocode}
+% \end{macro}^^A \if@sorted@list
+% \end{macro}^^A \@templist
+% \end{macro}^^A \@sortlist
+% \end{macro}^^A \sortlist
+%
+% \minisec{Traces für die Klasse}
+%
+% Ab und an ist es beim Erstellen des Handbuchs recht sinnvoll, verschiedene 
+% Dinge direkt im Logfile zu überprüfen. Hierfür werden folgend einige Befehle 
+% zur Ablaufkontrolle definiert.
+%
+% \begin{macro}{\tracinglabels}
+% \changes{v2.05}{2015/10/29}{neu}^^A
+% \begin{macro}{\tud@trace@lbl@created}
+% \changes{v2.05}{2015/10/29}{neu}^^A
+% \begin{macro}{\tud@trace@lbl@missing}
+% \changes{v2.05}{2015/10/29}{neu}^^A
+% \begin{macro}{\tud@trace@lbl@list@created}
+% \changes{v2.05}{2015/10/29}{neu}^^A
+% \begin{macro}{\tud@trace@lbl@list@missing}
+% \changes{v2.05}{2015/10/29}{neu}^^A
+% Mit \cs{tracinglabels} wird die Nachverfolgung aller erstellten Labels in der 
+% Dokumentation aktiviert werden. Die Label werden zum einen direkt im Logfile
+% ausgegeben und am Ende des selbigen in einer sortierten Liste ausgegeben. Die 
+% Sternversion des Befehls erzeugt keine sortierte Liste. Über das optionale 
+% Argument kann mit verschiedenen Schlüsseln zudem eingestellt werden, ob alle
+% Label (\val{all}) oder nur die erstellten (\val{created}) beziehungsweise die
+% fehlenden (\val{missing}) nachverfolgt werden sollen.
+%    \begin{macrocode}
+\newcommand*\tud@trace@lbl@created[1]{}
+\newcommand*\tud@trace@lbl@missing[1]{}
+\NewDocumentCommand\tracinglabels{sO{missing}}{%
+  \newcommand*\tud@trace@lbl@list@created{}%
+  \newcommand*\tud@trace@lbl@list@missing{}%
+  \@tempswafalse%
+  \ifstr{#2}{created}{\@tempswatrue}{}%
+  \ifstr{#2}{all}{\@tempswatrue}{}%
+  \if@tempswa%
+    \renewcommand*\tud@trace@lbl@created[1]{%
+      \typeout{%
+        +++++ label created: ##1 on page \thepage%
+      }%
+      \xifinlist{##1}{\tud@trace@lbl@list@created}{}{%
+        \listxadd\tud@trace@lbl@list@created{##1}%
+      }%
+    }%
+    \IfBooleanF{#1}{%
+      \AfterEndDocument{%
+        \typeout{+++++ labels created (sorted) +++++}%
+        \sortlist\tud@trace@lbl@list@created%
+        \forlistloop\typeout{\tud@trace@lbl@list@created}%
+      }%
+    }%
+  \fi%
+  \@tempswafalse%
+  \ifstr{#2}{missing}{\@tempswatrue}{}%
+  \ifstr{#2}{all}{\@tempswatrue}{}%
+  \if@tempswa%
+    \renewcommand*\tud@trace@lbl@missing[1]{%
+      \typeout{%
+        +++++ label missing: ##1 on page \thepage%
+      }%
+      \xifinlist{##1}{\tud@trace@lbl@list@missing}{}{%
+        \listxadd\tud@trace@lbl@list@missing{##1}%
+      }%
+    }%
+    \IfBooleanF{#1}{%
+      \AfterEndDocument{%
+        \typeout{+++++ labels missing (sorted) +++++}%
+        \sortlist\tud@trace@lbl@list@missing%
+        \forlistloop\typeout{\tud@trace@lbl@list@missing}%
+      }%
+    }%
+  \fi%
+}
+\@onlypreamble\tracinglabels
+%    \end{macrocode}
+% \end{macro}^^A \tud@trace@lbl@list@missing
+% \end{macro}^^A \tud@trace@lbl@list@created
+% \end{macro}^^A \tud@trace@lbl@missing
+% \end{macro}^^A \tud@trace@lbl@created
+% \end{macro}^^A \tracinglabels
+% \begin{macro}{\tracingmarkup}
+% \changes{v2.05}{2015/10/29}{neu}^^A
+% \begin{macro}{\tud@trace@markup}
+% \changes{v2.05}{2015/10/29}{neu}^^A
+% Durch die Verwendung von \cs{tracinglabels} wird die Nachverfolgung der durch
+% das Makro \cs{@ProcessMarkup} aufgerufenen Befehle \cs{ProcessMarkup@Declare}
+% beziehungsweise \cs{ProcessMarkup@output} inklusive all ihrer Argumente
+% aktiviert. Dies ist für die Kontrolle des erzeugten Markups sinnvoll.
+%    \begin{macrocode}
+\newcommand*\tud@trace@markup[2]{}
+\newcommand*\tracingmarkup{%
+  \renewcommand*\tud@trace@markup[2]{%
+    \typeout{+++++ markup ##1 on page \thepage^^J##2}%
+  }%
+}
+\@onlypreamble\tracingmarkup
+%    \end{macrocode}
+% \end{macro}^^A \tud@trace@markup
+% \end{macro}^^A \tracingmarkup
+% \begin{macro}{\tracingbundle}
+% \changes{v2.05}{2015/10/29}{neu}^^A
+% \begin{macro}{\tud@trace@bundle}
+% \changes{v2.05}{2015/10/29}{neu}^^A
+% \begin{macro}{\tud@trace@bundle@list}
+% \changes{v2.05}{2015/10/29}{neu}^^A
+% Wird \cs{tracingbundle} in der Präambel verwendet, werden alle direkt oder 
+% indirekt durch \cs{@ProcessMarkup} im Handbuch erzeugten Querverweise auf
+% Klassen oder Pakete aus dem \TUDScript-Bundle nachverfolgt und am Ende des
+% Logfiles ausgegeben. Damit kann im Zweifel übeprüft werden, ob eventuell eine
+% falsche Referenz genutzt wurde, wodurch u.\,U. Querverweise oder Einträge in
+% Index und Änderungsliste fehlerhaft werden oder erst gar nicht erscheinen.
+%    \begin{macrocode}
+\newcommand*\tud@trace@bundle[1]{}
+\newcommand*\tud@trace@bundle@list{}
+\newcommand*\tracingbundle{%
+  \renewcommand*\tud@trace@bundle[1]{%
+    \begingroup%
+      \def\Class####1{class:####1}%
+      \def\Package####1{package:####1}%
+      \xifinlist{##1}{\tud@trace@bundle@list}{}{%
+        \listxadd\tud@trace@bundle@list{##1}%
+      }%
+    \endgroup%
+  }%
+  \AfterEndDocument{%
+    \typeout{+++++ bundle list +++++}%
+    \forlistloop\typeout{\tud@trace@bundle@list}%
+  }%
+}
+\@onlypreamble\tracingbundle
+%    \end{macrocode}
+% \end{macro}^^A \tud@trace@bundle@list
+% \end{macro}^^A \tud@trace@bundle
+% \end{macro}^^A \tracingbundle
+%
+% \iffalse
+%</class>
+% \fi
+%
+% Die Sprachunterstützung für Klasse und Paket.
 %    \begin{macrocode}
 \RequirePackage{babel}[2014/03/24]
 %    \end{macrocode}
@@ -3142,105 +3414,6 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \Replace
-% \begin{macro}{\sortlist}
-% \changes{v2.02}{2014/07/25}{neu}^^A
-% \begin{macro}{\@sortlist}
-% \changes{v2.02}{2014/07/25}{neu}^^A
-% \begin{macro}{\list@sorted}
-% \changes{v2.02}{2014/07/25}{neu}^^A
-% \begin{macro}{\if@sorted@list}
-% \changes{v2.02}{2014/07/25}{neu}^^A
-% Der Befehl \cs{sortlist} erwartet eine \pkg{etoolbox}-Liste und sortiert diese
-% mit \cs{@sortlist} in alphabetischer Reihenfolge in eine kommagetrennte 
-% Auflistung. Diese wird anschließend wieder in eine \pkg{etoolbox}-Liste 
-% umgewandelt.
-%    \begin{macrocode}
-\newif\if@sorted@list
-\newcommand*\list@sorted{}
-\newcommand*\sortlist[1]{%
-  \let\list@sorted\relax%
-  \forlistloop\@sortlist{#1}%
-  \let#1\relax%
-  \@for\@tempa:=\list@sorted\do{\listeadd{#1}{\@tempa}}%
-}
-%    \end{macrocode}
-% Hier erfolgt die eigentliche Sortierung der Liste.
-%    \begin{macrocode}
-\newcommand*\@sortlist[1]{%
-%    \end{macrocode}
-% Der erste Eintrag wird direkt der Liste hinzugefügt.
-%    \begin{macrocode}
-  \ifx\list@sorted\relax%
-    \def\list@sorted{#1}%
-%    \end{macrocode}
-% Weitere Einräge werden mit \cs{pdfstrcmp} an der richtigen Stelle eingefügt.
-% Dabei wird die kommagetrennte Liste \cs{list@sorted} mit \cs{@for} durchlaufen
-% und \cs{@tempb} als Hilfsmakro verwendet, in welches die aktuelle Liste 
-% innerhalb der \cs{@for}-Schelife stückweise expandiert wird. Der Schalter
-% \cs{if@sorted@list} wird gesetzt, wenn das aktuelle Element an der richtigen
-% Stelle eingesetzt wurde.
-%    \begin{macrocode}
-  \else%
-    \@sorted@listfalse%
-    \let\@tempb\@empty%
-    \@for\@tempa:=\list@sorted\do{%
-%    \end{macrocode}
-% Ist der Eintrag bereits erfolgt, wird der verbliebene Teil der Liste 
-% angehängt.
-%    \begin{macrocode}
-      \if@sorted@list%
-        \expandafter\edef\expandafter\@tempb\expandafter{\@tempb,\@tempa}%
-      \else%
-%    \end{macrocode}
-% Liegt der Eintrag in alphabetischer Reihenfolge vor dem aktuellen der 
-% durchlaufenenen Liste, so wird dieser davor eingefügt. Dabei muss der Fall, 
-% dass das Element der erste Eintrag in der temporären Liste \cs{@tempb} ist, 
-% eine Sonderbehandlung erfolgen. Anschließend wird \cs{@sorted@listtrue} 
-% gesetzt.
-%    \begin{macrocode}
-        \expandafter\ifnum\pdfstrcmp{#1}{\@tempa}<\z@\relax%
-          \ifx\@tempb\@empty%
-            \expandafter\edef\expandafter\@tempb\expandafter{%
-              #1,\@tempa%
-            }%
-          \else%
-            \expandafter\edef\expandafter\@tempb\expandafter{%
-              \@tempb,#1,\@tempa%
-            }%
-          \fi%
-          \@sorted@listtrue%
-        \else%
-%    \end{macrocode}
-% Ist Eintrag in alphabetischer Reihenfolge nach dem aktuellen der geprüften 
-% Liste, so wird dieser (noch) nicht eingefügt. Der Sonderfall des ersten
-% Elementes wird abgedeckt.
-%    \begin{macrocode}
-          \ifx\@tempb\@empty%
-            \expandafter\edef\expandafter\@tempb\expandafter{\@tempa}%
-          \else%
-            \expandafter\edef\expandafter\@tempb\expandafter{\@tempb,\@tempa}%
-          \fi%
-        \fi%
-      \fi%
-    }%
-%    \end{macrocode}
-% Wurde der Eintrag nach dem Durchlaufen der Liste nicht eingefügt, so erfolgt 
-% dies hier am Ende der Liste.
-%    \begin{macrocode}
-    \if@sorted@list\else%
-      \expandafter\edef\expandafter\@tempb\expandafter{\@tempb,#1}%
-    \fi%
-%    \end{macrocode}
-% Die temporäre Liste \cs{@tempb} wird auf \cs{list@sorted} überschrieben.
-%    \begin{macrocode}
-    \let\list@sorted\@tempb%
-  \fi%
-}
-%    \end{macrocode}
-% \end{macro}^^A \if@sorted@list
-% \end{macro}^^A \list@sorted
-% \end{macro}^^A \@sortlist
-% \end{macro}^^A \sortlist
 %
 % \subsubsection{Erläuterungen und weiterführende Ergänzungen im Handbuch}
 %
@@ -4041,157 +4214,33 @@
 % \end{macro}^^A \seealso
 % \end{macro}^^A \see
 %
-% \iffalse
-%<*class>
-% \fi
+% \section{Verschiedenes für die Dokumentationsklassen und -pakete}
 %
-% \subsection{Traces für die Klasse}
+% Sowohl für die Klasse \cls{tudscrman} als auch \cls{tudscrdoc} werden ein 
+% paar Befehle zur komfortablen verwendung im Fließtext definiert. Außerdem 
+% erfolgen mittels einiger Pakete verschiedene Formateinstellungen.
 %
-% Ab und an ist es beim Erstellen des Handbuchs recht sinnvoll, verschiedene 
-% Dinge direkt im Logfile zu überprüfen. Hierfür werden folgend einige Befehle 
-% zur Ablaufkontrolle definiert.
 %
-% \begin{macro}{\tracinglabels}
-% \changes{v2.05}{2015/10/29}{neu}^^A
-% \begin{macro}{\tud@trace@lbl@created}
-% \changes{v2.05}{2015/10/29}{neu}^^A
-% \begin{macro}{\tud@trace@lbl@missing}
-% \changes{v2.05}{2015/10/29}{neu}^^A
-% \begin{macro}{\tud@trace@lbl@list@created}
-% \changes{v2.05}{2015/10/29}{neu}^^A
-% \begin{macro}{\tud@trace@lbl@list@missing}
-% \changes{v2.05}{2015/10/29}{neu}^^A
-% Mit \cs{tracinglabels} wird die Nachverfolgung aller erstellten Labels in der 
-% Dokumentation aktiviert werden. Die Label werden zum einen direkt im Logfile
-% ausgegeben und am Ende des selbigen in einer sortierten Liste ausgegeben. Die 
-% Sternversion des Befehls erzeugt keine sortierte Liste. Über das optionale 
-% Argument kann mit verschiedenen Schlüsseln zudem eingestellt werden, ob alle
-% Label (\val{all}) oder nur die erstellten (\val{created}) beziehungsweise die
-% fehlenden (\val{missing}) nachverfolgt werden sollen.
+% Für den Fließtext werden Pfeile u.\,ä. durch \pkg{textcomp} bereitgestellt.
 %    \begin{macrocode}
-\newcommand*\tud@trace@lbl@created[1]{}
-\newcommand*\tud@trace@lbl@missing[1]{}
-\NewDocumentCommand\tracinglabels{sO{missing}}{%
-  \newcommand*\tud@trace@lbl@list@created{}%
-  \newcommand*\tud@trace@lbl@list@missing{}%
-  \@tempswafalse%
-  \ifstr{#2}{created}{\@tempswatrue}{}%
-  \ifstr{#2}{all}{\@tempswatrue}{}%
-  \if@tempswa%
-    \renewcommand*\tud@trace@lbl@created[1]{%
-      \typeout{%
-        +++++ label created: ##1 on page \thepage%
-      }%
-      \xifinlist{##1}{\tud@trace@lbl@list@created}{}{%
-        \listxadd\tud@trace@lbl@list@created{##1}%
-      }%
-    }%
-    \IfBooleanF{#1}{%
-      \AfterEndDocument{%
-        \typeout{+++++ labels created (sorted) +++++}%
-        \sortlist\tud@trace@lbl@list@created%
-        \forlistloop\typeout{\tud@trace@lbl@list@created}%
-      }%
-    }%
-  \fi%
-  \@tempswafalse%
-  \ifstr{#2}{missing}{\@tempswatrue}{}%
-  \ifstr{#2}{all}{\@tempswatrue}{}%
-  \if@tempswa%
-    \renewcommand*\tud@trace@lbl@missing[1]{%
-      \typeout{%
-        +++++ label missing: ##1 on page \thepage%
-      }%
-      \xifinlist{##1}{\tud@trace@lbl@list@missing}{}{%
-        \listxadd\tud@trace@lbl@list@missing{##1}%
-      }%
-    }%
-    \IfBooleanF{#1}{%
-      \AfterEndDocument{%
-        \typeout{+++++ labels missing (sorted) +++++}%
-        \sortlist\tud@trace@lbl@list@missing%
-        \forlistloop\typeout{\tud@trace@lbl@list@missing}%
-      }%
-    }%
-  \fi%
-}
-\@onlypreamble\tracinglabels
+\RequirePackage{textcomp}[2005/09/27]
 %    \end{macrocode}
-% \end{macro}^^A \tud@trace@lbl@list@missing
-% \end{macro}^^A \tud@trace@lbl@list@created
-% \end{macro}^^A \tud@trace@lbl@missing
-% \end{macro}^^A \tud@trace@lbl@created
-% \end{macro}^^A \tracinglabels
-% \begin{macro}{\tracingmarkup}
-% \changes{v2.05}{2015/10/29}{neu}^^A
-% \begin{macro}{\tud@trace@markup}
-% \changes{v2.05}{2015/10/29}{neu}^^A
-% Durch die Verwendung von \cs{tracinglabels} wird die Nachverfolgung der durch
-% das Makro \cs{@ProcessMarkup} aufgerufenen Befehle \cs{ProcessMarkup@Declare}
-% beziehungsweise \cs{ProcessMarkup@output} inklusive all ihrer Argumente
-% aktiviert. Dies ist für die Kontrolle des erzeugten Markups sinnvoll.
+% Vergrößerung des Durchschusses.
 %    \begin{macrocode}
-\newcommand*\tud@trace@markup[2]{}
-\newcommand*\tracingmarkup{%
-  \renewcommand*\tud@trace@markup[2]{%
-    \typeout{+++++ markup ##1 on page \thepage^^J##2}%
-  }%
-}
-\@onlypreamble\tracingmarkup
+\RequirePackage{setspace}[2011/12/19]
+\setstretch{1.1}
 %    \end{macrocode}
-% \end{macro}^^A \tud@trace@markup
-% \end{macro}^^A \tracingmarkup
-% \begin{macro}{\tracingbundle}
-% \changes{v2.05}{2015/10/29}{neu}^^A
-% \begin{macro}{\tud@trace@bundle}
-% \changes{v2.05}{2015/10/29}{neu}^^A
-% \begin{macro}{\tud@trace@bundle@list}
-% \changes{v2.05}{2015/10/29}{neu}^^A
-% Wird \cs{tracingbundle} in der Präambel verwendet, werden alle direkt oder 
-% indirekt durch \cs{@ProcessMarkup} im Handbuch erzeugten Querverweise auf
-% Klassen oder Pakete aus dem \TUDScript-Bundle nachverfolgt und am Ende des
-% Logfiles ausgegeben. Damit kann im Zweifel übeprüft werden, ob eventuell eine
-% falsche Referenz genutzt wurde, wodurch u.\,U. Querverweise oder Einträge in
-% Index und Änderungsliste fehlerhaft werden oder erst gar nicht erscheinen.
-%    \begin{macrocode}
-\newcommand*\tud@trace@bundle[1]{}
-\newcommand*\tud@trace@bundle@list{}
-\newcommand*\tracingbundle{%
-  \renewcommand*\tud@trace@bundle[1]{%
-    \begingroup%
-      \def\Class####1{class:####1}%
-      \def\Package####1{package:####1}%
-      \xifinlist{##1}{\tud@trace@bundle@list}{}{%
-        \listxadd\tud@trace@bundle@list{##1}%
-      }%
-    \endgroup%
-  }%
-  \AfterEndDocument{%
-    \typeout{+++++ bundle list +++++}%
-    \forlistloop\typeout{\tud@trace@bundle@list}%
-  }%
-}
-\@onlypreamble\tracingbundle
-%    \end{macrocode}
-% \end{macro}^^A \tud@trace@bundle@list
-% \end{macro}^^A \tud@trace@bundle
-% \end{macro}^^A \tracingbundle
+%
+%
 %
 % \iffalse
-%</class>
 %</body>
 %</!doc>
 %<*body|doc>
 % \fi
 %
-% \section{Verschiedenes für die Dokumentationsklassen}
 %
-% Sowohl für die Klasse \cls{tudscrman} als auch \cls{tudscrdoc} werden ein 
-% paar Befehle zur komfortablen verwendung im Flißetext definiert.
 %
-% \ToDo{Besser im Quelltext platzieren, insbesondere xspace}[v2.05]
-% \begin{macro}{\vTUDScript}
-% \begin{macro}{\vKOMAScript}
 % \begin{macro}{\CD}
 % \begin{macro}{\CDs}
 % \begin{macro}{\TUD}
@@ -4200,21 +4249,7 @@
 % Diese Befehle stellen regelmäßig in der Quelltextdokumentatuion und im 
 % Handbuch genutzte Textbausteine bereit. Dazu wird der Befehl \cs{xspace} aus 
 % dem \pkg{xspace}-Paket genutzt.
-%    \begin{macrocode}
-\RequirePackage{xspace}[2009/10/20]
-\xspaceaddexceptions{"=}
-%    \end{macrocode}
-% Der Befehl \cs{vTUDScript} enthält die aktuelle \TUDScript"=Versionsnummer.
-% \ToDo{Warum AtBeginDocument?}[v2.05]
-%    \begin{macrocode}
-\newcommand*\vTUDScript{}
-\AtBeginDocument{%
-  \def\@tempb#1 #2 #3\relax#4\relax{\def\vTUDScript{#2}}%
-  \edef\@tempa{\TUDVersion}%
-  \expandafter\@tempb\@tempa\relax? ? \relax\relax%
-}
-\newcommand*\vKOMAScript{v3.17\xspace}
-%    \end{macrocode}
+%
 % Ganz zum Schluss noch Bugfixes für unterschiedliche Pakete.
 %    \begin{macrocode}
 \RequirePackage{scrhack}[2014/02/27]
@@ -4244,8 +4279,6 @@
 % \end{macro}^^A \TUD
 % \end{macro}^^A \CDs
 % \end{macro}^^A \CD
-% \end{macro}^^A \vKOMAScript
-% \end{macro}^^A \vTUDScript
 %
 % \iffalse
 %</body|doc>

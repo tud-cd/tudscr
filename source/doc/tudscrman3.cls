@@ -174,11 +174,53 @@
 \TUDProcessOptions\relax
 \LoadClass{\TUDClassName@Parent}
 %%% From File: tudscr-manual.dtx
-\PassOptionsToPackage{log-declarations=false}{xparse}
-\RequirePackage{xparse}[2013/12/31]
 \RequirePackage{xspace}[2009/10/20]
 \xspaceaddexceptions{"=}
-\newif\if@sorted@list
+\newcommand*\vTUDScript{}
+\AtBeginDocument{%
+  \def\@tempb#1 #2 #3\relax#4\relax{\def\vTUDScript{#2}}%
+  \edef\@tempa{\TUDVersion}%
+  \expandafter\@tempb\@tempa\relax? ? \relax\relax%
+}
+\newcommand*\vKOMAScript{v3.17\xspace}
+\PassOptionsToPackage{log-declarations=false}{xparse}
+\RequirePackage{xparse}[2013/12/31]
+\newtoks\tud@toks@
+\newcommand*\eaddto@hook[2]{%
+  \expandafter\addto@hook\expandafter#1\expandafter{#2}%
+}
+\newcommand*\tud@replace[3]{%
+  \begingroup%
+    % Ergebnis: \def\@tempa##1@##2\@nnil{\@tempb{##1}{##2}}%
+    \toks@{\def\@tempa##1}%
+    \eaddto@hook\toks@{\detokenize{#2}}%
+    \addto@hook\toks@{##2\@nnil{\@tempb{##1}{##2}}}%
+    \the\toks@%
+    \def\@tempb##1##2{%
+      \if\relax\detokenize{##2}\relax%
+        \appto#1{##1}%
+        \let\@tempc\relax%
+      \else%
+        \appto#1{##1#3}%
+        \def\@tempc{\@tempa##2\@nnil}%
+      \fi%
+      \@tempc%
+    }%
+    % Ergebnis: \@tempa #1@\@nnil%
+    \toks@{\@tempa}%
+    \edef\@tempc{\expandafter\detokenize\expandafter{#1}}%
+    \eaddto@hook\toks@{\@tempc}%
+    \eaddto@hook\toks@{\detokenize{#2}\@nnil}%
+    \def#1{}%
+    \the\toks@%
+    \edef\tud@reserved{%
+      \noexpand\endgroup%
+      \def\noexpand#1{#1}%
+    }%
+  \tud@reserved%
+}
+\newcommand*\@templist{}
+\let\@templist\relax%
 \newcommand*\sortlist[1]{%
   \ifdefvoid{#1}{%
     \ClassWarning{tudscrman}{%
@@ -194,6 +236,7 @@
     \let#1\@tempc%
   }%
 }
+\newif\if@sorted@list
 \newcommand*\@sortlist[1]{%
   \ifx\@templist\relax%
     \def\@templist{#1}%
@@ -302,8 +345,6 @@
   }%
 }
 \@onlypreamble\tracingbundle
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \PassOptionsToPackage{hyperindex=false,colorlinks,linkcolor=blue}{hyperref}
 \PassOptionsToPackage{open,openlevel=0}{bookmark}
 \AfterPackage*{hyperref}{%
@@ -349,7 +390,7 @@
     defined. At least the package `url' is loaded.
   }%
   \RequirePackage{url}[2013/09/16]%
-  \robustify\url%
+%  \robustify\url%
   \providecommand*\hypersetup[1]{}%
   \providecommand*\hyperdef[3]{\label{#1.#2}#3}%
   \providerobustcmd*\hyperref{\@ifnextchar[{\tud@hyperref}{\tud@@hyperref}}
@@ -373,6 +414,18 @@
   \providecommand*\tudhyperref[2]{#2}%
   \providecommand*\autorefname[1][]{??\xspace}%
 }
+\RequirePackage{varioref}[2011/10/02]
+\renewcommand*\fullref[1]{\hyperref[#1]{\autoref*{#1} \vpageref{#1}}}
+\newcommand*\hrfn[2]{%
+  \href{#1}{\trim@spaces{#2}}%
+  \footnote{%
+    \scalebox{0.95}{%
+      \def\_{_}%
+      \edef\@tempa{#1}%
+      \strut\expandafter\url\expandafter{\@tempa}%
+    }%
+  }%
+}
 \RequirePackage{babel}[2014/03/24]
 \AfterPackage*{hyperref}{%
   \patchcmd{\pdfstringdef}{\csname HyPsd@babel@}{%
@@ -381,178 +434,6 @@
 }
 \AfterPackage*{hyperref}{\RequirePackage[babel]{microtype}[2013/05/23]}
 \TUD@UnwindPackage{hyperref}{\RequirePackage[babel]{microtype}[2013/05/23]}
-\PassOptionsToPackage{xindy,splitindex}{imakeidx}
-\RequirePackage{imakeidx}[2013/07/11]
-\indexsetup{%
-  level=\addsec,%
-  noclearpage,firstpagestyle=headings,headers={\indexname}{\indexname},%
-  othercode={\renewcommand*\subitem{\@idxitem\hspace*{15\p@}}}%
-}
-\@ifpackagelater{imakeidx}{2013/07/12}{%
-  \ClassWarning%
-  {tudscrman}{%
-    Package `imakeidx' was updated so the patch for the\MessageBreak%
-    environment `theindex' is maybe outdated.%
-  }%
-}{%
-  \ifimki@original\else%
-    \renewenvironment{theindex}{%
-      \imki@maybeaddtotoc%
-      \imki@indexheaders%
-      \thispagestyle{\imki@firstpagestyle}%
-      \ifnum\imki@columns>\@ne%
-        \columnsep \imki@columnsep%
-        \ifx\imki@idxprologue\relax%
-          \begin{multicols}{\imki@columns}[\imki@indexlevel{\indexname}]%
-        \else%
-          \begin{multicols}{\imki@columns}[%
-            \imki@indexlevel{\indexname}%
-            \imki@idxprologue%
-          ]%
-        \fi%
-      \else%
-        \imki@indexlevel{\indexname}\imki@idxprologue%
-      \fi%
-      \global\let\imki@idxprologue\relax%
-      \parindent\z@%
-      \parskip\z@ \@plus .3\p@\relax%
-      \columnseprule \ifKV@imki@columnseprule.4\p@\else\z@\fi%
-      \raggedright%
-      \let\item\@idxitem%
-      \imki@othercode%
-    }{\ifnum\imki@columns>\@ne\end{multicols}\fi}%
-  \fi%
-}
-% TODO §§§ Kombination aus beiden möglich?
-\newrobustcmd\cleversee{\@cleversee{\seename}}
-\newrobustcmd\cleverseealso{\@cleversee{\alsoname}}
-\newcommand*\@cleversee{}
-\def\@cleversee#1#2#3\relax{%
-  \if\relax\detokenize{#3}\relax%
-    \emph{#1}\space#2%
-  \else%
-    #3, \emph{\alsoname}\space#2%
-  \fi%
-}
-\NewDocumentCommand\seeref{sm}{%
-  \emph{\IfBooleanTF{#1}{\alsoname}{\seename}}\space#2%
-}
-\newcommand*\seeidx[2]{\pageref{idx:#1}}
-\newcommand*\tud@write@i{}
-\newwrite\tud@write@i
-\openout\tud@write@i=\jobname-temp.xdy
-\write\tud@write@i{%
-(require "texindy.xdy")^^J%
-(define-location-class^^J%
-\space\space "arabic-page-numbers" ("arabic-numbers") :min-range-length 1^^J%
-)^^J%
-(markup-range :sep "--")^^J%
-(merge-rule "\@backslashchar[(.*)\@backslashchar]" "" :eregexp)^^J%
-(define-attributes (("declare" "!" "important" "?" "default")))^^J%
-(markup-locref^^J%
-\space\space :attr "declare"^^J%
-\space\space :open "\string\textbf{\string\hyperpage{"^^J%
-\space\space :close "}}"^^J%
-)^^J%
-(markup-locref^^J%
-\space\space :attr "!"^^J%
-\space\space :open "\string\textbf{\string\hyperpage{"^^J%
-\space\space :close "}}"^^J%
-)^^J%
-(markup-locref^^J%
-\space\space :attr "important"^^J%
-\space\space :open "\string\textsl{\string\hyperpage{"^^J%
-\space\space :close "}}"^^J%
-)^^J%
-(markup-locref^^J%
-\space\space :attr "?"^^J%
-\space\space :open "\string\textsl{\string\hyperpage{"^^J%
-\space\space :close "}}"^^J%
-)^^J%
-(markup-locref^^J%
-\space\space :attr "default"^^J%
-\space\space :open "\string\hyperpage{"^^J%
-\space\space :close "}"^^J%
-)^^J%
-(markup-locclass-list^^J%
-\space\space :open "\string\,\string\dotfill\string\,"^^J%
-\space\space :close "\string\relax"^^J%
-)^^J%
-(markup-crossref-list^^J%
-\space\space :class "see"^^J%
-\space\space :open "\string\cleversee{" :sep "; " :close "}"^^J%
-)^^J%
-(markup-crossref-layer-list^^J%
-\space\space :class "see" ^^J%
-\space\space :sep "\string\,\string\textbar\string\,"^^J%
-)^^J%
-(markup-crossref-list^^J%
-\space\space :class "seealso"^^J%
-\space\space :open "\string\cleverseealso{" :sep "; " :close "}"^^J%
-)^^J%
-(markup-crossref-layer-list^^J%
-\space\space :class "seealso" ^^J%
-\space\space :sep "\string\,\string\textbar\string\,"^^J%
-)^^J%
-(define-crossref-class "seeidx" :unverified)^^J%
-(markup-crossref-list^^J%
-\space\space :class "seeidx"^^J%
-\space\space :open "\string\seeidx{" :sep "; " :close "}{}"^^J%
-)^^J%
-(define-location-class-order^^J%
-\space (^^J%
-\space\space "see" "seealso" "seeidx"^^J%
-\space\space "roman-page-numbers" "arabic-page-numbers" "alpha-page-numbers"^^J%
-\space\space "Roman-page-numbers" "Alpha-page-numbers"^^J%
-\space )^^J%
-)^^J%
-(markup-indexentry :open "~n \string\subsubsubitem " :depth 3)^^J%
-(markup-indexentry :open "~n \string\subsubsubsubitem " :depth 4)^^J%
-}
-\closeout\tud@write@i
-\NewDocumentCommand\makexindyindex{somo}{%
-  \let\@tempb\@empty%
-  \IfBooleanT{#1}{%
-    \def\@tempc{\jobname-#4-declare.idx}%
-    \makeindex[name={#4-declare}]%
-    \IfFileExists{\@tempc}{%
-      \edef\@tempb{-o \jobname-#4.ind \@tempc}%
-    }{\ClassWarning{tudscrman}{File \@tempc\space not found}}%
-  }%
-  \protected@edef\@tempa{%
-    title={#3},%
-    columnsep=\noexpand\the\columnsep,%
-    \IfValueTF{#4}{%
-      name={#4},%
-      options={-M \jobname-temp.xdy -L german-din -t \jobname-#4.xlg \@tempb},%
-    }{%
-      options={-M \jobname-temp.xdy -L german-din -t \jobname.xlg},%
-    }%
-    \IfValueT{#2}{#2}%
-  }%
-  \expandafter\makeindex\expandafter[\@tempa]%
-}
-\makexindyindex{Allgemeiner Index}
-\makexindyindex*{Klassen, Pakete und Dateien}[files]
-\makexindyindex*{Klassen- und Paketoptionen}[options]
-\makexindyindex*{Befehle und Umgebungen mit dazugeh\"origen Parametern}[macros]
-\makexindyindex*{Sprachabh\"angige Bezeichner}[terms]
-\makexindyindex*{Seitenstile, Schriftelemente und Farben}[elements]
-\makexindyindex*{L\"angen und Z\"ahler}[misc]
-\makexindyindex[columns=1]{\"Anderungsliste}[changelog]
-\undef\makexindyindex
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\RequirePackage{enumitem}[2011/09/28]
-\setlist{noitemsep}
-\PassOptionsToPackage{quiet}{marginnote}
-\RequirePackage{marginnote}[2012/03/29]
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\newrobustcmd*\suffix[1]{\begingroup~\footnotesize(#1)\endgroup}
-\newrobustcmd*\bsc{\@backslashchar}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newif\if@declare
 \newif\if@openindex
 % 0: normales Verhalten (label und Ausgabe)
@@ -742,7 +623,7 @@
     \global\let\list@additional\relax%
     \global\@preset@listfalse%
     \global\@additional@listfalse%
-    \@ChangedAt@ProcessList{#1}{%
+    \@printchangedatlist{#1}{%
       \dimexpr.5\ht\strutbox+.5\dp\strutbox-.5\ht0-.5\dp0\relax%
     }%
     \IfValueT{#2}{#2}%
@@ -756,16 +637,11 @@
   \printdeclarationlist*%
   \@obsoletefalse%
 }
-
-
-
-
-
-\newif\if@changedat
-
-
-
-
+\NewDocumentCommand\printchangedatlist{sO{\z@}}{%
+  \@printchangedatlist{#1}{#2}%
+}
+\newrobustcmd*\bsc{\@backslashchar}
+\newrobustcmd*\suffix[1]{\begingroup~\footnotesize(#1)\endgroup}
 \newcommand*\NewExpandableDocumentCommand[3]{%
   \NewDocumentCommand#1{#2}{#3}%
   \DeclareExpandableDocumentCommand#1{#2}{#3}%
@@ -966,7 +842,7 @@
 }
 \newrobustcmd*\PParameter[1]{\mbox{\texttt{\{#1\}}}}
 \newrobustcmd*\POParameter[1]{\mbox{\texttt{[#1]}}}
-\newcommand*\@getPValue{%
+\newcommand*\@onlyPValue{%
   \let\PValue\@firstofone%
   \let\PValueName\@firstofone%
   \let\PName\@gobble%
@@ -1020,19 +896,6 @@
 \AfterPackage*{hyperref}{%
   \expandafter\pdfstringdefDisableCommands\expandafter{\@suppressmarkup}%
 }
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\newcommand*\@templabel{}
-\newcommand*\@tempentry{}
-\newcommand*\@tempformat{}
-\newcommand*\@tempkey{}
-\newcommand*\@tempbundle{}
-\newcommand*\@templist{}
-\let\@templist\relax%
-\newtoks\tud@toks@
-\newcommand*\eaddto@hook[2]{%
-  \expandafter\addto@hook\expandafter#1\expandafter{#2}%
-}
 \NewDocumentCommand\@getsublabel{smm}{%
   \begingroup%
     \def\@tempa##1##2##3{%
@@ -1064,11 +927,101 @@
     }%
   \tud@reserved%
 }
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\newcommand*\@suppressoutput{%
-  \let\@ProcessMarkup\@GobbleMarkup%
-  \renewcommand*\index[2][]{}%
+\newcommand*\@templabel{}
+  \newcommand*\format@label{%
+  \let\IeC\@firstofone%
+  \def~{-}%
+  \def\"##1{##1e}%
+  \def\ss{ss}%
+}
+% Verwendung dokumentieren!
+\NewDocumentCommand\@Label{m}{\@@Label#1}
+\NewDocumentCommand\@@Label{mmm}{%
+  \begingroup%
+    \@suppressmarkup%
+    \format@label%
+    \IfValueTF{#3}{%
+      \IfValueTF{#1}{%
+        \edef\@tempa{#1:#2:#3}%
+      }{%
+        \edef\@tempa{\@bundle:#2:#3}%
+      }%
+    }{%
+      \IfValueTF{#2}{%
+        \@getsublabel\@tempb{#2}%
+        \IfValueTF{#1}{%
+          \edef\@tempa{#1:\@tempb:#2}%
+        }{%
+          \edef\@tempa{\@bundle:\@tempb:#2}%
+        }%
+      }{%
+        \edef\@tempa{#1}%
+      }%
+    }%
+    \edef\@tempc{%
+      \noexpand\endgroup%
+      \def\noexpand\ProcessedArgument{\@tempa}%
+    }%
+  \@tempc%
+  \tud@replace\ProcessedArgument{@}{<at>}%
+  \tud@lowerstring{\ProcessedArgument}{\ProcessedArgument}%
+}
+\NewDocumentCommand\@@@Label{mmd==}{%
+  \def#1{#2}%
+  \IfValueT{#3}{%
+    \begingroup%
+      \@onlyPValue%
+      \format@label%
+      \ifstr{#3}{}{%
+        \def\tud@reserved{\endgroup}%
+      }{%
+        \protected@edef\tud@reserved{%
+          \noexpand\endgroup%
+          \lowercase{\appto\noexpand#1{=#3}}%
+        }%
+      }%
+    \tud@reserved%
+  }%
+}
+% Verwendung dokumentieren!
+\NewDocumentCommand\@getlabel{sm>{\@Label}>{\SplitArgument{2}{:}}md==}{%
+  \@@@Label#2{#3}=#4=%
+  \IfBooleanF{#1}{%
+    \tud@iflabelexists{#2}{}{%
+      \@@@Label\tud@reserved{#3}%
+      \tud@iflabelexists{\tud@reserved}{%
+        \let#2\tud@reserved%
+      }{%
+        \tud@ifbundle{\@@getlabel#2{#3}=#4=}{}%
+      }%
+    }%
+  }%
+}
+\NewDocumentCommand\@@getlabel{m>{\SplitArgument{2}{:}}mr==}{%
+  \@@@getlabel{#1}#2=#3=%
+}
+\NewDocumentCommand\@@@getlabel{mmmmr==}{%
+  \edef\tud@reserved{\expandafter\detokenize\expandafter{\@bundledefault}}%
+  \ifstr{\tud@reserved}{#2}{}{%
+    \toks@{\@getlabel#1}%
+    \eaddto@hook\toks@{\expandafter{\@bundledefault:#3:#4}}%
+    \IfValueT{#5}{\addto@hook\toks@{=#5=}}%
+    \the\toks@%
+  }%
+}
+% Verwendung dokumentieren!
+\NewDocumentCommand\tud@iflabelexists{>{\@Label}>{\SplitArgument{2}{:}}md==}{%
+  \@@@Label\tud@reserved{#1}=#2=%
+  \ifcsdef{r@\tud@reserved}{%
+    \expandafter\@firstoftwo%
+  }{%
+    \@@@Label\tud@reserved{#1}%
+    \ifcsdef{r@\tud@reserved}{%
+      \expandafter\@firstoftwo%
+    }{%
+     \expandafter\@secondoftwo%
+    }%
+  }%
 }
 % {#1}: Markup für Ausgabe
 % =#2=: optionaler Wert für Option und Key
@@ -1126,6 +1079,10 @@
       }%
     }%
   }%
+}
+\newcommand*\@suppressoutput{%
+  \let\@ProcessMarkup\@GobbleMarkup%
+  \renewcommand*\index[2][]{}% §§§ notwendig?
 }
 % {#1}: Label
 % {#2}: Hauptargument
@@ -1195,197 +1152,214 @@
   \endgroup%
   \@ClearMarkupFormat%
 }
-% {#1}: Markup für Index
-% =#2=: optionaler Wert für Option und Key für subentry
-% (#3): optionale Subdeclaration
-% {#4}: Stern?
-% |#5|: optionale Indexformatierung
-% [#6]: optionaler Suffix in der Index-Ausgabe
-\NewDocumentCommand\@ProcessIndex{md==d()md||o}{%
-  \ifboolexpr{%
-    bool {@tud@index} or bool {@obsolete}%
-  }{}{%
-    \IfBooleanTF{#4}{%
-      \IfValueT{#5}{%
-        \ClassWarning{tudscrman}{%
-          You've used the starred version. No index entry\MessageBreak%
-          for #1 is created. The\MessageBreak%
-          optional argument |#5| is ignored%
-        }%
-      }%
-    }{%
-      \@@ProcessIndex{#1}=#2=(#3)|#5|[#6]%
-    }%
-  }%
+\newcommand*\@MarkupFormat{}
+\newcommand*\@MarkupSuffix{}
+\newcommand*\@MarkupDeclare{}
+\NewDocumentCommand\@MarkupOutput{>{\SplitArgument{1}{!}}md==o}{%
+  \@@MarkupOutput#1=#2=[#3]%
 }
-% {#1}: Markup für Index
-% =#2=: optionaler Wert für Option und Key für subentry
-% (#3): optionale Subdeclaration
-% |#4|: optionale Indexformatierung
-% [#5]: optionaler Suffix in der Index-Ausgabe
-\NewDocumentCommand\@@ProcessIndex{mr==r()r||r[]}{%
-  \@getindex\@tempentry\@tempformat\@tempkey{#1}=#2=(#3)[#5]%
-  \@getsublabel*\@templabel{#1}%
+\NewDocumentCommand\@@MarkupOutput{mmd==o}{%
   \if@declare%
-    \if@openindex%
-      \IfValueT{#4}{%
-        \ClassWarning{tudscrman}{%
-          It is not possible to use any indexing format\MessageBreak%
-          like |#4| within the arguments of the\MessageBreak%
-          environments `Declaration' or `Declaration*'%
-        }%
-      }%
-      \index[\@templabel-declare]{\@tempkey\@tempentry @\@tempformat|(declare}%
-    \else%
-      \index[\@templabel-declare]{\@tempkey\@tempentry|declare)}%
-    \fi%
+    \tud@toks@{\@MarkupDeclare}%
   \else%
-    \IfValueT{#2}{%
-      \begingroup%
-        \@getPValue%
-        \ifstr{#2}{}{%
-          \def\tud@reserved{\endgroup}%
-        }{%
-          \def\@tempa{%
-            \@getindex*\@tempentry\@tempformat\@tempkey{#1}=#2=(#3)[#5]%
-          }%
-          \protected@edef\tud@reserved{%
-            \noexpand\endgroup%
-            \expandonce\@tempa%
-            \def\noexpand\@tempentry{\@tempentry!\@tempentry=#2}%
-          }%
-        }%
-      \tud@reserved%
+    \tud@toks@{\@MarkupInline}%
+  \fi%
+  \IfValueTF{#2}{%
+    \def\@tempa{#2}%
+  }{%
+    \def\@tempa{#1}%
+  }%
+  \IfValueT{#3}{\appto\@tempa{=#3}}%
+  \IfValueT{#4}{\appto\@tempa{#4}}%
+  \eaddto@hook\tud@toks@{\expandafter{\@tempa}}%
+  \the\tud@toks@%
+}
+\newcommand*\@MarkupInline[1]{\mbox{\@MarkupFormat#1}}
+\newcommand*\@MarkupDeclare@Default[1]{%
+  \begingroup\@MarkupFormat#1\endgroup\@MarkupSuffix%
+}
+\NewDocumentCommand\@SetMarkupFormat{mod()}{%
+  \def\@MarkupFormat{\ifdin{}{#1}}%
+  \IfValueT{#2}{\def\@MarkupSuffix{\suffix{#2}}}%
+  \IfValueT{#3}{\renewcommand*\@MarkupDeclare[1]{#3\@MarkupSuffix}}%
+}
+\newcommand*\@ClearMarkupFormat{%
+  \let\@MarkupFormat\relax%
+  \let\@MarkupDeclare\@MarkupDeclare@Default%
+  \let\@MarkupSuffix\relax%
+}
+\@ClearMarkupFormat
+\newcommand*\@CheckMarkupFormat{%
+  \ifx\@MarkupFormat\relax%
+    \ClassError{tudscrman}{\string\@SetMarkupFormat\space unused}{%
+      It seems you have forgotten to use \string\@SetMarkupFormat.%
     }%
-    \IfValueT{#4}{%
-      \ifstr{#4}{declare}{%
-        \appto\@templabel{-declare}%
-        \appto\@tempformat{|declare}%
-      }{%
-        \appto\@tempformat{|#4}%
-      }%
-    }%
-    \index[\@templabel]{\@tempkey\@tempentry @\@tempformat}%
   \fi%
 }
-% {#1}: Markup für Änderungsliste
-% =#2=: optionaler Wert für Option und Key für Änderungsliste
-% (#3): optionale Subdeclaration
-% [#4]: optionaler Suffix in der Änderungsliste
-\NewDocumentCommand\@ProcessChangedAt{md==d()o}{%
-  \@getindex*\@tempentry\@tempformat\@tempkey{#1}=#2=(#3)[#4]%
-    !Parameter angepasst!%
-  \IfValueT{#2}{%
-    \begingroup%
-      \@getPValue%
-      \ifstr{#2}{}{%
-        \def\tud@reserved{\endgroup}%
-      }{%
-        \protected@edef\tud@reserved{%
-          \noexpand\endgroup%
-          \def\noexpand\@tempentry{\@tempentry=#2}%
-        }%
-      }%
-    \tud@reserved%
+\PassOptionsToPackage{xindy,splitindex}{imakeidx}
+\RequirePackage{imakeidx}[2013/07/11]
+\indexsetup{%
+  level=\addsec,%
+  noclearpage,firstpagestyle=headings,headers={\indexname}{\indexname},%
+  othercode={\renewcommand*\subitem{\@idxitem\hspace*{15\p@}}}%
+}
+\@ifpackagelater{imakeidx}{2013/07/12}{%
+  \ClassWarning%
+  {tudscrman}{%
+    Package `imakeidx' was updated so the patch for the\MessageBreak%
+    environment `theindex' is maybe outdated.%
   }%
+}{%
+  \ifimki@original\else%
+    \renewenvironment{theindex}{%
+      \imki@maybeaddtotoc%
+      \imki@indexheaders%
+      \thispagestyle{\imki@firstpagestyle}%
+      \ifnum\imki@columns>\@ne%
+        \columnsep \imki@columnsep%
+        \ifx\imki@idxprologue\relax%
+          \begin{multicols}{\imki@columns}[\imki@indexlevel{\indexname}]%
+        \else%
+          \begin{multicols}{\imki@columns}[%
+            \imki@indexlevel{\indexname}%
+            \imki@idxprologue%
+          ]%
+        \fi%
+      \else%
+        \imki@indexlevel{\indexname}\imki@idxprologue%
+      \fi%
+      \global\let\imki@idxprologue\relax%
+      \parindent\z@%
+      \parskip\z@ \@plus .3\p@\relax%
+      \columnseprule \ifKV@imki@columnseprule.4\p@\else\z@\fi%
+      \raggedright%
+      \let\item\@idxitem%
+      \imki@othercode%
+    }{\ifnum\imki@columns>\@ne\end{multicols}\fi}%
+  \fi%
 }
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\newcommand*\tud@label{%
-  \let\IeC\@firstofone%
-  \def~{-}%
-  \def\"##1{##1e}%
-  \def\ss{ss}%
+% TODO §§§ Kombination aus beiden möglich?
+\newrobustcmd\cleversee{\@cleversee{\seename}}
+\newrobustcmd\cleverseealso{\@cleversee{\alsoname}}
+\newcommand*\@cleversee{}
+\def\@cleversee#1#2#3\relax{%
+  \if\relax\detokenize{#3}\relax%
+    \emph{#1}\space#2%
+  \else%
+    #3, \emph{\alsoname}\space#2%
+  \fi%
 }
-% Verwendung dokumentieren!
-\NewDocumentCommand\@Label{m}{\@@Label#1}
-\NewDocumentCommand\@@Label{mmm}{%
-  \begingroup%
-    \@suppressmarkup%
-    \tud@label%
-    \IfValueTF{#3}{%
-      \IfValueTF{#1}{%
-        \edef\@tempa{#1:#2:#3}%
-      }{%
-        \edef\@tempa{\@bundle:#2:#3}%
-      }%
+\NewDocumentCommand\seeref{sm}{%
+  \emph{\IfBooleanTF{#1}{\alsoname}{\seename}}\space#2%
+}
+\newcommand*\seeidx[2]{\pageref{idx:#1}}
+\newcommand*\tud@write@i{}
+\newwrite\tud@write@i
+\openout\tud@write@i=\jobname-temp.xdy
+\write\tud@write@i{%
+(require "texindy.xdy")^^J%
+(define-location-class^^J%
+\space\space "arabic-page-numbers" ("arabic-numbers") :min-range-length 1^^J%
+)^^J%
+(markup-range :sep "--")^^J%
+(merge-rule "\@backslashchar[(.*)\@backslashchar]" "" :eregexp)^^J%
+(define-attributes (("declare" "!" "important" "?" "default")))^^J%
+(markup-locref^^J%
+\space\space :attr "declare"^^J%
+\space\space :open "\string\textbf{\string\hyperpage{"^^J%
+\space\space :close "}}"^^J%
+)^^J%
+(markup-locref^^J%
+\space\space :attr "!"^^J%
+\space\space :open "\string\textbf{\string\hyperpage{"^^J%
+\space\space :close "}}"^^J%
+)^^J%
+(markup-locref^^J%
+\space\space :attr "important"^^J%
+\space\space :open "\string\textsl{\string\hyperpage{"^^J%
+\space\space :close "}}"^^J%
+)^^J%
+(markup-locref^^J%
+\space\space :attr "?"^^J%
+\space\space :open "\string\textsl{\string\hyperpage{"^^J%
+\space\space :close "}}"^^J%
+)^^J%
+(markup-locref^^J%
+\space\space :attr "default"^^J%
+\space\space :open "\string\hyperpage{"^^J%
+\space\space :close "}"^^J%
+)^^J%
+(markup-locclass-list^^J%
+\space\space :open "\string\,\string\dotfill\string\,"^^J%
+\space\space :close "\string\relax"^^J%
+)^^J%
+(markup-crossref-list^^J%
+\space\space :class "see"^^J%
+\space\space :open "\string\cleversee{" :sep "; " :close "}"^^J%
+)^^J%
+(markup-crossref-layer-list^^J%
+\space\space :class "see" ^^J%
+\space\space :sep "\string\,\string\textbar\string\,"^^J%
+)^^J%
+(markup-crossref-list^^J%
+\space\space :class "seealso"^^J%
+\space\space :open "\string\cleverseealso{" :sep "; " :close "}"^^J%
+)^^J%
+(markup-crossref-layer-list^^J%
+\space\space :class "seealso" ^^J%
+\space\space :sep "\string\,\string\textbar\string\,"^^J%
+)^^J%
+(define-crossref-class "seeidx" :unverified)^^J%
+(markup-crossref-list^^J%
+\space\space :class "seeidx"^^J%
+\space\space :open "\string\seeidx{" :sep "; " :close "}{}"^^J%
+)^^J%
+(define-location-class-order^^J%
+\space (^^J%
+\space\space "see" "seealso" "seeidx"^^J%
+\space\space "roman-page-numbers" "arabic-page-numbers" "alpha-page-numbers"^^J%
+\space\space "Roman-page-numbers" "Alpha-page-numbers"^^J%
+\space )^^J%
+)^^J%
+(markup-indexentry :open "~n \string\subsubsubitem " :depth 3)^^J%
+(markup-indexentry :open "~n \string\subsubsubsubitem " :depth 4)^^J%
+}
+\closeout\tud@write@i
+\NewDocumentCommand\makexindyindex{somo}{%
+  \let\@tempb\@empty%
+  \IfBooleanT{#1}{%
+    \def\@tempc{\jobname-#4-declare.idx}%
+    \makeindex[name={#4-declare}]%
+    \IfFileExists{\@tempc}{%
+      \edef\@tempb{-o \jobname-#4.ind \@tempc}%
+    }{\ClassWarning{tudscrman}{File \@tempc\space not found}}%
+  }%
+  \protected@edef\@tempa{%
+    title={#3},%
+    columnsep=\noexpand\the\columnsep,%
+    \IfValueTF{#4}{%
+      name={#4},%
+      options={-M \jobname-temp.xdy -L german-din -t \jobname-#4.xlg \@tempb},%
     }{%
-      \IfValueTF{#2}{%
-        \@getsublabel\@tempb{#2}%
-        \IfValueTF{#1}{%
-          \edef\@tempa{#1:\@tempb:#2}%
-        }{%
-          \edef\@tempa{\@bundle:\@tempb:#2}%
-        }%
-      }{%
-        \edef\@tempa{#1}%
-      }%
+      options={-M \jobname-temp.xdy -L german-din -t \jobname.xlg},%
     }%
-    \edef\@tempc{%
-      \noexpand\endgroup%
-      \def\noexpand\ProcessedArgument{\@tempa}%
-    }%
-  \@tempc%
-  \tud@replace\ProcessedArgument{@}{<at>}%
-  \tud@lowerstring{\ProcessedArgument}{\ProcessedArgument}%
-}
-\NewDocumentCommand\@@@Label{mmd==}{%
-  \def#1{#2}%
-  \IfValueT{#3}{%
-    \begingroup%
-      \@getPValue%
-      \tud@label%
-      \ifstr{#3}{}{%
-        \def\tud@reserved{\endgroup}%
-      }{%
-        \protected@edef\tud@reserved{%
-          \noexpand\endgroup%
-          \lowercase{\appto\noexpand#1{=#3}}%
-        }%
-      }%
-    \tud@reserved%
+    \IfValueT{#2}{#2}%
   }%
+  \expandafter\makeindex\expandafter[\@tempa]%
 }
-% Verwendung dokumentieren!
-\NewDocumentCommand\tud@iflabelexists{>{\@Label}>{\SplitArgument{2}{:}}md==}{%
-  \@@@Label\tud@reserved{#1}=#2=%
-  \ifcsdef{r@\tud@reserved}{%
-    \expandafter\@firstoftwo%
-  }{%
-    \@@@Label\tud@reserved{#1}%
-    \ifcsdef{r@\tud@reserved}{%
-      \expandafter\@firstoftwo%
-    }{%
-     \expandafter\@secondoftwo%
-    }%
-  }%
-}
-% Verwendung dokumentieren!
-\NewDocumentCommand\@getlabel{sm>{\@Label}>{\SplitArgument{2}{:}}md==}{%
-  \@@@Label#2{#3}=#4=%
-  \IfBooleanF{#1}{%
-    \tud@iflabelexists{#2}{}{%
-      \@@@Label\tud@reserved{#3}%
-      \tud@iflabelexists{\tud@reserved}{%
-        \let#2\tud@reserved%
-      }{%
-        \tud@ifbundle{\@@getlabel#2{#3}=#4=}{}%
-      }%
-    }%
-  }%
-}
-\NewDocumentCommand\@@getlabel{m>{\SplitArgument{2}{:}}mr==}{%
-  \@@@getlabel{#1}#2=#3=%
-}
-\NewDocumentCommand\@@@getlabel{mmmmr==}{%
-  \edef\tud@reserved{\expandafter\detokenize\expandafter{\@bundledefault}}%
-  \ifstr{\tud@reserved}{#2}{}{%
-    \toks@{\@getlabel#1}%
-    \eaddto@hook\toks@{\expandafter{\@bundledefault:#3:#4}}%
-    \IfValueT{#5}{\addto@hook\toks@{=#5=}}%
-    \the\toks@%
-  }%
-}
+\makexindyindex{Allgemeiner Index}
+\makexindyindex*{Klassen, Pakete und Dateien}[files]
+\makexindyindex*{Klassen- und Paketoptionen}[options]
+\makexindyindex*{Befehle und Umgebungen mit dazugeh\"origen Parametern}[macros]
+\makexindyindex*{Sprachabh\"angige Bezeichner}[terms]
+\makexindyindex*{Seitenstile, Schriftelemente und Farben}[elements]
+\makexindyindex*{L\"angen und Z\"ahler}[misc]
+\makexindyindex[columns=1]{\"Anderungsliste}[changelog]
+\undef\makexindyindex
+\newcommand*\@tempentry{}
+\newcommand*\@tempformat{}
+\newcommand*\@tempkey{}
+\newcommand*\@tempbundle{}
 \NewDocumentCommand\@getindex{smmmmd==r()r[]d!!}{%
   \let\@tempbundle\@bundledefault%
   \IfValueTF{#7}{%
@@ -1436,86 +1410,166 @@
     \appto#3{\suffix{\@tempbundle}}%
   \fi%
 }
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\newcommand*\tud@replace[3]{%
-  \begingroup%
-    % Ergebnis: \def\@tempa##1@##2\@nnil{\@tempb{##1}{##2}}%
-    \toks@{\def\@tempa##1}%
-    \eaddto@hook\toks@{\detokenize{#2}}%
-    \addto@hook\toks@{##2\@nnil{\@tempb{##1}{##2}}}%
-    \the\toks@%
-    \def\@tempb##1##2{%
-      \if\relax\detokenize{##2}\relax%
-        \appto#1{##1}%
-        \let\@tempc\relax%
-      \else%
-        \appto#1{##1#3}%
-        \def\@tempc{\@tempa##2\@nnil}%
-      \fi%
-      \@tempc%
+% {#1}: Markup für Index
+% =#2=: optionaler Wert für Option und Key für subentry
+% (#3): optionale Subdeclaration
+% {#4}: Stern?
+% |#5|: optionale Indexformatierung
+% [#6]: optionaler Suffix in der Index-Ausgabe
+\NewDocumentCommand\@ProcessIndex{md==d()md||o}{%
+  \ifboolexpr{%
+    bool {@tud@index} or bool {@obsolete}%
+  }{}{%
+    \IfBooleanTF{#4}{%
+      \IfValueT{#5}{%
+        \ClassWarning{tudscrman}{%
+          You've used the starred version. No index entry\MessageBreak%
+          for #1 is created. The\MessageBreak%
+          optional argument |#5| is ignored%
+        }%
+      }%
+    }{%
+      \@@ProcessIndex{#1}=#2=(#3)|#5|[#6]%
     }%
-    % Ergebnis: \@tempa #1@\@nnil%
-    \toks@{\@tempa}%
-    \edef\@tempc{\expandafter\detokenize\expandafter{#1}}%
-    \eaddto@hook\toks@{\@tempc}%
-    \eaddto@hook\toks@{\detokenize{#2}\@nnil}%
-    \def#1{}%
-    \the\toks@%
-    \edef\tud@reserved{%
+  }%
+}
+% {#1}: Markup für Index
+% =#2=: optionaler Wert für Option und Key für subentry
+% (#3): optionale Subdeclaration
+% |#4|: optionale Indexformatierung
+% [#5]: optionaler Suffix in der Index-Ausgabe
+\NewDocumentCommand\@@ProcessIndex{mr==r()r||r[]}{%
+  \@getindex\@tempentry\@tempformat\@tempkey{#1}=#2=(#3)[#5]%
+  \@getsublabel*\@templabel{#1}%
+  \if@declare%
+    \if@openindex%
+      \IfValueT{#4}{%
+        \ClassWarning{tudscrman}{%
+          It is not possible to use any indexing format\MessageBreak%
+          like |#4| within the arguments of the\MessageBreak%
+          environments `Declaration' or `Declaration*'%
+        }%
+      }%
+      \index[\@templabel-declare]{\@tempkey\@tempentry @\@tempformat|(declare}%
+    \else%
+      \index[\@templabel-declare]{\@tempkey\@tempentry|declare)}%
+    \fi%
+  \else%
+    \IfValueT{#2}{%
+      \begingroup%
+        \@onlyPValue%
+        \ifstr{#2}{}{%
+          \def\tud@reserved{\endgroup}%
+        }{%
+          \def\@tempa{%
+            \@getindex*\@tempentry\@tempformat\@tempkey{#1}=#2=(#3)[#5]%
+          }%
+          \protected@edef\tud@reserved{%
+            \noexpand\endgroup%
+            \expandonce\@tempa%
+            \def\noexpand\@tempentry{\@tempentry!\@tempentry=#2}%
+          }%
+        }%
+      \tud@reserved%
+    }%
+    \IfValueT{#4}{%
+      \ifstr{#4}{declare}{%
+        \appto\@templabel{-declare}%
+        \appto\@tempformat{|declare}%
+      }{%
+        \appto\@tempformat{|#4}%
+      }%
+    }%
+    \index[\@templabel]{\@tempkey\@tempentry @\@tempformat}%
+  \fi%
+}
+\newif\if@tud@index
+\newcommand*\@printindexskip{%
+  \ifnum\imki@columns>\@ne\relax\vspace{-\multicolsep}\fi%
+}
+\newcommand*\tud@indexprologue{}
+\newcommand*\@printindex[1][]{%
+  \pagebreak[3]%
+  \@tud@indextrue%
+  \ifx\tud@indexprologue\@empty%
+    \indexprologue[\@printindexskip]{%
+      \ifblank{#1}{\tudhyperdef*{idx:main}}{\tudhyperdef*{idx:#1}}%
+    }%
+  \else%
+    \indexprologue{%
+      \ifblank{#1}{\tudhyperdef*{idx:main}}{\tudhyperdef*{idx:#1}}%
+      \begingroup%
+        \let\footnote\@gobble%
+        \tud@indexprologue%
+        \@printindexskip%
+      \endgroup%
+    }%
+  \fi%
+  \ifblank{#1}{\printindex}{\printindex[#1]}%
+  \let\tud@indexprologue\@empty%
+}
+\NewDocumentCommand\CrossIndex{smom}{%
+  \def\@tempa##1##2##3{%
+    \index{%
+      \IfBooleanTF{#1}{##3@##3}{##3!"|@}%
+      \,\textrightarrow\,%
+      \tudhyperref{idx:##1}{\IfValueTF{##2}{##2}{Index der ##3}}|seeidx{##1}%
+    }%
+  }%
+  \forcsvlist{\@tempa{#2}{#3}}{#4}%
+}
+\newcommand*\SeeRef[2]{%
+  \begingroup%
+    \@suppressoutput%
+    \@nameuse{#1}{#2}%
+    \protected@edef\tud@reserved{%
       \noexpand\endgroup%
-      \def\noexpand#1{#1}%
+      \noexpand\index{#1!\@nameuse{#1}{#2}|see{\@tempformat}}%
     }%
   \tud@reserved%
 }
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\newcommand*\@MarkupFormat{}
-\newcommand*\@MarkupSuffix{}
-\newcommand*\@MarkupDeclare{}
-\NewDocumentCommand\@MarkupOutput{>{\SplitArgument{1}{!}}md==o}{%
-  \@@MarkupOutput#1=#2=[#3]%
-}
-\NewDocumentCommand\@@MarkupOutput{mmd==o}{%
-  \if@declare%
-    \tud@toks@{\@MarkupDeclare}%
-  \else%
-    \tud@toks@{\@MarkupInline}%
-  \fi%
-  \IfValueTF{#2}{%
-    \def\@tempa{#2}%
-  }{%
-    \def\@tempa{#1}%
-  }%
-  \IfValueT{#3}{\appto\@tempa{=#3}}%
-  \IfValueT{#4}{\appto\@tempa{#4}}%
-  \eaddto@hook\tud@toks@{\expandafter{\@tempa}}%
-  \the\tud@toks@%
-}
-\newcommand*\@MarkupInline[1]{\mbox{\@MarkupFormat#1}}
-\newcommand*\@MarkupDeclare@Default[1]{%
-  \begingroup\@MarkupFormat#1\endgroup\@MarkupSuffix%
-}
-\NewDocumentCommand\@SetMarkupFormat{mod()}{%
-  \def\@MarkupFormat{\ifdin{}{#1}}%
-  \IfValueT{#2}{\def\@MarkupSuffix{\suffix{#2}}}%
-  \IfValueT{#3}{\renewcommand*\@MarkupDeclare[1]{#3\@MarkupSuffix}}%
-}
-\newcommand*\@ClearMarkupFormat{%
-  \let\@MarkupFormat\relax%
-  \let\@MarkupDeclare\@MarkupDeclare@Default%
-  \let\@MarkupSuffix\relax%
-}
-\@ClearMarkupFormat
-\newcommand*\@CheckMarkupFormat{%
-  \ifx\@MarkupFormat\relax%
-    \ClassError{tudscrman}{\string\@SetMarkupFormat\space unused}{%
-      It seems you have forgotten to use \string\@SetMarkupFormat.%
+\newcommand*\PrintIndex{%
+  \begingroup%
+    \renewcommand\tud@indexprologue{%
+      Die aufgelisteten Schlagworte sollen sowohl Antworten bei generellen 
+      Fragen als auch L\"osungen f\"ur typische Probleme beim Umgang mit 
+      \hologo{LaTeXe} sowie dem \TUDScript-Bundle liefern. Falls ein gesuchter 
+      Begriff hier nicht auftaucht, sollte das \Forum erster Anlaufpunkt sein, 
+      um Fragen bei der Nutzung von \TUDScript zu beantworten.
     }%
-  \fi%
+    \@printindex%
+    \clearpage%
+    \renewcommand\tud@indexprologue{%
+      Dies ist der Index allre im Handbuch erl\"auterten sowie erw\"ahnten 
+      Optionen, wobei bei den meisten auch Untereintr\"age mit Seitenangeben 
+      f\"ur spezielle Wertzuweisungen existieren.
+    }%
+    \@printindex[options]%
+    \renewcommand\tud@indexprologue{%
+      Hier werden alle im Handbuch erl\"auterten sowie erw\"ahnten Befehle und 
+      Umgebungen aufgelistet, wobei bei einigen auch Untereintr\"age f\"ur 
+      Schl\"ussel-Wert-Parameter existieren, die im optionalen Argument der 
+      jeweiligen Anweisung verwendet werden k\"onnen. Bei einigen Parametern 
+      gibt es zus\"atzlich eine weitere Unterebene, in der Seitenverweise zu 
+      expliziten Wertzuweisungen an diese Parameter gegeben werden.
+    }%
+    \@printindex[macros]%
+    \renewcommand\tud@indexprologue{%
+      Dies sind alle von \TUDScript definierten, sprachabh\"angigen Bezeichner. 
+      Informationen zur Verwendung sowie den Anpassungsm\"oglichkeiten sind in 
+      \autoref{sec:localization} zu finden. 
+    }%
+    \@printindex[terms]%
+    \@printindex[elements]%
+    \@printindex[misc]%
+    \@printindex[files]%
+  \endgroup%
 }
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% {#1}: Markup für Änderungsliste
+% =#2=: optionaler Wert für Option und Key für Änderungsliste
+% (#3): optionale Subdeclaration
+% [#4]: optionaler Suffix in der Änderungsliste
+\newif\if@changedat
 \newcommand*\list@ChangedAt{}
 \let\list@ChangedAt\relax%
 \DeclareListParser*{\forssvlist}{;}%
@@ -1579,7 +1633,16 @@
   }%
   \listeadd{\list@ChangedAt}{\the\toks@}%
 }
-\NewDocumentCommand\@ChangedAt@ProcessList{mm}{%
+\newlength\changedatskip
+\NewDocumentCommand\ChangedAt{somO{\changedatskip}}{%
+  \IfValueTF{#2}{%
+    \@ChangedAt@CreateList[#2]{#3}%
+  }{%
+    \@ChangedAt@CreateList{#3}%
+  }%
+  \@printchangedatlist{#1}{#4}%
+}
+\NewDocumentCommand\@printchangedatlist{mm}{%
   \ifx\list@ChangedAt\relax\else%
     \let\@templist\relax%
     \forlistloop\@ChangedAt@CreateEntry{\list@ChangedAt}%
@@ -1647,20 +1710,59 @@
   }%
   \ifinlist{#1}{\@templist}{}{\listadd\@templist{#1}}%
 }
-\newlength\changedatskip
-\NewDocumentCommand\ChangedAt{somO{\changedatskip}}{%
-  \IfValueTF{#2}{%
-    \@ChangedAt@CreateList[#2]{#3}%
-  }{%
-    \@ChangedAt@CreateList{#3}%
+\NewDocumentCommand\@ProcessChangedAt{md==d()o}{%
+  \@getindex*\@tempentry\@tempformat\@tempkey{#1}=#2=(#3)[#4]%
+    !Parameter angepasst!%
+  \IfValueT{#2}{%
+    \begingroup%
+      \@onlyPValue%
+      \ifstr{#2}{}{%
+        \def\tud@reserved{\endgroup}%
+      }{%
+        \protected@edef\tud@reserved{%
+          \noexpand\endgroup%
+          \def\noexpand\@tempentry{\@tempentry=#2}%
+        }%
+      }%
+    \tud@reserved%
   }%
-  \@ChangedAt@ProcessList{#1}{#4}%
 }
-\NewDocumentCommand\printchangedatlist{sO{\z@}}{%
-  \@ChangedAt@ProcessList{#1}{#2}%
+\newcommand*\PrintChangelog{%
+  \begingroup%
+    \def\lettergroup##1{}%
+    \def\subsubsubitem{\@idxitem\hspace*{45\p@}}%
+    \apptocmd{\theindex}{%
+      \let\subsubsubsubitem\subsubsubitem
+      \let\subsubsubitem\subsubitem%
+      \let\subsubitem\subitem%
+      \let\subitem\item%
+      \renewcommand*\item{%
+        \begingroup%
+          \escapechar=`\\%
+          \catcode\endlinechar=\active%
+          \csname\string\item\endcsname%
+      }%
+      \begingroup%
+      \escapechar=`\\%
+      \lccode`\~=\endlinechar%
+      \lowercase{%
+        \expandafter\endgroup%
+        \expandafter\def\csname\string\item\endcsname##1~%
+      }{%
+        \endgroup%
+        \subsection*{\TUDScript \NoCaseChange{##1}}%
+        \tudhyperdef{idx:changelog:##1}%
+        \addsubsectiontocentry{}{##1}%
+      }%
+    }{}{\tud@patch@wrn{theindex}}%
+    \clearpage%
+    \@printindex[changelog]%
+  \endgroup%
 }
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\PassOptionsToPackage{quiet}{marginnote}
+\RequirePackage{marginnote}[2012/03/29]
+\RequirePackage{enumitem}[2011/09/28]
+\setlist{noitemsep}
 \newcommand*\stditem{}
 \newcommand*\before@item[1]{%
   \ifdefvoid{\stditem}{%
@@ -1730,32 +1832,6 @@
   \IfValueT{#5}{\addto@hook\toks@{(#5)}}%
   \the\toks@%
 }
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\RequirePackage{listings}[2014/03/04]
-\lstdefinestyle{tudscr}{%
-  basicstyle=\ttfamily\ifdef{\setstretch}{\setstretch{1}}{},%
-  keywordstyle=,%
-  columns=fullflexible,keepspaces,%
-  aboveskip=\smallskipamount,%
-  belowskip=\smallskipamount,%
-  language=[LaTeX]TeX,%
-  texcl,%
-}
-\newenvironment{Example}{\@nameuse{Example*}}{%
-  \@nameuse{endExample*}%
-  \addvspace{-\topsep}%
-}
-\newenvironment{Example*}{%
-  \labeling{{\usekomafont{disposition}Beispiel:\ }}%
-  \item[{\usekomafont{disposition}Beispiel:\ }]%
-}{%
-  \endlabeling%
-}
-\lstnewenvironment{Code}[1][]{\lstset{style=tudscr,#1}}{}
-\newcommand*\tud@currentHref{}
-\BeforeBeginEnvironment{Code}{\global\let\tud@currentHref\@currentHref}
-\AfterEndEnvironment{Code}{\global\let\@currentHref\tud@currentHref}
 \newlist{packages}{description}{2}
 \setlist[packages]{%
   topsep=\medskipamount,labelwidth=\linewidth,labelsep=0pt,font=\normalfont,%
@@ -1782,6 +1858,76 @@
     }%
   }]%
 }
+\newlength\tempdim
+\newsavebox\tabularm@box
+\newlength\tabularm@wd
+\newcommand*\tabularm@num{1}
+\NewEnviron{tabularm}[1]{%
+  \begin{lrbox}{\tabularm@box}%
+    \let\allcolumnpar\@gobble%
+    \begin{tabular}{*{#1}l}\BODY\end{tabular}%
+  \end{lrbox}%
+  \setlength\tabularm@wd{\wd\tabularm@box}%
+  \def\tabularm@num{#1}%
+  \let\allcolumnpar\@allcolumnpar%
+  \begin{tabular}{*{#1}l}\BODY\end{tabular}%
+}
+\newcommand*\@allcolumnpar[1]{%
+  \multicolumn{\tabularm@num}{@{}p{\tabularm@wd}@{}}{#1}%
+}
+\NewDocumentCommand\TermTable{smg}{%
+  \let\@templist\relax%
+  \forcsvlist{\listadd\@templist}{#2}%
+  \ifhmode\par\fi%
+  \vskip\medskipamount%
+  \@afterindentfalse\@afterheading%
+  \IfBooleanTF{#1}{%
+    \IfValueTF{#3}{\setlength\@tempdima{#3}}{\setlength\@tempdima{\linewidth}}%
+    \setlength\@tempdimc{-.7\baselineskip}%
+    \begin{tabularx}{\@tempdima}{lXX}\@TermTable\end{tabularx}%
+  }{%
+    \setlength\@tempdimc{\z@}%
+    \begin{tabular}{lll}\@TermTable\end{tabular}%
+  }%
+  \par\addvspace{\medskipamount}%
+}
+\newcommand*\@TermTable{%
+  \toprule%
+  \textbf{Bezeichner} & \textbf{Deutsch} & \textbf{Englisch}\tabularnewline%
+  \midrule%
+  \forlistloop\@@TermTable{\@templist}%
+  \bottomrule%
+}
+\newcommand*\@@TermTable[1]{%
+  \Term{#1} & %
+  \ifstr{\@nameuse{#1}}{}{\PName{leer}}{\@nameuse{#1}} & %
+  \selectlanguage{english}\vspace*{\@tempdimc}%
+  \ifstr{\@nameuse{#1}}{}{\PName{empty}}{\@nameuse{#1}}\tabularnewline%
+}
+\RequirePackage{listings}[2014/03/04]
+\lstdefinestyle{tudscr}{%
+  basicstyle=\ttfamily\ifdef{\setstretch}{\setstretch{1}}{},%
+  keywordstyle=,%
+  columns=fullflexible,keepspaces,%
+  aboveskip=\smallskipamount,%
+  belowskip=\smallskipamount,%
+  language=[LaTeX]TeX,%
+  texcl,%
+}
+\newenvironment{Example}{\@nameuse{Example*}}{%
+  \@nameuse{endExample*}%
+  \addvspace{-\topsep}%
+}
+\newenvironment{Example*}{%
+  \labeling{{\usekomafont{disposition}Beispiel:\ }}%
+  \item[{\usekomafont{disposition}Beispiel:\ }]%
+}{%
+  \endlabeling%
+}
+\lstnewenvironment{Code}[1][]{\lstset{style=tudscr,#1}}{}
+\newcommand*\tud@currentHref{}
+\BeforeBeginEnvironment{Code}{\global\let\tud@currentHref\@currentHref}
+\AfterEndEnvironment{Code}{\global\let\@currentHref\tud@currentHref}
 \RequirePackage{filemod}[2011/09/19]
 %\RequirePackage{silence}[2012/07/02]
 %\WarningFilter*{ifplatform}{^^J \space\space\space shell escape is disabled}
@@ -1850,8 +1996,6 @@
     \tud@shellescape@wrn%
   }%
 }
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \RequirePackage{ifpdf}[2011/01/30]
 \ifpdf
   \PassOptionsToPackage{obeyFinal}{todonotes}
@@ -1949,243 +2093,7 @@
 }
 \newcommand*\ListOfToDo{\if@tud@todo\listoftodos\fi}
 \reversemarginpar
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\NewDocumentCommand\CrossIndex{smom}{%
-  \def\@tempa##1##2##3{%
-    \index{%
-      \IfBooleanTF{#1}{##3@##3}{##3!"|@}%
-      \,\textrightarrow\,%
-      \tudhyperref{idx:##1}{\IfValueTF{##2}{##2}{Index der ##3}}|seeidx{##1}%
-    }%
-  }%
-  \forcsvlist{\@tempa{#2}{#3}}{#4}%
-}
-\newcommand*\SeeRef[2]{%
-  \begingroup%
-    \@suppressoutput%
-    \@nameuse{#1}{#2}%
-    \protected@edef\tud@reserved{%
-      \noexpand\endgroup%
-      \noexpand\index{#1!\@nameuse{#1}{#2}|see{\@tempformat}}%
-    }%
-  \tud@reserved%
-}
-\newcommand*\tud@indexprologue{}
-\newcommand*\PrintIndex{%
-  \begingroup%
-    \renewcommand\tud@indexprologue{%
-      Die aufgelisteten Schlagworte sollen sowohl Antworten bei generellen 
-      Fragen als auch L\"osungen f\"ur typische Probleme beim Umgang mit 
-      \hologo{LaTeXe} sowie dem \TUDScript-Bundle liefern. Falls ein gesuchter 
-      Begriff hier nicht auftaucht, sollte das \Forum erster Anlaufpunkt sein, 
-      um Fragen bei der Nutzung von \TUDScript zu beantworten.
-    }%
-    \@printindex%
-    \clearpage%
-    \renewcommand\tud@indexprologue{%
-      Dies ist der Index allre im Handbuch erl\"auterten sowie erw\"ahnten 
-      Optionen, wobei bei den meisten auch Untereintr\"age mit Seitenangeben 
-      f\"ur spezielle Wertzuweisungen existieren.
-    }%
-    \@printindex[options]%
-    \renewcommand\tud@indexprologue{%
-      Hier werden alle im Handbuch erl\"auterten sowie erw\"ahnten Befehle und 
-      Umgebungen aufgelistet, wobei bei einigen auch Untereintr\"age f\"ur 
-      Schl\"ussel-Wert-Parameter existieren, die im optionalen Argument der 
-      jeweiligen Anweisung verwendet werden k\"onnen. Bei einigen Parametern 
-      gibt es zus\"atzlich eine weitere Unterebene, in der Seitenverweise zu 
-      expliziten Wertzuweisungen an diese Parameter gegeben werden.
-    }%
-    \@printindex[macros]%
-    \renewcommand\tud@indexprologue{%
-      Dies sind alle von \TUDScript definierten, sprachabh\"angigen Bezeichner. 
-      Informationen zur Verwendung sowie den Anpassungsm\"oglichkeiten sind in 
-      \autoref{sec:localization} zu finden. 
-    }%
-    \@printindex[terms]%
-    \@printindex[elements]%
-    \@printindex[misc]%
-    \@printindex[files]%
-  \endgroup%
-}
-\newcommand*\@printindexskip{%
-  \ifnum\imki@columns>\@ne\relax\vspace{-\multicolsep}\fi%
-}
-\newif\if@tud@index
-\newcommand*\@printindex[1][]{%
-  \pagebreak[3]%
-  \@tud@indextrue%
-  \ifx\tud@indexprologue\@empty%
-    \indexprologue[\@printindexskip]{%
-      \ifblank{#1}{\tudhyperdef*{idx:main}}{\tudhyperdef*{idx:#1}}%
-    }%
-  \else%
-    \indexprologue{%
-      \ifblank{#1}{\tudhyperdef*{idx:main}}{\tudhyperdef*{idx:#1}}%
-      \begingroup%
-        \let\footnote\@gobble%
-        \tud@indexprologue%
-        \@printindexskip%
-      \endgroup%
-    }%
-  \fi%
-  \ifblank{#1}{\printindex}{\printindex[#1]}%
-  \let\tud@indexprologue\@empty%
-}
-\newcommand*\PrintChangelog{%
-  \begingroup%
-    \def\lettergroup##1{}%
-    \def\subsubsubitem{\@idxitem\hspace*{45\p@}}%
-    \apptocmd{\theindex}{%
-      \let\subsubsubsubitem\subsubsubitem
-      \let\subsubsubitem\subsubitem%
-      \let\subsubitem\subitem%
-      \let\subitem\item%
-      \renewcommand*\item{%
-        \begingroup%
-          \escapechar=`\\%
-          \catcode\endlinechar=\active%
-          \csname\string\item\endcsname%
-      }%
-      \begingroup%
-      \escapechar=`\\%
-      \lccode`\~=\endlinechar%
-      \lowercase{%
-        \expandafter\endgroup%
-        \expandafter\def\csname\string\item\endcsname##1~%
-      }{%
-        \endgroup%
-        \subsection*{\TUDScript \NoCaseChange{##1}}%
-        \tudhyperdef{idx:changelog:##1}%
-        \addsubsectiontocentry{}{##1}%
-      }%
-    }{}{\tud@patch@wrn{theindex}}%
-    \clearpage%
-    \@printindex[changelog]%
-  \endgroup%
-}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\RequirePackage{setspace}[2011/12/19]
-\setstretch{1.1}
-\RequirePackage{textcomp}[2005/09/27]
-\AfterPackage*{inputenc}{\RequirePackage{csquotes}[2011/10/22]}
-\TUD@UnwindPackage{csquotes}{%
-  \ClassWarning%
-    {tudscrman}{Package `csquotes' not loaded}%
-  \providecommand\enquote[1]{\glqg#1\grqq{}}%
-}
-\PassOptionsToPackage{vskip=\smallskipamount}{quoting}
-\RequirePackage{quoting}[2014/01/28]
-\RequirePackage{isodate}[2010/01/03]
-\RequirePackage{hologo}[2012/04/26]
-\RequirePackage{tabularx}[1999/01/07]
-\RequirePackage{ragged2e}[2009/05/21]
-\RequirePackage{chngcntr}[2009/09/02]
-\counterwithout{footnote}{chapter}
-\RequirePackage{booktabs}[2005/04/14]
-\RequirePackage{varioref}[2011/10/02]
-\renewcommand*\fullref[1]{\hyperref[#1]{\autoref*{#1} \vpageref{#1}}}
-\RequirePackage{tikz}[2013/12/13]
-\RequirePackage{pdfpages}[2013/08/25]
-\RequirePackage{units}[1998/08/04]
-\AtEndPreamble{%
-  \RequirePackage{ellipsis}[2004/9/28]%
-  \let\ellipsispunctuation\relax%
-}
-\newcommand*\vTUDScript{}
-\AtBeginDocument{%
-  \def\@tempb#1 #2 #3\relax#4\relax{\def\vTUDScript{#2}}%
-  \edef\@tempa{\TUDVersion}%
-  \expandafter\@tempb\@tempa\relax? ? \relax\relax%
-}
-\newcommand*\vKOMAScript{v3.17\xspace}
-\RequirePackage{scrhack}[2014/02/27]
-\NewDocumentCommand\TermTable{smg}{%
-  \let\@templist\relax%
-  \forcsvlist{\listadd\@templist}{#2}%
-  \ifhmode\par\fi%
-  \vskip\medskipamount%
-  \@afterindentfalse\@afterheading%
-  \IfBooleanTF{#1}{%
-    \IfValueTF{#3}{\setlength\@tempdima{#3}}{\setlength\@tempdima{\linewidth}}%
-    \setlength\@tempdimc{-.7\baselineskip}%
-    \begin{tabularx}{\@tempdima}{lXX}\@TermTable\end{tabularx}%
-  }{%
-    \setlength\@tempdimc{\z@}%
-    \begin{tabular}{lll}\@TermTable\end{tabular}%
-  }%
-  \par\addvspace{\medskipamount}%
-}
-\newcommand*\@TermTable{%
-  \toprule%
-  \textbf{Bezeichner} & \textbf{Deutsch} & \textbf{Englisch}\tabularnewline%
-  \midrule%
-  \forlistloop\@@TermTable{\@templist}%
-  \bottomrule%
-}
-\newcommand*\@@TermTable[1]{%
-  \Term{#1} & %
-  \ifstr{\@nameuse{#1}}{}{\PName{leer}}{\@nameuse{#1}} & %
-  \selectlanguage{english}\vspace*{\@tempdimc}%
-  \ifstr{\@nameuse{#1}}{}{\PName{empty}}{\@nameuse{#1}}\tabularnewline%
-}
-\newsavebox\tabularm@box
-\newlength\tabularm@wd
-\newcommand*\tabularm@num{1}
-\NewEnviron{tabularm}[1]{%
-  \begin{lrbox}{\tabularm@box}%
-    \let\allcolumnpar\@gobble%
-    \begin{tabular}{*{#1}l}\BODY\end{tabular}%
-  \end{lrbox}%
-  \setlength\tabularm@wd{\wd\tabularm@box}%
-  \def\tabularm@num{#1}%
-  \let\allcolumnpar\@allcolumnpar%
-  \begin{tabular}{*{#1}l}\BODY\end{tabular}%
-}
-\newcommand*\@allcolumnpar[1]{%
-  \multicolumn{\tabularm@num}{@{}p{\tabularm@wd}@{}}{#1}%
-}
-\newcommand*\CD{Corporate Design\xspace}
-\newcommand*\CDs{Corporate Designs\xspace}
-\newcommand*\TUD{Technische Universit\"at Dresden\xspace}
-\newcommand*\TnUD{Technischen Universit\"at Dresden\xspace}
-\newcommand*\TUDCD{\CD der \TnUD}%
-\newcommand*\TUDCDs{\CDs der \TnUD}%
-\newrobustcmd*\DDC{%
-  \mbox{%
-    D\kern.05em R\kern.05em E\kern.05em S\kern.05em %
-    D\kern.05em E\kern.05em N\kern.1em-\kern.1em concept%
-  }\xspace%
-}
-\AfterPackage*{babel}{%
-  \@expandtwoargs\in@{,english,}{,\bbl@loaded,}%
-  \ifin@%
-    \renewcommand*\CD{\foreignlanguage{english}{Corporate Design}\xspace}%
-    \renewcommand*\CDs{\foreignlanguage{english}{Corporate Designs}\xspace}%
-  \fi%
-}
-\newcommand*\Univers{\textubn{Univers}\xspace}
-\newcommand*\DIN{\textdbn{DIN~BOLD}\xspace}
-\newcommand*\textsbn{}
-\newrobustcmd*\sbnfont{\sffamily\bfseries\upshape}
-\DeclareTextFontCommand\textsbn{\sbnfont}
-\newcommand*\textsbs{}
-\newrobustcmd*\sbsfont{\sffamily\bfseries\slshape}
-\DeclareTextFontCommand\textsbs{\sbsfont}
-\newlength\tempdim
 \newcommand*\Attention[1]{\marginnote{\fbox{Achtung!}}\emph{\trim@spaces{#1}}}
-\newcommand*\hrfn[2]{%
-  \href{#1}{\trim@spaces{#2}}%
-  \footnote{%
-    \scalebox{0.95}{%
-      \def\_{_}%
-      \edef\@tempa{#1}%
-      \strut\expandafter\url\expandafter{\@tempa}%
-    }%
-  }%
-}
 \NewDocumentCommand\Forum{s}{%
   \IfBooleanTF{#1}{%
     \url{http://latex.wcms-file3.tu-dresden.de/phpBB3/}%
@@ -2219,6 +2127,59 @@
   }%
   \xspace%
 }
+\RequirePackage{scrhack}[2014/02/27]
+\RequirePackage{setspace}[2011/12/19]
+\setstretch{1.1}
+\RequirePackage{textcomp}[2005/09/27]
+\AfterPackage*{inputenc}{\RequirePackage{csquotes}[2011/10/22]}
+\TUD@UnwindPackage{csquotes}{%
+  \ClassWarning%
+    {tudscrman}{Package `csquotes' not loaded}%
+  \providecommand\enquote[1]{\glqg#1\grqq{}}%
+}
+\PassOptionsToPackage{vskip=\smallskipamount}{quoting}
+\RequirePackage{quoting}[2014/01/28]
+\RequirePackage{isodate}[2010/01/03]
+\RequirePackage{hologo}[2012/04/26]
+\RequirePackage{tabularx}[1999/01/07]
+\RequirePackage{ragged2e}[2009/05/21]
+\RequirePackage{chngcntr}[2009/09/02]
+\counterwithout{footnote}{chapter}
+\RequirePackage{booktabs}[2005/04/14]
+\RequirePackage{tikz}[2013/12/13]
+\RequirePackage{pdfpages}[2013/08/25]
+\RequirePackage{units}[1998/08/04]
+\AtEndPreamble{%
+  \RequirePackage{ellipsis}[2004/9/28]%
+  \let\ellipsispunctuation\relax%
+}
+\newcommand*\CD{Corporate Design\xspace}
+\newcommand*\CDs{Corporate Designs\xspace}
+\newcommand*\TUD{Technische Universit\"at Dresden\xspace}
+\newcommand*\TnUD{Technischen Universit\"at Dresden\xspace}
+\newcommand*\TUDCD{\CD der \TnUD}%
+\newcommand*\TUDCDs{\CDs der \TnUD}%
+\newrobustcmd*\DDC{%
+  \mbox{%
+    D\kern.05em R\kern.05em E\kern.05em S\kern.05em %
+    D\kern.05em E\kern.05em N\kern.1em-\kern.1em concept%
+  }\xspace%
+}
+\AfterPackage*{babel}{%
+  \@expandtwoargs\in@{,english,}{,\bbl@loaded,}%
+  \ifin@%
+    \renewcommand*\CD{\foreignlanguage{english}{Corporate Design}\xspace}%
+    \renewcommand*\CDs{\foreignlanguage{english}{Corporate Designs}\xspace}%
+  \fi%
+}
+\newcommand*\Univers{\textubn{Univers}\xspace}
+\newcommand*\DIN{\textdbn{DIN~BOLD}\xspace}
+\newcommand*\textsbn{}
+\newrobustcmd*\sbnfont{\sffamily\bfseries\upshape}
+\DeclareTextFontCommand\textsbn{\sbnfont}
+\newcommand*\textsbs{}
+\newrobustcmd*\sbsfont{\sffamily\bfseries\slshape}
+\DeclareTextFontCommand\textsbs{\sbsfont}
 %%% From File: tudscr-fields.dtx
 \newcommand*\@course{}
 \newrobustcmd*\course[1]{\gdef\@course{#1}}
