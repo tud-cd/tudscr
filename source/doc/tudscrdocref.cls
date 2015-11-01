@@ -197,18 +197,21 @@
 \newcommand*\CDs{Corporate Designs\xspace}
 \newcommand*\TUD{Technische Universit\"at Dresden\xspace}
 \newcommand*\TnUD{Technischen Universit\"at Dresden\xspace}
-\newcommand*\DDC{%
-  \mbox{%
-    D\kern.05em R\kern.05em E\kern.05em S\kern.05em D\kern.05em E\kern.05em
-    N\kern.1em-\kern.1em concept%
-  }\xspace%
-}
+\newcommand*\TUDCD{\CD der \TnUD}
+\newcommand*\TUDCDs{\CDs der \TnUD}
 \AfterPackage*{babel}{%
   \@expandtwoargs\in@{,english,}{,\bbl@loaded,}%
   \ifin@%
     \renewcommand*\CD{\foreignlanguage{english}{Corporate Design}\xspace}%
     \renewcommand*\CDs{\foreignlanguage{english}{Corporate Designs}\xspace}%
   \fi%
+}
+\DeclareRobustCommand\DDC%
+{%
+  \mbox{%
+    D\kern.05em R\kern.05em E\kern.05em S\kern.05em %
+    D\kern.05em E\kern.05em N\kern.1em-\kern.1em concept%
+  }\xspace%
 }
 \endinput
 %%

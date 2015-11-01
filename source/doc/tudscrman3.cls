@@ -183,6 +183,7 @@
   \expandafter\@tempb\@tempa\relax? ? \relax\relax%
 }
 \newcommand*\vKOMAScript{v3.17\xspace}
+\RequirePackage{scrhack}[2014/02/27]
 \PassOptionsToPackage{log-declarations=false}{xparse}
 \RequirePackage{xparse}[2013/12/31]
 \newtoks\tud@toks@
@@ -191,7 +192,6 @@
 }
 \newcommand*\tud@replace[3]{%
   \begingroup%
-    % Ergebnis: \def\@tempa##1@##2\@nnil{\@tempb{##1}{##2}}%
     \toks@{\def\@tempa##1}%
     \eaddto@hook\toks@{\detokenize{#2}}%
     \addto@hook\toks@{##2\@nnil{\@tempb{##1}{##2}}}%
@@ -206,7 +206,6 @@
       \fi%
       \@tempc%
     }%
-    % Ergebnis: \@tempa #1@\@nnil%
     \toks@{\@tempa}%
     \edef\@tempc{\expandafter\detokenize\expandafter{#1}}%
     \eaddto@hook\toks@{\@tempc}%
@@ -228,12 +227,12 @@
       is empty, nothing to sort here%
     }%
   }{%
-    \let\@tempc#1%
+    \let\tud@reserved#1%
     \let\@templist\relax%
-    \forlistloop\@sortlist{\@tempc}%
-    \let\@tempc\relax%
-    \@for\@tempa:=\@templist\do{\listeadd\@tempc{\@tempa}}%
-    \let#1\@tempc%
+    \forlistloop\@sortlist{\tud@reserved}%
+    \let\tud@reserved\relax%
+    \@for\@tempa:=\@templist\do{\listeadd\tud@reserved{\@tempa}}%
+    \let#1\tud@reserved%
   }%
 }
 \newif\if@sorted@list
@@ -390,7 +389,6 @@
     defined. At least the package `url' is loaded.
   }%
   \RequirePackage{url}[2013/09/16]%
-%  \robustify\url%
   \providecommand*\hypersetup[1]{}%
   \providecommand*\hyperdef[3]{\label{#1.#2}#3}%
   \providerobustcmd*\hyperref{\@ifnextchar[{\tud@hyperref}{\tud@@hyperref}}
@@ -436,19 +434,9 @@
 \TUD@UnwindPackage{hyperref}{\RequirePackage[babel]{microtype}[2013/05/23]}
 \newif\if@declare
 \newif\if@openindex
-% 0: normales Verhalten (label und Ausgabe)
-% 1: kein label, nur Ausgabe
-% 2: normales label, keine Ausgabe
-% 3: verschobenes label, keine Ausgabe
 \newcommand*\tud@declare{0}
 \newcommand*\list@declaration{}
 \let\list@declaration\relax
-\newcommand*\list@preset{}
-\let\list@preset\relax
-\newif\if@preset@list
-\newcommand*\list@additional{}
-\let\list@additional\relax
-\newif\if@additional@list
 \NewDocumentEnvironment{Declaration}{omoog}{%
   \listadd\list@declaration{#2}%
   \tud@declare@start[#1]{#2}{#3}{#4}{#5}%
@@ -496,36 +484,12 @@
   \tud@declare@end{#3}{\printobsoletelist}%
   \@obsoletefalse%
 }
-\NewDocumentEnvironment{Declaration*}{om}{%
-  \tud@declare@special@start[#1]{#2}{2}%
-}{%
-  \tud@declare@special@end{#2}%
-}
-
-\newcommand*\@bundle{}
-\newcommand*\@bundledefault{tudscr}
-\let\@bundle\@bundledefault
-\newcommand*\tud@ifbundle[2]{%
-  \ifstr{\@bundle}{\@bundledefault}{#2}{#1}%
-}
-\newenvironment{Bundle}[1]{%
-  \tud@ifbundle{%
-    \ClassError{tudscrman}{Nested environment `Bundle'}{%
-      It is not possible to nest this environment, when\MessageBreak%
-      a cross-label was given before.%
-    }%
-  }{%
-    \gdef\@bundle{#1}%
-  }%
-  \ignorespaces%
-}{\global\let\@bundle\@bundledefault\aftergroup\ignorespaces}
-\NewDocumentEnvironment{Bundle!}{om}{%
-  \tud@declare@special@start[#1]{#2}{3}%
-  \Bundle{#2}%
-}{%
-  \endBundle%
-  \tud@declare@special@end{#2}%
-}
+\newcommand*\list@preset{}
+\let\list@preset\relax
+\newif\if@preset@list
+\newcommand*\list@additional{}
+\let\list@additional\relax
+\newif\if@additional@list
 \NewDocumentCommand\tud@declare@start{ommmm}{%
   \@ChangedAt@CreateList[#2]{#1}%
   \IfValueTF{#3}{%
@@ -561,13 +525,40 @@
   \@declaretrue\@openindexfalse#1\@declarefalse%
   \pagebreak[1]%
 }
+\NewDocumentEnvironment{Declaration*}{om}{%
+  \tud@declare@special@start[#1]{#2}{2}%
+}{%
+  \tud@declare@special@end{#2}%
+}
+\NewDocumentEnvironment{Bundle!}{om}{%
+  \tud@declare@special@start[#1]{#2}{3}%
+  \Bundle{#2}%
+}{%
+  \endBundle%
+  \tud@declare@special@end{#2}%
+}
+\newenvironment{Bundle}[1]{%
+  \tud@ifbundle{%
+    \ClassError{tudscrman}{Nested environment `Bundle'}{%
+      It is not possible to nest this environment, when\MessageBreak%
+      a cross-label was given before.%
+    }%
+  }{%
+    \gdef\@bundle{#1}%
+  }%
+  \ignorespaces%
+}{\global\let\@bundle\@bundledefault\aftergroup\ignorespaces}
+\newcommand*\@bundle{}
+\newcommand*\@bundledefault{tudscr}
+\let\@bundle\@bundledefault
+\newcommand*\tud@ifbundle[2]{\ifstr{\@bundle}{\@bundledefault}{#2}{#1}}
 \NewDocumentCommand\tud@declare@special@start{omm}{%
   \@ChangedAt@CreateList(#2){#1}%
   \def\tud@declare{#3}%
   \@declaretrue\@openindextrue#2\@declarefalse%
   \def\tud@declare{0}%
 }
-\newcommand\tud@declare@special@end[1]{%
+\newcommand*\tud@declare@special@end[1]{%
   \ifx\list@ChangedAt\relax\else%
     \ClassError{tudscrman}{\string\printchangedatlist\space is missing}{%
       \string\list@ChangedAt\space is not empty. Did you\MessageBreak%
@@ -1348,12 +1339,12 @@
   \expandafter\makeindex\expandafter[\@tempa]%
 }
 \makexindyindex{Allgemeiner Index}
-\makexindyindex*{Klassen, Pakete und Dateien}[files]
 \makexindyindex*{Klassen- und Paketoptionen}[options]
 \makexindyindex*{Befehle und Umgebungen mit dazugeh\"origen Parametern}[macros]
 \makexindyindex*{Sprachabh\"angige Bezeichner}[terms]
 \makexindyindex*{Seitenstile, Schriftelemente und Farben}[elements]
 \makexindyindex*{L\"angen und Z\"ahler}[misc]
+\makexindyindex*{Klassen, Pakete und Dateien}[files]
 \makexindyindex[columns=1]{\"Anderungsliste}[changelog]
 \undef\makexindyindex
 \newcommand*\@tempentry{}
@@ -1904,16 +1895,6 @@
   \selectlanguage{english}\vspace*{\@tempdimc}%
   \ifstr{\@nameuse{#1}}{}{\PName{empty}}{\@nameuse{#1}}\tabularnewline%
 }
-\RequirePackage{listings}[2014/03/04]
-\lstdefinestyle{tudscr}{%
-  basicstyle=\ttfamily\ifdef{\setstretch}{\setstretch{1}}{},%
-  keywordstyle=,%
-  columns=fullflexible,keepspaces,%
-  aboveskip=\smallskipamount,%
-  belowskip=\smallskipamount,%
-  language=[LaTeX]TeX,%
-  texcl,%
-}
 \newenvironment{Example}{\@nameuse{Example*}}{%
   \@nameuse{endExample*}%
   \addvspace{-\topsep}%
@@ -1924,17 +1905,22 @@
 }{%
   \endlabeling%
 }
+\RequirePackage{listings}[2014/03/04]
+\lstdefinestyle{tudscr}{%
+  basicstyle=\ttfamily\ifdef{\setstretch}{\setstretch{1}}{},%
+  keywordstyle=,%
+  columns=fullflexible,keepspaces,%
+  aboveskip=\smallskipamount,%
+  belowskip=\smallskipamount,%
+  language=[LaTeX]TeX,%
+  texcl,%
+}
+\RequirePackage{filemod}[2011/09/19]
+\RequirePackage{ifplatform}[2010/10/22]
 \lstnewenvironment{Code}[1][]{\lstset{style=tudscr,#1}}{}
 \newcommand*\tud@currentHref{}
 \BeforeBeginEnvironment{Code}{\global\let\tud@currentHref\@currentHref}
 \AfterEndEnvironment{Code}{\global\let\@currentHref\tud@currentHref}
-\RequirePackage{filemod}[2011/09/19]
-%\RequirePackage{silence}[2012/07/02]
-%\WarningFilter*{ifplatform}{^^J \space\space\space shell escape is disabled}
-\RequirePackage{ifplatform}[2010/10/22]
-\newrobustcmd*\hypertut[2]{%
-  \hyperref{tutorials/#1.pdf}{\jobname}{tutorials:#1}{\File*{#1.pdf}#2}%
-}
 \newcommand*\tud@shellescape@wrn{%
   \ClassWarning%
   {tudscrman}{%
@@ -1942,6 +1928,9 @@
     activated shell escape option%
   }%
   \global\let\tud@shellescape@wrn\relax%
+}
+\newrobustcmd*\hypertut[2]{%
+  \hyperref{tutorials/#1.pdf}{\jobname}{tutorials:#1}{\File*{#1.pdf}#2}%
 }
 \NewDocumentCommand\Tutorial{smd||}{%
   \ifnum\pdfshellescape=\@ne\relax%
@@ -2127,10 +2116,9 @@
   }%
   \xspace%
 }
-\RequirePackage{scrhack}[2014/02/27]
+\RequirePackage{textcomp}[2005/09/27]
 \RequirePackage{setspace}[2011/12/19]
 \setstretch{1.1}
-\RequirePackage{textcomp}[2005/09/27]
 \AfterPackage*{inputenc}{\RequirePackage{csquotes}[2011/10/22]}
 \TUD@UnwindPackage{csquotes}{%
   \ClassWarning%
@@ -2157,20 +2145,21 @@
 \newcommand*\CDs{Corporate Designs\xspace}
 \newcommand*\TUD{Technische Universit\"at Dresden\xspace}
 \newcommand*\TnUD{Technischen Universit\"at Dresden\xspace}
-\newcommand*\TUDCD{\CD der \TnUD}%
-\newcommand*\TUDCDs{\CDs der \TnUD}%
-\newrobustcmd*\DDC{%
-  \mbox{%
-    D\kern.05em R\kern.05em E\kern.05em S\kern.05em %
-    D\kern.05em E\kern.05em N\kern.1em-\kern.1em concept%
-  }\xspace%
-}
+\newcommand*\TUDCD{\CD der \TnUD}
+\newcommand*\TUDCDs{\CDs der \TnUD}
 \AfterPackage*{babel}{%
   \@expandtwoargs\in@{,english,}{,\bbl@loaded,}%
   \ifin@%
     \renewcommand*\CD{\foreignlanguage{english}{Corporate Design}\xspace}%
     \renewcommand*\CDs{\foreignlanguage{english}{Corporate Designs}\xspace}%
   \fi%
+}
+\newrobustcmd*\DDC%
+{%
+  \mbox{%
+    D\kern.05em R\kern.05em E\kern.05em S\kern.05em %
+    D\kern.05em E\kern.05em N\kern.1em-\kern.1em concept%
+  }\xspace%
 }
 \newcommand*\Univers{\textubn{Univers}\xspace}
 \newcommand*\DIN{\textdbn{DIN~BOLD}\xspace}

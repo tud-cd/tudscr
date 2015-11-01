@@ -162,42 +162,9 @@
   \expandafter\@tempb\@tempa\relax? ? \relax\relax%
 }
 \newcommand*\vKOMAScript{v3.17\xspace}
+\RequirePackage{scrhack}[2014/02/27]
 \PassOptionsToPackage{log-declarations=false}{xparse}
 \RequirePackage{xparse}[2013/12/31]
-\RequirePackage{babel}[2014/03/24]
-\AfterPackage*{hyperref}{%
-  \patchcmd{\pdfstringdef}{\csname HyPsd@babel@}{%
-    \let\bbl@info\@gobble\csname HyPsd@babel@%
-  }{}{\tud@patch@wrn{pdfstringdef}}%
-}
-\AfterPackage*{inputenc}{\RequirePackage{csquotes}[2011/10/22]}
-\TUD@UnwindPackage{csquotes}{%
-  \PackageWarning%
-    {tudscrman}{Package `csquotes' not loaded}%
-  \providecommand\enquote[1]{\glqg#1\grqq{}}%
-}
-\AfterPackage*{hyperref}{\RequirePackage[babel]{microtype}[2013/05/23]}
-\TUD@UnwindPackage{hyperref}{\RequirePackage[babel]{microtype}[2013/05/23]}
-\PassOptionsToPackage{vskip=\smallskipamount}{quoting}
-\RequirePackage{quoting}[2014/01/28]
-\RequirePackage{isodate}[2010/01/03]
-\RequirePackage{hologo}[2012/04/26]
-\PassOptionsToPackage{quiet}{marginnote}
-\RequirePackage{marginnote}[2012/03/29]
-\RequirePackage{listings}[2014/03/04]
-\lstdefinestyle{tudscr}{%
-  basicstyle=\ttfamily\setstretch{1},%
-  keywordstyle=,%
-  columns=fullflexible,keepspaces,%
-  aboveskip=\smallskipamount,%
-  belowskip=\smallskipamount,%
-  language=[LaTeX]TeX,%
-  texcl,%
-}
-\RequirePackage{silence}[2012/07/02]
-\RequirePackage{filemod}[2011/09/19]
-\WarningFilter*{ifplatform}{^^J \space\space\space shell escape is disabled}
-\RequirePackage{ifplatform}[2010/10/22]
 \PassOptionsToPackage{hyperindex=false,colorlinks,linkcolor=blue}{hyperref}
 \PassOptionsToPackage{open,openlevel=0}{bookmark}
 \AfterPackage*{hyperref}{%
@@ -232,7 +199,6 @@
     defined. At least the package `url' is loaded.
   }%
   \RequirePackage{url}[2013/09/16]%
-  \robustify\url%
   \providecommand*\hypersetup[1]{}%
   \providecommand*\hyperdef[3]{\label{#1.#2}#3}%
   \providerobustcmd*\hyperref{\@ifnextchar[{\tud@hyperref}{\tud@@hyperref}}
@@ -255,6 +221,134 @@
   \providecommand*\tudhyperref[2]{#2}%
   \providecommand*\autorefname[1][]{??\xspace}%
 }
+\RequirePackage{varioref}[2011/10/02]
+\renewcommand*\fullref[1]{\hyperref[#1]{\autoref*{#1} \vpageref{#1}}}
+\newcommand*\hrfn[2]{%
+  \href{#1}{\trim@spaces{#2}}%
+  \footnote{%
+    \scalebox{0.95}{%
+      \def\_{_}%
+      \edef\@tempa{#1}%
+      \strut\expandafter\url\expandafter{\@tempa}%
+    }%
+  }%
+}
+\RequirePackage{babel}[2014/03/24]
+\AfterPackage*{hyperref}{%
+  \patchcmd{\pdfstringdef}{\csname HyPsd@babel@}{%
+    \let\bbl@info\@gobble\csname HyPsd@babel@%
+  }{}{\tud@patch@wrn{pdfstringdef}}%
+}
+\AfterPackage*{hyperref}{\RequirePackage[babel]{microtype}[2013/05/23]}
+\TUD@UnwindPackage{hyperref}{\RequirePackage[babel]{microtype}[2013/05/23]}
+\RequirePackage{scrwfile}[2013/08/05]
+\RequirePackage{silence}[2012/07/02]
+\RequirePackage{filecontents}[2011/10/08]
+\WarningFilter[Tutorial]{latex}{Overwriting file}%
+\newrobustcmd*\bsc{\@backslashchar}
+\newrobustcmd*\suffix[1]{\begingroup~\footnotesize(#1)\endgroup}
+\newcommand*\NewExpandableDocumentCommand[3]{%
+  \NewDocumentCommand#1{#2}{#3}%
+  \DeclareExpandableDocumentCommand#1{#2}{#3}%
+}
+\NewExpandableDocumentCommand\@Application{sm}{#2}
+\newcommand*\Application[1]{\ifdin{#1}{\mbox{\textsbs{#1}}}}
+\NewExpandableDocumentCommand\@Distribution{sm}{#2}
+\newcommand*\Distribution[1]{\ifdin{#1}{\mbox{\textsbn{#1}}}}
+\newcommand*\File[1]{\ifdin{#1}{\mbox{\textsbn{#1}}}}
+\NewExpandableDocumentCommand\@Class{sm}{#2}
+\NewDocumentCommand\Class{sm}{%
+  \ifdin{#2}{%
+    \IfBooleanTF{#1}{%
+      \tudhyperref{files:#2}{\textsbn{#2}}%
+    }{%
+      \textsbn{#2}%
+    }%
+    \index[files]{%
+      \begingroup\protect\sbnfont#2\endgroup\nobreakspace{\idxfont(Klasse)}%
+    }%
+  }%
+}
+\NewExpandableDocumentCommand\@Package{sm}{#2}
+\NewDocumentCommand\Package{smd<>}{%
+  \ifdin{#2}{%
+    \IfBooleanTF{#1}{%
+      \tudhyperref{files:#2}{\textsbn{#2}}%
+    }{%
+      \IfValueTF{#3}{%
+        \href{http://www.ctan.org/pkg/#3}{\textsbn{#2}}%
+      }{%
+        \href{http://www.ctan.org/pkg/#2}{\textsbn{#2}}%
+      }%
+    }%
+    \index[files]{%
+      \begingroup\protect\sbnfont#2\endgroup\nobreakspace{\idxfont(Paket)}%
+    }%
+  }%
+}
+\NewExpandableDocumentCommand\@Option{sm}{#2}
+\NewDocumentCommand\Option{smo}{%
+  \ifdin{#2}{%
+    \IfBooleanTF{#1}{%
+      \tudhyperref{options:#2}{\texttt{#2}}\IfValueT{#3}{\texttt{=#3}}%
+    }{%
+      \texttt{#2}\IfValueT{#3}{\texttt{=#3}}%
+    }%
+    \index[options]{\begingroup\ttfamily#2\endgroup}%
+  }%
+}
+\NewExpandableDocumentCommand\@Environment{sm}{#2}
+\NewDocumentCommand\Environment{sm}{%
+  \ifdin{#2}{%
+    \IfBooleanTF{#1}{%
+      \tudhyperref{macros:#2}{\texttt{#2}}%
+    }{%
+      \texttt{#2}%
+    }%
+    \index[macros]{\begingroup\ttfamily#2\endgroup}%
+  }%
+}
+\NewExpandableDocumentCommand\@Macro{sm}{#2}
+\NewDocumentCommand\Macro{sm}{%
+  \ifdin{\bsc#2}{%
+    \IfBooleanTF{#1}{%
+      \tudhyperref{macros:#2}{\texttt{\bsc#2}}%
+    }{%
+      \texttt{\bsc#2}%
+    }%
+    \index[macros]{\begingroup\ttfamily\bsc#2\endgroup}%
+  }%
+}
+\NewExpandableDocumentCommand\@Length{sm}{#2}
+\NewDocumentCommand\Length{sm}{%
+  \ifdin{\bsc#2}{%
+    \IfBooleanTF{#1}{%
+      \tudhyperref{macros:#2}{\texttt{\bsc#2}}%
+    }{%
+      \texttt{\bsc#2}%
+    }%
+    \index[macros]{%
+      \begingroup\ttfamily\bsc#2\endgroup\nobreakspace{\idxfont(L\"ange)}%
+    }%
+  }%
+}
+\newcommand*\@TUDScript{TUD-KOMA-Script}
+\newrobustcmd*\Path[1]{\mbox{\texttt{#1}}}
+\newrobustcmd*\PValue[1]{\mbox{\texttt{#1}}}
+\newrobustcmd*\PName[1]{\PValue{\textsl{<#1>}}}
+\newrobustcmd*\PValueName[1]{\PName{#1}}
+\newrobustcmd*\textOR{\PValue{\,\textbardbl\,}}
+\newrobustcmd*\PSet{\PName{Einstellung}}
+\newrobustcmd*\PBoolean{\PName{Ein-Aus-Wert}}
+\newrobustcmd*\PBName[1]{\PBoolean\textOR\PName{#1}}
+\newrobustcmd*\Parameter[1]{\mbox{\texttt{\{}\PName{#1}\texttt{\}}}}
+\newrobustcmd*\OParameter[1]{\mbox{\texttt{[}\PName{#1}\texttt{]}}}
+\newrobustcmd*\LParameter{\mbox{\texttt{[}\PName{Parameterliste}\texttt{]}}}
+\newrobustcmd*\OLParameter[1]{%
+  \mbox{\texttt{[}\PName{#1}\textOR\PName{Parameterliste}\texttt{]}}%
+}
+\newrobustcmd*\PParameter[1]{\mbox{\texttt{\{#1\}}}}
+\newrobustcmd*\POParameter[1]{\mbox{\texttt{[#1]}}}
 \PassOptionsToPackage{xindy,splitindex}{imakeidx}
 \RequirePackage{imakeidx}[2013/07/11]
 \indexsetup{%
@@ -347,33 +441,42 @@
 )^^J%
 }
 \closeout\tud@write@i
-\newcommand*\xdyopt{-M \jobname-temp.xdy -L german-din}
-\makeindex[title={Klassen- und Paketoptionen},name=options,options=\xdyopt]%
-\makeindex[%
-  title={Umgebungen, Befehle und Seitenstile},name=macros,options=\xdyopt%
-]%
-\makeindex[title={Klassen, Pakete und Dateien},name=files,options=\xdyopt]%
-\RequirePackage{scrwfile}[2013/08/05]
-\RequirePackage{filecontents}[2011/10/08]
-\WarningFilter[Tutorial]{latex}{Overwriting file}%
-\newcommand*\idxfont{}
-\let\idxfont\footnotesize
-\robustify{\idxfont}
-\newrobustcmd*\bsc{\@backslashchar}
-\newcommand*\suffix[1]{\begingroup~\footnotesize(#1)\endgroup}
-\newcommand*\tud@shellescape@wrn{%
-  \PackageWarning%
-  {tudscrman}{%
-    You have to recompile this document with\MessageBreak%
-    activated shell escape option%
+\NewDocumentCommand\makexindyindex{somo}{%
+  \let\@tempb\@empty%
+  \IfBooleanT{#1}{%
+    \def\@tempc{\jobname-#4-declare.idx}%
+    \makeindex[name={#4-declare}]%
+    \IfFileExists{\@tempc}{%
+      \edef\@tempb{-o \jobname-#4.ind \@tempc}%
+    }{\ClassWarning{tudscrman}{File \@tempc\space not found}}%
   }%
-  \global\let\tud@shellescape@wrn\relax%
+  \protected@edef\@tempa{%
+    title={#3},%
+    columnsep=\noexpand\the\columnsep,%
+    \IfValueTF{#4}{%
+      name={#4},%
+      options={-M \jobname-temp.xdy -L german-din -t \jobname-#4.xlg \@tempb},%
+    }{%
+      options={-M \jobname-temp.xdy -L german-din -t \jobname.xlg},%
+    }%
+    \IfValueT{#2}{#2}%
+  }%
+  \expandafter\makeindex\expandafter[\@tempa]%
 }
-\newcommand*\pdfexpandableoutline[1]{%
-  \AfterPackage*{hyperref}{\pdfstringdefDisableCommands{\csletcs{#1}{@#1}}}%
+\makexindyindex*{Klassen- und Paketoptionen}[options]
+\makexindyindex*{Befehle und Umgebungen mit dazugeh\"origen Parametern}[macros]
+\makexindyindex*{Klassen, Pakete und Dateien}[files]
+\undef\makexindyindex
+\RequirePackage{listings}[2014/03/04]
+\lstdefinestyle{tudscr}{%
+  basicstyle=\ttfamily\ifdef{\setstretch}{\setstretch{1}}{},%
+  keywordstyle=,%
+  columns=fullflexible,keepspaces,%
+  aboveskip=\smallskipamount,%
+  belowskip=\smallskipamount,%
+  language=[LaTeX]TeX,%
+  texcl,%
 }
-\newcommand*\@TUDScript{TUD-KOMA-Script}
-\pdfexpandableoutline{TUDScript}
 \newenvironment{Preamble}{\tud@tut@pre}{%
   \tud@tut@post%
   \tud@tut@append{\tud@write@i}%
@@ -645,103 +748,16 @@
   \tud@tut@readtostream{\jobname-trunk-temp.tex}{\tud@write@ii}%
   \immediate\closeout\tud@write@ii
 }
-\newcommand*\Application[1]{\ifdin{#1}{\mbox{\textsbs{#1}}}}
-\newcommand*\Distribution[1]{\ifdin{#1}{\mbox{\textsbn{#1}}}}
-\newcommand*\File[1]{\ifdin{#1}{\mbox{\textsbn{#1}}}}
-\NewDocumentCommand\Class{sm}{%
-  \ifdin{#2}{%
-    \IfBooleanTF{#1}{%
-      \tudhyperref{files:#2}{\textsbn{#2}}%
-    }{%
-      \textsbn{#2}%
-    }%
-    \index[files]{%
-      \begingroup\protect\sbnfont#2\endgroup\nobreakspace{\idxfont(Klasse)}%
-    }%
+\RequirePackage{filemod}[2011/09/19]
+\RequirePackage{ifplatform}[2010/10/22]
+\newcommand*\tud@shellescape@wrn{%
+  \PackageWarning%
+  {tudscrman}{%
+    You have to recompile this document with\MessageBreak%
+    activated shell escape option%
   }%
+  \global\let\tud@shellescape@wrn\relax%
 }
-\DeclareExpandableDocumentCommand\@Class{sm}{#2}
-\pdfexpandableoutline{Class}
-\NewDocumentCommand\Package{smd<>}{%
-  \ifdin{#2}{%
-    \IfBooleanTF{#1}{%
-      \tudhyperref{files:#2}{\textsbn{#2}}%
-    }{%
-      \IfValueTF{#3}{%
-        \href{http://www.ctan.org/pkg/#3}{\textsbn{#2}}%
-      }{%
-        \href{http://www.ctan.org/pkg/#2}{\textsbn{#2}}%
-      }%
-    }%
-    \index[files]{%
-      \begingroup\protect\sbnfont#2\endgroup\nobreakspace{\idxfont(Paket)}%
-    }%
-  }%
-}
-\DeclareExpandableDocumentCommand\@Package{sm}{#2}
-\pdfexpandableoutline{Package}
-\NewDocumentCommand\Option{smo}{%
-  \ifdin{#2}{%
-    \IfBooleanTF{#1}{%
-      \tudhyperref{options:#2}{\texttt{#2}}\IfValueT{#3}{\texttt{=#3}}%
-    }{%
-      \texttt{#2}\IfValueT{#3}{\texttt{=#3}}%
-    }%
-    \index[options]{\begingroup\ttfamily#2\endgroup}%
-  }%
-}
-\DeclareExpandableDocumentCommand\@Option{sm}{#2}
-\pdfexpandableoutline{Option}
-\NewDocumentCommand\Environment{sm}{%
-  \ifdin{#2}{%
-    \IfBooleanTF{#1}{%
-      \tudhyperref{macros:#2}{\texttt{#2}}%
-    }{%
-      \texttt{#2}%
-    }%
-    \index[macros]{\begingroup\ttfamily#2\endgroup}%
-  }%
-}
-\DeclareExpandableDocumentCommand\@Environment{sm}{#2}
-\pdfexpandableoutline{Environment}%
-\NewDocumentCommand\Macro{sm}{%
-  \ifdin{\bsc#2}{%
-    \IfBooleanTF{#1}{%
-      \tudhyperref{macros:#2}{\texttt{\bsc#2}}%
-    }{%
-      \texttt{\bsc#2}%
-    }%
-    \index[macros]{\begingroup\ttfamily\bsc#2\endgroup}%
-  }%
-}
-\DeclareExpandableDocumentCommand\@Macro{sm}{#2}
-\NewDocumentCommand\Length{sm}{%
-  \ifdin{\bsc#2}{%
-    \IfBooleanTF{#1}{%
-      \tudhyperref{macros:#2}{\texttt{\bsc#2}}%
-    }{%
-      \texttt{\bsc#2}%
-    }%
-    \index[macros]{%
-      \begingroup\ttfamily\bsc#2\endgroup\nobreakspace{\idxfont(L\"ange)}%
-    }%
-  }%
-}
-\newrobustcmd*\Path[1]{\mbox{\texttt{#1}}}
-\newrobustcmd*\textOR{\,\textbardbl\,}
-\newrobustcmd*\PValue[1]{\mbox{\texttt{#1}}}
-\newrobustcmd*\PName[1]{\PValue{\textsl{<#1>}}}
-\newrobustcmd*\PSet{\PName{Einstellung}}
-\newrobustcmd*\PBoolean{\PName{Ein-Aus-Wert}}
-\newrobustcmd*\PBName[1]{\PBoolean\textOR\PName{#1}}
-\newrobustcmd*\Parameter[1]{\mbox{\texttt{\{}\PName{#1}\texttt{\}}}}
-\newrobustcmd*\OParameter[1]{\mbox{\texttt{[}\PName{#1}\texttt{]}}}
-\newrobustcmd*\LParameter{\mbox{\texttt{[}\PName{Parameterliste}\texttt{]}}}
-\newrobustcmd*\OLParameter[1]{%
-  \mbox{\texttt{[}\PName{#1}\textOR\PName{Parameterliste}\texttt{]}}%
-}
-\newrobustcmd*\PParameter[1]{\mbox{\texttt{\{#1\}}}}
-\newrobustcmd*\POParameter[1]{\mbox{\texttt{[#1]}}}
 \newcommand*\Tutorial[1]{\href{#1.pdf}{\textsbn{#1.pdf}}}
 \RequirePackage{ifpdf}[2011/01/30]
 \ifpdf
@@ -756,6 +772,8 @@
 \else
   \TUDoptions{final=true}
 \fi
+\PassOptionsToPackage{quiet}{marginnote}
+\RequirePackage{marginnote}[2012/03/29]
 \newcommand*\@ToDo{}
 \NewDocumentCommand\ToDo{somo}{%
   \ifbool{@tud@todo}{%
@@ -805,6 +823,26 @@
 }
 \newcommand*\ListOfToDo{\if@tud@todo\clearpage\listoftodos\fi}
 \reversemarginpar
+\newcommand*\Attention[1]{\marginnote{\fbox{Achtung!}}\emph{#1}}
+\NewDocumentCommand\Forum{s}{%
+  \IfBooleanTF{#1}{%
+    \url{http://latex.wcms-file3.tu-dresden.de/phpBB3/}%
+  }{%
+    \hrfn{http://latex.wcms-file3.tu-dresden.de/phpBB3/}{TUD-\LaTeX-Forum}%
+  }%
+  \xspace%
+}
+\NewDocumentCommand\scrguide{sO{\KOMAScript-Handbuch}}{%
+  \def\@tempc{%
+    http://mirrors.ctan.org/macros/latex/contrib/koma-script/doc/scrguide.pdf%
+  }%
+  \IfBooleanTF{#1}{%
+    \href{\@tempc}{#2}%
+  }{%
+    \hrfn{\@tempc}{#2}%
+  }%
+  \xspace%
+}
 \newcommand*\PrintIndex{%
   \begingroup%
     \@printindex[options]%
@@ -833,17 +871,22 @@
 \RequirePackage{textcomp}[2005/09/27]
 \RequirePackage{setspace}[2011/12/19]
 \setstretch{1.1}
-\RequirePackage{scrhack}[2014/02/27]
+\AfterPackage*{inputenc}{\RequirePackage{csquotes}[2011/10/22]}
+\TUD@UnwindPackage{csquotes}{%
+  \PackageWarning%
+    {tudscrman}{Package `csquotes' not loaded}%
+  \providecommand\enquote[1]{\glqg#1\grqq{}}%
+}
+\PassOptionsToPackage{vskip=\smallskipamount}{quoting}
+\RequirePackage{quoting}[2014/01/28]
+\RequirePackage{isodate}[2010/01/03]
+\RequirePackage{hologo}[2012/04/26]
 \newcommand*\CD{Corporate Design\xspace}
 \newcommand*\CDs{Corporate Designs\xspace}
 \newcommand*\TUD{Technische Universit\"at Dresden\xspace}
 \newcommand*\TnUD{Technischen Universit\"at Dresden\xspace}
-\newcommand*\DDC{%
-  \mbox{%
-    D\kern.05em R\kern.05em E\kern.05em S\kern.05em D\kern.05em E\kern.05em
-    N\kern.1em-\kern.1em concept%
-  }\xspace%
-}
+\newcommand*\TUDCD{\CD der \TnUD}
+\newcommand*\TUDCDs{\CDs der \TnUD}
 \AfterPackage*{babel}{%
   \@expandtwoargs\in@{,english,}{,\bbl@loaded,}%
   \ifin@%
@@ -851,35 +894,21 @@
     \renewcommand*\CDs{\foreignlanguage{english}{Corporate Designs}\xspace}%
   \fi%
 }
+\newrobustcmd*\DDC%
+{%
+  \mbox{%
+    D\kern.05em R\kern.05em E\kern.05em S\kern.05em %
+    D\kern.05em E\kern.05em N\kern.1em-\kern.1em concept%
+  }\xspace%
+}
 \newcommand*\Univers{\textubn{Univers}\xspace}
-\newcommand*\DIN{\textdbn{DIN\nobreakspace{}BOLD}\xspace}
+\newcommand*\DIN{\textdbn{DIN~BOLD}\xspace}
 \newcommand*\textsbn{}
 \newrobustcmd*\sbnfont{\sffamily\bfseries\upshape}
 \DeclareTextFontCommand\textsbn{\sbnfont}
 \newcommand*\textsbs{}
 \newrobustcmd*\sbsfont{\sffamily\bfseries\slshape}
 \DeclareTextFontCommand\textsbs{\sbsfont}
-\newcommand*\Attention[1]{\marginnote{\fbox{Achtung!}}\emph{#1}}
-\NewDocumentCommand\Forum{s}{%
-  \IfBooleanTF{#1}{%
-    \url{http://latex.wcms-file3.tu-dresden.de/phpBB3/}%
-  }{%
-    \hrfn{http://latex.wcms-file3.tu-dresden.de/phpBB3/}{TUD-\LaTeX-Forum}%
-  }%
-  \xspace%
-}
-\newcommand*\hrfn[2]{\href{#1}{#2}\footnote{\scalebox{0.97}{\url{#1}}}}
-\NewDocumentCommand\scrguide{sO{\KOMAScript-Handbuch}}{%
-  \def\@tempc{%
-    http://mirrors.ctan.org/macros/latex/contrib/koma-script/doc/scrguide.pdf%
-  }%
-  \IfBooleanTF{#1}{%
-    \href{\@tempc}{#2}%
-  }{%
-    \hrfn{\@tempc}{#2}%
-  }%
-  \xspace%
-}
 %%% From File: tudscr-fields.dtx
 %%% From File: tudscr-locale.dtx
 \endinput
