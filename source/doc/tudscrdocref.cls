@@ -86,7 +86,17 @@
   }%
 }{}
 %%% From File: tudscr-doc.dtx
-\LoadClassWithOptions{scrdoc}
+\IfFileExists{scrbase.sty}{%
+  \RequirePackage{scrbase}[2013/12/19]%
+  \newcommand*\tud@maketitle{}%
+  \AfterClass{scrartcl}{\let\tud@maketitle\@maketitle}%
+  \AfterClass{scrdoc}{\let\@maketitle\tud@maketitle}%
+}{}
+\IfFileExists{scrdoc.cls}{%
+  \LoadClassWithOptions{scrdoc}%
+}{%
+  \LoadClassWithOptions{ltxdoc}%
+}
 \setlength\marginparwidth{140pt}
 \setlength\marginparsep{8pt}
 \setlength\oddsidemargin{\dimexpr\marginparwidth+\marginparsep-1in\relax}
@@ -156,8 +166,12 @@
   \AfterPackage*{inputenc}{\RequirePackage{csquotes}[2011/10/22]}%
 }
 \AtBeginDocument{%
-  \providecommand*\url[1]{\texttt{#1}}%
-  \providecommand*\texorpdfstring[2]{#1}%
+  \@ifpackageloaded{hyperref}{}{%
+    \RequirePackage{url}[2013/09/16]%
+    \providecommand*\hypersetup[1]{}%
+    \providecommand*\phantomsection{}%
+    \providecommand*\texorpdfstring[2]{#1}%
+  }%
   \@ifpackageloaded{babel}{}{%
     \ClassWarning{\TUDClassName}{Package `babel' not loaded}%
     \let\selectlanguage\@gobble%
@@ -183,16 +197,14 @@
   \fi%
 }
 %%% From File: tudscr-manual.dtx
+\RequirePackage{scrhack}[2014/02/27]
 \RequirePackage{xspace}[2009/10/20]
 \xspaceaddexceptions{"=}
 \newcommand*\vTUDScript{}
-\AtBeginDocument{%
-  \def\@tempb#1 #2 #3\relax#4\relax{\def\vTUDScript{#2}}%
-  \edef\@tempa{\TUDVersion}%
-  \expandafter\@tempb\@tempa\relax? ? \relax\relax%
-}
+\def\@tempb#1 #2 #3\relax#4\relax{\def\vTUDScript{#2}}%
+\edef\@tempa{\TUDVersion}%
+\expandafter\@tempb\@tempa\relax? ? \relax\relax%
 \newcommand*\vKOMAScript{v3.17\xspace}
-\RequirePackage{scrhack}[2014/02/27]
 \newcommand*\CD{Corporate Design\xspace}
 \newcommand*\CDs{Corporate Designs\xspace}
 \newcommand*\TUD{Technische Universit\"at Dresden\xspace}

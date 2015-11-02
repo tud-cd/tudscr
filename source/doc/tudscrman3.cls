@@ -151,7 +151,10 @@
 \let\tud@todo@type@neg\relax
 \TUD@key{ToDo}[true]{%
   \TUD@set@ifkey{ToDo}{@tud@todo}{#1}%
-  \ifx\FamilyKeyState\FamilyKeyStateProcessed\else%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \let\tud@todo@type@pos\relax%
+    \let\tud@todo@type@neg\relax%
+  \else%
     \def\@tempa not##1##2##3##4\@nil{%
       \ifstr{##1##2##3}{not}{%
         \if\relax##4\relax\else%
@@ -174,18 +177,19 @@
 \TUDProcessOptions\relax
 \LoadClass{\TUDClassName@Parent}
 %%% From File: tudscr-manual.dtx
-\RequirePackage{xspace}[2009/10/20]
-\xspaceaddexceptions{"=}
-\newcommand*\vTUDScript{}
-\AtBeginDocument{%
-  \def\@tempb#1 #2 #3\relax#4\relax{\def\vTUDScript{#2}}%
-  \edef\@tempa{\TUDVersion}%
-  \expandafter\@tempb\@tempa\relax? ? \relax\relax%
-}
-\newcommand*\vKOMAScript{v3.17\xspace}
 \RequirePackage{scrhack}[2014/02/27]
 \PassOptionsToPackage{log-declarations=false}{xparse}
 \RequirePackage{xparse}[2013/12/31]
+\PassOptionsToPackage{quiet}{marginnote}
+\RequirePackage{marginnote}[2012/03/29]
+\reversemarginpar
+\RequirePackage{xspace}[2009/10/20]
+\xspaceaddexceptions{"=}
+\newcommand*\vTUDScript{}
+\def\@tempb#1 #2 #3\relax#4\relax{\def\vTUDScript{#2}}%
+\edef\@tempa{\TUDVersion}%
+\expandafter\@tempb\@tempa\relax? ? \relax\relax%
+\newcommand*\vKOMAScript{v3.17\xspace}
 \newtoks\tud@toks@
 \newcommand*\eaddto@hook[2]{%
   \expandafter\addto@hook\expandafter#1\expandafter{#2}%
@@ -194,7 +198,7 @@
   \begingroup%
     \toks@{\def\@tempa##1}%
     \eaddto@hook\toks@{\detokenize{#2}}%
-    \addto@hook\toks@{##2\@nnil{\@tempb{##1}{##2}}}%
+    \addto@hook\toks@{##2\@nil{\@tempb{##1}{##2}}}%
     \the\toks@%
     \def\@tempb##1##2{%
       \if\relax\detokenize{##2}\relax%
@@ -202,14 +206,14 @@
         \let\@tempc\relax%
       \else%
         \appto#1{##1#3}%
-        \def\@tempc{\@tempa##2\@nnil}%
+        \def\@tempc{\@tempa##2\@nil}%
       \fi%
       \@tempc%
     }%
     \toks@{\@tempa}%
     \edef\@tempc{\expandafter\detokenize\expandafter{#1}}%
     \eaddto@hook\toks@{\@tempc}%
-    \eaddto@hook\toks@{\detokenize{#2}\@nnil}%
+    \eaddto@hook\toks@{\detokenize{#2}\@nil}%
     \def#1{}%
     \the\toks@%
     \edef\tud@reserved{%
@@ -397,6 +401,8 @@
   \providecommand*\href[3][]{#3}%
   \providecommand*\hyperpage[1]{#1}%
   \providecommand*\autoref{??\xspace\@ifstar{\ref}{\ref}}%
+  \providecommand*\phantomsection{}%
+  \providecommand*\texorpdfstring[2]{#1}%
   \tud@locale@german{\partautorefname}{Teil}%
   \tud@locale@german{\chapterautorefname}{Kapitel}%
   \tud@locale@german{\sectionautorefname}{Unterkapitel}%
@@ -467,12 +473,12 @@
       \def\@tempa{\emph{entf\"allt}}%
       \in@{:}{#1}%
       \ifin@%
-        \def\@tempb##1:##2\@nnil{%
+        \def\@tempb##1:##2\@nil{%
           \if\relax\detokenize{##2}\relax\else%
             \def\@tempa{\seeref{##2'page'}}%
           \fi%
         }%
-        \@tempb#1\@nnil%
+        \@tempb#1\@nil%
       \fi%
       \eaddto@hook\toks@{\expandafter{\@tempa}}%
       \the\toks@%
@@ -708,6 +714,7 @@
   \Option@Value{#1}#2=#3=(#4)'#5'|#6|%
 }
 \NewDocumentCommand\Option@Value{mmd==d==d()d''d||}{%
+  \IfValueT{#4}{\tud@keyval@error}%
   \if@changedat%
     \@ProcessChangedAt{\Option{#2}}=#3=(#5)[Option]%
   \else%
@@ -715,7 +722,6 @@
     \@ProcessMarkup{\Option{#2}}=#3=(#5)'#6'%
     \@ProcessIndex{\Option{#2}}=#3=(#5){#1}|#7|%
   \fi%
-  \IfValueT{#4}{\tud@keyval@error}%
 }
 \NewExpandableDocumentCommand\@Environment{sm}{#2}
 \NewDocumentCommand\Environment{smod()d''d||}{%
@@ -723,9 +729,9 @@
     \@ProcessChangedAt{\Environment{#2}}(#4)[Umgebung]%
   \else%
     \@SetMarkupFormat{\ttfamily}(%
-      \ttfamily \bsc{}begin\{#2\}\IfValueT{#3}{#3}\tabularnewline%
-      \ttfamily \dots\tabularnewline%
-      \ttfamily \bsc{}end\{#2\}%
+      \ttfamily\bsc{}begin\{#2\}\IfValueT{#3}{#3}\tabularnewline%
+      \ttfamily\dots\tabularnewline%
+      \ttfamily\bsc{}end\{#2\}%
     )%
     \@ProcessMarkup{\Environment{#2}}[#3](#4)'#5'%
     \@ProcessIndex{\Environment{#2}}(#4){#1}|#6|[Umgebung]%
@@ -746,6 +752,7 @@
   \Key@Value{#1}{#2}#3=#4=(#5)'#6'|#7|%
 }
 \NewDocumentCommand\Key@Value{mmmd==d==d()d''d||}{%
+  \IfValueT{#5}{\tud@keyval@error}%
   \if@changedat%
     \@ProcessChangedAt{\Key{#2}{#3}}=#4=(#6)[Parameter]%
   \else%
@@ -753,7 +760,6 @@
     \@ProcessMarkup{\Key{#2}{#3}}=#4=(#6)'#7'%
     \@ProcessIndex{\Key{#2}{#3}}=#4=(#6){#1}|#8|%
   \fi%
-  \IfValueT{#5}{\tud@keyval@error}%
 }
 \NewExpandableDocumentCommand\@Term{sm}{#2}
 \NewDocumentCommand\Term{smd()d''d||}{%
@@ -817,11 +823,11 @@
     \@ProcessIndex{\Counter{#2}}(#3){#1}|#5|[Z\"ahler]%
   \fi%
 }
+\newcommand*\@TUDScript{TUD-KOMA-Script}
 \newrobustcmd*\Path[1]{\mbox{\texttt{#1}}}
 \newrobustcmd*\PValue[1]{\mbox{\texttt{#1}}}
 \newrobustcmd*\PName[1]{\PValue{\textsl{<#1>}}}
 \newrobustcmd*\PValueName[1]{\PName{#1}}
-\newrobustcmd*\textOR{\PValue{\,\textbardbl\,}}
 \newrobustcmd*\PSet{\PName{Einstellung}}
 \newrobustcmd*\PBoolean{\PName{Ein-Aus-Wert}}
 \newrobustcmd*\PBName[1]{\PBoolean\textOR\PName{#1}}
@@ -833,10 +839,11 @@
 }
 \newrobustcmd*\PParameter[1]{\mbox{\texttt{\{#1\}}}}
 \newrobustcmd*\POParameter[1]{\mbox{\texttt{[#1]}}}
+\newrobustcmd*\textOR{\PValue{\,\textbardbl\,}}
 \newcommand*\@onlyPValue{%
   \let\PValue\@firstofone%
-  \let\PValueName\@firstofone%
   \let\PName\@gobble%
+  \let\PValueName\@firstofone%
   \let\PSet\@empty%
   \let\PBoolean\@empty%
   \let\PBName\@gobble%
@@ -846,9 +853,9 @@
   \let\OLParameter\@gobble%
   \let\PParameter\@gobble%
   \let\POParameter\@gobble%
+  \let\textOR\relax%
   \let\emph\@firstofone%
 }
-\newcommand*\@TUDScript{TUD-KOMA-Script}%
 \NewDocumentCommand\@suppressmarkup{s}{%
   \let\Application\@Application%
   \let\Distribution\@Distribution%
@@ -878,6 +885,7 @@
     \let\OLParameter\@firstofone%
     \let\PParameter\@firstofone%
     \let\POParameter\@firstofone%
+    \let\textOR\relax%
     \let\hologoRobust\@firstofone%
     \let\TUDScript\@TUDScript%
     \def\_{-}%
@@ -1230,8 +1238,8 @@
   \fi%
 }
 % TODO §§§ Kombination aus beiden möglich?
-\newrobustcmd\cleversee{\@cleversee{\seename}}
-\newrobustcmd\cleverseealso{\@cleversee{\alsoname}}
+\newrobustcmd*\cleversee{\@cleversee{\seename}}
+\newrobustcmd*\cleverseealso{\@cleversee{\alsoname}}
 \newcommand*\@cleversee{}
 \def\@cleversee#1#2#3\relax{%
   \if\relax\detokenize{#3}\relax%
@@ -1253,6 +1261,10 @@
 \space\space "arabic-page-numbers" ("arabic-numbers") :min-range-length 1^^J%
 )^^J%
 (markup-range :sep "--")^^J%
+(markup-locclass-list^^J%
+\space\space :open "\string\,\string\dotfill\string\,"^^J%
+\space\space :close "\string\relax"^^J%
+)^^J%
 (merge-rule "\@backslashchar[(.*)\@backslashchar]" "" :eregexp)^^J%
 (define-attributes (("declare" "!" "important" "?" "default")))^^J%
 (markup-locref^^J%
@@ -1280,21 +1292,17 @@
 \space\space :open "\string\hyperpage{"^^J%
 \space\space :close "}"^^J%
 )^^J%
-(markup-locclass-list^^J%
-\space\space :open "\string\,\string\dotfill\string\,"^^J%
-\space\space :close "\string\relax"^^J%
-)^^J%
 (markup-crossref-list^^J%
 \space\space :class "see"^^J%
 \space\space :open "\string\cleversee{" :sep "; " :close "}"^^J%
 )^^J%
-(markup-crossref-layer-list^^J%
-\space\space :class "see" ^^J%
-\space\space :sep "\string\,\string\textbar\string\,"^^J%
-)^^J%
 (markup-crossref-list^^J%
 \space\space :class "seealso"^^J%
 \space\space :open "\string\cleverseealso{" :sep "; " :close "}"^^J%
+)^^J%
+(markup-crossref-layer-list^^J%
+\space\space :class "see" ^^J%
+\space\space :sep "\string\,\string\textbar\string\,"^^J%
 )^^J%
 (markup-crossref-layer-list^^J%
 \space\space :class "seealso" ^^J%
@@ -1750,8 +1758,6 @@
     \@printindex[changelog]%
   \endgroup%
 }
-\PassOptionsToPackage{quiet}{marginnote}
-\RequirePackage{marginnote}[2012/03/29]
 \RequirePackage{enumitem}[2011/09/28]
 \setlist{noitemsep}
 \newcommand*\stditem{}
@@ -1763,57 +1769,57 @@
   }{}%
 }
 \newcommand*\tud@values{}
-\NewDocumentEnvironment{values}{go}{%
+\NewDocumentEnvironment{values}{mo}{%
   \def\tud@values{#1}%
-  \IfValueF{#1}{%
-    \let\tud@values\@empty%
-    \ClassWarning{tudscrman}{argument for values is missing}%
-  }%
-  \@values%
+  \IfValueTF{#2}{\@values[#2]}{\@values}%
 }{%
   \end@values%
 }
 \newlist{@values}{description}{1}
 \setlist[@values]{%
-  topsep=\smallskipamount,labelwidth=\columnwidth,labelsep=0pt,%
-  font=\normalfont\ttfamily,before=\before@item{values}%
+  topsep=\smallskipamount,labelwidth=\linewidth,labelsep=0pt,%
+  font=\normalfont,parsep=\parskip,listparindent=\parindent,%
+  before=\before@item{values}%
 }
 \DeclareListParser*{\forslashlist}{/}%
 \NewDocumentCommand\tud@item@values{sood()}{%
-  \let\@tempa\@empty%
-  \IfValueT{#2}{%
-    \def\@tempa##1{%
+  \IfValueTF{#2}{%
+    \let\@tempc\@empty%
+    \def\tud@reserved##1{%
       \if@tempswa%
-        \appto\@tempc{/##1}%
+        \appto\@tempb{/##1}%
       \else%
         \@tempswatrue%
-        \def\@tempb{##1}%
-        \let\@tempc\@empty%
+        \let\@tempb\@empty%
+        \def\@tempc{##1}%
       \fi%
     }%
     \@tempswafalse%
-    \forslashlist{\@tempa}{#2}%
-    \@getlabel*\@templabel{\@bundle:\tud@values}=\@tempb=%
-    \protected@edef\@tempb{%
-      =\IfBooleanTF{#1}{\noexpand\emph}{\@firstofone}{\@tempb}='none'|declare|%
+    \forslashlist{\tud@reserved}{#2}%
+    \edef\@tempa{\expandonce\tud@values}%
+    \protected@eappto\@tempa{%
+      =\IfBooleanTF{#1}{\noexpand\emph}{\@firstofone}{\@tempc}=%
     }%
-    \edef\@tempc{%
-      \noexpand\normalfont%
+    \appto\@tempa{'none'|declare|}%
+    \edef\@tempb{%
       \IfBooleanTF{#1}{\noexpand\emph}{\@firstofone}{%
-        \noexpand\PValue{\@tempc}\noexpand\normalfont%
+        \noexpand\PValue{\@tempb}%
       }%
     }%
     \IfBooleanTF{#1}{%
-      \appto\@tempc{\suffix{S\"aumniswert}}%
+      \appto\@tempb{\suffix{S\"aumniswert}}%
     }{%
-      \IfValueT{#3}{\appto\@tempc{\suffix{S\"aumniswert f\"ur #3}}}%
+      \IfValueT{#3}{\appto\@tempb{\suffix{S\"aumniswert f\"ur #3}}}%
     }%
-    \IfValueT{#4}{\appto\@tempc{\suffix{#4}}}%
+    \IfValueT{#4}{\appto\@tempb{\suffix{#4}}}%
+    \@getlabel*\@templabel{\@bundle:\tud@values}=\@tempc=%
+    \stditem[\tudhyperdef{\@templabel}\@tempa\@tempb]%
+  }{%
+    \stditem%
   }%
-  \stditem[\tudhyperdef{\@templabel}\expandafter\tud@values\@tempb\@tempc]%
 }
-\NewDocumentCommand\itemfalse{sood()}{\item@bool{#1}{false/off/no}[#2][#3](#4)}
 \NewDocumentCommand\itemtrue{sood()}{\item@bool{#1}{true/on/yes}[#2][#3](#4)}
+\NewDocumentCommand\itemfalse{sood()}{\item@bool{#1}{false/off/no}[#2][#3](#4)}
 \NewDocumentCommand\item@bool{mmr[]r[]r()}{%
   \toks@{\item}%
   \IfBooleanT{#1}{\addto@hook\toks@{*}}%
@@ -1825,8 +1831,9 @@
 }
 \newlist{packages}{description}{2}
 \setlist[packages]{%
-  topsep=\medskipamount,labelwidth=\linewidth,labelsep=0pt,font=\normalfont,%
-  parsep=\parskip,listparindent=\parindent,before=\before@item{packages}%
+  topsep=\smallskipamount,labelwidth=\linewidth,labelsep=0pt,%
+  font=\normalfont,parsep=\parskip,listparindent=\parindent,%
+  before=\before@item{packages}%
 }
 \NewDocumentCommand\tud@item@packages{od<>d()}{%
   \def\@tempa##1{%
@@ -1866,6 +1873,7 @@
 \newcommand*\@allcolumnpar[1]{%
   \multicolumn{\tabularm@num}{@{}p{\tabularm@wd}@{}}{#1}%
 }
+\RequirePackage{tabularx}[1999/01/07]
 \NewDocumentCommand\TermTable{smg}{%
   \let\@templist\relax%
   \forcsvlist{\listadd\@templist}{#2}%
@@ -1915,12 +1923,12 @@
   language=[LaTeX]TeX,%
   texcl,%
 }
-\RequirePackage{filemod}[2011/09/19]
-\RequirePackage{ifplatform}[2010/10/22]
 \lstnewenvironment{Code}[1][]{\lstset{style=tudscr,#1}}{}
 \newcommand*\tud@currentHref{}
 \BeforeBeginEnvironment{Code}{\global\let\tud@currentHref\@currentHref}
 \AfterEndEnvironment{Code}{\global\let\@currentHref\tud@currentHref}
+\RequirePackage{filemod}[2011/09/19]
+\RequirePackage{ifplatform}[2010/10/22]
 \newcommand*\tud@shellescape@wrn{%
   \ClassWarning%
   {tudscrman}{%
@@ -1999,89 +2007,92 @@
   \TUDoptions{final=true}
 \fi
 \AfterPackage*{todonotes}{%
-  \newcommand*\tud@type@color[2]{%
+  \newcommand*\tud@todo@type@color[2]{%
     \define@boolkey{todonotes}{#1}[true]{%
       \ifdef{\tudprintflag}{}{%
         \ifbool{KV@todonotes@#1}{\setkeys{todonotes}{color=#2}}{}%
       }%
     }%
   }%
-  \tud@type@color{doc}{HKS41!30}%
-  \tud@type@color{rls}{HKS44!50}%
-  \tud@type@color{imp}{HKS57!50}%
-  \tud@type@color{urg}{HKS07!50}%
-  \tud@type@color{nxt}{HKS92!30}%
-  \undef\tud@type@color%
+  \tud@todo@type@color{doc}{HKS41!30}%
+  \tud@todo@type@color{rls}{HKS44!50}%
+  \tud@todo@type@color{imp}{HKS57!50}%
+  \tud@todo@type@color{urg}{HKS07!50}%
+  \tud@todo@type@color{nxt}{HKS92!30}%
+  \undef\tud@todo@type@color%
+  \NewDocumentCommand\ToDo{somo}{%
+    \ifbool{@tud@todo}{%
+      \global\let\tud@currentHref\@currentHref%
+      \begingroup%
+        \let\@tempa\@empty%
+        \IfValueT{#4}{%
+          \def\@tempa{\@ifnextchar v{\@tempb}{\@tempb v}}%
+          \def\@tempb v##1\@nil{\def\@tempc{##1}}%
+          \@tempa #4\@nil%
+          \ifcsdef{tud@v@\@tempc}{%
+            \let\@templist\relax%
+            \listeadd\@templist{\@tempc}%
+            \expandafter\@tempa\vTUDScript\@nil%
+            \listeadd\@templist{\@tempc}%
+            \sortlist\@templist
+            \renewcommand*{\do}[1]{%
+              \ifstr{##1}{\@tempc}{\let\@tempa\@empty}{\def\@tempa{urg}}%
+              \listbreak%
+            }%
+            \dolistloop{\@templist}%
+          }{%
+            \def\@tempa##1.##2##3##4\@nil{##1##2##3}%
+            \edef\@tempc{\expandafter\@tempa\@tempc.000\@nil}%
+            \ifxnumber{\@tempc}{\def\@tempa{nxt}}{\let\@tempa\@empty}%
+          }%
+        }%
+        \IfValueT{#2}{\preto\@tempa{#2,}}%
+        \@tempswafalse%
+        \ifx\tud@todo@type@pos\relax\@tempswatrue\fi%
+        \toks@{\forcsvlist{\@tempb}}%
+        \eaddto@hook\toks@{\expandafter{\@tempa}}%
+        \let\@tempa\@empty%
+        \def\@tempb##1{%
+          \eappto\@tempa{##1,}%
+          \ifinlist{##1}{\tud@todo@type@pos}{\@tempswatrue}{}%
+          \ifinlist{##1}{\tud@todo@type@neg}{\@tempswafalse}{}%
+        }%
+        \the\toks@%
+        \if@tempswa%
+          \ifhmode\par\fi%
+          \let\par\relax%
+          \vskip\medskipamount%
+          \noindent%
+          \toks@\expandafter{\@tempa inline}%
+          \IfBooleanT{#1}{\addto@hook\toks@{,nolist}}%
+          \sbox\z@{%
+            \expandafter\todo\expandafter[\the\toks@]{\trim@spaces{#3}\strut}%
+          }\usebox\z@%
+          \renewcommand*\marginpar[2][]{%
+            \marginnote[##1]{##2}[\dimexpr-\ht\z@+1.6ex+1.75pt\relax]%
+          }%
+          \toks@\expandafter{\@tempa noline,nolist}%
+          \IfValueTF{#4}{%
+            \def\@tempb{\trim@spaces{#4}\strut}%
+          }{%
+            \def\@tempb{ToDo\strut}%
+          }%
+          \settowidth\marginparwidth{\@tempb}%
+          \addtolength\marginparwidth{\dimexpr1.6ex+1pt\relax}%
+          \expandafter\todo\expandafter[\the\toks@]{\@tempb}%
+          \aftergroup\par\aftergroup\noindent%
+        \fi%
+      \endgroup%
+      \global\let\@currentHref\tud@currentHref%
+    }{}%
+    \ignorespaces%
+  }%
+  \newcommand*\ListOfToDo{\if@tud@todo\clearpage\listoftodos\fi}%
 }
-\NewDocumentCommand\ToDo{somo}{%
-  \ifbool{@tud@todo}{%
-    \global\let\tud@currentHref\@currentHref%
-    \begingroup%
-      \let\@tempa\@empty%
-      \IfValueT{#4}{%
-        \def\@tempa{\@ifnextchar v{\@tempb}{\@tempb v}}%
-        \def\@tempb v##1\@nnil{\def\@tempc{##1}}%
-        \@tempa #4\@nnil%
-        \ifcsdef{tud@v@\@tempc}{%
-          \def\@tempa##1v##2.##3##4##5\@nnil{\def\@tempb{##2.##3##4}}%
-          \expandafter\@tempa\TUDVersion\@nnil%
-          \def\@tempa##1.##2\@nnil{##1##2}%
-          \edef\@tempb{\expandafter\@tempa\@tempb\@nnil}%
-          \edef\@tempc{\expandafter\@tempa\@tempc\@nnil}%
-          \ifnum\@tempb>\@tempc\relax%
-            \def\@tempa{urg}%
-          \else%
-            \let\@tempa\@empty%
-          \fi%
-        }{%
-          \def\@tempa##1.##2##3##4\@nnil{##1##2##3}%
-          \edef\@tempc{\expandafter\@tempa\@tempc.000\@nnil}%
-          \ifxnumber{\@tempc}{\def\@tempa{nxt}}{\let\@tempa\@empty}%
-        }%
-      }%
-      \IfValueT{#2}{\preto\@tempa{#2,}}%
-      \@tempswafalse%
-      \ifx\tud@todo@type@pos\relax\@tempswatrue\fi%
-      \toks@{\forcsvlist{\@tempb}}%
-      \eaddto@hook\toks@{\expandafter{\@tempa}}%
-      \let\@tempa\@empty%
-      \def\@tempb##1{%
-        \eappto\@tempa{##1,}%
-        \ifinlist{##1}{\tud@todo@type@pos}{\@tempswatrue}{}%
-        \ifinlist{##1}{\tud@todo@type@neg}{\@tempswafalse}{}%
-      }%
-      \the\toks@%
-      \if@tempswa%
-        \ifhmode\par\fi%
-        \let\par\relax%
-        \vskip\medskipamount%
-        \noindent%
-        \toks@\expandafter{\@tempa inline}%
-        \IfBooleanT{#1}{\addto@hook\toks@{,nolist}}%
-        \sbox\z@{%
-          \expandafter\todo\expandafter[\the\toks@]{\trim@spaces{#3}\strut}%
-        }\usebox\z@%
-        \renewcommand*\marginpar[2][]{%
-          \marginnote[##1]{##2}[\dimexpr-\ht\z@+1.6ex+1.75pt\relax]%
-        }%
-        \toks@\expandafter{\@tempa noline,nolist}%
-        \IfValueTF{#4}{%
-          \def\@tempb{\trim@spaces{#4}\strut}%
-        }{%
-          \def\@tempb{ToDo\strut}%
-        }%
-        \settowidth\marginparwidth{\@tempb}%
-        \addtolength\marginparwidth{\dimexpr1.6ex+1pt\relax}%
-        \expandafter\todo\expandafter[\the\toks@]{\@tempb}%
-        \aftergroup\par\aftergroup\noindent%
-      \fi%
-    \endgroup%
-    \global\let\@currentHref\tud@currentHref%
-  }{}%
-  \ignorespaces%
+\TUD@UnwindPackage{todonotes}{%
+  \NewDocumentCommand\ToDo{somo}{}%
+  \newcommand*\ListOfToDo{}%
 }
-\newcommand*\ListOfToDo{\if@tud@todo\listoftodos\fi}
-\reversemarginpar
 \newcommand*\Attention[1]{\marginnote{\fbox{Achtung!}}\emph{\trim@spaces{#1}}}
 \NewDocumentCommand\Forum{s}{%
   \IfBooleanTF{#1}{%
@@ -2129,7 +2140,6 @@
 \RequirePackage{quoting}[2014/01/28]
 \RequirePackage{isodate}[2010/01/03]
 \RequirePackage{hologo}[2012/04/26]
-\RequirePackage{tabularx}[1999/01/07]
 \RequirePackage{ragged2e}[2009/05/21]
 \RequirePackage{chngcntr}[2009/09/02]
 \counterwithout{footnote}{chapter}
