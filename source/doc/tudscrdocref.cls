@@ -91,12 +91,22 @@
   \newcommand*\tud@maketitle{}%
   \AfterClass{scrartcl}{\let\tud@maketitle\@maketitle}%
   \AfterClass{scrdoc}{\let\@maketitle\tud@maketitle}%
+  \AfterPackage{inputenc}{\RequirePackage{csquotes}[2011/10/22]}%
 }{}
 \IfFileExists{scrdoc.cls}{%
   \LoadClassWithOptions{scrdoc}%
 }{%
   \LoadClassWithOptions{ltxdoc}%
 }
+\title{%
+  \file{\filename}\thanks{%
+    Dies ist Version \fileversion\ von Datei \file{\filename}.%
+  }%
+}
+\author{Falk Hanisch\thanks{\tudscrmail}}
+\date{\filedate}
+\DeclareOption{final}{\let\tudfinalflag\relax}
+\ProcessOptions\relax
 \setlength\marginparwidth{140pt}
 \setlength\marginparsep{8pt}
 \setlength\oddsidemargin{\dimexpr\marginparwidth+\marginparsep-1in\relax}
@@ -108,16 +118,8 @@
 \setlength\headsep{30pt}
 \setlength\footskip{1.25\headsep}
 \setlength\textheight{\dimexpr\paperheight-2\headsep-\footskip\relax}
-\AfterPackage{tudscrfonts}{\AtBeginDocument{\setlength\columnsep{10pt}}}
 \RequirePackage{dox}[2010/12/16]
 \def\generalname{Allgemeines}
-\title{%
-  \file{\filename}\thanks{%
-    Dies ist Version \fileversion\ von Datei \file{\filename}.%
-  }%
-}
-\author{Falk Hanisch\thanks{\tudscrmail}}
-\date{\filedate}
 \DoNotIndex{\",\\,,\if,\@}
 \doxitem[idxtype=Option]{Option}{option}{Optionen}
 \doxitem[idxtype=Parameter]{Parameter}{parameter}{Parameter}
@@ -128,20 +130,6 @@
 \doxitem[idxtype=Farbe]{Color}{color}{Farben}
 \doxitem[macrolike,idxtype=Lok.]{Locale}{locale}{Lokalisierungsvariablen}
 \doxitem[macrolike,idxtype=Feld]{Field}{field}{Eingabefelder}
-\newcommand*\cls{}
-\newcommand*\pkg{}
-\newcommand*\opt{}
-\newcommand*\val{}
-\newcommand*\pgs{}
-\newcommand*\env{}
-\newcommand*\file{}
-\DeclareRobustCommand*{\cls}[1]{\mbox{\textsf{\textbf{#1}}}}
-\DeclareRobustCommand*{\pkg}[1]{\mbox{\textsf{\textbf{#1}}}}
-\DeclareRobustCommand*{\opt}[1]{\mbox{\texttt{#1}}}
-\DeclareRobustCommand*{\val}[1]{\mbox{\texttt{#1}}}
-\DeclareRobustCommand*{\pgs}[1]{\mbox{\texttt{#1}}}
-\DeclareRobustCommand*{\env}[1]{\mbox{\texttt{#1}}}
-\DeclareRobustCommand*{\file}[1]{\mbox{\texttt{#1}}}
 \newcommand*\ToDo[2][]{%
   \@ifnextchar[{\@ToDo{#2}}{\@ToDo{#2}[]}%
 }
@@ -157,16 +145,24 @@
     \endgraf%
   \fi%
 }
-\DeclareOption{final}{\let\tudfinalflag\relax}
-\ProcessOptions\relax
-\AfterPackage{hyperref}{%
-  \pdfstringdefDisableCommands{\def\TUDScript{TUD-KOMA-Script}}%
-}
-\AfterPackage{babel}{%
-  \AfterPackage*{inputenc}{\RequirePackage{csquotes}[2011/10/22]}%
-}
 \AtBeginDocument{%
-  \@ifpackageloaded{hyperref}{}{%
+  \@ifpackageloaded{etoolbox}{}{%
+    \providecommand{\newrobustcmd}{\DeclareRobustCommand}%
+  }
+  \newrobustcmd*\cls[1]{\mbox{\textsf{\textbf{#1}}}}
+  \newrobustcmd*\pkg[1]{\mbox{\textsf{\textbf{#1}}}}
+  \newrobustcmd*\opt[1]{\mbox{\texttt{#1}}}
+  \newrobustcmd*\val[1]{\mbox{\texttt{#1}}}
+  \newrobustcmd*\pgs[1]{\mbox{\texttt{#1}}}
+  \newrobustcmd*\env[1]{\mbox{\texttt{#1}}}
+  \newrobustcmd*\file[1]{\mbox{\texttt{#1}}}
+  \@ifpackageloaded{hyperref}{%
+    \pdfstringdefDisableCommands{%
+      \def\TUDScript{TUD-KOMA-Script}%
+      \let\cls\@firstofone%
+      \let\pkg\@firstofone%
+    }%
+  }{%
     \RequirePackage{url}[2013/09/16]%
     \providecommand*\hypersetup[1]{}%
     \providecommand*\phantomsection{}%
@@ -182,19 +178,28 @@
     \ClassWarning{\TUDClassName}{Package `csquotes' not loaded}%
     \providecommand\enquote[1]{\glqg#1\grqq{}}%
   }%
-  \providecommand*\ifdin[2]{#2}%
-}
-\AtBeginDocument{%
-  \@ifundefined{tud@cdfont}{\def\tud@cdfont{0}}{}%
-  \ifnum\tud@cdfont>\z@\relax% true/heavy
+  \@ifpackageloaded{tudscrfonts}{%
     \RequirePackage{mweights}[2013/07/21]%
-    \def\mddefault{m}%
-    \def\mdseries@tt{m}%
-    \renewcommand*\@pnumwidth{1.7em}%
-    \renewcommand*\@tocrmarg{2.7em}%
-  \else%
+    \ifnum\tud@cdfont>\z@\relax% true/heavy
+      \def\mddefault{m}%
+      \def\mdseries@tt{m}%
+      \renewcommand*\@pnumwidth{1.7em}%
+      \renewcommand*\@tocrmarg{2.7em}%
+    \fi%
+    \setlength\columnsep{10pt}%
+  }{%
     \RequirePackage{lmodern}[2009/10/30]%
-  \fi%
+    \providecommand*\ifdin[2]{#2}%
+    \providecommand*\textuln[1]{\textsf{#1}}%
+    \providecommand*\texturn[1]{\textuln{#1}}%
+    \providecommand*\textubn[1]{\textbf{\textuln{#1}}}%
+    \providecommand*\textuxn[1]{\textubn{#1}}%
+    \providecommand*\textuls[1]{\textsl{\textuln{#1}}}%
+    \providecommand*\texturs[1]{\textuls{#1}}%
+    \providecommand*\textubs[1]{\textbf{\textuls{#1}}}%
+    \providecommand*\textuxs[1]{\textubs{#1}}%
+    \providecommand*\textdbn[1]{\textubn{#1}}%
+  }%
 }
 %%% From File: tudscr-manual.dtx
 \RequirePackage{scrhack}[2014/02/27]
@@ -205,26 +210,29 @@
 \edef\@tempa{\TUDVersion}%
 \expandafter\@tempb\@tempa\relax? ? \relax\relax%
 \newcommand*\vKOMAScript{v3.17\xspace}
+\AtBeginDocument{%
 \newcommand*\CD{Corporate Design\xspace}
 \newcommand*\CDs{Corporate Designs\xspace}
 \newcommand*\TUD{Technische Universit\"at Dresden\xspace}
 \newcommand*\TnUD{Technischen Universit\"at Dresden\xspace}
 \newcommand*\TUDCD{\CD der \TnUD}
 \newcommand*\TUDCDs{\CDs der \TnUD}
-\AfterPackage*{babel}{%
+\@ifpackageloaded{babel}{%
   \@expandtwoargs\in@{,english,}{,\bbl@loaded,}%
   \ifin@%
     \renewcommand*\CD{\foreignlanguage{english}{Corporate Design}\xspace}%
     \renewcommand*\CDs{\foreignlanguage{english}{Corporate Designs}\xspace}%
   \fi%
-}
-\DeclareRobustCommand\DDC%
-{%
+}{}
+\newrobustcmd*\DDC{%
   \mbox{%
     D\kern.05em R\kern.05em E\kern.05em S\kern.05em %
     D\kern.05em E\kern.05em N\kern.1em-\kern.1em concept%
   }\xspace%
 }
+}
+\newcommand*\Univers{\textubn{Univers}\xspace}
+\newcommand*\DIN{\textdbn{DIN~BOLD}\xspace}
 \endinput
 %%
 %% End of file `tudscrdoc.cls'.
