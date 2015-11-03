@@ -574,8 +574,8 @@
   \@declaretrue\@openindexfalse#1\@declarefalse%
 }
 \newskip\tud@lastskip
-\pretocmd\index{\tud@lastskip=\lastskip}{}{\tud@patch@wrn{index}}
-\pretocmd\label{\tud@lastskip=\lastskip}{}{\tud@patch@wrn{label}}
+\pretocmd{\index}{\tud@lastskip=\lastskip}{}{\tud@patch@wrn{index}}
+\pretocmd{\label}{\tud@lastskip=\lastskip}{}{\tud@patch@wrn{label}}
 \NewDocumentCommand\printdeclarationlist{sd()}{%
   \ifx\list@declaration\relax\else%
     \ifhmode%
@@ -747,6 +747,26 @@
     \@ProcessIndex{\Macro{#2}}(#4){#1}|#6|%
   \fi%
 }
+\NewExpandableDocumentCommand\@Length{sm}{#2}
+\NewDocumentCommand\Length{smd()d''d||}{%
+  \if@changedat%
+    \@ProcessChangedAt{\Length{#2}}(#3)[L\"ange]%
+  \else%
+    \@SetMarkupFormat{\ttfamily\bsc}[L\"ange]%
+    \@ProcessMarkup{\Length{#2}}(#3)'#4'%
+    \@ProcessIndex{\Length{#2}}(#3){#1}|#5|[L\"ange]%
+  \fi%
+}
+\NewExpandableDocumentCommand\@Counter{sm}{#2}
+\NewDocumentCommand\Counter{smd()d''d||}{%
+  \if@changedat%
+    \@ProcessChangedAt{\Counter{#2}}(#3)[Z\"ahler]%
+  \else%
+    \@SetMarkupFormat{\ttfamily}[Z\"ahler]%
+    \@ProcessMarkup{\Counter{#2}}(#3)'#4'%
+    \@ProcessIndex{\Counter{#2}}(#3){#1}|#5|[Z\"ahler]%
+  \fi%
+}
 \NewExpandableDocumentCommand\@Key{smm}{#2!#3}
 \NewDocumentCommand\Key{sm>{\ProcessorKeyVal}md==d()d''d||}{%
   \Key@Value{#1}{#2}#3=#4=(#5)'#6'|#7|%
@@ -803,27 +823,37 @@
     \@ProcessIndex{\Color{#2}}(#4){#1}|#5|[Farbe]%
   \fi%
 }
-\NewExpandableDocumentCommand\@Length{sm}{#2}
-\NewDocumentCommand\Length{smd()d''d||}{%
-  \if@changedat%
-    \@ProcessChangedAt{\Length{#2}}(#3)[L\"ange]%
-  \else%
-    \@SetMarkupFormat{\ttfamily\bsc}[L\"ange]%
-    \@ProcessMarkup{\Length{#2}}(#3)'#4'%
-    \@ProcessIndex{\Length{#2}}(#3){#1}|#5|[L\"ange]%
-  \fi%
+\NewDocumentCommand\@getattribution{smm}{%
+  \begingroup%
+    \def\@tempa##1##2##3{%
+      \def##1####1{%
+        \edef\@tempb{\IfBooleanTF{#1}{##2}{##3}}%
+      }%
+    }%
+    \@tempa\Application{\jobname}{app}%
+    \@tempa\Distribution{\jobname}{dist}%
+    \@tempa\File{files}{file}%
+    \@tempa\Class{files}{cls}%
+    \@tempa\Package{files}{pkg}%
+    \@tempa\Option{options}{opt}%
+    \@tempa\Environment{macros}{env}%
+    \@tempa\Macro{macros}{cmd}%
+    \@tempa\Length{misc}{len}%
+    \@tempa\Counter{misc}{cnt}%
+    \def\Key##1##2{%
+      \edef\@tempb{\IfBooleanTF{#1}{macros}{key}}%
+    }%
+    \@tempa\Term{terms}{term}%
+    \@tempa\PageStyle{elements}{pgs}%
+    \@tempa\Font{elements}{font}%
+    \@tempa\Color{elements}{clr}%
+    #3%
+    \edef\tud@reserved{%
+      \noexpand\endgroup%
+      \def\noexpand#2{\@tempb}%
+    }%
+  \tud@reserved%
 }
-\NewExpandableDocumentCommand\@Counter{sm}{#2}
-\NewDocumentCommand\Counter{smd()d''d||}{%
-  \if@changedat%
-    \@ProcessChangedAt{\Counter{#2}}(#3)[Z\"ahler]%
-  \else%
-    \@SetMarkupFormat{\ttfamily}[Z\"ahler]%
-    \@ProcessMarkup{\Counter{#2}}(#3)'#4'%
-    \@ProcessIndex{\Counter{#2}}(#3){#1}|#5|[Z\"ahler]%
-  \fi%
-}
-\newcommand*\@TUDScript{TUD-KOMA-Script}
 \newrobustcmd*\Path[1]{\mbox{\texttt{#1}}}
 \newrobustcmd*\PValue[1]{\mbox{\texttt{#1}}}
 \newrobustcmd*\PName[1]{\PValue{\textsl{<#1>}}}
@@ -856,6 +886,7 @@
   \let\textOR\relax%
   \let\emph\@firstofone%
 }
+\newcommand*\@TUDScript{TUD-KOMA-Script}
 \NewDocumentCommand\@suppressmarkup{s}{%
   \let\Application\@Application%
   \let\Distribution\@Distribution%
@@ -865,13 +896,13 @@
   \let\Option\@Option%
   \let\Environment\@Environment%
   \let\Macro\@Macro%
+  \let\Length\@Length%
+  \let\Counter\@Counter%
   \let\Key\@Key%
   \let\Term\@Term%
   \let\PageStyle\@PageStyle%
   \let\Font\@Font%
   \let\Color\@Color%
-  \let\Length\@Length%
-  \let\Counter\@Counter%
   \IfBooleanF{#1}{%
     \let\PValue\@firstofone%
     \let\PName\@firstofone%
@@ -895,82 +926,33 @@
 \AfterPackage*{hyperref}{%
   \expandafter\pdfstringdefDisableCommands\expandafter{\@suppressmarkup}%
 }
-\NewDocumentCommand\@getsublabel{smm}{%
-  \begingroup%
-    \def\@tempa##1##2##3{%
-      \def##1####1{%
-        \edef\@tempb{\IfBooleanTF{#1}{##2}{##3}}%
-      }%
-    }%
-    \@tempa\Application{\jobname}{app}%
-    \@tempa\Distribution{\jobname}{dist}%
-    \@tempa\File{files}{file}%
-    \@tempa\Class{files}{cls}%
-    \@tempa\Package{files}{pkg}%
-    \@tempa\Option{options}{opt}%
-    \@tempa\Environment{macros}{env}%
-    \@tempa\Macro{macros}{cmd}%
-    \def\Key##1##2{%
-      \edef\@tempb{\IfBooleanTF{#1}{macros}{key}}%
-    }%
-    \@tempa\Term{terms}{term}%
-    \@tempa\PageStyle{elements}{pgs}%
-    \@tempa\Font{elements}{font}%
-    \@tempa\Color{elements}{clr}%
-    \@tempa\Length{misc}{len}%
-    \@tempa\Counter{misc}{cnt}%
-    #3%
-    \edef\tud@reserved{%
-      \noexpand\endgroup%
-      \def\noexpand#2{\@tempb}%
-    }%
-  \tud@reserved%
-}
 \newcommand*\@templabel{}
-  \newcommand*\format@label{%
+\newcommand*\@formatlabel{%
   \let\IeC\@firstofone%
   \def~{-}%
   \def\"##1{##1e}%
   \def\ss{ss}%
 }
 % Verwendung dokumentieren!
-\NewDocumentCommand\@Label{m}{\@@Label#1}
-\NewDocumentCommand\@@Label{mmm}{%
-  \begingroup%
-    \@suppressmarkup%
-    \format@label%
-    \IfValueTF{#3}{%
-      \IfValueTF{#1}{%
-        \edef\@tempa{#1:#2:#3}%
+\NewDocumentCommand\@getlabel{sm>{\@Label}>{\SplitArgument{2}{:}}md==}{%
+  \@@getlabel#2{#3}=#4=%
+  \IfBooleanF{#1}{%
+    \tud@iflabelexists{#2}{}{%
+      \@@getlabel\tud@reserved{#3}%
+      \tud@iflabelexists{\tud@reserved}{%
+        \let#2\tud@reserved%
       }{%
-        \edef\@tempa{\@bundle:#2:#3}%
-      }%
-    }{%
-      \IfValueTF{#2}{%
-        \@getsublabel\@tempb{#2}%
-        \IfValueTF{#1}{%
-          \edef\@tempa{#1:\@tempb:#2}%
-        }{%
-          \edef\@tempa{\@bundle:\@tempb:#2}%
-        }%
-      }{%
-        \edef\@tempa{#1}%
+        \tud@ifbundle{\@getdefaultlabel#2{#3}=#4=}{}%
       }%
     }%
-    \edef\@tempc{%
-      \noexpand\endgroup%
-      \def\noexpand\ProcessedArgument{\@tempa}%
-    }%
-  \@tempc%
-  \tud@replace\ProcessedArgument{@}{<at>}%
-  \tud@lowerstring{\ProcessedArgument}{\ProcessedArgument}%
+  }%
 }
-\NewDocumentCommand\@@@Label{mmd==}{%
+\NewDocumentCommand\@@getlabel{mmd==}{%
   \def#1{#2}%
   \IfValueT{#3}{%
     \begingroup%
       \@onlyPValue%
-      \format@label%
+      \@formatlabel%
       \ifstr{#3}{}{%
         \def\tud@reserved{\endgroup}%
       }{%
@@ -982,24 +964,10 @@
     \tud@reserved%
   }%
 }
-% Verwendung dokumentieren!
-\NewDocumentCommand\@getlabel{sm>{\@Label}>{\SplitArgument{2}{:}}md==}{%
-  \@@@Label#2{#3}=#4=%
-  \IfBooleanF{#1}{%
-    \tud@iflabelexists{#2}{}{%
-      \@@@Label\tud@reserved{#3}%
-      \tud@iflabelexists{\tud@reserved}{%
-        \let#2\tud@reserved%
-      }{%
-        \tud@ifbundle{\@@getlabel#2{#3}=#4=}{}%
-      }%
-    }%
-  }%
+\NewDocumentCommand\@getdefaultlabel{m>{\SplitArgument{2}{:}}mr==}{%
+  \@@getdefaultlabel{#1}#2=#3=%
 }
-\NewDocumentCommand\@@getlabel{m>{\SplitArgument{2}{:}}mr==}{%
-  \@@@getlabel{#1}#2=#3=%
-}
-\NewDocumentCommand\@@@getlabel{mmmmr==}{%
+\NewDocumentCommand\@@getdefaultlabel{mmmmr==}{%
   \edef\tud@reserved{\expandafter\detokenize\expandafter{\@bundledefault}}%
   \ifstr{\tud@reserved}{#2}{}{%
     \toks@{\@getlabel#1}%
@@ -1010,17 +978,47 @@
 }
 % Verwendung dokumentieren!
 \NewDocumentCommand\tud@iflabelexists{>{\@Label}>{\SplitArgument{2}{:}}md==}{%
-  \@@@Label\tud@reserved{#1}=#2=%
+  \@@getlabel\tud@reserved{#1}=#2=%
   \ifcsdef{r@\tud@reserved}{%
     \expandafter\@firstoftwo%
   }{%
-    \@@@Label\tud@reserved{#1}%
+    \@@getlabel\tud@reserved{#1}%
     \ifcsdef{r@\tud@reserved}{%
       \expandafter\@firstoftwo%
     }{%
      \expandafter\@secondoftwo%
     }%
   }%
+}
+% Verwendung dokumentieren!
+\NewDocumentCommand\@Label{m}{%
+  \@@Label#1%
+}
+\NewDocumentCommand\@@Label{mmm}{%
+  \begingroup%
+    \@suppressmarkup%
+    \@formatlabel%
+    \IfValueTF{#3}{%
+      \edef\@tempa{#1:#2:#3}%
+    }{%
+      \IfValueTF{#2}{%
+        \@getattribution\@tempb{#2}%
+        \IfValueTF{#1}{%
+          \edef\@tempa{#1:\@tempb:#2}%
+        }{%
+          \edef\@tempa{\@bundle:\@tempb:#2}%
+        }%
+      }{%
+        \edef\@tempa{#1}%
+      }%
+    }%
+    \edef\@tempc{%
+      \noexpand\endgroup%
+      \def\noexpand\ProcessedArgument{%
+        \expandafter\detokenize\expandafter{\@tempa}%
+      }%
+    }%
+  \@tempc%
 }
 % {#1}: Markup für Ausgabe
 % =#2=: optionaler Wert für Option und Key
@@ -1393,6 +1391,7 @@
   \tud@reserved%
   \tud@replace#2{@}{"@}%
   \def#3{#5}%
+  \tud@replace#3{@}{"@}%
   \IfValueT{#6}{\appto#3{=\protecting{#6}=}}%
   \ifx\@tempbundle\@bundledefault\else%
     \appto#3{(\@tempbundle)}%
@@ -1439,7 +1438,7 @@
 % [#5]: optionaler Suffix in der Index-Ausgabe
 \NewDocumentCommand\@@ProcessIndex{mr==r()r||r[]}{%
   \@getindex\@tempentry\@tempformat\@tempkey{#1}=#2=(#3)[#5]%
-  \@getsublabel*\@templabel{#1}%
+  \@getattribution*\@templabel{#1}%
   \if@declare%
     \if@openindex%
       \IfValueT{#4}{%
@@ -1838,7 +1837,7 @@
 \NewDocumentCommand\tud@item@packages{od<>d()}{%
   \def\@tempa##1{%
     \@tempb%
-    \@getlabel\@templabel{\@bundle:\Package{##1}}%
+    \@getlabel*\@templabel{\@bundle:\Package{##1}}%
     \tudhyperdef{\@templabel}%
     \begingroup%
       \Package{##1}<#2>'url'|!|%
@@ -1850,7 +1849,7 @@
       \let\@tempb\relax%
       \forcsvlist{\@tempa}{#1}%
       \IfValueT{#3}{%
-        \@getlabel\@templabel{\@bundle:\Package{#3}}%
+        \@getlabel*\@templabel{\@bundle:\Package{#3}}%
         \quad(\tudhyperdef{\@templabel}\Package{#3}'none'|!|)%
       }%
     }%
@@ -2035,7 +2034,7 @@
             \expandafter\@tempa\vTUDScript\@nil%
             \listeadd\@templist{\@tempc}%
             \sortlist\@templist
-            \renewcommand*{\do}[1]{%
+            \def\do##1{%
               \ifstr{##1}{\@tempc}{\let\@tempa\@empty}{\def\@tempa{urg}}%
               \listbreak%
             }%
@@ -2164,8 +2163,7 @@
     \renewcommand*\CDs{\foreignlanguage{english}{Corporate Designs}\xspace}%
   \fi%
 }
-\newrobustcmd*\DDC%
-{%
+\newrobustcmd*\DDC{%
   \mbox{%
     D\kern.05em R\kern.05em E\kern.05em S\kern.05em %
     D\kern.05em E\kern.05em N\kern.1em-\kern.1em concept%

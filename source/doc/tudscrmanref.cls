@@ -574,8 +574,8 @@
   \@declaretrue\@openindexfalse#1\@declarefalse%
 }
 \newskip\tud@lastskip
-\pretocmd\index{\tud@lastskip=\lastskip}{}{\tud@patch@wrn{index}}
-\pretocmd\label{\tud@lastskip=\lastskip}{}{\tud@patch@wrn{label}}
+\pretocmd{\index}{\tud@lastskip=\lastskip}{}{\tud@patch@wrn{index}}
+\pretocmd{\label}{\tud@lastskip=\lastskip}{}{\tud@patch@wrn{label}}
 \NewDocumentCommand\printdeclarationlist{sd()}{%
   \ifx\list@declaration\relax\else%
     \ifhmode%
@@ -747,6 +747,26 @@
     \@ProcessIndex{\Macro{#2}}(#4){#1}|#6|%
   \fi%
 }
+\NewExpandableDocumentCommand\@Length{sm}{#2}
+\NewDocumentCommand\Length{smd()d''d||}{%
+  \if@changedat%
+    \@ProcessChangedAt{\Length{#2}}(#3)[L\"ange]%
+  \else%
+    \@SetMarkupFormat{\ttfamily\bsc}[L\"ange]%
+    \@ProcessMarkup{\Length{#2}}(#3)'#4'%
+    \@ProcessIndex{\Length{#2}}(#3){#1}|#5|[L\"ange]%
+  \fi%
+}
+\NewExpandableDocumentCommand\@Counter{sm}{#2}
+\NewDocumentCommand\Counter{smd()d''d||}{%
+  \if@changedat%
+    \@ProcessChangedAt{\Counter{#2}}(#3)[Z\"ahler]%
+  \else%
+    \@SetMarkupFormat{\ttfamily}[Z\"ahler]%
+    \@ProcessMarkup{\Counter{#2}}(#3)'#4'%
+    \@ProcessIndex{\Counter{#2}}(#3){#1}|#5|[Z\"ahler]%
+  \fi%
+}
 \NewExpandableDocumentCommand\@Key{smm}{#2!#3}
 \NewDocumentCommand\Key{sm>{\ProcessorKeyVal}md==d()d''d||}{%
   \Key@Value{#1}{#2}#3=#4=(#5)'#6'|#7|%
@@ -803,27 +823,37 @@
     \@ProcessIndex{\Color{#2}}(#4){#1}|#5|[Farbe]%
   \fi%
 }
-\NewExpandableDocumentCommand\@Length{sm}{#2}
-\NewDocumentCommand\Length{smd()d''d||}{%
-  \if@changedat%
-    \@ProcessChangedAt{\Length{#2}}(#3)[L\"ange]%
-  \else%
-    \@SetMarkupFormat{\ttfamily\bsc}[L\"ange]%
-    \@ProcessMarkup{\Length{#2}}(#3)'#4'%
-    \@ProcessIndex{\Length{#2}}(#3){#1}|#5|[L\"ange]%
-  \fi%
+\NewDocumentCommand\@getattribution{smm}{%
+  \begingroup%
+    \def\@tempa##1##2##3{%
+      \def##1####1{%
+        \edef\@tempb{\IfBooleanTF{#1}{##2}{##3}}%
+      }%
+    }%
+    \@tempa\Application{\jobname}{app}%
+    \@tempa\Distribution{\jobname}{dist}%
+    \@tempa\File{files}{file}%
+    \@tempa\Class{files}{cls}%
+    \@tempa\Package{files}{pkg}%
+    \@tempa\Option{options}{opt}%
+    \@tempa\Environment{macros}{env}%
+    \@tempa\Macro{macros}{cmd}%
+    \@tempa\Length{misc}{len}%
+    \@tempa\Counter{misc}{cnt}%
+    \def\Key##1##2{%
+      \edef\@tempb{\IfBooleanTF{#1}{macros}{key}}%
+    }%
+    \@tempa\Term{terms}{term}%
+    \@tempa\PageStyle{elements}{pgs}%
+    \@tempa\Font{elements}{font}%
+    \@tempa\Color{elements}{clr}%
+    #3%
+    \edef\tud@reserved{%
+      \noexpand\endgroup%
+      \def\noexpand#2{\@tempb}%
+    }%
+  \tud@reserved%
 }
-\NewExpandableDocumentCommand\@Counter{sm}{#2}
-\NewDocumentCommand\Counter{smd()d''d||}{%
-  \if@changedat%
-    \@ProcessChangedAt{\Counter{#2}}(#3)[Z\"ahler]%
-  \else%
-    \@SetMarkupFormat{\ttfamily}[Z\"ahler]%
-    \@ProcessMarkup{\Counter{#2}}(#3)'#4'%
-    \@ProcessIndex{\Counter{#2}}(#3){#1}|#5|[Z\"ahler]%
-  \fi%
-}
-\newcommand*\@TUDScript{TUD-KOMA-Script}
 \newrobustcmd*\Path[1]{\mbox{\texttt{#1}}}
 \newrobustcmd*\PValue[1]{\mbox{\texttt{#1}}}
 \newrobustcmd*\PName[1]{\PValue{\textsl{<#1>}}}
@@ -856,6 +886,7 @@
   \let\textOR\relax%
   \let\emph\@firstofone%
 }
+\newcommand*\@TUDScript{TUD-KOMA-Script}
 \NewDocumentCommand\@suppressmarkup{s}{%
   \let\Application\@Application%
   \let\Distribution\@Distribution%
@@ -865,13 +896,13 @@
   \let\Option\@Option%
   \let\Environment\@Environment%
   \let\Macro\@Macro%
+  \let\Length\@Length%
+  \let\Counter\@Counter%
   \let\Key\@Key%
   \let\Term\@Term%
   \let\PageStyle\@PageStyle%
   \let\Font\@Font%
   \let\Color\@Color%
-  \let\Length\@Length%
-  \let\Counter\@Counter%
   \IfBooleanF{#1}{%
     \let\PValue\@firstofone%
     \let\PName\@firstofone%
@@ -894,6 +925,188 @@
 }
 \AfterPackage*{hyperref}{%
   \expandafter\pdfstringdefDisableCommands\expandafter{\@suppressmarkup}%
+}
+\newcommand*\@templabel{}
+\newcommand*\@formatlabel{%
+  \let\IeC\@firstofone%
+  \def~{-}%
+  \def\"##1{##1e}%
+  \def\ss{ss}%
+}
+\newcommand*\@getlabel[3]{%
+  \begingroup%
+    \let\Class\@firstofone%
+    \let\Package\@firstofone%
+    \let\Environment\@firstofone%
+    \let\Macro\@firstofone%
+    \let\texttt\@firstofone%
+    \let\textsbn\@firstofone%
+    \let\textsbs\@firstofone%
+    \tud@ifbundle{#3}{%
+      \edef\@tempa{%
+        \noexpand\endgroup%
+        \noexpand\edef\noexpand#1{#3:#2}%
+      }%
+    }{%
+      \edef\@tempa{%
+        \noexpand\endgroup%
+        \noexpand\edef\noexpand#1{#2}%
+      }%
+    }%
+  \@tempa%
+}
+\NewDocumentCommand\@Label{m}{%
+  \@@Label#1%
+}
+\NewDocumentCommand\@@Label{mmm}{%
+  \begingroup%
+    \@suppressmarkup%
+    \@formatlabel%
+    \IfValueTF{#3}{%
+      \edef\@tempa{#1:#2:#3}%
+    }{%
+      \IfValueTF{#2}{%
+        \@getattribution\@tempb{#2}%
+        \IfValueTF{#1}{%
+          \edef\@tempa{#1:\@tempb:#2}%
+        }{%
+          \edef\@tempa{\@bundle:\@tempb:#2}%
+        }%
+      }{%
+        \edef\@tempa{#1}%
+      }%
+    }%
+    \edef\@tempc{%
+      \noexpand\endgroup%
+      \def\noexpand\ProcessedArgument{%
+        \expandafter\detokenize\expandafter{\@tempa}%
+      }%
+    }%
+  \@tempc%
+}
+\NewDocumentCommand\@GobbleMarkup{md==od()d<>d''}{}%
+\NewDocumentCommand\@ProcessMarkup{mod''d()md!!omo}{%
+  \IfValueTF{#6}{%
+    \@getlabel\@templabel{#5:#6:#8}{#4}%
+  }{%
+    \@getlabel\@templabel{#5:#8}{#4}%
+  }%
+  \if@declare%
+    \if@openindex%
+      \IfValueT{#3}{%
+        \ClassWarning{tudscrman}{%
+          It is not possible to use any cross-reference\MessageBreak%
+          shorthand like '#3' within the arguments of\MessageBreak%
+          the environment `Declaration'%
+        }%
+      }%
+      \if@deprecated%
+        \expandafter\IfBooleanF\expandafter{\@MarkupFormat}{%
+          \tudhyperdef{\@templabel}%
+        }%
+      \else%
+        \expandafter\IfBooleanTF\expandafter{\@MarkupFormat}{%
+          \tudhyperdef{\@templabel}%
+        }{%
+          \ifx\@MarkupFormat\@empty\else%
+            \ClassWarning{tudscrman}{%
+              It is not possible to use any indexing format\MessageBreak%
+              like |\@MarkupFormat| within the arguments of the\MessageBreak%
+              environment `Declaration'%
+            }%
+          \fi%
+          \if@stareddeclare%
+            \tudhyperdef'{\@templabel}%
+          \else%
+            \tudhyperdef{\@templabel}%
+          \fi%
+          \@HyperIndex{#5}{#6}{#7}{#8}{#9}{#4}{(declare}%
+        }%
+      \fi%
+      \if@stareddeclare\else%
+        #1\IfValueT{#2}{#2}%
+      \fi%
+    \else%
+      \if@deprecated\else%
+        \expandafter\IfBooleanF\expandafter{\@MarkupFormat}{%
+          \@HyperIndex{#5}{#6}{#7}{#8}{#9}{#4}{declare)}%
+        }%
+      \fi%
+    \fi%
+  \else%
+    \ifx\@MarkupFormat\relax%
+      \ClassError{tudscrman}{\string\@SetMarkupFormat\space unused}{%
+        It seems you have forgotten to use \string\@SetMarkupFormat.%
+      }%
+    \else%
+      \expandafter\IfBooleanF\expandafter{\@MarkupFormat}{%
+        \@HyperIndex{#5}{#6}{#7}{#8}{#9}{#4}{\@MarkupFormat}%
+      }%
+    \fi%
+    \ifcsdef{r@\@templabel}{%
+      \def\@tempa{%
+        \mbox{\hyperref{}{\jobname}{\@templabel}{#1}\IfValueT{#2}{#2}}%
+      }%
+      \let\@tempb\relax%
+      \IfValueT{#3}{%
+        \def\@tempb{%
+          \ClassWarning{tudscrman}{%
+            You've used the unknown cross-reference\MessageBreak%
+            shorthand '#3'. Only 'auto', 'page'\MessageBreak%
+            and 'full' as well as 'none' are valid%
+          }%
+        }%
+        \ifstr{#3}{auto}{\def\@tempb{ in \autoref{\@templabel}}}{}%
+        \ifstr{#3}{page}{\def\@tempb{ \vpageref{\@templabel}}}{}%
+        \ifstr{#3}{ppage}{\def\@tempb{ \reftextfaraway{\@templabel}}}{}%
+        \ifstr{#3}{full}{\def\@tempb{ in \fullref{\@templabel}}}{}%
+        \ifstr{#3}{none}{%
+          \def\@tempa{\mbox{#1\IfValueT{#2}{#2}}}%
+          \let\@tempb\relax%
+        }{}%
+      }%
+      \@tempa\@tempb%
+    }{%
+      \def\@tempa{\mbox{#1\IfValueT{#2}{#2}}}%
+      \IfValueTF{#3}{%
+        \def\@tempb##1{\ClassWarning{tudscrman}{##1}}%
+      }{%
+        \def\@tempb##1{\ClassInfo{tudscrman}{##1}}%
+      }%
+      \@tempb{%
+        No cross-reference created, label \@templabel\MessageBreak%
+        is missing%
+      }%
+      \ifx\@CTANLink\relax%
+        \@tempa%
+      \else%
+        \href{http://www.ctan.org/\@CTANLink}{\@tempa}%
+      \fi%
+    }%
+  \fi%
+  \let\@MarkupFormat\relax%
+  \let\@CTANLink\relax%
+}
+\newcommand*\@MarkupFormat{}
+\let\@MarkupFormat\relax
+\newcommand*\@CheckMarkupFormat[2]{%
+  \IfBooleanT{#1}{%
+    \IfValueT{#2}{%
+      \ClassWarning{tudscrman}{%
+        You've used the starred version so no entry for\MessageBreak%
+        the index is created and the optional argument\MessageBreak%
+        |#2| will be ignored%
+      }%
+    }%
+  }%
+}
+\newcommand*\@SetMarkupFormat[2]{%
+  \@CheckMarkupFormat{#1}{#2}%
+  \IfBooleanTF{#1}{%
+    \def\@MarkupFormat{#1}%
+  }{%
+    \IfValueTF{#2}{\def\@MarkupFormat{#2}}{\def\@MarkupFormat{}}%
+  }%
 }
 \PassOptionsToPackage{xindy,splitindex}{imakeidx}
 \RequirePackage{imakeidx}[2013/07/11]
@@ -1054,153 +1267,6 @@
 \makexindyindex*{Klassen, Pakete und Dateien}[files]
 \makexindyindex[columns=1]{\"Anderungsliste}[changelog]
 \undef\makexindyindex
-\newcommand*\@IndexFormat{}
-\let\@IndexFormat\relax
-\newcommand*\CheckIndexFormat[2]{%
-  \IfBooleanT{#1}{%
-    \IfValueT{#2}{%
-      \ClassWarning{tudscrman}{%
-        You've used the starred version so no entry for\MessageBreak%
-        the index is created and the optional argument\MessageBreak%
-        |#2| will be ignored%
-      }%
-    }%
-  }%
-}
-\newcommand*\SetIndexFormat[2]{%
-  \CheckIndexFormat{#1}{#2}%
-  \IfBooleanTF{#1}{%
-    \def\@IndexFormat{#1}%
-  }{%
-    \IfValueTF{#2}{\def\@IndexFormat{#2}}{\def\@IndexFormat{}}%
-  }%
-}
-\newcommand*\@templabel{}
-\newcommand*\@createlabel[3]{%
-  \begingroup%
-    \let\Class\@firstofone%
-    \let\Package\@firstofone%
-    \let\Environment\@firstofone%
-    \let\Macro\@firstofone%
-    \let\texttt\@firstofone%
-    \let\textsbn\@firstofone%
-    \let\textsbs\@firstofone%
-    \tud@ifbundle{#3}{%
-      \edef\@tempa{%
-        \noexpand\endgroup%
-        \noexpand\edef\noexpand#1{#3:#2}%
-      }%
-    }{%
-      \edef\@tempa{%
-        \noexpand\endgroup%
-        \noexpand\edef\noexpand#1{#2}%
-      }%
-    }%
-  \@tempa%
-}
-\NewDocumentCommand\@ProcessOutput{mod''d()md!!omo}{%
-  \IfValueTF{#6}{%
-    \@createlabel\@templabel{#5:#6:#8}{#4}%
-  }{%
-    \@createlabel\@templabel{#5:#8}{#4}%
-  }%
-  \if@declare%
-    \if@openindex%
-      \IfValueT{#3}{%
-        \ClassWarning{tudscrman}{%
-          It is not possible to use any cross-reference\MessageBreak%
-          shorthand like '#3' within the arguments of\MessageBreak%
-          the environment `Declaration'%
-        }%
-      }%
-      \if@deprecated%
-        \expandafter\IfBooleanF\expandafter{\@IndexFormat}{%
-          \tudhyperdef{\@templabel}%
-        }%
-      \else%
-        \expandafter\IfBooleanTF\expandafter{\@IndexFormat}{%
-          \tudhyperdef{\@templabel}%
-        }{%
-          \ifx\@IndexFormat\@empty\else%
-            \ClassWarning{tudscrman}{%
-              It is not possible to use any indexing format\MessageBreak%
-              like |\@IndexFormat| within the arguments of the\MessageBreak%
-              environment `Declaration'%
-            }%
-          \fi%
-          \if@stareddeclare%
-            \tudhyperdef'{\@templabel}%
-          \else%
-            \tudhyperdef{\@templabel}%
-          \fi%
-          \@HyperIndex{#5}{#6}{#7}{#8}{#9}{#4}{(declare}%
-        }%
-      \fi%
-      \if@stareddeclare\else%
-        #1\IfValueT{#2}{#2}%
-      \fi%
-    \else%
-      \if@deprecated\else%
-        \expandafter\IfBooleanF\expandafter{\@IndexFormat}{%
-          \@HyperIndex{#5}{#6}{#7}{#8}{#9}{#4}{declare)}%
-        }%
-      \fi%
-    \fi%
-  \else%
-    \ifx\@IndexFormat\relax%
-      \ClassError{tudscrman}{\string\SetIndexFormat\space unused}{%
-        It seems you have forgotten to use \string\SetIndexFormat.%
-      }%
-    \else%
-      \expandafter\IfBooleanF\expandafter{\@IndexFormat}{%
-        \@HyperIndex{#5}{#6}{#7}{#8}{#9}{#4}{\@IndexFormat}%
-      }%
-    \fi%
-    \ifcsdef{r@\@templabel}{%
-      \def\@tempa{%
-        \mbox{\hyperref{}{\jobname}{\@templabel}{#1}\IfValueT{#2}{#2}}%
-      }%
-      \let\@tempb\relax%
-      \IfValueT{#3}{%
-        \def\@tempb{%
-          \ClassWarning{tudscrman}{%
-            You've used the unknown cross-reference\MessageBreak%
-            shorthand '#3'. Only 'auto', 'page'\MessageBreak%
-            and 'full' as well as 'none' are valid%
-          }%
-        }%
-        \ifstr{#3}{auto}{\def\@tempb{ in \autoref{\@templabel}}}{}%
-        \ifstr{#3}{page}{\def\@tempb{ \vpageref{\@templabel}}}{}%
-        \ifstr{#3}{ppage}{\def\@tempb{ \reftextfaraway{\@templabel}}}{}%
-        \ifstr{#3}{full}{\def\@tempb{ in \fullref{\@templabel}}}{}%
-        \ifstr{#3}{none}{%
-          \def\@tempa{\mbox{#1\IfValueT{#2}{#2}}}%
-          \let\@tempb\relax%
-        }{}%
-      }%
-      \@tempa\@tempb%
-    }{%
-      \def\@tempa{\mbox{#1\IfValueT{#2}{#2}}}%
-      \IfValueTF{#3}{%
-        \def\@tempb##1{\ClassWarning{tudscrman}{##1}}%
-      }{%
-        \def\@tempb##1{\ClassInfo{tudscrman}{##1}}%
-      }%
-      \@tempb{%
-        No cross-reference created, label \@templabel\MessageBreak%
-        is missing%
-      }%
-      \ifx\@CTANLink\relax%
-        \@tempa%
-      \else%
-        \href{http://www.ctan.org/\@CTANLink}{\@tempa}%
-      \fi%
-    }%
-  \fi%
-  \let\@IndexFormat\relax%
-  \let\@CTANLink\relax%
-}
-\newrobustcmd*\hyperidx[2][]{\tudhyperref{#1}{#2}}
 \newcommand*\@tempentry{}
 \newcommand*\@tempkeyentry{}
 \newcommand*\@createentry[3]{%
@@ -1215,7 +1281,7 @@
   \IfValueTF{#5}{\def\@tempb{#5}}{\def\@tempb{}}%
   \IfValueTF{#7}{\edef\@tempc{|#7}}{\def\@tempc{}}%
   \IfValueTF{#2}{%
-    \@createlabel\@templabel{#1:#2:#4}{#6}%
+    \@getlabel\@templabel{#1:#2:#4}{#6}%
     \@createentry\@tempentry{%
       \begingroup\expandonce\@tempa#4\endgroup\expandonce\@tempb%
     }{#6}%
@@ -1235,7 +1301,7 @@
       \index[keys]{\expandonce\@tempkeyentry\expandonce\@tempc}%
     }%
   }{%
-    \@createlabel\@templabel{#1:#4}{#6}%
+    \@getlabel\@templabel{#1:#4}{#6}%
     \@createentry\@tempentry{%
       \begingroup\expandonce\@tempa#4\endgroup\expandonce\@tempb%
     }{#6}%
@@ -1248,11 +1314,53 @@
     }%
   }%
 }
+\newcommand*\@printindexskip{%
+  \ifnum\imki@columns>\@ne\relax\vspace{-\multicolsep}\fi%
+}
+\newcommand*\tud@indexprologue{}
+\newcommand*\@printindex[1][]{%
+  \pagebreak[3]%
+  \ifblank{#1}{%
+    \ifx\tud@indexprologue\@empty%
+      \indexprologue[\@printindexskip]{\tudhyperdef'{idx:main}}%
+    \else%
+      \indexprologue{%
+        \tudhyperdef'{idx:main}%
+        \tud@indexprologue%
+      }%
+    \fi%
+    \printindex\@printindexskip%
+    \let\tud@indexprologue\@empty%
+  }{%
+    \indexprologue[\@printindexskip]{\tudhyperdef'{idx:#1}}%
+    \printindex[#1]\@printindexskip%
+  }%
+}
+\NewDocumentCommand\CrossIndex{mom}{%
+  \def\@tempa##1##2##3{%
+    \index{%
+      ##3!\textrightarrow{}\space%
+      \tudhyperref{idx:##1}{Index der \IfValueTF{##2}{##2}{##3}}|seeidx{##1}%
+    }%
+  }%
+  \forcsvlist{\@tempa{#1}{#2}}{#3}%
+}
+\newcommand*\PrintIndex{%
+  \begingroup%
+    \@printindex%
+    \@printindex[options]%
+    \@printindex[macros]%
+    \@printindex[terms]%
+    \@printindex[elements]%
+    \@printindex[misc]%
+    \@printindex[files]%
+  \endgroup%
+}
 \NewDocumentCommand\@ProcessChangedAt{md()md!!mmm}{%
   \IfValueTF{#4}{%
-    \@createlabel\@templabel{#3:#4:#6}{#2}%
+    \@getlabel\@templabel{#3:#4:#6}{#2}%
   }{%
-    \@createlabel\@templabel{#3:#6}{#2}%
+    \@getlabel\@templabel{#3:#6}{#2}%
   }%
   \IfBooleanTF{#1}{%
     \def\@tempa{\begingroup#5#6\endgroup}%
@@ -1391,6 +1499,28 @@
     \fi%
   \endgroup%
 }
+\newcommand*\hyperpagedeprecated{}
+\newif\if@changedat
+\NewDocumentCommand\Changelog{m}{%
+  \def\@tempa##1{%
+    \index{%
+      ##1!\textrightarrow{}\space%
+      \tudhyperref{idx:changelog}{\"Anderungsliste}|seeidx{changelog}%
+    }%
+  }%
+  \forcsvlist\@tempa{#1}%
+}
+\newcommand*\PrintChangelog{%
+  \begingroup%
+    \let\lettergroup\@gobble%
+    \@changedattrue%
+    \let\hyperpagedeprecated\hyperpage%
+    \preto\item{\let\hyperpagedeprecated\hyperpage}%
+    \preto\subitem{\let\hyperpagedeprecated\hyperpage}%
+    \preto\subsubitem{\let\hyperpagedeprecated\hyperpage}%
+    \@printindex[changelog]%
+  \endgroup%
+}
 \RequirePackage{enumitem}[2011/09/28]
 \setlist{noitemsep}
 \newcommand*\stditem{}
@@ -1471,7 +1601,7 @@
 \NewDocumentCommand\tud@item@packages{od<>d()}{%
   \def\@tempa##1{%
     \@tempb%
-    \@getlabel\@templabel{\@bundle:\Package{##1}}%
+    \@getlabel*\@templabel{\@bundle:\Package{##1}}%
     \tudhyperdef{\@templabel}%
     \begingroup%
       \Package{##1}<#2>'url'|!|%
@@ -1483,7 +1613,7 @@
       \let\@tempb\relax%
       \forcsvlist{\@tempa}{#1}%
       \IfValueT{#3}{%
-        \@getlabel\@templabel{\@bundle:\Package{#3}}%
+        \@getlabel*\@templabel{\@bundle:\Package{#3}}%
         \quad(\tudhyperdef{\@templabel}\Package{#3}'none'|!|)%
       }%
     }%
@@ -1668,7 +1798,7 @@
             \expandafter\@tempa\vTUDScript\@nil%
             \listeadd\@templist{\@tempc}%
             \sortlist\@templist
-            \renewcommand*{\do}[1]{%
+            \def\do##1{%
               \ifstr{##1}{\@tempc}{\let\@tempa\@empty}{\def\@tempa{urg}}%
               \listbreak%
             }%
@@ -1760,76 +1890,6 @@
   }%
   \xspace%
 }
-\newcommand*\PrintIndex{%
-  \begingroup%
-    \@printindex%
-    \@printindex[options]%
-    \@printindex[macros]%
-    \@printindex[keys]%
-    \@printindex[terms]%
-    \@printindex[fonts]%
-    \begingroup%
-      \let\lettergroup\@gobble%
-      \let\indexspace\par%
-      \@printindex[colors]%
-    \endgroup%
-    \@printindex[files]%
-  \endgroup%
-}
-\newcommand*\PrintIndexPrologue[1]{\long\gdef\@printindexprologue{#1}}
-\newcommand*\@printindexprologue{}
-\newcommand*\@printindexskip{%
-  \ifnum\imki@columns>\@ne\relax\vspace{-\multicolsep}\fi%
-}
-\newcommand*\@printindex[1][]{%
-  \pagebreak[3]%
-  \ifblank{#1}{%
-    \ifx\@printindexprologue\@empty%
-      \indexprologue[\@printindexskip]{\tudhyperdef'{idx:main}}%
-    \else%
-      \indexprologue{%
-        \tudhyperdef'{idx:main}%
-        \@printindexprologue%
-      }%
-    \fi%
-    \printindex\@printindexskip%
-    \let\@printindexprologue\@empty%
-  }{%
-    \indexprologue[\@printindexskip]{\tudhyperdef'{idx:#1}}%
-    \printindex[#1]\@printindexskip%
-  }%
-}
-\NewDocumentCommand\CrossIndex{mom}{%
-  \def\@tempa##1##2##3{%
-    \index{%
-      ##3!\textrightarrow{}\space%
-      \tudhyperref{idx:##1}{Index der \IfValueTF{##2}{##2}{##3}}|seeidx{##1}%
-    }%
-  }%
-  \forcsvlist{\@tempa{#1}{#2}}{#3}%
-}
-\newcommand*\hyperpagedeprecated{}
-\newif\if@changedat
-\NewDocumentCommand\Changelog{m}{%
-  \def\@tempa##1{%
-    \index{%
-      ##1!\textrightarrow{}\space%
-      \tudhyperref{idx:changelog}{\"Anderungsliste}|seeidx{changelog}%
-    }%
-  }%
-  \forcsvlist\@tempa{#1}%
-}
-\newcommand*\PrintChangelog{%
-  \begingroup%
-    \let\lettergroup\@gobble%
-    \@changedattrue%
-    \let\hyperpagedeprecated\hyperpage%
-    \preto\item{\let\hyperpagedeprecated\hyperpage}%
-    \preto\subitem{\let\hyperpagedeprecated\hyperpage}%
-    \preto\subsubitem{\let\hyperpagedeprecated\hyperpage}%
-    \@printindex[changelog]%
-  \endgroup%
-}
 \RequirePackage{textcomp}[2005/09/27]
 \RequirePackage{setspace}[2011/12/19]
 \setstretch{1.1}
@@ -1867,8 +1927,7 @@
     \renewcommand*\CDs{\foreignlanguage{english}{Corporate Designs}\xspace}%
   \fi%
 }
-\newrobustcmd*\DDC%
-{%
+\newrobustcmd*\DDC{%
   \mbox{%
     D\kern.05em R\kern.05em E\kern.05em S\kern.05em %
     D\kern.05em E\kern.05em N\kern.1em-\kern.1em concept%
