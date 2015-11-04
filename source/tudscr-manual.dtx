@@ -1495,6 +1495,24 @@
 %    \end{macrocode}
 % \end{macro}^^A \@Distribution
 % \end{macro}^^A \Distribution
+% \begin{macro}{\Engine}
+% \changes{v2.05}{2015/11/04}{neu}^^A
+% \begin{macro}{\@Engine}
+% \changes{v2.05}{2015/11/04}{neu}^^A
+% Die Auszeichnung und der Indexeintrag für ein bestimmtes Textsatzsystem.
+%    \begin{macrocode}
+\NewExpandableDocumentCommand\@Engine{sm}{#2}
+\NewDocumentCommand\Engine{smd||}{%
+  \@SetMarkupFormat{\sbnfont}%
+  \@ProcessMarkup{\Engine{\hologo{#2}}}%
+  \@ProcessIndex{\Engine{#2}}{#1}|#3|[Textsatzsystem]%
+}
+%<*package>
+\renewcommand*\Engine[1]{\ifdin{\hologo{#1}}{\mbox{\textsbn{\hologo{#1}}}}}
+%</package>
+%    \end{macrocode}
+% \end{macro}^^A \@Engine
+% \end{macro}^^A \Engine
 % \begin{macro}{\File}
 % \changes{v2.02}{2014/10/08}{überarbeitet}^^A
 % \begin{macro}{\@File}
@@ -1971,8 +1989,9 @@
       }%
     }%
     \@tempa\Application{\jobname}{app}%
-    \@tempa\Distribution{\jobname}{dist}%
-    \@tempa\File{files}{file}%
+    \@tempa\Distribution{\jobname}{dst}%
+    \@tempa\Engine{\jobname}{eng}%
+    \@tempa\File{files}{fle}%
     \@tempa\Class{files}{cls}%
     \@tempa\Package{files}{pkg}%
     \@tempa\Option{options}{opt}%
@@ -2107,6 +2126,7 @@
 \NewDocumentCommand\@suppressmarkup{s}{%
   \let\Application\@Application%
   \let\Distribution\@Distribution%
+  \let\Engine\@Engine%
   \let\File\@File%
   \let\Class\@Class%
   \let\Package\@Package%
@@ -2179,7 +2199,15 @@
 % \changes{v2.05}{2015/11/03}{neu}^^A
 % \begin{macro}{\@@getlabel}
 % \changes{v2.05}{2015/11/03}{neu}^^A
-% Der Befehl \cs{@getlabel} erzeugt ein Label aus dem zweiten Argument. 
+% Der Befehl \cs{@getlabel} erzeugt im ersten Schriftt aus dem zweiten Argument
+% in Zusammenspiel mit . 
+
+% \cs{SplitArgument}\val{\{2\}{\{:\}} aufgerufen worden sein. Diese Eigenheit
+% macht die Definition von \cs{@Label}
+
+
+% \val{\meta{Bundlepräfix}:\meta{Labelpräfix}:\meta{Element}}
+
 % Dabei werden hierfür einige Markup-Befehle vorübergehend außer Kraft gesetzt. 
 % Außerdem wird das Label ggf. für eine Split-Deklaration erweitert.
 %    \begin{macrocode}

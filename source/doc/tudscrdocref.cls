@@ -147,7 +147,7 @@
 }
 \AtBeginDocument{%
   \@ifpackageloaded{etoolbox}{}{%
-    \providecommand{\newrobustcmd}{\DeclareRobustCommand}%
+    \providecommand*\newrobustcmd{\DeclareRobustCommand}%
   }
   \newrobustcmd*\cls[1]{\mbox{\textsf{\textbf{#1}}}}
   \newrobustcmd*\pkg[1]{\mbox{\textsf{\textbf{#1}}}}

@@ -1,5 +1,5 @@
 %%
-%% This is file `tudscrman.cls',
+%% This is file `tudscrmanual.cls',
 %% generated with the docstrip utility.
 %%
 %% The original source files were:
@@ -80,7 +80,7 @@
   \typeout{+---------------------------------------------------------------}%
 }
 \NeedsTeXFormat{LaTeX2e}
-\TUD@ProvidesWrapperClass{tudscrman}{tudscrreprt}{manual class}
+\TUD@ProvidesWrapperClass{tudscrmanual}{tudscrreprt}{manual class}
 \@ifundefined{TUDScript}{%
   \DeclareRobustCommand{\TUDScript}{%
     \ifdin{TUD-KOMA-SCRIPT}{%
@@ -226,7 +226,7 @@
 \let\@templist\relax%
 \newcommand*\sortlist[1]{%
   \ifdefvoid{#1}{%
-    \ClassWarning{tudscrman}{%
+    \ClassWarning{tudscrmanual}{%
       The given list \string#1\space\MessageBreak%
       is empty, nothing to sort here%
     }%
@@ -387,7 +387,8 @@
   \def\@@autorefname#1#2#3#4#5\@nil#6\@nil{#6#4.\@nil}%
 }
 \TUD@UnwindPackage{hyperref}{%
-  \ClassWarning{tudscrman}{%
+  \ClassWarning{tudscrmanual}%
+  {%
     It is strongly recommended to load package `hyperref'.\MessageBreak%
     Nevertheless, essential commands are rudimentarily\MessageBreak%
     defined. At least the package `url' is loaded.
@@ -522,7 +523,7 @@
 }
 \newcommand*\tud@declare@end[2]{%
   \ifx\list@declaration\relax\else%
-    \ClassError{tudscrman}{\string#2\space is missing}{%
+    \ClassError{tudscrmanual}{\string#2\space is missing}{%
       \string\list@declaration\space is not empty. Did you forget\MessageBreak%
       to print this list with \string#2?%
     }%
@@ -545,7 +546,7 @@
 }
 \newenvironment{Bundle}[1]{%
   \tud@ifbundle{%
-    \ClassError{tudscrman}{Nested environment `Bundle'}{%
+    \ClassError{tudscrmanual}{Nested environment `Bundle'}{%
       It is not possible to nest this environment, when\MessageBreak%
       a cross-label was given before.%
     }%
@@ -566,7 +567,7 @@
 }
 \newcommand*\tud@declare@special@end[1]{%
   \ifx\list@ChangedAt\relax\else%
-    \ClassError{tudscrman}{\string\printchangedatlist\space is missing}{%
+    \ClassError{tudscrmanual}{\string\printchangedatlist\space is missing}{%
       \string\list@ChangedAt\space is not empty. Did you\MessageBreak%
       forget to print this list with \string\printchangedatlist?%
     }%
@@ -659,9 +660,9 @@
   \tud@reserved%
 }
 \newcommand*\tud@keyval@error{%
-  \ClassError{tudscrman}{Wrong usage of optional argument for value}{%
-    There are two optional arguments for a value!%
-  }%
+  \ClassError{tudscrmanual}%
+    {Wrong usage of optional argument for value}%
+    {There are two optional arguments for a value given!}%
 }
 \NewExpandableDocumentCommand\@Application{sm}{#2}
 \NewDocumentCommand\Application{smd||}{%
@@ -678,6 +679,12 @@
     \@ProcessMarkup{\Distribution{#2}}%
   }%
   \@ProcessIndex{\Distribution{#2}}{#1}|#4|[Distribution]%
+}
+\NewExpandableDocumentCommand\@Engine{sm}{#2}
+\NewDocumentCommand\Engine{smd||}{%
+  \@SetMarkupFormat{\sbnfont}%
+  \@ProcessMarkup{\Engine{\hologo{#2}}}%
+  \@ProcessIndex{\Engine{#2}}{#1}|#3|[Textsatzsystem]%
 }
 \NewExpandableDocumentCommand\@File{sm}{#2}
 \NewDocumentCommand\File{smd||}{%
@@ -831,8 +838,9 @@
       }%
     }%
     \@tempa\Application{\jobname}{app}%
-    \@tempa\Distribution{\jobname}{dist}%
-    \@tempa\File{files}{file}%
+    \@tempa\Distribution{\jobname}{dst}%
+    \@tempa\Engine{\jobname}{eng}%
+    \@tempa\File{files}{fle}%
     \@tempa\Class{files}{cls}%
     \@tempa\Package{files}{pkg}%
     \@tempa\Option{options}{opt}%
@@ -890,6 +898,7 @@
 \NewDocumentCommand\@suppressmarkup{s}{%
   \let\Application\@Application%
   \let\Distribution\@Distribution%
+  \let\Engine\@Engine%
   \let\File\@File%
   \let\Class\@Class%
   \let\Package\@Package%
@@ -994,7 +1003,7 @@
   \if@declare%
     \if@openindex%
       \IfValueT{#3}{%
-        \ClassWarning{tudscrman}{%
+        \ClassWarning{tudscrmanual}{%
           It is not possible to use any cross-reference\MessageBreak%
           shorthand like '#3' within the arguments of\MessageBreak%
           the environment `Declaration'%
@@ -1009,7 +1018,7 @@
           \tudhyperdef{\@templabel}%
         }{%
           \ifx\@MarkupFormat\@empty\else%
-            \ClassWarning{tudscrman}{%
+            \ClassWarning{tudscrmanual}{%
               It is not possible to use any indexing format\MessageBreak%
               like |\@MarkupFormat| within the arguments of the\MessageBreak%
               environment `Declaration'%
@@ -1035,7 +1044,7 @@
     \fi%
   \else%
     \ifx\@MarkupFormat\relax%
-      \ClassError{tudscrman}{\string\@SetMarkupFormat\space unused}{%
+      \ClassError{tudscrmanual}{\string\@SetMarkupFormat\space unused}{%
         It seems you have forgotten to use \string\@SetMarkupFormat.%
       }%
     \else%
@@ -1050,7 +1059,7 @@
       \let\@tempb\relax%
       \IfValueT{#3}{%
         \def\@tempb{%
-          \ClassWarning{tudscrman}{%
+          \ClassWarning{tudscrmanual}{%
             You've used the unknown cross-reference\MessageBreak%
             shorthand '#3'. Only 'auto', 'page'\MessageBreak%
             and 'full' as well as 'none' are valid%
@@ -1069,9 +1078,9 @@
     }{%
       \def\@tempa{\mbox{#1\IfValueT{#2}{#2}}}%
       \IfValueTF{#3}{%
-        \def\@tempb##1{\ClassWarning{tudscrman}{##1}}%
+        \def\@tempb##1{\ClassWarning{tudscrmanual}{##1}}%
       }{%
-        \def\@tempb##1{\ClassInfo{tudscrman}{##1}}%
+        \def\@tempb##1{\ClassInfo{tudscrmanual}{##1}}%
       }%
       \@tempb{%
         No cross-reference created, label \@templabel\MessageBreak%
@@ -1092,7 +1101,7 @@
 \newcommand*\@CheckMarkupFormat[2]{%
   \IfBooleanT{#1}{%
     \IfValueT{#2}{%
-      \ClassWarning{tudscrman}{%
+      \ClassWarning{tudscrmanual}{%
         You've used the starred version so no entry for\MessageBreak%
         the index is created and the optional argument\MessageBreak%
         |#2| will be ignored%
@@ -1116,8 +1125,8 @@
   othercode={\renewcommand*\subitem{\@idxitem\hspace*{15\p@}}}%
 }
 \@ifpackagelater{imakeidx}{2013/07/12}{%
-  \ClassWarning%
-  {tudscrman}{%
+  \ClassWarning{tudscrmanual}%
+  {%
     Package `imakeidx' was updated so the patch for the\MessageBreak%
     environment `theindex' is maybe outdated.%
   }%
@@ -1243,7 +1252,10 @@
     \makeindex[name={#4-declare}]%
     \IfFileExists{\@tempc}{%
       \edef\@tempb{-o \jobname-#4.ind \@tempc}%
-    }{\ClassWarning{tudscrman}{File \@tempc\space not found}}%
+    }{%
+      \ClassWarning{tudscrmanual}%
+        {File \@tempc\space not found}%
+    }%
   }%
   \protected@edef\@tempa{%
     title={#3},%
@@ -1693,8 +1705,8 @@
 \RequirePackage{filemod}[2011/09/19]
 \RequirePackage{ifplatform}[2010/10/22]
 \newcommand*\tud@shellescape@wrn{%
-  \ClassWarning%
-  {tudscrman}{%
+  \ClassWarning{tudscrmanual}%
+  {%
     You have to recompile this document with\MessageBreak%
     activated shell escape option%
   }%
@@ -1895,8 +1907,8 @@
 \setstretch{1.1}
 \AfterPackage*{inputenc}{\RequirePackage{csquotes}[2011/10/22]}
 \TUD@UnwindPackage{csquotes}{%
-  \ClassWarning%
-    {tudscrman}{Package `csquotes' not loaded}%
+  \ClassWarning{tudscrmanual}%
+    {Package `csquotes' not loaded}%
   \providecommand\enquote[1]{\glqg#1\grqq{}}%
 }
 \PassOptionsToPackage{vskip=\smallskipamount}{quoting}
@@ -2046,4 +2058,4 @@
 \tud@locale@english{\contactpersonname}{Contact}%
 \endinput
 %%
-%% End of file `tudscrman.cls'.
+%% End of file `tudscrmanual.cls'.
