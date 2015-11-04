@@ -942,27 +942,64 @@
   \def\"##1{##1e}%
   \def\ss{ss}%
 }
-\newcommand*\@getlabel[3]{%
-  \begingroup%
-    \let\Class\@firstofone%
-    \let\Package\@firstofone%
-    \let\Environment\@firstofone%
-    \let\Macro\@firstofone%
-    \let\texttt\@firstofone%
-    \let\textsbn\@firstofone%
-    \let\textsbs\@firstofone%
-    \tud@ifbundle{#3}{%
-      \edef\@tempa{%
-        \noexpand\endgroup%
-        \noexpand\edef\noexpand#1{#3:#2}%
-      }%
+\NewDocumentCommand\@getlabel{sm>{\@Label}>{\SplitArgument{2}{:}}md==}{%
+  \@@getlabel#2{#3}=#4=%
+  \IfBooleanF{#1}{%
+    \@tempswafalse%
+    \tud@iflabelexists{#2}{%
+      \@tempswatrue%
     }{%
-      \edef\@tempa{%
-        \noexpand\endgroup%
-        \noexpand\edef\noexpand#1{#2}%
+      \IfValueT{#4}{%
+        \@@getlabel\tud@reserved{#3}%
+        \tud@iflabelexists{\tud@reserved}{%
+          \let#2\tud@reserved%
+          \@tempswatrue%
+        }{}%
       }%
     }%
-  \@tempa%
+    \if@tempswa\else%
+      \tud@ifbundle{\@getdefaultlabel#2{#3}=#4=}{}%
+    \fi%
+  }%
+}
+\NewDocumentCommand\@@getlabel{mmd==}{%
+  \def#1{#2}%
+  \IfValueT{#3}{%
+    \begingroup%
+      \@onlyPValue%
+      \@formatlabel%
+      \ifstr{#3}{}{%
+        \def\tud@reserved{\endgroup}%
+      }{%
+        \protected@edef\tud@reserved{%
+          \noexpand\endgroup%
+          \appto\noexpand#1{=#3}%
+        }%
+      }%
+    \tud@reserved%
+  }%
+}
+\NewDocumentCommand\@getdefaultlabel{m>{\SplitArgument{2}{:}}mr==}{%
+  \@@getdefaultlabel{#1}#2=#3=%
+}
+\NewDocumentCommand\@@getdefaultlabel{mmmmr==}{%
+  \edef\tud@reserved{\expandafter\detokenize\expandafter{\@bundledefault}}%
+  \ifstr{\tud@reserved}{#2}{}{%
+    \@getlabel#1{\@bundledefault:#3:#4}=#5=%
+  }%
+}
+\NewDocumentCommand\tud@iflabelexists{>{\@Label}>{\SplitArgument{2}{:}}md==}{%
+  \@@getlabel\tud@reserved{#1}=#2=%
+  \ifcsdef{r@\tud@reserved}{%
+    \expandafter\@firstoftwo%
+  }{%
+    \@@getlabel\tud@reserved{#1}%
+    \ifcsdef{r@\tud@reserved}{%
+      \expandafter\@firstoftwo%
+    }{%
+     \expandafter\@secondoftwo%
+    }%
+  }%
 }
 \NewDocumentCommand\@Label{m}{%
   \@@Label#1%

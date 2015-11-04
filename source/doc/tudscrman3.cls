@@ -942,18 +942,24 @@
   \def\"##1{##1e}%
   \def\ss{ss}%
 }
-% Verwendung dokumentieren!
 \NewDocumentCommand\@getlabel{sm>{\@Label}>{\SplitArgument{2}{:}}md==}{%
   \@@getlabel#2{#3}=#4=%
   \IfBooleanF{#1}{%
-    \tud@iflabelexists{#2}{}{%
-      \@@getlabel\tud@reserved{#3}%
-      \tud@iflabelexists{\tud@reserved}{%
-        \let#2\tud@reserved%
-      }{%
-        \tud@ifbundle{\@getdefaultlabel#2{#3}=#4=}{}%
+    \@tempswafalse%
+    \tud@iflabelexists{#2}{%
+      \@tempswatrue%
+    }{%
+      \IfValueT{#4}{%
+        \@@getlabel\tud@reserved{#3}%
+        \tud@iflabelexists{\tud@reserved}{%
+          \let#2\tud@reserved%
+          \@tempswatrue%
+        }{}%
       }%
     }%
+    \if@tempswa\else%
+      \tud@ifbundle{\@getdefaultlabel#2{#3}=#4=}{}%
+    \fi%
   }%
 }
 \NewDocumentCommand\@@getlabel{mmd==}{%
@@ -967,7 +973,7 @@
       }{%
         \protected@edef\tud@reserved{%
           \noexpand\endgroup%
-          \lowercase{\appto\noexpand#1{=#3}}%
+          \appto\noexpand#1{=#3}%
         }%
       }%
     \tud@reserved%
@@ -979,27 +985,17 @@
 \NewDocumentCommand\@@getdefaultlabel{mmmmr==}{%
   \edef\tud@reserved{\expandafter\detokenize\expandafter{\@bundledefault}}%
   \ifstr{\tud@reserved}{#2}{}{%
-    \toks@{\@getlabel#1}%
-    \eaddto@hook\toks@{\expandafter{\@bundledefault:#3:#4}}%
-    \IfValueT{#5}{\addto@hook\toks@{=#5=}}%
-    \the\toks@%
+    \@getlabel#1{\@bundledefault:#3:#4}=#5=%
   }%
 }
-% Verwendung dokumentieren!
 \NewDocumentCommand\tud@iflabelexists{>{\@Label}>{\SplitArgument{2}{:}}md==}{%
   \@@getlabel\tud@reserved{#1}=#2=%
   \ifcsdef{r@\tud@reserved}{%
     \expandafter\@firstoftwo%
   }{%
-    \@@getlabel\tud@reserved{#1}%
-    \ifcsdef{r@\tud@reserved}{%
-      \expandafter\@firstoftwo%
-    }{%
-     \expandafter\@secondoftwo%
-    }%
+    \expandafter\@secondoftwo%
   }%
 }
-% Verwendung dokumentieren!
 \NewDocumentCommand\@Label{m}{%
   \@@Label#1%
 }

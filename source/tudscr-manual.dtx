@@ -1,4 +1,4 @@
-% \CheckSum{3892}
+% \CheckSum{3953}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-manual.dtx}[%
-  2015/11/02 v2.05 TUD-KOMA-Script\space%
+  2015/11/04 v2.05 TUD-KOMA-Script\space%
 %</driver>
 %<package&identify>\NeedsTeXFormat{LaTeX2e}
 %<package&identify>\ProvidesPackage{tudscrtutorial}[%
@@ -292,7 +292,7 @@
     \@for\@tempa:=\@templist\do{%
 %    \end{macrocode}
 % Ist der Eintrag bereits erfolgt, wird der verbliebene Teil der Liste 
-% angehängt.
+% angehangen.
 %    \begin{macrocode}
       \if@sorted@list%
         \expandafter\edef\expandafter\@tempb\expandafter{\@tempb,\@tempa}%
@@ -1634,8 +1634,8 @@
 % Durch den Argumentprozessor \cs{ProcessorKeyVal} wird dieses vom eigentlichen
 % Schlüssel getrennt. Dabei wird der gegebene Schlüssel immer in der Form
 % \marg{Schlüssel} ausgegeben. Sollte ein optionaler Wert gegeben worden sein, 
-% wird dieser und in der Form \val{=}\meta{Wert}\val{=} einfach angehängt und 
-% als optionales Argument von \cs{Option@Value} weiter verarbeitet. Mit dem
+% wird dieser in der Form \val{=}\meta{Wert}\val{=} einfach angehängt und als
+% optionales Argument von \cs{Option@Value} weiter verarbeitet. Mit dem
 % optionalen Argument in runden Klammern kann ggf. auf eine Option aus einem 
 %\TUDScript-Paket verwiesen 
 % werden.
@@ -1966,7 +1966,7 @@
 %
 % \subsubsection{Zuordnung der Markupbefehle für Label und Index}
 %
-% \ToDo{Anpassen für Paket}[v2.05]
+% \ToDo{Implementierung für Paket \pkg{tudscrtutorial}}[v2.05]
 %
 % \begin{macro}{\@getattribution}
 % \changes{v2.05}{2015/11/03}{neu}^^A
@@ -2088,6 +2088,11 @@
 % \begin{macro}{\@onlyPValue}
 % \changes{v2.02}{2014/10/09}{neu}^^A
 % \changes{v2.03}{2015/02/02}{\cs{relax} mit \cs{@empty} ersetzt}^^A
+% Dieser Befehl unterdrückt die Ausgabe fast aller Parameter. Lediglich die
+% Inhalte aus den beiden Makros \cs{PValue} und \cs{PValueName} werden 
+% ausgeführt. Dies wird für die Generierung von Labeln sowie die Erstellung der 
+% Einträge für index und Änderungsliste benötigt, um die Angabe von speziellen 
+% Werten bei Schlüsseln zu erhalten.
 %    \begin{macrocode}
 %<*class>
 \newcommand*\@onlyPValue{%
@@ -2195,43 +2200,94 @@
 %    \end{macrocode}
 % \end{macro}^^A \@formatlabel
 % \end{macro}^^A \@templabel
+% \ToDo{Implementierung für Paket \pkg{tudscrtutorial}}[v2.05]
 % \begin{macro}{\@getlabel}
 % \changes{v2.05}{2015/11/03}{neu}^^A
 % \begin{macro}{\@@getlabel}
 % \changes{v2.05}{2015/11/03}{neu}^^A
-% Der Befehl \cs{@getlabel} erzeugt im ersten Schriftt aus dem zweiten Argument
-% in Zusammenspiel mit . 
-
-% \cs{SplitArgument}\val{\{2\}{\{:\}} aufgerufen worden sein. Diese Eigenheit
-% macht die Definition von \cs{@Label}
-
-
-% \val{\meta{Bundlepräfix}:\meta{Labelpräfix}:\meta{Element}}
-
-% Dabei werden hierfür einige Markup-Befehle vorübergehend außer Kraft gesetzt. 
-% Außerdem wird das Label ggf. für eine Split-Deklaration erweitert.
+% Für den Befehl \cs{@getlabel} wird das zweite obligatorische Argument 
+% (\val{\#3}) für gewöhnlich in der Form
+% \val{\{\string\Bundle{\marg{Klasse/Paket}}:\string\Markup{\marg{Element}}\}}
+% angegeben. Dieses wird beim Einlesen direkt an die beiden Argumentprozessoren 
+% \cs{SplitArgument}\val{\{2\}\{:\}} gefolgt von \cs{@Label} weitergereicht. 
+% Nach dem Zusammenspiel enthält das zweite obligatorische Argument das ein  
+% Label der Form \val{\meta{Bundlepräfix}:\meta{Labelpräfix}:\meta{Element}}.
+% Auch die Angabe eines Makros als zweites obligatorische Argument, welches das 
+% Label in der richtigen Formatierung enthält, ist möglich.
 %    \begin{macrocode}
-\newcommand*\@getlabel[3]{%
-  \begingroup%
-    \let\Class\@firstofone%
-    \let\Package\@firstofone%
-    \let\Environment\@firstofone%
-    \let\Macro\@firstofone%
-    \let\texttt\@firstofone%
-    \let\textsbn\@firstofone%
-    \let\textsbs\@firstofone%
-    \tud@ifbundle{#3}{%
-      \edef\@tempa{%
-        \noexpand\endgroup%
-        \noexpand\edef\noexpand#1{#3:#2}%
-      }%
+\NewDocumentCommand\@getlabel{sm>{\@Label}>{\SplitArgument{2}{:}}md==}{%
+%    \end{macrocode}
+% Mit \cs{@@getlabel} wird das im zweiten obligatorischen Argument (\val{\#3}) 
+% generierte Label in das im ersten obligatorischen Argument (\val{\#2})
+% angegebenen Makro gespeichert und ggf. diesem das letzte optionale Argument
+% für einen speziellen Wert zu einem Schlüssel angehangen.
+%    \begin{macrocode}
+  \@@getlabel#2{#3}=#4=%
+%    \end{macrocode}
+% Die Sternversion von \cs{@getlabel} wird für das Definieren von Labeln bei 
+% Deklarationen etc. genutzt. Sollte diese verwendet worden sein, ist die 
+% Generierung beendet.
+%    \begin{macrocode}
+  \IfBooleanF{#1}{%
+%    \end{macrocode}
+% Andernfalls wird geprüft, ob das erstellte Label überhaupt existiert. Sollte 
+% dies nicht der Fall sein wird ein passendes Label für den gegebenen Schlüssel 
+% ohne speziellen Wert gesucht.
+%    \begin{macrocode}
+    \@tempswafalse%
+    \tud@iflabelexists{#2}{%
+      \@tempswatrue%
     }{%
-      \edef\@tempa{%
-        \noexpand\endgroup%
-        \noexpand\edef\noexpand#1{#2}%
+      \IfValueT{#4}{%
+        \@@getlabel\tud@reserved{#3}%
+        \tud@iflabelexists{\tud@reserved}{%
+          \let#2\tud@reserved%
+          \@tempswatrue%
+        }{}%
       }%
     }%
-  \@tempa%
+%    \end{macrocode}
+% Wurde auch danach noch kein passendes Label gefunden, gibt es u.\,U. eine 
+% letzte Möglichkeit, ein passendes Label zu finden. Wird in der Dokumentation 
+% gerade ein Paket oder eine sich von den Hauptklassen unterscheidende Klasse
+% aus dem \TUDScript-Bundle erläutert (Umgebungen \env{Bundle}, \env{Bundle!}), 
+% so wird eventuell auf ein Element aus ebendiesen Hauptklassen referenziert. 
+% In diesem Fall wird \cs{@getdefaultlabel} aufgerufen, um den Bundlepräfix
+% für das Label entsprechend zu setzen.
+%    \begin{macrocode}
+    \if@tempswa\else%
+      \tud@ifbundle{\@getdefaultlabel#2{#3}=#4=}{}%
+    \fi%
+  }%
+}
+%    \end{macrocode}
+% Mit \cs{@@getlabel} wird das generierte Label in das beim Aufruf von 
+% \cs{@getlabel} angegebenen Makro gespeichert.
+%    \begin{macrocode}
+\NewDocumentCommand\@@getlabel{mmd==}{%
+  \def#1{#2}%
+%    \end{macrocode}
+% Sollte optional ein spezieller Wert für einen Schlüssel übergeben worden 
+% sein, wird dieser ggf. angehängt.
+%    \begin{macrocode}
+  \IfValueT{#3}{%
+    \begingroup%
+%    \end{macrocode}
+% Dies geschieht jedoch nur für Werte, welche im optionalen Argument mit
+% \cs{PValue} bzw. \cs{PValueName} angegeben wurden.
+%    \begin{macrocode}
+      \@onlyPValue%
+      \@formatlabel%
+      \ifstr{#3}{}{%
+        \def\tud@reserved{\endgroup}%
+      }{%
+        \protected@edef\tud@reserved{%
+          \noexpand\endgroup%
+          \appto\noexpand#1{=#3}%
+        }%
+      }%
+    \tud@reserved%
+  }%
 }
 %    \end{macrocode}
 % \end{macro}^^A \@@getlabel
@@ -2240,10 +2296,59 @@
 % \changes{v2.05}{2015/11/03}{neu}^^A
 % \begin{macro}{\@@getdefaultlabel}
 % \changes{v2.05}{2015/11/03}{neu}^^A
+% Diese beiden Makros werden genutzt, um mit \cs{@getlabel} innerhalb der
+% Umgebungen \env{Bundle} und \env{Bundle!} für den Fall, dass ein gesuchtes 
+% Label für das aktuelle Bundle-Element nicht existiert, nach diesem Element
+% in den existierenden Labels der Hauptklassen zu suchen.
+%
+% Dabei wird das bereits generierte Label durch \cs{@getdefaultlabel} in seine 
+% drei Hauptbestandteile zur WEiterverarbeitung zerlegt.
 %    \begin{macrocode}
+\NewDocumentCommand\@getdefaultlabel{m>{\SplitArgument{2}{:}}mr==}{%
+  \@@getdefaultlabel{#1}#2=#3=%
+}
+%    \end{macrocode}
+% Durch \cs{@@getdefaultlabel} wird als erstes geprüft, ob der Bundlepräfix 
+% bereits dem Standardpräfix für die Hauptklassen entspricht. Nur wenn dies 
+% nicht der Fall ist, wird die Labelgenerierung abermals ausgeführt.
+%    \begin{macrocode}
+\NewDocumentCommand\@@getdefaultlabel{mmmmr==}{%
+  \edef\tud@reserved{\expandafter\detokenize\expandafter{\@bundledefault}}%
+  \ifstr{\tud@reserved}{#2}{}{%
+%    \end{macrocode}
+% Dabei erfolgt der Aufruf logischerweise mit dem richtigen Bundlepräfix. 
+%    \begin{macrocode}
+    \@getlabel#1{\@bundledefault:#3:#4}=#5=%
+  }%
+}
 %    \end{macrocode}
 % \end{macro}^^A \@@getdefaultlabel
 % \end{macro}^^A \@getdefaultlabel
+% \begin{macro}{\tud@iflabelexists}
+% \changes{v2.05}{2015/11/03}{neu}^^A
+% Mit dem Befehl \cs{tud@iflabelexists} kann eine Fallunterscheidung bezüglich
+% der Existenz eines Labels in der Form
+% \val{\meta{Bundlepräfix}:\meta{Labelpräfix}:\meta{Element}} durchgeführt
+% werden. Das zu prüfende Label ist in gleicher Weise wie bei \cs{@getlabel} 
+% anzugeben. Je nachdem, ob ein existierendes Label gefunden wird oder nicht, 
+% wird das dritte oder das vierte Argument ausgeführt.
+%    \begin{macrocode}
+\NewDocumentCommand\tud@iflabelexists{>{\@Label}>{\SplitArgument{2}{:}}md==}{%
+  \@@getlabel\tud@reserved{#1}=#2=%
+  \ifcsdef{r@\tud@reserved}{%
+    \expandafter\@firstoftwo%
+  }{%
+    \@@getlabel\tud@reserved{#1}%
+    \ifcsdef{r@\tud@reserved}{%
+      \expandafter\@firstoftwo%
+    }{%
+     \expandafter\@secondoftwo%
+    }%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@iflabelexists
+% \ToDo{Implementierung für Paket \pkg{tudscrtutorial}}[v2.05]
 % \begin{macro}{\@Label}
 % \changes{v2.05}{2015/11/03}{neu}^^A
 % \begin{macro}{\@@Label}
@@ -2252,7 +2357,7 @@
 % drei Argumente für das Erstellen eines gültigen Labels erwartet. Er wird 
 % sowohl von \cs{@getlabel} als auch von \cs{tud@iflabelexists} verwendet. Vor 
 % der Ausführung von \cs{@Label} muss das zu behandelnde Argument bereits mit 
-% \cs{SplitArgument}\val{\{2\}{\{:\}} aufgerufen worden sein. Diese Eigenheit
+% \cs{SplitArgument}\val{\{2\}\{:\}} aufgerufen worden sein. Diese Eigenheit
 % macht die Definition von \cs{@Label} notwendig, um das Ergebnis der zuvor
 % vorgenommenen Argumentaufspaltung verarbeiten zu können, in dem dieses an
 % \cs{@@Label} weitergereicht wird. Eine direkte Integration der Spaltung des
@@ -2273,22 +2378,38 @@
 % Es gibt insgesamt vier verschiedene Varianten der Argumentenübergabe an den
 % Argumentprozessor \cs{@@Label}.
 % \begin{description}\let\itshape\slshape
-%    \item[\cs{@@Label}\val{\marg{Bundlepräfix}\marg{Labelpräfix}\marg{Name}}]
-%      \strut\newline Das Label ist bereits vollständig bestimmt. In diesem 
-%      Fall wird es einfach wieder zusammengesetzt. Diese Variante tritt durch 
-%      einen rekursiven Aufruf des Argumentprozessors auf.
-%    \item[\cs{@@Label}\val{\{\string\bundle\}\{\string\markup\}\{-NoValue-\}}]
-%      \strut\newline Das Label soll für ein Markupelement generiert werden. 
-%      Dabei wurde explizit ein Paket oder eine Klasse aus dem Bundle angegeben 
-%      oder implizit das Makro \cs{@bundle} verwendet, welches innerhalb der 
-%      Umgebung \env{Bundle} und \env{Bundle!} auf das/die aktuell beschriebene 
-%      Paket/Klasse gesetzt wird.
-%    \item[\cs{@@Label}\val{\{-NoValue-\}\{\string\markup\}\{-NoValue-\}}]
+%    \item[\cs{@@Label}\val{\ignorespaces
+%      \{\string\LabelMakro\}\{-NoValue-\}\{-NoValue-\}\ignorespaces
+%    }]\strut\newline 
+%      Das Label ist bereits in \cs{LabelMakro} enthalten und soll expandiert 
+%      werden. Dabei spielt es keine Rolle, ob die durch \val{:} getrennten
+%      Bestandteile innerhalb des Labels schon als einfacher String oder in der 
+%      Markupform gegeben sind.
+%    \item[\cs{@@Label}\val{\ignorespaces
+%      \{-NoValue-\}\{\string\Markup{\marg{Element}}\}\{-NoValue-\}\ignorespaces
+%    }]
 %      \strut\newline Das Label soll für ein Markupelement genriert werden, 
 %      wobei in jedem Fall der Inhalt aus \cs{@bundle} als Bundlepräfix genutzt 
 %      wird.
-%    \item[\cs{@@Label}\val{\{\string\labelmakro\}\{-NoValue-\}\{-NoValue-\}}]
-%      \strut\newline Das Label soll aus einem Makro expandiert werden.
+%    \item[\cs{@@Label}\val{\ignorespaces
+%      \{\string\Bundle{\marg{Klasse/Paket}}\}\ignorespaces
+%      \{\string\Markup{\marg{Element}}\}\ignorespaces
+%      \{-NoValue-\}\ignorespaces
+%    }]\strut\newline 
+%      Das Label soll für ein Markupelement generiert werden. 
+%      Dabei wurde explizit ein Paket oder eine Klasse aus dem Bundle angegeben 
+%      oder implizit das Makro \cs{@bundle} als Argument verwendet, welches
+%      innerhalb der Umgebungen \env{Bundle} und \env{Bundle!} auf das/die
+%      aktuell beschriebene Paket/Klasse gesetzt wurde.
+%    \item[\cs{@@Label}\val{\ignorespaces
+%      \marg{Bundlepräfix}\ignorespaces
+%      \marg{Labelpräfix}\ignorespaces
+%      \marg{Element}\ignorespaces
+%    }]\strut\newline 
+%      Das Label ist bereits vollständig bestimmt und die Argumente werden 
+%      entweder als String oder als Markup übergeben. Auch Mischformen sind 
+%      möglich. In diesem Fall wird es einfach wieder zusammengesetzt. Diese
+%      Variante tritt durch rekursiven Aufruf des Argumentprozessors auf.
 % \end{description}
 %    \begin{macrocode}
 \NewDocumentCommand\@@Label{mmm}{%
