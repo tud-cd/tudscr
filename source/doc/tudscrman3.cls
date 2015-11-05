@@ -178,6 +178,7 @@
 \LoadClass{\TUDClassName@Parent}
 %%% From File: tudscr-manual.dtx
 \RequirePackage{scrhack}[2014/02/27]
+\RequirePackage{babel}[2014/03/24]
 \PassOptionsToPackage{log-declarations=false}{xparse}
 \RequirePackage{xparse}[2013/12/31]
 \PassOptionsToPackage{quiet}{marginnote}
@@ -431,7 +432,6 @@
     }%
   }%
 }
-\RequirePackage{babel}[2014/03/24]
 \AfterPackage*{hyperref}{%
   \patchcmd{\pdfstringdef}{\csname HyPsd@babel@}{%
     \let\bbl@info\@gobble\csname HyPsd@babel@%
@@ -441,7 +441,7 @@
 \TUD@UnwindPackage{hyperref}{\RequirePackage[babel]{microtype}[2013/05/23]}
 \newif\if@declare
 \newif\if@openindex
-\newcommand*\tud@declare{0}
+\newcommand*\tud@declare@type{0}
 \newcommand*\list@declaration{}
 \let\list@declaration\relax
 \NewDocumentEnvironment{Declaration}{omoog}{%
@@ -455,9 +455,9 @@
   \@obsoletetrue%
   \ifstr{#1}{}{%
     \listadd\list@declaration{%
-      \def\tud@declare{1}%
+      \def\tud@declare@type{1}%
       #3%
-      \def\tud@declare{0}%
+      \def\tud@declare@type{0}%
     }%
     \tud@declare@start{#3}{#4}{#5}{#6}%
   }{%
@@ -561,9 +561,9 @@
 \newcommand*\tud@ifbundle[2]{\ifstr{\@bundle}{\@bundledefault}{#2}{#1}}
 \NewDocumentCommand\tud@declare@special@start{omm}{%
   \@ChangedAt@CreateList(#2){#1}%
-  \def\tud@declare{#3}%
+  \def\tud@declare@type{#3}%
   \@declaretrue\@openindextrue#2\@declarefalse%
-  \def\tud@declare{0}%
+  \def\tud@declare@type{0}%
 }
 \newcommand*\tud@declare@special@end[1]{%
   \ifx\list@ChangedAt\relax\else%
@@ -824,7 +824,7 @@
     \@ProcessChangedAt{\Color{#2}}(#4)[Farbe]%
   \else%
     \@SetMarkupFormat{\ttfamily}[Farbe](%
-      \begingroup\@MarkupFormat{#2\IfValueT{#3}{~(#3)}}\endgroup%
+      \begingroup\ttfamily{#2\IfValueT{#3}{~(#3)}}\endgroup%
     )%
     \@ProcessMarkup{\Color{#2}}[#3](#4)'#5'%
     \@ProcessIndex{\Color{#2}}(#4){#1}|#5|[Farbe]%
@@ -895,7 +895,7 @@
   \let\emph\@firstofone%
 }
 \newcommand*\@TUDScript{TUD-KOMA-Script}
-\NewDocumentCommand\@suppressmarkup{s}{%
+\NewDocumentCommand\@gobblemarkup{s}{%
   \let\Application\@Application%
   \let\Distribution\@Distribution%
   \let\Engine\@Engine%
@@ -933,15 +933,15 @@
   }%
 }
 \AfterPackage*{hyperref}{%
-  \expandafter\pdfstringdefDisableCommands\expandafter{\@suppressmarkup}%
+  \expandafter\pdfstringdefDisableCommands\expandafter{\@gobblemarkup}%
 }
 \newcommand*\@templabel{}
 \newcommand*\@formatlabel{%
-  \let\IeC\@firstofone%
-  \let\NoCaseChange\@firstofone%
   \def~{-}%
+  \let\IeC\@firstofone%
   \def\"##1{##1e}%
   \def\ss{ss}%
+  \let\NoCaseChange\@firstofone%
 }
 \NewDocumentCommand\@getlabel{sm>{\@Label}>{\SplitArgument{2}{:}}md==}{%
   \@@getlabel#2{#3}=#4=%
@@ -989,9 +989,8 @@
     \@getlabel#1{\@bundledefault:#3:#4}=#5=%
   }%
 }
-\NewDocumentCommand\tud@iflabelexists{>{\@Label}>{\SplitArgument{2}{:}}md==}{%
-  \@@getlabel\tud@reserved{#1}=#2=%
-  \ifcsdef{r@\tud@reserved}{%
+\NewDocumentCommand\tud@iflabelexists{>{\@Label}>{\SplitArgument{2}{:}}m}{%
+  \ifcsdef{r@#1}{%
     \expandafter\@firstoftwo%
   }{%
     \expandafter\@secondoftwo%
@@ -1002,7 +1001,7 @@
 }
 \NewDocumentCommand\@@Label{mmm}{%
   \begingroup%
-    \@suppressmarkup%
+    \@gobblemarkup%
     \@formatlabel%
     \IfValueTF{#3}{%
       \edef\@tempa{#1:#2:#3}%
@@ -1026,30 +1025,25 @@
     }%
   \@tempc%
 }
-% {#1}: Markup für Ausgabe
-% =#2=: optionaler Wert für Option und Key
-% [#3]: optionaler Suffix für Ausgabe
-% (#4): optionale Subdeclaration
-% <#5>: URL
-% '#6': Querverweis
-\NewDocumentCommand\@GobbleMarkup{md==od()d<>d''}{}%
+\newcommand*\@suppressmarkup{\let\@ProcessMarkup\@SuppressMarkup}
+\NewDocumentCommand\@SuppressMarkup{md==od()d<>d''}{}%
 \NewDocumentCommand\@ProcessMarkup{md==od()d<>d''}{%
   \if@declare%
-    \@getlabel*\@templabel{\@bundle:#1}=#2=%
     \tud@toks@{\ProcessMarkup@Declare}%
+    \@getlabel*\@templabel{\@bundle:#1}=#2=%
   \else%
+    \tud@toks@{\ProcessMarkup@Inline}%
     \@getlabel\@templabel{#4:#1}=#2=%
-    \tud@toks@{\ProcessMarkup@Output}%
   \fi%
   \eaddto@hook\tud@toks@{\expandafter{\@templabel}}%
   \begingroup%
-    \@suppressmarkup*%
+    \@gobblemarkup*%
     \protected@edef\tud@reserved{%
       \noexpand\endgroup%
-      \def\noexpand\@tempentry{#1}%
+      \def\noexpand\tud@reserved{#1}%
     }%
   \tud@reserved%
-  \eaddto@hook\tud@toks@{\expandafter{\@tempentry}}%
+  \eaddto@hook\tud@toks@{\expandafter{\tud@reserved}}%
   \IfValueT{#2}{\addto@hook\tud@toks@{=#2=}}%
   \IfValueT{#3}{\addto@hook\tud@toks@{[#3]}}%
   \if@declare%
@@ -1083,17 +1077,9 @@
     }%
   }%
 }
-\newcommand*\@suppressoutput{%
-  \let\@ProcessMarkup\@GobbleMarkup%
-  \renewcommand*\index[2][]{}% §§§ notwendig?
-}
-% {#1}: Label
-% {#2}: Hauptargument
-% =#3=: optionaler Wert für Option und Key
-% [#4]: optionaler Suffix Ausgabe
 \NewDocumentCommand\ProcessMarkup@Declare{mmd==o}{%
   \@CheckMarkupFormat%
-  \ifcase\tud@declare%
+  \ifcase\tud@declare@type%
     \tudhyperdef{#1}%
     \@MarkupOutput{#2}=#3=[#4]%
   \or%
@@ -1105,13 +1091,7 @@
   \fi%
   \@ClearMarkupFormat%
 }
-% {#1}: Label
-% {#2}: Hauptargument
-% =#3=: optionaler Wert für Option und Key
-% [#4]: optionaler Suffix Ausgabe
-% <#5>: URL
-% '#6': Querverweis
-\NewDocumentCommand\ProcessMarkup@Output{mmd==od<>d''}{%
+\NewDocumentCommand\ProcessMarkup@Inline{mmd==od<>d''}{%
   \@CheckMarkupFormat%
   \begingroup%
     \def\@tempc{\@MarkupOutput{#2}=#3=[#4]}%
@@ -1155,9 +1135,6 @@
   \endgroup%
   \@ClearMarkupFormat%
 }
-\newcommand*\@MarkupFormat{}
-\newcommand*\@MarkupSuffix{}
-\newcommand*\@MarkupDeclare{}
 \NewDocumentCommand\@MarkupOutput{>{\SplitArgument{1}{!}}md==o}{%
   \@@MarkupOutput#1=#2=[#3]%
 }
@@ -1178,8 +1155,16 @@
   \the\tud@toks@%
 }
 \newcommand*\@MarkupInline[1]{\mbox{\@MarkupFormat{#1}}}
+\newcommand*\@MarkupDeclare{}
 \newcommand*\@MarkupDeclare@Default[1]{%
   \begingroup\@MarkupFormat{#1}\endgroup\@MarkupSuffix%
+}
+\newcommand*\@MarkupFormat{}
+\newcommand*\@MarkupSuffix{}
+\NewDocumentCommand\@SetMarkupFormat{mod()}{%
+  \def\@MarkupFormat{\ifdin{\MakeTextUppercase}{#1}}%
+  \IfValueT{#2}{\def\@MarkupSuffix{\suffix{#2}}}%
+  \IfValueT{#3}{\renewcommand*\@MarkupDeclare[1]{#3\@MarkupSuffix}}%
 }
 \robustify\NoCaseChange
 \appto\tud@uclcnotmath{%
@@ -1199,11 +1184,6 @@
   \@nonchangecase\PageStyle%
   \@nonchangecase\Font%
   \@nonchangecase\Color%
-}
-\NewDocumentCommand\@SetMarkupFormat{mod()}{%
-  \def\@MarkupFormat{\ifdin{\MakeTextUppercase}{#1}}%
-  \IfValueT{#2}{\def\@MarkupSuffix{\suffix{#2}}}%
-  \IfValueT{#3}{\renewcommand*\@MarkupDeclare[1]{#3\@MarkupSuffix}}%
 }
 \newcommand*\@ClearMarkupFormat{%
   \let\@MarkupFormat\relax%
@@ -1226,8 +1206,8 @@
   othercode={\renewcommand*\subitem{\@idxitem\hspace*{15\p@}}}%
 }
 \@ifpackagelater{imakeidx}{2013/07/12}{%
-  \ClassWarning%
-  {tudscrmanual}{%
+  \ClassWarning{tudscrmanual}%
+  {%
     Package `imakeidx' was updated so the patch for the\MessageBreak%
     environment `theindex' is maybe outdated.%
   }%
@@ -1260,7 +1240,7 @@
     }{\ifnum\imki@columns>\@ne\end{multicols}\fi}%
   \fi%
 }
-% TODO §§§ Kombination aus beiden möglich?
+% TODO §§§ Kombination aus beiden darstellbar?
 \newrobustcmd*\cleversee{\@cleversee{\seename}}
 \newrobustcmd*\cleverseealso{\@cleversee{\alsoname}}
 \newcommand*\@cleversee{}
@@ -1381,6 +1361,8 @@
 \makexindyindex*{Klassen, Pakete und Dateien}[files]
 \makexindyindex[columns=1]{\"Anderungsliste}[changelog]
 \undef\makexindyindex
+\newif\if@tud@index
+\addtoeachtocfile{\protect\@tud@indextrue}%
 \newcommand*\@tempentry{}
 \newcommand*\@tempformat{}
 \newcommand*\@tempkey{}
@@ -1391,7 +1373,7 @@
     \def\@tempbundle{#7}%
   }{%
     \tud@ifbundle{%
-      \tud@iflabelexists{\@bundle:#5}=#6={%
+      \tud@iflabelexists{\@bundle:#5}{%
         \edef\@tempbundle{\expandonce\@bundle}%
       }{}%
     }{}%
@@ -1399,7 +1381,7 @@
   \begingroup%
     \in@{\Key}{#5}%
     \ifin@%
-      \@suppressoutput%
+      \@suppressmarkup%
       \let\Key\@firstoftwo%
       #5%
       \def#4{%
@@ -1408,7 +1390,7 @@
       }%
       \let\Key\@secondoftwo%
     \else%
-      \@suppressmarkup%
+      \@gobblemarkup%
       \let#4\@empty%
     \fi%
     \edef\tud@reserved{%
@@ -1509,82 +1491,61 @@
     \index[\@templabel]{\@tempkey\@tempentry @\@tempformat}%
   \fi%
 }
-\newif\if@tud@index
-\addtoeachtocfile{\protect\@tud@indextrue}%
-\newcommand*\@printindexskip{%
-  \ifnum\imki@columns>\@ne\relax\vspace{-\multicolsep}\fi%
-}
-\newcommand*\tud@indexprologue{}
-\newcommand*\@printindex[1][]{%
-  \pagebreak[3]%
-  \@tud@indextrue%
-  \ifx\tud@indexprologue\@empty%
-    \indexprologue[\@printindexskip]{%
-      \ifblank{#1}{\tudhyperdef*{idx:main}}{\tudhyperdef*{idx:#1}}%
-    }%
-  \else%
-    \indexprologue{%
-      \ifblank{#1}{\tudhyperdef*{idx:main}}{\tudhyperdef*{idx:#1}}%
-      \begingroup%
-        \let\footnote\@gobble%
-        \tud@indexprologue%
-        \@printindexskip%
-      \endgroup%
-    }%
-  \fi%
-  \ifblank{#1}{\printindex}{\printindex[#1]}%
-  \let\tud@indexprologue\@empty%
-}
 \NewDocumentCommand\CrossIndex{smom}{%
   \def\@tempa##1##2##3{%
     \index{%
       \IfBooleanTF{#1}{##3@##3}{##3!"|@}%
       \,\textrightarrow\,%
-      \tudhyperref{idx:##1}{\IfValueTF{##2}{##2}{Index der ##3}}|seeidx{##1}%
+      \tudhyperref{idx:##2}{\IfValueTF{##1}{##1}{Index der ##3}}|seeidx{##2}%
     }%
   }%
-  \forcsvlist{\@tempa{#2}{#3}}{#4}%
+  \forcsvlist{\@tempa{#3}{#4}}{#2}%
 }
 \newcommand*\SeeRef[2]{%
-  \begingroup%
-    \@suppressoutput%
-    \@nameuse{#1}{#2}%
-    \protected@edef\tud@reserved{%
-      \noexpand\endgroup%
-      \noexpand\index{#1!\@nameuse{#1}{#2}|see{\@tempformat}}%
-    }%
-  \tud@reserved%
+  \sbox\z@{%
+    \let\@tempformat\relax%
+    #2%
+    \ifx\@tempformat\relax%
+      \gdef\@tempa{#2}%
+    \else%
+      \global\let\@tempa\@tempformat%
+    \fi%
+  }%
+  \index{#1!#2|see{\@tempa}}%
 }
+\newcommand*\tud@indexprologue{}
 \newcommand*\PrintIndex{%
   \begingroup%
     \renewcommand\tud@indexprologue{%
-      Die aufgelisteten Schlagworte sollen sowohl Antworten bei generellen 
-      Fragen als auch L\"osungen f\"ur typische Probleme beim Umgang mit 
-      \hologo{LaTeXe} sowie dem \TUDScript-Bundle liefern. Falls ein gesuchter 
-      Begriff hier nicht auftaucht, sollte das \Forum erster Anlaufpunkt sein, 
-      um Fragen bei der Nutzung von \TUDScript zu beantworten.
+      Die im Folgenden aufgelisteten Schlagworte sollen f\"ur den Umgang mit
+      \hologo{LaTeXe} im Allgemeinen sowie dem \TUDScript-Bundle im Speziellen
+      sowohl Antworten bei generellen Fragen liefern als auch L\"osungen f\"ur
+      typische Probleme bereitstellen. Falls ein gesuchter Begriff hier nicht
+      auftaucht oder trotz vorhander Hinweise kein zufriedenstellendes Ergebnis
+      erzielt werden kann, sollte das \Forum erster Anlaufpunkt sein, um
+      weitere Hilfe bei der Nutzung von \TUDScript zu erhalten.
     }%
     \@printindex%
     \clearpage%
     \renewcommand\tud@indexprologue{%
-      Dies ist der Index allre im Handbuch erl\"auterten sowie erw\"ahnten 
-      Optionen, wobei bei den meisten auch Untereintr\"age mit Seitenangeben 
+      Dies ist der Index aller im Handbuch erl\"auterten sowie erw\"ahnten
+      Optionen, wobei bei den meisten auch Untereintr\"age mit Seitenangeben
       f\"ur spezielle Wertzuweisungen existieren.
     }%
     \@printindex[options]%
     \renewcommand\tud@indexprologue{%
-      Hier werden alle im Handbuch erl\"auterten sowie erw\"ahnten Befehle und 
-      Umgebungen aufgelistet, wobei bei einigen auch Untereintr\"age f\"ur 
-      Schl\"ussel-Wert-Parameter existieren, die im optionalen Argument der 
-      jeweiligen Anweisung verwendet werden k\"onnen. Bei einigen Parametern 
-      gibt es zus\"atzlich eine weitere Unterebene, in der Seitenverweise zu 
+      Hier werden alle im Handbuch erl\"auterten sowie erw\"ahnten Befehle und
+      Umgebungen aufgelistet, wobei bei einigen auch Untereintr\"age f\"ur
+      Schl\"ussel-Wert-Parameter existieren, die im optionalen Argument der
+      jeweiligen Anweisung verwendet werden k\"onnen. Bei einigen Parametern
+      gibt es zus\"atzlich eine weitere Unterebene, in der Seitenverweise zu
       expliziten Wertzuweisungen an diese Parameter gegeben werden.
     }%
     \@printindex[macros]%
     \renewcommand\tud@indexprologue{%
-      Dies sind alle von \TUDScript definierten, sprachabh\"angigen Bezeichner. 
-      Informationen zur Verwendung sowie den Anpassungsm\"oglichkeiten sind in 
-      \autoref{sec:localization} zu finden. 
+      Dies sind alle von \TUDScript definierten, sprachabh\"angigen Bezeichner.
+      Informationen zur Verwendung sowie den Anpassungsm\"oglichkeiten sind in
+      \autoref{sec:localization} zu finden.
     }%
     \@printindex[terms]%
     \@printindex[elements]%
@@ -1592,13 +1553,62 @@
     \@printindex[files]%
   \endgroup%
 }
+\newcommand*\@printindexskip{%
+  \ifnum\imki@columns>\@ne\relax\vspace{-\multicolsep}\fi%
+}
+\newcommand*\@printindex[1][]{%
+  \pagebreak[3]%
+  \@tud@indextrue%
+  \ifblank{#1}{%
+    \def\tud@reserved{\tudhyperdef*{idx:main}}%
+  }{%
+    \def\tud@reserved{\tudhyperdef*{idx:#1}}%
+  }%
+  \ifx\tud@indexprologue\@empty%
+    \indexprologue[\@printindexskip]{\tud@reserved}%
+  \else%
+    \indexprologue{%
+      \tud@reserved%
+      \tud@indexprologue%
+      \@printindexskip%
+    }%
+  \fi%
+  \ifblank{#1}{\printindex}{\printindex[#1]}%
+  \let\tud@indexprologue\@empty%
+}
 % {#1}: Markup für Änderungsliste
 % =#2=: optionaler Wert für Option und Key für Änderungsliste
 % (#3): optionale Subdeclaration
 % [#4]: optionaler Suffix in der Änderungsliste
 \newif\if@changedat
+\NewDocumentCommand\@ProcessChangedAt{md==d()o}{%
+  \@getindex*\@tempentry\@tempformat\@tempkey{#1}=#2=(#3)[#4]%
+    !Parameter angepasst!%
+  \IfValueT{#2}{%
+    \begingroup%
+      \@onlyPValue%
+      \ifstr{#2}{}{%
+        \def\tud@reserved{\endgroup}%
+      }{%
+        \protected@edef\tud@reserved{%
+          \noexpand\endgroup%
+          \def\noexpand\@tempentry{\@tempentry=#2}%
+        }%
+      }%
+    \tud@reserved%
+  }%
+}
+\newlength\changedatskip
+\NewDocumentCommand\ChangedAt{somO{\changedatskip}}{%
+  \IfValueTF{#2}{%
+    \@ChangedAt@CreateList[#2]{#3}%
+  }{%
+    \@ChangedAt@CreateList{#3}%
+  }%
+  \@printchangedatlist{#1}{#4}%
+}
 \newcommand*\list@ChangedAt{}
-\let\list@ChangedAt\relax%
+\let\list@ChangedAt\relax
 \DeclareListParser*{\forssvlist}{;}%
 \NewDocumentCommand\@ChangedAt@CreateList{od()m}{%
   \IfValueT{#3}{\forssvlist{\@ChangedAt@@CreateList[#1](#2)}{#3}}%
@@ -1658,40 +1668,7 @@
       }%
     }%
   }%
-  \listeadd{\list@ChangedAt}{\the\toks@}%
-}
-\newlength\changedatskip
-\NewDocumentCommand\ChangedAt{somO{\changedatskip}}{%
-  \IfValueTF{#2}{%
-    \@ChangedAt@CreateList[#2]{#3}%
-  }{%
-    \@ChangedAt@CreateList{#3}%
-  }%
-  \@printchangedatlist{#1}{#4}%
-}
-\NewDocumentCommand\@printchangedatlist{mm}{%
-  \ifx\list@ChangedAt\relax\else%
-    \let\@templist\relax%
-    \forlistloop\@ChangedAt@CreateEntry{\list@ChangedAt}%
-    \global\let\list@ChangedAt\relax%
-    \IfBooleanF{#1}{%
-      \sortlist\@templist%
-      \strut%
-      \marginnote{%
-        \def\@tempa####1{%
-          \ignorespaces%
-          \tudhyperref{idx:changelog:####1}{####1}%
-          \tabularnewline%
-        }%
-        \begin{tabular}{|l|}%
-          \hline%
-          \forlistloop\@tempa{\@templist}%
-          \hline%
-        \end{tabular}%
-      }[#2]%
-      \ignorespaces%
-    }%
-  \fi%
+  \listeadd\list@ChangedAt{\the\toks@}%
 }
 \NewDocumentCommand\@ChangedAt@CreateEntry{>{\SplitArgument{4}{!}}m}{%
   \@ChangedAt@@CreateEntry#1%
@@ -1737,23 +1714,6 @@
   }%
   \ifinlist{#1}{\@templist}{}{\listadd\@templist{#1}}%
 }
-\NewDocumentCommand\@ProcessChangedAt{md==d()o}{%
-  \@getindex*\@tempentry\@tempformat\@tempkey{#1}=#2=(#3)[#4]%
-    !Parameter angepasst!%
-  \IfValueT{#2}{%
-    \begingroup%
-      \@onlyPValue%
-      \ifstr{#2}{}{%
-        \def\tud@reserved{\endgroup}%
-      }{%
-        \protected@edef\tud@reserved{%
-          \noexpand\endgroup%
-          \def\noexpand\@tempentry{\@tempentry=#2}%
-        }%
-      }%
-    \tud@reserved%
-  }%
-}
 \newcommand*\PrintChangelog{%
   \begingroup%
     \def\lettergroup##1{}%
@@ -1785,6 +1745,30 @@
     \clearpage%
     \@printindex[changelog]%
   \endgroup%
+}
+\NewDocumentCommand\@printchangedatlist{mm}{%
+  \ifx\list@ChangedAt\relax\else%
+    \let\@templist\relax%
+    \forlistloop\@ChangedAt@CreateEntry{\list@ChangedAt}%
+    \global\let\list@ChangedAt\relax%
+    \IfBooleanF{#1}{%
+      \sortlist\@templist%
+      \strut%
+      \marginnote{%
+        \def\@tempa####1{%
+          \ignorespaces%
+          \tudhyperref{idx:changelog:####1}{####1}%
+          \tabularnewline%
+        }%
+        \begin{tabular}{|l|}%
+          \hline%
+          \forlistloop\@tempa{\@templist}%
+          \hline%
+        \end{tabular}%
+      }[#2]%
+      \ignorespaces%
+    }%
+  \fi%
 }
 \RequirePackage{enumitem}[2011/09/28]
 \setlist{noitemsep}
@@ -1940,6 +1924,40 @@
   \item[{\usekomafont{disposition}Beispiel:\ }]%
 }{%
   \endlabeling%
+}
+\newcommand*\Attention[1]{\marginnote{\fbox{Achtung!}}\emph{\trim@spaces{#1}}}
+\NewDocumentCommand\Forum{s}{%
+  \IfBooleanTF{#1}{%
+    \url{http://latex.wcms-file3.tu-dresden.de/phpBB3/}%
+  }{%
+    \hrfn{http://latex.wcms-file3.tu-dresden.de/phpBB3/}{TUD-\LaTeX-Forum}%
+  }%
+  \xspace%
+}
+\NewDocumentCommand\GitHubRepo{s}{%
+  \def\@tempc{%
+    https://github.com/tud-cd/tudscr/releases%
+  }%
+  \IfBooleanTF{#1}{%
+    \href{\@tempc}{GitHub-Repository~\Distribution*{tudscr}}%
+  }{%
+    \hrfn{\@tempc}{GitHub-Repository~\Distribution*{tudscr}}%
+  }%
+  \xspace%
+}
+\newcommand*\notudscrartcl{%
+  F\"ur die Klasse \Class{tudscrartcl} ist diese Option nicht verf\"ugbar.%
+}
+\NewDocumentCommand\scrguide{sO{\KOMAScript-Handbuch}}{%
+  \def\@tempc{%
+    http://mirrors.ctan.org/macros/latex/contrib/koma-script/doc/scrguide.pdf%
+  }%
+  \IfBooleanTF{#1}{%
+    \href{\@tempc}{#2}%
+  }{%
+    \hrfn{\@tempc}{#2}%
+  }%
+  \xspace%
 }
 \RequirePackage{listings}[2014/03/04]
 \lstdefinestyle{tudscr}{%
@@ -2120,40 +2138,6 @@
 \TUD@UnwindPackage{todonotes}{%
   \NewDocumentCommand\ToDo{somo}{}%
   \newcommand*\ListOfToDo{}%
-}
-\newcommand*\Attention[1]{\marginnote{\fbox{Achtung!}}\emph{\trim@spaces{#1}}}
-\NewDocumentCommand\Forum{s}{%
-  \IfBooleanTF{#1}{%
-    \url{http://latex.wcms-file3.tu-dresden.de/phpBB3/}%
-  }{%
-    \hrfn{http://latex.wcms-file3.tu-dresden.de/phpBB3/}{TUD-\LaTeX-Forum}%
-  }%
-  \xspace%
-}
-\NewDocumentCommand\GitHubRepo{s}{%
-  \def\@tempc{%
-    https://github.com/tud-cd/tudscr/releases%
-  }%
-  \IfBooleanTF{#1}{%
-    \href{\@tempc}{GitHub-Repository~\Distribution*{tudscr}}%
-  }{%
-    \hrfn{\@tempc}{GitHub-Repository~\Distribution*{tudscr}}%
-  }%
-  \xspace%
-}
-\newcommand*\notudscrartcl{%
-  F\"ur die Klasse \Class{tudscrartcl} ist diese Option nicht verf\"ugbar.%
-}
-\NewDocumentCommand\scrguide{sO{\KOMAScript-Handbuch}}{%
-  \def\@tempc{%
-    http://mirrors.ctan.org/macros/latex/contrib/koma-script/doc/scrguide.pdf%
-  }%
-  \IfBooleanTF{#1}{%
-    \href{\@tempc}{#2}%
-  }{%
-    \hrfn{\@tempc}{#2}%
-  }%
-  \xspace%
 }
 \RequirePackage{textcomp}[2005/09/27]
 \RequirePackage{setspace}[2011/12/19]
