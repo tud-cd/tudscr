@@ -864,22 +864,22 @@
 }
 % §§§ eigenes Makro, welches vor Markup zu \@firstofone wird
 \appto\tud@uclcnotmath{%
-  \@nonchangecase\Application%
-  \@nonchangecase\Distribution%
-  \@nonchangecase\Engine%
-  \@nonchangecase\File%
-  \@nonchangecase\Class%
-  \@nonchangecase\Package%
-  \@nonchangecase\Option%
-  \@nonchangecase\Environment%
-  \@nonchangecase\Macro%
-  \@nonchangecase\Length%
-  \@nonchangecase\Counter%
-  \def\Key#1#2{\NoCaseChange{\Key{#1}{#2}}}%
-  \@nonchangecase\Term%
-  \@nonchangecase\PageStyle%
-  \@nonchangecase\Font%
-  \@nonchangecase\Color%
+%  \@nonchangecase\Application%
+%  \@nonchangecase\Distribution%
+%  \@nonchangecase\Engine%
+%  \@nonchangecase\File%
+%  \@nonchangecase\Class%
+%  \@nonchangecase\Package%
+%  \@nonchangecase\Option%
+%  \@nonchangecase\Environment%
+%  \@nonchangecase\Macro%
+%  \@nonchangecase\Length%
+%  \@nonchangecase\Counter%
+%  \def\Key#1#2{\NoCaseChange{\Key{#1}{#2}}}%
+%  \@nonchangecase\Term%
+%  \@nonchangecase\PageStyle%
+%  \@nonchangecase\Font%
+%  \@nonchangecase\Color%
 }
 \newrobustcmd*\Path[1]{\mbox{\texttt{#1}}}
 \newrobustcmd*\PValue[1]{\mbox{\texttt{#1}}}
@@ -1052,7 +1052,6 @@
 % '#6': Querverweis
 \NewDocumentCommand\@GobbleMarkup{md==od()d<>d''}{}%
 \NewDocumentCommand\@ProcessMarkup{md==od()d<>d''}{%
-  \toks@{#1}\typeout{::::: \the\toks@}%
   \if@declare%
     \@getlabel*\@templabel{\@bundle:#1}=#2=%
     \tud@toks@{\ProcessMarkup@Declare}%
@@ -1191,7 +1190,7 @@
   }{%
     \def\@tempa{#1}%
   }%
-%§§§ offen
+  % §§§ nicht sehr sauber, bei redefinition der gliederungsüberschriften neu!
 %  \ifdin{\edef\@tempa{\noexpand\tud@makeuppercase{\expandonce\@tempa}}}{}%
   \IfValueT{#3}{\appto\@tempa{=#3}}%
   \IfValueT{#4}{\appto\@tempa{#4}}%
