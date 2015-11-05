@@ -155,6 +155,7 @@
 \TUDProcessOptions\relax
 %%% From File: tudscr-manual.dtx
 \RequirePackage{scrhack}[2014/02/27]
+\RequirePackage{babel}[2014/03/24]
 \PassOptionsToPackage{log-declarations=false}{xparse}
 \RequirePackage{xparse}[2013/12/31]
 \PassOptionsToPackage{quiet}{marginnote}
@@ -238,7 +239,6 @@
     }%
   }%
 }
-\RequirePackage{babel}[2014/03/24]
 \AfterPackage*{hyperref}{%
   \patchcmd{\pdfstringdef}{\csname HyPsd@babel@}{%
     \let\bbl@info\@gobble\csname HyPsd@babel@%
@@ -461,7 +461,7 @@
 \newrobustcmd*\POParameter[1]{\mbox{\texttt{[#1]}}}
 \newrobustcmd*\textOR{\PValue{\,\textbardbl\,}}
 \newcommand*\@TUDScript{TUD-KOMA-Script}
-\NewDocumentCommand\@suppressmarkup{s}{%
+\NewDocumentCommand\@gobblemarkup{s}{%
   \let\Application\@Application%
   \let\Distribution\@Distribution%
   \let\Engine\@Engine%
@@ -494,7 +494,7 @@
   }%
 }
 \AfterPackage*{hyperref}{%
-  \expandafter\pdfstringdefDisableCommands\expandafter{\@suppressmarkup}%
+  \expandafter\pdfstringdefDisableCommands\expandafter{\@gobblemarkup}%
 }
 \PassOptionsToPackage{xindy,splitindex}{imakeidx}
 \RequirePackage{imakeidx}[2013/07/11]
@@ -642,20 +642,43 @@
 \makexindyindex*{Befehle und Umgebungen mit dazugeh\"origen Parametern}[macros]
 \makexindyindex*{Klassen, Pakete und Dateien}[files]
 \undef\makexindyindex
-\newcommand*\@printindexskip{%
-  \ifnum\imki@columns>\@ne\relax\vspace{-\multicolsep}\fi%
-}
-\newcommand*\@printindex[1][]{%
-  \pagebreak[3]%
-  \indexprologue[\@printindexskip]{}%
-  \printindex[#1]\@printindexskip%
-}
+\newif\if@tud@index
+\addtoeachtocfile{\protect\@tud@indextrue}%
 \newcommand*\PrintIndex{%
   \begingroup%
     \@printindex[options]%
     \@printindex[macros]%
     \@printindex[files]%
   \endgroup%
+}
+\newcommand*\@printindexskip{%
+  \ifnum\imki@columns>\@ne\relax\vspace{-\multicolsep}\fi%
+}
+\newcommand*\@printindex[1][]{%
+  \pagebreak[3]%
+  \@tud@indextrue%
+  \indexprologue[\@printindexskip]{}%
+  \ifblank{#1}{\printindex}{\printindex[#1]}%
+}
+\newcommand*\Attention[1]{\marginnote{\fbox{Achtung!}}\emph{\trim@spaces{#1}}}
+\NewDocumentCommand\Forum{s}{%
+  \IfBooleanTF{#1}{%
+    \url{http://latex.wcms-file3.tu-dresden.de/phpBB3/}%
+  }{%
+    \hrfn{http://latex.wcms-file3.tu-dresden.de/phpBB3/}{TUD-\LaTeX-Forum}%
+  }%
+  \xspace%
+}
+\NewDocumentCommand\scrguide{sO{\KOMAScript-Handbuch}}{%
+  \def\@tempc{%
+    http://mirrors.ctan.org/macros/latex/contrib/koma-script/doc/scrguide.pdf%
+  }%
+  \IfBooleanTF{#1}{%
+    \href{\@tempc}{#2}%
+  }{%
+    \hrfn{\@tempc}{#2}%
+  }%
+  \xspace%
 }
 \RequirePackage{listings}[2014/03/04]
 \lstdefinestyle{tudscr}{%
@@ -1048,26 +1071,6 @@
 \TUD@UnwindPackage{todonotes}{%
   \NewDocumentCommand\ToDo{somo}{}%
   \newcommand*\ListOfToDo{}%
-}
-\newcommand*\Attention[1]{\marginnote{\fbox{Achtung!}}\emph{\trim@spaces{#1}}}
-\NewDocumentCommand\Forum{s}{%
-  \IfBooleanTF{#1}{%
-    \url{http://latex.wcms-file3.tu-dresden.de/phpBB3/}%
-  }{%
-    \hrfn{http://latex.wcms-file3.tu-dresden.de/phpBB3/}{TUD-\LaTeX-Forum}%
-  }%
-  \xspace%
-}
-\NewDocumentCommand\scrguide{sO{\KOMAScript-Handbuch}}{%
-  \def\@tempc{%
-    http://mirrors.ctan.org/macros/latex/contrib/koma-script/doc/scrguide.pdf%
-  }%
-  \IfBooleanTF{#1}{%
-    \href{\@tempc}{#2}%
-  }{%
-    \hrfn{\@tempc}{#2}%
-  }%
-  \xspace%
 }
 \RequirePackage{textcomp}[2005/09/27]
 \RequirePackage{setspace}[2011/12/19]
