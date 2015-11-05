@@ -824,7 +824,7 @@
     \@ProcessChangedAt{\Color{#2}}(#4)[Farbe]%
   \else%
     \@SetMarkupFormat{\ttfamily}[Farbe](%
-      \begingroup\@MarkupFormat#2\IfValueT{#3}{~(#3)}\endgroup%
+      \begingroup\@MarkupFormat{#2\IfValueT{#3}{~(#3)}}\endgroup%
     )%
     \@ProcessMarkup{\Color{#2}}[#3](#4)'#5'%
     \@ProcessIndex{\Color{#2}}(#4){#1}|#5|[Farbe]%
@@ -861,25 +861,6 @@
       \def\noexpand#2{\@tempb}%
     }%
   \tud@reserved%
-}
-% §§§ eigenes Makro, welches vor Markup zu \@firstofone wird
-\appto\tud@uclcnotmath{%
-%  \@nonchangecase\Application%
-%  \@nonchangecase\Distribution%
-%  \@nonchangecase\Engine%
-%  \@nonchangecase\File%
-%  \@nonchangecase\Class%
-%  \@nonchangecase\Package%
-%  \@nonchangecase\Option%
-%  \@nonchangecase\Environment%
-%  \@nonchangecase\Macro%
-%  \@nonchangecase\Length%
-%  \@nonchangecase\Counter%
-%  \def\Key#1#2{\NoCaseChange{\Key{#1}{#2}}}%
-%  \@nonchangecase\Term%
-%  \@nonchangecase\PageStyle%
-%  \@nonchangecase\Font%
-%  \@nonchangecase\Color%
 }
 \newrobustcmd*\Path[1]{\mbox{\texttt{#1}}}
 \newrobustcmd*\PValue[1]{\mbox{\texttt{#1}}}
@@ -957,6 +938,7 @@
 \newcommand*\@templabel{}
 \newcommand*\@formatlabel{%
   \let\IeC\@firstofone%
+  \let\NoCaseChange\@firstofone%
   \def~{-}%
   \def\"##1{##1e}%
   \def\ss{ss}%
@@ -1190,19 +1172,36 @@
   }{%
     \def\@tempa{#1}%
   }%
-  % §§§ nicht sehr sauber, bei redefinition der gliederungsüberschriften neu!
-%  \ifdin{\edef\@tempa{\noexpand\tud@makeuppercase{\expandonce\@tempa}}}{}%
   \IfValueT{#3}{\appto\@tempa{=#3}}%
   \IfValueT{#4}{\appto\@tempa{#4}}%
   \eaddto@hook\tud@toks@{\expandafter{\@tempa}}%
   \the\tud@toks@%
 }
-\newcommand*\@MarkupInline[1]{\mbox{\@MarkupFormat#1}}
+\newcommand*\@MarkupInline[1]{\mbox{\@MarkupFormat{#1}}}
 \newcommand*\@MarkupDeclare@Default[1]{%
-  \begingroup\@MarkupFormat#1\endgroup\@MarkupSuffix%
+  \begingroup\@MarkupFormat{#1}\endgroup\@MarkupSuffix%
+}
+\robustify\NoCaseChange
+\appto\tud@uclcnotmath{%
+  \@nonchangecase\Application%
+  \@nonchangecase\Distribution%
+  \@nonchangecase\Engine%
+  \@nonchangecase\File%
+  \@nonchangecase\Class%
+  \@nonchangecase\Package%
+  \@nonchangecase\Option%
+  \@nonchangecase\Environment%
+  \@nonchangecase\Macro%
+  \@nonchangecase\Length%
+  \@nonchangecase\Counter%
+  \def\Key#1#2{\NoCaseChange{\Key{#1}{#2}}}%
+  \@nonchangecase\Term%
+  \@nonchangecase\PageStyle%
+  \@nonchangecase\Font%
+  \@nonchangecase\Color%
 }
 \NewDocumentCommand\@SetMarkupFormat{mod()}{%
-  \def\@MarkupFormat{\ifdin{\typeout{::::: \the\inputlineno}}{#1}}%
+  \def\@MarkupFormat{\ifdin{\MakeTextUppercase}{#1}}%
   \IfValueT{#2}{\def\@MarkupSuffix{\suffix{#2}}}%
   \IfValueT{#3}{\renewcommand*\@MarkupDeclare[1]{#3\@MarkupSuffix}}%
 }
@@ -1511,6 +1510,7 @@
   \fi%
 }
 \newif\if@tud@index
+\addtoeachtocfile{\protect\@tud@indextrue}%
 \newcommand*\@printindexskip{%
   \ifnum\imki@columns>\@ne\relax\vspace{-\multicolsep}\fi%
 }
