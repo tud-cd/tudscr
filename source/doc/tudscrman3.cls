@@ -862,6 +862,25 @@
     }%
   \tud@reserved%
 }
+% §§§ eigenes Makro, welches vor Markup zu \@firstofone wird
+\appto\tud@uclcnotmath{%
+  \@nonchangecase\Application%
+  \@nonchangecase\Distribution%
+  \@nonchangecase\Engine%
+  \@nonchangecase\File%
+  \@nonchangecase\Class%
+  \@nonchangecase\Package%
+  \@nonchangecase\Option%
+  \@nonchangecase\Environment%
+  \@nonchangecase\Macro%
+  \@nonchangecase\Length%
+  \@nonchangecase\Counter%
+  \def\Key#1#2{\NoCaseChange{\Key{#1}{#2}}}%
+  \@nonchangecase\Term%
+  \@nonchangecase\PageStyle%
+  \@nonchangecase\Font%
+  \@nonchangecase\Color%
+}
 \newrobustcmd*\Path[1]{\mbox{\texttt{#1}}}
 \newrobustcmd*\PValue[1]{\mbox{\texttt{#1}}}
 \newrobustcmd*\PName[1]{\PValue{\textsl{<#1>}}}
@@ -1033,6 +1052,7 @@
 % '#6': Querverweis
 \NewDocumentCommand\@GobbleMarkup{md==od()d<>d''}{}%
 \NewDocumentCommand\@ProcessMarkup{md==od()d<>d''}{%
+  \toks@{#1}\typeout{::::: \the\toks@}%
   \if@declare%
     \@getlabel*\@templabel{\@bundle:#1}=#2=%
     \tud@toks@{\ProcessMarkup@Declare}%
@@ -1171,6 +1191,8 @@
   }{%
     \def\@tempa{#1}%
   }%
+%§§§ offen
+%  \ifdin{\edef\@tempa{\noexpand\tud@makeuppercase{\expandonce\@tempa}}}{}%
   \IfValueT{#3}{\appto\@tempa{=#3}}%
   \IfValueT{#4}{\appto\@tempa{#4}}%
   \eaddto@hook\tud@toks@{\expandafter{\@tempa}}%
@@ -1181,7 +1203,7 @@
   \begingroup\@MarkupFormat#1\endgroup\@MarkupSuffix%
 }
 \NewDocumentCommand\@SetMarkupFormat{mod()}{%
-  \def\@MarkupFormat{\ifdin{}{#1}}%
+  \def\@MarkupFormat{\ifdin{\typeout{::::: \the\inputlineno}}{#1}}%
   \IfValueT{#2}{\def\@MarkupSuffix{\suffix{#2}}}%
   \IfValueT{#3}{\renewcommand*\@MarkupDeclare[1]{#3\@MarkupSuffix}}%
 }
