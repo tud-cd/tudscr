@@ -1,4 +1,4 @@
-% \CheckSum{4087}
+% \CheckSum{4104}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -439,7 +439,7 @@
 % \changes{v2.05}{2015/10/29}{neu}^^A
 % Durch die Verwendung von \cs{tracinglabels} wird die Nachverfolgung der durch
 % das Makro \cs{@ProcessMarkup} aufgerufenen Befehle \cs{ProcessMarkup@Declare}
-% beziehungsweise \cs{ProcessMarkup@output} inklusive all ihrer Argumente
+% beziehungsweise \cs{ProcessMarkup@Inline} inklusive all ihrer Argumente
 % aktiviert. Dies ist für die Kontrolle des erzeugten Markups sinnvoll.
 %    \begin{macrocode}
 \newcommand*\tud@trace@markup[2]{}
@@ -560,7 +560,7 @@
 % Der Befehl \cs{autorefname} dient dazu, den Verweistyp beziehungsweise den 
 % Bezeichner des aktuellen oder optional zu einem speziellen Label ohne die 
 % dazugehörige Nummerierung zu erhalten. Auf der Seite LaTeX Stack Exchange%
-%\footnote{\url{http://tex.stackexchange.com/q/33776/}} wurde das Prinzip 
+% \footnote{\url{http://tex.stackexchange.com/q/33776/}} wurde das Prinzip 
 % vorgestellt und hier übernommen.
 %    \begin{macrocode}
   \newcommand*\autorefname[1][current]{%
@@ -792,8 +792,8 @@
 }
 %    \end{macrocode}
 % Wurde eine oder beide der Optionen \opt{final} oder \opt{print} gesetzt bzw.
-% durch einen externen pdf\LaTeX-Aufruf die Flags \cs{tudfinalflag} und/oder
-% \cs{tudprintflag} definiert, werden die entsprechenden Einstellungen zur 
+% vor einem externen \app{pdflatex}-Aufruf die Flags \cs{tudfinalflag} und/oder
+% \cs{tudprintflag} definiert, werden die entsprechenden Einstellungen zur
 % finalen Ausgabe und/oder unbunten Druck vorgenommen und anschließend die 
 % entsprechenden Optionen unschädlich gemacht.
 %    \begin{macrocode}
@@ -888,8 +888,8 @@
 \newif\if@openindex
 %    \end{macrocode}
 % Das Makro \cs{tud@declare@type} bestimmt innerhalb einer Deklaration, wie 
-% genau das Markup erfolgen soll. Die möglichen Werte sind bei der Beschreibung 
-% von \cs{ProcessMarkup@Declare} zu finden.
+% das Markup erfolgen soll. Die möglichen Werte für \cs{tud@declare@type} sind
+% bei der Beschreibung von \cs{ProcessMarkup@Declare} zu finden.
 %    \begin{macrocode}
 \newcommand*\tud@declare@type{0}
 %    \end{macrocode}
@@ -1463,7 +1463,7 @@
 \NewDocumentCommand\Application{smd||}{%
   \@SetMarkupFormat{\sbsfont}%
   \@ProcessMarkup{\Application{#2}}%
-  \@ProcessIndex{\Application{#2}}{#1}|#3|[Anwendungssoftware]%
+  \@ProcessIndex{#1}{\Application{#2}}[Anwendungssoftware]|#3|%
 }
 %<*package>
 \renewcommand*\Application[1]{\ifdin{#1}{\mbox{\textsbs{#1}}}}
@@ -1486,7 +1486,7 @@
   }{%
     \@ProcessMarkup{\Distribution{#2}}%
   }%
-  \@ProcessIndex{\Distribution{#2}}{#1}|#4|[Distribution]%
+  \@ProcessIndex{#1}{\Distribution{#2}}[Distribution]|#4|%
 }
 %<*package>
 \renewcommand*\Distribution[1]{\ifdin{#1}{\mbox{\textsbn{#1}}}}
@@ -1504,7 +1504,7 @@
 \NewDocumentCommand\Engine{smd||}{%
   \@SetMarkupFormat{\sbnfont}%
   \@ProcessMarkup{\Engine{\hologo{#2}}}%
-  \@ProcessIndex{\Engine{#2}}{#1}|#3|[Textsatzsystem]%
+  \@ProcessIndex{#1}{\Engine{#2}}[Textsatzsystem]|#3|%
 }
 %<*package>
 \renewcommand*\Engine[1]{\ifdin{\hologo{#1}}{\mbox{\textsbn{\hologo{#1}}}}}
@@ -1521,7 +1521,7 @@
 \NewDocumentCommand\File{smd||}{%
   \@SetMarkupFormat{\sbnfont}%
   \@ProcessMarkup{\File{#2}}%
-  \@ProcessIndex{\File{#2}}{#1}|#3|[Datei]%
+  \@ProcessIndex{#1}{\File{#2}}[Datei]|#3|%
 }
 %<*package>
 \renewcommand*\File[1]{\ifdin{#1}{\mbox{\textsbn{#1}}}}
@@ -1546,7 +1546,7 @@
 %</class>
     \@SetMarkupFormat{\sbnfont}%
     \@ProcessMarkup{\Class{#2}}'#3'%
-    \@ProcessIndex{\Class{#2}}{#1}|#4|[Klasse]%
+    \@ProcessIndex{#1}{\Class{#2}}[Klasse]|#4|%
 %<*class>
   \fi%
 %</class>
@@ -1592,7 +1592,7 @@
     }{%
       \@ProcessMarkup{\Package{#2}}<#2>'#4'%
     }%
-    \@ProcessIndex{\Package{#2}}{#1}|#5|[Paket]%
+    \@ProcessIndex{#1}{\Package{#2}}[Paket]|#5|%
 %<*class>
   \fi%
 %</class>
@@ -1636,7 +1636,7 @@
 % wird dieser in der Form \val{=}\meta{Wert}\val{=} einfach angehängt und als
 % optionales Argument von \cs{Option@Value} weiter verarbeitet. Mit dem
 % optionalen Argument in runden Klammern kann ggf. auf eine Option aus einem 
-%\TUDScript-Paket verwiesen 
+% \TUDScript-Paket verwiesen 
 % werden.
 %    \begin{macrocode}
 \NewExpandableDocumentCommand\@Option{sm}{#2}
@@ -1653,12 +1653,12 @@
   \IfValueT{#4}{\tud@keyval@error}%
 %<*class>
   \if@changedat%
-    \@ProcessChangedAt{\Option{#2}}=#3=(#5)[Option]%
+    \@ProcessChangedAt{\Option{#2}}=#3=[Option](#5)%
   \else%
 %</class>
     \@SetMarkupFormat{\ttfamily}%
     \@ProcessMarkup{\Option{#2}}=#3=(#5)'#6'%
-    \@ProcessIndex{\Option{#2}}=#3=(#5){#1}|#7|%
+    \@ProcessIndex{#1}{\Option{#2}}=#3=(#5)|#7|%
 %<*class>
   \fi%
 %</class>
@@ -1693,7 +1693,7 @@
 \NewDocumentCommand\Environment{smod()d''d||}{%
 %<*class>
   \if@changedat%
-    \@ProcessChangedAt{\Environment{#2}}(#4)[Umgebung]%
+    \@ProcessChangedAt{\Environment{#2}}[Umgebung](#4)%
   \else%
 %</class>
 %    \end{macrocode}
@@ -1714,7 +1714,7 @@
       \ttfamily\bsc{}end\{#2\}%
     )%
     \@ProcessMarkup{\Environment{#2}}[#3](#4)'#5'%
-    \@ProcessIndex{\Environment{#2}}(#4){#1}|#6|[Umgebung]%
+    \@ProcessIndex{#1}{\Environment{#2}}[Umgebung](#4)|#6|%
 %<*class>
   \fi%
 %</class>
@@ -1748,12 +1748,12 @@
 \NewDocumentCommand\Macro{smod()d''d||}{%
 %<*class>
   \if@changedat%
-    \@ProcessChangedAt{\Macro{#2}}(#4)[Befehl]%
+    \@ProcessChangedAt{\Macro{#2}}[Befehl](#4)%
   \else%
 %</class>
     \@SetMarkupFormat{\ttfamily\bsc}%
     \@ProcessMarkup{\Macro{#2}}[#3](#4)'#5'%
-    \@ProcessIndex{\Macro{#2}}(#4){#1}|#6|%
+    \@ProcessIndex{#1}{\Macro{#2}}(#4)|#6|%
 %<*class>
   \fi%
 %</class>
@@ -1785,12 +1785,12 @@
 \NewDocumentCommand\Length{smd()d''d||}{%
 %<*class>
   \if@changedat%
-    \@ProcessChangedAt{\Length{#2}}(#3)[L\"ange]%
+    \@ProcessChangedAt{\Length{#2}}[L\"ange](#3)%
   \else%
 %</class>
     \@SetMarkupFormat{\ttfamily\bsc}[L\"ange]%
     \@ProcessMarkup{\Length{#2}}(#3)'#4'%
-    \@ProcessIndex{\Length{#2}}(#3){#1}|#5|[L\"ange]%
+    \@ProcessIndex{#1}{\Length{#2}}[L\"ange](#3)|#5|%
 %<*class>
   \fi%
 %</class>
@@ -1822,12 +1822,12 @@
 \NewDocumentCommand\Counter{smd()d''d||}{%
 %<*class>
   \if@changedat%
-    \@ProcessChangedAt{\Counter{#2}}(#3)[Z\"ahler]%
+    \@ProcessChangedAt{\Counter{#2}}[Z\"ahler](#3)%
   \else%
 %</class>
     \@SetMarkupFormat{\ttfamily}[Z\"ahler]%
     \@ProcessMarkup{\Counter{#2}}(#3)'#4'%
-    \@ProcessIndex{\Counter{#2}}(#3){#1}|#5|[Z\"ahler]%
+    \@ProcessIndex{#1}{\Counter{#2}}[Z\"ahler](#3)|#5|%
 %<*class>
   \fi%
 %</class>
@@ -1876,11 +1876,11 @@
 \NewDocumentCommand\Key@Value{mmmd==d==d()d''d||}{%
   \IfValueT{#5}{\tud@keyval@error}%
   \if@changedat%
-    \@ProcessChangedAt{\Key{#2}{#3}}=#4=(#6)[Parameter]%
+    \@ProcessChangedAt{\Key{#2}{#3}}=#4=[Parameter](#6)%
   \else%
     \@SetMarkupFormat{\ttfamily}[Parameter]%
     \@ProcessMarkup{\Key{#2}{#3}}=#4=(#6)'#7'%
-    \@ProcessIndex{\Key{#2}{#3}}=#4=(#6){#1}|#8|%
+    \@ProcessIndex{#1}{\Key{#2}{#3}}=#4=(#6)|#8|%
   \fi%
 }
 %    \end{macrocode}
@@ -1895,11 +1895,11 @@
 \NewExpandableDocumentCommand\@Term{sm}{#2}
 \NewDocumentCommand\Term{smd()d''d||}{%
   \if@changedat%
-    \@ProcessChangedAt{\Term{#2}}(#3)[Bezeichner]%
+    \@ProcessChangedAt{\Term{#2}}[Bezeichner](#3)%
   \else%
     \@SetMarkupFormat{\ttfamily\bsc}[Bezeichner]%
     \@ProcessMarkup{\Term{#2}}(#3)'#4'%
-    \@ProcessIndex{\Term{#2}}(#3){#1}|#5|%
+    \@ProcessIndex{#1}{\Term{#2}}(#3)|#5|%
   \fi%
 }
 %    \end{macrocode}
@@ -1913,11 +1913,11 @@
 \NewExpandableDocumentCommand\@PageStyle{sm}{#2}
 \NewDocumentCommand\PageStyle{smd()d''d||}{%
   \if@changedat%
-    \@ProcessChangedAt{\PageStyle{#2}}(#3)[Seitenstil]%
+    \@ProcessChangedAt{\PageStyle{#2}}[Seitenstil](#3)%
   \else%
     \@SetMarkupFormat{\ttfamily}[Seitenstil]%
     \@ProcessMarkup{\PageStyle{#2}}(#3)'#4'%
-    \@ProcessIndex{\PageStyle{#2}}(#3){#1}|#5|[Seitenstil]%
+    \@ProcessIndex{#1}{\PageStyle{#2}}[Seitenstil](#3)|#5|%
   \fi%
 }
 %    \end{macrocode}
@@ -1931,11 +1931,11 @@
 \NewExpandableDocumentCommand\@Font{sm}{#2}
 \NewDocumentCommand\Font{smd()d''d||}{%
   \if@changedat%
-    \@ProcessChangedAt{\Font{#2}}(#3)[Schriftelement]%
+    \@ProcessChangedAt{\Font{#2}}[Schriftelement](#3)%
   \else%
     \@SetMarkupFormat{\ttfamily}[Schriftelement]%
     \@ProcessMarkup{\Font{#2}}(#3)'#4'%
-    \@ProcessIndex{\Font{#2}}(#3){#1}|#5|[Schriftelement]%
+    \@ProcessIndex{#1}{\Font{#2}}[Schriftelement](#3)|#5|%
   \fi%
 }
 %    \end{macrocode}
@@ -1952,13 +1952,13 @@
 \NewExpandableDocumentCommand\@Color{sm}{#2}
 \NewDocumentCommand\Color{smoD(){\Package{tudscrcolor}}d''d||}{%
   \if@changedat%
-    \@ProcessChangedAt{\Color{#2}}(#4)[Farbe]%
+    \@ProcessChangedAt{\Color{#2}}[Farbe](#4)%
   \else%
     \@SetMarkupFormat{\ttfamily}[Farbe](%
       \begingroup\ttfamily{#2\IfValueT{#3}{~(#3)}}\endgroup%
     )%
     \@ProcessMarkup{\Color{#2}}[#3](#4)'#5'%
-    \@ProcessIndex{\Color{#2}}(#4){#1}|#5|[Farbe]%
+    \@ProcessIndex{#1}{\Color{#2}}[Farbe](#4)|#5|%
   \fi%
 }
 %    \end{macrocode}
@@ -2509,7 +2509,7 @@
 % Paket aus dem \TUDScript-Bundle angegeben werden, auf welche sich das
 % aktuelle auszuzeichnende Element bezieht und ggf. das Label und der
 % Indexeintrag dementsprechend erzeugt werden sollen. Verwendet wird es mit: 
-%\val{(\string\Class\marg{Klasse}/\string\Package\marg{Paket})} 
+% \val{(\string\Class\marg{Klasse}/\string\Package\marg{Paket})} 
 %
 % Das optionale Argument in Guillemets wird von \cs{Package} benötigt, um ggf.
 % die automatisch generierten Links auf CTAN anzupassen. Zuletzt kann mit 
@@ -2666,7 +2666,7 @@
 % veralteter Werte oder Parameter diese im Kontext ihrer Option oder Umgebung
 % bzw. ihres Befehls anzugeben.
 %
-% Die dritte Version kommt bei Erläuterungen mit der Umgebung\env{Declaration*}
+% Die dritte Version kommt bei Erklärungen mit der Umgebung \env{Declaration*}
 % zum Einsatz, welche im Fließtext verwendet wird und kein Markup, wohl aber
 % eine Label für das beschriebene Element erzeugt werden soll. Für die vierte
 % Variante, welche die Umgebung \env{Bundle!} betrifft, gilt dies im Prinzip
@@ -2702,11 +2702,11 @@
 % \end{macro}^^A \ProcessMarkup@Declare
 % \begin{macro}{\ProcessMarkup@Inline}
 % \changes{v2.05}{2015/11/05}{neu}^^A
-% Mit \cs{ProcessMarkup@Inline} wird die formatierte Ausgabe außerhalb von 
-% Deklarationen umgesetzt. Dabei entsprechen die ersten vier Argument denen des 
-% Befehls \cs{ProcessMarkup@Declare} und werden bis auf das Label ebenfalls an
-% \cs{@MarkupOutput} durchgereicht, nachdem mit \cs{@CheckMarkupFormat} auf 
-% eine exisierende Markup-Definition geprüft wurde.
+% Mit \cs{ProcessMarkup@Inline} wird die formatierte Ausgabe außerhalb der 
+% Deklarationsumgebungen umgesetzt. Dabei entsprechen die ersten vier Argument
+% denen des Befehls \cs{ProcessMarkup@Declare} und werden bis auf das Label
+% ebenso an \cs{@MarkupOutput} übergeben, nachdem mit \cs{@CheckMarkupFormat}
+% auf eine exisierende Markup-Definition geprüft wurde.
 %    \begin{macrocode}
 \NewDocumentCommand\ProcessMarkup@Inline{mmd==od<>d''}{%
   \@CheckMarkupFormat%
@@ -2759,9 +2759,9 @@
       \let\@tempa\@tempc%
       \IfValueT{#5}{\def\@tempa{\href{#5}{\@tempc}}}%
 %    \end{macrocode}
-% Ein Querverweis kann logischerweise nicht erstellt werden. Wurde dennoch eine 
-% \val{'}\meta{Referenzvariante}\val{'} für den Querverweis angegeben, wird
-% eine Warnung erzeugt.
+% Ein Querverweis kann logischerweise nicht erstellt werden. Wurde dennoch im 
+% letzten optionalen Argument eine \val{'}\meta{Referenzvariante}\val{'} für 
+% den Querverweis angegeben, wird eine Warnung erzeugt.
 %    \begin{macrocode}
       \let\@tempb\relax%
       \IfValueT{#6}{%
@@ -2797,10 +2797,10 @@
 % \changes{v2.05}{2015/11/05}{neu}^^A
 % \begin{macro}{\@@MarkupOutput}
 % \changes{v2.05}{2015/11/05}{neu}^^A
-% Der Befehl \cs{@MarkupOutput} wird für die formatierte Markup-Ausgabe sowohl
-% von \cs{ProcessMarkup@Declare} als auch \cs{ProcessMarkup@Inline} aufgerufen.
-% Das erste Argument enthält dabei das auszuzeichnende Element. Dabei ist die 
-% Besonderheit des Markup-Befehls \cs{Key}\marg{Makro}\marg{Parameter} zu
+% Der Befehl \cs{@MarkupOutput} wird für die formatierte Markup-Ausgabe von den
+% beiden Makros \cs{ProcessMarkup@Declare} sowie \cs{ProcessMarkup@Inline}
+% aufgerufen. Das erste Argument enthält dabei das auszuzeichnende Element.
+% Dabei ist die Besonderheit des Makros \cs{Key}\marg{Makro}\marg{Parameter} zu
 % beachten, dessen beiden Argumente hier in der Form \marg{Makro!Parameter} 
 % übergeben werden. Deshalb wird das erste Argument mit dem Argumentprozessor 
 % \cs{SplitArgument}\val{\{1\}\{!\}} getrennt und dann weiter verarbeitet.
@@ -2809,9 +2809,10 @@
   \@@MarkupOutput#1=#2=[#3]%
 }
 %    \end{macrocode}
-% Danach wird~-- wieder abhängig von \cs{if@declare}~-- \cs{@MarkupDeclare} 
-% oder \cs{@MarkupInline} aufgerufen. Auch hier wird für den Befehlsaufruf mit 
-% dem dazugehörigen Argument zur Vereinfachung ein Token-Register verwendet.
+% Danach wird~-- wieder abhängig vom Schalter \cs{if@declare}~-- entweder
+% \cs{@MarkupDeclare} oder \cs{@MarkupInline} aufgerufen. Auch hier wird für
+% den Befehlsaufruf mit dem dazugehörigen Argument zur Vereinfachung ein
+% Token-Register verwendet.
 %    \begin{macrocode}
 \NewDocumentCommand\@@MarkupOutput{mmd==o}{%
   \if@declare%
@@ -2967,7 +2968,7 @@
 % \subsubsection{Indexerstellung}
 %
 % Für die Erstellung aller Indexe wird das Paket \pkg{imakeidx} zusammen mit 
-% \pkg{xindy} verwendet. Diese können sowohl mit dem Paket als auch mit der 
+% \app{texindy} verwendet. Diese können sowohl mit dem Paket als auch mit der 
 % Klasse erzeugt werden. 
 %    \begin{macrocode}
 \PassOptionsToPackage{xindy,splitindex}{imakeidx}
@@ -3054,7 +3055,7 @@
 % Diese Makro übernimmt die eigentliche Arbeit. Es ist darauf angewiesen, dass 
 % die angegebene Seitenzahlen eines Indexeintrages erst \emph{nach} den
 % Hinweisen ausgegeben und mit \cs{relax} abgeschlossen werden. Dies wird mit
-% der später definierten Stildatei für \pkg{texindy} sichergestellt. So wird es 
+% der später definierten Stildatei für \app{texindy} sichergestellt. So wird es 
 % möglich, dass das Makro \cs{@cleversee} auf alles ihm bis \cs{relax} 
 % nachfolgende parsen kann und abhängig davon die Ausgabe gestaltet.
 %    \begin{macrocode}
@@ -3092,7 +3093,7 @@
 % \changes{v2.02}{2014/11/02}{neu}^^A
 % \begin{macro}{\tud@read}
 % \changes{v2.02}{2014/08/19}{neu}^^A
-% Für die Erstellung der Indexe wird zum Sortieren das Programm \pkg{xindy} 
+% Für die Erstellung der Indexe wird zum Sortieren das Programm \app{texindy} 
 % genutzt. Für dieses wird eine eigene Stildatei verwendet, welche zur Laufzeit 
 % erzeugt wofür zuerst ein Ausgabestream reserviert wird.
 % \ToDo{Indexbefehle in der Quelldatei zusammenführen}[v2.05]
@@ -3114,7 +3115,7 @@
 % \end{macro}^^A \tud@read
 % \end{macro}^^A \tud@write@ii
 % \end{macro}^^A \tud@write@i
-% Nachfolgend wird die zu erstellenden \pkg{xindy}-Stildatei kurz beschrieben.
+% Nachfolgend wird die zu erstellenden \app{texindy}-Stildatei kurz beschrieben.
 %    \begin{macrocode}
 \openout\tud@write@i=\jobname-temp.xdy
 \write\tud@write@i{%
@@ -3157,10 +3158,9 @@
 %    \end{macrocode}
 % Innerhalb ausgewählter Auszeichnungs- und Textbefehle sollten die Befehle
 % selbst, nicht jedoch die Argumente verworfen werden. Leider werden die 
-% manuell erstellten RegExp-Regeln durch \pkg{texindy} zu spät genutzt 
+% manuell erstellten RegExp-Regeln durch \app{texindy} zu spät genutzt 
 % (\url{http://sourceforge.net/p/xindy/bugs/22/}).
 %    \begin{macrocode}
-%(merge-rule "\\hyperidx\{(.*)\}\{(.*)\}" "/2" :eregexp)^^J%
 %(merge-rule "\\hologo\{(.*)\}" "/1" :eregexp)^^J%
 %(merge-rule "\\texttt\{(.*)\}" "/1" :eregexp)^^J%
 %(merge-rule "\\textsbn\{(.*)\}" "/1" :eregexp)^^J%
@@ -3251,7 +3251,7 @@
 %
 % Dieser Querverweistyp wird speziell im allgemeinen Index verwendet, um auf 
 % einen Spezialindex zu verweisen. Dabei dient \val{:unverified} zum 
-% Unterdrücken von Warnungen durch \pkg{texindy} aufgrund eines fehlenden 
+% Unterdrücken von Warnungen durch \app{texindy} aufgrund eines fehlenden 
 % Ziels für den Querverweis.
 %    \begin{macrocode}
 (define-crossref-class "seeidx" :unverified)^^J%
@@ -3282,7 +3282,7 @@
 %</class>
 % \fi
 %
-% Damit ist die \pkg{xindy}-Stildatei fertig.
+% Damit ist die \app{texindy}-Stildatei fertig.
 %    \begin{macrocode}
 }
 \closeout\tud@write@i
@@ -3292,7 +3292,7 @@
 % Um die einzelnen Indexe zu erstellen, wird das Makro \cs{makexindyindex} 
 % definiert. Die Sternversion dieses Befehle erstellt dabei neben dem normalen
 % Spezialindex einen weiteren, welcher explizit für Deklarationen genutzt wird.
-% Dieser wird anschließen als erstes an \pkg{texindy} weitergereicht, um die
+% Dieser wird anschließen als erstes an \app{texindy} weitergereicht, um die
 % richtige Formatierung der einzelnen Einträge gewährleisten zu können. Erst 
 % danach wird die Datei mit den normalen Einträgen verarbeitet. Siehe hierzu 
 % auch \cs{@@ProcessIndex}.
@@ -3369,38 +3369,143 @@
 %
 % \begin{macro}{\@getindex}
 % \changes{v2.05}{2015/11/05}{neu}^^A
-% \begin{macro}{\@tempentry}
+% \begin{macro}{\@idxkey}
 % \changes{v2.05}{2015/11/05}{neu}^^A
-% \begin{macro}{\@tempformat}
+% \begin{macro}{\@idxformat}
 % \changes{v2.05}{2015/11/05}{neu}^^A
-% \begin{macro}{\@tempkey}
+% \begin{macro}{\@idxentry}
 % \changes{v2.05}{2015/11/05}{neu}^^A
-% \begin{macro}{\@tempbundle}
+% \begin{macro}{\@idxbundle}
 % \changes{v2.05}{2015/11/05}{neu}^^A
-% Der Befehl \cs{@getindex} erzeugt einen Indexeintrag.
-% \ToDo{Doku}[v2.05]
+% Mit dem Makro \cs{@getindex} wird die Formatierung eines Indexeintrags für 
+% einen Markup-Befehl realisiert. Für das Sortieren der Indexeinträge kommt 
+% \app{texindy} zum Einsatz. Um die Indexeinträge wie gewünscht zu Formatieren, 
+% gibt es zwei Möglichkeit. 
+%
+% Bei der ersten Variante würde der Indexeintrag einfach direkt mit den 
+% Markup-Befehlen erstellt und in der \app{texindy}-Stildatei wird für alle
+% Auszeichnungsbefehle die passende \val{merge-rule} erstellt, um die korrekte 
+% Sortierung zu gewährleisten. Tatsächlich war in einer früheren Version genau
+% das der Ansatz. Allerdings werden die manuell erstellten RegExp-Regeln leider 
+% durch \app{texindy} zu spät genutzt, weshalb der Ansatz verworfen wurde.
+% (\url{http://sourceforge.net/p/xindy/bugs/22/}).
+%
+% Damit das Sortieren verlässlich funktioniert, werden die Einträge für den 
+% Index deshalb in der gewohnten Syntax von \app{makeindex} in der Form
+% \meta{Schlüsselwort}\val{@}\meta{Markup} erstellt. Diese Syntax kann auch mit
+% \app{texindy} genutzt werden. 
+%
+% An \cs{@getindex} werden vier obligatorische gefolgt von vier optionalen 
+% Argumenten übergeben. Die ersten beiden Hauptargumente sind die Makros, in 
+% welche \meta{Schlüsselwort}~-- für gewöhnlich \cs{@idxkey}~-- sowie die 
+% Formatierung\meta{Markup}~-- normalerweise \cs{@idxformat}~-- expandiert 
+% werden. Mit dem Makro im dritten Argument wird es möglich, Untereinträge zu 
+% einem \meta{Schlüsselwort} für beispielsweise Parameter von Umgebungen oder
+% Befehlen (\cs{Key}) sowie spezielle Schlüsselwerte von Optionen zu erzeugen.
+% Dabei wird vor der Erstellung des Untereintrages der direkt zuvor generierte
+% Indexhaupteintrag in das dritte Argument~-- Im Normallfall \cs{@idxentry}~--
+% gesichert.
+%
+% Das vierte obligatorische Argument enthält den eigentlichen Markup-Befehl für 
+% welchen der Indexeintrag erzeugt werden soll. An dieses schließen sich vier
+% optionale Argumente an, mit denen der Indexeintrag weiter formatiert werden 
+% kann. Das erste optionale Argument \val{=}\meta{Wert}\val{=} kann wie gewohnt
+% für das Hinzufügen eines Schlüsselwertes genutzt werden. Das zweite ordinäre
+% optionale Argument \oarg{Ausgabesuffix} fügt dem Eintrag in den Index eine
+% zusätzliche Anmerkung hinzu. Soll der Indexeintrag für ein spezielles Paket
+% oder eine Klasse aus \TUDScript-Bundle erstellt werden, wird das optionale
+% Argument \val{(\string\Class\marg{Klasse}/\string\Package\marg{Paket})} für 
+% einen Verweis auf das \parg{Bundleelement} verwendet, der in \cs{@idxbundle} 
+% gespeichert wird. Das letzte Argument \val{!}\meta{Anmerkung}\val{!} wird nur
+% innerhalb von \cs{@ProcessChangedAt} verwendet, um bei der Änderungsnotiz für
+% Parameter, welche als Untereintrag erstellt werden, dem Haupteintrag eine
+% Anmerkung hinzuzufügen.
 %    \begin{macrocode}
-\newcommand*\@tempentry{}
-\newcommand*\@tempformat{}
-\newcommand*\@tempkey{}
-\newcommand*\@tempbundle{}
-\NewDocumentCommand\@getindex{smmmmd==r()r[]d!!}{%
-  \let\@tempbundle\@bundledefault%
-  \IfValueTF{#7}{%
-    \def\@tempbundle{#7}%
+\newcommand*\@idxkey{}
+\newcommand*\@idxformat{}
+\newcommand*\@idxentry{}
+\newcommand*\@idxbundle{}
+\NewDocumentCommand\@getindex{smmmmd==r[]r()d!!}{%
+%    \end{macrocode}
+% Zu Beginn wird in einer Gruppe der Markup-Befehl des vierten obligatorischen
+% Arguments ausgewertet. Es wird eine Fallunterschiedung durchgeführt, ob es 
+% sich dabei um einen Parameter (\cs{Key}) handelt oder nicht. Ist dies der
+% Fall, wird für diesen Parameter der hier nachfolgend formatierte Indexeintrag
+% als Untereintrag verwendet. Dafür wird zuvor ein Haupteintrag aus dem ersten
+% Argument von \cs{Key} genriert und in das dritte obligatorische Argument
+% gespeichert (\cs{@idxentry}).
+%    \begin{macrocode}
+  \begingroup%
+    \let#4\@empty%
+    \in@{\Key}{#5}%
+%    \end{macrocode}
+% Um den Haupteintrag zu extrahieren, wird mit \cs{@suppressmarkup} die Ausgabe
+% des Markups deaktiviert und das erste Argument von \cs{Key} ausgeführt. Dies
+% führt über \cs{@ProcessIndex} zum rekursiven Aufruf von \cs{@getindex}. Als
+% Ergebnis sind im zweiten und dritten Argument~-- sprich in \cs{@idxkey} und 
+% \cs{@idxformat}~-- sowohl \meta{Schlüsselwort} als auch \meta{Markup} für den
+% Elterneintrag enthalten. Diese werden in das vierte Argument (\cs@{idxentry}) 
+% gespeichert.
+%    \begin{macrocode}
+    \ifin@%
+      \@suppressmarkup%
+      \let\Key\@firstoftwo%
+      #5%
+%    \end{macrocode}
+% Da der Inhalt des vierten Arguments am Ende der Gruppe expandiert wird, wird 
+% mit \cs{expandonce} dafür gesorgt, dass die Expansion nur einmalig erfolgt. 
+% Zu beachten ist außerdem, dass der Hauptindexeintrag bereits in der Form 
+% \meta{Schlüsselwort}\val{@}\meta{Markup}\textbf{\val{!}} zusammengefügt wird.
+%    \begin{macrocode}
+      \def#4{%
+        \expandonce#2\IfValueT{#9}{: #9}@%
+        \expandonce#3\IfValueT{#9}{: #9}!%
+      }%
+    \fi%
+%    \end{macrocode}
+% Nachdem ein möglicher Haupteintrag für Parameter erzeugt wurde, folgt nun 
+% der formatierte Indexeintrag für das aktuelle Markup-Element. Um diesen zu
+% erstellen, wird für \meta{Schlüsselwort} zunächst nur der Inhalt des
+% Hauptargumentes benötigt. Dieser wird hier in das zweite Argument
+% expandiert, der ggf. erzeugte Haupteintrag in das vierte. Für \cs{Key} ist
+% hier nur noch das zweite Argument relevant.
+%    \begin{macrocode}
+    \@gobblemarkup%
+    \let\Key\@secondoftwo%
+    \edef\tud@reserved{%
+      \noexpand\endgroup%
+      \def\noexpand#2{#5}%
+      \def\noexpand#4{#4}%
+    }%
+  \tud@reserved%
+%    \end{macrocode}
+% Die Auszeichnung für den Indexeintrag besteht in erster Linie aus dem 
+% Markup-Befehl selbst. Damit ein \val{@}-Zeichen beispielsweise in einem 
+% Makronamen korrekt verarbeitet wird, wird dieses im Stil von \app{makeindex} 
+% mit \val{"} maskiert.
+%    \begin{macrocode}
+  \def#3{#5}%
+  \tud@replace#2{@}{"@}%
+  \tud@replace#3{@}{"@}%
+%    \end{macrocode}
+
+%    \begin{macrocode}
+  \let\@idxbundle\@bundledefault%
+  \IfValueTF{#8}{%
+    \def\@idxbundle{#8}%
   }{%
     \tud@ifbundle{%
       \tud@iflabelexists{\@bundle:#5}{%
-        \edef\@tempbundle{\expandonce\@bundle}%
+        \edef\@idxbundle{\expandonce\@bundle}%
       }{}%
     }{}%
   }%
 }
 %    \end{macrocode}
-% \end{macro}^^A \@tempbundle
-% \end{macro}^^A \@tempkey
-% \end{macro}^^A \@tempformat
-% \end{macro}^^A \@tempentry
+% \end{macro}^^A \@idxbundle
+% \end{macro}^^A \@idxentry
+% \end{macro}^^A \@idxformat
+% \end{macro}^^A \@idxkey
 % \end{macro}^^A \@getindex
 
 
@@ -3409,7 +3514,7 @@
 % einer Formatierung \val{\textbar}\meta{Indexformat}\val{\textbar} genutzt
 % wurde, was sich natürlich widerspricht. In diesem Fall erfolgt eine Warnung.
 %    \begin{macrocode}
-\NewDocumentCommand\@ProcessIndex{md==d()md||o}{%
+\NewDocumentCommand\@ProcessIndex{mmd==od()d||}{%
   \IfBooleanT{#1}{%
     \IfValueT{#2}{%
       \ClassWarning{tudscrmanual}{%
@@ -3513,23 +3618,23 @@
 %    \begin{macrocode}
   \IfValueTF{#2}{%
     \@getlabel\@templabel{#1:#2:#4}{#6}%
-    \@getindex\@tempentry{%
+    \@getindex\@idxentry{%
       \begingroup\expandonce\@tempa#4\endgroup\expandonce\@tempb%
     }{#6}%
-    \@getindex\@tempkeyentry{%
+    \@getindex\@idxkeyentry{%
       \begingroup\expandonce\@tempa#4\endgroup%
       \noexpand\nobreakspace{\idxfont(#2)}%
     }{#6}%
     \ifcsdef{r@\@templabel}{%
       \index[#1]{%
-        #2!\hyperidx[\@templabel]{\expandonce\@tempentry}\expandonce\@tempc%
+        #2!\hyperidx[\@templabel]{\expandonce\@idxentry}\expandonce\@tempc%
       }%
       \index[keys]{%
-        \hyperidx[\@templabel]{\expandonce\@tempkeyentry}\expandonce\@tempc%
+        \hyperidx[\@templabel]{\expandonce\@idxkeyentry}\expandonce\@tempc%
       }%
     }{%
-      \index[#1]{#2!\expandonce\@tempentry\expandonce\@tempc}%
-      \index[keys]{\expandonce\@tempkeyentry\expandonce\@tempc}%
+      \index[#1]{#2!\expandonce\@idxentry\expandonce\@tempc}%
+      \index[keys]{\expandonce\@idxkeyentry\expandonce\@tempc}%
     }%
 %    \end{macrocode}
 % Falls es sich nicht um einen Parameter handelt, wird lediglich der Eintrag im 
@@ -3537,15 +3642,15 @@
 %    \begin{macrocode}
   }{%
     \@getlabel\@templabel{#1:#4}{#6}%
-    \@getindex\@tempentry{%
+    \@getindex\@idxentry{%
       \begingroup\expandonce\@tempa#4\endgroup\expandonce\@tempb%
     }{#6}%
     \ifcsdef{r@\@templabel}{%
       \index[#1]{%
-        \hyperidx[\@templabel]{\expandonce\@tempentry}\expandonce\@tempc%
+        \hyperidx[\@templabel]{\expandonce\@idxentry}\expandonce\@tempc%
       }%
     }{%
-      \index[#1]{\expandonce\@tempentry\expandonce\@tempc}%
+      \index[#1]{\expandonce\@idxentry\expandonce\@tempc}%
     }%
   }%
 }
@@ -3586,18 +3691,18 @@
 %    \begin{macrocode}
 \newcommand*\SeeRef[2]{%
   \sbox\z@{%
-    \let\@tempformat\relax%
+    \let\@idxformat\relax%
     #2%
 %    \end{macrocode}
 % Wurde im zweiten Argument ein Markup-Befehl angegeben, so wurde durch das 
-% Erstellen der Box das dazugehörige Indexformat in \cs{@tempformat} für den
-% Eintrag erstellt. Andernfalls wurde die Definiton von \cs{@tempformat} nicht 
+% Erstellen der Box das dazugehörige Indexformat in \cs{@idxformat} für den
+% Eintrag erstellt. Andernfalls wurde die Definiton von \cs{@idxformat} nicht 
 % geändert und das Argument wird nach der Box direkt in den Index eingetragen.
 %    \begin{macrocode}
-    \ifx\@tempformat\relax%
+    \ifx\@idxformat\relax%
       \gdef\@tempa{#2}%
     \else%
-      \global\let\@tempa\@tempformat%
+      \global\let\@tempa\@idxformat%
     \fi%
   }%
   \index{#1!#2|see{\@tempa}}%
@@ -3945,7 +4050,6 @@
     \begingroup%
       \@onlyPValue%
     \endgroup%
-    \@ChangedAt@@CreateEntry{#2}{#1}{\ChangedAt@Default: #3}%
 %    \end{macrocode}
 % Danach wird geprüft, ob das Makro \cs{Key} übergeben wurde. Außerdem wird ein 
 % Anker in der Änderungsliste für die Referenzierung auf die einzelnen Bereiche 
@@ -4045,7 +4149,7 @@
 % Handbuch erläutert werden.
 %
 % Das Paket \pkg{enumitem} erlaubt das Beeinflussen der Standardlisten und die 
-% Ableitung neuer Listen aus diesen. mit \cs{setlist\{noitemsep\}} werden die 
+% Ableitung neuer Listen aus diesen. Mit \cs{setlist\{noitemsep\}} werden die 
 % zusätzlichen Zwischenräume innerhalb der Listen beseitigt.
 %    \begin{macrocode}
 \RequirePackage{enumitem}[2011/09/28]
@@ -4829,7 +4933,7 @@
 % \cs{write18} kompiliert. Dabei sollte man sich nicht von der doppelten
 % Verwendung von \cs{jobname} verwirren lassen. Der Dateiname der temporär
 % erzeugten \LaTeX-Datei ist abhängig vom gesetzten Tutorial. Beim Aufruf
-% dieser wird über die Optionen von pdf\LaTeX{} der verwendete \cs{jobname}
+% dieser wird über die Optionen von \app{pdflatex} der verwendete \cs{jobname}
 % angepasst (siehe \cs{tud@tut@pdf}).
 %    \begin{macrocode}
 \ifnum\pdfshellescape=\@ne\relax%
@@ -4853,13 +4957,13 @@
 %    \end{macrocode}
 % Der Quelltext aus der \env{Trunk!}"=Umgebung wird~-- wie bei allen anderen
 % Derivaten der Umgebungen \env{Trunk}~-- in \file{\string\jobname-temp.tex}
-% gesichert. Beim Aufruf von pdf\LaTeX{} wird durch die Verwendung der Option 
-% \opt{-jobname=\string\jobname-temp} die eigentliche Definition des Makros 
-% \cs{jobname} in der aufgerufenen Datei \file{tutorial-temp.tex} überschrieben
-% und der Inhalt von \file{\string\jobname-temp.tex} wie gewünscht eingebunden
-% und kompiliert. Damit die so erstellte PDF-Datei mit \cs{IncludeStandalone} 
-% im weiteren Verlauf in das Tutorial eingebunden werden kann, wird diese noch
-% in \cs{\meta{Argument}-temp.pdf} umbenannt.
+% gesichert. Beim Aufruf von \app{pdflatex} wird durch die Verwendung der
+% Option \opt{-jobname=\string\jobname-temp} die eigentliche Definition des 
+% Makros \cs{jobname} in der aufgerufenen Datei \file{tutorial-temp.tex}
+% überschrieben und der Inhalt von \file{\string\jobname-temp.tex} wie
+% gewünscht eingebunden und kompiliert. Damit die so erstellte PDF-Datei mit 
+% \cs{IncludeStandalone} im weiteren Verlauf in das Tutorial eingebunden werden
+% kann, wird diese noch in \cs{\meta{Argument}-temp.pdf} umbenannt.
 %    \begin{macrocode}
 \newcommand*\tud@tut@pdf{%
   \ifnum\pdfshellescape=\@ne\relax%
@@ -5099,9 +5203,9 @@
 \NewDocumentCommand\Tutorial{smd||}{%
   \ifnum\pdfshellescape=\@ne\relax%
 %    \end{macrocode}
-% Um mit den verschachtelten Aufrufen von pdf\LaTeX{} umgehen zu können, wird 
-% das ganze Prozedere in ein Skript ausgelagert. Somit können die Aufrufe von
-% pdf\LaTeX{} für die Tutorials im entsprechenden Ordner erfolgen.
+% Um mit den verschachtelten Aufrufen von \app{pdflatex} umgehen zu können,
+% wird das ganze Prozedere in ein Skript ausgelagert. Somit können die Aufrufe
+% von \app{pdflatex} für die Tutorials im entsprechenden Ordner erfolgen.
 %    \begin{macrocode}
     \filemodCmp{tutorials/#2.pdf}{tutorials/#2.tex}{}{%
       \immediate\openout\tud@write@i=tutorials.sh%
@@ -5200,7 +5304,7 @@
 % \pkg{todonotes} lädt wiederum das Paket \pkg{tikz}, welches zu Problem bei
 % der automatisierten Erstellung von \env{pstricks}"=Grafiken führt. Mit dem 
 % Paket \pkg{ifpdf} kann erkannt werden, ob \pkg{auto-pst-pdf} im aktuellen
-% Durchlauf zum Einsatz kommt, da in diesem Fall nicht \pkg{pdflatex} als
+% Durchlauf zum Einsatz kommt, da in diesem Fall nicht \app{pdflatex} als
 % Textsatzsystem verwendet wird.
 %    \begin{macrocode}
 \RequirePackage{ifpdf}[2011/01/30]
@@ -5301,7 +5405,7 @@
 % \changes{v2.05}{2015/11/02}{neu}^^A
 % \begin{macro}{\ListOfToDo}
 % \changes{v2.02}{2014/07/10}{neu}^^A
-% Mit dem Befehl \cs{ToDo}\oarg{options}\marg{inline text}\oarg{marginnote}
+% Mit dem Befehl \cs{ToDo}\oarg{Option}\marg{ToDo-Notiz}\oarg{Versionsnummer}
 % kann bei aktivierter Option \opt{ToDo} eine Notiz mit einer offenen Aufgabe
 % erstellt werden. Das vorangestellte Argument kann Optionen beinhalten, welche
 % durch \pkg{todonotes} unterstützt werden. Außerdem werden die fünf booleschen
@@ -5504,7 +5608,7 @@
 %<*class>
 % \fi
 %
-% Mit \pkg{ragged2e} wird~-- falls benötigt~-- die Silbentrennung im 
+% Mit dem Paket \pkg{ragged2e} wird~-- falls benötigt~-- die Silbentrennung im 
 % Flattersatz aktiviert. 
 %    \begin{macrocode}
 \RequirePackage{ragged2e}[2009/05/21]

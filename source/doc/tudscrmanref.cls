@@ -668,7 +668,7 @@
 \NewDocumentCommand\Application{smd||}{%
   \@SetMarkupFormat{\sbsfont}%
   \@ProcessMarkup{\Application{#2}}%
-  \@ProcessIndex{\Application{#2}}{#1}|#3|[Anwendungssoftware]%
+  \@ProcessIndex{#1}{\Application{#2}}[Anwendungssoftware]|#3|%
 }
 \NewExpandableDocumentCommand\@Distribution{sm}{#2}
 \NewDocumentCommand\Distribution{smod||}{%
@@ -678,19 +678,19 @@
   }{%
     \@ProcessMarkup{\Distribution{#2}}%
   }%
-  \@ProcessIndex{\Distribution{#2}}{#1}|#4|[Distribution]%
+  \@ProcessIndex{#1}{\Distribution{#2}}[Distribution]|#4|%
 }
 \NewExpandableDocumentCommand\@Engine{sm}{#2}
 \NewDocumentCommand\Engine{smd||}{%
   \@SetMarkupFormat{\sbnfont}%
   \@ProcessMarkup{\Engine{\hologo{#2}}}%
-  \@ProcessIndex{\Engine{#2}}{#1}|#3|[Textsatzsystem]%
+  \@ProcessIndex{#1}{\Engine{#2}}[Textsatzsystem]|#3|%
 }
 \NewExpandableDocumentCommand\@File{sm}{#2}
 \NewDocumentCommand\File{smd||}{%
   \@SetMarkupFormat{\sbnfont}%
   \@ProcessMarkup{\File{#2}}%
-  \@ProcessIndex{\File{#2}}{#1}|#3|[Datei]%
+  \@ProcessIndex{#1}{\File{#2}}[Datei]|#3|%
 }
 \NewExpandableDocumentCommand\@Class{sm}{#2}
 \NewDocumentCommand\Class{smd''d||}{%
@@ -699,7 +699,7 @@
   \else%
     \@SetMarkupFormat{\sbnfont}%
     \@ProcessMarkup{\Class{#2}}'#3'%
-    \@ProcessIndex{\Class{#2}}{#1}|#4|[Klasse]%
+    \@ProcessIndex{#1}{\Class{#2}}[Klasse]|#4|%
   \fi%
 }
 \NewExpandableDocumentCommand\@Package{sm}{#2}
@@ -713,7 +713,7 @@
     }{%
       \@ProcessMarkup{\Package{#2}}<#2>'#4'%
     }%
-    \@ProcessIndex{\Package{#2}}{#1}|#5|[Paket]%
+    \@ProcessIndex{#1}{\Package{#2}}[Paket]|#5|%
   \fi%
 }
 \NewExpandableDocumentCommand\@Option{sm}{#2}
@@ -723,17 +723,17 @@
 \NewDocumentCommand\Option@Value{mmd==d==d()d''d||}{%
   \IfValueT{#4}{\tud@keyval@error}%
   \if@changedat%
-    \@ProcessChangedAt{\Option{#2}}=#3=(#5)[Option]%
+    \@ProcessChangedAt{\Option{#2}}=#3=[Option](#5)%
   \else%
     \@SetMarkupFormat{\ttfamily}%
     \@ProcessMarkup{\Option{#2}}=#3=(#5)'#6'%
-    \@ProcessIndex{\Option{#2}}=#3=(#5){#1}|#7|%
+    \@ProcessIndex{#1}{\Option{#2}}=#3=(#5)|#7|%
   \fi%
 }
 \NewExpandableDocumentCommand\@Environment{sm}{#2}
 \NewDocumentCommand\Environment{smod()d''d||}{%
   \if@changedat%
-    \@ProcessChangedAt{\Environment{#2}}(#4)[Umgebung]%
+    \@ProcessChangedAt{\Environment{#2}}[Umgebung](#4)%
   \else%
     \@SetMarkupFormat{\ttfamily}(%
       \ttfamily\bsc{}begin\{#2\}\IfValueT{#3}{#3}\tabularnewline%
@@ -741,37 +741,37 @@
       \ttfamily\bsc{}end\{#2\}%
     )%
     \@ProcessMarkup{\Environment{#2}}[#3](#4)'#5'%
-    \@ProcessIndex{\Environment{#2}}(#4){#1}|#6|[Umgebung]%
+    \@ProcessIndex{#1}{\Environment{#2}}[Umgebung](#4)|#6|%
   \fi%
 }
 \NewExpandableDocumentCommand\@Macro{sm}{#2}
 \NewDocumentCommand\Macro{smod()d''d||}{%
   \if@changedat%
-    \@ProcessChangedAt{\Macro{#2}}(#4)[Befehl]%
+    \@ProcessChangedAt{\Macro{#2}}[Befehl](#4)%
   \else%
     \@SetMarkupFormat{\ttfamily\bsc}%
     \@ProcessMarkup{\Macro{#2}}[#3](#4)'#5'%
-    \@ProcessIndex{\Macro{#2}}(#4){#1}|#6|%
+    \@ProcessIndex{#1}{\Macro{#2}}(#4)|#6|%
   \fi%
 }
 \NewExpandableDocumentCommand\@Length{sm}{#2}
 \NewDocumentCommand\Length{smd()d''d||}{%
   \if@changedat%
-    \@ProcessChangedAt{\Length{#2}}(#3)[L\"ange]%
+    \@ProcessChangedAt{\Length{#2}}[L\"ange](#3)%
   \else%
     \@SetMarkupFormat{\ttfamily\bsc}[L\"ange]%
     \@ProcessMarkup{\Length{#2}}(#3)'#4'%
-    \@ProcessIndex{\Length{#2}}(#3){#1}|#5|[L\"ange]%
+    \@ProcessIndex{#1}{\Length{#2}}[L\"ange](#3)|#5|%
   \fi%
 }
 \NewExpandableDocumentCommand\@Counter{sm}{#2}
 \NewDocumentCommand\Counter{smd()d''d||}{%
   \if@changedat%
-    \@ProcessChangedAt{\Counter{#2}}(#3)[Z\"ahler]%
+    \@ProcessChangedAt{\Counter{#2}}[Z\"ahler](#3)%
   \else%
     \@SetMarkupFormat{\ttfamily}[Z\"ahler]%
     \@ProcessMarkup{\Counter{#2}}(#3)'#4'%
-    \@ProcessIndex{\Counter{#2}}(#3){#1}|#5|[Z\"ahler]%
+    \@ProcessIndex{#1}{\Counter{#2}}[Z\"ahler](#3)|#5|%
   \fi%
 }
 \NewExpandableDocumentCommand\@Key{smm}{#2!#3}
@@ -781,53 +781,53 @@
 \NewDocumentCommand\Key@Value{mmmd==d==d()d''d||}{%
   \IfValueT{#5}{\tud@keyval@error}%
   \if@changedat%
-    \@ProcessChangedAt{\Key{#2}{#3}}=#4=(#6)[Parameter]%
+    \@ProcessChangedAt{\Key{#2}{#3}}=#4=[Parameter](#6)%
   \else%
     \@SetMarkupFormat{\ttfamily}[Parameter]%
     \@ProcessMarkup{\Key{#2}{#3}}=#4=(#6)'#7'%
-    \@ProcessIndex{\Key{#2}{#3}}=#4=(#6){#1}|#8|%
+    \@ProcessIndex{#1}{\Key{#2}{#3}}=#4=(#6)|#8|%
   \fi%
 }
 \NewExpandableDocumentCommand\@Term{sm}{#2}
 \NewDocumentCommand\Term{smd()d''d||}{%
   \if@changedat%
-    \@ProcessChangedAt{\Term{#2}}(#3)[Bezeichner]%
+    \@ProcessChangedAt{\Term{#2}}[Bezeichner](#3)%
   \else%
     \@SetMarkupFormat{\ttfamily\bsc}[Bezeichner]%
     \@ProcessMarkup{\Term{#2}}(#3)'#4'%
-    \@ProcessIndex{\Term{#2}}(#3){#1}|#5|%
+    \@ProcessIndex{#1}{\Term{#2}}(#3)|#5|%
   \fi%
 }
 \NewExpandableDocumentCommand\@PageStyle{sm}{#2}
 \NewDocumentCommand\PageStyle{smd()d''d||}{%
   \if@changedat%
-    \@ProcessChangedAt{\PageStyle{#2}}(#3)[Seitenstil]%
+    \@ProcessChangedAt{\PageStyle{#2}}[Seitenstil](#3)%
   \else%
     \@SetMarkupFormat{\ttfamily}[Seitenstil]%
     \@ProcessMarkup{\PageStyle{#2}}(#3)'#4'%
-    \@ProcessIndex{\PageStyle{#2}}(#3){#1}|#5|[Seitenstil]%
+    \@ProcessIndex{#1}{\PageStyle{#2}}[Seitenstil](#3)|#5|%
   \fi%
 }
 \NewExpandableDocumentCommand\@Font{sm}{#2}
 \NewDocumentCommand\Font{smd()d''d||}{%
   \if@changedat%
-    \@ProcessChangedAt{\Font{#2}}(#3)[Schriftelement]%
+    \@ProcessChangedAt{\Font{#2}}[Schriftelement](#3)%
   \else%
     \@SetMarkupFormat{\ttfamily}[Schriftelement]%
     \@ProcessMarkup{\Font{#2}}(#3)'#4'%
-    \@ProcessIndex{\Font{#2}}(#3){#1}|#5|[Schriftelement]%
+    \@ProcessIndex{#1}{\Font{#2}}[Schriftelement](#3)|#5|%
   \fi%
 }
 \NewExpandableDocumentCommand\@Color{sm}{#2}
 \NewDocumentCommand\Color{smoD(){\Package{tudscrcolor}}d''d||}{%
   \if@changedat%
-    \@ProcessChangedAt{\Color{#2}}(#4)[Farbe]%
+    \@ProcessChangedAt{\Color{#2}}[Farbe](#4)%
   \else%
     \@SetMarkupFormat{\ttfamily}[Farbe](%
       \begingroup\ttfamily{#2\IfValueT{#3}{~(#3)}}\endgroup%
     )%
     \@ProcessMarkup{\Color{#2}}[#3](#4)'#5'%
-    \@ProcessIndex{\Color{#2}}(#4){#1}|#5|[Farbe]%
+    \@ProcessIndex{#1}{\Color{#2}}[Farbe](#4)|#5|%
   \fi%
 }
 \NewDocumentCommand\@getattribution{smm}{%
@@ -1362,18 +1362,41 @@
 \undef\makexindyindex
 \newif\if@tud@index
 \addtoeachtocfile{\protect\@tud@indextrue}%
-\newcommand*\@tempentry{}
-\newcommand*\@tempformat{}
-\newcommand*\@tempkey{}
-\newcommand*\@tempbundle{}
-\NewDocumentCommand\@getindex{smmmmd==r()r[]d!!}{%
-  \let\@tempbundle\@bundledefault%
-  \IfValueTF{#7}{%
-    \def\@tempbundle{#7}%
+\newcommand*\@idxkey{}
+\newcommand*\@idxformat{}
+\newcommand*\@idxentry{}
+\newcommand*\@idxbundle{}
+\NewDocumentCommand\@getindex{smmmmd==r[]r()d!!}{%
+  \begingroup%
+    \let#4\@empty%
+    \in@{\Key}{#5}%
+    \ifin@%
+      \@suppressmarkup%
+      \let\Key\@firstoftwo%
+      #5%
+      \def#4{%
+        \expandonce#2\IfValueT{#9}{: #9}@%
+        \expandonce#3\IfValueT{#9}{: #9}!%
+      }%
+    \fi%
+    \@gobblemarkup%
+    \let\Key\@secondoftwo%
+    \edef\tud@reserved{%
+      \noexpand\endgroup%
+      \def\noexpand#2{#5}%
+      \def\noexpand#4{#4}%
+    }%
+  \tud@reserved%
+  \def#3{#5}%
+  \tud@replace#2{@}{"@}%
+  \tud@replace#3{@}{"@}%
+  \let\@idxbundle\@bundledefault%
+  \IfValueTF{#8}{%
+    \def\@idxbundle{#8}%
   }{%
     \tud@ifbundle{%
       \tud@iflabelexists{\@bundle:#5}{%
-        \edef\@tempbundle{\expandonce\@bundle}%
+        \edef\@idxbundle{\expandonce\@bundle}%
       }{}%
     }{}%
   }%
@@ -1416,35 +1439,35 @@
   \IfValueTF{#7}{\edef\@tempc{|#7}}{\def\@tempc{}}%
   \IfValueTF{#2}{%
     \@getlabel\@templabel{#1:#2:#4}{#6}%
-    \@getindex\@tempentry{%
+    \@getindex\@idxentry{%
       \begingroup\expandonce\@tempa#4\endgroup\expandonce\@tempb%
     }{#6}%
-    \@getindex\@tempkeyentry{%
+    \@getindex\@idxkeyentry{%
       \begingroup\expandonce\@tempa#4\endgroup%
       \noexpand\nobreakspace{\idxfont(#2)}%
     }{#6}%
     \ifcsdef{r@\@templabel}{%
       \index[#1]{%
-        #2!\hyperidx[\@templabel]{\expandonce\@tempentry}\expandonce\@tempc%
+        #2!\hyperidx[\@templabel]{\expandonce\@idxentry}\expandonce\@tempc%
       }%
       \index[keys]{%
-        \hyperidx[\@templabel]{\expandonce\@tempkeyentry}\expandonce\@tempc%
+        \hyperidx[\@templabel]{\expandonce\@idxkeyentry}\expandonce\@tempc%
       }%
     }{%
-      \index[#1]{#2!\expandonce\@tempentry\expandonce\@tempc}%
-      \index[keys]{\expandonce\@tempkeyentry\expandonce\@tempc}%
+      \index[#1]{#2!\expandonce\@idxentry\expandonce\@tempc}%
+      \index[keys]{\expandonce\@idxkeyentry\expandonce\@tempc}%
     }%
   }{%
     \@getlabel\@templabel{#1:#4}{#6}%
-    \@getindex\@tempentry{%
+    \@getindex\@idxentry{%
       \begingroup\expandonce\@tempa#4\endgroup\expandonce\@tempb%
     }{#6}%
     \ifcsdef{r@\@templabel}{%
       \index[#1]{%
-        \hyperidx[\@templabel]{\expandonce\@tempentry}\expandonce\@tempc%
+        \hyperidx[\@templabel]{\expandonce\@idxentry}\expandonce\@tempc%
       }%
     }{%
-      \index[#1]{\expandonce\@tempentry\expandonce\@tempc}%
+      \index[#1]{\expandonce\@idxentry\expandonce\@tempc}%
     }%
   }%
 }
@@ -1460,12 +1483,12 @@
 }
 \newcommand*\SeeRef[2]{%
   \sbox\z@{%
-    \let\@tempformat\relax%
+    \let\@idxformat\relax%
     #2%
-    \ifx\@tempformat\relax%
+    \ifx\@idxformat\relax%
       \gdef\@tempa{#2}%
     \else%
-      \global\let\@tempa\@tempformat%
+      \global\let\@tempa\@idxformat%
     \fi%
   }%
   \index{#1!#2|see{\@tempa}}%
@@ -1546,43 +1569,44 @@
     \def\@tempa{\begingroup#5#6\endgroup\nobreakspace{\idxfont(#7)}}%
   }%
   \ifcsdef{r@\@templabel}{\hyperidx[\@templabel]{\@tempa}}{\@tempa}%
+}
 \newlength\changedatskip
 \NewDocumentCommand\ChangedAt{sO{\changedatskip}mO{Allgemein}}{%
   \tud@ifbundle{\@bundle}{%
-    \ChangedAt@Process[#1]{#2}[#4\nobreakspace\@bundle]{#3}%
+    \@ChangedAt@CreateList[#1]{#2}[#4\nobreakspace\@bundle]{#3}%
   }{%
-    \ChangedAt@Process[#1]{#2}[#4]{#3}%
+    \@ChangedAt@CreateList[#1]{#2}[#4]{#3}%
   }%
-}
 }
 \newcommand*\list@ChangedAt{}
 \let\list@ChangedAt\relax
-\NewDocumentCommand\ChangedAt@Process{omom}{%
+\newcommand*\@changedatlist{}
+\NewDocumentCommand\@ChangedAt@CreateList{omom}{%
   \let\@changedatlist\relax%
-  \let\@changedatversionlist\relax%
+  \let\@templist\relax%
   \@for\@tempa:=#4\do{%
     \ifx\@tempa\@empty\else\ifx\@tempa\space\else%
       \IfValueT{#3}{\preto\@tempa{#3!}}%
       \listeadd{\@changedatlist}{\expandonce\@tempa}%
     \fi\fi%
   }%
-  \forlistloop\ChangedAt@Process@Split{\@changedatlist}%
+  \forlistloop\@ChangedAt@CreateEntry{\@changedatlist}%
 }
-\newcommand*\@changedatdeclare[2]{%
+\newcommand*\@ChangedAt@@CreateList[2]{%
   \IfValueT{#1}{%
     \@for\@tempa:=#1\do{%
       \ifx\@tempa\@empty\else\ifx\@tempa\space\else%
         \preto{\@tempa}{#2!}%
-        \expandafter\ChangedAt@Split\expandafter{\@tempa}%
+        \expandafter\@ChangedAt@@@CreateList\expandafter{\@tempa}%
       \fi\fi%
     }%
   }%
 }
-\NewDocumentCommand\ChangedAt@Split{>{\SplitArgument{2}{!}}m}{%
-  \ChangedAt@@Split#1%
+\NewDocumentCommand\@ChangedAt@@@CreateList{>{\SplitArgument{2}{!}}m}{%
+  \@ChangedAt@@@@CreateList#1%
 }
 \newcommand*\@changedatdeclaredefault{\emph{neu}}
-\newcommand*\ChangedAt@@Split[3]{%
+\newcommand*\@ChangedAt@@@@CreateList[3]{%
   \in@{*}{#1}%
   \ifin@%
     \tud@ifbundle{\@bundle}{%
@@ -1606,14 +1630,11 @@
   \fi%
   \listeadd\list@ChangedAt{\expandonce\@tempa}%
 }
-\newcommand*\@changedatlist{}
 \newcommand*\ChangedAt@Default{}
-\newcommand*\@changedatversionlist{}
-\let\@changedatversionlist\relax
-\NewDocumentCommand\ChangedAt@Process@Split{>{\SplitArgument{3}{!}}m}{%
-  \ChangedAt@@Process#1%
+\NewDocumentCommand\@ChangedAt@CreateEntry{>{\SplitArgument{4}{!}}m}{%
+  \@ChangedAt@@CreateEntry#1%
 }
-\newcommand*\ChangedAt@@Process[4]{%
+\newcommand*\@ChangedAt@@CreateEntry[4]{%
   \IfValueTF{#4}{%
     \begingroup%
       \@onlyPValue%
@@ -1623,7 +1644,7 @@
   }{%
     \IfValueT{#3}{\ChangedAt@@@Process{#2}{#1}{#3}}%
   }%
-  \xifinlist{#2}{\@changedatversionlist}{}{\listeadd\@changedatversionlist{#2}}%
+  \xifinlist{#2}{\@templist}{}{\listeadd\@templist{#2}}%
 }
 \newcommand*\ChangedAt@@@Process[3]{%
   \begingroup%
@@ -1654,26 +1675,22 @@
     \@printindex[changelog]%
   \endgroup%
 }
-\NewDocumentCommand\@printchangedatlist{sO{\z@}}{%
+\NewDocumentCommand\@printchangedatlist{mm}{%
   \ifx\list@ChangedAt\relax\else%
-    \if@deprecated%
-      \ChangedAt@Process[#1]{#2}{\list@ChangedAt}%
-    \else%
-      \ChangedAt@Process{#2}{\list@ChangedAt}%
-    \fi%
+    \@ChangedAt@CreateList{#2}{\list@ChangedAt}%
     \global\let\list@ChangedAt\relax%
     \IfBooleanF{#1}{%
-      \par\nobreak\vskip\dimexpr-\parskip-\baselineskip\relax%
-      \@afterindentfalse\@afterheading%
-      \sortlist{\@changedatversionlist}%
+      \sortlist\@templist%
       \strut%
       \marginnote{%
         \def\@tempa####1{%
-          \ignorespaces\tudhyperref{####1}{####1}\tabularnewline%
+          \ignorespaces%
+          \tudhyperref{idx:changelog:####1}{####1}%
+          \tabularnewline%
         }%
         \begin{tabular}{|l|}%
           \hline%
-          \forlistloop\@tempa{\@changedatversionlist}%
+          \forlistloop\@tempa{\@templist}%
           \hline%
         \end{tabular}%
       }[#2]%
