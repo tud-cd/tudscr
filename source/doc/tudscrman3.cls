@@ -1367,7 +1367,8 @@
 \newcommand*\@idxformat{}
 \newcommand*\@idxentry{}
 \newcommand*\@idxbundle{}
-\NewDocumentCommand\@getindex{smmmmd==r[]r()d!!}{%
+% §§§ evtl. kann der Stern raus oder für changelog verwendet werden
+\NewDocumentCommand\@getindex{smmmmd==r[]r()d||}{%
   \begingroup%
     \let#4\@empty%
     \in@{\Key}{#5}%
@@ -1375,9 +1376,13 @@
       \@suppressmarkup%
       \let\Key\@firstoftwo%
       #5%
+      \let\@tempa\@empty%
+      \IfValueT{#9}{%
+        \ifstr{#9}{changelog}{\def\@tempa{: Parameter angepasst}}{}%
+      }%
       \def#4{%
-        \expandonce#2\IfValueT{#9}{: #9}@%
-        \expandonce#3\IfValueT{#9}{: #9}!%
+        \expandonce#2\expandonce\@tempa @%
+        \expandonce#3\expandonce\@tempa !%
       }%
     \fi%
     \@gobblemarkup%
@@ -1401,9 +1406,46 @@
       }{}%
     }{}%
   }%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% TODO §§§ 
+  \begingroup%
+  \let\@tempb\@empty%
+  \IfValueT{#7}{\def\@tempb{#7}}%
+  \let\@tempa\@empty%
+  \@tempswatrue%
+  \ifx\@idxbundle\@bundledefault%
+    \@tempswafalse
+  \else%
+    \edef\@tempa{(\expandonce\@idxbundle)}%
+    \in@{\Key}{#5}\ifin@\@tempswafalse\fi%
+    \IfBooleanT{#1}{\@tempswafalse}%
+  \fi%
+  \let\@tempc\@empty%
+  \if@tempswa%
+    \edef\@tempc{\suffix{\expandonce\@idxbundle}}%
+  \fi%
+  % §§§ wie mit declare umgehen?
+  \typeout{^^J}%
+  \IfValueTF{#6}{%
+    \typeout{:::::=#6=}%
+    \eappto#4{%
+      \expandonce#2 \expandonce\@tempb\expandonce\@tempc @%
+      \expandonce#3\expandonce\@tempa\suffix{\expandonce\@tempb}\expandonce\@tempc!%
+    }%
+    \protected@eappto#2{=#6 \expandonce\@tempb}%
+    \protected@eappto#3{=\noexpand#6=\expandonce\@tempa\expandonce\@tempb}%
+  }{%
+    \protected@eappto#2{ \expandonce\@tempb}%
+    \protected@eappto#3{\expandonce\@tempa\suffix{\expandonce\@tempb}}%
+  }%
+  \begingroup\expandafter\toks@\expandafter{\@idxentry}\typeout{:::::\the\toks@}\endgroup%
+  \begingroup\expandafter\toks@\expandafter{\@idxkey}\typeout{:::::\the\toks@}\endgroup%
+  \begingroup\expandafter\toks@\expandafter{\@idxformat}\typeout{:::::\the\toks@}\endgroup%
+  \endgroup
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   \IfValueT{#6}{\appto#3{=\protecting{#6}=}}%
   \ifx\@idxbundle\@bundledefault\else%
-    \appto#3{(\@idxbundle)}%
+    \eappto#3{(\expandonce\@idxbundle)}%
   \fi%
   \IfValueT{#7}{%
     \appto#2{ #7}%
@@ -1414,8 +1456,9 @@
   \in@{\Key}{#5}\ifin@\@tempswafalse\fi%
   \IfBooleanT{#1}{\@tempswafalse}%
   \if@tempswa%
-    \appto#3{\suffix{\@idxbundle}}%
+    \eappto#3{\suffix{\expandonce\@idxbundle}}%
   \fi%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 }
 % {#1}: Stern?
 % {#2}: Markup für Index
@@ -1446,7 +1489,12 @@
 % (#4): optionale Subdeclaration
 % |#5|: optionale Indexformatierung
 \NewDocumentCommand\@@ProcessIndex{mr==r[]r()r||}{%
-  \@getindex\@idxkey\@idxformat\@idxentry{#1}=#2=[#3](#4)%
+% §§§ ???
+%  \if@declare%
+%    \@getindex\@idxkey\@idxformat\@idxentry{#1}=#2=[#3](#4)|declare|%
+%  \else%
+  \@getindex\@idxkey\@idxformat\@idxentry{#1}=#2=[#3](#4)|#5|%
+%  \fi%
   \@getattribution*\@templabel{#1}%
   \if@declare%
     \if@openindex%
@@ -1489,6 +1537,10 @@
     }%
     \index[\@templabel]{\@idxentry\@idxkey @\@idxformat}%
   \fi%
+  \typeout{^^J}%
+  \begingroup\expandafter\toks@\expandafter{\@idxentry}\typeout{:::::\the\toks@}\endgroup%
+  \begingroup\expandafter\toks@\expandafter{\@idxkey}\typeout{:::::\the\toks@}\endgroup%
+  \begingroup\expandafter\toks@\expandafter{\@idxformat}\typeout{:::::\the\toks@}\endgroup%
 }
 \NewDocumentCommand\CrossIndex{smom}{%
   \def\@tempa##1##2##3{%
@@ -1581,7 +1633,7 @@
 % (#4): optionale Subdeclaration
 \newif\if@changedat
 \NewDocumentCommand\@ProcessChangedAt{md==od()}{%
-  \@getindex*\@idxkey\@idxformat\@idxentry{#1}=#2=[#3](#4)!Parameter angepasst!%
+  \@getindex*\@idxkey\@idxformat\@idxentry{#1}=#2=[#3](#4)|changelog|%
   \IfValueT{#2}{%
     \begingroup%
       \@onlyPValue%
@@ -1711,6 +1763,10 @@
     }%
   }%
   \ifinlist{#1}{\@templist}{}{\listadd\@templist{#1}}%
+  \typeout{^^J}%
+  \begingroup\expandafter\toks@\expandafter{\@idxentry}\typeout{*****\the\toks@}\endgroup%
+  \begingroup\expandafter\toks@\expandafter{\@idxkey}\typeout{*****\the\toks@}\endgroup%
+  \begingroup\expandafter\toks@\expandafter{\@idxformat}\typeout{*****\the\toks@}\endgroup%
 }
 \newcommand*\PrintChangelog{%
   \begingroup%
