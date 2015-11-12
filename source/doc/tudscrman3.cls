@@ -894,6 +894,19 @@
   \let\textOR\relax%
   \let\emph\@firstofone%
 }
+\newcommand*\tud@ifPValue[4][]{%
+  \IfValueT{#2}{%
+    \begingroup%
+      \@onlyPValue%
+      #1%
+      \ifstr{#2}{}{%
+        \protected@edef\tud@reserved{\noexpand\endgroup#4}%
+      }{%
+        \protected@edef\tud@reserved{\noexpand\endgroup#3}%
+      }%
+    \tud@reserved%
+  }%
+}
 \newcommand*\@TUDScript{TUD-KOMA-Script}
 \NewDocumentCommand\@gobblemarkup{s}{%
   \let\Application\@Application%
@@ -965,20 +978,7 @@
 }
 \NewDocumentCommand\@@getlabel{mmd==}{%
   \def#1{#2}%
-  \IfValueT{#3}{%
-    \begingroup%
-      \@onlyPValue%
-      \@formatlabel%
-      \ifstr{#3}{}{%
-        \def\tud@reserved{\endgroup}%
-      }{%
-        \protected@edef\tud@reserved{%
-          \noexpand\endgroup%
-          \appto\noexpand#1{=#3}%
-        }%
-      }%
-    \tud@reserved%
-  }%
+  \tud@ifPValue[\@formatlabel]{#3}{\noexpand\appto\noexpand#1{=#3}}{}%
 }
 \NewDocumentCommand\@getdefaultlabel{m>{\SplitArgument{2}{:}}mr==}{%
   \@@getdefaultlabel{#1}#2=#3=%
@@ -1370,95 +1370,96 @@
 % §§§ evtl. kann der Stern raus oder für changelog verwendet werden
 \NewDocumentCommand\@getindex{smmmmd==r[]r()d||}{%
   \begingroup%
-    \let#4\@empty%
-    \in@{\Key}{#5}%
-    \ifin@%
-      \@suppressmarkup%
-      \let\Key\@firstoftwo%
-      #5%
-      \let\@tempa\@empty%
-      \IfValueT{#9}{%
-        \ifstr{#9}{changelog}{\def\@tempa{: Parameter angepasst}}{}%
+    \begingroup%
+      \let#4\@empty%
+      \in@{\Key}{#5}%
+      \ifin@%
+        \@suppressmarkup%
+        \let\Key\@firstoftwo%
+        #5%
+        \let\@tempa\@empty%
+        \IfBooleanT{#1}{\def\@tempa{: Parameter angepasst}}%
+        \def#4{%
+          \expandonce#2\expandonce\@tempa @%
+          \expandonce#3\expandonce\@tempa !%
+        }%
+      \fi%
+      \@gobblemarkup%
+      \let\Key\@secondoftwo%
+      \edef\tud@reserved{%
+        \noexpand\endgroup%
+        \def\noexpand#2{#5}%
+        \def\noexpand#4{#4}%
       }%
-      \def#4{%
-        \expandonce#2\expandonce\@tempa @%
-        \expandonce#3\expandonce\@tempa !%
-      }%
+    \tud@reserved%
+    \def#3{#5}%
+    \tud@replace#2{@}{"@}%
+    \tud@replace#3{@}{"@}%
+    \let\@idxbundle\@bundledefault%
+    \IfValueTF{#8}{%
+      \def\@idxbundle{#8}%
+    }{%
+      \tud@ifbundle{%
+        \tud@iflabelexists{\@bundle:#5}{%
+          \edef\@idxbundle{\expandonce\@bundle}%
+        }{}%
+      }{}%
+    }%
+    \let\@tempa\@empty%
+    \let\@tempb\@empty%
+    \@tempswatrue%
+    \ifx\@idxbundle\@bundledefault%
+      \@tempswafalse
+    \else%
+      \edef\@tempa{(\expandonce\@idxbundle)}%
+      \in@{\Key}{#5}\ifin@\@tempswafalse\fi%
+      \IfBooleanT{#1}{\@tempswafalse}%
     \fi%
-    \@gobblemarkup%
-    \let\Key\@secondoftwo%
-    \edef\tud@reserved{%
+    \let\@tempc\@tempa%
+    \IfValueT{#7}{%
+      \appto\@tempa{\suffix{#7}}%
+      \appto\@tempb{ #7}%
+    }%
+    \if@tempswa%
+      \eappto\@tempa{\suffix{\expandonce\@idxbundle}}%
+      \begingroup%
+        \@gobblemarkup%
+        \edef\tud@reserved{%
+          \noexpand\endgroup%
+          \noexpand\appto\noexpand\@tempb{ \@idxbundle}%
+        }%
+      \tud@reserved%
+    \fi%
+    \@tempswafalse%
+    \IfBooleanT{#1}{\@tempswatrue}%
+    \IfValueT{#9}{\ifstr{#9}{declare}{\@tempswatrue}{}}%
+    \if@tempswa%
+      \protected@eappto#2{\expandonce\@tempb}%
+      \tud@ifPValue{#6}{\noexpand\appto\noexpand#2{=#6}}{}%
+      \protected@eappto#3{\IfValueT{#6}{=#6=}\expandonce\@tempa}%
+    \else%
+      \tud@ifPValue{#6}{\noexpand\@tempswatrue}{}%
+      \if@tempswa%
+        \eappto#4{%
+          \expandonce#2\expandonce\@tempb @%
+          \expandonce#3\expandonce\@tempa!%
+        }%
+        \appto#2{=#6}%
+        \appto#3{=#6=}%
+        \protected@eappto#3{\expandonce\@tempc}%
+      \else%
+        \protected@eappto#2{\expandonce\@tempb}%
+        \protected@eappto#3{\expandonce\@tempa}%
+      \fi%
+    \fi%
+    \let\emph\@firstofone%
+    \protected@edef\tud@reserved{%
       \noexpand\endgroup%
-      \def\noexpand#2{#5}%
+      \def\noexpand#2{#2}%
+      \def\noexpand#3{#3}%
       \def\noexpand#4{#4}%
     }%
   \tud@reserved%
-  \def#3{#5}%
-  \tud@replace#2{@}{"@}%
-  \tud@replace#3{@}{"@}%
-  \let\@idxbundle\@bundledefault%
-  \IfValueTF{#8}{%
-    \def\@idxbundle{#8}%
-  }{%
-    \tud@ifbundle{%
-      \tud@iflabelexists{\@bundle:#5}{%
-        \edef\@idxbundle{\expandonce\@bundle}%
-      }{}%
-    }{}%
-  }%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% TODO §§§ 
-  \begingroup%
-  \let\@tempb\@empty%
-  \IfValueT{#7}{\def\@tempb{#7}}%
-  \let\@tempa\@empty%
-  \@tempswatrue%
-  \ifx\@idxbundle\@bundledefault%
-    \@tempswafalse
-  \else%
-    \edef\@tempa{(\expandonce\@idxbundle)}%
-    \in@{\Key}{#5}\ifin@\@tempswafalse\fi%
-    \IfBooleanT{#1}{\@tempswafalse}%
-  \fi%
-  \let\@tempc\@empty%
-  \if@tempswa%
-    \edef\@tempc{\suffix{\expandonce\@idxbundle}}%
-  \fi%
-  % §§§ wie mit declare umgehen?
-  \typeout{^^J}%
-  \IfValueTF{#6}{%
-    \typeout{:::::=#6=}%
-    \eappto#4{%
-      \expandonce#2 \expandonce\@tempb\expandonce\@tempc @%
-      \expandonce#3\expandonce\@tempa\suffix{\expandonce\@tempb}\expandonce\@tempc!%
-    }%
-    \protected@eappto#2{=#6 \expandonce\@tempb}%
-    \protected@eappto#3{=\noexpand#6=\expandonce\@tempa\expandonce\@tempb}%
-  }{%
-    \protected@eappto#2{ \expandonce\@tempb}%
-    \protected@eappto#3{\expandonce\@tempa\suffix{\expandonce\@tempb}}%
-  }%
-  \begingroup\expandafter\toks@\expandafter{\@idxentry}\typeout{:::::\the\toks@}\endgroup%
-  \begingroup\expandafter\toks@\expandafter{\@idxkey}\typeout{:::::\the\toks@}\endgroup%
-  \begingroup\expandafter\toks@\expandafter{\@idxformat}\typeout{:::::\the\toks@}\endgroup%
-  \endgroup
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  \IfValueT{#6}{\appto#3{=\protecting{#6}=}}%
-  \ifx\@idxbundle\@bundledefault\else%
-    \eappto#3{(\expandonce\@idxbundle)}%
-  \fi%
-  \IfValueT{#7}{%
-    \appto#2{ #7}%
-    \appto#3{\suffix{#7}}%
-  }%
-  \@tempswatrue%
-  \ifx\@idxbundle\@bundledefault\@tempswafalse\fi%
-  \in@{\Key}{#5}\ifin@\@tempswafalse\fi%
-  \IfBooleanT{#1}{\@tempswafalse}%
-  \if@tempswa%
-    \eappto#3{\suffix{\expandonce\@idxbundle}}%
-  \fi%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 }
 % {#1}: Stern?
 % {#2}: Markup für Index
@@ -1489,12 +1490,11 @@
 % (#4): optionale Subdeclaration
 % |#5|: optionale Indexformatierung
 \NewDocumentCommand\@@ProcessIndex{mr==r[]r()r||}{%
-% §§§ ???
-%  \if@declare%
-%    \@getindex\@idxkey\@idxformat\@idxentry{#1}=#2=[#3](#4)|declare|%
-%  \else%
-  \@getindex\@idxkey\@idxformat\@idxentry{#1}=#2=[#3](#4)|#5|%
-%  \fi%
+  \if@declare%
+    \@getindex\@idxkey\@idxformat\@idxentry{#1}=#2=[#3](#4)|declare|%
+  \else%
+    \@getindex\@idxkey\@idxformat\@idxentry{#1}=#2=[#3](#4)|#5|%
+  \fi%
   \@getattribution*\@templabel{#1}%
   \if@declare%
     \if@openindex%
@@ -1510,23 +1510,6 @@
       \index[\@templabel-declare]{\@idxentry\@idxkey|declare)}%
     \fi%
   \else%
-    \IfValueT{#2}{%
-      \begingroup%
-        \@onlyPValue%
-        \ifstr{#2}{}{%
-          \def\tud@reserved{\endgroup}%
-        }{%
-          \def\@tempa{%
-            \@getindex*\@idxkey\@idxformat\@idxentry{#1}=#2=[#3](#4)%
-          }%
-          \protected@edef\tud@reserved{%
-            \noexpand\endgroup%
-            \expandonce\@tempa%
-            \def\noexpand\@idxkey{\@idxkey!\@idxkey=#2}%
-          }%
-        }%
-      \tud@reserved%
-    }%
     \IfValueT{#5}{%
       \ifstr{#5}{declare}{%
         \appto\@templabel{-declare}%
@@ -1537,10 +1520,6 @@
     }%
     \index[\@templabel]{\@idxentry\@idxkey @\@idxformat}%
   \fi%
-  \typeout{^^J}%
-  \begingroup\expandafter\toks@\expandafter{\@idxentry}\typeout{:::::\the\toks@}\endgroup%
-  \begingroup\expandafter\toks@\expandafter{\@idxkey}\typeout{:::::\the\toks@}\endgroup%
-  \begingroup\expandafter\toks@\expandafter{\@idxformat}\typeout{:::::\the\toks@}\endgroup%
 }
 \NewDocumentCommand\CrossIndex{smom}{%
   \def\@tempa##1##2##3{%
@@ -1633,20 +1612,7 @@
 % (#4): optionale Subdeclaration
 \newif\if@changedat
 \NewDocumentCommand\@ProcessChangedAt{md==od()}{%
-  \@getindex*\@idxkey\@idxformat\@idxentry{#1}=#2=[#3](#4)|changelog|%
-  \IfValueT{#2}{%
-    \begingroup%
-      \@onlyPValue%
-      \ifstr{#2}{}{%
-        \def\tud@reserved{\endgroup}%
-      }{%
-        \protected@edef\tud@reserved{%
-          \noexpand\endgroup%
-          \def\noexpand\@idxkey{\@idxkey=#2}%
-        }%
-      }%
-    \tud@reserved%
-  }%
+  \@getindex*\@idxkey\@idxformat\@idxentry{#1}=#2=[#3](#4)%
 }
 \newlength\changedatskip
 \NewDocumentCommand\ChangedAt{somO{\changedatskip}}{%
@@ -1763,17 +1729,13 @@
     }%
   }%
   \ifinlist{#1}{\@templist}{}{\listadd\@templist{#1}}%
-  \typeout{^^J}%
-  \begingroup\expandafter\toks@\expandafter{\@idxentry}\typeout{*****\the\toks@}\endgroup%
-  \begingroup\expandafter\toks@\expandafter{\@idxkey}\typeout{*****\the\toks@}\endgroup%
-  \begingroup\expandafter\toks@\expandafter{\@idxformat}\typeout{*****\the\toks@}\endgroup%
 }
 \newcommand*\PrintChangelog{%
   \begingroup%
     \def\lettergroup##1{}%
     \def\subsubsubitem{\@idxitem\hspace*{45\p@}}%
     \apptocmd{\theindex}{%
-      \let\subsubsubsubitem\subsubsubitem
+      \let\subsubsubsubitem\subsubsubitem%
       \let\subsubsubitem\subsubitem%
       \let\subsubitem\subitem%
       \let\subitem\item%
@@ -1866,7 +1828,7 @@
     \protected@eappto\@tempa{%
       =\IfBooleanTF{#1}{\noexpand\emph}{\@firstofone}{\@tempc}=%
     }%
-    \appto\@tempa{'none'|declare|}%
+    \appto\@tempa{'none'|!|}%
     \edef\@tempb{%
       \IfBooleanTF{#1}{\noexpand\emph}{\@firstofone}{%
         \noexpand\PValue{\@tempb}%
