@@ -537,7 +537,7 @@
 }{%
   \tud@declare@special@end{#2}%
 }
-\NewDocumentEnvironment{Bundle!}{om}{%
+\NewDocumentEnvironment{Bundle*}{om}{%
   \tud@declare@special@start[#1]{#2}{3}%
   \Bundle{#2}%
 }{%
@@ -878,29 +878,26 @@
 \newrobustcmd*\PParameter[1]{\mbox{\texttt{\{#1\}}}}
 \newrobustcmd*\POParameter[1]{\mbox{\texttt{[#1]}}}
 \newrobustcmd*\textOR{\PValue{\,\textbardbl\,}}
-\newcommand*\@onlyPValue{%
-  \let\PValue\@firstofone%
-  \let\PName\@gobble%
-  \let\PValueName\@firstofone%
-  \let\PSet\@empty%
-  \let\PBoolean\@empty%
-  \let\PBName\@gobble%
-  \let\Parameter\@gobble%
-  \let\OParameter\@gobble%
-  \let\LParameter\@empty%
-  \let\OLParameter\@gobble%
-  \let\PParameter\@gobble%
-  \let\POParameter\@gobble%
-  \let\textOR\relax%
-  \let\emph\@firstofone%
-}
-\newcommand*\tud@ifPValue[4][]{%
+\newcommand*\tud@doifPValue[3][]{%
   \IfValueT{#2}{%
     \begingroup%
-      \@onlyPValue%
+      \let\PValue\@firstofone%
+      \let\PName\@gobble%
+      \let\PValueName\@firstofone%
+      \let\PSet\@empty%
+      \let\PBoolean\@empty%
+      \let\PBName\@gobble%
+      \let\Parameter\@gobble%
+      \let\OParameter\@gobble%
+      \let\LParameter\@empty%
+      \let\OLParameter\@gobble%
+      \let\PParameter\@gobble%
+      \let\POParameter\@gobble%
+      \let\textOR\relax%
+      \let\emph\@firstofone%
       #1%
       \ifstr{#2}{}{%
-        \protected@edef\tud@reserved{\noexpand\endgroup#4}%
+        \let\tud@reserved\endgroup%
       }{%
         \protected@edef\tud@reserved{\noexpand\endgroup#3}%
       }%
@@ -978,7 +975,7 @@
 }
 \NewDocumentCommand\@@getlabel{mmd==}{%
   \def#1{#2}%
-  \tud@ifPValue[\@formatlabel]{#3}{\noexpand\appto\noexpand#1{=#3}}{}%
+  \tud@doifPValue[\@formatlabel]{#3}{\noexpand\appto\noexpand#1{=#3}}%
 }
 \NewDocumentCommand\@getdefaultlabel{m>{\SplitArgument{2}{:}}mr==}{%
   \@@getdefaultlabel{#1}#2=#3=%
@@ -1380,8 +1377,8 @@
         \let\@tempa\@empty%
         \IfBooleanT{#1}{\def\@tempa{: Parameter angepasst}}%
         \def#4{%
-          \expandonce#2\expandonce\@tempa @%
-          \expandonce#3\expandonce\@tempa !%
+          \expandonce#2\expandonce\@tempa{}@%
+          \expandonce#3\expandonce\@tempa{}!%
         }%
       \fi%
       \@gobblemarkup%
@@ -1407,49 +1404,50 @@
     }%
     \let\@tempa\@empty%
     \let\@tempb\@empty%
+    \let\@tempc\@empty%
     \@tempswatrue%
     \ifx\@idxbundle\@bundledefault%
-      \@tempswafalse
+      \@tempswafalse%
     \else%
-      \edef\@tempa{(\expandonce\@idxbundle)}%
       \in@{\Key}{#5}\ifin@\@tempswafalse\fi%
       \IfBooleanT{#1}{\@tempswafalse}%
+      \edef\@tempb{(\expandonce\@idxbundle)}%
     \fi%
-    \let\@tempc\@tempa%
+    \let\@tempc\@tempb%
     \IfValueT{#7}{%
-      \appto\@tempa{\suffix{#7}}%
-      \appto\@tempb{ #7}%
+      \appto\@tempa{ #7}%
+      \appto\@tempb{\suffix{#7}}%
     }%
     \if@tempswa%
-      \eappto\@tempa{\suffix{\expandonce\@idxbundle}}%
       \begingroup%
         \@gobblemarkup%
         \edef\tud@reserved{%
           \noexpand\endgroup%
-          \noexpand\appto\noexpand\@tempb{ \@idxbundle}%
+          \noexpand\appto\noexpand\@tempa{ \@idxbundle}%
         }%
       \tud@reserved%
+      \eappto\@tempb{\suffix{\expandonce\@idxbundle}}%
     \fi%
     \@tempswafalse%
     \IfBooleanT{#1}{\@tempswatrue}%
     \IfValueT{#9}{\ifstr{#9}{declare}{\@tempswatrue}{}}%
     \if@tempswa%
-      \protected@eappto#2{\expandonce\@tempb}%
-      \tud@ifPValue{#6}{\noexpand\appto\noexpand#2{=#6}}{}%
-      \protected@eappto#3{\IfValueT{#6}{=#6=}\expandonce\@tempa}%
+      \protected@eappto#2{\expandonce\@tempa}%
+      \tud@doifPValue{#6}{\noexpand\appto\noexpand#2{=#6}}%
+      \protected@eappto#3{\IfValueT{#6}{=#6=}\expandonce\@tempb}%
     \else%
-      \tud@ifPValue{#6}{\noexpand\@tempswatrue}{}%
+      \tud@doifPValue{#6}{\noexpand\@tempswatrue}%
       \if@tempswa%
         \eappto#4{%
-          \expandonce#2\expandonce\@tempb @%
-          \expandonce#3\expandonce\@tempa!%
+          \expandonce#2\expandonce\@tempa{}@%
+          \expandonce#3\expandonce\@tempb{}!%
         }%
         \appto#2{=#6}%
         \appto#3{=#6=}%
         \protected@eappto#3{\expandonce\@tempc}%
       \else%
-        \protected@eappto#2{\expandonce\@tempb}%
-        \protected@eappto#3{\expandonce\@tempa}%
+        \protected@eappto#2{\expandonce\@tempa}%
+        \protected@eappto#3{\expandonce\@tempb}%
       \fi%
     \fi%
     \let\emph\@firstofone%
