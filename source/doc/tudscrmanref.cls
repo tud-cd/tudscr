@@ -537,7 +537,7 @@
 }{%
   \tud@declare@special@end{#2}%
 }
-\NewDocumentEnvironment{Bundle!}{om}{%
+\NewDocumentEnvironment{Bundle*}{om}{%
   \tud@declare@special@start[#1]{#2}{3}%
   \Bundle{#2}%
 }{%
@@ -878,21 +878,31 @@
 \newrobustcmd*\PParameter[1]{\mbox{\texttt{\{#1\}}}}
 \newrobustcmd*\POParameter[1]{\mbox{\texttt{[#1]}}}
 \newrobustcmd*\textOR{\PValue{\,\textbardbl\,}}
-\newcommand*\@onlyPValue{%
-  \let\PValue\@firstofone%
-  \let\PName\@gobble%
-  \let\PValueName\@firstofone%
-  \let\PSet\@empty%
-  \let\PBoolean\@empty%
-  \let\PBName\@gobble%
-  \let\Parameter\@gobble%
-  \let\OParameter\@gobble%
-  \let\LParameter\@empty%
-  \let\OLParameter\@gobble%
-  \let\PParameter\@gobble%
-  \let\POParameter\@gobble%
-  \let\textOR\relax%
-  \let\emph\@firstofone%
+\newcommand*\tud@doifPValue[3][]{%
+  \IfValueT{#2}{%
+    \begingroup%
+      \let\PValue\@firstofone%
+      \let\PName\@gobble%
+      \let\PValueName\@firstofone%
+      \let\PSet\@empty%
+      \let\PBoolean\@empty%
+      \let\PBName\@gobble%
+      \let\Parameter\@gobble%
+      \let\OParameter\@gobble%
+      \let\LParameter\@empty%
+      \let\OLParameter\@gobble%
+      \let\PParameter\@gobble%
+      \let\POParameter\@gobble%
+      \let\textOR\relax%
+      \let\emph\@firstofone%
+      #1%
+      \ifstr{#2}{}{%
+        \let\tud@reserved\endgroup%
+      }{%
+        \protected@edef\tud@reserved{\noexpand\endgroup#3}%
+      }%
+    \tud@reserved%
+  }%
 }
 \newcommand*\@TUDScript{TUD-KOMA-Script}
 \NewDocumentCommand\@gobblemarkup{s}{%
@@ -965,20 +975,7 @@
 }
 \NewDocumentCommand\@@getlabel{mmd==}{%
   \def#1{#2}%
-  \IfValueT{#3}{%
-    \begingroup%
-      \@onlyPValue%
-      \@formatlabel%
-      \ifstr{#3}{}{%
-        \def\tud@reserved{\endgroup}%
-      }{%
-        \protected@edef\tud@reserved{%
-          \noexpand\endgroup%
-          \appto\noexpand#1{=#3}%
-        }%
-      }%
-    \tud@reserved%
-  }%
+  \tud@doifPValue[\@formatlabel]{#3}{\noexpand\appto\noexpand#1{=#3}}%
 }
 \NewDocumentCommand\@getdefaultlabel{m>{\SplitArgument{2}{:}}mr==}{%
   \@@getdefaultlabel{#1}#2=#3=%
@@ -1366,110 +1363,148 @@
 \newcommand*\@idxformat{}
 \newcommand*\@idxentry{}
 \newcommand*\@idxbundle{}
-\NewDocumentCommand\@getindex{smmmmd==r[]r()d!!}{%
+\NewDocumentCommand\@getindex{smmmmr==r[]r()d||}{%
   \begingroup%
-    \let#4\@empty%
-    \in@{\Key}{#5}%
-    \ifin@%
-      \@suppressmarkup%
-      \let\Key\@firstoftwo%
-      #5%
-      \def#4{%
-        \expandonce#2\IfValueT{#9}{: #9}@%
-        \expandonce#3\IfValueT{#9}{: #9}!%
+    \begingroup%
+      \let#4\@empty%
+      \in@{\Key}{#5}%
+      \ifin@%
+        \@suppressmarkup%
+        \let\Key\@firstoftwo%
+        #5%
+        \let\@tempa\@empty%
+        \IfBooleanT{#1}{\def\@tempa{: Parameter angepasst}}%
+        \def#4{%
+          \expandonce#2\expandonce\@tempa{}@%
+          \expandonce#3\expandonce\@tempa{}!%
+        }%
+      \fi%
+      \@gobblemarkup%
+      \let\Key\@secondoftwo%
+      \edef\tud@reserved{%
+        \noexpand\endgroup%
+        \def\noexpand#2{#5}%
+        \def\noexpand#4{#4}%
       }%
+    \tud@reserved%
+    \def#3{#5}%
+    \tud@replace#2{@}{"@}%
+    \tud@replace#3{@}{"@}%
+    \let\@idxbundle\@bundledefault%
+    \IfValueTF{#8}{%
+      \def\@idxbundle{#8}%
+    }{%
+      \tud@ifbundle{%
+        \tud@iflabelexists{\@bundle:#5}{%
+          \edef\@idxbundle{\expandonce\@bundle}%
+        }{}%
+      }{}%
+    }%
+    \let\@tempa\@empty%
+    \let\@tempb\@empty%
+    \let\@tempc\@empty%
+    \@tempswatrue%
+    \ifx\@idxbundle\@bundledefault%
+      \@tempswafalse%
+    \else%
+      \in@{\Key}{#5}\ifin@\@tempswafalse\fi%
+      \IfBooleanT{#1}{\@tempswafalse}%
+      \edef\@tempb{(\expandonce\@idxbundle)}%
     \fi%
-    \@gobblemarkup%
-    \let\Key\@secondoftwo%
-    \edef\tud@reserved{%
+    \let\@tempc\@tempb%
+    \IfValueT{#7}{%
+      \appto\@tempa{ #7}%
+      \appto\@tempb{\suffix{#7}}%
+    }%
+    \if@tempswa%
+      \begingroup%
+        \@gobblemarkup%
+        \edef\tud@reserved{%
+          \noexpand\endgroup%
+          \noexpand\appto\noexpand\@tempa{ \@idxbundle}%
+        }%
+      \tud@reserved%
+      \eappto\@tempb{\suffix{\expandonce\@idxbundle}}%
+    \fi%
+    \@tempswafalse%
+    \IfBooleanT{#1}{\@tempswatrue}%
+    \IfValueT{#9}{\ifstr{#9}{declare}{\@tempswatrue}{}}%
+    \if@tempswa%
+      \protected@eappto#2{\expandonce\@tempa}%
+      \tud@doifPValue{#6}{\noexpand\appto\noexpand#2{=#6}}%
+      \protected@eappto#3{\IfValueT{#6}{=#6=}\expandonce\@tempb}%
+    \else%
+      \tud@doifPValue{#6}{\noexpand\@tempswatrue}%
+      \if@tempswa%
+        \eappto#4{%
+          \expandonce#2\expandonce\@tempa{}@%
+          \expandonce#3\expandonce\@tempb{}!%
+        }%
+        \appto#2{=#6}%
+        \appto#3{=#6=}%
+        \protected@eappto#3{\expandonce\@tempc}%
+      \else%
+        \protected@eappto#2{\expandonce\@tempa}%
+        \protected@eappto#3{\expandonce\@tempb}%
+      \fi%
+    \fi%
+    \let\emph\@firstofone%
+    \protected@edef\tud@reserved{%
       \noexpand\endgroup%
-      \def\noexpand#2{#5}%
+      \def\noexpand#2{#2}%
+      \def\noexpand#3{#3}%
       \def\noexpand#4{#4}%
     }%
   \tud@reserved%
-  \def#3{#5}%
-  \tud@replace#2{@}{"@}%
-  \tud@replace#3{@}{"@}%
-  \let\@idxbundle\@bundledefault%
-  \IfValueTF{#8}{%
-    \def\@idxbundle{#8}%
-  }{%
-    \tud@ifbundle{%
-      \tud@iflabelexists{\@bundle:#5}{%
-        \edef\@idxbundle{\expandonce\@bundle}%
-      }{}%
-    }{}%
+}
+\NewDocumentCommand\@ProcessIndex{mmd==od()d||}{%
+  \ifboolexpr{%
+    bool {@tud@index} or bool {@obsolete}%
+  }{}{%
+    \IfBooleanTF{#1}{%
+      \IfValueT{#6}{%
+        \ClassWarning{tudscrmanual}{%
+          You've used the starred version. No index entry\MessageBreak%
+          for #2 is created. The\MessageBreak%
+          optional argument |#6| will be ignored%
+        }%
+      }%
+    }{%
+      \@@ProcessIndex{#2}=#3=[#4](#5)|#6|%
+    }%
   }%
 }
-      \if@deprecated%
-        \expandafter\IfBooleanF\expandafter{\@MarkupFormat}{%
-          \tudhyperdef{\@templabel}%
+\NewDocumentCommand\@@ProcessIndex{mr==r[]r()r||}{%
+  \if@declare%
+    \@getindex\@idxkey\@idxformat\@idxentry{#1}=#2=[#3](#4)|declare|%
+  \else%
+    \@getindex\@idxkey\@idxformat\@idxentry{#1}=#2=[#3](#4)|#5|%
+  \fi%
+  \@getattribution*\@templabel{#1}%
+  \if@declare%
+    \if@openindex%
+      \IfValueT{#5}{%
+        \ClassWarning{tudscrmanual}{%
+          It is not possible to use any indexing format\MessageBreak%
+          like |#5| within the arguments of the\MessageBreak%
+          environments `Declaration' or `Declaration*'%
         }%
-      \else%
-        \expandafter\IfBooleanTF\expandafter{\@MarkupFormat}{%
-          \tudhyperdef{\@templabel}%
-        }{%
-          \ifx\@MarkupFormat\@empty\else%
-            \ClassWarning{tudscrmanual}{%
-              It is not possible to use any indexing format\MessageBreak%
-              like |\@MarkupFormat| within the arguments of the\MessageBreak%
-              environment `Declaration'%
-            }%
-          \fi%
-          \if@stareddeclare%
-            \tudhyperdef'{\@templabel}%
-          \else%
-            \tudhyperdef{\@templabel}%
-          \fi%
-          \@HyperIndex{#5}{#6}{#7}{#8}{#9}{#4}{(declare}%
-        }%
-      \fi%
-      \if@stareddeclare\else%
-        #1\IfValueT{#2}{#2}%
-      \fi%
+      }%
+      \index[\@templabel-declare]{\@idxentry\@idxkey{}@\@idxformat|(declare}%
     \else%
-      \if@deprecated\else%
-        \expandafter\IfBooleanF\expandafter{\@MarkupFormat}{%
-          \@HyperIndex{#5}{#6}{#7}{#8}{#9}{#4}{declare)}%
-        }%
-      \fi%
-\NewDocumentCommand\@HyperIndex{mmmmmmm}{%
-  \IfValueTF{#3}{\def\@tempa{#3}}{\def\@tempa{}}%
-  \IfValueTF{#5}{\def\@tempb{#5}}{\def\@tempb{}}%
-  \IfValueTF{#7}{\edef\@tempc{|#7}}{\def\@tempc{}}%
-  \IfValueTF{#2}{%
-    \@getlabel\@templabel{#1:#2:#4}{#6}%
-    \@getindex\@idxentry{%
-      \begingroup\expandonce\@tempa#4\endgroup\expandonce\@tempb%
-    }{#6}%
-    \@getindex\@idxkeyentry{%
-      \begingroup\expandonce\@tempa#4\endgroup%
-      \noexpand\nobreakspace{\idxfont(#2)}%
-    }{#6}%
-    \ifcsdef{r@\@templabel}{%
-      \index[#1]{%
-        #2!\hyperidx[\@templabel]{\expandonce\@idxentry}\expandonce\@tempc%
+      \index[\@templabel-declare]{\@idxentry\@idxkey|declare)}%
+    \fi%
+  \else%
+    \IfValueT{#5}{%
+      \ifstr{#5}{declare}{%
+        \appto\@templabel{-declare}%
+        \appto\@idxformat{|declare}%
+      }{%
+        \appto\@idxformat{|#5}%
       }%
-      \index[keys]{%
-        \hyperidx[\@templabel]{\expandonce\@idxkeyentry}\expandonce\@tempc%
-      }%
-    }{%
-      \index[#1]{#2!\expandonce\@idxentry\expandonce\@tempc}%
-      \index[keys]{\expandonce\@idxkeyentry\expandonce\@tempc}%
     }%
-  }{%
-    \@getlabel\@templabel{#1:#4}{#6}%
-    \@getindex\@idxentry{%
-      \begingroup\expandonce\@tempa#4\endgroup\expandonce\@tempb%
-    }{#6}%
-    \ifcsdef{r@\@templabel}{%
-      \index[#1]{%
-        \hyperidx[\@templabel]{\expandonce\@idxentry}\expandonce\@tempc%
-      }%
-    }{%
-      \index[#1]{\expandonce\@idxentry\expandonce\@tempc}%
-    }%
-  }%
+    \index[\@templabel]{\@idxentry\@idxkey{}@\@idxformat}%
+  \fi%
 }
 \NewDocumentCommand\CrossIndex{smom}{%
   \def\@tempa##1##2##3{%
@@ -1740,7 +1775,7 @@
     \protected@eappto\@tempa{%
       =\IfBooleanTF{#1}{\noexpand\emph}{\@firstofone}{\@tempc}=%
     }%
-    \appto\@tempa{'none'|declare|}%
+    \appto\@tempa{'none'|!|}%
     \edef\@tempb{%
       \IfBooleanTF{#1}{\noexpand\emph}{\@firstofone}{%
         \noexpand\PValue{\@tempb}%

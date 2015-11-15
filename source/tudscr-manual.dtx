@@ -1,4 +1,4 @@
-% \CheckSum{4227}
+% \CheckSum{4151}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-manual.dtx}[%
-  2015/11/14 v2.05 TUD-KOMA-Script\space%
+  2015/11/15 v2.05 TUD-KOMA-Script\space%
 %</driver>
 %<package&identify>\NeedsTeXFormat{LaTeX2e}
 %<package&identify>\ProvidesPackage{tudscrtutorial}[%
@@ -3416,7 +3416,7 @@
 % An \cs{@getindex} werden vier obligatorische gefolgt von vier optionalen 
 % Argumenten übergeben. Die ersten beiden Hauptargumente sind die Makros, in 
 % welche \meta{Schlüsselwort}~-- für gewöhnlich \cs{@idxkey}~-- sowie die 
-% Formatierung\meta{Markup}~-- normalerweise \cs{@idxformat}~-- expandiert 
+% Formatierung \meta{Markup}~-- normalerweise \cs{@idxformat}~-- expandiert 
 % werden. Mit dem Makro im dritten Argument wird es möglich, Untereinträge zu 
 % einem \meta{Schlüsselwort} für beispielsweise Parameter von Umgebungen oder
 % Befehlen (\cs{Key}) sowie spezielle Schlüsselwerte von Optionen zu erzeugen.
@@ -3430,21 +3430,25 @@
 % des Indexeintrags differenziert werden kann. Das erste optionale Argument 
 % \val{=}\meta{Wert}\val{=} kann wie bereits gewohnt für das Hinzufügen eines
 % Schlüsselwertes genutzt werden. Das zweite, ordinäre optionale Argument 
-% \oarg{Ausgabesuffix} fügt dem Eintrag in den Index eine zusätzliche Anmerkung
+% \oarg{Anmerkung} fügt dem Eintrag in den Index eine zusätzliche Anmerkung
 % hinzu. Soll der Indexeintrag für ein spezielles Paket oder eine Klasse aus
 % \TUDScript-Bundle erstellt werden, wird das optionale Argument in runden 
 % Klammern \val{(\string\Class\marg{Klasse}/\string\Package\marg{Paket})} für 
 % einen Verweis auf das \parg{Bundleelement} verwendet, der in \cs{@idxbundle} 
-% gespeichert wird. 
-%
-% Das letzte optionale Argument \val{\textbar}\meta{Anmerkung}\val{\textbar}
+% gespeichert wird. Das Argument \val{\textbar}\meta{Indexformat}\val{\textbar}
 % wird bei Deklarationen zur Unterdrückung von Untereinträgen verwendet.
+% Der vollständige Funktionsaufruf lautet:
+% \newline\begingroup\scriptsize
+% \cs{@getindex}\val{*}\cs{@idxkey}\cs{@idxformat}\cs{@idxentry}\ignorespaces%
+% \marg{Element}\val{=}\meta{Wert}\val{=}\oarg{Anmerkung}\ignorespaces%
+% \parg{Bundleelement}\val{\textbar}\meta{Indexformat}\val{\textbar}
+% \endgroup
 %    \begin{macrocode}
 \newcommand*\@idxkey{}
 \newcommand*\@idxformat{}
 \newcommand*\@idxentry{}
 \newcommand*\@idxbundle{}
-\NewDocumentCommand\@getindex{smmmmd==r[]r()d||}{%
+\NewDocumentCommand\@getindex{smmmmr==r[]r()d||}{%
 %    \end{macrocode}
 % Die Änderungen an allerhand temporären Makros sollen lokal bleibens.
 %    \begin{macrocode}
@@ -3653,155 +3657,110 @@
 % \end{macro}^^A \@idxformat
 % \end{macro}^^A \@idxkey
 % \end{macro}^^A \@getindex
-
-
-% Zuerst werden jedoch einige Hilfsmakros erstellt mit denen überprüft wird, ob
-% die Sternversion der zuvor definierten Auszeichnung"=Befehle zusammen mit
-% einer Formatierung \val{\textbar}\meta{Indexformat}\val{\textbar} genutzt
-% wurde, was sich natürlich widerspricht. In diesem Fall erfolgt eine Warnung.
-%    \begin{macrocode}
-\NewDocumentCommand\@ProcessIndex{mmd==od()d||}{%
-  \IfBooleanT{#1}{%
-    \IfValueT{#2}{%
-      \ClassWarning{tudscrmanual}{%
-        You've used the starred version so no entry for\MessageBreak%
-        the index is created and the optional argument\MessageBreak%
-        |#2| will be ignored%
-      }%
-    }%
-  }%
-}
-
-%    \end{macrocode}
-
-
-% Für die Deklaration veralteter Optionen, Befehle etc. kann die Sternvariante 
-% des Auszeichnungsbefehls verwendet werden, um das Erzeugen eines Labels zu 
-% unterbinden.
-%    \begin{macrocode}
-\NewDocumentCommand\@@ProcessIndex{mr==r()r||r[]}{%
-      \if@deprecated%
-        \expandafter\IfBooleanF\expandafter{\@MarkupFormat}{%
-          \tudhyperdef{\@templabel}%
-        }%
-%    \end{macrocode}
-% Wurde die Sternversion eines Auszeichnungsbefehls in der Umgebung 
-% \env{Declaration} genutzt, wird lediglich ein Label aber kein Eintrag im 
-% Index erzeugt.
-%    \begin{macrocode}
-      \else%
-        \expandafter\IfBooleanTF\expandafter{\@MarkupFormat}{%
-          \tudhyperdef{\@templabel}%
-%    \end{macrocode}
-% Andernfalls werden Label bzw. Hyperlinkanker und ein Eintrag in den Index 
-% erzeugt, wobei die Formatierung dieses Eintrags fest vorgegeben ist.
-%    \begin{macrocode}
-        }{%
-          \ifx\@MarkupFormat\@empty\else%
-            \ClassWarning{tudscrmanual}{%
-              It is not possible to use any indexing format\MessageBreak%
-              like |\@MarkupFormat| within the arguments of the\MessageBreak%
-              environment `Declaration'%
-            }%
-          \fi%
-%    \end{macrocode}
-% Wird zur Deklaration die Umgebung \env{Declaration*} genutzt, so wird der 
-% Hyperlink ein ganzes Stück nach oben verschoben. Hintergrund ist, dass diese 
-% Umgebung nur zum Deklarieren von Klassen und Paketen gedacht ist und direkt
-% nach einer Gliederungsüberschrift folgen sollte.
-%    \begin{macrocode}
-          \if@stareddeclare%
-            \tudhyperdef'{\@templabel}%
-%    \end{macrocode}
-% Andernfalls wird der normale Hyperlink gesetzt. Das Label zum Prüfen wird 
-% implizit durch \cs{tudhyperdef} gesetzt.
-%    \begin{macrocode}
-          \else%
-            \tudhyperdef{\@templabel}%
-          \fi%
-          \@HyperIndex{#5}{#6}{#7}{#8}{#9}{#4}{(declare}%
-        }%
-      \fi%
-%    \end{macrocode}
-% Die \env{Declaration*}"=Umgebung erzeugt keine direkte Ausgabe sondern nur 
-% die Hyperlinks und Indexeinträge. Die Nennung der Klasse bzw. des Paketes
-% oder der Pakete sollte in der Überschrift davor erfolgen.
-%    \begin{macrocode}
-      \if@stareddeclare\else%
-        #1\IfValueT{#2}{#2}%
-      \fi%
-%    \end{macrocode}
-
-
-
-% \begin{macro}{\@HyperIndex}
-% \changes{v2.02}{2014/10/08}{überarbeitet}^^A
-% Dieser Befehl sorgt für die eigentlichen Indexeinträge. Dabei werden für 
-% Einträge, welche innerhalb der \env{Declaration}-Umgebung deklariert wurden, 
-% ein Hyperlink im Index erstellt. Das erste Argument \marg{Index} enthält den 
-% gewünschten Zielindex. Danach folgt~-- für Parameter~-- der Haupteintrag. 
-% Daran schließt der Indexeintrag selbst mit \marg{Vorsatz}, \marg{Eintrag},
-% \marg{Anhang} und zum Abschluss \oarg{Formatierung} an. Der vollständige 
+% \begin{macro}{\@ProcessIndex}
+% \changes{v2.05}{2015/11/15}{neu}^^A
+% \begin{macro}{\@@ProcessIndex}
+% \changes{v2.05}{2015/11/15}{neu}^^A
+% Mit \cs{@ProcessIndex} wird geprüft, ob mit dem im zweiten obligatorischen 
+% Argument enthaltenen Markup-Befehl ein Indexeintrag erzeugt werden soll. 
+% Ein Indexeintrag kann mit der Sternversion eines Markup-Befehls explizit 
+% unterdrückt werden, wobei der boolesche Wert im ersten obligatorischen 
+% Argument an \cs{@ProcessIndex} zu Prüfung übergeben wird. Außerdem wird für
+% obsolete Deklarationen ebenso wie bei aktiviertem Schalter \cs{if@tud@index} 
+% kein Eintrag erstellt. In allen genannten Fällen passiert beim Aufruf von 
+% \cs{@ProcessIndex} nichts, andernfalls wird \cs{@@ProcessIndex} ausgeführt.
+%
+% Die auf die zwei obligatorischen Argumente folgenden optionalen sind in der
+% Nomenklatur identisch zu den bisherigen Erläuterungen, der vollständige 
 % Funktionsaufruf lautet:
 % \newline\begingroup\scriptsize
-% \cs{@HyperIndex}\marg{Index}\marg{Haupteintrag}\ignorespaces%
-% \marg{Vorsatz}\marg{Eintrag}\marg{Anhang}\marg{Formatierung}
+% \cs{@ProcessIndex}\marg{Stern?}\marg{Element}\ignorespaces%
+% \val{=}\meta{Wert}\val{=}\oarg{Anmerkung}\ignorespaces%
+% \parg{Bundleelement}\val{\textbar}\meta{Indexformat}\val{\textbar}
 % \endgroup
 %    \begin{macrocode}
-\NewDocumentCommand\@HyperIndex{mmmmmmm}{%
-  \IfValueTF{#3}{\def\@tempa{#3}}{\def\@tempa{}}%
-  \IfValueTF{#5}{\def\@tempb{#5}}{\def\@tempb{}}%
-  \IfValueTF{#7}{\edef\@tempc{|#7}}{\def\@tempc{}}%
-%    \end{macrocode}
-% Auch hier wird unterschieden, ob es sich um einen Parameter (keys) handelt. 
-% Wurde für einen Parameter eine Umgebung oder ein Befehl bereits definiert, 
-% werden zwei Indexeinträge generiert. Einer beim Befehl selber als 
-% Untereintrag für den jeweiligen Parameter und einer im Index für Parameter
-% selbst mit der dazugehörigen Umgebung bzw. dem dazugehörigen Befehl. Beide
-% erhalten einen entsprechenden Hyperlink zur Deklaration. Der Eintrag für den 
-% Index wird mit \cs{@createntry} erzeugt, um ggf. die dazugehörige Klasse bzw. 
-% das Paket aus dem \TUDScript-Bundle anzuhängen.
-%    \begin{macrocode}
-  \IfValueTF{#2}{%
-    \@getlabel\@templabel{#1:#2:#4}{#6}%
-    \@getindex\@idxentry{%
-      \begingroup\expandonce\@tempa#4\endgroup\expandonce\@tempb%
-    }{#6}%
-    \@getindex\@idxkeyentry{%
-      \begingroup\expandonce\@tempa#4\endgroup%
-      \noexpand\nobreakspace{\idxfont(#2)}%
-    }{#6}%
-    \ifcsdef{r@\@templabel}{%
-      \index[#1]{%
-        #2!\hyperidx[\@templabel]{\expandonce\@idxentry}\expandonce\@tempc%
-      }%
-      \index[keys]{%
-        \hyperidx[\@templabel]{\expandonce\@idxkeyentry}\expandonce\@tempc%
+\NewDocumentCommand\@ProcessIndex{mmd==od()d||}{%
+  \ifboolexpr{%
+    bool {@tud@index} or bool {@obsolete}%
+  }{}{%
+    \IfBooleanTF{#1}{%
+      \IfValueT{#6}{%
+        \ClassWarning{tudscrmanual}{%
+          You've used the starred version. No index entry\MessageBreak%
+          for #2 is created. The\MessageBreak%
+          optional argument |#6| will be ignored%
+        }%
       }%
     }{%
-      \index[#1]{#2!\expandonce\@idxentry\expandonce\@tempc}%
-      \index[keys]{\expandonce\@idxkeyentry\expandonce\@tempc}%
-    }%
-%    \end{macrocode}
-% Falls es sich nicht um einen Parameter handelt, wird lediglich der Eintrag im 
-% speziellen Index vorgenommen und ggf. ein Hyperlink erzeugt.
-%    \begin{macrocode}
-  }{%
-    \@getlabel\@templabel{#1:#4}{#6}%
-    \@getindex\@idxentry{%
-      \begingroup\expandonce\@tempa#4\endgroup\expandonce\@tempb%
-    }{#6}%
-    \ifcsdef{r@\@templabel}{%
-      \index[#1]{%
-        \hyperidx[\@templabel]{\expandonce\@idxentry}\expandonce\@tempc%
-      }%
-    }{%
-      \index[#1]{\expandonce\@idxentry\expandonce\@tempc}%
+      \@@ProcessIndex{#2}=#3=[#4](#5)|#6|%
     }%
   }%
 }
 %    \end{macrocode}
-% \end{macro}^^A \@HyperIndex
+% Mit \cs{@@ProcessIndex} erfolgt die eigentliche Erzeugung des Indexeintrages.
+%    \begin{macrocode}
+\NewDocumentCommand\@@ProcessIndex{mr==r[]r()r||}{%
+%    \end{macrocode}
+% Dabei erledigt \cs{@getindex} einen Großteil der Aufgabe. Mit besagtem Makro 
+% werden Schlüssel und Format für den gewünschten Indexeintrag erzeugt. Sollte 
+% optional ein spezieller \val{=}\meta{Wert}\val{=} für einen Schlüssel gegeben 
+% sein, so wird ggf. auch der passende Haupteintrag erstellt.
+%    \begin{macrocode}
+  \if@declare%
+    \@getindex\@idxkey\@idxformat\@idxentry{#1}=#2=[#3](#4)|declare|%
+  \else%
+    \@getindex\@idxkey\@idxformat\@idxentry{#1}=#2=[#3](#4)|#5|%
+  \fi%
+%    \end{macrocode}
+% Mit der Sternversion \cs{@getattribution*} wird der Zielindex für das im 
+% ersten Argument übergebene \marg{Element} ermittelt.
+%    \begin{macrocode}
+  \@getattribution*\@templabel{#1}%
+%    \end{macrocode}
+% Markup-Befehle, welche in Deklarationen verwendet wurden, werden für eine 
+% höhere Priorisierung in einem speziellen Index angelegt, wobei hier die 
+% Formatierung dieses Eintrags fest vorgegeben ist.
+%    \begin{macrocode}
+  \if@declare%
+    \if@openindex%
+      \IfValueT{#5}{%
+        \ClassWarning{tudscrmanual}{%
+          It is not possible to use any indexing format\MessageBreak%
+          like |#5| within the arguments of the\MessageBreak%
+          environments `Declaration' or `Declaration*'%
+        }%
+      }%
+%    \end{macrocode}
+% Jetzt folgt~-- abhängig vom Schalter \cs{if@openindex}~-- der öffnende oder 
+% schließende Indexeintrag der Deklaration. Für den schließenden ist dabei eine
+% Formatierung des Schlüssels nicht notwendig.
+%    \begin{macrocode}
+      \index[\@templabel-declare]{\@idxentry\@idxkey{}@\@idxformat|(declare}%
+    \else%
+      \index[\@templabel-declare]{\@idxentry\@idxkey|declare)}%
+    \fi%
+%    \end{macrocode}
+% Für Markup-Befehle außerhalb von Deklarationsumgebungen wird ein einfacher 
+% Eintrag in den Index erzeugt, wobei auch im Fließtext über das Indexformat 
+% \val{\textbar{}declare\textbar} eine Quasi-Deklaration verwendet werden kann. 
+% Dies wird beispielsweise für \KOMAScript-Optionen genutzt, um diese in der 
+% gewünschten Formatierung im Index erscheinen zu lassen.
+%    \begin{macrocode}    
+  \else%
+    \IfValueT{#5}{%
+      \ifstr{#5}{declare}{%
+        \appto\@templabel{-declare}%
+        \appto\@idxformat{|declare}%
+      }{%
+        \appto\@idxformat{|#5}%
+      }%
+    }%
+    \index[\@templabel]{\@idxentry\@idxkey{}@\@idxformat}%
+  \fi%
+}
+%    \end{macrocode}
+% \end{macro}^^A \@@ProcessIndex
+% \end{macro}^^A \@ProcessIndex
 % \begin{macro}{\CrossIndex}
 % Der Befehl \cs{CrossIndex} dient zum Eintragen eines Schlagwortes, welches im 
 % ersten obligatorischen Argument angegeben wird, in den allgemeinen Index und
@@ -4400,13 +4359,13 @@
 % wobei dieser für die Sternversion als Säumniswert mit \cs{emph} hervorgehoben 
 % wird. Zuletzt wird dafür Sorge getragen, dass auf den anschließend erzeugten 
 % Eintrag selbst kein Hyperlink erzeugt wird und dieser im passenden Index als 
-% Deklaration erscheint.
+% fettmarkierter Eintrag erscheint.
 %    \begin{macrocode}
     \edef\@tempa{\expandonce\tud@values}%
     \protected@eappto\@tempa{%
       =\IfBooleanTF{#1}{\noexpand\emph}{\@firstofone}{\@tempc}=%
     }%
-    \appto\@tempa{'none'|declare|}%
+    \appto\@tempa{'none'|!|}%
 %    \end{macrocode}
 % Danach werden alle weiteren möglichen Werte angegeben, wobei auch diese im 
 % Zweifelsfall mit \cs{emph} hervorzuheben sind.

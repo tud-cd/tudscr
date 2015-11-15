@@ -1364,8 +1364,7 @@
 \newcommand*\@idxformat{}
 \newcommand*\@idxentry{}
 \newcommand*\@idxbundle{}
-% §§§ evtl. kann der Stern raus oder für changelog verwendet werden
-\NewDocumentCommand\@getindex{smmmmd==r[]r()d||}{%
+\NewDocumentCommand\@getindex{smmmmr==r[]r()d||}{%
   \begingroup%
     \begingroup%
       \let#4\@empty%
@@ -1459,12 +1458,6 @@
     }%
   \tud@reserved%
 }
-% {#1}: Stern?
-% {#2}: Markup für Index
-% =#3=: optionaler Wert für Option und Key für subentry
-% [#4]: optionaler Suffix in der Index-Ausgabe
-% (#5): optionale Subdeclaration
-% |#6|: optionale Indexformatierung
 \NewDocumentCommand\@ProcessIndex{mmd==od()d||}{%
   \ifboolexpr{%
     bool {@tud@index} or bool {@obsolete}%
@@ -1474,7 +1467,7 @@
         \ClassWarning{tudscrmanual}{%
           You've used the starred version. No index entry\MessageBreak%
           for #2 is created. The\MessageBreak%
-          optional argument |#6| is ignored%
+          optional argument |#6| will be ignored%
         }%
       }%
     }{%
@@ -1482,11 +1475,6 @@
     }%
   }%
 }
-% {#1}: Markup für Index
-% =#2=: optionaler Wert für Option und Key für subentry
-% [#3]: optionaler Suffix in der Index-Ausgabe
-% (#4): optionale Subdeclaration
-% |#5|: optionale Indexformatierung
 \NewDocumentCommand\@@ProcessIndex{mr==r[]r()r||}{%
   \if@declare%
     \@getindex\@idxkey\@idxformat\@idxentry{#1}=#2=[#3](#4)|declare|%
@@ -1503,7 +1491,7 @@
           environments `Declaration' or `Declaration*'%
         }%
       }%
-      \index[\@templabel-declare]{\@idxentry\@idxkey @\@idxformat|(declare}%
+      \index[\@templabel-declare]{\@idxentry\@idxkey{}@\@idxformat|(declare}%
     \else%
       \index[\@templabel-declare]{\@idxentry\@idxkey|declare)}%
     \fi%
@@ -1516,7 +1504,7 @@
         \appto\@idxformat{|#5}%
       }%
     }%
-    \index[\@templabel]{\@idxentry\@idxkey @\@idxformat}%
+    \index[\@templabel]{\@idxentry\@idxkey{}@\@idxformat}%
   \fi%
 }
 \NewDocumentCommand\CrossIndex{smom}{%
