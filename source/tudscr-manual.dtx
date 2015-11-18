@@ -1,4 +1,4 @@
-% \CheckSum{4151}
+% \CheckSum{4209}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-manual.dtx}[%
-  2015/11/15 v2.05 TUD-KOMA-Script\space%
+  2015/11/18 v2.05 TUD-KOMA-Script\space%
 %</driver>
 %<package&identify>\NeedsTeXFormat{LaTeX2e}
 %<package&identify>\ProvidesPackage{tudscrtutorial}[%
@@ -80,21 +80,19 @@
 %
 % \selectlanguage{ngerman}
 %
-% \changes{v2.02}{2014/12/17}{\cls{tudscrmanual} xindy-Stildatei wird bei der 
-%   Kompilierung erzeugt}^^A
+% \changes{v2.02}{2014/12/17}{Erstellung der \app{xindy}-Stildatei während der 
+%   Kompilierung}^^A
 % \changes{v2.02}{2014/11/18}{\pkg{tudscrtutorial} Index für Tutorials}^^A
 % \changes{v2.05}{2015/08/04}{Geteilte Deklarationen für Klassen und Pakete}^^A
 %
 % \section{%
-%   Klasse und Paket für Anwenderdokumentation und -leitfäden von \TUDScript%
+%   Klasse und Paket für Handbuch und Leitfäden zu \TUDScript%
 % }
 %
 % Es werden die Klasse \cls{tudscrmanual} für das \TUDScript-Handuch sowie das 
 % Paket \pkg{tudscrtutorial} für das Setzen von einigen Anwenderleitfäden bzw.
 % Tutorials erzeugt. Da es zwischen der Klasse und dem Paket es eine große
 % Menge an Überschneidungen gibt, basieren diese auf der gleichen Quelldatei.
-%
-% \ToDo{\cs{@for} mit \cs{forcsvlist} ersetzen}[2.05]
 %
 % \StopEventually{\PrintIndex\PrintChanges}
 %
@@ -1389,7 +1387,7 @@
 % Argumenten am Ende genutzt werden können. Sollte ein Label existieren, wird 
 % automatisch ein Hyperlink erzeugt, welcher mit der optionalen Angabe von
 % \val{'}\meta{Referenzvariante}\val{'} um einen textuellen Querverweis ergänzt 
-% werden kann. Mit \val{\textbar}\meta{Indexformat}\val{\textbar} kann die
+% werden kann. Mit \val{\textbar}\meta{Indexmarkup}\val{\textbar} kann die
 % Erscheinung im Index angepasst werden. Bei einigen Befehlen kann zusätzlich
 % zuvor im Markup mit dem optionalen Argument \parg{Bundleelement} die
 % Zuweisung auf ein bestimmtes Paket oder eine Klasse aus dem \TUDScript-Bundle
@@ -2534,9 +2532,11 @@
 % \val{'}\meta{Referenzvariante}\val{'} der automatisch erzeugte Querverweis in
 % verschiedenen Varianten formatiert werden. Der vollständige Funktionsaufruf:
 % \newline\begingroup\scriptsize
-% \cs{@ProcessMarkup}\marg{Element}\val{=}\meta{Wert}\val{=}\ignorespaces
-% \oarg{Ausgabesuffix}\parg{Bundleelement}\ignorespaces
-% \val{<}\meta{CTAN-Paketname}\val{>}\val{'}\meta{Referenzvariante}\val{'}
+% \cs{@ProcessMarkup}\val{\ignorespaces%
+%   \marg{Element}=\meta{Wert}=\oarg{Ausgabesuffix}\ignorespaces%
+%   \parg{Bundleelement}<\meta{CTAN-Paket}>\ignorespaces%
+%   '\meta{Referenzvariante}'\ignorespaces%
+% }%
 % \endgroup
 %
 % In eingen Fällen ist es beim Aufruf eines Markup-Befehls nicht erwünscht, 
@@ -2613,9 +2613,9 @@
         }%
       }%
 %    \end{macrocode}
-% Für ein eventuell notwendiges Debugging, wird der nachfolgend aufgerufene
-% Befehl \cs{ProcessMarkup@Declare} mit seinen Argumenten ggf. in das Log-File 
-% geschrieben. Anschließend erfolgt der Aufruf.
+% Für ein eventuell notwendiges Debugging, wird \cs{ProcessMarkup@Declare} mit
+% seinen Argumenten ggf. in das Log-File geschrieben. Anschließend erfolgt der
+% Aufruf.
 %    \begin{macrocode}
       \tud@trace@markup{declare}{\the\tud@toks@}%
       \the\tud@toks@%
@@ -3063,12 +3063,12 @@
 % so werden diese zuerst ausgegeben, danach folgt der Querverweis mit dem 
 % Präfix \cs{seealsoname}. Der Befehl \cs{cleverseealso} verwendet letzteren 
 % Präfix in jedem Fall.
-% \ToDo{%
-%   Ist die beliebige Kombination der beiden Befehle möglich?%
-% }[v2.05]
 %    \begin{macrocode}
 \newrobustcmd*\cleversee{\@cleversee{\seename}}
-\newrobustcmd*\cleverseealso{\@cleversee{\alsoname}}
+\newrobustcmd*\cleverseealso{%
+  \ClassWarning{tudscrmanual}{You should use `|see' instead of `|seealso'}%
+  \@cleversee{\alsoname}%
+}
 %    \end{macrocode}
 % Diese Makro übernimmt die eigentliche Arbeit. Es ist darauf angewiesen, dass 
 % die angegebene Seitenzahlen eines Indexeintrages erst \emph{nach} den
@@ -3293,7 +3293,6 @@
 % Für die Änderungsliste werden Untereinträge bis zur fünften Ebene unterstützt.
 %    \begin{macrocode}
 (markup-indexentry :open "~n \string\subsubsubitem " :depth 3)^^J%
-(markup-indexentry :open "~n \string\subsubsubsubitem " :depth 4)^^J%
 %    \end{macrocode}
 %
 % \iffalse
@@ -3431,17 +3430,18 @@
 % \val{=}\meta{Wert}\val{=} kann wie bereits gewohnt für das Hinzufügen eines
 % Schlüsselwertes genutzt werden. Das zweite, ordinäre optionale Argument 
 % \oarg{Anmerkung} fügt dem Eintrag in den Index eine zusätzliche Anmerkung
-% hinzu. Soll der Indexeintrag für ein spezielles Paket oder eine Klasse aus
-% \TUDScript-Bundle erstellt werden, wird das optionale Argument in runden 
+% hinzu. Soll der Indexeintrag für ein spezifisches Paket oder eine Klasse aus
+% dem \TUDScript-Bundle erstellt werden, wird das optionale Argument in runden 
 % Klammern \val{(\string\Class\marg{Klasse}/\string\Package\marg{Paket})} für 
 % einen Verweis auf das \parg{Bundleelement} verwendet, der in \cs{@idxbundle} 
-% gespeichert wird. Das Argument \val{\textbar}\meta{Indexformat}\val{\textbar}
+% gespeichert wird. Das Argument \val{\textbar}\meta{Indexmarkup}\val{\textbar}
 % wird bei Deklarationen zur Unterdrückung von Untereinträgen verwendet.
 % Der vollständige Funktionsaufruf lautet:
 % \newline\begingroup\scriptsize
-% \cs{@getindex}\val{*}\cs{@idxkey}\cs{@idxformat}\cs{@idxentry}\ignorespaces%
-% \marg{Element}\val{=}\meta{Wert}\val{=}\oarg{Anmerkung}\ignorespaces%
-% \parg{Bundleelement}\val{\textbar}\meta{Indexformat}\val{\textbar}
+% \cs{@getindex}\cs{@idxkey}\cs{@idxformat}\cs{@idxentry}\val{\ignorespaces%
+%   \marg{Element}=\meta{Wert}=\oarg{Anmerkung}\ignorespaces% 
+%   \parg{Bundleelement}\textbar\meta{Indexmarkup}\textbar\ignorespaces%
+% }%
 % \endgroup
 %    \begin{macrocode}
 \newcommand*\@idxkey{}
@@ -3674,9 +3674,10 @@
 % Nomenklatur identisch zu den bisherigen Erläuterungen, der vollständige 
 % Funktionsaufruf lautet:
 % \newline\begingroup\scriptsize
-% \cs{@ProcessIndex}\marg{Stern?}\marg{Element}\ignorespaces%
-% \val{=}\meta{Wert}\val{=}\oarg{Anmerkung}\ignorespaces%
-% \parg{Bundleelement}\val{\textbar}\meta{Indexformat}\val{\textbar}
+% \cs{@ProcessIndex}\val{\ignorespaces%
+%   \marg{Stern?}\marg{Element}=\meta{Wert}=\oarg{Anmerkung}\ignorespaces%
+%   \parg{Bundleelement}\textbar\meta{Indexmarkup}\textbar\ignorespaces%
+% }%
 % \endgroup
 %    \begin{macrocode}
 \NewDocumentCommand\@ProcessIndex{mmd==od()d||}{%
@@ -3741,7 +3742,7 @@
     \fi%
 %    \end{macrocode}
 % Für Markup-Befehle außerhalb von Deklarationsumgebungen wird ein einfacher 
-% Eintrag in den Index erzeugt, wobei auch im Fließtext über das Indexformat 
+% Eintrag in den Index erzeugt, wobei auch im Fließtext über das Indexmarkup 
 % \val{\textbar{}declare\textbar} eine Quasi-Deklaration verwendet werden kann. 
 % Dies wird beispielsweise für \KOMAScript-Optionen genutzt, um diese in der 
 % gewünschten Formatierung im Index erscheinen zu lassen.
@@ -3805,12 +3806,12 @@
 % geändert und das Argument wird nach der Box direkt in den Index eingetragen.
 %    \begin{macrocode}
     \ifx\@idxformat\relax%
-      \gdef\@tempa{#2}%
+      \gdef\tud@reserved{#2}%
     \else%
-      \global\let\@tempa\@idxformat%
+      \global\let\tud@reserved\@idxformat%
     \fi%
   }%
-  \index{#1!#2|see{\@tempa}}%
+  \index{#1!#2|see{\tud@reserved}}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \SeeRef
@@ -3952,156 +3953,281 @@
 %
 % \subsection{Änderungsliste}
 %
-% Um dem Anwender einen schnellen Überblick zu Änderungen der aktuellen Verison 
+% Um dem Anwender einen schnellen Überblick zu Änderungen der aktuellen Version 
 % bereitstellen zu können, werden Befehle zur automatisierten Erzeugung einer 
-% solchen Liste definiert. Die Änderungsliste ist der Klasse vorbehalten.
+% solchen Liste definiert. Die Änderungsliste ist der Klasse \cls{tudscrmanual} 
+% vorbehalten.
 %
-% \ToDo{Doku}[v2.05]
+% Änderungsnotizen lassen sich auf zwei unterschieldichen Wegen generieren. 
+% Entweder über die Nutzung des Befehls \cs{ChangedAt} oder über das optionale 
+% Argument der Deklarationsumgebungen. Dabei sind diese in beiden Fällen in 
+% der Form Versionsnummer gefolgt von der eigentlichen Notiz anzugeben, wobei 
+% diese zwingend durch einen Doppelpunkt voneinander zu trennen sind. Die Form 
+% der Verwendung lautet: \meta{Versionsnummer}\val{:}\meta{Änderungsnotiz}. Die 
+% alleinige Angabe der Versionsnummer ohne Änderungsnotiz ist ebenso möglich.
+% 
+% Wird die Änderungsnotiz für ein bestimmtes Element wie eine Option oder ein 
+% Befehl erstellt, wie es bei den Deklarationsumgebungen implizit oder bei der 
+% Verwendung von \cs{ChangedAt} mit optionalem Argument geschieht, gibt es die 
+% zusätzliche Möglichkeit, einen Untereintrag zu erstellen. Dabei ist dieser 
+% nach Versionsnummer und vor Änderungsnotiz in folgender Form anzugeben: 
+% \meta{Versionsnummer}\val{!}\meta{Untereintrag}\val{:}\meta{Änderungsnotiz}.
+% Der Untereintrag ist für die explizite Angabe eines Schlüssel-Wert-Paares 
+% gedacht.
 % \begin{macro}{\if@changedat}
-%    \begin{macrocode}
-\newif\if@changedat
-%    \end{macrocode}
-% \end{macro}^^A \if@changedat
 % \begin{macro}{\@ProcessChangedAt}
 % \changes{v2.02}{2014/07/25}{erweitert}^^A
 % \changes{v2.02}{2014/10/08}{Sternversion ergänzt}^^A
-% Die Änderungsliste erhält ebenfalls einen Hyperlink zur Deklaration. Für
-% Umgebungs- und Befehlsparameter wird mit dem zweiten optionalen Argument ein
-% Untereintrag für die dazugehörige Umgebung beziehungsweise den dazugehörigen
-% Befehl erzeugt.
-%    \begin{macrocode}
-\NewDocumentCommand\@ProcessChangedAt{md()md!!mmm}{%
-  \IfValueTF{#4}{%
-    \@getlabel\@templabel{#3:#4:#6}{#2}%
-  }{%
-    \@getlabel\@templabel{#3:#6}{#2}%
-  }%
-  \IfBooleanTF{#1}{%
-    \def\@tempa{\begingroup#5#6\endgroup}%
-  }{%
-    \def\@tempa{\begingroup#5#6\endgroup\nobreakspace{\idxfont(#7)}}%
-  }%
+% Der Schalter \cs{if@changedat} wird im weiteren Verlauf dazu verwendet, das 
+% Standard-Verhalten der einzelnen Markup-Befehle kurzeitig zu ändern und
+% anstelle der Makros \cs{@ProcessMarkup} und \cs{@ProcessIndex} den Befehl 
+% \cs{@ProcessChangedAt} auszuführen, mit welchem die Formatierung der Einträge 
+% der Änderungsliste erfolgt.
+%   \begin{macrocode}
+\newif\if@changedat
+%    \end{macrocode}
+% Die Formatierung der Änderungseinträge erfolgt dabei wie auch für den Index 
+% mit \cs{@getindex}, wobei die Sternversion dabei für die Identifikation als
+% Änderungseintrag fungiert. Aufgerufen wird \cs{@ProcessChangedAt} während der 
+% Erstellung der Änderungseinträge mit \cs{@ChangedAt@CreateEntry}. Der Aufruf 
+% des Makros erfolgt dabei in der gewohnten Form mit einem obligatorischen 
+% gefolgt von drei optionalen Argumenten:
+% \newline\begingroup\scriptsize
+% \cs{@ProcessChangedAt}\val{\ignorespaces%
+%   \marg{Element}=\meta{Wert}=\oarg{Ausgabesuffix}\parg{Bundleelement}%
+% }%
+% \endgroup
+%   \begin{macrocode}
+\NewDocumentCommand\@ProcessChangedAt{md==od()}{%
+  \@getindex*\@idxkey\@idxformat\@idxentry{#1}=#2=[#3](#4)%
 }
 %    \end{macrocode}
 % \end{macro}^^A \@ProcessChangedAt
+% \end{macro}^^A \if@changedat
 % \begin{macro}{\ChangedAt}
 % \changes{v2.02}{2014/07/25}{erweitert}^^A
 % \changes{v2.02}{2014/10/15}{Sternversion neu (keine Randnotiz)}^^A
 % \begin{length}{\changedatskip}
 % \changes{v2.04}{2015/06/08}{neu}^^A
-% An den Befehl \cs{ChangedAt} kann eine kommagetrente Liste mit verschiedenen
-% Versionsnummern und dazugehörigen Änderungen übergeben werden. Er wird in der 
-% Form: \cs{ChangedAt}\verb|{|\meta{Version}\verb|!|\meta{Beschreibung}\verb|}| 
-% genutzt. Mit \cs{@ChangedAt@CreateList} wird der Prozess selbst durchgeführt. 
-% Es wird zu der angegebenen Versionsnummer ein Eintrag in die Änderungsliste
-% erstellt, wenn mit einem Ausrufezeichen getrennt der gewünschte Inhalt
-% gegeben wurde.
+% Der Befehl \cs{ChangedAt} kann im Fließtext für das Erstellen einer freien 
+% Änderungsnotiz genutzt werden. Das obligatorische Argument sollt wie kurz 
+% zuvor beschrieben verwendet werden.
 %
-% Alle übergegebenen Versionsnummern werden als Liste mit einmaligen Einträgen 
-% in einer Randnotiz gesetzt. Mit dem optionalen Argument kann ein vertikaler 
-% dieser angegeben werden. Die Version mit einem Apostroph verschiebt die 
-% Randnotiz um den Grundlinienabstand nach oben, die Sternversion unterdrückt
-% stattdessen die Ausgabe dieser vollständig.
+% Eine Änderungsnotiz wird für die angegebene Versionsnummer normalerweise im
+% Abschnitt \enquote{Allgemein} aufgeführt. Soll jedoch eine Notiz explizit für
+% eine Option, eine Umgebung, einen Befehlt etc. erstellt werden, kann dieses 
+% Element vor dem obligatorischen im optionalen Argument angegeben werden. Der 
+% Eintrag erfolgt dann im Abschnitt \enquote{Implementierung} für das gegebene
+% Element. Im obligatorischen Argument können auch mehrere Änderungsnotizen 
+% gleichzeitig erzeugt werden. hierfür sind diese mit Semikolon voneinander zu 
+% trennen. Das Erzeugen der Liste selbst erfolgt mit \cs{@ChangedAt@CreateList}.
+% 
+% Normalerweise wird bei der Nutzung von \cs{ChangedAt} zusätzlich zum Eintrag
+% in die Änderungsliste eine Randnotiz mit den angegebenen Versionsnummern
+% erzeugt. Mit dem letzten optionalen Argument nach dem obligatorischen kann
+% ein vertikaler Versatz dieser angegeben werden. Die Sternversion des Befehls 
+% unterdrückt die Ausgabe der Randnotiz. 
 %    \begin{macrocode}
 \newlength\changedatskip
-\NewDocumentCommand\ChangedAt{sO{\changedatskip}mO{Allgemein}}{%
-  \tud@ifbundle{\@bundle}{%
-    \@ChangedAt@CreateList[#1]{#2}[#4\nobreakspace\@bundle]{#3}%
+\NewDocumentCommand\ChangedAt{somO{\changedatskip}}{%
+  \IfValueTF{#2}{%
+    \@ChangedAt@CreateList[#2]{#3}%
   }{%
-    \@ChangedAt@CreateList[#1]{#2}[#4]{#3}%
+    \@ChangedAt@CreateList{#3}%
   }%
+%    \end{macrocode}
+% Nach dem Erstellen der Liste wird diese abgearbeitet und ggf. die Randnotiz 
+% ausgegeben.
+%    \begin{macrocode}
+  \@printchangedatlist{#1}{#4}%
 }
 %    \end{macrocode}
 % \end{length}^^A \changedatskip
 % \end{macro}^^A \ChangedAt
 %
-% \subsubsection{Sukzessive Erstellung der Änderungsliste}
+% \subsubsection{Sukzessive Erstellung der Einträge für die Änderungsliste}
 %
+% Das Erstellen von Änderungsnotizen erfolgt in zwei Schritten. Diese werden 
+% mit dem Befehl \cs{@ChangedAt@CreateList} in einer standardisierten Form in 
+% der temporären Liste \cs{list@ChangedAt} gespeichert und später mit dem Makro 
+% \cs{@ChangedAt@CreateEntry} verarbeitet. Dieses Vorgehen liegt in den 
+% Umgebungen für Deklarationen begründet, welche verschachtelt werden können,
+% jedoch einmalig mit \cs{printdeclarationlist} abgearbeitet werden.
+% 
+% \begin{macro}{\list@ChangedAt}
+% \changes{v2.02}{2014/07/25}{neu}^^A
+% \begin{macro}{\forssvlist}
+% \changes{v2.05}{2015/11/17}{neu}^^A
+% Hier werden die Liste \cs{list@ChangedAt} sowie das Makro \cs{forssvlist} für 
+% die Aufspaltung der semikolongetrennten Änderungsnotizen definiert.
+%    \begin{macrocode}
+\newcommand*\list@ChangedAt{}
+\let\list@ChangedAt\relax
+\DeclareListParser*{\forssvlist}{;}
+%    \end{macrocode}
+% \end{macro}^^A \forssvlist
+% \end{macro}^^A \list@ChangedAt
 % \begin{macro}{\@ChangedAt@CreateList}
 % \changes{v2.02}{2014/09/02}{neu}^^A
 % \begin{macro}{\@ChangedAt@@CreateList}
 % \changes{v2.02}{2014/10/09}{neu}^^A
 % \begin{macro}{\@ChangedAt@@@CreateList}
 % \begin{macro}{\@ChangedAt@@@@CreateList}
-% \begin{macro}{\list@ChangedAt}
-% \changes{v2.02}{2014/07/25}{neu}^^A
-% Mit diesen Befehlen wird die Änderungshistorie in Form eines Index erstellt. 
-% Der Befehl \cs{@ChangedAt@CreateList} setzt eine kommagetrennte Liste in eine 
-% im Format von \pkg{etoolbox} um. Anschließend wird diese für die 
-% Änderungsliste mit \cs{@ChangedAt@CreateEntry} aufgespalten. Die einzelnen 
-% Einträge werden mit \cs{@ChangedAt@@CreateEntry} weiter verarbeitet.
+% Mit diesen Befehlen wird eine Liste im Format von \pkg{etoolbox} erzeugt, 
+% welche alle notwendigen Angaben für das Erzeugen der Änderungshistorie in 
+% Form eines Indexes mit \cs{@ChangedAt@CreateEntry} enthält.
 %
-% Um für Änderungsnotizen die dazugehörige Option, Befehl etc. bei einer 
-% Deklaration kenntlich zu machen, wird das deklarierte Element zusammen mit 
-% der Notiz in einer Liste gespeichert. Da mehrere kommaseparierte Werte
-% angegeben werden können, muss das optionale Argument der Umgebung
-% \env{Declaration} dahingehend abgearbeitet werden. Dabei kann außerdem 
-% angegeben werden, ob es sich bei Änderung um eine Umbenennung von Option,
-% Befehl etc. handelt.
+% Der Befehl \cs{@ChangedAt@CreateList} kann vor dem obligatorischen Argument 
+% mit einem ordinären optionalen Argument verwendet werden, in welchem ein 
+% Makro, eine Umgebung, eine Option etc. angegeben wird. Ist dies der Fall, so 
+% wird der Eintrag in die Änderungsliste für dieses Element generiert, sonst 
+% wird eine allgemeiner Eintrag erzeugt. Das optionale Argument in runden 
+% Klammern wird lediglich verwendet, wenn für eine der beiden Spezialumgebungen 
+% \env{Declaration*} bzw. \env{Bundle*} eine Änderungsnotiz erstellt wird, um 
+% diese für das jeweilige \TUDScript-Bundle-Element in den entsprechenden
+% Abschnitt der Änderungsliste einzutragen. Das Hauptargument verarbeitet
+% schließlich eine semikolongetrennte Liste und reicht jeden Bestandteil 
+% zusammen mit den beiden optionalen Argumenten an \cs{@ChangedAt@@CreateList} 
+% weiter. 
 %    \begin{macrocode}
-\newcommand*\list@ChangedAt{}
-\let\list@ChangedAt\relax
-\NewDocumentCommand\@ChangedAt@CreateList{omom}{%
-  \let\@changedatlist\relax%
-  \let\@templist\relax%
-  \@for\@tempa:=#4\do{%
-    \ifx\@tempa\@empty\else\ifx\@tempa\space\else%
-      \IfValueT{#3}{\preto\@tempa{#3!}}%
-      \listeadd{\@changedatlist}{\expandonce\@tempa}%
-    \fi\fi%
-  }%
-  \forlistloop\@ChangedAt@CreateEntry{\@changedatlist}%
+\NewDocumentCommand\@ChangedAt@CreateList{od()m}{%
+  \IfValueT{#3}{\forssvlist{\@ChangedAt@@CreateList[#1](#2)}{#3}}%
 }
-\newcommand*\@ChangedAt@@CreateList[2]{%
-  \IfValueT{#1}{%
-    \@for\@tempa:=#1\do{%
-      \ifx\@tempa\@empty\else\ifx\@tempa\space\else%
-        \preto{\@tempa}{#2!}%
-        \expandafter\@ChangedAt@@@CreateList\expandafter{\@tempa}%
-      \fi\fi%
+%    \end{macrocode}
+% Mit \cs{@ChangedAt@@CreateList} wird lediglich die Versionsnummer von der 
+% eigentlichen Änderungsnotiz getrennt.
+%    \begin{macrocode}
+\NewDocumentCommand\@ChangedAt@@CreateList{r[]r()>{\SplitArgument{1}{:}}m}{%
+  \@ChangedAt@@@CreateList[#1](#2)#3%
+}
+%    \end{macrocode}
+% Zuletzt wird durch \cs{@ChangedAt@@@CreateList} ein möglicher Untereintrag
+% in ein separates Argument abgetrennt und \cs{@ChangedAt@@@@CreateList} mit
+% allen Argumenten aufgerufen.
+%    \begin{macrocode}
+\NewDocumentCommand\@ChangedAt@@@CreateList{r[]r()>{\SplitArgument{1}{!}}mm}{%
+  \@ChangedAt@@@@CreateList[#1](#2)#3{#4}%
+}
+%    \end{macrocode}
+% Der Befehl \cs{@ChangedAt@@@@CreateList} übernimmt schließlich die Erstellung 
+% des Eintrags in die Liste \cs{list@ChangedAt}. Wie bereits erwähnt enthalten 
+% die beiden ersten Argumente ggf. Markup-Befehl und \TUDScript-Bundle-Element. 
+% Danach folgt die Versionsnummer der Änderungsnotiz, der mögliche Untereintrag 
+% für einen Markup-Befehl sowie die Änderungsnotiz selbst. 
+%
+% Die oberste Gliederungsebene der Änderungshistorie ist die Versionsnummer. 
+% Unter dieser werden für jedes \TUDScript-Bundle-Element die Änderungsnotizen 
+% separat ausgegeben, wobei diese nochmal in einen allgemeinen Teil und einen 
+% zur Implementierung getrennt werden. 
+%
+% Der im Folgenden erzeugte Eintrag für die Liste \cs{list@ChangedAt} wird in
+% zwei unterschiedlichen Varianten generiert. In der Form 
+% \newline\begingroup\scriptsize
+% \val{\meta{Versionsnummer}!Allgemein!\meta{Änderungsnotiz}}
+% \endgroup\newline
+%  werden allgemeine Änderungsnotizen erstellt, für Einträge bezüglich der
+% Implementierung wird die folgende Form genutzt:
+% \newline\begingroup\scriptsize
+% \val{\meta{Versionsnummer}!Implementierung!\meta{Markup-Befehl}}\ignorespaces
+% \val{!\meta{Untereintrag}!\meta{Änderungsnotiz}}.
+% \endgroup
+%    \begin{macrocode}
+\NewDocumentCommand\@ChangedAt@@@@CreateList{r[]r()mmm}{%
+%    \end{macrocode}
+% Die Aufteilung der Änderungsliste in die einzelnen \TUDScript-Bundle-Elemente 
+% erfolgt entweder anhand des explizit angegebenen optionalen Argumentes in
+% runden Klammern oder aber implizit über den gegenwärtigen Inhalt des Makros
+% \cs{@bundle}. Dafür wird das Makro \cs{@tempa} so definiert, dass es das 
+% angegebene Argument in einer Box ausführt und das gesuchte Bundle-Element in 
+% \cs{@tempb} gespeichert ist.
+%    \begin{macrocode}
+  \def\@tempa##1{%
+    \sbox\z@{%
+      \let\@idxformat\relax%
+      \@changedattrue%
+      ##1%
+      \@changedatfalse%
+      \ifx\@idxformat\relax%
+        \gdef\@tempb{##1}%
+      \else%
+        \global\let\@tempb\@idxformat%
+      \fi%
     }%
   }%
-}
+  \let\@tempb\@empty%
+  \IfValueTF{#2}{%
+    \@tempa{#2}%
+  }{%
+    \tud@ifbundle{\@tempa{\@bundle}}{}%
+  }%
 %    \end{macrocode}
-% Die Änderungsnotiz für die Implementierung wird erst an den Ausrufezeichen 
-% in einzelne Argumente getrennt\dots
+% Nachdem klar ist, für welches Bundle-Element ggf. der Änderungslisteneintrag 
+% erzeugt werden soll, wird nun bestimmt, ob dieser im allgemeinen Teil oder in 
+% den zur Implementierung erscheinen soll. Dies wird an der Existenz des ersten
+% Argumentes entschieden. Ist es vorhanden, handelt es sich um einen Eintrag 
+% für den Implementierungsteil, welcher in \cs{list@ChangedAt} in der Form 
+% \newline\begingroup\scriptsize
+% \meta{Versionsnummer}\val{!Implementierung!}\meta{Markup-Befehl}\ignorespaces
+% \val{!}\meta{Untereintrag}\val{!}\meta{Änderungsnotiz} gespeichert wird, 
+% \endgroup
+% wobei der Untereintrag auch leer bleiben kann.
 %    \begin{macrocode}
-\NewDocumentCommand\@ChangedAt@@@CreateList{>{\SplitArgument{2}{!}}m}{%
-  \@ChangedAt@@@@CreateList#1%
-}
+  \IfValueTF{#1}{%
+    \toks@{#3!Implementierung }%
 %    \end{macrocode}
-% \dots und anschließend in die Liste \cs{list@ChangedAt}~-- in einer
-% etwas kryptischen Form~-- eingetragen. Dies geschieht jedoch nur, wenn im 
-% Argument nicht die Sternversion eines Auszeichnungsbefehls genutzt wurde. 
-% Diese sollen keinen Eintrag in der Änderungsliste, wohl aber eine Randnotiz
-% erzeugen.
+% Hier erfolgt ggf. der Eintrag des \TUDScript-Bundle-Elements, danach folgt 
+% der Markup-Befehl.
 %    \begin{macrocode}
-\newcommand*\@ChangedAt@@@@CreateList[3]{%
-  \in@{*}{#1}%
-  \ifin@%
-    \tud@ifbundle{\@bundle}{%
-      \protected@edef\@tempa{Allgemein\nobreakspace\@bundle!#2}%
-    }{%
-      \protected@edef\@tempa{Allgemein!#2}%
-    }%
-  \else%
-    \tud@ifbundle{\@bundle}{%
-      \protected@edef\@tempa{%
-        Implementierung\nobreakspace\@bundle!#2!%
-        \IfValueTF{#3}{#3}{\noexpand\@changedatdeclaredefault}!%
-        #1(\@bundle)%
+    \eaddto@hook\toks@{\@tempb}%
+    \addto@hook\toks@{!#1!}%
+%    \end{macrocode}
+% Wurde ein Untereintrag angegeben, wird dieser hier gefolgt von der 
+% eigentlichen Änderungsnotiz eingefügt. Für obsolete Deklarationen für die 
+% Änderungsnotiz in jedem Fall ignoriert, da beim späteren Aufruf des Makros  
+% \cs{@ChangedAt@CreateEntry} eine Standardmeldung ausgegeben wird.
+%    \begin{macrocode}
+    \IfValueT{#4}{\addto@hook\toks@{#4}}%
+    \addto@hook\toks@{!}%
+    \if@obsolete\else%
+      \IfValueT{#5}{\addto@hook\toks@{#5}}%
+    \fi%
+  }{%
+%    \end{macrocode}
+% Handelt es sich um einen allgemeinen Änderungseintrag, wird dieser in der Form
+% \newline\begingroup\scriptsize
+\meta{Versionsnummer}\val{!Allgemein!}\meta{Änderungsnotiz}%
+\endgroup
+% in der Liste \cs{list@ChangedAt} gespeichert. Für den allgemeinen Teil wird
+% mit der Angabe eines \TUDScript-Bundle-Elements etwas anders verfahren. Wurde 
+% dieses~-- wenn auch nur indirekt über eine der beiden Spezialumgebungen
+% \env{Declaration*} bzw. \env{Bundle*}~-- angegeben, so wird der Eintrag in
+% den allgemeinen Hauptteil als Untereintrag erzeugt. Erfolgte die Verwendung
+% jedoch innerhalb einer \TUDScript-Bundle-Deklaration, so erscheint der
+% Eintrag im allgemeinen Teil für das explizite Bundle-Element.
+%    \begin{macrocode}
+    \toks@{#3!Allgemein }%
+    \IfValueTF{#2}{%
+      \addto@hook\toks@{!}%
+      \eaddto@hook\toks@{\@tempb:\space}%
+      \IfValueTF{#5}{%
+        \addto@hook\toks@{#5}%
+      }{%
+        \addto@hook\toks@{\emph{neu}}%
       }%
     }{%
-      \protected@edef\@tempa{%
-        Implementierung!#2!%
-        \IfValueTF{#3}{#3}{\noexpand\@changedatdeclaredefault}!#1%
+      \eaddto@hook\toks@{\@tempb}%
+      \addto@hook\toks@{!}%
+      \addto@hook\toks@{#5}%
+    }%
+    \IfValueT{#4}{%
+      \ClassError{tudscrmanual}{Using !#4 isn't allowed for a change notice}{%
+        At least, it has to be implemented!%
       }%
     }%
-  \fi%
-  \listeadd\list@ChangedAt{\expandonce\@tempa}%
+  }%
+  \listeadd\list@ChangedAt{\the\toks@}%
 }
 %    \end{macrocode}
-% \end{macro}^^A \list@ChangedAt
 % \end{macro}^^A \@ChangedAt@@@@CreateList
 % \end{macro}^^A \@ChangedAt@@@CreateList
 % \end{macro}^^A \@ChangedAt@@CreateList
@@ -4109,79 +4235,122 @@
 %
 % \subsubsection{Ezeugen der Änderungseinträge}
 %
+% Mit diesen Makros erfolgt das eigentliche Eintragen der Änderungseinträge aus 
+% der Liste \cs{listqChangedAt} in den entsprechenden Index \val{changelog}. 
+%
 % \begin{macro}{\@ChangedAt@CreateEntry}
 % \changes{v2.02}{2014/09/02}{neu}^^A
 % \begin{macro}{\@ChangedAt@@CreateEntry}
 % \changes{v2.02}{2014/09/02}{neu}^^A
-% Der Befehl \cs{@ChangedAt@CreateEntry} teilt ein gegebenes Argument am 
-% Delimiter Ausrufezeichen (\enquote{!}) in drei Argumente auf und reicht diese
-% an \cs{@ChangedAt@@CreateEntry} weiter. Sollte kein oder nur Ausrufezeichen
-% gefunden werden, so wird das zweite und/oder dritte Argument mit dem~-- vom
-% Paket \pkg{xparse} definierten~-- leeren Wert \val{-NoValue-} an den 
-% Befehl \cs{@ChangedAt@@CreateEntry} übergeben.
+% Der Befehl \cs{@ChangedAt@CreateEntry} wird durch \cs{@printchangedatlist} 
+% aufgerufen und teilt die gegebene Liste am Delimiter Ausrufezeichen \val{!}
+% in fünf Argumente auf und reicht sie an \cs{@ChangedAt@@CreateEntry} weiter.
+% Sind weniger als vier Ausrufezeichen vorhanden, so werden die ungenutzten
+% Argumente mit dem~-- durch das Paket \pkg{xparse} definierten~-- leeren Wert
+% \val{-NoValue-} an den Befehl \cs{@ChangedAt@@CreateEntry} übergeben.
 %    \begin{macrocode}
 \NewDocumentCommand\@ChangedAt@CreateEntry{>{\SplitArgument{4}{!}}m}{%
   \@ChangedAt@@CreateEntry#1%
 }
 %    \end{macrocode}
-% Hiermit wird der Eintrag in die Änderungshistorie erzeugt. Dabei ist zu 
-% unterscheiden, ob der Befehl \cs{ChangedAt} direkt genutzt wurde oder aber 
-% der Eintrag innerhalb der \env{Declaration}-Umgebung erfolgte. Dies wird 
-% anhand des dritten Argumentes erkannt. Für den ersten Fall erfolgt ein
-% Eintrag lediglich, wenn neben der Versionsnummer selbst auch eine Erklärung
-% angegben wurde~-- eine Randnotiz wird aber in jedem Fall gesetzt.
-% Sollte keine Erklärung direkt angegeben worden sein, so wird in der
-% Änderungsliste vermerkt, dass es sich um eine \emph{neue} Option, Befehl etc.
-% handelt. Der eigentliche Eintrag selbst erfolgt mit 
-% \cs{@ChangedAt@@CreateEntry}.
-%
-% Mit diesen Befehlen wird die Änderungshistorie in Form eines Index erstellt. 
-% Der Befehl \cs{@ChangedAt@CreateList} setzt eine kommagetrennte Liste in eine 
-% im Format von \pkg{etoolbox} um. Anschließend wird diese für die 
-% Änderungsliste mit \cs{@ChangedAt@CreateEntry} aufgespalten. Die einzelnen 
-% Einträge werden mit \cs{@ChangedAt@@CreateEntry} weiter verarbeitet.
-% Mit \cs{@ChangedAt@@CreateEntry} Erfolgen die Einträge in die Änderungsliste.
-%
+% Mit \cs{@ChangedAt@@CreateEntry} wird der Eintrag in die Änderungshistorie
+% erzeugt, falls denn überhaupt ein Eintrag generiert werden soll. Dies wird
+% daran erkannt, ob das dritte Argument dew Wert \val{-NoValue-} entspricht 
+% oder eben nicht. Der zweite Fall tritt auf, wenn lediglich eine Randnotiz
+% gesetzt werden soll. Die in \cs{list@ChangedAt} gespeicherten Einträge haben 
+% die Form 
+% \newline\begingroup\scriptsize
+% \val{\meta{Versionsnummer}!Allgemein!\meta{Änderungsnotiz}}
+% \endgroup\newline
+% oder 
+% \newline\begingroup\scriptsize
+% \val{\meta{Versionsnummer}!Implementierung!\meta{Markup-Befehl}}\ignorespaces
+% \val{!\meta{Untereintrag}!\meta{Änderungsnotiz}}.
+% \endgroup
 %    \begin{macrocode}
 \newcommand*\@ChangedAt@@CreateEntry[5]{%
-  \IfValueTF{#4}{%
+  \IfValueT{#3}{%
 %    \end{macrocode}
 % Bei der Deklaration von Optionen, Befehlen etc. werden diese automatisch in 
 % der Liste der Änderungen im Bereich \enquote{Implementierung} vor der
-% gegebenen Erklärung selbst ausgegeben. Hierfür wird das dritte Argument
-% genutzt. Damit lediglich diese und nicht noch die dazugehörigen Argumente
-% eingetragen werden, werden die relevanten Befehle deaktiviert.
+% gegebenen Erklärung selbst ausgegeben. Hierfür wird die Existenz des vierten
+% Arguments geprüft. Ist dieses vorhanden\dots
 %    \begin{macrocode}
-    \begingroup%
-      \@onlyPValue%
-    \endgroup%
+    \IfValueTF{#4}{%
 %    \end{macrocode}
-% Danach wird geprüft, ob das Makro \cs{Key} übergeben wurde. Außerdem wird ein 
-% Anker in der Änderungsliste für die Referenzierung auf die einzelnen Bereiche 
-% (\enquote{Allgemein}, \enquote{Implementierung} und \enquote{Ersetzungen}) 
-% gesetzt.
+% \dots befindet sich im dritten Argument der Markup-Befehl für den Eintrag im
+% Implementierungsteil. Mit dem zwischenzeitlichen Aktivieren des Schalters
+% \cs{if@changedat} wird beim nachfolgenden Aufruf des Markup-Befehls das Makro 
+% \cs{@ProcessChangedAt} ausgeführt und dadurch \cs{@getindex*} aufgerufen, 
+% wodurch in den Makros \cs{@idxkey}, \cs{@idxformat} und \cs{@idxentry} die
+% passend formatierten Indexeinträge enthalten sind.
 %    \begin{macrocode}
-    \expandafter\in@\expandafter\Key\expandafter{\@tempa}%
-    \ifin@%
-      \begingroup%
-        \RenewDocumentCommand\Key{sommo}{\xdef\@TempKey{##3:}}%
-        \setbox\z@\hbox{#3}%
-      \endgroup%
-      \index[changelog]{%
-        #1\tudhyperdef*{#1}!\tudhyperdef*{#1:#2}#2!\@TempKey\ #3%
-      }%
-    \else%
-      \index[changelog]{%
-        #1\tudhyperdef*{#1}!\tudhyperdef*{#1:#2}#2!#3%
-      }%
-    \fi%
-  \endgroup%
+      \@changedattrue%
+      #3%
+      \@changedatfalse%
 %    \end{macrocode}
-% Wurde \cs{ChangedAt} direkt und nicht über das optionale Argument der 
-% Umgebungen \env{Declaration} genutzt, erscheint der gewünschte Eintrag im
-% Bereich \enquote{Allgemein}.
+% Das vierte Argument erstellt in der Änderungsliste einen Untereintrag für den
+% im dritten Argument gegebenen Markup-Befehl. Dies wird für Anmerkungen zu 
+% expliziten Schlüssel-Wert-Paaren bei Optionen oder Parametern genutzt. 
 %    \begin{macrocode}
-    \IfValueT{#3}{\@ChangedAt@@CreateEntry{#2}{#1}{#3}}%
+      \ifstr{#4}{}{}{%
+%    \end{macrocode}
+% Hierfür wird die zuvor erhaltene Formatierung des Markup-Befehls des dritten
+% Argumentes an den Haupteintrag \cs{@idxentry} mit der zusätzlichen Anmerkung 
+% \enquote{Werte angepasst } angehängt.
+%    \begin{macrocode}
+        \eappto\@idxentry{%
+          \expandonce\@idxkey: Werte angepasst@%
+          \expandonce\@idxformat: Werte angepasst!%
+        }%
+%    \end{macrocode}
+% Anschließend werden die Formatierungsbefehle des vierten Arguments genutzt, 
+% wobei vom Befehl \cs{suffix} nur das Argument selbst benötigt wird. Um den 
+% Inhalt von \cs{@idxentry} zu schützen, erfolgt das ganze in einer Gruppe.
+%    \begin{macrocode}
+        \begingroup
+          \@changedattrue%
+          #4%
+          \@changedatfalse%
+          \let\suffix\@gobble%
+          \protected@edef\tud@reserved{%
+            \noexpand\endgroup%
+            \def\noexpand\@idxkey{\@idxkey}%
+            \def\noexpand\@idxformat{\@idxformat}%
+          }%
+        \tud@reserved%
+      }%
+%    \end{macrocode}
+% Nachdem die Formatierung der Haupt- und Untereinträge soweit zusammengebaut 
+% wurden, wird die eigentliche Änderungsnotiz des fünften Arguments angehangen. 
+% Dabei wird für den Fall, dass \emph{keine} Erklärung angegeben wurde, in der 
+% Änderungsliste vermerkt, ob es sich bei dem Markup-Befehl respektive dessen 
+% Untereintrag um eine \emph{neue} bzw. eine \emph{obsolete} Variante handelt.
+%    \begin{macrocode}
+      \ifstr{#5}{}{%
+        \if@obsolete%
+          \appto\@idxformat{: \emph{entf\"allt}}%
+        \else%
+          \appto\@idxformat{: \emph{neu}}%
+        \fi%
+%    \end{macrocode}
+% Existiert ein Eintrag, wird dieser für Schlüssel und Format verwendet.
+%    \begin{macrocode}
+      }{%
+        \appto\@idxkey{: #5}%
+        \appto\@idxformat{: #5}%
+      }%
+%    \end{macrocode}
+% Nachdem alles abgearbeitet wurde, wird der Indexeintrag erstellt.
+%    \begin{macrocode}
+      \index[changelog]{#1!#2!\@idxentry\@idxkey @\@idxformat}%
+%    \end{macrocode}
+% Existiert das vierte Argument nicht, handelt es sich um einen allgemeinen 
+% Eintrag in der Änderungshistorie. Dieser wird direkt ausgeführt.
+%    \begin{macrocode}
+    }{%
+      \index[changelog]{#1!#2!#3}%
+    }%
   }%
 %    \end{macrocode}
 % Außerdem wird der Liste \cs{@templist} die aktuelle Version einmalig 
@@ -4195,13 +4364,52 @@
 %
 % \subsubsection{Ausgabe der Änderungsliste}
 %
+% Ähnlich wie für den Index wird auch für die Änderungsliste bei der Ausgabe 
+% verfahren. 
+%
 % \begin{macro}{\PrintChangelog}
-% Ähnlich wie für den Index wird auch für die Änderungsliste verfahren. Mit dem 
-% Makro \cs{hyperpagedeprecated} wird die Ausgabe der Seitenzahlen unterdrückt, 
-% wenn zusätzlich ein mit \cs{see} gesetzter Querverweis existiert.
+% Mit \cs{PrintChangelog} erfolgt die Ausgabe der Änderungsliste. Dabei ist zu 
+% beachten, dass die Einträge im Index bis zur vierten Ebene erfolgen.
 %    \begin{macrocode}
 \newcommand*\PrintChangelog{%
   \begingroup%
+%    \end{macrocode}
+% Die oberste Ebene enthält die Versionsnummer mit dem Präfix \val{v}. Diese 
+% Ebene soll nicht als Indexeintrag selber sondern vielmehr als Überschrift der
+% Ebene \cs{subsection} genutzt werden. Dafür wird zum einen das durch das 
+% Paket \pkg{imakeidx} definierte Makro \cs{lettergroup} \emph{unschädlich} 
+% gemacht, zum anderen wird der Befehl \cs{item} so umdefiniert, dass dieser
+% alles bis zum nächsten Zeilenumbruch als Argument einliest. Alle darunter 
+% liegenden \cs{item}-Befehle werden eine Ebene nach oben gehoben.
+%    \begin{macrocode}
+    \let\lettergroup\@gobble%
+    \apptocmd{\theindex}{%
+      \let\subsubsubitem\subsubitem%
+      \let\subsubitem\subitem%
+      \let\subitem\item%
+      \renewcommand*\item{%
+        \begingroup%
+          \escapechar=`\\%
+          \catcode\endlinechar=\active%
+          \csname\string\item\endcsname%
+      }%
+      \begingroup%
+      \escapechar=`\\%
+      \lccode`\~=\endlinechar%
+      \lowercase{%
+        \expandafter\endgroup%
+        \expandafter\def\csname\string\item\endcsname##1~%
+      }{%
+        \endgroup%
+        \subsection*{\TUDScript \NoCaseChange{##1}}%
+        \tudhyperdef{idx:changelog:##1}%
+        \addsubsectiontocentry{}{##1}%
+      }%
+    }{}{\tud@patch@wrn{theindex}}%
+%    \end{macrocode}
+% Mit der so angepassten \env{theindex}-Umgebung erfolgt die Ausgabe der 
+% Änderungshistorie.
+%    \begin{macrocode}
     \clearpage%
     \@printindex[changelog]%
   \endgroup%
@@ -4210,15 +4418,16 @@
 % \end{macro}^^A \PrintChangelog
 % \begin{macro}{\@printchangedatlist}
 % \changes{v2.02}{2014/10/09}{neu}^^A
-% Die Einträge in der Änderungsliste sowie die dazugehörige Randnotiz werden 
-% mit dem Makro \cs{@ChangedAt@CreateList} abgearbeitet, sortiert und erstellt. 
-% Bei \cs{@printchangedatlist} wird mit dem optionalen Argument der Versatz für
-% die Randnotiz gesetzt. Dieser wird wie auch die Liste an \cs{???} übergeben,
-% womit diese und die Randnotiz letztendlich erzeugt werden.
+% Die Einträge in der Liste der Änderungen \cs{list@ChangedAt} werden mit dem 
+% Makro \cs{@ChangedAt@CreateList} abgearbeitet, sortiert und erstellt. Das 
+% zweite obligatorische Argument von \cs{@printchangedatlist} steurrt den 
+% vertikalen Versatz der Randnotiz. Wird im ersten Argument das boolesche Flag 
+% zu \cs{BooleanTrue} gesetzt, wird die Randnotiz unterdrückt.
 %    \begin{macrocode}
 \NewDocumentCommand\@printchangedatlist{mm}{%
   \ifx\list@ChangedAt\relax\else%
-    \@ChangedAt@CreateList{#2}{\list@ChangedAt}%
+    \let\@templist\relax%
+    \forlistloop\@ChangedAt@CreateEntry{\list@ChangedAt}%
     \global\let\list@ChangedAt\relax%
 %    \end{macrocode}
 % Nach der Verarbeitung aller Einräge sind in \cs{@templist} alle angegebenen
@@ -5802,8 +6011,8 @@
 % \begin{macro}{\DIN}
 % Für die Nennung der Schriften spezielle Markos bereitgestellt.
 %    \begin{macrocode}
-\newcommand*\Univers{\textubn{Univers}\xspace}
-\newcommand*\DIN{\textdbn{DIN~BOLD}\xspace}
+\newcommand*\Univers{\texorpdfstring{\textubn{Univers}}{Univers}\xspace}
+\newcommand*\DIN{\texorpdfstring{\textdbn{DIN~BOLD}}{DIN BOLD}\xspace}
 %    \end{macrocode}
 % \end{macro}^^A \DIN
 % \end{macro}^^A \Univers
