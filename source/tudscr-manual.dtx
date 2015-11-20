@@ -1,4 +1,4 @@
-% \CheckSum{4140}
+% \CheckSum{4165}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-manual.dtx}[%
-  2015/11/20 v2.05 TUD-KOMA-Script\space%
+  2015/11/21 v2.05 TUD-KOMA-Script\space%
 %</driver>
 %<package&identify>\NeedsTeXFormat{LaTeX2e}
 %<package&identify>\ProvidesPackage{tudscrtutorial}[%
@@ -1456,10 +1456,10 @@
 % Die Auszeichnung und der Indexeintrag einer Anwendungssoftware.
 %    \begin{macrocode}
 \NewExpandableDocumentCommand\@Application{sm}{#2}
-\NewDocumentCommand\Application{smd||}{%
+\NewDocumentCommand\Application{smd()d||}{%
   \@SetMarkupFormat{\sbsfont}%
-  \@ProcessMarkup{\Application{#2}}%
-  \@ProcessIndex{#1}{\Application{#2}}[Anwendungssoftware]|#3|%
+  \@ProcessMarkup{\Application{#2}}(#3)%
+  \@ProcessIndex{#1}{\Application{#2}}[Anwendungssoftware](#3)|#4|%
 }
 %    \end{macrocode}
 % \end{macro}^^A \@Application
@@ -1472,14 +1472,14 @@
 % Fließtext genutzt werden.
 %    \begin{macrocode}
 \NewExpandableDocumentCommand\@Distribution{sm}{#2}
-\NewDocumentCommand\Distribution{smod||}{%
+\NewDocumentCommand\Distribution{smod()d||}{%
   \@SetMarkupFormat{\sbnfont}%
   \IfValueTF{#3}{%
-    \@ProcessMarkup{\Distribution{#2}}[~#3]%
+    \@ProcessMarkup{\Distribution{#2}}[~#3](#4)%
   }{%
-    \@ProcessMarkup{\Distribution{#2}}%
+    \@ProcessMarkup{\Distribution{#2}}(#4)%
   }%
-  \@ProcessIndex{#1}{\Distribution{#2}}[Distribution]|#4|%
+  \@ProcessIndex{#1}{\Distribution{#2}}[Distribution](#4)|#5|%
 }
 %    \end{macrocode}
 % \end{macro}^^A \@Distribution
@@ -1491,10 +1491,10 @@
 % Die Auszeichnung und der Indexeintrag für ein bestimmtes Textsatzsystem.
 %    \begin{macrocode}
 \NewExpandableDocumentCommand\@Engine{sm}{#2}
-\NewDocumentCommand\Engine{smd||}{%
+\NewDocumentCommand\Engine{smd()d||}{%
   \@SetMarkupFormat{\sbnfont}%
-  \@ProcessMarkup{\Engine{\hologo{#2}}}%
-  \@ProcessIndex{#1}{\Engine{#2}}[Textsatzsystem]|#3|%
+  \@ProcessMarkup{\Engine{\hologo{#2}}}(#3)%
+  \@ProcessIndex{#1}{\Engine{#2}}[Textsatzsystem](#3)|#4|%
 }
 %    \end{macrocode}
 % \end{macro}^^A \@Engine
@@ -1505,10 +1505,10 @@
 % Die Auszeichnung und der Indexeintrag einer Datei.
 %    \begin{macrocode}
 \NewExpandableDocumentCommand\@File{sm}{#2}
-\NewDocumentCommand\File{smd||}{%
+\NewDocumentCommand\File{smd()d||}{%
   \@SetMarkupFormat{\sbnfont}%
-  \@ProcessMarkup{\File{#2}}%
-  \@ProcessIndex{#1}{\File{#2}}[Datei]|#3|%
+  \@ProcessMarkup{\File{#2}}(#3)%
+  \@ProcessIndex{#1}{\File{#2}}[Datei](#3)|#4|%
 }
 %    \end{macrocode}
 % \end{macro}^^A \@File
@@ -1530,7 +1530,7 @@
 %</class>
     \@SetMarkupFormat{\sbnfont}%
     \@ProcessMarkup{\Class{#2}}(#3)'#4'%
-    \@ProcessIndex{#1}{\Class{#2}}[Klasse]|#5|%
+    \@ProcessIndex{#1}{\Class{#2}}[Klasse](#3)|#5|%
 %<*class>
   \fi%
 %</class>
@@ -1562,7 +1562,7 @@
     }{%
       \@ProcessMarkup{\Package{#2}}(#3)<#2>'#5'%
     }%
-    \@ProcessIndex{#1}{\Package{#2}}[Paket]|#6|%
+    \@ProcessIndex{#1}{\Package{#2}}[Paket](#3)|#6|%
 %<*class>
   \fi%
 %</class>
@@ -2790,6 +2790,8 @@
 % \begin{macro}{\@MarkupSuffix}
 % \changes{v2.05}{2015/11/05}{neu}^^A
 % \begin{macro}{\tud@uclcnotmath}
+% \begin{macro}{\tud@nonchangecase}
+% \changes{v2.05}{2015/11/20}{neu}^^A
 %    \begin{macrocode}
 \newcommand*\@MarkupFormat{}
 \newcommand*\@MarkupSuffix{}
@@ -2831,23 +2833,34 @@
 % alles in Majuskeln erscheint, wird für diesen Fall \cs{@MarkupFormat} genutzt.
 %    \begin{macrocode}
 \robustify\NoCaseChange
+\NewDocumentCommand\tud@nonchangecase{m}{%
+  \DeclareExpandableDocumentCommand#1{sm}{%
+    \IfBooleanT{##1}{\noexpand\@tud@indextrue}%
+    \NoCaseChange{#1{##2}}%
+  }%
+}
 \appto\tud@uclcnotmath{%
-  \@nonchangecase\Application%
-  \@nonchangecase\Distribution%
-  \@nonchangecase\Engine%
-  \@nonchangecase\File%
-  \@nonchangecase\Class%
-  \@nonchangecase\Package%
-  \@nonchangecase\Option%
-  \@nonchangecase\Environment%
-  \@nonchangecase\Macro%
-  \@nonchangecase\Length%
-  \@nonchangecase\Counter%
-  \def\Key#1#2{\NoCaseChange{\Key{#1}{#2}}}%
-  \@nonchangecase\Term%
-  \@nonchangecase\PageStyle%
-  \@nonchangecase\Font%
-  \@nonchangecase\Color%
+  \tud@nonchangecase\Application%
+  \tud@nonchangecase\Distribution%
+  \tud@nonchangecase\Engine%
+  \tud@nonchangecase\File%
+  \tud@nonchangecase\Class%
+  \tud@nonchangecase\Package%
+  \tud@nonchangecase\Option%
+  \tud@nonchangecase\Environment%
+  \tud@nonchangecase\Macro%
+  \tud@nonchangecase\Length%
+  \tud@nonchangecase\Counter%
+%<*class>
+  \DeclareExpandableDocumentCommand\Key{smm}{%
+    \IfBooleanT{##1}{\noexpand\@tud@indextrue}%
+    \NoCaseChange{#1{##2}{##3}}%
+  }%
+  \tud@nonchangecase\Term%
+  \tud@nonchangecase\PageStyle%
+  \tud@nonchangecase\Font%
+  \tud@nonchangecase\Color%
+%</class>
 }
 %    \end{macrocode}
 % Nach der formatierten Ausgabe wird \cs{@ClearMarkupFormat} aufgerufen, um die 
@@ -2869,6 +2882,7 @@
   \fi%
 }
 %    \end{macrocode}
+% \end{macro}^^A \tud@nonchangecase
 % \end{macro}^^A \tud@uclcnotmath
 % \end{macro}^^A \@MarkupSuffix
 % \end{macro}^^A \@MarkupFormat
@@ -3348,6 +3362,7 @@
 % gespeichert (\cs{@idxentry}).
 %    \begin{macrocode}
     \begingroup%
+%<*class>
       \let#4\@empty%
       \in@{\Key}{#5}%
 %    \end{macrocode}
@@ -3378,6 +3393,7 @@
           \expandonce#3\expandonce\@tempa{}!%
         }%
       \fi%
+%</class>
 %    \end{macrocode}
 % Nachdem ein möglicher Haupteintrag für Parameter erzeugt wurde, folgt nun 
 % der formatierte Indexeintrag für das aktuelle Markup-Element. Um diesen zu
@@ -3387,11 +3403,11 @@
 % hier nur noch das zweite Argument relevant.
 %    \begin{macrocode}
       \@gobblemarkup%
-      \let\Key\@secondoftwo%
+%<class>      \let\Key\@secondoftwo%
       \edef\tud@reserved{%
         \noexpand\endgroup%
         \def\noexpand#2{#5}%
-        \def\noexpand#4{#4}%
+%<class>        \def\noexpand#4{#4}%
       }%
     \tud@reserved%
 %    \end{macrocode}
@@ -3452,7 +3468,7 @@
 % Querverweises notwendig und wird in \cs{@tempb} und \cs@{@tempc} abgelegt.
 %    \begin{macrocode}
     \else%
-      \in@{\Key}{#5}\ifin@\@tempswafalse\fi%
+%<class>      \in@{\Key}{#5}\ifin@\@tempswafalse\fi%
       \IfBooleanT{#1}{\@tempswafalse}%
       \edef\@tempb{(\expandonce\@idxbundle)}%
     \fi%
@@ -5437,18 +5453,23 @@
 %    \end{macrocode}
 % Um mit den verschachtelten Aufrufen von \app{pdflatex} umgehen zu können,
 % wird das ganze Prozedere in ein Skript ausgelagert. Somit können die Aufrufe
-% von \app{pdflatex} für die Tutorials im entsprechenden Ordner erfolgen.
+% von \app{pdflatex} für die Tutorials aus dem entsprechenden Ordner und mit
+% den notwendigen Optionen erfolgen.
 %    \begin{macrocode}
     \filemodCmp{tutorials/#2.pdf}{tutorials/#2.tex}{}{%
+      \let\@tempa\@empty%
+      \ifdef{\tudfinalflag}{\appto\@tempa{\def\noexpand\tudfinalflag{}}}{}%
+      \ifdef{\tudprintflag}{\appto\@tempa{\def\noexpand\tudprintflag{}}}{}%
+      \appto\@tempa{\noexpand\input{#2.tex}}%
       \immediate\openout\tud@write@i=tutorials.sh\relax%
       \immediate\write\tud@write@i{%
         cd tutorials^^J%
-        pdflatex -shell-escape #2^^J%
-        pdflatex #2^^J%
+        pdflatex -shell-escape "\@tempa"^^J%
+        pdflatex "\@tempa"^^J%
         biber #2^^J%
-        pdflatex -shell-escape #2^^J%
+        pdflatex -shell-escape "\@tempa"^^J%
         makeglossaries #2^^J%
-        pdflatex #2%
+        pdflatex "\@tempa"%
       }%
       \immediate\closeout\tud@write@i%
 %    \end{macrocode}
