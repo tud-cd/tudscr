@@ -1,4 +1,4 @@
-% \CheckSum{4165}
+% \CheckSum{4222}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-manual.dtx}[%
-  2015/11/21 v2.05 TUD-KOMA-Script\space%
+  2015/11/22 v2.05 TUD-KOMA-Script\space%
 %</driver>
 %<package&identify>\NeedsTeXFormat{LaTeX2e}
 %<package&identify>\ProvidesPackage{tudscrtutorial}[%
@@ -156,6 +156,19 @@
 %    \end{macrocode}
 % \end{macro}^^A \vKOMAScript
 % \end{macro}^^A \vTUDScript
+% \begin{macro}{\tud@english}
+%    \begin{macrocode}
+\newcommand*\tud@english[1]{#1}
+%<!doc>\AfterPackage*{babel}{%
+%<doc>\AtBeginDocument{\@ifpackageloaded{babel}{%
+  \@expandtwoargs\in@{,english,}{,\bbl@loaded,}%
+  \ifin@%
+    \renewcommand*\tud@english[1]{\foreignlanguage{english}{#1}}%
+  \fi%
+%<doc>}{}}
+%<!doc>}
+%    \end{macrocode}
+% \end{macro}^^A \tud@english
 %
 % \iffalse
 %</body|doc>
@@ -1456,9 +1469,13 @@
 % Die Auszeichnung und der Indexeintrag einer Anwendungssoftware.
 %    \begin{macrocode}
 \NewExpandableDocumentCommand\@Application{sm}{#2}
-\NewDocumentCommand\Application{smd()d||}{%
+\NewDocumentCommand\Application{smd()d<>d||}{%
   \@SetMarkupFormat{\sbsfont}%
-  \@ProcessMarkup{\Application{#2}}(#3)%
+  \IfValueTF{#4}{%
+    \@ProcessMarkup{\Application{#2}}(#3)<#4>%
+  }{%
+    \@ProcessMarkup{\Application{#2}}(#3)%
+  }%
   \@ProcessIndex{#1}{\Application{#2}}[Anwendungssoftware](#3)|#4|%
 }
 %    \end{macrocode}
@@ -1557,7 +1574,7 @@
   \else%
 %</class>
     \@SetMarkupFormat{\sbnfont}%
-    \IfValueTF{#3}{%
+    \IfValueTF{#4}{%
       \@ProcessMarkup{\Package{#2}}(#3)<#4>'#5'%
     }{%
       \@ProcessMarkup{\Package{#2}}(#3)<#2>'#5'%
@@ -2435,7 +2452,11 @@
 %<*class>
   \if@declare%
     \tud@toks@{\ProcessMarkup@Declare}%
-    \@getlabel*\@templabel{\@bundle:#1}=#2=%
+    \IfValueTF{#4}{%
+      \@getlabel*\@templabel{#4:#1}=#2=%
+    }{%
+      \@getlabel*\@templabel{\@bundle:#1}=#2=%
+    }%
   \else%
 %</class>
     \tud@toks@{\ProcessMarkup@Inline}%
@@ -2526,14 +2547,20 @@
 % müssten. Für die wenigen Fälle, in denen gezielt auf einen Querverweis 
 % verzichtet werden soll, kann ein leeres Argument \val{()} angegeben werden.
 %    \begin{macrocode}
-  \IfValueT{#4}{%
-    \ifstr{#4}{}{}{%
-      \tud@trace@bundle{#4}%
-      \tud@iflabelexists{\@templabel}{}{%
-        \ClassWarning{tudscrmanual}{No existing label \@templabel\space for #4}%
+  \if@tud@index\else%
+    \IfValueT{#4}{%
+      \ifstr{#4}{}{}{%
+        \tud@trace@bundle{#4}%
+        \ifstr{#6}{none}{}{%
+          \tud@iflabelexists{\@templabel}{}{%
+            \ClassWarning{tudscrmanual}{%
+              No existing label \@templabel\space for #4%
+            }%
+          }%
+        }%
       }%
     }%
-  }%
+  \fi%
 %    \end{macrocode}
 % Nun erfolgt mit \cs{ProcessMarkup@Declare} bzw. \cs{ProcessMarkup@Inline} die 
 % Ausführung der eigetnlichen Auszeichnung.
@@ -3767,7 +3794,7 @@
       sowohl Antworten bei generellen Fragen liefern als auch L\"osungen f\"ur
       typische Probleme bereitstellen. Falls ein gesuchter Begriff hier nicht
       auftaucht oder trotz vorhander Hinweise kein zufriedenstellendes Ergebnis
-      erzielt werden kann, sollte das \Forum erster Anlaufpunkt sein, um
+      erzielt werden kann, sollte das \Forum* erster Anlaufpunkt sein, um
       weitere Hilfe bei der Nutzung von \TUDScript zu erhalten.
     }%
     \@printindex%
@@ -4735,60 +4762,6 @@
 %</class>
 % \fi
 %
-% \begin{macro}{\Attention}
-% \changes{v2.02}{2014/08/16}{neu}^^A
-% \begin{macro}{\Forum}
-% \begin{macro}{\GitHubRepo}
-% \changes{v2.02}{2014/08/16}{neu}^^A
-% \begin{macro}{\notudscrartcl}
-% \begin{macro}{\scrguide}
-% \changes{v2.02}{2014/09/04}{neu}^^A
-% \changes{v2.05}{2015/07/23}{Hyperlinktext über optionales Argument}^^A
-% Für die Anwenderdokumentation werden weitere Auszeichnungsbefehle definiert.
-%    \begin{macrocode}
-\newcommand*\Attention[1]{\marginnote{\fbox{Achtung!}}\emph{\trim@spaces{#1}}}
-\NewDocumentCommand\Forum{s}{%
-  \IfBooleanTF{#1}{%
-    \url{http://latex.wcms-file3.tu-dresden.de/phpBB3/}%
-  }{%
-    \hrfn{http://latex.wcms-file3.tu-dresden.de/phpBB3/}{TUD-\LaTeX-Forum}%
-  }%
-  \xspace%
-}
-%<*class>
-\NewDocumentCommand\GitHubRepo{s}{%
-  \def\@tempc{%
-    https://github.com/tud-cd/tudscr/releases%
-  }%
-  \IfBooleanTF{#1}{%
-    \href{\@tempc}{GitHub-Repository~\Distribution*{tudscr}}%
-  }{%
-    \hrfn{\@tempc}{GitHub-Repository~\Distribution*{tudscr}}%
-  }%
-  \xspace%
-}
-\newcommand*\notudscrartcl{%
-  F\"ur die Klasse \Class{tudscrartcl} ist diese Option nicht verf\"ugbar.%
-}
-%</class>
-\NewDocumentCommand\scrguide{sO{\KOMAScript-Handbuch}}{%
-  \def\@tempc{%
-    http://mirrors.ctan.org/macros/latex/contrib/koma-script/doc/scrguide.pdf%
-  }%
-  \IfBooleanTF{#1}{%
-    \href{\@tempc}{#2}%
-  }{%
-    \hrfn{\@tempc}{#2}%
-  }%
-  \xspace%
-}
-%    \end{macrocode}
-% \end{macro}^^A \scrguide
-% \end{macro}^^A \notudscrartcl
-% \end{macro}^^A \GitHubRepo
-% \end{macro}^^A \Forum
-% \end{macro}^^A \Attention
-%
 % \subsection{Einbinden von Quelltextauszügen}
 %
 % Sowohl im Handbuch als auch in den Tutorials werden Quelltextauszüge für das 
@@ -5304,7 +5277,7 @@
   Abs\"atze m\"oglicherweise verloren gehen k\"onnen. Dies kann insbesondere 
   aufgrund fehlender Leerzeilen zu einem unvorteilhaften Ausgabeergebnis 
   f\"uhren. Alternativ finden Sie den folgenden \hologo{LaTeX}-Quelltext auch 
-  im Pfad \Path{texmf/source/latex/tudscr/doc/examples/} als Datei 
+  im Pfad \Path{\PName{texmf}/source/latex/tudscr/doc/examples/} als Datei 
   \File{\jobname-example.tex}. \par #1
   \begin{quoting}[rightmargin=0pt]%
   \lstinputlisting[style=tudscr]{\jobname-example-temp.tex}%
@@ -5654,7 +5627,7 @@
       }%
     }%
     \edef\@tempb{not\trim@spaces{#1}}%
-    \expandafter\@tempa\@tempb\relax\@empty\@empty\@nil%
+    \expandafter\@tempa\@tempb\@empty\@empty\@empty\@nil%
     \@tud@todotrue%
     \FamilyKeyStateProcessed%
   \fi%
@@ -5919,6 +5892,67 @@
 %</class>
 %</body>
 %</!doc>
+%<*body>
+% \fi
+%
+% \begin{macro}{\Attention}
+% \changes{v2.02}{2014/08/16}{neu}^^A
+% \begin{macro}{\Forum}
+% \begin{macro}{\CTAN}
+% \changes{v2.05}{2015/11/22}{neu}^^A
+% \begin{macro}{\GitHubRepo}
+% \changes{v2.02}{2014/08/16}{neu}^^A
+% \begin{macro}{\notudscrartcl}
+% \begin{macro}{\scrguide}
+% \changes{v2.02}{2014/09/04}{neu}^^A
+% \changes{v2.05}{2015/07/23}{Hyperlinktext über optionales Argument}^^A
+% Für die Anwenderdokumentation werden weitere Auszeichnungsbefehle definiert.
+%    \begin{macrocode}
+\newcommand*\Attention[1]{\marginnote{\fbox{Achtung!}}\emph{\trim@spaces{#1}}}
+\NewDocumentCommand\Forum{st'}{%
+  \IfBooleanTF{#1}{\toks@{\href}}{\toks@{\hrfn}}%
+  \IfBooleanT{#2}{\toks@{\url}}%
+  \addto@hook\toks@{{http://latex.wcms-file3.tu-dresden.de/phpBB3/}}%
+  \IfBooleanF{#2}{\addto@hook\toks@{{TUD-\LaTeX-Forum}}}%
+  \the\toks@\xspace%
+}
+\NewDocumentCommand\CTAN{sog}{%
+  \IfBooleanTF{#1}{\toks@{\href}}{\toks@{\hrfn}}%
+  \addto@hook\toks@{{http://www.ctan.org/\IfValueT{#2}{#2}}}%
+  \addto@hook\toks@{%
+    {\tud@english{Comprehensive TeX Archive Network (CTAN\IfValueT{#3}{~#3})}}%
+  }%
+  \the\toks@\xspace%
+}
+%<*class>
+\NewDocumentCommand\GitHubRepo{s}{%
+  \IfBooleanTF{#1}{\toks@{\href}}{\toks@{\hrfn}}%
+  \addto@hook\toks@{{https://github.com/tud-cd/tudscr/releases}}%
+  \addto@hook\toks@{{\tud@english{GitHub-Repository~\Distribution*{tudscr}}}}%
+  \the\toks@\xspace%
+}
+\newcommand*\notudscrartcl{%
+  F\"ur die Klasse \Class{tudscrartcl} ist diese Option nicht verf\"ugbar.%
+}
+%</class>
+\NewDocumentCommand\scrguide{sO{\KOMAScript-Handbuch}}{%
+  \IfBooleanTF{#1}{\toks@{\href}}{\toks@{\hrfn}}%
+  \addto@hook\toks@{%
+    {http://mirrors.ctan.org/macros/latex/contrib/koma-script/doc/scrguide.pdf}%
+  }%
+  \addto@hook\toks@{{#2}}%
+  \the\toks@\xspace%
+}
+%    \end{macrocode}
+% \end{macro}^^A \scrguide
+% \end{macro}^^A \notudscrartcl
+% \end{macro}^^A \GitHubRepo
+% \end{macro}^^A \CTAN
+% \end{macro}^^A \Forum
+% \end{macro}^^A \Attention
+%
+% \iffalse
+%</body>
 %<*body|doc>
 % \fi
 %
@@ -5935,22 +5969,13 @@
 % Handbuch genutzte Textbausteine bereit. Dazu wird der Befehl \cs{xspace} aus 
 % dem \pkg{xspace}-Paket genutzt.
 %    \begin{macrocode}
-%<doc>\AtBeginDocument{%
-\newcommand*\CD{Corporate Design\xspace}
-\newcommand*\CDs{Corporate Designs\xspace}
+\newcommand*\CD{\tud@english{Corporate Design}\xspace}
+\newcommand*\CDs{\tud@english{Corporate Designs}\xspace}
 \newcommand*\TUD{Technische Universit\"at Dresden\xspace}
 \newcommand*\TnUD{Technischen Universit\"at Dresden\xspace}
 \newcommand*\TUDCD{\CD der \TnUD}
 \newcommand*\TUDCDs{\CDs der \TnUD}
-%<!doc>\AfterPackage*{babel}{%
-%<doc>\@ifpackageloaded{babel}{%
-  \@expandtwoargs\in@{,english,}{,\bbl@loaded,}%
-  \ifin@%
-    \renewcommand*\CD{\foreignlanguage{english}{Corporate Design}\xspace}%
-    \renewcommand*\CDs{\foreignlanguage{english}{Corporate Designs}\xspace}%
-  \fi%
-%<doc>}{}
-%<!doc>}
+%<doc>\AtBeginDocument{%
 \newrobustcmd*\DDC{%
   \mbox{%
     D\kern.05em R\kern.05em E\kern.05em S\kern.05em %
