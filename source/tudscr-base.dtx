@@ -1,4 +1,4 @@
-% \CheckSum{521}
+% \CheckSum{549}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -177,6 +177,34 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \ifstrbool
+%
+% \subsubsection{Test auf eine verwendbare Sprache}
+%
+% \begin{macro}{\iflanguageloaded}
+% \changes{v2.05}{2015/11/23}{neu}^^A
+% Hiermit kann getestet werden, ob das Argument als Sprache nutzbar ist.
+%    \begin{macrocode}
+\newcommand*\iflanguageloaded[1]{%
+  \PackageWarning{tudscrbase}{%
+    Whether package `babel' nor package `polyglossia' has been loaded%
+  }%
+  \expandafter\@secondoftwo%
+}
+\AfterPackage*{babel}{%
+  \renewcommand*\iflanguageloaded[1]{%
+    \@expandtwoargs\in@{,#1,}{,\bbl@loaded,}%
+    \ifin@%
+      \expandafter\@firstoftwo%
+    \else%
+      \expandafter\@secondoftwo%
+    \fi%
+  }%
+}
+\AfterPackage*{polyglossia}{%
+  \renewcommand*\iflanguageloaded[1]{\ifcsdef{#1@loaded}}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \iflanguageloaded
 %
 % \subsubsection{Expansion geschützter Makros}
 %
@@ -970,7 +998,15 @@
     \ifxnumber{\@tempb}{%
       \TUD@parameter@set{#1}{columns=\@tempb}%
     }{%
-      \TUD@parameter@set{#1}{language=\@tempb}%
+      \iflanguageloaded{\@tempb}{%
+        \TUD@parameter@set{#1}{language=\@tempb}%
+      }{%
+        \ClassError{\TUDClassName}{%
+          Unknown key `\@tempb' for environment #1%
+        }{%
+          If key `\@tempb' is a language, you haven't loaded it.%
+        }%
+      }%
     }%
   }%
   \forcsvlist\@tempa{#2}%
