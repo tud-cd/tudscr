@@ -1,4 +1,4 @@
-% \CheckSum{4222}
+% \CheckSum{4221}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -157,16 +157,15 @@
 % \end{macro}^^A \vKOMAScript
 % \end{macro}^^A \vTUDScript
 % \begin{macro}{\tud@english}
+% Mit diesem Befehl wird der Inhalt des Arumentes mit englischen Trennmustern 
+% gesetzt, falls die Sprache geladen wurde.
 %    \begin{macrocode}
 \newcommand*\tud@english[1]{#1}
-%<!doc>\AfterPackage*{babel}{%
-%<doc>\AtBeginDocument{\@ifpackageloaded{babel}{%
-  \@expandtwoargs\in@{,english,}{,\bbl@loaded,}%
-  \ifin@%
+\AtBeginDocument{%
+  \iflanguageloaded{english}{%
     \renewcommand*\tud@english[1]{\foreignlanguage{english}{#1}}%
-  \fi%
-%<doc>}{}}
-%<!doc>}
+  }{}%
+}
 %    \end{macrocode}
 % \end{macro}^^A \tud@english
 %
@@ -176,6 +175,20 @@
 %<*body>
 % \fi
 %
+% \begin{macro}{\pdfstrcmp}
+% \begin{macro}{\pdfshellescape}
+% Sollte \app{lualatex} eingesetzt werden, sind diese \app{pdflatex}-Primitiven 
+% dennoch notwendig, wofür \pkg{pdftexcmds} geladen wird.
+%    \begin{macrocode}
+\RequirePackage{ifluatex}
+\ifluatex
+  \RequirePackage{pdftexcmds}%
+  \let\pdfstrcmp\pdf@strcmp%
+  \let\pdfshellescape\pdf@shellescape%
+\fi
+%    \end{macrocode}
+% \end{macro}^^A \pdfshellescape
+% \end{macro}^^A \pdfstrcmp
 % \begin{macro}{\tud@toks@}
 % \changes{v2.05}{2015/11/01}{neu}^^A
 % \begin{macro}{\eaddto@hook}
@@ -5825,16 +5838,7 @@
 % erst nach \pkg{inputenc} erfolgen.
 %    \begin{macrocode}
 \AfterPackage*{inputenc}{\RequirePackage{csquotes}[2011/10/22]}
-\TUD@UnwindPackage{csquotes}{%
-%<*class>
-  \ClassWarning{tudscrmanual}%
-%</class>
-%<*package>
-  \PackageWarning{tudscrtutorial}%
-%</package>
-    {Package `csquotes' not loaded}%
-  \providecommand\enquote[1]{\glqg#1\grqq{}}%
-}
+\TUD@UnwindPackage{inputenc}{\RequirePackage{csquotes}[2011/10/22]}
 %    \end{macrocode}
 % Verbesserte Zitate.
 %    \begin{macrocode}
