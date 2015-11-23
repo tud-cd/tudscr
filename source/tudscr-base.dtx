@@ -1,4 +1,4 @@
-% \CheckSum{532}
+% \CheckSum{521}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-base.dtx}[%
-  2015/11/02 v2.05 TUD-KOMA-Script\space%
+  2015/11/23 v2.05 TUD-KOMA-Script\space%
 %</driver>
 %<package>\NeedsTeXFormat{LaTeX2e}
 %<package>\ProvidesPackage{tudscrbase}[%
@@ -277,7 +277,7 @@
 % gedacht sind.
 % \begin{macro}{\tud@reserved}
 % \changes{v2.05}{2015/10/27}{neu}^^A
-% Das Makro wird mit \cs{tud@lowerstring}\marg{Zielmakro}\marg{String} benutzt.
+% Ein Makro zur temporären Verwendung.
 %    \begin{macrocode}
 \newcommand*\tud@reserved{}
 %    \end{macrocode}
@@ -965,20 +965,15 @@
 % \env{abstract} und \env{tudpage}.
 %    \begin{macrocode}
 \newcommand*\TUD@parameter@defaulthandler[2]{%
-  \def\@tempa{#2}%
-%    \end{macrocode}
-% \ToDo{\cs{@for} durch \cs{forcsvlist} ersetzen}[v2.05]%
-%    \begin{macrocode}
-  \@for\@tempb:=\@tempa\do{%
-    \ifx\@tempb\@empty\else\ifx\@tempb\space\else%
-      \ifstr{\@tempb}{twocolumn}{\def\@tempb{2}}{}%
-      \ifxnumber{\@tempb}{%
-        \TUD@parameter@set{#1}{columns=\@tempb}%
-      }{%
-        \TUD@parameter@set{#1}{language=\@tempb}%
-      }%
-    \fi\fi%
+  \def\@tempa##1{%  
+    \ifstr{##1}{twocolumn}{\def\@tempb{2}}{\def\@tempb{##1}}%
+    \ifxnumber{\@tempb}{%
+      \TUD@parameter@set{#1}{columns=\@tempb}%
+    }{%
+      \TUD@parameter@set{#1}{language=\@tempb}%
+    }%
   }%
+  \forcsvlist\@tempa{#2}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \TUD@parameter@defaulthandler

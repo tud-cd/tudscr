@@ -1,4 +1,4 @@
-% \CheckSum{705}
+% \CheckSum{678}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-fields.dtx}[%
-  2015/11/18 v2.05 TUD-KOMA-Script (input fields)%
+  2015/11/23 v2.05 TUD-KOMA-Script (input fields)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -874,16 +874,10 @@
 % zu erzeugen. 
 %    \begin{macrocode}
 \newcommand*\tud@multiple@fields@store[2]{%
-  \letcs\@tempa{tud@split#1@list}%
+  \def\@tempa##1{\ifcsdef{@##1}{\tud@cmd@store{@##1}}{}}%
+  \letcs\@tempb{tud@split#1@list}%
   \let\and\relax%
-%    \end{macrocode}
-% \ToDo{\cs{@for} durch \cs{forcsvlist} ersetzen}[v2.05]%
-%    \begin{macrocode}
-  \@for\@tempb:=\@tempa\do{%
-    \ifx\@tempb\@empty\else\ifx\@tempb\space\else%
-      \ifcsdef{@\@tempb}{\tud@cmd@store{@\@tempb}}{}%
-    \fi\fi%
-  }%
+  \expandafter\forcsvlist\expandafter\@tempa\expandafter{\@tempb}%
   \begingroup%
     \let\thanks\@gobble%
     \let\footnote\@gobble%
@@ -895,19 +889,15 @@
 % bestehenden Feldwerte zurückgesetzt.
 %    \begin{macrocode}
 \newcommand*\tud@multiple@fields@restore[1]{%
-  \letcs\@tempa{tud@split#1@list}%
-  \let\and\relax%
-%    \end{macrocode}
-% \ToDo{\cs{@for} durch \cs{forcsvlist} ersetzen}[v2.05]%
-%    \begin{macrocode}
-  \@for\@tempb:=\@tempa\do{%
-    \ifx\@tempb\@empty\else\ifx\@tempb\space\else%
-      \ifcsdef{@\@tempb}{%
-        \tud@cmd@restore{@\@tempb}%
-        \global\csletcs{@\@tempb}{@\@tempb}%
-      }{}%
-    \fi\fi%
+  \def\@tempa##1{%
+    \ifcsdef{@##1}{%
+      \tud@cmd@restore{@##1}%
+      \global\csletcs{@##1}{@##1}%
+    }{}%
   }%
+  \letcs\@tempb{tud@split#1@list}%
+  \let\and\relax%
+  \expandafter\forcsvlist\expandafter\@tempa\expandafter{\@tempb}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@multiple@fields@restore
@@ -918,26 +908,22 @@
 % definerten Liste \cs{tud@split\meta{Feld}@list} auf Standardwerte zu setzen.
 %    \begin{macrocode}
 \newcommand*\tud@multiple@fields@preset[3]{%
-  \letcs\@tempa{tud@split#1@list}%
-  \let\and\relax%
-%    \end{macrocode}
-% \ToDo{\cs{@for} durch \cs{forcsvlist} ersetzen}[v2.05]%
-%    \begin{macrocode}
-  \@for\@tempb:=\@tempa\do{%
-    \ifx\@tempb\@empty\else\ifx\@tempb\space\else%
-      \edef\@tempc{\@nameuse{\@tempb}}%
-      \ifstr{#2}{*}{%
-        \@namedef{@\@tempb}{}%
-      }{%
-        \begingroup%
-          \protected@expandtwoargs\in@{\@tempc}{\@nameuse{#1}}%
-          \ifin@%
-            \ifcsempty{@\@tempb}{\@tempc{#2}}{}%
-          \fi%
-        \endgroup%
-      }%
-    \fi\fi%
+  \def\@tempa##1{%
+    \edef\@tempc{\@nameuse{##1}}%
+    \ifstr{#2}{*}{%
+      \@namedef{@##1}{}%
+    }{%
+      \begingroup%
+        \protected@expandtwoargs\in@{\@tempc}{\@nameuse{#1}}%
+        \ifin@%
+          \ifcsempty{@##1}{\@tempc{#2}}{}%
+        \fi%
+      \endgroup%
+    }%
   }%
+  \letcs\@tempb{tud@split#1@list}%
+  \let\and\relax%
+  \expandafter\forcsvlist\expandafter\@tempa\expandafter{\@tempb}%
   \begingroup%
     \let\thanks\@gobble%
     \let\footnote\@gobble%
