@@ -1,4 +1,4 @@
-% \CheckSum{1316}
+% \CheckSum{1366}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-layout.dtx}[%
-  2015/11/18 v2.05 TUD-KOMA-Script (layout)%
+  2015/11/24 v2.05 TUD-KOMA-Script (layout)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -642,7 +642,7 @@
 % Hilfsmakro abermals zugewiesen werden.
 %    \begin{macrocode}
 \newcommand*\tud@font@koma@reset[1]{%
-  \addtokomafont{#1}{\@nameuse{tud@font@koma@#1}}%
+  \ifcsdef{tud@font@koma@#1}{\addtokomafont{#1}{\@nameuse{tud@font@koma@#1}}}{}%
 }
 %    \end{macrocode}
 % Mit \cs{tud@font@koma@unset} kann das angegebene Element wieder zurückgesetzt
@@ -661,49 +661,35 @@
 % zwingenden Verwendung von \KOMAScript{}~v3.12 entfernt.
 % \end{macro}^^A \usesizeofkomafont
 % \begin{option}{headings}
-% \begin{macro}{\tud@font@heading@size}
 % Die \KOMAScript-Option \opt{headings} setzt die Formatierung aller 
 % Überschriften zurück. Damit die Einstellungen für das \CD aktiv bleiben, 
-% werden nach der Ausführung der Option die mit \cs{tud@font@koma@set} 
-% definierten Makros \cs{tud@font@koma@\meta{Element}} erneut an die 
-% entsprechenden Schriftelemente angehängt.
+% werden nach der Ausführung der Option durch \cs{tud@headings@reset} die mit 
+% \cs{tud@font@koma@set} definierten Makros \cs{tud@font@koma@\meta{Element}}
+% erneut an die entsprechenden Schriftelemente angehängt. Bei der Verwendung 
+% der \KOMAScript-Option \opt{headings=standardclasses} werden außerdem noch 
+% die Optionen \opt{open} und \opt{chapterprefix} ausgeführt, weshalb auch auf 
+% diese reagiert werden muss.
 %    \begin{macrocode}
-\newcommand*\tud@font@heading@size{}
-\AtEndOfClass{\let\tud@font@heading@size\size@part}
 \DefineFamilyMember{KOMA}
 \DefineFamilyKey{KOMA}{headings}{%
-  \TUD@set@numkey{headings}{@tempa}{%
-    {big}{0},%
-    {normal}{1},%
-    {small}{2},%
-    {standardclasses}{13}%
-  }{#1}%
-  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \AtEndOfFamilyOptions{%
-      \let\tud@font@heading@size\size@part%
-      \if@atdocument%
-        \tud@layout@process%
-        \ifcase\tud@layout@part\relax\else% !false
-          \tud@font@koma@reset{part}%
-          \tud@font@koma@reset{partnumber}%
-        \fi%
-%<*book|report>
-        \ifcase\tud@layout@chapter\relax\else% !false
-          \tud@font@koma@reset{chapter}%
-          \tud@font@koma@reset{chapterprefix}%
-        \fi%
-%</book|report>
-        \ifcase\tud@layout@section\relax\else% !false
-          \tud@font@koma@reset{section}%
-          \tud@font@koma@reset{subsection}%
-          \tud@font@koma@reset{subsubsection}%
-        \fi%
-      \fi%
-    }%
+  \if@atdocument%
+    \AtEndOfFamilyOptions{\tud@headings@reset}%
   \fi%
+  \FamilyKeyStateProcessed%
+}
+\DefineFamilyKey{KOMA}{open}{%
+  \if@atdocument%
+    \AtEndOfFamilyOptions{\tud@headings@reset}%
+  \fi%
+  \FamilyKeyStateProcessed%
+}
+\DefineFamilyKey{KOMA}{chapterprefix}{%
+  \if@atdocument%
+    \AtEndOfFamilyOptions{\tud@headings@reset}%
+  \fi%
+  \FamilyKeyStateProcessed%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@font@heading@size
 % \end{option}^^A headings
 %
 % \iffalse
@@ -717,6 +703,101 @@
 % verschiedener Textelemente sowie die farbliche Gestaltung verstanden. Für das
 % \CD gibt es dabei drei Ausprägungen, die für die verschiedenen Elemente
 % auch unabhängig gewählt werden können.
+%
+% \begin{macro}{\tud@headings}
+% \changes{v2.05}{2015/11/24}{neu}^^A
+% \begin{macro}{\tud@disposition@fontsize}
+% \changes{v2.05}{2015/11/24}{neu}^^A
+% \begin{macro}{\tud@thesis@fontsize}
+% \changes{v2.05}{2015/11/24}{neu}^^A
+% Als erstes werden die zuvor erwähnten Optionen verarbeitet, welche Einfluss 
+% auf die Formatierung respektive die Schriftgröße der Überschriften haben. In 
+% \cs{tud@headings} wird die über \opt{headings=\dots} gewählte Schriftgröße 
+% der Überschriften gesichert.
+%    \begin{macrocode}
+\newcommand*\tud@headings{}
+\newcommand*\tud@disposition@fontsize{}
+%<book|report|article>\newcommand*\tud@thesis@fontsize{}
+%    \end{macrocode}
+% \end{macro}^^A \tud@thesis@fontsize
+% \end{macro}^^A \tud@disposition@fontsize
+% \end{macro}^^A \tud@headings
+% \begin{macro}{\tud@headings@set}
+% \changes{v2.05}{2015/11/24}{neu}^^A
+% Sollte per Option eine andere als die aktuelle Überschriftengröße gewählt
+% werden, werden mit \cs{tud@headings@set} die passenden Schriftgrößen für die
+% Überschriften (\cs{tud@disposition@fontsize}) sowie ggf. die Titelseite 
+% (\cs{tud@thesis@fontsize}) gesetzt.
+%    \begin{macrocode}
+\newcommand*\tud@headings@set[1][]{%
+  \def\@tempa##1##2##3{%
+    \ifstr{##1}{\tud@headings}{}{%
+      \renewcommand*\tud@headings{##1}%
+      \renewcommand*\tud@disposition@fontsize{##2}%
+%<book|report|article>      \renewcommand*\tud@thesis@fontsize{##3}%
+      #1%
+    }%
+  }%
+%    \end{macrocode}
+% Wird \cs{tud@headings@set} aufgerufen, so werden mit \cs{KOMAoptionOf} die 
+% aktuellen Werte der Option \opt{headings} ausgelesen, welche in einer Liste 
+% ausgegeben werden. Diese wird durchlaufen und dabei auf die relevanten Werte 
+% reagiert.
+%    \begin{macrocode}
+  \KOMAoptionOf[\def\@tempb]{\KOMAClassFileName}{headings}%
+  \@for\@tempc:=\@tempb\do{%
+    \ifstr{standardclasses}{\@tempc}{\@tempa{standardclasses}{\Huge}{\LARGE}}{%
+    \ifstr{big}{\@tempc}{\@tempa{big}{\Huge}{\LARGE}}{%
+    \ifstr{normal}{\@tempc}{\@tempa{normal}{\huge}{\Large}}{%
+    \ifstr{small}{\@tempc}{\@tempa{small}{\LARGE}{\Large}}{}}}}%
+  }%
+}
+%    \end{macrocode}
+% Damit die Einstellungen für die Größe wirksam werden, wird das Makro einmalig
+% zu Beginn des Dokumentes ausgeführt.
+%    \begin{macrocode}
+\AtEndPreamble{\tud@headings@set}
+%    \end{macrocode}
+% \end{macro}^^A \tud@headings@set
+%
+% \iffalse
+%</class&body>
+%<*class&option>
+% \fi
+%
+% \begin{macro}{\tud@headings@reset}
+% \changes{v2.05}{2015/11/24}{neu}^^A
+% Hiermit wird nach dem Ausführen der Option \opt{headings} im Zweifelsfall die 
+% Größe und Formatierung der Überschriften neu gesetzt.
+%    \begin{macrocode}
+\newcommand*\tud@headings@reset{%
+  \tud@layout@process%
+  \tud@headings@set[%
+    \ifcase\tud@layout@part\relax\else% !false
+      \tud@font@koma@reset{part}%
+      \tud@font@koma@reset{partnumber}%
+    \fi%
+%<*book|report>
+    \ifcase\tud@layout@chapter\relax\else% !false
+      \tud@font@koma@reset{chapter}%
+      \tud@font@koma@reset{chapterprefix}%
+    \fi%
+%</book|report>
+    \ifcase\tud@layout@section\relax\else% !false
+      \tud@font@koma@reset{section}%
+      \tud@font@koma@reset{subsection}%
+      \tud@font@koma@reset{subsubsection}%
+    \fi%
+  ]%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@headings@reset
+%
+% \iffalse
+%</class&option>
+%<*class&body>
+% \fi
+%
 % \begin{macro}{\tud@part@fontcolor}
 % \begin{macro}{\tud@chapter@fontcolor}
 % \begin{macro}{\tud@section@fontcolor}
@@ -732,11 +813,9 @@
 % \end{macro}^^A \tud@section@fontcolor
 % \end{macro}^^A \tud@chapter@fontcolor
 % \end{macro}^^A \tud@part@fontcolor
-% \begin{KOMAfont}{tud@heading}
-% \changes{v2.02}{2014/08/24}{entfernt}^^A
 % \begin{KOMAfont}{parttitle}
 % \changes{v2.02}{2014/08/24}{neu}^^A
-% \begin{macro}{\tud@font@heading@numsize}
+% \begin{KOMAfont}{tud@heading}
 % \changes{v2.02}{2014/08/24}{entfernt}^^A
 % \begin{macro}{\tud@font@part}
 % \changes{v2.02}{2014/08/24}{entfernt}^^A
@@ -750,7 +829,7 @@
 %    \begin{macrocode}
 %<*book|report>
 \newkomafont{parttitle}{%
-  \tud@font@heading%
+  \tud@disposition@font%
   \tud@color{\tud@part@fontcolor}%
   \usesizeofkomafont{section}%
 }
@@ -760,9 +839,8 @@
 % \end{macro}^^A \tud@font@part@title
 % \end{macro}^^A \tud@font@part@number
 % \end{macro}^^A \tud@font@part
-% \end{macro}^^A \tud@font@heading@numsize
-% \end{KOMAfont}^^A parttitle
 % \end{KOMAfont}^^A tud@heading
+% \end{KOMAfont}^^A parttitle
 % \begin{length}{\pageheadingsvskip}
 % \changes{v2.02}{2014/06/23}{neu}^^A
 % \begin{length}{\headingsvskip}
@@ -854,12 +932,12 @@
     \tud@font@koma@set{titlehead}{\usekomafont{titlepage}}%
     \tud@font@koma@set{title}{%
       \usekomafont{disposition}%
-      \tud@font@heading%
-      \tud@font@heading@size%
+      \tud@disposition@font%
+      \tud@disposition@fontsize%
       \tud@color{\tud@title@fontcolor}%
     }%
     \tud@font@koma@set{subtitle}{%
-      \tud@font@heading%
+      \tud@disposition@font%
       \usesizeofkomafont{section}%
       \tud@color{\tud@title@fontcolor}%
     }%
@@ -950,11 +1028,11 @@
     \else%
 %</book|report>
       \tud@sectioning@set[addpart]{part}{%
-        \tud@font@heading%
+        \tud@disposition@font%
         \tud@color{\tud@part@fontcolor}%
       }%
       \tud@font@koma@set{partnumber}{%
-        \tud@font@heading%
+        \tud@disposition@font%
         \tud@color{\tud@part@fontcolor}%
       }%
 %<*book|report>
@@ -1004,8 +1082,8 @@
       \let\@@makechapterhead\tud@@@makechapterhead%
     }%
     \tud@sectioning@set[addchap]{chapter}{%
-      \tud@font@heading%
-      \tud@font@heading@size%
+      \tud@disposition@font%
+      \tud@disposition@fontsize%
       \tud@color{\tud@chapter@fontcolor}%
     }%
     \tud@font@koma@set{chapterprefix}{\usesizeofkomafont{partnumber}}%
@@ -1029,19 +1107,19 @@
       \renewcommand*\tud@section@fontcolor{HKS41}%
     \fi%
     \tud@sectioning@set[addsec]{section}{%
-      \tud@font@heading%
+      \tud@disposition@font%
       \tud@color{\tud@section@fontcolor}%
     }%
     \tud@sectioning@set{subsection}{%
-      \tud@font@heading%
+      \tud@disposition@font%
       \tud@color{\tud@section@fontcolor}%
     }%
     \tud@sectioning@set{subsubsection}{%
-      \tud@font@heading%
+      \tud@disposition@font%
       \tud@color{\tud@section@fontcolor}%
     }%
     \tud@sectioning@set{minisec}{%
-      \tud@font@heading%
+      \tud@disposition@font%
       \tud@color{\tud@section@fontcolor}%
     }%
     \tud@sectioning@set{paragraph}{%
@@ -1157,8 +1235,7 @@
   \tud@layout@specialpage@set{part}%
   \begingroup%
     \vspace*{%
-      \dimexpr\tud@dim@headdiff+\tud@dim@headingsvskip-\baselineskip%
-        +\parskip\relax%
+      \dimexpr\tud@dim@headdiff+\tud@dim@headingsvskip-\baselineskip\relax%
     }%
     \vspace*{\pageheadingsvskip}%
     \setparsizes{\z@}{\z@}{\z@\@plus1fil}\par@updaterelative%
@@ -1169,8 +1246,8 @@
 %    \begin{macrocode}
     \if@tud@parttitle%
       \begingroup%
-        \tud@font@heading%
-        \tud@font@heading@size%
+        \tud@disposition@font%
+        \tud@disposition@fontsize%
         \tud@color{\tud@part@fontcolor}%
         \ifx\@@title\@empty%
           \ClassWarning{\TUDClassName}{%
@@ -1439,7 +1516,7 @@
     \renewcommand*\tud@chapter@fontcolor{HKS41}%
   \fi%
   \vspace*{%
-    \dimexpr\tud@dim@headdiff+\tud@dim@headingsvskip+\parskip\relax%
+    \dimexpr\tud@dim@headdiff+\tud@dim@headingsvskip\relax%
   }%
   \if@tud@chapterpage%
     \vspace*{\pageheadingsvskip}%
