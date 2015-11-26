@@ -1,4 +1,4 @@
-% \CheckSum{2862}
+% \CheckSum{2853}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -1039,23 +1039,21 @@
 %    \end{macrocode}
 % \end{macro}^^A \thispagestyle
 % \begin{macro}{\tud@head@text}
-% \begin{macro}{\tud@head@text@first}
-% \begin{macro}{\tud@head@text@second}
+% \begin{macro}{\tud@head@text@list}
+% \changes{v2.05}{2015/11/26}{neu}^^A
 % \begin{macro}{\tud@head@text@delimiter}
 % \begin{macro}{\tud@head@text@buffer}
 % Diese Befehle sind Hilfsmakros, die bei der Erzeugung der Textzeile inner- und
 % unterhalb des Querbalkens des TUD-Kopfes dienen.
 %    \begin{macrocode}
 \newcommand*\tud@head@text{}
-\newcommand*\tud@head@text@first{}
-\newcommand*\tud@head@text@second{}
+\newcommand*\tud@head@text@list{}
 \newcommand*\tud@head@text@delimiter{}
 \newcommand*\tud@head@text@buffer{}
 %    \end{macrocode}
 % \end{macro}^^A \tud@head@text@buffer
 % \end{macro}^^A \tud@head@text@delimiter
-% \end{macro}^^A \tud@head@text@second
-% \end{macro}^^A \tud@head@text@first
+% \end{macro}^^A \tud@head@text@list
 % \end{macro}^^A \tud@head@text
 % \begin{macro}{\tud@head@rule}
 % \changes{v2.02}{2014/06/23}{gewünschte Breite als Argument}^^A
@@ -1072,45 +1070,37 @@
 % \end{macro}^^A \tud@head@rule
 % \begin{macro}{\tud@head@text@add}
 % \changes{v2.04}{2015/04/08}{Verwendung von \cs{protected@edef}}^^A
-% Dieser Befehl dient zum Füllen eines Puffer-Strings. Es werden sequentiell
-% alle potentiellen Felder hinzugefügt. Sollte das zuletzt hinzugefügte Feld
-% dazu führen, dass der Text der Kopfzeile über den Seitenrand hinausragt, so
-% wird eine zweite Zeile begonnen. In diesem Fall wird der temporäre Schalter
-% \cs{@tempswa} aktiviert. Auch das Trennzeichen zwischen einzelnen Feldern
-% muss gepuffert werden, da dieses nur gesetzt wird, wenn ein weiteres Feld
-% nachfolgt.
+% \changes{v2.05}{2015/11/26}{Redesign}^^A
+% Dieser Befehl dient zum Füllen einer Liste für die spätere Ausgabe der 
+% Kopfzeilenfelder. Es werden sequentiellalle potentiellen Felder hinzugefügt. 
+% Sollte das hinzuzufügende Feld dazu führen, dass der Text der Kopfzeile über
+% den Seitenrand hinausragen würde, so wird eine weitere Zeile begonnen. Das 
+% Trennzeichen zwischen einzelnen Feldern muss gepuffert werden, da dieses nur
+% gesetzt werden soll, wenn ein weiteres Feld nachfolgt.
 %    \begin{macrocode}
-\newcommand*\tud@head@text@add[3][, ]{%
-  \protected@edef\tud@head@text{#3}%
-  \ifx\tud@head@text\@empty%
-    \def\tud@head@text@delimiter{}%
-  \else%
-    \edef\tud@head@text@delimiter{\tud@head@text@buffer}%
+\newcommand*\tud@head@text@add[3][{, }]{%
+  \ifstr{#3}{}{}{%
+    \protected@edef\tud@head@text@delimiter{\tud@head@text@buffer}%
     \def\tud@head@text@buffer{#1}%
-  \fi%
-  \if@tempswa\else%
-    \def\@tempa{%
-      \tud@head@text@first%
-      \tud@head@text@delimiter%
-      #2%
+    \protected@edef\@tempa{%
       \tud@head@text%
+      \tud@head@text@delimiter%
+      #2#3%
     }%
+%    \end{macrocode}
+% Sollte das hinzuzufügende Feld die aktuelle Kopfzeile \cs{tud@head@text} über 
+% die Textbreite hinaus erweitern, wird der bisherige Inhalt in die Liste 
+% \cs{tud@head@text@list} gespeichert und eine neue mit dem aktuellen Inhalt 
+% begonnen. Andernfalls wird der aktuelle Inhalt dem bestehenden hinzugefügt.
+%    \begin{macrocode}
     \settowidth\@tempdima{\@tempa}%
     \ifdim\@tempdima>\textwidth\relax%
-      \@tempswatrue%
-      \def\tud@head@text@delimiter{}%
+      \listeadd\tud@head@text@list{\expandonce\tud@head@text}%
+      \protected@edef\tud@head@text{#2#3}%
     \else%
-      \protected@edef\tud@head@text@first{\@tempa}%
+      \protected@edef\tud@head@text{\@tempa}%
     \fi%
-  \fi%
-  \if@tempswa%
-    \protected@edef\tud@head@text@second{%
-      \tud@head@text@second%
-      \tud@head@text@delimiter%
-      #2%
-      \tud@head@text%
-    }%
-  \fi%
+  }%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@head@text@add
@@ -1137,60 +1127,77 @@
   \tud@head@font@set%
 %    \end{macrocode}
 % Der Inhalt der Kopfzeile wird durch die angegeben Fakultät etc. vorgegeben.
-% Sollte der Platz in einer Zeile dafür nicht ausreichen, wird eine zweite
+% Sollte der Platz in einer Zeile dafür nicht ausreichen, wird eine weitere
 % Zeile begonnen. Ob diese benötigt wird, ist abhängig vom Inhalt und von der
-% sich daraus ergebenden Breite der Textzeile. Das Erzeugen der ersten und
-% gegebenenfalls der zweiten Textzeile im Kopf erfolgt durch das Makro
-% \cs{tud@head@text@add}\oarg{Trennzeichen}\marg{Schrift}\marg{Feld}. Der dafür
-% verwendete Schalter \cs{@tempswa} und die benötigten Hilfsmakros werden
-% vor der Verwendung initialisiert.
+% sich daraus ergebenden Breite der Textzeile. Das Erzeugen der einzelnen 
+% Textzeilen im Kopf, die in \cs{tud@head@text@list} gesichert werden, erfolgt 
+% mit \cs{tud@head@text@add}\oarg{Trennzeichen}\marg{Schrift}\marg{Feld}. Die
+% dafür benötigten Hilfsmakros werden vor der Verwendung initialisiert.
 %    \begin{macrocode}
-  \@tempswafalse%
-  \def\tud@head@text@first{}%
-  \def\tud@head@text@second{}%
+  \def\tud@head@text{}%
+  \def\tud@head@text@list{}%
   \def\tud@head@text@buffer{}%
   \tud@head@text@add[\enskip]{\tud@head@font@bold}{\@faculty}%
   \tud@head@text@add{\tud@head@font@light}{\@department}%
   \tud@head@text@add{\tud@head@font@light}{\@institute}%
   \tud@head@text@add{\tud@head@font@light}{\@chair}%
 %    \end{macrocode}
-% Sollte die zweite Textzeile zu lang sein, was bei kleinen Papierformaten
-% vorkommen kann, dann wird eine Warnung ausgegeben.
+% Ganz zum Schluss wird der Rest aus \cs{tud@head@text} ebenso wie ggf. die 
+% zusätzliche Zeile in die Liste expandiert.
 %    \begin{macrocode}
-  \settowidth\@tempdima{\tud@head@text@second}%
-  \ifdim\@tempdima>\textwidth\relax%
-    \tud@head@text@wrn{\the\dimexpr\@tempdima-\textwidth\relax}%
-    \hfuzz=\@tempdima%
-  \fi%
+  \listeadd\tud@head@text@list{\expandonce\tud@head@text}%
+  \ifstr{\@extraheadline}{}{}{%%
+    \listadd\tud@head@text@list{\tud@head@font@light\@extraheadline}%
+  }%
 %    \end{macrocode}
-% Es erfolgt die Ausgabe der Textzeile(n) mit Fakultät etc. über
-% \cs{tud@head@text@write} sowie einer möglichen Extrazeile.
-%    \begin{macrocode}
-  \vbox{%
-    \linespread{0}\selectfont\offinterlineskip%
-%    \end{macrocode}
+% Die Ausgabe der Textzeile(n) mit Fakultät etc. im Kopfbereiche erfolgt über 
+% das Makro \cs{tud@head@text@write}. Hierbei ist zu beachten, dass für die
+% erste Zeile  bei einem zweifarbigem Kopf eine andere Textfarbe als für die
+% restlichen benötigt wird. Außerdem ist für diese aufgrund der Linien im
+% Querbalken ein etwas größerer Abstand zur zweiten Zeile notwendig, weshalb
+% die temporären Makros \cs{@tempb} und \cs{@tempc} einmalig genutzt werden.
 % Die Farbe des Textes der ersten Zeile entspricht immer der des Kopfes.
 %    \begin{macrocode}
-    \tud@color{\tud@head@fontcolor}%
-    \tud@head@text@write{\tud@head@text@first}%
+  \def\@tempb{\tud@color{\tud@head@fontcolor}}%
+  \def\@tempc{\depth+\tud@dim@heavyline}%
 %    \end{macrocode}
-% Die zweite und dritte Zeile sind bei zweifarbigen Kopf normalerweise blau, 
-% nur für einen dunklen Seitenhintergrund weiß.
+% Das Makro \cs{@tempa} wird zur Ababreitung der Liste \cs{tud@head@text@list} 
+% definiert.
+%    \begin{macrocode}
+  \def\@tempa##1{%
+    \settowidth\@tempdima{##1}%
+%    \end{macrocode}
+% Sollte eine der Textzeilen zu lang sein, was insbesondere bei kleineren 
+% Papierformaten vorkommen kann, dann wird eine Warnung ausgegeben.
+%    \begin{macrocode}
+    \ifdim\@tempdima>\textwidth\relax%
+      \tud@head@text@wrn{\the\dimexpr\@tempdima-\textwidth\relax}%
+      \ifdim\dimexpr\@tempdima-\textwidth\relax>\hfuzz\relax%
+        \hfuzz=\dimexpr\@tempdima-\textwidth\relax%
+      \fi%
+    \fi%
+    \@tempb%
+    \tud@head@text@write[\@tempc]{##1}%
+    \def\@tempb{\newline}%
+    \def\@tempc{\z@}%
+%    \end{macrocode}
+% Die weiteren Zeilen sind bei zweifarbigen Kopf normalerweise blau, nur für
+% einen dunklen Seitenhintergrund weiß.
 %    \begin{macrocode}
     \ifnum\tud@head@bar>\@ne% cdhead=barcolor/color
       \ifdefvoid{\tud@pagecolor}{\color{HKS41}}{%
         \ifstr{\tud@pagecolor}{HKS41}{\color{white}}{\color{HKS41}}%
       }%
     \fi%
-    \ifx\tud@head@text@second\@empty%
-      \newline\tud@head@text@write{\tud@head@font@light\@extraheadline}%
-    \else%
-      \newline\tud@head@text@write{\tud@head@text@second}%
-      \ifx\@extraheadline\@empty\else%
-        \newline\vbox{\tud@head@font@light\@extraheadline}%
-      \fi%
-    \fi%
   }%
+%    \end{macrocode}
+% Dies ist nun die eigentliche Ausgabe, welche in einer vertikalen Box erfolgt.
+%    \begin{macrocode}
+  \vbox{%
+    \linespread{0}\selectfont\offinterlineskip%
+    \forlistloop\@tempa{\tud@head@text@list}%
+  }%
+  \global\let\tud@head@text@wrn\@gobble%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@head@text@box
@@ -1200,27 +1207,13 @@
 % \changes{v2.02}{2014/12/04}{Zentrierung des Zeilentextes}^^A
 % Befehl zur Ausgabe der ersten und evtl. zweiten Textzeile im TUD-Kopf
 %    \begin{macrocode}
-\newcommand*\tud@head@text@write[1]{%
+\newcommand*\tud@head@text@write[2][\z@]{%
   \raisebox{\dimexpr(\tud@dim@barheight+2\tud@dim@line-\totalheight)/2\relax}[%
     \dimexpr\tud@dim@barheight-\depth\relax%
-  ][\dimexpr\depth+\tud@dim@heavyline\relax]{#1\vphantom{gjpqy\"A\"O\"U}}%
+  ][\dimexpr#1\relax]{#2\vphantom{gjpqy\"A\"O\"U}}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@head@text@write
-% \begin{macro}{\tud@head@text@wrn}
-% Warnung für den Fall, dass die Kopfinformationen breiter werden, als die
-% Textbreite, was bei besonders kleinen Papierformaten geschehen kann.
-%    \begin{macrocode}
-\newcommand\tud@head@text@wrn[1]{%
-  \ClassWarning{\TUDClassName}{%
-    The given entries for the headline\MessageBreak%
-    (faculty, institute etc.) are #1\MessageBreak%
-    too wide for the textwidth%
-  }%
-  \global\let\tud@head@text@wrn\@gobble%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@head@text@wrn
 % \begin{macro}{\tud@newlayerbox}
 % \changes{v2.04}{2015/05/31}{neu}^^A
 % \begin{macro}{\tud@savelayerbox}
@@ -3423,8 +3416,7 @@
 %    \end{macrocode}
 % Nur falls \pkg{typearea} zum Einsatz kommt, wird am Ende der Präambel die 
 % Satzspiegelberechnung mit \cs{recalctypearea} angestoßen, ansonsten wird 
-% lediglich \cs{tud@AfterChangingArea} ausgeführt.
-% \ToDo{Verwendete Schriftgröße prüfen?}[v2.05]
+% bloß \cs{tud@AfterChangingArea} ausgeführt.
 %    \begin{macrocode}
     \ifcase\tud@geometry\relax%
       \recalctypearea%

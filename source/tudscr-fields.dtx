@@ -1,4 +1,4 @@
-% \CheckSum{675}
+% \CheckSum{676}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -135,10 +135,10 @@
 \newcommand*\@institute{}
 \newcommand*\@chair{}
 %<*book|report|article>
-\newcommand*\faculty[2][]{\gdef\@faculty{\trim@spaces{#2}}}
-\newcommand*\department[2][]{\gdef\@department{\trim@spaces{#2}}}
-\newcommand*\institute[2][]{\gdef\@institute{\trim@spaces{#2}}}
-\newcommand*\chair[2][]{\gdef\@chair{\trim@spaces{#2}}}
+\newcommand*\faculty[2][]{\tud@head@text@set{faculty}{#2}}
+\newcommand*\department[2][]{\tud@head@text@set{department}{#2}}
+\newcommand*\institute[2][]{\tud@head@text@set{institute}{#2}}
+\newcommand*\chair[2][]{\tud@head@text@set{chair}{#2}}
 %</book|report|article>
 %<*poster>
 \newcommand*\@faculty@foot{}
@@ -165,14 +165,70 @@
 % \end{macro}^^A \faculty
 % \begin{macro}{\extraheadline}
 % \begin{field}{\@extraheadline}
-% Für die Angabe einer freien zweiten bzw. dritten Textzeile im Kopf. Dies ist
-% laut \CD nur in besonderen Ausnahmefällen gestattet.
+% Für die Angabe weiteren, freien Textzeile im Kopf. Dies ist laut \CD nur in
+% besonderen Ausnahmefällen gestattet.
 %    \begin{macrocode}
 \newcommand*\@extraheadline{}
-\newcommand*\extraheadline[1]{\gdef\@extraheadline{\trim@spaces{#1}}}
+\newcommand*\extraheadline[1]{\tud@head@text@set{extraheadline}{#1}}
 %    \end{macrocode}
 % \end{field}^^A \@extraheadline
 % \end{macro}^^A \extraheadline
+% \begin{macro}{\tud@head@text@set}
+% \changes{v2.05}{2015/11/26}{neu}^^A
+% \begin{macro}{\tud@head@text@wrn}
+% Für die Felder im Kopf wird bei einer Änderung dieser die Warnung bezüglich 
+% der zu großen Breite der Kopfinformationen, was bei kleinen Papierformaten
+% geschehen kann, (re-)definiert.
+%    \begin{macrocode}
+\newcommand\tud@head@text@wrn[1]{}%
+\newcommand*\tud@head@text@set[2]{%
+  \csgdef{@#1}{\trim@spaces{#2}}%
+  \gdef\tud@head@text@wrn##1{%
+    \ClassWarning{\TUDClassName}{%
+      The given entries for the headline\MessageBreak%
+      (faculty, institute etc.) are ##1\MessageBreak%
+      too wide for the textwidth%
+    }%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@head@text@wrn
+% \end{macro}^^A \tud@head@text@set
+% \begin{macro}{\tud@foot@line@add}
+% \changes{v2.05}{2015/07/06}{neu}^^A
+% \begin{macro}{\tud@foot@line@write}
+% \changes{v2.05}{2015/07/06}{neu}^^A
+% Mit \cs{tud@foot@line@add} wird der Inhalt eines Feldes in \cs{@\meta{Feld}} 
+% gespeichert. Der Befehl erwartet als erstes obligatorisches Argument den
+% Feldnamen und als zweites den Inhalt. Entspricht das dritte obligatorische 
+% Argument \cs{@nil}, so wird in \cs{@\meta{Feld}@foot} ebenfalls das zweite 
+% Argument abgelegt, andernfalls das dritte.
+%
+% Damit wird es für Poster möglich, die Befehle \cs{faculty}, \cs{department}, 
+% \cs{institute}, \cs{chair} und \cs{professor} dahingehend zu erweitern, dass 
+% unterschiedliche Angaben für die Kopf- und Fußzeile gemacht werden können.
+% Wird eines der zuvor genannten Makros lediglich mit einem obligatorischen
+% Argument verwendet, so enthalten Kopf und Fuß den gleichen Eintrag. Wird
+% jedoch zusätzlich das optionale Argument genutzt, so wird dessen Inhalt im 
+% Fußbereich mit \cs{tud@foot@line@write} ausgegeben.
+%    \begin{macrocode}
+%<*poster>
+\newcommand*\tud@foot@line@add[3]{%
+  \tud@head@text@set{#1}{#2}%
+  \ifx\@nil#3\relax%
+    \global\csletcs{@#1@foot}{@#1}%
+  \else%
+    \csgdef{@#1@foot}{\trim@spaces{#3}}%
+  \fi%
+}
+\newcommand*\tud@foot@line@write[1]{%
+  \protected@edef\@tempa{\csuse{@#1@foot}}%
+  \ifx\@tempa\@empty\else\newline{\csuse{@#1@foot}}\fi%
+}
+%</poster>
+%    \end{macrocode}
+% \end{macro}^^A \tud@foot@line@write
+% \end{macro}^^A \tud@foot@line@add
 % \begin{macro}{\title}
 % \begin{field}{\@@title}
 % \changes{v2.02}{2014/11/06}{\cs{protected@xdef} genutzt}^^A
@@ -1005,45 +1061,6 @@
 % \end{macro}^^A \tud@split@author
 %
 % \iffalse
-%<*class&poster>
-% \fi
-%
-% \begin{macro}{\tud@foot@line@add}
-% \changes{v2.05}{2015/07/06}{neu}^^A
-% \begin{macro}{\tud@foot@line@write}
-% \changes{v2.05}{2015/07/06}{neu}^^A
-% Mit \cs{tud@foot@line@add} wird der Inhalt eines Feldes in \cs{@\meta{Feld}} 
-% gespeichert. Der Befehl erwartet als erstes obligatorisches Argument den
-% Feldnamen und als zweites den Inhalt. Entspricht das dritte obligatorische 
-% Argument \cs{@nil}, so wird in \cs{@\meta{Feld}@foot} ebenfalls das zweite 
-% Argument abgelegt, andernfalls das dritte.
-%
-% Damit wird es für Poster möglich, die Befehle \cs{faculty}, \cs{department}, 
-% \cs{institute}, \cs{chair} und \cs{professor} dahingehend zu erweitern, dass 
-% unterschiedliche Angaben für die Kopf- und Fußzeile gemacht werden können.
-% Wird eines der zuvor genannten Makros lediglich mit einem obligatorischen
-% Argument verwendet, so enthalten Kopf und Fuß den gleichen Eintrag. Wird
-% jedoch zusätzlich das optionale Argument genutzt, so wird dessen Inhalt im 
-% Fußbereich mit \cs{tud@foot@line@write} ausgegeben.
-%    \begin{macrocode}
-\newcommand*\tud@foot@line@add[3]{%
-  \csgdef{@#1}{\trim@spaces{#2}}%
-  \ifx\@nil#3\relax%
-    \global\csletcs{@#1@foot}{@#1}%
-  \else%
-    \csgdef{@#1@foot}{\trim@spaces{#3}}%
-  \fi%
-}
-\newcommand*\tud@foot@line@write[1]{%
-  \protected@edef\@tempa{\csuse{@#1@foot}}%
-  \ifx\@tempa\@empty\else\newline{\csuse{@#1@foot}}\fi%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@foot@line@write
-% \end{macro}^^A \tud@foot@line@add
-%
-% \iffalse
-%</class&poster>
 %</!manual>
 % \fi
 %
