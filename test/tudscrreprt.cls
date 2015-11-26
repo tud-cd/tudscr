@@ -2640,10 +2640,10 @@
   \DeclareNewLayer[%
     background,headsep,%
     voffset=\tud@dim@logoy,%
+    addhoffset=\dimexpr\tud@dim@logox-\tud@dim@widemargin\relax,%
     contents={%
       \tud@mainlogo@set%
       \tud@headlogo@option@set%
-      \hspace*{\dimexpr\tud@dim@logox-\tud@dim@widemargin\relax}%
       \tud@mainlogo@use\hfill\tud@headlogo@use%
     },%
   ]{tudheadings.head.content}%
@@ -2671,6 +2671,8 @@
   \DeclareNewLayer[%
     background,headsep,%
     voffset=\dimexpr\tud@dim@topmargin+\tud@dim@line\relax,%
+    % TODO: Inhalt in Boxen setzen oder zumindest Makro nur einmal definieren
+    %       keine Expansion der Felder
     contents={\tud@head@text@box},%
   ]{tudheadings.head.text}%
   \DeclareNewLayer[%
@@ -2779,6 +2781,7 @@
       \setlength\@tempdima{\dimexpr\layerheight-\dp\strutbox\relax}%
       \tud@footlogo@option@set%
       \tud@footlogo@cmd@set{\@tempdima}{\layerwidth}%
+      % TODO: Inhalt in Boxen setzen?
       \tud@footcontent@use{\@tempdima}{\layerwidth}%
       \hspace*{-\layerwidth}%
       \tud@footlogo@cmd@use%
@@ -3402,6 +3405,7 @@
   \renewcommand*\tud@footcontent@left{#2}%
   \renewcommand*\tud@footcontent@right{#3}%
 }
+% TODO: Defintionbei Postern prüfen
 \newcommand*\tud@footcontent@use[2]{%
   \tud@ddc@check%
   \ifcase\@tempb%
