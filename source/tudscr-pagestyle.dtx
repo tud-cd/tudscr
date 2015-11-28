@@ -1,4 +1,4 @@
-% \CheckSum{2853}
+% \CheckSum{2874}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-pagestyle.dtx}[%
-  2015/11/26 v2.05 TUD-KOMA-Script (pagestyle)%
+  2015/11/28 v2.05 TUD-KOMA-Script (pagestyle)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -298,8 +298,11 @@
     \edef\tud@head@fontsize{\strip@pt\@tempdima}%
   \fi%
 %    \end{macrocode}
-% Zum Schluss werden die restlichen Längen aus der Referenzlänge berechnet.
+% Zum Schluss werden die restlichen Längen aus der Referenzlänge berechnet und 
+% das Erstellen der Kopfzeile aufgrund der möglichen Änderung der Schriftgröße
+% forciert.
 %    \begin{macrocode}
+  \global\@tud@head@font@settrue%
   \setlength\tud@dim@slimmargin{\dimexpr2\tud@dim@widemargin/3\relax}%
   \setlength\tud@dim@both{\dimexpr5\tud@dim@widemargin/3\relax}%
   \setlength\tud@dim@topmargin{\dimexpr7\tud@dim@widemargin/6\relax}%
@@ -479,13 +482,13 @@
   \DeclareNewLayer[%
     background,headsep,%
     voffset=\tud@dim@logoy,%
+    addhoffset=\dimexpr\tud@dim@logox-\tud@dim@widemargin\relax,%
     contents={%
 %    \end{macrocode}
 % Vor der Ausgabe der Logoboxen werden diese im Bedarfsfall neu gesetzt.
 %    \begin{macrocode}
       \tud@mainlogo@set%
       \tud@headlogo@option@set%
-      \hspace*{\dimexpr\tud@dim@logox-\tud@dim@widemargin\relax}%
       \tud@mainlogo@use\hfill\tud@headlogo@use%
     },%
   ]{tudheadings.head.content}%
@@ -532,7 +535,11 @@
   \DeclareNewLayer[%
     background,headsep,%
     voffset=\dimexpr\tud@dim@topmargin+\tud@dim@line\relax,%
-    contents={\tud@head@text@box},%
+    contents={%
+      \tud@head@font@set%
+      \tud@head@text@set%
+      \tud@head@text@box%
+    },%
   ]{tudheadings.head.text}%
 %    \end{macrocode}
 % \end{layer}^^A tudheadings.head.text
@@ -715,12 +722,12 @@
       contents={%
         \tud@footlogoheight@set%
         \setlength\@tempdima{\dimexpr\layerheight-\dp\strutbox\relax}%
-        \tud@footlogo@option@set%
         \tud@ddc@check%
         \ifcase\@tempb\relax% \tud@ddc@foot=false
           \addtolength\@tempdima{\dimexpr\ht\strutbox-\tud@dim@ddcdiff\relax}%
           \vskip\dimexpr\tud@dim@ddcdiff-\ht\strutbox-\baselineskip\relax%
         \fi%
+        \tud@footlogo@option@set%
         \tud@footlogo@cmd@set{\@tempdima}{\layerwidth}%
         \tud@footcontent@use{\@tempdima}{\layerwidth}%
         \hspace*{-\layerwidth}%
@@ -1038,6 +1045,19 @@
 }{}{\tud@patch@wrn{thispagestyle}}
 %    \end{macrocode}
 % \end{macro}^^A \thispagestyle
+% \begin{macro}{\tud@head@rule}
+% \changes{v2.02}{2014/06/23}{gewünschte Breite als Argument}^^A
+% Der Querbalken des Kopfes läuft je nach gewähltem Parameter \cs{tud@head@bar}
+% entweder nur über den Textbereich oder aber über die gesamte Seitenbreite.
+% Der Befehl erzeugt eine horizontale Linie mit der übergebenen Breite und 
+% über \cs{tud@dim@line} definierter Dicke.
+%    \begin{macrocode}
+\newcommand*\tud@head@rule[1]{%
+  \tud@color{\tud@head@fontcolor}%
+  \rule[\ht\strutbox]{#1}{\tud@dim@line}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@head@rule
 % \begin{macro}{\tud@head@text}
 % \begin{macro}{\tud@head@text@list}
 % \changes{v2.05}{2015/11/26}{neu}^^A
@@ -1055,19 +1075,6 @@
 % \end{macro}^^A \tud@head@text@delimiter
 % \end{macro}^^A \tud@head@text@list
 % \end{macro}^^A \tud@head@text
-% \begin{macro}{\tud@head@rule}
-% \changes{v2.02}{2014/06/23}{gewünschte Breite als Argument}^^A
-% Der Querbalken des Kopfes läuft je nach gewähltem Parameter \cs{tud@head@bar}
-% entweder nur über den Textbereich oder aber über die gesamte Seitenbreite.
-% Der Befehl erzeugt eine horizontale Linie mit der übergebenen Breite und 
-% über \cs{tud@dim@line} definierter Dicke.
-%    \begin{macrocode}
-\newcommand*\tud@head@rule[1]{%
-  \tud@color{\tud@head@fontcolor}%
-  \rule[\ht\strutbox]{#1}{\tud@dim@line}%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@head@rule
 % \begin{macro}{\tud@head@text@add}
 % \changes{v2.04}{2015/04/08}{Verwendung von \cs{protected@edef}}^^A
 % \changes{v2.05}{2015/11/26}{Redesign}^^A
@@ -1080,12 +1087,12 @@
 %    \begin{macrocode}
 \newcommand*\tud@head@text@add[3][{, }]{%
   \ifstr{#3}{}{}{%
-    \protected@edef\tud@head@text@delimiter{\tud@head@text@buffer}%
+    \edef\tud@head@text@delimiter{\expandonce\tud@head@text@buffer}%
     \def\tud@head@text@buffer{#1}%
-    \protected@edef\@tempa{%
-      \tud@head@text%
-      \tud@head@text@delimiter%
-      #2#3%
+    \edef\@tempa{%
+      \expandonce\tud@head@text%
+      \expandonce\tud@head@text@delimiter%
+      \unexpanded{#2#3}%
     }%
 %    \end{macrocode}
 % Sollte das hinzuzufügende Feld die aktuelle Kopfzeile \cs{tud@head@text} über 
@@ -1098,12 +1105,62 @@
       \listeadd\tud@head@text@list{\expandonce\tud@head@text}%
       \protected@edef\tud@head@text{#2#3}%
     \else%
-      \protected@edef\tud@head@text{\@tempa}%
+      \edef\tud@head@text{\expandonce\@tempa}%
     \fi%
   }%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@head@text@add
+% \begin{macro}{\tud@head@text@set}
+% \changes{v2.05}{2015/11/28}{neu}^^A
+% \begin{macro}{\tud@head@text@wrn}
+% \begin{macro}{\if@tud@head@text@set}
+% \changes{v2.05}{2015/11/28}{neu}^^A
+% Für die Felder im Kopf wird bei einer Änderung dieser die Warnung bezüglich 
+% der zu großen Breite der Kopfinformationen, was bei kleinen Papierformaten
+% geschehen kann, (re-)definiert.
+%    \begin{macrocode}
+\newif\if@tud@head@text@set
+\newcommand*\tud@head@text@wrn[1]{}
+\newcommand*\tud@head@text@set{%
+  \if@tud@head@text@set%
+%    \end{macrocode}
+% Der Inhalt der Kopfzeile wird durch die angegeben Fakultät etc. vorgegeben.
+% Sollte der Platz in einer Zeile dafür nicht ausreichen, wird eine weitere
+% Zeile begonnen. Ob diese benötigt wird, ist abhängig vom Inhalt und von der
+% sich daraus ergebenden Breite der Textzeile. Das Erzeugen der einzelnen 
+% Textzeilen im Kopf, die in \cs{tud@head@text@list} gesichert werden, erfolgt 
+% mit \cs{tud@head@text@add}\oarg{Trennzeichen}\marg{Schrift}\marg{Feld}. Die
+% dafür benötigten Hilfsmakros werden vor der Verwendung initialisiert.
+%    \begin{macrocode}
+    \def\tud@head@text{}%
+    \def\tud@head@text@list{}%
+    \def\tud@head@text@buffer{}%
+    \tud@head@text@add[\enskip]{\tud@head@font@bold}{\@faculty}%
+    \tud@head@text@add{\tud@head@font@light}{\@department}%
+    \tud@head@text@add{\tud@head@font@light}{\@institute}%
+    \tud@head@text@add{\tud@head@font@light}{\@chair}%
+%    \end{macrocode}
+% Ganz zum Schluss wird der Rest aus \cs{tud@head@text} ebenso wie ggf. die 
+% zusätzliche Zeile in die Liste expandiert.
+%    \begin{macrocode}
+    \listeadd\tud@head@text@list{\expandonce\tud@head@text}%
+    \ifstr{\@extraheadline}{}{}{%%
+      \listadd\tud@head@text@list{\tud@head@font@light\@extraheadline}%
+    }%
+    \gdef\tud@head@text@wrn##1{%
+      \ClassWarning{\TUDClassName}{%
+        The given entries for the headline\MessageBreak%
+        (faculty, institute etc.) are ##1\MessageBreak%
+        too wide for the textwidth%
+      }%
+    }%
+  \fi%
+}
+%    \end{macrocode}
+% \end{macro}^^A \if@tud@head@text@set
+% \end{macro}^^A \tud@head@text@wrn
+% \end{macro}^^A \tud@head@text@set
 % \begin{macro}{\tud@head@text@box}
 % \changes{v2.02}{2014/06/23}{neu}^^A
 % \changes{v2.03}{2015/01/09}{Bugfix für zweite Zeile. Diese muss in jedem Fall 
@@ -1118,37 +1175,6 @@
     \ClassWarningNoLine{\TUDClassName}{No `\string\faculty' given}%
     \faculty{}%
   \fi%
-%    \end{macrocode}
-% Abhängig vom Wert \cs{tud@cdfont}~-- gesetzt entweder von der globalen
-% Klassenoption oder vom lokalen Parameter \opt{cdfont}~-- werden entweder die
-% Schriften des \CDs oder aber die serifenlose Standardschrift für die Kopfzeile
-% verwendet.
-%    \begin{macrocode}
-  \tud@head@font@set%
-%    \end{macrocode}
-% Der Inhalt der Kopfzeile wird durch die angegeben Fakultät etc. vorgegeben.
-% Sollte der Platz in einer Zeile dafür nicht ausreichen, wird eine weitere
-% Zeile begonnen. Ob diese benötigt wird, ist abhängig vom Inhalt und von der
-% sich daraus ergebenden Breite der Textzeile. Das Erzeugen der einzelnen 
-% Textzeilen im Kopf, die in \cs{tud@head@text@list} gesichert werden, erfolgt 
-% mit \cs{tud@head@text@add}\oarg{Trennzeichen}\marg{Schrift}\marg{Feld}. Die
-% dafür benötigten Hilfsmakros werden vor der Verwendung initialisiert.
-%    \begin{macrocode}
-  \def\tud@head@text{}%
-  \def\tud@head@text@list{}%
-  \def\tud@head@text@buffer{}%
-  \tud@head@text@add[\enskip]{\tud@head@font@bold}{\@faculty}%
-  \tud@head@text@add{\tud@head@font@light}{\@department}%
-  \tud@head@text@add{\tud@head@font@light}{\@institute}%
-  \tud@head@text@add{\tud@head@font@light}{\@chair}%
-%    \end{macrocode}
-% Ganz zum Schluss wird der Rest aus \cs{tud@head@text} ebenso wie ggf. die 
-% zusätzliche Zeile in die Liste expandiert.
-%    \begin{macrocode}
-  \listeadd\tud@head@text@list{\expandonce\tud@head@text}%
-  \ifstr{\@extraheadline}{}{}{%%
-    \listadd\tud@head@text@list{\tud@head@font@light\@extraheadline}%
-  }%
 %    \end{macrocode}
 % Die Ausgabe der Textzeile(n) mit Fakultät etc. im Kopfbereiche erfolgt über 
 % das Makro \cs{tud@head@text@write}. Hierbei ist zu beachten, dass für die
@@ -1194,7 +1220,15 @@
 % Dies ist nun die eigentliche Ausgabe, welche in einer vertikalen Box erfolgt.
 %    \begin{macrocode}
   \vbox{%
-    \linespread{0}\selectfont\offinterlineskip%
+%    \end{macrocode}
+% Das Paket \pkg{ragged2e} ändert im Zweifelsfall die Länge \cs{spaceskip}. Um 
+% den Kopf unbeeinflusst davon immer in der gleichen Gestalt erscheinen zu 
+% lassen, wird dies hier temporär unterdrückt.
+%    \begin{macrocode}
+    \let\@raggedtwoe@everyselectfont\relax%
+    \setlength\spaceskip{\z@}%
+    \selectfont%
+    \offinterlineskip%
     \forlistloop\@tempa{\tud@head@text@list}%
   }%
   \global\let\tud@head@text@wrn\@gobble%
@@ -1226,13 +1260,13 @@
 % von \cs{includegraphics} möglichst gering zu halten.
 %    \begin{macrocode}
 \newcommand*\tud@newlayerbox[1]{%
-  \expandafter\newsavebox\csname tud@logo@#1\endcsname%
+  \expandafter\newsavebox\csname tud@layer@#1\endcsname%
 }
 \newcommand*\tud@savelayerbox[1]{%
-  \global\expandafter\sbox\csname tud@logo@#1\endcsname%
+  \global\expandafter\sbox\csname tud@layer@#1\endcsname%
 }
 \newcommand*\tud@uselayerbox[1]{%
-  \expandafter\usebox\csname tud@logo@#1\endcsname%
+  \expandafter\usebox\csname tud@layer@#1\endcsname%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@uselayerbox
@@ -1529,11 +1563,11 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@ddc@check
-% \begin{macro}{\tud@logo@main@black}
+% \begin{macro}{\tud@layer@main@black}
 % \changes{v2.04}{2015/05/31}{neu}^^A
-% \begin{macro}{\tud@logo@main@HKS41}
+% \begin{macro}{\tud@layer@main@HKS41}
 % \changes{v2.04}{2015/05/31}{neu}^^A
-% \begin{macro}{\tud@logo@main@white}
+% \begin{macro}{\tud@layer@main@white}
 % \changes{v2.04}{2015/05/31}{neu}^^A
 % Diese drei Boxen werden für das Logo der \TnUD reserviert. Abhängig von der 
 % gewählten Option des Layouts und der Seitenfarbe wird eine der Logos in der 
@@ -1543,9 +1577,9 @@
 \tud@newlayerbox{main@HKS41}
 \tud@newlayerbox{main@white}
 %    \end{macrocode}
-% \end{macro}^^A \tud@logo@main@white
-% \end{macro}^^A \tud@logo@main@HKS41
-% \end{macro}^^A \tud@logo@main@black
+% \end{macro}^^A \tud@layer@main@white
+% \end{macro}^^A \tud@layer@main@HKS41
+% \end{macro}^^A \tud@layer@main@black
 % \begin{macro}{\tud@mainlogo@set}
 % \changes{v2.04}{2015/05/31}{neu}^^A
 % \begin{macro}{\if@tud@mainlogo@wrn}
@@ -1571,7 +1605,7 @@
     \tud@savelayerbox{main@black}{\@tempa{TUD-black}}%
     \tud@savelayerbox{main@HKS41}{\@tempa{TUD-blue}}%
     \tud@savelayerbox{main@white}{\@tempa{TUD-white}}%
-    \setlength\tud@mainlogoheight{\ht\tud@logo@main@black}%
+    \settoheight\tud@mainlogoheight{\tud@uselayerbox{main@black}}%
     \global\tud@mainlogoheight=\tud@mainlogoheight%
 %    \end{macrocode}
 % Es soll sichergestellt werden, dass das bei der Verwendung von \pkg{typearea}
@@ -1627,16 +1661,16 @@
 % \end{macro}^^A \tud@@mainlogo
 % \end{macro}^^A \tud@mainlogo
 % \end{macro}^^A \tud@mainlogo@use
-% \begin{macro}{\tud@logo@head@black}
+% \begin{macro}{\tud@layer@head@black}
 % \changes{v2.04}{2015/05/31}{neu}^^A
-% \begin{macro}{\tud@logo@head@HKS41}
+% \begin{macro}{\tud@layer@head@HKS41}
 % \changes{v2.04}{2015/05/31}{neu}^^A
-% \begin{macro}{\tud@logo@head@white}
+% \begin{macro}{\tud@layer@head@white}
 % \changes{v2.04}{2015/05/31}{neu}^^A
-% \begin{macro}{\tud@logo@head@option}
+% \begin{macro}{\tud@layer@head@option}
 % \changes{v2.04}{2015/05/31}{neu}^^A
 % Diese Boxen werden für das \DDC-Logo und das Zweitlogo im Kopf definiert. Der 
-% Box \cs{tud@logo@head@option} fäält dabei die Rolle zu, entweder ein~-- per 
+% Box \cs{tud@layer@head@option} fäält dabei die Rolle zu, entweder ein~-- per 
 % Option gewähltes~-- \DDC-Logo oder aber das mit \cs{headlogo} angegebene 
 % Zweitlogo zusichern und auszugeben. Die anderen drei Boxen speichern das Logo 
 % von \DDC in den drei für die unterschiedlichen Layoutausprägung benötigten 
@@ -1647,10 +1681,10 @@
 \tud@newlayerbox{head@white}
 \tud@newlayerbox{head@option}
 %    \end{macrocode}
-% \end{macro}^^A \tud@logo@head@option
-% \end{macro}^^A \tud@logo@head@white
-% \end{macro}^^A \tud@logo@head@HKS41
-% \end{macro}^^A \tud@logo@head@black
+% \end{macro}^^A \tud@layer@head@option
+% \end{macro}^^A \tud@layer@head@white
+% \end{macro}^^A \tud@layer@head@HKS41
+% \end{macro}^^A \tud@layer@head@black
 % \begin{macro}{\headlogo}
 % \changes{v2.02}{2014/06/23}{Anpassung an automatische Wahl des \DDC-Logos}^^A
 % \begin{macro}{\@headlogo}
@@ -1783,13 +1817,13 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@headlogo@use
-% \begin{macro}{\tud@logo@foot@black}
+% \begin{macro}{\tud@layer@foot@black}
 % \changes{v2.04}{2015/06/01}{neu}^^A
-% \begin{macro}{\tud@logo@foot@HKS41}
+% \begin{macro}{\tud@layer@foot@HKS41}
 % \changes{v2.04}{2015/06/01}{neu}^^A
-% \begin{macro}{\tud@logo@foot@white}
+% \begin{macro}{\tud@layer@foot@white}
 % \changes{v2.04}{2015/06/01}{neu}^^A
-% \begin{macro}{\tud@logo@foot@option}
+% \begin{macro}{\tud@layer@foot@option}
 % \changes{v2.04}{2015/06/01}{neu}^^A
 % Im Fußbereich kann das \DDC-Logo rechtsbündig ausgegeben. Hierfür werden die 
 % entsprechenden Boxen für alle Farbvarianten definiert. Diese werden genutzt,
@@ -1801,10 +1835,10 @@
 \tud@newlayerbox{foot@white}
 \tud@newlayerbox{foot@option}
 %    \end{macrocode}
-% \end{macro}^^A \tud@logo@foot@option
-% \end{macro}^^A \tud@logo@foot@white
-% \end{macro}^^A \tud@logo@foot@HKS41
-% \end{macro}^^A \tud@logo@foot@black
+% \end{macro}^^A \tud@layer@foot@option
+% \end{macro}^^A \tud@layer@foot@white
+% \end{macro}^^A \tud@layer@foot@HKS41
+% \end{macro}^^A \tud@layer@foot@black
 % \begin{length}{\footlogoheight}
 % \changes{v2.03}{2015/01/27}{neu}^^A
 % \begin{length}{\tud@footlogoheight}
@@ -1949,14 +1983,14 @@
 % \end{macro}^^A \tud@ddc@sethead
 % \end{macro}^^A \tud@@ddclogo
 % \end{macro}^^A \tud@ddclogo
-% \begin{macro}{\tud@logo@foot@cmd}
+% \begin{macro}{\tud@layer@foot@cmd}
 % \changes{v2.04}{2015/06/01}{neu}^^A
 % Für das Setzen von benutzerdefinierten Logos im Fußbereich wird diese Box 
 % verwendet.
 %    \begin{macrocode}
 \tud@newlayerbox{foot@cmd}
 %    \end{macrocode}
-% \end{macro}^^A \tud@logo@foot@cmd
+% \end{macro}^^A \tud@layer@foot@cmd
 % \begin{macro}{\footlogo}
 % \changes{v2.03}{2015/01/27}{neu}^^A
 % \begin{macro}{\@footlogo}
@@ -1992,7 +2026,7 @@
 % Die mit \cs{footlogo} angegeben Logos und die dazugehörigen Einstellungen, 
 % welche entweder allgemein über das optionale Argument oder aber individuell 
 % durch \val{:} an den Dateinamen angehängt übergeben wurden, werden hier in
-% der Box \cs{tud@logo@foot@cmd} gespeichert.
+% der Box \cs{tud@layer@foot@cmd} gespeichert.
 %    \begin{macrocode}
 \newif\if@tud@footlogo@cmd@set
 \newcommand*\tud@footlogo@cmd@set[2]{%
@@ -2024,7 +2058,7 @@
 }
 %    \end{macrocode}
 % Der Befehl \cs{tud@footlogo@cmd@set} wird genutzt, um die einzelnen Logos für
-% den Fuß nacheinander in der Box \cs{tud@logo@foot@cmd} zu setzen.
+% den Fuß nacheinander in der Box \cs{tud@layer@foot@cmd} zu setzen.
 %    \begin{macrocode}
 \newcommand*\tud@footlogo@cmd@@set[2]{%
   \begingroup%
@@ -2102,10 +2136,7 @@
 % Schrifteinstellungen entweder einspaltig oder zweispaltig gesetzt. Die 
 % Sternversion des Befehls nimmt keinerlei Einstellungen für die Schrift vor.
 %    \begin{macrocode}
-\newkomafont{tudheadings}{%
-  \sffamily%
-  \tud@color{\tud@foot@fontcolor}%
-}
+\newkomafont{tudheadings}{\tud@color{\tud@foot@fontcolor}}
 %    \end{macrocode}
 % Die mit \cs{footcontent} angegebenen Inhalte werden in diesen drei Makros 
 % gesichert, weshalb diese vorher alloziert werden. Anschließend erfolgt die 
@@ -2113,20 +2144,30 @@
 %    \begin{macrocode}
 \newcommand*\tud@footcontent@font{}
 \newcommand*\tud@footcontent@left{}
-\newcommand*\tud@footcontent@right{}
+\newcommand*\tud@footcontent@right{\@nil}
+%    \end{macrocode}
+% Die Sternversion ändert die Schriftgröße vom Inhalt nicht. Die Normalversion
+% nutzt die Schriftgröße der Kopfzeile mit einem passenden Durchschuss.
+%    \begin{macrocode}
 \newcommand*\footcontent{%
   \@ifstar{%
-    \@tempswafalse%
+    \renewcommand*\tud@footcontent@font{\usekomafont{tudheadings}}%
     \@footcontent%
   }{%
-    \@tempswatrue%
+    \renewcommand*\tud@footcontent@font{%
+      \usekomafont{tudheadings}%
+      \setlength\@tempdima{\tud@head@fontsize\p@}%
+      \fontsize{\tud@head@fontsize}{1.25\@tempdima}%
+      \selectfont%
+    }%
     \@footcontent%
   }%
 }
 %    \end{macrocode}
 % Normalerweise wird der Inhalt vollständig über die verfügbare Seitenfußbreite 
 % gesetzt. Wird das optionale Argument \emph{nach} dem obligatorischen genutzt, 
-% so erfolgt die Ausgabe zweispaltig.
+% so erfolgt die Ausgabe zweispaltig. Das optionale Argument kann für 
+% zusätzliche Formatierungsbefehle genutzt werden.
 %    \begin{macrocode}
 \newcommand*\@footcontent[2][]{%
   \kernel@ifnextchar[%]
@@ -2135,45 +2176,7 @@
 }
 \newcommand*\@@footcontent{}
 \def\@@footcontent#1#2[#3]{%
-  \if@tempswa%
-    \renewcommand*\tud@footcontent@font{%
-%    \end{macrocode}
-% Vor der Verwendung der Schrift \val{tudheadings} wird der ursprüngliche Wert 
-% der Schriftgröße gesichert und der gewünschte Wert voreingestellt.
-%    \begin{macrocode}
-      \let\@tempa\f@size%
-      \let\@tempb\relax%
-      \let\f@size\tud@head@fontsize%
-      \usekomafont{tudheadings}%
-%    \end{macrocode}
-% Erfolgt durch Verwendung der Schriftart keine Änderung der Schriftgröße, so 
-% muss der Durchschuss angepasst werden.
-%    \begin{macrocode}
-      \ifx\f@size\tud@head@fontsize\relax%
-        \tud@divide\@tempb{\tud@head@fontsize}{\@tempa}%
-%    \end{macrocode}
-% Andernfalls wird die Schriftgröße auf die gewünschte Zielgröße angepasst.
-%    \begin{macrocode}
-      \else%
-        \let\tud@head@fontsize\f@size%
-        \ifdim\f@baselineskip=\baselineskip\relax\else%
-          \tud@divide\@tempb{\f@baselineskip}{\baselineskip}%
-        \fi%
-      \fi%
-%    \end{macrocode}
-% Anschließend werden die gewünschten Einstellungen aktiviert.
-%    \begin{macrocode}
-      \ifx\@tempb\relax\relax\else%
-        \linespread{\@tempb}%
-        \selectfont%
-      \fi%
-      \tud@head@font@set%
-      \tud@head@font@light%
-      #1%
-    }%
-  \else%
-    \renewcommand*\tud@footcontent@font{#1}%
-  \fi%
+  \appto\tud@footcontent@font{#1\selectfont}%
   \renewcommand*\tud@footcontent@left{#2}%
   \renewcommand*\tud@footcontent@right{#3}%
 }
@@ -2305,65 +2308,79 @@
 % \changes{v2.04}{2015/06/01}{neu}^^A
 % Mit \cs{tud@footcontent@use} erfolgt die Ausgabe der mit \cs{footcontent} 
 % definierten Inhalte. Dabei wird darauf geachtet, ob ein \DDC-Logo im Fuß
-% verwendet wird.
+% verwendet wird. Die Ausgabe erfolgt jedoch nur, falls tatsächlich etwas 
+% definiert wurde.
 %    \begin{macrocode}
 \newcommand*\tud@footcontent@use[2]{%
-  \tud@ddc@check%
-  \ifcase\@tempb%
-    \setlength\@tempdimc{\z@}%
-  \else%
-    \settowidth\@tempdimc{\tud@uselayerbox{foot@black}}%
-    \addtolength\@tempdimc{\columnsep}%
+  \@tempswatrue%
+  \ifx\tud@footcontent@left\@empty\relax%
+    \expandafter\ifx\tud@footcontent@right\@nil\relax%
+      \@tempswafalse%
+    \else%
+      \ifx\tud@footcontent@right\@empty\relax%
+        \@tempswafalse%
+      \fi%
+    \fi%
   \fi%
+  \if@tempswa%
+    \tud@ddc@check%
+    \ifcase\@tempb%
+      \setlength\@tempdimc{\z@}%
+    \else%
+      \settowidth\@tempdimc{\tud@uselayerbox{foot@black}}%
+      \addtolength\@tempdimc{\columnsep}%
+    \fi%
 %    \end{macrocode}
 % Äquivalent zu den Logos wird auch der frei definierbare Inhalt des Fußes mit 
 % einer vertikalen Box gesetzt. Mit \cs{@tempdimc} wird im Bedarfsfall der 
 % Freiraum für das \DDC-Logo bereitgestellt.
 %    \begin{macrocode}
-  \tud@vlayerbox{#1}{%
-    \vss%
-    \hbox to #2{%
-      \tud@footcontent@font%
+    \tud@vlayerbox{#1}{%
+      \linespread{1}%
+      \vss%
+      \hbox to #2{%
+        \tud@footcontent@font%
 %    \end{macrocode}
 % Wurde das optionale Argument nach dem obligatorischen nicht genutzt, so wird 
 % der Inhalt über die komplette Breite des Textbereiches ausgegeben.
 %    \begin{macrocode}
-      \expandafter\ifx\tud@footcontent@right\@nil\relax%
-        \vtop{%
-          \hsize=\dimexpr#2-\@tempdimc\relax%
-          \strut\ignorespaces\tud@footcontent@left\strut%
-        }%
+        \expandafter\ifx\tud@footcontent@right\@nil\relax%
+          \vtop{%
+            \hsize=\dimexpr#2-\@tempdimc\relax%
+            \strut\ignorespaces\tud@footcontent@left\strut%
+          }%
 %    \end{macrocode}
 % Im zweispaltigen modus werden zwei vertikale Boxen erzeugt, zwischen denen
 % der Abstand \cs{columnsep} eingefügt wird.
 %    \begin{macrocode}
-      \else%
-        \vtop{%
-          \hsize=\dimexpr(#2-\columnsep)/2\relax%
-          \strut\ignorespaces\tud@footcontent@left\strut%
-        }%
-        \hspace{\columnsep}%
-        \vtop{%
-          \hsize=\dimexpr(#2-\columnsep)/2-\@tempdimc\relax%
-          \strut\ignorespaces\tud@footcontent@right\strut%
-        }%
-      \fi%
-      \hss%
-    }%
-    \vss\vss%
+        \else%
+          \vtop{%
+            \hsize=\dimexpr(#2-\columnsep)/2\relax%
+            \strut\ignorespaces\tud@footcontent@left\strut%
+          }%
+          \hspace{\columnsep}%
+          \vtop{%
+            \hsize=\dimexpr(#2-\columnsep)/2-\@tempdimc\relax%
+            \strut\ignorespaces\tud@footcontent@right\strut%
+          }%
+        \fi%
+        \hss%
+      }%
+      \vss\vss%
 %    \end{macrocode}
 % Sollte der Inhalt für den Fußbereich zu groß sein, wird eine Warnung erzeugt.
 %    \begin{macrocode}
-  }{%
-    The content for the footer (`\string\footcontent')\MessageBreak%
-    is too high. You should either reduce the content\MessageBreak%
-    or lower the fontsize via the optional argument.%
-    \ifcase\tud@geometry\relax\else% true/symmetric/twoside
-      \MessageBreak%
-      Alternatively you can enlarge the bottom margin\MessageBreak%
-      by using option `extrabottommargin'.%
-    \fi%
-  }%
+    }{%
+      The content for the footer (`\string\footcontent')\MessageBreak%
+      is too high. You should either reduce the content\MessageBreak%
+      or lower the fontsize via the optional argument.%
+      \ifcase\tud@geometry\relax\else% true/symmetric/twoside
+        \MessageBreak%
+        Alternatively you can enlarge the bottom margin\MessageBreak%
+        by using option `extrabottommargin'.%
+      \fi%
+    }%
+  \fi%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@footcontent@use
@@ -2388,6 +2405,7 @@
 % \changes{v2.03}{2015/02/14}{neu}^^A
 % \begin{macro}{\if@tud@head@widebar@locked}
 % \changes{v2.03}{2015/02/14}{neu}^^A
+% \begin{macro}{\if@tud@head@font@set}
 % Mit dieser Option wird die zentrale Benutzerschnittstelle für Einstellungen 
 % des typischen Querbalkens für den TUD-Kopf geschaffen. Durch sie können
 % sowohl die verwendete Schrift als auch die Stärke für den Balkentext
@@ -2397,6 +2415,7 @@
 \cs@lock{tud@head@font}{0}
 \cs@lock{tud@head@bar}{0}
 \bool@lock{@tud@head@widebar}
+\newif\if@tud@head@font@set
 \TUD@key{cdhead}[true]{%
   \TUD@set@numkey{cdhead}{@tempa}{%
     \TUD@numkey@bool,%
@@ -2436,9 +2455,13 @@
     \or% paperwidth
       \bool@set@lock{@tud@head@widebar}{true}%
     \fi%
+    \ifnum\@tempa<\thr@@\relax%
+      \global\@tud@head@font@settrue%
+    \fi%
   \fi%
 }
 %    \end{macrocode}
+% \end{macro}^^A \if@tud@head@font@set
 % \end{macro}^^A \if@tud@head@widebar@locked
 % \end{macro}^^A \if@tud@head@widebar
 % \end{macro}^^A \tud@head@bar@lock
@@ -2493,7 +2516,7 @@
       \TUD@AfterPackage{scrlayer-scrpage}{%
         \tud@ps@restore{scrheadings}%
         \tud@ps@restore{plain.scrheadings}%
-        \tud@font@koma@unset{pageheadfoot}%
+        \tud@font@koma@unset{pagefoot}%
       }%
 %    \end{macrocode}
 % Die ursprünglichen Kopf- und Fußzeilen werden mit dem Makro \cs{tud@ps@store} 
@@ -2505,7 +2528,7 @@
       \TUD@AfterPackage{scrlayer-scrpage}{%
         \tud@ps@store{scrheadings}%
         \tud@ps@store{plain.scrheadings}%
-        \tud@font@koma@set{pageheadfoot}{\upshape}%
+        \tud@font@koma@set{pagefoot}{\upshape}%
         \clearpairofpagestyles%
         \ofoot[\pagemark]{%
           \if@twoside\ifodd\value{page}\else\pagemark\quad\fi\fi%

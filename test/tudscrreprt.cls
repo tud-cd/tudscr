@@ -135,7 +135,8 @@
 \newcommand*\tud@dinbold{0m6}
 \newif\if@tud@fontspec
 \AfterPackage*{fontspec}{\@tud@fontspectrue}
-\newcommand*\tud@disposition@font{\dinbn\tud@raggedright}
+\newif\if@tud@cdfont@din%
+\@tud@cdfont@dintrue
 \newcommand*\tud@cdfont{1}
 \TUD@key{cdfont}[true]{%
   \TUD@set@numkey{cdfont}{@tempa}{%
@@ -184,7 +185,6 @@
     \ifcase\@tempa\relax% false
       \renewcommand*\tud@cdfont{0}%
       \if@atdocument\tud@font@set\fi%
-      \renewcommand*\tud@disposition@font{\tud@RaggedRight}%
     \or% true
       \renewcommand*\tud@cdfont{1}%
       \if@atdocument\tud@font@set\fi%
@@ -192,9 +192,9 @@
       \renewcommand*\tud@cdfont{2}%
       \if@atdocument\tud@font@set\fi%
     \or% nodin
-      \renewcommand*\tud@disposition@font{\univbn\tud@RaggedRight}%
+      \@tud@cdfont@dinfalse%
     \or% din
-      \renewcommand*\tud@disposition@font{\dinbn\tud@raggedright}%
+      \@tud@cdfont@dintrue%
     \or% nohead
       \TUDoptions{cdhead=false}%
     \or% head
@@ -346,6 +346,7 @@
 \cs@lock{tud@head@font}{0}
 \cs@lock{tud@head@bar}{0}
 \bool@lock{@tud@head@widebar}
+\newif\if@tud@head@font@set
 \TUD@key{cdhead}[true]{%
   \TUD@set@numkey{cdhead}{@tempa}{%
     \TUD@numkey@bool,%
@@ -385,6 +386,9 @@
     \or% paperwidth
       \bool@set@lock{@tud@head@widebar}{true}%
     \fi%
+    \ifnum\@tempa<\thr@@\relax%
+      \global\@tud@head@font@settrue%
+    \fi%
   \fi%
 }
 \TUD@AfterPackage@Set{scrlayer-scrpage}
@@ -403,13 +407,13 @@
       \TUD@AfterPackage{scrlayer-scrpage}{%
         \tud@ps@restore{scrheadings}%
         \tud@ps@restore{plain.scrheadings}%
-        \tud@font@koma@unset{pageheadfoot}%
+        \tud@font@koma@unset{pagefoot}%
       }%
     \or% true
       \TUD@AfterPackage{scrlayer-scrpage}{%
         \tud@ps@store{scrheadings}%
         \tud@ps@store{plain.scrheadings}%
-        \tud@font@koma@set{pageheadfoot}{\upshape}%
+        \tud@font@koma@set{pagefoot}{\upshape}%
         \clearpairofpagestyles%
         \ofoot[\pagemark]{%
           \if@twoside\ifodd\value{page}\else\pagemark\quad\fi\fi%
@@ -776,11 +780,12 @@
   \ifcsdef{tud@font@koma@#1}{}{\addtokomafont{#1}{\@nameuse{tud@font@koma@#1}}}%
   \@namedef{tud@font@koma@#1}{#2\nobreak}%
 }
+\newcommand*\tud@font@koma@unset[1]{%
+  \ifcsdef{tud@font@koma@#1}{}{\addtokomafont{#1}{\@nameuse{tud@font@koma@#1}}}%
+  \@namedef{tud@font@koma@#1}{\relax}%
+}
 \newcommand*\tud@font@koma@reset[1]{%
   \ifcsdef{tud@font@koma@#1}{\addtokomafont{#1}{\@nameuse{tud@font@koma@#1}}}{}%
-}
-\newcommand*\tud@font@koma@unset[1]{%
-  \ifcsdef{tud@font@koma@#1}{\@namedef{tud@font@koma@#1}{\relax}}{}%
 }
 \DefineFamilyMember{KOMA}
 \DefineFamilyKey{KOMA}{headings}{%
@@ -1494,6 +1499,13 @@
   \newcommand*\textdbn{}%
   \DeclareTextFontCommand{\textdbn}{\dinbn}%
 }
+\newcommand*\tud@disposition@font{%
+  \if@tud@cdfont@din%
+    \dinbn\tud@raggedright%
+  \else%
+    \sectfont\tud@RaggedRight%
+  \fi%
+}
 \newcommand*\cdfont[1]{%
   \@cdfont{#1}%
   \ifx\@tempc\relax\else%
@@ -1789,6 +1801,7 @@
   \ifstr{#1}{nomath}{}{\tud@font@math@set}%
   \normalfont\selectfont%
   \tud@layout@process%
+  \global\@tud@head@font@settrue%
 }
 \newcommand*\tud@font@skip@set{%
   \tud@ifverlower{2.04}{}{%
@@ -1862,51 +1875,49 @@
 \newcommand*\tud@head@font@bold{}
 \newcommand*\tud@head@font@light{}
 \newcommand*\tud@head@font@set{%
-  \ifdef{\@raggedtwoe@everyselectfont}{%
-    \let\@raggedtwoe@everyselectfont\relax%
-    \setlength\spaceskip{\z@}%
-    \selectfont%
-  }{}%
-  \DeclareFixedFont{\tud@head@font@bold}{\encodingdefault}%
-    {\sfdefault}{bx}{n}{\tud@head@fontsize}%
-  \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
-    {\sfdefault}{\mddefault}{n}{\tud@head@fontsize}%
-  \@tempswafalse%
   \ifcase\tud@head@font\relax% false
     \ifnum\tud@cdfont>\z@\relax% true/heavy
-      \ClassWarning{\TUDClassName}{%
-        It isn't possible to use `cdhead=false'\MessageBreak%
-        together with `cdfont=true'%
-      }%
-      \@tempswatrue%
-    \fi%
-  \else% true/heavy
-    \@tempswatrue%
-  \fi%
-  \if@tempswa% true/heavy
-    \if@tud@fontspec%
-      \DeclareFixedFont{\tud@head@font@bold}{\encodingdefault}%
-        {UniversBold}{m}{n}{\tud@head@fontsize}%
-      \ifcase\tud@head@font\relax\or% true
-        \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
-          {UniversLight}{m}{n}{\tud@head@fontsize}%
-      \or% heavy
-        \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
-          {UniversRegular}{m}{n}{\tud@head@fontsize}%
+      \if@tud@head@font@set%
+        \ClassWarning{\TUDClassName}{%
+          It isn't possible to use `cdhead=false'\MessageBreak%
+          together with `cdfont=true'%
+        }%
       \fi%
-    \else%
-      \if@tud@univers%
+      \TUDoptions{cdhead=true}%
+    \fi%
+  \fi%
+  \if@tud@head@font@set%
+    \DeclareFixedFont{\tud@head@font@bold}{\encodingdefault}%
+      {\sfdefault}{bx}{n}{\tud@head@fontsize}%
+    \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
+      {\sfdefault}{\mddefault}{n}{\tud@head@fontsize}%
+    \ifcase\tud@head@font\relax\else% true/heavy
+      \if@tud@fontspec%
         \DeclareFixedFont{\tud@head@font@bold}{\encodingdefault}%
-          {\tud@univers}{b}{n}{\tud@head@fontsize}%
+          {UniversBold}{m}{n}{\tud@head@fontsize}%
         \ifcase\tud@head@font\relax\or% true
           \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
-            {\tud@univers}{l}{n}{\tud@head@fontsize}%
+            {UniversLight}{m}{n}{\tud@head@fontsize}%
         \or% heavy
           \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
-            {\tud@univers}{m}{n}{\tud@head@fontsize}%
+            {UniversRegular}{m}{n}{\tud@head@fontsize}%
+        \fi%
+      \else%
+        \if@tud@univers%
+          \DeclareFixedFont{\tud@head@font@bold}{\encodingdefault}%
+            {\tud@univers}{b}{n}{\tud@head@fontsize}%
+          \ifcase\tud@head@font\relax\or% true
+            \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
+              {\tud@univers}{l}{n}{\tud@head@fontsize}%
+          \or% heavy
+            \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
+              {\tud@univers}{m}{n}{\tud@head@fontsize}%
+          \fi%
         \fi%
       \fi%
     \fi%
+    \global\@tud@head@font@setfalse%
+    \global\@tud@head@text@settrue%
   \fi%
 }
 \newrobustcmd*\ifdin{%
@@ -1950,22 +1961,15 @@
 \newcommand*\@department{}
 \newcommand*\@institute{}
 \newcommand*\@chair{}
-\newcommand*\faculty[2][]{\tud@head@text@set{faculty}{#2}}
-\newcommand*\department[2][]{\tud@head@text@set{department}{#2}}
-\newcommand*\institute[2][]{\tud@head@text@set{institute}{#2}}
-\newcommand*\chair[2][]{\tud@head@text@set{chair}{#2}}
+\newcommand*\faculty[2][]{\tud@head@text@field{faculty}{#2}}
+\newcommand*\department[2][]{\tud@head@text@field{department}{#2}}
+\newcommand*\institute[2][]{\tud@head@text@field{institute}{#2}}
+\newcommand*\chair[2][]{\tud@head@text@field{chair}{#2}}
 \newcommand*\@extraheadline{}
-\newcommand*\extraheadline[1]{\tud@head@text@set{extraheadline}{#1}}
-\newcommand\tud@head@text@wrn[1]{}%
-\newcommand*\tud@head@text@set[2]{%
+\newcommand*\extraheadline[1]{\tud@head@text@field{extraheadline}{#1}}
+\newcommand*\tud@head@text@field[2]{%
   \csgdef{@#1}{\trim@spaces{#2}}%
-  \gdef\tud@head@text@wrn##1{%
-    \ClassWarning{\TUDClassName}{%
-      The given entries for the headline\MessageBreak%
-      (faculty, institute etc.) are ##1\MessageBreak%
-      too wide for the textwidth%
-    }%
-  }%
+  \global\@tud@head@text@settrue%
 }
 \newcommand*\@@title{}
 \renewcommand*\title[1]{%
@@ -1973,6 +1977,8 @@
   \begingroup%
     \let\thanks\@gobble%
     \let\footnote\@gobble%
+    \def\newline{\space\ignorespaces}%
+    \def\\{\space\ignorespaces}%
     \protected@xdef\@@title{\trim@spaces{#1}}%
   \endgroup%
 }
@@ -2568,6 +2574,7 @@
     \setlength{\@tempdima}{\@tempa\@tempdima}%
     \edef\tud@head@fontsize{\strip@pt\@tempdima}%
   \fi%
+  \global\@tud@head@font@settrue%
   \setlength\tud@dim@slimmargin{\dimexpr2\tud@dim@widemargin/3\relax}%
   \setlength\tud@dim@both{\dimexpr5\tud@dim@widemargin/3\relax}%
   \setlength\tud@dim@topmargin{\dimexpr7\tud@dim@widemargin/6\relax}%
@@ -2671,9 +2678,11 @@
   \DeclareNewLayer[%
     background,headsep,%
     voffset=\dimexpr\tud@dim@topmargin+\tud@dim@line\relax,%
-    % TODO: Inhalt in Boxen setzen oder zumindest Makro nur einmal definieren
-    %       keine Expansion der Felder
-    contents={\tud@head@text@box},%
+    contents={%
+      \tud@head@font@set%
+      \tud@head@text@set%
+      \tud@head@text@box%
+    },%
   ]{tudheadings.head.text}%
   \DeclareNewLayer[%
     background,headsep,%
@@ -2781,7 +2790,6 @@
       \setlength\@tempdima{\dimexpr\layerheight-\dp\strutbox\relax}%
       \tud@footlogo@option@set%
       \tud@footlogo@cmd@set{\@tempdima}{\layerwidth}%
-      % TODO: Inhalt in Boxen setzen?
       \tud@footcontent@use{\@tempdima}{\layerwidth}%
       \hspace*{-\layerwidth}%
       \tud@footlogo@cmd@use%
@@ -2795,12 +2803,12 @@
       contents={%
         \tud@footlogoheight@set%
         \setlength\@tempdima{\dimexpr\layerheight-\dp\strutbox\relax}%
-        \tud@footlogo@option@set%
         \tud@ddc@check%
         \ifcase\@tempb\relax% \tud@ddc@foot=false
           \addtolength\@tempdima{\dimexpr\ht\strutbox-\tud@dim@ddcdiff\relax}%
           \vskip\dimexpr\tud@dim@ddcdiff-\ht\strutbox-\baselineskip\relax%
         \fi%
+        \tud@footlogo@option@set%
         \tud@footlogo@cmd@set{\@tempdima}{\layerwidth}%
         \tud@footcontent@use{\@tempdima}{\layerwidth}%
         \hspace*{-\layerwidth}%
@@ -2982,49 +2990,61 @@
 \patchcmd{\thispagestyle}{\gdef\@specialstyle{#1}}{%
   \xdef\@specialstyle{\GetRealPageStyle{#1}}%
 }{}{\tud@patch@wrn{thispagestyle}}
-\newcommand*\tud@head@text{}
-\newcommand*\tud@head@text@list{}
-\newcommand*\tud@head@text@delimiter{}
-\newcommand*\tud@head@text@buffer{}
 \newcommand*\tud@head@rule[1]{%
   \tud@color{\tud@head@fontcolor}%
   \rule[\ht\strutbox]{#1}{\tud@dim@line}%
 }
+\newcommand*\tud@head@text{}
+\newcommand*\tud@head@text@list{}
+\newcommand*\tud@head@text@delimiter{}
+\newcommand*\tud@head@text@buffer{}
 \newcommand*\tud@head@text@add[3][{, }]{%
   \ifstr{#3}{}{}{%
-    \protected@edef\tud@head@text@delimiter{\tud@head@text@buffer}%
+    \edef\tud@head@text@delimiter{\expandonce\tud@head@text@buffer}%
     \def\tud@head@text@buffer{#1}%
-    \protected@edef\@tempa{%
-      \tud@head@text%
-      \tud@head@text@delimiter%
-      #2#3%
+    \edef\@tempa{%
+      \expandonce\tud@head@text%
+      \expandonce\tud@head@text@delimiter%
+      \unexpanded{#2#3}%
     }%
     \settowidth\@tempdima{\@tempa}%
     \ifdim\@tempdima>\textwidth\relax%
       \listeadd\tud@head@text@list{\expandonce\tud@head@text}%
       \protected@edef\tud@head@text{#2#3}%
     \else%
-      \protected@edef\tud@head@text{\@tempa}%
+      \edef\tud@head@text{\expandonce\@tempa}%
     \fi%
   }%
+}
+\newif\if@tud@head@text@set
+\newcommand*\tud@head@text@wrn[1]{}
+\newcommand*\tud@head@text@set{%
+  \if@tud@head@text@set%
+    \def\tud@head@text{}%
+    \def\tud@head@text@list{}%
+    \def\tud@head@text@buffer{}%
+    \tud@head@text@add[\enskip]{\tud@head@font@bold}{\@faculty}%
+    \tud@head@text@add{\tud@head@font@light}{\@department}%
+    \tud@head@text@add{\tud@head@font@light}{\@institute}%
+    \tud@head@text@add{\tud@head@font@light}{\@chair}%
+    \listeadd\tud@head@text@list{\expandonce\tud@head@text}%
+    \ifstr{\@extraheadline}{}{}{%%
+      \listadd\tud@head@text@list{\tud@head@font@light\@extraheadline}%
+    }%
+    \gdef\tud@head@text@wrn##1{%
+      \ClassWarning{\TUDClassName}{%
+        The given entries for the headline\MessageBreak%
+        (faculty, institute etc.) are ##1\MessageBreak%
+        too wide for the textwidth%
+      }%
+    }%
+  \fi%
 }
 \newcommand*\tud@head@text@box{%
   \ifx\@faculty\@empty%
     \ClassWarningNoLine{\TUDClassName}{No `\string\faculty' given}%
     \faculty{}%
   \fi%
-  \tud@head@font@set%
-  \def\tud@head@text{}%
-  \def\tud@head@text@list{}%
-  \def\tud@head@text@buffer{}%
-  \tud@head@text@add[\enskip]{\tud@head@font@bold}{\@faculty}%
-  \tud@head@text@add{\tud@head@font@light}{\@department}%
-  \tud@head@text@add{\tud@head@font@light}{\@institute}%
-  \tud@head@text@add{\tud@head@font@light}{\@chair}%
-  \listeadd\tud@head@text@list{\expandonce\tud@head@text}%
-  \ifstr{\@extraheadline}{}{}{%%
-    \listadd\tud@head@text@list{\tud@head@font@light\@extraheadline}%
-  }%
   \def\@tempb{\tud@color{\tud@head@fontcolor}}%
   \def\@tempc{\depth+\tud@dim@heavyline}%
   \def\@tempa##1{%
@@ -3046,7 +3066,10 @@
     \fi%
   }%
   \vbox{%
-    \linespread{0}\selectfont\offinterlineskip%
+    \let\@raggedtwoe@everyselectfont\relax%
+    \setlength\spaceskip{\z@}%
+    \selectfont%
+    \offinterlineskip%
     \forlistloop\@tempa{\tud@head@text@list}%
   }%
   \global\let\tud@head@text@wrn\@gobble%
@@ -3057,13 +3080,13 @@
   ][\dimexpr#1\relax]{#2\vphantom{gjpqy\"A\"O\"U}}%
 }
 \newcommand*\tud@newlayerbox[1]{%
-  \expandafter\newsavebox\csname tud@logo@#1\endcsname%
+  \expandafter\newsavebox\csname tud@layer@#1\endcsname%
 }
 \newcommand*\tud@savelayerbox[1]{%
-  \global\expandafter\sbox\csname tud@logo@#1\endcsname%
+  \global\expandafter\sbox\csname tud@layer@#1\endcsname%
 }
 \newcommand*\tud@uselayerbox[1]{%
-  \expandafter\usebox\csname tud@logo@#1\endcsname%
+  \expandafter\usebox\csname tud@layer@#1\endcsname%
 }
 \newcommand*\tud@vlayerbox[3]{%
   \begingroup%
@@ -3108,7 +3131,7 @@
     \tud@savelayerbox{main@black}{\@tempa{TUD-black}}%
     \tud@savelayerbox{main@HKS41}{\@tempa{TUD-blue}}%
     \tud@savelayerbox{main@white}{\@tempa{TUD-white}}%
-    \setlength\tud@mainlogoheight{\ht\tud@logo@main@black}%
+    \settoheight\tud@mainlogoheight{\tud@uselayerbox{main@black}}%
     \global\tud@mainlogoheight=\tud@mainlogoheight%
     \gdef\tud@mainlogo@wrn##1{%
       \ifdim##1<\ta@bcor\relax%
@@ -3354,19 +3377,21 @@
   \endgroup%
 }
 \newcommand*\tud@footlogo@cmd@use{\tud@uselayerbox{foot@cmd}}%
-\newkomafont{tudheadings}{%
-  \sffamily%
-  \tud@color{\tud@foot@fontcolor}%
-}
+\newkomafont{tudheadings}{\tud@color{\tud@foot@fontcolor}}
 \newcommand*\tud@footcontent@font{}
 \newcommand*\tud@footcontent@left{}
-\newcommand*\tud@footcontent@right{}
+\newcommand*\tud@footcontent@right{\@nil}
 \newcommand*\footcontent{%
   \@ifstar{%
-    \@tempswafalse%
+    \renewcommand*\tud@footcontent@font{\usekomafont{tudheadings}}%
     \@footcontent%
   }{%
-    \@tempswatrue%
+    \renewcommand*\tud@footcontent@font{%
+      \usekomafont{tudheadings}%
+      \setlength\@tempdima{\tud@head@fontsize\p@}%
+      \fontsize{\tud@head@fontsize}{1.25\@tempdima}%
+      \selectfont%
+    }%
     \@footcontent%
   }%
 }
@@ -3377,76 +3402,64 @@
 }
 \newcommand*\@@footcontent{}
 \def\@@footcontent#1#2[#3]{%
-  \if@tempswa%
-    \renewcommand*\tud@footcontent@font{%
-      \let\@tempa\f@size%
-      \let\@tempb\relax%
-      \let\f@size\tud@head@fontsize%
-      \usekomafont{tudheadings}%
-      \ifx\f@size\tud@head@fontsize\relax%
-        \tud@divide\@tempb{\tud@head@fontsize}{\@tempa}%
-      \else%
-        \let\tud@head@fontsize\f@size%
-        \ifdim\f@baselineskip=\baselineskip\relax\else%
-          \tud@divide\@tempb{\f@baselineskip}{\baselineskip}%
-        \fi%
-      \fi%
-      \ifx\@tempb\relax\relax\else%
-        \linespread{\@tempb}%
-        \selectfont%
-      \fi%
-      \tud@head@font@set%
-      \tud@head@font@light%
-      #1%
-    }%
-  \else%
-    \renewcommand*\tud@footcontent@font{#1}%
-  \fi%
+  \appto\tud@footcontent@font{#1\selectfont}%
   \renewcommand*\tud@footcontent@left{#2}%
   \renewcommand*\tud@footcontent@right{#3}%
 }
-% TODO: Defintionbei Postern prüfen
 \newcommand*\tud@footcontent@use[2]{%
-  \tud@ddc@check%
-  \ifcase\@tempb%
-    \setlength\@tempdimc{\z@}%
-  \else%
-    \settowidth\@tempdimc{\tud@uselayerbox{foot@black}}%
-    \addtolength\@tempdimc{\columnsep}%
-  \fi%
-  \tud@vlayerbox{#1}{%
-    \vss%
-    \hbox to #2{%
-      \tud@footcontent@font%
-      \expandafter\ifx\tud@footcontent@right\@nil\relax%
-        \vtop{%
-          \hsize=\dimexpr#2-\@tempdimc\relax%
-          \strut\ignorespaces\tud@footcontent@left\strut%
-        }%
-      \else%
-        \vtop{%
-          \hsize=\dimexpr(#2-\columnsep)/2\relax%
-          \strut\ignorespaces\tud@footcontent@left\strut%
-        }%
-        \hspace{\columnsep}%
-        \vtop{%
-          \hsize=\dimexpr(#2-\columnsep)/2-\@tempdimc\relax%
-          \strut\ignorespaces\tud@footcontent@right\strut%
-        }%
+  \@tempswatrue%
+  \ifx\tud@footcontent@left\@empty\relax%
+    \expandafter\ifx\tud@footcontent@right\@nil\relax%
+      \@tempswafalse%
+    \else%
+      \ifx\tud@footcontent@right\@empty\relax%
+        \@tempswafalse%
       \fi%
-      \hss%
-    }%
-    \vss\vss%
-  }{%
-    The content for the footer (`\string\footcontent')\MessageBreak%
-    is too high. You should either reduce the content\MessageBreak%
-    or lower the fontsize via the optional argument.%
-    \ifcase\tud@geometry\relax\else% true/symmetric/twoside
-      \MessageBreak%
-      Alternatively you can enlarge the bottom margin\MessageBreak%
-      by using option `extrabottommargin'.%
     \fi%
-  }%
+  \fi%
+  \if@tempswa%
+    \tud@ddc@check%
+    \ifcase\@tempb%
+      \setlength\@tempdimc{\z@}%
+    \else%
+      \settowidth\@tempdimc{\tud@uselayerbox{foot@black}}%
+      \addtolength\@tempdimc{\columnsep}%
+    \fi%
+    \tud@vlayerbox{#1}{%
+      \linespread{1}%
+      \vss%
+      \hbox to #2{%
+        \tud@footcontent@font%
+        \expandafter\ifx\tud@footcontent@right\@nil\relax%
+          \vtop{%
+            \hsize=\dimexpr#2-\@tempdimc\relax%
+            \strut\ignorespaces\tud@footcontent@left\strut%
+          }%
+        \else%
+          \vtop{%
+            \hsize=\dimexpr(#2-\columnsep)/2\relax%
+            \strut\ignorespaces\tud@footcontent@left\strut%
+          }%
+          \hspace{\columnsep}%
+          \vtop{%
+            \hsize=\dimexpr(#2-\columnsep)/2-\@tempdimc\relax%
+            \strut\ignorespaces\tud@footcontent@right\strut%
+          }%
+        \fi%
+        \hss%
+      }%
+      \vss\vss%
+    }{%
+      The content for the footer (`\string\footcontent')\MessageBreak%
+      is too high. You should either reduce the content\MessageBreak%
+      or lower the fontsize via the optional argument.%
+      \ifcase\tud@geometry\relax\else% true/symmetric/twoside
+        \MessageBreak%
+        Alternatively you can enlarge the bottom margin\MessageBreak%
+        by using option `extrabottommargin'.%
+      \fi%
+    }%
+  \fi%
 }
 \TUD@UnwindPackage{geometry}{%
   \newcommand*\tud@geometry@process{\tud@geometry@set}%
@@ -3977,9 +3990,8 @@
       \tud@color{\tud@title@fontcolor}%
     }%
     \tud@font@koma@set{subject}{%
-      \fontfamily{\sfdefault}%
-      \fontseries{\bfdefault}%
-      \selectfont%
+      \sffamily%
+      \bfseries%
       \tud@color{\tud@title@fontcolor}%
     }%
     \tud@font@koma@set{author}{\usekomafont{subject}}%
@@ -4502,8 +4514,7 @@
 }
 \newkomafont{titlepage}{%
   \usekomafont{subject}%
-  \fontseries{\mddefault}%
-  \selectfont%
+  \mdseries%
   \large%
 }
 \robustify{\thanks}%
@@ -4511,6 +4522,7 @@
 \newcommand*\tud@title@uppercase[1]{%
   \let\@tempa\relax%
   \begingroup%
+    \let\\\newline%
     \def\thanks##1{\gdef\@tempa{##1}}%
     \let\footnote\thanks%
     \sbox\z@{#1}%
