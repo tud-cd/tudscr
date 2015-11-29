@@ -53,6 +53,11 @@ Das Bundle beinhaltet:
 Versionen
 ---------
 
+**v2.04c** (2015/11/29)
+
++ Bugfix für fehlenden Schriften bei Verwendung von Paket `fontspec`
+
+
 **v2.04b** (2015/10/06)
 
 + Bugfix für KOMA-Script v3.19
@@ -176,6 +181,11 @@ The bundle offers:
 
 Versions
 --------
+
+**v2.04c** (2015/11/29)
+
++ bug fix for missing fonts when using package `fontspec`
+
 
 **v2.04b** (2015/10/06)
 
