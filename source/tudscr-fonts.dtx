@@ -1,4 +1,4 @@
-% \CheckSum{1300}
+% \CheckSum{1323}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-fonts.dtx}[%
-  2015/06/12 v2.04 TUD-KOMA-Script\space%
+  2015/11/29 v2.04c TUD-KOMA-Script\space%
 %</driver>
 %<package&identify>\NeedsTeXFormat{LaTeX2e}
 %<package&identify>\ProvidesPackage{%
@@ -91,6 +91,8 @@
 % \changes{v2.02}{2014/08/29}{Unterstützung für \pkg{fontspec}}^^A
 % \changes{v2.04}{2015/02/27}{Interaktion mit Paketen insbesondere für 
 %   den Mathematiksatz verbessert}^^A
+% \changes{v2.04c}{2015/11/29}{Bugfix für \pkg{fontspec} bei fehlenden 
+%   Schriften}^^A
 %
 % \section{Schriften des \CDs}
 %
@@ -453,28 +455,6 @@
 % \end{macro}^^A \tud@font@check
 % \begin{macro}{\tud@font@init}
 % \changes{v2.04}{2014/03/10}{neu}^^A
-% Das Makro \cs{tud@font@init} wird für die Defintion aller Befehle zur Auswahl 
-% der Schriften des \CDs verwendet. Er wird als Hook genutzt und abhängig vom 
-% Schalter \cs{if@tud@fontspec} entweder für die Verwendung von \pkg{fontspec}
-% oder des NFSS-Schemas mit \cs{preto}\cs{tud@font@init}\marg{Makro} angepasst.
-% Nach der optionsabhängigen Definition der Schriftauswahlbefehle werden die 
-% Initialisierungsbefehle undefiniert gesetzt.
-%    \begin{macrocode}
-\newcommand*\tud@font@init{%
-  \undef\tud@font@init@fontspec%
-  \undef\tud@font@init@nfss%
-  \undef\tud@font@init%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@font@init
-% \begin{macro}{\univln}
-% \begin{macro}{\univrn}
-% \begin{macro}{\univbn}
-% \begin{macro}{\univxn}
-% \begin{macro}{\univls}
-% \begin{macro}{\univrs}
-% \begin{macro}{\univbs}
-% \begin{macro}{\univxs}
 % \begin{macro}{\textuln}
 % \begin{macro}{\texturn}
 % \begin{macro}{\textubn}
@@ -483,81 +463,13 @@
 % \begin{macro}{\texturs}
 % \begin{macro}{\textubs}
 % \begin{macro}{\textuxs}
-% \begin{macro}{\dinbn}
-% \begin{macro}{\@dinbn}
 % \begin{macro}{\textdbn}
-% Es werden mehrere Schalter zur expliziten Auswahl für die Schriftschnitte
-% Univers~45~Light, Univers~55~Regular, Univers~65~Bold, Univers~75~Black,
-% Univers~45~Light~Oblique, Univers~55~Regular~Oblique, Univers~65~Bold~Oblique
-% sowie Univers~75~Black~Oblique und DIN~Bold definiert. Diese können so im 
-% Dokument unabhängig von der Option \opt{cdfont} genutzt werden. Bei der
-% Schriftauswahl der DIN~Bold wird neben dieser noch die entsprechende
-% Mathematikschrift aktiviert.
-% \begin{macro}{\tud@font@init@fontspec}
-% \changes{v2.04}{2014/03/10}{neu}^^A
-% Zuerst wird das Makro für die Defintion nach \pkg{fontspec}-Manier definiert, 
-% danach .
+% Das Makro \cs{tud@font@init} wird für die Defintion aller Befehle zur Auswahl 
+% der Schriften des \CDs verwendet. Er wird als Hook genutzt und abhängig vom 
+% Schalter \cs{if@tud@fontspec} entweder für die Verwendung von \pkg{fontspec}
+% oder des NFSS-Schemas mit \cs{preto}\cs{tud@font@init}\marg{Makro} angepasst.
 %    \begin{macrocode}
-\newcommand*\tud@font@init@fontspec{%
-%    \end{macrocode}
-% Für die Schriften werden hierfür feste NFSS-Namen vergeben, um diese unter
-% anderem auch beim Setzen des Kopfes im \CD der \TnUD explizit auswählen zu
-% können.
-%    \begin{macrocode}
-  \newfontface\univln{Univers Light}[NFSSFamily=UniversLight]%
-  \newfontface\univrn{Univers}[NFSSFamily=UniversRegular]%
-  \newfontface\univbn{Univers Bold}[NFSSFamily=UniversBold]%
-  \newfontface\univxn{Univers Black}[NFSSFamily=UniversBlack]%
-  \newfontface\univls{Univers Light Oblique}[NFSSFamily=UniversLightOblique]%
-  \newfontface\univrs{Univers Oblique}[NFSSFamily=UniversRegularOblique]%
-  \newfontface\univbs{Univers Bold Oblique}[NFSSFamily=UniversBoldOblique]%
-  \newfontface\univxs{Univers Black Oblique}[NFSSFamily=UniversBlackOblique]%
-  \newcommand*\textuln[1]{{\univln##1}}%
-  \newcommand*\texturn[1]{{\univrn##1}}%
-  \newcommand*\textubn[1]{{\univbn##1}}%
-  \newcommand*\textuxn[1]{{\univxn##1}}%
-  \newcommand*\textuls[1]{{\univls##1}}%
-  \newcommand*\texturs[1]{{\univrs##1}}%
-  \newcommand*\textubs[1]{{\univbs##1}}%
-  \newcommand*\textuxs[1]{{\univxs##1}}%
-%    \end{macrocode}
-% Nach der Univers-Schriftfamilie wird für DIN~Bold äquivalent verfahren.
-%    \begin{macrocode}
-  \newfontface\@dinbn{DIN Bold}[NFSSFamily=DINBold,BoldFont = DIN Bold]%
-  \newcommand*\dinbn{\@dinbn\if@tud@dinbold\mathversion{dinbold}\fi}%
-  \newcommand*\textdbn[1]{{\dinbn##1}}%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@font@init@fontspec
-% \begin{macro}{\tud@font@init@nfss}
-% \changes{v2.04}{2014/03/10}{neu}^^A
-% Falls \opt{fontspec} nicht aktiv ist, werden die Schriften klassisch nach dem 
-% NFSS definiert.
-%    \begin{macrocode}
-\newcommand*\tud@font@init@nfss{%
-  \if@tud@univers%
-    \newcommand*\univln{\usefont{\encodingdefault}{\tud@univers}{l}{n}}%
-    \newcommand*\univrn{\usefont{\encodingdefault}{\tud@univers}{m}{n}}%
-    \newcommand*\univbn{\usefont{\encodingdefault}{\tud@univers}{b}{n}}%
-    \newcommand*\univxn{\usefont{\encodingdefault}{\tud@univers}{eb}{n}}%
-    \newcommand*\univls{\usefont{\encodingdefault}{\tud@univers}{l}{sl}}%
-    \newcommand*\univrs{\usefont{\encodingdefault}{\tud@univers}{m}{sl}}%
-    \newcommand*\univbs{\usefont{\encodingdefault}{\tud@univers}{b}{sl}}%
-    \newcommand*\univxs{\usefont{\encodingdefault}{\tud@univers}{eb}{sl}}%
-%    \end{macrocode}
-% Ansonsten werden die Schalter für die Rückfallebene so definert, dass diese
-% einfach nichts machen.
-%    \begin{macrocode}
-  \else%
-    \newcommand*\univln{}%
-    \newcommand*\univrn{}%
-    \newcommand*\univbn{}%
-    \newcommand*\univxn{}%
-    \newcommand*\univls{}%
-    \newcommand*\univrs{}%
-    \newcommand*\univbs{}%
-    \newcommand*\univxs{}%
-  \fi%
+\newcommand*\tud@font@init{%
 %    \end{macrocode}
 % Außerdem werden für die Schriften noch die entsprechenden Textauswahlbefehle
 % bereitgestellt.
@@ -570,6 +482,7 @@
   \newcommand*\texturs{}%
   \newcommand*\textubs{}%
   \newcommand*\textuxs{}%
+  \newcommand*\textdbn{}%
   \DeclareTextFontCommand{\textuln}{\univln}%
   \DeclareTextFontCommand{\texturn}{\univrn}%
   \DeclareTextFontCommand{\textubn}{\univbn}%
@@ -578,25 +491,20 @@
   \DeclareTextFontCommand{\texturs}{\univrs}%
   \DeclareTextFontCommand{\textubs}{\univbs}%
   \DeclareTextFontCommand{\textuxs}{\univxs}%
-%    \end{macrocode}
-% Nach der Univers-Schriftfamilie wird für DIN~Bold äquivalent verfahren.
-%    \begin{macrocode}
-  \if@tud@dinbold%
-    \newcommand*\dinbn{%
-      \usefont{\encodingdefault}{\tud@dinbold}{b}{n}%
-      \mathversion{dinbold}%
-    }%
-  \else%
-    \let\dinbn\sectfont%
-  \fi%
-  \newcommand*\textdbn{}%
   \DeclareTextFontCommand{\textdbn}{\dinbn}%
+%    \end{macrocode}
+% Nach der optionsabhängigen Definition der Schriftauswahlbefehle werden die 
+% Initialisierungsbefehle undefiniert gesetzt.
+%    \begin{macrocode}
+  \undef\tud@font@init@fontspec%
+  \undef\tud@fontface%
+  \undef\tud@fontspec@flag%
+  \undef\tud@fontspec@error%
+  \undef\tud@font@init@nfss%
+  \undef\tud@font@init%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@font@init@fontspec
 % \end{macro}^^A \textdbn
-% \end{macro}^^A \@dinbn
-% \end{macro}^^A \dinbn
 % \end{macro}^^A \textuxs
 % \end{macro}^^A \textubs
 % \end{macro}^^A \texturs
@@ -605,6 +513,156 @@
 % \end{macro}^^A \textubn
 % \end{macro}^^A \texturn
 % \end{macro}^^A \textuln
+% \end{macro}^^A \tud@font@init
+% \begin{macro}{\univln}
+% \begin{macro}{\univrn}
+% \begin{macro}{\univbn}
+% \begin{macro}{\univxn}
+% \begin{macro}{\univls}
+% \begin{macro}{\univrs}
+% \begin{macro}{\univbs}
+% \begin{macro}{\univxs}
+% \begin{macro}{\dinbn}
+% \begin{macro}{\@dinbn}
+% Es werden mehrere Schalter zur expliziten Auswahl für die Schriftschnitte
+% Univers~45~Light, Univers~55~Regular, Univers~65~Bold, Univers~75~Black,
+% Univers~45~Light~Oblique, Univers~55~Regular~Oblique, Univers~65~Bold~Oblique
+% sowie Univers~75~Black~Oblique und DIN~Bold definiert. Diese können so im 
+% Dokument unabhängig von der Option \opt{cdfont} genutzt werden. Bei der
+% Schriftauswahl der DIN~Bold wird neben dieser noch die entsprechende
+% Mathematikschrift aktiviert. Dabei ist zu beachten, dass die Schriften evtl. 
+% gar nicht installiert sind und für diesen Fall eine Rückfallebene notwendig 
+% ist.
+% \begin{macro}{\tud@font@init@fontspec}
+% \changes{v2.04}{2014/03/10}{neu}^^A
+% \begin{macro}{\if@tud@fontspec@missing}
+% \changes{v2.04c}{2015/11/29}{neu}^^A
+% \begin{macro}{\tud@fontface}
+% \changes{v2.04c}{2015/11/29}{neu}^^A
+% \begin{macro}{\tud@fontspec@flag}
+% \changes{v2.04c}{2015/11/29}{neu}^^A
+% \begin{macro}{\tud@fontspec@error}
+% \changes{v2.04c}{2015/11/29}{neu}^^A
+% Leider exisitiert im Paket \pkg{fontspec} keine einfache Möglichkeit, auf das 
+% Vorhandensein von Schriften zu testen. Deshalb wird hier etwa getrickst, um 
+% die Schriften nur zu laden, falls diese auch tatsächlich existieren und die
+% ggf. auftrtende Fehlermeldung zu unterdrücken.
+%    \begin{macrocode}
+\newif\if@tud@fontspec@missing
+\newcommand*\tud@font@init@fontspec{}
+%    \end{macrocode}
+% Alles etwas umständlich, aber leider geht es nicht anders. Um die Fehler
+% zu unterdrücken, ist die Syntax von \LaTeX{}3 notwendig. Es wird mit 
+% dem Paket \pkg{xparse} der Befehl \cs{tud@fontface} welcher eigentlch den 
+% Befehl \cs{newfontface} nutzt und für denn Fall, dass keine Schrift 
+% exisitiert, den entsprechenden Befehl leer definiert.
+%    \begin{macrocode}
+\IfFileExists{xparse.sty}{\@tempswatrue}{\@tempswafalse}%
+\if@tempswa
+  \RequirePackage{xparse}
+  \newcommand*\tud@fontspec@flag{\global\@tud@fontspec@missingtrue\@gobbletwo}%
+  \NewDocumentCommand\tud@fontface{mmo}{%
+    \global\@tud@fontspec@missingfalse%
+    \newfontface#1{#2}[#3]%
+    \if@tud@fontspec@missing%
+      \renewrobustcmd*#1{}%
+    \fi%
+  }%
+%    \end{macrocode}
+% Um die Fehler bei dem Laden der Schrift zu unterdrücken, wird der dafür
+% verantwortliche Befehl gesichertr und anschließend passend neu definiert.
+%    \begin{macrocode}
+  \ExplSyntaxOn
+  \renewcommand*\tud@font@init@fontspec{%
+    \cs_set_eq:NN \tud@fontspec@error \__fontspec_error:nx
+    \cs_set_eq:NN \__fontspec_error:nx \tud@fontspec@flag
+%    \end{macrocode}
+% Für die Schriften werden feste NFSS-Namen vergeben, um diese unter anderem 
+% auch beim Setzen des Kopfes im \CD der \TnUD explizit auswählen zu können.
+%    \begin{macrocode}
+    \tud@fontface\univln{Univers Light}[NFSSFamily=UniversLight]%
+    \tud@fontface\univrn{Univers}[NFSSFamily=UniversRegular]%
+    \tud@fontface\univbn{Univers Bold}[NFSSFamily=UniversBold]%
+    \tud@fontface\univxn{Univers Black}[NFSSFamily=UniversBlack]%
+    \tud@fontface\univls{Univers Light Oblique}[NFSSFamily=UniversLightOblique]%
+    \tud@fontface\univrs{Univers Oblique}[NFSSFamily=UniversRegularOblique]%
+    \tud@fontface\univbs{Univers Bold Oblique}[NFSSFamily=UniversBoldOblique]%
+    \tud@fontface\univxs{Univers Black Oblique}[NFSSFamily=UniversBlackOblique]%
+%    \end{macrocode}
+% Nach der Univers-Schriftfamilie wird für DIN~Bold äquivalent verfahren. Da 
+% dieser Schriftschnitt zwingend für die Überschriften benötigt wird, sollte 
+% dieser zumindest auch auf deren Stil schalten.
+%    \begin{macrocode}
+    \tud@fontface\@dinbn{DIN Bold}[NFSSFamily=DINBold,BoldFont = DIN Bold]%
+    \if@tud@fontspec@missing%
+      \newrobustcmd*\dinbn{\sectfont}%
+    \else%
+      \if@tud@dinbold%
+        \newrobustcmd*\dinbn{\@dinbn\mathversion{dinbold}}%
+      \else%
+        \newrobustcmd*\dinbn{\@dinbn}%
+      \fi%
+    \fi%
+%    \end{macrocode}
+% Zum Schluss wird noch die Fehlermeldungen auf ihre ursprüngliche Definition
+% gesetzt und damit ist der ganze Zauber vorbei.
+%    \begin{macrocode}
+    \cs_set_eq:NN \__fontspec_error:nx \tud@fontspec@error
+  }%
+  \ExplSyntaxOff
+\fi%
+%    \end{macrocode}
+% \end{macro}^^A \tud@fontspec@error
+% \end{macro}^^A \tud@fontspec@flag
+% \end{macro}^^A \tud@fontface
+% \end{macro}^^A \if@tud@fontspec@missing
+% \end{macro}^^A \tud@font@init@fontspec
+% \begin{macro}{\tud@font@init@nfss}
+% \changes{v2.04}{2014/03/10}{neu}^^A
+% Falls \opt{fontspec} nicht aktiv ist, werden die Schriften klassisch nach dem 
+% NFSS definiert. Sind die Univer-Schriften installiert, dann werden dazu 
+% passende Schalter erstellt.
+%    \begin{macrocode}
+\newcommand*\tud@font@init@nfss{%
+  \if@tud@univers%
+    \newrobustcmd*\univln{\usefont{\encodingdefault}{\tud@univers}{l}{n}}%
+    \newrobustcmd*\univrn{\usefont{\encodingdefault}{\tud@univers}{m}{n}}%
+    \newrobustcmd*\univbn{\usefont{\encodingdefault}{\tud@univers}{b}{n}}%
+    \newrobustcmd*\univxn{\usefont{\encodingdefault}{\tud@univers}{eb}{n}}%
+    \newrobustcmd*\univls{\usefont{\encodingdefault}{\tud@univers}{l}{sl}}%
+    \newrobustcmd*\univrs{\usefont{\encodingdefault}{\tud@univers}{m}{sl}}%
+    \newrobustcmd*\univbs{\usefont{\encodingdefault}{\tud@univers}{b}{sl}}%
+    \newrobustcmd*\univxs{\usefont{\encodingdefault}{\tud@univers}{eb}{sl}}%
+%    \end{macrocode}
+% Ansonsten werden die Schalter für die Rückfallebene so definert, dass diese
+% einfach nichts machen.
+%    \begin{macrocode}
+  \else%
+    \newrobustcmd*\univln{}%
+    \newrobustcmd*\univrn{}%
+    \newrobustcmd*\univbn{}%
+    \newrobustcmd*\univxn{}%
+    \newrobustcmd*\univls{}%
+    \newrobustcmd*\univrs{}%
+    \newrobustcmd*\univbs{}%
+    \newrobustcmd*\univxs{}%
+  \fi%
+%    \end{macrocode}
+% Nach der Univers-Schriftfamilie wird für DIN~Bold äquivalent verfahren.
+%    \begin{macrocode}
+  \if@tud@dinbold%
+    \newrobustcmd*\dinbn{%
+      \usefont{\encodingdefault}{\tud@dinbold}{b}{n}%
+      \mathversion{dinbold}%
+    }%
+  \else%
+    \newrobustcmd*\dinbn{\sectfont}%
+  \fi%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@font@init@nfss
+% \end{macro}^^A \@dinbn
+% \end{macro}^^A \dinbn
 % \end{macro}^^A \univxs
 % \end{macro}^^A \univbs
 % \end{macro}^^A \univrs
