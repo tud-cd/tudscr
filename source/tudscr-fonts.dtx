@@ -1,4 +1,4 @@
-% \CheckSum{1327}
+% \CheckSum{1341}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -507,6 +507,7 @@
     \global\@tud@fontspec@missingfalse%
     \newfontface#1{#2}[#3]%
     \if@tud@fontspec@missing%
+      \@tempswatrue%
       \renewrobustcmd*#1{}%
     \fi%
   }%
@@ -515,6 +516,7 @@
 %    \begin{macrocode}
   \ExplSyntaxOn
   \renewcommand*\tud@font@init@fontspec{%
+    \@tempswafalse%
     \cs_set_eq:NN \tud@fontspec@error \__fontspec_error:nx
     \cs_set_eq:NN \__fontspec_error:nx \tud@fontspec@flag
 %    \end{macrocode}
@@ -545,10 +547,14 @@
       \fi%
     \fi%
 %    \end{macrocode}
-% Zum Schluss wird noch die Fehlermeldungen auf ihre ursprüngliche Definition
-% gesetzt und damit ist der ganze Zauber vorbei.
+% Zum Schluss wird der Schalter \cs{if@tud@fontspec@missing} aktiviert, falls 
+% auch nur eine Schrift beim Laden gefehlt hat sowie die Fehlermeldungen auf
+% ihre ursprüngliche Definition gesetzt. Damit ist der ganze Zauber vorbei.
 %    \begin{macrocode}
     \cs_set_eq:NN \__fontspec_error:nx \tud@fontspec@error
+    \if@tempswa%
+      \global\@tud@fontspec@missingtrue%
+    \fi%
   }%
   \ExplSyntaxOff
 \fi%
@@ -917,12 +923,25 @@
 % mathmatischen Formelsatz gibt, werden unabhängig vom Status der Option 
 % \emph{immer} die PostScript"=Schriften verwendet, falls diese installiert
 % sind. Damit \pkg{tudscrfonts} reibungslos mit den nachfolgenden Definitionen
-% funktioniert, wird im Bedarfsfall der Befehl \cs{sectfont} vorgehalten.
+% funktioniert, wird im Bedarfsfall der Befehl \cs{sectfont} vorgehalten. 
+% Außerdem wird eine Warnung ausgegeben, sobald mindestens eine der notwendigen
+% OpenType-Schriften fehlt.
 %    \begin{macrocode}
 %<*package>
   \ifdef{\sectfont}{}{\let\sectfont\relax}%
 %</package>
   \tud@font@init%
+  \if@tud@fontspec@missing%
+%<*class>
+    \ClassWarningNoLine{\TUDClassName}%
+%</class>
+%<*package>
+    \PackageWarningNoLine{tudscrfonts}%
+%</package>
+    {%
+      Some OTF-fonts are missing. A fallback layout is used%
+    }%
+  \fi%
 %    \end{macrocode}
 % Damit die Schrift im Dokument später noch umgestellt werden kann, werden
 % sämtliche Einstellungen erst am Ende der Präambel gesichert. Deshalb wird
@@ -1660,14 +1679,16 @@
 %    \begin{macrocode}
     \ifcase\tud@head@font\relax\else% true/heavy
       \if@tud@fontspec%
-        \DeclareFixedFont{\tud@head@font@bold}{\encodingdefault}%
-          {UniversBold}{m}{n}{\tud@head@fontsize}%
-        \ifcase\tud@head@font\relax\or% true
-          \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
-            {UniversLight}{m}{n}{\tud@head@fontsize}%
-        \or% heavy
-          \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
-            {UniversRegular}{m}{n}{\tud@head@fontsize}%
+        \if@tud@fontspec@missing\else%
+          \DeclareFixedFont{\tud@head@font@bold}{\encodingdefault}%
+            {UniversBold}{m}{n}{\tud@head@fontsize}%
+          \ifcase\tud@head@font\relax\or% true
+            \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
+              {UniversLight}{m}{n}{\tud@head@fontsize}%
+          \or% heavy
+            \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
+              {UniversRegular}{m}{n}{\tud@head@fontsize}%
+          \fi%
         \fi%
 %    \end{macrocode}
 % Die klassische Auswahl mittels NFSS-Schriftname und \cs{mddefault}.

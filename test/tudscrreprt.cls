@@ -1427,51 +1427,6 @@
   \undef\tud@font@check%
 }
 \newcommand*\tud@font@init{%
-  \undef\tud@font@init@fontspec%
-  \undef\tud@font@init@nfss%
-  \undef\tud@font@init%
-}
-\newcommand*\tud@font@init@fontspec{%
-  \newfontface\univln{Univers Light}[NFSSFamily=UniversLight]%
-  \newfontface\univrn{Univers}[NFSSFamily=UniversRegular]%
-  \newfontface\univbn{Univers Bold}[NFSSFamily=UniversBold]%
-  \newfontface\univxn{Univers Black}[NFSSFamily=UniversBlack]%
-  \newfontface\univls{Univers Light Oblique}[NFSSFamily=UniversLightOblique]%
-  \newfontface\univrs{Univers Oblique}[NFSSFamily=UniversRegularOblique]%
-  \newfontface\univbs{Univers Bold Oblique}[NFSSFamily=UniversBoldOblique]%
-  \newfontface\univxs{Univers Black Oblique}[NFSSFamily=UniversBlackOblique]%
-  \newcommand*\textuln[1]{{\univln##1}}%
-  \newcommand*\texturn[1]{{\univrn##1}}%
-  \newcommand*\textubn[1]{{\univbn##1}}%
-  \newcommand*\textuxn[1]{{\univxn##1}}%
-  \newcommand*\textuls[1]{{\univls##1}}%
-  \newcommand*\texturs[1]{{\univrs##1}}%
-  \newcommand*\textubs[1]{{\univbs##1}}%
-  \newcommand*\textuxs[1]{{\univxs##1}}%
-  \newfontface\@dinbn{DIN Bold}[NFSSFamily=DINBold,BoldFont = DIN Bold]%
-  \newcommand*\dinbn{\@dinbn\if@tud@dinbold\mathversion{dinbold}\fi}%
-  \newcommand*\textdbn[1]{{\dinbn##1}}%
-}
-\newcommand*\tud@font@init@nfss{%
-  \if@tud@univers%
-    \newcommand*\univln{\usefont{\encodingdefault}{\tud@univers}{l}{n}}%
-    \newcommand*\univrn{\usefont{\encodingdefault}{\tud@univers}{m}{n}}%
-    \newcommand*\univbn{\usefont{\encodingdefault}{\tud@univers}{b}{n}}%
-    \newcommand*\univxn{\usefont{\encodingdefault}{\tud@univers}{eb}{n}}%
-    \newcommand*\univls{\usefont{\encodingdefault}{\tud@univers}{l}{sl}}%
-    \newcommand*\univrs{\usefont{\encodingdefault}{\tud@univers}{m}{sl}}%
-    \newcommand*\univbs{\usefont{\encodingdefault}{\tud@univers}{b}{sl}}%
-    \newcommand*\univxs{\usefont{\encodingdefault}{\tud@univers}{eb}{sl}}%
-  \else%
-    \newcommand*\univln{}%
-    \newcommand*\univrn{}%
-    \newcommand*\univbn{}%
-    \newcommand*\univxn{}%
-    \newcommand*\univls{}%
-    \newcommand*\univrs{}%
-    \newcommand*\univbs{}%
-    \newcommand*\univxs{}%
-  \fi%
   \newcommand*\textuln{}%
   \newcommand*\texturn{}%
   \newcommand*\textubn{}%
@@ -1480,6 +1435,7 @@
   \newcommand*\texturs{}%
   \newcommand*\textubs{}%
   \newcommand*\textuxs{}%
+  \newcommand*\textdbn{}%
   \DeclareTextFontCommand{\textuln}{\univln}%
   \DeclareTextFontCommand{\texturn}{\univrn}%
   \DeclareTextFontCommand{\textubn}{\univbn}%
@@ -1488,16 +1444,86 @@
   \DeclareTextFontCommand{\texturs}{\univrs}%
   \DeclareTextFontCommand{\textubs}{\univbs}%
   \DeclareTextFontCommand{\textuxs}{\univxs}%
+  \DeclareTextFontCommand{\textdbn}{\dinbn}%
+  \undef\tud@font@init@fontspec%
+  \undef\tud@fontface%
+  \undef\tud@fontspec@flag%
+  \undef\tud@fontspec@error%
+  \undef\tud@font@init@nfss%
+  \undef\tud@font@init%
+}
+\newif\if@tud@fontspec@missing
+\newcommand*\tud@font@init@fontspec{}
+\IfFileExists{xparse.sty}{\@tempswatrue}{\@tempswafalse}%
+\if@tempswa
+  \RequirePackage{xparse}
+  \newcommand*\tud@fontspec@flag{\global\@tud@fontspec@missingtrue\@gobbletwo}%
+  \NewDocumentCommand\tud@fontface{mmo}{%
+    \global\@tud@fontspec@missingfalse%
+    \newfontface#1{#2}[#3]%
+    \if@tud@fontspec@missing%
+      \@tempswatrue%
+      \renewrobustcmd*#1{}%
+    \fi%
+  }%
+  \ExplSyntaxOn
+  \renewcommand*\tud@font@init@fontspec{%
+    \@tempswafalse%
+    \cs_set_eq:NN \tud@fontspec@error \__fontspec_error:nx
+    \cs_set_eq:NN \__fontspec_error:nx \tud@fontspec@flag
+    \tud@fontface\univln{Univers Light}[NFSSFamily=UniversLight]%
+    \tud@fontface\univrn{Univers}[NFSSFamily=UniversRegular]%
+    \tud@fontface\univbn{Univers Bold}[NFSSFamily=UniversBold]%
+    \tud@fontface\univxn{Univers Black}[NFSSFamily=UniversBlack]%
+    \tud@fontface\univls{Univers Light Oblique}[NFSSFamily=UniversLightOblique]%
+    \tud@fontface\univrs{Univers Oblique}[NFSSFamily=UniversRegularOblique]%
+    \tud@fontface\univbs{Univers Bold Oblique}[NFSSFamily=UniversBoldOblique]%
+    \tud@fontface\univxs{Univers Black Oblique}[NFSSFamily=UniversBlackOblique]%
+    \tud@fontface\@dinbn{DIN Bold}[NFSSFamily=DINBold,BoldFont = DIN Bold]%
+    \if@tud@fontspec@missing%
+      \newrobustcmd*\dinbn{\sectfont}%
+    \else%
+      \if@tud@dinbold%
+        \newrobustcmd*\dinbn{\@dinbn\mathversion{dinbold}}%
+      \else%
+        \newrobustcmd*\dinbn{\@dinbn}%
+      \fi%
+    \fi%
+    \cs_set_eq:NN \__fontspec_error:nx \tud@fontspec@error
+    \if@tempswa%
+      \global\@tud@fontspec@missingtrue%
+    \fi%
+  }%
+  \ExplSyntaxOff
+\fi%
+\newcommand*\tud@font@init@nfss{%
+  \if@tud@univers%
+    \newrobustcmd*\univln{\usefont{\encodingdefault}{\tud@univers}{l}{n}}%
+    \newrobustcmd*\univrn{\usefont{\encodingdefault}{\tud@univers}{m}{n}}%
+    \newrobustcmd*\univbn{\usefont{\encodingdefault}{\tud@univers}{b}{n}}%
+    \newrobustcmd*\univxn{\usefont{\encodingdefault}{\tud@univers}{eb}{n}}%
+    \newrobustcmd*\univls{\usefont{\encodingdefault}{\tud@univers}{l}{sl}}%
+    \newrobustcmd*\univrs{\usefont{\encodingdefault}{\tud@univers}{m}{sl}}%
+    \newrobustcmd*\univbs{\usefont{\encodingdefault}{\tud@univers}{b}{sl}}%
+    \newrobustcmd*\univxs{\usefont{\encodingdefault}{\tud@univers}{eb}{sl}}%
+  \else%
+    \newrobustcmd*\univln{}%
+    \newrobustcmd*\univrn{}%
+    \newrobustcmd*\univbn{}%
+    \newrobustcmd*\univxn{}%
+    \newrobustcmd*\univls{}%
+    \newrobustcmd*\univrs{}%
+    \newrobustcmd*\univbs{}%
+    \newrobustcmd*\univxs{}%
+  \fi%
   \if@tud@dinbold%
-    \newcommand*\dinbn{%
+    \newrobustcmd*\dinbn{%
       \usefont{\encodingdefault}{\tud@dinbold}{b}{n}%
       \mathversion{dinbold}%
     }%
   \else%
-    \newcommand*\dinbn{\sectfont}%
+    \newrobustcmd*\dinbn{\sectfont}%
   \fi%
-  \newcommand*\textdbn{}%
-  \DeclareTextFontCommand{\textdbn}{\dinbn}%
 }
 \newcommand*\tud@disposition@font{%
   \if@tud@cdfont@din%
@@ -1657,6 +1683,12 @@
     \preto\tud@font@init\tud@font@init@nfss%
   \fi%
   \tud@font@init%
+  \if@tud@fontspec@missing%
+    \ClassWarningNoLine{\TUDClassName}%
+    {%
+      Some OTF-fonts are missing. A fallback layout is used%
+    }%
+  \fi%
   \tud@font@set[nomath]%
   \AtBeginDocument{\tud@font@math@init}%
 }
@@ -1893,14 +1925,16 @@
       {\sfdefault}{\mddefault}{n}{\tud@head@fontsize}%
     \ifcase\tud@head@font\relax\else% true/heavy
       \if@tud@fontspec%
-        \DeclareFixedFont{\tud@head@font@bold}{\encodingdefault}%
-          {UniversBold}{m}{n}{\tud@head@fontsize}%
-        \ifcase\tud@head@font\relax\or% true
-          \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
-            {UniversLight}{m}{n}{\tud@head@fontsize}%
-        \or% heavy
-          \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
-            {UniversRegular}{m}{n}{\tud@head@fontsize}%
+        \if@tud@fontspec@missing\else%
+          \DeclareFixedFont{\tud@head@font@bold}{\encodingdefault}%
+            {UniversBold}{m}{n}{\tud@head@fontsize}%
+          \ifcase\tud@head@font\relax\or% true
+            \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
+              {UniversLight}{m}{n}{\tud@head@fontsize}%
+          \or% heavy
+            \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
+              {UniversRegular}{m}{n}{\tud@head@fontsize}%
+          \fi%
         \fi%
       \else%
         \if@tud@univers%
