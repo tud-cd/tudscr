@@ -1,4 +1,4 @@
-% \CheckSum{2874}
+% \CheckSum{3079}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -207,53 +207,130 @@
 % \changes{v2.03}{2015/01/23}{Längenberechnung für den Satzspiegel an 
 %   Referenzlänge \cs{tud@dim@widemargin} gekoppelt}^^A
 % \changes{v2.05}{2015/07/15}{Fallunterscheidung an DIN-B-Reihe angepasst}^^A
+% \begin{macro}{\if@tud@geometry@adjust}
+% \changes{v2.05}{2015/11/29}{neu}^^A
 % Hiermit werden in Abhängigkeit der gewählten Papiergröße die Maße für die
 % Größe der Kopfzeile, die Position des Logos, die Seitenränder sowie die
 % Schriftgröße in der Kopfzeile definiert. Aufgerufen wird der Befehl durch
 % \cs{tud@geometry@process}. Dabei fungiert \cs{tud@dim@widemargin} als 
-% Bezugslänge. Die maßgebliche Papiergröße ist DIN~A4 bzw. DIN~b4. Die Längen
+% Bezugslänge. Die maßgebliche Papiergröße ist DIN~A4 bzw. DIN~B4. Die Längen
 % für alle anderen Papiermaße unterscheiden sich um den Faktor~$\sqrt{2}$,
-% wobei das Format DIN~A5 nach den Vorgaben des \CDs übersprungen wird.
+% wobei das Format DIN~A5 nach den Vorgaben des \CDs übersprungen wird. 
+%
+% Um die Überschriften und den Satzspiegel auch in diesem Fall vertikal richtig
+% zu positionieren, wird der Schalter \cs{if@tud@geometry@adjust} benötigt.
+% Mit dem Wert \val{adapted} für \opt{cdgeometry} wird auch das Format DIN~A5 
+% mit den skalierten Seitenrändern erstellt.
 %    \begin{macrocode}
+\newif\if@tud@geometry@adjust
 \newcommand*\tud@geometry@set{%
   \tud@ifverlower{2.05}{%
-    \ifdim\paperheight<\dimexpr148mm+1.5mm\relax%
+    \ifdim\paperheight<\dimexpr105mm+1.5mm\relax%
       \def\@tempa{0}%
+    \else\ifdim\paperheight<\dimexpr148mm+1.5mm\relax%
+      \def\@tempa{1}%
+    \else\ifdim\paperheight<\dimexpr229mm+2mm\relax%
+      \def\@tempa{2}%
     \else\ifdim\paperheight<\dimexpr297mm+2mm\relax%
-      \def\@tempa{1}%
+      \def\@tempa{3}%
     \else\ifdim\paperheight<\dimexpr420mm+2mm\relax%
-      \def\@tempa{2}%
+      \def\@tempa{4}%
     \else\ifdim\paperheight<\dimexpr594mm+2mm\relax%
-      \def\@tempa{3}%
+      \def\@tempa{5}%
     \else\ifdim\paperheight<\dimexpr841mm+3mm\relax%
-      \def\@tempa{4}%
+      \def\@tempa{6}%
     \else\ifdim\paperheight<\dimexpr1189mm+3mm\relax%%
-      \def\@tempa{5}%
+      \def\@tempa{7}%
     \else%
-      \def\@tempa{6}%
-    \fi\fi\fi\fi\fi\fi%
+      \def\@tempa{8}%
+    \fi\fi\fi\fi\fi\fi\fi\fi%
   }{%
-    \ifdim\paperheight<\dimexpr176mm+2mm\relax%
+    \ifdim\paperheight<\dimexpr125mm+1.5mm\relax%
       \def\@tempa{0}%
-    \else\ifdim\paperheight<\dimexpr353mm+2mm\relax%
+    \else\ifdim\paperheight<\dimexpr176mm+2mm\relax%
       \def\@tempa{1}%
-    \else\ifdim\paperheight<\dimexpr500mm+2mm\relax%
+    \else\ifdim\paperheight<\dimexpr250mm+2mm\relax%
       \def\@tempa{2}%
-    \else\ifdim\paperheight<\dimexpr707mm+3mm\relax%
+    \else\ifdim\paperheight<\dimexpr353mm+2mm\relax%
       \def\@tempa{3}%
-    \else\ifdim\paperheight<\dimexpr1000mm+3mm\relax%
+    \else\ifdim\paperheight<\dimexpr500mm+2mm\relax%
       \def\@tempa{4}%
-    \else\ifdim\paperheight<\dimexpr1414mm+3mm\relax%
+    \else\ifdim\paperheight<\dimexpr707mm+3mm\relax%
       \def\@tempa{5}%
-    \else%
+    \else\ifdim\paperheight<\dimexpr1000mm+3mm\relax%
       \def\@tempa{6}%
-    \fi\fi\fi\fi\fi\fi%
+    \else\ifdim\paperheight<\dimexpr1414mm+3mm\relax%
+      \def\@tempa{7}%
+    \else%
+      \def\@tempa{8}%
+    \fi\fi\fi\fi\fi\fi\fi\fi%
   }%
-  \ifcase\@tempa\relax% <=A6/B6
+%    \end{macrocode}
+% In Abhängigkeit von der gefundenen Gestaltungshöhe wird nun der Satzspiegel 
+% definiert. Dabei wird geprüft, ob dieser im entweder innerhalb des durch das 
+% \CD vorgegebenen Rasters erzeugt oder anhand der Gestaltungshöhe berechnet
+% werden soll. 
+%    \begin{macrocode}
+  \@tud@geometry@adjustfalse%
+%    \end{macrocode}
+% Eine Berechnung des Satzspiegels findet in jedem Fall außerhalb des Rasters 
+% statt. Ansonsten wird DIN~A4 als Referenzformat ausgewählt.
+%    \begin{macrocode}
+  \ifnum\tud@geometry@calc=\tw@\relax%
+    \ifnum\@tempa>\z@\relax%
+      \ifnum\@tempa<8\relax%
+        \def\@tempa{3}%
+      \fi%
+    \fi%
+  \fi%
+%    \end{macrocode}
+% Bei Formaten, welche kleiner als das Raster sind, wird die Gestaltungshöhe 
+% für DIN~A6 als Referenz genommen, um den Satzspiegel zu brechnen.
+%    \begin{macrocode}
+  \ifcase\@tempa\relax% <=A7/B7
+    \ifnum\tud@geometry@calc=\tw@\relax\else%
+      \ClassWarning{\TUDClassName}{%
+        There's no type area defined for such a\MessageBreak%
+        small paper height. It is recommended to increase\MessageBreak%
+        the paper size. Nevertheless, it will be tried to\MessageBreak%
+        calculate a proper type area%
+      }%
+    \fi%
+    \tud@divide\@tempa{\paperheight}{148mm}%
+    \setlength\tud@dim@widemargin{15mm}%
+    \setlength\tud@dim@widemargin{\@tempa\tud@dim@widemargin}%
+    \setlength\tud@dim@heavyline{0.5pt}%
+    \setlength\tud@dim@heavyline{\@tempa\tud@dim@heavyline}%
+    \setlength\tud@dim@thinline{0.25pt}%
+    \setlength\tud@dim@thinline{\@tempa\tud@dim@thinline}%
+    \setlength{\@tempdima}{4.5pt}%
+    \setlength{\@tempdima}{\@tempa\@tempdima}%
+    \edef\tud@head@fontsize{\strip@pt\@tempdima}%
+  \or% <=A6/B6
     \setlength\tud@dim@widemargin{15mm}%
     \setlength\tud@dim@heavyline{0.5pt}%
     \setlength\tud@dim@thinline{0.25pt}%
     \renewcommand*\tud@head@fontsize{4.5}%
+%    \end{macrocode}
+% Für Formate der Klasse~5 gibt es zwei Varianten. Entweder, es wird sich an 
+% das Raster des \CDs geahtlen oder es wird ein eigener Satzspiegel für das 
+% Papierformat definiert. Wird das Raster gehalten, muss bei den Überschriften
+% etwas getrickst werden, weshalb der Schalter \cs{if@tud@geometry@adjust} 
+% gesetzt wird.
+%    \begin{macrocode}
+  \or% <=A5/B5
+    \ifnum\tud@geometry@calc=\z@\relax% restricted
+      \@tud@geometry@adjusttrue%
+      \setlength\tud@dim@widemargin{30mm}%
+      \setlength\tud@dim@heavyline{1pt}%
+      \setlength\tud@dim@thinline{0.5pt}%
+      \renewcommand*\tud@head@fontsize{9}%
+    \else%
+      \setlength\tud@dim@widemargin{21.213203mm}%
+      \setlength\tud@dim@heavyline{0.707107pt}%
+      \setlength\tud@dim@thinline{0.353553pt}%
+      \renewcommand*\tud@head@fontsize{6.363961}%
+    \fi%
   \or% <=A4/B4
     \setlength\tud@dim@widemargin{30mm}%
     \setlength\tud@dim@heavyline{1pt}%
@@ -280,12 +357,19 @@
     \setlength\tud@dim@thinline{2pt}%
     \renewcommand*\tud@head@fontsize{36}%
   \else% >A0/B0
-    \ClassWarning{\TUDClassName}{%
-      There's no type area defined for such a huge\MessageBreak%
-      paper height. It is recommended to reduce the\MessageBreak%
-      paper size. Nevertheless, it will be tried to\MessageBreak%
-      calculate a proper type area%
-    }%
+%    \end{macrocode}
+% Wei bei zu kleinen Formaten wird auch bei Formaten oberhalb des Rasters die
+% der Satzspiegel aus der Gestaltungshöhe berechnet, wobei hier DIN~A0 als 
+% Referenz verwendet wird.
+%    \begin{macrocode}
+    \ifnum\tud@geometry@calc=\tw@\relax\else%
+      \ClassWarning{\TUDClassName}{%
+        There's no type area defined for such a\MessageBreak%
+        huge paper height. It is recommended to reduce\MessageBreak%
+        the paper size. Nevertheless, it will be tried to\MessageBreak%
+        calculate a proper type area%
+      }%
+    \fi%
     \tud@divide\@tempa{\paperheight}{1189mm}%
     \setlength\tud@dim@widemargin{120mm}%
     \setlength\tud@dim@widemargin{\@tempa\tud@dim@widemargin}%
@@ -294,6 +378,19 @@
     \setlength\tud@dim@thinline{2pt}%
     \setlength\tud@dim@thinline{\@tempa\tud@dim@thinline}%
     \setlength{\@tempdima}{36pt}%
+    \setlength{\@tempdima}{\@tempa\@tempdima}%
+    \edef\tud@head@fontsize{\strip@pt\@tempdima}%
+  \fi%
+%    \end{macrocode}
+% Wurde die Berechnung aktiviert, dann erfolgt diese anhand der Referenz im 
+% Format DIN~A4.
+%    \begin{macrocode}
+  \ifnum\tud@geometry@calc=\tw@\relax%
+    \tud@divide\@tempa{\paperheight}{297mm}%
+    \setlength\tud@dim@widemargin{\@tempa\tud@dim@widemargin}%
+    \setlength\tud@dim@heavyline{\@tempa\tud@dim@heavyline}%
+    \setlength\tud@dim@thinline{\@tempa\tud@dim@thinline}%
+    \setlength{\@tempdima}{\tud@head@fontsize pt}%
     \setlength{\@tempdima}{\@tempa\@tempdima}%
     \edef\tud@head@fontsize{\strip@pt\@tempdima}%
   \fi%
@@ -314,8 +411,17 @@
   \setlength\tud@dim@footsep{%
     \dimexpr\tud@dim@widemargin-.6\tud@dim@topmargin\relax%
   }%
+%    \end{macrocode}
+% Wird die Gestaltungshöhe DIN~A5 im Raster verwendet, werden die Abstände 
+% zwischen Kopf- unf Fußzeile angepasst.
+%    \begin{macrocode}
+  \if@tud@geometry@adjust%
+    \setlength\tud@dim@headsep{\dimexpr.707107\tud@dim@headsep\relax}%
+    \setlength\tud@dim@footsep{\dimexpr.707107\tud@dim@footsep\relax}%
+  \fi%
 }
 %    \end{macrocode}
+% \end{macro}^^A \if@tud@geometry@adjust
 % \end{macro}^^A \tud@geometry@set
 %
 % \subsection{Unterstützung der \cls{standalone}-Klasse}
@@ -2621,6 +2727,8 @@
 % \begin{option}{cdgeometry}
 % \begin{macro}{\tud@geometry}
 % \begin{macro}{\if@tud@geometry@locked}
+% \begin{macro}{\tud@geometry@calc}
+% \changes{v2.05}{2015/11/29}{neu}^^A
 % Für das \CD sind standardmäßig feste Seitenränder vorgegeben. Diese sind
 % jedoch leider nur aus gestalterischen Motiven und ohne die Beachtung
 % typographischer Belange gewählt und festgelegt worden. Beispielweise ist ein
@@ -2633,30 +2741,53 @@
 % durch \pkg{typearea} aus dem \KOMAScript"=Paket erfolgen
 % (\opt{geomery=no}). Mit \cs{tud@geometry@process} werden alle getroffenen
 % Satzspiegeloptionen umgesetzt und nachfolgend definiert.
-% \ToDo{\val{real} für erzwungene A5 Größe, \val{blocked} für Vorgabe}[v2.05]
-% \ToDo{Formate \val{2A(a)0}, \val{2B(b)0}, \val{4A(a)0} implementieren}[v2.05]
-% \ToDo{zu kleine/große Formate berechnen}[v2.05]
 %    \begin{macrocode}
-\newcommand*\tud@geometry{0}
-\TUD@key@lock{cdgeometry}[true]{%
-  \TUD@set@numkey@lock{cdgeometry}{tud@geometry}{%
+\cs@lock{tud@geometry}{0}
+\newcommand*\tud@geometry@calc{0}
+\TUD@key{cdgeometry}[true]{%
+  \TUD@set@numkey{cdgeometry}{@tempa}{%
     \TUD@numkey@bool,%
     {typearea}{0},%
     {cd}{1},{tud}{1},{asymmetric}{1},%
     {symmetric}{2},{centred}{2},{centered}{2},%
     {normal}{2},{standard}{2},{std}{2},%
-    {twoside}{3},{balanced}{3}%
+    {twoside}{3},{balanced}{3},%
+    {oneside}{4},%
+    {restricted}{5},%
+    {adapted}{6},{adapt}{6},{adapting}{6},{unrestricted}{6},%
+    {calculated}{7},{calc}{7},{calculate}{7},{calculating}{7}%
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \ifnum\tud@geometry=\thr@@\relax%
+    \ifcase\@tempa% false/typearea
+      \cs@set@lock{tud@geometry}{0}%
+      \if@atdocument\tud@recalctypearea\fi%
+    \or% true/cd
+      \cs@set@lock{tud@geometry}{1}%
+      \if@atdocument\tud@recalctypearea\fi%
+    \or% symmetric
+      \cs@set@lock{tud@geometry}{2}%
+      \if@atdocument\tud@recalctypearea\fi%
+    \or% twoside
       \TUD@KOMAoptions{twoside=true}%
-    \fi%
-    \if@atdocument%
-      \ifnum\tud@geometry<\thr@@\relax\recalctypearea\fi%
+    \or% oneside
+      \TUD@KOMAoptions{twoside=false}%
+    \or% restricted
+      \cs@std@lock{tud@geometry}{1}%
+      \renewcommand*\tud@geometry@calc{0}%
+      \if@atdocument\tud@recalctypearea\fi%
+    \or% adapted
+      \cs@std@lock{tud@geometry}{1}%
+      \renewcommand*\tud@geometry@calc{1}%
+      \if@atdocument\tud@recalctypearea\fi%
+    \or% calculated
+      \cs@std@lock{tud@geometry}{1}%
+      \renewcommand*\tud@geometry@calc{2}%
+      \if@atdocument\tud@recalctypearea\fi%
     \fi%
   \fi%
 }
 %    \end{macrocode}
+% \end{macro}^^A \tud@geometry@calc
 % \end{macro}^^A \if@tud@geometry@locked
 % \end{macro}^^A \tud@geometry
 % \end{option}^^A cdgeometry
@@ -3049,11 +3180,16 @@
 %    \end{macrocode}
 % Es wird die Differenz der Höhen zwischen TUD-Kopf und Standardkopfzeile
 % für den Satzspiegel des \CDs berechnet. Außerdem wird die standardmäßige
-% vertikale Verschiebung der Überschriften festgelegt.
+% vertikale Verschiebung der Überschriften festgelegt, wobei hier insbesondere 
+% auf die Gestaltungshöhe DIN~A5 geachtet werden muss.
 %    \begin{macrocode}
     \ifdim\tud@ta@headdiff<\z@\relax\setlength\tud@ta@headdiff{\z@}\fi%
     \global\tud@ta@headdiff=\tud@ta@headdiff%
-    \setlength\tud@dim@headingsvskip{.6\tud@dim@topmargin}%
+    \if@tud@geometry@adjust%
+      \setlength\tud@dim@headingsvskip{.3\tud@dim@topmargin}%
+    \else%
+      \setlength\tud@dim@headingsvskip{.6\tud@dim@topmargin}%
+    \fi%
     \global\tud@dim@headingsvskip=\tud@dim@headingsvskip%
 %    \end{macrocode}
 % Für den Satzspiegel der Version~v2.02 wird außerdem die Länge für den höheren 
@@ -3410,6 +3546,21 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@AfterChangingArea
+% \begin{macro}{\tud@recalctypearea}
+% \changes{v2.05}{2015/11/29}{neu}^^A
+% Nur falls \pkg{typearea} zum Einsatz kommt, wird am Ende der Präambel die 
+% Satzspiegelberechnung mit \cs{recalctypearea} angestoßen, ansonsten wird 
+% bloß \cs{tud@AfterChangingArea} ausgeführt.
+%    \begin{macrocode}
+\newcommand*\tud@recalctypearea{%
+  \ifcase\tud@geometry\relax%
+    \recalctypearea%
+  \else%
+    \tud@AfterChangingArea%
+  \fi%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@recalctypearea
 % Damit alle Satzspiegeleinstellungen korrekt vorgenommen und auch alle
 % Klassenoptionen korrekt verarbeitet werden, wird die Berechnung erstmalig mit
 % \cs{AtEndPreamble} am Ende der Präambel ausgeführt. Nachfolgend erstellt
@@ -3436,16 +3587,7 @@
 % \cs{tud@BeforeSelectAnyPageStyle} aktiviert bzw. deaktiviert wird.
 %    \begin{macrocode}
     \BeforeSelectAnyPageStyle{\tud@BeforeSelectAnyPageStyle{#1}}%
-%    \end{macrocode}
-% Nur falls \pkg{typearea} zum Einsatz kommt, wird am Ende der Präambel die 
-% Satzspiegelberechnung mit \cs{recalctypearea} angestoßen, ansonsten wird 
-% bloß \cs{tud@AfterChangingArea} ausgeführt.
-%    \begin{macrocode}
-    \ifcase\tud@geometry\relax%
-      \recalctypearea%
-    \else%
-      \tud@AfterChangingArea%
-    \fi%
+    \tud@recalctypearea%
   }%
 }
 %    \end{macrocode}
