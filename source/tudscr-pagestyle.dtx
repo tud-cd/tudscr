@@ -1,4 +1,4 @@
-% \CheckSum{3081}
+% \CheckSum{3104}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-pagestyle.dtx}[%
-  2015/11/29 v2.05 TUD-KOMA-Script (pagestyle)%
+  2015/11/30 v2.05 TUD-KOMA-Script (pagestyle)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -806,16 +806,13 @@
       \tud@footlogoheight@set%
       \setlength\@tempdima{\dimexpr\layerheight-\dp\strutbox\relax}%
 %    \end{macrocode}
-% Im Bedarfsfall werden die Boxen vor der Ausgabe neu gesetzt. Danach erfolgt 
-% die Ausgabe, wobei die boxen übereinander gelegt werden.
+% Im Bedarfsfall werden die Boxen vor der Ausgabe durch die einzelnen 
+% \cs{\dots{}@use}-Befehle neu gesetzt. Danach erfolgt die Ausgabe, wobei die 
+% Boxen übereinander gelegt werden.
 %    \begin{macrocode}
-      \tud@footlogo@option@set%
-      \tud@footlogo@cmd@set{\@tempdima}{\layerwidth}%
+      \tud@footlogo@cmd@use{\@tempdima}{\layerwidth}%
+      \tud@footlogo@ddc@use{\@tempdima}{\layerwidth}%
       \tud@footcontent@use{\@tempdima}{\layerwidth}%
-      \hspace*{-\layerwidth}%
-      \tud@footlogo@cmd@use%
-      \hspace*{-\layerwidth}%
-      \hfill\tud@footlogo@ddc@use{\@tempdima}%
     },%
   ]{tudheadings.foot.content}%
 %    \end{macrocode}
@@ -833,13 +830,9 @@
           \addtolength\@tempdima{\dimexpr\ht\strutbox-\tud@dim@ddcdiff\relax}%
           \vskip\dimexpr\tud@dim@ddcdiff-\ht\strutbox-\baselineskip\relax%
         \fi%
-        \tud@footlogo@option@set%
-        \tud@footlogo@cmd@set{\@tempdima}{\layerwidth}%
+        \tud@footlogo@cmd@use{\@tempdima}{\layerwidth}%
+        \tud@footlogo@ddc@use{\@tempdima}{\layerwidth}%
         \tud@footcontent@use{\@tempdima}{\layerwidth}%
-        \hspace*{-\layerwidth}%
-        \tud@footlogo@cmd@use%
-        \hspace*{-\layerwidth}%
-        \hfill\tud@footlogo@ddc@use{\@tempdima}%
       },%
     ]{tudheadings.foot.content}%
   }{}%
@@ -2046,27 +2039,38 @@
 % Die Ausgabe des \DDC-Logos im Fuß erfolgt mit diesem Makro. Dabei wird dieses 
 % in einer Box optisch~-- leicht nach oben verschoben~-- vertikal zentriert.
 %    \begin{macrocode}
-\newcommand*\tud@footlogo@ddc@use[1]{%
-  \tud@vlayerbox{#1}{%
-    \vss%
-    \hbox{%
-      \tud@ddc@check%
-      \ifcase\@tempb\relax\or% \tud@ddc@foot=true
-        \tud@uselayerbox{foot@\tud@foot@logocolor}%
-      \else%
-        \tud@uselayerbox{foot@option}%
-      \fi%
+\newcommand*\tud@footlogo@ddc@use[2]{%
+  \tud@ddc@check%
+  \ifcase\@tempb\relax\else% \tud@ddc@foot=!false
+    \tud@footlogo@option@set%
+    \setbox\z@\hbox{%
+      \tud@vlayerbox{#1}{%
+        \vss%
+        \hbox to #2{%
+          \hss%
+          \ifcase\@tempb\relax\or% \tud@ddc@foot=true
+            \tud@uselayerbox{foot@\tud@foot@logocolor}%
+          \else%
+            \tud@uselayerbox{foot@option}%
+          \fi%
+        }%
+        \vss\vss%
+      }{%
+        The `\string\footlogoheight' (\the\tud@footlogoheight) is\MessageBreak%
+        too high. You should reduce this length.%
+        \ifcase\tud@geometry\else% true/symmetric/twoside
+          \MessageBreak%
+          Alternatively you can enlarge the bottom margin\MessageBreak%
+          by using option `extrabottommargin'.%
+        \fi%
+      }%
     }%
-    \vss\vss%
-  }{%
-    The `\string\footlogoheight' (\the\footlogoheight) is too\MessageBreak%
-    high. You should reduce this length.%
-    \ifcase\tud@geometry\else% true/symmetric/twoside
-      \MessageBreak%
-      Alternatively you can enlarge the bottom margin\MessageBreak%
-      by using option `extrabottommargin'.%
-    \fi%
-  }%
+%    \end{macrocode}
+% Nach der Ausgabe wird ein begativer horizontaler Abstand in der Boxbreite 
+% eingefügt, damit nachfolgende Boxen überlagert werden können.
+%    \begin{macrocode}
+    \usebox\z@\hspace*{-\wd\z@}%
+  \fi%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@footlogo@ddc@use
@@ -2218,7 +2222,12 @@
 % Der Befehl \cs{tud@footlogo@cmd@use} wird genutzt, um die einzelnen Logos für
 % den Fuß innerhalb der Ebene \val{tudheadings.foot.content} auszugeben.
 %    \begin{macrocode}
-\newcommand*\tud@footlogo@cmd@use{\tud@uselayerbox{foot@cmd}}%
+\newcommand*\tud@footlogo@cmd@use[2]{%
+  \tud@footlogo@option@set%
+  \tud@footlogo@cmd@set{#1}{#2}%
+  \setbox\z@\hbox{\tud@uselayerbox{foot@cmd}}%
+  \usebox\z@\hspace*{-\wd\z@}%
+}%
 %    \end{macrocode}
 % \end{macro}^^A \tud@footlogo@cmd@use
 % \begin{KOMAfont}{tudheadings}
@@ -2401,6 +2410,7 @@
 %    \begin{macrocode}
   \ifx\@webpage\@empty\else\newline\@webpage\fi%
 }
+\footcontent{\tud@footcontent@left@poster}[\tud@footcontent@right@poster]
 %    \end{macrocode}
 % \end{macro}^^A \tud@newline@poster
 % \end{macro}^^A \tud@footcontent@right@poster
@@ -2416,19 +2426,20 @@
 % definierten Inhalte. Dabei wird darauf geachtet, ob ein \DDC-Logo im Fuß
 % verwendet wird. Die Ausgabe erfolgt jedoch nur, falls tatsächlich etwas 
 % definiert wurde. Andernfalls wird lediglich eine leere Box der geforderten 
-% Breite ausgegeben. Dies ist notwendig, da nachgelagerte Funktionen eine Box
+% Breite ausgegeben. Dies ist notwendig, da nachgelagerte Funktionen diese Box
 % fester Breite erwarten.
 %    \begin{macrocode}
 \newcommand*\tud@footcontent@use[2]{%
-  \@tempswatrue%
+  \@tempswafalse%
   \ifx\tud@footcontent@left\@empty\relax%
-    \expandafter\ifx\tud@footcontent@right\@nil\relax%
-      \@tempswafalse%
-    \else%
-      \ifx\tud@footcontent@right\@empty\relax%
-        \@tempswafalse%
+    \def\@tempa{\@nil}%
+    \ifx\@tempa\tud@footcontent@right\relax\else%
+      \ifx\tud@footcontent@right\@empty\relax\else%
+        \@tempswatrue%
       \fi%
     \fi%
+  \else%
+    \@tempswatrue%
   \fi%
   \if@tempswa%
     \tud@ddc@check%
@@ -2452,7 +2463,8 @@
 % Wurde das optionale Argument nach dem obligatorischen nicht genutzt, so wird 
 % der Inhalt über die komplette Breite des Textbereiches ausgegeben.
 %    \begin{macrocode}
-        \expandafter\ifx\tud@footcontent@right\@nil\relax%
+        \def\@tempa{\@nil}%
+        \ifx\@tempa\tud@footcontent@right\relax%
           \vtop{%
             \hsize=\dimexpr#2-\@tempdimc\relax%
             \strut\ignorespaces\tud@footcontent@left\strut%
