@@ -1,0 +1,178 @@
+\RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
+\documentclass[english,ngerman]{tudscrreprt}
+\usepackage{babel}
+\usepackage{selinput}
+\SelectInputMappings{adieresis={ä},germandbls={ß}}
+\usepackage[T1]{fontenc}
+\usepackage{scrhack}
+\usepackage{tudscrsupervisor}
+
+\AfterPackage*{hyperref}{%
+\usepackage[%
+  automake,%
+% mit Tex Live einfach verwendbar
+%  xindy,
+%  acronym,% Abkürzungen
+  symbols,% Formelzeichen
+%  nomain,% kein Glossar
+  translate=babel,%
+  nogroupskip,%
+  toc,%
+  section=chapter,%
+%  nostyles,%
+]{glossaries}
+\makeglossaries
+
+\newglossaryentry{greekletters}{%
+  name={Greek letters},%
+  description={\nopostdesc},%
+  sort={a}%
+}
+\newglossaryentry{romanletters}{%
+  name={Roman letters},%
+  description={\nopostdesc},%
+  sort={b}%
+}
+
+% TODO treatise: newcommand(*)\cs durch newcommand(*){\cs} ersetzen
+% TODO Trennung der Symbole in treatise dokumentieren und im Forum posten
+\newcommand*{\newsymbol}[5][]{%
+  \ifgreeksymbol{#4}{%
+    \def\symboltemp{greekletters}%
+  }{%
+    \def\symboltemp{romanletters}%
+  }%
+  \newglossaryentry{#2}{%
+    type=symbols,%
+    name={#3},%
+    description={\nopostdesc},%
+    symbol={\ensuremath{#4}},%
+    user1={\ensuremath{\mathrm{#5}}},%
+    sort={#2},%
+    parent={\symboltemp},%
+    #1%
+  }%
+}
+
+\defglsentryfmt[symbols]{%
+  \ifmmode%
+    \glssymbol{\glslabel}%
+  \else%
+    \glsgenentryfmt~\glsentrysymbol{\glslabel}%
+  \fi%
+}
+
+\newglossarystyle{symblongtabu}{%
+  \newcommand*\symbollevel{-1}%
+  \renewenvironment{theglossary}{%
+    \begin{longtabu}spread 0pt[l]{ccX<{\strut}l}%
+  }{%
+    \end{longtabu}%
+  }%
+  \renewcommand*{\glsgroupheading}[1]{}%
+  \renewcommand*{\glsgroupskip}{}%
+  \newcommand*\symbolhead{%
+    \toprule
+    \bfseries Symbol & \bfseries Einheit &
+    \bfseries Name & \bfseries Seite(n)
+    \tabularnewline\midrule
+  }
+  \renewcommand*{\glossaryheader}{%
+    \endfirsthead\symbolhead\endhead%
+    \bottomrule\endfoot%
+    \gdef\symbollevel{-1}%
+  }%
+  \renewcommand*{\glossentry}[2]{%
+    \ifnum\symbollevel>0\relax\tabularnewline\bottomrule\tabularnewline[.5ex]\fi
+    \gdef\symbollevel{0}%
+    \hspace{-\tabcolsep}\minisec{\glsentryname{##1}}\tabularnewline[-1.5ex]%
+  }%
+  \renewcommand*{\subglossentry}[3]{%
+    \ifnum\symbollevel=0\relax%
+      \tabularnewline\symbolhead%
+    \else%
+      \tabularnewline
+    \fi%
+    \gdef\symbollevel{##1}%
+    \glsentryitem{##2}% Entry number if required
+    \glstarget{##2}{\glossentrysymbol{##2}} &
+    \glsentryuseri{##2} &
+    \glossentryname{##2} &
+    ##3%
+  }%
+}
+}% Ende von AfterPackage*
+
+\makeatletter
+\newcommand*\symbollist{}
+\newcommand*\symbolentry{}
+\newcommand*\symboltemp[1]{\ifdefvoid{#1}{}{\listadd\symbollist{#1}}}
+\forcsvlist{\symboltemp}{%
+  \alpha,\beta,\delta,\epsilon,\phi,\gamma,\eta,\iota,\theta,\kappa,\lambda,%
+  \mu,\nu,\pi,\chi,\rho,\sigma,\tau,\omega,\xi,\psi,\xi,%
+  \Alpha,\Beta,\Delta,\Epsilon,\Phi,\Gamma,\Eta,\Iota,\Thet,%
+  \Rho,\Sigma,\Tau,\Omega,\Xi,\Psi,\Xi%
+}
+\newcommand*\ifgreeksymbol[3]{%
+  \begingroup%
+    \def\symbolentry{#1}%
+    \def\symboltemp##1{\let##1\@firstofone}%
+    \forcsvlist{\symboltemp}{%
+      \hat,\check,\tilde,\acute,\grave,\dot,\ddot,\breve,\bar,\vec%
+    }%
+    \protected@edef\symbolentry{\symbolentry}%
+    \meaning\symbolentry%
+    \def\symboltemp##1_##2\relax{\def\symbolentry{##1}}%
+    \expandafter\symboltemp\symbolentry_\relax\relax%
+    \def\symboltemp##1^##2\relax{\def\symbolentry{##1}}%
+    \expandafter\symboltemp\symbolentry^\relax\relax%
+    \expandafter\ifinlist\expandafter{\symbolentry}{\symbollist}{%
+      \def\symboltemp{\endgroup#2}%
+    }{%
+      \def\symboltemp{\endgroup#3}%
+    }%
+  \symboltemp
+}
+\makeatother
+
+
+
+
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabu}
+
+\usepackage[colorlinks,linkcolor=blue]{hyperref}
+
+\glsaddall[types=symbols]
+
+
+\begin{document}
+
+\printsymbols[style=symblongtabu]
+
+\clearpage
+
+\newsymbol{l}{Länge}{l}{m}
+\newsymbol{m}{Masse}{m}{kg}
+\newsymbol{a}{Beschleunigung}{\ddot{x}}{\sfrac{m}{s^2}}
+\newsymbol{t}{Zeit}{t}{s}
+\newsymbol{f}{Frequenz}{f}{s^{-1}}
+\newsymbol{F}{Kraft}{F}{m \cdot kg \cdot s^{-2} = \sfrac{J}{m}}
+\newsymbol{Gamma}{Test Gamma}{\Gamma}{bla}
+\newsymbol{epsilon}{Test Epsilon}{\hat{\epsilon_a}}{bla}
+\newsymbol{gamma}{Test gamma}{\dot{\gamma}_b}{bla}
+
+
+%\gls{epsilon}
+Die Einheiten für die \gls{f} sowie die \gls{F} werden aus den
+SI"=Einheiten der Basisgrößen \gls{l}, \gls{m} und \gls{t} abgeleitet.
+Und dann gibt es noch die Grundgleichung der Mechanik, welche für den
+Fall einer konstanten Kraftwirkung in die Bewegungsrichtung einer
+Punktmasse lautet:
+\[\gls{F} = \gls{m} \cdot \gls{a}\]
+
+\glsaddall
+
+
+\end{document}
