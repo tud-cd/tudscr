@@ -43,6 +43,7 @@
     nomain,%
     translate=babel,%
     nogroupskip,%
+    nostyles,%
   ]{glossaries}
   \renewcommand*{\glsglossarymark}[1]{}
   \newignoredglossary{abbreviation}
@@ -473,7 +474,7 @@ Argument in der \Environment{itemize}-Umgebung verwendet wird und somit
 \chairman{Prof. Dr. Primus von Quack}
 \professor{Prof. Dr. Kater Karlo}
 
-\newcommand\taskcontent{%
+\newcommand{\taskcontent}{%
   Momentan ist das besagte Thema in aller Munde. Insbesondere wird es
   gerade in vielen~-- wenn nicht sogar in allen~-- Medien diskutiert.
   Es ist momentan noch nicht abzusehen, ob und wann sich diese Situation 
@@ -502,7 +503,7 @@ Argument in der \Environment{itemize}-Umgebung verwendet wird und somit
 
 \end{Hint!}
 \begin{Trunk+}
-\newcommand\taskcontent{%
+\newcommand{\taskcontent}{%
   Momentan ist das besagte Thema in aller Munde. Insbesondere wird es
   gerade in vielen~-- wenn nicht sogar in allen~-- Medien diskutiert.
   Es ist momentan noch nicht abzusehen, ob und wann sich diese Situation 
@@ -623,7 +624,7 @@ Verwendung von Gleitumgebungen eingegangen.
 \printsymbols[style=symblongtabu]
 
 \setchapterpreamble{%
-  \renewcommand*\dictumwidth{.4\textwidth}%
+  \renewcommand*{\dictumwidth}{.4\textwidth}%
   \dictum[Johann Wolfgang von Goethe]{%
     Es irrt der Mensch, solang er strebt.%
   }%
@@ -669,10 +670,15 @@ offen lässt.
 Das Paket \Package{glossaries} sollte immer \emph{nach} \Package{hyperref} 
 geladen werden. Entweder Sie achten explizit darauf oder Sie verwenden den 
 Befehl \Macro{AfterPackage*}(\Package{scrbase}) aus dem \KOMAScript-Bundle. Mit 
-diesem können Sie die Quelltext nach dem Laden eines Paketes ausführen. Es ist 
-allerdings darauf zu achten, dass der Quelltext nur ausgeführt wird, wenn das 
-avisierte Zielpaket auch tatsächlich geladen wird. Die für \Package{glossaries} 
-verwendeten Optionen werden kurz erläutert.
+diesem können Sie die Quelltext nach dem Laden eines Paketes ausführen. 
+\Attention{%
+  Es ist allerdings darauf zu achten, dass der Quelltext nur ausgeführt wird, 
+  wenn das avisierte Zielpaket auch tatsächlich geladen wird.
+} Falls Sie also auf \Package{hyperref} jedoch nicht auf \Package{glossaries} 
+verzichten möchten, dann sollte der nachfolgende Quelltext am Ende der Präambel 
+eingefügt werden.
+
+Die für \Package{glossaries} verwendeten Optionen werden kurz erläutert.
 %
 \begin{Preamble+}
 \AfterPackage*{hyperref}{%
@@ -744,6 +750,15 @@ die Gliederungsebene der Überschrift.
   section=chapter,%
 \end{Preamble}
 %
+Mit der Option \Option{nostyles}(\Package{glossaries}) kann man gegebenenfalls 
+das Laden der von \Package{glossaries} vordefinierten Stilen verhindern. Dies 
+ist insbesondere Sinnvoll, wenn für die einzelnen Glossare und Verzeichnisse 
+ohnehin eigene Stile erstellt werden, wie dies nachfolgend geschieht.
+%
+\begin{Hint}
+  nostyles,%
+\end{Hint}
+%
 Damit sind alle verwendeten Optionen erläutert. Schließlich sorgt der Befehl 
 \Macro{makeglossaries}(\Package{glossaries}) für das Erstellen der 
 optionsabhängigen Stildateien für \Application{makeindex} respektive 
@@ -752,9 +767,11 @@ optionsabhängigen Stildateien für \Application{makeindex} respektive
 \begin{Preamble}
 ]{glossaries}
 \makeglossaries
-
 \end{Preamble}
-%
+\begin{Preamble+}
+}% Ende von \AfterPackage*{hyperref}
+\AfterPackage*{glossaries}{%
+\end{Preamble+}
 Das Erstellen aller Glossare~-- unabhängig davon, ob \Application{xindy} oder 
 \Application{makeindex} für die Sortierung zum Einsatz kommt~-- sollte das 
 Perl"=Skript \File{makeglossaries}(\Package{glossaries}) verwendet werden, 
@@ -1009,8 +1026,8 @@ physikalische \PName{Einheit}.
 \newcommand*{\newsymbol}[5][]{%
   \newglossaryentry{#2}{%
     type=symbols,%
-    description={},%
     name={#3},%
+    description={\nopostdesc},%
     symbol={\ensuremath{#4}},%
     user1={\ensuremath{\mathrm{#5}}},%
     sort={#2},%
@@ -1138,15 +1155,15 @@ Hilfe ist.
   }{%
     \end{longtabu}%
   }%
+  \renewcommand*{\glsgroupheading}[1]{}%
+  \renewcommand*{\glsgroupskip}{}%
   \renewcommand*{\glossaryheader}{%
     \toprule
-    \bfseries Symbol & \bfseries Einheit &
-    \bfseries Name & \bfseries Seite(n)
+    \bfseries Formelzeichen & \bfseries Einheit &
+    \bfseries Bezeichnung & \bfseries Seite(n)
     \tabularnewline\midrule\endhead%
     \bottomrule\endfoot%
   }%
-  \renewcommand*{\glsgroupheading}[1]{}%
-  \renewcommand*{\glsgroupskip}{}%
   \renewcommand*{\glossentry}[2]{%
     \glsentryitem{##1}% Entry number if required
     \glstarget{##1}{\glossentrysymbol{##1}} &
@@ -1166,7 +1183,7 @@ erscheinen würde. In hier vorgestellten Fall werden der Kopf mit dem Makro
 einem möglichen Seitenumbruch zu Beginn und am Ende auf jeder Seite gesetzt.
 %
 \begin{Preamble+}
-}% Ende von AfterPackage*
+}% Ende von \AfterPackage*{glossaries}
 
 \end{Preamble+}
 %
@@ -1185,13 +1202,25 @@ Das Symbolverzeichnis kann sich nun durchaus sehen lassen.
   }%
   \renewcommand*{\glossaryheader}{%
     \toprule
-    \bfseries Symbol & \bfseries Einheit &
-    \bfseries Name & \bfseries Seite(n)
+    \bfseries Formelzeichen & \bfseries Einheit &
+    \bfseries Bezeichnung & \bfseries Seite(n)
     \tabularnewline\midrule%
   }%
 }
 \printsymbols[style=symbtabu]
 \end{quoting}
+
+\minisec{Unterteilung nach griechischen und lateinischen Symbolen}
+Oftmals wird es für Abschlussarbeiten verlangt, das Symbolverzeichnis nach 
+griechischen und lateinischen Formelzeichen zu untergliedern. Für die Umsetzung 
+dieser Anforderung ist die zuvor beschriebene Lösung prinzipiell nutzbar, 
+allerdings muss diese etwas erweitert werden.
+
+Realisiert wird das Ganze, indem die zwei Kategorien respektive Elterneinträge 
+\PValue{greekletters} sowie \PValue{romanletters} definiert und sämtliche
+Formelzeichen einem der beiden als Untereintrag zugeordnet werden.
+
+\ToDo{Weiter im Text}[v2.05]
 
 
 \subsection{Literaturverzeichnis}
@@ -2073,7 +2102,7 @@ die Beschriftung auf die Breite der Tabelle begrenzt.
 \begin{Trunk*}
 \makeatletter
 \newcolumntype{Z}{}
-\renewcommand*\NC@rewrite@Z[1][]{%
+\renewcommand*{\NC@rewrite@Z}[1][]{%
   \NC@find>{\hspace{0pt}}X[#1]<{\@finalstrut\@arstrutbox}%
 }
 \makeatother
@@ -2356,7 +2385,7 @@ muss in der Präambel lediglich Folgendes eingefügt werden:
 %
 \begin{Hint}
   \newignoredglossary{abbreviation}
-  \newcommand*\newabbreviation[4][]{%
+  \newcommand*{\newabbreviation}[4][]{%
     \newacronym[type=abbreviation,#1]{#2}{\mbox{#3\xspace}}{#4}%
   }%
 \end{Hint}
@@ -2616,7 +2645,7 @@ erstellt. Das Ergebnis ist in \autoref{fig:tikz} zu sehen.
     postaction={decorate},
     shorten >=0.7pt
   ]
-  \newcommand\tikzparbox[2][9]{%
+  \newcommand{\tikzparbox}[2][9]{%
     \parbox{#1\tikzunit}{\centering\hspace{0pt}#2}%
   }
   \begin{scope}[start chain]
@@ -2733,12 +2762,12 @@ Die innerhalb einer Gleitumgebung erzeugte \Package{pstricks}-Grafik ist in
 \begin{Hint?}
 \begin{figure}
 \begin{pspicture}(0,-2)(100,64)
-\newcommand\fnodetext{}
+\newcommand{\fnodetext}{}
 \def\fnodetext(#1)#2#3{%
   \fnode[framesize=18 8](#1){#2}%
   \rput(#1){\parbox{17\psunit}{\centering\hspace{0pt}#3}}%
 }
-\newcommand\scriptbox[2][24]{%
+\newcommand{\scriptbox}[2][24]{%
   \parbox{#1\psunit}{\scriptsize\centering\hspace{0pt}#2}%
 }
 \rput(15,10){%
