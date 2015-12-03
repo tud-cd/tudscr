@@ -755,9 +755,9 @@ das Laden der von \Package{glossaries} vordefinierten Stilen verhindern. Dies
 ist insbesondere Sinnvoll, wenn für die einzelnen Glossare und Verzeichnisse 
 ohnehin eigene Stile erstellt werden, wie dies nachfolgend geschieht.
 %
-\begin{Hint}
+\begin{Preamble}
   nostyles,%
-\end{Hint}
+\end{Preamble}
 %
 Damit sind alle verwendeten Optionen erläutert. Schließlich sorgt der Befehl 
 \Macro{makeglossaries}(\Package{glossaries}) für das Erstellen der 
@@ -769,7 +769,8 @@ optionsabhängigen Stildateien für \Application{makeindex} respektive
 \makeglossaries
 \end{Preamble}
 \begin{Preamble+}
-}% Ende von \AfterPackage*{hyperref}
+}% Ende von AfterPackage
+
 \AfterPackage*{glossaries}{%
 \end{Preamble+}
 Das Erstellen aller Glossare~-- unabhängig davon, ob \Application{xindy} oder 
@@ -826,9 +827,18 @@ aller Abkürzungen erfolgt mit:
 \begin{Hint}
 \printacronyms
 \end{Hint}
+\newglossarystyle{simple}{%
+  \renewenvironment{theglossary}{}{\par}%
+  \renewcommand*{\glossentry}[2]{%
+    \noindent%
+    \textsbn{\glsentryitem{##1}\glstarget{##1}\glossentryname{##1}}\quad
+    \glossentrydesc{##1}\glspostdescription\space ##2%
+    \par%
+  }%
+}
 \begin{quoting}[rightmargin=0pt]
 \glsdisablehyper
-\InputCode
+\printacronyms[style=simple]
 \end{quoting}
 %
 Dabei werden die Akronyme in einer \Environment{description}"=Umgebung gesetzt, 
@@ -1110,7 +1120,7 @@ sinnvolles Verzeichnis:
 \end{Hint}
 \begin{quoting}[rightmargin=0pt]
 \glsdisablehyper
-\InputCode
+\printsymbols[style=simple]
 \end{quoting}
 %
 Für dieses muss erst ein Stil definiert werden, was nachfolgend ähnlich zum 
@@ -1145,7 +1155,6 @@ angegeben werden. Die im nachfolgend definierten Stil verwendeten Befehle
 für unterschiedliche horizontale Linien stammen allesamt aus dem Paket 
 \Package{booktabs}, welches für den Satz von hochwertigen Tabellen eine große 
 Hilfe ist.
-
 %
 \CodeHook{\let\newglossarystyle\renewglossarystyle}
 \begin{Preamble*}
@@ -1183,7 +1192,7 @@ erscheinen würde. In hier vorgestellten Fall werden der Kopf mit dem Makro
 einem möglichen Seitenumbruch zu Beginn und am Ende auf jeder Seite gesetzt.
 %
 \begin{Preamble+}
-}% Ende von \AfterPackage*{glossaries}
+}% Ende von AfterPackage
 
 \end{Preamble+}
 %
@@ -1219,8 +1228,239 @@ allerdings muss diese etwas erweitert werden.
 Realisiert wird das Ganze, indem die zwei Kategorien respektive Elterneinträge 
 \PValue{greekletters} sowie \PValue{romanletters} definiert und sämtliche
 Formelzeichen einem der beiden als Untereintrag zugeordnet werden.
+%
+\begin{Hint*}
+\providecommand*\greeklettersname{Greek letters}
+\providecommand*\romanlettersname{Roman letters}
+\newglossaryentry{greekletters}{%
+  type=symbols,%
+  name={\greeklettersname},%
+  description={\nopostdesc},%
+  sort={a}%
+}
+\newglossaryentry{romanletters}{%
+  type=symbols,%
+  name={\romanlettersname},%
+  description={\nopostdesc},%
+  sort={b}%
+}
+\end{Hint*}
+%
+Die Bezeichnungen der beiden Kategorien könnten auch als Parameter von 
+\Macro*{newglossaryentry} mit \PValue{name=\PName{Bezeichung}} direkt 
+eingetragen werden. Um bei der Definition jedoch eine gewisse Flexibilität zu 
+gewährleisten, wird dies über die zwei Befehle \Macro*{greeklettersname} sowie
+\Macro*{romanlettersname} realisiert. Diese werden mit \KOMAScript-Mitteln 
+als sprachabhängige Bezeichner definiert.
+%
+\begin{Hint*}
+\providecaptionname{%
+  american,australian,british,canadian,english,newzealand%
+}{\greeklettersname}{Greek letters}
+\providecaptionname{%
+  german,ngerman,austrian,naustrian,swissgerman,nswissgerman%
+}{\greeklettersname}{Griechische Symbole}
+\providecaptionname{%
+  american,australian,british,canadian,english,newzealand%
+}{\romanlettersname}{Roman letters}
+\providecaptionname{%
+  german,ngerman,austrian,naustrian,swissgerman,nswissgerman%
+}{\romanlettersname}{Lateinische Symbole}
+\end{Hint*}
+%
+Für die Ausgabe wird der Glossarstil \PValue{symbsplitlongtabu} in ähnlicher 
+Manier wie die Stile zuvor definiert. Dieser wird darauf ausgelegt, dass alle 
+aufzulistenden Formelzeichen als Untereintrag von einem der beiden zuvor 
+erstellten Elterneinträge angegeben werden. Allerdings ist bei diesem Stil 
+aufgrund der Verwendung von \Environment{longtabu}(\Package{tabu}) etwas 
+Aufwand zu betreiben, um die gewünschte Ausgabe zu erhalten. Das grundlegende 
+Problem ist das Setzen von Überschriften und dem folgenden Tabellenkopf 
+innerhalb der Tabelle. Die Erläuterung des Quelltextauszugs erfolgt nach dessen 
+Ausgabe.
+%
+\CodeHook{\let\newglossarystyle\renewglossarystyle}
+\begin{Hint*}
+\newglossarystyle{symbsplitlongtabu}{%
+  \newcommand*\symbollevel{-1}%
+  \renewenvironment{theglossary}{%
+    \begin{longtabu}spread 0pt[l]{ccX<{\strut}l}%
+  }{%
+    \end{longtabu}%
+  }%
+  \renewcommand*{\glsgroupheading}[1]{}%
+  \renewcommand*{\glsgroupskip}{}%
+  \newcommand*\symbolhead{%
+    \toprule
+    \bfseries Formelzeichen & \bfseries Einheit &
+    \bfseries Bezeichnung & \bfseries Seite(n)
+    \tabularnewline\midrule
+  }%
+  \renewcommand*{\glossaryheader}{%
+    \endfirsthead%
+    \symbolhead\endhead%
+    \bottomrule\endfoot%
+    \gdef\symbollevel{-1}%
+  }%
+  \renewcommand*{\glossentry}[2]{%
+    \ifglshaschildren{##1}{%
+      \ifnum\symbollevel>0\relax%
+        \tabularnewline\bottomrule\tabularnewline[\smallskipamount]%
+      \fi
+      \gdef\symbollevel{0}%
+      \tabularnewline[%
+        \arraystretch\dimexpr-\ht\strutbox-\dp\strutbox\relax%
+      ]%
+      \multicolumn{4}{@{}l@{}}{\minisec{\glsentryname{##1}}}%
+    }{%
+      \GlossariesWarning{%
+        There are no childrens for entry ##1.\MessageBreak
+        Nothing will be printed. Maybe you should\MessageBreak
+        specify ##1 as a child entry.
+      }%
+    }%
+  }%
+  \renewcommand*{\subglossentry}[3]{%
+    \ifnum\symbollevel=0\relax%
+      \tabularnewline[\medskipamount]\symbolhead%
+    \else%
+      \tabularnewline
+    \fi%
+    \gdef\symbollevel{##1}%
+    \glsentryitem{##2}% Entry number if required
+    \glstarget{##2}{\glossentrysymbol{##2}} &
+    \glsentryuseri{##2} &
+    \glossentryname{##2} &
+    ##3%
+  }%
+}
+\end{Hint*}
+%
+Der neu definierte Befehl \Macro*{symbollevel} wird benötigt, um bei der 
+Ausgabe zu überprüfen, um es sich beim zuletzt gesetzten Eintrag um einen 
+Elterneintrag (\Macro*{glossentry}) oder Untereintrag (\Macro*{subglossentry}) 
+gehandelt hat. Im Makro \Macro*{symbolhead} wird die Definition für den zu 
+setzenden Tabellenkopf gespeichert. Der Inhalt von \Macro*{glossaryheader} wird 
+direkt zu Beginn der Umgebung \Environment{theglossary}(\Package{glossaries}) 
+ausgeführt. Dieser wird so umdefiniert, dass die Tabelle keinen Kopf vor der 
+ersten Überschrift erhält, jedoch nach einem Seitenumbruch sehr wohl der 
+Tabellenkopf gesetzt wird. Abgeschlossen wird die Tabelle mit einer Fußlinie.
 
-\ToDo{Weiter im Text}[v2.05]
+Danach erfolgt die Formatierung der Einträge. Der Befehl \Macro*{glossentry} 
+setzt \enquote{\greeklettersname} und \enquote{\romanlettersname} sowie 
+gegebenenfalls weitere Elterneinträge als Überschriften. Bevor dies passieren 
+kann wird eine vorher begonnene Tabelle mit einer Fußlinie beendet. Um die 
+Überschrift innerhalb von \Environment{longtabu}(\Package{tabu}) linksbündig zu 
+setzen, wird mit \Macro*{multicolumn} gearbeitet. Dieser Befehl muss in der 
+ersten Zelle zwingend als aller erstes genutzt werden. Um dies sicherzustellen, 
+wird zuvor eine neue Tabellenspalte eingefügt. Damit jedoch kein zusätzlicher 
+Leerraum entsteht, wird diese über das optionale Argument nach oben verschoben.
+Die Einträge für Formelzeichen selber erfolgen mit \Macro*{subglossentry}. Im 
+Gegensatz zum vorher beschriebenen Stil \PValue{symblongtabu} wird zusätzlich 
+der notwendige Tabellenkopf nach der Überschrift gesetzt, falls es sich um den 
+\emph{ersten} Untereintrags handelt.
+
+Jetzt könnte man den Glossarstil \PValue{symbsplitlongtabu} bereits verwenden 
+und jedem Formelzeichen bei der Definition mit 
+\begin{quoting}[leftmargin=\parindent]
+\Macro{newsymbol}[%
+  \POParameter{parent={greekletters/romanletters}}%
+  \PParameter{\dots}\PParameter{\dots}\PParameter{\dots}\PParameter{\dots}%
+]|?|%
+\end{quoting}
+eine der beiden Elterneinträge zuweisen. Für wenige Formelzeichen mag dies 
+ausreichen. Komfortabler wäre es natürlich, wenn die Zuweisung zu einer der 
+beiden Kategorien automatisch erfolgen würde. Ein Ansatz für dieses Unterfangen 
+wird folgend vorgestellt. 
+
+\Attention{%
+  Es kann nicht garantiert werden, dass dieser Ansatz in jedem Fall und für 
+  sämtliche Anwendungsszenarien funktioniert. Tatsächlich ist die Idee auf eine
+  \hrfn{http://latex.wcms-file3.tu-dresden.de/phpBB3/viewtopic.php?f=11&t=427}{
+    Frage aus dem \Forum*
+  } heraus entstanden. Für auftretende Probleme bei der Verwendung ist dort der 
+  beste Anlaufpunkt.
+}
+
+Die Grundidee ist, das zu definierende Formelzeichen mit einer Liste der Makros 
+für griechische Buchstaben abzugleichen und so zu entscheiden, in welche der 
+beiden Kategorien das Symbol einzuordnen ist. Hierfür werden nachfolgend eine 
+Liste \Macro*{greeksymbollist} aller griechischen Buchstaben sowie der Befehl 
+\Macro*{ifisgreeksymbol}[\Parameter{Symbol}\Parameter{Dann}\Parameter{Sonst}] 
+zur Fallunterscheidung definiert. Problematisch dabei ist, dass ein als 
+Argument übergebenes Formelzeichen auch mit diakritische Zeichen und Indizes 
+verwendet werden kann, beispielsweise $\dot{\varphi}_{\mathrm{max}}$
+(%
+  \Macro*{dot}[\PParameter{\Macro*{varphi}}]\PValue{\textunderscore}%
+  \PParameter{\Macro*{mathrm}[\PParameter{max}]}%
+). Deshalb werden bei der Ausführung von \Macro*{ifisgreeksymbol} temporär alle 
+diakritische Zeichen für den Mathematikmodus \enquote{unschädlich} gemacht und 
+das Argument \Parameter{Symbol} expandiert. Anschließend werden alle Anteile 
+für Hoch- sowie Tiefstellung abgeschnitten und das Resultat mit der Liste 
+\Macro*{greeksymbollist} abgeglichen.
+%
+\CodeHook{\let\newcommand\renewcommand}
+\begin{Hint*}
+\makeatletter
+\newcommand*\greeksymbollist{}
+\def\@tempa#1{\ifdefvoid{#1}{}{\listadd\greeksymbollist{#1}}}
+\forcsvlist{\@tempa}{%
+  \alpha,\beta,\varbeta,\gamma,\delta,\epsilon,\varepsilon,\zeta,%
+  \eta,\theta,\vartheta,\iota,\kappa,\varkappa,\lambda,\mu,\nu,%
+  \xi,\omicron,\pi,\varpi,\rho,\varrho,\sigma,\varsigma,\tau,%
+  \upsilon,\phi,\varphi,\chi,\psi,\omega,%
+  \Alpha,\Beta,\Gamma,\Delta,\Epsilon,\Zeta,\Eta,\Theta,\Iota,%
+  \Kappa,\Lambda,\Mu,\Nu,\Xi,\Omicron,\Pi,\Rho,\Sigma,\Tau,\Upsilon,%
+  \Phi,\Chi,\Psi,\Omega%
+}
+\newcommand*\ifisgreeksymbol[1]{%
+  \begingroup%
+    \def\@tempa##1{\let##1\@firstofone}%
+    \forcsvlist{\@tempa}{%
+      \acute,\bar,\breve,\check,\dot,\ddot,\dddot,\ddddot,%
+      \hat,\widehat,\grave,\tilde,\widetilde,\vec,%
+      \Acute,\Bar,\Breve,\Check,\Dot,\Ddot,\Hat,\Grave,\Tilde,\Vec%
+    }%
+    \protected@edef\@tempa{#1}%
+    \def\@tempb##1_##2\relax{\def\@tempa{##1}}%
+    \expandafter\@tempb\@tempa_\relax\relax%
+    \def\@tempb##1^##2\relax{\def\@tempa{##1}}%
+    \expandafter\@tempb\@tempa^\relax\relax%
+    \expandafter\ifinlist\expandafter{\@tempa}{\greeksymbollist}{%
+      \aftergroup\@firstoftwo%
+    }{%
+      \aftergroup\@secondoftwo%
+    }%
+  \endgroup%
+}
+\makeatother
+\end{Hint*}
+%
+Mit \Macro*{ifisgreeksymbol} kann jetzt auf die Art des Symbols getestet. Dies 
+wird innerhalb von \Macro{newsymbol}|?| genutzt, um den passenden Elterneintrag 
+auszuwählen. Über das optionale Argument kann jederzeit mit 
+\POParameter{parent={greekletters/romanletters}} der automatische ermittelte 
+Elterneintrag überschrieben werden.
+%
+\begin{Hint}
+\newcommand*\symbollettergroup{}
+\newcommand*{\newsymbol}[5][]{%
+  \ifisgreeksymbol{#4}{%
+    \renewcommand*{\symbollettergroup}{greekletters}%
+  }{%
+    \renewcommand*{\symbollettergroup}{romanletters}%
+  }%
+  \newglossaryentry{#2}{%
+    type=symbols,%
+    name={#3},%
+    description={\nopostdesc},%
+    symbol={\ensuremath{#4}},%
+    user1={\ensuremath{\mathrm{#5}}},%
+    sort={#2},%
+    parent={\symbollettergroup},%
+    #1%
+  }%
+}
+\end{Hint}
 
 
 \subsection{Literaturverzeichnis}
@@ -1812,12 +2052,12 @@ einer \Macro{mbox} gesetzt, wodurch die Spalten sehr breit werden und über den
 Seitenrand hinausragen können.
 
 Der Spaltentyp~\PValue{p}\Parameter{Breite} hingegen legt die Spaltenbreite 
-fest und setzt den Inhalt in jeder Zeile in eine \Macro{parbox}, wobei diese 
-wird mit ihrer obersten Zeile an der Grundlinie ausgerichtet wird. Das Paket
-\Package{array} stellt außerdem die Spaltentypen~\PValue{m}\Parameter{Breite} 
+fest und setzt die Zellinhalte in einer \Macro{parbox}, wobei diese mit ihrer 
+obersten Zeile an der Grundlinie ausgerichtet wird. Das Paket \Package{array} 
+stellt außerdem die Spaltentypen~\PValue{m}\Parameter{Breite} 
 und~\PValue{b}\Parameter{Breite} bereit, welche ebenfalls mit \Macro{parbox} 
 gesetzt werden, die Ausrichtung an der Grundlinie jedoch zentriert respektive 
-an der unteren Zeile der Box erfolgt. Es folgt ein Beispiel zur Verwendung der 
+an der unteren Zeile erfolgt. Es folgt ein Beispiel zur Nutzung der 
 \Environment{tabular}-Umgebung.
 %
 \begingroup
@@ -1839,10 +2079,10 @@ aaa & bbb & ccc & Worttrennungsmusterkontrolle\tabularnewline
 Die Tabellenbreite ergibt sich aus der Breite der einzelnen Spalten. Bei dieser 
 Umgebung liegt es allein beim Anwender, auf die korrekte Breite der Tabelle zu 
 achten, damit diese nicht über die Seitenränder hinausragt. Das kann auf Dauer 
-recht aufwändig werden. Das Festlegen der Gesamtbreite einer Tabelle durch den 
-Anwender und das automatische Berechnen einiger oder aller Spaltenbreiten ist 
-sicher die angenehmere Variante. Wie sich dies sehr komfortabel bewerkstelligen 
-lässt wird~-- ebenso wie die Lösung des Problems des nicht umbrochenen Eintrags 
+recht aufwändig werden. Das Festlegen der Gesamtbreite einer Tabelle und das 
+automatische Berechnen einiger oder aller Spaltenbreiten ist sicher die 
+angenehmere Variante. Wie sich dies sehr komfortabel bewerkstelligen lässt, 
+wird~-- ebenso wie die Lösung des Problems eines nicht umbrochenen Eintrags wie
 in der letzten Spalte der dritten Zeile der obigen Tabelle~-- im nachfolgenden
 Abschnitt demonstriert.
 
@@ -1861,6 +2101,7 @@ vereinen und glänzt insbesondere durch seine Vielseitigkeit.
 \usepackage{tabularx}
 \usepackage{tabulary}
 \usepackage{tabu}
+\usepackage{longtable}
 
 \end{Preamble}
 %
@@ -2050,9 +2291,9 @@ gesetzte Dokumente gegebenenfalls später angepasst werden müssen.
 
 Nichtsdestotrotz soll hier folgend die individuelle Verwendung einer 
 \Environment{tabu}(\Package{tabu})-Umgebung gezeigt werden, insbesondere weil 
-es für das Setzen umbruchfähiger Tabellen mit automatisch berechneten 
+für das Setzen umbruchfähiger Tabellen mit automatisch berechneten 
 Spaltenbreiten momentan (fast) keine Alternative zu der Umgebung 
-\Environment{longtabu}(\Package{tabu}) gibt. 
+\Environment{longtabu}(\Package{tabu}) existiert. 
 
 Dieses Paket definiert ebenso einen Spaltentyp~\PValue{X}, welchem allerdings 
 zusätzlich ein optionales Argument angehangen werden kann. Mit diesem lässt 
@@ -2373,7 +2614,7 @@ Umsetzung der in den genannten Artikeln erläuterten Empfehlungen helfen.
 In \cite{struckmann2007} wird gleich zu Beginn darauf hingewiesen, wie häufig 
 verwendete Abkürzungen sehr einfach im Dokument verwendet werden können und 
 dabei typografisch richtig gesetzt werden. Beispielsweise gelingt dies für die 
-Abkürzung \enquote{zum~Beispiel~(z.\,B.)} mit der nachfolgenden Definition:
+Abkürzung \enquote{zum~Beispiel~(z.\,B.)} mit dieser Definition:
 %
 \begin{Hint}
 \newcommand{\zB}{\mbox{z.\,B.}\xspace}
@@ -2403,10 +2644,10 @@ definiert und über die gewohnten Befehlen aus \Package{glossaries} verwendet
 werden.
 %
 \begin{Hint*}
-Die Ausgabe der eben definierten Abkürzung erfolgt \acrshort{zB} mit dem 
-Befehl \texttt{\textbackslash acrshort}. Wurde \texttt{glossaries} mit 
-der Option \texttt{shortcut} geladen, alternativ kann auch das kürzere 
-Makro \texttt{\textbackslash acs} genutzt werden.
+Die Ausgabe der soeben definierten Abkürzung \enquote{\acrshort{zB}}
+erfolgt mit dem Befehl \texttt{\textbackslash acrshort}. Wurde das
+Paket \texttt{glossaries} mit der Option \texttt{shortcut} geladen, 
+kann auch das Makro \texttt{\textbackslash acs} genutzt werden.
 \end{Hint*}
 
 
@@ -2422,12 +2663,12 @@ stehen mit \Tutorial{mathtype} und \Tutorial{mathswap} zwei weitere Tutorials
 zur Verfügung, die sich explizit mit der Thematik eines guten mathematischen 
 Satz beschäftigen.
 
-Das Paket \Package{amsmath} stellt den De-facto-Standard für den mathematischen 
-Satz mit \hologo{LaTeXe} dar. Allerdings wird es~-- insbesondere aus diesem 
-Grund~-- nur sehr \enquote{vorsichtig} weiterentwickelt. Für das Setzen neuer 
-Dokumente sollte deswegen das Paket \Package{mathtools} verwendet werden, 
-welches zwar auf \Package{amsmath} basiert, dieses jedoch um zusätzliche 
-Funktionalitäten ergänzt und Bugfixes bereithält.
+Das Paket \Package{amsmath} stellt für \hologo{LaTeXe} den De-facto-Standard 
+für den mathematischen Satz dar. Allerdings wird es~-- insbesondere aus diesem 
+Grund~-- sehr \enquote{vorsichtig} weiterentwickelt. Für das Setzen neuer 
+Dokumente sollte deshalb das Paket \Package{mathtools} verwendet werden, das
+auf \Package{amsmath} basiert und dieses um zusätzliche Funktionalitäten 
+ergänzt sowie Bugfixes bereithält.
 
 
 \subsection{Einheiten}
@@ -2488,6 +2729,7 @@ Auflistungen einfach an die individuellen Bedürfnisse angepasst werden.
 \begin{Preamble}
 \usepackage{enumitem}
 \end{Preamble}
+%
 Um diese ungewollten Abstände zwischen den Listenpunkten zu entfernen, kann der 
 Schlüssel \Option{noitemsep}(\Package{enumitem}) verwendet werden. Mit dem 
 Befehl \Macro{setlist}(\Package{enumitem}) werden~-- ohne zusätzliche Angaben 
@@ -2826,9 +3068,8 @@ Die innerhalb einer Gleitumgebung erzeugte \Package{pstricks}-Grafik ist in
 Damit \enquote{programmierte} Grafiken zum einen das Dokument respektive dessen 
 Struktur nicht unnötig unübersichtlich machen und zum anderen nur nach einer 
 Änderung abermals kompiliert werden, um die Kompilierungsdauer möglichst gering 
-zu halten, ist es ratsam, diese in separate Dateien auszulagern. Hierfür bieten 
-sich die Pakete \Package{subfiles}'manual' und \Package{standalone}'manual' an, 
-welche im Handbuch erläutert werden.
+zu halten, können diese in separate Dateien ausgelagert werden. Hierfür bieten 
+sich die Pakete \Package{subfiles}'manual' und \Package{standalone}'manual' an.
 
 
 
