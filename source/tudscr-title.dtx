@@ -1,4 +1,4 @@
-% \CheckSum{1369}
+% \CheckSum{1382}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-title.dtx}[%
-  2015/12/02 v2.05 TUD-KOMA-Script (title)%
+  2015/12/07 v2.05 TUD-KOMA-Script (title)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -387,6 +387,9 @@
     \ifcase\tud@layout@title\relax% false
       \ifx\tud@titlepagenumber\relax\gdef\tud@titlepagenumber{1}\fi%
       \tud@cmd@use{maketitle}[\tud@titlepagenumber]%
+      \tud@iftudps{\currentpagestyle}{%
+        \ifstr{\titlepagestyle}{empty}{\thispagestyle{empty.tudheadings}}{}%
+      }{}%
 %    \end{macrocode}
 % Für die \TUDScript-Klassen gibt es für doe Titleseite sowie den Titelkopf 
 % separate Befehle.
@@ -406,6 +409,18 @@
   \setcounter{footnote}{0}%
   \global\let\and\relax%
 }
+%    \end{macrocode}
+% Abschließend wird dafür Sorge getragen, dass bei einem aktiveten Seitenstil 
+% aus der \pgs{tudheadings}-Reihe auch der Titel in diesem gesetzt wird, auch 
+% wenn das Layout des \CDs selber nicht aktiv ist.
+%    \begin{macrocode}
+\patchcmd{\titlepage}{\thispagestyle{empty}}{%
+  \tud@iftudps{\currentpagestyle}{%
+    \thispagestyle{empty.tudheadings}%
+  }{%
+    \thispagestyle{empty}%
+  }%
+}{}{\tud@patch@wrn{titlepage}}
 \tud@cmd@store{maketitle}%
 \let\maketitle\tud@maketitle%
 %    \end{macrocode}
