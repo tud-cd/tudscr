@@ -1,4 +1,4 @@
-% \CheckSum{680}
+% \CheckSum{684}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-fields.dtx}[%
-  2015/12/05 v2.05 TUD-KOMA-Script (input fields)%
+  2015/12/07 v2.05 TUD-KOMA-Script (input fields)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -219,6 +219,7 @@
 % \end{macro}^^A \tud@foot@line@write
 % \end{macro}^^A \tud@foot@line@add
 % \begin{macro}{\title}
+% \begin{field}{\@title}
 % \begin{field}{\@@title}
 % \changes{v2.02}{2014/11/06}{\cs{protected@xdef} genutzt}^^A
 % \begin{field}{\@@author}
@@ -230,6 +231,7 @@
 % Version~v2.02 entfernt.
 %    \begin{macrocode}
 \newcommand*\@@title{}
+\robustify\@title
 \renewcommand*\title[1]{%
   \gdef\@title{#1}%
   \begingroup%
@@ -243,6 +245,7 @@
 %    \end{macrocode}
 % \end{field}^^A \@@author
 % \end{field}^^A \@@title
+% \end{field}^^A \@title
 % \end{macro}^^A \title
 % \begin{macro}{\authormore}
 % \begin{field}{\@authormore}
@@ -386,13 +389,13 @@
 % Angabe des verantwortlichen Hochschullehrers für Titel und Aufgabenstellung,
 % wird im Makro \cs{@professor} gespeichert.
 %    \begin{macrocode}
-\newcommand*\@professor{}
 %<*book|report|article>
-\newcommand*\professor[2][]{\gdef\@professor{#2}}
+\newcommand*\@professor{}
+\newcommand*\professor[1]{\gdef\@professor{#1}}
 %</book|report|article>
 %<*poster>
 \newcommand*\@professor@foot{}
-\newcommand*\professor[2][\@empty]{\tud@foot@line@add{professor}{#2}{#1}}
+\newcommand*\professor[1]{\gdef\@professor@foot{#1}}
 %</poster>
 %    \end{macrocode}
 % \end{field}^^A \@professor@foot
@@ -634,6 +637,11 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@datecheck
+%
+% \iffalse
+%</book|report|article>
+% \fi
+%
 % \begin{macro}{\date}
 % \begin{field}{\@date}
 % \begin{field}{\@@date}
@@ -646,17 +654,27 @@
 % \cs{@datemore} gespeichert wird. Der originale Standardbefehl für das Datum
 % \cs{date} wird erweitert, das Feld \cs{@@date} wurde entfernt.
 %    \begin{macrocode}
+%<*book|report|article>
 \newcommand*\@datemore{}
 \renewcommand*\date[2][]{%
   \gdef\@datemore{\trim@spaces{#1}}%
   \tud@printdate{\@date}{#2}%
   \global\let\tud@datecheck\relax%
 }
+%</book|report|article>
+%<*poster>
+\renewcommand*\date[2][]{}
+%</poster>
 %    \end{macrocode}
 % \end{field}^^A \@datemore
 % \end{field}^^A \@@date
 % \end{field}^^A \@date
 % \end{macro}^^A \date
+%
+% \iffalse
+%<*book|report|article>
+% \fi
+%
 % \begin{macro}{\defensedate}
 % \begin{field}{\@defensedate}
 % Das Verteidigungsdatum erscheint auf dem Titel und wird in \cs{@defensedate}
