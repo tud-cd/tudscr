@@ -1,4 +1,4 @@
-% \CheckSum{195}
+% \CheckSum{256}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-doc.dtx}[%
-  2015/06/12 v2.04 TUD-KOMA-Script\space%
+  2015/11/24 v2.05 TUD-KOMA-Script\space%
   (source code documentation based on scrdoc)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
@@ -84,9 +84,41 @@
 %<*class>
 % \fi
 %
-% Sie basiert auf der Klasse \cls{scrdoc}.
+% Sie lädt standarmäßig die Klasse \cls{scrdoc}. Sollte diese nicht existieren,
+% wird stattdessen \cls{ltxdoc} verwendet. Auch \cls{scrdoc} nutzt im Prinzip 
+% \cls{ltxdoc}, allerdings wird durch diese anstelle von \cls{article} die 
+% Klasse \cls{scrartcl} geladen. Damit der dazugehörige Titel genutzt werden 
+% kann, wird dieser temporär gesichert.
 %    \begin{macrocode}
-\LoadClassWithOptions{scrdoc}
+\IfFileExists{scrbase.sty}{%
+  \RequirePackage{scrbase}[2013/12/19]%
+  \newcommand*\tud@maketitle{}%
+  \PassOptionsToClass{toc=left}{scrartcl}%
+  \AfterClass{scrartcl}{\let\tud@maketitle\@maketitle}%
+  \AfterClass{scrdoc}{\let\@maketitle\tud@maketitle}%
+  \AfterPackage{inputenc}{\RequirePackage{csquotes}[2011/10/22]}%
+}{}
+\IfFileExists{scrdoc.cls}{%
+  \LoadClassWithOptions{scrdoc}%
+}{%
+  \LoadClassWithOptions{ltxdoc}%
+}
+%    \end{macrocode}
+% Titelei.
+%    \begin{macrocode}
+\title{%
+  \file{\filename}\thanks{%
+    Dies ist Version \fileversion\ von Datei \file{\filename}.%
+  }%
+}
+\author{Falk Hanisch\thanks{\tudscrmail}}
+\date{\filedate}
+%    \end{macrocode}
+% Optionen bzw. Flag für das automatisierte Erzeugen der Quelltextdokumentation
+% mit einem Skript ohne ToDo-Befehle.
+%    \begin{macrocode}
+\DeclareOption{final}{\let\tudfinalflag\relax}
+\ProcessOptions\relax
 %    \end{macrocode}
 % Die Seitenränder werden so eingestellt, dass für die Darstellung des 
 % Quelltextes genau 80~Zeichen zur Verfügung stehen.
@@ -102,19 +134,8 @@
 \setlength\headsep{30pt}
 \setlength\footskip{1.25\headsep}
 \setlength\textheight{\dimexpr\paperheight-2\headsep-\footskip\relax}
-\AfterPackage{tudscrfonts}{\AtBeginDocument{\setlength\columnsep{10pt}}}
 \RequirePackage{dox}[2010/12/16]
 \def\generalname{Allgemeines}
-%    \end{macrocode}
-% Titelei.
-%    \begin{macrocode}
-\title{%
-  \texttt{\filename}\thanks{%
-    Dies ist Version \fileversion\ von Datei \texttt{\filename}.%
-  }%
-}
-\author{Falk Hanisch\thanks{\tudscrmail}}
-\date{\filedate}
 %    \end{macrocode}
 % Befehle, welche nicht im Index auftauchen sollen.
 %    \begin{macrocode}
@@ -132,15 +153,6 @@
 \doxitem[macrolike,idxtype=Lok.]{Locale}{locale}{Lokalisierungsvariablen}
 \doxitem[macrolike,idxtype=Feld]{Field}{field}{Eingabefelder}
 %    \end{macrocode}
-% Zusätzliche Auszeichnungsbefehle.
-%    \begin{macrocode}
-\DeclareRobustCommand*{\cls}[1]{\mbox{\textsf{\textbf{#1}}}}
-\DeclareRobustCommand*{\pkg}[1]{\mbox{\textsf{\textbf{#1}}}}
-\DeclareRobustCommand*{\opt}[1]{\mbox{\texttt{#1}}}
-\DeclareRobustCommand*{\val}[1]{\mbox{\texttt{#1}}}
-\DeclareRobustCommand*{\pgs}[1]{\mbox{\texttt{#1}}}
-\DeclareRobustCommand*{\env}[1]{\mbox{\texttt{#1}}}
-%    \end{macrocode}
 % \begin{macro}{\ToDo}
 % \changes{v2.02}{2014/07/25}{neu}^^A
 % \begin{macro}{\@ToDo}
@@ -152,8 +164,7 @@
 % hinter dem eigentlichen Text angegeben.
 %    \begin{macrocode}
 \newcommand*\ToDo[2][]{%
-  \@ifnextchar[
-    {\@ToDo{#2}}{\@ToDo{#2}[]}
+  \@ifnextchar[{\@ToDo{#2}}{\@ToDo{#2}[]}%
 }
 \newcommand*\@ToDo{}
 \newcommand*\@@ToDo{}%
@@ -166,56 +177,131 @@
     \fbox{\parbox{\dimexpr\textwidth-2\fboxsep\relax}{#1\strut}}%
     \endgraf%
   \fi%
-}%
+}
 %    \end{macrocode}
 % \end{macro}^^A \@@ToDo
 % \end{macro}^^A \@ToDo
 % \end{macro}^^A \ToDo
-% Optionen bzw. Flag für das automatisierte Erstellen der Quelltextdokumentation
-% mit einem Skript ohne ToDo-Befehle.
+% Zum Schluss erfolgen einige Anpassungen mit \cs{AtBeginDocument}, um abhängig 
+% vom Ladezustand einiger Pakete reagieren zu können.
 %    \begin{macrocode}
-\DeclareOption{final}{\let\tudfinalflag\relax}
-\ProcessOptions\relax
-%    \end{macrocode}
-% Und noch etwas Kleinkram für \pkg{hyperref}, \pkg{babel} und \pkg{csquotes}.
-%    \begin{macrocode}
-\AfterPackage{hyperref}{%
-  \pdfstringdefDisableCommands{\def\TUDScript{TUD-KOMA-Script}}%
-}
-\AfterPackage{babel}{%
-  \AfterPackage*{inputenc}{\RequirePackage{csquotes}[2011/10/22]}%
-}
 \AtBeginDocument{%
-  \providecommand*\url[1]{\texttt{#1}}%
-  \providecommand*\texorpdfstring[2]{#1}%
+%    \end{macrocode}
+% \begin{macro}{\newrobustcmd}
+% Sollte \pkg{etoolbox} nicht geladen sein, wird der Befehl \cs{newrobustcmd} 
+% definiert, welcher anschließend für die Markup-Befehle genutzt wird.
+%    \begin{macrocode}
+  \@ifpackageloaded{etoolbox}{}{%
+    \providecommand*\newrobustcmd{\DeclareRobustCommand}%
+  }
+%    \end{macrocode}
+% \end{macro}^^A \newrobustcmd
+% \begin{macro}{\app}
+% \begin{macro}{\cls}
+% \begin{macro}{\pkg}
+% \begin{macro}{\opt}
+% \begin{macro}{\val}
+% \begin{macro}{\pgs}
+% \begin{macro}{\env}
+% \begin{macro}{\file}
+% Zusätzliche Auszeichnungsbefehle.
+%    \begin{macrocode}
+  \newrobustcmd*\app[1]{\mbox{\textsl{\textbf{#1}}}}
+  \newrobustcmd*\cls[1]{\mbox{\textsf{\textbf{#1}}}}
+  \newrobustcmd*\pkg[1]{\mbox{\textsf{\textbf{#1}}}}
+  \newrobustcmd*\opt[1]{\mbox{\texttt{#1}}}
+  \newrobustcmd*\val[1]{\mbox{\texttt{#1}}}
+  \newrobustcmd*\pgs[1]{\mbox{\texttt{#1}}}
+  \newrobustcmd*\env[1]{\mbox{\texttt{#1}}}
+  \newrobustcmd*\file[1]{\mbox{\texttt{#1}}}
+%    \end{macrocode}
+% \end{macro}^^A \file
+% \end{macro}^^A \env
+% \end{macro}^^A \pgs
+% \end{macro}^^A \val
+% \end{macro}^^A \opt
+% \end{macro}^^A \pkg
+% \end{macro}^^A \cls
+% \end{macro}^^A \app
+% \begin{macro}{\hypersetup}
+% \begin{macro}{\phantomsection}
+% \begin{macro}{\texorpdfstring}
+% Etwas Kleinkram für \pkg{hyperref}\dots
+%    \begin{macrocode}
+  \@ifpackageloaded{hyperref}{%
+    \pdfstringdefDisableCommands{%
+      \def\TUDScript{TUD-KOMA-Script}%
+      \let\cls\@firstofone%
+      \let\pkg\@firstofone%
+    }%
+  }{%
+    \RequirePackage{url}[2013/09/16]%
+    \providecommand*\hypersetup[1]{}%
+    \providecommand*\phantomsection{}%
+    \providecommand*\texorpdfstring[2]{#1}%
+  }%
+%    \end{macrocode}
+% \end{macro}^^A \texorpdfstring
+% \end{macro}^^A \phantomsection
+% \end{macro}^^A \hypersetup
+% \begin{macro}{\selectlanguage}
+% \begin{macro}{\glqq}
+% \begin{macro}{\grqq}
+% \dots sowie \pkg{babel}\dots
+%    \begin{macrocode}
   \@ifpackageloaded{babel}{}{%
     \ClassWarning{\TUDClassName}{Package `babel' not loaded}%
     \let\selectlanguage\@gobble%
     \let\glqq\relax%
     \let\grqq\relax%
   }%
+%    \end{macrocode}
+% \end{macro}^^A \grqq
+% \end{macro}^^A \glqq
+% \end{macro}^^A \selectlanguage
+% \begin{macro}{\enquote}
+% \dots und \pkg{csquotes}.
+%    \begin{macrocode}
   \@ifpackageloaded{csquotes}{}{%
     \ClassWarning{\TUDClassName}{Package `csquotes' not loaded}%
-    \providecommand\enquote[1]{\glqg#1\grqq{}}%
+    \providecommand\enquote[1]{\glqq#1\grqq{}}%
   }%
-  \providecommand*\ifdin[2]{#2}%
-}
 %    \end{macrocode}
+% \end{macro}^^A \enquote
 % Sollte das Paket \pkg{tudscrfonts} geladen worden sein, so wird die Stärke 
 % der Schriften für die Quelltextausgabe etwas erhöht, um die Lesbarkeit zu 
-% verbessern. Andernfalls wird das Paket \pkg{lmodern} geladen.
+% verbessern.
 %    \begin{macrocode}
-\AtBeginDocument{%
-  \@ifundefined{tud@cdfont}{\def\tud@cdfont{0}}{}%
-  \ifnum\tud@cdfont>\z@\relax% true/heavy
+  \@ifpackageloaded{tudscrfonts}{%
     \RequirePackage{mweights}[2013/07/21]%
-    \def\mddefault{m}%
-    \def\mdseries@tt{m}%
-    \renewcommand*\@pnumwidth{1.7em}%
-  \else%
+    \ifnum\tud@cdfont>\z@\relax% true/heavy    
+      \def\mddefault{m}%
+      \def\mdseries@tt{m}%
+      \renewcommand*\@pnumwidth{1.7em}%
+      \renewcommand*\@tocrmarg{2.7em}%
+    \fi%
+    \setlength\columnsep{10pt}%
+%    \end{macrocode}
+% Andernfalls wird das Paket \pkg{lmodern} geladen und die fehlenden Befehle 
+% zur Schriftauswahl rudimentär definiert.
+%    \begin{macrocode}
+  }{%
     \RequirePackage{lmodern}[2009/10/30]%
-  \fi%
-}%
+    \providecommand*\ifdin[2]{#2}%
+    \providecommand*\textuln[1]{\textsf{#1}}%
+    \providecommand*\texturn[1]{\textuln{#1}}%
+    \providecommand*\textubn[1]{\textbf{\textuln{#1}}}%
+    \providecommand*\textuxn[1]{\textubn{#1}}%
+    \providecommand*\textuls[1]{\textsl{\textuln{#1}}}%
+    \providecommand*\texturs[1]{\textuls{#1}}%
+    \providecommand*\textubs[1]{\textbf{\textuls{#1}}}%
+    \providecommand*\textuxs[1]{\textubs{#1}}%
+    \providecommand*\textdbn[1]{\textubn{#1}}%
+  }%
+%    \end{macrocode}
+% Damit sind die Anpassungen beendet.
+%    \begin{macrocode}
+}
 %    \end{macrocode}
 %
 % \iffalse

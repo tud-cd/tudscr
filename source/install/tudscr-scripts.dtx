@@ -1,6 +1,6 @@
 % \CheckSum{209}
 % \iffalse meta-comment
-%
+% 
 % ============================================================================
 % 
 %  TUD-KOMA-Script
@@ -50,7 +50,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-scripts.dtx}[%
-  2015/07/24 v2.04a TUD-KOMA-Script installation scripts%
+  2015/12/07 v2.05 TUD-KOMA-Script installation scripts%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -80,6 +80,7 @@
 % \changes{v2.04}{2015/06/17}{Unix-Bash-Skripte verbessert}^^A
 % \changes{v2.04}{2015/07/02}{Windows-Batch-Skripte verbessert}^^A
 % \changes{v2.04a}{2015/07/24}{Bugfix CScript-Aufruf mit Leerzeichen im Pfad}^^A
+% \changes{v2.05}{2015/12/07}{Ausgabe des Skriptpfades}^^A
 %
 % \section{Installationsskripte}
 %
@@ -127,6 +128,10 @@
 :: TeX Live 2015
 :: TeX Live 2015 Portable
 ::
+echo.
+echo  =====================================================================
+echo.
+echo   %~dp0
 echo.
 echo  =====================================================================
 echo.
@@ -338,10 +343,12 @@ if "%portable%" == "true" (
   )
 )
 echo.
-echo   Sie sollten den voreingestellten Standardpfad verwenden.
+echo  =====================================================================
+echo.
+echo   Sie sollten nachfolgend den eingestellten Standardpfad verwenden.
+echo   Aendern Sie diesen nur, wenn Sie genau wissen, was Sie tun.
 :proof_userinput
 echo.
-echo  =====================================================================
 set /p texmfpath=< texmfpath.tmp
 set "texmfpath=%texmfpath:/=\%"
 if "%texmfpath:~-1%"=="\" set texmfpath=%texmfpath:~,-1%
@@ -935,6 +942,20 @@ goto :end
 #
 %</full|font|converted>
 %</!uninstall>
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a 
+symlink
+  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative 
+  symlink, we need to resolve it relative to the path where the symlink file 
+  was located
+done
+DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+echo
+echo  =====================================================================
+echo 
+echo   $DIR
 echo
 echo  =====================================================================
 echo
@@ -1187,10 +1208,11 @@ else
   echo   in einem lokalen Benutzerpfad befinden.
 fi
 echo
-echo   Sie sollten den voreingestellten Standardpfad verwenden.
+echo  =====================================================================
+echo   Sie sollten nachfolgend den eingestellten Standardpfad verwenden.
+echo   Aendern Sie diesen nur, wenn Sie genau wissen, was Sie tun.
 proof_userinput
 echo
-echo  =====================================================================
 echo   Installation in folgenden Pfad:
 echo   $texmfpath
 echo  =====================================================================

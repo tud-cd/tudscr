@@ -23,7 +23,12 @@ echo.
 call update_classes.bat
 xcopy source temp\ /s
 cd temp
-call clear.bat
+call clearsource.bat
+del  clearsource.bat
+cd doc
+call cleardoc.bat
+del  cleardoc.bat
+cd ..
 if exist test rmdir test/s /q > nul
 mkdir tex\latex\tudscr
 mkdir source\latex\tudscr
@@ -52,11 +57,11 @@ echo  Erzeugen des Benutzerhandbuchs
 echo =========================================================================
 echo.
 cd doc
-pdflatex -shell-escape "\def\tudfinalflag{}\input{tudscr.tex}"
+pdflatex --shell-escape "\def\tudfinalflag{}\input{tudscr.tex}"
 pdflatex "\def\tudfinalflag{}\input{tudscr.tex}"
 pdflatex "\def\tudfinalflag{}\input{tudscr.tex}"
 pdflatex "\def\tudfinalflag{}\input{tudscr.tex}"
-pdflatex -shell-escape "\def\tudfinalflag{}\input{tudscr.tex}"
+pdflatex --shell-escape "\def\tudfinalflag{}\input{tudscr.tex}"
 pdflatex "\def\tudfinalflag{}\input{tudscr.tex}"
 pdflatex "\def\tudfinalflag{}\def\tudprintflag{}\input{tudscr.tex}"
 copy tudscr.pdf tudscr_print.pdf
@@ -113,6 +118,7 @@ copy temp\doc\latex\tudscr\tudscr.pdf       release-%version%\temp\
 copy temp\doc\latex\tudscr\tudscr_print.pdf release-%version%\temp\
 move temp\install\*.*                       release-%version%\temp\
 rmdir temp\install /s /q > nul
+rmdir temp\cwl /s /q > nul
 cd release-%version%\temp
 for /f %%f in ('dir /b *.bat') do unix2dos -k %%f
 7za a -tzip tudscr_%version%_full.zip   .\..\..\temp\*

@@ -1,4 +1,4 @@
-% \CheckSum{100}
+% \CheckSum{101}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -75,6 +75,7 @@
 % \StopEventually{\PrintIndex\PrintChanges}
 %
 % \begin{macro}{\TUDVersion}
+% \begin{macro}{\TUDScriptVersion}
 % \begin{macro}{\@TUDVersion}
 % \changes{v2.02}{2014/07/22}{Expandieren der Versionsangabe bei der Verwendung 
 %   von \pkg{docstrip} ermöglicht}^^A
@@ -97,7 +98,10 @@
   \else%
 %</!(package|class)>
   \ifx\TUDVersion\undefined%
-    \newcommand*\@TUDVersion[1]{\gdef\TUDVersion{#1}}%
+    \newcommand*\@TUDVersion[1]{%
+      \gdef\TUDVersion{#1}%
+      \gdef\TUDScriptVersion{#1}%
+    }%
   \else%
     \newcommand*\@TUDVersion[1]{%
       \def\@tempa{#1}%
@@ -114,11 +118,14 @@
 %<*!(package|class)>
   \fi%
 %</!(package|class)>
-  \@TUDVersion{2015/10/06 v2.05 BETA TUD-KOMA-Script}%
-\endgroup%
 %    \end{macrocode}
 % \ToDo{Version eintragen}[Release]
+%    \begin{macrocode}
+  \@TUDVersion{2015/11/23 v2.05 BETA TUD-KOMA-Script}%
+\endgroup%
+%    \end{macrocode}
 % \end{macro}^^A \@TUDVersion
+% \end{macro}^^A \TUDScriptVersion
 % \end{macro}^^A \TUDVersion
 %
 % \iffalse
@@ -174,40 +181,42 @@
 % Argument entspricht der Basis-Klasse. Das dritte Argument enthält eine kurze 
 % Beschreibung.
 %    \begin{macrocode}
-%<*book|report|article|doc>
+%<*book|report|article|poster|doc>
 \newcommand*\TUD@ProvidesClass[3]{%
-  \newcommand*\TUDClassName@KOMA{#2}%
-  \@ifundefined{TUDClassName@Parent}{\newcommand*\TUDClassName{#1}}{}%
   \ProvidesClass{#1}[%
 %!TUDVersion
     ^^J#3 (#2)%
   ]%
-  \@ifundefined{TUDClassName@Parent}{\TUD@ClassInfo}{}%
+  \newcommand*\TUDClassName@KOMA{#2}%
+  \@ifundefined{TUDClassName@Parent}{%
+    \newcommand*\TUDClassName{#1}%
+    \TUD@ClassInfo%
+  }{}%
 }
-%</book|report|article|doc>
-%<*poster|manual>
+%</book|report|article|poster|doc>
+%<*manual>
 \newcommand*\TUD@ProvidesWrapperClass[3]{%
+  \ProvidesClass{#1}[%
+%!TUDVersion
+    ^^J#3 (#2)%
+  ]%
   \newcommand*\TUDClassName@Parent{#2}%
   \newcommand*\TUDClassName{#1}%
-  \ProvidesClass{#1}[%
-%!TUDVersion
-    ^^J#3 (#2)%
-  ]%
   \TUD@ClassInfo%
 }
-%</poster|manual>
+%</manual>
 %    \end{macrocode}
 % Beim Verwenden der Klassen wird in der log-Datei ein Vermerk mit \cs{typeout} 
 % erstellt.
 %    \begin{macrocode}
 \providecommand*\TUD@ClassInfo{%
-  \typeout{+---------------------------------------------------------------}
-  \typeout{| The Corporate Design of Technische Universitaet Dresden}
-  \typeout{| Class: \TUDClassName}
-  \typeout{| Version: \TUDVersion}
-  \typeout{| Author: Falk Hanisch (\tudscrmail)}
-  \typeout{| Forum: http://latex.wcms-file3.tu-dresden.de/phpBB3/index.php}
-  \typeout{+---------------------------------------------------------------}
+  \typeout{+---------------------------------------------------------------}%
+  \typeout{| The Corporate Design of Technische Universitaet Dresden}%
+  \typeout{| Class: \TUDClassName}%
+  \typeout{| Version: \TUDVersion}%
+  \typeout{| Author: Falk Hanisch (\tudscrmail)}%
+  \typeout{| Forum: http://latex.wcms-file3.tu-dresden.de/phpBB3/index.php}%
+  \typeout{+---------------------------------------------------------------}%
 }
 %    \end{macrocode}
 % Hier erfolgt die Indentifizierung und die Zuweisung der Klassennamen.
@@ -216,17 +225,9 @@
 %<book>\TUD@ProvidesClass{tudscrbook}{scrbook}{document class}
 %<report>\TUD@ProvidesClass{tudscrreprt}{scrreprt}{document class}
 %<article>\TUD@ProvidesClass{tudscrartcl}{scrartcl}{document class}
-%<*doc>
-\TUD@ProvidesClass{tudscrdoc}{scrdoc}{%
-  internal source code documentation class%
-}
-%</doc>
-%<poster>\TUD@ProvidesWrapperClass{tudscrposter}{tudscrartcl}{poster class}
-%<*manual>
-\TUD@ProvidesWrapperClass{tudscrman}{tudscrreprt}{%
-  internal manual class%
-}
-%</manual>
+%<poster>\TUD@ProvidesClass{tudscrposter}{scrartcl}{poster class}
+%<doc>\TUD@ProvidesClass{tudscrdoc}{scrdoc}{source code documentation class}
+%<manual>\TUD@ProvidesWrapperClass{tudscrmanual}{tudscrreprt}{manual class}
 %    \end{macrocode}
 % \end{macro}^^A \TUD@ClassInfo
 % \end{macro}^^A \TUDClassName@KOMA
@@ -237,7 +238,7 @@
 %
 % \iffalse
 %</class>
-%<*package&(supervisor|comp|manual)>
+%<*package&(supervisor|comp|tutorial)>
 % \fi
 %
 % \subsection{Verwendbarkeit von \TUDScript-Paketen}
@@ -249,17 +250,17 @@
   \PackageError{%
 %<supervisor>    tudscrsupervisor%
 %<comp>    tudscrcomp%
-%<manual>    tudscrman%
+%<tutorial>    tudscrtutorial%
   }{Unsupported class found}{%
     This package can only be used with a class out of the\MessageBreak%
     tudscr bundle (tudscrbook, tudscrreprt, tudscrartcl).%
-  }
+  }%
   \endinput
 }{}
 %    \end{macrocode}
 %
 % \iffalse
-%</package&(supervisor|comp|manual)>
+%</package&(supervisor|comp|tutorial)>
 % \fi
 %
 % \subsection{Das \TUDScript-Logo}

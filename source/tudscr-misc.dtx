@@ -1,4 +1,4 @@
-% \CheckSum{106}
+% \CheckSum{256}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-misc.dtx}[%
-  2015/06/12 v2.04 TUD-KOMA-Script (miscellaneous)%
+  2015/12/02 v2.05 TUD-KOMA-Script (miscellaneous)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -74,6 +74,7 @@
 %
 % \changes{v2.02}{2014/06/23}{Unterstützung für \pkg{titlepage} entfernt}^^A
 % \changes{v2.02}{2014/07/08}{Optionen nutzen \cs{FamilyKeyState}}^^A
+% \changes{v2.05}{2015/07/06}{Bugfix für \pkg{multicol}}^^A
 %
 % \section{Verschiedenes für die Hauptklassen}
 %
@@ -82,6 +83,144 @@
 % \StopEventually{\PrintIndex\PrintChanges}
 %
 % \iffalse
+%<*class&option>
+% \fi
+%
+% \subsection{Papierformat und Schriftgröße}
+%
+% Insbesondere für Poster aber auch für alle anderen \TUDScript-Klassen wird
+% überprüft, ob nach einer Änderung des Standardpapierformates auch die
+% Schriftgröße durch den Anwender angepasst wurde. Diese wird jedoch nicht auf
+% Plausibilität geprüft, da der Aufwand hierfür relativ hoch wäre. Vielmehr 
+% wird davon ausgegangen, dass die explizite Angabe der Schriftgröße bewusst 
+% und dem Papierformat sowie den verwendeten Textspalten entsprechend erfolgt.
+%
+% Die nachfolgend definierten Optionen und Befehle orientieren sich dabei stark 
+% an internen \KOMAScript-Makros.
+%
+% \begin{option}{paper}
+% \changes{v2.05}{2015/07/24}{neu}^^A
+% \begin{macro}{\if@tud@paper@set}
+% \changes{v2.05}{2015/07/24}{neu}^^A
+% Da die \KOMAScript-Option \opt{paper} eine Menge an Einstellmöglichkeiten 
+% bietet, müssen die relevanten hier abgefangen werden.
+%    \begin{macrocode}
+\newif\if@tud@paper@set
+\TUD@key{paper}{%
+  \tud@lowerstring{\@tempa}{#1}%
+%    \end{macrocode}
+% Sowohl ISO/DIN-Formate\dots
+%    \begin{macrocode}
+  \def\@tempb##1##2\@nil{%
+    \@tempswafalse%
+    \if ##1a\@tempswatrue%
+      \else\if ##1b\@tempswatrue%
+        \else\if ##1c\@tempswatrue%
+          \else\if ##1d\@tempswatrue%
+    \fi\fi\fi\fi%
+    \if@tempswa%
+      \ifnumber{##2}{}{\@tempswafalse}%
+    \fi%
+  }%
+  \expandafter\@tempb\@tempa\@nil%
+%    \end{macrocode}
+% \dots als auch frei gewählte Papierformate werden erkannt.
+%    \begin{macrocode}
+  \if@tempswa\else%
+    \def\@tempb##1:##2:##3\@nil{%
+      \edef\@tempc{##1}%
+      \ifx\@tempc\@empty\@tempswafalse\else%
+        \edef\@tempc{##2}%
+        \ifx\@tempc\@empty\@tempswafalse\else\@tempswatrue\fi%
+      \fi%
+    }%
+    \expandafter\@tempb\@tempa::\@nil%
+  \fi%
+%    \end{macrocode}
+% Die Standardpapiergröße spielt allerdings keine Rolle für eine Warnung.
+%    \begin{macrocode}
+  \@tud@paper@setfalse%
+  \if@tempswa%
+    \ifstr{\@tempa}{a4}{}{\@tud@paper@settrue}%
+    \FamilyKeyStateProcessed%
+  \else%
+    \FamilyKeyStateUnknownValue%
+  \fi%
+}
+%    \end{macrocode}
+% \end{macro}^^A \if@tud@paper@set
+% \end{option}^^A paper
+% \begin{option}{fontsize}
+% \changes{v2.05}{2015/07/24}{neu}^^A
+% \begin{macro}{\if@tud@fontsize@set}
+% \changes{v2.05}{2015/07/24}{neu}^^A
+% Bei der Schriftgröße ist das bloße Erkennen und Weiterreichen der Option an 
+% die Klasse ausreichend.
+%    \begin{macrocode}
+\newif\if@tud@fontsize@set
+\TUD@key{fontsize}{%
+  \@tud@fontsize@settrue%
+  \PassOptionsToClass{fontsize=#1}{\TUDClassName@KOMA}%
+  \FamilyKeyStateProcessed%
+}
+%    \end{macrocode}
+% \end{macro}^^A \if@tud@fontsize@set
+% \end{option}^^A fontsize
+% Die Schlüssel sollen lediglich beim Laden der Dokumentklasse die angegebenen 
+% Optionen abfangen. Wurde das Papierformat jedoch nicht die Schriftgröße 
+% geändert, wird nun eine Warnung erzeugt.
+%    \begin{macrocode}
+\AtEndOfClass{%
+  \RelaxFamilyKey{TUD}{paper}%
+  \RelaxFamilyKey{TUD}{fontsize}%
+  \ifboolexpr{bool {@tud@paper@set} or bool {@landscape}}{%
+    \if@tud@fontsize@set\else%
+      \ClassWarningNoLine{\TUDClassName}{%
+        You've set a paper size, which is different from\MessageBreak%
+        default (paper=a4, paper=portrait). Therefore you\MessageBreak%
+        should additionally specify an explicit font size.\MessageBreak%
+        See the manual for further information.%
+      }%
+    \fi%
+  }{}%
+}
+%    \end{macrocode}
+%
+% \iffalse
+%</class&option>
+%<*class&execute&!inherit>
+% \fi
+%
+% \begin{macro}{\tud@x@paper}
+% \changes{v2.05}{2015/07/24}{neu}^^A
+% \begin{macro}{\tud@x@@paper}
+% \changes{v2.05}{2015/07/24}{neu}^^A
+% Um die Änderung des Papierformats auch über die \LaTeX-Standardoptionen wie 
+% beispielsweise \opt{a5paper} abfangen zu können, müssen auch die äquivalent 
+% zu \KOMAScript{} ausgewertet werden.
+%    \begin{macrocode}
+\newcommand*\tud@x@paper{%
+  \expandafter\tud@x@@paper\CurrentOption paper\tud@x@@paper%
+}
+\newcommand*\tud@x@@paper{}
+\def\tud@x@@paper #1#2paper#3\tud@x@@paper{%
+  \@tempswafalse%
+  \ifstr{#3}{paper}{\ifnumber{#2}{%
+    \ifstr{#1}{a}{\@tempswatrue}{%
+    \ifstr{#1}{b}{\@tempswatrue}{%
+    \ifstr{#1}{c}{\@tempswatrue}{%
+    \ifstr{#1}{d}{\@tempswatrue}{%
+    }}}}%
+  }{}}{}%
+  \if@tempswa\TUDExecuteOptions{#3=#1#2}\fi%
+  \PassOptionsToClass{\CurrentOption}{\TUDClassName@KOMA}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@x@@paper
+% \end{macro}^^A \tud@x@paper
+%
+% \iffalse
+%</class&execute&!inherit>
 %<*class&option>
 % \fi
 %
@@ -95,6 +234,7 @@
 % \val{symbolheadings} erweitert, mit welchem eingestellt werden kann, ob in den
 % Überschriften Symbole für die Fußnoten anstelle von Zahlen verwendet werden
 % sollen.
+% \ToDo{\opt{footnotes=symbolheadings} komplett überarbeiten}[v2.06]
 %    \begin{macrocode}
 \newif\if@tud@symbolheadings
 \TUD@key{footnotes}{%
@@ -125,7 +265,7 @@
 % die Symboleauswahl von Fußnoten in Überschirften inkrementiert.
 %    \begin{macrocode}
 %<book|report>\newcounter{symbolheadings}[chapter]%
-%<article>\newcounter{symbolheadings}%
+%<article|poster>\newcounter{symbolheadings}%
 %    \end{macrocode}
 % \end{counter}^^A symbolheadings
 %
@@ -187,35 +327,105 @@
 % \end{macro}^^A \tud@footnote@rehyper
 % \end{macro}^^A \tud@footnote@unhyper
 % \end{macro}^^A \tudbookmark
-% \begin{macro}{\maketitle}
-% \begin{macro}{\tableofcontents}
-% Für den Titel und das Inhaltsverzeichnis werden Outline-Einträge erzeugt.
+% \begin{macro}{\tud@bookmark@startatroot}
+% \changes{v2.05}{2015/08/05}{neu}^^A
+% Wird das Paket \pkg{bookmark} geladen, können die erzeugten Outlines gezielt 
+% auf der obersten Ebene erzeugt werden.
 %    \begin{macrocode}
-\pretocmd{\maketitle}{%
-  \if@tud@bookmarks%
-    \ifdef{\bookmarksetup}{\bookmarksetup{startatroot}}{}%
-  \fi%
-%<*book|report>
-  \tudbookmark[0]{\titlepagename}{title}%
-%</book|report>
-%<*article>
-  \tudbookmark[1]{\titlepagename}{title}%
-%</article>
-}{}{\tud@patch@wrn{maketitle}}
-\pretocmd{\tableofcontents}{%
-  \if@tud@bookmarks%
-    \ifdef{\bookmarksetup}{\bookmarksetup{startatroot}}{}%
-  \fi%
-%<*book|report>
-  \tudbookmark[0]{\contentsname}{toc}%
-%</book|report>
-%<*article>
-  \tudbookmark[1]{\contentsname}{toc}%
-%</article>
-}{}{\tud@patch@wrn{tableofcontents}}
+\newcommand*\tud@bookmark@startatroot{}
+\let\tud@bookmark@startatroot\relax
+\AfterPackage{bookmark}{%
+  \def\tud@bookmark@startatroot{%
+    \if@tud@bookmarks\bookmarksetup{startatroot}\fi%
+  }%
+}
 %    \end{macrocode}
+% \end{macro}^^A \tud@bookmark@startatroot
+% \begin{environment}{titlepage}
+% \changes{v2.05}{2015/08/05}{neu}^^A
+% \begin{macro}{\@maketitle}
+% \changes{v2.05}{2015/08/05}{neu}^^A
+% \begin{macro}{\tud@@maketitlehead}
+% \changes{v2.05}{2015/08/05}{neu}^^A
+% Ist die Option \opt{tudbookmarks} aktiviert, werden für Umschlag- und 
+% Titelseite PDF"=Lesezeichen bzw. Outline-Einträge erzeugt.
+%    \begin{macrocode}
+%<*book|report|article>
+\apptocmd{\titlepage}{%
+  \tud@bookmark@startatroot%
+  \if@tud@cover%
+    \tudbookmark[%
+%<book|report>    0%
+%<article>    1%
+    ]{\coverpagename}{cover}%
+  \else%
+    \tudbookmark[%
+%<book|report>    0%
+%<article>    1%
+    ]{\titlepagename}{title}%
+  \fi%
+}{}{\tud@patch@wrn{titlepage}}
+%</book|report|article>
+%    \end{macrocode}
+% Dies geschieht außerdem auch für die Titelköpfe.
+%    \begin{macrocode}
+\pretocmd{\tud@maketitlehead}{%
+  \tud@bookmark@startatroot%
+  \tudbookmark[%
+%<book|report>  0%
+%<article|poster>  1%
+  ]{\titlename}{title}%
+}{}{\tud@patch@wrn{tud@maketitlehead}}
+\pretocmd{\@maketitle}{%
+  \tud@bookmark@startatroot%
+  \tudbookmark[%
+%<book|report>  0%
+%<article|poster>  1%
+  ]{\titlename}{title}%
+}{}{\tud@patch@wrn{@maketitle}}
+%    \end{macrocode}
+% \end{macro}^^A \tud@@maketitlehead
+% \end{macro}^^A \@maketitle
+% \end{environment}^^A titlepage
+% \begin{macro}{\tableofcontents}
+% \begin{macro}{\listoffigures}
+% \begin{macro}{\listoftables}
+% Für die Verzeichnisse geschieht dies auch. Für das Inhaltsverzeichnis ist 
+% hierfür etwas mehr Aufwand notwendig. Für dieses wird im Normalfall keine 
+% PDF-Outline erzeugt. Deshalb ist hier ein wenig Trickserei notwendig, um zwar 
+% einen solchen Eintrag so erzeugen, dieses dabei aber nicht in sich selbst 
+% einzutragen.
+%    \begin{macrocode}
+\BeforeTOCHead[toc]{%
+  \tud@bookmark@startatroot%
+  \let\@tempc\relax%
+  \iftocfeature{toc}{totoc}{}{%
+    \if@tud@bookmarks%
+      \setuptoc{toc}{totoc}%
+      \tud@cmd@store{addtocontents}%
+      \def\@tempc{%
+        \unsettoc{toc}{totoc}%
+        \tud@cmd@restore{addtocontents}%
+      }%
+      \let\addtocontents\@gobbletwo%
+    \fi%
+  }%
+}
+\AfterTOCHead[toc]{\@tempc}
+\BeforeTOCHead[lof]{\tud@bookmark@startatroot}
+\BeforeTOCHead[lot]{\tud@bookmark@startatroot}
+%    \end{macrocode}
+% \end{macro}^^A \listoftables
+% \end{macro}^^A \listoffigures
 % \end{macro}^^A \tableofcontents
-% \end{macro}^^A \maketitle
+%
+% \subsection{Bugfixing}
+%
+% Hier taucht alles auf, was bei der Verwendung von \TUDScript mit anderen 
+% Paketen zu Problemen führen kann.
+%
+% \subsubsection{Das Paket \pkg{tocloft}}
+%
 % Das Paket \pkg{tocloft} verursacht allerlei Probleme. Wird es geladen, so 
 % erscheint eine entsprechende Warnung.
 %    \begin{macrocode}
@@ -229,6 +439,18 @@
 }
 %    \end{macrocode}
 %
+% \subsubsection{Das Paket \pkg{multicol}}
+%
+% Das Paket \pkg{multicol} ändert setzt den internen Zähler \cs{col@number} auf 
+% \cs{@ne}, wird jedoch der Befehl \cs{twocolumn} verwendet, so wird dieser 
+% wieder auf \cs{tw@} gesetzt, was unter Umständen zu Problemen führt.
+%    \begin{macrocode}
+\AfterPackage{multicol}{%
+  \patchcmd{\twocolumn}{\col@number \tw@}{\col@number \@ne}%
+    {}{\tud@patch@wrn{twocolumn}}%
+}
+%    \end{macrocode}
+%
 % \iffalse
 %</class&body>
 %<*execute>
@@ -237,37 +459,22 @@
 % \subsection{Durchreichen von Optionen und Standardoptionen}
 %
 % Durchreichen aller Klassenoptionen an die \KOMAScript-Klasse bzw. an die
-% genutzte \TUDScript-Elternklasse.
+% genutzte \TUDScript-Elternklasse. Für Klassen wird vor dem Durchreichen noch 
+% geprüft, ob ein spezielles Papierformat angegeben wurde.
 %    \begin{macrocode}
-%<*class&!inherit>
-\DeclareOption*{\PassOptionsToClass{\CurrentOption}{\TUDClassName@KOMA}}
-%</class&!inherit>
+%<class&!inherit>\DeclareOption*{\tud@x@paper}
 %<*class&inherit>
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{\TUDClassName@Parent}}
 %</class&inherit>
-%<*package&fonts>
-\DeclareOption*{\KOMAoptions{\CurrentOption}}
-%</package&fonts>
-%<*package&poster>
-\DeclareOption*{\TUDoptions{\CurrentOption}}
-%</package&poster>
+%<package&fonts>\DeclareOption*{\KOMAoptions{\CurrentOption}}
 %    \end{macrocode}
-% Es werden die Standardoptionen ausgeführt. Die Ausführung selbst wird durch
-% den Befehl \cs{TUD@noworlater} innerhalb von \cs{TUD@key} auf das Ende der
-% \KOMAScript-Klasse verzögert.
+% Es werden die Standardoptionen ausgeführt. Für die Klasse \cls{tudscrposter} 
+% werden die Farben aktiviert.
 %    \begin{macrocode}
-%<*class&!inherit>
-\TUDExecuteOptions{cd=true,cdfont=true,tudbookmarks=true}
-%</class&!inherit>
-%    \end{macrocode}
-% Für das Paket \pkg{tudscrfonts} werden die Schriften aktiviert.
-%    \begin{macrocode}
-%<*package&fonts>
-\TUDExecuteOptions{cdfont=true}
-%</package&fonts>
-%<*package&poster>
-\TUDExecuteOptions{cdstyle=bicolor}
-%</package&poster>
+%<*class>
+%<book|report|article>\TUDExecuteOptions{cd=true,tudbookmarks=true}
+%<poster>\TUDExecuteOptions{cd=bicolor,tudbookmarks=false}
+%</class>
 \TUDProcessOptions\relax
 %    \end{macrocode}
 % Die korrespindierende \KOMAScript-Klasse bzw. \TUDScript-Elternklasse wird 

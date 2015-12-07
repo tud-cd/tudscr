@@ -1,4 +1,4 @@
-% \CheckSum{575}
+% \CheckSum{581}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-locale.dtx}[%
-  2015/06/12 v2.04 TUD-KOMA-Script (localization)%
+  2015/12/07 v2.05 TUD-KOMA-Script (localization)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -73,6 +73,7 @@
 % \selectlanguage{ngerman}
 %
 % \changes{v2.02}{2014/06/23}{Unterstützung für \pkg{titlepage} entfernt}^^A
+% \changes{v2.05}{2015/07/06}{Bezeichner für Poster}^^A
 %
 % \section{Lokalisierung}
 %
@@ -87,7 +88,34 @@
 % \begin{macro}{\tud@locale@define}
 %
 % \iffalse
-%<*class>
+%<*class&!manual>
+% \fi
+%
+% Die neu definierten Bezeichner werden mit einer Fehlermeldung initialisiert.
+% Wird eine unterstützte Dokumentsprache~-- momentan sind dies lediglich
+% Deutsch und Englisch~-- in der Präambel des Dokumentes geladen, so werden die
+% Bezeichner sprachspezifisch überschrieben. Andernfalls bekommt der Anwender
+% eine Fehlermeldung mit Hinweisen, wie er selbst die Bezeichner für die
+% gewählte Sprache manuell definieren muss.
+%    \begin{macrocode}
+\newcommand*\tud@locale@define[1]{%
+  \providecommand*#1{%
+    \ClassError{\TUDClassName}{%
+      `\string#1' not defined for language `\languagename'%
+    }{%
+      Currently the class `\TUDClassName' only supports the\MessageBreak%
+      languages german and english an its dialects. You must\MessageBreak%
+      define single patterns by yourself, e.g.:\MessageBreak%
+      `\string\providecaptionname{\languagename}\string#1{<text>}'\MessageBreak%
+      You can send your definitions to \tudscrmail\space in\MessageBreak%
+      order to implement support for additional languages.%
+    }%
+  }%
+}
+%    \end{macrocode}
+%
+% \iffalse
+%<*book|report|article>
 % \fi
 %
 % \begin{locale}{\graduationtext}
@@ -111,6 +139,8 @@
 % \begin{locale}{\matriculationyearname}
 % \begin{locale}{\coverpagename}
 % \begin{locale}{\titlepagename}
+% \begin{locale}{\titlename}
+% \changes{v2.05}{2015/08/05}{neu}^^A
 % \begin{locale}{\abstractname}
 % \begin{locale}{\confirmationname}
 % \begin{locale}{\confirmationtext}
@@ -120,40 +150,8 @@
 % \begin{locale}{\blockingtext}
 % \changes{v2.02}{2014/05/16}{neu, \cs{restrictiontext} umbenannt}^^A
 % \changes{v2.02}{2014/11/05}{Korrektur bei der Verwendung von \cs{@@title}}^^A
-% \begin{locale}{\listingname}
-% \begin{locale}{\listlistingname}
-% \begin{locale}{\dissertationname}
-% \begin{locale}{\diplomathesisname}
-% \begin{locale}{\masterthesisname}
-% \begin{locale}{\bachelorthesisname}
-% \begin{locale}{\studentresearchname}
-% \begin{locale}{\projectpapername}
-% \begin{locale}{\seminarpapername}
-% \begin{locale}{\researchname}
-% \begin{locale}{\logname}
-% \begin{locale}{\internshipname}
-% \begin{locale}{\reportname}
-% Die neu definierten Bezeichner werden mit einer Fehlermeldung initialisiert.
-% Wird eine unterstützte Dokumentsprache~-- momentan sind dies lediglich
-% Deutsch und Englisch~-- in der Präambel des Dokumentes geladen, so werden die
-% Bezeichner sprachspezifisch überschrieben. Andernfalls bekommt der Anwender
-% eine Fehlermeldung mit Hinweisen, wie er selbst die Bezeichner für die
-% gewählte Sprache manuell definieren muss.
+% Diese Bezeichner existieren nur für die drei Hauptklassen.
 %    \begin{macrocode}
-\newcommand*\tud@locale@define[1]{%
-  \providecommand*#1{%
-    \ClassError{\TUDClassName}{%
-      `\string#1' not defined for language `\languagename'%
-    }{%
-      Currently the class `\TUDClassName' only supports the\MessageBreak%
-      languages german and english an its dialects. You must\MessageBreak%
-      define single patterns by yourself, e.g.:\MessageBreak%
-      `\string\providecaptionname{\languagename}\string#1{<text>}'\MessageBreak%
-      You can send your definitions to \tudscrmail\space in\MessageBreak% 
-      order to implement support for additional languages.
-    }%
-  }%
-}
 \tud@locale@define{\graduationtext}
 \tud@locale@define{\supervisorname}
 \tud@locale@define{\supervisorothername}
@@ -171,6 +169,7 @@
 \tud@locale@define{\matriculationnumbername}
 \tud@locale@define{\coverpagename}
 \tud@locale@define{\titlepagename}
+\tud@locale@define{\titlename}
 %<*book>
 \tud@locale@define{\abstractname}
 %</book>
@@ -178,6 +177,50 @@
 \tud@locale@define{\confirmationtext}
 \tud@locale@define{\blockingname}
 \tud@locale@define{\blockingtext}
+%    \end{macrocode}
+% \end{locale}^^A \blockingtext
+% \end{locale}^^A \blockingname
+% \end{locale}^^A \confirmationtext
+% \end{locale}^^A \confirmationname
+% \end{locale}^^A \abstractname
+% \end{locale}^^A \titlename
+% \end{locale}^^A \titlepagename
+% \end{locale}^^A \coverpagename
+% \end{locale}^^A \matriculationyearname
+% \end{locale}^^A \matriculationnumbername
+% \end{locale}^^A \defensedatetext
+% \end{locale}^^A \placeofbirthtext
+% \end{locale}^^A \dateofbirthtext
+% \end{locale}^^A \datetext
+% \end{locale}^^A \professorothername
+% \end{locale}^^A \professorname
+% \end{locale}^^A \advisorothername
+% \end{locale}^^A \advisorname
+% \end{locale}^^A \refereeothername
+% \end{locale}^^A \refereename
+% \end{locale}^^A \supervisorothername
+% \end{locale}^^A \supervisorname
+% \end{locale}^^A \graduationtext
+%
+% \iffalse
+%</book|report|article>
+% \fi
+%
+% \begin{locale}{\listingname}
+% \begin{locale}{\listlistingname}
+% \begin{locale}{\dissertationname}
+% \begin{locale}{\diplomathesisname}
+% \begin{locale}{\masterthesisname}
+% \begin{locale}{\bachelorthesisname}
+% \begin{locale}{\studentresearchname}
+% \begin{locale}{\projectpapername}
+% \begin{locale}{\seminarpapername}
+% \begin{locale}{\researchname}
+% \begin{locale}{\logname}
+% \begin{locale}{\internshipname}
+% \begin{locale}{\reportname}
+% Diese Bezeichner stehen zusätzlich auch für \cls{tudscrposter} zur Verfügung.
+%    \begin{macrocode}
 \tud@locale@define{\listingname}
 \tud@locale@define{\listlistingname}
 \tud@locale@define{\dissertationname}
@@ -203,44 +246,43 @@
 % \end{locale}^^A \masterthesisname
 % \end{locale}^^A \diplomathesisname
 % \end{locale}^^A \dissertationname
-% \end{locale}^^A \blockingtext
 % \end{locale}^^A \listlistingname
 % \end{locale}^^A \listingname
-% \end{locale}^^A \blockingname
-% \end{locale}^^A \confirmationtext
-% \end{locale}^^A \confirmationname
-% \end{locale}^^A \abstractname
-% \end{locale}^^A \titlepagename
-% \end{locale}^^A \coverpagename
-% \end{locale}^^A \matriculationyearname
-% \end{locale}^^A \matriculationnumbername
-% \end{locale}^^A \defensedatetext
-% \end{locale}^^A \placeofbirthtext
-% \end{locale}^^A \dateofbirthtext
-% \end{locale}^^A \datetext
-% \end{locale}^^A \professorothername
-% \end{locale}^^A \professorname
-% \end{locale}^^A \advisorothername
-% \end{locale}^^A \advisorname
-% \end{locale}^^A \refereeothername
-% \end{locale}^^A \refereename
-% \end{locale}^^A \supervisorothername
-% \end{locale}^^A \supervisorname
-% \end{locale}^^A \graduationtext
 %
 % \iffalse
-%</class>
-%<*supervisor>
+%</class&!manual>
+%<*class&poster|class&manual>
+% \fi
+%
+% \begin{locale}{\authorname}
+% \changes{v2.05}{2015/07/06}{neu}^^A
+% \begin{locale}{\contactname}
+% \changes{v2.05}{2015/07/06}{neu}^^A
+% \begin{locale}{\contactpersonname}
+% Die für \pkg{tudscrsupervisor} definierten Bezeichner werden durch
+% \cs{tud@locale@define} mit einer Fehlermeldung initialisiert.
+%    \begin{macrocode}
+\tud@locale@define{\authorname}
+\tud@locale@define{\contactname}
+\tud@locale@define{\contactpersonname}
+%    \end{macrocode}
+% \end{locale}^^A \contactpersonname
+% \end{locale}^^A \contactname
+% \end{locale}^^A \authorname
+%
+% \iffalse
+%</class&poster|class&manual>
+%<*package&supervisor|class&manual>
 % \fi
 %
 % \begin{locale}{\taskname}
 % \begin{locale}{\tasktext}
 % \begin{locale}{\namesname}
-% \changes{v2.04}{2015/05/06}{neu, \cs{authorname} umbenannt}^^A
+% \changes{v2.04}{2015/05/06}{neu, Umbenennung von \cs{authorname}}^^A
 % \begin{locale}{\titlename}
 % \begin{locale}{\coursename}
 % \begin{locale}{\disciplinename}
-% \changes{v2.02}{2014/05/16}{neu, \cs{branchname} umbenannt}^^A
+% \changes{v2.02}{2014/05/16}{neu, Umbenennung von \cs{branchname}}^^A
 % \begin{locale}{\issuedatetext}
 % \begin{locale}{\duedatetext}
 % \begin{locale}{\chairmanname}
@@ -296,28 +338,7 @@
 % \end{locale}^^A \taskname
 %
 % \iffalse
-%</supervisor>
-%<*poster>
-% \fi
-%
-% \begin{locale}{\authorname}
-% \changes{v2.04}{2015/05/12}{neu}^^A
-% \begin{locale}{\contactname}
-% \changes{v2.04}{2015/05/12}{neu}^^A
-% \begin{locale}{\contactpersonname}
-% Die für \pkg{tudscrsupervisor} definierten Bezeichner werden durch
-% \cs{tud@locale@define} mit einer Fehlermeldung initialisiert.
-%    \begin{macrocode}
-\tud@locale@define{\authorname}
-\tud@locale@define{\contactname}
-\tud@locale@define{\contactpersonname}
-%    \end{macrocode}
-% \end{locale}^^A \contactpersonname
-% \end{locale}^^A \contactname
-% \end{locale}^^A \authorname
-%
-% \iffalse
-%</poster>
+%</package&supervisor|class&manual>
 % \fi
 %
 % \end{macro}^^A \tud@locale@define
@@ -325,7 +346,7 @@
 % \subsection{Deutschsprachige Bezeichner}
 %
 % \iffalse
-%<*class>
+%<*class&!manual>
 % \fi
 %
 % \begin{macro}{\tud@locale@german}
@@ -343,9 +364,11 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@locale@german
+%
 % Hier erfolgt die eigentliche Definition der sprachabhängigen Bezeichner für 
 % die deutsche Sprache und ihre Dialekte.
 %    \begin{macrocode}
+%<*book|report|article>
 \tud@locale@german{\graduationtext}{zur Erlangung des akademischen Grades}%
 \tud@locale@german{\supervisorname}{Betreuer}%
 \tud@locale@german{\supervisorothername}{}%
@@ -389,6 +412,7 @@
 \tud@locale@german{\matriculationnumbername}{Matrikelnummer}%
 \tud@locale@german{\coverpagename}{Umschlagseite}%
 \tud@locale@german{\titlepagename}{Titelblatt}%
+\tud@locale@german{\titlename}{Titel}%
 %<*book>
 \tud@locale@german{\abstractname}{Zusammenfassung}%
 %</book>
@@ -428,6 +452,7 @@
   Universit\"at Dresden, den Gutachtern sowie den Mitgliedern des 
   Pr\"ufungsausschusses zug\"anglich zu machen.%
 }
+%</book|report|article>
 \tud@locale@german{\listingname}{Quelltext}%
 \tud@locale@german{\listlistingname}{Quelltextverzeichnis}%
 \tud@locale@german{\dissertationname}{Dissertation}%
@@ -444,8 +469,20 @@
 %    \end{macrocode}
 %
 % \iffalse
-%</class>
-%<*supervisor>
+%</class&!manual>
+%<*class&poster|class&manual>
+% \fi
+%
+% Hier erfolgen für die Klasse \cls{tudscrposter} weitere Definitionen.
+%    \begin{macrocode}
+\tud@locale@german{\authorname}{Autor}%
+\tud@locale@german{\contactname}{Kontakt}%
+\tud@locale@german{\contactpersonname}{Ansprechpartner}%
+%    \end{macrocode}
+%
+% \iffalse
+%</class&poster|class&manual>
+%<*package&supervisor|class&manual>
 % \fi
 %
 % Hier erfolgen für das Paket \pkg{tudscrsupervisor} weitere Definitionen.
@@ -473,26 +510,11 @@
 %    \end{macrocode}
 %
 % \iffalse
-%</supervisor>
-%<*poster>
-% \fi
-%
-% Hier erfolgen für das Paket \pkg{tudscrposter} weitere Definitionen.
-%    \begin{macrocode}
-\tud@locale@german{\authorname}{Autor}%
-\tud@locale@german{\contactname}{Kontakt}%
-\tud@locale@german{\contactpersonname}{Ansprechpartner}%
-%    \end{macrocode}
-%
-% \iffalse
-%</poster>
+%</package&supervisor|class&manual>
+%<*class&!manual>
 % \fi
 %
 % \subsection{Englischsprachige Bezeichner}
-%
-% \iffalse
-%<*class>
-% \fi
 %
 % \begin{macro}{\tud@locale@english}
 % \changes{v2.02}{2014/07/07}{Pseudonym für \cs{providecaptionname} mit
@@ -512,6 +534,7 @@
 % Hier erfolgt die eigentliche Definition der sprachabhängigen Bezeichner für 
 % die deutsche Sprache und ihre Dialekte.
 %    \begin{macrocode}
+%<*book|report|article>
 \tud@locale@english{\graduationtext}{to achieve the academic degree}%
 \tud@locale@english{\supervisorname}{Supervisor}%
 \tud@locale@english{\supervisorothername}{}%
@@ -555,6 +578,7 @@
 \tud@locale@english{\matriculationnumbername}{Matriculation number}%
 \tud@locale@english{\coverpagename}{Cover page}%
 \tud@locale@english{\titlepagename}{Title page}%
+\tud@locale@english{\titlename}{Title}%
 %<*book>
 \tud@locale@english{\abstractname}{Abstract}%
 %</book>
@@ -593,6 +617,7 @@
   Technische Universit\"at Dresden, the reviewers and also the
   members of the examination board.%
 }
+%</book|report|article>
 \tud@locale@english{\listingname}{Listing}%
 \tud@locale@english{\listlistingname}{List of Listings}%
 \tud@locale@english{\dissertationname}{Dissertation}%
@@ -609,8 +634,20 @@
 %    \end{macrocode}
 %
 % \iffalse
-%</class>
-%<*supervisor>
+%</class&!manual>
+%<*class&poster|class&manual>
+% \fi
+%
+% Hier erfolgen für die Klasse \cls{tudscrposter} weitere Definitionen.
+%    \begin{macrocode}
+\tud@locale@english{\authorname}{Author}%
+\tud@locale@english{\contactname}{Contact}%
+\tud@locale@english{\contactpersonname}{Contact}%
+%    \end{macrocode}
+%
+% \iffalse
+%</class&poster|class&manual>
+%<*package&supervisor|class&manual>
 % \fi
 %
 % Hier erfolgen für das Paket \pkg{tudscrsupervisor} weitere Definitionen.
@@ -638,20 +675,8 @@
 %    \end{macrocode}
 %
 % \iffalse
-%</supervisor>
-%<*poster>
-% \fi
-%
-% Hier erfolgen für das Paket \pkg{tudscrposter} weitere Definitionen.
-%    \begin{macrocode}
-\tud@locale@english{\authorname}{Author}%
-\tud@locale@english{\contactname}{Contact}%
-\tud@locale@english{\contactpersonname}{Contact}%
-%    \end{macrocode}
-%
-% \iffalse
-%</poster>
-%<*class>
+%</package&supervisor|class&manual>
+%<*class&!manual>
 % \fi
 %
 % \subsection{Unterstützung des Paketes \pkg{listings}}
@@ -678,7 +703,7 @@
 %    \end{macrocode}
 %
 % \iffalse
-%</class>
+%</class&!manual>
 % \fi
 %
 % \Finale
