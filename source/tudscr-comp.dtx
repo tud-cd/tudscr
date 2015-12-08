@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-comp.dtx}[%
-  2015/12/02 v2.05 TUD-KOMA-Script\space%
+  2015/12/08 v2.05 TUD-KOMA-Script\space%
 %</driver>
 %<package&identify>\NeedsTeXFormat{LaTeX2e}
 %<package&identify>\ProvidesPackage{tudscrcomp}[%
@@ -85,6 +85,12 @@
 %   mit neuen Schriftfamilien ermöglicht}^^A
 % \changes{v2.04}{2015/04/22}{\pkg{tudscrfonts}: Unterstützung veralteter 
 %   Posterklassen}^^A
+% \changes{v2.05}{2015/12/08}{\pkg{tudscrfonts-fix}: Das Paket übernimmt die 
+%   Bereitstellung der Schriften für veraltete Klassen}^^A
+%
+% \ToDo{Quelltextteile am Ende einbinden}[v2.05]
+% \ToDo{Tag font/!font überarbeiten (evtl. bundle?!)}[v2.05]
+% \ToDo{Paket \pkg{tudscrfonts-fix} fertigstellen und testen}[v2.05]
 %
 % \section{Kompatibilität zu früheren Versionen und Klassen}
 %
@@ -119,12 +125,12 @@
 %    \begin{macrocode}
 %<*option>
 \newcommand*\TUD@deprecated@key[2]{%
-%<*!fonts>
+%<*class>
   \ClassWarning{\TUDClassName}%
-%</!fonts>
-%<*fonts>
+%</class>
+%<*package&fonts>
   \PackageWarning{tudscrfonts}%
-%</fonts>
+%</package&fonts>
   {%
     The option key `#1' is deprecated.\MessageBreak%
     It's recommended to use `#2'\MessageBreak%
@@ -169,9 +175,9 @@
 %<*class>
   \ClassWarning{\TUDClassName}%
 %</class>
-%<*package>
+%<*package&fonts>
   \PackageWarning{tudscrfonts}%
-%</package>
+%</package&fonts>
   {%
     The option key `fontspec' is deprecated.\MessageBreak%
     You should load the package `fontspec' manually%
@@ -186,26 +192,26 @@
 %<*class>
 \AtEndOfClass%
 %</class>
-%<*package>
+%<*package&fonts>
 \AtEndOfPackage%
-%</package>
+%</package&fonts>
 {%
   \TUD@key{fontspec}[]%
   {%
 %<*class>
     \ClassError{\TUDClassName}%
 %</class>
-%<*package>
+%<*package&fonts>
     \PackageError{tudscrfonts}%
-%</package>
+%</package&fonts>
       {Option `fontspec' too late}{%
       Option `fontspec' can only be set while loading the\MessageBreak%
 %<*class>
       class `\TUDClassName'
 %</class>
-%<*package>
+%<*package&fonts>
       package `tudscrfonts'
-%</package>
+%</package&fonts>
       but you have tried to set it up later.%
     }%
     \FamilyKeyStateProcessed%
@@ -1008,9 +1014,10 @@
 %<*option>
 % \fi
 %
-% \subsection{Das Paket \pkg{tudscrfonts} -- Schriftfamilien für alte Klassen}
+% \subsection{Das Paket \pkg{tudscrfonts-fix} -- Die Schriftfamilien des \CDs 
+% für veraltete Klassen}
 %
-% Das Paket \pkg{tudscrfonts} versucht, die \TUDScript-Schriftfamilien für
+% Das Paket \pkg{tudscrfonts-fix} versucht, die \TUDScript-Schriftfamilien für
 % die veralteten Klassen von Klaus Bergmann sowie die Posterklassen anzubieten. 
 % Hierfür werden zunächst vor der Definition der Kompatibilitätseinstellungen 
 % passende Makros zur Fallunterscheidung definiert.
@@ -1035,8 +1042,8 @@
 % \end{macro}^^A if@tud@oldclass
 % \begin{macro}{\if@tud@oldscrclass}
 % \changes{v2.02}{2014/08/29}{neu}^^A
-% Soll das Paket \pkg{tudscrfonts} mit den \TUDScript-Klassen der Version~v1.0
-% genutzt werden, sind ebenfalls einige Anpassungen notwendig.
+% Soll das Paket \pkg{tudscrfonts-fix} mit \TUDScript der Version~v1.0 genutzt 
+% werden, sind ebenfalls einige Anpassungen notwendig.
 %    \begin{macrocode}
 \newif\if@tud@oldscrclass
 \@ifclassloaded{tudscrbookold}{\@tud@oldscrclasstrue}{}%
@@ -1050,12 +1057,11 @@
 %<*body>
 % \fi
 %
-% Wird das Paket \pkg{tudscrfonts} mit den alten TUD-Klassen \cls{tudbook}, 
+% Wird das Paket \pkg{tudscrfonts-fix} mit den alten TUD-Klassen \cls{tudbook}, 
 % \cls{tudmathposter} etc. oder \TUDScript in der Version~v1.0 verwendet,
 % müssen einige Kompatibilitätseinstellungen vorgenmommen werden. Hierfür sind
-% einige Patches notwendig. Bei den alten TUD-Klassen, müssen in erster Linie
-% einige Kompatibilitätseinstellungen vorgenmommen werden. Dies betrifft
-% insbesondere die Mathematikschriften sowie allerhand darin definierter, fixer 
+% wenige Patches notwendig. Bei den alten TUD-Klassen betrifft dies in erster 
+% Linie die Mathematikschriften sowie die in den Klassen definierten, fixen 
 % Schriften.
 %    \begin{macrocode}
 \ifbool{@tud@oldclass}{%
@@ -1197,14 +1203,14 @@
   \renewcommand*\tudfont[1]{\cdfont{#1}}%
   \if@sansmath%
     \if@tudfonts@eulermath%
-      \PackageWarningNoLine{tudscrfonts}{%
+      \PackageWarningNoLine{tudscrfonts-fix}{%
         You're using non-serif fonts in math mode. It's\MessageBreak%
         recommended to pass the option `noeulermath' to\MessageBreak%
         package `tudfonts'%
       }%
     \fi%
     \if@tud@cdmath\else%
-      \PackageWarning{tudscrfonts}{%
+      \PackageWarning{tudscrfonts-fix}{%
         If you want to use non-serif fonts in math mode,\MessageBreak%
         you should also use the option `serifmath'\MessageBreak%
         as optional argument for \string\documentclass%
@@ -1233,8 +1239,8 @@
 %
 % \subsubsection{Patches für die \TUDScript-Klassen~v1.0}
 %
-% Für die Verwendung des Paketes \pkg{tudscrfonts} mit den \TUDScript-Klassen
-% in der Version~v1.0 sind ebenfalls einige Anpassungen notwendig.
+% Für die Verwendung des Paketes \pkg{tudscrfonts-fix} mit \TUDScript in der
+% Version~v1.0 sind ebenfalls einige Anpassungen notwendig.
 %
 % Es muss Sorge dafür getragen werden, dass einige veraltete Befehle
 % aktualisiert werden. Hierfür müssen diese \enquote{unschädlich} gemacht
@@ -1268,3 +1274,65 @@
 % \Finale
 %
 \endinput
+
+
+% Für das Paket müssen zuvor einige Einstellungen angepasst werden, damit bei 
+% der Verwendung einer alten Klasse alles reibungslos funktioniert.
+%    \begin{macrocode}
+%<*package>
+\ifbool{@tud@oldscrclass}{%
+  \let\univln\relax%
+  \let\univrn\relax%
+  \let\univbn\relax%
+  \let\univxn\relax%
+  \let\univls\relax%
+  \let\univrs\relax%
+  \let\univbs\relax%
+  \let\univxs\relax%
+  \let\dinbn\relax%
+  \let\textuln\relax%
+  \let\texturn\relax%
+  \let\textubn\relax%
+  \let\textuxn\relax%
+  \let\textuls\relax%
+  \let\texturs\relax%
+  \let\textubs\relax%
+  \let\textuxs\relax%
+  \let\textdbn\relax%
+  \AtBeginDocument{%
+    \cmd@restore{rmdefault}%
+    \cmd@restore{sfdefault}%
+    \cmd@restore{bfdefault}%
+    \cmd@restore{mddefault}%
+    \cmd@restore{familydefault}%
+    \cmd@restore{seriesdefault}%
+    \cmd@restore{shapedefault}%
+    \cmd@restore{rmfamily}%
+    \cmd@restore{sffamily}%
+    \cmd@restore{ttfamily}%
+  }%
+}{}
+%</package>
+%    \end{macrocode}
+% Für die alten Klassen von Klaus Bergmann sowie \TUDScript in der Version~v1.0 
+% werden die fetten Schriften in einem stärkeren Schriftschnitt gesetzt.
+%    \begin{macrocode}
+%<*package>
+        \ifboolexpr{bool {@tud@oldclass} or bool {@tud@oldscrclass}}{%
+          \setsansfont{Univers Light}[%
+            BoldFont = Univers Bold,%
+            ItalicFont = Univers Light Oblique,%
+            BoldItalicFont = Univers Bold Oblique,%
+          ]%
+        }{}%
+%</package>
+%    \end{macrocode}
+% Bei den alten Klassen von Klaus Bergmann bzw. \TUDScript~v1.0 sind die fetten 
+% Schriften stärker.
+%    \begin{macrocode}
+%<*package>
+          \ifboolexpr{bool {@tud@oldclass} or bool {@tud@oldscrclass}}{%
+            \renewcommand*\bfdefault{b}%
+          }{}%
+%</package>
+%    \end{macrocode}
