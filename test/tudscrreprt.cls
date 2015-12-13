@@ -1409,64 +1409,6 @@
 \newif\if@tud@dinboldmath
 \newcommand*\tud@univers{lun}
 \newcommand*\tud@dinbold{0m6}
-\newcommand*\tud@font@check{%
-  \if@tud@fontspec%
-    \let\@tempa\@gobblefour%
-%    \edef\@tempa{%
-%      \lowercase{\noexpand\IfFileExists{OT1\tud@univers.fd}}%
-%    }%
-%    \edef\@tempb{%
-%      \lowercase{\noexpand\IfFileExists{OT1\tud@dinbold.fd}}%
-%    }%
-%    \def\@tempc##1{%
-%      \ClassInfoNoLine{\TUDClassName}%
-%      {%
-%        `##1' fonts for math typesetting not found\MessageBreak%
-%        Please use one of the installation scripts for the\MessageBreak%
-%        tudscr-bundle mentioned in the manual%
-%      }%
-%    }%
-  \else%
-    \edef\@tempa##1##2{%
-      \lowercase{\noexpand\IfFileExists{##1##2.fd}}%
-    }%
-    \def\@tempb##1{%
-      \ifnum\tud@cdfont>\z@\relax% true/heavy
-        \@tempswafalse%
-        \ifstr{OT1}{\encodingdefault}{\@tempswatrue}{}%
-        \ifstr{T1}{\encodingdefault}{\@tempswatrue}{}%
-        \ClassWarningNoLine{\TUDClassName}%
-        {%
-          `##1' fonts not found for encoding `\encodingdefault'.\MessageBreak%
-          \if@tempswa%
-            Please use one of the installation scripts for the\MessageBreak%
-            tudscr-bundle mentioned in the manual.\MessageBreak%
-          \else%
-            Please choose a possible encoding (`OT1' or `T1').\MessageBreak%
-          \fi%
-          A fallback layout is used%
-        }%
-      \fi%
-    }%
-    \def\@tempc##1{%
-      \ifnum\tud@cdfont>\z@\relax% true/heavy
-        \if@tud@cdmath%
-          \ClassWarningNoLine{\TUDClassName}%
-          {%
-            `##1' fonts for math typesetting not found\MessageBreak%
-            Please use one of the installation scripts for the\MessageBreak%
-            tudscr-bundle mentioned in the manual%
-          }%
-        \fi%
-      \fi%
-    }%
-  \fi%
-  \@tempa{\encodingdefault}{\tud@univers}{\@tud@universtrue}{\@tempb{Univers}}%
-  \@tempa{\encodingdefault}{\tud@dinbold}{\@tud@dinboldtrue}{\@tempb{DIN Bold}}%
-  \@tempa{OT1}{\tud@univers}{\@tud@universmathtrue}{\@tempc{Univers}}%
-  \@tempa{OT1}{\tud@dinbold}{\@tud@dinboldmathtrue}{\@tempc{DIN Bold}}%
-  \undef\tud@font@check%
-}
 \newcommand*\tud@font@init{%
   \newcommand*\textuln{}%
   \newcommand*\texturn{}%
@@ -1493,55 +1435,74 @@
   \undef\tud@font@init@nfss%
   \undef\tud@font@init%
 }
-\newif\if@tud@fontspec@missing
-\newcommand*\tud@font@init@fontspec{}
-\IfFileExists{xparse.sty}{\@tempswatrue}{\@tempswafalse}%
+\newcommand*\tud@fontspec@noerror{}
+\IfFileExists{expl3.sty}{\@tempswatrue}{\@tempswafalse}%
 \if@tempswa
-  \RequirePackage{xparse}
-  \newcommand*\tud@fontspec@flag{\global\@tud@fontspec@missingtrue\@gobbletwo}%
-  \NewDocumentCommand\tud@fontface{mmo}{%
-    \global\@tud@fontspec@missingfalse%
-    \newfontface#1{#2}[#3]%
-    \if@tud@fontspec@missing%
-      \@tempswatrue%
-      \renewrobustcmd*#1{}%
+  \RequirePackage{expl3}%
+  \ExplSyntaxOn%
+  \renewcommand*\tud@fontspec@noerror{%
+    \__fontspec_font_suppress_not_found_error:
+    \msg_redirect_name:nnn {fontspec}{font-not-found}{none}
+  }%
+  \ExplSyntaxOff%
+\fi%
+\newif\if@tud@fontspec@missing
+\newcommand*\tud@font@check{%
+  \edef\@tempa##1##2{%
+    \lowercase{\noexpand\IfFileExists{##1##2.fd}}%
+  }%
+  \def\@tempb##1{%
+    \ifnum\tud@cdfont>\z@\relax% true/heavy
+      \@tempswafalse%
+      \ifstr{OT1}{\encodingdefault}{\@tempswatrue}{}%
+      \ifstr{T1}{\encodingdefault}{\@tempswatrue}{}%
+      \ClassWarningNoLine{\TUDClassName}%
+      {%
+        `##1' fonts not found for encoding `\encodingdefault'.\MessageBreak%
+        \if@tempswa%
+          Please use one of the installation scripts for the\MessageBreak%
+          tudscr-bundle mentioned in the manual.\MessageBreak%
+        \else%
+          Please choose a possible encoding (`OT1' or `T1').\MessageBreak%
+        \fi%
+        A fallback layout is used%
+      }%
     \fi%
   }%
-  \ExplSyntaxOn
-  \renewcommand*\tud@font@init@fontspec{%
-    \@tempswafalse%
-    \cs_set_eq:NN \tud@fontspec@error \__fontspec_error:nx
-    \cs_set_eq:NN \__fontspec_error:nx \tud@fontspec@flag
-    \tud@fontface\univln{Univers Light}[NFSSFamily=UniversLight]%
-    \tud@fontface\univrn{Univers}[NFSSFamily=UniversRegular]%
-    \tud@fontface\univbn{Univers Bold}[NFSSFamily=UniversBold]%
-    \tud@fontface\univxn{Univers Black}[NFSSFamily=UniversBlack]%
-    \tud@fontface\univls{Univers Light Oblique}[NFSSFamily=UniversLightOblique]%
-    \tud@fontface\univrs{Univers Oblique}[NFSSFamily=UniversRegularOblique]%
-    \tud@fontface\univbs{Univers Bold Oblique}[NFSSFamily=UniversBoldOblique]%
-    \tud@fontface\univxs{Univers Black Oblique}[NFSSFamily=UniversBlackOblique]%
-    \tud@fontface\@dinbn{DIN Bold}[NFSSFamily=DINBold,BoldFont = DIN Bold]%
-    % §§§
-    \global\@tud@fontspec@missingtrue%
-    \if@tud@fontspec@missing%
-%      \newrobustcmd*\dinbn{\sectfont}%
-%      \newrobustcmd*\@dinbn{\sectfont}%
-      \renewrobustcmd*\@dinbn{\sectfont}%
-      \newrobustcmd*\dinbn{\tud@font@fallback@wrn\@dinbn}%
-    \else%
-      \if@tud@dinboldmath%
-        \newrobustcmd*\dinbn{\@dinbn\mathversion{dinbold}}%
-      \else%
-        \newrobustcmd*\dinbn{\@dinbn}%
+  \def\@tempc##1{%
+    \ifnum\tud@cdfont>\z@\relax% true/heavy
+      \if@tud@cdmath%
+        \ClassWarningNoLine{\TUDClassName}%
+        {%
+          `##1' fonts for math typesetting not found\MessageBreak%
+          Please use one of the installation scripts for the\MessageBreak%
+          tudscr-bundle mentioned in the manual%
+        }%
       \fi%
     \fi%
-    \cs_set_eq:NN \__fontspec_error:nx \tud@fontspec@error
-    \if@tempswa%
-      \global\@tud@fontspec@missingtrue%
-    \fi%
   }%
-  \ExplSyntaxOff
-\fi%
+  \if@tud@fontspec%
+%    \def\@tempb##1{%
+%      \ifnum\tud@cdfont>\z@\relax% true/heavy
+%%       $$$ nullfont-Abfrage
+%      \fi%
+%    }%
+%    \begingroup%
+%      \tud@fontspec@noerror%
+%%      \@tempb{<font>}{\tud@universfalse}%
+%    \endgroup%
+  \else%
+    \@tempa{\encodingdefault}{\tud@univers}{\@tud@universtrue}{%
+      \@tempb{Univers}%
+    }%
+    \@tempa{\encodingdefault}{\tud@dinbold}{\@tud@dinboldtrue}{%
+      \@tempb{DIN Bold}%
+    }%
+  \fi%
+  \@tempa{OT1}{\tud@univers}{\@tud@universmathtrue}{\@tempc{Univers}}%
+  \@tempa{OT1}{\tud@dinbold}{\@tud@dinboldmathtrue}{\@tempc{DIN Bold}}%
+  \undef\tud@font@check%
+}
 \newcommand*\tud@font@init@nfss{%
   \if@tud@univers%
     \newrobustcmd*\univln{\usefont{\encodingdefault}{\tud@univers}{l}{n}}%
@@ -1553,6 +1514,7 @@
     \newrobustcmd*\univbs{\usefont{\encodingdefault}{\tud@univers}{b}{sl}}%
     \newrobustcmd*\univxs{\usefont{\encodingdefault}{\tud@univers}{eb}{sl}}%
   \else%
+    % §§§ providecommand in \tud@font@init ?!
     \newrobustcmd*\univln{\tud@font@fallback{\mddefault}{n}}%
     \newrobustcmd*\univrn{\tud@font@fallback{\mddefault}{n}}%
     \newrobustcmd*\univbn{\tud@font@fallback{\bfdefault}{n}}%
@@ -1572,6 +1534,35 @@
     \newrobustcmd*\@dinbn{\sectfont}%
     \newrobustcmd*\dinbn{\tud@font@fallback@wrn\@dinbn}%
   \fi%
+}
+\newcommand*\tud@font@init@fontspec{%
+%  \@tempswafalse%
+%  \cs_set_eq:NN \tud@fontspec@error \__fontspec_error:nx
+%  \cs_set_eq:NN \__fontspec_error:nx \tud@fontspec@flag
+%  \tud@fontface\univln{Univers Light}[NFSSFamily=UniversLight]%
+%  \tud@fontface\univrn{Univers}[NFSSFamily=UniversRegular]%
+%  \tud@fontface\univbn{Univers Bold}[NFSSFamily=UniversBold]%
+%  \tud@fontface\univxn{Univers Black}[NFSSFamily=UniversBlack]%
+%  \tud@fontface\univls{Univers Light Oblique}[NFSSFamily=UniversLightOblique]%
+%  \tud@fontface\univrs{Univers Oblique}[NFSSFamily=UniversRegularOblique]%
+%  \tud@fontface\univbs{Univers Bold Oblique}[NFSSFamily=UniversBoldOblique]%
+%  \tud@fontface\univxs{Univers Black Oblique}[NFSSFamily=UniversBlackOblique]%
+%  \tud@fontface\@dinbn{DIN Bold}[NFSSFamily=DINBold,BoldFont = DIN Bold]%
+%  % §§§
+%  \if@tud@fontspec@missing%
+    \newrobustcmd*\@dinbn{\sectfont}%
+    \newrobustcmd*\dinbn{\tud@font@fallback@wrn\@dinbn}%
+%  \else%
+%    \if@tud@dinboldmath%
+%      \newrobustcmd*\dinbn{\@dinbn\mathversion{dinbold}}%
+%    \else%
+%      \newrobustcmd*\dinbn{\@dinbn}%
+%    \fi%
+%  \fi%
+%  \cs_set_eq:NN \__fontspec_error:nx \tud@fontspec@error
+%  \if@tempswa%
+%    \global\@tud@fontspec@missingtrue%
+%  \fi%
 }
 \newcommand*\tud@font@fallback[2]{%
   \tud@font@fallback@wrn%
@@ -1856,10 +1847,6 @@
 %          BoldItalicFont = LMMonoLt10-BoldOblique,%
 %        ]%
 %      \fi%
-      \renewcommand*\rmdefault{\sfdefault}%
-      \renewcommand*\familydefault{\sfdefault}%
-      \renewcommand*\seriesdefault{\mddefault}%
-      \renewcommand*\shapedefault{\updefault}%
     \else%
       \if@tud@univers%
         \renewcommand*\sfdefault{\tud@univers}%
@@ -1890,11 +1877,11 @@
         \fi%
       \fi%
     \fi%
-    \renewcommand*\rmdefault{\sfdefault}%
-    \renewcommand*\familydefault{\sfdefault}%
-    \renewcommand*\seriesdefault{\mddefault}%
-    \renewcommand*\shapedefault{\updefault}%
   \fi%
+  \renewcommand*\rmdefault{\sfdefault}%
+  \renewcommand*\familydefault{\sfdefault}%
+  \renewcommand*\seriesdefault{\mddefault}%
+  \renewcommand*\shapedefault{\updefault}%
   \if@tud@mweights%
     \edef\rmdef@ult{\rmdefault}%
     \edef\sfdef@ult{\sfdefault}%
