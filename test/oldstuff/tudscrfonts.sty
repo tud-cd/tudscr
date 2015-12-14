@@ -91,12 +91,6 @@
   \AtEndOfPackage{\renewcommand*\TUD@noworlater[2]{#1#2}}%
 \fi
 %%% From File: tudscr-fonts.dtx
-\newif\if@tud@univers
-\newif\if@tud@dinbold
-\newcommand*\tud@univers{lun}
-\newcommand*\tud@dinbold{0m6}
-\newif\if@tud@fontspec
-\AfterPackage*{fontspec}{\@tud@fontspectrue}
 \newif\if@tud@cdfont@din%
 \@tud@cdfont@dintrue
 \newcommand*\tud@cdfont{1}
@@ -164,6 +158,8 @@
   \if@atdocument\AtEndOfFamilyOptions{\tud@font@skip@set}\fi%
   \FamilyKeyStateProcessed%
 }
+\newif\if@tud@fontspec
+\AfterPackage*{fontspec}{\@tud@fontspectrue}
 \bool@lock{@tud@cdmath}
 \TUD@key{cdmath}[true]{%
   \TUD@set@numkey{cdmath}{@tempa}{%
@@ -378,70 +374,139 @@
 \DeclareOption*{\KOMAoptions{\CurrentOption}}
 \TUDProcessOptions\relax
 %%% From File: tudscr-fonts.dtx
-\newcommand*\tud@font@greek@loop[1]{%
-  \@for\@tempa:={%
-    Gamma,Delta,Theta,Lambda,Xi,Pi,Sigma,Upsilon,Phi,Psi,Omega%
-  }\do{#1{\@tempa}}%
-}
-\newcommand*\tud@font@greek@declare[1]{%
-  \edef\@tempb{%
-    \noexpand\DeclareMathSymbol{\csname tud@up#1\endcsname}%
-      {\noexpand\mathalpha}{operators}{\the\@tempcnta}%
-  }\@tempb%
-  \edef\@tempb{%
-    \noexpand\DeclareMathSymbol{\csname tud@var#1\endcsname}%
-      {\noexpand\mathalpha}{letters}{\the\@tempcnta}%
-  }\@tempb%
-  \csletcs{tud@#1}{tud@up#1}%
-  \advance \@tempcnta by 1%
-}
-\@tempcnta=\z@\relax
-\tud@font@greek@loop\tud@font@greek@declare
+\newcommand*\tud@univers{lun}
+\newif\if@tud@univers
+\newif\if@tud@universmath
+\newcommand*\tud@dinbold{0m6}
+\newif\if@tud@dinbold
+\newif\if@tud@dinboldmath
+\newcommand*\tud@font@nofontspecerror{}
+\IfFileExists{expl3.sty}{\@tempswatrue}{\@tempswafalse}%
+\if@tempswa
+  \RequirePackage{expl3}%
+  \ExplSyntaxOn%
+  \renewcommand*\tud@font@nofontspecerror{%
+    \__fontspec_font_suppress_not_found_error:
+    \msg_redirect_name:nnn {fontspec}{font-not-found}{none}
+  }%
+  \ExplSyntaxOff%
+\fi%
 \newcommand*\tud@font@check{%
-  \if@tud@fontspec%
-    \edef\@tempa{%
-      \lowercase{\noexpand\IfFileExists{OT1\tud@univers.fd}}%
-    }%
-    \edef\@tempb{%
-      \lowercase{\noexpand\IfFileExists{OT1\tud@dinbold.fd}}%
-    }%
-    \def\@tempc##1{%
-      \PackageInfoNoLine{tudscrfonts}%
-      {%
-        `##1' fonts for math typesetting not found\MessageBreak%
-        Please use one of the installation scripts for the\MessageBreak%
-        tudscr-bundle mentioned in the manual%
-      }%
-    }%
-  \else%
-    \edef\@tempa{%
-      \lowercase{\noexpand\IfFileExists{\encodingdefault\tud@univers.fd}}%
-    }%
-    \edef\@tempb{%
-      \lowercase{\noexpand\IfFileExists{\encodingdefault\tud@dinbold.fd}}%
-    }%
-    \def\@tempc##1{%
-      \@tempswafalse%
-      \ifstr{OT1}{\encodingdefault}{\@tempswatrue}{}%
-      \ifstr{T1}{\encodingdefault}{\@tempswatrue}{}%
-      \PackageWarningNoLine{tudscrfonts}%
-      {%
-        `##1' fonts not found for encoding `\encodingdefault'.\MessageBreak%
-        \if@tempswa%
+  \edef\@tempa##1##2{\lowercase{\noexpand\IfFileExists{##1##2.fd}}}%
+  \def\@tempb##1{%
+    \ifnum\tud@cdfont>\z@\relax% true/heavy
+      \if@tud@cdmath%
+        \PackageWarningNoLine{tudscrfonts}%
+        {%
+          `##1' fonts for math typesetting not found\MessageBreak%
           Please use one of the installation scripts for the\MessageBreak%
-          tudscr-bundle mentioned in the manual.\MessageBreak%
-        \else%
-          Please choose a possible encoding (`OT1' or `T1').\MessageBreak%
+          tudscr-bundle mentioned in the manual%
+        }%
+      \fi%
+    \fi%
+  }%
+  \@tempa{OT1}{\tud@univers}{\@tud@universmathtrue}{\@tempb{Univers}}%
+  \@tempa{OT1}{\tud@dinbold}{\@tud@dinboldmathtrue}{\@tempb{DIN Bold}}%
+  \if@tud@fontspec%
+    \def\@tempc##1##2{%
+      \fontspec{##1}%
+      \expandafter\ifx\the\font\nullfont%
+        ##2%
+        \ifnum\tud@cdfont>\z@\relax% true/heavy
+          \PackageWarningNoLine{tudscrfonts}%
+          {%
+            `##1' fonts not found for encoding `\encodingdefault'.\MessageBreak%
+            It seems, you haven't installed the required\MessageBreak%
+            OTF-font on your system. A fallback layout is used%
+          }%
         \fi%
-        A fallback layout is used%
-      }%
+      \fi%
     }%
+    \begingroup%
+      \tud@font@nofontspecerror%
+      \global\@tud@universtrue%
+      \@tempc{Univers Light}{\global\@tud@universfalse}%
+      \@tempc{Univers}{\global\@tud@universfalse}%
+      \@tempc{Univers Bold}{\global\@tud@universfalse}%
+      \@tempc{Univers Black}{\global\@tud@universfalse}%
+      \@tempc{Univers Light Oblique}{\global\@tud@universfalse}%
+      \@tempc{Univers Oblique}{\global\@tud@universfalse}%
+      \@tempc{Univers Bold Oblique}{\global\@tud@universfalse}%
+      \@tempc{Univers Black Oblique}{\global\@tud@universfalse}%
+      \global\@tud@dinboldtrue%
+      \@tempc{DIN Bold}{\global\@tud@dinboldfalse}%
+    \endgroup%
+  \else%
+    \def\@tempc##1{%
+      \ifnum\tud@cdfont>\z@\relax% true/heavy
+        \@tempswafalse%
+        \ifstr{OT1}{\encodingdefault}{\@tempswatrue}{}%
+        \ifstr{T1}{\encodingdefault}{\@tempswatrue}{}%
+        \PackageWarningNoLine{tudscrfonts}%
+        {%
+          `##1' fonts not found for encoding `\encodingdefault'.\MessageBreak%
+          \if@tempswa%
+            Please use one of the installation scripts for the\MessageBreak%
+            tudscr-bundle mentioned in the manual.\MessageBreak%
+          \else%
+            Please choose a possible encoding (`OT1' or `T1').\MessageBreak%
+          \fi%
+          A fallback layout is used%
+        }%
+      \fi%
+    }%
+    \@tempa{\encodingdefault}%
+      {\tud@univers}{\@tud@universtrue}{\@tempc{Univers}}%
+    \@tempa{\encodingdefault}%
+      {\tud@dinbold}{\@tud@dinboldtrue}{\@tempc{DIN Bold}}%
   \fi%
-  \@tempa{\@tud@universtrue}{\@tempc{Univers}}%
-  \@tempb{\@tud@dinboldtrue}{\@tempc{DIN Bold}}%
   \undef\tud@font@check%
 }
 \newcommand*\tud@font@init{%
+  \if@tud@univers%
+    \if@tud@fontspec%
+      \newfontface\univln{Univers Light}[NFSSFamily=UniversLight]
+      \newfontface\univrn{Univers}[NFSSFamily=UniversRegular]
+      \newfontface\univbn{Univers Bold}[NFSSFamily=UniversBold]
+      \newfontface\univxn{Univers Black}[NFSSFamily=UniversBlack]
+      \newfontface\univls{Univers Light Oblique}[NFSSFamily=UniversLightOblique]
+      \newfontface\univrs{Univers Oblique}[NFSSFamily=UniversRegularOblique]
+      \newfontface\univbs{Univers Bold Oblique}[NFSSFamily=UniversBoldOblique]
+      \newfontface\univxs{Univers Black Oblique}[NFSSFamily=UniversBlackOblique]
+    \else%
+      \newrobustcmd*\univln{\usefont{\encodingdefault}{\tud@univers}{l}{n}}%
+      \newrobustcmd*\univrn{\usefont{\encodingdefault}{\tud@univers}{m}{n}}%
+      \newrobustcmd*\univbn{\usefont{\encodingdefault}{\tud@univers}{b}{n}}%
+      \newrobustcmd*\univxn{\usefont{\encodingdefault}{\tud@univers}{eb}{n}}%
+      \newrobustcmd*\univls{\usefont{\encodingdefault}{\tud@univers}{l}{sl}}%
+      \newrobustcmd*\univrs{\usefont{\encodingdefault}{\tud@univers}{m}{sl}}%
+      \newrobustcmd*\univbs{\usefont{\encodingdefault}{\tud@univers}{b}{sl}}%
+      \newrobustcmd*\univxs{\usefont{\encodingdefault}{\tud@univers}{eb}{sl}}%
+    \fi%
+  \else%
+    \newrobustcmd*\univln{\tud@font@fallback{Univers Light}{md}{up}}%
+    \newrobustcmd*\univrn{\tud@font@fallback{Univers}{md}{up}}%
+    \newrobustcmd*\univbn{\tud@font@fallback{Univers Bold}{bf}{up}}%
+    \newrobustcmd*\univxn{\tud@font@fallback{Univers Black}{bf}{up}}%
+    \newrobustcmd*\univls{\tud@font@fallback{Univers Light Oblique}{md}{sl}}%
+    \newrobustcmd*\univrs{\tud@font@fallback{Univers Oblique}{md}{sl}}%
+    \newrobustcmd*\univbs{\tud@font@fallback{Univers Bold Oblique}{bf}{sl}}%
+    \newrobustcmd*\univxs{\tud@font@fallback{Univers Black Oblique}{bf}{sl}}%
+  \fi%
+  \if@tud@dinbold%
+    \if@tud@fontspec%
+      \newfontface\@dinbn{DIN Bold}[NFSSFamily=DINBold,BoldFont = DIN Bold]
+    \else%
+      \newrobustcmd*\@dinbn{\usefont{\encodingdefault}{\tud@dinbold}{b}{n}}%
+    \fi%
+    \if@tud@dinboldmath%
+      \appto\@dinbn{\mathversion{dinbold}}%
+    \fi%
+    \newrobustcmd*\dinbn{\@dinbn}%
+  \else%
+    \newrobustcmd*\@dinbn{\sectfont}%
+    \newrobustcmd*\dinbn{\tud@font@fallback@wrn{DIN Bold}\@dinbn}%
+  \fi%
   \newcommand*\textuln{}%
   \newcommand*\texturn{}%
   \newcommand*\textubn{}%
@@ -460,92 +525,18 @@
   \DeclareTextFontCommand{\textubs}{\univbs}%
   \DeclareTextFontCommand{\textuxs}{\univxs}%
   \DeclareTextFontCommand{\textdbn}{\dinbn}%
-  \undef\tud@font@init@fontspec%
-  \undef\tud@fontface%
-  \undef\tud@fontspec@flag%
-  \undef\tud@fontspec@error%
-  \undef\tud@font@init@nfss%
   \undef\tud@font@init%
 }
-\newif\if@tud@fontspec@missing
-\newcommand*\tud@font@init@fontspec{}
-\IfFileExists{xparse.sty}{\@tempswatrue}{\@tempswafalse}%
-\if@tempswa
-  \RequirePackage{xparse}
-  \newcommand*\tud@fontspec@flag{\global\@tud@fontspec@missingtrue\@gobbletwo}%
-  \NewDocumentCommand\tud@fontface{mmo}{%
-    \global\@tud@fontspec@missingfalse%
-    \newfontface#1{#2}[#3]%
-    \if@tud@fontspec@missing%
-      \@tempswatrue%
-      \renewrobustcmd*#1{}%
-    \fi%
-  }%
-  \ExplSyntaxOn
-  \renewcommand*\tud@font@init@fontspec{%
-    \@tempswafalse%
-    \cs_set_eq:NN \tud@fontspec@error \__fontspec_error:nx
-    \cs_set_eq:NN \__fontspec_error:nx \tud@fontspec@flag
-    \tud@fontface\univln{Univers Light}[NFSSFamily=UniversLight]%
-    \tud@fontface\univrn{Univers}[NFSSFamily=UniversRegular]%
-    \tud@fontface\univbn{Univers Bold}[NFSSFamily=UniversBold]%
-    \tud@fontface\univxn{Univers Black}[NFSSFamily=UniversBlack]%
-    \tud@fontface\univls{Univers Light Oblique}[NFSSFamily=UniversLightOblique]%
-    \tud@fontface\univrs{Univers Oblique}[NFSSFamily=UniversRegularOblique]%
-    \tud@fontface\univbs{Univers Bold Oblique}[NFSSFamily=UniversBoldOblique]%
-    \tud@fontface\univxs{Univers Black Oblique}[NFSSFamily=UniversBlackOblique]%
-    \tud@fontface\@dinbn{DIN Bold}[NFSSFamily=DINBold,BoldFont = DIN Bold]%
-    \if@tud@fontspec@missing%
-      \newrobustcmd*\dinbn{\sectfont}%
-    \else%
-      \if@tud@dinbold%
-        \newrobustcmd*\dinbn{\@dinbn\mathversion{dinbold}}%
-      \else%
-        \newrobustcmd*\dinbn{\@dinbn}%
-      \fi%
-    \fi%
-    \cs_set_eq:NN \__fontspec_error:nx \tud@fontspec@error
-    \if@tempswa%
-      \global\@tud@fontspec@missingtrue%
-    \fi%
-  }%
-  \ExplSyntaxOff
-\fi%
-\newcommand*\tud@font@init@nfss{%
-  \if@tud@univers%
-    \newrobustcmd*\univln{\usefont{\encodingdefault}{\tud@univers}{l}{n}}%
-    \newrobustcmd*\univrn{\usefont{\encodingdefault}{\tud@univers}{m}{n}}%
-    \newrobustcmd*\univbn{\usefont{\encodingdefault}{\tud@univers}{b}{n}}%
-    \newrobustcmd*\univxn{\usefont{\encodingdefault}{\tud@univers}{eb}{n}}%
-    \newrobustcmd*\univls{\usefont{\encodingdefault}{\tud@univers}{l}{sl}}%
-    \newrobustcmd*\univrs{\usefont{\encodingdefault}{\tud@univers}{m}{sl}}%
-    \newrobustcmd*\univbs{\usefont{\encodingdefault}{\tud@univers}{b}{sl}}%
-    \newrobustcmd*\univxs{\usefont{\encodingdefault}{\tud@univers}{eb}{sl}}%
-  \else%
-    \newrobustcmd*\univln{}%
-    \newrobustcmd*\univrn{}%
-    \newrobustcmd*\univbn{}%
-    \newrobustcmd*\univxn{}%
-    \newrobustcmd*\univls{}%
-    \newrobustcmd*\univrs{}%
-    \newrobustcmd*\univbs{}%
-    \newrobustcmd*\univxs{}%
-  \fi%
-  \if@tud@dinbold%
-    \newrobustcmd*\dinbn{%
-      \usefont{\encodingdefault}{\tud@dinbold}{b}{n}%
-      \mathversion{dinbold}%
-    }%
-  \else%
-    \newrobustcmd*\dinbn{\sectfont}%
-  \fi%
+\newcommand*\tud@font@fallback[3]{%
+  \tud@font@fallback@wrn{#1}%
+  \sffamily\csuse{#2series}\csuse{#3shape}%
 }
-\newcommand*\tud@disposition@font{%
-  \if@tud@cdfont@din%
-    \dinbn\tud@raggedright%
-  \else%
-    \sectfont\tud@RaggedRight%
-  \fi%
+\newcommand*\tud@font@fallback@wrn[1]{%
+  \PackageWarning{tudscrfonts}%
+  {%
+    The requested font `#1' is not available, so\MessageBreak%
+    a fallback layout is used%
+  }%
 }
 \newcommand*\cdfont[1]{%
   \@cdfont{#1}%
@@ -612,121 +603,21 @@
     \@expandtwoargs\in@{#1}{\@tempa}%
   }%
 }
-\newcommand*\mv@univers{}%
-\newcommand*\mv@universbold{}%
-\newcommand*\mv@dinbold{}%
-\newcommand*\tud@font@math@init{%
-  \if@tud@fontspec\if@tud@univers\if@tud@dinbold%
-    \@ifpackagewith{fontspec}{no-math}{}{%
-      \PackageWarningNoLine{tudscrfonts}%
-      {%
-        It's recommended to load package `fontspec' with\MessageBreak%
-        option `no-math'%
-      }%
-    }%
-  \fi\fi\fi%
-  \if@tud@univers%
-    \DeclareMathVersion{univers}%
-    \DeclareMathVersion{universbold}%
-    \SetSymbolFont{operators}{univers}{OT1}{\tud@univers}{l}{n}%
-    \SetSymbolFont{operators}{universbold}{OT1}{\tud@univers}{b}{n}%
-    \SetSymbolFont{letters}{univers}{OML}{\tud@univers}{l}{sl}%
-    \SetSymbolFont{letters}{universbold}{OML}{\tud@univers}{b}{sl}%
-    \SetSymbolFont{symbols}{univers}{OMS}{\tud@univers}{l}{n}%
-    \SetSymbolFont{symbols}{universbold}{OMS}{\tud@univers}{b}{n}%
-    \SetSymbolFont{largesymbols}{univers}{OMX}{iwona}{m}{n}%
-    \SetSymbolFont{largesymbols}{universbold}{OMX}{iwona}{b}{n}%
-    \SetMathAlphabet{\mathcal}{univers}{OMS}{lmsy}{m}{n}%
-    \SetMathAlphabet{\mathcal}{universbold}{OMS}{lmsy}{b}{n}%
-    \SetMathAlphabet{\mathbf}{univers}{OT1}{\tud@univers}{b}{n}%
-    \SetMathAlphabet{\mathbf}{universbold}{OT1}{\tud@univers}{eb}{n}%
-    \SetMathAlphabet{\mathsf}{univers}{OT1}{\tud@univers}{l}{n}%
-    \SetMathAlphabet{\mathsf}{universbold}{OT1}{\tud@univers}{b}{n}%
-    \SetMathAlphabet{\mathit}{univers}{OT1}{\tud@univers}{l}{sl}%
-    \SetMathAlphabet{\mathit}{universbold}{OT1}{\tud@univers}{b}{sl}%
-    \SetMathAlphabet{\mathtt}{univers}{OT1}{\tud@univers t}{l}{n}%
-    \SetMathAlphabet{\mathtt}{universbold}{OT1}{\tud@univers t}{b}{n}%
-    \@ifpackageloaded{amsfonts}{%
-      \DeclareFontFamily{U}{\tud@univers a}{}%
-      \DeclareFontShape{U}{\tud@univers a}{m}{n}{<->cmbras10}{}%
-      \SetSymbolFont{AMSa}{univers}{U}{\tud@univers a}{m}{n}%
-      \SetSymbolFont{AMSa}{universbold}{U}{\tud@univers a}{m}{n}%
-      \DeclareFontFamily{U}{\tud@univers b}{}%
-      \DeclareFontShape{U}{\tud@univers b}{m}{n}{<->cmbrbs10}{}%
-      \SetSymbolFont{AMSb}{univers}{U}{\tud@univers b}{m}{n}%
-      \SetSymbolFont{AMSb}{universbold}{U}{\tud@univers b}{m}{n}%
-      \SetMathAlphabet{\mathfrak}{univers}{U}{euf}{m}{n}%
-      \SetMathAlphabet{\mathfrak}{universbold}{U}{euf}{b}{n}%
-    }{}%
-  \fi%
-  \if@tud@dinbold%
-    \DeclareMathVersion{dinbold}%
-    \SetSymbolFont{operators}{dinbold}{OT1}{\tud@dinbold}{b}{n}%
-    \SetSymbolFont{letters}{dinbold}{OML}{\tud@dinbold}{b}{sl}%
-    \SetSymbolFont{symbols}{dinbold}{OMS}{\tud@dinbold}{b}{n}%
-    \SetSymbolFont{largesymbols}{dinbold}{OMX}{iwona}{ebc}{n}%
-    \SetMathAlphabet{\mathbf}{dinbold}{OT1}{\tud@dinbold}{b}{n}%
-    \SetMathAlphabet{\mathsf}{dinbold}{OT1}{\tud@dinbold}{b}{n}%
-    \SetMathAlphabet{\mathit}{dinbold}{OT1}{\tud@dinbold}{b}{sl}%
-  \fi%
-  \@ifpackageloaded{unicode-math}{%
-    \let\tud@font@math@set\relax%
-    \bool@set@lock{@tud@cdmath}{false}%
-  }{%
-    \let\@tempb\relax%
-    \let\@tempc\relax%
-    \DeclareMathSymbol{\@tempb}{\mathalpha}{letters}{0}%
-    \DeclareMathSymbol{\@tempc}{\mathord}{letters}{0}%
-    \@tempswafalse%
-    \ifnum\Gamma=\@tempb\relax\@tempswatrue\fi%
-    \ifnum\Gamma=\@tempc\relax\@tempswatrue\fi%
-    \if@tempswa%
-      \bool@std@lock{@tud@slantedgreek}{true}%
-    \fi%
-    \tud@font@greek@loop\tud@font@greek@init%
-    \tud@font@math@set%
-  }%
-  \sbox\z@{\dinbn$ $}%
-  \undef\tud@font@math@init%
-}
-\AtBeginDocument%
-{%
-  \tud@font@check%
-  \if@tud@fontspec%
-    \preto\tud@font@init\tud@font@init@fontspec%
-  \else%
-    \preto\tud@font@init\tud@font@init@nfss%
-  \fi%
-  \ifdef{\sectfont}{}{\let\sectfont\relax}%
-  \tud@font@init%
-  \if@tud@fontspec@missing%
-    \PackageWarningNoLine{tudscrfonts}%
-    {%
-      Some OTF-fonts are missing. A fallback layout is used%
-    }%
-  \fi%
-  \tud@font@set[nomath]%
-  \tud@font@math@init%
-}
-\newcommand*\tud@font@greek@init[1]{%
-  \ifcsdef{up#1}{}{%
-    \if@tempswa%
-      \csletcs{up#1}{tud@up#1}%
-    \else%
-      \csletcs{up#1}{#1}%
-    \fi%
-  }%
-  \ifcsdef{var#1}{}{%
-    \if@tempswa%
-      \csletcs{var#1}{#1}%
-    \else%
-      \csletcs{var#1}{tud@var#1}%
-    \fi%
-  }%
-}
 \newif\if@tud@mweights
 \AfterPackage*{mweights}{\@tud@mweightstrue}
-\newcommand*\tud@font@set[1][]{%
+\newcommand*\tud@font@set{%
+  \if@atdocument%
+    \ifnum\tud@cdfont>\z@\relax% true/heavy
+      \if@tud@univers\else%
+        \PackageWarning{tudscrfonts}%
+          {`Univers' fonts not found}%
+      \fi%
+      \if@tud@dinbold\else%
+        \PackageWarning{tudscrfonts}%
+          {`DIN Bold' fonts not found}%
+      \fi%
+    \fi%
+  \fi%
   \if@tud@mweights%
     \ifdef{\bfseries@rm}{}{\edef\bfseries@rm{\bfdefault}}%
     \ifdef{\bfseries@sf}{}{\edef\bfseries@sf{\bfdefault}}%
@@ -773,32 +664,32 @@
       \tud@cmd@store{mdseries@tt}%
     \fi%
     \bool@std@lock{@tud@cdmath}{true}%
-    \if@tud@fontspec%
-      \ifnum\tud@cdfont=\@ne\relax% true
-        \setsansfont{Univers Light}[%
-          BoldFont = Univers,%
-          ItalicFont = Univers Light Oblique,%
-          BoldItalicFont = Univers Oblique,%
-        ]%
-        \setmonofont{LMMonoLt10-Regular}[%
-          BoldFont = LMMono10-Regular,%
-          ItalicFont = LMMonoLt10-Oblique,%
-          BoldItalicFont = LMMonoSlant10-Regular,%
-        ]%
-      \else% heavy
-        \setsansfont{Univers}[%
-          BoldFont = Univers Bold,%
-          ItalicFont = Univers Oblique,%
-          BoldItalicFont = Univers Bold Oblique,%
-        ]%
-        \setmonofont{LMMono10-Regular}[%
-          BoldFont = LMMonoLt10-Bold,%
-          ItalicFont = LMMonoSlant10-Regular,%
-          BoldItalicFont = LMMonoLt10-BoldOblique,%
-        ]%
-      \fi%
-    \else%
-      \if@tud@univers%
+    \if@tud@univers%
+      \if@tud@fontspec%
+        \ifnum\tud@cdfont=\@ne\relax% true
+          \setsansfont{Univers Light}[%
+            BoldFont = Univers,%
+            ItalicFont = Univers Light Oblique,%
+            BoldItalicFont = Univers Oblique,%
+          ]%
+          \setmonofont{LMMonoLt10-Regular}[%
+            BoldFont = LMMono10-Regular,%
+            ItalicFont = LMMonoLt10-Oblique,%
+            BoldItalicFont = LMMonoSlant10-Regular,%
+          ]%
+        \else% heavy
+          \setsansfont{Univers}[%
+            BoldFont = Univers Bold,%
+            ItalicFont = Univers Oblique,%
+            BoldItalicFont = Univers Bold Oblique,%
+          ]%
+          \setmonofont{LMMono10-Regular}[%
+            BoldFont = LMMonoLt10-Bold,%
+            ItalicFont = LMMonoSlant10-Regular,%
+            BoldItalicFont = LMMonoLt10-BoldOblique,%
+          ]%
+        \fi%
+      \else%
         \renewcommand*\sfdefault{\tud@univers}%
         \renewcommand*\ttdefault{\tud@univers t}%
         \renewcommand*\itdefault{\sldefault}%
@@ -826,8 +717,8 @@
           \fi%
         \fi%
       \fi%
+      \renewcommand*\rmdefault{\sfdefault}%
     \fi%
-    \renewcommand*\rmdefault{\sfdefault}%
     \renewcommand*\familydefault{\sfdefault}%
     \renewcommand*\seriesdefault{\mddefault}%
     \renewcommand*\shapedefault{\updefault}%
@@ -840,7 +731,7 @@
     \edef\mddef@ult{\mddefault}%
   \fi%
   \tud@font@skip@set%
-  \ifstr{#1}{nomath}{}{\tud@font@math@set}%
+  \ifdefined\tud@font@math@init\else\tud@font@math@set\fi%
   \normalfont\selectfont%
 }
 \newcommand*\tud@font@skip@set{%
@@ -875,8 +766,137 @@
   \tud@skip@set\belowcaptionskip{\z@}%
   \tud@skip@set\columnsep{1.1\baselineskip}%
 }
+\newcommand*\tud@font@greek@loop[1]{%
+  \@for\@tempa:={%
+    Gamma,Delta,Theta,Lambda,Xi,Pi,Sigma,Upsilon,Phi,Psi,Omega%
+  }\do{#1{\@tempa}}%
+}
+\newcommand*\tud@font@greek@declare[1]{%
+  \edef\@tempb{%
+    \noexpand\DeclareMathSymbol{\csname tud@up#1\endcsname}%
+      {\noexpand\mathalpha}{operators}{\the\@tempcnta}%
+  }\@tempb%
+  \edef\@tempb{%
+    \noexpand\DeclareMathSymbol{\csname tud@var#1\endcsname}%
+      {\noexpand\mathalpha}{letters}{\the\@tempcnta}%
+  }\@tempb%
+  \csletcs{tud@#1}{tud@up#1}%
+  \advance \@tempcnta by 1%
+}
+\@tempcnta=\z@\relax
+\tud@font@greek@loop\tud@font@greek@declare
+\newcommand*\mv@univers{}%
+\newcommand*\mv@universbold{}%
+\newcommand*\mv@dinbold{}%
+\newcommand*\tud@font@math@init{%
+  \if@tud@fontspec\if@tud@cdmath%
+    \ifboolexpr{bool {@tud@universmath} or bool {@tud@dinboldmath}}{%
+      \@ifpackagewith{fontspec}{no-math}{}{%
+        \PackageWarningNoLine{tudscrfonts}%
+        {%
+          It's recommended to load package `fontspec'\MessageBreak%
+          with option `no-math', if you want to use the\MessageBreak%
+          corporate design fonts in math mode%
+        }%
+      }%
+    }{}%
+  \fi\fi%
+  \if@tud@universmath%
+    \DeclareMathVersion{univers}%
+    \DeclareMathVersion{universbold}%
+    \SetSymbolFont{operators}{univers}{OT1}{\tud@univers}{l}{n}%
+    \SetSymbolFont{operators}{universbold}{OT1}{\tud@univers}{b}{n}%
+    \SetSymbolFont{letters}{univers}{OML}{\tud@univers}{l}{sl}%
+    \SetSymbolFont{letters}{universbold}{OML}{\tud@univers}{b}{sl}%
+    \SetSymbolFont{symbols}{univers}{OMS}{\tud@univers}{l}{n}%
+    \SetSymbolFont{symbols}{universbold}{OMS}{\tud@univers}{b}{n}%
+    \SetSymbolFont{largesymbols}{univers}{OMX}{iwona}{m}{n}%
+    \SetSymbolFont{largesymbols}{universbold}{OMX}{iwona}{b}{n}%
+    \SetMathAlphabet{\mathcal}{univers}{OMS}{lmsy}{m}{n}%
+    \SetMathAlphabet{\mathcal}{universbold}{OMS}{lmsy}{b}{n}%
+    \SetMathAlphabet{\mathbf}{univers}{OT1}{\tud@univers}{b}{n}%
+    \SetMathAlphabet{\mathbf}{universbold}{OT1}{\tud@univers}{eb}{n}%
+    \SetMathAlphabet{\mathsf}{univers}{OT1}{\tud@univers}{l}{n}%
+    \SetMathAlphabet{\mathsf}{universbold}{OT1}{\tud@univers}{b}{n}%
+    \SetMathAlphabet{\mathit}{univers}{OT1}{\tud@univers}{l}{sl}%
+    \SetMathAlphabet{\mathit}{universbold}{OT1}{\tud@univers}{b}{sl}%
+    \SetMathAlphabet{\mathtt}{univers}{OT1}{\tud@univers t}{l}{n}%
+    \SetMathAlphabet{\mathtt}{universbold}{OT1}{\tud@univers t}{b}{n}%
+    \@ifpackageloaded{amsfonts}{%
+      \DeclareFontFamily{U}{\tud@univers a}{}%
+      \DeclareFontShape{U}{\tud@univers a}{m}{n}{<->cmbras10}{}%
+      \SetSymbolFont{AMSa}{univers}{U}{\tud@univers a}{m}{n}%
+      \SetSymbolFont{AMSa}{universbold}{U}{\tud@univers a}{m}{n}%
+      \DeclareFontFamily{U}{\tud@univers b}{}%
+      \DeclareFontShape{U}{\tud@univers b}{m}{n}{<->cmbrbs10}{}%
+      \SetSymbolFont{AMSb}{univers}{U}{\tud@univers b}{m}{n}%
+      \SetSymbolFont{AMSb}{universbold}{U}{\tud@univers b}{m}{n}%
+      \SetMathAlphabet{\mathfrak}{univers}{U}{euf}{m}{n}%
+      \SetMathAlphabet{\mathfrak}{universbold}{U}{euf}{b}{n}%
+    }{}%
+  \fi%
+  \if@tud@dinboldmath%
+    \DeclareMathVersion{dinbold}%
+    \SetSymbolFont{operators}{dinbold}{OT1}{\tud@dinbold}{b}{n}%
+    \SetSymbolFont{letters}{dinbold}{OML}{\tud@dinbold}{b}{sl}%
+    \SetSymbolFont{symbols}{dinbold}{OMS}{\tud@dinbold}{b}{n}%
+    \SetSymbolFont{largesymbols}{dinbold}{OMX}{iwona}{ebc}{n}%
+    \SetMathAlphabet{\mathbf}{dinbold}{OT1}{\tud@dinbold}{b}{n}%
+    \SetMathAlphabet{\mathsf}{dinbold}{OT1}{\tud@dinbold}{b}{n}%
+    \SetMathAlphabet{\mathit}{dinbold}{OT1}{\tud@dinbold}{b}{sl}%
+  \fi%
+  \@ifpackageloaded{unicode-math}{%
+    \let\tud@font@math@set\relax%
+    \bool@set@lock{@tud@cdmath}{false}%
+  }{%
+    \let\@tempb\relax%
+    \let\@tempc\relax%
+    \DeclareMathSymbol{\@tempb}{\mathalpha}{letters}{0}%
+    \DeclareMathSymbol{\@tempc}{\mathord}{letters}{0}%
+    \@tempswafalse%
+    \ifnum\Gamma=\@tempb\relax\@tempswatrue\fi%
+    \ifnum\Gamma=\@tempc\relax\@tempswatrue\fi%
+    \if@tempswa%
+      \bool@std@lock{@tud@slantedgreek}{true}%
+    \fi%
+    \tud@font@greek@loop\tud@font@greek@init%
+    \tud@font@math@set%
+  }%
+  \sbox\z@{\@dinbn$ $}%
+  \undef\tud@font@math@init%
+}
+\newcommand*\tud@font@greek@init[1]{%
+  \ifcsdef{up#1}{}{%
+    \if@tempswa%
+      \csletcs{up#1}{tud@up#1}%
+    \else%
+      \csletcs{up#1}{#1}%
+    \fi%
+  }%
+  \ifcsdef{var#1}{}{%
+    \if@tempswa%
+      \csletcs{var#1}{#1}%
+    \else%
+      \csletcs{var#1}{tud@var#1}%
+    \fi%
+  }%
+}
 \newcommand*\tud@font@math@set{%
-  \if@tud@univers%
+  \if@atdocument%
+    \ifnum\tud@cdfont>\z@\relax% true/heavy
+      \if@tud@cdmath%
+        \if@tud@universmath\else%
+          \PackageWarning{tudscrfonts}%
+            {`Univers' math fonts not found}%
+        \fi%
+        \if@tud@dinboldmath\else%
+          \PackageWarning{tudscrfonts}%
+            {`DIN Bold' math fonts not found}%
+        \fi%
+      \fi%
+    \fi%
+  \fi%
+  \if@tud@universmath%
     \if@tud@cdmath%
       \tud@cmd@store{mv@normal}%
       \tud@cmd@store{mv@bold}%
@@ -911,6 +931,21 @@
 }
 \newcommand*\tud@font@greek@upright[1]{\csletcs{#1}{up#1}}
 \newcommand*\tud@font@greek@slanted[1]{\csletcs{#1}{var#1}}
+\AtBeginDocument%
+{%
+  \tud@font@check%
+  \ifdef{\sectfont}{}{\let\sectfont\relax}%
+  \tud@font@init%
+  \tud@font@set%
+  \tud@font@math@init%
+}
+\newcommand*\tud@disposition@font{%
+  \if@tud@cdfont@din%
+    \@dinbn\tud@raggedright%
+  \else%
+    \sectfont\tud@RaggedRight%
+  \fi%
+}
 \newrobustcmd*\ifdin{%
   \@tempswafalse%
   \@expandtwoargs\in@{DINBold}{\f@family}%
@@ -946,6 +981,146 @@
 \AfterPackage*{siunitx}{%
   \providecommand*\lseries{\fontseries{l}\selectfont}%
 }
+%%% From File: tudscr-comp.dtx
+%\ifbool{@tud@oldclass}{%
+%  \AtBeginDocument{%
+%    \if@tud@fontspec%
+%      \DeclareFixedFont{\univLightVII}{\encodingdefault}%
+%        {UniversLight}{m}{n}{7}%
+%      \DeclareFixedFont{\univLightObliqueVII}{\encodingdefault}%
+%        {UniversLightOblique}{m}{n}{7}%
+%      \DeclareFixedFont{\univBoldVII}{\encodingdefault}%
+%        {UniversBold}{m}{n}{7}%
+%      \DeclareFixedFont{\univLightIX}{\encodingdefault}%
+%        {UniversLight}{m}{n}{9}%
+%      \DeclareFixedFont{\univLightObliqueIX}{\encodingdefault}%
+%        {UniversLightOblique}{m}{n}{9}%
+%      \DeclareFixedFont{\univBoldIX}{\encodingdefault}%
+%        {UniversBold}{m}{n}{9}%
+%      \DeclareFixedFont{\univLightXI}{\encodingdefault}%
+%        {UniversLight}{m}{n}{11}%
+%      \DeclareFixedFont{\univLightObliqueXI}{\encodingdefault}%
+%        {UniversLightOblique}{m}{n}{11}%
+%      \DeclareFixedFont{\univBoldXI}{\encodingdefault}%
+%        {UniversBold}{m}{n}{11}%
+%      \DeclareFixedFont{\univLightXV}{\encodingdefault}%
+%        {UniversLight}{m}{n}{15}%
+%      \DeclareFixedFont{\univLightObliqueXV}{\encodingdefault}%
+%        {UniversLightOblique}{m}{n}{15}%
+%      \DeclareFixedFont{\univBoldXV}{\encodingdefault}%
+%        {UniversBold}{m}{n}{15}%
+%    \else%
+%      \if@tud@univers%
+%        \DeclareFixedFont{\univLightVII}{\encodingdefault}%
+%          {\tud@univers}{l}{n}{7}%
+%        \DeclareFixedFont{\univLightObliqueVII}{\encodingdefault}%
+%          {\tud@univers}{l}{sl}{7}%
+%        \DeclareFixedFont{\univBoldVII}{\encodingdefault}%
+%          {\tud@univers}{b}{n}{7}%
+%        \DeclareFixedFont{\univLightIX}{\encodingdefault}%
+%          {\tud@univers}{l}{n}{9}%
+%        \DeclareFixedFont{\univLightObliqueIX}{\encodingdefault}%
+%          {\tud@univers}{l}{sl}{9}%
+%        \DeclareFixedFont{\univBoldIX}{\encodingdefault}%
+%          {\tud@univers}{b}{n}{9}%
+%        \DeclareFixedFont{\univLightXI}{\encodingdefault}%
+%          {\tud@univers}{l}{n}{11}%
+%        \DeclareFixedFont{\univLightObliqueXI}{\encodingdefault}%
+%          {\tud@univers}{l}{sl}{11}%
+%        \DeclareFixedFont{\univBoldXI}{\encodingdefault}%
+%          {\tud@univers}{b}{n}{11}%
+%        \DeclareFixedFont{\univLightXV}{\encodingdefault}%
+%          {\tud@univers}{l}{n}{15}%
+%        \DeclareFixedFont{\univLightObliqueXV}{\encodingdefault}%
+%          {\tud@univers}{l}{sl}{15}%
+%        \DeclareFixedFont{\univBoldXV}{\encodingdefault}%
+%          {\tud@univers}{b}{n}{15}%
+%      \fi%
+%    \fi%
+%    \if@sansmath%
+%      \DeclareSymbolFont{aunLetters}{OT1}{\tud@univers}{l}{sl}%
+%      \SetSymbolFont{aunLetters}{bold}{OT1}{\tud@univers}{b}{sl}%
+%      \DeclareSymbolFont{aunOperators}{OT1}{\tud@univers}{l}{n}%
+%      \SetSymbolFont{aunOperators}{bold}{OT1}{\tud@univers}{b}{n}%
+%      \DeclareSymbolFont{aunUpright}{OT1}{\tud@univers}{l}{n}%
+%      \SetSymbolFont{aunUpright}{bold}{OT1}{\tud@univers}{b}{n}%
+%      \DeclareSymbolFontAlphabet{\mathsf}{aunOperators}%
+%      \DeclareSymbolFontAlphabet{\mathnormal}{aunLetters}%
+%      \DeclareMathAlphabet\mathbf{OT1}{\tud@univers}{b}{n}%
+%      \SetMathAlphabet\mathbf{bold}{OT1}{\tud@univers}{b}{n}%
+%      \DeclareMathAlphabet\mathit{OT1}{\tud@univers}{l}{sl}%
+%      \SetMathAlphabet\mathit{bold}{OT1}{\tud@univers}{l}{sl}%
+%      \@ifpackageloaded{tudfonts}{%
+%        \let\mv@normal\mv@univers%
+%        \let\mv@bold\mv@universbold%
+%      }{}%
+%    \fi%
+%    \let\dinBold\dinbn%
+%    \let\dinfamily\dinbn%
+%  }%
+%}{}
+%\@ifclassloaded{tudbook}{%
+%  \patchcmd{\@makechapterhead}{\dinBold\Huge\bfseries}%
+%    {\bfseries\tud@disposition@font\Huge}{}{\tud@patch@wrn{@makechapterhead}}%
+%  \patchcmd{\@makeschapterhead}{\dinBold\Huge\bfseries}%
+%    {\bfseries\tud@disposition@font\Huge}{}{\tud@patch@wrn{@makeschapterhead}}%
+%  \patchcmd{\section}{\dinBold\Large\bfseries}%
+%    {\bfseries\tud@disposition@font\Large}{}{\tud@patch@wrn{section}}%
+%  \patchcmd{\showtitle}{\dinBold\Huge\bfseries}%
+%    {\bfseries\tud@disposition@font\Huge}{}{\tud@patch@wrn{showtitle}}%
+%}{}
+%\@ifclassloaded{tudmathposter}{%
+%  \setkomafont{title}{\bfseries\tud@disposition@font\Huge}%
+%  \renewcommand*\subtitlefont{\mdseries\tud@disposition@font\huge}%
+%  \if@mathevorgabe%
+%    \renewcommand*\sectionfont{\univbn\LARGE}%
+%    \renewcommand*\subsectionfont{\univbn\large}%
+%  \fi%
+%}{}
+%\@ifpackageloaded{tudfonts}{%
+%  \let\if@sansmath\if@tudfonts@sansmath%
+%  \renewcommand*\tudfont[1]{\cdfont{#1}}%
+%  \if@sansmath%
+%    \if@tudfonts@eulermath%
+%      \PackageWarningNoLine{tudscrfonts-fix}{%
+%        You're using non-serif fonts in math mode. It's\MessageBreak%
+%        recommended to pass the option `noeulermath' to\MessageBreak%
+%        package `tudfonts'%
+%      }%
+%    \fi%
+%    \if@tud@cdmath\else%
+%      \PackageWarning{tudscrfonts-fix}{%
+%        If you want to use non-serif fonts in math mode,\MessageBreak%
+%        you should also use the option `serifmath'\MessageBreak%
+%        as optional argument for \string\documentclass%
+%      }%
+%    \fi%
+%  \fi%
+%}{%
+%  \newif\if@tudfonts@nodin%
+%  \@ifundefined{if@sansmath}{\newif\if@sansmath}{}%
+%}
+%\@ifclassloaded{tudposter}{%
+%  \let\if@sansmath\if@tudposter@sansmath%
+%}{}
+%\ifbool{@tud@oldscrclass}{%
+%  \AtBeginDocument{%
+%    \DeclareSymbolFontAlphabet{\mathrm}{operators}%
+%    \if@tud@fontspec%
+%      \DeclareFixedFont{\univLightHead}{\encodingdefault}%
+%        {UniversLight}{m}{n}{\tud@head@fntsz}%
+%      \DeclareFixedFont{\univBoldHead}{\encodingdefault}%
+%        {UniversBold}{m}{n}{\tud@head@fntsz}%
+%    \else%
+%      \if@tud@univers%
+%        \DeclareFixedFont{\univLightHead}{\encodingdefault}%
+%          {\tud@univers}{l}{n}{\tud@head@fntsz}%
+%        \DeclareFixedFont{\univBoldHead}{\encodingdefault}%
+%          {\tud@univers}{b}{n}{\tud@head@fntsz}%
+%      \fi%
+%    \fi%
+%  }%
+%}{}
 \endinput
 %%
 %% End of file `tudscrfonts.sty'.
