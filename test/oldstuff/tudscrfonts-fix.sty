@@ -85,98 +85,117 @@
     }%
   }%
 \fi%
-\RequirePackage{scrbase}
-\RequirePackage{etoolbox}
+\RequirePackage{tudscrbase}
 \DeclareOption*{\PassOptionsToPackage{\CurrentOption}{tudscrfonts}}
 \ProcessOptions\relax
 \AtEndPreamble{%
   \tud@fontsfix@wrn%
   \RequirePackage{tudscrfonts}%
 }
-\newcommand*\tud@fontsfix@BeforeClass[1]{%
-  \let\tud@fontsfix@wrn\relax%
-  %%% v1
-  \newcommand*\tud@fontsfix@DeclareFixedFont{}
-  \let\tud@fontsfix@DeclareFixedFont\DeclareFixedFont%
-  \renewcommand*\DeclareFixedFont[6]{}%
-  %%% v2
-%  \newcommand*\tud@fontsfix@define@newfont{}
-%  \let\tud@fontsfix@define@newfont\define@newfont%
-%  \let\define@newfont\relax%
-  \csuse{tud@fontsfix@before@#1}%
-}
-\BeforeClass{tudbook}{\tud@fontsfix@beforeclass}%
-\BeforeClass{tudbeamer}{\tud@fontsfix@beforeclass}%
-\BeforeClass{tudfax}{\tud@fontsfix@beforeclass}%
-\BeforeClass{tudform}{\tud@fontsfix@beforeclass}%
-\BeforeClass{tudhaus}{\tud@fontsfix@beforeclass}%
-\BeforeClass{tudletter}{\tud@fontsfix@beforeclass}%
-\BeforeClass{tudposter}{\tud@fontsfix@beforeclass}%
-\BeforeClass{tudmathposter}{\tud@fontsfix@beforeclass}%
-\BeforeClass{tudscrbookold}{\tud@fontsfix@beforeclass}%
-\BeforeClass{tudscrreprtold}{\tud@fontsfix@beforeclass}%
-\BeforeClass{tudscrartclold}{\tud@fontsfix@beforeclass}%
-%
-\PassOptionsToClass{serifmath}{tudbook}
-%
-\newcommand*\tud@fontsfix@afterclass{%
+\newcommand*\tud@fontsfix@BeforeClass[2]{%
+  \BeforeClass{#1}{%
+    \let\tud@fontsfix@wrn\relax%
 %%% v1
-  \let\DeclareFixedFont\tud@fontsfix@DeclareFixedFont%
+    \newcommand*\tud@fontsfix@DeclareFixedFont{}
+    \let\tud@fontsfix@DeclareFixedFont\DeclareFixedFont%
+    \renewcommand*\DeclareFixedFont[6]{}%
 %%% v2
-%  \let\define@newfont\tud@define@newfont%
-  \renewcommand*\familydefault{\tud@univers}%
-  \DeclareRobustCommand\sffamily{%
-    \not@math@alphabet\sffamily\mathsf%
-    \fontfamily\sfdefault%
-    \selectfont%
-  }%
-  \DeclareRobustCommand\ttfamily{%
-    \not@math@alphabet\ttfamily\mathtt%
-    \fontfamily\ttdefault%
-    \selectfont%
+  %  \newcommand*\tud@fontsfix@define@newfont{}
+  %  \let\tud@fontsfix@define@newfont\define@newfont%
+  %  \let\define@newfont\relax%
+%%%
+    \tud@cmd@store{rmdefault}%
+    \tud@cmd@store{sfdefault}%
+    \tud@cmd@store{ttdefault}%
+    \tud@cmd@store{bfdefault}%
+    \tud@cmd@store{mddefault}%
+    \tud@cmd@store{itdefault}%
+    \tud@cmd@store{sldefault}%
+    \tud@cmd@store{scdefault}%
+    \tud@cmd@store{updefault}%
+    \tud@cmd@store{familydefault}%
+    \tud@cmd@store{seriesdefault}%
+    \tud@cmd@store{shapedefault}%
+    #2%
   }%
 }
-\AfterAtEndOfClass{tudbook}{\tud@fontsfix@afterclass}%
-\AfterAtEndOfClass{tudbeamer}{\tud@fontsfix@afterclass}%
-\AfterAtEndOfClass{tudfax}{\tud@fontsfix@afterclass}%
-\AfterAtEndOfClass{tudform}{\tud@fontsfix@afterclass}%
-\AfterAtEndOfClass{tudhaus}{\tud@fontsfix@afterclass}%
-\AfterAtEndOfClass{tudletter}{\tud@fontsfix@afterclass}%
-\AfterAtEndOfClass{tudposter}{\tud@fontsfix@afterclass}%
-\AfterAtEndOfClass{tudmathposter}{\tud@fontsfix@afterclass}%
-\AfterAtEndOfClass{tudscrbookold}{\tud@fontsfix@afterclass}%
-\AfterAtEndOfClass{tudscrreprtold}{\tud@fontsfix@afterclass}%
-\AfterAtEndOfClass{tudscrartclold}{\tud@fontsfix@afterclass}%
-\AfterPackage{tudscrfonts}{%
-  \ifbool{@tud@oldclass}{%
+\newcommand*\tud@fontsfix@AfterClass[2]{%
+  \AfterClass{#1}{%
+%%% v1
+    \let\DeclareFixedFont\tud@fontsfix@DeclareFixedFont%
+    \undef\tud@fontsfix@DeclareFixedFont%
+%%% v2
+%    \let\define@newfont\tud@define@newfont%
+%%%
+    \tud@cmd@restore{rmdefault}%
+    \tud@cmd@restore{sfdefault}%
+    \tud@cmd@restore{ttdefault}%
+    \tud@cmd@restore{bfdefault}%
+    \tud@cmd@restore{mddefault}%
+    \tud@cmd@restore{itdefault}%
+    \tud@cmd@restore{sldefault}%
+    \tud@cmd@restore{scdefault}%
+    \tud@cmd@restore{updefault}%
+    \tud@cmd@restore{familydefault}%
+    \tud@cmd@restore{seriesdefault}%
+    \tud@cmd@restore{shapedefault}%
+    #2%
+  }%
+}
+\newcommand*\tud@fontsfix@oldclasses{%
+  \AfterPackage{tudscrfonts}{%
     \AtBeginDocument{%
-      \if@tud@fontspec%
-        \DeclareFixedFont{\univLightVII}{\encodingdefault}%
-          {UniversLight}{m}{n}{7}%
-        \DeclareFixedFont{\univLightObliqueVII}{\encodingdefault}%
-          {UniversLightOblique}{m}{n}{7}%
-        \DeclareFixedFont{\univBoldVII}{\encodingdefault}%
-          {UniversBold}{m}{n}{7}%
-        \DeclareFixedFont{\univLightIX}{\encodingdefault}%
-          {UniversLight}{m}{n}{9}%
-        \DeclareFixedFont{\univLightObliqueIX}{\encodingdefault}%
-          {UniversLightOblique}{m}{n}{9}%
-        \DeclareFixedFont{\univBoldIX}{\encodingdefault}%
-          {UniversBold}{m}{n}{9}%
-        \DeclareFixedFont{\univLightXI}{\encodingdefault}%
-          {UniversLight}{m}{n}{11}%
-        \DeclareFixedFont{\univLightObliqueXI}{\encodingdefault}%
-          {UniversLightOblique}{m}{n}{11}%
-        \DeclareFixedFont{\univBoldXI}{\encodingdefault}%
-          {UniversBold}{m}{n}{11}%
-        \DeclareFixedFont{\univLightXV}{\encodingdefault}%
-          {UniversLight}{m}{n}{15}%
-        \DeclareFixedFont{\univLightObliqueXV}{\encodingdefault}%
-          {UniversLightOblique}{m}{n}{15}%
-        \DeclareFixedFont{\univBoldXV}{\encodingdefault}%
-          {UniversBold}{m}{n}{15}%
-      \else%
-        \if@tud@univers%
+      \newcommand*\univLightVII{}%
+      \newcommand*\univLightObliqueVII{}%
+      \newcommand*\univBoldVII{}%
+      \newcommand*\univLightIX{}%
+      \newcommand*\univLightObliqueIX{}%
+      \newcommand*\univBoldIX{}%
+      \newcommand*\univLightXI{}%
+      \newcommand*\univLightObliqueXI{}%
+      \newcommand*\univBoldXI{}%
+      \newcommand*\univLightXV{}%
+      \newcommand*\univLightObliqueXV{}%
+      \newcommand*\univBoldXV{}%
+      \newcommand*\univLightHead{}%
+      \newcommand*\univBoldHead{}%
+      \providecommand*\tud@head@fntsz{9}
+      \if@tud@univers%
+        \if@tud@fontspec%
+          \DeclareFixedFont{\univLightVII}{\encodingdefault}%
+            {UniversLight}{m}{n}{7}%
+          \DeclareFixedFont{\univLightObliqueVII}{\encodingdefault}%
+            {UniversLightOblique}{m}{n}{7}%
+          \DeclareFixedFont{\univBoldVII}{\encodingdefault}%
+            {UniversBold}{m}{n}{7}%
+          \DeclareFixedFont{\univLightIX}{\encodingdefault}%
+            {UniversLight}{m}{n}{9}%
+          \DeclareFixedFont{\univLightObliqueIX}{\encodingdefault}%
+            {UniversLightOblique}{m}{n}{9}%
+          \DeclareFixedFont{\univBoldIX}{\encodingdefault}%
+            {UniversBold}{m}{n}{9}%
+          \DeclareFixedFont{\univLightXI}{\encodingdefault}%
+            {UniversLight}{m}{n}{11}%
+          \DeclareFixedFont{\univLightObliqueXI}{\encodingdefault}%
+            {UniversLightOblique}{m}{n}{11}%
+          \DeclareFixedFont{\univBoldXI}{\encodingdefault}%
+            {UniversBold}{m}{n}{11}%
+          \DeclareFixedFont{\univLightXV}{\encodingdefault}%
+            {UniversLight}{m}{n}{15}%
+          \DeclareFixedFont{\univLightObliqueXV}{\encodingdefault}%
+            {UniversLightOblique}{m}{n}{15}%
+          \DeclareFixedFont{\univBoldXV}{\encodingdefault}%
+            {UniversBold}{m}{n}{15}%
+          \DeclareFixedFont{\univLightHead}{\encodingdefault}%
+            {UniversLight}{m}{n}{\tud@head@fntsz}%
+          \DeclareFixedFont{\univBoldHead}{\encodingdefault}%
+            {UniversBold}{m}{n}{\tud@head@fntsz}%
+          \setsansfont{Univers Light}[%
+            BoldFont = Univers Bold,%
+            ItalicFont = Univers Light Oblique,%
+            BoldItalicFont = Univers Bold Oblique,%
+          ]%
+        \else%
           \DeclareFixedFont{\univLightVII}{\encodingdefault}%
             {\tud@univers}{l}{n}{7}%
           \DeclareFixedFont{\univLightObliqueVII}{\encodingdefault}%
@@ -201,94 +220,175 @@
             {\tud@univers}{l}{sl}{15}%
           \DeclareFixedFont{\univBoldXV}{\encodingdefault}%
             {\tud@univers}{b}{n}{15}%
-        \fi%
-      \fi%
-      \if@sansmath%
-        \DeclareSymbolFont{aunLetters}{OT1}{\tud@univers}{l}{sl}%
-        \SetSymbolFont{aunLetters}{bold}{OT1}{\tud@univers}{b}{sl}%
-        \DeclareSymbolFont{aunOperators}{OT1}{\tud@univers}{l}{n}%
-        \SetSymbolFont{aunOperators}{bold}{OT1}{\tud@univers}{b}{n}%
-        \DeclareSymbolFont{aunUpright}{OT1}{\tud@univers}{l}{n}%
-        \SetSymbolFont{aunUpright}{bold}{OT1}{\tud@univers}{b}{n}%
-        \DeclareSymbolFontAlphabet{\mathsf}{aunOperators}%
-        \DeclareSymbolFontAlphabet{\mathnormal}{aunLetters}%
-        \DeclareMathAlphabet\mathbf{OT1}{\tud@univers}{b}{n}%
-        \SetMathAlphabet\mathbf{bold}{OT1}{\tud@univers}{b}{n}%
-        \DeclareMathAlphabet\mathit{OT1}{\tud@univers}{l}{sl}%
-        \SetMathAlphabet\mathit{bold}{OT1}{\tud@univers}{l}{sl}%
-        \@ifpackageloaded{tudfonts}{%
-          \let\mv@normal\mv@univers%
-          \let\mv@bold\mv@universbold%
-        }{}%
-      \fi%
-      \let\dinBold\dinbn%
-      \let\dinfamily\dinbn%
-    }%
-  }{}
-  \@ifclassloaded{tudbook}{%
-    \patchcmd{\@makechapterhead}{\dinBold\Huge\bfseries}%
-      {\bfseries\tud@disposition@font\Huge}{}{\tud@patch@wrn{@makechapterhead}}%
-    \patchcmd{\@makeschapterhead}{\dinBold\Huge\bfseries}%
-      {\bfseries\tud@disposition@font\Huge}{}{\tud@patch@wrn{@makeschapterhead}}%
-    \patchcmd{\section}{\dinBold\Large\bfseries}%
-      {\bfseries\tud@disposition@font\Large}{}{\tud@patch@wrn{section}}%
-    \patchcmd{\showtitle}{\dinBold\Huge\bfseries}%
-      {\bfseries\tud@disposition@font\Huge}{}{\tud@patch@wrn{showtitle}}%
-  }{}
-  \@ifclassloaded{tudmathposter}{%
-    \setkomafont{title}{\bfseries\tud@disposition@font\Huge}%
-    \renewcommand*\subtitlefont{\mdseries\tud@disposition@font\huge}%
-    \if@mathevorgabe%
-      \renewcommand*\sectionfont{\univbn\LARGE}%
-      \renewcommand*\subsectionfont{\univbn\large}%
-    \fi%
-  }{}
-  \@ifpackageloaded{tudfonts}{%
-    \let\if@sansmath\if@tudfonts@sansmath%
-    \renewcommand*\tudfont[1]{\cdfont{#1}}%
-    \if@sansmath%
-      \if@tudfonts@eulermath%
-        \PackageWarningNoLine{tudscrfonts}{%
-          You're using non-serif fonts in math mode. It's\MessageBreak%
-          recommended to pass the option `noeulermath' to\MessageBreak%
-          package `tudfonts'%
-        }%
-      \fi%
-      \if@tud@cdmath\else%
-        \PackageWarning{tudscrfonts}{%
-          If you want to use non-serif fonts in math mode,\MessageBreak%
-          you should also use the option `serifmath'\MessageBreak%
-          as optional argument for \string\documentclass%
-        }%
-      \fi%
-    \fi%
-  }{%
-    \newif\if@tudfonts@nodin%
-    \@ifundefined{if@sansmath}{\newif\if@sansmath}{}%
-  }
-  \@ifclassloaded{tudposter}{%
-    \let\if@sansmath\if@tudposter@sansmath%
-  }{}
-  \ifbool{@tud@oldscrclass}{%
-    \AtBeginDocument{%
-      \DeclareSymbolFontAlphabet{\mathrm}{operators}%
-      \if@tud@fontspec%
-        \DeclareFixedFont{\univLightHead}{\encodingdefault}%
-          {UniversLight}{m}{n}{\tud@head@fntsz}%
-        \DeclareFixedFont{\univBoldHead}{\encodingdefault}%
-          {UniversBold}{m}{n}{\tud@head@fntsz}%
-      \else%
-        \if@tud@univers%
           \DeclareFixedFont{\univLightHead}{\encodingdefault}%
             {\tud@univers}{l}{n}{\tud@head@fntsz}%
           \DeclareFixedFont{\univBoldHead}{\encodingdefault}%
             {\tud@univers}{b}{n}{\tud@head@fntsz}%
+          \renewcommand*\bfdefault{b}%
         \fi%
+      \else%
+        \DeclareFixedFont{\univLightVII}{\encodingdefault}%
+          {\sfdefault}{\mddefault}{\updefault}{7}%
+        \DeclareFixedFont{\univLightObliqueVII}{\encodingdefault}%
+          {\sfdefault}{\mddefault}{\sldefault}{7}%
+        \DeclareFixedFont{\univBoldVII}{\encodingdefault}%
+          {\sfdefault}{\bfdefault}{\updefault}{7}%
+        \DeclareFixedFont{\univLightIX}{\encodingdefault}%
+          {\sfdefault}{\mddefault}{\updefault}{9}%
+        \DeclareFixedFont{\univLightObliqueIX}{\encodingdefault}%
+          {\sfdefault}{\mddefault}{\sldefault}{9}%
+        \DeclareFixedFont{\univBoldIX}{\encodingdefault}%
+          {\sfdefault}{\bfdefault}{\updefault}{9}%
+        \DeclareFixedFont{\univLightXI}{\encodingdefault}%
+          {\sfdefault}{\mddefault}{\updefault}{11}%
+        \DeclareFixedFont{\univLightObliqueXI}{\encodingdefault}%
+          {\sfdefault}{\mddefault}{\sldefault}{11}%
+        \DeclareFixedFont{\univBoldXI}{\encodingdefault}%
+          {\sfdefault}{\bfdefault}{\updefault}{11}%
+        \DeclareFixedFont{\univLightXV}{\encodingdefault}%
+          {\sfdefault}{\mddefault}{\updefault}{15}%
+        \DeclareFixedFont{\univLightObliqueXV}{\encodingdefault}%
+          {\sfdefault}{\mddefault}{\sldefault}{15}%
+        \DeclareFixedFont{\univBoldXV}{\encodingdefault}%
+          {\sfdefault}{\bfdefault}{\updefault}{15}%
+        \DeclareFixedFont{\univLightHead}{\encodingdefault}%
+          {\sfdefault}{\mddefault}{\updefault}{\tud@head@fntsz}%
+        \DeclareFixedFont{\univBoldHead}{\encodingdefault}%
+          {\sfdefault}{\bfdefault}{\updefault}{\tud@head@fntsz}%
       \fi%
+      \let\dinBold\dinbn%
+      \let\dinfamily\dinbn%
     }%
-  }{}
+  }%
 }
+\tud@fontsfix@BeforeClass{tudbook}{%
+  \PassOptionsToClass{serifmath}{tudbook}%
+}
+\tud@fontsfix@AfterClass{tudbook}{%
+  \tud@fontsfix@oldclasses%
+  \patchcmd{\@makechapterhead}{\dinBold\Huge\bfseries}%
+    {\bfseries\tud@disposition@font\Huge}{}{\tud@patch@wrn{@makechapterhead}}%
+  \patchcmd{\@makeschapterhead}{\dinBold\Huge\bfseries}%
+    {\bfseries\tud@disposition@font\Huge}{}{\tud@patch@wrn{@makeschapterhead}}%
+  \patchcmd{\section}{\dinBold\Large\bfseries}%
+    {\bfseries\tud@disposition@font\Large}{}{\tud@patch@wrn{section}}%
+  \patchcmd{\showtitle}{\dinBold\Huge\bfseries}%
+    {\bfseries\tud@disposition@font\Huge}{}{\tud@patch@wrn{showtitle}}%
+}
+\tud@fontsfix@BeforeClass{tudletter}{%
+  \PassOptionsToClass{serifmath}{tudletter}%
+}
+\tud@fontsfix@AfterClass{tudletter}{%
+  \tud@fontsfix@oldclasses%
+}
+\tud@fontsfix@BeforeClass{tudfax}{%
+  \PassOptionsToClass{serifmath}{tudfax}%
+}
+\tud@fontsfix@AfterClass{tudfax}{%
+  \tud@fontsfix@oldclasses%
+}
+\tud@fontsfix@BeforeClass{tudform}{%
+  \PassOptionsToClass{serifmath}{tudform}%
+}
+\tud@fontsfix@AfterClass{tudform}{%
+  \tud@fontsfix@oldclasses%
+}
+\tud@fontsfix@BeforeClass{tudhaus}{%
+  \PassOptionsToClass{serifmath}{tudhaus}%
+}
+\tud@fontsfix@AfterClass{tudhaus}{%
+  \tud@fontsfix@oldclasses%
+}
+\tud@fontsfix@BeforeClass{tudbeamer}{%
+  \PassOptionsToClass{serifmath}{tudbeamer}%
+}
+\tud@fontsfix@AfterClass{tudbeamer}{%
+  \tud@fontsfix@oldclasses%
+}
+\tud@fontsfix@BeforeClass{tudposter}{%
+  \PassOptionsToClass{serifmath}{tudposter}%
+  \tud@cmd@store{normalfont}%
+  \let\normalfont\relax%
+}
+\tud@fontsfix@AfterClass{tudposter}{%
+  \tud@fontsfix@oldclasses%
+  \tud@cmd@restore{normalfont}%
+}
+\BeforePackage{tudfonts}{\typeout{:::: gucke}}
+\tud@fontsfix@BeforeClass{tudmathposter}{%
+  \PassOptionsToClass{serifmath}{tudmathposter}%
+}
+\tud@fontsfix@AfterClass{tudmathposter}{%
+  \tud@fontsfix@oldclasses%
+  \if@mathevorgabe%
+    \setkomafont{title}{\bfseries\tud@disposition@font\Huge}%
+    \renewcommand*\subtitlefont{\mdseries\tud@disposition@font\huge}%
+    \renewcommand*\sectionfont{\univbn\LARGE}%
+    \renewcommand*\subsectionfont{\univbn\large}%
+  \else%
+    % TODO
+  \fi%
+}
+% TODO: (Schrift-)Optionen aller Klassen prüfen
+\PreventPackageFromLoading[%
+%\RequirePackage{amsfonts}
+  \RequirePackage{amsmath}
+%\RequirePackage{lmodern}
+  \RequirePackage{tudscrfonts}%
+  \let\DeclareTudMathSizes\@gobblefour%
+  \newif\if@tudfonts@nodin%
+]{tudfonts}%
+% TODO: Option, um Anpassung an skips zu unterdrücken
 
+
+%\@ifclassloaded{tudmathposter}{%
+%  \setkomafont{title}{\bfseries\tud@disposition@font\Huge}%
+%  \renewcommand*\subtitlefont{\mdseries\tud@disposition@font\huge}%
+%  \if@mathevorgabe%
+%    \renewcommand*\sectionfont{\univbn\LARGE}%
+%    \renewcommand*\subsectionfont{\univbn\large}%
+%  \fi%
+%}{}
+%\@ifpackageloaded{tudfonts}{%
+%  \let\if@sansmath\if@tudfonts@sansmath%
+%  \renewcommand*\tudfont[1]{\cdfont{#1}}%
+%  \if@sansmath%
+%    \if@tudfonts@eulermath%
+%      \PackageWarningNoLine{tudscrfonts-fix}{%
+%        You're using non-serif fonts in math mode. It's\MessageBreak%
+%        recommended to pass the option `noeulermath' to\MessageBreak%
+%        package `tudfonts'%
+%      }%
+%    \fi%
+%    \if@tud@cdmath\else%
+%      \PackageWarning{tudscrfonts-fix}{%
+%        If you want to use non-serif fonts in math mode,\MessageBreak%
+%        you should also use the option `serifmath'\MessageBreak%
+%        as optional argument for \string\documentclass%
+%      }%
+%    \fi%
+%  \fi%
+%}{%
+%  \newif\if@tudfonts@nodin%
+%  \@ifundefined{if@sansmath}{\newif\if@sansmath}{}%
+%}
+%\@ifclassloaded{tudposter}{%
+%  \let\if@sansmath\if@tudposter@sansmath%
+%}{}
+
+%\tud@fontsfix@BeforeClass{tudscrbookold}{}
+%\tud@fontsfix@BeforeClass{tudscrreprtold}{}
+%\tud@fontsfix@BeforeClass{tudscrartclold}{}
+%\tud@fontsfix@AfterClass{tudscrbookold}{}
+%\tud@fontsfix@AfterClass{tudscrreprtold}{}
+%\tud@fontsfix@AfterClass{tudscrartclold}{}
+\newcommand*\tud@fontsfix@oldscrclasses{%
+  \AfterPackage{tudscrfonts}{%
+    \AtBeginDocument{%
+      \DeclareSymbolFontAlphabet{\mathrm}{operators}%
+    }%
+  }%
+}
 
 \endinput
 %%
