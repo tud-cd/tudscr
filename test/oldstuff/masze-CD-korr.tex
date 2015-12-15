@@ -1,0 +1,316 @@
+% Beispiel für Klasse tudposter.cls (Version 0.5).
+%%
+%% Autor: Martin Zabel (martin.zabel@tu-dresden.de)
+%%        Tobias schlemmer (tobias.schlemmer@mailbox.tu-dresden.de)
+%%
+%% Klassenoptionen siehe tudposter.cls.
+%%
+%%
+%% Wir bevorzugen PDFLaTeX. Für den Fall, dass die CD-Schriften nicht
+%% in der Standardkonfiguration erwähnt sind laden wir die .map-Datei
+%% Wichtig: das muss vor dem ersten Font-Befehl (also vor der
+%% Dokumentklasse geschehen.
+%
+% Diese Zeilen sind jetzt auskommentiert, da dies das Paket „tudfonts“
+% jetzt übernimmt
+%
+%\pdfmapfile{+univers.map}
+%\pdfmapfile{+dinbold.map}
+%%
+\documentclass[a0paper,noDIN,MathematikA0]{tudmathposter}
+\listfiles
+% Bei Bedarf: dinBold für Section. Dann aber auch Überschrift nur in
+% Großbuchstaben.
+%\addtokomafont{section}{\dinBold}
+
+% In diesem Poster benötigte Pakete.
+% Jedem wie es beliebt.
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc} % latin1 (Linux) oder ansinew (Win) wenn
+                            % nicht UTF 8
+\usepackage[ngerman]{babel}
+\usepackage{eso-pic}
+\usepackage{multicol}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage{url}
+\usepackage[pdfborder={0 0 0}]{hyperref}
+%\usepackage{tabularx}
+\usetikzlibrary{calc}
+\usetikzlibrary{shapes.multipart}
+\usetikzlibrary{positioning}
+
+% Beispiel für die Verwendung des listings-Paketes (Mutabor-Sprache)
+\lstdefinelanguage{Mutabor}{%
+%otherkeywords={:,=,:=,+,-,*,\(,\),[,],.,\,,;},
+%morekeywords=[1]{},%
+%Befehle
+morekeywords=[1]{INTERVALL,TON,TONSYSTEM,UMSTIMMUNG,HARMONIE,LOGIK,%
+INTERVAL,TONE,TONESYSTEM,RETUNING,PATTERN,LOGIC,SHIFTED},%
+%Funktionen
+morekeywords=[2]{MIDIKANAL,WURZEL,TASTE,MIDIIN,MIDIOUT,ANSONSTEN,%
+FORM,ROOT,MIDICHANNEL,KEY,ELSE},
+%morekeywords=[3]{=,-},
+%Datentypen
+%morekeywords=[4]{},%
+   sensitive=false,%
+   %alsoletter={=,-},
+%   alsoletter={+,-,*,/,.,:,=,<,>}, %(,),[,],.,\,,:,;,^,@,
+%   morecomment=[s]{(*}{*)},%
+%   morecomment=[s]{\{}{\}},%
+%   morecomment=[l]{//},%
+   morecomment=[s]{"}{"},%
+%   moredelim=*[s]{\[}{\]},%
+%   moredelim=*[s]{(}{)}
+%   moredelim=*[s]{\{}{\}}
+%   morestring=[d]'%
+  }%[keywords,comments,strings]%
+% lst-Sprachen laden.
+\lstloadlanguages{Mutabor}
+% Einstellungen für listings: Fonts und Farben
+\lstset{%
+  tabsize=8,
+  language=Mutabor,
+  defaultdialect=Mutabor,
+  basicstyle=\ttfamily\scriptsize\normalcolor,
+  identifierstyle=\color{HKS92K100},
+  keywordstyle=[1]{\color{HKS41K100}\bfseries},
+  keywordstyle=[2]{\color{HKS41K100}},
+  keywordstyle=[4]{\normalcolor},
+  keywordstyle=[3]{\color{HKS92K100}},
+  stringstyle=\color{HKS92K50},
+  commentstyle=\color{HKS92K70}\textit,
+  inputencoding=utf8,
+  extendedchars=false,
+  showtabs=false,
+  showspaces=false,%
+  texcl=true,%
+  escapechar=",
+  escapebegin={\color[rgb]{0.5,0.5,0.5}\expandafter\textit\bgroup%
+    \obeylines\obeyspaces
+    \dq},
+  escapeend={\dq\egroup}
+}
+
+\makeatletter
+\newcommand\nopt[1]{\strip@pt#1}%
+\makeatother
+
+\newlength{\zielbreite}%
+\newlength{\zielhoehe}%
+\newlength{\printmml}%
+
+% Beschriftung im Seitenkopf und Seitenfuß
+\institut{Institut für Algebra}
+\professur{Professur für \TeX nische Algebra}
+\author{T. Schlemmer, M. Behrisch und D. Borchmann}% Zum Beispiel für Kontaktdaten.
+\telefon{0351 463-35078}
+\fax{0351 463-\dots}
+\homepage{\small\url{http://www.math.tu-dresden.de/~schlemme/tudmathposter/}}
+% Folgende Zeile ist nicht CD-konform
+%\zweitlogofile{mathelogo}
+
+\title{Die Dokumentklasse „tudmathposter“}
+\subtitle{Eine \LaTeX klasse für die Evaluationsposter}
+\grautabelle
+\addto\captionsngerman{%
+  \def\figurename{Abb.}%
+  \def\tablename{Tab.}%
+}%
+
+\makeatletter
+\newcommand\bemaszung{%
+\begin{tikzpicture}[line width=8pt,draw=HKS92K100,text=HKS92K100,baseline=0pt]
+\useasboundingbox (0,0) rectangle (\paperwidth,\paperheight);
+
+\fill[fill=HKS41K10] (0,\paperheight-2cm) rectangle
++(\paperwidth,-\tudposter@headheight+2cm);
+\fill[fill=HKS41K10!50!white] (0,\paperheight-\tudposter@headheight)
+rectangle +(\paperwidth,-\tudposter@cbheight);
+\fill[fill=HKS41K10] (0,0) rectangle (\paperwidth,\tudposter@footheight);
+
+\draw[HKS92K30] (\oddsidemargin+1in,\paperheight-\headheight-\headsep)
+rectangle +(\textwidth,-\textheight);
+\draw[HKS92K30,line width=4pt] (\oddsidemargin+1in,0) -- +(0,\paperheight);
+\draw[HKS92K30,line width=4pt] (\oddsidemargin+1in+\textwidth,0) -- +(0,\paperheight);
+\draw (\tudposter@logospacex,\paperheight-\tudposter@logospacey)
+node[anchor=north west,inner sep=0pt,outer
+sep=0pt](logo){\color{white}\includegraphics[width=\tudposter@logowidth]{\tudposter@logo}};
+\draw[HKS92K30] (logo.south east) rectangle (logo.north west);
+\begingroup
+\fontsize{\tudposter@cbfontsize}\tudposter@cbfontsize\selectfont
+\setlength\@tempdima{\depthof{g}}%
+\draw
+(\oddsidemargin+1in,\paperheight-\headheight-\@tempdima+\tudposter@cbtextraise)
+node [anchor=south west,text=white,inner sep=0pt,outer sep=0pt] (fachrichtung)
+{\raisebox{-\depth}{\textbf{Fakultät für Mathematik und
+      Naturwissenschaften}~~Fachrichtung Mathematik}};
+\draw[HKS92K30,line width=4pt] (fachrichtung.north west) -- +(\textwidth-\oddsidemargin -1in,0);
+\draw[HKS92K30,line width=2pt] (\oddsidemargin+1in,\paperheight-\headheight+\tudposter@cbtextraise)-- +(\textwidth-\oddsidemargin -1in,0);
+\draw[HKS92K30,line width=4pt] (fachrichtung.south west) -- +(\textwidth-\oddsidemargin -1in,0);
+\endgroup
+
+\draw[<->,HKS92K30] (0,0.5\paperheight) -- +(\paperwidth,0)
+node[pos=0.46,above] {paperwidth};
+\draw[<->] (0.5\paperwidth,0) -- (0.5\paperwidth,\paperheight)
+node[pos=0.6,sloped,above]{paperheight};
+\draw[<->] (0.6\paperwidth,\paperheight) -- +(0,-2cm) node [pos=0.5,auto,xshift=0.5cm]
+{topmargin};
+\draw[<->] (0.6\paperwidth,\paperheight-\tudposter@headheight) --
++(0,\tudposter@headheight-2cm)
+node[pos=0.5,sloped,above]{tudposter@headheight};
+\draw[<->] (0.6\paperwidth,\paperheight-\tudposter@headheight) --
++(0,-\tudposter@cbheight) node[pos=0.5,anchor=west]
+{tudposter@cbheight};
+\draw[<->] (0.6\paperwidth,0) -- +(0,\tudposter@footheight)
+node[pos=0.5,sloped,above] {tudposter@footheight};
+\draw[line cap=butt] (0.17\paperwidth,\paperheight-\tudposter@headheight-\tudposter@cbheight) --
++(0,\tudposter@cbtextraise) node[pos=0.5,anchor=west] {tudposter@cbtextraise};
+\draw [<-] (0.17\paperwidth,\paperheight-\tudposter@headheight-\tudposter@cbheight) --
++(0,-1cm);
+\draw [<-]
+(0.17\paperwidth,\paperheight-\tudposter@headheight-\tudposter@cbheight+\tudposter@cbtextraise) --
++(0,1cm);
+\begingroup
+\fontsize{\tudposter@cbfontsize}\tudposter@cbfontsize\selectfont
+\setlength\@tempdima{\depthof{g}}%
+\draw [<->]
+(0.3\paperwidth,\paperheight-\tudposter@headheight-\tudposter@cbheight+\tudposter@cbtextraise-\@tempdima)
+-- +(0,\tudposter@cbfontsize) node [pos=0.5,anchor=west] {\small tudposter@cbfontsize};
+\endgroup
+
+\draw[<->] (0.91\paperwidth,\paperheight-\headheight) --
++(0,\headheight-2cm) node[pos=0.5,sloped,above]{headheight};
+\draw[<->] (0.91\paperwidth,\paperheight-\headheight-\headsep) --
++(0,\headsep) node [pos=0.5,sloped,above] {headsep};
+\draw[<->] (0.91\paperwidth,\paperheight-\headheight-\headsep-\textheight)
+-- +(0,\textheight) node [pos=0.1,sloped,above] {textheight};
+\draw[<->] (0.91\paperwidth,\paperheight-\headheight-\headsep-\textheight-\footskip)
+-- +(0,\footskip) node [pos=0.5,sloped,above] {footskip};
+
+
+\draw[<->] ($(logo.west)!0.5!(logo.north west)$) -- +(-\tudposter@logospacex,0)
+node[pos=0.9,anchor = south west,sloped] {tudposter@logospacex};
+\draw[<-] ($(logo.west)!0.5!(logo.north west)$) -- +(-\tudposter@logoposx,0)
+node[pos=0.8,anchor = south west,sloped,below] {tudposter@logospacex};
+\draw[<->] (logo.north west) -- +(0,\tudposter@logospacey)
+node[pos=0.5,anchor = west] {tudposter@logospacey};
+\draw[<->] (logo.south west) -- +(0,-\tudposter@logoposy)
+node[pos=0.5,anchor = west] {tudposter@logoposy};
+\draw[<->] ($(logo.west)!0.5!(logo.south west)$) -- +(\tudposter@logowidth,0)
+node[pos=0.5,sloped,below] {tudposter@logoswidth};
+
+\draw[<->] (0,0.25\paperheight) -- +(\oddsidemargin+1in,0) node
+[pos=0.5,sloped,above] {oddsidemargin} node[pos=0.5,sloped,below]
+{evensidemargin};
+\draw[<->] (\oddsidemargin+1in,0.25\paperheight) -- +(\textwidth,0) node
+[pos=0.1,sloped,above] {textwidth};
+{evensidemargin};
+
+\end{tikzpicture}
+}
+\newlength\myfs
+\newlength\mybs
+\newcommand\printfontsize[1]{%
+  \def\jetztfontsize{#1}%
+  \csname #1\endcsname
+  \setlength\myfs{\f@size pt}%
+  \setlength\mybs{\f@baselineskip}%
+  \expandafter\let\csname #1gr.\endcsname\myfs
+  \expandafter\let\csname #1 Z.-abst.\endcsname\mybs
+  \small
+  \printmm{#1gr.}%
+  \printmm{#1 Z.-abst.}%
+}
+\makeatother
+\begin{document}\thispagestyle{empty}\AddToShipoutPicture{\bemaszung}%
+\small
+\parskip\baselineskip
+\newcommand\printmm[1]{%
+  \item
+  \expandafter\printmml\csname #1\endcsname
+ #1 = \nopt\printmml\,pt =
+ \setlength\printmml{\printmml*\ratio{1pt}{1mm}}%
+  \nopt\printmml\,mm\\
+ \expandafter\printmml\csname #1\endcsname
+  \setlength{\printmml}{\printmml*\ratio{0.1\zielbreite}{0.1\paperwidth}}
+  #1 (b-skaliert) = \nopt\printmml\,pt =
+  \setlength\printmml{\printmml*\ratio{1pt}{1mm}}%
+  \nopt\printmml\,mm\\
+  \expandafter\printmml\csname #1\endcsname
+  \setlength{\printmml}{\printmml*\ratio{0.1\zielhoehe}{0.1\paperheight}}
+  #1 (h-skaliert) = \nopt\printmml\,pt =
+  \setlength\printmml{\printmml*\ratio{1pt}{1mm}}%
+  \nopt\printmml\,mm\par
+}%
+\setlength{\zielbreite}{851mm}%
+\setlength{\zielhoehe}{1199mm}%
+
+
+\begin{multicols}{2}
+Die Register werden wie folgt skaliert:
+b-skaliert: \[\text{Wert}*\frac{\text{\textbackslash
+    zielbreite}}{\text{\textbackslash paperwidth (Papierbreite)}}\]
+h-skaliert: \[\text{Wert}*\frac{\text{\textbackslash
+    zielhoehe}}{\text{\textbackslash paperheight (Papierhöhe)}}\]
+
+\makeatletter
+\@tempdima=1cm
+1cm = $\the\@tempdima$\\
+\begin{enumerate}
+\renewcommand\theenumi{\large$x_{\arabic{enumi}}$}%
+\begingroup
+\addtolength\topmargin{1in}%
+\addtolength\evensidemargin{1in}%
+\addtolength\oddsidemargin{1in}%
+\printmm{zielhoehe}
+\printmm{zielbreite}
+\printmm{paperheight}
+\printmm{paperwidth}
+\printmm{topmargin}
+\printmm{headheight}
+\printmm{headsep}
+\printmm{topskip}
+\printmm{textheight}
+\printmm{footskip}
+\printmm{oddsidemargin}
+\printmm{evensidemargin}
+\printmm{textwidth}
+\printmm{tudposter@headheight}
+\printmm{tudposter@logospacex}
+\printmm{tudposter@logospacey}
+\printmm{tudposter@logoposx}
+\printmm{tudposter@logoposy}
+\printmm{tudposter@logowidth}
+\printmm{tudposter@cbheight}
+\printmm{tudposter@cbfontsize}
+\printmm{tudposter@cbtextraise}
+\printmm{tudposter@footheight}
+\printmm{tudposter@lmargin}
+% rechter Rand: lt. M. Kaden: Achsenabstand minus zweimal Querbalken
+\printmm{tudposter@rmargin}
+\printmm{baselineskip}
+\makeatother
+\endgroup
+\end{enumerate}
+\end{multicols}
+\pagebreak
+\section{Schriftgrößen}
+\begin{multicols}{2}
+\begin{enumerate}\renewcommand\theenumi{\textbackslash\jetztfontsize}
+\printfontsize{tiny}
+\printfontsize{scriptsize}
+\printfontsize{footnotesize}
+\printfontsize{small}
+\printfontsize{normalsize}
+\printfontsize{large}
+\printfontsize{Large}
+\printfontsize{LARGE}
+\printfontsize{huge}
+\printfontsize{Huge}
+\end{enumerate}
+\end{multicols}
+\vfill
+Diese Hilfslinie zeigt das Seitenende an. \textbf{ZU ENTFERNEN}!
+\hrule
+\end{document}
