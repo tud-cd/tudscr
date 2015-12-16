@@ -153,13 +153,30 @@
     }{}%
   \fi%
 }
+\newif\if@tud@fontspec
+\AfterPackage*{fontspec}{\@tud@fontspectrue}
+\newif\if@tud@vspacing
+\TUD@key{vspacing}[true]{%
+  \TUD@set@numkey{vspacing}{@tempa}{%
+    \TUD@numkey@bool,%
+    {absolute}{0},{classic}{0},{standard}{0},%
+    {relative}{1},{fontsize}{1},{font}{1},{size}{1}%
+  }{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \ifcase\@tempa\relax% false
+      \@tud@vspacingfalse%
+    \or% true
+      \@tud@vspacingtrue%
+    \fi%
+    \if@atdocument\tud@font@skip@set\fi%
+  \fi%
+}
+\TUDExecuteOptions{vspacing=true}%
 \DefineFamilyMember{KOMA}
 \DefineFamilyKey{KOMA}{fontsize}{%
   \if@atdocument\AtEndOfFamilyOptions{\tud@font@skip@set}\fi%
   \FamilyKeyStateProcessed%
 }
-\newif\if@tud@fontspec
-\AfterPackage*{fontspec}{\@tud@fontspectrue}
 \bool@lock{@tud@cdmath}
 \TUD@key{cdmath}[true]{%
   \TUD@set@numkey{cdmath}{@tempa}{%
@@ -358,6 +375,7 @@
   \fi%
 }
 %%% From File: tudscr-misc.dtx
+\tud@ifverlower{2.04}{\TUDExecuteOptions{vspacing=false}}
 \DeclareOption*{\KOMAoptions{\CurrentOption}}
 \TUDProcessOptions\relax
 %%% From File: tudscr-fonts.dtx
@@ -717,39 +735,36 @@
     \edef\bfdef@ult{\bfdefault}%
     \edef\mddef@ult{\mddefault}%
   \fi%
-  \tud@font@skip@set%
   \ifdefined\tud@font@math@init\else\tud@font@math@set\fi%
+  \tud@font@skip@set%
   \normalfont\selectfont%
 }
 \newcommand*\tud@font@skip@set{%
-  \tud@ifverlower{2.04}{}{%
-    \ifcase\tud@cdfont\relax% false
-      \tud@skip@restore{smallskipamount}%
-      \tud@skip@restore{medskipamount}%
-      \tud@skip@restore{bigskipamount}%
-      \tud@skip@restore{abovecaptionskip}%
-      \tud@skip@restore{belowcaptionskip}%
-      \tud@skip@restore{columnsep}%
-    \else% true/heavy
-      \tud@skip@store{smallskipamount}%
-      \tud@skip@store{medskipamount}%
-      \tud@skip@store{bigskipamount}%
-      \tud@skip@store{abovecaptionskip}%
-      \tud@skip@store{belowcaptionskip}%
-      \tud@skip@store{columnsep}%
-      \tud@font@skip@@set%
-    \fi%
-  }%
+  \if@tud@vspacing%
+    \tud@skip@store{smallskipamount}%
+    \tud@skip@store{medskipamount}%
+    \tud@skip@store{bigskipamount}%
+    \tud@skip@store{abovecaptionskip}%
+    \tud@skip@store{belowcaptionskip}%
+    \tud@skip@store{columnsep}%
+    \tud@font@skip@@set%
+  \else%
+    \tud@skip@restore{smallskipamount}%
+    \tud@skip@restore{medskipamount}%
+    \tud@skip@restore{bigskipamount}%
+    \tud@skip@restore{abovecaptionskip}%
+    \tud@skip@restore{belowcaptionskip}%
+    \tud@skip@restore{columnsep}%
+  \fi%
 }
 \newcommand*\tud@font@skip@@set{%
-  \setlength{\@tempdimb}{\f@baselineskip}%
-  \scr@setlength\smallskipamount{\dimexpr\@tempdimb/4\relax}%
-    {\dimexpr\@tempdimb/12\relax}{\dimexpr\@tempdimb/12\relax}%
-  \scr@setlength\medskipamount{\dimexpr\@tempdimb/2\relax}%
-    {\dimexpr\@tempdimb/6\relax}{\dimexpr\@tempdimb/6\relax}%
-  \scr@setlength\bigskipamount{\@tempdimb}%
-    {\dimexpr\@tempdimb/3\relax}{\dimexpr\@tempdimb/3\relax}%
-  \tud@skip@set\abovecaptionskip{\dimexpr4\@tempdimb/5\relax}%
+  \scr@setlength\smallskipamount{\dimexpr\f@baselineskip/4\relax}%
+    {\dimexpr\f@baselineskip/12\relax}{\dimexpr\f@baselineskip/12\relax}%
+  \scr@setlength\medskipamount{\dimexpr\f@baselineskip/2\relax}%
+    {\dimexpr\f@baselineskip/6\relax}{\dimexpr\f@baselineskip/6\relax}%
+  \scr@setlength\bigskipamount{\f@baselineskip}%
+    {\dimexpr\f@baselineskip/3\relax}{\dimexpr\f@baselineskip/3\relax}%
+  \tud@skip@set\abovecaptionskip{\dimexpr4\f@baselineskip/5\relax}%
   \tud@skip@set\belowcaptionskip{\z@}%
   \tud@skip@set\columnsep{1.1\baselineskip}%
 }
