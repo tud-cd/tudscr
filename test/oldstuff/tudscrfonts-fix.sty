@@ -4,7 +4,11 @@
 %%
 %% The original source files were:
 %%
-%% tudscr-version.dtx  (with options: `package')
+%% tudscr-version.dtx  (with options: `package,fontsfix')
+%% tudscr-comp.dtx  (with options: `package,fontsfix,identify')
+%% tudscr-base.dtx  (with options: `load')
+%% tudscr-comp.dtx  (with options: `package,fontsfix,option')
+%% tudscr-comp.dtx  (with options: `package,fontsfix,body')
 %% 
 %% ============================================================================
 %% 
@@ -54,7 +58,7 @@
       \fi%
     }%
   \fi%
-  \@TUDVersion{2015/11/23 v2.05 BETA TUD-KOMA-Script}%
+  \@TUDVersion{2015/12/15 v2.05 BETA TUD-KOMA-Script}%
 \endgroup%
 \NeedsTeXFormat{LaTeX2e}
 \providecommand*\tudscrmail{tudscr@gmail.com}
@@ -65,7 +69,26 @@
     }\csname xspace\endcsname%
   }%
 }{}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% From File: tudscr-comp.dtx
+\ProvidesPackage{tudscrfonts-fix}[%
+  2015/12/15 v2.05 BETA TUD-KOMA-Script
+  package for font fixes
+  (compatibility for old tud(scr) classes)%
+]
+%%% From File: tudscr-base.dtx
+\RequirePackage{tudscrbase}[\TUDVersion]
+\ifx\TUD@noworlater\TUD@noworlater@simple
+  \renewcommand*\TUD@noworlater[2]{#1\AtEndOfPackage{#1#2}}%
+  \AtEndOfPackage{\renewcommand*\TUD@noworlater[2]{#1#2}}%
+\fi
+%%% From File: tudscr-comp.dtx
+\PassOptionsToPackage{vspacing=false}{tudscrfonts}
+\DeclareOption*{\PassOptionsToPackage{\CurrentOption}{tudscrfonts}}
+\ProcessOptions\relax
+\AtEndPreamble{%
+  \tud@fontsfix@wrn%
+  \RequirePackage{tudscrfonts}%
+}
 \ifx\usepackage\RequirePackage%
   \newcommand*\tud@fontsfix@wrn{%
     \PackageWarningNoLine{tudscrfonts-fix}{%
@@ -86,14 +109,7 @@
     }%
   }%
 \fi%
-\RequirePackage{tudscrbase}
-\PassOptionsToPackage{vspacing=false}{tudscrfonts}
-\DeclareOption*{\PassOptionsToPackage{\CurrentOption}{tudscrfonts}}
-\ProcessOptions\relax
-\AtEndPreamble{%
-  \tud@fontsfix@wrn%
-  \RequirePackage{tudscrfonts}%
-}
+%%% From File: tudscr-comp.dtx
 \newcommand*\tud@fontsfix@BeforeClass[2]{%
   \BeforeClass{#1}{%
     \let\tud@fontsfix@wrn\relax%
@@ -156,7 +172,7 @@
         \newcommand*\univBoldXV{}%
         \newcommand*\univLightHead{}%
         \newcommand*\univBoldHead{}%
-        \providecommand*\tud@head@fntsz{9}
+        \providecommand*\tud@head@fntsz{9}%
         \if@tud@univers%
           \if@tud@fontspec%
             \DeclareFixedFont{\univLightVII}{\encodingdefault}%
@@ -257,6 +273,18 @@
     }%
   }%
 }
+\tud@fontsfix@BeforeClass{tudletter}{}
+\tud@fontsfix@AfterClass{tudletter}{}
+\tud@fontsfix@BeforeClass{tudfax}{}
+\tud@fontsfix@AfterClass{tudfax}{}
+\tud@fontsfix@BeforeClass{tudform}{}
+\tud@fontsfix@AfterClass{tudform}{}
+\tud@fontsfix@BeforeClass{tudhaus}{}
+\tud@fontsfix@AfterClass{tudhaus}{}
+\tud@fontsfix@BeforeClass{tudposter}{}
+\tud@fontsfix@AfterClass{tudposter}{}
+\tud@fontsfix@BeforeClass{tudbeamer}{}
+\tud@fontsfix@AfterClass{tudbeamer}{}
 \tud@fontsfix@BeforeClass{tudbook}{}
 \tud@fontsfix@AfterClass{tudbook}{%
   \patchcmd{\@makechapterhead}{\dinBold\Huge\bfseries}%
@@ -268,16 +296,6 @@
   \patchcmd{\showtitle}{\dinBold\Huge\bfseries}%
     {\bfseries\tud@disposition@font\Huge}{}{\tud@patch@wrn{showtitle}}%
 }
-\tud@fontsfix@BeforeClass{tudletter}{}
-\tud@fontsfix@AfterClass{tudletter}{}
-\tud@fontsfix@BeforeClass{tudfax}{}
-\tud@fontsfix@AfterClass{tudfax}{}
-\tud@fontsfix@BeforeClass{tudform}{}
-\tud@fontsfix@AfterClass{tudform}{}
-\tud@fontsfix@BeforeClass{tudhaus}{}
-\tud@fontsfix@AfterClass{tudhaus}{}
-\tud@fontsfix@BeforeClass{tudposter}{}
-\tud@fontsfix@AfterClass{tudposter}{}
 \tud@fontsfix@BeforeClass{tudmathposter}{}
 \tud@fontsfix@AfterClass{tudmathposter}{%
   \setkomafont{title}{\bfseries\tud@disposition@font\Huge}%
@@ -290,16 +308,12 @@
     \newcommand*\subsectionfont{\univbn\large}%
   \fi%
 }
-% TODO: (Schrift-)Optionen aller Klassen prüfen, ob diese gesetzt werden
 \PreventPackageFromLoading[%
   \RequirePackage{amsmath}%
   \RequirePackage{amsfonts}%
   \let\DeclareTudMathSizes\@gobblefour%
   \newif\if@tudfonts@nodin%
 ]{tudfonts}%
-% TODO: Paket rescalefonts unterdrücken?!
-\tud@fontsfix@BeforeClass{tudbeamer}{}
-\tud@fontsfix@AfterClass{tudbeamer}{}
 \tud@fontsfix@BeforeClass{tudscrbookold}{}
 \tud@fontsfix@BeforeClass{tudscrreprtold}{}
 \tud@fontsfix@BeforeClass{tudscrartclold}{}
@@ -326,14 +340,6 @@
   \undef\textuxs%
   \undef\textdbn%
 }
-\newcommand*\tud@fontsfix@oldscrclasses{%
-  \AfterPackage{tudscrfonts}{%
-    \AtBeginDocument{%
-      \DeclareSymbolFontAlphabet{\mathrm}{operators}%
-    }%
-  }%
-}
-
 \endinput
 %%
 %% End of file `tudscrfonts-fix.sty'.
