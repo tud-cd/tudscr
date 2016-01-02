@@ -1,4 +1,4 @@
-% \CheckSum{3127}
+% \CheckSum{3219}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-pagestyle.dtx}[%
-  2015/12/07 v2.05 TUD-KOMA-Script (pagestyle)%
+  2015/12/14 v2.05 TUD-KOMA-Script (pagestyle)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -1138,25 +1138,99 @@
 % \end{macro}^^A \ps@tudpage@plain
 % \begin{macro}{\thispagestyle}
 % \changes{v2.03}{2015/01/20}{Auswahl eines Aliasseitenstils unterdrückt}^^A
+% Wird der Befehl \cs{thispagestyle} verwendet, muss dafür Sorge getragen 
+% werden, dass kein Alias-Seitenstil expandiert wird.
 %    \begin{macrocode}
 \patchcmd{\thispagestyle}{\gdef\@specialstyle{#1}}{%
   \xdef\@specialstyle{\GetRealPageStyle{#1}}%
 }{}{\tud@patch@wrn{thispagestyle}}
 %    \end{macrocode}
 % \end{macro}^^A \thispagestyle
-% \begin{macro}{\tud@head@rule}
-% \changes{v2.02}{2014/06/23}{gewünschte Breite als Argument}^^A
-% Der Querbalken des Kopfes läuft je nach gewähltem Parameter \cs{tud@head@bar}
-% entweder nur über den Textbereich oder aber über die gesamte Seitenbreite.
-% Der Befehl erzeugt eine horizontale Linie mit der übergebenen Breite und 
-% über \cs{tud@dim@line} definierter Dicke.
+% \begin{macro}{\tud@head@font@set}
+% \changes{v2.02}{2014/07/08}{Unterstützung für \opt{cdhead} hinzugefügt}^^A
+% \changes{v2.03}{2015/01/30}{Bugfix für die Änderung von \cs{spaceskip} durch
+%   das Paket \pkg{ragged2e}}^^A
+% \begin{macro}{\tud@head@fontsize}
+% \begin{macro}{\tud@head@font@bold}
+% \begin{macro}{\tud@head@font@light}
+% Die Schrift der Kopfzeile wird entweder in den Schriften des \CDs oder aber 
+% in den serifenlosen Standardschriften gesetzt, wobei für beide Varianten
+% sowohl eine fettgedruckte als auch eine normale Version benötigt wird. Die
+% Schrifthöhe ist durch das \CD unabhängig von der gewählten Schriftgröße im
+% Dokument vorgegeben und wird in Abhängigkeit von der Papiergröße gewählt und
+% in \cs{tud@head@fontsize} gespeichert.
 %    \begin{macrocode}
-\newcommand*\tud@head@rule[1]{%
-  \tud@color{\tud@head@fontcolor}%
-  \rule[\ht\strutbox]{#1}{\tud@dim@line}%
+\newcommand*\tud@head@fontsize{}
+\newcommand*\tud@head@font@bold{}
+\newcommand*\tud@head@font@light{}
+\newcommand*\tud@head@font@set{%
+%    \end{macrocode}
+% Die Option \opt{cdhead} wird ausgewertet. Sollte diese inkompatibel gesetzt 
+% sein, wird eine Warnung ausgegeben.
+%    \begin{macrocode}
+  \ifcase\tud@head@font\relax% false
+    \ifnum\tud@cdfont>\z@\relax% true/heavy
+      \if@tud@head@font@set%
+        \ClassWarning{\TUDClassName}{%
+          It isn't possible to use `cdhead=false'\MessageBreak%
+          together with `cdfont=true'%
+        }%
+      \fi%
+      \TUDoptions{cdhead=true}%
+    \fi%
+  \fi%
+%    \end{macrocode}
+% Die Schriften für den Kopf im \CD werden nachfolgend definiert. Abhängig von 
+% \cs{tud@cdfont} werden entweder die Schriften des \CDs oder aber die 
+% serifenlose Standardschrift für die Kopfzeile verwendet. Die Rückfallebene:
+%    \begin{macrocode}
+  \if@tud@head@font@set%
+    \DeclareFixedFont{\tud@head@font@bold}{\encodingdefault}%
+      {\sfdefault}{\bfdefault}{\updefault}{\tud@head@fontsize}%
+    \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
+      {\sfdefault}{\mddefault}{\updefault}{\tud@head@fontsize}%
+%    \end{macrocode}
+% Damit \cs{DeclareFixedFont} zusammen mit \pkg{fontspec} verwendet werden 
+% kann, wurde zu Beginn der Klasse den drei benötigten Schriftschnitten der 
+% \Univers spezielle Namen zugewiesen, die hier verwendet werden.
+%    \begin{macrocode}
+    \ifcase\tud@head@font\relax\else% true/heavy
+      \if@tud@univers%
+        \if@tud@fontspec%
+          \DeclareFixedFont{\tud@head@font@bold}{\encodingdefault}%
+            {UniversBold}{m}{n}{\tud@head@fontsize}%
+          \ifcase\tud@head@font\relax\or% true
+            \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
+              {UniversLight}{m}{n}{\tud@head@fontsize}%
+          \or% heavy
+            \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
+              {UniversRegular}{m}{n}{\tud@head@fontsize}%
+          \fi%
+%    \end{macrocode}
+% Die klassische Auswahl mittels NFSS-Schriftname und \cs{mddefault}.
+%    \begin{macrocode}
+        \else%
+          \DeclareFixedFont{\tud@head@font@bold}{\encodingdefault}%
+            {\tud@univers}{b}{n}{\tud@head@fontsize}%
+          \ifcase\tud@head@font\relax\or% true
+            \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
+              {\tud@univers}{l}{n}{\tud@head@fontsize}%
+          \or% heavy
+            \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
+              {\tud@univers}{m}{n}{\tud@head@fontsize}%
+          \fi%
+        \fi%
+      \fi%
+    \fi%
+    \global\@tud@head@font@setfalse%
+    \global\@tud@head@text@settrue%
+  \fi%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@head@rule
+% \end{macro}^^A \tud@head@font@light
+% \end{macro}^^A \tud@head@font@bold
+% \end{macro}^^A \tud@head@fontsize
+% \end{macro}^^A \tud@head@font@set
 % \begin{macro}{\tud@head@text}
 % \begin{macro}{\tud@head@text@list}
 % \changes{v2.05}{2015/11/26}{neu}^^A
@@ -1347,6 +1421,19 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@head@text@write
+% \begin{macro}{\tud@head@rule}
+% \changes{v2.02}{2014/06/23}{gewünschte Breite als Argument}^^A
+% Der Querbalken des Kopfes läuft je nach gewähltem Parameter \cs{tud@head@bar}
+% entweder nur über den Textbereich oder aber über die gesamte Seitenbreite.
+% Der Befehl erzeugt eine horizontale Linie mit der übergebenen Breite und 
+% über \cs{tud@dim@line} definierter Dicke.
+%    \begin{macrocode}
+\newcommand*\tud@head@rule[1]{%
+  \tud@color{\tud@head@fontcolor}%
+  \rule[\ht\strutbox]{#1}{\tud@dim@line}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@head@rule
 % \begin{macro}{\tud@newlayerbox}
 % \changes{v2.04}{2015/05/31}{neu}^^A
 % \begin{macro}{\tud@savelayerbox}
