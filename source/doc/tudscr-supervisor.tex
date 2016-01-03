@@ -1,0 +1,413 @@
+\chapter[Das Paket \Package*{tudscrsupervisor} -- Studentische Betreuung]{%
+  Ergänzungen für studentische Arbeiten
+}
+\begin{Bundle*}{\Package{tudscrsupervisor}}
+%
+Dieses Paket stellt für das Erstellen von Aufgabenstellungen und Gutachten 
+wissenschaftlicher Arbeiten sowie offiziellen Aushängen im \CD passende 
+Umgebungen und Befehle für den Anwender bereit. Deshalb richtet es sich 
+vornehmlich an Mitarbeiter an der \TnUD, kann jedoch natürlich auch von 
+Studenten genutzt werden.
+
+
+\section{Aufgabenstellung für eine wissenschaftliche Arbeit}
+\index{Aufgabenstellung|!(}%
+%
+\begin{Declaration}{\Environment{task}[\OLParameter{Überschrift}]}{%
+  \Environment{tudpage}'auto'%
+}
+\begin{Declaration}{\Key{\Environment{task}}{headline=\PName{Überschrift}}}
+\printdeclarationlist%
+%
+Mit der \Environment{task}"=Umgebung kann ein Aufgabenstellung für eine 
+wissenschaftliche Arbeit ausgegeben werden. Diese basiert auf der Umgebung 
+\Environment{tudpage} und akzeptiert deshalb im optionalen Argument alle 
+Parameter, welche bei der Beschreibung von \Environment{tudpage}'full' 
+erläutert wurden.
+
+Für die Aufgabenstellung wird normalerweise eine Überschrift gesetzt, welche 
+sich aus \Term{taskname} und~-- falls der Typ der Abschlussarbeit angegeben 
+wurde~-- noch aus \Term{tasktext} und \Macro{thesis} zusammensetzt. Der 
+Parameter \Key{\Environment{task}}{headline} kann genutzt werden, um diese 
+automatisch generierte Überschrift anzupassen.
+
+Zu Beginn der Aufgabenstellung erscheint eine Tabelle mit den angegebenen 
+Informationen zum Autor respektive zu den Autoren der Abschlussarbeit. Zwingend 
+anzugeben sind dafür lediglich der Name des oder der Verfasser (\Macro{author}) 
+sowie der Titel der Arbeit (\Macro{title}), welcher am Ende der Tabelle in 
+fetter Schrift aufgeführt wird. Optional werden noch die Felder für den 
+Studiengang (\Macro{course}), die Fachrichtung (\Macro{discipline}) sowie die 
+Matrikelnummer (\Macro{matriculationnumber}) und das Immatrikulationsjahr 
+(\Macro{matriculationyear}) ausgegeben, wobei nicht angegebene Felder bei der 
+Ausgabe ignoriert werden. Der eigentliche Inhalt der Umgebung~-- sprich die 
+Aufgabenstellung selbst~-- wird nach dem generierten Kopf ausgegeben
+
+Nach der Ausgabe des Inhaltes der Aufgabenstellung werden der oder die mit 
+\Macro{supervisor} definierten Betreuer aufgelistet. Dabei wird unter dem 
+jeweiligen Namen selbst der sprachabhängige Bezeichner (\Term{supervisorname}, 
+\Term{supervisorothername}) gesetzt. Darauf folgend erscheint das Ausgabedatum 
+(\Macro{issuedate}) und der verpflichtende Abgabetermin (\Macro{duedate}). Zum 
+Schluss wird die Unterschriftzeile für den Prüfungsausschussvorsitzenden 
+(\Macro{chairman}) und den betreuenden Hochschullehrer (\Macro{professor}) 
+gesetzt. Für genannte Personen werden unter dem Namen selbst die Bezeichner 
+ausgegeben (\Term{chairmanname} und \Term{professorname}).
+\end{Declaration}
+\end{Declaration}
+
+\begin{Declaration}{%
+  \Macro{taskform}[\LParameter\Parameter{Ziele}\Parameter{Schwerpunkte}]%
+}
+\printdeclarationlist%
+%
+Zusätzlich zur der frei gestaltbaren Umgebung \Environment{task} zur Erstellung
+einer Aufgabenstellung wird ein separater Befehl für eine standardisierte 
+Ausgabe zur Verfügung gestellt. Dieser strukturiert die Aufgabenstellung in die 
+zwei Bereiche \emph{Ziele} und \emph{Schwerpunkte} der Arbeit mit dazugehörigen 
+Überschriften (\Term{objectivesname}, \Term{focusname}).
+
+Im optionalen Argument können alle Parameter der Umgebung \Environment{task} 
+verwendet werden. Im ersten obligatorischen Argument sollte ein Text mit einer 
+kurzen thematischen Einordnung und dem eigentlichen Ziel der Arbeit erscheinen, 
+im zweiten Argument sollen die thematischen Schwerpunkte in Stichpunkten 
+benannt werden. Der Inhalt des zweiten notwendigen Argumentes wird in einer 
+\Environment{itemize}"=Umgebung gesetzt. Deshalb \emph{muss} jedem Stichpunkt 
+\Macro*{item} vorangestellt werden.
+\end{Declaration}
+%
+\begin{Example}
+Die empfohlene Verwendung des Befehls \Macro{taskform} ist wie folgt:
+\begin{Code}[escapechar=§]
+\taskform{%
+  Motivation der Arbeit im ersten Absatz§\dots§
+  
+  Ziele der Arbeit im zweiten Absatz§\dots§
+}{%
+  \item Schwerpunkt 1
+  \item Schwerpunkt 2
+}
+\end{Code}
+Hierzu sei auch auf das Minimalbeispiel in \autoref{sec:exmpl:task} verwiesen.
+\index{Aufgabenstellung|!)}%
+\end{Example}
+
+\begin{Declaration}{\Macro{course}[\Parameter{Studiengang}]}
+\begin{Declaration}[v2.02]{\Macro{discipline}[\Parameter{Studienrichtung}]}
+\printdeclarationlist%
+\index{Kollaboratives Schreiben}%
+%
+Mit diesen beiden Befehlen kann der Studiengang sowie die Studienrichtung für 
+den Autor oder die Autoren angegeben werden. Diese Informationen werden zu 
+Beginn der \Environment{task}"=Umgebung gesetzten Tabelle ausgegeben. Werden 
+diese Befehle innerhalb des Makros \Macro{author} verwendet, können auch 
+unterschiedliche Angaben für mehrere Autoren gemacht werden. Dabei sind die 
+Autoren mit \Macro{and} voneinander zu trennen.
+\end{Declaration}
+\end{Declaration}
+
+\begin{Declaration}{\Macro{chairman}[\Parameter{Prüfungsausschussvorsitzender}]}
+\printdeclarationlist%
+%
+Wird dieses Feld genutzt, wird neben dem betreuenden Hochschullehrer 
+(\Macro{professor}) auch der Vorsitzende des Prüfungsausschusses am Ende der 
+Aufgabenstellung aufgeführt. Dies wird zumeist für Abschlussarbeiten wie 
+beispielsweise \masterthesisname{} oder \diplomathesisname{} benötigt.
+\end{Declaration}
+
+\begin{Declaration}{\Macro{issuedate}[\Parameter{Ausgabedatum}]}
+\begin{Declaration}{\Macro{duedate}[\Parameter{Abgabetermin}]}
+\printdeclarationlist%
+%
+Mit diesen beiden Befehlen sollte das Datum der Ausgabe der Aufgabenstellung 
+sowie der spätest mögliche Abgabetermin angegeben werden. Ist das Paket 
+\Package{isodate} geladen, wird die damit eingestellte Formatierung des Datums 
+durch den Befehl \Macro{printdate}(\Package{isodate})'none' aus diesem Paket 
+für \Macro{issuedate} und \Macro{duedate} verwendet.
+\end{Declaration}
+\end{Declaration}
+
+
+\section{Gutachten für wissenschaftliche Arbeiten}
+\index{Gutachten|!(}%
+%
+\begin{Declaration}{\Environment{evaluation}[\OLParameter{Überschrift}]}{%
+  \Environment{tudpage}'auto'%
+}
+\begin{Declaration}{%
+  \Key{\Environment{evaluation}}{headline=\PName{Überschrift}}%
+}
+\begin{Declaration}{\Key{\Environment{evaluation}}{grade=\PName{Note}}}
+\printdeclarationlist%
+%
+Diese Umgebung wird für das Erstellen eines Gutachtens einer wissenschaftlichen 
+Arbeit bereitgestellt. Auch diese unterstützt alle Parameter, welche für die 
+Umgebung \Environment{tudpage}'full' beschrieben wurden.
+
+Für ein Gutachten wird gewöhnlich eine Überschrift aus \Term{evaluationname} 
+und~-- falls der Abschlussarbeitstyp angegeben wurde~-- \Term{evaluationtext} 
+sowie \Macro{thesis} generiert. Diese automatisch generierte Überschrift kann 
+mit dem Parameter \Key{\Environment{evaluation}}{headline} ersetzt werden. Am 
+Ende des Gutachtens wird die mit \Key{\Environment{evaluation}}{grade} 
+gegebene Note in fetter Schrift ausgezeichnet.
+
+Am Anfang der \Environment{evaluation}"=Umgebung wird die gleiche Tabelle mit 
+Autorenangaben ausgegeben, wie dies bei der \Environment{task}"=Umgebung der 
+Fall ist. Nach dem Tabellenkopf folgt auch hier der eigentliche Inhalt, sprich 
+das Gutachten der Abschlussarbeit. Abgeschlossen wird die Umgebung mit der 
+gegebenen Note~-- welche innerhalb von \Term{gradetext} ausgegeben wird~-- 
+sowie der Orts- und Datumsangabe (\Macro{place}, \Macro{date}) und der 
+darauffolgenden Unterschriftzeile für den oder die Gutachter (\Macro{referee}), 
+welche wiederum mit den entsprechenden sprachabhängigen Bezeichner 
+(\Term{refereename}, \Term{refereeothername}) ergänzt werden.
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+
+\begin{Declaration}{%
+  \Macro{evaluationform}[%
+    \LParameter\Parameter{Aufgabe}\Parameter{Inhalt}%
+    \Parameter{Bewertung}\Parameter{Note}%
+  ]%
+}
+\printdeclarationlist%
+%
+Neben der individuell nutzbaren Umgebung \Environment{evaluation} wird ein 
+separater Befehl zur Erstellung eines standardisierten Gutachtens 
+bereitgestellt. Dieser strukturiert die Ausgabe in die vier Bereiche 
+\emph{Aufgabe}, \emph{Inhalt}, \emph{Bewertung} und \emph{Note} und versieht 
+diese jeweils mit der dazugehörigen Überschrift beziehungsweise Textausgabe 
+(\Term{taskname}, \Term{contentname}, \Term{assessmentname} und 
+\Term{gradetext}). Das optionale Argument unterstützt alle Parameter der 
+\Environment{evaluation}"=Umgebung.
+\end{Declaration}
+%
+\begin{Example}
+Die empfohlene Verwendung des Befehls \Macro{evaluationform} ist wie folgt:
+\begin{Code}[escapechar=§]
+\evaluationform{%
+  Kurzbeschreibung der Aufgabenstellung§\dots§
+}{%
+  Zusammenfassung von Inhalt und Struktur§\dots§
+}{%
+  Bewertung der schriftlichen Abschlussarbeit§\dots§
+}{%
+  Zahl (Note)
+}
+\end{Code}
+Hierzu sei auch auf das Minimalbeispiel in \autoref{sec:exmpl:evaluation} 
+verwiesen.
+\index{Gutachten|!)}%
+\end{Example}
+
+\begin{Declaration}{\Macro{grade}[\Parameter{Note}]}
+\printdeclarationlist%
+%
+Neben der Angabe der Note für ein Gutachten über den Parameter 
+\Key{\Environment{evaluation}}{grade} der Umgebung \Environment{evaluation} 
+kann dafür auch dieser global wirkende Befehl verwendet werden.
+\end{Declaration}
+
+
+\section{Aushang}
+\index{Aushang|!(}%
+%
+\begin{Declaration}{\Environment{notice}[\OLParameter{Überschrift}]}{%
+  \Environment{tudpage}'auto'%
+}
+\begin{Declaration}{\Key{\Environment{notice}}{headline=\PName{Überschrift}}}
+\printdeclarationlist%
+%
+Für das Anfertigen eines Aushangs kann diese Umgebung verwendet werden. Diese 
+basiert abermals auf der Umgebung \Environment{tudpage} und unterstützt alle 
+deren Parameter.
+
+Wurde ein Datum angegeben, wird dieses in der oberen rechten Ecke gesetzt. 
+Anschließend wird die Überschrift ausgegeben, welche für gewöhnlich dem Inhalt 
+von \Term{noticename} entspricht und mit \Key{\Environment{notice}}{headline} 
+geändert werden kann. Nach der Überschrift wird bereits der Inhalt der Umgebung 
+ausgegeben. Wurde mit \Macro{contactperson} ein oder mehrere Ansprechpartner 
+angegeben, werden diese Informationen am Ende der Umgebung ausgegeben.
+\end{Declaration}
+\end{Declaration}
+
+\begin{Declaration}{%
+  \Macro{noticeform}[\LParameter\Parameter{Inhalt}\Parameter{Schwerpunkte}]%
+}
+\printdeclarationlist%
+%
+Auch für diese Umgebung gibt es einen Befehl für eine normierte Form. Diese 
+soll vor allem Verwendung für den Aushang studentischer Arbeitsthemen finden. 
+Für das optionale Argument können sämtliche Parameter verwendet werden, die 
+auch die \Environment{notice}"=Umgebung unterstützt.
+
+Das erste obligatorische Argument wird für eine kurze Inhaltsbeschreibung 
+verwendet. Neben dem Text sollte hier wenn möglich eine thematisch passende 
+Abbildung eingefügt werden (\Macro{includegraphics}(\Package{graphicx})'none'). 
+Das zweite Argument wird~--wie schon bei \Macro{taskform}~-- dazu verwendet, 
+einige Schwerpunkte aufzuzählen. Auch hier kommt nach der gliedernden 
+Überschrift (\Term{focusname}) eine \Environment{itemize}"=Umgebung zum 
+Einsatz, allen Schwerpunkten muss ein \Macro*{item} vorangestellt werden.
+\end{Declaration}
+%
+\begin{Example}
+Die empfohlene Verwendung des Befehls \Macro{noticeform} ist wie folgt:
+\begin{Code}[escapechar=§]
+\noticeform{%
+  Kurzbeschreibung des Inhaltes der studentischen Arbeit§\dots§
+  
+  Bild (optional), einzubinden mit:
+    \includegraphics[§\PName{Optionen}§]{§\PName{Datei}§}
+}{%
+  \item Schwerpunkt 1
+  \item Schwerpunkt 2
+}
+\end{Code}
+Hierzu sei auch auf das Minimalbeispiel in \autoref{sec:exmpl:notice} verwiesen.
+\index{Aushang|!)}%
+\end{Example}
+
+\begin{Declaration}[v2.02]{\Macro{contactperson}[\Parameter{Kontaktperson(en)}]}
+\begin{Declaration}{\Macro{office}[\Parameter{Dienstsitz}]}
+\begin{Declaration}[v2.02]{\Macro{telephone}[\Parameter{Telefonnummer}]}
+\begin{Declaration}[v2.02]{\Macro{emailaddress}[\Parameter{E-Mail-Adresse}]}
+\printdeclarationlist%
+%
+Am Ende eines Aushangs können mit \Macro{contactperson} Kontaktinformationen 
+für eine oder mehrere Ansprechpartner angegeben werden. Soll mehr als eine 
+Kontaktperson genannt werden, so müssen diese innerhalb des Befehls
+\Macro{contactperson} mit dem Befehl \Macro{and} getrennt werden. Für jede 
+Person kann innerhalb des Argumentes von \Macro{contactperson} der Dienstsitz 
+(\Macro{office}), die dienstliche Telefonnummer (\Macro{telephone}) sowie die 
+geschäftliche E"~Mail"=Adresse (\Macro{emailaddress}) angegeben werden. Sollte 
+das Paket \Package{hyperref} geladen werden, wird die gegebene E"~Mail"=Adresse 
+direkt in einen entsprechenden Link gewandelt.
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+
+
+\section{Zusätzliche sprachabhängige Bezeichner}
+\index{Bezeichner|!(}%
+%
+Für das Paket \Package{tudscrsupervisor} werden für die zusätzlichen Befehle 
+und Umgebungen weitere Bezeichner definiert. Für eine etwaige Anpassung dieser 
+sei auf \autoref{sec:localization} verwiesen.
+
+\begin{Declaration}{\Term{taskname}}
+\begin{Declaration}{\Term{tasktext}}
+\printdeclarationlist%
+%
+Die Bezeichnung der Aufgabenstellung selbst ist in \Term{taskname} enthalten. 
+Für die Generierung einer Überschrift wird dieser verwendet. Wurde außerdem mit 
+\Macro{thesis} oder \Macro{subject} der Typ der Abschlussarbeit%
+\footnote{%
+  \Option{subjectthesis} oder spezieller Wert aus \autoref{tab:thesis}
+}
+angegeben, wird die Überschrift zusammen mit dem Bezeichner \Term{tasktext}
+um die Typisierung erweitert. Falls gewünscht, kann die automatisch generierte 
+Überschrift mit dem Parameter \Key{\Environment{task}}{headline} der Umgebung 
+\Environment{task} überschrieben werden.
+\TermTable{taskname,tasktext}
+\end{Declaration}
+\end{Declaration}
+
+\begin{Declaration}[v2.04]{\Term{namesname}}
+\begin{Declaration}{\Term{titlename}}
+\begin{Declaration}{\Term{coursename}}
+\begin{Declaration}[v2.02]{\Term{disciplinename}}
+\printdeclarationlist%
+%
+Diese Bezeichner werden in der Tabelle mit den Autoreninformationen zu Beginn 
+der Aufgabenstellung verwendet. Dabei werden \Term{coursename} und 
+\Term{disciplinename} nur genutzt, wenn für mindestens einen Autor die Befehle 
+\Macro{course} und/oder \Macro{discipline} verwendet wurden.
+\TermTable{namesname,titlename,coursename,disciplinename}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+
+\begin{Declaration}{\Term{issuedatetext}}
+\begin{Declaration}{\Term{duedatetext}}
+\printdeclarationlist%
+%
+Am Ende der Aufgabenstellung wird nach dem oder der Betreuer das Ausgabedatum 
+und der Abgabetermin (\Macro{issuedate}, \Macro{duedate}) der Abschlussarbeit 
+mit folgenden Bezeichner erläutert.
+\TermTable{issuedatetext,duedatetext}
+\end{Declaration}
+\end{Declaration}
+
+\begin{Declaration}{\Term{chairmanname}}
+\printdeclarationlist%
+%
+Wurde der Prüfungsausschussvorsitzende (\Macro{chairman}) angegeben, erfolgt 
+unter dem Namen selbst die Ausgabe des Bezeichners.
+\TermTable{chairmanname}
+\end{Declaration}
+
+\begin{Declaration}{\Term{focusname}}
+\begin{Declaration}{\Term{objectivesname}}
+\printdeclarationlist%
+%
+Die Standardformen für Aufgabenstellung (\Macro{taskform}) respektive Aushang 
+(\Macro{noticeform}) nutzen für die gesetzten Überschriften diese Bezeichner.
+\TermTable{focusname,objectivesname}
+\end{Declaration}
+\end{Declaration}
+
+\begin{Declaration}{\Term{evaluationname}}
+\begin{Declaration}{\Term{evaluationtext}}
+\printdeclarationlist%
+%
+Die Bezeichnung des Gutachten selbst ist in \Term{evaluationname} enthalten. 
+Für die Generierung der Überschrift wird der Bezeichner \Term{evaluationtext} 
+sowie der mit \Macro{thesis} oder gegebenenfalls mit \Macro{subject} gegebenen 
+Typ der Abschlussarbeit verwendet. Diese automatisch generierte Überschrift 
+kann mit dem Parameter \Key{\Environment{evaluation}}{headline} der 
+Umgebung \Environment{evaluation} durch den Anwender überschrieben werden.
+\TermTable{evaluationname,evaluationtext}
+\end{Declaration}
+\end{Declaration}
+
+\begin{Declaration}{\Term{contentname}}
+\begin{Declaration}{\Term{assessmentname}}
+\printdeclarationlist%
+%
+Bei der standardisierten Form des Gutachten (\Macro{evaluationform}) werden die 
+darin~-- zur strukturierter Gliederung~-- erzeugten Überschriften mit den 
+Bezeichnern \Term{taskname}, \Term{contentname} und \Term{assessmentname} 
+gesetzt.
+\TermTable{taskname,contentname,assessmentname}
+\end{Declaration}
+\end{Declaration}
+
+\begin{Declaration}{\Term{gradetext}}
+\printdeclarationlist%
+%
+Wird für das Gutachten einer wissenschaftlichen Arbeit die erzielte Note 
+entweder mit dem Befehl \Macro{grade}[\Parameter{Note}] oder alternativ dazu 
+mit dem Parameter \Key{\Environment{evaluation}}{grade=\PName{Note}} der 
+Umgebung \Environment{evaluation} angegeben, so wird diese innerhalb von 
+\Term{gradetext} verwendet.
+\grade{\PName{Note}}
+\TermTable*{gradetext}{.7\textwidth}
+\end{Declaration}
+
+\begin{Declaration}{\Term{noticename}}
+\begin{Declaration}[v2.02]{\Term{contactpersonname}}
+\printdeclarationlist%
+%
+Die Bezeichnung des Aushangs selbst ist in \Term{noticename} enthalten. Für 
+die Generierung einer Überschrift wird dieser verwendet. Falls gewünscht, kann 
+diese mit dem Parameter \Key{\Environment{notice}}{headline} der Umgebung 
+\Environment{notice} überschrieben werden. Wurde eine Kontaktperson mit dem 
+Befehl \Macro{contactperson} angegeben, wird als Überschrift der Kontaktdaten 
+der Bezeichner \Term{contactpersonname} verwendet.
+
+\TermTable{noticename,contactpersonname}
+\end{Declaration}
+\end{Declaration}
+\index{Bezeichner|!)}%
+\end{Bundle*}
+
