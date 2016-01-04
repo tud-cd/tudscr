@@ -1,4 +1,4 @@
-% \CheckSum{684}
+% \CheckSum{750}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-fields.dtx}[%
-  2015/12/14 v2.05 TUD-KOMA-Script (input fields)%
+  2016/01/04 v2.05 TUD-KOMA-Script (input fields)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -222,13 +222,10 @@
 % \begin{field}{\@title}
 % \begin{field}{\@@title}
 % \changes{v2.02}{2014/11/06}{\cs{protected@xdef} genutzt}^^A
-% \begin{field}{\@@author}
-% \changes{v2.02}{2014/07/25}{entfernt}^^A
 % Für die spätere Verwendung im Dokument des Titels~-- beispielsweise für die
 % Aufgabenstellung oder die Selbstständigkeitserklärung~-- wird das Feld
 % \cs{@@title} definiert. In diesem wird der mit \cs{title} gesicherte Eintrag
-% ohne die etwaigen Fußnoten gespeichert. Das Feld \cs{@@author} wurde mit der 
-% Version~v2.02 entfernt.
+% ohne die etwaigen Fußnoten gespeichert. 
 %    \begin{macrocode}
 \newcommand*\@@title{}
 \robustify\@title
@@ -243,21 +240,62 @@
   \endgroup%
 }
 %    \end{macrocode}
-% \end{field}^^A \@@author
 % \end{field}^^A \@@title
 % \end{field}^^A \@title
 % \end{macro}^^A \title
+% \begin{macro}{\author}
+% \begin{field}{\@author}
+% \begin{field}{\@@author}
 % \begin{macro}{\authormore}
 % \begin{field}{\@authormore}
-% Ausgabe einer zusätzlichen Zeile mit \cs{authormore}\marg{Textzeile} direkt
-% unterhalb der Angabe des Autors auf der Titelseite, wird im Makro
+% Die Ausgabe einer zusätzlichen Zeile mit \cs{authormore}\marg{Textzeile}
+% direkt unterhalb der Angabe des Autors auf der Titelseite, wird im Makro
 % \cs{@authormore} gespeichert.
 %    \begin{macrocode}
+\newcommand*\@@author{}
+\renewcommand*\author[1]{%
+  \gdef\@author{#1}%
+%    \end{macrocode}
+% Das Feld \cs{@@author} soll lediglich die Autoren ohne weitere Anmerkungen 
+% enthalten. Deshalb werden die gewöhnlichen Formatierungsbefehle des Titels
+% temporär unschädlich gemacht.
+%    \begin{macrocode}
+  \begingroup%
+    \let\thanks\@gobble%
+    \let\footnote\@gobble%
+    \def\newline{\space\ignorespaces}%
+    \def\\{\space\ignorespaces}%
+%    \end{macrocode}
+% Die Makros aus \cs{tud@split@author@list} werden zu \cs{relax} gesetzt, um 
+% diese nach der Expansion weiter zu behandeln.
+%    \begin{macrocode}
+    \def\@tempa##1{\csdef{##1}####1{\noexpand\relax}}%
+    \let\@tempb\tud@split@author@list%
+    \robustify\and%
+    \expandafter\forcsvlist\expandafter\@tempa\expandafter{\@tempb}%
+    \protected@edef\@@author{#1}%
+%    \end{macrocode}
+% Da die Befehle für Zusatzinformationen unter Umständen ungewollte Leerzeichen 
+% im Feld \cs{@@author} hinterlassen, werden diese entfernt.
+%    \begin{macrocode}
+    \tud@replace\@@author{ \relax }{}%
+    \tud@replace\@@author{\relax }{}%
+    \tud@replace\@@author{ \relax}{}%
+    \tud@replace\@@author{\relax}{}%
+    \tud@replace\@@author{ \and }{\and}%
+    \tud@replace\@@author{ \and}{\and}%
+    \tud@replace\@@author{\and }{\and}%
+    \protected@xdef\@@author{\trim@spaces{\@@author}}%
+  \endgroup%
+}
 \newcommand*\@authormore{}
-\newrobustcmd*\authormore[1]{\gdef\@authormore{#1}}
+\newrobustcmd*\authormore[1]{\gdef\@authormore{#1}\ignorespaces}
 %    \end{macrocode}
 % \end{field}^^A \@authormore
 % \end{macro}^^A \authormore
+% \end{field}^^A \@@author
+% \end{field}^^A \@author
+% \end{macro}^^A \author
 % \begin{macro}{\publisher}
 % \begin{field}{\@publisher}
 % \changes{v2.02}{2014/07/25}{entfernt}^^A
@@ -473,7 +511,7 @@
 %    \begin{macrocode}
 \newcommand*\@matriculationnumber{}
 \newrobustcmd*\matriculationnumber[1]{%
-  \gdef\@matriculationnumber{#1}%
+  \gdef\@matriculationnumber{#1}\ignorespaces%
 }
 %    \end{macrocode}
 % \end{field}^^A \@matriculationnumber
@@ -484,7 +522,7 @@
 % gespeichert.
 %    \begin{macrocode}
 \newcommand*\@matriculationyear{}
-\newrobustcmd*\matriculationyear[1]{\gdef\@matriculationyear{#1}}
+\newrobustcmd*\matriculationyear[1]{\gdef\@matriculationyear{#1}\ignorespaces}
 %    \end{macrocode}
 % \end{field}^^A \@matriculationyear
 % \end{macro}^^A \matriculationyear
@@ -493,7 +531,7 @@
 % Der Geburtsort für den Titel wird in \cs{@placeofbirth} gespeichert.
 %    \begin{macrocode}
 \newcommand*\@placeofbirth{}
-\newrobustcmd*\placeofbirth[1]{\gdef\@placeofbirth{#1}}
+\newrobustcmd*\placeofbirth[1]{\gdef\@placeofbirth{#1}\ignorespaces}
 %    \end{macrocode}
 % \end{field}^^A \@placeofbirth
 % \end{macro}^^A \placeofbirth
@@ -520,16 +558,8 @@
   \fi%
   \vskip\tud@signatureskip\noindent%
   \begingroup%
-    \let\thanks\@gobble%
-    \let\footnote\@gobble%
-    \renewcommand*\tud@split@author[2]{%
-      \tud@multiple@fields@store{@author}{##1}%
-      \ignorespaces##1%
-      \tud@multiple@fields@restore{@author}%
-      \tud@multiple@@@split{##2}{\hfil}%
-    }%
-    \tud@multiple@split{@author}%
-    \hfil%
+    \let\and\hfil%
+    \@@author\hfil%
   \endgroup%
 }
 \newcommand*\confirmationclosing[1]{\gdef\@confirmationclosing{#1}}
@@ -691,7 +721,7 @@
 % gespeichert.
 %    \begin{macrocode}
 \newcommand*\@dateofbirth{}
-\newrobustcmd*\dateofbirth[1]{\tud@printdate{\@dateofbirth}{#1}}
+\newrobustcmd*\dateofbirth[1]{\tud@printdate{\@dateofbirth}{#1}\ignorespaces}
 %    \end{macrocode}
 % \end{field}^^A \@dateofbirth
 % \end{macro}^^A \dateofbirth
@@ -713,7 +743,7 @@
 % gespeichert.
 %    \begin{macrocode}
 \newcommand*\@course{}
-\newrobustcmd*\course[1]{\gdef\@course{#1}}
+\newrobustcmd*\course[1]{\gdef\@course{#1}\ignorespaces}
 %    \end{macrocode}
 % \end{field}^^A \@course
 % \end{macro}^^A \course
@@ -725,7 +755,7 @@
 % im Makro \cs{@discipline} gespeichert.
 %    \begin{macrocode}
 \newcommand*\@discipline{}
-\newrobustcmd*\discipline[1]{\gdef\@discipline{#1}}
+\newrobustcmd*\discipline[1]{\gdef\@discipline{#1}\ignorespaces}
 %    \end{macrocode}
 % \end{field}^^A \@discipline
 % \end{macro}^^A \discipline
