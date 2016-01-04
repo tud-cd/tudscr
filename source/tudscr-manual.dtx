@@ -1,4 +1,4 @@
-% \CheckSum{4233}
+% \CheckSum{4168}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-manual.dtx}[%
-  2015/12/15 v2.05 TUD-KOMA-Script\space%
+  2016/01/04 v2.05 TUD-KOMA-Script\space%
 %</driver>
 %<package&identify>\ProvidesPackage{tudscrtutorial}[%
 %<*driver|package&identify>
@@ -191,86 +191,6 @@
 %    \end{macrocode}
 % \end{macro}^^A \pdfshellescape
 % \end{macro}^^A \pdfstrcmp
-% \begin{macro}{\tud@toks@}
-% \changes{v2.05}{2015/11/01}{neu}^^A
-% \begin{macro}{\eaddto@hook}
-% \changes{v2.05}{2015/11/01}{neu}^^A
-% Es wird ein token-Regsiter reserviert, welches im weiteren Verlauf an allen
-% möglichen Punkten verwendet wird. Mit \cs{eaddto@hook} wird~-- in Ergänzung
-% zu \cs{addto@hook}~-- ein Makro zum Anfügen des expandierten Arguments an ein 
-% token-Register bereitgestellt.
-%    \begin{macrocode}
-\newtoks\tud@toks@
-\newcommand*\eaddto@hook[2]{%
-  \expandafter\addto@hook\expandafter#1\expandafter{#2}%
-}
-%    \end{macrocode}
-% \end{macro}^^A \eaddto@hook
-% \end{macro}^^A \tud@toks@
-% \begin{macro}{\tud@replace}
-% \changes{v2.05}{2015/11/01}{neu}^^A
-% Mit diesem Befehl kann in einem gegebenen Makro ein bestimmtes Zeichen durch 
-% ein anderes ersetzt werden. Dies wird verwendet, um für Indexbefehle oder 
-% Labels die möglicherweise enthaltenen \val{@}-Zeichen zu ersetzen.
-%    \begin{macrocode}
-\newcommand*\tud@replace[3]{%
-  \begingroup%
-%    \end{macrocode}
-% Zunächst wird \cs{@tempa} als ein durch \cs{@nil} abgegrenztes Makro mit 
-% zwei Argumenten definiert, wobei diese durch das im zweiten Argument gegebene 
-% \meta{Zeichen} voneinander abgegrenzt werden. Mit diese beiden Argumente wird
-% das Makro \cs{@tempb} aufgerufen. 
-%    \begin{macrocode}
-    \toks@{\def\@tempa##1}%
-    \eaddto@hook\toks@{\detokenize{#2}}%
-    \addto@hook\toks@{##2\@nil{\@tempb{##1}{##2}}}%
-%    \end{macrocode}
-% Der Inhalt von \cs{toks@} ist
-% \cs{def}\cs{@tempa\#1\meta{Zeichen}\#2}\cs{@nil\{\cs{@tempb\{\#1\}\{\#2\}}\}}
-% und definiert \cs{@tempa}.
-%    \begin{macrocode}
-    \the\toks@%
-%    \end{macrocode}
-% Nun wird \cs{@tempb} definiert. Dieses Makro fügt dem Zielmakro das erste
-% Argumente gefolgt von \meta{Ersatzzeichen} hinzu. Mit dem zweiten Argument
-% wird anschließend \cs{@tempa\#\#2}\cs{@nil} so lange rekursiv aufgerufen, bis
-% es wirklich leer ist, wodurch das zweite Argument \meta{Zeichen} sukzessive 
-% durch das dritte Argument \meta{Ersatzzeichen} ersetzt wird.
-%    \begin{macrocode}
-    \def\@tempb##1##2{%
-      \if\relax\detokenize{##2}\relax%
-        \appto#1{##1}%
-        \let\@tempc\relax%
-      \else%
-        \appto#1{##1#3}%
-        \def\@tempc{\@tempa##2\@nil}%
-      \fi%
-      \@tempc%
-    }%
-%    \end{macrocode}
-% Nachdem die beiden notwendigen Makros definiert wurden, erfolgt jetzt die 
-% eigentliche Ersetzung. Dafür wird der Inhalt des Zielmakros als Argument für 
-% \cs{@tempa} verwendet. Dem wird zum das zu ersetzende Zeichen gefolgt von
-% \cs{@nil} hinzugefügt, um das Argument abschließend zu begrenzen.
-%    \begin{macrocode}
-    \toks@{\@tempa}%
-    \edef\@tempc{\expandafter\detokenize\expandafter{#1}}%
-    \eaddto@hook\toks@{\@tempc}%
-    \eaddto@hook\toks@{\detokenize{#2}\@nil}%
-%    \end{macrocode}
-% Der Inhalt von \cs{toks@} hat die Form \cs{@tempa\#1\meta{Zeichen}}\cs{@nil},
-% wobei der inhalt von \meta{\#1} expandiert wird.
-%    \begin{macrocode}
-    \def#1{}%
-    \the\toks@%
-    \edef\tud@reserved{%
-      \noexpand\endgroup%
-      \def\noexpand#1{#1}%
-    }%
-  \tud@reserved%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@replace
 % \begin{macro}{\sortlist}
 % \changes{v2.02}{2014/07/25}{neu}^^A
 % \begin{macro}{\@sortlist}
