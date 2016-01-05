@@ -46,9 +46,9 @@ Möglichkeit, den Wert der Optionen noch nach dem Laden der Klasse zu ändern.
 Man kann wahlweise mit der Anweisung \Macro{TUDoptions} die Werte einer Reihe 
 von Optionen ändern. Jede Option der Optionenliste hat dabei die Form
 \PName{Option}\PValue{=}\PName{Wert}. Die meisten Optionen besitzen auch einen 
-Säumniswert\footnote{engl.: default value}. Sollte die Angabe eines Wertes 
-versäumt werden~-- es wird einfach die Form \PName{Option} verwendet~-- so wird 
-automatisch dieser Säumniswert angenommen.
+Standard- beziehungsweise Säumniswert. Sollte die Angabe eines Wertes versäumt 
+werden~-- es wird einfach die Form \PName{Option} verwendet~-- so wird dieser 
+Säumniswert verwendet.
 
 Manche Optionen können gleichzeitig mehrere Werte besitzen. Für diese besteht 
 die Möglichkeit, mit \Macro{TUDoption} der einen Option nacheinander eine 
@@ -94,12 +94,56 @@ werden.%
   \Package{iwona} für die Schrift \DIN und zusätzlich \Package{cmbright} für 
   die \Univers"=Schriftfamilie%
 }
-Diese Grundeinstellung lässt sich ebenfalls deaktivieren, wodurch die 
+Diese Einstellung lässt sich im Bedarfsfall deaktivieren, wodurch die 
 Standardschriften oder gegebenenfalls die eines zusätzlich geladenen Paketes 
 für den mathematischen Satz genutzt werden. Die dafür relevanten Einstellungen 
-werden in \autoref{sec:math} erläutert. In \autoref{sec:exmpl:mathtype} sowie 
-\autoref{sec:exmpl:mathswap} sind zusätzliche Hinweise zum typografisch guten 
-Mathematiksatz zu finden.
+werden in \autoref{sec:math} erläutert. 
+%In \autoref{sec:exmpl:mathtype} sowie \autoref{sec:exmpl:mathswap} sind 
+%zusätzliche Hinweise zum typografisch guten Mathematiksatz zu finden.
+
+
+\subsection{Die Schriften des \CDs im PostScript-Format}
+\index{PostScript-Schriften}%
+%
+Für die bei \hologo{LaTeXe} gebräuchliche Verwendung der PostScript-Schriften 
+ist lediglich die in \fullref{sec:install} beschriebene Installation notwendig. 
+%Geht diese reibungslos vonstatten, kann \TUDScript problemlos genutzt werden.
+
+
+\subsection{Die Schriften des \CDs im OpenType-Format}
+\tudhyperdef*{sec:fonts:fontspec}%
+\index{OpenType-Schriften}%
+%
+\ChangedAt{v2.02:OpenType-Schriften mit Paket \Package{fontspec} verwendbar}
+Das \TUDScript-Bundle unterstützt die Nutzung der Schriften des \CDs sowohl 
+im PostScript- als auch im OpenType"=Format. Letztere müssen ebenfalls über das 
+\hrfn{http://tu-dresden.de/service/publizieren/cd/1_basiselemente/03_hausschrift/schriftbestellung.html}%
+{Universitätsmarketing auf Anfrage} bestellt werden. Die in den beiden Archiven 
+\File{Univers\_8\_TTF\/.zip} und \File{DIN\_TTF\/.zip} enthaltenen Schriften 
+müssen für das Betriebssystem installiert werden und lassen sich anschließend 
+mit dem Paket \Package{fontspec} verwenden.
+
+Auf die Installation der PostScript"=Schriften kann dennoch nicht ohne Weiteres 
+verzichtet werden. Denn einerseits sind diese für die Kompilierung eines 
+\hologo{LaTeX}"~Dokumentes über den klassischen Prozesspfad via
+\Path{latex \textrightarrow{} dvips \textrightarrow{} ps2pdf}~-- wie es 
+beispielsweise für die Erstellung von Grafiken mit \Package{pstricks} notwendig 
+ist~-- erforderlich. Andererseits liefern die Schriftfamilien des \CDs keine 
+mathematische Glyphen, sodass diese bei der PostScript"=Schriftinstallation aus 
+den Schriftpaketen \Package{cmbright} und \Package{iwona} entnommen werden. Bei 
+den Schriften im OpenType"=Format ist dies leider nicht so einfach möglich, da 
+es schlichtweg an passenden Schriftpaketen für den Mathematiksatz im 
+OpenType"=Format mangelt, weshalb für den mathematischen Satz in jedem Fall die 
+PostScript"=Schriften genutzt werden, falls diese installiert sind. Weiterhin 
+kommt es beim Kerning der OpenType"=Schriften im Fließtext zu Problemen.
+
+Die Verwendung der Schriften des \CDs im OpenType"=Format sollte folglich nur 
+erfolgen, wenn eine Installation der PostScript"=Schriften \emph{absolut} nicht 
+möglich ist beziehungsweise \Engine{LuaLaTeX} oder \Engine{XeLaTeX} zwingend 
+genutzt werden müssen. Hierfür ist es~-- nach der systemweiten Installation der 
+OpenType"=Schriften~-- ausreichend, das Paket \Package{fontspec} zu laden.
+\index{Schriftart|?)}%
+
 
 
 \subsection{Schriften für den Textsatz}
@@ -264,6 +308,31 @@ lokal begrenzt wird~-- global auf das Dokument aus, wie etwa beispielsweise
 Schriftart nur für das nachfolgend angegebene Argument, wie zum Beispiel bei
 \Macro*{textbf}[\Parameter{Text}]. Darauf ist bei der Nutzung zu achten. 
 %
+\begin{Declaration}[v2.04]{\Macro{cdfont}[\Parameter{Schriftart}]}
+\begin{Declaration}[v2.04]{%
+  \Macro{textcdfont}[\Parameter{Schriftart}\Parameter{Text}]%
+}
+\printdeclarationlist
+Diese beiden Befehle dienen zuR gezielten Aktivierung einer Schriftart des \CDs 
+in Stärke und Schnitt. Hierbei entspricht \Macro{cdfont} einem Textschalter und 
+ändert die verwendete Schriftart unverzüglich im aktuellen Geltungsbereich auf 
+\PName{Schriftart}, wohingegen \Macro{textcdfont} als Textkommando fungiert und 
+den im zweiten Argument gegebenen \PName{Text} in \PName{Schriftart} setzt ohne 
+dabei die Dokumentschriftart selbst zu ändern.
+
+Für die Schriftauswahl muss im ersten Argument die Bezeichnung der gewünschten 
+Schriftart angegeben werden. Dieser ist der obigen Tabelle zu entnehmen. Für 
+die Auswahl der Schriftfamilie \Univers kann der Vorsatz \PValue{Univers} im 
+Argument \PName{Schriftart} entfallen. Ebenso sind weder Leerzeichen noch die 
+passende Groß- und Kleinschreibung notwendig. Für die Wahl der Schriftstärke 
+ist die entsprechende Zahl \emph{oder} die Bezeichnung allein ausreichend.%
+\footnote{\PValue{45/55/65/75} oder \PValue{Light/Regular/Bold/Black}}
+Anstelle des Suffix' \PValue{Oblique} ist auch die Nutzung von \PValue{Italic} 
+oder \PValue{Slanted} als Alias für die geneigten Schriftschnitte möglich. Zur 
+Auswahl von \DIN ist \PValue{din} als Argument hinreichend.
+\end{Declaration}
+\end{Declaration}
+
 \begin{Declaration}{\Macro{univln}}
 \begin{Declaration}{\Macro{textuln}[\Parameter{Text}]}
 \begin{Declaration}{\Macro{univrn}}
@@ -340,30 +409,6 @@ bereitstellen.
 \end{Declaration}
 \end{Declaration}
 
-\begin{Declaration}[v2.04]{\Macro{cdfont}[\Parameter{Schriftart}]}
-\begin{Declaration}[v2.04]{%
-  \Macro{textcdfont}[\Parameter{Schriftart}\Parameter{Text}]%
-}
-\printdeclarationlist
-Diese beiden Befehle dienen ebenfalls zu gezielten Aktivierung einer Schriftart 
-des \CDs in Stärke und Schnitt. Hierbei entspricht \Macro{cdfont} einem 
-Textschalter und ändert die aktuell verwendete Schriftart im aktuellen 
-Geltungsbereich auf \PName{Schriftart}, wohingegen \Macro{textcdfont} als 
-Textkommando fungiert und den im zweiten Argument gegebenen \PName{Text} in 
-\PName{Schriftart} setzt ohne dabei die Dokumentschriftart selbst zu ändern.
-
-Für die Schriftauswahl muss im ersten Argument der Name der zu verwendenden 
-Schriftart angegeben werden. Dieser ist der obigen Tabelle zu entnehmen. Für 
-die Auswahl der Schriftfamilie \Univers kann der Vorsatz \PValue{Univers} im 
-Argument \PName{Schriftart} entfallen. Ebenso sind weder Leerzeichen noch die 
-passende Groß- und Kleinschreibung notwendig. Für die Wahl der Schriftstärke 
-ist die entsprechende Zahl \emph{oder} die Bezeichnung allein ausreichend.%
-\footnote{\PValue{45/55/65/75} oder \PValue{Light/Regular/Bold/Black}}
-Anstelle des Suffix' \PValue{Oblique} ist auch die Nutzung von \PValue{Italic} 
-oder \PValue{Slanted} als Alias für die geneigten Schriftschnitte möglich. Zur 
-Auswahl von \DIN ist \PValue{din} als Argument hinreichend.
-\end{Declaration}
-\end{Declaration}
 
 
 \subsection{Schriften für den Mathematiksatz}
@@ -532,7 +577,6 @@ den Anwender die im Dokument verwendete Schriftgröße festgelegt werden.
 } Weitere Hinweise zur Wahl der passenden Schriftgröße sind außerdem in 
 \autoref{sec:fontsize} zu finden.
 
-\ToDo[doc]{Hier geht's weiter}[v2.05]
 \begin{Declaration}[v2.05]{\Option{vspacing=\PBoolean}}[true]%
 \printdeclarationlist%
 %
@@ -558,41 +602,6 @@ mehrspaltigen Layout
   vertikalen Leerraum automatisch festgelegt.
 \end{values}
 \end{Declaration}
-
-
-\subsection{Die Schriften des \CDs im OpenType-Format}
-\tudhyperdef*{sec:fonts:fontspec}%
-\index{OpenType-Schriften}%
-%
-\ChangedAt{v2.02:OpenType-Schriften mit Paket \Package{fontspec} verwendbar}
-Das \TUDScript-Bundle unterstützt die Nutzung der Schriften des \CDs sowohl 
-im PostScript- als auch im OpenType"=Format. Letztere müssen ebenfalls über das 
-\hrfn{http://tu-dresden.de/service/publizieren/cd/1_basiselemente/03_hausschrift/schriftbestellung.html}%
-{Universitätsmarketing auf Anfrage} bestellt werden. Die in den beiden Archiven 
-\File{Univers\_8\_TTF\/.zip} und \File{DIN\_TTF\/.zip} enthaltenen Schriften 
-müssen für das Betriebssystem installiert werden und lassen sich anschließend 
-mit dem Paket \Package{fontspec} verwenden.
-
-Auf die Installation der PostScript"=Schriften kann dennoch nicht ohne Weiteres 
-verzichtet werden. Denn einerseits sind diese für die Kompilierung eines 
-\hologo{LaTeX}"~Dokumentes über den klassischen Prozesspfad via
-\Path{latex \textrightarrow{} dvips \textrightarrow{} ps2pdf}~-- wie es 
-beispielsweise für die Erstellung von Grafiken mit \Package{pstricks} notwendig 
-ist~-- erforderlich. Andererseits liefern die Schriftfamilien des \CDs keine 
-mathematische Glyphen, sodass diese bei der PostScript"=Schriftinstallation aus 
-den Schriftpaketen \Package{cmbright} und \Package{iwona} entnommen werden. Bei 
-den Schriften im OpenType"=Format ist dies leider nicht so einfach möglich, da 
-es schlichtweg an passenden Schriftpaketen für den Mathematiksatz im 
-OpenType"=Format mangelt, weshalb für den mathematischen Satz in jedem Fall die 
-PostScript"=Schriften genutzt werden, falls diese installiert sind. Weiterhin 
-kommt es beim Kerning der OpenType"=Schriften im Fließtext zu Problemen.
-
-Die Verwendung der Schriften des \CDs im OpenType"=Format sollte folglich nur 
-erfolgen, wenn eine Installation der PostScript"=Schriften \emph{absolut} nicht 
-möglich ist beziehungsweise \Engine{LuaLaTeX} oder \Engine{XeLaTeX} zwingend 
-genutzt werden müssen. Hierfür ist es~-- nach der systemweiten Installation der 
-OpenType"=Schriften~-- ausreichend, das Paket \Package{fontspec} zu laden.
-\index{Schriftart|?)}%
 
 
 
