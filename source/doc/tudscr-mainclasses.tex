@@ -581,25 +581,17 @@ den Anwender die im Dokument verwendete Schriftgröße festgelegt werden.
 \printdeclarationlist%
 %
 Mit der Option \Option{vspacing=\PBoolean} lässt sich die zuvor beschriebene 
-Schriftgrößenabhängigkeit 
-%von \Length{bigskipamount}, \Length{medskipamount} und \Length{smallskipamount}
-für vertikalen Leerraum zwischen zwei Absätzen sowie 
-%\Length{abovecaptionskip} und  \Length{belowcaptionskip} 
-%für den Abstand 
-bei Beschriftungen als auch 
-%\Length{columnsep}, 
-für den horizontalen Abstand der einzelnen Textspalten untereinander im 
-mehrspaltigen Layout
-%,
- anpassen.
+Schriftgrößenabhängigkeit sowohl für vertikalen Leerraum zwischen zwei Absätzen 
+oder bei Beschriftungen als auch für den horizontalen Abstand zwischen den 
+Textspalten im mehrspaltigen Layout anpassen.
 %
 \begin{values}{\Option{vspacing}}
 \itemfalse[absolute/standard]
-  Die Längen für vertikalen Leerraum werden nicht angepasst, passende Werte 
-  sollten bei einer Änderung der Schriftgröße durch den Anwender gewählt werden.
+  Die besagten Längen werden nicht angepasst, passende Werte sollten bei einer 
+  Änderung der Schriftgröße durch den Anwender gewählt werden.
 \itemtrue*[relative/fontsize]
-  In Abhängigkeit von der gewählten Schriftgröße werden die Längen für 
-  vertikalen Leerraum automatisch festgelegt.
+  In Abhängigkeit von der gewählten Schriftgröße werden die zuvor genannten 
+  Längen automatisch festgelegt.
 \end{values}
 \end{Declaration}
 
@@ -608,10 +600,167 @@ mehrspaltigen Layout
 \section{Das Layout des \CDs}
 \index{Layout|(}%
 %
-Das Hauptaugenmerk der neuen Klassen liegt auf der Umsetzung des \TUDCDs für 
-\hologo{LaTeX}. Ein großer Teil der definierten Optionen und Befehle dient 
-genau dazu und wird nachfolgend beschrieben.
+%Das Hauptaugenmerk der neuen Klassen liegt auf der Umsetzung des \TUDCDs für 
+%\hologo{LaTeX}. Ein großer Teil der definierten Optionen und Befehle dient 
+%genau dazu und wird nachfolgend beschrieben.
 
+\subsection{Der Satzspiegel}
+\index{Satzspiegel|(}%
+%
+\begin{Declaration}[%
+  v2.03;
+  v2.05!\Option{cdgeometry=restricted};%
+  v2.05!\Option{cdgeometry=adapted};%
+  v2.05!\Option{cdgeometry=calculated};%
+]{\Option{cdgeometry=\PSet}}[true,restricted]%
+\printdeclarationlist%
+\index{Layout!Seitenstil}%
+\index{Satzspiegel!doppelseitig}%
+%
+Diese Option ist für die Aufteilung beziehungsweise die Berechnung des 
+Satzspiegels verantwortlich. Das Maß der Seitenränder ist im \CD fest 
+vorgegeben und wird standardmäßig von den \TUDScript-Klassen eingehalten. 
+Allerdings lassen sich die Seitenränder anpassen, um beispielsweise einen 
+vernünftigen doppelseitigen Satz zu ermöglichen.%
+\footnote{Hierbei sollte der innere Rand schmaler als der äußere sein}
+Des Weiteren besteht die Möglichkeit, auf das Standardverhalten von 
+\KOMAScript{} zurückzufallen und die Satzspiegelberechnung durch das Paket
+\Package{typearea} vornehmen zu lassen. Hier hat insbesondere die Klassenoption 
+\Option{DIV=\PSet}|declare| maßgeblichen Einfluss auf den Satzspiegel. Mehr 
+dazu ist in der \scrguide[Dokumentation von \KOMAScript] zu finden.
+%
+\begin{values}{\Option{cdgeometry}}
+\itemfalse
+  Die Satzspiegelberechnung erfolgt via \Package{typearea}, die Vorgaben des 
+  \CDs bezüglich der Seitenränder werden ignoriert.
+\itemtrue*[asymmetric/cd]
+  Die Seitenränder werden im asymmetrischen Stil des \CDs fest definiert und 
+  auch für den doppelseitigen Satz (Klassenoption \Option{twoside=true}) 
+  genutzt.%
+  \footnote{links: 30\,mm, rechts: 20\,mm, oben: 25\,mm, unten: 30\,mm}
+\item[symmetric/centred/centered]
+  Der Satzspiegel wird im einseitigen sowie doppelseitigen Satz auf der Seite 
+  zentriert.%
+  \footnote{links: 25\,mm, rechts: 25\,mm, oben: 25\,mm, unten: 30\,mm}
+\item[twoside/balanced]
+  Diese Einstellung aktiviert den doppelseitigen Satz (\Option{twoside=true}) 
+  und verändert den Satzspiegel derart, dass die Ränder der inneren Seiten 
+  schmaler sind als die der äußeren.%
+  \footnote{innen: 20\,mm, außen: 30\,mm, oben: 25\,mm, unten: 30\,mm}
+  \Attention{%
+    Der so erzeugte Satzspiegel ist jedoch nicht sehr vorteilhaft. Es ist zu 
+    beachten, dass dabei das Logo der \TnUD sehr nah am inneren Seitenrand 
+    des Dokumentes gesetzt wird, folglich insbesondere auf rechten respektive 
+    ungeraden Seiten sehr weit an den Blattrand rückt.
+  }
+  Diesem Problem kann zumindest teilweise~-- bei den Klassen \Class{tudscrbook} 
+  und \Class{tudscrartcl}~-- aus dem Weg gegangen werden, indem Titel, Teile 
+  und Kapitel mit der \KOMAScript-Option \Option{open=left} immer auf einer 
+  der nächsten linken Seite begonnen werden.
+\end{values}
+%
+Für die Festlegung der Seitenränder wird das Paket \Package{geometry} genutzt. 
+Ist \Option{cdgeometry=false} gewählt, erfolgt die Berechnung des Satzspiegels 
+durch \Package{typearea}. Die damit berechneten Werte werden anschließend an 
+\Package{geometry} weitergereicht und durch dieses umgesetzt.
+
+\ChangedAt{v2.05:Neue Möglichkeiten bei der Satzspiegelberechnung im \CD}
+Mit den folgenden Werten lässt sich einstellen, in welcher Variante der 
+Satzspiegel nach dem \TUDCD erstellt werden soll. 
+%
+\begin{values}{\Option{cdgeometry}}
+\item[restricted]
+  Der Satzspiegel entspricht den expliziten Vorgaben des \CDs (Voreinstellung).
+\item[adapted]
+  Laut dem Handbuch zum \CD werden für Papierformate zwischen DIN~A6 und DIN~A4 
+  \enquote{im Interesse größter Einheitlichkeit die Maßverhältnisse über einen 
+  größeren Formatbereich hinweg \enquote{eingefroren}.} Dies kann jedoch zu 
+  schlecht nutzbaren Satzspiegeln führen. Mit dieser Einstellung kann der 
+  äquivalente Satzspiegel für das Format~DIN~A5 aktiviert werden, bei allen 
+  anderen Formaten hat diese Einstellung keinen Einfluss. 
+\item[calculated]
+  Der Satzspiegel wird anhand der Referenzmaße für das Format~DIN~A4 für das 
+  eingestellte Papierformat \emph{skaliert}. Die eigentlich definierten 
+  diskreten Maße bei unterschiedlichen Gestaltungshöhen werden ignoriert.
+\end{values}
+\end{Declaration}
+
+\begin{Declaration}[v2.03]{\Option{extrabottommargin=\PName{Höhe}}}[0pt]%
+\printdeclarationlist%
+%
+Mit dieser Option kann die Größe des unteren Seitenrandes angepasst werden, 
+wenn der Satzspiegel des \CDs verwendet wird (\seeref{\Option{cdgeometry}}).
+Insbesondere für den Fall, dass bei Seiten im Stil \PageStyle{tudheadings} 
+im Fußbereich entweder mit \Macro{footlogo} Drittlogos verwendet werden und 
+diese über das optionale Argument oder via \Length{footlogoheight} über die 
+Standardhöhe hinaus vergrößert wurden oder mit \Macro{footcontent} ein 
+übergroßer Inhalt angegeben wurde, kann dieser unter Umständen etwas zu klein 
+sein. Mit der Option \Option{extrabottommargin} wird der Fußbereich durch 
+positive Werte vergrößert, negative Werte verkleinern diesen entsprechend. 
+
+Alternativ zur Option \Option{extrabottommargin} kann auch die Einstellung 
+\Option{cdfoot=\PValueName{Höhe}} mit einer Längenangabe verwendet werden. 
+Dabei spielt es für beide Optionen keine Rolle, ob eine \hologo{LaTeX}-Länge, 
+ein \hologo{TeX}-Abstand oder eine \hologo{TeX}-Ausdehnung als Länge bei der 
+Wertzuweisung verwendet wird.
+\end{Declaration}
+
+\minisec{Kopf"~ und Fußzeile im Zusammenspiel mit dem Satzspiegel}
+\index{Layout!Kopfzeile|?}%
+\index{Layout!Fußzeile|?}%
+%
+Da im \CD nicht festgelegt ist, wie die Gestaltung der Kopf"~ und Fußzeilen in 
+einer wissenschaftlichen Arbeit auszuführen ist, bleibt dem Nutzer dafür eine 
+gewisse Freiheit. Dafür sollte idealerweise das zu \KOMAScript{} gehörige Paket 
+\Package{scrlayer-scrpage} genutzt werden. 
+
+In der Dokumentation zu \Package{typearea} wird auch darauf eingegangen, wann 
+Kopf"~ und Fußzeile bei der Satzspiegelkonstruktion entweder dem Rand oder dem 
+Textkörper zugeschlagen werden sollten. Dies sollte bei der Erstellung eigener 
+Kopf"~ und Fußzeilen beachtet werden. Die Einstellung dafür erfolgt mit den 
+beiden \KOMAScript"=Optionen \Option{headinclude=\PBoolean}|declare| sowie 
+\Option{footinclude=\PBoolean}|declare|. Diese können~-- unabhängig von der 
+Einstellung zur Satzspiegelgestaltung durch die Option \Option{cdgeometry}~-- 
+verwendet werden.
+
+\minisec{Bindekorrektur}
+\index{Satzspiegel!Bindekorrektur|!}%
+%
+Im Zusammenhang mit den Seitenrändern oder besser dem Satzspiegel ist die durch 
+das Paket \Package{typearea} zur Verfügung gesellte \KOMAScript-Option 
+\Option{BCOR=\PName{Länge}}|declare| zu erwähnen. Mit dieser kann bei der 
+Satzspiegelberechnung ein Heftrand beziehungsweise eine Bindekorrektur 
+berücksichtigt werden. Der mit dieser Option angegebene Wert wird durch die 
+\TUDScript-Klassen auch an das Paket \Package{geometry} weitergereicht, sodass 
+der Benutzer unabhängig von der Satzspiegelgestaltung (\Option{cdgeometry}) die 
+Option \Option{BCOR} nutzen kann. So lässt sich eine Bindekorrektur von 
+beispielsweise \unit[5]{mm} mit der \emph{Klassenoption} \Option*{BCOR=5mm} 
+festlegen.
+
+Eine Anpassung der Bindekorrektur hat natürlich \emph{immer} eine Änderung der 
+verfügbaren Breite des Textbereichs zur Folge hat und führt somit zwingend zu 
+einer Anpassung des Satzspiegels. Da die Bindekorrektur jedoch abhängig von der 
+Höhe des Buchblocks gewählt werden sollte, welche letztendlich erst mit dem 
+Druck des fertiggestellten Dokumentes bestimmt werden kann, muss diese zu 
+Beginn abgeschätzt werden.
+%
+\begin{Example}
+Als Faustregel gilt, dass die erforderliche Bindekorrektur in etwa der halben 
+Höhe des Buchblocks entsprechen sollte. Dessen Höhe wiederum ist abhängig von 
+der Anzahl der Seiten sowie der Dichte des verwendeten Papiers. Wird normales 
+Papier mit einer Dichte von \unit[80]{g/m²} verwendet, so entsprechen 100~Blatt 
+in etwa einer Höhe von \unit[10]{mm}, bei \unit[100]{g/m²} ca. \unit[12]{mm}. 
+Dementsprechend wäre eine Bindekorrektur von \Option*{BCOR=5mm} beziehungsweise 
+\Option*{BCOR=6mm} bei diesem Beispiel zu wählen.
+\index{Satzspiegel|)}%
+\end{Example}
+
+
+\subsection{Die Gestalt von Titel, Umschlagseite, Teilen sowie Kapiteln \& Co.}
+\index{Layout!Farben|(}%
+\index{Layout!Seitenstil|(}%
+\index{Layout!Überschriften|(}%
+%
 Falls die nachfolgend beschriebene Option \Option{cd=\PSet} aktiviert ist, 
 werden einige, spezielle Seiten im prägnanten Stil mit dem Logo der \TnUD und 
 der dazugehörigen Kopfzeile mit Querbalken gesetzt. Dies betrifft insbesondere 
@@ -623,12 +772,6 @@ können weitere Seiten in diesem Stil erzeugt werden. Wird das Paket
 \Package{tudscrsupervisor} verwendet und mit den bereitgestellten Befehlen oder 
 Umgebungen eine Aufgabenstellung, ein Gutachten oder ein Aushang erstellt, so 
 erscheinen auch diese in besagtem Seitenstil.
-
-
-\subsection{Die Gestalt von Titel, Umschlagseite, Teilen sowie Kapiteln \& Co.}
-\index{Layout!Farben|(}%
-\index{Layout!Seitenstil|(}%
-\index{Layout!Überschriften|(}%
 %
 \begin{Declaration}[%
   v2.03!\Option{cd=bicolor}:%
@@ -835,9 +978,35 @@ dementsprechend tiefer.
 \end{Declaration}
 
 
+
 \subsection{Seiten im Stil des \CDs}
 \tudhyperdef*{sec:tudheadings}%
 \index{Layout!Seitenstil|?(}%
+%
+\begin{Declaration}{\Macro{faculty}[\Parameter{Fakultät}]}
+\begin{Declaration}{\Macro{department}[\Parameter{Einrichtung}]}
+\begin{Declaration}{\Macro{institute}[\Parameter{Institut}]}
+\begin{Declaration}{\Macro{chair}[\Parameter{Lehrstuhl}]}
+\begin{Declaration}{\Macro{extraheadline}[\Parameter{Textzeile}]}
+\printdeclarationlist%
+\index{Layout!Kopfzeile}%
+\index{Layout!Querbalken}%
+%
+Für den Seitenstil des \TUDCDs charakteristisch ist die Kopfzeile mit dem 
+prägnanten Querbalken. In dieser wird~-- falls angegeben~-- in fetter Schrift 
+die Fakultät ausgegeben, danach folgen durch Kommas getrennt die Einrichtung, 
+das Institut und der Lehrstuhl beziehungsweise die Professur. Sollte der Platz 
+in der ersten Zeile nicht ausreichen, erfolgt ein automatischer Zeilenumbruch.
+
+In besonderen Ausnahmefällen erlaubt das \CD die Angabe einer zusätzlichen
+zweiten beziehungsweise dritten Zeile unterhalb der Angaben des Bereichs an der 
+\TnUD, welche weitere, frei wählbare Angaben enthält. Diese kann mit dem Befehl 
+\Macro{extraheadline}[\Parameter{Textzeile}] definiert werden.
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
 %
 \begin{Declaration}[v2.02]{\PageStyle{tudheadings}}
 \begin{Declaration}[v2.02]{\PageStyle{plain.tudheadings}}
@@ -906,46 +1075,7 @@ Seitenfuß erschienen, so muss \Macro{pagestyle}[\PParameter{empty.tudheadings}]
 manuell aufgerufen werden. Um auf das normale Verhalten von \KOMAScript{} 
 zurückzuschalten, muss einer der beiden Stile \PageStyle{scrheadings} 
 beziehungsweise \PageStyle{plain.scrheadings} aktiviert werden.
-\end{Declaration}
-\end{Declaration}
-\end{Declaration}
-
-\begin{Declaration}[v2.04]{\Font{tudheadings}}
-\printdeclarationlist%
-\index{Schriftelemente}%
-%
-Im Fußbereich der Seiten im \PageStyle{tudheadings}-Seitenstil wird das 
-Schriftelement~\Font{tudheadings} verwendet. Dieses wirkt sich auf die 
-Seitenzahlen, den Kolumnentitel und die mit \Macro{footcontent} angegebenen 
-Inhalte aus. Hierüber wird die Wahl der richtigen Schriftfarbe in Abhängigkeit 
-vom Seitenhintergrund und den Einstellungen für die Optionen \Option{cdhead} 
-sowie \Option{cdfoot} realisiert. Wie \Font{tudheadings} angepasst werden 
-kann, ist in \autoref{sec:fonts:elements} zu finden.
 \index{Layout!Seitenstil|?)}%
-\end{Declaration}
-
-\begin{Declaration}{\Macro{faculty}[\Parameter{Fakultät}]}
-\begin{Declaration}{\Macro{department}[\Parameter{Einrichtung}]}
-\begin{Declaration}{\Macro{institute}[\Parameter{Institut}]}
-\begin{Declaration}{\Macro{chair}[\Parameter{Lehrstuhl}]}
-\begin{Declaration}{\Macro{extraheadline}[\Parameter{Textzeile}]}
-\printdeclarationlist%
-\index{Layout!Kopfzeile}%
-\index{Layout!Querbalken}%
-\index{Layout!Seitenstil|(}%
-%
-Für den Seitenstil des \TUDCDs charakteristisch ist die Kopfzeile mit dem 
-prägnanten Querbalken. In dieser wird~-- falls angegeben~-- in fetter Schrift 
-die Fakultät ausgegeben, danach folgen durch Kommas getrennt die Einrichtung, 
-das Institut und der Lehrstuhl beziehungsweise die Professur. Sollte der Platz 
-in der ersten Zeile nicht ausreichen, erfolgt ein automatischer Zeilenumbruch.
-
-In besonderen Ausnahmefällen erlaubt das \CD die Angabe einer zusätzlichen
-zweiten beziehungsweise dritten Zeile unterhalb der Angaben des Bereichs an der 
-\TnUD, welche weitere, frei wählbare Angaben enthält. Diese kann mit dem Befehl 
-\Macro{extraheadline}[\Parameter{Textzeile}] definiert werden.
-\end{Declaration}
-\end{Declaration}
 \end{Declaration}
 \end{Declaration}
 \end{Declaration}
@@ -955,6 +1085,7 @@ zweiten beziehungsweise dritten Zeile unterhalb der Angaben des Bereichs an der
   v2.04!\Option{cdhead=barcolor}:nur farbig abgesetzter Querbalken;%
 ]{\Option{cdhead=\PSet}}[true]
 \printdeclarationlist%
+\index{Layout!Seitenstil|(}%
 \index{Layout!Kopfzeile}%
 \index{Layout!Querbalken}%
 %
@@ -1073,6 +1204,19 @@ so kann auch die Fußzeile einen farbigen Hintergrund erhalten.
   Wird der Option ein Längenmaß übergeben, entspricht dies exakt der Verwendung 
   von Option \Option{extrabottommargin=\PName{Höhe}}.
 \end{values}
+\end{Declaration}
+
+\begin{Declaration}[v2.04]{\Font{tudheadings}}
+\printdeclarationlist%
+\index{Schriftelemente}%
+%
+Im Fußbereich der Seiten im \PageStyle{tudheadings}-Seitenstil wird das 
+Schriftelement~\Font{tudheadings} verwendet. Dieses wirkt sich auf die 
+Seitenzahlen, den Kolumnentitel und die mit \Macro{footcontent} angegebenen 
+Inhalte aus. Hierüber wird die Wahl der richtigen Schriftfarbe in Abhängigkeit 
+vom Seitenhintergrund und den Einstellungen für die Optionen \Option{cdhead} 
+sowie \Option{cdfoot} realisiert. Wie \Font{tudheadings} angepasst werden 
+kann, ist in \autoref{sec:fonts:elements} zu finden.
 \end{Declaration}
 
 \begin{Declaration}{\Macro{headlogo}[\LParameter\Parameter{Dateiname}]}
@@ -1270,6 +1414,7 @@ Verwendung der Option \Option{ddc=\PSet} erfolgt~-- deaktiviert. Ein mit
 definitiv unterdrückt, \Option{ddcfoot=\PSet} setzt das \DDC-Logo in jedem Fall 
 in den Seitenfuß. Die möglichen Werte der beiden Optionen entsprechen denen der 
 Option \Option{ddc}.
+\index{Layout!Seitenstil|)}%
 \end{Declaration}
 \end{Declaration}
 
@@ -1329,7 +1474,6 @@ gleichnamigen Klassenoptionen respektive Befehlen, wirken sich jedoch nur lokal
 innerhalb der \Environment{tudpage}"=Umgebung aus. Das Verhalten sowie die 
 jeweils gültigen Wertzuweisungen können in den entsprechenden Abschnitten des 
 Handbuchs nachgelesen werden.
-\index{Layout!Seitenstil|)}%
 \end{Declaration}
 \end{Declaration}
 \end{Declaration}
@@ -1695,6 +1839,30 @@ von \Macro{author} werden den jeweiligen, mit \Macro{and} getrennten Autoren
 zugeordnet. Mehr dazu ist im Minimalbeispiel in \autoref{sec:exmpl:thesis}.
 \end{Example}
 
+\begin{Declaration}{\Macro{date}[\OParameter{Ergänzung}\Parameter{Datum}]}
+\begin{Declaration}{\Macro{defensedate}[\Parameter{Verteidigungsdatum}]}
+\printdeclarationlist%
+\index{Datum|?}%
+\index{Datum!Abgabedatum|?}%
+\index{Datum!Verteidigungsdatum|?}%
+%
+Mit \Macro{date} kann das Datum angegeben werden. Das optionale Argument 
+erlaubt eine zusätzliche Anmerkung, welche nach dem Datum ausgegeben wird. Das 
+Datum wird bei normalen Dokumenten direkt nach dem Autor beziehungsweise den 
+Autoren ausgegeben. Bei Abschlussarbeiten~-- aktiviert durch die Verwendung von 
+\Macro{thesis} oder \Option{subjectthesis} in Verbindung mit \Macro{subject}~-- 
+erscheint dieses am Ende der Titelseite als Abgabedatum. Außerdem kann in 
+diesem Fall mit dem Befehl\Macro{defensedate} das Datum der Verteidigung 
+angegeben werden, wie es beispielsweise bei dem Druck von Dissertationen üblich 
+ist.
+
+Sollte das Paket \Package{isodate} geladen sein, so wird die damit eingestellte 
+Formatierung des Datums durch \Macro{printdate}(\Package{isodate})'none' aus 
+diesem Paket für alle Datumsfelder des Dokumentes und folglich auch für die 
+beiden Felder \Macro{date} und \Macro{defensedate} verwendet.
+\end{Declaration}
+\end{Declaration}
+
 \begin{Declaration}{\Macro{thesis}[\Parameter{Typisierung}]}
 \begin{Declaration}{\Macro{subject}[\Parameter{Typisierung}]}
 \printdeclarationlist%
@@ -1793,7 +1961,7 @@ diesem Fall ignoriert.
 \itemtrue*
   Der Typ der Abschlussarbeit (\Macro{thesis}) wird oberhalb des Titels in der 
   Betreffzeile gesetzt. Der angestrebte Abschluss (\Macro{graduation}) wird 
-  zentral in der schlankeren \Univers ausgegeben.
+  zentral in \Univers ausgegeben.
 \end{values}
 \end{Declaration}
 
@@ -1831,33 +1999,9 @@ Dissertation angegeben. Zusätzlich kann mit \Macro{professor} der betreuende
 Hochschullehrer beziehungsweise die betreuenden Professoren für studentische 
 Arbeiten angegeben werden. Die Angabe mehrerer Person erfolgt wie beim Befehl 
 \Macro{author} durch die Trennung mittels \Macro{and}.
-\end{Declaration}
-\end{Declaration}
-\end{Declaration}
-\end{Declaration}
-
-\begin{Declaration}{\Macro{date}[\OParameter{Ergänzung}\Parameter{Datum}]}
-\begin{Declaration}{\Macro{defensedate}[\Parameter{Verteidigungsdatum}]}
-\printdeclarationlist%
-\index{Datum|?}%
-\index{Datum!Abgabedatum|?}%
-\index{Datum!Verteidigungsdatum|?}%
-%
-Mit \Macro{date} kann das Datum angegeben werden. Das optionale Argument 
-erlaubt eine zusätzliche Anmerkung, welche nach dem Datum ausgegeben wird. Das 
-Datum wird bei normalen Dokumenten direkt nach dem Autor beziehungsweise den 
-Autoren ausgegeben. Bei Abschlussarbeiten~-- aktiviert durch die Verwendung von 
-\Macro{thesis} oder \Option{subjectthesis} in Verbindung mit \Macro{subject}~-- 
-erscheint dieses am Ende der Titelseite als Abgabedatum. Außerdem kann in 
-diesem Fall mit dem Befehl\Macro{defensedate} das Datum der Verteidigung 
-angegeben werden, wie es beispielsweise bei dem Druck von Dissertationen üblich 
-ist.
-
-Sollte das Paket \Package{isodate} geladen sein, so wird die damit eingestellte 
-Formatierung des Datums durch \Macro{printdate}(\Package{isodate})'none' aus 
-diesem Paket für alle Datumsfelder des Dokumentes und folglich auch für die 
-beiden Felder \Macro{date} und \Macro{defensedate} verwendet.
 \index{Titel!Felder|)}%
+\end{Declaration}
+\end{Declaration}
 \end{Declaration}
 \end{Declaration}
 
@@ -2110,156 +2254,6 @@ Der Stil dieser zusätzlich eingefügten Rückseiten ist abhängig von der Optio
 \index{Vakatseiten|)}%
 \end{Declaration}
 
-
-\subsection{Der Satzspiegel}
-\index{Satzspiegel|(}%
-%
-\begin{Declaration}[%
-  v2.03;
-  v2.05!\Option{cdgeometry=restricted};%
-  v2.05!\Option{cdgeometry=adapted};%
-  v2.05!\Option{cdgeometry=calculated};%
-]{\Option{cdgeometry=\PSet}}[true,restricted]%
-\printdeclarationlist%
-\index{Layout!Seitenstil}%
-\index{Satzspiegel!doppelseitig}%
-%
-Diese Option ist für die Aufteilung beziehungsweise die Berechnung des 
-Satzspiegels verantwortlich. Das Maß der Seitenränder ist im \CD fest 
-vorgegeben und wird standardmäßig von den \TUDScript-Klassen eingehalten. 
-Allerdings lassen sich die Seitenränder anpassen, um beispielsweise einen 
-vernünftigen doppelseitigen Satz zu ermöglichen.%
-\footnote{Hierbei sollte der innere Rand schmaler als der äußere sein}
-Des Weiteren besteht die Möglichkeit, auf das Standardverhalten von 
-\KOMAScript{} zurückzufallen und die Satzspiegelberechnung durch das Paket
-\Package{typearea} vornehmen zu lassen. Hier hat insbesondere die Klassenoption 
-\Option{DIV=\PSet}|declare| maßgeblichen Einfluss auf den Satzspiegel. Mehr 
-dazu ist in der \scrguide[Dokumentation von \KOMAScript] zu finden.
-%
-\begin{values}{\Option{cdgeometry}}
-\itemfalse
-  Die Satzspiegelberechnung erfolgt via \Package{typearea}, die Vorgaben des 
-  \CDs bezüglich der Seitenränder werden ignoriert.
-\itemtrue*[asymmetric/cd]
-  Die Seitenränder werden im asymmetrischen Stil des \CDs fest definiert und 
-  auch für den doppelseitigen Satz (Klassenoption \Option{twoside=true}) 
-  genutzt.%
-  \footnote{links: 30\,mm, rechts: 20\,mm, oben: 25\,mm, unten: 30\,mm}
-\item[symmetric/centred/centered]
-  Der Satzspiegel wird im einseitigen sowie doppelseitigen Satz auf der Seite 
-  zentriert.%
-  \footnote{links: 25\,mm, rechts: 25\,mm, oben: 25\,mm, unten: 30\,mm}
-\item[twoside/balanced]
-  Diese Einstellung aktiviert den doppelseitigen Satz (\Option{twoside=true}) 
-  und verändert den Satzspiegel derart, dass die Ränder der inneren Seiten 
-  schmaler sind als die der äußeren.%
-  \footnote{innen: 20\,mm, außen: 30\,mm, oben: 25\,mm, unten: 30\,mm}
-  \Attention{%
-    Der so erzeugte Satzspiegel ist jedoch nicht sehr vorteilhaft. Es ist zu 
-    beachten, dass dabei das Logo der \TnUD sehr nah am inneren Seitenrand 
-    des Dokumentes gesetzt wird, folglich insbesondere auf rechten respektive 
-    ungeraden Seiten sehr weit an den Blattrand rückt.
-  }
-  Diesem Problem kann zumindest teilweise~-- bei den Klassen \Class{tudscrbook} 
-  und \Class{tudscrartcl}~-- aus dem Weg gegangen werden, indem Titel, Teile 
-  und Kapitel mit der \KOMAScript-Option \Option{open=left} immer auf einer 
-  der nächsten linken Seite begonnen werden.
-\end{values}
-%
-Für die Festlegung der Seitenränder wird das Paket \Package{geometry} genutzt. 
-Ist \Option{cdgeometry=false} gewählt, erfolgt die Berechnung des Satzspiegels 
-durch \Package{typearea}. Die damit berechneten Werte werden anschließend an 
-\Package{geometry} weitergereicht und durch dieses umgesetzt.
-
-\ChangedAt{v2.05:Neue Möglichkeiten bei der Satzspiegelberechnung im \CD}
-Mit den folgenden Werten lässt sich einstellen, in welcher Variante der 
-Satzspiegel nach dem \TUDCD berechnet respektive erstellt werden soll. 
-\begin{values}{\Option{cdgeometry}}
-\item[restricted]
-  Der Satzspiegel entspricht den expliziten Vorgaben des \CDs (Voreinstellung).
-\item[adapted]
-  Laut dem Handbuch zum \CD werden für Papierformate zwischen DIN~A6 und DIN~A4 
-  \enquote{im Interesse größter Einheitlichkeit die Maßverhältnisse über einen 
-  größeren Formatbereich hinweg \enquote{eingefroren}.} Dies kann jedoch zu 
-  schlecht nutzbaren Satzspiegeln führen. Mit dieser Einstellung kann der 
-  äquivalente Satzspiegel für das Format~DIN~A5 aktiviert werden, bei allen 
-  anderen Formaten hat diese Einstellung keinen Einfluss. 
-\item[calculated]
-  Der Satzspiegel wird anhand der Referenzmaße für das Format~DIN~A4 für das 
-  eingestellte Papierformat \emph{skaliert}. Die eigentlich definierten 
-  diskreten Maße bei unterschiedlichen Gestaltungshöhen werden ignoriert.
-\end{values}
-\end{Declaration}
-
-\begin{Declaration}[v2.03]{\Option{extrabottommargin=\PName{Höhe}}}[0pt]%
-\printdeclarationlist%
-%
-Mit dieser Option kann die Größe des unteren Seitenrandes angepasst werden, 
-wenn der Satzspiegel des \CDs verwendet wird (\seeref{\Option{cdgeometry}}).
-Insbesondere für den Fall, dass bei Seiten im Stil \PageStyle{tudheadings} 
-im Fußbereich entweder mit \Macro{footlogo} Drittlogos verwendet werden und 
-diese über das optionale Argument oder via \Length{footlogoheight} über die 
-Standardhöhe hinaus vergrößert wurden oder mit \Macro{footcontent} ein 
-übergroßer Inhalt angegeben wurde, kann dieser unter Umständen etwas zu klein 
-sein. Mit der Option \Option{extrabottommargin} wird der Fußbereich durch 
-positive Werte vergrößert, negative Werte verkleinern diesen entsprechend. 
-
-Alternativ zur Option \Option{extrabottommargin} kann auch die Einstellung 
-\Option{cdfoot=\PValueName{Höhe}} mit einer Längenangabe verwendet werden. 
-Dabei spielt es für beide Optionen keine Rolle, ob eine \hologo{LaTeX}-Länge, 
-ein \hologo{TeX}-Abstand oder eine \hologo{TeX}-Ausdehnung als Länge bei der 
-Wertzuweisung verwendet wird.
-\end{Declaration}
-
-\minisec{Kopf"~ und Fußzeile im Zusammenspiel mit dem Satzspiegel}
-\index{Layout!Kopfzeile|?}%
-\index{Layout!Fußzeile|?}%
-%
-Da im \CD nicht festgelegt ist, wie die Gestaltung der Kopf"~ und Fußzeilen in 
-einer wissenschaftlichen Arbeit auszuführen ist, bleibt dem Nutzer dafür eine 
-gewisse Freiheit. Dafür sollte idealerweise das zu \KOMAScript{} gehörige Paket 
-\Package{scrlayer-scrpage} genutzt werden. 
-
-In der Dokumentation zu \Package{typearea} wird auch darauf eingegangen, wann 
-Kopf"~ und Fußzeile bei der Satzspiegelkonstruktion entweder dem Rand oder dem 
-Textkörper zugeschlagen werden sollten. Dies sollte bei der Erstellung eigener 
-Kopf"~ und Fußzeilen beachtet werden. Die Einstellung dafür erfolgt mit den 
-beiden \KOMAScript"=Optionen \Option{headinclude=\PBoolean}|declare| sowie 
-\Option{footinclude=\PBoolean}|declare|. Diese können~-- unabhängig von der 
-Einstellung zur Satzspiegelgestaltung durch die Option \Option{cdgeometry}~-- 
-verwendet werden.
-
-\minisec{Bindekorrektur}
-\index{Satzspiegel!Bindekorrektur|!}%
-%
-Im Zusammenhang mit den Seitenrändern oder besser dem Satzspiegel ist die durch 
-das Paket \Package{typearea} zur Verfügung gesellte \KOMAScript-Option 
-\Option{BCOR=\PName{Länge}}|declare| zu erwähnen. Mit dieser kann bei der 
-Satzspiegelberechnung ein Heftrand beziehungsweise eine Bindekorrektur 
-berücksichtigt werden. Der mit dieser Option angegebene Wert wird durch die 
-\TUDScript-Klassen auch an das Paket \Package{geometry} weitergereicht, sodass 
-der Benutzer unabhängig von der Satzspiegelgestaltung (\Option{cdgeometry}) die 
-Option \Option{BCOR} nutzen kann. So lässt sich eine Bindekorrektur von 
-beispielsweise \unit[5]{mm} mit der \emph{Klassenoption} \Option*{BCOR=5mm} 
-festlegen.
-
-Eine Anpassung der Bindekorrektur hat natürlich \emph{immer} eine Änderung der 
-verfügbaren Breite des Textbereichs zur Folge hat und führt somit zwingend zu 
-einer Anpassung des Satzspiegels. Da die Bindekorrektur jedoch abhängig von der 
-Höhe des Buchblocks gewählt werden sollte, welche letztendlich erst mit dem 
-Druck des fertiggestellten Dokumentes bestimmt werden kann, muss diese zu 
-Beginn abgeschätzt werden.
-%
-\begin{Example}
-Als Faustregel gilt, dass die erforderliche Bindekorrektur in etwa der halben 
-Höhe des Buchblocks entsprechen sollte. Dessen Höhe wiederum ist abhängig von 
-der Anzahl der Seiten sowie der Dichte des verwendeten Papiers. Wird normales 
-Papier mit einer Dichte von \unit[80]{g/m²} verwendet, so entsprechen 100~Blatt 
-in etwa einer Höhe von \unit[10]{mm}, bei \unit[100]{g/m²} ca. \unit[12]{mm}. 
-Dementsprechend wäre eine Bindekorrektur von \Option*{BCOR=5mm} beziehungsweise 
-\Option*{BCOR=6mm} bei diesem Beispiel zu wählen.
-\index{Satzspiegel|)}%
-\end{Example}
 
 
 \subsection{Verwendung von Schriftelementen}
