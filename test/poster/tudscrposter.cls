@@ -132,48 +132,51 @@
 \newif\if@tud@cdfont@din%
 \@tud@cdfont@dintrue
 \newcommand*\tud@cdfont{1}
+\newif\if@tud@cdfont@ultrabold%
 \TUD@key{cdfont}[true]{%
   \TUD@set@numkey{cdfont}{@tempa}{%
     \TUD@numkey@bool,%
     {light}{1},{lightfont}{1},{lite}{1},{litefont}{1},{noheavyfont}{1},%
     {heavy}{2},{heavyfont}{2},{bold}{2},{boldfont}{2},%
-    {nodin}{3},{nodinbold}{3},{noDIN}{3},{noDINBold}{3},%
-    {din}{4},{dinbold}{4},{DIN}{4},{DINBold}{4},%
-    {nohead}{5},{nocdhead}{5},{noheadfont}{5},{noheadcdfont}{5},%
-    {nocdheadfont}{5},{nobar}{5},{nobarfont}{5},%
-    {head}{6},{headfont}{6},{cdhead}{6},{headcdfont}{6},{cdheadfont}{6},%
-    {bar}{6},{barfont}{6},%
-    {lighthead}{6},{lightheadfont}{6},{lightfonthead}{6},%
-    {lightcdhead}{6},{lightheadcdfont}{6},{lightcdheadfont}{6},%
-    {lightbar}{6},{lightbarfont}{6},{lightfontbar}{6},%
-    {headlight}{6},{headfontlight}{6},{headlightfont}{6},%
-    {cdheadlight}{6},{headcdfontlight}{6},{cdheadfontlight}{6},%
-    {barlight}{6},{barfontlight}{6},{barlightfont}{6},%
-    {litehead}{6},{liteheadfont}{6},{litefonthead}{6},%
-    {litecdhead}{6},{liteheadcdfont}{6},{litecdheadfont}{6},%
-    {litebar}{6},{litebarfont}{6},{litefontbar}{6},%
-    {headlite}{6},{headfontlite}{6},{headlitefont}{6},%
-    {cdheadlite}{6},{headcdfontlite}{6},{cdheadfontlite}{6},%
-    {barlite}{6},{barfontlite}{6},{barlitefont}{6},%
-    {noheavyhead}{6},{noheavyheadfont}{6},{noheavyfonthead}{6},%
-    {noheavycdhead}{6},{noheavyheadcdfont}{6},{noheavycdheadfont}{6},%
-    {noheavybar}{6},{noheavybarfont}{6},{noheavyfontbar}{6},%
-    {headnoheavy}{6},{headfontnoheavy}{6},{headnoheavyfont}{6},%
-    {cdheadnoheavy}{6},{headcdfontnoheavy}{6},{cdheadfontnoheavy}{6},%
-    {barnoheavy}{6},{barfontnoheavy}{6},{barnoheavyfont}{6},%
-    {heavyhead}{7},{heavyheadfont}{7},{heavyfonthead}{7},%
-    {heavycdhead}{7},{heavyheadcdfont}{7},{heavycdheadfont}{7},%
-    {heavybar}{7},{heavybarfont}{7},{heavyfontbar}{7},%
-    {headheavy}{7},{headfontheavy}{7},{headheavyfont}{7},%
-    {cdheadheavy}{7},{headcdfontheavy}{7},{cdheadfontheavy}{7},%
-    {barheavy}{7},{barfontheavy}{7},{barheavyfont}{7},%
-    {nomath}{8},{nocdmath}{8},%
-    {serifmath}{8},{serif}{8},{nosansmath}{8},{nosans}{8},%
-    {math}{9},{cdmath}{9},{sansmath}{9},{sans}{9},%
-    {upgreek}{10},{upright}{10},{uprightgreek}{10},{uprightGreek}{10},%
-    {slgreek}{11},{slanted}{11},{slantedgreek}{11},{slantedGreek}{11},%
-    {fontspec}{12},{luatex}{12},{lualatex}{12}{xetex}{12},{xelatex}{12},%
-    {nofontspec}{13},{nfss}{13},{pdftex}{13},{pdflatex}{13}%
+    {normalbold}{3},{boldnormal}{3},%
+    {extendedbold}{4},{boldextended}{4},{ultrabold}{4},{boldultra}{4},%
+    {nodin}{5},{nodinbold}{5},{noDIN}{5},{noDINBold}{5},%
+    {din}{6},{dinbold}{6},{DIN}{6},{DINBold}{6},%
+    {nohead}{7},{nocdhead}{7},{noheadfont}{7},{noheadcdfont}{7},%
+    {nocdheadfont}{7},{nobar}{7},{nobarfont}{7},%
+    {head}{8},{headfont}{8},{cdhead}{8},{headcdfont}{8},{cdheadfont}{8},%
+    {bar}{8},{barfont}{8},%
+    {lighthead}{8},{lightheadfont}{8},{lightfonthead}{8},%
+    {lightcdhead}{8},{lightheadcdfont}{8},{lightcdheadfont}{8},%
+    {lightbar}{8},{lightbarfont}{8},{lightfontbar}{8},%
+    {headlight}{8},{headfontlight}{8},{headlightfont}{8},%
+    {cdheadlight}{8},{headcdfontlight}{8},{cdheadfontlight}{8},%
+    {barlight}{8},{barfontlight}{8},{barlightfont}{8},%
+    {litehead}{8},{liteheadfont}{8},{litefonthead}{8},%
+    {litecdhead}{8},{liteheadcdfont}{8},{litecdheadfont}{8},%
+    {litebar}{8},{litebarfont}{8},{litefontbar}{8},%
+    {headlite}{8},{headfontlite}{8},{headlitefont}{8},%
+    {cdheadlite}{8},{headcdfontlite}{8},{cdheadfontlite}{8},%
+    {barlite}{8},{barfontlite}{8},{barlitefont}{8},%
+    {noheavyhead}{8},{noheavyheadfont}{8},{noheavyfonthead}{8},%
+    {noheavycdhead}{8},{noheavyheadcdfont}{8},{noheavycdheadfont}{8},%
+    {noheavybar}{8},{noheavybarfont}{8},{noheavyfontbar}{8},%
+    {headnoheavy}{8},{headfontnoheavy}{8},{headnoheavyfont}{8},%
+    {cdheadnoheavy}{8},{headcdfontnoheavy}{8},{cdheadfontnoheavy}{8},%
+    {barnoheavy}{8},{barfontnoheavy}{8},{barnoheavyfont}{8},%
+    {heavyhead}{9},{heavyheadfont}{9},{heavyfonthead}{9},%
+    {heavycdhead}{9},{heavyheadcdfont}{9},{heavycdheadfont}{9},%
+    {heavybar}{9},{heavybarfont}{9},{heavyfontbar}{9},%
+    {headheavy}{9},{headfontheavy}{9},{headheavyfont}{9},%
+    {cdheadheavy}{9},{headcdfontheavy}{9},{cdheadfontheavy}{9},%
+    {barheavy}{9},{barfontheavy}{9},{barheavyfont}{9},%
+    {nomath}{10},{nocdmath}{10},%
+    {serifmath}{10},{serif}{10},{nosansmath}{10},{nosans}{10},%
+    {math}{11},{cdmath}{11},{sansmath}{11},{sans}{11},%
+    {upgreek}{12},{upright}{12},{uprightgreek}{12},{uprightGreek}{12},%
+    {slgreek}{13},{slanted}{13},{slantedgreek}{13},{slantedGreek}{13},%
+    {fontspec}{14},{luatex}{14},{lualatex}{14}{xetex}{14},{xelatex}{14},%
+    {nofontspec}{15},{nfss}{15},{pdftex}{15},{pdflatex}{15}%
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax% false
@@ -184,6 +187,18 @@
       \if@atdocument\tud@font@set\fi%
     \or% heavy
       \renewcommand*\tud@cdfont{2}%
+      \if@atdocument\tud@font@set\fi%
+    \or% normalbold
+      \@tud@cdfont@ultraboldfalse%
+      \ifcase\tud@cdfont\relax% false to true
+        \renewcommand*\tud@cdfont{1}%
+      \fi%
+      \if@atdocument\tud@font@set\fi%
+    \or% ultrabold
+      \@tud@cdfont@ultraboldtrue%
+      \ifcase\tud@cdfont\relax% false to true
+        \renewcommand*\tud@cdfont{1}%
+      \fi%
       \if@atdocument\tud@font@set\fi%
     \or% nodin
       \@tud@cdfont@dinfalse%
@@ -1445,22 +1460,38 @@
     \if@tud@univers%
       \if@tud@fontspec%
         \ifnum\tud@cdfont=\@ne\relax% true
-          \setsansfont{Univers Light}[%
-            BoldFont = Univers,%
-            ItalicFont = Univers Light Oblique,%
-            BoldItalicFont = Univers Oblique,%
-          ]%
+          \if@tud@cdfont@ultrabold% ultrabold
+            \setsansfont{Univers Light}[%
+              BoldFont = Univers Bold,%
+              ItalicFont = Univers Light Oblique,%
+              BoldItalicFont = Univers Bold Oblique,
+            ]%
+          \else% normalbold
+            \setsansfont{Univers Light}[%
+              BoldFont = Univers,%
+              ItalicFont = Univers Light Oblique,%
+              BoldItalicFont = Univers Oblique,
+            ]%
+          \fi%
           \setmonofont{LMMonoLt10-Regular}[%
             BoldFont = LMMono10-Regular,%
             ItalicFont = LMMonoLt10-Oblique,%
             BoldItalicFont = LMMonoSlant10-Regular,%
           ]%
         \else% heavy
-          \setsansfont{Univers}[%
-            BoldFont = Univers Bold,%
-            ItalicFont = Univers Oblique,%
-            BoldItalicFont = Univers Bold Oblique,%
-          ]%
+          \if@tud@cdfont@ultrabold% ultrabold
+            \setsansfont{Univers}[%
+              BoldFont = Univers Black,%
+              ItalicFont = Univers Oblique,%
+              BoldItalicFont = Univers Black Oblique,
+            ]%
+          \else% normalbold
+            \setsansfont{Univers}[%
+              BoldFont = Univers Bold,%
+              ItalicFont = Univers Oblique,%
+              BoldItalicFont = Univers Bold Oblique,%
+            ]%
+          \fi%
           \setmonofont{LMMono10-Regular}[%
             BoldFont = LMMonoLt10-Bold,%
             ItalicFont = LMMonoSlant10-Regular,%
