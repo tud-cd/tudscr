@@ -1,4 +1,4 @@
-% \CheckSum{3223}
+% \CheckSum{3319}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-pagestyle.dtx}[%
-  2016/01/16 v2.05 TUD-KOMA-Script (pagestyle)%
+  2016/03/06 v2.05 TUD-KOMA-Script (pagestyle)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -2146,7 +2146,7 @@
       }{%
         The `\string\footlogoheight' (\the\tud@footlogoheight) is\MessageBreak%
         too high. You should reduce this length.%
-        \ifcase\tud@geometry\else% true/symmetric/twoside
+        \ifnum\tud@geometry>\@ne\relax% true/symmetric/twoside
           \MessageBreak%
           Alternatively you can enlarge the bottom margin\MessageBreak%
           by using option `extrabottommargin'.%
@@ -2587,7 +2587,7 @@
       The content for the footer (`\string\footcontent')\MessageBreak%
       is too high. You should either reduce the content\MessageBreak%
       or lower the fontsize via the optional argument.%
-      \ifcase\tud@geometry\relax\else% true/symmetric/twoside
+      \ifnum\tud@geometry>\@ne\relax% true/symmetric/twoside
         \MessageBreak%
         Alternatively you can enlarge the bottom margin\MessageBreak%
         by using option `extrabottommargin'.%
@@ -2834,6 +2834,7 @@
 % \end{macro}^^A \tud@ps@myheadings
 % \end{macro}^^A \tud@ps@headings
 % \begin{option}{cdgeometry}
+% \changes{v2.05}{2016/03/06}{\val{custom} neu}^^A
 % \begin{macro}{\tud@geometry}
 % \begin{macro}{\if@tud@geometry@locked}
 % \begin{macro}{\tud@geometry@calc}
@@ -2850,6 +2851,7 @@
 % durch \pkg{typearea} aus dem \KOMAScript"=Paket erfolgen
 % (\opt{geomery=no}). Mit \cs{tud@geometry@process} werden alle getroffenen
 % Satzspiegeloptionen umgesetzt und nachfolgend definiert.
+% \ToDo{cdgeometry=custom dokumentieren}[v2.05]
 %    \begin{macrocode}
 \cs@lock{tud@geometry}{0}
 \newcommand*\tud@geometry@calc{0}
@@ -2864,34 +2866,41 @@
     {oneside}{4},%
     {restricted}{5},%
     {adapted}{6},{adapt}{6},{adapting}{6},{unrestricted}{6},%
-    {calculated}{7},{calc}{7},{calculate}{7},{calculating}{7}%
+    {calculated}{7},{calc}{7},{calculate}{7},{calculating}{7},%
+    {custom}{8},{user}{8},{package}{8}%
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa% false/typearea
       \cs@set@lock{tud@geometry}{0}%
       \if@atdocument\tud@recalctypearea\fi%
     \or% true/cd
-      \cs@set@lock{tud@geometry}{1}%
-      \if@atdocument\tud@recalctypearea\fi%
-    \or% symmetric
       \cs@set@lock{tud@geometry}{2}%
       \if@atdocument\tud@recalctypearea\fi%
+    \or% symmetric
+      \cs@set@lock{tud@geometry}{3}%
+      \if@atdocument\tud@recalctypearea\fi%
     \or% twoside
+      \cs@set@lock{tud@geometry}{4}%
       \TUD@KOMAoptions{twoside=true}%
     \or% oneside
+      \ifnum\tud@geometry>\thr@@\relax%
+        \cs@set@lock{tud@geometry}{3}%
+      \fi%
       \TUD@KOMAoptions{twoside=false}%
     \or% restricted
-      \cs@std@lock{tud@geometry}{1}%
+      \cs@std@lock{tud@geometry}{2}%
       \renewcommand*\tud@geometry@calc{0}%
       \if@atdocument\tud@recalctypearea\fi%
     \or% adapted
-      \cs@std@lock{tud@geometry}{1}%
+      \cs@std@lock{tud@geometry}{2}%
       \renewcommand*\tud@geometry@calc{1}%
       \if@atdocument\tud@recalctypearea\fi%
     \or% calculated
-      \cs@std@lock{tud@geometry}{1}%
+      \cs@std@lock{tud@geometry}{2}%
       \renewcommand*\tud@geometry@calc{2}%
       \if@atdocument\tud@recalctypearea\fi%
+    \or% custom
+      \cs@set@lock{tud@geometry}{1}%
     \fi%
   \fi%
 }
@@ -2971,9 +2980,12 @@
   \newcommand*\tud@geometry@process{\tud@geometry@set}%
   \let\tud@BeforeSelectAnyPageStyle\@gobble%
 }
+\@tempswatrue
 \tud@ifsacrop{%
+  \@tempswafalse%
   \PreventPackageFromLoading{geometry}%
-}{%
+}{}
+\if@tempswa%
   \RequirePackage{geometry}[2010/09/12]%
 %    \end{macrocode}
 % \begin{macro}{\tud@geometry@hmargin}
@@ -2999,21 +3011,77 @@
 % \end{macro}^^A \tud@geometry@hmargin
 % \begin{macro}{\tud@newgeometry}
 % \changes{v2.04}{2015/03/12}{neu}^^A
-% mit diesem Befehl wird abhängig davon, ob er in der Präambel oder im Dokument 
-% durch \cs{tud@geometry@process} ausgeführt wird, entweder \cs{geometry} oder 
-% \cs{newgeometry} aufgerufen.
+% \begin{macro}{\tud@loadgeometry}
+% \changes{v2.05}{2016/03/06}{neu}^^A
+% \begin{macro}{\if@tud@geometry@enabled}
+% \changes{v2.05}{2016/03/06}{neu}^^A
+% Mit \cs{tud@newgeometry} wird abhängig davon, ob er in der Präambel oder im 
+% Dokument von \cs{tud@geometry@process} verwendet wird, entweder \cs{geometry} 
+% oder \cs{newgeometry} aufgerufen. Mit \cs{if@tud@geometry@enabled} wird für 
+% den Fall, dass ein benutzerdefinierter Satzspiegel aktiviert wurde, das 
+% rekursive Aufrufen von \cs{geometry} bzw. \cs{newgeometry} und einer daraus 
+% resultierenden Endlosschleife unterbunden.
 %    \begin{macrocode}
+  \newif\if@tud@geometry@enabled%
+  \@tud@geometry@enabledtrue%
   \newcommand*\tud@newgeometry[1]{%
+    \@tud@geometry@enabledfalse%
     \if@atdocument%
       \edef\@tempa{#1}%
       \expandafter\newgeometry\expandafter{#1}%
     \else%
-      \edef\@tempa{paperwidth=\the\paperwidth,paperheight=\the\paperheight,#1}%
+      \edef\@tempa{%
+        reset,paperwidth=\the\paperwidth,paperheight=\the\paperheight,#1%
+      }%
       \expandafter\geometry\expandafter{\@tempa}%
     \fi%
+    \@tud@geometry@enabledtrue%
+  }%
+  \newcommand*\tud@loadgeometry[1]{%
+    \@tud@geometry@enabledfalse%
+    \loadgeometry{#1}%
+    \@tud@geometry@enabledtrue%
   }%
 %    \end{macrocode}
+% \end{macro}^^A \if@tud@geometry@enabled
+% \end{macro}^^A \tud@loadgeometry
 % \end{macro}^^A \tud@newgeometry
+% \begin{macro}{\tud@geometry@custom}
+% \changes{v2.05}{2016/03/06}{neu}^^A
+% \begin{macro}{\geometry}
+% \begin{macro}{\Gm@changelayout}
+% Für einen benutzerdefinierten Satzspiegel ist es notwendig, die durch den 
+% Anwender getätigten Einstellungen zu sichern und am Ende der Präambel für 
+% die unterschidlichen, durch die Klasse benötigten Satzspiegel der einzelnen 
+% Seitenstile umzusetzen.
+%    \begin{macrocode}
+  \newcommand*\tud@geometry@custom{}
+  \apptocmd{\geometry}{%
+    \if@tud@geometry@enabled%
+      \addto\tud@geometry@custom{#1,}%
+    \fi%
+  }{}{\tud@patch@wrn{geometry}}%
+  \AtEndPreamble{%
+    \tud@newgeometry{%
+      \tud@geometry@mpincl,%
+      \tud@geometry@hincl,%
+      \tud@geometry@fincl,%
+      \tud@geometry@custom%
+    }%
+  }%
+%    \end{macrocode}
+% Sollte im Dokument durch den Anwender der Satzspiegel manuell geändert 
+% werden, muss darauf reagiert und die unterschiedlichen Satzspiegel der Klasse 
+% angepasst werden. Hierfür wird am Ende von \cs{Gm@changelayout} ein Patch 
+% eingehängt.
+%    \begin{macrocode}
+  \apptocmd{\Gm@changelayout}{%
+    \if@tud@geometry@enabled\tud@recalctypearea\fi%
+  }{}{\tud@patch@wrn{Gm@changelayout}}%
+%    \end{macrocode}
+% \end{macro}^^A \Gm@changelayout
+% \end{macro}^^A \geometry
+% \end{macro}^^A \tud@geometry@custom
 % \begin{macro}{\tud@geometry@process}
 % \changes{v2.02}{2014/06/23}{geändert für das Paket \pkg{scrlayer-scrpage}}^^A
 % \changes{v2.03}{2015/01/09}{Satzspiegel des \CDs angepasst}^^A
@@ -3038,62 +3106,98 @@
 %    \begin{macrocode}
     \tud@geometry@set%
 %    \end{macrocode}
-% Für den Fall, dass \pkg{typearea} die Satzspiegelberechnung übernimmt, werden
-% die Ergebnisse aus der Berechnung direkt an \pkg{geometry} weitergereicht.
-% Dazu werden die berechneten Werte in die entsprechenden Hilfsmakros
-% für die Erstellung der \pkg{geometry}-Satzspiegel übergeben.
+% Für den Fall, dass \pkg{typearea} die Satzspiegelberechnung übernimmt oder 
+% dieser durch den Benutzerdefiniert wurde, werden die Ergebnisse aus der
+% Berechnung respektive die aktiven Einstellungen direkt an \pkg{geometry}
+% weitergereicht. Dazu werden die berechneten Werte in die entsprechenden 
+% Hilfsmakros für die Erstellung der \pkg{geometry}-Satzspiegel übergeben.
 %    \begin{macrocode}
-    \ifcase\tud@geometry\relax% false
+    \ifnum\tud@geometry<\tw@\relax% false/custom
 %    \end{macrocode}
 % Zu Beginn wird die Höhendifferenz zwischen TUD-Kopf und Standardkopfzeile
-% für den \pkg{typearea}-Satzspiegel berechnet.
+% für den benutzerdefnierten bzw. \pkg{typearea}-Satzspiegel berechnet.
 %    \begin{macrocode}
       \setlength\tud@ta@headdiff{%
         \dimexpr\tud@dim@topmargin+\tud@dim@barheight+\tud@dim@headsep%
           -\tud@ta@topmargin-\tud@ta@headheight-\tud@ta@headsep-1in\relax%
       }%
 %    \end{macrocode}
-% Sollte der \pkg{typearea}-Satzspiegel noch unterhalb des TUD-Kopfes liegen, 
-% wird der Abstand zum Kopf vergrößert.
+% Sollte der benutzerdefnierten bzw. \pkg{typearea}-Satzspiegel noch unterhalb 
+% des TUD-Kopfes liegen, wird der Abstand zum Kopf vergrößert.
 %    \begin{macrocode}
       \ifdim\tud@ta@headdiff<\z@\relax%
         \addtolength\tud@dim@headsep{-\tud@ta@headdiff}%
       \fi%
 %    \end{macrocode}
-% Anschließend erfolgen die horizontalen und vertikalen Randeinstellungen.
+% Anschließend erfolgen die horizontalen und vertikalen Randeinstellungen. 
+% Zunächst für \pkg{typearea}.
 %    \begin{macrocode}
-      \edef\tud@geometry@hmargin{%
-        bindingoffset=\the\ta@bcor,%
-        left=\the\dimexpr\oddsidemargin+1in-\ta@bcor\relax,%
-        textwidth=\the\textwidth,%
-        \tud@geometry@mpincl,%
-        marginparwidth=\the\dimexpr\evensidemargin+1in-\tud@ta@headsep\relax,%
-        \if@reversemargin%
-          reversemarginpar=true,%
-          \if@twoside%
-            marginparwidth=\the\dimexpr\oddsidemargin+1in%
-              -\tud@ta@headsep\relax,%
+      \ifcase\tud@geometry\relax%
+        \edef\tud@geometry@hmargin{%
+          left=\the\dimexpr\oddsidemargin+1in-\ta@bcor\relax,%
+          textwidth=\the\textwidth,%
+          bindingoffset=\the\ta@bcor,%
+          \tud@geometry@mpincl,%
+          marginparwidth=\the\dimexpr\evensidemargin+1in-\tud@ta@headsep\relax,%
+          \if@reversemargin%
+            reversemarginpar=true,%
+            \if@twoside%
+              marginparwidth=\the\dimexpr\oddsidemargin+1in%
+                -\tud@ta@headsep\relax,%
+            \fi%
+          \else%
+            reversemarginpar=false,%
           \fi%
+          marginparsep=\the\dimexpr.5\tud@ta@headsep\relax%
+        }%
+        \edef\tud@geometry@vmargin{%
+          \if@hincl%
+            includehead=true,%
+            top=\the\dimexpr\tud@ta@topmargin+1in\relax,%
+          \else%
+            includehead=false,%
+            top=\the\dimexpr\tud@ta@topmargin%
+              +\tud@ta@headheight+\tud@ta@headsep+1in\relax,%
+          \fi%
+          headheight=\the\tud@ta@headheight,%
+          headsep=\the\tud@ta@headsep,%
+          textheight=\the\tud@ta@textheight,%
+          \tud@geometry@fincl,%
+          footskip=\the\tud@ta@footskip%
+        }%
+%    \end{macrocode}
+% Und nun für den benutzerdefinierten Satzspiegel.
+%    \begin{macrocode}
+      \else% custom
+        \edef\tud@geometry@hmargin{%
+          left=\Gm@lmargin,%
+          right=\Gm@rmargin,%
+        }%
+        \ifdim\Gm@bindingoffset=\z@\relax%
+          \eappto\tud@geometry@hmargin{bindingoffset=\the\ta@bcor}%
         \else%
-          reversemarginpar=false,%
+          \eappto\tud@geometry@hmargin{bindingoffset=\the\Gm@bindingoffset}%
         \fi%
-        marginparsep=\the\dimexpr.5\tud@ta@headsep\relax%
-      }%
-      \edef\tud@geometry@vmargin{%
-        \if@hincl%
-          includehead=true,%
-          top=\the\dimexpr\tud@ta@topmargin+1in\relax,%
-        \else%
-          includehead=false,%
-          top=\the\dimexpr\tud@ta@topmargin+\tud@ta@headheight+\tud@ta@headsep%
-            +1in\relax,%
-        \fi%
-        headheight=\the\tud@ta@headheight,%
-        headsep=\the\tud@ta@headsep,%
-        textheight=\the\tud@ta@textheight,%
-        \tud@geometry@fincl,%
-        footskip=\the\tud@ta@footskip%
-      }%
+        \edef\tud@geometry@vmargin{%
+          \ifGm@includehead%
+            includehead=true,%
+            top=\the\dimexpr\tud@ta@topmargin+1in\relax,%
+          \else%
+            includehead=false,%
+            top=\the\dimexpr\tud@ta@topmargin%
+              +\tud@ta@headheight+\tud@ta@headsep+1in\relax,%
+          \fi%
+          headheight=\the\tud@ta@headheight,%
+          headsep=\the\tud@ta@headsep,%
+          bottom=\Gm@bmargin,%
+          footskip=\the\tud@ta@footskip,%
+          \ifGm@includefoot%
+            includefoot=true,%
+          \else%
+            includefoot=false,%
+          \fi%
+        }%
+      \fi%
 %    \end{macrocode}
 % Für den Satzspiegel mit TUD-Kopf muss unterschieden werden, ob der Abstand 
 % zwischen Kopf und Textbereich vergrößert wurde. Ist dies der Fall, wird die 
@@ -3136,7 +3240,8 @@
       \ifdim\tud@dim@extrabottommargin=\z@\relax\else%
         \ClassWarning{\TUDClassName}{%
           Option `extrabottommargin' is ineffective when\MessageBreak%
-          package typearea is used (`cdgeometry=no')%
+          package typearea or custom layout is used\MessageBreak%
+          (`cdgeometry=false/custom')%
         }%
       \fi%
 %    \end{macrocode}
@@ -3146,11 +3251,11 @@
 % unterschiedlichen Optionen definiert. Danach kommt der Gleichanteil.
 %    \begin{macrocode}
     \else%  true/symmetric/twoside
-      \ifcase\tud@geometry\or%  true
+      \ifcase\tud@geometry\or\or%  true
         \edef\tud@geometry@hmargin{%
-          bindingoffset=\the\ta@bcor,%
           left=\the\tud@dim@widemargin,%
           textwidth=\the\dimexpr\paperwidth-\tud@dim@both-\ta@bcor\relax,%
+          bindingoffset=\the\ta@bcor,%
           \if@twoside asymmetric,\fi%
           \tud@geometry@mpincl,%
           \if@reversemargin%
@@ -3170,9 +3275,9 @@
 %    \begin{macrocode}
       \or% symmetric
         \edef\tud@geometry@hmargin{%
-          bindingoffset=\the\ta@bcor,%
           left=\the\dimexpr.5\tud@dim@both\relax,%
           textwidth=\the\dimexpr\paperwidth-\tud@dim@both-\ta@bcor\relax,%
+          bindingoffset=\the\ta@bcor,%
           \tud@geometry@mpincl,%
           \if@reversemargin%
             reversemarginpar=true,%
@@ -3190,7 +3295,6 @@
 %    \begin{macrocode}
       \or% twoside
         \edef\tud@geometry@hmargin{%
-          bindingoffset=\the\ta@bcor,%
           \if@twoside%
             left=\the\dimexpr.4\tud@dim@both\relax,%
             twoside,%
@@ -3198,6 +3302,7 @@
             left=\the\dimexpr.5\tud@dim@both\relax,%
           \fi%
           textwidth=\the\dimexpr\paperwidth-\tud@dim@both-\ta@bcor\relax,%
+          bindingoffset=\the\ta@bcor,%
           \tud@geometry@mpincl,%
           marginparwidth=\the\dimexpr.5\tud@dim@both-\tud@ta@headsep\relax,%
           \if@reversemargin%
@@ -3368,7 +3473,7 @@
 %    \begin{macrocode}
     \if@atdocument%
       \ifstr{\tud@currentgeometry}{typearea}{}{%
-        \expandafter\loadgeometry\expandafter{\tud@currentgeometry}%
+        \expandafter\tud@loadgeometry\expandafter{\tud@currentgeometry}%
       }%
     \fi%
   }%
@@ -3411,7 +3516,7 @@
 % Damit sind alle notwendigen Satzspiegel für die unterschiedlichen Seitenstile 
 % definiert.
 %    \begin{macrocode}
-}
+\fi
 %    \end{macrocode}
 % \begin{macro}{\tud@BeforeSelectAnyPageStyle}
 % \changes{v2.02}{2014/06/23}{neu}^^A
@@ -3461,7 +3566,7 @@
 %    \begin{macrocode}
         \ifcase\@tempb\relax% \tud@ddc@foot=false
           \ifstr{\tud@currentgeometry}{tudarea}{}{%
-            \loadgeometry{tudarea}%
+            \tud@loadgeometry{tudarea}%
             \gdef\tud@currentgeometry{tudarea}%
           }%
 %    \end{macrocode}
@@ -3469,7 +3574,7 @@
 %    \begin{macrocode}
         \else% \tud@ddc@foot!=false
           \ifstr{\tud@currentgeometry}{tudareaddc}{}{%
-            \loadgeometry{tudareaddc}%
+            \tud@loadgeometry{tudareaddc}%
             \gdef\tud@currentgeometry{tudareaddc}%
           }%
         \fi%
@@ -3478,7 +3583,7 @@
 %    \begin{macrocode}
       }{%
         \ifstr{\tud@currentgeometry}{tudarea}{}{%
-          \loadgeometry{tudarea}%
+          \tud@loadgeometry{tudarea}%
           \gdef\tud@currentgeometry{tudarea}%
         }%
       }%
@@ -3502,7 +3607,7 @@
 %    \begin{macrocode}
     }{%
       \ifstr{\tud@currentgeometry}{typearea}{}{%
-        \loadgeometry{typearea}%
+        \tud@loadgeometry{typearea}%
         \gdef\tud@currentgeometry{typearea}%
       }%
 %    \end{macrocode}
@@ -3512,7 +3617,7 @@
 % werden.
 %    \begin{macrocode}
       \setlength\tud@dim@headdiff{\tud@ta@headdiff}%
-      \ifcase\tud@geometry\relax\else% true/symmetric/twoside
+      \ifnum\tud@geometry>\@ne\relax% true/symmetric/twoside
         \if@hincl%
           \addtolength\tud@dim@headdiff{%
             \dimexpr-\tud@ta@headheight-\tud@dim@headsep\relax%
