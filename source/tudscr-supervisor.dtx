@@ -1,4 +1,4 @@
-% \CheckSum{578}
+% \CheckSum{594}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-supervisor.dtx}[%
-  2016/01/16 v2.05 TUD-KOMA-Script\space%
+  2016/03/09 v2.05 TUD-KOMA-Script\space%
 %</driver>
 %<package>\ProvidesPackage{tudscrsupervisor}[%
 %<*driver|package>
@@ -97,11 +97,14 @@
 % \begin{environment}{task}
 % \changes{v2.03}{2015/01/05}{Bugfix für initialen Seitenstil}^^A
 % \changes{v2.03}{2015/01/05}{Bugfix für Seitenstil im zweiseitigen Satz}^^A
+% \begin{macro}{\tud@table@and}
+% \changes{v2.05}{2016/03/09}{neu}^^A
 % Die Umgebung für die Aufgabenstellung nutzt die \env{tudpage}-Umgebung. Sie
 % wird auf einer neuen (rechten) Seite gesetzt. Es wird zu Beginn eine Tabelle 
 % mit Informationen zum Autor gesetzt. Zum Abschluss werden Betreuer,
 % Hochschullehrer und ggf. Vorsitzender des Prüfungsausschusses ausgegeben.
 %    \begin{macrocode}
+\newcommand*\tud@table@and{}
 \newenvironment{task}[1][]{%
 %    \end{macrocode}
 % Die \env{tudpage}-Umgebung wird geöffnet. Mit dem Parameter \opt{headline} 
@@ -131,21 +134,29 @@
   \tud@author@table%
 }{%
 %    \end{macrocode}
-% Da auch Betreuer durch den Befehl \cs{and} getrennt werden, wird dieser für
-% die korrekte Ausgabe umdefiniert. Anschließend folgt die Ausgabe in einer
-% Tabelle, die Spalte der Bezeichner entspricht der aus dem oberen Teil.
+% Da auch Gutachter und Betreuer durch den Befehl \cs{and} getrennt werden,
+% wird dieser für die korrekte Ausgabe umdefiniert. Anschließend folgt die
+% Ausgabe in einer Tabelle, die Spalte der Bezeichner entspricht der aus dem
+% oberen Teil.
 %    \begin{macrocode}
-  \def\and{%
-    \tabularnewline%
-    \ifx\supervisorothername\@empty\else\supervisorothername\@titledelim\fi%
-      & \def\and{\tabularnewline &}%
+  \def\tud@table@and##1{%
+    \def\and{%
+      \tabularnewline%
+      \ifstr{\csuse{##1othername}}{}{}{\csuse{##1othername}\@titledelim}%
+        & \def\and{\tabularnewline &}%
+    }%
   }%
   \removelastskip%
   \ifdim\parskip>\z@\vskip\parskip\else\vskip\topsep\fi\medskip%
   \begingroup%
   \setparsizes{\z@}{\z@}{\z@\@plus 1fil}\par@updaterelative%
   \begin{tabular}{@{}p{\tud@dim@table}l@{}}%
-    \supervisorname\@titledelim & \@supervisor\tabularnewline[\smallskipamount]%
+    \ifx\@referee\@empty\else%
+      \refereename\@titledelim & 
+        \tud@table@and{referee}\@referee\tabularnewline[\smallskipamount]%
+    \fi%
+    \supervisorname\@titledelim & 
+      \tud@table@and{supervisor}\@supervisor\tabularnewline[\smallskipamount]%
     \issuedatetext\@titledelim & \@issuedate\tabularnewline%
     \duedatetext\@titledelim & \@duedate\tabularnewline%
   \end{tabular}%
@@ -175,6 +186,7 @@
   \aftergroup\cleardoublepage%
 }
 %    \end{macrocode}
+% \end{macro}^^A \tud@table@and
 % \end{environment}^^A task
 % \begin{macro}{\taskform}
 % Dies soll die Standardform einer Aufgabenstellung sein. Im ersten Argument
@@ -322,21 +334,27 @@
   \setlength\tud@dim@table{2em}%
 %    \end{macrocode}
 % Anschließend werden die Bezeichner sowohl der obligatorischen als auch der
-% genutzten, optionalen Felder expandiert. Anschließend wir mit dieser Liste
-% der längste bestimmt und in \cs{tud@dim@table} gespeichert.
+% genutzten, optionalen Felder in \cs{@tempa} gespeichert. Mit dieser Liste 
+% wird der längste Bezeichner bestimmt und dessen Länge in \cs{tud@dim@table}
+% gespeichert.
 %    \begin{macrocode}
-  \edef\@tempa{%
-    \namesname,\titlename,\supervisorname,\supervisorothername,%
-    \issuedatetext,\duedatetext,%
-    \expandafter\ifx\@matriculationnumber\@empty\else%
-      \matriculationnumbername%
-    \fi,%
-    \expandafter\ifx\@matriculationyear\@empty\else%
-      \matriculationyearname%
-    \fi,%
-    \expandafter\ifx\@course\@empty\else\coursename\fi,%
-    \expandafter\ifx\@discipline\@empty\else\disciplinename\fi,%
+  \def\@tempb##1{%
+    \expandafter\ifx\csname @##1\endcsname\@empty\else%
+      \expandafter\appto\expandafter\@tempa\expandafter{%
+        \expandafter,\csname ##1name\endcsname%
+      }%
+    \fi%
   }%
+  \def\@tempa{%
+    \namesname,\titlename,\issuedatetext,\duedatetext,\supervisorname%
+  }%
+  \tud@if@and{\@supervisor}{\appto\@tempa{,\supervisorothername}}{}%
+  \@tempb{referee}%
+  \tud@if@and{\@referee}{\appto\@tempa{,\refereeothername}}{}%
+  \@tempb{matriculationnumber}%
+  \@tempb{matriculationyear}%
+  \@tempb{course}%
+  \@tempb{discipline}%
   \@for\@tempb:=\@tempa\do{%
     \settowidth\@tempdima{\@tempb\@titledelim}%
     \ifdim\@tempdima>\tud@dim@table\relax%
