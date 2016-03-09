@@ -1,4 +1,4 @@
-% \CheckSum{581}
+% \CheckSum{597}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-locale.dtx}[%
-  2016/01/16 v2.05 TUD-KOMA-Script (localization)%
+  2016/03/09 v2.05 TUD-KOMA-Script (localization)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -120,14 +120,14 @@
 %
 % \begin{locale}{\graduationtext}
 % \changes{v2.02}{2014/05/16}{neu, umbenannt von \cs{degreetext}}^^A
-% \begin{locale}{\supervisorname}
-% \begin{locale}{\supervisorothername}
 % \begin{locale}{\refereename}
 % \changes{v2.02}{2014/05/20}{Unterscheidung, ob ein oder mehrere Gutachter
 %   angegeben sind}^^A
 % \begin{locale}{\refereeothername}
 % \begin{locale}{\advisorname}
 % \begin{locale}{\advisorothername}
+% \begin{locale}{\supervisorname}
+% \begin{locale}{\supervisorothername}
 % \begin{locale}{\professorname}
 % \begin{locale}{\professorothername}
 % \changes{v2.02}{2014/09/03}{neu}^^A
@@ -153,12 +153,12 @@
 % Diese Bezeichner existieren nur für die drei Hauptklassen.
 %    \begin{macrocode}
 \tud@locale@define{\graduationtext}
-\tud@locale@define{\supervisorname}
-\tud@locale@define{\supervisorothername}
 \tud@locale@define{\refereename}
 \tud@locale@define{\refereeothername}
 \tud@locale@define{\advisorname}
 \tud@locale@define{\advisorothername}
+\tud@locale@define{\supervisorname}
+\tud@locale@define{\supervisorothername}
 \tud@locale@define{\professorname}
 \tud@locale@define{\professorothername}
 \tud@locale@define{\datetext}
@@ -194,12 +194,12 @@
 % \end{locale}^^A \datetext
 % \end{locale}^^A \professorothername
 % \end{locale}^^A \professorname
+% \end{locale}^^A \supervisorothername
+% \end{locale}^^A \supervisorname
 % \end{locale}^^A \advisorothername
 % \end{locale}^^A \advisorname
 % \end{locale}^^A \refereeothername
 % \end{locale}^^A \refereename
-% \end{locale}^^A \supervisorothername
-% \end{locale}^^A \supervisorname
 % \end{locale}^^A \graduationtext
 %
 % \iffalse
@@ -343,12 +343,39 @@
 %
 % \end{macro}^^A \tud@locale@define
 %
-% \subsection{Deutschsprachige Bezeichner}
-%
 % \iffalse
 %<*class&!manual>
 % \fi
 %
+% \subsubsection{Hilfsmakros für selektive Bezeichner}
+%
+% Einige Bezeichner verhalten sich je nach der Angabe für einzelne Felder 
+% selektiv, die zur Auswahl notwendigen Makros werden hier definiert.
+%
+% \begin{macro}{\tud@locale@german}
+% \changes{v2.05}{2015/08/05}{neu}^^A
+% Dieser Befehl prüft, ob innerhalb eines Felder, welches im ersten Argument 
+% angegeben werden muss, \cs{and} verwendet wurde. Ist dies der wird das zweite 
+% Argument ausgeführt, andernfalls das dritte.
+%    \begin{macrocode}
+\newcommand*\tud@if@and[1]{%
+  \begingroup%
+    \protecting{%
+      \global\@tempswafalse%
+      \def\and{\global\@tempswatrue}%
+      \sbox\z@{#1}%
+    }%
+  \endgroup%
+  \if@tempswa%
+    \expandafter\@firstoftwo%
+  \else%
+    \expandafter\@secondoftwo%
+  \fi%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@locale@define
+%
+% \subsubsection{Deutschsprachige Bezeichner}
 % \begin{macro}{\tud@locale@german}
 % \changes{v2.02}{2014/07/07}{als Aliasbefehl für \cs{providecaptionname} mit
 %   dem Argument \marg{deutsche Sprachliste}}^^A
@@ -370,39 +397,55 @@
 %    \begin{macrocode}
 %<*book|report|article>
 \tud@locale@german{\graduationtext}{zur Erlangung des akademischen Grades}%
-\tud@locale@german{\supervisorname}{Betreuer}%
-\tud@locale@german{\supervisorothername}{}%
+%    \end{macrocode}
+% Für die nachfolgenden Felder, für die es bedarfsweise einen Bezeichner für 
+% eine zweite Person gibt (\cs{\dots{}othername}), werden jeweils verschiedene 
+% Varianten definiert. Existiert in einem Feld nur eine Person, wird der
+% Singular der Bezeichnung verwendet. Wurden mindestens zwei Personen angegeben
+% (\cs{and}), so wird geprüft, ob der Bezeichner für die zusätzlichen Personen
+% nicht leer ist. Ist dies der Fall, wird die alternative Form des Bezeichners
+% der ersten Person verwendet, andernfalls wird der Bezeichner im Plural
+% verwendet.
+%    \begin{macrocode}
 \tud@locale@german{\refereename}{%
-  \begingroup%
-    \protecting{%
-      \global\@tempswafalse%
-      \def\and{\global\@tempswatrue}%
-      \sbox\z@{\@referee}%
-    }%
-  \endgroup%
-  \if@tempswa%
-    Erstgutachter%
-  \else%
-    Gutachter%
-  \fi%
-}
+  \tud@if@and{\@referee}{%
+    \ifx\refereeothername\@empty%
+      Gutachter%
+    \else%
+      Erstgutachter%
+    \fi%
+  }{Gutachter}%
+}%
 \tud@locale@german{\refereeothername}{Zweitgutachter}%
-\tud@locale@german{\advisorname}{Fachreferent}%
+\tud@locale@german{\advisorname}{%
+  \tud@if@and{\@advisor}{%
+    \ifx\advisorothername\@empty%
+      Fachreferenten%
+    \else%
+      Erster Fachreferent%
+    \fi%
+  }{Fachreferent}%
+}%
 \tud@locale@german{\advisorothername}{}%
+\tud@locale@german{\supervisorname}{%
+  \tud@if@and{\@supervisor}{%
+    \ifx\supervisorothername\@empty%
+      Betreuer%
+    \else%
+      Erstbetreuer%
+    \fi%
+  }{Betreuer}%
+}%
+\tud@locale@german{\supervisorothername}{}%
 \tud@locale@german{\professorname}{%
-  \begingroup%
-    \protecting{%
-      \global\@tempswafalse%
-      \def\and{\global\@tempswatrue}%
-      \sbox\z@{\@professor}%
-    }%
-  \endgroup%
-  \if@tempswa%
-    Betreuende Hochschullehrer%
-  \else%
-    Betreuender Hochschullehrer%
-  \fi%
-}
+  \tud@if@and{\@professor}{%
+    \ifx\professorothername\@empty%
+      Betreuende Hochschullehrer%
+    \else%
+      Erster betreuender Hochschullehrer%
+    \fi%
+  }{Betreuender Hochschullehrer}%
+}%
 \tud@locale@german{\professorothername}{}%
 \tud@locale@german{\datetext}{Eingereicht am}%
 \tud@locale@german{\dateofbirthtext}{Geboren am}%
@@ -437,7 +480,7 @@
   \fi%
   Mir ist bekannt, dass die Nichteinhaltung dieser Erkl\"arung zum
   nachtr\"aglichen Entzug des Hochschulabschlusses f\"uhren kann.%
-}
+}%
 \tud@locale@german{\blockingname}{Sperrvermerk}%
 \tud@locale@german{\blockingtext}{%
   Diese \ifx\@@thesis\@empty Arbeit \else\@@thesis{} \fi
@@ -451,7 +494,7 @@
   vorliegende Arbeit ist nur dem Betreuer an der Technischen
   Universit\"at Dresden, den Gutachtern sowie den Mitgliedern 
   des Pr\"ufungsausschusses zug\"anglich zu machen.%
-}
+}%
 %</book|report|article>
 \tud@locale@german{\listingname}{Quelltext}%
 \tud@locale@german{\listlistingname}{Quelltextverzeichnis}%
@@ -504,7 +547,7 @@
 \tud@locale@german{\assessmentname}{Bewertung}%
 \tud@locale@german{\gradetext}{%
   Die Arbeit wird mit der Note \textbf{\@grade} bewertet.%
-}
+}%
 \tud@locale@german{\noticename}{Aushang}%
 \tud@locale@german{\contactpersonname}{Ansprechpartner}%
 %    \end{macrocode}
@@ -514,7 +557,7 @@
 %<*class&!manual>
 % \fi
 %
-% \subsection{Englischsprachige Bezeichner}
+% \subsubsection{Englischsprachige Bezeichner}
 %
 % \begin{macro}{\tud@locale@english}
 % \changes{v2.02}{2014/07/07}{Pseudonym für \cs{providecaptionname} mit
@@ -536,39 +579,45 @@
 %    \begin{macrocode}
 %<*book|report|article>
 \tud@locale@english{\graduationtext}{to achieve the academic degree}%
-\tud@locale@english{\supervisorname}{Supervisor}%
-\tud@locale@english{\supervisorothername}{}%
 \tud@locale@english{\refereename}{%
-  \begingroup%
-    \protecting{%
-      \global\@tempswafalse%
-      \def\and{\global\@tempswatrue}%
-      \sbox\z@{\@referee}%
-    }%
-  \endgroup%
-  \if@tempswa%
-    First referee%
-  \else%
-    Referee%
-  \fi%
-}
+  \tud@if@and{\@referee}{%
+    \ifx\refereeothername\@empty%
+      Referees%
+    \else%
+      First referee%
+    \fi%
+  }{Referee}%
+}%
 \tud@locale@english{\refereeothername}{Second referee}%
-\tud@locale@english{\advisorname}{Advisor}%
+\tud@locale@english{\advisorname}{%
+  \tud@if@and{\@advisor}{%
+    \ifx\advisorothername\@empty%
+      Advisors%
+    \else%
+      First advisor%
+    \fi%
+  }{Advisor}%
+}%
 \tud@locale@english{\advisorothername}{}%
+\tud@locale@english{\supervisorname}{%
+  \tud@if@and{\@supervisor}{%
+    \ifx\supervisorothername\@empty%
+      Supervisors%
+    \else%
+      First supervisor%
+    \fi%
+  }{Supervisor}%
+}%
+\tud@locale@english{\supervisorothername}{}%
 \tud@locale@english{\professorname}{%
-  \begingroup%
-    \protecting{%
-      \global\@tempswafalse%
-      \def\and{\global\@tempswatrue}%
-      \sbox\z@{\@professor}%
-    }%
-  \endgroup%
-  \if@tempswa%
-    Supervising professors%
-  \else%
-    Supervising professor%
-  \fi%
-}
+  \tud@if@and{\@professor}{%
+    \ifx\professorothername\@empty%
+      Supervising professors%
+    \else%
+      First supervising professor%
+    \fi%
+  }{Supervising professor}%
+}%
 \tud@locale@english{\professorothername}{}%
 \tud@locale@english{\datetext}{Submitted on}%
 \tud@locale@english{\dateofbirthtext}{Born on}%
@@ -603,7 +652,7 @@
   \fi%
   I am aware that violations of this declaration may lead to
   subsequent withdrawal of the degree.%
-}
+}%
 \tud@locale@english{\blockingname}{Restriction note}%
 \tud@locale@english{\blockingtext}{%
   This \ifx\@@thesis\@empty thesis \else\@@thesis{} \fi
@@ -616,7 +665,7 @@
   This thesis may only be made accessible to the supervisor at
   Technische Universit\"at Dresden, the reviewers and also the
   members of the examination board.%
-}
+}%
 %</book|report|article>
 \tud@locale@english{\listingname}{Listing}%
 \tud@locale@english{\listlistingname}{List of Listings}%
@@ -669,7 +718,7 @@
 \tud@locale@english{\assessmentname}{Assessment}%
 \tud@locale@english{\gradetext}{%
   The thesis is evaluated with a grade of \textbf{\@grade}.%
-}
+}%
 \tud@locale@english{\noticename}{Notice}%
 \tud@locale@english{\contactpersonname}{Contact}%
 %    \end{macrocode}
