@@ -1,4 +1,4 @@
-% \CheckSum{3319}
+% \CheckSum{3291}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-pagestyle.dtx}[%
-  2016/03/06 v2.05 TUD-KOMA-Script (pagestyle)%
+  2016/03/11 v2.05 TUD-KOMA-Script (pagestyle)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -3040,6 +3040,7 @@
   \newcommand*\tud@loadgeometry[1]{%
     \@tud@geometry@enabledfalse%
     \loadgeometry{#1}%
+    \@currsize%
     \@tud@geometry@enabledtrue%
   }%
 %    \end{macrocode}
@@ -3051,19 +3052,26 @@
 % \begin{macro}{\geometry}
 % \begin{macro}{\Gm@changelayout}
 % Für einen benutzerdefinierten Satzspiegel ist es notwendig, die durch den 
-% Anwender getätigten Einstellungen zu sichern und am Ende der Präambel für 
-% die unterschidlichen, durch die Klasse benötigten Satzspiegel der einzelnen 
-% Seitenstile umzusetzen.
+% Anwender in der Präambel getätigten Einstellungen zu sichern und am Ende der
+% Präambel für die unterschidlichen, durch die Klasse benötigten Satzspiegel
+% der einzelnen Seitenstile umzusetzen. Dabei werden auch etwaige Optionen von
+% \KOMAScript{} beachtet.
 %    \begin{macrocode}
   \newcommand*\tud@geometry@custom{}
   \apptocmd{\geometry}{%
     \if@tud@geometry@enabled%
-      \addto\tud@geometry@custom{#1,}%
+      \addto\tud@geometry@custom{,#1}%
     \fi%
   }{}{\tud@patch@wrn{geometry}}%
   \AtEndPreamble{%
     \tud@newgeometry{%
       \tud@geometry@mpincl,%
+      \if@reversemargin%
+        reversemarginpar=true,%
+      \else%
+        reversemarginpar=false,%
+      \fi
+      bindingoffset=\the\ta@bcor,%
       \tud@geometry@hincl,%
       \tud@geometry@fincl,%
       \tud@geometry@custom%
@@ -3136,19 +3144,15 @@
         \edef\tud@geometry@hmargin{%
           left=\the\dimexpr\oddsidemargin+1in-\ta@bcor\relax,%
           textwidth=\the\textwidth,%
-          bindingoffset=\the\ta@bcor,%
           \tud@geometry@mpincl,%
-          marginparwidth=\the\dimexpr\evensidemargin+1in-\tud@ta@headsep\relax,%
+          marginparwidth=\the\marginparwidth,%
+          marginparsep=\the\marginparsep,%
           \if@reversemargin%
             reversemarginpar=true,%
-            \if@twoside%
-              marginparwidth=\the\dimexpr\oddsidemargin+1in%
-                -\tud@ta@headsep\relax,%
-            \fi%
           \else%
             reversemarginpar=false,%
           \fi%
-          marginparsep=\the\dimexpr.5\tud@ta@headsep\relax%
+          bindingoffset=\the\ta@bcor%
         }%
         \edef\tud@geometry@vmargin{%
           \if@hincl%
@@ -3172,12 +3176,20 @@
         \edef\tud@geometry@hmargin{%
           left=\Gm@lmargin,%
           right=\Gm@rmargin,%
+          \ifGm@includemp%
+            includemp=true,%
+          \else%
+            includemp=false,%
+          \fi%
+          marginparwidth=\the\marginparwidth,%
+          marginparsep=\the\marginparsep,%
+          \if@reversemargin%
+            reversemarginpar=true,%
+          \else%
+            reversemarginpar=false,%
+          \fi%
+          bindingoffset=\the\Gm@bindingoffset%
         }%
-        \ifdim\Gm@bindingoffset=\z@\relax%
-          \eappto\tud@geometry@hmargin{bindingoffset=\the\ta@bcor}%
-        \else%
-          \eappto\tud@geometry@hmargin{bindingoffset=\the\Gm@bindingoffset}%
-        \fi%
         \edef\tud@geometry@vmargin{%
           \ifGm@includehead%
             includehead=true,%
@@ -3248,45 +3260,25 @@
 % Hier erfolgt die Definition der Hilfsmakros für das CD-konforme asymmetrische
 % bzw. an das \CD angelehnte Layout für einseitigen und zweiseitigen Satz.
 % Zuerst werden die verschiedenen unterschiedlichen horizontalen Ränder für die
-% unterschiedlichen Optionen definiert. Danach kommt der Gleichanteil.
+% unterschiedlichen Optionen definiert. Dies betrifft im einzelnen den äußeren 
+% Seitenrand (\cs{@tempdima}), die Textbreite (\cs{@tempdimb}) sowie die Breite 
+% der Randnotizen (\cs{@tempdimc}). Danach kommt der Gleichanteil.
 %    \begin{macrocode}
     \else%  true/symmetric/twoside
       \ifcase\tud@geometry\or\or%  true
-        \edef\tud@geometry@hmargin{%
-          left=\the\tud@dim@widemargin,%
-          textwidth=\the\dimexpr\paperwidth-\tud@dim@both-\ta@bcor\relax,%
-          bindingoffset=\the\ta@bcor,%
-          \if@twoside asymmetric,\fi%
-          \tud@geometry@mpincl,%
-          \if@reversemargin%
-            reversemarginpar=true,%
-            marginparwidth=\the\dimexpr\tud@dim@widemargin%
-              -\tud@ta@headsep\relax,%
-          \else%
-            reversemarginpar=false,%
-            marginparwidth=\the\dimexpr\tud@dim@slimmargin%
-              -\tud@ta@headsep\relax,%
-          \fi%
-          marginparsep=\the\dimexpr.5\tud@ta@headsep\relax%
-        }%
+        \setlength\@tempdima{\tud@dim@widemargin}%
+        \if@reversemargin%
+          \setlength\@tempdimc{\tud@dim@widemargin}%
+        \else%
+          \setlength\@tempdimc{\tud@dim@slimmargin}%
+        \fi%
 %    \end{macrocode}
 % Die zweite Variante ist eigentlich nicht konform mit dem \CD. Sie ist sowohl
 % im einseitigen als auch im zweiseitgigen Satz symmetrisch.
 %    \begin{macrocode}
       \or% symmetric
-        \edef\tud@geometry@hmargin{%
-          left=\the\dimexpr.5\tud@dim@both\relax,%
-          textwidth=\the\dimexpr\paperwidth-\tud@dim@both-\ta@bcor\relax,%
-          bindingoffset=\the\ta@bcor,%
-          \tud@geometry@mpincl,%
-          \if@reversemargin%
-            reversemarginpar=true,%
-          \else%
-            reversemarginpar=false,%
-          \fi%
-          marginparwidth=\the\dimexpr.5\tud@dim@both-\tud@ta@headsep\relax,%
-          marginparsep=\the\dimexpr.5\tud@ta@headsep\relax%
-        }%
+        \setlength\@tempdima{.5\tud@dim@both}%
+        \setlength\@tempdimc{.5\tud@dim@both}%
 %    \end{macrocode}
 % Eigentlich ist auch die dritte Variante nach dem \CD nicht zulässig. Sie ist
 % im einseitigen Satz symmetrisch, im zweiseitgigen Satz wird die innere Seite
@@ -3294,32 +3286,48 @@
 % TUD-Logo geachtet werden muss.
 %    \begin{macrocode}
       \or% twoside
-        \edef\tud@geometry@hmargin{%
-          \if@twoside%
-            left=\the\dimexpr.4\tud@dim@both\relax,%
-            twoside,%
-          \else%
-            left=\the\dimexpr.5\tud@dim@both\relax,%
-          \fi%
-          textwidth=\the\dimexpr\paperwidth-\tud@dim@both-\ta@bcor\relax,%
-          bindingoffset=\the\ta@bcor,%
-          \tud@geometry@mpincl,%
-          marginparwidth=\the\dimexpr.5\tud@dim@both-\tud@ta@headsep\relax,%
+        \if@twoside%
+          \setlength\@tempdima{.4\tud@dim@both}%
+        \else%
+          \setlength\@tempdima{.5\tud@dim@both}%
+        \fi%
+        \setlength\@tempdimc{.5\tud@dim@both}%
+        \if@twoside%
           \if@reversemargin%
-            reversemarginpar=true,%
-            \if@twoside%
-              marginparwidth=\the\dimexpr.4\tud@dim@both%
-                -\tud@ta@headsep\relax,%
-            \fi%
+            \setlength\@tempdimc{.4\tud@dim@both}%
           \else%
-            reversemarginpar=false,%
-            \if@twoside%
-              marginparwidth=\the\dimexpr.6\tud@dim@both%
-                -\tud@ta@headsep\relax,%
-            \fi%
+            \setlength\@tempdimc{.6\tud@dim@both}%
           \fi%
-          marginparsep=\the\dimexpr.5\tud@ta@headsep\relax%
-        }%
+        \fi%
+      \fi%
+%    \end{macrocode}
+% Die \emph{Berechnung} der Textbreite ist für alle Varainten identisch. Danach 
+% erfolgt die Zuweisung zum Makro.
+%    \begin{macrocode}
+      \addtolength\@tempdimc{-\tud@ta@headsep}%
+      \setlength\@tempdimb{\dimexpr\paperwidth-\tud@dim@both-\ta@bcor\relax}%
+      \if@mincl%
+        \addtolength\@tempdimb{-\@tempdimc}%
+      \fi%
+      \edef\tud@geometry@hmargin{%
+        left=\the\@tempdima,%
+        textwidth=\the\@tempdimb,%
+        \tud@geometry@mpincl,%
+        marginparwidth=\the\@tempdimc,%
+        marginparsep=\the\dimexpr.5\tud@ta@headsep\relax,%
+        \if@reversemargin%
+          reversemarginpar=true,%
+        \else%
+          reversemarginpar=false,%
+        \fi%
+        bindingoffset=\the\ta@bcor%
+      }%
+      \if@twoside%
+        \ifcase\tud@geometry\or\or% true
+          \appto\tud@geometry@hmargin{,asymmetric}%
+        \else% symmetric/twoside
+          \appto\tud@geometry@hmargin{,twoside}%
+        \fi%
       \fi%
 %    \end{macrocode}
 % Für alle drei Varianten der vertikale Gleichanteil. Der Satzspiegel der 
@@ -3327,25 +3335,25 @@
 %    \begin{macrocode}
       \tud@ifverlower{2.03}{%
         \edef\tud@geometry@vmargin{%
+          \tud@geometry@hincl,%
           top=\the\dimexpr.5\tud@dim@both\relax,%
           headheight=\the\tud@ta@headheight,%
           headsep=\the\tud@dim@headsep,%
           bottom=\the\dimexpr.5\tud@dim@both+\tud@dim@extrabottommargin\relax,%
+          \tud@geometry@fincl,%
           footskip=\the\dimexpr\tud@dim@headsep+\tud@ta@footheight%
-            -1.25\baselineskip\relax,%
-          \tud@geometry@hincl,%
-          \tud@geometry@fincl%
+            -1.25\baselineskip\relax%
         }%
       }{%
         \edef\tud@geometry@vmargin{%
+          \tud@geometry@hincl,%
           top=\the\tud@dim@slimmargin,%
           headheight=\the\tud@ta@headheight,%
           headsep=\the\tud@ta@headsep,%
           bottom=\the\dimexpr\tud@dim@widemargin%
             +\tud@dim@extrabottommargin\relax,%
-          footskip=\the\dimexpr\tud@dim@footsep+\tud@ta@footheight\relax,%
-          \tud@geometry@hincl,%
-          \tud@geometry@fincl%
+          \tud@geometry@fincl,%
+          footskip=\the\dimexpr\tud@dim@footsep+\tud@ta@footheight\relax%
         }%
       }%
       \edef\tud@geometry@tudmargin{%
