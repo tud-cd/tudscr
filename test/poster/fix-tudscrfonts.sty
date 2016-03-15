@@ -82,7 +82,7 @@
   \AtEndOfPackage{\renewcommand*\TUD@noworlater[2]{#1#2}}%
 \fi
 %%% From File: tudscr-comp.dtx
-\PassOptionsToPackage{vspacing=false}{tudscrfonts}
+\PassOptionsToPackage{vspacing=false,cdfont=ultrabold}{tudscrfonts}
 \DeclareOption*{\PassOptionsToPackage{\CurrentOption}{tudscrfonts}}
 \ProcessOptions\relax
 \AtEndPreamble{%
@@ -203,11 +203,11 @@
               {UniversLight}{m}{n}{\tud@head@fntsz}%
             \DeclareFixedFont{\univBoldHead}{\encodingdefault}%
               {UniversBold}{m}{n}{\tud@head@fntsz}%
-            \setsansfont{Univers Light}[%
-              BoldFont = Univers Bold,%
-              ItalicFont = Univers Light Oblique,%
-              BoldItalicFont = Univers Bold Oblique,%
-            ]%
+%            \setsansfont{Univers Light}[%
+%              BoldFont = Univers Bold,%
+%              ItalicFont = Univers Light Oblique,%
+%              BoldItalicFont = Univers Bold Oblique,%
+%            ]%
           \else%
             \DeclareFixedFont{\univLightVII}{\encodingdefault}%
               {\tud@univers}{l}{n}{7}%
@@ -322,16 +322,28 @@
   ]{tudfonts}%
 }
 \tud@fontsfix@AfterClass{tudmathposter}{%
+  \apptocmd{\maketitle}{\vspace{-2em}}{}{\tud@patch@wrn{maketitle}}%
   \setkomafont{title}{\tud@disposition@font[\bfseries]\Huge}%
-  \renewcommand*\subtitlefont{\tud@disposition@font[\mdseries]\huge}%
-  \renewcommand\preprocesstitle[1]{\tud@makeuppercase{#1}}
+  \renewcommand*\subtitlefont{%
+    \ifstr{\mddefault}{l}{%
+      \tud@disposition@font[\fontseries{m}]%
+    }{%
+      \tud@disposition@font[\fontseries{bx}]%
+    }%
+    \huge
+  }%
+  \renewcommand\preprocesstitle[1]{\tud@makeuppercase{#1}}%
   \if@mathevorgabe%
-    \renewcommand*\sectionfont{\univbn\LARGE}%
-    \renewcommand*\subsectionfont{\univbn\large}%
-  \else%
-    \newcommand*\sectionfont{\univbn\LARGE}%
-    \newcommand*\subsectionfont{\univbn\large}%
+    \undef\sectionfont%
+    \undef\subsectionfont%
   \fi%
+  \newcommand*\sectionfont{\tud@disposition@font[\bfseries]\LARGE}%
+  \newcommand*\subsectionfont{\sectionfont\large}%
+  \patchcmd{\ps@tudposter}%
+    {\textbf{\@einrichtung}}%
+    {\textbf{\fontseries{b}\selectfont\@einrichtung}}%
+    {}{\tud@patch@wrn{ps@tudposter}}%
+  \pagestyle{tudposter}%
 }
 %\PreventPackageFromLoading[%
 %  \RequirePackage{amsmath}%
