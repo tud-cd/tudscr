@@ -53,6 +53,11 @@ Das Bundle beinhaltet:
 Versionen
 ---------
 
+**v2.04d** (2016/03/26)
+
++ Bugfix für Titelseite bei `tudscrartcl`
+
+
 **v2.04c** (2015/11/29)
 
 + Bugfix für fehlenden Schriften bei Verwendung von Paket `fontspec`
@@ -181,6 +186,11 @@ The bundle offers:
 
 Versions
 --------
+
+**v2.04d** (2016/03/26)
+
++ bug fix for titlepage with `tudscrartcl`
+
 
 **v2.04c** (2015/11/29)
 
