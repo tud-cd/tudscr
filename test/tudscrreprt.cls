@@ -107,6 +107,7 @@
 }{}
 %%% From File: tudscr-base.dtx
 \RequirePackage{tudscrbase}[\TUDVersion]
+\tracingpatches
 \ifx\TUD@noworlater\TUD@noworlater@simple
   \renewcommand*\TUD@noworlater[2]{#1\AtEndOfClass{#1#2}}%
   \AtEndOfClass{\renewcommand*\TUD@noworlater[2]{#1#2}}%
@@ -2579,43 +2580,53 @@
 \newlength\tud@dim@headingsvskip
 \tud@ifverlower{2.03}{\newlength\tud@dim@ddcdiff}{}
 \newif\if@tud@geometry@adjust
+\newlength\tud@dim@layoutheight
+\newlength\tud@dim@layoutwidth
+\newlength\tud@dim@layouthoffset
+\newlength\tud@dim@layoutvoffset
+% TODO: Option für Länge, Schnittrand implementieren
+\newlength\tud@dim@layoutcrop
 \newcommand*\tud@geometry@set{%
+  \setlength\tud@dim@layoutheight{\Gm@layoutheight}%
+  \setlength\tud@dim@layoutwidth{\Gm@layoutwidth}%
+  \setlength\tud@dim@layouthoffset{\Gm@layouthoffset}%
+  \setlength\tud@dim@layoutvoffset{\Gm@layoutvoffset}%
   \tud@ifverlower{2.05}{%
-    \ifdim\paperheight<\dimexpr105mm+1.5mm\relax%
+    \ifdim\tud@dim@layoutheight<\dimexpr105mm+1.5mm\relax%
       \def\@tempa{0}%
-    \else\ifdim\paperheight<\dimexpr148mm+1.5mm\relax%
+    \else\ifdim\tud@dim@layoutheight<\dimexpr148mm+1.5mm\relax%
       \def\@tempa{1}%
-    \else\ifdim\paperheight<\dimexpr229mm+2mm\relax%
+    \else\ifdim\tud@dim@layoutheight<\dimexpr229mm+2mm\relax%
       \def\@tempa{2}%
-    \else\ifdim\paperheight<\dimexpr297mm+2mm\relax%
-      \def\@tempa{3}%
-    \else\ifdim\paperheight<\dimexpr420mm+2mm\relax%
+    \else\ifdim\tud@dim@layoutheight<\dimexpr297mm+2mm\relax%
+      \def\@tempa{3}%\tud@dim@layoutheight
+    \else\ifdim\tud@dim@layoutheight<\dimexpr420mm+2mm\relax%
       \def\@tempa{4}%
-    \else\ifdim\paperheight<\dimexpr594mm+2mm\relax%
+    \else\ifdim\tud@dim@layoutheight<\dimexpr594mm+2mm\relax%
       \def\@tempa{5}%
-    \else\ifdim\paperheight<\dimexpr841mm+3mm\relax%
+    \else\ifdim\tud@dim@layoutheight<\dimexpr841mm+3mm\relax%
       \def\@tempa{6}%
-    \else\ifdim\paperheight<\dimexpr1189mm+3mm\relax%%
+    \else\ifdim\tud@dim@layoutheight<\dimexpr1189mm+3mm\relax%%
       \def\@tempa{7}%
     \else%
       \def\@tempa{8}%
     \fi\fi\fi\fi\fi\fi\fi\fi%
   }{%
-    \ifdim\paperheight<\dimexpr125mm+1.5mm\relax%
+    \ifdim\tud@dim@layoutheight<\dimexpr125mm+1.5mm\relax%
       \def\@tempa{0}%
-    \else\ifdim\paperheight<\dimexpr176mm+2mm\relax%
+    \else\ifdim\tud@dim@layoutheight<\dimexpr176mm+2mm\relax%
       \def\@tempa{1}%
-    \else\ifdim\paperheight<\dimexpr250mm+2mm\relax%
+    \else\ifdim\tud@dim@layoutheight<\dimexpr250mm+2mm\relax%
       \def\@tempa{2}%
-    \else\ifdim\paperheight<\dimexpr353mm+2mm\relax%
+    \else\ifdim\tud@dim@layoutheight<\dimexpr353mm+2mm\relax%
       \def\@tempa{3}%
-    \else\ifdim\paperheight<\dimexpr500mm+2mm\relax%
+    \else\ifdim\tud@dim@layoutheight<\dimexpr500mm+2mm\relax%
       \def\@tempa{4}%
-    \else\ifdim\paperheight<\dimexpr707mm+3mm\relax%
+    \else\ifdim\tud@dim@layoutheight<\dimexpr707mm+3mm\relax%
       \def\@tempa{5}%
-    \else\ifdim\paperheight<\dimexpr1000mm+3mm\relax%
+    \else\ifdim\tud@dim@layoutheight<\dimexpr1000mm+3mm\relax%
       \def\@tempa{6}%
-    \else\ifdim\paperheight<\dimexpr1414mm+3mm\relax%
+    \else\ifdim\tud@dim@layoutheight<\dimexpr1414mm+3mm\relax%
       \def\@tempa{7}%
     \else%
       \def\@tempa{8}%
@@ -2638,7 +2649,7 @@
         calculate a proper type area%
       }%
     \fi%
-    \tud@divide\@tempa{\paperheight}{148mm}%
+    \tud@divide\@tempa{\tud@dim@layoutheight}{148mm}%
     \setlength\tud@dim@widemargin{15mm}%
     \setlength\tud@dim@widemargin{\@tempa\tud@dim@widemargin}%
     \setlength\tud@dim@heavyline{0.5pt}%
@@ -2700,7 +2711,7 @@
         calculate a proper type area%
       }%
     \fi%
-    \tud@divide\@tempa{\paperheight}{1189mm}%
+    \tud@divide\@tempa{\tud@dim@layoutheight}{1189mm}%
     \setlength\tud@dim@widemargin{120mm}%
     \setlength\tud@dim@widemargin{\@tempa\tud@dim@widemargin}%
     \setlength\tud@dim@heavyline{4pt}%
@@ -2712,7 +2723,7 @@
     \edef\tud@head@fontsize{\strip@pt\@tempdima}%
   \fi%
   \ifnum\tud@geometry@calc=\tw@\relax%
-    \tud@divide\@tempa{\paperheight}{297mm}%
+    \tud@divide\@tempa{\tud@dim@layoutheight}{297mm}%
     \setlength\tud@dim@widemargin{\@tempa\tud@dim@widemargin}%
     \setlength\tud@dim@heavyline{\@tempa\tud@dim@heavyline}%
     \setlength\tud@dim@thinline{\@tempa\tud@dim@thinline}%
@@ -2792,9 +2803,10 @@
 \AfterPackage{scrlayer-scrpage}{%
   \DeclareNewLayer[%
     background,headsep,%
-    voffset=\tud@dim@logoy,%
     addhoffset=\dimexpr\tud@dim@logox-\tud@dim@widemargin\relax,%
     addwidth=\dimexpr-\tud@dim@logox+\tud@dim@widemargin\relax,%
+    voffset=\tud@dim@logoy,%
+    addvoffset=\tud@dim@layoutvoffset,%
     contents={%
       \tud@mainlogo@set%
       \tud@headlogo@option@set%
@@ -2803,28 +2815,37 @@
   ]{tudheadings.head.content}%
   \DeclareNewLayer[%
     background,%
+    width=\tud@dim@layoutwidth,%
+    addhoffset=\tud@dim@layouthoffset,%
+    height=\tud@dim@topmargin,%
+    addvoffset=\tud@dim@layoutvoffset,%
     contents={%
       \ifnum\tud@head@bar>\tw@\relax% cdhead=color
         \color{HKS41}%
-        \rule{\layerwidth}{\tud@dim@topmargin}%
+        \rule{\layerwidth}{\layerheight}%
       \fi%
     },%
   ]{tudheadings.head.back}%
   \DeclareNewLayer[%
     background,%
+    width=\tud@dim@layoutwidth,%
+    addhoffset=\tud@dim@layouthoffset,%
+    height=\tud@dim@barheight,%
     voffset=\tud@dim@topmargin,%
+    addvoffset=\tud@dim@layoutvoffset,%
     contents={%
       \ifnum\tud@head@bar>\@ne\relax% cdhead=barcolor/color
         \color{HKS41!60}%
         \setlength{\@tempdima}{\dimexpr\ht\strutbox-\tud@dim@barheight\relax}%
         \ifdim\@tempdima<\z@\relax\setlength\@tempdima{\z@}\fi%
-        \raisebox{\@tempdima}{\rule{\layerwidth}{\tud@dim@barheight}}%
+        \raisebox{\@tempdima}{\rule{\layerwidth}{\layerheight}}%
       \fi%
     },%
   ]{tudheadings.head.bar}%
   \DeclareNewLayer[%
     background,headsep,%
     voffset=\dimexpr\tud@dim@topmargin+\tud@dim@line\relax,%
+    addvoffset=\tud@dim@layoutvoffset,%
     contents={%
       \tud@head@font@set%
       \tud@head@text@set%
@@ -2833,10 +2854,11 @@
   ]{tudheadings.head.text}%
   \DeclareNewLayer[%
     background,headsep,%
-    voffset=\dimexpr\tud@dim@topmargin-.5\tud@dim@line\relax,%
+    voffset=\dimexpr\tud@dim@topmargin-.5\tud@dim@line\relax,%\\
+    addvoffset=\tud@dim@layoutvoffset,%
     contents={%
       \ifnum\tud@head@bar<\tw@\relax% cdhead=nocolor/litecolor
-        \if@tud@head@widebar\else\tud@head@rule{\textwidth}\fi%
+        \if@tud@head@widebar\else\tud@head@rule{\layerwidth}\fi%
       \fi%
     },%
   ]{tudheadings.head.upline}%
@@ -2844,37 +2866,45 @@
     background,headsep,%
     voffset=\dimexpr\tud@dim@topmargin+\tud@dim@barheight%
       -.5\tud@dim@line\relax,%
+    addvoffset=\tud@dim@layoutvoffset,%
     contents={%
       \ifnum\tud@head@bar<\tw@\relax% cdhead=nocolor/litecolor
-        \if@tud@head@widebar\else\tud@head@rule{\textwidth}\fi%
+        \if@tud@head@widebar\else\tud@head@rule{\layerwidth}\fi%
       \fi%
     },%
   ]{tudheadings.head.lowline}%
   \DeclareNewLayer[%
     background,%
+    width=\tud@dim@layoutwidth,%
+    addhoffset=\tud@dim@layouthoffset,%
     voffset=\dimexpr\tud@dim@topmargin-.5\tud@dim@line\relax,%
+    addvoffset=\tud@dim@layoutvoffset,%
     contents={%
       \ifnum\tud@head@bar<\tw@\relax% cdhead=nocolor/litecolor
-        \if@tud@head@widebar\tud@head@rule{\paperwidth}\fi%
+        \if@tud@head@widebar\tud@head@rule{\layerwidth}\fi%
       \fi%
     },%
   ]{tudheadings.head.uplinewide}%
   \DeclareNewLayer[%
     background,%
+    width=\tud@dim@layoutwidth,%
+    addhoffset=\tud@dim@layouthoffset,%
     voffset=\dimexpr\tud@dim@topmargin+\tud@dim@barheight%
       -.5\tud@dim@line\relax,%
+    addvoffset=\tud@dim@layoutvoffset,%
     contents={%
       \ifnum\tud@head@bar<\tw@\relax% cdhead=nocolor/litecolor
-        \if@tud@head@widebar\tud@head@rule{\paperwidth}\fi%
+        \if@tud@head@widebar\tud@head@rule{\layerwidth}\fi%
       \fi%
     },%
   ]{tudheadings.head.lowlinewide}%
   \DeclareNewLayer[%
     background,foot,%
-    hoffset=0pt,%
-    width=\paperwidth,%
+    width=\tud@dim@layoutwidth,%
+    hoffset=\tud@dim@layouthoffset,%
     addvoffset=-\dp\strutbox,%
-    height=\dimexpr\paperheight-\layeryoffset\relax,%
+    height=\dimexpr\tud@dim@layoutheight-\layeryoffset%
+      +\tud@dim@layoutvoffset\relax,%
     contents={%
       \if@tud@foot@colored%
         \let\@tempc\relax%
@@ -2931,7 +2961,8 @@
   }{}%
   \DeclareNewLayer[%
     background,foot,%
-    height=\dimexpr\paperheight-\layeryoffset\relax,%
+    height=\dimexpr\tud@dim@layoutheight-\layeryoffset%
+      +\tud@dim@layoutvoffset\relax,%
     contents={%
       \tud@footlogoheight@set%
       \setlength\@tempdima{\dimexpr\layerheight-\dp\strutbox\relax}%
@@ -3034,7 +3065,9 @@
   \DeclareNewPageStyleAlias{tudscrheadingsempty}{empty.tudheadings}%
   \newcommand*\tud@pagecolor{}%
   \DeclareNewLayer[%
-    background,page,%
+    background,%page,%
+    area={\tud@dim@layouthoffset}{\tud@dim@layoutvoffset}%
+      {\tud@dim@layoutwidth}{\tud@dim@layoutheight},%
     contents={%
       \ifdefvoid{\tud@pagecolor}{}{%
         \color{\tud@pagecolor}%
@@ -3668,14 +3701,13 @@
 \newcommand*\tud@geometry@process{}%
 \TUD@UnwindPackage{geometry}{%
   \renewcommand*\tud@geometry@process{\tud@geometry@set}%
+  \let\Gm@layoutheight\paperheight%
+  \let\Gm@layoutwidth\paperwidth%
   \let\tud@BeforeSelectAnyPageStyle\@gobble%
 }
-\@tempswatrue
 \tud@ifsacrop{%
-  \@tempswafalse%
   \PreventPackageFromLoading{geometry}%
-}{}
-\if@tempswa%
+}{%
   \RequirePackage{geometry}[2010/09/12]%
   \newcommand*\tud@geometry@hmargin{}%
   \newcommand*\tud@geometry@vmargin{}%
@@ -3684,6 +3716,7 @@
   \newif\if@tud@geometry@enabled%
   \@tud@geometry@enabledtrue%
   \newcommand*\tud@newgeometry[1]{%
+    \edef\Gm@restore{}%
     \@tud@geometry@enabledfalse%
     \if@atdocument%
       \edef\@tempa{#1}%
@@ -3703,29 +3736,6 @@
     \@currsize%
     \@tud@geometry@enabledtrue%
   }%
-  \newcommand*\tud@geometry@custom{}
-  \apptocmd{\geometry}{%
-    \if@tud@geometry@enabled%
-      \addto\tud@geometry@custom{,#1}%
-    \fi%
-  }{}{\tud@patch@wrn{geometry}}%
-  \AtEndPreamble{%
-    \tud@newgeometry{%
-      \tud@geometry@mpincl,%
-      \if@reversemargin%
-        reversemarginpar=true,%
-      \else%
-        reversemarginpar=false,%
-      \fi
-      bindingoffset=\the\ta@bcor,%
-      \tud@geometry@hincl,%
-      \tud@geometry@fincl,%
-      \tud@geometry@custom%
-    }%
-  }%
-  \apptocmd{\Gm@changelayout}{%
-    \if@tud@geometry@enabled\tud@recalctypearea\fi%
-  }{}{\tud@patch@wrn{Gm@changelayout}}%
   \renewcommand*\tud@geometry@process{%
     \tud@geometry@set%
     \ifnum\tud@geometry<\tw@\relax% false/custom
@@ -3737,6 +3747,8 @@
         \addtolength\tud@dim@headsep{-\tud@ta@headdiff}%
       \fi%
       \ifcase\tud@geometry\relax%
+        % TODO: typearea in Gruppe ausführen und berechnete Werte sichern
+        % HOWTO: Wie die layout-definitionen übernehmen?
         \edef\tud@geometry@hmargin{%
           left=\the\dimexpr\oddsidemargin+1in-\ta@bcor\relax,%
           textwidth=\the\textwidth,%
@@ -3862,7 +3874,9 @@
         \fi%
       \fi%
       \addtolength\@tempdimc{-\tud@ta@headsep}%
-      \setlength\@tempdimb{\dimexpr\paperwidth-\tud@dim@both-\ta@bcor\relax}%
+      \setlength\@tempdimb{%
+        \dimexpr\tud@dim@layoutwidth-\tud@dim@both-\ta@bcor\relax%
+      }%
       \if@mincl%
         \addtolength\@tempdimb{-\@tempdimc}%
       \fi%
@@ -4008,6 +4022,30 @@
       includemp=false%
     \fi%
   }%
+}
+\@ifpackageloaded{geometry}{\@tempswatrue}{\@tempswafalse}
+\if@tempswa
+  \newcommand*\tud@geometry@custom{}
+  \apptocmd{\geometry}{%
+    \ifbool{@tud@geometry@enabled}{\appto\tud@geometry@custom{,#1}}{}%
+  }{}{\tud@patch@wrn{geometry}}%
+  \apptocmd{\Gm@changelayout}{%
+    \ifbool{@tud@geometry@enabled}{\tud@recalctypearea}{}%
+  }{}{\tud@patch@wrn{Gm@changelayout}}%
+  \AtEndPreamble{%
+    \tud@newgeometry{%
+      \tud@geometry@mpincl,%
+      \if@reversemargin%
+        reversemarginpar=true,%
+      \else%
+        reversemarginpar=false,%
+      \fi
+      bindingoffset=\the\ta@bcor,%
+      \tud@geometry@hincl,%
+      \tud@geometry@fincl,%
+      \tud@geometry@custom%
+    }%
+  }%
 \fi
 \newcommand*\tud@currentgeometry{}
 \newcommand*\tud@BeforeSelectAnyPageStyle[1]{%
@@ -4098,12 +4136,17 @@
   \gdef\tud@currentgeometry{}%
   \expandafter\pagestyle\expandafter{\currentpagestyle}%
 }
+% TODO: Wie mit layout von geometry umgehen, falls typearea aktiv?
 \newcommand*\tud@recalctypearea{%
   \ifcase\tud@geometry\relax%
+    \typeout{+++++ \the\paperheight}%
+    \typeout{+++++ \the\tud@dim@layoutheight}%
+    \csname @ta@usegeometryfalse\endcsname
     \recalctypearea%
   \else%
     \tud@AfterChangingArea%
   \fi%
+    \typeout{+++++ \the\tud@dim@layoutheight}%
 }
 \AtEndPreamble{%
   \tud@ifsacrop{}{%
@@ -4959,9 +5002,9 @@
           \topmargin=\dimexpr\coverpagetopmargin-1in\relax%
           \oddsidemargin=\dimexpr\coverpageleftmargin-1in\relax%
           \evensidemargin=\dimexpr\coverpageleftmargin-1in\relax%
-          \textwidth=\dimexpr\paperwidth-\coverpageleftmargin%
+          \textwidth=\dimexpr\tud@dim@layoutwidth-\coverpageleftmargin%
             -\coverpagerightmargin\relax%
-          \textheight=\dimexpr\paperheight-\coverpagetopmargin%
+          \textheight=\dimexpr\tud@dim@layoutheight-\coverpagetopmargin%
             -\coverpagebottommargin\relax%
           \headheight=0pt%
           \headsep=0pt%
@@ -5355,7 +5398,7 @@
       \begingroup%
         \oddsidemargin=\dimexpr\coverpageleftmargin-1in\relax%
         \evensidemargin=\dimexpr\coverpageleftmargin-1in\relax%
-        \textwidth=\dimexpr\paperwidth-\coverpageleftmargin%
+        \textwidth=\dimexpr\tud@dim@layoutwidth-\coverpageleftmargin%
           -\coverpagerightmargin\relax%
         \headheight=0pt%
         \headsep=0pt%
@@ -5380,7 +5423,7 @@
             }{}%
           \fi%
         \fi%
-        \textheight=\dimexpr\paperheight-\coverpagetopmargin%
+        \textheight=\dimexpr\tud@dim@layoutheight-\coverpagetopmargin%
           -\coverpagebottommargin-\tud@dim@extrabottommargin\relax%
         \topmargin=\dimexpr\coverpagetopmargin-1in\relax%
         \@colht=\textheight%

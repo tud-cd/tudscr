@@ -1,39 +1,106 @@
-\PassOptionsToPackage{driver=none}{geometry}
+% Option zum automatischen Setzen der Boxen
+%https://groups.google.com/forum/#!topic/de.comp.text.tex/1gouJ0Zov6o
+%http://tex.stackexchange.com/questions/248902/
+%https://wiki.scribus.net/canvas/PDF_Boxes_:_mediabox,_cropbox,_bleedbox,_trimbox,_artbox
+%http://www.prepressure.com/pdf/basics/page-boxes
+\documentclass[
+  cdgeometry=true,
+  paper=c4,
+  DIV=10,
+  cd=fullcolor,
+]{tudscrreprt}
+%\usepackage{geometry}
+\usepackage{blindtext}
+%\usepackage{graphicx}
+%\usepackage[a3,cam,center]{crop}
+%\recalctypearea
+%\KOMAoption{DIV=10}
+%\recalctypearea
+%\edef\Gm@restore{}%
+%\savegeometry{typearea}
+
+\geometry{layout=a4paper,showcrop,layoutoffset=5mm}
+
+\usepackage{hyperref}
+\begin{document}
+%\title{text}
+%\maketitle[cd=on,cdhead=color,cdfoot=color]
+%\Blinddocument
+
+\blindtext
+\clearpage
+
+\recalctypearea
+\blindtext
+\clearpage
+
+%\begingroup
+%\let\paperheight\Gm@layoutheight
+%\let\paperwidth\Gm@layoutwidth
+%\recalctypearea
+%\Blindtext
+%\endgroup
+%\clearpage
+%
+%
+%\Blindtext
+%\clearpage
+%\makeatother
+%%
+%%\blinddocument
+\end{document}
+
+
+%\PassOptionsToPackage{driver=none}{geometry}
 %\RequirePackage{scrbase}
 \documentclass[ddcfoot,%
   cd=fullcolor,
+  cdhead=fullcolor,
+  cdfoot=fullcolor,
+%  tudscrver=2.02,
 %  cdgeometry=false,
-  paper=b4,DIV=14,
+%  paper=b4,DIV=14,
 %  fontsize=12pt,
 %  a3paper,
+%  cdgeometry=false,
 ]{tudscrreprt}
 \usepackage[T1]{fontenc}
 \usepackage[ngerman]{babel}
 \usepackage[automark]{scrlayer-scrpage}
 \usepackage[math]{blindtext}
 
+%\usepackage{showframe}
 
-% TODO Zusammenspiel von geometry mit layout-Einstellungen und crop implementieren.
+
+% TODO Zusammenspiel von geometry mit layout-Einstellungen und crop 
+%implementieren.
 
 \usepackage{geometry}
 \geometry{%
 %  showframe,%
   showcrop,%
-%  paper=b4paper,%
-  left=3cm,right=2cm,top=2cm,bottom=3cm,marginparwidth=1cm,%
+  paper=c4paper,%
+%%  left=3cm,right=2cm,top=2cm,bottom=3cm,marginparwidth=1cm,%
   layout=a4paper,%
-  layouthoffset=2cm,
-  layoutvoffset=2cm,%
+  layouthoffset=1cm,
+  layoutvoffset=1cm,%
 }
 
 
-\usepackage[center,b3,cam]{crop}
+%\usepackage[b3,center]{crop}
+%\crop[cam]
 
 \makeatletter
 \providecommand*\ps@tudheadings{\ps@headings}
 \makeatother
 \pagestyle{tudheadings}
 \begin{document}
+\faculty{text}
+\department{text}
+\chair{text}
+\institute{text}
+
+
 \blinddocument
 
 \pagestyle{scrheadings}
@@ -67,7 +134,6 @@ titlepage=no,
 
 
 \begin{document}
-\faculty{text}
 \author{names}
 %\footlogo{TUD-white,TUD-black,}
 \title{text}
@@ -103,3 +169,99 @@ titlepage=no,
 
 \end{document}
 
+\documentclass[english,ngerman,class=tudscrreprt]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{chains}
+\usetikzlibrary{decorations.markings}
+\tikzset{on grid}
+\newlength{\tikzunit}
+\setlength{\tikzunit}{.01\textwidth}
+\tikzset{x=\tikzunit,y=\tikzunit}
+\begin{document}
+\begin{tikzpicture}
+  \tikzstyle{inner box}=[%
+    text width=17\tikzunit,
+    align=center,
+    rectangle,
+    inner sep=.5\tikzunit,
+    minimum height=8\tikzunit,
+    font=\hspace{0pt},
+    draw
+  ]
+  \tikzstyle{inner label}=[align=center, font=\scriptsize]
+  \tikzstyle{inner box chain}=[every node/.style={on chain}]
+  \tikzstyle{inner box chain below}=[%
+    inner box chain, node distance=8\tikzunit,continue chain=going below
+  ]
+  \tikzstyle{inner box chain right}=[%
+    inner box chain,node distance=35\tikzunit,continue chain=going right
+  ]
+  \tikzstyle{inner box chain above}=[%
+    inner box chain,node distance=16\tikzunit,continue chain=going above
+  ]
+  \tikzstyle{pstarrow->}=[%
+    decoration={markings,
+      mark=at position 1 with {\arrow[xscale=1.5]{stealth}};
+    },
+    postaction={decorate},
+    shorten >=0.7pt
+  ]
+  \newcommand{\tikzparbox}[2][9]{%
+    \parbox{#1\tikzunit}{\centering\hspace{0pt}#2}%
+  }
+  \begin{scope}[start chain]
+    \begin{scope}[inner box chain below]
+      \node(NE)[inner box]{Navigations\-ebene};
+      \node(NB)[inner label]{gewählte Fahrtroute\\ zeitlicher Ablauf};
+      \node(BE)[inner box]{{Bahnführungs\-ebene}};
+      \node(BS)[inner label]{%
+        gewählte Führungsgrößen:\\ Sollspur, Sollgeschwindigkeit%
+      };
+      \node(SE)[inner box]{Stabilisierungs\-ebene};
+    \end{scope}
+    \begin{scope}[inner box chain right]
+      \node(LQ)[inner box]{Längs- und Querdynamik};
+      \node(FO)[inner box]{Fahrbahn\-oberfläche};
+    \end{scope}
+    \begin{scope}[inner box chain above]
+      \node(FR)[inner box]{Fahrraum\\ \smallskip{\scriptsize Straße 
+      und\\ \vspace{-1.5ex}Verkehrssituation}};
+      \node(SN)[inner box]{Straßennetz};
+    \end{scope}
+  \end{scope}
+  \begin{scope}[inner label,minimum size=0pt]
+    \draw [pstarrow->] (FO) -| ++(13.5,-12) to
+      node [above]{Istspur, Istgeschwindigkeit} ++(-97,0) |- (SE);
+    \draw [pstarrow->] (FR) -| ++(14  ,-32) to 
+      node [above]{Bereich sicherer Führungsgrößen} ++(-98,0) |- (BE);
+    \draw [pstarrow->] (SN) -| ++(14.5  ,-52) to 
+      node [above]{mögliche Fahrtroute} ++(-99,0) |- (NE);
+  \end{scope}
+  \begin{scope}[inner label]
+    \draw              (NE) to (NB);
+    \draw [pstarrow->] (NB) to (BE);
+    \draw              (BE) to (BS);
+    \draw [pstarrow->] (BS) to (SE);
+    \draw [pstarrow->] (SE) to
+      node[above] {\tikzparbox{Stell\-größen}}
+      node[below] {\tikzparbox{Lenken Gasgeben Bremsen}}
+    (LQ);
+    \draw [pstarrow->] (LQ) to
+      node[above]{\tikzparbox{Regel\-größen}}
+      node[below]{\tikzparbox{Fahrzeugbewegung}}
+    (FO);
+    \draw [pstarrow->] (LQ)+(24,0) |- (FR);
+    \draw [pstarrow->] (LQ)+(24,0) |- (SN);
+  \end{scope}
+  \begin{scope}[very thick,rounded corners=5\tikzunit]
+    \draw (-12.5,-40) rectangle (12.5,14);
+    \draw ( 22.5,-40) rectangle (47.5,-18);
+    \draw ( 57.5,-40) rectangle (82.5,14);
+  \end{scope}
+  \begin{scope}[font=\bfseries]
+    \node at (0,9) {Fahrer};
+    \node at (35,-23) {Fahrzeug};
+    \node at (70,9) {Umwelt};
+  \end{scope}
+\end{tikzpicture}
+\end{document}
