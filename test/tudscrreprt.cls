@@ -107,7 +107,7 @@
 }{}
 %%% From File: tudscr-base.dtx
 \RequirePackage{tudscrbase}[\TUDVersion]
-%\tracingpatches
+\tracingpatches
 \ifx\TUD@noworlater\TUD@noworlater@simple
   \renewcommand*\TUD@noworlater[2]{#1\AtEndOfClass{#1#2}}%
   \AtEndOfClass{\renewcommand*\TUD@noworlater[2]{#1#2}}%
@@ -378,6 +378,7 @@
     {color}{6},{colour}{6},%
     {full}{6},{colorfull}{6},{fullcolor}{6},{colourfull}{6},{fullcolour}{6},%
     {textwidth}{7},{slim}{7},{slimhead}{7},{nowide}{7},{nowidehead}{7},%
+    {narrow}{7},{narrowhead}{7},{small}{7},{smallhead}{7},%
     {paperwidth}{8},{wide}{8},{widehead}{8}%
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
@@ -2155,6 +2156,7 @@
 \newcommand*\@placeofbirth{}
 \newrobustcmd*\placeofbirth[1]{\gdef\@placeofbirth{#1}\ignorespaces}
 \newlength\tud@signatureskip
+% TODO Schriftgrößenabhängig
 \setlength\tud@signatureskip{15mm plus 10mm minus 10mm}
 \newcommand*\@confirmationclosing{%
   \tud@datecheck%
@@ -2211,7 +2213,9 @@
 \newcommand*\tud@multiple@@split{}%
 \newcommand*\tud@multiple@split[1]{%
   \expandafter\ifpatchable\expandafter{\csname#1\endcsname}{%
-    \@latex@warning@no@line}{\csuse{#1}\csgdef{#1}{}%
+    \@latex@warning@no@line%
+  }{%
+    \csuse{#1}\csgdef{#1}{}%
   }{}%
   \def\tud@multiple@@split##1\and##2\relax{%
     \expandafter\csname tud@split#1\endcsname{##1}{##2}%
@@ -2585,9 +2589,6 @@
 \newlength\tud@dim@layoutwidth
 \newlength\tud@dim@layouthoffset
 \newlength\tud@dim@layoutvoffset
-% TODO: Option für Länge, Schnittrand implementieren
-% \ifGm@showcrop bzw. Option von Paket crop als Trigger
-\newlength\tud@dim@layoutcrop
 \newcommand*\tud@geometry@set{%
   \setlength\tud@dim@layoutheight{\paperheight}%
   \setlength\tud@dim@layoutwidth{\paperwidth}%
@@ -2754,6 +2755,26 @@
     \setlength\tud@dim@footsep{\dimexpr.707107\tud@dim@footsep\relax}%
   \fi%
 }
+\newlength\bleedmargin
+\setlength\bleedmargin{\maxdimen}
+% TODO: Schalter für Marken aus crop
+% TODO: Schalter für Zentrierung aus crop in tud@loadgeometry
+%\AfterPackage{crop}{}
+\newcommand*\tud@setbleedmargin@default{%
+  \ifdim\bleedmargin=\maxdimen\relax%
+    \@tempswafalse%
+    % ifpackageloaded raus aus Makro
+    \@ifpackageloaded{crop}{%
+      \ifx\CROP@@@marks\vfil\else\@tempswatrue\fi%
+    }{}%
+    \ifGm@showcrop\@tempswatrue\fi%
+    \if@tempswa%
+      \setlength\bleedmargin{.05\tud@dim@widemargin}%
+    \else%
+      \setlength\bleedmargin{\z@}%
+    \fi%
+  \fi%
+}
 \newcommand*\tud@ifsacrop{%
   \ifcsdef{ifsa@crop}{%
     \ifbool{sa@crop}{\@firstoftwo}{\@secondoftwo}%
@@ -2821,10 +2842,10 @@
   ]{tudheadings.head.content}%
   \DeclareNewLayer[%
     background,%
-    width=\tud@dim@layoutwidth,%
-    addhoffset=\tud@dim@layouthoffset,%
-    height=\tud@dim@topmargin,%
-    addvoffset=\tud@dim@layoutvoffset,%
+    width=\dimexpr\tud@dim@layoutwidth+2\bleedmargin\relax,%
+    addhoffset=\dimexpr\tud@dim@layouthoffset-\bleedmargin\relax,%
+    height=\dimexpr\tud@dim@topmargin+\bleedmargin\relax,%
+    addvoffset=\dimexpr\tud@dim@layoutvoffset-\bleedmargin\relax,%
     contents={%
       \ifnum\tud@head@bar>\tw@\relax% cdhead=color
         \color{HKS41}%
@@ -2834,8 +2855,8 @@
   ]{tudheadings.head.back}%
   \DeclareNewLayer[%
     background,%
-    width=\tud@dim@layoutwidth,%
-    addhoffset=\tud@dim@layouthoffset,%
+    width=\dimexpr\tud@dim@layoutwidth+2\bleedmargin\relax,%
+    addhoffset=\dimexpr\tud@dim@layouthoffset-\bleedmargin\relax,%
     height=\tud@dim@barheight,%
     voffset=\tud@dim@topmargin,%
     addvoffset=\tud@dim@layoutvoffset,%
@@ -2881,8 +2902,8 @@
   ]{tudheadings.head.lowline}%
   \DeclareNewLayer[%
     background,%
-    width=\tud@dim@layoutwidth,%
-    addhoffset=\tud@dim@layouthoffset,%
+    width=\dimexpr\tud@dim@layoutwidth+2\bleedmargin\relax,%
+    addhoffset=\dimexpr\tud@dim@layouthoffset-\bleedmargin\relax,%
     voffset=\dimexpr\tud@dim@topmargin-.5\tud@dim@line\relax,%
     addvoffset=\tud@dim@layoutvoffset,%
     contents={%
@@ -2893,8 +2914,8 @@
   ]{tudheadings.head.uplinewide}%
   \DeclareNewLayer[%
     background,%
-    width=\tud@dim@layoutwidth,%
-    addhoffset=\tud@dim@layouthoffset,%
+    width=\dimexpr\tud@dim@layoutwidth+2\bleedmargin\relax,%
+    addhoffset=\dimexpr\tud@dim@layouthoffset-\bleedmargin\relax,%
     voffset=\dimexpr\tud@dim@topmargin+\tud@dim@barheight%
       -.5\tud@dim@line\relax,%
     addvoffset=\tud@dim@layoutvoffset,%
@@ -2906,11 +2927,11 @@
   ]{tudheadings.head.lowlinewide}%
   \DeclareNewLayer[%
     background,foot,%
-    width=\tud@dim@layoutwidth,%
-    hoffset=\tud@dim@layouthoffset,%
+    width=\dimexpr\tud@dim@layoutwidth+2\bleedmargin\relax,%
+    hoffset=\dimexpr\tud@dim@layouthoffset-\bleedmargin\relax,%
     addvoffset=-\dp\strutbox,%
     height=\dimexpr\tud@dim@layoutheight-\layeryoffset%
-      +\tud@dim@layoutvoffset\relax,%
+      +\tud@dim@layoutvoffset+\bleedmargin\relax,%
     contents={%
       \if@tud@foot@colored%
         \let\@tempc\relax%
@@ -3072,8 +3093,12 @@
   \newcommand*\tud@pagecolor{}%
   \DeclareNewLayer[%
     background,%page,%
-    area={\tud@dim@layouthoffset}{\tud@dim@layoutvoffset}%
-      {\tud@dim@layoutwidth}{\tud@dim@layoutheight},%
+    area=
+      {\dimexpr\tud@dim@layouthoffset-\bleedmargin\relax}%
+      {\dimexpr\tud@dim@layoutvoffset-\bleedmargin\relax}%
+      {\dimexpr\tud@dim@layoutwidth+2\bleedmargin\relax}%
+      {\dimexpr\tud@dim@layoutheight+2\bleedmargin\relax}%
+    ,%
     contents={%
       \ifdefvoid{\tud@pagecolor}{}{%
         \color{\tud@pagecolor}%
@@ -3798,42 +3823,44 @@
           footskip=\the\footskip%
         }%
       \else% custom
-        \edef\tud@geometry@hmargin{%
-          left=\Gm@lmargin,%
-          right=\Gm@rmargin,%
-          \ifGm@includemp%
-            includemp=true,%
-          \else%
-            includemp=false,%
-          \fi%
-          marginparwidth=\the\marginparwidth,%
-          marginparsep=\the\marginparsep,%
-          \if@reversemargin%
-            reversemarginpar=true,%
-          \else%
-            reversemarginpar=false,%
-          \fi%
-          bindingoffset=\the\Gm@bindingoffset%
-        }%
-        \edef\tud@geometry@vmargin{%
-          \ifGm@includehead%
-            includehead=true,%
-            top=\the\dimexpr\topmargin+1in\relax,%
-          \else%
-            includehead=false,%
-            top=\the\dimexpr\topmargin%
-              +\headheight+\headsep+1in\relax,%
-          \fi%
-          headheight=\the\headheight,%
-          headsep=\the\headsep,%
-          textheight=\the\textheight,%
-          footskip=\the\footskip,%
-          \ifGm@includefoot%
-            includefoot=true,%
-          \else%
-            includefoot=false,%
-          \fi%
-        }%
+        \ifGm@pass\else%
+          \edef\tud@geometry@hmargin{%
+            left=\Gm@lmargin,%
+            right=\Gm@rmargin,%
+            \ifGm@includemp%
+              includemp=true,%
+            \else%
+              includemp=false,%
+            \fi%
+            marginparwidth=\the\marginparwidth,%
+            marginparsep=\the\marginparsep,%
+            \if@reversemargin%
+              reversemarginpar=true,%
+            \else%
+              reversemarginpar=false,%
+            \fi%
+            bindingoffset=\the\Gm@bindingoffset%
+          }%
+          \edef\tud@geometry@vmargin{%
+            \ifGm@includehead%
+              includehead=true,%
+              top=\the\dimexpr\topmargin+1in\relax,%
+            \else%
+              includehead=false,%
+              top=\the\dimexpr\topmargin%
+                +\headheight+\headsep+1in\relax,%
+            \fi%
+            headheight=\the\headheight,%
+            headsep=\the\headsep,%
+            textheight=\the\textheight,%
+            footskip=\the\footskip,%
+            \ifGm@includefoot%
+              includefoot=true,%
+            \else%
+              includefoot=false,%
+            \fi%
+          }%
+        \fi%
       \fi%
       \setlength\tud@dim@headdiff{%
         \dimexpr\tud@dim@topmargin+\tud@dim@barheight+\tud@dim@headsep%
@@ -4192,6 +4219,7 @@
     }%
     \BeforeSelectAnyPageStyle{\tud@BeforeSelectAnyPageStyle{#1}}%
     \tud@recalctypearea%
+    \tud@setbleedmargin@default%
   }%
 }
 \newcommand*\TUD@parameter@define@ps[1]{%
