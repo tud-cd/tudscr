@@ -1,4 +1,4 @@
-% \CheckSum{1388}
+% \CheckSum{1392}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-title.dtx}[%
-  2016/03/09 v2.05 TUD-KOMA-Script (title)%
+  2016/04/03 v2.05 TUD-KOMA-Script (title)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -576,9 +576,9 @@
           \topmargin=\dimexpr\coverpagetopmargin-1in\relax%
           \oddsidemargin=\dimexpr\coverpageleftmargin-1in\relax%
           \evensidemargin=\dimexpr\coverpageleftmargin-1in\relax%
-          \textwidth=\dimexpr\paperwidth-\coverpageleftmargin%
+          \textwidth=\dimexpr\tud@dim@layoutwidth-\coverpageleftmargin%
             -\coverpagerightmargin\relax%
-          \textheight=\dimexpr\paperheight-\coverpagetopmargin%
+          \textheight=\dimexpr\tud@dim@layoutheight-\coverpagetopmargin%
             -\coverpagebottommargin\relax%
           \headheight=0pt%
           \headsep=0pt%
@@ -600,7 +600,7 @@
 % Höhe steht wie die Überschriften auf Teil- und Kapitelseiten.
 %    \begin{macrocode}
     \vspace*{%
-      \dimexpr\tud@dim@headdiff+\tud@dim@headingsvskip-\baselineskip\relax%
+      \dimexpr\tud@dim@headdiffskip+\tud@dim@headingsvskip-\baselineskip\relax%
     }%
     \vspace*{\pageheadingsvskip}%
     \setparsizes{\z@}{\z@}{\z@\@plus1fil}\par@updaterelative%
@@ -956,12 +956,12 @@
   \global\@topnum=\z@%
 %<*book|report|article>
   \vspace*{%
-    \dimexpr\tud@dim@headdiff+\tud@dim@headingsvskip-\baselineskip\relax%
+    \dimexpr\tud@dim@headdiffskip+\tud@dim@headingsvskip-\baselineskip\relax%
   }%
   \vspace*{\headingsvskip}%
 %</book|report|article>
 %<*poster>
-  \vspace*{\dimexpr\tud@dim@headdiff-\baselineskip\relax}%
+  \vspace*{\dimexpr\tud@dim@headdiffskip-\baselineskip\relax}%
 %</poster>
   \setparsizes{\z@}{\z@}{\z@\@plus1fil}\par@updaterelative%
 %    \end{macrocode}
@@ -1307,13 +1307,13 @@
       \begingroup%
         \oddsidemargin=\dimexpr\coverpageleftmargin-1in\relax%
         \evensidemargin=\dimexpr\coverpageleftmargin-1in\relax%
-        \textwidth=\dimexpr\paperwidth-\coverpageleftmargin%
+        \textwidth=\dimexpr\tud@dim@layoutwidth-\coverpageleftmargin%
           -\coverpagerightmargin\relax%
         \headheight=0pt%
         \headsep=0pt%
-        \footskip=\dimexpr\tud@dim@footsep+\tud@ta@footheight\relax%
+        \footskip=\dimexpr\tud@dim@footsep+\footheight\relax%
         \tud@ifverlower{2.03}{%
-          \footskip=\dimexpr\tud@dim@headsep+\tud@ta@footheight%
+          \footskip=\dimexpr\tud@dim@headsep+\footheight%
             -1.25\baselineskip\relax%
         }{}%
 %    \end{macrocode}
@@ -1349,7 +1349,7 @@
 % Seitenrande gesetzt werden. Dies hat mit der originären Definition von 
 % \cs{coverpagetopmargin} zu tun. 
 %    \begin{macrocode}
-        \textheight=\dimexpr\paperheight-\coverpagetopmargin%
+        \textheight=\dimexpr\tud@dim@layoutheight-\coverpagetopmargin%
           -\coverpagebottommargin-\tud@dim@extrabottommargin\relax%
         \topmargin=\dimexpr\coverpagetopmargin-1in\relax%
         \@colht=\textheight%
@@ -1358,7 +1358,7 @@
         \columnwidth=\textwidth%
         \hsize=\columnwidth%
         \linewidth=\hsize%
-        \tud@dim@headdiff=\z@%
+        \tud@dim@headdiffskip=\z@%
 %    \end{macrocode}
 % Weil bereits die Titelseite normalerweise die Seitenzahl eins bekommt, kann es
 % bei der Verwendung des Paketes \pkg{hyperref} zu einer Warnung aufgrund der
@@ -1409,7 +1409,11 @@
     }{%
       \bool@set@lock{@tud@cover@cdgeometry}{false}%
     }{%
-      \TUD@parameter@error{cdgeometry}{true,false}%
+      \ifstr{#1}{custom}{\bool@set@lock{@tud@cover@cdgeometry}{false}}{%
+        \ifstr{#1}{user}{\bool@set@lock{@tud@cover@cdgeometry}{false}}{%
+          \TUD@parameter@error{cdgeometry}{true,false}%
+        }%
+      }%
     }%
   }%
   \TUD@parameter@define{pagenumber}{\def\tud@titlepagenumber{#1}}%
