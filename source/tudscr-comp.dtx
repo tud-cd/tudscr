@@ -1,4 +1,4 @@
-% \CheckSum{929}
+% \CheckSum{959}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -578,6 +578,8 @@
 \@namedef{tud@v@2.04}{2}
 \@namedef{tud@v@2.04a}{2}
 \@namedef{tud@v@2.04b}{2}
+\@namedef{tud@v@2.04c}{2}
+\@namedef{tud@v@2.04d}{2}
 \@namedef{tud@v@2.05}{3}
 \@namedef{tud@v@last}{3}
 %    \end{macrocode}
@@ -1048,32 +1050,35 @@
 %
 % Sämtliche Optionen werden an das Paket \pkg{tudscrfonts} durchgereicht, 
 % welches automatisch am Ende der Präambel geladen wird, falls dies zuvor durch 
-% den anwender geschieht.
+% den Anwender geschieht. Für die Klassen von Klaus Bergmann, \TUDScript in der 
+% Version~v1.0 sowie die alternativen Posterklassen bleiben die vertikalen 
+% Abstände schriftgrößenunabhängig. Außerdem wird für die fetten Schriften ein
+% stärkerer Schriftschnitt genutzt.
 %    \begin{macrocode}
-\PassOptionsToPackage{vspacing=false}{tudscrfonts}
+\PassOptionsToPackage{vspacing=false,cdfont=ultrabold}{tudscrfonts}
 \DeclareOption*{\PassOptionsToPackage{\CurrentOption}{tudscrfonts}}
 \ProcessOptions\relax
 \AtEndPreamble{%
-  \tud@fontsfix@wrn%
+  \tud@fontsfix@maybe@err%
   \RequirePackage{tudscrfonts}%
 }
 %    \end{macrocode}
-% \begin{macro}{\tud@fontsfix@wrn}
+% \begin{macro}{\tud@fontsfix@maybe@err}
 % \changes{v2.05}{2016/01/02}{neu}^^A
 % Je nachdem, ob das Paket zu spät oder mit einer falschen Klasse geladen 
 % wurde, wird eine Warnung ausgegeben.
 %    \begin{macrocode}
 \ifx\usepackage\RequirePackage
-  \newcommand*\tud@fontsfix@wrn{%
-    \PackageWarningNoLine{fix-tudscrfonts}{%
-      You should load `fix-tudscrfonts' before any\MessageBreak%
-      document class with `\string\RequirePackage'%
+  \newcommand*\tud@fontsfix@maybe@err{%
+    \PackageError{fix-tudscrfonts}{Package too late}{%
+      You must load `fix-tudscrfonts' before\MessageBreak%
+      any document class with `\string\RequirePackage'%
     }%
   }%
 \else
-  \newcommand*\tud@fontsfix@wrn{%
-    \PackageWarningNoLine{fix-tudscrfonts}{%
-      You should use `fix-tudscrfonts' only\MessageBreak%
+  \newcommand*\tud@fontsfix@maybe@err{%
+    \PackageError{fix-tudscrfonts}{Unsupported class found}{%
+      You have to use `fix-tudscrfonts' only\MessageBreak%
       with supported classes. These are: `tudbook',\MessageBreak%
       `tudbeamer', `tudfax', `tudform', `tudhaus',\MessageBreak%
       `tudletter', `tudposter' and `tudmathposter',\MessageBreak%
@@ -1084,7 +1089,7 @@
   }%
 \fi
 %    \end{macrocode}
-% \end{macro}^^A \tud@fontsfix@wrn
+% \end{macro}^^A \tud@fontsfix@maybe@err
 %
 % \iffalse
 %</option>
@@ -1123,7 +1128,7 @@
 %    \begin{macrocode}
 \newcommand*\tud@fontsfix@BeforeClass[2]{%
   \BeforeClass{#1}{%
-    \let\tud@fontsfix@wrn\relax%
+    \let\tud@fontsfix@maybe@err\relax%
     \tud@cmd@store{DeclareFixedFont}%
     \renewcommand*\DeclareFixedFont[6]{}%
     \tud@cmd@store{rmdefault}%
@@ -1214,15 +1219,6 @@
               {UniversLight}{m}{n}{\tud@head@fntsz}%
             \DeclareFixedFont{\univBoldHead}{\encodingdefault}%
               {UniversBold}{m}{n}{\tud@head@fntsz}%
-%    \end{macrocode}
-% Für die alten Klassen von Klaus Bergmann sowie \TUDScript in der Version~v1.0 
-% wird für die fetten Schriften ein stärkerer Schriftschnitt genutzt.
-%    \begin{macrocode}
-            \setsansfont{Univers Light}[%
-              BoldFont = Univers Bold,%
-              ItalicFont = Univers Light Oblique,%
-              BoldItalicFont = Univers Bold Oblique,%
-            ]%
           \else%
             \DeclareFixedFont{\univLightVII}{\encodingdefault}%
               {\tud@univers}{l}{n}{7}%
@@ -1252,10 +1248,6 @@
               {\tud@univers}{l}{n}{\tud@head@fntsz}%
             \DeclareFixedFont{\univBoldHead}{\encodingdefault}%
               {\tud@univers}{b}{n}{\tud@head@fntsz}%
-%    \end{macrocode}
-% Auch hier wird ein stärkerer Schriftschnitt für fette Schriften eingestellt.
-%    \begin{macrocode}
-            \renewcommand*\bfdefault{b}%
           \fi%
         \else%
           \DeclareFixedFont{\univLightVII}{\encodingdefault}%
@@ -1345,14 +1337,30 @@
 %    \begin{macrocode}
 \tud@fontsfix@BeforeClass{tudbook}{}
 \tud@fontsfix@AfterClass{tudbook}{%
-  \patchcmd{\@makechapterhead}{\dinBold\Huge\bfseries}%
-    {\bfseries\tud@disposition@font\Huge}{}{\tud@patch@wrn{@makechapterhead}}%
-  \patchcmd{\@makeschapterhead}{\dinBold\Huge\bfseries}%
-    {\bfseries\tud@disposition@font\Huge}{}{\tud@patch@wrn{@makeschapterhead}}%
-  \patchcmd{\section}{\dinBold\Large\bfseries}%
-    {\bfseries\tud@disposition@font\Large}{}{\tud@patch@wrn{section}}%
-  \patchcmd{\showtitle}{\dinBold\Huge\bfseries}%
-    {\bfseries\tud@disposition@font\Huge}{}{\tud@patch@wrn{showtitle}}%
+  \patchcmd{\@makechapterhead}%
+    {\dinBold\Huge\bfseries}%
+    {\tud@disposition@font[\bfseries]\Huge}%
+    {}{\tud@patch@wrn{@makechapterhead}}%
+  \patchcmd{\@makechapterhead}%
+    {\MakeUppercase}%
+    {\tud@makeuppercase}%
+    {}{\tud@patch@wrn{@makechapterhead}}%
+  \patchcmd{\@makeschapterhead}%
+    {\dinBold\Huge\bfseries}%
+    {\tud@disposition@font[\bfseries]\Huge}%
+    {}{\tud@patch@wrn{@makeschapterhead}}%
+  \patchcmd{\@makeschapterhead}%
+    {\MakeUppercase}%
+    {\tud@makeuppercase}%
+    {}{\tud@patch@wrn{@makeschapterhead}}%
+  \patchcmd{\section}%
+    {\dinBold\Large\bfseries\MakeUppercase}%
+    {\tud@disposition@font[\bfseries]\Large\tud@makeuppercase}%
+    {}{\tud@patch@wrn{section}}%
+  \patchcmd{\showtitle}%
+    {\dinBold\Huge\bfseries\MakeUppercase}%
+    {\tud@disposition@font[\bfseries]\Huge\tud@makeuppercase}%
+    {}{\tud@patch@wrn{showtitle}}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \showtitle
@@ -1381,15 +1389,32 @@
 %    \begin{macrocode}
 \tud@fontsfix@BeforeClass{tudmathposter}{}
 \tud@fontsfix@AfterClass{tudmathposter}{%
-  \setkomafont{title}{\bfseries\tud@disposition@font\Huge}%
-  \renewcommand*\subtitlefont{\mdseries\tud@disposition@font\huge}%
+  \apptocmd{\maketitle}{\vspace{-2em}}{}{\tud@patch@wrn{maketitle}}%
+  \setkomafont{title}{\tud@disposition@font[\bfseries]\Huge}%
+  \renewcommand*\subtitlefont{%
+    \ifstr{\mddefault}{l}{%
+      \tud@disposition@font[\fontseries{m}]%
+    }{%
+      \tud@disposition@font[\fontseries{bx}]%
+    }%
+    \huge%
+  }%
+  \renewcommand\preprocesstitle[1]{\tud@makeuppercase{#1}}%
   \if@mathevorgabe%
-    \renewcommand*\sectionfont{\univbn\LARGE}%
-    \renewcommand*\subsectionfont{\univbn\large}%
-  \else%
-    \newcommand*\sectionfont{\univbn\LARGE}%
-    \newcommand*\subsectionfont{\univbn\large}%
+    \undef\sectionfont%
+    \undef\subsectionfont%
   \fi%
+  \newcommand*\sectionfont{\tud@disposition@font[\bfseries]\LARGE}%
+  \newcommand*\subsectionfont{\sectionfont\large}%
+%    \end{macrocode}
+% Für die Schriftstärke in der Kopfzeile muss der Seitenstil angepasst und  
+% anschließend nochmals akiviert werden.
+%    \begin{macrocode}
+  \patchcmd{\ps@tudposter}%
+    {\textbf{\@einrichtung}}%
+    {\textbf{\fontseries{b}\selectfont\@einrichtung}}%
+    {}{\tud@patch@wrn{ps@tudposter}}%
+  \pagestyle{tudposter}%
 }
 %    \end{macrocode}
 % Die Klasse \cls{tudmathposter} lädt für die Einstellungen der Schriften das 

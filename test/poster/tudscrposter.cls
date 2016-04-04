@@ -53,14 +53,14 @@
 %% ============================================================================
 %% 
 %%% From File: tudscr-version.dtx
-\begingroup%
-  \catcode`\@11\relax%
-  \ifx\TUDVersion\undefined%
+\begingroup
+  \catcode`\@11\relax
+  \ifx\TUDVersion\undefined
     \newcommand*\@TUDVersion[1]{%
       \gdef\TUDVersion{#1}%
       \gdef\TUDScriptVersion{#1}%
-    }%
-  \else%
+    }
+  \else
     \newcommand*\@TUDVersion[1]{%
       \def\@tempa{#1}%
       \ifx\TUDVersion\@tempa\else%
@@ -71,15 +71,15 @@
           different TUD-KOMA-Script-Bundle versions%
         }%
       \fi%
-    }%
-  \fi%
-  \@TUDVersion{2016/01/16 v2.05 BETA TUD-KOMA-Script}%
-\endgroup%
+    }
+  \fi
+  \@TUDVersion{2016/04/04 v2.05 BETA TUD-KOMA-Script}
+\endgroup
 \NeedsTeXFormat{LaTeX2e}
 \providecommand*\tudscrmail{tudscr@gmail.com}
 \newcommand*\TUD@ProvidesClass[3]{%
   \ProvidesClass{#1}[%
-  2016/01/16 v2.05 BETA TUD-KOMA-Script
+  2016/04/04 v2.05 BETA TUD-KOMA-Script
     ^^J#3 (#2)%
   ]%
   \newcommand*\TUDClassName@KOMA{#2}%
@@ -99,7 +99,7 @@
 }
 \TUD@ProvidesClass{tudscrposter}{scrartcl}{poster class}
 \@ifundefined{TUDScript}{%
-  \DeclareRobustCommand{\TUDScript}{%
+  \DeclareRobustCommand\TUDScript{%
     \ifdin{TUD-KOMA-SCRIPT}{%
       \textsf{T\kern.05em U\kern.05em D\kern.1em-\kern.1em}\KOMAScript%
     }\csname xspace\endcsname%
@@ -129,17 +129,18 @@
     a TUD-KOMA-Script class%
   }%
 ]{tudscrfonts}
-\newif\if@tud@cdfont@din%
+\newif\if@tud@cdfont@din
+\newif\if@tud@cdfont@ultrabold
 \@tud@cdfont@dintrue
 \newcommand*\tud@cdfont{1}
-\newif\if@tud@cdfont@ultrabold%
 \TUD@key{cdfont}[true]{%
   \TUD@set@numkey{cdfont}{@tempa}{%
     \TUD@numkey@bool,%
     {light}{1},{lightfont}{1},{lite}{1},{litefont}{1},{noheavyfont}{1},%
     {heavy}{2},{heavyfont}{2},{bold}{2},{boldfont}{2},%
     {normalbold}{3},{boldnormal}{3},%
-    {extendedbold}{4},{boldextended}{4},{ultrabold}{4},{boldultra}{4},%
+    {ultrabold}{4},{boldultra}{4},{heavybold}{4},{boldheavy}{4},%
+    {extendedbold}{4},{boldextended}{4},%
     {nodin}{5},{nodinbold}{5},{noDIN}{5},{noDINBold}{5},%
     {din}{6},{dinbold}{6},{DIN}{6},{DINBold}{6},%
     {nohead}{7},{nocdhead}{7},{noheadfont}{7},{noheadcdfont}{7},%
@@ -255,7 +256,7 @@
     \if@atdocument\tud@font@skip@set\fi%
   \fi%
 }
-\TUDExecuteOptions{vspacing=true}%
+\TUDExecuteOptions{vspacing=true}
 \DefineFamilyMember{KOMA}
 \DefineFamilyKey{KOMA}{fontsize}{%
   \if@atdocument\AtEndOfFamilyOptions{\tud@font@skip@set}\fi%
@@ -392,6 +393,7 @@
     {color}{6},{colour}{6},%
     {full}{6},{colorfull}{6},{fullcolor}{6},{colourfull}{6},{fullcolour}{6},%
     {textwidth}{7},{slim}{7},{slimhead}{7},{nowide}{7},{nowidehead}{7},%
+    {narrow}{7},{narrowhead}{7},{small}{7},{smallhead}{7},%
     {paperwidth}{8},{wide}{8},{widehead}{8}%
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
@@ -1022,6 +1024,8 @@
 \@namedef{tud@v@2.04}{2}
 \@namedef{tud@v@2.04a}{2}
 \@namedef{tud@v@2.04b}{2}
+\@namedef{tud@v@2.04c}{2}
+\@namedef{tud@v@2.04d}{2}
 \@namedef{tud@v@2.05}{3}
 \@namedef{tud@v@last}{3}
 \newcommand*\tud@ifverlower[1]{%
@@ -1128,7 +1132,7 @@
   \@ifpackageloaded{graphicx}{}{%
     \@ifpackageloaded{graphics}{%
       \ClassWarningNoLine{\TUDClassName}{%
-        The package `graphics' was superseded by `graphicx',\MessageBreak%
+        Package `graphics' was superseded by `graphicx',\MessageBreak%
         which now will be loaded automatically%
       }%
     }{}%
@@ -1175,16 +1179,16 @@
 \newif\if@tud@dinbold
 \newif\if@tud@dinboldmath
 \newcommand*\tud@font@nofontspecerror{}
-\IfFileExists{expl3.sty}{\@tempswatrue}{\@tempswafalse}%
+\IfFileExists{expl3.sty}{\@tempswatrue}{\@tempswafalse}
 \if@tempswa
-  \RequirePackage{expl3}%
-  \ExplSyntaxOn%
+  \RequirePackage{expl3}
+  \ExplSyntaxOn
   \renewcommand*\tud@font@nofontspecerror{%
     \__fontspec_font_suppress_not_found_error:
     \msg_redirect_name:nnn {fontspec}{font-not-found}{none}
   }%
-  \ExplSyntaxOff%
-\fi%
+  \ExplSyntaxOff
+\fi
 \newcommand*\tud@font@check{%
   \edef\@tempa##1##2{\lowercase{\noexpand\IfFileExists{##1##2.fd}}}%
   \def\@tempb##1{%
@@ -1310,15 +1314,15 @@
   \newcommand*\textubs{}%
   \newcommand*\textuxs{}%
   \newcommand*\textdbn{}%
-  \DeclareTextFontCommand{\textuln}{\univln}%
-  \DeclareTextFontCommand{\texturn}{\univrn}%
-  \DeclareTextFontCommand{\textubn}{\univbn}%
-  \DeclareTextFontCommand{\textuxn}{\univxn}%
-  \DeclareTextFontCommand{\textuls}{\univls}%
-  \DeclareTextFontCommand{\texturs}{\univrs}%
-  \DeclareTextFontCommand{\textubs}{\univbs}%
-  \DeclareTextFontCommand{\textuxs}{\univxs}%
-  \DeclareTextFontCommand{\textdbn}{\dinbn}%
+  \DeclareTextFontCommand\textuln{\univln}%
+  \DeclareTextFontCommand\texturn{\univrn}%
+  \DeclareTextFontCommand\textubn{\univbn}%
+  \DeclareTextFontCommand\textuxn{\univxn}%
+  \DeclareTextFontCommand\textuls{\univls}%
+  \DeclareTextFontCommand\texturs{\univrs}%
+  \DeclareTextFontCommand\textubs{\univbs}%
+  \DeclareTextFontCommand\textuxs{\univxs}%
+  \DeclareTextFontCommand\textdbn{\dinbn}%
   \undef\tud@font@init%
 }
 \newcommand*\tud@font@fallback[3]{%
@@ -1490,7 +1494,7 @@
             \setsansfont{Univers}[%
               BoldFont = Univers Black,%
               ItalicFont = Univers Oblique,%
-              BoldItalicFont = Univers Black Oblique,
+              BoldItalicFont = Univers Black Oblique,%
             ]%
           \else% normalbold
             \setsansfont{Univers}[%
@@ -1510,9 +1514,9 @@
         \renewcommand*\ttdefault{\tud@univers t}%
         \renewcommand*\itdefault{\sldefault}%
         \ifnum\tud@cdfont=\@ne\relax% true
-          \if@tud@cdfont@ultrabold%
+          \if@tud@cdfont@ultrabold% ultrabold
             \renewcommand*\bfdefault{b}%
-          \else%
+          \else% normalbold
             \renewcommand*\bfdefault{m}%
           \fi%
           \renewcommand*\mddefault{l}%
@@ -1525,9 +1529,9 @@
             \def\mdseries@tt{l}%
           \fi%
         \else% heavy
-          \if@tud@cdfont@ultrabold%
+          \if@tud@cdfont@ultrabold% ultrabold
             \renewcommand*\bfdefault{eb}%
-          \else%
+          \else% normalbold
             \renewcommand*\bfdefault{b}%
           \fi%
           \renewcommand*\mddefault{m}%
@@ -1608,9 +1612,9 @@
 }
 \@tempcnta=\z@\relax
 \tud@font@greek@loop\tud@font@greek@declare
-\newcommand*\mv@univers{}%
-\newcommand*\mv@universbold{}%
-\newcommand*\mv@dinbold{}%
+\newcommand*\mv@univers{}
+\newcommand*\mv@universbold{}
+\newcommand*\mv@dinbold{}
 \newcommand*\tud@font@math@init{%
   \if@tud@fontspec\if@tud@cdmath%
     \ifboolexpr{bool {@tud@universmath} or bool {@tud@dinboldmath}}{%
@@ -1668,9 +1672,13 @@
     \SetSymbolFont{letters}{dinbold}{OML}{\tud@dinbold}{b}{sl}%
     \SetSymbolFont{symbols}{dinbold}{OMS}{\tud@dinbold}{b}{n}%
     \SetSymbolFont{largesymbols}{dinbold}{OMX}{iwona}{ebc}{n}%
+    \SetMathAlphabet{\mathrm}{dinbold}{OT1}{\tud@dinbold}{b}{n}%
+    \SetMathAlphabet{\mathnormal}{dinbold}{OML}{\tud@dinbold}{b}{sl}%
+    \SetMathAlphabet{\mathcal}{dinbold}{OMS}{lmsy}{b}{n}%
     \SetMathAlphabet{\mathbf}{dinbold}{OT1}{\tud@dinbold}{b}{n}%
     \SetMathAlphabet{\mathsf}{dinbold}{OT1}{\tud@dinbold}{b}{n}%
     \SetMathAlphabet{\mathit}{dinbold}{OT1}{\tud@dinbold}{b}{sl}%
+    \SetMathAlphabet{\mathtt}{dinbold}{OT1}{\tud@univers t}{b}{n}%
   \fi%
   \@ifpackageloaded{unicode-math}{%
     \let\tud@font@math@set\relax%
@@ -1791,12 +1799,11 @@
 }
 \patchcmd{\@uclcnotmath}{\@nonchangecase\ensuremath}{%
   \@nonchangecase\ensuremath\tud@uclcnotmath%
-}{}{\tud@patch@wrn{@uclcnotmath}}%
+}{}{\tud@patch@wrn{@uclcnotmath}}
 \newcommand*\tud@makeuppercase[1]{%
   \ifdin{\begingroup\MakeTextUppercase{#1}\endgroup}{#1}%
   \protect\vphantom{\"A\"O\"U}%
 }
-\AfterClass*{beamer}{\usefonttheme[onlymath]{serif}}
 \newcommand*\tud@raggedright{\raggedright}
 \newcommand*\tud@RaggedRight{\raggedright}
 \AfterPackage*{ragged2e}{%
@@ -1917,10 +1924,12 @@
     }%
   }%
 }
-\newcommand*\tud@multiple@@split{}%
+\newcommand*\tud@multiple@@split{}
 \newcommand*\tud@multiple@split[1]{%
   \expandafter\ifpatchable\expandafter{\csname#1\endcsname}{%
-    \@latex@warning@no@line}{\csuse{#1}\csgdef{#1}{}%
+    \@latex@warning@no@line%
+  }{%
+    \csuse{#1}\csgdef{#1}{}%
   }{}%
   \def\tud@multiple@@split##1\and##2\relax{%
     \expandafter\csname tud@split#1\endcsname{##1}{##2}%
@@ -2103,47 +2112,60 @@
 \newlength\tud@dim@line
 \newlength\tud@dim@heavyline
 \newlength\tud@dim@thinline
-\newlength\tud@dim@headdiff
 \newlength\tud@dim@headingsvskip
+\newlength\tud@dim@headdiff
+\newlength\tud@dim@headdiffskip
 \tud@ifverlower{2.03}{\newlength\tud@dim@ddcdiff}{}
 \newif\if@tud@geometry@adjust
+\newlength\tud@dim@layoutheight
+\newlength\tud@dim@layoutwidth
+\newlength\tud@dim@layouthoffset
+\newlength\tud@dim@layoutvoffset
 \newcommand*\tud@geometry@set{%
+  \setlength\tud@dim@layoutheight{\paperheight}%
+  \setlength\tud@dim@layoutwidth{\paperwidth}%
+  \ifGm@layout%
+    \setlength\tud@dim@layoutheight{\Gm@layoutheight}%
+    \setlength\tud@dim@layoutwidth{\Gm@layoutwidth}%
+  \fi%
+  \setlength\tud@dim@layouthoffset{\Gm@layouthoffset}%
+  \setlength\tud@dim@layoutvoffset{\Gm@layoutvoffset}%
   \tud@ifverlower{2.05}{%
-    \ifdim\paperheight<\dimexpr105mm+1.5mm\relax%
+    \ifdim\tud@dim@layoutheight<\dimexpr105mm+1.5mm\relax%
       \def\@tempa{0}%
-    \else\ifdim\paperheight<\dimexpr148mm+1.5mm\relax%
+    \else\ifdim\tud@dim@layoutheight<\dimexpr148mm+1.5mm\relax%
       \def\@tempa{1}%
-    \else\ifdim\paperheight<\dimexpr229mm+2mm\relax%
+    \else\ifdim\tud@dim@layoutheight<\dimexpr229mm+2mm\relax%
       \def\@tempa{2}%
-    \else\ifdim\paperheight<\dimexpr297mm+2mm\relax%
+    \else\ifdim\tud@dim@layoutheight<\dimexpr297mm+2mm\relax%
       \def\@tempa{3}%
-    \else\ifdim\paperheight<\dimexpr420mm+2mm\relax%
+    \else\ifdim\tud@dim@layoutheight<\dimexpr420mm+2mm\relax%
       \def\@tempa{4}%
-    \else\ifdim\paperheight<\dimexpr594mm+2mm\relax%
+    \else\ifdim\tud@dim@layoutheight<\dimexpr594mm+2mm\relax%
       \def\@tempa{5}%
-    \else\ifdim\paperheight<\dimexpr841mm+3mm\relax%
+    \else\ifdim\tud@dim@layoutheight<\dimexpr841mm+3mm\relax%
       \def\@tempa{6}%
-    \else\ifdim\paperheight<\dimexpr1189mm+3mm\relax%%
+    \else\ifdim\tud@dim@layoutheight<\dimexpr1189mm+3mm\relax%%
       \def\@tempa{7}%
     \else%
       \def\@tempa{8}%
     \fi\fi\fi\fi\fi\fi\fi\fi%
   }{%
-    \ifdim\paperheight<\dimexpr125mm+1.5mm\relax%
+    \ifdim\tud@dim@layoutheight<\dimexpr125mm+1.5mm\relax%
       \def\@tempa{0}%
-    \else\ifdim\paperheight<\dimexpr176mm+2mm\relax%
+    \else\ifdim\tud@dim@layoutheight<\dimexpr176mm+2mm\relax%
       \def\@tempa{1}%
-    \else\ifdim\paperheight<\dimexpr250mm+2mm\relax%
+    \else\ifdim\tud@dim@layoutheight<\dimexpr250mm+2mm\relax%
       \def\@tempa{2}%
-    \else\ifdim\paperheight<\dimexpr353mm+2mm\relax%
+    \else\ifdim\tud@dim@layoutheight<\dimexpr353mm+2mm\relax%
       \def\@tempa{3}%
-    \else\ifdim\paperheight<\dimexpr500mm+2mm\relax%
+    \else\ifdim\tud@dim@layoutheight<\dimexpr500mm+2mm\relax%
       \def\@tempa{4}%
-    \else\ifdim\paperheight<\dimexpr707mm+3mm\relax%
+    \else\ifdim\tud@dim@layoutheight<\dimexpr707mm+3mm\relax%
       \def\@tempa{5}%
-    \else\ifdim\paperheight<\dimexpr1000mm+3mm\relax%
+    \else\ifdim\tud@dim@layoutheight<\dimexpr1000mm+3mm\relax%
       \def\@tempa{6}%
-    \else\ifdim\paperheight<\dimexpr1414mm+3mm\relax%
+    \else\ifdim\tud@dim@layoutheight<\dimexpr1414mm+3mm\relax%
       \def\@tempa{7}%
     \else%
       \def\@tempa{8}%
@@ -2166,7 +2188,7 @@
         calculate a proper type area%
       }%
     \fi%
-    \tud@divide\@tempa{\paperheight}{148mm}%
+    \tud@divide\@tempa{\tud@dim@layoutheight}{148mm}%
     \setlength\tud@dim@widemargin{15mm}%
     \setlength\tud@dim@widemargin{\@tempa\tud@dim@widemargin}%
     \setlength\tud@dim@heavyline{0.5pt}%
@@ -2228,7 +2250,7 @@
         calculate a proper type area%
       }%
     \fi%
-    \tud@divide\@tempa{\paperheight}{1189mm}%
+    \tud@divide\@tempa{\tud@dim@layoutheight}{1189mm}%
     \setlength\tud@dim@widemargin{120mm}%
     \setlength\tud@dim@widemargin{\@tempa\tud@dim@widemargin}%
     \setlength\tud@dim@heavyline{4pt}%
@@ -2240,7 +2262,7 @@
     \edef\tud@head@fontsize{\strip@pt\@tempdima}%
   \fi%
   \ifnum\tud@geometry@calc=\tw@\relax%
-    \tud@divide\@tempa{\paperheight}{297mm}%
+    \tud@divide\@tempa{\tud@dim@layoutheight}{297mm}%
     \setlength\tud@dim@widemargin{\@tempa\tud@dim@widemargin}%
     \setlength\tud@dim@heavyline{\@tempa\tud@dim@heavyline}%
     \setlength\tud@dim@thinline{\@tempa\tud@dim@thinline}%
@@ -2263,6 +2285,26 @@
   \if@tud@geometry@adjust%
     \setlength\tud@dim@headsep{\dimexpr.707107\tud@dim@headsep\relax}%
     \setlength\tud@dim@footsep{\dimexpr.707107\tud@dim@footsep\relax}%
+  \fi%
+}
+\newif\if@tud@crop@center
+\AfterPackage{crop}{%
+  \pretocmd\CROP@center{\@tud@crop@centertrue}{}{\tud@patch@wrn{CROP@center}}
+}
+\newlength\bleedmargin
+\setlength\bleedmargin{\maxdimen}
+\newcommand*\tud@setbleedmargin@default{%
+  \ifdim\bleedmargin=\maxdimen\relax%
+    \@tempswafalse%
+    \scr@ifundefinedorrelax{CROP@@@marks}{}{%
+      \ifx\CROP@@@marks\vfil\else\@tempswatrue\fi%
+    }%
+    \ifGm@showcrop\@tempswatrue\fi%
+    \if@tempswa%
+      \setlength\bleedmargin{.05\tud@dim@widemargin}%
+    \else%
+      \setlength\bleedmargin{\z@}%
+    \fi%
   \fi%
 }
 \newcommand*\tud@ifsacrop{%
@@ -2320,9 +2362,10 @@
 \AfterPackage{scrlayer-scrpage}{%
   \DeclareNewLayer[%
     background,headsep,%
-    voffset=\tud@dim@logoy,%
     addhoffset=\dimexpr\tud@dim@logox-\tud@dim@widemargin\relax,%
     addwidth=\dimexpr-\tud@dim@logox+\tud@dim@widemargin\relax,%
+    voffset=\tud@dim@logoy,%
+    addvoffset=\tud@dim@layoutvoffset,%
     contents={%
       \tud@mainlogo@set%
       \tud@headlogo@option@set%
@@ -2331,28 +2374,37 @@
   ]{tudheadings.head.content}%
   \DeclareNewLayer[%
     background,%
+    width=\dimexpr\tud@dim@layoutwidth+2\bleedmargin\relax,%
+    addhoffset=\dimexpr\tud@dim@layouthoffset-\bleedmargin\relax,%
+    height=\dimexpr\tud@dim@topmargin+\bleedmargin\relax,%
+    addvoffset=\dimexpr\tud@dim@layoutvoffset-\bleedmargin\relax,%
     contents={%
       \ifnum\tud@head@bar>\tw@\relax% cdhead=color
         \color{HKS41}%
-        \rule{\layerwidth}{\tud@dim@topmargin}%
+        \rule{\layerwidth}{\layerheight}%
       \fi%
     },%
   ]{tudheadings.head.back}%
   \DeclareNewLayer[%
     background,%
+    width=\dimexpr\tud@dim@layoutwidth+2\bleedmargin\relax,%
+    addhoffset=\dimexpr\tud@dim@layouthoffset-\bleedmargin\relax,%
+    height=\tud@dim@barheight,%
     voffset=\tud@dim@topmargin,%
+    addvoffset=\tud@dim@layoutvoffset,%
     contents={%
       \ifnum\tud@head@bar>\@ne\relax% cdhead=barcolor/color
         \color{HKS41!60}%
         \setlength{\@tempdima}{\dimexpr\ht\strutbox-\tud@dim@barheight\relax}%
         \ifdim\@tempdima<\z@\relax\setlength\@tempdima{\z@}\fi%
-        \raisebox{\@tempdima}{\rule{\layerwidth}{\tud@dim@barheight}}%
+        \raisebox{\@tempdima}{\rule{\layerwidth}{\layerheight}}%
       \fi%
     },%
   ]{tudheadings.head.bar}%
   \DeclareNewLayer[%
     background,headsep,%
     voffset=\dimexpr\tud@dim@topmargin+\tud@dim@line\relax,%
+    addvoffset=\tud@dim@layoutvoffset,%
     contents={%
       \tud@head@font@set%
       \tud@head@text@set%
@@ -2362,9 +2414,10 @@
   \DeclareNewLayer[%
     background,headsep,%
     voffset=\dimexpr\tud@dim@topmargin-.5\tud@dim@line\relax,%
+    addvoffset=\tud@dim@layoutvoffset,%
     contents={%
       \ifnum\tud@head@bar<\tw@\relax% cdhead=nocolor/litecolor
-        \if@tud@head@widebar\else\tud@head@rule{\textwidth}\fi%
+        \if@tud@head@widebar\else\tud@head@rule{\layerwidth}\fi%
       \fi%
     },%
   ]{tudheadings.head.upline}%
@@ -2372,37 +2425,45 @@
     background,headsep,%
     voffset=\dimexpr\tud@dim@topmargin+\tud@dim@barheight%
       -.5\tud@dim@line\relax,%
+    addvoffset=\tud@dim@layoutvoffset,%
     contents={%
       \ifnum\tud@head@bar<\tw@\relax% cdhead=nocolor/litecolor
-        \if@tud@head@widebar\else\tud@head@rule{\textwidth}\fi%
+        \if@tud@head@widebar\else\tud@head@rule{\layerwidth}\fi%
       \fi%
     },%
   ]{tudheadings.head.lowline}%
   \DeclareNewLayer[%
     background,%
+    width=\dimexpr\tud@dim@layoutwidth+2\bleedmargin\relax,%
+    addhoffset=\dimexpr\tud@dim@layouthoffset-\bleedmargin\relax,%
     voffset=\dimexpr\tud@dim@topmargin-.5\tud@dim@line\relax,%
+    addvoffset=\tud@dim@layoutvoffset,%
     contents={%
       \ifnum\tud@head@bar<\tw@\relax% cdhead=nocolor/litecolor
-        \if@tud@head@widebar\tud@head@rule{\paperwidth}\fi%
+        \if@tud@head@widebar\tud@head@rule{\layerwidth}\fi%
       \fi%
     },%
   ]{tudheadings.head.uplinewide}%
   \DeclareNewLayer[%
     background,%
+    width=\dimexpr\tud@dim@layoutwidth+2\bleedmargin\relax,%
+    addhoffset=\dimexpr\tud@dim@layouthoffset-\bleedmargin\relax,%
     voffset=\dimexpr\tud@dim@topmargin+\tud@dim@barheight%
       -.5\tud@dim@line\relax,%
+    addvoffset=\tud@dim@layoutvoffset,%
     contents={%
       \ifnum\tud@head@bar<\tw@\relax% cdhead=nocolor/litecolor
-        \if@tud@head@widebar\tud@head@rule{\paperwidth}\fi%
+        \if@tud@head@widebar\tud@head@rule{\layerwidth}\fi%
       \fi%
     },%
   ]{tudheadings.head.lowlinewide}%
   \DeclareNewLayer[%
     background,foot,%
-    hoffset=0pt,%
-    width=\paperwidth,%
+    width=\dimexpr\tud@dim@layoutwidth+2\bleedmargin\relax,%
+    hoffset=\dimexpr\tud@dim@layouthoffset-\bleedmargin\relax,%
+    height=\dimexpr\tud@dim@layoutheight-\layeryoffset%
+      +\tud@dim@layoutvoffset+\bleedmargin\relax,%
     addvoffset=-\dp\strutbox,%
-    height=\dimexpr\paperheight-\layeryoffset\relax,%
     contents={%
       \if@tud@foot@colored%
         \let\@tempc\relax%
@@ -2459,7 +2520,8 @@
   }{}%
   \DeclareNewLayer[%
     background,foot,%
-    height=\dimexpr\paperheight-\layeryoffset\relax,%
+    height=\dimexpr\tud@dim@layoutheight-\layeryoffset%
+      +\tud@dim@layoutvoffset\relax,%
     contents={%
       \tud@footlogoheight@set%
       \setlength\@tempdima{\dimexpr\layerheight-\dp\strutbox\relax}%
@@ -2561,7 +2623,13 @@
   \DeclareNewPageStyleAlias{tudscrheadingsempty}{empty.tudheadings}%
   \newcommand*\tud@pagecolor{}%
   \DeclareNewLayer[%
-    background,page,%
+    background,%
+    area=%
+      {\dimexpr\tud@dim@layouthoffset-\bleedmargin\relax}%
+      {\dimexpr\tud@dim@layoutvoffset-\bleedmargin\relax}%
+      {\dimexpr\tud@dim@layoutwidth+2\bleedmargin\relax}%
+      {\dimexpr\tud@dim@layoutheight+2\bleedmargin\relax}%
+    ,%
     contents={%
       \ifdefvoid{\tud@pagecolor}{}{%
         \color{\tud@pagecolor}%
@@ -3103,7 +3171,7 @@
   \tud@footlogo@cmd@set{#1}{#2}%
   \setbox\z@\hbox{\tud@uselayerbox{foot@cmd}}%
   \usebox\z@\hspace*{-\wd\z@}%
-}%
+}
 \newkomafont{tudheadings}{\tud@color{\tud@foot@fontcolor}}
 \newcommand*\tud@footcontent@font{}
 \newcommand*\tud@footcontent@left{}
@@ -3259,16 +3327,19 @@
     \hbox to #2{}%
   \fi%
 }
+\newcommand*\tud@geometry@process{}
 \TUD@UnwindPackage{geometry}{%
-  \newcommand*\tud@geometry@process{\tud@geometry@set}%
+  \newif\ifGm@layout%
+  \let\Gm@layoutheight\paperheight%
+  \let\Gm@layoutwidth\paperwidth%
+  \let\Gm@layouthoffset\z@%
+  \let\Gm@layoutvoffset\z@%
+  \renewcommand*\tud@geometry@process{\tud@geometry@set}%
   \let\tud@BeforeSelectAnyPageStyle\@gobble%
 }
-\@tempswatrue
 \tud@ifsacrop{%
-  \@tempswafalse%
   \PreventPackageFromLoading{geometry}%
-}{}
-\if@tempswa%
+}{%
   \RequirePackage{geometry}[2010/09/12]%
   \newcommand*\tud@geometry@hmargin{}%
   \newcommand*\tud@geometry@vmargin{}%
@@ -3278,57 +3349,49 @@
   \@tud@geometry@enabledtrue%
   \newcommand*\tud@newgeometry[1]{%
     \@tud@geometry@enabledfalse%
+    \edef\@tempb{layoutoffset={\the\Gm@layouthoffset,\the\Gm@layoutvoffset}}%
+    \ifGm@layout%
+      \eappto\@tempb{,layoutsize={\the\Gm@layoutwidth,\the\Gm@layoutheight}}%
+    \fi%
     \if@atdocument%
-      \edef\@tempa{#1}%
-      \expandafter\newgeometry\expandafter{#1}%
+      \edef\@tempa{\@tempb,#1}%
+      \expandafter\newgeometry\expandafter{\@tempa}%
     \else%
+      \Gm@initnewgm%
       \edef\@tempa{%
-        reset,paperwidth=\the\paperwidth,paperheight=\the\paperheight,#1%
+        paperwidth=\the\paperwidth,paperheight=\the\paperheight,\@tempb,#1%
       }%
       \expandafter\geometry\expandafter{\@tempa}%
     \fi%
     \@tud@geometry@enabledtrue%
   }%
+  \newcommand*\tud@savegeometry[1]{%
+    \edef\Gm@restore{}%
+    \savegeometry{#1}%
+  }%
   \newcommand*\tud@loadgeometry[1]{%
     \@tud@geometry@enabledfalse%
     \loadgeometry{#1}%
     \@currsize%
+    \if@tud@crop@center\CROP@center\fi%
     \@tud@geometry@enabledtrue%
   }%
-  \newcommand*\tud@geometry@custom{}
-  \apptocmd{\geometry}{%
-    \if@tud@geometry@enabled%
-      \addto\tud@geometry@custom{,#1}%
-    \fi%
-  }{}{\tud@patch@wrn{geometry}}%
-  \AtEndPreamble{%
-    \tud@newgeometry{%
-      \tud@geometry@mpincl,%
-      \if@reversemargin%
-        reversemarginpar=true,%
-      \else%
-        reversemarginpar=false,%
-      \fi
-      bindingoffset=\the\ta@bcor,%
-      \tud@geometry@hincl,%
-      \tud@geometry@fincl,%
-      \tud@geometry@custom%
-    }%
-  }%
-  \apptocmd{\Gm@changelayout}{%
-    \if@tud@geometry@enabled\tud@recalctypearea\fi%
-  }{}{\tud@patch@wrn{Gm@changelayout}}%
-  \newcommand*\tud@geometry@process{%
+  \renewcommand*\tud@geometry@process{%
     \tud@geometry@set%
     \ifnum\tud@geometry<\tw@\relax% false/custom
-      \setlength\tud@ta@headdiff{%
-        \dimexpr\tud@dim@topmargin+\tud@dim@barheight+\tud@dim@headsep%
-          -\tud@ta@topmargin-\tud@ta@headheight-\tud@ta@headsep-1in\relax%
-      }%
-      \ifdim\tud@ta@headdiff<\z@\relax%
-        \addtolength\tud@dim@headsep{-\tud@ta@headdiff}%
-      \fi%
       \ifcase\tud@geometry\relax%
+        \ifGm@layout%
+          \tud@skip@store{paperheight}%
+          \tud@skip@store{paperwidth}%
+          \tud@cmd@store{tud@AfterChangingArea}%
+          \setlength\paperheight{\tud@dim@layoutheight}%
+          \setlength\paperwidth{\tud@dim@layoutwidth}%
+          \let\tud@AfterChangingArea\relax%
+          \recalctypearea%
+          \tud@skip@restore{paperheight}%
+          \tud@skip@restore{paperwidth}%
+          \tud@cmd@restore{tud@AfterChangingArea}%
+        \fi%
         \edef\tud@geometry@hmargin{%
           left=\the\dimexpr\oddsidemargin+1in-\ta@bcor\relax,%
           textwidth=\the\textwidth,%
@@ -3345,60 +3408,67 @@
         \edef\tud@geometry@vmargin{%
           \if@hincl%
             includehead=true,%
-            top=\the\dimexpr\tud@ta@topmargin+1in\relax,%
+            top=\the\dimexpr\topmargin+1in\relax,%
           \else%
             includehead=false,%
-            top=\the\dimexpr\tud@ta@topmargin%
-              +\tud@ta@headheight+\tud@ta@headsep+1in\relax,%
+            top=\the\dimexpr\topmargin%
+              +\headheight+\headsep+1in\relax,%
           \fi%
-          headheight=\the\tud@ta@headheight,%
-          headsep=\the\tud@ta@headsep,%
-          textheight=\the\tud@ta@textheight,%
+          headheight=\the\headheight,%
+          headsep=\the\headsep,%
+          textheight=\the\textheight,%
           \tud@geometry@fincl,%
-          footskip=\the\tud@ta@footskip%
+          footskip=\the\footskip%
         }%
       \else% custom
-        \edef\tud@geometry@hmargin{%
-          left=\Gm@lmargin,%
-          right=\Gm@rmargin,%
-          \ifGm@includemp%
-            includemp=true,%
-          \else%
-            includemp=false,%
-          \fi%
-          marginparwidth=\the\marginparwidth,%
-          marginparsep=\the\marginparsep,%
-          \if@reversemargin%
-            reversemarginpar=true,%
-          \else%
-            reversemarginpar=false,%
-          \fi%
-          bindingoffset=\the\Gm@bindingoffset%
-        }%
-        \edef\tud@geometry@vmargin{%
-          \ifGm@includehead%
-            includehead=true,%
-            top=\the\dimexpr\tud@ta@topmargin+1in\relax,%
-          \else%
-            includehead=false,%
-            top=\the\dimexpr\tud@ta@topmargin%
-              +\tud@ta@headheight+\tud@ta@headsep+1in\relax,%
-          \fi%
-          headheight=\the\tud@ta@headheight,%
-          headsep=\the\tud@ta@headsep,%
-          textheight=\the\tud@ta@textheight,%
-          footskip=\the\tud@ta@footskip,%
-          \ifGm@includefoot%
-            includefoot=true,%
-          \else%
-            includefoot=false,%
-          \fi%
-        }%
+        \ifGm@pass\else%
+          \edef\tud@geometry@hmargin{%
+            left=\Gm@lmargin,%
+            right=\Gm@rmargin,%
+            \ifGm@includemp%
+              includemp=true,%
+            \else%
+              includemp=false,%
+            \fi%
+            marginparwidth=\the\marginparwidth,%
+            marginparsep=\the\marginparsep,%
+            \if@reversemargin%
+              reversemarginpar=true,%
+            \else%
+              reversemarginpar=false,%
+            \fi%
+            bindingoffset=\the\Gm@bindingoffset%
+          }%
+          \edef\tud@geometry@vmargin{%
+            \ifGm@includehead%
+              includehead=true,%
+              top=\the\dimexpr\topmargin+1in\relax,%
+            \else%
+              includehead=false,%
+              top=\the\dimexpr\topmargin%
+                +\headheight+\headsep+1in\relax,%
+            \fi%
+            headheight=\the\headheight,%
+            headsep=\the\headsep,%
+            textheight=\the\textheight,%
+            footskip=\the\footskip,%
+            \ifGm@includefoot%
+              includefoot=true,%
+            \else%
+              includefoot=false,%
+            \fi%
+          }%
+        \fi%
       \fi%
-      \ifdim\tud@ta@headdiff<\z@\relax%
+      \setlength\tud@dim@headdiff{%
+        \dimexpr\tud@dim@topmargin+\tud@dim@barheight+\tud@dim@headsep%
+          -\topmargin-\headheight-\headsep-1in\relax%
+      }%
+      \ifdim\tud@dim@headdiff<\z@\relax%
+        \addtolength\tud@dim@headsep{-\tud@dim@headdiff}%
         \setlength\@tempdima{\z@}%
       \else%
-        \setlength\@tempdima{\tud@ta@headdiff}%
+        \setlength\@tempdima{\tud@dim@headdiff}%
       \fi%
       \edef\tud@geometry@tudmargin{%
         top=\the\dimexpr\tud@dim@topmargin+\tud@dim@barheight%
@@ -3406,18 +3476,18 @@
         headheight=\the\dimexpr\tud@dim@topmargin+\tud@dim@barheight%
           -\tud@dim@logoy\relax,%
         headsep=\the\tud@dim@headsep,%
-        textheight=\the\dimexpr\tud@ta@textheight-\@tempdima\relax,%
+        textheight=\the\dimexpr\textheight-\@tempdima\relax,%
         ignorehead%
       }%
       \tud@ifverlower{2.03}{%
         \setlength\tud@dim@ddcdiff{%
-          \dimexpr.6\tud@dim@topmargin-\tud@ta@footskip+\tud@dim@headsep%
-            +\tud@ta@footheight-1.25\baselineskip\relax%
+          \dimexpr.6\tud@dim@topmargin-\footskip+\tud@dim@headsep%
+            +\footheight-1.25\baselineskip\relax%
         }%
         \edef\tud@geometry@ddcmargin{%
-          textheight=\the\dimexpr\tud@ta@textheight-\tud@ta@headdiff%
+          textheight=\the\dimexpr\textheight-\tud@dim@headdiff%
             -\tud@dim@ddcdiff\relax,%
-          footskip=\the\dimexpr\tud@ta@footskip+\tud@dim@ddcdiff\relax%
+          footskip=\the\dimexpr\footskip+\tud@dim@ddcdiff\relax%
         }%
       }{}%
       \ifdim\tud@dim@extrabottommargin=\z@\relax\else%
@@ -3453,8 +3523,10 @@
           \fi%
         \fi%
       \fi%
-      \addtolength\@tempdimc{-\tud@ta@headsep}%
-      \setlength\@tempdimb{\dimexpr\paperwidth-\tud@dim@both-\ta@bcor\relax}%
+      \addtolength\@tempdimc{-\headsep}%
+      \setlength\@tempdimb{%
+        \dimexpr\tud@dim@layoutwidth-\tud@dim@both-\ta@bcor\relax%
+      }%
       \if@mincl%
         \addtolength\@tempdimb{-\@tempdimc}%
       \fi%
@@ -3463,7 +3535,7 @@
         textwidth=\the\@tempdimb,%
         \tud@geometry@mpincl,%
         marginparwidth=\the\@tempdimc,%
-        marginparsep=\the\dimexpr.5\tud@ta@headsep\relax,%
+        marginparsep=\the\dimexpr.5\headsep\relax,%
         \if@reversemargin%
           reversemarginpar=true,%
         \else%
@@ -3482,23 +3554,23 @@
         \edef\tud@geometry@vmargin{%
           \tud@geometry@hincl,%
           top=\the\dimexpr.5\tud@dim@both\relax,%
-          headheight=\the\tud@ta@headheight,%
+          headheight=\the\headheight,%
           headsep=\the\tud@dim@headsep,%
           bottom=\the\dimexpr.5\tud@dim@both+\tud@dim@extrabottommargin\relax,%
           \tud@geometry@fincl,%
-          footskip=\the\dimexpr\tud@dim@headsep+\tud@ta@footheight%
+          footskip=\the\dimexpr\tud@dim@headsep+\footheight%
             -1.25\baselineskip\relax%
         }%
       }{%
         \edef\tud@geometry@vmargin{%
           \tud@geometry@hincl,%
           top=\the\tud@dim@slimmargin,%
-          headheight=\the\tud@ta@headheight,%
-          headsep=\the\tud@ta@headsep,%
+          headheight=\the\headheight,%
+          headsep=\the\headsep,%
           bottom=\the\dimexpr\tud@dim@widemargin%
             +\tud@dim@extrabottommargin\relax,%
           \tud@geometry@fincl,%
-          footskip=\the\dimexpr\tud@dim@footsep+\tud@ta@footheight\relax%
+          footskip=\the\dimexpr\tud@dim@footsep+\footheight\relax%
         }%
       }%
       \edef\tud@geometry@tudmargin{%
@@ -3509,12 +3581,12 @@
         headsep=\the\tud@dim@headsep,%
         ignorehead%
       }%
-      \setlength\tud@ta@headdiff{%
+      \setlength\tud@dim@headdiff{%
         \dimexpr\tud@dim@topmargin+\tud@dim@barheight+\tud@dim@headsep%
           -\tud@dim@slimmargin\relax%
       }%
       \tud@ifverlower{2.03}{%
-        \setlength\tud@ta@headdiff{%
+        \setlength\tud@dim@headdiff{%
           \dimexpr\tud@dim@topmargin+\tud@dim@barheight+\tud@dim@headsep%
             -.5\tud@dim@both\relax%
         }%
@@ -3522,19 +3594,19 @@
         \edef\tud@geometry@ddcmargin{%
           \if@fincl%
             bottom=\the\dimexpr.5\tud@dim@both+\tud@dim@extrabottommargin%
-              +\tud@dim@ddcdiff+\tud@dim@headsep+\tud@ta@footheight%
+              +\tud@dim@ddcdiff+\tud@dim@headsep+\footheight%
               -1.25\baselineskip\relax,%
           \else%
             bottom=\the\dimexpr.5\tud@dim@both+\tud@dim@extrabottommargin%
               +\tud@dim@ddcdiff\relax,%
           \fi%
-          footskip=\the\dimexpr\tud@dim@headsep+\tud@ta@footheight%
+          footskip=\the\dimexpr\tud@dim@headsep+\footheight%
             -1.25\baselineskip+\tud@dim@ddcdiff\relax,%
         }%
       }{}%
     \fi%
-    \ifdim\tud@ta@headdiff<\z@\relax\setlength\tud@ta@headdiff{\z@}\fi%
-    \global\tud@ta@headdiff=\tud@ta@headdiff%
+    \ifdim\tud@dim@headdiff<\z@\relax\setlength\tud@dim@headdiff{\z@}\fi%
+    \global\tud@dim@headdiff=\tud@dim@headdiff%
     \if@tud@geometry@adjust%
       \setlength\tud@dim@headingsvskip{.3\tud@dim@topmargin}%
     \else%
@@ -3548,7 +3620,8 @@
     \tud@geometry@@process%
   }%
   \newcommand*\tud@geometry@@process{%
-    \edef\Gm@restore@org{\Gm@restore}%
+    \eappto\tud@geometry@hmargin{,layouthoffset=\the\Gm@layouthoffset}%
+    \eappto\tud@geometry@vmargin{,layoutvoffset=\the\Gm@layoutvoffset}%
     \tud@ifverlower{2.03}{%
       \edef\@tempa{%
         \tud@geometry@hmargin,%
@@ -3558,7 +3631,7 @@
         ignorehead,ignorefoot%
       }%
       \tud@newgeometry{\@tempa}%
-      \savegeometry{tudareaddc}%
+      \tud@savegeometry{tudareaddc}%
     }{}%
     \edef\@tempa{%
       \tud@geometry@hmargin,%
@@ -3566,13 +3639,13 @@
       \tud@geometry@tudmargin%
     }%
     \tud@newgeometry{\@tempa}%
-    \savegeometry{tudarea}%
+    \tud@savegeometry{tudarea}%
     \edef\@tempa{%
       \tud@geometry@hmargin,%
       \tud@geometry@vmargin%
     }%
     \tud@newgeometry{\@tempa}%
-    \savegeometry{typearea}%
+    \tud@savegeometry{typearea}%
     \if@atdocument%
       \ifstr{\tud@currentgeometry}{typearea}{}{%
         \expandafter\tud@loadgeometry\expandafter{\tud@currentgeometry}%
@@ -3600,7 +3673,7 @@
       includemp=false%
     \fi%
   }%
-\fi
+}
 \newcommand*\tud@currentgeometry{}
 \newcommand*\tud@BeforeSelectAnyPageStyle[1]{%
   \ifstr{#1}{\GetRealPageStyle{#1}}{%
@@ -3624,7 +3697,7 @@
           \gdef\tud@currentgeometry{tudarea}%
         }%
       }%
-      \setlength\tud@dim@headdiff{\z@}%
+      \setlength\tud@dim@headdiffskip{\z@}%
       \tud@font@koma@set{pagefoot}{\usekomafont{tudheadings}}%
       \tud@font@koma@set{pagenumber}{\usekomafont{tudheadings}}%
     }{%
@@ -3632,18 +3705,18 @@
         \tud@loadgeometry{typearea}%
         \gdef\tud@currentgeometry{typearea}%
       }%
-      \setlength\tud@dim@headdiff{\tud@ta@headdiff}%
+      \setlength\tud@dim@headdiffskip{\tud@dim@headdiff}%
       \ifnum\tud@geometry>\@ne\relax% true/symmetric/twoside
         \if@hincl%
-          \addtolength\tud@dim@headdiff{%
-            \dimexpr-\tud@ta@headheight-\tud@dim@headsep\relax%
+          \addtolength\tud@dim@headdiffskip{%
+            \dimexpr-\headheight-\tud@dim@headsep\relax%
           }%
         \fi%
       \fi%
       \tud@font@koma@unset{pagefoot}%
       \tud@font@koma@unset{pagenumber}%
     }%
-    \global\tud@dim@headdiff=\tud@dim@headdiff%
+    \global\tud@dim@headdiffskip=\tud@dim@headdiffskip%
   }{}%
 }
 \patchcmd{\cleardoubleoddpageusingstyle}{\pagestyle}{%
@@ -3667,24 +3740,7 @@
     }{}%
   }%
 }{}
-\newlength\tud@ta@textheight
-\newlength\tud@ta@topmargin
-\newlength\tud@ta@headheight
-\newlength\tud@ta@headsep
-\newlength\tud@ta@footheight
-\newlength\tud@ta@footskip
-\newlength\tud@ta@headdiff
 \newcommand*\tud@AfterChangingArea{%
-  \setlength\tud@ta@textheight{\textheight}%
-  \setlength\tud@ta@topmargin{\topmargin}%
-  \setlength\tud@ta@headheight{\headheight}%
-  \setlength\tud@ta@headsep{\headsep}%
-  \ifcsvoid{ta@fh}{%
-    \setlength\tud@ta@footheight{\footheight}%
-  }{%
-    \setlength\tud@ta@footheight{\ta@fh}%
-  }%
-  \setlength\tud@ta@footskip{\footskip}%
   \tud@geometry@process%
   \global\@tud@mainlogo@settrue%
   \gdef\tud@currentgeometry{}%
@@ -3692,11 +3748,65 @@
 }
 \newcommand*\tud@recalctypearea{%
   \ifcase\tud@geometry\relax%
-    \recalctypearea%
+    \csname @ta@usegeometryfalse\endcsname%
+    \ifGm@layout%
+      \tud@AfterChangingArea
+    \else%
+      \recalctypearea%
+    \fi
   \else%
     \tud@AfterChangingArea%
   \fi%
 }
+\@ifpackageloaded{geometry}{\@tempswatrue}{\@tempswafalse}
+\if@tempswa
+  \newcommand*\tud@geometry@custom{}%
+  \apptocmd{\geometry}{%
+    \ifbool{@tud@geometry@enabled}{\appto\tud@geometry@custom{,#1}}{}%
+  }{}{\tud@patch@wrn{geometry}}%
+  \apptocmd{\Gm@changelayout}{%
+    \ifboolexpr{bool {@tud@geometry@enabled} and bool {@atdocument}}{%
+      \ifnum\tud@geometry=\@ne\relax%
+        \tud@AfterChangingArea%
+      \else%
+        \expandafter\tud@loadgeometry\expandafter{\tud@currentgeometry}%
+      \fi%
+    }{}%
+  }{}{\tud@patch@wrn{Gm@changelayout}}%
+  \AtEndPreamble{%
+    \ifnum\tud@geometry=\@ne\relax\else%
+      \edef\tud@geometry@custom{%
+        left=\the\dimexpr\oddsidemargin+1in-\ta@bcor\relax,%
+        textwidth=\the\textwidth,%
+        marginparwidth=\the\marginparwidth,%
+        marginparsep=\the\marginparsep,%
+        bindingoffset=\the\ta@bcor,%
+        \if@hincl%
+          top=\the\dimexpr\topmargin+1in\relax,%
+        \else%
+          top=\the\dimexpr\topmargin%
+            +\headheight+\headsep+1in\relax,%
+        \fi%
+        headheight=\the\headheight,%
+        headsep=\the\headsep,%
+        textheight=\the\textheight,%
+        footskip=\the\footskip%
+      }%
+    \fi%
+    \tud@newgeometry{%
+      \tud@geometry@mpincl,%
+      \if@reversemargin%
+        reversemarginpar=true,%
+      \else%
+        reversemarginpar=false,%
+      \fi
+      bindingoffset=\the\ta@bcor,%
+      \tud@geometry@hincl,%
+      \tud@geometry@fincl,%
+      \tud@geometry@custom%
+    }%
+  }%
+\fi
 \AtEndPreamble{%
   \tud@ifsacrop{}{%
     \AfterCalculatingTypearea{\tud@AfterChangingArea}%
@@ -3706,6 +3816,7 @@
     }%
     \BeforeSelectAnyPageStyle{\tud@BeforeSelectAnyPageStyle{#1}}%
     \tud@recalctypearea%
+    \tud@setbleedmargin@default%
   }%
 }
 \newcommand*\TUD@parameter@define@ps[1]{%
@@ -3768,7 +3879,6 @@
       }{%
         \tud@disposition@font[\fontseries{bx}]%
       }%
-%      \tud@disposition@font%
       \usesizeofkomafont{section}%
       \tud@color{\tud@title@fontcolor}%
     }%
@@ -3879,7 +3989,7 @@
     \renewcommand*\tud@part@fontcolor{HKS41}%
   \fi%
 }{}{\tud@patch@wrn{tud@partheadstartvskip}}
-\ifcsdef{scr@v@3.18}{\@tempswatrue}{\@tempswafalse}%
+\ifcsdef{scr@v@3.18}{\@tempswatrue}{\@tempswafalse}
 \if@tempswa
   \newcommand*\tud@@startpart{}%
   \let\tud@@startpart\scr@@startpart%
@@ -3952,7 +4062,7 @@
   \ifblank{#1}{}{\tud@cmd@restore{#1}}%
   \tud@font@koma@unset{#2}%
 }
-\robustify{\footnote}%
+\robustify{\footnote}
 \newcommand*\tud@sectioning@uppercase[1]{%
   \begingroup%
     \if@tud@symbolheadings%
@@ -3968,8 +4078,8 @@
   \mdseries%
   \large%
 }
-\robustify{\thanks}%
-\robustify{\footnotemark}%
+\robustify{\thanks}
+\robustify{\footnotemark}
 \newcommand*\tud@title@uppercase[1]{%
   \let\@tempa\relax%
   \begingroup%
@@ -3984,8 +4094,8 @@
   \ifx\@tempa\relax\else\thanks\@tempa\fi%
 }
 \newcommand*\tud@title@fontcolor{}
-\newcommand*\tud@titlepagenumber{}%
-\let\tud@titlepagenumber\relax%
+\newcommand*\tud@titlepagenumber{}
+\let\tud@titlepagenumber\relax
 \newcommand*\tud@maketitle[1][]{%
   \begingroup%
     \TUD@parameter@set{title}{#1}%
@@ -4009,8 +4119,8 @@
     \thispagestyle{empty}%
   }%
 }{}{\tud@patch@wrn{titlepage}}
-\tud@cmd@store{maketitle}%
-\let\maketitle\tud@maketitle%
+\tud@cmd@store{maketitle}
+\let\maketitle\tud@maketitle
 \TUD@parameter{title}{%
   \TUD@parameter@define{cdtitle}[true]{\TUDoption{cdtitle}{#1}}%
   \TUD@parameter@let{cd}{cdtitle}%
@@ -4059,7 +4169,7 @@
 }
 \newcommand*\tud@@maketitlehead{%
   \global\@topnum=\z@%
-  \vspace*{\dimexpr\tud@dim@headdiff-\baselineskip\relax}%
+  \vspace*{\dimexpr\tud@dim@headdiffskip-\baselineskip\relax}%
   \setparsizes{\z@}{\z@}{\z@\@plus1fil}\par@updaterelative%
   \begingroup%
     \usekomafont{titlepage}%
@@ -4080,11 +4190,11 @@
     \ifx\@titlehead\@empty\else\usebox\z@\par\fi%
     \ifx\@subject\@empty\else\usebox\@ne\par\fi%
     {\usekomafont{title}{\tud@title@uppercase{\@title}\par}}%
-%    \vskip 2ex\@plus1ex\@minus1ex%
     \ifx\@subtitle\@empty\else%
+      \vskip 1ex\@plus.5ex\@minus.5ex%
       {\usekomafont{subtitle}{\tud@title@uppercase{\@subtitle}\par}}%
-      \vskip 2ex\@plus1ex\@minus1ex%
     \fi%
+    \vskip 2ex\@plus1ex\@minus1ex%
     \ifnum\col@number>\@ne\relax%
       \vspace*{-\multicolsep}%
     \fi%
@@ -4279,7 +4389,7 @@
   \tud@ifverlower{2.04}{\TUDoptions{vspacing=false}}{}%
 }
 %%% From File: tudscr-misc.dtx
-\newcounter{symbolheadings}%
+\newcounter{symbolheadings}
 \newcommand*\tudbookmark[1][]{\@gobbletwo}
 \newcommand*\tud@footnote@unhyper{}
 \AfterPackage{hyperref}{%
