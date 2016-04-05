@@ -1,4 +1,4 @@
-% \CheckSum{1350}
+% \CheckSum{1370}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-layout.dtx}[%
-  2016/04/04 v2.05 TUD-KOMA-Script (layout)%
+  2016/04/05 v2.05 TUD-KOMA-Script (layout)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -815,6 +815,13 @@
 % \end{macro}^^A \tud@section@fontcolor
 % \end{macro}^^A \tud@chapter@fontcolor
 % \end{macro}^^A \tud@part@fontcolor
+% \begin{macro}{\raggedtitle}
+% \changes{v2.05}{2016/04/05}{neu}^^A
+% Dieses Makro wird für die Ausrichtung des Titels bereitgehalten.
+%    \begin{macrocode}
+\providecommand*\raggedtitle{\raggedpart}
+%    \end{macrocode}
+% \end{macro}^^A \raggedtitle
 % \begin{KOMAfont}{parttitle}
 % \changes{v2.02}{2014/08/24}{neu}^^A
 % \begin{KOMAfont}{tud@heading}
@@ -888,6 +895,7 @@
 % \changes{v2.02}{2014/08/29}{Anpassungen für \pkg{fontspec}}^^A
 % \changes{v2.05}{2016/04/04}{Schrift für \val{subtitle} abhängig von
 %   \cs{mddefault}}^^A
+% \changes{v2.05}{2016/04/05}{Einstellung für Ausrichtung der Überschriften}^^A
 % Dieser Befehl kümmert sich darum, dass die gewählten Optionen für den
 % Seitenstil auch umgesetzt werden. Dabei wird insbesondere darauf Wert gelegt,
 % dass die Optionen auch im Dokument geändert und wiederhergestellt werden
@@ -937,12 +945,14 @@
 %</poster>
     \tud@font@koma@set{titlehead}{\usekomafont{titlepage}}%
     \tud@font@koma@set{title}{%
+      \raggedtitle%
       \usekomafont{disposition}%
       \tud@disposition@font%
       \tud@disposition@fontsize%
       \tud@color{\tud@title@fontcolor}%
     }%
     \tud@font@koma@set{subtitle}{%
+      \raggedtitle%
       \ifstr{\mddefault}{l}{%
         \tud@disposition@font[\fontseries{m}]%
       }{%
@@ -987,6 +997,7 @@
     }%
     \tud@sectioning@reset[addpart]{part}%
     \tud@font@koma@unset{partnumber}%
+    \tud@cmd@restore{raggedpart}%
 %    \end{macrocode}
 % Es werden die Standardbefehle gesichert und für das \CD angepasst. Einigen 
 % Makros werden mittels \cs{let} Definitionen von anderen Makros zugewiesen, 
@@ -1047,6 +1058,8 @@
 %<*book|report>
     \fi%
 %</book|report>
+    \tud@cmd@store{raggedpart}%
+    \renewcommand*\raggedpart{\tud@RaggedRight}%
   \fi%
 %    \end{macrocode}
 % Die Einstellungen für die Kapitel bzw. die folgenden Gliederungsebenen. Auch
@@ -1071,6 +1084,7 @@
     }%
     \tud@sectioning@reset[addchap]{chapter}%
     \tud@font@koma@unset{chapterprefix}%
+    \tud@cmd@restore{raggedchapter}%
 %    \end{macrocode}
 % Auch hier werden die Standardbefehle für ein mögliches Deaktivieren der
 % Optionen gesichert und anschließend geändert. Dabei erfolgt die Zuweisung der
@@ -1096,6 +1110,8 @@
       \tud@color{\tud@chapter@fontcolor}%
     }%
     \tud@font@koma@set{chapterprefix}{\usesizeofkomafont{partnumber}}%
+    \tud@cmd@store{raggedchapter}%
+    \renewcommand*\raggedchapter{\tud@RaggedRight}%
   \fi%
 %</book|report>
   \ifcase\tud@layout@section\relax% false
@@ -1105,6 +1121,7 @@
     \tud@sectioning@reset{minisec}%
     \tud@sectioning@reset{paragraph}%
     \tud@sectioning@reset{subparagraph}%
+    \tud@cmd@restore{raggedsection}%
 %    \end{macrocode}
 % Auch hier werden die Standardbefehle für ein mögliches Deaktivieren der
 % Optionen gesichert und anschließend geändert.
@@ -1137,6 +1154,8 @@
     \tud@sectioning@set{subparagraph}{%
       \tud@color{\tud@section@fontcolor}%
     }%
+    \tud@cmd@store{raggedsection}%
+    \renewcommand*\raggedsection{\tud@RaggedRight}%
   \fi%
 %    \end{macrocode}
 % Für Poster wird außerdem der passende Seitenstil und die Ausprägung von Kopf

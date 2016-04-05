@@ -1777,7 +1777,7 @@
   \if@tud@cdfont@din%
     \@dinbn\tud@raggedright%
   \else%
-    \sectfont#1\tud@RaggedRight%
+    \sectfont#1%
   \fi%
 }
 \newrobustcmd*\ifdin{%
@@ -3857,6 +3857,7 @@
 \AtEndPreamble{\tud@headings@set}
 \newcommand*\tud@part@fontcolor{}
 \newcommand*\tud@section@fontcolor{}
+\providecommand*\raggedtitle{\raggedpart}
 \newcommand*\tud@layout@process{%
   \ifcase\tud@layout@title\relax% false
     \renewcommand*\titlepagestyle{empty}%
@@ -3868,12 +3869,14 @@
     \renewcommand*\titlepagestyle{empty.tudheadings}%
     \tud@font@koma@set{titlehead}{\usekomafont{titlepage}}%
     \tud@font@koma@set{title}{%
+      \raggedtitle%
       \usekomafont{disposition}%
       \tud@disposition@font%
       \tud@disposition@fontsize%
       \tud@color{\tud@title@fontcolor}%
     }%
     \tud@font@koma@set{subtitle}{%
+      \raggedtitle%
       \ifstr{\mddefault}{l}{%
         \tud@disposition@font[\fontseries{m}]%
       }{%
@@ -3897,6 +3900,7 @@
     }%
     \tud@sectioning@reset[addpart]{part}%
     \tud@font@koma@unset{partnumber}%
+    \tud@cmd@restore{raggedpart}%
   \else% !false
     \tud@cmd@store{partheadstartvskip}%
     \let\partheadstartvskip\tud@partheadstartvskip%
@@ -3915,6 +3919,8 @@
         \tud@disposition@font%
         \tud@color{\tud@part@fontcolor}%
       }%
+    \tud@cmd@store{raggedpart}%
+    \renewcommand*\raggedpart{\tud@RaggedRight}%
   \fi%
   \ifcase\tud@layout@section\relax% false
     \tud@sectioning@reset[addsec]{section}%
@@ -3923,6 +3929,7 @@
     \tud@sectioning@reset{minisec}%
     \tud@sectioning@reset{paragraph}%
     \tud@sectioning@reset{subparagraph}%
+    \tud@cmd@restore{raggedsection}%
   \else% !false
     \renewcommand*\tud@section@fontcolor{}%
     \ifcase\tud@layout@section\relax\or\else% *color
@@ -3950,6 +3957,8 @@
     \tud@sectioning@set{subparagraph}{%
       \tud@color{\tud@section@fontcolor}%
     }%
+    \tud@cmd@store{raggedsection}%
+    \renewcommand*\raggedsection{\tud@RaggedRight}%
   \fi%
   \ifcase\tud@cd\relax% false
     \pagestyle{empty}%
