@@ -1998,9 +1998,7 @@
   authormore,office,telephone,telefax,emailaddress%
 }
 \newcommand*\tud@split@contactperson[2]{}
-\newcommand*\tud@split@contactperson@list{%
-  office,telephone,telefax,emailaddress%
-}
+\newcommand*\tud@split@contactperson@list{office,telephone,telefax,emailaddress}
 %%% From File: tudscr-locale.dtx
 \newcommand*\tud@locale@define[1]{%
   \providecommand*#1{%
