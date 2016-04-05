@@ -695,6 +695,51 @@
     \if@atdocument\tud@layout@process\fi%
   \fi%
 }
+\newcommand*\tud@pagecolor{}%
+\TUD@key{backgroundcolor}[true]{%
+  \TUD@set@numkey{backgroundcolor}{@tempa}{%
+    \TUD@numkey@bool,%
+    {nocolor}{0},{nocolour}{0},{none}{0},%
+    {color}{1},{colour}{1},{cdcolor}{1},{cdcolour}{1}%
+  }{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \ifcase\@tempa\relax% false
+      \renewcommand*\tud@pagecolor{}%
+      \if@atdocument\normalcolor\fi%
+    \else% true
+      \renewcommand*\tud@pagecolor{HKS41}%
+      \if@atdocument\color{white}\fi%
+    \fi%
+  \else%
+    \if@atdocument%
+      \tud@pagecolor@check{#1}{%
+        \renewcommand*\tud@pagecolor{#1}%
+      }%
+    \else%
+      \renewcommand*\tud@pagecolor{#1}%
+    \fi%
+    \FamilyKeyStateProcessed%
+  \fi%
+  \if@atdocument\tud@layout@process\fi%
+}
+\newcommand*\tud@pagecolor@check[2]{%
+  \@ifundefinedcolor{#1}{%
+    \ClassWarning{\TUDClassName}{%
+      The chosen color `#1' for background\MessageBreak%
+      is not defined%
+    }%
+    \renewcommand*\tud@pagecolor{}%
+  }{#2}%
+}
+\AfterPackage{xcolor}{%
+  \apptocmd\normalcolor{%
+    \ifstr{\tud@pagecolor}{HKS41}{\color{white}}{}%
+  }{}{\tud@patch@wrn{@uclcnotmath}}%
+  \AtBeginDocument{%
+    \tud@pagecolor@check{\tud@pagecolor}{}%
+    \normalcolor%
+  }%
+}
 \newcommand*\tud@font@koma@set[2]{%
   \ifcsdef{tud@font@koma@#1}{}{\addtokomafont{#1}{\@nameuse{tud@font@koma@#1}}}%
   \@namedef{tud@font@koma@#1}{#2\nobreak}%
@@ -2619,7 +2664,6 @@
   \DeclareNewPageStyleAlias{tudscrempty}{empty.tudheadings}%
   \DeclareNewPageStyleAlias{tudheadingsempty}{empty.tudheadings}%
   \DeclareNewPageStyleAlias{tudscrheadingsempty}{empty.tudheadings}%
-  \newcommand*\tud@pagecolor{}%
   \DeclareNewLayer[%
     background,%
     area=%
@@ -3867,6 +3911,7 @@
   }%
 }
 \AtEndPreamble{\tud@headings@set}
+\newcommand*\tud@title@fontcolor{}
 \newcommand*\tud@part@fontcolor{}
 \newcommand*\tud@section@fontcolor{}
 \providecommand*\raggedtitle{\raggedpart}
@@ -3947,6 +3992,9 @@
     \ifcase\tud@layout@section\relax\or\else% *color
       \renewcommand*\tud@section@fontcolor{HKS41}%
     \fi%
+    \ifstr{\tud@pagecolor}{HKS41}{%
+      \renewcommand*\tud@section@fontcolor{white}%
+    }{}%
     \tud@sectioning@set[addsec]{section}{%
       \tud@disposition@font%
       \tud@color{\tud@section@fontcolor}%
@@ -3974,20 +4022,25 @@
   \fi%
   \ifcase\tud@cd\relax% false
     \pagestyle{empty}%
+    \color{black}%
   \else% !false
     \pagestyle{empty.tudheadings}%
     \ifcase\tud@cd\relax\or% true
       \cs@std@lock{tud@head@bar}{0}%
       \bool@std@lock{@tud@foot@colored}{false}%
+      \color{black}%
     \or% litecolor
       \cs@std@lock{tud@head@bar}{1}%
       \bool@std@lock{@tud@foot@colored}{false}%
+      \color{HKS41}%
     \or% barcolor
       \cs@std@lock{tud@head@bar}{2}%
       \bool@std@lock{@tud@foot@colored}{false}%
+      \color{HKS41}%
     \else% bicolor/color/full
       \cs@std@lock{tud@head@bar}{3}%
       \bool@std@lock{@tud@foot@colored}{true}%
+      \color{HKS41}%
     \fi%
   \fi%
 }
@@ -4009,6 +4062,7 @@
   \ifcase\tud@layout@part\relax\or\else% *color
     \renewcommand*\tud@part@fontcolor{HKS41}%
   \fi%
+  \ifstr{\tud@pagecolor}{HKS41}{\renewcommand*\tud@part@fontcolor{white}}{}%
 }{}{\tud@patch@wrn{tud@partheadstartvskip}}
 \ifcsdef{scr@v@3.18}{\@tempswatrue}{\@tempswafalse}
 \if@tempswa
@@ -4114,7 +4168,6 @@
   \endgroup%
   \ifx\@tempa\relax\else\thanks\@tempa\fi%
 }
-\newcommand*\tud@title@fontcolor{}
 \newcommand*\tud@titlepagenumber{}
 \let\tud@titlepagenumber\relax
 \newcommand*\tud@maketitle[1][]{%
@@ -4154,6 +4207,7 @@
   \ifcase\tud@layout@title\relax\or\else% *color
     \renewcommand*\tud@title@fontcolor{HKS41}%
   \fi%
+  \ifstr{\tud@pagecolor}{HKS41}{\renewcommand*\tud@title@fontcolor{white}}{}%
   \par%
   \ifx\tud@titlepagenumber\relax\else%
     \ifnum\tud@titlepagenumber=\@ne\else%

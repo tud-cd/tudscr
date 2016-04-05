@@ -205,28 +205,50 @@
 \RequirePackage{amsfonts}
 \RequirePackage{calc}
 \setcounter{secnumdepth}{-1}
-\newcommand*\centersection[2][\@nil]{%
+\newcommand\sectiontopskip{\scr@section@beforeskip}
+\newcommand\subsectiontopskip{\scr@subsection@beforeskip}
+\DeclareNewSectionCommand[%
+  style=section,%
+  font={\usekomafont{section}},
+  level=1,%
+  indent=\z@,%
+  beforeskip=\z@,%
+  afterskip=2.3ex \@plus.2ex,%
+  tocindent=1.5em,%
+  tocnumwidth=2.3em,%
+]{topsection}
+\DeclareSectionCommand[%
+  style=section,%
+  font={\usekomafont{subsection}},
+  level=2,%
+  indent=\z@,%
+  beforeskip=\z@,%
+  afterskip=1.5ex \@plus .2ex,%
+  tocindent=3.8em,%
+  tocnumwidth=3.2em%
+]{topsubsection}
+\newcommand*\tud@center@section[3]{%
   \tud@cmd@store{raggedsection}%
   \let\raggedsection\centering%
-  \ifx#1\@nil\relax%
-    \section{#2}%
+  \ifx#2\@nil\relax%
+    \csname #1\endcsname{#3}%
   \else%
-    \section[#1]{#2}%
+    \csname #1\endcsname[#2]{#3}%
   \fi%
   \tud@cmd@restore{raggedsection}%
+}
+\newcommand*\centersection[2][\@nil]{%
+  \tud@center@section{section}{#1}{#2}%
 }
 \newcommand*\centersubsection[2][\@nil]{%
-  \tud@cmd@store{raggedsection}%
-  \let\raggedsection\centering%
-  \ifx#1\@nil\relax%
-    \subsection{#2}%
-  \else%
-    \subsection[#1]{#2}%
-  \fi%
-  \tud@cmd@restore{raggedsection}%
+  \tud@center@section{subsection}{#1}{#2}%
 }
-\newcommand\sectiontopskip{4ex}
-\newcommand\subsectiontopskip{1.5ex}
+\newcommand*\topcentersection[2][\@nil]{%
+  \tud@center@section{topsection}{#1}{#2}%
+}
+\newcommand*\topcentersubsection[2][\@nil]{%
+  \tud@center@section{topsubsection}{#1}{#2}%
+}
 \newenvironment{tablehere}
 {%
   \def\@captype{table}%
@@ -249,8 +271,6 @@
 \PassOptionsToPackage{table}{xcolor}
 \PassOptionsToPackage{oldcolors}{tudscrcolor}
 \RequirePackage{tudscrcolor}
-\renewcommand*\normalcolor{\color{HKS41}}
-\normalcolor
 \newif\if@tud@graytable
 \newcommand*\blautabelle{\@tud@graytablefalse}
 \newcommand*\grautabelle{\@tud@graytabletrue}
