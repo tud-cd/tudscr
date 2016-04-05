@@ -201,6 +201,66 @@
   \fi%
 }
 % ### für tudmathposter etc. in dtx
+\RequirePackage{amsmath}
+\RequirePackage{amsfonts}
+\RequirePackage{calc}
+\setcounter{secnumdepth}{-1}
+\newcommand*\centersection[2][\@nil]{%
+  \tud@cmd@store{raggedsection}%
+  \let\raggedsection\centering%
+  \ifx#1\@nil\relax%
+    \section{#2}%
+  \else%
+    \section[#1]{#2}%
+  \fi%
+  \tud@cmd@restore{raggedsection}%
+}
+\newcommand*\centersubsection[2][\@nil]{%
+  \tud@cmd@store{raggedsection}%
+  \let\raggedsection\centering%
+  \ifx#1\@nil\relax%
+    \subsection{#2}%
+  \else%
+    \subsection[#1]{#2}%
+  \fi%
+  \tud@cmd@restore{raggedsection}%
+}
+\newcommand\sectiontopskip{4ex}
+\newcommand\subsectiontopskip{1.5ex}
+\newenvironment{tablehere}
+{%
+  \def\@captype{table}%
+  \vskip\intextsep%
+  \ignorespaces%
+}{%
+  \vskip\intextsep%
+  \ignorespaces%
+}
+\newenvironment{figurehere}
+{%
+  \def\@captype{figure}%
+  \vskip\intextsep%
+  \ignorespaces%
+}{%
+  \vskip\intextsep%
+  \ignorespaces%
+}
+\RequirePackage{tabularx}
+\PassOptionsToPackage{table}{xcolor}
+\PassOptionsToPackage{oldcolors}{tudscrcolor}
+\RequirePackage{tudscrcolor}
+\renewcommand*\normalcolor{\color{HKS41}}
+\normalcolor
+\newif\if@tud@graytable
+\newcommand*\blautabelle{\@tud@graytablefalse}
+\newcommand*\grautabelle{\@tud@graytabletrue}
+\newenvironment{farbtabellen}{%
+  \if@tud@graytable%
+    \rowcolors{1}{HKS92!20}{HKS92!10}
+  \else%
+    \rowcolors{1}{HKS41!20}{HKS41!10}%
+  \fi%
+}{}
 \newcommand*\telefon{\telephone}
 \patchcmd{\tud@split@author@list}{telephone}{%
   telephone,telefon%
@@ -220,7 +280,53 @@
   \endgroup%
   \expandafter\webpage\expandafter{\@tempa}%
 }
-\newcommand*\institutslogofile[1]{\footlogo{,,,,,,#1,}}
+\newcommand*\fusszeile[2][]{\footcontent[#1]{#2}}
+\newcommand*\footcolumn[2]{%
+  \ifcase#1\relax\or%
+    \footcontent{#2}[*]%
+  \or%
+    \footcontent{*}[#2]%
+  \fi%
+}
+\newif\if@tud@mathposterfoot
+\newcommand*\tud@mathposterfootwidth{4.3\tud@dim@widemargin}
+\newcommand*\tudscrposterfoot{%
+  \@tud@mathposterfootfalse%
+  \footcontent{\tud@footcontent@left@poster}[\tud@footcontent@right@poster]%
+}
+\newcommand*\tudmathposterfoot{%
+  \@tud@mathposterfoottrue%
+  \footcontent[\small]%
+    {\tud@footcontent@left@poster[]}[{\tud@footcontent@right@poster[]}]%
+}
+\patchcmd\tud@footcontent@use{%
+  \hsize=\dimexpr(#2-\columnsep)/2\relax%
+}{%
+  \if@tud@mathposterfoot%
+    \hsize=\dimexpr(\tud@mathposterfootwidth-\columnsep)/2\relax%
+  \else%
+    \hsize=\dimexpr(#2-\columnsep)/2\relax%
+  \fi%
+}{}{\tud@patch@wrn{tud@footcontent@use}}
+\patchcmd\tud@footcontent@use{%
+  \hsize=\dimexpr(#2-\columnsep)/2-\@tempdimc\relax%
+}{%
+  \if@tud@mathposterfoot%
+    \hsize=\dimexpr(\tud@mathposterfootwidth-\columnsep)/2\relax%
+  \else%
+    \hsize=\dimexpr(#2-\columnsep)/2-\@tempdimc\relax%
+  \fi%
+}{}{\tud@patch@wrn{tud@footcontent@use}}
+%\tudmathposterfoot
+\newcommand*\zweitlogofile{\headlogo}
+\newcommand*\zweitlogo[1]{%
+  \PackageWarning{tudscrcomp}{%
+    It isn't possible to redefine the definition for\MessageBreak%
+    including a logo in the header. Please see the\MessageBreak%
+    documentation of \string\headlogo%
+  }%
+}
+\newcommand*\institutslogofile[1]{\footlogo{,,,,,,,#1,}}
 \newcommand*\institutslogo[1]{%
   \PackageWarning{tudscrcomp}{%
     It isn't possible to redefine the definition for\MessageBreak%
@@ -228,16 +334,26 @@
     documentation of \string\footlogo%
   }%
 }
-
-
-%\PassOptionsToPackage{oldcolors}{tudscrcolor}
-%\RequirePackage{tudscrcolor}
-%\newcommand\grautabelle{%
-%  \colorlet{tableoddcolor}{HKS92!20}%
-%  \colorlet{tableevencolor}{HKS92!10}%
-%}
-
-
+\newcommand*\drittlogofile[1]{%
+  \PackageWarning{tudscrcomp}{%
+    Nothing happened, you should use \string\footlogo\MessageBreak
+    instead. Please see the documentation of \string\footlogo\MessageBreak%
+    and option `ddc' or `ddcfoot'%
+  }%
+}
+\newcommand*\drittlogo[1]{%
+  \PackageWarning{tudscrcomp}{%
+    It isn't possible to redefine the definition for\MessageBreak%
+    including a logo in the footer. Please see the\MessageBreak%
+    documentation of \string\footlogo\space and option\MessageBreak%
+    `ddc' or `ddcfoot'%
+  }%
+}
+\ifnum\tud@cdfont>\z@\relax
+  \TUDoptions{cdfont=ultrabold}%
+\fi%
+\faculty{Fakult\"at Mathematik und Naturwissenschaften}
+\department{Fachrichtung Mathematik}
 % TODO \if@mathevorgabe prüfen %%%
 \endinput
 %%

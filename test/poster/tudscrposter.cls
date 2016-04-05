@@ -2723,8 +2723,9 @@
   \xdef\@specialstyle{\GetRealPageStyle{#1}}%
 }{}{\tud@patch@wrn{thispagestyle}}
 \newcommand*\tud@head@fontsize{}
-\newcommand*\tud@head@font@bold{}
 \newcommand*\tud@head@font@light{}
+\newcommand*\tud@head@font@bold{}
+\newcommand*\tud@head@font@@bold{}
 \newcommand*\tud@head@font@set{%
   \ifcase\tud@head@font\relax% false
     \ifnum\tud@cdfont>\z@\relax% true/heavy
@@ -2738,15 +2739,16 @@
     \fi%
   \fi%
   \if@tud@head@font@set%
-    \DeclareFixedFont{\tud@head@font@bold}{\encodingdefault}%
-      {\sfdefault}{\bfdefault}{\updefault}{\tud@head@fontsize}%
     \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
       {\sfdefault}{\mddefault}{\updefault}{\tud@head@fontsize}%
+    \DeclareFixedFont{\tud@head@font@bold}{\encodingdefault}%
+      {\sfdefault}{\bfdefault}{\updefault}{\tud@head@fontsize}%
+    \gdef\tud@head@font@@bold{%
+      \usefont{\encodingdefault}{\sfdefault}{\bfdefault}{\updefault}%
+    }%
     \ifcase\tud@head@font\relax\else% true/heavy
       \if@tud@univers%
         \if@tud@fontspec%
-          \DeclareFixedFont{\tud@head@font@bold}{\encodingdefault}%
-            {UniversBold}{m}{n}{\tud@head@fontsize}%
           \ifcase\tud@head@font\relax\or% true
             \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
               {UniversLight}{m}{n}{\tud@head@fontsize}%
@@ -2754,9 +2756,12 @@
             \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
               {UniversRegular}{m}{n}{\tud@head@fontsize}%
           \fi%
-        \else%
           \DeclareFixedFont{\tud@head@font@bold}{\encodingdefault}%
-            {\tud@univers}{b}{n}{\tud@head@fontsize}%
+            {UniversBold}{m}{n}{\tud@head@fontsize}%
+          \gdef\tud@head@font@@bold{%
+            \usefont{\encodingdefault}{UniversBold}{m}{n}%
+          }%
+        \else%
           \ifcase\tud@head@font\relax\or% true
             \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
               {\tud@univers}{l}{n}{\tud@head@fontsize}%
@@ -2764,6 +2769,11 @@
             \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
               {\tud@univers}{m}{n}{\tud@head@fontsize}%
           \fi%
+          \DeclareFixedFont{\tud@head@font@bold}{\encodingdefault}%
+            {\tud@univers}{b}{n}{\tud@head@fontsize}%
+          \gdef\tud@head@font@@bold{%
+            \usefont{\encodingdefault}{\tud@univers}{b}{n}%
+          }%
         \fi%
       \fi%
     \fi%
@@ -3196,13 +3206,17 @@
 \newcommand*\@@footcontent{}
 \def\@@footcontent#1#2[#3]{%
   \appto\tud@footcontent@font{#1\selectfont}%
-  \renewcommand*\tud@footcontent@left{#2}%
-  \renewcommand*\tud@footcontent@right{#3}%
+  \if\detokenize{*#2}\relax\else%
+    \renewcommand*\tud@footcontent@left{#2}%
+  \fi%
+  \if\detokenize{*#3}\relax\else%
+    \renewcommand*\tud@footcontent@right{#3}%
+  \fi%
 }
 \newcommand*\tud@newline@poster{}
-\newcommand*\tud@footcontent@left@poster{%
-  \ifx\contactname\@empty\else%
-    {\tud@head@font@bold\contactname}\newline%
+\newcommand*\tud@footcontent@left@poster[1][\contactname]{%
+  \ifx#1\@empty\else%
+    {\tud@head@font@@bold#1}\newline%
   \fi%
   Technische Universit\"at Dresden%
   \tud@foot@line@write{faculty}%
@@ -3211,7 +3225,7 @@
   \tud@foot@line@write{chair}%
   \tud@foot@line@write{professor}%
 }
-\newcommand*\tud@footcontent@right@poster{%
+\newcommand*\tud@footcontent@right@poster[1][\authorname]{%
   \def\tud@newline@poster{%
     \ifx\@authormore\@empty\else\newline\@authormore\fi%
     \ifx\@office\@empty\else\newline\@office\fi%
@@ -3226,8 +3240,8 @@
   }%
   \@tempswafalse%
   \ifx\@tempa\@empty\else%
-    \ifx\authorname\@empty\else%
-      {\tud@head@font@bold\authorname}\newline%
+    \ifx#1\@empty\else%
+      {\tud@head@font@@bold#1}\newline%
     \fi%
     \renewcommand*\tud@split@author[2]{%
       \tud@multiple@fields@store{@author}{##1}%
@@ -3250,7 +3264,7 @@
   \ifx\@contactperson\@empty\else%
     \if@tempswa\newline\fi%
     \ifx\contactpersonname\@empty\else%
-      {\tud@head@font@bold\contactpersonname}\newline%
+      {\tud@head@font@@bold\contactpersonname}\newline%
     \fi%
     \renewcommand*\tud@split@contactperson[2]{%
       \tud@multiple@fields@store{@contactperson}{##1}%
@@ -3315,7 +3329,7 @@
       The content for the footer (`\string\footcontent')\MessageBreak%
       is too high. You should either reduce the content\MessageBreak%
       or lower the fontsize via the optional argument.%
-      \ifnum\tud@geometry>\@ne\relax% true/symmetric/twoside
+      \ifnum\tud@geometry>\@ne% true/symmetric/twoside
         \MessageBreak%
         Alternatively you can enlarge the bottom margin\MessageBreak%
         by using option `extrabottommargin'.%
