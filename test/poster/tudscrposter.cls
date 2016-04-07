@@ -712,9 +712,7 @@
     \fi%
   \else%
     \if@atdocument%
-      \tud@pagecolor@check{#1}{%
-        \renewcommand*\tud@pagecolor{#1}%
-      }%
+      \tud@if@pagecolor{#1}{\renewcommand*\tud@pagecolor{#1}}%
     \else%
       \renewcommand*\tud@pagecolor{#1}%
     \fi%
@@ -722,7 +720,7 @@
   \fi%
   \if@atdocument\tud@layout@process\fi%
 }
-\newcommand*\tud@pagecolor@check[2]{%
+\newcommand*\tud@if@pagecolor[2]{%
   \@ifundefinedcolor{#1}{%
     \ClassWarning{\TUDClassName}{%
       The chosen color `#1' for background\MessageBreak%
@@ -736,7 +734,7 @@
     \ifstr{\tud@pagecolor}{HKS41}{\color{white}}{}%
   }{}{\tud@patch@wrn{@uclcnotmath}}%
   \AtBeginDocument{%
-    \tud@pagecolor@check{\tud@pagecolor}{}%
+    \ifdefvoid{\tud@pagecolor}{}{\tud@if@pagecolor{\tud@pagecolor}{}}%
     \normalcolor%
   }%
 }
@@ -1305,27 +1303,195 @@
   \fi%
   \undef\tud@font@check%
 }
+\newif\if@tud@mweights
+\AfterPackage*{mweights}{\@tud@mweightstrue}
+\newcommand*\tud@font@set{%
+  \if@atdocument%
+    \ifnum\tud@cdfont>\z@\relax% true/heavy
+      \if@tud@univers\else%
+        \ClassWarning{\TUDClassName}%
+          {`Univers' fonts not found}%
+      \fi%
+      \if@tud@dinbold\else%
+        \ClassWarning{\TUDClassName}%
+          {`DIN Bold' fonts not found}%
+      \fi%
+    \fi%
+  \fi%
+  \if@tud@mweights%
+    \ifdef{\bfseries@rm}{}{\edef\bfseries@rm{\bfdefault}}%
+    \ifdef{\bfseries@sf}{}{\edef\bfseries@sf{\bfdefault}}%
+    \ifdef{\bfseries@tt}{}{\edef\bfseries@tt{\bfdefault}}%
+    \ifdef{\mdseries@rm}{}{\edef\mdseries@rm{\mddefault}}%
+    \ifdef{\mdseries@sf}{}{\edef\mdseries@sf{\mddefault}}%
+    \ifdef{\mdseries@tt}{}{\edef\mdseries@tt{\mddefault}}%
+  \fi%
+  \ifcase\tud@cdfont\relax% false
+    \tud@cmd@restore{rmdefault}%
+    \tud@cmd@restore{sfdefault}%
+    \tud@cmd@restore{ttdefault}%
+    \tud@cmd@restore{bfdefault}%
+    \tud@cmd@restore{mddefault}%
+    \tud@cmd@restore{itdefault}%
+    \tud@cmd@restore{familydefault}%
+    \tud@cmd@restore{seriesdefault}%
+    \tud@cmd@restore{shapedefault}%
+    \if@tud@mweights%
+      \tud@cmd@restore{bfseries@rm}%
+      \tud@cmd@restore{bfseries@sf}%
+      \tud@cmd@restore{bfseries@tt}%
+      \tud@cmd@restore{mdseries@rm}%
+      \tud@cmd@restore{mdseries@sf}%
+      \tud@cmd@restore{mdseries@tt}%
+    \fi%
+    \bool@std@lock{@tud@cdmath}{false}%
+    \ifcase\tud@cd\relax% false
+      \cs@std@lock{tud@head@font}{0}%
+    \else% !false
+      \cs@std@lock{tud@head@font}{1}%
+    \fi%
+  \else% true/heavy
+    \tud@cmd@store{rmdefault}%
+    \tud@cmd@store{sfdefault}%
+    \tud@cmd@store{ttdefault}%
+    \tud@cmd@store{bfdefault}%
+    \tud@cmd@store{mddefault}%
+    \tud@cmd@store{itdefault}%
+    \tud@cmd@store{familydefault}%
+    \tud@cmd@store{seriesdefault}%
+    \tud@cmd@store{shapedefault}%
+    \if@tud@mweights%
+      \tud@cmd@store{bfseries@rm}%
+      \tud@cmd@store{bfseries@sf}%
+      \tud@cmd@store{bfseries@tt}%
+      \tud@cmd@store{mdseries@rm}%
+      \tud@cmd@store{mdseries@sf}%
+      \tud@cmd@store{mdseries@tt}%
+    \fi%
+    \bool@std@lock{@tud@cdmath}{true}%
+    \cs@std@lock{tud@head@font}{\tud@cdfont}%
+    \if@tud@univers%
+      \if@tud@fontspec%
+        \setsansfont{Univers}[%
+          FontFace = {l}{\updefault}{Univers Light},%
+          FontFace = {m}{\updefault}{Univers},%
+          FontFace = {b}{\updefault}{Univers Bold},%
+          FontFace = {bx}{\updefault}{Univers Bold},%
+          FontFace = {eb}{\updefault}{Univers Black},%
+          FontFace = {l}{\sldefault}{Univers Light Oblique},%
+          FontFace = {m}{\sldefault}{Univers Oblique},%
+          FontFace = {b}{\sldefault}{Univers Bold Oblique},%
+          FontFace = {bx}{\sldefault}{Univers Bold Oblique},%
+          FontFace = {eb}{\sldefault}{Univers Black Oblique},%
+          NFSSFamily = \tud@univers%
+        ]%
+        \setmonofont{LMMono10-Regular}[%
+          FontFace = {l}{\updefault}{LMMonoLt10-Regular},%
+          FontFace = {m}{\updefault}{LMMono10-Regular},%
+          FontFace = {b}{\updefault}{LMMonoLt10-Bold},%
+          FontFace = {bx}{\updefault}{LMMonoLt10-Bold},%
+          FontFace = {eb}{\updefault}{LMMonoLt10-Bold},%
+          FontFace = {l}{\sldefault}{LMMonoLt10-Oblique},%
+          FontFace = {m}{\sldefault}{LMMonoSlant10-Regular},%
+          FontFace = {b}{\sldefault}{LMMonoLt10-BoldOblique},%
+          FontFace = {bx}{\sldefault}{LMMonoLt10-BoldOblique},%
+          FontFace = {eb}{\sldefault}{LMMonoLt10-BoldOblique},%
+          NFSSFamily = \tud@univers t%
+        ]%
+      \else%
+        \renewcommand*\sfdefault{\tud@univers}%
+        \renewcommand*\ttdefault{\tud@univers t}%
+      \fi%
+      \ifnum\tud@cdfont=\@ne\relax% true
+        \if@tud@cdfont@ultrabold% ultrabold
+          \renewcommand*\bfdefault{b}%
+        \else% normalbold
+          \renewcommand*\bfdefault{m}%
+        \fi%
+        \renewcommand*\mddefault{l}%
+        \if@tud@mweights%
+          \def\bfseries@rm{m}%
+          \def\bfseries@sf{m}%
+          \def\bfseries@tt{m}%
+          \def\mdseries@rm{l}%
+          \def\mdseries@sf{l}%
+          \def\mdseries@tt{l}%
+        \fi%
+      \else% heavy
+        \if@tud@cdfont@ultrabold% ultrabold
+          \renewcommand*\bfdefault{eb}%
+        \else% normalbold
+          \renewcommand*\bfdefault{b}%
+        \fi%
+        \renewcommand*\mddefault{m}%
+        \if@tud@mweights%
+          \def\bfseries@rm{b}%
+          \def\bfseries@sf{b}%
+          \def\bfseries@tt{b}%
+          \def\mdseries@rm{m}%
+          \def\mdseries@sf{m}%
+          \def\mdseries@tt{m}%
+        \fi%
+      \fi%
+      \renewcommand*\rmdefault{\sfdefault}%
+      \renewcommand*\itdefault{\sldefault}%
+    \fi%
+    \renewcommand*\familydefault{\sfdefault}%
+    \renewcommand*\seriesdefault{\mddefault}%
+    \renewcommand*\shapedefault{\updefault}%
+  \fi%
+  \if@tud@mweights%
+    \edef\rmdef@ult{\rmdefault}%
+    \edef\sfdef@ult{\sfdefault}%
+    \edef\ttdef@ult{\ttdefault}%
+    \edef\bfdef@ult{\bfdefault}%
+    \edef\mddef@ult{\mddefault}%
+  \fi%
+  \ifdefined\tud@font@math@init\else\tud@font@math@set\fi%
+  \tud@font@skip@set%
+  \normalfont\selectfont%
+  \tud@layout@process%
+  \global\@tud@head@font@settrue%
+}
+\newcommand*\tud@font@skip@set{%
+  \if@tud@vspacing%
+    \tud@skip@store{smallskipamount}%
+    \tud@skip@store{medskipamount}%
+    \tud@skip@store{bigskipamount}%
+    \tud@skip@store{abovecaptionskip}%
+    \tud@skip@store{belowcaptionskip}%
+    \tud@skip@store{columnsep}%
+    \tud@font@skip@@set%
+  \else%
+    \tud@skip@restore{smallskipamount}%
+    \tud@skip@restore{medskipamount}%
+    \tud@skip@restore{bigskipamount}%
+    \tud@skip@restore{abovecaptionskip}%
+    \tud@skip@restore{belowcaptionskip}%
+    \tud@skip@restore{columnsep}%
+  \fi%
+}
+\newcommand*\tud@font@skip@@set{%
+  \scr@setlength\smallskipamount{\dimexpr\f@baselineskip/4\relax}%
+    {\dimexpr\f@baselineskip/12\relax}{\dimexpr\f@baselineskip/12\relax}%
+  \scr@setlength\medskipamount{\dimexpr\f@baselineskip/2\relax}%
+    {\dimexpr\f@baselineskip/6\relax}{\dimexpr\f@baselineskip/6\relax}%
+  \scr@setlength\bigskipamount{\f@baselineskip}%
+    {\dimexpr\f@baselineskip/3\relax}{\dimexpr\f@baselineskip/3\relax}%
+  \tud@skip@set\abovecaptionskip{\dimexpr\f@baselineskip*4/5\relax}%
+  \tud@skip@set\belowcaptionskip{\z@}%
+  \tud@skip@set\columnsep{1.1\baselineskip}%
+}
 \newcommand*\tud@font@init{%
   \if@tud@univers%
-    \if@tud@fontspec%
-      \newfontface\univln{Univers Light}[NFSSFamily=UniversLight]
-      \newfontface\univrn{Univers}[NFSSFamily=UniversRegular]
-      \newfontface\univbn{Univers Bold}[NFSSFamily=UniversBold]
-      \newfontface\univxn{Univers Black}[NFSSFamily=UniversBlack]
-      \newfontface\univls{Univers Light Oblique}[NFSSFamily=UniversLightOblique]
-      \newfontface\univrs{Univers Oblique}[NFSSFamily=UniversRegularOblique]
-      \newfontface\univbs{Univers Bold Oblique}[NFSSFamily=UniversBoldOblique]
-      \newfontface\univxs{Univers Black Oblique}[NFSSFamily=UniversBlackOblique]
-    \else%
-      \newrobustcmd*\univln{\usefont{\encodingdefault}{\tud@univers}{l}{n}}%
-      \newrobustcmd*\univrn{\usefont{\encodingdefault}{\tud@univers}{m}{n}}%
-      \newrobustcmd*\univbn{\usefont{\encodingdefault}{\tud@univers}{b}{n}}%
-      \newrobustcmd*\univxn{\usefont{\encodingdefault}{\tud@univers}{eb}{n}}%
-      \newrobustcmd*\univls{\usefont{\encodingdefault}{\tud@univers}{l}{sl}}%
-      \newrobustcmd*\univrs{\usefont{\encodingdefault}{\tud@univers}{m}{sl}}%
-      \newrobustcmd*\univbs{\usefont{\encodingdefault}{\tud@univers}{b}{sl}}%
-      \newrobustcmd*\univxs{\usefont{\encodingdefault}{\tud@univers}{eb}{sl}}%
-    \fi%
+    \newrobustcmd*\univln{\usefont{\encodingdefault}{\tud@univers}{l}{n}}%
+    \newrobustcmd*\univrn{\usefont{\encodingdefault}{\tud@univers}{m}{n}}%
+    \newrobustcmd*\univbn{\usefont{\encodingdefault}{\tud@univers}{b}{n}}%
+    \newrobustcmd*\univxn{\usefont{\encodingdefault}{\tud@univers}{eb}{n}}%
+    \newrobustcmd*\univls{\usefont{\encodingdefault}{\tud@univers}{l}{sl}}%
+    \newrobustcmd*\univrs{\usefont{\encodingdefault}{\tud@univers}{m}{sl}}%
+    \newrobustcmd*\univbs{\usefont{\encodingdefault}{\tud@univers}{b}{sl}}%
+    \newrobustcmd*\univxs{\usefont{\encodingdefault}{\tud@univers}{eb}{sl}}%
   \else%
     \newrobustcmd*\univln{\tud@font@fallback{Univers Light}{md}{up}}%
     \newrobustcmd*\univrn{\tud@font@fallback{Univers}{md}{up}}%
@@ -1338,7 +1504,19 @@
   \fi%
   \if@tud@dinbold%
     \if@tud@fontspec%
-      \newfontface\@dinbn{DIN Bold}[NFSSFamily=DINBold,BoldFont = DIN Bold]
+      \newfontface\@dinbn{DIN Bold}[%
+        FontFace = {l}{\updefault}{DIN Bold},%
+        FontFace = {m}{\updefault}{DIN Bold},%
+        FontFace = {b}{\updefault}{DIN Bold},%
+        FontFace = {bx}{\updefault}{DIN Bold},%
+        FontFace = {eb}{\updefault}{DIN Bold},%
+        FontFace = {l}{\sldefault}{Font=DIN Bold,FakeSlant=0.15},%
+        FontFace = {m}{\sldefault}{Font=DIN Bold,FakeSlant=0.15},%
+        FontFace = {b}{\sldefault}{Font=DIN Bold,FakeSlant=0.15},%
+        FontFace = {bx}{\sldefault}{Font=DIN Bold,FakeSlant=0.15},%
+        FontFace = {eb}{\sldefault}{Font=DIN Bold,FakeSlant=0.15},%
+        NFSSFamily = \tud@dinbold%
+      ]%
     \else%
       \newrobustcmd*\@dinbn{\usefont{\encodingdefault}{\tud@dinbold}{b}{n}}%
     \fi%
@@ -1445,198 +1623,6 @@
     \expandafter\@tempb\@tempa\relax%
     \@expandtwoargs\in@{#1}{\@tempa}%
   }%
-}
-\newif\if@tud@mweights
-\AfterPackage*{mweights}{\@tud@mweightstrue}
-\newcommand*\tud@font@set{%
-  \if@atdocument%
-    \ifnum\tud@cdfont>\z@\relax% true/heavy
-      \if@tud@univers\else%
-        \ClassWarning{\TUDClassName}%
-          {`Univers' fonts not found}%
-      \fi%
-      \if@tud@dinbold\else%
-        \ClassWarning{\TUDClassName}%
-          {`DIN Bold' fonts not found}%
-      \fi%
-    \fi%
-  \fi%
-  \if@tud@mweights%
-    \ifdef{\bfseries@rm}{}{\edef\bfseries@rm{\bfdefault}}%
-    \ifdef{\bfseries@sf}{}{\edef\bfseries@sf{\bfdefault}}%
-    \ifdef{\bfseries@tt}{}{\edef\bfseries@tt{\bfdefault}}%
-    \ifdef{\mdseries@rm}{}{\edef\mdseries@rm{\mddefault}}%
-    \ifdef{\mdseries@sf}{}{\edef\mdseries@sf{\mddefault}}%
-    \ifdef{\mdseries@tt}{}{\edef\mdseries@tt{\mddefault}}%
-  \fi%
-  \ifcase\tud@cdfont\relax% false
-    \tud@cmd@restore{rmdefault}%
-    \tud@cmd@restore{sfdefault}%
-    \tud@cmd@restore{ttdefault}%
-    \tud@cmd@restore{bfdefault}%
-    \tud@cmd@restore{mddefault}%
-    \tud@cmd@restore{itdefault}%
-    \tud@cmd@restore{familydefault}%
-    \tud@cmd@restore{seriesdefault}%
-    \tud@cmd@restore{shapedefault}%
-    \if@tud@mweights%
-      \tud@cmd@restore{bfseries@rm}%
-      \tud@cmd@restore{bfseries@sf}%
-      \tud@cmd@restore{bfseries@tt}%
-      \tud@cmd@restore{mdseries@rm}%
-      \tud@cmd@restore{mdseries@sf}%
-      \tud@cmd@restore{mdseries@tt}%
-    \fi%
-    \bool@std@lock{@tud@cdmath}{false}%
-    \ifcase\tud@cd\relax% false
-      \cs@std@lock{tud@head@font}{0}%
-    \else% !false
-      \cs@std@lock{tud@head@font}{1}%
-    \fi%
-  \else% true/heavy
-    \tud@cmd@store{rmdefault}%
-    \tud@cmd@store{sfdefault}%
-    \tud@cmd@store{ttdefault}%
-    \tud@cmd@store{bfdefault}%
-    \tud@cmd@store{mddefault}%
-    \tud@cmd@store{itdefault}%
-    \tud@cmd@store{familydefault}%
-    \tud@cmd@store{seriesdefault}%
-    \tud@cmd@store{shapedefault}%
-    \if@tud@mweights%
-      \tud@cmd@store{bfseries@rm}%
-      \tud@cmd@store{bfseries@sf}%
-      \tud@cmd@store{bfseries@tt}%
-      \tud@cmd@store{mdseries@rm}%
-      \tud@cmd@store{mdseries@sf}%
-      \tud@cmd@store{mdseries@tt}%
-    \fi%
-    \bool@std@lock{@tud@cdmath}{true}%
-    \cs@std@lock{tud@head@font}{\tud@cdfont}%
-    \if@tud@univers%
-      \if@tud@fontspec%
-        \ifnum\tud@cdfont=\@ne\relax% true
-          \if@tud@cdfont@ultrabold% ultrabold
-            \setsansfont{Univers Light}[%
-              BoldFont = Univers Bold,%
-              ItalicFont = Univers Light Oblique,%
-              BoldItalicFont = Univers Bold Oblique,%
-            ]%
-          \else% normalbold
-            \setsansfont{Univers Light}[%
-              BoldFont = Univers,%
-              ItalicFont = Univers Light Oblique,%
-              BoldItalicFont = Univers Oblique,%
-            ]%
-          \fi%
-          \setmonofont{LMMonoLt10-Regular}[%
-            BoldFont = LMMono10-Regular,%
-            ItalicFont = LMMonoLt10-Oblique,%
-            BoldItalicFont = LMMonoSlant10-Regular,%
-          ]%
-        \else% heavy
-          \if@tud@cdfont@ultrabold% ultrabold
-            \setsansfont{Univers}[%
-              BoldFont = Univers Black,%
-              ItalicFont = Univers Oblique,%
-              BoldItalicFont = Univers Black Oblique,%
-            ]%
-          \else% normalbold
-            \setsansfont{Univers}[%
-              BoldFont = Univers Bold,%
-              ItalicFont = Univers Oblique,%
-              BoldItalicFont = Univers Bold Oblique,%
-            ]%
-          \fi%
-          \setmonofont{LMMono10-Regular}[%
-            BoldFont = LMMonoLt10-Bold,%
-            ItalicFont = LMMonoSlant10-Regular,%
-            BoldItalicFont = LMMonoLt10-BoldOblique,%
-          ]%
-        \fi%
-      \else%
-        \renewcommand*\sfdefault{\tud@univers}%
-        \renewcommand*\ttdefault{\tud@univers t}%
-        \renewcommand*\itdefault{\sldefault}%
-        \ifnum\tud@cdfont=\@ne\relax% true
-          \if@tud@cdfont@ultrabold% ultrabold
-            \renewcommand*\bfdefault{b}%
-          \else% normalbold
-            \renewcommand*\bfdefault{m}%
-          \fi%
-          \renewcommand*\mddefault{l}%
-          \if@tud@mweights%
-            \def\bfseries@rm{m}%
-            \def\bfseries@sf{m}%
-            \def\bfseries@tt{m}%
-            \def\mdseries@rm{l}%
-            \def\mdseries@sf{l}%
-            \def\mdseries@tt{l}%
-          \fi%
-        \else% heavy
-          \if@tud@cdfont@ultrabold% ultrabold
-            \renewcommand*\bfdefault{eb}%
-          \else% normalbold
-            \renewcommand*\bfdefault{b}%
-          \fi%
-          \renewcommand*\mddefault{m}%
-          \if@tud@mweights%
-            \def\bfseries@rm{b}%
-            \def\bfseries@sf{b}%
-            \def\bfseries@tt{b}%
-            \def\mdseries@rm{m}%
-            \def\mdseries@sf{m}%
-            \def\mdseries@tt{m}%
-          \fi%
-        \fi%
-      \fi%
-      \renewcommand*\rmdefault{\sfdefault}%
-    \fi%
-    \renewcommand*\familydefault{\sfdefault}%
-    \renewcommand*\seriesdefault{\mddefault}%
-    \renewcommand*\shapedefault{\updefault}%
-  \fi%
-  \if@tud@mweights%
-    \edef\rmdef@ult{\rmdefault}%
-    \edef\sfdef@ult{\sfdefault}%
-    \edef\ttdef@ult{\ttdefault}%
-    \edef\bfdef@ult{\bfdefault}%
-    \edef\mddef@ult{\mddefault}%
-  \fi%
-  \ifdefined\tud@font@math@init\else\tud@font@math@set\fi%
-  \tud@font@skip@set%
-  \normalfont\selectfont%
-  \tud@layout@process%
-  \global\@tud@head@font@settrue%
-}
-\newcommand*\tud@font@skip@set{%
-  \if@tud@vspacing%
-    \tud@skip@store{smallskipamount}%
-    \tud@skip@store{medskipamount}%
-    \tud@skip@store{bigskipamount}%
-    \tud@skip@store{abovecaptionskip}%
-    \tud@skip@store{belowcaptionskip}%
-    \tud@skip@store{columnsep}%
-    \tud@font@skip@@set%
-  \else%
-    \tud@skip@restore{smallskipamount}%
-    \tud@skip@restore{medskipamount}%
-    \tud@skip@restore{bigskipamount}%
-    \tud@skip@restore{abovecaptionskip}%
-    \tud@skip@restore{belowcaptionskip}%
-    \tud@skip@restore{columnsep}%
-  \fi%
-}
-\newcommand*\tud@font@skip@@set{%
-  \scr@setlength\smallskipamount{\dimexpr\f@baselineskip/4\relax}%
-    {\dimexpr\f@baselineskip/12\relax}{\dimexpr\f@baselineskip/12\relax}%
-  \scr@setlength\medskipamount{\dimexpr\f@baselineskip/2\relax}%
-    {\dimexpr\f@baselineskip/6\relax}{\dimexpr\f@baselineskip/6\relax}%
-  \scr@setlength\bigskipamount{\f@baselineskip}%
-    {\dimexpr\f@baselineskip/3\relax}{\dimexpr\f@baselineskip/3\relax}%
-  \tud@skip@set\abovecaptionskip{\dimexpr\f@baselineskip*4/5\relax}%
-  \tud@skip@set\belowcaptionskip{\z@}%
-  \tud@skip@set\columnsep{1.1\baselineskip}%
 }
 \newcommand*\tud@font@greek@loop[1]{%
   \@for\@tempa:={%
@@ -1814,8 +1800,8 @@
 \AtEndPreamble%
 {%
   \tud@font@check%
-  \tud@font@init%
   \tud@font@set%
+  \tud@font@init%
   \AtBeginDocument{\tud@font@math@init}%
 }
 \newcommand*\tud@disposition@font[1][]{%
@@ -1826,11 +1812,7 @@
   \fi%
 }
 \newrobustcmd*\ifdin{%
-  \@tempswafalse%
-  \@expandtwoargs\in@{DINBold}{\f@family}%
-  \ifin@\@tempswatrue\fi%
-  \ifx\f@family\tud@dinbold\relax\@tempswatrue\fi%
-  \if@tempswa%
+  \ifx\f@family\tud@dinbold%
     \expandafter\@firstoftwo%
   \else%
     \expandafter\@secondoftwo%
@@ -2792,33 +2774,18 @@
     }%
     \ifcase\tud@head@font\relax\else% true/heavy
       \if@tud@univers%
-        \if@tud@fontspec%
-          \ifcase\tud@head@font\relax\or% true
-            \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
-              {UniversLight}{m}{n}{\tud@head@fontsize}%
-          \or% heavy
-            \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
-              {UniversRegular}{m}{n}{\tud@head@fontsize}%
-          \fi%
-          \DeclareFixedFont{\tud@head@font@bold}{\encodingdefault}%
-            {UniversBold}{m}{n}{\tud@head@fontsize}%
-          \gdef\tud@head@font@@bold{%
-            \usefont{\encodingdefault}{UniversBold}{m}{n}%
-          }%
-        \else%
-          \ifcase\tud@head@font\relax\or% true
-            \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
-              {\tud@univers}{l}{n}{\tud@head@fontsize}%
-          \or% heavy
-            \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
-              {\tud@univers}{m}{n}{\tud@head@fontsize}%
-          \fi%
-          \DeclareFixedFont{\tud@head@font@bold}{\encodingdefault}%
-            {\tud@univers}{b}{n}{\tud@head@fontsize}%
-          \gdef\tud@head@font@@bold{%
-            \usefont{\encodingdefault}{\tud@univers}{b}{n}%
-          }%
+        \ifcase\tud@head@font\relax\or% true
+          \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
+            {\tud@univers}{l}{n}{\tud@head@fontsize}%
+        \or% heavy
+          \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
+            {\tud@univers}{m}{n}{\tud@head@fontsize}%
         \fi%
+        \DeclareFixedFont{\tud@head@font@bold}{\encodingdefault}%
+          {\tud@univers}{b}{n}{\tud@head@fontsize}%
+        \gdef\tud@head@font@@bold{%
+          \usefont{\encodingdefault}{\tud@univers}{b}{n}%
+        }%
       \fi%
     \fi%
     \global\@tud@head@font@setfalse%
@@ -3806,10 +3773,10 @@
   \ifcase\tud@geometry\relax%
     \csname @ta@usegeometryfalse\endcsname%
     \ifGm@layout%
-      \tud@AfterChangingArea
+      \tud@AfterChangingArea%
     \else%
       \recalctypearea%
-    \fi
+    \fi%
   \else%
     \tud@AfterChangingArea%
   \fi%
@@ -3855,7 +3822,7 @@
         reversemarginpar=true,%
       \else%
         reversemarginpar=false,%
-      \fi
+      \fi%
       bindingoffset=\the\ta@bcor,%
       \tud@geometry@hincl,%
       \tud@geometry@fincl,%
