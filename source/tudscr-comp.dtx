@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-comp.dtx}[%
-  2016/04/04 v2.05 TUD-KOMA-Script\space%
+  2016/04/08 v2.05 TUD-KOMA-Script\space%
 %</driver>
 %<package&identify&comp>\ProvidesPackage{tudscrcomp}[%
 %<package&identify&fontsfix>\ProvidesPackage{fix-tudscrfonts}[%
@@ -143,7 +143,7 @@
 %<*class&body>
 \newcommand*\tud@deprecated@cmd[2]{%
   \AtBeginDocument{%
-    \ifcsdef{#1}{}{%
+    \ifcsundef{#1}{%
       \expandafter\newrobustcmd\csname #1\endcsname{%
         \ClassWarning{\TUDClassName}{%
           The command `\@backslashchar#1' is deprecated\MessageBreak%
@@ -152,7 +152,7 @@
         \csletcs{#1}{#2}%
         \@nameuse{#2}%
       }%
-    }%
+    }{}%
   }%
 }
 %</class&body>
@@ -490,8 +490,7 @@
   \def\@tempa{\@ifnextchar v{\@tempb}{\@tempb v}}%
   \def\@tempb v##1\@nil{\def\@tempc{##1}}%
   \@tempa #1\@nil%
-  \ifcsvoid{tud@v@\@tempc}{%
-    \def\tud@v@comp{0}%
+  \ifcsundef{tud@v@\@tempc}{%
 %<*class>
     \ClassWarningNoLine{\TUDClassName}%
 %</class>
@@ -503,7 +502,7 @@
       this value is not supported. Because of this, the\MessageBreak%
       value for `tudscrver' was set to `first'%
     }%
-    \FamilyKeyStateProcessed%
+    \def\tud@v@comp{0}%
   }{%
 %<*class>
     \ClassInfoNoLine{\TUDClassName}%
@@ -515,8 +514,8 @@
       Switching compatibility level to `\@tempc'%
     }%
     \edef\tud@v@comp{\@nameuse{tud@v@\@tempc}}%
-    \FamilyKeyStateProcessed%
   }%
+  \FamilyKeyStateProcessed%
 }
 %    \end{macrocode}
 % Eine zusätzliche Bedingung gibt es noch: Die Kompatibilität kann nur beim
@@ -901,7 +900,7 @@
 % Eine rudimentäre Umgebung für ein Glossar.
 %    \begin{macrocode}
 \AtBeginDocument{%
-  \ifdef{\theglossary}{}{%
+  \ifundef{\theglossary}{%
     \providecommand*\glossaryname{Glossar}%
     \newenvironment{theglossary}[1][]{%
       \PackageWarning{tudscrcomp}{%
@@ -919,7 +918,7 @@
       }%
     }{\endlist}%
     \newcommand\glossitem[1]{\item[] #1\par}%
-  }%
+  }{}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \glossitem

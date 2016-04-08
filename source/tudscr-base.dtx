@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-base.dtx}[%
-  2016/04/04 v2.05 TUD-KOMA-Script\space%
+  2016/04/08 v2.05 TUD-KOMA-Script\space%
 %</driver>
 %<package>\ProvidesPackage{tudscrbase}[%
 %<*driver|package>
@@ -777,14 +777,14 @@
   }{}%
 }
 \newcommand*\tud@skip@set[2]{%
-  \ifdef{#1}{%
+  \ifundef{#1}{}{%
     \@tempswafalse%
     \ifisskip{#1}{\@tempswatrue}{}%
     \ifisdimen{#1}{\@tempswatrue}{}%
     \if@tempswa%
       \setlength#1{#2}%
     \fi%
-  }{}%
+  }%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@skip@set
@@ -989,11 +989,11 @@
     The content of \string\TUD@KOMAoptions will be gobbled%
   }%
 }
-\ifcsname KOMAClassName\endcsname
+\ifdef{\KOMAClassName}{%
   \let\TUD@KOMAoptions\KOMAoptions
-\else
+}{%
   \AfterPackage*{scrextend}{\let\TUD@KOMAoptions\KOMAoptions}
-\fi
+}
 %</package>
 %    \end{macrocode}
 % Nach dem Laden des Paketes wird geprüft, ob die ursprüngliche Definition 
@@ -1109,7 +1109,7 @@
 % verhindert.
 %    \begin{macrocode}
 \newcommand*\tud@multicols@check{%
-  \ifdef{\multicols}{}{%
+  \ifundef{\multicols}{%
     \ifnum\tud@multicols>\@ne\relax%
       \ClassWarning{\TUDClassName}{%
         The option `columns=\tud@multicols' is only supported,\MessageBreak%
@@ -1117,7 +1117,7 @@
       }%
       \cs@set@lock{tud@multicols}{1}%
     \fi%
-  }%
+  }{}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@multicols@check
