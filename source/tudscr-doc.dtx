@@ -1,4 +1,4 @@
-% \CheckSum{256}
+% \CheckSum{287}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-doc.dtx}[%
-  2016/04/07 v2.05 TUD-KOMA-Script\space%
+  2016/04/17 v2.05 TUD-KOMA-Script\space%
   (source code documentation based on scrdoc)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
@@ -153,6 +153,40 @@
 \doxitem[macrolike,idxtype=Lok.]{Locale}{locale}{Lokalisierungsvariablen}
 \doxitem[macrolike,idxtype=Feld]{Field}{field}{Eingabefelder}
 %    \end{macrocode}
+% \begin{macro}{\changes@}
+% Bei der Erstellung der Änderungsliste fehlt bei Makros in der aktuellen 
+% Version von \pkg{doc} ein Leerzeichen. Das Problem ist bereits gemeldet.
+%    \begin{macrocode}
+\@ifpackagelater{doc}{2016/02/16}{%
+  \ClassWarning{tudscrdoc}{%
+    Package `doc' was updated so the patch for the\MessageBreak%
+    macro `changes@' is maybe outdated.%
+  }%
+}{%
+  \def\changes@#1#2#3{%
+    \protected@edef\@tempa{%
+      \noexpand\glossary{%
+        #1\levelchar
+        \ifx\saved@macroname\@empty
+          \space
+          \actualchar
+          \generalname
+        \else
+          \saved@indexname
+          \space
+          \actualchar
+          \string\verb\quotechar*%
+          \verbatimchar\saved@macroname
+          \verbatimchar
+        \fi
+        :\levelchar #3
+      }%
+    }%
+    \@tempa\endgroup\@esphack%
+  }
+}
+%    \end{macrocode}
+% \end{macro}^^A \changes@
 % \begin{macro}{\ToDo}
 % \changes{v2.02}{2014/07/25}{neu}^^A
 % \begin{macro}{\@ToDo}
