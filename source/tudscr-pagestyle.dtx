@@ -1,4 +1,4 @@
-% \CheckSum{3512}
+% \CheckSum{3534}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-pagestyle.dtx}[%
-  2016/04/08 v2.05 TUD-KOMA-Script (pagestyle)%
+  2016/04/17 v2.05 TUD-KOMA-Script (pagestyle)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -505,12 +505,12 @@
 % \cs{bleedmargin} auf 5\% der größten Randbreite gesetzt.
 %    \begin{macrocode}
 \newcommand*\tud@setbleedmargin@default{%
+  \@tempswafalse%
+  \ifcsundef{CROP@@@marks}{}{%
+    \ifx\CROP@@@marks\vfil\else\@tempswatrue\fi%
+  }%
+  \ifGm@showcrop\@tempswatrue\fi%
   \ifdim\bleedmargin=\maxdimen\relax%
-    \@tempswafalse%
-    \ifcsundef{CROP@@@marks}{}{%
-      \ifx\CROP@@@marks\vfil\else\@tempswatrue\fi%
-    }%
-    \ifGm@showcrop\@tempswatrue\fi%
     \if@tempswa%
       \setlength\bleedmargin{.05\tud@dim@widemargin}%
     \else%
@@ -649,7 +649,6 @@
 % \end{macro}^^A \ps@empty.tudheadings
 % \end{macro}^^A \ps@plain.tudheadings
 % \end{macro}^^A \ps@tudheadings
-%
 % \begin{pagestyle}{tudheadings}
 % \changes{v2.02}{2014/06/23}{neu}^^A
 % \begin{pagestyle}{plain.tudheadings}
@@ -1071,9 +1070,6 @@
 %    \end{macrocode}
 % \begin{layer}{tudheadings.pagecolor}
 % \changes{v2.03}{2015/01/09}{neu}^^A
-% \begin{macro}{\tud@pagecolor}
-% \begin{macro}{\tud@restorepagecolor}
-% \changes{v2.03}{2015/01/09}{entfernt}^^A
 % Um farbige Titel- Teil- und Kapitelseiten \emph{unabhängig} vom aktuell 
 % verwendeten Seitenstil erstellen zu können, wird die zusätzliche Ebene 
 % \val{tudheadings.pagecolor} definiert, die \emph{allen} Seitenstilen
@@ -1082,7 +1078,6 @@
 % \cs{tud@layout@\dots} optionsabhängig für Titel-, Teile- sowie Kapitelseiten 
 % gesetzt. 
 %    \begin{macrocode}
-  \newcommand*\tud@pagecolor{}%
   \DeclareNewLayer[%
     background,%
     area=%
@@ -1100,8 +1095,6 @@
   ]{tudheadings.pagecolor}%
   \AddLayersToPageStyle{@everystyle@}{tudheadings.pagecolor}%
 %    \end{macrocode}
-% \end{macro}^^A \tud@restorepagecolor
-% \end{macro}^^A \tud@pagecolor
 % \end{layer}^^A tudheadings.pagecolor
 % Damit wurden alle Ebenen und die darauf aufbauenden Seitenstile deklariert. 
 %
@@ -1212,11 +1205,20 @@
       \renewcommand*\tud@head@logocolor{white}%
       \renewcommand*\tud@head@fontcolor{white}%
       \renewcommand*\tud@foot@logocolor{white}%
+%    \end{macrocode}
+% Die Farbe für die Schrift im Fuß wird für Poster immer weiß gesetzt, falls 
+% über die Option \opt{backgroundcolor} für den Seitenhintergrund die primäre
+% Hausfarbe genutzt wird.
+%    \begin{macrocode}
+%<*book|report|article>
       \if@tud@foot@colored%
+%</book|report|article>
         \renewcommand*\tud@foot@fontcolor{white}%
+%<*book|report|article>
       \else%
         \renewcommand*\tud@foot@fontcolor{HKS41!30}%
       \fi%
+%</book|report|article>
       \bool@std@lock{@tud@head@widebar}{true}%
 %    \end{macrocode}
 % \dots sowie die für die farbigen Kapitelseiten.
@@ -1276,18 +1278,23 @@
 % \changes{v2.03}{2015/01/30}{Bugfix für die Änderung von \cs{spaceskip} durch
 %   das Paket \pkg{ragged2e}}^^A
 % \begin{macro}{\tud@head@fontsize}
-% \begin{macro}{\tud@head@font@bold}
 % \begin{macro}{\tud@head@font@light}
+% \begin{macro}{\tud@head@font@bold}
+% \begin{macro}{\tud@head@font@@bold}
+% \changes{v2.05}{2016/04/17}{neu}^^A
 % Die Schrift der Kopfzeile wird entweder in den Schriften des \CDs oder aber 
 % in den serifenlosen Standardschriften gesetzt, wobei für beide Varianten
 % sowohl eine fettgedruckte als auch eine normale Version benötigt wird. Die
 % Schrifthöhe ist durch das \CD unabhängig von der gewählten Schriftgröße im
 % Dokument vorgegeben und wird in Abhängigkeit von der Papiergröße gewählt und
-% in \cs{tud@head@fontsize} gespeichert.
+% in \cs{tud@head@fontsize} gespeichert. Das Makro \cs{tud@head@font@@bold} 
+% wird verwendet, um die Einstellung der fetten Schriften ohne die fixierte 
+% Schriftgröße nutzen zu können.
 %    \begin{macrocode}
 \newcommand*\tud@head@fontsize{}
-\newcommand*\tud@head@font@bold{}
 \newcommand*\tud@head@font@light{}
+\newcommand*\tud@head@font@bold{}
+\newcommand*\tud@head@font@@bold{}
 \newcommand*\tud@head@font@set{%
 %    \end{macrocode}
 % Die Option \opt{cdhead} wird ausgewertet. Sollte diese inkompatibel gesetzt 
@@ -1310,14 +1317,18 @@
 % serifenlose Standardschrift für die Kopfzeile verwendet. Die Rückfallebene:
 %    \begin{macrocode}
   \if@tud@head@font@set%
-    \DeclareFixedFont{\tud@head@font@bold}{\encodingdefault}%
-      {\sfdefault}{\bfdefault}{\updefault}{\tud@head@fontsize}%
     \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
       {\sfdefault}{\mddefault}{\updefault}{\tud@head@fontsize}%
+    \DeclareFixedFont{\tud@head@font@bold}{\encodingdefault}%
+      {\sfdefault}{\bfdefault}{\updefault}{\tud@head@fontsize}%
+    \protected\gdef\tud@head@font@@bold{%
+      \usefont{\encodingdefault}{\sfdefault}{\bfdefault}{\updefault}%
+    }%
+%    \end{macrocode}
+% Und jetzt die eigentlichen Schriften im \CD.
+%    \begin{macrocode}
     \ifcase\tud@head@font\relax\else% true/heavy
       \if@tud@univers%
-        \DeclareFixedFont{\tud@head@font@bold}{\encodingdefault}%
-          {\tud@univers}{b}{n}{\tud@head@fontsize}%
         \ifcase\tud@head@font\relax\or% true
           \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
             {\tud@univers}{l}{n}{\tud@head@fontsize}%
@@ -1325,6 +1336,11 @@
           \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
             {\tud@univers}{m}{n}{\tud@head@fontsize}%
         \fi%
+        \DeclareFixedFont{\tud@head@font@bold}{\encodingdefault}%
+          {\tud@univers}{b}{n}{\tud@head@fontsize}%
+        \protected\gdef\tud@head@font@@bold{%
+          \usefont{\encodingdefault}{\tud@univers}{b}{n}%
+        }%
       \fi%
     \fi%
     \global\@tud@head@font@setfalse%
@@ -1332,8 +1348,9 @@
   \fi%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@head@font@light
+% \end{macro}^^A \tud@head@font@@bold
 % \end{macro}^^A \tud@head@font@bold
+% \end{macro}^^A \tud@head@font@light
 % \end{macro}^^A \tud@head@fontsize
 % \end{macro}^^A \tud@head@font@set
 % \begin{macro}{\tud@head@text}
@@ -2430,6 +2447,7 @@
 % \changes{v2.04}{2015/04/21}{neu}^^A
 % \begin{macro}{\@@footcontent}
 % \changes{v2.04}{2015/04/21}{neu}^^A
+% \changes{v2.05}{2016/04/17}{Stern im Argument erhält aktuellen Inhalt}^^A
 % \begin{macro}{\tud@footcontent@font}
 % \changes{v2.04}{2015/06/01}{neu}^^A
 % \changes{v2.05}{2015/07/21}{Bugfix für die Schriftgröße und den Durchschuss 
@@ -2484,8 +2502,16 @@
 \newcommand*\@@footcontent{}
 \def\@@footcontent#1#2[#3]{%
   \appto\tud@footcontent@font{#1\selectfont}%
-  \renewcommand*\tud@footcontent@left{#2}%
-  \renewcommand*\tud@footcontent@right{#3}%
+%    \end{macrocode}
+% Wurde in einem der Argumente für den linken und/oder rechten Inhalt ein Stern 
+% verwendet, bleibt die bisherige Definition bestehen.
+%    \begin{macrocode}
+  \if\detokenize{*#2}\relax\else%
+    \renewcommand*\tud@footcontent@left{#2}%
+  \fi%
+  \if\detokenize{*#3}\relax\else%
+    \renewcommand*\tud@footcontent@right{#3}%
+  \fi%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@footcontent@right
@@ -2502,8 +2528,10 @@
 %
 % \begin{macro}{\tud@footcontent@left@poster}
 % \changes{v2.05}{2015/07/06}{neu}^^A
+% \changes{v2.05}{2016/04/17}{Überschrift optional}^^A
 % \begin{macro}{\tud@footcontent@right@poster}
 % \changes{v2.05}{2015/07/06}{neu}^^A
+% \changes{v2.05}{2016/04/17}{Überschrift optional}^^A
 % \begin{macro}{\tud@newline@poster}
 % Mit diesen beiden Hilfsmakros werden die linke und die rechte Spalte des 
 % Standard-Seitenfußes eines Posters festgelegt. In der linken Spalte werden 
@@ -2513,10 +2541,8 @@
 % werden, variiert werden können.
 %    \begin{macrocode}
 \newcommand*\tud@newline@poster{}
-\newcommand*\tud@footcontent@left@poster{%
-  \ifx\contactname\@empty\else%
-    {\tud@head@font@bold\contactname}\newline%
-  \fi%
+\newcommand*\tud@footcontent@left@poster[1][\contactname]{%
+  \ifstr{#1}{}{}{{\tud@head@font@@bold#1\newline}}%
   Technische Universit\"at Dresden%
   \tud@foot@line@write{faculty}%
   \tud@foot@line@write{department}%
@@ -2530,7 +2556,7 @@
 % individuelle Angaben bzgl. Büro, Telefonnummer und E-Mail-Adresse gemacht 
 % werden. 
 %    \begin{macrocode}
-\newcommand*\tud@footcontent@right@poster{%
+\newcommand*\tud@footcontent@right@poster[1][\authorname]{%
   \def\tud@newline@poster{%
     \ifx\@authormore\@empty\else\newline\@authormore\fi%
     \ifx\@office\@empty\else\newline\@office\fi%
@@ -2547,16 +2573,8 @@
   }{%
     \let\@tempa\@author%
   }%
-%    \end{macrocode}
-% Der temporäre Schalter wird verwendet, um die gleichzeitige Angabe von Autor 
-% und Kontaktperson zu erkennen und zwischen den Angaben eine Leerzeile 
-% einzufügen.
-%    \begin{macrocode}
-  \@tempswafalse%
   \ifx\@tempa\@empty\else%
-    \ifx\authorname\@empty\else%
-      {\tud@head@font@bold\authorname}\newline%
-    \fi%
+    \ifstr{#1}{}{}{{\tud@head@font@@bold#1\newline}}%
 %    \end{macrocode}
 % Das Makro zum Aufteilen der Autorenangaben wird für die hier benötigte Form 
 % definiert. Dabei wird die Ausgabe aller nicht \emph{lokal} angegebenen Felder
@@ -2577,7 +2595,10 @@
 % diese \emph{nach} allen Autoren ausgegeben.
 %    \begin{macrocode}
     \tud@newline@poster%
-    \@tempswatrue%
+%    \end{macrocode}
+% Werden Autor und Kontaktperson ausgegeben, ist eine Leerzeile einzufügen.
+%    \begin{macrocode}
+    \ifx\@contactperson\@empty\else\newline\fi%
   \fi%
 %    \end{macrocode}
 % Die Ausgabe der Kontaktperson(en) erfolgt analog zu der Autorenausgabe.
@@ -2589,10 +2610,9 @@
     \ifx\@emailaddress\@empty\else\newline\@emailaddress\fi%
   }%
   \ifx\@contactperson\@empty\else%
-    \if@tempswa\newline\fi%
-    \ifx\contactpersonname\@empty\else%
-      {\tud@head@font@bold\contactpersonname}\newline%
-    \fi%
+    \ifstr{\contactpersonname}{}{}{%
+      {\tud@head@font@@bold\contactpersonname\newline}%
+    }%
     \renewcommand*\tud@split@contactperson[2]{%
       \tud@multiple@fields@store{@contactperson}{##1}%
       \tud@multiple@fields@preset{@contactperson}{*}{##1}%
@@ -2693,7 +2713,7 @@
       The content for the footer (`\string\footcontent')\MessageBreak%
       is too high. You should either reduce the content\MessageBreak%
       or lower the fontsize via the optional argument.%
-      \ifnum\tud@geometry>\@ne\relax% true/symmetric/twoside
+      \ifnum\tud@geometry>\@ne% true/symmetric/twoside
         \MessageBreak%
         Alternatively you can enlarge the bottom margin\MessageBreak%
         by using option `extrabottommargin'.%
@@ -3086,6 +3106,8 @@
 \newcommand*\tud@geometry@process{}
 \TUD@UnwindPackage{geometry}{%
   \newif\ifGm@layout%
+  \newif\ifGm@showcrop%
+  \newif\ifGm@pass%
   \let\Gm@layoutheight\paperheight%
   \let\Gm@layoutwidth\paperwidth%
   \let\Gm@layouthoffset\z@%
@@ -3143,9 +3165,13 @@
 % sollen die von \pkg{geometry} bereitgestellten Möglichkieten für den 
 % Papierbogen nutzbar bleiben.
 %    \begin{macrocode}
-    \edef\@tempb{layoutoffset={\the\Gm@layouthoffset,\the\Gm@layoutvoffset}}%
-    \ifGm@layout%
-      \eappto\@tempb{,layoutsize={\the\Gm@layoutwidth,\the\Gm@layoutheight}}%
+    \ifGm@pass%
+      \def\@tempb{}%
+    \else%
+      \edef\@tempb{layoutoffset={\the\Gm@layouthoffset,\the\Gm@layoutvoffset}}%
+      \ifGm@layout%
+        \eappto\@tempb{,layoutsize={\the\Gm@layoutwidth,\the\Gm@layoutheight}}%
+      \fi%
     \fi%
     \if@atdocument%
       \edef\@tempa{\@tempb,#1}%
