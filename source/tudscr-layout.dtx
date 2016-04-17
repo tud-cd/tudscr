@@ -1,4 +1,4 @@
-% \CheckSum{1370}
+% \CheckSum{1435}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-layout.dtx}[%
-  2016/04/08 v2.05 TUD-KOMA-Script (layout)%
+  2016/04/17 v2.05 TUD-KOMA-Script (layout)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrdoc}
@@ -794,18 +794,81 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@headings@reset
+% \begin{macro}{\tud@pagecolor}
+% \begin{macro}{\tud@restorepagecolor}
+% \changes{v2.03}{2015/01/09}{entfernt}^^A
+% Der Befehl \cs{tud@pagecolor} dient für die Hauptklassen als Hilfsmakro, um 
+% je nach gewählter Ausprägung des Layouts die farblichen Seitenhintergründe zu 
+% aktivieren. Für die Klasse \cls{tudscrposter} wird der Befehl zusätzlich für 
+% das benutzerdefinierte Festlegen einer standardmäßigen Hintergrundfarbe mit
+% der Option \opt{backgroundcolor} genutzt.
+%    \begin{macrocode}
+\newcommand*\tud@pagecolor{}%
+%    \end{macrocode}
+% \end{macro}^^A \tud@restorepagecolor
+% \end{macro}^^A \tud@pagecolor
+% \begin{option}{backgroundcolor}
+% \changes{v2.05}{2016/04/15}{neu}^^A
+% Mit dieser Option kann die standardmäßige Hintergrundfarbe für Poster gesetzt 
+% werden.
+%    \begin{macrocode}
+%<*poster>
+\TUD@key{backgroundcolor}[true]{%
+  \TUD@set@numkey{backgroundcolor}{@tempa}{%
+    \TUD@numkey@bool,%
+    {nocolor}{0},{nocolour}{0},{none}{0},%
+    {color}{1},{colour}{1},{cdcolor}{1},{cdcolour}{1}%
+  }{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \ifcase\@tempa\relax% false
+      \renewcommand*\tud@pagecolor{}%
+    \else% true
+      \renewcommand*\tud@pagecolor{HKS41}%
+    \fi%
+  \else%
+    \renewcommand*\tud@pagecolor{#1}%
+    \FamilyKeyStateProcessed%
+  \fi%
+%    \end{macrocode}
+% Wird die Option innerhalb des Dokumentes verwendet, wird mit einer Box erst 
+% die gewählte Farbe verifiziert und anschließend auf die am Dokumentbeginn 
+% definierte Textfarbe umgestellt.
+%    \begin{macrocode}
+  \if@atdocument%
+    \ifdefvoid{\tud@pagecolor}{}{\sbox\z@{\color{\tud@pagecolor}}}%
+    \normalcolor%
+  \fi%
+}
+%    \end{macrocode}
+% Für das Aktivieren der Farbe \val{HKS41} wird \cs{normalcolor} erweitert, um 
+% hier in jedem Fall als Schriftfarbe \emph{weiß} zu verwenden.
+%    \begin{macrocode}
+\AfterPackage{xcolor}{%
+  \apptocmd\normalcolor{%
+    \ifstr{\tud@pagecolor}{HKS41}{\color{white}}{}%
+  }{}{\tud@patch@wrn{normalcolor}}%
+  \AtBeginDocument{%
+    \ifdefvoid{\tud@pagecolor}{}{\sbox\z@{\color{\tud@pagecolor}}}%
+    \normalcolor%
+  }%
+}
+%</poster>
+%    \end{macrocode}
+% \end{option}^^A backgroundcolor
 %
 % \iffalse
 %</class&option>
 %<*class&body>
 % \fi
 %
+% \begin{macro}{\tud@title@fontcolor}
 % \begin{macro}{\tud@part@fontcolor}
 % \begin{macro}{\tud@chapter@fontcolor}
 % \begin{macro}{\tud@section@fontcolor}
 % \changes{v2.05}{2015/07/07}{neu}^^A
 % Die Makros werden für die Farbe der Überschriften verwendet.
 %    \begin{macrocode}
+\newcommand*\tud@title@fontcolor{}
 \newcommand*\tud@part@fontcolor{}
 %<*book|report>
 \newcommand*\tud@chapter@fontcolor{}
@@ -815,6 +878,7 @@
 % \end{macro}^^A \tud@section@fontcolor
 % \end{macro}^^A \tud@chapter@fontcolor
 % \end{macro}^^A \tud@part@fontcolor
+% \end{macro}^^A \tud@title@fontcolor
 % \begin{macro}{\raggedtitle}
 % \changes{v2.05}{2016/04/05}{neu}^^A
 % Dieses Makro wird für die Ausrichtung des Titels bereitgehalten.
@@ -1134,50 +1198,55 @@
     \fi%
     \tud@sectioning@set[addsec]{section}{%
       \tud@disposition@font%
-      \tud@color{\tud@section@fontcolor}%
+      \ifstr{\tud@pagecolor}{HKS41}{}{\tud@color{\tud@section@fontcolor}}%
     }%
     \tud@sectioning@set{subsection}{%
       \tud@disposition@font%
-      \tud@color{\tud@section@fontcolor}%
+      \ifstr{\tud@pagecolor}{HKS41}{}{\tud@color{\tud@section@fontcolor}}%
     }%
     \tud@sectioning@set{subsubsection}{%
       \tud@disposition@font%
-      \tud@color{\tud@section@fontcolor}%
+      \ifstr{\tud@pagecolor}{HKS41}{}{\tud@color{\tud@section@fontcolor}}%
     }%
     \tud@sectioning@set{minisec}{%
       \tud@disposition@font%
-      \tud@color{\tud@section@fontcolor}%
+      \ifstr{\tud@pagecolor}{HKS41}{}{\tud@color{\tud@section@fontcolor}}%
     }%
     \tud@sectioning@set{paragraph}{%
-      \tud@color{\tud@section@fontcolor}%
+      \ifstr{\tud@pagecolor}{HKS41}{}{\tud@color{\tud@section@fontcolor}}%
     }%
     \tud@sectioning@set{subparagraph}{%
-      \tud@color{\tud@section@fontcolor}%
+      \ifstr{\tud@pagecolor}{HKS41}{}{\tud@color{\tud@section@fontcolor}}%
     }%
     \tud@cmd@store{raggedsection}%
     \renewcommand*\raggedsection{\tud@RaggedRight}%
   \fi%
 %    \end{macrocode}
 % Für Poster wird außerdem der passende Seitenstil und die Ausprägung von Kopf
-% und Fuß festgelegt.
+% und Fuß sowie die Schriftfarbe festgelegt.
 %    \begin{macrocode}
 %<*poster>
   \ifcase\tud@cd\relax% false
     \pagestyle{empty}%
+    \color{black}%
   \else% !false
     \pagestyle{empty.tudheadings}%
     \ifcase\tud@cd\relax\or% true
       \cs@std@lock{tud@head@bar}{0}%
       \bool@std@lock{@tud@foot@colored}{false}%
+      \color{black}%
     \or% litecolor
       \cs@std@lock{tud@head@bar}{1}%
       \bool@std@lock{@tud@foot@colored}{false}%
+      \color{HKS41}%
     \or% barcolor
       \cs@std@lock{tud@head@bar}{2}%
       \bool@std@lock{@tud@foot@colored}{false}%
+      \color{HKS41}%
     \else% bicolor/color/full
       \cs@std@lock{tud@head@bar}{3}%
       \bool@std@lock{@tud@foot@colored}{true}%
+      \color{HKS41}%
     \fi%
   \fi%
 %</poster>
