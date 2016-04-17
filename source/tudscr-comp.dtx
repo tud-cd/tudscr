@@ -1,4 +1,4 @@
-% \CheckSum{958}
+% \CheckSum{1335}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,9 +51,11 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-comp.dtx}[%
-  2016/04/08 v2.05 TUD-KOMA-Script\space%
+  2016/04/17 v2.05 TUD-KOMA-Script\space%
 %</driver>
-%<package&identify&comp>\ProvidesPackage{tudscrcomp}[%
+%<package&identify&comp&base>\ProvidesPackage{tudscrcomp}[%
+%<package&identify&comp&book>\ProvidesPackage{tudscrcomp-book}[%
+%<package&identify&comp&poster>\ProvidesPackage{tudscrcomp-poster}[%
 %<package&identify&fontsfix>\ProvidesPackage{fix-tudscrfonts}[%
 %<*driver|package&identify>
 %!TUDVersion
@@ -772,13 +774,33 @@
 %
 % \iffalse
 %<*package&comp>
+%<*base>
+% \fi
+%
+% \subsubsection{Erkennen der geladenen Klasse}
+%
+% Damit je nach geladener Klasse die passenden Kompatibilitätseinstellungen und 
+% -befehle bereitgestellt werden können, wird auf die geladene Klasse geprüft.
+% Danach wird das dazu passende Paket geladen.
+%    \begin{macrocode}
+\PassOptionsToPackage{oldcolors}{tudscrcolor}
+\@ifclassloaded{tudscrposter}{%
+  \RequirePackageWithOptions{tudscrcomp-poster}[\TUDVersion]%
+}{%
+  \RequirePackageWithOptions{tudscrcomp-book}[\TUDVersion]%
+}
+%    \end{macrocode}
+%
+% \iffalse
+%</base>
+%<*!base>
 %<*body>
 % \fi
 %
-% \ToDo{%
-%   Optionen für \cls{tudbook} und \cls{tudmathposter}\val{=Mathematik(A0)}; 
-%   überprüfen, ob passende Klasse geladen wurde.%
-% }[v2.05]
+% \subsubsection{Gemeinsame Optionen und Befehle für alle Klassen}
+%
+% Zunächst werden alle Optionen und Befehle definiert, die unabhängig von der 
+% geladenen Klasse generell bereitgestellt werden.
 %
 % \begin{macro}{\einrichtung}
 % \begin{macro}{\fachrichtung}
@@ -798,6 +820,7 @@
 %
 % \iffalse
 %</body>
+%<*book>
 %<*option>
 % \fi
 %
@@ -1011,36 +1034,481 @@
 % \end{macro}^^A \tud@schapter
 % \end{macro}^^A \tud@chapter
 %
-% \subsubsection{Kompatibilität zu \cls{tudmathposter}}
-%
-% \ToDo{%
-% Folgende Befehle sollten für maximale Kompatibilität unterstützt werden:
-% \begin{itemize}
-%   \item Umgebung \env{farbtabellen} mit \cs{grautabelle} und \cs{blautabelle}
-%   \item \cs{telefon}, \cs{fax}, \cs{homepage}, \cs{email}
-%   \item \cs{fusszeile} \cs{footcolumn} Die linke Spalte enthält Hochschule,
-%      Einrichtung, Fachrichtung, Institut und Professur. Die rechte Spalte ist
-%      frei wählbar, und kann mit den Variablen \cs{author}, \cs{telefon}, 
-%      \cs{email} und \cs{homepage} oder mit einem frei gewählten Absatz 
-%      (\cs{footcolumn2}) gefüllt werden.
-%   \item \cs{zweitlogo(file)}, \cs{drittlogo(file)}, \cs{institutslogo(file)}
-%   \item \cs{maketitle}
-%   \item \cs{schnittrand} mit \pkg{crop}?
-%   \item Abstände der Gliederungsebenen?
-%   \item Umgebungen \env{tablehere} und \env{figurehere}
-%   \item \cs{multicolsep}
-%   \item Optionen \opt{Mathematik} und \opt{MathematikA0}
-%   \item \cs{pagestyle}\val{\{tudposter\}}
-%   \item Option \opt{bluebg} implementieren
-%   \item Gliederungsbefehle \cs{topsection}, \cs{topsubsection}, 
-%     \cs{topcentersection}, \cs{centersubsection}, 
-%     \cs{topcentersubsection}, \cs{centersection}
-% \end{itemize}%
-% Testen mit \file{beispiel-utf8-serifmath.tex}
-% }[v2.05]
 %
 % \iffalse
 %</body>
+%</book>
+%<*poster>
+%<*option>
+% \fi
+%
+% \subsubsection{Kompatibilität zu \cls{tudmathposter}}
+%
+% Die hier bereitgestellten Optionen und Befehle werden durch die Klasse 
+% \cls{tudmathposter} bzw. \cls{tudposter} definiert.
+%
+% \begin{option}{bluebg}
+% \changes{v2.05}{2016/04/17}{neu}^^A
+% Mit der Option \opt{bluebg} kann der Hintergrund des Posters in \val{HKS41} 
+% gesetzt werden.
+%    \begin{macrocode}
+\TUD@key{bluebg}[true]{%
+  \TUD@set@ifkey{bluebg}{@tempswa}{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \if@tempswa%
+      \TUDoptions{backgroundcolor=true}%
+    \else%
+      \TUDoptions{backgroundcolor=false}%
+    \fi%
+  \fi%
+}
+%    \end{macrocode}
+% \end{option}^^A bluebg
+%
+% \iffalse
+%</option>
+%<*body>
+% \fi
+%
+% \begin{macro}{\telefon}
+% \changes{v2.05}{2016/04/17}{neu}^^A
+% \begin{macro}{\fax}
+% \changes{v2.05}{2016/04/17}{neu}^^A
+% \begin{macro}{\email}
+% \changes{v2.05}{2016/04/17}{neu}^^A
+% Hier werden Feldbefehle auf die \TUDScript-Pendants gelegt und der Befehl 
+% \cs{tud@split@author@list} um diese Befehle erweitert.
+%    \begin{macrocode}
+\newcommand*\telefon{\telephone}
+\patchcmd{\tud@split@author@list}{telephone}{%
+  telephone,telefon%
+}{}{\tud@patch@wrn{tud@split@author@list}}
+\newcommand*\fax{\telefax}
+\patchcmd{\tud@split@author@list}{telefax}{%
+  telefax,fax%
+}{}{\tud@patch@wrn{tud@split@author@list}}
+\newcommand*\email{\emailaddress}
+\patchcmd{\tud@split@author@list}{emailaddress}{%
+  emailaddress,email%
+}{}{\tud@patch@wrn{tud@split@author@list}}
+%    \end{macrocode}
+% \end{macro}^^A \email
+% \end{macro}^^A \fax
+% \end{macro}^^A \telefon
+% \begin{macro}{\homepage}
+% \changes{v2.05}{2016/04/17}{neu}^^A
+% Für die Angabe einer Website wird \cs{url} unschädlich gemacht, da dieses 
+% Makro innerhalb von \cs{webpage} ohnehin zum Einsatz kommt.
+%    \begin{macrocode}
+\newcommand*\homepage[1]{%
+  \begingroup%
+    \let\url\@firstofone%
+    \protected@xdef\@tempa{#1}%
+  \endgroup%
+  \expandafter\webpage\expandafter{\@tempa}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \homepage
+% \begin{macro}{\zweitlogofile}
+% \changes{v2.05}{2016/04/17}{neu}^^A
+% \begin{macro}{\zweitlogo}
+% \changes{v2.05}{2016/04/17}{neu}^^A
+% \begin{macro}{\institutslogofile}
+% \changes{v2.05}{2016/04/17}{neu}^^A
+% \begin{macro}{\institutslogo}
+% \changes{v2.05}{2016/04/17}{neu}^^A
+% \begin{macro}{\drittlogofile}
+% \changes{v2.05}{2016/04/17}{neu}^^A
+% \begin{macro}{\drittlogo}
+% \changes{v2.05}{2016/04/17}{neu}^^A
+% Die Makros zur Angabe von Logo-Dateien (\cs{\dots{}logofile}) werden auf die 
+% passenden \TUDScript-Befehle gelegt. Die Änderung der Makros, welche für die 
+% Einbindung der Logos verantwortlich sind (\cs{\dots{}logo}), wird allerdings
+% nicht unterstützt.
+%    \begin{macrocode}
+\newcommand*\zweitlogofile{\headlogo}
+\newcommand*\zweitlogo[1]{%
+  \PackageWarning{tudscrcomp}{%
+    It isn't possible to redefine the definition for\MessageBreak%
+    including a logo in the header. Please see the\MessageBreak%
+    documentation of \string\headlogo%
+  }%
+}
+\newcommand*\institutslogofile[1]{\footlogo{,,,,,,,#1,}}
+\newcommand*\institutslogo[1]{%
+  \PackageWarning{tudscrcomp}{%
+    It isn't possible to redefine the definition for\MessageBreak%
+    including a logo in the footer. Please see the\MessageBreak%
+    documentation of \string\footlogo%
+  }%
+}
+\newcommand*\drittlogofile[1]{%
+  \PackageWarning{tudscrcomp}{%
+    Nothing happened, you should use \string\footlogo\MessageBreak
+    instead. Please see the documentation of \string\footlogo\MessageBreak%
+    and option `ddc' or `ddcfoot'%
+  }%
+}
+\newcommand*\drittlogo[1]{%
+  \PackageWarning{tudscrcomp}{%
+    It isn't possible to redefine the definition for\MessageBreak%
+    including a logo in the footer. Please see the\MessageBreak%
+    documentation of \string\footlogo\space and option\MessageBreak%
+    `ddc' or `ddcfoot'%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \drittlogo
+% \end{macro}^^A \drittlogofile
+% \end{macro}^^A \institutslogo
+% \end{macro}^^A \institutslogofile
+% \end{macro}^^A \zweitlogo
+% \end{macro}^^A \zweitlogofile
+% \begin{macro}{\topsection}
+% \changes{v2.05}{2016/04/17}{neu}^^A
+% \begin{macro}{\topsubsection}
+% \changes{v2.05}{2016/04/17}{neu}^^A
+% Die Klasse \cls{tudmathposter} definiert zusätzliche Gliederungsbefehle, 
+% welche allerdings völlig willkürliche vertikale Abstände davor und danach 
+% verwendet. Es besteht keinerlei Ambition, diese genau abzubilden. Falls hier 
+% tatsächlich ein Anpassungsbedarf besteht, kann dies mit den entsprechenden
+% Mitteln von \KOMAScript{} (\cs{RedeclareSectionCommand}) nach dem Laden von
+% \pkg{tudscrcomp} erfolgen.
+%
+% Die neuen Gliederungsbefehle erschließen sich mir ohnehin nicht, wirken eher 
+% so, als ob diese entstanden sind, weil auf Anwendungsebene etwas nicht so 
+% funktioniert hat, wie gewollt und statt einer vernünftigen Ursachenforschung 
+% einfach ein eigenes Konstrukt erschaffen wurde, um unzulängliche Fähigkeiten 
+% zu umgehen. Sei's drum. Für die Umsetzung werden die Basisgliederungsbefehle 
+% geklont und anschließend der gewünschte vertikale Abstand vor der Überschrift 
+% entfernt.
+% \ToDo{Klonen der Gliederungsebene in Absprache mit Markus über Makro}[v2.06]
+%    \begin{macrocode}
+\newcounter{topsection}
+\let\c@topsection\c@section
+\newcommand*\topsectionnumdepth{\sectionnumdepth}
+\newcommand*\scr@topsection@sectionindent{\scr@section@sectionindent}
+\newcommand*\scr@topsection@beforeskip{\scr@section@beforeskip}
+\newcommand*\scr@topsection@afterskip{\scr@section@afterskip}
+\newcommand*\topsectiontocdepth{\sectiontocdepth}
+\newcommand*\scr@topsection@tocindent{\scr@section@tocindent}
+\newcommand*\scr@topsection@tocnumwidth{\scr@section@tocnumwidth}
+\newcommand*\l@topsection{\l@section}
+\DeclareNewSectionCommand[%
+  style=section,%
+  font={\usekomafont{section}},
+  beforeskip=\z@,%
+]{topsection}
+\newcounter{topsubsection}
+\let\c@topsubsection\c@subsection
+\newcommand*\topsubsectionnumdepth{\subsectionnumdepth}
+\newcommand*\scr@topsubsection@sectionindent{\scr@subsection@sectionindent}
+\newcommand*\scr@topsubsection@beforeskip{\scr@subsection@beforeskip}
+\newcommand*\scr@topsubsection@afterskip{\scr@subsection@afterskip}
+\newcommand*\topsubsectiontocdepth{\subsectiontocdepth}
+\newcommand*\scr@topsubsection@tocindent{\scr@subsection@tocindent}
+\newcommand*\scr@topsubsection@tocnumwidth{\scr@subsection@tocnumwidth}
+\newcommand*\l@topsubsection{\l@subsection}
+\DeclareNewSectionCommand[%
+  style=section,%
+  font={\usekomafont{subsection}},
+  beforeskip=\z@,%
+]{topsubsection}
+%    \end{macrocode}
+% \end{macro}^^A \topsubsection
+% \end{macro}^^A \topsection
+% \begin{macro}{\centersection}
+% \changes{v2.05}{2016/04/17}{neu}^^A
+% \begin{macro}{\centersubsection}
+% \changes{v2.05}{2016/04/17}{neu}^^A
+% \begin{macro}{\topcentersection}
+% \changes{v2.05}{2016/04/17}{neu}^^A
+% \begin{macro}{\topcentersubsection}
+% \changes{v2.05}{2016/04/17}{neu}^^A
+% \begin{macro}{\tud@center@section}
+% \changes{v2.05}{2016/04/17}{neu}^^A
+% Weiterhin werden Gliederungsebenen definiert, die unabhängig vom restlichen 
+% Layout zentriert gesetzt werden. Eine Mischung von unterschiedlichen Stilen 
+% gleichartiger Ebenen ist aus sicht von Typographie und Layout eher fraglich.
+%    \begin{macrocode}
+\newcommand*\centersection[2][\@nil]{%
+  \tud@center@section{section}{#1}{#2}%
+}
+\newcommand*\centersubsection[2][\@nil]{%
+  \tud@center@section{subsection}{#1}{#2}%
+}
+\newcommand*\topcentersection[2][\@nil]{%
+  \tud@center@section{topsection}{#1}{#2}%
+}
+\newcommand*\topcentersubsection[2][\@nil]{%
+  \tud@center@section{topsubsection}{#1}{#2}%
+}
+%    \end{macrocode}
+% Alle Gliederungsbefehle nutzen die passenden Ebenen mit der standardmaßig 
+% Ausrichtung und passen kurzfristig \cs{raggedsection} an. Dabei auch darauf 
+% geachtet, ob das optionale Argument durch den Anwender verwendet wird.
+%    \begin{macrocode}
+\newcommand*\tud@center@section[3]{%
+  \tud@cmd@store{raggedsection}%
+  \let\raggedsection\centering%
+  \ifx#2\@nil\relax%
+    \csname #1\endcsname{#3}%
+  \else%
+    \csname #1\endcsname[#2]{#3}%
+  \fi%
+  \tud@cmd@restore{raggedsection}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@center@section
+% \end{macro}^^A \topcentersubsection
+% \end{macro}^^A \topcentersection
+% \end{macro}^^A \centersubsection
+% \end{macro}^^A \centersection
+% \begin{macro}{\sectiontopskip}
+% \changes{v2.05}{2016/04/17}{neu}^^A
+% \begin{macro}{\subsectiontopskip}
+% \changes{v2.05}{2016/04/17}{neu}^^A
+% Die Klasse \cls{tudmathposter} stellt zu den neuen Gliederungsbefehlen noch 
+% zusätzlich die beiden Makros \cs{sectiontopskip} und \cs{subsectiontopskip}
+% bereit. Diese werden in darin bei der Definition dieser Gliederungsebenen
+% verwendet. Da die \TUDScript-Klassen den Ansatz verfolgen, dem Benutzer
+% weitestgehende Freiheiten bei der Gestaltung des Layouts einzuräumen, werden 
+% diese an die Einstellungen der zentralen \KOMAScript"=Benutzerschnittstelle 
+% gekoppelt.
+%    \begin{macrocode}
+\newcommand\sectiontopskip{\scr@section@beforeskip}
+\newcommand\subsectiontopskip{\scr@subsection@beforeskip}
+%    \end{macrocode}
+% \end{macro}^^A \subsectiontopskip
+% \end{macro}^^A \sectiontopskip
+% \begin{counter}{secnumdepth}
+% Standardmäßig wird die Nummerierung aller Gliederungsebenen deaktiviert.
+%    \begin{macrocode}
+\setcounter{secnumdepth}{-1}
+%    \end{macrocode}
+% \end{counter}^^A secnumdepth
+% \begin{macro}{\fusszeile}
+% \changes{v2.05}{2016/04/17}{neu}^^A
+% \begin{macro}{\footcolumn}
+% \changes{v2.05}{2016/04/17}{neu}^^A
+% Mit diesen beiden Befehlen lässt sich der Inhalt des Fußbereiches angepassen. 
+% Wird in einem und/oder beiden Argumente von \cs{footcolumn} ein Stern \val{*} 
+% verwendet, so bleibt der bisherige Inhalt erhalten.
+%    \begin{macrocode}
+\newcommand*\fusszeile[2][]{\footcontent[#1]{#2}}
+\newcommand*\footcolumn[2]{%
+  \ifxnumber{#1}{%
+    \ifcase#1\relax%
+      \footcontent{#2}%
+    \or%
+      \footcontent{#2}[*]%
+    \or%
+      \footcontent{*}[#2]%
+    \fi%
+  }{}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \footcolumn
+% \end{macro}^^A \fusszeile
+%
+% \iffalse
+%</body>
+%<*option>
+% \fi
+%
+% \begin{option}{tudmathposterfoot}
+% \changes{v2.05}{2016/04/17}{neu}^^A
+% \begin{macro}{\if@tud@mathposterfoot}
+% \changes{v2.05}{2016/04/17}{neu}^^A
+% Mit der Option \opt{tudmathposterfoot} kann die Darstellung des Fußes im 
+% Poster angepasst werden. Die Klasse \cls{tudmathposter} setzt den Fußbereich
+% in zwei asymmetrischen Spalten, wohingegen die \TUDScript-Klassen diesen
+% zentriert und symmetrisch zum Satzspiegel platzieren.
+%    \begin{macrocode}
+\newif\if@tud@mathposterfoot
+\TUD@key{tudmathposterfoot}[true]{%
+  \TUD@set@ifkey{tudmathposterfoot}{@tud@mathposterfoot}{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \if@tud@mathposterfoot%
+      \footcontent[\small]%
+        {\tud@footcontent@left@poster[]}[{\tud@footcontent@right@poster[]}]%
+    \else%
+      \footcontent%
+        {\tud@footcontent@left@poster}[\tud@footcontent@right@poster]%
+    \fi%
+  \fi%
+}
+\TUDExecuteOptions{tudmathposterfoot=true}
+%    \end{macrocode}
+% \end{macro}^^A \if@tud@mathposterfoot
+% \end{option}^^A tudmathposterfoot
+%
+% \iffalse
+%</option>
+%<*body>
+% \fi
+%
+% \begin{macro}{\tud@footcontent@use}
+% \begin{macro}{\tud@mathposterfootwidth}
+% \changes{v2.05}{2016/04/17}{neu}^^A
+% Um die Option \opt{tudmathposterfoot} abzuarbeiten, muss die Anpassung des
+% Makros \cs{tud@footcontent@use} für die Ausgabe des Fußbereichs erfolgen.
+% Normalerweise wird der Fußbereich in zwei gleichbreite Spalten über die
+% komplette Textbreite aufgeteilt. In \cls{tudmathposter} hingegen, werden 
+% beide Fußspalten nicht über den kompletten textberecih versteilt, sondern es 
+% verbleibt etwas ungenutzter Platz rechts davon, welcher für ein etwaiges Logo 
+% verwendet wird. Dieses Verhalten wird hier nachgebildet.
+%    \begin{macrocode}
+\newcommand*\tud@mathposterfootwidth{4.2\tud@dim@widemargin}
+\patchcmd\tud@footcontent@use{%
+  \hsize=\dimexpr#2-\@tempdimc\relax%
+}{%
+  \if@tud@mathposterfoot%
+    \hsize=\dimexpr\tud@mathposterfootwidth\relax%
+  \else%
+    \hsize=\dimexpr#2-\@tempdimc\relax%
+  \fi%
+}{}{\tud@patch@wrn{tud@footcontent@use}}
+\patchcmd\tud@footcontent@use{%
+  \hsize=\dimexpr(#2-\columnsep)/2\relax%
+}{%
+  \if@tud@mathposterfoot%
+    \hsize=\dimexpr(\tud@mathposterfootwidth-\columnsep)/2\relax%
+  \else%
+    \hsize=\dimexpr(#2-\columnsep)/2\relax%
+  \fi%
+}{}{\tud@patch@wrn{tud@footcontent@use}}
+\patchcmd\tud@footcontent@use{%
+  \hsize=\dimexpr(#2-\columnsep)/2-\@tempdimc\relax%
+}{%
+  \if@tud@mathposterfoot%
+    \hsize=\dimexpr(\tud@mathposterfootwidth-\columnsep)/2\relax%
+  \else%
+    \hsize=\dimexpr(#2-\columnsep)/2-\@tempdimc\relax%
+  \fi%
+}{}{\tud@patch@wrn{tud@footcontent@use}}
+%    \end{macrocode}
+% \end{macro}^^A \tud@mathposterfootwidth
+% \end{macro}^^A \tud@footcontent@use
+% \begin{environment}{figurehere}
+% \changes{v2.05}{2016/04/17}{neu}^^A
+% \begin{environment}{tablehere}
+% \changes{v2.05}{2016/04/17}{neu}^^A
+% Weiterhin stellt die Klasse \cls{tudmathposter} zwei Umgebungen bereit, mit 
+% denen sich Tabellen und Bilder an einer bestimmten Stelle exakt platzieren 
+% lassen. Prinzipiell könnte hierfür auch das Paket \pkg{float} zum Einsatz 
+% kommen.
+%    \begin{macrocode}
+\newenvironment{figurehere}{%
+  \def\@captype{figure}%
+  \renewcommand*\caption{\captionof{figure}}%
+  \renewcommand*\captionabove{\captionaboveof{figure}}%
+  \renewcommand*\captionbelow{\captionbelowof{figure}}%
+  \vskip\intextsep%
+  \vbox \bgroup%
+    \hsize=\columnwidth%
+    \@parboxrestore%
+    \ignorespaces%
+}{%
+  \egroup%
+  \vskip\intextsep%
+  \ignorespaces%
+}
+\newenvironment{tablehere}{%
+  \def\@captype{table}%
+  \renewcommand*\caption{\captionof{table}}%
+  \renewcommand*\captionabove{\captionaboveof{table}}%
+  \renewcommand*\captionbelow{\captionbelowof{table}}%
+  \vskip\intextsep%
+  \vbox \bgroup%
+    \hsize=\columnwidth%
+    \@parboxrestore%
+    \ignorespaces%
+}{%
+  \egroup%
+  \vskip\intextsep%
+  \ignorespaces%
+}
+%    \end{macrocode}
+% \end{environment}^^A tablehere
+% \end{environment}^^A figurehere
+% \begin{environment}{farbtabellen}
+% \changes{v2.05}{2016/04/17}{neu}^^A
+% \begin{macro}{\if@tud@graytable}
+% \changes{v2.05}{2016/04/17}{neu}^^A
+% \begin{macro}{\blautabelle}
+% \changes{v2.05}{2016/04/17}{neu}^^A
+% \begin{macro}{\grautabelle}
+% \changes{v2.05}{2016/04/17}{neu}^^A
+% Außerdem wird eine Umgebung für farbige Tabellen sowie zwei Umschaltbefehle 
+% für die farbliche Ausprägung der Tabellenzeilen definiert.
+%    \begin{macrocode}
+\PassOptionsToPackage{table}{xcolor}
+\newif\if@tud@graytable
+\newcommand*\blautabelle{\@tud@graytablefalse}
+\newcommand*\grautabelle{\@tud@graytabletrue}
+\newenvironment{farbtabellen}{%
+  \if@tud@graytable%
+    \rowcolors{1}{HKS92!20}{HKS92!10}
+  \else%
+    \rowcolors{1}{HKS41!20}{HKS41!10}%
+  \fi%
+}{}
+%    \end{macrocode}
+% \end{macro}^^A \grautabelle
+% \end{macro}^^A \blautabelle
+% \end{macro}^^A \if@tud@graytable
+% \end{environment}^^A farbtabellen
+% \begin{macro}{\schnittrand}
+% \changes{v2.05}{2016/04/17}{neu}^^A
+% Zu guter Letzt geht es an das Makro \cs{schnittrand}. Zur Intension dieses 
+% Befehls gab es unter \url{https://github.com/tud-cd/tud-cd/issues/6} bereits 
+% eine angeregte Diskussion. Was allerdings genau erreicht werden soll und ob
+% die Implementierung in \cls{tudmathposter} das avisierte Ziel tatsächlich 
+% fehlerfrei umsetzt, hat sich mir nicht erschlossen.
+%
+% Deshalb wird das Makro mehr oder weniger mit \cs{bleedmargin} gleichgesetzt.
+%    \begin{macrocode}
+\apptocmd{\tud@setbleedmargin@default}{%
+  \ifundef{\schnittrand}{}{%
+    \setlength\bleedmargin{\dimexpr\schnittrand\relax}%
+    \if@tempswa\else%
+      \PackageWarning{tudscrcomp}{%
+        The length `\string\bleedmargin' was set to the value\MessageBreak%
+        of `\string\schnittrand' (\the\dimexpr\schnittrand\relax)\MessageBreak%
+        Nevertheless, nothing has changed. You should use\MessageBreak%
+        the capabilities of either the package `geometry'\MessageBreak%
+        or `crop' in order to create crop marks. For more\MessageBreak%
+        information, please take a look in the manual\MessageBreak%
+        of the tudscr-bundle%
+      }%
+    \fi%
+  }%
+}{}{\tud@patch@wrn{tud@setbleedmargin@default}}%
+%    \end{macrocode}
+% \end{macro}^^A \schnittrand
+%
+% Die Klasse \cls{tudmathposter} lädt allerhand Pakete. Dies ist jedoch für den 
+% Anwender alles andere als vorteilhaft, da dadurch unter Umständen Konflikte
+% mit anderen Paketen entstehen oder der Nutzer im Zweifelsfall gar nicht weiß, 
+% dass verwendete Befehle aus bestimmten Paketen entspringen. Dennoch werden 
+% aus Kompatibilitätsgründen einige Pakete geladen, um bestehende Dokumente 
+% trotz alledem nach der Portierung kompiliert werden können. Um den Nutzer die 
+% Möglichkeit zu geben, die Pakete selber ggf. mit Optionen zu laden, erfolgt 
+% die Anforderung der Pakete erst am ende der Präambel.
+%    \begin{macrocode}
+\AtEndPreamble{%
+  \RequirePackage{amsmath}%
+  \RequirePackage{amsfonts}%
+  \RequirePackage{calc}%
+  \RequirePackage{tabularx}%
+}
+%    \end{macrocode}
+%
+% \iffalse
+%</body>
+%</poster>
+%</!base>
 %</package&comp>
 % \fi
 %
@@ -1485,3 +1953,11 @@
 % \Finale
 %
 \endinput
+
+% \begin{macro}{\bla}
+% \changes{v2.05}{2016/04/17}{neu}^^A
+% 
+%    \begin{macrocode}
+
+%    \end{macrocode}
+% \end{macro}^^A \bla
