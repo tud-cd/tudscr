@@ -1,23 +1,104 @@
+\documentclass[paper=a4,pagesize,cdgeometry=custom]{tudscrreprt}
+\usepackage{selinput}
+\SelectInputMappings{adieresis={ä},germandbls={ß}}
+\usepackage[T1]{fontenc}
+\usepackage[ngerman]{babel}
+\usepackage{blindtext}
+\usepackage{geometry}
+
+\geometry{margin=10mm,showframe}
+
+% TODO Anpassungen an Schlüssel
+% - paper auf KOMAoptions
+% - paperwidth, paperheight, papersize abfangen
+% - landscape und portrait auf paper=... abbilden
+% - layout in anlehnung an paper, gleiche Werte
+% - layoutwidth, layoutheight, layoutsize abfangen
+% - landscape und portrait auf layout=... abbilden
+\makeatletter
+\TUD@parameter{cdgeometry}{%
+  \TUD@parameter@define{paper}{\appto\@tempa{#1,}}%
+  \TUD@parameter@define{paperwidth}{}%
+  \TUD@parameter@define{paperheight}{}%
+  \TUD@parameter@define{papersize}{}%
+  \TUD@parameter@define{landscape}{%
+    %if else fi
+  }%
+  \TUD@parameter@define{portrait}{%
+    %if else fi
+  }%
+  \TUD@parameter@define{layout}{\appto\@tempb{#1,}}%
+  \TUD@parameter@define{layoutwidth}{}%
+  \TUD@parameter@define{layoutheight}{}%
+  \TUD@parameter@define{layoutsize}{}%
+  \TUD@parameter@sethandler{%
+    \if\relax\detokenize{#2}\relax%
+      \appto\@tempc{#1,}%
+    \else%
+      \appto\@tempc{#1=#2,}%
+    \fi%
+  }%
+}
+\newcommand*\tudgeometry[1]{%
+  \def\@tempa{}
+  \def\@tempb{}
+  \def\@tempc{}
+  \TUD@parameter@set{cdgeometry}{#1}%
+  \typeout{+++++ \meaning\@tempa}%
+  \typeout{+++++ \meaning\@tempb}%
+  \typeout{+++++ \meaning\@tempc}%
+}
+\makeatother
+
+\tudgeometry{paper=b4,paper=seascape,layout=a4,margin=15mm,showframe,bottom=25mm}
+
+\begin{document}
+
+\chapter{Überschrift Eins}
+\Blindtext
+
+
+\cleardoublepage
+
+%\storeareas\PotraitArea% speichert den aktuellen Satzspiegel
+%\KOMAoptions{paper=A3,paper=landscape,DIV=current}
+
+\newgeometry{margin=45mm}
+\chapter{Überschrift Zwei}
+\Blindtext
+
+
+\cleardoublepage
+
+\restoregeometry
+
+%\PotraitArea% lädt den gespeicherten Satzspiegel
+\chapter{Überschrift Drei}
+
+\texttt{\meaning\PotraitArea}
+
+\Blindtext
+\end{document}
+
 \documentclass[
   ngerman,
-]{tudscrreprt}
+  cdhead=bicolor,
+]{scrreprt}
 \usepackage{selinput}\SelectInputMappings{adieresis={ä},germandbls={ß}}
 \usepackage[T1]{fontenc}
 \usepackage{babel}
 \usepackage{blindtext}
 \begin{document}
 
-\begin{description}
-  \item[interword space] \the\fontdimen2\font
-  \item[interword stretch] \the\fontdimen3\font
-  \item[interword shrink] \the\fontdimen4\font
-  \item[xheight] \the\fontdimen5\font
-  \item[quad] \the\fontdimen6\font
-  \item[extra space] \the\fontdimen7\font
-  \item[spaceskip] \the\spaceskip
-  \item[xspaceskip] \the\xspaceskip
-  \item[hyphenchar] \the\hyphenchar\font
-\end{description}
+%\pagestyle{tudheadings}
+
+\Blindtext
+
+\clearpage
+\KOMAoptions{paper=a3}
+\recalctypearea
+
+\Blindtext
 
 \end{document}
 
