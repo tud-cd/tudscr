@@ -133,6 +133,7 @@
 \newif\if@tud@cdfont@ultrabold
 \@tud@cdfont@dintrue
 \newcommand*\tud@cdfont{1}
+% TODO: Für alle Optionswerte Suffix @val (auch cs@lock prüfen)
 \TUD@key{cdfont}[true]{%
   \TUD@set@numkey{cdfont}{@tempa}{%
     \TUD@numkey@bool,%
@@ -296,15 +297,20 @@
 \TUD@key{slantedGreek}[true]{\TUDoptions{slantedgreek=#1}}
 %%% From File: tudscr-pagestyle.dtx
 \newcommand*\tud@ps@list{}
+% TODO: \tud@iftudps -> \tud@iftudheadings
 \newcommand*\tud@iftudps[3]{%
   \xifinlist{\GetRealPageStyle{#1}}{\tud@ps@list}{#2}{#3}%
 }
 \newif\if@tud@ddc@internal
+% TODO: clearpage@iftudps -> tud@maybe@clearpage
+% TODO: Versionsprüfung in Makro
 \newcommand*\clearpage@iftudps{%
   \if@tud@ddc@internal\else\if@atdocument%
     \tud@iftudps{\currentpagestyle}{\clearpage}{}%
   \fi\fi%
 }
+% TODO: resetpagestyle@iftudps -> tud@maybe@resetpagestyle
+% TODO: Versionsprüfung in Makro
 \newcommand*\resetpagestyle@iftudps{%
   \if@tud@ddc@internal\else\if@atdocument%
     \tud@iftudps{\currentpagestyle}{%
@@ -325,6 +331,7 @@
 \newif\if@tud@headlogo@option@set
 \newif\if@tud@footlogo@option@set
 \newif\if@tud@ddc@auto
+% TODO: tud@ddc -> tud@ddc@val
 \newcommand*\tud@ddc{0}
 \TUD@key{ddc}[true]{%
   \tud@ifverlower{2.04}{\clearpage@iftudps}{}%
@@ -372,6 +379,7 @@
   \fi%
   \tud@ifverlower{2.04}{\resetpagestyle@iftudps}{}%
 }
+% TODO: \tud@head@font@val -> \tud@head@font@val
 \cs@lock{tud@head@font}{0}
 \cs@lock{tud@head@bar}{0}
 \bool@lock{@tud@head@widebar}
@@ -421,6 +429,7 @@
     \fi%
   \fi%
 }
+% TODO: TUD@AfterPackage@Set TUD@@AfterPackage
 \TUD@AfterPackage@Set{scrlayer-scrpage}
 \bool@lock{@tud@foot@colored}
 \TUD@key{cdfoot}[true]{%
@@ -500,6 +509,8 @@
     \csundef{@@tud@ps@#1@#2@#3@#4}%
   }{}%
 }
+% TODO: tud@geometry -> tud@cdgeometry
+% TODO: tud@cdgeometry -> tud@cdgeometry@val
 \cs@lock{tud@geometry}{0}
 \newcommand*\tud@geometry@calc{0}
 \TUD@key{cdgeometry}[true]{%
@@ -598,6 +609,7 @@
 \cs@lock{tud@layout@part}{0}
 \cs@lock{tud@layout@chapter}{0}
 \cs@lock{tud@layout@section}{0}
+% TODO: tud@cd -> tud@cd@val
 \newcommand*\tud@cd{0}
 \TUD@key{cd}[true]{%
   \TUD@set@numkey{cd}{tud@cd}{\tud@layout@switch}{#1}%
@@ -1414,6 +1426,7 @@
   }%
   \forcsvlist\@tempa{#2}%
 }
+% TODO: tud@multicols -> tud@multicols@val
 \cs@lock{tud@multicols}{1}
 \newcommand*\tud@multicols@check{%
   \ifundef{\multicols}{%
@@ -2016,6 +2029,7 @@
   \tud@font@init%
   \AtBeginDocument{\tud@font@math@init}%
 }
+% TODO: \tud@disposition@font -> \tud@disposition@fontface
 \newcommand*\tud@disposition@font[1][]{%
   \if@tud@cdfont@din%
     \@dinbn\tud@raggedright%
@@ -2116,6 +2130,8 @@
 \newcommand*\@@thesis{}
 \newcommand*\thesis[1]{\tud@thesis{thesis}{#1}}
 \newcommand*\tud@thanks{}
+% TODO \tud@@thesis -> \tud@@@thesis
+% TODO \tud@thesis -> \tud@@thesis
 \newcommand*\tud@thesis[2]{%
   \begingroup%
     \global\let\tud@thanks\relax%
@@ -2310,6 +2326,8 @@
     \sbox\z@{#3}%
   \endgroup%
 }
+% TODO \tud@split@author -> \tud@split@@author
+% TODO \tud@split@contactperson -> \tud@split@@contactperson
 \newcommand*\tud@split@author[2]{}
 \newcommand*\tud@split@author@list{%
   authormore,course,discipline,%
@@ -2369,6 +2387,7 @@
 \tud@locale@define{\logname}
 \tud@locale@define{\internshipname}
 \tud@locale@define{\reportname}
+% TODO: \tud@if@and -> \tud@ifin@and
 \newcommand*\tud@if@and[1]{%
   \begingroup%
     \protecting{%
@@ -2620,7 +2639,7 @@
 \newlength\tud@dim@thinline
 \newlength\tud@dim@headingsvskip
 \newlength\tud@dim@headdiff
-\newlength\tud@dim@headdiffskip
+\newlength\tud@dim@topdiffvskip
 \tud@ifverlower{2.03}{\newlength\tud@dim@ddcdiff}{}
 \newif\if@tud@geometry@adjust
 \newlength\tud@dim@layoutheight
@@ -2795,13 +2814,6 @@
 }
 \newif\if@tud@crop@center
 \AfterPackage{crop}{%
-  \@ifpackagelater{crop}{2003/05/21}{%
-    \ClassWarning{\TUDClassName}{%
-      Package `crop' was updated so the patch for the\MessageBreak%
-      option `center' is maybe outdated. Please contact\MessageBreak%
-      the TUD-KOMA-Script maintainer via \tudscrmail
-    }%
-  }{}%
   \pretocmd\CROP@center{\@tud@crop@centertrue}{}{\tud@patch@wrn{CROP@center}}
 }
 \newlength\bleedmargin
@@ -3281,6 +3293,7 @@
     \global\@tud@head@text@settrue%
   \fi%
 }
+% TODO: tud@head@text -> tud@head@text@val
 \newcommand*\tud@head@text{}
 \newcommand*\tud@head@text@list{}
 \newcommand*\tud@head@text@delimiter{}
@@ -3681,6 +3694,7 @@
   \usebox\z@\hspace*{-\wd\z@}%
 }
 \newkomafont{tudheadings}{\tud@color{\tud@foot@fontcolor}}
+% TODO: \tud@footcontent@font -> \tud@footcontent@fontface
 \newcommand*\tud@footcontent@font{}
 \newcommand*\tud@footcontent@left{}
 \newcommand*\tud@footcontent@right{\@nil}
@@ -3788,13 +3802,7 @@
   \PreventPackageFromLoading{geometry}%
 }{%
   \RequirePackage{geometry}[2010/09/12]%
-  \@ifpackagelater{geometry}{2010/09/13}{%
-    \ClassWarning{\TUDClassName}{%
-      Package `geometry' was updated so some patches\MessageBreak%
-      are maybe outdated. Please contact the TUD-KOMA-Script\MessageBreak%
-      maintainer via \tudscrmail
-    }%
-  }{}%
+  % \CheckCommand  \Gm@initnewgm \Gm@changelayout
   \newcommand*\tud@geometry@hmargin{}%
   \newcommand*\tud@geometry@vmargin{}%
   \newcommand*\tud@geometry@tudmargin{}%
@@ -3826,7 +3834,6 @@
   \newcommand*\tud@savegeometry[1]{%
     \edef\Gm@restore{}%
     \savegeometry{#1}%
-    \edef\foo{\Gm@restore}
   }%
   \newcommand*\tud@loadgeometry[1]{%
     \@tud@geometry@enabledfalse%
@@ -4156,7 +4163,7 @@
           \gdef\tud@currentgeometry{tudarea}%
         }%
       }%
-      \setlength\tud@dim@headdiffskip{\z@}%
+      \setlength\tud@dim@topdiffvskip{\z@}%
       \tud@font@koma@set{pagefoot}{\usekomafont{tudheadings}}%
       \tud@font@koma@set{pagenumber}{\usekomafont{tudheadings}}%
     }{%
@@ -4164,10 +4171,10 @@
         \tud@loadgeometry{typearea}%
         \gdef\tud@currentgeometry{typearea}%
       }%
-      \setlength\tud@dim@headdiffskip{\tud@dim@headdiff}%
+      \setlength\tud@dim@topdiffvskip{\tud@dim@headdiff}%
       \ifnum\tud@geometry>\@ne\relax% true/symmetric/twoside
         \if@hincl%
-          \addtolength\tud@dim@headdiffskip{%
+          \addtolength\tud@dim@topdiffvskip{%
             \dimexpr-\headheight-\tud@dim@headsep\relax%
           }%
         \fi%
@@ -4175,7 +4182,7 @@
       \tud@font@koma@unset{pagefoot}%
       \tud@font@koma@unset{pagenumber}%
     }%
-    \global\tud@dim@headdiffskip=\tud@dim@headdiffskip%
+    \global\tud@dim@topdiffvskip=\tud@dim@topdiffvskip%
   }{}%
 }
 \patchcmd{\cleardoubleoddpageusingstyle}{\pagestyle}{%
@@ -4220,9 +4227,11 @@
 \@ifpackageloaded{geometry}{\@tempswatrue}{\@tempswafalse}
 \if@tempswa
   \newcommand*\tud@geometry@custom{}%
+  % TODO 
   \apptocmd{\geometry}{%
     \ifbool{@tud@geometry@enabled}{\appto\tud@geometry@custom{,#1}}{}%
   }{}{\tud@patch@wrn{geometry}}%
+  \tud@cmd@store{Gm@changelayout}%
   \apptocmd{\Gm@changelayout}{%
     \ifboolexpr{bool {@tud@geometry@enabled} and bool {@atdocument}}{%
       \ifnum\tud@geometry=\@ne\relax%
@@ -4235,9 +4244,8 @@
   \pretocmd{\restoregeometry}{%
     \@tud@geometry@enabledfalse%
   }{}{\tud@patch@wrn{restoregeometry}}%
-  \pretocmd{\restoregeometry}{%
+  \apptocmd{\restoregeometry}{%
     \@tud@geometry@enabledtrue%
-    \tud@AfterChangingArea%
   }{}{\tud@patch@wrn{restoregeometry}}%
   \AtEndPreamble{%
     \ifnum\tud@geometry=\@ne\relax\else%
@@ -4286,6 +4294,7 @@
     \tud@setbleedmargin@default%
   }%
 }
+% TODO: TUD@parameter@define@ps -> TUD@parameter@pagestyle@define
 \newcommand*\TUD@parameter@define@ps[1]{%
   \TUD@parameter@define{cdfont}[true]{\TUDoption{cdfont}{#1}}%
   \TUD@parameter@define{cdhead}[true]{\TUDoption{cdhead}{#1}}%
@@ -4302,6 +4311,7 @@
   \TUD@parameter@define{tudfoot}[true]{\TUDoption{tudfoot}{#1}}%
   \TUD@parameter@let{logo}{headlogo}%
 }
+% TODO \tud@ps -> \tud@ps@val
 \newcommand*\tud@ps{tudheadings}
 \newcommand*\tud@ps@select{%
   \expandafter\pagestyle\expandafter{\tud@ps}%
@@ -4318,6 +4328,7 @@
     \renewcommand*\indexpagestyle{empty.tudheadings}%
   }{}%
 }
+% TODO \tud@currentpagestyle -> \tud@currentpagestyle@val
 \newcommand*\tud@currentpagestyle{}
 \newcommand*\tud@currentpagestyle@set{%
   \ifdefvoid{\tud@currentpagestyle}{%
@@ -4348,6 +4359,7 @@
   \aftergroup\tud@currentpagestyle@reset%
   \clearpage%
 ]
+% TODO: \TUD@parameter@sethandler -> \TUD@parameter@handler
 \TUD@parameter{tudpage}{%
   \TUD@parameter@define{language}{\selectlanguage{#1}}%
   \TUD@parameter@define{columns}{\cs@std@lock{tud@multicols}{#1}}%
@@ -4366,6 +4378,7 @@
   \TUD@parameter@sethandler{\TUD@parameter@defaulthandler{tudpage}{#1}}%
 }
 %%% From File: tudscr-layout.dtx
+% TODO: tud@headings -> tud@headings@val
 \newcommand*\tud@headings{}
 \newcommand*\tud@disposition@fontsize{}
 \newcommand*\tud@thesis@fontsize{}
@@ -4400,15 +4413,17 @@
 \newlength\pageheadingsvskip
 \newlength\headingsvskip
 \newcommand*\tud@headmidvskip{\par\nobreak\vspace{.5\baselineskip}}
+% TODO: tud@headmidvskip -> tud@headmidvskip@normal
+% TODO: tud@headmidvskip@neg -> tud@headmidvskip@reverse
 \newcommand*\tud@headmidvskip@neg{%
   \setbox\z@\vbox{\tud@headmidvskip}%
   \vspace*{\dimexpr-\dp\strutbox-\ht\strutbox-\ht\z@\relax}%
 }
 \newcommand*\tud@layout@process{%
   \ifcase\tud@layout@cover\relax% false
-    \bool@std@lock{@tud@cover@cdgeometry}{false}%
+    \bool@std@lock{@tud@cdgeometry@cover}{false}%
   \else% !false
-    \bool@std@lock{@tud@cover@cdgeometry}{true}%
+    \bool@std@lock{@tud@cdgeometry@cover}{true}%
   \fi%
   \ifcase\tud@layout@title\relax% false
     \tud@cmd@restore{titlepagestyle}%
@@ -4605,7 +4620,7 @@
   \tud@layout@specialpage@set{part}%
   \begingroup%
     \vspace*{%
-      \dimexpr\tud@dim@headdiffskip+\tud@dim@headingsvskip-\baselineskip\relax%
+      \dimexpr\tud@dim@topdiffvskip+\tud@dim@headingsvskip-\baselineskip\relax%
     }%
     \vspace*{\pageheadingsvskip}%
     \setparsizes{\z@}{\z@}{\z@\@plus1fil}\par@updaterelative%
@@ -4747,7 +4762,7 @@
     \renewcommand*\tud@chapter@fontcolor{HKS41}%
   \fi%
   \vspace*{%
-    \dimexpr\tud@dim@headdiffskip+\tud@dim@headingsvskip\relax%
+    \dimexpr\tud@dim@topdiffvskip+\tud@dim@headingsvskip\relax%
   }%
   \if@tud@chapterpage%
     \vspace*{\pageheadingsvskip}%
@@ -5055,6 +5070,10 @@
 }
 \newcommand*\tud@titlepagenumber{}
 \let\tud@titlepagenumber\relax
+% TODO: tud@maketitle -> tud@maketitle@master
+% TODO: tud@maketitlepage -> tud@maketitle@page
+% TODO: tud@maketitlehead -> tud@maketitle@head
+% TODO: tud@@maketitlehead -> tud@maketitle@@head
 \newcommand*\tud@maketitle[1][]{%
   \begingroup%
     \TUD@parameter@set{title}{#1}%
@@ -5160,7 +5179,7 @@
       \fi%
     \fi%
     \vspace*{%
-      \dimexpr\tud@dim@headdiffskip+\tud@dim@headingsvskip-\baselineskip\relax%
+      \dimexpr\tud@dim@topdiffvskip+\tud@dim@headingsvskip-\baselineskip\relax%
     }%
     \vspace*{\pageheadingsvskip}%
     \setparsizes{\z@}{\z@}{\z@\@plus1fil}\par@updaterelative%
@@ -5372,7 +5391,7 @@
 \newcommand*\tud@@maketitlehead{%
   \global\@topnum=\z@%
   \vspace*{%
-    \dimexpr\tud@dim@headdiffskip+\tud@dim@headingsvskip-\baselineskip\relax%
+    \dimexpr\tud@dim@topdiffvskip+\tud@dim@headingsvskip-\baselineskip\relax%
   }%
   \vspace*{\headingsvskip}%
   \setparsizes{\z@}{\z@}{\z@\@plus1fil}\par@updaterelative%
@@ -5442,6 +5461,7 @@
     }{}%
   \fi%
 }
+% TODO: reicht da keine temporäre Box?
 \newsavebox\tud@title@twocolumn@box
 \newcommand\tud@title@twocolumn[1]{%
   \onecolumn%
@@ -5505,7 +5525,7 @@
     \TUD@parameter@set{cover}{#1}%
     \let\tud@layout@title\tud@layout@cover%
     \tud@layout@process%
-    \if@tud@cover@cdgeometry%
+    \if@tud@cdgeometry@cover%
       \let\coverpagetopmargin\tud@dim@slimmargin%
       \let\coverpagebottommargin\tud@dim@widemargin%
       \let\coverpageleftmargin\tud@dim@widemargin%
@@ -5545,7 +5565,7 @@
           \footskip=\dimexpr\tud@dim@headsep+\footheight%
             -1.25\baselineskip\relax%
         }{}%
-        \if@tud@cover@cdgeometry%
+        \if@tud@cdgeometry@cover%
           \def\coverpagetopmargin{%
             \dimexpr\tud@dim@topmargin+\tud@dim@barheight%
               +\tud@dim@headsep\relax%
@@ -5570,7 +5590,7 @@
         \columnwidth=\textwidth%
         \hsize=\columnwidth%
         \linewidth=\hsize%
-        \tud@dim@headdiffskip=\z@%
+        \tud@dim@topdiffvskip=\z@%
         \ifundef{\hypersetup}{}{\hypersetup{pageanchor=false}}%
         \tud@maketitle%
         \clearpage%
@@ -5578,18 +5598,18 @@
     \fi%
   \endgroup%
 }
-\bool@lock{@tud@cover@cdgeometry}
+\bool@lock{@tud@cdgeometry@cover}
 \TUD@parameter{cover}{%
   \TUD@parameter@define{cdcover}[true]{\TUDoption{cdcover}{#1}}%
   \TUD@parameter@let{cd}{cdcover}%
   \TUD@parameter@define{cdgeometry}[true]{%
     \ifstrbool{#1}{%
-      \bool@set@lock{@tud@cover@cdgeometry}{true}%
+      \bool@set@lock{@tud@cdgeometry@cover}{true}%
     }{%
-      \bool@set@lock{@tud@cover@cdgeometry}{false}%
+      \bool@set@lock{@tud@cdgeometry@cover}{false}%
     }{%
-      \ifstr{#1}{custom}{\bool@set@lock{@tud@cover@cdgeometry}{false}}{%
-        \ifstr{#1}{user}{\bool@set@lock{@tud@cover@cdgeometry}{false}}{%
+      \ifstr{#1}{custom}{\bool@set@lock{@tud@cdgeometry@cover}{false}}{%
+        \ifstr{#1}{user}{\bool@set@lock{@tud@cdgeometry@cover}{false}}{%
           \TUD@parameter@error{cdgeometry}{true,false}%
         }%
       }%
