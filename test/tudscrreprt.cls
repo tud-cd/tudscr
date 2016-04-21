@@ -105,6 +105,7 @@
     }\csname xspace\endcsname%
   }%
 }{}
+% TODO: paketbezogene, interne Befehle von tud@ auf tud@pkg@
 %%% From File: tudscr-base.dtx
 \RequirePackage{tudscrbase}[\TUDVersion]
 \ifx\TUD@noworlater\TUD@noworlater@simple
