@@ -73,13 +73,13 @@
       \fi%
     }
   \fi
-  \@TUDVersion{2016/04/18 v2.05 BETA TUD-KOMA-Script}
+  \@TUDVersion{2016/04/25 v2.05 BETA TUD-KOMA-Script}
 \endgroup
 \NeedsTeXFormat{LaTeX2e}
 \providecommand*\tudscrmail{tudscr@gmail.com}
 \newcommand*\TUD@ProvidesClass[3]{%
   \ProvidesClass{#1}[%
-  2016/04/18 v2.05 BETA TUD-KOMA-Script
+  2016/04/25 v2.05 BETA TUD-KOMA-Script
     ^^J#3 (#2)%
   ]%
   \newcommand*\TUDClassName@KOMA{#2}%
@@ -4229,7 +4229,7 @@
 \@ifpackageloaded{geometry}{\@tempswatrue}{\@tempswafalse}
 \if@tempswa
   \newcommand*\tud@geometry@custom{}%
-  % TODO 
+  % TODO evtl tud@geometry definieren?
   \apptocmd{\geometry}{%
     \ifbool{@tud@geometry@enabled}{\appto\tud@geometry@custom{,#1}}{}%
   }{}{\tud@patch@wrn{geometry}}%
