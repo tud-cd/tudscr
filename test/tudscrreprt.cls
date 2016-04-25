@@ -105,6 +105,7 @@
     }\csname xspace\endcsname%
   }%
 }{}
+% TODO: AgentRansack: sämtlich \patchcmd vorher mit \CheckCommand prüfen
 % TODO: paketbezogene, interne Befehle von tud@ auf tud@pkg@
 %%% From File: tudscr-base.dtx
 \RequirePackage{tudscrbase}[\TUDVersion]
