@@ -1,4 +1,4 @@
-% \CheckSum{4178}
+% \CheckSum{4043}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-manual.dtx}[%
-  2016/04/21 v2.05 TUD-KOMA-Script\space%
+  2016/04/25 v2.05 TUD-KOMA-Script\space%
 %</driver>
 %<package&identify>\ProvidesPackage{tudscrtutorial}[%
 %<*driver|package&identify>
@@ -81,8 +81,8 @@
 %
 % \selectlanguage{ngerman}
 %
-% \changes{v2.02}{2014/12/17}{Erstellung der \app{xindy}-Stildatei während der 
-%   Kompilierung}^^A
+% \changes{v2.02}{2014/12/17}{Erstellung der \app{texindy}-Stildatei während
+%   der Kompilierung}^^A
 % \changes{v2.02}{2014/11/18}{\pkg{tudscrtutorial} Index für Tutorials}^^A
 % \changes{v2.05}{2015/08/04}{Geteilte Deklarationen für Klasse und Paket}^^A
 %
@@ -92,6 +92,7 @@
 % Paket \pkg{tudscrtutorial} für das Setzen von einigen Anwenderleitfäden bzw.
 % Tutorials erzeugt. Da es zwischen der Klasse und dem Paket es eine große
 % Menge an Überschneidungen gibt, basieren diese auf der gleichen Quelldatei.
+% \ToDo{Änderungsliste in glossary-Umgebung, separate .xdy-Datei}[v2.06]
 %
 % \StopEventually{\PrintIndex\PrintChanges}
 %
@@ -2979,206 +2980,9 @@
 %    \end{macrocode}
 % \end{macro}^^A \seeidx
 % \end{macro}^^A \seeref
-% \begin{macro}{\tud@write@i}
-% \changes{v2.02}{2014/10/22}{neu}^^A
-% \begin{macro}{\tud@write@ii}
-% \changes{v2.02}{2014/11/02}{neu}^^A
-% \begin{macro}{\tud@read}
-% \changes{v2.02}{2014/08/19}{neu}^^A
-% Für die Erstellung der Indexe wird zum Sortieren das Programm \app{texindy} 
-% genutzt. Für dieses wird eine eigene Stildatei verwendet, welche zur Laufzeit 
-% erzeugt wofür zuerst ein Ausgabestream reserviert wird.
-%    \begin{macrocode}
-\newcommand*\tud@write@i{}
-\newwrite\tud@write@i
-%    \end{macrocode}
-% Für die Tutorials werden später zusätzlich noch ein weiterer Ausgabe- sowie 
-% ein Eingabestream benötigt, die hier gleich mit initilaisiert werden.
-%    \begin{macrocode}
-%<*package>
-\newcommand*\tud@write@ii{}
-\newwrite\tud@write@ii
-\newcommand*\tud@read{}
-\newread\tud@read
-%</package>
-%    \end{macrocode}
-% \end{macro}^^A \tud@read
-% \end{macro}^^A \tud@write@ii
-% \end{macro}^^A \tud@write@i
-% Nachfolgend wird die zu erstellenden \app{texindy}-Stildatei kurz beschrieben.
-%    \begin{macrocode}
-\openout\tud@write@i=\jobname-temp.xdy
-\write\tud@write@i{%
-%    \end{macrocode}
-% Als erstes wird Standard-\LaTeX-Modul geladen.
-%    \begin{macrocode}
-(require "texindy.xdy")^^J%
-%    \end{macrocode}
-% Leider lässt sich für Seitenzahlbereiche via \val{:attr} (noch) kein Markup 
-% für angehängte \enquote{f.} sowie \enquote{ff.} einstellen. Diese würden 
-% deshalb bei kursiven oder fetten Seitenzahlen trotzdem in normaler Schrift
-% erscheinen, weshalb auf die Auszeichnung folgender Seiten verzichtet wird.
-%    \begin{macrocode}
-%(require "ff-ranges.xdy")^^J%
-%    \end{macrocode}
-%
-% Seitenbereiche werden sofort zusammengefasst, wobei als Trennzeichen ein
-% Halbgeviertstrich verwendet wird.
-%    \begin{macrocode}
-(define-location-class^^J%
-\space\space "arabic-page-numbers" ("arabic-numbers") :min-range-length 1^^J%
-)^^J%
-(markup-range :sep "--")^^J%
-%    \end{macrocode}
-% Punkte zwischen Eintrag und Seitenzahl. Das schließende \cs{relax} wird für 
-% die smarte Definition des Befehls \cs{cleversee} benötigt, welcher nach den 
-% beiden obligatorischen Argument die nachfolgenden Seitenzahlen sucht und 
-% dabei durch \cs{relax} begrenzt wird.
-%    \begin{macrocode}
-(markup-locclass-list^^J%
-\space\space :open "\string\,\string\dotfill\string\,"^^J%
-\space\space :close "\string\relax"^^J%
-)^^J%
-%    \end{macrocode}
-% Alle Argumente in eckigen Klammern werden ignoriert. Dies wird bei einigen
-% Indexbefehlen genutzt, um die nicht beachteten RegExp-Regeln auszugleichen, 
-% siehe den nächsten Absatz.
-%    \begin{macrocode}
-(merge-rule "\@backslashchar[(.*)\@backslashchar]" "" :eregexp)^^J%
-%    \end{macrocode}
-% Innerhalb ausgewählter Auszeichnungs- und Textbefehle sollten die Befehle
-% selbst, nicht jedoch die Argumente verworfen werden. Leider werden die 
-% manuell erstellten RegExp-Regeln durch \app{texindy} zu spät genutzt 
-% (\url{http://sourceforge.net/p/xindy/bugs/22/}).
-%    \begin{macrocode}
-%(merge-rule "\\hologo\{(.*)\}" "/1" :eregexp)^^J%
-%(merge-rule "\\texttt\{(.*)\}" "/1" :eregexp)^^J%
-%(merge-rule "\\textsbn\{(.*)\}" "/1" :eregexp)^^J%
-%(merge-rule "\\textsbs\{(.*)\}" "/1" :eregexp)^^J%
-%    \end{macrocode}
-% Es werden die Attribute \emph{declare} mit der Abkürzung \emph{!} sowie
-% \emph{important} mit der Abkürzung \emph{?} und \emph{default} definiert, 
-% welche hierarchisch gleichgestellt sind.
-%    \begin{macrocode}
-(define-attributes (("declare" "!" "important" "?" "default")))^^J%
-%    \end{macrocode}
-% Eine Alternative wäre, diese in der Hierarchie zu unterscheiden, allerdings
-% war eine Bildung von zufriedenstellenden Seitenbereichen dabei nicht möglich
-% und wurde deshalb verworfen.
-%    \begin{macrocode}
-%(markup-attribute-group-list :sep ", ")^^J%
-%(define-attributes (("declare" "!") ("important" "?")("default")))^^J%
-%    \end{macrocode}
-% Einträge, die als wichtig oder als Deklaration festgelegt wurden, könnten
-% auch für normale Indexeinträge zur Bereichsbildung verwendet werden. 
-% Allerdings führt dies auch zur Erzeugung redundanter Einträge, falls es sich 
-% bei den Sondereinträgen bereits um einen Seitenbereich handelt.
-%    \begin{macrocode}
-%(merge-to "declare" "default")^^J%
-%(merge-to "!" "default")^^J%
-%(merge-to "important" "default")^^J%
-%(merge-to "?" "default")^^J%
-%    \end{macrocode}
-% Hier erfolgt die Definition der Auszeichnugen der Attribute. Deklarationen 
-% werden fett gedruckt, wichtige Einträge erscheinen kursiv. Außerdem wird ein
-% entsprechnder Link auf die Seite eingefügt.
-%    \begin{macrocode}
-(markup-locref^^J%
-\space\space :attr "declare"^^J%
-\space\space :open "\string\textbf{\string\hyperpage{"^^J%
-\space\space :close "}}"^^J%
-)^^J%
-(markup-locref^^J%
-\space\space :attr "!"^^J%
-\space\space :open "\string\textbf{\string\hyperpage{"^^J%
-\space\space :close "}}"^^J%
-)^^J%
-(markup-locref^^J%
-\space\space :attr "important"^^J%
-\space\space :open "\string\textsl{\string\hyperpage{"^^J%
-\space\space :close "}}"^^J%
-)^^J%
-(markup-locref^^J%
-\space\space :attr "?"^^J%
-\space\space :open "\string\textsl{\string\hyperpage{"^^J%
-\space\space :close "}}"^^J%
-)^^J%
-(markup-locref^^J%
-\space\space :attr "default"^^J%
-\space\space :open "\string\hyperpage{"^^J%
-\space\space :close "}"^^J%
-)^^J%
-%    \end{macrocode}
-% Mit \val{see}\marg{Eintrag} erzeugte Querverweise im Index prüfen, ob 
-% außerdem noch Seitenzahlangaben exisitent sind.
-%    \begin{macrocode}
-(markup-crossref-list^^J%
-\space\space :class "see"^^J%
-\space\space :open "\string\cleversee{" :sep "; " :close "}"^^J%
-)^^J%
-(markup-crossref-list^^J%
-\space\space :class "seealso"^^J%
-\space\space :open "\string\cleverseealso{" :sep "; " :close "}"^^J%
-)^^J%
-%    \end{macrocode}
-% Werden mit \val{see}\marg{Eintrag!Untereintrag} gezielte Querverweise auf
-% Untereinträge im Index erstellt, so werden diese nicht standardmäßig mit 
-% einem Komma sondern mit \enquote{\,\textbar\,} getrennt.
-%    \begin{macrocode}
-(markup-crossref-layer-list^^J%
-\space\space :class "see" ^^J%
-\space\space :sep "\string\,\string\textbar\string\,"^^J%
-)^^J%
-(markup-crossref-layer-list^^J%
-\space\space :class "seealso" ^^J%
-\space\space :sep "\string\,\string\textbar\string\,"^^J%
-)^^J%
-%    \end{macrocode}
-%
-% \iffalse
-%<*class>
-% \fi
-%
-% Dieser Querverweistyp wird speziell im allgemeinen Index verwendet, um auf 
-% einen Spezialindex zu verweisen. Dabei dient \val{:unverified} zum 
-% Unterdrücken von Warnungen durch \app{texindy} aufgrund eines fehlenden 
-% Ziels für den Querverweis.
-%    \begin{macrocode}
-(define-crossref-class "seeidx" :unverified)^^J%
-(markup-crossref-list^^J%
-\space\space :class "seeidx"^^J%
-\space\space :open "\string\seeidx{" :sep "; " :close "}{}"^^J%
-)^^J%
-%    \end{macrocode}
-% Damit die Makros \cs{cleversee} und \cs{cleverseealso} sowie \cs{seeidx} auf
-% nachfolgende Seitenzahlen suchen können, müssen diese vor selbigen im Index
-% aufgerufen werden.
-%    \begin{macrocode}
-(define-location-class-order^^J%
-\space (^^J%
-\space\space "see" "seealso" "seeidx"^^J%
-\space\space "roman-page-numbers" "arabic-page-numbers" "alpha-page-numbers"^^J%
-\space\space "Roman-page-numbers" "Alpha-page-numbers"^^J%
-\space )^^J%
-)^^J%
-%    \end{macrocode}
-% Für die Änderungsliste werden Untereinträge bis zur fünften Ebene unterstützt.
-%    \begin{macrocode}
-(markup-indexentry :open "~n \string\subsubsubitem " :depth 3)^^J%
-%    \end{macrocode}
-%
-% \iffalse
-%</class>
-% \fi
-%
-% Damit ist die \app{texindy}-Stildatei fertig.
-%    \begin{macrocode}
-}
-\closeout\tud@write@i
-%    \end{macrocode}
-% \begin{macro}{\makexindyindex}
+% \begin{macro}{\maketexindyindex}
 % \changes{v2.05}{2015/11/01}{neu}^^A
-% Um die einzelnen Indexe zu erstellen, wird das Makro \cs{makexindyindex} 
+% Um die einzelnen Indexe zu erstellen, wird das Makro \cs{maketexindyindex} 
 % definiert. Die Sternversion dieses Befehle erstellt dabei neben dem normalen
 % Spezialindex einen weiteren, welcher explizit für Deklarationen genutzt wird.
 % Dieser wird anschließen als erstes an \app{texindy} weitergereicht, um die
@@ -3186,7 +2990,7 @@
 % danach wird die Datei mit den normalen Einträgen verarbeitet. Siehe hierzu 
 % auch \cs{@@ProcessIndex}.
 %    \begin{macrocode}
-\NewDocumentCommand\makexindyindex{somo}{%
+\NewDocumentCommand\maketexindyindex{somo}{%
   \let\@tempb\@empty%
 %<*class>
   \IfBooleanT{#1}{%
@@ -3213,22 +3017,22 @@
   \expandafter\makeindex\expandafter[\@tempa]%
 }
 %    \end{macrocode}
-% \end{macro}^^A \makexindyindex
-% Nun können mit \cs{makexindyindex} die einzelnen Indexe erstellt werden.
+% \end{macro}^^A \maketexindyindex
+% Nun können mit \cs{maketexindyindex} die einzelnen Indexe erstellt werden.
 %    \begin{macrocode}
-\makexindyindex{Allgemeiner Index}
-\makexindyindex*{Klassen- und Paketoptionen}[options]
-\makexindyindex*{Befehle und Umgebungen mit dazugeh\"origen Parametern}[macros]
+\maketexindyindex{Allgemeiner Index}
+\maketexindyindex*{Klassen- und Paketoptionen}[options]
+\maketexindyindex*{Befehle und Umgebungen mit zugeh\"origen Parametern}[macros]
 %<*class>
-\makexindyindex*{Sprachabh\"angige Bezeichner}[terms]
-\makexindyindex*{Seitenstile, Schriftelemente und Farben}[elements]
+\maketexindyindex*{Sprachabh\"angige Bezeichner}[terms]
+\maketexindyindex*{Seitenstile, Schriftelemente und Farben}[elements]
 %</class>
-\makexindyindex*{L\"angen und Z\"ahler}[misc]
-\makexindyindex*{Klassen, Pakete und Dateien}[files]
+\maketexindyindex*{L\"angen und Z\"ahler}[misc]
+\maketexindyindex*{Klassen, Pakete und Dateien}[files]
 %<*class>
-\makexindyindex[columns=1]{\"Anderungsliste}[changelog]
+\maketexindyindex[columns=1]{\"Anderungsliste}[changelog]
 %</class>
-\undef\makexindyindex
+\undef\maketexindyindex
 %    \end{macrocode}
 % \begin{macro}{\if@tud@index}
 % \changes{v2.05}{2015/11/05}{neu}^^A
@@ -4265,6 +4069,7 @@
 % gemacht, zum anderen wird der Befehl \cs{item} so umdefiniert, dass dieser
 % alles bis zum nächsten Zeilenumbruch als Argument einliest. Alle darunter 
 % liegenden \cs{item}-Befehle werden eine Ebene nach oben gehoben.
+% \ToDo{anstelle item mit eigenem, determinierten (relax)  Markupbefehl}[v2.06]
 %    \begin{macrocode}
     \let\lettergroup\@gobble%
     \apptocmd{\theindex}{%
@@ -4746,7 +4551,6 @@
 %
 % \iffalse
 %</class>
-%<*package>
 % \fi
 %
 % \subsubsection{Quelltextverarbeitung für das Paket}
@@ -4765,6 +4569,35 @@
 % deren Derivate verantwortlich. Die Umgebung \env{Hint} steht für zusätzliche 
 % Erläuterungen bereit, welche jedoch nicht in das Copy"~\&"~Paste"~Beispiel 
 % übernommen werden.
+%
+% \begin{macro}{\tud@write@i}
+% \changes{v2.02}{2014/10/22}{neu}^^A
+% \begin{macro}{\tud@write@ii}
+% \changes{v2.02}{2014/11/02}{neu}^^A
+% \begin{macro}{\tud@read}
+% \changes{v2.02}{2014/08/19}{neu}^^A
+% Für die Erstellung der Indexe wird zum Sortieren das Programm \app{texindy} 
+% genutzt. Für dieses wird eine eigene Stildatei verwendet, welche zur Laufzeit 
+% erzeugt wofür zuerst ein Ausgabestream reserviert wird.
+%    \begin{macrocode}
+\newcommand*\tud@write@i{}
+\newwrite\tud@write@i
+%    \end{macrocode}
+% Für die Tutorials werden später zusätzlich noch ein weiterer Ausgabe- sowie 
+% ein Eingabestream benötigt, die hier gleich mit initilaisiert werden.
+%    \begin{macrocode}
+%<*package>
+\newcommand*\tud@write@ii{}
+\newwrite\tud@write@ii
+%</package>
+%    \end{macrocode}
+% \end{macro}^^A \tud@read
+% \end{macro}^^A \tud@write@ii
+% \end{macro}^^A \tud@write@i
+%
+% \iffalse
+%<*package>
+% \fi
 %
 % \begin{macro}{\CodePreamble}
 % \changes{v2.02}{2014/08/20}{neu}^^A
@@ -5224,6 +5057,8 @@
 % \end{macro}^^A \StartTutorial
 % \begin{macro}{\tud@tut@readtostream}
 % \changes{v2.02}{2014/12/16}{neu}^^A
+% \begin{macro}{\tud@read}
+% \changes{v2.02}{2014/08/19}{neu}^^A
 % \begin{macro}{\tud@tut@line}
 % \changes{v2.02}{2014/08/19}{neu}^^A
 % \begin{macro}{\tud@tut@append}
@@ -5241,6 +5076,8 @@
 % in den Ausgabestream des zweiten Argumentes geschrieben. Dies wird durch die
 % Makros \cs{tud@tut@append} und \cs{tud@tut@collect} genutzt.
 %    \begin{macrocode}
+\newcommand*\tud@read{}
+\newread\tud@read
 \newcommand*\tud@tut@line{}
 \newcommand*\tud@tut@readtostream[2]{%
   \begingroup%
@@ -5305,6 +5142,7 @@
 % \end{macro}^^A \tud@tut@collect
 % \end{macro}^^A \tud@tut@append
 % \end{macro}^^A \tud@tut@line
+% \end{macro}^^A \tud@read
 % \end{macro}^^A \tud@tut@readtostream
 %
 % \iffalse
