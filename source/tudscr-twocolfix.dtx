@@ -1,4 +1,4 @@
-% \CheckSum{124}
+% \CheckSum{210}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-twocolfix.dtx}[%
-  2016/04/18 v2.05 TUD-KOMA-Script\space%
+  2016/04/25 v2.05 TUD-KOMA-Script\space%
 %</driver>
 %<package>\NeedsTeXFormat{LaTeX2e}
 %<package>\ProvidesPackage{twocolfix}[%
@@ -82,6 +82,9 @@
 % \fi
 %
 % \selectlanguage{ngerman}
+%
+% \changes{v2.05}{2016/04/25}{Überprüfen der Definition von \cs{@topnewpage}
+%   des \LaTeXe-Kernels}^^A
 %
 % \section{Bugfix für den zweispaltigen Satz}
 %
@@ -168,14 +171,65 @@
   \fi%
 }
 %    \end{macrocode}
+% Um eine Änderung am \LaTeXe-Kernel feststellen zu können, wird auf die zum
+% Zeitpunkt des Paketes aktuelle Definition von \cs{@topnewpage} geprüft.
+%    \begin{macrocode}
+\long\def\@tempb[#1]{%
+  \@nodocument
+  \@next\@currbox\@freelist{}{}%
+  \global \setbox\@currbox
+    \color@vbox
+      \normalcolor
+      \vbox {%
+        \hsize\textwidth
+        \@parboxrestore
+        \col@number \@ne
+        #1%
+        \vskip -\dbltextfloatsep
+      }%
+    \color@endbox
+  \ifdim \ht\@currbox>\textheight
+    \ht\@currbox \textheight
+  \fi
+  \global \count\@currbox \tw@
+  \@tempdima -\ht\@currbox
+  \advance \@tempdima -\dbltextfloatsep
+  \global \advance \@colht \@tempdima
+  \ifx \@dbltoplist \@empty
+  \else
+    \@latexerr{Float(s) lost}\@ehb
+    \let \@dbltoplist \@empty
+  \fi
+  \@cons \@dbltoplist \@currbox
+  \global \@dbltopnum \m@ne
+  \ifdim \@colht<2.5\baselineskip
+    \@latex@warning@no@line {Optional argument of \noexpand\twocolumn
+                        too tall on page \thepage}%
+    \@emptycol
+    \if@firstcolumn
+    \else
+      \@emptycol
+    \fi
+  \else
+    \global \vsize \@colht
+    \global \@colroom \@colht
+    \@floatplacement
+  \fi
+}
+%    \end{macrocode}
 % \begin{macro}{\@topnewpage}
 % \begin{macro}{\scr@topnewpage}
-% Nachdem der Befehl zuerst temporär definert wurde, wird nun abhängig von der
-% aktiven Klasse der notwendige Befehl mit der neuen Definition überschrieben.
+% Nachdem der neue Befehl sowie die Definition aus dem \LaTeXe-Kernel zuerst 
+% temporär definiert wurden, wird nun abhängig von der aktiven Klasse der
+% notwendige Befehl mit der neuen Definition überschrieben.
 %    \begin{macrocode}
-\@ifundefined{scr@topnewpage}
-  {\let\@topnewpage\@tempa}
-  {\let\scr@topnewpage\@tempa}
+\@ifundefined{scr@topnewpage}{%
+  \@check@eq\@topnewpage\@tempb%
+  \let\@topnewpage\@tempa%
+}{%
+  \@check@eq\scr@topnewpage\@tempb%
+  \let\scr@topnewpage\@tempa%
+}
 %    \end{macrocode}
 % \end{macro}^^A \scr@topnewpage
 % \end{macro}^^A \@topnewpage
