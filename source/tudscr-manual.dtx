@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-manual.dtx}[%
-  2016/04/25 v2.05 TUD-KOMA-Script\space%
+  2016/04/26 v2.05 TUD-KOMA-Script\space%
 %</driver>
 %<package&identify>\ProvidesPackage{tudscrtutorial}[%
 %<*driver|package&identify>
@@ -61,7 +61,7 @@
 %</driver|package&identify>
 %<*driver>
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
-\documentclass[english,ngerman]{tudscrdoc}
+\documentclass[english,ngerman,xindy]{tudscrdoc}
 \usepackage{selinput}\SelectInputMappings{adieresis={ä},germandbls={ß}}
 \usepackage[T1]{fontenc}
 \usepackage{babel}
@@ -83,7 +83,7 @@
 %
 % \changes{v2.02}{2014/12/17}{Erstellung der \app{texindy}-Stildatei während
 %   der Kompilierung}^^A
-% \changes{v2.02}{2014/11/18}{\pkg{tudscrtutorial} Index für Tutorials}^^A
+% \changes{v2.02}{2014/11/18}{\pkg{tudscrtutorial}: Index für Tutorials}^^A
 % \changes{v2.05}{2015/08/04}{Geteilte Deklarationen für Klasse und Paket}^^A
 %
 % \section{Klasse und Paket für Handbuch und Leitfäden zu \TUDScript}
@@ -92,7 +92,6 @@
 % Paket \pkg{tudscrtutorial} für das Setzen von einigen Anwenderleitfäden bzw.
 % Tutorials erzeugt. Da es zwischen der Klasse und dem Paket es eine große
 % Menge an Überschneidungen gibt, basieren diese auf der gleichen Quelldatei.
-% \ToDo{Änderungsliste in glossary-Umgebung, separate .xdy-Datei}[v2.06]
 %
 % \StopEventually{\PrintIndex\PrintChanges}
 %
@@ -1248,7 +1247,7 @@
 % Als erstes werden für Klasse und Paket einige Hilfmakros definiert.
 %
 % \begin{macro}{\bsc}
-% \changes{v2.02}{2014/07/22}{\cs{newrobustcmd} aus \pkg{etoolbox} anstelle von 
+% \changes{v2.02}{2014/07/22}{\cs{newrobustcmd} aus \pkg{etoolbox} anstatt
 %   \cs{DeclareRobustCommand}}^^A
 % Eine einfacher zu verwendende Kurzform.
 %    \begin{macrocode}
@@ -1492,8 +1491,7 @@
 % \end{macro}^^A \@Class
 % \end{macro}^^A \Class
 % \begin{macro}{\Package}
-% \changes{v2.02}{2014/07/10}{Ausgabe für ChangeLog hinzugefügt}^^A
-% \changes{v2.02}{2014/10/08}{überarbeitet}^^A
+% \changes{v2.02}{2014/07/10}{Ausgabe für Änderungsliste hinzugefügt}^^A
 % \begin{macro}{\@Package}
 % Für die Auszeichnungen von Paketen gelten vorherigen Aussagen äquivalent. 
 % Für Pakete wird ergänzend ein Hyperlink auf CTAN erzeugt, wenn für dieses 
@@ -1595,9 +1593,9 @@
 % \end{tabular}%
 %    \begin{macrocode}
     \@SetMarkupFormat{\ttfamily}(%
-      \ttfamily\bsc{}begin\{#2\}\IfValueT{#3}{#3}\tabularnewline%
-      \ttfamily\dots\tabularnewline%
-      \ttfamily\bsc{}end\{#2\}%
+      \ttfamily\bsc{}begin\textbraceleft#2\textbraceright\IfValueT{#3}{#3}%
+      \tabularnewline\ttfamily\dots%
+      \tabularnewline\ttfamily\bsc{}end\textbraceleft#2\textbraceright%
     )%
     \@ProcessMarkup{\Environment{#2}}[#3](#4)'#5'%
     \@ProcessIndex{#1}{\Environment{#2}}[Umgebung](#4)|#6|%
@@ -1895,13 +1893,15 @@
 \newrobustcmd*\PSet{\PName{Einstellung}}
 \newrobustcmd*\PBoolean{\PName{Ein-Aus-Wert}}
 \newrobustcmd*\PBName[1]{\PBoolean\textOR\PName{#1}}
-\newrobustcmd*\Parameter[1]{\mbox{\texttt{\{}\PName{#1}\texttt{\}}}}
+\newrobustcmd*\Parameter[1]{%
+  \mbox{\texttt{\textbraceleft}\PName{#1}\texttt{\textbraceright}}%
+}
 \newrobustcmd*\OParameter[1]{\mbox{\texttt{[}\PName{#1}\texttt{]}}}
 \newrobustcmd*\LParameter{\mbox{\texttt{[}\PName{Parameterliste}\texttt{]}}}
 \newrobustcmd*\OLParameter[1]{%
   \mbox{\texttt{[}\PName{#1}\textOR\PName{Parameterliste}\texttt{]}}%
 }
-\newrobustcmd*\PParameter[1]{\mbox{\texttt{\{#1\}}}}
+\newrobustcmd*\PParameter[1]{\mbox{\texttt{\textbraceleft#1\textbraceright}}}
 \newrobustcmd*\POParameter[1]{\mbox{\texttt{[#1]}}}
 \newrobustcmd*\textOR{\PValue{\,\textbardbl\,}}
 %    \end{macrocode}
@@ -4491,8 +4491,8 @@
   \addvspace{-\topsep}%
 }
 \newenvironment{Example*}{%
-  \labeling{{\usekomafont{disposition}Beispiel:\ }}%
-  \item[{\usekomafont{disposition}Beispiel:\ }]%
+  \labeling{{\usekomafont{disposition}Beispiel:\nobreakspace}}%
+  \item[{\usekomafont{disposition}Beispiel:\nobreakspace}]%
 }{%
   \endlabeling%
 }
@@ -5257,7 +5257,6 @@
 % \end{macro}^^A \Tutorial
 % \begin{macro}{\IncludeExample}
 % \changes{v2.02}{2014/07/25}{Skalierung der eingefügten Seiten}^^A
-% \changes{v2.02}{2014/10/14}{Reimplementierung}^^A
 % Mit diesem Befehl wird eine \LaTeX-Datei ggf. übersetzt und anschließend als
 % PDF"~Datei wieder eingebunden. Zuvor wird der dazugehörige Quelltext mittels
 % \cs{lstinputlisting} im Dokument ausgegeben. Dieser Befehl wird lediglich für 

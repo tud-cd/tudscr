@@ -37,10 +37,8 @@ echo \BaseDirectory{.}> docstrip.cfg
 echo \UseTDS>> docstrip.cfg
 tex tudscr.ins
 pdflatex "\def\tudfinalflag{}\input{tudscrsource.tex}"
-pdflatex "\def\tudfinalflag{}\input{tudscrsource.tex}"
-makeindex -s gglo.ist -o tudscrsource.gls tudscrsource.glo
-makeindex -s gind.ist -o tudscrsource.ind tudscrsource.idx
-pdflatex "\def\tudfinalflag{}\input{tudscrsource.tex}"
+pdflatex --shell-escape "\def\tudfinalflag{}\input{tudscrsource.tex}"
+pdflatex --shell-escape "\def\tudfinalflag{}\input{tudscrsource.tex}"
 pdflatex "\def\tudfinalflag{}\input{tudscrsource.tex}"
 move  *.dtx               source\latex\tudscr\
 move  tudscr.ins          source\latex\tudscr\
