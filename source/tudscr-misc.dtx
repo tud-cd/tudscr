@@ -1,4 +1,4 @@
-% \CheckSum{665}
+% \CheckSum{698}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,10 +51,10 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-misc.dtx}[%
-  2016/04/25 v2.05 TUD-KOMA-Script (miscellaneous)%
+  2016/04/26 v2.05 TUD-KOMA-Script (miscellaneous)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
-\documentclass[english,ngerman]{tudscrdoc}
+\documentclass[english,ngerman,xindy]{tudscrdoc}
 \usepackage{selinput}\SelectInputMappings{adieresis={ä},germandbls={ß}}
 \usepackage[T1]{fontenc}
 \usepackage{babel}
@@ -62,6 +62,7 @@
 \KOMAoptions{parskip=half-}
 \usepackage{microtype}
 \usepackage{bookmark}
+\EnableCrossrefs
 \CodelineIndex
 \RecordChanges
 \GetFileInfo{tudscr-misc.dtx}
@@ -74,8 +75,8 @@
 %
 % \selectlanguage{ngerman}
 %
-% \changes{v2.02}{2014/06/23}{Unterstützung für \pkg{titlepage} entfernt}^^A
-% \changes{v2.02}{2014/07/08}{Optionen nutzen \cs{FamilyKeyState}}^^A
+% \changes{v2.02}{2014/06/23}{Paket \pkg{titlepage} nicht weiter unterstützt}^^A
+% \changes{v2.02}{2014/07/08}{\cs{FamilyKeyState} wird von Optionen genutzt}^^A
 % \changes{v2.05}{2015/07/06}{Bugfix für \pkg{multicol}}^^A
 %
 % \section{Verschiedenes für das \TUDScript-Bundle}
@@ -471,6 +472,16 @@
 % den Stildateien sucht, werden diese zur Laufzeit im Arbeitsverzeichnis 
 % erstellt. Nachfolgend wird die zu erstellenden \app{texindy}-Stildatei kurz
 % beschrieben.
+% \begin{macro}{\@hashchar}
+% \changes{v2.05}{2016/04/25}{neu}^^A
+% Das Hash-Zeichen.
+%    \begin{macrocode}
+%<*doc>
+\catcode`\#=12
+\newcommand*\@hashchar{#}
+\catcode`\#=6
+%</doc>
+%    \end{macrocode}
 % \begin{macro}{\@itemlist@def}
 % \changes{v2.05}{2016/04/25}{neu}^^A
 % \begin{macro}{\@@itemlist}
@@ -519,22 +530,17 @@
 % \end{macro}^^A \if@itemlist@multi
 % \end{macro}^^A \@@itemlist
 % \end{macro}^^A \@itemlist@def
+% \end{macro}^^A \@hashchar
 % \begin{macro}{\tud@xdycreate}
 % \changes{v2.05}{2016/04/24}{neu}^^A
 % \begin{macro}{\tud@write@xdy}
 % \changes{v2.05}{2016/04/24}{neu}^^A
-% \begin{macro}{\@hashchar}
-% \changes{v2.05}{2016/04/25}{neu}^^A
 % \begin{macro}{\if@tud@glo@xdy}
 % \changes{v2.05}{2016/04/25}{neu}^^A
 % Dies sind die Hilfsmakros für die Erzeugung der notwendigen Dateien.
 %    \begin{macrocode}
-%<*doc>
-\catcode`\#=12
-\newcommand*\@hashchar{#}
-\catcode`\#=6
-%</doc>
 \begingroup
+%<doc>\ifdef{\tudtexindyflag}{%
 \newcommand*\tud@write@xdy{}
 \newwrite\tud@write@xdy
 \newif\if@tud@glo@xdy
@@ -551,6 +557,10 @@
 %
 % Für die Klasse \cls{tudscrdoc} sind zwei sehr ähnliche Stildateien notwendig. 
 % Die beiden unterschieden sich lediglich in der verwendeten Umgebung.
+% \begingroup%
+% \makeatletter%
+% \@bsphack\scan@allowedfalse\@esphack%
+% \makeatother%
 %    \begin{macrocode}
 %<*doc>
 \write\tud@write@xdy{%
@@ -559,13 +569,15 @@
 "\string\begin{#1}^^J%
 \space\space%
 \string\providecommand*\string\lettergroupDefault[1]{\@percentchar^^J%
-\@spaces\string\par\string\centerline{\string\textbf{Symbole}}%
+\@spaces\string\par%
+\string\centerline{\string\textbf{\string\textsf{Symbole}}}%
 \string\par\@percentchar^^J%
 \@spaces\string\nopagebreak\@percentchar^^J%
 \space\space}\@percentchar^^J%
 \space\space%
 \string\providecommand*\string\lettergroup[1]{\@percentchar^^J%
-\@spaces\string\par\string\centerline{\string\textbf{\@hashchar1}}%
+\@spaces\string\par%
+\string\centerline{\string\textbf{\string\textsf{\@hashchar1}}}%
 \string\par\@percentchar^^J%
 \@spaces\string\nopagebreak\@percentchar^^J%
 \space\space}\@percentchar^^J%
@@ -607,16 +619,26 @@
 % deshalb bei kursiven oder fetten Seitenzahlen trotzdem in normaler Schrift
 % erscheinen, weshalb auf die Auszeichnung folgender Seiten verzichtet wird.
 %    \begin{macrocode}
-%\write\tud@write@xdy{(require "ff-ranges.xdy")^^J}%
+%^^A\write\tud@write@xdy{(require "ff-ranges.xdy")^^J}%
 %    \end{macrocode}
 % Seitenbereiche werden sofort zusammengefasst, wobei als Trennzeichen ein
-% Halbgeviertstrich verwendet wird.
+% Halbgeviertstrich verwendet wird. Für \cls{tudscrdoc} werden die Seitenzahlen 
+% beim Einbinden der einzelnen \file{dtx}-Dateien mit einem alphanumerischen 
+% Präfix versehen, wofür eine eigene \val{location-class} erstellt wird.
 %    \begin{macrocode}
 \write\tud@write@xdy{%
 (define-location-class^^J%
-\space\space"arabic-page-numbers" ("arabic-numbers") :min-range-length 1^^J%
+\space\space"arabic-page-numbers" ("arabic-numbers")%
+\space:min-range-length 2^^J%
 )^^J%
-(markup-range :sep "--")^^J%
+%<*doc>
+(define-location-class^^J%
+\space\space"part" ("alpha" :sep "-" "arabic-numbers")%
+\space:min-range-length 2^^J%
+)^^J%
+%</doc>
+(markup-range :sep "--")%
+}%
 %    \end{macrocode}
 %
 % \subsubsection{Markup des Füllbereichs zwischen Eintrag und Seitenzahlen}
@@ -624,13 +646,27 @@
 % Punkte zwischen Eintrag und Seitenzahl. Das schließende \cs{relax} wird für 
 % die smarte Definition des Befehls \cs{cleversee} benötigt, welcher nach den 
 % beiden obligatorischen Argument die nachfolgenden Seitenzahlen sucht und 
-% dabei durch \cs{relax} begrenzt wird.
+% dabei durch \cs{relax} begrenzt wird. Für die Klasse \cls{tudscrdoc} wird in
+% der Änderungsliste der Hyperlink für die Seitenzahl respektive die Codezeile 
+% direkt erzeugt.
 %    \begin{macrocode}
+%<*doc>
+\if@tud@glo@xdy%
+\write\tud@write@xdy{%
 (markup-locclass-list%
-\space:open "\string\,\string\dotfill\string\,"%
+\space:open "\string\pfill\string\hypersourceref{" :close "}\string\relax"%
+)%
+}%
+\else%
+%</doc>
+\write\tud@write@xdy{%
+(markup-locclass-list%
+%<!doc>\space:open "\string\,\string\dotfill\string\,"%
+%<doc>\space:open "\string\pfill\space"%
 \space:close "\string\relax"%
 )%
 }%
+%<doc>\fi%
 %    \end{macrocode}
 %
 % \subsubsection{Ignorieren von bestimmten Anteilen bei der Sortierung}
@@ -641,7 +677,13 @@
 % oder mehrere vorangestellte \val{@}-Zeichen ignoriert.
 %    \begin{macrocode}
 \write\tud@write@xdy{%
-%<doc>(merge-rule "\string^(@+)(.*)" "\string\2\string\1" :eregexp :again)^^J%
+%<*doc>
+(merge-rule%
+\space"\string^(@+)(.*)"%
+\space"\string\2\string~\string~\string\1"%
+\space:eregexp :again%
+)^^J%
+%</doc>
 (merge-rule "\@backslashchar[(.*)\@backslashchar]" "" :eregexp)%
 }%
 %    \end{macrocode}
@@ -651,12 +693,12 @@
 % (\url{http://sourceforge.net/p/xindy/bugs/22/}).
 %    \begin{macrocode}
 %<*!doc>
-%\write\tud@write@xdy{%
-%(merge-rule "\\hologo\{(.*)\}" "/1" :eregexp)^^J%
-%(merge-rule "\\texttt\{(.*)\}" "/1" :eregexp)^^J%
-%(merge-rule "\\textsbn\{(.*)\}" "/1" :eregexp)^^J%
-%(merge-rule "\\textsbs\{(.*)\}" "/1" :eregexp)^^J%
-%}
+%^^A\write\tud@write@xdy{%
+%^^A(merge-rule "\\hologo\{(.*)\}" "/1" :eregexp)^^J%
+%^^A(merge-rule "\\texttt\{(.*)\}" "/1" :eregexp)^^J%
+%^^A(merge-rule "\\textsbn\{(.*)\}" "/1" :eregexp)^^J%
+%^^A(merge-rule "\\textsbs\{(.*)\}" "/1" :eregexp)^^J%
+%^^A}
 %</!doc>
 %    \end{macrocode}
 %
@@ -762,18 +804,18 @@
 % war eine Bildung von zufriedenstellenden Seitenbereichen dabei nicht möglich
 % und wurde deshalb verworfen.
 %    \begin{macrocode}
-%(markup-attribute-group-list :sep ", ")^^J%
-%(define-attributes (("declare" "!") ("important" "?")("default")))^^J%
+%^^A(markup-attribute-group-list :sep ", ")^^J%
+%^^A(define-attributes (("declare" "!") ("important" "?")("default")))^^J%
 %    \end{macrocode}
 % Einträge, die als wichtig oder als Deklaration festgelegt wurden, könnten
 % auch für normale Indexeinträge zur Bereichsbildung verwendet werden. 
 % Allerdings führt dies auch zur Erzeugung redundanter Einträge, falls es sich 
 % bei den Sondereinträgen bereits um einen Seitenbereich handelt.
 %    \begin{macrocode}
-%(merge-to "declare" "default")^^J%
-%(merge-to "!" "default")^^J%
-%(merge-to "important" "default")^^J%
-%(merge-to "?" "default")^^J%
+%^^A(merge-to "declare" "default")^^J%
+%^^A(merge-to "!" "default")^^J%
+%^^A(merge-to "important" "default")^^J%
+%^^A(merge-to "?" "default")^^J%
 %    \end{macrocode}
 % Hier erfolgt die Definition der Auszeichnugen der Attribute. Deklarationen 
 % werden fett gedruckt, wichtige Einträge erscheinen kursiv. Außerdem wird ein
@@ -903,6 +945,7 @@
 %
 % Damit ist die \app{texindy}-Stildatei fertig und kann mit \cs{tud@xdycreate} 
 % erstellt werden.
+% \endgroup
 %    \begin{macrocode}
 \closeout\tud@write@xdy
 }
@@ -913,10 +956,10 @@
 \tud@xdycreate{idx}
 \tud@xdycreate[theglossary]{glo}
 %</doc>
+%<doc>}{}
 \endgroup
 %    \end{macrocode}
 % \end{macro}^^A \if@tud@glo@xdy
-% \end{macro}^^A \@hashchar
 % \end{macro}^^A \tud@write@xdy
 % \end{macro}^^A \tud@xdycreate
 %

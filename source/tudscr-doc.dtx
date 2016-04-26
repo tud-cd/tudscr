@@ -1,4 +1,4 @@
-% \CheckSum{1167}
+% \CheckSum{1455}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,11 +51,11 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-doc.dtx}[%
-  2016/04/25 v2.05 TUD-KOMA-Script\space%
+  2016/04/26 v2.05 TUD-KOMA-Script\space%
   (source code documentation based on scrartcl/scrdoc)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
-\documentclass[english,ngerman]{tudscrdoc}
+\documentclass[english,ngerman,xindy]{tudscrdoc}
 \usepackage{selinput}\SelectInputMappings{adieresis={ä},germandbls={ß}}
 \usepackage[T1]{fontenc}
 \usepackage{babel}
@@ -97,7 +97,10 @@
   \newcommand*\saved@maketitle{}%
   \PassOptionsToClass{toc=left}{scrartcl}%
   \AfterClass{scrartcl}{\let\saved@maketitle\@maketitle}%
-  \AfterClass{ltxdoc}{\let\@maketitle\saved@maketitle}%
+  \AfterClass{ltxdoc}{%
+    \let\@maketitle\saved@maketitle%
+    \codeline@indexfalse%
+  }%
   \AfterPackage{inputenc}{\RequirePackage{csquotes}[2011/10/22]}%
 }{}
 %    \end{macrocode}
@@ -152,8 +155,12 @@
 %    \end{macrocode}
 % Befehle, welche bei der Verwednung von \cs{EnableCrossrefs} dennoch nicht im 
 % Index erscheinen sollen.
+% \begingroup%
+% \makeatletter%
+% \@bsphack\scan@allowedfalse\@esphack%
+% \makeatother%
 %    \begin{macrocode}
-\DoNotIndex{\ ,\",\.,\@,\\}
+\DoNotIndex{\ ,\",\.,\@,\\,\{,\}}
 \DoNotIndex{\@abstrtfalse,\@abstrttrue,\@addtoreset}
 \DoNotIndex{\@afterheading,\@afterindentfalse}
 \DoNotIndex{\@Alph,\@alph,\@arabic}
@@ -222,16 +229,8 @@
 \DoNotIndex{\year}
 \DoNotIndex{\z@}
 %    \end{macrocode}
-% Titelei.
-%    \begin{macrocode}
-\title{%
-  \file{\filename}\thanks{%
-    Dies ist Version \fileversion\ von Datei \file{\filename}.%
-  }%
-}
-\author{Falk Hanisch\thanks{\tudscrmail}}
-\date{\filedate}
-%    \end{macrocode}
+% Damit sind alle Einträge, welche nicht im Index auftauchen sollen, definiert.
+% \endgroup%
 % \begin{option}{final}
 % \begin{macro}{\tudfinalflag}
 % Option bzw. Flag für das automatisierte Erzeugen der Quelltextdokumentation
@@ -342,14 +341,9 @@
 %    \end{macrocode}
 % \end{macro}^^A \m@cro@
 % \begin{macro}{\changes@}
-% \begin{macro}{\generalname}
-% \begin{macro}{\implementationname}
 % Bei der Erstellung der Änderungsliste fehlt bei Makros in der aktuellen 
 % Version von \pkg{doc} ein Leerzeichen. Das Problem ist bereits gemeldet. 
-% Außerdem wird die Bezeichnungen für den allgemeinen Teil geändert.
 %    \begin{macrocode}
-\renewcommand*\generalname{Allgemein}
-\newcommand*\implementationname{Implementierung}
 \CheckCommand*\changes@[3]{%
   \protected@edef\@tempa{%
     \noexpand\glossary{%
@@ -441,17 +435,214 @@
   }%
 \fi%
 %    \end{macrocode}
+% \end{macro}^^A \changes@
+% \begin{macro}{\@wrglossary}
+% \begin{macro}{\filesep}
+% Für die Ausgabe der Änderungsliste soll nicht einfach nur die Seitenzahl 
+% sondern tatsächlich die Codezeile ausgegeben werden.
+%    \begin{macrocode}
+\CheckCommand*\@wrglossary[1]{%
+  \protected@write\@glossaryfile{}%
+  {\string\glossaryentry{#1}{\thepage}}%
+  \endgroup
+  \@esphack%
+}
+%    \end{macrocode}
+% Da \cs{filesep} leer ist, falls nicht \cs{DocInclude} verwendet wird, lassen 
+% sich im Index Seitenzahlen und Codezeilen nicht sofort unterscheiden, weshalb 
+% das Makro hier standardmäßig mit \val{x-} als Präfix für letztere definiert 
+% wird.
+%    \begin{macrocode}
+\def\filesep{x-}
+\def\@wrglossary#1{%
+%    \end{macrocode}
+% Der erste Zweig ist aktiv, wenn der Index mit Seitenzahlen erzeugt wird. 
+% Werden Codezeilen als Basis verwendet, entsprechend der zweite.
+%    \begin{macrocode}
+  \ifx\special@index\index%
+    \@tempswafalse%
+  \else%
+    \@tempswatrue%
+  \fi%
+%    \end{macrocode}
+% Für einen allgemeinen Eintrag soll definitiv die Seitenzahl verwendet werden.
+%    \begin{macrocode}
+  \ifx\saved@macroname\@empty%
+    \@tempswafalse%
+  \fi%
+  \if@tempswa%
+    \global\advance\c@CodelineNo\@ne
+    \protected@write\@glossaryfile{}{%
+      \string\glossaryentry{#1}{\filesep\number\c@CodelineNo}%
+    }
+    \global\advance\c@CodelineNo\m@ne
+  \else%
+    \protected@write\@glossaryfile{}{\string\glossaryentry{#1}{\thepage}}
+  \fi%
+  \endgroup
+  \@esphack%
+}
+%    \end{macrocode}
+% \end{macro}^^A \filesep
+% \end{macro}^^A \@wrglossary
+% \begin{macro}{\generalname}
+% \begin{macro}{\implementationname}
+% Die Bezeichnungen für den allgemeinen und den Implementierungsteil.
+%    \begin{macrocode}
+\renewcommand*\generalname{Allgemein}
+\newcommand*\implementationname{Implementierung}
+%    \end{macrocode}
 % \end{macro}^^A \implementationname
 % \end{macro}^^A \generalname
-% \end{macro}^^A \changes@
+% \begin{macro}{\hypersourcedef}
+% \changes{v2.05}{2016/04/26}{neu}^^A
+% \begin{macro}{\@hypersourcedef}
+% \changes{v2.05}{2016/04/26}{neu}^^A
+% \begin{macro}{\hypersourceref}
+% \changes{v2.05}{2016/04/26}{neu}^^A
+% \begin{macro}{\@hypersourceref}
+% \changes{v2.05}{2016/04/26}{neu}^^A
+% Diese Makros werden verwendet, um im Index repsektive in der Änderungsliste 
+% mithilfe von \pkg{hyperref} Hyperlinks auf die entsprechenden Codezeilen im 
+% Dokument zu setzen. 
+%    \begin{macrocode}
+\newcommand*\hypersourcedef[1]{}
+\newcommand*\@hypersourcedef{}
+\newcommand*\hypersourceref[1]{#1}
+\newcommand*\@hypersourceref[2][]{}
+\PassOptionsToPackage{hyperindex=false}{hyperref}
+\AfterPackage{hyperref}{%
+%    \end{macrocode}
+% Mit \cs{hypersourcedef} wird ein Textanker gesetzt, falls dieser noch nicht 
+% definiert wurde, was durch \cs{@hypersourcedef} abgesichert wird. Als 
+% Argument wird hierfür die aktuelle Codezeile verwendet.
+%    \begin{macrocode}
+  \renewcommand*\hypersourcedef[1]{%
+    \ifstr{#1}{\@hypersourcedef}{}{%
+      \Hy@raisedlink{\hyperdef{}{source:#1}{}}%
+      \xdef\@hypersourcedef{#1}%
+    }%
+  }%
+%    \end{macrocode}
+% Mit \cs{@hypersourceref} wird auf den Textanker verlinkt. Dies kann entweder 
+% direkt mit \cs{hypersourceref} erfolgen oder indirekt über das Attribut
+% \val{main}, welches bei der Definitionen von Befehlen etc. im Index genutzt 
+% wird. Hierfür wird das Makro \cs{main} umdefiniert.
+%    \begin{macrocode}
+  \renewcommand*\hypersourceref[1]{\@hypersourceref{#1}}%
+  \renewcommand*\main[1]{\@hypersourceref[\underline]{#1}}%
+%    \end{macrocode}
+% Die Referenz im Arguemnt kann entweder direkt als Seitenzahl oder in der Form 
+% \val{<Letter>-<Codezeile>} angegeben werden. Deshalb wird dafür gesorgt, dass 
+% das angegebene Argument demenstrpechend ausgewertet wird.
+%    \begin{macrocode}
+  \renewcommand*\@hypersourceref[2][\@firstofone]{%
+    \begingroup%
+      \def\@tempa##1-##2\relax{%
+        \if\relax\detokenize{##2}\relax%
+          \hyperlink{page.\@tempc}{#1{\@tempc}}%
+        \else%
+          \hyperref{}{}{source:\@tempc}{#1{\@tempc}}%
+        \fi%
+      }%
+      \def\@tempb##1{%
+        \def\@tempc{##1}%
+        \expandafter\@tempa##1-\relax%
+      }%
+      \forcsvlist\@tempb{#2}%
+    \endgroup%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \@hypersourceref
+% \end{macro}^^A \hypersourceref
+% \end{macro}^^A \@hypersourcedef
+% \end{macro}^^A \hypersourcedef
+% \begin{macro}{\@doxcreatespecialmainindex}
+% \begin{macro}{\@doxcreatespecialmainmacrolikeindex}
+% \begin{macro}{\@doxcreatespecialindex}
+% \begin{macro}{\@doxcreatespecialindex}
+% Für den Index muss bei diesen Makros eine kleine Anpassung erfolgen, damit 
+% die Sortierung auch bei der Verwendung von \app{texindy} richtig erfolgt und 
+% keine Einträge, welche es trotz gleicher Bezeichnung für unterschiedliche
+% Eintragstypen (bspw. Umgebung \env{abstract} und Option \opt{abstract}) gibt,
+% unterschlagen werden. Außerdem wird hier die Definition der Quelltextanker 
+% eingehangen.
+%    \begin{macrocode}
+\CheckCommand*\@doxcreatespecialmainindex[3]{%
+  \expandafter\def\csname SpecialMain#1Index\endcsname##1{%
+    \@bsphack%
+    \special@index{##1\actualchar{\string\ttfamily\space##1} (#2)
+      \encapchar main}%
+    \special@index{#3:\levelchar##1\actualchar{\string\ttfamily\space##1}
+      \encapchar main}%
+    \@esphack%
+  }%
+}
+\patchcmd{\@doxcreatespecialmainindex}{\actualchar}{%
+  \space(#2)\actualchar%
+}{}{\tud@patch@wrn{@doxcreatespecialmainindex}}
+\patchcmd{\@doxcreatespecialmainindex}{\@esphack}{%
+  \@esphack\hypersourcedef{\filesep\number\c@CodelineNo}%
+}{}{\tud@patch@wrn{@doxcreatespecialmainindex}}
+\CheckCommand*\@doxcreatespecialmainmacrolikeindex[3]{%
+  \expandafter\def\csname SpecialMain#1Index\endcsname##1{%
+    \@SpecialIndexHelper@##1\@nil
+    \@bsphack%
+    \special@index{\@gtempa\actualchar
+      \string\verb\quotechar*\verbatimchar\bslash\@gtempa\verbatimchar
+      \space(#2)\encapchar main}%
+    \special@index{#3:\levelchar\@gtempa\actualchar%
+      \string\verb\quotechar*\verbatimchar\bslash\@gtempa\verbatimchar
+      \encapchar main}%
+    \@esphack%
+  }%
+}
+\patchcmd{\@doxcreatespecialmainmacrolikeindex}{\actualchar}{%
+  \space(#2)\actualchar%
+}{}{\tud@patch@wrn{@doxcreatespecialmainmacrolikeindex}}
+\patchcmd{\@doxcreatespecialmainmacrolikeindex}{\@esphack}{%
+  \@esphack\hypersourcedef{\filesep\number\c@CodelineNo}%
+}{}{\tud@patch@wrn{@doxcreatespecialmainmacrolikeindex}}
+\CheckCommand*\@doxcreatespecialindex[3]{%
+  \expandafter\def\csname Special#1Index\endcsname##1{%
+    \@bsphack%
+    \index{##1\actualchar{\protect\ttfamily##1} (#2)\encapchar usage}%
+    \index{#3:\levelchar##1\actualchar{\protect\ttfamily##1}
+      \encapchar usage}%
+    \@esphack%
+  }%
+}
+\patchcmd{\@doxcreatespecialindex}{\actualchar}{%
+  \space(#2)\actualchar%
+}{}{\tud@patch@wrn{@doxcreatespecialindex}}
+\CheckCommand*\@doxcreatespecialmacrolikeindex[3]{%
+  \expandafter\def\csname Special#1Index\endcsname##1{%
+    \@SpecialIndexHelper@##1\@nil
+    \@bsphack%
+    \index{\@gtempa\actualchar
+      \string\verb\quotechar*\verbatimchar\bslash\@gtempa\verbatimchar
+      \space(#2)\encapchar usage}%
+    \index{#3:\levelchar\@gtempa\actualchar
+      \string\verb\quotechar*\verbatimchar\bslash\@gtempa\verbatimchar
+      \encapchar usage}%
+    \@esphack%
+  }%
+}
+\patchcmd{\@doxcreatespecialmacrolikeindex}{\actualchar}{%
+  \space(#2)\actualchar%
+}{}{\tud@patch@wrn{@doxcreatespecialmacrolikeindex}}
+%    \end{macrocode}
+% \end{macro}^^A \@doxcreatespecialindex
+% \end{macro}^^A \@doxcreatespecialindex
+% \end{macro}^^A \@doxcreatespecialmainmacrolikeindex
+% \end{macro}^^A \@doxcreatespecialmainindex
 % \begin{macro}{\doxitem}
 % \begin{macro}{\@doxcreateenv}
 % \begin{macro}{\@doxcreatemacrolikeindexname}
 % \begin{macro}{\@doxcreateindexname}
 % \begin{macro}{\saved@idxtype}
 % \begin{macro}{\@@doxenv}
-% \begin{macro}{\SetMacroIndexName}
-% \begin{macro}{\SetEnvIndexName}
 % Jetzt die Anpassungen der Änderungsliste für das Paket \pkg{dox}.
 %    \begin{macrocode}
 \CheckCommand\doxitem[4][]{%
@@ -560,6 +751,19 @@
 \patchcmd\@@doxenv{\ignorespaces}{%
   \csname Set#1IndexName\endcsname{\saved@macroname}\ignorespaces%
 }{}{\tud@patch@wrn{@@doxenv}}
+%    \end{macrocode}
+% \end{macro}^^A \@@doxenv
+% \end{macro}^^A \saved@idxtype
+% \end{macro}^^A \@doxcreateindexname
+% \end{macro}^^A \@doxcreatemacrolikeindexname
+% \end{macro}^^A \@doxcreateenv
+% \end{macro}^^A \doxitem
+% \begin{macro}{\SetMacroIndexName}
+% \begin{macro}{\SetEnvIndexName}
+% \begin{macro}{\SpecialMainMacroIndex}
+% Da für Makros und Umgebungen die notwendigen Makros nicht über \cs{doxitem} 
+% kreiert werden können, erfolgt dies hier direkt.
+%    \begin{macrocode}
 \def\SetMacroIndexName#1{%
   \edef\saved@indexname{\expandafter\@gobble#1}
   \let\saved@idxtype\@empty%
@@ -568,15 +772,13 @@
   \let\saved@indexname#1%
   \edef\saved@idxtype{environment}%
 }
+\apptocmd{\SpecialMainMacroIndex}{%
+  \hypersourcedef{\filesep\number\c@CodelineNo}%
+}{}{\tud@patch@wrn{SpecialMainMacroIndex}}
 %    \end{macrocode}
+% \end{macro}^^A \SpecialMainMacroIndex
 % \end{macro}^^A \SetEnvIndexName
 % \end{macro}^^A \SetMacroIndexName
-% \end{macro}^^A \@@doxenv
-% \end{macro}^^A \saved@idxtype
-% \end{macro}^^A \@doxcreateindexname
-% \end{macro}^^A \@doxcreatemacrolikeindexname
-% \end{macro}^^A \@doxcreateenv
-% \end{macro}^^A \doxitem
 % Nachdem nun die Anpassungen für die Änderungsliste erfolgt sind, können nun 
 % die für die Dokumentatiton notwendigen Umgebungen erstellt werden.
 %    \begin{macrocode}
@@ -619,9 +821,9 @@
 % Hilfsdateien für Index und Änderungsliste für \app{texindy} angepasst. Dabei 
 % werden diese automatisch erzeugt, falls dies möglich ist.
 %    \begin{macrocode}
-  \def\actualchar{&1&}
-  \def\quotechar{&2&}
-  \def\levelchar{&3&}
+  \def\actualchar{<&1&>}
+  \def\quotechar{<&2&>}
+  \def\levelchar{<&3&>}
   \begingroup
     \endlinechar=-1\relax%
     \def\tud@reserved#1#2{%
@@ -641,10 +843,11 @@
           \expandafter{\quotechar}{"}%
         \expandafter\tud@replace\expandafter\tud@idx@line%
           \expandafter{\levelchar}{!}%
+        \tud@replace\tud@idx@line{" @}{}%
         \ifeof\tud@read\else%
           \immediate\write\tud@write{\unexpanded\expandafter{\tud@idx@line}}%
+          \@tempswatrue%
         \fi%
-        \@tempswatrue%
       \repeat%
       \immediate\closein\tud@read%
       \immediate\closeout\tud@write%
@@ -657,12 +860,27 @@
               -M \jobname-#1.xdy\space 
             \jobname-texindy.#1
           }%
+%    \end{macrocode}
+% Falls nichts geschrieben wurde, wird eine leere Ausgabedatei erzeugt.
+%    \begin{macrocode}
+        \else%
+          \immediate\openout\tud@write=\jobname.#2%
+          \immediate\closeout\tud@write%
         \fi%
       \fi%
     }%
     \tud@reserved{idx}{ind}%
     \tud@reserved{glo}{gls}%
   \endgroup
+%    \end{macrocode}
+% Sollte \app{texindy} nicht aktiv sein, werden Index und Änderungsliste mit 
+% \app{makeindex} automatisch erzeugt.
+%    \begin{macrocode}
+\else
+  \ifnum\pdfshellescape=\@ne\relax%
+    \immediate\write18{makeindex -s gglo.ist -o \jobname.gls \jobname.glo}%
+    \immediate\write18{makeindex -s gind.ist -o \jobname.ind \jobname.idx}%
+  \fi%
 \fi
 %    \end{macrocode}
 % \end{macro}^^A \levelchar
@@ -816,6 +1034,16 @@
     \providecommand*\textuxs[1]{\textubs{#1}}%
     \providecommand*\textdbn[1]{\textubn{#1}}%
   }%
+%    \end{macrocode}
+% Und ganz zum Schluss noch die Titelei.
+%    \begin{macrocode}
+  \title{%
+    \file{\filename}\thanks{%
+      Dies ist Version \fileversion\nobreakspace{}von Datei \file{\filename}.%
+    }%
+  }%
+  \author{Falk Hanisch\thanks{\tudscrmail}}%
+  \date{\filedate}%
 }
 %    \end{macrocode}
 %
