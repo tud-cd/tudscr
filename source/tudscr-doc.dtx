@@ -1,4 +1,4 @@
-% \CheckSum{1455}
+% \CheckSum{1457}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -244,13 +244,18 @@
 % \changes{v2.05}{2016/04/21}{neu}^^A
 % \begin{option}{xindy}
 % \changes{v2.05}{2016/04/21}{neu}^^A
-% \begin{macro}{\tudtexindyflag}
+% \begin{option}{xdy}
 % \changes{v2.05}{2016/04/21}{neu}^^A
-% Option für das Erstellen der Indexdateien im Stil von \app{texindy}.
+% \begin{macro}{\tudxdyflag}
+% \changes{v2.05}{2016/04/21}{neu}^^A
+% Option(en) für das Erstellen der Indexdateien im Stil von \app{texindy}.
 %    \begin{macrocode}
-\DeclareOption{xindy}{\let\tudtexindyflag\relax}
+\DeclareOption{texindy}{\let\tudxdyflag\relax}
+\DeclareOption{xindy}{\let\tudxdyflag\relax}
+\DeclareOption{xdy}{\let\tudxdyflag\relax}
 %    \end{macrocode}
-% \end{macro}^^A \tudtexindyflag
+% \end{macro}^^A \tudxdyflag
+% \end{option}^^A xdy
 % \end{option}^^A xindy
 % \end{option}^^A texindy
 % Die beiden Optionen werden abgearbeitet
@@ -370,7 +375,7 @@
 % Erscheinens der einzelnen Einträge wird das angegebene Datum zur Sortierung 
 % genutzt.
 %    \begin{macrocode}
-\ifdefined\tudtexindyflag%
+\ifdefined\tudxdyflag%
   \renewcommand*\changes@[3]{%
 %    \end{macrocode}
 % Einträge sollen nur erzeugt werden, wenn diese vollständig sind.
@@ -808,7 +813,7 @@
 % \val{.ind}-Datei getauscht werden. Dafür wird diese zeilenweise eingelesen, 
 % die fraglichen Zeichen ersetzt und in eine weitere Hilfsdatei geschrieben.
 %    \begin{macrocode}
-\ifdefined\tudtexindyflag
+\ifdefined\tudxdyflag
   \newcommand*\tud@write{}
   \newwrite\tud@write
   \newcommand*\tud@read{}
@@ -828,7 +833,7 @@
     \endlinechar=-1\relax%
     \def\tud@reserved#1#2{%
       \immediate\openin\tud@read=\jobname.#1%
-      \immediate\openout\tud@write=\jobname-texindy.#1
+      \immediate\openout\tud@write=\jobname-xdy.#1
       \@tempswafalse%
       \loop\unless\ifeof\tud@read%
         \readline\tud@read to\tud@idx@line%
@@ -854,11 +859,12 @@
       \ifnum\pdfshellescape=\@ne\relax%
         \if@tempswa%
           \immediate\write18{%
-            texindy\space 
-              -o \jobname.#2\space 
-              -L german-din\space 
-              -M \jobname-#1.xdy\space 
-            \jobname-texindy.#1
+            texindy\space%
+              -o \jobname.#2\space%
+              -M \jobname-#2.xdy\space%
+              -L german-din\space%
+              -t \jobname-#2.xlg\space%
+            \jobname-xdy.#1
           }%
 %    \end{macrocode}
 % Falls nichts geschrieben wurde, wird eine leere Ausgabedatei erzeugt.
@@ -1010,7 +1016,7 @@
 %    \begin{macrocode}
   \@ifpackageloaded{tudscrfonts}{%
     \RequirePackage{mweights}[2013/07/21]%
-    \ifnum\tud@cdfont>\z@\relax% true/heavy    
+    \ifnum\tud@cdfont>\z@\relax% true/heavy
       \def\mddefault{m}%
       \def\mdseries@tt{m}%
       \renewcommand*\@pnumwidth{1.7em}%
