@@ -1,4 +1,4 @@
-% \CheckSum{4043}
+% \CheckSum{4083}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-manual.dtx}[%
-  2016/04/26 v2.05 TUD-KOMA-Script\space%
+  2016/04/27 v2.05 TUD-KOMA-Script\space%
 %</driver>
 %<package&identify>\ProvidesPackage{tudscrtutorial}[%
 %<*driver|package&identify>
@@ -1068,9 +1068,9 @@
 }
 %    \end{macrocode}
 % \end{environment}^^A Bundle*
-% \begin{macro}{\tud@declare@start}
+% \begin{macro}{\tud@declare@special@start}
 % \changes{v2.05}{2015/11/01}{neu}^^A
-% \begin{macro}{\tud@declare@end}
+% \begin{macro}{\tud@declare@special@end}
 % \changes{v2.05}{2015/11/01}{neu}^^A
 % Die beiden dienen zur vereinfachten Deklaration. Es wird keine Ausgabe 
 % sondern lediglich Hyperlink, Indexeintrag und Änderungsnotiz erzeugt. Das 
@@ -1095,8 +1095,8 @@
   \@declaretrue\@openindexfalse#1\@declarefalse%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@declare@end
-% \end{macro}^^A \tud@declare@start
+% \end{macro}^^A \tud@declare@special@end
+% \end{macro}^^A \tud@declare@special@start
 % \begin{macro}{\printdeclarationlist}
 % \begin{length}{\tud@lastskip}
 % \changes{v2.05}{2015/11/01}{neu}^^A
@@ -2882,48 +2882,68 @@
 %    \end{macrocode}
 % \begin{environment}{theindex}
 % \dots gefolgt von einem Patch für die Umgebung \env{theindex}, um unschöne 
-% Seitenumbrüche direkt nach Überschriften zu vermeiden.
+% Seitenumbrüche direkt nach Überschriften zu vermeiden. Diese treten auf, das 
+% das Paket \pkg{imakeidx} meiner Meinung nach die Überschriften zusammen mit 
+% der \env{multicols}-Umgebung falsch setzt. Der Patch sorgt dafür, dass die
+% Überschriften (\cs{imki@indexlevel}\val{\{}{\cs{indexname}\val{\{\}}}) nicht 
+% vor der Umgebung sondern~-- wie für \pkg{multicol} auch dokumentiert~-- im
+% optionalen Argument von \env{multicols} aufgerufen werden.
 %    \begin{macrocode}
-\@ifpackagelater{imakeidx}{2016/04/04}{%
-%<*class>
-  \ClassWarning{tudscrmanual}%
-%</class>
-%<*package>
-  \PackageWarning{tudscrtutorial}%
-%</package>
-  {%
-    Package `imakeidx' was updated so the patch for the\MessageBreak%
-    environment `theindex' is maybe outdated.%
+\ifimki@original\else%
+  \CheckCommand\theindex{%
+    \imki@maybeaddtotoc
+    \imki@indexlevel{\indexname}\imki@indexheaders
+    \thispagestyle{\imki@firstpagestyle}%
+    \ifnum\imki@columns>\@ne
+      \columnsep \imki@columnsep
+      \ifx\imki@idxprologue\relax
+        \begin{multicols}{\imki@columns}
+      \else
+        \begin{multicols}{\imki@columns}[\imki@idxprologue]
+      \fi
+    \else
+      \imki@idxprologue
+    \fi
+    \global\let\imki@idxprologue\relax
+    \parindent\z@
+    \parskip\z@ \@plus .3\p@\relax
+    \columnseprule \ifKV@imki@columnseprule.4\p@\else\z@\fi
+    \raggedright
+    \let\item\@idxitem
+    \imki@othercode%
   }%
-}{%
-  \ifimki@original\else%
-    \renewenvironment{theindex}{%
-      \imki@maybeaddtotoc%
-      \imki@indexheaders%
-      \thispagestyle{\imki@firstpagestyle}%
-      \ifnum\imki@columns>\@ne%
-        \columnsep \imki@columnsep%
-        \ifx\imki@idxprologue\relax%
-          \begin{multicols}{\imki@columns}[\imki@indexlevel{\indexname}]%
-        \else%
-          \begin{multicols}{\imki@columns}[%
-            \imki@indexlevel{\indexname}%
-            \imki@idxprologue%
-          ]%
-        \fi%
+  \patchcmd{\theindex}{%
+    \imki@indexlevel{\indexname}\imki@indexheaders%
+  }{%
+    \imki@indexheaders%
+  }{}{\tud@patch@wrn{theindex}}%
+  \patchcmd{\theindex}{%
+    \ifnum\imki@columns>\@ne
+      \columnsep \imki@columnsep
+      \ifx\imki@idxprologue\relax
+        \begin{multicols}{\imki@columns}
+      \else
+        \begin{multicols}{\imki@columns}[\imki@idxprologue]
+      \fi
+    \else
+      \imki@idxprologue
+    \fi
+  }{%
+    \ifnum\imki@columns>\@ne%
+      \columnsep \imki@columnsep%
+      \ifx\imki@idxprologue\relax%
+        \begin{multicols}{\imki@columns}[\imki@indexlevel{\indexname}]%
       \else%
-        \imki@indexlevel{\indexname}\imki@idxprologue%
+        \begin{multicols}{\imki@columns}[%
+          \imki@indexlevel{\indexname}%
+          \imki@idxprologue%
+        ]%
       \fi%
-      \global\let\imki@idxprologue\relax%
-      \parindent\z@%
-      \parskip\z@ \@plus .3\p@\relax%
-      \columnseprule \ifKV@imki@columnseprule.4\p@\else\z@\fi%
-      \raggedright%
-      \let\item\@idxitem%
-      \imki@othercode%
-    }{\ifnum\imki@columns>\@ne\end{multicols}\fi}%
-  \fi%
-}
+    \else%
+      \imki@indexlevel{\indexname}\imki@idxprologue%
+    \fi%
+  }{}{\tud@patch@wrn{theindex}}%
+\fi%
 %    \end{macrocode}
 % \end{environment}^^A theindex
 % \begin{macro}{\cleversee}
@@ -2980,9 +3000,9 @@
 %    \end{macrocode}
 % \end{macro}^^A \seeidx
 % \end{macro}^^A \seeref
-% \begin{macro}{\maketexindyindex}
+% \begin{macro}{\makexdyindex}
 % \changes{v2.05}{2015/11/01}{neu}^^A
-% Um die einzelnen Indexe zu erstellen, wird das Makro \cs{maketexindyindex} 
+% Um die einzelnen Indexe erstellen zu können, wird das Makro \cs{makexdyindex} 
 % definiert. Die Sternversion dieses Befehle erstellt dabei neben dem normalen
 % Spezialindex einen weiteren, welcher explizit für Deklarationen genutzt wird.
 % Dieser wird anschließen als erstes an \app{texindy} weitergereicht, um die
@@ -2990,7 +3010,7 @@
 % danach wird die Datei mit den normalen Einträgen verarbeitet. Siehe hierzu 
 % auch \cs{@@ProcessIndex}.
 %    \begin{macrocode}
-\NewDocumentCommand\maketexindyindex{somo}{%
+\NewDocumentCommand\makexdyindex{somo}{%
   \let\@tempb\@empty%
 %<*class>
   \IfBooleanT{#1}{%
@@ -3008,31 +3028,31 @@
     columnsep=\noexpand\the\columnsep,%
     \IfValueTF{#4}{%
       name={#4},%
-      options={-M \jobname-temp.xdy -L german-din -t \jobname-#4.xlg \@tempb},%
+      options={-M \jobname-ind.xdy -L german-din -t \jobname-#4.xlg \@tempb},%
     }{%
-      options={-M \jobname-temp.xdy -L german-din -t \jobname.xlg},%
+      options={-M \jobname-ind.xdy -L german-din -t \jobname.xlg},%
     }%
     \IfValueT{#2}{#2}%
   }%
   \expandafter\makeindex\expandafter[\@tempa]%
 }
 %    \end{macrocode}
-% \end{macro}^^A \maketexindyindex
-% Nun können mit \cs{maketexindyindex} die einzelnen Indexe erstellt werden.
+% \end{macro}^^A \makexdyindex
+% Nun können mit \cs{makexdyindex} die einzelnen Indexe erstellt werden.
 %    \begin{macrocode}
-\maketexindyindex{Allgemeiner Index}
-\maketexindyindex*{Klassen- und Paketoptionen}[options]
-\maketexindyindex*{Befehle und Umgebungen mit zugeh\"origen Parametern}[macros]
+\makexdyindex{Allgemeiner Index}
+\makexdyindex*{Klassen- und Paketoptionen}[options]
+\makexdyindex*{Befehle und Umgebungen mit zugeh\"origen Parametern}[macros]
 %<*class>
-\maketexindyindex*{Sprachabh\"angige Bezeichner}[terms]
-\maketexindyindex*{Seitenstile, Schriftelemente und Farben}[elements]
+\makexdyindex*{Sprachabh\"angige Bezeichner}[terms]
+\makexdyindex*{Seitenstile, Schriftelemente und Farben}[elements]
 %</class>
-\maketexindyindex*{L\"angen und Z\"ahler}[misc]
-\maketexindyindex*{Klassen, Pakete und Dateien}[files]
+\makexdyindex*{L\"angen und Z\"ahler}[misc]
+\makexdyindex*{Klassen, Pakete und Dateien}[files]
 %<*class>
-\maketexindyindex[columns=1]{\"Anderungsliste}[changelog]
+\makexdyindex[columns=1]{\"Anderungsliste}[changelog]
 %</class>
-\undef\maketexindyindex
+\undef\makexdyindex
 %    \end{macrocode}
 % \begin{macro}{\if@tud@index}
 % \changes{v2.05}{2015/11/05}{neu}^^A
@@ -3528,44 +3548,62 @@
   \begingroup%
 %<*class>
     \renewcommand\tud@indexprologue{%
-      Die im Folgenden aufgelisteten Schlagworte sollen f\"ur den Umgang mit
-      \hologo{LaTeXe} im Allgemeinen sowie dem \TUDScript-Bundle im Speziellen
-      sowohl Antworten bei generellen Fragen liefern als auch L\"osungen f\"ur
-      typische Probleme bereitstellen. Falls ein gesuchter Begriff hier nicht
-      auftaucht oder trotz vorhander Hinweise kein zufriedenstellendes Ergebnis
-      erzielt werden kann, sollte das \Forum* erster Anlaufpunkt sein, um
-      weitere Hilfe bei der Nutzung von \TUDScript zu erhalten.
+      Die im Folgenden aufgelisteten Schlagworte sollen f\"ur den Umgang mit 
+      \hologo{LaTeXe} im Allgemeinen sowie dem \TUDScript-Bundle im Speziellen 
+      sowohl Antworten bei generellen Fragen liefern als auch L\"osungen f\"ur 
+      typische Probleme bereitstellen. Falls ein gesuchter Begriff hier nicht 
+      auftaucht oder trotz vorhander Hinweise kein zufriedenstellendes Ergebnis 
+      erzielt werden kann, sollte das \Forum* erster Anlaufpunkt sein, um 
+      weitere Hilfe bei der Nutzung von \TUDScript zu erhalten.%
     }%
+%</class>
+%<*package>
+    \begingroup%
+    \let\lettergroup\@gobble%
+    \let\indexspace\relax%
+%</package>
     \@printindex%
+%<*package>
+    \endgroup%
+%</package>
+%<*class>
     \clearpage%
     \renewcommand\tud@indexprologue{%
-      Dies ist der Index aller im Handbuch erl\"auterten sowie erw\"ahnten
-      Optionen, wobei bei den meisten auch Untereintr\"age mit Seitenangeben
-      f\"ur spezielle Wertzuweisungen existieren.
+      Dies ist der Index aller im Handbuch erl\"auterten sowie erw\"ahnten 
+      Optionen, wobei bei den meisten auch Untereintr\"age mit Seitenangeben 
+      f\"ur spezielle Wertzuweisungen existieren.%
     }%
 %</class>
     \@printindex[options]%
 %<*class>
     \renewcommand\tud@indexprologue{%
       Dies ist die Auflistung aller im Handbuch erl\"auterten sowie erw\"ahnten 
-      Befehle und Umgebungen. Bei einigen existieren auch Untereintr\"age f\"ur
+      Befehle und Umgebungen. Bei einigen existieren auch Untereintr\"age f\"ur 
       Schl\"ussel-Wert-Parameter, welche im optionalen Argument der jeweiligen 
       Anweisung verwendet werden k\"onnen. In der dritten Unterebene sind 
       gegebenenfalls Seitenverweise f\"ur explizite Wertzuweisungen an diese 
-      Parameter zu finden.
+      Parameter zu finden.%
     }%
 %</class>
     \@printindex[macros]%
 %<*class>
     \renewcommand\tud@indexprologue{%
-      Dies sind alle von \TUDScript definierten, sprachabh\"angigen Bezeichner.
-      Informationen zur Verwendung sowie den Anpassungsm\"oglichkeiten sind in
-      \autoref{sec:localization} zu finden.
+      Dies sind alle von \TUDScript definierten, sprachabh\"angigen Bezeichner. 
+      Informationen zur Verwendung sowie den Anpassungsm\"oglichkeiten sind in 
+      \autoref{sec:localization} zu finden.%
     }%
     \@printindex[terms]%
     \@printindex[elements]%
-    \@printindex[misc]%
 %</class>
+%<*package>
+    \begingroup%
+    \let\lettergroup\@gobble%
+    \let\indexspace\relax%
+%</package>
+    \@printindex[misc]%
+%<*package>
+    \endgroup%
+%</package>
     \@printindex[files]%
   \endgroup%
 }
@@ -4573,8 +4611,6 @@
 % \changes{v2.02}{2014/10/22}{neu}^^A
 % \begin{macro}{\tud@write@ii}
 % \changes{v2.02}{2014/11/02}{neu}^^A
-% \begin{macro}{\tud@read}
-% \changes{v2.02}{2014/08/19}{neu}^^A
 % Für die Erstellung der Indexe wird zum Sortieren das Programm \app{texindy} 
 % genutzt. Für dieses wird eine eigene Stildatei verwendet, welche zur Laufzeit 
 % erzeugt wofür zuerst ein Ausgabestream reserviert wird.
@@ -4590,7 +4626,6 @@
 \newwrite\tud@write@ii
 %</package>
 %    \end{macrocode}
-% \end{macro}^^A \tud@read
 % \end{macro}^^A \tud@write@ii
 % \end{macro}^^A \tud@write@i
 %
@@ -5016,7 +5051,7 @@
 \newcommand\StartTutorial[1][%
   Bevor das eigentliche Tutorial beginnt, werden sowohl eine Dokumentklasse 
   als auch die f\"ur jedes \hologo{pdfLaTeX}-Dokument meiner Meinung nach 
-  sinnvollen Pakete geladen.
+  sinnvollen Pakete geladen.%
 ]{%
   \Hy@raisedlink{\hyperdef{\jobname}{tutorials:\jobname}{}}%
   \faculty{}%
@@ -5039,14 +5074,14 @@
   \addsec{Copy\nobreakspace\&\nobreakspace{}Paste}%
   \pagestyle{empty}%
   Zum Ende des Dokumentes wird das vorgestellte Tutorial als \"ubersetzbarer 
-  Quelltext ausgegeben, um dieses via Copy~\&~Paste verwenden und alle Punkte
+  Quelltext ausgegeben, um dieses via Copy~\&~Paste verwenden und alle Punkte 
   nachvollziehen zu k\"onnen. Bitte beachten Sie, dass~-- abh\"angig vom 
   genutzten PDF-Betrachter~-- beim Kopieren die dargestellten Einz\"uge und 
   Abs\"atze m\"oglicherweise verloren gehen k\"onnen. Dies kann insbesondere 
   aufgrund fehlender Leerzeilen zu einem unvorteilhaften Ausgabeergebnis 
   f\"uhren. Alternativ finden Sie den folgenden \hologo{LaTeX}-Quelltext auch 
   im Pfad \Path{\PName{texmf}/source/latex/tudscr/doc/examples/} als Datei 
-  \File{\jobname-example.tex}. \par #1
+  \File{\jobname-example.tex}. \par #1%
   \begin{quoting}[rightmargin=0pt]%
   \lstinputlisting[style=tudscr]{\jobname-example-temp.tex}%
   \end{quoting}%
