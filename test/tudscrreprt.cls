@@ -73,13 +73,13 @@
       \fi%
     }
   \fi
-  \@TUDVersion{2016/04/25 v2.05 BETA TUD-KOMA-Script}
+  \@TUDVersion{2016/04/26 v2.05 BETA TUD-KOMA-Script}
 \endgroup
 \NeedsTeXFormat{LaTeX2e}
 \providecommand*\tudscrmail{tudscr@gmail.com}
 \newcommand*\TUD@ProvidesClass[3]{%
   \ProvidesClass{#1}[%
-  2016/04/25 v2.05 BETA TUD-KOMA-Script
+  2016/04/26 v2.05 BETA TUD-KOMA-Script
     ^^J#3 (#2)%
   ]%
   \newcommand*\TUDClassName@KOMA{#2}%
@@ -2864,28 +2864,6 @@
 }{%
   \AtEndPreamble{\RequirePackage{scrlayer-scrpage}[2013/12/14]}%
 }
-\newcommand*\tud@pagestyle{}
-\let\tud@pagestyle\pagestyle
-\pretocmd{\tud@pagestyle}{%
-  \edef\currentpagestyle{#1}%
-}{}{\tud@patch@wrn{pagestyle}}
-\tud@cmd@store{pagestyle}
-\renewcommand*\pagestyle[1]{\AfterPackage!{scrlayer-scrpage}{\pagestyle{#1}}}
-\BeforePackage{scrlayer-scrpage}{%
-  \tud@cmd@restore{pagestyle}%
-  \undef\tud@pagestyle%
-}
-\TUD@UnwindPackage{scrlayer-scrpage}{%
-  \cslet{ps@tudheadings}{\ps@headings}%
-  \cslet{ps@plain.tudheadings}{\ps@plain}%
-  \cslet{ps@empty.tudheadings}{\ps@empty}%
-  \providecommand*\currentpagestyle{plain}%
-  \providecommand*\BeforeSelectAnyPageStyle[1]{}%
-  \providecommand*\GetRealPageStyle[1]{#1}%
-  \let\pagestyle\tud@pagestyle%
-  \undef\tud@pagestyle%
-  \expandafter\pagestyle\expandafter{\currentpagestyle}%
-}
 \AfterPackage{scrlayer-scrpage}{%
   \DeclareNewLayer[%
     background,headsep,%
@@ -3098,7 +3076,6 @@
     scrheadings.foot.above.line,%
     scrheadings.foot.below.line%
   }%
-  \listadd\tud@ps@list{tudheadings}%
   \DeclareNewPageStyleAlias{tud}{tudheadings}%
   \DeclareNewPageStyleAlias{tudscr}{tudheadings}%
   \DeclareNewPageStyleAlias{tudscrheadings}{tudheadings}%
@@ -3122,7 +3099,6 @@
     plain.scrheadings.foot.above.line,%
     plain.scrheadings.foot.below.line%
   }%
-  \listadd\tud@ps@list{plain.tudheadings}%
   \DeclareNewPageStyleAlias{plain.tudscrheadings}{plain.tudheadings}%
   \DeclareNewPageStyleAlias{tudplain}{plain.tudheadings}%
   \DeclareNewPageStyleAlias{tudscrplain}{plain.tudheadings}%
@@ -3143,7 +3119,6 @@
     tudheadings.foot.content,%
     tudheadings.last%
   }%
-  \listadd\tud@ps@list{empty.tudheadings}%
   \DeclareNewPageStyleAlias{empty.tudscrheadings}{empty.tudheadings}%
   \DeclareNewPageStyleAlias{tudempty}{empty.tudheadings}%
   \DeclareNewPageStyleAlias{tudscrempty}{empty.tudheadings}%
@@ -3179,6 +3154,9 @@
   \def\sls@currentheadings{tudheadings}%
   \def\sls@currentplain{plain.tudheadings}%
 }
+\listadd\tud@ps@list{tudheadings}
+\listadd\tud@ps@list{plain.tudheadings}
+\listadd\tud@ps@list{empty.tudheadings}
 \newcommand*\tud@head@logocolor{black}
 \newcommand*\tud@head@fontcolor{}
 \newcommand*\tud@foot@logocolor{black}
@@ -3247,6 +3225,29 @@
   \let\tud@dim@line\tud@dim@thinline%
   \ifstr{\tud@head@fontcolor}{white}{\let\tud@dim@line\tud@dim@heavyline}{}%
   \global\let\tud@foot@fontcolor\tud@foot@fontcolor%
+}
+\newcommand*\tud@pagestyle{}
+\let\tud@pagestyle\pagestyle
+\pretocmd{\tud@pagestyle}{%
+  \if@atdocument\tud@BeforeSelectAnyPageStyle{#1}\fi%
+  \edef\currentpagestyle{#1}%
+}{}{\tud@patch@wrn{pagestyle}}
+\tud@cmd@store{pagestyle}
+\renewcommand*\pagestyle[1]{\AfterPackage!{scrlayer-scrpage}{\pagestyle{#1}}}
+\BeforePackage{scrlayer-scrpage}{%
+  \tud@cmd@restore{pagestyle}%
+  \undef\tud@pagestyle%
+}
+\TUD@UnwindPackage{scrlayer-scrpage}{%
+  \cslet{ps@tudheadings}{\ps@headings}%
+  \cslet{ps@plain.tudheadings}{\ps@plain}%
+  \cslet{ps@empty.tudheadings}{\ps@empty}%
+  \providecommand*\currentpagestyle{plain}%
+  \providecommand*\BeforeSelectAnyPageStyle[1]{}%
+  \providecommand*\GetRealPageStyle[1]{#1}%
+  \let\pagestyle\tud@pagestyle%
+  \undef\tud@pagestyle%
+  \expandafter\pagestyle\expandafter{\currentpagestyle}%
 }
 \patchcmd{\thispagestyle}{\gdef\@specialstyle{#1}}{%
   \xdef\@specialstyle{\GetRealPageStyle{#1}}%
@@ -3789,17 +3790,6 @@
   \fi%
 }
 \newcommand*\tud@geometry@process{}
-\TUD@UnwindPackage{geometry}{%
-  \newif\ifGm@layout%
-  \newif\ifGm@showcrop%
-  \newif\ifGm@pass%
-  \let\Gm@layoutheight\paperheight%
-  \let\Gm@layoutwidth\paperwidth%
-  \let\Gm@layouthoffset\z@%
-  \let\Gm@layoutvoffset\z@%
-  \renewcommand*\tud@geometry@process{\tud@geometry@set}%
-  \let\tud@BeforeSelectAnyPageStyle\@gobble%
-}
 \tud@ifsacrop{%
   \PreventPackageFromLoading{geometry}%
 }{%
@@ -4186,6 +4176,17 @@
     }%
     \global\tud@dim@topdiffvskip=\tud@dim@topdiffvskip%
   }{}%
+}
+\TUD@UnwindPackage{geometry}{%
+  \newif\ifGm@layout%
+  \newif\ifGm@showcrop%
+  \newif\ifGm@pass%
+  \let\Gm@layoutheight\paperheight%
+  \let\Gm@layoutwidth\paperwidth%
+  \let\Gm@layouthoffset\z@%
+  \let\Gm@layoutvoffset\z@%
+  \renewcommand*\tud@geometry@process{\tud@geometry@set}%
+  \let\tud@BeforeSelectAnyPageStyle\@gobble%
 }
 \patchcmd{\cleardoubleoddpageusingstyle}{\pagestyle}{%
   \let\tud@BeforeSelectAnyPageStyle\@gobble\pagestyle%
@@ -4772,9 +4773,9 @@
     \vspace*{\headingsvskip}%
   \fi%
 }
+\newcommand*\tud@@@makechapterhead{}%
 \ifcsdef{scr@v@3.18}{\@tempswatrue}{\@tempswafalse}
 \if@tempswa
-  \newcommand*\tud@@@makechapterhead{}%
   \let\tud@@@makechapterhead\scr@@makechapterhead%
   \patchcmd{\tud@@@makechapterhead}{%
     \csname #1format\endcsname%
@@ -4787,7 +4788,6 @@
     \tud@headmidvskip%
   }{}{\tud@patch@wrn{scr@@makechapterhead}}%
 \else
-  \newcommand*\tud@@@makechapterhead{}%
   \let\tud@@@makechapterhead\@@makechapterhead%
   \patchcmd{\tud@@@makechapterhead}{%
     \chapterformat
@@ -5372,7 +5372,7 @@
     \renewcommand*\@makefnmark{\rlap\@oldmakefnmark}%
     \next@tdpage%
     \@tempswafalse%
-    \if@twocolumn\ifnum\col@number=\tw@\relax%
+    \if@twocolumn\ifnum\col@number>\@ne\relax%
       \@tempswatrue%
     \fi\fi%
     \if@tempswa%
@@ -5444,7 +5444,9 @@
     \ifx\@professor\@empty\else\tud@title@wrn{professor}\fi%
     \vskip 2\bigskipamount%
     \ifnum\col@number>\@ne\relax%
-      \vspace*{-\multicolsep}%
+      \ifdefvoid{\multicolsep}{}{%
+        \ifisskip{\multicolsep}{\vspace{-\multicolsep}}{}%
+      }%
     \fi%
     \tud@ifverlower{2.03}{\tud@ddc@enlargepage[\titlepagestyle]}{}%
   \endgroup%
@@ -5726,7 +5728,7 @@
       \ifnum\@nameuse{tud@#1@level}<\tw@\begin{\tud@quoting}\fi% false/true
     \fi\fi%
     \ifnum\tud@multicols>\@ne\relax%
-      \setlength\multicolsep{\z@}%
+      \vspace{-\multicolsep}%
       \begin{multicols}{\tud@multicols}[{\tud@fm@head{#1}{#3}}]%
     \else%
       \tud@fm@head{#1}{#3}%
@@ -5735,6 +5737,7 @@
 \newcommand*\tud@fm@body@end[1]{%
     \ifnum\tud@multicols>\@ne\relax%
       \end{multicols}%
+      \vspace{-\multicolsep}%
     \else%
       \par%
     \fi%
@@ -6133,10 +6136,6 @@
     floats. You should use the appropriate options of\MessageBreak%
     the KOMA-Script classes%
   }%
-}
-\AfterPackage{multicol}{%
-  \patchcmd{\twocolumn}{\col@number \tw@}{\col@number \@ne}%
-    {}{\tud@patch@wrn{twocolumn}}%
 }
 \endinput
 %%
