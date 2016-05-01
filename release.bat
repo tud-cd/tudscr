@@ -65,19 +65,11 @@ pdflatex "\def\tudfinalflag{}\def\tudprintflag{}\input{tudscr.tex}"
 copy tudscr.pdf tudscr_print.pdf
 pdflatex "\def\tudfinalflag{}\input{tudscr.tex}"
 del tutorials\*autopp*.* /q > nul
-attrib +h "tutorials\*-temp.pdf"
+attrib +h "tutorials\*-standalone-*.pdf"
 attrib +h "tutorials\*-pics.pdf"
-move tudscr*.pdf     latex\tudscr
-move tutorials\*.pdf latex\tudscr\tutorials\
-setlocal enabledelayedexpansion
-set "pattern=-temp"
-set "replace="
-for /f %%f in ('dir /b tutorials\*-example-temp.tex') do (
-  set "file=%%~f"
-  echo "!file!"
-  copy "tutorials\!file!" "..\source\latex\tudscr\doc\examples\!file:%pattern%=%replace%!"
-)
-endlocal
+move tudscr*.pdf             latex\tudscr\
+move tutorials\*.pdf         latex\tudscr\tutorials\
+move tutorials\*-example.tex ..\source\latex\tudscr\doc\examples\
 del *.* /q > nul
 rmdir examples /s /q > nul
 rmdir tutorials /s /q > nul
