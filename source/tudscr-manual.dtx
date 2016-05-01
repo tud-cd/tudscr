@@ -1,4 +1,4 @@
-% \CheckSum{4169}
+% \CheckSum{4173}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -93,9 +93,6 @@
 % Tutorials erzeugt. Da es zwischen der Klasse und dem Paket es eine große
 % Menge an Überschneidungen gibt, basieren diese auf der gleichen Quelldatei.
 % \ToDo{alle shellescape in dtx prüfen, nur bei Bedarf erzeugen}[v2.05]
-% \ToDo{alle temporären Dateien löschen (nicht example)}[v2.05]
-% \ToDo{Makros für temporäre Dateinamen}[v2.05]
-% \ToDo{allgemeine/ständig geschriebene Dateinamen abhängig vom Paket}[v2.05]
 %
 % \StopEventually{\PrintIndex\PrintChanges}
 %
@@ -4859,7 +4856,6 @@
 % \cs{tud@tut@temp-preamble.tex} beziehungsweise  \cs{tud@tut@temp-trunk.tex} 
 % angehangen und damit gesichert, um Quelltextauszüge aus dem Tutorial für die
 % Präambel sowie den Dokumentteil trennen beziehungsweise sortieren zu können.
-% \ToDo{tud@tut@temp.* am ende löschen, falls möglich}[v2.05]
 %    \begin{macrocode}
 \newcommand*\tud@tut@append[1]{%
   \ifstr{#1}{preamble}{%
@@ -5262,8 +5258,6 @@
 % temporär erzeugten \LaTeX-Datei ist abhängig vom gesetzten Tutorial. Beim
 % Aufruf dieser wird über die Optionen von \app{pdflatex} der verwendete
 % \cs{jobname} angepasst (siehe \cs{tud@tut@pdf}).
-% \ToDo{nur erzeugen, falls auch notwendig}[v2.05]
-% \ToDo{umbenennen in \cs{jobname}-\cs{@StandaloneFile}-temp}[v2.05]
 %    \begin{macrocode}
 \IfFileExists{\tud@tut@temp-standalone.tex}{\@tempswafalse}{\@tempswatrue}
 \if@tempswa%
@@ -5298,31 +5292,33 @@
 %    \begin{macrocode}
 \newcommand*\tud@tut@pdf{%
   \ifnum\pdfshellescape=\@ne\relax%
-    \begingroup%
-      \let\printdate\@firstofone%
-      \edef\@tempa{\expandonce\@date}%
-      \def\@tempb{\today}%
-      \ifx\@tempa\@tempb\relax%
-        \def\@tempb{}%
-      \else%
-        \edef\@tempb{\unexpanded{\def\StandaloneDate}{\@date}}%
-      \fi%
-      \edef\@tempa{%
-        pdflatex -jobname=\tud@tut@temp\space%
-        "\noexpand\unexpanded{\expandonce\@tempb\noexpand\input}%
-          {\tud@tut@temp-standalone.tex}"%
-      }%
-      \immediate\write18{\@tempa^^J\@tempa^^J\@tempa}%
-      \ifwindows%
-        \def\@tempa{rename}%
-      \else%
-        \def\@tempa{mv}%
-      \fi%
-      \immediate\write18{%
-        \@tempa\space\tud@tut@temp.pdf\space%
-        \jobname-standalone-\@StandaloneFile.pdf%
-      }%
-    \endgroup%
+    \filemodCmp{\jobname-standalone-\@StandaloneFile.pdf}{\jobname.tex}{}{%
+      \begingroup%
+        \let\printdate\@firstofone%
+        \edef\@tempa{\expandonce\@date}%
+        \def\@tempb{\today}%
+        \ifx\@tempa\@tempb\relax%
+          \def\@tempb{}%
+        \else%
+          \edef\@tempb{\unexpanded{\def\StandaloneDate}{\@date}}%
+        \fi%
+        \edef\@tempa{%
+          pdflatex -jobname=\tud@tut@temp\space%
+          "\noexpand\unexpanded{\expandonce\@tempb\noexpand\input}%
+            {\tud@tut@temp-standalone.tex}"%
+        }%
+        \immediate\write18{\@tempa^^J\@tempa^^J\@tempa}%
+        \ifwindows%
+          \def\@tempa{rename}%
+        \else%
+          \def\@tempa{mv}%
+        \fi%
+        \immediate\write18{%
+          \@tempa\space\tud@tut@temp.pdf\space%
+          \jobname-standalone-\@StandaloneFile.pdf%
+        }%
+      \endgroup%
+    }%
   \fi%
   \global\let\@StandaloneFile\relax%
 }
