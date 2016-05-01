@@ -951,7 +951,6 @@
     scrheadings.foot.above.line,%
     scrheadings.foot.below.line%
   }%
-  \listadd\tud@ps@list{tudheadings}%
 %    \end{macrocode}
 % Zuletzt werden Aliasnamen für den Seitenstil definiert.
 %    \begin{macrocode}
@@ -982,7 +981,6 @@
     plain.scrheadings.foot.above.line,%
     plain.scrheadings.foot.below.line%
   }%
-  \listadd\tud@ps@list{plain.tudheadings}%
   \DeclareNewPageStyleAlias{plain.tudscrheadings}{plain.tudheadings}%
   \DeclareNewPageStyleAlias{tudplain}{plain.tudheadings}%
   \DeclareNewPageStyleAlias{tudscrplain}{plain.tudheadings}%
@@ -1007,7 +1005,6 @@
     tudheadings.foot.content,%
     tudheadings.last%
   }%
-  \listadd\tud@ps@list{empty.tudheadings}%
   \DeclareNewPageStyleAlias{empty.tudscrheadings}{empty.tudheadings}%
   \DeclareNewPageStyleAlias{tudempty}{empty.tudheadings}%
   \DeclareNewPageStyleAlias{tudscrempty}{empty.tudheadings}%
@@ -1048,6 +1045,9 @@
 % \end{pagestyle}^^A tudheadings
 %    \begin{macrocode}
 }
+\listadd\tud@ps@list{tudheadings}
+\listadd\tud@ps@list{plain.tudheadings}
+\listadd\tud@ps@list{empty.tudheadings}
 %    \end{macrocode}
 % Mit der Nutzung von \pkg{scrlayer-scrpage} ist die parallele Verwendung des 
 % Paketes \pkg{fancyhdr} nicht möglich.
@@ -1215,6 +1215,7 @@
 \newcommand*\tud@pagestyle{}
 \let\tud@pagestyle\pagestyle
 \pretocmd{\tud@pagestyle}{%
+  \if@atdocument\tud@BeforeSelectAnyPageStyle{#1}\fi%
   \edef\currentpagestyle{#1}%
 }{}{\tud@patch@wrn{pagestyle}}
 %    \end{macrocode}
@@ -3114,8 +3115,7 @@
 %
 % Das Paket \pkg{geometry} erlaubt eine genaue Vorgabe des Satzspiegels und
 % der Seitenränder, wie es vom \CD der \TnUD verlangt wird. 
-% \ToDo{\cs{@ifpackagelater} raus}[v2.05]%
-% \ToDo{\cs{CheckCommand} für alle relevanten Befehle}[v2.05]%
+% \ToDo{\cs{@ifpackagelater} raus, \cs{CheckCommand} für relev. Befehle}[v2.05]%
 %    \begin{macrocode}
 \newcommand*\tud@geometry@process{}
 \tud@ifsacrop{%
@@ -3904,6 +3904,7 @@
 % \begin{macro}{\tud@geometry@custom}
 % \changes{v2.05}{2016/03/06}{neu}^^A
 % \begin{macro}{\geometry}
+% \begin{macro}{\restoregeometry}
 % \begin{macro}{\Gm@changelayout}
 % Für einen benutzerdefinierten Satzspiegel ist es notwendig, die durch den 
 % Anwender in der Präambel getätigten Einstellungen zu sichern und am Ende der
@@ -3932,6 +3933,18 @@
       \fi%
     }{}%
   }{}{\tud@patch@wrn{Gm@changelayout}}%
+%    \end{macrocode}
+% Bei der Verwendung von \cs{restoregeometry} wird der patch deaktiviert.
+%    \begin{macrocode}
+  \pretocmd{\restoregeometry}{%
+    \@tud@geometry@enabledfalse%
+  }{}{\tud@patch@wrn{restoregeometry}}%
+  \apptocmd{\restoregeometry}{%
+    \@tud@geometry@enabledtrue%
+  }{}{\tud@patch@wrn{restoregeometry}}%
+%    \end{macrocode}
+% Am Ende der Präambel wird der Satzspiegel des Dokumentes gesetzt.
+%    \begin{macrocode}
   \AtEndPreamble{%
 %    \end{macrocode}
 % Ist die Option \opt{geometry=custom} nicht aktiv, werden mit \cs{geometry} 
@@ -3966,12 +3979,14 @@
       bindingoffset=\the\ta@bcor,%
       \tud@geometry@hincl,%
       \tud@geometry@fincl,%
-      \tud@geometry@custom%
+      \tud@geometry@custom,%
+      driver=none%
     }%
   }%
 \fi
 %    \end{macrocode}
 % \end{macro}^^A \Gm@changelayout
+% \end{macro}^^A \restoregeometry
 % \end{macro}^^A \geometry
 % \end{macro}^^A \tud@geometry@custom
 % Damit alle Satzspiegeleinstellungen korrekt vorgenommen und auch alle
