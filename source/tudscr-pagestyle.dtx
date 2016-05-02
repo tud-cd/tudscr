@@ -1626,9 +1626,9 @@
 % im Fuß ausgegeben.
 % \begin{macro}{\if@tud@ddc@internal}
 % \changes{v2.02}{2014/07/08}{neu}^^A
-% \begin{macro}{\clearpage@iftudps}
+% \begin{macro}{\tud@comp@clearpage}
 % \changes{v2.04}{2015/05/31}{neu}^^A
-% \begin{macro}{\resetpagestyle@iftudps}
+% \begin{macro}{\tud@comp@resetpagestyle}
 % \changes{v2.04}{2015/05/31}{neu}^^A
 % Dieser Schalter wird intern von den Optionen \opt{ddc}, \opt{ddchead} und 
 % \opt{ddcfoot} verwendet, um rekursive Aufrufe der optionen zu verhindern.
@@ -1643,21 +1643,25 @@
 % Unterfangen definiert, jedoch beider Abarbeitung der Optionen nur noch im 
 % Kompatibilitätmodus ausgeführt.
 %    \begin{macrocode}
-\newcommand*\clearpage@iftudps{%
-  \if@tud@ddc@internal\else\if@atdocument%
-    \tud@iftudheadings{\currentpagestyle}{\clearpage}{}%
-  \fi\fi%
+\newcommand*\tud@comp@clearpage{%
+  \tud@ifverlower{2.04}{%
+    \if@tud@ddc@internal\else\if@atdocument%
+      \tud@iftudheadings{\currentpagestyle}{\clearpage}{}%
+    \fi\fi%
+  }{}%
 }
-\newcommand*\resetpagestyle@iftudps{%
-  \if@tud@ddc@internal\else\if@atdocument%
-    \tud@iftudheadings{\currentpagestyle}{%
-      \expandafter\pagestyle\expandafter{\currentpagestyle}%
-    }{}%
-  \fi\fi%
+\newcommand*\tud@comp@resetpagestyle{%
+  \tud@ifverlower{2.04}{%
+    \if@tud@ddc@internal\else\if@atdocument%
+      \tud@iftudheadings{\currentpagestyle}{%
+        \expandafter\pagestyle\expandafter{\currentpagestyle}%
+      }{}%
+    \fi\fi%
+  }{}%
 }
 %    \end{macrocode}
-% \end{macro}^^A \clearpage@iftudps
-% \end{macro}^^A \resetpagestyle@iftudps
+% \end{macro}^^A \tud@comp@clearpage
+% \end{macro}^^A \tud@comp@resetpagestyle
 % \end{macro}^^A \if@tud@ddc@internal
 % \begin{macro}{\tud@ddc@switch}
 % \changes{v2.02}{2014/06/23}{neu}^^A
@@ -1695,7 +1699,7 @@
 % Im Kompatibiltätsmodus wird ein Seitenumbruch erzwungen. Anschließend wird 
 % die Option abgearbeitet.
 %    \begin{macrocode}
-  \tud@ifverlower{2.04}{\clearpage@iftudps}{}%
+  \tud@comp@clearpage%
   \TUD@set@numkey{ddc}{tud@ddc@auto@num}{\tud@ddc@switch}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
 %    \end{macrocode}
@@ -1728,7 +1732,7 @@
 % Abschließend wird im Kompatibilitätsmodus der aktuelle Seitenstil aufgerufen,
 % um bei einem geänderten Fuß den notwendigen Satzspiegel zu laden.
 %    \begin{macrocode}
-  \tud@ifverlower{2.04}{\resetpagestyle@iftudps}{}%
+  \tud@comp@resetpagestyle%
 }
 %    \end{macrocode}
 % \end{macro}^^A \if@tud@footlogo@option@set
@@ -1745,7 +1749,7 @@
 %    \end{macrocode}
 % Der Seitenumbruch im Kompatibilitätsmodus.
 %    \begin{macrocode}
-  \tud@ifverlower{2.04}{\clearpage@iftudps}{}%
+  \tud@comp@clearpage%
   \TUD@set@numkey{ddchead}{tud@ddc@head@num}{\tud@ddc@switch}{#1}%
 %    \end{macrocode}
 % Beim internen Aufruf soll lediglich der Wert des Schlüssels geändert werden. 
@@ -1764,7 +1768,7 @@
 %    \end{macrocode}
 % Das Setzen des Seitenstils im Kompatibilitätsmodus.
 %    \begin{macrocode}
-  \tud@ifverlower{2.04}{\resetpagestyle@iftudps}{}%
+  \tud@comp@resetpagestyle%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@ddc@head@num
@@ -1779,7 +1783,7 @@
 %    \end{macrocode}
 % Der Seitenumbruch im Kompatibilitätsmodus.
 %    \begin{macrocode}
-  \tud@ifverlower{2.04}{\clearpage@iftudps}{}%
+  \tud@comp@clearpage%
   \TUD@set@numkey{ddcfoot}{tud@ddc@foot@num}{\tud@ddc@switch}{#1}%
 %    \end{macrocode}
 % Beim internen Aufruf soll lediglich der Wert des Schlüssels geändert werden. 
@@ -1798,7 +1802,7 @@
 %    \end{macrocode}
 % Das Setzen des Seitenstils im Kompatibilitätsmodus.
 %    \begin{macrocode}
-  \tud@ifverlower{2.04}{\resetpagestyle@iftudps}{}%
+  \tud@comp@resetpagestyle%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@ddc@foot@num
@@ -1984,7 +1988,7 @@
 \newcommand*\@@headlogo{}
 \newcommand*\tud@headlogo@wrn{}
 \newcommand*\headlogo[2][]{%
-  \tud@ifverlower{2.04}{\clearpage@iftudps}{}%
+  \tud@comp@clearpage%
   \renewcommand*\@headlogo{#2}%
   \renewcommand*\@@headlogo{#1}%
 %    \end{macrocode}
@@ -2002,7 +2006,7 @@
     }%
     \global\let\tud@headlogo@wrn\relax%
   }%
-  \tud@ifverlower{2.04}{\resetpagestyle@iftudps}{}%
+  \tud@comp@resetpagestyle%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@headlogo@wrn
@@ -2278,11 +2282,11 @@
 \newcommand*\@footlogo{}
 \newcommand*\@@footlogo{}
 \newcommand*\footlogo[2][]{%
-  \tud@ifverlower{2.04}{\clearpage@iftudps}{}%
+  \tud@comp@clearpage%
   \renewcommand*\@footlogo{#2}%
   \renewcommand*\@@footlogo{#1}%
   \global\@tud@footlogo@cmd@settrue%
-  \tud@ifverlower{2.04}{\resetpagestyle@iftudps}{}%
+  \tud@comp@resetpagestyle%
 }
 %    \end{macrocode}
 % \end{macro}^^A \footlogosep
