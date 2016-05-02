@@ -700,36 +700,29 @@
 % \CD gibt es dabei drei Ausprägungen, die für die verschiedenen Elemente
 % auch unabhängig gewählt werden können.
 %
-% \begin{macro}{\tud@headings}
+% \begin{macro}{\tud@headings@set}
+% \changes{v2.05}{2015/11/24}{neu}^^A
+% \begin{macro}{\tud@@headings}
 % \changes{v2.05}{2015/11/24}{neu}^^A
 % \begin{macro}{\tud@disposition@fontsize}
 % \changes{v2.05}{2015/11/24}{neu}^^A
 % \begin{macro}{\tud@thesis@fontsize}
 % \changes{v2.05}{2015/11/24}{neu}^^A
 % Als erstes werden die zuvor erwähnten Optionen verarbeitet, welche Einfluss 
-% auf die Formatierung respektive die Schriftgröße der Überschriften haben. In 
-% \cs{tud@headings} wird die über \opt{headings=\dots} gewählte Schriftgröße 
-% der Überschriften gesichert.
-%    \begin{macrocode}
-\newcommand*\tud@headings{}
-\newcommand*\tud@disposition@fontsize{}
-%<book|report|article>\newcommand*\tud@thesis@fontsize{}
-%    \end{macrocode}
-% \end{macro}^^A \tud@thesis@fontsize
-% \end{macro}^^A \tud@disposition@fontsize
-% \end{macro}^^A \tud@headings
-% \begin{macro}{\tud@headings@set}
-% \changes{v2.05}{2015/11/24}{neu}^^A
+% auf die Formatierung respektive die Schriftgröße der Überschriften haben. 
 % Wird mit der Option \opt{headings} eine andere Überschriftengröße gewählt, 
 % werden mit dem Befehl \cs{tud@headings@set} die dazu passenden Schriftgrößen 
 % sowohl für die Überschriften (\cs{tud@disposition@fontsize}) als auch die 
-% Titelseite 
-% (\cs{tud@thesis@fontsize}) gesetzt.
+% Titelseite (\cs{tud@thesis@fontsize}) gesetzt. In \cs{tud@@headings} wird die
+% über \opt{headings=\dots} gewählte Schriftgröße der Überschriften gesichert.
 %    \begin{macrocode}
+\newcommand*\tud@@headings{}
+\newcommand*\tud@disposition@fontsize{}
+%<book|report|article>\newcommand*\tud@thesis@fontsize{}
 \newcommand*\tud@headings@set[1][]{%
   \def\@tempa##1##2##3{%
-    \ifstr{##1}{\tud@headings}{}{%
-      \renewcommand*\tud@headings{##1}%
+    \ifstr{##1}{\tud@@headings}{}{%
+      \renewcommand*\tud@@headings{##1}%
       \renewcommand*\tud@disposition@fontsize{##2}%
 %<book|report|article>      \renewcommand*\tud@thesis@fontsize{##3}%
       #1%
@@ -755,6 +748,9 @@
 %    \begin{macrocode}
 \AtEndPreamble{\tud@headings@set}
 %    \end{macrocode}
+% \end{macro}^^A \tud@thesis@fontsize
+% \end{macro}^^A \tud@disposition@fontsize
+% \end{macro}^^A \tud@@headings
 % \end{macro}^^A \tud@headings@set
 %
 % \iffalse
@@ -912,26 +908,26 @@
 %    \end{macrocode}
 % \end{length}^^A \headingsvskip
 % \end{length}^^A \pageheadingsvskip
-% \begin{macro}{\tud@headmidvskip}
+% \begin{macro}{\tud@headmidvskip@normal}
 % \changes{v2.03}{2015/01/21}{neu}^^A
-% \begin{macro}{\tud@headmidvskip@neg}
+% \begin{macro}{\tud@headmidvskip@reverse}
 % \changes{v2.03}{2015/01/21}{neu}^^A
-% Mit \cs{tud@headmidvskip} wird der Abstände zwischen Nummerierung eines
+% Mit \cs{tud@headmidvskip@normal} wird der Abstand zwischen Nummerierung eines
 % Titels und der eigentlichen Bezeichnung gesetzt. Das gleiche gilt für eine
 % separate Kapitelnummernzeile (\opt{chapterprefix}) und dem eigentlichen
-% Kapiteltitel. Das Makro \cs{tud@headmidvskip@neg} wird benötigt, um ggf. 
+% Kapiteltitel. Das Makro \cs{tud@headmidvskip@reverse} wird benötigt, um ggf. 
 % vorher um den eingefügten Abstand nach oben zu verschieben.
 %    \begin{macrocode}
 %<*book|report>
-\newcommand*\tud@headmidvskip{\par\nobreak\vspace{.5\baselineskip}}
-\newcommand*\tud@headmidvskip@neg{%
-  \setbox\z@\vbox{\tud@headmidvskip}%
+\newcommand*\tud@headmidvskip@normal{\par\nobreak\vspace{.5\baselineskip}}
+\newcommand*\tud@headmidvskip@reverse{%
+  \setbox\z@\vbox{\tud@headmidvskip@normal}%
   \vspace*{\dimexpr-\dp\strutbox-\ht\strutbox-\ht\z@\relax}%
 }
 %</book|report>
 %    \end{macrocode}
-% \end{macro}^^A \tud@headmidvskip@neg
-% \end{macro}^^A \tud@headmidvskip
+% \end{macro}^^A \tud@headmidvskip@reverse
+% \end{macro}^^A \tud@headmidvskip@normal
 % \begin{macro}{\tud@layout@process}
 % \changes{v2.02}{2014/08/29}{Anpassungen für \pkg{fontspec}}^^A
 % \changes{v2.05}{2016/04/04}{Schrift für \val{subtitle} abhängig von
@@ -1335,7 +1331,7 @@
         {\usekomafont{titlepage}{\vskip 2ex\@plus1ex\@minus1ex}}%
       \endgroup%
     \else%
-      \usekomafont{partnumber}{\tud@headmidvskip@neg}%
+      \usekomafont{partnumber}{\tud@headmidvskip@reverse}%
     \fi%
   \endgroup%
 }
@@ -1437,12 +1433,12 @@
       \if@tud@parttitle%
         \enskip%
       \else%
-        \tud@headmidvskip%
+        \tud@headmidvskip@normal%
       \fi%
     }{%
       \if@tud@parttitle\else%
         \usekomafont{#1prefix}{\vphantom{\partname}}%
-        \tud@headmidvskip%
+        \tud@headmidvskip@normal%
       \fi%
     }%
   }{}{\tud@patch@wrn{scr@startpart}}%
@@ -1462,7 +1458,7 @@
     \normalfont\sectfont\nobreak%
     \if@tud@parttitle\else%
       \size@partnumber{\vphantom{\partname}}%
-      \tud@headmidvskip\nobreak%
+      \tud@headmidvskip@normal\nobreak%
     \fi%
   }{}{\tud@patch@wrn{scr@@startspart}}%
 %</book|report>
@@ -1492,12 +1488,12 @@
       \if@tud@parttitle%
         \enskip%
       \else%
-        \tud@headmidvskip%
+        \tud@headmidvskip@normal%
       \fi%
     }{%
       \if@tud@parttitle\else%
         \size@partnumber{\vphantom{\partname}}%
-        \tud@headmidvskip%
+        \tud@headmidvskip@normal%
       \fi%
     }%
   }{}{\tud@patch@wrn{@part}}%
@@ -1510,7 +1506,7 @@
     \normalfont\sectfont\nobreak%
     \if@tud@parttitle\else%
       \size@partnumber{\vphantom{\partname}}%
-      \tud@headmidvskip\nobreak%
+      \tud@headmidvskip@normal\nobreak%
     \fi%
     \size@part%
   }{}{\tud@patch@wrn{@spart}}%
@@ -1590,9 +1586,9 @@
 % enthält das Präfix selbst. Damit dieses in Majuskeln erscheint, wird
 % \cs{chapterformat} im Argument des Makros \cs{tud@makeuppercase} verwendet.
 % Zuletzt wird der Abstand zwischen dem Präfix und dem Kapiteltitel auf
-% \cs{tud@headmidvskip} gesetzt. Somit liegen die Kapitelüberschriften für alle 
-% Einstellmöglichkieten der \opt{parskip}-Option immer auf exakt der selben 
-% Höhe.
+% \cs{tud@headmidvskip@normal} gesetzt. Somit liegen die Kapitelüberschriften
+% für alle Einstellmöglichkieten der \opt{parskip}-Option immer auf exakt der
+% selben Höhe.
 %
 % Zuerst die Patches für \KOMAScript~v3.18:
 % \ToDo{Reimplementierung mit \cs{DeclareSectionCommand}, ifcsdef raus}[v2.06]
@@ -1606,10 +1602,10 @@
     \setlength{\@tempskipa}{\csname scr@#1@innerskip\endcsname}%
     \chapterheadmidvskip
   }{%
-    \tud@headmidvskip@neg%
+    \tud@headmidvskip@reverse%
     \vskip-\parskip%
     \tud@makeuppercase{\csname #1format\endcsname}%
-    \tud@headmidvskip%
+    \tud@headmidvskip@normal%
   }{}{\tud@patch@wrn{scr@@makechapterhead}}%
 %    \end{macrocode}
 % Und nun das Gleiche für \KOMAScript~v3.17:
@@ -1621,10 +1617,10 @@
     \setlength{\@tempskipa}{\scr@chapter@innerskip}%
     \chapterheadmidvskip
   }{%
-    \tud@headmidvskip@neg%
+    \tud@headmidvskip@reverse%
     \vskip-\parskip%
     \tud@makeuppercase{\chapterformat}%
-    \tud@headmidvskip%
+    \tud@headmidvskip@normal%
   }{}{\tud@patch@wrn{@@makechapterhead}}%
 \fi
 %    \end{macrocode}
