@@ -799,7 +799,7 @@
 \doxitem[macrolike,idxtype=Feld]{Field}{field}{Eingabefelder}
 \doxitem[idxtype=Schriftelement]{Font}{KOMAfont}{Schriftelemente}
 %    \end{macrocode}
-% \begin{macro}{\tud@write}
+% \begin{macro}{\tud@write@replace}
 % \changes{v2.05}{2016/04/21}{neu}^^A
 % \begin{macro}{\tud@read}
 % \changes{v2.05}{2016/04/21}{neu}^^A
@@ -814,8 +814,8 @@
 % die fraglichen Zeichen ersetzt und in eine weitere Hilfsdatei geschrieben.
 %    \begin{macrocode}
 \ifdefined\tudxdyflag
-  \newcommand*\tud@write{}
-  \newwrite\tud@write
+  \newcommand*\tud@write@replace{}
+  \newwrite\tud@write@replace
   \newcommand*\tud@read{}
   \newread\tud@read
   \newcommand*\tud@idx@line{}
@@ -833,7 +833,7 @@
     \endlinechar=-1\relax%
     \def\tud@reserved#1#2{%
       \immediate\openin\tud@read=\jobname.#1\relax%
-      \immediate\openout\tud@write=\jobname-xdy.#1\relax%
+      \immediate\openout\tud@write@replace=\jobname-xdy.#1\relax%
       \@tempswafalse%
       \loop\unless\ifeof\tud@read%
         \readline\tud@read to\tud@idx@line%
@@ -850,12 +850,14 @@
           \expandafter{\levelchar}{!}%
         \tud@replace\tud@idx@line{" @}{}%
         \ifeof\tud@read\else%
-          \immediate\write\tud@write{\unexpanded\expandafter{\tud@idx@line}}%
+          \immediate\write\tud@write@replace{%
+            \unexpanded\expandafter{\tud@idx@line}%
+          }%
           \@tempswatrue%
         \fi%
       \repeat%
       \immediate\closein\tud@read%
-      \immediate\closeout\tud@write%
+      \immediate\closeout\tud@write@replace%
       \ifnum\pdfshellescape=\@ne\relax%
         \if@tempswa%
           \immediate\write18{%
@@ -870,8 +872,8 @@
 % Falls nichts geschrieben wurde, wird eine leere Ausgabedatei erzeugt.
 %    \begin{macrocode}
         \else%
-          \immediate\openout\tud@write=\jobname.#2\relax%
-          \immediate\closeout\tud@write%
+          \immediate\openout\tud@write@replace=\jobname.#2\relax%
+          \immediate\closeout\tud@write@replace%
         \fi%
       \fi%
     }%
@@ -894,7 +896,7 @@
 % \end{macro}^^A \actualchar
 % \end{macro}^^A \tud@idx@line
 % \end{macro}^^A \tud@read
-% \end{macro}^^A \tud@write
+% \end{macro}^^A \tud@write@replace
 % \begin{macro}{\IndexPrologue}
 % \changes{v2.05}{2016/05/01}{neu}^^A
 %    \begin{macrocode}
