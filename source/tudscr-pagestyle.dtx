@@ -2542,7 +2542,7 @@
 % unterdrückt, indem der Befehl \cs{tud@multiple@fields@preset} im zweiten 
 % Argument mit einem \val{*} aufgerufen wird.
 %    \begin{macrocode}
-    \renewcommand*\tud@split@author[2]{%
+    \renewcommand*\tud@split@author@do[2]{%
       \tud@multiple@fields@store{@author}{##1}%
       \tud@multiple@fields@preset{@author}{*}{##1}%
       \ignorespaces##1\tud@newline@poster%
@@ -2574,7 +2574,7 @@
     \ifstr{\contactpersonname}{}{}{%
       {\tud@head@font@@bold\contactpersonname\newline}%
     }%
-    \renewcommand*\tud@split@contactperson[2]{%
+    \renewcommand*\tud@split@contactperson@do[2]{%
       \tud@multiple@fields@store{@contactperson}{##1}%
       \tud@multiple@fields@preset{@contactperson}{*}{##1}%
       \ignorespaces##1\tud@newline@poster%
@@ -4046,8 +4046,8 @@
 %
 % \begin{environment}{tudpage}
 % \changes{v2.02}{2014/06/23}{an Paket \pkg{scrlayer-scrpage} angepasst}^^A
-% \begin{macro}{\tud@ps}
-% \begin{macro}{\tud@ps@select}
+% \begin{macro}{\tud@envir@ps}
+% \begin{macro}{\tud@envir@selectps}
 % \changes{v2.02}{2014/07/19}{neu}^^A
 % \begin{macro}{\tud@currentpagestyle@set}
 % \changes{v2.02}{2014/07/18}{neu}^^A
@@ -4071,10 +4071,10 @@
 % wiederhergestellt. Die gewünschte Sprache der Umgebung kann als einzelner
 % Wert ohne Schlüssel angegben werden.
 %    \begin{macrocode}
-\newcommand*\tud@ps{tudheadings}
-\newcommand*\tud@ps@select{%
-  \expandafter\pagestyle\expandafter{\tud@ps}%
-  \ifstr{\GetRealPageStyle{\tud@ps}}{empty}{%
+\newcommand*\tud@envir@ps{tudheadings}
+\newcommand*\tud@envir@selectps{%
+  \expandafter\pagestyle\expandafter{\tud@envir@ps}%
+  \ifstr{\GetRealPageStyle{\tud@envir@ps}}{empty}{%
     \renewcommand*\titlepagestyle{empty}%
 %<*book|report>
     \renewcommand*\partpagestyle{empty}%
@@ -4082,7 +4082,7 @@
 %</book|report>
     \renewcommand*\indexpagestyle{empty}%
   }{}%
-  \ifstr{\GetRealPageStyle{\tud@ps}}{empty.tudheadings}{%
+  \ifstr{\GetRealPageStyle{\tud@envir@ps}}{empty.tudheadings}{%
     \renewcommand*\titlepagestyle{empty.tudheadings}%
 %<*book|report>
     \renewcommand*\partpagestyle{empty.tudheadings}%
@@ -4110,9 +4110,9 @@
 %    \begin{macrocode}
   \tud@currentpagestyle@set%
   \clearpage%
-  \def\tud@ps{tudheadings}%
+  \def\tud@envir@ps{tudheadings}%
   \TUD@parameter@set{tudpage}{#1}%
-  \tud@ps@select%
+  \tud@envir@selectps%
   \tud@multicols@check%
 %    \end{macrocode}
 % Falls das \pkg{multicol}-Paket geladen ist und eine Spaltenanzahl angegeben
@@ -4140,8 +4140,8 @@
 % \end{macro}^^A \tud@@currentpagestyle
 % \end{macro}^^A \tud@currentpagestyle@reset
 % \end{macro}^^A \tud@currentpagestyle@set
-% \end{macro}^^A \tud@ps@select
-% \end{macro}^^A \tud@ps
+% \end{macro}^^A \tud@envir@selectps
+% \end{macro}^^A \tud@envir@ps
 % \end{environment}^^A tudpage
 % Mit \cs{TUD@parameter}\marg{Family}\marg{\dots} wird die Parameterfamilie
 % festgelegt und anschließend die Definitionen getätigt.
@@ -4172,10 +4172,10 @@
 % einer der \pgs{tudheadings}-Seitenstile verwendet wird.
 %    \begin{macrocode}
   \TUD@parameter@define{pagestyle}{%
-    \tud@iftudps{#1}{\renewcommand*\tud@ps{#1}}{%
-      \ifstr{#1}{empty}{\renewcommand*\tud@ps{empty.tudheadings}}{%
-      \ifstr{#1}{plain}{\renewcommand*\tud@ps{plain.tudheadings}}{%
-      \ifstr{#1}{headings}{\renewcommand*\tud@ps{tudheadings}}{%
+    \tud@iftudps{#1}{\renewcommand*\tud@envir@ps{#1}}{%
+      \ifstr{#1}{empty}{\renewcommand*\tud@envir@ps{empty.tudheadings}}{%
+      \ifstr{#1}{plain}{\renewcommand*\tud@envir@ps{plain.tudheadings}}{%
+      \ifstr{#1}{headings}{\renewcommand*\tud@envir@ps{tudheadings}}{%
         \TUD@parameter@error{pagestyle}{%
           headings, plain, empty or any tudheadings page style type%
         }%
