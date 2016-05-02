@@ -1,4 +1,4 @@
-% \CheckSum{693}
+% \CheckSum{691}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -466,17 +466,17 @@
 \catcode`\#=6
 %</doc>
 %    \end{macrocode}
-% \begin{macro}{\@ilst@def}
+% \begin{macro}{\tud@lst@def}
 % \changes{v2.05}{2016/04/25}{neu}^^A
-% \begin{macro}{\@@ilst}
+% \begin{macro}{\tud@lst@values}
 % \changes{v2.05}{2016/04/25}{neu}^^A
-% \begin{macro}{\if@ilst@multi}
+% \begin{macro}{\if@tud@lst@multi}
 % \changes{v2.05}{2016/04/25}{neu}^^A
-% \begin{macro}{\@ilst@init}
+% \begin{macro}{\tud@lst@init}
 % \changes{v2.05}{2016/04/25}{neu}^^A
-% \begin{macro}{\@ilst@add}
+% \begin{macro}{\tud@lst@add}
 % \changes{v2.05}{2016/04/25}{neu}^^A
-% \begin{macro}{\@ilst@process}
+% \begin{macro}{\tud@lst@process}
 % \changes{v2.05}{2016/04/25}{neu}^^A
 % Für die Änderungsliste in \cls{tudscrdoc} wird bei der Beschreibung von 
 % Einträgen nur dann eine dritte Ebene verwendet, wenn es einem Eintrag mehrere 
@@ -484,36 +484,36 @@
 % direkt in der zweiten Ebene nach dem Eintrag selbst ausgegeben.
 %    \begin{macrocode}
 %<*doc>
-\newcommand*\@ilst@def{%
-  \newcommand*\@@ilst{}%
-  \newif\if@ilst@multi%
-  \newcommand*\@ilst@init{%
-    \let\@@ilst\relax%
-    \@ilst@multifalse%
+\newcommand*\tud@lst@def{%
+  \newcommand*\tud@lst@values{}%
+  \newif\if@tud@lst@multi%
+  \newcommand*\tud@lst@init{%
+    \let\tud@lst@values\relax%
+    \@tud@lst@multifalse%
   }%
-  \newcommand*\@ilst@add[1]{%
-    \ifx\@@ilst\relax\else%
-      \@ilst@multitrue%
+  \newcommand*\tud@lst@add[1]{%
+    \ifx\tud@lst@values\relax\else%
+      \@tud@lst@multitrue%
     \fi%
-    \listadd\@@ilst{##1}%
+    \listadd\tud@lst@values{##1}%
   }%
-  \newcommand*\@ilst@process{%
+  \newcommand*\tud@lst@process{%
     \def\tud@reserved{}%
-    \if@ilst@multi%
+    \if@tud@lst@multi%
       \def\tud@reserved{\subsubitem}%
       \efill%
     \fi%
-    \forlistloop\tud@reserved{\@@ilst}%
+    \forlistloop\tud@reserved{\tud@lst@values}%
   }%
 }
 %</doc>
 %    \end{macrocode}
-% \end{macro}^^A \@ilst@process
-% \end{macro}^^A \@ilst@add
-% \end{macro}^^A \@ilst@init
-% \end{macro}^^A \if@ilst@multi
-% \end{macro}^^A \@@ilst
-% \end{macro}^^A \@ilst@def
+% \end{macro}^^A \tud@lst@process
+% \end{macro}^^A \tud@lst@add
+% \end{macro}^^A \tud@lst@init
+% \end{macro}^^A \if@tud@lst@multi
+% \end{macro}^^A \tud@lst@values
+% \end{macro}^^A \tud@lst@def
 % \end{macro}^^A \@hashchar
 % \begin{macro}{\tud@xdy@create}
 % \changes{v2.05}{2016/04/24}{neu}^^A
@@ -573,7 +573,7 @@
 % Für die Änderungsliste erfolgt die GRuppierung anhand der Versionsnummer. Da 
 % diese auf der ersten Ebene angegeben ist (\cs{item}) muss das Ganze mit einem 
 % terminierten Befehl erfolgen. Hierfür wird \cs{@lettergroup} definiert. 
-% Außerdem werden mit \cs{@ilst@def} die benötigten Befehle zur selektiven 
+% Außerdem werden mit \cs{tud@lst@def} die benötigten Befehle zur selektiven 
 % Anzeige der Änderungseinträge definiert.
 %    \begin{macrocode}
   \if@tud@xdy@glo%
@@ -582,7 +582,7 @@
     \space\space%
     \string\def\string\@lettergroup\@hashchar1\string\relax%
     {\string\lettergroup{\@hashchar1}}\@percentchar^^J%
-    \space\space\string\@ilst@def\@percentchar%
+    \space\space\string\tud@lst@def\@percentchar%
   }%
   \fi%
 %    \end{macrocode}
@@ -745,17 +745,17 @@
 % direkt danach ausgegeben werden. Exisitieren für diesen jedoch mehrere
 % Anmerkungen, so sollen diese in der nächsten Ebene ausgegeben werden. Da die
 % Anzahl zu Beginn des Eintrags noch unbekannt ist, werden alle dazugehörigen
-% Anmerkungen zunächst mit \cs{@ilst@add} in der~-- zuvor mit dem Makro 
-% \cs{@ilst@init} initialisierten~-- Liste \cs{@@ilst} gesammelt und
-% diese am Ende des Eintrags durch \cs{@ilst@process} ausgewertet.
+% Anmerkungen zunächst mit \cs{tud@lst@add} in der~-- zuvor mit dem Makro 
+% \cs{tud@lst@init} initialisierten~-- Liste \cs{tud@lst@values} gesammelt und
+% diese am Ende des Eintrags durch \cs{tud@lst@process} ausgewertet.
 %    \begin{macrocode}
     (markup-indexentry-list^^J%
-    \space\space:open\space\space"\string\@ilst@init"^^J%
-    \space\space:close "\string~n \@spaces\space\string\@ilst@process"^^J%
+    \space\space:open \space"\string\tud@lst@init"^^J%
+    \space\space:close "\string~n \@spaces\space\string\tud@lst@process"^^J%
     \space\space:depth 3^^J%
     )^^J%
     (markup-indexentry^^J%
-    \space\space:open\space\space"\string~n\@spaces\space\string\@ilst@add{"^^J%
+    \space\space:open \space"\string~n\@spaces\space\string\tud@lst@add{"^^J%
     \space\space:close "}"^^J%
     \space\space:depth 3^^J%
     )%
