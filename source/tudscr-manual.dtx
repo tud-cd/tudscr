@@ -1360,7 +1360,7 @@
 % \changes{v2.05}{2015/11/01}{neu}^^A
 % \begin{macro}{\@bundle}
 % \changes{v2.05}{2015/08/04}{neu}^^A
-% \begin{macro}{\@bundledefault}
+% \begin{macro}{\@@bundle}
 % \changes{v2.05}{2015/11/01}{neu}^^A
 % \begin{macro}{\tud@ifbundle}
 % \changes{v2.05}{2015/08/04}{neu}^^A
@@ -1385,18 +1385,18 @@
     \gdef\@bundle{#1}%
   }%
   \ignorespaces%
-}{\global\let\@bundle\@bundledefault\aftergroup\ignorespaces}
+}{\global\let\@bundle\@@bundle\aftergroup\ignorespaces}
 %    \end{macrocode}
 % Diese Makros werden für das Definieren eines Bundle-Elements und ggf. das 
 % Prüfen des selbigen benötigt.
 %    \begin{macrocode}
 \newcommand*\@bundle{}
-\newcommand*\@bundledefault{tudscr}
-\let\@bundle\@bundledefault
-\newcommand*\tud@ifbundle[2]{\ifstr{\@bundle}{\@bundledefault}{#2}{#1}}
+\newcommand*\@@bundle{tudscr}
+\let\@bundle\@@bundle
+\newcommand*\tud@ifbundle[2]{\ifstr{\@bundle}{\@@bundle}{#2}{#1}}
 %    \end{macrocode}
 % \end{macro}^^A \tud@ifbundle
-% \end{macro}^^A \@bundledefault
+% \end{macro}^^A \@@bundle
 % \end{macro}^^A \@bundle
 % \end{environment}^^A Bundle
 % \begin{macro}{\Application}
@@ -2154,12 +2154,12 @@
 % nicht der Fall ist, wird die Labelgenerierung abermals ausgeführt.
 %    \begin{macrocode}
 \NewDocumentCommand\@@getdefaultlabel{mmmmr==}{%
-  \edef\tud@reserved{\expandafter\detokenize\expandafter{\@bundledefault}}%
+  \edef\tud@reserved{\expandafter\detokenize\expandafter{\@@bundle}}%
   \ifstr{\tud@reserved}{#2}{}{%
 %    \end{macrocode}
 % Dabei erfolgt der Aufruf logischerweise mit dem richtigen Bundlepräfix. 
 %    \begin{macrocode}
-    \@getlabel#1{\@bundledefault:#3:#4}=#5=%
+    \@getlabel#1{\@@bundle:#3:#4}=#5=%
   }%
 }
 %    \end{macrocode}
@@ -2276,7 +2276,7 @@
         \@getattribution\@tempb{#2}%
         \IfValueTF{#1}{%
           \ifstr{#1}{}{%
-            \edef\@tempa{\@bundledefault:\@tempb:#2}%
+            \edef\@tempa{\@@bundle:\@tempb:#2}%
           }{%
             \edef\@tempa{#1:\@tempb:#2}%
           }%
@@ -2477,7 +2477,7 @@
 % ob für das \meta{Element} überhaupt ein Link definiert wurde, der verwendet
 % werden soll. Ist dies nicht der Fall, wird eine Warnung ausgegeben. Dies ist 
 % möglich, da durch die automatische Labelgenerierung normalerweise alle nicht 
-% existierenden Labels mit \meta{Bundlepräfix} auf \cs{@bundledefault} zielen 
+% existierenden Labels mit \meta{Bundlepräfix} auf \cs{@@bundle} verweisen
 % müssten. Für die wenigen Fälle, in denen gezielt auf einen Querverweis 
 % verzichtet werden soll, kann ein leeres Argument \val{()} angegeben werden.
 %    \begin{macrocode}
@@ -3208,7 +3208,7 @@
 % der aktuelle Eintrag erzeugt werden soll. Eine explizite Angabe wird in jedem 
 % Fall genutzt,\dots
 %    \begin{macrocode}
-    \let\@idxbundle\@bundledefault%
+    \let\@idxbundle\@@bundle%
     \IfValueTF{#8}{%
       \def\@idxbundle{#8}%
     }{%
@@ -3242,7 +3242,7 @@
 % Hauptklassen gehören, erfolgen.
 %    \begin{macrocode}
     \@tempswatrue%
-    \ifx\@idxbundle\@bundledefault%
+    \ifx\@idxbundle\@@bundle%
       \@tempswafalse%
 %    \end{macrocode}
 % Ebenso werden die Anmerkungen für \cs{Key}-Elemente unterfdrückt, da diese 
