@@ -1,4 +1,4 @@
-% \CheckSum{220}
+% \CheckSum{216}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -99,10 +99,10 @@
 % \subsection{Optionen und Befehle des Paketes \pkg{tudscrcolor}}
 %
 %    \begin{macrocode}
-\DeclareOption{newcolors}{\let\@setcdcolors\relax}
-\DeclareOption{reduced}{\let\@setcdcolors\relax}
-\DeclareOption{oldcolors}{\let\@setcdcolors\@setcdcolorsold}
-\DeclareOption{full}{\let\@setcdcolors\@setcdcolorsold}
+\DeclareOption{newcolors}{\let\tud@setcolors@add\relax}
+\DeclareOption{reduced}{\let\tud@setcolors@add\relax}
+\DeclareOption{oldcolors}{\let\tud@setcolors@add\tud@setcolors@old}
+\DeclareOption{full}{\let\tud@setcolors@add\tud@setcolors@old}
 %    \end{macrocode}
 % \begin{macro}{\tud@color}
 % \changes{v2.04}{2015/04/21}{neu}^^A
@@ -116,17 +116,19 @@
 % \subsection{Farbdefinitionen für das Paket \pkg{tudscrcolor}}
 %
 % \begin{macro}{\setcdcolors}
-% \begin{macro}{\@setcdcolors}
+% \begin{macro}{\tud@setcolors@do}
+% \begin{macro}{\tud@setcolors@add}
 % Der Befehl \cs{setcdcolors} definiert die Farben des \CDs. Das Argument dient
 % zur Auswahl des gewünschten Farbmodels. Dies kann dazu genutzt werden,
-% innerhalb des Dokumentes die Definition der Farben für ein neues Farbmodell zu
-% ändern.
+% innerhalb des Dokumentes die Definition der Farben für ein neues Farbmodell 
+% zu ändern.
 %    \begin{macrocode}
-\newcommand*\@setcdcolors{}
 \newcommand*\setcdcolors[1]{%
-  \if\relax\detokenize{#1}\relax\else%
-    \selectcolormodel{\@tempa}%
-  \fi%
+  \selectcolormodel{#1}%
+  \tud@setcolors@do%
+}
+\newcommand*\tud@setcolors@add{}
+\newcommand*\tud@setcolors@do{%
 %    \end{macrocode}
 % \begin{color}{HKS41}
 % Die primäre Hausfarbe (dunkles Blau)
@@ -216,21 +218,22 @@
 % \end{color}^^A cdgray
 % \end{color}^^A cddarkblue
 % Damit enden die notwendigen Farbdefinitionen für das \pkg{tudscrcolor}-Paket.
-% Abhängig von den gewählten Optionen werden mit \cs{@setcdcolors} ggf.
+% Abhängig von den gewählten Optionen werden mit \cs{tud@setcolors@add} ggf.
 % zusätzliche Farbnamen definiert.
 %    \begin{macrocode}
-  \@setcdcolors%
+  \tud@setcolors@add%
 }
 %    \end{macrocode}
-% \end{macro}^^A \@setcdcolors
+% \end{macro}^^A \tud@setcolors@add
+% \end{macro}^^A \tud@setcolors@do
 % \end{macro}^^A \setcdcolors
-% \begin{macro}{\@setcdcolorsold}
+% \begin{macro}{\tud@setcolors@old}
 % Die erweiterten Farbbefehle werden durch \pkg{tudscrcolor} definiert, wenn
 % das Paket explizit mit der Option \opt{oldcolors} geladen wird. Damit werden 
 % alle gängigen Farbdefinitionen der vielen Insellösungen des \LaTeX-Universums
 % an der Technischen Universität Dresden unterstützt.
 %    \begin{macrocode}
-\newcommand*\@setcdcolorsold{%
+\newcommand*\tud@setcolors@old{%
   \colorlet{HKS41K10}{HKS41!10}%
   \colorlet{HKS41K20}{HKS41!20}%
   \colorlet{HKS41K30}{HKS41!30}%
@@ -393,7 +396,7 @@
   \colorlet{HKS07-100}{HKS07!100}%
 }
 %    \end{macrocode}
-% \end{macro}^^A \@setcdcolorsold
+% \end{macro}^^A \tud@setcolors@old
 % Zum Schluss werden die Optionen ausgeführt und ggf. an \pkg{xcolor} 
 % weitergereicht. Anschließend werden die Farben für das Dokument definiert.
 % Ohne die Angabe eines optionalen Argumentes an das Paket \pkg{xcolor} erfolgt
@@ -403,7 +406,7 @@
 \ExecuteOptions{reduced}
 \ProcessOptions\relax
 \RequirePackage{xcolor}[2007/01/21]
-\setcdcolors{}
+\tud@setcolors@do%
 %    \end{macrocode}
 %
 % \iffalse
