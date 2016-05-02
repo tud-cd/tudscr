@@ -73,13 +73,13 @@
       \fi%
     }
   \fi
-  \@TUDVersion{2016/04/26 v2.05 BETA TUD-KOMA-Script}
+  \@TUDVersion{2016/05/02 v2.05 BETA TUD-KOMA-Script}
 \endgroup
 \NeedsTeXFormat{LaTeX2e}
 \providecommand*\tudscrmail{tudscr@gmail.com}
 \newcommand*\TUD@ProvidesClass[3]{%
   \ProvidesClass{#1}[%
-  2016/04/26 v2.05 BETA TUD-KOMA-Script
+  2016/05/02 v2.05 BETA TUD-KOMA-Script
     ^^J#3 (#2)%
   ]%
   \newcommand*\TUDClassName@KOMA{#2}%
@@ -105,8 +105,6 @@
     }\csname xspace\endcsname%
   }%
 }{}
-% TODO: AgentRansack: sämtlich \patchcmd vorher mit \CheckCommand prüfen
-% TODO: paketbezogene, interne Befehle von tud@ auf tud@pkg@
 %%% From File: tudscr-base.dtx
 \RequirePackage{tudscrbase}[\TUDVersion]
 \ifx\TUD@noworlater\TUD@noworlater@simple
@@ -134,8 +132,7 @@
 \newif\if@tud@cdfont@din
 \newif\if@tud@cdfont@ultrabold
 \@tud@cdfont@dintrue
-\newcommand*\tud@cdfont{1}
-% TODO: Für alle Optionswerte Suffix @val (auch cs@lock prüfen)
+\newcommand*\tud@cdfont@num{1}
 \TUD@key{cdfont}[true]{%
   \TUD@set@numkey{cdfont}{@tempa}{%
     \TUD@numkey@bool,%
@@ -184,24 +181,24 @@
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax% false
-      \renewcommand*\tud@cdfont{0}%
+      \renewcommand*\tud@cdfont@num{0}%
       \if@atdocument\tud@font@set\fi%
     \or% true
-      \renewcommand*\tud@cdfont{1}%
+      \renewcommand*\tud@cdfont@num{1}%
       \if@atdocument\tud@font@set\fi%
     \or% heavy
-      \renewcommand*\tud@cdfont{2}%
+      \renewcommand*\tud@cdfont@num{2}%
       \if@atdocument\tud@font@set\fi%
     \or% normalbold
       \@tud@cdfont@ultraboldfalse%
-      \ifcase\tud@cdfont\relax% false to true
-        \renewcommand*\tud@cdfont{1}%
+      \ifcase\tud@cdfont@num\relax% false to true
+        \renewcommand*\tud@cdfont@num{1}%
       \fi%
       \if@atdocument\tud@font@set\fi%
     \or% ultrabold
       \@tud@cdfont@ultraboldtrue%
-      \ifcase\tud@cdfont\relax% false to true
-        \renewcommand*\tud@cdfont{1}%
+      \ifcase\tud@cdfont@num\relax% false to true
+        \renewcommand*\tud@cdfont@num{1}%
       \fi%
       \if@atdocument\tud@font@set\fi%
     \or% nodin
@@ -232,8 +229,8 @@
       \ifdim#1>\z@\relax%
         \TUD@KOMAoptions{fontsize=#1}%
         \csname @tud@fontsize@settrue\endcsname%
-        \ifcase\tud@cdfont\relax% false to true
-          \renewcommand*\tud@cdfont{1}%
+        \ifcase\tud@cdfont@num\relax% false to true
+          \renewcommand*\tud@cdfont@num{1}%
           \if@atdocument\tud@font@set\fi%
         \fi%
         \FamilyKeyStateProcessed%
@@ -299,26 +296,25 @@
 \TUD@key{slantedGreek}[true]{\TUDoptions{slantedgreek=#1}}
 %%% From File: tudscr-pagestyle.dtx
 \newcommand*\tud@ps@list{}
-% TODO: \tud@iftudps -> \tud@iftudheadings
-\newcommand*\tud@iftudps[3]{%
+\newcommand*\tud@iftudheadings[3]{%
   \xifinlist{\GetRealPageStyle{#1}}{\tud@ps@list}{#2}{#3}%
 }
 \newif\if@tud@ddc@internal
-% TODO: clearpage@iftudps -> tud@maybe@clearpage
-% TODO: Versionsprüfung in Makro
-\newcommand*\clearpage@iftudps{%
-  \if@tud@ddc@internal\else\if@atdocument%
-    \tud@iftudps{\currentpagestyle}{\clearpage}{}%
-  \fi\fi%
+\newcommand*\tud@comp@clearpage{%
+  \tud@ifverlower{2.04}{%
+    \if@tud@ddc@internal\else\if@atdocument%
+      \tud@iftudheadings{\currentpagestyle}{\clearpage}{}%
+    \fi\fi%
+  }{}%
 }
-% TODO: resetpagestyle@iftudps -> tud@maybe@resetpagestyle
-% TODO: Versionsprüfung in Makro
-\newcommand*\resetpagestyle@iftudps{%
-  \if@tud@ddc@internal\else\if@atdocument%
-    \tud@iftudps{\currentpagestyle}{%
-      \expandafter\pagestyle\expandafter{\currentpagestyle}%
-    }{}%
-  \fi\fi%
+\newcommand*\tud@comp@resetpagestyle{%
+  \tud@ifverlower{2.04}{%
+    \if@tud@ddc@internal\else\if@atdocument%
+      \tud@iftudheadings{\currentpagestyle}{%
+        \expandafter\pagestyle\expandafter{\currentpagestyle}%
+      }{}%
+    \fi\fi%
+  }{}%
 }
 \newcommand*\tud@ddc@switch{}
 \edef\tud@ddc@switch{%
@@ -333,11 +329,10 @@
 \newif\if@tud@headlogo@option@set
 \newif\if@tud@footlogo@option@set
 \newif\if@tud@ddc@auto
-% TODO: tud@ddc -> tud@ddc@val
-\newcommand*\tud@ddc{0}
+\newcommand*\tud@ddc@auto@num{0}
 \TUD@key{ddc}[true]{%
-  \tud@ifverlower{2.04}{\clearpage@iftudps}{}%
-  \TUD@set@numkey{ddc}{tud@ddc}{\tud@ddc@switch}{#1}%
+  \tud@comp@clearpage%
+  \TUD@set@numkey{ddc}{tud@ddc@auto@num}{\tud@ddc@switch}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \if@tud@ddc@internal%
       \@tud@ddc@autofalse%
@@ -351,12 +346,12 @@
     \global\@tud@headlogo@option@settrue%
     \global\@tud@footlogo@option@settrue%
   \fi%
-  \tud@ifverlower{2.04}{\resetpagestyle@iftudps}{}%
+  \tud@comp@resetpagestyle%
 }
-\newcommand*\tud@ddc@head{0}
+\newcommand*\tud@ddc@head@num{0}
 \TUD@key{ddchead}[true]{%
-  \tud@ifverlower{2.04}{\clearpage@iftudps}{}%
-  \TUD@set@numkey{ddchead}{tud@ddc@head}{\tud@ddc@switch}{#1}%
+  \tud@comp@clearpage%
+  \TUD@set@numkey{ddchead}{tud@ddc@head@num}{\tud@ddc@switch}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \if@tud@ddc@internal\else%
       \@tud@ddc@internaltrue%
@@ -365,12 +360,12 @@
       \@tud@ddc@internalfalse%
     \fi%
   \fi%
-  \tud@ifverlower{2.04}{\resetpagestyle@iftudps}{}%
+  \tud@comp@resetpagestyle%
 }
-\newcommand*\tud@ddc@foot{0}
+\newcommand*\tud@ddc@foot@num{0}
 \TUD@key{ddcfoot}[true]{%
-  \tud@ifverlower{2.04}{\clearpage@iftudps}{}%
-  \TUD@set@numkey{ddcfoot}{tud@ddc@foot}{\tud@ddc@switch}{#1}%
+  \tud@comp@clearpage%
+  \TUD@set@numkey{ddcfoot}{tud@ddc@foot@num}{\tud@ddc@switch}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \if@tud@ddc@internal\else%
       \@tud@ddc@internaltrue%
@@ -379,11 +374,10 @@
       \@tud@ddc@internalfalse%
     \fi%
   \fi%
-  \tud@ifverlower{2.04}{\resetpagestyle@iftudps}{}%
+  \tud@comp@resetpagestyle%
 }
-% TODO: \tud@head@font@val -> \tud@head@font@val
-\cs@lock{tud@head@font}{0}
-\cs@lock{tud@head@bar}{0}
+\cs@lock{tud@head@font@num}{0}
+\cs@lock{tud@head@bar@num}{0}
 \bool@lock{@tud@head@widebar}
 \newif\if@tud@head@font@set
 \TUD@key{cdhead}[true]{%
@@ -408,19 +402,19 @@
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax% false
-      \cs@set@lock{tud@head@font}{0}%
+      \cs@set@lock{tud@head@font@num}{0}%
     \or% true
-      \cs@set@lock{tud@head@font}{1}%
+      \cs@set@lock{tud@head@font@num}{1}%
     \or% heavy
-      \cs@set@lock{tud@head@font}{2}%
+      \cs@set@lock{tud@head@font@num}{2}%
     \or% nocolor
-      \cs@set@lock{tud@head@bar}{0}%
+      \cs@set@lock{tud@head@bar@num}{0}%
     \or% litecolor
-      \cs@set@lock{tud@head@bar}{1}%
+      \cs@set@lock{tud@head@bar@num}{1}%
     \or% barcolor
-      \cs@set@lock{tud@head@bar}{2}%
+      \cs@set@lock{tud@head@bar@num}{2}%
     \or% color
-      \cs@set@lock{tud@head@bar}{3}%
+      \cs@set@lock{tud@head@bar@num}{3}%
     \or% textwidth
       \bool@set@lock{@tud@head@widebar}{false}%
     \or% paperwidth
@@ -431,8 +425,7 @@
     \fi%
   \fi%
 }
-% TODO: TUD@AfterPackage@Set TUD@@AfterPackage
-\TUD@AfterPackage@Set{scrlayer-scrpage}
+\TUD@AfterPackage@set{scrlayer-scrpage}
 \bool@lock{@tud@foot@colored}
 \TUD@key{cdfoot}[true]{%
   \TUD@set@numkey{cdfoot}{@tempa}{%
@@ -445,13 +438,13 @@
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax% false
-      \TUD@AfterPackage{scrlayer-scrpage}{%
+      \TUD@AfterPackage@do{scrlayer-scrpage}{%
         \tud@ps@restore{scrheadings}%
         \tud@ps@restore{plain.scrheadings}%
         \tud@font@koma@unset{pageheadfoot}%
       }%
     \or% true
-      \TUD@AfterPackage{scrlayer-scrpage}{%
+      \TUD@AfterPackage@do{scrlayer-scrpage}{%
         \tud@ps@store{scrheadings}%
         \tud@ps@store{plain.scrheadings}%
         \tud@font@koma@set{pageheadfoot}{\upshape}%
@@ -473,48 +466,46 @@
   \fi%
 }
 \newcommand*\tud@ps@store[1]{%
-  \tud@@ps@store{#1}{odd}{left}{head}%
-  \tud@@ps@store{#1}{odd}{right}{head}%
-  \tud@@ps@store{#1}{odd}{middle}{head}%
-  \tud@@ps@store{#1}{even}{left}{head}%
-  \tud@@ps@store{#1}{even}{right}{head}%
-  \tud@@ps@store{#1}{even}{middle}{head}%
-  \tud@@ps@store{#1}{odd}{left}{foot}%
-  \tud@@ps@store{#1}{odd}{right}{foot}%
-  \tud@@ps@store{#1}{odd}{middle}{foot}%
-  \tud@@ps@store{#1}{even}{left}{foot}%
-  \tud@@ps@store{#1}{even}{right}{foot}%
-  \tud@@ps@store{#1}{even}{middle}{foot}%
+  \tud@ps@@store{#1}{odd}{left}{head}%
+  \tud@ps@@store{#1}{odd}{right}{head}%
+  \tud@ps@@store{#1}{odd}{middle}{head}%
+  \tud@ps@@store{#1}{even}{left}{head}%
+  \tud@ps@@store{#1}{even}{right}{head}%
+  \tud@ps@@store{#1}{even}{middle}{head}%
+  \tud@ps@@store{#1}{odd}{left}{foot}%
+  \tud@ps@@store{#1}{odd}{right}{foot}%
+  \tud@ps@@store{#1}{odd}{middle}{foot}%
+  \tud@ps@@store{#1}{even}{left}{foot}%
+  \tud@ps@@store{#1}{even}{right}{foot}%
+  \tud@ps@@store{#1}{even}{middle}{foot}%
 }
-\newcommand*\tud@@ps@store[4]{%
+\newcommand*\tud@ps@@store[4]{%
   \ifcsdef{@@tud@ps@#1@#2@#3@#4}{}{%
     \csletcs{@@tud@ps@#1@#2@#3@#4}{sls@ps@#1@#2@#3@#4}%
   }%
 }
 \newcommand*\tud@ps@restore[1]{%
-  \tud@@ps@restore{#1}{odd}{left}{head}%
-  \tud@@ps@restore{#1}{odd}{right}{head}%
-  \tud@@ps@restore{#1}{odd}{middle}{head}%
-  \tud@@ps@restore{#1}{even}{left}{head}%
-  \tud@@ps@restore{#1}{even}{right}{head}%
-  \tud@@ps@restore{#1}{even}{middle}{head}%
-  \tud@@ps@restore{#1}{odd}{left}{foot}%
-  \tud@@ps@restore{#1}{odd}{right}{foot}%
-  \tud@@ps@restore{#1}{odd}{middle}{foot}%
-  \tud@@ps@restore{#1}{even}{left}{foot}%
-  \tud@@ps@restore{#1}{even}{right}{foot}%
-  \tud@@ps@restore{#1}{even}{middle}{foot}%
+  \tud@ps@@restore{#1}{odd}{left}{head}%
+  \tud@ps@@restore{#1}{odd}{right}{head}%
+  \tud@ps@@restore{#1}{odd}{middle}{head}%
+  \tud@ps@@restore{#1}{even}{left}{head}%
+  \tud@ps@@restore{#1}{even}{right}{head}%
+  \tud@ps@@restore{#1}{even}{middle}{head}%
+  \tud@ps@@restore{#1}{odd}{left}{foot}%
+  \tud@ps@@restore{#1}{odd}{right}{foot}%
+  \tud@ps@@restore{#1}{odd}{middle}{foot}%
+  \tud@ps@@restore{#1}{even}{left}{foot}%
+  \tud@ps@@restore{#1}{even}{right}{foot}%
+  \tud@ps@@restore{#1}{even}{middle}{foot}%
 }
-\newcommand*\tud@@ps@restore[4]{%
+\newcommand*\tud@ps@@restore[4]{%
   \ifcsdef{@@tud@ps@#1@#2@#3@#4}{%
     \csletcs{sls@ps@#1@#2@#3@#4}{@@tud@ps@#1@#2@#3@#4}%
     \csundef{@@tud@ps@#1@#2@#3@#4}%
   }{}%
 }
-% TODO: tud@geometry -> tud@cdgeometry
-% TODO: tud@cdgeometry -> tud@cdgeometry@val
-\cs@lock{tud@geometry}{0}
-\newcommand*\tud@geometry@calc{0}
+\cs@lock{tud@cdgeometry@num}{0}
+\newcommand*\tud@cdgeometry@calc@num{0}
 \TUD@key{cdgeometry}[true]{%
   \TUD@set@numkey{cdgeometry}{@tempa}{%
     \TUD@numkey@bool,%
@@ -530,37 +521,37 @@
     {custom}{8},{user}{8},{package}{8}%
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \ifcase\@tempa% false/typearea
-      \cs@set@lock{tud@geometry}{0}%
+    \ifcase\@tempa\relax% false/typearea
+      \cs@set@lock{tud@cdgeometry@num}{0}%
       \if@atdocument\tud@recalctypearea\fi%
     \or% true/cd
-      \cs@set@lock{tud@geometry}{2}%
+      \cs@set@lock{tud@cdgeometry@num}{2}%
       \if@atdocument\tud@recalctypearea\fi%
     \or% symmetric
-      \cs@set@lock{tud@geometry}{3}%
+      \cs@set@lock{tud@cdgeometry@num}{3}%
       \if@atdocument\tud@recalctypearea\fi%
     \or% twoside
-      \cs@set@lock{tud@geometry}{4}%
+      \cs@set@lock{tud@cdgeometry@num}{4}%
       \TUD@KOMAoptions{twoside=true}%
     \or% oneside
-      \ifnum\tud@geometry>\thr@@\relax%
-        \cs@set@lock{tud@geometry}{3}%
+      \ifnum\tud@cdgeometry@num>\thr@@\relax%
+        \cs@set@lock{tud@cdgeometry@num}{3}%
       \fi%
       \TUD@KOMAoptions{twoside=false}%
     \or% restricted
-      \cs@std@lock{tud@geometry}{2}%
-      \renewcommand*\tud@geometry@calc{0}%
+      \cs@std@lock{tud@cdgeometry@num}{2}%
+      \renewcommand*\tud@cdgeometry@calc@num{0}%
       \if@atdocument\tud@recalctypearea\fi%
     \or% adapted
-      \cs@std@lock{tud@geometry}{2}%
-      \renewcommand*\tud@geometry@calc{1}%
+      \cs@std@lock{tud@cdgeometry@num}{2}%
+      \renewcommand*\tud@cdgeometry@calc@num{1}%
       \if@atdocument\tud@recalctypearea\fi%
     \or% calculated
-      \cs@std@lock{tud@geometry}{2}%
-      \renewcommand*\tud@geometry@calc{2}%
+      \cs@std@lock{tud@cdgeometry@num}{2}%
+      \renewcommand*\tud@cdgeometry@calc@num{2}%
       \if@atdocument\tud@recalctypearea\fi%
     \or% custom
-      \cs@set@lock{tud@geometry}{1}%
+      \cs@set@lock{tud@cdgeometry@num}{1}%
     \fi%
   \fi%
 }
@@ -570,17 +561,17 @@
     \TUD@set@lengthkey{extrabottommargin}{\tud@dim@extrabottommargin}{#1}%
   }{%
     \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-      \if@atdocument\tud@geometry@process\fi%
+      \if@atdocument\tud@cdgeometry@process\fi%
     \fi%
   }%
 }
 \DefineFamilyMember{KOMA}
 \DefineFamilyKey{KOMA}{twoside}{%
-  \if@atdocument\AtEndOfFamilyOptions{\tud@geometry@process}\fi%
+  \if@atdocument\AtEndOfFamilyOptions{\tud@cdgeometry@process}\fi%
   \FamilyKeyStateProcessed%
 }
 \DefineFamilyKey{KOMA}{twocolumn}{%
-  \if@atdocument\AtEndOfFamilyOptions{\tud@geometry@process}\fi%
+  \if@atdocument\AtEndOfFamilyOptions{\tud@cdgeometry@process}\fi%
   \FamilyKeyStateProcessed%
 }
 \IfFileExists{silence.sty}{%
@@ -606,73 +597,72 @@
   {color}{5},{colour}{5},%
   {full}{6},{colorfull}{6},{fullcolor}{6},{colourfull}{6},{fullcolour}{6}%
 }
-\cs@lock{tud@layout@cover}{0}
-\cs@lock{tud@layout@title}{0}
-\cs@lock{tud@layout@part}{0}
-\cs@lock{tud@layout@chapter}{0}
-\cs@lock{tud@layout@section}{0}
-% TODO: tud@cd -> tud@cd@val
-\newcommand*\tud@cd{0}
+\cs@lock{tud@layout@cover@num}{0}
+\cs@lock{tud@layout@title@num}{0}
+\cs@lock{tud@layout@part@num}{0}
+\cs@lock{tud@layout@chapter@num}{0}
+\cs@lock{tud@layout@section@num}{0}
+\newcommand*\tud@cd@num{0}
 \TUD@key{cd}[true]{%
-  \TUD@set@numkey{cd}{tud@cd}{\tud@layout@switch}{#1}%
+  \TUD@set@numkey{cd}{tud@cd@num}{\tud@layout@switch}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \ifcase\tud@cd\relax% false
-      \cs@std@lock{tud@layout@cover}{0}%
-      \cs@std@lock{tud@layout@title}{0}%
-      \cs@std@lock{tud@layout@part}{0}%
-      \cs@std@lock{tud@layout@chapter}{0}%
+    \ifcase\tud@cd@num\relax% false
+      \cs@std@lock{tud@layout@cover@num}{0}%
+      \cs@std@lock{tud@layout@title@num}{0}%
+      \cs@std@lock{tud@layout@part@num}{0}%
+      \cs@std@lock{tud@layout@chapter@num}{0}%
       \TUD@std@ifkey@lock{chapterpage}{false}%
-      \cs@std@lock{tud@layout@section}{0}%
+      \cs@std@lock{tud@layout@section@num}{0}%
     \or% true
-      \cs@std@lock{tud@layout@cover}{1}%
-      \cs@std@lock{tud@layout@title}{1}%
-      \cs@std@lock{tud@layout@part}{1}%
-      \cs@std@lock{tud@layout@chapter}{1}%
+      \cs@std@lock{tud@layout@cover@num}{1}%
+      \cs@std@lock{tud@layout@title@num}{1}%
+      \cs@std@lock{tud@layout@part@num}{1}%
+      \cs@std@lock{tud@layout@chapter@num}{1}%
       \TUD@std@ifkey@lock{chapterpage}{false}%
-      \cs@std@lock{tud@layout@section}{1}%
+      \cs@std@lock{tud@layout@section@num}{1}%
     \or% litecolor
-      \cs@std@lock{tud@layout@cover}{1}%
-      \cs@std@lock{tud@layout@title}{2}%
-      \cs@std@lock{tud@layout@part}{2}%
-      \cs@std@lock{tud@layout@chapter}{2}%
+      \cs@std@lock{tud@layout@cover@num}{1}%
+      \cs@std@lock{tud@layout@title@num}{2}%
+      \cs@std@lock{tud@layout@part@num}{2}%
+      \cs@std@lock{tud@layout@chapter@num}{2}%
       \TUD@std@ifkey@lock{chapterpage}{false}%
-      \cs@std@lock{tud@layout@section}{2}%
+      \cs@std@lock{tud@layout@section@num}{2}%
     \or% barcolor
-      \cs@std@lock{tud@layout@cover}{1}%
-      \cs@std@lock{tud@layout@title}{3}%
-      \cs@std@lock{tud@layout@part}{3}%
-      \cs@std@lock{tud@layout@chapter}{3}%
+      \cs@std@lock{tud@layout@cover@num}{1}%
+      \cs@std@lock{tud@layout@title@num}{3}%
+      \cs@std@lock{tud@layout@part@num}{3}%
+      \cs@std@lock{tud@layout@chapter@num}{3}%
       \TUD@std@ifkey@lock{chapterpage}{false}%
-      \cs@std@lock{tud@layout@section}{2}%
+      \cs@std@lock{tud@layout@section@num}{2}%
     \or% bicolor
-      \cs@std@lock{tud@layout@cover}{1}%
-      \cs@std@lock{tud@layout@title}{4}%
-      \cs@std@lock{tud@layout@part}{4}%
-      \cs@std@lock{tud@layout@chapter}{4}%
+      \cs@std@lock{tud@layout@cover@num}{1}%
+      \cs@std@lock{tud@layout@title@num}{4}%
+      \cs@std@lock{tud@layout@part@num}{4}%
+      \cs@std@lock{tud@layout@chapter@num}{4}%
       \TUD@std@ifkey@lock{chapterpage}{false}%
-      \cs@std@lock{tud@layout@section}{2}%
+      \cs@std@lock{tud@layout@section@num}{2}%
     \or% color
-      \cs@std@lock{tud@layout@cover}{1}%
-      \cs@std@lock{tud@layout@title}{5}%
-      \cs@std@lock{tud@layout@part}{5}%
-      \cs@std@lock{tud@layout@chapter}{5}%
+      \cs@std@lock{tud@layout@cover@num}{1}%
+      \cs@std@lock{tud@layout@title@num}{5}%
+      \cs@std@lock{tud@layout@part@num}{5}%
+      \cs@std@lock{tud@layout@chapter@num}{5}%
       \TUD@std@ifkey@lock{chapterpage}{true}%
-      \cs@std@lock{tud@layout@section}{2}%
+      \cs@std@lock{tud@layout@section@num}{2}%
     \or% full
-      \cs@std@lock{tud@layout@cover}{1}%
-      \cs@std@lock{tud@layout@title}{6}%
-      \cs@std@lock{tud@layout@part}{6}%
-      \cs@std@lock{tud@layout@chapter}{6}%
+      \cs@std@lock{tud@layout@cover@num}{1}%
+      \cs@std@lock{tud@layout@title@num}{6}%
+      \cs@std@lock{tud@layout@part@num}{6}%
+      \cs@std@lock{tud@layout@chapter@num}{6}%
       \TUD@std@ifkey@lock{chapterpage}{true}%
-      \cs@std@lock{tud@layout@section}{2}%
+      \cs@std@lock{tud@layout@section@num}{2}%
     \fi%
     \if@atdocument%
       \tud@layout@process%
     \else%
-      \ifcase\tud@cd\relax% false
-        \cs@std@lock{tud@geometry}{0}%
+      \ifcase\tud@cd@num\relax% false
+        \cs@std@lock{tud@cdgeometry@num}{0}%
       \else% !false
-        \cs@std@lock{tud@geometry}{2}%
+        \cs@std@lock{tud@cdgeometry@num}{2}%
       \fi%
     \fi%
   \fi%
@@ -681,19 +671,19 @@
   \TUD@set@numkey{cdcover}{@tempa}{\tud@layout@switch}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax% false
-      \cs@set@lock{tud@layout@cover}{0}%
+      \cs@set@lock{tud@layout@cover@num}{0}%
     \or% true
-      \cs@set@lock{tud@layout@cover}{1}%
+      \cs@set@lock{tud@layout@cover@num}{1}%
     \or% litecolor
-      \cs@set@lock{tud@layout@cover}{2}%
+      \cs@set@lock{tud@layout@cover@num}{2}%
     \or% barcolor
-      \cs@set@lock{tud@layout@cover}{3}%
+      \cs@set@lock{tud@layout@cover@num}{3}%
     \or% bicolor
-      \cs@set@lock{tud@layout@cover}{4}%
+      \cs@set@lock{tud@layout@cover@num}{4}%
     \or% color
-      \cs@set@lock{tud@layout@cover}{5}%
+      \cs@set@lock{tud@layout@cover@num}{5}%
     \or% full
-      \cs@set@lock{tud@layout@cover}{6}%
+      \cs@set@lock{tud@layout@cover@num}{6}%
     \fi%
     \if@atdocument\tud@layout@process\fi%
   \fi%
@@ -702,19 +692,19 @@
   \TUD@set@numkey{cdtitle}{@tempa}{\tud@layout@switch}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax% false
-      \cs@set@lock{tud@layout@title}{0}%
+      \cs@set@lock{tud@layout@title@num}{0}%
     \or% true
-      \cs@set@lock{tud@layout@title}{1}%
+      \cs@set@lock{tud@layout@title@num}{1}%
     \or% litecolor
-      \cs@set@lock{tud@layout@title}{2}%
+      \cs@set@lock{tud@layout@title@num}{2}%
     \or% barcolor
-      \cs@set@lock{tud@layout@title}{3}%
+      \cs@set@lock{tud@layout@title@num}{3}%
     \or% bicolor
-      \cs@set@lock{tud@layout@title}{4}%
+      \cs@set@lock{tud@layout@title@num}{4}%
     \or% color
-      \cs@set@lock{tud@layout@title}{5}%
+      \cs@set@lock{tud@layout@title@num}{5}%
     \or% full
-      \cs@set@lock{tud@layout@title}{6}%
+      \cs@set@lock{tud@layout@title@num}{6}%
     \fi%
     \if@atdocument\tud@layout@process\fi%
   \fi%
@@ -723,19 +713,19 @@
   \TUD@set@numkey{cdpart}{@tempa}{\tud@layout@switch}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax% false
-      \cs@set@lock{tud@layout@part}{0}%
+      \cs@set@lock{tud@layout@part@num}{0}%
     \or% true
-      \cs@set@lock{tud@layout@part}{1}%
+      \cs@set@lock{tud@layout@part@num}{1}%
     \or% litecolor
-      \cs@set@lock{tud@layout@part}{2}%
+      \cs@set@lock{tud@layout@part@num}{2}%
     \or% barcolor
-      \cs@set@lock{tud@layout@part}{3}%
+      \cs@set@lock{tud@layout@part@num}{3}%
     \or% bicolor
-      \cs@set@lock{tud@layout@part}{4}%
+      \cs@set@lock{tud@layout@part@num}{4}%
     \or% color
-      \cs@set@lock{tud@layout@part}{5}%
+      \cs@set@lock{tud@layout@part@num}{5}%
     \or% full
-      \cs@set@lock{tud@layout@part}{6}%
+      \cs@set@lock{tud@layout@part@num}{6}%
     \fi%
     \if@atdocument\tud@layout@process\fi%
   \fi%
@@ -744,25 +734,25 @@
   \TUD@set@numkey{cdchapter}{@tempa}{\tud@layout@switch}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax% false
-      \cs@set@lock{tud@layout@chapter}{0}%
+      \cs@set@lock{tud@layout@chapter@num}{0}%
       \TUD@std@ifkey@lock{chapterpage}{false}%
     \or% true
-      \cs@set@lock{tud@layout@chapter}{1}%
+      \cs@set@lock{tud@layout@chapter@num}{1}%
       \TUD@std@ifkey@lock{chapterpage}{false}%
     \or% litecolor
-      \cs@set@lock{tud@layout@chapter}{2}%
+      \cs@set@lock{tud@layout@chapter@num}{2}%
       \TUD@std@ifkey@lock{chapterpage}{false}%
     \or% barcolor
-      \cs@set@lock{tud@layout@chapter}{3}%
+      \cs@set@lock{tud@layout@chapter@num}{3}%
       \TUD@std@ifkey@lock{chapterpage}{false}%
     \or% bicolor
-      \cs@set@lock{tud@layout@chapter}{4}%
+      \cs@set@lock{tud@layout@chapter@num}{4}%
       \TUD@std@ifkey@lock{chapterpage}{false}%
     \or% color
-      \cs@set@lock{tud@layout@chapter}{5}%
+      \cs@set@lock{tud@layout@chapter@num}{5}%
       \TUD@std@ifkey@lock{chapterpage}{true}%
     \or% full
-      \cs@set@lock{tud@layout@chapter}{6}%
+      \cs@set@lock{tud@layout@chapter@num}{6}%
       \TUD@std@ifkey@lock{chapterpage}{true}%
     \fi%
     \if@atdocument\tud@layout@process\fi%
@@ -772,11 +762,11 @@
   \TUD@set@numkey{cdsection}{@tempa}{\tud@layout@switch}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax% false
-      \cs@set@lock{tud@layout@section}{0}%
+      \cs@set@lock{tud@layout@section@num}{0}%
     \or% true
-      \cs@set@lock{tud@layout@section}{1}%
+      \cs@set@lock{tud@layout@section@num}{1}%
     \else% *color
-      \cs@set@lock{tud@layout@section}{2}%
+      \cs@set@lock{tud@layout@section@num}{2}%
     \fi%
     \if@atdocument\tud@layout@process\fi%
   \fi%
@@ -885,15 +875,15 @@
 \newcommand*\tud@headings@reset{%
   \tud@layout@process%
   \tud@headings@set[%
-    \ifcase\tud@layout@part\relax\else% !false
+    \ifcase\tud@layout@part@num\relax\else% !false
       \tud@font@koma@reset{part}%
       \tud@font@koma@reset{partnumber}%
     \fi%
-    \ifcase\tud@layout@chapter\relax\else% !false
+    \ifcase\tud@layout@chapter@num\relax\else% !false
       \tud@font@koma@reset{chapter}%
       \tud@font@koma@reset{chapterprefix}%
     \fi%
-    \ifcase\tud@layout@section\relax\else% !false
+    \ifcase\tud@layout@section@num\relax\else% !false
       \tud@font@koma@reset{section}%
       \tud@font@koma@reset{subsection}%
       \tud@font@koma@reset{subsubsection}%
@@ -924,8 +914,8 @@
   {tocmultiple}{13},{tocmulti}{13},{tocall}{13},{tocaggregate}{13},%
   {totocmultiple}{13},{totocmulti}{13},{totocall}{13},{totocaggregate}{13}%
 }
-\newcommand*\tud@abstract@level{0}
-\cs@lock{tud@abstract@toc}{0}
+\newcommand*\tud@abstract@level@num{0}
+\cs@lock{tud@abstract@toc@num}{0}
 \newif\if@tud@abstract@multi
 \@tud@abstract@multitrue
 \newif\if@tud@abstract@fil
@@ -936,17 +926,17 @@
   \TUD@set@numkey{abstract}{@tempa}{\@tempb}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax% false
-      \renewcommand*\tud@abstract@level{0}%
-      \cs@std@lock{tud@abstract@toc}{0}%
+      \renewcommand*\tud@abstract@level@num{0}%
+      \cs@std@lock{tud@abstract@toc@num}{0}%
     \or% true
-      \renewcommand*\tud@abstract@level{1}%
-      \cs@std@lock{tud@abstract@toc}{0}%
+      \renewcommand*\tud@abstract@level@num{1}%
+      \cs@std@lock{tud@abstract@toc@num}{0}%
     \or% section
-      \renewcommand*\tud@abstract@level{2}%
-      \cs@std@lock{tud@abstract@toc}{1}%
+      \renewcommand*\tud@abstract@level@num{2}%
+      \cs@std@lock{tud@abstract@toc@num}{1}%
     \or% chapter
-      \renewcommand*\tud@abstract@level{3}%
-      \cs@std@lock{tud@abstract@toc}{1}%
+      \renewcommand*\tud@abstract@level@num{3}%
+      \cs@std@lock{tud@abstract@toc@num}{1}%
     \or% single
       \@tud@abstract@multifalse%
     \or% multiple
@@ -960,27 +950,27 @@
     \or% nomarkboth
       \@tud@abstract@markbothfalse%
     \or% nottotoc
-      \cs@set@lock{tud@abstract@toc}{0}%
+      \cs@set@lock{tud@abstract@toc@num}{0}%
     \or% totoc
-      \ifnum\tud@abstract@toc<\thr@@\relax%
-        \cs@set@lock{tud@abstract@toc}{1}%
+      \ifnum\tud@abstract@toc@num<\thr@@\relax%
+        \cs@set@lock{tud@abstract@toc@num}{1}%
       \else%
-        \cs@set@lock{tud@abstract@toc}{3}%
+        \cs@set@lock{tud@abstract@toc@num}{3}%
       \fi%
     \or% totocleveldown
-      \ifnum\tud@abstract@toc<\thr@@\relax%
-        \cs@set@lock{tud@abstract@toc}{2}%
+      \ifnum\tud@abstract@toc@num<\thr@@\relax%
+        \cs@set@lock{tud@abstract@toc@num}{2}%
       \else%
-        \cs@set@lock{tud@abstract@toc}{4}%
+        \cs@set@lock{tud@abstract@toc@num}{4}%
       \fi%
     \or% totocmutliple
-      \ifnum\tud@abstract@toc=\z@\relax%
-        \cs@set@lock{tud@abstract@toc}{1}%
+      \ifnum\tud@abstract@toc@num=\z@\relax%
+        \cs@set@lock{tud@abstract@toc@num}{1}%
       \fi%
-      \ifnum\tud@abstract@toc<\thr@@\relax%
+      \ifnum\tud@abstract@toc@num<\thr@@\relax%
         \edef\@tempa{%
-          \noexpand\cs@set@lock{tud@abstract@toc}{%
-            \the\numexpr\tud@abstract@toc+2\relax%
+          \noexpand\cs@set@lock{tud@abstract@toc@num}{%
+            \the\numexpr\tud@abstract@toc@num+2\relax%
           }%
         }\@tempa%
       \fi%
@@ -991,8 +981,8 @@
 \DefineFamilyKey{KOMA}{abstract}[true]{%
   \AtEndOfFamilyOptions{\TUDoptions{abstract=#1}}%
 }
-\newcommand*\tud@declaration@level{1}
-\cs@lock{tud@declaration@toc}{0}
+\newcommand*\tud@declaration@level@num{1}
+\cs@lock{tud@declaration@toc@num}{0}
 \newif\if@tud@declaration@multi
 \@tud@declaration@multitrue
 \newif\if@tud@declaration@fil
@@ -1003,17 +993,17 @@
   \TUD@set@numkey{declaration}{@tempa}{\@tempb}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax% false
-      \renewcommand*\tud@declaration@level{0}%
-      \cs@std@lock{tud@declaration@toc}{0}%
+      \renewcommand*\tud@declaration@level@num{0}%
+      \cs@std@lock{tud@declaration@toc@num}{0}%
     \or% true
-      \renewcommand*\tud@declaration@level{1}%
-      \cs@std@lock{tud@declaration@toc}{0}%
+      \renewcommand*\tud@declaration@level@num{1}%
+      \cs@std@lock{tud@declaration@toc@num}{0}%
     \or% section
-      \renewcommand*\tud@declaration@level{2}%
-      \cs@std@lock{tud@declaration@toc}{1}%
+      \renewcommand*\tud@declaration@level@num{2}%
+      \cs@std@lock{tud@declaration@toc@num}{1}%
     \or% chapter
-      \renewcommand*\tud@declaration@level{3}%
-      \cs@std@lock{tud@declaration@toc}{1}%
+      \renewcommand*\tud@declaration@level@num{3}%
+      \cs@std@lock{tud@declaration@toc@num}{1}%
     \or% single
       \@tud@declaration@multifalse%
     \or% multiple
@@ -1027,27 +1017,27 @@
     \or% nomarkboth
       \@tud@declaration@markbothfalse%
     \or% nottotoc
-      \cs@set@lock{tud@declaration@toc}{0}%
+      \cs@set@lock{tud@declaration@toc@num}{0}%
     \or% totoc
-      \ifnum\tud@declaration@toc<\thr@@\relax%
-        \cs@set@lock{tud@declaration@toc}{1}%
+      \ifnum\tud@declaration@toc@num<\thr@@\relax%
+        \cs@set@lock{tud@declaration@toc@num}{1}%
       \else%
-        \cs@set@lock{tud@declaration@toc}{3}%
+        \cs@set@lock{tud@declaration@toc@num}{3}%
       \fi%
     \or% totocleveldown
-      \ifnum\tud@declaration@toc<\thr@@\relax%
-        \cs@set@lock{tud@declaration@toc}{2}%
+      \ifnum\tud@declaration@toc@num<\thr@@\relax%
+        \cs@set@lock{tud@declaration@toc@num}{2}%
       \else%
-        \cs@set@lock{tud@declaration@toc}{4}%
+        \cs@set@lock{tud@declaration@toc@num}{4}%
       \fi%
     \or% totocmutliple
-      \ifnum\tud@declaration@toc=\z@\relax%
-        \cs@set@lock{tud@declaration@toc}{1}%
+      \ifnum\tud@declaration@toc@num=\z@\relax%
+        \cs@set@lock{tud@declaration@toc@num}{1}%
       \fi%
-      \ifnum\tud@declaration@toc<\thr@@\relax%
+      \ifnum\tud@declaration@toc@num<\thr@@\relax%
         \edef\@tempa{%
-          \noexpand\cs@set@lock{tud@declaration@toc}{%
-            \the\numexpr\tud@declaration@toc+2\relax%
+          \noexpand\cs@set@lock{tud@declaration@toc@num}{%
+            \the\numexpr\tud@declaration@toc@num+2\relax%
           }%
         }\@tempa%
       \fi%
@@ -1428,16 +1418,15 @@
   }%
   \forcsvlist\@tempa{#2}%
 }
-% TODO: tud@multicols -> tud@multicols@val
-\cs@lock{tud@multicols}{1}
+\cs@lock{tud@multicols@num}{1}
 \newcommand*\tud@multicols@check{%
   \ifundef{\multicols}{%
-    \ifnum\tud@multicols>\@ne\relax%
+    \ifnum\tud@multicols@num>\@ne\relax%
       \ClassWarning{\TUDClassName}{%
-        The option `columns=\tud@multicols' is only supported,\MessageBreak%
-        when package `multicol' is loaded%
+        The option `columns=\tud@multicols@num' is only\MessageBreak%
+        supported, when package `multicol' is loaded%
       }%
-      \cs@set@lock{tud@multicols}{1}%
+      \cs@set@lock{tud@multicols@num}{1}%
     \fi%
   }{}%
 }
@@ -1462,7 +1451,7 @@
 \newcommand*\tud@font@check{%
   \edef\@tempa##1##2{\lowercase{\noexpand\IfFileExists{##1##2.fd}}}%
   \def\@tempb##1{%
-    \ifnum\tud@cdfont>\z@\relax% true/heavy
+    \ifnum\tud@cdfont@num>\z@\relax% true/heavy
       \if@tud@cdmath%
         \ClassWarningNoLine{\TUDClassName}%
         {%
@@ -1480,7 +1469,7 @@
       \fontspec{##1}%
       \expandafter\ifx\the\font\nullfont%
         ##2%
-        \ifnum\tud@cdfont>\z@\relax% true/heavy
+        \ifnum\tud@cdfont@num>\z@\relax% true/heavy
           \ClassWarningNoLine{\TUDClassName}%
           {%
             `##1' fonts not found for encoding `\encodingdefault'\MessageBreak%
@@ -1506,7 +1495,7 @@
     \endgroup%
   \else%
     \def\@tempc##1{%
-      \ifnum\tud@cdfont>\z@\relax% true/heavy
+      \ifnum\tud@cdfont@num>\z@\relax% true/heavy
         \@tempswafalse%
         \ifstr{OT1}{\encodingdefault}{\@tempswatrue}{}%
         \ifstr{T1}{\encodingdefault}{\@tempswatrue}{}%
@@ -1534,7 +1523,7 @@
 \AfterPackage*{mweights}{\@tud@mweightstrue}
 \newcommand*\tud@font@set{%
   \if@atdocument%
-    \ifnum\tud@cdfont>\z@\relax% true/heavy
+    \ifnum\tud@cdfont@num>\z@\relax% true/heavy
       \if@tud@univers\else%
         \ClassWarning{\TUDClassName}%
           {`Univers' fonts not found}%
@@ -1553,7 +1542,7 @@
     \ifundef{\mdseries@sf}{\edef\mdseries@sf{\mddefault}}{}%
     \ifundef{\mdseries@tt}{\edef\mdseries@tt{\mddefault}}{}%
   \fi%
-  \ifcase\tud@cdfont\relax% false
+  \ifcase\tud@cdfont@num\relax% false
     \tud@cmd@restore{rmdefault}%
     \tud@cmd@restore{sfdefault}%
     \tud@cmd@restore{ttdefault}%
@@ -1572,10 +1561,10 @@
       \tud@cmd@restore{mdseries@tt}%
     \fi%
     \bool@std@lock{@tud@cdmath}{false}%
-    \ifcase\tud@cd\relax% false
-      \cs@std@lock{tud@head@font}{0}%
+    \ifcase\tud@cd@num\relax% false
+      \cs@std@lock{tud@head@font@num}{0}%
     \else% !false
-      \cs@std@lock{tud@head@font}{1}%
+      \cs@std@lock{tud@head@font@num}{1}%
     \fi%
   \else% true/heavy
     \tud@cmd@store{rmdefault}%
@@ -1596,7 +1585,7 @@
       \tud@cmd@store{mdseries@tt}%
     \fi%
     \bool@std@lock{@tud@cdmath}{true}%
-    \cs@std@lock{tud@head@font}{\tud@cdfont}%
+    \cs@std@lock{tud@head@font@num}{\tud@cdfont@num}%
     \if@tud@univers%
       \if@tud@fontspec%
         \setsansfont{Univers}[%
@@ -1629,7 +1618,7 @@
         \renewcommand*\sfdefault{\tud@univers}%
         \renewcommand*\ttdefault{\tud@univers t}%
       \fi%
-      \ifnum\tud@cdfont=\@ne\relax% true
+      \ifnum\tud@cdfont@num=\@ne\relax% true
         \if@tud@cdfont@ultrabold% ultrabold
           \renewcommand*\bfdefault{b}%
         \else% normalbold
@@ -1753,7 +1742,7 @@
     \newrobustcmd*\dinbn{\@dinbn}%
   \else%
     \newrobustcmd*\@dinbn{\sectfont}%
-    \newrobustcmd*\dinbn{\tud@font@fallback@wrn{DIN Bold}\@dinbn}%
+    \newrobustcmd*\dinbn{\tud@font@wrn{DIN Bold}\@dinbn}%
   \fi%
   \newcommand*\textuln{}%
   \newcommand*\texturn{}%
@@ -1776,10 +1765,10 @@
   \undef\tud@font@init%
 }
 \newcommand*\tud@font@fallback[3]{%
-  \tud@font@fallback@wrn{#1}%
+  \tud@font@wrn{#1}%
   \sffamily\csuse{#2series}\csuse{#3shape}%
 }
-\newcommand*\tud@font@fallback@wrn[1]{%
+\newcommand*\tud@font@wrn[1]{%
   \ClassWarning{\TUDClassName}%
   {%
     The requested font `#1' is not available, so\MessageBreak%
@@ -1800,7 +1789,7 @@
   \fi%
 }
 \newcommand*\@cdfont[1]{%
-  \tud@trimfontname\@tempa{#1}%
+  \tud@cdfont@trim\@tempa{#1}%
   \ifstr{\@tempa}{45}{\def\@tempc{ln}}{%
   \ifstr{\@tempa}{55}{\def\@tempc{rn}}{%
   \ifstr{\@tempa}{65}{\def\@tempc{bn}}{%
@@ -1820,30 +1809,30 @@
       {The font `#1' is unknown}%
   }}}}}}}}}}}}}}%
 }
-\newcommand*\tud@trimfontname[2]{%
+\newcommand*\tud@cdfont@trim[2]{%
   \protected@edef\@tempa{\trim@spaces{#2}}%
   \tud@lowerstring{\@tempa}{\@tempa}%
-  \tud@@trimfontname{ }{}%
-  \tud@@trimfontname{-}{}%
-  \tud@@trimfontname{_}{}%
-  \tud@@trimfontname{~}{}%
-  \tud@@trimfontname{ce}{}%
-  \tud@@trimfontname{ff}{}%
-  \tud@@trimfontname{univers}{}%
-  \tud@@trimfontname{60}{65}%
-  \tud@@trimfontname{light}{45}%
-  \tud@@trimfontname{regular}{55}%
-  \tud@@trimfontname{bold}{65}%
-  \tud@@trimfontname{black}{75}%
-  \tud@@trimfontname{4545}{45}%
-  \tud@@trimfontname{5555}{55}%
-  \tud@@trimfontname{6565}{65}%
-  \tud@@trimfontname{7575}{75}%
-  \tud@@trimfontname{italic}{oblique}%
-  \tud@@trimfontname{slanted}{oblique}%
+  \tud@cdfont@@trim{ }{}%
+  \tud@cdfont@@trim{-}{}%
+  \tud@cdfont@@trim{_}{}%
+  \tud@cdfont@@trim{~}{}%
+  \tud@cdfont@@trim{ce}{}%
+  \tud@cdfont@@trim{ff}{}%
+  \tud@cdfont@@trim{univers}{}%
+  \tud@cdfont@@trim{60}{65}%
+  \tud@cdfont@@trim{light}{45}%
+  \tud@cdfont@@trim{regular}{55}%
+  \tud@cdfont@@trim{bold}{65}%
+  \tud@cdfont@@trim{black}{75}%
+  \tud@cdfont@@trim{4545}{45}%
+  \tud@cdfont@@trim{5555}{55}%
+  \tud@cdfont@@trim{6565}{65}%
+  \tud@cdfont@@trim{7575}{75}%
+  \tud@cdfont@@trim{italic}{oblique}%
+  \tud@cdfont@@trim{slanted}{oblique}%
   \let#1\@tempa%
 }
-\newcommand*\tud@@trimfontname[2]{%
+\newcommand*\tud@cdfont@@trim[2]{%
   \def\@tempb##1#1##2\relax{\def\@tempa{##1#2##2}}%
   \@expandtwoargs\in@{#1}{\@tempa}%
   \@whilesw\ifin@\fi{%
@@ -1976,7 +1965,7 @@
 }
 \newcommand*\tud@font@math@set{%
   \if@atdocument%
-    \ifnum\tud@cdfont>\z@\relax% true/heavy
+    \ifnum\tud@cdfont@num>\z@\relax% true/heavy
       \if@tud@cdmath%
         \if@tud@universmath\else%
           \ClassWarning{\TUDClassName}%
@@ -2031,8 +2020,7 @@
   \tud@font@init%
   \AtBeginDocument{\tud@font@math@init}%
 }
-% TODO: \tud@disposition@font -> \tud@disposition@fontface
-\newcommand*\tud@disposition@font[1][]{%
+\newcommand*\tud@disposition@fontface[1][]{%
   \if@tud@cdfont@din%
     \@dinbn\tud@raggedright%
   \else%
@@ -2130,11 +2118,9 @@
 \providecommand*\publisher[1]{\publishers{#1}}
 \newcommand*\@thesis{}
 \newcommand*\@@thesis{}
-\newcommand*\thesis[1]{\tud@thesis{thesis}{#1}}
+\newcommand*\thesis[1]{\tud@thesis@do{thesis}{#1}}
 \newcommand*\tud@thanks{}
-% TODO \tud@@thesis -> \tud@@@thesis
-% TODO \tud@thesis -> \tud@@thesis
-\newcommand*\tud@thesis[2]{%
+\newcommand*\tud@thesis@do[2]{%
   \begingroup%
     \global\let\tud@thanks\relax%
     \def\thanks##1{\gdef\tud@thanks{##1}}%
@@ -2146,23 +2132,23 @@
     \ifstr{#1}{thesis}{\protected@xdef\@@thesis{#2}}{}%
     \global\let\@tempa\@tempa%
   \endgroup%
-  \ifstr{\@tempa}{diss}{\tud@@thesis{#1}{\dissertationname}}{%
-  \ifstr{\@tempa}{doctoral}{\tud@@thesis{#1}{\dissertationname}}{%
-  \ifstr{\@tempa}{phd}{\tud@@thesis{#1}{\dissertationname}}{%
-  \ifstr{\@tempa}{diploma}{\tud@@thesis{#1}{\diplomathesisname}}{%
-  \ifstr{\@tempa}{master}{\tud@@thesis{#1}{\masterthesisname}}{%
-  \ifstr{\@tempa}{bachelor}{\tud@@thesis{#1}{\bachelorthesisname}}{%
-  \ifstr{\@tempa}{student}{\tud@@thesis{#1}{\studentresearchname}}{%
-  \ifstr{\@tempa}{project}{\tud@@thesis{#1}{\projectpapername}}{%
-  \ifstr{\@tempa}{seminar}{\tud@@thesis{#1}{\seminarpapername}}{%
-  \ifstr{\@tempa}{research}{\tud@@thesis{#1}{\researchname}}{%
-  \ifstr{\@tempa}{log}{\tud@@thesis{#1}{\logname}}{%
-  \ifstr{\@tempa}{report}{\tud@@thesis{#1}{\reportname}}{%
-  \ifstr{\@tempa}{internship}{\tud@@thesis{#1}{\internshipname}}{%
+  \ifstr{\@tempa}{diss}{\tud@thesis@@do{#1}{\dissertationname}}{%
+  \ifstr{\@tempa}{doctoral}{\tud@thesis@@do{#1}{\dissertationname}}{%
+  \ifstr{\@tempa}{phd}{\tud@thesis@@do{#1}{\dissertationname}}{%
+  \ifstr{\@tempa}{diploma}{\tud@thesis@@do{#1}{\diplomathesisname}}{%
+  \ifstr{\@tempa}{master}{\tud@thesis@@do{#1}{\masterthesisname}}{%
+  \ifstr{\@tempa}{bachelor}{\tud@thesis@@do{#1}{\bachelorthesisname}}{%
+  \ifstr{\@tempa}{student}{\tud@thesis@@do{#1}{\studentresearchname}}{%
+  \ifstr{\@tempa}{project}{\tud@thesis@@do{#1}{\projectpapername}}{%
+  \ifstr{\@tempa}{seminar}{\tud@thesis@@do{#1}{\seminarpapername}}{%
+  \ifstr{\@tempa}{research}{\tud@thesis@@do{#1}{\researchname}}{%
+  \ifstr{\@tempa}{log}{\tud@thesis@@do{#1}{\logname}}{%
+  \ifstr{\@tempa}{report}{\tud@thesis@@do{#1}{\reportname}}{%
+  \ifstr{\@tempa}{internship}{\tud@thesis@@do{#1}{\internshipname}}{%
     \csdef{@#1}{#2}%
   }}}}}}}}}}}}}%
 }
-\newcommand*\tud@@thesis[2]{%
+\newcommand*\tud@thesis@@do[2]{%
   \ifstr{#1}{subject}{%
     \ifx\@thesis\@empty\else%
       \ClassWarning{\TUDClassName}{Field `thesis' is overwritten by `subject'}%
@@ -2178,11 +2164,11 @@
   \fi%
   \gdef\@@thesis{#2}%
 }
-\renewcommand*\subject[1]{\tud@thesis{subject}{#1}}
+\renewcommand*\subject[1]{\tud@thesis@do{subject}{#1}}
 \newcommand*\@graduation{}
-\newcommand*\@graduationabbr{}
+\newcommand*\@@graduation{}
 \newcommand*\graduation[2][]{%
-  \ifxblank{#1}{\gdef\@graduationabbr{}}{\gdef\@graduationabbr{(#1)}}%
+  \ifxblank{#1}{\gdef\@@graduation{}}{\gdef\@@graduation{(#1)}}%
   \gdef\@graduation{#2}%
 }
 \newcommand*\@professor{}
@@ -2267,7 +2253,7 @@
     \csuse{#1}\csgdef{#1}{}%
   }{}%
   \def\tud@multiple@@split##1\and##2\relax{%
-    \expandafter\csname tud@split#1\endcsname{##1}{##2}%
+    \expandafter\csname tud@split#1@do\endcsname{##1}{##2}%
   }%
   \begingroup%
     \let\and\relax%
@@ -2328,9 +2314,7 @@
     \sbox\z@{#3}%
   \endgroup%
 }
-% TODO \tud@split@author -> \tud@split@@author
-% TODO \tud@split@contactperson -> \tud@split@@contactperson
-\newcommand*\tud@split@author[2]{}
+\newcommand*\tud@split@author@do[2]{}
 \newcommand*\tud@split@author@list{%
   authormore,course,discipline,%
   matriculationyear,enrolmentyear,%
@@ -2389,8 +2373,7 @@
 \tud@locale@define{\logname}
 \tud@locale@define{\internshipname}
 \tud@locale@define{\reportname}
-% TODO: \tud@if@and -> \tud@ifin@and
-\newcommand*\tud@if@and[1]{%
+\newcommand*\tud@ifin@and[1]{%
   \begingroup%
     \protecting{%
       \global\@tempswafalse%
@@ -2411,7 +2394,7 @@
 }
 \tud@locale@german{\graduationtext}{zur Erlangung des akademischen Grades}%
 \tud@locale@german{\refereename}{%
-  \tud@if@and{\@referee}{%
+  \tud@ifin@and{\@referee}{%
     \ifx\refereeothername\@empty%
       Gutachter%
     \else%
@@ -2421,7 +2404,7 @@
 }%
 \tud@locale@german{\refereeothername}{Zweitgutachter}%
 \tud@locale@german{\advisorname}{%
-  \tud@if@and{\@advisor}{%
+  \tud@ifin@and{\@advisor}{%
     \ifx\advisorothername\@empty%
       Fachreferenten%
     \else%
@@ -2431,7 +2414,7 @@
 }%
 \tud@locale@german{\advisorothername}{}%
 \tud@locale@german{\supervisorname}{%
-  \tud@if@and{\@supervisor}{%
+  \tud@ifin@and{\@supervisor}{%
     \ifx\supervisorothername\@empty%
       Betreuer%
     \else%
@@ -2441,7 +2424,7 @@
 }%
 \tud@locale@german{\supervisorothername}{}%
 \tud@locale@german{\professorname}{%
-  \tud@if@and{\@professor}{%
+  \tud@ifin@and{\@professor}{%
     \ifx\professorothername\@empty%
       Betreuende Hochschullehrer%
     \else%
@@ -2517,7 +2500,7 @@
 }
 \tud@locale@english{\graduationtext}{to achieve the academic degree}%
 \tud@locale@english{\refereename}{%
-  \tud@if@and{\@referee}{%
+  \tud@ifin@and{\@referee}{%
     \ifx\refereeothername\@empty%
       Referees%
     \else%
@@ -2527,7 +2510,7 @@
 }%
 \tud@locale@english{\refereeothername}{Second referee}%
 \tud@locale@english{\advisorname}{%
-  \tud@if@and{\@advisor}{%
+  \tud@ifin@and{\@advisor}{%
     \ifx\advisorothername\@empty%
       Advisors%
     \else%
@@ -2537,7 +2520,7 @@
 }%
 \tud@locale@english{\advisorothername}{}%
 \tud@locale@english{\supervisorname}{%
-  \tud@if@and{\@supervisor}{%
+  \tud@ifin@and{\@supervisor}{%
     \ifx\supervisorothername\@empty%
       Supervisors%
     \else%
@@ -2547,7 +2530,7 @@
 }%
 \tud@locale@english{\supervisorothername}{}%
 \tud@locale@english{\professorname}{%
-  \tud@if@and{\@professor}{%
+  \tud@ifin@and{\@professor}{%
     \ifx\professorothername\@empty%
       Supervising professors%
     \else%
@@ -2640,15 +2623,15 @@
 \newlength\tud@dim@heavyline
 \newlength\tud@dim@thinline
 \newlength\tud@dim@headingsvskip
-\newlength\tud@dim@headdiff
-\newlength\tud@dim@topdiffvskip
+\newlength\tud@dim@areadiff
+\newlength\tud@dim@areavskip
 \tud@ifverlower{2.03}{\newlength\tud@dim@ddcdiff}{}
-\newif\if@tud@geometry@adjust
+\newif\if@tud@cdgeometry@adjust
 \newlength\tud@dim@layoutheight
 \newlength\tud@dim@layoutwidth
 \newlength\tud@dim@layouthoffset
 \newlength\tud@dim@layoutvoffset
-\newcommand*\tud@geometry@set{%
+\newcommand*\tud@cdgeometry@set{%
   \setlength\tud@dim@layoutheight{\paperheight}%
   \setlength\tud@dim@layoutwidth{\paperwidth}%
   \ifGm@layout%
@@ -2698,8 +2681,8 @@
       \def\@tempa{8}%
     \fi\fi\fi\fi\fi\fi\fi\fi%
   }%
-  \@tud@geometry@adjustfalse%
-  \ifnum\tud@geometry@calc=\tw@\relax%
+  \@tud@cdgeometry@adjustfalse%
+  \ifnum\tud@cdgeometry@calc@num=\tw@\relax%
     \ifnum\@tempa>\z@\relax%
       \ifnum\@tempa<8\relax%
         \def\@tempa{3}%
@@ -2707,7 +2690,7 @@
     \fi%
   \fi%
   \ifcase\@tempa\relax% <=A7/B7
-    \ifnum\tud@geometry@calc=\tw@\relax\else%
+    \ifnum\tud@cdgeometry@calc@num=\tw@\relax\else%
       \ClassWarning{\TUDClassName}{%
         There's no type area defined for such a\MessageBreak%
         small paper height. It is recommended to increase\MessageBreak%
@@ -2731,8 +2714,8 @@
     \setlength\tud@dim@thinline{0.25pt}%
     \renewcommand*\tud@head@fontsize{4.5}%
   \or% <=A5/B5
-    \ifnum\tud@geometry@calc=\z@\relax% restricted
-      \@tud@geometry@adjusttrue%
+    \ifnum\tud@cdgeometry@calc@num=\z@\relax% restricted
+      \@tud@cdgeometry@adjusttrue%
       \setlength\tud@dim@widemargin{30mm}%
       \setlength\tud@dim@heavyline{1pt}%
       \setlength\tud@dim@thinline{0.5pt}%
@@ -2769,7 +2752,7 @@
     \setlength\tud@dim@thinline{2pt}%
     \renewcommand*\tud@head@fontsize{36}%
   \else% >A0/B0
-    \ifnum\tud@geometry@calc=\tw@\relax\else%
+    \ifnum\tud@cdgeometry@calc@num=\tw@\relax\else%
       \ClassWarning{\TUDClassName}{%
         There's no type area defined for such a\MessageBreak%
         huge paper height. It is recommended to reduce\MessageBreak%
@@ -2788,7 +2771,7 @@
     \setlength{\@tempdima}{\@tempa\@tempdima}%
     \edef\tud@head@fontsize{\strip@pt\@tempdima}%
   \fi%
-  \ifnum\tud@geometry@calc=\tw@\relax%
+  \ifnum\tud@cdgeometry@calc@num=\tw@\relax%
     \tud@divide\@tempa{\tud@dim@layoutheight}{297mm}%
     \setlength\tud@dim@widemargin{\@tempa\tud@dim@widemargin}%
     \setlength\tud@dim@heavyline{\@tempa\tud@dim@heavyline}%
@@ -2809,7 +2792,7 @@
   \setlength\tud@dim@footsep{%
     \dimexpr\tud@dim@widemargin-.6\tud@dim@topmargin\relax%
   }%
-  \if@tud@geometry@adjust%
+  \if@tud@cdgeometry@adjust%
     \setlength\tud@dim@headsep{\dimexpr.707107\tud@dim@headsep\relax}%
     \setlength\tud@dim@footsep{\dimexpr.707107\tud@dim@footsep\relax}%
   \fi%
@@ -2884,7 +2867,7 @@
     height=\dimexpr\tud@dim@topmargin+\bleedmargin\relax,%
     addvoffset=\dimexpr\tud@dim@layoutvoffset-\bleedmargin\relax,%
     contents={%
-      \ifnum\tud@head@bar>\tw@\relax% cdhead=color
+      \ifnum\tud@head@bar@num>\tw@\relax% cdhead=color
         \color{HKS41}%
         \rule{\layerwidth}{\layerheight}%
       \fi%
@@ -2898,7 +2881,7 @@
     voffset=\tud@dim@topmargin,%
     addvoffset=\tud@dim@layoutvoffset,%
     contents={%
-      \ifnum\tud@head@bar>\@ne\relax% cdhead=barcolor/color
+      \ifnum\tud@head@bar@num>\@ne\relax% cdhead=barcolor/color
         \color{HKS41!60}%
         \setlength{\@tempdima}{\dimexpr\ht\strutbox-\tud@dim@barheight\relax}%
         \ifdim\@tempdima<\z@\relax\setlength\@tempdima{\z@}\fi%
@@ -2921,7 +2904,7 @@
     voffset=\dimexpr\tud@dim@topmargin-.5\tud@dim@line\relax,%
     addvoffset=\tud@dim@layoutvoffset,%
     contents={%
-      \ifnum\tud@head@bar<\tw@\relax% cdhead=nocolor/litecolor
+      \ifnum\tud@head@bar@num<\tw@\relax% cdhead=nocolor/litecolor
         \if@tud@head@widebar\else\tud@head@rule{\layerwidth}\fi%
       \fi%
     },%
@@ -2932,7 +2915,7 @@
       -.5\tud@dim@line\relax,%
     addvoffset=\tud@dim@layoutvoffset,%
     contents={%
-      \ifnum\tud@head@bar<\tw@\relax% cdhead=nocolor/litecolor
+      \ifnum\tud@head@bar@num<\tw@\relax% cdhead=nocolor/litecolor
         \if@tud@head@widebar\else\tud@head@rule{\layerwidth}\fi%
       \fi%
     },%
@@ -2944,7 +2927,7 @@
     voffset=\dimexpr\tud@dim@topmargin-.5\tud@dim@line\relax,%
     addvoffset=\tud@dim@layoutvoffset,%
     contents={%
-      \ifnum\tud@head@bar<\tw@\relax% cdhead=nocolor/litecolor
+      \ifnum\tud@head@bar@num<\tw@\relax% cdhead=nocolor/litecolor
         \if@tud@head@widebar\tud@head@rule{\layerwidth}\fi%
       \fi%
     },%
@@ -2957,7 +2940,7 @@
       -.5\tud@dim@line\relax,%
     addvoffset=\tud@dim@layoutvoffset,%
     contents={%
-      \ifnum\tud@head@bar<\tw@\relax% cdhead=nocolor/litecolor
+      \ifnum\tud@head@bar@num<\tw@\relax% cdhead=nocolor/litecolor
         \if@tud@head@widebar\tud@head@rule{\layerwidth}\fi%
       \fi%
     },%
@@ -2973,7 +2956,7 @@
       \if@tud@foot@colored%
         \let\@tempc\relax%
         \ifdefvoid{\tud@pagecolor}{%
-          \ifcase\tud@head@bar\relax\or% cdhead=litecolor
+          \ifcase\tud@head@bar@num\relax\or% cdhead=litecolor
             \def\@tempc{\color{HKS41!60}}%
           \or% cdhead=barcolor
             \def\@tempc{\color{HKS41!60}}%
@@ -2997,7 +2980,7 @@
         \if@tud@foot@colored%
           \let\@tempc\relax%
           \ifdefvoid{\tud@pagecolor}{%
-            \ifcase\tud@head@bar\relax\or\or% cdhead=barcolor
+            \ifcase\tud@head@bar@num\relax\or\or% cdhead=barcolor
               \def\@tempc{\color{HKS41!60}}%
             \or% cdhead=color
               \def\@tempc{\color{HKS41}}%
@@ -3008,14 +2991,14 @@
           }%
           \ifx\@tempc\relax\else%
             \tud@ddc@check%
-            \ifcase\@tempb\relax% \tud@ddc@foot=false
+            \ifcase\@tempb\relax% \tud@ddc@foot@num=false
               \vbox to \layerheight{%
                 \vfil\@tempc%
                 \rule{\layerwidth}{%
                   \dimexpr\layerheight-\tud@dim@ddcdiff+\ht\strutbox\relax%
                 }%
               }%
-            \else% \tud@ddc@foot!=false
+            \else% \tud@ddc@foot@num!=false
               \@tempc\rule{\layerwidth}{\layerheight}%
             \fi%
           \fi%
@@ -3042,7 +3025,7 @@
         \tud@footlogoheight@set%
         \setlength\@tempdima{\dimexpr\layerheight-\dp\strutbox\relax}%
         \tud@ddc@check%
-        \ifcase\@tempb\relax% \tud@ddc@foot=false
+        \ifcase\@tempb\relax% \tud@ddc@foot@num=false
           \addtolength\@tempdima{\dimexpr\ht\strutbox-\tud@dim@ddcdiff\relax}%
           \vskip\dimexpr\tud@dim@ddcdiff-\ht\strutbox-\baselineskip\relax%
         \fi%
@@ -3141,6 +3124,9 @@
   ]{tudheadings.pagecolor}%
   \AddLayersToPageStyle{@everystyle@}{tudheadings.pagecolor}%
 }
+\listadd\tud@ps@list{tudheadings}
+\listadd\tud@ps@list{plain.tudheadings}
+\listadd\tud@ps@list{empty.tudheadings}
 \PreventPackageFromLoading[%
   \ClassWarning{\TUDClassName}{%
     The package `fancyhdr' must not be used with a\MessageBreak%
@@ -3154,16 +3140,13 @@
   \def\sls@currentheadings{tudheadings}%
   \def\sls@currentplain{plain.tudheadings}%
 }
-\listadd\tud@ps@list{tudheadings}
-\listadd\tud@ps@list{plain.tudheadings}
-\listadd\tud@ps@list{empty.tudheadings}
 \newcommand*\tud@head@logocolor{black}
 \newcommand*\tud@head@fontcolor{}
 \newcommand*\tud@foot@logocolor{black}
 \newcommand*\tud@foot@fontcolor{}
 \newcommand*\tud@ps@onbackground{%
   \ifdefvoid{\tud@pagecolor}{%
-    \ifcase\tud@head@bar\relax% cdhead=nocolor
+    \ifcase\tud@head@bar@num\relax% cdhead=nocolor
       \renewcommand*\tud@head@logocolor{black}%
       \renewcommand*\tud@head@fontcolor{}%
     \or% cdhead=litecolor
@@ -3176,7 +3159,7 @@
       \renewcommand*\tud@head@logocolor{white}%
       \renewcommand*\tud@head@fontcolor{white}%
     \fi%
-    \ifcase\tud@head@bar\relax% cdhead=nocolor
+    \ifcase\tud@head@bar@num\relax% cdhead=nocolor
       \renewcommand*\tud@foot@logocolor{black}%
       \renewcommand*\tud@foot@fontcolor{}%
       \if@tud@foot@colored%
@@ -3208,7 +3191,7 @@
     }{%
       \renewcommand*\tud@head@logocolor{HKS41}%
       \renewcommand*\tud@head@fontcolor{HKS41}%
-      \ifcase\tud@head@bar\relax\or\or\or% cdhead=color
+      \ifcase\tud@head@bar@num\relax\or\or\or% cdhead=color
         \renewcommand*\tud@head@logocolor{white}%
         \renewcommand*\tud@head@fontcolor{white}%
       \fi%
@@ -3257,8 +3240,8 @@
 \newcommand*\tud@head@font@bold{}
 \newcommand*\tud@head@font@@bold{}
 \newcommand*\tud@head@font@set{%
-  \ifcase\tud@head@font\relax% false
-    \ifnum\tud@cdfont>\z@\relax% true/heavy
+  \ifcase\tud@head@font@num\relax% false
+    \ifnum\tud@cdfont@num>\z@\relax% true/heavy
       \if@tud@head@font@set%
         \ClassWarning{\TUDClassName}{%
           It isn't possible to use `cdhead=false'\MessageBreak%
@@ -3276,9 +3259,9 @@
     \protected\gdef\tud@head@font@@bold{%
       \usefont{\encodingdefault}{\sfdefault}{\bfdefault}{\updefault}%
     }%
-    \ifcase\tud@head@font\relax\else% true/heavy
+    \ifcase\tud@head@font@num\relax\else% true/heavy
       \if@tud@univers%
-        \ifcase\tud@head@font\relax\or% true
+        \ifcase\tud@head@font@num\relax\or% true
           \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
             {\tud@univers}{l}{n}{\tud@head@fontsize}%
         \or% heavy
@@ -3296,8 +3279,7 @@
     \global\@tud@head@text@settrue%
   \fi%
 }
-% TODO: tud@head@text -> tud@head@text@val
-\newcommand*\tud@head@text{}
+\newcommand*\tud@head@text@line{}
 \newcommand*\tud@head@text@list{}
 \newcommand*\tud@head@text@delimiter{}
 \newcommand*\tud@head@text@buffer{}
@@ -3306,16 +3288,16 @@
     \edef\tud@head@text@delimiter{\expandonce\tud@head@text@buffer}%
     \def\tud@head@text@buffer{#1}%
     \edef\@tempa{%
-      \expandonce\tud@head@text%
+      \expandonce\tud@head@text@line%
       \expandonce\tud@head@text@delimiter%
       \unexpanded{#2#3}%
     }%
     \settowidth\@tempdima{\@tempa}%
     \ifdim\@tempdima>\textwidth\relax%
-      \listeadd\tud@head@text@list{\expandonce\tud@head@text}%
-      \protected@edef\tud@head@text{#2#3}%
+      \listeadd\tud@head@text@list{\expandonce\tud@head@text@line}%
+      \protected@edef\tud@head@text@line{#2#3}%
     \else%
-      \edef\tud@head@text{\expandonce\@tempa}%
+      \edef\tud@head@text@line{\expandonce\@tempa}%
     \fi%
   }%
 }
@@ -3323,14 +3305,14 @@
 \newcommand*\tud@head@text@wrn[1]{}
 \newcommand*\tud@head@text@set{%
   \if@tud@head@text@set%
-    \def\tud@head@text{}%
+    \def\tud@head@text@line{}%
     \def\tud@head@text@list{}%
     \def\tud@head@text@buffer{}%
     \tud@head@text@add[\enskip]{\tud@head@font@bold}{\@faculty}%
     \tud@head@text@add{\tud@head@font@light}{\@department}%
     \tud@head@text@add{\tud@head@font@light}{\@institute}%
     \tud@head@text@add{\tud@head@font@light}{\@chair}%
-    \listeadd\tud@head@text@list{\expandonce\tud@head@text}%
+    \listeadd\tud@head@text@list{\expandonce\tud@head@text@line}%
     \ifstr{\@extraheadline}{}{}{%%
       \listadd\tud@head@text@list{\tud@head@font@light\@extraheadline}%
     }%
@@ -3362,7 +3344,7 @@
     \tud@head@text@write[\@tempc]{##1}%
     \def\@tempb{\newline}%
     \def\@tempc{\z@}%
-    \ifnum\tud@head@bar>\@ne% cdhead=barcolor/color
+    \ifnum\tud@head@bar@num>\@ne\relax% cdhead=barcolor/color
       \ifdefvoid{\tud@pagecolor}{\color{HKS41}}{%
         \ifstr{\tud@pagecolor}{HKS41}{\color{white}}{\color{HKS41}}%
       }%
@@ -3409,15 +3391,15 @@
   \vbox to #1{#2}%
 }
 \newcommand*\tud@ddc@check{%
-  \let\@tempa\tud@ddc@head%
-  \let\@tempb\tud@ddc@foot%
+  \let\@tempa\tud@ddc@head@num%
+  \let\@tempb\tud@ddc@foot@num%
   \if@tud@ddc@auto%
     \ifdefvoid{\@headlogo}{%
-      \let\@tempa\tud@ddc%
+      \let\@tempa\tud@ddc@auto@num%
       \let\@tempb\z@%
     }{%
       \let\@tempa\z@%
-      \let\@tempb\tud@ddc%
+      \let\@tempb\tud@ddc@auto@num%
     }%
   \fi%
   \tud@ifverlower{2.03}{%
@@ -3429,7 +3411,7 @@
 \tud@newlayerbox{main@black}
 \tud@newlayerbox{main@HKS41}
 \tud@newlayerbox{main@white}
-\newlength\tud@mainlogoheight
+\newlength\tud@dim@mainlogoheight
 \newcommand*\tud@mainlogo@wrn[1]{}
 \newif\if@tud@mainlogo@set
 \newcommand*\tud@mainlogo@set{%
@@ -3438,8 +3420,8 @@
     \tud@savelayerbox{main@black}{\@tempa{TUD-black}}%
     \tud@savelayerbox{main@HKS41}{\@tempa{TUD-blue}}%
     \tud@savelayerbox{main@white}{\@tempa{TUD-white}}%
-    \settoheight\tud@mainlogoheight{\tud@uselayerbox{main@black}}%
-    \global\tud@mainlogoheight=\tud@mainlogoheight%
+    \settoheight\tud@dim@mainlogoheight{\tud@uselayerbox{main@black}}%
+    \global\tud@dim@mainlogoheight=\tud@dim@mainlogoheight%
     \gdef\tud@mainlogo@wrn##1{%
       \ifdim##1<\ta@bcor\relax%
         \ClassWarning{\TUDClassName}{%
@@ -3472,7 +3454,7 @@
 \newcommand*\@@headlogo{}
 \newcommand*\tud@headlogo@wrn{}
 \newcommand*\headlogo[2][]{%
-  \tud@ifverlower{2.04}{\clearpage@iftudps}{}%
+  \tud@comp@clearpage%
   \renewcommand*\@headlogo{#2}%
   \renewcommand*\@@headlogo{#1}%
   \global\@tud@headlogo@option@settrue%
@@ -3485,11 +3467,11 @@
     }%
     \global\let\tud@headlogo@wrn\relax%
   }%
-  \tud@ifverlower{2.04}{\resetpagestyle@iftudps}{}%
+  \tud@comp@resetpagestyle%
 }
 \newcommand*\tud@headlogo@set{%
   \def\@tempa{%
-    \includegraphics[keepaspectratio,totalheight=\tud@mainlogoheight]%
+    \includegraphics[keepaspectratio,totalheight=\tud@dim@mainlogoheight]%
   }%
   \tud@savelayerbox{head@black}{\@tempa{DDC-24}}%
   \tud@savelayerbox{head@HKS41}{\@tempa{DDC-27}}%
@@ -3501,13 +3483,13 @@
     \def\@tempc##1##2{%
       \tud@savelayerbox{head@option}{%
         \includegraphics[%
-          keepaspectratio,totalheight=\tud@mainlogoheight,##2%
+          keepaspectratio,totalheight=\tud@dim@mainlogoheight,##2%
         ]{##1}%
       }%
     }%
     \tud@savelayerbox{head@option}{}%
     \tud@ddc@check%
-    \ifcase\@tempa\relax% \tud@ddc@head=false
+    \ifcase\@tempa\relax% \tud@ddc@head@num=false
       \ifdefvoid{\@headlogo}{}{%
         \protected@edef\@headlogo{%
           \expandafter\trim@spaces\expandafter{\@headlogo}%
@@ -3515,28 +3497,28 @@
         \protected@edef\@tempb{\noexpand\@tempc{\@headlogo}{\@@headlogo}}%
         \@tempb%
       }%
-    \or\or% \tud@ddc@head=color
+    \or\or% \tud@ddc@head@num=color
       \@tempc{DDC-03}{}%
-    \or% \tud@ddc@head=colorblack
+    \or% \tud@ddc@head@num=colorblack
       \@tempc{DDC-09}{}%
-    \or% \tud@ddc@head=gray
+    \or% \tud@ddc@head@num=gray
       \@tempc{DDC-21}{}%
-    \or% \tud@ddc@head=black
+    \or% \tud@ddc@head@num=black
       \@tempc{DDC-24}{}%
-    \or% \tud@ddc@head=blue
+    \or% \tud@ddc@head@num=blue
       \@tempc{DDC-27}{}%
-    \or% \tud@ddc@head=white
+    \or% \tud@ddc@head@num=white
       \@tempc{DDC-30}{}%
     \fi%
     \global\@tud@headlogo@option@setfalse%
   \fi%
 }
 \newcommand*\tud@headlogo@use{%
-  \tud@vlayerbox{\tud@mainlogoheight}{%
+  \tud@vlayerbox{\tud@dim@mainlogoheight}{%
     \vss%
     \hbox{%
       \tud@ddc@check%
-      \ifnum\@tempa=\@ne\relax% \tud@ddc@head=true
+      \ifnum\@tempa=\@ne\relax% \tud@ddc@head@num=true
         \tud@uselayerbox{head@\tud@head@logocolor}%
       \else%
         \tud@uselayerbox{head@option}%
@@ -3556,26 +3538,26 @@
 \tud@newlayerbox{foot@white}
 \tud@newlayerbox{foot@option}
 \newlength\footlogoheight
-\newlength\tud@footlogoheight
+\newlength\tud@dim@footlogoheight
 \newcommand*\tud@footlogoheight@set{%
   \ifdim\footlogoheight=\z@\relax%
     \tud@ifverlower{2.03}{%
-      \setlength\tud@footlogoheight{.6\tud@dim@topmargin}%
+      \setlength\tud@dim@footlogoheight{.6\tud@dim@topmargin}%
     }{%
-      \setlength\tud@footlogoheight{\tud@mainlogoheight}%
+      \setlength\tud@dim@footlogoheight{\tud@dim@mainlogoheight}%
     }%
   \else%
-    \ifdim\footlogoheight=\tud@footlogoheight\relax\else%
-      \setlength\tud@footlogoheight{\footlogoheight}%
+    \ifdim\footlogoheight=\tud@dim@footlogoheight\relax\else%
+      \setlength\tud@dim@footlogoheight{\footlogoheight}%
       \global\@tud@footlogo@option@settrue%
     \fi%
   \fi%
-  \global\tud@footlogoheight=\tud@footlogoheight%
+  \global\tud@dim@footlogoheight=\tud@dim@footlogoheight%
 }
 \newcommand*\tud@footlogo@ddc@set[2]{%
   \tud@footlogoheight@set%
   \tud@savelayerbox{foot@#1}{%
-    \includegraphics[keepaspectratio,totalheight=\tud@footlogoheight]{#2}%
+    \includegraphics[keepaspectratio,totalheight=\tud@dim@footlogoheight]{#2}%
   }%
 }
 \newcommand*\tud@footlogo@set{%
@@ -3587,17 +3569,17 @@
 \newcommand*\tud@footlogo@option@set{%
   \if@tud@footlogo@option@set%
     \tud@ddc@check%
-    \ifcase\@tempb\relax\or\or% \tud@ddc@foot=color
+    \ifcase\@tempb\relax\or\or% \tud@ddc@foot@num=color
       \tud@footlogo@ddc@set{option}{DDC-01}%
-    \or% \tud@ddc@foot=colorblack
+    \or% \tud@ddc@foot@num=colorblack
       \tud@footlogo@ddc@set{option}{DDC-07}%
-    \or% \tud@ddc@foot=gray
+    \or% \tud@ddc@foot@num=gray
       \tud@footlogo@ddc@set{option}{DDC-19}%
-    \or% \tud@ddc@foot=black
+    \or% \tud@ddc@foot@num=black
       \tud@footlogo@ddc@set{option}{DDC-22}%
-    \or% \tud@ddc@foot=blue
+    \or% \tud@ddc@foot@num=blue
       \tud@footlogo@ddc@set{option}{DDC-25}%
-    \or% \tud@ddc@foot=white
+    \or% \tud@ddc@foot@num=white
       \tud@footlogo@ddc@set{option}{DDC-28}%
     \fi%
     \global\@tud@footlogo@option@setfalse%
@@ -3605,14 +3587,14 @@
 }
 \newcommand*\tud@footlogo@ddc@use[2]{%
   \tud@ddc@check%
-  \ifcase\@tempb\relax\else% \tud@ddc@foot=!false
+  \ifcase\@tempb\relax\else% \tud@ddc@foot@num=!false
     \tud@footlogo@option@set%
     \setbox\z@\hbox{%
       \tud@vlayerbox{#1}{%
         \vss%
         \hbox to #2{%
           \hss%
-          \ifcase\@tempb\relax\or% \tud@ddc@foot=true
+          \ifcase\@tempb\relax\or% \tud@ddc@foot@num=true
             \tud@uselayerbox{foot@\tud@foot@logocolor}%
           \else%
             \tud@uselayerbox{foot@option}%
@@ -3620,9 +3602,9 @@
         }%
         \vss\vss%
       }{%
-        The `\string\footlogoheight' (\the\tud@footlogoheight) is\MessageBreak%
+        `\string\footlogoheight' (\the\tud@dim@footlogoheight) is\MessageBreak%
         too high. You should reduce this length.%
-        \ifnum\tud@geometry>\@ne\relax% true/symmetric/twoside
+        \ifnum\tud@cdgeometry@num>\@ne% true/symmetric/twoside
           \MessageBreak%
           Alternatively you can enlarge the bottom margin\MessageBreak%
           by using option `extrabottommargin'.%
@@ -3637,11 +3619,11 @@
 \newcommand*\@footlogo{}
 \newcommand*\@@footlogo{}
 \newcommand*\footlogo[2][]{%
-  \tud@ifverlower{2.04}{\clearpage@iftudps}{}%
+  \tud@comp@clearpage%
   \renewcommand*\@footlogo{#2}%
   \renewcommand*\@@footlogo{#1}%
   \global\@tud@footlogo@cmd@settrue%
-  \tud@ifverlower{2.04}{\resetpagestyle@iftudps}{}%
+  \tud@comp@resetpagestyle%
 }
 \newif\if@tud@footlogo@cmd@set
 \newcommand*\tud@footlogo@cmd@set[2]{%
@@ -3681,7 +3663,7 @@
     \DeclareListParser{\@tempc}{:}%
     \@tempc{#1}%
     \preto\@@footlogo{%
-      keepaspectratio,totalheight=\tud@footlogoheight,%
+      keepaspectratio,totalheight=\tud@dim@footlogoheight,%
     }%
     \appto\@@footlogo{\@tempb}%
     \protected@edef\@tempc{\noexpand\includegraphics[\@@footlogo]{\@tempa}}%
@@ -3697,16 +3679,15 @@
   \usebox\z@\hspace*{-\wd\z@}%
 }
 \newkomafont{tudheadings}{\tud@color{\tud@foot@fontcolor}}
-% TODO: \tud@footcontent@font -> \tud@footcontent@fontface
-\newcommand*\tud@footcontent@font{}
+\newcommand*\tud@footcontent@fontface{}
 \newcommand*\tud@footcontent@left{}
 \newcommand*\tud@footcontent@right{\@nil}
 \newcommand*\footcontent{%
   \@ifstar{%
-    \renewcommand*\tud@footcontent@font{\usekomafont{tudheadings}}%
+    \renewcommand*\tud@footcontent@fontface{\usekomafont{tudheadings}}%
     \@footcontent%
   }{%
-    \renewcommand*\tud@footcontent@font{%
+    \renewcommand*\tud@footcontent@fontface{%
       \usekomafont{tudheadings}%
       \setlength\@tempdima{\tud@head@fontsize\p@}%
       \fontsize{\tud@head@fontsize}{1.25\@tempdima}%
@@ -3722,7 +3703,7 @@
 }
 \newcommand*\@@footcontent{}
 \def\@@footcontent#1#2[#3]{%
-  \appto\tud@footcontent@font{#1\selectfont}%
+  \appto\tud@footcontent@fontface{#1\selectfont}%
   \if\detokenize{*#2}\relax\else%
     \renewcommand*\tud@footcontent@left{#2}%
   \fi%
@@ -3744,7 +3725,7 @@
   \fi%
   \if@tempswa%
     \tud@ddc@check%
-    \ifcase\@tempb%
+    \ifcase\@tempb\relax%
       \setlength\@tempdimc{\z@}%
     \else%
       \settowidth\@tempdimc{\tud@uselayerbox{foot@black}}%
@@ -3754,7 +3735,7 @@
       \linespread{1}%
       \vss%
       \hbox to #2{%
-        \tud@footcontent@font%
+        \tud@footcontent@fontface%
         \def\@tempa{\@nil}%
         \ifx\@tempa\tud@footcontent@right\relax%
           \vtop{%
@@ -3779,7 +3760,7 @@
       The content for the footer (`\string\footcontent')\MessageBreak%
       is too high. You should either reduce the content\MessageBreak%
       or lower the fontsize via the optional argument.%
-      \ifnum\tud@geometry>\@ne% true/symmetric/twoside
+      \ifnum\tud@cdgeometry@num>\@ne% true/symmetric/twoside
         \MessageBreak%
         Alternatively you can enlarge the bottom margin\MessageBreak%
         by using option `extrabottommargin'.%
@@ -3789,16 +3770,16 @@
     \hbox to #2{}%
   \fi%
 }
-\newcommand*\tud@geometry@process{}
+\newcommand*\tud@cdgeometry@process{}
 \tud@ifsacrop{%
   \PreventPackageFromLoading{geometry}%
 }{%
   \RequirePackage{geometry}[2010/09/12]%
   % \CheckCommand  \Gm@initnewgm \Gm@changelayout
-  \newcommand*\tud@geometry@hmargin{}%
-  \newcommand*\tud@geometry@vmargin{}%
-  \newcommand*\tud@geometry@tudmargin{}%
-  \tud@ifverlower{2.03}{\newcommand*\tud@geometry@ddcmargin{}}{}%
+  \newcommand*\tud@cdgeometry@hmargin{}%
+  \newcommand*\tud@cdgeometry@vmargin{}%
+  \newcommand*\tud@cdgeometry@tudmargin{}%
+  \tud@ifverlower{2.03}{\newcommand*\tud@cdgeometry@ddcmargin{}}{}%
   \newif\if@tud@geometry@enabled%
   \@tud@geometry@enabledtrue%
   \newcommand*\tud@newgeometry[1]{%
@@ -3834,10 +3815,10 @@
     \if@tud@crop@center\CROP@center\fi%
     \@tud@geometry@enabledtrue%
   }%
-  \renewcommand*\tud@geometry@process{%
-    \tud@geometry@set%
-    \ifnum\tud@geometry<\tw@\relax% false/custom
-      \ifcase\tud@geometry\relax%
+  \renewcommand*\tud@cdgeometry@process{%
+    \tud@cdgeometry@set%
+    \ifnum\tud@cdgeometry@num<\tw@\relax% false/custom
+      \ifcase\tud@cdgeometry@num\relax%
         \ifGm@layout%
           \tud@skip@store{paperheight}%
           \tud@skip@store{paperwidth}%
@@ -3850,10 +3831,10 @@
           \tud@skip@restore{paperwidth}%
           \tud@cmd@restore{tud@AfterChangingArea}%
         \fi%
-        \edef\tud@geometry@hmargin{%
+        \edef\tud@cdgeometry@hmargin{%
           left=\the\dimexpr\oddsidemargin+1in-\ta@bcor\relax,%
           textwidth=\the\textwidth,%
-          \tud@geometry@mpincl,%
+          \tud@cdgeometry@mpincl,%
           marginparwidth=\the\marginparwidth,%
           marginparsep=\the\marginparsep,%
           \if@reversemargin%
@@ -3863,7 +3844,7 @@
           \fi%
           bindingoffset=\the\ta@bcor%
         }%
-        \edef\tud@geometry@vmargin{%
+        \edef\tud@cdgeometry@vmargin{%
           \if@hincl%
             includehead=true,%
             top=\the\dimexpr\topmargin+1in\relax,%
@@ -3875,12 +3856,12 @@
           headheight=\the\headheight,%
           headsep=\the\headsep,%
           textheight=\the\textheight,%
-          \tud@geometry@fincl,%
+          \tud@cdgeometry@fincl,%
           footskip=\the\footskip%
         }%
       \else% custom
         \ifGm@pass\else%
-          \edef\tud@geometry@hmargin{%
+          \edef\tud@cdgeometry@hmargin{%
             left=\Gm@lmargin,%
             right=\Gm@rmargin,%
             \ifGm@includemp%
@@ -3897,7 +3878,7 @@
             \fi%
             bindingoffset=\the\Gm@bindingoffset%
           }%
-          \edef\tud@geometry@vmargin{%
+          \edef\tud@cdgeometry@vmargin{%
             \ifGm@includehead%
               includehead=true,%
               top=\the\dimexpr\topmargin+1in\relax,%
@@ -3918,17 +3899,17 @@
           }%
         \fi%
       \fi%
-      \setlength\tud@dim@headdiff{%
+      \setlength\tud@dim@areadiff{%
         \dimexpr\tud@dim@topmargin+\tud@dim@barheight+\tud@dim@headsep%
           -\topmargin-\headheight-\headsep-1in\relax%
       }%
-      \ifdim\tud@dim@headdiff<\z@\relax%
-        \addtolength\tud@dim@headsep{-\tud@dim@headdiff}%
+      \ifdim\tud@dim@areadiff<\z@\relax%
+        \addtolength\tud@dim@headsep{-\tud@dim@areadiff}%
         \setlength\@tempdima{\z@}%
       \else%
-        \setlength\@tempdima{\tud@dim@headdiff}%
+        \setlength\@tempdima{\tud@dim@areadiff}%
       \fi%
-      \edef\tud@geometry@tudmargin{%
+      \edef\tud@cdgeometry@tudmargin{%
         top=\the\dimexpr\tud@dim@topmargin+\tud@dim@barheight%
           +\tud@dim@headsep\relax,%
         headheight=\the\dimexpr\tud@dim@topmargin+\tud@dim@barheight%
@@ -3942,8 +3923,8 @@
           \dimexpr.6\tud@dim@topmargin-\footskip+\tud@dim@headsep%
             +\footheight-1.25\baselineskip\relax%
         }%
-        \edef\tud@geometry@ddcmargin{%
-          textheight=\the\dimexpr\textheight-\tud@dim@headdiff%
+        \edef\tud@cdgeometry@ddcmargin{%
+          textheight=\the\dimexpr\textheight-\tud@dim@areadiff%
             -\tud@dim@ddcdiff\relax,%
           footskip=\the\dimexpr\footskip+\tud@dim@ddcdiff\relax%
         }%
@@ -3956,7 +3937,7 @@
         }%
       \fi%
     \else%  true/symmetric/twoside
-      \ifcase\tud@geometry\or\or%  true
+      \ifcase\tud@cdgeometry@num\relax\or\or%  true
         \setlength\@tempdima{\tud@dim@widemargin}%
         \if@reversemargin%
           \setlength\@tempdimc{\tud@dim@widemargin}%
@@ -3988,10 +3969,10 @@
       \if@mincl%
         \addtolength\@tempdimb{-\@tempdimc}%
       \fi%
-      \edef\tud@geometry@hmargin{%
+      \edef\tud@cdgeometry@hmargin{%
         left=\the\@tempdima,%
         textwidth=\the\@tempdimb,%
-        \tud@geometry@mpincl,%
+        \tud@cdgeometry@mpincl,%
         marginparwidth=\the\@tempdimc,%
         marginparsep=\the\dimexpr.5\headsep\relax,%
         \if@reversemargin%
@@ -4002,36 +3983,36 @@
         bindingoffset=\the\ta@bcor%
       }%
       \if@twoside%
-        \ifcase\tud@geometry\or\or% true
-          \appto\tud@geometry@hmargin{,asymmetric}%
+        \ifcase\tud@cdgeometry@num\relax\or\or% true
+          \appto\tud@cdgeometry@hmargin{,asymmetric}%
         \else% symmetric/twoside
-          \appto\tud@geometry@hmargin{,twoside}%
+          \appto\tud@cdgeometry@hmargin{,twoside}%
         \fi%
       \fi%
       \tud@ifverlower{2.03}{%
-        \edef\tud@geometry@vmargin{%
-          \tud@geometry@hincl,%
+        \edef\tud@cdgeometry@vmargin{%
+          \tud@cdgeometry@hincl,%
           top=\the\dimexpr.5\tud@dim@both\relax,%
           headheight=\the\headheight,%
           headsep=\the\tud@dim@headsep,%
           bottom=\the\dimexpr.5\tud@dim@both+\tud@dim@extrabottommargin\relax,%
-          \tud@geometry@fincl,%
+          \tud@cdgeometry@fincl,%
           footskip=\the\dimexpr\tud@dim@headsep+\footheight%
             -1.25\baselineskip\relax%
         }%
       }{%
-        \edef\tud@geometry@vmargin{%
-          \tud@geometry@hincl,%
+        \edef\tud@cdgeometry@vmargin{%
+          \tud@cdgeometry@hincl,%
           top=\the\tud@dim@slimmargin,%
           headheight=\the\headheight,%
           headsep=\the\headsep,%
           bottom=\the\dimexpr\tud@dim@widemargin%
             +\tud@dim@extrabottommargin\relax,%
-          \tud@geometry@fincl,%
+          \tud@cdgeometry@fincl,%
           footskip=\the\dimexpr\tud@dim@footsep+\footheight\relax%
         }%
       }%
-      \edef\tud@geometry@tudmargin{%
+      \edef\tud@cdgeometry@tudmargin{%
         top=\the\dimexpr\tud@dim@topmargin+\tud@dim@barheight%
           +\tud@dim@headsep\relax,%
         headheight=\the\dimexpr\tud@dim@topmargin+\tud@dim@barheight%
@@ -4039,17 +4020,17 @@
         headsep=\the\tud@dim@headsep,%
         ignorehead%
       }%
-      \setlength\tud@dim@headdiff{%
+      \setlength\tud@dim@areadiff{%
         \dimexpr\tud@dim@topmargin+\tud@dim@barheight+\tud@dim@headsep%
           -\tud@dim@slimmargin\relax%
       }%
       \tud@ifverlower{2.03}{%
-        \setlength\tud@dim@headdiff{%
+        \setlength\tud@dim@areadiff{%
           \dimexpr\tud@dim@topmargin+\tud@dim@barheight+\tud@dim@headsep%
             -.5\tud@dim@both\relax%
         }%
         \setlength\tud@dim@ddcdiff{.6\tud@dim@topmargin}%
-        \edef\tud@geometry@ddcmargin{%
+        \edef\tud@cdgeometry@ddcmargin{%
           \if@fincl%
             bottom=\the\dimexpr.5\tud@dim@both+\tud@dim@extrabottommargin%
               +\tud@dim@ddcdiff+\tud@dim@headsep+\footheight%
@@ -4063,9 +4044,9 @@
         }%
       }{}%
     \fi%
-    \ifdim\tud@dim@headdiff<\z@\relax\setlength\tud@dim@headdiff{\z@}\fi%
-    \global\tud@dim@headdiff=\tud@dim@headdiff%
-    \if@tud@geometry@adjust%
+    \ifdim\tud@dim@areadiff<\z@\relax\setlength\tud@dim@areadiff{\z@}\fi%
+    \global\tud@dim@areadiff=\tud@dim@areadiff%
+    \if@tud@cdgeometry@adjust%
       \setlength\tud@dim@headingsvskip{.3\tud@dim@topmargin}%
     \else%
       \setlength\tud@dim@headingsvskip{.6\tud@dim@topmargin}%
@@ -4075,32 +4056,32 @@
       \ifdim\tud@dim@ddcdiff<\z@\relax\setlength\tud@dim@ddcdiff{\z@}\fi%
       \global\tud@dim@ddcdiff=\tud@dim@ddcdiff%
     }{}%
-    \tud@geometry@@process%
+    \tud@cdgeometry@@process%
   }%
-  \newcommand*\tud@geometry@@process{%
-    \eappto\tud@geometry@hmargin{,layouthoffset=\the\Gm@layouthoffset}%
-    \eappto\tud@geometry@vmargin{,layoutvoffset=\the\Gm@layoutvoffset}%
+  \newcommand*\tud@cdgeometry@@process{%
+    \eappto\tud@cdgeometry@hmargin{,layouthoffset=\the\Gm@layouthoffset}%
+    \eappto\tud@cdgeometry@vmargin{,layoutvoffset=\the\Gm@layoutvoffset}%
     \tud@ifverlower{2.03}{%
       \edef\@tempa{%
-        \tud@geometry@hmargin,%
-        \tud@geometry@vmargin,%
-        \tud@geometry@tudmargin,%
-        \tud@geometry@ddcmargin,%
+        \tud@cdgeometry@hmargin,%
+        \tud@cdgeometry@vmargin,%
+        \tud@cdgeometry@tudmargin,%
+        \tud@cdgeometry@ddcmargin,%
         ignorehead,ignorefoot%
       }%
       \tud@newgeometry{\@tempa}%
       \tud@savegeometry{tudareaddc}%
     }{}%
     \edef\@tempa{%
-      \tud@geometry@hmargin,%
-      \tud@geometry@vmargin,%
-      \tud@geometry@tudmargin%
+      \tud@cdgeometry@hmargin,%
+      \tud@cdgeometry@vmargin,%
+      \tud@cdgeometry@tudmargin%
     }%
     \tud@newgeometry{\@tempa}%
     \tud@savegeometry{tudarea}%
     \edef\@tempa{%
-      \tud@geometry@hmargin,%
-      \tud@geometry@vmargin%
+      \tud@cdgeometry@hmargin,%
+      \tud@cdgeometry@vmargin%
     }%
     \tud@newgeometry{\@tempa}%
     \tud@savegeometry{typearea}%
@@ -4110,21 +4091,21 @@
       }%
     \fi%
   }%
-  \newcommand*\tud@geometry@hincl{%
+  \newcommand*\tud@cdgeometry@hincl{%
     \if@hincl%
       includehead=true%
     \else%
       includehead=false%
     \fi%
   }%
-  \newcommand*\tud@geometry@fincl{%
+  \newcommand*\tud@cdgeometry@fincl{%
     \if@fincl%
       includefoot=true%
     \else%
       includefoot=false%
     \fi%
   }%
-  \newcommand*\tud@geometry@mpincl{%
+  \newcommand*\tud@cdgeometry@mpincl{%
     \if@mincl%
       includemp=true%
     \else%
@@ -4135,15 +4116,15 @@
 \newcommand*\tud@currentgeometry{}
 \newcommand*\tud@BeforeSelectAnyPageStyle[1]{%
   \ifstr{#1}{\GetRealPageStyle{#1}}{%
-    \tud@iftudps{#1}{%
+    \tud@iftudheadings{#1}{%
       \tud@ifverlower{2.03}{%
         \tud@ddc@check%
-        \ifcase\@tempb\relax% \tud@ddc@foot=false
+        \ifcase\@tempb\relax% \tud@ddc@foot@num=false
           \ifstr{\tud@currentgeometry}{tudarea}{}{%
             \tud@loadgeometry{tudarea}%
             \gdef\tud@currentgeometry{tudarea}%
           }%
-        \else% \tud@ddc@foot!=false
+        \else% \tud@ddc@foot@num!=false
           \ifstr{\tud@currentgeometry}{tudareaddc}{}{%
             \tud@loadgeometry{tudareaddc}%
             \gdef\tud@currentgeometry{tudareaddc}%
@@ -4155,7 +4136,7 @@
           \gdef\tud@currentgeometry{tudarea}%
         }%
       }%
-      \setlength\tud@dim@topdiffvskip{\z@}%
+      \setlength\tud@dim@areavskip{\z@}%
       \tud@font@koma@set{pagefoot}{\usekomafont{tudheadings}}%
       \tud@font@koma@set{pagenumber}{\usekomafont{tudheadings}}%
     }{%
@@ -4163,10 +4144,10 @@
         \tud@loadgeometry{typearea}%
         \gdef\tud@currentgeometry{typearea}%
       }%
-      \setlength\tud@dim@topdiffvskip{\tud@dim@headdiff}%
-      \ifnum\tud@geometry>\@ne\relax% true/symmetric/twoside
+      \setlength\tud@dim@areavskip{\tud@dim@areadiff}%
+      \ifnum\tud@cdgeometry@num>\@ne\relax% true/symmetric/twoside
         \if@hincl%
-          \addtolength\tud@dim@topdiffvskip{%
+          \addtolength\tud@dim@areavskip{%
             \dimexpr-\headheight-\tud@dim@headsep\relax%
           }%
         \fi%
@@ -4174,7 +4155,7 @@
       \tud@font@koma@unset{pagefoot}%
       \tud@font@koma@unset{pagenumber}%
     }%
-    \global\tud@dim@topdiffvskip=\tud@dim@topdiffvskip%
+    \global\tud@dim@areavskip=\tud@dim@areavskip%
   }{}%
 }
 \TUD@UnwindPackage{geometry}{%
@@ -4185,7 +4166,7 @@
   \let\Gm@layoutwidth\paperwidth%
   \let\Gm@layouthoffset\z@%
   \let\Gm@layoutvoffset\z@%
-  \renewcommand*\tud@geometry@process{\tud@geometry@set}%
+  \renewcommand*\tud@cdgeometry@process{\tud@cdgeometry@set}%
   \let\tud@BeforeSelectAnyPageStyle\@gobble%
 }
 \patchcmd{\cleardoubleoddpageusingstyle}{\pagestyle}{%
@@ -4199,10 +4180,10 @@
 }{}{\tud@patch@wrn{cleardoublepageusingstyle}}
 \tud@ifverlower{2.03}{%
   \newcommand*\tud@ddc@enlargepage[1][]{%
-    \tud@iftudps{#1}{%
+    \tud@iftudheadings{#1}{%
       \ifstr{\tud@currentgeometry}{tudareaddc}{}{%
         \tud@ddc@check%
-        \ifcase\@tempb\relax\else% \tud@ddc@foot!=false
+        \ifcase\@tempb\relax\else% \tud@ddc@foot@num!=false
           \enlargethispage{-\tud@dim@ddcdiff}%
         \fi%
       }%
@@ -4210,13 +4191,13 @@
   }%
 }{}
 \newcommand*\tud@AfterChangingArea{%
-  \tud@geometry@process%
+  \tud@cdgeometry@process%
   \global\@tud@mainlogo@settrue%
   \gdef\tud@currentgeometry{}%
   \expandafter\pagestyle\expandafter{\currentpagestyle}%
 }
 \newcommand*\tud@recalctypearea{%
-  \ifcase\tud@geometry\relax%
+  \ifcase\tud@cdgeometry@num\relax%
     \csname @ta@usegeometryfalse\endcsname%
     \ifGm@layout%
       \tud@AfterChangingArea%
@@ -4229,15 +4210,14 @@
 }
 \@ifpackageloaded{geometry}{\@tempswatrue}{\@tempswafalse}
 \if@tempswa
-  \newcommand*\tud@geometry@custom{}%
-  % TODO evtl tud@geometry definieren?
+  \newcommand*\tud@cdgeometry@custom{}%
+  % TODO evtl tud@cdgeometry definieren?
   \apptocmd{\geometry}{%
-    \ifbool{@tud@geometry@enabled}{\appto\tud@geometry@custom{,#1}}{}%
+    \ifbool{@tud@geometry@enabled}{\appto\tud@cdgeometry@custom{,#1}}{}%
   }{}{\tud@patch@wrn{geometry}}%
-  \tud@cmd@store{Gm@changelayout}%
   \apptocmd{\Gm@changelayout}{%
     \ifboolexpr{bool {@tud@geometry@enabled} and bool {@atdocument}}{%
-      \ifnum\tud@geometry=\@ne\relax%
+      \ifnum\tud@cdgeometry@num=\@ne\relax%
         \tud@AfterChangingArea%
       \else%
         \expandafter\tud@loadgeometry\expandafter{\tud@currentgeometry}%
@@ -4251,8 +4231,8 @@
     \@tud@geometry@enabledtrue%
   }{}{\tud@patch@wrn{restoregeometry}}%
   \AtEndPreamble{%
-    \ifnum\tud@geometry=\@ne\relax\else%
-      \edef\tud@geometry@custom{%
+    \ifnum\tud@cdgeometry@num=\@ne\relax\else%
+      \edef\tud@cdgeometry@custom{%
         left=\the\dimexpr\oddsidemargin+1in-\ta@bcor\relax,%
         textwidth=\the\textwidth,%
         marginparwidth=\the\marginparwidth,%
@@ -4271,16 +4251,16 @@
       }%
     \fi%
     \tud@newgeometry{%
-      \tud@geometry@mpincl,%
+      \tud@cdgeometry@mpincl,%
       \if@reversemargin%
         reversemarginpar=true,%
       \else%
         reversemarginpar=false,%
       \fi%
       bindingoffset=\the\ta@bcor,%
-      \tud@geometry@hincl,%
-      \tud@geometry@fincl,%
-      \tud@geometry@custom,%
+      \tud@cdgeometry@hincl,%
+      \tud@cdgeometry@fincl,%
+      \tud@cdgeometry@custom,%
       driver=none%
     }%
   }%
@@ -4297,8 +4277,7 @@
     \tud@setbleedmargin@default%
   }%
 }
-% TODO: TUD@parameter@define@ps -> TUD@parameter@pagestyle@define
-\newcommand*\TUD@parameter@define@ps[1]{%
+\newcommand*\tud@parameters@pagestyle[1]{%
   \TUD@parameter@define{cdfont}[true]{\TUDoption{cdfont}{#1}}%
   \TUD@parameter@define{cdhead}[true]{\TUDoption{cdhead}{#1}}%
   \TUD@parameter@define{cdfoot}[true]{\TUDoption{cdfoot}{#1}}%
@@ -4314,81 +4293,77 @@
   \TUD@parameter@define{tudfoot}[true]{\TUDoption{tudfoot}{#1}}%
   \TUD@parameter@let{logo}{headlogo}%
 }
-% TODO \tud@ps -> \tud@ps@val
-\newcommand*\tud@ps{tudheadings}
-\newcommand*\tud@ps@select{%
-  \expandafter\pagestyle\expandafter{\tud@ps}%
-  \ifstr{\GetRealPageStyle{\tud@ps}}{empty}{%
+\newcommand*\tud@envir@ps{tudheadings}
+\newcommand*\tud@envir@selectps{%
+  \expandafter\pagestyle\expandafter{\tud@envir@ps}%
+  \ifstr{\GetRealPageStyle{\tud@envir@ps}}{empty}{%
     \renewcommand*\titlepagestyle{empty}%
     \renewcommand*\partpagestyle{empty}%
     \renewcommand*\chapterpagestyle{empty}%
     \renewcommand*\indexpagestyle{empty}%
   }{}%
-  \ifstr{\GetRealPageStyle{\tud@ps}}{empty.tudheadings}{%
+  \ifstr{\GetRealPageStyle{\tud@envir@ps}}{empty.tudheadings}{%
     \renewcommand*\titlepagestyle{empty.tudheadings}%
     \renewcommand*\partpagestyle{empty.tudheadings}%
     \renewcommand*\chapterpagestyle{empty.tudheadings}%
     \renewcommand*\indexpagestyle{empty.tudheadings}%
   }{}%
 }
-% TODO \tud@currentpagestyle -> \tud@currentpagestyle@val
-\newcommand*\tud@currentpagestyle{}
+\newcommand*\tud@currentpagestyle@value{}
 \newcommand*\tud@currentpagestyle@set{%
-  \ifdefvoid{\tud@currentpagestyle}{%
-    \xdef\tud@currentpagestyle{\currentpagestyle}%
+  \ifdefvoid{\tud@currentpagestyle@value}{%
+    \xdef\tud@currentpagestyle@value{\currentpagestyle}%
   }{}%
 }
 \newcommand*\tud@currentpagestyle@reset{%
-  \ifdefvoid{\tud@currentpagestyle}{}{%
-    \expandafter\pagestyle\expandafter{\tud@currentpagestyle}%
-    \let\tud@currentpagestyle\relax%
+  \ifdefvoid{\tud@currentpagestyle@value}{}{%
+    \expandafter\pagestyle\expandafter{\tud@currentpagestyle@value}%
+    \let\tud@currentpagestyle@value\relax%
   }%
 }
 \NewEnviron{tudpage}[1][]{%
   \tud@currentpagestyle@set%
   \clearpage%
-  \def\tud@ps{tudheadings}%
+  \def\tud@envir@ps{tudheadings}%
   \TUD@parameter@set{tudpage}{#1}%
-  \tud@ps@select%
+  \tud@envir@selectps%
   \tud@multicols@check%
-  \ifnum\tud@multicols>\@ne\relax%
-    \begin{multicols}{\tud@multicols}%
+  \ifnum\tud@multicols@num>\@ne\relax%
+    \begin{multicols}{\tud@multicols@num}%
   \fi%
   \BODY%
-  \ifnum\tud@multicols>\@ne\relax%
+  \ifnum\tud@multicols@num>\@ne\relax%
     \end{multicols}%
   \fi%
 }[%
   \aftergroup\tud@currentpagestyle@reset%
   \clearpage%
 ]
-% TODO: \TUD@parameter@sethandler -> \TUD@parameter@handler
 \TUD@parameter{tudpage}{%
   \TUD@parameter@define{language}{\selectlanguage{#1}}%
-  \TUD@parameter@define{columns}{\cs@std@lock{tud@multicols}{#1}}%
+  \TUD@parameter@define{columns}{\cs@std@lock{tud@multicols@num}{#1}}%
   \TUD@parameter@define{pagestyle}{%
-    \tud@iftudps{#1}{\renewcommand*\tud@ps{#1}}{%
-      \ifstr{#1}{empty}{\renewcommand*\tud@ps{empty.tudheadings}}{%
-      \ifstr{#1}{plain}{\renewcommand*\tud@ps{plain.tudheadings}}{%
-      \ifstr{#1}{headings}{\renewcommand*\tud@ps{tudheadings}}{%
+    \tud@iftudheadings{#1}{\renewcommand*\tud@envir@ps{#1}}{%
+      \ifstr{#1}{empty}{\renewcommand*\tud@envir@ps{empty.tudheadings}}{%
+      \ifstr{#1}{plain}{\renewcommand*\tud@envir@ps{plain.tudheadings}}{%
+      \ifstr{#1}{headings}{\renewcommand*\tud@envir@ps{tudheadings}}{%
         \TUD@parameter@error{pagestyle}{%
           headings, plain, empty or any tudheadings page style type%
         }%
       }}}%
     }%
   }%
-  \TUD@parameter@define@ps{#1}%
-  \TUD@parameter@sethandler{\TUD@parameter@defaulthandler{tudpage}{#1}}%
+  \tud@parameters@pagestyle{#1}%
+  \TUD@parameter@handler{\TUD@parameter@defaulthandler{tudpage}{#1}}%
 }
 %%% From File: tudscr-layout.dtx
-% TODO: tud@headings -> tud@headings@val
-\newcommand*\tud@headings{}
+\newcommand*\tud@headings@value{}
 \newcommand*\tud@disposition@fontsize{}
 \newcommand*\tud@thesis@fontsize{}
 \newcommand*\tud@headings@set[1][]{%
   \def\@tempa##1##2##3{%
-    \ifstr{##1}{\tud@headings}{}{%
-      \renewcommand*\tud@headings{##1}%
+    \ifstr{##1}{\tud@headings@value}{}{%
+      \renewcommand*\tud@headings@value{##1}%
       \renewcommand*\tud@disposition@fontsize{##2}%
       \renewcommand*\tud@thesis@fontsize{##3}%
       #1%
@@ -4409,26 +4384,24 @@
 \newcommand*\tud@section@fontcolor{}
 \providecommand*\raggedtitle{\raggedpart}
 \newkomafont{parttitle}{%
-  \tud@disposition@font%
+  \tud@disposition@fontface%
   \tud@color{\tud@part@fontcolor}%
   \usesizeofkomafont{section}%
 }
 \newlength\pageheadingsvskip
 \newlength\headingsvskip
-\newcommand*\tud@headmidvskip{\par\nobreak\vspace{.5\baselineskip}}
-% TODO: tud@headmidvskip -> tud@headmidvskip@normal
-% TODO: tud@headmidvskip@neg -> tud@headmidvskip@reverse
-\newcommand*\tud@headmidvskip@neg{%
-  \setbox\z@\vbox{\tud@headmidvskip}%
+\newcommand*\tud@headmidvskip@normal{\par\nobreak\vspace{.5\baselineskip}}
+\newcommand*\tud@headmidvskip@reverse{%
+  \setbox\z@\vbox{\tud@headmidvskip@normal}%
   \vspace*{\dimexpr-\dp\strutbox-\ht\strutbox-\ht\z@\relax}%
 }
 \newcommand*\tud@layout@process{%
-  \ifcase\tud@layout@cover\relax% false
+  \ifcase\tud@layout@cover@num\relax% false
     \bool@std@lock{@tud@cdgeometry@cover}{false}%
   \else% !false
     \bool@std@lock{@tud@cdgeometry@cover}{true}%
   \fi%
-  \ifcase\tud@layout@title\relax% false
+  \ifcase\tud@layout@title@num\relax% false
     \tud@cmd@restore{titlepagestyle}%
     \tud@font@koma@unset{titlehead}%
     \tud@font@koma@unset{title}%
@@ -4444,16 +4417,16 @@
     \tud@font@koma@set{title}{%
       \raggedtitle%
       \usekomafont{disposition}%
-      \tud@disposition@font%
+      \tud@disposition@fontface%
       \tud@disposition@fontsize%
       \tud@color{\tud@title@fontcolor}%
     }%
     \tud@font@koma@set{subtitle}{%
       \raggedtitle%
       \ifstr{\mddefault}{l}{%
-        \tud@disposition@font[\fontseries{m}]%
+        \tud@disposition@fontface[\fontseries{m}]%
       }{%
-        \tud@disposition@font[\fontseries{bx}]%
+        \tud@disposition@fontface[\fontseries{bx}]%
       }%
       \usesizeofkomafont{section}%
       \tud@color{\tud@title@fontcolor}%
@@ -4467,7 +4440,7 @@
     \tud@font@koma@set{date}{\usekomafont{titlepage}}%
     \tud@font@koma@set{publishers}{\usekomafont{author}}%
   \fi%
-  \ifcase\tud@layout@part\relax% false
+  \ifcase\tud@layout@part@num\relax% false
     \tud@cmd@restore{partheadstartvskip}%
     \tud@cmd@restore{partheadendvskip}%
     \tud@cmd@restore{partheademptypage}%
@@ -4507,18 +4480,18 @@
       \tud@font@koma@set{partnumber}{\usekomafont{parttitle}}%
     \else%
       \tud@sectioning@set[addpart]{part}{%
-        \tud@disposition@font%
+        \tud@disposition@fontface%
         \tud@color{\tud@part@fontcolor}%
       }%
       \tud@font@koma@set{partnumber}{%
-        \tud@disposition@font%
+        \tud@disposition@fontface%
         \tud@color{\tud@part@fontcolor}%
       }%
     \fi%
     \tud@cmd@store{raggedpart}%
     \renewcommand*\raggedpart{\ifdin{\tud@raggedright}{\tud@RaggedRight}}%
   \fi%
-  \ifcase\tud@layout@chapter\relax% false
+  \ifcase\tud@layout@chapter@num\relax% false
     \tud@cmd@restore{chapterheadstartvskip}%
     \tud@cmd@restore{chapterformat}%
     \tud@cmd@restore{@chapter}%
@@ -4545,7 +4518,7 @@
       \let\@@makechapterhead\tud@@@makechapterhead%
     }%
     \tud@sectioning@set[addchap]{chapter}{%
-      \tud@disposition@font%
+      \tud@disposition@fontface%
       \tud@disposition@fontsize%
       \tud@color{\tud@chapter@fontcolor}%
     }%
@@ -4553,7 +4526,7 @@
     \tud@cmd@store{raggedchapter}%
     \renewcommand*\raggedchapter{\ifdin{\tud@raggedright}{\tud@RaggedRight}}%
   \fi%
-  \ifcase\tud@layout@section\relax% false
+  \ifcase\tud@layout@section@num\relax% false
     \tud@sectioning@reset[addsec]{section}%
     \tud@sectioning@reset{subsection}%
     \tud@sectioning@reset{subsubsection}%
@@ -4563,23 +4536,23 @@
     \tud@cmd@restore{raggedsection}%
   \else% !false
     \renewcommand*\tud@section@fontcolor{}%
-    \ifcase\tud@layout@section\relax\or\else% *color
+    \ifcase\tud@layout@section@num\relax\or\else% *color
       \renewcommand*\tud@section@fontcolor{HKS41}%
     \fi%
     \tud@sectioning@set[addsec]{section}{%
-      \tud@disposition@font%
+      \tud@disposition@fontface%
       \ifstr{\tud@pagecolor}{HKS41}{}{\tud@color{\tud@section@fontcolor}}%
     }%
     \tud@sectioning@set{subsection}{%
-      \tud@disposition@font%
+      \tud@disposition@fontface%
       \ifstr{\tud@pagecolor}{HKS41}{}{\tud@color{\tud@section@fontcolor}}%
     }%
     \tud@sectioning@set{subsubsection}{%
-      \tud@disposition@font%
+      \tud@disposition@fontface%
       \ifstr{\tud@pagecolor}{HKS41}{}{\tud@color{\tud@section@fontcolor}}%
     }%
     \tud@sectioning@set{minisec}{%
-      \tud@disposition@font%
+      \tud@disposition@fontface%
       \ifstr{\tud@pagecolor}{HKS41}{}{\tud@color{\tud@section@fontcolor}}%
     }%
     \tud@sectioning@set{paragraph}{%
@@ -4609,7 +4582,7 @@
 }
 \newcommand*\tud@partheadstartvskip{%
   \renewcommand*\tud@part@fontcolor{}% false/true
-  \ifcase\tud@layout@part\relax\or\or% litecolor
+  \ifcase\tud@layout@part@num\relax\or\or% litecolor
     \renewcommand*\tud@part@fontcolor{HKS41}%
   \or% barcolor
     \renewcommand*\tud@part@fontcolor{HKS41}%
@@ -4623,13 +4596,13 @@
   \tud@layout@specialpage@set{part}%
   \begingroup%
     \vspace*{%
-      \dimexpr\tud@dim@topdiffvskip+\tud@dim@headingsvskip-\baselineskip\relax%
+      \dimexpr\tud@dim@areavskip+\tud@dim@headingsvskip-\baselineskip\relax%
     }%
     \vspace*{\pageheadingsvskip}%
     \setparsizes{\z@}{\z@}{\z@\@plus1fil}\par@updaterelative%
     \if@tud@parttitle%
       \begingroup%
-        \tud@disposition@font%
+        \tud@disposition@fontface%
         \tud@disposition@fontsize%
         \tud@color{\tud@part@fontcolor}%
         \ifx\@@title\@empty%
@@ -4645,27 +4618,27 @@
         {\usekomafont{titlepage}{\vskip 2ex\@plus1ex\@minus1ex}}%
       \endgroup%
     \else%
-      \usekomafont{partnumber}{\tud@headmidvskip@neg}%
+      \usekomafont{partnumber}{\tud@headmidvskip@reverse}%
     \fi%
   \endgroup%
 }
 \newcommand*\tud@partheadendvskip{%
   \tud@cleardoublespecialpage{%
     \renewcommand*\tud@pagecolor{}%
-    \ifcase\tud@layout@part\relax\or% true
-      \cs@std@lock{tud@head@bar}{0}%
+    \ifcase\tud@layout@part@num\relax\or% true
+      \cs@std@lock{tud@head@bar@num}{0}%
     \or% litecolor
-      \cs@set@lock{tud@head@bar}{1}%
+      \cs@set@lock{tud@head@bar@num}{1}%
     \or% barcolor
-      \cs@set@lock{tud@head@bar}{2}%
+      \cs@set@lock{tud@head@bar@num}{2}%
     \or% bicolor
-      \cs@set@lock{tud@head@bar}{3}%
+      \cs@set@lock{tud@head@bar@num}{3}%
     \or% color
       \renewcommand*\tud@pagecolor{HKS41}%
-      \cs@set@lock{tud@head@bar}{1}%
+      \cs@set@lock{tud@head@bar@num}{1}%
     \or% full
       \renewcommand*\tud@pagecolor{HKS41}%
-      \cs@set@lock{tud@head@bar}{3}%
+      \cs@set@lock{tud@head@bar@num}{3}%
     \fi%
     \addtokomafont{pagenumber}{\usekomafont{tudheadings}}%
     \addtokomafont{pagefoot}{\usekomafont{tudheadings}}%
@@ -4689,12 +4662,12 @@
       \if@tud@parttitle%
         \enskip%
       \else%
-        \tud@headmidvskip%
+        \tud@headmidvskip@normal%
       \fi%
     }{%
       \if@tud@parttitle\else%
         \usekomafont{#1prefix}{\vphantom{\partname}}%
-        \tud@headmidvskip%
+        \tud@headmidvskip@normal%
       \fi%
     }%
   }{}{\tud@patch@wrn{scr@startpart}}%
@@ -4707,7 +4680,7 @@
     \normalfont\sectfont\nobreak%
     \if@tud@parttitle\else%
       \size@partnumber{\vphantom{\partname}}%
-      \tud@headmidvskip\nobreak%
+      \tud@headmidvskip@normal\nobreak%
     \fi%
   }{}{\tud@patch@wrn{scr@@startspart}}%
 \else
@@ -4725,12 +4698,12 @@
       \if@tud@parttitle%
         \enskip%
       \else%
-        \tud@headmidvskip%
+        \tud@headmidvskip@normal%
       \fi%
     }{%
       \if@tud@parttitle\else%
         \size@partnumber{\vphantom{\partname}}%
-        \tud@headmidvskip%
+        \tud@headmidvskip@normal%
       \fi%
     }%
   }{}{\tud@patch@wrn{@part}}%
@@ -4743,14 +4716,14 @@
     \normalfont\sectfont\nobreak%
     \if@tud@parttitle\else%
       \size@partnumber{\vphantom{\partname}}%
-      \tud@headmidvskip\nobreak%
+      \tud@headmidvskip@normal\nobreak%
     \fi%
     \size@part%
   }{}{\tud@patch@wrn{@spart}}%
 \fi
 \newcommand*\tud@partpreamble{%
-  \ifnum\tud@abstract@level>\@ne\relax% sec/chap
-    \renewcommand*\tud@abstract@level{1}%
+  \ifnum\tud@abstract@level@num>\@ne\relax% sec/chap
+    \renewcommand*\tud@abstract@level@num{1}%
   \fi%
   \KOMAoptions{titlepage=false}%
   \addtokomafont{disposition}{\tud@color{\tud@part@fontcolor}}%
@@ -4761,11 +4734,11 @@
 }
 \newcommand*\tud@chapterheadstartvskip{%
   \renewcommand*\tud@chapter@fontcolor{}%
-  \ifcase\tud@layout@chapter\relax\or\else% *color
+  \ifcase\tud@layout@chapter@num\relax\or\else% *color
     \renewcommand*\tud@chapter@fontcolor{HKS41}%
   \fi%
   \vspace*{%
-    \dimexpr\tud@dim@topdiffvskip+\tud@dim@headingsvskip\relax%
+    \dimexpr\tud@dim@areavskip+\tud@dim@headingsvskip\relax%
   }%
   \if@tud@chapterpage%
     \vspace*{\pageheadingsvskip}%
@@ -4782,10 +4755,10 @@
     \setlength{\@tempskipa}{\csname scr@#1@innerskip\endcsname}%
     \chapterheadmidvskip
   }{%
-    \tud@headmidvskip@neg%
+    \tud@headmidvskip@reverse%
     \vskip-\parskip%
     \tud@makeuppercase{\csname #1format\endcsname}%
-    \tud@headmidvskip%
+    \tud@headmidvskip@normal%
   }{}{\tud@patch@wrn{scr@@makechapterhead}}%
 \else
   \let\tud@@@makechapterhead\@@makechapterhead%
@@ -4794,19 +4767,19 @@
     \setlength{\@tempskipa}{\scr@chapter@innerskip}%
     \chapterheadmidvskip
   }{%
-    \tud@headmidvskip@neg%
+    \tud@headmidvskip@reverse%
     \vskip-\parskip%
     \tud@makeuppercase{\chapterformat}%
-    \tud@headmidvskip%
+    \tud@headmidvskip@normal%
   }{}{\tud@patch@wrn{@@makechapterhead}}%
 \fi
 \newcommand*\tud@chapterpreamble{%
-  \ifnum\tud@abstract@level>\@ne\relax% sec/chap
-    \renewcommand*\tud@abstract@level{1}%
+  \ifnum\tud@abstract@level@num>\@ne\relax% sec/chap
+    \renewcommand*\tud@abstract@level@num{1}%
   \fi%
   \KOMAoptions{titlepage=false}%
   \if@tud@chapterpage%
-    \ifcase\tud@cdfont\relax\or% true
+    \ifcase\tud@cdfont@num\relax\or% true
       \TUDoptions{cdfont=true}%
     \or% heavy
       \TUDoptions{cdfont=heavy}%
@@ -4845,20 +4818,20 @@
     \tud@cleardoublespecialpage{%
       \renewcommand*\tud@pagecolor{}%
       \let\tud@foot@fontcolor\tud@chapter@fontcolor%
-      \ifcase\tud@layout@chapter\relax\or% true
-        \cs@std@lock{tud@head@bar}{0}%
+      \ifcase\tud@layout@chapter@num\relax\or% true
+        \cs@std@lock{tud@head@bar@num}{0}%
       \or% litecolor
-        \cs@set@lock{tud@head@bar}{1}%
+        \cs@set@lock{tud@head@bar@num}{1}%
       \or% barcolor
-        \cs@set@lock{tud@head@bar}{2}%
+        \cs@set@lock{tud@head@bar@num}{2}%
       \or% bicolor
-        \cs@set@lock{tud@head@bar}{3}%
+        \cs@set@lock{tud@head@bar@num}{3}%
       \or% color
         \renewcommand*\tud@pagecolor{HKS41!10}%
-        \cs@set@lock{tud@head@bar}{1}%
+        \cs@set@lock{tud@head@bar@num}{1}%
       \or% fullcolor
         \renewcommand*\tud@pagecolor{HKS41!10}%
-        \cs@set@lock{tud@head@bar}{3}%
+        \cs@set@lock{tud@head@bar@num}{3}%
       \fi%
       \addtokomafont{pagenumber}{\usekomafont{tudheadings}}%
       \addtokomafont{pagefoot}{\usekomafont{tudheadings}}%
@@ -4867,24 +4840,24 @@
     \tud@layout@specialpage@unset%
     \if@restonecol\twocolumn\fi%
   \else%
-    \edef\tud@head@bar@store{\tud@head@bar}%
+    \edef\tud@head@bar@store{\tud@head@bar@num}%
     \edef\tud@head@bar@restore{%
-      \gdef\noexpand\tud@head@bar{\tud@head@bar@store}%
+      \gdef\noexpand\tud@head@bar@num{\tud@head@bar@store}%
       \global\let\noexpand\tud@head@bar@store\relax%
       \global\let\noexpand\tud@head@bar@restore\relax%
     }%
-    \ifcase\tud@layout@chapter\relax\or% true
-      \cs@std@lock{tud@head@bar}{0}%
+    \ifcase\tud@layout@chapter@num\relax\or% true
+      \cs@std@lock{tud@head@bar@num}{0}%
     \or% litecolor
-      \cs@set@lock{tud@head@bar}{1}%
+      \cs@set@lock{tud@head@bar@num}{1}%
     \or% barcolor
-      \cs@set@lock{tud@head@bar}{2}%
+      \cs@set@lock{tud@head@bar@num}{2}%
     \or% bicolor
-      \cs@set@lock{tud@head@bar}{3}%
+      \cs@set@lock{tud@head@bar@num}{3}%
     \or% color
-      \cs@set@lock{tud@head@bar}{1}%
+      \cs@set@lock{tud@head@bar@num}{1}%
     \or% fullcolor
-      \cs@set@lock{tud@head@bar}{3}%
+      \cs@set@lock{tud@head@bar@num}{3}%
     \fi%
     \tud@ifverlower{2.03}{\tud@ddc@enlargepage[\chapterpagestyle]}{}%
   \fi%
@@ -5070,26 +5043,22 @@
     \let\@subject\@thesis%
   \fi\fi%
 }
-\newcommand*\tud@titlepagenumber{}
-\let\tud@titlepagenumber\relax
-% TODO: tud@maketitle -> tud@maketitle@master
-% TODO: tud@maketitlepage -> tud@maketitle@page
-% TODO: tud@maketitlehead -> tud@maketitle@head
-% TODO: tud@@maketitlehead -> tud@maketitle@@head
+\newcommand*\tud@title@pagenumber{}
+\let\tud@title@pagenumber\relax
 \newcommand*\tud@maketitle[1][]{%
   \begingroup%
     \TUD@parameter@set{title}{#1}%
-    \ifcase\tud@layout@title\relax% false
-      \ifx\tud@titlepagenumber\relax\gdef\tud@titlepagenumber{1}\fi%
-      \tud@cmd@use{maketitle}[\tud@titlepagenumber]%
-      \tud@iftudps{\currentpagestyle}{%
+    \ifcase\tud@layout@title@num\relax% false
+      \ifx\tud@title@pagenumber\relax\gdef\tud@title@pagenumber{1}\fi%
+      \tud@cmd@use{maketitle}[\tud@title@pagenumber]%
+      \tud@iftudheadings{\currentpagestyle}{%
         \ifstr{\titlepagestyle}{empty}{\thispagestyle{empty.tudheadings}}{}%
       }{}%
     \else% !false
       \if@titlepage%
-        \tud@maketitlepage%
+        \tud@make@titlepage%
       \else%
-        \tud@maketitlehead%
+        \tud@make@titlehead%
       \fi%
     \fi%
   \endgroup%
@@ -5097,7 +5066,7 @@
   \global\let\and\relax%
 }
 \patchcmd{\titlepage}{\thispagestyle{empty}}{%
-  \tud@iftudps{\currentpagestyle}{%
+  \tud@iftudheadings{\currentpagestyle}{%
     \thispagestyle{empty.tudheadings}%
   }{%
     \thispagestyle{empty}%
@@ -5108,14 +5077,14 @@
 \TUD@parameter{title}{%
   \TUD@parameter@define{cdtitle}[true]{\TUDoption{cdtitle}{#1}}%
   \TUD@parameter@let{cd}{cdtitle}%
-  \TUD@parameter@define{pagenumber}{\def\tud@titlepagenumber{#1}}%
-  \TUD@parameter@define@ps{#1}%
-  \TUD@parameter@sethandler{\TUD@parameter@set{title}{pagenumber=#1}}%
+  \TUD@parameter@define{pagenumber}{\def\tud@title@pagenumber{#1}}%
+  \tud@parameters@pagestyle{#1}%
+  \TUD@parameter@handler{\TUD@parameter@set{title}{pagenumber=#1}}%
 }
 \newcommand*\tud@titleback{}
-\newcommand*\tud@maketitlepage{%
+\newcommand*\tud@make@titlepage{%
   \renewcommand*\tud@title@fontcolor{}%
-  \ifcase\tud@layout@title\relax\or\or% litecolor
+  \ifcase\tud@layout@title@num\relax\or\or% litecolor
     \renewcommand*\tud@title@fontcolor{HKS41}%
   \or% barcolor
     \renewcommand*\tud@title@fontcolor{HKS41}%
@@ -5128,8 +5097,8 @@
   \fi%
   \begin{titlepage}%
     \tud@layout@specialpage@set{title}%
-    \ifx\tud@titlepagenumber\relax\else%
-      \setcounter{page}{\tud@titlepagenumber}%
+    \ifx\tud@title@pagenumber\relax\else%
+      \setcounter{page}{\tud@title@pagenumber}%
     \fi%
     \if@tud@cover\else%
       \let\footnotesize\small%
@@ -5181,7 +5150,7 @@
       \fi%
     \fi%
     \vspace*{%
-      \dimexpr\tud@dim@topdiffvskip+\tud@dim@headingsvskip-\baselineskip\relax%
+      \dimexpr\tud@dim@areavskip+\tud@dim@headingsvskip-\baselineskip\relax%
     }%
     \vspace*{\pageheadingsvskip}%
     \setparsizes{\z@}{\z@}{\z@\@plus1fil}\par@updaterelative%
@@ -5211,7 +5180,7 @@
       \fi%
       \vskip 2ex\@plus1ex\@minus1ex%
       \vskip 2\bigskipamount%
-      \let\tud@split@author\tud@split@author@title%
+      \let\tud@split@author@do\tud@split@author@title%
       \tud@multiple@split{@author}\par%
       \vskip 2ex\@plus1ex\@minus1ex%
       \ifx\@thesis\@empty%
@@ -5232,7 +5201,7 @@
           \ifx\@graduation\@empty\else%
             \def\@tempc{%
               \@graduation%
-              \ifx\@graduationabbr\@empty\else\nobreakspace\@graduationabbr\fi%
+              \ifx\@@graduation\@empty\else\nobreakspace\@@graduation\fi%
             }%
             {\usekomafont{titlepage}{\graduationtext\par}}%
             \vskip 2ex\@plus1ex\@minus1ex%
@@ -5292,20 +5261,20 @@
     \fi%
     \def\@tempa{%
       \renewcommand*\tud@pagecolor{}%
-      \ifcase\tud@layout@title\relax\or% true
-        \cs@std@lock{tud@head@bar}{0}%
+      \ifcase\tud@layout@title@num\relax\or% true
+        \cs@std@lock{tud@head@bar@num}{0}%
       \or% litecolor
-        \cs@set@lock{tud@head@bar}{1}%
+        \cs@set@lock{tud@head@bar@num}{1}%
       \or% barcolor
-        \cs@set@lock{tud@head@bar}{2}%
+        \cs@set@lock{tud@head@bar@num}{2}%
       \or% bicolor
-        \cs@set@lock{tud@head@bar}{3}%
+        \cs@set@lock{tud@head@bar@num}{3}%
       \or% color
         \renewcommand*\tud@pagecolor{HKS41}%
-        \cs@set@lock{tud@head@bar}{1}%
+        \cs@set@lock{tud@head@bar@num}{1}%
       \or% full
         \renewcommand*\tud@pagecolor{HKS41}%
-        \cs@set@lock{tud@head@bar}{3}%
+        \cs@set@lock{tud@head@bar@num}{3}%
       \fi%
       \tud@color{\tud@title@fontcolor}%
       \addtokomafont{pagenumber}{\usekomafont{tudheadings}}%
@@ -5351,14 +5320,14 @@
     {\usekomafont{author}{\csuse{@#1}\par}}%
   \fi%
 }
-\newcommand*\tud@maketitlehead{%
+\newcommand*\tud@make@titlehead{%
   \renewcommand*\tud@title@fontcolor{}%
-  \ifcase\tud@layout@title\relax\or\else% *color
+  \ifcase\tud@layout@title@num\relax\or\else% *color
     \renewcommand*\tud@title@fontcolor{HKS41}%
   \fi%
   \par%
-  \ifx\tud@titlepagenumber\relax\else%
-    \ifnum\tud@titlepagenumber=\@ne\else%
+  \ifx\tud@title@pagenumber\relax\else%
+    \ifnum\tud@title@pagenumber=\@ne\relax\else%
       \ClassWarning{\TUDClassName}{%
         Optional argument of \string\maketitle\space ignored\MessageBreak%
         at notitlepage-mode%
@@ -5379,21 +5348,21 @@
       \ifx\@extratitle\@empty\else%
         \twocolumn[\@makeextratitle]\next@tdpage%
       \fi%
-      \twocolumn[\tud@@maketitlehead]%
+      \twocolumn[\tud@make@@titlehead]%
     \else%
       \ifx\@extratitle\@empty\else%
         \@makeextratitle\next@tdpage%
       \fi%
-      \tud@@maketitlehead%
+      \tud@make@@titlehead%
     \fi%
     \ifx\titlepagestyle\@empty\else\thispagestyle{\titlepagestyle}\fi%
     \@thanks%
   \endgroup%
 }
-\newcommand*\tud@@maketitlehead{%
+\newcommand*\tud@make@@titlehead{%
   \global\@topnum=\z@%
   \vspace*{%
-    \dimexpr\tud@dim@topdiffvskip+\tud@dim@headingsvskip-\baselineskip\relax%
+    \dimexpr\tud@dim@areavskip+\tud@dim@headingsvskip-\baselineskip\relax%
   }%
   \vspace*{\headingsvskip}%
   \setparsizes{\z@}{\z@}{\z@\@plus1fil}\par@updaterelative%
@@ -5425,7 +5394,7 @@
     \fi%
     \vskip 2ex\@plus1ex\@minus1ex%
     \vskip 2\bigskipamount%
-    \let\tud@split@author\tud@split@author@title%
+    \let\tud@split@author@do\tud@split@author@title%
     \tud@multiple@split{@author}\par%
     \vskip 2ex\@plus1ex\@minus1ex%
     {\usekomafont{date}{\@date\nobreakspace\@datemore\par}}%
@@ -5465,38 +5434,37 @@
     }{}%
   \fi%
 }
-% TODO: reicht da keine temporäre Box?
-\newsavebox\tud@title@twocolumn@box
+\newsavebox\tud@title@box
 \newcommand\tud@title@twocolumn[1]{%
   \onecolumn%
   \begingroup%
     \let\clearpage\relax%
     \let\newpage\relax%
-    \global\setbox\tud@title@twocolumn@box\vbox{%
+    \global\setbox\tud@title@box\vbox{%
       \vspace*{.9\baselineskip}#1\bigskip%
     }%
   \endgroup%
   \setlength\@tempdima{\textheight}%
   \tud@ifverlower{2.03}{%
     \tud@ddc@check%
-    \ifcase\@tempb\relax\else% \tud@ddc@foot!=false
+    \ifcase\@tempb\relax\else% \tud@ddc@foot@num!=false
       \setlength\@tempdima{\dimexpr\textheight-\tud@dim@ddcdiff\relax}%
       \@tempswatrue%
     \fi%
   }{}%
-  \ifdim\ht\tud@title@twocolumn@box>\@tempdima\relax%
-    \@whiledim\ht\tud@title@twocolumn@box>\@tempdima\do{%
+  \ifdim\ht\tud@title@box>\@tempdima\relax%
+    \@whiledim\ht\tud@title@box>\@tempdima\do{%
       \splittopskip\topskip%
       \splitmaxdepth\maxdepth%
-      \vsplit\tud@title@twocolumn@box to \@tempdima%
+      \vsplit\tud@title@box to \@tempdima%
       \clearpage%
       \setlength\@tempdima{\textheight}%
       \tud@ifverlower{2.03}{\@tempswafalse}{}%
     }%
   \else%
-    \setbox\tud@title@twocolumn@box\vbox{#1\bigskip}%
+    \setbox\tud@title@box\vbox{#1\bigskip}%
   \fi%
-  \twocolumn[\unvbox\tud@title@twocolumn@box]%
+  \twocolumn[\unvbox\tud@title@box]%
   \tud@ifverlower{2.03}{%
     \if@tempswa%
       \ClassWarning{\TUDClassName}{%
@@ -5527,7 +5495,7 @@
     \let\thanks\@gobble%
     \let\footnote\@gobble%
     \TUD@parameter@set{cover}{#1}%
-    \let\tud@layout@title\tud@layout@cover%
+    \let\tud@layout@title@num\tud@layout@cover@num%
     \tud@layout@process%
     \if@tud@cdgeometry@cover%
       \let\coverpagetopmargin\tud@dim@slimmargin%
@@ -5539,14 +5507,14 @@
         \def\coverpagebottommargin{.5\tud@dim@both}%
       }{}%
     \fi%
-    \ifcase\tud@layout@cover\relax% false
+    \ifcase\tud@layout@cover@num\relax% false
       \KOMAoptions{titlepage=firstiscover}%
       \let\@extratitle\@empty%
       \let\@uppertitleback\@empty%
       \let\@lowertitleback\@empty%
       \let\@dedication\@empty%
-      \ifx\tud@titlepagenumber\relax\gdef\tud@titlepagenumber{1}\fi%
-      \tud@cmd@use{maketitle}[\tud@titlepagenumber]%
+      \ifx\tud@title@pagenumber\relax\gdef\tud@title@pagenumber{1}\fi%
+      \tud@cmd@use{maketitle}[\tud@title@pagenumber]%
     \else% !false
       \@tud@covertrue%
       \@titlepagetrue%
@@ -5594,7 +5562,7 @@
         \columnwidth=\textwidth%
         \hsize=\columnwidth%
         \linewidth=\hsize%
-        \tud@dim@topdiffvskip=\z@%
+        \tud@dim@areavskip=\z@%
         \ifundef{\hypersetup}{}{\hypersetup{pageanchor=false}}%
         \tud@maketitle%
         \clearpage%
@@ -5619,9 +5587,9 @@
       }%
     }%
   }%
-  \TUD@parameter@define{pagenumber}{\def\tud@titlepagenumber{#1}}%
-  \TUD@parameter@define@ps{#1}%
-  \TUD@parameter@sethandler{%
+  \TUD@parameter@define{pagenumber}{\def\tud@title@pagenumber{#1}}%
+  \tud@parameters@pagestyle{#1}%
+  \TUD@parameter@handler{%
     \ifxnumber{#1}{%
       \TUD@parameter@set{cover}{pagenumber=#1}%
     }{%
@@ -5632,7 +5600,7 @@
 %%% From File: tudscr-frontmatter.dtx
 \newcommand*\tud@fm@check[2]{%
   \global\let\tud@fm@set\tud@fm@first%
-  \ifnumless{\@nameuse{tud@#1@level}}{3}{% false/true/section
+  \ifnumless{\@nameuse{tud@#1@level@num}}{3}{% false/true/section
     \ifboolexpr{%
       bool {@titlepage} and bool {@tud@#1@fil} and bool {@tud@#1@multi}%
     }{%
@@ -5652,7 +5620,7 @@
     \boolfalse{@tud@#1@multi}%
     \boolfalse{@tud@#1@fil}%
   }%
-  \ifnum\@nameuse{tud@#1@toc}>\tw@\relax%
+  \ifnum\@nameuse{tud@#1@toc@num}>\tw@\relax%
     \tud@fm@toc{#1}{#2}%
   \fi%
   \global\let\tud@fm@set\tud@fm@first%
@@ -5673,7 +5641,7 @@
       \sbox\z@{\vbox{#2}}%
       \protected@edef\@tempa{%
         \noexpand\endgroup%
-        \noexpand\ifnumodd{\csname tud@#1@toc\endcsname}{%
+        \noexpand\ifnumodd{\csname tud@#1@toc@num\endcsname}{%
           \noexpand\addchaptertocentry{}{\tud@fm@@toc}%
         }{%
           \noexpand\addsectiontocentry{}{\tud@fm@@toc}%
@@ -5687,8 +5655,8 @@
       with `#1=tocmultiple'%
     }%
     \edef\@tempa{%
-      \noexpand\cs@set@lock{tud@#1@toc}{%
-        \the\numexpr\@nameuse{tud@#1@toc}-2\relax%
+      \noexpand\cs@set@lock{tud@#1@toc@num}{%
+        \the\numexpr\@nameuse{tud@#1@toc@num}-2\relax%
       }%
     }%
     \@tempa%
@@ -5714,7 +5682,7 @@
         \ifbool{@tud@#1@fil}{\vfil\null\clearpage\null\vfil}{\clearpage}%
       }%
     \else%
-      \ifnum\@nameuse{tud@#1@level}=\z@%
+      \ifnum\@nameuse{tud@#1@level@num}=\z@\relax%
         \ifundef{\main@language}{}{\vspace*{-\baselineskip}}%
       \fi%
     \fi%
@@ -5725,29 +5693,33 @@
     \TUD@parameter@set{#1}{#2}%
     \tud@fm@set{#1}%
     \if@twocolumn\else\if@titlepage\else\relax%
-      \ifnum\@nameuse{tud@#1@level}<\tw@\begin{\tud@quoting}\fi% false/true
+      \ifnum\@nameuse{tud@#1@level@num}<\tw@\relax% false/true
+        \begin{\tud@quoting}%
+      \fi%
     \fi\fi%
-    \ifnum\tud@multicols>\@ne\relax%
+    \ifnum\tud@multicols@num>\@ne\relax%
       \vspace{-\multicolsep}%
-      \begin{multicols}{\tud@multicols}[{\tud@fm@head{#1}{#3}}]%
+      \begin{multicols}{\tud@multicols@num}[{\tud@fm@head{#1}{#3}}]%
     \else%
       \tud@fm@head{#1}{#3}%
     \fi%
 }
 \newcommand*\tud@fm@body@end[1]{%
-    \ifnum\tud@multicols>\@ne\relax%
+    \ifnum\tud@multicols@num>\@ne\relax%
       \end{multicols}%
       \vspace{-\multicolsep}%
     \else%
       \par%
     \fi%
     \if@twocolumn\else\if@titlepage\else\relax%
-      \ifnum\@nameuse{tud@#1@level}<\tw@\end{\tud@quoting}\par\fi% false/true
+      \ifnum\@nameuse{tud@#1@level@num}<\tw@\relax% false/true
+        \end{\tud@quoting}\par%
+      \fi%
     \fi\fi%
   \endgroup%
 }
 \newcommand*\tud@fm@head[2]{%
-  \ifcase\@nameuse{tud@#1@level}\relax% false
+  \ifcase\@nameuse{tud@#1@level@num}\relax% false
     \if@titlepage\endgraf\fi%
     \csname phantomsection\endcsname%
     \ifstr{\@currenvir}{\tud@quoting}{}{%
@@ -5783,15 +5755,11 @@
   \ifbool{@tud@#1@markboth}{%
     \markboth{\MakeMarkcase{#2}}{\MakeMarkcase{#2}}%
   }{}%
-  \ifnum\@nameuse{tud@#1@toc}>\z@\relax%
-    \ifnum\@nameuse{tud@#1@toc}<\thr@@\relax%
-      \ifnumodd{\csname tud@#1@toc\endcsname}{%
-        \addchaptertocentry{}{#2}%
-      }{%
-        \addsectiontocentry{}{#2}%
-      }%
-    \fi%
-  \fi%
+  \ifcase\@nameuse{tud@#1@toc@num}\relax\or% totoc
+    \addchaptertocentry{}{#2}%
+  \or% totocleveldown
+    \addsectiontocentry{}{#2}%
+  \fi
 }
 \newcommand*\tud@fm@pagestyle[2]{%
   \if@titlepage%
@@ -5800,7 +5768,7 @@
         You tried to use `#2' as a pagestyle for the\MessageBreak%
         `#1' environment, but it was never defined.%
       }%
-    }{\def\tud@ps{#2}}%
+    }{\def\tud@envir@ps{#2}}%
   \else%
     \ClassWarning{\TUDClassName}{%
       The key `pagestyle' can only be used either with\MessageBreak%
@@ -5814,21 +5782,21 @@
 \csundef{abstract}
 \csundef{endabstract}
 \NewEnviron{abstract}[1][]{%
-  \ifnum\@nameuse{tud@abstract@level}>\tw@\relax\@titlepagetrue\fi% chapter
-  \let\tud@ps\relax%
+  \ifnum\tud@abstract@level@num>\tw@\relax\@titlepagetrue\fi% chapter
+  \let\tud@envir@ps\relax%
   \TUD@parameter@set{abstract}{#1}%
   \tud@multicols@check%
   \if@titlepage%
     \tud@currentpagestyle@set%
-    \ifx\tud@ps\relax%
-      \tud@iftudps{\currentpagestyle}{%
-        \def\tud@ps{empty.tudheadings}%
+    \ifx\tud@envir@ps\relax%
+      \tud@iftudheadings{\currentpagestyle}{%
+        \def\tud@envir@ps{empty.tudheadings}%
       }{%
-        \def\tud@ps{empty}%
+        \def\tud@envir@ps{empty}%
       }%
     \fi%
     \clearpage%
-    \tud@ps@select%
+    \tud@envir@selectps%
   \fi%
   \renewcommand*\nextabstract[1][]{%
     \tud@fm@body@end{abstract}%
@@ -5845,30 +5813,30 @@
     \aftergroup\tud@currentpagestyle@reset%
     \clearpage%
   \else%
-    \ifnum\tud@abstract@level=\tw@%
+    \ifnum\tud@abstract@level@num=\tw@\relax%
       \vskip\dimexpr\bigskipamount-\parskip\relax%
     \fi%
   \fi%
 ]
 \TUD@parameter{abstract}{%
   \TUD@parameter@define{language}{\selectlanguage{#1}}%
-  \TUD@parameter@define{columns}{\cs@std@lock{tud@multicols}{#1}}%
+  \TUD@parameter@define{columns}{\cs@std@lock{tud@multicols@num}{#1}}%
   \TUD@parameter@define{pagestyle}{\tud@fm@pagestyle{abstract}{#1}}%
   \TUD@parameter@define{markboth}[true]{%
     \ifstrbool{#1}{%
       \@tud@abstract@markbothtrue%
-      \ifx\tud@ps\relax\def\tud@ps{headings}\fi%
+      \ifx\tud@envir@ps\relax\def\tud@envir@ps{headings}\fi%
     }{%
       \@tud@abstract@markbothfalse%
     }{%
       \@tud@abstract@markbothfalse%
-      \ifx\tud@ps\relax\def\tud@ps{headings}\fi%
+      \ifx\tud@envir@ps\relax\def\tud@envir@ps{headings}\fi%
       \manualmark\markboth{#1}{#1}%
     }%
   }%
   \TUD@parameter@define{abstract}{\TUDoption{abstract}{#1}}%
   \TUD@parameter@let{option}{abstract}%
-  \TUD@parameter@sethandler{\TUD@parameter@defaulthandler{abstract}{#1}}%
+  \TUD@parameter@handler{\TUD@parameter@defaulthandler{abstract}{#1}}%
 }
 \newcommand*\nextabstract[1][]{%
   \ClassError{\TUDClassName}{Incorrect usage of `\string\nextabstract'}{%
@@ -5879,21 +5847,21 @@
 \newif\if@tud@declarations
 \NewEnviron{declarations}[1][]{%
   \@tud@declarationstrue%
-  \ifnum\@nameuse{tud@declaration@level}>\tw@\relax\@titlepagetrue\fi% chapter
-  \let\tud@ps\relax%
+  \ifnum\tud@declaration@level@num>\tw@\relax\@titlepagetrue\fi% chapter
+  \let\tud@envir@ps\relax%
   \TUD@parameter@set{declaration}{#1}%
   \tud@multicols@check%
   \if@titlepage%
     \tud@currentpagestyle@set%
-    \ifx\tud@ps\relax%
-      \tud@iftudps{\currentpagestyle}{%
-        \def\tud@ps{empty.tudheadings}%
+    \ifx\tud@envir@ps\relax%
+      \tud@iftudheadings{\currentpagestyle}{%
+        \def\tud@envir@ps{empty.tudheadings}%
       }{%
-        \def\tud@ps{empty}%
+        \def\tud@envir@ps{empty}%
       }%
     \fi%
     \clearpage%
-    \tud@ps@select%
+    \tud@envir@selectps%
   \fi%
   \def\and{, }%
   \let\thanks\@gobble%
@@ -5904,24 +5872,24 @@
     \aftergroup\tud@currentpagestyle@reset%
     \clearpage%
   \else%
-    \ifnum\tud@declaration@level=\tw@%
+    \ifnum\tud@declaration@level@num=\tw@\relax%
       \vskip\dimexpr\bigskipamount-\parskip\relax%
     \fi%
   \fi%
 ]
 \TUD@parameter{declaration}{%
   \TUD@parameter@define{language}{\selectlanguage{#1}}%
-  \TUD@parameter@define{columns}{\cs@std@lock{tud@multicols}{#1}}%
+  \TUD@parameter@define{columns}{\cs@std@lock{tud@multicols@num}{#1}}%
   \TUD@parameter@define{pagestyle}{\tud@fm@pagestyle{declaration}{#1}}%
   \TUD@parameter@define{markboth}[true]{%
     \ifstrbool{#1}{%
       \@tud@declaration@markbothtrue%
-      \ifx\tud@ps\relax\def\tud@ps{headings}\fi%
+      \ifx\tud@envir@ps\relax\def\tud@envir@ps{headings}\fi%
     }{%
       \@tud@declaration@markbothfalse%
     }{%
       \@tud@declaration@markbothfalse%
-      \ifx\tud@ps\relax\def\tud@ps{headings}\fi%
+      \ifx\tud@envir@ps\relax\def\tud@envir@ps{headings}\fi%
       \manualmark\markboth{#1}{#1}%
     }%
   }%
@@ -5932,7 +5900,7 @@
   \TUD@parameter@let{confirmationclosing}{closing}%
   \TUD@parameter@define{declaration}{\TUDoption{declaration}{#1}}%
   \TUD@parameter@let{option}{declaration}%
-  \TUD@parameter@sethandler{\TUD@parameter@defaulthandler{declaration}{#1}}%
+  \TUD@parameter@handler{\TUD@parameter@defaulthandler{declaration}{#1}}%
 }
 \newcommand*\tud@supporter{}
 \newcommand*\declaration{%
@@ -5979,7 +5947,7 @@
   }%
 }
 \newcommand*\@confirmation[1][]{%
-  \TUD@parameter@sethandler[declaration]{%
+  \TUD@parameter@handler[declaration]{%
     \TUD@parameter@set{declaration}{supporter=##1}%
   }%
   \ifbool{@tud@declarations}{%
@@ -5991,7 +5959,7 @@
       \tud@fm@confirmation%
     \end{declarations}%
   }%
-  \TUD@parameter@sethandler[declaration]{%
+  \TUD@parameter@handler[declaration]{%
     \TUD@parameter@defaulthandler{declaration}{##1}%
   }%
 }
@@ -6001,7 +5969,7 @@
   \tud@fm@body@end{declaration}%
 }
 \newcommand*\blocking[1][]{%
-  \TUD@parameter@sethandler[declaration]{%
+  \TUD@parameter@handler[declaration]{%
     \TUD@parameter@set{declaration}{company=##1}%
   }%
   \ifbool{@tud@declarations}{%
@@ -6013,7 +5981,7 @@
       \tud@fm@blocking%
     \end{declarations}%
   }%
-  \TUD@parameter@sethandler[declaration]{%
+  \TUD@parameter@handler[declaration]{%
     \TUD@parameter@defaulthandler{declaration}{##1}%
   }%
 }
@@ -6098,12 +6066,12 @@
     ]{\titlepagename}{title}%
   \fi%
 }{}{\tud@patch@wrn{titlepage}}
-\pretocmd{\tud@maketitlehead}{%
+\pretocmd{\tud@make@titlehead}{%
   \tud@bookmark@startatroot%
   \tudbookmark[%
   0%
   ]{\titlename}{title}%
-}{}{\tud@patch@wrn{tud@maketitlehead}}
+}{}{\tud@patch@wrn{tud@make@titlehead}}
 \pretocmd{\@maketitle}{%
   \tud@bookmark@startatroot%
   \tudbookmark[%
