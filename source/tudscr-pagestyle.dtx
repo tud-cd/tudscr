@@ -1332,7 +1332,7 @@
 % \end{macro}^^A \tud@head@font@light
 % \end{macro}^^A \tud@head@fontsize
 % \end{macro}^^A \tud@head@font@set
-% \begin{macro}{\tud@head@text}
+% \begin{macro}{\tud@head@text@line}
 % \begin{macro}{\tud@head@text@list}
 % \changes{v2.05}{2015/11/26}{neu}^^A
 % \begin{macro}{\tud@head@text@delimiter}
@@ -1340,7 +1340,7 @@
 % Diese Befehle sind Hilfsmakros, die bei der Erzeugung der Textzeile inner- und
 % unterhalb des Querbalkens des TUD-Kopfes dienen.
 %    \begin{macrocode}
-\newcommand*\tud@head@text{}
+\newcommand*\tud@head@text@line{}
 \newcommand*\tud@head@text@list{}
 \newcommand*\tud@head@text@delimiter{}
 \newcommand*\tud@head@text@buffer{}
@@ -1348,7 +1348,7 @@
 % \end{macro}^^A \tud@head@text@buffer
 % \end{macro}^^A \tud@head@text@delimiter
 % \end{macro}^^A \tud@head@text@list
-% \end{macro}^^A \tud@head@text
+% \end{macro}^^A \tud@head@text@line
 % \begin{macro}{\tud@head@text@add}
 % \changes{v2.04}{2015/04/08}{Verwendung von \cs{protected@edef}}^^A
 % \changes{v2.05}{2015/11/26}{Redesign}^^A
@@ -1364,22 +1364,22 @@
     \edef\tud@head@text@delimiter{\expandonce\tud@head@text@buffer}%
     \def\tud@head@text@buffer{#1}%
     \edef\@tempa{%
-      \expandonce\tud@head@text%
+      \expandonce\tud@head@text@line%
       \expandonce\tud@head@text@delimiter%
       \unexpanded{#2#3}%
     }%
 %    \end{macrocode}
-% Sollte das hinzuzufügende Feld die aktuelle Kopfzeile \cs{tud@head@text} über 
-% die Textbreite hinaus erweitern, wird der bisherige Inhalt in die Liste 
+% Sollte das hinzuzufügende Feld die aktuelle Kopfzeile \cs{tud@head@text@line} 
+% über die Textbreite hinaus erweitern, wird der bisherige Inhalt in die Liste 
 % \cs{tud@head@text@list} gespeichert und eine neue mit dem aktuellen Inhalt 
 % begonnen. Andernfalls wird der aktuelle Inhalt dem bestehenden hinzugefügt.
 %    \begin{macrocode}
     \settowidth\@tempdima{\@tempa}%
     \ifdim\@tempdima>\textwidth\relax%
-      \listeadd\tud@head@text@list{\expandonce\tud@head@text}%
-      \protected@edef\tud@head@text{#2#3}%
+      \listeadd\tud@head@text@list{\expandonce\tud@head@text@line}%
+      \protected@edef\tud@head@text@line{#2#3}%
     \else%
-      \edef\tud@head@text{\expandonce\@tempa}%
+      \edef\tud@head@text@line{\expandonce\@tempa}%
     \fi%
   }%
 }
@@ -1407,7 +1407,7 @@
 % mit \cs{tud@head@text@add}\oarg{Trennzeichen}\marg{Schrift}\marg{Feld}. Die
 % dafür benötigten Hilfsmakros werden vor der Verwendung initialisiert.
 %    \begin{macrocode}
-    \def\tud@head@text{}%
+    \def\tud@head@text@line{}%
     \def\tud@head@text@list{}%
     \def\tud@head@text@buffer{}%
     \tud@head@text@add[\enskip]{\tud@head@font@bold}{\@faculty}%
@@ -1415,10 +1415,10 @@
     \tud@head@text@add{\tud@head@font@light}{\@institute}%
     \tud@head@text@add{\tud@head@font@light}{\@chair}%
 %    \end{macrocode}
-% Ganz zum Schluss wird der Rest aus \cs{tud@head@text} ebenso wie ggf. die 
-% zusätzliche Zeile in die Liste expandiert.
+% Ganz zum Schluss wird der Rest aus \cs{tud@head@text@line} ebenso wie ggf. 
+% die zusätzliche Zeile in die Liste expandiert.
 %    \begin{macrocode}
-    \listeadd\tud@head@text@list{\expandonce\tud@head@text}%
+    \listeadd\tud@head@text@list{\expandonce\tud@head@text@line}%
     \ifstr{\@extraheadline}{}{}{%%
       \listadd\tud@head@text@list{\tud@head@font@light\@extraheadline}%
     }%
