@@ -1,4 +1,4 @@
-% \CheckSum{4171}
+% \CheckSum{4173}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -819,7 +819,7 @@
 %
 % \begin{macro}{\if@declare}
 % \begin{macro}{\if@openindex}
-% \begin{macro}{\tud@declare@type}
+% \begin{macro}{\tud@declare@num}
 % \changes{v2.05}{2015/11/01}{neu}^^A
 % Dies sin ein paar Hilfsmakros zur Steuerung des Markup sowie der Ausgabe von
 % Deklarationen, Index und Änderungsliste, welche bei den nächsten Befehlen und 
@@ -832,13 +832,13 @@
 \newif\if@declare
 \newif\if@openindex
 %    \end{macrocode}
-% Das Makro \cs{tud@declare@type} bestimmt innerhalb einer Deklaration, wie 
-% das Markup erfolgen soll. Die möglichen Werte für \cs{tud@declare@type} sind
+% Das Makro \cs{tud@declare@num} bestimmt innerhalb einer Deklaration, wie 
+% das Markup erfolgen soll. Die möglichen Werte für \cs{tud@declare@num} sind
 % bei der Beschreibung von \cs{ProcessMarkup@Declare} zu finden.
 %    \begin{macrocode}
-\newcommand*\tud@declare@type{0}
+\newcommand*\tud@declare@num{0}
 %    \end{macrocode}
-% \end{macro}^^A \tud@declare@type
+% \end{macro}^^A \tud@declare@num
 % \end{macro}^^A \if@openindex
 % \end{macro}^^A \if@declare
 % \begin{environment}{Declaration}
@@ -900,9 +900,9 @@
 % keine Änderungsnotiz erzeugt.
 %    \begin{macrocode}
     \listadd\list@declaration{%
-      \def\tud@declare@type{1}%
+      \def\tud@declare@num{1}%
       #3%
-      \def\tud@declare@type{0}%
+      \def\tud@declare@num{0}%
     }%
     \tud@declare@start{#3}{#4}{#5}{#6}%
   }{%
@@ -1077,14 +1077,14 @@
 % sondern lediglich Hyperlink, Indexeintrag und Änderungsnotiz erzeugt. Das 
 % optionale Argument dient einem Änderungseintrag, das erste obligaotrische 
 % gilt der eigentlichen Deklaration, das zweite zur Einstellung des Makros 
-% \cs{tud@declare@type}, mit welchem das Verhalten für das Erzeugen der Labels 
+% \cs{tud@declare@num}, mit welchem das Verhalten für das Erzeugen der Labels 
 % gesteuert wird.
 %    \begin{macrocode}
 \NewDocumentCommand\tud@declare@special@start{omm}{%
   \@ChangedAt@CreateList(#2){#1}%
-  \def\tud@declare@type{#3}%
+  \def\tud@declare@num{#3}%
   \@declaretrue\@openindextrue#2\@declarefalse%
-  \def\tud@declare@type{0}%
+  \def\tud@declare@num{0}%
 }
 \newcommand*\tud@declare@special@end[1]{%
   \ifx\list@ChangedAt\relax\else%
@@ -2509,7 +2509,7 @@
 % \begin{macro}{\ProcessMarkup@Declare}
 % \changes{v2.05}{2015/11/05}{neu}^^A
 % Mit \cs{ProcessMarkup@Declare} wird die formatierte Ausgabe der Deklaration 
-% realisiert. Wie diese genau gestaltet ist, wird durch \cs{tud@declare@type}
+% realisiert. Wie diese genau gestaltet ist, wird durch \cs{tud@declare@num}
 % bestimmt. Folgende Werte sind möglich:
 % \begin{description}
 % \item[\val{0}:] Ausgabe von Markup, Erzeugen eines Labels
@@ -2544,7 +2544,7 @@
 %<*class>
 \NewDocumentCommand\ProcessMarkup@Declare{mmd==o}{%
   \@CheckMarkupFormat%
-  \ifcase\tud@declare@type%
+  \ifcase\tud@declare@num\relax%
     \tudhyperdef{#1}%
     \@MarkupOutput{#2}=#3=[#4]%
   \or%
@@ -2927,7 +2927,7 @@
       \imki@idxprologue
     \fi
   }{%
-    \ifnum\imki@columns>\@ne%
+    \ifnum\imki@columns>\@ne\relax%
       \columnsep \imki@columnsep%
       \ifx\imki@idxprologue\relax%
         \begin{multicols}{\imki@columns}[\imki@indexlevel{\indexname}]%

@@ -220,7 +220,7 @@
 \newcommand*\tud@font@check{%
   \edef\@tempa##1##2{\lowercase{\noexpand\IfFileExists{##1##2.fd}}}%
   \def\@tempb##1{%
-    \ifnum\tud@cdfont>\z@\relax% true/heavy
+    \ifnum\tud@cdfont@num>\z@\relax% true/heavy
       \if@tud@cdmath%
 %<*class>
         \ClassWarningNoLine{\TUDClassName}%
@@ -254,7 +254,7 @@
       \fontspec{##1}%
       \expandafter\ifx\the\font\nullfont%
         ##2%
-        \ifnum\tud@cdfont>\z@\relax% true/heavy
+        \ifnum\tud@cdfont@num>\z@\relax% true/heavy
 %<*class>
           \ClassWarningNoLine{\TUDClassName}%
 %</class>
@@ -289,7 +289,7 @@
 % gleichen Maße geprüft.
 %    \begin{macrocode}
     \def\@tempc##1{%
-      \ifnum\tud@cdfont>\z@\relax% true/heavy
+      \ifnum\tud@cdfont@num>\z@\relax% true/heavy
         \@tempswafalse%
         \ifstr{OT1}{\encodingdefault}{\@tempswatrue}{}%
         \ifstr{T1}{\encodingdefault}{\@tempswatrue}{}%
@@ -335,7 +335,7 @@
 % \changes{v2.02}{2014/07/08}{Schlüsselwerte für \opt{cdhead}}^^A
 % \changes{v2.02}{2014/08/29}{Schlüsselwerte für \opt{fontspec}}^^A
 % \changes{v2.05}{2016/04/04}{Schlüsselwerte für \val{ultrabold}}^^A
-% \begin{macro}{\tud@cdfont}
+% \begin{macro}{\tud@cdfont@num}
 % \begin{macro}{\if@tud@cdfont@din}
 % \begin{macro}{\if@tud@cdfont@ultrabold}
 % \changes{v2.05}{2016/04/04}{neu}^^A
@@ -349,7 +349,7 @@
 \newif\if@tud@cdfont@din
 \newif\if@tud@cdfont@ultrabold
 \@tud@cdfont@dintrue
-\newcommand*\tud@cdfont{1}
+\newcommand*\tud@cdfont@num{1}
 \TUD@key{cdfont}[true]{%
   \TUD@set@numkey{cdfont}{@tempa}{%
     \TUD@numkey@bool,%
@@ -404,27 +404,27 @@
 % den Fließtext.
 %    \begin{macrocode}
     \ifcase\@tempa\relax% false
-      \renewcommand*\tud@cdfont{0}%
+      \renewcommand*\tud@cdfont@num{0}%
       \if@atdocument\tud@font@set\fi%
     \or% true
-      \renewcommand*\tud@cdfont{1}%
+      \renewcommand*\tud@cdfont@num{1}%
       \if@atdocument\tud@font@set\fi%
     \or% heavy
-      \renewcommand*\tud@cdfont{2}%
+      \renewcommand*\tud@cdfont@num{2}%
       \if@atdocument\tud@font@set\fi%
 %    \end{macrocode}
 % Die Definition des fetten Schriftschnittes.
 %    \begin{macrocode}
     \or% normalbold
       \@tud@cdfont@ultraboldfalse%
-      \ifcase\tud@cdfont\relax% false to true
-        \renewcommand*\tud@cdfont{1}%
+      \ifcase\tud@cdfont@num\relax% false to true
+        \renewcommand*\tud@cdfont@num{1}%
       \fi%
       \if@atdocument\tud@font@set\fi%
     \or% ultrabold
       \@tud@cdfont@ultraboldtrue%
-      \ifcase\tud@cdfont\relax% false to true
-        \renewcommand*\tud@cdfont{1}%
+      \ifcase\tud@cdfont@num\relax% false to true
+        \renewcommand*\tud@cdfont@num{1}%
       \fi%
       \if@atdocument\tud@font@set\fi%
 %    \end{macrocode}
@@ -489,8 +489,8 @@
       \ifdim#1>\z@\relax%
         \TUD@KOMAoptions{fontsize=#1}%
         \csname @tud@fontsize@settrue\endcsname%
-        \ifcase\tud@cdfont\relax% false to true
-          \renewcommand*\tud@cdfont{1}%
+        \ifcase\tud@cdfont@num\relax% false to true
+          \renewcommand*\tud@cdfont@num{1}%
           \if@atdocument\tud@font@set\fi%
         \fi%
         \FamilyKeyStateProcessed%
@@ -501,7 +501,7 @@
 %    \end{macrocode}
 % \end{macro}^^A \if@tud@cdfont@ultrabold
 % \end{macro}^^A \if@tud@cdfont@din
-% \end{macro}^^A \tud@cdfont
+% \end{macro}^^A \tud@cdfont@num
 % \end{option}^^A cdfont
 % \begin{macro}{\if@tud@fontspec}
 % \changes{v2.02}{2014/08/29}{neu}^^A
@@ -595,7 +595,7 @@
 % dass die Schriften des \CDs nicht installiert sind, eine Warnung erzeugt.
 %    \begin{macrocode}
   \if@atdocument%
-    \ifnum\tud@cdfont>\z@\relax% true/heavy
+    \ifnum\tud@cdfont@num>\z@\relax% true/heavy
       \if@tud@univers\else%
 %<*class>
         \ClassWarning{\TUDClassName}%
@@ -628,7 +628,7 @@
 % Werden die Schriften des \CDs deaktiviert, wird auf die zu Dokumentbeginn
 % gesicherten Schriften\footnote{mit und ohne Serifen} zurückgeschaltet.
 %    \begin{macrocode}
-  \ifcase\tud@cdfont\relax% false
+  \ifcase\tud@cdfont@num\relax% false
     \tud@cmd@restore{rmdefault}%
     \tud@cmd@restore{sfdefault}%
     \tud@cmd@restore{ttdefault}%
@@ -655,10 +655,10 @@
 % kein Layout im \CD genutzt wird.
 %    \begin{macrocode}
 %<*class>
-    \ifcase\tud@cd\relax% false
-      \cs@std@lock{tud@head@font}{0}%
+    \ifcase\tud@cd@num\relax% false
+      \cs@std@lock{tud@head@font@num}{0}%
     \else% !false
-      \cs@std@lock{tud@head@font}{1}%
+      \cs@std@lock{tud@head@font@num}{1}%
     \fi%
 %</class>
 %    \end{macrocode}
@@ -693,7 +693,7 @@
 % Die Schrift im Querbalken wird bei den Klassen angepasst.
 %    \begin{macrocode}
 %<*class>
-    \cs@std@lock{tud@head@font}{\tud@cdfont}%
+    \cs@std@lock{tud@head@font@num}{\tud@cdfont@num}%
 %</class>
 %    \end{macrocode}
 % Danach erfolgt die Definition der Schriften des \CDs entweder mit dem Paket
@@ -734,7 +734,7 @@
         \renewcommand*\sfdefault{\tud@univers}%
         \renewcommand*\ttdefault{\tud@univers t}%
       \fi%
-      \ifnum\tud@cdfont=\@ne\relax% true
+      \ifnum\tud@cdfont@num=\@ne\relax% true
         \if@tud@cdfont@ultrabold% ultrabold
           \renewcommand*\bfdefault{b}%
         \else% normalbold
@@ -1570,7 +1570,7 @@
 % Warnung erzeugt.
 %    \begin{macrocode}
   \if@atdocument%
-    \ifnum\tud@cdfont>\z@\relax% true/heavy
+    \ifnum\tud@cdfont@num>\z@\relax% true/heavy
       \if@tud@cdmath%
         \if@tud@universmath\else%
 %<*class>
