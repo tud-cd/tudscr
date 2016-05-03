@@ -951,9 +951,9 @@
 % \end{environment}^^A theglossary
 % \begin{macro}{\chapterpage}
 % \begin{macro}{\if@tud@comp@chapterpage}
-% \begin{macro}{\tud@chapterpage@set}
-% \begin{macro}{\tud@chapterpage@unset}
-% \begin{macro}{\tud@chapterpage@wrn}
+% \begin{macro}{\tud@comp@chapterpage@set}
+% \begin{macro}{\tud@comp@chapterpage@unset}
+% \begin{macro}{\tud@comp@chapterpage@wrn}
 % Die alte \cls{tudbook}-Klasse stellt den Befehl \cs{chapterpage} bereit.
 % Mit diesem ist es möglich, das Verhalten der Kapitelseiten~-- welches durch
 % die Option \opt{chapterpage} gesteuert wird~-- temporär umzuschalten, also
@@ -961,19 +961,19 @@
 % typographisch durchaus zu hinterfragen, allerdings sollen die neuen Klassen
 % möglichst kompatibel zu der alten sein, weshalb diese Funktionalität trotzdem
 % implementiert wird. Der Befehl \cs{chapterpage} setzt den globalen Schalter
-% \cs{if@tud@comp@chapterpage}. Der Befehl \cs{tud@chapterpage@set} setzt für 
-% Kapitel das komplementäre Verhalten zur eigentlich gewählten
+% \cs{if@tud@comp@chapterpage}. Der Befehl \cs{tud@comp@chapterpage@set} setzt 
+% für Kapitel das komplementäre Verhalten zur eigentlich gewählten
 % \opt{chapterpage}"=Option. Nach dem Setzen der entsprechenden Überschrift
-% wird \cs{tud@chapterpage@set} nochmals aufgerufen, das Verhalten auf den
+% wird \cs{tud@comp@chapterpage@set} nochmals aufgerufen, das Verhalten auf den
 % ursprünglichen Zustand geschaltet und der globale Schalter
 % \cs{if@tud@comp@chapterpage} zurückgesetzt.
 %    \begin{macrocode}
 \newif\if@tud@comp@chapterpage
 \newcommand*\chapterpage{%
   \global\@tud@comp@chapterpagetrue%
-  \tud@chapterpage@wrn%
+  \tud@comp@chapterpage@wrn%
 }
-\newcommand*\tud@chapterpage@set[1][]{%
+\newcommand*\tud@comp@chapterpage@set[1][]{%
   \if@tud@comp@chapterpage%
     \if@tud@chapterpage%
       \TUDoptions{chapterpage=false}%
@@ -982,26 +982,26 @@
     \fi%
   \fi%
 }
-\newcommand*\tud@chapterpage@unset[1][]{%
-  \tud@chapterpage@set%
+\newcommand*\tud@comp@chapterpage@unset[1][]{%
+  \tud@comp@chapterpage@set%
   \global\@tud@comp@chapterpagefalse%
 }
 %    \end{macrocode}
 % Da wie bereits beschrieben das Vorgehen äußerst fragwürdig ist, wird bei der
 % Verwendung von \cs{chapterpage} zumindest einmalig eine Warnung ausgegeben.
 %    \begin{macrocode}
-\newcommand*\tud@chapterpage@wrn{%
+\newcommand*\tud@comp@chapterpage@wrn{%
   \PackageWarning{tudscrcomp}{%
     The command \string\chapterpage\space is not\MessageBreak%
     recommended. You should use the same style for\MessageBreak%
     chapters throughout the document%
   }%
-  \global\let\tud@chapterpage@wrn\relax%
+  \global\let\tud@comp@chapterpage@wrn\relax%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@chapterpage@wrn
-% \end{macro}^^A \tud@chapterpage@unset
-% \end{macro}^^A \tud@chapterpage@set
+% \end{macro}^^A \tud@comp@chapterpage@wrn
+% \end{macro}^^A \tud@comp@chapterpage@unset
+% \end{macro}^^A \tud@comp@chapterpage@set
 % \end{macro}^^A \if@tud@comp@chapterpage
 % \end{macro}^^A \chapterpage
 % \begin{macro}{\tud@chapter}
@@ -1012,21 +1012,21 @@
 %    \begin{macrocode}
 \AtEndPreamble{%
   \if@chapter%
-    \pretocmd{\tud@chapter}{\tud@chapterpage@set}%
+    \pretocmd{\tud@chapter}{\tud@comp@chapterpage@set}%
       {}{\tud@patch@wrn{tud@chapter}}%
-    \apptocmd{\tud@chapter}{\tud@chapterpage@unset}%
+    \apptocmd{\tud@chapter}{\tud@comp@chapterpage@unset}%
       {}{\tud@patch@wrn{tud@chapter}}%
-    \pretocmd{\tud@schapter}{\tud@chapterpage@set}%
+    \pretocmd{\tud@schapter}{\tud@comp@chapterpage@set}%
       {}{\tud@patch@wrn{tud@schapter}}%
-    \apptocmd{\tud@schapter}{\tud@chapterpage@unset}%
+    \apptocmd{\tud@schapter}{\tud@comp@chapterpage@unset}%
       {}{\tud@patch@wrn{tud@schapter}}%
-    \pretocmd{\tud@addchap}{\tud@chapterpage@set}%
+    \pretocmd{\tud@addchap}{\tud@comp@chapterpage@set}%
       {}{\tud@patch@wrn{tud@addchap}}%
-    \apptocmd{\tud@addchap}{\tud@chapterpage@unset}%
+    \apptocmd{\tud@addchap}{\tud@comp@chapterpage@unset}%
       {}{\tud@patch@wrn{tud@addchap}}%
-    \pretocmd{\tud@saddchap}{\tud@chapterpage@set}%
+    \pretocmd{\tud@saddchap}{\tud@comp@chapterpage@set}%
       {}{\tud@patch@wrn{tud@saddchap}}%
-    \apptocmd{\tud@saddchap}{\tud@chapterpage@unset}%
+    \apptocmd{\tud@saddchap}{\tud@comp@chapterpage@unset}%
       {}{\tud@patch@wrn{tud@saddchap}}%
   \fi%
 }
@@ -1227,30 +1227,30 @@
 % \changes{v2.05}{2016/04/17}{neu}^^A
 % \begin{macro}{\topcentersubsection}
 % \changes{v2.05}{2016/04/17}{neu}^^A
-% \begin{macro}{\tud@center@section}
+% \begin{macro}{\tud@comp@centersection}
 % \changes{v2.05}{2016/04/17}{neu}^^A
 % Weiterhin werden Gliederungsebenen definiert, die unabhängig vom restlichen 
 % Layout zentriert gesetzt werden. Eine Mischung von unterschiedlichen Stilen 
 % gleichartiger Ebenen ist aus sicht von Typographie und Layout eher fraglich.
 %    \begin{macrocode}
 \newcommand*\centersection[2][\@nil]{%
-  \tud@center@section{section}{#1}{#2}%
+  \tud@comp@centersection{section}{#1}{#2}%
 }
 \newcommand*\centersubsection[2][\@nil]{%
-  \tud@center@section{subsection}{#1}{#2}%
+  \tud@comp@centersection{subsection}{#1}{#2}%
 }
 \newcommand*\topcentersection[2][\@nil]{%
-  \tud@center@section{topsection}{#1}{#2}%
+  \tud@comp@centersection{topsection}{#1}{#2}%
 }
 \newcommand*\topcentersubsection[2][\@nil]{%
-  \tud@center@section{topsubsection}{#1}{#2}%
+  \tud@comp@centersection{topsubsection}{#1}{#2}%
 }
 %    \end{macrocode}
 % Alle Gliederungsbefehle nutzen die passenden Ebenen mit der standardmaßig 
 % Ausrichtung und passen kurzfristig \cs{raggedsection} an. Dabei auch darauf 
 % geachtet, ob das optionale Argument durch den Anwender verwendet wird.
 %    \begin{macrocode}
-\newcommand*\tud@center@section[3]{%
+\newcommand*\tud@comp@centersection[3]{%
   \tud@cmd@store{raggedsection}%
   \let\raggedsection\centering%
   \ifx#2\@nil\relax%
@@ -1261,7 +1261,7 @@
   \tud@cmd@restore{raggedsection}%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@center@section
+% \end{macro}^^A \tud@comp@centersection
 % \end{macro}^^A \topcentersubsection
 % \end{macro}^^A \topcentersection
 % \end{macro}^^A \centersubsection
@@ -1352,7 +1352,7 @@
 % \fi
 %
 % \begin{macro}{\tud@footcontent@use}
-% \begin{macro}{\tud@footcontent@mathposterwidth}
+% \begin{macro}{\tud@comp@mathposterwidth}
 % \changes{v2.05}{2016/04/17}{neu}^^A
 % Um die Option \opt{tudmathposterfoot} abzuarbeiten, muss die Anpassung des
 % Makros \cs{tud@footcontent@use} für die Ausgabe des Fußbereichs erfolgen.
@@ -1362,12 +1362,12 @@
 % verbleibt etwas ungenutzter Platz rechts davon, welcher für ein etwaiges Logo 
 % verwendet wird. Dieses Verhalten wird hier nachgebildet.
 %    \begin{macrocode}
-\newcommand*\tud@footcontent@mathposterwidth{4.2\tud@dim@widemargin}
+\newcommand*\tud@comp@mathposterwidth{4.2\tud@dim@widemargin}
 \patchcmd\tud@footcontent@use{%
   \hsize=\dimexpr#2-\@tempdimc\relax%
 }{%
   \if@tud@mathposterfoot%
-    \hsize=\dimexpr\tud@footcontent@mathposterwidth\relax%
+    \hsize=\dimexpr\tud@comp@mathposterwidth\relax%
   \else%
     \hsize=\dimexpr#2-\@tempdimc\relax%
   \fi%
@@ -1376,7 +1376,7 @@
   \hsize=\dimexpr(#2-\columnsep)/2\relax%
 }{%
   \if@tud@mathposterfoot%
-    \hsize=\dimexpr(\tud@footcontent@mathposterwidth-\columnsep)/2\relax%
+    \hsize=\dimexpr(\tud@comp@mathposterwidth-\columnsep)/2\relax%
   \else%
     \hsize=\dimexpr(#2-\columnsep)/2\relax%
   \fi%
@@ -1385,13 +1385,13 @@
   \hsize=\dimexpr(#2-\columnsep)/2-\@tempdimc\relax%
 }{%
   \if@tud@mathposterfoot%
-    \hsize=\dimexpr(\tud@footcontent@mathposterwidth-\columnsep)/2\relax%
+    \hsize=\dimexpr(\tud@comp@mathposterwidth-\columnsep)/2\relax%
   \else%
     \hsize=\dimexpr(#2-\columnsep)/2-\@tempdimc\relax%
   \fi%
 }{}{\tud@patch@wrn{tud@footcontent@use}}
 %    \end{macrocode}
-% \end{macro}^^A \tud@footcontent@mathposterwidth
+% \end{macro}^^A \tud@comp@mathposterwidth
 % \end{macro}^^A \tud@footcontent@use
 % \begin{environment}{figurehere}
 % \changes{v2.05}{2016/04/17}{neu}^^A
@@ -1437,7 +1437,7 @@
 % \end{environment}^^A figurehere
 % \begin{environment}{farbtabellen}
 % \changes{v2.05}{2016/04/17}{neu}^^A
-% \begin{macro}{\if@tud@graytable}
+% \begin{macro}{\if@tud@comp@graytable}
 % \changes{v2.05}{2016/04/17}{neu}^^A
 % \begin{macro}{\blautabelle}
 % \changes{v2.05}{2016/04/17}{neu}^^A
@@ -1447,11 +1447,11 @@
 % für die farbliche Ausprägung der Tabellenzeilen definiert.
 %    \begin{macrocode}
 \PassOptionsToPackage{table}{xcolor}
-\newif\if@tud@graytable
-\newcommand*\blautabelle{\@tud@graytablefalse}
-\newcommand*\grautabelle{\@tud@graytabletrue}
+\newif\if@tud@comp@graytable
+\newcommand*\blautabelle{\@tud@comp@graytablefalse}
+\newcommand*\grautabelle{\@tud@comp@graytabletrue}
 \newenvironment{farbtabellen}{%
-  \if@tud@graytable%
+  \if@tud@comp@graytable%
     \rowcolors{1}{HKS92!20}{HKS92!10}
   \else%
     \rowcolors{1}{HKS41!20}{HKS41!10}%
@@ -1460,7 +1460,7 @@
 %    \end{macrocode}
 % \end{macro}^^A \grautabelle
 % \end{macro}^^A \blautabelle
-% \end{macro}^^A \if@tud@graytable
+% \end{macro}^^A \if@tud@comp@graytable
 % \end{environment}^^A farbtabellen
 % \begin{macro}{\schnittrand}
 % \changes{v2.05}{2016/04/17}{neu}^^A
@@ -1472,7 +1472,7 @@
 %
 % Deshalb wird das Makro mehr oder weniger mit \cs{bleedmargin} gleichgesetzt.
 %    \begin{macrocode}
-\apptocmd{\tud@setbleedmargin@default}{%
+\apptocmd{\tud@bleedmargin@set}{%
   \ifundef{\schnittrand}{}{%
     \setlength\bleedmargin{\dimexpr\schnittrand\relax}%
     \if@tempswa\else%
@@ -1487,7 +1487,7 @@
       }%
     \fi%
   }%
-}{}{\tud@patch@wrn{tud@setbleedmargin@default}}%
+}{}{\tud@patch@wrn{tud@bleedmargin@set}}%
 %    \end{macrocode}
 % \end{macro}^^A \schnittrand
 %
