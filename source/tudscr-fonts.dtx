@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-fonts.dtx}[%
-  2016/05/02 v2.05 TUD-KOMA-Script\space%
+  2016/05/03 v2.05 TUD-KOMA-Script\space%
 %</driver>
 %<package&identify>\ProvidesPackage{%
 %<package&identify&!fontsizes>  tudscrfonts%
@@ -890,7 +890,7 @@
 % \begin{macro}{\univbs}
 % \begin{macro}{\univxs}
 % \begin{macro}{\dinbn}
-% \begin{macro}{\@dinbn}
+% \begin{macro}{\tud@dinbn}
 % \begin{macro}{\textuln}
 % \begin{macro}{\texturn}
 % \begin{macro}{\textubn}
@@ -944,7 +944,7 @@
 %    \begin{macrocode}
   \if@tud@dinbold%
     \if@tud@fontspec%
-      \newfontface\@dinbn{DIN Bold}[%
+      \newfontface\tud@dinbn{DIN Bold}[%
         FontFace = {l}{\updefault}{DIN Bold},%
         FontFace = {m}{\updefault}{DIN Bold},%
         FontFace = {b}{\updefault}{DIN Bold},%
@@ -958,15 +958,15 @@
         NFSSFamily = \tud@dinbold%
       ]%
     \else%
-      \newrobustcmd*\@dinbn{\usefont{\encodingdefault}{\tud@dinbold}{b}{n}}%
+      \newrobustcmd*\tud@dinbn{\usefont{\encodingdefault}{\tud@dinbold}{b}{n}}%
     \fi%
     \if@tud@dinboldmath%
-      \appto\@dinbn{\mathversion{dinbold}}%
+      \appto\tud@dinbn{\mathversion{dinbold}}%
     \fi%
-    \newrobustcmd*\dinbn{\@dinbn}%
+    \newrobustcmd*\dinbn{\tud@dinbn}%
   \else%
-    \newrobustcmd*\@dinbn{\sectfont}%
-    \newrobustcmd*\dinbn{\tud@font@wrn{DIN Bold}\@dinbn}%
+    \newrobustcmd*\tud@dinbn{\sectfont}%
+    \newrobustcmd*\dinbn{\tud@font@wrn{DIN Bold}\tud@dinbn}%
   \fi%
 %    \end{macrocode}
 % Außerdem werden für die Schriften noch die entsprechenden Textauswahlbefehle
@@ -1026,7 +1026,7 @@
 % \end{macro}^^A \textubn
 % \end{macro}^^A \texturn
 % \end{macro}^^A \textuln
-% \end{macro}^^A \@dinbn
+% \end{macro}^^A \tud@dinbn
 % \end{macro}^^A \dinbn
 % \end{macro}^^A \univxs
 % \end{macro}^^A \univbs
@@ -1045,7 +1045,7 @@
 % \changes{v2.04}{2015/04/24}{\cls{tudmathposter} wird unterstützt}^^A
 % \begin{macro}{\textcdfont}
 % \changes{v2.04}{2015/03/04}{neu}^^A
-% \begin{macro}{\@cdfont}
+% \begin{macro}{\tud@cdfont@get}
 % \changes{v2.04}{2015/03/04}{neu}^^A
 % \begin{macro}{\tud@cdfont@trim}
 % \changes{v2.04}{2015/03/04}{neu}^^A
@@ -1059,19 +1059,19 @@
 % Textbefehl ermöglicht.
 %    \begin{macrocode}
 \newcommand*\cdfont[1]{%
-  \@cdfont{#1}%
+  \tud@cdfont@get{#1}%
   \ifx\@tempc\relax\else%
     \ifstr{\@tempc}{dinbn}{\dinbn}{\csuse{univ\@tempc}}%
   \fi%
 }
 \providecommand*\tudfont[1]{\cdfont{#1}}
 \newcommand*\textcdfont[2]{%
-  \@cdfont{#1}%
+  \tud@cdfont@get{#1}%
   \ifx\@tempc\relax\else%
     \ifstr{\@tempc}{dinbn}{\textdbn{#2}}{\csuse{textu\@tempc}{#2}}%
   \fi%
 }
-\newcommand*\@cdfont[1]{%
+\newcommand*\tud@cdfont@get[1]{%
   \tud@cdfont@trim\@tempa{#1}%
   \ifstr{\@tempa}{45}{\def\@tempc{ln}}{%
   \ifstr{\@tempa}{55}{\def\@tempc{rn}}{%
@@ -1131,7 +1131,7 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@cdfont@@trim
 % \end{macro}^^A \tud@cdfont@trim
-% \end{macro}^^A \@cdfont
+% \end{macro}^^A \tud@cdfont@get
 % \end{macro}^^A \textcdfont
 % \end{macro}^^A \tudfont
 % \end{macro}^^A \cdfont
@@ -1476,7 +1476,7 @@
 % Daran anschließend werden die \DIN-Schriften in einer Box verwendet, um das
 % Laden der Schriftdefinitionen am Dokumentbeginn zu forcieren.
 %    \begin{macrocode}
-  \sbox\z@{\@dinbn$ $}%
+  \sbox\z@{\tud@dinbn$ $}%
 %    \end{macrocode}
 % Zuletzt wird der Befehl für die Initialisierung der Mathematikschriften 
 % undefiniert gesetzt.
@@ -1703,7 +1703,7 @@
 %    \begin{macrocode}
 \newcommand*\tud@disposition@fontface[1][]{%
   \if@tud@cdfont@din%
-    \@dinbn\tud@raggedright%
+    \tud@dinbn\tud@raggedright%
   \else%
     \sectfont#1%
   \fi%
