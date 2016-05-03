@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-doc.dtx}[%
-  2016/05/02 v2.05 TUD-KOMA-Script\space%
+  2016/05/03 v2.05 TUD-KOMA-Script\space%
   (source code documentation based on scrartcl/scrdoc)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
@@ -801,7 +801,7 @@
 %    \end{macrocode}
 % \begin{macro}{\tud@write@replace}
 % \changes{v2.05}{2016/04/21}{neu}^^A
-% \begin{macro}{\tud@read}
+% \begin{macro}{\tud@read@replace}
 % \changes{v2.05}{2016/04/21}{neu}^^A
 % \begin{macro}{\tud@idx@line}
 % \changes{v2.05}{2016/04/21}{neu}^^A
@@ -816,8 +816,8 @@
 \ifdefined\tudxdyflag
   \newcommand*\tud@write@replace{}
   \newwrite\tud@write@replace
-  \newcommand*\tud@read{}
-  \newread\tud@read
+  \newcommand*\tud@read@replace{}
+  \newread\tud@read@replace
   \newcommand*\tud@idx@line{}
 %    \end{macrocode}
 % Die Makros für die fraglichen Steuerzeichen werden so angepasst, dass die
@@ -832,11 +832,11 @@
   \begingroup
     \endlinechar=-1\relax%
     \def\tud@reserved#1#2{%
-      \immediate\openin\tud@read=\jobname.#1\relax%
+      \immediate\openin\tud@read@replace=\jobname.#1\relax%
       \immediate\openout\tud@write@replace=\jobname-xdy.#1\relax%
       \@tempswafalse%
-      \loop\unless\ifeof\tud@read%
-        \readline\tud@read to\tud@idx@line%
+      \loop\unless\ifeof\tud@read@replace%
+        \readline\tud@read@replace to\tud@idx@line%
         \tud@replace\tud@idx@line{"}{""}%
         \tud@replace\tud@idx@line{!}{"!}%
         \tud@replace\tud@idx@line{:}{":}%
@@ -849,14 +849,14 @@
         \expandafter\tud@replace\expandafter\tud@idx@line%
           \expandafter{\levelchar}{!}%
         \tud@replace\tud@idx@line{" @}{}%
-        \ifeof\tud@read\else%
+        \ifeof\tud@read@replace\else%
           \immediate\write\tud@write@replace{%
             \unexpanded\expandafter{\tud@idx@line}%
           }%
           \@tempswatrue%
         \fi%
       \repeat%
-      \immediate\closein\tud@read%
+      \immediate\closein\tud@read@replace%
       \immediate\closeout\tud@write@replace%
       \ifnum\pdfshellescape=\@ne\relax%
         \if@tempswa%
@@ -895,7 +895,7 @@
 % \end{macro}^^A \quotechar
 % \end{macro}^^A \actualchar
 % \end{macro}^^A \tud@idx@line
-% \end{macro}^^A \tud@read
+% \end{macro}^^A \tud@read@replace
 % \end{macro}^^A \tud@write@replace
 % \begin{macro}{\IndexPrologue}
 % \changes{v2.05}{2016/05/01}{neu}^^A
@@ -912,32 +912,32 @@
 
 % \begin{macro}{\ToDo}
 % \changes{v2.02}{2014/07/25}{neu}^^A
-% \begin{macro}{\To@Do}
+% \begin{macro}{\tud@ToDo}
 % \changes{v2.02}{2014/07/25}{neu}^^A
-% \begin{macro}{\To@@Do}
+% \begin{macro}{\tud@@ToDo}
 % \changes{v2.02}{2014/07/25}{neu}^^A
 % Die Befehle für die ToDo-Notizen. Um in der gleichen Nomenklatur wie beim
 % Handbuch bleiben zu können, wird die Randnotizmarke als optionales Argument
 % hinter dem eigentlichen Text angegeben.
 %    \begin{macrocode}
 \newcommand*\ToDo[2][]{%
-  \@ifnextchar[{\To@Do{#2}}{\To@Do{#2}[]}%
+  \@ifnextchar[{\tud@ToDo{#2}}{\tud@ToDo{#2}[]}%
 }
-\newcommand*\To@Do{}
-\newcommand*\To@@Do{}
-\def\To@Do#1[#2]{%
+\newcommand*\tud@ToDo{}
+\newcommand*\tud@@ToDo{}
+\def\tud@ToDo#1[#2]{%
   \ifdefined\tudfinalflag\else%
-    \def\To@@Do{\ifstr{#2}{}{ToDo}{ToDo: #2}}%
+    \def\tud@@ToDo{\ifstr{#2}{}{ToDo}{ToDo: #2}}%
     \endgraf%
     \hfuzz0.8pt%
-    \leavevmode\marginpar{\raggedleft\fbox{\To@@Do\strut}}%
+    \leavevmode\marginpar{\raggedleft\fbox{\tud@@ToDo\strut}}%
     \fbox{\parbox{\dimexpr\textwidth-2\fboxsep\relax}{#1\strut}}%
     \endgraf%
   \fi%
 }
 %    \end{macrocode}
-% \end{macro}^^A \To@@Do
-% \end{macro}^^A \To@Do
+% \end{macro}^^A \tud@@ToDo
+% \end{macro}^^A \tud@ToDo
 % \end{macro}^^A \ToDo
 % Zum Schluss erfolgen einige Anpassungen mit \cs{AtBeginDocument}, um abhängig 
 % vom Ladezustand einiger Pakete reagieren zu können.
