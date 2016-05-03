@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-supervisor.dtx}[%
-  2016/05/02 v2.05 TUD-KOMA-Script\space%
+  2016/05/03 v2.05 TUD-KOMA-Script\space%
 %</driver>
 %<package>\ProvidesPackage{tudscrsupervisor}[%
 %<*driver|package>
@@ -146,8 +146,10 @@
   \def\tud@table@and##1{%
     \def\and{%
       \tabularnewline%
-      \ifstr{\csuse{##1othername}}{}{}{\csuse{##1othername}\@titledelim}%
-        & \def\and{\tabularnewline &}%
+      \ifstr{\csuse{##1othername}}{}{}{%
+        \csuse{##1othername}\tud@title@delimiter%
+      }%
+      & \def\and{\tabularnewline &}%
     }%
   }%
   \removelastskip%
@@ -156,13 +158,13 @@
   \setparsizes{\z@}{\z@}{\z@\@plus 1fil}\par@updaterelative%
   \begin{tabular}{@{}p{\tud@dim@table}l@{}}%
     \ifx\@referee\@empty\else%
-      \refereename\@titledelim & %
+      \refereename\tud@title@delimiter & %
         \tud@table@and{referee}\@referee\tabularnewline[\smallskipamount]%
     \fi%
-    \supervisorname\@titledelim & %
+    \supervisorname\tud@title@delimiter & %
       \tud@table@and{supervisor}\@supervisor\tabularnewline[\smallskipamount]%
-    \issuedatetext\@titledelim & \@issuedate\tabularnewline%
-    \duedatetext\@titledelim & \@duedate\tabularnewline%
+    \issuedatetext\tud@title@delimiter & \@issuedate\tabularnewline%
+    \duedatetext\tud@title@delimiter & \@duedate\tabularnewline%
   \end{tabular}%
 %    \end{macrocode}
 % Darunter wird etwas Platz für die Unterschriften von betreuendem Professor
@@ -360,7 +362,7 @@
   \@tempb{course}%
   \@tempb{discipline}%
   \@for\@tempb:=\@tempa\do{%
-    \settowidth\@tempdima{\@tempb\@titledelim}%
+    \settowidth\@tempdima{\@tempb\tud@title@delimiter}%
     \ifdim\@tempdima>\tud@dim@table\relax%
       \setlength\tud@dim@table{\@tempdima}%
     \fi%
@@ -375,17 +377,17 @@
   \setparsizes{\z@}{\z@}{\z@\@plus 1fil}\par@updaterelative%
   \begin{tabular}{@{}p{\tud@dim@table}}%
     \ifx\@course\@empty\else%
-      \coursename\@titledelim\tabularnewline%
+      \coursename\tud@title@delimiter\tabularnewline%
     \fi%
     \ifx\@discipline\@empty\else%
-      \disciplinename\@titledelim\tabularnewline%
+      \disciplinename\tud@title@delimiter\tabularnewline%
     \fi%
-    \namesname\@titledelim\tabularnewline%
+    \namesname\tud@title@delimiter\tabularnewline%
     \ifx\@matriculationnumber\@empty\else%
-      \matriculationnumbername\@titledelim\tabularnewline%
+      \matriculationnumbername\tud@title@delimiter\tabularnewline%
     \fi%
     \ifx\@matriculationyear\@empty\else%
-      \matriculationyearname\@titledelim\tabularnewline%
+      \matriculationyearname\tud@title@delimiter\tabularnewline%
     \fi%
   \end{tabular}%
 %    \end{macrocode}
@@ -441,7 +443,7 @@
   \vskip\smallskipamount%
   \begin{tabular}{@{}p{\tud@dim@table}%
     p{\dimexpr\textwidth-\tud@dim@table-2\tabcolsep\relax}@{}}%
-    \titlename\@titledelim & \tud@RaggedRight\textsf{\textbf{\@@title}}%
+    \titlename\tud@title@delimiter & \tud@RaggedRight\textsf{\textbf{\@@title}}%
   \end{tabular}%
   \par%
   \endgroup%
