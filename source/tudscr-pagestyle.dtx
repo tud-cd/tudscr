@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-pagestyle.dtx}[%
-  2016/05/02 v2.05 TUD-KOMA-Script (pagestyle)%
+  2016/05/03 v2.05 TUD-KOMA-Script (pagestyle)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman,xindy]{tudscrdoc}
@@ -1832,7 +1832,7 @@
   \let\@tempa\tud@ddc@head@num%
   \let\@tempb\tud@ddc@foot@num%
   \if@tud@ddc@auto%
-    \ifdefvoid{\@headlogo}{%
+    \ifdefvoid{\tud@headlogo@filename}{%
       \let\@tempa\tud@ddc@auto@num%
       \let\@tempb\z@%
     }{%
@@ -1847,7 +1847,7 @@
 %    \begin{macrocode}
   \tud@ifverlower{2.03}{%
     \ifnum\@tempb=\z@\relax%
-      \ifdefvoid{\@footlogo}{}{\let\@tempb\m@ne}%
+      \ifdefvoid{\tud@footlogo@filenames}{}{\let\@tempb\m@ne}%
     \fi%
   }{}%
 }
@@ -1971,26 +1971,26 @@
 % \end{macro}^^A \tud@layer@head@black
 % \begin{macro}{\headlogo}
 % \changes{v2.02}{2014/06/23}{Anpassung an automatische Wahl des \DDC-Logos}^^A
-% \begin{macro}{\@headlogo}
+% \begin{macro}{\tud@headlogo@filename}
 % \changes{v2.02}{2014/06/23}{neu}^^A
-% \begin{macro}{\@@headlogo}
+% \begin{macro}{\tud@headlogo@fileoptions}
 % \changes{v2.02}{2014/06/23}{neu}^^A
 % \begin{macro}{\tud@headlogo@wrn}
 % \changes{v2.02}{2014/06/23}{neu}^^A
-% Diese Befehle dienen zum Einbinden eines Zweitlogos im Kopf bündig zum
-% rechten Seitenrand. Bei der Angabe des Logos mit
-% \cs{headlogo}\oarg{Optionsliste}\marg{Dateiname} wird der Dateiname in
-% \cs{@headlogo} und das optionale Argument in \cs{@@headlogo}
-% gespeichert, damit diese später über \cs{tud@headlogo} an den Befehl
-% \cs{includegraphics} weitergereicht werden können.
+% Diese Befehle dienen zum Einbinden eines möglichen Zweitlogos im Kopf bündig
+% zum rechten Seitenrand. Mit \cs{headlogo}\oarg{Optionsliste}\marg{Dateiname} 
+% werden der Dateiname und das optionale Argument in \cs{tud@headlogo@filename} 
+% bzw. \cs{tud@headlogo@fileoptions} gespeichert, damit diese später bei der
+% tatsächlichen Verwendung des Logos mit dem Makro \cs{tud@headlogo@set} an den
+% Befehl \cs{includegraphics} weitergereicht werden können.
 %    \begin{macrocode}
-\newcommand*\@headlogo{}
-\newcommand*\@@headlogo{}
+\newcommand*\tud@headlogo@filename{}
+\newcommand*\tud@headlogo@fileoptions{}
 \newcommand*\tud@headlogo@wrn{}
 \newcommand*\headlogo[2][]{%
   \tud@comp@clearpage%
-  \renewcommand*\@headlogo{#2}%
-  \renewcommand*\@@headlogo{#1}%
+  \renewcommand*\tud@headlogo@filename{#2}%
+  \renewcommand*\tud@headlogo@fileoptions{#1}%
 %    \end{macrocode}
 % Nachdem Setzen des Zweitlogos müssen die entsprechenden Boxen mit den Logos 
 % von \DDC neu gesetzt werden. Weil dieses dabei vom Kopf in den Fuß oder
@@ -2000,9 +2000,9 @@
   \global\@tud@footlogo@option@settrue%
   \gdef\tud@headlogo@wrn{%
     \ClassWarning{\TUDClassName}{%
-      The secondary logo `\string\headlogo{\@headlogo}' is\MessageBreak%
-      overwritten with DDC logo. Maybe you should use\MessageBreak%
-      `ddcfoot' or better `ddc' instead of `ddchead'%
+      Secondary logo `\string\headlogo{\tud@headlogo@filename}'\MessageBreak%
+      is overwritten with DDC logo. Maybe you should\MessageBreak%
+      use `ddcfoot' or better `ddc' instead of `ddchead'%
     }%
     \global\let\tud@headlogo@wrn\relax%
   }%
@@ -2010,8 +2010,8 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@headlogo@wrn
-% \end{macro}^^A \@@headlogo
-% \end{macro}^^A \@headlogo
+% \end{macro}^^A \tud@headlogo@fileoptions
+% \end{macro}^^A \tud@headlogo@filename
 % \end{macro}^^A \headlogo
 % \begin{macro}{\tud@headlogo@set}
 % \changes{v2.04}{2015/05/31}{neu}^^A
@@ -2048,11 +2048,13 @@
     \tud@savelayerbox{head@option}{}%
     \tud@ddc@check%
     \ifcase\@tempa\relax% \tud@ddc@head@num=false
-      \ifdefvoid{\@headlogo}{}{%
-        \protected@edef\@headlogo{%
-          \expandafter\trim@spaces\expandafter{\@headlogo}%
+      \ifdefvoid{\tud@headlogo@filename}{}{%
+        \protected@edef\tud@headlogo@filename{%
+          \expandafter\trim@spaces\expandafter{\tud@headlogo@filename}%
         }%
-        \protected@edef\@tempb{\noexpand\@tempc{\@headlogo}{\@@headlogo}}%
+        \protected@edef\@tempb{%
+          \noexpand\@tempc{\tud@headlogo@filename}{\tud@headlogo@fileoptions}%
+        }%
         \@tempb%
       }%
     \or\or% \tud@ddc@head@num=color
@@ -2092,9 +2094,9 @@
     }%
     \vss%
   }{%
-    The given `\string\headlogo{\@headlogo}' is too large.%
+    The given `\string\headlogo{\tud@headlogo@filename}' is too large.%
   }%
-  \ifdefvoid{\@headlogo}{}{%
+  \ifdefvoid{\tud@headlogo@filename}{}{%
     \tud@ddc@check%
     \ifnum\@tempa>\z@\relax\tud@headlogo@wrn\fi%
   }%
@@ -2269,9 +2271,9 @@
 % \end{macro}^^A \tud@layer@foot@cmd
 % \begin{macro}{\footlogo}
 % \changes{v2.03}{2015/01/27}{neu}^^A
-% \begin{macro}{\@footlogo}
+% \begin{macro}{\tud@footlogo@filenames}
 % \changes{v2.03}{2015/01/27}{neu}^^A
-% \begin{macro}{\@@footlogo}
+% \begin{macro}{\tud@footlogo@fileoptions}
 % \changes{v2.03}{2015/01/27}{neu}^^A
 % \begin{macro}{\footlogosep}
 % \changes{v2.03}{2015/01/27}{neu}^^A
@@ -2279,19 +2281,19 @@
 % Fuß angegeben werden, die mit \cs{footlogosep} voneinander getrennt werden.
 %    \begin{macrocode}
 \newcommand*\footlogosep{\hfill}
-\newcommand*\@footlogo{}
-\newcommand*\@@footlogo{}
+\newcommand*\tud@footlogo@filenames{}
+\newcommand*\tud@footlogo@fileoptions{}
 \newcommand*\footlogo[2][]{%
   \tud@comp@clearpage%
-  \renewcommand*\@footlogo{#2}%
-  \renewcommand*\@@footlogo{#1}%
+  \renewcommand*\tud@footlogo@filenames{#2}%
+  \renewcommand*\tud@footlogo@fileoptions{#1}%
   \global\@tud@footlogo@cmd@settrue%
   \tud@comp@resetpagestyle%
 }
 %    \end{macrocode}
 % \end{macro}^^A \footlogosep
-% \end{macro}^^A \@@footlogo
-% \end{macro}^^A \@footlogo
+% \end{macro}^^A \tud@footlogo@fileoptions
+% \end{macro}^^A \tud@footlogo@filenames
 % \end{macro}^^A \footlogo
 % \begin{macro}{\tud@footlogo@cmd@set}
 % \changes{v2.04}{2015/06/01}{neu}^^A
@@ -2318,7 +2320,7 @@
 % Leerzeichen zu entfernen, werden diese mit \cs{trim@spaces} entfernt.
 %    \begin{macrocode}
         \let\@tempa\relax%
-        \@for\@tempb:=\@footlogo\do{%
+        \@for\@tempb:=\tud@footlogo@filenames\do{%
           \edef\@tempb{\expandafter\trim@spaces\expandafter{\@tempb}}%
           \@tempa%
           \ifx\@tempb\@empty\else%
@@ -2362,15 +2364,17 @@
 %    \end{macrocode}
 % In jedem Fall werden die Grundeinstellungen als erstes ausgeführt.
 %    \begin{macrocode}
-    \preto\@@footlogo{%
+    \preto\tud@footlogo@fileoptions{%
       keepaspectratio,totalheight=\tud@dim@footlogoheight,%
     }%
 %    \end{macrocode}
 % Wurden tatsächlich inidviduelle Parameter übergeben, so werden diese als 
 % letztes ausgeführt, um vorige Einstellungen überschreiben zu können.
 %    \begin{macrocode}
-    \appto\@@footlogo{\@tempb}%
-    \protected@edef\@tempc{\noexpand\includegraphics[\@@footlogo]{\@tempa}}%
+    \appto\tud@footlogo@fileoptions{\@tempb}%
+    \protected@edef\@tempc{%
+      \noexpand\includegraphics[\tud@footlogo@fileoptions]{\@tempa}%
+    }%
 %    \end{macrocode}
 % Die Logos werden~-- wie auch das \DDC-Logo im Fuß~-- individuell optisch
 % vertikal zentriert.
@@ -2383,7 +2387,7 @@
 %    \end{macrocode}
 % \end{macro}^^A \if@tud@footlogo@cmd@set
 % \end{macro}^^A \tud@footlogo@cmd@set
-% \begin{macro}{\tud@footlogo@cmd@@use}
+% \begin{macro}{\tud@footlogo@cmd@use}
 % \changes{v2.04}{2015/06/01}{neu}^^A
 % Der Befehl \cs{tud@footlogo@cmd@use} wird genutzt, um die einzelnen Logos für
 % den Fuß innerhalb der Ebene \val{tudheadings.foot.content} auszugeben.
@@ -2400,9 +2404,9 @@
 % \changes{v2.04}{2015/04/21}{neu}^^A
 % \begin{macro}{\footcontent}
 % \changes{v2.04}{2015/04/21}{neu}^^A
-% \begin{macro}{\@footcontent}
+% \begin{macro}{\tud@footcontent@do}
 % \changes{v2.04}{2015/04/21}{neu}^^A
-% \begin{macro}{\@@footcontent}
+% \begin{macro}{\tud@footcontent@@do}
 % \changes{v2.04}{2015/04/21}{neu}^^A
 % \changes{v2.05}{2016/04/17}{Stern im Argument erhält aktuellen Inhalt}^^A
 % \begin{macro}{\tud@footcontent@fontface}
@@ -2434,7 +2438,7 @@
 \newcommand*\footcontent{%
   \@ifstar{%
     \renewcommand*\tud@footcontent@fontface{\usekomafont{tudheadings}}%
-    \@footcontent%
+    \tud@footcontent@do%
   }{%
     \renewcommand*\tud@footcontent@fontface{%
       \usekomafont{tudheadings}%
@@ -2442,7 +2446,7 @@
       \fontsize{\tud@head@fontsize}{1.25\@tempdima}%
       \selectfont%
     }%
-    \@footcontent%
+    \tud@footcontent@do%
   }%
 }
 %    \end{macrocode}
@@ -2451,13 +2455,13 @@
 % so erfolgt die Ausgabe zweispaltig. Das optionale Argument kann für 
 % zusätzliche Formatierungsbefehle genutzt werden.
 %    \begin{macrocode}
-\newcommand*\@footcontent[2][]{%
+\newcommand*\tud@footcontent@do[2][]{%
   \kernel@ifnextchar[%]
-    {\@@footcontent{#1}{#2}}%
-    {\@@footcontent{#1}{#2}[\@nil]}%
+    {\tud@footcontent@@do{#1}{#2}}%
+    {\tud@footcontent@@do{#1}{#2}[\@nil]}%
 }
-\newcommand*\@@footcontent{}
-\def\@@footcontent#1#2[#3]{%
+\newcommand*\tud@footcontent@@do{}
+\def\tud@footcontent@@do#1#2[#3]{%
   \appto\tud@footcontent@fontface{#1\selectfont}%
 %    \end{macrocode}
 % Wurde in einem der Argumente für den linken und/oder rechten Inhalt ein Stern 
@@ -2474,8 +2478,8 @@
 % \end{macro}^^A \tud@footcontent@right
 % \end{macro}^^A \tud@footcontent@left
 % \end{macro}^^A \tud@footcontent@fontface
-% \end{macro}^^A \@@footcontent
-% \end{macro}^^A \@footcontent
+% \end{macro}^^A \tud@footcontent@@do
+% \end{macro}^^A \tud@footcontent@do
 % \end{macro}^^A \footcontent
 % \end{KOMAfont}^^A tudheadings
 %
