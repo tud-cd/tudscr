@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-manual.dtx}[%
-  2016/05/02 v2.05 TUD-KOMA-Script\space%
+  2016/05/03 v2.05 TUD-KOMA-Script\space%
 %</driver>
 %<package&identify>\ProvidesPackage{tudscrtutorial}[%
 %<*driver|package&identify>
@@ -912,9 +912,9 @@
 % Untereintrag genutzt.
 %    \begin{macrocode}
     \IfValueTF{#2}{%
-      \ChangedAt@CreateList[#2]{#1!#3}%
+      \Changed@At@CreateList[#2]{#1!#3}%
     }{%
-      \ChangedAt@CreateList[#3]{#1}%
+      \Changed@At@CreateList[#3]{#1}%
     }%
     \IfValueTF{#6}{%
       \tud@declare@start{#3}{#4}{#5}{#6}%
@@ -977,11 +977,11 @@
 %    \begin{macrocode}
 \NewDocumentCommand\tud@declare@start{ommmm}{%
 %    \end{macrocode}
-% Die optional angegebenen Änderungen werden mit \cs{ChangedAt@CreateList} in 
+% Die optional angegebenen Änderungen werden mit \cs{Changed@At@CreateList} in 
 % der Liste \cs{list@changedat} gesichert und später sowohl für die Randnotiz 
 % als auch die Änderungsliste verarbeitet.
 %    \begin{macrocode}
-  \ChangedAt@CreateList[#2]{#1}%
+  \Changed@At@CreateList[#2]{#1}%
 %    \end{macrocode}
 % Hier noch die Listen für Voreinstellungen\dots
 %    \begin{macrocode}
@@ -1080,7 +1080,7 @@
 % gesteuert wird.
 %    \begin{macrocode}
 \NewDocumentCommand\tud@declare@special@start{omm}{%
-  \ChangedAt@CreateList(#2){#1}%
+  \Changed@At@CreateList(#2){#1}%
   \def\tud@declare@num{#3}%
   \@declaretrue\@openindextrue#2\@declarefalse%
   \def\tud@declare@num{0}%
@@ -2043,8 +2043,8 @@
 % \changes{v2.05}{2015/11/03}{neu}^^A
 % In \cs{tud@lbl@tmp} werden nachfolgend die durch \cs{tud@lbl@get@curr} oder 
 % \cs{tud@attr@get} erzeugten (Sub-)Label gespeichert. Mit dem Hilfsmakro 
-% \cs{tud@lbl@fmt} wird innerhalb der beiden Befehle \cs{tud@lbl@@processor} 
-% und \cs{tud@lbl@get@@curr} dafür gesorgt, dass geschützte Leerzeichen sowie
+% \cs{tud@lbl@fmt} wird innerhalb der beiden Befehle \cs{tud@lbl@@create} und 
+% \cs{tud@lbl@get@@curr} dafür gesorgt, dass geschützte Leerzeichen sowie
 % eingabekodierungsabhängige Zeichen korrekt für ein Label umgesetzt werden.
 % Auch durch \cs{NoCaseChange} in Überschriften geschützte Inhalte werden 
 % direkt übernommen.
@@ -2068,14 +2068,14 @@
 % Argument (\val{\#3}) für gewöhnlich in der Form
 % \val{\{\string\Bundle{\marg{Klasse/Paket}}:\string\Markup{\marg{Element}}\}}
 % angegeben. Dieses wird beim Einlesen direkt an die beiden Argumentprozessoren 
-% \cs{SplitArgument}\val{\{2\}\{:\}} gefolgt von \cs{tud@lbl@processor} 
-% weitergereicht. Danach enthält das zweite obligatorische Argument ein Label 
-% der Form \meta{Bundlepräfix}\val{:}\meta{Labelpräfix}\val{:}\meta{Element}.
-% Auch die Angabe eines Makros als zweites obligatorische Argument, welches das 
-% Label in der richtigen Formatierung enthält, ist möglich.
+% \cs{SplitArgument}\val{\{2\}\{:\}} gefolgt von \cs{tud@lbl@create} übergeben. 
+% Danach enthält das zweite obligatorische Argument ein Label der Form
+% \meta{Bundlepräfix}\val{:}\meta{Labelpräfix}\val{:}\meta{Element}. Auch die
+% Angabe eines Makros als zweites obligatorische Argument, welches das Label in
+% der richtigen Formatierung enthält, ist möglich.
 %    \begin{macrocode}
 \NewDocumentCommand\tud@lbl@get@curr{%
-  sm>{\tud@lbl@processor}>{\SplitArgument{2}{:}}md==%
+  sm>{\tud@lbl@create}>{\SplitArgument{2}{:}}md==%
 }{%
 %    \end{macrocode}
 % Mit \cs{tud@lbl@get@@curr} wird das im zweiten obligatorischen Argument 
@@ -2182,7 +2182,7 @@
 %    \begin{macrocode}
 %<*class>
 \NewDocumentCommand\tud@if@lbl@exists{%
-  >{\tud@lbl@processor}>{\SplitArgument{2}{:}}m%
+  >{\tud@lbl@create}>{\SplitArgument{2}{:}}m%
 }{%
   \ifcsdef{r@#1}{%
     \expandafter\@firstoftwo%
@@ -2193,50 +2193,49 @@
 %</class>
 %    \end{macrocode}
 % \end{macro}^^A \tud@if@lbl@exists
-% \begin{macro}{\tud@lbl@processor}
+% \begin{macro}{\tud@lbl@create}
 % \changes{v2.05}{2015/11/03}{neu}^^A
-% \begin{macro}{\tud@lbl@@processor}
+% \begin{macro}{\tud@lbl@@create}
 % \changes{v2.05}{2015/11/03}{neu}^^A
-% Das Makro \cs{tud@lbl@@processor} ist ein Argumentprozessor, welcher als  
-% Eingabe genau drei Argumente für das Erstellen eines gültigen Labels
-% erwartet. Er wird sowohl von \cs{tud@lbl@get@curr} als auch von
-% \cs{tud@if@lbl@exists} verwendet. Vor der Nutzung von \cs{tud@lbl@processor}
-% muss das Argument bereits mit \cs{SplitArgument}\val{\{2\}\{:\}} aufgerufen
-% worden sein. Diese Eigenheit macht die Definition von \cs{tud@lbl@processor}
-% notwendig, um das Ergebnis der zuvor vorgenommenen Argumentaufspaltung
-% verarbeiten zu können, in dem dieses an \cs{tud@lbl@@processor} durchgereicht 
-% wird. Eine Integration der Spaltung des Argumentes in \cs{tud@lbl@processor} 
-% ist aufgrund des mehrmaligen rekursiven Aufrufs von \cs{tud@lbl@processor}
-% nicht möglich.
+% Das Makro \cs{tud@lbl@@create} ist ein Argumentprozessor, welcher als Eingabe 
+% genau drei Argumente für das Erstellen eines gültigen Labels erwartet. Er
+% wird sowohl von \cs{tud@lbl@get@curr} als auch von \cs{tud@if@lbl@exists}
+% verwendet. Vor der Nutzung von \cs{tud@lbl@create} muss das Argument zuvor
+% bereits mit \cs{SplitArgument}\val{\{2\}\{:\}} aufgerufen worden sein. Diese
+% Eigenheit macht die Definition von \cs{tud@lbl@create} notwendig, um das
+% Ergebnis der zuvor vorgenommenen Argumentaufspaltung verarbeiten zu können,
+% in dem dieses an \cs{tud@lbl@@create} durchgereicht wird. Eine Integration 
+% der Spaltung des Argumentes in \cs{tud@lbl@create} ist aufgrund des 
+% mehrmaligen rekursiven Aufrufs von \cs{tud@lbl@create} nicht möglich.
 %
-% Mit dem Argumentprozessor \cs{tud@lbl@processor} wird es möglich, an die 
-% beiden Makros \cs{tud@lbl@get@curr} und \cs{tud@if@lbl@exists} entweder ein 
-% einzelnes Makro, welches das Label bereits beinhaltet, als auch einen
-% Markup-Befehl ggf. mit einem Bundlepräfix zu übergeben. In beiden Fällen wird 
-% aus dem übergebenen Argument ein eindeutiges Label in der Form 
+% Mit dem Argumentprozessor \cs{tud@lbl@create} wird es möglich, an die beiden 
+% Befehle \cs{tud@lbl@get@curr} und \cs{tud@if@lbl@exists} sowohl ein
+% einzelnes Makro, welches das Label bereits beinhaltet als auch einen
+% Markup-Befehl ggf. mit einem Bundlepräfix zu übergeben. In beiden Fällen
+% wird aus dem übergebenen Argument ein eindeutiges Label in der Form 
 % \meta{Bundlepräfix}\val{:}\meta{Labelpräfix}\val{:}\meta{Element} generiert 
 % und als resultierendes Argument an das aufrufenden Makro übergeben.
 %    \begin{macrocode}
-\NewDocumentCommand\tud@lbl@processor{m}{\tud@lbl@@processor#1}
+\NewDocumentCommand\tud@lbl@create{m}{\tud@lbl@@create#1}
 %    \end{macrocode}
 % Es gibt insgesamt vier verschiedene Varianten der Argumentenübergabe an den
-% Argumentprozessor \cs{tud@lbl@@processor}.
+% Argumentprozessor \cs{tud@lbl@@create}.
 % \begin{description}\let\itshape\slshape
-%    \item[\cs{tud@lbl@@processor}\val{\ignorespaces
+%    \item[\cs{tud@lbl@@create}\val{\ignorespaces
 %      \{\string\LabelMakro\}\{-NoValue-\}\{-NoValue-\}\ignorespaces
 %    }]\strut\newline 
 %      Das Label ist bereits in \cs{LabelMakro} enthalten und soll expandiert 
 %      werden. Dabei spielt es keine Rolle, ob die durch \val{:} getrennten
 %      Bestandteile innerhalb des Labels schon als einfacher String oder in der 
 %      Markupform gegeben sind.
-%    \item[\cs{tud@lbl@@processor}\val{\ignorespaces
+%    \item[\cs{tud@lbl@@create}\val{\ignorespaces
 %      \{-NoValue-\}\{\string\Markup{\marg{Element}}\}\{-NoValue-\}\ignorespaces
 %    }]
-%      \strut\newline Das Label soll für ein Markupelement genriert werden, 
+%      \strut\newline Das Label soll für ein Markupelement generiert werden, 
 %      wobei in jedem Fall der Inhalt aus \cs{tud@bdl@curr} als Bundlepräfix
 %      genutzt wird.
-%    \item[\cs{tud@lbl@@processor}\val{\ignorespaces
-%      \{\string\Class\marg{Klasse}/\string\Package\marg{Paket}\}\ignorespaces
+%    \item[\cs{tud@lbl@@create}\val{\ignorespaces
+%      \{\string\Class/\string\Package\marg{Element}\}\ignorespaces
 %      \{\string\Markup{\marg{Element}}\}\ignorespaces
 %      \{-NoValue-\}\ignorespaces
 %    }]\strut\newline 
@@ -2245,7 +2244,7 @@
 %      oder implizit das Makro \cs{tud@bdl@curr} als Argument verwendet,
 %      welches innerhalb der Umgebungen \env{Bundle} und \env{Bundle*} auf
 %      das/die aktuell beschriebene Paket/Klasse gesetzt wurde.
-%    \item[\cs{tud@lbl@@processor}\val{\ignorespaces
+%    \item[\cs{tud@lbl@@create}\val{\ignorespaces
 %      \marg{Bundlepräfix}\ignorespaces
 %      \marg{Labelpräfix}\ignorespaces
 %      \marg{Element}\ignorespaces
@@ -2256,7 +2255,7 @@
 %      Variante tritt durch rekursiven Aufruf des Argumentprozessors auf.
 % \end{description}
 %    \begin{macrocode}
-\NewDocumentCommand\tud@lbl@@processor{mmm}{%
+\NewDocumentCommand\tud@lbl@@create{mmm}{%
   \begingroup%
 %    \end{macrocode}
 % Zu Beginn werden die Markup-Befehle auf ihre expandierbaren Varianten gesetzt 
@@ -2313,8 +2312,8 @@
   \@tempc%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@lbl@@processor
-% \end{macro}^^A \tud@lbl@processor
+% \end{macro}^^A \tud@lbl@@create
+% \end{macro}^^A \tud@lbl@create
 %
 % \subsubsection{Abarbeitung der Markup-Befehle}
 %
@@ -3103,8 +3102,8 @@
 % \app{texindy} genutzt werden. 
 %
 % An \cs{tud@idx@get} werden vier obligatorische gefolgt von vier optionalen 
-% Argumenten übergeben. Die ersten beiden Hauptargumente sind die Makros, in 
-% welche \meta{Schlüsselwort}~-- für gewöhnlich \cs{tud@idx@key}~-- sowie die 
+% Argumenten übergeben. Die ersten beiden Argumente sind die Makros, in welche
+% \meta{Schlüsselwort}~-- für gewöhnlich \cs{tud@idx@key}~-- sowie die 
 % Formatierung \meta{Markup}~-- normalerweise \cs{tud@idx@fmt}~-- expandiert 
 % werden. Mit dem Makro im dritten Argument wird es möglich, Untereinträge zu 
 % einem \meta{Schlüsselwort} für beispielsweise Parameter von Umgebungen oder
@@ -3130,8 +3129,8 @@
 % \newline\begingroup\scriptsize
 % \cs{tud@idx@get}\cs{tud@idx@key}\cs{tud@idx@fmt}\cs{tud@idx@val}%%
 % \val{\ignorespaces%
-%   \marg{Element}=\meta{Wert}=\oarg{Anmerkung}\ignorespaces% 
-%   \parg{Bundleelement}\textbar\meta{Indexmarkup}\textbar\ignorespaces%
+%   \marg{Elem.}=\meta{Wert}=\oarg{Anm.}\ignorespaces% 
+%   \parg{Bundleelem.}\textbar\meta{Indexmark.}\textbar\ignorespaces%
 % }%
 % \endgroup
 %    \begin{macrocode}
@@ -3728,7 +3727,7 @@
 % Die Formatierung der Änderungseinträge erfolgt dabei wie auch für den Index 
 % mit \cs{tud@idx@get}, wobei die Sternversion dabei für die Identifikation als
 % Änderungseintrag fungiert. Aufgerufen wird \cs{Process@ChangedAt} während der 
-% Erstellung der Änderungseinträge mit \cs{ChangedAt@CreateEntry}. Der Aufruf 
+% Erstellung der Änderungseinträge mit \cs{Changed@At@CreateEntry}. Der Aufruf 
 % des Makros erfolgt dabei in der gewohnten Form mit einem obligatorischen 
 % gefolgt von drei optionalen Argumenten:
 % \newline\begingroup\scriptsize
@@ -3759,7 +3758,7 @@
 % Eintrag erfolgt dann im Abschnitt \enquote{Implementierung} für das gegebene
 % Element. Im obligatorischen Argument können auch mehrere Änderungsnotizen 
 % gleichzeitig erzeugt werden. hierfür sind diese mit Semikolon voneinander zu 
-% trennen. Das Erzeugen der Liste selbst erfolgt mit \cs{ChangedAt@CreateList}.
+% trennen. Das Erzeugen der Liste erfolgt mit \cs{Changed@At@CreateList}.
 % 
 % Normalerweise wird bei der Nutzung von \cs{ChangedAt} zusätzlich zum Eintrag
 % in die Änderungsliste eine Randnotiz mit den angegebenen Versionsnummern
@@ -3770,9 +3769,9 @@
 \newlength\changedatskip
 \NewDocumentCommand\ChangedAt{somO{\changedatskip}}{%
   \IfValueTF{#2}{%
-    \ChangedAt@CreateList[#2]{#3}%
+    \Changed@At@CreateList[#2]{#3}%
   }{%
-    \ChangedAt@CreateList{#3}%
+    \Changed@At@CreateList{#3}%
   }%
 %    \end{macrocode}
 % Nach dem Erstellen der Liste wird diese abgearbeitet und ggf. die Randnotiz 
@@ -3787,9 +3786,9 @@
 % \subsubsection{Sukzessive Erstellung der Einträge für die Änderungsliste}
 %
 % Das Erstellen von Änderungsnotizen erfolgt in zwei Schritten. Diese werden 
-% mit dem Befehl \cs{ChangedAt@CreateList} in einer standardisierten Form in 
+% mit dem Befehl \cs{Changed@At@CreateList} in einer standardisierten Form in 
 % der temporären Liste \cs{list@changedat} gespeichert und später mit dem Makro 
-% \cs{ChangedAt@CreateEntry} verarbeitet. Dieses Vorgehen liegt in den 
+% \cs{Changed@At@CreateEntry} verarbeitet. Dieses Vorgehen liegt in den 
 % Umgebungen für Deklarationen begründet, welche verschachtelt werden können,
 % jedoch einmalig mit \cs{printdeclarationlist} abgearbeitet werden.
 % 
@@ -3806,17 +3805,17 @@
 %    \end{macrocode}
 % \end{macro}^^A \forssvlist
 % \end{macro}^^A \list@changedat
-% \begin{macro}{\ChangedAt@CreateList}
+% \begin{macro}{\Changed@At@CreateList}
 % \changes{v2.02}{2014/09/02}{neu}^^A
-% \begin{macro}{\ChangedAt@@CreateList}
+% \begin{macro}{\Changed@At@@CreateList}
 % \changes{v2.02}{2014/10/09}{neu}^^A
-% \begin{macro}{\ChangedAt@@@CreateList}
-% \begin{macro}{\ChangedAt@@@@CreateList}
+% \begin{macro}{\Changed@At@@@CreateList}
+% \begin{macro}{\Changed@At@@@@CreateList}
 % Mit diesen Befehlen wird eine Liste im Format von \pkg{etoolbox} erzeugt, 
 % welche alle notwendigen Angaben für das Erzeugen der Änderungshistorie in 
-% Form eines Indexes mit \cs{ChangedAt@CreateEntry} enthält.
+% Form eines Indexes mit \cs{Changed@At@CreateEntry} enthält.
 %
-% Der Befehl \cs{ChangedAt@CreateList} kann vor dem obligatorischen Argument 
+% Der Befehl \cs{Changed@At@CreateList} kann vor dem obligatorischen Argument 
 % mit einem ordinären optionalen Argument verwendet werden, in welchem ein 
 % Makro, eine Umgebung, eine Option etc. angegeben wird. Ist dies der Fall, so 
 % wird der Eintrag in die Änderungsliste für dieses Element generiert, sonst 
@@ -3826,29 +3825,29 @@
 % diese für das jeweilige \TUDScript-Bundle-Element in den entsprechenden
 % Abschnitt der Änderungsliste einzutragen. Das Hauptargument verarbeitet
 % schließlich eine semikolongetrennte Liste und reicht jeden Bestandteil 
-% zusammen mit den beiden optionalen Argumenten an \cs{ChangedAt@@CreateList} 
+% zusammen mit den beiden optionalen Argumenten an \cs{Changed@At@@CreateList} 
 % weiter. 
 %    \begin{macrocode}
-\NewDocumentCommand\ChangedAt@CreateList{od()m}{%
-  \IfValueT{#3}{\forssvlist{\ChangedAt@@CreateList[#1](#2)}{#3}}%
+\NewDocumentCommand\Changed@At@CreateList{od()m}{%
+  \IfValueT{#3}{\forssvlist{\Changed@At@@CreateList[#1](#2)}{#3}}%
 }
 %    \end{macrocode}
-% Mit \cs{ChangedAt@@CreateList} wird lediglich die Versionsnummer von der 
+% Mit \cs{Changed@At@@CreateList} wird lediglich die Versionsnummer von der 
 % eigentlichen Änderungsnotiz getrennt.
 %    \begin{macrocode}
-\NewDocumentCommand\ChangedAt@@CreateList{r[]r()>{\SplitArgument{1}{:}}m}{%
-  \ChangedAt@@@CreateList[#1](#2)#3%
+\NewDocumentCommand\Changed@At@@CreateList{r[]r()>{\SplitArgument{1}{:}}m}{%
+  \Changed@At@@@CreateList[#1](#2)#3%
 }
 %    \end{macrocode}
-% Zuletzt wird durch \cs{ChangedAt@@@CreateList} ein möglicher Untereintrag
-% in ein separates Argument abgetrennt und \cs{ChangedAt@@@@CreateList} mit
+% Zuletzt wird durch \cs{Changed@At@@@CreateList} ein möglicher Untereintrag
+% in ein separates Argument abgetrennt und \cs{Changed@At@@@@CreateList} mit
 % allen Argumenten aufgerufen.
 %    \begin{macrocode}
-\NewDocumentCommand\ChangedAt@@@CreateList{r[]r()>{\SplitArgument{1}{!}}mm}{%
-  \ChangedAt@@@@CreateList[#1](#2)#3{#4}%
+\NewDocumentCommand\Changed@At@@@CreateList{r[]r()>{\SplitArgument{1}{!}}mm}{%
+  \Changed@At@@@@CreateList[#1](#2)#3{#4}%
 }
 %    \end{macrocode}
-% Der Befehl \cs{ChangedAt@@@@CreateList} übernimmt schließlich die Erstellung 
+% Der Befehl \cs{Changed@At@@@@CreateList} übernimmt schließlich die Erstellung 
 % des Eintrags in die Liste \cs{list@changedat}. Wie bereits erwähnt enthalten 
 % die beiden ersten Argumente ggf. Markup-Befehl und \TUDScript-Bundle-Element. 
 % Danach folgt die Versionsnummer der Änderungsnotiz, der mögliche Untereintrag 
@@ -3871,7 +3870,7 @@
 % \val{!\meta{Untereintrag}!\meta{Änderungsnotiz}}.
 % \endgroup
 %    \begin{macrocode}
-\NewDocumentCommand\ChangedAt@@@@CreateList{r[]r()mmm}{%
+\NewDocumentCommand\Changed@At@@@@CreateList{r[]r()mmm}{%
 %    \end{macrocode}
 % Die Aufteilung der Änderungsliste in die einzelnen \TUDScript-Bundle-Elemente 
 % erfolgt entweder anhand des explizit angegebenen optionalen Argumentes in
@@ -3923,7 +3922,7 @@
 % Wurde ein Untereintrag angegeben, wird dieser hier gefolgt von der 
 % eigentlichen Änderungsnotiz eingefügt. Für obsolete Deklarationen für die 
 % Änderungsnotiz in jedem Fall ignoriert, da beim späteren Aufruf des Makros  
-% \cs{ChangedAt@CreateEntry} eine Standardmeldung ausgegeben wird.
+% \cs{Changed@At@CreateEntry} eine Standardmeldung ausgegeben wird.
 %    \begin{macrocode}
     \IfValueT{#4}{\addto@hook\toks@{#4}}%
     \addto@hook\toks@{!}%
@@ -3967,32 +3966,32 @@
   \listeadd\list@changedat{\the\toks@}%
 }
 %    \end{macrocode}
-% \end{macro}^^A \ChangedAt@@@@CreateList
-% \end{macro}^^A \ChangedAt@@@CreateList
-% \end{macro}^^A \ChangedAt@@CreateList
-% \end{macro}^^A \ChangedAt@CreateList
+% \end{macro}^^A \Changed@At@@@@CreateList
+% \end{macro}^^A \Changed@At@@@CreateList
+% \end{macro}^^A \Changed@At@@CreateList
+% \end{macro}^^A \Changed@At@CreateList
 %
 % \subsubsection{Ezeugen der Änderungseinträge}
 %
 % Mit diesen Makros erfolgt das eigentliche Eintragen der Änderungseinträge aus 
 % der Liste \cs{listqChangedAt} in den entsprechenden Index \val{changelog}. 
 %
-% \begin{macro}{\ChangedAt@CreateEntry}
+% \begin{macro}{\Changed@At@CreateEntry}
 % \changes{v2.02}{2014/09/02}{neu}^^A
-% \begin{macro}{\ChangedAt@@CreateEntry}
+% \begin{macro}{\Changed@At@@CreateEntry}
 % \changes{v2.02}{2014/09/02}{neu}^^A
-% Der Befehl \cs{ChangedAt@CreateEntry} wird durch \cs{@printchangedatlist} 
+% Der Befehl \cs{Changed@At@CreateEntry} wird durch \cs{@printchangedatlist} 
 % aufgerufen und teilt die gegebene Liste am Delimiter Ausrufezeichen \val{!}
-% in fünf Argumente auf und reicht sie an \cs{ChangedAt@@CreateEntry} weiter.
+% in fünf Argumente auf und reicht sie an \cs{Changed@At@@CreateEntry} weiter.
 % Sind weniger als vier Ausrufezeichen vorhanden, so werden die ungenutzten
 % Argumente mit dem~-- durch das Paket \pkg{xparse} definierten~-- leeren Wert
-% \val{-NoValue-} an den Befehl \cs{ChangedAt@@CreateEntry} übergeben.
+% \val{-NoValue-} an den Befehl \cs{Changed@At@@CreateEntry} übergeben.
 %    \begin{macrocode}
-\NewDocumentCommand\ChangedAt@CreateEntry{>{\SplitArgument{4}{!}}m}{%
-  \ChangedAt@@CreateEntry#1%
+\NewDocumentCommand\Changed@At@CreateEntry{>{\SplitArgument{4}{!}}m}{%
+  \Changed@At@@CreateEntry#1%
 }
 %    \end{macrocode}
-% Mit \cs{ChangedAt@@CreateEntry} wird der Eintrag in die Änderungshistorie
+% Mit \cs{Changed@At@@CreateEntry} wird der Eintrag in die Änderungshistorie
 % erzeugt, falls denn überhaupt ein Eintrag generiert werden soll. Dies wird
 % daran erkannt, ob das dritte Argument dew Wert \val{-NoValue-} entspricht 
 % oder eben nicht. Der zweite Fall tritt auf, wenn lediglich eine Randnotiz
@@ -4007,7 +4006,7 @@
 % \val{!\meta{Untereintrag}!\meta{Änderungsnotiz}}.
 % \endgroup
 %    \begin{macrocode}
-\newcommand*\ChangedAt@@CreateEntry[5]{%
+\newcommand*\Changed@At@@CreateEntry[5]{%
   \IfValueT{#3}{%
 %    \end{macrocode}
 % Bei der Deklaration von Optionen, Befehlen etc. werden diese automatisch in 
@@ -4098,8 +4097,8 @@
   \ifinlist{#1}{\@templist}{}{\listadd\@templist{#1}}%
 }
 %    \end{macrocode}
-% \end{macro}^^A \ChangedAt@@CreateEntry
-% \end{macro}^^A \ChangedAt@CreateEntry
+% \end{macro}^^A \Changed@At@@CreateEntry
+% \end{macro}^^A \Changed@At@CreateEntry
 %
 % \subsubsection{Ausgabe der Änderungsliste}
 %
@@ -4160,7 +4159,7 @@
 % \begin{macro}{\print@changedatlist}
 % \changes{v2.02}{2014/10/09}{neu}^^A
 % Die Einträge in der Liste der Änderungen \cs{list@changedat} werden mit dem 
-% Makro \cs{ChangedAt@CreateList} abgearbeitet, sortiert und erstellt. Das 
+% Makro \cs{Changed@At@CreateList} abgearbeitet, sortiert und erstellt. Das 
 % zweite obligatorische Argument von \cs{@printchangedatlist} steurrt den 
 % vertikalen Versatz der Randnotiz. Wird im ersten Argument das boolesche Flag 
 % zu \cs{BooleanTrue} gesetzt, wird die Randnotiz unterdrückt.
@@ -4168,7 +4167,7 @@
 \NewDocumentCommand\print@changedatlist{mm}{%
   \ifx\list@changedat\relax\else%
     \let\@templist\relax%
-    \forlistloop\ChangedAt@CreateEntry{\list@changedat}%
+    \forlistloop\Changed@At@CreateEntry{\list@changedat}%
     \global\let\list@changedat\relax%
 %    \end{macrocode}
 % Nach der Verarbeitung aller Einräge sind in \cs{@templist} alle angegebenen
