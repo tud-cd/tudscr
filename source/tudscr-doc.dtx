@@ -1,4 +1,4 @@
-% \CheckSum{1473}
+% \CheckSum{1565}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-doc.dtx}[%
-  2016/05/03 v2.05 TUD-KOMA-Script\space%
+  2016/05/04 v2.05 TUD-KOMA-Script\space%
   (source code documentation based on scrartcl/scrdoc)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
@@ -690,7 +690,48 @@
 % aufgrund des optionalen Argumentes nicht möglich ist, wird der notwendige 
 % Patch einfach zu Beginn von \cs{@doxcreateenv} eingehängt.
 %    \begin{macrocode}
-\pretocmd\@doxcreateenv{%
+\CheckCommand\doxitem[4][]{%
+  \@nameuse{dox@macrolike\dox@macrolikedefault}%
+  \def\dox@idxtype{#3}%
+  \setkeys{dox}{#1}
+  \@ifundefined{Print#2Name}{%
+    \ifdox@macrolike
+      \expandafter\def\csname Print#2Name\endcsname##1{%
+        \strut\MacroFont\string ##1\ }
+    \else
+      \expandafter\def\csname Print#2Name\endcsname##1{%
+        \strut\MacroFont ##1\ }
+    \fi}{}
+  \ifdox@macrolike
+    \def\@doxexpr{\@doxcreatespecialmainmacrolikeindex{#2}}%
+  \else
+    \def\@doxexpr{\@doxcreatespecialmainindex{#2}}%
+  \fi
+  \expandafter\@doxexpr\expandafter{\dox@idxtype}{#4}%
+  \@ifundefined{PrintDescribe#2}{%
+    \ifdox@macrolike
+      \expandafter\def\csname PrintDescribe#2\endcsname##1{%
+        \strut\MacroFont\string ##1\ }
+    \else
+      \expandafter\def\csname PrintDescribe#2\endcsname##1{%
+        \strut\MacroFont ##1\ }
+    \fi}{}
+  \ifdox@macrolike
+    \def\@doxexpr{\@doxcreatespecialmacrolikeindex{#2}}%
+  \else
+    \def\@doxexpr{\@doxcreatespecialindex{#2}}%
+  \fi
+  \expandafter\@doxexpr\expandafter{\dox@idxtype}{#4}%
+  \@doxcreatedescribe{#2}
+  \@doxcreateenv{#2}{#3}%
+}
+\CheckCommand*\@doxcreateenv[2]{%
+  \expandafter\def\csname #2\endcsname{%
+    \@ifnextchar[%]
+    {\@doxenv{#1}}{\@doxenv{#1}[]}}
+  \expandafter\let\csname end#2\endcsname\endtrivlist%
+}
+\pretocmd{\@doxcreateenv}{%
   \ifdox@macrolike%
     \def\@doxexpr{\@doxcreatemacrolikeindexname{#1}}%
   \else%
@@ -753,7 +794,7 @@
 %    \end{macrocode}
 % \dots und nun der eigentliche Patch sowie die Basisdefinitionen.
 %    \begin{macrocode}
-\patchcmd\@@doxenv{\ignorespaces}{%
+\patchcmd{\@@doxenv}{\ignorespaces}{%
   \csname Set#1IndexName\endcsname{\saved@macroname}\ignorespaces%
 }{}{\tud@patch@wrn{@@doxenv}}
 %    \end{macrocode}
@@ -776,6 +817,10 @@
 \def\SetEnvIndexName#1{%
   \let\saved@indexname#1%
   \edef\saved@idxtype{environment}%
+}
+\CheckCommand*\SpecialMainMacroIndex[1]{%
+  \SpecialMainIndex{#1}\nobreak%
+  \DoNotIndex{#1}%
 }
 \apptocmd{\SpecialMainMacroIndex}{%
   \hypersourcedef{\filesep\number\c@CodelineNo}%
@@ -912,32 +957,30 @@
 
 % \begin{macro}{\ToDo}
 % \changes{v2.02}{2014/07/25}{neu}^^A
-% \begin{macro}{\tud@ToDo}
-% \changes{v2.02}{2014/07/25}{neu}^^A
-% \begin{macro}{\tud@@ToDo}
+% \begin{macro}{\@ToDo}
 % \changes{v2.02}{2014/07/25}{neu}^^A
 % Die Befehle für die ToDo-Notizen. Um in der gleichen Nomenklatur wie beim
 % Handbuch bleiben zu können, wird die Randnotizmarke als optionales Argument
 % hinter dem eigentlichen Text angegeben.
 %    \begin{macrocode}
 \newcommand*\ToDo[2][]{%
-  \@ifnextchar[{\tud@ToDo{#2}}{\tud@ToDo{#2}[]}%
+  \@ifnextchar[{\@ToDo{#2}}{\@ToDo{#2}[]}%
 }
-\newcommand*\tud@ToDo{}
-\newcommand*\tud@@ToDo{}
-\def\tud@ToDo#1[#2]{%
+\newcommand*\@ToDo{}
+\def\@ToDo#1[#2]{%
   \ifdefined\tudfinalflag\else%
-    \def\tud@@ToDo{\ifstr{#2}{}{ToDo}{ToDo: #2}}%
-    \endgraf%
-    \hfuzz0.8pt%
-    \leavevmode\marginpar{\raggedleft\fbox{\tud@@ToDo\strut}}%
-    \fbox{\parbox{\dimexpr\textwidth-2\fboxsep\relax}{#1\strut}}%
-    \endgraf%
+    \begingroup%
+      \def\tud@reserved{\ifstr{#2}{}{ToDo: ??}{ToDo: #2}}%
+      \endgraf%
+      \hfuzz0.8pt%
+      \leavevmode\marginpar{\raggedleft\fbox{\tud@reserved\strut}}%
+      \fbox{\parbox{\dimexpr\textwidth-2\fboxsep\relax}{#1\strut}}%
+      \endgraf%
+    \endgroup%
   \fi%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@@ToDo
-% \end{macro}^^A \tud@ToDo
+% \end{macro}^^A \@ToDo
 % \end{macro}^^A \ToDo
 % Zum Schluss erfolgen einige Anpassungen mit \cs{AtBeginDocument}, um abhängig 
 % vom Ladezustand einiger Pakete reagieren zu können.
