@@ -1,4 +1,4 @@
-% \CheckSum{4173}
+% \CheckSum{4171}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-manual.dtx}[%
-  2016/05/04 v2.05 TUD-KOMA-Script\space%
+  2016/05/05 v2.05 TUD-KOMA-Script\space%
 %</driver>
 %<package&identify>\ProvidesPackage{tudscrtutorial}[%
 %<*driver|package&identify>
@@ -146,6 +146,7 @@
 % Diese beiden Befehle werden für die aktuelle \TUDScript-Versionsnummer sowie 
 % die mindestens notwendige Version von \KOMAScript{} in der Dokumentation
 % verwendet.
+% \ToDo{\KOMAScript-Version anpassen}[v2.06]%
 %    \begin{macrocode}
 \newcommand*\vTUDScript{}
 \def\@tempb#1 #2 #3\relax#4\relax{\def\vTUDScript{#2}}
@@ -578,7 +579,6 @@
 %    \end{macrocode}
 % Zunächst die direkt innerhalb der Dokumentation verwendeten Befehle nebst 
 % dazugehöriger Warnung.
-% \begin{macro}{\url}
 % \begin{macro}{\hypersetup}
 % \begin{macro}{\hyperdef}
 % \begin{macro}{\hyperref}
@@ -633,7 +633,6 @@
 % \end{macro}^^A \hyperref
 % \end{macro}^^A \hyperdef
 % \end{macro}^^A \hypersetup
-% \end{macro}^^A \url
 % \begin{macro}{\partautorefname}
 % \begin{macro}{\chapterautorefname}
 % \begin{macro}{\sectionautorefname}
@@ -667,11 +666,13 @@
   \providecommand*\autorefname[1][]{??\xspace}%
 }
 %    \end{macrocode}
+% \begin{macro}{\fullref}
 % Verbesserte Referenzierungen auf Seiten.
 %    \begin{macrocode}
 \RequirePackage{varioref}[2011/10/02]
 \renewcommand*\fullref[1]{\hyperref[#1]{\autoref*{#1} \vpageref{#1}}}
 %    \end{macrocode}
+% \end{macro}^^A \fullref
 % \begin{macro}{\hrfn}
 % \changes{v2.02}{2014/08/16}{neu}^^A
 % \changes{v2.04}{2015/02/18}{Schriftgröße mit \cs{scalebox}}^^A
@@ -758,7 +759,9 @@
     \TUD@key{ToDo}{}%
   }{}%
   \ifdef{\tudprintflag}{%
-    \TUDoptions{cd=true}%
+    \ifnum\tud@cd@num>\z@\relax%
+      \TUDoptions{cd=true}%
+    \fi%
     \TUD@key{cd}{}%
     \ifundef{\hypersetup}{}{\hypersetup{hidelinks}}%
   }{}%
@@ -792,19 +795,6 @@
 %
 % \iffalse
 %</class>
-%<*package>
-% \fi
-%
-% Wird das Paket \pkg{tudscrtutorial} geladen, werden zu Beginn des Dokumentes 
-% ein paar Standardeinstellungen gemacht.
-%
-%    \begin{macrocode}
-\KOMAoptions{headings=small}
-\TUDoptions{cd=true,cdfoot=true}
-%    \end{macrocode}
-%
-% \iffalse
-%</package>
 %</option>
 %<*body>
 %<*class>
@@ -5395,36 +5385,20 @@
 %
 % \subsection{ToDo-Liste}
 %
-% Für Klasse und Paket besteht die Möglichkeit, Änderungsnotizen zu nutzen. 
-% Hierfür wird das Paket \pkg{todonotes} genutzt. Dieses kann jedoch nur zum
-% Einsatz kommen, falls \pkg{auto-pst-pdf} nicht gerade aktiv ist, denn 
-% \pkg{todonotes} lädt wiederum das Paket \pkg{tikz}, welches zu Problem bei
-% der automatisierten Erstellung von \env{pstricks}"=Grafiken führt. Mit dem 
-% Paket \pkg{ifpdf} kann erkannt werden, ob \pkg{auto-pst-pdf} im aktuellen
-% Durchlauf zum Einsatz kommt, da in diesem Fall nicht \app{pdflatex} als
-% Textsatzsystem verwendet wird.
+% Für Klasse und Paket besteht die Möglichkeit, Änderungsnotizen zu nutzen, 
+% wofür das Paket \pkg{todonotes} geladen wird.
 %    \begin{macrocode}
-\RequirePackage{ifpdf}[2011/01/30]
-\ifpdf
-  \PassOptionsToPackage{obeyFinal}{todonotes}
+\PassOptionsToPackage{obeyFinal}{todonotes}
 %    \end{macrocode}
 % Für den Druck wird die farbige Ausgabe der ToDo-Notizen deaktiviert.
 %    \begin{macrocode}
-  \ifdef{\tudprintflag}{%
-    \PassOptionsToPackage{color=white}{todonotes}%
-  }{%
-    \PassOptionsToPackage{colorinlistoftodos,color=HKS92!10}{todonotes}%
-  }
-  \RequirePackage{todonotes}[2012/07/25]
-  \TUDoptions{ToDo=true}
-%    \end{macrocode}
-% Ist \pkg{auto-pst-pdf} aktiv, wird einfach die Option \opt{final} gesetzt, um
-% eine Verwendung der Option \opt{ToDo} nach dem Laden der Klasse unschädlich
-% zu machen.
-%    \begin{macrocode}
-\else
-  \TUDoptions{final=true}
-\fi
+\ifdef{\tudprintflag}{%
+  \PassOptionsToPackage{color=white}{todonotes}%
+}{%
+  \PassOptionsToPackage{colorinlistoftodos,color=HKS92!10}{todonotes}%
+}
+\RequirePackage{todonotes}[2012/07/25]
+\TUDoptions{ToDo=true}
 %    \end{macrocode}
 %
 % \iffalse
