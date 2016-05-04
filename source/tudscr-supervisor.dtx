@@ -1,4 +1,4 @@
-% \CheckSum{601}
+% \CheckSum{600}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-supervisor.dtx}[%
-  2016/05/03 v2.05 TUD-KOMA-Script\space%
+  2016/05/04 v2.05 TUD-KOMA-Script\space%
 %</driver>
 %<package>\ProvidesPackage{tudscrsupervisor}[%
 %<*driver|package>
@@ -99,14 +99,14 @@
 % \begin{environment}{task}
 % \changes{v2.03}{2015/01/05}{Bugfix für initialen Seitenstil}^^A
 % \changes{v2.03}{2015/01/05}{Bugfix für Seitenstil im zweiseitigen Satz}^^A
-% \begin{macro}{\tud@table@and}
+% \begin{macro}{\tud@authortable@multiple}
 % \changes{v2.05}{2016/03/09}{neu}^^A
 % Die Umgebung für die Aufgabenstellung nutzt die \env{tudpage}-Umgebung. Sie
 % wird auf einer neuen (rechten) Seite gesetzt. Es wird zu Beginn eine Tabelle 
 % mit Informationen zum Autor gesetzt. Zum Abschluss werden Betreuer,
 % Hochschullehrer und ggf. Vorsitzender des Prüfungsausschusses ausgegeben.
 %    \begin{macrocode}
-\newcommand*\tud@table@and{}
+\newcommand*\tud@authortable@multiple{}
 \newenvironment{task}[1][]{%
 %    \end{macrocode}
 % Die \env{tudpage}-Umgebung wird geöffnet. Mit dem Parameter \opt{headline} 
@@ -135,7 +135,7 @@
       \fi\fi%
     \else\@headline\fi%
   }%
-  \tud@author@table%
+  \tud@authortable@set%
 }{%
 %    \end{macrocode}
 % Da auch Gutachter und Betreuer durch den Befehl \cs{and} getrennt werden,
@@ -143,7 +143,7 @@
 % Ausgabe in einer Tabelle, die Spalte der Bezeichner entspricht der aus dem
 % oberen Teil.
 %    \begin{macrocode}
-  \def\tud@table@and##1{%
+  \def\tud@authortable@multiple##1{%
     \def\and{%
       \tabularnewline%
       \ifstr{\csuse{##1othername}}{}{}{%
@@ -151,18 +151,19 @@
       }%
       & \def\and{\tabularnewline &}%
     }%
+    \csuse{@##1}%
   }%
   \removelastskip%
   \ifdim\parskip>\z@\vskip\parskip\else\vskip\topsep\fi\medskip%
   \begingroup%
   \setparsizes{\z@}{\z@}{\z@\@plus 1fil}\par@updaterelative%
-  \begin{tabular}{@{}p{\tud@dim@table}l@{}}%
+  \begin{tabular}{@{}p{\tud@dim@authortable}l@{}}%
     \ifx\@referee\@empty\else%
       \refereename\tud@title@delimiter & %
-        \tud@table@and{referee}\@referee\tabularnewline[\smallskipamount]%
+        \tud@authortable@multiple{referee}\tabularnewline[\smallskipamount]%
     \fi%
     \supervisorname\tud@title@delimiter & %
-      \tud@table@and{supervisor}\@supervisor\tabularnewline[\smallskipamount]%
+      \tud@authortable@multiple{supervisor}\tabularnewline[\smallskipamount]%
     \issuedatetext\tud@title@delimiter & \@issuedate\tabularnewline%
     \duedatetext\tud@title@delimiter & \@duedate\tabularnewline%
   \end{tabular}%
@@ -192,7 +193,7 @@
   \aftergroup\cleardoublepage%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@table@and
+% \end{macro}^^A \tud@authortable@multiple
 % \end{environment}^^A task
 % \begin{macro}{\taskform}
 % Dies soll die Standardform einer Aufgabenstellung sein. Im ersten Argument
@@ -245,7 +246,7 @@
       \fi\fi%
     \else\@headline\fi%
   }%
-  \tud@author@table%
+  \tud@authortable@set%
 }{%
 %    \end{macrocode}
 % Die gegebenen Note sowie Ort und Datum werden am Ende ggf. ausgegeben.
@@ -313,15 +314,15 @@
 \newcommand*\student{\author}
 %    \end{macrocode}
 % \end{macro}^^A \student
-% \begin{macro}{\tud@author@table}
+% \begin{macro}{\tud@authortable@set}
 % \changes{v2.01b}{2014/06/04}{Probleme mit Paket \pkg{calc} behoben}^^A
-% \begin{length}{\tud@dim@table}
-% Der Befehl \cs{tud@author@table} dient zur Ausgabe einer Tabelle mit
+% \begin{length}{\tud@dim@authortable}
+% Der Befehl \cs{tud@authortable@set} dient zur Ausgabe einer Tabelle mit
 % Informationen zum Autor/zu den Autoren\footnote{Matrikelnummer, Jahrgang,
 % Studiengang etc.} für Aufgabenstellung und Gutachten.
 %    \begin{macrocode}
-\newlength\tud@dim@table
-\newcommand*\tud@author@table{%
+\newlength\tud@dim@authortable
+\newcommand*\tud@authortable@set{%
   \begingroup%
   \let\thanks\@gobble%
   \let\footnote\@gobble%
@@ -337,11 +338,11 @@
 %    \begin{macrocode}
   \tud@multiple@split{@author}%
   \tud@multiple@fields@preset{@author}{\null}{}%
-  \setlength\tud@dim@table{2em}%
+  \setlength\tud@dim@authortable{2em}%
 %    \end{macrocode}
 % Anschließend werden die Bezeichner sowohl der obligatorischen als auch der
-% genutzten, optionalen Felder in \cs{@tempa} gespeichert. Mit dieser Liste 
-% wird der längste Bezeichner bestimmt und dessen Länge in \cs{tud@dim@table}
+% genutzten, optionalen Felder in \cs{@tempa} gespeichert. Mit der Liste wird
+% der längste Bezeichner bestimmt und dessen Länge in \cs{tud@dim@authortable}
 % gespeichert.
 %    \begin{macrocode}
   \def\@tempb##1{%
@@ -363,11 +364,11 @@
   \@tempb{discipline}%
   \@for\@tempb:=\@tempa\do{%
     \settowidth\@tempdima{\@tempb\tud@title@delimiter}%
-    \ifdim\@tempdima>\tud@dim@table\relax%
-      \setlength\tud@dim@table{\@tempdima}%
+    \ifdim\@tempdima>\tud@dim@authortable\relax%
+      \setlength\tud@dim@authortable{\@tempdima}%
     \fi%
   }%
-  \global\tud@dim@table=\tud@dim@table%
+  \global\tud@dim@authortable=\tud@dim@authortable%
 %    \end{macrocode}
 % Die Tabelle mit den benötigten Bezeichnern. Damit diese bis an den Seiterand
 % ohne Warnungen gesetzt werden können, wird die Auszeichnung von Absatzenden
@@ -375,7 +376,7 @@
 %    \begin{macrocode}
   \begingroup%
   \setparsizes{\z@}{\z@}{\z@\@plus 1fil}\par@updaterelative%
-  \begin{tabular}{@{}p{\tud@dim@table}}%
+  \begin{tabular}{@{}p{\tud@dim@authortable}}%
     \ifx\@course\@empty\else%
       \coursename\tud@title@delimiter\tabularnewline%
     \fi%
@@ -441,8 +442,8 @@
 % Danach wird der Inhalt der Aufgabenstellung gesetzt.
 %    \begin{macrocode}
   \vskip\smallskipamount%
-  \begin{tabular}{@{}p{\tud@dim@table}%
-    p{\dimexpr\textwidth-\tud@dim@table-2\tabcolsep\relax}@{}}%
+  \begin{tabular}{@{}p{\tud@dim@authortable}%
+    p{\dimexpr\textwidth-\tud@dim@authortable-2\tabcolsep\relax}@{}}%
     \titlename\tud@title@delimiter & \tud@RaggedRight\textsf{\textbf{\@@title}}%
   \end{tabular}%
   \par%
@@ -452,8 +453,8 @@
   \noindent\ignorespaces%
 }
 %    \end{macrocode}
-% \end{length}^^A \tud@dim@table
-% \end{macro}^^A \tud@author@table
+% \end{length}^^A \tud@dim@authortable
+% \end{macro}^^A \tud@authortable@set
 % \begin{environment}{notice}
 % \changes{v2.03}{2015/01/05}{Bugfix für Seitenstil im zweiseitigen Satz}^^A
 % Die Umgebung für Aushänge nutzt ebenfalls die \env{tudpage}-Umgebung. Sie wird
