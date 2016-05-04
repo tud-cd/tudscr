@@ -1,4 +1,4 @@
-% \CheckSum{1445}
+% \CheckSum{1450}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-layout.dtx}[%
-  2016/05/04 v2.05 TUD-KOMA-Script (layout)%
+  2016/05/05 v2.05 TUD-KOMA-Script (layout)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman,xindy]{tudscrdoc}
@@ -704,7 +704,7 @@
 % \changes{v2.05}{2015/11/24}{neu}^^A
 % \begin{macro}{\tud@headings@current}
 % \changes{v2.05}{2015/11/24}{neu}^^A
-% \begin{macro}{\tud@disposition@fontsize}
+% \begin{macro}{\tud@sec@fontsize}
 % \changes{v2.05}{2015/11/24}{neu}^^A
 % \begin{macro}{\tud@thesis@fontsize}
 % \changes{v2.05}{2015/11/24}{neu}^^A
@@ -712,19 +712,19 @@
 % auf die Formatierung respektive die Schriftgröße der Überschriften haben. 
 % Wird mit der Option \opt{headings} eine andere Überschriftengröße gewählt, 
 % werden mit dem Befehl \cs{tud@headings@set} die dazu passenden Schriftgrößen 
-% sowohl für die Überschriften (\cs{tud@disposition@fontsize}) als auch die 
+% sowohl für die Überschriften (\cs{tud@sec@fontsize}) als auch die 
 % Titelseite (\cs{tud@thesis@fontsize}) gesetzt. In \cs{tud@headings@current} 
 % wird die über \opt{headings=\dots} gewählte Schriftgröße der Überschriften
 % gesichert.
 %    \begin{macrocode}
 \newcommand*\tud@headings@current{}
-\newcommand*\tud@disposition@fontsize{}
+\newcommand*\tud@sec@fontsize{}
 %<book|report|article>\newcommand*\tud@thesis@fontsize{}
 \newcommand*\tud@headings@set[1][]{%
   \def\@tempa##1##2##3{%
     \ifstr{##1}{\tud@headings@current}{}{%
       \renewcommand*\tud@headings@current{##1}%
-      \renewcommand*\tud@disposition@fontsize{##2}%
+      \renewcommand*\tud@sec@fontsize{##2}%
 %<book|report|article>      \renewcommand*\tud@thesis@fontsize{##3}%
       #1%
     }%
@@ -750,7 +750,7 @@
 \AtEndPreamble{\tud@headings@set}
 %    \end{macrocode}
 % \end{macro}^^A \tud@thesis@fontsize
-% \end{macro}^^A \tud@disposition@fontsize
+% \end{macro}^^A \tud@sec@fontsize
 % \end{macro}^^A \tud@headings@current
 % \end{macro}^^A \tud@headings@set
 %
@@ -882,7 +882,7 @@
 %    \begin{macrocode}
 %<*book|report>
 \newkomafont{parttitle}{%
-  \tud@disposition@fontface%
+  \tud@sec@fontface%
   \tud@color{\tud@part@fontcolor}%
   \usesizeofkomafont{section}%
 }
@@ -986,16 +986,16 @@
     \tud@font@koma@set{title}{%
       \raggedtitle%
       \usekomafont{disposition}%
-      \tud@disposition@fontface%
-      \tud@disposition@fontsize%
+      \tud@sec@fontface%
+      \tud@sec@fontsize%
       \tud@color{\tud@title@fontcolor}%
     }%
     \tud@font@koma@set{subtitle}{%
       \raggedtitle%
       \ifstr{\mddefault}{l}{%
-        \tud@disposition@fontface[\fontseries{m}]%
+        \tud@sec@fontface[\fontseries{m}]%
       }{%
-        \tud@disposition@fontface[\fontseries{bx}]%
+        \tud@sec@fontface[\fontseries{bx}]%
       }%
       \usesizeofkomafont{section}%
       \tud@color{\tud@title@fontcolor}%
@@ -1087,18 +1087,18 @@
     \else%
 %</book|report>
       \tud@sectioning@set[addpart]{part}{%
-        \tud@disposition@fontface%
+        \tud@sec@fontface%
         \tud@color{\tud@part@fontcolor}%
       }%
       \tud@font@koma@set{partnumber}{%
-        \tud@disposition@fontface%
+        \tud@sec@fontface%
         \tud@color{\tud@part@fontcolor}%
       }%
 %<*book|report>
     \fi%
 %</book|report>
     \tud@cmd@store{raggedpart}%
-    \renewcommand*\raggedpart{\ifdin{\tud@raggedright}{\tud@RaggedRight}}%
+    \renewcommand*\raggedpart{\tud@sec@ragged}%
   \fi%
 %    \end{macrocode}
 % Die Einstellungen für die Kapitel bzw. die folgenden Gliederungsebenen. Auch
@@ -1144,13 +1144,13 @@
       \let\@@makechapterhead\tud@@makechapterhead%
     }%
     \tud@sectioning@set[addchap]{chapter}{%
-      \tud@disposition@fontface%
-      \tud@disposition@fontsize%
+      \tud@sec@fontface%
+      \tud@sec@fontsize%
       \tud@color{\tud@chapter@fontcolor}%
     }%
     \tud@font@koma@set{chapterprefix}{\usesizeofkomafont{partnumber}}%
     \tud@cmd@store{raggedchapter}%
-    \renewcommand*\raggedchapter{\ifdin{\tud@raggedright}{\tud@RaggedRight}}%
+    \renewcommand*\raggedchapter{\tud@sec@ragged}%
   \fi%
 %</book|report>
   \ifcase\tud@layout@section@num\relax% false
@@ -1172,19 +1172,19 @@
       \renewcommand*\tud@section@fontcolor{HKS41}%
     \fi%
     \tud@sectioning@set[addsec]{section}{%
-      \tud@disposition@fontface%
+      \tud@sec@fontface%
       \ifstr{\tud@pagecolor}{HKS41}{}{\tud@color{\tud@section@fontcolor}}%
     }%
     \tud@sectioning@set{subsection}{%
-      \tud@disposition@fontface%
+      \tud@sec@fontface%
       \ifstr{\tud@pagecolor}{HKS41}{}{\tud@color{\tud@section@fontcolor}}%
     }%
     \tud@sectioning@set{subsubsection}{%
-      \tud@disposition@fontface%
+      \tud@sec@fontface%
       \ifstr{\tud@pagecolor}{HKS41}{}{\tud@color{\tud@section@fontcolor}}%
     }%
     \tud@sectioning@set{minisec}{%
-      \tud@disposition@fontface%
+      \tud@sec@fontface%
       \ifstr{\tud@pagecolor}{HKS41}{}{\tud@color{\tud@section@fontcolor}}%
     }%
     \tud@sectioning@set{paragraph}{%
@@ -1194,7 +1194,7 @@
       \ifstr{\tud@pagecolor}{HKS41}{}{\tud@color{\tud@section@fontcolor}}%
     }%
     \tud@cmd@store{raggedsection}%
-    \renewcommand*\raggedsection{\ifdin{\tud@raggedright}{\tud@RaggedRight}}%
+    \renewcommand*\raggedsection{\tud@sec@ragged}%
   \fi%
 %    \end{macrocode}
 % Für Poster wird außerdem der passende Seitenstil und die Ausprägung von Kopf
@@ -1313,8 +1313,8 @@
 %    \begin{macrocode}
     \if@tud@parttitle%
       \begingroup%
-        \tud@disposition@fontface%
-        \tud@disposition@fontsize%
+        \tud@sec@fontface%
+        \tud@sec@fontsize%
         \tud@color{\tud@part@fontcolor}%
         \ifx\@@title\@empty%
           \ClassWarning{\TUDClassName}{%
@@ -1669,6 +1669,11 @@
 % müsste innerhalb des Argumentes von \cs{parbox} die \KOMAScript-Option 
 % \opt{parbox} neu gesetzt werden.
 %    \begin{macrocode}
+\CheckCommand\set@@@@preamble[6]{%
+  \expandafter\gdef\csname #1@preamble\endcsname{%
+    \hbox to\hsize{#4\parbox[{#2}]{#3}{#6\par}#5\par}%
+  }%
+}
 \patchcmd{\set@@@@preamble}{%
   \hbox to\hsize{#4\parbox[{#2}]{#3}{#6\par}#5\par}%
 }{%

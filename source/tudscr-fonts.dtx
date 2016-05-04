@@ -1,4 +1,4 @@
-% \CheckSum{1317}
+% \CheckSum{1369}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-fonts.dtx}[%
-  2016/05/03 v2.05 TUD-KOMA-Script\space%
+  2016/05/05 v2.05 TUD-KOMA-Script\space%
 %</driver>
 %<package&identify>\ProvidesPackage{%
 %<package&identify&!fontsizes>  tudscrfonts%
@@ -111,6 +111,8 @@
 % Schriftfamilien für die alten Klassen verzichtet werden. Im Vergleich zu 
 % dieser Installation werden dabei fehlende Glyphen ergänzt und Probleme beim
 % Kerning behoben.
+% \ToDo{tud@sec@ragged und tud@sec@fontface im Paket prüfen.}[v2.05]
+% \ToDo{insbesondere tud@sec@ragged für alte Klassen}[v2.05]
 %
 % \StopEventually{\PrintIndex\PrintChanges}
 %
@@ -1693,15 +1695,39 @@
 }
 %    \end{macrocode}
 %
+% \subsection{Anpassungen für die Klasse \cls{beamer}}
+%
+% Die \cls{beamer}-Klasse lädt standardmäßig serifenlose Mathematikschriften. 
+% Dies soll verhindert werden, damit die Auswahl über die Option \opt{cdmath} 
+% erfolgen kann.
+%    \begin{macrocode}
+%<*package>
+\AfterClass*{beamer}{\usefonttheme[onlymath]{serif}}
+%</package>
+%    \end{macrocode}
+%
+% \subsection{Anpassungen für das Paket \pkg{siunitx}}
+%
+% \begin{macro}{\lseries}
+% Das Paket \pkg{siunitx} nutzt den Befehl \cs{lseries} für den Fall, dass für
+% den Fließtext eine Schrift die Serie \val{l} verwendet. Dem wird hier 
+% Rechnung getragen.
+%    \begin{macrocode}
+\AfterPackage*{siunitx}{%
+  \providecommand*\lseries{\fontseries{l}\selectfont}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \lseries
+%
 % \subsection{Schrifteinstellungen für Überschriften}
 %
-% \begin{macro}{\tud@disposition@fontface}
+% \begin{macro}{\tud@sec@fontface}
 % \changes{v2.05}{2016/04/04}{Optionales Argument für \pkg{tudscrcomp}}^^A
-% Mit \cs{tud@disposition@fontface} wird die Schriftart für Überschriften im 
+% Mit \cs{tud@sec@fontface} wird die Schriftart für Überschriften im 
 % Layout des \CDs definiert. Normalerweise wird hierfür \DIN verwendet, was
 % allerdings per Option auch deaktiviert werden kann.
 %    \begin{macrocode}
-\newcommand*\tud@disposition@fontface[1][]{%
+\newcommand*\tud@sec@fontface[1][]{%
   \if@tud@cdfont@din%
     \tud@dinbn\tud@raggedright%
   \else%
@@ -1709,7 +1735,7 @@
   \fi%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@disposition@fontface
+% \end{macro}^^A \tud@sec@fontface
 % \begin{macro}{\ifdin}
 % \changes{v2.02}{2014/08/29}{Anpassungen für \pkg{fontspec}}^^A
 % Der Befehl \cs{ifdin} prüft auf die Verwendung von \DIN. Davon abhängig wird
@@ -1727,65 +1753,10 @@
 %    \end{macrocode}
 % \end{macro}^^A \ifdin
 %
-% \subsection{Bedingte Majuskeln für Überschriften}
+% \subsection{Ausrichtung von Überschriften und das Paket \pkg{ragged2e}}
 %
-% Überschriften sollen bloß in Großbuchstaben gesetzt werden, wenn auch 
-% tatsächlich die Schrift \DIN verwendet wird.
-% \begin{macro}{\tud@uclcnotmath}
-% \changes{v2.02}{2014/06/27}{\pkg{textcase}: Ignorieren von Fußnoten im 
-%   Argument des Befehls \cs{MakeTextUppercase}}^^A
-% \changes{v2.03}{2015/01/21}{\pkg{textcase}: Ignorieren des Befehls 
-%   \cs{@mkboth} im Argument des Befehls \cs{MakeTextUppercase}}^^A
-% \begin{macro}{\@uclcnotmath}
-% Für das Setzen der Überschriften in Majuskeln\footnote{Großbuchstaben} mit
-% \cs{MakeTextUppercase}, was den internen \LaTeX-Befehl \cs{MakeUppercase}
-% verbessert, wird das Paket \pkg{textcase} genutzt. Damit Fußnoten nicht 
-% automatisch in Majuskeln gesetzt werden, wird außerdem der interne Befehl
-% \cs{@uclcnotmath} aus diesem Paket angepasst.
-% \ToDo{\opt{footnotes=symbolheadings} komplett überarbeiten}[v2.06]
-%    \begin{macrocode}
-\RequirePackage{textcase}[2004/10/07]
-\newcommand*\tud@uclcnotmath{%
-  \def\footnote##1##{\toks@{\noexpand\footnote##1}\@footnote}%
-  \def\@footnote##1{\NoCaseChange{\the\toks@{##1}}}%
-  \def\@mkboth##1##2{\NoCaseChange{\@mkboth{##1}{##2}}}%
-}
-\patchcmd{\@uclcnotmath}{\@nonchangecase\ensuremath}{%
-  \@nonchangecase\ensuremath\tud@uclcnotmath%
-}{}{\tud@patch@wrn{@uclcnotmath}}
-%    \end{macrocode}
-% \end{macro}^^A \@uclcnotmath
-% \end{macro}^^A \tud@uclcnotmath
-% \begin{macro}{\tud@makeuppercase}
-% Der Befehl führt \cs{MakeTextUppercase}\marg{Text} deshalb nur aus, wenn die 
-% richtige Schriftfamilie verwendet wird. 
-%    \begin{macrocode}
-\newcommand*\tud@makeuppercase[1]{%
-  \ifdin{\begingroup\MakeTextUppercase{#1}\endgroup}{#1}%
-%    \end{macrocode}
-% Aufgrund eines Fehlers im \LaTeX-Kernels liegt die Grundlinie für die beiden
-% Gliederungsebenen \cs{section} und \cs{subsection} zu hoch. Mit dem Einfügen
-% des vertikalen Freiraums für die Umlaute wird diese automatisch nach unten
-% verschoben. Allerdings ist das ein ziemlich übler Hack.
-%    \begin{macrocode}
-  \protect\vphantom{\"A\"O\"U}%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@makeuppercase
-%
-% \subsection{Anpassungen für die Klasse \cls{beamer}}
-%
-% Die \cls{beamer}-Klasse lädt standardmäßig serifenlose Mathematikschriften. 
-% Dies soll verhindert werden, damit die Auswahl über die Option \opt{cdmath} 
-% erfolgen kann.
-%    \begin{macrocode}
-%<*package>
-\AfterClass*{beamer}{\usefonttheme[onlymath]{serif}}
-%</package>
-%    \end{macrocode}
-%
-% \subsection{Anpassungen für das Paket \pkg{ragged2e}}
-%
+% \begin{macro}{\tud@sec@ragged}
+% \changes{v2.05}{2016/05/04}{neu}^^A
 % \begin{macro}{\tud@raggedright}
 % \begin{macro}{\tud@RaggedRight}
 % Die Überschriften in \DIN sollen laut \CD linksbündig und nie mit aktiver
@@ -1806,22 +1777,75 @@
   }{}%
   \renewcommand*\tud@RaggedRight{\RaggedRight}%
 }
+\newcommand*\tud@sec@ragged{\ifdin{\tud@raggedright}{\tud@RaggedRight}}
 %    \end{macrocode}
-% \end{macro}^^A \tud@ragged2e
+% \end{macro}^^A \tud@RaggedRight
 % \end{macro}^^A \tud@raggedright
+% \end{macro}^^A \tud@sec@ragged
 %
-% \subsection{Anpassungen für das Paket \pkg{siunitx}}
+% \subsection{Bedingte Majuskeln für Überschriften}
 %
-% \begin{macro}{\lseries}
-% Das Paket \pkg{siunitx} nutzt den Befehl \cs{lseries} für den Fall, dass für
-% den Fließtext eine Schrift die Serie \val{l} verwendet. Dem wird hier 
-% Rechnung getragen.
+% Überschriften sollen bloß in Großbuchstaben gesetzt werden, wenn auch 
+% tatsächlich die Schrift \DIN verwendet wird.
+% \begin{macro}{\tud@makeuppercase}
+% Der Befehl führt \cs{MakeTextUppercase}\marg{Text} deshalb nur aus, wenn die 
+% richtige Schriftfamilie verwendet wird. 
 %    \begin{macrocode}
-\AfterPackage*{siunitx}{%
-  \providecommand*\lseries{\fontseries{l}\selectfont}%
+\newcommand*\tud@makeuppercase[1]{%
+  \ifdin{\begingroup\MakeTextUppercase{#1}\endgroup}{#1}%
+%    \end{macrocode}
+% Aufgrund eines Fehlers im \LaTeX-Kernels liegt die Grundlinie für die beiden
+% Gliederungsebenen \cs{section} und \cs{subsection} zu hoch. Mit dem Einfügen
+% des vertikalen Freiraums für die Umlaute wird diese automatisch nach unten
+% verschoben. Allerdings ist das ein ziemlich übler Hack.
+%    \begin{macrocode}
+  \protect\vphantom{\"A\"O\"U}%
 }
 %    \end{macrocode}
-% \end{macro}^^A \lseries
+% \end{macro}^^A \tud@makeuppercase
+% \begin{macro}{\tud@uclcnotmath}
+% \changes{v2.02}{2014/06/27}{\pkg{textcase}: Ignorieren von Fußnoten im 
+%   Argument des Befehls \cs{MakeTextUppercase}}^^A
+% \changes{v2.03}{2015/01/21}{\pkg{textcase}: Ignorieren des Befehls 
+%   \cs{@mkboth} im Argument des Befehls \cs{MakeTextUppercase}}^^A
+% \begin{macro}{\@uclcnotmath}
+% Für das Setzen der Überschriften in Majuskeln\footnote{Großbuchstaben} mit
+% \cs{MakeTextUppercase}, was den internen \LaTeX-Befehl \cs{MakeUppercase}
+% verbessert, wird das Paket \pkg{textcase} genutzt. Damit Fußnoten nicht 
+% automatisch in Majuskeln gesetzt werden, wird außerdem der interne Befehl
+% \cs{@uclcnotmath} aus diesem Paket angepasst.
+% \ToDo{\opt{footnotes=symbolheadings} komplett überarbeiten}[v2.06]
+%    \begin{macrocode}
+\RequirePackage{textcase}[2004/10/07]
+\CheckCommand*\@uclcnotmath[4]{%
+  \begingroup
+    #1%
+    \def\({$}\let\)\(%
+    \def\NoCaseChange##1{\noexpand\NoCaseChange{\noexpand##1}}%
+    \@nonchangecase\label
+    \@nonchangecase\ref
+    \@nonchangecase\ensuremath
+    \def\cite##1##{\toks@{\noexpand\cite##1}\@citex}%
+    \def\@citex##1{\NoCaseChange{\the\toks@{##1}}}%
+    \def\reserved@a##1##2{\let#2\reserved@a}%
+    \expandafter\reserved@a\@uclclist\reserved@b{\reserved@b\@gobble}%
+    \protected@edef\reserved@a{%
+      \endgroup
+      \noexpand\@skipmath#3#4$\valign$%
+    }%
+  \reserved@a%
+}
+\newcommand*\tud@uclcnotmath{%
+  \def\footnote##1##{\toks@{\noexpand\footnote##1}\@footnote}%
+  \def\@footnote##1{\NoCaseChange{\the\toks@{##1}}}%
+  \def\@mkboth##1##2{\NoCaseChange{\@mkboth{##1}{##2}}}%
+}
+\patchcmd{\@uclcnotmath}{\@nonchangecase\ensuremath}{%
+  \@nonchangecase\ensuremath\tud@uclcnotmath%
+}{}{\tud@patch@wrn{@uclcnotmath}}
+%    \end{macrocode}
+% \end{macro}^^A \@uclcnotmath
+% \end{macro}^^A \tud@uclcnotmath
 %
 % \iffalse
 %</body>
