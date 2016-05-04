@@ -1720,7 +1720,7 @@
   \fi%
   \if@tud@dinbold%
     \if@tud@fontspec%
-      \newfontface\@dinbn{DIN Bold}[%
+      \newfontface\tud@dinbn{DIN Bold}[%
         FontFace = {l}{\updefault}{DIN Bold},%
         FontFace = {m}{\updefault}{DIN Bold},%
         FontFace = {b}{\updefault}{DIN Bold},%
@@ -1734,15 +1734,15 @@
         NFSSFamily = \tud@dinbold%
       ]%
     \else%
-      \newrobustcmd*\@dinbn{\usefont{\encodingdefault}{\tud@dinbold}{b}{n}}%
+      \newrobustcmd*\tud@dinbn{\usefont{\encodingdefault}{\tud@dinbold}{b}{n}}%
     \fi%
     \if@tud@dinboldmath%
-      \appto\@dinbn{\mathversion{dinbold}}%
+      \appto\tud@dinbn{\mathversion{dinbold}}%
     \fi%
-    \newrobustcmd*\dinbn{\@dinbn}%
+    \newrobustcmd*\dinbn{\tud@dinbn}%
   \else%
-    \newrobustcmd*\@dinbn{\sectfont}%
-    \newrobustcmd*\dinbn{\tud@font@wrn{DIN Bold}\@dinbn}%
+    \newrobustcmd*\tud@dinbn{\sectfont}%
+    \newrobustcmd*\dinbn{\tud@font@wrn{DIN Bold}\tud@dinbn}%
   \fi%
   \newcommand*\textuln{}%
   \newcommand*\texturn{}%
@@ -1776,19 +1776,19 @@
   }%
 }
 \newcommand*\cdfont[1]{%
-  \@cdfont{#1}%
+  \tud@cdfont@get{#1}%
   \ifx\@tempc\relax\else%
     \ifstr{\@tempc}{dinbn}{\dinbn}{\csuse{univ\@tempc}}%
   \fi%
 }
 \providecommand*\tudfont[1]{\cdfont{#1}}
 \newcommand*\textcdfont[2]{%
-  \@cdfont{#1}%
+  \tud@cdfont@get{#1}%
   \ifx\@tempc\relax\else%
     \ifstr{\@tempc}{dinbn}{\textdbn{#2}}{\csuse{textu\@tempc}{#2}}%
   \fi%
 }
-\newcommand*\@cdfont[1]{%
+\newcommand*\tud@cdfont@get[1]{%
   \tud@cdfont@trim\@tempa{#1}%
   \ifstr{\@tempa}{45}{\def\@tempc{ln}}{%
   \ifstr{\@tempa}{55}{\def\@tempc{rn}}{%
@@ -1944,7 +1944,7 @@
     \tud@font@greek@loop\tud@font@greek@init%
     \tud@font@math@set%
   }%
-  \sbox\z@{\@dinbn$ $}%
+  \sbox\z@{\tud@dinbn$ $}%
   \undef\tud@font@math@init%
 }
 \newcommand*\tud@font@greek@init[1]{%
@@ -2022,7 +2022,7 @@
 }
 \newcommand*\tud@disposition@fontface[1][]{%
   \if@tud@cdfont@din%
-    \@dinbn\tud@raggedright%
+    \tud@dinbn\tud@raggedright%
   \else%
     \sectfont#1%
   \fi%
@@ -2191,15 +2191,15 @@
 \newrobustcmd*\matriculationyear[1]{\gdef\@matriculationyear{#1}\ignorespaces}
 \newcommand*\@placeofbirth{}
 \newrobustcmd*\placeofbirth[1]{\gdef\@placeofbirth{#1}\ignorespaces}
-\newlength\tud@signatureskip
-\setlength\tud@signatureskip{8ex plus 6ex minus 6ex}
+\newlength\tud@dim@signatureskip
+\setlength\tud@dim@signatureskip{8ex plus 6ex minus 6ex}
 \newcommand*\@confirmationclosing{%
   \tud@datecheck%
   \ifx\@date\@empty\else%
     \medskip\noindent%
     \ifx\@place\@empty\else\@place,\nobreakspace\fi\@date%
   \fi%
-  \vskip\tud@signatureskip\noindent%
+  \vskip\tud@dim@signatureskip\noindent%
   \begingroup%
     \let\and\hfil%
     \@@author\hfil%
@@ -2803,7 +2803,7 @@
 }
 \newlength\bleedmargin
 \setlength\bleedmargin{\maxdimen}
-\newcommand*\tud@setbleedmargin@default{%
+\newcommand*\tud@bleedmargin@set{%
   \@tempswafalse%
   \ifcsundef{CROP@@@marks}{}{%
     \ifx\CROP@@@marks\vfil\else\@tempswatrue\fi%
@@ -3394,7 +3394,7 @@
   \let\@tempa\tud@ddc@head@num%
   \let\@tempb\tud@ddc@foot@num%
   \if@tud@ddc@auto%
-    \ifdefvoid{\@headlogo}{%
+    \ifdefvoid{\tud@headlogo@filename}{%
       \let\@tempa\tud@ddc@auto@num%
       \let\@tempb\z@%
     }{%
@@ -3404,7 +3404,7 @@
   \fi%
   \tud@ifverlower{2.03}{%
     \ifnum\@tempb=\z@\relax%
-      \ifdefvoid{\@footlogo}{}{\let\@tempb\m@ne}%
+      \ifdefvoid{\tud@footlogo@filenames}{}{\let\@tempb\m@ne}%
     \fi%
   }{}%
 }
@@ -3450,20 +3450,20 @@
 \tud@newlayerbox{head@HKS41}
 \tud@newlayerbox{head@white}
 \tud@newlayerbox{head@option}
-\newcommand*\@headlogo{}
-\newcommand*\@@headlogo{}
+\newcommand*\tud@headlogo@filename{}
+\newcommand*\tud@headlogo@fileoptions{}
 \newcommand*\tud@headlogo@wrn{}
 \newcommand*\headlogo[2][]{%
   \tud@comp@clearpage%
-  \renewcommand*\@headlogo{#2}%
-  \renewcommand*\@@headlogo{#1}%
+  \renewcommand*\tud@headlogo@filename{#2}%
+  \renewcommand*\tud@headlogo@fileoptions{#1}%
   \global\@tud@headlogo@option@settrue%
   \global\@tud@footlogo@option@settrue%
   \gdef\tud@headlogo@wrn{%
     \ClassWarning{\TUDClassName}{%
-      The secondary logo `\string\headlogo{\@headlogo}' is\MessageBreak%
-      overwritten with DDC logo. Maybe you should use\MessageBreak%
-      `ddcfoot' or better `ddc' instead of `ddchead'%
+      Secondary logo `\string\headlogo{\tud@headlogo@filename}'\MessageBreak%
+      is overwritten with DDC logo. Maybe you should\MessageBreak%
+      use `ddcfoot' or better `ddc' instead of `ddchead'%
     }%
     \global\let\tud@headlogo@wrn\relax%
   }%
@@ -3490,11 +3490,13 @@
     \tud@savelayerbox{head@option}{}%
     \tud@ddc@check%
     \ifcase\@tempa\relax% \tud@ddc@head@num=false
-      \ifdefvoid{\@headlogo}{}{%
-        \protected@edef\@headlogo{%
-          \expandafter\trim@spaces\expandafter{\@headlogo}%
+      \ifdefvoid{\tud@headlogo@filename}{}{%
+        \protected@edef\tud@headlogo@filename{%
+          \expandafter\trim@spaces\expandafter{\tud@headlogo@filename}%
         }%
-        \protected@edef\@tempb{\noexpand\@tempc{\@headlogo}{\@@headlogo}}%
+        \protected@edef\@tempb{%
+          \noexpand\@tempc{\tud@headlogo@filename}{\tud@headlogo@fileoptions}%
+        }%
         \@tempb%
       }%
     \or\or% \tud@ddc@head@num=color
@@ -3526,9 +3528,9 @@
     }%
     \vss%
   }{%
-    The given `\string\headlogo{\@headlogo}' is too large.%
+    The given `\string\headlogo{\tud@headlogo@filename}' is too large.%
   }%
-  \ifdefvoid{\@headlogo}{}{%
+  \ifdefvoid{\tud@headlogo@filename}{}{%
     \tud@ddc@check%
     \ifnum\@tempa>\z@\relax\tud@headlogo@wrn\fi%
   }%
@@ -3616,12 +3618,12 @@
 }
 \tud@newlayerbox{foot@cmd}
 \newcommand*\footlogosep{\hfill}
-\newcommand*\@footlogo{}
-\newcommand*\@@footlogo{}
+\newcommand*\tud@footlogo@filenames{}
+\newcommand*\tud@footlogo@fileoptions{}
 \newcommand*\footlogo[2][]{%
   \tud@comp@clearpage%
-  \renewcommand*\@footlogo{#2}%
-  \renewcommand*\@@footlogo{#1}%
+  \renewcommand*\tud@footlogo@filenames{#2}%
+  \renewcommand*\tud@footlogo@fileoptions{#1}%
   \global\@tud@footlogo@cmd@settrue%
   \tud@comp@resetpagestyle%
 }
@@ -3632,7 +3634,7 @@
     \tud@savelayerbox{foot@cmd}{%
       \hbox to #2{%
         \let\@tempa\relax%
-        \@for\@tempb:=\@footlogo\do{%
+        \@for\@tempb:=\tud@footlogo@filenames\do{%
           \edef\@tempb{\expandafter\trim@spaces\expandafter{\@tempb}}%
           \@tempa%
           \ifx\@tempb\@empty\else%
@@ -3662,11 +3664,13 @@
     \let\@tempc\relax%
     \DeclareListParser{\@tempc}{:}%
     \@tempc{#1}%
-    \preto\@@footlogo{%
+    \preto\tud@footlogo@fileoptions{%
       keepaspectratio,totalheight=\tud@dim@footlogoheight,%
     }%
-    \appto\@@footlogo{\@tempb}%
-    \protected@edef\@tempc{\noexpand\includegraphics[\@@footlogo]{\@tempa}}%
+    \appto\tud@footlogo@fileoptions{\@tempb}%
+    \protected@edef\@tempc{%
+      \noexpand\includegraphics[\tud@footlogo@fileoptions]{\@tempa}%
+    }%
     \tud@vlayerbox{#2}{\vss\hbox{\@tempc}\vss\vss}{%
       The given `\string\footlogo{\@tempa}' is too large.%
     }%
@@ -3685,7 +3689,7 @@
 \newcommand*\footcontent{%
   \@ifstar{%
     \renewcommand*\tud@footcontent@fontface{\usekomafont{tudheadings}}%
-    \@footcontent%
+    \tud@footcontent@do%
   }{%
     \renewcommand*\tud@footcontent@fontface{%
       \usekomafont{tudheadings}%
@@ -3693,16 +3697,16 @@
       \fontsize{\tud@head@fontsize}{1.25\@tempdima}%
       \selectfont%
     }%
-    \@footcontent%
+    \tud@footcontent@do%
   }%
 }
-\newcommand*\@footcontent[2][]{%
+\newcommand*\tud@footcontent@do[2][]{%
   \kernel@ifnextchar[%]
-    {\@@footcontent{#1}{#2}}%
-    {\@@footcontent{#1}{#2}[\@nil]}%
+    {\tud@footcontent@@do{#1}{#2}}%
+    {\tud@footcontent@@do{#1}{#2}[\@nil]}%
 }
-\newcommand*\@@footcontent{}
-\def\@@footcontent#1#2[#3]{%
+\newcommand*\tud@footcontent@@do{}
+\def\tud@footcontent@@do#1#2[#3]{%
   \appto\tud@footcontent@fontface{#1\selectfont}%
   \if\detokenize{*#2}\relax\else%
     \renewcommand*\tud@footcontent@left{#2}%
@@ -4274,7 +4278,7 @@
     }%
     \BeforeSelectAnyPageStyle{\tud@BeforeSelectAnyPageStyle{#1}}%
     \tud@recalctypearea%
-    \tud@setbleedmargin@default%
+    \tud@bleedmargin@set%
   }%
 }
 \newcommand*\tud@parameters@pagestyle[1]{%
@@ -4357,13 +4361,13 @@
   \TUD@parameter@handler{\TUD@parameter@defaulthandler{tudpage}{#1}}%
 }
 %%% From File: tudscr-layout.dtx
-\newcommand*\tud@headings@value{}
+\newcommand*\tud@headings@current{}
 \newcommand*\tud@disposition@fontsize{}
 \newcommand*\tud@thesis@fontsize{}
 \newcommand*\tud@headings@set[1][]{%
   \def\@tempa##1##2##3{%
-    \ifstr{##1}{\tud@headings@value}{}{%
-      \renewcommand*\tud@headings@value{##1}%
+    \ifstr{##1}{\tud@headings@current}{}{%
+      \renewcommand*\tud@headings@current{##1}%
       \renewcommand*\tud@disposition@fontsize{##2}%
       \renewcommand*\tud@thesis@fontsize{##3}%
       #1%
@@ -4512,10 +4516,10 @@
     \tud@cmd@store{@schapter}%
     \ifcsdef{scr@v@3.18}{%
       \tud@cmd@store{scr@@makechapterhead}%
-      \let\scr@@makechapterhead\tud@@@makechapterhead%
+      \let\scr@@makechapterhead\tud@@makechapterhead%
     }{%
       \tud@cmd@store{@@makechapterhead}%
-      \let\@@makechapterhead\tud@@@makechapterhead%
+      \let\@@makechapterhead\tud@@makechapterhead%
     }%
     \tud@sectioning@set[addchap]{chapter}{%
       \tud@disposition@fontface%
@@ -4746,11 +4750,11 @@
     \vspace*{\headingsvskip}%
   \fi%
 }
-\newcommand*\tud@@@makechapterhead{}%
+\newcommand*\tud@@makechapterhead{}%
 \ifcsdef{scr@v@3.18}{\@tempswatrue}{\@tempswafalse}
 \if@tempswa
-  \let\tud@@@makechapterhead\scr@@makechapterhead%
-  \patchcmd{\tud@@@makechapterhead}{%
+  \let\tud@@makechapterhead\scr@@makechapterhead%
+  \patchcmd{\tud@@makechapterhead}{%
     \csname #1format\endcsname%
     \setlength{\@tempskipa}{\csname scr@#1@innerskip\endcsname}%
     \chapterheadmidvskip
@@ -4761,8 +4765,8 @@
     \tud@headmidvskip@normal%
   }{}{\tud@patch@wrn{scr@@makechapterhead}}%
 \else
-  \let\tud@@@makechapterhead\@@makechapterhead%
-  \patchcmd{\tud@@@makechapterhead}{%
+  \let\tud@@makechapterhead\@@makechapterhead%
+  \patchcmd{\tud@@makechapterhead}{%
     \chapterformat
     \setlength{\@tempskipa}{\scr@chapter@innerskip}%
     \chapterheadmidvskip
@@ -4982,8 +4986,8 @@
   \endgroup%
   \ifx\@tempa\relax\else\thanks\@tempa\fi%
 }
-\newcommand*\@titledelim{:\nobreakspace}
-\newcommand*\titledelimiter[1]{\gdef\@titledelim{#1}}
+\newcommand*\tud@title@delimiter{:\nobreakspace}
+\newcommand*\titledelimiter[1]{\gdef\tud@title@delimiter{#1}}
 \newcommand*\tud@newline@title{}
 \newcommand*\tud@split@author@title[2]{%
   \tud@multiple@fields@store{@author}{#1}%
@@ -4998,7 +5002,7 @@
       \if@titlepage%
         \tud@newline@title%
         \ifstr{\dateofbirthtext}{}%
-          {}{\dateofbirthtext\@titledelim}\@dateofbirth%
+          {}{\dateofbirthtext\tud@title@delimiter}\@dateofbirth%
         \ifx\@placeofbirth\@empty\else%
           \nobreakspace\placeofbirthtext\nobreakspace\@placeofbirth%
         \fi%
@@ -5010,7 +5014,7 @@
       \ifstr{\csuse{@##1}}{}{}{%
         \if@titlepage%
           \tud@newline@title%
-          \ifstr{\csuse{##1name}}{}{}{\csuse{##1name}\@titledelim}%
+          \ifstr{\csuse{##1name}}{}{}{\csuse{##1name}\tud@title@delimiter}%
           \csuse{@##1}%
         \else%
           \tud@title@wrn{##1}%
@@ -5031,7 +5035,7 @@
     activated titlepage option%
   }%
 }
-\newcommand*\tud@letsubjectthesis{%
+\newcommand*\tud@thesis@tosubject{%
   \if@tud@subjectthesis\ifx\@thesis\@empty\else%
     \ifx\@subject\@empty\else%
       \ClassWarning{\TUDClassName}{%
@@ -5165,7 +5169,7 @@
         }}%
         \addtolength\@tempdima{\dimexpr\ht\z@+\dp\z@\relax}%
       \fi%
-      \tud@letsubjectthesis%
+      \tud@thesis@tosubject%
       \ifx\@subject\@empty\else%
         \sbox\@ne{\vbox{{\usekomafont{subject}{\@subject\par\null}}}}%
         \addtolength\@tempdima{\dimexpr\ht\@ne+\dp\@ne+\p@\relax}%
@@ -5224,10 +5228,12 @@
           \tud@datecheck%
           \ifx\@date\@empty\else%
             \vskip 2ex\@plus1ex\@minus1ex%
-            \ifstr{\datetext}{}{}{\datetext\@titledelim}%
+            \ifstr{\datetext}{}{}{\datetext\tud@title@delimiter}%
             {\usekomafont{date}{\@date\nobreakspace\@datemore\par}}%
             \ifx\@defensedate\@empty\else%
-              \ifstr{\defensedatetext}{}{}{\defensedatetext\@titledelim}%
+              \ifstr{\defensedatetext}{}{}{%
+                \defensedatetext\tud@title@delimiter%
+              }%
               {\usekomafont{date}{\@defensedate\par}}%
             \fi%
           \fi%
@@ -5379,7 +5385,7 @@
       \addtolength\@tempdima{\dimexpr\ht\z@+\dp\z@\relax}%
     \fi%
     \TUDoptions{subjectthesis=true}%
-    \tud@letsubjectthesis%
+    \tud@thesis@tosubject%
     \ifx\@subject\@empty\else%
       \sbox\@ne{\vbox{{\usekomafont{subject}{\@subject\par\null}}}}%
       \addtolength\@tempdima{\dimexpr\ht\@ne+\dp\@ne+\p@\relax}%
@@ -5902,25 +5908,25 @@
   \TUD@parameter@let{option}{declaration}%
   \TUD@parameter@handler{\TUD@parameter@defaulthandler{declaration}{#1}}%
 }
-\newcommand*\tud@supporter{}
+\newcommand*\tud@fm@supporter{}
 \newcommand*\declaration{%
   \@ifstar{%
-    \def\tud@supporter{supporter=\@supervisor}%
-    \@declaration%
+    \def\tud@fm@supporter{supporter=\@supervisor}%
+    \tud@fm@declaration%
   }{%
-    \let\tud@supporter\@empty%
-    \@declaration%
+    \let\tud@fm@supporter\@empty%
+    \tud@fm@declaration%
   }%
 }
-\newcommand*\@declaration[1][]{%
+\newcommand*\tud@fm@declaration[1][]{%
   \ifbool{@tud@declarations}{%
     \begingroup%
-      \tud@fm@confirmation[#1,\tud@supporter]%
+      \tud@fm@@confirmation[#1,\tud@fm@supporter]%
       \tud@fm@blocking[#1]%
     \endgroup%
   }{%
-    \begin{declarations}[#1,\tud@supporter]%
-      \tud@fm@confirmation%
+    \begin{declarations}[#1,\tud@fm@supporter]%
+      \tud@fm@@confirmation%
       \tud@fm@blocking%
     \end{declarations}%
   }%
@@ -5939,31 +5945,31 @@
 }
 \newcommand*\confirmation{%
   \@ifstar{%
-    \def\tud@supporter{supporter=\@supervisor}%
-    \@confirmation%
+    \def\tud@fm@supporter{supporter=\@supervisor}%
+    \tud@fm@confirmation%
   }{%
-    \let\tud@supporter\@empty%
-    \@confirmation%
+    \let\tud@fm@supporter\@empty%
+    \tud@fm@confirmation%
   }%
 }
-\newcommand*\@confirmation[1][]{%
+\newcommand*\tud@fm@confirmation[1][]{%
   \TUD@parameter@handler[declaration]{%
     \TUD@parameter@set{declaration}{supporter=##1}%
   }%
   \ifbool{@tud@declarations}{%
     \begingroup%
-      \tud@fm@confirmation[#1,\tud@supporter]%
+      \tud@fm@@confirmation[#1,\tud@fm@supporter]%
     \endgroup%
   }{%
-    \begin{declarations}[#1,\tud@supporter]%
-      \tud@fm@confirmation%
+    \begin{declarations}[#1,\tud@fm@supporter]%
+      \tud@fm@@confirmation%
     \end{declarations}%
   }%
   \TUD@parameter@handler[declaration]{%
     \TUD@parameter@defaulthandler{declaration}{##1}%
   }%
 }
-\newcommand*\tud@fm@confirmation[1][]{%
+\newcommand*\tud@fm@@confirmation[1][]{%
   \tud@fm@body@start{declaration}{#1}{\confirmationname}%
     \confirmationtext\vskip\z@\@confirmationclosing%
   \tud@fm@body@end{declaration}%
