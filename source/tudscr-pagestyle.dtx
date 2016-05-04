@@ -1,4 +1,4 @@
-% \CheckSum{3568}
+% \CheckSum{3584}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-pagestyle.dtx}[%
-  2016/05/03 v2.05 TUD-KOMA-Script (pagestyle)%
+  2016/05/04 v2.05 TUD-KOMA-Script (pagestyle)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman,xindy]{tudscrdoc}
@@ -195,7 +195,7 @@
 % Version~v2.02 für den Satzspiegel notwendig war. Dieser etwas verschrobene
 % Satzspiegel wird im Kompatibilitätsmodus weiterhin angeboten.
 %    \begin{macrocode}
-\tud@ifverlower{2.03}{\newlength\tud@dim@ddcdiff}{}
+\tud@if@tudscrverlower{2.03}{\newlength\tud@dim@ddcdiff}{}
 %    \end{macrocode}
 % \end{length}^^A \tud@dim@ddcdiff
 % \begin{macro}{\tud@cdgeometry@set}
@@ -240,7 +240,7 @@
   \fi%
   \setlength\tud@dim@layouthoffset{\Gm@layouthoffset}%
   \setlength\tud@dim@layoutvoffset{\Gm@layoutvoffset}%
-  \tud@ifverlower{2.05}{%
+  \tud@if@tudscrverlower{2.05}{%
     \ifdim\tud@dim@layoutheight<\dimexpr105mm+1.5mm\relax%
       \def\@tempa{0}%
     \else\ifdim\tud@dim@layoutheight<\dimexpr148mm+1.5mm\relax%
@@ -471,7 +471,15 @@
 %    \begin{macrocode}
 \newif\if@tud@crop@center
 \AfterPackage{crop}{%
-  \pretocmd\CROP@center{\@tud@crop@centertrue}{}{\tud@patch@wrn{CROP@center}}
+  \CheckCommand*\CROP@center{%
+    \voffset\stockheight
+    \advance\voffset-\paperheight
+    \voffset.5\voffset
+    \hoffset\stockwidth
+    \advance\hoffset-\paperwidth
+    \hoffset.5\hoffset
+  }%
+  \pretocmd{\CROP@center}{\@tud@crop@centertrue}{}{\tud@patch@wrn{CROP@center}}
 }
 %    \end{macrocode}
 % \end{macro}^^A \CROP@center
@@ -794,7 +802,7 @@
 % geändert. Hier wird dem Rechnung getragen, indem der farbige Hintergrund im 
 % Zweifelsfall vergrößert wird.
 %    \begin{macrocode}
-  \tud@ifverlower{2.03}{%
+  \tud@if@tudscrverlower{2.03}{%
     \ModifyLayer[%
       addvoffset=-\tud@dim@ddcdiff+\ht\strutbox,%
       contents={%
@@ -860,7 +868,7 @@
 % Bis zur Version~v2.02 wurde für die Verwendung des \DDC-Logos der Satzspiegel
 % geändert. Hier wird dem Rechnung getragen.
 %    \begin{macrocode}
-  \tud@ifverlower{2.03}{%
+  \tud@if@tudscrverlower{2.03}{%
     \ModifyLayer[%
       addvoffset=-\tud@dim@ddcdiff+\ht\strutbox,%
       contents={%
@@ -1592,25 +1600,25 @@
 %
 % \subsection{Befehle, Optionen und Umsetzung der Seitenstilvarianten}
 %
-% \begin{macro}{\tud@iftudheadings}
+% \begin{macro}{\tud@if@tudheadings}
 % \changes{v2.02}{2014/06/23}{neu}^^A
 % \begin{macro}{\tud@ps@list}
 % \changes{v2.02}{2014/06/23}{neu}^^A
-% Mit dem Befehl \cs{tud@iftudheadings} wird geprüft, ob der im ersten Argument 
-% gegebene Seitenstil~-- was auch das Makro \cs{currentpagestyle} sein kann,
-% welches durch das Paket \pkg{scrlayer-scrpage} definiert wird und den
+% Mit dem Befehl \cs{tud@if@tudheadings} kann geprüft werden, ob der im ersten 
+% Argument gegebene Seitenstil~-- was auch das Makro \cs{currentpagestyle} sein
+% kann, welches durch das Paket \pkg{scrlayer-scrpage} definiert wird und den
 % aktuellen Seitenstil beinhaltet~-- einem aus der Liste \cs{tud@ps@list}
 % entspricht. Ist dies der Fall, wird das zweite Argument ausgeführt, 
 % anderfalls das dritte. Die Liste \cs{tud@ps@list} wird bei der Definition der 
 % Seitenstile selbst gesetzt.
 %    \begin{macrocode}
 \newcommand*\tud@ps@list{}
-\newcommand*\tud@iftudheadings[3]{%
+\newcommand*\tud@if@tudheadings[3]{%
   \xifinlist{\GetRealPageStyle{#1}}{\tud@ps@list}{#2}{#3}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@ps@list
-% \end{macro}^^A \tud@iftudheadings
+% \end{macro}^^A \tud@if@tudheadings
 % \begin{option}{ddc}
 % \changes{v2.02}{2014/06/23}{automatische Logowahl}^^A
 % \begin{option}{ddchead}
@@ -1644,16 +1652,16 @@
 % Kompatibilitätmodus ausgeführt.
 %    \begin{macrocode}
 \newcommand*\tud@comp@clearpage{%
-  \tud@ifverlower{2.04}{%
+  \tud@if@tudscrverlower{2.04}{%
     \if@tud@ddc@internal\else\if@atdocument%
-      \tud@iftudheadings{\currentpagestyle}{\clearpage}{}%
+      \tud@if@tudheadings{\currentpagestyle}{\clearpage}{}%
     \fi\fi%
   }{}%
 }
 \newcommand*\tud@comp@resetpagestyle{%
-  \tud@ifverlower{2.04}{%
+  \tud@if@tudscrverlower{2.04}{%
     \if@tud@ddc@internal\else\if@atdocument%
-      \tud@iftudheadings{\currentpagestyle}{%
+      \tud@if@tudheadings{\currentpagestyle}{%
         \expandafter\pagestyle\expandafter{\currentpagestyle}%
       }{}%
     \fi\fi%
@@ -1845,7 +1853,7 @@
 % Logos im Fuß die Variable \cs{@tempb} auf einen negativen Wert gesetzt, um 
 % auch ohne die Ausgabe eines \DDC-Logos den Fußbereich zu vergrößern.
 %    \begin{macrocode}
-  \tud@ifverlower{2.03}{%
+  \tud@if@tudscrverlower{2.03}{%
     \ifnum\@tempb=\z@\relax%
       \ifdefvoid{\tud@footlogo@filenames}{}{\let\@tempb\m@ne}%
     \fi%
@@ -2144,7 +2152,7 @@
 \newlength\tud@dim@footlogoheight
 \newcommand*\tud@footlogoheight@set{%
   \ifdim\footlogoheight=\z@\relax%
-    \tud@ifverlower{2.03}{%
+    \tud@if@tudscrverlower{2.03}{%
       \setlength\tud@dim@footlogoheight{.6\tud@dim@topmargin}%
     }{%
       \setlength\tud@dim@footlogoheight{\tud@dim@mainlogoheight}%
@@ -3088,7 +3096,7 @@
   \newcommand*\tud@cdgeometry@hmargin{}%
   \newcommand*\tud@cdgeometry@vmargin{}%
   \newcommand*\tud@cdgeometry@tudmargin{}%
-  \tud@ifverlower{2.03}{\newcommand*\tud@cdgeometry@ddcmargin{}}{}%
+  \tud@if@tudscrverlower{2.03}{\newcommand*\tud@cdgeometry@ddcmargin{}}{}%
 %    \end{macrocode}
 % \end{macro}^^A \tud@cdgeometry@ddcmargin
 % \end{macro}^^A \tud@cdgeometry@tudmargin
@@ -3320,7 +3328,7 @@
 % Für den Kompatibilitätsmodus der Version~v2.02 gibt es für den \DDC-Fuß einen 
 % separaten Satzspiegel.
 %    \begin{macrocode}
-      \tud@ifverlower{2.03}{%
+      \tud@if@tudscrverlower{2.03}{%
         \setlength\tud@dim@ddcdiff{%
           \dimexpr.6\tud@dim@topmargin-\footskip+\tud@dim@headsep%
             +\footheight-1.25\baselineskip\relax%
@@ -3422,7 +3430,7 @@
 % Für alle drei Varianten der vertikale Gleichanteil. Der Satzspiegel der 
 % Version~v2.02 wird aus Gründen der Kompatibilität weiterhin vorgehalten.
 %    \begin{macrocode}
-      \tud@ifverlower{2.03}{%
+      \tud@if@tudscrverlower{2.03}{%
         \edef\tud@cdgeometry@vmargin{%
           \tud@cdgeometry@hincl,%
           top=\the\dimexpr.5\tud@dim@both\relax,%
@@ -3464,7 +3472,7 @@
 %    \end{macrocode}
 % Für die Kompatibilitätsvariante wieder mal die Extrawurst.
 %    \begin{macrocode}
-      \tud@ifverlower{2.03}{%
+      \tud@if@tudscrverlower{2.03}{%
         \setlength\tud@dim@areadiff{%
           \dimexpr\tud@dim@topmargin+\tud@dim@barheight+\tud@dim@headsep%
             -.5\tud@dim@both\relax%
@@ -3506,7 +3514,7 @@
 % Für den Satzspiegel der Version~v2.02 wird außerdem die Länge für den höheren 
 % Seitenfuß gesetzt.
 %    \begin{macrocode}
-    \tud@ifverlower{2.03}{%
+    \tud@if@tudscrverlower{2.03}{%
       \ifdim\tud@dim@ddcdiff<\z@\relax\setlength\tud@dim@ddcdiff{\z@}\fi%
       \global\tud@dim@ddcdiff=\tud@dim@ddcdiff%
     }{}%
@@ -3535,7 +3543,7 @@
 %    \begin{macrocode}
     \eappto\tud@cdgeometry@hmargin{,layouthoffset=\the\Gm@layouthoffset}%
     \eappto\tud@cdgeometry@vmargin{,layoutvoffset=\the\Gm@layoutvoffset}%
-    \tud@ifverlower{2.03}{%
+    \tud@if@tudscrverlower{2.03}{%
       \edef\@tempa{%
         \tud@cdgeometry@hmargin,%
         \tud@cdgeometry@vmargin,%
@@ -3646,12 +3654,12 @@
 % Für den Fall, das ein \pgs{tudheadings}-Seitenstil geladen werden soll, muss 
 % der dazugehörige Satzspiegel ausgewählt werden\dots
 %    \begin{macrocode}
-    \tud@iftudheadings{#1}{%
+    \tud@if@tudheadings{#1}{%
 %    \end{macrocode}
 % \dots wobei in der Version~v2.02 zwei unterschiedliche existierten, und 
 % abhängig von der Verwendung des \DDC-Logos im Fuß waren.
 %    \begin{macrocode}
-      \tud@ifverlower{2.03}{%
+      \tud@if@tudscrverlower{2.03}{%
 %    \end{macrocode}
 % In diesem Fall werden die Seitenfußeinstellungen mit \cs{tud@ddc@check} in
 % \cs{@tempb} geschrieben und abhängig davon der richtige Satzspiegel geladen. 
@@ -3781,9 +3789,9 @@
 % Fuß gesetzt werden soll. Der entsprechende Seitenstil kann im optionalen
 % Argument angegeben werden, wenn der Befehl bedingt ausgeführt werden soll.
 %    \begin{macrocode}
-\tud@ifverlower{2.03}{%
+\tud@if@tudscrverlower{2.03}{%
   \newcommand*\tud@ddc@enlargepage[1][]{%
-    \tud@iftudheadings{#1}{%
+    \tud@if@tudheadings{#1}{%
       \ifstr{\tud@currentgeometry}{tudareaddc}{}{%
         \tud@ddc@check%
         \ifcase\@tempb\relax\else% \tud@ddc@foot@num!=false
@@ -3854,6 +3862,7 @@
 % Präambel für die unterschidlichen, durch die Klasse benötigten Satzspiegel
 % der einzelnen Seitenstile umzusetzen. Dabei werden auch etwaige Optionen von
 % \KOMAScript{} beachtet.
+% \ToDo{Patcherei überarbeiten, \cs{CheckCommand}}[v2.05]
 %    \begin{macrocode}
 \@ifpackageloaded{geometry}{\@tempswatrue}{\@tempswafalse}
 \if@tempswa
@@ -4176,12 +4185,12 @@
 % \end{parameter} ^^A columns
 % \begin{parameter}{pagestyle}
 % \changes{v2.02}{2014/06/23}{neu}^^A
-% \changes{v2.03}{2015/01/28}{\cs{tud@iftudheadings} verwendet}^^A
+% \changes{v2.03}{2015/01/28}{\cs{tud@if@tudheadings} verwendet}^^A
 % Mit diesem Parameter kann der verwendete Seitenstil eingestellt werden, wobei 
 % einer der \pgs{tudheadings}-Seitenstile verwendet wird.
 %    \begin{macrocode}
   \TUD@parameter@define{pagestyle}{%
-    \tud@iftudheadings{#1}{\renewcommand*\tud@envir@ps{#1}}{%
+    \tud@if@tudheadings{#1}{\renewcommand*\tud@envir@ps{#1}}{%
       \ifstr{#1}{empty}{\renewcommand*\tud@envir@ps{empty.tudheadings}}{%
       \ifstr{#1}{plain}{\renewcommand*\tud@envir@ps{plain.tudheadings}}{%
       \ifstr{#1}{headings}{\renewcommand*\tud@envir@ps{tudheadings}}{%

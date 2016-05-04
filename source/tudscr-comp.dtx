@@ -1,4 +1,4 @@
-% \CheckSum{1337}
+% \CheckSum{1380}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-comp.dtx}[%
-  2016/05/03 v2.05 TUD-KOMA-Script\space%
+  2016/05/04 v2.05 TUD-KOMA-Script\space%
 %</driver>
 %<package&identify&comp&base>\ProvidesPackage{tudscrcomp}[%
 %<package&identify&comp&book>\ProvidesPackage{tudscrcomp-book}[%
@@ -98,6 +98,7 @@
 % Hiermit werden sowohl veraltete Befehle und Optionen aus früheren Versionen
 % von \TUDScript als auch \enquote{veraltete} Klassen und Pakete, welche das 
 % \CD der \TnUD mehr oder weniger gut umsetzen, unterstützt.
+% \ToDo{BeforeClass und AfterClass zusammenführen}[v2.05]
 %
 % \StopEventually{\PrintIndex\PrintChanges}
 %
@@ -604,12 +605,12 @@
 % \end{macro}^^A \tud@v@first
 % \end{macro}^^A \tud@v@comp
 % \end{option}^^A tudscrver
-% \begin{macro}{\tud@ifverlower}
+% \begin{macro}{\tud@if@tudscrverlower}
 % \changes{v2.03}{2015/01/13}{neu}^^A
 % Mit diesem Befehl können abhängig von der gegebenen Kompatibilitätsversion in 
 % den Klassen unterschiedliche Einstellungen vorgenommen werden.
 %    \begin{macrocode}
-\newcommand*\tud@ifverlower[1]{%
+\newcommand*\tud@if@tudscrverlower[1]{%
   \ifnum\tud@v@comp<\@nameuse{tud@v@#1}\relax%
     \expandafter\@firstoftwo%
   \else%
@@ -617,7 +618,7 @@
   \fi%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@ifverlower
+% \end{macro}^^A \tud@if@tudscrverlower
 %
 % \iffalse
 %</option>
@@ -742,7 +743,7 @@
 \AtEndOfPackage%
 %</package>
 {%
-  \tud@ifverlower{2.04}{\TUDoptions{vspacing=false}}{}%
+  \tud@if@tudscrverlower{2.04}{\TUDoptions{vspacing=false}}{}%
 }
 %    \end{macrocode}
 % \begin{macro}{\dinBold}
@@ -1363,7 +1364,7 @@
 % verwendet wird. Dieses Verhalten wird hier nachgebildet.
 %    \begin{macrocode}
 \newcommand*\tud@comp@mathposterwidth{4.2\tud@dim@widemargin}
-\patchcmd\tud@footcontent@use{%
+\patchcmd{\tud@footcontent@use}{%
   \hsize=\dimexpr#2-\@tempdimc\relax%
 }{%
   \if@tud@mathposterfoot%
@@ -1372,7 +1373,7 @@
     \hsize=\dimexpr#2-\@tempdimc\relax%
   \fi%
 }{}{\tud@patch@wrn{tud@footcontent@use}}
-\patchcmd\tud@footcontent@use{%
+\patchcmd{\tud@footcontent@use}{%
   \hsize=\dimexpr(#2-\columnsep)/2\relax%
 }{%
   \if@tud@mathposterfoot%
@@ -1381,7 +1382,7 @@
     \hsize=\dimexpr(#2-\columnsep)/2\relax%
   \fi%
 }{}{\tud@patch@wrn{tud@footcontent@use}}
-\patchcmd\tud@footcontent@use{%
+\patchcmd{\tud@footcontent@use}{%
   \hsize=\dimexpr(#2-\columnsep)/2-\@tempdimc\relax%
 }{%
   \if@tud@mathposterfoot%
@@ -1872,6 +1873,29 @@
 \tud@fontsfix@BeforeClass{tudmathposter}{}
 \tud@fontsfix@AfterClass{tudmathposter}{%
   \setkomafont{title}{\tud@disposition@fontface[\bfseries]\Huge}%
+  \CheckCommand\maketitle{%
+    \if@matheanull
+    \setlength\@tempskipa{31.194586mm-\topsep}%
+    \else
+    \setlength\@tempskipa{33.02mm-\topskip}%
+    \fi
+    \vskip\@tempskipa
+   {%
+      \ifx\@title\@empty\else
+      \usekomafont{title}\preprocesstitle{\@title}%
+      \ifx\@subtitle\@empty\else\\\fi
+      \fi
+    }{
+      \ifx\@subtitle\@empty\else
+      \subtitlefont\preprocesstitle{\@subtitle}%
+      \fi
+      \if@matheanull
+      \vskip 2.9948cm\relax
+      \else
+      \vskip 3.17cm\relax
+      \fi
+    }%
+  }%
   \apptocmd{\maketitle}{\vspace{-6ex}}{}{\tud@patch@wrn{maketitle}}%
   \renewcommand*\subtitlefont{%
     \unskip%
