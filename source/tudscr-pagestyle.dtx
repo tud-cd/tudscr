@@ -3110,19 +3110,19 @@
 % \changes{v2.05}{2016/04/03}{neu}^^A
 % \begin{macro}{\tud@loadgeometry}
 % \changes{v2.05}{2016/03/06}{neu}^^A
-% \begin{macro}{\if@tud@geometry@enabled}
+% \begin{macro}{\if@tud@x@geometry@enabled}
 % \changes{v2.05}{2016/03/06}{neu}^^A
 % Mit dem Befehl \cs{tud@newgeometry} wird abhängig davon, ob dieser in der
 % Präambel oder im Dokument von \cs{tud@cdgeometry@process} verwendet wird,
 % entweder \cs{geometry} oder \cs{newgeometry} aufgerufen. Mit dem Schalter 
-% \cs{if@tud@geometry@enabled} wird für den Fall, dass ein benutzerdefinierter
+% \cs{if@tud@x@geometry@enabled} wird im Fall, dass ein benutzerdefinierter
 % Satzspiegel aktiviert wurde, das rekursive Aufrufen von \cs{geometry} bzw.
 % \cs{newgeometry} und einer daraus resultierenden Endlosschleife unterbunden.
 %    \begin{macrocode}
-  \newif\if@tud@geometry@enabled%
-  \@tud@geometry@enabledtrue%
+  \newif\if@tud@x@geometry@enabled%
+  \@tud@x@geometry@enabledtrue%
   \newcommand*\tud@newgeometry[1]{%
-    \@tud@geometry@enabledfalse%
+    \@tud@x@geometry@enabledfalse%
 %    \end{macrocode}
 % Unabhängig von der gewählten Option \opt{cdgeometry} für den Satzspiegel 
 % sollen die von \pkg{geometry} bereitgestellten Möglichkieten für den 
@@ -3150,14 +3150,14 @@
       }%
       \expandafter\geometry\expandafter{\@tempa}%
     \fi%
-    \@tud@geometry@enabledtrue%
+    \@tud@x@geometry@enabledtrue%
   }%
   \newcommand*\tud@savegeometry[1]{%
     \edef\Gm@restore{}%
     \savegeometry{#1}%
   }%
   \newcommand*\tud@loadgeometry[1]{%
-    \@tud@geometry@enabledfalse%
+    \@tud@x@geometry@enabledfalse%
     \loadgeometry{#1}%
 %    \end{macrocode}
 % Die nächsten beiden Makros müssen nach der Satzspiegeländerung des ausgeführt 
@@ -3166,10 +3166,10 @@
 %    \begin{macrocode}
     \@currsize%
     \if@tud@x@crop@center\CROP@center\fi%
-    \@tud@geometry@enabledtrue%
+    \@tud@x@geometry@enabledtrue%
   }%
 %    \end{macrocode}
-% \end{macro}^^A \if@tud@geometry@enabled
+% \end{macro}^^A \if@tud@x@geometry@enabled
 % \end{macro}^^A \tud@loadgeometry
 % \end{macro}^^A \tud@savegeometry
 % \end{macro}^^A \tud@newgeometry
@@ -3870,7 +3870,7 @@
 \if@tempswa
   \newcommand*\tud@cdgeometry@custom{}%
   \apptocmd{\geometry}{%
-    \ifbool{@tud@geometry@enabled}{\appto\tud@cdgeometry@custom{,#1}}{}%
+    \ifbool{@tud@x@geometry@enabled}{\appto\tud@cdgeometry@custom{,#1}}{}%
   }{}{\tud@patch@wrn{geometry}}%
 %    \end{macrocode}
 % Sollte im Dokument durch den Anwender der Satzspiegel manuell geändert 
@@ -3879,7 +3879,7 @@
 % eingehängt.
 %    \begin{macrocode}
   \apptocmd{\Gm@changelayout}{%
-    \ifboolexpr{bool {@tud@geometry@enabled} and bool {@atdocument}}{%
+    \ifboolexpr{bool {@tud@x@geometry@enabled} and bool {@atdocument}}{%
       \ifnum\tud@cdgeometry@num=\@ne\relax%
         \tud@AfterChangingArea%
       \else%
@@ -3891,10 +3891,10 @@
 % Bei der Verwendung von \cs{restoregeometry} wird der patch deaktiviert.
 %    \begin{macrocode}
   \pretocmd{\restoregeometry}{%
-    \@tud@geometry@enabledfalse%
+    \@tud@x@geometry@enabledfalse%
   }{}{\tud@patch@wrn{restoregeometry}}%
   \apptocmd{\restoregeometry}{%
-    \@tud@geometry@enabledtrue%
+    \@tud@x@geometry@enabledtrue%
   }{}{\tud@patch@wrn{restoregeometry}}%
 %    \end{macrocode}
 % Am Ende der Präambel wird der Satzspiegel des Dokumentes gesetzt.
