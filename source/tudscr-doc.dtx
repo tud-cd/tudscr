@@ -1,4 +1,4 @@
-% \CheckSum{1565}
+% \CheckSum{1566}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-doc.dtx}[%
-  2016/05/05 v2.05 TUD-KOMA-Script\space%
+  2016/05/10 v2.05 TUD-KOMA-Script\space%
   (source code documentation based on scrartcl/scrdoc)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
@@ -848,8 +848,6 @@
 % \changes{v2.05}{2016/04/21}{neu}^^A
 % \begin{macro}{\tud@read@replace}
 % \changes{v2.05}{2016/04/21}{neu}^^A
-% \begin{macro}{\tud@idx@line}
-% \changes{v2.05}{2016/04/21}{neu}^^A
 % \begin{macro}{\actualchar}
 % \begin{macro}{\quotechar}
 % \begin{macro}{\levelchar}
@@ -863,7 +861,6 @@
   \newwrite\tud@write@replace
   \newcommand*\tud@read@replace{}
   \newread\tud@read@replace
-  \newcommand*\tud@idx@line{}
 %    \end{macrocode}
 % Die Makros für die fraglichen Steuerzeichen werden so angepasst, dass die
 % Wahrscheinlichkeit für eine Verwendung dieser Kombination in einem Makro- 
@@ -881,22 +878,23 @@
       \immediate\openout\tud@write@replace=\jobname-xdy.#1\relax%
       \@tempswafalse%
       \loop\unless\ifeof\tud@read@replace%
-        \readline\tud@read@replace to\tud@idx@line%
-        \tud@replace\tud@idx@line{"}{""}%
-        \tud@replace\tud@idx@line{!}{"!}%
-        \tud@replace\tud@idx@line{:}{":}%
-        \tud@replace\tud@idx@line{@}{"@}%
-        \tud@replace\tud@idx@line{\"@}{"\@backslashchar"@}%
-        \expandafter\tud@replace\expandafter\tud@idx@line%
+        \let\@tempc\relax%
+        \readline\tud@read@replace to\@tempc%
+        \tud@replace\@tempc{"}{""}%
+        \tud@replace\@tempc{!}{"!}%
+        \tud@replace\@tempc{:}{":}%
+        \tud@replace\@tempc{@}{"@}%
+        \tud@replace\@tempc{\"@}{"\@backslashchar"@}%
+        \expandafter\tud@replace\expandafter\@tempc%
           \expandafter{\actualchar}{@}%
-        \expandafter\tud@replace\expandafter\tud@idx@line%
+        \expandafter\tud@replace\expandafter\@tempc%
           \expandafter{\quotechar}{"}%
-        \expandafter\tud@replace\expandafter\tud@idx@line%
+        \expandafter\tud@replace\expandafter\@tempc%
           \expandafter{\levelchar}{!}%
-        \tud@replace\tud@idx@line{" @}{}%
+        \tud@replace\@tempc{" @}{}%
         \ifeof\tud@read@replace\else%
           \immediate\write\tud@write@replace{%
-            \unexpanded\expandafter{\tud@idx@line}%
+            \unexpanded\expandafter{\@tempc}%
           }%
           \@tempswatrue%
         \fi%
@@ -939,7 +937,6 @@
 % \end{macro}^^A \levelchar
 % \end{macro}^^A \quotechar
 % \end{macro}^^A \actualchar
-% \end{macro}^^A \tud@idx@line
 % \end{macro}^^A \tud@read@replace
 % \end{macro}^^A \tud@write@replace
 % \begin{macro}{\IndexPrologue}
