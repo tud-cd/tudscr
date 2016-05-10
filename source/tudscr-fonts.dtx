@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-fonts.dtx}[%
-  2016/05/03 v2.05 TUD-KOMA-Script\space%
+  2016/05/10 v2.05 TUD-KOMA-Script\space%
 %</driver>
 %<package&identify>\ProvidesPackage{tudscrfonts}[%
 %<*driver|package&identify>
@@ -143,7 +143,7 @@
 %
 % \iffalse
 %</package&identify>
-%<*body>
+%<*option>
 % \fi
 %
 % \subsection{Schriftauswahl im \TUDScript-Bundle}
@@ -157,6 +157,24 @@
 % Installation der PostScript"=Schriften gut funktioniert, ist diese Variante 
 % zu bevorzugen. Trotzdem werden beide Varianten, die Schriftfamilie des \CDs 
 % für den Fließtext und die Überschriften zu verwenden, angeboten.
+%
+% \begin{macro}{\if@tud@x@fontspec@enabled}
+% \changes{v2.02}{2014/08/29}{neu}^^A
+% Wird das Paket \pkg{fontspec} durch den Nutzer geladen, wird der passende 
+% Schlüssel gesetzt und die Schrifteinstellungen erfolgen mit den dazugehörigen 
+% Befehlen. Dies wurde in früheren Versionen mit der Option \opt{fontspec} 
+% realisiert, die auch weiterhin bereitgehalten wird. Deshalb muss der Schalter 
+% bereits vor der Abarbeitung der Optionen definiert werden. 
+%    \begin{macrocode}
+\newif\if@tud@x@fontspec@enabled
+\AfterPackage*{fontspec}{\@tud@x@fontspec@enabledtrue}
+%    \end{macrocode}
+% \end{macro}^^A \if@tud@x@fontspec@enabled
+%
+% \iffalse
+%</option>
+%<*body>
+% \fi
 %
 % \begin{macro}{\tud@univers}
 % \begin{macro}{\if@tud@univers}
@@ -184,7 +202,7 @@
 % \end{macro}^^A \tud@univers
 % \begin{macro}{\tud@font@check}
 % \changes{v2.04}{2015/03/10}{neu}^^A
-% \begin{macro}{\tud@font@nofontspecerror}
+% \begin{macro}{\tud@x@fontspec@noerror}
 % \changes{v2.05}{2015/12/14}{neu}^^A
 % Mit \cs{tud@font@check} wird überprüft, ob die benötigten Schriften \Univers
 % und \DIN im PostScript- bzw. OTF-Format installiert sind und die passenden 
@@ -194,15 +212,15 @@
 % Da das Paket \pkg{fontspec} keinen Befehl zum Prüfen auf das Vorhandensein
 % einer bestimmten Schrift bereitstellt, muss hier etwas getrickst werden. Bei
 % der Wahl einer nicht installierten Schrift wird normalerweise ein Fehler 
-% ausgegeben. Mit \cs{tud@font@nofontspecerror} wird dies verhindert, indem die
+% ausgegeben. Mit \cs{tud@x@fontspec@noerror} wird dies verhindert, indem die
 % erzeugte Fehlermeldung mit \cs{msg\_redirect\_name:nnn} unterdrückt wird.
 %    \begin{macrocode}
-\newcommand*\tud@font@nofontspecerror{}
+\newcommand*\tud@x@fontspec@noerror{}
 \IfFileExists{expl3.sty}{\@tempswatrue}{\@tempswafalse}
 \if@tempswa
   \RequirePackage{expl3}
   \ExplSyntaxOn
-  \renewcommand*\tud@font@nofontspecerror{%
+  \renewcommand*\tud@x@fontspec@noerror{%
     \__fontspec_font_suppress_not_found_error:
     \msg_redirect_name:nnn {fontspec}{font-not-found}{none}
   }%
@@ -245,7 +263,7 @@
 % kann, ist es hinreichend, wenn eine der benötigten Schriften nicht existiert,
 % um die Rückfallebene zu aktivieren.
 %    \begin{macrocode}
-  \if@tud@fontspec%
+  \if@tud@x@fontspec@enabled%
     \def\@tempc##1##2{%
       \fontspec{##1}%
       \expandafter\ifx\the\font\nullfont%
@@ -266,7 +284,7 @@
       \fi%
     }%
     \begingroup%
-      \tud@font@nofontspecerror%
+      \tud@x@fontspec@noerror%
       \global\@tud@universtrue%
       \@tempc{Univers Light}{\global\@tud@universfalse}%
       \@tempc{Univers}{\global\@tud@universfalse}%
@@ -315,7 +333,7 @@
   \undef\tud@font@check%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@font@nofontspecerror
+% \end{macro}^^A \tud@x@fontspec@noerror
 % \end{macro}^^A \tud@font@check
 %
 % \iffalse
@@ -499,18 +517,6 @@
 % \end{macro}^^A \if@tud@cdfont@din
 % \end{macro}^^A \tud@cdfont@num
 % \end{option}^^A cdfont
-% \begin{macro}{\if@tud@fontspec}
-% \changes{v2.02}{2014/08/29}{neu}^^A
-% Wird das Paket \pkg{fontspec} durch den Nutzer geladen, wird der passende 
-% Schlüssel gesetzt und die Schrifteinstellungen erfolgen mit den dazugehörigen 
-% Befehlen. Dies wurde in früheren Versionen mit der Option \opt{fontspec} 
-% realisiert, die auch weiterhin bereitgehalten wird. Deshalb muss der Schalter 
-% bereits vor der Abarbeitung der Optionen definiert werden. 
-%    \begin{macrocode}
-\newif\if@tud@fontspec
-\AfterPackage*{fontspec}{\@tud@fontspectrue}
-%    \end{macrocode}
-% \end{macro}^^A \if@tud@fontspec
 % \begin{option}{vspacing}
 % \changes{v2.05}{2015/12/17}{neu}^^A
 % \begin{macro}{\if@tud@vspacing}
@@ -696,7 +702,7 @@
 % \pkg{fontspec} oder\dots
 %    \begin{macrocode}
     \if@tud@univers%
-      \if@tud@fontspec%
+      \if@tud@x@fontspec@enabled%
         \setsansfont{Univers}[%
           FontFace = {l}{\updefault}{Univers Light},%
           FontFace = {m}{\updefault}{Univers},%
@@ -939,7 +945,7 @@
 % dieser zumindest auch auf deren Stil schalten.
 %    \begin{macrocode}
   \if@tud@dinbold%
-    \if@tud@fontspec%
+    \if@tud@x@fontspec@enabled%
       \newfontface\tud@dinbn{DIN Bold}[%
         FontFace = {l}{\updefault}{DIN Bold},%
         FontFace = {m}{\updefault}{DIN Bold},%
@@ -1358,7 +1364,7 @@
 \newcommand*\mv@universbold{}
 \newcommand*\mv@dinbold{}
 \newcommand*\tud@font@math@init{%
-  \if@tud@fontspec\if@tud@cdmath%
+  \if@tud@x@fontspec@enabled\if@tud@cdmath%
     \ifboolexpr{bool {@tud@universmath} or bool {@tud@dinboldmath}}{%
       \@ifpackagewith{fontspec}{no-math}{}{%
 %<*class>
