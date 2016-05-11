@@ -129,6 +129,8 @@
     a TUD-KOMA-Script class%
   }%
 ]{tudscrfonts}
+\newif\if@tud@x@fontspec@enabled
+\AfterPackage*{fontspec}{\@tud@x@fontspec@enabledtrue}
 \newif\if@tud@cdfont@din
 \newif\if@tud@cdfont@ultrabold
 \@tud@cdfont@dintrue
@@ -238,8 +240,6 @@
     }{}%
   \fi%
 }
-\newif\if@tud@fontspec
-\AfterPackage*{fontspec}{\@tud@fontspectrue}
 \newif\if@tud@vspacing
 \TUD@key{vspacing}[true]{%
   \TUD@set@numkey{vspacing}{@tempa}{%
@@ -296,21 +296,21 @@
 \TUD@key{slantedGreek}[true]{\TUDoptions{slantedgreek=#1}}
 %%% From File: tudscr-pagestyle.dtx
 \newcommand*\tud@ps@list{}
-\newcommand*\tud@iftudheadings[3]{%
+\newcommand*\tud@if@tudheadings[3]{%
   \xifinlist{\GetRealPageStyle{#1}}{\tud@ps@list}{#2}{#3}%
 }
 \newif\if@tud@ddc@internal
 \newcommand*\tud@comp@clearpage{%
-  \tud@ifverlower{2.04}{%
+  \tud@if@tudscrverlower{2.04}{%
     \if@tud@ddc@internal\else\if@atdocument%
-      \tud@iftudheadings{\currentpagestyle}{\clearpage}{}%
+      \tud@if@tudheadings{\currentpagestyle}{\clearpage}{}%
     \fi\fi%
   }{}%
 }
 \newcommand*\tud@comp@resetpagestyle{%
-  \tud@ifverlower{2.04}{%
+  \tud@if@tudscrverlower{2.04}{%
     \if@tud@ddc@internal\else\if@atdocument%
-      \tud@iftudheadings{\currentpagestyle}{%
+      \tud@if@tudheadings{\currentpagestyle}{%
         \expandafter\pagestyle\expandafter{\currentpagestyle}%
       }{}%
     \fi\fi%
@@ -1060,7 +1060,7 @@
     The option key `fontspec' is deprecated\MessageBreak%
     You should load the package `fontspec' manually%
   }%
-  \TUD@set@ifkey{fontspec}{@tud@fontspec}{#1}%
+  \TUD@set@ifkey{fontspec}{@tud@x@fontspec@enabled}{#1}%
 }
 \AtEndOfClass%
 {%
@@ -1074,7 +1074,7 @@
     }%
     \FamilyKeyStateProcessed%
   }%
-  \if@tud@fontspec%
+  \if@tud@x@fontspec@enabled%
     \RequirePackage{fontspec}[2014/06/21]%
   \fi%
 }
@@ -1287,7 +1287,7 @@
 \csdef{tud@v@2.04d}{2}
 \csdef{tud@v@2.05}{3}
 \csdef{tud@v@last}{3}
-\newcommand*\tud@ifverlower[1]{%
+\newcommand*\tud@if@tudscrverlower[1]{%
   \ifnum\tud@v@comp<\@nameuse{tud@v@#1}\relax%
     \expandafter\@firstoftwo%
   \else%
@@ -1348,6 +1348,8 @@
     \fi%
   }{}%
 }
+\newif\if@tud@bookmarks
+\TUD@ifkey{tudbookmarks}{@tud@bookmarks}
 \newif\if@tud@symbolheadings
 \TUD@key{footnotes}{%
   \TUD@set@numkey{footnotes}{@tempa}{%
@@ -1362,8 +1364,9 @@
     \fi%
   \fi%
 }
-\newif\if@tud@bookmarks
-\TUD@ifkey{tudbookmarks}{@tud@bookmarks}
+\AtEndPreamble{%
+  \newcounter{symbolheadings}[chapter]
+}
 %%% From File: tudscr-misc.dtx
 \newcommand*\tud@x@paper{%
   \expandafter\tud@x@@paper\CurrentOption paper\tud@x@@paper%
@@ -1437,12 +1440,12 @@
 \newcommand*\tud@dinbold{0m6}
 \newif\if@tud@dinbold
 \newif\if@tud@dinboldmath
-\newcommand*\tud@font@nofontspecerror{}
+\newcommand*\tud@x@fontspec@noerror{}
 \IfFileExists{expl3.sty}{\@tempswatrue}{\@tempswafalse}
 \if@tempswa
   \RequirePackage{expl3}
   \ExplSyntaxOn
-  \renewcommand*\tud@font@nofontspecerror{%
+  \renewcommand*\tud@x@fontspec@noerror{%
     \__fontspec_font_suppress_not_found_error:
     \msg_redirect_name:nnn {fontspec}{font-not-found}{none}
   }%
@@ -1464,7 +1467,7 @@
   }%
   \@tempa{OT1}{\tud@univers}{\@tud@universmathtrue}{\@tempb{Univers}}%
   \@tempa{OT1}{\tud@dinbold}{\@tud@dinboldmathtrue}{\@tempb{DIN Bold}}%
-  \if@tud@fontspec%
+  \if@tud@x@fontspec@enabled%
     \def\@tempc##1##2{%
       \fontspec{##1}%
       \expandafter\ifx\the\font\nullfont%
@@ -1480,7 +1483,7 @@
       \fi%
     }%
     \begingroup%
-      \tud@font@nofontspecerror%
+      \tud@x@fontspec@noerror%
       \global\@tud@universtrue%
       \@tempc{Univers Light}{\global\@tud@universfalse}%
       \@tempc{Univers}{\global\@tud@universfalse}%
@@ -1519,8 +1522,8 @@
   \fi%
   \undef\tud@font@check%
 }
-\newif\if@tud@mweights
-\AfterPackage*{mweights}{\@tud@mweightstrue}
+\newif\if@tud@x@mweights@enabled
+\AfterPackage*{mweights}{\@tud@x@mweights@enabledtrue}
 \newcommand*\tud@font@set{%
   \if@atdocument%
     \ifnum\tud@cdfont@num>\z@\relax% true/heavy
@@ -1534,7 +1537,7 @@
       \fi%
     \fi%
   \fi%
-  \if@tud@mweights%
+  \if@tud@x@mweights@enabled%
     \ifundef{\bfseries@rm}{\edef\bfseries@rm{\bfdefault}}{}%
     \ifundef{\bfseries@sf}{\edef\bfseries@sf{\bfdefault}}{}%
     \ifundef{\bfseries@tt}{\edef\bfseries@tt{\bfdefault}}{}%
@@ -1552,7 +1555,7 @@
     \tud@cmd@restore{familydefault}%
     \tud@cmd@restore{seriesdefault}%
     \tud@cmd@restore{shapedefault}%
-    \if@tud@mweights%
+    \if@tud@x@mweights@enabled%
       \tud@cmd@restore{bfseries@rm}%
       \tud@cmd@restore{bfseries@sf}%
       \tud@cmd@restore{bfseries@tt}%
@@ -1576,7 +1579,7 @@
     \tud@cmd@store{familydefault}%
     \tud@cmd@store{seriesdefault}%
     \tud@cmd@store{shapedefault}%
-    \if@tud@mweights%
+    \if@tud@x@mweights@enabled%
       \tud@cmd@store{bfseries@rm}%
       \tud@cmd@store{bfseries@sf}%
       \tud@cmd@store{bfseries@tt}%
@@ -1587,7 +1590,7 @@
     \bool@std@lock{@tud@cdmath}{true}%
     \cs@std@lock{tud@head@font@num}{\tud@cdfont@num}%
     \if@tud@univers%
-      \if@tud@fontspec%
+      \if@tud@x@fontspec@enabled%
         \setsansfont{Univers}[%
           FontFace = {l}{\updefault}{Univers Light},%
           FontFace = {m}{\updefault}{Univers},%
@@ -1625,7 +1628,7 @@
           \renewcommand*\bfdefault{m}%
         \fi%
         \renewcommand*\mddefault{l}%
-        \if@tud@mweights%
+        \if@tud@x@mweights@enabled%
           \def\bfseries@rm{m}%
           \def\bfseries@sf{m}%
           \def\bfseries@tt{m}%
@@ -1640,7 +1643,7 @@
           \renewcommand*\bfdefault{b}%
         \fi%
         \renewcommand*\mddefault{m}%
-        \if@tud@mweights%
+        \if@tud@x@mweights@enabled%
           \def\bfseries@rm{b}%
           \def\bfseries@sf{b}%
           \def\bfseries@tt{b}%
@@ -1656,7 +1659,7 @@
     \renewcommand*\seriesdefault{\mddefault}%
     \renewcommand*\shapedefault{\updefault}%
   \fi%
-  \if@tud@mweights%
+  \if@tud@x@mweights@enabled%
     \edef\rmdef@ult{\rmdefault}%
     \edef\sfdef@ult{\sfdefault}%
     \edef\ttdef@ult{\ttdefault}%
@@ -1719,7 +1722,7 @@
     \newrobustcmd*\univxs{\tud@font@fallback{Univers Black Oblique}{bf}{sl}}%
   \fi%
   \if@tud@dinbold%
-    \if@tud@fontspec%
+    \if@tud@x@fontspec@enabled%
       \newfontface\tud@dinbn{DIN Bold}[%
         FontFace = {l}{\updefault}{DIN Bold},%
         FontFace = {m}{\updefault}{DIN Bold},%
@@ -1863,7 +1866,7 @@
 \newcommand*\mv@universbold{}
 \newcommand*\mv@dinbold{}
 \newcommand*\tud@font@math@init{%
-  \if@tud@fontspec\if@tud@cdmath%
+  \if@tud@x@fontspec@enabled\if@tud@cdmath%
     \ifboolexpr{bool {@tud@universmath} or bool {@tud@dinboldmath}}{%
       \@ifpackagewith{fontspec}{no-math}{}{%
         \ClassWarningNoLine{\TUDClassName}%
@@ -2020,7 +2023,10 @@
   \tud@font@init%
   \AtBeginDocument{\tud@font@math@init}%
 }
-\newcommand*\tud@disposition@fontface[1][]{%
+\AfterPackage*{siunitx}{%
+  \providecommand*\lseries{\fontseries{l}\selectfont}%
+}
+\newcommand*\tud@sec@fontface[1][]{%
   \if@tud@cdfont@din%
     \tud@dinbn\tud@raggedright%
   \else%
@@ -2034,19 +2040,6 @@
     \expandafter\@secondoftwo%
   \fi%
 }
-\RequirePackage{textcase}[2004/10/07]
-\newcommand*\tud@uclcnotmath{%
-  \def\footnote##1##{\toks@{\noexpand\footnote##1}\@footnote}%
-  \def\@footnote##1{\NoCaseChange{\the\toks@{##1}}}%
-  \def\@mkboth##1##2{\NoCaseChange{\@mkboth{##1}{##2}}}%
-}
-\patchcmd{\@uclcnotmath}{\@nonchangecase\ensuremath}{%
-  \@nonchangecase\ensuremath\tud@uclcnotmath%
-}{}{\tud@patch@wrn{@uclcnotmath}}
-\newcommand*\tud@makeuppercase[1]{%
-  \ifdin{\begingroup\MakeTextUppercase{#1}\endgroup}{#1}%
-  \protect\vphantom{\"A\"O\"U}%
-}
 \newcommand*\tud@raggedright{\raggedright}
 \newcommand*\tud@RaggedRight{\raggedright}
 \AfterPackage*{ragged2e}{%
@@ -2055,8 +2048,11 @@
   }{}%
   \renewcommand*\tud@RaggedRight{\RaggedRight}%
 }
-\AfterPackage*{siunitx}{%
-  \providecommand*\lseries{\fontseries{l}\selectfont}%
+\newcommand*\tud@sec@ragged{\ifdin{\tud@raggedright}{\tud@RaggedRight}}
+\RequirePackage{textcase}[2004/10/07]
+\newcommand*\tud@makeuppercase[1]{%
+  \ifdin{\begingroup\MakeTextUppercase{#1}\endgroup}{#1}%
+  \protect\vphantom{\"A\"O\"U}%
 }
 %%% From File: tudscr-fields.dtx
 \RequirePackage{trimspaces}[2009/09/17]
@@ -2625,7 +2621,7 @@
 \newlength\tud@dim@headingsvskip
 \newlength\tud@dim@areadiff
 \newlength\tud@dim@areavskip
-\tud@ifverlower{2.03}{\newlength\tud@dim@ddcdiff}{}
+\tud@if@tudscrverlower{2.03}{\newlength\tud@dim@ddcdiff}{}
 \newif\if@tud@cdgeometry@adjust
 \newlength\tud@dim@layoutheight
 \newlength\tud@dim@layoutwidth
@@ -2640,7 +2636,7 @@
   \fi%
   \setlength\tud@dim@layouthoffset{\Gm@layouthoffset}%
   \setlength\tud@dim@layoutvoffset{\Gm@layoutvoffset}%
-  \tud@ifverlower{2.05}{%
+  \tud@if@tudscrverlower{2.05}{%
     \ifdim\tud@dim@layoutheight<\dimexpr105mm+1.5mm\relax%
       \def\@tempa{0}%
     \else\ifdim\tud@dim@layoutheight<\dimexpr148mm+1.5mm\relax%
@@ -2797,9 +2793,19 @@
     \setlength\tud@dim@footsep{\dimexpr.707107\tud@dim@footsep\relax}%
   \fi%
 }
-\newif\if@tud@crop@center
+\newif\if@tud@x@crop@center
 \AfterPackage{crop}{%
-  \pretocmd\CROP@center{\@tud@crop@centertrue}{}{\tud@patch@wrn{CROP@center}}
+  \CheckCommand*\CROP@center{%
+    \voffset\stockheight
+    \advance\voffset-\paperheight
+    \voffset.5\voffset
+    \hoffset\stockwidth
+    \advance\hoffset-\paperwidth
+    \hoffset.5\hoffset
+  }%
+  \pretocmd{\CROP@center}{%
+    \@tud@x@crop@centertrue%
+  }{}{\tud@patch@wrn{CROP@center}}
 }
 \newlength\bleedmargin
 \setlength\bleedmargin{\maxdimen}
@@ -2817,36 +2823,13 @@
     \fi%
   \fi%
 }
-\newcommand*\tud@ifsacrop{%
-  \ifcsundef{ifsa@crop}{%
-    \@secondoftwo%
-  }{%
-    \ifbool{sa@crop}{\@firstoftwo}{\@secondoftwo}%
-  }%
-}
-\tud@ifsacrop{%
+\newif\if@tud@x@standalone@crop
+\AfterClass*{standalone}{\let\if@tud@x@standalone@crop\ifsa@crop}
+\if@tud@x@standalone@crop
   \PreventPackageFromLoading{scrlayer-scrpage}%
-  \pagestyle{empty}%
-  \hoffset=-72.27pt%
-  \voffset=-72.27pt%
-  \topmargin=0pt%
-  \headheight=0pt%
-  \headsep=0pt%
-  \marginparsep=0pt%
-  \marginparwidth=0pt%
-  \footskip=0pt%
-  \marginparpush=0pt%
-  \oddsidemargin=0pt%
-  \evensidemargin=0pt%
-  \topskip=0pt%
-  \textheight=\maxdimen%
-  \ifcsundef{if@chapter}{%
-    \newif\if@chapter%
-    \ifcsundef{chapter}{\@chapterfalse}{\@chaptertrue}%
-  }{}%
-}{%
+\else
   \AtEndPreamble{\RequirePackage{scrlayer-scrpage}[2013/12/14]}%
-}
+\fi
 \AfterPackage{scrlayer-scrpage}{%
   \DeclareNewLayer[%
     background,headsep,%
@@ -2973,7 +2956,7 @@
       \fi%
     },%
   ]{tudheadings.foot.back}%
-  \tud@ifverlower{2.03}{%
+  \tud@if@tudscrverlower{2.03}{%
     \ModifyLayer[%
       addvoffset=-\tud@dim@ddcdiff+\ht\strutbox,%
       contents={%
@@ -3018,7 +3001,7 @@
       \tud@footcontent@use{\@tempdima}{\layerwidth}%
     },%
   ]{tudheadings.foot.content}%
-  \tud@ifverlower{2.03}{%
+  \tud@if@tudscrverlower{2.03}{%
     \ModifyLayer[%
       addvoffset=-\tud@dim@ddcdiff+\ht\strutbox,%
       contents={%
@@ -3222,6 +3205,10 @@
   \undef\tud@pagestyle%
 }
 \TUD@UnwindPackage{scrlayer-scrpage}{%
+  \ifcsundef{if@chapter}{%
+    \newif\if@chapter%
+    \ifcsundef{chapter}{\@chapterfalse}{\@chaptertrue}%
+  }{}%
   \cslet{ps@tudheadings}{\ps@headings}%
   \cslet{ps@plain.tudheadings}{\ps@plain}%
   \cslet{ps@empty.tudheadings}{\ps@empty}%
@@ -3402,7 +3389,7 @@
       \let\@tempb\tud@ddc@auto@num%
     }%
   \fi%
-  \tud@ifverlower{2.03}{%
+  \tud@if@tudscrverlower{2.03}{%
     \ifnum\@tempb=\z@\relax%
       \ifdefvoid{\tud@footlogo@filenames}{}{\let\@tempb\m@ne}%
     \fi%
@@ -3543,7 +3530,7 @@
 \newlength\tud@dim@footlogoheight
 \newcommand*\tud@footlogoheight@set{%
   \ifdim\footlogoheight=\z@\relax%
-    \tud@ifverlower{2.03}{%
+    \tud@if@tudscrverlower{2.03}{%
       \setlength\tud@dim@footlogoheight{.6\tud@dim@topmargin}%
     }{%
       \setlength\tud@dim@footlogoheight{\tud@dim@mainlogoheight}%
@@ -3775,19 +3762,21 @@
   \fi%
 }
 \newcommand*\tud@cdgeometry@process{}
-\tud@ifsacrop{%
+\if@tud@x@standalone@crop
   \PreventPackageFromLoading{geometry}%
-}{%
+\else
   \RequirePackage{geometry}[2010/09/12]%
+\fi
+\AfterPackage*{geometry}{%
   % \CheckCommand  \Gm@initnewgm \Gm@changelayout
   \newcommand*\tud@cdgeometry@hmargin{}%
   \newcommand*\tud@cdgeometry@vmargin{}%
   \newcommand*\tud@cdgeometry@tudmargin{}%
-  \tud@ifverlower{2.03}{\newcommand*\tud@cdgeometry@ddcmargin{}}{}%
-  \newif\if@tud@geometry@enabled%
-  \@tud@geometry@enabledtrue%
+  \tud@if@tudscrverlower{2.03}{\newcommand*\tud@cdgeometry@ddcmargin{}}{}%
+  \newif\if@tud@x@geometry@enabled%
+  \@tud@x@geometry@enabledtrue%
   \newcommand*\tud@newgeometry[1]{%
-    \@tud@geometry@enabledfalse%
+    \@tud@x@geometry@enabledfalse%
     \ifGm@pass%
       \def\@tempb{}%
     \else%
@@ -3806,18 +3795,18 @@
       }%
       \expandafter\geometry\expandafter{\@tempa}%
     \fi%
-    \@tud@geometry@enabledtrue%
+    \@tud@x@geometry@enabledtrue%
   }%
   \newcommand*\tud@savegeometry[1]{%
     \edef\Gm@restore{}%
     \savegeometry{#1}%
   }%
   \newcommand*\tud@loadgeometry[1]{%
-    \@tud@geometry@enabledfalse%
+    \@tud@x@geometry@enabledfalse%
     \loadgeometry{#1}%
     \@currsize%
-    \if@tud@crop@center\CROP@center\fi%
-    \@tud@geometry@enabledtrue%
+    \if@tud@x@crop@center\CROP@center\fi%
+    \@tud@x@geometry@enabledtrue%
   }%
   \renewcommand*\tud@cdgeometry@process{%
     \tud@cdgeometry@set%
@@ -3922,7 +3911,7 @@
         textheight=\the\dimexpr\textheight-\@tempdima\relax,%
         ignorehead%
       }%
-      \tud@ifverlower{2.03}{%
+      \tud@if@tudscrverlower{2.03}{%
         \setlength\tud@dim@ddcdiff{%
           \dimexpr.6\tud@dim@topmargin-\footskip+\tud@dim@headsep%
             +\footheight-1.25\baselineskip\relax%
@@ -3993,7 +3982,7 @@
           \appto\tud@cdgeometry@hmargin{,twoside}%
         \fi%
       \fi%
-      \tud@ifverlower{2.03}{%
+      \tud@if@tudscrverlower{2.03}{%
         \edef\tud@cdgeometry@vmargin{%
           \tud@cdgeometry@hincl,%
           top=\the\dimexpr.5\tud@dim@both\relax,%
@@ -4028,7 +4017,7 @@
         \dimexpr\tud@dim@topmargin+\tud@dim@barheight+\tud@dim@headsep%
           -\tud@dim@slimmargin\relax%
       }%
-      \tud@ifverlower{2.03}{%
+      \tud@if@tudscrverlower{2.03}{%
         \setlength\tud@dim@areadiff{%
           \dimexpr\tud@dim@topmargin+\tud@dim@barheight+\tud@dim@headsep%
             -.5\tud@dim@both\relax%
@@ -4056,7 +4045,7 @@
       \setlength\tud@dim@headingsvskip{.6\tud@dim@topmargin}%
     \fi%
     \global\tud@dim@headingsvskip=\tud@dim@headingsvskip%
-    \tud@ifverlower{2.03}{%
+    \tud@if@tudscrverlower{2.03}{%
       \ifdim\tud@dim@ddcdiff<\z@\relax\setlength\tud@dim@ddcdiff{\z@}\fi%
       \global\tud@dim@ddcdiff=\tud@dim@ddcdiff%
     }{}%
@@ -4065,7 +4054,7 @@
   \newcommand*\tud@cdgeometry@@process{%
     \eappto\tud@cdgeometry@hmargin{,layouthoffset=\the\Gm@layouthoffset}%
     \eappto\tud@cdgeometry@vmargin{,layoutvoffset=\the\Gm@layoutvoffset}%
-    \tud@ifverlower{2.03}{%
+    \tud@if@tudscrverlower{2.03}{%
       \edef\@tempa{%
         \tud@cdgeometry@hmargin,%
         \tud@cdgeometry@vmargin,%
@@ -4120,8 +4109,8 @@
 \newcommand*\tud@currentgeometry{}
 \newcommand*\tud@BeforeSelectAnyPageStyle[1]{%
   \ifstr{#1}{\GetRealPageStyle{#1}}{%
-    \tud@iftudheadings{#1}{%
-      \tud@ifverlower{2.03}{%
+    \tud@if@tudheadings{#1}{%
+      \tud@if@tudscrverlower{2.03}{%
         \tud@ddc@check%
         \ifcase\@tempb\relax% \tud@ddc@foot@num=false
           \ifstr{\tud@currentgeometry}{tudarea}{}{%
@@ -4182,9 +4171,9 @@
 \patchcmd{\cleardoublepageusingstyle}{\pagestyle}{%
   \let\tud@BeforeSelectAnyPageStyle\@gobble\pagestyle%
 }{}{\tud@patch@wrn{cleardoublepageusingstyle}}
-\tud@ifverlower{2.03}{%
+\tud@if@tudscrverlower{2.03}{%
   \newcommand*\tud@ddc@enlargepage[1][]{%
-    \tud@iftudheadings{#1}{%
+    \tud@if@tudheadings{#1}{%
       \ifstr{\tud@currentgeometry}{tudareaddc}{}{%
         \tud@ddc@check%
         \ifcase\@tempb\relax\else% \tud@ddc@foot@num!=false
@@ -4217,10 +4206,10 @@
   \newcommand*\tud@cdgeometry@custom{}%
   % TODO evtl tud@cdgeometry definieren?
   \apptocmd{\geometry}{%
-    \ifbool{@tud@geometry@enabled}{\appto\tud@cdgeometry@custom{,#1}}{}%
+    \ifbool{@tud@x@geometry@enabled}{\appto\tud@cdgeometry@custom{,#1}}{}%
   }{}{\tud@patch@wrn{geometry}}%
   \apptocmd{\Gm@changelayout}{%
-    \ifboolexpr{bool {@tud@geometry@enabled} and bool {@atdocument}}{%
+    \ifboolexpr{bool {@tud@x@geometry@enabled} and bool {@atdocument}}{%
       \ifnum\tud@cdgeometry@num=\@ne\relax%
         \tud@AfterChangingArea%
       \else%
@@ -4229,10 +4218,10 @@
     }{}%
   }{}{\tud@patch@wrn{Gm@changelayout}}%
   \pretocmd{\restoregeometry}{%
-    \@tud@geometry@enabledfalse%
+    \@tud@x@geometry@enabledfalse%
   }{}{\tud@patch@wrn{restoregeometry}}%
   \apptocmd{\restoregeometry}{%
-    \@tud@geometry@enabledtrue%
+    \@tud@x@geometry@enabledtrue%
   }{}{\tud@patch@wrn{restoregeometry}}%
   \AtEndPreamble{%
     \ifnum\tud@cdgeometry@num=\@ne\relax\else%
@@ -4270,7 +4259,23 @@
   }%
 \fi
 \AtEndPreamble{%
-  \tud@ifsacrop{}{%
+  \if@tud@x@standalone@crop%
+    \pagestyle{empty}%
+    \hoffset=-72.27pt%
+    \voffset=-72.27pt%
+    \topmargin=0pt%
+    \headheight=0pt%
+    \headsep=0pt%
+    \marginparsep=0pt%
+    \marginparwidth=0pt%
+    \footskip=0pt%
+    \marginparpush=0pt%
+    \oddsidemargin=0pt%
+    \evensidemargin=0pt%
+    \topskip=0pt%
+    \textheight=\maxdimen%
+    \let\tud@recalctypearea\relax%
+  \else%
     \AfterCalculatingTypearea{\tud@AfterChangingArea}%
     \AfterSettingArea{\tud@AfterChangingArea}%
     \ifundef{\AfterRestoreareas}{}{%
@@ -4278,8 +4283,8 @@
     }%
     \BeforeSelectAnyPageStyle{\tud@BeforeSelectAnyPageStyle{#1}}%
     \tud@recalctypearea%
-    \tud@bleedmargin@set%
-  }%
+  \fi%
+  \tud@bleedmargin@set%
 }
 \newcommand*\tud@parameters@pagestyle[1]{%
   \TUD@parameter@define{cdfont}[true]{\TUDoption{cdfont}{#1}}%
@@ -4347,7 +4352,7 @@
   \TUD@parameter@define{language}{\selectlanguage{#1}}%
   \TUD@parameter@define{columns}{\cs@std@lock{tud@multicols@num}{#1}}%
   \TUD@parameter@define{pagestyle}{%
-    \tud@iftudheadings{#1}{\renewcommand*\tud@envir@ps{#1}}{%
+    \tud@if@tudheadings{#1}{\renewcommand*\tud@envir@ps{#1}}{%
       \ifstr{#1}{empty}{\renewcommand*\tud@envir@ps{empty.tudheadings}}{%
       \ifstr{#1}{plain}{\renewcommand*\tud@envir@ps{plain.tudheadings}}{%
       \ifstr{#1}{headings}{\renewcommand*\tud@envir@ps{tudheadings}}{%
@@ -4362,13 +4367,13 @@
 }
 %%% From File: tudscr-layout.dtx
 \newcommand*\tud@headings@current{}
-\newcommand*\tud@disposition@fontsize{}
+\newcommand*\tud@sec@fontsize{}
 \newcommand*\tud@thesis@fontsize{}
 \newcommand*\tud@headings@set[1][]{%
   \def\@tempa##1##2##3{%
     \ifstr{##1}{\tud@headings@current}{}{%
       \renewcommand*\tud@headings@current{##1}%
-      \renewcommand*\tud@disposition@fontsize{##2}%
+      \renewcommand*\tud@sec@fontsize{##2}%
       \renewcommand*\tud@thesis@fontsize{##3}%
       #1%
     }%
@@ -4388,7 +4393,7 @@
 \newcommand*\tud@section@fontcolor{}
 \providecommand*\raggedtitle{\raggedpart}
 \newkomafont{parttitle}{%
-  \tud@disposition@fontface%
+  \tud@sec@fontface%
   \tud@color{\tud@part@fontcolor}%
   \usesizeofkomafont{section}%
 }
@@ -4421,16 +4426,16 @@
     \tud@font@koma@set{title}{%
       \raggedtitle%
       \usekomafont{disposition}%
-      \tud@disposition@fontface%
-      \tud@disposition@fontsize%
+      \tud@sec@fontface%
+      \tud@sec@fontsize%
       \tud@color{\tud@title@fontcolor}%
     }%
     \tud@font@koma@set{subtitle}{%
       \raggedtitle%
       \ifstr{\mddefault}{l}{%
-        \tud@disposition@fontface[\fontseries{m}]%
+        \tud@sec@fontface[\fontseries{m}]%
       }{%
-        \tud@disposition@fontface[\fontseries{bx}]%
+        \tud@sec@fontface[\fontseries{bx}]%
       }%
       \usesizeofkomafont{section}%
       \tud@color{\tud@title@fontcolor}%
@@ -4484,16 +4489,16 @@
       \tud@font@koma@set{partnumber}{\usekomafont{parttitle}}%
     \else%
       \tud@sectioning@set[addpart]{part}{%
-        \tud@disposition@fontface%
+        \tud@sec@fontface%
         \tud@color{\tud@part@fontcolor}%
       }%
       \tud@font@koma@set{partnumber}{%
-        \tud@disposition@fontface%
+        \tud@sec@fontface%
         \tud@color{\tud@part@fontcolor}%
       }%
     \fi%
     \tud@cmd@store{raggedpart}%
-    \renewcommand*\raggedpart{\ifdin{\tud@raggedright}{\tud@RaggedRight}}%
+    \renewcommand*\raggedpart{\tud@sec@ragged}%
   \fi%
   \ifcase\tud@layout@chapter@num\relax% false
     \tud@cmd@restore{chapterheadstartvskip}%
@@ -4522,13 +4527,13 @@
       \let\@@makechapterhead\tud@@makechapterhead%
     }%
     \tud@sectioning@set[addchap]{chapter}{%
-      \tud@disposition@fontface%
-      \tud@disposition@fontsize%
+      \tud@sec@fontface%
+      \tud@sec@fontsize%
       \tud@color{\tud@chapter@fontcolor}%
     }%
     \tud@font@koma@set{chapterprefix}{\usesizeofkomafont{partnumber}}%
     \tud@cmd@store{raggedchapter}%
-    \renewcommand*\raggedchapter{\ifdin{\tud@raggedright}{\tud@RaggedRight}}%
+    \renewcommand*\raggedchapter{\tud@sec@ragged}%
   \fi%
   \ifcase\tud@layout@section@num\relax% false
     \tud@sectioning@reset[addsec]{section}%
@@ -4544,19 +4549,19 @@
       \renewcommand*\tud@section@fontcolor{HKS41}%
     \fi%
     \tud@sectioning@set[addsec]{section}{%
-      \tud@disposition@fontface%
+      \tud@sec@fontface%
       \ifstr{\tud@pagecolor}{HKS41}{}{\tud@color{\tud@section@fontcolor}}%
     }%
     \tud@sectioning@set{subsection}{%
-      \tud@disposition@fontface%
+      \tud@sec@fontface%
       \ifstr{\tud@pagecolor}{HKS41}{}{\tud@color{\tud@section@fontcolor}}%
     }%
     \tud@sectioning@set{subsubsection}{%
-      \tud@disposition@fontface%
+      \tud@sec@fontface%
       \ifstr{\tud@pagecolor}{HKS41}{}{\tud@color{\tud@section@fontcolor}}%
     }%
     \tud@sectioning@set{minisec}{%
-      \tud@disposition@fontface%
+      \tud@sec@fontface%
       \ifstr{\tud@pagecolor}{HKS41}{}{\tud@color{\tud@section@fontcolor}}%
     }%
     \tud@sectioning@set{paragraph}{%
@@ -4566,7 +4571,7 @@
       \ifstr{\tud@pagecolor}{HKS41}{}{\tud@color{\tud@section@fontcolor}}%
     }%
     \tud@cmd@store{raggedsection}%
-    \renewcommand*\raggedsection{\ifdin{\tud@raggedright}{\tud@RaggedRight}}%
+    \renewcommand*\raggedsection{\tud@sec@ragged}%
   \fi%
 }
 \newcommand*\tud@layout@specialpage@set[1]{%
@@ -4606,8 +4611,8 @@
     \setparsizes{\z@}{\z@}{\z@\@plus1fil}\par@updaterelative%
     \if@tud@parttitle%
       \begingroup%
-        \tud@disposition@fontface%
-        \tud@disposition@fontsize%
+        \tud@sec@fontface%
+        \tud@sec@fontsize%
         \tud@color{\tud@part@fontcolor}%
         \ifx\@@title\@empty%
           \ClassWarning{\TUDClassName}{%
@@ -4794,6 +4799,11 @@
   \fi%
   \@afterindentfalse\@afterheading%
 }
+\CheckCommand\set@@@@preamble[6]{%
+  \expandafter\gdef\csname #1@preamble\endcsname{%
+    \hbox to\hsize{#4\parbox[{#2}]{#3}{#6\par}#5\par}%
+  }%
+}
 \patchcmd{\set@@@@preamble}{%
   \hbox to\hsize{#4\parbox[{#2}]{#3}{#6\par}#5\par}%
 }{%
@@ -4863,7 +4873,7 @@
     \or% fullcolor
       \cs@set@lock{tud@head@bar@num}{3}%
     \fi%
-    \tud@ifverlower{2.03}{\tud@ddc@enlargepage[\chapterpagestyle]}{}%
+    \tud@if@tudscrverlower{2.03}{\tud@ddc@enlargepage[\chapterpagestyle]}{}%
   \fi%
   \if@twocolumn%
     \@afterindentfalse\@afterheading%
@@ -5055,7 +5065,7 @@
     \ifcase\tud@layout@title@num\relax% false
       \ifx\tud@title@pagenumber\relax\gdef\tud@title@pagenumber{1}\fi%
       \tud@cmd@use{maketitle}[\tud@title@pagenumber]%
-      \tud@iftudheadings{\currentpagestyle}{%
+      \tud@if@tudheadings{\currentpagestyle}{%
         \ifstr{\titlepagestyle}{empty}{\thispagestyle{empty.tudheadings}}{}%
       }{}%
     \else% !false
@@ -5070,7 +5080,7 @@
   \global\let\and\relax%
 }
 \patchcmd{\titlepage}{\thispagestyle{empty}}{%
-  \tud@iftudheadings{\currentpagestyle}{%
+  \tud@if@tudheadings{\currentpagestyle}{%
     \thispagestyle{empty.tudheadings}%
   }{%
     \thispagestyle{empty}%
@@ -5111,7 +5121,7 @@
       \renewcommand*\thefootnote{\@fnsymbol\c@footnote}%
       \let\@oldmakefnmark\@makefnmark%
       \renewcommand*\@makefnmark{\rlap\@oldmakefnmark}%
-      \tud@footnote@unhyper%
+      \tud@x@hyperref@realfootnotes%
       \ifx\@extratitle\@empty%
         \if@titlepageiscoverpage%
           \ClassWarning{\TUDClassName}{%
@@ -5286,7 +5296,7 @@
       \addtokomafont{pagenumber}{\usekomafont{tudheadings}}%
       \addtokomafont{pagefoot}{\usekomafont{tudheadings}}%
       \thispagestyle{empty.tudheadings}%
-      \tud@ifverlower{2.03}{\tud@ddc@enlargepage}{}%
+      \tud@if@tudscrverlower{2.03}{\tud@ddc@enlargepage}{}%
     }%
     \if@tud@cover%
       \begingroup%
@@ -5374,7 +5384,7 @@
   \setparsizes{\z@}{\z@}{\z@\@plus1fil}\par@updaterelative%
   \begingroup%
     \usekomafont{titlepage}%
-    \tud@footnote@unhyper%
+    \tud@x@hyperref@realfootnotes%
     \setlength\@tempdima{\z@}%
     \ifx\@titlehead\@empty\else%
       \sbox\z@{\vbox{%
@@ -5423,7 +5433,7 @@
         \ifisskip{\multicolsep}{\vspace{-\multicolsep}}{}%
       }%
     \fi%
-    \tud@ifverlower{2.03}{\tud@ddc@enlargepage[\titlepagestyle]}{}%
+    \tud@if@tudscrverlower{2.03}{\tud@ddc@enlargepage[\titlepagestyle]}{}%
   \endgroup%
 }
 \newcommand\maketitleonecolumn[2][]{%
@@ -5451,7 +5461,7 @@
     }%
   \endgroup%
   \setlength\@tempdima{\textheight}%
-  \tud@ifverlower{2.03}{%
+  \tud@if@tudscrverlower{2.03}{%
     \tud@ddc@check%
     \ifcase\@tempb\relax\else% \tud@ddc@foot@num!=false
       \setlength\@tempdima{\dimexpr\textheight-\tud@dim@ddcdiff\relax}%
@@ -5465,13 +5475,13 @@
       \vsplit\tud@title@box to \@tempdima%
       \clearpage%
       \setlength\@tempdima{\textheight}%
-      \tud@ifverlower{2.03}{\@tempswafalse}{}%
+      \tud@if@tudscrverlower{2.03}{\@tempswafalse}{}%
     }%
   \else%
     \setbox\tud@title@box\vbox{#1\bigskip}%
   \fi%
   \twocolumn[\unvbox\tud@title@box]%
-  \tud@ifverlower{2.03}{%
+  \tud@if@tudscrverlower{2.03}{%
     \if@tempswa%
       \ClassWarning{\TUDClassName}{%
         You are using a two-column title along with\MessageBreak%
@@ -5508,7 +5518,7 @@
       \let\coverpagebottommargin\tud@dim@widemargin%
       \let\coverpageleftmargin\tud@dim@widemargin%
       \let\coverpagerightmargin\tud@dim@slimmargin%
-      \tud@ifverlower{2.03}{%
+      \tud@if@tudscrverlower{2.03}{%
         \def\coverpagetopmargin{.5\tud@dim@both}%
         \def\coverpagebottommargin{.5\tud@dim@both}%
       }{}%
@@ -5539,7 +5549,7 @@
         \headheight=0pt%
         \headsep=0pt%
         \footskip=\dimexpr\tud@dim@footsep+\footheight\relax%
-        \tud@ifverlower{2.03}{%
+        \tud@if@tudscrverlower{2.03}{%
           \footskip=\dimexpr\tud@dim@headsep+\footheight%
             -1.25\baselineskip\relax%
         }{}%
@@ -5554,7 +5564,7 @@
           \def\@tempa{2\dimexpr\coverpagetopmargin\relax}%
           \ifx\@tempa\coverpagebottommargin\relax%
             \let\coverpagebottommargin\tud@dim@widemargin%
-            \tud@ifverlower{2.03}{%
+            \tud@if@tudscrverlower{2.03}{%
               \def\coverpagebottommargin{.5\tud@dim@both}%
             }{}%
           \fi%
@@ -5765,7 +5775,7 @@
     \addchaptertocentry{}{#2}%
   \or% totocleveldown
     \addsectiontocentry{}{#2}%
-  \fi
+  \fi%
 }
 \newcommand*\tud@fm@pagestyle[2]{%
   \if@titlepage%
@@ -5795,7 +5805,7 @@
   \if@titlepage%
     \tud@currentpagestyle@set%
     \ifx\tud@envir@ps\relax%
-      \tud@iftudheadings{\currentpagestyle}{%
+      \tud@if@tudheadings{\currentpagestyle}{%
         \def\tud@envir@ps{empty.tudheadings}%
       }{%
         \def\tud@envir@ps{empty}%
@@ -5860,7 +5870,7 @@
   \if@titlepage%
     \tud@currentpagestyle@set%
     \ifx\tud@envir@ps\relax%
-      \tud@iftudheadings{\currentpagestyle}{%
+      \tud@if@tudheadings{\currentpagestyle}{%
         \def\tud@envir@ps{empty.tudheadings}%
       }{%
         \def\tud@envir@ps{empty}%
@@ -6031,12 +6041,11 @@
 }
 \AtEndOfClass%
 {%
-  \tud@ifverlower{2.04}{\TUDoptions{vspacing=false}}{}%
+  \tud@if@tudscrverlower{2.04}{\TUDoptions{vspacing=false}}{}%
 }
 %%% From File: tudscr-misc.dtx
-\newcounter{symbolheadings}[chapter]
 \newcommand*\tudbookmark[1][]{\@gobbletwo}
-\newcommand*\tud@footnote@unhyper{}
+\newcommand*\tud@x@hyperref@realfootnotes{}
 \AfterPackage{hyperref}{%
   \renewcommand*\tudbookmark[3][]{%
     \relax%
@@ -6045,7 +6054,7 @@
       \ifblank{#1}{\pdfbookmark{#2}{#3}}{\pdfbookmark[#1]{#2}{#3}}%
     \fi%
   }%
-  \renewcommand*\tud@footnote@unhyper{%
+  \renewcommand*\tud@x@hyperref@realfootnotes{%
     \let\Hy@saved@footnotemark\@footnotemark%
     \let\Hy@saved@footnotetext\@footnotetext%
     \let\@footnotemark\H@@footnotemark%
@@ -6053,15 +6062,14 @@
   }%
   \pdfstringdefDisableCommands{\let\NoCaseChange\@firstofone}%
 }
-\newcommand*\tud@bookmark@startatroot{}
-\let\tud@bookmark@startatroot\relax
+\newcommand*\tud@x@bookmark@startatroot{\relax}
 \AfterPackage{bookmark}{%
-  \def\tud@bookmark@startatroot{%
+  \renewcommand*\tud@x@bookmark@startatroot{%
     \if@tud@bookmarks\bookmarksetup{startatroot}\fi%
   }%
 }
 \apptocmd{\titlepage}{%
-  \tud@bookmark@startatroot%
+  \tud@x@bookmark@startatroot%
   \if@tud@cover%
     \tudbookmark[%
     0%
@@ -6073,19 +6081,19 @@
   \fi%
 }{}{\tud@patch@wrn{titlepage}}
 \pretocmd{\tud@make@titlehead}{%
-  \tud@bookmark@startatroot%
+  \tud@x@bookmark@startatroot%
   \tudbookmark[%
   0%
   ]{\titlename}{title}%
 }{}{\tud@patch@wrn{tud@make@titlehead}}
 \pretocmd{\@maketitle}{%
-  \tud@bookmark@startatroot%
+  \tud@x@bookmark@startatroot%
   \tudbookmark[%
   0%
   ]{\titlename}{title}%
 }{}{\tud@patch@wrn{@maketitle}}
 \BeforeTOCHead[toc]{%
-  \tud@bookmark@startatroot%
+  \tud@x@bookmark@startatroot%
   \let\@tempc\relax%
   \iftocfeature{toc}{totoc}{}{%
     \if@tud@bookmarks%
@@ -6100,8 +6108,8 @@
   }%
 }
 \AfterTOCHead[toc]{\@tempc}
-\BeforeTOCHead[lof]{\tud@bookmark@startatroot}
-\BeforeTOCHead[lot]{\tud@bookmark@startatroot}
+\BeforeTOCHead[lof]{\tud@x@bookmark@startatroot}
+\BeforeTOCHead[lot]{\tud@x@bookmark@startatroot}
 \BeforePackage{tocloft}{%
   \ClassWarningNoLine{\TUDClassName}{%
     It is absolutely not recommended to use package\MessageBreak%
@@ -6111,6 +6119,32 @@
     the KOMA-Script classes%
   }%
 }
+\CheckCommand*\@uclcnotmath[4]{%
+  \begingroup
+    #1%
+    \def\({$}\let\)\(%
+    \def\NoCaseChange##1{\noexpand\NoCaseChange{\noexpand##1}}%
+    \@nonchangecase\label
+    \@nonchangecase\ref
+    \@nonchangecase\ensuremath
+    \def\cite##1##{\toks@{\noexpand\cite##1}\@citex}%
+    \def\@citex##1{\NoCaseChange{\the\toks@{##1}}}%
+    \def\reserved@a##1##2{\let#2\reserved@a}%
+    \expandafter\reserved@a\@uclclist\reserved@b{\reserved@b\@gobble}%
+    \protected@edef\reserved@a{%
+      \endgroup
+      \noexpand\@skipmath#3#4$\valign$%
+    }%
+  \reserved@a%
+}
+\newcommand*\tud@uclcnotmath{%
+  \def\footnote##1##{\toks@{\noexpand\footnote##1}\@footnote}%
+  \def\@footnote##1{\NoCaseChange{\the\toks@{##1}}}%
+  \def\@mkboth##1##2{\NoCaseChange{\@mkboth{##1}{##2}}}%
+}
+\patchcmd{\@uclcnotmath}{\@nonchangecase\ensuremath}{%
+  \@nonchangecase\ensuremath\tud@uclcnotmath%
+}{}{\tud@patch@wrn{@uclcnotmath}}
 \endinput
 %%
 %% End of file `tudscrreprt.cls'.

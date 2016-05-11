@@ -1,4 +1,4 @@
-% \CheckSum{3584}
+% \CheckSum{3593}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-pagestyle.dtx}[%
-  2016/05/10 v2.05 TUD-KOMA-Script (pagestyle)%
+  2016/05/11 v2.05 TUD-KOMA-Script (pagestyle)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman,xindy]{tudscrdoc}
@@ -535,7 +535,7 @@
 % der Verwendung mit den \TUDScript-Klassen nicht in die Quere kommen, müssen 
 % für einige Einstellungen unterdrückt werden.
 %
-% \begin{macro}{\tud@ifsacrop}
+% \begin{macro}{\if@tud@x@standalone@crop}
 % \changes{v2.02}{2014/09/08}{neu}^^A
 % Mit diesem Makro kann die Verwendung der Option \opt{crop} mit der Klasse 
 % \cls{standalone} geprüft werden. Das erste Argument wird ausgeführt, wenn 
@@ -543,15 +543,10 @@
 % ausgeführt, wenn entweder die Option \opt{crop} deaktiviert ist oder die 
 % Klasse \cls{standalone} gar nicht geladen wurde.
 %    \begin{macrocode}
-\newcommand*\tud@ifsacrop{%
-  \ifcsundef{ifsa@crop}{%
-    \@secondoftwo%
-  }{%
-    \ifbool{sa@crop}{\@firstoftwo}{\@secondoftwo}%
-  }%
-}
+\newif\if@tud@x@standalone@crop
+\AfterClass*{standalone}{\let\if@tud@x@standalone@crop\ifsa@crop}
 %    \end{macrocode}
-% \end{macro}^^A \tud@ifsacrop
+% \end{macro}^^A \if@tud@x@standalone@crop
 %
 % \subsection{Definition des Seitenstils mittels \pkg{scrlayer-scrpage}}
 %
@@ -567,29 +562,11 @@
 % werden die Seitenränder auf die Einstellungen dieser Klasse gesetzt und das
 % Laden von \pkg{scrlayer-scrpage} verhindert.
 %    \begin{macrocode}
-\tud@ifsacrop{%
+\if@tud@x@standalone@crop
   \PreventPackageFromLoading{scrlayer-scrpage}%
-  \pagestyle{empty}%
-  \hoffset=-72.27pt%
-  \voffset=-72.27pt%
-  \topmargin=0pt%
-  \headheight=0pt%
-  \headsep=0pt%
-  \marginparsep=0pt%
-  \marginparwidth=0pt%
-  \footskip=0pt%
-  \marginparpush=0pt%
-  \oddsidemargin=0pt%
-  \evensidemargin=0pt%
-  \topskip=0pt%
-  \textheight=\maxdimen%
-  \ifcsundef{if@chapter}{%
-    \newif\if@chapter%
-    \ifcsundef{chapter}{\@chapterfalse}{\@chaptertrue}%
-  }{}%
-}{%
+\else
   \AtEndPreamble{\RequirePackage{scrlayer-scrpage}[2013/12/14]}%
-}
+\fi
 %    \end{macrocode}
 % Für das Erzeugen der Seitenstile wird das Paket \pkg{scrlayer-scrpage} 
 % genutzt. Mit diesem können verschiedene Ebenen erstellt werden, aus welchen 
@@ -1232,6 +1209,10 @@
 % notwendige Makros definiert.
 %    \begin{macrocode}
 \TUD@UnwindPackage{scrlayer-scrpage}{%
+  \ifcsundef{if@chapter}{%
+    \newif\if@chapter%
+    \ifcsundef{chapter}{\@chapterfalse}{\@chaptertrue}%
+  }{}%
   \cslet{ps@tudheadings}{\ps@headings}%
   \cslet{ps@plain.tudheadings}{\ps@plain}%
   \cslet{ps@empty.tudheadings}{\ps@empty}%
@@ -3071,10 +3052,12 @@
 % \ToDo{\cs{@ifpackagelater} raus, \cs{CheckCommand} für relev. Befehle}[v2.05]%
 %    \begin{macrocode}
 \newcommand*\tud@cdgeometry@process{}
-\tud@ifsacrop{%
+\if@tud@x@standalone@crop
   \PreventPackageFromLoading{geometry}%
-}{%
+\else
   \RequirePackage{geometry}[2010/09/12]%
+\fi
+\AfterPackage*{geometry}{%
   \@ifpackagelater{geometry}{2010/09/13}{%
     \ClassWarning{\TUDClassName}{%
       Package `geometry' was updated so some patches\MessageBreak%
@@ -3952,7 +3935,23 @@
 % \opt{crop} geladen wurde, um die Seitenränder nicht zu ändern.
 %    \begin{macrocode}
 \AtEndPreamble{%
-  \tud@ifsacrop{}{%
+  \if@tud@x@standalone@crop%
+    \pagestyle{empty}%
+    \hoffset=-72.27pt%
+    \voffset=-72.27pt%
+    \topmargin=0pt%
+    \headheight=0pt%
+    \headsep=0pt%
+    \marginparsep=0pt%
+    \marginparwidth=0pt%
+    \footskip=0pt%
+    \marginparpush=0pt%
+    \oddsidemargin=0pt%
+    \evensidemargin=0pt%
+    \topskip=0pt%
+    \textheight=\maxdimen%
+    \let\tud@recalctypearea\relax%
+  \else%
 %    \end{macrocode}
 % Nach einer Neuberechnung oder Änderung des Satzspiegels durch \pkg{typearea} 
 % werden die für die Seitenstile benötigten Satzspiegel mit \pkg{geometry} neu
@@ -3970,8 +3969,8 @@
 %    \begin{macrocode}
     \BeforeSelectAnyPageStyle{\tud@BeforeSelectAnyPageStyle{#1}}%
     \tud@recalctypearea%
-    \tud@bleedmargin@set%
-  }%
+  \fi%
+  \tud@bleedmargin@set%
 }
 %    \end{macrocode}
 % \begin{macro}{\tud@parameters@pagestyle}
