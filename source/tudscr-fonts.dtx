@@ -1,4 +1,4 @@
-% \CheckSum{1369}
+% \CheckSum{1297}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-fonts.dtx}[%
-  2016/05/10 v2.05 TUD-KOMA-Script\space%
+  2016/05/11 v2.05 TUD-KOMA-Script\space%
 %</driver>
 %<package&identify>\ProvidesPackage{tudscrfonts}[%
 %<*driver|package&identify>
@@ -1785,11 +1785,15 @@
 %
 % \subsection{Bedingte Majuskeln für Überschriften}
 %
-% Überschriften sollen bloß in Großbuchstaben gesetzt werden, wenn auch 
-% tatsächlich die Schrift \DIN verwendet wird.
+% Für Überschriften in Majuskeln\footnote{Großbuchstaben} wird der Befehl
+% \cs{MakeTextUppercase}, was den internen \LaTeX-Befehl \cs{MakeUppercase}
+% verbessert, aus dem Paket \pkg{textcase} genutzt. 
+%    \begin{macrocode}
+\RequirePackage{textcase}[2004/10/07]
+%    \end{macrocode}
 % \begin{macro}{\tud@makeuppercase}
-% Der Befehl führt \cs{MakeTextUppercase}\marg{Text} deshalb nur aus, wenn die 
-% richtige Schriftfamilie verwendet wird. 
+% Der Befehl führt \cs{MakeTextUppercase}\marg{Text} nur dann aus, wenn die 
+% richtige Schriftfamilie~-- sprich \DIN~-- verwendet wird.
 %    \begin{macrocode}
 \newcommand*\tud@makeuppercase[1]{%
   \ifdin{\begingroup\MakeTextUppercase{#1}\endgroup}{#1}%
@@ -1803,49 +1807,6 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@makeuppercase
-% \begin{macro}{\tud@uclcnotmath}
-% \changes{v2.02}{2014/06/27}{\pkg{textcase}: Ignorieren von Fußnoten im 
-%   Argument des Befehls \cs{MakeTextUppercase}}^^A
-% \changes{v2.03}{2015/01/21}{\pkg{textcase}: Ignorieren des Befehls 
-%   \cs{@mkboth} im Argument des Befehls \cs{MakeTextUppercase}}^^A
-% \begin{macro}{\@uclcnotmath}
-% Für das Setzen der Überschriften in Majuskeln\footnote{Großbuchstaben} mit
-% \cs{MakeTextUppercase}, was den internen \LaTeX-Befehl \cs{MakeUppercase}
-% verbessert, wird das Paket \pkg{textcase} genutzt. Damit Fußnoten nicht 
-% automatisch in Majuskeln gesetzt werden, wird außerdem der interne Befehl
-% \cs{@uclcnotmath} aus diesem Paket angepasst.
-% \ToDo{\opt{footnotes=symbolheadings} komplett überarbeiten}[v2.06]
-%    \begin{macrocode}
-\RequirePackage{textcase}[2004/10/07]
-\CheckCommand*\@uclcnotmath[4]{%
-  \begingroup
-    #1%
-    \def\({$}\let\)\(%
-    \def\NoCaseChange##1{\noexpand\NoCaseChange{\noexpand##1}}%
-    \@nonchangecase\label
-    \@nonchangecase\ref
-    \@nonchangecase\ensuremath
-    \def\cite##1##{\toks@{\noexpand\cite##1}\@citex}%
-    \def\@citex##1{\NoCaseChange{\the\toks@{##1}}}%
-    \def\reserved@a##1##2{\let#2\reserved@a}%
-    \expandafter\reserved@a\@uclclist\reserved@b{\reserved@b\@gobble}%
-    \protected@edef\reserved@a{%
-      \endgroup
-      \noexpand\@skipmath#3#4$\valign$%
-    }%
-  \reserved@a%
-}
-\newcommand*\tud@uclcnotmath{%
-  \def\footnote##1##{\toks@{\noexpand\footnote##1}\@footnote}%
-  \def\@footnote##1{\NoCaseChange{\the\toks@{##1}}}%
-  \def\@mkboth##1##2{\NoCaseChange{\@mkboth{##1}{##2}}}%
-}
-\patchcmd{\@uclcnotmath}{\@nonchangecase\ensuremath}{%
-  \@nonchangecase\ensuremath\tud@uclcnotmath%
-}{}{\tud@patch@wrn{@uclcnotmath}}
-%    \end{macrocode}
-% \end{macro}^^A \@uclcnotmath
-% \end{macro}^^A \tud@uclcnotmath
 %
 % \iffalse
 %</body>
