@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-layout.dtx}[%
-  2016/05/05 v2.05 TUD-KOMA-Script (layout)%
+  2016/05/17 v2.05 TUD-KOMA-Script (layout)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman,xindy]{tudscrdoc}
@@ -657,9 +657,9 @@
 % \end{macro}^^A \tud@font@koma@reset
 % \end{macro}^^A \tud@font@koma@set
 % \begin{option}{headings}
-% Die \KOMAScript-Option \opt{headings} setzt die Formatierung aller 
-% Überschriften zurück. Damit die Einstellungen für das \CD aktiv bleiben, 
-% werden nach der Ausführung der Option durch \cs{tud@headings@reset} die mit 
+% Die \KOMAScript-Option \opt{headings} setzt für alle Überschriften die 
+% Formatierung zurück. Um die Einstellungen für das \CD aktiv zu halten, werden 
+% nach der Ausführung der Option durch \cs{tud@x@scr@headings@reset} die mit 
 % \cs{tud@font@koma@set} definierten Makros \cs{tud@font@koma@\meta{Element}}
 % erneut an die entsprechenden Schriftelemente angehängt. Bei der Verwendung 
 % der \KOMAScript-Option \opt{headings=standardclasses} werden außerdem noch 
@@ -669,19 +669,19 @@
 \DefineFamilyMember{KOMA}
 \DefineFamilyKey{KOMA}{headings}{%
   \if@atdocument%
-    \AtEndOfFamilyOptions{\tud@headings@reset}%
+    \AtEndOfFamilyOptions{\tud@x@scr@headings@reset}%
   \fi%
   \FamilyKeyStateProcessed%
 }
 \DefineFamilyKey{KOMA}{open}{%
   \if@atdocument%
-    \AtEndOfFamilyOptions{\tud@headings@reset}%
+    \AtEndOfFamilyOptions{\tud@x@scr@headings@reset}%
   \fi%
   \FamilyKeyStateProcessed%
 }
 \DefineFamilyKey{KOMA}{chapterprefix}{%
   \if@atdocument%
-    \AtEndOfFamilyOptions{\tud@headings@reset}%
+    \AtEndOfFamilyOptions{\tud@x@scr@headings@reset}%
   \fi%
   \FamilyKeyStateProcessed%
 }
@@ -700,9 +700,9 @@
 % \CD gibt es dabei drei Ausprägungen, die für die verschiedenen Elemente
 % auch unabhängig gewählt werden können.
 %
-% \begin{macro}{\tud@headings@set}
+% \begin{macro}{\tud@x@scr@headings@set}
 % \changes{v2.05}{2015/11/24}{neu}^^A
-% \begin{macro}{\tud@headings@current}
+% \begin{macro}{\tud@x@scr@headings@current}
 % \changes{v2.05}{2015/11/24}{neu}^^A
 % \begin{macro}{\tud@sec@fontsize}
 % \changes{v2.05}{2015/11/24}{neu}^^A
@@ -711,29 +711,29 @@
 % Als erstes werden die zuvor erwähnten Optionen verarbeitet, welche Einfluss 
 % auf die Formatierung respektive die Schriftgröße der Überschriften haben. 
 % Wird mit der Option \opt{headings} eine andere Überschriftengröße gewählt, 
-% werden mit dem Befehl \cs{tud@headings@set} die dazu passenden Schriftgrößen 
-% sowohl für die Überschriften (\cs{tud@sec@fontsize}) als auch die 
-% Titelseite (\cs{tud@thesis@fontsize}) gesetzt. In \cs{tud@headings@current} 
+% werden mit \cs{tud@x@scr@headings@set} die passenden Schriftgrößen sowohl für 
+% die Überschriften (\cs{tud@sec@fontsize}) als auch die Titelseite 
+% (\cs{tud@thesis@fontsize}) gesetzt. In \cs{tud@x@scr@headings@current} 
 % wird die über \opt{headings=\dots} gewählte Schriftgröße der Überschriften
 % gesichert.
 %    \begin{macrocode}
-\newcommand*\tud@headings@current{}
+\newcommand*\tud@x@scr@headings@current{}
 \newcommand*\tud@sec@fontsize{}
 %<book|report|article>\newcommand*\tud@thesis@fontsize{}
-\newcommand*\tud@headings@set[1][]{%
+\newcommand*\tud@x@scr@headings@set[1][]{%
   \def\@tempa##1##2##3{%
-    \ifstr{##1}{\tud@headings@current}{}{%
-      \renewcommand*\tud@headings@current{##1}%
+    \ifstr{##1}{\tud@x@scr@headings@current}{}{%
+      \renewcommand*\tud@x@scr@headings@current{##1}%
       \renewcommand*\tud@sec@fontsize{##2}%
 %<book|report|article>      \renewcommand*\tud@thesis@fontsize{##3}%
       #1%
     }%
   }%
 %    \end{macrocode}
-% Wird \cs{tud@headings@set} aufgerufen, so werden mit \cs{KOMAoptionOf} die 
-% aktuellen Werte der Option \opt{headings} ausgelesen, welche in einer Liste 
-% ausgegeben werden. Diese wird durchlaufen und dabei auf die relevanten Werte 
-% reagiert.
+% Wird \cs{tud@x@scr@headings@set} aufgerufen, so werden mit \cs{KOMAoptionOf} 
+% die aktuellen Werte der Option \opt{headings} ausgelesen, welche in einer
+% Liste ausgegeben werden. Diese wird durchlaufen und dabei auf die relevanten
+% Werte reagiert.
 %    \begin{macrocode}
   \KOMAoptionOf[\def\@tempb]{\KOMAClassFileName}{headings}%
   \@for\@tempc:=\@tempb\do{%
@@ -747,26 +747,26 @@
 % Damit die Einstellungen für die Größe wirksam werden, wird das Makro einmalig
 % zu Beginn des Dokumentes ausgeführt.
 %    \begin{macrocode}
-\AtEndPreamble{\tud@headings@set}
+\AtEndPreamble{\tud@x@scr@headings@set}
 %    \end{macrocode}
 % \end{macro}^^A \tud@thesis@fontsize
 % \end{macro}^^A \tud@sec@fontsize
-% \end{macro}^^A \tud@headings@current
-% \end{macro}^^A \tud@headings@set
+% \end{macro}^^A \tud@x@scr@headings@current
+% \end{macro}^^A \tud@x@scr@headings@set
 %
 % \iffalse
 %</class&body>
 %<*class&option>
 % \fi
 %
-% \begin{macro}{\tud@headings@reset}
+% \begin{macro}{\tud@x@scr@headings@reset}
 % \changes{v2.05}{2015/11/24}{neu}^^A
 % Hiermit wird nach dem Ausführen der Option \opt{headings} im Zweifelsfall die 
 % Größe und Formatierung der Überschriften neu gesetzt.
 %    \begin{macrocode}
-\newcommand*\tud@headings@reset{%
+\newcommand*\tud@x@scr@headings@reset{%
   \tud@layout@process%
-  \tud@headings@set[%
+  \tud@x@scr@headings@set[%
     \ifcase\tud@layout@part@num\relax\else% !false
       \tud@font@koma@reset{part}%
       \tud@font@koma@reset{partnumber}%
@@ -785,7 +785,7 @@
   ]%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@headings@reset
+% \end{macro}^^A \tud@x@scr@headings@reset
 % \begin{macro}{\tud@pagecolor}
 % Der Befehl \cs{tud@pagecolor} dient für die Hauptklassen als Hilfsmakro, um 
 % je nach gewählter Ausprägung des Layouts die farblichen Seitenhintergründe zu 
