@@ -1,4 +1,4 @@
-% \CheckSum{1563}
+% \CheckSum{1544}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-doc.dtx}[%
-  2016/05/11 v2.05 TUD-KOMA-Script\space%
+  2016/05/18 v2.05 TUD-KOMA-Script\space%
   (source code documentation based on scrartcl/scrdoc)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
@@ -88,67 +88,47 @@
 % \fi
 %
 % Sie lädt standarmäßig die Klasse \cls{ltxdoc}, ersetzt allerdings im Stile 
-% von \cls{scrdoc} im Hintergrund \cls{article} durch \cls{scrartcl}, falls 
-% diese Klasse existiert. Damit der zu \cls{scrartcl} gehörige Titel genutzt
-% werden kann, wird dieser temporär gesichert.
+% von \cls{scrdoc} im Hintergrund \cls{article} durch \cls{scrartcl}. Damit der
+% zu \cls{scrartcl} gehörige Titel genutzt werden kann, wird dieser temporär
+% gesichert.
 %    \begin{macrocode}
-\IfFileExists{scrbase.sty}{%
-  \RequirePackage{scrbase}[2013/12/19]%
-  \newcommand*\saved@maketitle{}%
-  \PassOptionsToClass{toc=left}{scrartcl}%
-  \AfterClass{scrartcl}{\let\saved@maketitle\@maketitle}%
-  \AfterClass{ltxdoc}{%
-    \let\@maketitle\saved@maketitle%
-    \codeline@indexfalse%
-  }%
-  \AfterPackage{inputenc}{\RequirePackage{csquotes}[2011/10/22]}%
-}{}
+\RequirePackage{scrbase}[2013/12/19]%
+\newcommand*\saved@maketitle{}%
+\PassOptionsToClass{toc=left}{scrartcl}%
+\AfterClass{scrartcl}{\let\saved@maketitle\@maketitle}%
+\AfterClass{ltxdoc}{%
+  \let\@maketitle\saved@maketitle%
+  \codeline@indexfalse%
+}%
+\AfterPackage{inputenc}{\RequirePackage{csquotes}[2011/10/22]}%
 %    \end{macrocode}
 % Der folgende Quelltext ist 1:1 aus \cls{scrdoc} kopiert.
 %    \begin{macrocode}
-\IfFileExists{scrartcl.cls}{%
-  \newcommand*\sd@saved@LoadClass{}
-  \let\sd@saved@LoadClass=\LoadClass
-  \renewcommand*\LoadClass[2][]{%
-    \begingroup
-      \edef\@tempc{##2}\def\@tempb{article}%
-      \ifx\@tempc\@tempb
-        \let\LoadClass\sd@saved@LoadClass
-        \def\@tempc{scrartcl}%
-      \fi
-      \edef\@tempc{%
-        \noexpand\endgroup\noexpand\sd@saved@LoadClass[{##1}]{\@tempc}}%
-    \@tempc
-  }
-  \newcommand*\sd@saved@PassOptionsToClass{}
-  \let\sd@saved@PassOptionsToClass=\PassOptionsToClass
-  \renewcommand*\PassOptionsToClass[2]{%
-    \begingroup
-      \edef\@tempc{##2}\def\@tempb{article}%
-      \ifx\@tempc\@tempb
-        \def\@tempc{scrartcl}%
-      \fi
-      \edef\@tempc{%
-        \noexpand\endgroup\noexpand\sd@saved@PassOptionsToClass{##1}{%
-          \@tempc}}%
-    \@tempc
-  }
-}{%
-  \typeout{^^J%
-    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!^^J%
-    !!! You should generate KOMA-Script classes first!^^J%
-    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!^^J%
-    ^^J%
-  }%
-  \DeclareRobustCommand\KOMAScript{\textsf{K\kern.05em O\kern.05em%
-      M\kern.05em A\kern.1em-\kern.1em Script}}%
-  \def\addsec{\section*}%
-  \newenvironment{labeling}[2][]{%
-    \description
-  }{%
-    \csname enddescription\endcsname
-  }%
-  \newcommand*\marginline{\marginpar}%
+\newcommand*\sd@saved@LoadClass{}
+\let\sd@saved@LoadClass=\LoadClass
+\renewcommand*\LoadClass[2][]{%
+  \begingroup
+    \edef\@tempc{#2}\def\@tempb{article}%
+    \ifx\@tempc\@tempb
+      \let\LoadClass\sd@saved@LoadClass
+      \def\@tempc{scrartcl}%
+    \fi
+    \edef\@tempc{%
+      \noexpand\endgroup\noexpand\sd@saved@LoadClass[{#1}]{\@tempc}}%
+  \@tempc
+}
+\newcommand*\sd@saved@PassOptionsToClass{}
+\let\sd@saved@PassOptionsToClass=\PassOptionsToClass
+\renewcommand*\PassOptionsToClass[2]{%
+  \begingroup
+    \edef\@tempc{#2}\def\@tempb{article}%
+    \ifx\@tempc\@tempb
+      \def\@tempc{scrartcl}%
+    \fi
+    \edef\@tempc{%
+      \noexpand\endgroup\noexpand\sd@saved@PassOptionsToClass{#1}{%
+        \@tempc}}%
+  \@tempc
 }
 \LoadClassWithOptions{ltxdoc}
 \setcounter{IndexColumns}{2}
@@ -935,25 +915,23 @@
   \fi%
 \fi
 %    \end{macrocode}
+% Jetzt werden noch die Einleitungen für Index und Änderungsliste angepasst.
+%    \begin{macrocode}
+\IndexPrologue{%
+  \addsec{Index}%
+  Unterstrichene Zahlen, die gegebenenfalls mit einem Hyperlink versehen sind, 
+  verweisen auf die \ifcodeline@index Codezeile der \fi Definition, alle 
+  weiteren sind \ifcodeline@index Zeilennummern\else Seitenzahlen\fi, wo der 
+  jeweilige Eintrag verwendet wird.
+}
+\GlossaryPrologue{\addsec{\"Anderungsliste}}
+%    \end{macrocode}
 % \end{macro}^^A \levelchar
 % \end{macro}^^A \quotechar
 % \end{macro}^^A \actualchar
 % \end{macro}^^A \tud@line@replace
 % \end{macro}^^A \tud@read@replace
 % \end{macro}^^A \tud@write@replace
-% \begin{macro}{\IndexPrologue}
-% \changes{v2.05}{2016/05/01}{neu}^^A
-%    \begin{macrocode}
-\IndexPrologue{%
-  \section *{Index}\markboth {Index}{Index}
-  Unterstrichene Zahlen, die gegebenenfalls mit einem Hyperlink versehen sind, 
-  verweisen auf die \ifcodeline@index Codezeile der \fi Definition, alle 
-  weiteren sind \ifcodeline@index Zeilennummern\else Seitenzahlen\fi, wo der 
-  jeweilige Eintrag verwendet wird.
-}
-%    \end{macrocode}
-% \end{macro}^^A \IndexPrologue
-
 % \begin{macro}{\ToDo}
 % \changes{v2.02}{2014/07/25}{neu}^^A
 % \begin{macro}{\@ToDo}
