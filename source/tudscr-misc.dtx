@@ -1,4 +1,4 @@
-% \CheckSum{765}
+% \CheckSum{801}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-misc.dtx}[%
-  2016/05/17 v2.05 TUD-KOMA-Script (miscellaneous)%
+  2016/05/18 v2.05 TUD-KOMA-Script (miscellaneous)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman,xindy]{tudscrdoc}
@@ -739,14 +739,35 @@
 % oder mehrere vorangestellte \val{@}-Zeichen ignoriert.
 %    \begin{macrocode}
   \write\tud@write@xdy{%
+    (merge-rule "\@backslashchar[(.*)\@backslashchar]" "" :eregexp)%
 %<*doc>
+    ^^J%
     (merge-rule%
-    \space"\string^(@+)(.*)"%
-    \space"\string\2\string~\string~\string\1"%
+    \space"\string^(@+)([\string^@~n]*)"%
+    \space"\string\2\string~e\string\1"%
     \space:eregexp :again%
     )^^J%
+    (merge-rule%
+    \space"(.*)(@@@@)([\string^@~n]*)"%
+    \space"\string\1@@@\string\3\string~e"%
+    \space:again :eregexp%
+    )^^J%
+    (merge-rule%
+    \space"(.*)(@@@)([\string^@~n]*)"%
+    \space"\string\1@@\string\3\string~e"%
+    \space:again :eregexp%
+    )^^J%
+    (merge-rule%
+    \space"(.*)(@@)([\string^@~n]*)"%
+    \space"\string\1@\string\3\string~e"%
+    \space:eregexp :again%
+    )^^J%
+    (merge-rule%
+    \space"(.*?)(@)([\string^@~n]*)"%
+    \space"\string\1\string~b\string\3"%
+    \space:eregexp :again%
+    )
 %</doc>
-    (merge-rule "\@backslashchar[(.*)\@backslashchar]" "" :eregexp)%
   }%
 %    \end{macrocode}
 % Innerhalb ausgewählter Auszeichnungs- und Textbefehle sollten die Befehle
