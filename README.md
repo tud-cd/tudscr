@@ -29,7 +29,7 @@ Universitätsmarketing  mit dem Hinweis auf die Verwendung von LaTeX anfordern.
 Für die Installation der PostScript-Schriften sei auf den entsprechenden 
 Release unter https://github.com/tud-cd/tudscr/releases/tag/fonts und das 
 LaTeX-Forum der Technischen Universität Dresden verwiesen: 
-http://latex.wcms-file3.tu-dresden.de/phpBB3/index.php
+http://latex.wcms-file3.tu-dresden.de/phpBB3/
 
 
 Klassen und Pakete
@@ -169,7 +169,7 @@ university marketing university marketing with regard to the use of LaTeX. To
 install the PostScript fonts, please refer to the corresponding release under 
 https://github.com/tud-cd/tudscr/releases/tag/fonts and the LaTeX forum of the 
 Technische Universität Dresden: 
-http://latex.wcms-file3.tu-dresden.de/phpBB3/index.php
+http://latex.wcms-file3.tu-dresden.de/phpBB3/
 
 Classes and Packages
 --------------------
