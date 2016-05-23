@@ -73,13 +73,13 @@
       \fi%
     }
   \fi
-  \@TUDVersion{2016/05/02 v2.05 BETA TUD-KOMA-Script}
+  \@TUDVersion{2016/05/20 v2.05 BETA TUD-KOMA-Script}
 \endgroup
 \NeedsTeXFormat{LaTeX2e}
 \providecommand*\tudscrmail{tudscr@gmail.com}
 \newcommand*\TUD@ProvidesClass[3]{%
   \ProvidesClass{#1}[%
-  2016/05/02 v2.05 BETA TUD-KOMA-Script
+  2016/05/20 v2.05 BETA TUD-KOMA-Script
     ^^J#3 (#2)%
   ]%
   \newcommand*\TUDClassName@KOMA{#2}%
@@ -94,7 +94,7 @@
   \typeout{| Class: \TUDClassName}%
   \typeout{| Version: \TUDVersion}%
   \typeout{| Author: Falk Hanisch (\tudscrmail)}%
-  \typeout{| Forum: http://latex.wcms-file3.tu-dresden.de/phpBB3/index.php}%
+  \typeout{| Forum: http://latex.wcms-file3.tu-dresden.de/phpBB3/}%
   \typeout{+---------------------------------------------------------------}%
 }
 \TUD@ProvidesClass{tudscrreprt}{scrreprt}{document class}
@@ -462,7 +462,9 @@
       \bool@set@lock{@tud@foot@colored}{true}%
     \fi%
   \else%
-    \TUDoptions{extrabottommargin=#1}%
+    \ifdimen{#1}{%
+      \TUDoptions{extrabottommargin=#1}%
+    }{}%
   \fi%
 }
 \newcommand*\tud@ps@store[1]{%
@@ -523,13 +525,13 @@
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax% false/typearea
       \cs@set@lock{tud@cdgeometry@num}{0}%
-      \if@atdocument\tud@recalctypearea\fi%
+      \if@atdocument\tud@cdgeometry@process\fi%
     \or% true/cd
       \cs@set@lock{tud@cdgeometry@num}{2}%
-      \if@atdocument\tud@recalctypearea\fi%
+      \if@atdocument\tud@cdgeometry@process\fi%
     \or% symmetric
       \cs@set@lock{tud@cdgeometry@num}{3}%
-      \if@atdocument\tud@recalctypearea\fi%
+      \if@atdocument\tud@cdgeometry@process\fi%
     \or% twoside
       \cs@set@lock{tud@cdgeometry@num}{4}%
       \TUD@KOMAoptions{twoside=true}%
@@ -541,15 +543,15 @@
     \or% restricted
       \cs@std@lock{tud@cdgeometry@num}{2}%
       \renewcommand*\tud@cdgeometry@calc@num{0}%
-      \if@atdocument\tud@recalctypearea\fi%
+      \if@atdocument\tud@cdgeometry@process\fi%
     \or% adapted
       \cs@std@lock{tud@cdgeometry@num}{2}%
       \renewcommand*\tud@cdgeometry@calc@num{1}%
-      \if@atdocument\tud@recalctypearea\fi%
+      \if@atdocument\tud@cdgeometry@process\fi%
     \or% calculated
       \cs@std@lock{tud@cdgeometry@num}{2}%
       \renewcommand*\tud@cdgeometry@calc@num{2}%
-      \if@atdocument\tud@recalctypearea\fi%
+      \if@atdocument\tud@cdgeometry@process\fi%
     \or% custom
       \cs@set@lock{tud@cdgeometry@num}{1}%
     \fi%
@@ -561,17 +563,17 @@
     \TUD@set@lengthkey{extrabottommargin}{\tud@dim@extrabottommargin}{#1}%
   }{%
     \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-      \if@atdocument\tud@cdgeometry@process\fi%
+      \if@atdocument\tud@cdgeometry@@process\fi%
     \fi%
   }%
 }
 \DefineFamilyMember{KOMA}
 \DefineFamilyKey{KOMA}{twoside}{%
-  \if@atdocument\AtEndOfFamilyOptions{\tud@cdgeometry@process}\fi%
+  \if@atdocument\AtEndOfFamilyOptions{\tud@cdgeometry@@process}\fi%
   \FamilyKeyStateProcessed%
 }
 \DefineFamilyKey{KOMA}{twocolumn}{%
-  \if@atdocument\AtEndOfFamilyOptions{\tud@cdgeometry@process}\fi%
+  \if@atdocument\AtEndOfFamilyOptions{\tud@cdgeometry@@process}\fi%
   \FamilyKeyStateProcessed%
 }
 \IfFileExists{silence.sty}{%
@@ -856,25 +858,25 @@
 \DefineFamilyMember{KOMA}
 \DefineFamilyKey{KOMA}{headings}{%
   \if@atdocument%
-    \AtEndOfFamilyOptions{\tud@headings@reset}%
+    \AtEndOfFamilyOptions{\tud@x@scr@headings@reset}%
   \fi%
   \FamilyKeyStateProcessed%
 }
 \DefineFamilyKey{KOMA}{open}{%
   \if@atdocument%
-    \AtEndOfFamilyOptions{\tud@headings@reset}%
+    \AtEndOfFamilyOptions{\tud@x@scr@headings@reset}%
   \fi%
   \FamilyKeyStateProcessed%
 }
 \DefineFamilyKey{KOMA}{chapterprefix}{%
   \if@atdocument%
-    \AtEndOfFamilyOptions{\tud@headings@reset}%
+    \AtEndOfFamilyOptions{\tud@x@scr@headings@reset}%
   \fi%
   \FamilyKeyStateProcessed%
 }
-\newcommand*\tud@headings@reset{%
+\newcommand*\tud@x@scr@headings@reset{%
   \tud@layout@process%
-  \tud@headings@set[%
+  \tud@x@scr@headings@set[%
     \ifcase\tud@layout@part@num\relax\else% !false
       \tud@font@koma@reset{part}%
       \tud@font@koma@reset{partnumber}%
@@ -1295,7 +1297,7 @@
   \fi%
 }
 %%% From File: tudscr-misc.dtx
-\newif\if@tud@paper@set
+\newif\if@tud@x@scr@paper@set
 \TUD@key{paper}{%
   \tud@lowerstring{\@tempa}{#1}%
   \def\@tempb##1##2\@nil{%
@@ -1320,9 +1322,9 @@
     }%
     \expandafter\@tempb\@tempa::\@nil%
   \fi%
-  \@tud@paper@setfalse%
+  \@tud@x@scr@paper@setfalse%
   \if@tempswa%
-    \ifstr{\@tempa}{a4}{}{\@tud@paper@settrue}%
+    \ifstr{\@tempa}{a4}{}{\@tud@x@scr@paper@settrue}%
     \FamilyKeyStateProcessed%
   \else%
     \FamilyKeyStateUnknownValue%
@@ -1337,7 +1339,7 @@
 \AtEndOfClass{%
   \RelaxFamilyKey{TUD}{paper}%
   \RelaxFamilyKey{TUD}{fontsize}%
-  \ifboolexpr{bool {@tud@paper@set} or bool {@landscape}}{%
+  \ifboolexpr{bool {@tud@x@scr@paper@set} or bool {@landscape}}{%
     \if@tud@fontsize@set\else%
       \ClassWarningNoLine{\TUDClassName}{%
         You've set a paper size, which is different from\MessageBreak%
@@ -1368,11 +1370,11 @@
   \newcounter{symbolheadings}[chapter]
 }
 %%% From File: tudscr-misc.dtx
-\newcommand*\tud@x@paper{%
-  \expandafter\tud@x@@paper\CurrentOption paper\tud@x@@paper%
+\newcommand*\tud@x@scr@paper{%
+  \expandafter\tud@x@scr@@paper\CurrentOption paper\tud@x@scr@@paper%
 }
-\newcommand*\tud@x@@paper{}
-\def\tud@x@@paper #1#2paper#3\tud@x@@paper{%
+\newcommand*\tud@x@scr@@paper{}
+\def\tud@x@scr@@paper #1#2paper#3\tud@x@scr@@paper{%
   \@tempswafalse%
   \ifstr{#3}{paper}{\ifnumber{#2}{%
     \ifstr{#1}{a}{\@tempswatrue}{%
@@ -1384,7 +1386,7 @@
   \if@tempswa\TUDExecuteOptions{#3=#1#2}\fi%
   \PassOptionsToClass{\CurrentOption}{\TUDClassName@KOMA}%
 }
-\DeclareOption*{\tud@x@paper}
+\DeclareOption*{\tud@x@scr@paper}
 \TUDExecuteOptions{cd=true,tudbookmarks=true}
 \TUDProcessOptions\relax
 \LoadClass{\TUDClassName@KOMA}[2015/04/23]
@@ -1421,18 +1423,17 @@
   }%
   \forcsvlist\@tempa{#2}%
 }
-\cs@lock{tud@multicols@num}{1}
-\newcommand*\tud@multicols@check{%
-  \ifundef{\multicols}{%
-    \ifnum\tud@multicols@num>\@ne\relax%
-      \ClassWarning{\TUDClassName}{%
-        The option `columns=\tud@multicols@num' is only\MessageBreak%
-        supported, when package `multicol' is loaded%
-      }%
-      \cs@set@lock{tud@multicols@num}{1}%
-    \fi%
-  }{}%
+\cs@lock{tud@x@multicol@num}{1}
+\newcommand*\tud@x@multicol@check{%
+  \ifnum\tud@x@multicol@num>\@ne\relax%
+    \ClassWarning{\TUDClassName}{%
+      The option `columns=\tud@x@multicol@num' is only\MessageBreak%
+      supported, when package `multicol' is loaded%
+    }%
+    \cs@set@lock{tud@x@multicol@num}{1}%
+  \fi%
 }
+\AfterPackage{multicol}{\renewcommand*\tud@x@multicol@check{\relax}}
 %%% From File: tudscr-fonts.dtx
 \newcommand*\tud@univers{lun}
 \newif\if@tud@univers
@@ -2205,7 +2206,7 @@
 \newcommand*\@place{Dresden}
 \newcommand*\place[1]{\gdef\@place{#1}}
 \TUD@UnwindPackage{isodate}{\providecommand*\printdate[1]{#1}}
-\newcommand*\tud@printdate[2]{%
+\newcommand*\tud@x@isodate@printdate[2]{%
   \ifx\today#2\relax%
     \gdef#1{#2}%
   \else%
@@ -2234,13 +2235,15 @@
 \newcommand*\@datemore{}
 \renewcommand*\date[2][]{%
   \gdef\@datemore{\trim@spaces{#1}}%
-  \tud@printdate{\@date}{#2}%
+  \tud@x@isodate@printdate{\@date}{#2}%
   \global\let\tud@datecheck\relax%
 }
 \newcommand*\@defensedate{}
-\newcommand*\defensedate[1]{\tud@printdate{\@defensedate}{#1}}
+\newcommand*\defensedate[1]{\tud@x@isodate@printdate{\@defensedate}{#1}}
 \newcommand*\@dateofbirth{}
-\newrobustcmd*\dateofbirth[1]{\tud@printdate{\@dateofbirth}{#1}\ignorespaces}
+\newrobustcmd*\dateofbirth[1]{%
+  \tud@x@isodate@printdate{\@dateofbirth}{#1}\ignorespaces%
+}
 \newcommand*\tud@multiple@@split{}
 \newcommand*\tud@multiple@split[1]{%
   \expandafter\ifpatchable\expandafter{\csname#1\endcsname}{%
@@ -3762,6 +3765,7 @@
   \fi%
 }
 \newcommand*\tud@cdgeometry@process{}
+\newcommand*\tud@cdgeometry@@process{}
 \if@tud@x@standalone@crop
   \PreventPackageFromLoading{geometry}%
 \else
@@ -3809,6 +3813,18 @@
     \@tud@x@geometry@enabledtrue%
   }%
   \renewcommand*\tud@cdgeometry@process{%
+    \ifcase\tud@cdgeometry@num\relax%
+      \csname @ta@usegeometryfalse\endcsname%
+      \ifGm@layout%
+        \tud@AfterChangingArea%
+      \else%
+        \recalctypearea%
+      \fi%
+    \else%
+      \tud@AfterChangingArea%
+    \fi%
+  }%
+  \renewcommand*\tud@cdgeometry@@process{%
     \tud@cdgeometry@set%
     \ifnum\tud@cdgeometry@num<\tw@\relax% false/custom
       \ifcase\tud@cdgeometry@num\relax%
@@ -4049,9 +4065,9 @@
       \ifdim\tud@dim@ddcdiff<\z@\relax\setlength\tud@dim@ddcdiff{\z@}\fi%
       \global\tud@dim@ddcdiff=\tud@dim@ddcdiff%
     }{}%
-    \tud@cdgeometry@@process%
+    \tud@cdgeometry@@@process%
   }%
-  \newcommand*\tud@cdgeometry@@process{%
+  \newcommand*\tud@cdgeometry@@@process{%
     \eappto\tud@cdgeometry@hmargin{,layouthoffset=\the\Gm@layouthoffset}%
     \eappto\tud@cdgeometry@vmargin{,layoutvoffset=\the\Gm@layoutvoffset}%
     \tud@if@tudscrverlower{2.03}{%
@@ -4159,7 +4175,7 @@
   \let\Gm@layoutwidth\paperwidth%
   \let\Gm@layouthoffset\z@%
   \let\Gm@layoutvoffset\z@%
-  \renewcommand*\tud@cdgeometry@process{\tud@cdgeometry@set}%
+  \renewcommand*\tud@cdgeometry@@process{\tud@cdgeometry@set}%
   \let\tud@BeforeSelectAnyPageStyle\@gobble%
 }
 \patchcmd{\cleardoubleoddpageusingstyle}{\pagestyle}{%
@@ -4184,22 +4200,10 @@
   }%
 }{}
 \newcommand*\tud@AfterChangingArea{%
-  \tud@cdgeometry@process%
+  \tud@cdgeometry@@process%
   \global\@tud@mainlogo@settrue%
   \gdef\tud@currentgeometry{}%
   \expandafter\pagestyle\expandafter{\currentpagestyle}%
-}
-\newcommand*\tud@recalctypearea{%
-  \ifcase\tud@cdgeometry@num\relax%
-    \csname @ta@usegeometryfalse\endcsname%
-    \ifGm@layout%
-      \tud@AfterChangingArea%
-    \else%
-      \recalctypearea%
-    \fi%
-  \else%
-    \tud@AfterChangingArea%
-  \fi%
 }
 \@ifpackageloaded{geometry}{\@tempswatrue}{\@tempswafalse}
 \if@tempswa
@@ -4274,7 +4278,7 @@
     \evensidemargin=0pt%
     \topskip=0pt%
     \textheight=\maxdimen%
-    \let\tud@recalctypearea\relax%
+    \let\tud@cdgeometry@process\relax%
   \else%
     \AfterCalculatingTypearea{\tud@AfterChangingArea}%
     \AfterSettingArea{\tud@AfterChangingArea}%
@@ -4282,7 +4286,7 @@
       \AfterRestoreareas{\tud@AfterChangingArea}%
     }%
     \BeforeSelectAnyPageStyle{\tud@BeforeSelectAnyPageStyle{#1}}%
-    \tud@recalctypearea%
+    \tud@cdgeometry@process%
   \fi%
   \tud@bleedmargin@set%
 }
@@ -4336,12 +4340,12 @@
   \def\tud@envir@ps{tudheadings}%
   \TUD@parameter@set{tudpage}{#1}%
   \tud@envir@selectps%
-  \tud@multicols@check%
-  \ifnum\tud@multicols@num>\@ne\relax%
-    \begin{multicols}{\tud@multicols@num}%
+  \tud@x@multicol@check%
+  \ifnum\tud@x@multicol@num>\@ne\relax%
+    \begin{multicols}{\tud@x@multicol@num}%
   \fi%
   \BODY%
-  \ifnum\tud@multicols@num>\@ne\relax%
+  \ifnum\tud@x@multicol@num>\@ne\relax%
     \end{multicols}%
   \fi%
 }[%
@@ -4350,7 +4354,7 @@
 ]
 \TUD@parameter{tudpage}{%
   \TUD@parameter@define{language}{\selectlanguage{#1}}%
-  \TUD@parameter@define{columns}{\cs@std@lock{tud@multicols@num}{#1}}%
+  \TUD@parameter@define{columns}{\cs@std@lock{tud@x@multicol@num}{#1}}%
   \TUD@parameter@define{pagestyle}{%
     \tud@if@tudheadings{#1}{\renewcommand*\tud@envir@ps{#1}}{%
       \ifstr{#1}{empty}{\renewcommand*\tud@envir@ps{empty.tudheadings}}{%
@@ -4366,13 +4370,13 @@
   \TUD@parameter@handler{\TUD@parameter@defaulthandler{tudpage}{#1}}%
 }
 %%% From File: tudscr-layout.dtx
-\newcommand*\tud@headings@current{}
+\newcommand*\tud@x@scr@headings@current{}
 \newcommand*\tud@sec@fontsize{}
 \newcommand*\tud@thesis@fontsize{}
-\newcommand*\tud@headings@set[1][]{%
+\newcommand*\tud@x@scr@headings@set[1][]{%
   \def\@tempa##1##2##3{%
-    \ifstr{##1}{\tud@headings@current}{}{%
-      \renewcommand*\tud@headings@current{##1}%
+    \ifstr{##1}{\tud@x@scr@headings@current}{}{%
+      \renewcommand*\tud@x@scr@headings@current{##1}%
       \renewcommand*\tud@sec@fontsize{##2}%
       \renewcommand*\tud@thesis@fontsize{##3}%
       #1%
@@ -4386,7 +4390,7 @@
     \ifstr{small}{\@tempc}{\@tempa{small}{\LARGE}{\Large}}{}}}}%
   }%
 }
-\AtEndPreamble{\tud@headings@set}
+\AtEndPreamble{\tud@x@scr@headings@set}
 \newcommand*\tud@title@fontcolor{}
 \newcommand*\tud@part@fontcolor{}
 \newcommand*\tud@chapter@fontcolor{}
@@ -5713,15 +5717,15 @@
         \begin{\tud@quoting}%
       \fi%
     \fi\fi%
-    \ifnum\tud@multicols@num>\@ne\relax%
+    \ifnum\tud@x@multicol@num>\@ne\relax%
       \vspace{-\multicolsep}%
-      \begin{multicols}{\tud@multicols@num}[{\tud@fm@head{#1}{#3}}]%
+      \begin{multicols}{\tud@x@multicol@num}[{\tud@fm@head{#1}{#3}}]%
     \else%
       \tud@fm@head{#1}{#3}%
     \fi%
 }
 \newcommand*\tud@fm@body@end[1]{%
-    \ifnum\tud@multicols@num>\@ne\relax%
+    \ifnum\tud@x@multicol@num>\@ne\relax%
       \end{multicols}%
       \vspace{-\multicolsep}%
     \else%
@@ -5801,7 +5805,7 @@
   \ifnum\tud@abstract@level@num>\tw@\relax\@titlepagetrue\fi% chapter
   \let\tud@envir@ps\relax%
   \TUD@parameter@set{abstract}{#1}%
-  \tud@multicols@check%
+  \tud@x@multicol@check%
   \if@titlepage%
     \tud@currentpagestyle@set%
     \ifx\tud@envir@ps\relax%
@@ -5836,7 +5840,7 @@
 ]
 \TUD@parameter{abstract}{%
   \TUD@parameter@define{language}{\selectlanguage{#1}}%
-  \TUD@parameter@define{columns}{\cs@std@lock{tud@multicols@num}{#1}}%
+  \TUD@parameter@define{columns}{\cs@std@lock{tud@x@multicol@num}{#1}}%
   \TUD@parameter@define{pagestyle}{\tud@fm@pagestyle{abstract}{#1}}%
   \TUD@parameter@define{markboth}[true]{%
     \ifstrbool{#1}{%
@@ -5866,7 +5870,7 @@
   \ifnum\tud@declaration@level@num>\tw@\relax\@titlepagetrue\fi% chapter
   \let\tud@envir@ps\relax%
   \TUD@parameter@set{declaration}{#1}%
-  \tud@multicols@check%
+  \tud@x@multicol@check%
   \if@titlepage%
     \tud@currentpagestyle@set%
     \ifx\tud@envir@ps\relax%
@@ -5895,7 +5899,7 @@
 ]
 \TUD@parameter{declaration}{%
   \TUD@parameter@define{language}{\selectlanguage{#1}}%
-  \TUD@parameter@define{columns}{\cs@std@lock{tud@multicols@num}{#1}}%
+  \TUD@parameter@define{columns}{\cs@std@lock{tud@x@multicol@num}{#1}}%
   \TUD@parameter@define{pagestyle}{\tud@fm@pagestyle{declaration}{#1}}%
   \TUD@parameter@define{markboth}[true]{%
     \ifstrbool{#1}{%
@@ -6137,13 +6141,13 @@
     }%
   \reserved@a%
 }
-\newcommand*\tud@uclcnotmath{%
+\newcommand*\tud@x@textcase@uclcnotmath{%
   \def\footnote##1##{\toks@{\noexpand\footnote##1}\@footnote}%
   \def\@footnote##1{\NoCaseChange{\the\toks@{##1}}}%
   \def\@mkboth##1##2{\NoCaseChange{\@mkboth{##1}{##2}}}%
 }
 \patchcmd{\@uclcnotmath}{\@nonchangecase\ensuremath}{%
-  \@nonchangecase\ensuremath\tud@uclcnotmath%
+  \@nonchangecase\ensuremath\tud@x@textcase@uclcnotmath%
 }{}{\tud@patch@wrn{@uclcnotmath}}
 \endinput
 %%

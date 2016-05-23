@@ -1,4 +1,4 @@
-% \CheckSum{3593}
+% \CheckSum{3596}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-pagestyle.dtx}[%
-  2016/05/20 v2.05 TUD-KOMA-Script (pagestyle)%
+  2016/05/23 v2.05 TUD-KOMA-Script (pagestyle)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman,xindy]{tudscrdoc}
@@ -2852,7 +2852,9 @@
 % Außerdem kann mit der Option \opt{extrabottommargin} gesetzt werden.
 %    \begin{macrocode}
   \else%
-    \TUDoptions{extrabottommargin=#1}%
+    \ifdimen{#1}{%
+      \TUDoptions{extrabottommargin=#1}%
+    }{}%
   \fi%
 }
 %    \end{macrocode}
@@ -3051,6 +3053,7 @@
 % der Seitenränder, wie es vom \CD der \TnUD verlangt wird. 
 % \ToDo{\cs{@ifpackagelater} raus, \cs{CheckCommand} für relev. Befehle}[v2.05]%
 %    \begin{macrocode}
+\newcommand*\tud@cdgeometry@process{}
 \newcommand*\tud@cdgeometry@@process{}
 \if@tud@x@standalone@crop
   \PreventPackageFromLoading{geometry}%
@@ -3162,18 +3165,18 @@
 % Satzspiegelberechnung mit \cs{recalctypearea} angestoßen, ansonsten wird 
 % bloß \cs{tud@AfterChangingArea} ausgeführt.
 %    \begin{macrocode}
-\newcommand*\tud@cdgeometry@process{%
-  \ifcase\tud@cdgeometry@num\relax%
-    \csname @ta@usegeometryfalse\endcsname%
-    \ifGm@layout%
-      \tud@AfterChangingArea%
+  \renewcommand*\tud@cdgeometry@process{%
+    \ifcase\tud@cdgeometry@num\relax%
+      \csname @ta@usegeometryfalse\endcsname%
+      \ifGm@layout%
+        \tud@AfterChangingArea%
+      \else%
+        \recalctypearea%
+      \fi%
     \else%
-      \recalctypearea%
+      \tud@AfterChangingArea%
     \fi%
-  \else%
-    \tud@AfterChangingArea%
-  \fi%
-}
+  }%
 %    \end{macrocode}
 % \end{macro}^^A \tud@cdgeometry@process
 % \begin{macro}{\tud@cdgeometry@@process}
