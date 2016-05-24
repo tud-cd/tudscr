@@ -6,6 +6,105 @@
 
 \usepackage{blindtext}
 
+
+\usepackage{tudscrsupervisor}
+
+\begin{document}
+\makeatletter
+
+\newcommand*\TUD@parameter@nokey{@nokey@}
+\renewcommand*\TUD@parameter@set[2]{%
+  \@expandtwoargs\in@{=}{#2}%
+  \ifin@%
+    \@expandtwoargs\kvsetkeys{#1}{#2}%
+  \else%
+    \@expandtwoargs\kvsetkeys{#1}{\TUD@parameter@nokey=#2}%
+  \fi%
+}
+\renewcommand*\TUD@parameter@defaulthandler[3]{%
+  \ifstr{#2}{\TUD@parameter@nokey}{%
+    \def\@tempa##1{%
+      \ifstr{##1}{twocolumn}{\def\@tempb{2}}{\def\@tempb{##1}}%
+      \ifxnumber{\@tempb}{%
+        \TUD@parameter@set{#1}{columns=\@tempb}%
+      }{%
+        \iflanguageloaded{\@tempb}{%
+          \TUD@parameter@set{#1}{language=\@tempb}%
+        }{%
+          \ClassError{\TUDClassName}{%
+            Unknown default value `\@tempb' for #1%
+          }{%
+            If value `\@tempb' is a language, you haven't loaded it.%
+          }%
+        }%
+      }%
+    }%
+    \forcsvlist\@tempa{#3}%
+  }{\kv@handled@false}%
+}
+\renewcommand*\TUD@parameter@handler[1][]{%
+% TODO: @nokey@ hier zusätzlich oder ausschließlich testen?
+%       (nicht in defaulthandler)
+  \ifxblank{#1}{%
+    \TUD@parameter@checkfamily{\TUD@parameter@handler}%
+    \expandafter\kv@set@family@handler\expandafter{\TUD@parameter@family}%
+  }{%
+    \expandafter\kv@set@family@handler\expandafter{#1}%
+  }%
+}
+
+\TUD@parameter{tudpage}{%
+  \TUD@parameter@define{key}{\def\testkey{#1}}%
+%  \TUD@parameter@handler{\TUD@parameter@defaulthandler{tudpage}{#1}{#2}}%
+  \TUD@parameter@handler{\def\testkey{\kv@value}}%
+}
+
+\TUD@parameter@set{tudpage}{key=blaa}%
+
+\testkey
+
+\TUD@parameter@set{tudpage}{blaß}%
+%
+\testkey
+
+\TUD@parameter@set{tudpage}{2}%
+
+%\testkey
+
+%\def\testvalue{nothing}
+%\define@key{test}{key}{\def\testvalue{#1}}
+%\kv@set@family@handler{test}{%
+%  \typeout{++++++ *****}
+%  \ifx\kv@value\relax%
+%    \kv@handled@true%
+%    \def\kv@key{key}%
+%    \def\kv@value{key}%
+%%    aaa
+%%    \expandafter\kvsetkeys\expandafter{test}\expandafter{key=\kv@key}%
+%  \else%
+%    \kv@handled@false%
+%  \fi%
+%}
+%
+%\kvsetkeys{test}{key=blaß}
+%
+%\testvalue
+%
+%\kvsetkeys{test}{blasser}
+%
+%\testvalue
+%
+%%\kvsetkeys{test}{aaa=blaer}
+%
+%\testvalue
+
+\makeatother
+
+%\noticeform[{ößch}]{text}{\item aaa}
+%\taskform[ösch]{text}{\item aaa}
+%\evaluationform[ösch]{text}{aaa}{aaa}{aaa}
+\end{document}
+
 \usepackage{geometry}
 \geometry{margin=10mm,showframe}
 
