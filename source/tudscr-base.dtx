@@ -1,4 +1,4 @@
-% \CheckSum{616}
+% \CheckSum{696}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-base.dtx}[%
-  2016/05/24 v2.05 TUD-KOMA-Script\space%
+  2016/05/26 v2.05 TUD-KOMA-Script\space%
 %</driver>
 %<package>\ProvidesPackage{tudscrbase}[%
 %<*driver|package>
@@ -802,113 +802,206 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@patch@wrn
-% \begin{macro}{\TUD@parameter}
 % \begin{macro}{\TUD@parameter@family}
+% \begin{macro}{\TUD@parameter@@family}
 % \begin{macro}{\TUD@parameter@checkfamily}
-% Mit \cs{TUD@parameter}\marg{Familienname}\marg{Definitionen} können
+% Mit \cs{TUD@parameter@family}\marg{Familienname}\marg{Definitionen} können
 % Schlüssel"=Wert"=Parameter für die optionalen Argumente von Befehle definiert
 % werden. Das erste Argument definiert den Familiennamen für den jeweiligen 
 % Befehl, welcher eindeutig gewählt werden sollte. Dieser wird im Hilfsmakro
-% \cs{TUD@parameter@family} gesichert. Dies soll im Zusammenspiel mit dem 
+% \cs{TUD@parameter@@family} gesichert. Dies soll im Zusammenspiel mit dem 
 % Makro \cs{TUD@parameter@checkfamily} dafür sorgen, dass die im Folgenden
 % bereitgestellten Befehle \cs{TUD@parameter@define}, \cs{TUD@parameter@let},
-% und \cs{TUD@parameter@handler}~-- welche die eigentliche Definition der
-% Parameter für den Benutzer bewerkstelligen~-- ohne die Angabe der Familie nur
-% innerhalb des zweiten Argumentes von \cs{TUD@parameter} verwendet werden
-% können.
+% und \cs{TUD@parameter@handler@macro}~-- welche die eigentliche Definition der
+% Parameter für den Benutzer bewerkstelligen~-- ohne die Angabe der Familie 
+% nur innerhalb des zweiten Argumentes von \cs{TUD@parameter@family} verwendet
+% werden können.
 %    \begin{macrocode}
-\newcommand*\TUD@parameter@family{}
-\newcommand*\TUD@parameter[2]{%
-  \ifxblank{#1}{}{\xdef\TUD@parameter@family{#1}}%
+\newcommand*\TUD@parameter@@family{}
+\newcommand*\TUD@parameter@family[2]{%
+  \xdef\TUD@parameter@@family{#1}%
   #2%
-  \global\let\TUD@parameter@family\relax%
+  \gdef\TUD@parameter@@family{}%
 }
-\let\TUD@parameter@family\relax
 %    \end{macrocode}
 % Dieser Befehl prüft, ob eine Familie für den Paramter definiert wurde.
 %    \begin{macrocode}
-\newcommand*\TUD@parameter@checkfamily[1]{%
-  \ifx\TUD@parameter@family\relax%
+\newcommand*\TUD@parameter@checkfamily[2]{%
+  \ifxblank{#1}{%
     \PackageError{tudscrbase}{%
-      No family for keys given%
+      No family for \@backslashchar#2 defined%
     }{%
-      You have to use \string#1\space within the\MessageBreak%
-      second argument of \string\TUD@parameter. The first \MessageBreak%
-      argument of \string\TUD@parameter\space has to be a unique family name.%
+      You have to use \@backslashchar#2\space within the\MessageBreak%
+      second argument of \string\TUD@parameter@family. The first\MessageBreak%
+      argument of \string\TUD@parameter@family\space has to be\MessageBreak%
+      a unique family name. Alternatively, you can specify\MessageBreak%
+      the family name within the optional argument of\MessageBreak%
+      \@backslashchar#2.
     }%
-  \fi%
+  }{}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \TUD@parameter@checkfamily
+% \end{macro}^^A \TUD@parameter@@family
 % \end{macro}^^A \TUD@parameter@family
-% \end{macro}^^A \TUD@parameter
 % \begin{macro}{\TUD@parameter@define}
 % \begin{macro}{\TUD@parameter@let}
 % \changes{v2.02}{2014/07/25}{Beachtung der gegebenen Standardwerte}^^A
-% \begin{macro}{\TUD@parameter@handler}
 % \cs{TUD@parameter@define}\marg{Name}\oarg{Säumniswert}\marg{Verarbeitung}
 % nutzt \cs{define@key} aus dem \pkg{keyval}"=Paket, um einen Schlüssel und
 % dessen Verarbeitung zu definieren, wobei auf den zugewiesenen Wert innerhalb 
 % des zweiten obligatorischen Argumentes mit \val{\#1} zugegriffen werden kann.
 %    \begin{macrocode}
-\newcommand*\TUD@parameter@define[1][]{%
-  \ifxblank{#1}{%
-    \TUD@parameter@checkfamily{\TUD@parameter@define}%
-    \expandafter\define@key\expandafter{\TUD@parameter@family}%
-  }{%
-    \expandafter\define@key\expandafter{#1}%
-  }%
+\newcommand*\TUD@parameter@define[1][\TUD@parameter@@family]{%
+  \TUD@parameter@checkfamily{#1}{TUD@parameter@define}%
+  \expandafter\define@key\expandafter{#1}%
 }
 %    \end{macrocode}
 % Mit \cs{TUD@parameter@let}\marg{Name}\marg{Name} kann äquivalent zur
 % \mbox{\TeX-Primitive \cs{let}} die Definition der Verarbeitung eines
 % Parameters auf einen weiteren übertragen werden.
 %    \begin{macrocode}
-\newcommand*\TUD@parameter@let[3][]{%
-  \ifxblank{#1}{%
-    \TUD@parameter@checkfamily{\TUD@parameter@let}%
-    \@expandtwoargs{\csletcs}{%
-      KV@\TUD@parameter@family @#2%
-    }{%
-      KV@\TUD@parameter@family @#3%
-    }%
-    \@expandtwoargs{\csletcs}{%
-      KV@\TUD@parameter@family @#2@default%
-    }{%
-      KV@\TUD@parameter@family @#3@default%
-    }%
-  }{%
-    \@expandtwoargs{\csletcs}{KV@#1@#2}{KV@#1@#3}%
-    \@expandtwoargs{\csletcs}{KV@#1@#2@default}{KV@#1@#3@default}%
-  }%
+\newcommand*\TUD@parameter@let[3][\TUD@parameter@@family]{%
+  \TUD@parameter@checkfamily{#1}{TUD@parameter@let}%
+  \@expandtwoargs{\csletcs}{KV@#1@#2}{KV@#1@#3}%
+  \@expandtwoargs{\csletcs}{KV@#1@#2@default}{KV@#1@#3@default}%
 }
 %    \end{macrocode}
-% Außerdem kann durch \cs{TUD@parameter@handler}\marg{Verarbeitung} definiert
-% werden, wie verfahren werden soll, wenn ein optionales Argument im klasischen
-% \LaTeX-Stil und nicht in der Schlüssel"=Wert"=Syntax angegeben wird. Auf das
-% optionale Argument wird ganz normal mit \val{\#1} zugegriffen.
-%    \begin{macrocode}
-\newcommand*\TUD@parameter@handler[1][]{%
-  \ifxblank{#1}{%
-    \TUD@parameter@checkfamily{\TUD@parameter@handler}%
-    \expandafter\kv@set@family@handler\expandafter{\TUD@parameter@family}%
-  }{%
-    \expandafter\kv@set@family@handler\expandafter{#1}%
-  }%
-}
-%    \end{macrocode}
-% \end{macro}^^A \TUD@parameter@handler
 % \end{macro}^^A \TUD@parameter@let
 % \end{macro}^^A \TUD@parameter@define
 % \begin{macro}{\TUD@parameter@set}
+% \changes{v2.05}{2016/05/26}{robustere Verarbeitung von Default-Argumenten}^^A
+% \begin{macro}{\TUD@parameter@nokey}
+% \changes{v2.05}{2016/05/26}{neu}^^A
 % Mit \cs{TUD@parameter@set}\marg{Familienname}\marg{Parameterliste} wird die
 % Verarbeitung aller gegebenen Parameter veranlasst. Normalerweise wird dieser
-% Befehl \emph{nicht} innerhalb des zweiten Argumentes von \cs{TUD@parameter}
+% Befehl \emph{nicht} innerhalb des Argumentes von \cs{TUD@parameter@family}
 % verwendet. In jedem Fall muss die zu verwendende Familie angegeben werden.
 %    \begin{macrocode}
-\newcommand*\TUD@parameter@set[2]{\@expandtwoargs\kvsetkeys{#1}{#2}}
+\newcommand*\TUD@parameter@nokey{@nokey@}
+\newcommand*\TUD@parameter@set[2]{%
 %    \end{macrocode}
+% Hierfür wird die angegebene Parameterliste sukzessive abgearbeitet. Elemente, 
+% welche in Schlüssel"=Wert"=Syntax angegeben wurden, bleiben unverändert\dots
+%    \begin{macrocode}
+  \def\@tempb{}%
+  \def\@tempa##1{%
+    \@expandtwoargs\in@{=}{##1}%
+    \ifin@%
+      \appto\@tempb{##1,}%
+    \else%
+%    \end{macrocode}
+% \dots ebenso wie Schlüssel ohne Wert, falls diese definiert wurden. Zu 
+% beachten ist, dass es mit \cs{TUD@parameter@handler@value} respektive
+% \cs{TUD@parameter@handler@default} auch möglich ist, für einen mit einem der 
+% beiden Makros gewählten Schlüssel, lediglich den passenden Wert anzugeben.
+% Dies wird genutzt, um optionale Argumente direkt für den Hauptparameter eines
+% Makros oder einer Umgebung~-- wie beispielsweise für eine Überschrift~--
+% nutzen zu können, aber zusätzlich die Möglichkeit zu bieten, auch eine
+% Parameterliste zu verwenden. Hierfür werden Umlaute sowie das \glq ß\grq{}
+% unschädlich gemacht.
+%    \begin{macrocode}
+      \begingroup
+        \let\IeC\@firstofone%
+        \def\"####1{####1e}%
+        \def\ss{ss}%
+        \protected@edef\tud@reserved{%
+          \endgroup%
+          \noexpand\protected@edef\noexpand\@tempc{KV@#1@##1}%
+        }%
+      \tud@reserved%
+      \ifcsdef{\@tempc}{%
+        \appto\@tempb{##1,}%
+      }{%
+        \protected@eappto\@tempb{\TUD@parameter@nokey=##1,}%
+      }%
+    \fi%
+  }%
+  \forcsvlist\@tempa{#2}%
+  \@expandtwoargs\kvsetkeys{#1}{\@tempb}%
+}
+% Ursprünglich entwickelte sich dieser Ansatz aus der Situation, dass das Makro 
+% \cs{maketitle} in seiner Standarddefinition ein optionales Argument für eine
+% Seitenzahl bereithält, bei den \TUDScript-Klassen jedoch auch die Möglichkeit
+% besteht, verschiedene zusätzliche Parameter für diesen Befehl zu verwenden. 
+% Um allerdings für den Anwender das gewohnte Vorgehen beibehalten zu können,
+% wurde diese Sonderbehandlung implementiert. 
+%    \end{macrocode}
+% \end{macro}^^A \TUD@parameter@nokey
 % \end{macro}^^A \TUD@parameter@set
+% \begin{macro}{\TUD@parameter@handler@macro}
+% \changes{v2.05}{2016/05/26}{robustere Verarbeitung von Default-Argumenten}^^A
+% Durch \cs{TUD@parameter@handler@macro}\marg{Verarbeitung} kann definiert 
+% werden, wie mit einem zuvor nicht mit \cs{TUD@parameter@define} definiertem
+% Parameter beziehungsweise gewöhnlichem optionalen Argument umzugehen ist. 
+% Diese Argumente wurden zuvor durch \cs{TUD@parameter@set} dem Schlüssel 
+% \cs{TUD@parameter@nokey} als Wert zugewiesen, um Umlaute etc. ohne Bedenken
+% verwenden zu können.
+%    \begin{macrocode}
+\newcommand*\TUD@parameter@handler@macro[2][\TUD@parameter@@family]{%
+  \TUD@parameter@checkfamily{#1}{TUD@parameter@handler@macro}%
+  \expandafter\kv@set@family@handler\expandafter{#1}{%
+    \ifstr{\kv@key}{\TUD@parameter@nokey}{#2}{\kv@handled@false}%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \TUD@parameter@handler@macro
+% \begin{macro}{\TUD@parameter@handler@value}
+% \changes{v2.05}{2016/05/26}{neu}^^A
+% Mit diesem Makro wird einem optionalen Argument, welches ohne Schlüssel 
+% angegeben wurde, ein expliziter Parameter zugewiesen, welcher damit gesetzt 
+% wird.
+%    \begin{macrocode}
+\newcommand*\TUD@parameter@handler@value[2][\TUD@parameter@@family]{%
+  \TUD@parameter@checkfamily{#1}{TUD@parameter@handler@value}%
+  \protected@edef\@tempa{%
+    \noexpand\TUD@parameter@set{#1}{#2=\noexpand\kv@value}%
+  }%
+  \edef\@tempb{%
+    \etex@unexpanded{\TUD@parameter@handler@macro[#1]}{\expandonce\@tempa}%
+  }\@tempb%
+}
+%    \end{macrocode}
+% \end{macro}^^A \TUD@parameter@handler@macro
+% \begin{macro}{\TUD@parameter@handler@default}
+% Hiermit kann sowohl die zu verwendende Sprache als auch die Anzahl der
+% gewünschten Spalten für bestimmte Umgebungen ohne die explizite Angabe eines
+% Schlüssels festgelegt werden. Momentan betrifft das die beiden Umgebungen
+% \env{abstract} und \env{tudpage} sowie Befehle und Umgebungen, welche auf 
+% letzterer basieren.
+%    \begin{macrocode}
+\newcommand*\TUD@parameter@handler@default[2][\TUD@parameter@@family]{%
+  \TUD@parameter@checkfamily{#1}{TUD@parameter@handler@default}%
+  \ifxblank{#2}{%
+    \def\@tempa{\let\tud@reserved\relax}%
+  }{%
+    \def\@tempa{\def\tud@reserved{#2=\kv@value}}%
+  }%
+  \appto\@tempa{%
+    \ifstr{\kv@value}{twocolumn}{\def\kv@value{2}}{}%
+    \ifxnumber{\kv@value}{\def\tud@reserved{columns=\kv@value}}{}%
+    \iflanguageloaded{\kv@value}{\def\tud@reserved{language=\kv@value}}{}%
+    \ifx\tud@reserved\relax%
+      \PackageError{tudscrbase}{%
+        Unknown default value `\kv@value'%
+      }{%
+        If `\kv@value' is a language, you haven't loaded it.\MessageBreak%
+        Otherwise, there's no handler for the given value.\MessageBreak%
+        You should specify a certian key (<key>=\kv@value).
+      }%
+    \fi%
+  }%
+  \protected@eappto\@tempa{%
+    \noexpand\ifx\noexpand\tud@reserved\noexpand\relax\noexpand\else%
+      \noexpand\TUD@parameter@set{#1}{\noexpand\tud@reserved}%
+    \noexpand\fi%
+  }%
+  \edef\@tempb{%
+    \etex@unexpanded{\TUD@parameter@handler@macro[#1]}{\expandonce\@tempa}%
+  }\@tempb%
+}
+%    \end{macrocode}
+% \end{macro}^^A \TUD@parameter@handler@default
 % \begin{macro}{\TUD@parameter@error}
 % Das Makro \cs{TUD@parameter@wrn}\marg{Parameter}\marg{Werteliste} gibt für
 % den Fall einer ungültigen Wertzuweisung an einen bestimmten \meta{Parameter}
@@ -1062,37 +1155,10 @@
 }
 %    \end{macrocode}
 %
-% \subsection{Parameter für Umgebungen und mehrspaltige Texte}
+% \subsection{Parameter für mehrspaltige Texte}
 %
-% Diese Befehle dienen dazu, bei Umgebungen die Sprache über einen Parameter
-% anzugeben sowie das Paket \pkg{multicol} verwenden zu können.
-% \begin{macro}{\TUD@parameter@defaulthandler}
-% Hiermit kann sowohl die zu verwendende Sprache als auch die Anzahl der
-% gewünschten Spalten für bestimmte Umgebungen ohne die explizite Angabe eines
-% Schlüssels festgelegt werden. Momentan betrifft das die beiden Umgebungen
-% \env{abstract} und \env{tudpage}.
-%    \begin{macrocode}
-\newcommand*\TUD@parameter@defaulthandler[2]{%
-  \def\@tempa##1{%
-    \ifstr{##1}{twocolumn}{\def\@tempb{2}}{\def\@tempb{##1}}%
-    \ifxnumber{\@tempb}{%
-      \TUD@parameter@set{#1}{columns=\@tempb}%
-    }{%
-      \iflanguageloaded{\@tempb}{%
-        \TUD@parameter@set{#1}{language=\@tempb}%
-      }{%
-        \ClassError{\TUDClassName}{%
-          Unknown key `\@tempb' for environment #1%
-        }{%
-          If key `\@tempb' is a language, you haven't loaded it.%
-        }%
-      }%
-    }%
-  }%
-  \forcsvlist\@tempa{#2}%
-}
-%    \end{macrocode}
-% \end{macro}^^A \TUD@parameter@defaulthandler
+% Diese Befehle dienen dazu, bei Umgebungen oder Befehlen über einen Parameter
+% das Paket \pkg{multicol} verwenden zu können.
 % \begin{macro}{\tud@x@multicol@num}
 % \begin{macro}{\tud@x@multicol@check}
 % Im Makro \cs{tud@x@multicol@num} wird die Anzahl der gewünschten Spalten in 

@@ -1,4 +1,4 @@
-% \CheckSum{811}
+% \CheckSum{813}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-frontmatter.dtx}[%
-  2016/05/20 v2.05 TUD-KOMA-Script (frontmatter)%
+  2016/05/26 v2.05 TUD-KOMA-Script (frontmatter)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman,xindy]{tudscrdoc}
@@ -862,7 +862,7 @@
 % Als Schlüssel für die \env{abstract}-Umgebung können Sprache, Anzahl der
 % Spalten oder auch die zur Umgebung gehörigen Klassenoptionen angegeben werden.
 %    \begin{macrocode}
-\TUD@parameter{abstract}{%
+\TUD@parameter@family{abstract}{%
   \TUD@parameter@define{language}{\selectlanguage{#1}}%
   \TUD@parameter@define{columns}{\cs@std@lock{tud@x@multicol@num}{#1}}%
 %<*book|report|article>
@@ -889,10 +889,10 @@
 %    \end{macrocode}
 % Für die Optionsangabe ohne Schlüssel und Wert kann eine Anzahl an Spalten
 % oder eine alternative Sprache angegeben werden. Für die Auswertung des 
-% Argumentes verantwortlich ist der Befehl \cs{TUD@parameter@defaulthandler}, 
+% Argumentes verantwortlich ist der Befehl \cs{TUD@parameter@handler@default}, 
 % welcher auch von der Umgebung \env{tudpage} verwendet wird.
 %    \begin{macrocode}
-  \TUD@parameter@handler{\TUD@parameter@defaulthandler{abstract}{#1}}%
+  \TUD@parameter@handler@default{}%
 }
 %    \end{macrocode}
 % \end{parameter}^^A option
@@ -1115,7 +1115,7 @@
 % \opt{option} dienen zum Setzen der Werte, welche auch als Klassenoptionen
 % gesetzt werden können.
 %    \begin{macrocode}
-\TUD@parameter{declaration}{%
+\TUD@parameter@family{declaration}{%
   \TUD@parameter@define{language}{\selectlanguage{#1}}%
   \TUD@parameter@define{columns}{\cs@std@lock{tud@x@multicol@num}{#1}}%
   \TUD@parameter@define{pagestyle}{\tud@fm@pagestyle{declaration}{#1}}%
@@ -1138,7 +1138,7 @@
   \TUD@parameter@let{confirmationclosing}{closing}%
   \TUD@parameter@define{declaration}{\TUDoption{declaration}{#1}}%
   \TUD@parameter@let{option}{declaration}%
-  \TUD@parameter@handler{\TUD@parameter@defaulthandler{declaration}{#1}}%
+  \TUD@parameter@handler@default{}%
 }
 %    \end{macrocode}
 % \end{parameter}^^A option
@@ -1178,18 +1178,18 @@
     \def\tud@fm@supporter{supporter=\@supervisor}%
     \tud@fm@declaration%
   }{%
-    \let\tud@fm@supporter\@empty%
+    \def\tud@fm@supporter{supporter=\@supporter}%
     \tud@fm@declaration%
   }%
 }
 \newcommand*\tud@fm@declaration[1][]{%
   \ifbool{@tud@declarations}{%
     \begingroup%
-      \tud@fm@@confirmation[#1,\tud@fm@supporter]%
+      \tud@fm@@confirmation[\tud@fm@supporter,#1]%
       \tud@fm@blocking[#1]%
     \endgroup%
   }{%
-    \begin{declarations}[#1,\tud@fm@supporter]%
+    \begin{declarations}[\tud@fm@supporter,#1]%
       \tud@fm@@confirmation%
       \tud@fm@blocking%
     \end{declarations}%
@@ -1236,33 +1236,27 @@
     \def\tud@fm@supporter{supporter=\@supervisor}%
     \tud@fm@confirmation%
   }{%
-    \let\tud@fm@supporter\@empty%
+    \def\tud@fm@supporter{supporter=\@supporter}%
     \tud@fm@confirmation%
   }%
 }
 \newcommand*\tud@fm@confirmation[1][]{%
 %    \end{macrocode}
 % Damit das optionale Argument ohne Schlüssel für die Unterstützer verwendet 
-% werden kann, wird der Handler umdefiniert.
+% werden kann, wird der Handler lokal umdefiniert. Außerdem werden irrelevante
+% Parameter undefiniert gesetzt.
 %    \begin{macrocode}
-  \TUD@parameter@handler[declaration]{%
-    \TUD@parameter@set{declaration}{supporter=##1}%
-  }%
-  \ifbool{@tud@declarations}{%
-    \begingroup%
-      \tud@fm@@confirmation[#1,\tud@fm@supporter]%
-    \endgroup%
-  }{%
-    \begin{declarations}[#1,\tud@fm@supporter]%
-      \tud@fm@@confirmation%
-    \end{declarations}%
-  }%
-%    \end{macrocode}
-% Der Handler wird auf das ursprüngliche Verhalten zurückgesetzt.
-%    \begin{macrocode}
-  \TUD@parameter@handler[declaration]{%
-    \TUD@parameter@defaulthandler{declaration}{##1}%
-  }%
+  \begingroup%
+    \TUD@parameter@handler@default[declaration]{supporter}%
+    \undef\KV@declaration@company%
+    \ifbool{@tud@declarations}{%
+      \tud@fm@@confirmation[\tud@fm@supporter,#1]%
+    }{%
+      \begin{declarations}[\tud@fm@supporter,#1]%
+        \tud@fm@@confirmation%
+      \end{declarations}%
+    }%
+  \endgroup%
 }
 %    \end{macrocode}
 % Dies ist der eigentliche Inhalt des Befehls \cs{confirmation}.
@@ -1286,21 +1280,20 @@
 % optionale Argument ohne Schlüssel setzt hier die Firma für den Sperrvermerk.
 %    \begin{macrocode}
 \newcommand*\blocking[1][]{%
-  \TUD@parameter@handler[declaration]{%
-    \TUD@parameter@set{declaration}{company=##1}%
-  }%
-  \ifbool{@tud@declarations}{%
-    \begingroup%
+  \begingroup%
+    \TUD@parameter@handler@default[declaration]{company}%
+    \undef\KV@declaration@supporter%
+    \undef\KV@declaration@place%
+    \undef\KV@declaration@closing%
+    \undef\KV@declaration@confirmationclosing%
+    \ifbool{@tud@declarations}{%
       \tud@fm@blocking[#1]%
-    \endgroup%
-  }{%
-    \begin{declarations}[#1]%
-      \tud@fm@blocking%
-    \end{declarations}%
-  }%
-  \TUD@parameter@handler[declaration]{%
-    \TUD@parameter@defaulthandler{declaration}{##1}%
-  }%
+    }{%
+      \begin{declarations}[#1]%
+        \tud@fm@blocking%
+      \end{declarations}%
+    }%
+  \endgroup%
 }
 %    \end{macrocode}
 % Dies ist der eigentliche Inhalt des Befehls \cs{blocking}.

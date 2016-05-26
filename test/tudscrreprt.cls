@@ -1404,25 +1404,6 @@
   \RequirePackage{graphicx}[1999/02/16]%
   \RequirePackage{tudscrcolor}[\TUDVersion]%
 }
-\newcommand*\TUD@parameter@defaulthandler[2]{%
-  \def\@tempa##1{%
-    \ifstr{##1}{twocolumn}{\def\@tempb{2}}{\def\@tempb{##1}}%
-    \ifxnumber{\@tempb}{%
-      \TUD@parameter@set{#1}{columns=\@tempb}%
-    }{%
-      \iflanguageloaded{\@tempb}{%
-        \TUD@parameter@set{#1}{language=\@tempb}%
-      }{%
-        \ClassError{\TUDClassName}{%
-          Unknown key `\@tempb' for environment #1%
-        }{%
-          If key `\@tempb' is a language, you haven't loaded it.%
-        }%
-      }%
-    }%
-  }%
-  \forcsvlist\@tempa{#2}%
-}
 \cs@lock{tud@x@multicol@num}{1}
 \newcommand*\tud@x@multicol@check{%
   \ifnum\tud@x@multicol@num>\@ne\relax%
@@ -3280,7 +3261,7 @@
     \edef\@tempa{%
       \expandonce\tud@head@text@line%
       \expandonce\tud@head@text@delimiter%
-      \unexpanded{#2#3}%
+      \etex@unexpanded{#2#3}%
     }%
     \settowidth\@tempdima{\@tempa}%
     \ifdim\@tempdima>\textwidth\relax%
@@ -4290,7 +4271,7 @@
   \fi%
   \tud@bleedmargin@set%
 }
-\newcommand*\tud@parameters@pagestyle[1]{%
+\newcommand*\tud@ps@parameters[1]{%
   \TUD@parameter@define{cdfont}[true]{\TUDoption{cdfont}{#1}}%
   \TUD@parameter@define{cdhead}[true]{\TUDoption{cdhead}{#1}}%
   \TUD@parameter@define{cdfoot}[true]{\TUDoption{cdfoot}{#1}}%
@@ -4352,7 +4333,7 @@
   \aftergroup\tud@currentpagestyle@reset%
   \clearpage%
 ]
-\TUD@parameter{tudpage}{%
+\TUD@parameter@family{tudpage}{%
   \TUD@parameter@define{language}{\selectlanguage{#1}}%
   \TUD@parameter@define{columns}{\cs@std@lock{tud@x@multicol@num}{#1}}%
   \TUD@parameter@define{pagestyle}{%
@@ -4366,8 +4347,8 @@
       }}}%
     }%
   }%
-  \tud@parameters@pagestyle{#1}%
-  \TUD@parameter@handler{\TUD@parameter@defaulthandler{tudpage}{#1}}%
+  \tud@ps@parameters{#1}%
+  \TUD@parameter@handler@default{}%
 }
 %%% From File: tudscr-layout.dtx
 \newcommand*\tud@x@scr@headings@current{}
@@ -5092,12 +5073,12 @@
 }{}{\tud@patch@wrn{titlepage}}
 \tud@cmd@store{maketitle}
 \let\maketitle\tud@maketitle
-\TUD@parameter{title}{%
+\TUD@parameter@family{title}{%
   \TUD@parameter@define{cdtitle}[true]{\TUDoption{cdtitle}{#1}}%
   \TUD@parameter@let{cd}{cdtitle}%
   \TUD@parameter@define{pagenumber}{\def\tud@title@pagenumber{#1}}%
-  \tud@parameters@pagestyle{#1}%
-  \TUD@parameter@handler{\TUD@parameter@set{title}{pagenumber=#1}}%
+  \tud@ps@parameters{#1}%
+  \TUD@parameter@handler@value{pagenumber}%
 }
 \newcommand*\tud@titleback{}
 \newcommand*\tud@make@titlepage{%
@@ -5591,7 +5572,7 @@
   \endgroup%
 }
 \bool@lock{@tud@cdgeometry@cover}
-\TUD@parameter{cover}{%
+\TUD@parameter@family{cover}{%
   \TUD@parameter@define{cdcover}[true]{\TUDoption{cdcover}{#1}}%
   \TUD@parameter@let{cd}{cdcover}%
   \TUD@parameter@define{cdgeometry}[true]{%
@@ -5608,14 +5589,8 @@
     }%
   }%
   \TUD@parameter@define{pagenumber}{\def\tud@title@pagenumber{#1}}%
-  \tud@parameters@pagestyle{#1}%
-  \TUD@parameter@handler{%
-    \ifxnumber{#1}{%
-      \TUD@parameter@set{cover}{pagenumber=#1}%
-    }{%
-      \TUD@parameter@set{cover}{cdgeometry=#1}%
-    }%
-  }%
+  \tud@ps@parameters{#1}%
+  \TUD@parameter@handler@value{pagenumber}%
 }
 %%% From File: tudscr-frontmatter.dtx
 \newcommand*\tud@fm@check[2]{%
@@ -5838,7 +5813,7 @@
     \fi%
   \fi%
 ]
-\TUD@parameter{abstract}{%
+\TUD@parameter@family{abstract}{%
   \TUD@parameter@define{language}{\selectlanguage{#1}}%
   \TUD@parameter@define{columns}{\cs@std@lock{tud@x@multicol@num}{#1}}%
   \TUD@parameter@define{pagestyle}{\tud@fm@pagestyle{abstract}{#1}}%
@@ -5856,7 +5831,7 @@
   }%
   \TUD@parameter@define{abstract}{\TUDoption{abstract}{#1}}%
   \TUD@parameter@let{option}{abstract}%
-  \TUD@parameter@handler{\TUD@parameter@defaulthandler{abstract}{#1}}%
+  \TUD@parameter@handler@default{}%
 }
 \newcommand*\nextabstract[1][]{%
   \ClassError{\TUDClassName}{Incorrect usage of `\string\nextabstract'}{%
@@ -5897,7 +5872,7 @@
     \fi%
   \fi%
 ]
-\TUD@parameter{declaration}{%
+\TUD@parameter@family{declaration}{%
   \TUD@parameter@define{language}{\selectlanguage{#1}}%
   \TUD@parameter@define{columns}{\cs@std@lock{tud@x@multicol@num}{#1}}%
   \TUD@parameter@define{pagestyle}{\tud@fm@pagestyle{declaration}{#1}}%
@@ -5920,7 +5895,7 @@
   \TUD@parameter@let{confirmationclosing}{closing}%
   \TUD@parameter@define{declaration}{\TUDoption{declaration}{#1}}%
   \TUD@parameter@let{option}{declaration}%
-  \TUD@parameter@handler{\TUD@parameter@defaulthandler{declaration}{#1}}%
+  \TUD@parameter@handler@default{}%
 }
 \newcommand*\tud@fm@supporter{}
 \newcommand*\declaration{%
@@ -5928,18 +5903,18 @@
     \def\tud@fm@supporter{supporter=\@supervisor}%
     \tud@fm@declaration%
   }{%
-    \let\tud@fm@supporter\@empty%
+    \def\tud@fm@supporter{supporter=\@supporter}%
     \tud@fm@declaration%
   }%
 }
 \newcommand*\tud@fm@declaration[1][]{%
   \ifbool{@tud@declarations}{%
     \begingroup%
-      \tud@fm@@confirmation[#1,\tud@fm@supporter]%
+      \tud@fm@@confirmation[\tud@fm@supporter,#1]%
       \tud@fm@blocking[#1]%
     \endgroup%
   }{%
-    \begin{declarations}[#1,\tud@fm@supporter]%
+    \begin{declarations}[\tud@fm@supporter,#1]%
       \tud@fm@@confirmation%
       \tud@fm@blocking%
     \end{declarations}%
@@ -5962,26 +5937,22 @@
     \def\tud@fm@supporter{supporter=\@supervisor}%
     \tud@fm@confirmation%
   }{%
-    \let\tud@fm@supporter\@empty%
+    \def\tud@fm@supporter{supporter=\@supporter}%
     \tud@fm@confirmation%
   }%
 }
 \newcommand*\tud@fm@confirmation[1][]{%
-  \TUD@parameter@handler[declaration]{%
-    \TUD@parameter@set{declaration}{supporter=##1}%
-  }%
-  \ifbool{@tud@declarations}{%
-    \begingroup%
-      \tud@fm@@confirmation[#1,\tud@fm@supporter]%
-    \endgroup%
-  }{%
-    \begin{declarations}[#1,\tud@fm@supporter]%
-      \tud@fm@@confirmation%
-    \end{declarations}%
-  }%
-  \TUD@parameter@handler[declaration]{%
-    \TUD@parameter@defaulthandler{declaration}{##1}%
-  }%
+  \begingroup%
+    \TUD@parameter@handler@default[declaration]{supporter}%
+    \undef\KV@declaration@company%
+    \ifbool{@tud@declarations}{%
+      \tud@fm@@confirmation[\tud@fm@supporter,#1]%
+    }{%
+      \begin{declarations}[\tud@fm@supporter,#1]%
+        \tud@fm@@confirmation%
+      \end{declarations}%
+    }%
+  \endgroup%
 }
 \newcommand*\tud@fm@@confirmation[1][]{%
   \tud@fm@body@start{declaration}{#1}{\confirmationname}%
@@ -5989,21 +5960,20 @@
   \tud@fm@body@end{declaration}%
 }
 \newcommand*\blocking[1][]{%
-  \TUD@parameter@handler[declaration]{%
-    \TUD@parameter@set{declaration}{company=##1}%
-  }%
-  \ifbool{@tud@declarations}{%
-    \begingroup%
+  \begingroup%
+    \TUD@parameter@handler@default[declaration]{company}%
+    \undef\KV@declaration@supporter%
+    \undef\KV@declaration@place%
+    \undef\KV@declaration@closing%
+    \undef\KV@declaration@confirmationclosing%
+    \ifbool{@tud@declarations}{%
       \tud@fm@blocking[#1]%
-    \endgroup%
-  }{%
-    \begin{declarations}[#1]%
-      \tud@fm@blocking%
-    \end{declarations}%
-  }%
-  \TUD@parameter@handler[declaration]{%
-    \TUD@parameter@defaulthandler{declaration}{##1}%
-  }%
+    }{%
+      \begin{declarations}[#1]%
+        \tud@fm@blocking%
+      \end{declarations}%
+    }%
+  \endgroup%
 }
 \newcommand*\tud@fm@blocking[1][]{%
   \tud@fm@body@start{declaration}{#1}{\blockingname}%
