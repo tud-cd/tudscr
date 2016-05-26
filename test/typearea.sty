@@ -13,7 +13,7 @@
 %% scrkernel-compatibility.dtx  (with options: `package,typearea,body')
 %% scrlogo.dtx  (with options: `logo')
 %% 
-%% Copyright (c) 1994-2014 Markus Kohm [komascript at gmx info]
+%% Copyright (c) 1994-2016 Markus Kohm [komascript at gmx info]
 %% 
 %% This file was generated from file(s) of the KOMA-Script bundle.
 %% ---------------------------------------------------------------
@@ -45,7 +45,7 @@
 %% find a complete unmodified copy of LaTeX2e at
 %% <http://www.ctan.org/pub/tex-archive/macros/latex/base/>.
 %% 
-%%% From File: $Id: scrkernel-version.dtx 2213 2015-10-03 12:59:03Z kohm $
+%%% From File: $Id: scrkernel-version.dtx 2215 2015-10-06 09:50:41Z kohm $
 \begingroup
   \catcode`\@11\relax
   \ifx\KOMAScriptVersion\undefined
@@ -67,16 +67,16 @@
       \fi
     }
   \fi
-  \@CheckKOMAScriptVersion{2015/10/03 v3.19a KOMA-Script}%
+  \@CheckKOMAScriptVersion{2016/05/10 v3.20 KOMA-Script}%
 \endgroup
 \providecommand*{\scr@pkgextension}{\@pkgextension}
 \AtBeginDocument{%
   \let\scr@pkgextension\@pkgextension
 }
-%%% From File: $Id: scrkernel-typearea.dtx 2166 2015-07-26 08:15:44Z kohm $
+%%% From File: $Id: scrkernel-typearea.dtx 2429 2016-04-12 12:10:19Z kohm $
 \NeedsTeXFormat{LaTeX2e}[1995/06/01]
 \ProvidesPackage{typearea}[%
-  2015/10/03 v3.19a KOMA-Script
+  2016/05/10 v3.20 KOMA-Script
   package (type area)]
 \typeout{%
   Package typearea, \csname ver@typearea.\@pkgextension\endcsname^^J%
@@ -85,9 +85,9 @@
   \@spaces\@spaces\@spaces\@spaces\space\space
   Copyright (C) Markus Kohm, 1994-^^J%
 }
-%%% From File: $Id: scrkernel-basics.dtx 2190 2015-08-29 17:21:55Z kohm $
+%%% From File: $Id: scrkernel-basics.dtx 2438 2016-04-27 10:58:21Z kohm $
 \RequirePackage{scrkbase}[\KOMAScriptVersion]
-%%% From File: $Id: scrkernel-typearea.dtx 2166 2015-07-26 08:15:44Z kohm $
+%%% From File: $Id: scrkernel-typearea.dtx 2429 2016-04-12 12:10:19Z kohm $
 \newcommand*\SetDIVList[1]{\def\ta@divlist{{}{}{}{}{}{}{}{}{}#1}}
 \newcommand*\SetXDIVList[1]{\def\ta@divlist{#1}}
 \newlength{\ta@bcor}
@@ -265,9 +265,21 @@
 \newif\if@hincl\@ifundefined{if@hsl}{}{\let\if@hincl\if@hsl}
 \KOMA@ifkey{headinclude}{@hincl}
 \KOMA@DeclareDeprecatedOption[typearea]{headexclude}{headinclude=false}
+\KOMA@key{headsepline}[true]{%
+  \KOMA@set@ifkey{headinclude}{@hincl}{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed
+    \KOMA@kav@replacebool{.typearea.\scr@pkgextension}{headinclude}{@hincl}%
+  \fi
+}
 \newif\if@fincl\@ifundefined{if@fsl}{}{\let\if@fincl\if@fsl}
 \KOMA@ifkey{footinclude}{@fincl}
 \KOMA@DeclareDeprecatedOption[typearea]{footexclude}{footinclude=false}
+\KOMA@key{footsepline}[true]{%
+  \KOMA@set@ifkey{footinclude}{@hincl}{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed
+    \KOMA@kav@replacebool{.typearea.\scr@pkgextension}{footinclude}{@hincl}%
+  \fi
+}
 \KOMA@ifkey{mpinclude}{@mincl}
 \KOMA@DeclareDeprecatedOption[typearea]{mpexclude}{mpinclude=false}
 \KOMA@key{BCOR}{%
@@ -363,7 +375,7 @@
 \KOMA@key{pagesize}[auto]{%
   \KOMA@set@ncmdkey{pagesize}{@pagesizelast}{%
     {off}{-1},{no}{-1},{false}{-1},%
-    {auto}{0},{automedia}{1},{dvips}{2},{pdftex}{3},{dvipdfmx}{4}%
+    {auto}{0},{automedia}{1},{dvips}{2},{pdftex}{3},{luatex}{3},{dvipdfmx}{4}%
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed
     \ifcase\number\@pagesizelast\relax
@@ -463,8 +475,12 @@
   }%
 }
 \newcommand{\set@pdftexpagesize}{%
-  \ifnotundefined{pdfpagewidth}{\pdfpagewidth=\paperwidth}{}%
-  \ifnotundefined{pdfpageheight}{\pdfpageheight=\paperheight}{}%
+  \scr@ifundefinedorrelax{pdfpagewidth}{%
+    \scr@ifundefinedorrelax{pagewidth}{}{pagewidth=\paperwidth}%
+  }{\pdfpagewidth=\paperwidth}%
+  \scr@ifundefinedorrelax{pdfpageheight}{%
+    \scr@ifundefinedorrelax{pageheight}{}{pageheight=\paperheight}%
+  }{\pdfpageheight=\paperheight}%
 }
 \newcommand{\set@dvipspagesize}{%
   \begingroup
@@ -673,7 +689,7 @@
 \KOMA@ifkey{usegeometry}{@ta@usegeometry}
 \DeclareOption*{%
   \x@paper}
-%%% From File: $Id: scrkernel-compatibility.dtx 2213 2015-10-03 12:59:03Z kohm $
+%%% From File: $Id: scrkernel-compatibility.dtx 2342 2016-02-17 11:13:55Z kohm $
 \providecommand*
   {\scr@compatibility}{\scr@v@last}
 \newcommand*{\scr@ta@compatibility}{\scr@compatibility}
@@ -778,6 +794,7 @@
 \@namedef{scr@v@3.18a}{15}
 \@namedef{scr@v@3.19}{15}
 \@namedef{scr@v@3.19a}{15}
+\@namedef{scr@v@3.20}{15}
 \@namedef{scr@v@last}{15}
 \newcommand*{\scr@ta@v@is@lt}[1]{%
   \scr@ta@compatibility<\@nameuse{scr@v@#1}
@@ -791,7 +808,7 @@
 \newcommand*{\scr@ta@v@is@ge}[1]{%
   \numexpr\scr@ta@compatibility+\@ne >\@nameuse{scr@v@#1}
 }
-%%% From File: $Id: scrkernel-typearea.dtx 2166 2015-07-26 08:15:44Z kohm $
+%%% From File: $Id: scrkernel-typearea.dtx 2429 2016-04-12 12:10:19Z kohm $
 \InputIfFileExists{typearea.cfg}{%
   \typeout{%
     ***************************************^^J%
@@ -945,11 +962,11 @@
   \fi
 }
 \newcommand*{\AfterCalculatingTypearea}{%
-  \@ifstar \l@addto@macro \g@addto@macro \@typearea@end
+  \kernel@ifstar \l@addto@macro \g@addto@macro \@typearea@end
 }
 \newcommand*{\@typearea@end}{}
 \newcommand*{\AfterSettingArea}{%
-  \@ifstar \l@addto@macro \g@addto@macro \@areaset@end
+  \kernel@ifstar \l@addto@macro \g@addto@macro \@areaset@end
 }
 \newcommand*{\@areaset@end}{}
 \newcommand*{\activateareas}{%
@@ -1092,10 +1109,12 @@
   \reserved@a
 }
 \newcommand*{\BeforeRestoreareas}{%
-  \@ifstar{\scr@storeareashook{before@current}}{\scr@storeareashook{before}}%
+  \kernel@ifstar{\scr@storeareashook{before@current}}%
+                {\scr@storeareashook{before}}%
 }
 \newcommand*{\AfterRestoreareas}{%
-  \@ifstar{\scr@storeareashook{after@current}}{\scr@storeareashook{after}}%
+  \kernel@ifstar{\scr@storeareashook{after@current}}%
+                {\scr@storeareashook{after}}%
 }
 \newcommand*{\scr@storeareashook}[2]{%
   \expandafter\l@addto@macro\csname scr@storeareas@#1@hook\endcsname{#2}%
@@ -1507,7 +1526,7 @@
   \fi
 }
 \typearea[current]{current}
-%%% From File: $Id: scrkernel-compatibility.dtx 2213 2015-10-03 12:59:03Z kohm $
+%%% From File: $Id: scrkernel-compatibility.dtx 2342 2016-02-17 11:13:55Z kohm $
 %%% From File: $Id: scrlogo.dtx 1380 2013-10-01 15:31:55Z mjk $
 \@ifundefined{KOMAScript}{%
   \DeclareRobustCommand{\KOMAScript}{\textsf{K\kern.05em O\kern.05em%
