@@ -3299,7 +3299,7 @@
 \newcommand*\tud@head@text@delimiter{}
 \newcommand*\tud@head@text@buffer{}
 \newcommand*\tud@head@text@add[3][{, }]{%
-  \ifstr{#3}{}{}{%
+  \ifxblank{#3}{}{%
     \edef\tud@head@text@delimiter{\expandonce\tud@head@text@buffer}%
     \def\tud@head@text@buffer{#1}%
     \edef\@tempa{%
@@ -3328,7 +3328,7 @@
     \tud@head@text@add{\tud@head@font@light}{\@institute}%
     \tud@head@text@add{\tud@head@font@light}{\@chair}%
     \listeadd\tud@head@text@list{\expandonce\tud@head@text@line}%
-    \ifstr{\@extraheadline}{}{}{%%
+    \ifxblank{\@extraheadline}{}{%%
       \listadd\tud@head@text@list{\tud@head@font@light\@extraheadline}%
     }%
     \gdef\tud@head@text@wrn##1{%
@@ -5040,7 +5040,7 @@
     \ifx\@dateofbirth\@empty\else%
       \if@titlepage%
         \tud@newline@title%
-        \ifstr{\dateofbirthtext}{}%
+        \ifxblank{\dateofbirthtext}%
           {}{\dateofbirthtext\tud@title@delimiter}\@dateofbirth%
         \ifx\@placeofbirth\@empty\else%
           \nobreakspace\placeofbirthtext\nobreakspace\@placeofbirth%
@@ -5267,10 +5267,10 @@
           \tud@date@check%
           \ifx\@date\@empty\else%
             \vskip 2ex\@plus1ex\@minus1ex%
-            \ifstr{\datetext}{}{}{\datetext\tud@title@delimiter}%
+            \ifxblank{\datetext}{}{\datetext\tud@title@delimiter}%
             {\usekomafont{date}{\tud@date@print\par}}%
             \ifx\@defensedate\@empty\else%
-              \ifstr{\defensedatetext}{}{}{%
+              \ifxblank{\defensedatetext}{}{%
                 \defensedatetext\tud@title@delimiter%
               }%
               {\usekomafont{date}{\@defensedate\par}}%
