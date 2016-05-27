@@ -380,6 +380,7 @@
 \cs@lock{tud@head@bar@num}{0}
 \bool@lock{@tud@head@widebar}
 \newif\if@tud@head@font@set
+\newif\if@tud@head@date
 \TUD@key{cdhead}[true]{%
   \TUD@set@numkey{cdhead}{@tempa}{%
     \TUD@numkey@bool,%
@@ -398,7 +399,9 @@
     {full}{6},{colorfull}{6},{fullcolor}{6},{colourfull}{6},{fullcolour}{6},%
     {textwidth}{7},{slim}{7},{slimhead}{7},{nowide}{7},{nowidehead}{7},%
     {narrow}{7},{narrowhead}{7},{small}{7},{smallhead}{7},%
-    {paperwidth}{8},{wide}{8},{widehead}{8}%
+    {paperwidth}{8},{wide}{8},{widehead}{8},%
+    {date}{9},{showdate}{9},{dateon}{9},{datetrue}{9},{dateyes}{9},%
+    {nodate}{10},{hidedate}{10},{dateoff}{10},{datefalse}{10},{dateno}{10}%
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax% false
@@ -419,6 +422,10 @@
       \bool@set@lock{@tud@head@widebar}{false}%
     \or% paperwidth
       \bool@set@lock{@tud@head@widebar}{true}%
+    \or% date
+      \@tud@head@datetrue%
+    \or% nodate
+      \@tud@head@datefalse%
     \fi%
     \ifnum\@tempa<\thr@@\relax%
       \global\@tud@head@font@settrue%
@@ -2172,7 +2179,7 @@
 \newlength\tud@dim@signatureskip
 \setlength\tud@dim@signatureskip{8ex plus 6ex minus 6ex}
 \newcommand*\@confirmationclosing{%
-  \tud@datecheck%
+  \tud@date@check%
   \ifx\@date\@empty\else%
     \medskip\noindent%
     \ifx\@place\@empty\else\@place,\nobreakspace\fi\@date%
@@ -2196,7 +2203,7 @@
       {\gdef#1{\printdate{#2}}}%
   \fi%
 }
-\newcommand*\tud@datecheck{%
+\newcommand*\tud@date@check{%
   \ifdefvoid{\@duedate}{%
     \ClassWarning{\TUDClassName}{%
       `\string\date' was not given\MessageBreak%
@@ -2211,13 +2218,36 @@
     }%
     \global\let\@date\@duedate%
   }%
-  \global\let\tud@datecheck\relax%
+  \global\let\tud@date@check\relax%
 }
-\newcommand*\@datemore{}
-\renewcommand*\date[2][]{%
-  \gdef\@datemore{\trim@spaces{#1}}%
+\renewcommand*\date{%
+  \@ifstar{%
+    \TUD@parameter@set{date}{pre=\@place{,}}%
+    \tud@date@set%
+  }{\tud@date@set}%
+}
+\newcommand*\tud@date@set[2][]{%
+  \TUD@parameter@set{date}{#1}%
   \tud@x@isodate@printdate{\@date}{#2}%
-  \global\let\tud@datecheck\relax%
+  \global\let\tud@date@check\relax%
+}
+\newcommand*\tud@date@pre{}
+\newcommand*\tud@date@app{}
+\TUD@parameter@family{date}{%
+  \TUD@parameter@define{pre}{\protected@edef\tud@date@pre{\trim@spaces{#1}}}%
+  \TUD@parameter@let{before}{pre}%
+  \TUD@parameter@let{prefix}{pre}%
+  \TUD@parameter@define{app}{\protected@edef\tud@date@app{\trim@spaces{#1}}}%
+  \TUD@parameter@let{after}{app}%
+  \TUD@parameter@let{suffix}{app}%
+  \TUD@parameter@handler@value{app}%
+}
+\newcommand*\tud@date@print{%
+  \ifx\@date\@empty\else%
+    \ifx\tud@date@pre\@empty\else\tud@date@pre\nobreakspace\fi%
+    \@date%
+    \ifx\tud@date@app\@empty\else\nobreakspace\tud@date@app\fi%
+  \fi%
 }
 \newcommand*\@defensedate{}
 \newcommand*\defensedate[1]{\tud@x@isodate@printdate{\@defensedate}{#1}}
@@ -2913,6 +2943,12 @@
     },%
   ]{tudheadings.head.lowlinewide}%
   \DeclareNewLayer[%
+    foreground,headsep,%
+    addvoffset=.5\tud@dim@headsep,%
+    height=\baselineskip,%
+    contents={\if@tud@head@date\hfill\tud@date@print\fi},%
+  ]{tudheadings.head.date}%
+  \DeclareNewLayer[%
     background,foot,%
     width=\dimexpr\tud@dim@layoutwidth+2\bleedmargin\relax,%
     hoffset=\dimexpr\tud@dim@layouthoffset-\bleedmargin\relax,%
@@ -3017,6 +3053,7 @@
     tudheadings.head.lowline,%
     tudheadings.head.uplinewide,%
     tudheadings.head.lowlinewide,%
+    tudheadings.head.date,%
     tudheadings.foot.back,%
     tudheadings.foot.content,%
     tudheadings.last,%
@@ -3040,6 +3077,7 @@
     tudheadings.head.lowline,%
     tudheadings.head.uplinewide,%
     tudheadings.head.lowlinewide,%
+    tudheadings.head.date,%
     tudheadings.foot.back,%
     tudheadings.foot.content,%
     tudheadings.last,%
@@ -3065,6 +3103,7 @@
     tudheadings.head.lowline,%
     tudheadings.head.uplinewide,%
     tudheadings.head.lowlinewide,%
+    tudheadings.head.date,%
     tudheadings.foot.back,%
     tudheadings.foot.content,%
     tudheadings.last%
@@ -5186,7 +5225,7 @@
         \if@tud@cover\else%
           \ifx\@date\@empty\else%
             \vskip 2ex\@plus.1fill%
-            {\usekomafont{date}{\@date\nobreakspace\@datemore\par}}%
+            {\usekomafont{date}{\tud@date@print\par}}%
           \fi%
         \fi%
         \vskip 2ex\@plus.25fill%
@@ -5220,11 +5259,11 @@
         \tud@title@names{supervisor}%
         \tud@title@names{professor}%
         \ifx\@thesis\@empty\else%
-          \tud@datecheck%
+          \tud@date@check%
           \ifx\@date\@empty\else%
             \vskip 2ex\@plus1ex\@minus1ex%
             \ifstr{\datetext}{}{}{\datetext\tud@title@delimiter}%
-            {\usekomafont{date}{\@date\nobreakspace\@datemore\par}}%
+            {\usekomafont{date}{\tud@date@print\par}}%
             \ifx\@defensedate\@empty\else%
               \ifstr{\defensedatetext}{}{}{%
                 \defensedatetext\tud@title@delimiter%
@@ -5397,8 +5436,10 @@
     \vskip 2\bigskipamount%
     \let\tud@split@author@do\tud@split@author@title%
     \tud@multiple@split{@author}\par%
-    \vskip 2ex\@plus1ex\@minus1ex%
-    {\usekomafont{date}{\@date\nobreakspace\@datemore\par}}%
+    \ifx\@date\@empty\else%
+      \vskip 2ex\@plus1ex\@minus1ex%
+      {\usekomafont{date}{\tud@date@print\par}}%
+    \fi%
     \ifx\@publishers\@empty\else%
       \vskip 2ex\@plus1ex\@minus1ex%
       {\usekomafont{publishers}{\@publishers\par}}%

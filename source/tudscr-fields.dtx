@@ -1,4 +1,4 @@
-% \CheckSum{753}
+% \CheckSum{794}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-fields.dtx}[%
-  2016/05/20 v2.05 TUD-KOMA-Script (input fields)%
+  2016/05/27 v2.05 TUD-KOMA-Script (input fields)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman,xindy]{tudscrdoc}
@@ -571,7 +571,7 @@
 % Als Abschluss der Selbstständigkeitserklärung für Ort und Unterschrift.
 %    \begin{macrocode}
 \newcommand*\@confirmationclosing{%
-  \tud@datecheck%
+  \tud@date@check%
   \ifx\@date\@empty\else%
     \medskip\noindent%
     \ifx\@place\@empty\else\@place,\nobreakspace\fi\@date%
@@ -628,7 +628,6 @@
 %
 % \iffalse
 %</poster>
-%<*book|report|article>
 % \fi
 %
 % \subsection{Datumsfelder}
@@ -662,13 +661,13 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@x@isodate@printdate
-% \begin{macro}{\tud@datecheck}
+% \begin{macro}{\tud@date@check}
 % \changes{v2.04}{2015/05/06}{neu}^^A
 % Das Makro wird vor der Nutzung des Datumfeldes genutzt um zu prüfen, ob ein
 % selbiges explizit angegeben wurde. Falls dies nicht der Fall ist, wird eine
 % Warnung ausgegeben.
 %    \begin{macrocode}
-\newcommand*\tud@datecheck{%
+\newcommand*\tud@date@check{%
   \ifdefvoid{\@duedate}{%
     \ClassWarning{\TUDClassName}{%
       `\string\date' was not given\MessageBreak%
@@ -683,42 +682,68 @@
     }%
     \global\let\@date\@duedate%
   }%
-  \global\let\tud@datecheck\relax%
+  \global\let\tud@date@check\relax%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@datecheck
-%
-% \iffalse
-%</book|report|article>
-% \fi
-%
+% \end{macro}^^A \tud@date@check
 % \begin{macro}{\date}
 % \begin{field}{\@date}
-% \begin{field}{\@datemore}
+% \begin{macro}{\tud@date@set}
+% \changes{v2.05}{2016/05/27}{neu}^^A
+% \begin{field}{\tud@date@pre}
+% \changes{v2.05}{2016/05/27}{neu}^^A
+% \begin{field}{\tud@date@app}
+% \changes{v2.05}{2016/05/27}{neu}^^A
 % Das Abgabedatum der Arbeit für den Titel, wird im originalen Makro \cs{@date}
-% gespeichert. Zusätzlich kann als optionales Argument eine Ergänzung angehängt
-% werden~-- beispielsweise als Erklärung für eine verspätete Abgabe aufgrund
-% einer offiziellen Verlängerung der Bearbeitungszeit~-- welche im Feld
-% \cs{@datemore} gespeichert wird. Der originale Standardbefehl für das Datum
-% \cs{date} wird erweitert.
-% \ToDo{Datumsangabe variabler (davor/danach), Sternversion für Ort}[v2.05]
-% \ToDo{\cs{@datemore} raus}[v2.05]
+% gespeichert. Zusätzlich kann über die Parameter im optionalen Argument eine 
+% Ergänzung davorgesetzt angehängt werden~-- beispielsweise als Erklärung für
+% eine verspätete Abgabe aufgrund einer Verlängerung der Bearbeitungszeit~--
+% welche in den Feldern \cs{tud@date@pre} und \cs{tud@date@app} gespeichert
+% wird. Hierfür wird der originale Befehl für das Datum \cs{date} erweitert, 
+% wobei die Sternversion \cs{date*} den angegebenen Ort als Präfix verwendet.
 %    \begin{macrocode}
-%<*book|report|article>
-\newcommand*\@datemore{}
-\renewcommand*\date[2][]{%
-  \gdef\@datemore{\trim@spaces{#1}}%
-  \tud@x@isodate@printdate{\@date}{#2}%
-  \global\let\tud@datecheck\relax%
+\renewcommand*\date{%
+  \@ifstar{%
+    \TUD@parameter@set{date}{pre=\@place{,}}%
+    \tud@date@set%
+  }{\tud@date@set}%
 }
-%</book|report|article>
-%<*poster>
-\renewcommand*\date[2][]{}
-%</poster>
+\newcommand*\tud@date@set[2][]{%
+  \TUD@parameter@set{date}{#1}%
+  \tud@x@isodate@printdate{\@date}{#2}%
+  \global\let\tud@date@check\relax%
+}
+\newcommand*\tud@date@pre{}
+\newcommand*\tud@date@app{}
+\TUD@parameter@family{date}{%
+  \TUD@parameter@define{pre}{\protected@edef\tud@date@pre{\trim@spaces{#1}}}%
+  \TUD@parameter@let{before}{pre}%
+  \TUD@parameter@let{prefix}{pre}%
+  \TUD@parameter@define{app}{\protected@edef\tud@date@app{\trim@spaces{#1}}}%
+  \TUD@parameter@let{after}{app}%
+  \TUD@parameter@let{suffix}{app}%
+  \TUD@parameter@handler@value{app}%
+}
 %    \end{macrocode}
-% \end{field}^^A \@datemore
+% \end{field}^^A \tud@date@app
+% \end{field}^^A \tud@date@pre
+% \end{macro}^^A \tud@date@set
 % \end{field}^^A \@date
 % \end{macro}^^A \date
+% \begin{macro}{\tud@date@print}
+% \changes{v2.05}{2016/05/27}{neu}^^A
+% Mit diesem Makro erfolgt die eigentliche Ausgabe des Datums und ggf. der 
+% optionalen Ergänzungen.
+%    \begin{macrocode}
+\newcommand*\tud@date@print{%
+  \ifx\@date\@empty\else%
+    \ifx\tud@date@pre\@empty\else\tud@date@pre\nobreakspace\fi%
+    \@date%
+    \ifx\tud@date@app\@empty\else\nobreakspace\tud@date@app\fi%
+  \fi%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@date@print
 %
 % \iffalse
 %<*book|report|article>
