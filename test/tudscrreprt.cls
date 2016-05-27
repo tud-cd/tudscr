@@ -2147,7 +2147,7 @@
   \else%
     \protected@xdef\@thesis{\noexpand#2\noexpand\thanks{\tud@thanks}}%
   \fi%
-  \gdef\@@thesis{#2}%
+  \protected@xdef\@@thesis{\trim@spaces{#2}}%
 }
 \renewcommand*\subject[1]{\tud@thesis@do{subject}{#1}}
 \newcommand*\@graduation{}
@@ -2222,7 +2222,7 @@
 }
 \renewcommand*\date{%
   \@ifstar{%
-    \TUD@parameter@set{date}{pre=\@place{,}}%
+    \TUD@parameter@set{date}{pre=\noexpand\@place{,}}%
     \tud@date@set%
   }{\tud@date@set}%
 }
@@ -2234,19 +2234,24 @@
 \newcommand*\tud@date@pre{}
 \newcommand*\tud@date@app{}
 \TUD@parameter@family{date}{%
-  \TUD@parameter@define{pre}{\protected@edef\tud@date@pre{\trim@spaces{#1}}}%
-  \TUD@parameter@let{before}{pre}%
-  \TUD@parameter@let{prefix}{pre}%
-  \TUD@parameter@define{app}{\protected@edef\tud@date@app{\trim@spaces{#1}}}%
-  \TUD@parameter@let{after}{app}%
-  \TUD@parameter@let{suffix}{app}%
-  \TUD@parameter@handler@value{app}%
+  \TUD@parameter@define{before}{\def\tud@date@pre{#1}}%
+  \TUD@parameter@let{pre}{before}%
+  \TUD@parameter@let{prefix}{before}%
+  \TUD@parameter@define{after}{\def\tud@date@app{#1}}%
+  \TUD@parameter@let{app}{after}%
+  \TUD@parameter@let{suffix}{after}%
+  \TUD@parameter@define{place}{\def\@place{#1}\def\tud@date@pre{#1,}}%
+  \TUD@parameter@handler@value{after}%
 }
 \newcommand*\tud@date@print{%
   \ifx\@date\@empty\else%
-    \ifx\tud@date@pre\@empty\else\tud@date@pre\nobreakspace\fi%
+    \ifx\tud@date@pre\@empty\else%
+      \expandafter\trim@spaces\expandafter{\tud@date@pre}\nobreakspace%
+    \fi%
     \@date%
-    \ifx\tud@date@app\@empty\else\nobreakspace\tud@date@app\fi%
+    \ifx\tud@date@app\@empty\else%
+      \nobreakspace\expandafter\trim@spaces\expandafter{\tud@date@app}%
+    \fi%
   \fi%
 }
 \newcommand*\@defensedate{}
@@ -6004,7 +6009,6 @@
   \begingroup%
     \TUD@parameter@handler@default[declaration]{company}%
     \undef\KV@declaration@supporter%
-    \undef\KV@declaration@place%
     \undef\KV@declaration@closing%
     \undef\KV@declaration@confirmationclosing%
     \ifbool{@tud@declarations}{%

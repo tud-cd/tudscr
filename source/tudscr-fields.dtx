@@ -1,4 +1,4 @@
-% \CheckSum{794}
+% \CheckSum{805}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -403,7 +403,7 @@
   \else%
     \protected@xdef\@thesis{\noexpand#2\noexpand\thanks{\tud@thanks}}%
   \fi%
-  \gdef\@@thesis{#2}%
+  \protected@xdef\@@thesis{\trim@spaces{#2}}%
 }
 \renewcommand*\subject[1]{\tud@thesis@do{subject}{#1}}
 %    \end{macrocode}
@@ -588,9 +588,9 @@
 % \end{macro}^^A \confirmationclosing
 % \begin{macro}{\place}
 % \begin{field}{\@place}
-% Die Angabe des Ortes mit \cs{place} für die Selbstständigkeitserklärung wird 
-% im Makro \cs{@place} gespeichert und standardmäßig mit \enquote{Dresden}
-% gesetzt.
+% Die Angabe des Ortes mit \cs{place} für die Selbstständigkeitserklärung und 
+% ggf. das Datum wird im Makro \cs{@place} gespeichert und standardmäßig mit
+% \enquote{Dresden} gesetzt.
 %    \begin{macrocode}
 \newcommand*\@place{Dresden}
 \newcommand*\place[1]{\gdef\@place{#1}}
@@ -690,10 +690,6 @@
 % \begin{field}{\@date}
 % \begin{macro}{\tud@date@set}
 % \changes{v2.05}{2016/05/27}{neu}^^A
-% \begin{field}{\tud@date@pre}
-% \changes{v2.05}{2016/05/27}{neu}^^A
-% \begin{field}{\tud@date@app}
-% \changes{v2.05}{2016/05/27}{neu}^^A
 % Das Abgabedatum der Arbeit für den Titel, wird im originalen Makro \cs{@date}
 % gespeichert. Zusätzlich kann über die Parameter im optionalen Argument eine 
 % Ergänzung davorgesetzt angehängt werden~-- beispielsweise als Erklärung für
@@ -704,7 +700,7 @@
 %    \begin{macrocode}
 \renewcommand*\date{%
   \@ifstar{%
-    \TUD@parameter@set{date}{pre=\@place{,}}%
+    \TUD@parameter@set{date}{pre=\noexpand\@place{,}}%
     \tud@date@set%
   }{\tud@date@set}%
 }
@@ -713,23 +709,51 @@
   \tud@x@isodate@printdate{\@date}{#2}%
   \global\let\tud@date@check\relax%
 }
-\newcommand*\tud@date@pre{}
-\newcommand*\tud@date@app{}
-\TUD@parameter@family{date}{%
-  \TUD@parameter@define{pre}{\protected@edef\tud@date@pre{\trim@spaces{#1}}}%
-  \TUD@parameter@let{before}{pre}%
-  \TUD@parameter@let{prefix}{pre}%
-  \TUD@parameter@define{app}{\protected@edef\tud@date@app{\trim@spaces{#1}}}%
-  \TUD@parameter@let{after}{app}%
-  \TUD@parameter@let{suffix}{app}%
-  \TUD@parameter@handler@value{app}%
-}
 %    \end{macrocode}
-% \end{field}^^A \tud@date@app
-% \end{field}^^A \tud@date@pre
 % \end{macro}^^A \tud@date@set
 % \end{field}^^A \@date
 % \end{macro}^^A \date
+% \begin{field}{\tud@date@pre}
+% \changes{v2.05}{2016/05/27}{neu}^^A
+% \begin{field}{\tud@date@app}
+% \changes{v2.05}{2016/05/27}{neu}^^A
+% \begin{parameter}{before}
+% \changes{v2.05}{2016/05/27}{neu}^^A
+% \begin{parameter}{after}
+% \changes{v2.05}{2016/05/27}{neu}^^A
+% \begin{parameter}{prefix}
+% \changes{v2.05}{2016/05/27}{neu}^^A
+% \begin{parameter}{suffix}
+% \changes{v2.05}{2016/05/27}{neu}^^A
+% \begin{parameter}{pre}
+% \changes{v2.05}{2016/05/27}{neu}^^A
+% \begin{parameter}{app}
+% \changes{v2.05}{2016/05/27}{neu}^^A
+% \begin{parameter}{place}
+% \changes{v2.05}{2016/05/27}{neu}^^A
+%    \begin{macrocode}
+\newcommand*\tud@date@pre{}
+\newcommand*\tud@date@app{}
+\TUD@parameter@family{date}{%
+  \TUD@parameter@define{before}{\def\tud@date@pre{#1}}%
+  \TUD@parameter@let{pre}{before}%
+  \TUD@parameter@let{prefix}{before}%
+  \TUD@parameter@define{after}{\def\tud@date@app{#1}}%
+  \TUD@parameter@let{app}{after}%
+  \TUD@parameter@let{suffix}{after}%
+  \TUD@parameter@define{place}{\def\@place{#1}\def\tud@date@pre{#1,}}%
+  \TUD@parameter@handler@value{after}%
+}
+%    \end{macrocode}
+% \end{parameter}^^A place
+% \end{parameter}^^A app
+% \end{parameter}^^A pre
+% \end{parameter}^^A suffix
+% \end{parameter}^^A prefix
+% \end{parameter}^^A after
+% \end{parameter}^^A before
+% \end{field}^^A \tud@date@app
+% \end{field}^^A \tud@date@pre
 % \begin{macro}{\tud@date@print}
 % \changes{v2.05}{2016/05/27}{neu}^^A
 % Mit diesem Makro erfolgt die eigentliche Ausgabe des Datums und ggf. der 
@@ -737,9 +761,13 @@
 %    \begin{macrocode}
 \newcommand*\tud@date@print{%
   \ifx\@date\@empty\else%
-    \ifx\tud@date@pre\@empty\else\tud@date@pre\nobreakspace\fi%
+    \ifx\tud@date@pre\@empty\else%
+      \expandafter\trim@spaces\expandafter{\tud@date@pre}\nobreakspace%
+    \fi%
     \@date%
-    \ifx\tud@date@app\@empty\else\nobreakspace\tud@date@app\fi%
+    \ifx\tud@date@app\@empty\else%
+      \nobreakspace\expandafter\trim@spaces\expandafter{\tud@date@app}%
+    \fi%
   \fi%
 }
 %    \end{macrocode}
