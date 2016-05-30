@@ -77,13 +77,13 @@
       \fi%
     }
   \fi
-  \TUD@Version@Check{2016/05/30 v2.05 BETA TUD-KOMA-Script}
+  \TUD@Version@Check{2016/05/31 v2.05 BETA TUD-KOMA-Script}
 \endgroup
 \NeedsTeXFormat{LaTeX2e}
 \providecommand*\tudscrmail{tudscr@gmail.com}
 \newcommand*\TUD@ProvidesClass[3]{%
   \ProvidesClass{#1}[%
-  2016/05/30 v2.05 BETA TUD-KOMA-Script
+  2016/05/31 v2.05 BETA TUD-KOMA-Script
     ^^J#3 (#2)%
   ]%
   \newcommand*\TUD@Class@KOMA{#2}%
@@ -1060,7 +1060,7 @@
   \fi%
 }
 %%% From File: tudscr-comp.dtx
-\newcommand*\TUD@deprecated@key[2]{%
+\newcommand*\TUD@key@deprecated[2]{%
   \ClassWarning{\TUD@Class@Name}%
   {%
     The option key `#1' is deprecated\MessageBreak%
@@ -1097,9 +1097,9 @@
   \TUD@set@ifkey{cdfonts}{@tempswa}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \if@tempswa%
-      \TUD@deprecated@key{cdfonts=#1}{cdfont=true}%
+      \TUD@key@deprecated{cdfonts=#1}{cdfont=true}%
     \else%
-      \TUD@deprecated@key{cdfonts=#1}{cdfont=false}%
+      \TUD@key@deprecated{cdfonts=#1}{cdfont=false}%
     \fi%
   \fi%
 }
@@ -1107,9 +1107,9 @@
   \TUD@set@ifkey{tudfonts}{@tempswa}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \if@tempswa%
-      \TUD@deprecated@key{tudfonts=#1}{cdfont=true}%
+      \TUD@key@deprecated{tudfonts=#1}{cdfont=true}%
     \else%
-      \TUD@deprecated@key{tudfonts=#1}{cdfont=false}%
+      \TUD@key@deprecated{tudfonts=#1}{cdfont=false}%
     \fi%
   \fi%
 }
@@ -1117,9 +1117,9 @@
   \TUD@set@ifkey{heavyfont}{@tempswa}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \if@tempswa%
-      \TUD@deprecated@key{heavyfont}{cdfont=heavy}%
+      \TUD@key@deprecated{heavyfont}{cdfont=heavy}%
     \else%
-      \TUD@deprecated@key{heavyfont=#1}{cdfont=true}%
+      \TUD@key@deprecated{heavyfont=#1}{cdfont=true}%
     \fi%
   \fi%
 }
@@ -1127,9 +1127,9 @@
   \TUD@set@ifkey{din}{@tempswa}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \if@tempswa%
-      \TUD@deprecated@key{din}{cdfont=din}%
+      \TUD@key@deprecated{din}{cdfont=din}%
     \else%
-      \TUD@deprecated@key{din=#1}{cdfont=nodin}%
+      \TUD@key@deprecated{din=#1}{cdfont=nodin}%
     \fi%
   \fi%
 }
@@ -1137,9 +1137,9 @@
   \TUD@set@ifkey{nodin}{@tempswa}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \if@tempswa%
-      \TUD@deprecated@key{nodin}{cdfont=nodin}%
+      \TUD@key@deprecated{nodin}{cdfont=nodin}%
     \else%
-      \TUD@deprecated@key{nodin=#1}{cdfont=din}%
+      \TUD@key@deprecated{nodin=#1}{cdfont=din}%
     \fi%
   \fi%
 }
@@ -1147,9 +1147,9 @@
   \TUD@set@ifkey{noDIN}{@tempswa}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \if@tempswa%
-      \TUD@deprecated@key{noDIN}{cdfont=nodin}%
+      \TUD@key@deprecated{noDIN}{cdfont=nodin}%
     \else%
-      \TUD@deprecated@key{noDIN=#1}{cdfont=din}%
+      \TUD@key@deprecated{noDIN=#1}{cdfont=din}%
     \fi%
   \fi%
 }
@@ -1157,9 +1157,9 @@
   \TUD@set@ifkey{sansmath}{@tempswa}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \if@tempswa%
-      \TUD@deprecated@key{sansmath}{cdmath=true}%
+      \TUD@key@deprecated{sansmath}{cdmath=true}%
     \else%
-      \TUD@deprecated@key{sansmath=#1}{cdmath=false}%
+      \TUD@key@deprecated{sansmath=#1}{cdmath=false}%
     \fi%
   \fi%
 }
@@ -1167,13 +1167,13 @@
   \TUD@set@ifkey{serifmath}{@tempswa}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \if@tempswa%
-      \TUD@deprecated@key{serifmath}{cdmath=false}%
+      \TUD@key@deprecated{serifmath}{cdmath=false}%
     \else%
-      \TUD@deprecated@key{serifmath=#1}{cdmath=true}%
+      \TUD@key@deprecated{serifmath=#1}{cdmath=true}%
     \fi%
   \fi%
 }
-\TUD@key{geometry}[true]{\TUD@deprecated@key{geometry=#1}{cdgeometry=#1}}
+\TUD@key{geometry}[true]{\TUD@key@deprecated{geometry=#1}{cdgeometry=#1}}
 \TUD@key{barfont}[true]{%
   \TUD@set@numkey{barfont}{@tempa}{%
     \TUD@numkey@bool,%
@@ -1184,11 +1184,11 @@
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax% false
-      \TUD@deprecated@key{barfont=#1}{cdhead=false}%
+      \TUD@key@deprecated{barfont=#1}{cdhead=false}%
     \or% true
-      \TUD@deprecated@key{barfont=#1}{cdhead=true}%
+      \TUD@key@deprecated{barfont=#1}{cdhead=true}%
     \or% heavy
-      \TUD@deprecated@key{barfont=#1}{cdhead=heavy}%
+      \TUD@key@deprecated{barfont=#1}{cdhead=heavy}%
     \fi%
   \fi%
 }
@@ -1196,9 +1196,9 @@
   \TUD@set@ifkey{widehead}{@tempswa}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \if@tempswa%
-      \TUD@deprecated@key{widehead}{cdhead=paperwidth}%
+      \TUD@key@deprecated{widehead}{cdhead=paperwidth}%
     \else%
-      \TUD@deprecated@key{widehead=#1}{cdhead=textwidth}%
+      \TUD@key@deprecated{widehead=#1}{cdhead=textwidth}%
     \fi%
   \fi%
 }
@@ -1206,9 +1206,9 @@
   \TUD@set@ifkey{tudfoot}{@tempswa}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \if@tempswa%
-      \TUD@deprecated@key{tudfoot}{cdfoot=true}%
+      \TUD@key@deprecated{tudfoot}{cdfoot=true}%
     \else%
-      \TUD@deprecated@key{tudfoot=#1}{cdfoot=false}%
+      \TUD@key@deprecated{tudfoot=#1}{cdfoot=false}%
     \fi%
   \fi%
 }
@@ -1227,15 +1227,15 @@
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax% false
-      \TUD@deprecated@key{color=#1}{cd=true}%
+      \TUD@key@deprecated{color=#1}{cd=true}%
     \or% true
-      \TUD@deprecated@key{color=#1}{cd=color}%
+      \TUD@key@deprecated{color=#1}{cd=color}%
     \or% litecolor
-      \TUD@deprecated@key{color=#1}{cd=pale}%
+      \TUD@key@deprecated{color=#1}{cd=pale}%
     \or% bicolor
-      \TUD@deprecated@key{color=#1}{cd=bicolor}%
+      \TUD@key@deprecated{color=#1}{cd=bicolor}%
     \or% full
-      \TUD@deprecated@key{color=#1}{cd=fullcolor}%
+      \TUD@key@deprecated{color=#1}{cd=fullcolor}%
     \fi%
   \fi%
 }
@@ -1290,6 +1290,11 @@
   }%
 }
 \csdef{tud@v@first}{0}
+\csdef{tud@v@2.00}{0}
+\csdef{tud@v@2.01}{0}
+\csdef{tud@v@2.01a}{0}
+\csdef{tud@v@2.01b}{0}
+\csdef{tud@v@2.02}{0}
 \csdef{tud@v@2.02}{0}
 \csdef{tud@v@2.03}{1}
 \csdef{tud@v@2.03a}{1}
@@ -6064,7 +6069,7 @@
   \tud@fm@body@end{declaration}%
 }
 %%% From File: tudscr-comp.dtx
-\newcommand*\tud@deprecated@cmd[2]{%
+\newcommand*\TUD@cmd@deprecated[2]{%
   \AtBeginDocument{%
     \ifcsundef{#1}{%
       \expandafter\newrobustcmd\csname #1\endcsname{%
@@ -6080,21 +6085,21 @@
 }
 \newlength\chapterheadingvskip
 \let\chapterheadingvskip\headingsvskip
-\tud@deprecated@cmd{professorship}{chair}
-\tud@deprecated@cmd{studentid}{matriculationnumber}
-\tud@deprecated@cmd{matriculationid}{matriculationnumber}
-\tud@deprecated@cmd{enrolmentyear}{matriculationyear}
-\tud@deprecated@cmd{birthplace}{placeofbirth}
-\tud@deprecated@cmd{submissiondate}{date}
-\tud@deprecated@cmd{oralexaminationdate}{defensedate}
-\tud@deprecated@cmd{birthday}{dateofbirth}
-\tud@deprecated@cmd{location}{place}
-\tud@deprecated@cmd{logofile}{headlogo}
-\tud@deprecated@cmd{logofilename}{headlogo}
+\TUD@cmd@deprecated{professorship}{chair}
+\TUD@cmd@deprecated{studentid}{matriculationnumber}
+\TUD@cmd@deprecated{matriculationid}{matriculationnumber}
+\TUD@cmd@deprecated{enrolmentyear}{matriculationyear}
+\TUD@cmd@deprecated{birthplace}{placeofbirth}
+\TUD@cmd@deprecated{submissiondate}{date}
+\TUD@cmd@deprecated{oralexaminationdate}{defensedate}
+\TUD@cmd@deprecated{birthday}{dateofbirth}
+\TUD@cmd@deprecated{location}{place}
+\TUD@cmd@deprecated{logofile}{headlogo}
+\TUD@cmd@deprecated{logofilename}{headlogo}
 \AfterPackage{tudscrsupervisor}{%
-  \tud@deprecated@cmd{startdate}{issuedate}%
-  \tud@deprecated@cmd{finaldate}{duedate}%
-  \tud@deprecated@cmd{maturitydate}{duedate}%
+  \TUD@cmd@deprecated{startdate}{issuedate}%
+  \TUD@cmd@deprecated{finaldate}{duedate}%
+  \TUD@cmd@deprecated{maturitydate}{duedate}%
 }
 \AtEndOfClass%
 {%
