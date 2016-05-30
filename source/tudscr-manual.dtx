@@ -1,4 +1,4 @@
-% \CheckSum{4171}
+% \CheckSum{4127}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,11 +51,11 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-manual.dtx}[%
-  2016/05/24 v2.05 TUD-KOMA-Script\space%
+  2016/05/31 v2.05 TUD-KOMA-Script\space%
 %</driver>
 %<package&identify>\ProvidesPackage{tudscrtutorial}[%
 %<*driver|package&identify>
-%!TUDVersion
+%!TUD@Version
 %<package>  package (internal tutorials)%
 ]
 %</driver|package&identify>
@@ -143,16 +143,11 @@
 %    \end{macrocode}
 % \begin{macro}{\vTUDScript}
 % \begin{macro}{\vKOMAScript}
-% Diese beiden Befehle werden für die aktuelle \TUDScript-Versionsnummer sowie 
-% die mindestens notwendige Version von \KOMAScript{} in der Dokumentation
-% verwendet.
-% \ToDo{\KOMAScript-Version anpassen}[v2.06]%
+% Diese Befehle geben in der Dokumentation die aktuelle Version von \TUDScript
+% sowie die mindestens notwendige Version von \KOMAScript aus.
 %    \begin{macrocode}
-\newcommand*\vTUDScript{}
-\def\@tempb#1 #2 #3\relax#4\relax{\def\vTUDScript{#2}}
-\edef\@tempa{\TUDVersion}
-\expandafter\@tempb\@tempa\relax? ? \relax\relax
-\newcommand*\vKOMAScript{v3.17\xspace}
+\newcommand*\vTUDScript{v\TUDScriptVersionNumber}
+\newcommand*\vKOMAScript{v\TUD@Version@KOMA}
 %    \end{macrocode}
 % \end{macro}^^A \vKOMAScript
 % \end{macro}^^A \vTUDScript
@@ -200,8 +195,8 @@
 % \changes{v2.02}{2014/07/25}{neu}^^A
 % \begin{macro}{\if@tud@list@sorted}
 % \changes{v2.02}{2014/07/25}{neu}^^A
-% Der Befehl \cs{sortlist} erwartet eine \pkg{etoolbox}-Liste und sortiert diese
-% mit \cs{sort@list} in alphabetischer Reihenfolge in eine kommagetrennte 
+% Der Befehl \cs{tud@list@sort} erwartet eine \pkg{etoolbox}-Liste und sortiert 
+% diese mit \cs{sort@list} in alphabetischer Reihenfolge in eine kommagetrennte 
 % Auflistung. Diese wird anschließend wieder in eine \pkg{etoolbox}-Liste 
 % umgewandelt.
 %    \begin{macrocode}
@@ -789,7 +784,7 @@
   captions=tableheading,%
   numbers=noenddot,%
   cd=color,%
-}{\TUDClassName@Parent}
+}{\TUD@Class@Parent}
 \PassOptionsToPackage{automark}{scrlayer-scrpage}
 %    \end{macrocode}
 %
@@ -1965,13 +1960,6 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@doifPValue
-% \begin{macro}{\@TUDScript}
-% \changes{v2.02}{2014/08/16}{neu}^^A
-% Der expandierbare Befehl von \TUDScript.
-%    \begin{macrocode}
-\newcommand*\@TUDScript{TUD-KOMA-Script}
-%    \end{macrocode}
-% \end{macro}^^A \@TUDScript
 % \begin{macro}{\Markup@Gobble}
 % \changes{v2.05}{2015/11/01}{neu}^^A
 % Dieser Befehl definiert alle Markup-Befehle in der Form um, dass diese nur 
@@ -2013,7 +2001,7 @@
     \let\POParameter\@firstofone%
     \let\textOR\relax%
     \let\hologoRobust\@firstofone%
-    \let\TUDScript\@TUDScript%
+    \def\TUDScript{TUD-KOMA-Script}%
     \def\_{-}%
     \protected\def~{~}%
   }%
@@ -4166,9 +4154,9 @@
     \global\let\tud@changedat@list\relax%
 %    \end{macrocode}
 % Nach der Verarbeitung der Einräge sind in \cs{tud@templist} alle angegebenen
-% Versionsnummern genau einmal enthalten. Mit \cs{sortlist} werden diese in die
-% richtige Reihenfolge sortiert und anschließend als Randnotiz in einer Tabelle
-% ausgegeben, falls nicht die Sternversion verwendet wurde.
+% Versionsnummern genau einmal enthalten. Mit \cs{tud@list@sort} werden diese 
+% in die richtige Reihenfolge sortiert und anschließend als Randnotiz in einer
+% Tabelle ausgegeben, falls nicht die Sternversion verwendet wurde.
 %    \begin{macrocode}
     \IfBooleanF{#1}{%
       \tud@list@sort\tud@templist%
@@ -5478,6 +5466,8 @@
 % \changes{v2.05}{2015/11/02}{Farbkodierung durch optionale Versionsnummer}^^A
 % \begin{macro}{\tud@todo@type@color}
 % \changes{v2.05}{2015/11/02}{neu}^^A
+% \begin{macro}{\tud@todo@marginnote}
+% \changes{v2.05}{2016/05/31}{neu}^^A
 % \begin{macro}{\ListOfToDo}
 % \changes{v2.02}{2014/07/10}{neu}^^A
 % Mit dem Befehl \cs{ToDo}\oarg{Option}\marg{ToDo-Notiz}\oarg{Versionsnummer}
@@ -5501,6 +5491,7 @@
   \tud@todo@type@color{urg}{HKS07!50}%
   \tud@todo@type@color{nxt}{HKS92!30}%
   \undef\tud@todo@type@color%
+  \newcommand*\tud@todo@marginnote{}%
 %    \end{macrocode}
 % Nun folgt die Definition des eigentlichen Befehls. Dabei wird zu Beginn
 % \cs{@currentHref} gesichert und am Ende wiederhergestellt.
@@ -5520,26 +5511,18 @@
 % dieser angegeben sein, wird auf eine gültige Versionsnummer geprüft. Dabei 
 % wird ein möglicherweise vorangestelltes \val{v} entfernt.
 %    \begin{macrocode}
+        \def\tud@todo@marginnote{ToDo}%
         \IfValueT{#4}{%
-          \def\@tempa{\@ifnextchar v{\@tempb}{\@tempb v}}%
-          \def\@tempb v##1\@nil{\def\@tempc{##1}}%
-          \@tempa #4\@nil%
+          \def\tud@todo@marginnote{#4}%
+          \tud@v@get\@tempc{#4}%
 %    \end{macrocode}
 % Exisitiert die angegebene Versionsnummer, so wird geprüft, ob die des 
 % optionalen Argumentes bereits veraltet ist. Ist dies der Fall, wird die 
 % ToDo-Notiz als dringlich (\val{urg}) gekennzeichnet.
 %    \begin{macrocode}
           \ifcsdef{tud@v@\@tempc}{%
-            \let\tud@templist\relax%
-            \listeadd\tud@templist{\@tempc}%
-            \expandafter\@tempa\vTUDScript\@nil%
-            \listeadd\tud@templist{\@tempc}%
-            \tud@list@sort\tud@templist
-            \def\do##1{%
-              \ifstr{##1}{\@tempc}{\let\@tempa\@empty}{\def\@tempa{urg}}%
-              \listbreak%
-            }%
-            \dolistloop{\tud@templist}%
+            \ifstr{\@tempc}{\TUDScriptVersionNumber}{}{\def\@tempa{urg}}%
+            \edef\tud@todo@marginnote{v\@tempc}%
 %    \end{macrocode}
 % Exisitiert die angegebene Versionsnummer nicht, so wird geprüft, ob es sich 
 % überhaupt um eine Versionsnummer handelt. Ist dies der Fall, wird die 
@@ -5547,8 +5530,11 @@
 %    \begin{macrocode}
           }{%
             \def\@tempa##1.##2##3##4\@nil{##1##2##3}%
-            \edef\@tempc{\expandafter\@tempa\@tempc.000\@nil}%
-            \ifxnumber{\@tempc}{\def\@tempa{nxt}}{\let\@tempa\@empty}%
+            \edef\@tempb{\expandafter\@tempa\@tempc.000\@nil}%
+            \ifxnumber{\@tempb}{%
+              \def\@tempa{nxt}%
+              \edef\tud@todo@marginnote{v\@tempc}%
+            }{\let\@tempa\@empty}%
           }%
         }%
 %    \end{macrocode}
@@ -5601,14 +5587,9 @@
             \marginnote[##1]{##2}[\dimexpr-\ht\z@+1.6ex+1.75pt\relax]%
           }%
           \toks@\expandafter{\@tempa noline,nolist}%
-          \IfValueTF{#4}{%
-            \def\@tempb{\trim@spaces{#4}\strut}%
-          }{%
-            \def\@tempb{ToDo\strut}%
-          }%
-          \settowidth\marginparwidth{\@tempb}%
+          \settowidth\marginparwidth{\tud@todo@marginnote}%
           \addtolength\marginparwidth{\dimexpr1.6ex+1pt\relax}%
-          \expandafter\todo\expandafter[\the\toks@]{\@tempb}%
+          \expandafter\todo\expandafter[\the\toks@]{\tud@todo@marginnote\strut}%
           \aftergroup\par\aftergroup\noindent%
         \fi%
       \endgroup%
@@ -5632,6 +5613,7 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \ListOfToDo
+% \end{macro}^^A \tud@todo@marginnote
 % \end{macro}^^A \tud@todo@type@color
 % \end{macro}^^A \ToDo
 %

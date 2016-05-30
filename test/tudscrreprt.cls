@@ -55,17 +55,21 @@
 %%% From File: tudscr-version.dtx
 \begingroup
   \catcode`\@11\relax
-  \ifx\TUDVersion\undefined
-    \newcommand*\@TUDVersion[1]{%
-      \gdef\TUDVersion{#1}%
+  \ifx\TUD@Version\undefined
+    \newcommand*\TUD@Version@Check[1]{%
+      \gdef\TUD@Version{#1}%
       \gdef\TUDScriptVersion{#1}%
+      \def\@tempb##1 v##2 ##3\relax##4\relax{\gdef\TUDScriptVersionNumber{##2}}%
+      \edef\@tempa{\TUD@Version}%
+      \expandafter\@tempb\@tempa\relax? ? \relax\relax%
+      \gdef\TUD@Version@KOMA{3.17}%
     }
   \else
-    \newcommand*\@TUDVersion[1]{%
+    \newcommand*\TUD@Version@Check[1]{%
       \def\@tempa{#1}%
-      \ifx\TUDVersion\@tempa\else%
+      \ifx\TUD@Version\@tempa\else%
         \@latex@warning@no@line{%
-          \noexpand\TUDVersion\space is `\TUDVersion',\MessageBreak%
+          \noexpand\TUD@Version\space is `\TUD@Version',\MessageBreak%
           but `#1' was expected!\MessageBreak%
           You should not use classes, packages or files from\MessageBreak%
           different TUD-KOMA-Script-Bundle versions%
@@ -73,31 +77,33 @@
       \fi%
     }
   \fi
-  \@TUDVersion{2016/05/20 v2.05 BETA TUD-KOMA-Script}
+  \TUD@Version@Check{2016/05/30 v2.05 BETA TUD-KOMA-Script}
 \endgroup
 \NeedsTeXFormat{LaTeX2e}
 \providecommand*\tudscrmail{tudscr@gmail.com}
 \newcommand*\TUD@ProvidesClass[3]{%
   \ProvidesClass{#1}[%
-  2016/05/20 v2.05 BETA TUD-KOMA-Script
+  2016/05/30 v2.05 BETA TUD-KOMA-Script
     ^^J#3 (#2)%
   ]%
-  \newcommand*\TUDClassName@KOMA{#2}%
-  \@ifundefined{TUDClassName@Parent}{%
-    \newcommand*\TUDClassName{#1}%
-    \TUD@ClassInfo%
+  \newcommand*\TUD@Class@KOMA{#2}%
+  \@ifundefined{TUD@Class@Parent}{%
+    \newcommand*\TUD@Class@Name{#1}%
+    \TUD@Class@Info%
   }{}%
 }
-\providecommand*\TUD@ClassInfo{%
+\providecommand*\TUD@Class@Info{%
   \typeout{+---------------------------------------------------------------}%
   \typeout{| The Corporate Design of Technische Universitaet Dresden}%
-  \typeout{| Class: \TUDClassName}%
-  \typeout{| Version: \TUDVersion}%
+  \typeout{| Class: \TUD@Class@Name}%
+  \typeout{| Version: \TUD@Version}%
   \typeout{| Author: Falk Hanisch (\tudscrmail)}%
   \typeout{| Forum: http://latex.wcms-file3.tu-dresden.de/phpBB3/}%
   \typeout{+---------------------------------------------------------------}%
 }
 \TUD@ProvidesClass{tudscrreprt}{scrreprt}{document class}
+\edef\TUDScriptClassName{\TUD@Class@Name}
+\providecommand*\TUDClassName{\TUDScriptClassName}
 \@ifundefined{TUDScript}{%
   \DeclareRobustCommand\TUDScript{%
     \ifdin{TUD-KOMA-SCRIPT}{%
@@ -106,7 +112,7 @@
   }%
 }{}
 %%% From File: tudscr-base.dtx
-\RequirePackage{tudscrbase}[\TUDVersion]
+\RequirePackage{tudscrbase}[\TUD@Version]
 \ifx\TUD@noworlater\TUD@noworlater@simple
   \renewcommand*\TUD@noworlater[2]{#1\AtEndOfClass{#1#2}}%
   \AtEndOfClass{\renewcommand*\TUD@noworlater[2]{#1#2}}%
@@ -115,16 +121,16 @@
   \if@atdocument%
     \KOMAoptions{#1}%
   \else%
-    \@ifclassloaded{\TUDClassName@KOMA}{%
+    \@ifclassloaded{\TUD@Class@KOMA}{%
       \KOMAoptions{#1}%
     }{%
-      \PassOptionsToClass{#1}{\TUDClassName@KOMA}%
+      \PassOptionsToClass{#1}{\TUD@Class@KOMA}%
     }%
   \fi%
 }
 %%% From File: tudscr-fonts.dtx
 \PreventPackageFromLoading[%
-  \ClassWarning{\TUDClassName}{%
+  \ClassWarning{\TUD@Class@Name}{%
     The package `tudscrfonts' must not be used with\MessageBreak%
     a TUD-KOMA-Script class%
   }%
@@ -301,14 +307,14 @@
 }
 \newif\if@tud@ddc@internal
 \newcommand*\tud@comp@clearpage{%
-  \tud@if@tudscrverlower{2.04}{%
+  \tud@if@v@lower{2.04}{%
     \if@tud@ddc@internal\else\if@atdocument%
       \tud@if@tudheadings{\currentpagestyle}{\clearpage}{}%
     \fi\fi%
   }{}%
 }
 \newcommand*\tud@comp@resetpagestyle{%
-  \tud@if@tudscrverlower{2.04}{%
+  \tud@if@v@lower{2.04}{%
     \if@tud@ddc@internal\else\if@atdocument%
       \tud@if@tudheadings{\currentpagestyle}{%
         \expandafter\pagestyle\expandafter{\currentpagestyle}%
@@ -809,7 +815,7 @@
     }{%
       \AfterPreamble{%
         \ifcsundef{ps@#1}{%
-          \ClassError{\TUDClassName}{`#1' is no valid pagestyle}{%
+          \ClassError{\TUD@Class@Name}{`#1' is no valid pagestyle}{%
             You tried to use `#1' as a pagestyle for option\MessageBreak%
             `cleardoublespecialpage', but it was never defined.%
           }%
@@ -1055,7 +1061,7 @@
 }
 %%% From File: tudscr-comp.dtx
 \newcommand*\TUD@deprecated@key[2]{%
-  \ClassWarning{\TUDClassName}%
+  \ClassWarning{\TUD@Class@Name}%
   {%
     The option key `#1' is deprecated\MessageBreak%
     It's recommended to use `#2'\MessageBreak%
@@ -1064,7 +1070,7 @@
   \TUDoptions{#2}%
 }
 \TUD@key{fontspec}[true]{%
-  \ClassWarning{\TUDClassName}%
+  \ClassWarning{\TUD@Class@Name}%
   {%
     The option key `fontspec' is deprecated\MessageBreak%
     You should load the package `fontspec' manually%
@@ -1075,10 +1081,10 @@
 {%
   \TUD@key{fontspec}[]%
   {%
-    \ClassError{\TUDClassName}%
+    \ClassError{\TUD@Class@Name}%
       {Option `fontspec' too late}{%
       Option `fontspec' can only be set while loading the\MessageBreak%
-      class `\TUDClassName'
+      class `\TUD@Class@Name'
       but you have tried to set it up later.%
     }%
     \FamilyKeyStateProcessed%
@@ -1236,52 +1242,50 @@
 \TUD@key{colour}[true]{\TUDoptions{color=#1}}
 \newcommand*\tud@v@comp{\tud@v@last}
 \TUD@key{tudscrver}[last]{%
-  \def\@tempa{\@ifnextchar v{\@tempb}{\@tempb v}}%
-  \def\@tempb v##1\@nil{\def\@tempc{##1}}%
-  \@tempa #1\@nil%
-  \ifcsundef{tud@v@\@tempc}{%
-    \ClassWarningNoLine{\TUDClassName}%
+  \tud@v@get\@tempa{#1}%
+  \ifcsundef{tud@v@\@tempa}{%
+    \ClassWarningNoLine{\TUD@Class@Name}%
     {%
-      You have set option `tudscrver' to `\@tempc', but\MessageBreak%
+      You have set option `tudscrver' to `\@tempa', but\MessageBreak%
       this value is not supported. Because of this, the\MessageBreak%
       value for `tudscrver' was set to `first'%
     }%
     \def\tud@v@comp{0}%
   }{%
-    \ClassInfoNoLine{\TUDClassName}%
+    \ClassInfoNoLine{\TUD@Class@Name}%
     {%
-      Switching compatibility level to `\@tempc'%
+      Switching compatibility level to `\@tempa'%
     }%
-    \edef\tud@v@comp{\@nameuse{tud@v@\@tempc}}%
+    \edef\tud@v@comp{\@nameuse{tud@v@\@tempa}}%
   }%
   \FamilyKeyStateProcessed%
 }
 \AtEndOfClass%
 {%
   \TUD@key{tudscrver}[]{%
-    \ClassError{\TUDClassName}%
+    \ClassError{\TUD@Class@Name}%
     {Option `tudscrver' too late}{%
       Option `tudscrver' can only be set while loading the\MessageBreak%
-      class `\TUDClassName'
+      class `\TUD@Class@Name'
       but you have tried to set it up later.%
     }%
     \FamilyKeyStateProcessed%
   }%
-  \ifcsdef{scr@v@3.17}{%
+  \ifcsdef{scr@v@\TUD@Version@KOMA}{%
     \ifnum\scr@compatibility<\@nameuse{scr@v@3.12}\relax%
-      \ClassError{\TUDClassName}{%
+      \ClassError{\TUD@Class@Name}{%
         KOMA-Script compatibility level too low%
       }{%
-        \TUDVersion\space has to be used at least with\MessageBreak%
+        \TUD@Version\space must be used at least with\MessageBreak%
         KOMA-Script compatibility option `version=3.12'.%
       }%
     \fi%
   }{%
-    \ClassError{\TUDClassName}{%
-      KOMA-Script v3.17 is required%
+    \ClassError{\TUD@Class@Name}{%
+      KOMA-Script v\TUD@Version@KOMA is required%
     }{%
-      \TUDVersion\space has to be used with KOMA-Script v3.17\MessageBreak%
-      at least. You're using \KOMAScriptVersion%
+      \TUD@Version\space must at least be used with\MessageBreak%
+      KOMA-Script v\TUD@Version@KOMA. You're using \KOMAScriptVersion%
     }%
   }%
 }
@@ -1296,12 +1300,36 @@
 \csdef{tud@v@2.04d}{2}
 \csdef{tud@v@2.05}{3}
 \csdef{tud@v@last}{3}
-\newcommand*\tud@if@tudscrverlower[1]{%
-  \ifnum\tud@v@comp<\@nameuse{tud@v@#1}\relax%
-    \expandafter\@firstoftwo%
-  \else%
-    \expandafter\@secondoftwo%
-  \fi%
+\newcommand*\tud@v@get[2]{%
+  \begingroup%
+    \def\@tempa{\@ifnextchar v{\@tempb}{\@tempb v}}%
+    \def\@tempb v##1\@nil{\def\@tempc{##1}}%
+    \@tempa #2\@nil%
+    \edef\tud@reserved{%
+      \endgroup%
+      \etex@unexpanded{\def#1}{\@tempc}%
+    }%
+  \tud@reserved%
+}
+\newcommand*\tud@if@v@lower[1]{%
+  \begingroup%
+    \tud@v@get\@tempa{#1}%
+    \ifcsdef{tud@v@\@tempa}{%
+      \ifnum\tud@v@comp<\@nameuse{tud@v@\@tempa}\relax%
+        \def\tud@reserved{\endgroup\@firstoftwo}%
+      \else%
+        \def\tud@reserved{\endgroup\@secondoftwo}%
+      \fi%
+    }{%
+      \def\tud@reserved{%
+        \ClassWarningNoLine{\TUD@Class@Name}{%PackageWarning!
+          Erroneous usage of `\string\tud@if@v@lower'.\MessageBreak%
+          There's no defined macro `\string\tud@v@\@tempa'%
+        }%
+        \endgroup\@firstoftwo%
+      }%
+    }
+  \tud@reserved%
 }
 %%% From File: tudscr-misc.dtx
 \newif\if@tud@x@scr@paper@set
@@ -1340,7 +1368,7 @@
 \newif\if@tud@fontsize@set
 \TUD@key{fontsize}{%
   \@tud@fontsize@settrue%
-  \PassOptionsToClass{fontsize=#1}{\TUDClassName@KOMA}%
+  \PassOptionsToClass{fontsize=#1}{\TUD@Class@KOMA}%
   \FamilyKeyStateProcessed%
 }
 \AtEndOfClass{%
@@ -1348,7 +1376,7 @@
   \RelaxFamilyKey{TUD}{fontsize}%
   \ifboolexpr{bool {@tud@x@scr@paper@set} or bool {@landscape}}{%
     \if@tud@fontsize@set\else%
-      \ClassWarningNoLine{\TUDClassName}{%
+      \ClassWarningNoLine{\TUD@Class@Name}{%
         You've set a paper size, which is different from\MessageBreak%
         default (paper=a4, paper=portrait). Therefore you\MessageBreak%
         should additionally specify an explicit font size.\MessageBreak%
@@ -1391,30 +1419,30 @@
     }}}}%
   }{}}{}%
   \if@tempswa\TUDExecuteOptions{#3=#1#2}\fi%
-  \PassOptionsToClass{\CurrentOption}{\TUDClassName@KOMA}%
+  \PassOptionsToClass{\CurrentOption}{\TUD@Class@KOMA}%
 }
 \DeclareOption*{\tud@x@scr@paper}
 \TUDExecuteOptions{cd=true,tudbookmarks=true}
 \TUDProcessOptions\relax
-\LoadClass{\TUDClassName@KOMA}[2015/04/23]
+\LoadClass{\TUD@Class@KOMA}[2015/04/23]
 %%% From File: tudscr-base.dtx
 \RequirePackage{environ}[2013/04/01]
 \AtEndPreamble{%
   \@ifpackageloaded{graphicx}{}{%
     \@ifpackageloaded{graphics}{%
-      \ClassWarningNoLine{\TUDClassName}{%
+      \ClassWarningNoLine{\TUD@Class@Name}{%
         Package `graphics' was superseded by `graphicx',\MessageBreak%
         which now will be loaded automatically%
       }%
     }{}%
   }%
   \RequirePackage{graphicx}[1999/02/16]%
-  \RequirePackage{tudscrcolor}[\TUDVersion]%
+  \RequirePackage{tudscrcolor}[\TUD@Version]%
 }
 \cs@lock{tud@x@multicol@num}{1}
 \newcommand*\tud@x@multicol@check{%
   \ifnum\tud@x@multicol@num>\@ne\relax%
-    \ClassWarning{\TUDClassName}{%
+    \ClassWarning{\TUD@Class@Name}{%
       The option `columns=\tud@x@multicol@num' is only\MessageBreak%
       supported, when package `multicol' is loaded%
     }%
@@ -1445,7 +1473,7 @@
   \def\@tempb##1{%
     \ifnum\tud@cdfont@num>\z@\relax% true/heavy
       \if@tud@cdmath%
-        \ClassWarningNoLine{\TUDClassName}%
+        \ClassWarningNoLine{\TUD@Class@Name}%
         {%
           `##1' fonts for math typesetting not found\MessageBreak%
           Please use one of the installation scripts for the\MessageBreak%
@@ -1462,7 +1490,7 @@
       \expandafter\ifx\the\font\nullfont%
         ##2%
         \ifnum\tud@cdfont@num>\z@\relax% true/heavy
-          \ClassWarningNoLine{\TUDClassName}%
+          \ClassWarningNoLine{\TUD@Class@Name}%
           {%
             `##1' fonts not found for encoding `\encodingdefault'\MessageBreak%
             It seems, you haven't installed the required\MessageBreak%
@@ -1491,7 +1519,7 @@
         \@tempswafalse%
         \ifstr{OT1}{\encodingdefault}{\@tempswatrue}{}%
         \ifstr{T1}{\encodingdefault}{\@tempswatrue}{}%
-        \ClassWarningNoLine{\TUDClassName}%
+        \ClassWarningNoLine{\TUD@Class@Name}%
         {%
           `##1' fonts not found for encoding `\encodingdefault'\MessageBreak%
           \if@tempswa%
@@ -1517,11 +1545,11 @@
   \if@atdocument%
     \ifnum\tud@cdfont@num>\z@\relax% true/heavy
       \if@tud@univers\else%
-        \ClassWarning{\TUDClassName}%
+        \ClassWarning{\TUD@Class@Name}%
           {`Univers' fonts not found}%
       \fi%
       \if@tud@dinbold\else%
-        \ClassWarning{\TUDClassName}%
+        \ClassWarning{\TUD@Class@Name}%
           {`DIN Bold' fonts not found}%
       \fi%
     \fi%
@@ -1761,7 +1789,7 @@
   \sffamily\csuse{#2series}\csuse{#3shape}%
 }
 \newcommand*\tud@font@wrn[1]{%
-  \ClassWarning{\TUDClassName}%
+  \ClassWarning{\TUD@Class@Name}%
   {%
     The requested font `#1' is not available, so\MessageBreak%
     a fallback layout is used%
@@ -1797,7 +1825,7 @@
   \ifstr{\@tempa}{din}{\def\@tempc{dinbn}}{%
   \ifstr{\@tempa}{din65}{\def\@tempc{dinbn}}{%
     \let\@tempc\relax%
-    \ClassWarning{\TUDClassName}%
+    \ClassWarning{\TUD@Class@Name}%
       {The font `#1' is unknown}%
   }}}}}}}}}}}}}}%
 }
@@ -1858,7 +1886,7 @@
   \if@tud@x@fontspec@enabled\if@tud@cdmath%
     \ifboolexpr{bool {@tud@universmath} or bool {@tud@dinboldmath}}{%
       \@ifpackagewith{fontspec}{no-math}{}{%
-        \ClassWarningNoLine{\TUDClassName}%
+        \ClassWarningNoLine{\TUD@Class@Name}%
         {%
           It's recommended to load package `fontspec'\MessageBreak%
           with option `no-math', if you want to use the\MessageBreak%
@@ -1960,11 +1988,11 @@
     \ifnum\tud@cdfont@num>\z@\relax% true/heavy
       \if@tud@cdmath%
         \if@tud@universmath\else%
-          \ClassWarning{\TUDClassName}%
+          \ClassWarning{\TUD@Class@Name}%
             {`Univers' math fonts not found}%
         \fi%
         \if@tud@dinboldmath\else%
-          \ClassWarning{\TUDClassName}%
+          \ClassWarning{\TUD@Class@Name}%
             {`DIN Bold' math fonts not found}%
         \fi%
       \fi%
@@ -2123,20 +2151,24 @@
   \ifstr{\@tempa}{diploma}{\tud@thesis@@do{#1}{\diplomathesisname}}{%
   \ifstr{\@tempa}{master}{\tud@thesis@@do{#1}{\masterthesisname}}{%
   \ifstr{\@tempa}{bachelor}{\tud@thesis@@do{#1}{\bachelorthesisname}}{%
-  \ifstr{\@tempa}{student}{\tud@thesis@@do{#1}{\studentresearchname}}{%
+  \ifstr{\@tempa}{student}{\tud@thesis@@do{#1}{\studentthesisname}}{%
+  \ifstr{\@tempa}{evidence}{\tud@thesis@@do{#1}{\studentresearchname}}{%
   \ifstr{\@tempa}{project}{\tud@thesis@@do{#1}{\projectpapername}}{%
   \ifstr{\@tempa}{seminar}{\tud@thesis@@do{#1}{\seminarpapername}}{%
+  \ifstr{\@tempa}{term}{\tud@thesis@@do{#1}{\termpapername}}{%
   \ifstr{\@tempa}{research}{\tud@thesis@@do{#1}{\researchname}}{%
   \ifstr{\@tempa}{log}{\tud@thesis@@do{#1}{\logname}}{%
   \ifstr{\@tempa}{report}{\tud@thesis@@do{#1}{\reportname}}{%
   \ifstr{\@tempa}{internship}{\tud@thesis@@do{#1}{\internshipname}}{%
     \csdef{@#1}{#2}%
-  }}}}}}}}}}}}}%
+  }}}}}}}}}}}}}}}%
 }
 \newcommand*\tud@thesis@@do[2]{%
   \ifstr{#1}{subject}{%
     \ifx\@thesis\@empty\else%
-      \ClassWarning{\TUDClassName}{Field `thesis' is overwritten by `subject'}%
+      \ClassWarning{\TUD@Class@Name}{%
+        Field `thesis' is overwritten by `subject'%
+      }%
     \fi%
     \TUD@std@ifkey@lock{subjectthesis}{true}%
   }{%
@@ -2205,14 +2237,14 @@
 }
 \newcommand*\tud@date@check{%
   \ifdefvoid{\@duedate}{%
-    \ClassWarning{\TUDClassName}{%
+    \ClassWarning{\TUD@Class@Name}{%
       `\string\date' was not given\MessageBreak%
       Since a thesis is a self-contained work, an end\MessageBreak%
       date should be specified by the author.\MessageBreak%
       Nevertheless, today's date is used%
     }%
   }{%
-    \ClassWarning{\TUDClassName}{%
+    \ClassWarning{\TUD@Class@Name}{%
       `\string\date' was not given\MessageBreak%
       It's substituted by the given due date%
     }%
@@ -2339,10 +2371,10 @@
 %%% From File: tudscr-locale.dtx
 \newcommand*\tud@locale@define[1]{%
   \providecommand*#1{%
-    \ClassError{\TUDClassName}{%
+    \ClassError{\TUD@Class@Name}{%
       `\string#1' not defined for language `\languagename'%
     }{%
-      Currently the class `\TUDClassName' only supports the\MessageBreak%
+      Currently the class `\TUD@Class@Name' only supports the\MessageBreak%
       languages german and english an its dialects. You must\MessageBreak%
       define single patterns by yourself, e.g.:\MessageBreak%
       `\string\providecaptionname{\languagename}\string#1{<text>}'\MessageBreak%
@@ -2381,9 +2413,11 @@
 \tud@locale@define{\diplomathesisname}
 \tud@locale@define{\masterthesisname}
 \tud@locale@define{\bachelorthesisname}
+\tud@locale@define{\studentthesisname}
 \tud@locale@define{\studentresearchname}
 \tud@locale@define{\projectpapername}
 \tud@locale@define{\seminarpapername}
+\tud@locale@define{\termpapername}
 \tud@locale@define{\researchname}
 \tud@locale@define{\logname}
 \tud@locale@define{\internshipname}
@@ -2501,9 +2535,11 @@
 \tud@locale@german{\diplomathesisname}{Diplomarbeit}%
 \tud@locale@german{\masterthesisname}{Master-Arbeit}%
 \tud@locale@german{\bachelorthesisname}{Bachelor-Arbeit}%
-\tud@locale@german{\studentresearchname}{Studienarbeit}%
+\tud@locale@german{\studentthesisname}{Studienarbeit}%
+\tud@locale@german{\studentresearchname}{Gro\ss{}er Beleg}%
 \tud@locale@german{\projectpapername}{Projektarbeit}%
 \tud@locale@german{\seminarpapername}{Seminararbeit}%
+\tud@locale@german{\termpapername}{Hausarbeit}%
 \tud@locale@german{\researchname}{Forschungsbericht}%
 \tud@locale@german{\logname}{Protokoll}%
 \tud@locale@german{\internshipname}{Praktikumsbericht}%
@@ -2606,9 +2642,11 @@
 \tud@locale@english{\diplomathesisname}{Diploma Thesis}%
 \tud@locale@english{\masterthesisname}{Master Thesis}%
 \tud@locale@english{\bachelorthesisname}{Bachelor Thesis}%
+\tud@locale@english{\studentthesisname}{Student Thesis}%
 \tud@locale@english{\studentresearchname}{Student Research Project}%
 \tud@locale@english{\projectpapername}{Project Paper}%
 \tud@locale@english{\seminarpapername}{Seminar Paper}%
+\tud@locale@english{\termpapername}{Term Paper}%
 \tud@locale@english{\researchname}{Research Report}%
 \tud@locale@english{\logname}{Log}%
 \tud@locale@english{\internshipname}{Internship Report}%
@@ -2640,7 +2678,7 @@
 \newlength\tud@dim@headingsvskip
 \newlength\tud@dim@areadiff
 \newlength\tud@dim@areavskip
-\tud@if@tudscrverlower{2.03}{\newlength\tud@dim@ddcdiff}{}
+\tud@if@v@lower{2.03}{\newlength\tud@dim@ddcdiff}{}
 \newif\if@tud@cdgeometry@adjust
 \newlength\tud@dim@layoutheight
 \newlength\tud@dim@layoutwidth
@@ -2655,7 +2693,7 @@
   \fi%
   \setlength\tud@dim@layouthoffset{\Gm@layouthoffset}%
   \setlength\tud@dim@layoutvoffset{\Gm@layoutvoffset}%
-  \tud@if@tudscrverlower{2.05}{%
+  \tud@if@v@lower{2.05}{%
     \ifdim\tud@dim@layoutheight<\dimexpr105mm+1.5mm\relax%
       \def\@tempa{0}%
     \else\ifdim\tud@dim@layoutheight<\dimexpr148mm+1.5mm\relax%
@@ -2670,7 +2708,7 @@
       \def\@tempa{5}%
     \else\ifdim\tud@dim@layoutheight<\dimexpr841mm+3mm\relax%
       \def\@tempa{6}%
-    \else\ifdim\tud@dim@layoutheight<\dimexpr1189mm+3mm\relax%%
+    \else\ifdim\tud@dim@layoutheight<\dimexpr1189mm+3mm\relax%
       \def\@tempa{7}%
     \else%
       \def\@tempa{8}%
@@ -2706,7 +2744,7 @@
   \fi%
   \ifcase\@tempa\relax% <=A7/B7
     \ifnum\tud@cdgeometry@calc@num=\tw@\relax\else%
-      \ClassWarning{\TUDClassName}{%
+      \ClassWarning{\TUD@Class@Name}{%
         There's no type area defined for such a\MessageBreak%
         small paper height. It is recommended to increase\MessageBreak%
         the paper size. Nevertheless, it will be tried to\MessageBreak%
@@ -2768,7 +2806,7 @@
     \renewcommand*\tud@head@fontsize{36}%
   \else% >A0/B0
     \ifnum\tud@cdgeometry@calc@num=\tw@\relax\else%
-      \ClassWarning{\TUDClassName}{%
+      \ClassWarning{\TUD@Class@Name}{%
         There's no type area defined for such a\MessageBreak%
         huge paper height. It is recommended to reduce\MessageBreak%
         the paper size. Nevertheless, it will be tried to\MessageBreak%
@@ -2981,7 +3019,7 @@
       \fi%
     },%
   ]{tudheadings.foot.back}%
-  \tud@if@tudscrverlower{2.03}{%
+  \tud@if@v@lower{2.03}{%
     \ModifyLayer[%
       addvoffset=-\tud@dim@ddcdiff+\ht\strutbox,%
       contents={%
@@ -3026,7 +3064,7 @@
       \tud@footcontent@use{\@tempdima}{\layerwidth}%
     },%
   ]{tudheadings.foot.content}%
-  \tud@if@tudscrverlower{2.03}{%
+  \tud@if@v@lower{2.03}{%
     \ModifyLayer[%
       addvoffset=-\tud@dim@ddcdiff+\ht\strutbox,%
       contents={%
@@ -3139,7 +3177,7 @@
 \listadd\tud@ps@list{plain.tudheadings}
 \listadd\tud@ps@list{empty.tudheadings}
 \PreventPackageFromLoading[%
-  \ClassWarning{\TUDClassName}{%
+  \ClassWarning{\TUD@Class@Name}{%
     The package `fancyhdr' must not be used with a\MessageBreak%
     TUD-KOMA-Script class. You should make use of the\MessageBreak%
     capabilities of package `scrlayer-scrpage' instead%
@@ -3174,7 +3212,7 @@
       \renewcommand*\tud@foot@logocolor{black}%
       \renewcommand*\tud@foot@fontcolor{}%
       \if@tud@foot@colored%
-        \ClassWarning{\TUDClassName}{%
+        \ClassWarning{\TUD@Class@Name}{%
           It isn't possible to use a colored foot together\MessageBreak%
           with a non-colored head (`cdhead=nocolor')%
         }%
@@ -3258,7 +3296,7 @@
   \ifcase\tud@head@font@num\relax% false
     \ifnum\tud@cdfont@num>\z@\relax% true/heavy
       \if@tud@head@font@set%
-        \ClassWarning{\TUDClassName}{%
+        \ClassWarning{\TUD@Class@Name}{%
           It isn't possible to use `cdhead=false'\MessageBreak%
           together with `cdfont=true'%
         }%
@@ -3328,11 +3366,11 @@
     \tud@head@text@add{\tud@head@font@light}{\@institute}%
     \tud@head@text@add{\tud@head@font@light}{\@chair}%
     \listeadd\tud@head@text@list{\expandonce\tud@head@text@line}%
-    \ifxblank{\@extraheadline}{}{%%
+    \ifxblank{\@extraheadline}{}{%
       \listadd\tud@head@text@list{\tud@head@font@light\@extraheadline}%
     }%
     \gdef\tud@head@text@wrn##1{%
-      \ClassWarning{\TUDClassName}{%
+      \ClassWarning{\TUD@Class@Name}{%
         The given entries for the headline\MessageBreak%
         (faculty, institute etc.) are ##1\MessageBreak%
         too wide for the textwidth%
@@ -3342,7 +3380,7 @@
 }
 \newcommand*\tud@head@text@box{%
   \ifx\@faculty\@empty%
-    \ClassWarningNoLine{\TUDClassName}{No `\string\faculty' given}%
+    \ClassWarningNoLine{\TUD@Class@Name}{No `\string\faculty' given}%
     \faculty{}%
   \fi%
   \def\@tempb{\tud@color{\tud@head@fontcolor}}%
@@ -3397,7 +3435,7 @@
     \setbox\z@\vbox{#2}%
     \setlength\@tempdima{\dimexpr\ht\z@+\dp\z@-#1\relax}%
     \ifdim\@tempdima>\z@\relax%
-      \ClassWarning{\TUDClassName}{%
+      \ClassWarning{\TUD@Class@Name}{%
         #3\MessageBreak%
         The maximum height is exceeded by \the\@tempdima\MessageBreak%
       }%
@@ -3417,7 +3455,7 @@
       \let\@tempb\tud@ddc@auto@num%
     }%
   \fi%
-  \tud@if@tudscrverlower{2.03}{%
+  \tud@if@v@lower{2.03}{%
     \ifnum\@tempb=\z@\relax%
       \ifdefvoid{\tud@footlogo@filenames}{}{\let\@tempb\m@ne}%
     \fi%
@@ -3439,7 +3477,7 @@
     \global\tud@dim@mainlogoheight=\tud@dim@mainlogoheight%
     \gdef\tud@mainlogo@wrn##1{%
       \ifdim##1<\ta@bcor\relax%
-        \ClassWarning{\TUDClassName}{%
+        \ClassWarning{\TUD@Class@Name}{%
           The selected page layout means that the\MessageBreak%
           logo of TUD extends beyond the printing area.\MessageBreak%
           The inner margin is smaller than BCOR\MessageBreak%
@@ -3475,7 +3513,7 @@
   \global\@tud@headlogo@option@settrue%
   \global\@tud@footlogo@option@settrue%
   \gdef\tud@headlogo@wrn{%
-    \ClassWarning{\TUDClassName}{%
+    \ClassWarning{\TUD@Class@Name}{%
       Secondary logo `\string\headlogo{\tud@headlogo@filename}'\MessageBreak%
       is overwritten with DDC logo. Maybe you should\MessageBreak%
       use `ddcfoot' or better `ddc' instead of `ddchead'%
@@ -3558,7 +3596,7 @@
 \newlength\tud@dim@footlogoheight
 \newcommand*\tud@footlogoheight@set{%
   \ifdim\footlogoheight=\z@\relax%
-    \tud@if@tudscrverlower{2.03}{%
+    \tud@if@v@lower{2.03}{%
       \setlength\tud@dim@footlogoheight{.6\tud@dim@topmargin}%
     }{%
       \setlength\tud@dim@footlogoheight{\tud@dim@mainlogoheight}%
@@ -3801,7 +3839,7 @@
   \newcommand*\tud@cdgeometry@hmargin{}%
   \newcommand*\tud@cdgeometry@vmargin{}%
   \newcommand*\tud@cdgeometry@tudmargin{}%
-  \tud@if@tudscrverlower{2.03}{\newcommand*\tud@cdgeometry@ddcmargin{}}{}%
+  \tud@if@v@lower{2.03}{\newcommand*\tud@cdgeometry@ddcmargin{}}{}%
   \newif\if@tud@x@geometry@enabled%
   \@tud@x@geometry@enabledtrue%
   \newcommand*\tud@newgeometry[1]{%
@@ -3952,7 +3990,7 @@
         textheight=\the\dimexpr\textheight-\@tempdima\relax,%
         ignorehead%
       }%
-      \tud@if@tudscrverlower{2.03}{%
+      \tud@if@v@lower{2.03}{%
         \setlength\tud@dim@ddcdiff{%
           \dimexpr.6\tud@dim@topmargin-\footskip+\tud@dim@headsep%
             +\footheight-1.25\baselineskip\relax%
@@ -3964,7 +4002,7 @@
         }%
       }{}%
       \ifdim\tud@dim@extrabottommargin=\z@\relax\else%
-        \ClassWarning{\TUDClassName}{%
+        \ClassWarning{\TUD@Class@Name}{%
           Option `extrabottommargin' is ineffective when\MessageBreak%
           package typearea or custom layout is used\MessageBreak%
           (`cdgeometry=false/custom')%
@@ -4023,7 +4061,7 @@
           \appto\tud@cdgeometry@hmargin{,twoside}%
         \fi%
       \fi%
-      \tud@if@tudscrverlower{2.03}{%
+      \tud@if@v@lower{2.03}{%
         \edef\tud@cdgeometry@vmargin{%
           \tud@cdgeometry@hincl,%
           top=\the\dimexpr.5\tud@dim@both\relax,%
@@ -4058,7 +4096,7 @@
         \dimexpr\tud@dim@topmargin+\tud@dim@barheight+\tud@dim@headsep%
           -\tud@dim@slimmargin\relax%
       }%
-      \tud@if@tudscrverlower{2.03}{%
+      \tud@if@v@lower{2.03}{%
         \setlength\tud@dim@areadiff{%
           \dimexpr\tud@dim@topmargin+\tud@dim@barheight+\tud@dim@headsep%
             -.5\tud@dim@both\relax%
@@ -4086,7 +4124,7 @@
       \setlength\tud@dim@headingsvskip{.6\tud@dim@topmargin}%
     \fi%
     \global\tud@dim@headingsvskip=\tud@dim@headingsvskip%
-    \tud@if@tudscrverlower{2.03}{%
+    \tud@if@v@lower{2.03}{%
       \ifdim\tud@dim@ddcdiff<\z@\relax\setlength\tud@dim@ddcdiff{\z@}\fi%
       \global\tud@dim@ddcdiff=\tud@dim@ddcdiff%
     }{}%
@@ -4095,7 +4133,7 @@
   \newcommand*\tud@cdgeometry@@@process{%
     \eappto\tud@cdgeometry@hmargin{,layouthoffset=\the\Gm@layouthoffset}%
     \eappto\tud@cdgeometry@vmargin{,layoutvoffset=\the\Gm@layoutvoffset}%
-    \tud@if@tudscrverlower{2.03}{%
+    \tud@if@v@lower{2.03}{%
       \edef\@tempa{%
         \tud@cdgeometry@hmargin,%
         \tud@cdgeometry@vmargin,%
@@ -4151,7 +4189,7 @@
 \newcommand*\tud@BeforeSelectAnyPageStyle[1]{%
   \ifstr{#1}{\GetRealPageStyle{#1}}{%
     \tud@if@tudheadings{#1}{%
-      \tud@if@tudscrverlower{2.03}{%
+      \tud@if@v@lower{2.03}{%
         \tud@ddc@check%
         \ifcase\@tempb\relax% \tud@ddc@foot@num=false
           \ifstr{\tud@currentgeometry}{tudarea}{}{%
@@ -4212,7 +4250,7 @@
 \patchcmd{\cleardoublepageusingstyle}{\pagestyle}{%
   \let\tud@BeforeSelectAnyPageStyle\@gobble\pagestyle%
 }{}{\tud@patch@wrn{cleardoublepageusingstyle}}
-\tud@if@tudscrverlower{2.03}{%
+\tud@if@v@lower{2.03}{%
   \newcommand*\tud@ddc@enlargepage[1][]{%
     \tud@if@tudheadings{#1}{%
       \ifstr{\tud@currentgeometry}{tudareaddc}{}{%
@@ -4644,7 +4682,7 @@
         \tud@sec@fontsize%
         \tud@color{\tud@part@fontcolor}%
         \ifx\@@title\@empty%
-          \ClassWarning{\TUDClassName}{%
+          \ClassWarning{\TUD@Class@Name}{%
             You activated the option `parttitle' but\MessageBreak%
             no title was given%
           }%
@@ -4902,14 +4940,14 @@
     \or% fullcolor
       \cs@set@lock{tud@head@bar@num}{3}%
     \fi%
-    \tud@if@tudscrverlower{2.03}{\tud@ddc@enlargepage[\chapterpagestyle]}{}%
+    \tud@if@v@lower{2.03}{\tud@ddc@enlargepage[\chapterpagestyle]}{}%
   \fi%
   \if@twocolumn%
     \@afterindentfalse\@afterheading%
   \fi%
 }
 \newcommand*\tud@clearcolor@wrn{%
-  \ClassWarning{\TUDClassName}{%
+  \ClassWarning{\TUD@Class@Name}{%
     Option `clearcolor' is only available together with\MessageBreak%
     options `twoside' and `open=right'%
   }%
@@ -5040,8 +5078,8 @@
     \ifx\@dateofbirth\@empty\else%
       \if@titlepage%
         \tud@newline@title%
-        \ifxblank{\dateofbirthtext}%
-          {}{\dateofbirthtext\tud@title@delimiter}\@dateofbirth%
+        \ifxblank{\dateofbirthtext}{}{\dateofbirthtext\tud@title@delimiter}%
+        \@dateofbirth%
         \ifx\@placeofbirth\@empty\else%
           \nobreakspace\placeofbirthtext\nobreakspace\@placeofbirth%
         \fi%
@@ -5069,7 +5107,7 @@
   \tud@multiple@@@split{#2}{\vskip 2ex}%
 }
 \newcommand*\tud@title@wrn[1]{%
-  \ClassWarning{\TUDClassName}{%
+  \ClassWarning{\TUD@Class@Name}{%
     `\@backslashchar#1' has to be used with\MessageBreak%
     activated titlepage option%
   }%
@@ -5077,7 +5115,7 @@
 \newcommand*\tud@thesis@tosubject{%
   \if@tud@subjectthesis\ifx\@thesis\@empty\else%
     \ifx\@subject\@empty\else%
-      \ClassWarning{\TUDClassName}{%
+      \ClassWarning{\TUD@Class@Name}{%
         The option `subjectthesis' was activated, so\MessageBreak%
         the field `subject' will be overwritten with the\MessageBreak%
         given thesis%
@@ -5153,7 +5191,7 @@
       \tud@x@hyperref@realfootnotes%
       \ifx\@extratitle\@empty%
         \if@titlepageiscoverpage%
-          \ClassWarning{\TUDClassName}{%
+          \ClassWarning{\TUD@Class@Name}{%
             Using option `titlepage=firstiscover' is only\MessageBreak%
             possible with an extra title. Alternatively you can\MessageBreak%
             create a cover with `\string\makecover'%
@@ -5325,7 +5363,7 @@
       \addtokomafont{pagenumber}{\usekomafont{tudheadings}}%
       \addtokomafont{pagefoot}{\usekomafont{tudheadings}}%
       \thispagestyle{empty.tudheadings}%
-      \tud@if@tudscrverlower{2.03}{\tud@ddc@enlargepage}{}%
+      \tud@if@v@lower{2.03}{\tud@ddc@enlargepage}{}%
     }%
     \if@tud@cover%
       \begingroup%
@@ -5373,7 +5411,7 @@
   \par%
   \ifx\tud@title@pagenumber\relax\else%
     \ifnum\tud@title@pagenumber=\@ne\relax\else%
-      \ClassWarning{\TUDClassName}{%
+      \ClassWarning{\TUD@Class@Name}{%
         Optional argument of \string\maketitle\space ignored\MessageBreak%
         at notitlepage-mode%
       }%
@@ -5464,7 +5502,7 @@
         \ifisskip{\multicolsep}{\vspace{-\multicolsep}}{}%
       }%
     \fi%
-    \tud@if@tudscrverlower{2.03}{\tud@ddc@enlargepage[\titlepagestyle]}{}%
+    \tud@if@v@lower{2.03}{\tud@ddc@enlargepage[\titlepagestyle]}{}%
   \endgroup%
 }
 \newcommand\maketitleonecolumn[2][]{%
@@ -5476,7 +5514,7 @@
       \tud@title@twocolumn{\tud@maketitle[#1]{#2}}%
     \fi%
   \else%
-    \ClassError{\TUDClassName}{%
+    \ClassError{\TUD@Class@Name}{%
       `\string\maketitleonecolumn' can only be used in twocolumn mode%
     }{}%
   \fi%
@@ -5492,7 +5530,7 @@
     }%
   \endgroup%
   \setlength\@tempdima{\textheight}%
-  \tud@if@tudscrverlower{2.03}{%
+  \tud@if@v@lower{2.03}{%
     \tud@ddc@check%
     \ifcase\@tempb\relax\else% \tud@ddc@foot@num!=false
       \setlength\@tempdima{\dimexpr\textheight-\tud@dim@ddcdiff\relax}%
@@ -5506,15 +5544,15 @@
       \vsplit\tud@title@box to \@tempdima%
       \clearpage%
       \setlength\@tempdima{\textheight}%
-      \tud@if@tudscrverlower{2.03}{\@tempswafalse}{}%
+      \tud@if@v@lower{2.03}{\@tempswafalse}{}%
     }%
   \else%
     \setbox\tud@title@box\vbox{#1\bigskip}%
   \fi%
   \twocolumn[\unvbox\tud@title@box]%
-  \tud@if@tudscrverlower{2.03}{%
+  \tud@if@v@lower{2.03}{%
     \if@tempswa%
-      \ClassWarning{\TUDClassName}{%
+      \ClassWarning{\TUD@Class@Name}{%
         You are using a two-column title along with\MessageBreak%
         the DDC-logo. Unfortunately in this case, the\MessageBreak%
         type area has to be adjusted manually. Please\MessageBreak%
@@ -5527,7 +5565,7 @@
 \newif\if@tud@cover
 \newcommand*\makecover[1][]{%
   \if@titlepageiscoverpage%
-    \ClassWarning{\TUDClassName}{%
+    \ClassWarning{\TUD@Class@Name}{%
       Using both option `titlepage=firstiscover' and\MessageBreak%
       `\string\makecover' together isn't supported. The\MessageBreak%
       option `titlepage=firstiscover' will be ignored. If you\MessageBreak%
@@ -5549,7 +5587,7 @@
       \let\coverpagebottommargin\tud@dim@widemargin%
       \let\coverpageleftmargin\tud@dim@widemargin%
       \let\coverpagerightmargin\tud@dim@slimmargin%
-      \tud@if@tudscrverlower{2.03}{%
+      \tud@if@v@lower{2.03}{%
         \def\coverpagetopmargin{.5\tud@dim@both}%
         \def\coverpagebottommargin{.5\tud@dim@both}%
       }{}%
@@ -5580,7 +5618,7 @@
         \headheight=0pt%
         \headsep=0pt%
         \footskip=\dimexpr\tud@dim@footsep+\footheight\relax%
-        \tud@if@tudscrverlower{2.03}{%
+        \tud@if@v@lower{2.03}{%
           \footskip=\dimexpr\tud@dim@headsep+\footheight%
             -1.25\baselineskip\relax%
         }{}%
@@ -5595,7 +5633,7 @@
           \def\@tempa{2\dimexpr\coverpagetopmargin\relax}%
           \ifx\@tempa\coverpagebottommargin\relax%
             \let\coverpagebottommargin\tud@dim@widemargin%
-            \tud@if@tudscrverlower{2.03}{%
+            \tud@if@v@lower{2.03}{%
               \def\coverpagebottommargin{.5\tud@dim@both}%
             }{}%
           \fi%
@@ -5647,7 +5685,7 @@
     }{%
       \sbox\z@{\vbox{#2}}%
       \ifdim\textheight<\dimexpr\ht\z@+\dp\z@\relax%
-        \ClassWarning{\TUDClassName}{%
+        \ClassWarning{\TUD@Class@Name}{%
           The given content within the `#1'\MessageBreak%
           environment is too large, so it wasn't possible\MessageBreak%
           to center the body vertically. Setting the option\MessageBreak%
@@ -5690,7 +5728,7 @@
       }%
     \@tempa%
   }{%
-    \ClassWarning{\TUDClassName}{%
+    \ClassWarning{\TUD@Class@Name}{%
       It isn't possible to use `#1=single'\MessageBreak%
       or `#1=chapter'
       with `#1=tocmultiple'%
@@ -5805,13 +5843,13 @@
 \newcommand*\tud@fm@pagestyle[2]{%
   \if@titlepage%
     \ifcsundef{ps@#2}{%
-      \ClassError{\TUDClassName}{`#2' is no valid pagestyle}{%
+      \ClassError{\TUD@Class@Name}{`#2' is no valid pagestyle}{%
         You tried to use `#2' as a pagestyle for the\MessageBreak%
         `#1' environment, but it was never defined.%
       }%
     }{\def\tud@envir@ps{#2}}%
   \else%
-    \ClassWarning{\TUDClassName}{%
+    \ClassWarning{\TUD@Class@Name}{%
       The key `pagestyle' can only be used either with\MessageBreak%
       activated option `titlepage' or with chapter\MessageBreak%
       headings (`#1=chapter')%
@@ -5880,7 +5918,7 @@
   \TUD@parameter@handler@default{}%
 }
 \newcommand*\nextabstract[1][]{%
-  \ClassError{\TUDClassName}{Incorrect usage of `\string\nextabstract'}{%
+  \ClassError{\TUD@Class@Name}{Incorrect usage of `\string\nextabstract'}{%
     The command `\string\nextabstract' can only be used within\MessageBreak%
     the environment `abstract'.%
   }%
@@ -5972,7 +6010,7 @@
       #3%
     \tud@fm@body@end{declaration}%
   }{%
-    \ClassError{\TUDClassName}{Incorrect usage of `\string\nextdeclaration'}{%
+    \ClassError{\TUD@Class@Name}{Incorrect usage of `\string\nextdeclaration'}{%
       The command `\string\nextdeclaration' can only be used\MessageBreak%
       within the environment `declarations'.%
     }%
@@ -6030,7 +6068,7 @@
   \AtBeginDocument{%
     \ifcsundef{#1}{%
       \expandafter\newrobustcmd\csname #1\endcsname{%
-        \ClassWarning{\TUDClassName}{%
+        \ClassWarning{\TUD@Class@Name}{%
           The command `\@backslashchar#1' is deprecated\MessageBreak%
           It's recommended to use `\@backslashchar#2' instead%
         }%
@@ -6060,7 +6098,7 @@
 }
 \AtEndOfClass%
 {%
-  \tud@if@tudscrverlower{2.04}{\TUDoptions{vspacing=false}}{}%
+  \tud@if@v@lower{2.04}{\TUDoptions{vspacing=false}}{}%
 }
 %%% From File: tudscr-misc.dtx
 \newcommand*\tudbookmark[1][]{\@gobbletwo}
@@ -6130,7 +6168,7 @@
 \BeforeTOCHead[lof]{\tud@x@bookmark@startatroot}
 \BeforeTOCHead[lot]{\tud@x@bookmark@startatroot}
 \BeforePackage{tocloft}{%
-  \ClassWarningNoLine{\TUDClassName}{%
+  \ClassWarningNoLine{\TUD@Class@Name}{%
     It is absolutely not recommended to use package\MessageBreak%
     `tocloft'. Loading the package will certainly lead\MessageBreak%
     to problems with table of contents and any list of\MessageBreak%

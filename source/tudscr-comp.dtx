@@ -1,4 +1,4 @@
-% \CheckSum{1380}
+% \CheckSum{1423}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,14 +51,14 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-comp.dtx}[%
-  2016/05/23 v2.05 TUD-KOMA-Script\space%
+  2016/05/31 v2.05 TUD-KOMA-Script\space%
 %</driver>
 %<package&identify&comp&base>\ProvidesPackage{tudscrcomp}[%
 %<package&identify&comp&book>\ProvidesPackage{tudscrcomp-book}[%
 %<package&identify&comp&poster>\ProvidesPackage{tudscrcomp-poster}[%
 %<package&identify&fontsfix>\ProvidesPackage{fix-tudscrfonts}[%
 %<*driver|package&identify>
-%!TUDVersion
+%!TUD@Version
 %<package&comp>  package
 %<package&fontsfix>  package for font fixes
   (compatibility for old tud(scr) classes)%
@@ -127,7 +127,7 @@
 %<*option>
 \newcommand*\TUD@deprecated@key[2]{%
 %<*class>
-  \ClassWarning{\TUDClassName}%
+  \ClassWarning{\TUD@Class@Name}%
 %</class>
 %<*package&fonts>
   \PackageWarning{tudscrfonts}%
@@ -149,7 +149,7 @@
   \AtBeginDocument{%
     \ifcsundef{#1}{%
       \expandafter\newrobustcmd\csname #1\endcsname{%
-        \ClassWarning{\TUDClassName}{%
+        \ClassWarning{\TUD@Class@Name}{%
           The command `\@backslashchar#1' is deprecated\MessageBreak%
           It's recommended to use `\@backslashchar#2' instead%
         }%
@@ -176,7 +176,7 @@
 %    \begin{macrocode}
 \TUD@key{fontspec}[true]{%
 %<*class>
-  \ClassWarning{\TUDClassName}%
+  \ClassWarning{\TUD@Class@Name}%
 %</class>
 %<*package&fonts>
   \PackageWarning{tudscrfonts}%
@@ -202,7 +202,7 @@
   \TUD@key{fontspec}[]%
   {%
 %<*class>
-    \ClassError{\TUDClassName}%
+    \ClassError{\TUD@Class@Name}%
 %</class>
 %<*package&fonts>
     \PackageError{tudscrfonts}%
@@ -210,7 +210,7 @@
       {Option `fontspec' too late}{%
       Option `fontspec' can only be set while loading the\MessageBreak%
 %<*class>
-      class `\TUDClassName'
+      class `\TUD@Class@Name'
 %</class>
 %<*package&fonts>
       package `tudscrfonts'
@@ -456,7 +456,111 @@
 % \changes{v2.02}{2014/08/22}{neu}^^A
 % \begin{macro}{\tud@v@comp}
 % \changes{v2.02}{2014/08/22}{neu}^^A
+% In einigen Fällen sind Änderungen mit früheren Versionen nicht kompatibel 
+% oder unerwünscht, weil diese beispielsweise das Ausgabeergebnis verändern.
+% Standardmäßig werden die Klassen in der aktuellen Version geladen. Mit 
+% \opt{tudscrver=\meta{Version}} kann auf das Verhalten einer früheren
+% Version geschaltet werden. Die eingestellte Kompatibilität wird als Zahl in 
+% \cs{tud@v@comp} gespeichert. In den Makros \cs{tud@v@\meta{Version}} werden
+% die zugehörigen Nummern gespeichert.
+%    \begin{macrocode}
+\newcommand*\tud@v@comp{\tud@v@last}
+\TUD@key{tudscrver}[last]{%
+  \tud@v@get\@tempa{#1}%
+  \ifcsundef{tud@v@\@tempa}{%
+%<*class>
+    \ClassWarningNoLine{\TUD@Class@Name}%
+%</class>
+%<*package&fonts>
+    \PackageWarningNoLine{tudscrfonts}%
+%</package&fonts>
+    {%
+      You have set option `tudscrver' to `\@tempa', but\MessageBreak%
+      this value is not supported. Because of this, the\MessageBreak%
+      value for `tudscrver' was set to `first'%
+    }%
+    \def\tud@v@comp{0}%
+  }{%
+%<*class>
+    \ClassInfoNoLine{\TUD@Class@Name}%
+%</class>
+%<*package&fonts>
+    \PackageInfoNoLine{tudscrfonts}%
+%</package&fonts>
+    {%
+      Switching compatibility level to `\@tempa'%
+    }%
+    \edef\tud@v@comp{\@nameuse{tud@v@\@tempa}}%
+  }%
+  \FamilyKeyStateProcessed%
+}
+%    \end{macrocode}
+% Eine zusätzliche Bedingung gibt es noch: Die Kompatibilität kann nur beim
+% Laden der Klasse bzw. des Paketes gesetzt werden, danach nicht mehr.
+%    \begin{macrocode}
+%<*class>
+\AtEndOfClass%
+%</class>
+%<*package>
+\AtEndOfPackage%
+%</package>
+{%
+  \TUD@key{tudscrver}[]{%
+%<*class>
+    \ClassError{\TUD@Class@Name}%
+%</class>
+%<*package&fonts>
+    \PackageError{tudscrfonts}%
+%</package&fonts>
+    {Option `tudscrver' too late}{%
+      Option `tudscrver' can only be set while loading the\MessageBreak%
+%<*class>
+      class `\TUD@Class@Name'
+%</class>
+%<*package&fonts>
+      package `tudscrfonts'
+%</package&fonts>
+      but you have tried to set it up later.%
+    }%
+    \FamilyKeyStateProcessed%
+  }%
+%    \end{macrocode}
+% Außerdem wird darauf geachtet, dass die mindestens benötigte Version von
+% \KOMAScript{} installiert ist. (\cs{\TUD@Version@KOMA}: \TUD@Version@KOMA). 
+% Sollte dies nicht der Fall sein, wird ein Fehler erzeugt.
+%    \begin{macrocode}
+%<*class>
+  \ifcsdef{scr@v@\TUD@Version@KOMA}{%
+    \ifnum\scr@compatibility<\@nameuse{scr@v@3.12}\relax%
+      \ClassError{\TUD@Class@Name}{%
+        KOMA-Script compatibility level too low%
+      }{%
+        \TUD@Version\space must be used at least with\MessageBreak%
+        KOMA-Script compatibility option `version=3.12'.%
+      }%
+    \fi%
+  }{%
+    \ClassError{\TUD@Class@Name}{%
+      KOMA-Script v\TUD@Version@KOMA is required%
+    }{%
+      \TUD@Version\space must at least be used with\MessageBreak%
+      KOMA-Script v\TUD@Version@KOMA. You're using \KOMAScriptVersion%
+    }%
+  }%
+%</class>
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@v@comp
+% \end{option}^^A tudscrver
 % \begin{macro}{\tud@v@first}
+% \changes{v2.02}{2014/08/22}{neu}^^A
+% \begin{macro}{\tud@v@2.00}
+% \changes{v2.02}{2014/08/22}{neu}^^A
+% \begin{macro}{\tud@v@2.01}
+% \changes{v2.02}{2014/08/22}{neu}^^A
+% \begin{macro}{\tud@v@2.01a}
+% \changes{v2.02}{2014/08/22}{neu}^^A
+% \begin{macro}{\tud@v@2.01b}
 % \changes{v2.02}{2014/08/22}{neu}^^A
 % \begin{macro}{\tud@v@2.02}
 % \changes{v2.02}{2014/08/22}{neu}^^A
@@ -481,105 +585,15 @@
 % \changes{v2.03}{2015/01/13}{angepasst}^^A
 % \changes{v2.04}{2015/02/18}{angepasst}^^A
 % \changes{v2.05}{2015/07/03}{angepasst}^^A
-% In einigen Fällen sind Änderungen mit früheren Versionen nicht kompatibel 
-% oder unerwünscht, weil diese beispielsweise das Ausgabeergebnis verändern.
-% Standardmäßig werden die Klassen in der aktuellen Version geladen. Mit 
-% \opt{tudscrver=\meta{Version}} kann auf das Verhalten einer früheren
-% Version geschaltet werden. Die eingestellte Kompatibilität wird als Zahl in 
-% \cs{tud@v@comp} gespeichert. In den Makros \cs{tud@v@\meta{Version}} werden
-% die zugehörigen Nummern gespeichert.
-%    \begin{macrocode}
-\newcommand*\tud@v@comp{\tud@v@last}
-\TUD@key{tudscrver}[last]{%
-  \def\@tempa{\@ifnextchar v{\@tempb}{\@tempb v}}%
-  \def\@tempb v##1\@nil{\def\@tempc{##1}}%
-  \@tempa #1\@nil%
-  \ifcsundef{tud@v@\@tempc}{%
-%<*class>
-    \ClassWarningNoLine{\TUDClassName}%
-%</class>
-%<*package&fonts>
-    \PackageWarningNoLine{tudscrfonts}%
-%</package&fonts>
-    {%
-      You have set option `tudscrver' to `\@tempc', but\MessageBreak%
-      this value is not supported. Because of this, the\MessageBreak%
-      value for `tudscrver' was set to `first'%
-    }%
-    \def\tud@v@comp{0}%
-  }{%
-%<*class>
-    \ClassInfoNoLine{\TUDClassName}%
-%</class>
-%<*package&fonts>
-    \PackageInfoNoLine{tudscrfonts}%
-%</package&fonts>
-    {%
-      Switching compatibility level to `\@tempc'%
-    }%
-    \edef\tud@v@comp{\@nameuse{tud@v@\@tempc}}%
-  }%
-  \FamilyKeyStateProcessed%
-}
-%    \end{macrocode}
-% Eine zusätzliche Bedingung gibt es noch: Die Kompatibilität kann nur beim
-% Laden der Klasse bzw. des Paketes gesetzt werden, danach nicht mehr.
-%    \begin{macrocode}
-%<*class>
-\AtEndOfClass%
-%</class>
-%<*package>
-\AtEndOfPackage%
-%</package>
-{%
-  \TUD@key{tudscrver}[]{%
-%<*class>
-    \ClassError{\TUDClassName}%
-%</class>
-%<*package&fonts>
-    \PackageError{tudscrfonts}%
-%</package&fonts>
-    {Option `tudscrver' too late}{%
-      Option `tudscrver' can only be set while loading the\MessageBreak%
-%<*class>
-      class `\TUDClassName'
-%</class>
-%<*package&fonts>
-      package `tudscrfonts'
-%</package&fonts>
-      but you have tried to set it up later.%
-    }%
-    \FamilyKeyStateProcessed%
-  }%
-%    \end{macrocode}
-% Außerdem wird darauf geachtet, dass mindestens \KOMAScript-Version~v3.17
-% vorhanden ist, andernfalls wird ein Fehler erzeugt.
-%    \begin{macrocode}
-%<*class>
-  \ifcsdef{scr@v@3.17}{%
-    \ifnum\scr@compatibility<\@nameuse{scr@v@3.12}\relax%
-      \ClassError{\TUDClassName}{%
-        KOMA-Script compatibility level too low%
-      }{%
-        \TUDVersion\space has to be used at least with\MessageBreak%
-        KOMA-Script compatibility option `version=3.12'.%
-      }%
-    \fi%
-  }{%
-    \ClassError{\TUDClassName}{%
-      KOMA-Script v3.17 is required%
-    }{%
-      \TUDVersion\space has to be used with KOMA-Script v3.17\MessageBreak%
-      at least. You're using \KOMAScriptVersion%
-    }%
-  }%
-%</class>
-}
-%    \end{macrocode}
 % Die numerischen Werte zu den einzelnen Versionen.
 % \ToDo{Für jede neue Version der entsprechende Befehl}[Release]
 %    \begin{macrocode}
 \csdef{tud@v@first}{0}
+\csdef{tud@v@2.00}{0}
+\csdef{tud@v@2.01}{0}
+\csdef{tud@v@2.01a}{0}
+\csdef{tud@v@2.01b}{0}
+\csdef{tud@v@2.02}{0}
 \csdef{tud@v@2.02}{0}
 \csdef{tud@v@2.03}{1}
 \csdef{tud@v@2.03a}{1}
@@ -601,26 +615,58 @@
 % \end{macro}^^A \tud@v@2.03a
 % \end{macro}^^A \tud@v@2.03
 % \end{macro}^^A \tud@v@2.02
+% \end{macro}^^A \tud@v@2.01b
+% \end{macro}^^A \tud@v@2.01a
+% \end{macro}^^A \tud@v@2.01
+% \end{macro}^^A \tud@v@2.00
 % \end{macro}^^A \tud@v@first
-% \end{macro}^^A \tud@v@comp
-% \end{option}^^A tudscrver
-% \begin{macro}{\tud@if@tudscrverlower}
+% \begin{macro}{\tud@v@get}
+% \changes{v2.05}{2016/05/31}{neu}^^A
+% Mit \cs{tud@v@get} wird die angegebene Versionsnummer in eine Normalform 
+% gebracht und an das Makro im ersten Argument übergeben. Damit spielt es keine 
+% Rolle, ob die im zweiten Argument übergebene Versionsnummer mit oder ohne 
+% führendes \enquote{v} angegeben wird.
+%    \begin{macrocode}
+\newcommand*\tud@v@get[2]{%
+  \begingroup%
+    \def\@tempa{\@ifnextchar v{\@tempb}{\@tempb v}}%
+    \def\@tempb v##1\@nil{\def\@tempc{##1}}%
+    \@tempa #2\@nil%
+    \edef\tud@reserved{%
+      \endgroup%
+      \etex@unexpanded{\def#1}{\@tempc}%
+    }%
+  \tud@reserved%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@v@get
+% \begin{macro}{\tud@if@v@lower}
 % \changes{v2.03}{2015/01/13}{neu}^^A
 % Mit diesem Befehl können abhängig von der gegebenen Kompatibilitätsversion in 
 % den Klassen unterschiedliche Einstellungen vorgenommen werden.
-% \ToDo{Möglichkeit auf Anwenderebene Version zu prüfen (vTUDScript)}[v2.05]
-% \ToDo{evtl doch \cs{tud@if@versionlower}?}[v2.05]
-% \ToDo{Argument mit und ohne v! Siehe Key tudscrver}[v2.05]
 %    \begin{macrocode}
-\newcommand*\tud@if@tudscrverlower[1]{%
-  \ifnum\tud@v@comp<\@nameuse{tud@v@#1}\relax%
-    \expandafter\@firstoftwo%
-  \else%
-    \expandafter\@secondoftwo%
-  \fi%
+\newcommand*\tud@if@v@lower[1]{%
+  \begingroup%
+    \tud@v@get\@tempa{#1}%
+    \ifcsdef{tud@v@\@tempa}{%
+      \ifnum\tud@v@comp<\@nameuse{tud@v@\@tempa}\relax%
+        \def\tud@reserved{\endgroup\@firstoftwo}%
+      \else%
+        \def\tud@reserved{\endgroup\@secondoftwo}%
+      \fi%
+    }{%
+      \def\tud@reserved{%
+        \ClassWarningNoLine{\TUD@Class@Name}{%PackageWarning!
+          Erroneous usage of `\string\tud@if@v@lower'.\MessageBreak%
+          There's no defined macro `\string\tud@v@\@tempa'%
+        }%
+        \endgroup\@firstoftwo%
+      }%
+    }
+  \tud@reserved%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@if@tudscrverlower
+% \end{macro}^^A \tud@if@v@lower
 %
 % \iffalse
 %</option>
@@ -745,7 +791,7 @@
 \AtEndOfPackage%
 %</package>
 {%
-  \tud@if@tudscrverlower{2.04}{\TUDoptions{vspacing=false}}{}%
+  \tud@if@v@lower{2.04}{\TUDoptions{vspacing=false}}{}%
 }
 %    \end{macrocode}
 % \begin{macro}{\dinBold}
@@ -790,9 +836,9 @@
 %    \begin{macrocode}
 \PassOptionsToPackage{oldcolors}{tudscrcolor}
 \@ifclassloaded{tudscrposter}{%
-  \RequirePackageWithOptions{tudscrcomp-poster}[\TUDVersion]%
+  \RequirePackageWithOptions{tudscrcomp-poster}[\TUD@Version]%
 }{%
-  \RequirePackageWithOptions{tudscrcomp-book}[\TUDVersion]%
+  \RequirePackageWithOptions{tudscrcomp-book}[\TUD@Version]%
 }
 %    \end{macrocode}
 %

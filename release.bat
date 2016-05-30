@@ -5,7 +5,7 @@ echo  Festlegen der Version, welche erstellt werden soll
 echo =========================================================================
 echo.
 for /f "tokens=1,2,3 delims= " %%a in (
-  'findstr /r \@TUDVersion{[0-9][0-9][0-9][0-9]/[0-9][0-9]/[0-9][0-9] source\tudscr-version.dtx'
+  'findstr /r \TUD@Version@Check{[0-9][0-9][0-9][0-9]/[0-9][0-9]/[0-9][0-9] source\tudscr-version.dtx'
 ) do (
   if "%%c" == "TUD-KOMA-Script}%%" (
     set version=%%b
@@ -15,6 +15,8 @@ for /f "tokens=1,2,3 delims= " %%a in (
 )
 if exist temp rmdir temp /s /q > nul
 if exist release-%version% rmdir release-%version% /s /q > nul
+echo.
+echo TUD-KOMA-Script %version%
 echo.
 echo =========================================================================
 echo  Erzeugen der Klassen und der inline-Dokumentation fuer %version%
