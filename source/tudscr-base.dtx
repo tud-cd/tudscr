@@ -1,4 +1,4 @@
-% \CheckSum{694}
+% \CheckSum{700}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -53,13 +53,13 @@
 \ProvidesFile{tudscr-base.dtx}[%
   2016/05/31 v2.05 TUD-KOMA-Script\space%
 %</driver>
-%<package>\ProvidesPackage{tudscrbase}[%
-%<*driver|package>
+%<package&base>\ProvidesPackage{tudscrbase}[%
+%<*driver|package&base>
 %!TUD@Version
 %<package>  package
   (basics for the bundle)%
 ]
-%</driver|package>
+%</driver|package&base>
 %<*driver>
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman,xindy]{tudscrdoc}
@@ -108,20 +108,28 @@
 %
 % \subsection{Das Paket \pkg{tudscrbase}}
 %
-% Das Paket \pkg{scrbase} wird zur Optionsdefinition benötigt.
+% Das Paket \pkg{scrbase} wird zur Optionsdefinition benötigt, \pkg{scrlfile} 
+% für verschiedene Hooks vor sowie nach Klassen und Paketen.
 %    \begin{macrocode}
-\RequirePackage{scrbase}[2013/12/19]
-%    \end{macrocode}
-% Das Paket \pkg{kvsetkeys} erweitert \pkg{keyval} um die Möglichkeit, das
-% Verhalten bei der Angabe eines nicht definierten Schlüssels festzulegen.
-%    \begin{macrocode}
-\RequirePackage{etexcmds}[2011/02/16]
-\RequirePackage{kvsetkeys}[2012/04/25]
+%<base>\RequirePackage{scrbase}[2013/12/19]
+%<fontsfix>\RequirePackage{scrlfile}[2013/12/19]
 %    \end{macrocode}
 % Das Paket \pkg{etoolbox} wird für die Manipulation bereits definierter
 % Makros sowie zur erweiterten Auswertung boolescher Ausdrücke benötigt.
 %    \begin{macrocode}
 \RequirePackage{etoolbox}[2011/01/03]
+%    \end{macrocode}
+%
+% \iffalse
+%</package>
+%<*package&base>
+% \fi
+%
+% Das Paket \pkg{kvsetkeys} erweitert \pkg{keyval} um die Möglichkeit, das
+% Verhalten bei der Angabe eines nicht definierten Schlüssels festzulegen.
+%    \begin{macrocode}
+\RequirePackage{etexcmds}[2011/02/16]
+\RequirePackage{kvsetkeys}[2012/04/25]
 %    \end{macrocode}
 %
 % \subsubsection{Robuster Test auf leeres Argument}
@@ -545,7 +553,7 @@
 % \end{macro}^^A \TUD@key@lock
 %
 % \iffalse
-%</package>
+%</package&base>
 % \fi
 %
 % \begin{macro}{\TUD@noworlater}
@@ -569,7 +577,7 @@
 % Option wird die Wertzuweisung abermals ausgeführt, gefolgt von der im 
 % zweiten Argument definierten Abarbeitung dieser.
 %    \begin{macrocode}
-%<*package>
+%<*package&base>
 \newcommand*\TUD@noworlater[2]{}
 \newcommand*\TUD@noworlater@simple[2]{%
   \PackageWarning{tudscrbase}{%
@@ -578,7 +586,7 @@
   #1#2%
 }
 \let\TUD@noworlater\TUD@noworlater@simple
-%</package>
+%</package&base>
 %    \end{macrocode}
 % Nach dem Laden des Paketes wird geprüft, ob die ursprüngliche Definition 
 % des Befehls aus dem Paket noch besteht. Ist dies der Fall, wird der Befehl
@@ -601,7 +609,7 @@
 % \end{macro}^^A \TUD@noworlater
 %
 % \iffalse
-%<*package>
+%<*package&base>
 % \fi
 %
 % \begin{macro}{\cs@lock}
@@ -674,6 +682,12 @@
 % \end{macro}^^A \bool@std@lock
 % \end{macro}^^A \bool@lock
 % \end{macro}^^A \tud@setbool
+%
+% \iffalse
+%</package&base>
+%<*package>
+% \fi
+%
 % \begin{macro}{\tud@cmd@store}
 % \begin{macro}{\tud@cmd@restore}
 % \begin{macro}{\tud@cmd@reset}
@@ -702,6 +716,7 @@
   \tud@cmd@check{#1}%
   \ifcsdef{@@tud@#1}{}{\csletcs{@@tud@#1}{#1}}%
 }
+%<*base>
 \newcommand*\tud@cmd@restore[1]{%
   \tud@cmd@check{#1}%
   \ifcsdef{@@tud@#1}{%
@@ -725,6 +740,7 @@
     \@nameuse{#1}%
   }%
 }
+%</base>
 %    \end{macrocode}
 % Dieses Makro dient zum Überprüfen, ob der zu sichernde beziehungsweise 
 % wiederherzustellende Befehl überhaupt definiert ist. Sollte das nicht der 
@@ -732,9 +748,10 @@
 %    \begin{macrocode}
 \newcommand*\tud@cmd@check[1]{%
   \ifcsdef{#1}{}{%
-    \PackageError{tudscrbase}{%
-      `\@backslashchar#1' is not defined%
-    }{%
+    \PackageError{%
+%<base>      tudscrbase%
+%<fontsfix>      fix-tudscrfonts%
+    }{`\@backslashchar#1' is not defined}{%
       The command `\@backslashchar#1' was never defined\MessageBreak%
       Please contact the TUD-KOMA-Script maintainer\MessageBreak%
       via \tudscrmail. A bugfix is urgently required.%
@@ -742,12 +759,30 @@
   }%
 }
 %    \end{macrocode}
+% Die beiden Befehle \cs{tud@cmd@store} und \cs{tud@cmd@check} werden für das 
+% Paket \pkg{fix-tudscrfonts} bereits außerhalb von \pkg{tudscrbase} definiert. 
+% Damit deshalb keine Probleme entstehen, werden diese kurzerhand vor dem Laden 
+% von \pkg{tudscrbase} undefiniert gesetzt.
+%    \begin{macrocode}
+%<*fontsfix>
+\BeforePackage{tudscrbase}{%
+  \undef\tud@cmd@store%
+  \undef\tud@cmd@check%
+}
+%</fontsfix>
+%    \end{macrocode}
 % \end{macro}^^A \tud@cmd@check
 % \end{macro}^^A \tud@cmd@use
 % \end{macro}^^A \tud@cmd@update
 % \end{macro}^^A \tud@cmd@reset
 % \end{macro}^^A \tud@cmd@restore
 % \end{macro}^^A \tud@cmd@store
+%
+% \iffalse
+%</package>
+%<*package&base>
+% \fi
+%
 % \begin{macro}{\tud@skip@store}
 % \changes{v2.04}{2015/03/02}{neu}^^A
 % \begin{macro}{\tud@skip@restore}
@@ -1062,7 +1097,7 @@
 % \end{macro}^^A \TUD@AfterPackage@set
 %
 % \iffalse
-%</package>
+%</package&base>
 % \fi
 %
 % \begin{macro}{\TUD@KOMAoptions}
@@ -1073,7 +1108,7 @@
 % Ausführung des Arguments direkt über \cs{KOMAoptions}. Andernfalls wird das 
 % angegebene Argument an die zuladende Klasse durchgereicht.
 %    \begin{macrocode}
-%<*package>
+%<*package&base>
 \newcommand*\TUD@KOMAoptions[1]{%
   \PackageWarning{tudscrbase}{%
     You should load package `scrextend' right after the\MessageBreak%
@@ -1085,7 +1120,7 @@
 }{%
   \AfterPackage*{scrextend}{\let\TUD@KOMAoptions\KOMAoptions}
 }
-%</package>
+%</package&base>
 %    \end{macrocode}
 % Nach dem Laden des Paketes wird geprüft, ob die ursprüngliche Definition 
 % des Befehls aus dem Paket noch besteht. Ist dies der Fall, wird der Befehl
