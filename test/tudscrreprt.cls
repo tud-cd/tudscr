@@ -2048,18 +2048,18 @@
 \AfterPackage*{siunitx}{%
   \providecommand*\lseries{\fontseries{l}\selectfont}%
 }
-\newcommand*\tud@sec@fontface[1][]{%
-  \if@tud@cdfont@din%
-    \tud@dinbn\tud@raggedright%
-  \else%
-    \sectfont#1%
-  \fi%
-}
 \newrobustcmd*\ifdin{%
   \ifx\f@family\tud@dinbold%
     \expandafter\@firstoftwo%
   \else%
     \expandafter\@secondoftwo%
+  \fi%
+}
+\newcommand*\tud@sec@fontface[1][]{%
+  \if@tud@cdfont@din%
+    \tud@dinbn\tud@raggedright%
+  \else%
+    \sectfont#1%
   \fi%
 }
 \newcommand*\tud@raggedright{\raggedright}
@@ -2070,7 +2070,6 @@
   }{}%
   \renewcommand*\tud@RaggedRight{\RaggedRight}%
 }
-\newcommand*\tud@sec@ragged{\ifdin{\tud@raggedright}{\tud@RaggedRight}}
 \RequirePackage{textcase}[2004/10/07]
 \newcommand*\tud@makeuppercase[1]{%
   \ifdin{\begingroup\MakeTextUppercase{#1}\endgroup}{#1}%
@@ -4463,7 +4462,7 @@
 \newcommand*\tud@part@fontcolor{}
 \newcommand*\tud@chapter@fontcolor{}
 \newcommand*\tud@section@fontcolor{}
-\providecommand*\raggedtitle{\raggedpart}
+\providecommand*\raggedtitle{\tud@raggedright}
 \newkomafont{parttitle}{%
   \tud@sec@fontface%
   \tud@color{\tud@part@fontcolor}%
@@ -4570,7 +4569,7 @@
       }%
     \fi%
     \tud@cmd@store{raggedpart}%
-    \renewcommand*\raggedpart{\tud@sec@ragged}%
+    \renewcommand*\raggedpart{\tud@raggedright}%
   \fi%
   \ifcase\tud@layout@chapter@num\relax% false
     \tud@cmd@restore{chapterheadstartvskip}%
@@ -4605,7 +4604,7 @@
     }%
     \tud@font@koma@set{chapterprefix}{\usesizeofkomafont{partnumber}}%
     \tud@cmd@store{raggedchapter}%
-    \renewcommand*\raggedchapter{\tud@sec@ragged}%
+    \renewcommand*\raggedchapter{\tud@raggedright}%
   \fi%
   \ifcase\tud@layout@section@num\relax% false
     \tud@sectioning@reset[addsec]{section}%
@@ -4643,7 +4642,7 @@
       \ifstr{\tud@pagecolor}{HKS41}{}{\tud@color{\tud@section@fontcolor}}%
     }%
     \tud@cmd@store{raggedsection}%
-    \renewcommand*\raggedsection{\tud@sec@ragged}%
+    \renewcommand*\raggedsection{\tud@raggedright}%
   \fi%
 }
 \newcommand*\tud@layout@specialpage@set[1]{%

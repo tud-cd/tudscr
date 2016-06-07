@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-layout.dtx}[%
-  2016/05/31 v2.05 TUD-KOMA-Script (layout)%
+  2016/06/07 v2.05 TUD-KOMA-Script (layout)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman,xindy]{tudscrdoc}
@@ -873,7 +873,7 @@
 % \changes{v2.05}{2016/04/05}{neu}^^A
 % Dieses Makro wird für die Ausrichtung des Titels bereitgehalten.
 %    \begin{macrocode}
-\providecommand*\raggedtitle{\raggedpart}
+\providecommand*\raggedtitle{\tud@raggedright}
 %    \end{macrocode}
 % \end{macro}^^A \raggedtitle
 % \begin{KOMAfont}{parttitle}
@@ -1098,7 +1098,7 @@
     \fi%
 %</book|report>
     \tud@cmd@store{raggedpart}%
-    \renewcommand*\raggedpart{\tud@sec@ragged}%
+    \renewcommand*\raggedpart{\tud@raggedright}%
   \fi%
 %    \end{macrocode}
 % Die Einstellungen für die Kapitel bzw. die folgenden Gliederungsebenen. Auch
@@ -1150,7 +1150,7 @@
     }%
     \tud@font@koma@set{chapterprefix}{\usesizeofkomafont{partnumber}}%
     \tud@cmd@store{raggedchapter}%
-    \renewcommand*\raggedchapter{\tud@sec@ragged}%
+    \renewcommand*\raggedchapter{\tud@raggedright}%
   \fi%
 %</book|report>
   \ifcase\tud@layout@section@num\relax% false
@@ -1194,7 +1194,7 @@
       \ifstr{\tud@pagecolor}{HKS41}{}{\tud@color{\tud@section@fontcolor}}%
     }%
     \tud@cmd@store{raggedsection}%
-    \renewcommand*\raggedsection{\tud@sec@ragged}%
+    \renewcommand*\raggedsection{\tud@raggedright}%
   \fi%
 %    \end{macrocode}
 % Für Poster wird außerdem der passende Seitenstil und die Ausprägung von Kopf
@@ -1471,10 +1471,9 @@
   \newcommand*\tud@@part{}%
 %<*article|poster>
   \let\tud@@part\@part%
-  \patchcmd{\tud@@part}%
-    {\size@partnumber{\partformat}}%
-    {\size@partnumber{\tud@makeuppercase{\partformat}}}%
-    {}{\tud@patch@wrn{@part}}%
+  \patchcmd{\tud@@part}{\size@partnumber{\partformat}}{%
+    \size@partnumber{\tud@makeuppercase{\partformat}}%
+  }{}{\tud@patch@wrn{@part}}%
 %</article|poster>
 %<*book|report>
   \let\tud@@part\@part%
