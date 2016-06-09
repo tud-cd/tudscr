@@ -1,4 +1,4 @@
-% \CheckSum{598}
+% \CheckSum{606}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-locale.dtx}[%
-  2016/05/31 v2.05 TUD-KOMA-Script (localization)%
+  2016/06/09 v2.05 TUD-KOMA-Script (localization)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman,xindy]{tudscrdoc}
@@ -356,22 +356,22 @@
 % \begin{macro}{\tud@ifin@and}
 % \changes{v2.05}{2015/08/05}{neu}^^A
 % Dieser Befehl prüft, ob innerhalb eines Felder, welches im ersten Argument 
-% angegeben werden muss, \cs{and} verwendet wurde. Ist dies der wird das zweite 
-% Argument ausgeführt, andernfalls das dritte.
+% angegeben werden muss, \cs{and} verwendet wurde. Ist dies der Fall, wird das
+% zweite Argument ausgeführt, andernfalls das dritte.
 %    \begin{macrocode}
 \newcommand*\tud@ifin@and[1]{%
   \begingroup%
-    \protecting{%
-      \global\@tempswafalse%
-      \def\and{\global\@tempswatrue}%
-      \sbox\z@{#1}%
+    \let\and\relax%
+    \protected@edef\@tempb{#1}%
+    \def\@tempa##1\and##2\relax{%
+      \if\relax\detokenize{##2}\relax%
+        \aftergroup\@secondoftwo%
+      \else%
+        \aftergroup\@firstoftwo%
+      \fi%
     }%
-  \endgroup%
-  \if@tempswa%
-    \expandafter\@firstoftwo%
-  \else%
-    \expandafter\@secondoftwo%
-  \fi%
+    \expandafter\@tempa\@tempb\and\relax%
+  \endgroup
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@ifin@and
