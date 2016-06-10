@@ -1,4 +1,4 @@
-% \CheckSum{700}
+% \CheckSum{738}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-base.dtx}[%
-  2016/06/09 v2.05 TUD-KOMA-Script\space%
+  2016/06/10 v2.05 TUD-KOMA-Script\space%
 %</driver>
 %<package&base>\ProvidesPackage{tudscrbase}[%
 %<*driver|package&base>
@@ -88,6 +88,10 @@
 %
 % Für die Erstellung der Wrapper-Klassen werden die dafür benötigten Pakete
 % eingebunden und Steuerungsbefehle definiert.
+% \ToDo{%
+%    Schnittstelle ähnlich zu \cs{KOMA@kav@\dots}? Falls ja, dann Löschen von 
+%    Elemente aus \pkg{etoolbox}-Listen ermöglichen \cs{list(cs)(g/e/x)}rem%
+% }[v2.07]
 %
 % \StopEventually{\PrintIndex\PrintChanges\PrintToDos}
 %
@@ -110,8 +114,41 @@
 %
 % Das Paket \pkg{scrbase} wird zur Optionsdefinition benötigt, \pkg{scrlfile} 
 % für verschiedene Hooks vor sowie nach Klassen und Paketen.
+% \ToDo{Patch für \pkg{scrbase} raus}[v3.21]
 %    \begin{macrocode}
-%<base>\RequirePackage{scrbase}[2013/12/19]
+%<*base>
+\RequirePackage{scrbase}[2013/12/19]
+\@ifpackagelater{scrbase}{2016/05/11}{}{%
+  \renewcommand*\test@@ifdimunt[1]{%
+    \@tempswafalse
+    \ifstr{#1}{pt}{\@tempswatrue}{%
+      \ifstr{#1}{pc}{\@tempswatrue}{%
+        \ifstr{#1}{in}{\@tempswatrue}{%
+          \ifstr{#1}{bp}{\@tempswatrue}{%
+            \ifstr{#1}{cm}{\@tempswatrue}{%
+              \ifstr{#1}{mm}{\@tempswatrue}{%
+                \ifstr{#1}{dd}{\@tempswatrue}{%
+                  \ifstr{#1}{cc}{\@tempswatrue}{%
+                    \ifstr{#1}{sp}{\@tempswatrue}{%
+                      \ifstr{#1}{ex}{\@tempswatrue}{%
+                        \ifstr{#1}{em}{\@tempswatrue}{%
+                          \scr@ifpdfoutput{%
+                            \ifstr{#1}{px}{\@tempswatrue}{}%
+                          }{}%
+                        }%
+                      }%
+                    }%
+                  }%
+                }%
+              }%
+            }%
+          }%
+        }%
+      }%
+    }%
+  }%
+}
+%</base>
 %<fontsfix>\RequirePackage{scrlfile}[2013/12/19]
 %    \end{macrocode}
 % Das Paket \pkg{etoolbox} wird für die Manipulation bereits definierter
@@ -1110,35 +1147,34 @@
 % angegebene Argument an die zuladende Klasse durchgereicht.
 %    \begin{macrocode}
 %<*package&base>
-\newcommand*\TUD@KOMAoptions[1]{%
-  \PackageWarning{tudscrbase}{%
-    You should load package `scrextend' right after the\MessageBreak%
-    documentclass. Option \string\TUD@KOMAoptions{`#1'} is gobbled%
-  }%
-}
+\newcommand*\TUD@KOMAoptions[1]{}
 \ifdef{\KOMAClassName}{%
   \let\TUD@KOMAoptions\KOMAoptions
 }{%
+  \renewcommand*\TUD@KOMAoptions[1]{%
+    \PackageWarning{tudscrbase}{%
+      You should load package `scrextend' right after the\MessageBreak%
+      documentclass. Option \string\TUD@KOMAoptions{`#1'} is gobbled%
+    }%
+  }%
   \AfterPackage*{scrextend}{\let\TUD@KOMAoptions\KOMAoptions}
 }
 %</package&base>
 %    \end{macrocode}
-% Nach dem Laden des Paketes wird geprüft, ob die ursprüngliche Definition 
-% des Befehls aus dem Paket noch besteht. Ist dies der Fall, wird der Befehl
-% zur Verzögerung an das Ende der Klasse bzw. des Paketes umdefiniert.
+% Nach dem Laden einer \TUDScript-Klasse wird der Befehl so angepasst, dass 
+% dieser vor dem Laden der dazugehörigen \KOMAScript-Elternklasse die Optionen 
+% einfach durchreicht. Nach dem Laden der Klasse steht dann \cs{KOMAoptions} 
+% zur Verfügung.
 %    \begin{macrocode}
 %<*load&class>
-\renewcommand*\TUD@KOMAoptions[1]{%
-  \if@atdocument%
-    \KOMAoptions{#1}%
-  \else%
-    \@ifclassloaded{\TUD@Class@KOMA}{%
-      \KOMAoptions{#1}%
-    }{%
-      \PassOptionsToClass{#1}{\TUD@Class@KOMA}%
-    }%
-  \fi%
-}
+%<*!inherit>
+\renewcommand*\TUD@KOMAoptions[1]{\PassOptionsToClass{#1}{\TUD@Class@KOMA}}
+\AfterClass{\TUD@Class@KOMA}{\let\TUD@KOMAoptions\KOMAoptions}
+%</!inherit>
+%<*inherit>
+\renewcommand*\TUD@KOMAoptions[1]{\PassOptionsToClass{#1}{\TUD@Class@Parent}}
+\AfterClass{\TUD@Class@Parent}{\let\TUD@KOMAoptions\KOMAoptions}
+%</inherit>
 %</load&class>
 %    \end{macrocode}
 % \end{macro}^^A \TUD@KOMAoptions
