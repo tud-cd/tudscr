@@ -5,8 +5,8 @@
 %% The original source files were:
 %%
 %% tudscr-version.dtx  (with options: `class,report')
-%% tudscr-base.dtx  (with options: `class,load')
-%% tudscr-fonts.dtx  (with options: `class,option')
+%% tudscr-base.dtx  (with options: `class,report,load')
+%% tudscr-fonts.dtx  (with options: `class,report,option')
 %% tudscr-pagestyle.dtx  (with options: `class,report,option')
 %% tudscr-layout.dtx  (with options: `class,report,option')
 %% tudscr-title.dtx  (with options: `class,report,option')
@@ -14,8 +14,8 @@
 %% tudscr-comp.dtx  (with options: `class,report,option')
 %% tudscr-misc.dtx  (with options: `class,report,option')
 %% tudscr-misc.dtx  (with options: `class,report,execute')
-%% tudscr-base.dtx  (with options: `class,body')
-%% tudscr-fonts.dtx  (with options: `class,body')
+%% tudscr-base.dtx  (with options: `class,report,body')
+%% tudscr-fonts.dtx  (with options: `class,report,body')
 %% tudscr-fields.dtx  (with options: `class,report,body')
 %% tudscr-locale.dtx  (with options: `class,report,body')
 %% tudscr-pagestyle.dtx  (with options: `class,report,body')
@@ -117,17 +117,8 @@
   \renewcommand*\TUD@noworlater[2]{#1\AtEndOfClass{#1#2}}%
   \AtEndOfClass{\renewcommand*\TUD@noworlater[2]{#1#2}}%
 \fi
-\renewcommand*\TUD@KOMAoptions[1]{%
-  \if@atdocument%
-    \KOMAoptions{#1}%
-  \else%
-    \@ifclassloaded{\TUD@Class@KOMA}{%
-      \KOMAoptions{#1}%
-    }{%
-      \PassOptionsToClass{#1}{\TUD@Class@KOMA}%
-    }%
-  \fi%
-}
+\renewcommand*\TUD@KOMAoptions[1]{\PassOptionsToClass{#1}{\TUD@Class@KOMA}}
+\AfterClass{\TUD@Class@KOMA}{\let\TUD@KOMAoptions\KOMAoptions}
 %%% From File: tudscr-fonts.dtx
 \PreventPackageFromLoading[%
   \ClassWarning{\TUD@Class@Name}{%
@@ -190,24 +181,29 @@
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax% false
       \renewcommand*\tud@cdfont@num{0}%
+      % TODO \TUD@SpecialOptionAtDocument
       \if@atdocument\tud@font@set\fi%
     \or% true
       \renewcommand*\tud@cdfont@num{1}%
+      % TODO \TUD@SpecialOptionAtDocument
       \if@atdocument\tud@font@set\fi%
     \or% heavy
       \renewcommand*\tud@cdfont@num{2}%
+      % TODO \TUD@SpecialOptionAtDocument
       \if@atdocument\tud@font@set\fi%
     \or% normalbold
       \@tud@cdfont@ultraboldfalse%
       \ifcase\tud@cdfont@num\relax% false to true
         \renewcommand*\tud@cdfont@num{1}%
       \fi%
+      % TODO \TUD@SpecialOptionAtDocument
       \if@atdocument\tud@font@set\fi%
     \or% ultrabold
       \@tud@cdfont@ultraboldtrue%
       \ifcase\tud@cdfont@num\relax% false to true
         \renewcommand*\tud@cdfont@num{1}%
       \fi%
+      % TODO \TUD@SpecialOptionAtDocument
       \if@atdocument\tud@font@set\fi%
     \or% nodin
       \@tud@cdfont@dinfalse%
@@ -239,6 +235,7 @@
         \csname @tud@fontsize@settrue\endcsname%
         \ifcase\tud@cdfont@num\relax% false to true
           \renewcommand*\tud@cdfont@num{1}%
+          % TODO \TUD@SpecialOptionAtDocument
           \if@atdocument\tud@font@set\fi%
         \fi%
         \FamilyKeyStateProcessed%
@@ -246,6 +243,7 @@
     }{}%
   \fi%
 }
+% TODO vspacing -> relspacing
 \newif\if@tud@vspacing
 \TUD@key{vspacing}[true]{%
   \TUD@set@numkey{vspacing}{@tempa}{%
@@ -259,12 +257,14 @@
     \or% true
       \@tud@vspacingtrue%
     \fi%
+    % TODO \TUD@SpecialOptionAtDocument
     \if@atdocument\tud@font@skip@set\fi%
   \fi%
 }
 \TUDExecuteOptions{vspacing=true}
 \DefineFamilyMember{KOMA}
 \DefineFamilyKey{KOMA}{fontsize}{%
+  % TODO \TUD@SpecialOptionAtDocument
   \if@atdocument\AtEndOfFamilyOptions{\tud@font@skip@set}\fi%
   \FamilyKeyStateProcessed%
 }
@@ -280,9 +280,11 @@
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax% false
       \bool@set@lock{@tud@cdmath}{false}%
+      % TODO \TUD@SpecialOptionAtDocument
       \if@atdocument\tud@font@math@set\fi%
     \or% true
       \bool@set@lock{@tud@cdmath}{true}%
+      % TODO \TUD@SpecialOptionAtDocument
       \if@atdocument\tud@font@math@set\fi%
     \or% upgreek
       \TUDoptions{slantedgreek=false}%
@@ -296,6 +298,7 @@
   \TUD@set@ifkey{slantedgreek}{@tud@slantedgreek}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \bool@set@lock{@tud@slantedgreek}{#1}%
+    % TODO \TUD@SpecialOptionAtDocument
     \if@atdocument\tud@font@math@set\fi%
   \fi%
 }
@@ -306,6 +309,7 @@
   \xifinlist{\GetRealPageStyle{#1}}{\tud@ps@list}{#2}{#3}%
 }
 \newif\if@tud@ddc@internal
+% TODO: Redefinition der beiden Befehle mit \AtBeginDocument
 \newcommand*\tud@comp@clearpage{%
   \tud@if@v@lower{2.04}{%
     \if@tud@ddc@internal\else\if@atdocument%
@@ -475,9 +479,7 @@
       \bool@set@lock{@tud@foot@colored}{true}%
     \fi%
   \else%
-    \ifdimen{#1}{%
-      \TUDoptions{extrabottommargin=#1}%
-    }{}%
+    \ifdimen{#1}{\TUDoptions{extrabottommargin=#1}}{}%
   \fi%
 }
 \newcommand*\tud@ps@store[1]{%
@@ -538,12 +540,15 @@
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax% false/typearea
       \cs@set@lock{tud@cdgeometry@num}{0}%
+      % TODO \TUD@SpecialOptionAtDocument
       \if@atdocument\tud@cdgeometry@process\fi%
     \or% true/cd
       \cs@set@lock{tud@cdgeometry@num}{2}%
+      % TODO \TUD@SpecialOptionAtDocument
       \if@atdocument\tud@cdgeometry@process\fi%
     \or% symmetric
       \cs@set@lock{tud@cdgeometry@num}{3}%
+      % TODO \TUD@SpecialOptionAtDocument
       \if@atdocument\tud@cdgeometry@process\fi%
     \or% twoside
       \cs@set@lock{tud@cdgeometry@num}{4}%
@@ -556,36 +561,74 @@
     \or% restricted
       \cs@std@lock{tud@cdgeometry@num}{2}%
       \renewcommand*\tud@cdgeometry@calc@num{0}%
+      % TODO \TUD@SpecialOptionAtDocument
       \if@atdocument\tud@cdgeometry@process\fi%
     \or% adapted
       \cs@std@lock{tud@cdgeometry@num}{2}%
       \renewcommand*\tud@cdgeometry@calc@num{1}%
+      % TODO \TUD@SpecialOptionAtDocument
       \if@atdocument\tud@cdgeometry@process\fi%
     \or% calculated
       \cs@std@lock{tud@cdgeometry@num}{2}%
       \renewcommand*\tud@cdgeometry@calc@num{2}%
+      % TODO \TUD@SpecialOptionAtDocument
       \if@atdocument\tud@cdgeometry@process\fi%
     \or% custom
       \cs@set@lock{tud@cdgeometry@num}{1}%
     \fi%
   \fi%
 }
+% TODO: Optionen für Längen (falls zu prüfen, auf \maxdimen setzen)
+% \footlogoheight, \pageheadingsvskip und \headingsvskip
+% TODO: Hook am Ende von tud@font@set definieren und nutzen?
+% wegen Abhängigkeit zur Schriftgröße von em,ex
 \newlength\tud@dim@extrabottommargin
 \TUD@key{extrabottommargin}{%
   \TUD@noworlater{%
     \TUD@set@lengthkey{extrabottommargin}{\tud@dim@extrabottommargin}{#1}%
   }{%
     \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+      % TODO \TUD@SpecialOptionAtDocument
       \if@atdocument\tud@cdgeometry@@process\fi%
     \fi%
   }%
 }
+\newlength\tud@dim@bleedmargin
+\setlength\tud@dim@bleedmargin{\maxdimen}
+\TUD@key{bleedmargin}{%
+%  \TUD@noworlater{%
+    \TUD@set@lengthkey{bleedmargin}{\tud@dim@bleedmargin}{#1}%
+%  }{%
+%    \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+%      \tud@cdgeometry@@process@atdocument%
+%    \fi%
+%  }%
+}
+% TODO: Nur Werte größer 0 zulassen
+\newcommand*\tud@bleedmargin@set{%
+  \@tempswafalse%
+  \ifcsundef{CROP@@@marks}{}{%
+    \ifx\CROP@@@marks\vfil\else\@tempswatrue\fi%
+  }%
+  \ifGm@showcrop\@tempswatrue\fi%
+  \ifdim\tud@dim@bleedmargin=\maxdimen\relax%
+    \if@tempswa%
+      \setlength\tud@dim@bleedmargin{.05\tud@dim@widemargin}%
+    \else%
+      \setlength\tud@dim@bleedmargin{\z@}%
+    \fi%
+  \else%
+    % TODO: Hinweis, falls crop nicht geladen bzw. layout nicht gesetzt
+  \fi%
+}
 \DefineFamilyMember{KOMA}
 \DefineFamilyKey{KOMA}{twoside}{%
+  % TODO \TUD@SpecialOptionAtDocument???
   \if@atdocument\AtEndOfFamilyOptions{\tud@cdgeometry@@process}\fi%
   \FamilyKeyStateProcessed%
 }
 \DefineFamilyKey{KOMA}{twocolumn}{%
+  % TODO \TUD@SpecialOptionAtDocument???
   \if@atdocument\AtEndOfFamilyOptions{\tud@cdgeometry@@process}\fi%
   \FamilyKeyStateProcessed%
 }
@@ -671,6 +714,7 @@
       \TUD@std@ifkey@lock{chapterpage}{true}%
       \cs@std@lock{tud@layout@section@num}{2}%
     \fi%
+    % TODO \TUD@SpecialOptionAtDocument
     \if@atdocument%
       \tud@layout@process%
     \else%
@@ -700,6 +744,7 @@
     \or% full
       \cs@set@lock{tud@layout@cover@num}{6}%
     \fi%
+    % TODO \TUD@SpecialOptionAtDocument
     \if@atdocument\tud@layout@process\fi%
   \fi%
 }
@@ -721,6 +766,7 @@
     \or% full
       \cs@set@lock{tud@layout@title@num}{6}%
     \fi%
+    % TODO \TUD@SpecialOptionAtDocument
     \if@atdocument\tud@layout@process\fi%
   \fi%
 }
@@ -742,6 +788,7 @@
     \or% full
       \cs@set@lock{tud@layout@part@num}{6}%
     \fi%
+    % TODO \TUD@SpecialOptionAtDocument
     \if@atdocument\tud@layout@process\fi%
   \fi%
 }
@@ -770,6 +817,7 @@
       \cs@set@lock{tud@layout@chapter@num}{6}%
       \TUD@std@ifkey@lock{chapterpage}{true}%
     \fi%
+    % TODO \TUD@SpecialOptionAtDocument
     \if@atdocument\tud@layout@process\fi%
   \fi%
 }
@@ -783,6 +831,7 @@
     \else% *color
       \cs@set@lock{tud@layout@section@num}{2}%
     \fi%
+    % TODO \TUD@SpecialOptionAtDocument
     \if@atdocument\tud@layout@process\fi%
   \fi%
 }
@@ -790,6 +839,7 @@
 \TUD@key{parttitle}[true]{%
   \TUD@set@ifkey{parttitle}{@tud@parttitle}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    % TODO \TUD@SpecialOptionAtDocument
     \if@atdocument\tud@layout@process\fi%
   \fi%
 }
@@ -870,40 +920,19 @@
 }
 \DefineFamilyMember{KOMA}
 \DefineFamilyKey{KOMA}{headings}{%
-  \if@atdocument%
-    \AtEndOfFamilyOptions{\tud@x@scr@headings@reset}%
-  \fi%
+  % TODO \TUD@SpecialOptionAtDocument???
+  \if@atdocument\AtEndOfFamilyOptions{\tud@x@scr@headings@reset}\fi%
   \FamilyKeyStateProcessed%
 }
 \DefineFamilyKey{KOMA}{open}{%
-  \if@atdocument%
-    \AtEndOfFamilyOptions{\tud@x@scr@headings@reset}%
-  \fi%
+  % TODO \TUD@SpecialOptionAtDocument???
+  \if@atdocument\AtEndOfFamilyOptions{\tud@x@scr@headings@reset}\fi%
   \FamilyKeyStateProcessed%
 }
 \DefineFamilyKey{KOMA}{chapterprefix}{%
-  \if@atdocument%
-    \AtEndOfFamilyOptions{\tud@x@scr@headings@reset}%
-  \fi%
+  % TODO \TUD@SpecialOptionAtDocument???
+  \if@atdocument\AtEndOfFamilyOptions{\tud@x@scr@headings@reset}\fi%
   \FamilyKeyStateProcessed%
-}
-\newcommand*\tud@x@scr@headings@reset{%
-  \tud@layout@process%
-  \tud@x@scr@headings@set[%
-    \ifcase\tud@layout@part@num\relax\else% !false
-      \tud@font@koma@reset{part}%
-      \tud@font@koma@reset{partnumber}%
-    \fi%
-    \ifcase\tud@layout@chapter@num\relax\else% !false
-      \tud@font@koma@reset{chapter}%
-      \tud@font@koma@reset{chapterprefix}%
-    \fi%
-    \ifcase\tud@layout@section@num\relax\else% !false
-      \tud@font@koma@reset{section}%
-      \tud@font@koma@reset{subsection}%
-      \tud@font@koma@reset{subsubsection}%
-    \fi%
-  ]%
 }
 \newcommand*\tud@pagecolor{}%
 %%% From File: tudscr-title.dtx
@@ -1333,7 +1362,7 @@
         }%
         \endgroup\@firstoftwo%
       }%
-    }
+    }%
   \tud@reserved%
 }
 %%% From File: tudscr-misc.dtx
@@ -1406,10 +1435,25 @@
     \fi%
   \fi%
 }
-\AtEndPreamble{%
+\AtEndOfClass{%
   \newcounter{symbolheadings}[chapter]
 }
 %%% From File: tudscr-misc.dtx
+% TODO: für Reihenfolge alle \AtEndPreamble durchgehen
+\newcommand*\tud@options@process{}
+\newcommand*\tud@options@hook{}
+\let\tud@options@hook\relax
+\newcommand*\TUD@SpecialOptionAtDocument[1]{}
+\AtBeginDocument{%
+  \renewcommand*\TUD@SpecialOptionAtDocument[1]{%
+    \ifx\tud@options@hook\relax%
+      \def\tud@options@hook{\let\tud@options@hook\relax}%
+      \AtEndOfFamilyOptions{\tud@options@hook\tud@options@process}%
+    \fi%
+    \appto\tud@options@hook{#1}%
+    \typeout{+++++ \meaning\tud@options@hook}%
+  }%
+}
 \newcommand*\tud@x@scr@paper{%
   \expandafter\tud@x@scr@@paper\CurrentOption paper\tud@x@scr@@paper%
 }
@@ -1558,14 +1602,6 @@
           {`DIN Bold' fonts not found}%
       \fi%
     \fi%
-  \fi%
-  \if@tud@x@mweights@enabled%
-    \ifundef{\bfseries@rm}{\edef\bfseries@rm{\bfdefault}}{}%
-    \ifundef{\bfseries@sf}{\edef\bfseries@sf{\bfdefault}}{}%
-    \ifundef{\bfseries@tt}{\edef\bfseries@tt{\bfdefault}}{}%
-    \ifundef{\mdseries@rm}{\edef\mdseries@rm{\mddefault}}{}%
-    \ifundef{\mdseries@sf}{\edef\mdseries@sf{\mddefault}}{}%
-    \ifundef{\mdseries@tt}{\edef\mdseries@tt{\mddefault}}{}%
   \fi%
   \ifcase\tud@cdfont@num\relax% false
     \tud@cmd@restore{rmdefault}%
@@ -2040,6 +2076,14 @@
 \newcommand*\tud@font@greek@slanted[1]{\csletcs{#1}{var#1}}
 \AtEndPreamble%
 {%
+  \if@tud@x@mweights@enabled%
+    \ifundef{\bfseries@rm}{\edef\bfseries@rm{\bfdefault}}{}%
+    \ifundef{\bfseries@sf}{\edef\bfseries@sf{\bfdefault}}{}%
+    \ifundef{\bfseries@tt}{\edef\bfseries@tt{\bfdefault}}{}%
+    \ifundef{\mdseries@rm}{\edef\mdseries@rm{\mddefault}}{}%
+    \ifundef{\mdseries@sf}{\edef\mdseries@sf{\mddefault}}{}%
+    \ifundef{\mdseries@tt}{\edef\mdseries@tt{\mddefault}}{}%
+  \fi%
   \tud@font@check%
   \tud@font@set%
   \tud@font@init%
@@ -2428,17 +2472,17 @@
 \tud@locale@define{\reportname}
 \newcommand*\tud@ifin@and[1]{%
   \begingroup%
-    \protecting{%
-      \global\@tempswafalse%
-      \def\and{\global\@tempswatrue}%
-      \sbox\z@{#1}%
+    \let\and\relax%
+    \protected@edef\@tempb{#1}%
+    \def\@tempa##1\and##2\relax{%
+      \if\relax\detokenize{##2}\relax%
+        \aftergroup\@secondoftwo%
+      \else%
+        \aftergroup\@firstoftwo%
+      \fi%
     }%
-  \endgroup%
-  \if@tempswa%
-    \expandafter\@firstoftwo%
-  \else%
-    \expandafter\@secondoftwo%
-  \fi%
+    \expandafter\@tempa\@tempb\and\relax%
+  \endgroup
 }
 \newcommand*\tud@locale@german{%
   \providecaptionname{%
@@ -2868,22 +2912,6 @@
     \@tud@x@crop@centertrue%
   }{}{\tud@patch@wrn{CROP@center}}
 }
-\newlength\bleedmargin
-\setlength\bleedmargin{\maxdimen}
-\newcommand*\tud@bleedmargin@set{%
-  \@tempswafalse%
-  \ifcsundef{CROP@@@marks}{}{%
-    \ifx\CROP@@@marks\vfil\else\@tempswatrue\fi%
-  }%
-  \ifGm@showcrop\@tempswatrue\fi%
-  \ifdim\bleedmargin=\maxdimen\relax%
-    \if@tempswa%
-      \setlength\bleedmargin{.05\tud@dim@widemargin}%
-    \else%
-      \setlength\bleedmargin{\z@}%
-    \fi%
-  \fi%
-}
 \newif\if@tud@x@standalone@crop
 \AfterClass*{standalone}{\let\if@tud@x@standalone@crop\ifsa@crop}
 \if@tud@x@standalone@crop
@@ -2906,10 +2934,10 @@
   ]{tudheadings.head.content}%
   \DeclareNewLayer[%
     background,%
-    width=\dimexpr\tud@dim@layoutwidth+2\bleedmargin\relax,%
-    addhoffset=\dimexpr\tud@dim@layouthoffset-\bleedmargin\relax,%
-    height=\dimexpr\tud@dim@topmargin+\bleedmargin\relax,%
-    addvoffset=\dimexpr\tud@dim@layoutvoffset-\bleedmargin\relax,%
+    width=\dimexpr\tud@dim@layoutwidth+2\tud@dim@bleedmargin\relax,%
+    addhoffset=\dimexpr\tud@dim@layouthoffset-\tud@dim@bleedmargin\relax,%
+    height=\dimexpr\tud@dim@topmargin+\tud@dim@bleedmargin\relax,%
+    addvoffset=\dimexpr\tud@dim@layoutvoffset-\tud@dim@bleedmargin\relax,%
     contents={%
       \ifnum\tud@head@bar@num>\tw@\relax% cdhead=color
         \color{HKS41}%
@@ -2919,8 +2947,8 @@
   ]{tudheadings.head.back}%
   \DeclareNewLayer[%
     background,%
-    width=\dimexpr\tud@dim@layoutwidth+2\bleedmargin\relax,%
-    addhoffset=\dimexpr\tud@dim@layouthoffset-\bleedmargin\relax,%
+    width=\dimexpr\tud@dim@layoutwidth+2\tud@dim@bleedmargin\relax,%
+    addhoffset=\dimexpr\tud@dim@layouthoffset-\tud@dim@bleedmargin\relax,%
     height=\tud@dim@barheight,%
     voffset=\tud@dim@topmargin,%
     addvoffset=\tud@dim@layoutvoffset,%
@@ -2966,8 +2994,8 @@
   ]{tudheadings.head.lowline}%
   \DeclareNewLayer[%
     background,%
-    width=\dimexpr\tud@dim@layoutwidth+2\bleedmargin\relax,%
-    addhoffset=\dimexpr\tud@dim@layouthoffset-\bleedmargin\relax,%
+    width=\dimexpr\tud@dim@layoutwidth+2\tud@dim@bleedmargin\relax,%
+    addhoffset=\dimexpr\tud@dim@layouthoffset-\tud@dim@bleedmargin\relax,%
     voffset=\dimexpr\tud@dim@topmargin-.5\tud@dim@line\relax,%
     addvoffset=\tud@dim@layoutvoffset,%
     contents={%
@@ -2978,8 +3006,8 @@
   ]{tudheadings.head.uplinewide}%
   \DeclareNewLayer[%
     background,%
-    width=\dimexpr\tud@dim@layoutwidth+2\bleedmargin\relax,%
-    addhoffset=\dimexpr\tud@dim@layouthoffset-\bleedmargin\relax,%
+    width=\dimexpr\tud@dim@layoutwidth+2\tud@dim@bleedmargin\relax,%
+    addhoffset=\dimexpr\tud@dim@layouthoffset-\tud@dim@bleedmargin\relax,%
     voffset=\dimexpr\tud@dim@topmargin+\tud@dim@barheight%
       -.5\tud@dim@line\relax,%
     addvoffset=\tud@dim@layoutvoffset,%
@@ -2997,10 +3025,10 @@
   ]{tudheadings.head.date}%
   \DeclareNewLayer[%
     background,foot,%
-    width=\dimexpr\tud@dim@layoutwidth+2\bleedmargin\relax,%
-    hoffset=\dimexpr\tud@dim@layouthoffset-\bleedmargin\relax,%
+    width=\dimexpr\tud@dim@layoutwidth+2\tud@dim@bleedmargin\relax,%
+    hoffset=\dimexpr\tud@dim@layouthoffset-\tud@dim@bleedmargin\relax,%
     height=\dimexpr\tud@dim@layoutheight-\layeryoffset%
-      +\tud@dim@layoutvoffset+\bleedmargin\relax,%
+      +\tud@dim@layoutvoffset+\tud@dim@bleedmargin\relax,%
     addvoffset=-\dp\strutbox,%
     contents={%
       \if@tud@foot@colored%
@@ -3163,10 +3191,10 @@
   \DeclareNewLayer[%
     background,%
     area=%
-      {\dimexpr\tud@dim@layouthoffset-\bleedmargin\relax}%
-      {\dimexpr\tud@dim@layoutvoffset-\bleedmargin\relax}%
-      {\dimexpr\tud@dim@layoutwidth+2\bleedmargin\relax}%
-      {\dimexpr\tud@dim@layoutheight+2\bleedmargin\relax}%
+      {\dimexpr\tud@dim@layouthoffset-\tud@dim@bleedmargin\relax}%
+      {\dimexpr\tud@dim@layoutvoffset-\tud@dim@bleedmargin\relax}%
+      {\dimexpr\tud@dim@layoutwidth+2\tud@dim@bleedmargin\relax}%
+      {\dimexpr\tud@dim@layoutheight+2\tud@dim@bleedmargin\relax}%
     ,%
     contents={%
       \ifdefvoid{\tud@pagecolor}{}{%
@@ -3264,6 +3292,7 @@
 }
 \newcommand*\tud@pagestyle{}
 \let\tud@pagestyle\pagestyle
+% TODO: Teil mit if@atdocument direkt bei UnwindPackage einbauen
 \pretocmd{\tud@pagestyle}{%
   \if@atdocument\tud@BeforeSelectAnyPageStyle{#1}\fi%
   \edef\currentpagestyle{#1}%
@@ -4458,6 +4487,24 @@
   }%
 }
 \AtEndPreamble{\tud@x@scr@headings@set}
+\newcommand*\tud@x@scr@headings@reset{%
+  \tud@layout@process%
+  \tud@x@scr@headings@set[%
+    \ifcase\tud@layout@part@num\relax\else% !false
+      \tud@font@koma@reset{part}%
+      \tud@font@koma@reset{partnumber}%
+    \fi%
+    \ifcase\tud@layout@chapter@num\relax\else% !false
+      \tud@font@koma@reset{chapter}%
+      \tud@font@koma@reset{chapterprefix}%
+    \fi%
+    \ifcase\tud@layout@section@num\relax\else% !false
+      \tud@font@koma@reset{section}%
+      \tud@font@koma@reset{subsection}%
+      \tud@font@koma@reset{subsubsection}%
+    \fi%
+  ]%
+}
 \newcommand*\tud@title@fontcolor{}
 \newcommand*\tud@part@fontcolor{}
 \newcommand*\tud@chapter@fontcolor{}
