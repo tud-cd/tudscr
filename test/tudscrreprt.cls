@@ -292,6 +292,34 @@
 }
 \TUD@key{slantedGreek}[true]{\TUDoptions{slantedgreek=#1}}
 %%% From File: tudscr-pagestyle.dtx
+\newlength\tud@dim@bleedmargin
+\setlength\tud@dim@bleedmargin{\maxdimen}
+\TUD@key{bleedmargin}{%
+%  \TUD@noworlater{%
+    \TUD@set@lengthkey{bleedmargin}{\tud@dim@bleedmargin}{#1}%
+%  }{%
+%    \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+%      \tud@cdgeometry@@process@atdocument%
+%    \fi%
+%  }%
+}
+% TODO: Nur Werte größer 0 zulassen
+\newcommand*\tud@bleedmargin@set{%
+  \@tempswafalse%
+  \ifcsundef{CROP@@@marks}{}{%
+    \ifx\CROP@@@marks\vfil\else\@tempswatrue\fi%
+  }%
+  \ifGm@showcrop\@tempswatrue\fi%
+  \ifdim\tud@dim@bleedmargin=\maxdimen\relax%
+    \if@tempswa%
+      \setlength\tud@dim@bleedmargin{.05\tud@dim@widemargin}%
+    \else%
+      \setlength\tud@dim@bleedmargin{\z@}%
+    \fi%
+  \else%
+    % TODO: Hinweis, falls crop nicht geladen bzw. layout nicht gesetzt
+  \fi%
+}
 \newcommand*\tud@ps@list{}
 \newcommand*\tud@if@tudheadings[3]{%
   \xifinlist{\GetRealPageStyle{#1}}{\tud@ps@list}{#2}{#3}%
@@ -573,34 +601,6 @@
       \TUD@SpecialOptionAtDocument{tud@cdgeometry@@process}%
     \fi%
   }%
-}
-\newlength\tud@dim@bleedmargin
-\setlength\tud@dim@bleedmargin{\maxdimen}
-\TUD@key{bleedmargin}{%
-%  \TUD@noworlater{%
-    \TUD@set@lengthkey{bleedmargin}{\tud@dim@bleedmargin}{#1}%
-%  }{%
-%    \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-%      \tud@cdgeometry@@process@atdocument%
-%    \fi%
-%  }%
-}
-% TODO: Nur Werte größer 0 zulassen
-\newcommand*\tud@bleedmargin@set{%
-  \@tempswafalse%
-  \ifcsundef{CROP@@@marks}{}{%
-    \ifx\CROP@@@marks\vfil\else\@tempswatrue\fi%
-  }%
-  \ifGm@showcrop\@tempswatrue\fi%
-  \ifdim\tud@dim@bleedmargin=\maxdimen\relax%
-    \if@tempswa%
-      \setlength\tud@dim@bleedmargin{.05\tud@dim@widemargin}%
-    \else%
-      \setlength\tud@dim@bleedmargin{\z@}%
-    \fi%
-  \else%
-    % TODO: Hinweis, falls crop nicht geladen bzw. layout nicht gesetzt
-  \fi%
 }
 \DefineFamilyMember{KOMA}
 \DefineFamilyKey{KOMA}{twoside}{%
