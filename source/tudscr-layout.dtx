@@ -1,4 +1,4 @@
-% \CheckSum{1500}
+% \CheckSum{1479}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-layout.dtx}[%
-  2016/06/13 v2.05 TUD-KOMA-Script (layout)%
+  2016/06/14 v2.05 TUD-KOMA-Script (layout)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman,xindy]{tudscrdoc}
@@ -285,14 +285,13 @@
 % Deshalb wird er hier nur innerhalb des Dokumentes genutzt. Dies gilt auch für
 % die folgenden Optionen.
 %    \begin{macrocode}
-    \if@atdocument%
-      \tud@layout@process%
-    \else%
+    \TUD@SpecialOptionAtDocument{tud@layout@process}%
 %    \end{macrocode}
 % Innerhalb der Präambel wird der Satzspiegel abhängig vom gewünschten Layout
 % festgelegt. Dies kann vom Benutzer mit dem Setzen der Option \opt{cdgeometry}
 % überschrieben werden.
 %    \begin{macrocode}
+    \if@atdocument\else%
       \ifcase\tud@cd@num\relax% false
         \cs@std@lock{tud@cdgeometry@num}{0}%
       \else% !false
@@ -339,7 +338,7 @@
     \or% full
       \cs@set@lock{tud@layout@cover@num}{6}%
     \fi%
-    \if@atdocument\tud@layout@process\fi%
+    \TUD@SpecialOptionAtDocument{tud@layout@process}%
   \fi%
 }
 %</book|report|article>
@@ -367,7 +366,7 @@
     \or% full
       \cs@set@lock{tud@layout@title@num}{6}%
     \fi%
-    \if@atdocument\tud@layout@process\fi%
+    \TUD@SpecialOptionAtDocument{tud@layout@process}%
   \fi%
 }
 %    \end{macrocode}
@@ -394,7 +393,7 @@
     \or% full
       \cs@set@lock{tud@layout@part@num}{6}%
     \fi%
-    \if@atdocument\tud@layout@process\fi%
+    \TUD@SpecialOptionAtDocument{tud@layout@process}%
   \fi%
 }
 %    \end{macrocode}
@@ -431,7 +430,7 @@
       \cs@set@lock{tud@layout@chapter@num}{6}%
       \TUD@std@ifkey@lock{chapterpage}{@tud@chapterpage}{true}%
     \fi%
-    \if@atdocument\tud@layout@process\fi%
+    \TUD@SpecialOptionAtDocument{tud@layout@process}%
   \fi%
 }
 %</book|report>
@@ -451,7 +450,7 @@
     \else% *color
       \cs@set@lock{tud@layout@section@num}{2}%
     \fi%
-    \if@atdocument\tud@layout@process\fi%
+    \TUD@SpecialOptionAtDocument{tud@layout@process}%
   \fi%
 }
 %    \end{macrocode}
@@ -472,7 +471,7 @@
 \TUD@key{parttitle}[true]{%
   \TUD@set@ifkey{parttitle}{@tud@parttitle}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \if@atdocument\tud@layout@process\fi%
+    \TUD@SpecialOptionAtDocument{tud@layout@process}%
   \fi%
 }
 %    \end{macrocode}
@@ -668,21 +667,15 @@
 %    \begin{macrocode}
 \DefineFamilyMember{KOMA}
 \DefineFamilyKey{KOMA}{headings}{%
-  \if@atdocument%
-    \AtEndOfFamilyOptions{\tud@x@scr@headings@reset}%
-  \fi%
+  \TUD@SpecialOptionAtDocument{tud@x@scr@headings@reset}%
   \FamilyKeyStateProcessed%
 }
 \DefineFamilyKey{KOMA}{open}{%
-  \if@atdocument%
-    \AtEndOfFamilyOptions{\tud@x@scr@headings@reset}%
-  \fi%
+  \TUD@SpecialOptionAtDocument{tud@x@scr@headings@reset}%  
   \FamilyKeyStateProcessed%
 }
 \DefineFamilyKey{KOMA}{chapterprefix}{%
-  \if@atdocument%
-    \AtEndOfFamilyOptions{\tud@x@scr@headings@reset}%
-  \fi%
+  \TUD@SpecialOptionAtDocument{tud@x@scr@headings@reset}%
   \FamilyKeyStateProcessed%
 }
 %    \end{macrocode}
@@ -753,12 +746,6 @@
 % \end{macro}^^A \tud@sec@fontsize
 % \end{macro}^^A \tud@x@scr@headings@current
 % \end{macro}^^A \tud@x@scr@headings@set
-%
-% \iffalse
-%</class&body>
-%<*class&option>
-% \fi
-%
 % \begin{macro}{\tud@x@scr@headings@reset}
 % \changes{v2.05}{2015/11/24}{neu}^^A
 % Hiermit wird nach dem Ausführen der Option \opt{headings} im Zweifelsfall die 
@@ -786,6 +773,12 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@x@scr@headings@reset
+%
+% \iffalse
+%</class&body>
+%<*class&option>
+% \fi
+%
 % \begin{macro}{\tud@pagecolor}
 % Der Befehl \cs{tud@pagecolor} dient für die Hauptklassen als Hilfsmakro, um 
 % je nach gewählter Ausprägung des Layouts die farblichen Seitenhintergründe zu 

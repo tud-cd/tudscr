@@ -77,13 +77,13 @@
       \fi%
     }
   \fi
-  \TUD@Version@Check{2016/05/31 v2.05 BETA TUD-KOMA-Script}
+  \TUD@Version@Check{2016/06/10 v2.05 BETA TUD-KOMA-Script}
 \endgroup
 \NeedsTeXFormat{LaTeX2e}
 \providecommand*\tudscrmail{tudscr@gmail.com}
 \newcommand*\TUD@ProvidesClass[3]{%
   \ProvidesClass{#1}[%
-  2016/05/31 v2.05 BETA TUD-KOMA-Script
+  2016/06/10 v2.05 BETA TUD-KOMA-Script
     ^^J#3 (#2)%
   ]%
   \newcommand*\TUD@Class@KOMA{#2}%
@@ -181,30 +181,25 @@
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax% false
       \renewcommand*\tud@cdfont@num{0}%
-      % TODO \TUD@SpecialOptionAtDocument
-      \if@atdocument\tud@font@set\fi%
+      \TUD@SpecialOptionAtDocument{tud@font@set}%
     \or% true
       \renewcommand*\tud@cdfont@num{1}%
-      % TODO \TUD@SpecialOptionAtDocument
-      \if@atdocument\tud@font@set\fi%
+      \TUD@SpecialOptionAtDocument{tud@font@set}%
     \or% heavy
       \renewcommand*\tud@cdfont@num{2}%
-      % TODO \TUD@SpecialOptionAtDocument
-      \if@atdocument\tud@font@set\fi%
+      \TUD@SpecialOptionAtDocument{tud@font@set}%
     \or% normalbold
       \@tud@cdfont@ultraboldfalse%
       \ifcase\tud@cdfont@num\relax% false to true
         \renewcommand*\tud@cdfont@num{1}%
       \fi%
-      % TODO \TUD@SpecialOptionAtDocument
-      \if@atdocument\tud@font@set\fi%
+      \TUD@SpecialOptionAtDocument{tud@font@set}%
     \or% ultrabold
       \@tud@cdfont@ultraboldtrue%
       \ifcase\tud@cdfont@num\relax% false to true
         \renewcommand*\tud@cdfont@num{1}%
       \fi%
-      % TODO \TUD@SpecialOptionAtDocument
-      \if@atdocument\tud@font@set\fi%
+      \TUD@SpecialOptionAtDocument{tud@font@set}%
     \or% nodin
       \@tud@cdfont@dinfalse%
     \or% din
@@ -235,8 +230,7 @@
         \csname @tud@fontsize@settrue\endcsname%
         \ifcase\tud@cdfont@num\relax% false to true
           \renewcommand*\tud@cdfont@num{1}%
-          % TODO \TUD@SpecialOptionAtDocument
-          \if@atdocument\tud@font@set\fi%
+          \TUD@SpecialOptionAtDocument{tud@font@set}%
         \fi%
         \FamilyKeyStateProcessed%
       \fi%
@@ -257,15 +251,12 @@
     \or% true
       \@tud@vspacingtrue%
     \fi%
-    % TODO \TUD@SpecialOptionAtDocument
-    \if@atdocument\tud@font@skip@set\fi%
+    \TUD@SpecialOptionAtDocument{tud@font@skip@set}%
   \fi%
 }
-\TUDExecuteOptions{vspacing=true}
 \DefineFamilyMember{KOMA}
 \DefineFamilyKey{KOMA}{fontsize}{%
-  % TODO \TUD@SpecialOptionAtDocument
-  \if@atdocument\AtEndOfFamilyOptions{\tud@font@skip@set}\fi%
+  \TUD@SpecialOptionAtDocument{tud@font@skip@set}%
   \FamilyKeyStateProcessed%
 }
 \bool@lock{@tud@cdmath}
@@ -280,12 +271,10 @@
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax% false
       \bool@set@lock{@tud@cdmath}{false}%
-      % TODO \TUD@SpecialOptionAtDocument
-      \if@atdocument\tud@font@math@set\fi%
+      \TUD@SpecialOptionAtDocument{tud@font@math@set}%
     \or% true
       \bool@set@lock{@tud@cdmath}{true}%
-      % TODO \TUD@SpecialOptionAtDocument
-      \if@atdocument\tud@font@math@set\fi%
+      \TUD@SpecialOptionAtDocument{tud@font@math@set}%
     \or% upgreek
       \TUDoptions{slantedgreek=false}%
     \or% slgreek
@@ -298,8 +287,7 @@
   \TUD@set@ifkey{slantedgreek}{@tud@slantedgreek}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \bool@set@lock{@tud@slantedgreek}{#1}%
-    % TODO \TUD@SpecialOptionAtDocument
-    \if@atdocument\tud@font@math@set\fi%
+    \TUD@SpecialOptionAtDocument{tud@font@math@set}%
   \fi%
 }
 \TUD@key{slantedGreek}[true]{\TUDoptions{slantedgreek=#1}}
@@ -540,16 +528,13 @@
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax% false/typearea
       \cs@set@lock{tud@cdgeometry@num}{0}%
-      % TODO \TUD@SpecialOptionAtDocument
-      \if@atdocument\tud@cdgeometry@process\fi%
+      \TUD@SpecialOptionAtDocument{tud@cdgeometry@process}%
     \or% true/cd
       \cs@set@lock{tud@cdgeometry@num}{2}%
-      % TODO \TUD@SpecialOptionAtDocument
-      \if@atdocument\tud@cdgeometry@process\fi%
+      \TUD@SpecialOptionAtDocument{tud@cdgeometry@process}%
     \or% symmetric
       \cs@set@lock{tud@cdgeometry@num}{3}%
-      % TODO \TUD@SpecialOptionAtDocument
-      \if@atdocument\tud@cdgeometry@process\fi%
+      \TUD@SpecialOptionAtDocument{tud@cdgeometry@process}%
     \or% twoside
       \cs@set@lock{tud@cdgeometry@num}{4}%
       \TUD@KOMAoptions{twoside=true}%
@@ -561,18 +546,15 @@
     \or% restricted
       \cs@std@lock{tud@cdgeometry@num}{2}%
       \renewcommand*\tud@cdgeometry@calc@num{0}%
-      % TODO \TUD@SpecialOptionAtDocument
-      \if@atdocument\tud@cdgeometry@process\fi%
+      \TUD@SpecialOptionAtDocument{tud@cdgeometry@process}%
     \or% adapted
       \cs@std@lock{tud@cdgeometry@num}{2}%
       \renewcommand*\tud@cdgeometry@calc@num{1}%
-      % TODO \TUD@SpecialOptionAtDocument
-      \if@atdocument\tud@cdgeometry@process\fi%
+      \TUD@SpecialOptionAtDocument{tud@cdgeometry@process}%
     \or% calculated
       \cs@std@lock{tud@cdgeometry@num}{2}%
       \renewcommand*\tud@cdgeometry@calc@num{2}%
-      % TODO \TUD@SpecialOptionAtDocument
-      \if@atdocument\tud@cdgeometry@process\fi%
+      \TUD@SpecialOptionAtDocument{tud@cdgeometry@process}%
     \or% custom
       \cs@set@lock{tud@cdgeometry@num}{1}%
     \fi%
@@ -588,8 +570,7 @@
     \TUD@set@lengthkey{extrabottommargin}{\tud@dim@extrabottommargin}{#1}%
   }{%
     \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-      % TODO \TUD@SpecialOptionAtDocument
-      \if@atdocument\tud@cdgeometry@@process\fi%
+      \TUD@SpecialOptionAtDocument{tud@cdgeometry@@process}%
     \fi%
   }%
 }
@@ -623,13 +604,11 @@
 }
 \DefineFamilyMember{KOMA}
 \DefineFamilyKey{KOMA}{twoside}{%
-  % TODO \TUD@SpecialOptionAtDocument???
-  \if@atdocument\AtEndOfFamilyOptions{\tud@cdgeometry@@process}\fi%
+  \TUD@SpecialOptionAtDocument{tud@cdgeometry@@process}%
   \FamilyKeyStateProcessed%
 }
 \DefineFamilyKey{KOMA}{twocolumn}{%
-  % TODO \TUD@SpecialOptionAtDocument???
-  \if@atdocument\AtEndOfFamilyOptions{\tud@cdgeometry@@process}\fi%
+  \TUD@SpecialOptionAtDocument{tud@cdgeometry@@process}%
   \FamilyKeyStateProcessed%
 }
 \IfFileExists{silence.sty}{%
@@ -669,55 +648,53 @@
       \cs@std@lock{tud@layout@title@num}{0}%
       \cs@std@lock{tud@layout@part@num}{0}%
       \cs@std@lock{tud@layout@chapter@num}{0}%
-      \TUD@std@ifkey@lock{chapterpage}{false}%
+      \TUD@std@ifkey@lock{chapterpage}{@tud@chapterpage}{false}%
       \cs@std@lock{tud@layout@section@num}{0}%
     \or% true
       \cs@std@lock{tud@layout@cover@num}{1}%
       \cs@std@lock{tud@layout@title@num}{1}%
       \cs@std@lock{tud@layout@part@num}{1}%
       \cs@std@lock{tud@layout@chapter@num}{1}%
-      \TUD@std@ifkey@lock{chapterpage}{false}%
+      \TUD@std@ifkey@lock{chapterpage}{@tud@chapterpage}{false}%
       \cs@std@lock{tud@layout@section@num}{1}%
     \or% litecolor
       \cs@std@lock{tud@layout@cover@num}{1}%
       \cs@std@lock{tud@layout@title@num}{2}%
       \cs@std@lock{tud@layout@part@num}{2}%
       \cs@std@lock{tud@layout@chapter@num}{2}%
-      \TUD@std@ifkey@lock{chapterpage}{false}%
+      \TUD@std@ifkey@lock{chapterpage}{@tud@chapterpage}{false}%
       \cs@std@lock{tud@layout@section@num}{2}%
     \or% barcolor
       \cs@std@lock{tud@layout@cover@num}{1}%
       \cs@std@lock{tud@layout@title@num}{3}%
       \cs@std@lock{tud@layout@part@num}{3}%
       \cs@std@lock{tud@layout@chapter@num}{3}%
-      \TUD@std@ifkey@lock{chapterpage}{false}%
+      \TUD@std@ifkey@lock{chapterpage}{@tud@chapterpage}{false}%
       \cs@std@lock{tud@layout@section@num}{2}%
     \or% bicolor
       \cs@std@lock{tud@layout@cover@num}{1}%
       \cs@std@lock{tud@layout@title@num}{4}%
       \cs@std@lock{tud@layout@part@num}{4}%
       \cs@std@lock{tud@layout@chapter@num}{4}%
-      \TUD@std@ifkey@lock{chapterpage}{false}%
+      \TUD@std@ifkey@lock{chapterpage}{@tud@chapterpage}{false}%
       \cs@std@lock{tud@layout@section@num}{2}%
     \or% color
       \cs@std@lock{tud@layout@cover@num}{1}%
       \cs@std@lock{tud@layout@title@num}{5}%
       \cs@std@lock{tud@layout@part@num}{5}%
       \cs@std@lock{tud@layout@chapter@num}{5}%
-      \TUD@std@ifkey@lock{chapterpage}{true}%
+      \TUD@std@ifkey@lock{chapterpage}{@tud@chapterpage}{true}%
       \cs@std@lock{tud@layout@section@num}{2}%
     \or% full
       \cs@std@lock{tud@layout@cover@num}{1}%
       \cs@std@lock{tud@layout@title@num}{6}%
       \cs@std@lock{tud@layout@part@num}{6}%
       \cs@std@lock{tud@layout@chapter@num}{6}%
-      \TUD@std@ifkey@lock{chapterpage}{true}%
+      \TUD@std@ifkey@lock{chapterpage}{@tud@chapterpage}{true}%
       \cs@std@lock{tud@layout@section@num}{2}%
     \fi%
-    % TODO \TUD@SpecialOptionAtDocument
-    \if@atdocument%
-      \tud@layout@process%
-    \else%
+    \TUD@SpecialOptionAtDocument{tud@layout@process}%
+    \if@atdocument\else%
       \ifcase\tud@cd@num\relax% false
         \cs@std@lock{tud@cdgeometry@num}{0}%
       \else% !false
@@ -744,8 +721,7 @@
     \or% full
       \cs@set@lock{tud@layout@cover@num}{6}%
     \fi%
-    % TODO \TUD@SpecialOptionAtDocument
-    \if@atdocument\tud@layout@process\fi%
+    \TUD@SpecialOptionAtDocument{tud@layout@process}%
   \fi%
 }
 \TUD@key{cdtitle}[true]{%
@@ -766,8 +742,7 @@
     \or% full
       \cs@set@lock{tud@layout@title@num}{6}%
     \fi%
-    % TODO \TUD@SpecialOptionAtDocument
-    \if@atdocument\tud@layout@process\fi%
+    \TUD@SpecialOptionAtDocument{tud@layout@process}%
   \fi%
 }
 \TUD@key{cdpart}[true]{%
@@ -788,8 +763,7 @@
     \or% full
       \cs@set@lock{tud@layout@part@num}{6}%
     \fi%
-    % TODO \TUD@SpecialOptionAtDocument
-    \if@atdocument\tud@layout@process\fi%
+    \TUD@SpecialOptionAtDocument{tud@layout@process}%
   \fi%
 }
 \TUD@key{cdchapter}[true]{%
@@ -797,28 +771,27 @@
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax% false
       \cs@set@lock{tud@layout@chapter@num}{0}%
-      \TUD@std@ifkey@lock{chapterpage}{false}%
+      \TUD@std@ifkey@lock{chapterpage}{@tud@chapterpage}{false}%
     \or% true
       \cs@set@lock{tud@layout@chapter@num}{1}%
-      \TUD@std@ifkey@lock{chapterpage}{false}%
+      \TUD@std@ifkey@lock{chapterpage}{@tud@chapterpage}{false}%
     \or% litecolor
       \cs@set@lock{tud@layout@chapter@num}{2}%
-      \TUD@std@ifkey@lock{chapterpage}{false}%
+      \TUD@std@ifkey@lock{chapterpage}{@tud@chapterpage}{false}%
     \or% barcolor
       \cs@set@lock{tud@layout@chapter@num}{3}%
-      \TUD@std@ifkey@lock{chapterpage}{false}%
+      \TUD@std@ifkey@lock{chapterpage}{@tud@chapterpage}{false}%
     \or% bicolor
       \cs@set@lock{tud@layout@chapter@num}{4}%
-      \TUD@std@ifkey@lock{chapterpage}{false}%
+      \TUD@std@ifkey@lock{chapterpage}{@tud@chapterpage}{false}%
     \or% color
       \cs@set@lock{tud@layout@chapter@num}{5}%
-      \TUD@std@ifkey@lock{chapterpage}{true}%
+      \TUD@std@ifkey@lock{chapterpage}{@tud@chapterpage}{true}%
     \or% full
       \cs@set@lock{tud@layout@chapter@num}{6}%
-      \TUD@std@ifkey@lock{chapterpage}{true}%
+      \TUD@std@ifkey@lock{chapterpage}{@tud@chapterpage}{true}%
     \fi%
-    % TODO \TUD@SpecialOptionAtDocument
-    \if@atdocument\tud@layout@process\fi%
+    \TUD@SpecialOptionAtDocument{tud@layout@process}%
   \fi%
 }
 \TUD@key{cdsection}[true]{%
@@ -831,16 +804,14 @@
     \else% *color
       \cs@set@lock{tud@layout@section@num}{2}%
     \fi%
-    % TODO \TUD@SpecialOptionAtDocument
-    \if@atdocument\tud@layout@process\fi%
+    \TUD@SpecialOptionAtDocument{tud@layout@process}%
   \fi%
 }
 \newif\if@tud@parttitle
 \TUD@key{parttitle}[true]{%
   \TUD@set@ifkey{parttitle}{@tud@parttitle}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    % TODO \TUD@SpecialOptionAtDocument
-    \if@atdocument\tud@layout@process\fi%
+    \TUD@SpecialOptionAtDocument{tud@layout@process}%
   \fi%
 }
 \newif\if@tud@chapterpage
@@ -920,18 +891,15 @@
 }
 \DefineFamilyMember{KOMA}
 \DefineFamilyKey{KOMA}{headings}{%
-  % TODO \TUD@SpecialOptionAtDocument???
-  \if@atdocument\AtEndOfFamilyOptions{\tud@x@scr@headings@reset}\fi%
+  \TUD@SpecialOptionAtDocument{tud@x@scr@headings@reset}%
   \FamilyKeyStateProcessed%
 }
 \DefineFamilyKey{KOMA}{open}{%
-  % TODO \TUD@SpecialOptionAtDocument???
-  \if@atdocument\AtEndOfFamilyOptions{\tud@x@scr@headings@reset}\fi%
+  \TUD@SpecialOptionAtDocument{tud@x@scr@headings@reset}%
   \FamilyKeyStateProcessed%
 }
 \DefineFamilyKey{KOMA}{chapterprefix}{%
-  % TODO \TUD@SpecialOptionAtDocument???
-  \if@atdocument\AtEndOfFamilyOptions{\tud@x@scr@headings@reset}\fi%
+  \TUD@SpecialOptionAtDocument{tud@x@scr@headings@reset}%
   \FamilyKeyStateProcessed%
 }
 \newcommand*\tud@pagecolor{}%
@@ -1439,21 +1407,7 @@
   \newcounter{symbolheadings}[chapter]
 }
 %%% From File: tudscr-misc.dtx
-% TODO: für Reihenfolge alle \AtEndPreamble durchgehen
-\newcommand*\tud@options@process{}
-\newcommand*\tud@options@hook{}
-\let\tud@options@hook\relax
 \newcommand*\TUD@SpecialOptionAtDocument[1]{}
-\AtBeginDocument{%
-  \renewcommand*\TUD@SpecialOptionAtDocument[1]{%
-    \ifx\tud@options@hook\relax%
-      \def\tud@options@hook{\let\tud@options@hook\relax}%
-      \AtEndOfFamilyOptions{\tud@options@hook\tud@options@process}%
-    \fi%
-    \appto\tud@options@hook{#1}%
-    \typeout{+++++ \meaning\tud@options@hook}%
-  }%
-}
 \newcommand*\tud@x@scr@paper{%
   \expandafter\tud@x@scr@@paper\CurrentOption paper\tud@x@scr@@paper%
 }
@@ -1471,7 +1425,9 @@
   \PassOptionsToClass{\CurrentOption}{\TUD@Class@KOMA}%
 }
 \DeclareOption*{\tud@x@scr@paper}
-\TUDExecuteOptions{cd=true,tudbookmarks=true}
+\TUDExecuteOptions{%
+  cd=true,vspacing=true,tudbookmarks=true%
+}
 \TUDProcessOptions\relax
 \LoadClass{\TUD@Class@KOMA}[2015/04/23]
 %%% From File: tudscr-base.dtx
@@ -2218,9 +2174,9 @@
         Field `thesis' is overwritten by `subject'%
       }%
     \fi%
-    \TUD@std@ifkey@lock{subjectthesis}{true}%
+    \TUD@std@ifkey@lock{subjectthesis}{@tud@subjectthesis}{true}%
   }{%
-    \TUD@std@ifkey@lock{subjectthesis}{false}%
+    \TUD@std@ifkey@lock{subjectthesis}{@tud@subjectthesis}{false}%
   }%
   \ifx\tud@thanks\relax%
     \gdef\@thesis{#2}%
@@ -4093,6 +4049,9 @@
         \else% symmetric/twoside
           \appto\tud@cdgeometry@hmargin{,twoside}%
         \fi%
+      \fi%
+      \if@twocolumn%
+        \appto\tud@cdgeometry@hmargin{,twocolumn}%
       \fi%
       \tud@if@v@lower{2.03}{%
         \edef\tud@cdgeometry@vmargin{%
@@ -6177,6 +6136,63 @@
   \tud@if@v@lower{2.04}{\TUDoptions{vspacing=false}}{}%
 }
 %%% From File: tudscr-misc.dtx
+\newcommand*\tud@atdocument@hook{}
+\let\tud@atdocument@hook\relax
+\AtBeginDocument{%
+  \renewcommand*\TUD@SpecialOptionAtDocument[1]{%
+    \ifx\tud@atdocument@hook\relax%
+      \gdef\tud@atdocument@hook{\global\let\tud@atdocument@hook\relax}%
+      \AtEndOfFamilyOptions{%
+        \typeout{+++++ bla}
+        \tud@atdocument@hook%
+        \tud@atdocument@process%
+      }%
+    \fi%
+    \gappto\tud@atdocument@hook{\global\booltrue{@#1}}%
+  }%
+}
+\newif\if@tud@font@set
+\newif\if@tud@font@math@set
+\newif\if@tud@font@skip@set
+\newif\if@tud@x@scr@headings@reset
+\newif\if@tud@layout@process
+\newif\if@tud@cdgeometry@process
+\newif\if@tud@cdgeometry@@process
+\newcommand*\tud@atdocument@process{%
+  \if@tud@font@set%
+    \tud@font@set%
+    \global\@tud@font@setfalse%
+    \global\@tud@font@math@setfalse%
+    \global\@tud@font@skip@setfalse%
+    \global\@tud@layout@processfalse%
+  \fi%
+  \if@tud@font@math@set%
+    \tud@font@math@set%
+    \global\@tud@font@math@setfalse%
+  \fi%
+  \if@tud@font@skip@set%
+    \tud@font@skip@set%
+    \global\@tud@font@skip@setfalse%
+  \fi%
+  \if@tud@x@scr@headings@reset%
+    \tud@x@scr@headings@reset%
+    \global\@tud@x@scr@headings@resetfalse%
+    \global\@tud@layout@processfalse%
+  \fi%
+  \if@tud@layout@process%
+    \tud@layout@process%
+    \global\@tud@layout@processfalse%
+  \fi%
+  \if@tud@cdgeometry@process%
+    \tud@cdgeometry@process%
+    \global\@tud@cdgeometry@processfalse%
+    \global\@tud@cdgeometry@@processfalse%
+  \fi%
+  \if@tud@cdgeometry@@process%
+    \tud@cdgeometry@@process%
+    \global\@tud@cdgeometry@@processfalse%
+  \fi%
+}
 \newcommand*\tudbookmark[1][]{\@gobbletwo}
 \newcommand*\tud@x@hyperref@realfootnotes{}
 \AfterPackage{hyperref}{%

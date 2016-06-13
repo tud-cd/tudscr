@@ -1,4 +1,4 @@
-% \CheckSum{813}
+% \CheckSum{900}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-misc.dtx}[%
-  2016/06/10 v2.05 TUD-KOMA-Script (miscellaneous)%
+  2016/06/14 v2.05 TUD-KOMA-Script (miscellaneous)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman,xindy]{tudscrdoc}
@@ -82,18 +82,136 @@
 %
 % Alles, wofür sich eine separate Datei nicht lohnt, landet hier.
 % \ToDo{%
-%   Abarbeitung der \cs{if@atdocument}-Optionen sortieren. Betrifft:%
-%   \cs{tud@font@set}, \cs{tud@font@skip@set}, \cs{tud@font@math@set},%
-%   \cs{tud@cdgeometry@process}?, \cs{tud@cdgeometry@@process},%
-%   \cs{tud@layout@process} -- boolschen Wert setzen und zentrales Makro 
-%   definieren, was notwendige Makros mit \cs{AtEndOfFamilyOptions} aufruft?
-%   Dabei das entrale Makro nur einmalig hinzufügen!
+%   Problem bei \cs{TUDoptions} mit \cs{AtEndOfFamilyOptions} beheben
 % }[v2.05]
 %
 % \StopEventually{\PrintIndex\PrintChanges\PrintToDos}
 %
 % \iffalse
 %<*!xindy>
+% \fi
+%
+% \subsection{Sukkzessives Abarbeiten von Layoutoptionen im Dokument}
+%
+% Werden mit \cs{TUDoptions} nach \cs{begin\{document\}} mehrere Layoutoptionen 
+% gleichzeitig angegeben, muss dafür Sorge getragen werden, dass diese in der 
+% korrekten Reihenfolge abgearbeitet werden. 
+%
+% Das Makro \cs{TUD@SpecialOptionAtDocument} kann innerhalb von \cs{TUD@key} 
+% verwendet werden, um einen im obligatorischen Argument angegebenen Schalter 
+% zu aktivieren. Dabei wird über \cs{tud@atdocument@hook} garantiert, dass der 
+% Befehl \cs{tud@atdocument@process}, welcher für die Abarbeitung der einzelnen 
+% Makros in der richtigen Reihenfolge verantwortlich ist, lediglich einmal über 
+% \cs{AtEndOfFamilyOptions} ausgeführt wird.
+%
+% \begin{macro}{\TUD@SpecialOptionAtDocument}
+% \changes{v2.05}{2016/06/14}{neu}^^A
+% \begin{macro}{\tud@atdocument@hook}
+% \changes{v2.05}{2016/06/14}{neu}^^A
+%    \begin{macrocode}
+%<execute>\newcommand*\TUD@SpecialOptionAtDocument[1]{}
+%<*body>
+\newcommand*\tud@atdocument@hook{}
+\let\tud@atdocument@hook\relax
+\AtBeginDocument{%
+  \renewcommand*\TUD@SpecialOptionAtDocument[1]{%
+    \ifx\tud@atdocument@hook\relax%
+      \gdef\tud@atdocument@hook{\global\let\tud@atdocument@hook\relax}%
+      \AtEndOfFamilyOptions{%
+        \tud@atdocument@hook%
+        \tud@atdocument@process%
+      }%
+    \fi%
+    \gappto\tud@atdocument@hook{\global\booltrue{@#1}}%
+  }%
+}
+%</body>
+%    \end{macrocode}
+% \end{macro}^^A \tud@atdocument@hook
+% \end{macro}^^A \TUD@SpecialOptionAtDocument
+%
+% \iffalse
+%<*body>
+% \fi
+%
+% \begin{macro}{\tud@atdocument@process}
+% \changes{v2.05}{2016/06/14}{neu}^^A
+% \begin{macro}{\if@tud@font@set}
+% \changes{v2.05}{2016/06/14}{neu}^^A
+% \begin{macro}{\if@tud@font@math@set}
+% \changes{v2.05}{2016/06/14}{neu}^^A
+% \begin{macro}{\if@tud@font@skip@set}
+% \changes{v2.05}{2016/06/14}{neu}^^A
+% \begin{macro}{\if@tud@x@scr@headings@reset}
+% \changes{v2.05}{2016/06/14}{neu}^^A
+% \begin{macro}{\if@tud@layout@process}
+% \changes{v2.05}{2016/06/14}{neu}^^A
+% \begin{macro}{\if@tud@cdgeometry@process}
+% \changes{v2.05}{2016/06/14}{neu}^^A
+% \begin{macro}{\if@tud@cdgeometry@@process}
+% \changes{v2.05}{2016/06/14}{neu}^^A
+% Das Makro \cs{tud@atdocument@process} wird im Dokument ausgeführt, wenn 
+% mindestens eine Option gesetzt wurde, welche \cs{TUD@SpecialOptionAtDocument} 
+% verwendet. Je nachdem, welche Schalter insgesamt aktiviert wurden, werden die 
+% dazugehörigen Befehle für die Einstellungen von Schriften, Layout und/oder 
+% Satzspiegel in der richtigen Reihenfolge ausgeführt.
+%    \begin{macrocode}
+\newif\if@tud@font@set
+\newif\if@tud@font@math@set
+\newif\if@tud@font@skip@set
+\newif\if@tud@x@scr@headings@reset
+\newif\if@tud@layout@process
+\newif\if@tud@cdgeometry@process
+\newif\if@tud@cdgeometry@@process
+\newcommand*\tud@atdocument@process{%
+  \if@tud@font@set%
+    \tud@font@set%
+    \global\@tud@font@setfalse%
+    \global\@tud@font@math@setfalse%
+    \global\@tud@font@skip@setfalse%
+    \global\@tud@layout@processfalse%
+  \fi%
+  \if@tud@font@math@set%
+    \tud@font@math@set%
+    \global\@tud@font@math@setfalse%
+  \fi%
+  \if@tud@font@skip@set%
+    \tud@font@skip@set%
+    \global\@tud@font@skip@setfalse%
+  \fi%
+%<*class>
+  \if@tud@x@scr@headings@reset%
+    \tud@x@scr@headings@reset%
+    \global\@tud@x@scr@headings@resetfalse%
+    \global\@tud@layout@processfalse%
+  \fi%
+  \if@tud@layout@process%
+    \tud@layout@process%
+    \global\@tud@layout@processfalse%
+  \fi%
+  \if@tud@cdgeometry@process%
+    \tud@cdgeometry@process%
+    \global\@tud@cdgeometry@processfalse%
+    \global\@tud@cdgeometry@@processfalse%
+  \fi%
+  \if@tud@cdgeometry@@process%
+    \tud@cdgeometry@@process%
+    \global\@tud@cdgeometry@@processfalse%
+  \fi%
+%</class>
+}
+%    \end{macrocode}
+% \end{macro}^^A \if@tud@cdgeometry@@process
+% \end{macro}^^A \if@tud@cdgeometry@process
+% \end{macro}^^A \if@tud@layout@process
+% \end{macro}^^A \if@tud@x@scr@headings@reset
+% \end{macro}^^A \if@tud@font@skip@set
+% \end{macro}^^A \if@tud@font@math@set
+% \end{macro}^^A \if@tud@font@set
+% \end{macro}^^A \tud@atdocument@process
+%
+% \iffalse
+%</body>
 %<*class&option>
 % \fi
 %
@@ -434,7 +552,7 @@
 % Dieser Zähler wird bei aktivierter Option \opt{footnotes=symbolheadings} für 
 % die Symboleauswahl von Fußnoten in Überschirften inkrementiert.
 %    \begin{macrocode}
-\AtEndPreamble{%
+\AtEndOfClass{%
 %<book|report>  \newcounter{symbolheadings}[chapter]
 %<article|poster>  \newcounter{symbolheadings}
 }
@@ -506,10 +624,12 @@
 % Es werden die Standardoptionen ausgeführt. Für die Klasse \cls{tudscrposter} 
 % werden die Farben aktiviert.
 %    \begin{macrocode}
-%<*class>
-%<book|report|article>\TUDExecuteOptions{cd=true,tudbookmarks=true}
-%<poster>\TUDExecuteOptions{cd=bicolor,tudbookmarks=false,cdfont=ultrabold}
-%</class>
+%<*class&!inherit>
+\TUDExecuteOptions{%
+%<book|report|article>  cd=true,vspacing=true,tudbookmarks=true%
+%<poster>  cd=bicolor,vspacing=true,tudbookmarks=false,cdfont=ultrabold%
+}
+%</class&!inherit>
 %<*package&tutorial>
 \KOMAoptions{headings=small}
 \TUDoptions{cdfoot=true}
