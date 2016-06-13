@@ -1,4 +1,4 @@
-% \CheckSum{1450}
+% \CheckSum{1500}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-layout.dtx}[%
-  2016/06/07 v2.05 TUD-KOMA-Script (layout)%
+  2016/06/13 v2.05 TUD-KOMA-Script (layout)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman,xindy]{tudscrdoc}
@@ -1409,10 +1409,18 @@
 %<*article|poster>
   \newcommand*\tud@@startpart{}%
   \let\tud@@startpart\scr@@startpart%
-  \patchcmd{\tud@@startpart}%
-    {\usekomafont{#1prefix}{\@nameuse{#1format}}}%
-    {\usekomafont{#1prefix}{\tud@makeuppercase{\@nameuse{#1format}}}}%
-    {}{\tud@patch@wrn{scr@@startpart}}%
+  \ifcsdef{scr@v@3.21}{\@tempswatrue}{\@tempswafalse}%
+  \if@tempswa%
+    \patchcmd{\tud@@startpart}%
+      {\usekomafont{#1prefix}{\nobreak\@nameuse{#1format}}}%
+      {\usekomafont{#1prefix}{\nobreak\tud@makeuppercase{\@nameuse{#1format}}}}%
+      {}{\tud@patch@wrn{scr@@startpart}}%
+  \else%
+    \patchcmd{\tud@@startpart}%
+      {\usekomafont{#1prefix}{\@nameuse{#1format}}}%
+      {\usekomafont{#1prefix}{\tud@makeuppercase{\@nameuse{#1format}}}}%
+      {}{\tud@patch@wrn{scr@@startpart}}%
+  \fi%
 %</article|poster>
 %    \end{macrocode}
 % Für \cls{tudscrbook}- und \cls{tudscrreprt}-Klasse ist etwas mehr Arbeit
@@ -1423,27 +1431,52 @@
 %<*book|report>
   \newcommand*\tud@@startpart{}%
   \let\tud@@startpart\scr@@startpart%
-  \patchcmd{\tud@@startpart}{%
-    \ifnumbered{#1}{%
-      \usekomafont{#1prefix}{\@nameuse{#1format}}%
-      \setlength{\@tempskipa}{\@nameuse{scr@#1@innerskip}}%
-      \partheadmidvskip%
-    }{}%
-  }{%
-    \ifnumbered{#1}{%
-      \usekomafont{#1prefix}{\tud@makeuppercase{\@nameuse{#1format}}}%
-      \if@tud@parttitle%
-        \enskip%
-      \else%
-        \tud@headmidvskip@normal%
-      \fi%
+  \ifcsdef{scr@v@3.21}{\@tempswatrue}{\@tempswafalse}%
+  \if@tempswa%
+    \patchcmd{\tud@@startpart}{%
+      \ifnumbered{#1}{%
+        \usekomafont{#1prefix}{\nobreak\@nameuse{#1format}}%
+        \setlength{\@tempskipa}{\@nameuse{scr@#1@innerskip}}%
+        \partheadmidvskip%
+      }{}%
     }{%
-      \if@tud@parttitle\else%
-        \usekomafont{#1prefix}{\vphantom{\partname}}%
-        \tud@headmidvskip@normal%
-      \fi%
-    }%
-  }{}{\tud@patch@wrn{scr@startpart}}%
+      \ifnumbered{#1}{%
+        \usekomafont{#1prefix}{\nobreak\tud@makeuppercase{\@nameuse{#1format}}}%
+        \if@tud@parttitle%
+          \enskip%
+        \else%
+          \tud@headmidvskip@normal%
+        \fi%
+      }{%
+        \if@tud@parttitle\else%
+          \usekomafont{#1prefix}{\vphantom{\partname}}%
+          \tud@headmidvskip@normal%
+        \fi%
+      }%
+    }{}{\tud@patch@wrn{scr@startpart}}%
+  \else%
+    \patchcmd{\tud@@startpart}{%
+      \ifnumbered{#1}{%
+        \usekomafont{#1prefix}{\@nameuse{#1format}}%
+        \setlength{\@tempskipa}{\@nameuse{scr@#1@innerskip}}%
+        \partheadmidvskip%
+      }{}%
+    }{%
+      \ifnumbered{#1}{%
+        \usekomafont{#1prefix}{\tud@makeuppercase{\@nameuse{#1format}}}%
+        \if@tud@parttitle%
+          \enskip%
+        \else%
+          \tud@headmidvskip@normal%
+        \fi%
+      }{%
+        \if@tud@parttitle\else%
+          \usekomafont{#1prefix}{\vphantom{\partname}}%
+          \tud@headmidvskip@normal%
+        \fi%
+      }%
+    }{}{\tud@patch@wrn{scr@startpart}}%
+  \fi%
 %</book|report>
 %    \end{macrocode}
 % Bei den Teile-Befehlen ohne Gliederungsnummerierung muss zusätzlich der

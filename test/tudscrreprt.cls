@@ -4777,27 +4777,52 @@
 \if@tempswa
   \newcommand*\tud@@startpart{}%
   \let\tud@@startpart\scr@@startpart%
-  \patchcmd{\tud@@startpart}{%
-    \ifnumbered{#1}{%
-      \usekomafont{#1prefix}{\@nameuse{#1format}}%
-      \setlength{\@tempskipa}{\@nameuse{scr@#1@innerskip}}%
-      \partheadmidvskip%
-    }{}%
-  }{%
-    \ifnumbered{#1}{%
-      \usekomafont{#1prefix}{\tud@makeuppercase{\@nameuse{#1format}}}%
-      \if@tud@parttitle%
-        \enskip%
-      \else%
-        \tud@headmidvskip@normal%
-      \fi%
+  \ifcsdef{scr@v@3.21}{\@tempswatrue}{\@tempswafalse}%
+  \if@tempswa%
+    \patchcmd{\tud@@startpart}{%
+      \ifnumbered{#1}{%
+        \usekomafont{#1prefix}{\nobreak\@nameuse{#1format}}%
+        \setlength{\@tempskipa}{\@nameuse{scr@#1@innerskip}}%
+        \partheadmidvskip%
+      }{}%
     }{%
-      \if@tud@parttitle\else%
-        \usekomafont{#1prefix}{\vphantom{\partname}}%
-        \tud@headmidvskip@normal%
-      \fi%
-    }%
-  }{}{\tud@patch@wrn{scr@startpart}}%
+      \ifnumbered{#1}{%
+        \usekomafont{#1prefix}{\nobreak\tud@makeuppercase{\@nameuse{#1format}}}%
+        \if@tud@parttitle%
+          \enskip%
+        \else%
+          \tud@headmidvskip@normal%
+        \fi%
+      }{%
+        \if@tud@parttitle\else%
+          \usekomafont{#1prefix}{\vphantom{\partname}}%
+          \tud@headmidvskip@normal%
+        \fi%
+      }%
+    }{}{\tud@patch@wrn{scr@startpart}}%
+  \else%
+    \patchcmd{\tud@@startpart}{%
+      \ifnumbered{#1}{%
+        \usekomafont{#1prefix}{\@nameuse{#1format}}%
+        \setlength{\@tempskipa}{\@nameuse{scr@#1@innerskip}}%
+        \partheadmidvskip%
+      }{}%
+    }{%
+      \ifnumbered{#1}{%
+        \usekomafont{#1prefix}{\tud@makeuppercase{\@nameuse{#1format}}}%
+        \if@tud@parttitle%
+          \enskip%
+        \else%
+          \tud@headmidvskip@normal%
+        \fi%
+      }{%
+        \if@tud@parttitle\else%
+          \usekomafont{#1prefix}{\vphantom{\partname}}%
+          \tud@headmidvskip@normal%
+        \fi%
+      }%
+    }{}{\tud@patch@wrn{scr@startpart}}%
+  \fi%
   \newcommand*\tud@@startspart{}%
   \let\tud@@startspart\scr@@startspart%
   \patchcmd{\tud@@startspart}{%
