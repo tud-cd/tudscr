@@ -237,19 +237,18 @@
     }{}%
   \fi%
 }
-% TODO vspacing -> relspacing
-\newif\if@tud@vspacing
-\TUD@key{vspacing}[true]{%
-  \TUD@set@numkey{vspacing}{@tempa}{%
+\newif\if@tud@relspacing
+\TUD@key{relspacing}[true]{%
+  \TUD@set@numkey{relspacing}{@tempa}{%
     \TUD@numkey@bool,%
     {absolute}{0},{classic}{0},{standard}{0},%
     {relative}{1},{fontsize}{1},{font}{1},{size}{1}%
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax% false
-      \@tud@vspacingfalse%
+      \@tud@relspacingfalse%
     \or% true
-      \@tud@vspacingtrue%
+      \@tud@relspacingtrue%
     \fi%
     \TUD@SpecialOptionAtDocument{tud@font@skip@set}%
   \fi%
@@ -325,21 +324,22 @@
   \xifinlist{\GetRealPageStyle{#1}}{\tud@ps@list}{#2}{#3}%
 }
 \newif\if@tud@ddc@internal
-% TODO: Redefinition der beiden Befehle mit \AtBeginDocument
-\newcommand*\tud@comp@clearpage{%
+\newcommand*\tud@comp@clearpage{}%
+\newcommand*\tud@comp@resetpagestyle{}%
+\AtBeginDocument{%
   \tud@if@v@lower{2.04}{%
-    \if@tud@ddc@internal\else\if@atdocument%
-      \tud@if@tudheadings{\currentpagestyle}{\clearpage}{}%
-    \fi\fi%
-  }{}%
-}
-\newcommand*\tud@comp@resetpagestyle{%
-  \tud@if@v@lower{2.04}{%
-    \if@tud@ddc@internal\else\if@atdocument%
-      \tud@if@tudheadings{\currentpagestyle}{%
-        \expandafter\pagestyle\expandafter{\currentpagestyle}%
-      }{}%
-    \fi\fi%
+    \renewcommand*\tud@comp@clearpage{%
+      \if@tud@ddc@internal\else%
+        \tud@if@tudheadings{\currentpagestyle}{\clearpage}{}%
+      \fi%
+    }%
+    \renewcommand*\tud@comp@resetpagestyle{%
+      \if@tud@ddc@internal\else%
+        \tud@if@tudheadings{\currentpagestyle}{%
+          \expandafter\pagestyle\expandafter{\currentpagestyle}%
+        }{}%
+      \fi%
+    }%
   }{}%
 }
 \newcommand*\tud@ddc@switch{}
@@ -1426,7 +1426,7 @@
 }
 \DeclareOption*{\tud@x@scr@paper}
 \TUDExecuteOptions{%
-  cd=true,vspacing=true,tudbookmarks=true%
+  cd=true,relspacing=true,tudbookmarks=true%
 }
 \TUDProcessOptions\relax
 \LoadClass{\TUD@Class@KOMA}[2015/04/23]
@@ -1687,7 +1687,7 @@
   \global\@tud@head@font@settrue%
 }
 \newcommand*\tud@font@skip@set{%
-  \if@tud@vspacing%
+  \if@tud@relspacing%
     \tud@skip@store{smallskipamount}%
     \tud@skip@store{medskipamount}%
     \tud@skip@store{bigskipamount}%
@@ -6133,7 +6133,7 @@
 }
 \AtEndOfClass%
 {%
-  \tud@if@v@lower{2.04}{\TUDoptions{vspacing=false}}{}%
+  \tud@if@v@lower{2.04}{\TUDoptions{relspacing=false}}{}%
 }
 %%% From File: tudscr-misc.dtx
 \newcommand*\tud@atdocument@hook{}
@@ -6143,7 +6143,6 @@
     \ifx\tud@atdocument@hook\relax%
       \gdef\tud@atdocument@hook{\global\let\tud@atdocument@hook\relax}%
       \AtEndOfFamilyOptions{%
-        \typeout{+++++ bla}
         \tud@atdocument@hook%
         \tud@atdocument@process%
       }%
