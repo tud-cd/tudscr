@@ -295,7 +295,7 @@
 \setlength\tud@dim@bleedmargin{\maxdimen}
 \TUD@key{bleedmargin}{%
 %  \TUD@noworlater{%
-    \TUD@set@lengthkey{bleedmargin}{\tud@dim@bleedmargin}{#1}%
+  \TUD@set@lengthkey{bleedmargin}{\tud@dim@bleedmargin}{#1}%
 %  }{%
 %    \ifx\FamilyKeyState\FamilyKeyStateProcessed%
 %      \tud@cdgeometry@@process@atdocument%
