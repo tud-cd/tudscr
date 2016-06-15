@@ -1,4 +1,4 @@
-% \CheckSum{3592}
+% \CheckSum{3582}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -489,58 +489,40 @@
 %
 % \iffalse
 %</class&body>
-%<*class>
+%<*class&option>
 % \fi
 %
 % \begin{option}{bleedmargin}
 % \changes{v2.05}{2016/06/14}{neu}^^A
-% \begin{length}{\tud@len@bleedmargin}
-% \changes{v2.05}{2016/04/03}{neu}^^A
-% \begin{macro}{\tud@bleedmargin@set}
+% \begin{macro}{\tud@dim@bleedmargin}
 % \changes{v2.05}{2016/04/03}{neu}^^A
 % Wird entweder das Paket \pkg{crop} oder aber die Option \opt{layout} des 
 % Paketes \pkg{geometry} für Schnittmarken verwendet, werden alle farbigen 
 % Elemente des Layouts dahingehend vergrößert, dass beim Zuschneiden des 
 % Papierbogens \emph{in die Farbe} geschnitten wird. Verantwortlich hierfür ist 
-% die Länge \cs{tud@len@bleedmargin}, die natürlich auch vom Anwender mit der 
-% Option \opt{bleedmargin} beliebig gesetzt werden kann.
-% \ToDo{Option \opt{bleedmargin} prüfen/vollständig implementieren}[v2.05]
+% das Makro \cs{tud@dim@bleedmargin}, welches natürlich auch vom Anwender mit
+% der Option \opt{bleedmargin} beliebig gesetzt werden kann. Als Standardwert 
+% werden 5\% der größten Randbreite gesetzt.
 %    \begin{macrocode}
-%<*option>
-\newlength\tud@len@bleedmargin
-\setlength\tud@len@bleedmargin{\maxdimen}
+\newcommand*\tud@dim@bleedmargin{.05\tud@len@widemargin}
 \TUD@key{bleedmargin}{%
-  \TUD@set@lengthkey{bleedmargin}{\tud@len@bleedmargin}{#1}%
-}
+  \TUD@set@dimenkey{bleedmargin}{\tud@dim@bleedmargin}{#1}%
 %    \end{macrocode}
-% Das Makro \cs{tud@bleedmargin@set} wird einmalig am Ende der Präambel 
-% aufgerufen. Es wird geprüft, ob die Länge \cs{bleedmargin} durch den Anwender 
-% angepasst wurde. Ist dies nicht er Fall, wird gerpüft, ob für \pkg{crop} oder 
-% \pkg{geometry} Schnittmarken definiert wurden. In diesem Fall wird die Länge 
-% \cs{bleedmargin} auf 5\% der größten Randbreite gesetzt.
+% Negative Werte sind nicht möglich, diese werden automatisch korrigiert.
 %    \begin{macrocode}
-\newcommand*\tud@bleedmargin@set{%
-  \@tempswafalse%
-  \ifcsundef{CROP@@@marks}{}{%
-    \ifx\CROP@@@marks\vfil\else\@tempswatrue\fi%
-  }%
-  \ifGm@showcrop\@tempswatrue\fi%
-  \ifdim\tud@len@bleedmargin=\maxdimen\relax%
-    \if@tempswa%
-      \setlength\tud@len@bleedmargin{.05\tud@len@widemargin}%
-    \else%
-      \setlength\tud@len@bleedmargin{\z@}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \ifdim\dimexpr\tud@dim@bleedmargin\relax<\z@\relax%
+      \def\@tempa-##1\@nil{\def\tud@dim@bleedmargin{##1}}%
+      \@tempa#1\@nil%
     \fi%
   \fi%
 }
-%</option>
 %    \end{macrocode}
-% \end{macro}^^A \tud@bleedmargin@set
-% \end{length}^^A \tud@len@bleedmargin
+% \end{macro}^^A \tud@dim@bleedmargin
 % \end{option}^^A bleedmargin
 %
 % \iffalse
-%</class>
+%</class&option>
 %<*class&body>
 % \fi
 %
@@ -641,10 +623,10 @@
 %    \begin{macrocode}
   \DeclareNewLayer[%
     background,%
-    width=\dimexpr\tud@len@layoutwidth+2\tud@len@bleedmargin\relax,%
-    addhoffset=\dimexpr\tud@len@layouthoffset-\tud@len@bleedmargin\relax,%
-    height=\dimexpr\tud@len@topmargin+\tud@len@bleedmargin\relax,%
-    addvoffset=\dimexpr\tud@len@layoutvoffset-\tud@len@bleedmargin\relax,%
+    width=\dimexpr\tud@len@layoutwidth+\tud@dim@bleedmargin*2\relax,%
+    addhoffset=\dimexpr\tud@len@layouthoffset-\tud@dim@bleedmargin\relax,%
+    height=\dimexpr\tud@len@topmargin+\tud@dim@bleedmargin\relax,%
+    addvoffset=\dimexpr\tud@len@layoutvoffset-\tud@dim@bleedmargin\relax,%
     contents={%
       \ifnum\tud@head@bar@num>\tw@\relax% cdhead=color
         \color{HKS41}%
@@ -654,8 +636,8 @@
   ]{tudheadings.head.back}%
   \DeclareNewLayer[%
     background,%
-    width=\dimexpr\tud@len@layoutwidth+2\tud@len@bleedmargin\relax,%
-    addhoffset=\dimexpr\tud@len@layouthoffset-\tud@len@bleedmargin\relax,%
+    width=\dimexpr\tud@len@layoutwidth+\tud@dim@bleedmargin*2\relax,%
+    addhoffset=\dimexpr\tud@len@layouthoffset-\tud@dim@bleedmargin\relax,%
     height=\tud@len@barheight,%
     voffset=\tud@len@topmargin,%
     addvoffset=\tud@len@layoutvoffset,%
@@ -724,8 +706,8 @@
   ]{tudheadings.head.lowline}%
   \DeclareNewLayer[%
     background,%
-    width=\dimexpr\tud@len@layoutwidth+2\tud@len@bleedmargin\relax,%
-    addhoffset=\dimexpr\tud@len@layouthoffset-\tud@len@bleedmargin\relax,%
+    width=\dimexpr\tud@len@layoutwidth+\tud@dim@bleedmargin*2\relax,%
+    addhoffset=\dimexpr\tud@len@layouthoffset-\tud@dim@bleedmargin\relax,%
     voffset=\dimexpr\tud@len@topmargin-.5\tud@len@line\relax,%
     addvoffset=\tud@len@layoutvoffset,%
     contents={%
@@ -736,8 +718,8 @@
   ]{tudheadings.head.uplinewide}%
   \DeclareNewLayer[%
     background,%
-    width=\dimexpr\tud@len@layoutwidth+2\tud@len@bleedmargin\relax,%
-    addhoffset=\dimexpr\tud@len@layouthoffset-\tud@len@bleedmargin\relax,%
+    width=\dimexpr\tud@len@layoutwidth+\tud@dim@bleedmargin*2\relax,%
+    addhoffset=\dimexpr\tud@len@layouthoffset-\tud@dim@bleedmargin\relax,%
     voffset=\dimexpr\tud@len@topmargin+\tud@len@barheight%
       -.5\tud@len@line\relax,%
     addvoffset=\tud@len@layoutvoffset,%
@@ -782,10 +764,10 @@
 %    \begin{macrocode}
   \DeclareNewLayer[%
     background,foot,%
-    width=\dimexpr\tud@len@layoutwidth+2\tud@len@bleedmargin\relax,%
-    hoffset=\dimexpr\tud@len@layouthoffset-\tud@len@bleedmargin\relax,%
+    width=\dimexpr\tud@len@layoutwidth+\tud@dim@bleedmargin*2\relax,%
+    hoffset=\dimexpr\tud@len@layouthoffset-\tud@dim@bleedmargin\relax,%
     height=\dimexpr\tud@len@layoutheight-\layeryoffset%
-      +\tud@len@layoutvoffset+\tud@len@bleedmargin\relax,%
+      +\tud@len@layoutvoffset+\tud@dim@bleedmargin\relax,%
     addvoffset=-\dp\strutbox,%
     contents={%
       \if@tud@foot@colored%
@@ -1023,10 +1005,10 @@
   \DeclareNewLayer[%
     background,%
     area=%
-      {\dimexpr\tud@len@layouthoffset-\tud@len@bleedmargin\relax}%
-      {\dimexpr\tud@len@layoutvoffset-\tud@len@bleedmargin\relax}%
-      {\dimexpr\tud@len@layoutwidth+2\tud@len@bleedmargin\relax}%
-      {\dimexpr\tud@len@layoutheight+2\tud@len@bleedmargin\relax}%
+      {\dimexpr\tud@len@layouthoffset-\tud@dim@bleedmargin\relax}%
+      {\dimexpr\tud@len@layoutvoffset-\tud@dim@bleedmargin\relax}%
+      {\dimexpr\tud@len@layoutwidth+\tud@dim@bleedmargin*2\relax}%
+      {\dimexpr\tud@len@layoutheight+\tud@dim@bleedmargin*2\relax}%
     ,%
     contents={%
       \ifdefvoid{\tud@pagecolor}{}{%
@@ -3031,25 +3013,22 @@
 % \end{macro}^^A \tud@cdgeometry@num
 % \end{option}^^A cdgeometry
 % \begin{option}{extrabottommargin}
-% \begin{length}{\tud@len@extrabottommargin}
+% \begin{macro}{\tud@dim@extrabottommargin}
 % Diese Option dient dazu, die Höhe des Fußes anzupassen. Dies ist jedoch nur 
 % möglich, wenn der Satzspiegel des \CDs verwendet wird. Kommt \pkg{typearea} 
 % zum Einsatz, ist die Option wirkungslos. Da für die Länge ggf. auch Werte 
 % angegeben werden können, die abhängig von der Schriftgröße sind, wird die 
 % Ausführung dieser Option verzögert.
 %    \begin{macrocode}
-\newlength\tud@len@extrabottommargin
+\newcommand*\tud@dim@extrabottommargin{\z@}
 \TUD@key{extrabottommargin}{%
-  \TUD@noworlater{%
-    \TUD@set@lengthkey{extrabottommargin}{\tud@len@extrabottommargin}{#1}%
-  }{%
-    \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-      \TUD@SpecialOptionAtDocument{tud@cdgeometry@@process}%
-    \fi%
-  }%
+  \TUD@set@dimenkey{extrabottommargin}{\tud@dim@extrabottommargin}{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \TUD@SpecialOptionAtDocument{tud@cdgeometry@@process}%
+  \fi%
 }
 %    \end{macrocode}
-% \end{length}^^A \tud@len@extrabottommargin
+% \end{macro}^^A \tud@dim@extrabottommargin
 % \end{option}^^A extrabottommargin
 % \begin{option}{twoside}
 % \begin{option}{twocolumn}
@@ -3396,7 +3375,7 @@
 % Warnung ausgegeben, dass diese für den \pkg{typearea}-Satzspiegel wirkungslos
 % ist.
 %    \begin{macrocode}
-      \ifdim\tud@len@extrabottommargin=\z@\relax\else%
+      \ifdim\dimexpr\tud@dim@extrabottommargin\relax=\z@\relax\else%
         \ClassWarning{\TUD@Class@Name}{%
           Option `extrabottommargin' is ineffective when\MessageBreak%
           package typearea or custom layout is used\MessageBreak%
@@ -3491,7 +3470,7 @@
           top=\the\dimexpr.5\tud@len@both\relax,%
           headheight=\the\headheight,%
           headsep=\the\tud@len@headsep,%
-          bottom=\the\dimexpr.5\tud@len@both+\tud@len@extrabottommargin\relax,%
+          bottom=\the\dimexpr.5\tud@len@both+\tud@dim@extrabottommargin\relax,%
           \tud@cdgeometry@fincl,%
           footskip=\the\dimexpr\tud@len@headsep+\footheight%
             -1.25\baselineskip\relax%
@@ -3503,7 +3482,7 @@
           headheight=\the\headheight,%
           headsep=\the\headsep,%
           bottom=\the\dimexpr\tud@len@widemargin%
-            +\tud@len@extrabottommargin\relax,%
+            +\tud@dim@extrabottommargin\relax,%
           \tud@cdgeometry@fincl,%
           footskip=\the\dimexpr\tud@len@footsep+\footheight\relax%
         }%
@@ -3539,11 +3518,11 @@
         \setlength\tud@len@ddcdiff{.6\tud@len@topmargin}%
         \edef\tud@cdgeometry@ddcmargin{%
           \if@fincl%
-            bottom=\the\dimexpr.5\tud@len@both+\tud@len@extrabottommargin%
+            bottom=\the\dimexpr.5\tud@len@both+\tud@dim@extrabottommargin%
               +\tud@len@ddcdiff+\tud@len@headsep+\footheight%
               -1.25\baselineskip\relax,%
           \else%
-            bottom=\the\dimexpr.5\tud@len@both+\tud@len@extrabottommargin%
+            bottom=\the\dimexpr.5\tud@len@both+\tud@dim@extrabottommargin%
               +\tud@len@ddcdiff\relax,%
           \fi%
           footskip=\the\dimexpr\tud@len@headsep+\footheight%
@@ -4021,7 +4000,6 @@
     \BeforeSelectAnyPageStyle{\tud@BeforeSelectAnyPageStyle{#1}}%
     \tud@cdgeometry@process%
   \fi%
-  \tud@bleedmargin@set%
 }
 %    \end{macrocode}
 % \begin{macro}{\tud@ps@parameters}
