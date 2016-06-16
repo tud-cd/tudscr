@@ -1,4 +1,4 @@
-% \CheckSum{744}
+% \CheckSum{772}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-base.dtx}[%
-  2016/06/15 v2.05 TUD-KOMA-Script\space%
+  2016/06/16 v2.05 TUD-KOMA-Script\space%
 %</driver>
 %<package&base>\ProvidesPackage{tudscrbase}[%
 %<*driver|package&base>
@@ -224,6 +224,30 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \ifstrbool
+%
+% \subsubsection{Test auf Angabe einer Länge}
+%
+% \begin{macro}{\ifxlen}
+% \changes{v2.05}{2016/06/16}{neu}^^A
+% Hiermit kann getestet werden, ob das gegebene Argument einer Länge entspricht.
+%    \begin{macrocode}
+\newcommand*\ifxlen[1]{%
+  \begingroup%
+    \protected@edef\@tempa{#1}%
+    \@tempswafalse%
+    \ifisdimen{\@tempa}{\@tempswatrue}{}%
+    \ifisskip{\@tempa}{\@tempswatrue}{}%
+    \ifisdimexpr{\@tempa}{\@tempswatrue}{}%
+    \if@tempswa\edef\@tempa{\the\@tempa}\fi%
+    \ifisdimension{\@tempa}{%
+      \aftergroup\@firstoftwo%
+    }{%
+      \aftergroup\@secondoftwo%
+    }%
+  \endgroup
+}
+%    \end{macrocode}
+% \end{macro}^^A \iflanguageloaded
 %
 % \subsubsection{Test auf eine verwendbare Sprache}
 %
@@ -523,7 +547,7 @@
 % Makro gespeichert.
 %    \begin{macrocode}
 \newcommand*\TUD@set@dimenkey[3]{%
-  \ifdimen{#3}{%
+  \ifxlen{#3}{%
     \def#2{#3}%
     \FamilyKeyStateProcessed%
   }{%
