@@ -1,4 +1,4 @@
-% \CheckSum{3582}
+% \CheckSum{3612}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-pagestyle.dtx}[%
-  2016/06/15 v2.05 TUD-KOMA-Script (pagestyle)%
+  2016/06/16 v2.05 TUD-KOMA-Script (pagestyle)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman,xindy]{tudscrdoc}
@@ -845,7 +845,7 @@
 % Layers nicht vollständig genutzt, um bei einem farbigen Fußbereich einen 
 % gewissen Abstand vom Inhalt zur Kante zu erhalten.
 %    \begin{macrocode}
-      \tud@footlogoheight@set%
+      \tud@footlogoheight@check%
       \setlength\@tempdima{\dimexpr\layerheight-\dp\strutbox\relax}%
 %    \end{macrocode}
 % Im Bedarfsfall werden die Boxen vor der Ausgabe durch die einzelnen 
@@ -865,7 +865,7 @@
     \ModifyLayer[%
       addvoffset=-\tud@len@ddcdiff+\ht\strutbox,%
       contents={%
-        \tud@footlogoheight@set%
+        \tud@footlogoheight@check%
         \setlength\@tempdima{\dimexpr\layerheight-\dp\strutbox\relax}%
         \tud@ddc@check%
         \ifcase\@tempb\relax% \tud@ddc@foot@num=false
@@ -1618,30 +1618,24 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@ps@list
 % \end{macro}^^A \tud@if@tudheadings
-% \begin{option}{ddc}
-% \changes{v2.02}{2014/06/23}{automatische Logowahl}^^A
-% \begin{option}{ddchead}
-% \changes{v2.02}{2014/06/23}{Logo von \DDC entweder in Kopf oder Fuß}^^A
-% \begin{option}{ddcfoot}
-% \changes{v2.02}{2014/06/23}{Logo von \DDC entweder in Kopf oder Fuß}^^A
-% Diese Optionen dienen zur Auswahl des \DDC-Logos auf Seiten mit dem Stil 
-% \pgs{tudheadings}. Die Option \opt{ddchead} setzt das Logo dabei immer in den
-% Kopf, wobei ein mit \cs{headlogo} definiertes Zweitlogo gegebenenfalls 
-% überschrieben wird. Die Option \opt{ddcfoot} setzt das Logo immer in den Fuß. 
-% Mit der Option \opt{ddc} wird das Logo nur in den Kopf gesetzt, wenn kein 
-% Zweitlogo angegeben ist. Ist dies jedoch der Fall, wird das Logo stattdessen 
-% im Fuß ausgegeben.
 % \begin{macro}{\if@tud@ddc@internal}
 % \changes{v2.02}{2014/07/08}{neu}^^A
+% Dieser Schalter wird intern von den Optionen \opt{ddc}, \opt{ddchead} und 
+% \opt{ddcfoot} verwendet, um rekursive Aufrufe der Optionen zu verhindern.
+%    \begin{macrocode}
+\newif\if@tud@ddc@internal
+%    \end{macrocode}
+% \end{macro}^^A \if@tud@ddc@internal
+%
+% \iffalse
+%</class&option>
+%<*class>
+% \fi
+%
 % \begin{macro}{\tud@comp@clearpage}
 % \changes{v2.04}{2015/05/31}{neu}^^A
 % \begin{macro}{\tud@comp@resetpagestyle}
 % \changes{v2.04}{2015/05/31}{neu}^^A
-% Dieser Schalter wird intern von den Optionen \opt{ddc}, \opt{ddchead} und 
-% \opt{ddcfoot} verwendet, um rekursive Aufrufe der optionen zu verhindern.
-%    \begin{macrocode}
-\newif\if@tud@ddc@internal
-%    \end{macrocode}
 % Bis zur Version~v2.02 wurden unterschiedliche Satzsiegel für den Seitenfuß 
 % mit und ohne \DDC-Logo verwendet. Damit dieser im Zweifelsfall umgestellt 
 % werden kann, wurde vor dem Ausführen der entsprechenden Optionen ein 
@@ -1650,8 +1644,11 @@
 % Unterfangen definiert, jedoch bei der Abarbeitung der Optionen nur noch im 
 % Kompatibilitätmodus ausgeführt.
 %    \begin{macrocode}
+%<*option>
 \newcommand*\tud@comp@clearpage{}%
 \newcommand*\tud@comp@resetpagestyle{}%
+%</option>
+%<*body>
 \AtBeginDocument{%
   \tud@if@v@lower{2.04}{%
     \renewcommand*\tud@comp@clearpage{%
@@ -1668,10 +1665,29 @@
     }%
   }{}%
 }
+%</body>
 %    \end{macrocode}
 % \end{macro}^^A \tud@comp@clearpage
 % \end{macro}^^A \tud@comp@resetpagestyle
-% \end{macro}^^A \if@tud@ddc@internal
+%
+% \iffalse
+%</class>
+%<*class&option>
+% \fi
+%
+% \begin{option}{ddc}
+% \changes{v2.02}{2014/06/23}{automatische Logowahl}^^A
+% \begin{option}{ddchead}
+% \changes{v2.02}{2014/06/23}{Logo von \DDC entweder in Kopf oder Fuß}^^A
+% \begin{option}{ddcfoot}
+% \changes{v2.02}{2014/06/23}{Logo von \DDC entweder in Kopf oder Fuß}^^A
+% Diese Optionen dienen zur Auswahl des \DDC-Logos auf Seiten mit dem Stil 
+% \pgs{tudheadings}. Die Option \opt{ddchead} setzt das Logo dabei immer in den
+% Kopf, wobei ein mit \cs{headlogo} definiertes Zweitlogo gegebenenfalls 
+% überschrieben wird. Die Option \opt{ddcfoot} setzt das Logo immer in den Fuß. 
+% Mit der Option \opt{ddc} wird das Logo nur in den Kopf gesetzt, wenn kein 
+% Zweitlogo angegeben ist. Ist dies jedoch der Fall, wird das Logo stattdessen 
+% im Fuß ausgegeben.
 % \begin{macro}{\tud@ddc@switch}
 % \changes{v2.02}{2014/06/23}{neu}^^A
 % Dieses Makro definiert die gültigen Werte für die \DDC-Optionen \opt{ddc}, 
@@ -1932,7 +1948,8 @@
 % den Boxen in der richtigen Größe neu zu setzen.
 %    \begin{macrocode}
     \tud@headlogo@set%
-    \tud@footlogo@set%
+    \@tud@footlogo@option@settrue%
+    \tud@footlogo@option@set%
     \global\@tud@mainlogo@setfalse%
   \fi%
 }
@@ -2134,50 +2151,88 @@
 % \end{macro}^^A \tud@layer@foot@white
 % \end{macro}^^A \tud@layer@foot@HKS41
 % \end{macro}^^A \tud@layer@foot@black
-% \begin{length}{\footlogoheight}
-% \changes{v2.03}{2015/01/27}{neu}^^A
-% \begin{length}{\tud@len@footlogoheight}
+%
+% \iffalse
+%</class&body>
+%<*class>
+% \fi
+%
+% \begin{option}{footlogoheight}
+% \changes{v2.05}{2016/06/16}{neu}^^A
+% \begin{macro}{\tud@dim@footlogoheight}
 % \changes{v2.04}{2015/06/01}{neu}^^A
-% \begin{macro}{\tud@footlogoheight@set}
-% \changes{v2.04}{2015/04/21}{neu}^^A
-% Für den Anwender besteht mit der Länge \cs{footlogoheight} die Möglichkeit, 
+% Für den Anwender besteht mit der Option \opt{footlogoheight} die Möglichkeit, 
 % die Höhe aller Logos im Fußbereich~-- also eventuell das \DDC-Logo sowie
 % vom Anwender mit dem Befehl \cs{footlogo} angegebene Logos~-- zentral
-% festzulegen. Dabei wird die Länge nicht direkt genutzt, sondern intern
-% \cs{tud@len@footlogoheight} verwendet. mit \cs{tud@footlogoheight@set} wird
-% geprüft, ob der Anwender \cs{footlogoheight} tatsächlich angepasst hat.
-% Sollte dies der Fall sein, wird \cs{tud@footlogoheight@set} auf diesen Wert
-% gesetzt, andernfalls werden die hinterlegten Standardwerte verwendet.
+% festzulegen. Dabei wird der gewünschte Wert in \cs{tud@dim@footlogoheight} 
+% abgelegt. 
+%    \begin{macrocode}
+%<*option>
+\newcommand*\tud@dim@footlogoheight{}
+\let\tud@dim@footlogoheight\relax
+\TUD@key{footlogoheight}{%
+  \TUD@set@dimenkey{footlogoheight}{\tud@dim@footlogoheight}{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \ifdim\dimexpr\tud@dim@footlogoheight\relax<\z@\relax%
+      \def\@tempa-##1\@nil{\def\tud@dim@footlogoheight{##1}}%
+      \@tempa#1\@nil%
+    \fi%
+    \global\@tud@footlogo@option@settrue%
+  \fi%
+}
+%</option>
+%    \end{macrocode}
+% Da sich mit der Version~v2.03 die Standardhöhe des \DDC-Logos im Fußbereich 
+% geändert hat, wird dieser Wert abhängig von der Einstellung für die Option 
+% \opt{tudscrver} nach der Abarbeitung der Optionen am Ende der Klasse gesetzt.
+%    \begin{macrocode}
+%<*body>
+\AtEndOfClass{%
+  \ifdefvoid{\tud@dim@footlogoheight}{%
+    \tud@if@v@lower{2.03}{%
+      \def\tud@dim@footlogoheight{.6\tud@len@topmargin}%
+    }{%
+      \def\tud@dim@footlogoheight{\tud@len@mainlogoheight}%
+    }%
+  }{}%
+}
+%</body>
+%    \end{macrocode}
+% \end{macro}^^A \tud@dim@footlogoheight
+% \end{option}^^A footlogoheight
+%
+% \iffalse
+%</class>
+%<*class&body>
+% \fi
+%
+% \begin{length}{\footlogoheight}
+% \changes{v2.03}{2015/01/27}{neu}^^A
+% \begin{macro}{\tud@footlogoheight@check}
+% \changes{v2.04}{2015/04/21}{neu}^^A
+% Mit \cs{tud@footlogoheight@check} wird geprüft, ob der Anwender anstelle der 
+% Option \opt{footlogoheight} die bis einschließlich der Version~v2.04 hierfür 
+% bereitgestellte Länge \cs{footlogoheight} verwendet hat. Sollte dies der Fall
+% sein, wird \cs{tud@dim@footlogoheight} auf diesen Wert gesetzt und eine
+% Warnung erzeugt.
 %    \begin{macrocode}
 \newlength\footlogoheight
-\newlength\tud@len@footlogoheight
-\newcommand*\tud@footlogoheight@set{%
-  \ifdim\footlogoheight=\z@\relax%
-    \tud@if@v@lower{2.03}{%
-      \setlength\tud@len@footlogoheight{.6\tud@len@topmargin}%
-    }{%
-      \setlength\tud@len@footlogoheight{\tud@len@mainlogoheight}%
+\setlength\footlogoheight{\maxdimen}
+\newcommand*\tud@footlogoheight@check{%
+  \ifdim\footlogoheight<\maxdimen\relax%
+    \ClassWarning{\TUD@Class@Name}{%
+      Using the length `\string\footlogoheight' is deprecated.\MessageBreak%
+      You should use option `footlogoheight' instead.
     }%
-  \else%
-%    \end{macrocode}
-% Der Grund für die Verwendung einer internen Länge \cs{tud@len@footlogoheight} 
-% liegt darin begründet, dass eine Änderung der Länge \cs{footlogoheight} eine 
-% Erneuerung der genutzten Boxen benötigt. Die Prüfung und ggf. das Setzen des 
-% entsprechenden Schalters geschieht hier.
-%    \begin{macrocode}
-    \ifdim\footlogoheight=\tud@len@footlogoheight\relax\else%
-      \setlength\tud@len@footlogoheight{\footlogoheight}%
-      \global\@tud@footlogo@option@settrue%
-    \fi%
+    \xdef\tud@dim@footlogoheight{\the\footlogoheight}%
+    \setlength\footlogoheight{\maxdimen}%
+    \global\footlogoheight=\footlogoheight%
+    \global\@tud@footlogo@option@settrue%
   \fi%
-  \global\tud@len@footlogoheight=\tud@len@footlogoheight%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@footlogoheight@set
-% \end{length}^^A \tud@len@footlogoheight
+% \end{macro}^^A \tud@footlogoheight@check
 % \end{length}^^A \footlogoheight
-% \begin{macro}{\tud@footlogo@set}
-% \changes{v2.04}{2015/06/01}{neu}^^A
 % \begin{macro}{\tud@footlogo@ddc@set}
 % \changes{v2.04}{2015/06/01}{neu}^^A
 % \begin{macro}{\tud@footlogo@option@set}
@@ -2188,19 +2243,9 @@
 % das Makro \cs{tud@footlogo@ddc@set} definiert.
 %    \begin{macrocode}
 \newcommand*\tud@footlogo@ddc@set[2]{%
-  \tud@footlogoheight@set%
   \tud@savelayerbox{foot@#1}{%
-    \includegraphics[keepaspectratio,totalheight=\tud@len@footlogoheight]{#2}%
+    \includegraphics[keepaspectratio,totalheight=\tud@dim@footlogoheight]{#2}%
   }%
-}
-%    \end{macrocode}
-% anschließend erfolgt das eigentliche Setzen der Boxen.
-%    \begin{macrocode}
-\newcommand*\tud@footlogo@set{%
-  \tud@footlogo@ddc@set{black}{DDC-22}%
-  \tud@footlogo@ddc@set{HKS41}{DDC-25}%
-  \tud@footlogo@ddc@set{white}{DDC-28}%
-  \tud@footlogo@option@set%
 }
 %    \end{macrocode}
 % Hiermit werden die \DDC-Optionen \opt{ddc} bzw. \opt{ddcfoot} abgearbeitet. 
@@ -2209,6 +2254,9 @@
 %    \begin{macrocode}
 \newcommand*\tud@footlogo@option@set{%
   \if@tud@footlogo@option@set%
+    \tud@footlogo@ddc@set{black}{DDC-22}%
+    \tud@footlogo@ddc@set{HKS41}{DDC-25}%
+    \tud@footlogo@ddc@set{white}{DDC-28}%
     \tud@ddc@check%
     \ifcase\@tempb\relax\or\or% \tud@ddc@foot@num=color
       \tud@footlogo@ddc@set{option}{DDC-01}%
@@ -2229,7 +2277,6 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@footlogo@option@set
 % \end{macro}^^A \tud@footlogo@ddc@set
-% \end{macro}^^A \tud@footlogo@set
 % \begin{macro}{\tud@footlogo@ddc@use}
 % \changes{v2.04}{2015/06/01}{neu}^^A
 % Die Ausgabe des \DDC-Logos im Fuß erfolgt mit diesem Makro. Dabei wird dieses 
@@ -2252,8 +2299,8 @@
         }%
         \vss\vss%
       }{%
-        `\string\footlogoheight' (\the\tud@len@footlogoheight) is\MessageBreak%
-        too high. You should reduce this length.%
+        You should reduce `footlogoheight', because it is\MessageBreak
+        too high (\the\dimexpr\tud@dim@footlogoheight\relax).%
         \ifnum\tud@cdgeometry@num>\@ne% true/symmetric/twoside
           \MessageBreak%
           Alternatively you can enlarge the bottom margin\MessageBreak%
@@ -2310,6 +2357,8 @@
 % \changes{v2.03}{2015/01/27}{neu}^^A
 % \changes{v2.03}{2015/02/02}{optionale Parameter für unterschiedliche Dateien 
 % individuell nutzbar}^^A
+% \begin{macro}{\if@tud@footlogo@cmd@set}
+% \changes{v2.04}{2015/06/01}{neu}^^A
 % Die mit \cs{footlogo} angegeben Logos und die dazugehörigen Einstellungen, 
 % welche entweder allgemein über das optionale Argument oder aber individuell 
 % durch \val{:} an den Dateinamen angehängt übergeben wurden, werden hier in
@@ -2318,7 +2367,6 @@
 \newif\if@tud@footlogo@cmd@set
 \newcommand*\tud@footlogo@cmd@set[2]{%
   \if@tud@footlogo@cmd@set%
-    \tud@footlogoheight@set%
     \tud@savelayerbox{foot@cmd}{%
       \hbox to #2{%
 %    \end{macrocode}
@@ -2374,7 +2422,7 @@
 % In jedem Fall werden die Grundeinstellungen als erstes ausgeführt.
 %    \begin{macrocode}
     \preto\tud@footlogo@fileoptions{%
-      keepaspectratio,totalheight=\tud@len@footlogoheight,%
+      keepaspectratio,totalheight=\tud@dim@footlogoheight,%
     }%
 %    \end{macrocode}
 % Wurden tatsächlich inidviduelle Parameter übergeben, so werden diese als 
@@ -2395,6 +2443,7 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \if@tud@footlogo@cmd@set
+% \end{macro}^^A \tud@footlogo@cmd@@set
 % \end{macro}^^A \tud@footlogo@cmd@set
 % \begin{macro}{\tud@footlogo@cmd@use}
 % \changes{v2.04}{2015/06/01}{neu}^^A

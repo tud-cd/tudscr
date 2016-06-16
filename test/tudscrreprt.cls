@@ -308,22 +308,6 @@
 \newif\if@tud@ddc@internal
 \newcommand*\tud@comp@clearpage{}%
 \newcommand*\tud@comp@resetpagestyle{}%
-\AtBeginDocument{%
-  \tud@if@v@lower{2.04}{%
-    \renewcommand*\tud@comp@clearpage{%
-      \if@tud@ddc@internal\else%
-        \tud@if@tudheadings{\currentpagestyle}{\clearpage}{}%
-      \fi%
-    }%
-    \renewcommand*\tud@comp@resetpagestyle{%
-      \if@tud@ddc@internal\else%
-        \tud@if@tudheadings{\currentpagestyle}{%
-          \expandafter\pagestyle\expandafter{\currentpagestyle}%
-        }{}%
-      \fi%
-    }%
-  }{}%
-}
 \newcommand*\tud@ddc@switch{}
 \edef\tud@ddc@switch{%
   \TUD@numkey@bool,%
@@ -383,6 +367,18 @@
     \fi%
   \fi%
   \tud@comp@resetpagestyle%
+}
+\newcommand*\tud@dim@footlogoheight{}
+\let\tud@dim@footlogoheight\relax
+\TUD@key{footlogoheight}{%
+  \TUD@set@dimenkey{footlogoheight}{\tud@dim@footlogoheight}{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \ifdim\dimexpr\tud@dim@footlogoheight\relax<\z@\relax%
+      \def\@tempa-##1\@nil{\def\tud@dim@footlogoheight{##1}}%
+      \@tempa#1\@nil%
+    \fi%
+    \global\@tud@footlogo@option@settrue%
+  \fi%
 }
 \cs@lock{tud@head@font@num}{0}
 \cs@lock{tud@head@bar@num}{0}
@@ -3020,7 +3016,7 @@
     height=\dimexpr\tud@len@layoutheight-\layeryoffset%
       +\tud@len@layoutvoffset\relax,%
     contents={%
-      \tud@footlogoheight@set%
+      \tud@footlogoheight@check%
       \setlength\@tempdima{\dimexpr\layerheight-\dp\strutbox\relax}%
       \tud@footlogo@cmd@use{\@tempdima}{\layerwidth}%
       \tud@footlogo@ddc@use{\@tempdima}{\layerwidth}%
@@ -3031,7 +3027,7 @@
     \ModifyLayer[%
       addvoffset=-\tud@len@ddcdiff+\ht\strutbox,%
       contents={%
-        \tud@footlogoheight@set%
+        \tud@footlogoheight@check%
         \setlength\@tempdima{\dimexpr\layerheight-\dp\strutbox\relax}%
         \tud@ddc@check%
         \ifcase\@tempb\relax% \tud@ddc@foot@num=false
@@ -3405,6 +3401,22 @@
   \endgroup%
   \vbox to #1{#2}%
 }
+\AtBeginDocument{%
+  \tud@if@v@lower{2.04}{%
+    \renewcommand*\tud@comp@clearpage{%
+      \if@tud@ddc@internal\else%
+        \tud@if@tudheadings{\currentpagestyle}{\clearpage}{}%
+      \fi%
+    }%
+    \renewcommand*\tud@comp@resetpagestyle{%
+      \if@tud@ddc@internal\else%
+        \tud@if@tudheadings{\currentpagestyle}{%
+          \expandafter\pagestyle\expandafter{\currentpagestyle}%
+        }{}%
+      \fi%
+    }%
+  }{}%
+}
 \newcommand*\tud@ddc@check{%
   \let\@tempa\tud@ddc@head@num%
   \let\@tempb\tud@ddc@foot@num%
@@ -3451,7 +3463,8 @@
       \fi%
     }%
     \tud@headlogo@set%
-    \tud@footlogo@set%
+    \@tud@footlogo@option@settrue%
+    \tud@footlogo@option@set%
     \global\@tud@mainlogo@setfalse%
   \fi%
 }
@@ -3554,39 +3567,39 @@
 \tud@newlayerbox{foot@HKS41}
 \tud@newlayerbox{foot@white}
 \tud@newlayerbox{foot@option}
-% TODO: Optionen für Längen (falls zu prüfen, auf \maxdimen setzen)
-% \footlogoheight, \pageheadingsvskip und \headingsvskip beibehalten
-\newlength\footlogoheight
-\newlength\tud@len@footlogoheight
-\newcommand*\tud@footlogoheight@set{%
-  \ifdim\footlogoheight=\z@\relax%
+\AtEndOfClass{%
+  \ifdefvoid{\tud@dim@footlogoheight}{%
     \tud@if@v@lower{2.03}{%
-      \setlength\tud@len@footlogoheight{.6\tud@len@topmargin}%
+      \def\tud@dim@footlogoheight{.6\tud@len@topmargin}%
     }{%
-      \setlength\tud@len@footlogoheight{\tud@len@mainlogoheight}%
+      \def\tud@dim@footlogoheight{\tud@len@mainlogoheight}%
     }%
-  \else%
-    \ifdim\footlogoheight=\tud@len@footlogoheight\relax\else%
-      \setlength\tud@len@footlogoheight{\footlogoheight}%
-      \global\@tud@footlogo@option@settrue%
-    \fi%
+  }{}%
+}
+\newlength\footlogoheight
+\setlength\footlogoheight{\maxdimen}
+\newcommand*\tud@footlogoheight@check{%
+  \ifdim\footlogoheight<\maxdimen\relax%
+    \ClassWarning{\TUD@Class@Name}{%
+      Using the length `\string\footlogoheight' is deprecated.\MessageBreak%
+      You should use option `footlogoheight' instead.
+    }%
+    \xdef\tud@dim@footlogoheight{\the\footlogoheight}%
+    \setlength\footlogoheight{\maxdimen}%
+    \global\footlogoheight=\footlogoheight%
+    \global\@tud@footlogo@option@settrue%
   \fi%
-  \global\tud@len@footlogoheight=\tud@len@footlogoheight%
 }
 \newcommand*\tud@footlogo@ddc@set[2]{%
-  \tud@footlogoheight@set%
   \tud@savelayerbox{foot@#1}{%
-    \includegraphics[keepaspectratio,totalheight=\tud@len@footlogoheight]{#2}%
+    \includegraphics[keepaspectratio,totalheight=\tud@dim@footlogoheight]{#2}%
   }%
-}
-\newcommand*\tud@footlogo@set{%
-  \tud@footlogo@ddc@set{black}{DDC-22}%
-  \tud@footlogo@ddc@set{HKS41}{DDC-25}%
-  \tud@footlogo@ddc@set{white}{DDC-28}%
-  \tud@footlogo@option@set%
 }
 \newcommand*\tud@footlogo@option@set{%
   \if@tud@footlogo@option@set%
+    \tud@footlogo@ddc@set{black}{DDC-22}%
+    \tud@footlogo@ddc@set{HKS41}{DDC-25}%
+    \tud@footlogo@ddc@set{white}{DDC-28}%
     \tud@ddc@check%
     \ifcase\@tempb\relax\or\or% \tud@ddc@foot@num=color
       \tud@footlogo@ddc@set{option}{DDC-01}%
@@ -3621,8 +3634,8 @@
         }%
         \vss\vss%
       }{%
-        `\string\footlogoheight' (\the\tud@len@footlogoheight) is\MessageBreak%
-        too high. You should reduce this length.%
+        You should reduce `footlogoheight', because it is\MessageBreak
+        too high (\the\dimexpr\tud@dim@footlogoheight\relax).%
         \ifnum\tud@cdgeometry@num>\@ne% true/symmetric/twoside
           \MessageBreak%
           Alternatively you can enlarge the bottom margin\MessageBreak%
@@ -3647,7 +3660,6 @@
 \newif\if@tud@footlogo@cmd@set
 \newcommand*\tud@footlogo@cmd@set[2]{%
   \if@tud@footlogo@cmd@set%
-    \tud@footlogoheight@set%
     \tud@savelayerbox{foot@cmd}{%
       \hbox to #2{%
         \let\@tempa\relax%
@@ -3682,7 +3694,7 @@
     \DeclareListParser{\@tempc}{:}%
     \@tempc{#1}%
     \preto\tud@footlogo@fileoptions{%
-      keepaspectratio,totalheight=\tud@len@footlogoheight,%
+      keepaspectratio,totalheight=\tud@dim@footlogoheight,%
     }%
     \appto\tud@footlogo@fileoptions{\@tempb}%
     \protected@edef\@tempc{%
@@ -4449,6 +4461,8 @@
   \tud@color{\tud@part@fontcolor}%
   \usesizeofkomafont{section}%
 }
+% TODO: Optionen für Längen (falls zu prüfen, auf \maxdimen setzen)
+% \pageheadingsvskip und \headingsvskip beibehalten
 \newlength\pageheadingsvskip
 \newlength\headingsvskip
 \newcommand*\tud@headmidvskip@normal{\par\nobreak\vspace{.5\baselineskip}}
