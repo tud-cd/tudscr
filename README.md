@@ -58,6 +58,11 @@ Versionen
 + 
 
 
+**v2.04e** (2016/06/17)
+
++ Bugfix für Teile mit KOMA-Script v3.21
+
+
 **v2.04d** (2016/03/26)
 
 + Bugfix für Titelseite bei `tudscrartcl`
@@ -195,6 +200,11 @@ Versions
 **v2.05** (2016/xx/xx)
 
 + 
+
+
+**v2.04e** (2016/06/17)
+
++ bug fix for parts with KOMA-Script v3.21
 
 
 **v2.04d** (2016/03/26)
