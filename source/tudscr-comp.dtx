@@ -1,4 +1,4 @@
-% \CheckSum{1444}
+% \CheckSum{1471}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -119,6 +119,8 @@
 % \changes{v2.03}{2015/02/05}{neu}^^A
 % \begin{macro}{\TUD@cmd@deprecated}
 % \changes{v2.03}{2015/02/05}{neu}^^A
+% \begin{macro}{\TUD@len@deprecated}
+% \changes{v2.05}{2016/06/20}{neu}^^A
 % Um alte Optionen und Befehle dem Anwender bei der Verwendung kenntlich zu 
 % machen, werden entsprechende Warnungen definiert. Für Optionen wird dabei
 % lediglich die empfohlene Option ausgegeben. Das Ausführen dieser wird später
@@ -159,8 +161,21 @@
     }{}%
   }%
 }
+\newcommand*\TUD@len@deprecated[2][]{%
+  \ifdim\csuse{#2}<\maxdimen\relax%
+    \ClassWarning{\TUD@Class@Name}{%
+      Using the length `\@backslashchar#2' is deprecated.\MessageBreak%
+      You should use option `#2' instead%
+    }%
+    \csxdef{tud@dim@#2}{\the\csuse{#2}}%
+    \expandafter\setlength\csname #2\endcsname{\maxdimen}%
+    \global\csuse{#2}=\csuse{#2}%
+    #1%
+  \fi%
+}
 %</class&body>
 %    \end{macrocode}
+% \end{macro}^^A \TUD@len@deprecated
 % \end{macro}^^A \TUD@cmd@deprecated
 % \end{macro}^^A \TUD@key@deprecated
 %
@@ -578,6 +593,8 @@
 % \changes{v2.04c}{2015/11/29}{neu}^^A
 % \begin{macro}{\tud@v@2.04d}
 % \changes{v2.04d}{2016/03/26}{neu}^^A
+% \begin{macro}{\tud@v@2.04e}
+% \changes{v2.04e}{2016/06/17}{neu}^^A
 % \begin{macro}{\tud@v@2.05}
 % \changes{v2.05}{2015/07/03}{neu}^^A
 % \begin{macro}{\tud@v@last}
@@ -602,11 +619,13 @@
 \csdef{tud@v@2.04b}{2}
 \csdef{tud@v@2.04c}{2}
 \csdef{tud@v@2.04d}{2}
+\csdef{tud@v@2.04e}{2}
 \csdef{tud@v@2.05}{3}
 \csdef{tud@v@last}{3}
 %    \end{macrocode}
 % \end{macro}^^A \tud@v@last
 % \end{macro}^^A \tud@v@2.05
+% \end{macro}^^A \tud@v@2.04e
 % \end{macro}^^A \tud@v@2.04d
 % \end{macro}^^A \tud@v@2.04c
 % \end{macro}^^A \tud@v@2.04b
@@ -674,12 +693,42 @@
 %<*class&body>
 % \fi
 %
+% \begin{length}{\footlogoheight}
+% \changes{v2.03}{2015/01/27}{neu}^^A
+% Um die Höhe von Logos im Fußbereich der \pgs{tudheadings}-Seitenstile 
+% einheitlich festzulegen, gab es bis einschließlich der Version~v2.04 die 
+% Länge \cs{footlogoheight} anstelle der Option \opt{footlogoheight}. Sollte 
+% der Anwender diese anpassen, wird \cs{tud@dim@footlogoheight} auf diesen Wert 
+% gesetzt und eine Warnung erzeugt.
+%    \begin{macrocode}
+\newlength\footlogoheight
+\setlength\footlogoheight{\maxdimen}
+%    \end{macrocode}
+% \end{length}^^A \footlogoheight
+% \begin{length}{\pageheadingsvskip}
+% \changes{v2.02}{2014/06/23}{neu}^^A
+% \begin{length}{\headingsvskip}
+% \changes{v2.02}{2014/06/23}{neu}^^A
+% Mit diesen Längen konnte der Anwender vor der Version~v2.05 die Überschriften 
+% von Titel, Teilen und Kapiteln vertikal verschieben. Diese Funktionalität 
+% wird seitdem mit den Optionen \opt{headingsvskip} und \opt{pageheadingsvskip} 
+% abgedeckt.
+%    \begin{macrocode}
+%<*book|report|article>
+\newlength\pageheadingsvskip
+\setlength\pageheadingsvskip{\maxdimen}
+\newlength\headingsvskip
+\setlength\headingsvskip{\maxdimen}
+%</book|report|article>
+%    \end{macrocode}
+% \end{length}^^A \headingsvskip
+% \end{length}^^A \pageheadingsvskip
 % \begin{length}{\chapterheadingvskip}
 % Die Länge \cs{chapterheadingvskip} wird aus Gründen der Kompatibilität zu
 % älteren Versionen definiert.
 %    \begin{macrocode}
 %<*book|report>
-\newlength\chapterheadingvskip
+\newcommand*\chapterheadingvskip{}
 \let\chapterheadingvskip\headingsvskip
 %</book|report>
 %    \end{macrocode}
@@ -1531,29 +1580,22 @@
 % \changes{v2.05}{2016/04/17}{neu}^^A
 % Zu guter Letzt geht es an das Makro \cs{schnittrand}. Zur Intension dieses 
 % Befehls gab es unter \url{https://github.com/tud-cd/tud-cd/issues/6} bereits 
-% eine angeregte Diskussion. Was allerdings genau erreicht werden soll und ob
-% die Implementierung in \cls{tudmathposter} das avisierte Ziel tatsächlich 
-% fehlerfrei umsetzt, hat sich mir nicht erschlossen.
-%
-% Deshalb wird das Makro mehr oder weniger mit \cs{bleedmargin} gleichgesetzt.
-% \ToDo{Option \opt{bleedmargin} verwenden}[v2.05]
+% eine angeregte Diskussion. Deshalb wird das Makro als Wertzuweisung für die 
+% Option \opt{bleedmargin} genutzt.
+% \ToDo{Check auf crop oder geometry-layout}[v2.05]
 %    \begin{macrocode}
-\apptocmd{\tud@bleedmargin@set}{%
-  \ifundef{\schnittrand}{}{%
-    \setlength\bleedmargin{\dimexpr\schnittrand\relax}%
-    \if@tempswa\else%
-      \PackageWarning{tudscrcomp}{%
-        The length `\string\bleedmargin' was set to the value\MessageBreak%
-        of `\string\schnittrand' (\the\dimexpr\schnittrand\relax)\MessageBreak%
-        Nevertheless, nothing has changed. You should use\MessageBreak%
-        the capabilities of either the package `geometry'\MessageBreak%
-        or `crop' in order to create crop marks. For more\MessageBreak%
-        information, please take a look in the manual\MessageBreak%
-        of the tudscr-bundle%
-      }%
-    \fi%
+\ifundef{\schnittrand}{}{%
+  \TUDoptions{bleedmargin=\schnittrand}%
+  \PackageWarning{tudscrcomp}{%
+    The option `bleedmargin' was set to the value\MessageBreak%
+    of `\string\schnittrand' (\the\dimexpr\schnittrand\relax)\MessageBreak%
+    Nevertheless, nothing has changed. You should use\MessageBreak%
+    the capabilities of either the package `geometry'\MessageBreak%
+    or `crop' in order to create crop marks. For more\MessageBreak%
+    information, please take a look in the manual\MessageBreak%
+    of the tudscr-bundle%
   }%
-}{}{\tud@patch@wrn{tud@bleedmargin@set}}%
+}%
 %    \end{macrocode}
 % \end{macro}^^A \schnittrand
 %

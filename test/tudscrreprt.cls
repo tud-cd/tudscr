@@ -113,10 +113,6 @@
 }{}
 %%% From File: tudscr-base.dtx
 \RequirePackage{tudscrbase}[\TUD@Version]
-\ifx\TUD@noworlater\TUD@noworlater@simple
-  \renewcommand*\TUD@noworlater[2]{#1\AtEndOfClass{#1#2}}%
-  \AtEndOfClass{\renewcommand*\TUD@noworlater[2]{#1#2}}%
-\fi
 \renewcommand*\TUD@KOMAoptions[1]{\PassOptionsToClass{#1}{\TUD@Class@KOMA}}
 \AfterClass{\TUD@Class@KOMA}{\let\TUD@KOMAoptions\KOMAoptions}
 %%% From File: tudscr-fonts.dtx
@@ -874,6 +870,14 @@
   \FamilyKeyStateProcessed%
 }
 \newcommand*\tud@pagecolor{}%
+\newcommand*\tud@dim@pageheadingsvskip{0pt}
+\TUD@key{pageheadingsvskip}{%
+  \TUD@set@dimenkey{pageheadingsvskip}{\tud@dim@pageheadingsvskip}{#1}%
+}
+\newcommand*\tud@dim@headingsvskip{0pt}
+\TUD@key{headingsvskip}{%
+  \TUD@set@dimenkey{headingsvskip}{\tud@dim@headingsvskip}{#1}%
+}
 %%% From File: tudscr-title.dtx
 \newif\if@tud@subjectthesis
 \TUD@key@lock{subjectthesis}[true]{%
@@ -1224,7 +1228,7 @@
     {%
       Switching compatibility level to `\@tempa'%
     }%
-    \edef\tud@v@comp{\@nameuse{tud@v@\@tempa}}%
+    \edef\tud@v@comp{\csuse{tud@v@\@tempa}}%
   }%
   \FamilyKeyStateProcessed%
 }
@@ -1240,7 +1244,7 @@
     \FamilyKeyStateProcessed%
   }%
   \ifcsdef{scr@v@\TUD@Version@KOMA}{%
-    \ifnum\scr@compatibility<\@nameuse{scr@v@3.12}\relax%
+    \ifnum\scr@compatibility<\csuse{scr@v@3.12}\relax%
       \ClassError{\TUD@Class@Name}{%
         KOMA-Script compatibility level too low%
       }{%
@@ -1271,6 +1275,7 @@
 \csdef{tud@v@2.04b}{2}
 \csdef{tud@v@2.04c}{2}
 \csdef{tud@v@2.04d}{2}
+\csdef{tud@v@2.04e}{2}
 \csdef{tud@v@2.05}{3}
 \csdef{tud@v@last}{3}
 \newcommand*\tud@v@get[2]{%
@@ -1288,7 +1293,7 @@
   \begingroup%
     \tud@v@get\@tempa{#1}%
     \ifcsdef{tud@v@\@tempa}{%
-      \ifnum\tud@v@comp<\@nameuse{tud@v@\@tempa}\relax%
+      \ifnum\tud@v@comp<\csuse{tud@v@\@tempa}\relax%
         \def\tud@reserved{\endgroup\@firstoftwo}%
       \else%
         \def\tud@reserved{\endgroup\@secondoftwo}%
@@ -2315,12 +2320,12 @@
 }
 \newcommand*\tud@multiple@fields@preset[3]{%
   \def\@tempa##1{%
-    \edef\@tempc{\@nameuse{##1}}%
+    \edef\@tempc{\csuse{##1}}%
     \ifstr{#2}{*}{%
       \csdef{@##1}{}%
     }{%
       \begingroup%
-        \protected@expandtwoargs\in@{\@tempc}{\@nameuse{#1}}%
+        \protected@expandtwoargs\in@{\@tempc}{\csuse{#1}}%
         \ifin@%
           \ifcsvoid{@##1}{\@tempc{#2}}{}%
         \fi%
@@ -2650,7 +2655,7 @@
 \newlength\tud@len@line
 \newlength\tud@len@heavyline
 \newlength\tud@len@thinline
-\newlength\tud@len@headingsvskip
+\newlength\tud@len@areaheadvskip
 \newlength\tud@len@areadiff
 \newlength\tud@len@areavskip
 \tud@if@v@lower{2.03}{\newlength\tud@len@ddcdiff}{}
@@ -3016,7 +3021,9 @@
     height=\dimexpr\tud@len@layoutheight-\layeryoffset%
       +\tud@len@layoutvoffset\relax,%
     contents={%
-      \tud@footlogoheight@check%
+      \TUD@len@deprecated[%
+        \global\@tud@footlogo@option@settrue%
+      ]{footlogoheight}%
       \setlength\@tempdima{\dimexpr\layerheight-\dp\strutbox\relax}%
       \tud@footlogo@cmd@use{\@tempdima}{\layerwidth}%
       \tud@footlogo@ddc@use{\@tempdima}{\layerwidth}%
@@ -3027,7 +3034,9 @@
     \ModifyLayer[%
       addvoffset=-\tud@len@ddcdiff+\ht\strutbox,%
       contents={%
-        \tud@footlogoheight@check%
+        \TUD@len@deprecated[%
+          \global\@tud@footlogo@option@settrue%
+        ]{footlogoheight}%
         \setlength\@tempdima{\dimexpr\layerheight-\dp\strutbox\relax}%
         \tud@ddc@check%
         \ifcase\@tempb\relax% \tud@ddc@foot@num=false
@@ -3576,20 +3585,6 @@
     }%
   }{}%
 }
-\newlength\footlogoheight
-\setlength\footlogoheight{\maxdimen}
-\newcommand*\tud@footlogoheight@check{%
-  \ifdim\footlogoheight<\maxdimen\relax%
-    \ClassWarning{\TUD@Class@Name}{%
-      Using the length `\string\footlogoheight' is deprecated.\MessageBreak%
-      You should use option `footlogoheight' instead.
-    }%
-    \xdef\tud@dim@footlogoheight{\the\footlogoheight}%
-    \setlength\footlogoheight{\maxdimen}%
-    \global\footlogoheight=\footlogoheight%
-    \global\@tud@footlogo@option@settrue%
-  \fi%
-}
 \newcommand*\tud@footlogo@ddc@set[2]{%
   \tud@savelayerbox{foot@#1}{%
     \includegraphics[keepaspectratio,totalheight=\tud@dim@footlogoheight]{#2}%
@@ -3853,7 +3848,7 @@
   }%
   \renewcommand*\tud@cdgeometry@process{%
     \ifcase\tud@cdgeometry@num\relax%
-      \csname @ta@usegeometryfalse\endcsname%
+      \csuse{@ta@usegeometryfalse}%
       \ifGm@layout%
         \tud@AfterChangingArea%
       \else%
@@ -4098,11 +4093,11 @@
     \ifdim\tud@len@areadiff<\z@\relax\setlength\tud@len@areadiff{\z@}\fi%
     \global\tud@len@areadiff=\tud@len@areadiff%
     \if@tud@cdgeometry@adjust%
-      \setlength\tud@len@headingsvskip{.3\tud@len@topmargin}%
+      \setlength\tud@len@areaheadvskip{.3\tud@len@topmargin}%
     \else%
-      \setlength\tud@len@headingsvskip{.6\tud@len@topmargin}%
+      \setlength\tud@len@areaheadvskip{.6\tud@len@topmargin}%
     \fi%
-    \global\tud@len@headingsvskip=\tud@len@headingsvskip%
+    \global\tud@len@areaheadvskip=\tud@len@areaheadvskip%
     \tud@if@v@lower{2.03}{%
       \ifdim\tud@len@ddcdiff<\z@\relax\setlength\tud@len@ddcdiff{\z@}\fi%
       \global\tud@len@ddcdiff=\tud@len@ddcdiff%
@@ -4461,10 +4456,6 @@
   \tud@color{\tud@part@fontcolor}%
   \usesizeofkomafont{section}%
 }
-% TODO: Optionen für Längen (falls zu prüfen, auf \maxdimen setzen)
-% \pageheadingsvskip und \headingsvskip beibehalten
-\newlength\pageheadingsvskip
-\newlength\headingsvskip
 \newcommand*\tud@headmidvskip@normal{\par\nobreak\vspace{.5\baselineskip}}
 \newcommand*\tud@headmidvskip@reverse{%
   \setbox\z@\vbox{\tud@headmidvskip@normal}%
@@ -4671,9 +4662,10 @@
   \tud@layout@specialpage@set{part}%
   \begingroup%
     \vspace*{%
-      \dimexpr\tud@len@areavskip+\tud@len@headingsvskip-\baselineskip\relax%
+      \dimexpr\tud@len@areavskip+\tud@len@areaheadvskip-\baselineskip\relax%
     }%
-    \vspace*{\pageheadingsvskip}%
+    \TUD@len@deprecated{pageheadingsvskip}%
+    \vspace*{\tud@dim@pageheadingsvskip}%
     \setparsizes{\z@}{\z@}{\z@\@plus1fil}\par@updaterelative%
     \if@tud@parttitle%
       \begingroup%
@@ -4747,7 +4739,7 @@
           \tud@headmidvskip@normal%
         \fi%
       }%
-    }{}{\tud@patch@wrn{scr@startpart}}%
+    }{}{\tud@patch@wrn{scr@@startpart}}%
   \else%
     \patchcmd{\tud@@startpart}{%
       \ifnumbered{#1}{%
@@ -4769,7 +4761,7 @@
           \tud@headmidvskip@normal%
         \fi%
       }%
-    }{}{\tud@patch@wrn{scr@startpart}}%
+    }{}{\tud@patch@wrn{scr@@startpart}}%
   \fi%
   \newcommand*\tud@@startspart{}%
   \let\tud@@startspart\scr@@startspart%
@@ -4838,12 +4830,14 @@
     \renewcommand*\tud@chapter@fontcolor{HKS41}%
   \fi%
   \vspace*{%
-    \dimexpr\tud@len@areavskip+\tud@len@headingsvskip\relax%
+    \dimexpr\tud@len@areavskip+\tud@len@areaheadvskip\relax%
   }%
   \if@tud@chapterpage%
-    \vspace*{\pageheadingsvskip}%
+    \TUD@len@deprecated{pageheadingsvskip}%
+    \vspace*{\tud@dim@pageheadingsvskip}%
   \else%
-    \vspace*{\headingsvskip}%
+    \TUD@len@deprecated{headingsvskip}%
+    \vspace*{\tud@dim@headingsvskip}%
   \fi%
 }
 \newcommand*\tud@@makechapterhead{}%
@@ -5255,9 +5249,10 @@
       \fi%
     \fi%
     \vspace*{%
-      \dimexpr\tud@len@areavskip+\tud@len@headingsvskip-\baselineskip\relax%
+      \dimexpr\tud@len@areavskip+\tud@len@areaheadvskip-\baselineskip\relax%
     }%
-    \vspace*{\pageheadingsvskip}%
+    \TUD@len@deprecated{pageheadingsvskip}%
+    \vspace*{\tud@dim@pageheadingsvskip}%
     \setparsizes{\z@}{\z@}{\z@\@plus1fil}\par@updaterelative%
     \begingroup%
       \usekomafont{titlepage}%
@@ -5469,9 +5464,10 @@
 \newcommand*\tud@make@@titlehead{%
   \global\@topnum=\z@%
   \vspace*{%
-    \dimexpr\tud@len@areavskip+\tud@len@headingsvskip-\baselineskip\relax%
+    \dimexpr\tud@len@areavskip+\tud@len@areaheadvskip-\baselineskip\relax%
   }%
-  \vspace*{\headingsvskip}%
+  \TUD@len@deprecated{headingsvskip}%
+  \vspace*{\tud@dim@headingsvskip}%
   \setparsizes{\z@}{\z@}{\z@\@plus1fil}\par@updaterelative%
   \begingroup%
     \usekomafont{titlepage}%
@@ -5675,7 +5671,7 @@
         \ifundef{\hypersetup}{}{\hypersetup{pageanchor=false}}%
         \tud@maketitle%
         \clearpage%
-      \csname titlepage@restore\endcsname%
+      \titlepage@restore%
     \fi%
   \endgroup%
 }
@@ -5703,7 +5699,7 @@
 %%% From File: tudscr-frontmatter.dtx
 \newcommand*\tud@fm@check[2]{%
   \global\let\tud@fm@set\tud@fm@first%
-  \ifnumless{\@nameuse{tud@#1@level@num}}{3}{% false/true/section
+  \ifnumless{\csuse{tud@#1@level@num}}{3}{% false/true/section
     \ifboolexpr{%
       bool {@titlepage} and bool {@tud@#1@fil} and bool {@tud@#1@multi}%
     }{%
@@ -5723,7 +5719,7 @@
     \boolfalse{@tud@#1@multi}%
     \boolfalse{@tud@#1@fil}%
   }%
-  \ifnum\@nameuse{tud@#1@toc@num}>\tw@\relax%
+  \ifnum\csuse{tud@#1@toc@num}>\tw@\relax%
     \tud@fm@toc{#1}{#2}%
   \fi%
   \global\let\tud@fm@set\tud@fm@first%
@@ -5759,7 +5755,7 @@
     }%
     \edef\@tempa{%
       \noexpand\cs@set@lock{tud@#1@toc@num}{%
-        \the\numexpr\@nameuse{tud@#1@toc@num}-2\relax%
+        \the\numexpr\csuse{tud@#1@toc@num}-2\relax%
       }%
     }%
     \@tempa%
@@ -5785,7 +5781,7 @@
         \ifbool{@tud@#1@fil}{\vfil\null\clearpage\null\vfil}{\clearpage}%
       }%
     \else%
-      \ifnum\@nameuse{tud@#1@level@num}=\z@\relax%
+      \ifnum\csuse{tud@#1@level@num}=\z@\relax%
         \ifundef{\main@language}{}{\vspace*{-\baselineskip}}%
       \fi%
     \fi%
@@ -5796,7 +5792,7 @@
     \TUD@parameter@set{#1}{#2}%
     \tud@fm@set{#1}%
     \if@twocolumn\else\if@titlepage\else\relax%
-      \ifnum\@nameuse{tud@#1@level@num}<\tw@\relax% false/true
+      \ifnum\csuse{tud@#1@level@num}<\tw@\relax% false/true
         \begin{\tud@quoting}%
       \fi%
     \fi\fi%
@@ -5815,16 +5811,16 @@
       \par%
     \fi%
     \if@twocolumn\else\if@titlepage\else\relax%
-      \ifnum\@nameuse{tud@#1@level@num}<\tw@\relax% false/true
+      \ifnum\csuse{tud@#1@level@num}<\tw@\relax% false/true
         \end{\tud@quoting}\par%
       \fi%
     \fi\fi%
   \endgroup%
 }
 \newcommand*\tud@fm@head[2]{%
-  \ifcase\@nameuse{tud@#1@level@num}\relax% false
+  \ifcase\csuse{tud@#1@level@num}\relax% false
     \if@titlepage\endgraf\fi%
-    \csname phantomsection\endcsname%
+    \csuse{phantomsection}%
     \ifstr{\@currenvir}{\tud@quoting}{}{%
       \if@twocolumn%
         \vskip\dimexpr\smallskipamount-\parskip\relax%
@@ -5834,7 +5830,7 @@
     }%
   \or% true
     \if@titlepage\endgraf\fi%
-    \csname phantomsection\endcsname%
+    \csuse{phantomsection}%
     \@afterindentfalse%
     \ifstr{\@currenvir}{\tud@quoting}{}{%
       \vskip\dimexpr\bigskipamount-\parskip\relax%
@@ -5858,7 +5854,7 @@
   \ifbool{@tud@#1@markboth}{%
     \markboth{\MakeMarkcase{#2}}{\MakeMarkcase{#2}}%
   }{}%
-  \ifcase\@nameuse{tud@#1@toc@num}\relax\or% totoc
+  \ifcase\csuse{tud@#1@toc@num}\relax\or% totoc
     \addchaptertocentry{}{#2}%
   \or% totocleveldown
     \addsectiontocentry{}{#2}%
@@ -6102,7 +6098,25 @@
     }{}%
   }%
 }
-\newlength\chapterheadingvskip
+\newcommand*\TUD@len@deprecated[2][]{%
+  \ifdim\csuse{#2}<\maxdimen\relax%
+    \ClassWarning{\TUD@Class@Name}{%
+      Using the length `\@backslashchar#2' is deprecated.\MessageBreak%
+      You should use option `#2' instead%
+    }%
+    \csxdef{tud@dim@#2}{\the\csuse{#2}}%
+    \expandafter\setlength\csname #2\endcsname{\maxdimen}%
+    \global\csuse{#2}=\csuse{#2}%
+    #1%
+  \fi%
+}
+\newlength\footlogoheight
+\setlength\footlogoheight{\maxdimen}
+\newlength\pageheadingsvskip
+\setlength\pageheadingsvskip{\maxdimen}
+\newlength\headingsvskip
+\setlength\headingsvskip{\maxdimen}
+\newcommand*\chapterheadingvskip{}
 \let\chapterheadingvskip\headingsvskip
 \TUD@cmd@deprecated{professorship}{chair}
 \TUD@cmd@deprecated{studentid}{matriculationnumber}

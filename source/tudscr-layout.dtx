@@ -1,4 +1,4 @@
-% \CheckSum{1479}
+% \CheckSum{1488}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -838,6 +838,38 @@
 %</poster>
 %    \end{macrocode}
 % \end{option}^^A backgroundcolor
+% \begin{option}{pageheadingsvskip}
+% \changes{v2.05}{2016/06/20}{neu}^^A
+% \begin{macro}{\tud@dim@pageheadingsvskip}
+% \changes{v2.05}{2016/06/20}{neu}^^A
+% \begin{option}{headingsvskip}
+% \changes{v2.05}{2016/06/20}{neu}^^A
+% \begin{macro}{\tud@dim@headingsvskip}
+% \changes{v2.05}{2016/06/20}{neu}^^A
+% Mit diesen Optionen kann der Anwender die Überschriften von Titel, Teilen und
+% Kapiteln vertikal von ihrer Standardposition verschieben, welche vom \CD
+% eigentlich vorgegeben ist. Die Option \opt{pageheadingsvskip} verschiebt 
+% dabei Überschriften, welche allein auf einer Seite stehen, also Überschriften
+% von Teilen oder auf Kapitelseiten. Auch die vertikale Position des Titels
+% kann damit beeinflusst werden. Mit der Option \opt{headingsvskip} werden 
+% Überschriften von Kapiteln oder die des Titelkopfes (\opt{titlepage=false}) 
+% verschoben, bei denen nach der Überschrift direkt der Fließtext folgt.
+%    \begin{macrocode}
+%<*book|report|article>
+\newcommand*\tud@dim@pageheadingsvskip{0pt}
+\TUD@key{pageheadingsvskip}{%
+  \TUD@set@dimenkey{pageheadingsvskip}{\tud@dim@pageheadingsvskip}{#1}%
+}
+\newcommand*\tud@dim@headingsvskip{0pt}
+\TUD@key{headingsvskip}{%
+  \TUD@set@dimenkey{headingsvskip}{\tud@dim@headingsvskip}{#1}%
+}
+%</book|report|article>
+%    \end{macrocode}
+% \end{macro}^^A \tud@dim@headingsvskip
+% \end{option}^^A headingsvskip
+% \end{macro}^^A \tud@dim@pageheadingsvskip
+% \end{option}^^A pageheadingsvskip
 %
 % \iffalse
 %</class&option>
@@ -882,27 +914,6 @@
 %</book|report>
 %    \end{macrocode}
 % \end{KOMAfont}^^A parttitle
-% \begin{length}{\pageheadingsvskip}
-% \changes{v2.02}{2014/06/23}{neu}^^A
-% \begin{length}{\headingsvskip}
-% \changes{v2.02}{2014/06/23}{neu}^^A
-% Mit diesen Längen kann der Anwender die Überschriften von Titel, Teilen und
-% Kapiteln vertikal von ihrer Standardposition verschieben, welche vom \CD
-% eigentlich vorgegeben ist. Die Länge \cs{pageheadingsvskip} verschiebt dabei
-% Überschriften, welche allein auf einer Seite stehen, also Überschriften von 
-% Teilen oder auf Kapitelseiten. Auch die vertikale Position des Titels kann 
-% damit beeinflusst werden. Mit \cs{headingsvskip} werden Überschriften von
-% Kapiteln oder aber die des Titelkopfes (\opt{titlepage=false}) verschoben,
-% bei denen nach der Überschrift direkt der Fließtext folgt.
-% \ToDo{\opt{headingsvskip} und \opt{pageheadingsvskip} als Option}[v2.05]
-%    \begin{macrocode}
-%<*book|report|article>
-\newlength\pageheadingsvskip
-\newlength\headingsvskip
-%</book|report|article>
-%    \end{macrocode}
-% \end{length}^^A \headingsvskip
-% \end{length}^^A \pageheadingsvskip
 % \begin{macro}{\tud@headmidvskip@normal}
 % \changes{v2.03}{2015/01/21}{neu}^^A
 % \begin{macro}{\tud@headmidvskip@reverse}
@@ -1297,7 +1308,8 @@
     \vspace*{%
       \dimexpr\tud@len@areavskip+\tud@len@areaheadvskip-\baselineskip\relax%
     }%
-    \vspace*{\pageheadingsvskip}%
+    \TUD@len@deprecated{pageheadingsvskip}%
+    \vspace*{\tud@dim@pageheadingsvskip}%
     \setparsizes{\z@}{\z@}{\z@\@plus1fil}\par@updaterelative%
 %    \end{macrocode}
 % Sollte die \opt{parttitle}-Option aktiviert sein, so wird der Titel des
@@ -1583,9 +1595,9 @@
 % \begin{macro}{\tud@chapterheadstartvskip}
 % \changes{v2.02}{2014/06/23}{neu}^^A
 % \cs{chapterheadstartvskip} wird für die Position der Kapitelüberschriften im
-% \CD angepasst. Mit der Länge \cs{headingsvskip} kann diese Position vertikal
-% durch den Benutzer verschoben werden. Außerdem werden die benötigten Farben
-% für die jeweilig gewählte Option ausgewählt.
+% \CD angepasst. Mit der Option \opt{headingsvskip} kann diese vertikal durch
+% den Benutzer verschoben werden. Außerdem werden die benötigten Farben für die
+% jeweils gewählte Option ausgewählt.
 %    \begin{macrocode}
 \newcommand*\tud@chapterheadstartvskip{%
   \renewcommand*\tud@chapter@fontcolor{}%
@@ -1596,9 +1608,11 @@
     \dimexpr\tud@len@areavskip+\tud@len@areaheadvskip\relax%
   }%
   \if@tud@chapterpage%
-    \vspace*{\pageheadingsvskip}%
+    \TUD@len@deprecated{pageheadingsvskip}%
+    \vspace*{\tud@dim@pageheadingsvskip}%
   \else%
-    \vspace*{\headingsvskip}%
+    \TUD@len@deprecated{headingsvskip}%
+    \vspace*{\tud@dim@headingsvskip}%
   \fi%
 }
 %    \end{macrocode}
