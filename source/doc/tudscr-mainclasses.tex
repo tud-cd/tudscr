@@ -6,7 +6,6 @@
 \index{Hauptklassen|!}%
 %
 \ChangedAt*{%
-  v2.00:Robustheit vieler Befehle und Optionen erhöht;%
   v2.02:Umbenennung einiger Befehle für Kompatibilität mit anderen Paketen;%
   v2.03:Anpassungen interner Befehle an \KOMAScript-Version~v3.15%
 }
@@ -156,7 +155,9 @@ OpenType"=Schriften~-- ausreichend, das Paket \Package{fontspec} zu laden.
   v2.02!\Option{cdfont=heavyhead};
   v2.03!\Option{cdfont=din};
   v2.03!\Option{cdfont=nodin};
-]{\Option{cdfont=\PSet}}[true]%
+  v2.05!\Option{cdfont=normalbold};
+  v2.05!\Option{cdfont=ultrabold};
+]{\Option{cdfont=\PSet}}[true,normalbold]%
 \printdeclarationlist%
 %
 Mit der Option \Option{cdfont} können durch den Anwender alle zentralen 
@@ -191,9 +192,16 @@ Querbalken der Kopfzeile lässt sich hiermit ebenfalls einstellen.
   \Option{cdfont=true}. Die Mathematikschriften werden nicht beeinflusst, 
   diese lassen sich gegebenenfalls mit \Macro{boldmath} auf den fetten Schnitt 
   umschalten.
-\ToDo[doc]{%
-  \Option{cdfont=ultrabold} sowie \Option{cdfont=normalbold} dokumentieren%
-}[v2.05]
+\item[normalbold]
+  \ChangedAt{v2.05}
+  Für fette Schriftschnitte wird \texturn{Univers~55~Regular} beziehungsweise 
+  bei stärkeren Schriften (\Option{cdfont=heavy}) \textubn{Univers~65~Bold} 
+  verwendet. Dies ist die Voreinstellung.
+\item[ultrabold/heavybold]
+  \ChangedAt{v2.05}
+  Die fetten Schriften werden stärker hervorgehoben. Es kommt 
+  \textubn{Univers~65~Bold} respektive \textuxn{Univers~75~Black} bei erhöhter 
+  Schriftstärke (\Option{cdfont=heavy}) zum Einsatz.
 \item[nodin]
   Für Überschriften wird \Univers anstatt \DIN verwendet, die Schriftstärke 
   kann mit \Option{cdfont=true} respektive \Option{cdfont=heavy} eingestellt 
@@ -228,14 +236,13 @@ beeinflussen:
   verwendet und der Benutzer kann beliebige Schriftpakete für den 
   Mathematikmodus nutzen, \seeref{\Option{cdmath=false}}.
 \item[math/cdmath]
-  Es werden serifenlose Mathematikschriften für lateinische und griechische 
-  Lettern genutzt, \seeref{\Option{cdmath=true}}.
+  Serifenlose Mathematikschriften, \seeref{\Option{cdmath=true}}.
 \item[upgreek/uprightgreek]
-  Die großen griechischen Buchstaben werden im Mathematikmodus aufrecht gesetzt,
+  Griechische Großbuchstaben werden aufrecht gesetzt, 
   \seeref{\Option{slantedgreek=false}}.
 \item[slgreek/slantedgreek]
-  In mathematischen Umgebungen erfolgt die Ausgabe der griechischen Majuskeln 
-  kursiv, \seeref{\Option{slantedgreek=true}}.
+  Die Ausgabe der griechischen Majuskeln erfolgt kursiv, 
+  \seeref{\Option{slantedgreek=true}}.
 \end{values}
 %
 \ChangedAt{%
@@ -539,14 +546,14 @@ Mathematikmodus bei der Verwendung der Befehle \Macro*{Delta}, \Macro*{Theta},
 %
 \begin{values}{\Option{slantedgreek}}
 \itemfalse
-  Die griechischen Majuskeln werden wie bei den Standardklassen aufrecht 
-  gesetzt.
+  Die griechischen Majuskeln werden in Umgebungen für den Mathematiksatz wie 
+  bei den Standardklassen aufrecht gesetzt.
 \itemtrue*
-  Die Ausgabe der griechischen Großbuchstaben erfolgt kursiv.
+  Die Ausgabe der griechischen Großbuchstaben erfolgt im Mathematikmodus kursiv.
 \end{values}
 %
 Wie unabhängig von der Option \Option{slantedgreek} gezielt kursive und 
-aufrechte Buchstaben gesetzt werden können, wird \vpageref{sec:greek} 
+aufrechte Buchstaben gesetzt werden können, wurde zuvor \vpageref{sec:greek} 
 beschrieben.
 \index{Griechische Buchstaben|)}%
 \end{Declaration}
@@ -616,6 +623,7 @@ Textspalten im mehrspaltigen Layout anpassen.
   v2.05!\Option{cdgeometry=restricted};%
   v2.05!\Option{cdgeometry=adapted};%
   v2.05!\Option{cdgeometry=calculated};%
+  v2.05!\Option{cdgeometry=custom};%
 ]{\Option{cdgeometry=\PSet}}[true,restricted]%
 \printdeclarationlist%
 \index{Layout!Seitenstil}%
@@ -632,7 +640,6 @@ Des Weiteren besteht die Möglichkeit, auf das Standardverhalten von
 \Package{typearea} vornehmen zu lassen. Hier hat insbesondere die Klassenoption 
 \Option{DIV=\PSet}|declare| maßgeblichen Einfluss auf den Satzspiegel. Mehr 
 dazu ist in der \scrguide[Dokumentation von \KOMAScript] zu finden.
-\ToDo[doc]{\Option{cdgeometry=custom} dokumentieren}[v2.05]
 %
 \begin{values}{\Option{cdgeometry}}
 \itemfalse
@@ -688,6 +695,12 @@ Satzspiegel nach dem \TUDCD erstellt werden soll.
   eingestellte Papierformat \emph{skaliert}. Die eigentlich definierten 
   diskreten Maße bei unterschiedlichen Gestaltungshöhen werden ignoriert.
 \end{values}
+%
+\begin{values}{\Option{cdgeometry}}
+\item[custom]
+  \ToDo[doc]{\Option{cdgeometry=custom} dokumentieren}[v2.05]
+\end{values}
+
 \end{Declaration}
 
 \begin{Declaration}[v2.03]{\Option{extrabottommargin=\PName{Höhe}}}[0pt]%
@@ -1866,7 +1879,7 @@ zugeordnet. Mehr dazu ist im Minimalbeispiel in \autoref{sec:exmpl:thesis}.
 \end{Example}
 
 \begin{Declaration}[%
-  v2.05:Parameter für Prä- und Suffix bei der Datumsangabe;
+  v2.05:Angabe von Parametern für Prä- und Suffix bei Datumsausgabe möglich;
 ]{\Macro{date}[\OLParameter{Suffix}\Parameter{Datum}]}
 \begin{Declaration}[v2.05]{%
   \Macro{date*}[\OLParameter{Suffix}\Parameter{Datum}]%
@@ -2336,7 +2349,7 @@ automatisch ein. Detaillierte Informationen sind in der Dokumentation von
 \section{Zusätzliche Optionen und Erweiterungen}
 \ChangedAt*{%
   v2.03:Bugfix für \abstractname, \confirmationname{} und \blockingname{} 
-    bei Seitenstil und Kolumnentitel%
+    bei der Festlegung von Seitenstil und Kolumnentitel%
 }%
 Neben den Befehlen für die Anpassung des Layouts an das \TUDCD stellen die 
 \TUDScript-Klassen weitere Befehle und Umgebungen zur Verfügung, um die 
