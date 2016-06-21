@@ -1681,13 +1681,12 @@
   \fi%
 }
 \newcommand*\tud@font@skip@@set{%
-  \scr@setlength\smallskipamount{\dimexpr\f@baselineskip/4\relax}%
-    {\dimexpr\f@baselineskip/12\relax}{\dimexpr\f@baselineskip/12\relax}%
-  \scr@setlength\medskipamount{\dimexpr\f@baselineskip/2\relax}%
-    {\dimexpr\f@baselineskip/6\relax}{\dimexpr\f@baselineskip/6\relax}%
-  \scr@setlength\bigskipamount{\f@baselineskip}%
-    {\dimexpr\f@baselineskip/3\relax}{\dimexpr\f@baselineskip/3\relax}%
-  \tud@skip@set\abovecaptionskip{\dimexpr\f@baselineskip*4/5\relax}%
+  \smallskipamount=\partopsep%
+  \medskipamount=\partopsep%
+  \multiply\medskipamount by 2%
+  \bigskipamount=\partopsep%
+  \multiply\bigskipamount by 4%
+  \tud@skip@set\abovecaptionskip{\dimexpr\bigskipamount*5/6\relax}%
   \tud@skip@set\belowcaptionskip{\z@}%
   \tud@skip@set\columnsep{1.1\baselineskip}%
 }
