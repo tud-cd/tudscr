@@ -1272,9 +1272,6 @@ auf jeden Fall im Kopf und überschreibt damit das mit \Macro{headlogo}
 angegebene Zweitlogo.
 \end{Declaration}
 
-\ToDo[doc]{%
-  \Option{footlogoheight} dokumentieren, \Length{footlogoheight} veraltet%
-}[v2.05]
 \begin{Declaration}[v2.03]{%
   \Macro{footlogo}[\LParameter\Parameter{Dateinamenliste}]%
 }
@@ -1317,7 +1314,7 @@ Argumente sind der Dokumentation des \Package{graphicx}-Paketes zu entnehmen.
 \end{Declaration}
 \end{Declaration}
 
-\begin{Declaration}[v2.05]{\Option{footlogoheight}}%
+\begin{Declaration}[v2.05]{\Option{footlogoheight=\Parameter{Längenwert}}}%
 \printdeclarationlist%
 %
 Ohne die Angabe eines optionalen Argumentes bei \Macro{footlogo} für die Größe 
@@ -1329,7 +1326,10 @@ darstellen zu können, kann diese über \Option{extrabottommargin=\PName{Höhe}}
 beziehungsweise \Option{cdfoot=\PValueName{Höhe}} angepasst werden.
 \end{Declaration}
 
-\begin{Declaration}[v2.04]{%
+\begin{Declaration}[%
+  v2.04;
+  v2.05:Änderung des Inhaltes nur einer Spalte möglich
+]{%
   \Macro{footcontent}[%
     \OParameter{Anweisungen}\Parameter{Inhalt}\OParameter{Inhalt}%
   ]%
@@ -1353,17 +1353,24 @@ obligatorischen Argument in der linken und der Inhalt aus dem zweiten,
 optionalen Argument entsprechend in der rechten Fußspalte gesetzt wird. Dabei 
 wird ein etwaiges \DDC-Logo, welches über die Option \Option{ddc} respektive
 \Option{ddcfoot} gesetzt wurde, beachtet und der für den Text zur Verfügung 
-stehende Bereich im Fuß reduziert.
+stehende Platz im Fuß reduziert.
 
-Im Fußbereich wird für die Schrift das Schriftelement \Font{tudheadings}  
+\ChangedAt{v2.05}
+Wird an das Argument für die linke oder die rechte Spalte lediglich ein Stern 
+\PValue{*} übergeben, so bleibt der bis dahin definierte Inhalt in dieser 
+Spalte erhalten. Beispielsweise kann die linke Fußbereichsspalte mit 
+\Macro{footcontent}\Parameter{Inhalt}\POParameter{*} angepasst werden ohne 
+dabei den Inhalt der rechten Spalte zu verändern.
+
+Im Fußbereich wird für die Schrift das Schriftelement \Font{tudheadings} 
 verwendet. Dabei wird auch die Schriftgröße angepasst, wobei diese sich an der 
 Kopfzeile orientiert. Zusätzlich können mit dem ersten optionalen Argument von 
-\Macro{footcontent} weitere Schrifteinstellungen respektive Anweisungen vor der 
-eigentlichen Ausgabe des Inhaltes erfolgen. Soll die Definition des Inhalts für 
-den Fußbereich ohne die automatische Anpassung der Schriftgröße erfolgen, so 
-kann die Sternversion \Macro{footcontent*} genutzt und gegebenenfalls die 
-Schriftformatierung über das optionale Argument vorgenommen werden.
-\ToDo[doc]{sternversion im Argument}[v2.05]
+\Macro{footcontent} vor der eigentlichen Ausgabe des Inhaltes zusätzliche 
+Schrifteinstellungen respektive \PName{Anweisungen} ausgeführt werden. 
+Soll die Definition des Inhalts im Fußbereich ohne eine automatische Anpassung 
+der Schriftgröße erfolgen, so ist die Sternversion \Macro{footcontent*} zu 
+nutzen. Auch hier lässt sich gegebenenfalls das optionale Argument für die 
+Schriftformatierung nutzen.
 \end{Declaration}
 \end{Declaration}
 
@@ -1801,16 +1808,22 @@ dem Befehl \Macro{titledelimiter} lässt sich dieses Trennzeichen beliebig an
 die individuellen Wünsche des Anwenders anpassen.
 \end{Declaration}
 
-\ToDo[doc]{\Macro{course} und \Macro{discipline}}[v2.05]
-\ToDo[doc]{\Term{coursename} und \Term{disciplinename}}[v2.05]
 \begin{Declaration}{\Macro{author}[\Parameter{Autor(en)}]}
 \begin{Declaration}{\Macro{authormore}[\Parameter{Autorenzusatz}]}
 \begin{Declaration}{\Macro{dateofbirth}[\Parameter{Geburtsdatum}]}
 \begin{Declaration}{\Macro{placeofbirth}[\Parameter{Geburtsort}]}
 \begin{Declaration}{\Macro{matriculationnumber}[\Parameter{Matrikelnummer}]}
 \begin{Declaration}{\Macro{matriculationyear}[\Parameter{Immatrikulationsjahr}]}
+\begin{Declaration}[%
+  v2.05:Für Titel verwendbar%
+]{\Macro{course}[\Parameter{Studiengang}]}
+\begin{Declaration}[%
+  v2.02;%
+  v2.05:Für Titel verwendbar%
+]{\Macro{discipline}[\Parameter{Studienrichtung}]}
 \printdeclarationlist%
 \index{Autorenangaben|?}%
+\index{Kollaboratives Schreiben}%
 \index{Datum!Geburtsdatum|?}%
 %
 Mit dem Befehl \Macro{author} wird der Autor angegeben. Innerhalb des 
@@ -1825,7 +1838,13 @@ geladen sein, so wird die damit eingestellte Formatierung des Datums durch
 \Macro{dateofbirth}~-- wie übrigens bei jedem anderem Datumsfeld der 
 \TUDScript-Klassen auch~-- verwendet. Hierfür wird aus besagtem Paket das Makro 
 \Macro{printdate}(\Package{isodate})'none' genutzt. Die weiteren Befehle als 
-zusätzliche Angabe erklären sich von selbst.
+zusätzliche Angabe erklären sich quasi von selbst. Anzumerken ist, dass die mit 
+den Befehlen \Macro{course}, \Macro{discipline}, \Macro{matriculationnumber} 
+sowie \Macro{matriculationyear} angegebenen Informationen auch durch die 
+\Environment{task}"=Umgebung aus dem Paket \Package{tudscrsupervisor} genutzt 
+werden, falls diese denn zum Einsatz kommt.
+\end{Declaration}
+\end{Declaration}
 \end{Declaration}
 \end{Declaration}
 \end{Declaration}
@@ -3180,22 +3199,27 @@ diese genutzt werden können, ist bei der Erläuterung von \Macro{thesis} und
 \begin{Declaration}{\Term{placeofbirthtext}}
 \begin{Declaration}{\Term{matriculationnumbername}}
 \begin{Declaration}{\Term{matriculationyearname}}
+\begin{Declaration}{\Term{coursename}}
+\begin{Declaration}[v2.02]{\Term{disciplinename}}
 \printdeclarationlist%
 \index{Autorenangaben}%
 \index{Datum!Geburtsdatum}%
 %
-Werden für den Autor oder die Autoren das Geburtsdatum (\Macro{dateofbirth}), 
-der Geburtsort (\Macro{placeofbirth}) sowie die
-Matrikelnummer (\Macro{matriculationnumber}) und/oder das Immatrikulationsjahr 
-(\Macro{matriculationyear}) angegeben, werden sowohl auf der Titelseite als 
-auch auf der gegebenenfalls mit \Package{tudscrsupervisor} erstellten 
-Aufgabenstellung die dazugehörigen Bezeichner vorangestellt. Auf dem Titel 
-werden diese dabei mit dem durch \Macro{titledelimiter} gegebenen Trennzeichen 
-vom eigentlichen Feld abgegrenzt.
+Werden für den Autor oder die Autoren mit dem entsprechenden Befehl das 
+Geburtsdatum (\Macro{dateofbirth}), der Geburtsort (\Macro{placeofbirth}), der 
+Studiengang (\Macro{course}), die Studienrichtung (\Macro{discipline}) oder 
+auch die Matrikelnummer (\Macro{matriculationnumber}) und/oder das 
+Immatrikulationsjahr (\Macro{matriculationyear}) angegeben, werden sowohl auf 
+der Titelseite als auch auf der gegebenenfalls mit \Package{tudscrsupervisor} 
+erstellten Aufgabenstellung die dazugehörigen Bezeichner vorangestellt. Auf dem 
+Titel werden diese dabei mit dem durch \Macro{titledelimiter} gegebenen 
+Trennzeichen vom eigentlichen Feld abgegrenzt.
 \TermTable{%
   dateofbirthtext,placeofbirthtext,matriculationnumbername,%
-  matriculationyearname%
+  matriculationyearname,coursename,disciplinename%
 }
+\end{Declaration}
+\end{Declaration}
 \end{Declaration}
 \end{Declaration}
 \end{Declaration}
