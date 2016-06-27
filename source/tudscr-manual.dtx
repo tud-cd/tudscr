@@ -1,4 +1,4 @@
-% \CheckSum{4129}
+% \CheckSum{4135}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-manual.dtx}[%
-  2016/06/22 v2.05 TUD-KOMA-Script\space%
+  2016/06/27 v2.05 TUD-KOMA-Script\space%
 %</driver>
 %<package&identify>\ProvidesPackage{tudscrtutorial}[%
 %<*driver|package&identify>
@@ -3492,12 +3492,15 @@
 % Mit \cs{SeeRef} wird unter dem im ersten Argument gegebenen Schlagwort ein
 % Indexuntereintrag erzeugt, der wiederum auf einen Indexeintrag des zweiten 
 % Argumentes verweist. Dabei kann im zweiten Argument ein normaler Begriff oder 
-% ein Markup-Befehl verwendet werden.
+% ein Markup-Befehl verwendet werden. Normalerweise wird für den Querverweis 
+% die Referenzklasse \val{see} verwendet, die Sternversion des Befehls hingegen 
+% nutzt \val{seeunverified}, um auf eine Prüfung des verwiesenen Eintrags zu 
+% verzichten.
 %    \begin{macrocode}
-\newcommand*\SeeRef[2]{%
+\NewDocumentCommand\SeeRef{smm}{%
   \sbox\z@{%
     \let\tud@idx@fmt\relax%
-    #2%
+    #3%
 %    \end{macrocode}
 % Wurde im zweiten Argument ein Markup-Befehl angegeben, so wurde durch das 
 % Erstellen der Box das dazugehörige Indexformat in \cs{tud@idx@fmt} für den
@@ -3505,12 +3508,13 @@
 % geändert und das Argument wird nach der Box direkt in den Index eingetragen.
 %    \begin{macrocode}
     \ifx\tud@idx@fmt\relax%
-      \gdef\tud@reserved{#2}%
+      \gdef\tud@reserved{#3}%
     \else%
       \global\let\tud@reserved\tud@idx@fmt%
     \fi%
   }%
-  \index{#1!#2|see{\tud@reserved}}%
+  \IfBooleanTF{#1}{\def\tud@idx@fmt{seeunverified}}{\def\tud@idx@fmt{see}}%
+  \index{#2!#3|\tud@idx@fmt{\tud@reserved}}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \SeeRef
