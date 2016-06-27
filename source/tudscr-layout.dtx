@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-layout.dtx}[%
-  2016/06/20 v2.05 TUD-KOMA-Script (layout)%
+  2016/06/27 v2.05 TUD-KOMA-Script (layout)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman,xindy]{tudscrdoc}
@@ -1017,8 +1017,6 @@
   \fi%
 %    \end{macrocode}
 % Das gleiche für die Teileseiten.
-% \ToDo{Reimplementierung mit \cs{DeclareSectionCommand}, ifcsdef raus}[v2.06]
-% \ToDo{Alle Elemente für vertikalen Freiraum vor Änderungen schützen}[v2.06]
 %    \begin{macrocode}
   \ifcase\tud@layout@part@num\relax% false
     \tud@cmd@restore{partheadstartvskip}%
@@ -1050,8 +1048,6 @@
 % die Originaldefinition zurückschalten zu können, wird so verfahren. Die
 % angepassten Befehle selbst und die dazugehörige Beschreibung sind etwas
 % weiter unten im Quelltext zu finden.
-% \ToDo{Reimplementierung mit \cs{DeclareSectionCommand}, ifcsdef raus}[v2.06]
-% \ToDo{Schriftfarbauswahl in \cs{tud@layout@process}}[v2.06]
 %    \begin{macrocode}
   \else% !false
     \tud@cmd@store{partheadstartvskip}%
@@ -1111,8 +1107,6 @@
 % der Anteil für die Kapitel weg. Das Verhalten der nachgelagerten
 % Gliederungsebenen orientiert für diese Klasse an den Einstellungen für die
 % Teileseiten.
-% \ToDo{Reimplementierung mit \cs{DeclareSectionCommand}, ifcsdef raus}[v2.06]
-% \ToDo{Alle Elemente für vertikalen Freiraum vor Änderungen schützen}[v2.06]
 %    \begin{macrocode}
 %<*book|report>
   \ifcase\tud@layout@chapter@num\relax% false
@@ -1132,7 +1126,6 @@
 % Auch hier werden die Standardbefehle für ein mögliches Deaktivieren der
 % Optionen gesichert und anschließend geändert. Dabei erfolgt die Zuweisung der
 % angepassten Befehle abermals über \cs{let}.
-% \ToDo{Reimplementierung mit \cs{DeclareSectionCommand}, ifcsdef raus}[v2.06]
 %    \begin{macrocode}
   \else% !false
     \tud@cmd@store{chapterheadstartvskip}%
@@ -1168,7 +1161,6 @@
 %    \end{macrocode}
 % Auch hier werden die Standardbefehle für ein mögliches Deaktivieren der
 % Optionen gesichert und anschließend geändert.
-% \ToDo{Reimplementierung mit \cs{DeclareSectionCommand}}[v2.06]
 %    \begin{macrocode}
   \else% !false
     \renewcommand*\tud@section@fontcolor{}%
@@ -1409,7 +1401,6 @@
 % Damit auch das Präfix der Teile in Majuskeln erscheint, wird dem Befehl
 % \cs{partformat}, welcher das Präfix enthält, für die \cls{tudscrartcl}-Klasse
 % der entsprechende Befehl vorangestellt. Die Patches für \KOMAScript~v3.18:
-% \ToDo{Reimplementierung mit \cs{DeclareSectionCommand}, ifcsdef raus}[v2.06]
 %    \begin{macrocode}
 \ifcsdef{scr@v@3.18}{\@tempswatrue}{\@tempswafalse}
 \if@tempswa
@@ -1634,7 +1625,6 @@
 % selben Höhe.
 %
 % Zuerst die Patches für \KOMAScript~v3.18:
-% \ToDo{Reimplementierung mit \cs{DeclareSectionCommand}, ifcsdef raus}[v2.06]
 %    \begin{macrocode}
 \newcommand*\tud@@makechapterhead{}%
 \ifcsdef{scr@v@3.18}{\@tempswatrue}{\@tempswafalse}
@@ -1902,7 +1892,14 @@
 % Alle für die \TUDScript-Klassen angepassten Gliederungsbefehle von \cs{part} 
 % bis \cs{subsubsection} werden seit Version~v2.02 ausnahmslos mit \cs{SecDef} 
 % erzeugt. 
-% \ToDo{Implementierung gut suchbarer Makronamen (\cs{tud@sec@capter})}[v2.06]
+% \ToDo{Implementierung gut suchbarer Makronamen (\cs{tud@sec@chapter})}[v2.06]
+% \ToDo{Reimplementierung mit \cs{DeclareSectionCommand}}[v2.06]
+% \ToDo{\cs{ifcsdef\{scr@v@3.18\}} raus, \KOMAScript~v3.22 obligatorisch}[v2.06]
+% \ToDo{Alle Elemente für vertikalen Freiraum vor Änderungen schützen}[v2.06]
+% \ToDo{\cs{...pagecolor} (part/chapter/title)}[v2.06]
+% \ToDo{\cs{...fontcolor} (part/chapter/title)}[v2.06]
+% \ToDo{Schriftfarbauswahl in \cs{tud@layout@process}}[v2.06]
+% \ToDo{Falls notwendig, \cs{@@tud@} mit \cs{tud@cmd@use} ersetzen}[v2.06]
 %    \begin{macrocode}
 \newcommand*\tud@part{}
 \newcommand*\tud@spart{}
@@ -1958,7 +1955,6 @@
 %    \end{macrocode}
 % Für die Überschriften, welche mit \cs{minisec} gesetzt werden, genügt jedoch
 % ein vereinfachtes Vorgehen.
-% \ToDo{Falls notwendig, \cs{@@tud@} mit \cs{tud@cmd@use} ersetzen}[v2.06]
 %    \begin{macrocode}
   \ifstr{#2}{minisec}{%
     \renewcommand\minisec[1]{\@@tud@minisec{\tud@makeuppercase{##1}}}%
@@ -2003,7 +1999,6 @@
 % gesicherte Originalbefehl mit dem gewünschten Eintrag als optionales Argument
 % aufgerufen und nur das obligatorische Argument mit \cs{tud@makeuppercase}
 % behandelt.
-% \ToDo{Falls notwendig, \cs{@@tud@} mit \cs{tud@cmd@use} ersetzen}[v2.06]
 %    \begin{macrocode}
   \csedef{tud@#1}[##1]##2{%
     \expandafter\expandafter\expandafter\noexpand%
@@ -2025,7 +2020,6 @@
 % \cs{NoCaseChange} verwendet wird. Dieser bleibt hier wirkungslos. Es liegt 
 % sehr wahrscheinlich daran, dass diese Befehle intern \cs{section*} verwenden.
 % Deshalb werden für \cs{addsec} die Befehle leicht abgewandelt definiert.
-% \ToDo{Falls notwendig, \cs{@@tud@} mit \cs{tud@cmd@use} ersetzen}[v2.06]
 %    \begin{macrocode}
   \ifstr{#1}{addsec}{%
     \def\tud@addsec[##1]##2{%
