@@ -120,7 +120,8 @@ Das \TUDScript-Bundle unterstützt die Nutzung der Schriften des \CDs sowohl
 im PostScript- als auch im OpenType"=Format. Letztere müssen ebenfalls über das 
 \hrfn{https://tu-dresden.de/cd/1_basiselemente/03_hausschrift/}{%
   Universitätsmarketing auf Anfrage%
-} bestellt werden. Die in den beiden Archiven \File{Univers\_8\_TTF\/.zip} und 
+}
+bestellt werden. Die in den beiden Archiven \File{Univers\_8\_TTF\/.zip} und 
 \File{DIN\_TTF\/.zip} enthaltenen Schriften müssen erst für das Betriebssystem 
 installiert werden und lassen sich nachfolgend mit dem Paket \Package{fontspec} 
 verwenden.
@@ -183,7 +184,10 @@ Querbalken der Kopfzeile lässt sich hiermit ebenfalls einstellen.
   Es werden die Hausschriften im Stil des \TUDCDs genutzt. Überschriften der 
   obersten Gliederungsebenen bis einschließlich \Macro*{subsubsection} 
   verwenden \DIN, darunter liegende%
-  \footnote{\Macro{paragraph} und \Macro{subparagraph}} 
+  \footnote{%
+    \Macro{paragraph}(\Package{koma-script})'none' und 
+    \Macro{subparagraph}(\Package{koma-script})'none'%
+  }
   \textubn{Univers~65~Bold}. Für den Fließtext im Dokument kommt 
   \textuln{Univers~45~Light} zum Einsatz. Aus \Package{lmodern} wird die
   \texttt{Schreibmaschinenschrift} verwendet.
@@ -491,10 +495,12 @@ Werte für die Option \Option{cdmath} sind:
     \newcommand*\greekLetters{%
       Delta,Theta,Lambda,Xi,Pi,Sigma,Upsilon,Phi,Psi,Omega%
     }%
-    \def\do#1{\appto\tablecontent{%
-      \Macro*{var#1} & $\csuse{var#1}$ & & 
-      \Macro*{up#1} & $\csuse{up#1}$\tabularnewline
-    }}%
+    \def\do#1{%
+      \appto\tablecontent{%
+        \Macro*{var#1} & $\csuse{var#1}$ & & 
+        \Macro*{up#1} & $\csuse{up#1}$\tabularnewline
+      }%
+    }%
     \expandafter\docsvlist\expandafter{\greekLetters}%
     \centering%
     \vspace{\intextsep}\noindent
@@ -576,11 +582,14 @@ mehrere Längen abhängig~-- im Gegensatz zu \KOMAScript. Dies betrifft sowohl
 die drei dehnbaren Längen \Length{bigskipamount}, \Length{medskipamount} 
 und \Length{smallskipamount}, welche von den drei Befehlen \Macro{bigskip}, 
 \Macro{medskip} beziehungsweise \Macro{smallskip} für das Einfügen vertikaler 
-Abstände genutzt werden, als auch die beiden Längen \Length{abovecaptionskip} 
-und \Length{belowcaptionskip} für den Abstand zwischen einem Gleitobjekt und 
-dessen mit \Macro{caption} gesetzten Beschreibung. Außerdem wird die Länge 
-\Length{columnsep} als Maß für den Abstand der einzelnen Textspalten im zwei- 
-oder mehrspaltigen Layout in Relation zur Schriftgröße festgelegt.
+Abstände genutzt werden, als auch die beiden Längen 
+\Length{abovecaptionskip}(\Package{koma-script})'none' und 
+\Length{belowcaptionskip}(\Package{koma-script})'none' für den Abstand zwischen 
+einem Gleitobjekt und dessen mit 
+\Macro{caption}(\Package{koma-script},~\Package{caption})'none' gesetzten 
+Beschreibung. Außerdem wird die Länge \Length{columnsep} als Maß für den 
+Abstand der einzelnen Textspalten im zwei- oder mehrspaltigen Layout in 
+Relation zur Schriftgröße festgelegt.
 
 Die verwendete Schriftgröße kann durch den Anwender über die \KOMAScript-Option 
 \Option{fontsize=\PName{Schriftgröße}}(\Package{koma-script})'none' festgelegt 
@@ -588,7 +597,8 @@ werden.
 \Attention{%
   Dabei ist zu beachten, dass diese immer als Klassenoption angegeben werden 
   sollte.%
-} Weitere Hinweise zur Wahl der passenden Schriftgröße sind außerdem in 
+}
+Weitere Hinweise zur Wahl der passenden Schriftgröße sind außerdem in 
 \autoref{sec:fontsize} zu finden.
 
 \begin{Declaration}[v2.05]{\Option{relspacing=\PBoolean}}[true]%
@@ -703,7 +713,7 @@ Satzspiegel nach dem \TUDCD erstellt werden soll.
 %
 \begin{values}{\Option{cdgeometry}}
 \item[custom]
-  \ToDo[doc]{\Option{cdgeometry=custom} dokumentieren}[v2.05]
+  \ToDo[doc]{\Option*{cdgeometry=custom} dokumentieren}[v2.05]
 \end{values}
 
 \end{Declaration}
@@ -844,9 +854,17 @@ Kapitelseiten sowie die Überschriften der weiteren Gliederungsebenen.
 Das Verhalten aller für das Layout relevanten Elemente wird von der eben zuvor 
 erläuterten Option \Option{cd=\PSet} bestimmt. Dies betrifft zum einen sowohl 
 den Titel~(\Macro{maketitle}) als auch die Umschlagseite~(\Macro{makecover}) 
-und zum anderen alle Teileseiten~(\Macro{part}, \Macro{addpart}) und 
-Kapitelseiten~(\Macro{chapter}, \Macro{addchap}) sowie alle darunter liegenden 
-Gliederungsebenen.
+und zum anderen alle Teileseiten
+(%
+  \Macro{part}(\Package{koma-script})'none', 
+  \Macro{addpart}(\Package{koma-script})'none'%
+)
+und Kapitelseiten 
+(%
+  \Macro{chapter}(\Package{koma-script})'none', 
+  \Macro{addchap}(\Package{koma-script})'none'%
+)
+sowie alle darunter liegenden Gliederungsebenen.
 
 Soll ein bestimmtes Element des Layouts abweichend von der allgemeinen 
 Einstellung für das gesamte Dokument erscheinen, so kann eine der folgenden 
@@ -854,9 +872,10 @@ Optionen genutzt werden, um dieses individuell anzupassen.%
 \footnote{%
   \Option{cdtitle} für den Titel, \Option{cdcover} für die Umschlagseite,
   \Option{cdpart} für Teile, \Option{cdchapter} für Kapitel sowie
-  \Option{cdsection} für alle darunter liegenden Gliederungsebenen
-} Die gültigen Wertzuweisungen für die einzelnen Elemente entsprechend dabei 
-den möglichen Werten für die Option \Option{cd=\PSet}.
+  \Option{cdsection} für alle darunter liegenden Gliederungsebenen%
+}
+Die gültigen Wertzuweisungen für die einzelnen Elemente entsprechend dabei den 
+möglichen Werten für die Option \Option{cd=\PSet}.
 
 \begin{Declaration}[%
   v2.03!\Option{cdtitle=bicolor}:%
@@ -872,16 +891,19 @@ Mit der Option \Option{cdtitle} kann die allgemeine Einstellung für den Titel
 überschrieben werden. Es kann zwischen dem normalen (\Option{cdtitle=false}) 
 und dem im \CD umgeschaltet werden. Die neue Titelseite unterstützt alle durch 
 \KOMAScript{} definierten Befehle für den Titel.%
+\ToDo[doc]{Fußnote prüfen}[v2.05]
 \footnote{\raggedright%
-  \Macro{extratitle}[\Parameter{Schmutztitel}],
-  \Macro{titlehead}[\Parameter{Kopf}],
+  \Macro{extratitle}[\Parameter{Schmutztitel}](\Package{koma-script}),
+  \Macro{titlehead}[\Parameter{Kopf}](\Package{koma-script}),
   \Macro{subject}[\Parameter{Typisierung}], \Macro{title}[\Parameter{Titel}],
   \Macro{subtitle}[\Parameter{Untertitel}], \Macro{author}[\Parameter{Autor}],
-  \Macro{date}[\Parameter{Datum}], \Macro{publishers}[\Parameter{Verlag}],
-  \Macro{and} und \Macro{thanks}[\Parameter{Fußnote}] sowie
-  \Macro{uppertitleback}[\Parameter{Titelrückseitenkopf}],
-  \Macro{lowertitleback}[\Parameter{Titelrückseitenfuß}]
-  und \Macro{dedication}[\Parameter{Widmung}]
+  \Macro{publishers}[\Parameter{Verlag}](\Package{koma-script}),
+  \Macro{date}[\Parameter{Datum}], \Macro{and}, 
+  \Macro{thanks}[\Parameter{Fußnote}](\Package{koma-script}) und 
+  \Macro{dedication}[\Parameter{Widmung}](\Package{koma-script}) sowie
+  \Macro{uppertitleback}[\Parameter{Titelrückseitenkopf}](\Package{koma-script})
+  und
+  \Macro{lowertitleback}[\Parameter{Titelrückseitenfuß}](\Package{koma-script})%
 }
 Zusätzlich werden viele neue Felder definiert, welche vor allem für eine 
 wissenschaftliche Arbeit von Relevanz sind. Genaueres dazu 
@@ -923,9 +945,11 @@ die Umschlagseite dem originalen \KOMAScript-Titel. Die Verwendung des Befehls
 %
 Für die Teileseiten kann der Wert des Schlüssels \Option{cd=\PSet} separat 
 überschrieben und somit deren Layout respektive Erscheinungsbild beeinflusst 
-werden, welches bei der Benutzung der Befehle \Macro{part} beziehungsweise 
-\Macro{addpart} und deren Sternversionen genutzt wird. Weitere Hinweise zur 
-Teileseite im \CD sind in \autoref{sec:part} zu finden.
+werden, welches bei der Benutzung der Befehle 
+\Macro{part}(\Package{koma-script})'none' und 
+\Macro{addpart}(\Package{koma-script})'none' sowie deren Sternversionen 
+verwendet wird. In \autoref{sec:part} sind weitere Hinweise zur Teileseite im 
+\CD zu finden.
 \end{Declaration}
 
 \begin{Declaration}[%
@@ -940,20 +964,25 @@ Teileseite im \CD sind in \autoref{sec:part} zu finden.
 %
 Für Kapitelseiten kann der Schlüsselwert \Option{cd=\PSet} ebenfalls angepasst 
 und damit das Layout respektive Erscheinungsbild geändert werden, das bei der 
-Verwendung von \Macro{chapter} beziehungsweise \Macro{addchap} und den 
-dazugehörigen Sternversionen genutzt wird. Weitere Hinweise zur Kapitelseite im 
-\CD sind in \autoref{sec:chapter} zu finden.
+Verwendung von \Macro{chapter}(\Package{koma-script})'none' beziehungsweise 
+\Macro{addchap}(\Package{koma-script})'none' und den dazugehörigen 
+Sternversionen genutzt wird. Weitere Hinweise zur Kapitelseite im \CD sind in 
+\autoref{sec:chapter} zu finden.
 \end{Declaration}
 
 \begin{Declaration}[v2.05]{\Option{cdsection=\PSet}}
 \printdeclarationlist%
 %
-Für Überschriften der weiteren Gliederungsebenen \Macro{section}, 
-\Macro{subsection}, \Macro{subsubsection} sowie \Macro{paragraph} und 
-\Macro{subparagraph} werden in der primären Hausfarbe \Color{HKS41} ausgegeben, 
-falls über die Option \Option{cd=\PSet} eine farbige Ausprägung des Layouts 
-eingestellt wurde. Mit der Angabe von \Option{cdsection=true} erschienen die 
-Überschriften der genannten Gliederungsebenen ohne Farbeinsatz.
+Für Überschriften der weiteren Gliederungsebenen
+\Macro{section}(\Package{koma-script})'none', 
+\Macro{subsection}(\Package{koma-script})'none', 
+\Macro{subsubsection}(\Package{koma-script})'none' sowie 
+\Macro{paragraph}(\Package{koma-script})'none' und 
+\Macro{subparagraph}(\Package{koma-script})'none'
+werden in der primären Hausfarbe \Color{HKS41} ausgegeben, falls über die 
+Option \Option{cd=\PSet} eine farbige Ausprägung des Layouts eingestellt wurde. 
+Mit der Angabe von \Option{cdsection=true} erschienen die Überschriften der 
+genannten Gliederungsebenen ohne Farbeinsatz.
 \end{Declaration}
 %
 \begin{Example}
@@ -987,7 +1016,7 @@ auch die Kapitelüberschrift bei deaktivierter Kapitelseite
 (\Option{chapterpage=false}) in ihrer vertikalen Position anzupassen.
 \Attention{%
   Es ist zu beachten, dass von einer Änderung der \KOMAScript-Befehle
-  \Macro{partheadstartvskip} und \Macro{chapterheadstartvskip} dringlichst 
+  \Macro*{partheadstartvskip} und \Macro*{chapterheadstartvskip} dringlichst 
   abgeraten wird und stattdessen die hier erläuterten Längen genutzt werden 
   sollten, da ansonsten schwerwiegende Fehler auftreten können.
 }
@@ -1045,8 +1074,9 @@ von Fakultät~(\Macro{faculty}), Einrichtung~(\Macro{department}),
 Institut~(\Macro{institute}) und Lehrstuhl~(\Macro{chair}) im dazugehörigen 
 Querbalken. Durch die Nutzung des Paketes \Package{scrlayer-scrpage} lassen 
 sich entweder einzelne Seiten oder auch ganze Dokumente sehr einfach in diesem 
-Stil setzen. Dazu muss lediglich mit \Macro{pagestyle}[\Parameter{Seitenstil}] 
-einer der Seitenstile geladen werden. 
+Stil setzen. Dazu muss lediglich mit 
+\Macro{pagestyle}[\Parameter{Seitenstil}](\Package{koma-script})'none' einer 
+der Seitenstile geladen werden. 
 
 Allen Seitenstilen gemein ist der typische Kopf mit dem charakteristischen 
 Querbalken, dessen Gestalt für \emph{alle} Seitenstile gleichermaßen über die 
@@ -1074,7 +1104,7 @@ der Anwenderschnittstelle von \Package{scrlayer-scrpage}.%
   \Macro{ofoot}(\Package{scrlayer-scrpage})'none', 
   \Macro{cfoot}(\Package{scrlayer-scrpage})'none' und 
   \Macro{ifoot}(\Package{scrlayer-scrpage})'none'
-  genutzt werden.
+  genutzt werden.%
 }
 Wie die einzelnen Befehle zur Individualisierung der Fußzeile zu verwenden 
 sind, kann der \scrguide[\KOMAScript-Anleitung] entnommen werden. Alternativ 
@@ -1084,8 +1114,9 @@ Inhalt für den Fußbereich definiert werden, mit \Macro{footlogo} ist die
 Ausgabe von einem oder mehreren Logos in diesem möglich. Die verwendete Schrift 
 im Fußbereich wird durch das Schriftelement~\Font{tudheadings} festgelegt.
 
-Sobald einer der definierten Stile mit \Macro{pagestyle}[\Parameter{Seitentil}] 
-aktiviert wurde, sind die beiden Seitenstile \PageStyle{tudheadings} sowie 
+Sobald einer der definierten Stile mit 
+\Macro{pagestyle}[\Parameter{Seitentil}](\Package{koma-script})'none' aktiviert 
+wurde, sind die beiden Seitenstile \PageStyle{tudheadings} sowie 
 \PageStyle{plain.tudheadings} zusätzlich unter den Namen \PageStyle{headings} 
 respektive \PageStyle{plain} verwendbar. Dies hat den Vorteil, dass bei 
 Optionen oder Befehlen, welche automatisch zwischen den beiden Seitenstilen 
@@ -1095,10 +1126,12 @@ umgeschaltet wird.
 
 Der Seitenstil \PageStyle{empty} erzeugt allerdings weiterhin eine komplett 
 leere Seite. Soll eine Seite mit der prägnanten Kopfzeile der \TnUD und leerem 
-Seitenfuß erschienen, so muss \Macro{pagestyle}[\PParameter{empty.tudheadings}] 
+Seitenfuß erschienen, so muss \Macro*{pagestyle}[\PParameter{empty.tudheadings}]
 manuell aufgerufen werden. Um auf das normale Verhalten von \KOMAScript{} 
-zurückzuschalten, muss einer der beiden Stile \PageStyle{scrheadings} 
-beziehungsweise \PageStyle{plain.scrheadings} aktiviert werden.
+zurückzuschalten, muss mit \Macro*{pagestyle}[\Parameter{Seitentil}] einer der 
+beiden Seitenstile \PageStyle{scrheadings}(\Package{scrlayer-scrpage})'none'
+oder \PageStyle{plain.scrheadings}(\Package{scrlayer-scrpage})'none' aktiviert 
+werden.
 \index{Layout!Seitenstil|?)}%
 \end{Declaration}
 \end{Declaration}
@@ -1296,15 +1329,15 @@ Argument des Befehls \Macro{footlogo} angegeben werden. Sollte tatsächlich
 nicht nur ein Dateiname sondern eine Liste übergeben worden sein, so wird bei 
 der Ausgabe der Logos zwischen diesen jeweils der in \Macro{footlogosep} 
 gespeicherte Separator~-- standardmäßig \Macro*{hfill}~-- gesetzt. Dieser kann 
-mit \Macro*{renewcommand*}\Macro{footlogosep}[\PParameter{\dots}] beliebig 
-durch den Anwender angepasst werden. Der Separator wird auch gesetzt, falls in 
-\PName{Dateinamenliste} lediglich ein Komma verwendet wurde. Mit 
+mit \Macro*{renewcommand*}[\PParameter{\Macro{footlogosep}}\PParameter{\dots}] 
+beliebig durch den Anwender angepasst werden. Der Separator wird auch gesetzt, 
+falls in \PName{Dateinamenliste} lediglich ein Komma verwendet wurde. Mit 
 \Macro{footlogo}[\PParameter{,\PName{Dateiname},}] kann so beispielsweise ein 
 Logo zentriert im Fuß gesetzt werden.
 \Attention{%
   Dabei ist zu beachten, dass ein mit der Option \Option{ddc} beziehungsweise 
   \Option{ddcfoot} gesetztes \DDC-Logo im Fußbereich~-- im Gegensatz zur 
-  Verwendung von \Macro{footconten}~-- überlagert werden könnte. Hier muss der 
+  Verwendung von \Macro{footcontent}~-- überlagert werden könnte. Hier muss der 
   Anwender im Zweifel durch das Einfügen von Separatoren~-- sprich Kommas~-- im 
   Argument von \Macro{footlogo} etwas Formatierungsarbeit leisten.
 }
@@ -1367,7 +1400,7 @@ stehende Platz im Fuß reduziert.
 Wird an das Argument für die linke oder die rechte Spalte lediglich ein Stern 
 \PValue{*} übergeben, so bleibt der bis dahin definierte Inhalt in dieser 
 Spalte erhalten. Beispielsweise kann die linke Fußbereichsspalte mit 
-\Macro{footcontent}\Parameter{Inhalt}\POParameter{*} angepasst werden ohne 
+\Macro{footcontent}[\Parameter{Inhalt}\POParameter{*}] angepasst werden ohne 
 dabei den Inhalt der rechten Spalte zu verändern.
 
 Im Fußbereich wird für die Schrift das Schriftelement \Font{tudheadings} 
@@ -1473,7 +1506,7 @@ Option \Option{ddc}.
 
 \ToDo[imp]{%
   Spezialseite zur freien Gestaltung mit Hintergrundebene für Bilder und Texte 
-  (CD-Handbuch S. 80 ff.); Seitenstil: \PageStyle{special.tudheadings}
+  (CD-Handbuch S. 80 ff.); Seitenstil: \PageStyle*{special.tudheadings}
 }[v2.06]
 
 \begin{Declaration}{\Environment{tudpage}[\OLParameter{Sprache}]}
@@ -1558,12 +1591,12 @@ erscheinen soll. Für den Titel im \TUDCD werden alle Felder unterstützt, welch
 bereits durch \KOMAScript{} definiert sind. Darüber hinaus werden für die 
 \TUDScript-Klassen weitere Felder bereitgestellt, welche Auswirkungen auf die 
 Gestalt des Titels haben. Diese werden nachfolgend in diesem \autorefname 
-erläutert. Der Titel~-- bestehend aus dem möglichen Schmutztitel 
-(\Macro{extratitle}), der eigentlichen Titelseite respektive des Titelkopfes 
-und der nachgelagerten Elementen~-- kann mit \Macro{maketitle} ausgegeben 
-werden. Außerdem kann im zweispaltigen Satz \Macro{maketitleonecolumn} 
-verwendet werden, womit eine einspaltige Ergänzung nach dem Titel selbst 
-ermöglicht wird.
+erläutert. Der Titel~-- bestehend aus einem möglichen Schmutztitel 
+(\Macro{extratitle}(\Package{koma-script})), der eigentlichen Titelseite 
+respektive des Titelkopfes und der nachgelagerten Elementen~-- kann mit 
+\Macro{maketitle} ausgegeben werden. Außerdem kann im zweispaltigen Satz 
+\Macro{maketitleonecolumn} verwendet werden, womit eine einspaltige Ergänzung 
+nach dem Titel selbst ermöglicht wird.
 
 Zusätzlich zum Titel lässt sich mit \Macro{makecover} eine Umschlagseite 
 erzeugen. Diese kann insbesondere für gebundene Arbeiten verwendet werden. Es 
@@ -1585,10 +1618,16 @@ einer Abschlussarbeit angegeben wird, nutzt das Schriftelement~\Font{thesis}.
 Für alle Felder des Titels und der Umschlagseite lassen sich die verwendeten
 Schriften anpassen. In \autoref{sec:fonts:elements} lässt sich nachlesen, wie 
 dies genau funktioniert. Dabei werden für Titel und Umschlagseite sowohl die 
-bereits durch \KOMAScript{} bereitgestellten Schriftelemente \Font{titlehead}, 
-\Font{subject}, \Font{title}, \Font{subtitle}, \Font{author}, \Font{date}, 
-\Font{publishers} und \Font{dedication} als auch die neuen \Font{titlepage} und 
-\Font{thesis} unterstützt.
+bereits durch \KOMAScript{} bereitgestellten Schriftelemente
+\Font{titlehead}(\Package{koma-script})'none', 
+\Font{subject}(\Package{koma-script})'none', 
+\Font{title}(\Package{koma-script})'none', 
+\Font{subtitle}(\Package{koma-script})'none', 
+\Font{author}(\Package{koma-script})'none', 
+\Font{publishers}(\Package{koma-script})'none',
+\Font{date}(\Package{koma-script})'none' und 
+\Font{dedication}(\Package{koma-script})'none'
+als auch die neuen \Font{titlepage} und \Font{thesis} unterstützt.
 %
 \begin{Example}
 In diesem Dokument wurde der Untertitel derart geändert, dass dieser nicht 
@@ -1648,11 +1687,12 @@ rechts öffnenden Kapiteln gesetzt,%
 \footnote{%
   \KOMAScript-Optionen \Option{twoside=true}(\Package{typearea})'none' und 
   \Option{open=right}(\Package{koma-script})'none', Standard für 
-  \Class{tudscrbook}
+  \Class{tudscrbook}%
 }
-so wird zusätzlich die Option \Option{clearcolor} beachtet. Dies gilt es 
-insbesondere bei der Verwendung der Befehle \Macro{uppertitleback} respektive 
-\Macro{lowertitleback} für die Titelrückseite zu beachten.
+so wird zusätzlich die Option \Option{clearcolor} einbezogen. Dies gilt es 
+insbesondere bei den Befehlen \Macro{uppertitleback}(\Package{koma-script}) 
+respektive \Macro{lowertitleback}(\Package{koma-script}) für die Titelrückseite 
+zu beachten.
 
 Das optionale Argument erlaubt~-- ebenso wie bei den \KOMAScript"=Klassen~-- 
 die Änderung der Seitenzahl der Titelseite. Diese wird jedoch nicht ausgegeben, 
@@ -1760,8 +1800,8 @@ jedoch jederzeit mit \Option{cdcover=\PSet} überschrieben werden.
 Wird \Option{cdcover=true} gewählt, so wird die Umschlagseite im \TUDCD 
 gesetzt. Auf dieser werden der Titel des Dokumentes, die Typisierung 
 durch \Macro{thesis} und/oder \Macro{subject} sowie der Autor oder respektive 
-die Autoren und gegebenenfalls der mit \Macro{publishers} angegebene Verlag 
-ausgegeben.
+die Autoren und gegebenenfalls der mit \Macro{publishers}(\Package{koma-script})
+angegebene Verlag ausgegeben.
 \ChangedAt{v2.02}
 Für die Einstellung \Option{cdcover=false} wird lediglich der normale 
 \KOMAScript"=Titel als separate Umschlagseite ausgegeben. 
@@ -1770,13 +1810,15 @@ Die Titelseite selbst gehört immer zum Buchblock und wird daher im gleichen
 Satzspiegel gesetzt. Dem entgegen steht die Umschlagseite, welche zumeist in 
 einem anderen Layout erscheint. Normalerweise wird das Cover~-- unabhängig von 
 der Option \Option{cdgeometry}~-- im asymmetrischen Satzspiegel des \CDs 
-gesetzt. Mit \Key{\Macro{makecover}}{cdgeometry=false} im optionalen Argument 
+gesetzt. Mit \Key*{\Macro{makecover}}{cdgeometry=false} im optionalen Argument 
 kann das Verhalten geändert werden. In diesem Fall erscheint auch die 
 Umschlagseite im Buchblock des restlichen Dokumentes. Allerdings können für 
-diese Einstellung die Seitenränder mit den Befehlen \Macro{coverpagetopmargin}, 
-\Macro{coverpageleftmargin}, \Macro{coverpagerightmargin} sowie 
-\Macro{coverpagebottommargin} durch den Nutzer frei angepasst werden. Mehr dazu 
-ist im \scrguide zu finden.
+diese Einstellung die Seitenränder mit den Befehlen 
+\Macro{coverpagetopmargin}(\Package{koma-script})'none', 
+\Macro{coverpageleftmargin}(\Package{koma-script})'none', 
+\Macro{coverpagerightmargin}(\Package{koma-script})'none' sowie 
+\Macro{coverpagebottommargin}(\Package{koma-script})'none' 
+durch den Nutzer frei angepasst werden. Mehr dazu ist im \scrguide zu finden.
 
 Außerdem kann mit dem optionalen Argument die Seitenzahl der Umschlagseite 
 geändert werden. Diese wird jedoch nicht ausgegeben, sondern beeinflusst 
@@ -1857,8 +1899,8 @@ geladen sein, so wird die damit eingestellte Formatierung des Datums durch
 zusätzliche Angabe erklären sich quasi von selbst. Anzumerken ist, dass die mit 
 den Befehlen \Macro{course}, \Macro{discipline}, \Macro{matriculationnumber} 
 sowie \Macro{matriculationyear} angegebenen Informationen auch durch die 
-\Environment{task}"=Umgebung aus dem Paket \Package{tudscrsupervisor} genutzt 
-werden, falls diese denn zum Einsatz kommt.
+\Environment{task}(\Package{tudscrsupervisor})"=Umgebung aus dem Paket 
+\Package{tudscrsupervisor} genutzt werden, falls diese denn zum Einsatz kommt.
 \end{Declaration}
 \end{Declaration}
 \end{Declaration}
@@ -1997,7 +2039,8 @@ und \Macro{subject}[\Parameter{Wert}] zu \Option{subjectthesis=true}.
 \caption{%
   Spezielle Werte zur Typisierung des Dokumentes für
   \Macro{thesis} und \Macro{subject}%
-}\tudhyperdef{tab:thesis}%
+}%
+\tudhyperdef{tab:thesis}%
 %
 \centering%
 \newcommand*\typecast[2]{%
@@ -2106,6 +2149,7 @@ Arbeiten angegeben werden. Die Angabe mehrerer Person erfolgt wie beim Befehl
 \end{Declaration}
 \end{Declaration}
 
+\begin{Bundle}{\Package{koma-script}}
 \begin{Declaration}{\Macro{extratitle}[\Parameter{Schmutztitel}]}
 \begin{Declaration}{\Macro{titlehead}[\Parameter{Kopf}]}
 \begin{Declaration}{\Macro{publishers}[\Parameter{Verlag}]}
@@ -2131,11 +2175,12 @@ muss gegebenenfalls vom Anwender kontrolliert werden. Der mit dem Befehl
 bezeichnen sondern kann auch andere Informationen beinhalten, welche am Ende 
 der Titelseite ausgegeben werden sollen.
 
-Fußnoten werden auf dem Titel nicht mit \Macro{footnote}, sondern mit der 
-Anweisung \Macro{thanks} erzeugt. Diese dienen in der Regel für Anmerkungen bei 
-Titel oder den Autoren. Als Fußnotenzeichen werden dabei Symbole statt Zahlen 
-verwendet. Der Befehl \Macro{thanks} kann nur innerhalb des Arguments einer 
-der Anweisungen für die Titelseite wie beispielsweise \Macro{author} oder 
+Fußnoten werden auf dem Titel nicht mit 
+\Macro{footnote}(\Package{koma-script})'none', sondern mit der Anweisung 
+\Macro{thanks} erzeugt. Diese dienen in der Regel für Anmerkungen bei Titel 
+oder den Autoren. Als Fußnotenzeichen werden dabei Symbole statt Zahlen 
+verwendet. Der Befehl \Macro{thanks} kann nur innerhalb des Arguments einer der 
+Anweisungen für die Titelseite wie beispielsweise \Macro{author} oder 
 \Macro{title} verwendet werden.
 
 \index{Satzspiegel!doppelseitig}%
@@ -2156,18 +2201,22 @@ muss daher vor der Nutzung von \Macro{maketitle} angegeben werden.
 \end{Declaration}
 \end{Declaration}
 \end{Declaration}
-
+\end{Bundle}
 
 \subsection{Die Teileseite}
 \tudhyperdef*{sec:part}%
 %
-\ChangedAt[\Macro{partpagestyle}]{%
+\ChangedAt[\Macro{partpagestyle}(\Package{koma-script})]{%
   v2.02:Seitenstil \PageStyle{plain.tudheadings} wird genutzt%
 }
 Wird für die Teileseiten das Layout des \CDs verwendet, so wird der Seitenstil 
-dieser (\Macro{partpagestyle}) auf \PageStyle{plain.tudheadings} gesetzt. 
-Möchten Sie stattdessen einen anderen Seitenstil nutzen, so kann dieser mit 
-\Macro*{renewcommand*}[\PParameter{\Macro{partpagestyle}}\Parameter{Seitenstil}]
+dieser (\Macro{partpagestyle}(\Package{koma-script})'none') auf 
+\PageStyle{plain.tudheadings} gesetzt. Möchten Sie stattdessen einen anderen 
+Seitenstil nutzen, so kann dieser mit 
+\Macro*{renewcommand*}[%
+  \PParameter{\Macro{partpagestyle}(\Package{koma-script})'none'}%
+  \Parameter{Seitenstil}%
+]
 angepasst werden.
 
 \begin{Declaration}{\Option{parttitle=\PBoolean}}[false]%
@@ -2177,8 +2226,9 @@ angepasst werden.
 %
 Diese Option ermöglicht es, den mit \Macro{title} gegebenen Titel des 
 Dokumentes selbst in großer Schrift auf einer Teileseite auszugeben, die 
-Bezeichnung des mit \Macro{part}[\Parameter{Bezeichnung}] erzeugten Teils wird 
-in diesem Fall in kleiner Schrift direkt darunter gesetzt. Diese 
+Bezeichnung des mit 
+\Macro{part}[\Parameter{Bezeichnung}](\Package{koma-script})'none' erzeugten 
+Teils wird in diesem Fall in kleiner Schrift direkt darunter gesetzt. Diese 
 Layout"=Variante findet sich im Handbuch für das \TUDCD. \notudscrartcl
 %
 \begin{values}{\Option{parttitle}}
@@ -2217,7 +2267,7 @@ beziehungsweise bei doppelseitigem Satz und rechts öffnenden Kapiteln%
 \footnote{%
   \KOMAScript-Optionen \Option{twoside=true}(\Package{typearea})'none' und 
   \Option{open=right}(\Package{koma-script})'none', Standard für 
-  \Class{tudscrbook}
+  \Class{tudscrbook}%
 }
 auf der übernächsten Seite ausgegeben. Die in diesem Fall erzeugte Rückseite 
 wird in ihrer Ausprägung~-- wie auch Teileseiten~-- durch die Einstellung von 
@@ -2227,19 +2277,21 @@ standardmäßig aktiviert. \notudscrartcl
 \begin{values}{\Option{chapterpage}}
 \itemfalse
   Es gibt keine Sonderstellung von Kapiteln, der nachfolgende Text wird direkt 
-  unter der Überschrift respektive nach der mit \Macro{setchapterpreamble} 
-  erzeugten Kapitelpräambel auf der gleichen Seite ausgegeben.
+  unter der Überschrift respektive nach der mit 
+  \Macro{setchapterpreamble}(\Package{koma-script})'none' erzeugten 
+  Kapitelpräambel auf der gleichen Seite ausgegeben.
 \itemtrue*
   Die Kapitelüberschrift und gegebenenfalls die Kapitelpräambel werden auf 
   einer separaten Seite gesetzt. Der folgende Text erscheint auf der nächsten 
   respektive übernächsten Seite, \seeref*{\Option{cleardoublespecialpage}}.
 \end{values}
 %
-\ChangedAt[\Macro{chapterpagestyle}]{%
-  v2.02:nicht mehr abhängig von \Macro{partpagestyle}
+\ChangedAt[\Macro{chapterpagestyle}(\Package{koma-script})]{%
+  v2.02:nicht mehr abhängig von \Macro{partpagestyle}(\Package{koma-script})
 }
 Mit \Macro*{renewcommand*}[%
-  \PParameter{\Macro{chapterpagestyle}}\Parameter{Seitenstil}%
+  \PParameter{\Macro{chapterpagestyle}(\Package{koma-script})'none'}%
+  \Parameter{Seitenstil}%
 ]
 lässt sich übrigens~-- unabhängig von der Option \Option{chapterpage}~-- der 
 Seitenstil von Kapiteln anpassen. Bei der Verwendung von Kapitelseiten mit 
@@ -2261,25 +2313,26 @@ Automatisch erzeugte Vakatseiten~-- auch absichtliche Leerseiten genannt~--
 sind in Abhängigkeit der 
 \KOMAScript-Optionen \Option{twoside=\PSet}(\Package{typearea})'none'|declare| 
 und \Option{open=\PName{Methode}}(\Package{koma-script})'none'|declare| am 
-Beginn von Teilen und Kapiteln in Dokumenten zu finden.\footnote{%
+Beginn von Teilen und Kapiteln in Dokumenten zu finden.%
+\footnote{%
   Voreinstellungen
   \Class{tudscrbook}: 
   \Option{twoside=true}(\Package{typearea})'none', 
   \Option{open=right}(\Package{koma-script})'none';
   \Class{tudscrartcl} und \Class{tudscrreprt}: 
   \Option{open=any}(\Package{koma-script})'none', 
-  \Option{twoside=true}(\Package{typearea})'none'
-} Für die Vakatseiten kann der Seitenstil mit der \KOMAScript"=Option 
+  \Option{twoside=true}(\Package{typearea})'none'%
+}
+Für die Vakatseiten kann der Seitenstil mit der \KOMAScript"=Option 
 \Option{cleardoublepage=\PSet}(\Package{koma-script})'none'|declare| 
 eingestellt werden.
 
 \ToDo[doc,imp]{%
   Rückseite bei Kapitelseiten (auch bei Teilen?) im doppelseitigen Satz per 
   Option nicht als Vakatseite setzen. Implementierung von farbigen Seiten 
-  davor (\Option*{open=right}(\Package{koma-script})) sowie danach 
-  (\Option*{open=left}(\Package{koma-script})). Setzen von speziellen Inhalten 
-  auf diesen Seiten äquivalent zu \Macro*{setpartpreamble} bzw. 
-  \Macro*{setchapterpreamble}; ggf. temporär umschalten bzw. Warnung bei 
+  davor (\Option*{open=right}) sowie danach (\Option*{open=left}). Setzen von 
+  speziellen Inhalten auf diesen Seiten äquivalent zu \Macro*{setpartpreamble} 
+  bzw. \Macro*{setchapterpreamble}; ggf. temporär umschalten bzw. Warnung bei 
   Konflikt.
   \url{http://latex.wcms-file3.tu-dresden.de/phpBB3/viewtopic.php?f=11&t=396}
 }[v2.06]
@@ -2292,10 +2345,11 @@ eingestellt werden.
 %
 Diese Option wirkt sich lediglich bei aktiviertem doppelseitigem Satz und 
 ausschließlich rechts eröffnenden Seiten für Teile beziehungsweise Kapitel
-aus.\footnote{%
+aus.%
+\footnote{%
   \KOMAScript"=Option \Option{twoside=true}(\Package{typearea})'none' und 
   \Option{open=right}(\Package{koma-script})'none'%
-} 
+}
 In diesem Fall kann der Stil der darauffolgenden, linken Seite~-- sprich der 
 Rückseite~-- beeinflusst werden. Das Normalverhalten sieht vor, dass nach einem 
 Teil die nachfolgende Rückseite unabhängig von der Einstellung für 
@@ -2319,8 +2373,8 @@ Farbe wie die Vorderseite von Teil oder Kapitel gesetzt werden. \notudscrartcl
   der Einstellung von \Option{cleardoublepage}(\Package{koma-script})'none' für 
   Vakatseiten.
 \item[current]
-  Es wird der aktuell definierte Seitenstil (\Macro{pagestyle}) für die 
-  erzeugte Rückseite verwendet.
+  Für die erzeugte Rückseite wird der aktuell definierte Seitenstil 
+  (\Macro{pagestyle}(\Package{koma-script})'none') verwendet.
 \item[\PValueName{Seitenstil}]
   Mit der Angabe von \Option{cleardoublespecialpage=\PName{Seitenstil}} 
   kann ein beliebiger, bereits definierter Seitenstil für die Rückseite nach 
@@ -2333,7 +2387,7 @@ Farbe wie die Vorderseite von Teil oder Kapitel gesetzt werden. \notudscrartcl
 \end{Declaration}
 
 \ToDo[doc,imp]{%
-  \Option{clearcolor} in \Option{cleardoublespecialpage}%
+  \Option*{clearcolor} in \Option*{cleardoublespecialpage}%
 }[v2.06]
 \begin{Declaration}{\Option{clearcolor=\PBoolean}}[false]%
 \printdeclarationlist%
@@ -2349,11 +2403,12 @@ Aktivieren dieser Option die Rückseiten von Teilen~-- und je nach Einstellung
 von \Option{chapterpage} gegebenenfalls auch von Kapiteln~-- farbig gesetzt.%
 \footnote{%
   Dies führt bei der Ausgabe zu farbigen Blättern (Vorder- und Rückseite) der 
-  entsprechenden Elemente des Layouts.
+  entsprechenden Elemente des Layouts.%
 }
 Die Option wirkt sich ebenfalls auf die Rückseite des Titels aus.%
 \footnote{%
-  \seeref{\Macro{uppertitleback} und \Macro{lowertitleback}} im \scrguide*
+  \seeref{\Macro{uppertitleback}(\Package{koma-script}) und 
+  \Macro{lowertitleback}(\Package{koma-script})} im \scrguide*%
 }
 Der Stil dieser zusätzlich eingefügten Rückseiten ist abhängig von der Option
 \Option{cleardoublespecialpage}.
@@ -2379,9 +2434,10 @@ durch \KOMAScript{} bereitgestellten~-- definiert. Dies sind \Font{titlepage},
 \Font{thesis}, \Font{tudheadings} sowie \Font{parttitle}. Sowohl die bereits 
 durch \KOMAScript{} definierten als auch alle hier genannten und folgend 
 erläuterten Schriftelemente sollten im Bedarfsfall vom Anwender über den Befehl 
-\Macro{addtokomafont}[\Parameter{Schriftelement}\Parameter{Einstellungen}]
-angepasst werden. Mehr dazu ist im \scrguide innerhalb des Abschnitts 
-\emph{Textauszeichnungen} zu finden.
+\Macro{addtokomafont}[%
+  \Parameter{Schriftelement}\Parameter{Einstellungen}%
+](\Package{koma-script})'none' angepasst werden. Mehr dazu ist im \scrguide 
+innerhalb des Abschnitts \emph{Textauszeichnungen} zu finden.
 
 
 \subsection{Die Farben des \CDs}
@@ -2446,12 +2502,12 @@ die Zusammenfassung außerdem in Gestalt eines \sectionautorefname{}s oder für
   Bezeichner \Term{abstractname} vor der eigentlichen Zusammenfassung gesetzt.
 \item[section/addsec]
   Die Überschrift (\Term{abstractname}) verwendet den Gliederungsbefehl 
-  \Macro{section}.
+  \Macro{section}(\Package{koma-script})'none'.
 \item[chapter/addchap][\Class{tudscrbook}](%
     nur \Class{tudscrreprt} und \Class{tudscrbook}%
   )
-  Es wird der Befehl \Macro{chapter} für das Setzen der Überschrift 
-  (\Term{abstractname}) genutzt. 
+  Es wird der Befehl \Macro{chapter}(\Package{koma-script})'none' für das 
+  Setzen der Überschrift (\Term{abstractname}) genutzt. 
 \item[heading]
   Es wird die höchstmögliche Gliederungsebene verwendet. Für 
   \Class{tudscrartcl} entspricht dies \Option{abstract=section}, bei 
@@ -2560,10 +2616,10 @@ Die \Environment{abstract}-Umgebung dient speziell für die Ausgabe einer
 Zusammenfassung, entweder zu Beginn eines Dokumentes oder beispielsweise vor 
 einem Teil oder Kapitel. Wird ein Titelkopf und keine Titelseite verwendet 
 (\KOMAScript-Option \Option{titlepage=false}(\Package{koma-script})'none'), so 
-wird eine Zusammenfassung~--- identisch zu den \KOMAScript"=Klassen~-- in einer 
-\Environment{quotation}"=Umgebung ausgegeben, wobei die Überschrift 
-\emph{nicht} in der Form einer Gliederungsebene gesetzt wird. Die verwendete 
-Umgebung hat jedoch den Nachteil, dass in dieser die \KOMAScript-Option 
+wird eine Zusammenfassung~-- identisch zu den \KOMAScript"=Klassen~-- in einer 
+\Environment{quotation}(\Package{koma-script})'none'"=Umgebung ausgegeben, 
+wobei die Überschrift \emph{nicht} in der Form einer Gliederungsebene gesetzt 
+wird. Diese Umgebung hat jedoch den Nachteil, dass die \KOMAScript-Option 
 \Option{parskip=\PName{Methode}}(\Package{koma-script})'none' nicht beachtet 
 wird. Um dies zu beheben, kann das Paket \Package{quoting} geladen werden, 
 wodurch stattdessen die Umgebung \Environment{quoting}(\Package{quoting})'none' 
@@ -2608,11 +2664,13 @@ Wurde das Paket \Package{multicol} geladen, kann mit dem Parameter
 mehrspaltig gesetzt werden. Dem Parameter \Key{\Environment{abstract}}{option} 
 können alle gültigen, bereits erläuterten Werte der Option \Option{abstract} 
 übergeben werden. Die damit gemachten Einstellungen wirken sich~-- im Gegensatz 
-zur Angabe als Klassenoption oder über die Variante der späten Optionenwahl%
+zur Variante der späten Optionenwahl%
 \footnote{%
   \Macro{TUDoption}[\PParameter{abstract}\Parameter{Einstellung}] oder
-  \Macro{TUDoptions}[\PParameter{abstract=\PName{Einstellung}}]
-}~-- lediglich lokal auf die verwendete \Environment{abstract}"=Umgebung aus.
+  \Macro{TUDoptions}[\PParameter{abstract=\PName{Einstellung}}]%
+}
+respektive als Angabe einer Klassenoption~-- lediglich lokal auf die verwendete 
+\Environment{abstract}"=Umgebung aus.
 
 \ChangedAt{v2.02}
 Sollen mehrere Zusammenfassungen erzeugt und dabei die Einstellungen 
@@ -2626,9 +2684,10 @@ unterstützt werden. Das Minimalbeispiel in \fullref{sec:exmpl:dissertation}
 zeigt hierfür das notwendige Vorgehen.
 
 Wird die \Environment{abstract}"=Umgebung innerhalb des Argumentes der Befehle 
-\Macro{setpartpreamble} beziehungsweise \Macro{setchapterpreamble} verwendet, 
-so wird die Überschrift~-- im Fall, dass nicht \Option{abstract=false} gewählt 
-ist~-- \emph{immer} in Textgröße und zentriert gesetzt.
+\Macro{setpartpreamble}(\Package{koma-script})'none' beziehungsweise 
+\Macro{setchapterpreamble}(\Package{koma-script})'none' verwendet, so wird die 
+Überschrift~-- im Fall, dass nicht \Option{abstract=false} gewählt ist~-- 
+\emph{immer} in Textgröße und zentriert gesetzt.
 \end{Declaration}
 \end{Declaration}
 \end{Declaration}
@@ -2638,16 +2697,17 @@ ist~-- \emph{immer} in Textgröße und zentriert gesetzt.
 \end{Declaration}
 
 \minisec{Umbenennung der \abstractname}
-Mit dem \KOMAScript-Befehl \Macro{renewcaptionname} kann der Bezeichner~-- 
-sprich der Wortlaut~-- der für die \Environment{abstract}-Umgebung verwendeten 
-Überschrift verändert werden. Mehr dazu ist in \autoref{sec:localization} zu 
-finden.
+Mit dem \KOMAScript-Befehl \Macro{renewcaptionname}(\Package{koma-script})'none'
+kann der Bezeichner~-- sprich der Wortlaut~-- der für die 
+\Environment{abstract}-Umgebung verwendeten Überschrift verändert werden. Mehr 
+dazu ist in \autoref{sec:localization} zu finden.
 %
 \begin{Example}
 Die Überschrift der \Environment{abstract}-Umgebung soll für die Sprache 
 \PValue{ngerman} von \enquote{\abstractname} in \enquote{Kurzfassung} umbenannt 
-werden. Der Befehl \Macro{renewcaptionname} erwartet die drei obligatorischen 
-Argumente \Parameter{Sprache}\Parameter{Makro}\Parameter{Inhalt}:
+werden. Das Makro \Macro{renewcaptionname}(\Package{koma-script})'none' 
+erwartet die drei obligatorischen Argumente 
+\Parameter{Sprache}\Parameter{Makro}\Parameter{Inhalt}:
 \begin{Code}[escapechar=§]
 \renewcaptionname{ngerman}{\abstractname}{Kurzfassung}
 \end{Code}
@@ -2693,11 +2753,13 @@ Im Gegensatz zur Option \Option{abstract} stehen die Einstellungen
   der Selbstständigkeitserklärung beziehungsweise \Term{blockingname} vor dem 
   Sperrvermerk wird gesetzt. 
 \item[section/addsec]
-  Die Überschrift verwendet den Gliederungsbefehl \Macro{section}.
+  Die Überschrift verwendet den Gliederungsbefehl 
+  \Macro{section}(\Package{koma-script})'none'.
 \item[chapter/addchap][\Class{tudscrbook}](%
     nur \Class{tudscrreprt} und \Class{tudscrbook}%
   )
-  Es wird der Befehl \Macro{chapter} für das Setzen der Überschrift genutzt. 
+  Es wird der Befehl \Macro{chapter}(\Package{koma-script})'none' für das 
+  Setzen der Überschrift genutzt. 
 \item[heading]
   Es wird die höchstmögliche Gliederungsebene verwendet. Für 
   \Class{tudscrartcl} entspricht dies \Option{declaration=section}, bei 
@@ -3040,10 +3102,10 @@ lässt sich die \emph{mehrfache} Angabe eines Parameters vermeiden.
 \begin{Declaration}[v2.02]{\Counter{symbolheadings}}%
 \printdeclarationlist%
 %
-\ToDo[imp]{Fehler \Macro{addchap} beheben, Paket \Package{footmisc}}[v2.06]
+\ToDo[imp]{Fehler \Macro*{addchap} beheben, Paket \Package*{footmisc}}[v2.06]
 \ToDo[imp]{Zähler auch bei Sternversionen von Kapiteln zurücksetzen}[v2.06]
 \ToDo[imp]{Fußnoten nicht ins Inhaltsverzeichnis und in die Kopfzeile?!}[v2.06]
-\ToDo[imp]{Problem mit \Package{hyperref} lösbar?}[v2.06]
+\ToDo[imp]{Problem mit \Package*{hyperref} lösbar?}[v2.06]
 %
 Für die Überschriften wird die \KOMAScript-Option \Option{footnotes} erweitert.
 Normalerweise kann diese die Werte \PValue{multiple} und \PValue{nomultiple} 
@@ -3120,7 +3182,7 @@ und \emph{Deutsch} bereitzustellen. Ein Großteil davon betrifft Bezeichnungen
 für Felder auf der Titelseite (\autoref{sec:title}). Hierfür wird
 \Macro{providecaptionname}[%
   \Parameter{Sprache}\Parameter{Makro}\Parameter{Inhalt}%
-]
+](\Package{koma-script})'none'
 verwendet, wobei \PName{Sprache} dem geladenen Sprachpaket~-- normalerweise das 
 Paket \Package{babel}~-- bekannt sein muss.
 
@@ -3129,7 +3191,7 @@ welche von einem beliebigen (Sprach"~)Paket bereitgestellt werden, ändern
 wollen, ist hierfür der Befehl
 \Macro{renewcaptionname}[%
   \Parameter{Sprache}\Parameter{Makro}\Parameter{Inhalt}%
-] 
+](\Package{koma-script})'none'
 zu verwenden. Es sollte natürlich dabei eine \PName{Sprache} angegeben werden, 
 welche im Dokument durch \Package{babel} oder ein anderes Sprachpaket verwendet 
 wird, beispielsweise \PValue{ngerman} oder \PValue{english}. 
@@ -3170,7 +3232,15 @@ folgenden Personen durch den Bezeichner \Term*{\noexpand\dots{}othername}
 ergänzt.
 
 \ChangedAt{v2.02,v2.05}
-Bei den Bezeichnung wird unterschieden, ob eine oder mehrere Personen angegeben wurden. Wird lediglich eine Person genannt, so ist eine Unterscheidung nicht notwendig und es wird der Singular genutzt. Werden jedoch zwei oder mehr Personen angegeben, so wird geprüft, ob der dazugehörige Bezeichner für die Zweitperson (\Term*{\noexpand\dots{}othername}) definiert ist. Falls dies so ist, wird die alternative Bezeichnung für die erstgenannte Person verwendet, andernfalls wird der Plural des Bezeichners verwendet. Dies betrifft alle Felder, die über \Macro{referee}, \Macro{advisor}, \Macro{supervisor} oder \Macro{professor} angegeben wurden.
+Bei den Bezeichnung wird unterschieden, ob eine oder mehrere Personen angegeben 
+wurden. Wird lediglich eine Person genannt, so ist eine Unterscheidung nicht 
+notwendig und es wird der Singular genutzt. Werden jedoch zwei oder mehr 
+Personen angegeben, so wird geprüft, ob der dazugehörige Bezeichner für die 
+Zweitperson (\Term*{\noexpand\dots{}othername}) definiert ist. Falls dies so 
+ist, wird die alternative Bezeichnung für die erstgenannte Person verwendet, 
+andernfalls wird der Plural des Bezeichners verwendet. Dies betrifft alle 
+Felder, die über \Macro{referee}, \Macro{advisor}, \Macro{supervisor} oder 
+\Macro{professor} angegeben wurden.
 
 \renewcaptionname{ngerman}{\refereename}{(Erst-)Gutachter}
 \renewcaptionname{english}{\refereename}{(First) Referee(s)}
@@ -3270,7 +3340,7 @@ Trennzeichen vom eigentlichen Feld abgegrenzt.
 Wurde erkannt, dass das aktuelle Dokument eine Abschlussarbeit ist,%
 \footnote{%
   Entweder wurde \Macro{thesis} oder \Macro{subject} mit einem speziellen Wert 
-  oder der Option \Option{subjectthesis} verwendet.
+  oder der Option \Option{subjectthesis} verwendet.%
 }
 so kann der zu erlangende akademische Grad mit dem Befehl \Macro{graduation} 
 angegeben werden. Bei dessen Ausgabe auf dem Titel wird dabei der entsprechende 
@@ -3325,13 +3395,14 @@ gegebenenfalls die Felder für den Titel (\Macro{title}) und die Typisierung der
 Abschlussarbeit%
 \footnote{%
   entweder \Macro{thesis} oder \Macro{subject}[\Parameter{\autoref{tab:thesis}}]
-  beziehungsweise Option \Option{subjectthesis=true}
+  beziehungsweise Option \Option{subjectthesis=true}%
 }
 sowie die angegebenen Unterstützer%
 \footnote{%
   \Macro{confirmation}[%
     \POParameter{\Key{\Macro{confirmation}}{supporter=\PName{Unterstützer}}}%
-  ] oder \Macro{supporter}[\Parameter{Unterstützer}]%
+  ]
+  oder \Macro{supporter}[\Parameter{Unterstützer}]%
 }
 beachtet. Für den Sperrvermerk (\Macro{blocking}) wird neben dem Titel 
 (\Macro{title}) optional außerdem noch das Feld der externen Firma%
@@ -3352,11 +3423,11 @@ angezeigt.
   \def\@company{\PName{Firma}}
   \makeatother
   \vskip\medskipamount\noindent
-  \textbf{Bezeichner}\quad\Term*{confirmationtext}%
+  \textbf{Bezeichner}\quad\Term{confirmationtext}%
   \begin{quoting}
   \confirmationtext
   \end{quoting}
-  \textbf{Bezeichner}\quad\Term*{blockingtext}%
+  \textbf{Bezeichner}\quad\Term{blockingtext}%
   \begin{quoting}
   \blockingtext
   \end{quoting}
@@ -3371,14 +3442,15 @@ angezeigt.
   \noindent
   Soll eine der Erklärungen geändert und dabei der Inhalt eines Feldes genutzt 
   werden, lässt sich über den Befehl \Macro*{csuse}[\PParameter{\dots}] aus dem 
-  Paket \Package*{etoolbox} auf die Felder zugreifen. Als Argument können dabei
+  Paket \Package{etoolbox} auf die Felder zugreifen. Als Argument können dabei
   \PValue{@@author}, \PValue{@@title}, \PValue{@@thesis}, \PValue{@supporter} 
   und \PValue{@company} verwendet werden.%
   \footnote{%
     Autor: \showfield{@@author}, Titel: \showfield{@@title}, Art der 
     Abschlussarbeit: \showfield{@@thesis}, Unterstützer: \showfield{@supporter} 
     und Firma: \showfield{@company}%
-  } Gegebenenfalls ist zusätzlich die Definition von \Macro*{and} anzupassen.
+  }
+  Gegebenenfalls ist zusätzlich die Definition von \Macro{and} anzupassen.
 \endgroup
 \index{Selbstständigkeitserklärung|)}%
 \index{Sperrvermerk|)}%
@@ -3453,7 +3525,7 @@ Nutzung von \Option{tudscrver} nur als Klassenoption möglich ist.
   Seit der Version~v2.04 werden mehrere Längen in Abhängigkeit der gewählten 
   Schriftgröße definiert. Mit der Wahl \Option{tudscrver=2.03} lässt sich diese 
   Funktionalität deaktivieren, wobei hierfür lediglich die \TUDScript-Option 
-  \Option*{relspacing=false} aufgerufen wird. 
+  \Option{relspacing=false} aufgerufen wird. 
 \item[\PValue{2.04}]
   \index{Satzspiegel}%
   \ChangedAt{%
