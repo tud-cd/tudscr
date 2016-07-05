@@ -1,4 +1,4 @@
-% \CheckSum{4135}
+% \CheckSum{4144}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-manual.dtx}[%
-  2016/07/03 v2.05 TUD-KOMA-Script\space%
+  2016/07/05 v2.05 TUD-KOMA-Script\space%
 %</driver>
 %<package&identify>\ProvidesPackage{tudscrtutorial}[%
 %<*driver|package&identify>
@@ -1395,7 +1395,6 @@
 % \changes{v2.02}{2014/10/08}{überarbeitet}^^A
 % \begin{macro}{\@Application}
 % Die Auszeichnung und der Indexeintrag einer Anwendungssoftware.
-% \ToDo{Standardargument für d() auf \cs{Package\{tudscr\}}?}[v2.05]
 %    \begin{macrocode}
 \NewExpandableDocumentCommand\@Application{sm}{#2}
 \NewDocumentCommand\Application{smd()d<>d||}{%
@@ -3207,12 +3206,19 @@
 %    \end{macrocode}
 % \dots eine implizite nur, wenn auch tatsächlich das passende Label existiert, 
 % da sonst mit Sicherheit falsche Einträge im Index erscheinen würden.
-% \ToDo{doppelte Einträge von Paketen verhindern}[v2.05]
 %    \begin{macrocode}
 %<*class>
       \tud@if@bdl{%
         \tud@if@lbl@exists{\tud@bdl@curr:#5}{%
           \edef\tud@idx@bdl{\expandonce\tud@bdl@curr}%
+%    \end{macrocode}
+% Sollte der Eintrag selbst dem Suffix für Paket oder Klasse entsprechen, wird
+% dieser ignoriert.
+%    \begin{macrocode}
+          \def\tud@reserved{#5}%
+          \ifx\tud@reserved\tud@idx@bdl%
+            \let\tud@idx@bdl\tud@bdl@dflt%
+          \fi%
         }{}%
       }{}%
 %</class>
