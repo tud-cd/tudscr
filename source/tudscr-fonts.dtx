@@ -1,4 +1,4 @@
-% \CheckSum{1247}
+% \CheckSum{1269}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-fonts.dtx}[%
-  2016/06/21 v2.05 TUD-KOMA-Script\space%
+  2016/07/08 v2.05 TUD-KOMA-Script\space%
 %</driver>
 %<package&identify>\ProvidesPackage{tudscrfonts}[%
 %<*driver|package&identify>
@@ -130,13 +130,34 @@
 % \fi
 %
 % Sollte keine \KOMAScript-Klasse genutzt werden, wird zusätzlich das Paket
-% \pkg{scrextend} benötigt. Das Paket \pkg{trimspaces} ist für die alternative 
-% Schriftauswahl mit \cs{cdfont} bzw. \cs{textcdfont} notwendig.
+% \pkg{scrextend} benötigt. 
 %    \begin{macrocode}
 \ifcsname KOMAClassName\endcsname\else
   \RequirePackage{scrextend}[2013/12/19]
 \fi
-\RequirePackage{trimspaces}[2009/09/17]
+%    \end{macrocode}
+% Wird das Paket \pkg{tudscrfonts} nach einer der Klassen verwendet, welche die 
+% veralteten Schriftfamilien für \Univers und \DIN definieren, so wird eine 
+% Warnung mit dem Hinweis auf das Paket \pkg{fix-tudscrfonts} ausgegeben.
+%    \begin{macrocode}
+\@tempswafalse%
+\@for\@tempa:={%
+  tudbook,tudbeamer,tudfax,tudform,tudhaus,tudletter,%
+  tudposter,tudmathposter,tudscrbookold,tudscrreprtold,tudscrartclold%
+}\do{%
+  \@ifclassloaded{\@tempa}{%
+    \if@tempswa\else\@tempswatrue\let\@tempb\@tempa\fi%
+  }{}%
+}%
+\if@tempswa%
+    \@ifpackageloaded{fix-tudscrfonts}{}{%
+      \PackageWarning{tudscrfonts}{%
+        As you loaded class `\@tempb', you should\MessageBreak%
+        load `fix-tudscrfonts' before the class\MessageBreak%
+        with `\string\RequirePackage'%
+      }%
+    }%
+\fi%
 %    \end{macrocode}
 %
 % \iffalse
@@ -557,6 +578,12 @@
 %<*body>
 % \fi
 %
+% Mit dem Paket \pkg{trimspaces} werden für die alternative Schriftauswahl mit 
+% \cs{cdfont} bzw. \cs{textcdfont} eventuell vorhandene Leerzeichen aus dem 
+% Argument entfernt. Auch beim Einlesen von Feldern wird dies genutzt.
+%    \begin{macrocode}
+\RequirePackage{trimspaces}[2009/09/17]
+%    \end{macrocode}
 % \begin{macro}{\tud@font@set}
 % \changes{v2.04}{2015/03/01}{Unterstützung für das Paket \pkg{mweights}}^^A
 % \begin{macro}{\if@tud@x@mweights@enabled}
