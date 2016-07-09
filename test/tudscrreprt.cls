@@ -1280,7 +1280,7 @@
 \csdef{tud@v@last}{3}
 \newcommand*\tud@v@get[2]{%
   \begingroup%
-    \def\@tempa{\@ifnextchar v{\@tempb}{\@tempb v}}%
+    \def\@tempa{\kernel@ifnextchar v{\@tempb}{\@tempb v}}%
     \def\@tempb v##1\@nil{\def\@tempc{##1}}%
     \@tempa #2\@nil%
     \edef\tud@reserved{%
@@ -1520,6 +1520,7 @@
   \fi%
   \undef\tud@font@check%
 }
+\RequirePackage{trimspaces}[2009/09/17]
 \newif\if@tud@x@mweights@enabled
 \AfterPackage*{mweights}{\@tud@x@mweights@enabledtrue}
 \newcommand*\tud@font@set{%
@@ -2051,7 +2052,6 @@
   \protect\vphantom{\"A\"O\"U}%
 }
 %%% From File: tudscr-fields.dtx
-\RequirePackage{trimspaces}[2009/09/17]
 \newcommand*\@faculty{}
 \newcommand*\@department{}
 \newcommand*\@institute{}
@@ -2232,7 +2232,7 @@
   \global\let\tud@date@check\relax%
 }
 \renewcommand*\date{%
-  \@ifstar{%
+  \kernel@ifstar{%
     \TUD@parameter@set{date}{pre=\noexpand\@place{,}}%
     \tud@date@set%
   }{\tud@date@set}%
@@ -2283,6 +2283,8 @@
   }%
   \begingroup%
     \let\and\relax%
+    \def\newline{}%
+    \def\\{}%
     \edef\@tempa{\csname#1\endcsname\and}%
   \expandafter\endgroup%
   \expandafter\tud@multiple@@split\@tempa\relax%
@@ -3710,7 +3712,7 @@
 \newcommand*\tud@footcontent@left{}
 \newcommand*\tud@footcontent@right{\@nil}
 \newcommand*\footcontent{%
-  \@ifstar{%
+  \kernel@ifstar{%
     \renewcommand*\tud@footcontent@fontface{\usekomafont{tudheadings}}%
     \tud@footcontent@do%
   }{%
@@ -6002,7 +6004,7 @@
 }
 \newcommand*\tud@fm@supporter{}
 \newcommand*\declaration{%
-  \@ifstar{%
+  \kernel@ifstar{%
     \def\tud@fm@supporter{supporter=\@supervisor}%
     \tud@fm@declaration%
   }{%
@@ -6036,7 +6038,7 @@
   }%
 }
 \newcommand*\confirmation{%
-  \@ifstar{%
+  \kernel@ifstar{%
     \def\tud@fm@supporter{supporter=\@supervisor}%
     \tud@fm@confirmation%
   }{%
