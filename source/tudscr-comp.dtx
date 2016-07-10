@@ -1,4 +1,4 @@
-% \CheckSum{1473}
+% \CheckSum{1463}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-comp.dtx}[%
-  2016/07/09 v2.05 TUD-KOMA-Script\space%
+  2016/07/10 v2.05 TUD-KOMA-Script\space%
 %</driver>
 %<package&identify&comp&base>\ProvidesPackage{tudscrcomp}[%
 %<package&identify&comp&book>\ProvidesPackage{tudscrcomp-book}[%
@@ -1179,15 +1179,15 @@
 % Hier werden Feldbefehle auf die \TUDScript-Pendants gelegt und der Befehl 
 % \cs{tud@split@author@list} um diese Befehle erweitert.
 %    \begin{macrocode}
-\newcommand*\telefon{\telephone}
+\newrobustcmd*\telefon{\telephone}
 \patchcmd{\tud@split@author@list}{telephone}{%
   telephone,telefon%
 }{}{\tud@patch@wrn{tud@split@author@list}}
-\newcommand*\fax{\telefax}
+\newrobustcmd*\fax{\telefax}
 \patchcmd{\tud@split@author@list}{telefax}{%
   telefax,fax%
 }{}{\tud@patch@wrn{tud@split@author@list}}
-\newcommand*\email{\emailaddress}
+\newrobustcmd*\email[1]{\emailaddress*{#1}}
 \patchcmd{\tud@split@author@list}{emailaddress}{%
   emailaddress,email%
 }{}{\tud@patch@wrn{tud@split@author@list}}
@@ -1197,16 +1197,10 @@
 % \end{macro}^^A \telefon
 % \begin{macro}{\homepage}
 % \changes{v2.05}{2016/04/17}{neu}^^A
-% Für die Angabe einer Website wird \cs{url} unschädlich gemacht, da dieses 
-% Makro innerhalb von \cs{webpage} ohnehin zum Einsatz kommt.
+% Für die Angabe einer Website wird \cs{webpage*} verwendet, um etwaige Makros 
+% zur Formatierung nicht beachten zu müssen.
 %    \begin{macrocode}
-\newcommand*\homepage[1]{%
-  \begingroup%
-    \let\url\@firstofone%
-    \protected@xdef\@tempa{#1}%
-  \endgroup%
-  \expandafter\webpage\expandafter{\@tempa}%
-}
+\newcommand*\homepage[1]{\webpage*{#1}}
 %    \end{macrocode}
 % \end{macro}^^A \homepage
 % \begin{macro}{\zweitlogofile}
@@ -1226,7 +1220,7 @@
 % Einbindung der Logos verantwortlich sind (\cs{\dots{}logo}), wird allerdings
 % nicht unterstützt.
 %    \begin{macrocode}
-\newcommand*\zweitlogofile{\headlogo}
+\newcommand*\zweitlogofile[2][]{\headlogo[#1]{#2}}
 \newcommand*\zweitlogo[1]{%
   \PackageWarning{tudscrcomp}{%
     It isn't possible to redefine the definition for\MessageBreak%
@@ -1234,7 +1228,7 @@
     documentation of \string\headlogo%
   }%
 }
-\newcommand*\institutslogofile[1]{\footlogo{,,,,,,,#1,}}
+\newcommand*\institutslogofile[2][]{\footlogo[#1]{,,,,,,,#2,}}
 \newcommand*\institutslogo[1]{%
   \PackageWarning{tudscrcomp}{%
     It isn't possible to redefine the definition for\MessageBreak%
@@ -1450,8 +1444,8 @@
 %    \begin{macrocode}
 \TUD@key{cdfoot}[true]{%
   \TUD@set@numkey{cdfoot}{@tempa}{%
-    {tudscrposter}{0},{cdposter}{0},{poster}{0},%
-    {tudmathposter}{1},{mathposter}{1},{tudposter}{1}%
+    {tudscrposter}{0},{tudscrposterfoot}{0},{cdposter}{0},{poster}{0},%
+    {tudmathposter}{1},{tudmathposterfoot}{1},{mathposter}{1},{tudposter}{1}%
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax% tudscrposter

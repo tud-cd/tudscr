@@ -1,4 +1,4 @@
-% \CheckSum{817}
+% \CheckSum{835}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-fields.dtx}[%
-  2016/07/09 v2.05 TUD-KOMA-Script (input fields)%
+  2016/07/10 v2.05 TUD-KOMA-Script (input fields)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman,xindy]{tudscrdoc}
@@ -607,22 +607,32 @@
 % \changes{v2.05}{2015/07/06}{neu}^^A
 % \begin{field}{\@webpage}
 % \changes{v2.05}{2015/07/06}{neu}^^A
+% \begin{macro}{\tud@webpage@simple}
+% \changes{v2.05}{2016/07/09}{neu}^^A
+% \begin{macro}{\tud@webpage@hyper}
+% \changes{v2.05}{2016/07/09}{neu}^^A
 % Im Fußbereich eines Posters kann zusätzlich eine Web-Seite angegeben werden.
 %    \begin{macrocode}
 \newcommand*\@webpage{}
-\newcommand*\webpage[2][]{\gdef\@webpage{#2}}
+\newrobustcmd*\webpage{%
+  \kernel@ifstar{\tud@webpage@simple}{\tud@webpage@hyper}%
+}
+\newrobustcmd*\tud@webpage@simple[1]{\gdef\@webpage{#1}}
+\newrobustcmd*\tud@webpage@hyper[2][]{\gdef\@webpage{#2}}
 \AfterPackage{hyperref}{%
-  \renewrobustcmd*\webpage[2][hidelinks]{%
+  \renewrobustcmd*\tud@webpage@hyper[2][hidelinks]{%
     \gdef\@webpage{%
       \begingroup%
-        \hypersetup{#1}%
         \urlstyle{same}%
+        \hypersetup{#1}%
         \url{#2}%
       \endgroup%
     }%
   }%
 }
 %    \end{macrocode}
+% \end{macro}^^A \tud@webpage@hyper
+% \end{macro}^^A \tud@webpage@simple
 % \end{field}^^A \@webpage
 % \end{macro}^^A \webpage
 %
@@ -888,6 +898,10 @@
 % \changes{v2.02}{2014/05/16}{neu, Umbenennung des Makros \cs{email}}^^A
 % \begin{field}{\@emailaddress}
 % \changes{v2.02}{2014/05/16}{neu, Umbenennung des Makros \cs{@email}}^^A
+% \begin{macro}{\tud@emailaddress@simple}
+% \changes{v2.05}{2016/07/09}{neu}^^A
+% \begin{macro}{\tud@emailaddress@hyper}
+% \changes{v2.05}{2016/07/09}{neu}^^A
 % Für einen Aushang bzw. ein Poster kann eine oder mehrere Kontaktpersonen 
 % angegeben werden. Zusätzlich lassen sich für jede einzelne Person ein Raum,
 % eine Telefonnummer und die E-Mail"=Adresse hinzugefügen.
@@ -904,19 +918,25 @@
 \newcommand*\@telefax{}
 \newrobustcmd*\telefax[1]{\gdef\@telefax{#1}}
 \newcommand*\@emailaddress{}
-\newrobustcmd*\emailaddress[2][]{\gdef\@emailaddress{#2}}
+\newrobustcmd*\emailaddress{%
+  \kernel@ifstar{\tud@emailaddress@simple}{\tud@emailaddress@hyper}%
+}
+\newrobustcmd*\tud@emailaddress@simple[1]{\gdef\@emailaddress{#1}}
+\newrobustcmd*\tud@emailaddress@hyper[2][]{\gdef\@emailaddress{#2}}
 \AfterPackage*{hyperref}{%
-  \renewrobustcmd*\emailaddress[2][hidelinks]{%
+  \renewrobustcmd*\tud@emailaddress@hyper[2][hidelinks]{%
     \gdef\@emailaddress{%
       \begingroup%
-        \hypersetup{#1}%
         \urlstyle{same}%
+        \hypersetup{#1}%
         \href{mailto:#2}{\nolinkurl{#2}}%
       \endgroup%
     }%
   }%
 }
 %    \end{macrocode}
+% \end{macro}^^A \tud@emailaddress@hyper
+% \end{macro}^^A \tud@emailaddress@simple
 % \end{field}^^A \@emailaddress
 % \end{macro}^^A \emailaddress
 % \end{field}^^A \@telefax
