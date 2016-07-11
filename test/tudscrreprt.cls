@@ -77,13 +77,13 @@
       \fi%
     }
   \fi
-  \TUD@Version@Check{2016/06/10 v2.05 BETA TUD-KOMA-Script}
+  \TUD@Version@Check{2016/07/11 v2.05 BETA TUD-KOMA-Script}
 \endgroup
 \NeedsTeXFormat{LaTeX2e}
 \providecommand*\tudscrmail{tudscr@gmail.com}
 \newcommand*\TUD@ProvidesClass[3]{%
   \ProvidesClass{#1}[%
-  2016/06/10 v2.05 BETA TUD-KOMA-Script
+  2016/07/11 v2.05 BETA TUD-KOMA-Script
     ^^J#3 (#2)%
   ]%
   \newcommand*\TUD@Class@KOMA{#2}%
