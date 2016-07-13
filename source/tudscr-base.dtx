@@ -1,4 +1,4 @@
-% \CheckSum{746}
+% \CheckSum{773}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-base.dtx}[%
-  2016/07/11 v2.05 TUD-KOMA-Script\space%
+  2016/07/13 v2.05 TUD-KOMA-Script\space%
 %</driver>
 %<package&base>\ProvidesPackage{tudscrbase}[%
 %<*driver|package&base>
@@ -235,11 +235,11 @@
   \begingroup%
     \protected@edef\@tempa{#1}%
     \@tempswafalse%
-    \ifisdimen{\@tempa}{\@tempswatrue}{}%
-    \ifisskip{\@tempa}{\@tempswatrue}{}%
-    \ifisdimexpr{\@tempa}{\@tempswatrue}{}%
+    \expandafter\ifisdimen\expandafter{\@tempa}{\@tempswatrue}{}%
+    \expandafter\ifisskip\expandafter{\@tempa}{\@tempswatrue}{}%
+    \expandafter\ifisdimexpr\expandafter{\@tempa}{\@tempswatrue}{}%
     \if@tempswa\edef\@tempa{\the\@tempa}\fi%
-    \ifisdimension{\@tempa}{%
+    \expandafter\ifisdimension\expandafter{\@tempa}{%
       \aftergroup\@firstoftwo%
     }{%
       \aftergroup\@secondoftwo%
@@ -800,41 +800,63 @@
 %
 % \begin{macro}{\tud@skip@store}
 % \changes{v2.04}{2015/03/02}{neu}^^A
+% \changes{v2.05}{2016/07/13}{Verwendung von \cs{tud@skip@check}}^^A
 % \begin{macro}{\tud@skip@restore}
 % \changes{v2.04}{2015/03/02}{neu}^^A
+% \changes{v2.05}{2016/07/13}{Verwendung von \cs{tud@skip@check}}^^A
+% \begin{macro}{\tud@skip@reset}
+% \changes{v2.05}{2016/07/13}{neu}^^A
 % \begin{macro}{\tud@skip@set}
 % \changes{v2.04}{2015/05/05}{neu}^^A
+% \changes{v2.05}{2016/07/13}{Verwendung von \cs{tud@skip@check}}^^A
+% \begin{macro}{\tud@skip@check}
+% \changes{v2.05}{2016/07/13}{neu}^^A
 % Hiermit können~-- äquivalent zum Sichern und Wiederherstellen von Befehlen~-- 
 % Längenregister abgespeichert werden.
 %    \begin{macrocode}
 \newcommand*\tud@skip@store[1]{%
-  \ifcsdef{@@tud@skip@#1}{}{%
-    \@tempswafalse%
-    \ifisskip{\csname #1\endcsname}{\@tempswatrue}{}%
-    \ifisdimen{\csname #1\endcsname}{\@tempswatrue}{}%
-    \if@tempswa%
+  \tud@skip@check{#1}{%
+    \ifcsdef{@@tud@skip@#1}{}{%
       \csedef{@@tud@skip@#1}{\expandafter\the\csname #1\endcsname}%
-    \fi%
+    }%
   }%
 }
 \newcommand*\tud@skip@restore[1]{%
-  \ifcsdef{@@tud@skip@#1}{%
-    \csname #1\endcsname=\csname @@tud@skip@#1\endcsname%
-    \csundef{@@tud@skip@#1}%
-  }{}%
-}
-\newcommand*\tud@skip@set[2]{%
-  \ifundef{#1}{}{%
-    \@tempswafalse%
-    \ifisskip{#1}{\@tempswatrue}{}%
-    \ifisdimen{#1}{\@tempswatrue}{}%
-    \if@tempswa%
-      \setlength#1{#2}%
-    \fi%
+  \tud@skip@check{#1}{%
+    \ifcsdef{@@tud@skip@#1}{%
+      \csname #1\endcsname=\csname @@tud@skip@#1\endcsname%
+      \csundef{@@tud@skip@#1}%
+    }{}%
   }%
 }
+\newcommand*\tud@skip@reset[1]{%
+  \tud@skip@check{#1}{%
+    \ifcsdef{@@tud@skip@#1}{%
+      \csname#1\endcsname=\csname @@tud@skip@#1\endcsname%
+    }{}%
+  }%
+}
+\newcommand*\tud@skip@set[2]{%
+  \tud@skip@check{#1}{%
+    \expandafter\setlength\csname #1\endcsname{#2}%
+  }%
+}
+\newcommand*\tud@skip@check[1]{%
+  \begingroup%
+    \@tempswafalse%
+    \expandafter\ifisskip\expandafter{\csname#1\endcsname}{\@tempswatrue}{}%
+    \expandafter\ifisdimen\expandafter{\csname#1\endcsname}{\@tempswatrue}{}%
+    \if@tempswa%
+      \aftergroup\@firstofone%
+    \else%
+      \aftergroup\@gobble%
+    \fi%
+  \endgroup%
+}
 %    \end{macrocode}
+% \end{macro}^^A \tud@skip@check
 % \end{macro}^^A \tud@skip@set
+% \end{macro}^^A \tud@skip@reset
 % \end{macro}^^A \tud@skip@restore
 % \end{macro}^^A \tud@skip@store
 % \begin{macro}{\tud@patch@wrn}
