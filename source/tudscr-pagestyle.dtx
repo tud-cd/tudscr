@@ -1,4 +1,4 @@
-% \CheckSum{3585}
+% \CheckSum{3598}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-pagestyle.dtx}[%
-  2016/07/11 v2.05 TUD-KOMA-Script (pagestyle)%
+  2016/07/14 v2.05 TUD-KOMA-Script (pagestyle)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman,xindy]{tudscrdoc}
@@ -3173,9 +3173,20 @@
         \eappto\@tempb{,layoutsize={\the\Gm@layoutwidth,\the\Gm@layoutheight}}%
       \fi%
     \fi%
+%    \end{macrocode}
+% Um etwaige Änderungen am Papierformat innerhalb des Dokumentes beachten zu 
+% können, werden die aktuellen Maße für das Papierformat an \cs{Gm@restore@org} 
+% angehangen.
+%    \begin{macrocode}
     \if@atdocument%
       \edef\@tempa{\@tempb,#1}%
+      \tud@cmd@store{Gm@restore@org}%
+      \eappto\Gm@restore@org{%
+        \paperwidth=\the\paperwidth\relax%
+        \paperheight=\the\paperheight\relax%
+      }%
       \expandafter\newgeometry\expandafter{\@tempa}%
+      \tud@cmd@restore{Gm@restore@org}%
     \else%
 %    \end{macrocode}
 % Zu Beginn des Dokumentes werden mit \cs{Gm@initnewgm} vor jedem Satzspiegel
@@ -3190,7 +3201,7 @@
     \@tud@x@geometry@enabledtrue%
   }%
   \newcommand*\tud@savegeometry[1]{%
-    \edef\Gm@restore{}%
+    \def\Gm@restore{}%
     \savegeometry{#1}%
   }%
   \newcommand*\tud@loadgeometry[1]{%
@@ -3264,20 +3275,25 @@
 %    \end{macrocode}
 % Anschließend erfolgen die horizontalen und vertikalen Randeinstellungen. 
 % Zunächst für \pkg{typearea}. Hierfür ist eine Sonderbehandlung notwendig, 
-% falls mit \cs{geometry} eine Größe für den Drcukbereich/das Layout angegeben 
-% wurde.
+% falls mit \cs{geometry} eine Größe für den Druckbereich/das Layout angegeben 
+% wurde. Dafür wird das Papierformat temporär auf die Größe des angegebenen 
+% Layouts geändert und der Satzspiegel neu berechnet. Damit diese Berechnung 
+% jedoch nicht umgesetzt wird, wird \cs{activateareas} unschädlich gemacht. 
 %    \begin{macrocode}
       \ifcase\tud@cdgeometry@num\relax%
         \ifGm@layout%
           \tud@skip@store{paperheight}%
           \tud@skip@store{paperwidth}%
+          \tud@cmd@store{activateareas}%
           \tud@cmd@store{tud@AfterChangingArea}%
           \setlength\paperheight{\tud@len@layoutheight}%
           \setlength\paperwidth{\tud@len@layoutwidth}%
+          \let\activateareas\relax%
           \let\tud@AfterChangingArea\relax%
           \recalctypearea%
           \tud@skip@restore{paperheight}%
           \tud@skip@restore{paperwidth}%
+          \tud@cmd@restore{activateareas}%
           \tud@cmd@restore{tud@AfterChangingArea}%
         \fi%
 %    \end{macrocode}
@@ -3346,12 +3362,12 @@
             headheight=\the\headheight,%
             headsep=\the\headsep,%
             textheight=\the\textheight,%
-            footskip=\the\footskip,%
             \ifGm@includefoot%
               includefoot=true,%
             \else%
               includefoot=false,%
             \fi%
+            footskip=\the\footskip%
           }%
         \fi%
       \fi%
@@ -3375,13 +3391,13 @@
         \setlength\@tempdima{\tud@len@areadiff}%
       \fi%
       \edef\tud@cdgeometry@tudmargin{%
+        ignorehead=true,%
         top=\the\dimexpr\tud@len@topmargin+\tud@len@barheight%
           +\tud@len@headsep\relax,%
         headheight=\the\dimexpr\tud@len@topmargin+\tud@len@barheight%
           -\tud@len@logoy\relax,%
         headsep=\the\tud@len@headsep,%
-        textheight=\the\dimexpr\textheight-\@tempdima\relax,%
-        ignorehead%
+        textheight=\the\dimexpr\textheight-\@tempdima\relax%
       }%
 %    \end{macrocode}
 % Für den Kompatibilitätsmodus der Version~v2.02 gibt es für den \DDC-Fuß einen 
@@ -3516,12 +3532,12 @@
         }%
       }%
       \edef\tud@cdgeometry@tudmargin{%
+        ignorehead=true,%
         top=\the\dimexpr\tud@len@topmargin+\tud@len@barheight%
           +\tud@len@headsep\relax,%
         headheight=\the\dimexpr\tud@len@topmargin+\tud@len@barheight%
           -\tud@len@logoy\relax,%
-        headsep=\the\tud@len@headsep,%
-        ignorehead%
+        headsep=\the\tud@len@headsep%
       }%
 %    \end{macrocode}
 % Es wird die Differenz der Höhen zwischen TUD-Kopf und Standardkopfzeile
@@ -3894,6 +3910,36 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@AfterChangingArea
+% Damit alle Satzspiegeleinstellungen korrekt vorgenommen und auch alle
+% Klassenoptionen korrekt verarbeitet werden, wird die Berechnung erstmalig mit
+% \cs{AtEndPreamble} am Ende der Präambel ausgeführt. Dies geschieht jedoch  
+% \emph{nicht}, wenn die \cls{standalone}-Klasse mit der Option \opt{crop} 
+% geladen wurde, um die Seitenränder nicht zu ändern.
+%    \begin{macrocode}
+\if@tud@x@standalone@crop
+  \AtEndPreamble{%
+    \pagestyle{empty}%
+    \hoffset=-72.27pt%
+    \voffset=-72.27pt%
+    \topmargin=0pt%
+    \headheight=0pt%
+    \headsep=0pt%
+    \marginparsep=0pt%
+    \marginparwidth=0pt%
+    \footskip=0pt%
+    \marginparpush=0pt%
+    \oddsidemargin=0pt%
+    \evensidemargin=0pt%
+    \topskip=0pt%
+    \textheight=\maxdimen%
+    \let\tud@AfterChangingArea\relax%
+    \let\tud@cdgeometry@process\relax%
+  }
+\else
+%    \end{macrocode}
+% Im Normalfall werden durch \cs{tud@cdgeometry@@process} alle benötigten
+% Satzspiegel erstellt. Mit dem Setzen des Seitenstils wird der jeweils
+% richtige bzw. benötigte Satzspiegel ausgewählt.
 % \begin{macro}{\tud@cdgeometry@custom}
 % \changes{v2.05}{2016/03/06}{neu}^^A
 % \begin{macro}{\geometry}
@@ -3906,8 +3952,6 @@
 % \KOMAScript{} beachtet.
 % \ToDo{Patcherei überarbeiten, \cs{CheckCommand}}[v2.05]
 %    \begin{macrocode}
-\@ifpackageloaded{geometry}{\@tempswatrue}{\@tempswafalse}
-\if@tempswa
   \newcommand*\tud@cdgeometry@custom{}%
   \apptocmd{\geometry}{%
     \ifbool{@tud@x@geometry@enabled}{\appto\tud@cdgeometry@custom{,#1}}{}%
@@ -3940,6 +3984,7 @@
 % Am Ende der Präambel wird der Satzspiegel des Dokumentes gesetzt.
 %    \begin{macrocode}
   \AtEndPreamble{%
+    \recalctypearea%
 %    \end{macrocode}
 % Ist die Option \opt{geometry=custom} nicht aktiv, werden mit \cs{geometry} 
 % etwaig gemachte Einstellungen überschrieben.
@@ -3976,40 +4021,6 @@
       \tud@cdgeometry@custom,%
       driver=none%
     }%
-  }%
-\fi
-%    \end{macrocode}
-% \end{macro}^^A \Gm@changelayout
-% \end{macro}^^A \restoregeometry
-% \end{macro}^^A \geometry
-% \end{macro}^^A \tud@cdgeometry@custom
-% Damit alle Satzspiegeleinstellungen korrekt vorgenommen und auch alle
-% Klassenoptionen korrekt verarbeitet werden, wird die Berechnung erstmalig mit
-% \cs{AtEndPreamble} am Ende der Präambel ausgeführt. Nachfolgend erstellt
-% \cs{tud@cdgeometry@@process} alle benötigten Satzspiegel. Mit dem Setzen des
-% Seitenstils wird der jeweils richtige bzw. benötigte Satzspiegel ausgewählt.
-% Dies geschieht \emph{nicht}, wenn die \cls{standalone}-Klasse mit der Option
-% \opt{crop} geladen wurde, um die Seitenränder nicht zu ändern.
-%    \begin{macrocode}
-\AtEndPreamble{%
-  \if@tud@x@standalone@crop%
-    \pagestyle{empty}%
-    \hoffset=-72.27pt%
-    \voffset=-72.27pt%
-    \topmargin=0pt%
-    \headheight=0pt%
-    \headsep=0pt%
-    \marginparsep=0pt%
-    \marginparwidth=0pt%
-    \footskip=0pt%
-    \marginparpush=0pt%
-    \oddsidemargin=0pt%
-    \evensidemargin=0pt%
-    \topskip=0pt%
-    \textheight=\maxdimen%
-    \let\tud@AfterChangingArea\relax%
-    \let\tud@cdgeometry@process\relax%
-  \else%
 %    \end{macrocode}
 % Nach einer Neuberechnung oder Änderung des Satzspiegels durch \pkg{typearea} 
 % werden die für die Seitenstile benötigten Satzspiegel mit \pkg{geometry} neu
@@ -4027,9 +4038,13 @@
 %    \begin{macrocode}
     \BeforeSelectAnyPageStyle{\tud@BeforeSelectAnyPageStyle{#1}}%
     \tud@cdgeometry@process%
-  \fi%
-}
+  }
+\fi
 %    \end{macrocode}
+% \end{macro}^^A \Gm@changelayout
+% \end{macro}^^A \restoregeometry
+% \end{macro}^^A \geometry
+% \end{macro}^^A \tud@cdgeometry@custom
 % \begin{macro}{\tud@ps@parameters}
 % Im Folgenden werden die einzelnen Parameter für die \env{tudpage}-Umgebung
 % definiert. Die Parameter für Kopf- und Fußzeile werden nicht nur für die 
