@@ -1,4 +1,4 @@
-% \CheckSum{3598}
+% \CheckSum{3916}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-pagestyle.dtx}[%
-  2016/07/15 v2.05 TUD-KOMA-Script (pagestyle)%
+  2016/07/17 v2.05 TUD-KOMA-Script (pagestyle)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman,xindy]{tudscrdoc}
@@ -2987,6 +2987,8 @@
 \cs@lock{tud@cdgeometry@num}{0}
 \newcommand*\tud@cdgeometry@calc@num{0}
 \TUD@key{cdgeometry}[true]{%
+  \let\@tempb\tud@cdgeometry@num%
+  \let\@tempc\tud@cdgeometry@calc@num%
   \TUD@set@numkey{cdgeometry}{@tempa}{%
     \TUD@numkey@bool,%
     {typearea}{0},%
@@ -3003,13 +3005,10 @@
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax% false/typearea
       \cs@set@lock{tud@cdgeometry@num}{0}%
-      \TUD@SpecialOptionAtDocument{tud@cdgeometry@process}%
     \or% true/cd
       \cs@set@lock{tud@cdgeometry@num}{2}%
-      \TUD@SpecialOptionAtDocument{tud@cdgeometry@process}%
     \or% symmetric
       \cs@set@lock{tud@cdgeometry@num}{3}%
-      \TUD@SpecialOptionAtDocument{tud@cdgeometry@process}%
     \or% twoside
       \cs@set@lock{tud@cdgeometry@num}{4}%
       \TUD@KOMAoptions{twoside=true}%
@@ -3021,17 +3020,20 @@
     \or% restricted
       \cs@std@lock{tud@cdgeometry@num}{2}%
       \renewcommand*\tud@cdgeometry@calc@num{0}%
-      \TUD@SpecialOptionAtDocument{tud@cdgeometry@process}%
     \or% adapted
       \cs@std@lock{tud@cdgeometry@num}{2}%
       \renewcommand*\tud@cdgeometry@calc@num{1}%
-      \TUD@SpecialOptionAtDocument{tud@cdgeometry@process}%
     \or% calculated
       \cs@std@lock{tud@cdgeometry@num}{2}%
       \renewcommand*\tud@cdgeometry@calc@num{2}%
-      \TUD@SpecialOptionAtDocument{tud@cdgeometry@process}%
     \or% custom
       \cs@set@lock{tud@cdgeometry@num}{1}%
+    \fi%
+    \@tempswafalse%
+    \ifx\@tempb\tud@cdgeometry@num\relax\@tempswatrue\fi%
+    \ifx\@tempc\tud@cdgeometry@calc@num\relax\@tempswatrue\fi%
+    \if@tempswa%
+      \TUD@SpecialOptionAtDocument{tud@cdgeometry@process}%
     \fi%
   \fi%
 }
@@ -3102,7 +3104,7 @@
 %
 % Das Paket \pkg{geometry} erlaubt eine genaue Vorgabe des Satzspiegels und
 % der Seitenränder, wie es vom \CD der \TnUD verlangt wird. 
-% \ToDo{\cs{@ifpackagelater} raus, \cs{CheckCommand} für relev. Befehle}[v2.05]%
+% \ToDo{Satzspiegel ohne \pkg{geometry}?}[v2.07]%
 %    \begin{macrocode}
 \newcommand*\tud@cdgeometry@process{}
 \newcommand*\tud@cdgeometry@@process{}
@@ -3110,15 +3112,144 @@
   \PreventPackageFromLoading{geometry}%
 \else
   \RequirePackage{geometry}[2010/09/12]%
+  \CheckCommand*\Gm@initnewgm{%
+    \Gm@passfalse
+    \Gm@swap@papersizefalse
+    \Gm@dimlist={}
+    \Gm@hbodyfalse
+    \Gm@vbodyfalse
+    \Gm@heightroundedfalse
+    \Gm@includeheadfalse
+    \Gm@includefootfalse
+    \Gm@includempfalse
+    \let\Gm@width\@undefined
+    \let\Gm@height\@undefined
+    \let\Gm@textwidth\@undefined
+    \let\Gm@textheight\@undefined
+    \let\Gm@lines\@undefined
+    \let\Gm@hscale\@undefined
+    \let\Gm@vscale\@undefined
+    \let\Gm@hmarginratio\@undefined
+    \let\Gm@vmarginratio\@undefined
+    \let\Gm@lmargin\@undefined
+    \let\Gm@rmargin\@undefined
+    \let\Gm@tmargin\@undefined
+    \let\Gm@bmargin\@undefined
+    \Gm@layoutfalse
+    \Gm@layouthoffset\z@
+    \Gm@layoutvoffset\z@
+    \Gm@bindingoffset\z@
+  }%
+  \expandafter\CheckCommand%
+  \csname\expandafter\@gobble\string\Gm@changelayout\space\endcsname{%
+    \setlength{\@colht}{\textheight}
+    \setlength{\@colroom}{\textheight}%
+    \setlength{\vsize}{\textheight}
+    \setlength{\columnwidth}{\textwidth}%
+    \if@twocolumn%
+      \advance\columnwidth-\columnsep
+      \divide\columnwidth\tw@%
+      \@firstcolumntrue%
+    \fi%
+    \setlength{\hsize}{\columnwidth}%
+    \setlength{\linewidth}{\hsize}%
+  }%
+  \CheckCommand*\Gm@@process{%
+    \Gm@expandlengths
+    \Gm@adjustpaper
+    \addtolength\Gm@layoutwidth{-\Gm@bindingoffset}%
+    \Gm@adjustmp
+    \Gm@adjustbody
+    \Gm@detall{h}{width}{lmargin}{rmargin}%
+    \Gm@detall{v}{height}{tmargin}{bmargin}%
+    \setlength\textwidth{\Gm@width}%
+    \setlength\textheight{\Gm@height}%
+    \setlength\topmargin{\Gm@tmargin}%
+    \setlength\oddsidemargin{\Gm@lmargin}%
+    \addtolength\oddsidemargin{-1\Gm@truedimen in}%
+    \ifGm@includemp
+      \advance\textwidth-\Gm@wd@mp
+      \advance\oddsidemargin\Gm@odd@mp
+    \fi
+    \if@mparswitch
+      \setlength\evensidemargin{\Gm@rmargin}%
+      \addtolength\evensidemargin{-1\Gm@truedimen in}%
+      \ifGm@includemp
+        \advance\evensidemargin\Gm@even@mp
+      \fi
+    \else
+      \evensidemargin\oddsidemargin
+    \fi
+    \advance\oddsidemargin\Gm@bindingoffset
+    \addtolength\topmargin{-1\Gm@truedimen in}%
+    \ifGm@includehead
+      \addtolength\textheight{-\headheight}%
+      \addtolength\textheight{-\headsep}%
+    \else
+      \addtolength\topmargin{-\headheight}%
+      \addtolength\topmargin{-\headsep}%
+    \fi
+    \ifGm@includefoot
+      \addtolength\textheight{-\footskip}%
+    \fi
+    \ifGm@heightrounded
+      \setlength\@tempdima{\textheight}%
+      \addtolength\@tempdima{-\topskip}%
+      \@tempcnta\@tempdima
+      \@tempcntb\baselineskip
+      \divide\@tempcnta\@tempcntb
+      \setlength\@tempdimb{\baselineskip}%
+      \multiply\@tempdimb\@tempcnta
+      \advance\@tempdima-\@tempdimb
+      \multiply\@tempdima\tw@
+      \ifdim\@tempdima>\baselineskip
+        \addtolength\@tempdimb{\baselineskip}%
+      \fi
+      \addtolength\@tempdimb{\topskip}%
+      \textheight\@tempdimb
+    \fi
+    \advance\oddsidemargin\Gm@layouthoffset%
+    \advance\evensidemargin\Gm@layouthoffset%
+    \advance\topmargin\Gm@layoutvoffset%
+    \addtolength\Gm@layoutwidth{\Gm@bindingoffset}%
+  }%
+  \CheckCommand\geometry[1]{%
+    \Gm@clean
+    \setkeys{Gm}{#1}%
+    \Gm@process%
+  }%
+  \CheckCommand\newgeometry[1]{%
+    \clearpage
+    \Gm@restore@org
+    \Gm@initnewgm
+    \Gm@newgmtrue
+    \setkeys{Gm}{#1}%
+    \Gm@newgmfalse
+    \Gm@process
+    \ifnum\mag=\@m\else\Gm@magtooffset\fi
+    \Gm@changelayout
+    \Gm@showparams{newgeometry}%
+  }%
+  \CheckCommand\restoregeometry{%
+    \clearpage
+    \Gm@restore@pkg
+    \Gm@changelayout%
+  }%
+  \CheckCommand*\savegeometry[1]{%
+    \Gm@save
+    \expandafter\edef\csname Gm@restore@@#1\endcsname{\Gm@restore}%
+  }%
+  \CheckCommand*\loadgeometry[1]{%
+    \clearpage
+    \@ifundefined{Gm@restore@@#1}{%
+      \PackageError{geometry}{%
+      \string\loadgeometry : name `#1' undefined}{%
+      The name `#1' should be predefined with \string\savegeometry}%
+    }{\@nameuse{Gm@restore@@#1}%
+    \Gm@changelayout}%
+  }%
 \fi
 \AfterPackage*{geometry}{%
-  \@ifpackagelater{geometry}{2010/09/13}{%
-    \ClassWarning{\TUD@Class@Name}{%
-      Package `geometry' was updated so some patches\MessageBreak%
-      are maybe outdated. Please contact the TUD-KOMA-Script\MessageBreak%
-      maintainer via \tudscrmail
-    }%
-  }{}%
 %    \end{macrocode}
 % \begin{macro}{\tud@cdgeometry@hmargin}
 % \begin{macro}{\tud@cdgeometry@vmargin}
@@ -3200,9 +3331,28 @@
     \fi%
     \@tud@x@geometry@enabledtrue%
   }%
+%    \end{macrocode}
+% Beim Speichern eines Satzspiegels sichert \pkg{geometry} tatsächlich nicht 
+% alle notwendigen Einstellungen und Befehle. Deshalb wird etwas nachgeholfen.
+%    \begin{macrocode}
   \newcommand*\tud@savegeometry[1]{%
     \def\Gm@restore{}%
     \savegeometry{#1}%
+    \csepreto{Gm@restore@@#1}{%
+      \unexpanded{\def\Gm@lmargin}{\Gm@lmargin}%
+      \unexpanded{\def\Gm@rmargin}{\Gm@rmargin}%
+      \noexpand\Gm@bindingoffset=\the\Gm@bindingoffset%
+      \ifGm@includemp%
+        \noexpand\Gm@includemptrue%
+      \else%
+        \noexpand\Gm@includempfalse%
+      \fi%
+      \ifGm@layout%
+        \noexpand\Gm@layouttrue%
+      \else%
+        \noexpand\Gm@layoutfalse%
+      \fi%
+    }%
   }%
   \newcommand*\tud@loadgeometry[1]{%
     \@tud@x@geometry@enabledfalse%
@@ -3230,11 +3380,7 @@
   \renewcommand*\tud@cdgeometry@process{%
     \ifcase\tud@cdgeometry@num\relax%
       \csuse{@ta@usegeometryfalse}%
-      \ifGm@layout%
-        \tud@AfterChangingArea%
-      \else%
-        \recalctypearea%
-      \fi%
+      \recalctypearea%
     \else%
       \tud@AfterChangingArea%
     \fi%
@@ -3260,6 +3406,7 @@
 % sowie ggf. untere Seitenrand geändert werden.
 %    \begin{macrocode}
   \renewcommand*\tud@cdgeometry@@process{%
+    \csuse{@ta@usegeometryfalse}%
 %    \end{macrocode}
 % Die Maßvorgaben werden entsprechend der Seitengröße gesetzt.
 %    \begin{macrocode}
@@ -3650,13 +3797,13 @@
       \tud@cdgeometry@vmargin%
     }%
     \tud@newgeometry{\@tempa}%
-    \tud@savegeometry{typearea}%
+    \tud@savegeometry{stdarea}%
 %    \end{macrocode}
 % Falls die (abermalige) Erstellung der Satzspiegel im Dokument erfolgt, sollte 
 % anschließend auch der richtige Satzspiegel wieder ausgewählt werden.
 %    \begin{macrocode}
     \if@atdocument%
-      \ifstr{\tud@currentgeometry}{typearea}{}{%
+      \ifstr{\tud@currentgeometry}{stdarea}{}{%
         \expandafter\tud@loadgeometry\expandafter{\tud@currentgeometry}%
       }%
     \fi%
@@ -3790,9 +3937,9 @@
 % zurückgesetzt.
 %    \begin{macrocode}
     }{%
-      \ifstr{\tud@currentgeometry}{typearea}{}{%
-        \tud@loadgeometry{typearea}%
-        \gdef\tud@currentgeometry{typearea}%
+      \ifstr{\tud@currentgeometry}{stdarea}{}{%
+        \tud@loadgeometry{stdarea}%
+        \gdef\tud@currentgeometry{stdarea}%
       }%
 %    \end{macrocode}
 % Die Länge \cs{tud@len@areavskip} wird auf den berechneten Wert gesetzt. 
@@ -3940,7 +4087,7 @@
 % Im Normalfall werden durch \cs{tud@cdgeometry@@process} alle benötigten
 % Satzspiegel erstellt. Mit dem Setzen des Seitenstils wird der jeweils
 % richtige bzw. benötigte Satzspiegel ausgewählt.
-% \begin{macro}{\tud@cdgeometry@custom}
+% \begin{macro}{\tud@cdgeometry@init}
 % \changes{v2.05}{2016/03/06}{neu}^^A
 % \begin{macro}{\geometry}
 % \begin{macro}{\restoregeometry}
@@ -3952,9 +4099,9 @@
 % \KOMAScript{} beachtet.
 % \ToDo{Patcherei überarbeiten, \cs{CheckCommand}}[v2.05]
 %    \begin{macrocode}
-  \newcommand*\tud@cdgeometry@custom{}%
+  \newcommand*\tud@cdgeometry@init{}%
   \apptocmd{\geometry}{%
-    \ifbool{@tud@x@geometry@enabled}{\appto\tud@cdgeometry@custom{,#1}}{}%
+    \ifbool{@tud@x@geometry@enabled}{\appto\tud@cdgeometry@init{,#1}}{}%
   }{}{\tud@patch@wrn{geometry}}%
 %    \end{macrocode}
 % Sollte im Dokument durch den Anwender der Satzspiegel manuell geändert 
@@ -3964,33 +4111,63 @@
 %    \begin{macrocode}
   \apptocmd{\Gm@changelayout}{%
     \ifboolexpr{bool {@tud@x@geometry@enabled} and bool {@atdocument}}{%
-      \ifnum\tud@cdgeometry@num=\@ne\relax%
-        \tud@AfterChangingArea%
-      \else%
-        \expandafter\tud@loadgeometry\expandafter{\tud@currentgeometry}%
-      \fi%
+      \tud@cdgeometry@process%
     }{}%
   }{}{\tud@patch@wrn{Gm@changelayout}}%
 %    \end{macrocode}
-% Bei der Verwendung von \cs{restoregeometry} wird der patch deaktiviert.
+% Bei der Verwendung von \cs{restoregeometry} wird der am Ende der Präambel 
+% der passend zur entsprechende Einstellung von \opt{cdgeometry} gesicherte 
+% Satzspiegel geladen. Über das optinale Argument kann der gewünschte Wert für 
+% die Option \opt{cdgeometry} angegeben werden.
 %    \begin{macrocode}
-  \pretocmd{\restoregeometry}{%
-    \@tud@x@geometry@enabledfalse%
-  }{}{\tud@patch@wrn{restoregeometry}}%
-  \apptocmd{\restoregeometry}{%
-    \@tud@x@geometry@enabledtrue%
-  }{}{\tud@patch@wrn{restoregeometry}}%
+  \renewcommand*\restoregeometry[1][]{%
+    \IfArgIsEmpty{#1}{}{%
+      \tud@cmd@store{TUD@SpecialOptionAtDocument}%
+      \let\TUD@SpecialOptionAtDocument\@gobble%
+      \TUDoption{cdgeometry}{#1}%
+      \tud@cmd@restore{TUD@SpecialOptionAtDocument}%
+    }%
+    \ifnum\tud@cdgeometry@num=\@ne\relax
+      \tud@loadgeometry{init@custom}%
+    \else%
+      \tud@loadgeometry{init@typearea}%
+    \fi%
+    \tud@AfterChangingArea%
+  }%
 %    \end{macrocode}
-% Am Ende der Präambel wird der Satzspiegel des Dokumentes gesetzt.
+% Am Ende der Präambel wird der Satzspiegel des Dokumentes gesetzt. Dabei 
+% werden auch sowohl der benutzderdefinierte Satzspiegel als auch die durch
+% \pkg{typearea} berechneten Einstellungen gesichert.
 %    \begin{macrocode}
   \AtEndPreamble{%
-    \recalctypearea%
+    \csuse{@ta@usegeometryfalse}%
+    \def\tud@reserved#1{%
+      \tud@newgeometry{%
+        \tud@cdgeometry@mpincl,%
+        \if@reversemargin%
+          reversemarginpar=true,%
+        \else%
+          reversemarginpar=false,%
+        \fi%
+        bindingoffset=\the\ta@bcor,%
+        \tud@cdgeometry@hincl,%
+        \tud@cdgeometry@fincl,%
+        \tud@cdgeometry@init,%
+        driver=none%
+      }%
+      \addtolength\oddsidemargin{-\Gm@layouthoffset}%
+      \addtolength\evensidemargin{-\Gm@layouthoffset}%
+      \addtolength\topmargin{-\Gm@layoutvoffset}%
+      \tud@savegeometry{init@#1}%
+    }%
 %    \end{macrocode}
 % Ist die Option \opt{geometry=custom} nicht aktiv, werden mit \cs{geometry} 
 % etwaig gemachte Einstellungen überschrieben.
 %    \begin{macrocode}
-    \ifnum\tud@cdgeometry@num=\@ne\relax\else%
-      \edef\tud@cdgeometry@custom{%
+    \begingroup%
+      \let\scr@grouplevel@test\@gobble%
+      \recalctypearea%
+      \edef\tud@cdgeometry@init{%
         left=\the\dimexpr\oddsidemargin+1in-\ta@bcor\relax,%
         textwidth=\the\textwidth,%
         marginparwidth=\the\marginparwidth,%
@@ -4007,20 +4184,13 @@
         textheight=\the\textheight,%
         footskip=\the\footskip%
       }%
-    \fi%
-    \tud@newgeometry{%
-      \tud@cdgeometry@mpincl,%
-      \if@reversemargin%
-        reversemarginpar=true,%
-      \else%
-        reversemarginpar=false,%
-      \fi%
-      bindingoffset=\the\ta@bcor,%
-      \tud@cdgeometry@hincl,%
-      \tud@cdgeometry@fincl,%
-      \tud@cdgeometry@custom,%
-      driver=none%
-    }%
+      \tud@reserved{typearea}%
+      \global\let\Gm@restore@@init@typearea\Gm@restore@@init@typearea%
+    \endgroup%
+%    \end{macrocode}
+% Falls \opt{geometry=custom} aktiv ist, werden die Einstellungen übernommen.
+%    \begin{macrocode}
+    \tud@reserved{custom}%
 %    \end{macrocode}
 % Nach einer Neuberechnung oder Änderung des Satzspiegels durch \pkg{typearea} 
 % werden die für die Seitenstile benötigten Satzspiegel mit \pkg{geometry} neu
@@ -4044,7 +4214,7 @@
 % \end{macro}^^A \Gm@changelayout
 % \end{macro}^^A \restoregeometry
 % \end{macro}^^A \geometry
-% \end{macro}^^A \tud@cdgeometry@custom
+% \end{macro}^^A \tud@cdgeometry@init
 % \begin{macro}{\tud@ps@parameters}
 % Im Folgenden werden die einzelnen Parameter für die \env{tudpage}-Umgebung
 % definiert. Die Parameter für Kopf- und Fußzeile werden nicht nur für die 
