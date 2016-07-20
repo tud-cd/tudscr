@@ -1,4 +1,4 @@
-% \CheckSum{768}
+% \CheckSum{769}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -1003,17 +1003,23 @@
 % \end{macro}^^A \TUD@parameter@set
 % \begin{macro}{\TUD@parameter@handler@macro}
 % \changes{v2.05}{2016/05/26}{robustere Verarbeitung von Default-Argumenten}^^A
-% Durch \cs{TUD@parameter@handler@macro}\marg{Verarbeitung} kann definiert 
-% werden, wie mit einem zuvor nicht mit \cs{TUD@parameter@def} definiertem
-% Parameter beziehungsweise gewöhnlichem optionalen Argument umzugehen ist. 
-% Diese Argumente wurden zuvor durch \cs{TUD@parameter@set} dem Schlüssel 
+% Durch \cs{TUD@parameter@handler@macro} kann definiert werden, wie mit einem
+% zuvor nicht mit \cs{TUD@parameter@def} definiertem Parameter beziehungsweise
+% gewöhnlichem optionalen Argument umzugehen ist. Dabei wird unterschieden, ob 
+% es sich bei dem unbekannten Parameter um ein normales optionales Argument 
+% oder um eine Angabe in Schlüssel-Wert-Syntax handelt. Dabei wurden einfache 
+% optionale Argumente zuvor durch \cs{TUD@parameter@set} dem Schlüssel 
 % \cs{TUD@parameter@nokey} als Wert zugewiesen, um Umlaute etc. ohne Bedenken
 % verwenden zu können.
+%
+% Das erste obligatorische Argument von \cs{TUD@parameter@handler@macro} wird 
+% für die Verarbeitung unbekannter Schlüssel-Wert-Paare genutzt, das zweite für 
+% einfache optionale Argumente.
 %    \begin{macrocode}
-\newcommand*\TUD@parameter@handler@macro[2][\TUD@parameter@@family]{%
+\newcommand*\TUD@parameter@handler@macro[3][\TUD@parameter@@family]{%
   \TUD@parameter@checkfamily{#1}{TUD@parameter@handler@macro}%
   \expandafter\kv@set@family@handler\expandafter{#1}{%
-    \ifstr{\kv@key}{\TUD@parameter@nokey}{#2}{\kv@handled@false}%
+    \ifstr{\kv@key}{\TUD@parameter@nokey}{#3}{#2}%
   }%
 }
 %    \end{macrocode}
@@ -1022,25 +1028,26 @@
 % \changes{v2.05}{2016/05/26}{neu}^^A
 % Mit diesem Makro wird einem optionalen Argument, welches ohne Schlüssel 
 % angegeben wurde, ein expliziter Parameter zugewiesen, welcher damit gesetzt 
-% wird.
+% wird. Unbekannte Schlüssel-Wert-Argumente werden durch \cs{kv@handled@false} 
+% immer als Fehler zurückgemeldet.
 %    \begin{macrocode}
 \newcommand*\TUD@parameter@handler@value[2][\TUD@parameter@@family]{%
   \TUD@parameter@checkfamily{#1}{TUD@parameter@handler@value}%
   \protected@edef\@tempa{%
     \noexpand\TUD@parameter@set{#1}{#2=\noexpand\kv@value}%
   }%
-  \edef\@tempb{%
-    \etex@unexpanded{\TUD@parameter@handler@macro[#1]}{\expandonce\@tempa}%
-  }\@tempb%
+  \def\@tempb{\TUD@parameter@handler@macro[#1]{\kv@handled@false}}%
+  \expandafter\@tempb\expandafter{\@tempa}%
 }
 %    \end{macrocode}
-% \end{macro}^^A \TUD@parameter@handler@macro
+% \end{macro}^^A \TUD@parameter@handler@value
 % \begin{macro}{\TUD@parameter@handler@default}
 % Hiermit kann sowohl die zu verwendende Sprache als auch die Anzahl der
 % gewünschten Spalten für bestimmte Umgebungen ohne die explizite Angabe eines
 % Schlüssels festgelegt werden. Momentan betrifft das die beiden Umgebungen
 % \env{abstract} und \env{tudpage} sowie Befehle und Umgebungen, welche auf 
-% letzterer basieren.
+% letzterer basieren. Unbekannte Argumente in Schlüssel-Wert-Syntax werden
+% nicht unterstützt.
 %    \begin{macrocode}
 \newcommand*\TUD@parameter@handler@default[2][\TUD@parameter@@family]{%
   \TUD@parameter@checkfamily{#1}{TUD@parameter@handler@default}%
@@ -1068,9 +1075,8 @@
       \noexpand\TUD@parameter@set{#1}{\noexpand\tud@reserved}%
     \noexpand\fi%
   }%
-  \edef\@tempb{%
-    \etex@unexpanded{\TUD@parameter@handler@macro[#1]}{\expandonce\@tempa}%
-  }\@tempb%
+  \def\@tempb{\TUD@parameter@handler@macro[#1]{\kv@handled@false}}%
+  \expandafter\@tempb\expandafter{\@tempa}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \TUD@parameter@handler@default
