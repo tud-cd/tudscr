@@ -311,9 +311,9 @@ vor der ersten und nach der letzten entfernt werden.
 \section{Unterdrückung des Einzuges eines Absatzes}
 \index{Absatzauszeichnung}%
 %
-Werden zur Auszeichnung von Absätzen im Dokument~-- wie es aus typografischer 
-Sicht zumeist sinnvoll ist~-- Einzüge und keine vertikalen Abstände verwendet
-(\KOMAScript-Option \Option{parskip=false}(\Package{koma-script})'none'), kann 
+Werden zur Absatzauszeichnung im Dokument~-- wie es aus typografischer Sicht 
+zumeist sinnvoll ist~-- Einzüge und keine vertikalen Abstände verwendet
+(\KOMAScript-Option \Option*{parskip=false}(\Package{koma-script})'none'), kann 
 es vorkommen, dass ein ganz bestimmter Absatz~-- beispielsweise der nach einer 
 zuvor genutzten Umgebung folgende~-- ungewollt eingerückt ist. Dies kann sehr 
 einfach manuell behoben werden, indem direkt zu Beginn des Absatzes das Makro 
@@ -506,8 +506,8 @@ selber.
 \begin{Example}
 Ein Dokument im A4"~Format soll kurzzeitig auf ein A3"=Querformat geändert 
 werden. Das folgende Minimalbeispiel zeigt, wie dies mit \KOMAScript-Mitteln 
-über die Optionen \Option{paper=landscape}(\Package{typearea})'none' und 
-\Option{paper=A3}(\Package{typearea})'none' geändert werden kann.
+über die Optionen \Option*{paper=landscape}(\Package{typearea})'none' und 
+\Option*{paper=A3}(\Package{typearea})'none' geändert werden kann.
 \begin{Code}
 \documentclass[paper=a4,pagesize]{tudscrreprt}
 \usepackage{selinput}
@@ -534,10 +534,6 @@ werden. Das folgende Minimalbeispiel zeigt, wie dies mit \KOMAScript-Mitteln
 \end{Code}
 \end{Example}
 
-\ToDo[doc]{%
-  Schnittmarken mit \Package*{crop} bzw. \Package*{geometry} dokumentieren%
-}[v2.05]
-%\section{Schnittmarken}
 
 
 \section{Vermeiden des Skalierens einer PDF-Datei beim Druck}
@@ -566,6 +562,79 @@ Weitere Informationen dazu sind unter \url{http://www.komascript.de/node/1897}
 zu finden.
 
 
+\section{Beschnittzugabe und Schnittmarken}
+\tudhyperdef*{sec:tips:cropmarks}%
+\index{Beschnittzugabe|!}%
+\index{Schnittmarken|!}%
+%
+Beim Plotten von Postern oder anderen farbigen Druckerzeugnissen besteht 
+oftmals das Problem, dass ein randloses Drucken nur schwer realisierbar ist. 
+Deshalb wird zu oftmals damit beholfen, dass der Druck des fertigen Dokumentes 
+auf einem größeren Papierbogen erfolgt und anschließend auf das gewünschte 
+Zielformat zugeschnitten wird, womit das Problem des nicht bedruckbaren Randes 
+entfällt. Dies kann über zwei verschiedene Wege realisiert werden.
+
+Der einfachste Weg ist die Verwendung des Paketes \Package{crop}. Mit diesem 
+kann das Dokument ganz normal im gewünschten Zielformat erstellt werden. Vor 
+dem Druck wird dieses Paket geladen und einfach das gewünschte Format des 
+Papierbogens angegeben. 
+%
+\begin{quoting}
+\begin{Code}[escapechar=§]
+\RequirePackage{fix-cm}
+\documentclass[%
+  paper=a1,
+  fontsize=36pt,
+  DIV=calc,
+]{tudscrposter}
+\usepackage{selinput}
+\SelectInputMappings{adieresis={ä},germandbls={ß}}
+\usepackage[T1]{fontenc}
+§\dots§
+\usepackage{graphicx}
+\usepackage[b1,center,cam]{crop}
+\begin{document}
+§\dots§
+\end{document}
+\end{Code}
+\end{quoting}
+%
+Alternativ dazu kann für die \TUDScript-Klassen auf die Funktionalität des 
+Paketes \Package{geometry} zurückgegriffen werden. Dieses Paket stellt den 
+Befehl \Macro{geometry}(\Package{geometry})'none' bereit, in dessen Argument mit
+\Key{\Macro{geometry}(\Package{geometry})}{paper=\PName{Papierformat}}|default|
+das Papierformat festgelegt werden kann. Wird zusätzlich noch der Parameter 
+\Key{\Macro{geometry}(\Package{geometry})}{layout=\PName{Zielformat}}|default|
+angegeben, so wird damit das gewünschte Zielformat definiert. Dabei sollte mit
+\Key{\Macro{geometry}(\Package{geometry})}{layoutoffset=\PName{Längenwert}}|default|
+dieser Bereich gegebenenfalls etwas eingerückt werden. Die Angabe von 
+\Key{\Macro{geometry}(\Package{geometry})}{showcrop=\PBoolean}|default|
+generiert außerdem noch visuelle Schnittmarken. 
+%
+\begin{quoting}
+\begin{Code}[escapechar=§]
+\RequirePackage{fix-cm}
+\documentclass[%
+  paper=a1,
+  fontsize=36pt,
+  DIV=calc,
+]{tudscrposter}
+\usepackage{selinput}
+\SelectInputMappings{adieresis={ä},germandbls={ß}}
+\usepackage[T1]{fontenc}
+§\dots§
+\geometry{paper=b1,layout=a1,layoutoffset=1in,showcrop}
+\begin{document}
+§\dots§
+\end{document}
+\end{Code}
+\end{quoting}
+%
+Für genauere Erläuterungen sowie weitere Einstellmöglichkeiten sei auf die 
+Dokumentation von \Package{crop} beziehungsweise \Package{geometry} verwiesen.
+
+
+
 \section{Warnung bei der Schriftgrößenwahl}
 \tudhyperdef*{sec:tips:fontsize}%
 \ChangedAt{v2.04:\TaT Warnung bei der Schriftgrößenwahl}
@@ -587,7 +656,8 @@ den Computer-Modern-Standardschriften gesucht wird, unabhängig davon, ob im
 Nachhinein ein anderes Schriftpaket geladen wird. Diese sind de-facto nicht in 
 alle Größen skalierbar. Um die Warnungen zu beseitigen, sollte das Paket 
 \Package{fix-cm} mit \Macro*{RequirePackage} \emph{vor} der Dokumentklasse 
-geladen werden: 
+geladen werden:
+% 
 \begin{quoting}[rightmargin=0pt]
 \begin{Code}[escapechar=§]
 \RequirePackage{fix-cm}
@@ -788,10 +858,9 @@ Mit \Macro*{immediate}\Macro*{write18}[\Parameter{externer Aufruf}] wird das
 zwischenzeitliche Ausführen eines externen Programms beim Durchlauf von 
 \Engine{pdfLaTeX}~-- in diesem Fall von \File{inkscape.exe}~-- möglich. Damit 
 der externe Aufruf auch tatsächlich durchgeführt wird, ist die Ausführung von 
-\Engine{pdfLaTeX} mit der Option \Path{-{}-shell-escape} beziehungsweise bei 
-der Verwendung von \Distribution{\hologo{MiKTeX}} mit \Path{-{}-enable-write18} 
-zwingend notwendig. Außerdem muss der Pfad zur Datei \File{inkscape.exe} dem 
-System bekannt sein.%
+\Engine{pdfLaTeX} mit der Option \Path{-{}-shell-escape} beziehungsweise 
+\Path{-{}-enable-write18} zwingend notwendig. Außerdem muss der Pfad zur Datei 
+\File{inkscape.exe} dem System bekannt sein.%
 \footnote{%
   Der Pfad zu \File{inkscape.exe} in der Umgebungsvariable \Path{PATH} des 
   Betriebssystems enthalten sein.%
