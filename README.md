@@ -2,7 +2,7 @@
 TUD-KOMA-Script
 ===============
 
-TUD-KOMA-Script 2016/06/17 v2.04e
+TUD-KOMA-Script 2016/07/26 v2.05
 Copyright (c) Falk Hanisch <tudscr@gmail.com>, 2012-2016
 
 This material is subject to the LaTeX Project Public License version 1.3c or 
@@ -29,7 +29,7 @@ Universitätsmarketing  mit dem Hinweis auf die Verwendung von LaTeX anfordern.
 Für die Installation der PostScript-Schriften sei auf den entsprechenden 
 Release unter https://github.com/tud-cd/tudscr/releases/tag/fonts und das 
 LaTeX-Forum der Technischen Universität Dresden verwiesen: 
-http://latex.wcms-file3.tu-dresden.de/phpBB3/index.php
+http://latex.wcms-file3.tu-dresden.de/phpBB3/
 
 
 Klassen und Pakete
@@ -39,11 +39,16 @@ Das Bundle beinhaltet:
 
 + die drei Dokumentklassen `tudscrartcl`, `tudscrreprt`, `tudscrbook` als
   Wrapper-Klassen von `scrartcl`, `scrreprt` and `scrbook`,
++ die Klasse `tudscrposter` für das Erstellen von Postern
 + das Paket `tudscrsupervisor`, welches Umgebungen und Befehle für die
   Erstellung von Aufgabenstellungen, Gutachten und Aushängen bereitstellt,
 + das Paket `tudscrfonts`, das die Schriften des Corporate Designs der
   Technischen Universität Dresden für die LaTeX-Standard-Klassen und die 
   KOMA-Script-Klassen nutzbar macht,
++ das Paket `fix-tudscrfonts`, das selbige Schriften für weitere TUD-CD-Klassen
+  verfügbar macht, welche nicht zu TUD-KOMA-Script gehören,
++ das Paket `tudscrcomp`, welches den Umstieg von fremden TUD-CD-Klassen auf
+  TUD-KOMA-Script vereinfacht,
 + das Paket `mathswap` für das Austauschen mathematischer Trennzeichen 
   innerhalb von Zahlen (ähnlich zu `ionumbers`),
 + das Paket `twocolfix` zur Fehlerbefehbung der Position von Überschriften im
@@ -53,9 +58,21 @@ Das Bundle beinhaltet:
 Versionen
 ---------
 
+**v2.05** (2016/07/26)
+
++ Klasse `tudscrposter`
++ Schnittmarken mit Paketen `crop` und `geometry` möglich
++ neue Einstellungsmöglichkeiten für den Satzspiegel
++ schriftgrößenabhängige Abstände mit Option `relspacing`
++ `\course` und `\discipline` für Titel nutzbar
++ Paket `tudscrcomp`: Unterstützung der Klassen `tudmathposter` und `tudposter`
++ Paket `fix-tudscrfonts`
+
+
 **v2.04e** (2016/06/17)
 
 + Bugfix für Teile mit KOMA-Script v3.21
+
 
 **v2.04d** (2016/03/26)
 
@@ -168,7 +185,7 @@ university marketing university marketing with regard to the use of LaTeX. To
 install the PostScript fonts, please refer to the corresponding release under 
 https://github.com/tud-cd/tudscr/releases/tag/fonts and the LaTeX forum of the 
 Technische Universität Dresden: 
-http://latex.wcms-file3.tu-dresden.de/phpBB3/index.php
+http://latex.wcms-file3.tu-dresden.de/phpBB3/
 
 Classes and Packages
 --------------------
@@ -177,11 +194,16 @@ The bundle offers:
 
 + the three document classes `tudscrartcl`, `tudscrreprt`, `tudscrbook` as
   wrapper classes for `scrartcl`, `scrreprt` and `scrbook`,
++ the class `tudscrposter` for creating posters,
 + the package `tudscrsupervisor` providing environments and macros to create
   tasks, evaluations and notices for scientific theses,
 + the package `tudscrfonts`, which makes the corporate design fonts of the
   Technische Universität Dresden available for LaTeX standard classes and 
   KOMA-Script classes,
++ the package `fix-tudscrfonts`, which provides the same fonts to additional
+  corporate design classes not related to TUD-KOMA-Script
++ the package `tudscrcomp`, which simplifies the switch to TUD-KOMA-Script 
+  from external corporate design classes,
 + the package `mathswap` for swapping math delimiters within numbers (similiar
   to `ionumbers`),
 + the package `twocolfix` for fixing the positioning bug of headings in
@@ -190,6 +212,17 @@ The bundle offers:
 
 Versions
 --------
+
+**v2.05** (2016/07/26)
+
++ class `tudscrposter`
++ crop marks  with packages `crop` and `geometry` possible
++ new possible settings for type area
++ font size related skips with option `relspacing`
++ `\course` and `\discipline` available on title
++ package `tudscrcomp`: support for classes `tudmathposter` and `tudposter`
++ package `fix-tudscrfonts`
+
 
 **v2.04e** (2016/06/17)
 

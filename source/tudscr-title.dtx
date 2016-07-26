@@ -1,4 +1,4 @@
-% \CheckSum{1290}
+% \CheckSum{1381}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -18,13 +18,13 @@
 % 
 % ----------------------------------------------------------------------------
 % 
-% Dieses Werk darf nach den Bedingungen der LaTeX Project Public Lizenz
-% in der Version 1.3c, verteilt und/oder veraendert werden. Die aktuelle 
-% Version dieser Lizenz ist http://www.latex-project.org/lppl.txt und 
-% Version 1.3c oder spaeter ist Teil aller Verteilungen von LaTeX 2005/12/01 
-% oder spaeter und dieses Werks. Dieses Werk hat den LPPL-Verwaltungs-Status 
-% "author-maintained", wird somit allein durch den Autor verwaltet. Der 
-% aktuelle Verwalter und Autor dieses Werkes ist Falk Hanisch.
+%  Dieses Werk darf nach den Bedingungen der LaTeX Project Public Lizenz
+%  in der Version 1.3c, verteilt und/oder veraendert werden. Die aktuelle 
+%  Version dieser Lizenz ist http://www.latex-project.org/lppl.txt und 
+%  Version 1.3c oder spaeter ist Teil aller Verteilungen von LaTeX 2005/12/01 
+%  oder spaeter und dieses Werks. Dieses Werk hat den LPPL-Verwaltungs-Status 
+%  "author-maintained", wird somit allein durch den Autor verwaltet. Der 
+%  aktuelle Verwalter und Autor dieses Werkes ist Falk Hanisch.
 % 
 % ============================================================================
 %
@@ -51,15 +51,17 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-title.dtx}[%
-  2015/06/12 v2.04 TUD-KOMA-Script (title)%
+  2016/07/20 v2.05 TUD-KOMA-Script (title)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
-\documentclass[english,ngerman]{tudscrdoc}
+\documentclass[english,ngerman,xindy]{tudscrdoc}
 \usepackage{selinput}\SelectInputMappings{adieresis={ä},germandbls={ß}}
 \usepackage[T1]{fontenc}
 \usepackage{babel}
 \usepackage{tudscrfonts} % only load this package, if the fonts are installed
 \KOMAoptions{parskip=half-}
+\usepackage{microtype}
+\usepackage{bookmark}
 \CodelineIndex
 \RecordChanges
 \GetFileInfo{tudscr-title.dtx}
@@ -72,13 +74,14 @@
 %
 % \selectlanguage{ngerman}
 %
-% \changes{v2.02}{2014/06/24}{Unterstützung für \pkg{titlepage} entfernt}^^A
+% \changes{v2.02}{2014/06/23}{Paket \pkg{titlepage} nicht weiter unterstützt}^^A
+% \changes{v2.05}{2015/07/13}{Titel für Poster}^^A
 %
 % \section{Titelei}
 %
-% Die Titelseite wird für die \TUDScript-Klassen bereitgestellt.
+% Titelseite und Titelkopf werden für die \TUDScript-Klassen bereitgestellt.
 %
-% \StopEventually{\PrintIndex\PrintChanges}
+% \StopEventually{\PrintIndex\PrintChanges\PrintToDos}
 %
 % \iffalse
 %<*class&body>
@@ -95,6 +98,7 @@
 % \iffalse
 %</class&body>
 %<*class&option>
+%<*book|report|article>
 % \fi
 %
 % \begin{option}{subjectthesis}
@@ -114,6 +118,43 @@
 % \end{option}^^A subjectthesis
 %
 % \iffalse
+%</book|report|article>
+%<*poster>
+% \fi
+%
+% \begin{option}{titlepage}
+% \begin{macro}{\tud@titlepage@deactivate}
+% Für Poster gibt es keine separate Titelseite sondern nur einen Titelkopf. 
+% Falls die falsche Einstellung gewählt ist, wird diese deaktiviert und eine 
+% Warnung ausgegeben.
+%    \begin{macrocode}
+\DefineFamilyMember{KOMA}
+\DefineFamilyKey{KOMA}{titlepage}[true]{%
+  \TUD@set@numkey{titlepage}{@tempa}{\TUD@numkey@bool,{firstiscover}{2}}{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \AtEndOfFamilyOptions{\tud@titlepage@deactivate}%
+  \fi%
+}
+\newcommand*\tud@titlepage@deactivate{%
+  \if@titlepage%
+    \KOMAoptions{titlepage=false}%
+    \ClassWarning{\TUD@Class@Name}{%
+      The class `\TUD@Class@Name' can't be used with\MessageBreak%
+      activated titlepage option. It will be enforced to\MessageBreak%
+      `titlepage=false'%
+    }%
+    \renewcommand*\tud@titlepage@deactivate{%
+      \if@titlepage\KOMAoptions{titlepage=false}\fi%
+    }%
+  \fi%
+}
+\AtBeginDocument{\tud@titlepage@deactivate}
+%    \end{macrocode}
+% \end{macro}^^A \tud@titlepage@deactivate
+% \end{option}^^A titlepage
+%
+% \iffalse
+%</poster>
 %</class&option>
 %<*class&body>
 % \fi
@@ -129,22 +170,180 @@
 % allerdings etwas kleiner. \opt{titlepage} für alle Zusatzinformationen wie
 % Autor, Datum etc.
 %    \begin{macrocode}
-\newkomafont{thesis}{\usekomafont{title}\LARGE}
+%<*book|report|article>
+\newkomafont{thesis}{%
+  \usekomafont{title}%
+  \tud@thesis@fontsize%
+}
+%</book|report|article>
 \newkomafont{titlepage}{%
   \usekomafont{subject}%
-  \fontseries{\mddefault}%
-  \selectfont%
+  \mdseries%
   \large%
 }
 %    \end{macrocode}
 % \end{KOMAfont}^^A titlepage
 % \end{KOMAfont}^^A thesis
-% \begin{macro}{\tud@title@fontcolor}
-% Das Makro wird für die Hintergrundfarbe der Titelseite verwendet.
+% Die Befehle \cs{thanks} und \cs{footnotemark} werden mit \cs{robustify} 
+% behandelt, um die Makros vor dem Expandieren zu schützen. Dies ist z.\,B. für
+% \cs{tud@multiple@split} aber auch für weitere Felder auf dem Titel nötig.
 %    \begin{macrocode}
-\newcommand*\tud@title@fontcolor{}
+\robustify{\thanks}
+\robustify{\footnotemark}
 %    \end{macrocode}
-% \end{macro}^^A \tud@title@fontcolor
+% \begin{macro}{\tud@title@uppercase}
+% Für das Setzen einzelner Felder in Majuskeln werden diese beiden Befehle
+% definiert. Bei der Verwendung des Befehls \cs{thanks} auf der Titelseite soll
+% sichergestellt werden, dass der Inhalt selbst nicht in Majuskeln gesetzt wird.
+%    \begin{macrocode}
+\newcommand*\tud@title@uppercase[1]{%
+  \let\@tempa\relax%
+  \begingroup%
+    \let\\\newline%
+%    \end{macrocode}
+% Der Befehl \cs{thanks} wird so umdefiniert, dass der Inhalt in ein temporäres
+% Makro gespeichert wird. Danach wird durch das Setzen einer temporären Box der
+% Befehl \cs{thanks} ausgeführt und der Inhalt gesichert. Für die Ausführung von
+% \cs{tud@makeuppercase} wird das Argument von \cs{thanks} ignoriert. Nachdem 
+% das gewünschte Feld in Majuskeln gesetzt wurde, wird die gespeicherte Fußnote
+% ausgegeben.
+%    \begin{macrocode}
+    \def\thanks##1{\gdef\@tempa{##1}}%
+    \let\footnote\thanks%
+    \sbox\z@{#1}%
+    \let\thanks\@gobble%
+    \let\footnote\@gobble%
+    \tud@makeuppercase{#1}%
+  \endgroup%
+  \ifx\@tempa\relax\else\thanks\@tempa\fi%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@title@uppercase
+%
+% \iffalse
+%<*book|report|article>
+% \fi
+%
+% \begin{macro}{\titledelimiter}
+% \begin{macro}{\tud@title@delimiter}
+% Dieses Makro wird für das Trennzeichen auf der Titelseite genutzt.
+%    \begin{macrocode}
+\newcommand*\tud@title@delimiter{:\nobreakspace}
+\newcommand*\titledelimiter[1]{\gdef\tud@title@delimiter{#1}}
+%    \end{macrocode}
+% \end{macro}^^A \tud@title@delimiter
+% \end{macro}^^A \titledelimiter
+% \begin{macro}{\tud@split@author@title}
+% \changes{v2.04}{2015/05/12}{neu}^^A
+% \begin{macro}{\tud@newline@title}
+% Das Makro \cs{tud@split@author@title} dient der formatierten Ausgabe aller 
+% Informationen für mehrere Autoren auf der Titelseite.
+%    \begin{macrocode}
+\newcommand*\tud@newline@title{}
+\newcommand*\tud@split@author@title[2]{%
+%    \end{macrocode}
+% Zu Beginn werden alle Felder, welche innerhalb von \cs{@author} angegeben
+% sind, gesichert. 
+%    \begin{macrocode}
+  \tud@multiple@fields@store{@author}{#1}%
+%    \end{macrocode}
+% Um die Abstände definiert zu setzen, wird \cs{tud@newline@title} verwendet. 
+% Sobald auch nur eine zusätzliche Information ausgegeben werden soll, wird ein
+% etwas kleiner Abstand eingefügt. Anschließend wird jede Information einfach 
+% in einer neuen Zeile ausgegeben.
+%    \begin{macrocode}
+  \renewcommand*\tud@newline@title{\vskip .5ex\let\tud@newline@title\newline}%
+%    \end{macrocode}
+% Die Felder \cs{@author} und ggf. \cs{@authormore} werden sowohl auf der
+% Titelseite als auch im Titelkopf jedoch nicht auf der Umschlagseite 
+% ausgegeben.
+%    \begin{macrocode}
+  {\usekomafont{author}{\ignorespaces#1}}%
+  \if@tud@cover\else%
+    \ifx\@authormore\@empty\else%
+      \tud@newline@title%
+      \@authormore%
+    \fi%
+%    \end{macrocode}
+% Nur auf der Titelseite erfolgt die Ausgabe von Geburtsdatum, Geburtsort,
+% Matrikelnummer und Immatrikulationsjahr. Sollte ein Titelkopf verwendet
+% werden, so wird für jedes gesetzte Feld eine Warnung ausgegeben.
+%    \begin{macrocode}
+    \ifx\@dateofbirth\@empty\else%
+      \if@titlepage%
+        \tud@newline@title%
+        \ifxblank{\dateofbirthtext}{}{\dateofbirthtext\tud@title@delimiter}%
+        \@dateofbirth%
+        \ifx\@placeofbirth\@empty\else%
+          \nobreakspace\placeofbirthtext\nobreakspace\@placeofbirth%
+        \fi%
+      \else%
+        \tud@title@wrn{dateofbirth}%
+      \fi%
+    \fi%
+    \def\@tempc##1{%
+      \ifstr{\csuse{@##1}}{}{}{%
+        \if@titlepage%
+          \tud@newline@title%
+          \ifstr{\csuse{##1name}}{}{}{\csuse{##1name}\tud@title@delimiter}%
+          \csuse{@##1}%
+        \else%
+          \tud@title@wrn{##1}%
+        \fi%
+      }%
+    }%
+    \@tempc{course}%
+    \@tempc{discipline}%
+    \@tempc{matriculationnumber}%
+    \@tempc{matriculationyear}%
+  \fi%
+%    \end{macrocode}
+% Zunächst werden die zuvor bestehenden Feldinhalte wiederhergestellt. Danach 
+% wird durch den Aufruf von \cs{tud@multiple@@@split} wird das übergebene
+% \meta{Feld} sukzessive abgearbeitet.
+%    \begin{macrocode}
+  \tud@multiple@fields@restore{@author}%
+  \tud@multiple@@@split{#2}{\vskip 2ex}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@newline@title
+% \end{macro}^^A \tud@split@author@title
+% \begin{macro}{\tud@title@wrn}
+% Bei der Nutzung eines Titelkopfes wird bloß eine reduzierte Menge an
+% Informationen ausgegeben. Darauf wird der Anwender ggf. hingewiesen.
+%    \begin{macrocode}
+\newcommand*\tud@title@wrn[1]{%
+  \ClassWarning{\TUD@Class@Name}{%
+    `\@backslashchar#1' has to be used with\MessageBreak%
+    activated titlepage option%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@title@wrn
+% \begin{macro}{\tud@thesis@tosubject}
+% Bei der Verwendung der Option \opt{subjectthesis} wird zum einen geprüft, ob
+% das Feld \cs{@thesis} gesetzt ist und zum anderen, ob das Feld \cs{@subject}
+% auch leer ist.
+%    \begin{macrocode}
+\newcommand*\tud@thesis@tosubject{%
+  \if@tud@subjectthesis\ifx\@thesis\@empty\else%
+    \ifx\@subject\@empty\else%
+      \ClassWarning{\TUD@Class@Name}{%
+        The option `subjectthesis' was activated, so\MessageBreak%
+        the field `subject' will be overwritten with the\MessageBreak%
+        given thesis%
+      }%
+    \fi%
+    \let\@subject\@thesis%
+  \fi\fi%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@thesis@tosubject
+%
+% \iffalse
+%</book|report|article>
+% \fi
+%
 % \begin{macro}{\tud@maketitle}
 % \changes{v2.01a}{2014/06/03}{Fehler bei Nutzung von \cs{subtitle} behoben}^^A
 % \changes{v2.02}{2014/06/23}{\val{firstiscover} wird als Wert für die Option 
@@ -152,64 +351,71 @@
 % \changes{v2.02}{2014/07/19}{Im zweispaltigen Satz wird für den Titelkopf
 %   \cs{tud@title@twocolumn} verwendet}^^A
 % \changes{v2.02}{2014/09/05}{Neue Parameter}^^A
-% \changes{v2.02}{2014/09/05}{Titelseite mit \cs{tud@maketitlepage}}^^A
-% \begin{macro}{\tud@titlepagenumber}
+% \changes{v2.02}{2014/09/05}{Titelseite mit \cs{tud@make@titlepage}}^^A
+% \begin{macro}{\tud@title@pagenumber}
 % \changes{v2.02}{2014/06/23}{neu}^^A
 % Bei der entsprechend gewählten Layoutoption, wird eine neue Titelseite im \CD
 % gesetzt. Damit auf das Standardverhalten von \KOMAScript{} zurückgestellt
 % werden kann, wird der ursprüngliche \cs{maketitle}-Befehl bei der Abarbeitung 
 % der Layoutoptionen gesichert. (siehe \cs{tud@layout@process}) und kann ggf. 
 % wiederhergestellt bzw. mit \cs{tud@cmd@use} verwendet werden. Ist das Layout 
-% des \CDs gefordert wird entweder mit \cs{tud@maketitlepage} eine Titelseite 
+% des \CDs gefordert wird entweder mit \cs{tud@make@titlepage} eine Titelseite 
 % gesetzt~-- wobei sich diese in ihrer Struktur am originalen \cs{maketitle}
 % orientiert~-- oder das Titelkopflayout wird angepasst.
 %    \begin{macrocode}
-\newcommand*\tud@titlepagenumber{}%
-\let\tud@titlepagenumber\relax%
+\newcommand*\tud@title@pagenumber{}
+\let\tud@title@pagenumber\relax
 \newcommand*\tud@maketitle[1][]{%
   \begingroup%
 %    \end{macrocode}
 % Das optionale Argument wird für das Setzen der Parameter verwendet.
 %    \begin{macrocode}
     \TUD@parameter@set{title}{#1}%
-    \ifcase\tud@layout@title\relax% false
-      \ifx\tud@titlepagenumber\relax\gdef\tud@titlepagenumber{1}\fi%
-      \tud@cmd@use{maketitle}[\tud@titlepagenumber]%
+%    \end{macrocode}
+% Ist das \CD für den Titel deaktiviert, wird mit \cs{tud@cmd@use} der 
+% originale \KOMAScript-Befehl \cs{maketitle} aufgerufen. 
+%    \begin{macrocode}
+    \ifcase\tud@layout@title@num\relax% false
+      \ifx\tud@title@pagenumber\relax\gdef\tud@title@pagenumber{1}\fi%
+      \tud@cmd@use{maketitle}[\tud@title@pagenumber]%
+      \tud@if@tudheadings{\currentpagestyle}{%
+        \ifstr{\titlepagestyle}{empty}{\thispagestyle{empty.tudheadings}}{}%
+      }{}%
+%    \end{macrocode}
+% Für die \TUDScript-Klassen gibt es für doe Titleseite sowie den Titelkopf 
+% separate Befehle.
+%    \begin{macrocode}
     \else% !false
+%<*book|report|article>
       \if@titlepage%
-        \tud@maketitlepage%
-%    \end{macrocode}
-% Neben einer kompletten Titelseite gibt es auch noch einen Titelkopf. Auch 
-% hierfür wird die Ausprägung festgelegt. 
-%    \begin{macrocode}
+        \tud@make@titlepage%
       \else%
-        \def\tud@title@fontcolor{}%
-        \ifcase\tud@layout@title\relax\or\else% *color
-          \def\tud@title@fontcolor{HKS41}%
-        \fi%
-%    \end{macrocode}
-% Um einen Titelkopf zu setzen, wird einfach der Originalbefehl verwendet und
-% nur der innere Teil (\cs{@maketitle}) angepasst.
-%    \begin{macrocode}
-        \let\@maketitle\tud@@maketitle%
-        \ifx\tud@titlepagenumber\relax\gdef\tud@titlepagenumber{1}\fi%
-%    \end{macrocode}
-% Um einen zweispaltigen Satz für den Titelkopf ermöglichen zu können und 
-% gleichzeitig dabei den TUD-Kopf zu verwenden, wird der interne Befehl 
-% \cs{tud@title@twocolumn} verwendet. Damit wird der Titel selber einspaltig 
-% gesetzt und direkt danach der zweispaltige Satz begonnen.
-%    \begin{macrocode}
-        \if@twocolumn%
-          \tud@title@twocolumn{\tud@cmd@use{maketitle}[\tud@titlepagenumber]}%
-        \else%
-          \tud@cmd@use{maketitle}[\tud@titlepagenumber]%
-        \fi%
+%</book|report|article>
+        \tud@make@titlehead%
+%<*book|report|article>
       \fi%
+%</book|report|article>
     \fi%
   \endgroup%
+  \setcounter{footnote}{0}%
+  \global\let\and\relax%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@titlepagenumber
+% Abschließend wird dafür Sorge getragen, dass bei einem aktivierten Seitenstil 
+% aus der \pgs{tudheadings}-Reihe ebenfalls der Titel in diesem gesetzt wird,
+% auch wenn das Layout des \CDs selber nicht aktiv ist.
+%    \begin{macrocode}
+\patchcmd{\titlepage}{\thispagestyle{empty}}{%
+  \tud@if@tudheadings{\currentpagestyle}{%
+    \thispagestyle{empty.tudheadings}%
+  }{%
+    \thispagestyle{empty}%
+  }%
+}{}{\tud@patch@wrn{titlepage}}
+\tud@cmd@store{maketitle}
+\let\maketitle\tud@maketitle
+%    \end{macrocode}
+% \end{macro}^^A \tud@title@pagenumber
 % \end{macro}^^A \tud@maketitle
 % \begin{parameter}{cdtitle}
 % \changes{v2.03}{2015/01/12}{neu}^^A
@@ -229,21 +435,21 @@
 % Die einzelnen Parameter dienen zur Einstellung der Titelseite und entsprechen
 % in ihrem Verhalten den gleichnamigen Klassenoptionen.
 %    \begin{macrocode}
-\TUD@parameter{title}{%
-  \TUD@parameter@define{cdtitle}[true]{\TUDoption{cdtitle}{#1}}%
+\TUD@parameter@family{title}{%
+  \TUD@parameter@def{cdtitle}[true]{\TUDoption{cdtitle}{#1}}%
   \TUD@parameter@let{cd}{cdtitle}%
-  \TUD@parameter@define{pagenumber}{\def\tud@titlepagenumber{#1}}%
+  \TUD@parameter@def{pagenumber}{\def\tud@title@pagenumber{#1}}%
 %    \end{macrocode}
-% Mit \cs{TUD@parameter@define@ps} werden alle verfügbaren Parameter für die 
-% Kopf- und Fußzeilen definiert.
+% Mit \cs{tud@ps@parameters} werden alle verfügbaren Parameter für die Kopf-
+% und Fußzeilen definiert.
 %    \begin{macrocode}
-  \TUD@parameter@define@ps{#1}%
+  \tud@ps@parameters{#1}%
 %    \end{macrocode}
 % Für den Fall, dass ein Wert nicht in der Schlüssel"=Wert"=Notation angegeben
 % wurde, wird versucht, das gegebene Argument als Seitenzahl zu verwenden.
 %    \begin{macrocode}
-  \TUD@parameter@sethandler{\TUD@parameter@set{title}{pagenumber=#1}}%
-}%
+  \TUD@parameter@handler@value{pagenumber}%
+}
 %    \end{macrocode}
 % \end{parameter}^^A ddcfoot
 % \end{parameter}^^A ddchead
@@ -256,14 +462,12 @@
 % \end{parameter}^^A pagenumber
 % \end{parameter}^^A cd
 % \end{parameter}^^A cdtitle
-% Die Befehle \cs{thanks} und \cs{footnotemark} werden mit \cs{robustify} 
-% behandelt, um die Makros vor dem Expandieren zu schützen. Dies ist z.\,B. für
-% \cs{tud@multiple@split} aber auch für weitere Felder auf dem Titel nötig.
-%    \begin{macrocode}
-\robustify{\thanks}%
-\robustify{\footnotemark}%
-%    \end{macrocode}
-% \begin{macro}{\tud@maketitlepage}
+%
+% \iffalse
+%<*book|report|article>
+% \fi
+%
+% \begin{macro}{\tud@make@titlepage}
 % \changes{v2.02}{2014/09/05}{neu}^^A
 % \begin{macro}{\tud@titleback}
 % Bei der entsprechend gewählten Layoutoption, wird eine neue Titelseite im \CD
@@ -272,12 +476,11 @@
 % überschrieben (siehe \cs{tud@layout@process}) und kann ggf. wiederhergestellt
 % werden. Der Befehl selbst orientiert sich dabei in seiner Struktur an dem
 % originalen \cs{maketitle}. Für die ggf. farbige Ausgabe der Titelrückseite 
-% wird das Hilfmakro \cs{tud@titleback} definiert. Mit \cs{tud@titlepagenumber} 
-% kann eine Seitenzahl für den Titel~-- auch über den Befehl \cs{makecover}~--
-% angegeben werden.
+% wird das Hilfmakro \cs{tud@titleback} definiert. Eine Seitenzahl für den
+% Titel kann mit \cs{tud@title@pagenumber} angegeben werden.
 %    \begin{macrocode}
-\newcommand*\tud@titleback{}%
-\newcommand*\tud@maketitlepage{%
+\newcommand*\tud@titleback{}
+\newcommand*\tud@make@titlepage{%
 %    \end{macrocode}
 % Es wird durch die \KOMAScript-Option \opt{titlepage} unterschieden, ob eine
 % Titelseite oder aber ein Titelkopf gesetzt werden soll. In Abhängigkeit davon
@@ -285,17 +488,17 @@
 % wird die entsprechende Layoutoption ausgewertet und entsprechend dieser die
 % Werte belegt.
 %    \begin{macrocode}
-  \def\tud@title@fontcolor{}%
-  \ifcase\tud@layout@title\relax\or\or% litecolor
-    \def\tud@title@fontcolor{HKS41}%
+  \renewcommand*\tud@title@fontcolor{}%
+  \ifcase\tud@layout@title@num\relax\or\or% litecolor
+    \renewcommand*\tud@title@fontcolor{HKS41}%
   \or% barcolor
-    \def\tud@title@fontcolor{HKS41}%
+    \renewcommand*\tud@title@fontcolor{HKS41}%
   \or% bicolor
-    \def\tud@title@fontcolor{HKS41}%
+    \renewcommand*\tud@title@fontcolor{HKS41}%
   \or% color
-    \def\tud@title@fontcolor{HKS41!30}%
+    \renewcommand*\tud@title@fontcolor{HKS41!30}%
   \or% full
-    \def\tud@title@fontcolor{HKS41!30}%
+    \renewcommand*\tud@title@fontcolor{HKS41!30}%
   \fi%
 %    \end{macrocode}
 % Die Titelseite. Es existieren die Optionen \opt{full} für eine vollständig
@@ -308,8 +511,8 @@
 % Dieser Teil entspricht der Standarddefinition. Für das Setzen des Covers ist
 % ein Großteil der Einstellungen irrelevant und wird übersrpungen.
 %    \begin{macrocode}
-    \ifx\tud@titlepagenumber\relax\else%
-      \setcounter{page}{\tud@titlepagenumber}%
+    \ifx\tud@title@pagenumber\relax\else%
+      \setcounter{page}{\tud@title@pagenumber}%
     \fi%
 %    \end{macrocode}
 % Dieser Teil entspricht der Standarddefinition. Für das Setzen des Covers ist
@@ -331,16 +534,16 @@
 % Layout per später Optionswahl noch zu ändern, muss der interne Code aus
 % \pkg{hyperref} hier noch einmal für den TUD-Titel aufgerufen werden.
 %    \begin{macrocode}
-      \tud@footnote@unhyper%
+      \tud@x@hyperref@realfootnotes%
 %    \end{macrocode}
 % Im Gegensatz zu den \KOMAScript-Klassen wird für eine Umschlagseite die 
 % Option \opt{titlepage=firstiscover} nur für den Schmutztitel \cs{extratitle}
-% und nicht für die eigentlcihe Titelseite unterstützt. Für ein Cover im \CD
+% und nicht für die eigentliche Titelseite unterstützt. Für ein Cover im \CD
 % ist der Befehl \cs{makecover} mit den dazugehörigen Parametern zu nutzen.
 %    \begin{macrocode}
       \ifx\@extratitle\@empty%
         \if@titlepageiscoverpage%
-          \ClassWarning{\TUDClassName}{%
+          \ClassWarning{\TUD@Class@Name}{%
             Using option `titlepage=firstiscover' is only\MessageBreak%
             possible with an extra title. Alternatively you can\MessageBreak%
             create a cover with `\string\makecover'%
@@ -363,9 +566,9 @@
           \topmargin=\dimexpr\coverpagetopmargin-1in\relax%
           \oddsidemargin=\dimexpr\coverpageleftmargin-1in\relax%
           \evensidemargin=\dimexpr\coverpageleftmargin-1in\relax%
-          \textwidth=\dimexpr\paperwidth-\coverpageleftmargin%
+          \textwidth=\dimexpr\tud@len@layoutwidth-\coverpageleftmargin%
             -\coverpagerightmargin\relax%
-          \textheight=\dimexpr\paperheight-\coverpagetopmargin%
+          \textheight=\dimexpr\tud@len@layoutheight-\coverpagetopmargin%
             -\coverpagebottommargin\relax%
           \headheight=0pt%
           \headsep=0pt%
@@ -383,37 +586,14 @@
       \fi%
     \fi%
 %    \end{macrocode}
-% Ist die Option \opt{tudbookmarks} aktiviert, werden für Umschlag- und 
-% Titelseite PDF"=Lesezeichen gesetzt.
-%    \begin{macrocode}
-    \if@tud@bookmarks%
-      \if@tud@cover%
-%<*book|report>
-        \tudbookmark[0]{\coverpagename}{cover}%
-%</book|report>
-%<*article>
-        \tudbookmark[1]{\coverpagename}{cover}%
-%</article>
-        \ifdef{\bookmarksetup}{\bookmarksetup{startatroot}}{}%
-      \else%
-%<*book|report>
-        \tudbookmark[0]{\titlepagename}{title}%
-%</book|report>
-%<*article>
-        \tudbookmark[1]{\titlepagename}{title}%
-%</article>
-        \ifdef{\bookmarksetup}{\bookmarksetup{startatroot}}{}%
-      \fi%
-    \fi%
-%    \end{macrocode}
 % Das ganze Layout wird vertikal so verschoben, dass der Titel auf der gleichen
 % Höhe steht wie die Überschriften auf Teil- und Kapitelseiten.
 %    \begin{macrocode}
     \vspace*{%
-      \dimexpr\tud@dim@headdiff+\tud@dim@headingsvskip-\baselineskip%
-        +\parskip\relax%
+      \dimexpr\tud@len@areavskip+\tud@len@areaheadvskip-\baselineskip\relax%
     }%
-    \vspace*{\pageheadingsvskip}%
+    \TUD@len@deprecated{pageheadingsvskip}%
+    \vspace*{\tud@dim@pageheadingsvskip}%
     \setparsizes{\z@}{\z@}{\z@\@plus1fil}\par@updaterelative%
 %    \end{macrocode}
 % Damit die Farbeinstellungen der Schriften lokal begrenzt bleiben, wird dieser
@@ -446,7 +626,7 @@
 % Erkennen, ob in der Betreffzeile eine Abschlussarbeit ausgegeben werden soll
 % und kann.
 %    \begin{macrocode}
-      \tud@letsubjectthesis%
+      \tud@thesis@tosubject%
       \ifx\@subject\@empty\else%
         \sbox\@ne{\vbox{{\usekomafont{subject}{\@subject\par\null}}}}%
         \addtolength\@tempdima{\dimexpr\ht\@ne+\dp\@ne+\p@\relax}%
@@ -460,20 +640,20 @@
 % Titelseite in unterschiedlichen Größen und Schriftstärken.
 %    \begin{macrocode}
       {\usekomafont{title}{\tud@title@uppercase{\@title}\par}}%
-      \vskip 2ex\@plus1ex\@minus1ex%
 %    \end{macrocode}
 % Der Untertitel wird ggf. in der gleichen Schrift gesetzt wie der Titel,
 % allerdings etwas kleiner.
 %    \begin{macrocode}
       \ifx\@subtitle\@empty\else%
+        \vskip 1ex\@plus.5ex\@minus.5ex%
         {\usekomafont{subtitle}{\tud@title@uppercase{\@subtitle}\par}}%
-        \vskip 2ex\@plus1ex\@minus1ex%
       \fi%
+      \vskip 2ex\@plus1ex\@minus1ex%
       \vskip 2\bigskipamount%
 %    \end{macrocode}
 % Ausgabe eines Autors oder mehrerer Autoren ggf. mit Zusatzinformationen.
 %    \begin{macrocode}
-      \let\tud@split@author\tud@split@author@title%
+      \let\tud@split@author@do\tud@split@author@title%
       \tud@multiple@split{@author}\par%
       \vskip 2ex\@plus1ex\@minus1ex%
 %    \end{macrocode}
@@ -485,7 +665,7 @@
         \if@tud@cover\else%
           \ifx\@date\@empty\else%
             \vskip 2ex\@plus.1fill%
-            {\usekomafont{date}{\@date\nobreakspace\@datemore\par}}%
+            {\usekomafont{date}{\tud@date@print\par}}%
           \fi%
         \fi%
         \vskip 2ex\@plus.25fill%
@@ -511,7 +691,7 @@
           \ifx\@graduation\@empty\else%
             \def\@tempc{%
               \@graduation%
-              \ifx\@graduationabbr\@empty\else\nobreakspace\@graduationabbr\fi%
+              \ifx\@@graduation\@empty\else\nobreakspace\@@graduation\fi%
             }%
             {\usekomafont{titlepage}{\graduationtext\par}}%
             \vskip 2ex\@plus1ex\@minus1ex%
@@ -533,28 +713,30 @@
 % Darauf folgend wird der betreuende Hochschullehrer ausgegeben.
 %    \begin{macrocode}
       \if@tud@cover\else%
-        \tud@title@names{supervisor}%
         \tud@title@names{referee}%
         \tud@title@names{advisor}%
+        \tud@title@names{supervisor}%
         \tud@title@names{professor}%
 %    \end{macrocode}
 % Bei einer Abschlussarbeit gehört normalerweise auch ein Abgabedatum auf den
 % Titel. Sollte keines angegeben sein, so erscheint eine Warnung. Es wird an
 % Stelle dessen das angegebene Enddatum oder aber das heutige Datum verwendet.
-% Durch das Paket \pkg{tudscrtask} wird das zusätzliche Feld \cs{@duedate}
+% Durch das Paket \pkg{tudscrsupervisor} wird zusätzlich das Feld \cs{@duedate}
 % definiert, welches hier ggf. für auf ein nutzbares Datum geprüft wird.
 %    \begin{macrocode}
         \ifx\@thesis\@empty\else%
-          \tud@datecheck%
+          \tud@date@check%
           \ifx\@date\@empty\else%
             \vskip 2ex\@plus1ex\@minus1ex%
-            \ifstr{\datetext}{}{}{\datetext\@titledelim}%
-            {\usekomafont{date}{\@date\nobreakspace\@datemore\par}}%
+            \ifxblank{\datetext}{}{\datetext\tud@title@delimiter}%
+            {\usekomafont{date}{\tud@date@print\par}}%
 %    \end{macrocode}
 % Zusätzlich kann noch ein Datum der mündlichen Verteidigung angegeben werden.
 %    \begin{macrocode}
             \ifx\@defensedate\@empty\else%
-              \ifstr{\defensedatetext}{}{}{\defensedatetext\@titledelim}%
+              \ifxblank{\defensedatetext}{}{%
+                \defensedatetext\tud@title@delimiter%
+              }%
               {\usekomafont{date}{\@defensedate\par}}%
             \fi%
           \fi%
@@ -600,21 +782,21 @@
 % Einstellungen übernommen.
 %    \begin{macrocode}
     \def\@tempa{%
-      \def\tud@pagecolor{}%
-      \ifcase\tud@layout@title\relax\or% true
-        \cs@std@lock{tud@head@bar}{0}%
+      \renewcommand*\tud@pagecolor{}%
+      \ifcase\tud@layout@title@num\relax\or% true
+        \cs@std@lock{tud@head@bar@num}{0}%
       \or% litecolor
-        \cs@set@lock{tud@head@bar}{1}%
+        \cs@set@lock{tud@head@bar@num}{1}%
       \or% barcolor
-        \cs@set@lock{tud@head@bar}{2}%
+        \cs@set@lock{tud@head@bar@num}{2}%
       \or% bicolor
-        \cs@set@lock{tud@head@bar}{3}%
+        \cs@set@lock{tud@head@bar@num}{3}%
       \or% color
-        \def\tud@pagecolor{HKS41}%
-        \cs@set@lock{tud@head@bar}{1}%
+        \renewcommand*\tud@pagecolor{HKS41}%
+        \cs@set@lock{tud@head@bar@num}{1}%
       \or% full
-        \def\tud@pagecolor{HKS41}%
-        \cs@set@lock{tud@head@bar}{3}%
+        \renewcommand*\tud@pagecolor{HKS41}%
+        \cs@set@lock{tud@head@bar@num}{3}%
       \fi%
       \tud@color{\tud@title@fontcolor}%
       \addtokomafont{pagenumber}{\usekomafont{tudheadings}}%
@@ -624,7 +806,7 @@
 % Im Kompatibilitätsmodus für die Version~v2.02 wird im Zweifelsfall die Seite 
 % für den Fuß mit \DDC-Logo vergrößert.
 %    \begin{macrocode}
-      \tud@ifverlower{2.03}{\tud@ddc@enlargepage}{}%
+      \tud@if@v@lower{2.03}{\tud@ddc@enlargepage}{}%
     }%
 %    \end{macrocode}
 % Bei der Ausgabe des Covers werden lediglich die Farb- und Schriftdefinitionen
@@ -674,41 +856,10 @@
       \fi%
     \fi%
   \end{titlepage}%
-  \if@tud@cover\else%
-    \setcounter{footnote}{0}%
-    \global\let\and\relax%
-  \fi%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@titleback
-% \end{macro}^^A \tud@maketitlepage
-% \begin{macro}{\tud@title@uppercase}
-% Für das Setzen einzelner Felder in Majuskeln werden diese beiden Befehle
-% definiert. Bei der Verwendung des Befehls \cs{thanks} auf der Titelseite soll
-% sichergestellt werden, dass der Inhalt selbst nicht in Majuskeln gesetzt wird.
-%    \begin{macrocode}
-\newcommand*\tud@title@uppercase[1]{%
-  \let\@tempa\relax%
-  \begingroup%
-%    \end{macrocode}
-% Der Befehl \cs{thanks} wird so umdefiniert, dass der Inhalt in ein temporäres
-% Makro gespeichert wird. Danach wird durch das Setzen einer temporären Box der
-% Befehl \cs{thanks} ausgeführt und der Inhalt gesichert. Für die Ausführung von
-% \cs{tud@makeuppercase} wird das Argument von \cs{thanks} ignoriert. Nachdem 
-% das gewünschte Feld in Majuskeln gesetzt wurde, wird die gespeicherte Fußnote
-% ausgegeben.
-%    \begin{macrocode}
-    \def\thanks##1{\gdef\@tempa{##1}}%
-    \let\footnote\thanks%
-    \sbox\z@{#1}%
-    \let\thanks\@gobble%
-    \let\footnote\@gobble%
-    \tud@makeuppercase{#1}%
-  \endgroup%
-  \ifx\@tempa\relax\else\thanks\@tempa\fi%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@title@uppercase
+% \end{macro}^^A \tud@make@titlepage
 % \begin{macro}{\tud@title@names}
 % Dieser Befehl dient zur getrennten Ausgabe von mehreren, mit dem Makro 
 % \cs{and} separierten Einträgen in den Feldern \cs{@supervisor}, \cs{@referee}
@@ -720,36 +871,92 @@
     \def\and{%
       \ifcsvoid{#1othername}{\par}{%
         \vskip 1ex\@plus.5ex\@minus.5ex%
-        {\usekomafont{titlepage}{\@nameuse{#1othername}\par}}%
+        {\usekomafont{titlepage}{\csuse{#1othername}\par}}%
       }%
       \let\and\par%
     }%
     \vskip 1ex\@plus.5ex\@minus.5ex%
-    {\usekomafont{titlepage}{\@nameuse{#1name}\par}}%
-    {\usekomafont{author}{\@nameuse{@#1}\par}}%
+    {\usekomafont{titlepage}{\csuse{#1name}\par}}%
+    {\usekomafont{author}{\csuse{@#1}\par}}%
   \fi%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@title@names
-% \begin{macro}{\titledelimiter}
-% \begin{macro}{\@titledelim}
-% Dieses Makro wird für das Trennzeichen auf der Titelseite genutzt.
+%
+% \iffalse
+%</book|report|article>
+% \fi
+%
+% \begin{macro}{\tud@make@titlehead}
+% \changes{v2.05}{2015/07/13}{neu}^^A
+% \begin{macro}{\tud@make@@titlehead}
+% \changes{v2.05}{2015/07/13}{neu}^^A
+% Die Befehle für einen Titelkopf (\opt{titlepage=no}). Diese sind stark an den 
+% orginalen \KOMAScript-Befehle orientiert.
 %    \begin{macrocode}
-\newcommand*\@titledelim{:\nobreakspace}
-\newcommand*\titledelimiter[1]{\gdef\@titledelim{#1}}
+\newcommand*\tud@make@titlehead{%
+  \renewcommand*\tud@title@fontcolor{}%
+  \ifcase\tud@layout@title@num\relax\or\else% *color
+    \ifstr{\tud@pagecolor}{HKS41}{}{\renewcommand*\tud@title@fontcolor{HKS41}}%
+  \fi%
+  \par%
+  \ifx\tud@title@pagenumber\relax\else%
+    \ifnum\tud@title@pagenumber=\@ne\relax\else%
+      \ClassWarning{\TUD@Class@Name}{%
+        Optional argument of \string\maketitle\space ignored\MessageBreak%
+        at notitlepage-mode%
+      }%
+    \fi%
+  \fi%
 %    \end{macrocode}
-% \end{macro}^^A \@titledelim
-% \end{macro}^^A \titledelimiter
-% \begin{macro}{\tud@@maketitle}
-% Der eigentliche Befehl für einen Titelkopf (\opt{titlepage=no}).
+% Dieser Teil ist mehr oder weniger funktional identisch zu \KOMAScript.
 %    \begin{macrocode}
-\newcommand*\tud@@maketitle{%
+  \begingroup%
+    \let\titlepage@restore\relax%
+    \renewcommand*\thefootnote{\@fnsymbol\c@footnote}%
+    \let\@oldmakefnmark\@makefnmark%
+    \renewcommand*\@makefnmark{\rlap\@oldmakefnmark}%
+    \next@tdpage%
+%    \end{macrocode}
+% Hier wird überprüft, ob das Dokument zweispaltig gesetzt wird und zusätzlich 
+% das Paket \pkg{multicol} geladen wurde. Ist letzteres nicht der Fall, wird
+% der Titel einspaltig ausgegeben und anschließend der im Zweispaltensatz 
+% begonnen.
+%    \begin{macrocode}
+    \@tempswafalse%
+    \if@twocolumn\ifnum\col@number>\@ne\relax%
+      \@tempswatrue%
+    \fi\fi%
+    \if@tempswa%
+      \ifx\@extratitle\@empty\else%
+        \twocolumn[\@makeextratitle]\next@tdpage%
+      \fi%
+      \twocolumn[\tud@make@@titlehead]%
+    \else%
+      \ifx\@extratitle\@empty\else%
+        \@makeextratitle\next@tdpage%
+      \fi%
+      \tud@make@@titlehead%
+    \fi%
+    \ifx\titlepagestyle\@empty\else\thispagestyle{\titlepagestyle}\fi%
+    \@thanks%
+  \endgroup%
+}
+%    \end{macrocode}
+% Hier erfolgt die Ausgabe des Titelkopfes.
+%    \begin{macrocode}
+\newcommand*\tud@make@@titlehead{%
   \global\@topnum=\z@%
+%<*book|report|article>
   \vspace*{%
-    \dimexpr\tud@dim@headdiff+\tud@dim@headingsvskip-\baselineskip%
-      +\parskip\relax%
+    \dimexpr\tud@len@areavskip+\tud@len@areaheadvskip-\baselineskip\relax%
   }%
-  \vspace*{\headingsvskip}%
+  \TUD@len@deprecated{headingsvskip}%
+  \vspace*{\tud@dim@headingsvskip}%
+%</book|report|article>
+%<*poster>
+  \vspace*{\dimexpr\tud@len@areavskip-\baselineskip\relax}%
+%</poster>
   \setparsizes{\z@}{\z@}{\z@\@plus1fil}\par@updaterelative%
 %    \end{macrocode}
 % Damit die Farbeinstellungen der Schriften lokal begrenzt bleiben, wird dieser
@@ -758,7 +965,7 @@
 %    \begin{macrocode}
   \begingroup%
     \usekomafont{titlepage}%
-    \tud@footnote@unhyper%
+    \tud@x@hyperref@realfootnotes%
 %    \end{macrocode}
 % Ähnlich wie bei der Titelseite wird auch beim Titelkopf die Inhalte von 
 % \cs{@titlehead} und \cs{@subject} so nach oben verschoben, dass der Titel 
@@ -777,32 +984,39 @@
 % Erkennen, ob in der Betreffzeile eine Abschlussarbeit ausgegeben werden soll
 % und kann. Bei einem Titelkopf ist nur diese Variante möglich.
 %    \begin{macrocode}
+%<*book|report|article>
     \TUDoptions{subjectthesis=true}%
-    \tud@letsubjectthesis%
+    \tud@thesis@tosubject%
+%</book|report|article>
     \ifx\@subject\@empty\else%
       \sbox\@ne{\vbox{{\usekomafont{subject}{\@subject\par\null}}}}%
       \addtolength\@tempdima{\dimexpr\ht\@ne+\dp\@ne+\p@\relax}%
     \fi%
+%<*book|report|article>
     \vspace*{-\@tempdima}%
+%</book|report|article>
     \ifx\@titlehead\@empty\else\usebox\z@\par\fi%
     \ifx\@subject\@empty\else\usebox\@ne\par\fi%
     {\usekomafont{title}{\tud@title@uppercase{\@title}\par}}%
-    \vskip 2ex\@plus1ex\@minus1ex%
     \ifx\@subtitle\@empty\else%
+      \vskip 1ex\@plus.5ex\@minus.5ex%
       {\usekomafont{subtitle}{\tud@title@uppercase{\@subtitle}\par}}%
-      \vskip 2ex\@plus1ex\@minus1ex%
     \fi%
-    \vskip 2\bigskipamount%
+    \vskip 2ex\@plus1ex\@minus1ex%
 %    \end{macrocode}
 % Ausgabe eines Autors oder mehrerer Autoren ggf. mit Zusatzinformationen.
 %    \begin{macrocode}
-    \let\tud@split@author\tud@split@author@title%
+%<*book|report|article>
+    \vskip 2\bigskipamount%
+    \let\tud@split@author@do\tud@split@author@title%
     \tud@multiple@split{@author}\par%
-    \vskip 2ex\@plus1ex\@minus1ex%
 %    \end{macrocode}
 % Ausgabe von Datum, Verlag und Danksagung wie im Original.
 %    \begin{macrocode}
-    {\usekomafont{date}{\@date\nobreakspace\@datemore\par}}%
+    \ifx\@date\@empty\else%
+      \vskip 2ex\@plus1ex\@minus1ex%
+      {\usekomafont{date}{\tud@date@print\par}}%
+    \fi%
     \ifx\@publishers\@empty\else%
       \vskip 2ex\@plus1ex\@minus1ex%
       {\usekomafont{publishers}{\@publishers\par}}%
@@ -816,109 +1030,35 @@
 % Titelkopf ausgegeben werden, dann wird eine Warnung ausgegeben.
 %    \begin{macrocode}
     \ifx\@graduation\@empty\else\tud@title@wrn{graduation}\fi%
-    \ifx\@supervisor\@empty\else\tud@title@wrn{supervisor}\fi%
     \ifx\@referee\@empty\else\tud@title@wrn{referee}\fi%
+    \ifx\@advisor\@empty\else\tud@title@wrn{advisor}\fi%
+    \ifx\@supervisor\@empty\else\tud@title@wrn{supervisor}\fi%
     \ifx\@professor\@empty\else\tud@title@wrn{professor}\fi%
 %    \end{macrocode}
 % Am Ende wird noch etwas vertikaler Abstand eingefügt.
 %    \begin{macrocode}
     \vskip 2\bigskipamount%
+%</book|report|article>
+    \ifnum\col@number>\@ne\relax%
+      \ifdefvoid{\multicolsep}{}{%
+        \ifisskip{\multicolsep}{\vspace{-\multicolsep}}{}%
+      }%
+    \fi%
 %    \end{macrocode}
 % Wird das \DDC-Logo im Kompatibilitätsmodus für die Version~v2.02 gesetzt, 
 % muss dafür am unteren Rand entsprechend Platz gelassen werden.
 %    \begin{macrocode}
-    \tud@ifverlower{2.03}{\tud@ddc@enlargepage[\titlepagestyle]}{}%
+    \tud@if@v@lower{2.03}{\tud@ddc@enlargepage[\titlepagestyle]}{}%
   \endgroup%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@@maketitle
-% \begin{macro}{\tud@split@author@title}
-% \changes{v2.04}{2015/05/12}{neu}^^A
-% \begin{macro}{\tud@newline}
-% Das Makro \cs{tud@split@author} dient der formatierten Ausgabe aller 
-% Informationen für mehrere Autoren auf der Titelseite.
-%    \begin{macrocode}
-\newcommand*\tud@newline{}
-\newcommand*\tud@split@author@title[2]{%
-%    \end{macrocode}
-% Zu Beginn werden alle Felder, welche innerhalb von \cs{@author} angegeben
-% sind, gesichert. 
-%    \begin{macrocode}
-  \tud@multiple@fields@store{@author}{#1}%
-%    \end{macrocode}
-% Um die Abstände definiert zu setzen, wird \cs{tud@newline} verwendet. Sobald
-% auch nur eine zusätzliche Information ausgegeben werden soll, wird ein etwas
-% kleiner Abstand eingefügt. Anschließend wird jede Information einfach in
-% einer neuen Zeile ausgegeben.
-%    \begin{macrocode}
-  \def\tud@newline{\vskip .5ex\let\tud@newline\newline}%
-%    \end{macrocode}
-% Die Felder \cs{@author} und ggf. \cs{@authormore} werden sowohl auf der
-% Titelseite als auch im Titelkopf jedoch nicht auf der Umschlagseite 
-% ausgegeben.
-%    \begin{macrocode}
-  {\usekomafont{author}{\ignorespaces#1}}%
-  \if@tud@cover\else%
-    \ifx\@authormore\@empty\else%
-      \tud@newline%
-      \@authormore%
-    \fi%
-%    \end{macrocode}
-% Nur auf der Titelseite erfolgt die Ausgabe von Geburtsdatum, Geburtsort,
-% Matrikelnummer und Immatrikulationsjahr. Sollte ein Titelkopf verwendet
-% werden, so wird für jedes gesetzte Feld eine Warnung ausgegeben.
-%    \begin{macrocode}
-    \ifx\@dateofbirth\@empty\else%
-      \if@titlepage%
-        \tud@newline%
-        \ifstr{\dateofbirthtext}{}%
-          {}{\dateofbirthtext\@titledelim}\@dateofbirth%
-        \ifx\@placeofbirth\@empty\else%
-          \nobreakspace\placeofbirthtext\nobreakspace\@placeofbirth%
-        \fi%
-      \else%
-        \tud@title@wrn{dateofbirth}%
-      \fi%
-    \fi%
-    \ifx\@matriculationnumber\@empty\else%
-      \if@titlepage%
-        \tud@newline%
-        \ifstr{\matriculationnumbername}{}%
-          {}{\matriculationnumbername\@titledelim}%
-        \@matriculationnumber%
-      \else%
-        \tud@title@wrn{matriculationnumber}%
-      \fi%
-    \fi%
-    \ifx\@matriculationyear\@empty\else%
-      \if@titlepage%
-        \tud@newline%
-        \ifstr{\matriculationyearname}{}%
-          {}{\matriculationyearname\@titledelim}%
-        \@matriculationyear%
-      \else%
-        \tud@title@wrn{matriculationyear}%
-      \fi%
-    \fi%
-  \fi%
-%    \end{macrocode}
-% Zunächst werden die zuvor bestehenden Feldinhalte wiederhergestellt. Danach 
-% wird durch den Aufruf von \cs{tud@multiple@@@split} wird das übergebene
-% \meta{Feld} sukzessive abgearbeitet.
-%    \begin{macrocode}
-  \tud@multiple@fields@restore{@author}%
-  \tud@multiple@@@split{#2}{\vskip 2ex}%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@newline
-% \end{macro}^^A \tud@split@author@title
+% \end{macro}^^A \tud@make@@titlehead
+% \end{macro}^^A \tud@make@titlehead
 % \begin{macro}{\maketitleonecolumn}
 % \changes{v2.02}{2014/08/16}{einspaltiger Text obligatorisch}^^A
-% \begin{macro}{\@maketitleonecolumn}
-% \changes{v2.02}{2014/08/12}{entfernt}^^A
 % \begin{macro}{\tud@title@twocolumn}
 % \changes{v2.03}{2015/01/13}{Bugfix für falsche Position des Titels}^^A
-% \begin{macro}{\tud@title@twocolumn@box}
+% \begin{macro}{\tud@title@box}
 % Zum Setzen eines einspaltigen Titels mit einspaltiger Zusammenfassung bei
 % einem Titelkopf~-- dank der Hilfe von Markus Kohm.%
 % \footnote{\url{http://www.komascript.de/node/1699}}
@@ -935,14 +1075,18 @@
 % \opt{titlepage}.
 %    \begin{macrocode}
   \if@twocolumn%
+%<*book|report|article>
     \if@titlepage%
-      \maketitle[#1]%
+      \tud@maketitle[#1]%
       \onecolumn{#2}\twocolumn%
     \else%
-      \tud@title@twocolumn{\maketitle[#1]{#2}}%
+%</book|report|article>
+      \tud@title@twocolumn{\tud@maketitle[#1]{#2}}%
+%<*book|report|article>
     \fi%
+%</book|report|article>
   \else%
-    \ClassError{\TUDClassName}{%
+    \ClassError{\TUD@Class@Name}{%
       `\string\maketitleonecolumn' can only be used in twocolumn mode%
     }{}%
   \fi%
@@ -952,7 +1096,7 @@
 % gesetzt werden soll. Damit sich dieser auch über mehrere Seiten erstrecken
 % kann, wird mit einer Box gearbeitet.
 %    \begin{macrocode}
-\newsavebox\tud@title@twocolumn@box
+\newsavebox\tud@title@box
 \newcommand\tud@title@twocolumn[1]{%
 %    \end{macrocode}
 % Zunächst wird auf einseitigen Satz umgeschaltet. Der zu schreibende Inhalt
@@ -969,7 +1113,7 @@
 % von \val{.9}\cs{baselineskip} zur korrekten Postionierung der Überschrift
 % eingefügt werden.
 %    \begin{macrocode}
-    \global\setbox\tud@title@twocolumn@box\vbox{%
+    \global\setbox\tud@title@box\vbox{%
       \vspace*{.9\baselineskip}#1\bigskip%
     }%
   \endgroup%
@@ -979,10 +1123,10 @@
 % der ggf. beachtet werden muss.
 %    \begin{macrocode}
   \setlength\@tempdima{\textheight}%
-  \tud@ifverlower{2.03}{%
+  \tud@if@v@lower{2.03}{%
     \tud@ddc@check%
-    \ifcase\@tempb\relax\else% \tud@ddc@foot!=false
-      \setlength\@tempdima{\dimexpr\textheight-\tud@dim@ddcdiff\relax}%
+    \ifcase\@tempb\relax\else% \tud@ddc@foot@num!=false
+      \setlength\@tempdima{\dimexpr\textheight-\tud@len@ddcdiff\relax}%
       \@tempswatrue%
     \fi%
   }{}%
@@ -990,14 +1134,14 @@
 % Jetzt werden der Inhalt stückweise so lange auf einzelnen Seiten ausgeben,
 % bis der immer kleiner werdende Rest in der Box auf eine Seite passt.
 %    \begin{macrocode}
-  \ifdim\ht\tud@title@twocolumn@box>\@tempdima\relax%
-    \@whiledim\ht\tud@title@twocolumn@box>\@tempdima\do{%
+  \ifdim\ht\tud@title@box>\@tempdima\relax%
+    \@whiledim\ht\tud@title@box>\@tempdima\do{%
       \splittopskip\topskip%
       \splitmaxdepth\maxdepth%
-      \vsplit\tud@title@twocolumn@box to \@tempdima%
+      \vsplit\tud@title@box to \@tempdima%
       \clearpage%
       \setlength\@tempdima{\textheight}%
-      \tud@ifverlower{2.03}{\@tempswafalse}{}%
+      \tud@if@v@lower{2.03}{\@tempswafalse}{}%
     }%
 %    \end{macrocode}
 % Passt der auszugebende einspaltige Teil auf eine Seite, ist eine vertikale 
@@ -1005,74 +1149,39 @@
 % die Box vor der Ausgabe einfach neu und ohne diese Länge gesetzt.
 %    \begin{macrocode}
   \else%
-    \setbox\tud@title@twocolumn@box\vbox{#1\bigskip}%
+    \setbox\tud@title@box\vbox{#1\bigskip}%
   \fi%
 %    \end{macrocode}
 % Der Rest wir einfach als optionales Argument von \cs{twocolumn} ausgegeben.
 %    \begin{macrocode}
-  \twocolumn[\unvbox\tud@title@twocolumn@box]%
+  \twocolumn[\unvbox\tud@title@box]%
 %    \end{macrocode}
 % In der Version~v2.02 wird eine Warnung ausgegeben, damit der Anwender den
 % Satzspiegel manuell anpassen kann. Die Verwendung von \pkg{afterpage} liefert 
 % leider nicht in allen Fällen das gewollte Ergebnis, weshalb darauf verzichtet 
 % wird.
 %    \begin{macrocode}
-  \tud@ifverlower{2.03}{%
+  \tud@if@v@lower{2.03}{%
     \if@tempswa%
-      \ClassWarning{\TUDClassName}{%
+      \ClassWarning{\TUD@Class@Name}{%
         You are using a two-column title along with\MessageBreak%
         the DDC-logo. Unfortunately in this case, the\MessageBreak%
         type area has to be adjusted manually. Please\MessageBreak%
-        use `\string\enlargethispage{-\the\tud@dim@ddcdiff}'\MessageBreak%
+        use `\string\enlargethispage{-\the\tud@len@ddcdiff}'\MessageBreak%
         in both columns after the title%
       }%
     \fi%
   }{}%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@title@twocolumn@box
+% \end{macro}^^A \tud@title@box
 % \end{macro}^^A \tud@title@twocolumn
-% \end{macro}^^A \@maketitleonecolumn
 % \end{macro}^^A \maketitleonecolumn
-% \begin{macro}{\tud@letsubjectthesis}
-% Bei der Verwendung der Option \opt{subjectthesis} wird zum einen geprüft, ob
-% das Feld \cs{@thesis} gesetzt ist und zum anderen, ob das Feld \cs{@subject}
-% auch leer ist.
-%    \begin{macrocode}
-\newcommand*\tud@letsubjectthesis{%
-  \if@tud@subjectthesis\ifx\@thesis\@empty\else%
-    \ifx\@subject\@empty\else%
-      \ClassWarning{\TUDClassName}{%
-        The option `subjectthesis' was activated.\MessageBreak%
-        The field `subject' will be overwritten with the\MessageBreak%
-        given thesis%
-      }%
-    \fi%
-    \let\@subject\@thesis%
-  \fi\fi%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@letsubjectthesis
-% \begin{macro}{\tud@title@wrn}
-% Bei der Nutzung eines Titelkopfes wird bloß eine reduzierte Menge an
-% Informationen ausgegeben. Darauf wird der Anwender ggf. hingewiesen.
-%    \begin{macrocode}
-\newcommand*\tud@title@wrn[1]{%
-  \ClassWarning{\TUDClassName}{%
-    `\@backslashchar#1' has to be used with\MessageBreak%
-    activated titlepage option%
-  }%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@title@wrn
-% \begin{macro}{\next@tdpage}
-% \changes{v2.02}{2014/05/17}{entfernt}^^A
-% \begin{macro}{\tud@extratitle}
-% \changes{v2.02}{2014/06/23}{entfernt}^^A
-% Mit \TUDScript~v2.02 wurde die Bereitstellung dieser beiden Befehle aufgrund
-% der zwingenden Verwendung von \KOMAScript{}~v3.12 entfernt.
-% \end{macro}^^A \tud@extratitle
-% \end{macro}^^A \next@tdpage
+%
+%
+% \iffalse
+%<*book|report|article>
+% \fi
 %
 % \subsection{Cover}
 %
@@ -1084,7 +1193,7 @@
 % \begin{macro}{\makecover}
 % \changes{v2.02}{2014/06/23}{Warnung für die Option \opt{titlepage} mit dem
 %   Wert \val{firstiscover}}^^A
-% \changes{v2.02}{2014/08/08}{\cs{makecover} auch ohne \CD verwendbar}^^A
+% \changes{v2.02}{2014/08/08}{ohne \CD verwendbar}^^A
 % \changes{v2.02}{2014/08/12}{Satzspiegel mit \cs{coverpage\dots{}margin}
 %   änderbar, falls CD-Layout deaktiviert}^^A
 % \changes{v2.03}{2015/01/09}{Anpassungen für neue Satzspiegelerzeugung}^^A
@@ -1098,7 +1207,7 @@
 % Ist die Option \opt{titlepage=firstiscover} aktiv, wird eine Warnung erzeugt.
 %    \begin{macrocode}
   \if@titlepageiscoverpage%
-    \ClassWarning{\TUDClassName}{%
+    \ClassWarning{\TUD@Class@Name}{%
       Using both option `titlepage=firstiscover' and\MessageBreak%
       `\string\makecover' together isn't supported. The\MessageBreak%
       option `titlepage=firstiscover' will be ignored. If you\MessageBreak%
@@ -1122,7 +1231,7 @@
     \let\thanks\@gobble%
     \let\footnote\@gobble%
     \TUD@parameter@set{cover}{#1}%
-    \let\tud@layout@title\tud@layout@cover%
+    \let\tud@layout@title@num\tud@layout@cover@num%
     \tud@layout@process%
 %    \end{macrocode}
 % Wird der Parameter \opt{cdgeometry} aktiviert, werden die Seitenränder wie 
@@ -1130,14 +1239,14 @@
 % Einstellungen des Satzspiegels und können mit \cs{coverpage\dots margin} 
 % durch den Anwender angepasst werden.
 %    \begin{macrocode}
-    \if@tud@cover@cdgeometry%
-      \let\coverpagetopmargin\tud@dim@slimmargin%
-      \let\coverpagebottommargin\tud@dim@widemargin%
-      \let\coverpageleftmargin\tud@dim@widemargin%
-      \let\coverpagerightmargin\tud@dim@slimmargin%
-      \tud@ifverlower{2.03}{%
-        \def\coverpagetopmargin{.5\tud@dim@both}%
-        \def\coverpagebottommargin{.5\tud@dim@both}%
+    \if@tud@cdgeometry@cover%
+      \let\coverpagetopmargin\tud@len@slimmargin%
+      \let\coverpagebottommargin\tud@len@widemargin%
+      \let\coverpageleftmargin\tud@len@widemargin%
+      \let\coverpagerightmargin\tud@len@slimmargin%
+      \tud@if@v@lower{2.03}{%
+        \def\coverpagetopmargin{.5\tud@len@both}%
+        \def\coverpagebottommargin{.5\tud@len@both}%
       }{}%
     \fi%
 %    \end{macrocode}
@@ -1147,14 +1256,14 @@
 % anpassen zu können. Außerdem werden ein mit \cs{extatitle} gegebener
 % Schmutztitel ebenso ignoriert, wie Danksagung oder Einträge für die Rückseite.
 %    \begin{macrocode}
-    \ifcase\tud@layout@cover\relax% false
+    \ifcase\tud@layout@cover@num\relax% false
       \KOMAoptions{titlepage=firstiscover}%
       \let\@extratitle\@empty%
       \let\@uppertitleback\@empty%
       \let\@lowertitleback\@empty%
       \let\@dedication\@empty%
-      \ifx\tud@titlepagenumber\relax\gdef\tud@titlepagenumber{1}\fi%
-      \tud@cmd@use{maketitle}[\tud@titlepagenumber]%
+      \ifx\tud@title@pagenumber\relax\gdef\tud@title@pagenumber{1}\fi%
+      \tud@cmd@use{maketitle}[\tud@title@pagenumber]%
     \else% !false
 %    \end{macrocode}
 % Der Befehl verwendet das Layout des Titels im \CD. Allerdings werden nicht
@@ -1185,23 +1294,23 @@
       \begingroup%
         \oddsidemargin=\dimexpr\coverpageleftmargin-1in\relax%
         \evensidemargin=\dimexpr\coverpageleftmargin-1in\relax%
-        \textwidth=\dimexpr\paperwidth-\coverpageleftmargin%
+        \textwidth=\dimexpr\tud@len@layoutwidth-\coverpageleftmargin%
           -\coverpagerightmargin\relax%
         \headheight=0pt%
         \headsep=0pt%
-        \footskip=\dimexpr\tud@dim@footsep+\tud@ta@footheight\relax%
-        \tud@ifverlower{2.03}{%
-          \footskip=\dimexpr\tud@dim@headsep+\tud@ta@footheight%
+        \footskip=\dimexpr\tud@len@footsep+\footheight\relax%
+        \tud@if@v@lower{2.03}{%
+          \footskip=\dimexpr\tud@len@headsep+\footheight%
             -1.25\baselineskip\relax%
         }{}%
 %    \end{macrocode}
 % Bei der Höhe des oberen Seitenrandes muss unterschieden werden, ob der
 % Satzspiegel im \CD oder aber im Buchblock erscheinen soll.
 %    \begin{macrocode}
-        \if@tud@cover@cdgeometry%
+        \if@tud@cdgeometry@cover%
           \def\coverpagetopmargin{%
-            \dimexpr\tud@dim@topmargin+\tud@dim@barheight%
-              +\tud@dim@headsep\relax%
+            \dimexpr\tud@len@topmargin+\tud@len@barheight%
+              +\tud@len@headsep\relax%
           }%
         \else%
 %    \end{macrocode}
@@ -1211,13 +1320,13 @@
 % durch den Anwender korrigiert werden. Standardmäßig wird die Höhe jedoch für
 % das \CD angepasst. Auch die Fußhöhe wird im Zweifelsfall gesetzt.
 %    \begin{macrocode}
-          \topmargin=\dimexpr\tud@dim@topmargin+\tud@dim@barheight%
-            +\tud@dim@headsep-1in\relax%
+          \topmargin=\dimexpr\tud@len@topmargin+\tud@len@barheight%
+            +\tud@len@headsep-1in\relax%
           \def\@tempa{2\dimexpr\coverpagetopmargin\relax}%
           \ifx\@tempa\coverpagebottommargin\relax%
-            \let\coverpagebottommargin\tud@dim@widemargin%
-            \tud@ifverlower{2.03}{%
-              \def\coverpagebottommargin{.5\tud@dim@both}%
+            \let\coverpagebottommargin\tud@len@widemargin%
+            \tud@if@v@lower{2.03}{%
+              \def\coverpagebottommargin{.5\tud@len@both}%
             }{}%
           \fi%
         \fi%
@@ -1227,7 +1336,7 @@
 % Seitenrande gesetzt werden. Dies hat mit der originären Definition von 
 % \cs{coverpagetopmargin} zu tun. 
 %    \begin{macrocode}
-        \textheight=\dimexpr\paperheight-\coverpagetopmargin%
+        \textheight=\dimexpr\tud@len@layoutheight-\coverpagetopmargin%
           -\coverpagebottommargin-\tud@dim@extrabottommargin\relax%
         \topmargin=\dimexpr\coverpagetopmargin-1in\relax%
         \@colht=\textheight%
@@ -1236,20 +1345,20 @@
         \columnwidth=\textwidth%
         \hsize=\columnwidth%
         \linewidth=\hsize%
-        \tud@dim@headdiff=\z@%
+        \tud@len@areavskip=\z@%
 %    \end{macrocode}
 % Weil bereits die Titelseite normalerweise die Seitenzahl eins bekommt, kann es
 % bei der Verwendung des Paketes \pkg{hyperref} zu einer Warnung aufgrund der
 % doppelt verwendeten Seitenzahl kommen. Um dies zu verhindern, werden die
 % Seitenanker für das Cover deaktiviert.
 %    \begin{macrocode}
-        \ifdef{\hypersetup}{\hypersetup{pageanchor=false}}{}%
+        \ifundef{\hypersetup}{}{\hypersetup{pageanchor=false}}%
 %    \end{macrocode}
 % Die Ausgabe des Covers und ggf. das Wiederherstellen des Satzspiegels.
 %    \begin{macrocode}
         \tud@maketitle%
         \clearpage%
-      \csname titlepage@restore\endcsname%
+      \titlepage@restore%
     \fi%
   \endgroup%
 }
@@ -1262,8 +1371,8 @@
 % \changes{v2.03}{2015/01/12}{neu}^^A
 % \begin{parameter}{cdgeometry}
 % \changes{v2.02}{2014/06/23}{neu}^^A
-% \begin{macro}{\if@tud@cover@cdgeometry}
-% \begin{macro}{\if@tud@cover@cdgeometry@locked}
+% \begin{macro}{\if@tud@cdgeometry@cover}
+% \begin{macro}{\if@tud@cdgeometry@cover@locked}
 % \begin{parameter}{pagenumber}
 % \begin{parameter}{cdfont}
 % \begin{parameter}{cdhead}
@@ -1277,37 +1386,35 @@
 % entsprechen in ihrem Verhalten den gleichnamigen Klassenoptionen~--
 % \opt{cdgeometry} ausgenommen.
 %    \begin{macrocode}
-\bool@lock{@tud@cover@cdgeometry}
-\TUD@parameter{cover}{%
-  \TUD@parameter@define{cdcover}[true]{\TUDoption{cdcover}{#1}}%
+\bool@lock{@tud@cdgeometry@cover}
+\TUD@parameter@family{cover}{%
+  \TUD@parameter@def{cdcover}[true]{\TUDoption{cdcover}{#1}}%
   \TUD@parameter@let{cd}{cdcover}%
-  \TUD@parameter@define{cdgeometry}[true]{%
+  \TUD@parameter@def{cdgeometry}[true]{%
     \ifstrbool{#1}{%
-      \bool@set@lock{@tud@cover@cdgeometry}{true}%
+      \bool@set@lock{@tud@cdgeometry@cover}{true}%
     }{%
-      \bool@set@lock{@tud@cover@cdgeometry}{false}%
+      \bool@set@lock{@tud@cdgeometry@cover}{false}%
     }{%
-      \TUD@parameter@error{cdgeometry}{true,false}%
+      \ifstr{#1}{custom}{\bool@set@lock{@tud@cdgeometry@cover}{false}}{%
+        \ifstr{#1}{user}{\bool@set@lock{@tud@cdgeometry@cover}{false}}{%
+          \TUD@parameter@error{cdgeometry}{true,false}%
+        }%
+      }%
     }%
   }%
-  \TUD@parameter@define{pagenumber}{\def\tud@titlepagenumber{#1}}%
+  \TUD@parameter@def{pagenumber}{\def\tud@title@pagenumber{#1}}%
 %    \end{macrocode}
-% Mit \cs{TUD@parameter@define@ps} werden alle verfügbaren Parameter für die 
-% Kopf- und Fußzeilen definiert.
+% Mit \cs{tud@ps@parameters} werden alle verfügbaren Parameter für die Kopf-
+% und Fußzeilen definiert.
 %    \begin{macrocode}
-  \TUD@parameter@define@ps{#1}%
+  \tud@ps@parameters{#1}%
 %    \end{macrocode}
 % Für den Fall, dass ein Wert nicht in der Schlüssel"=Wert"=Notation angegeben
 % wurde, wird versucht, das gegebene Argument entweder als booleschen Ausdruck 
 % für das Seitenlayout oder als Seitenzahl zu interpretieren.
 %    \begin{macrocode}
-  \TUD@parameter@sethandler{%
-    \ifxnumber{#1}{%
-      \TUD@parameter@set{cover}{pagenumber=#1}%
-    }{%
-      \TUD@parameter@set{cover}{cdgeometry=#1}%
-    }%
-  }%
+  \TUD@parameter@handler@value{pagenumber}%
 }
 %    \end{macrocode}
 % \end{parameter}^^A ddcfoot
@@ -1319,13 +1426,14 @@
 % \end{parameter}^^A cdhead
 % \end{parameter}^^A cdfont
 % \end{parameter}^^A pagenumber
-% \end{macro}^^A \if@tud@cover@cdgeometry@locked
-% \end{macro}^^A \if@tud@cover@cdgeometry
+% \end{macro}^^A \if@tud@cdgeometry@cover@locked
+% \end{macro}^^A \if@tud@cdgeometry@cover
 % \end{parameter}^^A cdgeometry
 % \end{parameter}^^A cd
 % \end{parameter}^^A cdcover
 %
 % \iffalse
+%</book|report|article>
 %</class&body>
 % \fi
 %

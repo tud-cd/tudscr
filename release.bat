@@ -5,9 +5,9 @@ echo  Festlegen der Version, welche erstellt werden soll
 echo =========================================================================
 echo.
 for /f "tokens=1,2,3 delims= " %%a in (
-  'findstr /r \@TUDVersion{[0-9][0-9][0-9][0-9]/[0-9][0-9]/[0-9][0-9] source\tudscr-version.dtx'
+  'findstr /r \TUD@Version@Check{[0-9][0-9][0-9][0-9]/[0-9][0-9]/[0-9][0-9] source\tudscr-version.dtx'
 ) do (
-  if "%%c" == "TUD-KOMA-Script}%%" (
+  if "%%c" == "TUD-KOMA-Script}" (
     set version=%%b
   ) else (
     set version=%%b-%%c
@@ -16,6 +16,8 @@ for /f "tokens=1,2,3 delims= " %%a in (
 if exist temp rmdir temp /s /q > nul
 if exist release-%version% rmdir release-%version% /s /q > nul
 echo.
+echo TUD-KOMA-Script %version%
+echo.
 echo =========================================================================
 echo  Erzeugen der Klassen und der inline-Dokumentation fuer %version%
 echo =========================================================================
@@ -23,7 +25,12 @@ echo.
 call update_classes.bat
 xcopy source temp\ /s
 cd temp
-call clear.bat
+call clearsource.bat
+del  clearsource.bat
+cd doc
+call cleardoc.bat
+del  cleardoc.bat
+cd ..
 if exist test rmdir test/s /q > nul
 mkdir tex\latex\tudscr
 mkdir source\latex\tudscr
@@ -32,10 +39,8 @@ echo \BaseDirectory{.}> docstrip.cfg
 echo \UseTDS>> docstrip.cfg
 tex tudscr.ins
 pdflatex "\def\tudfinalflag{}\input{tudscrsource.tex}"
-pdflatex "\def\tudfinalflag{}\input{tudscrsource.tex}"
-makeindex -s gglo.ist -o tudscrsource.gls tudscrsource.glo
-makeindex -s gind.ist -o tudscrsource.ind tudscrsource.idx
-pdflatex "\def\tudfinalflag{}\input{tudscrsource.tex}"
+pdflatex --shell-escape "\def\tudfinalflag{}\input{tudscrsource.tex}"
+pdflatex --shell-escape "\def\tudfinalflag{}\input{tudscrsource.tex}"
 pdflatex "\def\tudfinalflag{}\input{tudscrsource.tex}"
 move  *.dtx               source\latex\tudscr\
 move  tudscr.ins          source\latex\tudscr\
@@ -52,29 +57,21 @@ echo  Erzeugen des Benutzerhandbuchs
 echo =========================================================================
 echo.
 cd doc
-pdflatex -shell-escape "\def\tudfinalflag{}\input{tudscr.tex}"
+pdflatex --shell-escape "\def\tudfinalflag{}\input{tudscr.tex}"
 pdflatex "\def\tudfinalflag{}\input{tudscr.tex}"
 pdflatex "\def\tudfinalflag{}\input{tudscr.tex}"
 pdflatex "\def\tudfinalflag{}\input{tudscr.tex}"
-pdflatex -shell-escape "\def\tudfinalflag{}\input{tudscr.tex}"
+pdflatex --shell-escape "\def\tudfinalflag{}\input{tudscr.tex}"
 pdflatex "\def\tudfinalflag{}\input{tudscr.tex}"
 pdflatex "\def\tudfinalflag{}\def\tudprintflag{}\input{tudscr.tex}"
 copy tudscr.pdf tudscr_print.pdf
 pdflatex "\def\tudfinalflag{}\input{tudscr.tex}"
 del tutorials\*autopp*.* /q > nul
-attrib +h "tutorials\*-temp.pdf"
+attrib +h "tutorials\*-standalone-*.pdf"
 attrib +h "tutorials\*-pics.pdf"
-move tudscr*.pdf     latex\tudscr
-move tutorials\*.pdf latex\tudscr\tutorials\
-setlocal enabledelayedexpansion
-set "pattern=-temp"
-set "replace="
-for /f %%f in ('dir /b tutorials\*-example-temp.tex') do (
-  set "file=%%~f"
-  echo "!file!"
-  copy "tutorials\!file!" "..\source\latex\tudscr\doc\examples\!file:%pattern%=%replace%!"
-)
-endlocal
+move tudscr*.pdf             latex\tudscr\
+move tutorials\*.pdf         latex\tudscr\tutorials\
+move tutorials\*-example.tex ..\source\latex\tudscr\doc\examples\
 del *.* /q > nul
 rmdir examples /s /q > nul
 rmdir tutorials /s /q > nul
@@ -113,6 +110,7 @@ copy temp\doc\latex\tudscr\tudscr.pdf       release-%version%\temp\
 copy temp\doc\latex\tudscr\tudscr_print.pdf release-%version%\temp\
 move temp\install\*.*                       release-%version%\temp\
 rmdir temp\install /s /q > nul
+rmdir temp\cwl /s /q > nul
 cd release-%version%\temp
 for /f %%f in ('dir /b *.bat') do unix2dos -k %%f
 7za a -tzip tudscr_%version%_full.zip   .\..\..\temp\*

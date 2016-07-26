@@ -3,27 +3,28 @@
   \input tudscr-version.dtx
   \gdef\filename{\jobname}
 \endgroup
-\ProvidesFile{tudscrsource.tex}[\TUDVersion (sourcedoc)]
+\ProvidesFile{tudscrsource.tex}[\TUDScriptVersion (sourcedoc)]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
-\documentclass[english,ngerman]{tudscrdoc}
+\documentclass[english,ngerman,xindy]{tudscrdoc}
 \usepackage{selinput}\SelectInputMappings{adieresis={ä},germandbls={ß}}
 \usepackage[T1]{fontenc}
 \usepackage{babel}
 \usepackage{tudscrfonts} % only load this package, if the fonts are installed
-\usepackage{bookmark}
+\KOMAoptions{parskip=half-}
 \usepackage{microtype}
-\EnableCrossrefs
+\usepackage{bookmark}
+%\EnableCrossrefs
 \CodelineIndex
 \RecordChanges
 \GetFileInfo{tudscrsource.tex}
-\KOMAoptions{parskip=half-}
 \begin{document}
 \addtokomafont{subject}{\sffamily}
-\subject{\TUDScript{}~\vTUDScript{} basierend auf \KOMAScript{}~\vKOMAScript}
+\subject{\TUDScript \vTUDScript{} basierend auf \KOMAScript}
 \title{Ein \LaTeXe-Bundle für Dokumente \mbox{im neuen \CD der} \mbox{\TnUD}}
 \subtitle{Dokumentierter Quelltext}
 \date{\filedate\\[1ex] Version \fileversion}
 \author{Falk Hanisch\thanks{\tudscrmail}}
+
 \makeatletter
 \begingroup%
   \def\and{, }%
@@ -36,8 +37,14 @@
     pdfkeywords = {LaTeX, \TUDScript, Quelltext},%
   }%
 \endgroup%
+\renewcommand*\@pnumwidth{1.9em}
+\renewcommand*\@tocrmarg{2.9em}
 \makeatother
+
+
 \maketitle
+
+
 Das \TUDScript-Bundle setzt das \CD der \TnUD für \LaTeXe{} um. Die darin 
 enthaltenen Klassen und Paketen basieren auf dem \KOMAScript-Bundle und sind 
 sehr eng mit diesen verwoben. Momentan ergänzen sie die alten, auf den 
@@ -45,12 +52,14 @@ Standard-\LaTeX-Klassen basierenden Vorlagen von Klaus Bergmann, sollen diese
 jedoch mittel- bis langfristig ersetzen.%
 \footnote{%
   aktuell ist dies \cls{tudbook}, geplant \cls{tudfax}, \cls{tudletter}, 
-  \cls{tudform}, \cls{tudhaus} und evtl. auch \cls{tudbeamer}
+  \cls{tudform}, \cls{tudhaus} und evtl. auch \cls{tudbeamer}%
 }
 Es handelt sich bei diesem Dokument \emph{nicht} um das Anwenderhandbuch
 sondern um den dokumentierten Quelltext der Implementierung von \TUDScript.
 Das Anwenderhandbuch kann über die Konsole respektive das Terminal mit dem 
-Aufruf \texttt{texdoc tudscr} geöffnet werden. 
+Aufruf \texttt{texdoc tudscr} geöffnet werden.
+
+\ToDo{Sämtliche \cs{@temp\dots}-Makros auf \cs{tud@reserved\dots} ändern}[v2.06]
 
 \tableofcontents
 \clearpage
@@ -60,43 +69,33 @@ Aufruf \texttt{texdoc tudscr} geöffnet werden.
 \DocInclude{tudscr-fonts}
 \DocInclude{tudscr-fields}
 \DocInclude{tudscr-locale}
+\DocInclude{tudscr-area}
 \DocInclude{tudscr-pagestyle}
 \DocInclude{tudscr-layout}
-\DocInclude{tudscr-frontmatter}
 \DocInclude{tudscr-title}
-\DocInclude{tudscr-misc}
+\DocInclude{tudscr-frontmatter}
 \DocInclude{tudscr-comp}
-
+\DocInclude{tudscr-misc}
 \DocInclude{tudscr-color}
 \DocInclude{tudscr-supervisor}
-\DocInclude{tudscr-poster}
+
 \DocInclude{tudscr-twocolfix}
 \DocInclude{tudscr-mathswap}
 
-%\DocInclude{tudscr-doc}
-%\DocInclude{tudscr-manual}
-%
-%\DocInclude{install/tudscr-metrics}
-%\DocInclude{install/tudscr-scripts}
+\ifdefined\tudfinalflag\else
+\DocInclude{tudscr-doc}
+\DocInclude{tudscr-manual}
+
+\DocInclude{install/tudscr-metrics}
+\DocInclude{install/tudscr-scripts}
+\fi
 
 \addpart{\appendixname}
 \vspace*{-2\baselineskip}
-\phantomsection\addsectiontocentry{}{\indexname}
-\begingroup
-  \makeatletter
-  \l@addto@macro\IndexParms{\hbadness=10000}
-  \makeatother
-  \PrintIndex
-\endgroup
-%
+\PrintIndex
 \clearpage
-\phantomsection\addsectiontocentry{}{Change History}
-\begingroup
-  \makeatletter
-  \def\@oddfoot{Change History\hfill\thepage}
-  \def\@evenfoot{Change History\hfill\thepage}
-  \makeatother
-  \PrintChanges
-  \clearpage
-\endgroup
+\PrintChanges
+\clearpage
+\PrintToDos
+\clearpage
 \end{document}

@@ -1,4 +1,4 @@
-% \CheckSum{575}
+% \CheckSum{601}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -18,13 +18,13 @@
 % 
 % ----------------------------------------------------------------------------
 % 
-% Dieses Werk darf nach den Bedingungen der LaTeX Project Public Lizenz
-% in der Version 1.3c, verteilt und/oder veraendert werden. Die aktuelle 
-% Version dieser Lizenz ist http://www.latex-project.org/lppl.txt und 
-% Version 1.3c oder spaeter ist Teil aller Verteilungen von LaTeX 2005/12/01 
-% oder spaeter und dieses Werks. Dieses Werk hat den LPPL-Verwaltungs-Status 
-% "author-maintained", wird somit allein durch den Autor verwaltet. Der 
-% aktuelle Verwalter und Autor dieses Werkes ist Falk Hanisch.
+%  Dieses Werk darf nach den Bedingungen der LaTeX Project Public Lizenz
+%  in der Version 1.3c, verteilt und/oder veraendert werden. Die aktuelle 
+%  Version dieser Lizenz ist http://www.latex-project.org/lppl.txt und 
+%  Version 1.3c oder spaeter ist Teil aller Verteilungen von LaTeX 2005/12/01 
+%  oder spaeter und dieses Werks. Dieses Werk hat den LPPL-Verwaltungs-Status 
+%  "author-maintained", wird somit allein durch den Autor verwaltet. Der 
+%  aktuelle Verwalter und Autor dieses Werkes ist Falk Hanisch.
 % 
 % ============================================================================
 %
@@ -51,15 +51,17 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-locale.dtx}[%
-  2015/06/12 v2.04 TUD-KOMA-Script (localization)%
+  2016/07/20 v2.05 TUD-KOMA-Script (localization)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
-\documentclass[english,ngerman]{tudscrdoc}
+\documentclass[english,ngerman,xindy]{tudscrdoc}
 \usepackage{selinput}\SelectInputMappings{adieresis={ä},germandbls={ß}}
 \usepackage[T1]{fontenc}
 \usepackage{babel}
 \usepackage{tudscrfonts} % only load this package, if the fonts are installed
 \KOMAoptions{parskip=half-}
+\usepackage{microtype}
+\usepackage{bookmark}
 \CodelineIndex
 \RecordChanges
 \GetFileInfo{tudscr-locale.dtx}
@@ -72,7 +74,8 @@
 %
 % \selectlanguage{ngerman}
 %
-% \changes{v2.02}{2014/06/23}{Unterstützung für \pkg{titlepage} entfernt}^^A
+% \changes{v2.02}{2014/06/23}{Paket \pkg{titlepage} nicht weiter unterstützt}^^A
+% \changes{v2.05}{2015/07/06}{Bezeichner für Poster}^^A
 %
 % \section{Lokalisierung}
 %
@@ -80,26 +83,53 @@
 % bedeutet, dass abhängig von der gewählten Sprache die entsprechenden
 % Bezeichner gesetzt werden.
 %
-% \StopEventually{\PrintIndex\PrintChanges}
+% \StopEventually{\PrintIndex\PrintChanges\PrintToDos}
 %
 % \subsection{Definition der sprachabhängigen Bezeichner}
 %
 % \begin{macro}{\tud@locale@define}
 %
 % \iffalse
-%<*class>
+%<*class&!manual>
+% \fi
+%
+% Die neu definierten Bezeichner werden mit einer Fehlermeldung initialisiert.
+% Wird eine unterstützte Dokumentsprache~-- momentan sind dies lediglich
+% Deutsch und Englisch~-- in der Präambel des Dokumentes geladen, so werden die
+% Bezeichner sprachspezifisch überschrieben. Andernfalls bekommt der Anwender
+% eine Fehlermeldung mit Hinweisen, wie er selbst die Bezeichner für die
+% gewählte Sprache manuell definieren muss.
+%    \begin{macrocode}
+\newcommand*\tud@locale@define[1]{%
+  \providecommand*#1{%
+    \ClassError{\TUD@Class@Name}{%
+      `\string#1' not defined for language `\languagename'%
+    }{%
+      Currently the class `\TUD@Class@Name' only supports the\MessageBreak%
+      languages german and english an its dialects. You must\MessageBreak%
+      define single patterns by yourself, e.g.:\MessageBreak%
+      `\string\providecaptionname{\languagename}\string#1{<text>}'\MessageBreak%
+      You can send your definitions to \tudscrmail\space in\MessageBreak%
+      order to implement support for additional languages.%
+    }%
+  }%
+}
+%    \end{macrocode}
+%
+% \iffalse
+%<*book|report|article>
 % \fi
 %
 % \begin{locale}{\graduationtext}
 % \changes{v2.02}{2014/05/16}{neu, umbenannt von \cs{degreetext}}^^A
-% \begin{locale}{\supervisorname}
-% \begin{locale}{\supervisorothername}
 % \begin{locale}{\refereename}
 % \changes{v2.02}{2014/05/20}{Unterscheidung, ob ein oder mehrere Gutachter
 %   angegeben sind}^^A
 % \begin{locale}{\refereeothername}
 % \begin{locale}{\advisorname}
 % \begin{locale}{\advisorothername}
+% \begin{locale}{\supervisorname}
+% \begin{locale}{\supervisorothername}
 % \begin{locale}{\professorname}
 % \begin{locale}{\professorothername}
 % \changes{v2.02}{2014/09/03}{neu}^^A
@@ -111,6 +141,7 @@
 % \begin{locale}{\matriculationyearname}
 % \begin{locale}{\coverpagename}
 % \begin{locale}{\titlepagename}
+% \begin{locale}{\titlename}
 % \begin{locale}{\abstractname}
 % \begin{locale}{\confirmationname}
 % \begin{locale}{\confirmationtext}
@@ -120,47 +151,15 @@
 % \begin{locale}{\blockingtext}
 % \changes{v2.02}{2014/05/16}{neu, \cs{restrictiontext} umbenannt}^^A
 % \changes{v2.02}{2014/11/05}{Korrektur bei der Verwendung von \cs{@@title}}^^A
-% \begin{locale}{\listingname}
-% \begin{locale}{\listlistingname}
-% \begin{locale}{\dissertationname}
-% \begin{locale}{\diplomathesisname}
-% \begin{locale}{\masterthesisname}
-% \begin{locale}{\bachelorthesisname}
-% \begin{locale}{\studentresearchname}
-% \begin{locale}{\projectpapername}
-% \begin{locale}{\seminarpapername}
-% \begin{locale}{\researchname}
-% \begin{locale}{\logname}
-% \begin{locale}{\internshipname}
-% \begin{locale}{\reportname}
-% Die neu definierten Bezeichner werden mit einer Fehlermeldung initialisiert.
-% Wird eine unterstützte Dokumentsprache~-- momentan sind dies lediglich
-% Deutsch und Englisch~-- in der Präambel des Dokumentes geladen, so werden die
-% Bezeichner sprachspezifisch überschrieben. Andernfalls bekommt der Anwender
-% eine Fehlermeldung mit Hinweisen, wie er selbst die Bezeichner für die
-% gewählte Sprache manuell definieren muss.
+% Diese Bezeichner existieren nur für die drei Hauptklassen.
 %    \begin{macrocode}
-\newcommand*\tud@locale@define[1]{%
-  \providecommand*#1{%
-    \ClassError{\TUDClassName}{%
-      `\string#1' not defined for language `\languagename'%
-    }{%
-      Currently the class `\TUDClassName' only supports the\MessageBreak%
-      languages german and english an its dialects. You must\MessageBreak%
-      define single patterns by yourself, e.g.:\MessageBreak%
-      `\string\providecaptionname{\languagename}\string#1{<text>}'\MessageBreak%
-      You can send your definitions to \tudscrmail\space in\MessageBreak% 
-      order to implement support for additional languages.
-    }%
-  }%
-}
 \tud@locale@define{\graduationtext}
-\tud@locale@define{\supervisorname}
-\tud@locale@define{\supervisorothername}
 \tud@locale@define{\refereename}
 \tud@locale@define{\refereeothername}
 \tud@locale@define{\advisorname}
 \tud@locale@define{\advisorothername}
+\tud@locale@define{\supervisorname}
+\tud@locale@define{\supervisorothername}
 \tud@locale@define{\professorname}
 \tud@locale@define{\professorothername}
 \tud@locale@define{\datetext}
@@ -171,6 +170,7 @@
 \tud@locale@define{\matriculationnumbername}
 \tud@locale@define{\coverpagename}
 \tud@locale@define{\titlepagename}
+\tud@locale@define{\titlename}
 %<*book>
 \tud@locale@define{\abstractname}
 %</book>
@@ -178,38 +178,13 @@
 \tud@locale@define{\confirmationtext}
 \tud@locale@define{\blockingname}
 \tud@locale@define{\blockingtext}
-\tud@locale@define{\listingname}
-\tud@locale@define{\listlistingname}
-\tud@locale@define{\dissertationname}
-\tud@locale@define{\diplomathesisname}
-\tud@locale@define{\masterthesisname}
-\tud@locale@define{\bachelorthesisname}
-\tud@locale@define{\studentresearchname}
-\tud@locale@define{\projectpapername}
-\tud@locale@define{\seminarpapername}
-\tud@locale@define{\researchname}
-\tud@locale@define{\logname}
-\tud@locale@define{\internshipname}
-\tud@locale@define{\reportname}
 %    \end{macrocode}
-% \end{locale}^^A \reportname
-% \end{locale}^^A \internshipname
-% \end{locale}^^A \logname
-% \end{locale}^^A \researchname
-% \end{locale}^^A \seminarpapername
-% \end{locale}^^A \projectpapername
-% \end{locale}^^A \studentresearchname
-% \end{locale}^^A \bachelorthesisname
-% \end{locale}^^A \masterthesisname
-% \end{locale}^^A \diplomathesisname
-% \end{locale}^^A \dissertationname
 % \end{locale}^^A \blockingtext
-% \end{locale}^^A \listlistingname
-% \end{locale}^^A \listingname
 % \end{locale}^^A \blockingname
 % \end{locale}^^A \confirmationtext
 % \end{locale}^^A \confirmationname
 % \end{locale}^^A \abstractname
+% \end{locale}^^A \titlename
 % \end{locale}^^A \titlepagename
 % \end{locale}^^A \coverpagename
 % \end{locale}^^A \matriculationyearname
@@ -220,27 +195,104 @@
 % \end{locale}^^A \datetext
 % \end{locale}^^A \professorothername
 % \end{locale}^^A \professorname
+% \end{locale}^^A \supervisorothername
+% \end{locale}^^A \supervisorname
 % \end{locale}^^A \advisorothername
 % \end{locale}^^A \advisorname
 % \end{locale}^^A \refereeothername
 % \end{locale}^^A \refereename
-% \end{locale}^^A \supervisorothername
-% \end{locale}^^A \supervisorname
 % \end{locale}^^A \graduationtext
 %
 % \iffalse
-%</class>
-%<*supervisor>
+%</book|report|article>
+% \fi
+%
+% \begin{locale}{\coursename}
+% \begin{locale}{\disciplinename}
+% \changes{v2.02}{2014/05/16}{neu, Umbenennung von \cs{branchname}}^^A
+% \begin{locale}{\listingname}
+% \begin{locale}{\listlistingname}
+% \begin{locale}{\dissertationname}
+% \begin{locale}{\diplomathesisname}
+% \begin{locale}{\masterthesisname}
+% \begin{locale}{\bachelorthesisname}
+% \begin{locale}{\studentthesisname}
+% \begin{locale}{\studentresearchname}
+% \begin{locale}{\projectpapername}
+% \begin{locale}{\seminarpapername}
+% \begin{locale}{\termpapername}
+% \begin{locale}{\researchname}
+% \begin{locale}{\logname}
+% \begin{locale}{\internshipname}
+% \begin{locale}{\reportname}
+% Diese Bezeichner stehen zusätzlich auch für \cls{tudscrposter} zur Verfügung.
+%    \begin{macrocode}
+\tud@locale@define{\coursename}
+\tud@locale@define{\disciplinename}
+\tud@locale@define{\listingname}
+\tud@locale@define{\listlistingname}
+\tud@locale@define{\dissertationname}
+\tud@locale@define{\diplomathesisname}
+\tud@locale@define{\masterthesisname}
+\tud@locale@define{\bachelorthesisname}
+\tud@locale@define{\studentthesisname}
+\tud@locale@define{\studentresearchname}
+\tud@locale@define{\projectpapername}
+\tud@locale@define{\seminarpapername}
+\tud@locale@define{\termpapername}
+\tud@locale@define{\researchname}
+\tud@locale@define{\logname}
+\tud@locale@define{\internshipname}
+\tud@locale@define{\reportname}
+%    \end{macrocode}
+% \end{locale}^^A \reportname
+% \end{locale}^^A \internshipname
+% \end{locale}^^A \logname
+% \end{locale}^^A \researchname
+% \end{locale}^^A \termpapername
+% \end{locale}^^A \seminarpapername
+% \end{locale}^^A \projectpapername
+% \end{locale}^^A \studentresearchname
+% \end{locale}^^A \studentthesisname
+% \end{locale}^^A \bachelorthesisname
+% \end{locale}^^A \masterthesisname
+% \end{locale}^^A \diplomathesisname
+% \end{locale}^^A \dissertationname
+% \end{locale}^^A \listlistingname
+% \end{locale}^^A \listingname
+% \end{locale}^^A \disciplinename
+% \end{locale}^^A \coursename
+%
+% \iffalse
+%</class&!manual>
+%<*class&poster|package&supervisor|class&manual>
+% \fi
+%
+% \begin{locale}{\authorname}
+% \changes{v2.05}{2015/07/06}{neu}^^A
+% \begin{locale}{\contactname}
+% \changes{v2.05}{2015/07/06}{neu}^^A
+% \begin{locale}{\contactpersonname}
+% Diese Bezeichner stehen für \cls{tudscrposter} sowie \pkg{tudscrsupervisor}
+% bereit.
+%    \begin{macrocode}
+\tud@locale@define{\authorname}
+\tud@locale@define{\contactname}
+\tud@locale@define{\contactpersonname}
+%    \end{macrocode}
+% \end{locale}^^A \contactpersonname
+% \end{locale}^^A \contactname
+% \end{locale}^^A \authorname
+%
+% \iffalse
+%</class&poster|package&supervisor|class&manual>
+%<*package&supervisor|class&manual>
 % \fi
 %
 % \begin{locale}{\taskname}
 % \begin{locale}{\tasktext}
 % \begin{locale}{\namesname}
-% \changes{v2.04}{2015/05/06}{neu, \cs{authorname} umbenannt}^^A
-% \begin{locale}{\titlename}
-% \begin{locale}{\coursename}
-% \begin{locale}{\disciplinename}
-% \changes{v2.02}{2014/05/16}{neu, \cs{branchname} umbenannt}^^A
+% \changes{v2.04}{2015/05/06}{neu, Umbenennung von \cs{authorname}}^^A
 % \begin{locale}{\issuedatetext}
 % \begin{locale}{\duedatetext}
 % \begin{locale}{\chairmanname}
@@ -252,7 +304,6 @@
 % \begin{locale}{\assessmentname}
 % \begin{locale}{\gradetext}
 % \begin{locale}{\noticename}
-% \begin{locale}{\contactpersonname}
 % \changes{v2.02}{2014/05/16}{neu, umbenannt von \cs{contactname}}^^A
 % Die für \pkg{tudscrsupervisor} definierten Bezeichner werden durch
 % \cs{tud@locale@define} mit einer Fehlermeldung initialisiert.
@@ -260,9 +311,6 @@
 \tud@locale@define{\taskname}
 \tud@locale@define{\tasktext}
 \tud@locale@define{\namesname}
-\tud@locale@define{\titlename}
-\tud@locale@define{\coursename}
-\tud@locale@define{\disciplinename}
 \tud@locale@define{\issuedatetext}
 \tud@locale@define{\duedatetext}
 \tud@locale@define{\chairmanname}
@@ -274,9 +322,7 @@
 \tud@locale@define{\assessmentname}
 \tud@locale@define{\gradetext}
 \tud@locale@define{\noticename}
-\tud@locale@define{\contactpersonname}
 %    \end{macrocode}
-% \end{locale}^^A \contactpersonname
 % \end{locale}^^A \noticename
 % \end{locale}^^A \gradetext
 % \end{locale}^^A \assessmentname
@@ -288,46 +334,49 @@
 % \end{locale}^^A \chairmanname
 % \end{locale}^^A \duedatetext
 % \end{locale}^^A \issuedatetext
-% \end{locale}^^A \disciplinename
-% \end{locale}^^A \coursename
-% \end{locale}^^A \titlename
 % \end{locale}^^A \namesname
 % \end{locale}^^A \tasktext
 % \end{locale}^^A \taskname
 %
 % \iffalse
-%</supervisor>
-%<*poster>
-% \fi
-%
-% \begin{locale}{\authorname}
-% \changes{v2.04}{2015/05/12}{neu}^^A
-% \begin{locale}{\contactname}
-% \changes{v2.04}{2015/05/12}{neu}^^A
-% \begin{locale}{\contactpersonname}
-% Die für \pkg{tudscrsupervisor} definierten Bezeichner werden durch
-% \cs{tud@locale@define} mit einer Fehlermeldung initialisiert.
-%    \begin{macrocode}
-\tud@locale@define{\authorname}
-\tud@locale@define{\contactname}
-\tud@locale@define{\contactpersonname}
-%    \end{macrocode}
-% \end{locale}^^A \contactpersonname
-% \end{locale}^^A \contactname
-% \end{locale}^^A \authorname
-%
-% \iffalse
-%</poster>
+%</package&supervisor|class&manual>
 % \fi
 %
 % \end{macro}^^A \tud@locale@define
 %
-% \subsection{Deutschsprachige Bezeichner}
-%
 % \iffalse
-%<*class>
+%<*class&!manual>
 % \fi
 %
+% \subsubsection{Hilfsmakros für selektive Bezeichner}
+%
+% Einige Bezeichner verhalten sich je nach der Angabe für einzelne Felder 
+% selektiv, die zur Auswahl notwendigen Makros werden hier definiert.
+%
+% \begin{macro}{\tud@ifin@and}
+% \changes{v2.05}{2015/08/05}{neu}^^A
+% Dieser Befehl prüft, ob innerhalb eines Felder, welches im ersten Argument 
+% angegeben werden muss, \cs{and} verwendet wurde. Ist dies der Fall, wird das
+% zweite Argument ausgeführt, andernfalls das dritte.
+%    \begin{macrocode}
+\newcommand*\tud@ifin@and[1]{%
+  \begingroup%
+    \let\and\relax%
+    \protected@edef\@tempb{#1}%
+    \def\@tempa##1\and##2\relax{%
+      \IfArgIsEmpty{##2}{%
+        \aftergroup\@secondoftwo%
+      }{%
+        \aftergroup\@firstoftwo%
+      }%
+    }%
+    \expandafter\@tempa\@tempb\and\relax%
+  \endgroup
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@ifin@and
+%
+% \subsubsection{Deutschsprachige Bezeichner}
 % \begin{macro}{\tud@locale@german}
 % \changes{v2.02}{2014/07/07}{als Aliasbefehl für \cs{providecaptionname} mit
 %   dem Argument \marg{deutsche Sprachliste}}^^A
@@ -343,43 +392,61 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@locale@german
+%
 % Hier erfolgt die eigentliche Definition der sprachabhängigen Bezeichner für 
 % die deutsche Sprache und ihre Dialekte.
 %    \begin{macrocode}
+%<*book|report|article>
 \tud@locale@german{\graduationtext}{zur Erlangung des akademischen Grades}%
-\tud@locale@german{\supervisorname}{Betreuer}%
-\tud@locale@german{\supervisorothername}{}%
+%    \end{macrocode}
+% Für die nachfolgenden Felder, für die es bedarfsweise einen Bezeichner für 
+% eine zweite Person gibt (\cs{\dots{}othername}), werden jeweils verschiedene 
+% Varianten definiert. Existiert in einem Feld nur eine Person, wird der
+% Singular der Bezeichnung verwendet. Wurden mindestens zwei Personen angegeben
+% (\cs{and}), so wird geprüft, ob der Bezeichner für die zusätzlichen Personen
+% nicht leer ist. Ist dies der Fall, wird die alternative Form des Bezeichners
+% der ersten Person verwendet, andernfalls wird der Bezeichner im Plural
+% verwendet.
+%    \begin{macrocode}
 \tud@locale@german{\refereename}{%
-  \begingroup%
-    \protecting{%
-      \global\@tempswafalse%
-      \def\and{\global\@tempswatrue}%
-      \sbox\z@{\@referee}%
-    }%
-  \endgroup%
-  \if@tempswa%
-    Erstgutachter%
-  \else%
-    Gutachter%
-  \fi%
-}
+  \tud@ifin@and{\@referee}{%
+    \ifx\refereeothername\@empty%
+      Gutachter%
+    \else%
+      Erstgutachter%
+    \fi%
+  }{Gutachter}%
+}%
 \tud@locale@german{\refereeothername}{Zweitgutachter}%
-\tud@locale@german{\advisorname}{Fachreferent}%
+\tud@locale@german{\advisorname}{%
+  \tud@ifin@and{\@advisor}{%
+    \ifx\advisorothername\@empty%
+      Fachreferenten%
+    \else%
+      Erster Fachreferent%
+    \fi%
+  }{Fachreferent}%
+}%
 \tud@locale@german{\advisorothername}{}%
+\tud@locale@german{\supervisorname}{%
+  \tud@ifin@and{\@supervisor}{%
+    \ifx\supervisorothername\@empty%
+      Betreuer%
+    \else%
+      Erstbetreuer%
+    \fi%
+  }{Betreuer}%
+}%
+\tud@locale@german{\supervisorothername}{}%
 \tud@locale@german{\professorname}{%
-  \begingroup%
-    \protecting{%
-      \global\@tempswafalse%
-      \def\and{\global\@tempswatrue}%
-      \sbox\z@{\@professor}%
-    }%
-  \endgroup%
-  \if@tempswa%
-    Betreuende Hochschullehrer%
-  \else%
-    Betreuender Hochschullehrer%
-  \fi%
-}
+  \tud@ifin@and{\@professor}{%
+    \ifx\professorothername\@empty%
+      Betreuende Hochschullehrer%
+    \else%
+      Erster betreuender Hochschullehrer%
+    \fi%
+  }{Betreuender Hochschullehrer}%
+}%
 \tud@locale@german{\professorothername}{}%
 \tud@locale@german{\datetext}{Eingereicht am}%
 \tud@locale@german{\dateofbirthtext}{Geboren am}%
@@ -389,54 +456,60 @@
 \tud@locale@german{\matriculationnumbername}{Matrikelnummer}%
 \tud@locale@german{\coverpagename}{Umschlagseite}%
 \tud@locale@german{\titlepagename}{Titelblatt}%
+\tud@locale@german{\titlename}{Titel}%
 %<*book>
 \tud@locale@german{\abstractname}{Zusammenfassung}%
 %</book>
 \tud@locale@german{\confirmationname}{Selbstst\"andigkeitserkl\"arung}%
 \tud@locale@german{\confirmationtext}{%
-  Hiermit versichere ich, dass ich die vorliegende
+  Hiermit versichere ich, dass ich die vorliegende 
   \ifx\@@thesis\@empty Arbeit \else\@@thesis{} \fi
   \ifx\@@title\@empty\else mit dem Titel \emph{\@@title} \fi
-  selbstst\"andig und ohne unzul\"assige Hilfe Dritter verfasst habe. Es
-  wurden keine anderen als die in der Arbeit angegebenen Hilfsmittel und
-  Quellen benutzt. Die w\"ortlichen und sinngem\"a\ss{} \"ubernommenen
-  Zitate habe ich als solche kenntlich gemacht.
+  selbstst\"andig und ohne unzul\"assige Hilfe Dritter verfasst habe. 
+  Es wurden keine anderen als die in der Arbeit angegebenen Hilfsmittel 
+  und Quellen benutzt. Die w\"ortlichen und sinngem\"a\ss{} 
+  \"ubernommenen Zitate habe ich als solche kenntlich gemacht. 
   \ifx\@supporter\@empty%
-    Es waren keine weiteren Personen an der geistigen Herstellung der
-    vorliegenden Arbeit beteiligt.
+    Es waren keine weiteren Personen an der geistigen Herstellung 
+    der vorliegenden Arbeit beteiligt. 
   \else%
-    W\"ahrend der Anfertigung dieser Arbeit wurde ich nur von folgenden
-    Personen unterst\"utzt:%
+    W\"ahrend der Anfertigung dieser Arbeit wurde ich nur von 
+    folgenden Personen unterst\"utzt:%
     \begin{quote}\def\and{\newline}\@supporter\end{quote}%
-    \noindent Weitere Personen waren an der geistigen Herstellung der
-    vorliegenden Arbeit nicht beteiligt.
+    \noindent Weitere Personen waren an der geistigen Herstellung 
+    der vorliegenden Arbeit nicht beteiligt. 
   \fi%
-  Mir ist bekannt, dass die Nichteinhaltung dieser Erkl\"arung zum
+  Mir ist bekannt, dass die Nichteinhaltung dieser Erkl\"arung zum 
   nachtr\"aglichen Entzug des Hochschulabschlusses f\"uhren kann.%
-}
+}%
 \tud@locale@german{\blockingname}{Sperrvermerk}%
 \tud@locale@german{\blockingtext}{%
   Diese \ifx\@@thesis\@empty Arbeit \else\@@thesis{} \fi
   \ifx\@@title\@empty\else mit dem Titel \emph{\@@title} \fi
   enth\"alt vertrauliche Informationen\ifx\@company\@empty\else
-  , offengelegt durch \emph{\@company}\fi. Ver\"offentlichungen,
-  Vervielf\"altigungen und Einsichtnahme~-- auch nur auszugsweise~--
+  , offengelegt durch \emph{\@company}\fi. Ver\"offentlichungen, 
+  Vervielf\"altigungen und Einsichtnahme~-- auch nur auszugsweise~-- 
   sind ohne ausdr\"uckliche Genehmigung \ifx\@company\@empty\else
-  durch \emph{\@company} \fi nicht gestattet, ebenso wie
-  Ver\"offentlichungen \"uber den Inhalt dieser Arbeit. Die
-  vorliegende Arbeit ist nur dem Betreuer an der Technischen
-  Universit\"at Dresden, den Gutachtern sowie den Mitgliedern des 
-  Pr\"ufungsausschusses zug\"anglich zu machen.%
-}
+  durch \emph{\@company} \fi nicht gestattet, ebenso wie 
+  Ver\"offentlichungen \"uber den Inhalt dieser Arbeit. Die 
+  vorliegende Arbeit ist nur dem Betreuer an der Technischen 
+  Universit\"at Dresden, den Gutachtern sowie den Mitgliedern 
+  des Pr\"ufungsausschusses zug\"anglich zu machen.%
+}%
+%</book|report|article>
+\tud@locale@german{\coursename}{Studiengang}%
+\tud@locale@german{\disciplinename}{Studienrichtung}%
 \tud@locale@german{\listingname}{Quelltext}%
 \tud@locale@german{\listlistingname}{Quelltextverzeichnis}%
 \tud@locale@german{\dissertationname}{Dissertation}%
 \tud@locale@german{\diplomathesisname}{Diplomarbeit}%
 \tud@locale@german{\masterthesisname}{Master-Arbeit}%
 \tud@locale@german{\bachelorthesisname}{Bachelor-Arbeit}%
-\tud@locale@german{\studentresearchname}{Studienarbeit}%
+\tud@locale@german{\studentthesisname}{Studienarbeit}%
+\tud@locale@german{\studentresearchname}{Gro\ss{}er Beleg}%
 \tud@locale@german{\projectpapername}{Projektarbeit}%
 \tud@locale@german{\seminarpapername}{Seminararbeit}%
+\tud@locale@german{\termpapername}{Hausarbeit}%
 \tud@locale@german{\researchname}{Forschungsbericht}%
 \tud@locale@german{\logname}{Protokoll}%
 \tud@locale@german{\internshipname}{Praktikumsbericht}%
@@ -444,8 +517,21 @@
 %    \end{macrocode}
 %
 % \iffalse
-%</class>
-%<*supervisor>
+%</class&!manual>
+%<*class&poster|package&supervisor|class&manual>
+% \fi
+%
+% Hier erfolgen für die Klasse \cls{tudscrposter} sowie das Paket
+% \pkg{tudscrsupervisor} weitere Definitionen.
+%    \begin{macrocode}
+\tud@locale@german{\authorname}{Autor}%
+\tud@locale@german{\contactname}{Kontakt}%
+\tud@locale@german{\contactpersonname}{Ansprechpartner}%
+%    \end{macrocode}
+%
+% \iffalse
+%</class&poster|package&supervisor|class&manual>
+%<*package&supervisor|class&manual>
 % \fi
 %
 % Hier erfolgen für das Paket \pkg{tudscrsupervisor} weitere Definitionen.
@@ -453,9 +539,6 @@
 \tud@locale@german{\taskname}{Aufgabenstellung}%
 \tud@locale@german{\tasktext}{f\"ur die Anfertigung einer}%
 \tud@locale@german{\namesname}{Name}%
-\tud@locale@german{\titlename}{Titel}%
-\tud@locale@german{\coursename}{Studiengang}%
-\tud@locale@german{\disciplinename}{Studienrichtung}%
 \tud@locale@german{\issuedatetext}{Ausgeh\"andigt am}%
 \tud@locale@german{\duedatetext}{Einzureichen am}%
 \tud@locale@german{\chairmanname}{Pr\"ufungsausschussvorsitzender}%
@@ -467,32 +550,16 @@
 \tud@locale@german{\assessmentname}{Bewertung}%
 \tud@locale@german{\gradetext}{%
   Die Arbeit wird mit der Note \textbf{\@grade} bewertet.%
-}
+}%
 \tud@locale@german{\noticename}{Aushang}%
-\tud@locale@german{\contactpersonname}{Ansprechpartner}%
 %    \end{macrocode}
 %
 % \iffalse
-%</supervisor>
-%<*poster>
+%</package&supervisor|class&manual>
+%<*class&!manual>
 % \fi
 %
-% Hier erfolgen für das Paket \pkg{tudscrposter} weitere Definitionen.
-%    \begin{macrocode}
-\tud@locale@german{\authorname}{Autor}%
-\tud@locale@german{\contactname}{Kontakt}%
-\tud@locale@german{\contactpersonname}{Ansprechpartner}%
-%    \end{macrocode}
-%
-% \iffalse
-%</poster>
-% \fi
-%
-% \subsection{Englischsprachige Bezeichner}
-%
-% \iffalse
-%<*class>
-% \fi
+% \subsubsection{Englischsprachige Bezeichner}
 %
 % \begin{macro}{\tud@locale@english}
 % \changes{v2.02}{2014/07/07}{Pseudonym für \cs{providecaptionname} mit
@@ -512,40 +579,47 @@
 % Hier erfolgt die eigentliche Definition der sprachabhängigen Bezeichner für 
 % die deutsche Sprache und ihre Dialekte.
 %    \begin{macrocode}
+%<*book|report|article>
 \tud@locale@english{\graduationtext}{to achieve the academic degree}%
-\tud@locale@english{\supervisorname}{Supervisor}%
-\tud@locale@english{\supervisorothername}{}%
 \tud@locale@english{\refereename}{%
-  \begingroup%
-    \protecting{%
-      \global\@tempswafalse%
-      \def\and{\global\@tempswatrue}%
-      \sbox\z@{\@referee}%
-    }%
-  \endgroup%
-  \if@tempswa%
-    First referee%
-  \else%
-    Referee%
-  \fi%
-}
+  \tud@ifin@and{\@referee}{%
+    \ifx\refereeothername\@empty%
+      Referees%
+    \else%
+      First referee%
+    \fi%
+  }{Referee}%
+}%
 \tud@locale@english{\refereeothername}{Second referee}%
-\tud@locale@english{\advisorname}{Advisor}%
+\tud@locale@english{\advisorname}{%
+  \tud@ifin@and{\@advisor}{%
+    \ifx\advisorothername\@empty%
+      Advisors%
+    \else%
+      First advisor%
+    \fi%
+  }{Advisor}%
+}%
 \tud@locale@english{\advisorothername}{}%
+\tud@locale@english{\supervisorname}{%
+  \tud@ifin@and{\@supervisor}{%
+    \ifx\supervisorothername\@empty%
+      Supervisors%
+    \else%
+      First supervisor%
+    \fi%
+  }{Supervisor}%
+}%
+\tud@locale@english{\supervisorothername}{}%
 \tud@locale@english{\professorname}{%
-  \begingroup%
-    \protecting{%
-      \global\@tempswafalse%
-      \def\and{\global\@tempswatrue}%
-      \sbox\z@{\@professor}%
-    }%
-  \endgroup%
-  \if@tempswa%
-    Supervising professors%
-  \else%
-    Supervising professor%
-  \fi%
-}
+  \tud@ifin@and{\@professor}{%
+    \ifx\professorothername\@empty%
+      Supervising professors%
+    \else%
+      First supervising professor%
+    \fi%
+  }{Supervising professor}%
+}%
 \tud@locale@english{\professorothername}{}%
 \tud@locale@english{\datetext}{Submitted on}%
 \tud@locale@english{\dateofbirthtext}{Born on}%
@@ -555,53 +629,59 @@
 \tud@locale@english{\matriculationnumbername}{Matriculation number}%
 \tud@locale@english{\coverpagename}{Cover page}%
 \tud@locale@english{\titlepagename}{Title page}%
+\tud@locale@english{\titlename}{Title}%
 %<*book>
 \tud@locale@english{\abstractname}{Abstract}%
 %</book>
 \tud@locale@english{\confirmationname}{Statement of authorship}%
 \tud@locale@english{\confirmationtext}{%
-  I hereby certify that I have authored this
+  I hereby certify that I have authored this 
   \ifx\@@thesis\@empty thesis\else\@@thesis{} \fi
   \ifx\@@title\@empty\else entitled \emph{\@@title} \fi
-  independently and without undue assistance from third
-  parties. No other than the resources and references
-  indicated in this thesis have been used. I have marked
-  both literal and accordingly adopted quotations as such.
+  independently and without undue assistance from third 
+  parties. No other than the resources and references 
+  indicated in this thesis have been used. I have marked 
+  both literal and accordingly adopted quotations as such. 
   \ifx\@supporter\@empty%
-    They were no additional persons involved in the spiritual
-    preparation of the present thesis.
+    There were no additional persons involved in the 
+    intellectual preparation of the present thesis. 
   \else%
-    During the preparation of this thesis I was only supported
-    by the following persons:%
+    During the preparation of this thesis I was only  
+    supported by the following persons:%
     \begin{quote}\def\and{\newline}\@supporter\end{quote}%
-    \noindent Additional persons were not involved in the spiritual
-    preparation of the present thesis.
+    \noindent Additional persons were not involved in the 
+    intellectual preparation of the present thesis. 
   \fi%
-  I am aware that violations of this declaration may lead to
+  I am aware that violations of this declaration may lead to 
   subsequent withdrawal of the degree.%
-}
+}%
 \tud@locale@english{\blockingname}{Restriction note}%
 \tud@locale@english{\blockingtext}{%
   This \ifx\@@thesis\@empty thesis \else\@@thesis{} \fi
   \ifx\@@title\@empty\else entitled \emph{\@@title} \fi
   contains confidential data\ifx\@company\@empty\else
-  , disclosed by \emph{\@company}\fi. Publications, duplications and
-  inspections---even in part---are prohibited without explicit
-  permission\ifx\@company\@empty\else\space by \emph{\@company}\fi,
-  as well as publications about the content of this thesis.
-  This thesis may only be made accessible to the supervisor at
-  Technische Universit\"at Dresden, the reviewers and also the
+  , disclosed by \emph{\@company}\fi. Publications, duplications 
+  and inspections---even in part---are prohibited without explicit 
+  permission\ifx\@company\@empty\else\space by \emph{\@company}\fi, 
+  as well as publications about the content of this thesis. 
+  This thesis may only be made accessible to the supervisor at 
+  Technische Universit\"at Dresden, the reviewers and also the 
   members of the examination board.%
-}
+}%
+%</book|report|article>
+\tud@locale@english{\coursename}{Course}%
+\tud@locale@english{\disciplinename}{Discipline}%
 \tud@locale@english{\listingname}{Listing}%
 \tud@locale@english{\listlistingname}{List of Listings}%
 \tud@locale@english{\dissertationname}{Dissertation}%
 \tud@locale@english{\diplomathesisname}{Diploma Thesis}%
 \tud@locale@english{\masterthesisname}{Master Thesis}%
 \tud@locale@english{\bachelorthesisname}{Bachelor Thesis}%
+\tud@locale@english{\studentthesisname}{Student Thesis}%
 \tud@locale@english{\studentresearchname}{Student Research Project}%
 \tud@locale@english{\projectpapername}{Project Paper}%
 \tud@locale@english{\seminarpapername}{Seminar Paper}%
+\tud@locale@english{\termpapername}{Term Paper}%
 \tud@locale@english{\researchname}{Research Report}%
 \tud@locale@english{\logname}{Log}%
 \tud@locale@english{\internshipname}{Internship Report}%
@@ -609,8 +689,21 @@
 %    \end{macrocode}
 %
 % \iffalse
-%</class>
-%<*supervisor>
+%</class&!manual>
+%<*class&poster|package&supervisor|class&manual>
+% \fi
+%
+% Hier erfolgen für die Klasse \cls{tudscrposter} sowie das Paket
+% \pkg{tudscrsupervisor} weitere Definitionen.
+%    \begin{macrocode}
+\tud@locale@english{\authorname}{Author}%
+\tud@locale@english{\contactname}{Contact}%
+\tud@locale@english{\contactpersonname}{Contact}%
+%    \end{macrocode}
+%
+% \iffalse
+%</class&poster|package&supervisor|class&manual>
+%<*package&supervisor|class&manual>
 % \fi
 %
 % Hier erfolgen für das Paket \pkg{tudscrsupervisor} weitere Definitionen.
@@ -618,9 +711,6 @@
 \tud@locale@english{\taskname}{Task}%
 \tud@locale@english{\tasktext}{for the preparation of a}%
 \tud@locale@english{\namesname}{Name}%
-\tud@locale@english{\titlename}{Title}%
-\tud@locale@english{\coursename}{Course}%
-\tud@locale@english{\disciplinename}{Discipline}%
 \tud@locale@english{\issuedatetext}{Issued on}%
 \tud@locale@english{\duedatetext}{Due date for submission}%
 \tud@locale@english{\chairmanname}{Chairman of the Audit Committee}%
@@ -632,26 +722,13 @@
 \tud@locale@english{\assessmentname}{Assessment}%
 \tud@locale@english{\gradetext}{%
   The thesis is evaluated with a grade of \textbf{\@grade}.%
-}
+}%
 \tud@locale@english{\noticename}{Notice}%
-\tud@locale@english{\contactpersonname}{Contact}%
 %    \end{macrocode}
 %
 % \iffalse
-%</supervisor>
-%<*poster>
-% \fi
-%
-% Hier erfolgen für das Paket \pkg{tudscrposter} weitere Definitionen.
-%    \begin{macrocode}
-\tud@locale@english{\authorname}{Author}%
-\tud@locale@english{\contactname}{Contact}%
-\tud@locale@english{\contactpersonname}{Contact}%
-%    \end{macrocode}
-%
-% \iffalse
-%</poster>
-%<*class>
+%</package&supervisor|class&manual>
+%<*class&!manual>
 % \fi
 %
 % \subsection{Unterstützung des Paketes \pkg{listings}}
@@ -678,7 +755,7 @@
 %    \end{macrocode}
 %
 % \iffalse
-%</class>
+%</class&!manual>
 % \fi
 %
 % \Finale

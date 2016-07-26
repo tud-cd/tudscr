@@ -1,8 +1,8 @@
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrartcl}
+\usepackage{tudscrtutorial}
 \usepackage{selinput}\SelectInputMappings{adieresis={ä},germandbls={ß}}
 \usepackage[T1]{fontenc}
-\usepackage{tudscrman}
 \lstset{%
   inputencoding=utf8,extendedchars=true,
   literate=%
@@ -12,9 +12,10 @@
 }
 
 \usepackage{mathtools}
+\usepackage{bookmark}
 
 \begin{document}
-\date{17.12.2014}
+\date{20.11.2015}
 \author{Falk Hanisch\thanks{\noexpand\scriptsize\noexpand\Email{\tudscrmail}}}
 \title{Ein Beitrag zum mathematischen Satz in \NoCaseChange{\hologo{LaTeXe}}}
 \makeatletter
@@ -56,8 +57,8 @@ mikrotypografisch alles richtig gemacht werden soll, gibt es einiges zu
 beachten. Generell gilt, dass Variablen kursiv, Bezeichnungen und Konstanten
 aufrecht gesetzt werden. Um beschreibende Indizes bei Formelzeichen richtig zu 
 setzen, ist ohne weitere Maßnahmen die exzessive Nutzung der beiden Befehle 
-\Macro{mathrm}\PParameter{\dots} und \Macro{mathit}\PParameter{\dots} wohl oder 
-übel notwendig. Somit wird aus:
+\Macro{mathrm}[\PParameter{\dots}] und \Macro{mathit}[\PParameter{\dots}] wohl 
+oder übel notwendig. Somit wird aus:
 %
 \begin{Trunk*}
 \begin{equation*}
@@ -89,13 +90,13 @@ M_\mathrm{EM_{min}}\leq M_\mathrm{EM}\leq M_\mathrm{EM_{max}}
 
 \end{Trunk*}
 %
-Wie man sieht, ist dabei eine ganze Menge Handarbeit vonnöten. Allerdings lässt 
-sich das relativ gut vereinfachen lassen. Zu diesem Zwecke wird ein Befehl 
-\Macro{ind}\PParameter{\dots} für das Setzen von Indizes bei Formelzeichen 
-definiert. Danach kann man sich~-- wenn man das für nötig und sinnvoll 
-erachtet~-- noch zusätzliche Befehle für häufig verwendete Ausdrücke schnitzen. 
-Als Beispiel wird das schon eben genutzte Drehmoment \ensuremath{M} verwendet. 
-Hierfür könnte man Folgendes definieren:
+Augenscheinlich ist dabei eine sehr viel Handarbeit notwendig. Allerdings 
+lässt sich dies relativ gut vereinfachen. Zu diesem Zwecke wird ein Befehl 
+\Macro{ind}[\PParameter{\dots}] für das Setzen von Indizes bei Formelzeichen 
+definiert. Danach können~-- wenn dies für nötig und sinnvoll erachtet wird~-- 
+noch zusätzliche Befehle für häufig verwendete Ausdrücke definiert werden. Als 
+Beispiel wird das schon eben genutzte Drehmoment \ensuremath{M} verwendet. 
+Hierfür wäre folgende Definition möglich:
 %
 \CodeHook{\let\newcommand\renewcommand}
 \begin{Trunk*}
@@ -120,19 +121,19 @@ und damit diese Ausgabe erzeugen:
 
 \end{Trunk*}
 %
-Netter Nebeneffekt ist, dass man den Befehl aufgrund der Verwendung von 
-\Macro{ensuremath}\PParameter{\dots} nun auch im Fließtext verwenden kann, 
-beispielsweise wie hier \M{VM_{ind}} (\Macro{M}\PParameter{VM\_\{ind\}}) für 
-das induzierte Moment einer Verbrennungskraftmaschine.
+Netter Nebeneffekt ist, dass dieser Befehl aufgrund der Verwendung von 
+\Macro{ensuremath}[\PParameter{\dots}] nun auch im Fließtext verwenden werden 
+kann, beispielsweise für das induzierte Moment einer Verbrennungskraftmaschine 
+\M{VM_{ind}} (\Macro{M}[\PParameter{VM\_\PParameter{ind}}]).
 
-Möchte man es sich noch bequemer machen, strikt man sich noch eine Lösung, in
-der man~-- im Gegensatz zum \hologo{LaTeX}"=Standardfall~-- \textbf{nach} dem
-obligatorischen Argument noch ein optionales für einen weiteren Index angeben
-kann, um damit der natürlichen Schreibweise zu entsprechen. Es wird der Befehl 
-\Macro{M} so definiert, das dieser entweder mit \Macro{M}\Parameter{Index} 
-oder in der Variante \Macro{M}\Parameter{Index}\OParameter{Indexindex} 
-genutzt 
-werden kann.
+Für noch mehr Bequemlichkeit bei der Nutzung kann eine Lösung gefunden werden, 
+mit welcher~-- im Gegensatz zur Standardbefehlsdefinition in \hologo{LaTeXe}~-- 
+\textbf{nach} dem obligatorischen Argument noch ein optionales für einen 
+weiteren Index angegeben werden kann, um damit der natürlichen Schreibweise zu 
+entsprechen. Es wird der Befehl \Macro{M} so definiert, das dieser entweder mit 
+\Macro{M}[\Parameter{Index}] oder in der Variante mit nachgelagertem optionalen 
+Argument \Macro{M}[\Parameter{Index}\OParameter{Indexindex}] genutzt werden 
+kann.
 %
 \CodeHook{\let\newcommand\renewcommand}
 \begin{Trunk*}
@@ -162,7 +163,7 @@ Somit vereinfacht sich das zu Beginn vorgestellte Beispiel recht deutlich:
 \end{equation*}
 \end{Trunk*}
 %
-Das Definieren von \Macro{M}\Parameter{Index}\OParameter{Indexindex} mit 
+Das Definieren von \Macro{M}[\Parameter{Index}\OParameter{Indexindex}] mit 
 angehängtem optionalen Argument ist ehrlich gesagt nur ein wenig Spielerei und 
 soll zeigen, wie dies prinzipiell mit \hologo{LaTeXe}"=Mitteln funktioniert. 
 Das Paket \Package{xparse} könnte alternativ zum hier vorgestellten Vorgehen 
@@ -173,12 +174,12 @@ folgendermaßen lauten:
 \NewDocumentCommand \M { m o } {%
   \ensuremath{%
     M\ind{%
-      #1
-      \IfNoValueTF{#2}{}{_{#2}}
+      #1\IfValueT{#2}{_{#2}}%
     }%
   }%
 }
 \end{Hint}
 %
 \FinishTutorial
+\ListOfToDo
 \end{document}

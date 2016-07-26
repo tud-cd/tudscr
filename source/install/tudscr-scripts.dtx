@@ -1,6 +1,6 @@
 % \CheckSum{209}
 % \iffalse meta-comment
-%
+% 
 % ============================================================================
 % 
 %  TUD-KOMA-Script
@@ -18,13 +18,13 @@
 % 
 % ----------------------------------------------------------------------------
 % 
-% Dieses Werk darf nach den Bedingungen der LaTeX Project Public Lizenz
-% in der Version 1.3c, verteilt und/oder veraendert werden. Die aktuelle 
-% Version dieser Lizenz ist http://www.latex-project.org/lppl.txt und 
-% Version 1.3c oder spaeter ist Teil aller Verteilungen von LaTeX 2005/12/01 
-% oder spaeter und dieses Werks. Dieses Werk hat den LPPL-Verwaltungs-Status 
-% "author-maintained", wird somit allein durch den Autor verwaltet. Der 
-% aktuelle Verwalter und Autor dieses Werkes ist Falk Hanisch.
+%  Dieses Werk darf nach den Bedingungen der LaTeX Project Public Lizenz
+%  in der Version 1.3c, verteilt und/oder veraendert werden. Die aktuelle 
+%  Version dieser Lizenz ist http://www.latex-project.org/lppl.txt und 
+%  Version 1.3c oder spaeter ist Teil aller Verteilungen von LaTeX 2005/12/01 
+%  oder spaeter und dieses Werks. Dieses Werk hat den LPPL-Verwaltungs-Status 
+%  "author-maintained", wird somit allein durch den Autor verwaltet. Der 
+%  aktuelle Verwalter und Autor dieses Werkes ist Falk Hanisch.
 % 
 % ============================================================================
 %
@@ -50,15 +50,17 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-scripts.dtx}[%
-  2015/07/24 v2.04a TUD-KOMA-Script installation scripts%
+  2016/07/26 v2.05 TUD-KOMA-Script installation scripts%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
-\documentclass[english,ngerman]{tudscrdoc}
+\documentclass[english,ngerman,xindy]{tudscrdoc}
 \usepackage{selinput}\SelectInputMappings{adieresis={ä},germandbls={ß}}
 \usepackage[T1]{fontenc}
 \usepackage{babel}
 \usepackage{tudscrfonts} % only load this package, if the fonts are installed
 \KOMAoptions{parskip=half-}
+\usepackage{microtype}
+\usepackage{bookmark}
 \CodelineIndex
 \RecordChanges
 \GetFileInfo{tudscr-scripts.dtx}
@@ -79,7 +81,6 @@
 % \changes{v2.04}{2015/05/12}{Pakete für T1-Kodierung obligatorisch}^^A
 % \changes{v2.04}{2015/06/17}{Unix-Bash-Skripte verbessert}^^A
 % \changes{v2.04}{2015/07/02}{Windows-Batch-Skripte verbessert}^^A
-% \changes{v2.04a}{2015/07/24}{Bugfix CScript-Aufruf mit Leerzeichen im Pfad}^^A
 %
 % \section{Installationsskripte}
 %
@@ -97,8 +98,12 @@
 % Dieses Skript generiert ein Archiv mit diesen Schriften. Diese können mit dem 
 % Skript \texttt{<converted>} installiert werden.
 %
-% \StopEventually{\PrintIndex\PrintChanges}
+% \StopEventually{\PrintIndex\PrintChanges\PrintToDos}
 %
+% \begingroup%
+% \makeatletter%
+% \@bsphack\scan@allowedfalse\@esphack%
+% \makeatother%
 %
 % \iffalse
 %<*win>
@@ -110,6 +115,7 @@
 % Zuerst wird die Ausgabe der Befehlszeilen mit \val{@echo off} deaktiviert, 
 % darauf folgen ein paar Kommentare im Skript und daran anschließend die
 % erfolgt Ausgabe der Identifikation des jeweiligen Skriptes.
+% \changes{v2.05}{2015/12/07}{Ausgabe des Skriptpfades}^^A
 %
 %    \begin{macrocode}
 @echo off
@@ -124,9 +130,13 @@
 :: MiKTeX 2.9 32-bit
 :: MiKTeX Portable 2.9 32-bit
 :: MiKTeX 2.9 64-bit
-:: TeX Live 2015
-:: TeX Live 2015 Portable
+:: TeX Live 2016
+:: TeX Live 2016 Portable
 ::
+echo.
+echo  =====================================================================
+echo.
+echo   %~dp0
 echo.
 echo  =====================================================================
 echo.
@@ -137,7 +147,7 @@ echo.
 %<converted>echo   Installation der konvertierten TUD-CD-Schriften unter Windows
 %<uninstall>echo   Deinstallation TUD-KOMA-Script unter Windows
 %<old>echo   fuer obsolete Klassen und Pakete
-%!echoTUDVersion
+%!TUD@Version@Echo
 echo.
 cd /d %~dp0
 %    \end{macrocode}
@@ -338,10 +348,12 @@ if "%portable%" == "true" (
   )
 )
 echo.
-echo   Sie sollten den voreingestellten Standardpfad verwenden.
+echo  =====================================================================
+echo.
+echo   Sie sollten nachfolgend den eingestellten Standardpfad verwenden.
+echo   Aendern Sie diesen nur, wenn Sie genau wissen, was Sie tun.
 :proof_userinput
 echo.
-echo  =====================================================================
 set /p texmfpath=< texmfpath.tmp
 set "texmfpath=%texmfpath:/=\%"
 if "%texmfpath:~-1%"=="\" set texmfpath=%texmfpath:~,-1%
@@ -733,6 +745,9 @@ goto :end
   echo   Die Datei %~1 wurde nicht gefunden. Diese wird fuer die
   echo   Installation zwingend benoetigt. Bitte kopieren Sie %~1
   echo   in das Verzeichnis des Skriptes und fuehren dieses abermals aus.
+  echo   Beachten Sie, dass die Schriftarchive speziell für die Verwendung
+  echo   von LaTeX bestellt werden müssen, ein bloßes Umbenennen falscher 
+  echo   Archive wird zu Fehlern bei der Installation führen.
   echo.
   echo  =====================================================================
   goto :eof
@@ -798,6 +813,8 @@ goto :end
 % Sollte sich im aktuellen Pfad die Standalone-Variante von \textbf{7zip} 
 % befinden, wird diese verwendet. Dies war bis zur Version~v2.04 zwingend 
 % notwendig.
+% \changes{v2.04a}{2015/07/24}{Bugfix CScript-Aufruf mit Leerzeichen im Pfad}^^A
+% \changes{v2.05}{2016/05/11}{Ausgabe der entpackten Dateien}^^A
 %    \begin{macrocode}
 :unzip
   echo  =====================================================================
@@ -818,9 +835,16 @@ goto :end
         echo   End If
         echo End With
         echo With CreateObject^("Shell.Application"^)
-        echo   .NameSpace^(Folder^).CopyHere .NameSpace^(ZipFile^).Items, 272
+        echo   Set objZipFile = .NameSpace^(ZipFile^).Items^(^)
+        echo   For Each zFile In objZipFile
+        echo     .NameSpace^(Folder^).CopyHere zFile, 272
+        echo     WScript.Echo^(zFile.Name ^& " entpackt"^)
+        echo   Next
         echo End With
-        echo wScript.Sleep 2000
+        echo WScript.Echo^(^)
+        echo WScript.Echo^("Alle Dateien entpackt"^)
+        echo WScript.Echo^(^)
+        echo WScript.Sleep 1000
       ) > tudscrtemp\winunzip.vbs
     )
     setlocal enabledelayedexpansion
@@ -897,7 +921,7 @@ goto :end
 # Ubuntu 15.04
 #
 # in Kombination mit:
-# TeX Live 2015
+# TeX Live 2016
 #
 %<*!uninstall>
 # Notwendige Tools:
@@ -916,25 +940,38 @@ goto :end
 # Univers_PS.zip
 #
 # Die Installation erfolgt in Normalfall in das lokale Benutzerverzeichnis
-# $TEXMFHOME. Dieses entspricht unter Linux in '~/texmf' und unter Mac OS in 
-# '~/Library/texmf'. Wird das Skript mit 'sudo' ausgefuehrt, erfolgt die 
-# systemweite Installation fuer alle Nutzer in $TEXMFLOCAL. 
+# $TEXMFHOME. Dieses entspricht unter Linux in '~/texmf' und unter Mac OS in
+# '~/Library/texmf'. Wird das Skript mit 'sudo' ausgefuehrt, erfolgt die
+# systemweite Installation fuer alle Nutzer in $TEXMFLOCAL.
 #
 %<*full|font|converted>
-# Fuer die lokale Benutzerinstallation wird waehrend des Installationsprozesses 
+# Fuer die lokale Benutzerinstallation wird waehrend des Installationsprozesses
 # geprueft, ob die Schriften mit dem Befehl 'updmap-sys' systemweit registriert
 # werden koennen oder ob dies im Zweifelsfall mit 'updmap' fuer den aktuellen
 # Benutzer lokal geschehen muss. Die erste Variante benoetigt Zugriffsrechte
-# auf den Installationsordner der Distribution, welche im Zweifelsfall durch 
+# auf den Installationsordner der Distribution, welche im Zweifelsfall durch
 # das Skript efragt werden. Wird die zweite Variante gewaehlt, wird der Befehl
 # 'updmap-sys' wirkungslos und der Anwender muss ab sofort den Befehl 'updmap'
 # nach Aenderungen an den systemweiten LaTeX-Schriften (z.B. Updates) manuell
 # aufrufen, damit neue respektive aktualisierte Schriften registriert werden.
-# Bei Mac OS kann dies automatisch mit "TeX Live Utility.app": "Preferences..." 
+# Bei Mac OS kann dies automatisch mit "TeX Live Utility.app": "Preferences..."
 # -> "Automatically enable fonts in my home directory." erfolgen.
 #
 %</full|font|converted>
 %</!uninstall>
+SOURCE="${BASH_SOURCE[0]}"
+# if $SOURCE was a relative symlink, we need to resolve it relative to the path
+# where the symlink file was located
+while [ -h "$SOURCE" ]; do
+  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+done
+DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+echo
+echo  =====================================================================
+echo
+echo   $DIR
 echo
 echo  =====================================================================
 echo
@@ -945,7 +982,7 @@ echo
 %<converted>echo   Installation der konvertierten TUD-CD-Schriften unter Unix
 %<uninstall>echo   Deinstallation TUD-KOMA-Script unter Unix
 %<old>echo   fuer obsolete Klassen und Pakete
-%!echoTUDVersion
+%!TUD@Version@Echo
 echo
 %    \end{macrocode}
 %
@@ -972,6 +1009,9 @@ missingfile()
   echo   Die Datei $1 wurde nicht gefunden. Diese wird fuer die
   echo   Installation zwingend benoetigt. Bitte kopieren Sie $1
   echo   in das Verzeichnis des Skriptes und fuehren dieses abermals aus.
+  echo   Beachten Sie, dass die Schriftarchive speziell für die Verwendung
+  echo   von LaTeX bestellt werden müssen, ein bloßes Umbenennen falscher
+  echo   Archive wird zu Fehlern bei der Installation führen.
   echo
   echo  =====================================================================
 }
@@ -1082,7 +1122,7 @@ if [ -z "$texpath" ] ; then
   abort
 fi
 echo
-echo   LaTeX-Distribution gefunden in: 
+echo   LaTeX-Distribution gefunden in:
 echo   \'$texpath\'
 echo
 echo  =====================================================================
@@ -1187,10 +1227,11 @@ else
   echo   in einem lokalen Benutzerpfad befinden.
 fi
 echo
-echo   Sie sollten den voreingestellten Standardpfad verwenden.
+echo  =====================================================================
+echo   Sie sollten nachfolgend den eingestellten Standardpfad verwenden.
+echo   Aendern Sie diesen nur, wenn Sie genau wissen, was Sie tun.
 proof_userinput
 echo
-echo  =====================================================================
 echo   Installation in folgenden Pfad:
 echo   $texmfpath
 echo  =====================================================================
@@ -1260,7 +1301,7 @@ else
     echo Andernfalls wird lediglich \'updmap\' aufgerufen, wodurch der Befehl
     echo \'updmap-sys\' ab diesem Zeitpunkt wirkungslos wird und der Anwender
     echo ab sofort nach Aenderungen an den LaTeX-Schriften \(z.B. Updates\)
-    echo den Befehl \'updmap\' manuell aufrufen muss, damit neue repsektive
+    echo den Befehl \'updmap\' manuell aufrufen muss, damit neue respektive
     echo aktualisierte Schriften registriert werden.
     select yn in "Schreibrechte setzen (empfohlen)" "'updmap' verwenden"; do
       case $yn in
@@ -1558,6 +1599,8 @@ exit 0
 %</uninstall>
 %</unix>
 % \fi
+%
+% \endgroup
 %
 % \Finale
 %

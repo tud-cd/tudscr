@@ -2,12 +2,10 @@
 attrib +h "*.bat" /s
 attrib +h "*.dtx" /s
 attrib +h "*.ins" /s
-attrib +h "*.tex" /s
-attrib -h "*-temp.*" /s> nul
+attrib +h "tudscrsource.tex"
 attrib -h "install\*.bat" /s> nul
 attrib -h "install\*.tex" /s> nul
-attrib +h "logo\*.*"
-attrib +h "test\*.cls"> nul
-attrib +h "test\*.sty"> nul
+attrib +h "doc\*.*" /s
+attrib +h "logo\*.*" /s
 del "*.*" /s /q> nul
 attrib -h "*.*" /s

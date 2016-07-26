@@ -14,7 +14,7 @@ cat > docstrip.cfg <<EOF
 \UseTDS
 EOF
 tex tudscr.ins
-texmfpath=`kpsewhich --var-value=TEXMFHOME|sed 's,^!*,,'`
+texmfpath=`kpsewhich --var-value=TEXMFLOCAL|sed 's,^!*,,'`
 cp -r tex "$texmfpath" 
 cd "$topdir"
 if [ -d temp ]
