@@ -1,4 +1,4 @@
-% \CheckSum{2125}
+% \CheckSum{2198}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-area.dtx}[%
-  2016/07/22 v2.05 TUD-KOMA-Script (type or page area)%
+  2016/07/26 v2.05 TUD-KOMA-Script (type or page area)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman,xindy]{tudscrdoc}
@@ -623,7 +623,7 @@
 % der Option \opt{bleedmargin} beliebig gesetzt werden kann. Als Standardwert 
 % werden 5\% der größten Randbreite gesetzt.
 %    \begin{macrocode}
-\newcommand*\tud@dim@bleedmargin{.05\tud@len@widemargin}
+\newcommand*\tud@dim@bleedmargin{.2in}
 \TUD@key{bleedmargin}{%
   \TUD@set@dimenkey{bleedmargin}{\tud@dim@bleedmargin}{#1}%
 %    \end{macrocode}
@@ -658,6 +658,10 @@
 % \end{option}^^A twocolumn
 % \end{option}^^A twoside
 %
+% \begin{macro}{\tud@x@typearea@warnings@off}
+% \changes{v2.05}{2016/07/26}{neu}^^A
+% \begin{macro}{\tud@x@typearea@warnings@on}
+% \changes{v2.05}{2016/07/26}{neu}^^A
 % Sollte das Paket \pkg{silence} vorhanden sein wird es geladen, um die vom 
 % Paket \pkg{typearea} erzeugten Warnungen beim Laden einer \TUDScript-Klasse 
 % zu unterdrücken, da im Normalfall das Paket gar nicht für die Berechnung des 
@@ -666,6 +670,8 @@
 % die entsprechenden Warnungen werden etwas später und in Abhängigkeit der 
 % verwendeten Schriftart erzeugt.
 %    \begin{macrocode}
+\newcommand*\tud@x@ta@warnings@off{}
+\newcommand*\tud@x@ta@warnings@on{}
 \IfFileExists{silence.sty}{%
   \RequirePackage{silence}[2012/07/02]%
   \WarningFilter[typearea]{typearea}{DIV for}%
@@ -674,8 +680,12 @@
   \WarningFilter[typearea]{typearea}{Very low DIV value!}%
   \BeforePackage{typearea}{\ActivateWarningFilters[typearea]}%
   \AfterPackage{typearea}{\DeactivateWarningFilters[typearea]}%
+  \renewcommand*\tud@x@ta@warnings@off{\ActivateWarningFilters[typearea]}
+  \renewcommand*\tud@x@ta@warnings@on{\DeactivateWarningFilters[typearea]}
 }{}
 %    \end{macrocode}
+% \end{macro}^^A \tud@x@ta@warnings@on
+% \end{macro}^^A \tud@x@ta@warnings@off
 %
 % \iffalse
 %</class&option>
@@ -997,8 +1007,12 @@
     }%
     \TUD@parameter@def{layout}{\tud@area@def{layout}{#1}}%
     \TUD@parameter@let{layoutname}{layout}%
-    \TUD@parameter@def{layoutwidth}{\tud@area@def{layout}{#1:\the\paperheight}}%
-    \TUD@parameter@def{layoutheight}{\tud@area@def{layout}{\the\paperwidth:#1}}%
+    \TUD@parameter@def{layoutwidth}{%
+      \tud@area@def{layout}{#1:\the\tud@len@layoutheight}%
+    }%
+    \TUD@parameter@def{layoutheight}{%
+      \tud@area@def{layout}{\the\tud@len@layoutwidth:#1}%
+    }%
     \TUD@parameter@def{layoutsize}{%
       \def\@tempa##1,##2,##3\@nil{%
         \IfArgIsEmpty{##2}{%
@@ -1089,6 +1103,20 @@
     \fi%
     \if@tempswa%
       \cseappto{tud@x@geometry@#1}{\@tempa,}%
+      \def\@tempb##1:##2:##3\@nil{%
+        \IfArgIsEmpty{##2}{}{%
+          \ifstr{#1}{paper}{%
+            \setlength\paperwidth{##1}%
+            \setlength\paperheight{##2}%
+          }{%
+            \ifstr{#1}{layout}{%
+              \setlength\tud@len@layoutwidth{##1}%
+              \setlength\tud@len@layoutheight{##2}%
+            }{}%
+          }%
+        }%
+      }%
+      \expandafter\@tempb\@tempa::\@nil%
     \else%
       \appto\tud@x@geometry@parameter{#2,}%
     \fi%
@@ -1131,6 +1159,13 @@
   \newcommand*\tud@x@geometry@layout{}
   \newcommand*\tud@x@geometry@parameter{}
   \newcommand*\tud@geometry[2]{%
+    \ifGm@layout%
+      \setlength\tud@len@layoutheight{\Gm@layoutheight}%
+      \setlength\tud@len@layoutwidth{\Gm@layoutwidth}%
+    \else%
+      \setlength\tud@len@layoutheight{\paperheight}%
+      \setlength\tud@len@layoutwidth{\paperwidth}%
+    \fi%
     \let\tud@x@geometry@paper\@empty%
     \let\tud@x@geometry@layout\@empty%
     \let\tud@x@geometry@parameter\@empty%
@@ -1946,7 +1981,27 @@
         \setlength\paperheight{\Gm@layoutheight}%
         \setlength\paperwidth{\Gm@layoutwidth}%
         \let\activateareas\relax%
+%    \end{macrocode}
+% Der Kram ist dafür da, etwaige Warnungen von \pkg{typearea} aufgrund der 
+% fehlenden Wahl für die Satzspiegelaufteilung zu unterdrücken.
+%    \begin{macrocode}
+        \tud@x@ta@warnings@off%
+        \KOMAoptionOf[\def\@tempa]{typearea.\scr@pkgextension}{DIV}%
+        \def\@tempb{{0}}%
+        \ifx\@tempa\@tempb\relax%
+          \KOMAoptionOf[\def\@tempa]{typearea.\scr@pkgextension}{paper}%
+          \@for\@tempb:=\@tempa\do{%
+            \@tempswatrue%
+            \ifx\@tempb\defaultpapersize\relax%
+              \@tempswafalse%
+            \fi%
+          }%
+          \if@tempswa%
+            \KOMAoptions{DIV=11}%
+          \fi%
+        \fi%
         \recalctypearea%
+        \tud@x@ta@warnings@on%
         \edef\tud@x@geometry@init{%
           left=\the\dimexpr\oddsidemargin+1in-\ta@bcor\relax,%
           textwidth=\the\textwidth,%
