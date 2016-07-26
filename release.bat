@@ -7,7 +7,7 @@ echo.
 for /f "tokens=1,2,3 delims= " %%a in (
   'findstr /r \TUD@Version@Check{[0-9][0-9][0-9][0-9]/[0-9][0-9]/[0-9][0-9] source\tudscr-version.dtx'
 ) do (
-  if "%%c" == "TUD-KOMA-Script}%%" (
+  if "%%c" == "TUD-KOMA-Script}" (
     set version=%%b
   ) else (
     set version=%%b-%%c
