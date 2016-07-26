@@ -1,4 +1,4 @@
-% \CheckSum{582}
+% \CheckSum{594}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-supervisor.dtx}[%
-  2016/07/20 v2.05 TUD-KOMA-Script\space%
+  2016/07/26 v2.05 TUD-KOMA-Script\space%
 %</driver>
 %<package>\ProvidesPackage{tudscrsupervisor}[%
 %<*driver|package>
@@ -102,14 +102,18 @@
 % \begin{parameter}{headline}
 % \begin{parameter}{heading}
 % \begin{parameter}{line}
-% \begin{macro}{\tud@authortable@multiple}
+% \begin{parameter}{style}
+% \begin{macro}{\tud@multiple@fields@output}
 % \changes{v2.05}{2016/03/09}{neu}^^A
+% \begin{macro}{\tud@multiple@fields@style}
+% \changes{v2.05}{2016/05/26}{neu}^^A
 % Die Umgebung für die Aufgabenstellung nutzt die \env{tudpage}-Umgebung. Sie
 % wird auf einer neuen (rechten) Seite gesetzt. Es wird zu Beginn eine Tabelle 
 % mit Informationen zum Autor gesetzt. Zum Abschluss werden Betreuer,
 % Hochschullehrer und ggf. Vorsitzender des Prüfungsausschusses ausgegeben.
 %    \begin{macrocode}
-\newcommand*\tud@authortable@multiple{}
+\newcommand*\tud@multiple@fields@output{}
+\newcommand*\tud@multiple@fields@style{table}
 \newenvironment{task}[1][]{%
 %    \end{macrocode}
 % Die \env{tudpage}-Umgebung wird geöffnet. Mit dem Parameter \opt{headline} 
@@ -121,6 +125,7 @@
     \TUD@parameter@def{headline}{\def\@headline{##1}}%
     \TUD@parameter@let{heading}{headline}%
     \TUD@parameter@let{line}{headline}%
+    \TUD@parameter@def{style}{\def\tud@multiple@fields@style{##1}}%
     \TUD@parameter@handler@default{headline}%
   }%
   \tudpage[pagestyle=empty,#1]%
@@ -145,13 +150,17 @@
 % Ausgabe in einer Tabelle, die Spalte der Bezeichner entspricht der aus dem
 % oberen Teil.
 %    \begin{macrocode}
-  \def\tud@authortable@multiple##1{%
-    \def\and{%
-      \tabularnewline%
-      \ifstr{\csuse{##1othername}}{}{}{%
-        \csuse{##1othername}\tud@title@delimiter%
+  \def\tud@multiple@fields@output##1{%
+    \ifstr{\tud@multiple@fields@style}{table}{%
+      \def\and{%
+        \tabularnewline%
+        \ifstr{\csuse{##1othername}}{}{}{%
+          \csuse{##1othername}\tud@title@delimiter%
+        }%
+        & \def\and{\tabularnewline &}%
       }%
-      & \def\and{\tabularnewline &}%
+    }{%
+      \def\and{\unskip,\space\ignorespaces}%
     }%
     \csuse{@##1}%
   }%
@@ -162,10 +171,10 @@
   \begin{tabular}{@{}p{\tud@len@authortable}l@{}}%
     \ifx\@referee\@empty\else%
       \refereename\tud@title@delimiter & %
-        \tud@authortable@multiple{referee}\tabularnewline[\smallskipamount]%
+        \tud@multiple@fields@output{referee}\tabularnewline[\smallskipamount]%
     \fi%
     \supervisorname\tud@title@delimiter & %
-      \tud@authortable@multiple{supervisor}\tabularnewline[\smallskipamount]%
+      \tud@multiple@fields@output{supervisor}\tabularnewline[\smallskipamount]%
     \issuedatetext\tud@title@delimiter & \@issuedate\tabularnewline%
     \duedatetext\tud@title@delimiter & \@duedate\tabularnewline%
   \end{tabular}%
@@ -195,7 +204,9 @@
   \aftergroup\cleardoublepage%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@authortable@multiple
+% \end{macro}^^A \tud@multiple@fields@style
+% \end{macro}^^A \tud@multiple@fields@output
+% \end{parameter}^^A style
 % \end{parameter}^^A line
 % \end{parameter}^^A heading
 % \end{parameter}^^A headline
