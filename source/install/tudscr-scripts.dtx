@@ -50,7 +50,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-scripts.dtx}[%
-  2016/07/26 v2.05 TUD-KOMA-Script installation scripts%
+  2016/08/24 v2.05a TUD-KOMA-Script installation scripts%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman,xindy]{tudscrdoc}
@@ -253,6 +253,7 @@ call :checkfile    "Univers_PS.zip"
 call :checkfile    "DIN_Bd_PS.zip"
 %<!old>call :checkfile    "tudscr_fonts_install.zip"
 if "%missing%" == "true" goto :abort
+call :checkscript  "tftopl"       "fontware"
 call :checkscript  "pltotf"       "fontware"
 call :checkscript  "vptovf"       "fontware"
 call :checkpackage "fontinst.sty" "fontinst"
@@ -1038,7 +1039,7 @@ missingpackage()
 }
 checkscript()
 {
-  script=$(which $1)
+  script=$(find $texpath -name "$1")
   if [ -z "$script" ] ; then
     missing=true
     missingscript "$1" "$2"
@@ -1114,7 +1115,13 @@ abort()
 % Nach der Defiition der Funktionen wird geprüft, ob eine \LaTeX-Distribution 
 % vorhanden ist.
 %    \begin{macrocode}
-texpath=$(which tex)
+symlinkpath=$(which tex)
+while [ -h "$symlinkpath" ]; do
+  DIR="$( cd -P "$( dirname "$symlinkpath" )" && pwd )"
+  symlinkpath="$(readlink "$symlinkpath")"
+  [[ $symlinkpath != /* ]] && SOURCE="$texpath/$symlinkpath"
+done
+texpath="$( cd -P "$( dirname "$symlinkpath" )" && pwd )"
 if [ -z "$texpath" ] ; then
   echo Es wurde keine LaTeX-Distribution gefunden.
   echo Moeglicherweise hilft der Aufruf des Skriptes mit:
@@ -1172,6 +1179,7 @@ checkfile "DIN_Bd_PS.zip"
 if $missing ; then
   abort
 fi
+checkscript "tftopl"        "fontware"
 checkscript "pltotf"        "fontware"
 checkscript "vptovf"        "fontware"
 checkpackage "fontinst.sty" "fontinst"
