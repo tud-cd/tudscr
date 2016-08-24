@@ -38,7 +38,7 @@ Klassen und Pakete
 Das Bundle beinhaltet:
 
 + die drei Dokumentklassen `tudscrartcl`, `tudscrreprt`, `tudscrbook` als
-  Wrapper-Klassen von `scrartcl`, `scrreprt` and `scrbook`,
+  Wrapper-Klassen von `scrartcl`, `scrreprt` und `scrbook`,
 + die Klasse `tudscrposter` für das Erstellen von Postern
 + das Paket `tudscrsupervisor`, welches Umgebungen und Befehle für die
   Erstellung von Aufgabenstellungen, Gutachten und Aushängen bereitstellt,
