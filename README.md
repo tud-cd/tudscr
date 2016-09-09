@@ -2,7 +2,7 @@
 TUD-KOMA-Script
 ===============
 
-TUD-KOMA-Script 2016/08/24 v2.05a
+TUD-KOMA-Script 2016/09/09 v2.05b
 Copyright (c) Falk Hanisch <tudscr@gmail.com>, 2012-2016
 
 This material is subject to the LaTeX Project Public License version 1.3c or 
@@ -57,6 +57,10 @@ Das Bundle beinhaltet:
 
 Versionen
 ---------
+
+**v2.05b** (2016/09/09)
++ Bugfix für `fix-tudscrfonts`
+
 
 **v2.05a** (2016/08/24)
 + Bugfix für Überprüfung der installierten Schriften
@@ -216,6 +220,10 @@ The bundle offers:
 
 Versions
 --------
+
+**v2.05b** (2016/09/09)
++ bug fix for `fix-tudscrfonts`
+
 
 **v2.05a** (2016/08/24)
 + bug fix for verification of installed fonts
