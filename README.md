@@ -58,6 +58,10 @@ Das Bundle beinhaltet:
 Versionen
 ---------
 
+**v2.05c** (2016/09/15)
++ Bugfix bei Verwendung von KOMA-Script v3.19 und früher
+
+
 **v2.05b** (2016/09/09)
 + Bugfix für `fix-tudscrfonts`
 
@@ -220,6 +224,10 @@ The bundle offers:
 
 Versions
 --------
+
+**v2.05c** (2016/09/15)
++ bug fix for usage of KOMA-Script v3.19 and earlier
+
 
 **v2.05b** (2016/09/09)
 + bug fix for `fix-tudscrfonts`
