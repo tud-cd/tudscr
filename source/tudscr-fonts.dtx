@@ -1,9 +1,9 @@
-% \CheckSum{1270}
+% \CheckSum{1278}
 % \iffalse meta-comment
 % 
 % ============================================================================
 % 
-%  TUD-KOMA-Script
+%  TUD-Script
 %  Copyright (c) Falk Hanisch <tudscr@gmail.com>, 2012-2016
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-fonts.dtx}[%
-  2016/08/24 v2.05a TUD-KOMA-Script\space%
+  2016/09/22 v2.05d TUD-Script\space%
 %</driver>
 %<package&identify>\ProvidesPackage{tudscrfonts}[%
 %<*driver|package&identify>
@@ -119,7 +119,7 @@
 \PreventPackageFromLoading[%
   \ClassWarning{\TUD@Class@Name}{%
     The package `tudscrfonts' must not be used with\MessageBreak%
-    a TUD-KOMA-Script class%
+    a TUD-Script class%
   }%
 ]{tudscrfonts}
 %    \end{macrocode}
@@ -142,8 +142,7 @@
 %    \begin{macrocode}
 \@tempswafalse%
 \@for\@tempa:={%
-  tudbook,tudbeamer,tudfax,tudform,tudhaus,tudletter,%
-  tudposter,tudmathposter,tudscrbookold,tudscrreprtold,tudscrartclold%
+  tudbook,tudbeamer,tudfax,tudform,tudhaus,tudletter,tudposter,tudmathposter%
 }\do{%
   \@ifclassloaded{\@tempa}{%
     \if@tempswa\else\@tempswatrue\let\@tempb\@tempa\fi%
@@ -1369,10 +1368,6 @@
 % griechischen Buchstaben aus dem Paket \pkg{cmbright}. Zusätzlich werden aus
 % dem \pkg{iwona}-Paket die mathematische Symbole verwendet. Es werden zwei
 % Mathematikversion mit normalen sowie mit fetten Glyphen bereitgestellt.
-% \ToDo{%
-%   Paket \pkg{breqn} auf Ende \cs{tud@font@math@init} verzögern\newline%
-%   \url{http://latex.wcms-file3.tu-dresden.de/phpBB3/viewtopic.php?f=11&t=443}%
-% }[v2.06]
 %    \begin{macrocode}
 \newcommand*\mv@univers{}
 \newcommand*\mv@universbold{}
@@ -1465,22 +1460,13 @@
     \bool@set@lock{@tud@cdmath}{false}%
   }{%
 %    \end{macrocode}
-% Für die griechischen Buchstaben wird geprüft, ob durch ein Paket diese auf 
-% die kursive Variante gesetzt wurden. Ist dies der Fall, wird der Standardwert 
-% für die Option \opt{slantedgreek} auf \val{true} gesetzt. Anschließend 
-% erfolgt die \emph{Intialisierung} der griechischen Großbuchstaben mit dem
-% Befehl \cs{tud@font@greek@init}.
+% Für die griechischen Buchstaben wird mit \cs{tud@font@greek@check@slanted}
+% geprüft, ob durch ein Paket diese auf die kursive Variante gesetzt wurden.
+% Ist dies der Fall, wird der Standardwert für die Option \opt{slantedgreek}
+% auf \val{true} gesetzt. Anschließend erfolgt die \emph{Intialisierung} der
+% griechischen Großbuchstaben mit dem Befehl \cs{tud@font@greek@init}.
 %    \begin{macrocode}
-    \let\@tempb\relax%
-    \let\@tempc\relax%
-    \DeclareMathSymbol{\@tempb}{\mathalpha}{letters}{0}%
-    \DeclareMathSymbol{\@tempc}{\mathord}{letters}{0}%
-    \@tempswafalse%
-    \ifnum\Gamma=\@tempb\relax\@tempswatrue\fi%
-    \ifnum\Gamma=\@tempc\relax\@tempswatrue\fi%
-    \if@tempswa%
-      \bool@std@lock{@tud@slantedgreek}{true}%
-    \fi%
+    \tud@font@greek@check@slanted%
     \tud@font@greek@loop\tud@font@greek@init%
 %    \end{macrocode}
 % Zum Schluss werden abhängig von der gewählten Einstellung für die Schriftart 
@@ -1504,6 +1490,35 @@
 % \end{macro}^^A \mv@universbold
 % \end{macro}^^A \mv@univers
 % \end{macro}^^A \tud@font@math@init
+% \begin{macro}{\tud@font@greek@check@slanted}
+% \changes{v2.05d}{2016/09/22}{neu}^^A
+% Dieser Befehl prüft die aktuelle Definition von \cs{Gamma} und vergleicht 
+% diese mit den kursiven Varianten des Buchstabens. Sind diese identisch, wird 
+% davon ausgegangen, dass ein Paket mit der Option \opt{slantedGreek} oder 
+% ähnlich geladen wurde. In diesem Fall wird der voreingestellte Wert für die 
+% entsprechende \TUDScript-Option gesetzt.
+%    \begin{macrocode}
+\newcommand*\tud@font@greek@check@slanted{%
+  \let\@tempb\relax%
+  \let\@tempc\relax%
+  \DeclareMathSymbol{\@tempb}{\mathalpha}{letters}{0}%
+  \DeclareMathSymbol{\@tempc}{\mathord}{letters}{0}%
+  \@tempswafalse%
+  \ifnum\Gamma=\@tempb\relax\@tempswatrue\fi%
+  \ifnum\Gamma=\@tempc\relax\@tempswatrue\fi%
+  \if@tempswa%
+    \bool@std@lock{@tud@slantedgreek}{true}%
+  \fi%
+  \let\tud@font@greek@check@slanted\relax%
+}
+%    \end{macrocode}
+% Da die Definition der griechischen Buchstaben durch das Paket \pkg{flexisym} 
+% stark verändert wird, wird die Prüfung in jedem Fall vor besagtem Paket 
+% ausgeführt.
+%    \begin{macrocode}
+\BeforePackage{flexisym}{\tud@font@greek@check@slanted}
+%    \end{macrocode}
+% \end{macro}^^A \tud@font@greek@check@slanted
 % \begin{macro}{\tud@font@greek@init}
 % \changes{v2.04}{2015/03/10}{neu}^^A
 % \begin{macro}{\upDelta}
