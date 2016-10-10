@@ -2,7 +2,7 @@
 TUD-Script
 ===============
 
-TUD-Script 2016/09/22 v2.05d
+TUD-Script 2016/10/10 v2.05e
 Copyright (c) Falk Hanisch <tudscr@gmail.com>, 2012-2016
 
 This material is subject to the LaTeX Project Public License version 1.3c or 
@@ -57,6 +57,9 @@ Das Bundle beinhaltet:
 
 Versionen
 ---------
+
+**v2.05e** (2016/10/10)
++ Bugfix für Verwendung von `\author` nach `\maketitle`
 
 **v2.05d** (2016/09/22)
 + Bezeichnung in TUD-Script-Bundle geändert
@@ -229,6 +232,10 @@ The bundle offers:
 
 Versions
 --------
+
+**v2.05e** (2016/10/10)
++ bug fix for usage of `\author` after `\maketitle`
+
 
 **v2.05d** (2016/09/22)
 + notation changed to TUD-Script-Bundle
