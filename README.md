@@ -58,8 +58,13 @@ Das Bundle beinhaltet:
 Versionen
 ---------
 
+**v2.05f** (2016/10/12)
++ Probleme mit dem Paket `bm` behoben
+
+
 **v2.05e** (2016/10/10)
 + Bugfix für Verwendung von `\author` nach `\maketitle`
+
 
 **v2.05d** (2016/09/22)
 + Bezeichnung in TUD-Script-Bundle geändert
@@ -232,6 +237,10 @@ The bundle offers:
 
 Versions
 --------
+
+**v2.05f** (2016/10/12)
++ solved problems with package `bm`
+
 
 **v2.05e** (2016/10/10)
 + bug fix for usage of `\author` after `\maketitle`
