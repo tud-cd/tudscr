@@ -1,4 +1,4 @@
-% \CheckSum{1278}
+% \CheckSum{1291}
 % \iffalse meta-comment
 % 
 % ============================================================================
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-fonts.dtx}[%
-  2016/09/22 v2.05d TUD-Script\space%
+  2016/10/12 v2.05f TUD-Script\space%
 %</driver>
 %<package&identify>\ProvidesPackage{tudscrfonts}[%
 %<*driver|package&identify>
@@ -801,7 +801,7 @@
 % definiert. Danach erfolgt die Behandlung der Mathematikschriften und die 
 % gewählte Standardschrift aktiviert. Zum Schluss wird das Layout erneuert.
 %    \begin{macrocode}
-  \ifdef{\tud@font@math@init}{}{\tud@font@math@set}%
+  \ifundef{\tud@font@math@init}{\tud@font@math@set}{}%
   \tud@font@skip@set%
   \normalfont\selectfont%
 %<*class>
@@ -914,6 +914,8 @@
 % Das Makro \cs{tud@font@init} wird für die Defintion aller Befehle zur Auswahl 
 % der Schriften des \CDs verwendet.
 %    \begin{macrocode}
+\newcommand*\tud@dinbn{}
+\let\tud@dinbn\relax
 \newcommand*\tud@font@init{%
 %    \end{macrocode}
 % Es werden mehrere Schalter zur expliziten Auswahl für die Schriftschnitte
@@ -1479,11 +1481,6 @@
 % Laden der Schriftdefinitionen am Dokumentbeginn zu forcieren.
 %    \begin{macrocode}
   \sbox\z@{\tud@dinbn$ $}%
-%    \end{macrocode}
-% Zuletzt wird der Befehl für die Initialisierung der Mathematikschriften 
-% undefiniert gesetzt.
-%    \begin{macrocode}
-  \undef\tud@font@math@init%
 }
 %    \end{macrocode}
 % \end{macro}^^A \mv@dinbold
@@ -1686,9 +1683,7 @@
 % das Setzen der Mathematikschriften durch \cs{AtBeginDocument} innerhalb von 
 % \cs{AtEndPreamble} am Ende \emph{aller} \cs{AtBeginDocument}.
 %    \begin{macrocode}
-%<class>\AtEndPreamble%
-%<package>\AtBeginDocument%
-{%
+\AtEndPreamble{%
 %    \end{macrocode}
 % Falls \pkg{mweights} geladen wurde, werden im Bedarfsfall die vom Paket
 % erwarteten Makros für die Schriftschnitte der einzelnen Schriftfamilien 
@@ -1708,9 +1703,7 @@
 % Damit \pkg{tudscrfonts} reibungslos mit den nachfolgenden Definitionen
 % funktioniert, wird im Bedarfsfall der Befehl \cs{sectfont} vorgehalten. 
 %    \begin{macrocode}
-%<*package>
-  \ifdef{\sectfont}{}{\let\sectfont\relax}%
-%</package>
+%<package>  \ifdef{\sectfont}{}{\let\sectfont\relax}%
 %    \end{macrocode}
 % Damit die Schrift im Dokument später noch umgestellt werden kann, werden
 % sämtliche Einstellungen erst am Ende der Präambel gesichert. Deshalb wird
@@ -1731,12 +1724,30 @@
 % insbesondere auf Einstellungen von \pkg{fontspec} reagieren zu können. Da es
 % so gut wie keine freien OpenType"=Schriften für den mathmatischen Formelsatz
 % gibt, werden \emph{immer} die PostScript"=Schriften verwendet, falls diese
-% installiert sind. 
+% installiert sind. Wurde jedoch das Paket \pkg{bm} angefordert, so müssen die
+% Mathematikschriften spätestens zum Ende der Präambel initialisiert werden.
 %    \begin{macrocode}
-%<class>  \AtBeginDocument{\tud@font@math@init}%
-%<package>  \tud@font@math@init%
+  \if@tud@x@bm@requested%
+    \tud@font@math@init%
+    \UnPreventPackageFromLoading{bm}%
+    \RequirePackage{bm}%
+  \fi%
+  \AtBeginDocument{\tud@font@math@init\let\tud@font@math@init\relax}%
 }
 %    \end{macrocode}
+%
+% \subsection{Anpassungen für das Paket \pkg{bm}}
+%
+% \begin{macro}{\if@tud@x@bm@requested}
+% Das Paket \pkg{bm} stellt den Befehl \cs{bm} für fette und kursive Symbole im 
+% Mathematiksatz bereit. Damit dies funktioniert, muss das Laden des Paketes 
+% auf das Ende der Präambel verzögert werden, um zuvor alle Einstellungen für 
+% die mathematischen Symbole vornehmen zu können.
+%    \begin{macrocode}
+\newif\if@tud@x@bm@requested
+\PreventPackageFromLoading[\@tud@x@bm@requestedtrue]{bm}
+%    \end{macrocode}
+% \end{macro}^^A \if@tud@x@bm@requested
 %
 % \subsection{Anpassungen für die Klasse \cls{beamer}}
 %
