@@ -1,9 +1,10 @@
-============================================================================
 
- TUD-Script
- Copyright (c) Falk Hanisch <tudscr@gmail.com>, 2012-2016
+ TUD-Script -- Corporate Design of Technische Universität Dresden
+----------------------------------------------------------------------------
 
-============================================================================
+ Copyright (C) Falk Hanisch <tudscr@gmail.com>, 2012-2016
+
+----------------------------------------------------------------------------
 
  This work may be distributed and/or modified under the conditions of the
  LaTeX Project Public License, version 1.3c of the license. The latest
@@ -13,7 +14,7 @@
  "author-maintained". The current maintainer and author of this work
  is Falk Hanisch.
 
-----------------------------------------------------------------------------
+============================================================================
 
  Dieses Werk darf nach den Bedingungen der LaTeX Project Public Lizenz
  in der Version 1.3c, verteilt und/oder veraendert werden. Die aktuelle 
@@ -23,4 +24,4 @@
  "author-maintained", wird somit allein durch den Autor verwaltet. Der 
  aktuelle Verwalter und Autor dieses Werkes ist Falk Hanisch.
 
-============================================================================
+----------------------------------------------------------------------------

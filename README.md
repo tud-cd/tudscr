@@ -1,16 +1,21 @@
 
-TUD-Script
-===============
+ TUD-Script -- Corporate Design of Technische Universität Dresden
+----------------------------------------------------------------------------
 
-TUD-Script 2016/10/12 v2.05f
-Copyright (c) Falk Hanisch <tudscr@gmail.com>, 2012-2016
+ Copyright (C) Falk Hanisch <tudscr@gmail.com>, 2012-2016
 
-This material is subject to the LaTeX Project Public License version 1.3c or 
-later. See http://www.latex-project.org/lppl.txt for details of that license.
+ tudscr 2016/10/12 v2.05f
 
-English text below
+============================================================================
 
--------------------------------------------------------------------------------
+ This material is subject to the LaTeX Project Public License version 1.3c 
+ or later. See http://www.latex-project.org/lppl.txt for details.
+
+============================================================================
+ 
+ English text below
+
+----------------------------------------------------------------------------
 
 Zusammenfassung
 ---------------
