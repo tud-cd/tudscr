@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-manual.dtx}[%
-  2016/10/17 v2.05g TUD-Script\space%
+  2016/10/24 v2.05g TUD-Script\space%
 %</driver>
 %<package&identify>\ProvidesPackage{tudscrtutorial}[%
 %<*driver|package&identify>
@@ -69,11 +69,17 @@
 \KOMAoptions{parskip=half-}
 \usepackage{microtype}
 \usepackage{bookmark}
+
 \CodelineIndex
 \RecordChanges
 \GetFileInfo{tudscr-manual.dtx}
+\title{\file{\filename}}
+\author{Falk Hanisch\qquad\expandafter\mailto\expandafter{\tudscrmail}}
+\date{\fileversion\nobreakspace(\filedate)}
+
 \begin{document}
   \maketitle
+  \tableofcontents
   \DocInput{\filename}
 \end{document}
 %</driver>
@@ -210,9 +216,9 @@
 % \begin{macro}{\if@tud@list@sorted}
 % \changes{v2.02}{2014/07/25}{neu}^^A
 % Der Befehl \cs{tud@list@sort} erwartet eine \pkg{etoolbox}-Liste und sortiert 
-% diese mit \cs{sort@list} in alphabetischer Reihenfolge in eine kommagetrennte 
-% Auflistung. Diese wird anschließend wieder in eine \pkg{etoolbox}-Liste 
-% umgewandelt.
+% diese mit dem Makro \cs{sort@list} in alphabetischer Reihenfolge in eine 
+% kommagetrennte Auflistung. Diese wird anschließend wieder in eine
+% \pkg{etoolbox}-Liste umgewandelt.
 %    \begin{macrocode}
 \newcommand*\tud@templist{}
 \let\tud@templist\relax
@@ -1055,15 +1061,16 @@
 % \end{environment}^^A Declaration*
 % \begin{environment}{Bundle*}
 % \changes{v2.05}{2015/11/01}{neu}^^A
-% Die Umgebung \env{Bundle*} wird verwendet, wenn ein zusätzliche Paket oder 
-% eine weitere Klasse in Ergänzung zu den Hauptklassen dokumentiert wird. Dabei 
-% wird die Umgebung \env{Bundle} geöffnet, nachdem das obligatorischen Argument 
-% mit dem Befehl \cs{tud@declare@special@start} deklariert wird. Dabei sollte 
-% die Umgebung \env{Bundle*} direkt nach einer Gliederungsüberschrift genutzt
-% werden, in welcher das zu deklarierende Element (Klasse, Paket etc.) genannt
-% wird, da der Anker des erzeugten Labels weiter nach oben auf die Höhe der 
-% Überschirft verschoben wird. Zum Abschluss der Deklaration wird nach dem
-% Schließen der Umgebung \env{Bundle} \cs{tud@declare@special@end} genutzt. 
+% Die Umgebung \env{Bundle*} wird verwendet, wenn ein zusätzliches Paket oder 
+% eine weitere Klasse in Ergänzung zu den Hauptklassen dokumentiert wird. 
+% Hierfür wird die Umgebung \env{Bundle} erst geöffnet, nachdem mit dem Makro
+% \cs{tud@declare@special@start} das obligatorische Argument~-- sprich die 
+% Klasse oder das Paket~-- deklariert wird. Die Umgebung \env{Bundle*} sollte 
+% dabei direkt nach einer Gliederungsüberschrift genutzt werden, in welcher das 
+% zu deklarierende Element (Klasse, Paket etc.) genannt wird, da der Anker des 
+% erzeugten Labels weiter nach oben auf die Höhe der Überschirft verschoben
+% wird. Zum Abschluss der Deklaration wird \cs{tud@declare@special@end} nach
+% dem Schließen der Umgebung \env{Bundle} genutzt. 
 %    \begin{macrocode}
 \NewDocumentEnvironment{Bundle*}{om}{%
   \tud@declare@special@start[#1]{#2}{3}%
@@ -3163,7 +3170,7 @@
 % des Markups deaktiviert und das erste Argument von \cs{Key} ausgeführt. Dies
 % führt über \cs{Process@Index} zum rekursiven Aufruf von \cs{tud@idx@get}. Als
 % Ergebnis sind im zweiten und dritten Argument~-- sprich in \cs{tud@idx@key} 
-% und \cs{tud@idx@fmt}~-- sowohl \meta{Schlüsselwort} als auch \meta{Markup} 
+% und \cs{tud@idx@fmt}~-- sowohl \meta{Markup} als auch \meta{Schlüsselwort} 
 % für den Elterneintrag enthalten. Diese werden in das vierte Argument
 % (\cs{idxentry}) gespeichert.
 %    \begin{macrocode}
@@ -3712,13 +3719,11 @@
 % solchen Liste definiert. Die Änderungsliste ist der Klasse \cls{tudscrmanual} 
 % vorbehalten.
 %
-% Änderungsnotizen lassen sich auf zwei unterschieldichen Wegen generieren. 
-% Entweder über die Nutzung des Befehls \cs{ChangedAt} oder über das optionale 
-% Argument der Deklarationsumgebungen. Dabei sind diese in beiden Fällen in 
-% der Form Versionsnummer gefolgt von der eigentlichen Notiz anzugeben, wobei 
-% diese zwingend durch einen Doppelpunkt voneinander zu trennen sind. Die Form 
-% der Verwendung lautet: \meta{Versionsnummer}\val{:}\meta{Änderungsnotiz}. Die 
-% alleinige Angabe der Versionsnummer ohne Änderungsnotiz ist ebenso möglich.
+% Änderungsnotizen lassen sich auf zwei unterschiedlichen Wegen generieren. 
+% Entweder über die Nutzung von \cs{ChangedAt} oder über das optionale Argument
+% einer der Deklarationsumgebungen. Diese sind in der Form 
+% \meta{Versionsnummer}\val{:}\meta{Änderungsnotiz} anzugeben. Die alleinige 
+% Angabe der Versionsnummer ohne Änderungsnotiz ist ebenso möglich.
 % 
 % Wird die Änderungsnotiz für ein bestimmtes Element wie eine Option oder ein 
 % Befehl erstellt, wie es bei den Deklarationsumgebungen implizit oder bei der 
@@ -3733,18 +3738,18 @@
 % \changes{v2.02}{2014/07/25}{erweitert}^^A
 % \changes{v2.02}{2014/10/08}{Sternversion ergänzt}^^A
 % Der Schalter \cs{if@tud@changedat} wird im weiteren Verlauf dazu verwendet, 
-% das Standard-Verhalten der einzelnen Markup-Befehle kurzeitig zu ändern und
+% das Standardverhalten der einzelnen Markup-Befehle kurzeitig zu ändern und
 % anstelle der Makros \cs{Process@Markup} und \cs{Process@Index} den Befehl 
 % \cs{Process@ChangedAt} auszuführen, mit welchem die Formatierung der Einträge 
 % der Änderungsliste erfolgt.
 %   \begin{macrocode}
 \newif\if@tud@changedat
 %    \end{macrocode}
-% Die Formatierung der Änderungseinträge erfolgt dabei wie auch für den Index 
-% mit \cs{tud@idx@get}, wobei die Sternversion dabei für die Identifikation als
-% Änderungseintrag fungiert. Aufgerufen wird \cs{Process@ChangedAt} während der 
-% Erstellung der Änderungseinträge mit \cs{Changed@At@CreateEntry}. Der Aufruf 
-% des Makros erfolgt dabei in der gewohnten Form mit einem obligatorischen 
+% Die Formatierung der Änderungseinträge erfolgt~-- wie auch für den Index~-- 
+% mit dem Makro \cs{tud@idx@get}, wobei die Sternversion für die Identifikation
+% als Änderungseintrag fungiert. Aufgerufen wird \cs{Process@ChangedAt} während 
+% der Erstellung der Änderungseinträge mit \cs{Changed@At@CreateEntry}. Der
+% Aufruf des Makros erfolgt dabei in gewohnter Form mit einem obligatorischen 
 % gefolgt von drei optionalen Argumenten:
 % \newline\begingroup\scriptsize
 % \cs{Process@ChangedAt}\val{\ignorespaces%
@@ -4992,7 +4997,7 @@
 % \changes{v2.02}{2014/08/19}{neu}^^A
 % \begin{macro}{\tud@tut@post}
 % \changes{v2.02}{2014/08/19}{neu}^^A
-% Dies sind die Hilfsmakros, welche zu Beginn und Ende der Quelltextumgebungen 
+% Dies sind Hilfsmakros, welche zu Beginn und Ende der Quelltextumgebungen 
 % \env{Preamble}, \env{Trunk} und \env{Hint} für das Sichern der Inhalte in
 % eine Hilfsdatei verantwortlich sind, wofür die \env{filecontents}-Umgebung 
 % genutzt wird.
@@ -5008,25 +5013,25 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@tut@post
 % \end{macro}^^A \tud@tut@pre
-% Die nachfolgenden Umgebungen nutzen die beiden Hilfsmakros \cs{tud@tut@pre}
-% und \cs{tud@tut@post}, welche den gegebenen Inhalt in die temporäre Datei 
-% \file{\string\tud@tut@temp.tex} schreiben. Mit \cs{tud@tut@append} werden 
-% zusätzlich~-- abhängig vom gegebenen Argument~-- die im Dokument gesetzten 
-% Quelltextauszüge der Datei \file{\string\tud@tut@temp-preamble.tex} oder 
-% \file{\string\tud@tut@temp-trunk.tex} hinzugefügt. Damit werden die 
-% gewünschten Inhalte für ein Copy"~\&"~Paste"~Beispiel gesammelt und mit
-% \cs{FinishTutorial} ausgegeben.
+% Die nachfolgenden Umgebungen verwenden die beiden, gerade zuvor eingeführten 
+% Hilfsmakros \cs{tud@tut@pre} und \cs{tud@tut@post}, welche den gegebenen 
+% Inhalt in die temporäre Datei \file{\string\tud@tut@temp.tex} schreiben. Die 
+% im Dokument in den Umgebungen gesetzten Quelltextauszüge werden mit dem Makro
+% \cs{tud@tut@append}~-- abhängig vom gegebenen Argument~-- zusätzlich für ein 
+% Copy"~\&"~Paste"~Beispiel in \file{\string\tud@tut@temp-preamble.tex} oder
+% \file{\string\tud@tut@temp-trunk.tex} gepsiechert. Die damit gesammelten 
+% Inhalte werden am Ende mit \cs{FinishTutorial} ausgegeben.
 % \begin{environment}{Preamble}
 % \changes{v2.02}{2014/11/02}{neu}^^A
 % \begin{environment}{Preamble*}
 % \changes{v2.02}{2014/11/03}{neu}^^A
 % \begin{environment}{Preamble+}
 % \changes{v2.02}{2014/11/03}{neu}^^A
-% Die Umgebung \env{Preamble} dient für die Ausgabe von Quelltexten, welche in 
-% einem \LaTeXe-Dokument in der Präambel verwendet werden müssen oder sollten. 
-% Die in ihr gesetzten Inhalte werden für das Copy"~\&"~Paste-Beispiel vor den 
-% Inhalten aus der Umgebung \env{Trunk} ausgegeben. Die Sternversion führt
-% den Inhalt zusätzlich im Dokument aus. Die Pluszechen"=Version fügt dem
+% Die Umgebung \env{Preamble} dient für die Ausgabe von Quelltextauszügenen, 
+% welche in einem \LaTeXe-Dokument in der Präambel verwendet werden müssen oder
+% sollten. Die in ihr gesetzten Inhalte werden für das Copy"~\&"~Paste-Beispiel
+% vor den Inhalten aus der Umgebung \env{Trunk} ausgegeben. Die Sternversion
+% führt den Inhalt zusätzlich im Dokument aus. Die Pluszechen"=Version fügt dem
 % Ausgabestream ihren Inhalt hinzu, ohne das dieser ausgegeben oder ausgeführt
 % wird.
 %    \begin{macrocode}

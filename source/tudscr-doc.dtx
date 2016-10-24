@@ -1,4 +1,4 @@
-% \CheckSum{1618}
+% \CheckSum{1645}
 % \iffalse meta-comment
 % 
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-doc.dtx}[%
-  2016/10/17 v2.05g TUD-Script\space%
+  2016/10/24 v2.05g TUD-Script\space%
   (source code documentation based on scrartcl/scrdoc)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
@@ -63,11 +63,17 @@
 \KOMAoptions{parskip=half-}
 \usepackage{microtype}
 \usepackage{bookmark}
+
 \CodelineIndex
 \RecordChanges
 \GetFileInfo{tudscr-doc.dtx}
+\title{\file{\filename}}
+\author{Falk Hanisch\qquad\expandafter\mailto\expandafter{\tudscrmail}}
+\date{\fileversion\nobreakspace(\filedate)}
+
 \begin{document}
   \maketitle
+  \tableofcontents
   \DocInput{\filename}
 \end{document}
 %</driver>
@@ -93,13 +99,10 @@
 % gesichert.
 %    \begin{macrocode}
 \RequirePackage{scrbase}[2013/12/19]%
-\newcommand*\saved@maketitle{}%
+\newcommand*\scr@maketitle{}%
 \PassOptionsToClass{toc=left}{scrartcl}%
-\AfterClass{scrartcl}{\let\saved@maketitle\@maketitle}%
-\AfterClass{ltxdoc}{%
-  \let\@maketitle\saved@maketitle%
-  \codeline@indexfalse%
-}%
+\AfterClass{scrartcl}{\let\scr@maketitle\@maketitle}%
+\AfterClass{ltxdoc}{\codeline@indexfalse}%
 \AfterPackage{inputenc}{\RequirePackage{csquotes}[2011/10/22]}%
 %    \end{macrocode}
 % Der folgende Quelltext ist 1:1 aus \cls{scrdoc} kopiert.
@@ -259,12 +262,19 @@
 \setlength\headsep{30pt}
 \setlength\footskip{1.5\headsep}
 \setlength\textheight{\dimexpr\paperheight-2.5\headsep-\footskip\relax}
-\setlength\marginparwidth{150pt}
-\setlength\marginparsep{0pt}
+\begingroup
+  \MacroFont\selectfont
+  \settowidth\@tempdima{\space}
+  \setlength\@tempdima{80\@tempdima}
+  \addtolength\@tempdima{\MacroIndent}
+  \edef\@tempa{%
+    \endgroup
+    \noexpand\setlength\noexpand\textwidth{\the\@tempdima}
+  }
+\@tempa
+\setlength\marginparsep{1em}
+\setlength\marginparwidth{\dimexpr\paperwidth-\textwidth-2\marginparsep\relax}
 \setlength\oddsidemargin{\dimexpr\marginparwidth+\marginparsep-1in\relax}
-\setlength\textwidth{%
-  \dimexpr\paperwidth-1in-\oddsidemargin-.5\headsep\relax%
-}
 %    \end{macrocode}
 % \end{length}^^A \textwidth
 % \end{length}^^A \textheight
@@ -1056,21 +1066,42 @@
 % \begin{macro}{\hypersetup}
 % \begin{macro}{\phantomsection}
 % \begin{macro}{\texorpdfstring}
+% \begin{macro}{\href}
+% \begin{macro}{\mailto}
+% \changes{v2.05g}{2016/10/24}{neu}^^A
+% \begin{macro}{\hrfn}
+% \changes{v2.05g}{2016/10/24}{neu}^^A
 % Etwas Kleinkram für \pkg{hyperref}\dots
 %    \begin{macrocode}
+  \newcommand*\hrfn[2]{%
+    \href{#1}{#2}%
+    \footnote{%
+      \scalebox{0.95}{%
+        \def\_{_}%
+        \edef\@tempa{#1}%
+        \strut\expandafter\url\expandafter{\@tempa}%
+      }%
+    }%
+  }
   \@ifpackageloaded{hyperref}{%
     \pdfstringdefDisableCommands{%
       \def\TUDScript{TUD-Script}%
       \let\cls\@firstofone%
       \let\pkg\@firstofone%
     }%
+    \newrobustcmd*\mailto[1]{\href{mailto:#1}{\nolinkurl{#1}}}%
   }{%
     \RequirePackage{url}[2013/09/16]%
     \providecommand*\hypersetup[1]{}%
     \providecommand*\phantomsection{}%
     \providecommand*\texorpdfstring[2]{#1}%
+    \providecommand*\href[3][]{#3}%
+    \newrobustcmd*\mailto[1]{\url{#1}}%
   }%
 %    \end{macrocode}
+% \end{macro}^^A \hrfn
+% \end{macro}^^A \mailto
+% \end{macro}^^A \href
 % \end{macro}^^A \texorpdfstring
 % \end{macro}^^A \phantomsection
 % \end{macro}^^A \hypersetup
@@ -1128,16 +1159,6 @@
     \providecommand*\textuxs[1]{\textubs{#1}}%
     \providecommand*\textdbn[1]{\textubn{#1}}%
   }%
-%    \end{macrocode}
-% Und ganz zum Schluss noch die Titelei.
-%    \begin{macrocode}
-  \title{%
-    \file{\filename}\thanks{%
-      Dies ist Version \fileversion\nobreakspace{}von Datei \file{\filename}.%
-    }%
-  }%
-  \author{Falk Hanisch\thanks{\tudscrmail}}%
-  \date{\filedate}%
 }
 %    \end{macrocode}
 %
