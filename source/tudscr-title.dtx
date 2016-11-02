@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-title.dtx}[%
-  2016/10/24 v2.05g TUD-Script (title)%
+  2016/11/02 v2.05g TUD-Script (title)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman,xindy]{tudscrdoc}
@@ -350,14 +350,20 @@
 %</book|report|article>
 % \fi
 %
-% \begin{macro}{\tud@maketitle}
+% \begin{macro}{\maketitle}
 % \changes{v2.01a}{2014/06/03}{Fehler bei Nutzung von \cs{subtitle} behoben}^^A
 % \changes{v2.02}{2014/06/23}{\val{firstiscover} wird als Wert für die Option 
 %   \opt{titlepage} unterstützt}^^A
 % \changes{v2.02}{2014/07/19}{Im zweispaltigen Satz wird für den Titelkopf
 %   \cs{tud@title@twocolumn} verwendet}^^A
-% \changes{v2.02}{2014/09/05}{Neue Parameter}^^A
 % \changes{v2.02}{2014/09/05}{Titelseite mit \cs{tud@make@titlepage}}^^A
+% \begin{parameter}{cdtitle}
+% \changes{v2.03}{2015/01/12}{neu}^^A
+% \begin{parameter}{cd}
+% \changes{v2.03}{2015/01/12}{neu}^^A
+% \begin{parameter}{pagenumber}
+% \changes{v2.02}{2014/09/05}{neu}^^A
+% \begin{macro}{\tud@maketitle}
 % \begin{macro}{\tud@title@pagenumber}
 % \changes{v2.02}{2014/06/23}{neu}^^A
 % Bei der entsprechend gewählten Layoutoption, wird eine neue Titelseite im \CD
@@ -421,23 +427,6 @@
 \tud@cmd@store{maketitle}
 \let\maketitle\tud@maketitle
 %    \end{macrocode}
-% \end{macro}^^A \tud@title@pagenumber
-% \end{macro}^^A \tud@maketitle
-% \begin{parameter}{cdtitle}
-% \changes{v2.03}{2015/01/12}{neu}^^A
-% \begin{parameter}{cd}
-% \changes{v2.03}{2015/01/12}{neu}^^A
-% \begin{parameter}{pagenumber}
-% \changes{v2.02}{2014/09/05}{neu}^^A
-% \begin{parameter}{cdfont}
-% \changes{v2.02}{2014/09/05}{neu}^^A
-% \begin{parameter}{cdhead}
-% \begin{parameter}{cdfoot}
-% \begin{parameter}{headlogo}
-% \begin{parameter}{footlogo}
-% \begin{parameter}{ddc}
-% \begin{parameter}{ddchead}
-% \begin{parameter}{ddcfoot}
 % Die einzelnen Parameter dienen zur Einstellung der Titelseite und entsprechen
 % in ihrem Verhalten den gleichnamigen Klassenoptionen.
 %    \begin{macrocode}
@@ -457,17 +446,12 @@
   \TUD@parameter@handler@value{pagenumber}%
 }
 %    \end{macrocode}
-% \end{parameter}^^A ddcfoot
-% \end{parameter}^^A ddchead
-% \end{parameter}^^A ddc
-% \end{parameter}^^A footlogo
-% \end{parameter}^^A headlogo
-% \end{parameter}^^A cdfoot
-% \end{parameter}^^A cdhead
-% \end{parameter}^^A cdfont
+% \end{macro}^^A \tud@title@pagenumber
+% \end{macro}^^A \tud@maketitle
 % \end{parameter}^^A pagenumber
 % \end{parameter}^^A cd
 % \end{parameter}^^A cdtitle
+% \end{macro}^^A \maketitle
 %
 % \iffalse
 %<*book|report|article>
@@ -618,6 +602,10 @@
 % eigentlichen Titel für \cs{@titlehead} \textbf{und} \cs{@subject} abgezogen
 % werden. Anschließend werden die beiden Boxen ausgegeben und der Aufbau der
 % Titelseite kann beginnen.
+% \ToDo{%
+%   Der Kram mit Absatz und neuer Zeile ist nicht ganz stimmig, die Länge zum 
+%   Verschieben wird nicht suaber berechnet. Alles in eine Box der Höhe 0?
+% }[v2.06]
 %    \begin{macrocode}
       \setlength\@tempdima{\z@}%
       \ifx\@titlehead\@empty\else%
@@ -712,6 +700,7 @@
         \vskip 2ex\@plus.5fill%
       \fi%
 %    \end{macrocode}
+% \ToDo{Befehl zum Angeben optionaler Inhalte, bspw. ein Bild}[v2.06]
 % Wenn Betreuer angegeben wurden, dann werden diese auf dem Titel ausgeben. Um
 % die Vorlage auch für Dissertationen verwenden zu können, ist ein Feld für
 % Gutachter vorgesehen. Außerdem wird für Promotionsschriften ein Feld für
@@ -1206,6 +1195,15 @@
 % \changes{v2.02}{2014/08/12}{Satzspiegel mit \cs{coverpage\dots{}margin}
 %   änderbar, falls CD-Layout deaktiviert}^^A
 % \changes{v2.03}{2015/01/09}{Anpassungen für neue Satzspiegelerzeugung}^^A
+% \begin{parameter}{cdcover}
+% \changes{v2.03}{2015/01/12}{neu}^^A
+% \begin{parameter}{cd}
+% \changes{v2.03}{2015/01/12}{neu}^^A
+% \begin{parameter}{pagenumber}
+% \begin{parameter}{cdgeometry}
+% \changes{v2.02}{2014/06/23}{neu}^^A
+% \begin{macro}{\if@tud@cdgeometry@cover}
+% \begin{macro}{\if@tud@cdgeometry@cover@locked}
 % \begin{macro}{\if@tud@cover}
 % Der Befehl \cs{makecover} ist für eine Umschlagseite bei einem gebundenen 
 % Werk zu verwenden.
@@ -1372,28 +1370,12 @@
   \endgroup%
 }
 %    \end{macrocode}
-% \end{macro}^^A \if@tud@cover
-% \end{macro}^^A \makecover
-% \begin{parameter}{cdcover}
-% \changes{v2.03}{2015/01/12}{neu}^^A
-% \begin{parameter}{cd}
-% \changes{v2.03}{2015/01/12}{neu}^^A
-% \begin{parameter}{cdgeometry}
-% \changes{v2.02}{2014/06/23}{neu}^^A
-% \begin{macro}{\if@tud@cdgeometry@cover}
-% \begin{macro}{\if@tud@cdgeometry@cover@locked}
-% \begin{parameter}{pagenumber}
-% \begin{parameter}{cdfont}
-% \begin{parameter}{cdhead}
-% \begin{parameter}{cdfoot}
-% \begin{parameter}{headlogo}
-% \begin{parameter}{footlogo}
-% \begin{parameter}{ddc}
-% \begin{parameter}{ddchead}
-% \begin{parameter}{ddcfoot}
 % Die einzelnen Parameter dienen zur Einstellung der Umschlagseite und
-% entsprechen in ihrem Verhalten den gleichnamigen Klassenoptionen~--
-% \opt{cdgeometry} ausgenommen.
+% entsprechen~-- \prm{cdgeometry} ausgenommen~-- in ihrem Verhalten den
+% gleichnamigen Klassenoptionen. Der genannte Parameter kann eigentlich nur mit
+% booleschen Werten verwenet werden. Für einen benutzerdefinierten Satzspiegel 
+% der Umschlagseite müssen die \KOMAScript-Makros \cs{coverpage\dots{}margin} 
+% angepasst werden.
 %    \begin{macrocode}
 \bool@lock{@tud@cdgeometry@cover}
 \TUD@parameter@family{cover}{%
@@ -1426,20 +1408,14 @@
   \TUD@parameter@handler@value{pagenumber}%
 }
 %    \end{macrocode}
-% \end{parameter}^^A ddcfoot
-% \end{parameter}^^A ddchead
-% \end{parameter}^^A ddc
-% \end{parameter}^^A footlogo
-% \end{parameter}^^A headlogo
-% \end{parameter}^^A cdfoot
-% \end{parameter}^^A cdhead
-% \end{parameter}^^A cdfont
-% \end{parameter}^^A pagenumber
+% \end{macro}^^A \if@tud@cover
 % \end{macro}^^A \if@tud@cdgeometry@cover@locked
 % \end{macro}^^A \if@tud@cdgeometry@cover
 % \end{parameter}^^A cdgeometry
+% \end{parameter}^^A pagenumber
 % \end{parameter}^^A cd
 % \end{parameter}^^A cdcover
+% \end{macro}^^A \makecover
 %
 % \iffalse
 %</book|report|article>
