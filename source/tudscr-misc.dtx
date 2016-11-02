@@ -1,4 +1,4 @@
-% \CheckSum{907}
+% \CheckSum{1005}
 % \iffalse meta-comment
 % 
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-misc.dtx}[%
-  2016/10/24 v2.05g TUD-Script (miscellaneous)%
+  2016/11/02 v2.05g TUD-Script (miscellaneous)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman,xindy]{tudscrdoc}
@@ -674,16 +674,40 @@
 % den Stildateien sucht, werden diese zur Laufzeit im Arbeitsverzeichnis 
 % erstellt. Nachfolgend wird die zu erstellenden \app{texindy}-Stildatei kurz
 % beschrieben.
+%
+% \iffalse
+%<*doc>
+% \fi
+%
 % \begin{macro}{\@hashchar}
 % \changes{v2.05}{2016/04/25}{neu}^^A
 % Das Hash-Zeichen.
 %    \begin{macrocode}
-%<*doc>
 \catcode`\#=12
 \newcommand*\@hashchar{#}
 \catcode`\#=6
-%</doc>
 %    \end{macrocode}
+% \end{macro}^^A \@hashchar
+% \begin{macro}{\tud@lst@subsub}
+% \changes{v2.05g}{2016/11/02}{neu}^^A
+% \begin{macro}{\tud@lst@subsubsub}
+% \changes{v2.05g}{2016/11/02}{neu}^^A
+% \begin{macro}{\subsubsubitem}
+% \changes{v2.05g}{2016/11/02}{neu}^^A
+% \begin{macro}{\efil}
+% \changes{v2.05g}{2016/11/02}{neu}^^A
+% Für die Quelltextdokumentation werden Parameter in einer weiteren Unterebene 
+% ausgegeben.
+%    \begin{macrocode}
+\newcommand*\tud@lst@subsub{}
+\newcommand*\tud@lst@subsubsub{}
+\newcommand*\subsubsubitem{\@idxitem\hspace*{35\p@}}
+\newcommand*\efil{\hfil\nopagebreak}%
+%    \end{macrocode}
+% \end{macro}^^A \efil
+% \end{macro}^^A \subsubsubitem
+% \end{macro}^^A \tud@lst@subsubsub
+% \end{macro}^^A \tud@lst@subsub
 % \begin{macro}{\tud@lst@def}
 % \changes{v2.05}{2016/04/25}{neu}^^A
 % \begin{macro}{\tud@lst@values}
@@ -696,43 +720,89 @@
 % \changes{v2.05}{2016/04/25}{neu}^^A
 % \begin{macro}{\tud@lst@process}
 % \changes{v2.05}{2016/04/25}{neu}^^A
+% \begin{macro}{\tud@lst@@values}
+% \changes{v2.05g}{2016/11/02}{neu}^^A
+% \begin{macro}{\if@tud@lst@@multi}
+% \changes{v2.05g}{2016/11/02}{neu}^^A
+% \begin{macro}{\tud@lst@@init}
+% \changes{v2.05g}{2016/11/02}{neu}^^A
+% \begin{macro}{\tud@lst@@add}
+% \changes{v2.05g}{2016/11/02}{neu}^^A
+% \begin{macro}{\tud@lst@@process}
+% \changes{v2.05g}{2016/11/02}{neu}^^A
 % Für die Änderungsliste in \cls{tudscrdoc} wird bei der Beschreibung von 
 % Einträgen nur dann eine dritte Ebene verwendet, wenn es einem Eintrag mehrere 
 % Angaben existieren. Sollte nur eine Anmerkung vorhanden sein, wird diese 
 % direkt in der zweiten Ebene nach dem Eintrag selbst ausgegeben.
 %    \begin{macrocode}
-%<*doc>
 \newcommand*\tud@lst@def{%
   \newcommand*\tud@lst@values{}%
   \newif\if@tud@lst@multi%
   \newcommand*\tud@lst@init{%
     \let\tud@lst@values\relax%
+    \let\tud@lst@subsub\relax%
     \@tud@lst@multifalse%
   }%
   \newcommand*\tud@lst@add[1]{%
     \ifx\tud@lst@values\relax\else%
       \@tud@lst@multitrue%
+      \def\tud@lst@subsub{\subsubitem}%
     \fi%
-    \listadd\tud@lst@values{##1}%
+    \listadd\tud@lst@values{\tud@lst@subsub ##1}%
   }%
   \newcommand*\tud@lst@process{%
-    \def\tud@reserved{}%
     \if@tud@lst@multi%
-      \def\tud@reserved{\subsubitem}%
-      \efill%
+      \preto\tud@lst@values{\efill}%
     \fi%
-    \forlistloop\tud@reserved{\tud@lst@values}%
+    \forlistloop{}{\tud@lst@values}%
+    \tud@lst@init%
+  }%
+  \newcommand*\tud@lst@@values{}%
+  \newif\if@tud@lst@@multi%
+  \newcommand*\tud@lst@@init{%
+    \let\tud@lst@@values\relax%
+    \def\tud@lst@subsub{\subsubitem}%
+    \def\tud@lst@subsubsub{\space}%
+    \@tud@lst@@multifalse%
+  }%
+  \newcommand*\tud@lst@@add[1]{%
+    \@tud@lst@multitrue%
+    \ifx\tud@lst@@values\relax\else%
+      \@tud@lst@@multitrue%
+      \def\tud@lst@subsubsub{\subsubsubitem}%
+    \fi%
+    \listadd\tud@lst@@values{##1}%
+  }%
+  \newcommand*\tud@lst@@process{%
+    \if@tud@lst@@multi%
+      \appto\tud@lst@values{\efill}%
+    \fi%
+    \edef\tud@reserved####1{%
+      \noexpand\listadd\noexpand\tud@lst@values{%
+        \expandonce\tud@lst@subsubsub####1%
+      }%
+    }%
+    \forlistloop{\tud@reserved}{\tud@lst@@values}%
+    \tud@lst@@init%
   }%
 }
-%</doc>
 %    \end{macrocode}
+% \end{macro}^^A \tud@lst@@process
+% \end{macro}^^A \tud@lst@@add
+% \end{macro}^^A \tud@lst@@init
+% \end{macro}^^A \if@tud@lst@@multi
+% \end{macro}^^A \tud@lst@@values
 % \end{macro}^^A \tud@lst@process
 % \end{macro}^^A \tud@lst@add
 % \end{macro}^^A \tud@lst@init
 % \end{macro}^^A \if@tud@lst@multi
 % \end{macro}^^A \tud@lst@values
 % \end{macro}^^A \tud@lst@def
-% \end{macro}^^A \@hashchar
+%
+% \iffalse
+%</doc>
+% \fi
+%
 % \begin{macro}{\tud@xdy@create}
 % \changes{v2.05}{2016/04/24}{neu}^^A
 % \begin{macro}{\tud@write@xdy}
@@ -806,12 +876,21 @@
 %    \end{macrocode}
 % Der Abschluss der Umgebungsdefinition.
 %    \begin{macrocode}
+  \if@tud@xdy@glo%
+  \write\tud@write@xdy{%
+    "^^J%
+    \space\space:close "\string~n\string~n\string\end{#1}\string~n"^^J%
+    \space\space:hierdepth 4^^J%
+    )%
+  }%
+  \else%
   \write\tud@write@xdy{%
     "^^J%
     \space\space:close "\string~n\string~n\string\end{#1}\string~n"^^J%
     \space\space:hierdepth 3^^J%
     )%
   }%
+  \fi%
 %</doc>
 %    \end{macrocode}
 %
@@ -832,7 +911,7 @@
   \write\tud@write@xdy{%
     (define-location-class^^J%
     \space\space"arabic-page-numbers" ("arabic-numbers")%
-    \space:min-range-length 1^^J%
+    \space:min-range-length 2^^J%
     )^^J%
 %<*doc>
     (define-alphabet "AlphaExtended"^^J%
@@ -845,40 +924,13 @@
     \space)^^J%
     )^^J%
     (define-location-class^^J%
-    \space\space"part" ("AlphaExtended" :sep "-" "arabic-numbers")%
-    \space:min-range-length 1^^J%
+    \space\space"codeline" ("AlphaExtended" :sep "-" "arabic-numbers")%
+    \space:min-range-length 2^^J%
     )^^J%
+    (define-location-class-order ("arabic-page-numbers" "codeline"))^^J%
 %</doc>
     (markup-range :sep "--")%
   }%
-%    \end{macrocode}
-%
-% \subsubsection{Markup des Füllbereichs zwischen Eintrag und Seitenzahlen}
-%
-% Punkte zwischen Eintrag und Seitenzahl. Das schließende \cs{relax} wird für 
-% die smarte Definition des Befehls \cs{cleversee} benötigt, welcher nach den 
-% beiden obligatorischen Argument die nachfolgenden Seitenzahlen sucht und 
-% dabei durch \cs{relax} begrenzt wird. Für die Klasse \cls{tudscrdoc} wird in
-% der Änderungsliste der Hyperlink für die Seitenzahl respektive die Codezeile 
-% direkt erzeugt.
-%    \begin{macrocode}
-%<*doc>
-  \if@tud@xdy@glo%
-  \write\tud@write@xdy{%
-    (markup-locclass-list%
-    \space:open "\string\pfill\string\hypersourceref{" :close "}\string\relax"%
-    )%
-  }%
-  \else%
-%</doc>
-  \write\tud@write@xdy{%
-    (markup-locclass-list%
-%<!doc>    \space:open "\string\,\string\dotfill\string\,"%
-%<doc>    \space:open "\string\pfill\space"%
-    \space:close "\string\relax"%
-    )%
-  }%
-%<doc>  \fi%
 %    \end{macrocode}
 %
 % \subsubsection{Ignorieren von bestimmten Anteilen bei der Sortierung}
@@ -916,7 +968,7 @@
     \space"(.*?)(@)([\string^@~n]*)"%
     \space"\string\1\string~b\string\3"%
     \space:eregexp :again%
-    )
+    )%
 %</doc>
   }%
 %    \end{macrocode}
@@ -999,14 +1051,26 @@
 % \cs{tud@lst@process} ausgewertet.
 %    \begin{macrocode}
     (markup-indexentry-list^^J%
-    \space\space:open \space"\string\tud@lst@init"^^J%
+    \space\space:open\space\space"\string\tud@lst@init"^^J%
     \space\space:close "\string~n \@spaces\space\string\tud@lst@process"^^J%
     \space\space:depth 3^^J%
     )^^J%
     (markup-indexentry^^J%
-    \space\space:open \space"\string~n\@spaces\space\string\tud@lst@add{"^^J%
+    \space\space:open%
+    \space\space"\string~n\@spaces\space\space\string\tud@lst@add{"^^J%
     \space\space:close "}"^^J%
     \space\space:depth 3^^J%
+    )^^J%
+    (markup-indexentry-list^^J%
+    \space\space:close "\string~n\@spaces\@spaces\string\tud@lst@@process{"^^J%
+    \space\space:open\space\space"}\string\tud@lst@@init"^^J%
+    \space\space:depth 4^^J%
+    )^^J%
+    (markup-indexentry^^J%
+    \space\space:open%
+    \space\space"\string~n\@spaces\@spaces\string\tud@lst@@add{"^^J%
+    \space\space:close "}"^^J%
+    \space\space:depth 4^^J%
     )%
   }%
 %    \end{macrocode}
@@ -1014,10 +1078,29 @@
 %    \begin{macrocode}
   \else%
   \write\tud@write@xdy{%
-    (markup-indexentry-list :open "\string\efill" :depth 1)%
+    (markup-indexentry-list :open "\string\efil" :depth 1)%
   }%
   \fi%
 %</doc>
+%    \end{macrocode}
+%
+% \subsubsection{Markup des Füllbereichs zwischen Eintrag und Seitenzahlen}
+%
+% Punkte zwischen Eintrag und Seitenzahl. Das schließende \cs{relax} wird für 
+% die smarte Definition des Befehls \cs{cleversee} benötigt, welcher nach den 
+% beiden obligatorischen Argument die nachfolgenden Seitenzahlen sucht und 
+% dabei durch \cs{relax} begrenzt wird. Für die Klasse \cls{tudscrdoc} wird in
+% der Änderungsliste der Hyperlink für die Seitenzahl respektive die Codezeile 
+% direkt erzeugt.
+%    \begin{macrocode}
+  \write\tud@write@xdy{%
+    (markup-locclass-list%
+%<!doc>    \space:open "\string\,\string\dotfill\string\,"%
+%<doc>    \space:open "\string\pfill\space"%
+    \space:close "\string\relax"%
+    \space:sep ",\space"%
+    )%
+  }%
 %    \end{macrocode}
 %
 % \subsubsection{Attribute für Einträge}
@@ -1091,17 +1174,16 @@
 % Für \cls{tudscrdoc} erfolgen die Auszeichnungen für den Index im Stile von
 % \pkg{doc} mit den Attribute \emph{main} und \emph{usage}.
 %    \begin{macrocode}
-  \if@tud@xdy@glo\else%
   \write\tud@write@xdy{%
-    (define-attributes (("main" "usage" "default")))^^J%
-    (markup-locref :attr "main"%
-    \space\space:open "\string\main{"\space\space:close "}"%
-    )^^J%
+    (markup-attribute-group-list :sep ", ")^^J%
+    (define-attributes (("usage") ("main") ("default")))^^J%
     (markup-locref :attr "usage"%
     \space:open "\string\usage{"\space:close "}"%
+    )^^J%
+    (markup-locref :attr "main"%
+    \space\space:open "\string\main{"\space\space:close "}"%
     )%
   }%
-  \fi%
 %    \end{macrocode}
 %
 % \iffalse
