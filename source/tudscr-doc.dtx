@@ -1,4 +1,4 @@
-% \CheckSum{1905}
+% \CheckSum{1882}
 % \iffalse meta-comment
 % 
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-doc.dtx}[%
-  2016/11/02 v2.05g TUD-Script\space%
+  2016/11/03 v2.05g TUD-Script\space%
   (source code documentation based on scrartcl/scrdoc)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
@@ -350,33 +350,23 @@
 % \changes{v2.05}{2016/04/26}{neu}^^A
 % \begin{macro}{\hypersource@def}
 % \changes{v2.05}{2016/04/26}{neu}^^A
-% \begin{macro}{\hypersourceref}
+% \begin{macro}{\hypersource@ref@codeline}
 % \changes{v2.05}{2016/04/26}{neu}^^A
-% \begin{macro}{\hypersource@ref}
+% \begin{macro}{\hypersource@ref@page}
 % \changes{v2.05}{2016/04/26}{neu}^^A
-% \begin{macro}{\filesep}
-% \begin{macro}{\hypersource@filesep}
-% \changes{v2.05g}{2016/11/02}{neu}^^A
 % Diese Makros werden verwendet, um im Index respektive in der Änderungsliste 
-% mithilfe von \pkg{hyperref} Hyperlinks auf die entsprechenden Codezeilen im 
+% mithilfe von \pkg{hyperref} Hyperlinks auf Codezeilen respektive Seiten im 
 % Dokument zu setzen. 
 %    \begin{macrocode}
 \newcommand*\hypersourcedef[1]{}
 \newcommand*\hypersource@def{}
-\newcommand*\hypersourceref[1]{#1}
-\newcommand*\hypersource@ref[2][]{}
-%    \end{macrocode}
-% Da \cs{filesep} leer ist, falls nicht \cs{DocInclude} verwendet wird, lassen 
-% sich im Index Seitenzahlen und Codezeilen nicht sofort unterscheiden, weshalb 
-% das Makro hier standardmäßig mit \val{?-} als Präfix für letztere definiert 
-% wird.
-%    \begin{macrocode}
-\newcommand*\hypersource@filesep{?}
-\edef\filesep{\hypersource@filesep-}
+\newcommand*\hypersource@ref@codeline[2][]{}
+\newcommand*\hypersource@ref@page[2][]{}
 %    \end{macrocode}
 % Dies funktioniert jedoch nur, falls \pkg{hyperref} geladen wird.
 %    \begin{macrocode}
-\PassOptionsToPackage{hyperindex=false}{hyperref}
+\PassOptionsToPackage{hyperindex=false,colorlinks,linkcolor=blue}{hyperref}
+\PassOptionsToPackage{open,openlevel=0}{bookmark}
 \AfterPackage{hyperref}{%
 %    \end{macrocode}
 % Mit \cs{hypersourcedef} wird ein Textanker gesetzt, falls dieser noch nicht 
@@ -390,54 +380,35 @@
     }%
   }%
 %    \end{macrocode}
-% Mit \cs{hypersource@ref} wird auf den Textanker verlinkt. Dies kann entweder 
-% direkt mit \cs{hypersourceref} erfolgen oder indirekt über die Attribute
-% \val{main} bzw. \val{usage}, welche bei der Definitionen von Befehlen etc. im 
-% Index genutzt werden. Hierfür werden die dazugehörigen Makros umdefiniert.
+% Mit \cs{hypersource@ref@\dots} wird auf Anker im Dokument verlinkt. Dies 
+% erfolgt indirekt über die Attribute \val{main} bzw. \val{usage}, welche bei
+% der Definitionen von Befehlen etc. im Index genutzt werden. Hierfür werden
+% die dazugehörigen Makros umdefiniert.
 %    \begin{macrocode}
-  \renewcommand*\hypersourceref[1]{\hypersource@ref{#1}}%
-  \renewcommand*\main[1]{\hypersource@ref[\underline]{#1}}%
-  \renewcommand*\usage[1]{\hypersource@ref[\textit]{#1}}%
-%    \end{macrocode}
-% Die Referenz im Argument kann entweder in der Form \val{<Letter>-<Codezeile>}
-% oder direkt als Seitenzahl oder angegeben werden. Deshalb wird dafür gesorgt,
-% dass das angegebene Argument dementsprechend ausgewertet wird.
-%    \begin{macrocode}
-  \renewcommand*\hypersource@ref[2][\@firstofone]{%
+  \renewcommand*\hypersource@ref@codeline[2][\@firstofone]{%
     \begingroup%
-      \def\@tempa##1-##2\relax{%
-        \IfArgIsEmpty{##2}{%
-          \hyperlink{page.\@tempc}{#1{\@tempc}}%
-        }{%
-%    \end{macrocode}
-% Ohne die Verwendung von \cs{DocInclude} wird kein Präfix vor die Codezeile 
-% gesetzt.
-%    \begin{macrocode}
-          \ifstr{##1}{\hypersource@filesep}{%
-            \hyperref{}{}{source:\@tempc}{%
-              #1{%
-                \expandafter\expandafter\expandafter\@gobble%
-                \expandafter\@gobble\@tempc%
-              }%
-            }%
-          }{%
-            \hyperref{}{}{source:\@tempc}{#1{\@tempc}}%
-          }%
-        }%
-      }%
-      \def\@tempb##1{%
-        \def\@tempc{##1}%
-        \expandafter\@tempa##1-\relax%
-      }%
-      \forcsvlist\@tempb{#2}%
+      \def\@tempa##1{\hyperref{}{}{source:##1}{#1{##1}}}%
+      \forcsvlist\@tempa{#2}%
     \endgroup%
   }%
+  \renewcommand*\hypersource@ref@page[2][\@firstofone]{%
+    \begingroup%
+      \def\@tempa##1{\hyperlink{page.##1}{#1{##1}}}%
+      \forcsvlist\@tempa{#2}%
+    \endgroup%
+  }%
+  \renewcommand*\main[1]{%
+    \ifcodeline@index%
+      \hypersource@ref@codeline[\underline]{#1}%
+    \else%
+      \hypersource@ref@page[\underline]{#1}%
+    \fi%
+  }%
+  \renewcommand*\usage[1]{\hypersource@ref@page[\textit]{#1}}%
 }
 %    \end{macrocode}
-% \end{macro}^^A \hypersource@filesep
-% \end{macro}^^A \filesep
-% \end{macro}^^A \hypersource@ref
-% \end{macro}^^A \hypersourceref
+% \end{macro}^^A \hypersource@ref@page
+% \end{macro}^^A \hypersource@ref@codeline
 % \end{macro}^^A \hypersource@def
 % \end{macro}^^A \hypersourcedef
 % \begin{macro}{\@doxcreatespecialmainindex}
@@ -744,13 +715,12 @@
   }
 }
 \tud@reserved{Env}{environment}
-\tud@reserved{Env}{environment}
 \tud@reserved{Option}{option}
 \tud@reserved{PageStyle}{pagestyle}
 \tud@reserved{Layer}{layer}
 \tud@reserved[macrolike]{Length}{length}
 \tud@reserved{Counter}{counter}
-\tud@reserved{Color}{color}
+\tud@reserved{Color}{TUDcolor}
 \tud@reserved[macrolike]{Locale}{locale}
 \tud@reserved[macrolike]{Field}{field}
 \tud@reserved{Font}{KOMAfont}
@@ -1110,8 +1080,12 @@
 %    \begin{macrocode}
 \else
   \ifnum\pdfshellescape=\@ne\relax%
-    \immediate\write18{makeindex -s gglo.ist -o \jobname.gls \jobname.glo}%
-    \immediate\write18{makeindex -s gind.ist -o \jobname.ind \jobname.idx}%
+    \immediate\write18{%
+      makeindex -s gglo.ist -t \jobname.glg -o \jobname.gls \jobname.glo%
+    }%
+    \immediate\write18{%
+      makeindex -s gind.ist -t \jobname.ilg -o \jobname.ind \jobname.idx%
+    }%
   \fi%
 \fi
 %    \end{macrocode}
@@ -1194,19 +1168,14 @@
       \fbox{\parbox{\dimexpr\textwidth-2\fboxsep\relax}{#1\strut}}%
       \endgraf%
 %    \end{macrocode}
-% Werden Codezeilen im Index aufgeführt, so erhält auch eine ToDo-Notiz einen 
-% entsprechenden Querverweis.
+% Werden mit \cs{DocInclude} mehrere Dateien in das Dokument eingefügt, so 
+% erhält die ToDo-Notiz einen entsprechenden Hinweis.
 %    \begin{macrocode}
-      \ifcodeline@index%
-        \global\advance\c@CodelineNo\@ne%
-        \hypersourcedef{\filesep\number\c@CodelineNo}%
-        \addxcontentsline{tdo}{todo}{%
-          \tud@reserved:\space#1~(\protect\main{\filesep\number\c@CodelineNo})%
-        }%
-        \global\advance\c@CodelineNo\m@ne%
-      \else%
-        \addxcontentsline{tdo}{todo}{\tud@reserved:\space#1}%
+      \let\@tempa\@empty%
+      \ifdefined\currentfile%
+        \def\@tempa{\,--\,\texttt{\currentfile}}%
       \fi%
+      \addxcontentsline{tdo}{todo}{\tud@reserved\@tempa:\space#1}%
     \endgroup%
   \fi%
 }
@@ -1271,16 +1240,17 @@
   \newcommand*\hrfn[2]{%
     \href{#1}{#2}%
     \footnote{%
-      \scalebox{0.95}{%
+      \begingroup%
         \def\_{_}%
         \edef\@tempa{#1}%
         \strut\expandafter\url\expandafter{\@tempa}%
-      }%
+      \endgroup%
     }%
   }
   \@ifpackageloaded{hyperref}{%
     \pdfstringdefDisableCommands{%
       \def\TUDScript{TUD-Script}%
+      \def\KOMAScript{KOMA-Script}%
       \let\cls\@firstofone%
       \let\pkg\@firstofone%
     }%
