@@ -1,4 +1,4 @@
-% \CheckSum{4153}
+% \CheckSum{4164}
 % \iffalse meta-comment
 % 
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-manual.dtx}[%
-  2016/10/24 v2.05g TUD-Script\space%
+  2016/11/07 v2.05g TUD-Script\space%
 %</driver>
 %<package&identify>\ProvidesPackage{tudscrtutorial}[%
 %<*driver|package&identify>
@@ -2026,6 +2026,7 @@
     \let\textOR\relax%
     \let\hologoRobust\@firstofone%
     \def\TUDScript{TUD-Script}%
+    \def\KOMAScript{KOMA-Script}%
     \def\_{-}%
     \protected\def~{~}%
   }%
@@ -4897,21 +4898,28 @@
 % \begin{macro}{\FinishTutorial}
 % \changes{v2.02}{2014/08/21}{neu}^^A
 % Mit \cs{StartTutorial} wird ein Hyperlink für den Querverweis aus dem 
-% Handbuch definiert. Außerdem wird gleich der Titel und ein einleitender Satz 
-% gesetzt.
+% Handbuch definiert. Außerdem wird gleich der Titel und~-- falls im optionalen 
+% Argument angegeben~-- eine Zusammenfassung gesetzt. Die Sternversion gibt 
+% nach der optionalen Beschreibung einen einleitenden Satz zur Dokumnentklasse 
+% und sinnvollen Paketen an. Diese sollten direkt nach \cs{StartTutorial} in 
+% der \env{Preamble}-Umgebung angegeben werden.
 %    \begin{macrocode}
 \TUDoptions{headingsvskip=-10ex}
-\newcommand\StartTutorial[1][%
-  Bevor das eigentliche Tutorial beginnt, werden sowohl eine Dokumentklasse 
-  als auch die f\"ur jedes \hologo{pdfLaTeX}-Dokument meiner Meinung nach 
-  sinnvollen Pakete geladen.%
-]{%
-  \Hy@raisedlink{\hyperdef{\jobname}{tutorials:\jobname}{}}%
-  \faculty{}%
-  \maketitle\noindent#1%
+\newcommand\StartTutorial[1][]{%
   \immediate\openout\tud@write@a=\tud@tut@temp-preamble.tex\relax%
   \immediate\openout\tud@write@b=\tud@tut@temp-trunk.tex\relax%
-  \immediate\write\tud@write@b{^^J\string\begin{document}^^J}
+  \immediate\write\tud@write@b{^^J\string\begin{document}^^J}%
+  \Hy@raisedlink{\hyperdef{\jobname}{tutorials:\jobname}{}}%
+  \faculty{}%
+  \maketitle%
+  \ifblank{#1}{}{%
+    \noindent%
+    \begin{abstract}%
+    \noindent#1%
+    \end{abstract}%
+    \medskip%
+  }%
+  \noindent\ignorespaces%
 }
 %    \end{macrocode}
 % Der Befehl \cs{FinishTutorial} schleißt den noch offenen Ausgabestream und
@@ -4970,7 +4978,11 @@
 %    \begin{macrocode}
 \newcommand\Code@Preamble{}
 \let\Code@Preamble\relax
-\newcommand\CodePreamble[1]{\long\gdef\Code@Preamble{#1}}
+\newcommand\CodePreamble[1]{%
+  \long\gdef\Code@Preamble{%
+    \hskip.5\leftmargin\textit{Die resultierende Ausgabe:}\space#1%
+  }%
+}
 \newcommand*\Code@Hook{}
 \let\Code@Hook\relax
 \newcommand*\CodeHook[1]{\gdef\Code@Hook{#1}}
