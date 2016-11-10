@@ -1,4 +1,4 @@
-% \CheckSum{1913}
+% \CheckSum{2103}
 % \iffalse meta-comment
 % 
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -132,6 +132,7 @@
 }
 \LoadClassWithOptions{ltxdoc}
 \setcounter{IndexColumns}{2}
+\setcounter{StandardModuleDepth}{2}
 %    \end{macrocode}
 %
 % \subsection{Klassenoptionen}
@@ -251,121 +252,7 @@
 %<*class&body>
 % \fi
 %
-% \subsection{Satzspiegel}
-%
-% \begin{length}{\topmargin}
-% \begin{length}{\headheight}
-% \begin{length}{\headsep}
-% \begin{length}{\footskip}
-% \begin{length}{\marginparwidth}
-% \begin{length}{\marginparsep}
-% \begin{length}{\oddsidemargin}
-% \begin{length}{\textheight}
-% \begin{length}{\textwidth}
-% Die Seitenränder werden so eingestellt, dass für die Darstellung des 
-% Quelltextes genau 80~Zeichen zur Verfügung stehen.
-%    \begin{macrocode}
-\AtEndPreamble{%
-  \setlength\topmargin{-1in}
-  \setlength\headheight{0pt}
-  \setlength\headsep{30pt}
-  \setlength\footskip{1.5\headsep}
-  \setlength\textheight{\dimexpr\paperheight-2.5\headsep-\footskip\relax}
-  \settowidth\MacroIndent{\rmfamily\scriptsize 0000\ }
-  \begingroup
-    \MacroFont\selectfont
-    \settowidth\@tempdima{\space}
-    \setlength\@tempdima{80\@tempdima}
-    \addtolength\@tempdima{\dimexpr\MacroIndent+.1\p@\relax}
-    \edef\@tempa{%
-      \endgroup
-      \noexpand\setlength\noexpand\textwidth{\the\@tempdima}
-    }
-  \@tempa
-  \setlength\marginparsep{1em}
-  \setlength\marginparwidth{\dimexpr\paperwidth-\textwidth-2\marginparsep\relax}
-  \setlength\oddsidemargin{\dimexpr\marginparwidth+\marginparsep-1in\relax}
-}
-%    \end{macrocode}
-% \end{length}^^A \textwidth
-% \end{length}^^A \textheight
-% \end{length}^^A \oddsidemargin
-% \end{length}^^A \marginparsep
-% \end{length}^^A \marginparwidth
-% \end{length}^^A \footskip
-% \end{length}^^A \headsep
-% \end{length}^^A \headheight
-% \end{length}^^A \topmargin
-%
-% \subsection{Optionale Verlinkungen mit dem Paket \pkg{hyperref}}
-%
-% \begin{macro}{\hypersourcedef}
-% \changes{v2.05}{2016/04/26}{neu}^^A
-% \begin{macro}{\hypersource@def}
-% \changes{v2.05}{2016/04/26}{neu}^^A
-% \begin{macro}{\hypersource@ref@codeline}
-% \changes{v2.05}{2016/04/26}{neu}^^A
-% \begin{macro}{\hypersource@ref@page}
-% \changes{v2.05}{2016/04/26}{neu}^^A
-% Diese Makros werden verwendet, um im Index respektive in der Änderungsliste 
-% mithilfe von \pkg{hyperref} Hyperlinks auf Codezeilen respektive Seiten im 
-% Dokument zu setzen. 
-%    \begin{macrocode}
-\newcommand*\hypersourcedef[1]{}
-\newcommand*\hypersource@def{}
-\newcommand*\hypersource@ref@codeline[2][]{}
-\newcommand*\hypersource@ref@page[2][]{}
-%    \end{macrocode}
-% Dies funktioniert jedoch nur, falls \pkg{hyperref} geladen wird.
-%    \begin{macrocode}
-\PassOptionsToPackage{hyperindex=false,colorlinks,linkcolor=blue}{hyperref}
-\PassOptionsToPackage{open,openlevel=0}{bookmark}
-\AfterPackage{hyperref}{%
-%    \end{macrocode}
-% Mit \cs{hypersourcedef} wird ein Textanker gesetzt, falls dieser noch nicht 
-% definiert wurde, was durch \cs{hypersource@def} abgesichert wird. Als 
-% Argument wird hierfür die aktuelle Codezeile verwendet.
-%    \begin{macrocode}
-  \renewcommand*\hypersourcedef[1]{%
-    \ifstr{#1}{\hypersource@def}{}{%
-      \Hy@raisedlink{\hyperdef{}{source:#1}{}}%
-      \xdef\hypersource@def{#1}%
-    }%
-  }%
-%    \end{macrocode}
-% Mit \cs{hypersource@ref@\dots} wird auf Anker im Dokument verlinkt. Dies 
-% erfolgt indirekt über die Attribute \val{main} bzw. \val{usage}, welche bei
-% der Definitionen von Befehlen etc. im Index genutzt werden. Hierfür werden
-% die dazugehörigen Makros umdefiniert.
-%    \begin{macrocode}
-  \renewcommand*\hypersource@ref@codeline[2][\@firstofone]{%
-    \begingroup%
-      \def\@tempa##1{\hyperref{}{}{source:##1}{#1{##1}}}%
-      \forcsvlist\@tempa{#2}%
-    \endgroup%
-  }%
-  \renewcommand*\hypersource@ref@page[2][\@firstofone]{%
-    \begingroup%
-      \def\@tempa##1{\hyperlink{page.##1}{#1{##1}}}%
-      \forcsvlist\@tempa{#2}%
-    \endgroup%
-  }%
-  \renewcommand*\main[1]{%
-    \ifcodeline@index%
-      \hypersource@ref@codeline[\underline]{#1}%
-    \else%
-      \hypersource@ref@page[\underline]{#1}%
-    \fi%
-  }%
-  \renewcommand*\usage[1]{\hypersource@ref@page[\textit]{#1}}%
-}
-%    \end{macrocode}
-% \end{macro}^^A \hypersource@ref@page
-% \end{macro}^^A \hypersource@ref@codeline
-% \end{macro}^^A \hypersource@def
-% \end{macro}^^A \hypersourcedef
-%
-% \subsection{Defintion und Erscheinungsbild von Deklarationselementen}
+% \subsection{Definition und Erscheinungsbild von Deklarationselementen}
 %
 % Mit dem Paket~\pkg{dox} können weitere Deklarationselemente erstellt werden.
 % Dieses lädt außerdem das Paket~\pkg{doc}, welches die Grundfunktionalitäten
@@ -378,7 +265,7 @@
 \@ifpackagelater{dox}{2010/12/17}{%
   \ClassWarning{\TUD@Class@Name}{%
     Package `dox' was updated so some patches\MessageBreak%
-    are maybe outdated
+    are maybe outdated%
   }%
 }{}%
 %    \end{macrocode}
@@ -423,136 +310,12 @@
 %    \end{macrocode}
 % \end{macro}^^A \m@cro@
 %
-% \subsubsection{Erweiterte Indexeinträge für Deklarationselemente}
-%
-% \begin{macro}{\@doxcreatespecialmainindex}
-% \begin{macro}{\@doxcreatespecialmainmacrolikeindex}
-% \begin{macro}{\@doxcreatespecialindex}
-% \begin{macro}{\@doxcreatespecialindex}
-% Für den Index muss bei diesen Makros eine kleine Anpassung erfolgen, damit 
-% die Sortierung auch bei der Verwendung von \app{texindy} richtig erfolgt und 
-% keine Einträge, welche es trotz gleicher Bezeichnung für unterschiedliche
-% Deklarationselemente (beispielsweise Umgebung \env{abstract} und Option
-% \opt{abstract}) gibt, unterschlagen werden. Außerdem wird hier die Definition
-% der Quelltextanker eingehangen und die Elterneinträge für Parameteränderungen 
-% zurückgesetzt.
-% \ToDo{Indextyp (Kurzform) in Klammern in der Randnotiz?}[v2.05g]
-%    \begin{macrocode}
-\CheckCommand*\@doxcreatespecialmainindex[3]{%
-  \expandafter\def\csname SpecialMain#1Index\endcsname##1{%
-    \@bsphack%
-    \special@index{##1\actualchar{\string\ttfamily\space##1} (#2)
-      \encapchar main}%
-    \special@index{#3:\levelchar##1\actualchar{\string\ttfamily\space##1}
-      \encapchar main}%
-    \@esphack%
-  }%
-}
-\renewcommand*\@doxcreatespecialmainindex[3]{%
-  \expandafter\def\csname SpecialMain#1Index\endcsname##1{%
-    \@bsphack%
-    \special@index{%
-      ##1 (#2)\actualchar{\string\ttfamily\space##1} (#2)\encapchar main%
-    }%
-    \special@index{%
-      #3:\levelchar##1\actualchar{\string\ttfamily\space##1}\encapchar main%
-    }%
-    \@esphack%
-    \let\parameter@parent@changes\relax%
-    \hypersourcedef{\filesep\number\c@CodelineNo}%
-  }%
-}
-\CheckCommand*\@doxcreatespecialmainmacrolikeindex[3]{%
-  \expandafter\def\csname SpecialMain#1Index\endcsname##1{%
-    \@SpecialIndexHelper@##1\@nil
-    \@bsphack%
-    \special@index{\@gtempa\actualchar
-      \string\verb\quotechar*\verbatimchar\bslash\@gtempa\verbatimchar
-      \space(#2)\encapchar main}%
-    \special@index{#3:\levelchar\@gtempa\actualchar%
-      \string\verb\quotechar*\verbatimchar\bslash\@gtempa\verbatimchar
-      \encapchar main}%
-    \@esphack%
-  }%
-}
-\renewcommand*\@doxcreatespecialmainmacrolikeindex[3]{%
-  \expandafter\def\csname SpecialMain#1Index\endcsname##1{%
-    \@SpecialIndexHelper@##1\@nil
-    \@bsphack%
-    \special@index{\@gtempa\space(#2)\actualchar
-      \string\verb\quotechar*\verbatimchar\bslash\@gtempa\verbatimchar
-      \space(#2)\encapchar main}%
-    \special@index{#3:\levelchar\@gtempa\actualchar%
-      \string\verb\quotechar*\verbatimchar\bslash\@gtempa\verbatimchar
-      \encapchar main}%
-    \@esphack%
-    \let\parameter@parent@changes\relax%
-    \hypersourcedef{\filesep\number\c@CodelineNo}%
-  }%
-}
-\CheckCommand*\@doxcreatespecialindex[3]{%
-  \expandafter\def\csname Special#1Index\endcsname##1{%
-    \@bsphack%
-    \index{##1\actualchar{\protect\ttfamily##1} (#2)\encapchar usage}%
-    \index{#3:\levelchar##1\actualchar{\protect\ttfamily##1}
-      \encapchar usage}%
-    \@esphack%
-  }%
-}
-\renewcommand*\@doxcreatespecialindex[3]{%
-  \expandafter\def\csname Special#1Index\endcsname##1{%
-    \@bsphack%
-    \index{##1 (#2)\actualchar{\protect\ttfamily##1} (#2)\encapchar usage}%
-    \index{#3:\levelchar##1\actualchar{\protect\ttfamily##1}\encapchar usage}%
-    \@esphack%
-  }%
-}
-\CheckCommand*\@doxcreatespecialmacrolikeindex[3]{%
-  \expandafter\def\csname Special#1Index\endcsname##1{%
-    \@SpecialIndexHelper@##1\@nil
-    \@bsphack%
-    \index{\@gtempa\actualchar
-      \string\verb\quotechar*\verbatimchar\bslash\@gtempa\verbatimchar
-      \space(#2)\encapchar usage}%
-    \index{#3:\levelchar\@gtempa\actualchar
-      \string\verb\quotechar*\verbatimchar\bslash\@gtempa\verbatimchar
-      \encapchar usage}%
-    \@esphack%
-  }%
-}
-\renewcommand*\@doxcreatespecialmacrolikeindex[3]{%
-  \expandafter\def\csname Special#1Index\endcsname##1{%
-    \@SpecialIndexHelper@##1\@nil
-    \@bsphack%
-    \index{\@gtempa\space(#2)\actualchar
-      \string\verb\quotechar*\verbatimchar\bslash\@gtempa\verbatimchar
-      \space(#2)\encapchar usage}%
-    \index{#3:\levelchar\@gtempa\actualchar
-      \string\verb\quotechar*\verbatimchar\bslash\@gtempa\verbatimchar
-      \encapchar usage}%
-    \@esphack%
-  }%
-}
-%    \end{macrocode}
-% \end{macro}^^A \@doxcreatespecialindex
-% \end{macro}^^A \@doxcreatespecialindex
-% \end{macro}^^A \@doxcreatespecialmainmacrolikeindex
-% \end{macro}^^A \@doxcreatespecialmainindex
-%
-% \subsubsection{Erweiterte Änderungseinträge für Deklarationselemente}
+% \subsubsection{Erweiterte Einträge für Index und Änderungsliste}
 %
 % \begin{macro}{\doxitem}
-% \begin{macro}{\@doxcreateenv}
-% \begin{macro}{\@doxcreatemacrolikeindexname}
-% \begin{macro}{\@doxcreateindexname}
-% \begin{macro}{\saved@indextype}
-% \begin{macro}{\@@doxenv}
-% Jetzt die Anpassungen der Änderungsliste für das Paket \pkg{dox}. Da das
-% direkte Patchen von \cs{doxitem} mit den Mitteln von \pkg{etoolbox} aufgrund
-% des optionalen Argumentes nicht möglich ist, wird der notwendige Patch
-% einfach zu Beginn von \cs{@doxcreateenv} eingehängt. Ziel ist es, in den 
-% Makros \cs{saved@indexname} und \cs{saved@indextype} den Namen und den Typ 
-% des aktuellen Deklarationselementes zu speichern.
+% Mit dem Befehl \cs{doxitem} werden beliebige Deklarationselemente erstellt. 
+% das Makro wird für das Hinzufügen des Eintragstyps für Index, Änderungsliste 
+% und Randnotiz angepasst.
 %    \begin{macrocode}
 \CheckCommand\doxitem[4][]{%
   \@nameuse{dox@macrolike\dox@macrolikedefault}%
@@ -589,40 +352,268 @@
   \@doxcreatedescribe{#2}
   \@doxcreateenv{#2}{#3}%
 }
-\CheckCommand*\@doxcreateenv[2]{%
-  \expandafter\def\csname #2\endcsname{%
-    \@ifnextchar[%]
-    {\@doxenv{#1}}{\@doxenv{#1}[]}}
-  \expandafter\let\csname end#2\endcsname\endtrivlist%
-}
-\pretocmd{\@doxcreateenv}{%
+%    \end{macrocode}
+% Das Makro wird dahingehend angepasst, dass alle für die Ausgabe erzeugten 
+% Befehle der Form  \cs{Print\meta{Typ}Name} und \cs{PrintDescribe\meta{Typ}}
+% um den Eintragstyp ergänzt werden, erstellt durch \cs{doxcreateprintname} 
+% bzw. \cs{doxcreatemacrolikeprintname}. Zusätzlich werden für die Klasse
+% \cls{tudscrdoc} neue Befehle in der Form \cs{Set\meta{Typ}IndexName} mit
+% \cs{doxcreateindexname} bzw. \cs{doxcreatemacrolikeindexname} erstellt. Mit
+% diesen wird beim Aufruf einer Deklarationsumgebung der aktuelle Name und
+% Eintragstyp des jeweiligen Deklarationselementes gesichert, um diese
+% Informationen in der Änderungsliste nutzen zu können.
+%    \begin{macrocode}
+\renewcommand*\doxitem[4][]{%
+  \@nameuse{dox@macrolike\dox@macrolikedefault}%
+  \def\dox@idxtype{#3}%
+  \setkeys{dox}{#1}%
   \ifdox@macrolike%
-    \def\@doxexpr{\@doxcreatemacrolikeindexname{#1}}%
+    \def\@doxexpr{\@doxcreatespecialmainmacrolikeindex{#2}}%
   \else%
-    \def\@doxexpr{\@doxcreateindexname{#1}}%
+    \def\@doxexpr{\@doxcreatespecialmainindex{#2}}%
+  \fi%
+  \expandafter\@doxexpr\expandafter{\dox@idxtype}{#4}%
+  \ifdox@macrolike%
+    \def\@doxexpr{\@doxcreatespecialmacrolikeindex{#2}}%
+  \else%
+    \def\@doxexpr{\@doxcreatespecialindex{#2}}%
+  \fi%
+  \expandafter\@doxexpr\expandafter{\dox@idxtype}{#4}%
+  \ifdox@macrolike%
+    \def\@doxexpr{\@doxcreatemacrolikeprintname{#2}}%
+  \else%
+    \def\@doxexpr{\@doxcreateprintname{#2}}%
   \fi%
   \expandafter\@doxexpr\expandafter{\dox@idxtype}%
-}{}{\tud@patch@wrn{@doxcreateenv}}
+  \ifdox@macrolike%
+    \def\@doxexpr{\@doxcreatemacrolikeindexname{#2}}%
+  \else%
+    \def\@doxexpr{\@doxcreateindexname{#2}}%
+  \fi%
+  \expandafter\@doxexpr\expandafter{\dox@idxtype}%
+  \@doxcreatedescribe{#2}%
+  \@doxcreateenv{#2}{#3}%
+}
 %    \end{macrocode}
-% Nun noch die beiden Befehle, welche durch den Patch ausgeführt werden.
+% \end{macro}^^A \doxitem
+% \begin{macro}{\index@type}
+% \changes{v2.05g}{2016/11/10}{neu}^^A
+% Dieses Makro dient zur Formatierung des Typen der Deklarationselemente in 
+% Index und Änderungsliste.
+%    \begin{macrocode}
+\newrobustcmd*\index@type[1]{%
+  \begingroup%
+  \normalfont\scriptsize\space(#1)%
+  \endgroup%
+}
+%    \end{macrocode}
+% \end{macro}^^A \index@type
+% \begin{macro}{\@doxcreatespecialmainmacrolikeindex}
+% \begin{macro}{\@doxcreatespecialmainindex}
+% \begin{macro}{\@doxcreatespecialmacrolikeindex}
+% \begin{macro}{\@doxcreatespecialindex}
+% Für den Index muss bei diesen Makros eine Anpassung erfolgen, damit die
+% Sortierung auch bei der Verwendung von \app{texindy} richtig erfolgt und 
+% keine Einträge, welche es trotz gleicher Bezeichnung für unterschiedliche
+% Deklarationselemente (beispielsweise Umgebung \env{abstract} und Option
+% \opt{abstract}) gibt, unterschlagen werden. Außerdem wird hier die Definition
+% der Quelltextanker eingehangen und die Elterneinträge für Parameteränderungen 
+% zurückgesetzt.
+%    \begin{macrocode}
+\CheckCommand*\@doxcreatespecialmainmacrolikeindex[3]{%
+  \expandafter\def\csname SpecialMain#1Index\endcsname##1{%
+    \@SpecialIndexHelper@##1\@nil
+    \@bsphack%
+    \special@index{\@gtempa\actualchar
+      \string\verb\quotechar*\verbatimchar\bslash\@gtempa\verbatimchar
+      \space(#2)\encapchar main}%
+    \special@index{#3:\levelchar\@gtempa\actualchar%
+      \string\verb\quotechar*\verbatimchar\bslash\@gtempa\verbatimchar
+      \encapchar main}%
+    \@esphack%
+  }%
+}
+%    \end{macrocode}
+% Um den Typ der Deklarationselemente in den Index einzutragen, wird der Typ
+% geschützt expandiert, um beispielsweise Umlaute problemlos nutzen zu können.
+%    \begin{macrocode}
+\renewcommand*\@doxcreatespecialmainmacrolikeindex[3]{%
+  \expandafter\def\csname SpecialMain#1Index\endcsname##1{%
+    \@SpecialIndexHelper@##1\@nil%
+    \@bsphack%
+    \protected@edef\tud@reserved{#2}%
+    \special@index{%
+      \@gtempa\space\expandonce\tud@reserved\actualchar%
+      \string\verb\quotechar*\verbatimchar\bslash\@gtempa\verbatimchar%
+      \index@type{\expandonce\tud@reserved}\encapchar main%
+    }%
+    \protected@edef\tud@reserved{#3}%
+    \special@index{%
+      \expandonce\tud@reserved:\levelchar\@gtempa\actualchar%
+      \string\verb\quotechar*\verbatimchar\bslash\@gtempa\verbatimchar%
+      \encapchar main%
+    }%
+    \@esphack%
+    \let\parameter@parent@changes\relax%
+    \hypersourcedef{\filesep\number\c@CodelineNo}%
+  }%
+}
+\CheckCommand*\@doxcreatespecialmainindex[3]{%
+  \expandafter\def\csname SpecialMain#1Index\endcsname##1{%
+    \@bsphack%
+    \special@index{##1\actualchar{\string\ttfamily\space##1} (#2)
+      \encapchar main}%
+    \special@index{#3:\levelchar##1\actualchar{\string\ttfamily\space##1}
+      \encapchar main}%
+    \@esphack%
+  }%
+}
+\renewcommand*\@doxcreatespecialmainindex[3]{%
+  \expandafter\def\csname SpecialMain#1Index\endcsname##1{%
+    \@bsphack%
+    \protected@edef\tud@reserved{#2}%
+    \special@index{%
+      ##1\space\expandonce\tud@reserved\actualchar%
+      {\string\ttfamily\space##1}\index@type{\expandonce\tud@reserved}%
+      \encapchar main%
+    }%
+    \protected@edef\tud@reserved{#3}%
+    \special@index{%
+      \expandonce\tud@reserved:\levelchar##1\actualchar%
+      {\string\ttfamily\space##1}\encapchar main%
+    }%
+    \@esphack%
+    \let\parameter@parent@changes\relax%
+    \hypersourcedef{\filesep\number\c@CodelineNo}%
+  }%
+}
+\CheckCommand*\@doxcreatespecialmacrolikeindex[3]{%
+  \expandafter\def\csname Special#1Index\endcsname##1{%
+    \@SpecialIndexHelper@##1\@nil
+    \@bsphack%
+    \index{\@gtempa\actualchar
+      \string\verb\quotechar*\verbatimchar\bslash\@gtempa\verbatimchar
+      \space(#2)\encapchar usage}%
+    \index{#3:\levelchar\@gtempa\actualchar
+      \string\verb\quotechar*\verbatimchar\bslash\@gtempa\verbatimchar
+      \encapchar usage}%
+    \@esphack%
+  }%
+}
+\renewcommand*\@doxcreatespecialmacrolikeindex[3]{%
+  \expandafter\def\csname Special#1Index\endcsname##1{%
+    \@SpecialIndexHelper@##1\@nil%
+    \@bsphack%
+    \protected@edef\tud@reserved{#2}%
+    \index{%
+      \@gtempa\space\expandonce\tud@reserved\actualchar%
+      \string\verb\quotechar*\verbatimchar\bslash\@gtempa\verbatimchar%
+      \index@type{\expandonce\tud@reserved}\encapchar usage%
+    }%
+    \protected@edef\tud@reserved{#3}%
+    \index{%
+      \expandonce\tud@reserved:\levelchar\@gtempa\actualchar%
+      \string\verb\quotechar*\verbatimchar\bslash\@gtempa\verbatimchar%
+      \encapchar usage%
+    }%
+    \@esphack%
+  }%
+}
+\CheckCommand*\@doxcreatespecialindex[3]{%
+  \expandafter\def\csname Special#1Index\endcsname##1{%
+    \@bsphack%
+    \index{##1\actualchar{\protect\ttfamily##1} (#2)\encapchar usage}%
+    \index{#3:\levelchar##1\actualchar{\protect\ttfamily##1}
+      \encapchar usage}%
+    \@esphack%
+  }%
+}
+\renewcommand*\@doxcreatespecialindex[3]{%
+  \expandafter\def\csname Special#1Index\endcsname##1{%
+    \@bsphack%
+    \protected@edef\tud@reserved{#2}%
+    \index{%
+      ##1\space\expandonce\tud@reserved\actualchar%
+      {\protect\ttfamily##1}\index@type{\expandonce\tud@reserved}%
+      \encapchar usage%
+    }%
+    \protected@edef\tud@reserved{#3}%
+    \index{%
+      \expandonce\tud@reserved:\levelchar##1\actualchar%
+      {\protect\ttfamily##1}\encapchar usage%
+    }%
+    \@esphack%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \@doxcreatespecialindex
+% \end{macro}^^A \@doxcreatespecialmacrolikeindex
+% \end{macro}^^A \@doxcreatespecialmainindex
+% \end{macro}^^A \@doxcreatespecialmainmacrolikeindex
+% \begin{macro}{\@doxcreatemacrolikeprintname}
+% \begin{macro}{\@doxcreateprintname}
+% \begin{macro}{\@doxcreatemacrolikeindexname}
+% \begin{macro}{\@doxcreateindexname}
+% \begin{macro}{\saved@indextype}
+% Hiermit werden die Makros zur Ausgabe als Randnotiz definiert. Mit diesen
+% wird dem eigentlichen Eintrag der Eintragstyp angehängt. Zu beachten ist, das 
+% entgegen der ursprünglichen Definition \cs{strut} erst zum Schluss ausgeführt 
+% wird. Somit lassen sich potenzielle Probleme mit dem Paket \pkg{microtype} 
+% vermeiden.
+%    \begin{macrocode}
+\def\@doxcreatemacrolikeprintname#1#2{%
+  \@ifundefined{Print#1Name}{%
+    \expandafter\def\csname Print#1Name\endcsname##1{%
+      \MacroFont\string##1\index@type{#2}\strut\ %
+    }%
+  }{}%
+  \@ifundefined{PrintDescribe#1}{%
+    \expandafter\def\csname PrintDescribe#1\endcsname##1{%
+      \MacroFont\string##1\index@type{#2}\strut\ %
+    }%
+  }{}%
+}
+\def\@doxcreateprintname#1#2{%
+  \@ifundefined{Print#1Name}{%
+    \expandafter\def\csname Print#1Name\endcsname##1{%
+      \MacroFont##1\index@type{#2}\strut\ %
+    }%
+  }{}%
+  \@ifundefined{PrintDescribe#1}{%
+    \expandafter\def\csname PrintDescribe#1\endcsname##1{%
+      \MacroFont##1\index@type{#2}\strut\ %
+    }%
+  }{}%
+}
+%    \end{macrocode}
+% Ziel ist es, in den 
+% Makros \cs{saved@indexname} und \cs{saved@indextype} den Namen und den Typ 
+% des aktuellen Deklarationselementes zu speichern.
 %    \begin{macrocode}
 \newcommand*\saved@indextype{}
 \def\@doxcreatemacrolikeindexname#1#2{%
   \expandafter\def\csname Set#1IndexName\endcsname##1{%
     \edef\saved@indexname{\expandafter\@gobble##1}%
-    \edef\saved@indextype{#2}%
+    \protected@edef\saved@indextype{#2}%
   }%
 }
 \def\@doxcreateindexname#1#2{%
   \expandafter\def\csname Set#1IndexName\endcsname##1{%
     \let\saved@indexname##1%
-    \edef\saved@indextype{#2}%
+    \protected@edef\saved@indextype{#2}%
   }%
 }
 %    \end{macrocode}
-% In \cs{@@doxenv} sollen die bei der Verwendung von \cs{doxitem} respektive 
-% \cs{@doxcreateenv} definierten Makros \cs{Set\dots{}IndexName} ausgeführt 
-% werden. Zuerst das Prüfen des Befehls\dots
+% \end{macro}^^A \saved@indextype
+% \end{macro}^^A \@doxcreateindexname
+% \end{macro}^^A \@doxcreatemacrolikeindexname
+% \end{macro}^^A \@doxcreateprintname
+% \end{macro}^^A \@doxcreatemacrolikeprintname
+% \begin{macro}{\@@doxenv}
+% Es folgen kleine Anpassungen für die Änderungsliste. Beim Aufruf von 
+% \cs{@@doxenv} sollen die bei der Verwendung von \cs{doxitem} definierten
+% Makros \cs{Set\meta{Typ}IndexName} ausgeführt werden. Zuerst das Prüfen des
+% Befehls\dots
 %    \begin{macrocode}
 \CheckCommand\@@doxenv[2]{%
   \endgroup%
@@ -663,18 +654,13 @@
 }{}{\tud@patch@wrn{@@doxenv}}
 %    \end{macrocode}
 % \end{macro}^^A \@@doxenv
-% \end{macro}^^A \saved@indextype
-% \end{macro}^^A \@doxcreateindexname
-% \end{macro}^^A \@doxcreatemacrolikeindexname
-% \end{macro}^^A \@doxcreateenv
-% \end{macro}^^A \doxitem
 % \begin{macro}{\SetMacroIndexName}
 % \begin{macro}{\SpecialMainMacroIndex}
-% Da für Makros die notwendigen Befehle nicht über \cs{doxitem} kreiert werden
-% können, erfolgt dies hier direkt.
+% Da für Makros die notwendigen Befehle nicht über \cs{doxitem} kreiert werden,
+% erfolgt dies hier direkt.
 %    \begin{macrocode}
 \newcommand*\SetMacroIndexName[1]{%
-  \edef\saved@indexname{\expandafter\@gobble#1}
+  \edef\saved@indexname{\expandafter\@gobble#1}%
   \let\saved@indextype\@empty%
 }
 \CheckCommand*\SpecialMainMacroIndex[1]{%
@@ -699,8 +685,10 @@
 \renewcommand*\tud@reserved[3][]{%
   \doxitem[#1,idxtype=\csname tud@#3@name\endcsname]{#2}{#3}{%
     \csname tud@#3s@name\endcsname%
-  }
+  }%
 }
+\undef\PrintEnvName
+\undef\PrintDescribeEnv
 \tud@reserved{Env}{environment}
 \tud@reserved{Option}{option}
 \tud@reserved{PageStyle}{pagestyle}
@@ -753,10 +741,10 @@
   }%
 }{}{\tud@patch@wrn{SetMacroIndexName}}
 \apptocmd\SetEnvIndexName{%
-  \edef\parameter@parent@indexname{#1\space(\saved@indextype)}%
-  \edef\parameter@parent@indexformat{%
+  \protected@edef\parameter@parent@indexname{#1\space\saved@indextype}%
+  \protected@edef\parameter@parent@indexformat{%
     \string\verb\quotechar*\verbatimchar#1\verbatimchar%
-    \string\,(\saved@indextype)%
+    \index@type{\saved@indextype}%
   }%
 }{}{\tud@patch@wrn{SetEnvIndexName}}
 %    \end{macrocode}
@@ -782,15 +770,15 @@
   \special@index{%
     \parameter@parent@indexname\actualchar%
     \parameter@parent@indexformat\levelchar%
-    #1\space(\tud@parameter@name)\actualchar%
-    {\string\ttfamily\space#1}\space(\tud@parameter@name)%
+    #1\space\tud@parameter@name\actualchar%
+    {\string\ttfamily\space#1}\index@type{\tud@parameter@name}%
     \encapchar main%
   }%
   \special@index{%
     \tud@parameters@name:\levelchar%
     #1\space\parameter@parent@indexname%
-    \actualchar{\string\ttfamily\space #1}%
-    \,--\,\parameter@parent@indexformat%
+    \actualchar{\string\ttfamily\space#1}%
+    \noexpand\,--\noexpand\,\parameter@parent@indexformat%
     \encapchar main%
   }%
   \@esphack%
@@ -849,14 +837,14 @@
         \protected@edef\@tempb{%
           \saved@indexname%
           \ifx\saved@indextype\@empty\else%
-            \space(\saved@indextype)%
+            \space\saved@indextype%
           \fi%
           \actualchar%
           \string\verb\quotechar*%
           \verbatimchar\saved@macroname%
           \verbatimchar%
           \ifx\saved@indextype\@empty\else%
-            \space(\saved@indextype)%
+            \index@type{\saved@indextype}%
           \fi%
           :\levelchar%
         }%
@@ -870,7 +858,7 @@
           \parameter@parent@changes%
           \saved@indexname%
           \ifx\saved@indextype\@empty\else%
-            \space(\saved@indextype)%
+            \space\saved@indextype%
           \fi%
           \actualchar%
 %    \end{macrocode}
@@ -880,7 +868,7 @@
 %    \begin{macrocode}
           {\noexpand\ttfamily\saved@macroname}%
           \ifx\saved@indextype\@empty\else%
-            \space(\saved@indextype)%
+            \index@type{\saved@indextype}%
           \fi%
           :\levelchar%
         }%
@@ -893,10 +881,10 @@
           \else%
             \tud@implementation@name%
           \fi%
-          \levelchar
+          \levelchar%
           \ifx\saved@macroname\@empty\else%
             \@tempb%
-          \fi
+          \fi%
           #2 #3%
           \actualchar%
           #3% (#2)%
@@ -927,14 +915,14 @@
           \fi%
           \saved@indexname%
           \ifx\saved@indextype\@empty\else%
-            \space(\saved@indextype)%
+            \space\saved@indextype%
           \fi%
           \actualchar%
           \string\verb\quotechar*%
           \verbatimchar\saved@macroname%
           \verbatimchar%
           \ifx\saved@indextype\@empty\else%
-            \space(\saved@indextype)%
+            \index@type{\saved@indextype}%
           \fi%
           \ifx\parameter@parent@changes\relax%
             :\levelchar%
@@ -982,7 +970,7 @@
       }%
     \fi%
   \fi%
-  \endgroup
+  \endgroup%
   \@esphack%
 }
 %    \end{macrocode}
@@ -1166,7 +1154,7 @@
                 -o \jobname.#2\space%
                 -M \@currname-#2.xdy\space%
                 -t \jobname-#2.xlg\space%
-              \jobname-xdy.#1
+              \jobname-xdy.#1%
             }%
 %    \end{macrocode}
 % Falls nichts geschrieben wurde, wird eine leere Ausgabedatei erzeugt.
@@ -1293,14 +1281,139 @@
 % \end{macro}^^A \@ToDo
 % \end{macro}^^A \ToDo
 %
-% \subsection{Kleinkram}
-% \subsubsection{Zusätzliche Markup-Befehle}
+% \subsection{Satzspiegel}
 %
-% Zum Schluss erfolgen einige Anpassungen mit \cs{AtBeginDocument}, um abhängig 
-% vom Ladezustand einiger Pakete reagieren zu können.
+% Um den zur Verfügung stehenden Platz möglichst effektiv zu nutzen, soll der 
+% Satzspiegel dahingehend aufgeteilt werden, dass für die Darstellung jeder
+% Quelltextzeile genau 80~Zeichen zur Verfügung stehen. Dies ist allerdings 
+% abhängig von der geladenen Typewriter-Schrift. Deshalb wird die Berechnung 
+% des Satzspiegels erst zum Ende der Präambel ausgeführt, um auf etwaige Pakete
+% zur Schriftauswahl reagieren zu können.
+%
+% \begin{macro}{\calculatearea}
+% \changes{v2.05g}{2016/11/10}{neu}^^A
+% \begin{length}{\topmargin}
+% \begin{length}{\headheight}
+% \begin{length}{\headsep}
+% \begin{length}{\footskip}
+% \begin{length}{\textheight}
+% \begin{length}{\textwidth}
+% \begin{length}{\columnsep}
+% \begin{length}{\marginparsep}
+% \begin{length}{\marginparwidth}
+% \begin{length}{\oddsidemargin}
+% Hiermit wird die Berechnung des Satzspiegels ausgeführt.
 %    \begin{macrocode}
-\AtBeginDocument{%
+\newcommand*\calculatearea{%
+  \setlength\topmargin{-1in}%
+  \setlength\headheight{0pt}%
+  \setlength\headsep{3em}%
+  \setlength\footskip{1.5\headsep}%
+  \setlength\textheight{\dimexpr\paperheight-2.5\headsep-\footskip\relax}%
+  \settowidth\MacroIndent{\rmfamily\scriptsize 0000\ }%
+  \begingroup%
+    \MacroFont\selectfont%
+    \settowidth\@tempdima{\space}%
+    \setlength\@tempdima{80\@tempdima}%
+%^^A    \addtolength\@tempdima{\dimexpr\MacroIndent+.1\p@\relax}%
+    \addtolength\@tempdima{\MacroIndent}%
+    \edef\@tempa{%
+      \endgroup%
+      \noexpand\setlength\noexpand\textwidth{\the\@tempdima}%
+    }%
+  \@tempa%
+  \setlength\columnsep{1em}%
+  \setlength\marginparsep{1em}%
+  \setlength\marginparwidth{%
+    \dimexpr\paperwidth-\textwidth-2\marginparsep\relax%
+  }%
+  \setlength\oddsidemargin{\dimexpr\marginparwidth+\marginparsep-1in\relax}%
+}
+\AtEndPreamble{\calculatearea}
 %    \end{macrocode}
+% \end{length}^^A \oddsidemargin
+% \end{length}^^A \marginparwidth
+% \end{length}^^A \marginparsep
+% \end{length}^^A \columnsep
+% \end{length}^^A \textwidth
+% \end{length}^^A \textheight
+% \end{length}^^A \footskip
+% \end{length}^^A \headsep
+% \end{length}^^A \headheight
+% \end{length}^^A \topmargin
+% \end{macro}^^A \calculatearea
+% \begin{macro}{\saved@calculatearea}
+% \changes{v2.05g}{2016/11/10}{neu}^^A
+% \begin{macro}{\tud@font@set}
+% \begin{macro}{\@pnumwidth}
+% \begin{macro}{\@tocrmarg}
+% \begin{macro}{\MacroFont}
+% \begin{macro}{\AltMacroFont}
+% Etwas komplizierter wird es, wenn das paket \pkg{tudscrfonts} geladen wird. 
+% Die darin ausgewählten Typewriter-Schriften sind zur Quelltextdokumentation 
+% zu schlank. Deshalb wird das Paket \pkg{mweights} genutzt, um die Stärke 
+% etwas zu erhöhen. Damit dies mit dem Paket \pkg{doc} funktioniert, muss der 
+% Befehl \cs{MacroFont} leicht angepasst werden.
+%
+% Da das Paket \pkg{tudscrfonts} das Festlegen der Schriften selbst auf das 
+% Ende der Präambel verzögert, muss sichergestellt werden, dass die Berechnung 
+% des Satzspiegels erst nach der Schriftauswahl erfolgt. Deshalb wird der 
+% Inhalt von \cs{calculatearea} in \cs{saved@calculatearea} gescihert und 
+% anschließend unschädlich gemacht. Danach wird die Satzspiegelberechnung an 
+% das Makro \cs{tud@font@set} angehangen.
+%    \begin{macrocode}
+\AfterPackage{tudscrfonts}{%
+  \RequirePackage{mweights}[2013/07/21]%
+  \CheckCommand*\MacroFont{%
+    \fontencoding\encodingdefault%
+    \fontfamily\ttdefault%
+    \fontseries\mddefault%
+    \fontshape\updefault%
+    \small%
+  }%
+  \renewcommand*\MacroFont{%
+    \fontencoding\encodingdefault%
+    \fontfamily\ttdefault%
+    \fontseries\mdseries@tt%
+    \fontshape\updefault%
+    \small%
+  }%
+  \CheckCommand*\AltMacroFont{%
+    \fontencoding\encodingdefault%
+    \fontfamily\ttdefault%
+    \fontseries\mddefault%
+    \fontshape\sldefault%
+    \small%
+  }%
+  \renewcommand*\AltMacroFont{%
+    \fontencoding\encodingdefault%
+    \fontfamily\ttdefault%
+    \fontseries\mdseries@tt%
+    \fontshape\sldefault%
+    \small%
+  }%
+  \newcommand*\saved@calculatearea{}%
+  \let\saved@calculatearea\calculatearea%
+  \let\calculatearea\relax%
+  \appto\tud@font@set{%
+    \ifcase\tud@cdfont@num\relax\else% true/heavy
+      \def\mdseries@tt{m}%
+      \renewcommand*\@pnumwidth{1.7em}%
+      \renewcommand*\@tocrmarg{2.7em}%
+    \fi%
+    \saved@calculatearea%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \AltMacroFont
+% \end{macro}^^A \MacroFont
+% \end{macro}^^A \@tocrmarg
+% \end{macro}^^A \@pnumwidth
+% \end{macro}^^A \tud@font@set
+% \end{macro}^^A \saved@calculatearea
+%
+% \subsection{Zusätzliche Markup-Befehle}
+%
 % \begin{macro}{\app}
 % \begin{macro}{\cls}
 % \begin{macro}{\pkg}
@@ -1313,15 +1426,15 @@
 % \begin{macro}{\file}
 % Zusätzliche Auszeichnungsbefehle.
 %    \begin{macrocode}
-  \newrobustcmd*\app[1]{\mbox{\textsl{\textbf{#1}}}}
-  \newrobustcmd*\cls[1]{\mbox{\textsf{\textbf{#1}}}}
-  \newrobustcmd*\pkg[1]{\mbox{\textsf{\textbf{#1}}}}
-  \newrobustcmd*\opt[1]{\mbox{\texttt{#1}}}
-  \newrobustcmd*\val[1]{\mbox{\texttt{#1}}}
-  \newrobustcmd*\pgs[1]{\mbox{\texttt{#1}}}
-  \newrobustcmd*\env[1]{\mbox{\texttt{#1}}}
-  \newrobustcmd*\prm[1]{\mbox{\texttt{#1}}}
-  \newrobustcmd*\file[1]{\mbox{\texttt{#1}}}
+\newrobustcmd*\app[1]{\mbox{\textsl{\textbf{#1}}}}
+\newrobustcmd*\cls[1]{\mbox{\textsf{\textbf{#1}}}}
+\newrobustcmd*\pkg[1]{\mbox{\textsf{\textbf{#1}}}}
+\newrobustcmd*\opt[1]{\mbox{\texttt{#1}}}
+\newrobustcmd*\val[1]{\mbox{\texttt{#1}}}
+\newrobustcmd*\pgs[1]{\mbox{\texttt{#1}}}
+\newrobustcmd*\env[1]{\mbox{\texttt{#1}}}
+\newrobustcmd*\prm[1]{\mbox{\texttt{#1}}}
+\newrobustcmd*\file[1]{\mbox{\texttt{#1}}}
 %    \end{macrocode}
 % \end{macro}^^A \file
 % \end{macro}^^A \prm
@@ -1333,55 +1446,134 @@
 % \end{macro}^^A \cls
 % \end{macro}^^A \app
 %
-% \subsubsection{Ergänzungen für \pkg{hyperref}}
+% \subsection{Optionale Verlinkungen mit dem Paket \pkg{hyperref}}
 %
+% \begin{macro}{\hypersourcedef}
+% \changes{v2.05}{2016/04/26}{neu}^^A
+% \begin{macro}{\hypersource@def}
+% \changes{v2.05}{2016/04/26}{neu}^^A
+% \begin{macro}{\hypersource@ref@codeline}
+% \changes{v2.05}{2016/04/26}{neu}^^A
+% \begin{macro}{\hypersource@ref@page}
+% \changes{v2.05}{2016/04/26}{neu}^^A
+% Diese Makros werden verwendet, um im Index respektive in der Änderungsliste 
+% mithilfe von \pkg{hyperref} Hyperlinks auf Codezeilen respektive Seiten im 
+% Dokument zu setzen. 
+%    \begin{macrocode}
+\newcommand*\hypersourcedef[1]{}
+\newcommand*\hypersource@def{}
+\newcommand*\hypersource@ref@codeline[2][]{}
+\newcommand*\hypersource@ref@page[2][]{}
+%    \end{macrocode}
+% Dies funktioniert jedoch nur, falls \pkg{hyperref} geladen wird.
+%    \begin{macrocode}
+\PassOptionsToPackage{hyperindex=false,colorlinks,linkcolor=blue}{hyperref}
+\PassOptionsToPackage{open,openlevel=0}{bookmark}
+\AfterPackage{hyperref}{%
+%    \end{macrocode}
+% Mit \cs{hypersourcedef} wird ein Textanker gesetzt, falls dieser noch nicht 
+% definiert wurde, was durch \cs{hypersource@def} abgesichert wird. Als 
+% Argument wird hierfür die aktuelle Codezeile verwendet.
+%    \begin{macrocode}
+  \renewcommand*\hypersourcedef[1]{%
+    \ifstr{#1}{\hypersource@def}{}{%
+      \Hy@raisedlink{\hyperdef{}{source:#1}{}}%
+      \xdef\hypersource@def{#1}%
+    }%
+  }%
+%    \end{macrocode}
+% Mit \cs{hypersource@ref@\dots} wird auf Anker im Dokument verlinkt. Dies 
+% erfolgt indirekt über die Attribute \val{main} bzw. \val{usage}, welche bei
+% der Definitionen von Befehlen etc. im Index genutzt werden. Hierfür werden
+% die dazugehörigen Makros umdefiniert.
+%    \begin{macrocode}
+  \renewcommand*\hypersource@ref@codeline[2][\@firstofone]{%
+    \begingroup%
+      \def\@tempa##1{\hyperref{}{}{source:##1}{#1{##1}}}%
+      \forcsvlist\@tempa{#2}%
+    \endgroup%
+  }%
+  \renewcommand*\hypersource@ref@page[2][\@firstofone]{%
+    \begingroup%
+      \def\@tempa##1{\hyperlink{page.##1}{#1{##1}}}%
+      \forcsvlist\@tempa{#2}%
+    \endgroup%
+  }%
+  \renewcommand*\main[1]{%
+    \ifcodeline@index%
+      \hypersource@ref@codeline[\underline]{#1}%
+    \else%
+      \hypersource@ref@page[\underline]{#1}%
+    \fi%
+  }%
+  \renewcommand*\usage[1]{\hypersource@ref@page[\textit]{#1}}%
+%    \end{macrocode}
+% Zum Schluss werden noch ein paar Auszeichnungsbefehle für die Nutzung in 
+% Überschriften vorbereitet.
+%    \begin{macrocode}
+  \pdfstringdefDisableCommands{%
+    \def\DDC{DRESDEN-concept}%
+    \def\TUDScript{TUD-Script}%
+    \def\KOMAScript{KOMA-Script}%
+    \let\cls\@firstofone%
+    \let\pkg\@firstofone%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \hypersource@ref@page
+% \end{macro}^^A \hypersource@ref@codeline
+% \end{macro}^^A \hypersource@def
+% \end{macro}^^A \hypersourcedef
+% \begin{macro}{\mailto}
+% Ein Makro zur Angabe einer verlinkten E-Mail-Adresse.
+% \changes{v2.05g}{2016/10/24}{neu}^^A
+%    \begin{macrocode}
+\newrobustcmd*\mailto[1]{\href{mailto:#1}{\nolinkurl{#1}}}%
+%    \end{macrocode}
+% \end{macro}^^A \mailto
+% \begin{macro}{\hrfn}
+% \changes{v2.05g}{2016/10/24}{neu}^^A
+% Zum Erstellen eines Links mit dazugehöriger URL in einer Fußnote.
+%    \begin{macrocode}
+\newcommand*\hrfn[2]{%
+  \href{#1}{#2}%
+  \footnote{%
+    \begingroup%
+      \def\_{_}%
+      \edef\@tempa{#1}%
+      \strut\expandafter\url\expandafter{\@tempa}%
+    \endgroup%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \hrfn
+%
+% \subsection{Rückfalloptionen bei fehlenden Paketen}
+%
+% Zum Schluss erfolgen einige Anpassungen mit \cs{AtEndPreamble}, um abhängig 
+% vom Ladezustand einiger Pakete reagieren zu können.
+%    \begin{macrocode}
+\AtEndPreamble{%
+%    \end{macrocode}
 % \begin{macro}{\hypersetup}
 % \begin{macro}{\phantomsection}
 % \begin{macro}{\texorpdfstring}
 % \begin{macro}{\href}
-% \begin{macro}{\mailto}
-% \changes{v2.05g}{2016/10/24}{neu}^^A
-% \begin{macro}{\hrfn}
-% \changes{v2.05g}{2016/10/24}{neu}^^A
 % Etwas Kleinkram für \pkg{hyperref}\dots
 %    \begin{macrocode}
-  \newcommand*\hrfn[2]{%
-    \href{#1}{#2}%
-    \footnote{%
-      \begingroup%
-        \def\_{_}%
-        \edef\@tempa{#1}%
-        \strut\expandafter\url\expandafter{\@tempa}%
-      \endgroup%
-    }%
-  }
-  \@ifpackageloaded{hyperref}{%
-    \pdfstringdefDisableCommands{%
-      \def\DDC{DRESDEN-concept}%
-      \def\TUDScript{TUD-Script}%
-      \def\KOMAScript{KOMA-Script}%
-      \let\cls\@firstofone%
-      \let\pkg\@firstofone%
-    }%
-    \newrobustcmd*\mailto[1]{\href{mailto:#1}{\nolinkurl{#1}}}%
-  }{%
+  \@ifpackageloaded{hyperref}{}{%
     \RequirePackage{url}[2013/09/16]%
+    \providecommand*\nolinkurl[1]{\url{#1}}%
     \providecommand*\hypersetup[1]{}%
     \providecommand*\phantomsection{}%
     \providecommand*\texorpdfstring[2]{#1}%
     \providecommand*\href[3][]{#3}%
-    \newrobustcmd*\mailto[1]{\url{#1}}%
   }%
 %    \end{macrocode}
-% \end{macro}^^A \hrfn
-% \end{macro}^^A \mailto
 % \end{macro}^^A \href
 % \end{macro}^^A \texorpdfstring
 % \end{macro}^^A \phantomsection
 % \end{macro}^^A \hypersetup
-%
-% \subsubsection{Rückfalloptionen bei fehlenden Paketen}
-%
 % \begin{macro}{\selectlanguage}
 % \begin{macro}{\glqq}
 % \begin{macro}{\grqq}
@@ -1406,23 +1598,11 @@
   }%
 %    \end{macrocode}
 % \end{macro}^^A \enquote
-% Sollte das Paket \pkg{tudscrfonts} geladen worden sein, so wird die Stärke 
-% der Schriften für die Quelltextausgabe etwas erhöht, um die Lesbarkeit zu 
-% verbessern.
+% Sollte das Paket \pkg{tudscrfonts} nicht geladen worden sein, so wird das
+% Paket \pkg{lmodern} geladen und die fehlenden Befehle zur Schriftauswahl
+% rudimentär definiert.
 %    \begin{macrocode}
-  \@ifpackageloaded{tudscrfonts}{%
-    \RequirePackage{mweights}[2013/07/21]%
-    \ifnum\tud@cdfont@num>\z@\relax% true/heavy
-      \def\mddefault{m}%
-      \def\mdseries@tt{m}%
-      \renewcommand*\@pnumwidth{1.7em}%
-      \renewcommand*\@tocrmarg{2.7em}%
-    \fi%
-%    \end{macrocode}
-% Andernfalls wird das Paket \pkg{lmodern} geladen und die fehlenden Befehle 
-% zur Schriftauswahl rudimentär definiert.
-%    \begin{macrocode}
-  }{%
+  \@ifpackageloaded{tudscrfonts}{}{%
     \RequirePackage{lmodern}[2009/10/30]%
     \providecommand*\ifdin[2]{#2}%
     \providecommand*\textuln[1]{\textsf{#1}}%
@@ -1435,10 +1615,6 @@
     \providecommand*\textuxs[1]{\textubs{#1}}%
     \providecommand*\textdbn[1]{\textubn{#1}}%
   }%
-%    \end{macrocode}
-% Zuletzt wird der Spaltenabstand im Index festgelegt.
-%    \begin{macrocode}
-  \setlength\columnsep{1em}%
 }
 %    \end{macrocode}
 %
