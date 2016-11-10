@@ -370,6 +370,81 @@
 % \end{macro}^^A \tud@x@fontspec@noerror
 % \end{macro}^^A \tud@font@check
 %
+% \subsection{Kompatibilität der Schriften mit verschiedenen Pakete}
+% \subsubsection{Ausrichtung von Überschriften und das Paket \pkg{ragged2e}}
+%
+% \begin{macro}{\tud@raggedright}
+% \begin{macro}{\tud@RaggedRight}
+% Die Überschriften in \DIN sollen laut \CD linksbündig und nie mit aktiver
+% Silbentrennung gesetzt werden. Normalerweise ist das dies beim linksbündigen
+% Satz bei \LaTeX{} der Fall. Allerdings ist es mit dem Paket \pkg{ragged2e}
+% möglich, das Verhalten für den Flattersatz zu ändern und die Silbentrennung
+% zu aktivieren. Mit der Option \opt{newcommands} werden dabei die originalen
+% Befehle überschrieben, vorher jedoch in \cs{LaTeX\dots} gesichert. Diese
+% Makros dienen dazu, die Überschriften in jedem Fall~-- auch bei der Verwendung
+% von \pkg{ragged2e} mit der Option \opt{newcommands}~-- ohne Trennungen zu
+% setzen.
+%    \begin{macrocode}
+\newcommand*\tud@raggedright{\raggedright}
+\newcommand*\tud@RaggedRight{\raggedright}
+\AfterPackage*{ragged2e}{%
+  \ifdef{\LaTeXraggedright}{%
+    \renewcommand*\tud@raggedright{\LaTeXraggedright}%
+  }{}%
+  \renewcommand*\tud@RaggedRight{\RaggedRight}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@RaggedRight
+% \end{macro}^^A \tud@raggedright
+%
+% \subsubsection{Anpassungen für das Paket \pkg{siunitx}}
+%
+% \begin{macro}{\lseries}
+% Das Paket \pkg{siunitx} nutzt den Befehl \cs{lseries} für den Fall, dass für
+% den Fließtext eine Schrift die Serie \val{l} verwendet. Dem wird hier 
+% Rechnung getragen.
+%    \begin{macrocode}
+\AfterPackage*{siunitx}{%
+  \providecommand*\lseries{\fontseries{l}\selectfont}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \lseries
+%
+% \subsubsection{Anpassungen für die Klasse \cls{beamer}}
+%
+% Die \cls{beamer}-Klasse lädt standardmäßig serifenlose Mathematikschriften. 
+% Dies soll verhindert werden, damit die Auswahl über die Option \opt{cdmath} 
+% erfolgen kann.
+%    \begin{macrocode}
+%<*package>
+\AfterClass*{beamer}{\usefonttheme[onlymath]{serif}}
+%</package>
+%    \end{macrocode}
+%
+% \subsubsection{Mathematikschriften in Verbindung mit dem Paket \pkg{bm}}
+%
+% \begin{macro}{\if@tud@x@bm@requested}
+% Das Paket \pkg{bm} stellt den Befehl \cs{bm} für fette und kursive Symbole im 
+% Mathematiksatz bereit. Damit dies funktioniert, muss das Laden des Paketes 
+% auf das Ende der Präambel verzögert werden, um zuvor alle Einstellungen für 
+% die mathematischen Symbole vornehmen zu können.
+%    \begin{macrocode}
+\newif\if@tud@x@bm@requested
+%<*package>
+\@ifpackageloaded{bm}{%
+  \PackageWarning{tudscrfonts}{%
+    Package `bm' must be loaded after `tudscrfonts'.\MessageBreak%
+    Otherwise the functionality can not be guaranteed%
+  }%
+}{%
+%</package>
+\PreventPackageFromLoading[\@tud@x@bm@requestedtrue]{bm}
+%<*package>
+}
+%</package>
+%    \end{macrocode}
+% \end{macro}^^A \if@tud@x@bm@requested
+%
 % \iffalse
 %</body>
 %<*option>
@@ -1813,81 +1888,6 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@makeuppercase
-%
-% \section{Kompatibilität der Schriften mit verschiedenen Pakete}
-% \subsection{Ausrichtung von Überschriften und das Paket \pkg{ragged2e}}
-%
-% \begin{macro}{\tud@raggedright}
-% \begin{macro}{\tud@RaggedRight}
-% Die Überschriften in \DIN sollen laut \CD linksbündig und nie mit aktiver
-% Silbentrennung gesetzt werden. Normalerweise ist das dies beim linksbündigen
-% Satz bei \LaTeX{} der Fall. Allerdings ist es mit dem Paket \pkg{ragged2e}
-% möglich, das Verhalten für den Flattersatz zu ändern und die Silbentrennung
-% zu aktivieren. Mit der Option \opt{newcommands} werden dabei die originalen
-% Befehle überschrieben, vorher jedoch in \cs{LaTeX\dots} gesichert. Diese
-% Makros dienen dazu, die Überschriften in jedem Fall~-- auch bei der Verwendung
-% von \pkg{ragged2e} mit der Option \opt{newcommands}~-- ohne Trennungen zu
-% setzen.
-%    \begin{macrocode}
-\newcommand*\tud@raggedright{\raggedright}
-\newcommand*\tud@RaggedRight{\raggedright}
-\AfterPackage*{ragged2e}{%
-  \ifdef{\LaTeXraggedright}{%
-    \renewcommand*\tud@raggedright{\LaTeXraggedright}%
-  }{}%
-  \renewcommand*\tud@RaggedRight{\RaggedRight}%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@RaggedRight
-% \end{macro}^^A \tud@raggedright
-%
-% \subsection{Mathematikschriften in Verbindung mit dem Paket \pkg{bm}}
-%
-% \begin{macro}{\if@tud@x@bm@requested}
-% Das Paket \pkg{bm} stellt den Befehl \cs{bm} für fette und kursive Symbole im 
-% Mathematiksatz bereit. Damit dies funktioniert, muss das Laden des Paketes 
-% auf das Ende der Präambel verzögert werden, um zuvor alle Einstellungen für 
-% die mathematischen Symbole vornehmen zu können.
-%    \begin{macrocode}
-\newif\if@tud@x@bm@requested
-%<*package>
-\@ifpackageloaded{bm}{%
-  \PackageWarning{tudscrfonts}{%
-    Package `bm' must be loaded after `tudscrfonts'.\MessageBreak%
-    Otherwise the functionality can not be guaranteed%
-  }%
-}{%
-%</package>
-\PreventPackageFromLoading[\@tud@x@bm@requestedtrue]{bm}
-%<*package>
-}
-%</package>
-%    \end{macrocode}
-% \end{macro}^^A \if@tud@x@bm@requested
-%
-% \subsection{Anpassungen für das Paket \pkg{siunitx}}
-%
-% \begin{macro}{\lseries}
-% Das Paket \pkg{siunitx} nutzt den Befehl \cs{lseries} für den Fall, dass für
-% den Fließtext eine Schrift die Serie \val{l} verwendet. Dem wird hier 
-% Rechnung getragen.
-%    \begin{macrocode}
-\AfterPackage*{siunitx}{%
-  \providecommand*\lseries{\fontseries{l}\selectfont}%
-}
-%    \end{macrocode}
-% \end{macro}^^A \lseries
-%
-% \subsection{Anpassungen für die Klasse \cls{beamer}}
-%
-% Die \cls{beamer}-Klasse lädt standardmäßig serifenlose Mathematikschriften. 
-% Dies soll verhindert werden, damit die Auswahl über die Option \opt{cdmath} 
-% erfolgen kann.
-%    \begin{macrocode}
-%<*package>
-\AfterClass*{beamer}{\usefonttheme[onlymath]{serif}}
-%</package>
-%    \end{macrocode}
 %
 % \iffalse
 %</body>
