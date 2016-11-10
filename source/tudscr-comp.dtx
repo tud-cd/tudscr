@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-comp.dtx}[%
-  2016/10/24 v2.05g TUD-Script\space%
+  2016/11/10 v2.05g TUD-Script\space%
 %</driver>
 %<package&identify&comp&base>\ProvidesPackage{tudscrcomp}[%
 %<package&identify&comp&book>\ProvidesPackage{tudscrcomp-book}[%
@@ -72,8 +72,8 @@
 \usepackage{babel}
 \usepackage{tudscrfonts} % only load this package, if the fonts are installed
 \KOMAoptions{parskip=half-}
-\usepackage{microtype}
 \usepackage{bookmark}
+\usepackage[babel]{microtype}
 
 \CodelineIndex
 \RecordChanges
@@ -96,18 +96,8 @@
 %   mit neuen Schriftfamilien ermöglicht}^^A
 % \changes{v2.04}{2015/04/22}{\pkg{tudscrfonts}: Unterstützung veralteter 
 %   Posterklassen}^^A
-% \changes{v2.05}{2015/12/08}{\pkg{fix-tudscrfonts}: Dieses Paket übernimmt die 
-%   Bereitstellung der Schriften für veraltete Klassen}^^A
 %
-% \section{Kompatibilität zu früheren Versionen und Klassen}
-%
-% Hiermit werden sowohl veraltete Befehle und Optionen aus früheren Versionen
-% von \TUDScript als auch \enquote{veraltete} Klassen und Pakete, welche das 
-% \CD der \TnUD mehr oder weniger gut umsetzen, unterstützt.
-%
-% \StopEventually{\PrintIndex\PrintChanges\PrintToDos}
-%
-% \subsection{Kompatibilität zu früheren \TUDScript-Versionen}
+% \section{Kompatibilität zu früheren \TUDScript-Versionen}
 %
 % Mit der Version v2.02 wurde eine Menge~-- teilweise sehr tiefgreifend~-- an 
 % der Benutzerschnittstelle in \TUDScript geändert. Dabei wird versucht, die
@@ -116,6 +106,8 @@
 % der Verwendung dieser der Anwender darüber informiert wird. Die Vorkehrungen 
 % betreffen sowohl die Klassen selber als auch die zusätzlich bereitgestellten 
 % Pakete.
+%
+% \StopEventually{\PrintIndex\PrintChanges\PrintToDos}
 %
 % \iffalse
 %<*class|(package&fonts)>
@@ -188,6 +180,252 @@
 % \iffalse
 %<*option>
 % \fi
+%
+% \begin{option}{tudscrver}
+% \changes{v2.02}{2014/08/22}{neu}^^A
+% \begin{macro}{\tud@v@comp}
+% \changes{v2.02}{2014/08/22}{neu}^^A
+% In einigen Fällen sind Änderungen mit früheren Versionen nicht kompatibel 
+% oder unerwünscht, weil diese beispielsweise das Ausgabeergebnis verändern.
+% Standardmäßig werden die Klassen in der aktuellen Version geladen. Mit 
+% \opt{tudscrver=\meta{Version}} kann auf das Verhalten einer früheren
+% Version geschaltet werden. Die eingestellte Kompatibilität wird als Zahl in 
+% \cs{tud@v@comp} gespeichert. In den Makros \cs{tud@v@\meta{Version}} werden
+% die zugehörigen Nummern gespeichert.
+%    \begin{macrocode}
+\newcommand*\tud@v@comp{\tud@v@last}
+\TUD@key{tudscrver}[last]{%
+  \tud@v@get\@tempa{#1}%
+  \ifcsundef{tud@v@\@tempa}{%
+%<*class>
+    \ClassWarningNoLine{\TUD@Class@Name}%
+%</class>
+%<*package&fonts>
+    \PackageWarningNoLine{tudscrfonts}%
+%</package&fonts>
+    {%
+      You have set option `tudscrver' to `\@tempa', but\MessageBreak%
+      this value is not supported. Because of this, the\MessageBreak%
+      value for `tudscrver' was set to `first'%
+    }%
+    \def\tud@v@comp{0}%
+  }{%
+%<*class>
+    \ClassInfoNoLine{\TUD@Class@Name}%
+%</class>
+%<*package&fonts>
+    \PackageInfoNoLine{tudscrfonts}%
+%</package&fonts>
+    {%
+      Switching compatibility level to `\@tempa'%
+    }%
+    \edef\tud@v@comp{\csuse{tud@v@\@tempa}}%
+  }%
+  \FamilyKeyStateProcessed%
+}
+%    \end{macrocode}
+% Eine zusätzliche Bedingung gibt es noch: Die Kompatibilität kann nur beim
+% Laden der Klasse bzw. des Paketes gesetzt werden, danach nicht mehr.
+%    \begin{macrocode}
+%<*class>
+\AtEndOfClass%
+%</class>
+%<*package>
+\AtEndOfPackage%
+%</package>
+{%
+  \TUD@key{tudscrver}[]{%
+%<*class>
+    \ClassError{\TUD@Class@Name}%
+%</class>
+%<*package&fonts>
+    \PackageError{tudscrfonts}%
+%</package&fonts>
+    {Option `tudscrver' too late}{%
+      Option `tudscrver' can only be set while loading the\MessageBreak%
+%<*class>
+      class `\TUD@Class@Name'
+%</class>
+%<*package&fonts>
+      package `tudscrfonts'
+%</package&fonts>
+      but you have tried to set it up later.%
+    }%
+    \FamilyKeyStateProcessed%
+  }%
+%    \end{macrocode}
+% Außerdem wird darauf geachtet, dass die mindestens benötigte Version von
+% \KOMAScript{} installiert ist. (\cs{\TUD@Version@KOMA}: \TUD@Version@KOMA). 
+% Sollte dies nicht der Fall sein, wird ein Fehler erzeugt.
+%    \begin{macrocode}
+%<*class>
+  \ifcsdef{scr@v@\TUD@Version@KOMA}{%
+    \ifnum\scr@compatibility<\csuse{scr@v@3.12}\relax%
+      \ClassError{\TUD@Class@Name}{%
+        KOMA-Script compatibility level too low%
+      }{%
+        \TUD@Version\space must be used at least with\MessageBreak%
+        KOMA-Script compatibility option `version=3.12'.%
+      }%
+    \fi%
+  }{%
+    \ClassError{\TUD@Class@Name}{%
+      KOMA-Script v\TUD@Version@KOMA is required%
+    }{%
+      \TUD@Version\space must at least be used with\MessageBreak%
+      KOMA-Script v\TUD@Version@KOMA. You're using \KOMAScriptVersion%
+    }%
+  }%
+%</class>
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@v@comp
+% \end{option}^^A tudscrver
+% \ToDo{Für jede neue Version der entsprechende Befehl}[Release]
+% \begin{macro}{\tud@v@first}
+% \changes{v2.02}{2014/08/22}{neu}^^A
+% \begin{macro}{\tud@v@2.00}
+% \changes{v2.02}{2014/08/22}{neu}^^A
+% \begin{macro}{\tud@v@2.01}
+% \changes{v2.02}{2014/08/22}{neu}^^A
+% \begin{macro}{\tud@v@2.01a}
+% \changes{v2.02}{2014/08/22}{neu}^^A
+% \begin{macro}{\tud@v@2.01b}
+% \changes{v2.02}{2014/08/22}{neu}^^A
+% \begin{macro}{\tud@v@2.02}
+% \changes{v2.02}{2014/08/22}{neu}^^A
+% \begin{macro}{\tud@v@2.03}
+% \changes{v2.03}{2015/01/13}{neu}^^A
+% \begin{macro}{\tud@v@2.03a}
+% \changes{v2.03a}{2015/06/12}{neu}^^A
+% \begin{macro}{\tud@v@2.04}
+% \changes{v2.04}{2015/02/18}{neu}^^A
+% \begin{macro}{\tud@v@2.04a}
+% \changes{v2.04a}{2015/07/24}{neu}^^A
+% \begin{macro}{\tud@v@2.04b}
+% \changes{v2.04b}{2015/10/06}{neu}^^A
+% \begin{macro}{\tud@v@2.04c}
+% \changes{v2.04c}{2015/11/29}{neu}^^A
+% \begin{macro}{\tud@v@2.04d}
+% \changes{v2.04d}{2016/03/26}{neu}^^A
+% \begin{macro}{\tud@v@2.04e}
+% \changes{v2.04e}{2016/06/17}{neu}^^A
+% \begin{macro}{\tud@v@2.05}
+% \changes{v2.05}{2015/07/03}{neu}^^A
+% \begin{macro}{\tud@v@2.05a}
+% \changes{v2.05a}{2015/08/24}{neu}^^A
+% \begin{macro}{\tud@v@2.05b}
+% \changes{v2.05b}{2015/09/09}{neu}^^A
+% \begin{macro}{\tud@v@2.05c}
+% \changes{v2.05c}{2015/09/15}{neu}^^A
+% \begin{macro}{\tud@v@2.05d}
+% \changes{v2.05d}{2015/09/21}{neu}^^A
+% \begin{macro}{\tud@v@2.05e}
+% \changes{v2.05d}{2015/10/10}{neu}^^A
+% \begin{macro}{\tud@v@2.05f}
+% \changes{v2.05d}{2015/10/12}{neu}^^A
+% \begin{macro}{\tud@v@last}
+% \changes{v2.02}{2014/08/22}{neu}^^A
+% \changes{v2.03}{2015/01/13}{angepasst}^^A
+% \changes{v2.04}{2015/02/18}{angepasst}^^A
+% \changes{v2.05}{2015/07/03}{angepasst}^^A
+% Die numerischen Werte zu den einzelnen Versionen.
+%    \begin{macrocode}
+\csdef{tud@v@first}{0}
+\csdef{tud@v@2.00}{0}
+\csdef{tud@v@2.01}{0}
+\csdef{tud@v@2.01a}{0}
+\csdef{tud@v@2.01b}{0}
+\csdef{tud@v@2.02}{0}
+\csdef{tud@v@2.02}{0}
+\csdef{tud@v@2.03}{1}
+\csdef{tud@v@2.03a}{1}
+\csdef{tud@v@2.04}{2}
+\csdef{tud@v@2.04a}{2}
+\csdef{tud@v@2.04b}{2}
+\csdef{tud@v@2.04c}{2}
+\csdef{tud@v@2.04d}{2}
+\csdef{tud@v@2.04e}{2}
+\csdef{tud@v@2.05}{3}
+\csdef{tud@v@2.05a}{3}
+\csdef{tud@v@2.05b}{3}
+\csdef{tud@v@2.05c}{3}
+\csdef{tud@v@2.05d}{3}
+\csdef{tud@v@2.05e}{3}
+\csdef{tud@v@2.05f}{3}
+\csdef{tud@v@last}{3}
+%    \end{macrocode}
+% \end{macro}^^A \tud@v@last
+% \end{macro}^^A \tud@v@2.05f
+% \end{macro}^^A \tud@v@2.05e
+% \end{macro}^^A \tud@v@2.05d
+% \end{macro}^^A \tud@v@2.05c
+% \end{macro}^^A \tud@v@2.05b
+% \end{macro}^^A \tud@v@2.05a
+% \end{macro}^^A \tud@v@2.05
+% \end{macro}^^A \tud@v@2.04e
+% \end{macro}^^A \tud@v@2.04d
+% \end{macro}^^A \tud@v@2.04c
+% \end{macro}^^A \tud@v@2.04b
+% \end{macro}^^A \tud@v@2.04a
+% \end{macro}^^A \tud@v@2.04
+% \end{macro}^^A \tud@v@2.03a
+% \end{macro}^^A \tud@v@2.03
+% \end{macro}^^A \tud@v@2.02
+% \end{macro}^^A \tud@v@2.01b
+% \end{macro}^^A \tud@v@2.01a
+% \end{macro}^^A \tud@v@2.01
+% \end{macro}^^A \tud@v@2.00
+% \end{macro}^^A \tud@v@first
+% \begin{macro}{\tud@v@get}
+% \changes{v2.05}{2016/05/31}{neu}^^A
+% Mit \cs{tud@v@get} wird die angegebene Versionsnummer in eine Normalform 
+% gebracht und an das Makro im ersten Argument übergeben. Damit spielt es keine 
+% Rolle, ob die im zweiten Argument übergebene Versionsnummer mit oder ohne 
+% führendes \enquote{v} angegeben wird.
+%    \begin{macrocode}
+\newcommand*\tud@v@get[2]{%
+  \begingroup%
+    \def\@tempa{\kernel@ifnextchar v{\@tempb}{\@tempb v}}%
+    \def\@tempb v##1\@nil{\def\@tempc{##1}}%
+    \@tempa #2\@nil%
+    \edef\tud@reserved{%
+      \endgroup%
+      \etex@unexpanded{\def#1}{\@tempc}%
+    }%
+  \tud@reserved%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@v@get
+% \begin{macro}{\tud@if@v@lower}
+% \changes{v2.03}{2015/01/13}{neu}^^A
+% Mit diesem Befehl können abhängig von der gegebenen Kompatibilitätsversion in 
+% den Klassen unterschiedliche Einstellungen vorgenommen werden.
+%    \begin{macrocode}
+\newcommand*\tud@if@v@lower[1]{%
+  \begingroup%
+    \tud@v@get\@tempa{#1}%
+    \ifcsdef{tud@v@\@tempa}{%
+      \ifnum\tud@v@comp<\csuse{tud@v@\@tempa}\relax%
+        \def\tud@reserved{\endgroup\@firstoftwo}%
+      \else%
+        \def\tud@reserved{\endgroup\@secondoftwo}%
+      \fi%
+    }{%
+      \def\tud@reserved{%
+        \ClassWarningNoLine{\TUD@Class@Name}{%PackageWarning!
+          Erroneous usage of `\string\tud@if@v@lower'.\MessageBreak%
+          There's no defined macro `\string\tud@v@\@tempa'%
+        }%
+        \endgroup\@firstoftwo%
+      }%
+    }%
+  \tud@reserved%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@if@v@lower
+%
+% \subsection{Veraltete Optionen}
 %
 % \begin{option}{fontspec}
 % \changes{v2.02}{2014/08/29}{neu}^^A
@@ -367,8 +605,8 @@
 %
 % \begin{option}{geometry}
 % \changes{v2.02}{2014/07/08}{neu}^^A
-% Umbennennung der zu allgemein benannten Option, um zukünftigen Konflikten mit
-% \KOMAScript{} aus dem Weg zu gehen.
+% Umbenennung der zu allgemein bezeichneten Option, um zukünftig potenziellen 
+% Konflikten mit \KOMAScript{} aus dem Weg zu gehen.
 %    \begin{macrocode}
 \TUD@key{geometry}[true]{\TUD@key@deprecated{geometry=#1}{cdgeometry=#1}}
 %    \end{macrocode}
@@ -471,257 +709,12 @@
 %
 % \iffalse
 %</class>
-% \fi
-%
-% \begin{option}{tudscrver}
-% \changes{v2.02}{2014/08/22}{neu}^^A
-% \begin{macro}{\tud@v@comp}
-% \changes{v2.02}{2014/08/22}{neu}^^A
-% \begin{macro}{\tud@v@first}
-% \changes{v2.02}{2014/08/22}{neu}^^A
-% \begin{macro}{\tud@v@2.00}
-% \changes{v2.02}{2014/08/22}{neu}^^A
-% \begin{macro}{\tud@v@2.01}
-% \changes{v2.02}{2014/08/22}{neu}^^A
-% \begin{macro}{\tud@v@2.01a}
-% \changes{v2.02}{2014/08/22}{neu}^^A
-% \begin{macro}{\tud@v@2.01b}
-% \changes{v2.02}{2014/08/22}{neu}^^A
-% \begin{macro}{\tud@v@2.02}
-% \changes{v2.02}{2014/08/22}{neu}^^A
-% \begin{macro}{\tud@v@2.03}
-% \changes{v2.03}{2015/01/13}{neu}^^A
-% \begin{macro}{\tud@v@2.03a}
-% \changes{v2.03a}{2015/06/12}{neu}^^A
-% \begin{macro}{\tud@v@2.04}
-% \changes{v2.04}{2015/02/18}{neu}^^A
-% \begin{macro}{\tud@v@2.04a}
-% \changes{v2.04a}{2015/07/24}{neu}^^A
-% \begin{macro}{\tud@v@2.04b}
-% \changes{v2.04b}{2015/10/06}{neu}^^A
-% \begin{macro}{\tud@v@2.04c}
-% \changes{v2.04c}{2015/11/29}{neu}^^A
-% \begin{macro}{\tud@v@2.04d}
-% \changes{v2.04d}{2016/03/26}{neu}^^A
-% \begin{macro}{\tud@v@2.04e}
-% \changes{v2.04e}{2016/06/17}{neu}^^A
-% \begin{macro}{\tud@v@2.05}
-% \changes{v2.05}{2015/07/03}{neu}^^A
-% \begin{macro}{\tud@v@2.05a}
-% \changes{v2.05a}{2015/08/24}{neu}^^A
-% \begin{macro}{\tud@v@2.05b}
-% \changes{v2.05b}{2015/09/09}{neu}^^A
-% \begin{macro}{\tud@v@2.05c}
-% \changes{v2.05c}{2015/09/15}{neu}^^A
-% \begin{macro}{\tud@v@2.05d}
-% \changes{v2.05d}{2015/09/21}{neu}^^A
-% \begin{macro}{\tud@v@2.05e}
-% \changes{v2.05d}{2015/10/10}{neu}^^A
-% \begin{macro}{\tud@v@2.05f}
-% \changes{v2.05d}{2015/10/12}{neu}^^A
-% \begin{macro}{\tud@v@last}
-% \changes{v2.02}{2014/08/22}{neu}^^A
-% \changes{v2.03}{2015/01/13}{angepasst}^^A
-% \changes{v2.04}{2015/02/18}{angepasst}^^A
-% \changes{v2.05}{2015/07/03}{angepasst}^^A
-% In einigen Fällen sind Änderungen mit früheren Versionen nicht kompatibel 
-% oder unerwünscht, weil diese beispielsweise das Ausgabeergebnis verändern.
-% Standardmäßig werden die Klassen in der aktuellen Version geladen. Mit 
-% \opt{tudscrver=\meta{Version}} kann auf das Verhalten einer früheren
-% Version geschaltet werden. Die eingestellte Kompatibilität wird als Zahl in 
-% \cs{tud@v@comp} gespeichert. In den Makros \cs{tud@v@\meta{Version}} werden
-% die zugehörigen Nummern gespeichert.
-%    \begin{macrocode}
-\newcommand*\tud@v@comp{\tud@v@last}
-\TUD@key{tudscrver}[last]{%
-  \tud@v@get\@tempa{#1}%
-  \ifcsundef{tud@v@\@tempa}{%
-%<*class>
-    \ClassWarningNoLine{\TUD@Class@Name}%
-%</class>
-%<*package&fonts>
-    \PackageWarningNoLine{tudscrfonts}%
-%</package&fonts>
-    {%
-      You have set option `tudscrver' to `\@tempa', but\MessageBreak%
-      this value is not supported. Because of this, the\MessageBreak%
-      value for `tudscrver' was set to `first'%
-    }%
-    \def\tud@v@comp{0}%
-  }{%
-%<*class>
-    \ClassInfoNoLine{\TUD@Class@Name}%
-%</class>
-%<*package&fonts>
-    \PackageInfoNoLine{tudscrfonts}%
-%</package&fonts>
-    {%
-      Switching compatibility level to `\@tempa'%
-    }%
-    \edef\tud@v@comp{\csuse{tud@v@\@tempa}}%
-  }%
-  \FamilyKeyStateProcessed%
-}
-%    \end{macrocode}
-% Eine zusätzliche Bedingung gibt es noch: Die Kompatibilität kann nur beim
-% Laden der Klasse bzw. des Paketes gesetzt werden, danach nicht mehr.
-%    \begin{macrocode}
-%<*class>
-\AtEndOfClass%
-%</class>
-%<*package>
-\AtEndOfPackage%
-%</package>
-{%
-  \TUD@key{tudscrver}[]{%
-%<*class>
-    \ClassError{\TUD@Class@Name}%
-%</class>
-%<*package&fonts>
-    \PackageError{tudscrfonts}%
-%</package&fonts>
-    {Option `tudscrver' too late}{%
-      Option `tudscrver' can only be set while loading the\MessageBreak%
-%<*class>
-      class `\TUD@Class@Name'
-%</class>
-%<*package&fonts>
-      package `tudscrfonts'
-%</package&fonts>
-      but you have tried to set it up later.%
-    }%
-    \FamilyKeyStateProcessed%
-  }%
-%    \end{macrocode}
-% Außerdem wird darauf geachtet, dass die mindestens benötigte Version von
-% \KOMAScript{} installiert ist. (\cs{\TUD@Version@KOMA}: \TUD@Version@KOMA). 
-% Sollte dies nicht der Fall sein, wird ein Fehler erzeugt.
-%    \begin{macrocode}
-%<*class>
-  \ifcsdef{scr@v@\TUD@Version@KOMA}{%
-    \ifnum\scr@compatibility<\csuse{scr@v@3.12}\relax%
-      \ClassError{\TUD@Class@Name}{%
-        KOMA-Script compatibility level too low%
-      }{%
-        \TUD@Version\space must be used at least with\MessageBreak%
-        KOMA-Script compatibility option `version=3.12'.%
-      }%
-    \fi%
-  }{%
-    \ClassError{\TUD@Class@Name}{%
-      KOMA-Script v\TUD@Version@KOMA is required%
-    }{%
-      \TUD@Version\space must at least be used with\MessageBreak%
-      KOMA-Script v\TUD@Version@KOMA. You're using \KOMAScriptVersion%
-    }%
-  }%
-%</class>
-}
-%    \end{macrocode}
-% Die numerischen Werte zu den einzelnen Versionen.
-% \ToDo{Für jede neue Version der entsprechende Befehl}[Release]
-%    \begin{macrocode}
-\csdef{tud@v@first}{0}
-\csdef{tud@v@2.00}{0}
-\csdef{tud@v@2.01}{0}
-\csdef{tud@v@2.01a}{0}
-\csdef{tud@v@2.01b}{0}
-\csdef{tud@v@2.02}{0}
-\csdef{tud@v@2.02}{0}
-\csdef{tud@v@2.03}{1}
-\csdef{tud@v@2.03a}{1}
-\csdef{tud@v@2.04}{2}
-\csdef{tud@v@2.04a}{2}
-\csdef{tud@v@2.04b}{2}
-\csdef{tud@v@2.04c}{2}
-\csdef{tud@v@2.04d}{2}
-\csdef{tud@v@2.04e}{2}
-\csdef{tud@v@2.05}{3}
-\csdef{tud@v@2.05a}{3}
-\csdef{tud@v@2.05b}{3}
-\csdef{tud@v@2.05c}{3}
-\csdef{tud@v@2.05d}{3}
-\csdef{tud@v@2.05e}{3}
-\csdef{tud@v@2.05f}{3}
-\csdef{tud@v@last}{3}
-%    \end{macrocode}
-% \end{macro}^^A \tud@v@last
-% \end{macro}^^A \tud@v@2.05f
-% \end{macro}^^A \tud@v@2.05e
-% \end{macro}^^A \tud@v@2.05d
-% \end{macro}^^A \tud@v@2.05c
-% \end{macro}^^A \tud@v@2.05b
-% \end{macro}^^A \tud@v@2.05a
-% \end{macro}^^A \tud@v@2.05
-% \end{macro}^^A \tud@v@2.04e
-% \end{macro}^^A \tud@v@2.04d
-% \end{macro}^^A \tud@v@2.04c
-% \end{macro}^^A \tud@v@2.04b
-% \end{macro}^^A \tud@v@2.04a
-% \end{macro}^^A \tud@v@2.04
-% \end{macro}^^A \tud@v@2.03a
-% \end{macro}^^A \tud@v@2.03
-% \end{macro}^^A \tud@v@2.02
-% \end{macro}^^A \tud@v@2.01b
-% \end{macro}^^A \tud@v@2.01a
-% \end{macro}^^A \tud@v@2.01
-% \end{macro}^^A \tud@v@2.00
-% \end{macro}^^A \tud@v@first
-% \end{macro}^^A \tud@v@comp
-% \end{option}^^A tudscrver
-% \begin{macro}{\tud@v@get}
-% \changes{v2.05}{2016/05/31}{neu}^^A
-% Mit \cs{tud@v@get} wird die angegebene Versionsnummer in eine Normalform 
-% gebracht und an das Makro im ersten Argument übergeben. Damit spielt es keine 
-% Rolle, ob die im zweiten Argument übergebene Versionsnummer mit oder ohne 
-% führendes \enquote{v} angegeben wird.
-%    \begin{macrocode}
-\newcommand*\tud@v@get[2]{%
-  \begingroup%
-    \def\@tempa{\kernel@ifnextchar v{\@tempb}{\@tempb v}}%
-    \def\@tempb v##1\@nil{\def\@tempc{##1}}%
-    \@tempa #2\@nil%
-    \edef\tud@reserved{%
-      \endgroup%
-      \etex@unexpanded{\def#1}{\@tempc}%
-    }%
-  \tud@reserved%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@v@get
-% \begin{macro}{\tud@if@v@lower}
-% \changes{v2.03}{2015/01/13}{neu}^^A
-% Mit diesem Befehl können abhängig von der gegebenen Kompatibilitätsversion in 
-% den Klassen unterschiedliche Einstellungen vorgenommen werden.
-%    \begin{macrocode}
-\newcommand*\tud@if@v@lower[1]{%
-  \begingroup%
-    \tud@v@get\@tempa{#1}%
-    \ifcsdef{tud@v@\@tempa}{%
-      \ifnum\tud@v@comp<\csuse{tud@v@\@tempa}\relax%
-        \def\tud@reserved{\endgroup\@firstoftwo}%
-      \else%
-        \def\tud@reserved{\endgroup\@secondoftwo}%
-      \fi%
-    }{%
-      \def\tud@reserved{%
-        \ClassWarningNoLine{\TUD@Class@Name}{%PackageWarning!
-          Erroneous usage of `\string\tud@if@v@lower'.\MessageBreak%
-          There's no defined macro `\string\tud@v@\@tempa'%
-        }%
-        \endgroup\@firstoftwo%
-      }%
-    }%
-  \tud@reserved%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@if@v@lower
-%
-% \iffalse
 %</option>
 %</class|(package&fonts)>
 %<*class&body>
 % \fi
+%
+% \subsection{Veraltete Befehle und Längen}
 %
 % \begin{length}{\footlogoheight}
 % \changes{v2.03}{2015/01/27}{neu}^^A
@@ -879,7 +872,7 @@
 %</body>
 % \fi
 %
-% \subsection{Das Paket \pkg{tudscrcomp} -- Kompatibilität veralteter Klassen}
+% \section{Das Paket \pkg{tudscrcomp} -- Kompatibilität veralteter Klassen}
 %
 % Neben den \TUDScript-Klassen gibt es zahlreiche andere \LaTeX-Umsetzungen des 
 % \CDs der \TnUD. Um eine Migration von diesen \enquote{veralteten} Klassen
@@ -894,7 +887,7 @@
 %<*base>
 % \fi
 %
-% \subsubsection{Erkennen der geladenen Klasse}
+% \subsection{Erkennen der geladenen Klasse}
 %
 % Damit je nach geladener Klasse die passenden Kompatibilitätseinstellungen und 
 % -befehle bereitgestellt werden können, wird auf die geladene Klasse geprüft.
@@ -914,7 +907,7 @@
 %<*body>
 % \fi
 %
-% \subsubsection{Gemeinsame Optionen und Befehle für alle Klassen}
+% \subsection{Gemeinsame Optionen und Befehle für alle Klassen}
 %
 % Zunächst werden alle Optionen und Befehle definiert, die unabhängig von der 
 % geladenen Klasse generell bereitgestellt werden.
@@ -952,7 +945,7 @@
 %<*option>
 % \fi
 %
-% \subsubsection{Kompatibilität zu \cls{tudbook}}
+% \subsection{Kompatibilität zu \cls{tudbook}}
 %
 % Die folgenden Optionen und Befehle werden durch die Klasse \cls{tudbook} und
 % teilweise durch \TUDScript~v1.0 definiert.
@@ -1170,7 +1163,7 @@
 %<*option>
 % \fi
 %
-% \subsubsection{Kompatibilität zu \cls{tudmathposter}}
+% \subsection{Kompatibilität zu \cls{tudmathposter}}
 %
 % Die hier bereitgestellten Optionen und Befehle werden durch die Klasse 
 % \cls{tudmathposter} bzw. \cls{tudposter} definiert.
@@ -1507,13 +1500,14 @@
 % \begin{macro}{\tud@footcontent@use}
 % \begin{macro}{\tud@comp@mathposterwidth}
 % \changes{v2.05}{2016/04/17}{neu}^^A
-% Um die Option \opt{tudmathposterfoot} abzuarbeiten, muss die Anpassung des
-% Makros \cs{tud@footcontent@use} für die Ausgabe des Fußbereichs erfolgen.
+% Um die Option \opt{tudmathposterfoot} umzusetzen, muss für die Ausgabe des 
+% Fußbereichs eine Anpassung des Makros \cs{tud@footcontent@use} erfolgen.
 % Normalerweise wird der Fußbereich in zwei gleichbreite Spalten über die
-% komplette Textbreite aufgeteilt. In \cls{tudmathposter} hingegen, werden 
-% beide Fußspalten nicht über den kompletten textberecih versteilt, sondern es 
-% verbleibt etwas ungenutzter Platz rechts davon, welcher für ein etwaiges Logo 
-% verwendet wird. Dieses Verhalten wird hier nachgebildet.
+% komplette Textbreite aufgeteilt. Dahingegen werden durch die Klasse 
+% \cls{tudmathposter} beide Fußspalten nicht über den kompletten Textbereich
+% verteilt, sondern es verbleibt etwas ungenutzter Platz rechts davon, welcher
+% für ein etwaiges Logo verwendet wird. Dieses Verhalten kann über die Option 
+% \opt{tudmathposterfoot} aktiviert werden und wird hier nachgebildet.
 %    \begin{macrocode}
 \newcommand*\tud@comp@mathposterwidth{4.2\tud@len@widemargin}
 \patchcmd{\tud@footcontent@use}{%
@@ -1619,9 +1613,9 @@
 % \begin{macro}{\schnittrand}
 % \changes{v2.05}{2016/04/17}{neu}^^A
 % Zu guter Letzt geht es an das Makro \cs{schnittrand}. Zur Intension dieses 
-% Befehls gab es unter \url{https://github.com/tud-cd/tud-cd/issues/6} bereits 
-% eine angeregte Diskussion. Deshalb wird das Makro als Wertzuweisung für die 
-% Option \opt{bleedmargin} genutzt.
+% Befehls gab es auf \hrfn{https://github.com/tud-cd/tud-cd/issues/6}{GitHub}
+% bereits eine angeregte Diskussion. Deshalb wird das Makro als Wertzuweisung
+% für die Option \opt{bleedmargin} genutzt.
 % \ToDo{Für \cls{tudscrposter} übernehmen?}[v2.07]
 %    \begin{macrocode}
 \ifundef{\schnittrand}{}{%
@@ -1671,10 +1665,14 @@
 %</package&comp>
 % \fi
 %
-% \subsection{\pkg{fix-tudscrfonts} -- Schriften des \CDs für alte TUD-Klassen}
+% \section{Das Paket \pkg{fix-tudscrfonts} -- Schriften für alte TUD-Klassen}
 %
-% Das Paket \pkg{fix-tudscrfonts} bietet die \TUDScript-Schriftfamilien für die
-% veralteten Klassen von Klaus Bergmann sowie die Posterklassen an. 
+% \changes{v2.05}{2015/12/08}{\pkg{fix-tudscrfonts}: Dieses Paket übernimmt die 
+%   Bereitstellung der Schriften für veraltete Klassen}^^A
+%
+% Das Paket \pkg{fix-tudscrfonts} bietet die Schriftfamilien des \TUDCDs im 
+% \TUDScript-Stil für die \enquote{veralteten} Klassen von Klaus Bergmann sowie
+% die Posterklassen an. 
 %
 % \iffalse
 %<*package&fontsfix>
@@ -1685,8 +1683,8 @@
 % welches automatisch am Ende der Präambel geladen wird, falls dies zuvor durch 
 % den Anwender geschieht. Für die Klassen von Klaus Bergmann, \TUDScript in der 
 % Version~v1.0 sowie die alternativen Posterklassen bleiben die vertikalen 
-% Abstände schriftgrößenunabhängig. Außerdem wird für die fetten Schriften ein
-% stärkerer Schriftschnitt genutzt.
+% Abstände schriftgrößenunabhängig. Außerdem wird für die fette Schriftstärke 
+% ein stärkerer Schriftschnitt genutzt.
 %    \begin{macrocode}
 \PassOptionsToPackage{relspacing=false,cdfont=ultrabold}{tudscrfonts}
 \DeclareOption*{\PassOptionsToPackage{\CurrentOption}{tudscrfonts}}
@@ -1696,10 +1694,19 @@
   \RequirePackage{tudscrfonts}[\TUD@Version]%
 }
 %    \end{macrocode}
+%
+% \subsection{Verwendbarkeit und Ladezeitpunkt von \pkg{fix-tudscrfonts}}
+%
+% Da das Paket eine Vielzahl an Anpassungen der Schriftbefehle vornimmt sowie
+% die Definition von \LaTeXe-Standardbefehlen bereits vor dem Laden der
+% eigentlichen Dokumentklasse sichern muss, kann dieses Paket ausschließlich 
+% vor \cs{documentclass} mit \cs{RequirePackage} geladen werden.
+%
 % \begin{macro}{\tud@fontsfix@maybe@err}
 % \changes{v2.05}{2016/01/02}{neu}^^A
-% Je nachdem, ob das Paket zu spät oder mit einer falschen Klasse geladen 
-% wurde, wird eine Warnung ausgegeben.
+% Dieser Befehl wird nach dem Laden einer unterstützten Klasse zu \cs{relax} 
+% gesetzt. Sollte das Paket jedoch erst nach einer Dokumentklasse geladen 
+% werden, so wird ein Fehler ausgegeben.
 %    \begin{macrocode}
 \ifx\usepackage\RequirePackage
   \newcommand*\tud@fontsfix@maybe@err{%
@@ -1708,6 +1715,10 @@
       any document class with `\string\RequirePackage'%
     }%
   }%
+%    \end{macrocode}
+% Wird das Paket mit einer nicht unterstützten Dokumentklasse verwendet, wird
+% ebenfalls ein Fehler ausgegeben.
+%    \begin{macrocode}
 \else
   \newcommand*\tud@fontsfix@maybe@err{%
     \PackageError{fix-tudscrfonts}{Unsupported class found}{%
@@ -1728,10 +1739,10 @@
 %<*body>
 % \fi
 %
-% \subsubsection{Patches für die unterstützten Klassen}
+% \subsection{Patches für die unterstützten Klassen}
 %
 % Für alle unterstützten Klassen sind vor und nach dem Laden einige Anpassungen 
-% notwendig.
+% an den bereitgestellten Schriftbefehlen notwendig.
 %
 % \begin{macro}{\tud@fontsfix@AdaptClass}
 % \changes{v2.05}{2016/01/02}{neu}^^A
@@ -1739,20 +1750,21 @@
 % \changes{v2.05}{2015/07/13}{neu}^^A
 % \begin{macro}{\dinfamily}
 % \changes{v2.05}{2015/07/13}{neu}^^A
-% \begin{macro}{\univBoldHead}
-% \begin{macro}{\univLightHead}
-% \begin{macro}{\univBoldXV}
-% \begin{macro}{\univLightObliqueXV}
-% \begin{macro}{\univLightXV}
-% \begin{macro}{\univBoldXI}
-% \begin{macro}{\univLightObliqueXI}
-% \begin{macro}{\univLightXI}
-% \begin{macro}{\univBoldIX}
-% \begin{macro}{\univLightObliqueIX}
-% \begin{macro}{\univLightIX}
-% \begin{macro}{\univBoldVII}
-% \begin{macro}{\univLightObliqueVII}
 % \begin{macro}{\univLightVII}
+% \begin{macro}{\univLightObliqueVII}
+% \begin{macro}{\univBoldVII}
+% \begin{macro}{\univLightIX}
+% \begin{macro}{\univLightObliqueIX}
+% \begin{macro}{\univBoldIX}
+% \begin{macro}{\univLightXI}
+% \begin{macro}{\univLightObliqueXI}
+% \begin{macro}{\univBoldXI}
+% \begin{macro}{\univLightXV}
+% \begin{macro}{\univLightObliqueXV}
+% \begin{macro}{\univBoldXV}
+% \begin{macro}{\univLightHead}
+% \begin{macro}{\univBoldHead}
+% \begin{macro}{\tud@head@fntsz}
 % Mit diesen beiden Befehlen werden vor dem Laden der alten Klassen einige
 % Befehle gesichert und die benötigten Optionen gesetzt. Nach dem Laden der 
 % jeweiligen Klasse werden die gesicherten Makrodefinitionen wiederhergestellt 
@@ -1785,9 +1797,6 @@
     \PassOptionsToClass{serifmath}{#1}%
   }%
   \AfterClass{#1}{%
-%    \end{macrocode}
-% 
-%    \begin{macrocode}
     \RequirePackage{tudscrbase}[\TUD@Version]%
     \tud@cmd@restore{DeclareFixedFont}%
     \tud@cmd@restore{rmdefault}%
@@ -1921,20 +1930,21 @@
   }%
 }
 %    \end{macrocode}
-% \end{macro}^^A \univLightVII
-% \end{macro}^^A \univLightObliqueVII
-% \end{macro}^^A \univBoldVII
-% \end{macro}^^A \univLightIX
-% \end{macro}^^A \univLightObliqueIX
-% \end{macro}^^A \univBoldIX
-% \end{macro}^^A \univLightXI
-% \end{macro}^^A \univLightObliqueXI
-% \end{macro}^^A \univBoldXI
-% \end{macro}^^A \univLightXV
-% \end{macro}^^A \univLightObliqueXV
-% \end{macro}^^A \univBoldXV
-% \end{macro}^^A \univLightHead
+% \end{macro}^^A \tud@head@fntsz
 % \end{macro}^^A \univBoldHead
+% \end{macro}^^A \univLightHead
+% \end{macro}^^A \univBoldXV
+% \end{macro}^^A \univLightObliqueXV
+% \end{macro}^^A \univLightXV
+% \end{macro}^^A \univBoldXI
+% \end{macro}^^A \univLightObliqueXI
+% \end{macro}^^A \univLightXI
+% \end{macro}^^A \univBoldIX
+% \end{macro}^^A \univLightObliqueIX
+% \end{macro}^^A \univLightIX
+% \end{macro}^^A \univBoldVII
+% \end{macro}^^A \univLightObliqueVII
+% \end{macro}^^A \univLightVII
 % \end{macro}^^A \dinfamily
 % \end{macro}^^A \dinBold
 % \end{macro}^^A \tud@fontsfix@AdaptClass
@@ -1953,9 +1963,9 @@
 % Wird das Paket \pkg{fix-tudscrfonts} mit den alten TUD-Klassen \cls{tudbook}, 
 % \cls{tudmathposter} etc. oder \TUDScript in der Version~v1.0 verwendet,
 % müssen einige Kompatibilitätseinstellungen vorgenmommen werden. Hierfür sind
-% wenige Patches notwendig. 
+% wenige Patches notwendig.
 %
-% \subsubsection{Spezielle Patches für die Klasse \cls{tudbook}}
+% \subsection{Spezielle Patches für die Klasse \cls{tudbook}}
 %
 % Die notwendigen Anpassungen der Klasse \cls{tudbook} betreffen die
 % Schriftauswahl bei Überschriften.
@@ -2003,7 +2013,7 @@
 % \end{macro}^^A \@makeschapterhead
 % \end{macro}^^A \@makechapterhead
 %
-% \subsubsection{Spezielle Patches für die Klasse \cls{tudmathposter}}
+% \subsection{Spezielle Patches für die Klasse \cls{tudmathposter}}
 %
 % Auch für die Posterklasse \cls{tudmathposter} sowie das Paket \pkg{tudfonts} 
 % sind kleine Anpassungen notwendig.
@@ -2101,7 +2111,7 @@
 % \end{macro}^^A \maketitle
 % \end{KOMAfont}^^A title
 %
-% \subsubsection{Patches für die \TUDScript-Klassen~v1.0}
+% \subsection{Patches für die \TUDScript-Klassen~v1.0}
 %
 % Für die Verwendung des Paketes \pkg{fix-tudscrfonts} mit \TUDScript in der
 % Version~v1.0 sind ebenfalls einige Anpassungen notwendig. Es muss Sorge dafür

@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-color.dtx}[%
-  2016/11/03 v2.05g TUD-Script\space%
+  2016/11/10 v2.05g TUD-Script\space%
 %</driver>
 %<package>\ProvidesPackage{tudscrcolor}[%
 %<*driver|package>
@@ -68,8 +68,8 @@
 \usepackage{babel}
 \usepackage{tudscrfonts} % only load this package, if the fonts are installed
 \KOMAoptions{parskip=half-}
-\usepackage{microtype}
 \usepackage{bookmark}
+\usepackage[babel]{microtype}
 
 \CodelineIndex
 \RecordChanges
@@ -88,7 +88,7 @@
 %
 % \selectlanguage{ngerman}
 %
-% \section{Die Farben des \CDs}
+% \section{Das Paket \pkg{tudscrcolor} -- Die Farben des \CDs}
 %
 % Das \TUDCD legt nicht nur die zu nutzenden Schriften und das Layout sondern 
 % auch die zu verwendenden Farben fest. Diese werden nachfolgend für das CMYK"~ 
@@ -102,28 +102,26 @@
 %<*package>
 % \fi
 %
-% \subsection{Optionen und Befehle des Paketes \pkg{tudscrcolor}}
+% \subsection{Optionen und Befehle}
 %
+% \begin{option}{newcolors}
+% \begin{option}{reduced}
+% \begin{option}{oldcolors}
+% \begin{option}{full}
+% Das Paket kann entweder mit einfachen, für \TUDScript ausreichenden oder 
+% erweiterten Farbdefinitionen geladen werden. Letztere definieren zusätzliche 
+% Farbbezeichnungen für die Kompatibilität zu alten TUD-Klassen.
 %    \begin{macrocode}
 \DeclareOption{newcolors}{\let\tud@setcolors@add\relax}
 \DeclareOption{reduced}{\let\tud@setcolors@add\relax}
 \DeclareOption{oldcolors}{\let\tud@setcolors@add\tud@setcolors@old}
 \DeclareOption{full}{\let\tud@setcolors@add\tud@setcolors@old}
 %    \end{macrocode}
-% \begin{macro}{\tud@color}
-% \changes{v2.04}{2015/04/21}{neu}^^A
-% Der Befehl wählt eine Farbe nur aus, wenn diese auch tatsächlich im zu 
-% übergebenden Makro definiert ist.
-%    \begin{macrocode}
-\newcommand*\tud@color[1]{\ifdefvoid{#1}{}{\color{#1}}}
-%    \end{macrocode}
-% \end{macro}^^A \tud@color
-%
-% \subsection{Farbdefinitionen für das Paket \pkg{tudscrcolor}}
-%
+% \end{option}^^A full
+% \end{option}^^A oldcolors
+% \end{option}^^A reduced
+% \end{option}^^A newcolors
 % \begin{macro}{\setcdcolors}
-% \begin{macro}{\tud@setcolors@do}
-% \begin{macro}{\tud@setcolors@add}
 % Der Befehl \cs{setcdcolors} definiert die Farben des \CDs. Das Argument dient
 % zur Auswahl des gewünschten Farbmodels. Dies kann dazu genutzt werden,
 % innerhalb des Dokumentes die Definition der Farben für ein neues Farbmodell 
@@ -133,7 +131,27 @@
   \selectcolormodel{#1}%
   \tud@setcolors@do%
 }
-\newcommand*\tud@setcolors@add{}
+%    \end{macrocode}
+% \end{macro}^^A \setcdcolors
+% \begin{macro}{\tud@color}
+% \changes{v2.04}{2015/04/21}{neu}^^A
+% Der Befehl wählt eine in einem Makro gespeicherte Farbe nur aus, wenn dieses 
+% auch tatsächlich definiert ist. Dieser Befehl wird von den \TUDScript-Klassen 
+% für die Umsetzung des Layouts verwendet.
+%    \begin{macrocode}
+\newcommand*\tud@color[1]{\ifdefvoid{#1}{}{\color{#1}}}
+%    \end{macrocode}
+% \end{macro}^^A \tud@color
+%
+% \subsection{Farbdefinitionen}
+% \subsubsection{Notwendige Farben für \TUDScript}
+%
+% \begin{macro}{\tud@setcolors@do}
+% Die eigentliche Definitionen der Farben erfolgt erst durch die Ausführung des 
+% Befehls \cs{tud@setcolors@do}. Damit wird es möglich, auf die angegebenen 
+% Optionen in Form von \cs{tud@setcolors@add} oder den durch das Paket 
+% \pkg{xcolor} angegebenen Farbraum zu reagieren.
+%    \begin{macrocode}
 \newcommand*\tud@setcolors@do{%
 %    \end{macrocode}
 % \begin{TUDcolor}{HKS41}
@@ -230,15 +248,18 @@
   \tud@setcolors@add%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@setcolors@add
 % \end{macro}^^A \tud@setcolors@do
-% \end{macro}^^A \setcdcolors
+%
+% \subsubsection{Zusätzliche Farben für alte TUD-Klassen}
+%
+% \begin{macro}{\tud@setcolors@add}
 % \begin{macro}{\tud@setcolors@old}
 % Die erweiterten Farbbefehle werden durch \pkg{tudscrcolor} definiert, wenn
 % das Paket explizit mit der Option \opt{oldcolors} geladen wird. Damit werden 
 % alle gängigen Farbdefinitionen der vielen Insellösungen des \LaTeX-Universums
 % an der \TnUD unterstützt.
 %    \begin{macrocode}
+\newcommand*\tud@setcolors@add{}
 \newcommand*\tud@setcolors@old{%
   \colorlet{HKS41K10}{HKS41!10}%
   \colorlet{HKS41K20}{HKS41!20}%
@@ -403,6 +424,10 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@setcolors@old
+% \end{macro}^^A \tud@setcolors@add
+%
+% \subsection{Ausführung der Optionen}
+%
 % Zum Schluss werden die Optionen ausgeführt und ggf. an \pkg{xcolor} 
 % weitergereicht. Anschließend werden die Farben für das Dokument definiert.
 % Ohne die Angabe eines optionalen Argumentes an das Paket \pkg{xcolor} erfolgt

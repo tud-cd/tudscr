@@ -1,4 +1,4 @@
-% \CheckSum{4166}
+% \CheckSum{4168}
 % \iffalse meta-comment
 % 
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-manual.dtx}[%
-  2016/11/08 v2.05g TUD-Script\space%
+  2016/11/10 v2.05g TUD-Script\space%
 %</driver>
 %<package&identify>\ProvidesPackage{tudscrtutorial}[%
 %<*driver|package&identify>
@@ -67,8 +67,8 @@
 \usepackage{babel}
 \usepackage{tudscrfonts} % only load this package, if the fonts are installed
 \KOMAoptions{parskip=half-}
-\usepackage{microtype}
 \usepackage{bookmark}
+\usepackage[babel]{microtype}
 
 \CodelineIndex
 \RecordChanges
@@ -92,20 +92,22 @@
 % \changes{v2.02}{2014/11/18}{\pkg{tudscrtutorial}: Index für Tutorials}^^A
 % \changes{v2.05}{2015/08/04}{Geteilte Deklarationen für Klasse und Paket}^^A
 %
-% \section{Klasse und Paket für Handbuch und Leitfäden zu \TUDScript}
+% \section{Handbuch und Leitfäden zu \TUDScript}
 %
-% Es werden die Klasse \cls{tudscrmanual} für das \TUDScript-Handuch sowie das 
-% Paket \pkg{tudscrtutorial} für das Setzen von einigen Anwenderleitfäden bzw.
+% Es werden die Klasse \cls{tudscrmanual} für das Handuch sowie das Paket
+% \pkg{tudscrtutorial} für das Setzen von einigen Anwenderleitfäden bzw.
 % Tutorials erzeugt. Da es zwischen der Klasse und dem Paket es eine große
-% Menge an Überschneidungen gibt, basieren diese auf der gleichen Quelldatei.
+% Menge an Überschneidungen gibt, basieren diese auf der gleichen Quelldatei. 
+% Einiges davon wird auch für die Quelltextdokumentationsklasse \cls{tudscrdoc} 
+% verwendet.
 %
 % \StopEventually{\PrintIndex\PrintChanges\PrintToDos}
 %
 % \iffalse
-%<*body|doc>
+%<*body|class&doc>
 % \fi
 %
-% \subsection{Notwendige Pakete und Befehle für Klasse und Paket}
+% \subsection{Notwendige Pakete und Befehle}
 %
 % Basis für die Handbuchklasse \cls{tudscrmanual} ist die \cls{tudscrreprt}. 
 % Zusätzlich wird das Paket \pkg{tudscrtutorial} erstellt, um an das Handbuch
@@ -151,6 +153,7 @@
 % Um bei einer signifikanten Änderung des Paketes passend reagieren zu können, 
 % wird auf das aktuelle Paketdatum geprüft und für neue Versionen eine Warnung
 % erzeugt.
+% \ToDo{Kann raus, sobald \pkg{geometry} nicht mehr notwendig}[v2.07]
 %    \begin{macrocode}
 %<*!doc>
 \@ifpackagelater{geometry}{2010/09/13}{%
@@ -188,7 +191,7 @@
 % \end{macro}^^A \tud@english
 %
 % \iffalse
-%</body|doc>
+%</body|class&doc>
 %<*!doc>
 %<*body>
 % \fi
@@ -321,7 +324,7 @@
 %<*package>
 % \fi
 %
-% \subsubsection{Zusätzliche Pakete für das Paket \pkg{tudscrtutorial}}
+% \subsection{Zusätzliche Pakete für das Paket \pkg{tudscrtutorial}}
 %
 % Mit dem Paket \pkg{scrwfile} lassen sich Probleme mit zu wenig verfügbaren 
 % Streams für das Schreiben externer Datein beheben. Hintergrund ist die
@@ -346,10 +349,91 @@
 %
 % \iffalse
 %</package>
+%</body>
+%<*option>
+% \fi
+%
+% \subsection{%
+%   Optionen für die Ausgabe von \cls{tudscrmanual} und \pkg{tudscrtutorial}%
+% }
+%
+% \begin{option}{final}
+% \begin{option}{print}
+% \begin{macro}{\tudfinalflag}
+% \begin{macro}{\tudprintflag}
+% Diese beiden Optionen dienen zur finalen und/oder der unbunten Ausgabe.
+%    \begin{macrocode}
+\TUD@key{final}[true]{%
+  \TUD@set@ifkey{final}{@tempswa}{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \if@tempswa%
+      \let\tudfinalflag\relax%
+    \fi%
+  \fi%
+}
+\TUD@key{print}[true]{%
+  \TUD@set@ifkey{print}{@tempswa}{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \if@tempswa%
+      \let\tudprintflag\relax%
+    \fi%
+  \fi%
+}
+%    \end{macrocode}
+% Wurde eine oder beide der Optionen \opt{final} oder \opt{print} gesetzt bzw.
+% vor einem externen \app{pdflatex}-Aufruf die Flags \cs{tudfinalflag} und/oder
+% \cs{tudprintflag} definiert, werden die entsprechenden Einstellungen zur
+% finalen Ausgabe und/oder unbunten Druck vorgenommen und anschließend die 
+% entsprechenden Optionen unschädlich gemacht.
+%    \begin{macrocode}
+\AtEndPreamble{%
+  \ifdef{\tudfinalflag}{%
+    \TUDoptions{ToDo=false}%
+    \TUD@key{ToDo}{}%
+  }{}%
+  \ifdef{\tudprintflag}{%
+    \ifnum\tud@cd@num>\z@\relax%
+      \TUDoptions{cd=true}%
+    \fi%
+    \TUD@key{cd}{}%
+    \ifundef{\hypersetup}{}{\hypersetup{hidelinks}}%
+  }{}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tudprintflag
+% \end{macro}^^A \tudfinalflag
+% \end{option}^^A print
+% \end{option}^^A final
+%
+% \iffalse
 %<*class>
 % \fi
 %
-% \subsubsection{Debug-Traces für die Klasse \cls{tudscrmanual}}
+% \subsection{Standardoptionen der Klasse \cls{tudscrmanual}}
+%
+% Es werden einige Optionen für das Handbuch standardmäßig aktiviert. Dazu 
+% werden diese an die entsprechende Elternklasse übergeben.
+%    \begin{macrocode}
+\PassOptionsToClass{%
+  cdfoot=true,%
+  chapterpage=true,%
+  chapterprefix=true,%
+  headings=optiontoheadandtoc,%
+  captions=tableheading,%
+  numbers=noenddot,%
+  cd=color,%
+}{\TUD@Class@Parent}
+\PassOptionsToPackage{automark}{scrlayer-scrpage}
+%    \end{macrocode}
+%
+% \iffalse
+%</class>
+%</option>
+%<*body>
+%<*class>
+% \fi
+%
+% \subsection{Debug-Traces für die Klasse \cls{tudscrmanual}}
 %
 % Ab und an ist es beim Erstellen des Handbuchs recht sinnvoll, verschiedene 
 % Dinge direkt im Logfile zu überprüfen. Hierfür werden folgend einige Befehle 
@@ -485,7 +569,7 @@
 %</class>
 % \fi
 %
-% \subsubsection{Anpassungen für das Paket \pkg{hyperref} und Querverweise}
+% \subsection{Anpassungen für das Paket \pkg{hyperref} und Querverweise}
 %
 % Das Paket \pkg{hyperref} wird für alle möglichen Links und Querverweise 
 % geladen, \pkg{bookmark} verbesssert das Erstellen der Outline-Einträge.
@@ -557,9 +641,9 @@
 % \begin{macro}{\auto@refname}
 % \begin{macro}{\auto@@refname}
 % Der Befehl \cs{autorefname} dient dazu, den Verweistyp beziehungsweise den 
-% Bezeichner des aktuellen oder optional zu einem speziellen Label ohne die 
-% dazugehörige Nummerierung zu erhalten. Auf der Seite LaTeX Stack Exchange%
-% \footnote{\url{http://tex.stackexchange.com/q/33776/}} wurde das Prinzip 
+% Bezeichner des aktuellen~-- oder optional eines speziellen~-- Labels ohne die 
+% dazugehörige Nummerierung zu erhalten. Das zugrunde liegende Funktionsprinzip 
+% wurde bei \hrfn{http://tex.stackexchange.com/q/33776/}{LaTeX Stack Exchange} 
 % vorgestellt und hier übernommen.
 %    \begin{macrocode}
   \newcommand*\autorefname[1][current]{%
@@ -736,93 +820,15 @@
 %    \end{macrocode}
 %
 % \iffalse
-%</body>
-%<*option>
-% \fi
-%
-% \subsection{Optionen für das Ausgabeformat}
-%
-% \begin{option}{final}
-% \begin{option}{print}
-% \begin{macro}{\tudfinalflag}
-% \begin{macro}{\tudprintflag}
-% Diese beiden Optionen dienen zur finalen und/oder der unbunten Ausgabe.
-%    \begin{macrocode}
-\TUD@key{final}[true]{%
-  \TUD@set@ifkey{final}{@tempswa}{#1}%
-  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \if@tempswa%
-      \let\tudfinalflag\relax%
-    \fi%
-  \fi%
-}
-\TUD@key{print}[true]{%
-  \TUD@set@ifkey{print}{@tempswa}{#1}%
-  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \if@tempswa%
-      \let\tudprintflag\relax%
-    \fi%
-  \fi%
-}
-%    \end{macrocode}
-% Wurde eine oder beide der Optionen \opt{final} oder \opt{print} gesetzt bzw.
-% vor einem externen \app{pdflatex}-Aufruf die Flags \cs{tudfinalflag} und/oder
-% \cs{tudprintflag} definiert, werden die entsprechenden Einstellungen zur
-% finalen Ausgabe und/oder unbunten Druck vorgenommen und anschließend die 
-% entsprechenden Optionen unschädlich gemacht.
-%    \begin{macrocode}
-\AtEndPreamble{%
-  \ifdef{\tudfinalflag}{%
-    \TUDoptions{ToDo=false}%
-    \TUD@key{ToDo}{}%
-  }{}%
-  \ifdef{\tudprintflag}{%
-    \ifnum\tud@cd@num>\z@\relax%
-      \TUDoptions{cd=true}%
-    \fi%
-    \TUD@key{cd}{}%
-    \ifundef{\hypersetup}{}{\hypersetup{hidelinks}}%
-  }{}%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tudprintflag
-% \end{macro}^^A \tudfinalflag
-% \end{option}^^A print
-% \end{option}^^A final
-%
-% \iffalse
 %<*class>
 % \fi
 %
-% \subsection{Standardoptionen der Anwenderdokumentation}
+% \subsection{Deklarationsumgebungen für die Klasse \cls{tudscrmanual}}
 %
-% Es werden einige Optionen für das Handbuch standardmäßig aktiviert. Dazu 
-% werden diese an die entsprechende Elternklasse übergeben.
-%    \begin{macrocode}
-\PassOptionsToClass{%
-  cdfoot=true,%
-  chapterpage=true,%
-  chapterprefix=true,%
-  headings=optiontoheadandtoc,%
-  captions=tableheading,%
-  numbers=noenddot,%
-  cd=color,%
-}{\TUD@Class@Parent}
-\PassOptionsToPackage{automark}{scrlayer-scrpage}
-%    \end{macrocode}
-%
-% \iffalse
-%</class>
-%</option>
-%<*body>
-%<*class>
-% \fi
-%
-% \subsection{Deklarationen für die Klasse}
-%
-% Die Umgebungen \env{Declaration} und \env{Declaration*} werden beide für die 
-% Auszeichnung von Optionen, Umgebungen und Befehlen verwendet, die \TUDScript 
-% dem Anwender zur Verfügung stellt.
+% Die Umgebungen beiden \env{Declaration} und \env{Declaration*} sowie 
+% \env{Obsolete} und \env{Bundle} werden für die Beschreibung von Optionen,
+% Umgebungen, Befehlen etc. verwendet, welche von \TUDScript dem Anwender zur 
+% Verfügung gestellt werden.
 %
 % \begin{macro}{\if@tud@declare}
 % \begin{macro}{\if@openindex}
@@ -1048,7 +1054,7 @@
 % Die Sternversion der Umgebung \env{Declaration*} ist für die vereinfachte 
 % Deklaration von Klassen, Paketen etc. gedacht, bei denen keine Ausgabe 
 % sondern lediglich Hyperlink, Indexeintrag und Änderungsnotiz erzeugt werden 
-% sollen. Hierbei werden die Befehle \cs{tud@declare@special@start} sowie 
+% sollen. Hierbei werden die beiden Befehle \cs{tud@declare@special@start} und 
 % \cs{tud@declare@special@end} genutzt, wobei der Anker des erzeugten Labels
 % nicht erhöht sondern auf der aktuellen Grundlinie erzeugt wird.
 %    \begin{macrocode}
@@ -1238,8 +1244,8 @@
 % \end{macro}^^A \printobsoletelist
 % \begin{macro}{\printchangedatlist}
 % \changes{v2.05}{2015/11/01}{neu}^^A
-% Damit werden Änderungsnotizen der Umgebungen \env{Declaration*} sowie
-% \env{Bundle} und \env{Bundle*} ausgegeben.
+% Damit werden Änderungsnotizen der Umgebungen \env{Declaration*}, \env{Bundle} 
+% und \env{Bundle*} ausgegeben.
 %    \begin{macrocode}
 \NewDocumentCommand\printchangedatlist{sO{\z@}}{%
   \print@changedatlist{#1}{#2}%
@@ -1278,10 +1284,10 @@
 % \end{macro}^^A \suffix
 % \begin{macro}{\NewExpandableDocumentCommand}
 % \changes{v2.02}{2014/11/04}{neu}^^A
-% Für Labels, Index- und Änderungs sowie PDF-Outline-Einträge etc. müssen ganz
-% bestimmte Markup-Befehle durch eine expandierbare Version ersetzt werden. Der
-% Befehl \cs{NewExpandableDocumentCommand} wird definiert, um dies möglichst
-% einfach zu gestalten.
+% Für Labels, Index- und Änderungs- sowie PDF-Outline-Einträge etc. müssen ganz
+% bestimmte Markup-Befehle durch eine expandierbare Version ersetzt werden. Um 
+% dies möglichst einfach zu gestalten, wird \cs{NewExpandableDocumentCommand} 
+% definiert.
 %    \begin{macrocode}
 \newcommand*\NewExpandableDocumentCommand[3]{%
   \NewDocumentCommand#1{#2}{#3}%
@@ -1823,10 +1829,11 @@
 \NewDocumentCommand\tud@attr@get{smm}{%
   \begingroup%
 %    \end{macrocode}
-% Das temporäre Makro \cs{@tempa} definiert zunächst alle Markup-Befehle lokal
-% neu und expandiert beim Aufruf für jeden dieser Markup-Befehle~-- abhängig
-% vom Aufruf von \cs{tud@attr@get} mit oder ohne Stern~-- entweder zum Markup 
-% passenden Index oder das entsprechende Labelpräfix in \cs{@tempb}.
+% Das temporäre Makro \cs{@tempa} definiert zunächst alle Markup-Befehle in 
+% einer Gruppe neu und expandiert beim Aufruf jedes dieser lokal umdefinierten 
+% Markup-Befehle~-- abhängig vom Aufruf von \cs{tud@attr@get} mit oder ohne
+% Stern~-- entweder zum Markup-Befehl passenden Index oder zum entsprechenden
+% Labelpräfix in \cs{@tempb}.
 %    \begin{macrocode}
     \def\@tempa##1##2##3{%
       \def##1####1{%
@@ -2025,6 +2032,7 @@
     \let\POParameter\@firstofone%
     \let\textOR\relax%
     \let\hologoRobust\@firstofone%
+    \def\DDC{DRESDEN-concept}%
     \def\TUDScript{TUD-Script}%
     \def\KOMAScript{KOMA-Script}%
     \def\_{-}%
@@ -2796,7 +2804,7 @@
 }
 %    \end{macrocode}
 % Das durch die \TUDScript-Hauptklassen in Ergänzung zum Paket \pkg{textcase}
-% erstellte Makro \cs{tud@x@textcase@uclcnotmath} erlaubt die Definition von
+% erstellte Makro \cs{tud@x@textcase@uclcnotmath} ermöglicht die Definition von
 % Makros, welche von \cs{MakeTextUppercase} nicht beachtet werden sollen.
 % Das besagte Makro kommt in Überschriften bei den \TUDScript-Klassen zum
 % Einsatz, wenn diese in \DIN gesetzt werden. Das hat zu Folge, dass die
@@ -2867,11 +2875,7 @@
 % \subsection{Index}
 %
 % Hier erscheint alles, was für Erstellen und Ausgabe der einzelnen Indexe 
-% notwendig ist.
-%
-% \subsubsection{Indexerstellung}
-%
-% Für die Erstellung aller Indexe wird das Paket \pkg{imakeidx} zusammen mit 
+% notwendig ist. Hierfür wird das Paket \pkg{imakeidx} in Verbindung mit 
 % \app{texindy} verwendet. Diese können sowohl mit dem Paket als auch mit der 
 % Klasse erzeugt werden. 
 % \ToDo{Patcherei für imakeidx raus, sobald dies geht}[v2.06]
@@ -2960,60 +2964,6 @@
 \fi%
 %    \end{macrocode}
 % \end{environment}^^A theindex
-% \begin{macro}{\cleversee}
-% \changes{v2.05}{2015/11/02}{neu}^^A
-% \begin{macro}{\cleverseealso}
-% \changes{v2.05}{2015/11/02}{neu}^^A
-% \begin{macro}{\tud@cleversee}
-% \changes{v2.05}{2015/11/02}{neu}^^A
-% Diese Befehle dienen zum smarten Setzen von Hinweisen im Index. Existiert 
-% lediglich dieser Hinweis im Index, wird dieser mit dem Präfix \cs{seename} 
-% ausgegeben. Sind jedoch für einen Indexeintrag auch Seitenzahlen vorhanden, 
-% so werden diese zuerst ausgegeben, danach folgt der Querverweis mit dem 
-% Präfix \cs{seealsoname}. Der Befehl \cs{cleverseealso} verwendet letzteren 
-% Präfix in jedem Fall.
-%    \begin{macrocode}
-\newrobustcmd*\cleversee{\tud@cleversee{\seename}}
-\newrobustcmd*\cleverseealso{%
-  \ClassWarning{tudscrmanual}{You should use `|see' instead of `|seealso'}%
-  \tud@cleversee{\alsoname}%
-}
-%    \end{macrocode}
-% Diese Makro übernimmt die eigentliche Arbeit. Es ist darauf angewiesen, dass 
-% die angegebene Seitenzahlen eines Indexeintrages erst \emph{nach} den
-% Hinweisen ausgegeben und mit \cs{relax} abgeschlossen werden. Dies wird mit
-% der später definierten Stildatei für \app{texindy} sichergestellt. So wird es 
-% möglich, dass das Makro \cs{tud@cleversee} auf alles ihm bis \cs{relax} 
-% nachfolgende parsen kann und abhängig davon die Ausgabe gestaltet.
-%    \begin{macrocode}
-\newcommand*\tud@cleversee{}
-\def\tud@cleversee#1#2#3\relax{%
-  \IfArgIsEmpty{#3}{%
-    \emph{#1}\space#2%
-  }{%
-    #3, \emph{\alsoname}\space#2%
-  }%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@cleversee
-% \end{macro}^^A \cleverseealso
-% \end{macro}^^A \cleversee
-% \begin{macro}{\seeref}
-% \changes{v2.05}{2015/11/02}{neu}^^A
-% \begin{macro}{\seeidx}
-% Der Befehl \cs{seeref} kann anstelle von \cs{see} bzw. in der Sternversion
-% statt \cs{alsosee} genutzt werden. Das Makro \cs{seeidx} verweist auf die 
-% Seite eines Indexes.
-%    \begin{macrocode}
-%<*class>
-\NewDocumentCommand\seeref{sm}{%
-  \emph{\IfBooleanTF{#1}{\alsoname}{\seename}}\space#2%
-}
-\newcommand*\seeidx[2]{\pageref{idx:#1}}
-%</class>
-%    \end{macrocode}
-% \end{macro}^^A \seeidx
-% \end{macro}^^A \seeref
 % \begin{macro}{\makexdyindex}
 % \changes{v2.05}{2015/11/01}{neu}^^A
 % Um die einzelnen Indexe erstellen zu können, wird das Makro \cs{makexdyindex} 
@@ -3074,7 +3024,7 @@
 % er bei der Ausgabe von Verzeichnissen auf \val{true} gesetzt, um das Setzen 
 % von Indexeinträgen durch Markup-Befehle in den Verzeichnissen selbst zu 
 % unterbinden. Weiterhin verhindert der aktivierte Schalter bei der Ausführung 
-% von \cs{Process@Markup} das erstellen von erweiterten Querverweisen sowie das 
+% von \cs{Process@Markup} das Erstellen von erweiterten Querverweisen sowie das 
 % Setzen von CTAN-Links bei Paketen (\cs{Package}), was weder in Verzeichnissen 
 % noch im Index erwünscht ist, weshalb vom Makro \cs{@printindex} ebenfalls
 % \cs{@tud@indextrue} gesetzt wird.
@@ -3083,6 +3033,9 @@
 \addtoeachtocfile{\protect\@tud@indextrue}
 %    \end{macrocode}
 % \end{macro}^^A \if@tud@index
+%
+% \subsubsection{Formatierung von Indexeinträgen}
+%
 % \begin{macro}{\tud@idx@get}
 % \changes{v2.05}{2015/11/05}{neu}^^A
 % \begin{macro}{\tud@idx@key}
@@ -3102,9 +3055,9 @@
 % Markup-Befehlen erstellt und in der \app{texindy}-Stildatei wird für alle
 % Auszeichnungsbefehle die passende \val{merge-rule} erstellt, um die korrekte 
 % Sortierung zu gewährleisten. Tatsächlich war in einer früheren Version genau
-% das der Ansatz. Allerdings werden die manuell erstellten RegExp-Regeln leider 
-% durch \app{texindy} zu spät genutzt, weshalb der Ansatz verworfen wurde.
-% (\url{http://sourceforge.net/p/xindy/bugs/22/}).
+% das der Ansatz. Allerdings werden die manuell erstellten RegExp-Regeln durch 
+% \hrfn{http://sourceforge.net/p/xindy/bugs/22/}{\app{texindy} nicht korrekt}
+% genutzt werden, weshalb der Ansatz verworfen wurde.
 %
 % Damit das Sortieren verlässlich funktioniert, werden die Einträge für den 
 % Index deshalb in der gewohnten Syntax von \app{makeindex} in der Form
@@ -3171,9 +3124,9 @@
 % des Markups deaktiviert und das erste Argument von \cs{Key} ausgeführt. Dies
 % führt über \cs{Process@Index} zum rekursiven Aufruf von \cs{tud@idx@get}. Als
 % Ergebnis sind im zweiten und dritten Argument~-- sprich in \cs{tud@idx@key} 
-% und \cs{tud@idx@fmt}~-- sowohl \meta{Markup} als auch \meta{Schlüsselwort} 
-% für den Elterneintrag enthalten. Diese werden in das vierte Argument
-% (\cs{idxentry}) gespeichert.
+% und \cs{tud@idx@fmt}~-- \meta{Markup} und \meta{Schlüsselwort} für den
+% Elterneintrag enthalten. Diese werden in das vierte Argument (\cs{idxentry})
+% gespeichert.
 %    \begin{macrocode}
       \ifin@%
         \Markup@Suppress%
@@ -3371,6 +3324,63 @@
 % \end{macro}^^A \tud@idx@fmt
 % \end{macro}^^A \tud@idx@key
 % \end{macro}^^A \tud@idx@get
+% \begin{macro}{\cleversee}
+% \changes{v2.05}{2015/11/02}{neu}^^A
+% \begin{macro}{\cleverseealso}
+% \changes{v2.05}{2015/11/02}{neu}^^A
+% \begin{macro}{\tud@cleversee}
+% \changes{v2.05}{2015/11/02}{neu}^^A
+% Diese Befehle dienen zum smarten Setzen von Hinweisen im Index. Existiert 
+% lediglich dieser Hinweis im Index, wird dieser mit dem Präfix \cs{seename} 
+% ausgegeben. Sind jedoch für einen Indexeintrag auch Seitenzahlen vorhanden, 
+% so werden diese zuerst ausgegeben, danach folgt der Querverweis mit dem 
+% Präfix \cs{seealsoname}. Der Befehl \cs{cleverseealso} verwendet letzteren 
+% Präfix in jedem Fall.
+%    \begin{macrocode}
+\newrobustcmd*\cleversee{\tud@cleversee{\seename}}
+\newrobustcmd*\cleverseealso{%
+  \ClassWarning{tudscrmanual}{You should use `|see' instead of `|seealso'}%
+  \tud@cleversee{\alsoname}%
+}
+%    \end{macrocode}
+% Diese Makro übernimmt die eigentliche Arbeit. Es ist darauf angewiesen, dass 
+% die angegebene Seitenzahlen eines Indexeintrages erst \emph{nach} den
+% Hinweisen ausgegeben und mit \cs{relax} abgeschlossen werden. Dies wird mit
+% der später definierten Stildatei für \app{texindy} sichergestellt. So wird es 
+% möglich, dass das Makro \cs{tud@cleversee} auf alles ihm bis \cs{relax} 
+% nachfolgende parsen kann und abhängig davon die Ausgabe gestaltet.
+%    \begin{macrocode}
+\newcommand*\tud@cleversee{}
+\def\tud@cleversee#1#2#3\relax{%
+  \IfArgIsEmpty{#3}{%
+    \emph{#1}\space#2%
+  }{%
+    #3, \emph{\alsoname}\space#2%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@cleversee
+% \end{macro}^^A \cleverseealso
+% \end{macro}^^A \cleversee
+% \begin{macro}{\seeref}
+% \changes{v2.05}{2015/11/02}{neu}^^A
+% \begin{macro}{\seeidx}
+% Der Befehl \cs{seeref} kann anstelle von \cs{see} bzw. in der Sternversion
+% statt \cs{alsosee} genutzt werden. Das Makro \cs{seeidx} verweist auf die 
+% Seite eines Indexes.
+%    \begin{macrocode}
+%<*class>
+\NewDocumentCommand\seeref{sm}{%
+  \emph{\IfBooleanTF{#1}{\alsoname}{\seename}}\space#2%
+}
+\newcommand*\seeidx[2]{\pageref{idx:#1}}
+%</class>
+%    \end{macrocode}
+% \end{macro}^^A \seeidx
+% \end{macro}^^A \seeref
+%
+% \subsubsection{Erstellen von Indexeinträgen}
+%
 % \begin{macro}{\Process@Index}
 % \changes{v2.05}{2015/11/15}{neu}^^A
 % \begin{macro}{\Process@@Index}
@@ -3928,9 +3938,9 @@
 % für den Implementierungsteil, welcher in \cs{tud@changedat@list} in der Form 
 % \newline\begingroup\scriptsize
 % \meta{Versionsnummer}\val{!Implementierung!}\meta{Markup-Befehl}\ignorespaces
-% \val{!}\meta{Untereintrag}\val{!}\meta{Änderungsnotiz} gespeichert wird, 
-% \endgroup
-% wobei der Untereintrag auch leer bleiben kann.
+% \val{!}\meta{Untereintrag}\val{!}\meta{Änderungsnotiz}
+% \endgroup\newline
+% gespeichert wird, wobei der Untereintrag auch leer bleiben kann.
 %    \begin{macrocode}
   \IfValueTF{#1}{%
     \toks@{#3!Implementierung }%
@@ -3956,7 +3966,7 @@
 % Handelt es sich um einen allgemeinen Änderungseintrag, wird dieser in der Form
 % \newline\begingroup\scriptsize
 % \meta{Versionsnummer}\val{!Allgemein!}\meta{Änderungsnotiz}%
-% \endgroup
+% \endgroup\newline
 % in der Liste \cs{tud@changedat@list} gespeichert. Für den allgemeinen Teil 
 % wird mit der Angabe eines \TUDScript-Bundle-Elements etwas anders verfahren.
 % Wurde dieses~-- wenn auch nur indirekt über eine der beiden Spezialumgebungen
@@ -3993,7 +4003,7 @@
 % \end{macro}^^A \Changed@At@@CreateList
 % \end{macro}^^A \Changed@At@CreateList
 %
-% \subsubsection{Ezeugen der Änderungseinträge}
+% \subsubsection{Erzeugen der Änderungseinträge}
 %
 % Mit diesen Makros erfolgt das eigentliche Eintragen der Änderungseinträge aus 
 % der Liste \cs{listqChangedAt} in den entsprechenden Index \val{changelog}. 
@@ -4219,7 +4229,7 @@
 %    \end{macrocode}
 % \end{macro}^^A \print@changedatlist
 %
-% \subsection{Erläuterungen und weiterführende Ergänzungen im Handbuch}
+% \subsection{Erweiterte Listen für Erläuterungen im Handbuch}
 %
 % Es folgen einige Umgebungen, mit welchen bestimmte Aspekte oder Pakete im
 % Handbuch erläutert werden.
@@ -4231,15 +4241,15 @@
 \RequirePackage{enumitem}[2011/09/28]
 \setlist{noitemsep}
 %    \end{macrocode}
+% \begin{macro}{\stditem}
+% \begin{macro}{\tud@before@item}
 % Mit den Möglichkeiten des Paketes \pkg{enumitem} werden folgend Listen für 
 % das Aufführen von möglichen Werten einer Option sowie der Beschreibung von 
-% nützlichen Paketen erstellt. Für beide Lsiten soll dabei die originale 
+% nützlichen Paketen erstellt. Für beide Listen soll dabei die originale 
 % Definition von \cs{item} in \cs{stditem} gesichert und anschließend angepasst
 % werden. Die Sicherung und Redefinition von \cs{item} erfolgt dabei über das 
 % Makro \cs{tud@before@item} über einen bereitgestellten \emph{hook} zu Beginn
 % der jeweiligen Liste.
-% \begin{macro}{\stditem}
-% \begin{macro}{\tud@before@item}
 %    \begin{macrocode}
 \newcommand*\stditem{}
 \newcommand*\tud@before@item[1]{%
@@ -4256,6 +4266,9 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@before@item
 % \end{macro}^^A \stditem
+%
+% \subsubsection{Listen für gültige Werte von Optionen}
+%
 % \begin{environment}{values}
 % \begin{environment}{@values}
 % \begin{macro}{\tud@values}
@@ -4405,6 +4418,9 @@
 % \end{macro}^^A \itemfalse
 % \end{macro}^^A \itemtrue
 % \end{macro}^^A \tud@item@bool
+%
+% \subsubsection{Listen für die Beschreibung von Paketen}
+%
 % \begin{environment}{packages}
 % \begin{macro}{\tud@item@packages}
 % \changes{v2.02}{2014/10/09}{optionales Argument für CTAN-Link}^^A
@@ -4460,6 +4476,10 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@item@packages
 % \end{environment}^^A packages
+%
+% \subsection{Erläuterungen und weiterführende Ergänzungen im Handbuch}
+% \subsubsection{Tabelle mit automatisch berechneter Mehrspaltenzellenbreite}
+%
 % \begin{environment}{tabularm}
 % \begin{macro}{\tabularm@allcolumnpar}
 % \begin{macro}{\tabularm@box}
@@ -4498,6 +4518,9 @@
 % \end{macro}^^A \tabularm@num
 % \end{macro}^^A \tabularm@allcolumnpar
 % \end{environment}^^A tabularm
+%
+% \subsubsection{Tabelle für mehrsprachigen Bezeichner}
+%
 % Mit Hilfe von \pkg{tabularx} können Tabellen bestimmter Breite und
 % automatisch berechneten Spaltenbreiten gesetzt werden.
 %    \begin{macrocode}
@@ -4546,6 +4569,9 @@
 % \end{macro}^^A \Term@@Table
 % \end{macro}^^A \Term@Table
 % \end{macro}^^A \TermTable
+%
+% \subsubsection{Umgebung für die Angabe eines Beispiels}
+%
 % \begin{environment}{Example}
 % \begin{environment}{Example*}
 % Diese Umgebung wird für die exemplarische Erläuterung von bestimmten Aspekten 
@@ -4871,12 +4897,13 @@
 }
 %    \end{macrocode}
 % Der innerhalb der Umgebungen \env{Preamble} und \env{Trunk}~-- sowie deren 
-% Derivaten~-- angegeben Inhalt wird beim Beenden dieser in die Hilfsdatei
-% \cs{tud@tut@temp.tex} zwischengespeichert. Mit dem Befehl \cs{tud@tut@append}
-% wird der Inhalt dieser Datei ausgelesen und den zusätzlichen Hilfsdateien
-% \cs{tud@tut@temp-preamble.tex} beziehungsweise  \cs{tud@tut@temp-trunk.tex} 
-% angehangen und damit gesichert, um Quelltextauszüge aus dem Tutorial für die
-% Präambel sowie den Dokumentteil trennen beziehungsweise sortieren zu können.
+% Derivaten~-- angegebene Inhalt wird beim Schließen dieser Umgebungen in die 
+% Hilfsdatei \cs{tud@tut@temp.tex} zwischengespeichert. Mit dem Befehl
+% \cs{tud@tut@append} wird der Inhalt dieser Datei ausgelesen und den
+% zusätzlichen Hilfsdateien \cs{tud@tut@temp-preamble.tex} beziehungsweise 
+% \cs{tud@tut@temp-trunk.tex} angehangen und damit gesichert, um die jeweiligen 
+% Quelltextauszüge aus dem Tutorial für die Präambel sowie den Dokumentteil
+% trennen beziehungsweise sortieren zu können.
 %    \begin{macrocode}
 \newcommand*\tud@tut@append[1]{%
   \ifstr{#1}{preamble}{%
@@ -5151,7 +5178,7 @@
 % \changes{v2.02}{2014/10/13}{neu}^^A
 % \begin{environment}{Hint?}
 % \changes{v2.02}{2014/12/09}{neu}^^A
-% \begin{environment}{Hint{!}}
+% \begin{environment}{Hint!}
 % \changes{v2.02}{2014/11/13}{neu}^^A
 % Um Quelltextausschnitte zur weiterführenden Information anzugeben, wird die
 % Umgebung \env{Hint} definiert. Der Inhalt wird ausgegben und~-- falls die
@@ -5281,9 +5308,9 @@
 % \end{macro}^^A \InputCode
 % \begin{macro}{\tud@tut@pdf}
 % \changes{v2.02}{2014/10/22}{neu}^^A
-% Die Umgebungen \env{Trunk!} und \env{hint!} verwenden nach der Ausgabe des
+% Die Umgebungen \env{Trunk!} und \env{Hint!} verwenden nach der Ausgabe des
 % Quelltextes diesen abermals, um daraus eine PDF-Datei zu erzeugen. Dafür wird
-% mithilfe einer \env{filecontents}-Umgebung eine temporäre \LaTeX-Datei
+% eine temporäre \LaTeX-Datei mithilfe einer \env{filecontents}-Umgebung 
 % erzeugt. Diese bindet die mit \env{Trunk!} erzeugte Datei ein und wird
 % anschließend via \cs{write18} kompiliert. Dabei sollte man sich nicht von der 
 % doppelten Verwendung von \cs{jobname} verwirren lassen. Der Dateiname der
@@ -5671,11 +5698,29 @@
 % \end{macro}^^A \tud@todo@type@color
 % \end{macro}^^A \ToDo
 %
-% \section{Verschiedenes für die Dokumentationsklassen und -pakete}
+% \iffalse
+%</body>
+%</!doc>
+% \fi
+%
+% \subsection{Verschiedenes für die Dokumentationsklassen und -pakete}
 %
 % Sowohl für die Klasse \cls{tudscrmanual} als auch \cls{tudscrdoc} werden ein 
-% paar Befehle zur komfortablen verwendung im Fließtext definiert. Außerdem 
+% paar Befehle zur komfortablen Verwendung im Fließtext definiert. Außerdem 
 % erfolgen mittels einiger Pakete verschiedene Formateinstellungen.
+%
+% \subsubsection{Ergänzend geladene Pakete}
+%
+% Sprachabhängiges Setzen von Anführungszeichen. Das Laden des Paketes darf 
+% erst nach \pkg{inputenc} erfolgen.
+%    \begin{macrocode}
+%<body|class&doc>\AfterPackage*{inputenc}{\RequirePackage{csquotes}[2011/10/22]}
+%<body>\TUD@UnwindPackage{inputenc}{\RequirePackage{csquotes}[2011/10/22]}
+%    \end{macrocode}
+%
+% \iffalse
+%<*body>
+% \fi
 %
 % Für den Fließtext werden Pfeile u.\,ä. durch \pkg{textcomp} bereitgestellt.
 %    \begin{macrocode}
@@ -5685,12 +5730,6 @@
 %    \begin{macrocode}
 \RequirePackage{setspace}[2011/12/19]
 \setstretch{1.1}
-%    \end{macrocode}
-% Sprachabhängiges Setzen von Anführungszeichen. Das Laden des Paketes darf 
-% erst nach \pkg{inputenc} erfolgen.
-%    \begin{macrocode}
-\AfterPackage*{inputenc}{\RequirePackage{csquotes}[2011/10/22]}
-\TUD@UnwindPackage{inputenc}{\RequirePackage{csquotes}[2011/10/22]}
 %    \end{macrocode}
 % Verbesserte Zitate.
 %    \begin{macrocode}
@@ -5759,10 +5798,9 @@
 %
 % \iffalse
 %</class>
-%</body>
-%</!doc>
-%<*body>
 % \fi
+%
+% \subsubsection{Zusätzliche Markup-Befehle}
 %
 % \begin{macro}{\Attention}
 % \changes{v2.02}{2014/08/16}{neu}^^A
@@ -5835,7 +5873,7 @@
 %
 % \iffalse
 %</body>
-%<*body|doc>
+%<*body|class&doc>
 % \fi
 %
 % \begin{macro}{\CD}
@@ -5884,7 +5922,7 @@
 % \end{macro}^^A \Univers
 %
 % \iffalse
-%</body|doc>
+%</body|class&doc>
 %<*body>
 % \fi
 %

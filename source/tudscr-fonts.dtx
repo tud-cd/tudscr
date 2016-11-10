@@ -1,4 +1,4 @@
-% \CheckSum{1291}
+% \CheckSum{1294}
 % \iffalse meta-comment
 % 
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-fonts.dtx}[%
-  2016/10/24 v2.05g TUD-Script\space%
+  2016/11/10 v2.05g TUD-Script\space%
 %</driver>
 %<package&identify>\ProvidesPackage{tudscrfonts}[%
 %<*driver|package&identify>
@@ -67,8 +67,8 @@
 \usepackage{babel}
 \usepackage{tudscrfonts} % only load this package, if the fonts are installed
 \KOMAoptions{parskip=half-}
-\usepackage{microtype}
 \usepackage{bookmark}
+\usepackage[babel]{microtype}
 
 \CodelineIndex
 \RecordChanges
@@ -96,7 +96,7 @@
 % \changes{v2.04c}{2015/11/29}{Bugfix für \pkg{fontspec} bei fehlenden 
 %   Schriften}^^A
 %
-% \section{Schriften des \CDs}
+% \section{Die Hausschriften der \TnUD}
 %
 % Für das \TUDCD werden die Schriften \Univers und \DIN benötigt. Zur
 % fehlerfreien Verwendung dieser Klassen sollten diese bitte installiert
@@ -119,8 +119,13 @@
 %<*class&option>
 % \fi
 %
-% \subsection{Verwendbarkeit und Nutzung des Paketes \pkg{tudscrfonts}}
+% \subsection{%
+%   Verwendung durch die \TUDScript-Klassen und das Paket \pkg{tudscrfonts}%
+% }
 %
+% Die Schriften des \TUDCDs werden standardmäßig durch die \TUDScript-Klassen 
+% verwendet. Für Dokumentklassen, welche nicht zum \TUDScript-Bundle gehören,
+% können diese über das Paket \pkg{tudscrfonts} geladen werden.
 %    \begin{macrocode}
 \PreventPackageFromLoading[%
   \ClassWarning{\TUD@Class@Name}{%
@@ -170,7 +175,7 @@
 %<*option>
 % \fi
 %
-% \subsection{Schriftauswahl im \TUDScript-Bundle}
+% \subsection{Auswahl des Fontformates}
 %
 % Das \TUDScript-Bundle unterstützt sowohl die Schriftauswahl im klassischen 
 % New Font Selection Scheme (NFSS) als auch das Einbinden der Schriften im 
@@ -199,6 +204,11 @@
 %</option>
 %<*body>
 % \fi
+%
+% \subsection{Prüfen der Schriftverfügbarkeit}
+%
+% Nachfolgend werden Makros definiert, mit denen geprüft werden kann, ob die 
+% notwendigen Schriften im passenden Fontformat auch installiert sind.
 %
 % \begin{macro}{\tud@univers}
 % \begin{macro}{\if@tud@univers}
@@ -365,6 +375,7 @@
 %<*option>
 % \fi
 %
+% \subsection{Schriftauswahl und -optionen}
 % \subsubsection{Schriften für den Fließtext}
 %
 % Hier werden die Optionen und Befehle zur Schriftauswahl definiert.
@@ -451,7 +462,8 @@
       \renewcommand*\tud@cdfont@num{2}%
       \TUD@SpecialOptionAtDocument{tud@font@set}%
 %    \end{macrocode}
-% Die Definition des fetten Schriftschnittes.
+% Für die Definition der fetten Schriftstärke kommt je nach Einstellung ein
+% anderer Schriftschnitt zum Einsatz.
 %    \begin{macrocode}
     \or% normalbold
       \@tud@cdfont@ultraboldfalse%
@@ -958,9 +970,7 @@
     \newrobustcmd*\univxs{\tud@font@fallback{Univers Black Oblique}{bf}{sl}}%
   \fi%
 %    \end{macrocode}
-% Nach der Univers-Schriftfamilie wird für DIN~Bold äquivalent verfahren. Da 
-% dieser Schriftschnitt zwingend für die Überschriften benötigt wird, sollte 
-% dieser zumindest auch auf deren Stil schalten.
+% Nach der \Univers-Schriftfamilie wird für \DIN äquivalent verfahren.
 %    \begin{macrocode}
   \if@tud@dinbold%
     \if@tud@x@fontspec@enabled%
@@ -984,6 +994,11 @@
       \appto\tud@dinbn{\mathversion{dinbold}}%
     \fi%
     \newrobustcmd*\dinbn{\tud@dinbn}%
+%    \end{macrocode}
+% Da der Schalter \cs{dinbn} innerhalb der Überschriften verwendet wird, sollte 
+% dieser zumindest auch auf den Überschriftenstil schalten, falls \DIN  elbst 
+% nicht installiert ist.
+%    \begin{macrocode}
   \else%
     \newrobustcmd*\tud@dinbn{\sectfont}%
     \newrobustcmd*\dinbn{\tud@font@wrn{DIN Bold}\tud@dinbn}%
@@ -1161,7 +1176,7 @@
 %<*option>
 % \fi
 %
-% \subsection{Schriften für den Mathematiksatz}
+% \subsubsection{Schriften für den Mathematiksatz}
 %
 % Da die Schriften des \CDs keinen Mathematiksatz beeinhalten, musste~--
 % insbesondere für griechische Symbole~-- eine passende Alternative gefunden
@@ -1693,7 +1708,7 @@
 \AtEndPreamble{%
 %    \end{macrocode}
 % Falls das Paket \pkg{mweights} geladen wurde, werden im Bedarfsfall die vom
-% Paket erwarteten Makros für die Schriftschnitte der einzelnen Schriftfamilien 
+% Paket erwarteten Makros für die Schriftstärken der einzelnen Schriftfamilien 
 % definiert. Beim Aufruf von \cs{tud@font@set} werden diese anschließend 
 % gesichert.
 %    \begin{macrocode}
@@ -1743,44 +1758,7 @@
 }
 %    \end{macrocode}
 %
-% \subsection{Anpassungen für das Paket \pkg{bm}}
-%
-% \begin{macro}{\if@tud@x@bm@requested}
-% Das Paket \pkg{bm} stellt den Befehl \cs{bm} für fette und kursive Symbole im 
-% Mathematiksatz bereit. Damit dies funktioniert, muss das Laden des Paketes 
-% auf das Ende der Präambel verzögert werden, um zuvor alle Einstellungen für 
-% die mathematischen Symbole vornehmen zu können.
-%    \begin{macrocode}
-\newif\if@tud@x@bm@requested
-\PreventPackageFromLoading[\@tud@x@bm@requestedtrue]{bm}
-%    \end{macrocode}
-% \end{macro}^^A \if@tud@x@bm@requested
-%
-% \subsection{Anpassungen für die Klasse \cls{beamer}}
-%
-% Die \cls{beamer}-Klasse lädt standardmäßig serifenlose Mathematikschriften. 
-% Dies soll verhindert werden, damit die Auswahl über die Option \opt{cdmath} 
-% erfolgen kann.
-%    \begin{macrocode}
-%<*package>
-\AfterClass*{beamer}{\usefonttheme[onlymath]{serif}}
-%</package>
-%    \end{macrocode}
-%
-% \subsection{Anpassungen für das Paket \pkg{siunitx}}
-%
-% \begin{macro}{\lseries}
-% Das Paket \pkg{siunitx} nutzt den Befehl \cs{lseries} für den Fall, dass für
-% den Fließtext eine Schrift die Serie \val{l} verwendet. Dem wird hier 
-% Rechnung getragen.
-%    \begin{macrocode}
-\AfterPackage*{siunitx}{%
-  \providecommand*\lseries{\fontseries{l}\selectfont}%
-}
-%    \end{macrocode}
-% \end{macro}^^A \lseries
-%
-% \subsection{Schrifteinstellungen für Überschriften}
+% \subsubsection{Schrifteinstellungen für Überschriften}
 %
 % \begin{macro}{\ifdin}
 % \changes{v2.02}{2014/08/29}{Anpassungen für \pkg{fontspec}}^^A
@@ -1813,35 +1791,6 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@sec@fontface
-%
-% \subsection{Ausrichtung von Überschriften und das Paket \pkg{ragged2e}}
-%
-% \begin{macro}{\tud@raggedright}
-% \begin{macro}{\tud@RaggedRight}
-% Die Überschriften in \DIN sollen laut \CD linksbündig und nie mit aktiver
-% Silbentrennung gesetzt werden. Normalerweise ist das dies beim linksbündigen
-% Satz bei \LaTeX{} der Fall. Allerdings ist es mit dem Paket \pkg{ragged2e}
-% möglich, das Verhalten für den Flattersatz zu ändern und die Silbentrennung
-% zu aktivieren. Mit der Option \opt{newcommands} werden dabei die originalen
-% Befehle überschrieben, vorher jedoch in \cs{LaTeX\dots} gesichert. Dieses
-% Makro dient dazu, die Überschriften in jedem Fall~-- auch bei der Verwendung
-% von \pkg{ragged2e} mit der Option \opt{newcommands}~-- ohne Trennungen zu
-% setzen.
-%    \begin{macrocode}
-\newcommand*\tud@raggedright{\raggedright}
-\newcommand*\tud@RaggedRight{\raggedright}
-\AfterPackage*{ragged2e}{%
-  \ifdef{\LaTeXraggedright}{%
-    \renewcommand*\tud@raggedright{\LaTeXraggedright}%
-  }{}%
-  \renewcommand*\tud@RaggedRight{\RaggedRight}%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@RaggedRight
-% \end{macro}^^A \tud@raggedright
-%
-% \subsection{Bedingte Majuskeln für Überschriften}
-%
 % Für Überschriften in Majuskeln\footnote{Großbuchstaben} wird der Befehl
 % \cs{MakeTextUppercase}, was den internen \LaTeX-Befehl \cs{MakeUppercase}
 % verbessert, aus dem Paket \pkg{textcase} genutzt. 
@@ -1864,6 +1813,81 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@makeuppercase
+%
+% \section{Kompatibilität der Schriften mit verschiedenen Pakete}
+% \subsection{Ausrichtung von Überschriften und das Paket \pkg{ragged2e}}
+%
+% \begin{macro}{\tud@raggedright}
+% \begin{macro}{\tud@RaggedRight}
+% Die Überschriften in \DIN sollen laut \CD linksbündig und nie mit aktiver
+% Silbentrennung gesetzt werden. Normalerweise ist das dies beim linksbündigen
+% Satz bei \LaTeX{} der Fall. Allerdings ist es mit dem Paket \pkg{ragged2e}
+% möglich, das Verhalten für den Flattersatz zu ändern und die Silbentrennung
+% zu aktivieren. Mit der Option \opt{newcommands} werden dabei die originalen
+% Befehle überschrieben, vorher jedoch in \cs{LaTeX\dots} gesichert. Diese
+% Makros dienen dazu, die Überschriften in jedem Fall~-- auch bei der Verwendung
+% von \pkg{ragged2e} mit der Option \opt{newcommands}~-- ohne Trennungen zu
+% setzen.
+%    \begin{macrocode}
+\newcommand*\tud@raggedright{\raggedright}
+\newcommand*\tud@RaggedRight{\raggedright}
+\AfterPackage*{ragged2e}{%
+  \ifdef{\LaTeXraggedright}{%
+    \renewcommand*\tud@raggedright{\LaTeXraggedright}%
+  }{}%
+  \renewcommand*\tud@RaggedRight{\RaggedRight}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@RaggedRight
+% \end{macro}^^A \tud@raggedright
+%
+% \subsection{Mathematikschriften in Verbindung mit dem Paket \pkg{bm}}
+%
+% \begin{macro}{\if@tud@x@bm@requested}
+% Das Paket \pkg{bm} stellt den Befehl \cs{bm} für fette und kursive Symbole im 
+% Mathematiksatz bereit. Damit dies funktioniert, muss das Laden des Paketes 
+% auf das Ende der Präambel verzögert werden, um zuvor alle Einstellungen für 
+% die mathematischen Symbole vornehmen zu können.
+%    \begin{macrocode}
+\newif\if@tud@x@bm@requested
+%<*package>
+\@ifpackageloaded{bm}{%
+  \PackageWarning{tudscrfonts}{%
+    Package `bm' must be loaded after `tudscrfonts'.\MessageBreak%
+    Otherwise the functionality can not be guaranteed%
+  }%
+}{%
+%</package>
+\PreventPackageFromLoading[\@tud@x@bm@requestedtrue]{bm}
+%<*package>
+}
+%</package>
+%    \end{macrocode}
+% \end{macro}^^A \if@tud@x@bm@requested
+%
+% \subsection{Anpassungen für das Paket \pkg{siunitx}}
+%
+% \begin{macro}{\lseries}
+% Das Paket \pkg{siunitx} nutzt den Befehl \cs{lseries} für den Fall, dass für
+% den Fließtext eine Schrift die Serie \val{l} verwendet. Dem wird hier 
+% Rechnung getragen.
+%    \begin{macrocode}
+\AfterPackage*{siunitx}{%
+  \providecommand*\lseries{\fontseries{l}\selectfont}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \lseries
+%
+% \subsection{Anpassungen für die Klasse \cls{beamer}}
+%
+% Die \cls{beamer}-Klasse lädt standardmäßig serifenlose Mathematikschriften. 
+% Dies soll verhindert werden, damit die Auswahl über die Option \opt{cdmath} 
+% erfolgen kann.
+%    \begin{macrocode}
+%<*package>
+\AfterClass*{beamer}{\usefonttheme[onlymath]{serif}}
+%</package>
+%    \end{macrocode}
 %
 % \iffalse
 %</body>

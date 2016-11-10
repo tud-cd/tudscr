@@ -1,4 +1,4 @@
-% \CheckSum{1983}
+% \CheckSum{1913}
 % \iffalse meta-comment
 % 
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-doc.dtx}[%
-  2016/11/09 v2.05g TUD-Script\space%
+  2016/11/10 v2.05g TUD-Script\space%
   (source code documentation based on scrartcl/scrdoc)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
@@ -61,8 +61,8 @@
 \usepackage{babel}
 \usepackage{tudscrfonts} % only load this package, if the fonts are installed
 \KOMAoptions{parskip=half-}
-\usepackage{microtype}
 \usepackage{bookmark}
+\usepackage[babel]{microtype}
 
 \CodelineIndex
 \RecordChanges
@@ -84,25 +84,23 @@
 % \changes{v2.03}{2015/01/09}{\cls{tudscrdoc}: Indextyp Seitenstilebene}^^A
 % \changes{v2.05}{2016/04/21}{Verwendung von \app{texindy} möglich}^^A
 %
-% \section{Quelltextdokumentation für das \TUDScript-Bundle}
+% \section{Die Klasse \cls{tudscrdoc} -- Erweiterte Quelltextdokumentation}
 %
 % Mit dieser Klasse erfolgt die Quelltextdokumentation des \TUDScript-Bundles. 
+% Sie lädt standarmäßig die Klasse \cls{ltxdoc}, ersetzt allerdings im Stile 
+% von \cls{scrdoc} im Hintergrund \cls{article} durch \cls{scrartcl}.
 % \StopEventually{\PrintIndex\PrintChanges\PrintToDos}
 %
 % \iffalse
 %<*class&option>
 % \fi
 %
-% Sie lädt standarmäßig die Klasse \cls{ltxdoc}, ersetzt allerdings im Stile 
-% von \cls{scrdoc} im Hintergrund \cls{article} durch \cls{scrartcl}. Damit der
-% zu \cls{scrartcl} gehörige Titel genutzt werden kann, wird dieser temporär
-% gesichert.
+% Damit der zu \cls{scrartcl} gehörige Titel genutzt werden kann, wird dieser
+% temporär gesichert.
 %    \begin{macrocode}
-\RequirePackage{scrbase}[2013/12/19]%
 \newcommand*\scr@maketitle{}%
 \PassOptionsToClass{toc=left}{scrartcl}%
 \AfterClass{scrartcl}{\let\scr@maketitle\@maketitle}%
-\AfterPackage{inputenc}{\RequirePackage{csquotes}[2011/10/22]}%
 %    \end{macrocode}
 % Der folgende Quelltext ist 1:1 aus \cls{scrdoc} kopiert.
 %    \begin{macrocode}
@@ -135,7 +133,44 @@
 \LoadClassWithOptions{ltxdoc}
 \setcounter{IndexColumns}{2}
 %    \end{macrocode}
-% Befehle, welche bei der Verwednung von \cs{EnableCrossrefs} dennoch nicht im 
+%
+% \subsection{Klassenoptionen}
+%
+% \begin{option}{final}
+% \begin{macro}{\tudfinalflag}
+% Option bzw. Flag für das automatisierte Erzeugen der Quelltextdokumentation
+% mit einem Skript ohne ToDo-Befehle.
+%    \begin{macrocode}
+\DeclareOption{final}{\let\tudfinalflag\relax}
+%    \end{macrocode}
+% \end{macro}^^A \tudfinalflag
+% \end{option}^^A final
+% \begin{option}{texindy}
+% \changes{v2.05}{2016/04/21}{neu}^^A
+% \begin{option}{xindy}
+% \changes{v2.05}{2016/04/21}{neu}^^A
+% \begin{option}{xdy}
+% \changes{v2.05}{2016/04/21}{neu}^^A
+% \begin{macro}{\tudxdyflag}
+% \changes{v2.05}{2016/04/21}{neu}^^A
+% Option(en) für das Erstellen der Indexdateien im Stil von \app{texindy}.
+%    \begin{macrocode}
+\DeclareOption{texindy}{\let\tudxdyflag\relax}
+\DeclareOption{xindy}{\let\tudxdyflag\relax}
+\DeclareOption{xdy}{\let\tudxdyflag\relax}
+%    \end{macrocode}
+% \end{macro}^^A \tudxdyflag
+% \end{option}^^A xdy
+% \end{option}^^A xindy
+% \end{option}^^A texindy
+% Die beiden Optionen werden abgearbeitet
+%    \begin{macrocode}
+\ProcessOptions\relax
+%    \end{macrocode}
+%
+% \subsection{Ignorierte Makros bei der Nutzung von zusätzlichen Indexeinträgen}
+%
+% Befehle, welche bei der Verwendung von \cs{EnableCrossrefs} dennoch nicht im 
 % Index erscheinen sollen.
 % \begingroup%
 % \DisableCrossrefs%
@@ -210,38 +245,14 @@
 %^^A\DoNotIndex{\z@}
 %    \end{macrocode}
 % \endgroup%
-% Damit sind alle Einträge, welche nicht im Index auftauchen sollen, definiert.
-% \begin{option}{final}
-% \begin{macro}{\tudfinalflag}
-% Option bzw. Flag für das automatisierte Erzeugen der Quelltextdokumentation
-% mit einem Skript ohne ToDo-Befehle.
-%    \begin{macrocode}
-\DeclareOption{final}{\let\tudfinalflag\relax}
-%    \end{macrocode}
-% \end{macro}^^A \tudfinalflag
-% \end{option}^^A final
-% \begin{option}{texindy}
-% \changes{v2.05}{2016/04/21}{neu}^^A
-% \begin{option}{xindy}
-% \changes{v2.05}{2016/04/21}{neu}^^A
-% \begin{option}{xdy}
-% \changes{v2.05}{2016/04/21}{neu}^^A
-% \begin{macro}{\tudxdyflag}
-% \changes{v2.05}{2016/04/21}{neu}^^A
-% Option(en) für das Erstellen der Indexdateien im Stil von \app{texindy}.
-%    \begin{macrocode}
-\DeclareOption{texindy}{\let\tudxdyflag\relax}
-\DeclareOption{xindy}{\let\tudxdyflag\relax}
-\DeclareOption{xdy}{\let\tudxdyflag\relax}
-%    \end{macrocode}
-% \end{macro}^^A \tudxdyflag
-% \end{option}^^A xdy
-% \end{option}^^A xindy
-% \end{option}^^A texindy
-% Die beiden Optionen werden abgearbeitet
-%    \begin{macrocode}
-\ProcessOptions\relax
-%    \end{macrocode}
+%
+% \iffalse
+%</class&option>
+%<*class&body>
+% \fi
+%
+% \subsection{Satzspiegel}
+%
 % \begin{length}{\topmargin}
 % \begin{length}{\headheight}
 % \begin{length}{\headsep}
@@ -254,24 +265,27 @@
 % Die Seitenränder werden so eingestellt, dass für die Darstellung des 
 % Quelltextes genau 80~Zeichen zur Verfügung stehen.
 %    \begin{macrocode}
-\setlength\topmargin{-1in}
-\setlength\headheight{0pt}
-\setlength\headsep{30pt}
-\setlength\footskip{1.5\headsep}
-\setlength\textheight{\dimexpr\paperheight-2.5\headsep-\footskip\relax}
-\begingroup
-  \MacroFont\selectfont
-  \settowidth\@tempdima{\space}
-  \setlength\@tempdima{80\@tempdima}
-  \addtolength\@tempdima{\MacroIndent}
-  \edef\@tempa{%
-    \endgroup
-    \noexpand\setlength\noexpand\textwidth{\the\@tempdima}
-  }
-\@tempa
-\setlength\marginparsep{1em}
-\setlength\marginparwidth{\dimexpr\paperwidth-\textwidth-2\marginparsep\relax}
-\setlength\oddsidemargin{\dimexpr\marginparwidth+\marginparsep-1in\relax}
+\AtEndPreamble{%
+  \setlength\topmargin{-1in}
+  \setlength\headheight{0pt}
+  \setlength\headsep{30pt}
+  \setlength\footskip{1.5\headsep}
+  \setlength\textheight{\dimexpr\paperheight-2.5\headsep-\footskip\relax}
+  \settowidth\MacroIndent{\rmfamily\scriptsize 0000\ }
+  \begingroup
+    \MacroFont\selectfont
+    \settowidth\@tempdima{\space}
+    \setlength\@tempdima{80\@tempdima}
+    \addtolength\@tempdima{\dimexpr\MacroIndent+.1\p@\relax}
+    \edef\@tempa{%
+      \endgroup
+      \noexpand\setlength\noexpand\textwidth{\the\@tempdima}
+    }
+  \@tempa
+  \setlength\marginparsep{1em}
+  \setlength\marginparwidth{\dimexpr\paperwidth-\textwidth-2\marginparsep\relax}
+  \setlength\oddsidemargin{\dimexpr\marginparwidth+\marginparsep-1in\relax}
+}
 %    \end{macrocode}
 % \end{length}^^A \textwidth
 % \end{length}^^A \textheight
@@ -282,68 +296,9 @@
 % \end{length}^^A \headsep
 % \end{length}^^A \headheight
 % \end{length}^^A \topmargin
-% Mit dem Paket~\pkg{dox} können weitere Eintragstypen erstellt werden. Dieses 
-% lädt außerdem das Paket~\pkg{doc}, welches die Grundfunktionalitäten für die 
-% Erstellung von \file{dtx}-Dateien bereitstellt. In der momentanen Version 
-% unterstützt das Paket~\pkg{dox} die aktuellen Anpassungen an die Erstellung 
-% von Änderungsnotizen durch \pkg{doc} nicht, weshalb im Folgenden einige 
-% Patches notwendig sind. Hierfür wird das Paket \pkg{tudscrbase} geladen.
-%    \begin{macrocode}
-\RequirePackage{tudscrbase}[\TUD@Version]
-\RequirePackage{dox}[2010/12/16]
-\@ifpackagelater{dox}{2010/12/17}{%
-  \ClassWarning{\TUD@Class@Name}{%
-    Package `dox' was updated so some patches\MessageBreak%
-    are maybe outdated
-  }%
-}{}%
-%    \end{macrocode}
 %
-% \iffalse
-%</class&option>
-%<*class&body>
-% \fi
+% \subsection{Optionale Verlinkungen mit dem Paket \pkg{hyperref}}
 %
-% \begin{macro}{\m@cro@}
-% Nach dem Laden der Pakete werden die Definitionen einiger Makros überprüft.
-%    \begin{macrocode}
-\CheckCommand\m@cro@[2]{%
-  \endgroup \topsep\MacroTopsep \trivlist
-  \edef\saved@macroname{\string#2}%
-  #1
-    \let\saved@indexname\saved@macroname
-  \else
-    \edef\saved@indexname{\expandafter\@gobble\string#2}%
-  \fi
-  \def\makelabel##1{\llap{##1}}%
-  \if@inlabel
-    \let\@tempa\@empty \count@\macro@cnt
-    \loop \ifnum\count@>\z@
-      \edef\@tempa{\@tempa\hbox{\strut}}\advance\count@\m@ne \repeat
-    \edef\makelabel##1{\llap{\vtop to\baselineskip
-                               {\@tempa\hbox{##1}\vss}}}%
-    \advance \macro@cnt \@ne
-  \else  \macro@cnt\@ne  \fi
-  \edef\@tempa{\noexpand\item[%
-     #1%
-       \noexpand\PrintMacroName
-     \else
-       \noexpand\PrintEnvName
-     \fi
-     {\string#2}]}%
-  \@tempa
-  \global\advance\c@CodelineNo\@ne
-   #1%
-      \SpecialMainIndex{#2}\nobreak
-      \DoNotIndex{#2}%
-   \else
-      \SpecialMainEnvIndex{#2}\nobreak
-   \fi
-  \global\advance\c@CodelineNo\m@ne
-  \ignorespaces
-}
-%    \end{macrocode}
-% \end{macro}^^A \m@cro@
 % \begin{macro}{\hypersourcedef}
 % \changes{v2.05}{2016/04/26}{neu}^^A
 % \begin{macro}{\hypersource@def}
@@ -409,6 +364,67 @@
 % \end{macro}^^A \hypersource@ref@codeline
 % \end{macro}^^A \hypersource@def
 % \end{macro}^^A \hypersourcedef
+%
+% \subsection{Defintion und Erscheinungsbild von Deklarationselementen}
+%
+% Mit dem Paket~\pkg{dox} können weitere Deklarationselemente erstellt werden.
+% Dieses lädt außerdem das Paket~\pkg{doc}, welches die Grundfunktionalitäten
+% für die Erstellung von \file{dtx}-Dateien bereitstellt. In der momentanen
+% Version unterstützt das Paket~\pkg{dox} die aktuellen Anpassungen an die
+% Erstellung von Änderungsnotizen durch \pkg{doc} nicht, weshalb im Folgenden
+% einige Patches notwendig sind.
+%    \begin{macrocode}
+\RequirePackage{dox}[2010/12/16]
+\@ifpackagelater{dox}{2010/12/17}{%
+  \ClassWarning{\TUD@Class@Name}{%
+    Package `dox' was updated so some patches\MessageBreak%
+    are maybe outdated
+  }%
+}{}%
+%    \end{macrocode}
+% \begin{macro}{\m@cro@}
+% Nach dem Laden des Paketes werden die Definitionen einiger Makros überprüft.
+%    \begin{macrocode}
+\CheckCommand\m@cro@[2]{%
+  \endgroup \topsep\MacroTopsep \trivlist
+  \edef\saved@macroname{\string#2}%
+  #1
+    \let\saved@indexname\saved@macroname
+  \else
+    \edef\saved@indexname{\expandafter\@gobble\string#2}%
+  \fi
+  \def\makelabel##1{\llap{##1}}%
+  \if@inlabel
+    \let\@tempa\@empty \count@\macro@cnt
+    \loop \ifnum\count@>\z@
+      \edef\@tempa{\@tempa\hbox{\strut}}\advance\count@\m@ne \repeat
+    \edef\makelabel##1{\llap{\vtop to\baselineskip
+                               {\@tempa\hbox{##1}\vss}}}%
+    \advance \macro@cnt \@ne
+  \else  \macro@cnt\@ne  \fi
+  \edef\@tempa{\noexpand\item[%
+     #1%
+       \noexpand\PrintMacroName
+     \else
+       \noexpand\PrintEnvName
+     \fi
+     {\string#2}]}%
+  \@tempa
+  \global\advance\c@CodelineNo\@ne
+   #1%
+      \SpecialMainIndex{#2}\nobreak
+      \DoNotIndex{#2}%
+   \else
+      \SpecialMainEnvIndex{#2}\nobreak
+   \fi
+  \global\advance\c@CodelineNo\m@ne
+  \ignorespaces
+}
+%    \end{macrocode}
+% \end{macro}^^A \m@cro@
+%
+% \subsubsection{Erweiterte Indexeinträge für Deklarationselemente}
+%
 % \begin{macro}{\@doxcreatespecialmainindex}
 % \begin{macro}{\@doxcreatespecialmainmacrolikeindex}
 % \begin{macro}{\@doxcreatespecialindex}
@@ -416,9 +432,10 @@
 % Für den Index muss bei diesen Makros eine kleine Anpassung erfolgen, damit 
 % die Sortierung auch bei der Verwendung von \app{texindy} richtig erfolgt und 
 % keine Einträge, welche es trotz gleicher Bezeichnung für unterschiedliche
-% Eintragstypen (bspw. Umgebung \env{abstract} und Option \opt{abstract}) gibt,
-% unterschlagen werden. Außerdem wird hier die Definition der Quelltextanker 
-% eingehangen und die Elterneinträge für Parameternänderungen zurückgesetzt.
+% Deklarationselemente (beispielsweise Umgebung \env{abstract} und Option
+% \opt{abstract}) gibt, unterschlagen werden. Außerdem wird hier die Definition
+% der Quelltextanker eingehangen und die Elterneinträge für Parameteränderungen 
+% zurückgesetzt.
 % \ToDo{Indextyp (Kurzform) in Klammern in der Randnotiz?}[v2.05g]
 %    \begin{macrocode}
 \CheckCommand*\@doxcreatespecialmainindex[3]{%
@@ -521,53 +538,21 @@
 % \end{macro}^^A \@doxcreatespecialindex
 % \end{macro}^^A \@doxcreatespecialmainmacrolikeindex
 % \end{macro}^^A \@doxcreatespecialmainindex
+%
+% \subsubsection{Erweiterte Änderungseinträge für Deklarationselemente}
+%
 % \begin{macro}{\doxitem}
 % \begin{macro}{\@doxcreateenv}
 % \begin{macro}{\@doxcreatemacrolikeindexname}
 % \begin{macro}{\@doxcreateindexname}
-% \begin{macro}{\saved@idxtype}
+% \begin{macro}{\saved@indextype}
 % \begin{macro}{\@@doxenv}
-% Jetzt die Anpassungen der Änderungsliste für das Paket \pkg{dox}.
-%    \begin{macrocode}
-\CheckCommand\doxitem[4][]{%
-  \@nameuse{dox@macrolike\dox@macrolikedefault}%
-  \def\dox@idxtype{#3}%
-  \setkeys{dox}{#1}
-  \@ifundefined{Print#2Name}{%
-    \ifdox@macrolike
-      \expandafter\def\csname Print#2Name\endcsname##1{%
-        \strut\MacroFont\string ##1\ }
-    \else
-      \expandafter\def\csname Print#2Name\endcsname##1{%
-        \strut\MacroFont ##1\ }
-    \fi}{}
-  \ifdox@macrolike
-    \def\@doxexpr{\@doxcreatespecialmainmacrolikeindex{#2}}%
-  \else
-    \def\@doxexpr{\@doxcreatespecialmainindex{#2}}%
-  \fi
-  \expandafter\@doxexpr\expandafter{\dox@idxtype}{#4}%
-  \@ifundefined{PrintDescribe#2}{%
-    \ifdox@macrolike
-      \expandafter\def\csname PrintDescribe#2\endcsname##1{%
-        \strut\MacroFont\string ##1\ }
-    \else
-      \expandafter\def\csname PrintDescribe#2\endcsname##1{%
-        \strut\MacroFont ##1\ }
-    \fi}{}
-  \ifdox@macrolike
-    \def\@doxexpr{\@doxcreatespecialmacrolikeindex{#2}}%
-  \else
-    \def\@doxexpr{\@doxcreatespecialindex{#2}}%
-  \fi
-  \expandafter\@doxexpr\expandafter{\dox@idxtype}{#4}%
-  \@doxcreatedescribe{#2}
-  \@doxcreateenv{#2}{#3}%
-}
-%    \end{macrocode}
-% Da das direkte Patchen von \cs{doxitem} mit den Mitteln von \pkg{etoolbox} 
-% aufgrund des optionalen Argumentes nicht möglich ist, wird der notwendige 
-% Patch einfach zu Beginn von \cs{@doxcreateenv} eingehängt.
+% Jetzt die Anpassungen der Änderungsliste für das Paket \pkg{dox}. Da das
+% direkte Patchen von \cs{doxitem} mit den Mitteln von \pkg{etoolbox} aufgrund
+% des optionalen Argumentes nicht möglich ist, wird der notwendige Patch
+% einfach zu Beginn von \cs{@doxcreateenv} eingehängt. Ziel ist es, in den 
+% Makros \cs{saved@indexname} und \cs{saved@indextype} den Namen und den Typ 
+% des aktuellen Deklarationselementes zu speichern.
 %    \begin{macrocode}
 \CheckCommand\doxitem[4][]{%
   \@nameuse{dox@macrolike\dox@macrolikedefault}%
@@ -621,17 +606,17 @@
 %    \end{macrocode}
 % Nun noch die beiden Befehle, welche durch den Patch ausgeführt werden.
 %    \begin{macrocode}
-\newcommand*\saved@idxtype{}
+\newcommand*\saved@indextype{}
 \def\@doxcreatemacrolikeindexname#1#2{%
   \expandafter\def\csname Set#1IndexName\endcsname##1{%
     \edef\saved@indexname{\expandafter\@gobble##1}%
-    \edef\saved@idxtype{#2}%
+    \edef\saved@indextype{#2}%
   }%
 }
 \def\@doxcreateindexname#1#2{%
   \expandafter\def\csname Set#1IndexName\endcsname##1{%
     \let\saved@indexname##1%
-    \edef\saved@idxtype{#2}%
+    \edef\saved@indextype{#2}%
   }%
 }
 %    \end{macrocode}
@@ -678,7 +663,7 @@
 }{}{\tud@patch@wrn{@@doxenv}}
 %    \end{macrocode}
 % \end{macro}^^A \@@doxenv
-% \end{macro}^^A \saved@idxtype
+% \end{macro}^^A \saved@indextype
 % \end{macro}^^A \@doxcreateindexname
 % \end{macro}^^A \@doxcreatemacrolikeindexname
 % \end{macro}^^A \@doxcreateenv
@@ -690,7 +675,7 @@
 %    \begin{macrocode}
 \newcommand*\SetMacroIndexName[1]{%
   \edef\saved@indexname{\expandafter\@gobble#1}
-  \let\saved@idxtype\@empty%
+  \let\saved@indextype\@empty%
 }
 \CheckCommand*\SpecialMainMacroIndex[1]{%
   \SpecialMainIndex{#1}\nobreak%
@@ -703,6 +688,9 @@
 %    \end{macrocode}
 % \end{macro}^^A \SpecialMainMacroIndex
 % \end{macro}^^A \SetMacroIndexName
+%
+% \subsubsection{Erstellen aller Deklarationselemente}
+%
 % Nachdem nun die Anpassungen für die Änderungsliste erfolgt sind, können nun 
 % die für die Dokumentatiton notwendigen Umgebungen mit \cs{docitem} erstellt
 % werden. Dabei kommen die Lokalisierungsvariablen \cs{tud@\dots{}@name} zum 
@@ -725,6 +713,9 @@
 \tud@reserved{Font}{KOMAfont}
 \tud@reserved{Parameter}{parameter}
 %    \end{macrocode}
+%
+% \subsubsection{Besonderheiten des Deklarationselementes \emph{Parameter}}
+%
 % \begin{macro}{\parameter@parent@changes}
 % \changes{v2.05g}{2016/11/02}{neu}^^A
 % \begin{macro}{\parameter@parent@indexname}
@@ -762,9 +753,10 @@
   }%
 }{}{\tud@patch@wrn{SetMacroIndexName}}
 \apptocmd\SetEnvIndexName{%
-  \edef\parameter@parent@indexname{#1\space(\saved@idxtype)}%
+  \edef\parameter@parent@indexname{#1\space(\saved@indextype)}%
   \edef\parameter@parent@indexformat{%
-    \string\verb\quotechar*\verbatimchar#1\verbatimchar\space(\saved@idxtype)%
+    \string\verb\quotechar*\verbatimchar#1\verbatimchar%
+    \string\,(\saved@indextype)%
   }%
 }{}{\tud@patch@wrn{SetEnvIndexName}}
 %    \end{macrocode}
@@ -798,7 +790,7 @@
     \tud@parameters@name:\levelchar%
     #1\space\parameter@parent@indexname%
     \actualchar{\string\ttfamily\space #1}%
-    \space--\space\parameter@parent@indexformat%
+    \,--\,\parameter@parent@indexformat%
     \encapchar main%
   }%
   \@esphack%
@@ -806,6 +798,9 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \SpecialMainParameterIndex
+%
+% \subsubsection{Erzeugen von Änderungseinträgen}
+%
 % \begin{macro}{\changes@}
 % Bei der Erstellung der Änderungsliste fehlt bei Makros in der aktuellen 
 % Version von \pkg{doc} ein Leerzeichen. Das Problem ist bereits gemeldet. 
@@ -853,15 +848,15 @@
       \ifx\parameter@parent@changes\relax%
         \protected@edef\@tempb{%
           \saved@indexname%
-          \ifx\saved@idxtype\@empty\else%
-            \space(\saved@idxtype)%
+          \ifx\saved@indextype\@empty\else%
+            \space(\saved@indextype)%
           \fi%
           \actualchar%
           \string\verb\quotechar*%
           \verbatimchar\saved@macroname%
           \verbatimchar%
-          \ifx\saved@idxtype\@empty\else%
-            \space(\saved@idxtype)%
+          \ifx\saved@indextype\@empty\else%
+            \space(\saved@indextype)%
           \fi%
           :\levelchar%
         }%
@@ -874,8 +869,8 @@
         \protected@edef\@tempb{%
           \parameter@parent@changes%
           \saved@indexname%
-          \ifx\saved@idxtype\@empty\else%
-            \space(\saved@idxtype)%
+          \ifx\saved@indextype\@empty\else%
+            \space(\saved@indextype)%
           \fi%
           \actualchar%
 %    \end{macrocode}
@@ -884,8 +879,8 @@
 % sondern lediglich \cs{ttfamily} verwendet.
 %    \begin{macrocode}
           {\noexpand\ttfamily\saved@macroname}%
-          \ifx\saved@idxtype\@empty\else%
-            \space(\saved@idxtype)%
+          \ifx\saved@indextype\@empty\else%
+            \space(\saved@indextype)%
           \fi%
           :\levelchar%
         }%
@@ -931,15 +926,15 @@
             \parameter@parent@changes zzz\space%
           \fi%
           \saved@indexname%
-          \ifx\saved@idxtype\@empty\else%
-            \space(\saved@idxtype)%
+          \ifx\saved@indextype\@empty\else%
+            \space(\saved@indextype)%
           \fi%
           \actualchar%
           \string\verb\quotechar*%
           \verbatimchar\saved@macroname%
           \verbatimchar%
-          \ifx\saved@idxtype\@empty\else%
-            \space(\saved@idxtype)%
+          \ifx\saved@indextype\@empty\else%
+            \space(\saved@indextype)%
           \fi%
           \ifx\parameter@parent@changes\relax%
             :\levelchar%
@@ -992,6 +987,9 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \@wrglossary
+%
+% \subsubsection{Erscheinung von Einträgen in der Änderungsliste}
+%
 % \begin{macro}{\tud@lst@def}
 % \changes{v2.05}{2016/04/25}{neu}^^A
 % \begin{macro}{\tud@lst@values}
@@ -1099,6 +1097,9 @@
 % \end{macro}^^A \if@tud@lst@multi
 % \end{macro}^^A \tud@lst@values
 % \end{macro}^^A \tud@lst@def
+%
+% \subsubsection{Erzeugen von Index und Änderungsliste}
+%
 % \begin{macro}{\tud@write@replace}
 % \changes{v2.05}{2016/04/21}{neu}^^A
 % \begin{macro}{\tud@read@replace}
@@ -1206,6 +1207,9 @@
 \IndexPrologue{\addsec{\indexname}\tud@index@text}
 \GlossaryPrologue{\addsec{\tud@changes@name}}
 %    \end{macrocode}
+%
+% \subsection{ToDo-Liste}
+%
 % \begin{macro}{\PrintToDos}
 % \changes{v2.05}{2016/05/19}{neu}^^A
 % Für ToDo-Notizen wird am Ende eine Liste aller offenen Punkte ausgegeben.
@@ -1263,7 +1267,7 @@
   \ifdefined\tudfinalflag\else%
     \begingroup%
       \csuse{phantomsection}%
-      \ifxblank{#2}{%
+      \IfArgIsEmpty{#2}{%
         \def\tud@reserved{??}%
       }{%
         \def\tud@reserved{#2}%
@@ -1288,20 +1292,15 @@
 %    \end{macrocode}
 % \end{macro}^^A \@ToDo
 % \end{macro}^^A \ToDo
+%
+% \subsection{Kleinkram}
+% \subsubsection{Zusätzliche Markup-Befehle}
+%
 % Zum Schluss erfolgen einige Anpassungen mit \cs{AtBeginDocument}, um abhängig 
 % vom Ladezustand einiger Pakete reagieren zu können.
 %    \begin{macrocode}
 \AtBeginDocument{%
 %    \end{macrocode}
-% \begin{macro}{\newrobustcmd}
-% Sollte \pkg{etoolbox} nicht geladen sein, wird der Befehl \cs{newrobustcmd} 
-% definiert, welcher anschließend für die Markup-Befehle genutzt wird.
-%    \begin{macrocode}
-  \@ifpackageloaded{etoolbox}{}{%
-    \providecommand*\newrobustcmd{\DeclareRobustCommand}%
-  }%
-%    \end{macrocode}
-% \end{macro}^^A \newrobustcmd
 % \begin{macro}{\app}
 % \begin{macro}{\cls}
 % \begin{macro}{\pkg}
@@ -1333,6 +1332,9 @@
 % \end{macro}^^A \pkg
 % \end{macro}^^A \cls
 % \end{macro}^^A \app
+%
+% \subsubsection{Ergänzungen für \pkg{hyperref}}
+%
 % \begin{macro}{\hypersetup}
 % \begin{macro}{\phantomsection}
 % \begin{macro}{\texorpdfstring}
@@ -1355,6 +1357,7 @@
   }
   \@ifpackageloaded{hyperref}{%
     \pdfstringdefDisableCommands{%
+      \def\DDC{DRESDEN-concept}%
       \def\TUDScript{TUD-Script}%
       \def\KOMAScript{KOMA-Script}%
       \let\cls\@firstofone%
@@ -1376,6 +1379,9 @@
 % \end{macro}^^A \texorpdfstring
 % \end{macro}^^A \phantomsection
 % \end{macro}^^A \hypersetup
+%
+% \subsubsection{Rückfalloptionen bei fehlenden Paketen}
+%
 % \begin{macro}{\selectlanguage}
 % \begin{macro}{\glqq}
 % \begin{macro}{\grqq}

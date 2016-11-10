@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-fields.dtx}[%
-  2016/11/02 v2.05g TUD-Script (input fields)%
+  2016/11/10 v2.05g TUD-Script (input fields)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman,xindy]{tudscrdoc}
@@ -60,8 +60,8 @@
 \usepackage{babel}
 \usepackage{tudscrfonts} % only load this package, if the fonts are installed
 \KOMAoptions{parskip=half-}
-\usepackage{microtype}
 \usepackage{bookmark}
+\usepackage[babel]{microtype}
 
 \CodelineIndex
 \RecordChanges
@@ -82,11 +82,11 @@
 %
 % \changes{v2.02}{2014/06/23}{Paket \pkg{titlepage} nicht weiter unterstützt}^^A
 %
-% \section{Eingabefelder für den Nutzer}
+% \section{Anwenderbefehle für Eingabefelder}
 %
-% Die Vorlagen für das \TUDCD definieren mehrere Felder, welche durch den
-% Anwender festgelegt werden können und dadurch auf der Titelseite bzw. auf der 
-% Aufgabenstellung~-- falls das Paket \pkg{tudscrsupervisor} zum Einsatz 
+% Das \TUDScript-Bundle für das \TUDCD definieren mehrere Felder, welche durch
+% den Anwender festgelegt werden können und dadurch auf der Titelseite bzw. auf
+% der Aufgabenstellung~-- falls das Paket \pkg{tudscrsupervisor} zum Einsatz 
 % kommt~-- ausgegeben werden. Ein Großteil der definierten Felder wird unter 
 % anderem für den Satz der Titelseite benötigt.
 %
@@ -101,7 +101,7 @@
 %<*class&!manual>
 % \fi
 %
-% \subsection{Textfelder}
+% \subsection{Textfelder für die \TUDScript-Klassen}
 %
 % Von den Klassen benötigte Formularfelder werden definiert. Für das Setzen von 
 % Feldern werden mit dem Makro \cs{trim@spaces} aus dem Paket \pkg{trimspaces} 
@@ -349,17 +349,18 @@
 % Art bzw. Typ der Abschlussarbeit kann \cs{thesis}\marg{Abschlussarbeit}
 % angegeben werden und wird im Makro \cs{@thesis} gespeichert. Alternativ
 % dazu kann auch der Befehl \cs{subject} verwendet werden. Mit dem Befehl
-% \cs{tud@thesis@do} wird in den Feldern \@thesis respektive \@subject nach
-% bestimmten Schlagwörtern für Abschlussarbeiten o.\,ä. gesucht. Wird eines
-% dieser Wörter gefunden, wird der entsprechende reguläre Ausdruck für dieses
+% \cs{tud@thesis@do} wird in den Feldern \cs{@thesis} respektive \cs{@subject} 
+% nach bestimmten Schlagwörtern für Abschlussarbeiten o.\,ä. gesucht. Wird 
+% eines dieser Wörter gefunden, wird der entsprechende Bezeichner für dieses
 % Feld gesetzt. Zusätzlich wird durch \cs{tud@thesis@@do} dafür gesorgt, dass
 % gegebenenfalls der Inhalt von \cs{@subject} in \cs{@thesis} verschoben und
-% die entsprechende Option \opt{subjectthesis} gesetzt wird. In \cs{@@thesis}
+% entsprechend die Option \opt{subjectthesis} gesetzt wird. In \cs{@@thesis}
 % wird die angegebene Abschlussarbeit ohne etwaige Fußnoten gespeichert.
 %    \begin{macrocode}
 \newcommand*\@thesis{}
 \newcommand*\@@thesis{}
 \newcommand*\thesis[1]{\tud@thesis@do{thesis}{#1}}
+\renewcommand*\subject[1]{\tud@thesis@do{subject}{#1}}
 \newcommand*\tud@thanks{}
 \newcommand*\tud@thesis@do[2]{%
   \begingroup%
@@ -413,7 +414,6 @@
   \fi%
   \protected@xdef\@@thesis{\trim@spaces{#2}}%
 }
-\renewcommand*\subject[1]{\tud@thesis@do{subject}{#1}}
 %    \end{macrocode}
 % \end{macro}^^A \tud@thanks
 % \end{macro}^^A \tud@thesis@@do
@@ -648,14 +648,14 @@
 %</poster>
 % \fi
 %
-% \subsection{Datumsfelder}
+% \subsection{Datumsfelder für die \TUDScript-Klassen}
 %
 % \begin{macro}{\printdate}
 % Im Folgenden werden mehrere Datumsfelder definiert. Damit diese optional
 % durch das \pkg{isodate}-Paket formatiert werden können, wird der zu
 % diesem Paket gehörende Befehl \cs{printdate} in die Definition der
-% eigentlichen Datumsfelder integriert. Sollte das \pkg{isodate}-Paket nicht
-% geladen werden, so muss dieser Befehl trotzdem definiert sein.
+% eigentlichen Datumsfelder integriert. Sollte das Paket nicht geladen werden,
+% so muss dieser Befehl trotzdem definiert sein.
 % \ToDo{Unterstützung für \pkg{datetime2}}[v2.06]
 %    \begin{macrocode}
 \TUD@UnwindPackage{isodate}{\providecommand*\printdate[1]{#1}}
@@ -823,15 +823,18 @@
 %<*package&supervisor|class&manual>
 % \fi
 %
-% \subsection{Felder für \pkg{tudscrsupervisor} und \cls{tudscrposter}}
+% \subsection{%
+%   Felder für die Klasse \cls{tudscrposter}%
+%   und das Paket \pkg{tudscrsupervisor}%
+% }
 %
-% Die beiden genanntent Pakete stellen einige weitere Felder bereit bzw. 
-% erweitern deren Funktionalitäten.
+% Die Klasse \cls{tudscrposter} und das Paket \pkg{tudscrsupervisor} stellen 
+% einige weitere Felder bereit bzw. erweitern deren Funktionalitäten.
 %
 % \begin{macro}{\chairman}
 % \begin{field}{\@chairman}
-% Angabe des Prüfungsausschussvorsitzenden für die Aufgabenstellung, wird im
-% Makro \cs{@chairman} gespeichert.
+% Die Angabe des Prüfungsausschussvorsitzenden für die Aufgabenstellung, wird 
+% im Makro \cs{@chairman} gespeichert.
 %    \begin{macrocode}
 \newcommand*\@chairman{}
 \newcommand*\chairman[1]{\gdef\@chairman{#1}}
@@ -961,7 +964,7 @@
 %<*class>
 % \fi
 %
-% \subsection{Prozessieren von Feldern}
+% \subsection{Verarbeitung bestimmter Feldinhalte für die Ausgabe}
 %
 % Einige Felder sind darauf ausgelegt, dass deren kommagetrennte Inhalte 
 % einzeln abgearbeitet und ausgewertet werden können. Die folgenden Makros 
@@ -1043,8 +1046,8 @@
 % \begin{macro}{\tud@multiple@fields@restore}
 % \changes{v2.04}{2015/05/12}{neu}^^A
 % Mit \cs{tud@multiple@fields@store} und \cs{tud@multiple@fields@restore} 
-% werden zwei Hilfsmakros definiert, um einzelne Feldinhalte lokal ändern und
-% nach der Verarbeitung auf den ursprünglichen Wert zurücksetzen zu können.
+% werden Hilfsmakros definiert, um einzelne Feldinhalte lokal ändern und nach
+% der Verarbeitung auf den ursprünglichen Wert zurücksetzen zu können.
 %
 % Nach der Sicherung der globalen Feldinhalte wird der übergebene Teilinhalt
 % des zweiten Argumentes mit \cs{sbox}\cs{z@}\marg{\#2} in eine Box expandiert.

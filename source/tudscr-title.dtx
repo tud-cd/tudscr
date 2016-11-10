@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-title.dtx}[%
-  2016/11/02 v2.05g TUD-Script (title)%
+  2016/11/10 v2.05g TUD-Script (title)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman,xindy]{tudscrdoc}
@@ -60,8 +60,8 @@
 \usepackage{babel}
 \usepackage{tudscrfonts} % only load this package, if the fonts are installed
 \KOMAoptions{parskip=half-}
-\usepackage{microtype}
 \usepackage{bookmark}
+\usepackage[babel]{microtype}
 
 \CodelineIndex
 \RecordChanges
@@ -83,9 +83,17 @@
 % \changes{v2.02}{2014/06/23}{Paket \pkg{titlepage} nicht weiter unterstützt}^^A
 % \changes{v2.05}{2015/07/13}{Titel für Poster}^^A
 %
-% \section{Titelei}
+% \section{Titelei für die \TUDScript-Klassen}
 %
-% Titelseite und Titelkopf werden für die \TUDScript-Klassen bereitgestellt.
+% Zusätzlich zu den \KOMAScript-Varianten werde für die \TUDScript-Klassen
+% spezielle, im \TUDCD gehaltene Ausführungen von Titelseite und Titelkopf
+% bereitgestellt. Zusätzlich gibt es auch eine Umschlagsseite (Cover), welche
+% in beiden Gestaltungsvarianten genutzt werden kann.
+%
+% Für Titelseite und Titelkopf werden durch \TUDScript eine monochrome Version, 
+% eine Version mit leichtem Farbeinsatz und eine durchweg farbige Version im
+% \TUDCD bereitgestellt. Dabei wird auch das Aussehen und die Position des
+% Titels analog zu den Überschriften auf Teile- und Kapitelseiten festgelegt.
 %
 % \StopEventually{\PrintIndex\PrintChanges\PrintToDos}
 %
@@ -93,13 +101,7 @@
 %<*class&body>
 % \fi
 %
-% \subsection{Titelseite und Titelkopf}
-%
-% Für alle Klassen im \TUDCD wird eine neue Titelseite und ein neuer Titelkopf
-% bereitgestellt. Es werden eine monochrome Version, eine Version mit leichtem
-% Farbeinsatz und eine durchweg farbige Version bereitgestellt Außerdem wird
-% hier das Aussehen und die Position des Titels analog zu den Überschriften auf
-% Teile- und Kapitelseiten festgelegt.
+% \subsection{Optionen und Schriftelemente für die Titelei}
 %
 % \iffalse
 %</class&body>
@@ -171,7 +173,7 @@
 % \changes{v2.02}{2014/08/29}{Anpassungen für \pkg{fontspec}}^^A
 % Diese Font-Elemente werden auf der Titelseite verwendet. \opt{thesis}, um den
 % Typ der Arbeit und ggf. den zu erlangenden akademischen Grad zu setzen.
-% Allerdings kommt Letzteres nur zum Tragen, wenn die Option \opt{subthesis}
+% Allerdings kommt Letzteres nur zum Tragen, wenn die Option \opt{subjectthesis}
 % deaktiviert ist. Es wird die gleiche Schrift wie für den Titel verwendet,
 % allerdings etwas kleiner. \opt{titlepage} für alle Zusatzinformationen wie
 % Autor, Datum etc.
@@ -190,6 +192,12 @@
 %    \end{macrocode}
 % \end{KOMAfont}^^A titlepage
 % \end{KOMAfont}^^A thesis
+%
+% \subsection{Titelseite und Titelkopf}
+% \subsubsection{Parameter für Titelseite und Titelkopf}
+%
+% \begin{macro}{\thanks}
+% \begin{macro}{\footnotemark}
 % Die Befehle \cs{thanks} und \cs{footnotemark} werden mit \cs{robustify} 
 % behandelt, um die Makros vor dem Expandieren zu schützen. Dies ist z.\,B. für
 % \cs{tud@multiple@split} aber auch für weitere Felder auf dem Titel nötig.
@@ -197,159 +205,8 @@
 \robustify{\thanks}
 \robustify{\footnotemark}
 %    \end{macrocode}
-% \begin{macro}{\tud@title@uppercase}
-% Für das Setzen einzelner Felder in Majuskeln werden diese beiden Befehle
-% definiert. Bei der Verwendung des Befehls \cs{thanks} auf der Titelseite soll
-% sichergestellt werden, dass der Inhalt selbst nicht in Majuskeln gesetzt wird.
-%    \begin{macrocode}
-\newcommand*\tud@title@uppercase[1]{%
-  \let\@tempa\relax%
-  \begingroup%
-    \let\\\newline%
-%    \end{macrocode}
-% Der Befehl \cs{thanks} wird so umdefiniert, dass der Inhalt in ein temporäres
-% Makro gespeichert wird. Danach wird durch das Setzen einer temporären Box der
-% Befehl \cs{thanks} ausgeführt und der Inhalt gesichert. Für die Ausführung von
-% \cs{tud@makeuppercase} wird das Argument von \cs{thanks} ignoriert. Nachdem 
-% das gewünschte Feld in Majuskeln gesetzt wurde, wird die gespeicherte Fußnote
-% ausgegeben.
-%    \begin{macrocode}
-    \def\thanks##1{\gdef\@tempa{##1}}%
-    \let\footnote\thanks%
-    \sbox\z@{#1}%
-    \let\thanks\@gobble%
-    \let\footnote\@gobble%
-    \tud@makeuppercase{#1}%
-  \endgroup%
-  \ifx\@tempa\relax\else\thanks\@tempa\fi%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@title@uppercase
-%
-% \iffalse
-%<*book|report|article>
-% \fi
-%
-% \begin{macro}{\titledelimiter}
-% \begin{macro}{\tud@title@delimiter}
-% Dieses Makro wird für das Trennzeichen auf der Titelseite genutzt.
-%    \begin{macrocode}
-\newcommand*\tud@title@delimiter{:\nobreakspace}
-\newcommand*\titledelimiter[1]{\gdef\tud@title@delimiter{#1}}
-%    \end{macrocode}
-% \end{macro}^^A \tud@title@delimiter
-% \end{macro}^^A \titledelimiter
-% \begin{macro}{\tud@split@author@title}
-% \changes{v2.04}{2015/05/12}{neu}^^A
-% \begin{macro}{\tud@newline@title}
-% Das Makro \cs{tud@split@author@title} dient der formatierten Ausgabe aller 
-% Informationen für mehrere Autoren auf der Titelseite.
-%    \begin{macrocode}
-\newcommand*\tud@newline@title{}
-\newcommand*\tud@split@author@title[2]{%
-%    \end{macrocode}
-% Zu Beginn werden alle Felder, welche innerhalb von \cs{@author} angegeben
-% sind, gesichert. 
-%    \begin{macrocode}
-  \tud@multiple@fields@store{@author}{#1}%
-%    \end{macrocode}
-% Um die Abstände definiert zu setzen, wird \cs{tud@newline@title} verwendet. 
-% Sobald auch nur eine zusätzliche Information ausgegeben werden soll, wird ein
-% etwas kleiner Abstand eingefügt. Anschließend wird jede Information einfach 
-% in einer neuen Zeile ausgegeben.
-%    \begin{macrocode}
-  \renewcommand*\tud@newline@title{\vskip .5ex\let\tud@newline@title\newline}%
-%    \end{macrocode}
-% Die Felder \cs{@author} und ggf. \cs{@authormore} werden sowohl auf der
-% Titelseite als auch im Titelkopf jedoch nicht auf der Umschlagseite 
-% ausgegeben.
-%    \begin{macrocode}
-  {\usekomafont{author}{\ignorespaces#1}}%
-  \if@tud@cover\else%
-    \ifx\@authormore\@empty\else%
-      \tud@newline@title%
-      \@authormore%
-    \fi%
-%    \end{macrocode}
-% Nur auf der Titelseite erfolgt die Ausgabe von Geburtsdatum, Geburtsort,
-% Matrikelnummer und Immatrikulationsjahr. Sollte ein Titelkopf verwendet
-% werden, so wird für jedes gesetzte Feld eine Warnung ausgegeben.
-%    \begin{macrocode}
-    \ifx\@dateofbirth\@empty\else%
-      \if@titlepage%
-        \tud@newline@title%
-        \ifxblank{\dateofbirthtext}{}{\dateofbirthtext\tud@title@delimiter}%
-        \@dateofbirth%
-        \ifx\@placeofbirth\@empty\else%
-          \nobreakspace\placeofbirthtext\nobreakspace\@placeofbirth%
-        \fi%
-      \else%
-        \tud@title@wrn{dateofbirth}%
-      \fi%
-    \fi%
-    \def\@tempc##1{%
-      \ifstr{\csuse{@##1}}{}{}{%
-        \if@titlepage%
-          \tud@newline@title%
-          \ifstr{\csuse{##1name}}{}{}{\csuse{##1name}\tud@title@delimiter}%
-          \csuse{@##1}%
-        \else%
-          \tud@title@wrn{##1}%
-        \fi%
-      }%
-    }%
-    \@tempc{course}%
-    \@tempc{discipline}%
-    \@tempc{matriculationnumber}%
-    \@tempc{matriculationyear}%
-  \fi%
-%    \end{macrocode}
-% Zunächst werden die zuvor bestehenden Feldinhalte wiederhergestellt. Danach 
-% wird durch den Aufruf von \cs{tud@multiple@@@split} wird das übergebene
-% \meta{Feld} sukzessive abgearbeitet.
-%    \begin{macrocode}
-  \tud@multiple@fields@restore{@author}%
-  \tud@multiple@@@split{#2}{\vskip 2ex}%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@newline@title
-% \end{macro}^^A \tud@split@author@title
-% \begin{macro}{\tud@title@wrn}
-% Bei der Nutzung eines Titelkopfes wird bloß eine reduzierte Menge an
-% Informationen ausgegeben. Darauf wird der Anwender ggf. hingewiesen.
-%    \begin{macrocode}
-\newcommand*\tud@title@wrn[1]{%
-  \ClassWarning{\TUD@Class@Name}{%
-    `\@backslashchar#1' has to be used with\MessageBreak%
-    activated titlepage option%
-  }%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@title@wrn
-% \begin{macro}{\tud@thesis@tosubject}
-% Bei der Verwendung der Option \opt{subjectthesis} wird zum einen geprüft, ob
-% das Feld \cs{@thesis} gesetzt ist und zum anderen, ob das Feld \cs{@subject}
-% auch leer ist.
-%    \begin{macrocode}
-\newcommand*\tud@thesis@tosubject{%
-  \if@tud@subjectthesis\ifx\@thesis\@empty\else%
-    \ifx\@subject\@empty\else%
-      \ClassWarning{\TUD@Class@Name}{%
-        The option `subjectthesis' was activated, so\MessageBreak%
-        the field `subject' will be overwritten with the\MessageBreak%
-        given thesis%
-      }%
-    \fi%
-    \let\@subject\@thesis%
-  \fi\fi%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@thesis@tosubject
-%
-% \iffalse
-%</book|report|article>
-% \fi
-%
+% \end{macro}^^A \footnotemark
+% \end{macro}^^A \thanks
 % \begin{macro}{\maketitle}
 % \changes{v2.01a}{2014/06/03}{Fehler bei Nutzung von \cs{subtitle} behoben}^^A
 % \changes{v2.02}{2014/06/23}{\val{firstiscover} wird als Wert für die Option 
@@ -457,6 +314,8 @@
 %<*book|report|article>
 % \fi
 %
+% \subsubsection{Die Definition der Titelseite}
+%
 % \begin{macro}{\tud@make@titlepage}
 % \changes{v2.02}{2014/09/05}{neu}^^A
 % \begin{macro}{\tud@titleback}
@@ -526,10 +385,11 @@
 %    \begin{macrocode}
       \tud@x@hyperref@realfootnotes%
 %    \end{macrocode}
-% Im Gegensatz zu den \KOMAScript-Klassen wird für eine Umschlagseite die 
-% Option \opt{titlepage=firstiscover} nur für den Schmutztitel \cs{extratitle}
-% und nicht für die eigentliche Titelseite unterstützt. Für ein Cover im \CD
-% ist der Befehl \cs{makecover} mit den dazugehörigen Parametern zu nutzen.
+% Die Option für eine Umschlagseite \opt{titlepage=firstiscover} wird im
+% Gegensatz zu den \KOMAScript-Klassen nur für einen optionalen Schmutztitel
+% \cs{extratitle} und nicht für die eigentliche Titelseite unterstützt. Für
+% dieses Unterfangen ist bei \TUDScript der Befehl \cs{makecover} mit den
+% dazugehörigen Parametern zu nutzen.
 %    \begin{macrocode}
       \ifx\@extratitle\@empty%
         \if@titlepageiscoverpage%
@@ -702,8 +562,8 @@
 %    \end{macrocode}
 % \ToDo{Befehl zum Angeben optionaler Inhalte, bspw. ein Bild}[v2.06]
 % Wenn Betreuer angegeben wurden, dann werden diese auf dem Titel ausgeben. Um
-% die Vorlage auch für Dissertationen verwenden zu können, ist ein Feld für
-% Gutachter vorgesehen. Außerdem wird für Promotionsschriften ein Feld für
+% diese Titelseite auch für Dissertationen verwenden zu können, ist ein Feld 
+% für Gutachter vorgesehen. Außerdem wird für Promotionsschriften ein Feld für
 % Fachreferenten bereitgehalten. Das Format der Ausgabe ist dabei identisch.
 % Darauf folgend wird der betreuende Hochschullehrer ausgegeben.
 %    \begin{macrocode}
@@ -739,8 +599,10 @@
       \fi%
 %    \end{macrocode}
 % Zu guter Letzt kann das Standard-Verlagsfeld befüllt werden.
-% \ToDo{Unterschriftenfeld, siehe \tiny\protect\url{%
-%   http://latex.wcms-file3.tu-dresden.de/phpBB3/viewtopic.php?p=1523\#p1523}
+% \ToDo{Unterschriftenfeld auf Titelseite, siehe entsprechenden
+%   \href{%
+      http://latex.wcms-file3.tu-dresden.de/phpBB3/viewtopic.php?p=1523\#p1523%
+%   }{Forumsbeitrag}%
 % }[v2.06]
 %    \begin{macrocode}
       \ifx\@publishers\@empty\else%
@@ -858,32 +720,12 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@titleback
 % \end{macro}^^A \tud@make@titlepage
-% \begin{macro}{\tud@title@names}
-% Dieser Befehl dient zur getrennten Ausgabe von mehreren, mit dem Makro 
-% \cs{and} separierten Einträgen in den Feldern \cs{@supervisor}, \cs{@referee}
-% und \cs{@advisor}.
-%    \begin{macrocode}
-\newcommand*\tud@title@names[1]{%
-  \letcs\@tempa{@#1}%
-  \ifx\@tempa\@empty\else%
-    \def\and{%
-      \ifcsvoid{#1othername}{\par}{%
-        \vskip 1ex\@plus.5ex\@minus.5ex%
-        {\usekomafont{titlepage}{\csuse{#1othername}\par}}%
-      }%
-      \let\and\par%
-    }%
-    \vskip 1ex\@plus.5ex\@minus.5ex%
-    {\usekomafont{titlepage}{\csuse{#1name}\par}}%
-    {\usekomafont{author}{\csuse{@#1}\par}}%
-  \fi%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@title@names
 %
 % \iffalse
 %</book|report|article>
 % \fi
+%
+% \subsubsection{Die Definition des Titelkopfes}
 %
 % \begin{macro}{\tud@make@titlehead}
 % \changes{v2.05}{2015/07/13}{neu}^^A
@@ -1052,14 +894,194 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@make@@titlehead
 % \end{macro}^^A \tud@make@titlehead
+%
+% \subsubsection{Hilfsmakros für die Ausgabe}
+%
+% \begin{macro}{\tud@title@uppercase}
+% Für das Setzen einzelner Felder in Majuskeln werden diese beiden Befehle
+% definiert. Bei der Verwendung des Befehls \cs{thanks} auf der Titelseite soll
+% sichergestellt werden, dass der Inhalt selbst nicht in Majuskeln gesetzt wird.
+%    \begin{macrocode}
+\newcommand*\tud@title@uppercase[1]{%
+  \let\@tempa\relax%
+  \begingroup%
+    \let\\\newline%
+%    \end{macrocode}
+% Der Befehl \cs{thanks} wird so umdefiniert, dass der Inhalt in ein temporäres
+% Makro gespeichert wird. Danach wird durch das Setzen einer temporären Box der
+% Befehl \cs{thanks} ausgeführt und der Inhalt gesichert. Für die Ausführung von
+% \cs{tud@makeuppercase} wird das Argument von \cs{thanks} ignoriert. Nachdem 
+% das gewünschte Feld in Majuskeln gesetzt wurde, wird die gespeicherte Fußnote
+% ausgegeben.
+%    \begin{macrocode}
+    \def\thanks##1{\gdef\@tempa{##1}}%
+    \let\footnote\thanks%
+    \sbox\z@{#1}%
+    \let\thanks\@gobble%
+    \let\footnote\@gobble%
+    \tud@makeuppercase{#1}%
+  \endgroup%
+  \ifx\@tempa\relax\else\thanks\@tempa\fi%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@title@uppercase
+%
+% \iffalse
+%<*book|report|article>
+% \fi
+%
+% \begin{macro}{\tud@thesis@tosubject}
+% Bei der Verwendung der Option \opt{subjectthesis} wird zum einen geprüft, ob
+% das Feld \cs{@thesis} gesetzt ist und zum anderen, ob das Feld \cs{@subject}
+% auch leer ist.
+%    \begin{macrocode}
+\newcommand*\tud@thesis@tosubject{%
+  \if@tud@subjectthesis\ifx\@thesis\@empty\else%
+    \ifx\@subject\@empty\else%
+      \ClassWarning{\TUD@Class@Name}{%
+        The option `subjectthesis' was activated, so\MessageBreak%
+        the field `subject' will be overwritten with the\MessageBreak%
+        given thesis%
+      }%
+    \fi%
+    \let\@subject\@thesis%
+  \fi\fi%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@thesis@tosubject
+% \begin{macro}{\tud@title@names}
+% Dieser Befehl dient zur getrennten Ausgabe von mehreren, mit dem Makro 
+% \cs{and} separierten Einträgen in den Feldern \cs{@supervisor}, \cs{@referee}
+% und \cs{@advisor}.
+%    \begin{macrocode}
+\newcommand*\tud@title@names[1]{%
+  \letcs\@tempa{@#1}%
+  \ifx\@tempa\@empty\else%
+    \def\and{%
+      \ifcsvoid{#1othername}{\par}{%
+        \vskip 1ex\@plus.5ex\@minus.5ex%
+        {\usekomafont{titlepage}{\csuse{#1othername}\par}}%
+      }%
+      \let\and\par%
+    }%
+    \vskip 1ex\@plus.5ex\@minus.5ex%
+    {\usekomafont{titlepage}{\csuse{#1name}\par}}%
+    {\usekomafont{author}{\csuse{@#1}\par}}%
+  \fi%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@title@names
+% \begin{macro}{\titledelimiter}
+% \begin{macro}{\tud@title@delimiter}
+% Dieses Makro wird für das Trennzeichen auf der Titelseite genutzt.
+%    \begin{macrocode}
+\newcommand*\tud@title@delimiter{:\nobreakspace}
+\newcommand*\titledelimiter[1]{\gdef\tud@title@delimiter{#1}}
+%    \end{macrocode}
+% \end{macro}^^A \tud@title@delimiter
+% \end{macro}^^A \titledelimiter
+% \begin{macro}{\tud@split@author@title}
+% \changes{v2.04}{2015/05/12}{neu}^^A
+% \begin{macro}{\tud@newline@title}
+% Das Makro \cs{tud@split@author@title} dient der formatierten Ausgabe aller 
+% Informationen für mehrere Autoren auf der Titelseite.
+%    \begin{macrocode}
+\newcommand*\tud@newline@title{}
+\newcommand*\tud@split@author@title[2]{%
+%    \end{macrocode}
+% Zu Beginn werden alle Felder, welche innerhalb von \cs{@author} angegeben
+% sind, gesichert. 
+%    \begin{macrocode}
+  \tud@multiple@fields@store{@author}{#1}%
+%    \end{macrocode}
+% Um die Abstände definiert zu setzen, wird \cs{tud@newline@title} verwendet. 
+% Sobald auch nur eine zusätzliche Information ausgegeben werden soll, wird ein
+% etwas kleiner Abstand eingefügt. Anschließend wird jede Information einfach 
+% in einer neuen Zeile ausgegeben.
+%    \begin{macrocode}
+  \renewcommand*\tud@newline@title{\vskip .5ex\let\tud@newline@title\newline}%
+%    \end{macrocode}
+% Die Felder \cs{@author} und ggf. \cs{@authormore} werden sowohl auf der
+% Titelseite als auch im Titelkopf jedoch nicht auf der Umschlagseite 
+% ausgegeben.
+%    \begin{macrocode}
+  {\usekomafont{author}{\ignorespaces#1}}%
+  \if@tud@cover\else%
+    \ifx\@authormore\@empty\else%
+      \tud@newline@title%
+      \@authormore%
+    \fi%
+%    \end{macrocode}
+% Nur auf der Titelseite erfolgt die Ausgabe von Geburtsdatum, Geburtsort,
+% Matrikelnummer und Immatrikulationsjahr. Sollte ein Titelkopf verwendet
+% werden, so wird für jedes gesetzte Feld eine Warnung ausgegeben.
+%    \begin{macrocode}
+    \ifx\@dateofbirth\@empty\else%
+      \if@titlepage%
+        \tud@newline@title%
+        \ifxblank{\dateofbirthtext}{}{\dateofbirthtext\tud@title@delimiter}%
+        \@dateofbirth%
+        \ifx\@placeofbirth\@empty\else%
+          \nobreakspace\placeofbirthtext\nobreakspace\@placeofbirth%
+        \fi%
+      \else%
+        \tud@title@wrn{dateofbirth}%
+      \fi%
+    \fi%
+    \def\@tempc##1{%
+      \ifstr{\csuse{@##1}}{}{}{%
+        \if@titlepage%
+          \tud@newline@title%
+          \ifstr{\csuse{##1name}}{}{}{\csuse{##1name}\tud@title@delimiter}%
+          \csuse{@##1}%
+        \else%
+          \tud@title@wrn{##1}%
+        \fi%
+      }%
+    }%
+    \@tempc{course}%
+    \@tempc{discipline}%
+    \@tempc{matriculationnumber}%
+    \@tempc{matriculationyear}%
+  \fi%
+%    \end{macrocode}
+% Zunächst werden die zuvor bestehenden Feldinhalte wiederhergestellt. Danach 
+% wird durch den Aufruf von \cs{tud@multiple@@@split} wird das übergebene
+% \meta{Feld} sukzessive abgearbeitet.
+%    \begin{macrocode}
+  \tud@multiple@fields@restore{@author}%
+  \tud@multiple@@@split{#2}{\vskip 2ex}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@newline@title
+% \end{macro}^^A \tud@split@author@title
+% \begin{macro}{\tud@title@wrn}
+% Bei der Nutzung eines Titelkopfes wird bloß eine reduzierte Menge an
+% Informationen ausgegeben. Darauf wird der Anwender ggf. hingewiesen.
+%    \begin{macrocode}
+\newcommand*\tud@title@wrn[1]{%
+  \ClassWarning{\TUD@Class@Name}{%
+    `\@backslashchar#1' has to be used with\MessageBreak%
+    activated titlepage option%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@title@wrn
+%
+% \iffalse
+%</book|report|article>
+% \fi
+%
+% \subsection{Einspaltige Titelei in zweispaltigen Dokumenten}
+%
 % \begin{macro}{\maketitleonecolumn}
 % \changes{v2.02}{2014/08/16}{einspaltiger Text obligatorisch}^^A
 % \begin{macro}{\tud@title@twocolumn}
 % \changes{v2.03}{2015/01/13}{Bugfix für falsche Position des Titels}^^A
 % \begin{macro}{\tud@title@box}
 % Zum Setzen eines einspaltigen Titels mit einspaltiger Zusammenfassung bei
-% einem Titelkopf~-- dank der Hilfe von Markus Kohm.%
-% \footnote{\url{http://www.komascript.de/node/1699}}
+% einem Titelkopf~-- \hrfn{http://www.komascript.de/node/1699}{Dank der Hilfe}
+% von Markus Kohm.
 %
 % Der Befehl \cs{maketitleonecolumn}\oarg{Parameter}\oarg{Inhalt} kann bei
 % zweispaltigem Satz dazu genutzt werden, einen einspaltigen Titel zu bekommen.
@@ -1181,7 +1203,7 @@
 %<*book|report|article>
 % \fi
 %
-% \subsection{Cover}
+% \subsection{Umschlagseite (Cover)}
 %
 % Zusätzlich zur eigentlichen Titelseite kann für Druckerzeugnisse eine 
 % separate Umschlagseite erzeugt werden. Um die Gestaltung dieser anzupassen, 
