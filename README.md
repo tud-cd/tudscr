@@ -8,11 +8,11 @@
 
 ============================================================================
 
- This material is subject to the LaTeX Project Public License version 1.3c 
+ This material is subject to the LaTeX Project Public License version 1.3c
  or later. See http://www.latex-project.org/lppl.txt for details.
 
 ============================================================================
- 
+
  English text below
 
 ----------------------------------------------------------------------------
@@ -20,20 +20,20 @@
 Zusammenfassung
 ---------------
 
-Das TUD-Script-Bundle stellt sowohl Klassen als auch Pakete bereit, um 
-LaTeX-Dokumente im Corporate Design der Technischen Universität Dresden zu 
-erstellen. Es basiert auf dem KOMA-Script-Bundle, welches zwingend vorhanden 
-sein muss. Außerdem sollten die beiden PostScript-Schriftfamilien Univers und 
-DIN-Bold installiert werden. Geschieht dies nicht, können die Dokumentklassen 
-zwar genutzt werden, die ausgegebenen Dokumente entsprechen in diesem Fall 
+Das TUD-Script-Bundle stellt sowohl Klassen als auch Pakete bereit, um
+LaTeX-Dokumente im Corporate Design der Technischen Universität Dresden zu
+erstellen. Es basiert auf dem KOMA-Script-Bundle, welches zwingend vorhanden
+sein muss. Außerdem sollten die beiden PostScript-Schriftfamilien Univers und
+DIN-Bold installiert werden. Geschieht dies nicht, können die Dokumentklassen
+zwar genutzt werden, die ausgegebenen Dokumente entsprechen in diesem Fall
 jedoch nicht dem ursprünglich erhofftem Stil.
 
-Mitarbeiter und Studenten der Technischen Universität Dresden können die 
-Schriftdateien unter https://tu-dresden.de/service/publizieren/cd/4_latex vom 
+Mitarbeiter und Studenten der Technischen Universität Dresden können die
+Schriftdateien unter https://tu-dresden.de/service/publizieren/cd/4_latex vom
 Universitätsmarketing  mit dem Hinweis auf die Verwendung von LaTeX anfordern.
-Für die Installation der PostScript-Schriften sei auf den entsprechenden 
-Release unter https://github.com/tud-cd/tudscr/releases/tag/fonts und das 
-LaTeX-Forum der Technischen Universität Dresden verwiesen: 
+Für die Installation der PostScript-Schriften sei auf den entsprechenden
+Release unter https://github.com/tud-cd/tudscr/releases/tag/fonts und das
+LaTeX-Forum der Technischen Universität Dresden verwiesen:
 http://latex.wcms-file3.tu-dresden.de/phpBB3/
 
 
@@ -48,13 +48,13 @@ Das Bundle beinhaltet:
 + das Paket `tudscrsupervisor`, welches Umgebungen und Befehle für die
   Erstellung von Aufgabenstellungen, Gutachten und Aushängen bereitstellt,
 + das Paket `tudscrfonts`, das die Schriften des Corporate Designs der
-  Technischen Universität Dresden für die LaTeX-Standard-Klassen und die 
+  Technischen Universität Dresden für die LaTeX-Standard-Klassen und die
   KOMA-Script-Klassen nutzbar macht,
 + das Paket `fix-tudscrfonts`, das selbige Schriften für weitere TUD-CD-Klassen
   verfügbar macht, welche nicht zu TUD-Script gehören,
 + das Paket `tudscrcomp`, welches den Umstieg von fremden TUD-CD-Klassen auf
   TUD-Script vereinfacht,
-+ das Paket `mathswap` für das Austauschen mathematischer Trennzeichen 
++ das Paket `mathswap` für das Austauschen mathematischer Trennzeichen
   innerhalb von Zahlen (ähnlich zu `ionumbers`),
 + das Paket `twocolfix` zur Fehlerbefehbung der Position von Überschriften im
   zweispaltigen Layout und
@@ -178,20 +178,20 @@ Versionen
 
 **v2.01** (2014/04/24)
 
-+ Fehlerkorrekturen beim Kerning der Ziffern und bei der Schriftstärke auf der 
++ Fehlerkorrekturen beim Kerning der Ziffern und bei der Schriftstärke auf der
   Titelseite
 
-  
+
 **v2.00** (2014/04/22)
 
-+ Das TUD-Script-Bundle wurde von Grund auf überarbeitet und mittels 
-  `docstrip` erzeugt. Viele Fehler wurden entfernt und die Robustheit der 
-  Befehle und Optionen wurde erhöht. Die Verwendung der Schriften, insbesondere 
-  für den mathematischen Satz, wurde entscheidend verbessert. Weiterhin erfuhr 
-  das Handbuch des Bundles eine komplette Überarbeitung, wurde erweitert und um 
++ Das TUD-Script-Bundle wurde von Grund auf überarbeitet und mittels
+  `docstrip` erzeugt. Viele Fehler wurden entfernt und die Robustheit der
+  Befehle und Optionen wurde erhöht. Die Verwendung der Schriften, insbesondere
+  für den mathematischen Satz, wurde entscheidend verbessert. Weiterhin erfuhr
+  das Handbuch des Bundles eine komplette Überarbeitung, wurde erweitert und um
   mehrere Indexe ergänzt.
 
-  
+
 **v1.0** (2012/10/31)
 
 + erste Version des TUD-Script-Bundles
@@ -202,19 +202,19 @@ Versionen
 Summary
 -------
 
-The TUD-Script bundle provides both classes and packages in order to 
-create LaTeX documents in the corporate design of the Technische Universität 
+The TUD-Script bundle provides both classes and packages in order to
+create LaTeX documents in the corporate design of the Technische Universität
 Dresden. It bases on the KOMA-Script bundle, which must necessarily be present.
-In addition, the PostScript font families Univers and DIN-Bold should be 
-installed. Otherwise, the document classes can admittedly be used, but in this 
+In addition, the PostScript font families Univers and DIN-Bold should be
+installed. Otherwise, the document classes can admittedly be used, but in this
 case, the created documents do not correspond to the originally thought style.
 
 Employees and students of the Technische Universität Dresden can request these
-fonts via  https://tu-dresden.de/service/publizieren/cd/4_latex from the 
-university marketing university marketing with regard to the use of LaTeX. To 
-install the PostScript fonts, please refer to the corresponding release under 
-https://github.com/tud-cd/tudscr/releases/tag/fonts and the LaTeX forum of the 
-Technische Universität Dresden: 
+fonts via  https://tu-dresden.de/service/publizieren/cd/4_latex from the
+university marketing university marketing with regard to the use of LaTeX. To
+install the PostScript fonts, please refer to the corresponding release under
+https://github.com/tud-cd/tudscr/releases/tag/fonts and the LaTeX forum of the
+Technische Universität Dresden:
 http://latex.wcms-file3.tu-dresden.de/phpBB3/
 
 Classes and Packages
@@ -228,11 +228,11 @@ The bundle offers:
 + the package `tudscrsupervisor` providing environments and macros to create
   tasks, evaluations and notices for scientific theses,
 + the package `tudscrfonts`, which makes the corporate design fonts of the
-  Technische Universität Dresden available for LaTeX standard classes and 
+  Technische Universität Dresden available for LaTeX standard classes and
   KOMA-Script classes,
 + the package `fix-tudscrfonts`, which provides the same fonts to additional
   corporate design classes not related to TUD-Script
-+ the package `tudscrcomp`, which simplifies the switch to TUD-Script 
++ the package `tudscrcomp`, which simplifies the switch to TUD-Script
   from external corporate design classes,
 + the package `mathswap` for swapping math delimiters within numbers (similiar
   to `ionumbers`),
@@ -335,7 +335,7 @@ Versions
 + loading the corporate design fonts in OpenType format with `fontspec` is
   possible
 + improved installation routine of PostScript fonts
-+ pages in the style of the corporate design are generated using the package 
++ pages in the style of the corporate design are generated using the package
   `scrlayer-scrpage`
 + various options and commands to customize these pages
 + support of the KOMA-Script font elements for title and cover
@@ -363,14 +363,14 @@ Versions
 
 **v2.00** (2014/04/22)
 
-+ The TUD-Script bundle has been redesigned from the ground up and is 
-  generated by using `docstrip`. Many bugs have been removed and the robustness 
-  of the commands and options has been increased. The use of the fonts, 
-  especially for the mathematical set, was significantly improved. The manual 
-  of the bundle underwent a complete overhaul, has been extended and 
++ The TUD-Script bundle has been redesigned from the ground up and is
+  generated by using `docstrip`. Many bugs have been removed and the robustness
+  of the commands and options has been increased. The use of the fonts,
+  especially for the mathematical set, was significantly improved. The manual
+  of the bundle underwent a complete overhaul, has been extended and
   supplemented by several indexes.
 
-  
+
 **v1.0** (2012/10/31)
 
 + first version of the TUD-Script bundle
