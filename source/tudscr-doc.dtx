@@ -1,4 +1,4 @@
-% \CheckSum{2103}
+% \CheckSum{2035}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-doc.dtx}[%
-  2016/11/10 v2.05g TUD-Script\space%
+  2016/11/12 v2.05g TUD-Script\space%
   (source code documentation based on scrartcl/scrdoc)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
@@ -1435,6 +1435,19 @@
 \newrobustcmd*\env[1]{\mbox{\texttt{#1}}}
 \newrobustcmd*\prm[1]{\mbox{\texttt{#1}}}
 \newrobustcmd*\file[1]{\mbox{\texttt{#1}}}
+\AfterPackage{hyperref}{%
+  \pdfstringdefDisableCommands{%
+    \let\app\@firstofone%
+    \let\cls\@firstofone%
+    \let\pkg\@firstofone%
+    \let\opt\@firstofone%
+    \let\val\@firstofone%
+    \let\pgs\@firstofone%
+    \let\env\@firstofone%
+    \let\prm\@firstofone%
+    \let\file\@firstofone%
+  }%
+}
 %    \end{macrocode}
 % \end{macro}^^A \file
 % \end{macro}^^A \prm
@@ -1446,108 +1459,6 @@
 % \end{macro}^^A \cls
 % \end{macro}^^A \app
 %
-% \subsection{Optionale Verlinkungen mit dem Paket \pkg{hyperref}}
-%
-% \begin{macro}{\hypersourcedef}
-% \changes{v2.05}{2016/04/26}{neu}^^A
-% \begin{macro}{\hypersource@def}
-% \changes{v2.05}{2016/04/26}{neu}^^A
-% \begin{macro}{\hypersource@ref@codeline}
-% \changes{v2.05}{2016/04/26}{neu}^^A
-% \begin{macro}{\hypersource@ref@page}
-% \changes{v2.05}{2016/04/26}{neu}^^A
-% Diese Makros werden verwendet, um im Index respektive in der Änderungsliste 
-% mithilfe von \pkg{hyperref} Hyperlinks auf Codezeilen respektive Seiten im 
-% Dokument zu setzen. 
-%    \begin{macrocode}
-\newcommand*\hypersourcedef[1]{}
-\newcommand*\hypersource@def{}
-\newcommand*\hypersource@ref@codeline[2][]{}
-\newcommand*\hypersource@ref@page[2][]{}
-%    \end{macrocode}
-% Dies funktioniert jedoch nur, falls \pkg{hyperref} geladen wird.
-%    \begin{macrocode}
-\PassOptionsToPackage{hyperindex=false,colorlinks,linkcolor=blue}{hyperref}
-\PassOptionsToPackage{open,openlevel=0}{bookmark}
-\AfterPackage{hyperref}{%
-%    \end{macrocode}
-% Mit \cs{hypersourcedef} wird ein Textanker gesetzt, falls dieser noch nicht 
-% definiert wurde, was durch \cs{hypersource@def} abgesichert wird. Als 
-% Argument wird hierfür die aktuelle Codezeile verwendet.
-%    \begin{macrocode}
-  \renewcommand*\hypersourcedef[1]{%
-    \ifstr{#1}{\hypersource@def}{}{%
-      \Hy@raisedlink{\hyperdef{}{source:#1}{}}%
-      \xdef\hypersource@def{#1}%
-    }%
-  }%
-%    \end{macrocode}
-% Mit \cs{hypersource@ref@\dots} wird auf Anker im Dokument verlinkt. Dies 
-% erfolgt indirekt über die Attribute \val{main} bzw. \val{usage}, welche bei
-% der Definitionen von Befehlen etc. im Index genutzt werden. Hierfür werden
-% die dazugehörigen Makros umdefiniert.
-%    \begin{macrocode}
-  \renewcommand*\hypersource@ref@codeline[2][\@firstofone]{%
-    \begingroup%
-      \def\@tempa##1{\hyperref{}{}{source:##1}{#1{##1}}}%
-      \forcsvlist\@tempa{#2}%
-    \endgroup%
-  }%
-  \renewcommand*\hypersource@ref@page[2][\@firstofone]{%
-    \begingroup%
-      \def\@tempa##1{\hyperlink{page.##1}{#1{##1}}}%
-      \forcsvlist\@tempa{#2}%
-    \endgroup%
-  }%
-  \renewcommand*\main[1]{%
-    \ifcodeline@index%
-      \hypersource@ref@codeline[\underline]{#1}%
-    \else%
-      \hypersource@ref@page[\underline]{#1}%
-    \fi%
-  }%
-  \renewcommand*\usage[1]{\hypersource@ref@page[\textit]{#1}}%
-%    \end{macrocode}
-% Zum Schluss werden noch ein paar Auszeichnungsbefehle für die Nutzung in 
-% Überschriften vorbereitet.
-%    \begin{macrocode}
-  \pdfstringdefDisableCommands{%
-    \def\DDC{DRESDEN-concept}%
-    \def\TUDScript{TUD-Script}%
-    \def\KOMAScript{KOMA-Script}%
-    \let\cls\@firstofone%
-    \let\pkg\@firstofone%
-  }%
-}
-%    \end{macrocode}
-% \end{macro}^^A \hypersource@ref@page
-% \end{macro}^^A \hypersource@ref@codeline
-% \end{macro}^^A \hypersource@def
-% \end{macro}^^A \hypersourcedef
-% \begin{macro}{\mailto}
-% Ein Makro zur Angabe einer verlinkten E-Mail-Adresse.
-% \changes{v2.05g}{2016/10/24}{neu}^^A
-%    \begin{macrocode}
-\newrobustcmd*\mailto[1]{\href{mailto:#1}{\nolinkurl{#1}}}%
-%    \end{macrocode}
-% \end{macro}^^A \mailto
-% \begin{macro}{\hrfn}
-% \changes{v2.05g}{2016/10/24}{neu}^^A
-% Zum Erstellen eines Links mit dazugehöriger URL in einer Fußnote.
-%    \begin{macrocode}
-\newcommand*\hrfn[2]{%
-  \href{#1}{#2}%
-  \footnote{%
-    \begingroup%
-      \def\_{_}%
-      \edef\@tempa{#1}%
-      \strut\expandafter\url\expandafter{\@tempa}%
-    \endgroup%
-  }%
-}
-%    \end{macrocode}
-% \end{macro}^^A \hrfn
-%
 % \subsection{Rückfalloptionen bei fehlenden Paketen}
 %
 % Zum Schluss erfolgen einige Anpassungen mit \cs{AtEndPreamble}, um abhängig 
@@ -1555,29 +1466,10 @@
 %    \begin{macrocode}
 \AtEndPreamble{%
 %    \end{macrocode}
-% \begin{macro}{\hypersetup}
-% \begin{macro}{\phantomsection}
-% \begin{macro}{\texorpdfstring}
-% \begin{macro}{\href}
-% Etwas Kleinkram für \pkg{hyperref}\dots
-%    \begin{macrocode}
-  \@ifpackageloaded{hyperref}{}{%
-    \RequirePackage{url}[2013/09/16]%
-    \providecommand*\nolinkurl[1]{\url{#1}}%
-    \providecommand*\hypersetup[1]{}%
-    \providecommand*\phantomsection{}%
-    \providecommand*\texorpdfstring[2]{#1}%
-    \providecommand*\href[3][]{#3}%
-  }%
-%    \end{macrocode}
-% \end{macro}^^A \href
-% \end{macro}^^A \texorpdfstring
-% \end{macro}^^A \phantomsection
-% \end{macro}^^A \hypersetup
 % \begin{macro}{\selectlanguage}
 % \begin{macro}{\glqq}
 % \begin{macro}{\grqq}
-% \dots sowie \pkg{babel}\dots
+% Etwas kleinkram für \pkg{babel}\dots
 %    \begin{macrocode}
   \@ifpackageloaded{babel}{}{%
     \ClassWarning{\TUD@Class@Name}{Package `babel' not loaded}%

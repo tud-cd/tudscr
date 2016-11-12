@@ -1,4 +1,4 @@
-% \CheckSum{4168}
+% \CheckSum{4229}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-manual.dtx}[%
-  2016/11/10 v2.05g TUD-Script\space%
+  2016/11/12 v2.05g TUD-Script\space%
 %</driver>
 %<package&identify>\ProvidesPackage{tudscrtutorial}[%
 %<*driver|package&identify>
@@ -567,6 +567,9 @@
 %
 % \iffalse
 %</class>
+%</body>
+%</!doc>
+%<*body|class&doc>
 % \fi
 %
 % \subsection{Anpassungen für das Paket \pkg{hyperref} und Querverweise}
@@ -583,18 +586,18 @@
 %    \begin{macrocode}
 \AfterPackage*{hyperref}{%
 %    \end{macrocode}
+% Zuerst die Einstellungen für \cls{tudscrmanual} und \pkg{tudscrtutorial}.
+%
+% \iffalse
+%<*!doc>
+% \fi
+%
 % Die Bezeichner für die Abschnittsebenen werden umbenannt.
 %    \begin{macrocode}
   \renewcaptionname{ngerman}{\sectionautorefname}{Unterkapitel}%
   \renewcaptionname{ngerman}{\subsectionautorefname}{Abschnitt}%
   \renewcaptionname{ngerman}{\subsubsectionautorefname}{Unterabschnitt}%
 %    \end{macrocode}
-% \begin{macro}{\Email}
-% Hiermit wird ein Hyperlink für eine E"~Mail-Adresse erzeugt.
-%    \begin{macrocode}
-  \newcommand*\Email[1]{\href{mailto:#1}{\nolinkurl{#1}}}%
-%    \end{macrocode}
-% \end{macro}^^A \Email
 % \begin{macro}{\tudhyperdef}
 % \changes{v2.02}{2014/10/27}{neu}^^A
 % \begin{macro}{\tudhyperref}
@@ -668,7 +671,73 @@
 % \end{macro}^^A \auto@@refname
 % \end{macro}^^A \auto@refname
 % \end{macro}^^A \autorefname
-% Damit sind die Ausführungen für das Paket \pkg{hyperref} beendet.
+% Nun die Einstellungen für \cls{tudscrdoc}.
+%
+% \iffalse
+%</!doc>
+%<*doc>
+% \fi
+%
+% \begin{macro}{\hypersourcedef}
+% \changes{v2.05}{2016/04/26}{neu}^^A
+% \begin{macro}{\hypersource@def}
+% \changes{v2.05}{2016/04/26}{neu}^^A
+% \begin{macro}{\hypersource@ref@codeline}
+% \changes{v2.05}{2016/04/26}{neu}^^A
+% \begin{macro}{\hypersource@ref@page}
+% \changes{v2.05}{2016/04/26}{neu}^^A
+% Diese Makros werden verwendet, um im Index respektive in der Änderungsliste 
+% mithilfe von \pkg{hyperref} Hyperlinks auf Codezeilen respektive Seiten im 
+% Dokument zu setzen. 
+%
+% Mit \cs{hypersourcedef} wird ein Textanker gesetzt, falls dieser noch nicht 
+% definiert wurde, was durch \cs{hypersource@def} abgesichert wird. Als 
+% Argument wird hierfür die aktuelle Codezeile verwendet.
+%    \begin{macrocode}
+  \newcommand*\hypersource@def{}
+  \newcommand*\hypersourcedef[1]{%
+    \ifstr{#1}{\hypersource@def}{}{%
+      \Hy@raisedlink{\hyperdef{}{source:#1}{}}%
+      \xdef\hypersource@def{#1}%
+    }%
+  }%
+%    \end{macrocode}
+% Mit \cs{hypersource@ref@\dots} wird auf Anker im Dokument verlinkt. Dies 
+% erfolgt indirekt über die Attribute \val{main} bzw. \val{usage}, welche bei
+% der Definitionen von Befehlen etc. im Index genutzt werden. Hierfür werden
+% die dazugehörigen Makros umdefiniert.
+%    \begin{macrocode}
+  \newcommand*\hypersource@ref@codeline[2][\@firstofone]{%
+    \begingroup%
+      \def\@tempa##1{\hyperref{}{}{source:##1}{#1{##1}}}%
+      \forcsvlist\@tempa{#2}%
+    \endgroup%
+  }%
+  \newcommand*\hypersource@ref@page[2][\@firstofone]{%
+    \begingroup%
+      \def\@tempa##1{\hyperlink{page.##1}{#1{##1}}}%
+      \forcsvlist\@tempa{#2}%
+    \endgroup%
+  }%
+  \renewcommand*\main[1]{%
+    \ifcodeline@index%
+      \hypersource@ref@codeline[\underline]{#1}%
+    \else%
+      \hypersource@ref@page[\underline]{#1}%
+    \fi%
+  }%
+  \renewcommand*\usage[1]{\hypersource@ref@page[\textit]{#1}}%
+%    \end{macrocode}
+% \end{macro}^^A \hypersource@ref@page
+% \end{macro}^^A \hypersource@ref@codeline
+% \end{macro}^^A \hypersource@def
+% \end{macro}^^A \hypersourcedef
+%
+% \iffalse
+%</doc>
+% \fi
+%
+% Das war's. Damit sind die Ausführungen für das Paket \pkg{hyperref} beendet.
 %    \begin{macrocode}
 }
 %    \end{macrocode}
@@ -679,17 +748,8 @@
 %    \end{macrocode}
 % Zunächst die direkt innerhalb der Dokumentation verwendeten Befehle nebst 
 % dazugehöriger Warnung.
-% \begin{macro}{\hypersetup}
-% \begin{macro}{\hyperdef}
-% \begin{macro}{\hyperref}
-% \begin{macro}{\tud@hyperref@a}
-% \begin{macro}{\tud@hyperref@b}
-% \begin{macro}{\href}
-% \begin{macro}{\hyperpage}
-% \begin{macro}{\autoref}
-% \begin{macro}{\texorpdfstring}
-% \begin{macro}{\phantomsection}
 %    \begin{macrocode}
+%<*!doc>
 %<*class>
   \ClassWarningNoLine{tudscrmanual}%
 %</class>
@@ -701,8 +761,47 @@
     Nevertheless, essential commands are rudimentarily\MessageBreak%
     defined. At least the package `url' is loaded.%
   }%
-  \RequirePackage{url}[2013/09/16]%
+%</!doc>
+%    \end{macrocode}
+% \begin{macro}{\hypersetup}
+% \begin{macro}{\href}
+% \begin{macro}{\phantomsection}
+% \begin{macro}{\texorpdfstring}
+% \begin{macro}{\nolinkurl}
+% Einige vom Paket \pkg{hyperref} definierten Befehle werden vorgehalten.
+%    \begin{macrocode}
   \providecommand*\hypersetup[1]{}%
+  \providecommand*\href[3][]{#3}%
+  \providecommand*\phantomsection{}%
+  \providecommand*\texorpdfstring[2]{#1}%
+  \RequirePackage{url}[2013/09/16]%
+  \providecommand*\nolinkurl[1]{\url{#1}}%
+%    \end{macrocode}
+% \end{macro}^^A \nolinkurl
+% \end{macro}^^A \texorpdfstring
+% \end{macro}^^A \phantomsection
+% \end{macro}^^A \href
+% \end{macro}^^A \hypersetup
+%
+% \iffalse
+%<*!doc>
+% \fi
+%
+% \begin{macro}{\hyperpage}
+% \begin{macro}{\autoref}
+% Der Befehl \cs{autoref} wird auch in der Sternversion genutzt.
+%    \begin{macrocode}
+  \providecommand*\hyperpage[1]{#1}%
+  \providecommand*\autoref{??\xspace\kernel@ifstar{\ref}{\ref}}%
+%    \end{macrocode}
+% \end{macro}^^A \autoref
+% \end{macro}^^A \hyperpage
+% \begin{macro}{\hyperdef}
+% \begin{macro}{\hyperref}
+% \begin{macro}{\tud@hyperref@a}
+% \begin{macro}{\tud@hyperref@b}
+% Mit \cs{hyperdef} wird ein ein Label direkt vor dem Text eingefügt.
+%    \begin{macrocode}
   \providecommand*\hyperdef[3]{\label{#1.#2}#3}%
 %    \end{macrocode}
 % Der Befehl \cs{hyperref} existiert in zwei Varianten. Entweder mit einem 
@@ -713,28 +812,11 @@
   }
   \newcommand*\tud@hyperref@a[2][]{#2}
   \newcommand*\tud@hyperref@b[4]{#4}
-  \providecommand*\href[3][]{#3}%
-  \providecommand*\hyperpage[1]{#1}%
 %    \end{macrocode}
-% Der Befehl \cs{autoref} wird auch in der Sternversion genutzt.
-%    \begin{macrocode}
-  \providecommand*\autoref{??\xspace\kernel@ifstar{\ref}{\ref}}%
-%    \end{macrocode}
-% Auch \cs{texorpdfstring} und \cs{phantomsection} werden vorgehalten.
-%    \begin{macrocode}
-  \providecommand*\phantomsection{}%
-  \providecommand*\texorpdfstring[2]{#1}%
-%    \end{macrocode}
-% \end{macro}^^A \phantomsection
-% \end{macro}^^A \texorpdfstring
-% \end{macro}^^A \autoref
-% \end{macro}^^A \hyperpage
-% \end{macro}^^A \href
 % \end{macro}^^A \tud@hyperref@b
 % \end{macro}^^A \tud@hyperref@a
 % \end{macro}^^A \hyperref
 % \end{macro}^^A \hyperdef
-% \end{macro}^^A \hypersetup
 % \begin{macro}{\partautorefname}
 % \begin{macro}{\chapterautorefname}
 % \begin{macro}{\sectionautorefname}
@@ -758,46 +840,63 @@
 % \end{macro}^^A \sectionautorefname
 % \end{macro}^^A \chapterautorefname
 % \end{macro}^^A \partautorefname
-% Anschließend folgen die für Klasse und Paket eigens definierten Befehle.
+% Anschließend folgen die für Anwenderdokumentation eigens definierten Befehle.
 %    \begin{macrocode}
-  \providecommand*\Email[1]{\mbox{#1}}%
 %<*class>
   \ProvideDocumentCommand\tudhyperdef{sm}{\label{#2}}%
 %</class>
   \providecommand*\tudhyperref[2]{#2}%
   \providecommand*\autorefname[1][]{??\xspace}%
+%
+% \iffalse
+%</!doc>
+%<*doc>
+% \fi
+%
+%    \end{macrocode}
+% Und hier der Teil für die Quelltextdokumentation.
+%    \begin{macrocode}
+  \providecommand*\hypersourcedef[1]{}
+  \providecommand*\hypersource@def{}
+  \providecommand*\hypersource@ref@codeline[2][]{}
+  \providecommand*\hypersource@ref@page[2][]{}
+%
+% \iffalse
+%</doc>
+% \fi
+%
+%    \begin{macrocode}
 }
 %    \end{macrocode}
-% \begin{macro}{\fullref}
-% Verbesserte Referenzierungen auf Seiten.
-%    \begin{macrocode}
-\RequirePackage{varioref}[2011/10/02]
-\renewcommand*\fullref[1]{\hyperref[#1]{\autoref*{#1} \vpageref{#1}}}
-%    \end{macrocode}
-% \end{macro}^^A \fullref
 % \begin{macro}{\hrfn}
 % \changes{v2.02}{2014/08/16}{neu}^^A
 % \changes{v2.04}{2015/02/18}{Schriftgröße mit \cs{scalebox}}^^A
 % Mit diesem Makro können Hyperlinks im Fließtext erzeugt werden, welche 
 % zusätzlich noch die dazugeörige URL als Fußnote anzeigen.
-% \ToDo{\cs{scalebox} weg, anders lösen!}[v2.06]
 %    \begin{macrocode}
+%<doc>\TUD@UnwindPackage{trimspaces}{\providecommand*\trim@spaces[1]{#1}}
 \newcommand*\hrfn[2]{%
   \href{#1}{\trim@spaces{#2}}%
   \footnote{%
-    \scalebox{0.95}{%
+    \begingroup%
 %    \end{macrocode}
-% Die Box wird verwendet, um zu lange URLs ausreichend zu verkleinern. Außerdem 
-% werden Unterstriche entschärft, die im Zweifel zu Fehlern führen können.
+% Die Gruppe wird verwendet, um Unterstriche zu entschärfen, die im Zweifel zu 
+% Fehlern führen können.
 %    \begin{macrocode}
       \def\_{_}%
       \edef\@tempa{#1}%
       \strut\expandafter\url\expandafter{\@tempa}%
-    }%
+    \endgroup%
   }%
 }
 %    \end{macrocode}
 % \end{macro}^^A \hrfn
+% \begin{macro}{\mailto}
+% Ein Makro zur Angabe einer verlinkten E"~Mail-Adresse.
+%    \begin{macrocode}
+\newrobustcmd*\mailto[1]{\href{mailto:#1}{\nolinkurl{#1}}}%
+%    \end{macrocode}
+% \end{macro}^^A \mailto
 % Wenn \pkg{hyperref} geladen wird, erzeugt das Paket \pkg{babel} innerhalb von 
 % \cs{pdfstringdef} ziemlich viele und absolut unnötige Infos in der Form
 % \texttt{Package babel Info: Redefining ngerman shorthand}. Dieser Patch dient
@@ -809,6 +908,19 @@
   }{}{\tud@patch@wrn{pdfstringdef}}%
 }
 %    \end{macrocode}
+%
+% \iffalse
+%</body|class&doc>
+%<*body>
+% \fi
+%
+% \begin{macro}{\fullref}
+% Verbesserte Referenzierungen auf Seiten.
+%    \begin{macrocode}
+\RequirePackage{varioref}[2011/10/02]
+\renewcommand*\fullref[1]{\hyperref[#1]{\autoref*{#1} \vpageref{#1}}}
+%    \end{macrocode}
+% \end{macro}^^A \fullref
 % Das Paket \pkg{microtype} wird für den optischen Randausgleich verwendet. Es 
 % sollte erst nach \pkg{hyperref} geladen werden.
 %    \begin{macrocode}
@@ -821,6 +933,9 @@
 %    \end{macrocode}
 %
 % \iffalse
+%</body>
+%<*!doc>
+%<*body>
 %<*class>
 % \fi
 %
@@ -2033,9 +2148,6 @@
     \let\POParameter\@firstofone%
     \let\textOR\relax%
     \let\hologoRobust\@firstofone%
-    \def\DDC{DRESDEN-concept}%
-    \def\TUDScript{TUD-Script}%
-    \def\KOMAScript{KOMA-Script}%
     \def\_{-}%
     \protected\def~{~}%
   }%
@@ -5896,14 +6008,19 @@
 \newcommand*\TnUD{Technischen Universit\"at Dresden\xspace}
 \newcommand*\TUDCD{\CD der \TnUD}
 \newcommand*\TUDCDs{\CDs der \TnUD}
-%<doc>\AtBeginDocument{%
 \newrobustcmd*\DDC{%
   \mbox{%
     D\kern.05em R\kern.05em E\kern.05em S\kern.05em %
     D\kern.05em E\kern.05em N\kern.1em-\kern.1em concept%
   }\xspace%
 }
-%<doc>}
+\AfterPackage*{hyperref}{%
+  \pdfstringdefDisableCommands{%
+    \def\DDC{DRESDEN-concept}%
+    \def\TUDScript{TUD-Script}%
+    \def\KOMAScript{KOMA-Script}%
+  }%
+}
 %    \end{macrocode}
 % \end{macro}^^A \DDC
 % \end{macro}^^A \TUDCDs
