@@ -28,6 +28,62 @@
 %
 % ----------------------------------------------------------------------------
 %
+%<*batchfile>
+\ifx\documentclass\undefined
+\input docstrip.tex
+\begingroup
+\catcode`\%=12 \catcode`\*=14
+\gdef\processLineX%#1{*
+  \ifcase\ifx%#10\else
+         \ifx<#11\else
+         \ifx!#12\else 3\fi\fi\fi\relax
+    \expandafter\putMetaComment\or
+    \expandafter\checkOption\or
+    \expandafter\expandVariable\or
+    \expandafter\removeComment\fi
+  #1}
+\endgroup
+\def\expandVariable!#1\endLine{%
+  \advance\codeLinesPassed\@ne
+  \maybeMsg{x}%
+  \edef\inLine{\csname #1\endcsname}%
+  \let\do\putline@do
+  \activefiles
+}
+\@@input ../tudscr-version.dtx
+\edef\TUD@Version@Echo{echo\space\space\space\TUD@Version}
+\keepsilent
+\askforoverwritefalse
+\generate{%
+  \nopreamble\nopostamble%
+  \file{tudscr_fonts_install.bxt}   {\from{tudscr-scripts.dtx}{win,font}}%
+  \file{tudscr_V_full_install.bxt}  {\from{tudscr-scripts.dtx}{win,full}}%
+  \file{tudscr_V_update_install.bxt}{\from{tudscr-scripts.dtx}{win,update}}%
+  \file{tudscr_fonts_install.sh}    {\from{tudscr-scripts.dtx}{unix,font}}%
+  \file{tudscr_V_full_install.sh}   {\from{tudscr-scripts.dtx}{unix,full}}%
+  \file{tudscr_V_update_install.sh} {\from{tudscr-scripts.dtx}{unix,update}}%
+  \file{tudscr_uninstall.bxt}       {\from{tudscr-scripts.dtx}{win,uninstall}}%
+  \file{tudscr_uninstall.sh}        {\from{tudscr-scripts.dtx}{unix,uninstall}}%
+  \file{tud_fonts_install.bxt}      {\from{tudscr-scripts.dtx}{win,font,old}}%
+  \file{tud_fonts_install.sh}       {\from{tudscr-scripts.dtx}{unix,font,old}}%
+}
+\generate{%
+  \nopreamble\nopostamble%
+  \file{tudscr_fonts_convert.bxt}{\from{tudscr-scripts.dtx}{win,convert}}%
+  \file{tudscr_fonts_convert.sh}{\from{tudscr-scripts.dtx}{unix,convert}}%
+  \file{tudscr_fonts_converted_install.bxt}{%
+    \from{tudscr-scripts.dtx}{win,converted}%
+  }%
+  \file{tudscr_fonts_converted_install.sh}{%
+    \from{tudscr-scripts.dtx}{unix,converted}%
+  }%
+}
+\else
+\let\endbatchfile\relax
+\fi
+\endbatchfile
+%</batchfile>
+%
 % \fi
 %
 % \CharacterTable
@@ -50,7 +106,7 @@
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-scripts.dtx}[%
-  2016/11/10 v2.05g TUD-Script installation scripts%
+  2016/11/12 v2.05g TUD-Script (installation scripts)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman,xindy]{tudscrdoc}
@@ -751,9 +807,9 @@ goto :end
   echo   Die Datei %~1 wurde nicht gefunden. Diese wird fuer die
   echo   Installation zwingend benoetigt. Bitte kopieren Sie %~1
   echo   in das Verzeichnis des Skriptes und fuehren dieses abermals aus.
-  echo   Beachten Sie, dass die Schriftarchive speziell für die Verwendung
-  echo   von LaTeX bestellt werden müssen, ein bloßes Umbenennen falscher 
-  echo   Archive wird zu Fehlern bei der Installation führen.
+  echo   Beachten Sie, dass die Schriftarchive speziell fuer die Verwendung
+  echo   von LaTeX bestellt werden muessen, ein alleiniges Umbenennen 
+  echo   falscher Archive wird zu Fehlern bei der Installation fuehren.
   echo.
   echo  =====================================================================
   goto :eof
@@ -1015,9 +1071,9 @@ missingfile()
   echo   Die Datei $1 wurde nicht gefunden. Diese wird fuer die
   echo   Installation zwingend benoetigt. Bitte kopieren Sie $1
   echo   in das Verzeichnis des Skriptes und fuehren dieses abermals aus.
-  echo   Beachten Sie, dass die Schriftarchive speziell für die Verwendung
-  echo   von LaTeX bestellt werden müssen, ein bloßes Umbenennen falscher
-  echo   Archive wird zu Fehlern bei der Installation führen.
+  echo   Beachten Sie, dass die Schriftarchive speziell fuer die Verwendung
+  echo   von LaTeX bestellt werden muessen, ein alleiniges Umbenennen 
+  echo   falscher Archive wird zu Fehlern bei der Installation fuehren.
   echo
   echo  =====================================================================
 }

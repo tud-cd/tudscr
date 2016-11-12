@@ -28,6 +28,66 @@
 %
 % ----------------------------------------------------------------------------
 %
+%<*batchfile>
+\ifx\documentclass\undefined
+\input docstrip.tex
+\begingroup
+\catcode`\%=12 \catcode`\*=14
+\gdef\processLine#1{*
+  \advance\processedLines\@ne
+  \ifx%#1
+    \expandafter\processLineX
+  \else
+    \expandafter\removeComment
+  \fi
+  #1}
+\endgroup
+\begingroup
+\catcode`\%=12 \catcode`\*=14
+\gdef\processLineX%#1{*
+  \ifcase\ifx%#10\else
+         \ifx<#11\else
+         \ifx=#12\else 3\fi\fi\fi\relax
+    \expandafter\putMetaComment\or
+    \expandafter\checkOption\or
+    \expandafter\cwlLine\or
+    \expandafter\removeComment\fi
+  #1}
+\endgroup
+\def\cwlLine=#1\endLine{%
+  \advance\codeLinesPassed\@ne
+  \maybeMsg{.}%
+  \def\inLine{#1}%
+  \let\do\putline@do
+  \activefiles
+}
+\def\MetaPrefix{\string##}
+\@@input ../tudscr-version.dtx
+\keepsilent
+\preamble
+
+ TUD-Script -- Corporate Design of Technische Universitaet Dresden
+----------------------------------------------------------------------------
+
+ Copyright (C) Falk Hanisch <tudscr@gmail.com>, 2012-2016
+
+----------------------------------------------------------------------------
+
+\endpreamble
+\askforoverwritefalse
+\generate{%
+  \usepreamble\defaultpreamble\nopostamble%
+  \file{tudscrtest.cwl}{%
+    \from{../tudscr-version.dtx}{class}%
+    \from{tudscr-cwl.dtx}{class}%
+  }%
+}
+\else
+\let\endbatchfile\relax
+\fi
+\endbatchfile
+%</batchfile>
+%
 % \fi
 %
 % \CharacterTable
@@ -47,11 +107,10 @@
 %   Right brace   \}     Tilde         \~}
 %
 % \iffalse
-%%% From File: tudscr-cwl.dtx
 %<*driver>
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-cwl.dtx}[%
-  2016/11/10 v2.05g TUD-Script (TeXstudio support)%
+  2016/11/12 v2.05g TUD-Script (TeXstudio support)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman,xindy]{tudscrdoc}
@@ -99,7 +158,7 @@
 % \changes{v2.05}{2015/11/04}{neu}^^A
 % Hier ein bisschen Text und die Definition. Danach der Kram für tudscr-cwl.ins
 % \iffalse
-%?\TestMacro{Argument}
+%=\TestMacro{Argument}
 % \fi
 %    \begin{macrocode}
 \newcommand*\TestMacro[1]{#1}
