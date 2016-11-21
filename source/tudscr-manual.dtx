@@ -1,4 +1,4 @@
-% \CheckSum{4229}
+% \CheckSum{4220}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -49,9 +49,9 @@
 % \iffalse
 %%% From File: tudscr-manual.dtx
 %<*driver>
-\ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
+\ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-manual.dtx}[%
-  2016/11/12 v2.05g TUD-Script\space%
+  2016/11/21 v2.05g TUD-Script\space%
 %</driver>
 %<package&identify>\ProvidesPackage{tudscrtutorial}[%
 %<*driver|package&identify>
@@ -190,6 +190,12 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@english
+% Sollte \app{lualatex} als Dokumentprozessor eingesetzt werden, sind die 
+% \app{pdflatex}-Primitiven \cs{pdf(@)strcmp} und \cs{pdf(@)shellescape}
+% dennoch notwendig, wofür das Paket \pkg{pdftexcmds} geladen wird.
+%    \begin{macrocode}
+\RequirePackage{pdftexcmds}[2016/05/21]
+%    \end{macrocode}
 %
 % \iffalse
 %</body|class&doc>
@@ -197,20 +203,6 @@
 %<*body>
 % \fi
 %
-% \begin{macro}{\pdfstrcmp}
-% \begin{macro}{\pdfshellescape}
-% Sollte \app{lualatex} eingesetzt werden, sind diese \app{pdflatex}-Primitiven 
-% dennoch notwendig, wofür \pkg{pdftexcmds} geladen wird.
-%    \begin{macrocode}
-\RequirePackage{ifluatex}[2016/05/16]
-\ifluatex
-  \RequirePackage{pdftexcmds}[2016/05/21]
-  \let\pdfstrcmp\pdf@strcmp
-  \let\pdfshellescape\pdf@shellescape
-\fi
-%    \end{macrocode}
-% \end{macro}^^A \pdfshellescape
-% \end{macro}^^A \pdfstrcmp
 % \begin{macro}{\tud@list@sort}
 % \changes{v2.02}{2014/07/25}{neu}^^A
 % \begin{macro}{\tud@list@@sort}
@@ -277,7 +269,7 @@
 % eine Sonderbehandlung erfolgen. Anschließend wird \cs{@tud@list@sortedtrue} 
 % gesetzt.
 %    \begin{macrocode}
-        \expandafter\ifnum\pdfstrcmp{#1}{\@tempa}<\z@\relax%
+        \expandafter\ifnum\pdf@strcmp{#1}{\@tempa}<\z@\relax%
           \ifx\@tempb\@empty%
             \expandafter\edef\expandafter\@tempb\expandafter{%
               #1,\@tempa%
@@ -4850,7 +4842,7 @@
   \hyperref{tutorials/#1.pdf}{#1}{tutorials:#1}{\File*{#1.pdf}#2}%
 }
 \NewDocumentCommand\Tutorial{smd||}{%
-  \ifnum\pdfshellescape=\@ne\relax%
+  \ifnum\pdf@shellescape=\@ne\relax%
 %    \end{macrocode}
 % Um mit den verschachtelten Aufrufen von \app{pdflatex} umgehen zu können,
 % wird das ganze Prozedere in ein Skript ausgelagert. Somit können die Aufrufe
@@ -4924,7 +4916,7 @@
 % Die Beispiele werden nur erneut kompiliert, wenn sich diese geändert haben 
 % oder noch gar kein entsprechendes PDF"~Dokument existiert.
 %    \begin{macrocode}
-  \ifnum\pdfshellescape=\@ne\relax%
+  \ifnum\pdf@shellescape=\@ne\relax%
     \filemodCmp{examples/#1.pdf}{examples/#1.tex}{}{%
       \immediate\write18{%
         pdflatex -output-directory examples examples/#1.tex^^J%
@@ -4934,8 +4926,8 @@
   \fi%
 %    \end{macrocode}
 % Ist die gesuchte Datei vorhanden, wird diese auch eingebunden. Andernfalls 
-% wird eine Warnung mit dem Hinweis auf die notwendige Verwednung von 
-% \val{pdflatex} mit der Option \opt{--shell-escape} erzeugt.
+% wird eine Warnung mit dem Hinweis auf die notwendige Verwendung von 
+% \app{pdflatex} mit der Option \opt{--shell-escape} erzeugt.
 %    \begin{macrocode}
   \IfFileExists{examples/#1.pdf}{%
     \includepdf[%
@@ -5095,7 +5087,7 @@
 % Falls es möglich ist, werden nach dem Durchlauf alle nicht mehr benötigten 
 % Hilfsdateien gelöscht.
 %    \begin{macrocode}
-  \ifnum\pdfshellescape=\@ne\relax%
+  \ifnum\pdf@shellescape=\@ne\relax%
     \ifwindows%
       \def\@tempa{del}%
     \else%
@@ -5466,7 +5458,7 @@
 % der erzeugten Datei angepasst werden kann.
 %    \begin{macrocode}
 \newcommand*\tud@tut@pdf{%
-  \ifnum\pdfshellescape=\@ne\relax%
+  \ifnum\pdf@shellescape=\@ne\relax%
     \filemodCmp{\jobname-standalone-\StandaloneFile.pdf}{\jobname.tex}{}{%
       \begingroup%
         \let\printdate\@firstofone%
@@ -5549,7 +5541,7 @@
 %    \begin{macrocode}
 %<*package>
 \AfterPackage*{pstricks}{%
-  \ifnum\pdfshellescape=\@ne\relax%
+  \ifnum\pdf@shellescape=\@ne\relax%
     \filemodCmp{\jobname-pics.pdf}{\jobname.tex}{%
       \PassOptionsToPackage{off}{auto-pst-pdf}%
     }{}%
@@ -5561,7 +5553,7 @@
 % Nach dem Paket \pkg{auto-pst-pdf} seine Arbeit verrichtet hat, werden alle 
 % etwaigen temporär erzeugten Dateien radikal gelöscht.
 %    \begin{macrocode}
-  \ifnum\pdfshellescape=\@ne\relax%
+  \ifnum\pdf@shellescape=\@ne\relax%
     \edef\@tempa{\app@exe{\app@rm "*\app@suffix*"}}%
     \@tempa%
   \fi%
