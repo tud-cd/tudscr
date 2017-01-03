@@ -2,9 +2,9 @@
  TUD-Script -- Corporate Design of Technische Universität Dresden
 ----------------------------------------------------------------------------
 
- Copyright (C) Falk Hanisch <tudscr@gmail.com>, 2012-2016
+ Copyright (C) Falk Hanisch <tudscr@gmail.com>, 2012-2017
 
- tudscr 2016/10/12 v2.05f
+ tudscr 2017/00/00 v2.05g
 
 ============================================================================
 
@@ -62,6 +62,11 @@ Das Bundle beinhaltet:
 
 Versionen
 ---------
+
+**v2.05g** (2017/00/00)
++ Erweiterung der Quelltextdokumentationsklasse `tudscrdoc`
++ kleinere Fehler im TUD-Script-Bundle behoben
+
 
 **v2.05f** (2016/10/12)
 + Probleme mit dem Paket `bm` behoben
@@ -243,6 +248,11 @@ The bundle offers:
 Versions
 --------
 
+**v2.05g** (2017/00/00)
++ enhancement of the source code documentation class `tudscrdoc`
++ minor errors fixed within the TUD-Script bundle
+
+
 **v2.05f** (2016/10/12)
 + solved problems with package `bm`
 
@@ -252,7 +262,7 @@ Versions
 
 
 **v2.05d** (2016/09/22)
-+ notation changed to TUD-Script-Bundle
++ notation changed to TUD-Script bundle
 + solved problems with package `flexisym`
 
 
