@@ -1,32 +1,32 @@
 % \CheckSum{594}
 % \iffalse meta-comment
-% 
-% ============================================================================
-% 
-%  TUD-Script
-%  Copyright (c) Falk Hanisch <tudscr@gmail.com>, 2012-2016
-% 
-% ============================================================================
-% 
+%
+%  TUD-Script -- Corporate Design of Technische Universität Dresden
+% ----------------------------------------------------------------------------
+%
+%  Copyright (C) Falk Hanisch <tudscr@gmail.com>, 2012-2017
+%
+% ----------------------------------------------------------------------------
+%
 %  This work may be distributed and/or modified under the conditions of the
 %  LaTeX Project Public License, version 1.3c of the license. The latest
-%  version of this license is in http://www.latex-project.org/lppl.txt and 
+%  version of this license is in http://www.latex-project.org/lppl.txt and
 %  version 1.3c or later is part of all distributions of LaTeX 2005/12/01
-%  or later and of this work. This work has the LPPL maintenance status 
+%  or later and of this work. This work has the LPPL maintenance status
 %  "author-maintained". The current maintainer and author of this work
 %  is Falk Hanisch.
-% 
-% ----------------------------------------------------------------------------
-% 
-%  Dieses Werk darf nach den Bedingungen der LaTeX Project Public Lizenz
-%  in der Version 1.3c, verteilt und/oder veraendert werden. Die aktuelle 
-%  Version dieser Lizenz ist http://www.latex-project.org/lppl.txt und 
-%  Version 1.3c oder spaeter ist Teil aller Verteilungen von LaTeX 2005/12/01 
-%  oder spaeter und dieses Werks. Dieses Werk hat den LPPL-Verwaltungs-Status 
-%  "author-maintained", wird somit allein durch den Autor verwaltet. Der 
-%  aktuelle Verwalter und Autor dieses Werkes ist Falk Hanisch.
-% 
+%
 % ============================================================================
+%
+%  Dieses Werk darf nach den Bedingungen der LaTeX Project Public Lizenz
+%  in der Version 1.3c, verteilt und/oder verändert werden. Die aktuelle
+%  Version dieser Lizenz ist http://www.latex-project.org/lppl.txt und
+%  Version 1.3c oder später ist Teil aller Verteilungen von LaTeX 2005/12/01
+%  oder später und dieses Werks. Dieses Werk hat den LPPL-Verwaltungs-Status
+%  "author-maintained", wird somit allein durch den Autor verwaltet. Der
+%  aktuelle Verwalter und Autor dieses Werkes ist Falk Hanisch.
+%
+% ----------------------------------------------------------------------------
 %
 % \fi
 %
@@ -49,9 +49,9 @@
 % \iffalse
 %%% From File: tudscr-supervisor.dtx
 %<*driver>
-\ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
+\ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-supervisor.dtx}[%
-  2016/09/22 v2.05d TUD-Script\space%
+  2017/01/03 v2.05g TUD-Script\space%
 %</driver>
 %<package>\ProvidesPackage{tudscrsupervisor}[%
 %<*driver|package>
@@ -68,13 +68,19 @@
 \usepackage{babel}
 \usepackage{tudscrfonts} % only load this package, if the fonts are installed
 \KOMAoptions{parskip=half-}
-\usepackage{microtype}
 \usepackage{bookmark}
+\usepackage[babel]{microtype}
+
 \CodelineIndex
 \RecordChanges
 \GetFileInfo{tudscr-supervisor.dtx}
+\title{\file{\filename}}
+\author{Falk Hanisch\qquad\expandafter\mailto\expandafter{\tudscrmail}}
+\date{\fileversion\nobreakspace(\filedate)}
+
 \begin{document}
   \maketitle
+  \tableofcontents
   \DocInput{\filename}
 \end{document}
 %</driver>
@@ -82,11 +88,13 @@
 %
 % \selectlanguage{ngerman}
 %
-% \section{Aufgabenstellung}
+% \section{%
+%   Das Paket \pkg{tudscrsupervisor} -- Betreuung wissenschaftlicher Arbeiten%
+% }
 %
-% Diese Paket stellt für die \cls{tudscr}-Klassen mehrere Umgebungen und
-% Befehle zur Erstellung der Aufgabenstellung einer Abschlussarbeit sowie
-% eines Gutachtens und eines Aushangs bereit.
+% Diese Paket stellt für die \TUDScript-Klassen mehrere Umgebungen und Befehle
+% zur Erstellung der Aufgabenstellung einer Abschlussarbeit sowie eines
+% Gutachtens und eines Aushangs bereit.
 %
 % \StopEventually{\PrintIndex\PrintChanges\PrintToDos}
 %
@@ -94,7 +102,168 @@
 %<*package>
 % \fi
 %
-% \subsection{Das Paket \pkg{tudscrsupervisor}}
+% \begin{macro}{\tud@multiple@fields@output}
+% \changes{v2.05}{2016/03/09}{neu}^^A
+% \begin{macro}{\tud@multiple@fields@style}
+% \changes{v2.05}{2016/05/26}{neu}^^A
+% Diesen beiden Makros dienen dazu, unterschiedliche Varianten für die Ausgabe 
+% innerhalb der nachfolgenden Umgebungen generieren zu können. Momentan werden 
+% diese nur innerhalb der \env{task}-Umgebung verwendet.
+%    \begin{macrocode}
+\newcommand*\tud@multiple@fields@output{}
+\newcommand*\tud@multiple@fields@style{table}
+%    \end{macrocode}
+% \end{macro}^^A \tud@multiple@fields@style
+% \end{macro}^^A \tud@multiple@fields@output
+% \begin{macro}{\student}
+% Der Befehl \cs{student} kann als Alias für \cs{author} genutzt werden.
+%    \begin{macrocode}
+\newcommand*\student{\author}
+%    \end{macrocode}
+% \end{macro}^^A \student
+% \begin{macro}{\tud@authortable@set}
+% \changes{v2.01b}{2014/06/04}{Probleme mit Paket \pkg{calc} behoben}^^A
+% \begin{length}{\tud@len@authortable}
+% Der Befehl \cs{tud@authortable@set} dient bei Aufgabenstellung und Gutachten 
+% zur Ausgabe einer Tabelle mit Informationen zum Autor beziehungsweise zu den
+% Autoren.\footnote{Matrikelnummer, Jahrgang, Studiengang etc.}
+%    \begin{macrocode}
+\newlength\tud@len@authortable
+\newcommand*\tud@authortable@set{%
+  \begingroup%
+  \let\thanks\@gobble%
+  \let\footnote\@gobble%
+%    \end{macrocode}
+% Zu Beginn wird eine Tabelle mit den Bezeichnern aller genutzten Feldern
+% ausgegeben. Danach folgen alle Autoren. Damit ein einheitliches Layout
+% entsteht und auch die Tabellen am Ende der Umgebung in der ersten Spalte die
+% gleiche Breite haben wie im oberen Teil, ist die Bestimmung einer festen
+% Spaltenbreite notwendig, die so breit wie der längste Bezeichner ist.
+% Dafür muss festgestellt werden, welche optionalen Felder denn nun überhaupt
+% genutzt werden. Dafür wird \cs{tud@multiple@fields@preset} mit \cs{null} als
+% Argument aufgerufen, um alle potenziellen Felder erkennen zu können.
+%    \begin{macrocode}
+  \tud@multiple@split{@author}%
+  \tud@multiple@fields@preset{@author}{\null}{}%
+  \setlength\tud@len@authortable{2em}%
+%    \end{macrocode}
+% Anschließend werden die Bezeichner sowohl der obligatorischen als auch der
+% genutzten, optionalen Felder in \cs{@tempa} gespeichert. Mit der Liste wird
+% der längste Bezeichner bestimmt und dessen Länge in \cs{tud@len@authortable}
+% gespeichert.
+%    \begin{macrocode}
+  \def\@tempb##1{%
+    \expandafter\ifx\csname @##1\endcsname\@empty\else%
+      \expandafter\appto\expandafter\@tempa\expandafter{%
+        \expandafter,\csname ##1name\endcsname%
+      }%
+    \fi%
+  }%
+  \def\@tempa{%
+    \namesname,\titlename,\issuedatetext,\duedatetext,\supervisorname%
+  }%
+  \tud@ifin@and{\@supervisor}{\appto\@tempa{,\supervisorothername}}{}%
+  \@tempb{referee}%
+  \tud@ifin@and{\@referee}{\appto\@tempa{,\refereeothername}}{}%
+  \@tempb{matriculationnumber}%
+  \@tempb{matriculationyear}%
+  \@tempb{course}%
+  \@tempb{discipline}%
+  \@for\@tempb:=\@tempa\do{%
+    \settowidth\@tempdima{\@tempb\tud@title@delimiter}%
+    \ifdim\@tempdima>\tud@len@authortable\relax%
+      \setlength\tud@len@authortable{\@tempdima}%
+    \fi%
+  }%
+  \global\tud@len@authortable=\tud@len@authortable%
+%    \end{macrocode}
+% Die Tabelle mit den benötigten Bezeichnern. Damit diese bis an den Seiterand
+% ohne Warnungen gesetzt werden können, wird die Auszeichnung von Absatzenden
+% aufgehoben.
+%    \begin{macrocode}
+  \begingroup%
+  \setparsizes{\z@}{\z@}{\z@\@plus 1fil}\par@updaterelative%
+  \begin{tabular}{@{}p{\tud@len@authortable}}%
+    \ifx\@course\@empty\else%
+      \coursename\tud@title@delimiter\tabularnewline%
+    \fi%
+    \ifx\@discipline\@empty\else%
+      \disciplinename\tud@title@delimiter\tabularnewline%
+    \fi%
+    \namesname\tud@title@delimiter\tabularnewline%
+    \ifx\@matriculationnumber\@empty\else%
+      \matriculationnumbername\tud@title@delimiter\tabularnewline%
+    \fi%
+    \ifx\@matriculationyear\@empty\else%
+      \matriculationyearname\tud@title@delimiter\tabularnewline%
+    \fi%
+  \end{tabular}%
+%    \end{macrocode}
+% Der Befehl \cs{tud@split@author@do} wird innerhalb der \TUDScript-Klassen zur
+% formatierten Ausgabe mehrerer Autoren auf der Titelseite verwendet, welche
+% durch\cs{author}\marg{Autor(en)} angegeben und mit \cs{and} getrennt wurden.
+% Er wird hier auf die Ausgabe der Autoren mit den jeweils zusätzlich gegebenen 
+% Informationen in einer Tabelle angepasst.
+%    \begin{macrocode}
+  \renewcommand*\tud@split@author@do[2]{%
+%    \end{macrocode}
+% Weil alle Autoren in einer Tabelle gesetzt werden wird geprüft, welche Felder
+% individuell via \cs{author} angegeben wurden. Damit die Tabellen die gleiche
+% Höhe haben, auch wenn für einen Autor ein Feld ausgelassen wurde, werden alle
+% insgesamt angegebenen Felder mit via \cs{tud@multiple@fields@preset} mit
+% \cs{null} initialisiert. Anschließend werden die für den aktuellen Autor
+% angegebenen Felder gesetzt.
+%    \begin{macrocode}
+    \tud@multiple@fields@store{@author}{##1}%
+    \tud@multiple@fields@preset{@author}{\null}{##1}%
+%    \end{macrocode}
+% Nach viel Geplänkel kommt nun die eigentliche Tabelle mit ggf. zusätzlichen
+% Informationen zum Autor.
+%    \begin{macrocode}
+    \begin{tabular}{l@{}}%
+      \ifx\@course\@empty\else\@course\tabularnewline\fi%
+      \ifx\@discipline\@empty\else\@discipline\tabularnewline\fi%
+      \textsf{\textbf{\ignorespaces##1}}\tabularnewline%
+      \ifx\@matriculationnumber\@empty\else%
+        \@matriculationnumber\tabularnewline%
+      \fi%
+      \ifx\@matriculationyear\@empty\else%
+        \@matriculationyear\tabularnewline%
+      \fi%
+    \end{tabular}%
+%    \end{macrocode}
+% Sollte ein weiterer Autor folgen, wird \cs{tabcolsep} zusätzlich eingefügt,
+% um den Standardabstand bei Tabellen zu sichern, da die Tabelle vorher ohne
+% rechten \enquote{Rand} gesetzt wurde, um die letzte Tabelle ggf. genau bis
+% zum rechten Rand setzen zu können.
+%    \begin{macrocode}
+    \tud@multiple@fields@restore{@author}%
+    \tud@multiple@@@split{##2}{\enskip\hspace{\tabcolsep}}%
+  }%
+%    \end{macrocode}
+% Hier erfolgt die eigentliche Ausgabe.
+%    \begin{macrocode}
+  \tud@multiple@split{@author}%
+%    \end{macrocode}
+% Nach den Autoren wird der Titel über die komplette Textbreite ausgegeben.
+% Danach wird der Inhalt der Aufgabenstellung gesetzt.
+%    \begin{macrocode}
+  \vskip\smallskipamount%
+  \begin{tabular}{@{}p{\tud@len@authortable}%
+    p{\dimexpr\textwidth-\tud@len@authortable-2\tabcolsep\relax}@{}}%
+    \titlename\tud@title@delimiter & \tud@RaggedRight\textsf{\textbf{\@@title}}%
+  \end{tabular}%
+  \par%
+  \endgroup%
+  \ifdim\parskip>\z@\else\vskip\topsep\fi%
+  \endgroup%
+  \noindent\ignorespaces%
+}
+%    \end{macrocode}
+% \end{length}^^A \tud@len@authortable
+% \end{macro}^^A \tud@authortable@set
+%
+% \subsection{Aufgabenstellung}
 %
 % \begin{environment}{task}
 % \changes{v2.03}{2015/01/05}{Bugfix für initialen Seitenstil}^^A
@@ -103,17 +272,11 @@
 % \begin{parameter}{heading}
 % \begin{parameter}{line}
 % \begin{parameter}{style}
-% \begin{macro}{\tud@multiple@fields@output}
-% \changes{v2.05}{2016/03/09}{neu}^^A
-% \begin{macro}{\tud@multiple@fields@style}
-% \changes{v2.05}{2016/05/26}{neu}^^A
 % Die Umgebung für die Aufgabenstellung nutzt die \env{tudpage}-Umgebung. Sie
 % wird auf einer neuen (rechten) Seite gesetzt. Es wird zu Beginn eine Tabelle 
 % mit Informationen zum Autor gesetzt. Zum Abschluss werden Betreuer,
 % Hochschullehrer und ggf. Vorsitzender des Prüfungsausschusses ausgegeben.
 %    \begin{macrocode}
-\newcommand*\tud@multiple@fields@output{}
-\newcommand*\tud@multiple@fields@style{table}
 \newenvironment{task}[1][]{%
 %    \end{macrocode}
 % Die \env{tudpage}-Umgebung wird geöffnet. Mit dem Parameter \opt{headline} 
@@ -204,8 +367,6 @@
   \aftergroup\cleardoublepage%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@multiple@fields@style
-% \end{macro}^^A \tud@multiple@fields@output
 % \end{parameter}^^A style
 % \end{parameter}^^A line
 % \end{parameter}^^A heading
@@ -230,11 +391,15 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \taskform
+%
+% \subsection{Gutachten}
+%
 % \begin{environment}{evaluation}
 % \changes{v2.03}{2015/01/05}{Bugfix für Seitenstil im zweiseitigen Satz}^^A
 % \begin{parameter}{headline}
 % \begin{parameter}{heading}
 % \begin{parameter}{line}
+% \begin{parameter}{grade}
 % Die Umgebung für das Gutachten nutzt ebenfalls die \env{tudpage}-Umgebung. Sie
 % wird auf einer neuen (rechten) Seite gesetzt. Es wird zu Beginn eine Tabelle 
 % mit Informationen zum Autor gesetzt. Zum Abschluss werden Ort, Datum und 
@@ -310,6 +475,7 @@
   \aftergroup\cleardoublepage%
 }
 %    \end{macrocode}
+% \end{parameter}^^A grade
 % \end{parameter}^^A line
 % \end{parameter}^^A heading
 % \end{parameter}^^A headline
@@ -331,153 +497,9 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \evaluationform
-% \begin{macro}{\student}
-% Der Befehl \cs{student} kann als Alias für \cs{author} genutzt werden.
-%    \begin{macrocode}
-\newcommand*\student{\author}
-%    \end{macrocode}
-% \end{macro}^^A \student
-% \begin{macro}{\tud@authortable@set}
-% \changes{v2.01b}{2014/06/04}{Probleme mit Paket \pkg{calc} behoben}^^A
-% \begin{length}{\tud@len@authortable}
-% Der Befehl \cs{tud@authortable@set} dient zur Ausgabe einer Tabelle mit
-% Informationen zum Autor/zu den Autoren\footnote{Matrikelnummer, Jahrgang,
-% Studiengang etc.} für Aufgabenstellung und Gutachten.
-%    \begin{macrocode}
-\newlength\tud@len@authortable
-\newcommand*\tud@authortable@set{%
-  \begingroup%
-  \let\thanks\@gobble%
-  \let\footnote\@gobble%
-%    \end{macrocode}
-% Zu Beginn wird eine Tabelle mit den Bezeichnern aller genutzten Feldern
-% ausgegeben. Danach folgen alle Autoren. Damit ein einheitliches Layout
-% entsteht und auch die Tabellen am Ende der Umgebung in der ersten Spalte die
-% gleiche Breite haben wie im oberen Teil, ist die Bestimmung einer festen
-% Spaltenbreite notwendig, die so breit wie der längste Bezeichner ist.
-% Dafür muss festgestellt werden, welche optionalen Felder denn nun überhaupt
-% genutzt werden. Dafür wird \cs{tud@multiple@fields@preset} mit \cs{null} als
-% Argument aufgerufen, um alle potentiellen Felder erkennen zu können.
-%    \begin{macrocode}
-  \tud@multiple@split{@author}%
-  \tud@multiple@fields@preset{@author}{\null}{}%
-  \setlength\tud@len@authortable{2em}%
-%    \end{macrocode}
-% Anschließend werden die Bezeichner sowohl der obligatorischen als auch der
-% genutzten, optionalen Felder in \cs{@tempa} gespeichert. Mit der Liste wird
-% der längste Bezeichner bestimmt und dessen Länge in \cs{tud@len@authortable}
-% gespeichert.
-%    \begin{macrocode}
-  \def\@tempb##1{%
-    \expandafter\ifx\csname @##1\endcsname\@empty\else%
-      \expandafter\appto\expandafter\@tempa\expandafter{%
-        \expandafter,\csname ##1name\endcsname%
-      }%
-    \fi%
-  }%
-  \def\@tempa{%
-    \namesname,\titlename,\issuedatetext,\duedatetext,\supervisorname%
-  }%
-  \tud@ifin@and{\@supervisor}{\appto\@tempa{,\supervisorothername}}{}%
-  \@tempb{referee}%
-  \tud@ifin@and{\@referee}{\appto\@tempa{,\refereeothername}}{}%
-  \@tempb{matriculationnumber}%
-  \@tempb{matriculationyear}%
-  \@tempb{course}%
-  \@tempb{discipline}%
-  \@for\@tempb:=\@tempa\do{%
-    \settowidth\@tempdima{\@tempb\tud@title@delimiter}%
-    \ifdim\@tempdima>\tud@len@authortable\relax%
-      \setlength\tud@len@authortable{\@tempdima}%
-    \fi%
-  }%
-  \global\tud@len@authortable=\tud@len@authortable%
-%    \end{macrocode}
-% Die Tabelle mit den benötigten Bezeichnern. Damit diese bis an den Seiterand
-% ohne Warnungen gesetzt werden können, wird die Auszeichnung von Absatzenden
-% aufgehoben.
-%    \begin{macrocode}
-  \begingroup%
-  \setparsizes{\z@}{\z@}{\z@\@plus 1fil}\par@updaterelative%
-  \begin{tabular}{@{}p{\tud@len@authortable}}%
-    \ifx\@course\@empty\else%
-      \coursename\tud@title@delimiter\tabularnewline%
-    \fi%
-    \ifx\@discipline\@empty\else%
-      \disciplinename\tud@title@delimiter\tabularnewline%
-    \fi%
-    \namesname\tud@title@delimiter\tabularnewline%
-    \ifx\@matriculationnumber\@empty\else%
-      \matriculationnumbername\tud@title@delimiter\tabularnewline%
-    \fi%
-    \ifx\@matriculationyear\@empty\else%
-      \matriculationyearname\tud@title@delimiter\tabularnewline%
-    \fi%
-  \end{tabular}%
-%    \end{macrocode}
-% Der Befehl \cs{tud@split@author@do} wird innerhalb der \cls{tudscr}-Klassen 
-% zur formatierten Ausgabe mehrerer Autoren auf der Titelseite verwendet, 
-% welche durch\cs{author}\marg{Autor(en)} angegeben und mit \cs{and} getrennt 
-% wurden. Er wird hier auf die Ausgabe der Autoren mit den jeweils zusätzlich
-% gegebenen Informationen in einer Tabelle angepasst.
-%    \begin{macrocode}
-  \renewcommand*\tud@split@author@do[2]{%
-%    \end{macrocode}
-% Weil alle Autoren in einer Tabelle gesetzt werden wird geprüft, welche Felder
-% individuell via \cs{author} angegeben wurden. Damit die Tabellen die gleiche
-% Höhe haben, auch wenn für einen Autor ein Feld ausgelassen wurde, werden alle
-% insgesamt angegebenen Felder mit via \cs{tud@multiple@fields@preset} mit
-% \cs{null} initialisiert. Anschließend werden die für den aktuellen Autor
-% angegebenen Felder gesetzt.
-%    \begin{macrocode}
-    \tud@multiple@fields@store{@author}{##1}%
-    \tud@multiple@fields@preset{@author}{\null}{##1}%
-%    \end{macrocode}
-% Nach viel Geplänkel kommt nun die eigentliche Tabelle mit ggf. zusätzlichen
-% Informationen zum Autor.
-%    \begin{macrocode}
-    \begin{tabular}{l@{}}%
-      \ifx\@course\@empty\else\@course\tabularnewline\fi%
-      \ifx\@discipline\@empty\else\@discipline\tabularnewline\fi%
-      \textsf{\textbf{\ignorespaces##1}}\tabularnewline%
-      \ifx\@matriculationnumber\@empty\else%
-        \@matriculationnumber\tabularnewline%
-      \fi%
-      \ifx\@matriculationyear\@empty\else%
-        \@matriculationyear\tabularnewline%
-      \fi%
-    \end{tabular}%
-%    \end{macrocode}
-% Sollte ein weiterer Autor folgen, wird \cs{tabcolsep} zusätzlich eingefügt,
-% um den Standardabstand bei Tabellen zu sichern, da die Tabelle vorher ohne
-% rechten \enquote{Rand} gesetzt wurde, um die letzte Tabelle ggf. genau bis
-% zum rechten Rand setzen zu können.
-%    \begin{macrocode}
-    \tud@multiple@fields@restore{@author}%
-    \tud@multiple@@@split{##2}{\enskip\hspace{\tabcolsep}}%
-  }%
-%    \end{macrocode}
-% Hier erfolgt die eigentliche Ausgabe.
-%    \begin{macrocode}
-  \tud@multiple@split{@author}%
-%    \end{macrocode}
-% Nach den Autoren wird der Titel über die komplette Textbreite ausgegeben.
-% Danach wird der Inhalt der Aufgabenstellung gesetzt.
-%    \begin{macrocode}
-  \vskip\smallskipamount%
-  \begin{tabular}{@{}p{\tud@len@authortable}%
-    p{\dimexpr\textwidth-\tud@len@authortable-2\tabcolsep\relax}@{}}%
-    \titlename\tud@title@delimiter & \tud@RaggedRight\textsf{\textbf{\@@title}}%
-  \end{tabular}%
-  \par%
-  \endgroup%
-  \ifdim\parskip>\z@\else\vskip\topsep\fi%
-  \endgroup%
-  \noindent\ignorespaces%
-}
-%    \end{macrocode}
-% \end{length}^^A \tud@len@authortable
-% \end{macro}^^A \tud@authortable@set
+%
+% \subsection{Aushang}
+%
 % \begin{environment}{notice}
 % \begin{parameter}{headline}
 % \begin{parameter}{heading}

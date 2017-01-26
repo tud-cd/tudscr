@@ -1,32 +1,32 @@
-% \CheckSum{840}
+% \CheckSum{842}
 % \iffalse meta-comment
-% 
-% ============================================================================
-% 
-%  TUD-Script
-%  Copyright (c) Falk Hanisch <tudscr@gmail.com>, 2012-2016
-% 
-% ============================================================================
-% 
+%
+%  TUD-Script -- Corporate Design of Technische Universität Dresden
+% ----------------------------------------------------------------------------
+%
+%  Copyright (C) Falk Hanisch <tudscr@gmail.com>, 2012-2017
+%
+% ----------------------------------------------------------------------------
+%
 %  This work may be distributed and/or modified under the conditions of the
 %  LaTeX Project Public License, version 1.3c of the license. The latest
-%  version of this license is in http://www.latex-project.org/lppl.txt and 
+%  version of this license is in http://www.latex-project.org/lppl.txt and
 %  version 1.3c or later is part of all distributions of LaTeX 2005/12/01
-%  or later and of this work. This work has the LPPL maintenance status 
+%  or later and of this work. This work has the LPPL maintenance status
 %  "author-maintained". The current maintainer and author of this work
 %  is Falk Hanisch.
-% 
-% ----------------------------------------------------------------------------
-% 
-%  Dieses Werk darf nach den Bedingungen der LaTeX Project Public Lizenz
-%  in der Version 1.3c, verteilt und/oder veraendert werden. Die aktuelle 
-%  Version dieser Lizenz ist http://www.latex-project.org/lppl.txt und 
-%  Version 1.3c oder spaeter ist Teil aller Verteilungen von LaTeX 2005/12/01 
-%  oder spaeter und dieses Werks. Dieses Werk hat den LPPL-Verwaltungs-Status 
-%  "author-maintained", wird somit allein durch den Autor verwaltet. Der 
-%  aktuelle Verwalter und Autor dieses Werkes ist Falk Hanisch.
-% 
+%
 % ============================================================================
+%
+%  Dieses Werk darf nach den Bedingungen der LaTeX Project Public Lizenz
+%  in der Version 1.3c, verteilt und/oder verändert werden. Die aktuelle
+%  Version dieser Lizenz ist http://www.latex-project.org/lppl.txt und
+%  Version 1.3c oder später ist Teil aller Verteilungen von LaTeX 2005/12/01
+%  oder später und dieses Werks. Dieses Werk hat den LPPL-Verwaltungs-Status
+%  "author-maintained", wird somit allein durch den Autor verwaltet. Der
+%  aktuelle Verwalter und Autor dieses Werkes ist Falk Hanisch.
+%
+% ----------------------------------------------------------------------------
 %
 % \fi
 %
@@ -49,9 +49,9 @@
 % \iffalse
 %%% From File: tudscr-fields.dtx
 %<*driver>
-\ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
+\ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-fields.dtx}[%
-  2016/10/10 v2.05e TUD-Script (input fields)%
+  2017/01/26 v2.05g TUD-Script (input fields)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman,xindy]{tudscrdoc}
@@ -60,13 +60,19 @@
 \usepackage{babel}
 \usepackage{tudscrfonts} % only load this package, if the fonts are installed
 \KOMAoptions{parskip=half-}
-\usepackage{microtype}
 \usepackage{bookmark}
+\usepackage[babel]{microtype}
+
 \CodelineIndex
 \RecordChanges
 \GetFileInfo{tudscr-fields.dtx}
+\title{\file{\filename}}
+\author{Falk Hanisch\qquad\expandafter\mailto\expandafter{\tudscrmail}}
+\date{\fileversion\nobreakspace(\filedate)}
+
 \begin{document}
   \maketitle
+  \tableofcontents
   \DocInput{\filename}
 \end{document}
 %</driver>
@@ -76,13 +82,13 @@
 %
 % \changes{v2.02}{2014/06/23}{Paket \pkg{titlepage} nicht weiter unterstützt}^^A
 %
-% \section{Eingabefelder für den Nutzer}
+% \section{Anwenderbefehle für Eingabefelder}
 %
-% Die Vorlagen für das \CD der Technischen Universität Dresden definieren
-% mehrere Felder, welche durch den Nutzer gesetzt und auf Titelseite bzw. mit
-% \pkg{tudscrsupervisor} auch teilweise für die Aufgabenstellung verwendet 
-% werden. Ein Großteil der definierten Felder wird unter anderem für den Satz 
-% der Titelseite benötigt.
+% Das \TUDScript-Bundle für das \TUDCD definieren mehrere Felder, welche durch
+% den Anwender festgelegt werden können und dadurch auf der Titelseite bzw. auf
+% der Aufgabenstellung~-- falls das Paket \pkg{tudscrsupervisor} zum Einsatz 
+% kommt~-- ausgegeben werden. Ein Großteil der definierten Felder wird unter 
+% anderem für den Satz der Titelseite benötigt.
 %
 % Das Setzen einer speziellen Titelseite mit \LaTeX{} ist eines der häufigsten
 % anliegen. Dafür ist von Markus Kohm\footnote{Autor von \KOMAScript} das
@@ -95,7 +101,7 @@
 %<*class&!manual>
 % \fi
 %
-% \subsection{Textfelder}
+% \subsection{Textfelder für die \TUDScript-Klassen}
 %
 % Von den Klassen benötigte Formularfelder werden definiert. Für das Setzen von 
 % Feldern werden mit dem Makro \cs{trim@spaces} aus dem Paket \pkg{trimspaces} 
@@ -265,28 +271,36 @@
     \def\newline{\space\ignorespaces}%
     \def\\{\space\ignorespaces}%
 %    \end{macrocode}
-% Die Makros aus \cs{tud@split@author@list} werden zu \cs{relax} gesetzt, um 
+% Die Makros aus \cs{tud@split@author@list} werden zu \cs{@tempc} gesetzt, um 
 % diese nach der Expansion weiter zu behandeln.
 %    \begin{macrocode}
-    \def\@tempa##1{\csdef{##1}####1{\noexpand\relax}}%
+    \let\@tempc\relax%
+    \def\@tempa##1{\csedef{##1}####1{\@tempc}}%
     \let\@tempb\tud@split@author@list%
     \ifx\and\relax\else%
       \robustify\and%
     \fi%
     \expandafter\forcsvlist\expandafter\@tempa\expandafter{\@tempb}%
-    \protected@edef\@@author{#1}%
 %    \end{macrocode}
 % Da die Befehle für Zusatzinformationen unter Umständen ungewollte Leerzeichen 
 % im Feld \cs{@@author} hinterlassen, werden diese entfernt.
 %    \begin{macrocode}
-    \tud@replace\@@author{ \relax }{}%
-    \tud@replace\@@author{\relax }{}%
-    \tud@replace\@@author{ \relax}{}%
-    \tud@replace\@@author{\relax}{}%
-    \tud@replace\@@author{ \and }{\and}%
-    \tud@replace\@@author{ \and}{\and}%
-    \tud@replace\@@author{\and }{\and}%
-    \protected@xdef\@@author{\trim@spaces{\@@author}}%
+    \def\@tempa##1##2{%
+      \def\@tempb####1##2####2\@nil{%
+        \IfArgIsEmpty{####2}{%
+          \def##1{####1}%
+        }{%
+          \@tempb####1####2\@nil%
+        }%
+      }%
+      \expandafter\@tempb##1##2\@nil%
+    }%
+    \protected@edef\@@author{#1}%
+    \@tempa{\@@author}{ \@tempc }%
+    \@tempa{\@@author}{\@tempc }%
+    \@tempa{\@@author}{ \@tempc}%
+    \@tempa{\@@author}{\@tempc}%
+    \xdef\@@author{\expandonce\@@author}%
   \endgroup%
 }
 \newcommand*\@authormore{}
@@ -343,17 +357,18 @@
 % Art bzw. Typ der Abschlussarbeit kann \cs{thesis}\marg{Abschlussarbeit}
 % angegeben werden und wird im Makro \cs{@thesis} gespeichert. Alternativ
 % dazu kann auch der Befehl \cs{subject} verwendet werden. Mit dem Befehl
-% \cs{tud@thesis@do} wird in den Feldern \@thesis respektive \@subject nach
-% bestimmten Schlagwörtern für Abschlussarbeiten o.\,ä. gesucht. Wird eines
-% dieser Wörter gefunden, wird der entsprechende reguläre Ausdruck für dieses
+% \cs{tud@thesis@do} wird in den Feldern \cs{@thesis} respektive \cs{@subject} 
+% nach bestimmten Schlagwörtern für Abschlussarbeiten o.\,ä. gesucht. Wird 
+% eines dieser Wörter gefunden, wird der entsprechende Bezeichner für dieses
 % Feld gesetzt. Zusätzlich wird durch \cs{tud@thesis@@do} dafür gesorgt, dass
 % gegebenenfalls der Inhalt von \cs{@subject} in \cs{@thesis} verschoben und
-% die entsprechende Option \opt{subjectthesis} gesetzt wird. In \cs{@@thesis}
+% entsprechend die Option \opt{subjectthesis} gesetzt wird. In \cs{@@thesis}
 % wird die angegebene Abschlussarbeit ohne etwaige Fußnoten gespeichert.
 %    \begin{macrocode}
 \newcommand*\@thesis{}
 \newcommand*\@@thesis{}
 \newcommand*\thesis[1]{\tud@thesis@do{thesis}{#1}}
+\renewcommand*\subject[1]{\tud@thesis@do{subject}{#1}}
 \newcommand*\tud@thanks{}
 \newcommand*\tud@thesis@do[2]{%
   \begingroup%
@@ -407,7 +422,6 @@
   \fi%
   \protected@xdef\@@thesis{\trim@spaces{#2}}%
 }
-\renewcommand*\subject[1]{\tud@thesis@do{subject}{#1}}
 %    \end{macrocode}
 % \end{macro}^^A \tud@thanks
 % \end{macro}^^A \tud@thesis@@do
@@ -642,14 +656,14 @@
 %</poster>
 % \fi
 %
-% \subsection{Datumsfelder}
+% \subsection{Datumsfelder für die \TUDScript-Klassen}
 %
 % \begin{macro}{\printdate}
 % Im Folgenden werden mehrere Datumsfelder definiert. Damit diese optional
 % durch das \pkg{isodate}-Paket formatiert werden können, wird der zu
 % diesem Paket gehörende Befehl \cs{printdate} in die Definition der
-% eigentlichen Datumsfelder integriert. Sollte das \pkg{isodate}-Paket nicht
-% geladen werden, so muss dieser Befehl trotzdem definiert sein.
+% eigentlichen Datumsfelder integriert. Sollte das Paket nicht geladen werden,
+% so muss dieser Befehl trotzdem definiert sein.
 % \ToDo{Unterstützung für \pkg{datetime2}}[v2.06]
 %    \begin{macrocode}
 \TUD@UnwindPackage{isodate}{\providecommand*\printdate[1]{#1}}
@@ -700,8 +714,26 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@date@check
 % \begin{macro}{\date}
-% \begin{field}{\@date}
+% \begin{parameter}{before}
+% \changes{v2.05}{2016/05/27}{neu}^^A
+% \begin{parameter}{after}
+% \changes{v2.05}{2016/05/27}{neu}^^A
+% \begin{parameter}{prefix}
+% \changes{v2.05}{2016/05/27}{neu}^^A
+% \begin{parameter}{suffix}
+% \changes{v2.05}{2016/05/27}{neu}^^A
+% \begin{parameter}{pre}
+% \changes{v2.05}{2016/05/27}{neu}^^A
+% \begin{parameter}{app}
+% \changes{v2.05}{2016/05/27}{neu}^^A
+% \begin{parameter}{place}
+% \changes{v2.05}{2016/05/27}{neu}^^A
 % \begin{macro}{\tud@date@set}
+% \changes{v2.05}{2016/05/27}{neu}^^A
+% \begin{field}{\@date}
+% \begin{field}{\tud@date@pre}
+% \changes{v2.05}{2016/05/27}{neu}^^A
+% \begin{field}{\tud@date@app}
 % \changes{v2.05}{2016/05/27}{neu}^^A
 % Das Abgabedatum der Arbeit für den Titel, wird im originalen Makro \cs{@date}
 % gespeichert. Zusätzlich kann über die Parameter im optionalen Argument eine 
@@ -722,29 +754,6 @@
   \tud@x@isodate@printdate{\@date}{#2}%
   \global\let\tud@date@check\relax%
 }
-%    \end{macrocode}
-% \end{macro}^^A \tud@date@set
-% \end{field}^^A \@date
-% \end{macro}^^A \date
-% \begin{field}{\tud@date@pre}
-% \changes{v2.05}{2016/05/27}{neu}^^A
-% \begin{field}{\tud@date@app}
-% \changes{v2.05}{2016/05/27}{neu}^^A
-% \begin{parameter}{before}
-% \changes{v2.05}{2016/05/27}{neu}^^A
-% \begin{parameter}{after}
-% \changes{v2.05}{2016/05/27}{neu}^^A
-% \begin{parameter}{prefix}
-% \changes{v2.05}{2016/05/27}{neu}^^A
-% \begin{parameter}{suffix}
-% \changes{v2.05}{2016/05/27}{neu}^^A
-% \begin{parameter}{pre}
-% \changes{v2.05}{2016/05/27}{neu}^^A
-% \begin{parameter}{app}
-% \changes{v2.05}{2016/05/27}{neu}^^A
-% \begin{parameter}{place}
-% \changes{v2.05}{2016/05/27}{neu}^^A
-%    \begin{macrocode}
 \newcommand*\tud@date@pre{}
 \newcommand*\tud@date@app{}
 \TUD@parameter@family{date}{%
@@ -758,6 +767,10 @@
   \TUD@parameter@handler@value{after}%
 }
 %    \end{macrocode}
+% \end{field}^^A \tud@date@app
+% \end{field}^^A \tud@date@pre
+% \end{field}^^A \@date
+% \end{macro}^^A \tud@date@set
 % \end{parameter}^^A place
 % \end{parameter}^^A app
 % \end{parameter}^^A pre
@@ -765,8 +778,7 @@
 % \end{parameter}^^A prefix
 % \end{parameter}^^A after
 % \end{parameter}^^A before
-% \end{field}^^A \tud@date@app
-% \end{field}^^A \tud@date@pre
+% \end{macro}^^A \date
 % \begin{macro}{\tud@date@print}
 % \changes{v2.05}{2016/05/27}{neu}^^A
 % Mit diesem Makro erfolgt die eigentliche Ausgabe des Datums und ggf. der 
@@ -819,15 +831,18 @@
 %<*package&supervisor|class&manual>
 % \fi
 %
-% \subsection{Felder für \pkg{tudscrsupervisor} und \cls{tudscrposter}}
+% \subsection{%
+%   Felder für die Klasse \cls{tudscrposter}%
+%   und das Paket \pkg{tudscrsupervisor}%
+% }
 %
-% Die beiden genanntent Pakete stellen einige weitere Felder bereit bzw. 
-% erweitern deren Funktionalitäten.
+% Die Klasse \cls{tudscrposter} und das Paket \pkg{tudscrsupervisor} stellen 
+% einige weitere Felder bereit bzw. erweitern deren Funktionalitäten.
 %
 % \begin{macro}{\chairman}
 % \begin{field}{\@chairman}
-% Angabe des Prüfungsausschussvorsitzenden für die Aufgabenstellung, wird im
-% Makro \cs{@chairman} gespeichert.
+% Die Angabe des Prüfungsausschussvorsitzenden für die Aufgabenstellung, wird 
+% im Makro \cs{@chairman} gespeichert.
 %    \begin{macrocode}
 \newcommand*\@chairman{}
 \newcommand*\chairman[1]{\gdef\@chairman{#1}}
@@ -957,7 +972,7 @@
 %<*class>
 % \fi
 %
-% \subsection{Prozessieren von Feldern}
+% \subsection{Verarbeitung bestimmter Feldinhalte für die Ausgabe}
 %
 % Einige Felder sind darauf ausgelegt, dass deren kommagetrennte Inhalte 
 % einzeln abgearbeitet und ausgewertet werden können. Die folgenden Makros 
@@ -1039,8 +1054,8 @@
 % \begin{macro}{\tud@multiple@fields@restore}
 % \changes{v2.04}{2015/05/12}{neu}^^A
 % Mit \cs{tud@multiple@fields@store} und \cs{tud@multiple@fields@restore} 
-% werden zwei Hilfsmakros definiert, um einzelne Feldinhalte lokal ändern und
-% nach der Verarbeitung auf den ursprünglichen Wert zurücksetzen zu können.
+% werden Hilfsmakros definiert, um einzelne Feldinhalte lokal ändern und nach
+% der Verarbeitung auf den ursprünglichen Wert zurücksetzen zu können.
 %
 % Nach der Sicherung der globalen Feldinhalte wird der übergebene Teilinhalt
 % des zweiten Argumentes mit \cs{sbox}\cs{z@}\marg{\#2} in eine Box expandiert.
@@ -1126,7 +1141,7 @@
 % \changes{v2.05}{2015/07/06}{neu}^^A
 % \begin{macro}{\tud@split@contactperson@list}
 % \changes{v2.05}{2015/07/06}{neu}^^A
-% Die Befehle \cs{tud@split@author@do} und \cs{tud@split@contactperson@do} 
+% Die beiden Makros \cs{tud@split@author@do} und \cs{tud@split@contactperson@do}
 % werden zunächst jeweils als Dummy initialisiert und an den entsprechenden
 % Stellen umdefiniert. Dies betrifft den Titel, die Aufgabenstellung und den 
 % Aushang in den Umgebungen \env{task} und \env{notice} sowie den Seitenfuß bei

@@ -81,8 +81,9 @@ echo  Erzeugen der Installationdateien
 echo =========================================================================
 echo.
 cd ..\install
+tex tudscr-metrics.dtx
 copy  ..\source\latex\tudscr\tudscr-version.dtx ..\.
-tex tudscr-install.ins
+tex tudscr-scripts.dtx
 rename *.bxt *.bat
 setlocal enabledelayedexpansion
 set "pattern=_V_"

@@ -15,8 +15,8 @@
 \usepackage{bookmark}
 
 \begin{document}
-\date{20.11.2015}
-\author{Falk Hanisch\thanks{\noexpand\scriptsize\noexpand\Email{\tudscrmail}}}
+\date{07.11.2016}
+\author{Falk Hanisch\thanks{\noexpand\scriptsize\noexpand\mailto{\tudscrmail}}}
 \title{Ein Beitrag zum mathematischen Satz in \NoCaseChange{\hologo{LaTeXe}}}
 \makeatletter
 \begingroup%
@@ -32,7 +32,20 @@
 \endgroup%
 \markright{\@title}
 \makeatother
-\StartTutorial
+\StartTutorial[%
+  Im mathematischen Satz sollten lediglich Formelzeichen für physikalische 
+  Größen und Variablen sowie Funktions- und Operatorzeichen mit frei wählbarer 
+  Bedeutung kursiv geschrieben werden. Dagegen werden Einheiten und ihre 
+  Vorsätze, Zahlen, Funktions- und Operatorzeichen mit feststehender Bedeutung 
+  sowie Chemische Elemente und Verbindungen aufrecht gesetzt. Weiterhin werden 
+  Indizes, welche ein Formelzeichen näher beschreiben, ebenfalls aufrecht 
+  gesetzt. Dieses Tutorial zeigt, wie mit einfachen Mitteln die Auszeichnung 
+  von beschreibenden Indizes bei Formelzeichen typografisch korrekt erfolgen 
+  kann.
+]
+Bevor das eigentliche Tutorial beginnt, werden sowohl eine Dokumentklasse als 
+auch die für jedes \hologo{pdfLaTeX}-Dokument meiner Meinung nach sinnvollen 
+Pakete geladen.
 %
 \begin{Preamble}
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
@@ -52,14 +65,10 @@ in diesem Tutorial verwendeten Mathematikumgebungen \Environment{equation},
 \usepackage{amsmath}
 \end{Preamble}
 %
-Ein guter Mathematiksatz ist in \hologo{LaTeX} durchaus Sisyphusarbeit. Wenn 
-mikrotypografisch alles richtig gemacht werden soll, gibt es einiges zu 
-beachten. Generell gilt, dass Variablen kursiv, Bezeichnungen und Konstanten
-aufrecht gesetzt werden. Um beschreibende Indizes bei Formelzeichen richtig zu 
-setzen, ist ohne weitere Maßnahmen die exzessive Nutzung der beiden Befehle 
-\Macro{mathrm}[\PParameter{\dots}] und \Macro{mathit}[\PParameter{\dots}] wohl 
-oder übel notwendig. Somit wird aus:
+Zunächst wird ein kurzes Beispiel gegeben, welches für die nachfolgenden 
+Ausführungen als Grundlage dienen soll. 
 %
+\CodePreamble{}%
 \begin{Trunk*}
 \begin{equation*}
 \begin{gathered}
@@ -74,8 +83,16 @@ M_{EMmin}\leq M_{EM}\leq M_{EMmax}
 
 \end{Trunk*}
 %
-mit ziemlich viel Anpassungsarbeit:
+Ein guter Mathematiksatz ist in \hologo{LaTeX} durchaus Sisyphusarbeit. Wenn 
+mikrotypografisch alles richtig gemacht werden soll, gibt es einiges zu 
+beachten. Generell gilt, dass Variablen kursiv oder geneigt, Bezeichnungen und 
+Konstanten aufrecht gesetzt werden. Um beschreibende Indizes formal richtig zu 
+setzen, ist ohne weitere Maßnahmen die exzessive Nutzung der Befehle 
+\Macro{mathrm}[\PParameter{\dots}] und \Macro{mathit}[\PParameter{\dots}] 
+respektive \Macro{mathnormal}[\PParameter{\dots}] wohl oder übel notwendig. 
+Aus dem vorhergehenden Beispiel wird mit ziemlich viel Anpassungsarbeit:
 %
+\CodePreamble{}%
 \begin{Trunk*}
 \begin{equation*}
 \begin{gathered}
@@ -90,23 +107,26 @@ M_\mathrm{EM_{min}}\leq M_\mathrm{EM}\leq M_\mathrm{EM_{max}}
 
 \end{Trunk*}
 %
-Augenscheinlich ist dabei eine sehr viel Handarbeit notwendig. Allerdings 
-lässt sich dies relativ gut vereinfachen. Zu diesem Zwecke wird ein Befehl 
-\Macro{ind}[\PParameter{\dots}] für das Setzen von Indizes bei Formelzeichen 
-definiert. Danach können~-- wenn dies für nötig und sinnvoll erachtet wird~-- 
-noch zusätzliche Befehle für häufig verwendete Ausdrücke definiert werden. Als 
-Beispiel wird das schon eben genutzte Drehmoment \ensuremath{M} verwendet. 
-Hierfür wäre folgende Definition möglich:
+Augenscheinlich ist dabei sehr viel Handarbeit notwendig. Allerdings lässt sich 
+dies relativ gut vereinfachen. Zu diesem Zwecke wird für das Setzen von Indizes 
+bei Formelzeichen der Befehl \Macro{ind}[\PParameter{\dots}] definiert. Danach 
+können~-- wenn dies für nötig und sinnvoll erachtet wird~-- noch zusätzliche 
+Befehle für häufig verwendete Ausdrücke definiert werden. Als Beispiel wird das 
+schon eben genutzte Drehmoment \ensuremath{M} verwendet. Hierfür wäre folgende 
+Definition möglich:%
+\footnote{%
+  Dabei sorgt \Macro*{kern.03em} für das Einfügen eins kleinen Abstandes 
+  zwischen kursiver Variable und dem aufrechten Index. Abhängig von der 
+  verwendeten Schriftart sollte dieser Abstand leicht angepasst werden. 
+}
 %
 \CodeHook{\let\newcommand\renewcommand}
 \begin{Trunk*}
-\newcommand*{\ind}[1]{\ensuremath{_\mathrm{#1}}}
+\newcommand*{\ind}[1]{\ensuremath{\kern.03em_\mathrm{#1}}}
 \newcommand*{\M}[1]{\ensuremath{M\ind{#1}}}
 
 \end{Trunk*}
-%
-und damit diese Ausgabe erzeugen:
-%
+\CodePreamble{}
 \begin{Trunk*}
 \begin{equation*}
 \begin{gathered}
@@ -121,23 +141,23 @@ und damit diese Ausgabe erzeugen:
 
 \end{Trunk*}
 %
-Netter Nebeneffekt ist, dass dieser Befehl aufgrund der Verwendung von 
-\Macro{ensuremath}[\PParameter{\dots}] nun auch im Fließtext verwenden werden 
-kann, beispielsweise für das induzierte Moment einer Verbrennungskraftmaschine 
-\M{VM_{ind}} (\Macro{M}[\PParameter{VM\_\PParameter{ind}}]).
+Ein gewünschter Nebeneffekt der vorhergehenden Definition ist, dass dieser 
+Befehl aufgrund der Verwendung von \Macro{ensuremath}[\PParameter{\dots}] nun 
+auch im Fließtext verwenden werden kann. Beispielsweise lässt sich im Textteil 
+das induzierten Moment einer Verbrennungskraftmaschine~\M{VM_{ind}} angeben
+(\Macro{M}[\PParameter{VM\_\PParameter{ind}}]).
 
 Für noch mehr Bequemlichkeit bei der Nutzung kann eine Lösung gefunden werden, 
 mit welcher~-- im Gegensatz zur Standardbefehlsdefinition in \hologo{LaTeXe}~-- 
-\textbf{nach} dem obligatorischen Argument noch ein optionales für einen 
-weiteren Index angegeben werden kann, um damit der natürlichen Schreibweise zu 
-entsprechen. Es wird der Befehl \Macro{M} so definiert, das dieser entweder mit 
-\Macro{M}[\Parameter{Index}] oder in der Variante mit nachgelagertem optionalen 
-Argument \Macro{M}[\Parameter{Index}\OParameter{Indexindex}] genutzt werden 
-kann.
+\textbf{nach} dem obligatorischen noch ein optionales Argument für einen 
+zusätzlichen Subindex angegeben werden kann, um damit der natürlichen 
+Schreibweise zu entsprechen. Es wird der Befehl \Macro{M} so definiert, das 
+dieser entweder mit \Macro{M}[\Parameter{Index}] oder in der Variante 
+\Macro{M}[\Parameter{Index}\OParameter{Indexindex}] mit nachgelagertem 
+optionalen Argument genutzt werden kann.
 %
 \CodeHook{\let\newcommand\renewcommand}
 \begin{Trunk*}
-\renewcommand*{\ind}[1]{\ensuremath{_\mathrm{#1}}}
 \makeatletter
 \renewcommand*{\M}[1]{\@ifnextchar[{\o@M{#1}}{\n@M{#1}}}
 \newcommand*{\n@M}{}
@@ -172,11 +192,7 @@ Argument genutzt werden. Damit würde die Befehlsdeklaration für \Macro{M}
 folgendermaßen lauten:
 \begin{Hint}
 \NewDocumentCommand \M { m o } {%
-  \ensuremath{%
-    M\ind{%
-      #1\IfValueT{#2}{_{#2}}%
-    }%
-  }%
+  \ensuremath{M\ind{#1\IfValueT{#2}{_{#2}}}}%
 }
 \end{Hint}
 %
