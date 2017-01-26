@@ -4,7 +4,7 @@
 
  Copyright (C) Falk Hanisch <tudscr@gmail.com>, 2012-2017
 
- tudscr 2017/00/00 v2.05g
+ tudscr 2017/01/26 v2.05g
 
 ============================================================================
 
@@ -63,7 +63,7 @@ Das Bundle beinhaltet:
 Versionen
 ---------
 
-**v2.05g** (2017/00/00)
+**v2.05g** (2017/01/26)
 + Erweiterung der Quelltextdokumentationsklasse `tudscrdoc`
 + kleinere Fehler im TUD-Script-Bundle behoben
 
@@ -248,7 +248,7 @@ The bundle offers:
 Versions
 --------
 
-**v2.05g** (2017/00/00)
+**v2.05g** (2017/01/26)
 + enhancement of the source code documentation class `tudscrdoc`
 + minor errors fixed within the TUD-Script bundle
 
