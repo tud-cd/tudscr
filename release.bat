@@ -47,7 +47,8 @@ move  tudscr.ins          source\latex\tudscr\
 move  tudscrsource.tex    source\latex\tudscr\
 xcopy doc                 source\latex\tudscr\doc\ /s
 del source\latex\tudscr\test.tex /s > nul
-for /f %%f in ('dir /b ..\*.md') do copy ..\%%f doc\latex\tudscr\%%~nf
+rem for /f %%f in ('dir /b ..\*.md') do copy ..\%%f doc\latex\tudscr\%%~nf
+copy ..\*.md doc\latex\tudscr\
 move tudscrsource.pdf doc\latex\tudscr\
 move logo             tex\latex\tudscr\
 del *.* /q > nul
@@ -152,7 +153,7 @@ mkdir CTAN\tudscr\logo
 xcopy ..\temp\doc\latex\tudscr\*.*      CTAN\tudscr\doc\    /s
 xcopy ..\temp\source\latex\tudscr\*.*   CTAN\tudscr\source\ /s
 xcopy ..\temp\tex\latex\tudscr\logo\*.* CTAN\tudscr\logo\   /s
-move  CTAN\tudscr\doc\README            CTAN\tudscr\README
+move  CTAN\tudscr\doc\README.md         CTAN\tudscr\README.md
 cd temp
 (
   echo With WScript
