@@ -1,4 +1,4 @@
-% \CheckSum{840}
+% \CheckSum{842}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-fields.dtx}[%
-  2017/01/03 v2.05g TUD-Script (input fields)%
+  2017/01/26 v2.05g TUD-Script (input fields)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman,xindy]{tudscrdoc}
@@ -271,28 +271,36 @@
     \def\newline{\space\ignorespaces}%
     \def\\{\space\ignorespaces}%
 %    \end{macrocode}
-% Die Makros aus \cs{tud@split@author@list} werden zu \cs{relax} gesetzt, um 
+% Die Makros aus \cs{tud@split@author@list} werden zu \cs{@tempc} gesetzt, um 
 % diese nach der Expansion weiter zu behandeln.
 %    \begin{macrocode}
-    \def\@tempa##1{\csdef{##1}####1{\noexpand\relax}}%
+    \let\@tempc\relax%
+    \def\@tempa##1{\csedef{##1}####1{\@tempc}}%
     \let\@tempb\tud@split@author@list%
     \ifx\and\relax\else%
       \robustify\and%
     \fi%
     \expandafter\forcsvlist\expandafter\@tempa\expandafter{\@tempb}%
-    \protected@edef\@@author{#1}%
 %    \end{macrocode}
 % Da die Befehle für Zusatzinformationen unter Umständen ungewollte Leerzeichen 
 % im Feld \cs{@@author} hinterlassen, werden diese entfernt.
 %    \begin{macrocode}
-    \tud@replace\@@author{ \relax }{}%
-    \tud@replace\@@author{\relax }{}%
-    \tud@replace\@@author{ \relax}{}%
-    \tud@replace\@@author{\relax}{}%
-    \tud@replace\@@author{ \and }{\and}%
-    \tud@replace\@@author{ \and}{\and}%
-    \tud@replace\@@author{\and }{\and}%
-    \protected@xdef\@@author{\trim@spaces{\@@author}}%
+    \def\@tempa##1##2{%
+      \def\@tempb####1##2####2\@nil{%
+        \IfArgIsEmpty{####2}{%
+          \def##1{####1}%
+        }{%
+          \@tempb####1####2\@nil%
+        }%
+      }%
+      \expandafter\@tempb##1##2\@nil%
+    }%
+    \protected@edef\@@author{#1}%
+    \@tempa{\@@author}{ \@tempc }%
+    \@tempa{\@@author}{\@tempc }%
+    \@tempa{\@@author}{ \@tempc}%
+    \@tempa{\@@author}{\@tempc}%
+    \xdef\@@author{\expandonce\@@author}%
   \endgroup%
 }
 \newcommand*\@authormore{}
