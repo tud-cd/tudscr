@@ -4,7 +4,7 @@
 
  Copyright (C) Falk Hanisch <tudscr@gmail.com>, 2012-2017
 
- tudscr 2017/01/26 v2.05g
+ tudscr 2017/02/04 v2.05h
 
 ============================================================================
 
@@ -62,6 +62,11 @@ Das Bundle beinhaltet:
 
 Versionen
 ---------
+
+**v2.05h** (2017/02/04)
++ Quelltextdokumentationsklasse `tudscrdoc` an neue Version von `dox` angepasst
++ Glyphen (`lessequal` und `greaterequal`) in Schriftfamilien korrigiert
+
 
 **v2.05g** (2017/01/26)
 + Erweiterung der Quelltextdokumentationsklasse `tudscrdoc`
@@ -247,6 +252,11 @@ The bundle offers:
 
 Versions
 --------
+
+**v2.05h** (2017/02/04)
++ adaption of the source code documentation class `tudscrdoc` to updated `dox`
++ glyphs (`lessequal` und `greaterequal`) in font families corrected
+
 
 **v2.05g** (2017/01/26)
 + enhancement of the source code documentation class `tudscrdoc`
