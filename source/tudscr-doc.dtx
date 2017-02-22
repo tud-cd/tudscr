@@ -1,4 +1,4 @@
-% \CheckSum{1975}
+% \CheckSum{2020}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-doc.dtx}[%
-  2017/02/13 v2.05h TUD-Script\space%
+  2017/02/22 v2.05i TUD-Script\space%
   (source code documentation based on scrartcl/scrdoc)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
@@ -717,7 +717,8 @@
 % \end{macro}^^A \@SaveMacroIndexName
 % \begin{macro}{\SpecialMainParameterIndex}
 % \changes{v2.05g}{2016/11/02}{neu}^^A
-% Hier wird nun die Gestalt der Einträge für Parameter festgelegt.
+% Hier wird nun die Gestalt der Einträge für Parameter als Haupteintrag 
+% festgelegt.
 %    \begin{macrocode}
 \renewcommand*\SpecialMainParameterIndex[1]{%
   \ifx\parameter@parent@indexname\relax%
@@ -751,6 +752,43 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \SpecialMainParameterIndex
+% \begin{environment}{DescribeParameterParent}
+% \changes{v2.05i}{2017/02/20}{neu}^^A
+% \begin{macro}{\SpecialParameterIndex}
+% \changes{v2.05i}{2017/02/20}{neu}^^A
+% Selbiges für die Verwendung durch \cs{Describe\dots}
+%    \begin{macrocode}
+\newenvironment{DescribeParameterParent}[2]{%
+  \@nameuse{@Save#1IndexName}{\string#2}%
+}{}
+\renewcommand*\SpecialParameterIndex[1]{%
+  \ifx\parameter@parent@indexname\relax%
+    \ClassError{\TUD@Class@Name}{No previous macro or environment}{%
+      Since parameters can only be used for macros or\MessageBreak%
+      environments, you have to use macro\MessageBreak%
+      `\string\DescribeParameter' only within the environment\MessageBreak%
+      `DescribeParameterParent'.%
+    }%
+  \fi%
+  \@bsphack%
+  \index{%
+    \parameter@parent@indexname\actualchar%
+    \parameter@parent@indexformat\levelchar%
+    #1\space\tud@parameter@name\actualchar%
+    {\protect\ttfamily#1}\index@type{\tud@parameter@name}%
+    \encapchar usage%
+  }%
+  \index{%
+    \tud@parameters@name:\levelchar#1\space\parameter@parent@indexname%
+    \actualchar{\protect\ttfamily#1}%
+    \noexpand\,--\noexpand\,\parameter@parent@indexformat%
+    \encapchar usage%
+  }%
+  \@esphack%
+}
+%    \end{macrocode}
+% \end{macro}^^A \SpecialParameterIndex
+% \end{environment}
 %
 % \subsubsection{Erzeugen von Änderungseinträgen}
 %
