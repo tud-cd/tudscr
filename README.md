@@ -4,7 +4,7 @@
 
  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2017
 
- tudscr 2017/02/04 v2.05h
+ tudscr 2017/02/22 v2.05hi
 
 ============================================================================
 
@@ -62,6 +62,10 @@ Das Bundle beinhaltet:
 
 Versionen
 ---------
+
+**v2.05i** (2017/xx/xx)
++ Umgebung `DescribeParameterParent` in Klasse `tudscrdoc`
+
 
 **v2.05h** (2017/02/04)
 + Quelltextdokumentationsklasse `tudscrdoc` an neue Version von `dox` angepasst
@@ -252,6 +256,9 @@ The bundle offers:
 
 Versions
 --------
+
+**v2.05i** (2017/xx/xx)
++ environment `DescribeParameterParent` in class `tudscrdoc`
 
 **v2.05h** (2017/02/04)
 + adaption of the source code documentation class `tudscrdoc` to updated `dox`
