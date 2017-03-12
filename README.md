@@ -4,7 +4,7 @@
 
  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2017
 
- tudscr 2017/02/22 v2.05hi
+ tudscr 2017/03/12 v2.05i
 
 ============================================================================
 
@@ -63,8 +63,10 @@ Das Bundle beinhaltet:
 Versionen
 ---------
 
-**v2.05i** (2017/xx/xx)
+**v2.05i** (2017/03/12)
++ Umgebungen `Describe<Element>s` für mehrere Elemente in Klasse `tudscrdoc`
 + Umgebung `DescribeParameterParent` in Klasse `tudscrdoc`
++ Bugfix für `\mu` bei Mathematikschriften
 
 
 **v2.05h** (2017/02/04)
@@ -257,8 +259,10 @@ The bundle offers:
 Versions
 --------
 
-**v2.05i** (2017/xx/xx)
+**v2.05i** (2017/03/12)
++ environment `Describe<Element>s` for mutliple elements in class `tudscrdoc`
 + environment `DescribeParameterParent` in class `tudscrdoc`
++ bug fix for `\mu` with math font
 
 **v2.05h** (2017/02/04)
 + adaption of the source code documentation class `tudscrdoc` to updated `dox`
