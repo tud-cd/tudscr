@@ -67,6 +67,7 @@ Versionen
 + Umgebungen `Describe<Element>s` für mehrere Elemente in Klasse `tudscrdoc`
 + Umgebung `DescribeParameterParent` in Klasse `tudscrdoc`
 + Bugfix für `\mu` bei Mathematikschriften
++ Bugfix in Klasse `tudscrmanual` für neue Version von `xparse`
 
 
 **v2.05h** (2017/02/04)
@@ -263,6 +264,7 @@ Versions
 + environment `Describe<Element>s` for mutliple elements in class `tudscrdoc`
 + environment `DescribeParameterParent` in class `tudscrdoc`
 + bug fix for `\mu` with math font
++ bug fix in class `tudscrmanual` for new version of `xparse`
 
 **v2.05h** (2017/02/04)
 + adaption of the source code documentation class `tudscrdoc` to updated `dox`

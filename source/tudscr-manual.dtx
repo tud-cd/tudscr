@@ -1,4 +1,4 @@
-% \CheckSum{4275}
+% \CheckSum{4277}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-manual.dtx}[%
-  2017/02/22 v2.05i TUD-Script\space%
+  2017/03/12 v2.05i TUD-Script\space%
 %</driver>
 %<package&identify>\ProvidesPackage{tudscrtutorial}[%
 %<*driver|package&identify>
@@ -887,7 +887,7 @@
 % \begin{macro}{\mailto}
 % Ein Makro zur Angabe einer verlinkten E"~Mail-Adresse.
 %    \begin{macrocode}
-\newrobustcmd*\mailto[1]{\href{mailto:#1}{\nolinkurl{#1}}}%
+\newrobustcmd*\mailto[1]{\mbox{\href{mailto:#1}{\nolinkurl{#1}}}}%
 %    \end{macrocode}
 % \end{macro}^^A \mailto
 % Wenn \pkg{hyperref} geladen wird, erzeugt das Paket \pkg{babel} innerhalb von 
@@ -999,7 +999,7 @@
 %    \begin{macrocode}
 \NewDocumentEnvironment{Declaration}{omoog}{%
   \listadd\tud@declaration@list{#2}%
-  \tud@declare@start[#1]{#2}{#3}{#4}{#5}%
+  \tud@declare@start[#1]{#2}[#3][#4]{#5}%
 }{%
   \tud@declare@end{#2}{\printdeclarationlist}%
 }
@@ -1026,7 +1026,7 @@
       #3%
       \def\tud@declare@num{0}%
     }%
-    \tud@declare@start{#3}{#4}{#5}{#6}%
+    \tud@declare@start{#3}[#4][#5]{#6}%
   }{%
     \listadd\tud@declaration@list{#3}%
 %    \end{macrocode}
@@ -1040,7 +1040,7 @@
       \Changed@At@CreateList[#3]{#1}%
     }%
     \IfValueTF{#6}{%
-      \tud@declare@start{#3}{#4}{#5}{#6}%
+      \tud@declare@start{#3}[#4][#5]{#6}%
 %    \end{macrocode}
 % Ohne eine zusätzliche Angabe imletzten optionalen Argument wird standardmäßig
 % der Entfall der Deklaration angegeben. Alternativ dazu kann im ersten 
@@ -1048,7 +1048,7 @@
 % neue bzw. aktuell gültige Deklaration als Querverweis angegeben werden.
 %    \begin{macrocode}
     }{%
-      \toks@{\tud@declare@start{#3}{#4}{#5}}%
+      \toks@{\tud@declare@start{#3}[#4][#5]}%
       \def\@tempa{\emph{entf\"allt}}%
       \in@{:}{#1}%
       \ifin@%
@@ -1098,7 +1098,7 @@
 % Dies sind die Makros für die eigentliche Abarbeitung der Deklarationsbefehle 
 % zu Beginn und Ende der Umgebungen \env{Declaration} und \env{Obsolete}.
 %    \begin{macrocode}
-\NewDocumentCommand\tud@declare@start{ommmm}{%
+\NewDocumentCommand\tud@declare@start{omoog}{%
 %    \end{macrocode}
 % Die optional angegebenen Änderungen werden mit \cs{Changed@At@CreateList} in 
 % der Liste \cs{tud@changedat@list} gesichert und später sowohl für die
@@ -1393,13 +1393,14 @@
 % \end{macro}^^A \suffix
 % \begin{macro}{\NewExpandableDocumentCommand}
 % \changes{v2.02}{2014/11/04}{neu}^^A
+% \changes{v2.05i}{2017/03/12}{wird mittlerweile von \pkg{xparse} definiert}^^A
 % Für Labels, Index- und Änderungs- sowie PDF-Outline-Einträge etc. müssen ganz
 % bestimmte Markup-Befehle durch eine expandierbare Version ersetzt werden. Um 
 % dies möglichst einfach zu gestalten, wird \cs{NewExpandableDocumentCommand} 
 % definiert.
 %    \begin{macrocode}
-\newcommand*\NewExpandableDocumentCommand[3]{%
-  \NewDocumentCommand#1{#2}{#3}%
+\providecommand*\NewExpandableDocumentCommand[3]{%
+  \NewDocumentCommand#1{#2}{}%
   \DeclareExpandableDocumentCommand#1{#2}{#3}%
 }
 %    \end{macrocode}
@@ -2196,7 +2197,7 @@
 % der richtigen Formatierung enthält, ist möglich.
 %    \begin{macrocode}
 \NewDocumentCommand\tud@lbl@get@curr{%
-  sm>{\tud@lbl@create}>{\SplitArgument{2}{:}}md==%
+  sm>{\SplitArgument{2}{:}}>{\tud@lbl@create}md==%
 }{%
 %    \end{macrocode}
 % Mit \cs{tud@lbl@get@@curr} wird das im zweiten obligatorischen Argument 
@@ -2272,14 +2273,14 @@
 % seine drei Hauptbestandteile zur WEiterverarbeitung zerlegt.
 %    \begin{macrocode}
 \NewDocumentCommand\tud@lbl@get@dflt{m>{\SplitArgument{2}{:}}mr==}{%
-  \tud@lbl@get@@dflt{#1}#2=#3=%
+  \tud@lbl@get@@dflt{#1}#2{#3}%
 }
 %    \end{macrocode}
 % Durch \cs{tud@lbl@get@@dflt} wird als erstes geprüft, ob der Bundlepräfix 
 % bereits dem Standardpräfix für die Hauptklassen entspricht. Nur wenn dies 
 % nicht der Fall ist, wird die Labelgenerierung abermals ausgeführt.
 %    \begin{macrocode}
-\NewDocumentCommand\tud@lbl@get@@dflt{mmmmr==}{%
+\NewDocumentCommand\tud@lbl@get@@dflt{mmmmm}{%
   \edef\tud@reserved{\expandafter\detokenize\expandafter{\tud@bdl@dflt}}%
   \ifstr{\tud@reserved}{#2}{}{%
 %    \end{macrocode}
@@ -2303,7 +2304,7 @@
 %    \begin{macrocode}
 %<*class>
 \NewDocumentCommand\tud@if@lbl@exists{%
-  >{\tud@lbl@create}>{\SplitArgument{2}{:}}m%
+  >{\SplitArgument{2}{:}}>{\tud@lbl@create}m%
 }{%
   \ifcsdef{r@#1}{%
     \expandafter\@firstoftwo%
@@ -2806,7 +2807,7 @@
 % \cs{SplitArgument}\val{\{1\}\{!\}} getrennt und dann weiter verarbeitet.
 %    \begin{macrocode}
 \NewDocumentCommand\Markup@Output{>{\SplitArgument{1}{!}}md==o}{%
-  \Markup@@Output#1=#2=[#3]%
+  \Markup@@Output#1{#2}{#3}%
 }
 %    \end{macrocode}
 % Anschließend wird entweder \cs{Markup@Declare} oder \cs{Markup@Inline}
@@ -2814,7 +2815,7 @@
 % wird für den Befehlsaufruf mit dem dazugehörigen Argument zur Vereinfachung
 % ein Token-Register verwendet.
 %    \begin{macrocode}
-\NewDocumentCommand\Markup@@Output{mmd==o}{%
+\NewDocumentCommand\Markup@@Output{mmmm}{%
 %<*class>
   \if@tud@declare%
     \tud@toks@{\Markup@Declare}%
@@ -3967,22 +3968,22 @@
 % weiter. 
 %    \begin{macrocode}
 \NewDocumentCommand\Changed@At@CreateList{od()m}{%
-  \IfValueT{#3}{\forssvlist{\Changed@At@@CreateList[#1](#2)}{#3}}%
+  \IfValueT{#3}{\forssvlist{\Changed@At@@CreateList{#1}{#2}}{#3}}%
 }
 %    \end{macrocode}
 % Mit \cs{Changed@At@@CreateList} wird lediglich die Versionsnummer von der 
 % eigentlichen Änderungsnotiz getrennt.
 %    \begin{macrocode}
-\NewDocumentCommand\Changed@At@@CreateList{r[]r()>{\SplitArgument{1}{:}}m}{%
-  \Changed@At@@@CreateList[#1](#2)#3%
+\NewDocumentCommand\Changed@At@@CreateList{mm>{\SplitArgument{1}{:}}m}{%
+  \Changed@At@@@CreateList{#1}{#2}#3%
 }
 %    \end{macrocode}
 % Zuletzt wird durch \cs{Changed@At@@@CreateList} ein möglicher Untereintrag
 % in ein separates Argument abgetrennt und \cs{Changed@At@@@@CreateList} mit
 % allen Argumenten aufgerufen.
 %    \begin{macrocode}
-\NewDocumentCommand\Changed@At@@@CreateList{r[]r()>{\SplitArgument{1}{!}}mm}{%
-  \Changed@At@@@@CreateList[#1](#2)#3{#4}%
+\NewDocumentCommand\Changed@At@@@CreateList{mm>{\SplitArgument{1}{!}}mm}{%
+  \Changed@At@@@@CreateList{#1}{#2}#3{#4}%
 }
 %    \end{macrocode}
 % Der Befehl \cs{Changed@At@@@@CreateList} übernimmt nun die Erstellung des 
@@ -4008,7 +4009,7 @@
 % \val{!\meta{Untereintrag}!\meta{Änderungsnotiz}}.
 % \endgroup
 %    \begin{macrocode}
-\NewDocumentCommand\Changed@At@@@@CreateList{r[]r()mmm}{%
+\NewDocumentCommand\Changed@At@@@@CreateList{mmmmm}{%
 %    \end{macrocode}
 % Die Aufteilung der Änderungsliste in die einzelnen \TUDScript-Bundle-Elemente 
 % erfolgt entweder anhand des explizit angegebenen optionalen Argumentes in
@@ -5068,6 +5069,7 @@
   \immediate\closeout\tud@write@a%
   \clearpage%
   \addsec{Copy\nobreakspace\&\nobreakspace{}Paste}%
+  \thispagestyle{empty}%
   \pagestyle{empty}%
   Zum Ende des Dokumentes wird das vorgestellte Tutorial als \"ubersetzbarer 
   Quelltext ausgegeben, um dieses via Copy~\&~Paste verwenden und alle Punkte 
