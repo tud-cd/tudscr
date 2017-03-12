@@ -2,9 +2,9 @@
  TUD-Script -- Corporate Design of Technische Universität Dresden
 ----------------------------------------------------------------------------
 
- Copyright (C) Falk Hanisch <tudscr@gmail.com>, 2012-2017
+ Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2017
 
- tudscr 2017/02/04 v2.05h
+ tudscr 2017/03/12 v2.05i
 
 ============================================================================
 
@@ -62,6 +62,12 @@ Das Bundle beinhaltet:
 
 Versionen
 ---------
+
+**v2.05i** (2017/03/12)
++ Umgebungen `Describe<Element>s` für mehrere Elemente in Klasse `tudscrdoc`
++ Umgebung `DescribeParameterParent` in Klasse `tudscrdoc`
++ Bugfix für `\mu` bei Mathematikschriften
+
 
 **v2.05h** (2017/02/04)
 + Quelltextdokumentationsklasse `tudscrdoc` an neue Version von `dox` angepasst
@@ -252,6 +258,11 @@ The bundle offers:
 
 Versions
 --------
+
+**v2.05i** (2017/03/12)
++ environment `Describe<Element>s` for mutliple elements in class `tudscrdoc`
++ environment `DescribeParameterParent` in class `tudscrdoc`
++ bug fix for `\mu` with math font
 
 **v2.05h** (2017/02/04)
 + adaption of the source code documentation class `tudscrdoc` to updated `dox`

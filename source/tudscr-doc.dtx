@@ -1,10 +1,10 @@
-% \CheckSum{1975}
+% \CheckSum{2084}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
 % ----------------------------------------------------------------------------
 %
-%  Copyright (C) Falk Hanisch <tudscr@gmail.com>, 2012-2017
+%  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2017
 %
 % ----------------------------------------------------------------------------
 %
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-doc.dtx}[%
-  2017/02/04 v2.05h TUD-Script\space%
+  2017/03/09 v2.05i TUD-Script\space%
   (source code documentation based on scrartcl/scrdoc)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
@@ -173,8 +173,19 @@
 %
 % Befehle, welche bei der Verwendung von \cs{EnableCrossrefs} dennoch nicht im 
 % Index erscheinen sollen.
+%
+% \begin{macro}{\DisableCrossrefsForced}
+% \changes{v2.05i}{2017/03/02}{neu}^^A
+% Für das sichere Deaktivieren von Makroeinträgen im Index nach der Verwendung 
+% von \cs{EnableCrossrefs}. Sollte in einer Gruppe genutzt werden!
+%    \begin{macrocode}
+\newcommand*\DisableCrossrefsForced{}
+\let\DisableCrossrefsForced\DisableCrossrefs
+%    \end{macrocode}
+% \end{macro}^^A \DisableCrossrefsForced
+%
 % \begingroup%
-% \DisableCrossrefs%
+% \DisableCrossrefsForced%
 %    \begin{macrocode}
 %^^A\DoNotIndex{\ ,\",\.,\@,\\,\{,\}}
 %^^A\DoNotIndex{\@abstrtfalse,\@abstrttrue,\@addtoreset}
@@ -367,7 +378,11 @@
 % neuen Makros \cs{doxcreateindexname} bzw. \cs{doxcreatemacrolikeindexname} 
 % erstellt. Mit diesen wird beim Aufruf einer Deklarationsumgebung der aktuelle
 % Name und Eintragstyp des jeweiligen Deklarationselementes gesichert, um diese
-% Informationen in der Änderungsliste nutzen zu können.
+% Informationen in der Änderungsliste nutzen zu können. Außerdem werden mit dem 
+% Makro \cs{@doxcreatedescribes} Befehle erzeugt, mit denen eine Liste von zu 
+% beschreibenden Elementen via \cs{DescribeOption\meta{Typ}s} erzeugt werden 
+% kann. Dies dient insbesondere zum Erzeugen der Randnotizen mit \cs{marginnote}
+% aus dem glecihnamigen Paket.
 %    \begin{macrocode}
 \renewcommand*\doxitem[4][]{%
   \@nameuse{dox@macrolike\dox@macrolikedefault}%
@@ -398,10 +413,47 @@
   \fi%
   \expandafter\@doxexpr\expandafter{\dox@idxtype}%
   \@doxcreatedescribe{#2}%
+  \@doxcreatedescribes{#2}%
   \@doxcreateenv{#2}{#3}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \doxitem
+% \begin{macro}{\@doxcreatedescribes}
+% \changes{v2.05i}{2017/03/09}{neu}^^A
+% \begin{length}{\marginnotevskip}
+% \changes{v2.05i}{2017/03/09}{neu}^^A
+% \begin{macro}{\marginpar}
+% Hiermit werden Befehle der Form \cs{DescribeOption\meta{Typ}s} erzeugt, mit 
+% welchen mehrere Eintragstypen erzeugt werden können. Gleichzeitig werden die 
+% Randnotizen via \cs{marginnote} mit den passenden vertikalen Abständen 
+% erstellt.
+%    \begin{macrocode}
+\newlength\marginnotevskip
+\newcommand*\@doxcreatedescribes[1]{%
+  \expandafter\def\csname Describe#1s\endcsname##1{%
+    \setlength\marginnotevskip{\z@}%
+    \@for\@tempa:=##1\do{%
+      \ifx\@tempa\@empty\else%
+        \edef\@tempb{\expandonce{\csname Describe#1\endcsname}{\@tempa}}%
+        \@tempb%
+        \addtolength\marginnotevskip{\baselineskip}%
+      \fi%
+    }%
+  }%
+}
+\AfterPackage{marginnote}{%
+  \renewcommand*\marginpar[2][]{%
+    \IfArgIsEmpty{#1}{%
+      \marginnote{#2}[\marginnotevskip]%
+    }{%
+      \marginnote[{#1}]{#2}[\marginnotevskip]%
+    }%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \marginpar
+% \end{length}^^A \marginnotevskip
+% \end{macro}^^A \@doxcreatedescribes
 % \begin{macro}{\index@type}
 % \changes{v2.05g}{2016/11/10}{neu}^^A
 % Dieses Makro dient zur Formatierung des Typen der Deklarationselemente in 
@@ -717,7 +769,8 @@
 % \end{macro}^^A \@SaveMacroIndexName
 % \begin{macro}{\SpecialMainParameterIndex}
 % \changes{v2.05g}{2016/11/02}{neu}^^A
-% Hier wird nun die Gestalt der Einträge für Parameter festgelegt.
+% Hier wird nun die Gestalt der Einträge für Parameter als Haupteintrag 
+% festgelegt.
 %    \begin{macrocode}
 \renewcommand*\SpecialMainParameterIndex[1]{%
   \ifx\parameter@parent@indexname\relax%
@@ -751,6 +804,43 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \SpecialMainParameterIndex
+% \begin{environment}{DescribeParameterParent}
+% \changes{v2.05i}{2017/02/20}{neu}^^A
+% \begin{macro}{\SpecialParameterIndex}
+% \changes{v2.05i}{2017/02/20}{neu}^^A
+% Selbiges für die Verwendung durch \cs{Describe\dots}
+%    \begin{macrocode}
+\newenvironment{DescribeParameterParent}[2]{%
+  \@nameuse{@Save#1IndexName}{\string#2}%
+}{}
+\renewcommand*\SpecialParameterIndex[1]{%
+  \ifx\parameter@parent@indexname\relax%
+    \ClassError{\TUD@Class@Name}{No previous macro or environment}{%
+      Since parameters can only be used for macros or\MessageBreak%
+      environments, you have to use macro\MessageBreak%
+      `\string\DescribeParameter' only within the environment\MessageBreak%
+      `DescribeParameterParent'.%
+    }%
+  \fi%
+  \@bsphack%
+  \index{%
+    \parameter@parent@indexname\actualchar%
+    \parameter@parent@indexformat\levelchar%
+    #1\space\tud@parameter@name\actualchar%
+    {\protect\ttfamily#1}\index@type{\tud@parameter@name}%
+    \encapchar usage%
+  }%
+  \index{%
+    \tud@parameters@name:\levelchar#1\space\parameter@parent@indexname%
+    \actualchar{\protect\ttfamily#1}%
+    \noexpand\,--\noexpand\,\parameter@parent@indexformat%
+    \encapchar usage%
+  }%
+  \@esphack%
+}
+%    \end{macrocode}
+% \end{macro}^^A \SpecialParameterIndex
+% \end{environment}
 %
 % \subsubsection{Erzeugen von Änderungseinträgen}
 %
@@ -1227,7 +1317,15 @@
       }%
       \endgraf%
       \hfuzz0.8pt%
-      \leavevmode\marginpar{\raggedleft\fbox{ToDo:\space\tud@reserved\strut}}%
+      \leavevmode%
+      \def\@tempa{\raggedleft\fbox{ToDo:\space\tud@reserved\strut}}%
+      \ifdefined\marginnote%
+        \expandafter\marginnote\expandafter{\@tempa}[%
+          \dimexpr-\fboxsep-\fboxrule\relax%
+        ]%
+      \else%
+        \expandafter\marginpar\expandafter{\@tempa}%
+      \fi%
       \fbox{\parbox{\dimexpr\textwidth-2\fboxsep\relax}{#1\strut}}%
       \endgraf%
 %    \end{macrocode}
@@ -1388,6 +1486,8 @@
 % \begin{macro}{\env}
 % \begin{macro}{\prm}
 % \changes{v2.05g}{2016/11/02}{neu}^^A
+% \begin{macro}{\cnt}
+% \changes{v2.05i}{2017/02/23}{neu}^^A
 % \begin{macro}{\file}
 % Zusätzliche Auszeichnungsbefehle.
 %    \begin{macrocode}
@@ -1399,6 +1499,7 @@
 \newrobustcmd*\pgs[1]{\mbox{\texttt{#1}}}
 \newrobustcmd*\env[1]{\mbox{\texttt{#1}}}
 \newrobustcmd*\prm[1]{\mbox{\texttt{#1}}}
+\newrobustcmd*\cnt[1]{\mbox{\texttt{#1}}}
 \newrobustcmd*\file[1]{\mbox{\texttt{#1}}}
 \AfterPackage{hyperref}{%
   \pdfstringdefDisableCommands{%
@@ -1415,6 +1516,7 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \file
+% \end{macro}^^A \cnt
 % \end{macro}^^A \prm
 % \end{macro}^^A \env
 % \end{macro}^^A \pgs
