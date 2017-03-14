@@ -14,7 +14,7 @@
  "author-maintained". The current maintainer and author of this work
  is Falk Hanisch.
 
-============================================================================
+----------------------------------------------------------------------------
 
  Dieses Werk darf nach den Bedingungen der LaTeX Project Public Lizenz
  in der Version 1.3c, verteilt und/oder verändert werden. Die aktuelle
