@@ -3,7 +3,6 @@ cd %~dp0
 echo =========================================================================
 echo  Festlegen der Version, welche erstellt werden soll
 echo =========================================================================
-echo.
 for /f "tokens=1,2,3 delims= " %%a in (
   'findstr /r \TUD@Version@Check{[0-9][0-9][0-9][0-9]/[0-9][0-9]/[0-9][0-9] source\tudscr-version.dtx'
 ) do (

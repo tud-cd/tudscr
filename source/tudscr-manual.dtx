@@ -1,4 +1,4 @@
-% \CheckSum{4277}
+% \CheckSum{4322}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -16,7 +16,7 @@
 %  "author-maintained". The current maintainer and author of this work
 %  is Falk Hanisch.
 %
-% ============================================================================
+% ----------------------------------------------------------------------------
 %
 %  Dieses Werk darf nach den Bedingungen der LaTeX Project Public Lizenz
 %  in der Version 1.3c, verteilt und/oder verändert werden. Die aktuelle
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-manual.dtx}[%
-  2017/03/12 v2.05i TUD-Script\space%
+  2017/03/27 v2.05k TUD-Script\space%
 %</driver>
 %<package&identify>\ProvidesPackage{tudscrtutorial}[%
 %<*driver|package&identify>
@@ -607,16 +607,19 @@
 %    \begin{macrocode}
   \newcommand*\tud@manualname{tudscr}%
 %<*class>
-  \NewDocumentCommand\tudhyperdef{sm}{%
-    \IfBooleanTF{#1}{%
-      \raisebox{4\baselineskip}[0pt][0pt]{\hyperdef{\tud@manualname}{#2}{}}%
+  \NewDocumentCommand\tudhyperdef{st'm}{%
+    \@tempswafalse%
+    \IfBooleanT{#1}{\@tempswatrue\setlength\@tempdima{3\baselineskip}}%
+    \IfBooleanT{#2}{\@tempswatrue\setlength\@tempdima{15\baselineskip}}%
+    \if@tempswa%
+      \raisebox{\@tempdima}[0pt][0pt]{\hyperdef{\tud@manualname}{#3}{}}%
       \par\nobreak\vskip\dimexpr-\parskip-\baselineskip\relax%
       \@afterindentfalse\@afterheading%
-    }{%
-      \Hy@raisedlink{\hyperdef{\tud@manualname}{#2}{}}\ignorespaces%
-    }%
-    \label{#2}%
-    \tud@trace@lbl@created@add{#2}%
+    \else%
+      \Hy@raisedlink{\hyperdef{\tud@manualname}{#3}{}}\ignorespaces%
+    \fi%
+    \label{#3}%
+    \tud@trace@lbl@created@add{#3}%
   }%
   \newcommand*\tudhyperref[2]{\hyperref{}{\tud@manualname}{#1}{#2}}%
 %</class>
@@ -836,7 +839,7 @@
 % Anschließend folgen die für Anwenderdokumentation eigens definierten Befehle.
 %    \begin{macrocode}
 %<*class>
-  \ProvideDocumentCommand\tudhyperdef{sm}{\label{#2}}%
+  \ProvideDocumentCommand\tudhyperdef{st'm}{\label{#3}}%
 %</class>
   \providecommand*\tudhyperref[2]{#2}%
   \providecommand*\autorefname[1][]{??\xspace}%
@@ -1098,7 +1101,7 @@
 % Dies sind die Makros für die eigentliche Abarbeitung der Deklarationsbefehle 
 % zu Beginn und Ende der Umgebungen \env{Declaration} und \env{Obsolete}.
 %    \begin{macrocode}
-\NewDocumentCommand\tud@declare@start{omoog}{%
+\NewDocumentCommand\tud@declare@start{omr[]r[]m}{%
 %    \end{macrocode}
 % Die optional angegebenen Änderungen werden mit \cs{Changed@At@CreateList} in 
 % der Liste \cs{tud@changedat@list} gesichert und später sowohl für die
@@ -1421,12 +1424,11 @@
 % (fast) alle der folgenden Befehle gilt, dass diese mit zwei optionalen
 % Argumenten am Ende genutzt werden können. Sollte ein Label existieren, wird 
 % automatisch ein Hyperlink erzeugt, welcher mit der optionalen Angabe von
-% \val{'}\meta{Referenzvariante}\val{'} um einen textuellen Querverweis ergänzt 
-% werden kann. Mit \val{\textbar}\meta{Indexmarkup}\val{\textbar} kann die
-% Erscheinung im Index angepasst werden. Bei einigen Befehlen kann zusätzlich
-% zuvor im Markup mit dem optionalen Argument \parg{Bundleelement} die
-% Zuweisung auf ein bestimmtes Paket oder eine Klasse aus dem \TUDScript-Bundle
-% erfolgen.
+% |'|\meta{Referenzvariante}|'| um einen textuellen Querverweis ergänzt werden
+% kann. Mit \verb=|=\meta{Indexmarkup}\verb=|= kann die Erscheinung im Index
+% angepasst werden. Bei einigen Befehlen kann zusätzlich zuvor im Markup mit
+% dem optionalen Argument \parg{Bundleelement} die Zuweisung auf ein bestimmtes
+% Paket oder eine Klasse aus dem \TUDScript-Bundle erfolgen.
 %
 % Die eigentliche Behandlung erfolgt mit dem Befehl \cs{Process@Markup}, 
 % welcher die tatsächliche Auszeichnung im Fließtext bzw. als Deklaration 
@@ -1441,18 +1443,18 @@
 % \begin{macro}{\tud@keyval@error}
 % \changes{v2.05}{2015/11/01}{neu}^^A
 % Bei Optionen und Parametern können spezielle Werte einfach im Hauptargument 
-% durch \val{=} getrennt angegeben werden. Um diese auszuwerten, wird dieser 
-% Befehl definiert, welcher als Argumentprozessor verwendet wird.
+% durch |=| getrennt angegeben werden. Um diese auszuwerten, wird dieser Befehl
+% definiert, welcher als Argumentprozessor verwendet wird.
 %    \begin{macrocode}
 \newcommand*\ProcessorKeyVal[1]{%
   \begingroup%
     \in@{=}{#1}%
 %    \end{macrocode}
-% Wird im Argument ein \val{=} gefunden, so wird alles Darauffolgende als Wert
+% Wird im Argument ein |=| gefunden, so wird alles Darauffolgende als Wert 
 % erkannt und dem eigentlichen Hauptargument bei der Ausgabe angehangen. Das
 % Makro, welches diesen Argumentprozessor verwendet, erhält als Ausgabe also
-% entweder \marg{Schlüssel} oder \marg{Schlüssel}\val{=}\meta{Wert}\val{=} 
-% falls \cs{ProcessorKeyVal} mit \marg{Schlüssel=Wert} verwendet wurde .
+% entweder \marg{Schlüssel} oder \marg{Schlüssel}|=|\meta{Wert}|=| falls
+% \cs{ProcessorKeyVal} mit \marg{Schlüssel=Wert} verwendet wurde.
 %    \begin{macrocode}
     \ifin@%
       \def\@tempa##1=##2\@nil{\toks@{{##1}=##2=}}%
@@ -1660,15 +1662,14 @@
 % \begin{macro}{\@Option}
 % \changes{v2.02}{2014/11/02}{neu}^^A
 % Im Gegensatz zu den vorherigen Befehlen, kann im Hauptargument ein spezieller 
-% Wert für eine Option optional durch ein \val{=} getrennt angegeben werden.
-% Durch den Argumentprozessor \cs{ProcessorKeyVal} wird dieses vom eigentlichen
+% Wert für eine Option optional durch ein |=| getrennt angegeben werden. Durch
+% den Argumentprozessor \cs{ProcessorKeyVal} wird dieses vom eigentlichen
 % Schlüssel getrennt. Dabei wird der gegebene Schlüssel immer in der Form
 % \marg{Schlüssel} ausgegeben. Sollte ein optionaler Wert gegeben worden sein, 
-% wird dieser in der Form \val{=}\meta{Wert}\val{=} einfach angehängt und als
-% optionales Argument von \cs{Option@Value} weiter verarbeitet. Mit dem
-% optionalen Argument in runden Klammern kann ggf. auf eine Option aus einem 
-% \TUDScript-Paket verwiesen 
-% werden.
+% wird dieser in der Form |=|\meta{Wert}|=| einfach angehängt und als optionales
+% Argument von \cs{Option@Value} weiter verarbeitet. Mit dem optionalen Argument
+% in runden Klammern kann ggf. auf eine Option aus einem  \TUDScript-Paket
+% verwiesen werden.
 %    \begin{macrocode}
 \NewExpandableDocumentCommand\@Option{sm}{#2}
 \NewDocumentCommand\Option{s>{\ProcessorKeyVal}md==d()d''d||}{%
@@ -1676,7 +1677,7 @@
 }
 %    \end{macrocode}
 % Für die interne Verwendung kann das optionale Argument für den Wert auch 
-% direkt mit \val{=}\meta{Wert}\val{=} angehangen werden. Um die gleichzeitige 
+% direkt mit |=|\meta{Wert}|=| angehangen werden. Um die gleichzeitige 
 % Verwendung beider Varianten zu unterdrücken, wird in diesem Fall ein Fehler 
 % erzeugt.
 %    \begin{macrocode}
@@ -1825,7 +1826,7 @@
 % Befehle. Das erste Argument ist die Umgebung oder der Befehl, wofür der 
 % Parameter gültig ist. Das zweite Argument ist der Parameter selbst. Die 
 % optionale Zuweisung eines Wertes kann äquivalent zu \cs{Option} mit dem
-% Trennzeichen~\val{=} im Hauptargument erfolgen.
+% Trennzeichen~|=| im Hauptargument erfolgen.
 %    \begin{macrocode}
 \NewExpandableDocumentCommand\@Key{smm}{#2!#3}
 \NewDocumentCommand\Key{sm>{\ProcessorKeyVal}md==d()d''d||}{%
@@ -2187,23 +2188,23 @@
 % \begin{macro}{\tud@lbl@get@@curr}
 % \changes{v2.05}{2015/11/03}{neu}^^A
 % Für den Befehl \cs{tud@lbl@get@curr} wird das zweite obligatorische 
-% Argument (\val{\#3}) für gewöhnlich in der Form
-% \val{\{\string\Bundle{\marg{Klasse/Paket}}:\string\Markup{\marg{Element}}\}}
-% angegeben. Dieses wird beim Einlesen direkt an die beiden Argumentprozessoren 
-% \cs{SplitArgument}\val{\{2\}\{:\}} gefolgt von \cs{tud@lbl@create} übergeben. 
-% Danach enthält das zweite obligatorische Argument ein Label der Form
-% \meta{Bundlepräfix}\val{:}\meta{Labelpräfix}\val{:}\meta{Element}. Auch die
-% Angabe eines Makros als zweites obligatorische Argument, welches das Label in
-% der richtigen Formatierung enthält, ist möglich.
+% Argument (|#3|) für gewöhnlich in der Form
+% |{\Bundle|\marg{Klasse/Paket}|:\Markup|\marg{Element}|}| angegeben. Dieses
+% wird beim Einlesen direkt an die beiden Argumentprozessoren 
+% \cs{SplitArgument}|{2}{:}| gefolgt von \cs{tud@lbl@create} übergeben. Danach
+% enthält das zweite obligatorische Argument ein Label der Form
+% \meta{Bundlepräfix}|:|\meta{Labelpräfix}|:|\meta{Element}. Auch die Angabe
+% eines Makros als zweites obligatorische Argument, welches das Label in der
+% richtigen Formatierung enthält, ist möglich.
 %    \begin{macrocode}
 \NewDocumentCommand\tud@lbl@get@curr{%
-  sm>{\SplitArgument{2}{:}}>{\tud@lbl@create}md==%
+  sm>{\tud@lbl@create}>{\SplitArgument{2}{:}}md==%
 }{%
 %    \end{macrocode}
 % Mit \cs{tud@lbl@get@@curr} wird das im zweiten obligatorischen Argument 
-% (\val{\#3}) generierte Label in das im ersten obligatorischen Argument
-% (\val{\#2}) angegebenen Makro gespeichert und ggf. diesem das letzte
-% optionale Argument für einen speziellen Wert zu einem Schlüssel angehangen.
+% (|#3|) generierte Label in das im ersten obligatorischen Argument |#2|
+% angegebenen Makro gespeichert und ggf. diesem das letzte optionale Argument
+% für einen speziellen Wert zu einem Schlüssel angehangen.
 %    \begin{macrocode}
   \tud@lbl@get@@curr#2{#3}=#4=%
 %    \end{macrocode}
@@ -2273,14 +2274,14 @@
 % seine drei Hauptbestandteile zur WEiterverarbeitung zerlegt.
 %    \begin{macrocode}
 \NewDocumentCommand\tud@lbl@get@dflt{m>{\SplitArgument{2}{:}}mr==}{%
-  \tud@lbl@get@@dflt{#1}#2{#3}%
+  \tud@lbl@get@@dflt{#1}#2=#3=%
 }
 %    \end{macrocode}
 % Durch \cs{tud@lbl@get@@dflt} wird als erstes geprüft, ob der Bundlepräfix 
 % bereits dem Standardpräfix für die Hauptklassen entspricht. Nur wenn dies 
 % nicht der Fall ist, wird die Labelgenerierung abermals ausgeführt.
 %    \begin{macrocode}
-\NewDocumentCommand\tud@lbl@get@@dflt{mmmmm}{%
+\NewDocumentCommand\tud@lbl@get@@dflt{mmmmr==}{%
   \edef\tud@reserved{\expandafter\detokenize\expandafter{\tud@bdl@dflt}}%
   \ifstr{\tud@reserved}{#2}{}{%
 %    \end{macrocode}
@@ -2296,15 +2297,14 @@
 % \changes{v2.05}{2015/11/05}{neu}^^A
 % Mit dem Befehl \cs{tud@if@lbl@exists} wird eine Fallunterscheidung bezüglich
 % der Existenz eines Labels in der Form
-% \meta{Bundlepräfix}\val{:}\meta{Labelpräfix}\val{:}\meta{Element} 
-% durchgeführt. Das zu prüfende Label ist in gleicher Weise wie beim Makro
-% \cs{tud@lbl@get@curr} anzugeben. Je nachdem, ob ein existierendes Label 
-% gefunden wird oder nicht, wird das zweite oder das dritte obligatorische
-% Argument ausgeführt.
+% \meta{Bundlepräfix}|:|\meta{Labelpräfix}|:|\meta{Element} durchgeführt. Das
+% zu prüfende Label ist in gleicher Weise wie beim Makro \cs{tud@lbl@get@curr}
+% anzugeben. Je nachdem, ob ein existierendes Label gefunden wird oder nicht,
+% wird das zweite oder das dritte obligatorische Argument ausgeführt.
 %    \begin{macrocode}
 %<*class>
 \NewDocumentCommand\tud@if@lbl@exists{%
-  >{\SplitArgument{2}{:}}>{\tud@lbl@create}m%
+  >{\tud@lbl@create}>{\SplitArgument{2}{:}}m%
 }{%
   \ifcsdef{r@#1}{%
     \expandafter\@firstoftwo%
@@ -2323,7 +2323,7 @@
 % genau drei Argumente für das Erstellen eines gültigen Labels erwartet. Er
 % wird sowohl von \cs{tud@lbl@get@curr} als auch von \cs{tud@if@lbl@exists}
 % verwendet. Vor der Nutzung von \cs{tud@lbl@create} muss das Argument zuvor
-% bereits mit \cs{SplitArgument}\val{\{2\}\{:\}} aufgerufen worden sein. Diese
+% bereits mit \cs{SplitArgument}|{2}{:}| aufgerufen worden sein. Diese
 % Eigenheit macht die Definition von \cs{tud@lbl@create} notwendig, um das
 % Ergebnis der zuvor vorgenommenen Argumentaufspaltung verarbeiten zu können,
 % in dem dieses an \cs{tud@lbl@@create} durchgereicht wird. Eine Integration 
@@ -2335,41 +2335,34 @@
 % einzelnes Makro, welches das Label bereits beinhaltet als auch einen
 % Markup-Befehl ggf. mit einem Bundlepräfix zu übergeben. In beiden Fällen
 % wird aus dem übergebenen Argument ein eindeutiges Label in der Form 
-% \meta{Bundlepräfix}\val{:}\meta{Labelpräfix}\val{:}\meta{Element} generiert 
-% und als resultierendes Argument an das aufrufenden Makro übergeben.
+% \meta{Bundlepräfix}|:|\meta{Labelpräfix}|:|\meta{Element} generiert und als
+% resultierendes Argument an das aufrufenden Makro übergeben.
 %    \begin{macrocode}
 \NewDocumentCommand\tud@lbl@create{m}{\tud@lbl@@create#1}
 %    \end{macrocode}
 % Es gibt insgesamt vier verschiedene Varianten der Argumentenübergabe an den
 % Argumentprozessor \cs{tud@lbl@@create}.
 % \begin{description}\let\itshape\slshape
-%    \item[\cs{tud@lbl@@create}\val{\ignorespaces
-%      \{\string\LabelMakro\}\{-NoValue-\}\{-NoValue-\}\ignorespaces
-%    }]\strut\newline
+%    \item[\cs{tud@lbl@@create}]\ignorespaces%
+%    |{\LabelMakro}{-NoValue-}{-NoValue-}|\strut\newline%
 %      Das Label ist bereits in \cs{LabelMakro} enthalten und soll expandiert 
-%      werden. Dabei spielt es keine Rolle, ob die durch \val{:} getrennten
+%      werden. Dabei spielt es keine Rolle, ob die durch |:| getrennten
 %      Bestandteile innerhalb des Labels schon als einfacher String oder in der 
 %      Markupform gegeben sind.
-%    \item[\cs{tud@lbl@@create}\val{\ignorespaces
-%      \{-NoValue-\}\{\string\Markup{\marg{Element}}\}\{-NoValue-\}\ignorespaces
-%    }]\strut\newline
+%    \item[\cs{tud@lbl@@create}]\ignorespaces%
+%    |{-NoValue-}{\Markup|\marg{Element}|}{-NoValue-}|\strut\newline%
 %      Das Label soll für ein Markupelement generiert werden, wobei in jedem
 %      Fall der Inhalt aus \cs{tud@bdl@curr} als Bundlepräfix genutzt wird.
-%    \item[\cs{tud@lbl@@create}\val{\ignorespaces
-%      \{\string\Class/\string\Package\marg{\dots}\}\ignorespaces
-%      \{\string\Markup{\marg{Element}}\}\ignorespaces
-%      \{-NoValue-\}\ignorespaces
-%    }]\strut\newline 
+%    \item[\cs{tud@lbl@@create}]\ignorespaces%
+%    |{\Class/\Package|\marg{\dots}|}|\ignorespaces%
+%    |{\Markup|\marg{Element}|}{-NoValue-}|\strut\newline%
 %      Das Label soll für ein Markupelement generiert werden. 
 %      Dabei wurde explizit ein Paket oder eine Klasse aus dem Bundle angegeben 
 %      oder implizit das Makro \cs{tud@bdl@curr} als Argument verwendet,
 %      welches innerhalb der Umgebungen \env{Bundle} und \env{Bundle*} auf
 %      das/die aktuell beschriebene Paket/Klasse gesetzt wurde.
-%    \item[\cs{tud@lbl@@create}\val{\ignorespaces
-%      \marg{Bundlepräfix}\ignorespaces
-%      \marg{Labelpräfix}\ignorespaces
-%      \marg{Element}\ignorespaces
-%    }]\strut\newline 
+%    \item[\cs{tud@lbl@@create}]\ignorespaces%
+%    \marg{Bundlepräfix}\marg{Labelpräfix}\marg{Element}\strut\newline 
 %      Das Label ist bereits vollständig bestimmt und die Argumente werden 
 %      entweder als String oder als Markup übergeben. Auch Mischformen sind 
 %      möglich. In diesem Fall wird es einfach wieder zusammengesetzt. Diese
@@ -2460,28 +2453,26 @@
 % Der Befehl \cs{Process@Markup} ist das Herzstück der Auszeichnungen aller
 % Elemente. Das obligatorische Argument ist das auszuzeichnende Element selbst,
 % welches im weiteren Verlauf der Abarbeitung expandiert wird. Darauf folgen 
-% mehrere optionale Argumente. Mit \val{=}\meta{Wert}\val{=} kann ein Wert für
-% einen Schlüssel angegeben werden, was aktuell von \cs{Option} und \cs{Key} 
-% genutzt wird. Darauf folgend kann in einem ordinären optionalen Argument ein
-% Suffix für die Fließtextausgabe angegeben werden, was von \cs{Distribution} 
-% sowie \cs{Environment}, \cs{Macro} und \cs{Color} verwendet wird.
+% mehrere optionale Argumente. Mit |=|\meta{Wert}|=| kann ein Wert für einen
+% Schlüssel angegeben werden, was aktuell von \cs{Option} und \cs{Key} genutzt
+% wird. Darauf folgend kann in einem ordinären optionalen Argument ein Suffix
+% für die Fließtextausgabe angegeben werden, was von \cs{Distribution}  sowie
+% \cs{Environment}, \cs{Macro} und \cs{Color} verwendet wird.
 %
 % Mit dem optionalen Argument in runden Klammern kann eine Klasse oder ein 
 % Paket aus dem \TUDScript-Bundle angegeben werden, auf welche sich das
 % aktuelle auszuzeichnende Element bezieht und ggf. das Label und der
 % Indexeintrag dementsprechend erzeugt werden sollen. Verwendet wird es mit: 
-% \val{(\string\Class\marg{Klasse}/\string\Package\marg{Paket})} 
+% |(\Class|\marg{Klasse}|)| oder |(\Package|\marg{Paket}|)| 
 %
 % Das optionale Argument in Guillemets wird von \cs{Package} benötigt, um ggf.
 % die automatisch generierten Links auf CTAN anzupassen. Zuletzt kann mit 
-% \val{'}\meta{Referenzvariante}\val{'} der automatisch erzeugte Querverweis in
+% |'|\meta{Referenzvariante}|'| der automatisch erzeugte Querverweis in
 % verschiedenen Varianten formatiert werden. Der vollständige Funktionsaufruf:
 % \newline\begingroup\scriptsize
-% \cs{Process@Markup}\val{\ignorespaces%
-%   \marg{Element}=\meta{Wert}=\oarg{Ausgabesuffix}\ignorespaces%
-%   \parg{Bundleelement}<\meta{CTAN-Paket}>\ignorespaces%
-%   '\meta{Referenzvariante}'\ignorespaces%
-% }%
+%   \cs{Process@Markup}\marg{Element}|=|\meta{Wert}|=|\ignorespaces%
+%   \oarg{Ausgabesuffix}\parg{Bundleelement}\ignorespaces%
+%   |<|\meta{CTAN-Paket}|>||'|\meta{Referenzvariante}|'|\ignorespaces%
 % \endgroup
 %
 % In eingen Fällen ist es beim Aufruf eines Markup-Befehls nicht erwünscht, 
@@ -2540,8 +2531,8 @@
   \tud@reserved%
   \eaddto@hook\tud@toks@{\expandafter{\tud@reserved}}%
 %    \end{macrocode}
-% Es folgen gegebenenfalls die optionalen Argument \val{=}\meta{Wert}\val{=} 
-% sowie \oarg{Ausgabesuffix}~-- falls diese angegeben wurden.
+% Es folgen gegebenenfalls die optionalen Argument |=|\meta{Wert}|=| sowie
+% \oarg{Ausgabesuffix}~-- falls diese angegeben wurden.
 %    \begin{macrocode}
   \IfValueT{#2}{\addto@hook\tud@toks@{=#2=}}%
   \IfValueT{#3}{\addto@hook\tud@toks@{[#3]}}%
@@ -2553,8 +2544,8 @@
 % der Deklarationsumgebung am Ende dieser notwendig. Dabei soll allerdings das
 % Markup nicht noch ein weiteres Mal ausgegeben werden. Deshalb wird der
 % Schalter hier genutzt, um lediglich zu Beginn einer Deklaration das Markup 
-% auszuführen. Dabei Angaben für eine \val{'}\meta{Referenzvariante}\val{'}
-% nicht erlaubt.
+% auszuführen. Dabei Angaben für eine |'|\meta{Referenzvariante}|'| nicht
+% erlaubt.
 %   \begin{macrocode}
 %<*class>
   \if@tud@declare%
@@ -2577,11 +2568,11 @@
 %    \end{macrocode}
 % Findet der Auszeichnungsbefehl außerhalb einer Umgebung für Deklarationen
 % Verwendung, werden die optionalen Argumente für einen CTAN-Link 
-% \val{<}\meta{CTAN-Paketname}\val{>} sowie die Formatierung des Querverweise
-% \val{'}\meta{Referenzvariante}\val{'} hinzugefügt~-- falls vorhanden. Dies 
-% geschieht jedoch nur, wenn das Markup nicht innerhalb eines Index erfolgt, 
-% da hier URL-Hyperlinks und formatierte Querverweise unerwünscht sind. Mit 
-% der Angabe eines leeren Argumentes \val{<>} wird gar kein Hyperlink erstellt.
+% |<|\meta{CTAN-Paketname}|>| sowie die Formatierung des Querverweise
+% |'|\meta{Referenzvariante}|'| hinzugefügt~-- falls vorhanden. Dies geschieht
+% jedoch nur, wenn das Markup nicht innerhalb eines Index erfolgt, da hier
+% URL-Hyperlinks und formatierte Querverweise unerwünscht sind. Mit der Angabe
+% eines leeren Argumentes |<>| wird gar kein Hyperlink erstellt.
 %    \begin{macrocode}
   \else%
 %</class>
@@ -2606,7 +2597,7 @@
 % möglich, da durch die automatische Labelgenerierung normalerweise alle nicht 
 % existierenden Labels mit \meta{Bundlepräfix} auf \cs{tud@bdl@dftl} verweisen
 % müssten. Für die wenigen Fälle, in denen gezielt auf einen Querverweis 
-% verzichtet werden soll, kann ein leeres Argument \val{()} angegeben werden.
+% verzichtet werden soll, kann ein leeres Argument \parg{} angegeben werden.
 %    \begin{macrocode}
   \if@tud@index\else%
     \IfValueT{#4}{%
@@ -2661,7 +2652,7 @@
 % Das erste Argument enthält das zu definierende Label, gefolgt vom Element, 
 % welches ausgezeichnet werden soll. Die tatsächliche Ausgabe erfolgt mit dem 
 % Makro \cs{Markup@Output}. An dieses werden die beiden optionalen Argumente 
-% \val{=}\meta{Wert}\val{=} und \oarg{Ausgabesuffix} direkt weitergereicht.
+% |=|\meta{Wert}|=| und \oarg{Ausgabesuffix} direkt weitergereicht.
 %
 % Vor der eigentlichen Ausführung wird mit \cs{Markup@CheckFormat} geprüft, ob 
 % für das auszuzeichnende Element mit \cs{Markup@SetFormat} überhaupt eine 
@@ -2716,11 +2707,12 @@
 %    \end{macrocode}
 % Anschließend wird \cs{@tempb} ggf. für den erweiterten Querverweis verwendet.
 % Wurde ein Format für den Querverweis gesetzt, muss dieses validiert werden. 
-% Gültige Kürzel sind \val{'auto'}, \val{'page'} und \val{'full'}. Damit werden
-% die erzeugten Querverweise um den Gliederungsabschnitt, die Seite oder beides
-% ergänzt. Außerdem kann mit \val{'none'} der Hyperlink komplett unterbunden
-% werden. Für \cs{Package} kann mit zusätzlich \val{'url'} noch der gCTAN-Link 
-% forciert werden, auch wenn eigentlich ein Label für das Paket existiert.
+% Gültige Kürzel sind |'|\val{auto}|'|, |'|\val{page}|'| und |'|\val{full}|'|. 
+% Damit werden die erzeugten Querverweise um den Gliederungsabschnitt, die
+% Seite oder beides ergänzt. Außerdem kann mit |'|\val{none}|'| der Hyperlink 
+% komplett unterbunden werden. Für den Befehl \cs{Package} kann mit zusätzlich 
+% |'|\val{url}|'| noch der CTAN-Link forciert werden, auch wenn eigentlich ein
+% Label für das Paket existiert.
 %    \begin{macrocode}
       \let\@tempb\relax%
       \IfValueT{#6}{%
@@ -2750,8 +2742,8 @@
       \IfValueT{#5}{\def\@tempa{\href{#5}{\@tempc}}}%
 %    \end{macrocode}
 % Ein Querverweis kann logischerweise nicht erstellt werden. Wurde dennoch im 
-% letzten optionalen Argument eine \val{'}\meta{Referenzvariante}\val{'} für 
-% den Querverweis angegeben, wird eine Warnung erzeugt.
+% letzten optionalen Argument eine |'|\meta{Referenzvariante}|'| für den
+% Querverweis angegeben, wird eine Warnung erzeugt.
 %    \begin{macrocode}
       \let\@tempb\relax%
       \IfValueT{#6}{%
@@ -2804,10 +2796,10 @@
 % Dabei ist die Besonderheit des Makros \cs{Key}\marg{Makro}\marg{Parameter} zu
 % beachten, dessen beiden Argumente hier in der Form \marg{Makro!Parameter} 
 % übergeben werden. Deshalb wird das erste Argument mit dem Argumentprozessor 
-% \cs{SplitArgument}\val{\{1\}\{!\}} getrennt und dann weiter verarbeitet.
+% \cs{SplitArgument}|{1}{!}| getrennt und dann weiter verarbeitet.
 %    \begin{macrocode}
-\NewDocumentCommand\Markup@Output{>{\SplitArgument{1}{!}}md==o}{%
-  \Markup@@Output#1{#2}{#3}%
+\NewDocumentCommand\Markup@Output{>{\SplitArgument{1}{!}}mr==r[]}{%
+  \Markup@@Output#1=#2=[#3]%
 }
 %    \end{macrocode}
 % Anschließend wird entweder \cs{Markup@Declare} oder \cs{Markup@Inline}
@@ -2815,7 +2807,7 @@
 % wird für den Befehlsaufruf mit dem dazugehörigen Argument zur Vereinfachung
 % ein Token-Register verwendet.
 %    \begin{macrocode}
-\NewDocumentCommand\Markup@@Output{mmmm}{%
+\NewDocumentCommand\Markup@@Output{mmr==r[]}{%
 %<*class>
   \if@tud@declare%
     \tud@toks@{\Markup@Declare}%
@@ -3010,7 +3002,7 @@
 % Seitenumbrüche direkt nach Überschriften zu vermeiden. Diese treten auf, das 
 % das Paket \pkg{imakeidx} meiner Meinung nach die Überschriften zusammen mit 
 % der \env{multicols}-Umgebung falsch setzt. Der Patch sorgt dafür, dass die
-% Überschriften (\cs{imki@indexlevel}\val{\{}{\cs{indexname}\val{\{\}}}) nicht 
+% Überschriften (\cs{imki@indexlevel}|{|\cs{indexname}|}|) nicht 
 % vor der Umgebung sondern~-- wie für \pkg{multicol} auch dokumentiert~-- im
 % optionalen Argument von \env{multicols} aufgerufen werden.
 %    \begin{macrocode}
@@ -3160,7 +3152,7 @@
 %
 % Bei der ersten Variante würde der Indexeintrag einfach direkt mit den 
 % Markup-Befehlen erstellt und in der \app{texindy}-Stildatei wird für alle
-% Auszeichnungsbefehle die passende \val{merge-rule} erstellt, um die korrekte 
+% Auszeichnungsbefehle die passende |merge-rule| erstellt, um die korrekte 
 % Sortierung zu gewährleisten. Tatsächlich war in einer früheren Version genau
 % das der Ansatz. Allerdings werden die manuell erstellten RegExp-Regeln durch 
 % \hrfn{http://sourceforge.net/p/xindy/bugs/22/}{\app{texindy} nicht korrekt}
@@ -3168,7 +3160,7 @@
 %
 % Damit das Sortieren verlässlich funktioniert, werden die Einträge für den 
 % Index deshalb in der gewohnten Syntax von \app{makeindex} in der Form
-% \meta{Schlüsselwort}\val{@}\meta{Markup} erstellt. Diese Syntax kann auch mit
+% \meta{Schlüsselwort}|@|\meta{Markup} erstellt. Diese Syntax kann auch mit
 % \app{texindy} genutzt werden. 
 %
 % An \cs{tud@idx@get} werden vier obligatorische gefolgt von vier optionalen 
@@ -3186,22 +3178,20 @@
 % 
 % Daran schließen sich vier optionale Argumente an, mit denen die Formatierung 
 % des Indexeintrags differenziert werden kann. Das erste optionale Argument 
-% \val{=}\meta{Wert}\val{=} kann wie bereits gewohnt für das Hinzufügen eines
+% |=|\meta{Wert}|=| kann wie bereits gewohnt für das Hinzufügen eines
 % Schlüsselwertes genutzt werden. Das zweite, ordinäre optionale Argument 
 % \oarg{Anmerkung} fügt dem Eintrag in den Index eine zusätzliche Anmerkung
 % hinzu. Soll der Indexeintrag für ein spezifisches Paket oder eine Klasse aus
 % dem \TUDScript-Bundle erstellt werden, wird das optionale Argument in runden 
-% Klammern \val{(\string\Class\marg{Klasse}/\string\Package\marg{Paket})} für 
+% Klammern \parg{\string\Class\marg{Klasse}/\string\Package\marg{Paket}} für 
 % einen Verweis auf das \parg{Bundleelement} verwendet, der in \cs{@idxbundle} 
-% gespeichert wird. Das Argument \val{\textbar}\meta{Indexmarkup}\val{\textbar}
-% wird bei Deklarationen zur Unterdrückung von Untereinträgen verwendet.
+% gespeichert wird. Das Argument \verb=|=\meta{Indexmarkup}\verb=|= wird bei
+% Deklarationen zur Unterdrückung von Untereinträgen verwendet.
 % Der vollständige Funktionsaufruf lautet:
 % \newline\begingroup\scriptsize
-% \cs{tud@idx@get}\cs{tud@idx@key}\cs{tud@idx@fmt}\cs{tud@idx@val}%
-% \val{\ignorespaces%
-%   \marg{Elem.}=\meta{Wert}=\oarg{Anm.}\ignorespaces% 
-%   \parg{Bundleelem.}\textbar\meta{Indexmark.}\textbar\ignorespaces%
-% }%
+%   \cs{tud@idx@get}\cs{tud@idx@key}\cs{tud@idx@fmt}\ignorespaces%
+%   \cs{tud@idx@val}\marg{Elem.}|=|\meta{Wert}|=|\oarg{Anm.}\ignorespaces%
+%   \parg{Bundleelem.}\verb=|=\meta{Indexmark.}\verb=|=\ignorespaces%
 % \endgroup
 %    \begin{macrocode}
 \newcommand*\tud@idx@key{}
@@ -3243,9 +3233,9 @@
 % Da der Inhalt des vierten Arguments am Ende der Gruppe expandiert wird, wird 
 % mit \cs{expandonce} dafür gesorgt, dass die Expansion nur einmalig erfolgt. 
 % Zu beachten ist außerdem, dass der Hauptindexeintrag bereits in der Form 
-% \meta{Schlüsselwort}\val{@}\meta{Markup}\textbf{\val{!}} zusammengefügt wird.
-% Die Sternversion wird für die Änderungsnotizen verwendet. Für diese wird eine 
-% kleine Anmerkung im Haupteintrag ergänzt.
+% \meta{Schlüsselwort}|@|\meta{Markup}|!| zusammengefügt wird. Die Sternversion
+% wird für die Änderungsnotizen verwendet. Für diese wird eine kleine Anmerkung
+% im Haupteintrag ergänzt.
 %    \begin{macrocode}
         \let\@tempa\@empty%
         \IfBooleanT{#1}{\def\@tempa{: Parameter angepasst}}%
@@ -3273,9 +3263,9 @@
     \tud@reserved%
 %    \end{macrocode}
 % Die Auszeichnung für den Indexeintrag besteht in erster Linie aus dem 
-% Markup-Befehl selbst. Damit ein \val{@}-Zeichen beispielsweise in einem 
+% Markup-Befehl selbst. Damit ein |@|"~Zeichen beispielsweise in einem 
 % Makronamen korrekt verarbeitet wird, wird dieses im Stil von \app{makeindex} 
-% mit \val{"} maskiert.
+% mit |"| maskiert.
 %    \begin{macrocode}
     \def#3{#5}%
     \tud@replace#2{@}{"@}%
@@ -3367,12 +3357,12 @@
       \eappto\@tempb{\suffix{\expandonce\tud@idx@bdl}}%
     \fi%
 %    \end{macrocode}
-% Sollte mit \val{=}\meta{Wert}\val{=} ein spezieller Schlüsselwert angegeben 
-% worden sein, wird für diesen normalerweise ein separater Untereintrag 
-% erstellt. Der Schalter \cs{@tempswa} wird genutzt, um das Erzeugen dieses 
-% Untereintrages im Zweifel zu unterdrücken und diesen stattdessen als normalen 
-% Eintrag zu setzen. Dies ist zum einen bei Deklarationen und zum anderen in 
-% der Änderungsliste notwendig. Außerdem kann dies auch mit der Anagabe von 
+% Sollte mit |=|\meta{Wert}|=| ein spezieller Schlüsselwert angegeben worden
+% sein, wird für diesen normalerweise ein separater Untereintrag erstellt. Der
+% Schalter \cs{@tempswa} wird genutzt, um das Erzeugen dieses Untereintrages im
+% Zweifel zu unterdrücken und diesen stattdessen als normalen Eintrag zu
+% setzen. Dies ist zum einen bei Deklarationen und zum anderen in der
+% Änderungsliste notwendig. Außerdem kann dies auch mit der Angabe von 
 % \val{default} als Indexargument erzwungen werden.
 %    \begin{macrocode}
     \@tempswafalse%
@@ -3437,6 +3427,7 @@
 % \changes{v2.05}{2015/11/02}{neu}^^A
 % \begin{macro}{\tud@cleversee}
 % \changes{v2.05}{2015/11/02}{neu}^^A
+% \changes{v2.05k}{2017/03/20}{neu}^^A
 % Diese Befehle dienen zum smarten Setzen von Hinweisen im Index. Existiert 
 % lediglich dieser Hinweis im Index, wird dieser mit dem Präfix \cs{seename} 
 % ausgegeben. Sind jedoch für einen Indexeintrag auch Seitenzahlen vorhanden, 
@@ -3455,14 +3446,24 @@
 % Hinweisen ausgegeben und mit \cs{relax} abgeschlossen werden. Dies wird mit
 % der später definierten Stildatei für \app{texindy} sichergestellt. So wird es 
 % möglich, dass das Makro \cs{tud@cleversee} auf alles ihm bis \cs{relax} 
-% nachfolgende parsen kann und abhängig davon die Ausgabe gestaltet.
+% nachfolgende parsen kann und abhängig davon die Ausgabe gestaltet. Das zweite 
+% obligatorische Argument beinhaltet dabei den Querverweis, das dritte Argument
+% ist alles nachfolgende bis \cs{relax}.
 %    \begin{macrocode}
 \newcommand*\tud@cleversee{}
 \def\tud@cleversee#1#2#3\relax{%
   \IfArgIsEmpty{#3}{%
     \emph{#1}\space#2%
   }{%
-    #3, \emph{\alsoname}\space#2%
+%    \end{macrocode}
+% Folgen im Index nach \cs{cleversee}\marg{Querverweis} noch weitere Einträge, 
+% so sind diese zu Beginn durch \enquote{, } getrennt. Diese zwei Zeichen 
+% werden mithilfe von \cs{@tempa} ignoriert.
+%    \begin{macrocode}
+    \begingroup%
+      \def\@tempa, ##1\@nil{##1,\space\emph{\alsoname}\space#2}%
+      \@tempa#3\@nil%
+    \endgroup%
   }%
 }
 %    \end{macrocode}
@@ -3505,10 +3506,9 @@
 % Nomenklatur identisch zu den bisherigen Erläuterungen, der vollständige 
 % Funktionsaufruf lautet:
 % \newline\begingroup\scriptsize
-% \cs{Process@Index}\val{\ignorespaces%
-%   \marg{Stern?}\marg{Element}=\meta{Wert}=\oarg{Anmerkung}\ignorespaces%
-%   \parg{Bundleelement}\textbar\meta{Indexmarkup}\textbar\ignorespaces%
-% }%
+%   \cs{Process@Index}\marg{Stern?}\marg{Element}\ignorespaces%
+%   |=|\meta{Wert}|=|\oarg{Anmerkung}\parg{Bundleelement}\ignorespaces%
+%   \verb=|=\meta{Indexmarkup}\verb=|=\ignorespaces%
 % \endgroup
 %    \begin{macrocode}
 \NewDocumentCommand\Process@Index{mmd==od()d||}{%
@@ -3536,8 +3536,8 @@
 %    \end{macrocode}
 % Dabei erledigt \cs{tud@idx@get} einen Großteil der Aufgabe. Mit besagtem 
 % Makro werden Schlüssel und Format für den gewünschten Indexeintrag erzeugt.
-% Sollte optional ein spezieller \val{=}\meta{Wert}\val{=} für einen Schlüssel
-% gegeben sein, so wird ggf. auch der passende Haupteintrag erstellt.
+% Sollte optional ein spezieller |=|\meta{Wert}|=| für einen Schlüssel gegeben
+% sein, so wird ggf. auch der passende Haupteintrag erstellt.
 %    \begin{macrocode}
 %<*class>
   \if@tud@declare%
@@ -3582,7 +3582,7 @@
 %    \end{macrocode}
 % Für Markup-Befehle außerhalb von Deklarationsumgebungen wird ein einfacher 
 % Eintrag in den Index erzeugt, wobei auch im Fließtext über das Indexmarkup 
-% \val{\textbar{}declare\textbar} eine Quasi-Deklaration verwendet werden kann. 
+% \verb=|=\val{declare}\verb=|= eine Quasi-Deklaration verwendet werden kann. 
 % Dies wird beispielsweise für \KOMAScript-Optionen genutzt, um diese in der 
 % gewünschten Formatierung im Index erscheinen zu lassen.
 %    \begin{macrocode}    
@@ -3646,9 +3646,9 @@
 % Indexuntereintrag erzeugt, der wiederum auf einen Indexeintrag des zweiten 
 % Argumentes verweist. Dabei kann im zweiten Argument ein normaler Begriff oder 
 % ein Markup-Befehl verwendet werden. Normalerweise wird für den Querverweis 
-% die Referenzklasse \val{see} verwendet, die Sternversion des Befehls hingegen 
-% nutzt \val{seeunverified}, um auf eine Prüfung des verwiesenen Eintrags zu 
-% verzichten.
+% die Referenzklasse \verb=|see= verwendet, die Sternversion des Befehls
+% hingegen nutzt \verb=|seeunverified=, um auf eine Prüfung des verwiesenen
+% Eintrags zu verzichten.
 %    \begin{macrocode}
 \NewDocumentCommand\SeeRef{smm}{%
   \sbox\z@{%
@@ -3840,17 +3840,16 @@
 % Änderungsnotizen lassen sich auf zwei unterschiedlichen Wegen generieren. 
 % Entweder über die Nutzung von \cs{ChangedAt} oder über das optionale Argument
 % einer der Deklarationsumgebungen. Diese sind in der Form 
-% \meta{Versionsnummer}\val{:}\meta{Änderungsnotiz} anzugeben. Die alleinige 
-% Angabe der Versionsnummer ohne Änderungsnotiz ist ebenso möglich.
+% \meta{Versionsnummer}|:|\meta{Änderungsnotiz} anzugeben. Die alleinige Angabe
+% der Versionsnummer ohne Änderungsnotiz ist ebenso möglich.
 % 
 % Wird die Änderungsnotiz für ein bestimmtes Element wie eine Option oder ein 
 % Befehl erstellt, wie es bei den Deklarationsumgebungen implizit oder bei der 
 % Verwendung von \cs{ChangedAt} mit optionalem Argument geschieht, gibt es die 
 % zusätzliche Möglichkeit, einen Untereintrag zu erstellen. Dabei ist dieser 
 % nach Versionsnummer und vor Änderungsnotiz in folgender Form anzugeben: 
-% \meta{Versionsnummer}\val{!}\meta{Untereintrag}\val{:}\meta{Änderungsnotiz}.
-% Der Untereintrag ist für die explizite Angabe eines Schlüssel-Wert-Paares 
-% gedacht.
+% \meta{Versionsnummer}|!|\meta{Untereintrag}|:|\meta{Änderungsnotiz}. Der
+% Untereintrag ist für die explizite Angabe eines Schlüssel-Wert-Paares gedacht.
 % \begin{macro}{\if@tud@changedat}
 % \begin{macro}{\Process@ChangedAt}
 % \changes{v2.02}{2014/07/25}{erweitert}^^A
@@ -3870,9 +3869,8 @@
 % Aufruf des Makros erfolgt dabei in gewohnter Form mit einem obligatorischen 
 % gefolgt von drei optionalen Argumenten:
 % \newline\begingroup\scriptsize
-% \cs{Process@ChangedAt}\val{\ignorespaces%
-%   \marg{Element}=\meta{Wert}=\oarg{Ausgabesuffix}\parg{Bundleelement}%
-% }%
+%   \cs{Process@ChangedAt}\marg{Element}|=|\meta{Wert}|=|\ignorespaces%
+%   \oarg{Ausgabesuffix}\parg{Bundleelement}\ignorespaces%
 % \endgroup
 %   \begin{macrocode}
 \NewDocumentCommand\Process@ChangedAt{md==od()}{%
@@ -3968,22 +3966,22 @@
 % weiter. 
 %    \begin{macrocode}
 \NewDocumentCommand\Changed@At@CreateList{od()m}{%
-  \IfValueT{#3}{\forssvlist{\Changed@At@@CreateList{#1}{#2}}{#3}}%
+  \IfValueT{#3}{\forssvlist{\Changed@At@@CreateList[#1](#2)}{#3}}%
 }
 %    \end{macrocode}
 % Mit \cs{Changed@At@@CreateList} wird lediglich die Versionsnummer von der 
 % eigentlichen Änderungsnotiz getrennt.
 %    \begin{macrocode}
-\NewDocumentCommand\Changed@At@@CreateList{mm>{\SplitArgument{1}{:}}m}{%
-  \Changed@At@@@CreateList{#1}{#2}#3%
+\NewDocumentCommand\Changed@At@@CreateList{r[]r()>{\SplitArgument{1}{:}}m}{%
+  \Changed@At@@@CreateList[#1](#2)#3%
 }
 %    \end{macrocode}
 % Zuletzt wird durch \cs{Changed@At@@@CreateList} ein möglicher Untereintrag
 % in ein separates Argument abgetrennt und \cs{Changed@At@@@@CreateList} mit
 % allen Argumenten aufgerufen.
 %    \begin{macrocode}
-\NewDocumentCommand\Changed@At@@@CreateList{mm>{\SplitArgument{1}{!}}mm}{%
-  \Changed@At@@@@CreateList{#1}{#2}#3{#4}%
+\NewDocumentCommand\Changed@At@@@CreateList{r[]r()>{\SplitArgument{1}{!}}mm}{%
+  \Changed@At@@@@CreateList[#1](#2)#3{#4}%
 }
 %    \end{macrocode}
 % Der Befehl \cs{Changed@At@@@@CreateList} übernimmt nun die Erstellung des 
@@ -4000,16 +3998,16 @@
 % Der im Folgenden erzeugte Eintrag für die Liste \cs{tud@changedat@list} wird
 % in zwei unterschiedlichen Varianten generiert. In der Form 
 % \newline\begingroup\scriptsize
-% \val{\meta{Versionsnummer}!Allgemein!\meta{Änderungsnotiz}}
+%   \meta{Versionsnummer}|!Allgemein!|\meta{Änderungsnotiz}\ignorespaces%
 % \endgroup\newline
 %  werden allgemeine Änderungsnotizen erstellt, für Einträge bezüglich der
 % Implementierung wird die folgende Form genutzt:
 % \newline\begingroup\scriptsize
-% \val{\meta{Versionsnummer}!Implementierung!\meta{Markup-Befehl}}\ignorespaces
-% \val{!\meta{Untereintrag}!\meta{Änderungsnotiz}}.
+%   \meta{Versionsnummer}|!Implementierung!|\meta{Markup-Befehl}\ignorespaces%
+%   |!|\meta{Untereintrag}|!|\meta{Änderungsnotiz}\ignorespaces%
 % \endgroup
 %    \begin{macrocode}
-\NewDocumentCommand\Changed@At@@@@CreateList{mmmmm}{%
+\NewDocumentCommand\Changed@At@@@@CreateList{r[]r()mmm}{%
 %    \end{macrocode}
 % Die Aufteilung der Änderungsliste in die einzelnen \TUDScript-Bundle-Elemente 
 % erfolgt entweder anhand des explizit angegebenen optionalen Argumentes in
@@ -4044,8 +4042,8 @@
 % Argumentes entschieden. Ist es vorhanden, handelt es sich um einen Eintrag 
 % für den Implementierungsteil, welcher in \cs{tud@changedat@list} in der Form 
 % \newline\begingroup\scriptsize
-% \meta{Versionsnummer}\val{!Implementierung!}\meta{Markup-Befehl}\ignorespaces
-% \val{!}\meta{Untereintrag}\val{!}\meta{Änderungsnotiz}
+%   \meta{Versionsnummer}|!Implementierung!|\meta{Markup-Befehl}\ignorespaces%
+%   |!|\meta{Untereintrag}|!|\meta{Änderungsnotiz}\ignorespaces%
 % \endgroup\newline
 % gespeichert wird, wobei der Untereintrag auch leer bleiben kann.
 %    \begin{macrocode}
@@ -4072,7 +4070,7 @@
 %    \end{macrocode}
 % Handelt es sich um einen allgemeinen Änderungseintrag, wird dieser in der Form
 % \newline\begingroup\scriptsize
-% \meta{Versionsnummer}\val{!Allgemein!}\meta{Änderungsnotiz}%
+%   \meta{Versionsnummer}|!Allgemein!|\meta{Änderungsnotiz}\ignorespaces%
 % \endgroup\newline
 % in der Liste \cs{tud@changedat@list} gespeichert. Für den allgemeinen Teil 
 % wird mit der Angabe eines \TUDScript-Bundle-Elements etwas anders verfahren.
@@ -4120,8 +4118,8 @@
 % \begin{macro}{\Changed@At@@CreateEntry}
 % \changes{v2.02}{2014/09/02}{neu}^^A
 % Der Befehl \cs{Changed@At@CreateEntry} wird durch \cs{@printchangedatlist} 
-% aufgerufen und teilt die gegebene Liste am Delimiter Ausrufezeichen \val{!}
-% in fünf Argumente auf und reicht sie an \cs{Changed@At@@CreateEntry} weiter.
+% aufgerufen und teilt die gegebene Liste am Delimiter Ausrufezeichen |!| in
+% fünf Argumente auf und reicht sie an \cs{Changed@At@@CreateEntry} weiter.
 % Sind weniger als vier Ausrufezeichen vorhanden, so werden die ungenutzten
 % Argumente mit dem~-- durch das Paket \pkg{xparse} definierten~-- leeren Wert
 % \val{-NoValue-} an den Befehl \cs{Changed@At@@CreateEntry} übergeben.
@@ -4137,12 +4135,12 @@
 % gesetzt werden soll. Die in \cs{tud@changedat@list} gespeicherten Einträge 
 % haben die Form 
 % \newline\begingroup\scriptsize
-% \val{\meta{Versionsnummer}!Allgemein!\meta{Änderungsnotiz}}
+%   \meta{Versionsnummer}|!Allgemein!|\meta{Änderungsnotiz}\ignorespaces%
 % \endgroup\newline
 % oder 
 % \newline\begingroup\scriptsize
-% \val{\meta{Versionsnummer}!Implementierung!\meta{Markup-Befehl}}\ignorespaces
-% \val{!\meta{Untereintrag}!\meta{Änderungsnotiz}}.
+%   \meta{Versionsnummer}|!Implementierung!|\meta{Markup-Befehl}\ignorespaces%
+%   |!|\meta{Untereintrag}|!|\meta{Änderungsnotiz}\ignorespaces%
 % \endgroup
 %    \begin{macrocode}
 \newcommand*\Changed@At@@CreateEntry[5]{%
@@ -4251,13 +4249,13 @@
 \newcommand*\PrintChangelog{%
   \begingroup%
 %    \end{macrocode}
-% Die oberste Ebene enthält die Versionsnummer mit dem Präfix \val{v}. Diese 
-% Ebene soll nicht als Indexeintrag selber sondern vielmehr als Überschrift der
-% Ebene \cs{subsection} genutzt werden. Dafür wird zum einen das durch das 
-% Paket \pkg{imakeidx} definierte Makro \cs{lettergroup} \emph{unschädlich} 
-% gemacht, zum anderen wird der Befehl \cs{item} so umdefiniert, dass dieser
-% alles bis zum nächsten Zeilenumbruch als Argument einliest. Alle darunter 
-% liegenden \cs{item}-Befehle werden eine Ebene nach oben gehoben.
+% Die oberste Ebene enthält die Versionsnummer mit dem Präfix |v|. Diese Ebene
+% soll nicht als Indexeintrag selber sondern vielmehr als Überschrift der Ebene
+% \cs{subsection} genutzt werden. Dafür wird zum einen das durch das Paket
+% \pkg{imakeidx} definierte Makro \cs{lettergroup} \emph{unschädlich} gemacht,
+% zum anderen wird der Befehl \cs{item} so umdefiniert, dass dieser alles bis
+% zum nächsten Zeilenumbruch als Argument einliest. Alle darunter liegenden
+% \cs{item}-Befehle werden eine Ebene nach oben gehoben.
 %    \begin{macrocode}
     \let\lettergroup\@gobble%
     \apptocmd{\theindex}{%
@@ -4412,9 +4410,9 @@
 % werden, um die Einstellung für den Säumniswert hervorzuheben. Im ersten 
 % optionalen Argument können die möglichen Werte einer Option oder eines 
 % Parameters angegeben werden. Sind mehrere Werte gleichbedeutende Werte
-% verwendbar, so sind diese durch \val{/} zu trennen. Dabei wird der als 
-% erstes angegebene Wert für den Untereintrag in den Index verwendet. Das 
-% zweite optionale Argument kann genutzt werden, falls beispielsweise für
+% verwendbar, so sind diese durch |/| zu trennen. Dabei wird der als erstes
+% angegebene Wert für den Untereintrag in den Index verwendet. Das zweite
+% optionale Argument kann genutzt werden, falls beispielsweise für
 % unterschiedliche Klassen sich der Säumniswert unterscheidet. Das letzte 
 % optionale Argument in runden Klammern fügt zum Schluss einen ergänzenden 
 % Eintrag hinzu.
@@ -4811,8 +4809,8 @@
 % \begin{macro}{\tud@shellescape@wrn}
 % \changes{v2.02}{2014/10/14}{neu}^^A
 % Dieses Makro wird verwendet, wenn eine gesuchte Datei nicht gefunden wurde, 
-% weil das Dokument noch nicht mit der Option \opt{--shell-escape} kompiliert 
-% wurde.
+% weil das Dokument noch nicht mit dem Schalter \file{-{}-shell-escape} 
+% kompiliert wurde.
 %    \begin{macrocode}
 \newcommand*\tud@shellescape@wrn[1]{%
 %<*class>
@@ -4924,19 +4922,36 @@
         pdflatex -output-directory examples examples/#1.tex%
       }%
     }%
+%    \end{macrocode}
+% Sollte es eine spezielle Version eines beispiels für die Druckausgabe geben, 
+% wird auch dieses kompiliert.
+%    \begin{macrocode}
+    \filemodCmp{examples/#1_print.pdf}{examples/#1_print.tex}{}{%
+      \immediate\write18{%
+        pdflatex -output-directory examples examples/#1_print.tex^^J%
+        pdflatex -output-directory examples examples/#1_print.tex%
+      }%
+    }%
   \fi%
 %    \end{macrocode}
 % Ist die gesuchte Datei vorhanden, wird diese auch eingebunden. Andernfalls 
 % wird eine Warnung mit dem Hinweis auf die notwendige Verwendung von 
-% \app{pdflatex} mit der Option \opt{--shell-escape} erzeugt.
+% \app{pdflatex} mit dem Schalter \file{-{}-shell-escape} erzeugt.
 %    \begin{macrocode}
-  \IfFileExists{examples/#1.pdf}{%
-    \includepdf[%
-      pages=-,noautoscale,frame,keepaspectratio,pagecommand={},%
-      height=\textheight,width=\textwidth, offset=5mm 0mm%
-    ]{examples/#1.pdf}%
+  \def\@tempa{examples/#1.pdf}%
+  \ifdef{\tudprintflag}{%
+    \IfFileExists{examples/#1_print.pdf}{\def\@tempa{examples/#1_print.pdf}}{}%
+  }{}%
+  \IfFileExists{\@tempa}{%
+    \edef\@tempa{%
+      \noexpand\includepdf[%
+        pages=-,noautoscale,frame,keepaspectratio,pagecommand={},%
+        height=\noexpand\textheight,width=\noexpand\textwidth,offset=5mm 0mm%
+      ]{\@tempa}%
+    }%
+    \@tempa%
   }{%
-    \tud@shellescape@wrn{examples/#1.pdf}%
+    \tud@shellescape@wrn{\@tempa}%
   }%
 }
 %</class>
@@ -5450,7 +5465,7 @@
 % Der Quelltext aus den Umgebungen \env{Trunk!} und \env{Hint!} wird~-- wie bei
 % allen anderen \env{Trunk}-Derivaten~-- in  \file{\string\tud@tut@temp.tex}
 % gesichert. Beim Aufruf von \app{pdflatex} wird durch die Nutzung der Option
-% \opt{-jobname=\string\tud@tut@temp} die Definition von \cs{jobname} in der
+% \file{-jobname=\string\tud@tut@temp} die Definition von \cs{jobname} in der
 % aufgerufenen Datei \file{\string\tud@tut@temp-standalone.tex} überschrieben
 % und der Inhalt von \file{\string\tud@tut@temp.tex} wie gewünscht eingebunden
 % und kompiliert. Damit die so erstellte PDF-Datei mit \cs{IncludeStandalone}
@@ -5698,7 +5713,7 @@
 % Das angestellte optionale Argument erzeugt zusätzlich eine Notiz am Rand, in
 % welcher vorzugsweise die angedachte Version eingetragen werden kann. Sollte 
 % dieser angegeben sein, wird auf eine gültige Versionsnummer geprüft. Dabei 
-% wird ein möglicherweise vorangestelltes \val{v} entfernt.
+% wird ein möglicherweise vorangestelltes |v| entfernt.
 %    \begin{macrocode}
         \def\tud@todo@marginnote{ToDo}%
         \IfValueT{#4}{%
@@ -5862,11 +5877,17 @@
 %    \begin{macrocode}
 \RequirePackage{ragged2e}[2009/05/21]
 %    \end{macrocode}
-% Die Fußnoten werden nicht mit jedem Kapitel zurückgesetzt.
+% Die Fußnoten werden nicht mit jedem Kapitel zurückgesetzt\dots
 %    \begin{macrocode}
-\RequirePackage{chngcntr}[2009/09/02]
-\counterwithout{footnote}{chapter}
-\addtokomafont{footnote}{\tud@RaggedRight}
+\@removefromreset{footnote}{chapter}
+%    \end{macrocode}
+% \dots und im Flattersatz ausgegeben.
+%    \begin{macrocode}
+\ifcsdef{scr@v@3.23}{%
+  \renewcommand*\raggedfootnote{\tud@RaggedRight}%
+}{%
+  \pretocmd{\@makefntext}{\tud@RaggedRight}{}{\tud@patch@wrn{@makefntext}}%
+}
 %    \end{macrocode}
 % Das Paket wird für die Erstellung von Tabellen verwendet.
 %    \begin{macrocode}
@@ -5916,7 +5937,7 @@
 % \changes{v2.05}{2015/11/01}{neu}^^A
 % Mit diesem Befehl kann in einem gegebenen Makro ein bestimmtes Zeichen durch 
 % ein anderes ersetzt werden. Dies wird verwendet, um für Indexbefehle oder 
-% Labels die möglicherweise enthaltenen \val{@}-Zeichen zu ersetzen.
+% Labels die möglicherweise enthaltenen |@|"~Zeichen zu ersetzen.
 %    \begin{macrocode}
 \newcommand*\tud@replace[3]{%
   \begingroup%

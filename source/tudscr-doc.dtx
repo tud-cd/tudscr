@@ -1,4 +1,4 @@
-% \CheckSum{2084}
+% \CheckSum{2092}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -16,7 +16,7 @@
 %  "author-maintained". The current maintainer and author of this work
 %  is Falk Hanisch.
 %
-% ============================================================================
+% ----------------------------------------------------------------------------
 %
 %  Dieses Werk darf nach den Bedingungen der LaTeX Project Public Lizenz
 %  in der Version 1.3c, verteilt und/oder verändert werden. Die aktuelle
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-doc.dtx}[%
-  2017/03/09 v2.05i TUD-Script\space%
+  2017/03/27 v2.05k TUD-Script\space%
   (source code documentation based on scrartcl/scrdoc)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
@@ -130,7 +130,7 @@
         \@tempc}}%
   \@tempc
 }
-\LoadClassWithOptions{ltxdoc}
+\LoadClassWithOptions{ltxdoc}[2015/03/26]
 \setcounter{IndexColumns}{2}
 \setcounter{StandardModuleDepth}{2}
 %    \end{macrocode}
@@ -267,7 +267,7 @@
 %
 % Mit dem Paket~\pkg{dox} können weitere Deklarationselemente erstellt werden.
 % Dieses lädt außerdem das Paket~\pkg{doc}, welches die Grundfunktionalitäten
-% für die Erstellung von \file{dtx}-Dateien bereitstellt. In der momentanen
+% für die Erstellung von \file{.dtx}-Dateien bereitstellt. In der momentanen
 % Version unterstützt das Paket~\pkg{dox} die aktuellen Anpassungen an die
 % Erstellung von Änderungsnotizen durch \pkg{doc} nicht, weshalb im Folgenden
 % einige Patches notwendig sind.
@@ -432,15 +432,21 @@
 \newcommand*\@doxcreatedescribes[1]{%
   \expandafter\def\csname Describe#1s\endcsname##1{%
     \setlength\marginnotevskip{\z@}%
-    \@for\@tempa:=##1\do{%
-      \ifx\@tempa\@empty\else%
-        \edef\@tempb{\expandonce{\csname Describe#1\endcsname}{\@tempa}}%
+    \def\@tempc{##1}%
+    \@for\@tempa:=\@tempc\do{%
+      \expandafter\ifblank\expandafter{\@tempa}{}{%
+        \edef\@tempb{%
+          \expandonce{\csname Describe#1\endcsname}{\expandonce{\@tempa}}%
+        }%
         \@tempb%
         \addtolength\marginnotevskip{\baselineskip}%
-      \fi%
+      }%
     }%
+    \setlength\marginnotevskip{\z@}%
+    \ignorespaces%
   }%
 }
+\@doxcreatedescribes{Macro}
 \AfterPackage{marginnote}{%
   \renewcommand*\marginpar[2][]{%
     \IfArgIsEmpty{#1}{%
@@ -709,7 +715,7 @@
 \undef\PrintDescribeEnv
 \tud@reserved{Env}{environment}
 \tud@reserved{Option}{option}
-\tud@reserved{PageStyle}{pagestyle}
+\tud@reserved{LayerPageStyle}{layerpagestyle}
 \tud@reserved{Layer}{layer}
 \tud@reserved[macrolike]{Length}{length}
 \tud@reserved{Counter}{counter}
@@ -1154,7 +1160,7 @@
 % \begin{macro}{\levelchar}
 % Damit die erzeugten Dateien für Index und Änderungsliste von \app{texindy} 
 % verarbeitet werden können, müssen einige Steuerzeichen in der originalen 
-% \val{.ind}-Datei getauscht werden. Dafür wird diese zeilenweise eingelesen, 
+% \file{.ind}-Datei getauscht werden. Dafür wird diese zeilenweise eingelesen, 
 % die fraglichen Zeichen ersetzt und in eine weitere Hilfsdatei geschrieben.
 %    \begin{macrocode}
 \ifdefined\tudxdyflag

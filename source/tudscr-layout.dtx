@@ -1,4 +1,4 @@
-% \CheckSum{1469}
+% \CheckSum{1439}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -16,7 +16,7 @@
 %  "author-maintained". The current maintainer and author of this work
 %  is Falk Hanisch.
 %
-% ============================================================================
+% ----------------------------------------------------------------------------
 %
 %  Dieses Werk darf nach den Bedingungen der LaTeX Project Public Lizenz
 %  in der Version 1.3c, verteilt und/oder verändert werden. Die aktuelle
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-layout.dtx}[%
-  2017/02/17 v2.05i TUD-Script (layout)%
+  2017/03/27 v2.05k TUD-Script (layout)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman,xindy]{tudscrdoc}
@@ -512,7 +512,7 @@
 % Für Klassen mit separaten Teileseiten und Kapiteln wird eine zusätzliche
 % Option definiert, welche nur bei zweiseitigem Satz (\opt{twoside}) und
 % zusätzlich immer auf nur der rechten Seite öffnenden Teilen bzw. Kapiteln
-% (\opt{open=right}) zum Tragen kommen.
+% (\opt{open}|=|\val{right}) zum Tragen kommen.
 %
 % Diese Option steuert, ob die Rückseite von Titel, Teilen und ggf. auch bei
 % separaten Kapitelseiten\footnote{bei aktivierter \opt{chapterpage}-Option}
@@ -612,9 +612,9 @@
 % \begin{option}{clearcolour}
 % \begin{macro}{\if@tud@clearcolor}
 % Bei starkem Farbeinsatz im Stil des \CDs auf Titel- Teil- oder Kapitelseiten
-% (\opt{cd\dots=color}) wird die entsprechende Rückseite in der gleichen Farbe 
-% wie die dazugehörige Vorderseite gestaltet. Für Teile- bzw. Kapitelseiten 
-% muss dafür die entsprechende Option\footnote{\opt{cleardoublespecialpage}} 
+% (\opt{cd\dots}|=|\val{color}) wird die entsprechende Rückseite in der 
+% gleichen Farbe wie die dazugehörige Vorderseite gestaltet. Für Teile- bzw.
+% Kapitelseiten muss dafür die passende Option (\opt{cleardoublespecialpage})
 % aktiviert sein.
 % 
 %    \begin{macrocode}
@@ -700,9 +700,9 @@
 % nach der Ausführung der Option durch \cs{tud@x@scr@headings@reset} die mit 
 % \cs{tud@font@koma@set} definierten Makros \cs{tud@font@koma@\meta{Element}}
 % erneut an die entsprechenden Schriftelemente angehängt. Bei der Verwendung 
-% der \KOMAScript-Option \opt{headings=standardclasses} werden außerdem noch 
-% die Optionen \opt{open} und \opt{chapterprefix} ausgeführt, weshalb auch auf 
-% diese reagiert werden muss.
+% der \KOMAScript-Option \opt{headings}|=|\val{standardclasses} werden außerdem 
+% noch die Optionen \opt{open} und \opt{chapterprefix} ausgeführt, weshalb auch
+% auf diese reagiert werden muss.
 %    \begin{macrocode}
 \DefineFamilyMember{KOMA}
 \DefineFamilyKey{KOMA}{headings}{%
@@ -738,9 +738,10 @@
 % die Option \opt{headings} eine andere Überschriftengröße gewählt, werden mit
 % dem Makro \cs{tud@x@scr@headings@set} die passenden Schriftgrößen sowohl für
 % die Überschriften (\cs{tud@sec@fontsize}) als auch die Titelseite
-% (\cs{tud@thesis@fontsize}) gesetzt. Dafür werden die mit der Option 
-% \opt{headings=\dots} gewählte Schriftgröße der Überschriften im Hilfsmakro 
-% \cs{tud@x@scr@headings@current} gesichert.
+% (\cs{tud@thesis@fontsize}) gesetzt. Dafür wird gewählte Schriftgröße 
+% der Überschriften\footnote{\ignorespaces%
+%   Option \opt{headings}|=|\val{standardclasses/big/normal/small}\ignorespaces%
+% } im Hilfsmakro \cs{tud@x@scr@headings@current} gesichert.
 %    \begin{macrocode}
 \newcommand*\tud@x@scr@headings@current{}
 \newcommand*\tud@sec@fontsize{}
@@ -824,9 +825,9 @@
 % eigentlich vorgegeben ist. Die Option \opt{pageheadingsvskip} verschiebt 
 % dabei Überschriften, welche allein auf einer Seite stehen, also Überschriften
 % von Teilen oder auf Kapitelseiten. Auch die vertikale Position des Titels
-% kann damit beeinflusst werden. Mit der Option \opt{headingsvskip} werden 
-% Überschriften von Kapiteln oder die des Titelkopfes (\opt{titlepage=false}) 
-% verschoben, bei denen nach der Überschrift direkt der Fließtext folgt.
+% kann damit beeinflusst werden. Mit der Option \opt{headingsvskip} werden die
+% Überschriften von Kapiteln, bei denen direkt danach der Fließtext folgt, oder 
+% die des Titelkopfes (\opt{titlepage}|=|\val{false}) verschoben.
 %    \begin{macrocode}
 %<*book|report|article>
 \newcommand*\tud@dim@pageheadingsvskip{0pt}
@@ -1059,11 +1060,11 @@
 %    \begin{macrocode}
 %<*book|report>
     \if@tud@parttitle%
-      \tud@sectioning@set[addpart]{part}{\usekomafont{parttitle}}%
+      \tud@sectioning@set{part}{\usekomafont{parttitle}}%
       \tud@font@koma@set{partnumber}{\usekomafont{parttitle}}%
     \else%
 %</book|report>
-      \tud@sectioning@set[addpart]{part}{%
+      \tud@sectioning@set{part}{%
         \tud@sec@fontface%
         \tud@color{\tud@part@fontcolor}%
       }%
@@ -1117,7 +1118,7 @@
       \tud@cmd@store{@@makechapterhead}%
       \let\@@makechapterhead\tud@@makechapterhead%
     }%
-    \tud@sectioning@set[addchap]{chapter}{%
+    \tud@sectioning@set{chapter}{%
       \tud@sec@fontface%
       \tud@sec@fontsize%
       \tud@color{\tud@chapter@fontcolor}%
@@ -1144,7 +1145,7 @@
     \ifcase\tud@layout@section@num\relax\or\else% *color
       \renewcommand*\tud@section@fontcolor{HKS41}%
     \fi%
-    \tud@sectioning@set[addsec]{section}{%
+    \tud@sectioning@set{section}{%
       \tud@sec@fontface%
       \ifstr{\tud@pagecolor}{HKS41}{}{\tud@color{\tud@section@fontcolor}}%
     }%
@@ -1421,7 +1422,7 @@
 % \cs{autoref} automatisch generierte Querverweise aus dem Paket \pkg{hyperref}
 % nicht zu verändern. Alternativ zu \cs{let}\cs{@parboxrestore}\cs{relax} 
 % müsste innerhalb des Argumentes von \cs{parbox} die \KOMAScript-Option 
-% \opt{parbox} neu gesetzt werden.
+% \opt{parskip} neu gesetzt werden.
 %    \begin{macrocode}
 \CheckCommand\set@@@@preamble[6]{%
   \expandafter\gdef\csname #1@preamble\endcsname{%
@@ -1828,8 +1829,8 @@
 % \end{macro}^^A \tud@chapter@pre
 % \end{macro}^^A \tud@chapter@app
 % \begin{macro}{\tud@clearcolor@wrn}
-% Warnung für den Fall, dass die Option \opt{clearcolor} ohne \opt{open=right}
-% und \opt{twoside} verwendet wird.
+% Die Warnung für den Fall, dass die Option \opt{clearcolor} ohne 
+% \opt{open}|=|\val{right} und \opt{twoside} verwendet wird.
 %    \begin{macrocode}
 \newcommand*\tud@clearcolor@wrn{%
   \ClassWarning{\TUD@Class@Name}{%
@@ -1851,16 +1852,10 @@
 %
 % \begin{macro}{\tud@part}
 % \begin{macro}{\tud@spart}
-% \begin{macro}{\tud@addpart}
-% \begin{macro}{\tud@saddpart}
 % \begin{macro}{\tud@chapter}
 % \begin{macro}{\tud@schapter}
-% \begin{macro}{\tud@addchap}
-% \begin{macro}{\tud@saddchap}
 % \begin{macro}{\tud@section}
 % \begin{macro}{\tud@ssection}
-% \begin{macro}{\tud@addsec}
-% \begin{macro}{\tud@saddsec}
 % \begin{macro}{\tud@subsection}
 % \begin{macro}{\tud@ssubsection}
 % \begin{macro}{\tud@subsubsection}
@@ -1895,18 +1890,12 @@
 %    \begin{macrocode}
 \newcommand*\tud@part{}
 \newcommand*\tud@spart{}
-\newcommand*\tud@addpart{}
-\newcommand*\tud@saddpart{}
 %<*book|report>
 \newcommand*\tud@chapter{}
 \newcommand*\tud@schapter{}
-\newcommand*\tud@addchap{}
-\newcommand*\tud@saddchap{}
 %</book|report>
 \newcommand*\tud@section{}
 \newcommand*\tud@ssection{}
-\newcommand*\tud@addsec{}
-\newcommand*\tud@saddsec{}
 \newcommand*\tud@subsection{}
 \newcommand*\tud@ssubsection{}
 \newcommand*\tud@subsubsection{}
@@ -1916,20 +1905,15 @@
 % \end{macro}^^A \tud@subsubsection
 % \end{macro}^^A \tud@ssubsection
 % \end{macro}^^A \tud@subsection
-% \end{macro}^^A \tud@saddsec
-% \end{macro}^^A \tud@addsec
 % \end{macro}^^A \tud@ssection
 % \end{macro}^^A \tud@section
-% \end{macro}^^A \tud@saddchap
-% \end{macro}^^A \tud@addchap
 % \end{macro}^^A \tud@schapter
 % \end{macro}^^A \tud@chapter
-% \end{macro}^^A \tud@saddpart
-% \end{macro}^^A \tud@addpart
 % \end{macro}^^A \tud@spart
 % \end{macro}^^A \tud@part
 % \begin{macro}{\tud@sectioning@set}
 % \changes{v2.02}{2014/08/16}{Bug mit Majuskeln bei \cs{addsec} behoben}^^A
+% \changes{v2.05k}{2017/03/14}{Sonderbehandlung von \cs{add\dots} unnötig}^^A
 % \begin{macro}{\tud@sectioning@case}
 % \changes{v2.02}{2014/09/12}{Reimplementierung mit \cs{SecDef}}^^A
 % \begin{macro}{\tud@sectioning@reset}
@@ -1937,30 +1921,23 @@
 % \changes{v2.02}{2014/07/25}{neu}^^A
 % Das Makro \cs{tud@sectioning@set} sichert und überschreibt die gegebenen
 % Befehle der einzelnen Gliederungsebenen und fügt diesen die zusätzlich 
-% angegebene Schriftdefinition mit dem Makro \cs{tud@font@koma@set} zu. Das
-% optionale Argument ermöglicht die Anpassung des gegebenen Gliederungsbefehls
-% ohne zusätzliche Definition der Schrift. Dies ist für die von \KOMAScript{} 
-% obendrein bereitgestellten Gliederungsbefehle (\cs{add\dots}) notwendig.
+% angegebene Schriftdefinition mit dem Makro \cs{tud@font@koma@set} zu.
 %    \begin{macrocode}
-\newcommand*\tud@sectioning@set[3][]{%
-  \tud@cmd@store{#2}%
+\newcommand*\tud@sectioning@set[2]{%
+  \tud@cmd@store{#1}%
 %    \end{macrocode}
 % Für die Überschriften, welche mit \cs{minisec} gesetzt werden, genügt jedoch
 % ein vereinfachtes Vorgehen.
 %    \begin{macrocode}
-  \ifstr{#2}{minisec}{%
+  \ifstr{#1}{minisec}{%
     \renewcommand\minisec[1]{\@@tud@minisec{\tud@makeuppercase{##1}}}%
 %    \end{macrocode}
 % Hier erfolgt die Anpassung und Formatierung aller anderen Gliederungsbefehle.
 %    \begin{macrocode}
   }{%
-    \tud@sectioning@case{#2}%
-    \ifblank{#1}{}{%
-      \tud@cmd@store{#1}%
-      \tud@sectioning@case{#1}%
-    }%
+    \tud@sectioning@case{#1}%
   }%
-  \tud@font@koma@set{#2}{#3}%
+  \tud@font@koma@set{#1}{#2}%
 }
 %    \end{macrocode}
 % Da die Großschreibung der Überschriften nur beim Setzen der Überschrift
@@ -2007,31 +1984,13 @@
       {\noexpand\tud@sectioning@uppercase{##1}}%
   }%
 %    \end{macrocode}
-% Aus nicht ganz nachvollziehbaren Gründen gibt es bei Überschriften, die mit
-% \cs{addsec} gesetzt werden, ein Problem, wenn innerhalb dieser der Befehl
-% \cs{NoCaseChange} verwendet wird. Dieser bleibt hier wirkungslos. Es liegt 
-% sehr wahrscheinlich daran, dass diese Befehle intern \cs{section*} verwenden.
-% Deshalb werden für \cs{addsec} die Befehle leicht abgewandelt definiert.
-%    \begin{macrocode}
-  \ifstr{#1}{addsec}{%
-    \def\tud@addsec[##1]##2{%
-      \@@tud@addsec[{##1}]{\tud@sectioning@uppercase##2}%
-    }%
-    \def\tud@saddsec##1{%
-      \@@tud@addsec*{\tud@sectioning@uppercase##1}%
-    }%
-  }{}%
-%    \end{macrocode}
 % Die Änderungen durch \cs{tud@chapter@pre} und \cs{tud@chapter@app} sollen bei
 % der Erzeugung eines Kapitels greifen. Damit die originalen Befehle nicht
 % beeinflusst werden, erfolgt die Manipulation der bereits adaptierten Befehle
 % für Kapitel.
 %    \begin{macrocode}
 %<*book|report>
-  \@tempswafalse%
-  \ifstr{#1}{chapter}{\@tempswatrue}{}%
-  \ifstr{#1}{addchap}{\@tempswatrue}{}%
-  \if@tempswa%
+  \ifstr{#1}{chapter}{%
     \def\@tempa{,s}%
     \@for\@tempb:=\@tempa\do{%
       \expandafter\pretocmd\expandafter{\csname tud@\@tempb#1\endcsname}{%
@@ -2041,7 +2000,7 @@
         \tud@chapter@app%
       }{}{\tud@patch@wrn{tud@sectioning@case}}%
     }%
-  \fi%
+  }{}%
 %</book|report>
 }
 %    \end{macrocode}
@@ -2057,7 +2016,7 @@
 %    \end{macrocode}
 % Der Befehl \cs{tud@sectioning@uppercase} ist für das Setzen der 
 % Gliederungsüberschriften in Majuskeln verantwortlich. Außerdem wird ggf. die
-% Option \opt{footnotes=symbolheadings} umgesetzt.
+% Option \opt{footnotes}|=|\val{symbolheadings} umgesetzt.
 %    \begin{macrocode}
 \robustify{\footnote}
 \newcommand*\tud@sectioning@uppercase[1]{%

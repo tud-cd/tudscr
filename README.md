@@ -4,15 +4,12 @@
 
  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2017
 
- tudscr 2017/03/12 v2.05i
+ tudscr 2017/03/27 v2.05k
 
-============================================================================
+----------------------------------------------------------------------------
 
  This material is subject to the LaTeX Project Public License version 1.3c
  or later. See http://www.latex-project.org/lppl.txt for details.
-
-============================================================================
-
  English text below
 
 ----------------------------------------------------------------------------
@@ -42,46 +39,52 @@ Klassen und Pakete
 
 Das Bundle beinhaltet:
 
-+ die drei Dokumentklassen `tudscrartcl`, `tudscrreprt`, `tudscrbook` als
-  Wrapper-Klassen von `scrartcl`, `scrreprt` und `scrbook`,
-+ die Klasse `tudscrposter` für das Erstellen von Postern
-+ das Paket `tudscrsupervisor`, welches Umgebungen und Befehle für die
++ die drei Dokumentklassen **tudscrartcl**, **tudscrreprt**, **tudscrbook** 
+  als Wrapper-Klassen von **scrartcl**, **scrreprt** und **scrbook**,
++ die Klasse **tudscrposter** für das Erstellen von Postern
++ das Paket **tudscrsupervisor**, welches Umgebungen und Befehle für die
   Erstellung von Aufgabenstellungen, Gutachten und Aushängen bereitstellt,
-+ das Paket `tudscrfonts`, das die Schriften des Corporate Designs der
++ das Paket **tudscrfonts**, das die Schriften des Corporate Designs der
   Technischen Universität Dresden für die LaTeX-Standard-Klassen und die
   KOMA-Script-Klassen nutzbar macht,
-+ das Paket `fix-tudscrfonts`, das selbige Schriften für weitere TUD-CD-Klassen
-  verfügbar macht, welche nicht zu TUD-Script gehören,
-+ das Paket `tudscrcomp`, welches den Umstieg von fremden TUD-CD-Klassen auf
++ das Paket **fix-tudscrfonts**, das selbige Schriften für weitere 
+  TUD-CD-Klassen verfügbar macht, welche nicht zu TUD-Script gehören,
++ das Paket **tudscrcomp**, welches den Umstieg von fremden TUD-CD-Klassen auf
   TUD-Script vereinfacht,
-+ das Paket `mathswap` für das Austauschen mathematischer Trennzeichen
-  innerhalb von Zahlen (ähnlich zu `ionumbers`),
-+ das Paket `twocolfix` zur Fehlerbefehbung der Position von Überschriften im
++ das Paket **mathswap** für das Austauschen mathematischer Trennzeichen
+  innerhalb von Zahlen (ähnlich zu **ionumbers**),
++ das Paket **twocolfix** zur Fehlerbefehbung der Position von Überschriften im
   zweispaltigen Layout und
 + eine umfassende Anwenderdokumentation sowie mehrere Tutorials.
 
 Versionen
 ---------
 
+**v2.05k** (2017/03/27)
++ Bugfix für Gliederungsbefehle `\addpart`, `\addchap` und `\addsec`
++ kleinere Anpassungen für Dokumentationsklassen
+
+
 **v2.05i** (2017/03/12)
-+ Umgebungen `Describe<Element>s` für mehrere Elemente in Klasse `tudscrdoc`
-+ Umgebung `DescribeParameterParent` in Klasse `tudscrdoc`
++ Befehl `\Describe<Element>s` für mehrere Elemente in Klasse **tudscrdoc**
++ Umgebung `DescribeParameterParent` in Klasse **tudscrdoc**
 + Bugfix für `\mu` bei Mathematikschriften
-+ Bugfix in Klasse `tudscrmanual` für neue Version von `xparse`
++ Bugfix in Klasse **tudscrmanual** für neue Version von **xparse**
 
 
 **v2.05h** (2017/02/04)
-+ Quelltextdokumentationsklasse `tudscrdoc` an neue Version von `dox` angepasst
++ Quelltextdokumentationsklasse **tudscrdoc** an neue Version von **dox** 
+  angepasst
 + Glyphen (`lessequal` und `greaterequal`) in Schriftfamilien korrigiert
 
 
 **v2.05g** (2017/01/26)
-+ Erweiterung der Quelltextdokumentationsklasse `tudscrdoc`
++ Erweiterung der Quelltextdokumentationsklasse **tudscrdoc**
 + kleinere Fehler im TUD-Script-Bundle behoben
 
 
 **v2.05f** (2016/10/12)
-+ Probleme mit dem Paket `bm` behoben
++ Probleme mit dem Paket **bm** behoben
 
 
 **v2.05e** (2016/10/10)
@@ -90,7 +93,7 @@ Versionen
 
 **v2.05d** (2016/09/22)
 + Bezeichnung in TUD-Script-Bundle geändert
-+ Probleme mit dem Paket `flexisym` behoben
++ Probleme mit dem Paket **flexisym** behoben
 
 
 **v2.05c** (2016/09/15)
@@ -98,7 +101,7 @@ Versionen
 
 
 **v2.05b** (2016/09/09)
-+ Bugfix für `fix-tudscrfonts`
++ Bugfix für **fix-tudscrfonts**
 
 
 **v2.05a** (2016/08/24)
@@ -107,13 +110,14 @@ Versionen
 
 **v2.05** (2016/07/26)
 
-+ Klasse `tudscrposter`
-+ Schnittmarken mit Paketen `crop` und `geometry` möglich
++ Klasse **tudscrposter**
++ Schnittmarken mit Paketen **crop** und **geometry** möglich
 + neue Einstellungsmöglichkeiten für den Satzspiegel
 + schriftgrößenabhängige Abstände mit Option `relspacing`
 + `\course` und `\discipline` für Titel nutzbar
-+ Paket `tudscrcomp`: Unterstützung der Klassen `tudmathposter` und `tudposter`
-+ Paket `fix-tudscrfonts`
++ Paket **tudscrcomp**: Unterstützung der Klassen **tudmathposter** und
+  **tudposter**
++ Paket **fix-tudscrfonts**
 
 
 **v2.04e** (2016/06/17)
@@ -123,12 +127,12 @@ Versionen
 
 **v2.04d** (2016/03/26)
 
-+ Bugfix für Titelseite bei `tudscrartcl`
++ Bugfix für Titelseite bei **tudscrartcl**
 
 
 **v2.04c** (2015/11/29)
 
-+ Bugfix für fehlenden Schriften bei Verwendung von Paket `fontspec`
++ Bugfix für fehlenden Schriften bei Verwendung von Paket **fontspec**
 
 
 **v2.04b** (2015/10/06)
@@ -144,7 +148,7 @@ Versionen
 **v2.04** (2015/07/02)
 
 + Anpassungen an KOMA-Script v3.18
-+ Einfachere Verwendung von `fontspec`
++ Einfachere Verwendung von Paket **fontspec**
 + verbesserte Installationsroutine der Schriften für portable Distributionen
 + alleinstehender farbiger Querbalken im Kopfbereich
 + freier Inhalt im Fußbereich möglich
@@ -167,20 +171,20 @@ Versionen
 
 **v2.02** (2014/12/17)
 
-+ Paket `tudscrfonts`
-+ Probleme mit der Klasse `standalone` behoben
-+ Laden der Schriften des Corporate Designs im OpenType-Format mit `fontspec`
-  ermöglicht
++ Paket **tudscrfonts**
++ Probleme mit der Klasse **standalone** behoben
++ Laden der Schriften des Corporate Designs im OpenType-Format mit Paket 
+  **fontspec** ermöglicht
 + verbesserte Installationsroutine der PostScript-Schriften
 + Seiten im Stil des Corporate Designs werden mithilfe des Paketes
-  `scrlayer-scrpage` erzeugt
+  **scrlayer-scrpage** erzeugt
 + verschiedene Optionen und Befehle zur individuellen Gestaltung dieser Seiten
 + Unterstützung der KOMA-Script-Schriftelemente für Titel und Umschlagseite
 + Befehle und Umgebungen für Zusammenfassung, Selbstständigkeitserklärung und
   Sperrvermerk wurden verbessert
-+ Fussnoten in Überschriften können per Option mit Symbolen gesetzt werden
++ Fussnoten in Überschriften als Symbole  per Option `footnotes`
 + einige Befehle wurden für Kompatibilität zu anderen Paketen umbenannt
-+ Funktionalität des Paketes `mathswap` im Dokument umschaltbar
++ Funktionalität des Paketes **mathswap** im Dokument umschaltbar
 
 
 **v2.01b** (2014/06/04)
@@ -201,8 +205,8 @@ Versionen
 
 **v2.00** (2014/04/22)
 
-+ Das TUD-Script-Bundle wurde von Grund auf überarbeitet und mittels
-  `docstrip` erzeugt. Viele Fehler wurden entfernt und die Robustheit der
++ Das TUD-Script-Bundle wurde von Grund auf überarbeitet und mittels Paket
+  **docstrip** erzeugt. Viele Fehler wurden entfernt und die Robustheit der
   Befehle und Optionen wurde erhöht. Die Verwendung der Schriften, insbesondere
   für den mathematischen Satz, wurde entscheidend verbessert. Weiterhin erfuhr
   das Handbuch des Bundles eine komplette Überarbeitung, wurde erweitert und um
@@ -239,45 +243,50 @@ Classes and Packages
 
 The bundle offers:
 
-+ the three document classes `tudscrartcl`, `tudscrreprt`, `tudscrbook` as
-  wrapper classes for `scrartcl`, `scrreprt` and `scrbook`,
-+ the class `tudscrposter` for creating posters,
-+ the package `tudscrsupervisor` providing environments and macros to create
++ the three document classes **tudscrartcl**, **tudscrreprt**, **tudscrbook** 
+  as wrapper classes for **scrartcl**, **scrreprt** and **scrbook**,
++ the class **tudscrposter** for creating posters,
++ the package **tudscrsupervisor** providing environments and macros to create
   tasks, evaluations and notices for scientific theses,
-+ the package `tudscrfonts`, which makes the corporate design fonts of the
++ the package **tudscrfonts**, which makes the corporate design fonts of the
   Technische Universität Dresden available for LaTeX standard classes and
   KOMA-Script classes,
-+ the package `fix-tudscrfonts`, which provides the same fonts to additional
++ the package **fix-tudscrfonts**, which provides the same fonts to additional
   corporate design classes not related to TUD-Script
-+ the package `tudscrcomp`, which simplifies the switch to TUD-Script
++ the package **tudscrcomp**, which simplifies the switch to TUD-Script
   from external corporate design classes,
-+ the package `mathswap` for swapping math delimiters within numbers (similiar
-  to `ionumbers`),
-+ the package `twocolfix` for fixing the positioning bug of headings in
++ the package **mathswap** for swapping math delimiters within numbers 
+  (similiar to **ionumbers**),
++ the package **twocolfix** for fixing the positioning bug of headings in
   twocolumn layout and
 + an comprehensive user documentation as well as several tutorials.
 
 Versions
 --------
 
+**v2.05k** (2017/03/27)
++ bug fix for sectioning commands `\addpart`, `\addchap` und `\addsec`
++ small adaptions for documentation classes
+
+
 **v2.05i** (2017/03/12)
-+ environment `Describe<Element>s` for mutliple elements in class `tudscrdoc`
-+ environment `DescribeParameterParent` in class `tudscrdoc`
++ command `\Describe<Element>s` for mutliple elements in class **tudscrdoc**
++ environment `DescribeParameterParent` in class **tudscrdoc**
 + bug fix for `\mu` with math font
-+ bug fix in class `tudscrmanual` for new version of `xparse`
++ bug fix in class **tudscrmanual** for new version of **xparse**
 
 **v2.05h** (2017/02/04)
-+ adaption of the source code documentation class `tudscrdoc` to updated `dox`
++ adaption to source code documentation class **tudscrdoc** for updated **dox**
 + glyphs (`lessequal` und `greaterequal`) in font families corrected
 
 
 **v2.05g** (2017/01/26)
-+ enhancement of the source code documentation class `tudscrdoc`
++ enhancement of the source code documentation class **tudscrdoc**
 + minor errors fixed within the TUD-Script bundle
 
 
 **v2.05f** (2016/10/12)
-+ solved problems with package `bm`
++ solved problems with package **bm**
 
 
 **v2.05e** (2016/10/10)
@@ -286,7 +295,7 @@ Versions
 
 **v2.05d** (2016/09/22)
 + notation changed to TUD-Script bundle
-+ solved problems with package `flexisym`
++ solved problems with package **flexisym**
 
 
 **v2.05c** (2016/09/15)
@@ -294,7 +303,7 @@ Versions
 
 
 **v2.05b** (2016/09/09)
-+ bug fix for `fix-tudscrfonts`
++ bug fix for **fix-tudscrfonts**
 
 
 **v2.05a** (2016/08/24)
@@ -303,13 +312,14 @@ Versions
 
 **v2.05** (2016/07/26)
 
-+ class `tudscrposter`
-+ crop marks  with packages `crop` and `geometry` possible
++ class **tudscrposter**
++ crop marks  with packages **crop** and **geometry** possible
 + new possible settings for type area
 + font size related skips with option `relspacing`
 + `\course` and `\discipline` available on title
-+ package `tudscrcomp`: support for classes `tudmathposter` and `tudposter`
-+ package `fix-tudscrfonts`
++ package **tudscrcomp**: support for classes **tudmathposter** and 
+  **tudposter**
++ package **fix-tudscrfonts**
 
 
 **v2.04e** (2016/06/17)
@@ -319,12 +329,12 @@ Versions
 
 **v2.04d** (2016/03/26)
 
-+ bug fix for titlepage with `tudscrartcl`
++ bug fix for titlepage with **tudscrartcl**
 
 
 **v2.04c** (2015/11/29)
 
-+ bug fix for missing fonts when using package `fontspec`
++ bug fix for missing fonts when using package **fontspec**
 
 
 **v2.04b** (2015/10/06)
@@ -340,7 +350,7 @@ Versions
 **v2.04** (2015/07/02)
 
 + adjustments to KOMA-Script v3.18
-+ simpler usage of `fontspec`
++ simpler usage of package **fontspec**
 + improved installation routine for portable distributions
 + solitary colored head bar
 + customisable content in the foot possible
@@ -363,20 +373,20 @@ Versions
 
 **v2.02** (2014/12/17)
 
-+ package `tudscrfonts`
-+ fixed bug with class `standalone`
-+ loading the corporate design fonts in OpenType format with `fontspec` is
-  possible
++ package **tudscrfonts**
++ fixed bug with class **standalone**
++ loading the corporate design fonts in OpenType format with package 
+  **fontspec** is possible
 + improved installation routine of PostScript fonts
 + pages in the style of the corporate design are generated using the package
-  `scrlayer-scrpage`
+  **scrlayer-scrpage**
 + various options and commands to customize these pages
 + support of the KOMA-Script font elements for title and cover
 + commands and environments for abstract, statement of authorship and
   restriction note have been improved
 + footnotes in headings can be set as symbols per option `footnotes`
 + some commands have been renamed for compatibility with other packages
-+ functionality of the package `mathswap` can be switched within the document
++ functionality of the package **mathswap** can be switched within the document
 
 
 **v2.01b** (2014/06/04)
@@ -397,10 +407,10 @@ Versions
 **v2.00** (2014/04/22)
 
 + The TUD-Script bundle has been redesigned from the ground up and is
-  generated by using `docstrip`. Many bugs have been removed and the robustness
-  of the commands and options has been increased. The use of the fonts,
-  especially for the mathematical set, was significantly improved. The manual
-  of the bundle underwent a complete overhaul, has been extended and
+  generated by using **docstrip**. Many bugs have been removed and the 
+  robustness of the commands and options has been increased. The use of the 
+  fonts, especially for the mathematical set, was significantly improved. The 
+  manual of the bundle underwent a complete overhaul, has been extended and
   supplemented by several indexes.
 
 
