@@ -4,7 +4,7 @@
 
  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2017
 
- tudscr 2017/03/12 v2.05k
+ tudscr 2017/03/27 v2.05k
 
 ----------------------------------------------------------------------------
 
@@ -59,6 +59,11 @@ Das Bundle beinhaltet:
 
 Versionen
 ---------
+
+**v2.05k** (2017/03/27)
++ Bugfix für Gliederungsbefehle `\addpart`, `\addchap` und `\addsec`
++ kleinere Anpassungen für Dokumentationsklassen
+
 
 **v2.05i** (2017/03/12)
 + Befehl `\Describe<Element>s` für mehrere Elemente in Klasse **tudscrdoc**
@@ -258,6 +263,11 @@ The bundle offers:
 
 Versions
 --------
+
+**v2.05k** (2017/03/27)
++ bug fix for sectioning commands `\addpart`, `\addchap` und `\addsec`
++ small adaptions for documentation classes
+
 
 **v2.05i** (2017/03/12)
 + command `\Describe<Element>s` for mutliple elements in class **tudscrdoc**
