@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-texindy.dtx}[%
-  2017/03/14 v2.05k TUD-Script (texindy style files)%
+  2017/03/27 v2.05k TUD-Script (texindy style files)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman,xindy]{tudscrdoc}
@@ -83,10 +83,9 @@
 % \section{Stildateien für \texorpdfstring{\app{texindy}}{texindy}}
 %
 % Für die Dokumentationsklassen und -pakete wird zur Sortierung \app{texindy} 
-% verwendet. Da das Programm die die Dateien nicht in einem \val{TEXPATH} nach 
-% den Stildateien sucht, werden diese zur Laufzeit im Arbeitsverzeichnis 
-% erstellt. Nachfolgend werden die zu erstellenden \app{texindy}-Stildateien
-% kurz beschrieben.
+% verwendet. Da das Programm die die Dateien nicht in einem |TEXPATH| nach den
+% Stildateien sucht, werden diese zur Laufzeit im Arbeitsverzeichnis erstellt.
+% Nachfolgend werden die zu erstellenden \app{texindy}-Stildateien beschrieben.
 %
 % \StopEventually{\PrintIndex\PrintChanges\PrintToDos}
 %
@@ -196,23 +195,23 @@
 %
 % \subsection{Defintion und Markup der Seitenzahlen}
 %
-% Leider lässt sich für Seitenzahlbereiche via \val{:attr} (noch) kein Markup 
-% für angehängte \enquote{f.} sowie \enquote{ff.} einstellen. Diese würden 
-% deshalb bei kursiven oder fetten Seitenzahlen trotzdem in normaler Schrift
-% erscheinen, weshalb auf die Auszeichnung folgender Seiten verzichtet wird.
+% Leider lässt sich für Seitenzahlbereiche via |:attr| (noch) kein Markup für 
+% angehängte \enquote{f.} sowie \enquote{ff.} einstellen. Diese würden deshalb
+% bei kursiven oder fetten Seitenzahlen trotzdem in normaler Schrift erscheinen,
+% weshalb auf die Auszeichnung folgender Seiten verzichtet wird.
 %    \begin{macrocode}
 %^^A  \write\tud@write@xdy{(require "ff-ranges.xdy")}%
 %    \end{macrocode}
 % Bereiche mit mehr als zwei Seitenzahlen werden zusammengefasst, wobei als
 % Trennzeichen ein Halbgeviertstrich verwendet wird. Für \cls{tudscrdoc} werden 
-% die Seitenzahlen beim Einbinden der einzelnen \file{dtx}-Dateien mit einem
-% alphanumerischen Präfix versehen, wofür eine eigene \val{location-class}
-% erstellt wird.
+% die Seitenzahlen beim Einbinden der einzelnen \file{.dtx}-Dateien mit einem
+% alphanumerischen Präfix versehen, wofür eine eigene |location-class| erstellt
+% wird.
 %    \begin{macrocode}
   \write\tud@write@xdy{%
     (define-location-class^^J%
     \space\space"arabic-page-numbers" ("arabic-numbers")%
-    \space:min-range-length 2^^J%
+    \space:min-range-length 1^^J%
     )^^J%
 %<*doc>
     (define-alphabet "AlphaExtended"^^J%
@@ -239,7 +238,7 @@
 % Alle Argumente in eckigen Klammern werden ignoriert. Dies wird bei einigen
 % Indexbefehlen genutzt, um die nicht beachteten RegExp-Regeln auszugleichen, 
 % siehe den nächsten Absatz. In der Klasse \cls{tudscrdoc} werden außerdem ein 
-% oder mehrere vorangestellte \val{@}-Zeichen ignoriert.
+% oder mehrere vorangestellte |@|"~Zeichen ignoriert.
 %    \begin{macrocode}
   \write\tud@write@xdy{%
     (merge-rule "\@backslashchar[(.*)\@backslashchar]" "" :eregexp)%
@@ -302,7 +301,7 @@
 %    \end{macrocode}
 % Für die Änderungsliste von \cls{tudscrdoc} erfolgt die Gruppierung anhand der
 % angegebenen Versionsnummer. Das bedeutet, das das Markup für die eigentliche 
-% \val{letter-group} unterdrückt und die erste Ebene dafür verwendet wird. 
+% |letter-group| unterdrückt und die erste Ebene dafür verwendet wird. 
 %    \begin{macrocode}
 %<*doc>
   \if@tud@xdy@glo%
@@ -312,10 +311,10 @@
     \space:close-head "}"%
     )^^J%
 %    \end{macrocode}
-% Leider gibt es für die Eintragsebenen keine Schlüssel \val{open-head} und
-% \val{close-head}, weshalb für die Änderungsliste etwas getrickst werden muss. 
-% Zwischen Einträgen der ersten Ebene soll äquivalent zu \val{letter-group} 
-% etwas Abstand eingefügt werden.
+% Leider gibt es für die Eintragsebenen keine Schlüssel |open-head| und
+% |close-head|, weshalb für die Änderungsliste etwas getrickst werden muss. 
+% Zwischen Einträgen der ersten Ebene soll äquivalent zu |letter-group| etwas
+% Abstand eingefügt werden.
 %    \begin{macrocode}
     (markup-indexentry-list%
     \space:sep "\string~n\string~n\space\space\string\indexspace\string~n"%
@@ -500,7 +499,7 @@
 %
 % \subsection{Querverweise im Index}
 %
-% Im Handbuch prüfen mit \val{see}\marg{Eintrag} erzeugte Querverweise im 
+% Im Handbuch prüfen, mit \verb=|see=\marg{Eintrag} erzeugte Querverweise im 
 % Index, ob außerdem noch Seitenzahlangaben existent sind.
 %    \begin{macrocode}
   \write\tud@write@xdy{%
@@ -518,7 +517,7 @@
 % \fi
 %
 % Um Querverweise ohne Prüfung des Zieleintrags erzeugen zu können, wird der 
-% passende Typ \val{seeunverified} definiert.
+% passende Typ |seeunverified| definiert.
 %    \begin{macrocode}
   \write\tud@write@xdy{%
     (define-crossref-class "seeunverified" :unverified)^^J%
@@ -528,9 +527,9 @@
   }%
 %    \end{macrocode}
 % Dieser Querverweistyp wird speziell im allgemeinen Index verwendet, um auf 
-% einen Spezialindex zu verweisen. Dabei dient \val{:unverified} zum 
-% Unterdrücken von Warnungen durch \app{texindy} aufgrund eines fehlenden 
-% Ziels für den Querverweis.
+% einen Spezialindex zu verweisen. Dabei dient |:unverified| zum Unterdrücken
+% von Warnungen durch \app{texindy} aufgrund eines fehlenden Ziels für den
+% Querverweis.
 %    \begin{macrocode}
   \write\tud@write@xdy{%
     (define-crossref-class "seeidx" :unverified)^^J%
@@ -559,7 +558,7 @@
 %</class>
 % \fi
 %
-% Werden mit \val{see}\marg{Eintrag!Untereintrag} gezielte Querverweise auf
+% Werden mit \verb=|see=\marg{Eintrag!Untereintrag} gezielte Querverweise auf
 % Untereinträge im Index erstellt, so werden diese nicht standardmäßig mit 
 % einem Komma sondern mit \enquote{\,\textbar\,} getrennt.
 %    \begin{macrocode}
