@@ -1,6 +1,6 @@
-\newcommand*\TaT{\hyperref[sec:tips]{Tipps \& Tricks}:\xspace}
+\setchapterpreamble{\tudhyperdef'{sec:tips}}
 \chapter{Praktische Tipps \& Tricks}
-\tudhyperdef*{sec:tips}%
+\newcommand*\TaT{\hyperref[sec:tips]{Tipps \& Tricks}:\xspace}
 \section{\NoCaseChange{\hologo{LaTeX}}-Editoren}
 \tudhyperdef*{sec:tips:editor}%
 %
@@ -340,7 +340,7 @@ einem Kapitel mit \Macro{counterwithout*}[%
 
 
 
-\section{Setzen von Einheiten mit \Package{siunitx}}
+\section{Lokalisierung für das Setzen von Einheiten mit \Package{siunitx}}
 \tudhyperdef*{sec:tips:siunitx}%
 \index{Einheiten}%
 %
@@ -495,75 +495,6 @@ Auf dieser Webseite wird das gesuchte Symbol einfach gezeichnet, die dazu
 
 
 
-\section{Änderung des Papierformates}
-\index{Papierformat}%
-%
-Es kann vorkommen, dass innerhalb eines Dokumentes kurzzeitig das Papierformat 
-geändert werden soll, um beispielsweise eine Konstruktionsskizze in der 
-digitalen PDF"~Datei einzubinden. Dabei ist es mit der \KOMAScript-Option 
-\Option{paper=\PSet}(\Package{typearea})'none' sowohl möglich, lediglich die 
-Ausrichtung in ein Querformat zu ändern, als auch die Größe des Papierformates 
-selber.
-%
-\begin{Example}
-Ein Dokument im A4"~Format soll kurzzeitig auf ein A3"=Querformat geändert 
-werden. Das folgende Minimalbeispiel zeigt, wie dies mit \KOMAScript-Mitteln 
-über die Optionen \Option*{paper=landscape}(\Package{typearea})'none' und 
-\Option*{paper=A3}(\Package{typearea})'none' geändert werden kann.
-\begin{Code}
-\documentclass[paper=a4,pagesize]{tudscrreprt}
-\usepackage{selinput}
-\SelectInputMappings{adieresis={ä},germandbls={ß}}
-\usepackage[T1]{fontenc}
-\usepackage[ngerman]{babel}
-\usepackage{blindtext}
-
-\begin{document}
-\chapter{Überschrift Eins}
-\Blindtext
-
-\cleardoublepage
-\storeareas\PotraitArea% speichert den aktuellen Satzspiegel
-\KOMAoptions{paper=A3,paper=landscape,DIV=current}
-\chapter{Überschrift Zwei}
-\Blindtext
-
-\cleardoublepage
-\PotraitArea% lädt den gespeicherten Satzspiegel
-\chapter{Überschrift Drei}
-\Blindtext
-\end{document}
-\end{Code}
-\end{Example}
-
-
-
-\section{Vermeiden des Skalierens einer PDF-Datei beim Druck}
-\ChangedAt{v2.04:\TaT Vermeiden des Skalierens einer PDF"~Datei beim Druck}
-%
-Beim Erzeugen eines Druckauftrages einer PDF"~Datei kann es unter Umständen dazu 
-führen, dass diese durch den verwendeten PDF"~Betrachter unnötigerweise vorher 
-skaliert wird und dabei die Seitenränder vergrößert werden. Um dieses Verhalten 
-für Dokumente, die mit \Engine{pdfTeX} erzeugt werden, zu unterdrücken, gibt es 
-zwei Möglichkeiten:
-%
-\begin{enumerate}
-\item Wenn im Dokument ohnehin das Paket \Package{hyperref} verwendet wird, 
-  ist der simple Aufruf von
-  \Macro{hypersetup}[%
-    \PParameter{pdfprintscaling=None}%
-  ](\Package{hyperref})'none'
-  ausreichend.
-\item Der Low"~Level"~Befehl
-  \Macro*{pdfcatalog}[\PParameter{/ViewerPreferences<{}</PrintScaling/None>{}>}]
-  hat das gleiche Verhalten und kann auch ohne das Paket \Package{hyperref} 
-  genutzt werden.
-\end{enumerate}
-%
-Weitere Informationen dazu sind unter \url{http://www.komascript.de/node/1897} 
-zu finden.
-
-
 \section{Beschnittzugabe und Schnittmarken}
 \tudhyperdef*{sec:tips:crop}%
 \index{Beschnittzugabe|!}%
@@ -639,6 +570,105 @@ erweitert werden, um ein \enquote{Zuschneiden in die Farbe} zu ermöglichen.
 
 
 
+\section{Änderung des Papierformates}
+\index{Papierformat}%
+%
+Es kann vorkommen, dass innerhalb eines Dokumentes kurzzeitig das Papierformat 
+geändert werden soll, um beispielsweise eine Konstruktionsskizze in der 
+digitalen PDF"~Datei einzubinden. Dabei ist es mit der \KOMAScript-Option 
+\Option{paper=\PSet}(\Package{typearea})'none' sowohl möglich, lediglich die 
+Ausrichtung in ein Querformat zu ändern, als auch die Größe des Papierformates 
+selber.
+%
+\begin{Example}
+Ein Dokument im A4"~Format soll kurzzeitig auf ein A3"=Querformat geändert 
+werden. Das folgende Minimalbeispiel zeigt, wie dies mit \KOMAScript-Mitteln 
+über die Optionen \Option*{paper=landscape}(\Package{typearea})'none' und 
+\Option*{paper=A3}(\Package{typearea})'none' geändert werden kann.
+\begin{Code}
+\documentclass[paper=a4,pagesize]{tudscrreprt}
+\usepackage{selinput}
+\SelectInputMappings{adieresis={ä},germandbls={ß}}
+\usepackage[T1]{fontenc}
+\usepackage[ngerman]{babel}
+\usepackage{blindtext}
+
+\begin{document}
+\chapter{Überschrift Eins}
+\Blindtext
+
+\cleardoublepage
+\storeareas\PotraitArea% speichert den aktuellen Satzspiegel
+\KOMAoptions{paper=A3,paper=landscape,DIV=current}
+\chapter{Überschrift Zwei}
+\Blindtext
+
+\cleardoublepage
+\PotraitArea% lädt den gespeicherten Satzspiegel
+\chapter{Überschrift Drei}
+\Blindtext
+\end{document}
+\end{Code}
+\end{Example}
+
+
+
+\section{Automatisiertes Einbinden von \Application{Inkscape}-Grafiken }
+\tudhyperdef*{sec:tips:svg}%
+\ChangedAt{v2.05k:\TaT \Macro*{includesvg} aus Paket \Package{svg} verwenden}
+\index{Grafiken}%
+%
+Das Einbinden von \Application{Inkscape}"=Grafiken in \hologo{LaTeX}"=Dokumente
+wird auf \CTAN[pkg/svg-inkscape]{\Package*{svg-inkscape}'none'} erläutert. Ein 
+daraus abgeleiteter und verbesserter Ansatz wird durch das Paket \Package{svg} 
+bereitgestellt. Mit diesem Paket ist ein \textbf{automatisierter} Export der 
+\Application{Inkscape}"=Grafiken direkt bei der Kompilierung mit \Engine{LaTeX} 
+und dem anschließenden Einbinden in das Dokument möglich. Hierfür wird der 
+Befehl \Macro*{includesvg}[\OParameter{Parameter}\Parameter{SVG-Datei}] durch 
+das Paket definiert.
+
+Dabei erfolgt der externe Aufruf von \Application{Inkscape} über Kommandozeile 
+beziehungsweise Terminal mit \File{inkscape.exe}. Damit dieser auch tatsächlich 
+durchgeführt wird, ist die Ausführung von \Engine{pdfLaTeX} mit der Option 
+\Path{-{}-shell-escape} beziehungsweise \Path{-{}-enable-write18} zwingend 
+notwendig. Außerdem muss der Pfad zur Datei \File{inkscape.exe} dem System 
+bekannt sein.%
+\footnote{%
+  Der Pfad zu \File{inkscape.exe} in der Umgebungsvariable \Path{PATH} des 
+  Betriebssystems enthalten sein.%
+}
+Für weiterführende Informationen sei auf die Dokumentation des Pakets 
+\Package{svg} verwiesen.
+
+
+
+\section{Vermeiden des Skalierens einer PDF-Datei beim Druck}
+\ChangedAt{v2.04:\TaT Vermeiden des Skalierens einer PDF"~Datei beim Druck}
+%
+Beim Erzeugen eines Druckauftrages einer PDF"~Datei kann es unter Umständen dazu 
+führen, dass diese durch den verwendeten PDF"~Betrachter unnötigerweise vorher 
+skaliert wird und dabei die Seitenränder vergrößert werden. Um dieses Verhalten 
+für Dokumente, die mit \Engine{pdfTeX} erzeugt werden, zu unterdrücken, gibt es 
+zwei Möglichkeiten:
+%
+\begin{enumerate}
+\item Wenn im Dokument ohnehin das Paket \Package{hyperref} verwendet wird, 
+  ist der simple Aufruf von
+  \Macro{hypersetup}[%
+    \PParameter{pdfprintscaling=None}%
+  ](\Package{hyperref})'none'
+  ausreichend.
+\item Der Low"~Level"~Befehl
+  \Macro*{pdfcatalog}[\PParameter{/ViewerPreferences<{}</PrintScaling/None>{}>}]
+  hat das gleiche Verhalten und kann auch ohne das Paket \Package{hyperref} 
+  genutzt werden.
+\end{enumerate}
+%
+Weitere Informationen dazu sind unter \url{http://www.komascript.de/node/1897} 
+zu finden.
+
+
+
 \section{Warnung bei der Schriftgrößenwahl}
 \tudhyperdef*{sec:tips:fontsize}%
 \ChangedAt{v2.04:\TaT Warnung bei der Schriftgrößenwahl}
@@ -676,6 +706,59 @@ geladen werden:
 \end{quoting}
 %
 Damit werden die Warnungen behoben.
+
+
+
+\section{Fehlermeldung beim Laden eines Paketes mit Optionen}
+\ChangedAt{v2.05:\TaT Fehler beim Laden eines Paketes mit Optionen}
+%
+Es kann unter Umständen passieren, dass beim Laden eines Paketes mit bestimmten 
+Optionen via \Macro*{usepackage}[\OParameter{Paketoptionen}\Parameter{Paket}] 
+folgender Fehler ausgegeben wird:
+%
+\begin{quoting}
+\begin{Code}[escapechar=§]
+! LaTeX Error: Option clash for package <§\dots§>.
+\end{Code}
+\end{quoting}
+%
+Mit großer Sicherheit wird das angeforderte Paket bereits durch die verwendete 
+Dokumentklasse oder ein anderes Paket geladen. Normalerweise genügt es, bereits 
+vor dem Laden der Dokumentklasse mit \Macro*{documentclass} durch 
+\Macro{PassOptionsToPackage}[\Parameter{Paketoptionen}\Parameter{Paket}] die 
+gewünschten Optionen an das Paket weiterzureichen, welches den Konflikt meldet.
+
+
+
+\section{Fehlermeldung: ! No room for a new \textbackslash write}
+\tudhyperdef*{sec:tips:write}
+\ChangedAt{v2.02:\TaT Fehler beim Schreiben von Hilfsdateien}
+%
+Für das Erstellen und Schreiben externer Hilfsdateien steht \hologo{LaTeXe} nur 
+eine begrenzte Anzahl sogenannter Ausgabe-Streams zur Verfügung. Allein für 
+jedes zu erstellende Verzeichnis reserviert \hologo{LaTeX} selbst jeweils einen 
+neuen Stream. Auch einige bereits zuvor in diesem Handbuch vorgestellte, sehr 
+hilfreiche Pakete~-- wie beispielsweise \Package{hyperref}, \Package{biblatex}, 
+\Package{glossaries}, \Package{todonotes} oder auch \Package{filecontents}~-- 
+benötigen eigene Hilfsdateien und öffnen für das Erstellen dieser einen 
+Ausgabe-Stream oder mehr. Lädt der Anwender mehrere, in eine Hilfsdatei 
+schreibende Pakete, kann es zur der Fehlermeldung
+%
+\begin{quoting}
+\begin{Code}
+! No room for a new \write .
+\end{Code}
+\end{quoting}
+%
+kommen. Abhilfe schafft hier das Paket \Package{scrwfile}<koma-script>, welches 
+einige Änderungen am \hologo{LaTeX}"=Kernel vornimmt, um die Anzahl der 
+benötigten Hilfsdateien für das Schreiben aller Verzeichnisse zu reduzieren. Es 
+muss einfach in der Präambel eingebunden werden. Sollten mit diesem Paket 
+unerwarteter Weise Probleme auftreten, ist dessen Anleitung im \scrguide zu 
+finden. Eine weitere Möglichkeit, das beschriebene Problem der geringen Menge 
+an Ausgabe-Streams zu umgehen, stellt das Paket \Package{morewrites} dar. 
+Allerdings ist dessen Verwendung nicht in allen Fällen von Erfolg gekrönt.
+
 
 
 \section{Platzierung von Gleitobjekten}
@@ -723,9 +806,9 @@ platziert werden. Er sollte zwischen~\PValue{0.2} und~\PValue{0.5} betragen.
 \begin{Declaration}{\Macro*{textfraction}}[0\textfraction]
 \printdeclarationlist%
 %
-Dies ist der Mindestanteil an Text, der auf einer Seite mit Gleitobjekten 
-vorhanden sein muss, wenn diese nicht auf einer eigenen Seite ausgegeben 
-werden. Er sollte im Bereich von~\PValue{0.1}\dots\PValue{0.3} liegen.
+Dies ist der Mindestanteil an Fließtext, der auf einer Seite mit Gleitobjekten 
+vorhanden sein muss, wenn diese nicht auf einer separaten Seite ausgegeben 
+werden. Er sollte in einem Bereich von~\PValue{0.1}\dots\PValue{0.3} liegen.
 \end{Declaration}
 
 \begin{Declaration}{\Counter*{totalnumber}}[\arabic{totalnumber}]
@@ -778,155 +861,6 @@ Unterfangen Folgendes nutzen:
 \makeatother
 \end{Code}
 \end{Example}
-
-
-
-\section{Automatisiertes Einbinden von \Application{Inkscape}-Grafiken }
-\tudhyperdef*{sec:tips:svg}%
-\index{Grafiken}%
-%
-Das Einbinden von \Application{Inkscape}"=Grafiken in \hologo{LaTeX}"=Dokumente
-wird auf \CTAN[pkg/svg-inkscape]{\Package*{svg-inkscape}'none'} erläutert. Hier 
-wird ein daraus abgeleiteter und verbesserter Ansatz vorgestellt, um den Export 
-der \Application{Inkscape}"=Grafiken \textbf{automatisiert} direkt bei der 
-Kompilierung durch \Engine{pdfLaTeX} auszuführen und diese in das Dokument 
-einzubinden. Nutzer von unixartigen Systemen können alternativ dazu auch das 
-Paket \Package{svg} nutzen, welches ebenfalls den folgend erläuterten Befehl 
-\Macro{includesvg}~-- in etwas abgewandelter Form~-- definiert.
-
-Die mit \Application{Inkscape}|?| erstellte Grafik soll automatisch exportiert
-und eingebunden werden. Um die benötigte Zeit für die Kompilierung möglichst 
-gering zu halten, sollte der Export nicht bei jedem \Engine{pdfLaTeX}"=Lauf 
-erfolgen, sondern lediglich, falls die originale Bilddatei geändert respektive 
-aktualisiert wurde. Hierfür wird das Paket \Package{filemod} verwendet. Die 
-automatisierte Übersetzung einer Grafik im SVG"~Format in eine PDF"~Datei und 
-die daran anschließende Einbindung dieser in das Dokument ist mit der 
-\ToDo[imp]{Bugfix in \Package{svg} oder in tudscr oder eigenes Paket?}[v2.06]
-%\ChangedAt{%
-%  v2.06:\TaT\Macro*{includesvg} Bugfix für \Application{Inkscape} Version~0.91;
-%  v2.06:\TaT\Macro*{includesvg} in Funktionalität erweitert%
-%}
-Definition von \Macro{includesvg}[\OParameter{Breite}\Parameter{Datei}] 
-in der Präambel des Dokumentes wie folgt möglich:
-%\usepackage{filemod}
-%\usepackage{kvsetkeys}
-%\usepackage{graphicx}
-%\graphicspath{{bla/}{blubb/}}
-%\DeclareUnicodeCharacter{2212}{\ensuremath{-}}
-%\makeatletter
-%\newcommand*{\includesvg}[2][\textwidth]{%
-%  \def\svgwidth{#1}%
-%  \filemodCmp{#2.pdf}{#2.svg}{}{%
-%    \immediate\write18{%
-%      inkscape -z -D --file=#2.svg --export-pdf=#2.pdf --export-latex%
-%    }%
-%  }%
-%  \IfFileExists{#2.pdf}{%
-%    \begingroup%
-%      \pdfximage{#2.pdf}%
-%      \let\saved@includegraphics\includegraphics%
-%      \let\includegraphics\patch@includegraphics%
-%      \InputIfFileExists{#2.pdf_tex}{}{}%
-%    \endgroup%
-%  }{}%
-%}
-%\newcommand*\saved@includegraphics{}
-%\newcommand*\patch@includegraphics[2][]{%
-%  \define@key{svg}{page}{\@tempcnta=##1\relax}%
-%  \kv@set@family@handler{svg}{}%
-%  \kvsetkeys{svg}{#1}%
-%  \ifnum\@tempcnta>\pdflastximagepages\relax\else%
-%    \saved@includegraphics[#1]{#2}%
-%  \fi%
-%}
-%\makeatother
-%
-\begin{Declaration*}{\Macro{includesvg}}
-\begin{quoting}
-\begin{Code}[escapechar=§]
-\usepackage{filemod}
-\newcommand*{\includesvg}[2][\textwidth]{%
-  \def\svgwidth{#1}
-  \filemodCmp{#2.pdf}{#2.svg}{}{%
-    \immediate\write18{%
-      inkscape -z -D --file=#2.svg --export-pdf=#2.pdf --export-latex
-    }%
-  }%
-  \InputIfFileExists{#2.pdf_tex}{}{}%
-}
-\end{Code}
-\end{quoting}
-\end{Declaration*}
-%
-Mit \Macro*{immediate}\Macro*{write18}[\Parameter{externer Aufruf}] wird das 
-zwischenzeitliche Ausführen eines externen Programms beim Durchlauf von 
-\Engine{pdfLaTeX}~-- in diesem Fall von \File{inkscape.exe}~-- möglich. Damit 
-der externe Aufruf auch tatsächlich durchgeführt wird, ist die Ausführung von 
-\Engine{pdfLaTeX} mit der Option \Path{-{}-shell-escape} beziehungsweise 
-\Path{-{}-enable-write18} zwingend notwendig. Außerdem muss der Pfad zur Datei 
-\File{inkscape.exe} dem System bekannt sein.%
-\footnote{%
-  Der Pfad zu \File{inkscape.exe} in der Umgebungsvariable \Path{PATH} des 
-  Betriebssystems enthalten sein.%
-}
-Bei der Verwendung des Befehls \Macro{includesvg} \emph{muss} der Dateiname 
-\emph{ohne Endung} angegeben werden. Die einzubindende SVG"~Datei sollte sich 
-hierbei im gleichen Pfad wie das Hauptdokument befinden. Ist die SVG"~Datei in 
-einem Unterordner relativ zum Pfad des Hauptdokumentes, kann dieser einfach mit 
-\Macro{includesvg}[\PParameter{\PName{Ordner}/\PName{Datei}}] im Argument 
-angegeben werden.
-
-
-
-\section{Fehlermeldung: ! No room for a new \textbackslash write}
-\tudhyperdef*{sec:tips:write}
-\ChangedAt{v2.02:\TaT Fehler beim Schreiben von Hilfsdateien}
-%
-Für das Erstellen und Schreiben externer Hilfsdateien steht \hologo{LaTeXe} nur 
-eine begrenzte Anzahl sogenannter Ausgabe-Streams zur Verfügung. Allein für 
-jedes zu erstellende Verzeichnis reserviert \hologo{LaTeX} selbst jeweils einen 
-neuen Stream. Auch einige bereits zuvor in diesem Handbuch vorgestellte, sehr 
-hilfreiche Pakete~-- wie beispielsweise \Package{hyperref}, \Package{biblatex}, 
-\Package{glossaries}, \Package{todonotes} oder auch \Package{filecontents}~-- 
-benötigen eigene Hilfsdateien und öffnen für das Erstellen dieser einen 
-Ausgabe-Stream oder mehr. Lädt der Anwender mehrere, in eine Hilfsdatei 
-schreibende Pakete, kann es zur der Fehlermeldung
-%
-\begin{quoting}
-\begin{Code}
-! No room for a new \write .
-\end{Code}
-\end{quoting}
-%
-kommen. Abhilfe schafft hier das Paket \Package{scrwfile}<koma-script>, welches 
-einige Änderungen am \hologo{LaTeX}"=Kernel vornimmt, um die Anzahl der 
-benötigten Hilfsdateien für das Schreiben aller Verzeichnisse zu reduzieren. Es 
-muss einfach in der Präambel eingebunden werden. Sollten mit diesem Paket 
-unerwarteter Weise Probleme auftreten, ist dessen Anleitung im \scrguide zu 
-finden. Eine weitere Möglichkeit, das beschriebene Problem der geringen Menge 
-an Ausgabe-Streams zu umgehen, stellt das Paket \Package{morewrites} dar. 
-Allerdings ist dessen Verwendung nicht in allen Fällen von Erfolg gekrönt.
-
-
-
-\section{Fehlermeldung beim Laden eines Paketes mit Optionen}
-\ChangedAt{v2.05:\TaT Fehler beim Laden eines Paketes mit Optionen}
-%
-Es kann unter Umständen passieren, dass beim Laden eines Paketes mit bestimmten 
-Optionen via \Macro*{usepackage}[\OParameter{Paketoptionen}\Parameter{Paket}] 
-folgender Fehler ausgegeben wird:
-%
-\begin{quoting}
-\begin{Code}[escapechar=§]
-! LaTeX Error: Option clash for package <§\dots§>.
-\end{Code}
-\end{quoting}
-%
-Mit großer Sicherheit wird das angeforderte Paket bereits durch die verwendete 
-Dokumentklasse oder ein anderes Paket geladen. Normalerweise genügt es, bereits 
-vor dem Laden der Dokumentklasse mit \Macro*{documentclass} durch 
-\Macro{PassOptionsToPackage}[\Parameter{Paketoptionen}\Parameter{Paket}] die 
-gewünschten Optionen an das Paket weiterzureichen, welches den Konflikt meldet.
 
 
 
