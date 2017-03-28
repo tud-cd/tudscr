@@ -197,7 +197,25 @@
 % bereits vor der Abarbeitung der Optionen definiert werden. 
 %    \begin{macrocode}
 \newif\if@tud@x@fontspec@enabled
-\AfterPackage*{fontspec}{\@tud@x@fontspec@enabledtrue}
+\AfterPackage*{fontspec}{%
+  \@ifpackagelater{fontspec}{2017/01/24}{%
+    \@tud@x@fontspec@enabledtrue%
+  }{%
+    \@tud@x@fontspec@enabledfalse%
+%<*class>
+    \ClassWarningNoLine{\TUD@Class@Name}%
+%</class>
+%<*package>
+    \PackageWarningNoLine{tudscrfonts}%
+%</package>
+    {%
+      Version `2017/01/24' of package `fontspec' is needed,\MessageBreak
+      but only version\MessageBreak
+      `\csname ver@fontspec.sty\endcsname'\MessageBreak
+      is available, so a fallback layout is used%
+    }%
+  }%
+}
 %    \end{macrocode}
 % \end{macro}^^A \if@tud@x@fontspec@enabled
 %
@@ -239,32 +257,22 @@
 % \changes{v2.04}{2015/03/10}{neu}^^A
 % \begin{macro}{\tud@x@fontspec@noerror}
 % \changes{v2.05}{2015/12/14}{neu}^^A
+% \changes{v2.05l}{2017/03/28}{unnötig seit \pkg{fontspec} `2017/01/24'}^^A
+% \begin{macro}{\tud@x@fontspec@fam@univ}
+% \changes{v2.05l}{2017/03/28}{neu}^^A
+% \begin{macro}{\tud@x@fontspec@set@univ}
+% \changes{v2.05l}{2017/03/28}{neu}^^A
+% \begin{macro}{\tud@x@fontspec@fam@din}
+% \changes{v2.05l}{2017/03/28}{neu}^^A
+% \begin{macro}{\tud@x@fontspec@set@din}
+% \changes{v2.05l}{2017/03/28}{neu}^^A
 % Mit \cs{tud@font@check} wird überprüft, ob die benötigten Schriften \Univers
 % und \DIN im PostScript- bzw. OTF-Format installiert sind und die passenden 
 % Schalter gesetzt. Beim Nichtvorhandensein der Schriften wird im eine Warnung
-% ausgegeben und eine Rückfallebene definiert.
-%
-% Da das Paket \pkg{fontspec} keinen Befehl zum Prüfen auf das Vorhandensein
-% einer bestimmten Schrift bereitstellt, muss hier etwas getrickst werden. Bei
-% der Wahl einer nicht installierten Schrift wird normalerweise ein Fehler 
-% ausgegeben. Mit \cs{tud@x@fontspec@noerror} wird dies verhindert, indem die
-% erzeugte Fehlermeldung mit \cs{msg\_redirect\_name:nnn} unterdrückt wird.
-%    \begin{macrocode}
-\newcommand*\tud@x@fontspec@noerror{}
-\IfFileExists{expl3.sty}{\@tempswatrue}{\@tempswafalse}
-\if@tempswa
-  \RequirePackage{expl3}[2016/05/18]
-  \ExplSyntaxOn
-  \renewcommand*\tud@x@fontspec@noerror{%
-    \__fontspec_font_suppress_not_found_error:
-    \msg_redirect_name:nnn {fontspec}{font-not-found}{none}
-  }%
-  \ExplSyntaxOff
-\fi
-%    \end{macrocode}
-% Jetzt kann es mit dem eigentlichen Überprüfen der Schriften losgehen. Für das 
-% Prüfen der Mathematikschriften ist es unerheblich, ob \pkg{fontspec} genutzt 
-% wird, da hier immer die PostScript-Schriften zum Einsatz kommen.
+% ausgegeben und eine Rückfallebene definiert. Dies geschieht mit dem Befehl
+% \cs{IfFontExistsTF}. Für die Mathematikschriften ist es unerheblich, ob
+% \pkg{fontspec} genutzt wird, da hier immer die PostScript-Schriften zum
+% Einsatz kommen.
 %    \begin{macrocode}
 \newcommand*\tud@font@check{%
   \edef\@tempa##1##2{\lowercase{\noexpand\IfFileExists{##1##2.fd}}}%
@@ -300,8 +308,7 @@
 %    \begin{macrocode}
   \if@tud@x@fontspec@enabled%
     \def\@tempc##1##2{%
-      \fontspec{##1}%
-      \expandafter\ifx\the\font\nullfont%
+      \IfFontExistsTF{##1}{}{%
         ##2%
         \ifnum\tud@cdfont@num>\z@\relax% true/heavy
 %<*class>
@@ -311,27 +318,62 @@
           \PackageWarningNoLine{tudscrfonts}%
 %</package>
           {%
-            `##1' fonts not found for encoding `\encodingdefault'\MessageBreak%
-            It seems, you haven't installed the required\MessageBreak%
+            `##1' fonts not found for `\encodingdefault'\MessageBreak%
+            encoding. It seems, you haven't installed the required\MessageBreak%
             OTF-font on your system. A fallback layout is used%
           }%
         \fi%
-      \fi%
+      }%
     }%
-    \begingroup%
-      \tud@x@fontspec@noerror%
-      \global\@tud@universtrue%
-      \@tempc{Univers Light}{\global\@tud@universfalse}%
-      \@tempc{Univers}{\global\@tud@universfalse}%
-      \@tempc{Univers Bold}{\global\@tud@universfalse}%
-      \@tempc{Univers Black}{\global\@tud@universfalse}%
-      \@tempc{Univers Light Oblique}{\global\@tud@universfalse}%
-      \@tempc{Univers Oblique}{\global\@tud@universfalse}%
-      \@tempc{Univers Bold Oblique}{\global\@tud@universfalse}%
-      \@tempc{Univers Black Oblique}{\global\@tud@universfalse}%
-      \global\@tud@dinboldtrue%
-      \@tempc{DIN Bold}{\global\@tud@dinboldfalse}%
-    \endgroup%
+    \@tud@universtrue%
+    \@tempc{Univers Light}{\@tud@universfalse}%
+    \@tempc{Univers}{\@tud@universfalse}%
+    \@tempc{Univers Bold}{\@tud@universfalse}%
+    \@tempc{Univers Black}{\@tud@universfalse}%
+    \@tempc{Univers Light Oblique}{\@tud@universfalse}%
+    \@tempc{Univers Oblique}{\@tud@universfalse}%
+    \@tempc{Univers Bold Oblique}{\@tud@universfalse}%
+    \@tempc{Univers Black Oblique}{\@tud@universfalse}%
+    \@tud@dinboldtrue%
+    \@tempc{DIN Bold}{\@tud@dinboldfalse}%
+%    \end{macrocode}
+% Wurden alle notwendigen OTF"~Schriften gefunden, werden die zwei Makros 
+% definiert, in welchen die notwendigen Einstellungen gespeichert werden. 
+% Anschließend werden zwei Schriftfamilien erzeugt, damit später auf diese 
+% zugegriffen werden kann bzw. die Schriften geladen werden.
+%    \begin{macrocode}
+    \if@tud@univers%
+      \newcommand*\tud@x@fontspec@set@univ{%
+        FontFace = {l}{\updefault}{Univers Light},%
+        FontFace = {m}{\updefault}{Univers},%
+        FontFace = {b}{\updefault}{Univers Bold},%
+        FontFace = {bx}{\updefault}{Univers Bold},%
+        FontFace = {eb}{\updefault}{Univers Black},%
+        FontFace = {l}{\sldefault}{Univers Light Oblique},%
+        FontFace = {m}{\sldefault}{Univers Oblique},%
+        FontFace = {b}{\sldefault}{Univers Bold Oblique},%
+        FontFace = {bx}{\sldefault}{Univers Bold Oblique},%
+        FontFace = {eb}{\sldefault}{Univers Black Oblique},%
+        NFSSFamily = \tud@univers%
+      }%
+      \newfontfamily\tud@x@fontspec@fam@univ{Univers}[\tud@x@fontspec@set@univ]%
+    \fi%
+    \if@tud@dinbold%
+      \newcommand*\tud@x@fontspec@set@din{%
+        FontFace = {l}{\updefault}{DIN Bold},%
+        FontFace = {m}{\updefault}{DIN Bold},%
+        FontFace = {b}{\updefault}{DIN Bold},%
+        FontFace = {bx}{\updefault}{DIN Bold},%
+        FontFace = {eb}{\updefault}{DIN Bold},%
+        FontFace = {l}{\sldefault}{Font=DIN Bold,FakeSlant=0.15},%
+        FontFace = {m}{\sldefault}{Font=DIN Bold,FakeSlant=0.15},%
+        FontFace = {b}{\sldefault}{Font=DIN Bold,FakeSlant=0.15},%
+        FontFace = {bx}{\sldefault}{Font=DIN Bold,FakeSlant=0.15},%
+        FontFace = {eb}{\sldefault}{Font=DIN Bold,FakeSlant=0.15},%
+        NFSSFamily = \tud@dinbold%
+      }%
+      \newfontfamily\tud@x@fontspec@fam@din{DIN Bold}[\tud@x@fontspec@set@din]%
+    \fi%
   \else%
 %    \end{macrocode}
 % Ist \pkg{fontspec} nicht aktiv, wird auf die Schriften für den Fließtext im 
@@ -368,6 +410,10 @@
   \undef\tud@font@check%
 }
 %    \end{macrocode}
+% \end{macro}^^A \tud@x@fontspec@set@din
+% \end{macro}^^A \tud@x@fontspec@fam@din
+% \end{macro}^^A \tud@x@fontspec@set@univ
+% \end{macro}^^A \tud@x@fontspec@fam@univ
 % \end{macro}^^A \tud@x@fontspec@noerror
 % \end{macro}^^A \tud@font@check
 %
@@ -813,19 +859,7 @@
 %    \begin{macrocode}
     \if@tud@univers%
       \if@tud@x@fontspec@enabled%
-        \setsansfont{Univers}[%
-          FontFace = {l}{\updefault}{Univers Light},%
-          FontFace = {m}{\updefault}{Univers},%
-          FontFace = {b}{\updefault}{Univers Bold},%
-          FontFace = {bx}{\updefault}{Univers Bold},%
-          FontFace = {eb}{\updefault}{Univers Black},%
-          FontFace = {l}{\sldefault}{Univers Light Oblique},%
-          FontFace = {m}{\sldefault}{Univers Oblique},%
-          FontFace = {b}{\sldefault}{Univers Bold Oblique},%
-          FontFace = {bx}{\sldefault}{Univers Bold Oblique},%
-          FontFace = {eb}{\sldefault}{Univers Black Oblique},%
-          NFSSFamily = \tud@univers%
-        ]%
+        \setsansfont{Univers}[\tud@x@fontspec@set@univ]%
         \setmonofont{LMMono10-Regular}[%
           FontFace = {l}{\updefault}{LMMonoLt10-Regular},%
           FontFace = {m}{\updefault}{LMMono10-Regular},%
@@ -1010,8 +1044,6 @@
 % Das Makro \cs{tud@font@init} wird für die Defintion aller Befehle zur Auswahl 
 % der Schriften des \CDs verwendet.
 %    \begin{macrocode}
-\newcommand*\tud@dinbn{}
-\let\tud@dinbn\relax
 \newcommand*\tud@font@init{%
 %    \end{macrocode}
 % Es werden mehrere Schalter zur expliziten Auswahl für die Schriftschnitte
@@ -1050,23 +1082,7 @@
 % Nach der \Univers-Schriftfamilie wird für \DIN äquivalent verfahren.
 %    \begin{macrocode}
   \if@tud@dinbold%
-    \if@tud@x@fontspec@enabled%
-      \newfontface\tud@dinbn{DIN Bold}[%
-        FontFace = {l}{\updefault}{DIN Bold},%
-        FontFace = {m}{\updefault}{DIN Bold},%
-        FontFace = {b}{\updefault}{DIN Bold},%
-        FontFace = {bx}{\updefault}{DIN Bold},%
-        FontFace = {eb}{\updefault}{DIN Bold},%
-        FontFace = {l}{\sldefault}{Font=DIN Bold,FakeSlant=0.15},%
-        FontFace = {m}{\sldefault}{Font=DIN Bold,FakeSlant=0.15},%
-        FontFace = {b}{\sldefault}{Font=DIN Bold,FakeSlant=0.15},%
-        FontFace = {bx}{\sldefault}{Font=DIN Bold,FakeSlant=0.15},%
-        FontFace = {eb}{\sldefault}{Font=DIN Bold,FakeSlant=0.15},%
-        NFSSFamily = \tud@dinbold%
-      ]%
-    \else%
-      \newrobustcmd*\tud@dinbn{\usefont{\encodingdefault}{\tud@dinbold}{b}{n}}%
-    \fi%
+    \newrobustcmd*\tud@dinbn{\usefont{\encodingdefault}{\tud@dinbold}{b}{n}}%
     \if@tud@dinboldmath%
       \appto\tud@dinbn{\mathversion{dinbold}}%
     \fi%
