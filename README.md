@@ -62,6 +62,7 @@ Versionen
 
 **v2.05l** (2017/03/29)
 + Bugfix für Paket **fontspec** bei Option `cdfont=false`
++ Bugfix für Paket **fontspec** bei Schriftnamen
 
 **v2.05k** (2017/03/27)
 + Bugfix für Gliederungsbefehle `\addpart`, `\addchap` und `\addsec`
@@ -229,6 +230,7 @@ Versions
 
 **v2.05l** (2017/03/29)
 + bug fix for package **fontspec** with option `cdfont=false`
++ bug fix for package **fontspec** with font names
 
 **v2.05k** (2017/03/27)
 + bug fix for sectioning commands `\addpart`, `\addchap` und `\addsec`
