@@ -1,0 +1,371 @@
+\RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
+\documentclass[english,ngerman]{tudscrreprt}
+\usepackage{babel}
+\usepackage[T1]{fontenc}
+\usepackage{selinput}\SelectInputMappings{adieresis={ä},germandbls={ß}}
+\usepackage{scrhack}
+\usepackage{tudscrsupervisor}
+
+\AfterPackage*{hyperref}{%
+\usepackage[%
+  acronym,% Abkürzungen
+  symbols,% Formelzeichen
+  nomain,% kein Glossar
+  nogroupskip,%
+  toc,%
+  section=chapter,%
+  nostyles,%
+  translate=babel,%
+% mit Tex Live einfach verwendbar
+  xindy={language=german-din},
+]{glossaries}
+\makeglossaries
+}% Ende von AfterPackage
+
+\AfterPackage*{glossaries}{%
+\newglossarystyle{acrotabu}{%
+  \renewenvironment{theglossary}{%
+    \begin{tabu}spread 0pt{@{}lX<{\strut}l@{}}%
+  }{%
+    \end{tabu}\par\bigskip%
+  }%
+  \renewcommand*{\glossaryheader}{}%
+  \renewcommand*{\glsgroupheading}[1]{}%
+  \renewcommand*{\glsgroupskip}{}%
+  \renewcommand*{\glossentry}[2]{%
+    \glsentryitem{##1}% Entry number if required
+    \glstarget{##1}{\sffamily\bfseries\glossentryname{##1}} &
+    \glsentrydesc{##1} &
+    ##2\tabularnewline
+  }
+}
+
+\newcommand*{\newsymbol}[5][]{%
+  \newglossaryentry{#2}{%
+    type=symbols,%
+    name={#3},%
+    description={\nopostdesc},%
+    symbol={\ensuremath{#4}},%
+    user1={\ensuremath{\mathrm{#5}}},%
+    sort={#2},%
+    #1%
+  }%
+}
+
+\defglsentryfmt[symbols]{%
+  \ifmmode%
+    \glssymbol{\glslabel}%
+  \else%
+    \glsgenentryfmt~\glsentrysymbol{\glslabel}%
+  \fi%
+}
+\newglossarystyle{symblongtabu}{%
+  \renewenvironment{theglossary}{%
+    \begin{longtabu}spread 0pt[l]{ccX<{\strut}l}%
+  }{%
+    \end{longtabu}%
+  }%
+  \renewcommand*{\glsgroupheading}[1]{}%
+  \renewcommand*{\glsgroupskip}{}%
+  \renewcommand*{\glossaryheader}{%
+    \toprule
+    \bfseries Formelzeichen & \bfseries Einheit &
+    \bfseries Bezeichnung & \bfseries Seite(n)
+    \tabularnewline\midrule\endhead%
+    \bottomrule\endfoot%
+  }%
+  \renewcommand*{\glossentry}[2]{%
+    \glsentryitem{##1}% Entry number if required
+    \glstarget{##1}{\glossentrysymbol{##1}} &
+    \glsentryuseri{##1} &
+    \glossentryname{##1} &
+    ##2\tabularnewline%
+  }%
+}
+
+\providecommand*\greeklettersname{Greek letters}
+\providecommand*\romanlettersname{Roman letters}
+\newglossaryentry{greekletters}{%
+  type=symbols,%
+  name={\greeklettersname},%
+  description={\nopostdesc},%
+  sort={a}%
+}
+\newglossaryentry{romanletters}{%
+  type=symbols,%
+  name={\romanlettersname},%
+  description={\nopostdesc},%
+  sort={b}%
+}
+\providecaptionname{%
+american,australian,british,canadian,english,newzealand%
+}{\greeklettersname}{Greek letters}
+\providecaptionname{%
+german,ngerman,austrian,naustrian,swissgerman,nswissgerman%
+}{\greeklettersname}{Griechische Symbole}
+\providecaptionname{%
+american,australian,british,canadian,english,newzealand%
+}{\romanlettersname}{Roman letters}
+\providecaptionname{%
+german,ngerman,austrian,naustrian,swissgerman,nswissgerman%
+}{\romanlettersname}{Lateinische Symbole}
+
+\newglossarystyle{symbsplitlongtabu}{%
+  \newcommand*\symbollevel{-1}%
+  \renewenvironment{theglossary}{%
+    \begin{longtabu}spread 0pt[l]{ccX<{\strut}l}%
+  }{%
+    \end{longtabu}%
+  }%
+  \renewcommand*{\glsgroupheading}[1]{}%
+  \renewcommand*{\glsgroupskip}{}%
+  \newcommand*\symbolhead{%
+    \toprule
+    \bfseries Formelzeichen & \bfseries Einheit &
+    \bfseries Bezeichnung & \bfseries Seite(n)
+    \tabularnewline\midrule
+  }%
+  \renewcommand*{\glossaryheader}{%
+    \endfirsthead%
+    \symbolhead\endhead%
+    \bottomrule\endfoot%
+    \gdef\symbollevel{-1}%
+  }%
+  \renewcommand*{\glossentry}[2]{%
+    \ifglshaschildren{##1}{%
+      \ifnum\symbollevel>0\relax%
+        \tabularnewline\bottomrule\tabularnewline[\smallskipamount]%
+      \fi
+      \gdef\symbollevel{0}%
+      \tabularnewline[%
+        \arraystretch\dimexpr-\ht\strutbox-\dp\strutbox\relax%
+      ]%
+      \multicolumn{4}{@{}l@{}}{\minisec{\glsentryname{##1}}}%
+    }{%
+      \GlossariesWarning{%
+        There are no childrens for entry ##1.\MessageBreak
+        Nothing will be printed. Maybe you should\MessageBreak
+        specify ##1 as a child entry.
+      }%
+    }%
+  }%
+  \renewcommand*{\subglossentry}[3]{%
+    \ifnum\symbollevel=0\relax%
+      \tabularnewline[\medskipamount]\symbolhead%
+    \else%
+      \tabularnewline
+    \fi%
+    \gdef\symbollevel{##1}%
+    \glsentryitem{##2}% Entry number if required
+    \glstarget{##2}{\glossentrysymbol{##2}} &
+    \glsentryuseri{##2} &
+    \glossentryname{##2} &
+    ##3%
+  }%
+}
+
+\newglossarystyle{symbslongtabu}{%
+  \renewenvironment{theglossary}{%
+    \begin{longtabu}spread 0pt[l]{ccX<{\strut}l}%
+  }{%
+    \end{longtabu}%
+  }%
+  \renewcommand*{\glsgroupskip}{
+%    \bottomrule
+  }%
+  \renewcommand*{\glsgroupheading}[1]{%
+%    %##1: grouplabel
+%    \tabularnewline\tabularnewline\tabularnewline%
+%    \multicolumn{4}{@{}l@{}}{\minisec{\Large\glsgetgrouptitle{##1}}}%
+%    \tabularnewline%
+%    \tabularnewline%
+%    \toprule%
+%    \bfseries Formelzeichen&%
+%    \bfseries Einheit&%
+%    \bfseries Bezeichnung&%
+%    \bfseries Seite(n)\tabularnewline%
+%    \midrule
+  }%
+  \renewcommand*{\glossarypreamble}{%
+%    \tabulinesep=1pt%
+%    \vspace*{-3\baselineskip}%
+  }%
+  \renewcommand*{\glossaryheader}{%
+%    \endfirsthead%
+%    \toprule%
+%    \bfseries Formelzeichen&%
+%    \bfseries Einheit&%
+%    \bfseries Bezeichnung&%
+%    \bfseries Seite(n)\tabularnewline%
+%    \midrule\endhead%
+%    \bottomrule\endfoot%
+  }%
+  \renewcommand*{\glossentry}[2]{%
+    %##1: glslabel, ##2: pages
+    \glsentryitem{##1}\glstarget{##1}{\glossentrysymbol{##1}}&%
+    \glsentryuseri{##1}&%
+    \glossentryname{##1}&%
+    ##2\tabularnewline%
+  }%
+  \renewcommand*{\glossarypostamble}{}%
+}
+
+%\renewcommand*{\newsymbol}[5][]{%
+%  \newglossaryentry{#2}{%
+%    type=symbols,%
+%    name={#3},% name/meaning
+%    description={\nopostdesc},%
+%    symbol={#4},% symbol
+%    user1\ensuremath{\si[per-mode=fraction]{#5}},%
+%    sort={#2},% group-sortname
+%    #1%
+%  }%
+%}
+
+
+}% Ende von AfterPackage
+\usepackage{xfrac,longtable,tabu,booktabs}
+\usepackage[colorlinks,linkcolor=blue]{hyperref}
+
+\makeatletter
+\newcommand*\greeksymbollist{}
+\def\@tempa#1{\ifdefvoid{#1}{}{\listadd\greeksymbollist{#1}}}
+\forcsvlist{\@tempa}{%
+\alpha,\beta,\varbeta,\gamma,\delta,\epsilon,\varepsilon,\zeta,%
+\eta,\theta,\vartheta,\iota,\kappa,\varkappa,\lambda,\mu,\nu,%
+\xi,\omicron,\pi,\varpi,\rho,\varrho,\sigma,\varsigma,\tau,%
+\upsilon,\phi,\varphi,\chi,\psi,\omega,%
+\Alpha,\Beta,\Gamma,\Delta,\Epsilon,\Zeta,\Eta,\Theta,\Iota,%
+\Kappa,\Lambda,\Mu,\Nu,\Xi,\Omicron,\Pi,\Rho,\Sigma,\Tau,\Upsilon,%
+\Phi,\Chi,\Psi,\Omega%
+}
+\newcommand*\ifisgreeksymbol[1]{%
+  \begingroup%
+  \def\@tempa##1{\let##1\@firstofone}%
+  \forcsvlist{\@tempa}{%
+    \acute,\bar,\breve,\check,\dot,\ddot,\dddot,\ddddot,%
+    \hat,\widehat,\grave,\tilde,\widetilde,\vec,%
+    \Acute,\Bar,\Breve,\Check,\Dot,\Ddot,\Hat,\Grave,\Tilde,\Vec%
+  }%
+  \def\boldsymbol{}%
+  \protected@edef\@tempa{#1}%
+  \def\@tempb##1_##2\relax{\def\@tempa{##1}}%
+  \expandafter\@tempb\@tempa_\relax\relax%
+  \def\@tempb##1^##2\relax{\def\@tempa{##1}}%
+  \expandafter\@tempb\@tempa^\relax\relax%
+  \expandafter\ifinlist\expandafter{\@tempa}{\greeksymbollist}{%
+    \aftergroup\@firstoftwo%
+  }{%
+    \aftergroup\@secondoftwo%
+  }%
+  \endgroup%
+}
+\makeatother
+
+%\newcommand*\symbollettergroup{}
+%\renewcommand*{\newsymbol}[5][]{%
+%  \ifisgreeksymbol{#4}{%
+%    \renewcommand*{\symbollettergroup}{greekletters}%
+%  }{%
+%    \renewcommand*{\symbollettergroup}{romanletters}%
+%  }%
+%  \symbollettergroup
+%  \newglossaryentry{#2}{%
+%    type=symbols,%
+%    name={#3},%
+%    description={\nopostdesc},%
+%    symbol={\ensuremath{#4}},%
+%    user1={\ensuremath{\mathrm{#5}}},%
+%    sort={#2},%
+%    parent={\symbollettergroup},%
+%    #1%
+%  }%
+%}
+
+\begin{document}
+
+\printsymbols[style=symbslongtabu]
+
+\newsymbol{alpha}{Test}{\alpha}{nothing}
+\newsymbol[parent=romanletters]{l}{Länge}{l}{m}
+\newsymbol{m}{Masse}{m}{kg}
+\newsymbol{a}{Beschleunigung}{a}{\sfrac{m}{s^2}}
+\newsymbol{t}{Zeit}{t}{s}
+\newsymbol{f}{Frequenz}{f}{s^{-1}}
+\newsymbol{F}{Kraft}{F}{m \cdot kg \cdot s^{-2} = \sfrac{J}{m}}
+
+Die Einheiten für die \gls{f} sowie die \gls{F} werden aus den
+SI"=Einheiten der Basisgrößen \gls{l}, \gls{m} und \gls{t} abgeleitet.
+Und dann gibt es noch die Grundgleichung der Mechanik, welche für den
+Fall einer konstanten Kraftwirkung in die Bewegungsrichtung einer
+Punktmasse lautet:
+\[\gls{F} = \gls{m} \cdot \gls{a} \cdot \gls{alpha}\]
+
+
+\end{document}
+
+
+
+%\providecommand*\Ggroupname{Griechische Symbole} 
+%\providecommand*\Rgroupname{Lateinische Symbole}
+%
+\newglossarystyle{symbslongtabu}{%
+  \renewenvironment{theglossary}{%
+    \begin{longtabu}spread 0pt[l]{ccX<{\strut}l}%
+  }{%
+    \end{longtabu}%
+  }%
+  \renewcommand*{\glsgroupskip}{
+    \bottomrule
+  }%
+  \renewcommand*{\glsgroupheading}[1]{%
+    %##1: grouplabel
+    \tabularnewline\tabularnewline\tabularnewline%
+    
+\multicolumn{4}{@{}l@{}}{\minisec{\Large\glsgetgrouptitle{##1}}}\tabularnewline%
+    \tabularnewline%
+    \toprule%
+    \bfseries Formelzeichen&%
+    \bfseries Einheit&%
+    \bfseries Bezeichnung&%
+    \bfseries Seite(n)\tabularnewline%
+    \midrule
+  }%
+  \renewcommand*{\glossarypreamble}{%
+    \tabulinesep=1pt%
+    \vspace*{-3\baselineskip}%
+  }%
+  \renewcommand*{\glossaryheader}{%
+    \endfirsthead%
+    \toprule%
+    \bfseries Formelzeichen&%
+    \bfseries Einheit&%
+    \bfseries Bezeichnung&%
+    \bfseries Seite(n)\tabularnewline%
+    \midrule\endhead%
+    \bottomrule\endfoot%
+  }%
+  \renewcommand*{\glossentry}[2]{%
+    %##1: glslabel, ##2: pages
+    \glsentryitem{##1}\glstarget{##1}{\glossentrysymbol{##1}}&%
+    \glsentryuseri{##1}&%
+    \glossentryname{##1}&%
+    ##2\tabularnewline%
+  }%
+  \renewcommand*{\glossarypostamble}{}%
+}
+
+\renewcommand*{\newsymbol}[5][]{%
+  \newglossaryentry{#2}{%
+    type=symbols,%
+    name={#3},% name/meaning
+    description={\nopostdesc},%
+    symbol={#4},% symbol
+    user1\ensuremath{\si[per-mode=fraction]{#5}},%
+    sort={#2},% group-sortname
+    #1%
+  }%
+}
+%
+%\newcommand*{\newgreeksymbol}[5][]{\newsymbol[#1]{g-#2}{#3}{#4}{#5}}
+%\newcommand*{\newlatinsymbol}[5][]{\newsymbol[#1]{r-#2}{#3}{#4}{#5}}
