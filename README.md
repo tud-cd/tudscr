@@ -60,6 +60,10 @@ Das Bundle beinhaltet:
 Versionen
 ---------
 
+**v2.05m** (2017/05/30)
++ Bugfix für Unicode-Engines für die Glyphe `ß`
++ Bugfix für Paket **siunitx** bei Erkennung der Schriftfamilie
+
 **v2.05l** (2017/03/29)
 + Bugfix für Paket **fontspec** bei Option `cdfont=false`
 + Bugfix für Paket **fontspec** bei Schriftnamen
@@ -227,6 +231,10 @@ The bundle offers:
 
 Versions
 --------
+
+**v2.05m** (2017/05/30)
++ bug fix for Unicode engines for glyph`ß`
++ bug fix for package **siunitx** when recognizing the font family
 
 **v2.05l** (2017/03/29)
 + bug fix for package **fontspec** with option `cdfont=false`
