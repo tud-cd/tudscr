@@ -1,4 +1,4 @@
-% \CheckSum{749}
+% \CheckSum{752}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-base.dtx}[%
-  2017/03/29 v2.05l TUD-Script\space%
+  2017/05/30 v2.05m TUD-Script\space%
 %</driver>
 %<package&base>\ProvidesPackage{tudscrbase}[%
 %<*driver|package&base>
@@ -957,16 +957,17 @@
 %    \begin{macrocode}
 \newcommand*\TUD@parameter@nokey{@nokey@}
 \newcommand*\TUD@parameter@set[2]{%
+  \IfArgIsEmpty{#2}{}{%
 %    \end{macrocode}
 % Hierfür wird die angegebene Parameterliste sukzessive abgearbeitet. Elemente, 
 % welche in Schlüssel"=Wert"=Syntax angegeben wurden, bleiben unverändert\dots
 %    \begin{macrocode}
-  \def\@tempb{}%
-  \def\@tempa##1{%
-    \@expandtwoargs\in@{=}{##1}%
-    \ifin@%
-      \appto\@tempb{##1,}%
-    \else%
+    \def\@tempb{}%
+    \def\@tempa##1{%
+      \@expandtwoargs\in@{=}{##1}%
+      \ifin@%
+        \appto\@tempb{##1,}%
+      \else%
 %    \end{macrocode}
 % \dots ebenso wie Schlüssel ohne Wert, falls diese definiert wurden. Zu 
 % beachten ist, dass es mit \cs{TUD@parameter@handler@value} respektive
@@ -975,27 +976,29 @@
 % Dies wird genutzt, um optionale Argumente direkt für den Hauptparameter eines
 % Makros oder einer Umgebung~-- wie beispielsweise für eine Überschrift~--
 % nutzen zu können, aber zusätzlich die Möglichkeit zu bieten, auch eine
-% Parameterliste zu verwenden. Hierfür werden Umlaute sowie das \glq ß\grq{}
+% Parameterliste zu verwenden. Hierfür werden Umlaute sowie das \enquote*{ß}
 % unschädlich gemacht.
 %    \begin{macrocode}
-      \begingroup
-        \let\IeC\@firstofone%
-        \def\"####1{####1e}%
-        \def\ss{ss}%
-        \protected@edef\tud@reserved{%
-          \endgroup%
-          \noexpand\protected@edef\noexpand\@tempc{KV@#1@##1}%
+        \begingroup
+          \let\IeC\@firstofone%
+          \def\"####1{####1e}%
+          \def\ss{ss}%
+          \def\SS{SS}%
+          \protected@edef\tud@reserved{%
+            \endgroup%
+            \noexpand\protected@edef\noexpand\@tempc{KV@#1@##1}%
+          }%
+        \tud@reserved%
+        \ifcsdef{\@tempc}{%
+          \appto\@tempb{##1,}%
+        }{%
+          \protected@eappto\@tempb{\TUD@parameter@nokey=##1,}%
         }%
-      \tud@reserved%
-      \ifcsdef{\@tempc}{%
-        \appto\@tempb{##1,}%
-      }{%
-        \protected@eappto\@tempb{\TUD@parameter@nokey=##1,}%
-      }%
-    \fi%
+      \fi%
+    }%
+    \forcsvlist\@tempa{#2}%
+    \@expandtwoargs\kvsetkeys{#1}{\@tempb}%
   }%
-  \forcsvlist\@tempa{#2}%
-  \@expandtwoargs\kvsetkeys{#1}{\@tempb}%
 }
 % Ursprünglich entwickelte sich dieser Ansatz aus der Situation, dass das Makro 
 % \cs{maketitle} in seiner Standarddefinition ein optionales Argument für eine
