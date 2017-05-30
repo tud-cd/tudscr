@@ -1,37 +1,255 @@
 \documentclass[%
+cdfont=false,
+%cdmath=true,
+cdmath=false,cd=false
+]{tudscrbook}
+\usepackage[%
+  detect-all=true,
+%detect-display-math=true, 
+%detect-family=true,
+%%%detect-inline-family=text,
+%%%detect-inline-weight=text,
+%detect-mode=true,
+%%detect-shape=false,
+%%detect-weight=false,  
+%%  detect-all=false,
+%%  mode=text
+%%  mode=math
+]{siunitx}
+%\usepackage{libertine}
+
+
+  %\TUDoptions{cdfont=true, cdmath=false}	%also problematic
+%  \providecommand{\num}[1]{#1}
+\begin{document}
+
+\title{text}
+\author{names}
+\thesis{thesis}
+\date{\today}
+
+\makecover[cdcover]
+
+\maketitle[cd=false]
+
+%\TUDoptions{cdfont=true, cdmath=false}	%problematic
+%  \TUDoptions{}
+%    \sisetup{number-math-rm = \mathtt,}
+  \[
+  12340 + \num{12340}
+  \]
+  12340 + \num{12340} + 
+  \(12340 + \num{12340}\) 
+  (First couple and last couple should look the same)
+\end{document}
+
+\documentclass[%
 %  cd=no,
   chapterprefix,
+  headings=optiontoheadandtoc,
+  ngerman
 ]{tudscrreprt}
 \usepackage{selinput}
 \SelectInputMappings{adieresis={ä},germandbls={ß}}
 \usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{babel}
 \usepackage{blindtext}
 %\geometry{paper=b1,layout=a1,layoutoffset=1in,showcrop}
-\begin{document}
-%\renewcommand{\chapterpagestyle}{empty}
-
-\chapter{title}
-\blindtext
-\DeclareNewSectionCommand[%
-  style=chapter,%
-  level=0,%
-  pagestyle=\chapterpagestyle,%
-  beforeskip=3.9em,
-  afterskip=2.05em,
-  innerskip=.6em,
-  font=\Huge\dinbn,
-  prefixfont=\huge,
-  tocstyle=chapter,%
-  tocindent=0pt,%
-  tocnumwidth=1.5em%
-]{tudchapter}
-\tudchapter{bla}
-\blindtext
 
 \makeatletter
+%\tud@font@koma@set{chapter}{%
+%  \tud@sec@fontface%
+%  \tud@sec@fontsize%
+%  \tud@color{\tud@chapter@fontcolor}%
+%}%
+\providecommand*\tud@chapterheadstartvskip{}%
+\renewcommand*\tud@chapterheadstartvskip{%
+%  \renewcommand*\tud@chapter@fontcolor{}%
+%  \ifcase\tud@layout@chapter@num\relax\or\else% *color
+%    \renewcommand*\tud@chapter@fontcolor{HKS41}%
+%  \fi%
+%
+%  \vspace{\@tempskipa}%
+%  \vspace*{%
+%    \dimexpr\tud@len@areavskip+\tud@len@areaheadvskip\relax%
+%  }%
+  \if@tud@chapterpage%
+    \TUD@deprecated@lengthcs{pageheadingsvskip}%
+    \vspace*{\tud@dim@pageheadingsvskip}%
+  \else%
+    \TUD@deprecated@lengthcs{headingsvskip}%
+    \vspace*{\tud@dim@headingsvskip}%
+  \fi%
+}
+%\CheckCommand*{\scr@@makechapterhead}[2]{}%
+\providecommand*\tud@@makechapterhead{}%
+\renewcommand*{\tud@@makechapterhead}[2]{%
+  \@tempskipa=\glueexpr \csname scr@#1@beforeskip\endcsname\relax\relax
+  \ifdim\@tempskipa<\z@\@tempskipa-\@tempskipa\else
+    \expandafter\ifnum\scr@v@is@ge{3.22}\@afterindenttrue\fi
+  \fi
+%  \tud@chapterheadstartvskip%
+  \chapterheadstartvskip%
+  {%
+    \setlength{\parindent}{\z@}\setlength{\parfillskip}{\z@ plus 1fil}%
+    \def\IfUseNumber{\ifnumbered{#1}}%
+    \if@chapterprefix
+      \let\IfUsePrefixLine\@firstoftwo
+    \else
+      \let\IfUsePrefixLine\@secondoftwo
+    \fi
+    \normalfont\usekomafont{disposition}{%
+      \usekomafont{#1}{%
+        \settoheight{\@tempskipa}{%
+          {\usekomafont{#1prefix}{%
+            \vrule \@width\z@ \@height\csname scr@#1@innerskip\endcsname%
+          }}%
+        }%
+        \ifdin{\tud@raggedright}{\raggedchapter}%
+        \IfUseNumber{%
+          \IfUsePrefixLine{%
+            \chapterlineswithprefixformat{#1}{%
+              {%
+%              \tud@headmidvskip@reverse
+                \usekomafont{#1prefix}{%
+                                \vskip-\@tempskipa
+                  \tud@makeuppercase{\csname #1format\endcsname}%
+                  \setlength{\@tempskipa}{\csname scr@#1@innerskip\endcsname}%
+                  \chapterheadmidvskip%
+                }%
+              }%
+            }{\interlinepenalty \@M\tud@makeuppercase{#2}\@@par}%
+          }{%
+            \chapterlinesformat{#1}%
+            {\csname #1format\endcsname}%
+            {\interlinepenalty \@M\tud@makeuppercase{#2}\@@par}%
+          }%
+        }{%
+          \IfUsePrefixLine{%
+            \chapterlineswithprefixformat{#1}%
+            {}%
+            {\interlinepenalty \@M\tud@makeuppercase{#2}\@@par}%
+          }{%
+            \chapterlinesformat{#1}%
+            {}%
+            {\interlinepenalty \@M\tud@makeuppercase{#2}\@@par}%
+          }%
+        }%
+      }%
+    }%
+  }%
+  \nobreak\par\nobreak
+  \@tempskipa=\glueexpr \csname scr@#1@afterskip\endcsname\relax\relax
+  \ifdim\@tempskipa<\z@\@tempskipa-\@tempskipa\fi
+  \chapterheadendvskip
+}
+%  \renewcommand*\tud@chapter@fontcolor{}%
+%  \ifcase\tud@layout@chapter@num\relax\or\else% *color
+%    \renewcommand*\tud@chapter@fontcolor{HKS41}%
+%  \fi%
+%  \vspace*{%
+%    \dimexpr\tud@len@areavskip+\tud@len@areaheadvskip\relax%
+%  }%
+%  \if@tud@chapterpage%
+%    \TUD@deprecated@lengthcs{pageheadingsvskip}%
+%    \vspace*{\tud@dim@pageheadingsvskip}%
+%  \else%
+%    \TUD@deprecated@lengthcs{headingsvskip}%
+%    \vspace*{\tud@dim@headingsvskip}%
+%  \fi%
+\ifx\TUDScript\@undefined\else%
+\let\scr@@makechapterhead\tud@@makechapterhead
+\fi
+\newcommand*{\tud@@makeschapterhead}[2]{%
+  \@tempskipa=\glueexpr \csname scr@#1@beforeskip\endcsname\relax\relax
+  \ifdim\@tempskipa<\z@\@tempskipa-\@tempskipa\else
+    \expandafter\ifnum\scr@v@is@ge{3.22}\@afterindenttrue\fi
+  \fi
+%  \tud@chapterheadstartvskip%
+  \chapterheadstartvskip%
+  {%
+    \setlength{\parindent}{\z@}\setlength{\parfillskip}{\z@ plus 1fil}%
+    \let\IfUseNumber\secondoftwo
+    \if@chapterprefix
+      \let\IfUsePrefixLine\@firstoftwo
+    \else
+      \let\IfUsePrefixLine\@secondoftwo
+    \fi
+    \normalfont\usekomafont{disposition}{%
+      \usekomafont{#1}{%
+        \ifdin{\tud@raggedright}{\raggedchapter}%
+        \IfUsePrefixLine{%
+          \chapterlineswithprefixformat{#1}%
+          {}%
+          {\interlinepenalty \@M\tud@makeuppercase{#2}\@@par}%
+        }{%
+          \chapterlinesformat{#1}%
+          {}%
+          {\interlinepenalty \@M\tud@makeuppercase{#2}\@@par}%
+        }%
+      }%
+    }%
+  }%
+  \nobreak\par\nobreak
+  \@tempskipa=\glueexpr \csname scr@#1@afterskip\endcsname\relax\relax
+  \ifdim\@tempskipa<\z@\@tempskipa-\@tempskipa\fi
+  \chapterheadendvskip
+}
+\ifx\TUDScript\@undefined\else%
+\let\scr@@makeschapterhead\tud@@makeschapterhead
+\fi
+\begin{document}
+%\renewcommand{\chapterpagestyle}{empty}
+%\meaning\prefacename
+%\def\prefacename{Vorwort}
+\tableofcontents
+\chapter{\prefacename 1}
+\chapter*{\prefacename 2}
+\addchap{\prefacename 3}
+\addchap*{\prefacename 4}
+\meaning\SecDef
+
+\meaning\chapter
+\smallskip
+
+\meaning\scr@startchapter
+\smallskip
+
+\meaning\@schapter
+\smallskip
+
+\meaning\scr@@startchapter
+\smallskip
+%
+%\cleardoubleemptypage
+%
+%\DeclareSectionCommand[%
+%  style=chapter,%
+%  level=0,%
+%  pagestyle=empty,%
+%  beforeskip=3.9em,
+%  afterskip=2.05em,
+%%  indent=0pt,
+%  innerskip=.6em,
+%  font=\Huge\dinbn,
+%  prefixfont=\huge,
+%  tocstyle=chapter,%
+%  tocindent=0pt,%
+%  tocnumwidth=1.5em%
+%]{tudchapter}
+%\tudchapter{bla}
+%\meaning\tudchapter
+%\smallskip
+%
 %\meaning\scr@startchapter
+%\smallskip
 %
 %\meaning\scr@@startchapter
-
-\meaning\scr@@makechapterhead
+%\smallskip
+%
+%\meaning\scr@@startschapter
 \end{document}
+
+folgende Makros sind zu definieren (vererben oder neu)
+tudchapterpagestyle

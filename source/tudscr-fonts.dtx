@@ -1,4 +1,4 @@
-% \CheckSum{1307}
+% \CheckSum{1396}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-fonts.dtx}[%
-  2017/03/29 v2.05l TUD-Script\space%
+  2017/05/30 v2.05m TUD-Script\space%
 %</driver>
 %<package&identify>\ProvidesPackage{tudscrfonts}[%
 %<*driver|package&identify>
@@ -398,7 +398,35 @@
 % \end{macro}^^A \tud@font@math@missing@wrn
 % \end{macro}^^A \tud@font@check
 %
-% \subsection{Kompatibilität der Schriften mit verschiedenen Pakete}
+% \subsection{Kompatibilität der Schriften}
+% \subsubsection{Majuskel-ß für Unicode-Prozessoren}
+%
+% Es wird für die Majuskelvariante der Glyphe \enquote*{ß} eine Rückfallebene
+% (Substitution mit \enquote*{SS}) definiert, da diese für Unicode-Engines 
+% standardmäßig nicht bereitgestellt wird. Um diese zu erkennen, wird auf die 
+% gleiche Methodik wie im Paket \pkg{newunicodechar} zurückgegriffen.
+%    \begin{macrocode}
+\begingroup
+\catcode`\^=7
+\catcode30=12
+\catcode`\!=12
+\edef\tud@reserved{\@gobble^^^^0021}
+\expandafter\endgroup
+%    \end{macrocode}
+% Wurde eine Unicode-Engine erkannt (|^^^^0021| wird als ein Token gelesen), 
+% dann werden die Kodierungen für kleines und großes \enquote*{ß} dahingehend 
+% angepasst, dass diese \enquote*{ss} bzw. \enquote*{SS} verwenden, wenn die 
+% entsprechende Glyphe nicht vorhanden ist.
+%    \begin{macrocode}
+\ifx\tud@reserved\@empty\relax
+  \RequirePackage{newunicodechar}[2012/11/12]%
+  \uccode"00DF="1E9E%
+  \lccode"1E9E="00DF%
+  \newunicodechar{^^^^00df}{\iffontchar\font"00DF \symbol{"00DF}\else ss\fi}%
+  \newunicodechar{^^^^1e9e}{\iffontchar\font"1E9E \symbol{"1E9E}\else SS\fi}%
+\fi
+%    \end{macrocode}
+%
 % \subsubsection{Ausrichtung von Überschriften und das Paket \pkg{ragged2e}}
 %
 % \begin{macro}{\tud@raggedright}
@@ -428,14 +456,21 @@
 % \subsubsection{Anpassungen für das Paket \pkg{siunitx}}
 %
 % \begin{macro}{\lseries}
+% \begin{macro}{\@tud@x@siunitx@enabledtrue}
+% \changes{v2.05m}{2017/05/29}{neu}
 % Das Paket \pkg{siunitx} nutzt den Befehl \cs{lseries} für den Fall, dass für
 % den Fließtext eine Schrift die Serie \val{l} verwendet. Dem wird hier 
-% Rechnung getragen.
+% Rechnung getragen. Außerdem muss bei der Auswahl der Schriften evtl. auf das 
+% Paket reagiert werden, weil es sich bei der Definition der Schriften für den 
+% Mathematikmodus auf \cs{familydefault} bzw. \cs{rmfamily} verlässt.
 %    \begin{macrocode}
+\newif\if@tud@x@siunitx@enabled
 \AfterPackage*{siunitx}{%
+  \@tud@x@siunitx@enabledtrue%
   \providecommand*\lseries{\fontseries{l}\selectfont}%
 }
 %    \end{macrocode}
+% \end{macro}^^A \if@tud@x@siunitx@enabledes
 % \end{macro}^^A \lseries
 %
 % \subsubsection{Anpassungen für die Klasse \cls{beamer}}
@@ -1040,6 +1075,7 @@
   \if@tud@x@fontspec@enabled%
     \if@tud@univers%
       \newcommand*\tud@x@fontspec@set@univ{%
+        Ligatures=TeX,%
         BoldFont={},%
         ItalicFont={},%
         BoldItalicFont={},%
@@ -1061,6 +1097,7 @@
     \fi%
     \if@tud@dinbold%
       \newcommand*\tud@x@fontspec@set@din{%
+        Ligatures=TeX,%
         BoldFont={},%
         ItalicFont={},%
         BoldItalicFont={},%
@@ -1154,6 +1191,24 @@
   \DeclareTextFontCommand\textubs{\univbs}%
   \DeclareTextFontCommand\textuxs{\univxs}%
   \DeclareTextFontCommand\textdbn{\dinbn}%
+%    \end{macrocode}
+% Zuletzt werden Makros bereitgestellt, welche normalerweise durch das Paket 
+% \pkg{babel} vorgehalten werden.
+%    \begin{macrocode}
+%^^A    \def\tud@reserved##1##2{%
+%^^A      \ifundef{##2}{}{%
+%^^A \ProvideTextCommand{##1}{\encodingdefault}{\TextOrMath{##2}{\mbox{##2}}}%
+%^^A      }%
+%^^A    }%
+%^^A    \tud@reserved{\SS}{SS}%
+%^^A    \tud@reserved{\glq}{\quotesinglbase}%
+%^^A    \tud@reserved{\grq}{\textquoteleft}%
+%^^A    \tud@reserved{\glqq}{\quotedblbase}%
+%^^A    \tud@reserved{\grqq}{\textquotedblleft}%
+%^^A    \tud@reserved{\flq}{\guilsinglleft}%
+%^^A    \tud@reserved{\frq}{\guilsinglright}%
+%^^A    \tud@reserved{\flqq}{\guillemotleft}%
+%^^A    \tud@reserved{\frqq}{\guillemotright}%
 %    \end{macrocode}
 % Nach der optionsabhängigen Definition der Schriftauswahlbefehle wird der
 % Initialisierungsbefehle undefiniert gesetzt.
@@ -1858,6 +1913,22 @@
 % die dazugehörigen Befehle definiert.
 %    \begin{macrocode}
   \tud@font@init%
+%    \end{macrocode}
+% Wurde das Paket \pkg{siunitx} geladen, so werden die Schrifteinstellungen mit 
+% \opt{cdfont}|=|\val{false} deaktiviert und zu Beginn des Dokumentes auf die 
+% aktuelle Einstellung gesetzt.
+%    \begin{macrocode}
+  \if@tud@x@siunitx@enabled%
+    \ifcase\tud@cdfont@num\relax% false
+      \def\tud@reserved{\TUDoptions{cdfont=false}}%
+    \or% true
+      \def\tud@reserved{\TUDoptions{cdfont=true}}%
+    \or% heavy
+      \def\tud@reserved{\TUDoptions{cdfont=heavy}}%
+    \fi%
+    \expandafter\AtBeginDocument\expandafter{\tud@reserved}%
+    \TUDoptions{cdfont=false}%
+  \fi%
 %    \end{macrocode}
 % Damit die Schrift im Dokument später noch umgestellt werden kann, werden
 % sämtliche Einstellungen erst am Ende der Präambel gesichert. Deshalb wird

@@ -1,4 +1,4 @@
-% \CheckSum{2114}
+% \CheckSum{2119}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-pagestyle.dtx}[%
-  2017/03/29 v2.05l TUD-Script (pagestyle)%
+  2017/05/30 v2.05m TUD-Script (pagestyle)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman,xindy]{tudscrdoc}
@@ -2562,21 +2562,32 @@
 %
 % \subsection{Umgebungsparameter für die neuen Seitenstile}
 %
-% \begin{macro}{\tud@ps@parameters}
+% \begin{macro}{\if@tud@parameter@ps@font@set}
+% \changes{v2.05m}{2017/05/30}{neu}^^A
+% Der Schalter wird verwendet, um das explizite Setzen der Schrifteinstellungen
+% über die Seitenstilparameter zu detektieren.
+%    \begin{macrocode}
+\newif\if@tud@parameter@ps@font@set
+%    \end{macrocode}
+% \end{macro}^^A \if@tud@parameter@ps@font@set
+% \begin{macro}{\TUD@parameter@ps@def}
 % Im Folgenden werden die einzelnen Parameter für die \env{tudpage}-Umgebung
 % definiert. Die Parameter für Kopf- und Fußzeile werden nicht nur für die 
 % \env{tudpage}-Umgebung sondern auch noch für Titel und Umschlagseite
 % verwendet, weshalb deren Definitionen zur einfacheren Wiederverwendung in das
-% Makro \cs{tud@ps@parameters} ausgelagert werden.
+% Makro \cs{TUD@parameter@ps@def} ausgelagert werden.
 %    \begin{macrocode}
-\newcommand*\tud@ps@parameters[1]{%
+\newcommand*\TUD@parameter@ps@def[1]{%
 %    \end{macrocode}
 % \begin{parameter}{cdfont}
 % Die Option \opt{cdfont} bestimmt, ob die Schriften des \CDs oder aber die
 % standardmäßigen Serifenlosen für die Auszeichnugen in der Kopfzeile und
 % Serifen im Inhalt verwendet werden.
 %    \begin{macrocode}
-  \TUD@parameter@def{cdfont}[true]{\TUDoption{cdfont}{#1}}%
+  \TUD@parameter@def{cdfont}[true]{%
+    \TUDoption{cdfont}{#1}%
+    \@tud@parameter@ps@font@settrue%
+  }%
 %    \end{macrocode}
 % \end{parameter}^^A cdfont
 % \begin{parameter}{cdhead}
@@ -2628,8 +2639,14 @@
 % \begin{parameter}{logo}
 % Für die Kompatibilität werden auch veraltete Parameter bereitgestellt.
 %    \begin{macrocode}
-  \TUD@parameter@def{cdfonts}[true]{\TUDoption{cdfonts}{#1}}%
-  \TUD@parameter@def{tudfonts}[true]{\TUDoption{tudfonts}{#1}}%
+  \TUD@parameter@def{cdfonts}[true]{%
+    \TUDoption{cdfonts}{#1}%
+    \@tud@parameter@ps@font@settrue%
+  }%
+  \TUD@parameter@def{tudfonts}[true]{%
+    \TUDoption{tudfonts}{#1}%
+    \@tud@parameter@ps@font@settrue%
+  }%
   \TUD@parameter@def{barfont}[true]{\TUDoption{barfont}{#1}}%
   \TUD@parameter@def{widehead}[true]{\TUDoption{widehead}{#1}}%
   \TUD@parameter@def{tudfoot}[true]{\TUDoption{tudfoot}{#1}}%
@@ -2646,7 +2663,7 @@
 %    \begin{macrocode}
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@ps@parameters
+% \end{macro}^^A \TUD@parameter@ps@def
 %
 % \iffalse
 %<*book|report|article>
@@ -2785,7 +2802,7 @@
 %    \end{macrocode}
 % Hier werden die Parameter für Kopf- und Fußzeile tatsächlich definiert.
 %    \begin{macrocode}
-  \tud@ps@parameters{#1}%
+  \TUD@parameter@ps@def{#1}%
 %    \end{macrocode}
 % Für den Fall, dass ein Wert nicht in der Schlüssel"=Wert"=Notation gegeben
 % wird, erfolgt eine Sonderbehandlung durch \cs{TUD@parameter@handler@default},
