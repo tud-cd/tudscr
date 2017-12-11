@@ -18,7 +18,7 @@
 %% tudscr-base.dtx  (with options: `class,report,body')
 %% tudscr-fonts.dtx  (with options: `class,report,body')
 %% tudscr-fields.dtx  (with options: `class,report,body')
-%% tudscr-locale.dtx  (with options: `class,report,body')
+%% tudscr-localization.dtx  (with options: `class,report,body')
 %% tudscr-area.dtx  (with options: `class,report,body')
 %% tudscr-pagestyle.dtx  (with options: `class,report,body')
 %% tudscr-layout.dtx  (with options: `class,report,body')
@@ -29,7 +29,7 @@
 %% 
 %% TUD-Script -- Corporate Design of Technische Universitaet Dresden
 %% 
-%%   2017/03/29 v2.05l TUD-Script
+%%   2017/05/30 v2.05m TUD-Script
 %% 
 %% Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2017
 %% 
@@ -72,13 +72,13 @@
       \fi%
     }
   \fi
-  \TUD@Version@Check{2017/03/29 v2.05l TUD-Script}
+  \TUD@Version@Check{2017/05/30 v2.05m TUD-Script}
 \endgroup
 \NeedsTeXFormat{LaTeX2e}
 \providecommand*\tudscrmail{hanisch.latex@outlook.com}
 \newcommand*\TUD@ProvidesClass[3]{%
   \ProvidesClass{#1}[%
-  2017/03/29 v2.05l TUD-Script
+  2017/05/30 v2.05m TUD-Script
     ^^J#3 (#2)%
   ]%
   \newcommand*\TUD@Class@KOMA{#2}%
@@ -1124,6 +1124,7 @@
 \csdef{tud@v@2.05i}{3}
 \csdef{tud@v@2.05k}{3}
 \csdef{tud@v@2.05l}{3}
+\csdef{tud@v@2.05m}{3}
 \csdef{tud@v@last}{3}
 \newcommand*\tud@v@get[2]{%
   \begingroup%
@@ -1554,6 +1555,19 @@
     in the TUD-Script manual%
   }%
 }
+\begingroup
+\catcode`\^=7
+\catcode30=12
+\catcode`\!=12
+\edef\tud@reserved{\@gobble^^^^0021}
+\expandafter\endgroup
+\ifx\tud@reserved\@empty\relax
+  \RequirePackage{newunicodechar}[2012/11/12]%
+  \uccode"00DF="1E9E%
+  \lccode"1E9E="00DF%
+  \newunicodechar{^^^^00df}{\iffontchar\font"00DF \symbol{"00DF}\else ss\fi}%
+  \newunicodechar{^^^^1e9e}{\iffontchar\font"1E9E \symbol{"1E9E}\else SS\fi}%
+\fi
 \newcommand*\tud@raggedright{\raggedright}
 \newcommand*\tud@RaggedRight{\raggedright}
 \AfterPackage*{ragged2e}{%
@@ -2120,7 +2134,7 @@
 }
 \newcommand*\tud@sec@fontface[1][]{%
   \if@tud@cdfont@din%
-    \tud@dinbn%
+    \tud@dinbn\tud@raggedright%
   \else%
     \sectfont#1%
   \fi%
@@ -2438,8 +2452,8 @@
   matriculationnumber,studentid,matriculationid,%
   placeofbirth,birthplace,dateofbirth,birthday,%
 }
-%%% From File: tudscr-locale.dtx
-\newcommand*\tud@locale@define[1]{%
+%%% From File: tudscr-localization.dtx
+\newcommand*\tud@localization@define[1]{%
   \providecommand*#1{%
     \ClassError{\TUD@Class@Name}{%
       `\string#1' not defined for language `\languagename'%
@@ -2453,45 +2467,45 @@
     }%
   }%
 }
-\tud@locale@define{\graduationtext}
-\tud@locale@define{\refereename}
-\tud@locale@define{\refereeothername}
-\tud@locale@define{\advisorname}
-\tud@locale@define{\advisorothername}
-\tud@locale@define{\supervisorname}
-\tud@locale@define{\supervisorothername}
-\tud@locale@define{\professorname}
-\tud@locale@define{\professorothername}
-\tud@locale@define{\datetext}
-\tud@locale@define{\dateofbirthtext}
-\tud@locale@define{\placeofbirthtext}
-\tud@locale@define{\defensedatetext}
-\tud@locale@define{\matriculationyearname}
-\tud@locale@define{\matriculationnumbername}
-\tud@locale@define{\coverpagename}
-\tud@locale@define{\titlepagename}
-\tud@locale@define{\titlename}
-\tud@locale@define{\confirmationname}
-\tud@locale@define{\confirmationtext}
-\tud@locale@define{\blockingname}
-\tud@locale@define{\blockingtext}
-\tud@locale@define{\coursename}
-\tud@locale@define{\disciplinename}
-\tud@locale@define{\listingname}
-\tud@locale@define{\listlistingname}
-\tud@locale@define{\dissertationname}
-\tud@locale@define{\diplomathesisname}
-\tud@locale@define{\masterthesisname}
-\tud@locale@define{\bachelorthesisname}
-\tud@locale@define{\studentthesisname}
-\tud@locale@define{\studentresearchname}
-\tud@locale@define{\projectpapername}
-\tud@locale@define{\seminarpapername}
-\tud@locale@define{\termpapername}
-\tud@locale@define{\researchname}
-\tud@locale@define{\logname}
-\tud@locale@define{\internshipname}
-\tud@locale@define{\reportname}
+\tud@localization@define{\graduationtext}
+\tud@localization@define{\refereename}
+\tud@localization@define{\refereeothername}
+\tud@localization@define{\advisorname}
+\tud@localization@define{\advisorothername}
+\tud@localization@define{\supervisorname}
+\tud@localization@define{\supervisorothername}
+\tud@localization@define{\professorname}
+\tud@localization@define{\professorothername}
+\tud@localization@define{\datetext}
+\tud@localization@define{\dateofbirthtext}
+\tud@localization@define{\placeofbirthtext}
+\tud@localization@define{\defensedatetext}
+\tud@localization@define{\matriculationyearname}
+\tud@localization@define{\matriculationnumbername}
+\tud@localization@define{\coverpagename}
+\tud@localization@define{\titlepagename}
+\tud@localization@define{\titlename}
+\tud@localization@define{\confirmationname}
+\tud@localization@define{\confirmationtext}
+\tud@localization@define{\blockingname}
+\tud@localization@define{\blockingtext}
+\tud@localization@define{\coursename}
+\tud@localization@define{\disciplinename}
+\tud@localization@define{\listingname}
+\tud@localization@define{\listlistingname}
+\tud@localization@define{\dissertationname}
+\tud@localization@define{\diplomathesisname}
+\tud@localization@define{\masterthesisname}
+\tud@localization@define{\bachelorthesisname}
+\tud@localization@define{\studentthesisname}
+\tud@localization@define{\studentresearchname}
+\tud@localization@define{\projectpapername}
+\tud@localization@define{\seminarpapername}
+\tud@localization@define{\termpapername}
+\tud@localization@define{\researchname}
+\tud@localization@define{\logname}
+\tud@localization@define{\internshipname}
+\tud@localization@define{\reportname}
 \newcommand*\tud@ifin@and[1]{%
   \begingroup%
     \let\and\relax%
@@ -2506,13 +2520,15 @@
     \expandafter\@tempa\@tempb\and\relax%
   \endgroup
 }
-\newcommand*\tud@locale@german{%
+\newcommand*\tud@localization@german{%
   \providecaptionname{%
     german,ngerman,austrian,naustrian,swissgerman,nswissgerman%
   }%
 }
-\tud@locale@german{\graduationtext}{zur Erlangung des akademischen Grades}%
-\tud@locale@german{\refereename}{%
+\tud@localization@german{\graduationtext}{%
+  zur Erlangung des akademischen Grades%
+}%
+\tud@localization@german{\refereename}{%
   \tud@ifin@and{\@referee}{%
     \ifx\refereeothername\@empty%
       Gutachter%
@@ -2521,8 +2537,8 @@
     \fi%
   }{Gutachter}%
 }%
-\tud@locale@german{\refereeothername}{Zweitgutachter}%
-\tud@locale@german{\advisorname}{%
+\tud@localization@german{\refereeothername}{Zweitgutachter}%
+\tud@localization@german{\advisorname}{%
   \tud@ifin@and{\@advisor}{%
     \ifx\advisorothername\@empty%
       Fachreferenten%
@@ -2531,8 +2547,8 @@
     \fi%
   }{Fachreferent}%
 }%
-\tud@locale@german{\advisorothername}{}%
-\tud@locale@german{\supervisorname}{%
+\tud@localization@german{\advisorothername}{}%
+\tud@localization@german{\supervisorname}{%
   \tud@ifin@and{\@supervisor}{%
     \ifx\supervisorothername\@empty%
       Betreuer%
@@ -2541,8 +2557,8 @@
     \fi%
   }{Betreuer}%
 }%
-\tud@locale@german{\supervisorothername}{}%
-\tud@locale@german{\professorname}{%
+\tud@localization@german{\supervisorothername}{}%
+\tud@localization@german{\professorname}{%
   \tud@ifin@and{\@professor}{%
     \ifx\professorothername\@empty%
       Betreuende Hochschullehrer%
@@ -2551,18 +2567,18 @@
     \fi%
   }{Betreuender Hochschullehrer}%
 }%
-\tud@locale@german{\professorothername}{}%
-\tud@locale@german{\datetext}{Eingereicht am}%
-\tud@locale@german{\dateofbirthtext}{Geboren am}%
-\tud@locale@german{\placeofbirthtext}{in}%
-\tud@locale@german{\defensedatetext}{Verteidigt am}%
-\tud@locale@german{\matriculationyearname}{Immatrikulationsjahr}%
-\tud@locale@german{\matriculationnumbername}{Matrikelnummer}%
-\tud@locale@german{\coverpagename}{Umschlagseite}%
-\tud@locale@german{\titlepagename}{Titelblatt}%
-\tud@locale@german{\titlename}{Titel}%
-\tud@locale@german{\confirmationname}{Selbstst\"andigkeitserkl\"arung}%
-\tud@locale@german{\confirmationtext}{%
+\tud@localization@german{\professorothername}{}%
+\tud@localization@german{\datetext}{Eingereicht am}%
+\tud@localization@german{\dateofbirthtext}{Geboren am}%
+\tud@localization@german{\placeofbirthtext}{in}%
+\tud@localization@german{\defensedatetext}{Verteidigt am}%
+\tud@localization@german{\matriculationyearname}{Immatrikulationsjahr}%
+\tud@localization@german{\matriculationnumbername}{Matrikelnummer}%
+\tud@localization@german{\coverpagename}{Umschlagseite}%
+\tud@localization@german{\titlepagename}{Titelblatt}%
+\tud@localization@german{\titlename}{Titel}%
+\tud@localization@german{\confirmationname}{Selbstst\"andigkeitserkl\"arung}%
+\tud@localization@german{\confirmationtext}{%
   Hiermit versichere ich, dass ich die vorliegende Arbeit
   \ifx\@@title\@empty\else mit dem Titel \emph{\@@title} \fi
   selbstst\"andig und ohne unzul\"assige Hilfe Dritter verfasst habe.
@@ -2582,8 +2598,8 @@
   Mir ist bekannt, dass die Nichteinhaltung dieser Erkl\"arung zum
   nachtr\"aglichen Entzug des Hochschulabschlusses f\"uhren kann.%
 }%
-\tud@locale@german{\blockingname}{Sperrvermerk}%
-\tud@locale@german{\blockingtext}{%
+\tud@localization@german{\blockingname}{Sperrvermerk}%
+\tud@localization@german{\blockingtext}{%
   Diese Arbeit
   \ifx\@@title\@empty\else mit dem Titel \emph{\@@title} \fi
   enth\"alt vertrauliche Informationen\ifx\@company\@empty\else
@@ -2596,30 +2612,30 @@
   Universit\"at Dresden, den Gutachtern sowie den Mitgliedern
   des Pr\"ufungsausschusses zug\"anglich zu machen.%
 }%
-\tud@locale@german{\coursename}{Studiengang}%
-\tud@locale@german{\disciplinename}{Studienrichtung}%
-\tud@locale@german{\listingname}{Quelltext}%
-\tud@locale@german{\listlistingname}{Quelltextverzeichnis}%
-\tud@locale@german{\dissertationname}{Dissertation}%
-\tud@locale@german{\diplomathesisname}{Diplomarbeit}%
-\tud@locale@german{\masterthesisname}{Master-Arbeit}%
-\tud@locale@german{\bachelorthesisname}{Bachelor-Arbeit}%
-\tud@locale@german{\studentthesisname}{Studienarbeit}%
-\tud@locale@german{\studentresearchname}{Gro\ss{}er Beleg}%
-\tud@locale@german{\projectpapername}{Projektarbeit}%
-\tud@locale@german{\seminarpapername}{Seminararbeit}%
-\tud@locale@german{\termpapername}{Hausarbeit}%
-\tud@locale@german{\researchname}{Forschungsbericht}%
-\tud@locale@german{\logname}{Protokoll}%
-\tud@locale@german{\internshipname}{Praktikumsbericht}%
-\tud@locale@german{\reportname}{Bericht}%
-\newcommand*\tud@locale@english{%
+\tud@localization@german{\coursename}{Studiengang}%
+\tud@localization@german{\disciplinename}{Studienrichtung}%
+\tud@localization@german{\listingname}{Quelltext}%
+\tud@localization@german{\listlistingname}{Quelltextverzeichnis}%
+\tud@localization@german{\dissertationname}{Dissertation}%
+\tud@localization@german{\diplomathesisname}{Diplomarbeit}%
+\tud@localization@german{\masterthesisname}{Master-Arbeit}%
+\tud@localization@german{\bachelorthesisname}{Bachelor-Arbeit}%
+\tud@localization@german{\studentthesisname}{Studienarbeit}%
+\tud@localization@german{\studentresearchname}{Gro\ss{}er Beleg}%
+\tud@localization@german{\projectpapername}{Projektarbeit}%
+\tud@localization@german{\seminarpapername}{Seminararbeit}%
+\tud@localization@german{\termpapername}{Hausarbeit}%
+\tud@localization@german{\researchname}{Forschungsbericht}%
+\tud@localization@german{\logname}{Protokoll}%
+\tud@localization@german{\internshipname}{Praktikumsbericht}%
+\tud@localization@german{\reportname}{Bericht}%
+\newcommand*\tud@localization@english{%
   \providecaptionname{%
     american,australian,british,canadian,english,newzealand,UKenglish,USenglish%
   }%
 }
-\tud@locale@english{\graduationtext}{to achieve the academic degree}%
-\tud@locale@english{\refereename}{%
+\tud@localization@english{\graduationtext}{to achieve the academic degree}%
+\tud@localization@english{\refereename}{%
   \tud@ifin@and{\@referee}{%
     \ifx\refereeothername\@empty%
       Referees%
@@ -2628,8 +2644,8 @@
     \fi%
   }{Referee}%
 }%
-\tud@locale@english{\refereeothername}{Second referee}%
-\tud@locale@english{\advisorname}{%
+\tud@localization@english{\refereeothername}{Second referee}%
+\tud@localization@english{\advisorname}{%
   \tud@ifin@and{\@advisor}{%
     \ifx\advisorothername\@empty%
       Advisors%
@@ -2638,8 +2654,8 @@
     \fi%
   }{Advisor}%
 }%
-\tud@locale@english{\advisorothername}{}%
-\tud@locale@english{\supervisorname}{%
+\tud@localization@english{\advisorothername}{}%
+\tud@localization@english{\supervisorname}{%
   \tud@ifin@and{\@supervisor}{%
     \ifx\supervisorothername\@empty%
       Supervisors%
@@ -2648,8 +2664,8 @@
     \fi%
   }{Supervisor}%
 }%
-\tud@locale@english{\supervisorothername}{}%
-\tud@locale@english{\professorname}{%
+\tud@localization@english{\supervisorothername}{}%
+\tud@localization@english{\professorname}{%
   \tud@ifin@and{\@professor}{%
     \ifx\professorothername\@empty%
       Supervising professors%
@@ -2658,18 +2674,18 @@
     \fi%
   }{Supervising professor}%
 }%
-\tud@locale@english{\professorothername}{}%
-\tud@locale@english{\datetext}{Submitted on}%
-\tud@locale@english{\dateofbirthtext}{Born on}%
-\tud@locale@english{\placeofbirthtext}{in}%
-\tud@locale@english{\defensedatetext}{Defended on}%
-\tud@locale@english{\matriculationyearname}{Matriculation year}%
-\tud@locale@english{\matriculationnumbername}{Matriculation number}%
-\tud@locale@english{\coverpagename}{Cover page}%
-\tud@locale@english{\titlepagename}{Title page}%
-\tud@locale@english{\titlename}{Title}%
-\tud@locale@english{\confirmationname}{Statement of authorship}%
-\tud@locale@english{\confirmationtext}{%
+\tud@localization@english{\professorothername}{}%
+\tud@localization@english{\datetext}{Submitted on}%
+\tud@localization@english{\dateofbirthtext}{Born on}%
+\tud@localization@english{\placeofbirthtext}{in}%
+\tud@localization@english{\defensedatetext}{Defended on}%
+\tud@localization@english{\matriculationyearname}{Matriculation year}%
+\tud@localization@english{\matriculationnumbername}{Matriculation number}%
+\tud@localization@english{\coverpagename}{Cover page}%
+\tud@localization@english{\titlepagename}{Title page}%
+\tud@localization@english{\titlename}{Title}%
+\tud@localization@english{\confirmationname}{Statement of authorship}%
+\tud@localization@english{\confirmationtext}{%
   I hereby certify that I have authored this
   \ifx\@@thesis\@empty thesis\else\@@thesis{} \fi
   \ifx\@@title\@empty\else entitled \emph{\@@title} \fi
@@ -2690,8 +2706,8 @@
   I am aware that violations of this declaration may lead to
   subsequent withdrawal of the degree.%
 }%
-\tud@locale@english{\blockingname}{Restriction note}%
-\tud@locale@english{\blockingtext}{%
+\tud@localization@english{\blockingname}{Restriction note}%
+\tud@localization@english{\blockingtext}{%
   This \ifx\@@thesis\@empty thesis \else\@@thesis{} \fi
   \ifx\@@title\@empty\else entitled \emph{\@@title} \fi
   contains confidential data\ifx\@company\@empty\else
@@ -2703,32 +2719,32 @@
   Technische Universit\"at Dresden, the reviewers and also the
   members of the examination board.%
 }%
-\tud@locale@english{\coursename}{Course}%
-\tud@locale@english{\disciplinename}{Discipline}%
-\tud@locale@english{\listingname}{Listing}%
-\tud@locale@english{\listlistingname}{List of Listings}%
-\tud@locale@english{\dissertationname}{Dissertation}%
-\tud@locale@english{\diplomathesisname}{Diploma Thesis}%
-\tud@locale@english{\masterthesisname}{Master Thesis}%
-\tud@locale@english{\bachelorthesisname}{Bachelor Thesis}%
-\tud@locale@english{\studentthesisname}{Student Thesis}%
-\tud@locale@english{\studentresearchname}{Student Research Project}%
-\tud@locale@english{\projectpapername}{Project Paper}%
-\tud@locale@english{\seminarpapername}{Seminar Paper}%
-\tud@locale@english{\termpapername}{Term Paper}%
-\tud@locale@english{\researchname}{Research Report}%
-\tud@locale@english{\logname}{Log}%
-\tud@locale@english{\internshipname}{Internship Report}%
-\tud@locale@english{\reportname}{Report}%
+\tud@localization@english{\coursename}{Course}%
+\tud@localization@english{\disciplinename}{Discipline}%
+\tud@localization@english{\listingname}{Listing}%
+\tud@localization@english{\listlistingname}{List of Listings}%
+\tud@localization@english{\dissertationname}{Dissertation}%
+\tud@localization@english{\diplomathesisname}{Diploma Thesis}%
+\tud@localization@english{\masterthesisname}{Master Thesis}%
+\tud@localization@english{\bachelorthesisname}{Bachelor Thesis}%
+\tud@localization@english{\studentthesisname}{Student Thesis}%
+\tud@localization@english{\studentresearchname}{Student Research Project}%
+\tud@localization@english{\projectpapername}{Project Paper}%
+\tud@localization@english{\seminarpapername}{Seminar Paper}%
+\tud@localization@english{\termpapername}{Term Paper}%
+\tud@localization@english{\researchname}{Research Report}%
+\tud@localization@english{\logname}{Log}%
+\tud@localization@english{\internshipname}{Internship Report}%
+\tud@localization@english{\reportname}{Report}%
 \AfterPackage{listings}{%
   \renewcommand*\lstlistingname{\listingname}%
   \renewcommand*\lstlistlistingname{\listlistingname}%
 }
 \AfterPackage{mathswap}{%
-  \tud@locale@german{\@commaswap}{,}%
-  \tud@locale@german{\@dotswap}{\,}%
-  \tud@locale@english{\@commaswap}{\,}%
-  \tud@locale@english{\@dotswap}{.}%
+  \tud@localization@german{\@commaswap}{,}%
+  \tud@localization@german{\@dotswap}{\,}%
+  \tud@localization@english{\@commaswap}{\,}%
+  \tud@localization@english{\@dotswap}{.}%
 }
 %%% From File: tudscr-area.dtx
 \newif\if@tud@x@crop@center
@@ -4786,8 +4802,12 @@
     \fi%
   }{}%
 }
-\newcommand*\tud@ps@parameters[1]{%
-  \TUD@parameter@def{cdfont}[true]{\TUDoption{cdfont}{#1}}%
+\newif\if@tud@parameter@ps@font@set
+\newcommand*\TUD@parameter@ps@def[1]{%
+  \TUD@parameter@def{cdfont}[true]{%
+    \TUDoption{cdfont}{#1}%
+    \@tud@parameter@ps@font@settrue%
+  }%
   \TUD@parameter@def{cdhead}[true]{\TUDoption{cdhead}{#1}}%
   \TUD@parameter@def{cdfoot}[true]{\TUDoption{cdfoot}{#1}}%
   \TUD@parameter@def{headlogo}{\headlogo{#1}}%
@@ -4795,8 +4815,14 @@
   \TUD@parameter@def{ddc}[true]{\TUDoption{ddc}{#1}}%
   \TUD@parameter@def{ddchead}[true]{\TUDoption{ddchead}{#1}}%
   \TUD@parameter@def{ddcfoot}[true]{\TUDoption{ddcfoot}{#1}}%
-  \TUD@parameter@def{cdfonts}[true]{\TUDoption{cdfonts}{#1}}%
-  \TUD@parameter@def{tudfonts}[true]{\TUDoption{tudfonts}{#1}}%
+  \TUD@parameter@def{cdfonts}[true]{%
+    \TUDoption{cdfonts}{#1}%
+    \@tud@parameter@ps@font@settrue%
+  }%
+  \TUD@parameter@def{tudfonts}[true]{%
+    \TUDoption{tudfonts}{#1}%
+    \@tud@parameter@ps@font@settrue%
+  }%
   \TUD@parameter@def{barfont}[true]{\TUDoption{barfont}{#1}}%
   \TUD@parameter@def{widehead}[true]{\TUDoption{widehead}{#1}}%
   \TUD@parameter@def{tudfoot}[true]{\TUDoption{tudfoot}{#1}}%
@@ -4862,7 +4888,7 @@
       }}}%
     }%
   }%
-  \tud@ps@parameters{#1}%
+  \TUD@parameter@ps@def{#1}%
   \TUD@parameter@handler@default{}%
 }
 \PreventPackageFromLoading[%
@@ -5530,6 +5556,9 @@
         \ifstr{\titlepagestyle}{empty}{\thispagestyle{empty.tudheadings}}{}%
       }{}%
     \else% !false
+      \if@tud@parameter@ps@font@set\else%
+        \TUDoptions{cdfont=true}%
+      \fi%
       \if@titlepage%
         \tud@make@titlepage%
       \else%
@@ -5553,7 +5582,7 @@
   \TUD@parameter@def{cdtitle}[true]{\TUDoption{cdtitle}{#1}}%
   \TUD@parameter@let{cd}{cdtitle}%
   \TUD@parameter@def{pagenumber}{\def\tud@title@pagenumber{#1}}%
-  \tud@ps@parameters{#1}%
+  \TUD@parameter@ps@def{#1}%
   \TUD@parameter@handler@value{pagenumber}%
 }
 \newcommand*\tud@titleback{}
@@ -6143,7 +6172,7 @@
     }%
   }%
   \TUD@parameter@def{pagenumber}{\def\tud@title@pagenumber{#1}}%
-  \tud@ps@parameters{#1}%
+  \TUD@parameter@ps@def{#1}%
   \TUD@parameter@handler@value{pagenumber}%
 }
 %%% From File: tudscr-frontmatter.dtx
