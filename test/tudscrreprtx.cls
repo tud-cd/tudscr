@@ -6217,6 +6217,7 @@
       }%
       \let\clearpage\relax%
       \sbox\z@{\vbox{#2}}%
+      \csuse{phantomsection}%
       \protected@edef\@tempa{%
         \noexpand\endgroup%
         \noexpand\ifnumodd{\csname tud@#1@toc@num\endcsname}{%
