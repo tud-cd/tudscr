@@ -381,18 +381,18 @@
   \TUD@SpecialOptionAtDocument{tud@cdgeometry@@process}%
   \FamilyKeyStateProcessed%
 }
-\newcommand*\tud@x@ta@warnings@off{}
-\newcommand*\tud@x@ta@warnings@on{}
+\newcommand*\tud@x@ta@silent{}
+\newcommand*\tud@x@ta@verbose{}
 \IfFileExists{silence.sty}{%
   \RequirePackage{silence}[2012/07/02]%
   \WarningFilter[typearea]{typearea}{DIV for}%
   \WarningFilter[typearea]{typearea}{Bad type area settings!}%
   \WarningFilter[typearea]{typearea}{Maybe no optimal type area settings!}%
   \WarningFilter[typearea]{typearea}{Very low DIV value!}%
-  \BeforePackage{typearea}{\ActivateWarningFilters[typearea]}%
-  \AfterPackage{typearea}{\DeactivateWarningFilters[typearea]}%
-  \renewcommand*\tud@x@ta@warnings@off{\ActivateWarningFilters[typearea]}
-  \renewcommand*\tud@x@ta@warnings@on{\DeactivateWarningFilters[typearea]}
+  \renewcommand*\tud@x@ta@silent{\ActivateWarningFilters[typearea]}
+  \renewcommand*\tud@x@ta@verbose{\DeactivateWarningFilters[typearea]}
+  \BeforePackage{typearea}{\tud@x@ta@silent}%
+  \AfterPackage{typearea}{\tud@x@ta@verbose}%
 }{}
 %%% From File: tudscr-pagestyle.dtx
 \cs@lock{tud@head@font@num}{0}
@@ -467,13 +467,13 @@
       \TUD@AfterPackage@do{scrlayer-scrpage}{%
         \tud@ps@restore{scrheadings}%
         \tud@ps@restore{plain.scrheadings}%
-        \tud@font@koma@unset{pageheadfoot}%
+        \tud@komafont@unset{pageheadfoot}%
       }%
     \or% true
       \TUD@AfterPackage@do{scrlayer-scrpage}{%
         \tud@ps@store{scrheadings}%
         \tud@ps@store{plain.scrheadings}%
-        \tud@font@koma@set{pageheadfoot}{\upshape}%
+        \tud@komafont@set{pageheadfoot}{\upshape}%
         \clearpairofpagestyles%
         \ofoot[\pagemark]{%
           \if@twoside\ifodd\value{page}\else\pagemark\quad\fi\fi%
@@ -1185,21 +1185,13 @@
 \TUD@key{cdfonts}[true]{%
   \TUD@set@ifkey{cdfonts}{@tempswa}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \if@tempswa%
-      \TUD@deprecated@key{cdfonts=#1}{cdfont=true}%
-    \else%
-      \TUD@deprecated@key{cdfonts=#1}{cdfont=false}%
-    \fi%
+    \TUD@deprecated@key{cdfonts=#1}{cdfont=#1}%
   \fi%
 }
 \TUD@key{tudfonts}[true]{%
   \TUD@set@ifkey{tudfonts}{@tempswa}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \if@tempswa%
-      \TUD@deprecated@key{tudfonts=#1}{cdfont=true}%
-    \else%
-      \TUD@deprecated@key{tudfonts=#1}{cdfont=false}%
-    \fi%
+    \TUD@deprecated@key{tudfonts=#1}{cdfont=#1}%
   \fi%
 }
 \TUD@key{heavyfont}[true]{%
@@ -1452,23 +1444,23 @@
   \RequirePackage{tudscrcolor}[\TUD@Version]%
 }
 %%% From File: tudscr-fonts.dtx
-\newcommand*\tud@univers{lun}
-\newif\if@tud@univers
-\newif\if@tud@universmath
-\newcommand*\tud@dinbold{0m6}
-\newif\if@tud@dinbold
-\newif\if@tud@dinboldmath
-\newcommand*\tud@font@check{%
+\newcommand*\tud@cdfont@uv{lun}
+\newif\if@tud@cdfont@uv
+\newif\if@tud@cdmath@uv
+\newcommand*\tud@cdfont@db{0m6}
+\newif\if@tud@cdfont@db
+\newif\if@tud@cdmath@db
+\newcommand*\tud@cdfont@check{%
   \edef\@tempa##1##2{\lowercase{\noexpand\IfFileExists{##1##2.fd}}}%
   \def\@tempb##1{%
     \if@tud@cdmath%
-      \tud@font@math@missing@wrn{##1}%
+      \tud@cdmath@missing{##1}%
     \fi%
   }%
-  \@tempa{OT1}{\tud@univers}{\@tud@universmathtrue}{\@tempb{Univers}}%
-  \@tempa{OT1}{\tud@dinbold}{\@tud@dinboldmathtrue}{\@tempb{DIN-Bold}}%
+  \@tempa{OT1}{\tud@cdfont@uv}{\@tud@cdmath@uvtrue}{\@tempb{Univers}}%
+  \@tempa{OT1}{\tud@cdfont@db}{\@tud@cdmath@dbtrue}{\@tempb{DIN-Bold}}%
   \if@tud@cdmath%
-    \ifboolexpr{bool {@tud@universmath} and bool {@tud@dinboldmath}}{}{%
+    \ifboolexpr{bool {@tud@cdmath@uv} and bool {@tud@cdmath@db}}{}{%
       \bool@set@lock{@tud@cdmath}{false}%
     }%
   \fi%
@@ -1477,39 +1469,39 @@
       \IfFontExistsTF{##1}{}{%
         ##2%
         \ifnum\tud@cdfont@num>\z@\relax% true/heavy
-          \tud@font@missing@wrn{##1}%
+          \tud@cdfont@missing{##1}%
         \fi%
       }%
     }%
-    \@tud@universtrue%
-    \@tempc{Univers Light}{\@tud@universfalse}%
-    \@tempc{Univers}{\@tud@universfalse}%
-    \@tempc{Univers Bold}{\@tud@universfalse}%
-    \@tempc{Univers Black}{\@tud@universfalse}%
-    \@tempc{Univers LightOblique}{\@tud@universfalse}%
-    \@tempc{Univers Oblique}{\@tud@universfalse}%
-    \@tempc{Univers BoldOblique}{\@tud@universfalse}%
-    \@tempc{Univers BlackOblique}{\@tud@universfalse}%
-    \@tud@dinboldtrue%
-    \@tempc{DIN-Bold}{\@tud@dinboldfalse}%
+    \@tud@cdfont@uvtrue%
+    \@tempc{Univers Light}{\@tud@cdfont@uvfalse}%
+    \@tempc{Univers}{\@tud@cdfont@uvfalse}%
+    \@tempc{Univers Bold}{\@tud@cdfont@uvfalse}%
+    \@tempc{Univers Black}{\@tud@cdfont@uvfalse}%
+    \@tempc{Univers LightOblique}{\@tud@cdfont@uvfalse}%
+    \@tempc{Univers Oblique}{\@tud@cdfont@uvfalse}%
+    \@tempc{Univers BoldOblique}{\@tud@cdfont@uvfalse}%
+    \@tempc{Univers BlackOblique}{\@tud@cdfont@uvfalse}%
+    \@tud@cdfont@dbtrue%
+    \@tempc{DIN-Bold}{\@tud@cdfont@dbfalse}%
   \else%
     \def\@tempc##1{%
       \ifnum\tud@cdfont@num>\z@\relax% true/heavy
-        \tud@font@missing@wrn{##1}%
+        \tud@cdfont@missing{##1}%
       \fi%
     }%
     \expandafter\@tempa\expandafter{\encodingdefault}%
-      {\tud@univers}{\@tud@universtrue}{\@tempc{Univers}}%
+      {\tud@cdfont@uv}{\@tud@cdfont@uvtrue}{\@tempc{Univers}}%
     \expandafter\@tempa\expandafter{\encodingdefault}%
-      {\tud@dinbold}{\@tud@dinboldtrue}{\@tempc{DIN-Bold}}%
+      {\tud@cdfont@db}{\@tud@cdfont@dbtrue}{\@tempc{DIN-Bold}}%
   \fi%
-  \ifboolexpr{bool {@tud@univers} and bool {@tud@dinbold}}{}{%
+  \ifboolexpr{bool {@tud@cdfont@uv} and bool {@tud@cdfont@db}}{}{%
     \renewcommand*\tud@cdfont@num{0}%
     \bool@std@lock{@tud@cdmath}{false}%
   }%
-  \undef\tud@font@check%
+  \undef\tud@cdfont@check%
 }
-\newcommand*\tud@font@missing@wrn[1]{%
+\newcommand*\tud@cdfont@missing[1]{%
   \begingroup%
     \def\@tempa{%
       `#1' font not found for `\encodingdefault' encoding.\MessageBreak%
@@ -1547,7 +1539,7 @@
     \ClassWarning{\TUD@Class@Name}{\@tempa}%
   \endgroup%
 }
-\newcommand*\tud@font@math@missing@wrn[1]{%
+\newcommand*\tud@cdmath@missing[1]{%
   \ClassWarning{\TUD@Class@Name}%
   {%
     `#1' fonts for math typesetting not found.\MessageBreak%
@@ -1589,13 +1581,13 @@
 \newcommand*\tud@font@set{%
   \if@atdocument%
     \ifnum\tud@cdfont@num>\z@\relax% true/heavy
-      \if@tud@univers\else%
-        \tud@font@missing@wrn{Univers}%
+      \if@tud@cdfont@uv\else%
+        \tud@cdfont@missing{Univers}%
       \fi%
-      \if@tud@dinbold\else%
-        \tud@font@missing@wrn{DIN-Bold}%
+      \if@tud@cdfont@db\else%
+        \tud@cdfont@missing{DIN-Bold}%
       \fi%
-      \ifboolexpr{bool {@tud@univers} and bool {@tud@dinbold}}{}{%
+      \ifboolexpr{bool {@tud@cdfont@uv} and bool {@tud@cdfont@db}}{}{%
         \renewcommand*\tud@cdfont@num{0}%
         \bool@std@lock{@tud@cdmath}{false}%
       }%
@@ -1643,9 +1635,9 @@
       \tud@cmd@store{mdseries@tt}%
     \fi%
     \cs@std@lock{tud@head@font@num}{\tud@cdfont@num}%
-    \if@tud@univers%
+    \if@tud@cdfont@uv%
       \if@tud@x@fontspec@enabled%
-        \setsansfont{Univers}[\tud@x@fontspec@set@univ]%
+        \setsansfont{Univers}[\tud@x@fontspec@set@uv]%
         \setmonofont{LMMono10-Regular}[%
           BoldFont={},%
           ItalicFont={},%
@@ -1661,11 +1653,11 @@
           FontFace={b}{\sldefault}{LMMonoLt10-BoldOblique},%
           FontFace={bx}{\sldefault}{LMMonoLt10-BoldOblique},%
           FontFace={eb}{\sldefault}{LMMonoLt10-BoldOblique},%
-          NFSSFamily=\tud@univers t%
+          NFSSFamily=\tud@cdfont@uv t%
         ]%
       \else%
-        \renewcommand*\sfdefault{\tud@univers}%
-        \renewcommand*\ttdefault{\tud@univers t}%
+        \renewcommand*\sfdefault{\tud@cdfont@uv}%
+        \renewcommand*\ttdefault{\tud@cdfont@uv t}%
       \fi%
       \ifnum\tud@cdfont@num=\@ne\relax% true
         \if@tud@cdfont@ultrabold% ultrabold
@@ -1749,8 +1741,8 @@
 }
 \newcommand*\tud@font@init{%
   \if@tud@x@fontspec@enabled%
-    \if@tud@univers%
-      \newcommand*\tud@x@fontspec@set@univ{%
+    \if@tud@cdfont@uv%
+      \newcommand*\tud@x@fontspec@set@uv{%
         Ligatures=TeX,%
         BoldFont={},%
         ItalicFont={},%
@@ -1767,11 +1759,11 @@
         FontFace={bx}{\sldefault}{Univers BoldOblique},%
         FontFace={eb}{\sldefault}{Univers BlackOblique}%
       }%
-      \newfontfamily\tud@x@fontspec@fam@univ{Univers}[%
-        \tud@x@fontspec@set@univ,NFSSFamily=\tud@univers%
+      \newfontfamily\tud@x@fontspec@fam@uv{Univers}[%
+        \tud@x@fontspec@set@uv,NFSSFamily=\tud@cdfont@uv%
       ]%
     \fi%
-    \if@tud@dinbold%
+    \if@tud@cdfont@db%
       \newcommand*\tud@x@fontspec@set@din{%
         Ligatures=TeX,%
         BoldFont={},%
@@ -1790,38 +1782,38 @@
         FontFace={eb}{\sldefault}{Font=DIN-Bold,FakeSlant=0.15}%
       }%
       \newfontfamily\tud@x@fontspec@fam@din{DIN-Bold}[%
-        \tud@x@fontspec@set@din,NFSSFamily=\tud@dinbold%
+        \tud@x@fontspec@set@din,NFSSFamily=\tud@cdfont@db%
       ]%
     \fi%
   \fi%
-  \if@tud@univers%
-    \newrobustcmd*\univln{\usefont{\encodingdefault}{\tud@univers}{l}{n}}%
-    \newrobustcmd*\univrn{\usefont{\encodingdefault}{\tud@univers}{m}{n}}%
-    \newrobustcmd*\univbn{\usefont{\encodingdefault}{\tud@univers}{b}{n}}%
-    \newrobustcmd*\univxn{\usefont{\encodingdefault}{\tud@univers}{eb}{n}}%
-    \newrobustcmd*\univls{\usefont{\encodingdefault}{\tud@univers}{l}{sl}}%
-    \newrobustcmd*\univrs{\usefont{\encodingdefault}{\tud@univers}{m}{sl}}%
-    \newrobustcmd*\univbs{\usefont{\encodingdefault}{\tud@univers}{b}{sl}}%
-    \newrobustcmd*\univxs{\usefont{\encodingdefault}{\tud@univers}{eb}{sl}}%
+  \if@tud@cdfont@uv%
+    \newrobustcmd*\univln{\usefont{\encodingdefault}{\tud@cdfont@uv}{l}{n}}%
+    \newrobustcmd*\univrn{\usefont{\encodingdefault}{\tud@cdfont@uv}{m}{n}}%
+    \newrobustcmd*\univbn{\usefont{\encodingdefault}{\tud@cdfont@uv}{b}{n}}%
+    \newrobustcmd*\univxn{\usefont{\encodingdefault}{\tud@cdfont@uv}{eb}{n}}%
+    \newrobustcmd*\univls{\usefont{\encodingdefault}{\tud@cdfont@uv}{l}{sl}}%
+    \newrobustcmd*\univrs{\usefont{\encodingdefault}{\tud@cdfont@uv}{m}{sl}}%
+    \newrobustcmd*\univbs{\usefont{\encodingdefault}{\tud@cdfont@uv}{b}{sl}}%
+    \newrobustcmd*\univxs{\usefont{\encodingdefault}{\tud@cdfont@uv}{eb}{sl}}%
   \else%
-    \newrobustcmd*\univln{\tud@font@fallback{Univers Light}{md}{up}}%
-    \newrobustcmd*\univrn{\tud@font@fallback{Univers}{md}{up}}%
-    \newrobustcmd*\univbn{\tud@font@fallback{Univers Bold}{bf}{up}}%
-    \newrobustcmd*\univxn{\tud@font@fallback{Univers Black}{bf}{up}}%
-    \newrobustcmd*\univls{\tud@font@fallback{Univers LightOblique}{md}{sl}}%
-    \newrobustcmd*\univrs{\tud@font@fallback{Univers Oblique}{md}{sl}}%
-    \newrobustcmd*\univbs{\tud@font@fallback{Univers BoldOblique}{bf}{sl}}%
-    \newrobustcmd*\univxs{\tud@font@fallback{Univers BlackOblique}{bf}{sl}}%
+    \newrobustcmd*\univln{\tud@cdfont@fallback{Univers Light}{md}{up}}%
+    \newrobustcmd*\univrn{\tud@cdfont@fallback{Univers}{md}{up}}%
+    \newrobustcmd*\univbn{\tud@cdfont@fallback{Univers Bold}{bf}{up}}%
+    \newrobustcmd*\univxn{\tud@cdfont@fallback{Univers Black}{bf}{up}}%
+    \newrobustcmd*\univls{\tud@cdfont@fallback{Univers LightOblique}{md}{sl}}%
+    \newrobustcmd*\univrs{\tud@cdfont@fallback{Univers Oblique}{md}{sl}}%
+    \newrobustcmd*\univbs{\tud@cdfont@fallback{Univers BoldOblique}{bf}{sl}}%
+    \newrobustcmd*\univxs{\tud@cdfont@fallback{Univers BlackOblique}{bf}{sl}}%
   \fi%
-  \if@tud@dinbold%
-    \newrobustcmd*\tud@dinbn{\usefont{\encodingdefault}{\tud@dinbold}{b}{n}}%
-    \if@tud@dinboldmath%
-      \appto\tud@dinbn{\mathversion{dinbold}}%
+  \if@tud@cdfont@db%
+    \newrobustcmd*\tud@dinbn{\usefont{\encodingdefault}{\tud@cdfont@db}{b}{n}}%
+    \if@tud@cdmath@db%
+      \appto\tud@dinbn{\mathversion{db}}%
     \fi%
     \newrobustcmd*\dinbn{\tud@dinbn}%
   \else%
     \newrobustcmd*\tud@dinbn{\sectfont}%
-    \newrobustcmd*\dinbn{\tud@font@fallback@wrn{DIN-Bold}\tud@dinbn}%
+    \newrobustcmd*\dinbn{\tud@cdfont@wrn{DIN-Bold}\tud@dinbn}%
   \fi%
   \newcommand*\textuln{}%
   \newcommand*\texturn{}%
@@ -1843,11 +1835,11 @@
   \DeclareTextFontCommand\textdbn{\dinbn}%
   \undef\tud@font@init%
 }
-\newcommand*\tud@font@fallback[3]{%
-  \tud@font@fallback@wrn{#1}%
+\newcommand*\tud@cdfont@fallback[3]{%
+  \tud@cdfont@wrn{#1}%
   \sffamily\csuse{#2series}\csuse{#3shape}%
 }
-\newcommand*\tud@font@fallback@wrn[1]{%
+\newcommand*\tud@cdfont@wrn[1]{%
   \ClassWarning{\TUD@Class@Name}%
   {%
     The requested font `#1' is not available, so\MessageBreak%
@@ -1938,12 +1930,12 @@
 }
 \@tempcnta=\z@\relax
 \tud@font@greek@loop\tud@font@greek@declare
-\newcommand*\mv@univers{}
-\newcommand*\mv@universbold{}
-\newcommand*\mv@dinbold{}
+\newcommand*\mv@uv{}
+\newcommand*\mv@uvbold{}
+\newcommand*\mv@db{}
 \newcommand*\tud@font@math@init{%
   \if@tud@x@fontspec@enabled\if@tud@cdmath%
-    \ifboolexpr{bool {@tud@universmath} or bool {@tud@dinboldmath}}{%
+    \ifboolexpr{bool {@tud@cdmath@uv} or bool {@tud@cdmath@db}}{%
       \@ifpackagewith{fontspec}{no-math}{}{%
         \ClassWarningNoLine{\TUD@Class@Name}%
         {%
@@ -1954,57 +1946,57 @@
       }%
     }{}%
   \fi\fi%
-  \if@tud@universmath%
-    \DeclareMathVersion{univers}%
-    \DeclareMathVersion{universbold}%
-    \SetSymbolFont{operators}{univers}{OT1}{\tud@univers}{l}{n}%
-    \SetSymbolFont{operators}{universbold}{OT1}{\tud@univers}{b}{n}%
-    \SetSymbolFont{letters}{univers}{OML}{\tud@univers}{l}{sl}%
-    \SetSymbolFont{letters}{universbold}{OML}{\tud@univers}{b}{sl}%
-    \SetSymbolFont{symbols}{univers}{OMS}{\tud@univers}{l}{n}%
-    \SetSymbolFont{symbols}{universbold}{OMS}{\tud@univers}{b}{n}%
-    \SetSymbolFont{largesymbols}{univers}{OMX}{iwona}{m}{n}%
-    \SetSymbolFont{largesymbols}{universbold}{OMX}{iwona}{b}{n}%
-    \SetMathAlphabet{\mathrm}{univers}{OT1}{\tud@univers}{l}{n}%
-    \SetMathAlphabet{\mathrm}{universbold}{OT1}{\tud@univers}{b}{n}%
-    \SetMathAlphabet{\mathnormal}{univers}{OML}{\tud@univers}{l}{sl}%
-    \SetMathAlphabet{\mathnormal}{universbold}{OML}{\tud@univers}{b}{sl}%
-    \SetMathAlphabet{\mathbf}{univers}{OT1}{\tud@univers}{b}{n}%
-    \SetMathAlphabet{\mathbf}{universbold}{OT1}{\tud@univers}{eb}{n}%
-    \SetMathAlphabet{\mathsf}{univers}{OT1}{\tud@univers}{l}{n}%
-    \SetMathAlphabet{\mathsf}{universbold}{OT1}{\tud@univers}{b}{n}%
-    \SetMathAlphabet{\mathit}{univers}{OT1}{\tud@univers}{l}{sl}%
-    \SetMathAlphabet{\mathit}{universbold}{OT1}{\tud@univers}{b}{sl}%
-    \SetMathAlphabet{\mathtt}{univers}{OT1}{\tud@univers t}{l}{n}%
-    \SetMathAlphabet{\mathtt}{universbold}{OT1}{\tud@univers t}{b}{n}%
-    \SetMathAlphabet{\mathcal}{univers}{OMS}{lmsy}{m}{n}%
-    \SetMathAlphabet{\mathcal}{universbold}{OMS}{lmsy}{b}{n}%
+  \if@tud@cdmath@uv%
+    \DeclareMathVersion{uv}%
+    \DeclareMathVersion{uvbold}%
+    \SetSymbolFont{operators}{uv}{OT1}{\tud@cdfont@uv}{l}{n}%
+    \SetSymbolFont{operators}{uvbold}{OT1}{\tud@cdfont@uv}{b}{n}%
+    \SetSymbolFont{letters}{uv}{OML}{\tud@cdfont@uv}{l}{sl}%
+    \SetSymbolFont{letters}{uvbold}{OML}{\tud@cdfont@uv}{b}{sl}%
+    \SetSymbolFont{symbols}{uv}{OMS}{\tud@cdfont@uv}{l}{n}%
+    \SetSymbolFont{symbols}{uvbold}{OMS}{\tud@cdfont@uv}{b}{n}%
+    \SetSymbolFont{largesymbols}{uv}{OMX}{iwona}{m}{n}%
+    \SetSymbolFont{largesymbols}{uvbold}{OMX}{iwona}{b}{n}%
+    \SetMathAlphabet{\mathrm}{uv}{OT1}{\tud@cdfont@uv}{l}{n}%
+    \SetMathAlphabet{\mathrm}{uvbold}{OT1}{\tud@cdfont@uv}{b}{n}%
+    \SetMathAlphabet{\mathnormal}{uv}{OML}{\tud@cdfont@uv}{l}{sl}%
+    \SetMathAlphabet{\mathnormal}{uvbold}{OML}{\tud@cdfont@uv}{b}{sl}%
+    \SetMathAlphabet{\mathbf}{uv}{OT1}{\tud@cdfont@uv}{b}{n}%
+    \SetMathAlphabet{\mathbf}{uvbold}{OT1}{\tud@cdfont@uv}{eb}{n}%
+    \SetMathAlphabet{\mathsf}{uv}{OT1}{\tud@cdfont@uv}{l}{n}%
+    \SetMathAlphabet{\mathsf}{uvbold}{OT1}{\tud@cdfont@uv}{b}{n}%
+    \SetMathAlphabet{\mathit}{uv}{OT1}{\tud@cdfont@uv}{l}{sl}%
+    \SetMathAlphabet{\mathit}{uvbold}{OT1}{\tud@cdfont@uv}{b}{sl}%
+    \SetMathAlphabet{\mathtt}{uv}{OT1}{\tud@cdfont@uv t}{l}{n}%
+    \SetMathAlphabet{\mathtt}{uvbold}{OT1}{\tud@cdfont@uv t}{b}{n}%
+    \SetMathAlphabet{\mathcal}{uv}{OMS}{lmsy}{m}{n}%
+    \SetMathAlphabet{\mathcal}{uvbold}{OMS}{lmsy}{b}{n}%
     \@ifpackageloaded{amsfonts}{%
-      \DeclareFontFamily{U}{\tud@univers a}{}%
-      \DeclareFontShape{U}{\tud@univers a}{m}{n}{<->cmbras10}{}%
-      \SetSymbolFont{AMSa}{univers}{U}{\tud@univers a}{m}{n}%
-      \SetSymbolFont{AMSa}{universbold}{U}{\tud@univers a}{m}{n}%
-      \DeclareFontFamily{U}{\tud@univers b}{}%
-      \DeclareFontShape{U}{\tud@univers b}{m}{n}{<->cmbrbs10}{}%
-      \SetSymbolFont{AMSb}{univers}{U}{\tud@univers b}{m}{n}%
-      \SetSymbolFont{AMSb}{universbold}{U}{\tud@univers b}{m}{n}%
-      \SetMathAlphabet{\mathfrak}{univers}{U}{euf}{m}{n}%
-      \SetMathAlphabet{\mathfrak}{universbold}{U}{euf}{b}{n}%
+      \DeclareFontFamily{U}{\tud@cdfont@uv a}{}%
+      \DeclareFontShape{U}{\tud@cdfont@uv a}{m}{n}{<->cmbras10}{}%
+      \SetSymbolFont{AMSa}{uv}{U}{\tud@cdfont@uv a}{m}{n}%
+      \SetSymbolFont{AMSa}{uvbold}{U}{\tud@cdfont@uv a}{m}{n}%
+      \DeclareFontFamily{U}{\tud@cdfont@uv b}{}%
+      \DeclareFontShape{U}{\tud@cdfont@uv b}{m}{n}{<->cmbrbs10}{}%
+      \SetSymbolFont{AMSb}{uv}{U}{\tud@cdfont@uv b}{m}{n}%
+      \SetSymbolFont{AMSb}{uvbold}{U}{\tud@cdfont@uv b}{m}{n}%
+      \SetMathAlphabet{\mathfrak}{uv}{U}{euf}{m}{n}%
+      \SetMathAlphabet{\mathfrak}{uvbold}{U}{euf}{b}{n}%
     }{}%
   \fi%
-  \if@tud@dinboldmath%
-    \DeclareMathVersion{dinbold}%
-    \SetSymbolFont{operators}{dinbold}{OT1}{\tud@dinbold}{b}{n}%
-    \SetSymbolFont{letters}{dinbold}{OML}{\tud@dinbold}{b}{sl}%
-    \SetSymbolFont{symbols}{dinbold}{OMS}{\tud@dinbold}{b}{n}%
-    \SetSymbolFont{largesymbols}{dinbold}{OMX}{iwona}{ebc}{n}%
-    \SetMathAlphabet{\mathrm}{dinbold}{OT1}{\tud@dinbold}{b}{n}%
-    \SetMathAlphabet{\mathnormal}{dinbold}{OML}{\tud@dinbold}{b}{sl}%
-    \SetMathAlphabet{\mathbf}{dinbold}{OT1}{\tud@dinbold}{b}{n}%
-    \SetMathAlphabet{\mathsf}{dinbold}{OT1}{\tud@dinbold}{b}{n}%
-    \SetMathAlphabet{\mathit}{dinbold}{OT1}{\tud@dinbold}{b}{sl}%
-    \SetMathAlphabet{\mathtt}{dinbold}{OT1}{\tud@univers t}{b}{n}%
-    \SetMathAlphabet{\mathcal}{dinbold}{OMS}{lmsy}{b}{n}%
+  \if@tud@cdmath@db%
+    \DeclareMathVersion{db}%
+    \SetSymbolFont{operators}{db}{OT1}{\tud@cdfont@db}{b}{n}%
+    \SetSymbolFont{letters}{db}{OML}{\tud@cdfont@db}{b}{sl}%
+    \SetSymbolFont{symbols}{db}{OMS}{\tud@cdfont@db}{b}{n}%
+    \SetSymbolFont{largesymbols}{db}{OMX}{iwona}{ebc}{n}%
+    \SetMathAlphabet{\mathrm}{db}{OT1}{\tud@cdfont@db}{b}{n}%
+    \SetMathAlphabet{\mathnormal}{db}{OML}{\tud@cdfont@db}{b}{sl}%
+    \SetMathAlphabet{\mathbf}{db}{OT1}{\tud@cdfont@db}{b}{n}%
+    \SetMathAlphabet{\mathsf}{db}{OT1}{\tud@cdfont@db}{b}{n}%
+    \SetMathAlphabet{\mathit}{db}{OT1}{\tud@cdfont@db}{b}{sl}%
+    \SetMathAlphabet{\mathtt}{db}{OT1}{\tud@cdfont@uv t}{b}{n}%
+    \SetMathAlphabet{\mathcal}{db}{OMS}{lmsy}{b}{n}%
   \fi%
   \@ifpackageloaded{unicode-math}{%
     \let\tud@font@math@set\relax%
@@ -2032,14 +2024,14 @@
 \BeforePackage{flexisym}{\tud@font@greek@check@slanted}
 \newcommand*\tud@font@greek@init[1]{%
   \ifcsundef{up#1}{%
-    \if@tempswa%
+    \if@tud@slantedgreek%
       \csletcs{up#1}{tud@up#1}%
     \else%
       \csletcs{up#1}{#1}%
     \fi%
   }{}%
   \ifcsundef{var#1}{%
-    \if@tempswa%
+    \if@tud@slantedgreek%
       \csletcs{var#1}{#1}%
     \else%
       \csletcs{var#1}{tud@var#1}%
@@ -2049,23 +2041,23 @@
 \newcommand*\tud@font@math@set{%
   \if@atdocument%
     \if@tud@cdmath%
-      \if@tud@universmath\else%
-        \tud@font@math@missing@wrn{Univers}%
+      \if@tud@cdmath@uv\else%
+        \tud@cdmath@missing{Univers}%
       \fi%
-      \if@tud@dinboldmath\else%
-        \tud@font@math@missing@wrn{DIN-Bold}%
+      \if@tud@cdmath@db\else%
+        \tud@cdmath@missing{DIN-Bold}%
       \fi%
-      \ifboolexpr{bool {@tud@universmath} and bool {@tud@dinboldmath}}{}{%
+      \ifboolexpr{bool {@tud@cdmath@uv} and bool {@tud@cdmath@db}}{}{%
         \bool@set@lock{@tud@cdmath}{false}%
       }%
     \fi%
   \fi%
-  \if@tud@universmath%
+  \if@tud@cdmath@uv%
     \if@tud@cdmath%
       \tud@cmd@store{mv@normal}%
       \tud@cmd@store{mv@bold}%
-      \let\mv@normal\mv@univers%
-      \let\mv@bold\mv@universbold%
+      \let\mv@normal\mv@uv%
+      \let\mv@bold\mv@uvbold%
       \tud@font@greek@loop\tud@font@greek@set%
     \else%
       \tud@cmd@restore{mv@normal}%
@@ -2104,7 +2096,7 @@
     \ifundef{\mdseries@sf}{\edef\mdseries@sf{\mddefault}}{}%
     \ifundef{\mdseries@tt}{\edef\mdseries@tt{\mddefault}}{}%
   \fi%
-  \tud@font@check%
+  \tud@cdfont@check%
   \tud@font@init%
   \if@tud@x@siunitx@enabled%
     \ifcase\tud@cdfont@num\relax% false
@@ -2126,7 +2118,7 @@
   \AtBeginDocument{\tud@font@math@init\let\tud@font@math@init\relax}%
 }
 \newrobustcmd*\ifdin{%
-  \ifx\f@family\tud@dinbold%
+  \ifx\f@family\tud@cdfont@db%
     \expandafter\@firstoftwo%
   \else%
     \expandafter\@secondoftwo%
@@ -3714,8 +3706,8 @@
         }%
       }%
       \setlength\tud@len@areavskip{\z@}%
-      \tud@font@koma@set{pagefoot}{\usekomafont{tudheadings}}%
-      \tud@font@koma@set{pagenumber}{\usekomafont{tudheadings}}%
+      \tud@komafont@set{pagefoot}{\usekomafont{tudheadings}}%
+      \tud@komafont@set{pagenumber}{\usekomafont{tudheadings}}%
     }{%
       \ifstr{\tud@currentgeometry}{stdarea}{}{%
         \tud@loadgeometry{stdarea}%
@@ -3729,8 +3721,8 @@
           }%
         \fi%
       \fi%
-      \tud@font@koma@unset{pagefoot}%
-      \tud@font@koma@unset{pagenumber}%
+      \tud@komafont@unset{pagefoot}%
+      \tud@komafont@unset{pagenumber}%
     }%
     \global\tud@len@areavskip=\tud@len@areavskip%
   }{}%
@@ -3774,7 +3766,7 @@
         \setlength\paperheight{\Gm@layoutheight}%
         \setlength\paperwidth{\Gm@layoutwidth}%
         \let\activateareas\relax%
-        \tud@x@ta@warnings@off%
+        \tud@x@ta@silent%
         \KOMAoptionOf[\def\@tempa]{typearea.\scr@pkgextension}{DIV}%
         \def\@tempb{{0}}%
         \ifx\@tempa\@tempb\relax%
@@ -3790,7 +3782,7 @@
           \fi%
         \fi%
         \recalctypearea%
-        \tud@x@ta@warnings@on%
+        \tud@x@ta@verbose%
         \edef\tud@x@geometry@init{%
           left=\the\dimexpr\oddsidemargin+1in-\ta@bcor\relax,%
           textwidth=\the\textwidth,%
@@ -4287,16 +4279,16 @@
     \DeclareFixedFont{\tud@head@font@bold}{\encodingdefault}%
       {\sfdefault}{\bfdefault}{\updefault}{\tud@head@fontsize}%
     \ifcase\tud@head@font@num\relax\else% true/heavy
-      \if@tud@univers%
+      \if@tud@cdfont@uv%
         \ifcase\tud@head@font@num\relax\or% true
           \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
-            {\tud@univers}{l}{n}{\tud@head@fontsize}%
+            {\tud@cdfont@uv}{l}{n}{\tud@head@fontsize}%
         \or% heavy
           \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
-            {\tud@univers}{m}{n}{\tud@head@fontsize}%
+            {\tud@cdfont@uv}{m}{n}{\tud@head@fontsize}%
         \fi%
         \DeclareFixedFont{\tud@head@font@bold}{\encodingdefault}%
-          {\tud@univers}{b}{n}{\tud@head@fontsize}%
+          {\tud@cdfont@uv}{b}{n}{\tud@head@fontsize}%
       \fi%
     \fi%
     \global\@tud@head@font@setfalse%
@@ -4924,17 +4916,17 @@
   \tud@layout@process%
   \tud@x@scr@headings@set[%
     \ifcase\tud@layout@part@num\relax\else% !false
-      \tud@font@koma@reset{part}%
-      \tud@font@koma@reset{partnumber}%
+      \tud@komafont@reset{part}%
+      \tud@komafont@reset{partnumber}%
     \fi%
     \ifcase\tud@layout@chapter@num\relax\else% !false
-      \tud@font@koma@reset{chapter}%
-      \tud@font@koma@reset{chapterprefix}%
+      \tud@komafont@reset{chapter}%
+      \tud@komafont@reset{chapterprefix}%
     \fi%
     \ifcase\tud@layout@section@num\relax\else% !false
-      \tud@font@koma@reset{section}%
-      \tud@font@koma@reset{subsection}%
-      \tud@font@koma@reset{subsubsection}%
+      \tud@komafont@reset{section}%
+      \tud@komafont@reset{subsection}%
+      \tud@komafont@reset{subsubsection}%
     \fi%
   ]%
 }
@@ -4961,18 +4953,18 @@
   \fi%
   \ifcase\tud@layout@title@num\relax% false
     \tud@cmd@restore{titlepagestyle}%
-    \tud@font@koma@unset{titlehead}%
-    \tud@font@koma@unset{title}%
-    \tud@font@koma@unset{subtitle}%
-    \tud@font@koma@unset{subject}%
-    \tud@font@koma@unset{author}%
-    \tud@font@koma@unset{date}%
-    \tud@font@koma@unset{publishers}%
+    \tud@komafont@unset{titlehead}%
+    \tud@komafont@unset{title}%
+    \tud@komafont@unset{subtitle}%
+    \tud@komafont@unset{subject}%
+    \tud@komafont@unset{author}%
+    \tud@komafont@unset{date}%
+    \tud@komafont@unset{publishers}%
   \else% !false
     \tud@cmd@store{titlepagestyle}%
     \renewcommand*\titlepagestyle{plain.tudheadings}%
-    \tud@font@koma@set{titlehead}{\usekomafont{titlepage}}%
-    \tud@font@koma@set{title}{%
+    \tud@komafont@set{titlehead}{\usekomafont{titlepage}}%
+    \tud@komafont@set{title}{%
       \raggedtitle%
       \usekomafont{disposition}%
       \tud@sec@fontface%
@@ -4980,7 +4972,7 @@
       \tud@color{\tud@title@fontcolor}%
     }%
     % TODO opt headings=small --> Größe der restlichen Elemente auf Titel/Cover?
-    \tud@font@koma@set{subtitle}{%
+    \tud@komafont@set{subtitle}{%
       \raggedtitle%
       \ifstr{\mddefault}{l}{%
         \tud@sec@fontface[\fontseries{m}]%
@@ -4990,14 +4982,14 @@
       \usesizeofkomafont{section}%
       \tud@color{\tud@title@fontcolor}%
     }%
-    \tud@font@koma@set{subject}{%
+    \tud@komafont@set{subject}{%
       \sffamily%
       \bfseries%
       \tud@color{\tud@title@fontcolor}%
     }%
-    \tud@font@koma@set{author}{\usekomafont{subject}}%
-    \tud@font@koma@set{date}{\usekomafont{titlepage}}%
-    \tud@font@koma@set{publishers}{\usekomafont{author}}%
+    \tud@komafont@set{author}{\usekomafont{subject}}%
+    \tud@komafont@set{date}{\usekomafont{titlepage}}%
+    \tud@komafont@set{publishers}{\usekomafont{author}}%
   \fi%
 %  \ifcase\tud@layout@part@num\relax% false
 %    \tud@cmd@restore{partheadstartvskip}%
@@ -5012,7 +5004,7 @@
 %      \tud@cmd@restore{@spart}%
 %    }%
 %    \tud@sectioning@reset[addpart]{part}%
-%    \tud@font@koma@unset{partnumber}%
+%    \tud@komafont@unset{partnumber}%
 %    \tud@cmd@restore{raggedpart}%
 %  \else% !false
 %    \tud@cmd@store{partheadstartvskip}%
@@ -5036,13 +5028,13 @@
 %    }%
 %    \if@tud@parttitle%
 %      \tud@sectioning@set{part}{\usekomafont{parttitle}}%
-%      \tud@font@koma@set{partnumber}{\usekomafont{parttitle}}%
+%      \tud@komafont@set{partnumber}{\usekomafont{parttitle}}%
 %    \else%
 %      \tud@sectioning@set{part}{%
 %        \tud@sec@fontface%
 %        \tud@color{\tud@part@fontcolor}%
 %      }%
-%      \tud@font@koma@set{partnumber}{%
+%      \tud@komafont@set{partnumber}{%
 %        \tud@sec@fontface%
 %        \tud@color{\tud@part@fontcolor}%
 %      }%
@@ -5061,8 +5053,8 @@
 %      \tud@cmd@restore{@@makechapterhead}%
 %    }%
 %    \tud@sectioning@reset[addchap]{chapter}%
-    \tud@font@koma@unset{chapter}%
-    \tud@font@koma@unset{chapterprefix}%
+    \tud@komafont@unset{chapter}%
+    \tud@komafont@unset{chapterprefix}%
 %    \tud@cmd@restore{raggedchapter}%
   \else% !false
 %    \tud@cmd@store{chapterheadstartvskip}%
@@ -5077,12 +5069,12 @@
 %      \tud@cmd@store{@@makechapterhead}%
 %      \let\@@makechapterhead\tud@@makechapterhead%
 %    }%
-    \tud@font@koma@set{chapter}{%
+    \tud@komafont@set{chapter}{%
       \tud@sec@fontface%
       \tud@sec@fontsize%
       \tud@color{\tud@chapter@fontcolor}%
     }%
-    \tud@font@koma@set{chapterprefix}{\usesizeofkomafont{partnumber}}%
+    \tud@komafont@set{chapterprefix}{\usesizeofkomafont{partnumber}}%
 %    \tud@cmd@store{raggedchapter}%
 %    \renewcommand*\raggedchapter{\tud@raggedright}%
   \fi%
@@ -5126,7 +5118,7 @@
 %  \fi%
 }
 \newcommand*\tud@layout@specialpage@set[1]{%
-  \tud@font@koma@set{footnote}{%
+  \tud@komafont@set{footnote}{%
     \edef\@tempa{%
       \noexpand\tud@color{%
         \expandafter\noexpand\csname tud@#1@fontcolor\endcsname%
@@ -5137,7 +5129,7 @@
   \let\footnoterule\relax%
 }
 \newcommand*\tud@layout@specialpage@unset{%
-  \tud@font@koma@unset{footnote}%
+  \tud@komafont@unset{footnote}%
   \tud@cmd@restore{footnoterule}%
 }
 \newcommand*\tud@partheadstartvskip{%
@@ -5519,7 +5511,7 @@
 \newcommand*\tud@sectioning@reset[2][]{%
   \tud@cmd@restore{#2}%
   \ifblank{#1}{}{\tud@cmd@restore{#1}}%
-  \tud@font@koma@unset{#2}%
+  \tud@komafont@unset{#2}%
 }
 \robustify{\footnote}
 \newcommand*\tud@sectioning@uppercase[1]{%

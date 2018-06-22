@@ -665,9 +665,9 @@
 % \end{option}^^A twocolumn
 % \end{option}^^A twoside
 %
-% \begin{macro}{\tud@x@typearea@warnings@off}
+% \begin{macro}{\tud@x@typearea@silent}
 % \changes{v2.05}{2016/07/26}{neu}^^A
-% \begin{macro}{\tud@x@typearea@warnings@on}
+% \begin{macro}{\tud@x@typearea@verbose}
 % \changes{v2.05}{2016/07/26}{neu}^^A
 % Sollte das Paket \pkg{silence} vorhanden sein wird es geladen, um die vom 
 % Paket \pkg{typearea} erzeugten Warnungen beim Laden einer \TUDScript-Klasse 
@@ -677,22 +677,22 @@
 % die entsprechenden Warnungen werden etwas später und in Abhängigkeit der 
 % verwendeten Schriftart erzeugt.
 %    \begin{macrocode}
-\newcommand*\tud@x@ta@warnings@off{}
-\newcommand*\tud@x@ta@warnings@on{}
+\newcommand*\tud@x@ta@silent{}
+\newcommand*\tud@x@ta@verbose{}
 \IfFileExists{silence.sty}{%
   \RequirePackage{silence}[2012/07/02]%
   \WarningFilter[typearea]{typearea}{DIV for}%
   \WarningFilter[typearea]{typearea}{Bad type area settings!}%
   \WarningFilter[typearea]{typearea}{Maybe no optimal type area settings!}%
   \WarningFilter[typearea]{typearea}{Very low DIV value!}%
-  \BeforePackage{typearea}{\ActivateWarningFilters[typearea]}%
-  \AfterPackage{typearea}{\DeactivateWarningFilters[typearea]}%
-  \renewcommand*\tud@x@ta@warnings@off{\ActivateWarningFilters[typearea]}
-  \renewcommand*\tud@x@ta@warnings@on{\DeactivateWarningFilters[typearea]}
+  \renewcommand*\tud@x@ta@silent{\ActivateWarningFilters[typearea]}
+  \renewcommand*\tud@x@ta@verbose{\DeactivateWarningFilters[typearea]}
+  \BeforePackage{typearea}{\tud@x@ta@silent}%
+  \AfterPackage{typearea}{\tud@x@ta@verbose}%
 }{}
 %    \end{macrocode}
-% \end{macro}^^A \tud@x@ta@warnings@on
-% \end{macro}^^A \tud@x@ta@warnings@off
+% \end{macro}^^A \tud@x@ta@verbose
+% \end{macro}^^A \tud@x@ta@silent
 %
 % \iffalse
 %</class&option>
@@ -1860,8 +1860,8 @@
 % Im Seitenfuß wird für die Seitenzahl und ggf. die Kolumnentitel die passende 
 % Schrift verwendet.
 %    \begin{macrocode}
-      \tud@font@koma@set{pagefoot}{\usekomafont{tudheadings}}%
-      \tud@font@koma@set{pagenumber}{\usekomafont{tudheadings}}%
+      \tud@komafont@set{pagefoot}{\usekomafont{tudheadings}}%
+      \tud@komafont@set{pagenumber}{\usekomafont{tudheadings}}%
 %    \end{macrocode}
 % Dies ist der Fall, wenn kein \pgs{tudheadings}-Seitenstil geladen werden soll.
 % Zusätzlich zum Satzspeigel wird außerdem der Seitenstil \pgs{empty} 
@@ -1889,8 +1889,8 @@
 %    \end{macrocode}
 % Die Schriften für Seitenzahl und Kolumnentitel werden zurückgesetzt.
 %    \begin{macrocode}
-      \tud@font@koma@unset{pagefoot}%
-      \tud@font@koma@unset{pagenumber}%
+      \tud@komafont@unset{pagefoot}%
+      \tud@komafont@unset{pagenumber}%
     }%
 %    \end{macrocode}
 % Die Länge \cs{tud@len@areavskip} wird vorsichtshalber global gesetzt.
@@ -1984,7 +1984,7 @@
 % Der Kram ist dafür da, etwaige Warnungen von \pkg{typearea} aufgrund der 
 % fehlenden Wahl für die Satzspiegelaufteilung zu unterdrücken.
 %    \begin{macrocode}
-        \tud@x@ta@warnings@off%
+        \tud@x@ta@silent%
         \KOMAoptionOf[\def\@tempa]{typearea.\scr@pkgextension}{DIV}%
         \def\@tempb{{0}}%
         \ifx\@tempa\@tempb\relax%
@@ -2000,7 +2000,7 @@
           \fi%
         \fi%
         \recalctypearea%
-        \tud@x@ta@warnings@on%
+        \tud@x@ta@verbose%
         \edef\tud@x@geometry@init{%
           left=\the\dimexpr\oddsidemargin+1in-\ta@bcor\relax,%
           textwidth=\the\textwidth,%

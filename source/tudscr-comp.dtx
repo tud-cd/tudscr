@@ -1,4 +1,4 @@
-% \CheckSum{1501}
+% \CheckSum{1493}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -56,11 +56,11 @@
 %<package&identify&comp&base>\ProvidesPackage{tudscrcomp}[%
 %<package&identify&comp&book>\ProvidesPackage{tudscrcomp-book}[%
 %<package&identify&comp&poster>\ProvidesPackage{tudscrcomp-poster}[%
-%<package&identify&fontsfix>\ProvidesPackage{fix-tudscrfonts}[%
+%<package&identify&fixfonts>\ProvidesPackage{fix-tudscrfonts}[%
 %<*driver|package&identify>
 %!TUD@Version
 %<package&comp>  package
-%<package&fontsfix>  package for font fixes
+%<package&fixfonts>  package for font fixes
   (compatibility for old tud(scr) classes)%
 ]
 %</driver|package&identify>
@@ -1704,7 +1704,7 @@
 % die Posterklassen an. 
 %
 % \iffalse
-%<*package&fontsfix>
+%<*package&fixfonts>
 %<*option>
 % \fi
 %
@@ -1719,7 +1719,7 @@
 \DeclareOption*{\PassOptionsToPackage{\CurrentOption}{tudscrfonts}}
 \ProcessOptions\relax
 \AtEndPreamble{%
-  \tud@fontsfix@maybe@err%
+  \tud@fixfonts@class@check%
   \RequirePackage{tudscrfonts}[\TUD@Version]%
 }
 %    \end{macrocode}
@@ -1731,14 +1731,14 @@
 % eigentlichen Dokumentklasse sichern muss, kann dieses Paket ausschließlich 
 % vor \cs{documentclass} mit \cs{RequirePackage} geladen werden.
 %
-% \begin{macro}{\tud@fontsfix@maybe@err}
+% \begin{macro}{\tud@fixfonts@class@check}
 % \changes{v2.05}{2016/01/02}{neu}^^A
 % Dieser Befehl wird nach dem Laden einer unterstützten Klasse zu \cs{relax} 
 % gesetzt. Sollte das Paket jedoch erst nach einer Dokumentklasse geladen 
 % werden, so wird ein Fehler ausgegeben.
 %    \begin{macrocode}
 \ifx\usepackage\RequirePackage
-  \newcommand*\tud@fontsfix@maybe@err{%
+  \newcommand*\tud@fixfonts@class@check{%
     \PackageError{fix-tudscrfonts}{Package too late}{%
       You must load `fix-tudscrfonts' with\MessageBreak%
       `\string\RequirePackage' before any document class.%
@@ -1749,7 +1749,7 @@
 % ebenfalls ein Fehler ausgegeben.
 %    \begin{macrocode}
 \else
-  \newcommand*\tud@fontsfix@maybe@err{%
+  \newcommand*\tud@fixfonts@class@check{%
     \PackageError{fix-tudscrfonts}{Unsupported class found}{%
       You have to use `fix-tudscrfonts' only\MessageBreak%
       with supported classes. These are: `tudbook',\MessageBreak%
@@ -1761,7 +1761,7 @@
   }%
 \fi
 %    \end{macrocode}
-% \end{macro}^^A \tud@fontsfix@maybe@err
+% \end{macro}^^A \tud@fixfonts@class@check
 %
 % \iffalse
 %</option>
@@ -1773,7 +1773,7 @@
 % Für alle unterstützten Klassen sind vor und nach dem Laden einige Anpassungen 
 % an den bereitgestellten Schriftbefehlen notwendig.
 %
-% \begin{macro}{\tud@fontsfix@AdaptClass}
+% \begin{macro}{\tud@fixfonts@class@adapt}
 % \changes{v2.05}{2016/01/02}{neu}^^A
 % \begin{macro}{\dinBold}
 % \changes{v2.05}{2015/07/13}{neu}^^A
@@ -1801,9 +1801,9 @@
 % dies in erster Linie die Mathematikschriften sowie die in den Klassen
 % definierten, fixen Schriften.
 %    \begin{macrocode}
-\newcommand*\tud@fontsfix@AdaptClass[2]{%
+\newcommand*\tud@fixfonts@class@adapt[2]{%
   \BeforeClass{#1}{%
-    \let\tud@fontsfix@maybe@err\relax%
+    \let\tud@fixfonts@class@check\relax%
     \tud@cmd@store{DeclareFixedFont}%
     \renewcommand*\DeclareFixedFont[6]{}%
     \tud@cmd@store{rmdefault}%
@@ -1864,7 +1864,7 @@
         \newcommand*\univLightHead{}%
         \newcommand*\univBoldHead{}%
         \providecommand*\tud@head@fntsz{9}%
-        \if@tud@univers%
+        \if@tud@cdfont@uv%
           \if@tud@x@fontspec@enabled%
             \DeclareFixedFont{\univLightVII}{\encodingdefault}%
               {UniversLight}{m}{n}{7}%
@@ -1896,33 +1896,33 @@
               {UniversBold}{m}{n}{\tud@head@fntsz}%
           \else%
             \DeclareFixedFont{\univLightVII}{\encodingdefault}%
-              {\tud@univers}{l}{n}{7}%
+              {\tud@cdfont@uv}{l}{n}{7}%
             \DeclareFixedFont{\univLightObliqueVII}{\encodingdefault}%
-              {\tud@univers}{l}{sl}{7}%
+              {\tud@cdfont@uv}{l}{sl}{7}%
             \DeclareFixedFont{\univBoldVII}{\encodingdefault}%
-              {\tud@univers}{b}{n}{7}%
+              {\tud@cdfont@uv}{b}{n}{7}%
             \DeclareFixedFont{\univLightIX}{\encodingdefault}%
-              {\tud@univers}{l}{n}{9}%
+              {\tud@cdfont@uv}{l}{n}{9}%
             \DeclareFixedFont{\univLightObliqueIX}{\encodingdefault}%
-              {\tud@univers}{l}{sl}{9}%
+              {\tud@cdfont@uv}{l}{sl}{9}%
             \DeclareFixedFont{\univBoldIX}{\encodingdefault}%
-              {\tud@univers}{b}{n}{9}%
+              {\tud@cdfont@uv}{b}{n}{9}%
             \DeclareFixedFont{\univLightXI}{\encodingdefault}%
-              {\tud@univers}{l}{n}{11}%
+              {\tud@cdfont@uv}{l}{n}{11}%
             \DeclareFixedFont{\univLightObliqueXI}{\encodingdefault}%
-              {\tud@univers}{l}{sl}{11}%
+              {\tud@cdfont@uv}{l}{sl}{11}%
             \DeclareFixedFont{\univBoldXI}{\encodingdefault}%
-              {\tud@univers}{b}{n}{11}%
+              {\tud@cdfont@uv}{b}{n}{11}%
             \DeclareFixedFont{\univLightXV}{\encodingdefault}%
-              {\tud@univers}{l}{n}{15}%
+              {\tud@cdfont@uv}{l}{n}{15}%
             \DeclareFixedFont{\univLightObliqueXV}{\encodingdefault}%
-              {\tud@univers}{l}{sl}{15}%
+              {\tud@cdfont@uv}{l}{sl}{15}%
             \DeclareFixedFont{\univBoldXV}{\encodingdefault}%
-              {\tud@univers}{b}{n}{15}%
+              {\tud@cdfont@uv}{b}{n}{15}%
             \DeclareFixedFont{\univLightHead}{\encodingdefault}%
-              {\tud@univers}{l}{n}{\tud@head@fntsz}%
+              {\tud@cdfont@uv}{l}{n}{\tud@head@fntsz}%
             \DeclareFixedFont{\univBoldHead}{\encodingdefault}%
-              {\tud@univers}{b}{n}{\tud@head@fntsz}%
+              {\tud@cdfont@uv}{b}{n}{\tud@head@fntsz}%
           \fi%
         \else%
           \DeclareFixedFont{\univLightVII}{\encodingdefault}%
@@ -1976,17 +1976,17 @@
 % \end{macro}^^A \univLightVII
 % \end{macro}^^A \dinfamily
 % \end{macro}^^A \dinBold
-% \end{macro}^^A \tud@fontsfix@AdaptClass
+% \end{macro}^^A \tud@fixfonts@class@adapt
 %
 % Nach der Definition der notwendigen Befehle erfolgt nun die Umsetzung für 
 % alle unterstützten Klassen.
 %    \begin{macrocode}
-\tud@fontsfix@AdaptClass{tudletter}{}
-\tud@fontsfix@AdaptClass{tudfax}{}
-\tud@fontsfix@AdaptClass{tudform}{}
-\tud@fontsfix@AdaptClass{tudhaus}{}
-\tud@fontsfix@AdaptClass{tudposter}{}
-\tud@fontsfix@AdaptClass{tudbeamer}{}
+\tud@fixfonts@class@adapt{tudletter}{}
+\tud@fixfonts@class@adapt{tudfax}{}
+\tud@fixfonts@class@adapt{tudform}{}
+\tud@fixfonts@class@adapt{tudhaus}{}
+\tud@fixfonts@class@adapt{tudposter}{}
+\tud@fixfonts@class@adapt{tudbeamer}{}
 %    \end{macrocode}
 %
 % Wird das Paket \pkg{fix-tudscrfonts} mit den alten TUD-Klassen \cls{tudbook}, 
@@ -2006,7 +2006,7 @@
 % Die Überschriften sollen abhängig von der Option \opt{cdfont} und nicht immer 
 % zwingend in \DIN gesetzt werden.
 %    \begin{macrocode}
-\tud@fontsfix@AdaptClass{tudbook}{%
+\tud@fixfonts@class@adapt{tudbook}{%
   \patchcmd{\@makechapterhead}{\dinBold\Huge\bfseries}{%
     \tud@sec@fontface[\bfseries]%
     \if@color\color{HKS41-100}\fi%
@@ -2063,7 +2063,7 @@
 % \changes{v2.04}{2015/04/24}{\cls{tudmathposter} wird unterstützt}^^A
 % Es werden einige Einstellungen für die Überschriften angepasst.
 %    \begin{macrocode}
-\tud@fontsfix@AdaptClass{tudmathposter}{%
+\tud@fixfonts@class@adapt{tudmathposter}{%
   \def\raggedtitle{\tud@raggedright}%
   \renewcommand*\raggedpart{\tud@raggedright}%
   \renewcommand*\raggedsection{\tud@raggedright}%
@@ -2126,7 +2126,7 @@
 % \end{macro}^^A \maketitle
 % \end{KOMAfont}^^A title
 %
-% \begin{macro}{\tud@fontsfix@tudfonts}
+% \begin{macro}{\tud@fixfonts@tudfonts}
 % \changes{v2.05n}{2018/02/14}{%
 %   neu, nur einmaliges Ausführen des Fixes für \pkg{tudfonts}%
 % }^^A
@@ -2136,17 +2136,17 @@
 % Paket \pkg{tudfonts}. Wenn \pkg{tudscrfonts} zum Einsatz kommen soll, ist das 
 % unerwünscht, weshalb das Laden hiermit unterbunden wird.
 %    \begin{macrocode}
-\newcommand*\tud@fontsfix@tudfonts{%
+\newcommand*\tud@fixfonts@tudfonts{%
   \RequirePackage{amsmath}%
   \RequirePackage{amsfonts}%
   \let\DeclareTudMathSizes\@gobblefour%
   \newif\if@tudfonts@nodin%
-  \let\tud@fontsfix@tudfonts\relax%
+  \let\tud@fixfonts@tudfonts\relax%
 }
-\PreventPackageFromLoading[\tud@fontsfix@tudfonts]{tudfonts}
+\PreventPackageFromLoading[\tud@fixfonts@tudfonts]{tudfonts}
 %    \end{macrocode}
 % \end{macro}^^A \if@tudfonts@nodin
-% \end{macro}^^A \tud@fontsfix@tudfonts
+% \end{macro}^^A \tud@fixfonts@tudfonts
 %
 % \subsection{Patches für die \TUDScript-Klassen~v1.0}
 %
@@ -2180,7 +2180,7 @@
 %
 % \iffalse
 %</body>
-%</package&fontsfix>
+%</package&fixfonts>
 % \fi
 %
 % \Finale
