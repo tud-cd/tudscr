@@ -1,4 +1,4 @@
-% \CheckSum{1439}
+% \CheckSum{1356}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-layout.dtx}[%
-  2017/03/29 v2.05l TUD-Script (layout)%
+  2018/06/26 v2.06 TUD-Script (layout)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman,xindy]{tudscrdoc}
@@ -473,21 +473,6 @@
 %
 % Die nun folgenden Optionen und Befehle werden nur für die beiden Klassen 
 % \cls{tudscrbook} und \cls{tudscrreprt} definiert.
-% \begin{option}{parttitle}
-% \begin{macro}{\if@tud@parttitle}
-% Der Schalter dient zur Steuerung, ob der Titel des Dokumentes wie im Handbuch
-% des \CDs auf den Teileseiten stehen soll.
-%    \begin{macrocode}
-\newif\if@tud@parttitle
-\TUD@key{parttitle}[true]{%
-  \TUD@set@ifkey{parttitle}{@tud@parttitle}{#1}%
-  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \TUD@SpecialOptionAtDocument{tud@layout@process}%
-  \fi%
-}
-%    \end{macrocode}
-% \end{macro}^^A \if@tud@parttitle
-% \end{option}^^A parttitle
 % \begin{option}{chapterpage}
 % \begin{macro}{\if@tud@chapterpage}
 % \begin{macro}{\if@tud@chapterpage@locked}
@@ -896,19 +881,6 @@
 \providecommand*\raggedtitle{\tud@raggedright}
 %    \end{macrocode}
 % \end{macro}^^A \raggedtitle
-% \begin{KOMAfont}{parttitle}
-% \changes{v2.02}{2014/08/24}{neu}^^A
-% Es wird das Schriftelement für die Option \opt{parttitle} erstellt.
-%    \begin{macrocode}
-%<*book|report>
-\newkomafont{parttitle}{%
-  \tud@sec@fontface%
-  \tud@color{\tud@part@fontcolor}%
-  \usesizeofkomafont{section}%
-}
-%</book|report>
-%    \end{macrocode}
-% \end{KOMAfont}^^A parttitle
 %
 % \subsection{Umsetzung des Layouts}
 %
@@ -1056,25 +1028,15 @@
 %    \end{macrocode}
 % Es wird die Schriftfarbe, "~größe und "~art angepasst, je nachdem ob der
 % Titel des Dokumentes auf den Teileseiten auftauchen soll oder eben nicht.
-% Für die Artikel-Klasse gibt es die \opt{parttitle}-Option nicht.
 %    \begin{macrocode}
-%<*book|report>
-    \if@tud@parttitle%
-      \tud@sectioning@set{part}{\usekomafont{parttitle}}%
-      \tud@komafont@set{partnumber}{\usekomafont{parttitle}}%
-    \else%
-%</book|report>
-      \tud@sectioning@set{part}{%
-        \tud@sec@fontface%
-        \tud@color{\tud@part@fontcolor}%
-      }%
-      \tud@komafont@set{partnumber}{%
-        \tud@sec@fontface%
-        \tud@color{\tud@part@fontcolor}%
-      }%
-%<*book|report>
-    \fi%
-%</book|report>
+    \tud@sectioning@set{part}{%
+      \tud@sec@fontface%
+      \tud@color{\tud@part@fontcolor}%
+    }%
+    \tud@komafont@set{partnumber}{%
+      \tud@sec@fontface%
+      \tud@color{\tud@part@fontcolor}%
+    }%
     \tud@cmd@store{raggedpart}%
     \renewcommand*\raggedpart{\tud@raggedright}%
   \fi%
@@ -1232,15 +1194,11 @@
 % \end{macro}^^A \tud@layout@specialpage@unset
 % \end{macro}^^A \tud@layout@specialpage@set
 % \begin{macro}{\tud@partheadstartvskip}
-% \changes{v2.02}{2014/11/05}{Nutzung der Option \opt{parttitle} verbessert}^^A
-% \changes{v2.03}{2015/01/21}{Bei Verwendung der Option \opt{parttitle}:
-%   Abstand ist identisch zu Untertitel auf Titelseite}^^A
 % \begin{macro}{\partheadstartvskip}
 % Dieses Makro ersetzt den Standardbefehl \cs{partheadstartvskip} für die
 % CD-Teilseiten. Damit lassen sich insbesondere die Farbanpassungen für alle
-% Klassen sowie die Option \opt{parttitle} für \cls{tudscrreprt}- und
-% \cls{tudscrbook}-Klasse einfach realisieren und gleichzeitig das
-% Zurückschalten auf das Standardverhalten gewährleisten.
+% Klassen einfach realisieren und gleichzeitig das Zurückschalten auf das
+% Standardverhalten gewährleisten.
 %
 % Für die \cls{tudscrartcl}-Klasse wird der vertikale Standardabstand
 % beibehalten und lediglich die Farbanpassung hinzugefügt.
@@ -1281,35 +1239,7 @@
     \TUD@deprecated@lengthcs{pageheadingsvskip}%
     \vspace*{\tud@dim@pageheadingsvskip}%
     \setparsizes{\z@}{\z@}{\z@\@plus1fil}\par@updaterelative%
-%    \end{macrocode}
-% Sollte die \opt{parttitle}-Option aktiviert sein, so wird der Titel des
-% Dokumentes statt des Teiletitels mit \cs{tud@parttitle} auf die Seite
-% gesetzt.
-%    \begin{macrocode}
-    \if@tud@parttitle%
-      \begingroup%
-        \tud@sec@fontface%
-        \tud@sec@fontsize%
-        \tud@color{\tud@part@fontcolor}%
-        \ifx\@@title\@empty%
-          \ClassWarning{\TUD@Class@Name}{%
-            You activated the option `parttitle' but\MessageBreak%
-            no title was given%
-          }%
-          \tud@makeuppercase{\strut}%
-        \else%
-          \tud@makeuppercase{\@@title}%
-        \fi%
-%    \end{macrocode}
-% Der Titel des Teils wird auf der gleichen Höhe wie der Untertitel auf der 
-% Titelseite ausgegeben.
-%    \begin{macrocode}
-        \par\nobreak%
-        {\usekomafont{titlepage}{\vskip 2ex\@plus1ex\@minus1ex}}%
-      \endgroup%
-    \else%
-      \usekomafont{partnumber}{\tud@headmidvskip@reverse}%
-    \fi%
+    \usekomafont{partnumber}{\tud@headmidvskip@reverse}%
   \endgroup%
 }
 %</book|report>
@@ -1399,11 +1329,6 @@
 % Die Farb- und Schrifteinstellungen sind nur für reine Kapitelseiten notwendig.
 %    \begin{macrocode}
   \if@tud@chapterpage%
-    \ifcase\tud@cdfont@num\relax\or% true
-      \TUDoptions{cdfont=true}%
-    \or% heavy
-      \TUDoptions{cdfont=heavy}%
-    \fi%
     \addtokomafont{disposition}{\tud@color{\tud@chapter@fontcolor}}%
     \addtokomafont{dictum}{\tud@color{\tud@chapter@fontcolor}}%
     \tud@color{\tud@chapter@fontcolor}%
@@ -1511,16 +1436,10 @@
         \usekomafont{#1prefix}{%
           \nobreak\tud@makeuppercase{\@nameuse{#1format}}%
         }%
-        \if@tud@parttitle%
-          \enskip%
-        \else%
-          \tud@headmidvskip@normal%
-        \fi%
+        \tud@headmidvskip@normal%
       }{%
-        \if@tud@parttitle\else%
-          \usekomafont{#1prefix}{\vphantom{\partname}}%
-          \tud@headmidvskip@normal%
-        \fi%
+        \usekomafont{#1prefix}{\vphantom{\partname}}%
+        \tud@headmidvskip@normal%
       }%
     }{}{\tud@patch@wrn{scr@@startpart}}%
   \else%
@@ -1533,16 +1452,10 @@
     }{%
       \ifnumbered{#1}{%
         \usekomafont{#1prefix}{\tud@makeuppercase{\@nameuse{#1format}}}%
-        \if@tud@parttitle%
-          \enskip%
-        \else%
-          \tud@headmidvskip@normal%
-        \fi%
+        \tud@headmidvskip@normal%
       }{%
-        \if@tud@parttitle\else%
-          \usekomafont{#1prefix}{\vphantom{\partname}}%
-          \tud@headmidvskip@normal%
-        \fi%
+        \usekomafont{#1prefix}{\vphantom{\partname}}%
+        \tud@headmidvskip@normal%
       }%
     }{}{\tud@patch@wrn{scr@@startpart}}%
   \fi%
@@ -1560,10 +1473,8 @@
     \sectfont\nobreak
   }{%
     \normalfont\sectfont\nobreak%
-    \if@tud@parttitle\else%
-      \size@partnumber{\vphantom{\partname}}%
-      \tud@headmidvskip@normal\nobreak%
-    \fi%
+    \size@partnumber{\vphantom{\partname}}%
+    \tud@headmidvskip@normal\nobreak%
   }{}{\tud@patch@wrn{scr@@startspart}}%
 %</book|report>
 %    \end{macrocode}
@@ -1588,16 +1499,10 @@
   }{%
     \ifnumbered{part}{%
       \size@partnumber{\tud@makeuppercase{\partformat}}%
-      \if@tud@parttitle%
-        \enskip%
-      \else%
-        \tud@headmidvskip@normal%
-      \fi%
+      \tud@headmidvskip@normal%
     }{%
-      \if@tud@parttitle\else%
-        \size@partnumber{\vphantom{\partname}}%
-        \tud@headmidvskip@normal%
-      \fi%
+      \size@partnumber{\vphantom{\partname}}%
+      \tud@headmidvskip@normal%
     }%
   }{}{\tud@patch@wrn{@part}}%
   \newcommand*\tud@@spart{}%
@@ -1607,10 +1512,8 @@
     \sectfont\nobreak\size@part
   }{%
     \normalfont\sectfont\nobreak%
-    \if@tud@parttitle\else%
-      \size@partnumber{\vphantom{\partname}}%
-      \tud@headmidvskip@normal\nobreak%
-    \fi%
+    \size@partnumber{\vphantom{\partname}}%
+    \tud@headmidvskip@normal\nobreak%
     \size@part%
   }{}{\tud@patch@wrn{@spart}}%
 %</book|report>
