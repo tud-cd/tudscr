@@ -1,4 +1,4 @@
-% \CheckSum{4317}
+% \CheckSum{4361}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-manual.dtx}[%
-  2018/06/29 v2.06 TUD-Script\space%
+  2018/07/03 v2.06 TUD-Script\space%
 %</driver>
 %<package&identify>\ProvidesPackage{tudscrtutorial}[%
 %<*driver|package&identify>
@@ -101,6 +101,7 @@
 % Menge an Überschneidungen gibt, basieren diese auf der gleichen Quelldatei. 
 % Einiges davon wird auch für die Quelltextdokumentationsklasse \cls{tudscrdoc} 
 % verwendet.
+% \ToDo{\cs{write18} durch \cs{ShellEscape} ersetzen}[v2.06]
 %
 % \StopEventually{\PrintIndex\PrintChanges\PrintToDos}
 %
@@ -157,7 +158,7 @@
 % \ToDo{Kann raus, sobald \pkg{geometry} nicht mehr notwendig}[v2.07]
 %    \begin{macrocode}
 %<*!doc>
-\@ifpackagelater{geometry}{2010/09/13}{%
+\@ifpackagelater{geometry}{2018/04/17}{%
   \ClassWarning{\TUD@Class@Name}{%
     Package `geometry' was updated so some patches\MessageBreak%
     are maybe outdated%
@@ -2183,6 +2184,7 @@
   \let\IeC\@firstofone%
   \def\"##1{##1e}%
   \def\ss{ss}%
+  \def\dots{...}%
   \let\NoCaseChange\@firstofone%
 }
 %    \end{macrocode}
@@ -2441,6 +2443,40 @@
 % im Fließtext wird zum einen das in \cs{Markup@Format} individuell definierte
 % Markup umgesetzt und zum anderen wird dabei gleich automatisch ein Eintrag
 % für das Element im Index erzeugt.
+
+% \begin{macro}{\ifdisposition}
+% \begin{macro}{\if@tud@disposition}
+% Das Markup soll lediglich im Fließtext erfolgen, in Überschriften soll 
+% lediglich das Hauptargument ausgegeben werden. Hierfür wird ein Schalter und 
+% der auswertende Befehl definiert. Der Schalter wird in die notwendigen 
+% Befehle gepatcht.
+%    \begin{macrocode}
+\newif\if@tud@disposition
+\newcommand*\ifdisposition{%
+  \if@tud@disposition%
+    \expandafter\@firstoftwo%
+  \else%
+    \expandafter\@secondoftwo%
+  \fi%
+}
+\pretocmd{\partlineswithprefixformat}{%
+  \@tud@dispositiontrue%
+}{}{\tud@patch@wrn{partlineswithprefixformat}}
+\pretocmd{\chapterlinesformat}{%
+  \@tud@dispositiontrue%
+}{}{\tud@patch@wrn{chapterlinesformat}}
+\pretocmd{\chapterlineswithprefixformat}{%
+  \@tud@dispositiontrue%
+}{}{\tud@patch@wrn{chapterlineswithprefixformat}}
+\pretocmd{\sectionlinesformat}{%
+  \@tud@dispositiontrue%
+}{}{\tud@patch@wrn{sectionlinesformat}}
+\pretocmd{\sectioncatchphraseformat}{%
+  \@tud@dispositiontrue%
+}{}{\tud@patch@wrn{sectioncatchphraseformat}}
+%    \end{macrocode}
+% \end{macro}^^A \if@tud@disposition
+% \end{macro}^^A \tud@if@disposition
 %
 % In der Klasse \cls{tudscrmanual} werden die Markup-Befehle zusätzlich auch 
 % als Argument der Umgebung \env{Declaration} genutzt. Für diese Verwendung
@@ -2786,12 +2822,13 @@
 % Ganz zum Schluss erfolgt die Ausgabe als Hyperlink mit optional erweitertem 
 % Querverweis nicht, wenn gerade eine Überschrift gesetzt wird.
 %    \begin{macrocode}
-    \ifdin{\@tempc}{\@tempa\@tempb}%
+    \ifdisposition{\@tempc}{\@tempa\@tempb}%
 %    \end{macrocode}
 % Zum Schluss wird die Formatierung mit \cs{Markup@ClearFormat} zurückgesetzt.
 %    \begin{macrocode}
   \endgroup%
   \Markup@ClearFormat%
+  \xspace%
 }
 %    \end{macrocode}
 % \end{macro}^^A \Process@@MarkupInline
@@ -2878,13 +2915,6 @@
 % \changes{v2.05}{2015/11/05}{neu}^^A
 % \begin{macro}{\Markup@Suffix}
 % \changes{v2.05}{2015/11/05}{neu}^^A
-% \begin{macro}{\tud@x@textcase@uclcnotmath}
-% \begin{macro}{\tud@nonchangecase}
-% \changes{v2.05}{2015/11/20}{neu}^^A
-%    \begin{macrocode}
-\newcommand*\Markup@Format{}
-\newcommand*\Markup@Suffix{}
-%    \end{macrocode}
 % Der Befehl \cs{Markup@SetFormat} setzt das gewünschte Format für die jeweilge
 % Ausgabe. Dieses wird im ersten Argument angegeben. Das ordinäre optionale 
 % Argument kann genutzt werden, wenn bei der Deklaration noch eine genauere 
@@ -2895,22 +2925,48 @@
 % wird insbesondere von \cs{Environment} genutzt, um bei der Deklaration eine
 % Tabelle zu erzeugen.
 %    \begin{macrocode}
+\newcommand*\Markup@Format{}
+\newcommand*\Markup@Suffix{}
 \NewDocumentCommand\Markup@SetFormat{mod()}{%
 %    \end{macrocode}
-% Außerdem ist noch eine weitere Besonderheit zu beachten. Sollte gerade \DIN
-% verwendet werden~-- der Befehl wird innerhalb einer Überschrift genutzt~--
-% wird lediglich das Hauptargument unformatiert jedoch als Argument von 
-% \cs{MakeTextUppercase} ausgegeben, um das Setzen von Majuskeln zu erzwingen.
-% Der Hintergrund wird bei der Erweiterung von \cs{tud@x@textcase@uclcnotmath}
-% erläutert.
+% Außerdem ist noch eine weitere Besonderheit zu beachten. Sollte gerade eine
+% Überschrift gesetzt werden, wird lediglich das Hauptargument unformatiert 
+% ausgegeben.
 %    \begin{macrocode}
-  \def\Markup@Format{\ifdin{\MakeTextUppercase}{#1}}%
+  \def\Markup@Format{\ifdisposition{\MakeTextUppercase}{#1}}%
   \IfValueT{#2}{\def\Markup@Suffix{\suffix{#2}}}%
 %<*class>
   \IfValueT{#3}{\renewcommand*\Markup@Declare[1]{#3\Markup@Suffix}}%
 %</class>
 }
 %    \end{macrocode}
+% Nach der formatierten Ausgabe wird \cs{Markup@ClearFormat} aufgerufen, um die 
+% aktuell definierte Formatierung zurückzusetzen und bei einem neuen Aufruf 
+% eines der Markup-Befehle mit \cs{Markup@CheckFormat} auf die Verwendung von 
+% \cs{Markup@SetFormat} prüfen zu können.
+%    \begin{macrocode}
+\newcommand*\Markup@ClearFormat{%
+  \let\Markup@Format\relax%
+  \let\Markup@Declare\Markup@@Declare%
+  \let\Markup@Suffix\relax%
+}
+\Markup@ClearFormat
+\newcommand*\Markup@CheckFormat{%
+  \ifx\Markup@Format\relax%
+    \ClassError{tudscrmanual}{\string\Markup@SetFormat\space unused}{%
+      It seems you have forgotten to use \string\Markup@SetFormat.%
+    }%
+  \fi%
+}
+%    \end{macrocode}
+% \end{macro}^^A \Markup@Suffix
+% \end{macro}^^A \Markup@Format
+% \end{macro}^^A \Markup@ClearFormat
+% \end{macro}^^A \Markup@SetFormat
+% \end{macro}^^A \Markup@CheckFormat
+% \begin{macro}{\tud@x@textcase@uclcnotmath}
+% \begin{macro}{\tud@nonchangecase}
+% \changes{v2.05}{2015/11/20}{neu}^^A
 % Das durch die \TUDScript-Hauptklassen in Ergänzung zum Paket \pkg{textcase}
 % erstellte Makro \cs{tud@x@textcase@uclcnotmath} ermöglicht die Definition von
 % Makros, welche von \cs{MakeTextUppercase} nicht beachtet werden sollen.
@@ -2921,6 +2977,7 @@
 % nicht gewünscht wäre. Deshalb werden \emph{alle} Markup-Befehle der Liste zum
 % Ignorieren hinzugefügt. Damit aber bei der eigentlichen Ausgabe alles in
 % Majuskeln erscheint, wird für diesen Fall \cs{Markup@Format} genutzt.
+% \ToDo{kann eigentlich raus, bzw. nur, wenn notwendig}[v2.06]
 %    \begin{macrocode}
 \robustify\NoCaseChange
 \NewDocumentCommand\tud@nonchangecase{m}{%
@@ -2953,32 +3010,8 @@
 %</class>
 }{}{\tud@patch@wrn{tud@x@textcase@uclcnotmath}}
 %    \end{macrocode}
-% Nach der formatierten Ausgabe wird \cs{Markup@ClearFormat} aufgerufen, um die 
-% aktuell definierte Formatierung zurückzusetzen und bei einem neuen Aufruf 
-% eines der Markup-Befehle mit \cs{Markup@CheckFormat} auf die Verwendung von 
-% \cs{Markup@SetFormat} prüfen zu können.
-%    \begin{macrocode}
-\newcommand*\Markup@ClearFormat{%
-  \let\Markup@Format\relax%
-  \let\Markup@Declare\Markup@@Declare%
-  \let\Markup@Suffix\relax%
-}
-\Markup@ClearFormat
-\newcommand*\Markup@CheckFormat{%
-  \ifx\Markup@Format\relax%
-    \ClassError{tudscrmanual}{\string\Markup@SetFormat\space unused}{%
-      It seems you have forgotten to use \string\Markup@SetFormat.%
-    }%
-  \fi%
-}
-%    \end{macrocode}
 % \end{macro}^^A \tud@nonchangecase
 % \end{macro}^^A \tud@x@textcase@uclcnotmath
-% \end{macro}^^A \Markup@Suffix
-% \end{macro}^^A \Markup@Format
-% \end{macro}^^A \Markup@ClearFormat
-% \end{macro}^^A \Markup@SetFormat
-% \end{macro}^^A \Markup@CheckFormat
 %
 % \subsection{Index}
 %
@@ -2986,6 +3019,7 @@
 % notwendig ist. Hierfür wird das Paket \pkg{imakeidx} in Verbindung mit 
 % \app{texindy} verwendet. Diese können sowohl mit dem Paket als auch mit der 
 % Klasse erzeugt werden. 
+% \ToDo{was soll das mit \cs{shellescape}?}[v2.06]
 % \ToDo{Patcherei für imakeidx raus, sobald dies geht}[v2.06]
 %    \begin{macrocode}
 \PassOptionsToPackage{xindy,splitindex}{imakeidx}
@@ -5846,8 +5880,15 @@
 % Sprachabhängiges Setzen von Anführungszeichen. Das Laden des Paketes darf 
 % erst nach \pkg{inputenc} erfolgen.
 %    \begin{macrocode}
-%<body|class&doc>\AfterPackage*{inputenc}{\RequirePackage{csquotes}[2011/10/22]}
-%<body>\TUD@UnwindPackage{inputenc}{\RequirePackage{csquotes}[2011/10/22]}
+%<*body|class&doc>
+\ifpdftex{%
+  \AfterPackage*{inputenc}{\RequirePackage{csquotes}[2011/10/22]}
+  \TUD@UnwindPackage{inputenc}{\RequirePackage{csquotes}[2011/10/22]}
+}{%
+  \AfterPackage*{fontspec}{\RequirePackage{csquotes}[2011/10/22]}
+  \TUD@UnwindPackage{fontspec}{\RequirePackage{csquotes}[2011/10/22]}
+}
+%</body|class&doc>
 %    \end{macrocode}
 %
 % \iffalse
@@ -6125,15 +6166,19 @@
 % \end{macro}^^A \TUD
 % \end{macro}^^A \CDs
 % \end{macro}^^A \CD
+% \begin{macro}{\OpenSans}
+% \changes{v2.06}{2018/07/02}{neu}^^A
 % \begin{macro}{\Univers}
 % \begin{macro}{\DIN}
 % Für die Nennung der Schriften spezielle Markos bereitgestellt.
 %    \begin{macrocode}
+\newcommand*\OpenSans{\texorpdfstring{\textosbn{Open~Sans}}{Open Sans}\xspace}
 \newcommand*\Univers{\texorpdfstring{\textubn{Univers}}{Univers}\xspace}
 \newcommand*\DIN{\texorpdfstring{\textdbn{DIN~BOLD}}{DIN BOLD}\xspace}
 %    \end{macrocode}
 % \end{macro}^^A \DIN
 % \end{macro}^^A \Univers
+% \end{macro}^^A \OpenSans
 %
 % \iffalse
 %</body|class&doc>
