@@ -17,8 +17,7 @@ echo   Erstellen der Open Sans Schriften zur Verwendung mit TUD-Script
 echo.
 cd /d %~dp0
 set familyname=fdd
-set destinationpath=%~dp0created
-set localfolder=tudscros
+set destinationpath=%~dp0%familyname%
 set externalpath=%~dp0external
 set temppath=%~dp0%familyname%temp
 if exist %temppath% rmdir /s /q %temppath%> nul
@@ -33,7 +32,7 @@ set missing=false
 call :checkfile    "Open_Sans.zip"
 call :checkfile    "grkfinst.zip"
 call :checkpackage "fontinst.sty" "fontinst"
-REM call :checkpackage "mdsymbol.sty" "mdsymbol"
+call :checkpackage "mdsymbol.sty" "mdsymbol"
 call :checkscript  "tftopl"       "fontware"
 call :checkscript  "pltotf"       "fontware"
 call :checkscript  "vptovf"       "fontware"
@@ -82,8 +81,8 @@ dir /b *.pl> files.txt
 for /f "delims=. " %%i in (files.txt) do pltotf %%i.pl %%i.tfm
 dir /b *.vpl> files.txt
 for /f "delims=. " %%i in (files.txt) do vptovf %%i.vpl %%i.vf %%i.tfm
-REM del *.pl
-REM del *.vpl
+del *.pl
+del *.vpl
 (
   echo \input finstmsc.sty
   echo \resetstr{PSfontsuffix}{.pfb}
@@ -99,22 +98,20 @@ echo   Konvertierung abgeschlossen.
 echo  =====================================================================
 echo.
 if exist %destinationpath% rmdir /s /q %destinationpath%> nul
-mkdir "%destinationpath%\tex\latex\%localfolder%\fonts"
-mkdir "%destinationpath%\fonts\tfm\%localfolder%"
-mkdir "%destinationpath%\fonts\afm\%localfolder%"
-mkdir "%destinationpath%\fonts\vf\%localfolder%"
-mkdir "%destinationpath%\fonts\type1\%localfolder%"
-mkdir "%destinationpath%\fonts\enc\dvips\%localfolder%"
-mkdir "%destinationpath%\fonts\map\dvips\%localfolder%"
-move /y *.pfb "%destinationpath%\fonts\type1\%localfolder%"
-move /y *.afm "%destinationpath%\fonts\afm\%localfolder%"
-move /y *.pfb "%destinationpath%\fonts\type1\%localfolder%"
-move /y *.afm "%destinationpath%\fonts\afm\%localfolder%"
-move /y *.tfm "%destinationpath%\fonts\tfm\%localfolder%"
-move /y *.vf  "%destinationpath%\fonts\vf\%localfolder%"
-move /y *.enc "%destinationpath%\fonts\enc\dvips\%localfolder%"
-move /y *.map "%destinationpath%\fonts\map\dvips\%localfolder%"
-move /y *.fd  "%destinationpath%\tex\latex\%localfolder%\fonts"
+mkdir "%destinationpath%\type1"
+mkdir "%destinationpath%\afm"
+mkdir "%destinationpath%\tfm"
+mkdir "%destinationpath%\vf"
+mkdir "%destinationpath%\enc\dvips"
+mkdir "%destinationpath%\map\dvips"
+mkdir "%destinationpath%\fd"
+move /y *.pfb "%destinationpath%\type1\"
+move /y *.afm "%destinationpath%\afm\"
+move /y *.tfm "%destinationpath%\tfm\"
+move /y *.vf  "%destinationpath%\vf\"
+move /y *.enc "%destinationpath%\enc\dvips\"
+move /y *.map "%destinationpath%\map\dvips\"
+move /y *.fd  "%destinationpath%\fd"
 :end
   echo.
   echo  =====================================================================

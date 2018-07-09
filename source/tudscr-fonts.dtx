@@ -148,7 +148,7 @@
 % Wird das Paket \pkg{tudscrfonts} nach einer der Klassen verwendet, welche die 
 % veralteten Schriftfamilien für \Univers und \DIN definieren, so wird eine 
 % Warnung mit dem Hinweis auf das Paket \pkg{fix-tudscrfonts} ausgegeben.
-% \ToDo{an neue Schriften anpassen}[v2.06]
+% \ToDo{Paket \pkg{fix-tudscrfonts} an neue Schriften anpassen}[v2.06]
 %    \begin{macrocode}
 \@tempswafalse%
 \@for\@tempa:={%
@@ -449,7 +449,7 @@
   }%
   \undef\tud@cdfont@check%
 }
-\newcommand*\tud@cdfont@missing[1]{%
+\renewcommand*\tud@cdfont@missing[1]{%
   \begingroup%
     \def\@tempa{%
       `#1' font not found for `\encodingdefault' encoding.\MessageBreak%
@@ -484,22 +484,11 @@
       \fi%
     \fi%
     \appto\@tempa{.\MessageBreak A fallback layout is used}%
-%<*class>
-    \ClassWarning{\TUD@Class@Name}{\@tempa}%
-%</class>
-%<*package>
-    \PackageWarning{tudscrfonts}{\@tempa}%
-%</package>
+    \PackageWarning{tudscroldfonts}{\@tempa}%
   \endgroup%
 }
 \newcommand*\tud@cdmath@missing[1]{%
-%<*class>
-  \ClassWarning{\TUD@Class@Name}%
-%</class>
-%<*package>
-  \PackageWarning{tudscrfonts}%
-%</package>
-  {%
+  \PackageWarning{tudscroldfonts}{%
     `#1' fonts for math typesetting not found.\MessageBreak%
     Please use one of the installation scripts listed\MessageBreak%
     in the TUD-Script manual%
@@ -902,29 +891,6 @@
 \AfterPackage*{mweights}{\@tud@x@mweights@enabledtrue}
 \newcommand*\tud@font@set{%
 %    \end{macrocode}
-% Wurde die Option \opt{cdfont} nicht in der Präambel genutzt, wird im Fall,
-% dass die Schriften des \CDs nicht installiert sind, eine Warnung erzeugt.
-% \ToDo{Warnung als Makro, ebenfalls in \cs{tud@font@check nutzen}}[v2.06]
-%    \begin{macrocode}
-%<*oldfonts>
-  \if@atdocument%
-    \if@tud@cdfont@active%
-      \if@tud@cdfont@uv\else%
-        \tud@cdfont@missing{Univers}%
-      \fi%
-      \if@tud@cdfont@db\else%
-        \tud@cdfont@missing{DIN-Bold}%
-      \fi%
-%    \end{macrocode}
-% Sind die Schriften des \CDs nicht vorhanden, wird die Option zurückgesetzt.
-%    \begin{macrocode}
-      \ifboolexpr{bool {@tud@cdfont@uv} and bool {@tud@cdfont@db}}{}{%
-        \bool@std@lock{@tud@cdmath@active}{false}%
-      }%
-    \fi%
-  \fi%
-%</oldfonts>
-%    \end{macrocode}
 % Ist die Verwendung der Schriften des \CDs gewünscht, werden die Schnitte der 
 % Standardschriften vorher vorher gesichert, um diese später vollständig 
 % wiederherstellen zu können.
@@ -1098,19 +1064,42 @@
 %<*oldfonts>
 \renewcommand*\tud@cdfont@set{%
 %    \end{macrocode}
+% Wurde die Option \opt{cdfont} nicht in der Präambel genutzt, wird im Fall,
+% dass die Schriften des \CDs nicht installiert sind, eine Warnung erzeugt.
+% \ToDo{Warnung als Makro, ebenfalls in \cs{tud@font@check nutzen}}[v2.06]
+%    \begin{macrocode}
+  \if@atdocument%
+    \if@tud@cdfont@uv\else%
+      \tud@cdfont@missing{Univers}%
+    \fi%
+    \if@tud@cdfont@db\else%
+      \tud@cdfont@missing{DIN-Bold}%
+    \fi%
+%    \end{macrocode}
+% Sind die Schriften des \CDs nicht vorhanden, wird die Option zurückgesetzt.
+%    \begin{macrocode}
+    \ifboolexpr{bool {@tud@cdfont@uv} and bool {@tud@cdfont@db}}{}{%
+      \bool@std@lock{@tud@cdmath@active}{false}%
+    }%
+  \fi%
+%    \end{macrocode}
 % Das Aktivieren der Schriften erfolgt entweder mit dem Paket \pkg{fontspec}
 % oder\dots
 %    \begin{macrocode}
   \if@tud@cdfont@uv%
     \if@tud@x@fontspec@enabled%
       \setsansfont{\tud@cdfont@uv}%
-      \setmonofont{\tud@cdfont@uv t}%
+      \if@tud@cdfont@tt%
+        \setmonofont{\tud@cdfont@uv t}%
+      \fi%
 %    \end{macrocode}
 % \dots nach dem NFSS.
 %    \begin{macrocode}
     \else%
       \renewcommand*\sfdefault{\tud@cdfont@uv}%
-      \renewcommand*\ttdefault{\tud@cdfont@uv t}%
+      \if@tud@cdfont@tt%
+        \renewcommand*\ttdefault{\tud@cdfont@uv t}%
+      \fi%
     \fi%
     \tud@cdfont@@set%
     \let\mddefault\tud@cdfont@md%
@@ -1463,7 +1452,7 @@
 %    \begin{macrocode}
 %<*oldfonts>
 \renewcommand*\tud@cdfont@init{%
-  \if@cdfont@uv%
+  \if@tud@cdfont@uv%
     \if@tud@x@fontspec@enabled%
       \tud@x@fontspec@init{\tud@cdfont@uv}{%
         UprightFont={Univers},%
@@ -1510,12 +1499,12 @@
   \if@tud@cdfont@db%
     \if@tud@x@fontspec@enabled%
       \tud@x@fontspec@init{\tud@cdfont@db}{%
-        UprightFont={DIN-Bold},
+        UprightFont={DIN-Bold},%
         FontFace={l}{n}{DIN-Bold},%
         FontFace={m}{n}{DIN-Bold},%
         FontFace={b}{n}{DIN-Bold},%
         FontFace={bx}{n}{DIN-Bold},%
-        FontFace={eb}{nault}{DIN-Bold},%
+        FontFace={eb}{n}{DIN-Bold},%
         FontFace={l}{sl}{Font=DIN-Bold,FakeSlant=0.15},%
         FontFace={m}{sl}{Font=DIN-Bold,FakeSlant=0.15},%
         FontFace={b}{sl}{Font=DIN-Bold,FakeSlant=0.15},%
@@ -2252,7 +2241,7 @@
 \newcommand*\mv@tud@dm{}
 \renewcommand*\tud@cdmath@init{%
   \if@tud@cdmath@uv%
-    \tud@cdmath@declare{\tud@cdfont@uv}%
+    \tud@cdmath@declare{\tud@cdfont@uv}{\tud@cdfont@uv t}%
     \SetSymbolFont{largesymbols}{tud@nm}{OMX}{iwona}{m}{n}%
     \SetSymbolFont{largesymbols}{tud@bm}{OMX}{iwona}{b}{n}%
     \SetMathAlphabet{\mathcal}{tud@nm}{OMS}{lmsy}{m}{n}%
@@ -2270,8 +2259,6 @@
       \DeclareFontShape{U}{\tud@cdfont@uv b}{m}{n}{<->cmbrbs10}{}%
       \SetSymbolFont{AMSb}{tud@nm}{U}{\tud@cdfont@uv b}{m}{n}%
       \SetSymbolFont{AMSb}{tud@bm}{U}{\tud@cdfont@uv b}{m}{n}%
-      \SetMathAlphabet{\mathfrak}{tud@nm}{U}{euf}{m}{n}%
-      \SetMathAlphabet{\mathfrak}{tud@bm}{U}{euf}{b}{n}%
     }{}%
   \fi%
 %    \end{macrocode}
@@ -2290,13 +2277,15 @@
     \SetMathAlphabet{\mathbf}{tud@dm}{OT1}{\tud@cdfont@db}{b}{n}%
     \SetMathAlphabet{\mathsf}{tud@dm}{OT1}{\tud@cdfont@db}{b}{n}%
     \SetMathAlphabet{\mathit}{tud@dm}{OT1}{\tud@cdfont@db}{b}{sl}%
-    \SetMathAlphabet{\mathtt}{tud@dm}{OT1}{\tud@cdfont@uv t}{b}{n}%
+    \if@tud@cdfont@tt%
+      \SetMathAlphabet{\mathtt}{tud@dm}{OT1}{\tud@cdfont@uv t}{b}{n}%
+    \fi%
     \SetMathAlphabet{\mathcal}{tud@dm}{OMS}{lmsy}{b}{n}%
   \fi%
-  %    \end{macrocode}
-  % Daran anschließend werden die \DIN-Schriften in einer Box verwendet, um das
-  % Laden der Schriftdefinitionen am Dokumentbeginn zu forcieren.
-  %    \begin{macrocode}
+%    \end{macrocode}
+% Daran anschließend werden die \DIN-Schriften in einer Box verwendet, um das
+% Laden der Schriftdefinitionen am Dokumentbeginn zu forcieren.
+%    \begin{macrocode}
   \AtBeginDocument{\sbox\z@{\tud@db$ $}}%
 }
 %</oldfonts>
