@@ -31,8 +31,9 @@ echo.
 set missing=false
 call :checkfile    "Open_Sans.zip"
 call :checkfile    "grkfinst.zip"
-call :checkpackage "fontinst.sty" "fontinst"
+REM call :checkfile    "MdSymbol.zip"
 call :checkpackage "mdsymbol.sty" "mdsymbol"
+call :checkpackage "fontinst.sty" "fontinst"
 call :checkscript  "tftopl"       "fontware"
 call :checkscript  "pltotf"       "fontware"
 call :checkscript  "vptovf"       "fontware"
