@@ -6505,7 +6505,7 @@
 \AtEndOfClass%
 {%
   \tud@if@v@lower{2.04}{\TUDoptions{relspacing=false}}{}%
-  \tud@if@v@lower{2.06}{\TUDoptions{cdoldfont=true}}{}%
+  \tud@if@v@lower{2.06}{\RequirePackage{tudscroldfonts}[\TUD@Version]}{}%
 }
 %%% From File: tudscr-misc.dtx
 \newcommand*\tud@atdocument@hook{}
