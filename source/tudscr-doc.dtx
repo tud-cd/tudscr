@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-doc.dtx}[%
-  2018/07/03 v2.06 TUD-Script\space%
+  2018/07/10 v2.06 TUD-Script\space%
   (source code documentation based on scrartcl/scrdoc)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
@@ -101,7 +101,7 @@
 % temporär gesichert.
 %    \begin{macrocode}
 \newcommand*\scr@maketitle{}%
-\PassOptionsToClass{toc=left}{scrartcl}%
+\PassOptionsToClass{toc=left,DIV=calc,fontsize=9pt}{scrartcl}%
 \AfterClass{scrartcl}{\let\scr@maketitle\@maketitle}%
 %    \end{macrocode}
 % Der folgende Quelltext ist 1:1 aus \cls{scrdoc} kopiert.
@@ -178,8 +178,8 @@
 %
 % \begin{macro}{\DisableCrossrefsForced}
 % \changes{v2.05i}{2017/03/02}{neu}^^A
-% Für das sichere Deaktivieren von Makroeinträgen im Index nach der Verwendung 
-% von \cs{EnableCrossrefs}. Sollte in einer Gruppe genutzt werden!
+% Deaktivieren von Makroeinträgen im Index nach der Verwendung von
+% \cs{EnableCrossrefs}. Sollte in einer Gruppe genutzt werden!
 %    \begin{macrocode}
 \newcommand*\DisableCrossrefsForced{}
 \let\DisableCrossrefsForced\DisableCrossrefs
@@ -628,24 +628,24 @@
 % vermeiden.
 %    \begin{macrocode}
 \def\@doxcreatemacrolikeprintname#1#2{%
-  \@ifundefined{Print#1Name}{%
+  \ifcsundef{Print#1Name}{%
     \expandafter\def\csname Print#1Name\endcsname##1{%
       \MacroFont\string##1\index@type{#2}\strut\ %
     }%
   }{}%
-  \@ifundefined{PrintDescribe#1}{%
+  \ifcsundef{PrintDescribe#1}{%
     \expandafter\def\csname PrintDescribe#1\endcsname##1{%
       \MacroFont\string##1\index@type{#2}\strut\ %
     }%
   }{}%
 }
 \def\@doxcreateprintname#1#2{%
-  \@ifundefined{Print#1Name}{%
+  \ifcsundef{Print#1Name}{%
     \expandafter\def\csname Print#1Name\endcsname##1{%
       \MacroFont##1\index@type{#2}\strut\ %
     }%
   }{}%
-  \@ifundefined{PrintDescribe#1}{%
+  \ifcsundef{PrintDescribe#1}{%
     \expandafter\def\csname PrintDescribe#1\endcsname##1{%
       \MacroFont##1\index@type{#2}\strut\ %
     }%
@@ -755,9 +755,9 @@
 % \changes{v2.05g}{2016/11/02}{neu}^^A
 % Bei der Ausführung einer dieser beiden Befehle bei der Definition von einem 
 % Makro oder einer Umgebung werden diese für evtl. nachfolgende Parameter als 
-% Elterneinträge definiert. Hierfür werden sowohl für den Index als auch die 
-% Änderungsliste die Einträge zur Sortierung in \cs{parameter@parent@indexname} 
-% und für die Formatierung in \cs{parameter@parent@indexformat} gespeichert.
+% Elterneinträge definiert. Hierfür werden die Einträge zur Sortierung für den
+% Index sowie die Änderungsliste in \cs{parameter@parent@indexname} und für die
+% Formatierung in \cs{parameter@parent@indexformat} gespeichert.
 %    \begin{macrocode}
 \apptocmd{\@SaveMacroIndexName}{%
   \edef\parameter@parent@indexname{\expandafter\@gobble#1}%
@@ -1429,7 +1429,7 @@
 % Da das Paket \pkg{tudscrfonts} das Festlegen der Schriften selbst auf das 
 % Ende der Präambel verzögert, muss sichergestellt werden, dass die Berechnung 
 % des Satzspiegels erst nach der Schriftauswahl erfolgt. Deshalb wird der 
-% Inhalt von \cs{calculatearea} in \cs{saved@calculatearea} gescihert und 
+% Inhalt von \cs{calculatearea} in \cs{saved@calculatearea} gesichert und 
 % anschließend unschädlich gemacht. Danach wird die Satzspiegelberechnung an 
 % das Makro \cs{tud@font@set} angehangen.
 %    \begin{macrocode}
@@ -1437,7 +1437,7 @@
   \IfFileExists{mweights.sty}{%
     \RequirePackage{mweights}[2013/07/21]%
   }{%
-    \ClassWarning{\TUD@Class@Name}{Package `mweights' was no found}%
+    \ClassWarning{\TUD@Class@Name}{Package `mweights' was not found}%
   }%
   \CheckCommand*\MacroFont{%
     \fontencoding\encodingdefault%

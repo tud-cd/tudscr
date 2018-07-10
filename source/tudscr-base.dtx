@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-base.dtx}[%
-  2018/06/29 v2.06 TUD-Script\space%
+  2018/07/10 v2.06 TUD-Script\space%
 %</driver>
 %<package&base>\ProvidesPackage{tudscrbase}[%
 %<*driver|package&base>
@@ -231,7 +231,8 @@
 % Ausdruck interpretiert werden kann. Ist der String als \enquote{wahr} 
 % interpretierbar, wird das zweite Argument ausgeführt. Kann der String als 
 % \enquote{falsch} angesehen werden, dementsprechen das dritte. Ist der String 
-% kein logischer Wert, kommt das letzte Argument zum Tragen. Die Syntax lautet: 
+% kein logischer Wert, kommt das letzte Argument zum Tragen. Die Syntax lautet:
+% 
 % \cs{ifstrbool}\marg{Argument}\marg{Wahr}\marg{Falsch}\marg{Andernfalls}
 %    \begin{macrocode}
 \newcommand*\ifstrbool[4]{%
@@ -609,7 +610,7 @@
 % geschrieben wird, wenn nicht über eine entsprechende Option ein explizites
 % Verhalten mit \cs{cs@set@lock}\marg{Name}\marg{Definition} zugewiesen wurde.
 % Dies ist äquivalent zu \cs{TUD@std@ifkey@lock} und \cs{TUD@set@ifkey@lock}
-% bzw. \cs{TUD@std@numkey@lock} und \cs{TUD@set@numkey@lock}
+% beziehungsweise \cs{TUD@std@numkey@lock} und \cs{TUD@set@numkey@lock}
 %    \begin{macrocode}
 \newcommand*\cs@lock[2]{%
   \expandafter\newcommand\expandafter*\csname#1\endcsname{#2}%
@@ -698,8 +699,8 @@
 % Durch das Makro \cs{tud@cmd@restore}\marg{Befehlsname} wird das mit
 % \cs{tud@cmd@store} erstellte Hilfsmakro zusätzlich noch  gelöscht. Der
 % ursprüngliche Befehl kann als solcher mit \cs{tud@cmd@use}\marg{Befehlsname}
-% weiterhin genutzt werden. Ein zuvor bereits gesicherter Befehl kann mit dem
-% Makro \cs{tud@cmd@update}\marg{Befehlsname} auf die momentane Definition 
+% weiterhin genutzt werden. Ein zuvor bereits gesicherter Befehl kann mit 
+% \cs{tud@cmd@update}\marg{Befehlsname} auf die momentane Definition 
 % aktualisiert werden.
 %    \begin{macrocode}
 \newcommand*\tud@cmd@store[1]{%
@@ -1145,9 +1146,7 @@
 %    \begin{macrocode}
 %<*package&base>
 \newcommand*\TUD@KOMAoptions[1]{}
-\ifdef{\KOMAClassName}{%
-  \let\TUD@KOMAoptions\KOMAoptions
-}{%
+\ifundef{\KOMAClassName}{%
   \renewcommand*\TUD@KOMAoptions[1]{%
     \PackageWarning{tudscrbase}{%
       You should load package `scrextend' right after the\MessageBreak%
@@ -1155,6 +1154,8 @@
     }%
   }%
   \AfterPackage*{scrextend}{\let\TUD@KOMAoptions\KOMAoptions}
+}{%
+  \let\TUD@KOMAoptions\KOMAoptions
 }
 %</package&base>
 %    \end{macrocode}
