@@ -1,4 +1,4 @@
-% \CheckSum{1310}
+% \CheckSum{1357}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-fonts.dtx}[%
-  2018/07/10 v2.06 TUD-Script\space%
+  2018/07/11 v2.06 TUD-Script\space%
 %</driver>
 %<package&identify>\ProvidesPackage{tudscrfonts}[%
 %<*driver|package&identify>
@@ -237,25 +237,33 @@
 % Dokumente mit den Schriften \Univers und \DIN nutzen zu können, werden die 
 % entsprechenden Befehle ebenfalls vorgehalten.
 %
-% \begin{macro}{\tud@cdfont@os}
+% \begin{macro}{\if@tud@cdfont@opensans}
 % \changes{v2.06}{2018/06/28}{neu}^^A
-% \begin{macro}{\if@tud@cdfont@os}
+% \begin{macro}{\tud@cdfont@fam}
 % \changes{v2.06}{2018/06/28}{neu}^^A
-% \begin{macro}{\tud@cdfont@tt}
+% \begin{macro}{\tud@cdfont@fam@lf}
 % \changes{v2.06}{2018/06/28}{neu}^^A
-% \begin{macro}{\if@tud@cdfont@tt}
+% \begin{macro}{\tud@cdfont@fam@osf}
+% \changes{v2.06}{2018/06/28}{neu}^^A
+% \begin{macro}{\if@tud@cdfont@roboto}
+% \changes{v2.06}{2018/06/28}{neu}^^A
+% \begin{macro}{\tud@cdfont@fam@tt}
 % \changes{v2.06}{2018/06/28}{neu}^^A
 % Zu Beginn werden Schalter und Hilfsmakros definiert.
 %    \begin{macrocode}
-\newcommand*\tud@cdfont@os{fdd}
-\newif\if@tud@cdfont@os
-\newcommand*\tud@cdfont@tt{fddt}
-\newif\if@tud@cdfont@tt
+\newif\if@tud@cdfont@opensans
+\newcommand*\tud@cdfont@fam{fdd}
+\newcommand*\tud@cdfont@fam@lf{fdd}
+\newcommand*\tud@cdfont@fam@osf{fddj}
+\newif\if@tud@cdfont@roboto
+\newcommand*\tud@cdfont@fam@tt{fddt}
 %    \end{macrocode}
-% \end{macro}^^A \if@tud@cdfont@tt
-% \end{macro}^^A \tud@cdfont@tt
-% \end{macro}^^A \if@tud@cdfont@os
-% \end{macro}^^A \tud@cdfont@os
+% \end{macro}^^A \tud@cdfont@fam@tt
+% \end{macro}^^A \if@tud@cdfont@roboto
+% \end{macro}^^A \tud@cdfont@fam@osf
+% \end{macro}^^A \tud@cdfont@fam@lf
+% \end{macro}^^A \tud@cdfont@fam
+% \end{macro}^^A \if@tud@cdfont@opensans
 % \begin{macro}{\tud@cdfont@check}
 % \changes{v2.04}{2015/03/10}{neu}^^A
 % \begin{macro}{\tud@cdfont@missing}
@@ -267,9 +275,9 @@
 % mit dem Befehl \cs{IfFontExistsTF}.
 %    \begin{macrocode}
 \newcommand*\tud@cdfont@check{%
-  \@tud@cdfont@ostrue%
+  \@tud@cdfont@opensanstrue%
   \def\@tempa##1{%
-    \@tud@cdfont@osfalse%
+    \@tud@cdfont@opensansfalse%
     \if@tud@cdfont@active%
       \tud@cdfont@missing{##1}%
     \fi%
@@ -298,14 +306,17 @@
 % Fließtext im gleichen Maße geprüft.
 %    \begin{macrocode}
     \edef\@tempb##1{%
-      \lowercase{\noexpand\IfFileExists{##1\tud@cdfont@os.fd}}{}{%
-        \noexpand\@tempa{##1\tud@cdfont@os.fd}%
+      \lowercase{\noexpand\IfFileExists{##1\tud@cdfont@fam@lf.fd}}{}{%
+        \noexpand\@tempa{##1\tud@cdfont@fam@lf.fd}%
+      }%
+      \lowercase{\noexpand\IfFileExists{##1\tud@cdfont@fam@osf.fd}}{}{%
+        \noexpand\@tempa{##1\tud@cdfont@fam@osf.fd}%
       }%
     }%
     \expandafter\@tempb\expandafter{\encodingdefault}%
   \fi%
   \IfFileExists{roboto-mono.sty}{%
-    \@tud@cdfont@tttrue%
+    \@tud@cdfont@robototrue%
   }{}%
   \undef\tud@cdfont@check%
 }
@@ -478,6 +489,10 @@
 % \changes{v2.06}{2018/06/26}{neu}^^A
 % \begin{macro}{\if@tud@cdfont@ultrabold}
 % \changes{v2.05}{2016/04/04}{neu}^^A
+% \begin{macro}{\if@tud@cdfont@lining}
+% \changes{v2.06}{2018/07/10}{neu}^^A
+% \begin{macro}{\if@tud@cdfont@typewriter}
+% \changes{v2.06}{2018/07/10}{neu}^^A
 % \begin{macro}{\tud@cdfont@activate}
 % \changes{v2.06}{2018/07/02}{neu}^^A
 % Mit dieser Option wird die zentrale Benutzerschnittstelle für alle möglichen
@@ -491,6 +506,8 @@
 \newif\if@tud@cdfont@active
 \newif\if@tud@cdfont@heavy
 \newif\if@tud@cdfont@ultrabold
+\newif\if@tud@cdfont@lining
+\newif\if@tud@cdfont@typewriter
 \TUD@key{cdfont}[true]{%
   \TUD@set@numkey{cdfont}{@tempa}{%
     \TUD@bool@numkey,%
@@ -639,6 +656,7 @@
 }
 \newcommand*\tud@cdfont@activate{%
   \@tud@cdfont@activetrue%
+  \bool@std@lock{@tud@cdmath@active}{true}%
 %<*class>
   \if@tud@cdfont@heavy%
     \cs@std@lock{tud@head@font@num}{2}%
@@ -646,11 +664,12 @@
     \cs@std@lock{tud@head@font@num}{1}%
   \fi%
 %</class>
-  \bool@std@lock{@tud@cdmath@active}{true}%
   \TUD@SpecialOptionAtDocument{tud@font@set}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@cdfont@activate
+% \end{macro}^^A \if@tud@cdfont@typewriter
+% \end{macro}^^A \if@tud@cdfont@lining
 % \end{macro}^^A \if@tud@cdfont@ultrabold
 % \end{macro}^^A \if@tud@cdfont@heavy
 % \end{macro}^^A \if@tud@cdfont@active
@@ -857,28 +876,36 @@
 % Hiermit erfolgt die eigentliche Auswahl der Schriftfamilien für das \CD.
 %    \begin{macrocode}
 \newcommand*\tud@cdfont@set{%
-  \if@tud@cdfont@os%
+  \if@tud@cdfont@opensans%
+    \if@tud@cdfont@lining%
+      \let\tud@cdfont@fam\tud@cdfont@fam@lf%
+    \else%
+      \let\tud@cdfont@fam\tud@cdfont@fam@osf%
+    \fi%
 %    \end{macrocode}
 % Das Aktivieren der Schriften erfolgt entweder mit dem Paket \pkg{fontspec}
 % oder\dots
 %    \begin{macrocode}
     \if@tud@x@fontspec@enabled%
-      \setsansfont{\tud@cdfont@os}%
-      \if@tud@cdfont@tt%
-        \setmonofont{\tud@cdfont@tt}%
-      \fi%
+      \setsansfont{\tud@cdfont@fam}%
 %    \end{macrocode}
 % \dots nach dem NFSS.
 %    \begin{macrocode}
     \else%
-      \renewcommand*\sfdefault{\tud@cdfont@os}%
-      \if@tud@cdfont@tt%
-        \renewcommand*\ttdefault{\tud@cdfont@tt}%
-      \fi%
+      \renewcommand*\sfdefault{\tud@cdfont@fam}%
     \fi%
     \tud@cdfont@@set%
     \let\mddefault\tud@cdfont@md%
     \let\bfdefault\tud@cdfont@bf%
+  \fi%
+  \if@tud@cdfont@roboto%
+    \if@tud@cdfont@typewriter%
+      \if@tud@x@fontspec@enabled%
+        \setmonofont{\tud@cdfont@fam@tt}%
+      \else%
+        \renewcommand*\ttdefault{\tud@cdfont@fam@tt}%
+      \fi%
+    \fi%
   \fi%
 }
 \newcommand*\tud@cdfont@md{}
@@ -982,33 +1009,44 @@
 % jeweiligen Schriftschnitte.
 %    \begin{macrocode}
 \newcommand*\tud@x@fontspec@init[2]{%
-  \def\@tempa{%
-    NFSSFamily=#1,%
-    Ligatures=TeX,%
-    BoldFont={},%
-    ItalicFont={},%
-    BoldItalicFont={},%
-    SmallCapsFont={},%
-    #2%
-  }%
+%    \end{macrocode}
+% Die Argumente werden in einer Gruppe expandiert.
+%    \begin{macrocode}
+  \begingroup%
+    \def\@tempa{%
+      NFSSFamily=#1,%
+      Ligatures=TeX,%
+      BoldFont={},%
+      ItalicFont={},%
+      BoldItalicFont={},%
+      SmallCapsFont={},%
+      #2%
+    }%
 %    \end{macrocode}
 % Durch die Verwendung des optionalen Argumentes von \cs{defaultfontfeatures} 
 % werden die gewünschten Features einem Schriftfamiliennamen zugewiesen. Diese 
 % können anschließend einfach bspw. mit \cs{setsansfont}\marg{Name} genutzt 
 % werden.
 %    \begin{macrocode}
-  \edef\@tempa{%
-    \noexpand\defaultfontfeatures[#1]{\@tempa}%
-  }\@tempa%
+    \edef\@tempa{%
+      \noexpand\defaultfontfeatures[#1]{\@tempa}%
+    }%
 %    \end{macrocode}
 % Damit die Schrift mit ihrem NFSS-Namen auf jeden Fall definiert ist, auch 
 % wenn die Schriften des \CDs nicht aktiviert wurden, wird \cs{newfontfamily} 
 % aufgerufen.
 %    \begin{macrocode}
-  \edef\@tempb{%
-    \noexpand\newfontfamily%
-      \expandafter\noexpand\csname tud@x@fontspec@#1\endcsname{#1}%
-  }\@tempb%
+    \edef\@tempb{%
+      \noexpand\newfontfamily%
+        \expandafter\noexpand\csname tud@x@fontspec@#1\endcsname{#1}%
+    }%
+%    \end{macrocode}
+% Die expandierten Argumente werden nach der Gruppe ausgeführt.
+%    \begin{macrocode}
+    \edef\@tempc{%
+      \endgroup\expandonce\@tempa\expandonce\@tempb%
+    }%
+  \@tempc%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@x@fontspec@init
@@ -1062,9 +1100,9 @@
 % Zur Nutztung der OTF"~Schriften werden mit \cs{tud@x@fontspec@init} alle 
 % benötigten Schriftfamilien mit ihren einzelnen Schriftschnitten definiert.
 %    \begin{macrocode}
-  \if@tud@cdfont@os%
+  \if@tud@cdfont@opensans%
     \if@tud@x@fontspec@enabled%
-      \tud@x@fontspec@init{\tud@cdfont@os}{%
+      \def\@tempa{%
         UprightFont={OpenSansRegular},%
         FontFace={l}{n}{OpenSansLight},%
         FontFace={m}{n}{OpenSansRegular},%
@@ -1079,6 +1117,8 @@
         FontFace={bx}{sl}{OpenSansBoldItalic},%
         FontFace={eb}{sl}{OpenSansExtraBoldItalic}%
       }%
+      \tud@x@fontspec@init{\tud@cdfont@fam@lf}{\@tempa}%
+      \tud@x@fontspec@init{\tud@cdfont@fam@of}{Numbers=OldStyle,\@tempa}%
     \fi%
 %    \end{macrocode}
 % Es werden mehrere Schalter zur expliziten Auswahl für die Schriftschnitte
@@ -1090,16 +1130,16 @@
 % definiert. Diese können so im Dokument unabhängig von der Option 
 % \opt{cdfont} genutzt werden.
 %    \begin{macrocode}
-    \newrobustcmd*\osln{\usefont{\encodingdefault}{\tud@cdfont@os}{l}{n}}%
-    \newrobustcmd*\osrn{\usefont{\encodingdefault}{\tud@cdfont@os}{m}{n}}%
-    \newrobustcmd*\ossn{\usefont{\encodingdefault}{\tud@cdfont@os}{sb}{n}}%
-    \newrobustcmd*\osbn{\usefont{\encodingdefault}{\tud@cdfont@os}{b}{n}}%
-    \newrobustcmd*\osxn{\usefont{\encodingdefault}{\tud@cdfont@os}{eb}{n}}%
-    \newrobustcmd*\osli{\usefont{\encodingdefault}{\tud@cdfont@os}{l}{sl}}%
-    \newrobustcmd*\osri{\usefont{\encodingdefault}{\tud@cdfont@os}{m}{sl}}%
-    \newrobustcmd*\ossi{\usefont{\encodingdefault}{\tud@cdfont@os}{sb}{sl}}%
-    \newrobustcmd*\osbi{\usefont{\encodingdefault}{\tud@cdfont@os}{b}{sl}}%
-    \newrobustcmd*\osxi{\usefont{\encodingdefault}{\tud@cdfont@os}{eb}{sl}}%
+    \newrobustcmd*\osln{\usefont{\encodingdefault}{\tud@cdfont@fam}{l}{n}}%
+    \newrobustcmd*\osrn{\usefont{\encodingdefault}{\tud@cdfont@fam}{m}{n}}%
+    \newrobustcmd*\ossn{\usefont{\encodingdefault}{\tud@cdfont@fam}{sb}{n}}%
+    \newrobustcmd*\osbn{\usefont{\encodingdefault}{\tud@cdfont@fam}{b}{n}}%
+    \newrobustcmd*\osxn{\usefont{\encodingdefault}{\tud@cdfont@fam}{eb}{n}}%
+    \newrobustcmd*\osli{\usefont{\encodingdefault}{\tud@cdfont@fam}{l}{sl}}%
+    \newrobustcmd*\osri{\usefont{\encodingdefault}{\tud@cdfont@fam}{m}{sl}}%
+    \newrobustcmd*\ossi{\usefont{\encodingdefault}{\tud@cdfont@fam}{sb}{sl}}%
+    \newrobustcmd*\osbi{\usefont{\encodingdefault}{\tud@cdfont@fam}{b}{sl}}%
+    \newrobustcmd*\osxi{\usefont{\encodingdefault}{\tud@cdfont@fam}{eb}{sl}}%
 %    \end{macrocode}
 % Sind die notwendigen Schriften nicht installiert, werden die Schalter für die
 % Rückfallebene so definiert, dass diese eine Warnung ausgeben.
@@ -1144,8 +1184,8 @@
 % Weiterhin werden die TypeWriter-Schriften gesetzt.
 %    \begin{macrocode}
   \if@tud@x@fontspec@enabled%
-    \if@tud@cdfont@tt%
-      \tud@x@fontspec@init{\tud@cdfont@tt}{%
+    \if@tud@cdfont@roboto%
+      \tud@x@fontspec@init{\tud@cdfont@fam@tt}{%
         Extension={.ttf},%
         UprightFont={RobotoMono-Regular},%
         FontFace={l}{n}{RobotoMono-Light},%
@@ -1162,7 +1202,7 @@
         FontFace={eb}{sl}{RobotoMono-BoldItalic}%
       }%
     \else%
-      \tud@x@fontspec@init{\tud@cdfont@tt}{%
+      \tud@x@fontspec@init{\tud@cdfont@fam@tt}{%
         UprightFont={LMMono10-Regular},%
         FontFace={l}{n}{LMMonoLt10-Regular},%
         FontFace={m}{n}{LMMono10-Regular},%
@@ -1601,7 +1641,7 @@
 \newcommand*\mv@tud@nm{}
 \newcommand*\mv@tud@bm{}
 \newcommand*\tud@cdmath@init{%
-  \tud@cdmath@declare{\tud@cdfont@os}{\tud@cdfont@tt}%
+  \tud@cdmath@declare{\tud@cdfont@fam@lf}{\tud@cdfont@fam@tt}%
 }
 \newcommand*\tud@cdmath@declare[2]{%
   \DeclareMathVersion{tud@nm}%
@@ -1630,9 +1670,15 @@
   \SetMathAlphabet{\mathit}{tud@bm}{OT1}{#1}{\tud@cdfont@bf}{sl}%
   \SetMathAlphabet{\mathbf}{tud@nm}{OT1}{#1}{\tud@cdfont@bf}{n}%
   \SetMathAlphabet{\mathbf}{tud@bm}{OT1}{#1}{\tud@cdfont@ebf}{n}%
-  \if@tud@cdfont@tt%
+  \if@tud@cdfont@typewriter%
     \SetMathAlphabet{\mathtt}{tud@nm}{OT1}{#2}{\tud@cdfont@md}{n}%
     \SetMathAlphabet{\mathtt}{tud@bm}{OT1}{#2}{\tud@cdfont@bf}{n}%
+%    \end{macrocode}
+% \ToDo{prüfen}[v2.06]
+%    \begin{macrocode}
+  \else%
+    \SetMathAlphabet{\mathtt}{tud@nm}{OT1}{\ttdefault}{m}{n}%
+    \SetMathAlphabet{\mathtt}{tud@bm}{OT1}{\ttdefault}{b}{n}%
   \fi%
   \IfFileExists{ueus.fd}{%
     \SetMathAlphabet{\mathcal}{tud@nm}{U}{eus}{m}{n}%
@@ -2024,25 +2070,25 @@
 % Hiermit werden die eigentlichen Schriften des \CDs gesetzt.
 %    \begin{macrocode}
 \newcommand*\tud@head@cdfont@set{%
-  \if@tud@cdfont@os%
+  \if@tud@cdfont@opensans%
     \ifcase\tud@head@font@num\relax\or% true
       \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
-        {\tud@cdfont@os}{l}{n}{\tud@head@fontsize}%
+        {\tud@cdfont@fam@lf}{l}{n}{\tud@head@fontsize}%
       \DeclareFixedFont{\tud@head@font@bold}{\encodingdefault}%
-        {\tud@cdfont@os}{sb}{n}{\tud@head@fontsize}%
+        {\tud@cdfont@fam@lf}{sb}{n}{\tud@head@fontsize}%
 %<*poster>
       \protected\gdef\tud@head@font@@bold{%
-        \usefont{\encodingdefault}{\tud@cdfont@os}{sb}{n}%
+        \usefont{\encodingdefault}{\tud@cdfont@fam@lf}{sb}{n}%
       }%
 %</poster>
     \or% heavy
       \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
-        {\tud@cdfont@os}{m}{n}{\tud@head@fontsize}%
+        {\tud@cdfont@fam@lf}{m}{n}{\tud@head@fontsize}%
       \DeclareFixedFont{\tud@head@font@bold}{\encodingdefault}%
-        {\tud@cdfont@os}{b}{n}{\tud@head@fontsize}%
+        {\tud@cdfont@fam@lf}{b}{n}{\tud@head@fontsize}%
 %<*poster>
       \protected\gdef\tud@head@font@@bold{%
-        \usefont{\encodingdefault}{\tud@cdfont@os}{b}{n}%
+        \usefont{\encodingdefault}{\tud@cdfont@fam@lf}{b}{n}%
       }%
 %</poster>
     \fi%
