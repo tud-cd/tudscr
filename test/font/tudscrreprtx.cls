@@ -1749,8 +1749,7 @@
 \newcommand*\tud@cdfont@init{%
   \if@tud@cdfont@opensans%
     \if@tud@x@fontspec@enabled%
-      % TODO oldsytlefigures Numbers=OldStyle
-      \def\tud@reserved{%
+      \def\@tempa{%
         UprightFont={OpenSansRegular},%
         FontFace={l}{n}{OpenSansLight},%
         FontFace={m}{n}{OpenSansRegular},%
@@ -1765,51 +1764,51 @@
         FontFace={bx}{sl}{OpenSansBoldItalic},%
         FontFace={eb}{sl}{OpenSansExtraBoldItalic}%
       }%
-      \tud@x@fontspec@init{\tud@cdfont@fam@lf}{\tud@reserved}%
-      \tud@x@fontspec@init{\tud@cdfont@fam@osf}{Numbers=OldStyle,\tud@reserved}%
+      \tud@x@fontspec@init{\tud@cdfont@fam@lf}{\@tempa}%
+      \tud@x@fontspec@init{\tud@cdfont@fam@of}{Numbers=OldStyle,\@tempa}%
     \fi%
-    \newrobustcmd*\osln{\usefont{\encodingdefault}{\tud@cdfont@fam}{l}{n}}%
-    \newrobustcmd*\osrn{\usefont{\encodingdefault}{\tud@cdfont@fam}{m}{n}}%
-    \newrobustcmd*\ossn{\usefont{\encodingdefault}{\tud@cdfont@fam}{sb}{n}}%
-    \newrobustcmd*\osbn{\usefont{\encodingdefault}{\tud@cdfont@fam}{b}{n}}%
-    \newrobustcmd*\osxn{\usefont{\encodingdefault}{\tud@cdfont@fam}{eb}{n}}%
-    \newrobustcmd*\osli{\usefont{\encodingdefault}{\tud@cdfont@fam}{l}{sl}}%
-    \newrobustcmd*\osri{\usefont{\encodingdefault}{\tud@cdfont@fam}{m}{sl}}%
-    \newrobustcmd*\ossi{\usefont{\encodingdefault}{\tud@cdfont@fam}{sb}{sl}}%
-    \newrobustcmd*\osbi{\usefont{\encodingdefault}{\tud@cdfont@fam}{b}{sl}}%
-    \newrobustcmd*\osxi{\usefont{\encodingdefault}{\tud@cdfont@fam}{eb}{sl}}%
+    \newrobustcmd*\cdfontln{\usefont{\encodingdefault}{\tud@cdfont@fam}{l}{n}}
+    \newrobustcmd*\cdfontrn{\usefont{\encodingdefault}{\tud@cdfont@fam}{m}{n}}
+    \newrobustcmd*\cdfontsn{\usefont{\encodingdefault}{\tud@cdfont@fam}{sb}{n}}
+    \newrobustcmd*\cdfontbn{\usefont{\encodingdefault}{\tud@cdfont@fam}{b}{n}}
+    \newrobustcmd*\cdfontxn{\usefont{\encodingdefault}{\tud@cdfont@fam}{eb}{n}}
+    \newrobustcmd*\cdfontli{\usefont{\encodingdefault}{\tud@cdfont@fam}{l}{sl}}
+    \newrobustcmd*\cdfontri{\usefont{\encodingdefault}{\tud@cdfont@fam}{m}{sl}}
+    \newrobustcmd*\cdfontsi{\usefont{\encodingdefault}{\tud@cdfont@fam}{sb}{sl}}
+    \newrobustcmd*\cdfontbi{\usefont{\encodingdefault}{\tud@cdfont@fam}{b}{sl}}
+    \newrobustcmd*\cdfontxi{\usefont{\encodingdefault}{\tud@cdfont@fam}{eb}{sl}}
   \else%
-    \newrobustcmd*\osln{\tud@cdfont@fallback{OpenSansLight}{md}{up}}%
-    \newrobustcmd*\osrn{\tud@cdfont@fallback{OpenSansRegular}{md}{up}}%
-    \newrobustcmd*\ossn{\tud@cdfont@fallback{OpenSansSemiBold}{md}{up}}%
-    \newrobustcmd*\osbn{\tud@cdfont@fallback{OpenSansBold}{bf}{up}}%
-    \newrobustcmd*\osxn{\tud@cdfont@fallback{OpenSansExtraBold}{bf}{up}}%
-    \newrobustcmd*\osli{\tud@cdfont@fallback{OpenSansLightItalic}{md}{sl}}%
-    \newrobustcmd*\osri{\tud@cdfont@fallback{OpenSansItalic}{md}{sl}}%
-    \newrobustcmd*\ossi{\tud@cdfont@fallback{OpenSansSemiBoldItalic}{md}{sl}}%
-    \newrobustcmd*\osbi{\tud@cdfont@fallback{OpenSansBoldItalic}{bf}{sl}}%
-    \newrobustcmd*\osxi{\tud@cdfont@fallback{OpenSansExtraBoldItalic}{bf}{sl}}%
+    \tud@cdfont@fallback\cdfontln{OpenSansLight}{md}{up}
+    \tud@cdfont@fallback\cdfontrn{OpenSansRegular}{md}{up}
+    \tud@cdfont@fallback\cdfontsn{OpenSansSemiBold}{md}{up}
+    \tud@cdfont@fallback\cdfontbn{OpenSansBold}{bf}{up}
+    \tud@cdfont@fallback\cdfontxn{OpenSansExtraBold}{bf}{up}
+    \tud@cdfont@fallback\cdfontli{OpenSansLightItalic}{md}{sl}
+    \tud@cdfont@fallback\cdfontri{OpenSansItalic}{md}{sl}
+    \tud@cdfont@fallback\cdfontsi{OpenSansSemiBoldItalic}{md}{sl}
+    \tud@cdfont@fallback\cdfontbi{OpenSansBoldItalic}{bf}{sl}
+    \tud@cdfont@fallback\cdfontxi{OpenSansExtraBoldItalic}{bf}{sl}
   \fi%
-  \newcommand*\textosln{}%
-  \newcommand*\textosrn{}%
-  \newcommand*\textossn{}%
-  \newcommand*\textosbn{}%
-  \newcommand*\textosxn{}%
-  \newcommand*\textosli{}%
-  \newcommand*\textosri{}%
-  \newcommand*\textossi{}%
-  \newcommand*\textosbi{}%
-  \newcommand*\textosxi{}%
-  \DeclareTextFontCommand\textosln{\osln}%
-  \DeclareTextFontCommand\textosrn{\osrn}%
-  \DeclareTextFontCommand\textossn{\ossn}%
-  \DeclareTextFontCommand\textosbn{\osbn}%
-  \DeclareTextFontCommand\textosxn{\osxn}%
-  \DeclareTextFontCommand\textosli{\osli}%
-  \DeclareTextFontCommand\textosri{\osri}%
-  \DeclareTextFontCommand\textossi{\ossi}%
-  \DeclareTextFontCommand\textosbi{\osbi}%
-  \DeclareTextFontCommand\textosxi{\osxi}%
+  \newcommand*\textcdln{}%
+  \newcommand*\textcdrn{}%
+  \newcommand*\textcdsn{}%
+  \newcommand*\textcdbn{}%
+  \newcommand*\textcdxn{}%
+  \newcommand*\textcdli{}%
+  \newcommand*\textcdri{}%
+  \newcommand*\textcdsi{}%
+  \newcommand*\textcdbi{}%
+  \newcommand*\textcdxi{}%
+  \DeclareTextFontCommand\textcdln{\cdfontln}%
+  \DeclareTextFontCommand\textcdrn{\cdfontrn}%
+  \DeclareTextFontCommand\textcdsn{\cdfontsn}%
+  \DeclareTextFontCommand\textcdbn{\cdfontbn}%
+  \DeclareTextFontCommand\textcdxn{\cdfontxn}%
+  \DeclareTextFontCommand\textcdli{\cdfontli}%
+  \DeclareTextFontCommand\textcdri{\cdfontri}%
+  \DeclareTextFontCommand\textcdsi{\cdfontsi}%
+  \DeclareTextFontCommand\textcdbi{\cdfontbi}%
+  \DeclareTextFontCommand\textcdxi{\cdfontxi}%
   % TODO wann und wie wird welche ttfamily ausgewählt?
   \if@tud@x@fontspec@enabled%
     \if@tud@cdfont@roboto%
@@ -1849,15 +1848,17 @@
   \fi%
   \undef\tud@cdfont@init%
 }
-\newcommand*\tud@cdfont@fallback[3]{%
-  \tud@cdfont@wrn{#1}%
-  \sffamily\csuse{#2series}\csuse{#3shape}%
+\newcommand*\tud@cdfont@fallback[4]{%
+  \newrobustcmd*#1{%
+    \tud@cdfont@wrn{#2}%
+    \sffamily\csuse{#3series}\csuse{#4shape}%
+  }%
 }
 \newcommand*\tud@cdfont@wrn[1]{%
   \ClassWarning{\TUD@Class@Name}%
   {%
-    The requested font `#1' is not available, so\MessageBreak%
-    a fallback layout is used%
+    The requested font `#1'\MessageBreak%
+    is not available, a fallback layout is used%
   }%
 }
 \newcommand*\cdfont[1]{%
@@ -1870,7 +1871,7 @@
 \newcommand*\textcdfont[2]{%
   \tud@cdfont@get{#1}%
   \ifx\@tempc\relax\else%
-    \csuse{textos\@tempc}{#2}%
+    \csuse{textcd\@tempc}{#2}%
   \fi%
 }
 \newcommand*\tud@cdfont@get[1]{%
@@ -6471,8 +6472,8 @@
       \expandafter\newrobustcmd\csname #1\endcsname{%
         \ClassWarning{\TUD@Class@Name}%
         {%
-          The command `\@backslashchar#1' is deprecated\MessageBreak%
-          It's recommended to use `\@backslashchar#2' instead%
+          The command `\@backslashchar#1' is deprecated.\MessageBreak%
+          You should use `\@backslashchar#2' instead%
         }%
         \csletcs{#1}{#2}%
         \csuse{#2}%
@@ -6521,24 +6522,24 @@
   \tud@if@v@lower{2.04}{\TUDoptions{relspacing=false}}{}%
   \tud@if@v@lower{2.06}{\RequirePackage{tudscroldfonts}[\TUD@Version]}{}%
 }
-\TUD@deprecated@cs{univln}{osln}%
-\TUD@deprecated@cs{univrn}{osrn}%
-\TUD@deprecated@cs{univbn}{ossn}%
-\TUD@deprecated@cs{univxn}{osbn}%
-\TUD@deprecated@cs{univls}{osli}%
-\TUD@deprecated@cs{univrs}{osri}%
-\TUD@deprecated@cs{univbs}{ossi}%
-\TUD@deprecated@cs{univxs}{osbi}%
-\TUD@deprecated@cs{textuln}{textosln}%
-\TUD@deprecated@cs{texturn}{textosrn}%
-\TUD@deprecated@cs{textubn}{textossn}%
-\TUD@deprecated@cs{textuxn}{textosbn}%
-\TUD@deprecated@cs{textuls}{textosli}%
-\TUD@deprecated@cs{texturs}{textosri}%
-\TUD@deprecated@cs{textubs}{textossi}%
-\TUD@deprecated@cs{textuxs}{textosbi}%
-\TUD@deprecated@cs{dinbn}{osxn}%
-\TUD@deprecated@cs{textdbn}{textosxn}%
+\TUD@deprecated@cs{univln}{cdfontln}%
+\TUD@deprecated@cs{univrn}{cdfontrn}%
+\TUD@deprecated@cs{univbn}{cdfontsn}%
+\TUD@deprecated@cs{univxn}{cdfontbn}%
+\TUD@deprecated@cs{univls}{cdfontli}%
+\TUD@deprecated@cs{univrs}{cdfontri}%
+\TUD@deprecated@cs{univbs}{cdfontsi}%
+\TUD@deprecated@cs{univxs}{cdfontbi}%
+\TUD@deprecated@cs{textuln}{textcdln}%
+\TUD@deprecated@cs{texturn}{textcdrn}%
+\TUD@deprecated@cs{textubn}{textcdsn}%
+\TUD@deprecated@cs{textuxn}{textcdbn}%
+\TUD@deprecated@cs{textuls}{textcdli}%
+\TUD@deprecated@cs{texturs}{textcdri}%
+\TUD@deprecated@cs{textubs}{textcdsi}%
+\TUD@deprecated@cs{textuxs}{textcdbi}%
+\TUD@deprecated@cs{dinbn}{cdfontxn}%
+\TUD@deprecated@cs{textdbn}{textcdxn}%
 %%% From File: tudscr-misc.dtx
 \newcommand*\tud@atdocument@hook{}
 \let\tud@atdocument@hook\relax
