@@ -142,8 +142,6 @@
 % TODO oldstylenum
 \newif\if@tud@cdfont@lining
 \@tud@cdfont@liningtrue
-% TODO cdfonttt
-\newif\if@tud@cdfont@typewriter
 \TUD@key{cdfont}[true]{%
   \TUD@set@numkey{cdfont}{@tempa}{%
     \TUD@bool@numkey,%
@@ -261,6 +259,23 @@
     \cs@std@lock{tud@head@font@num}{1}%
   \fi%
   \TUD@SpecialOptionAtDocument{tud@font@set}%
+}
+\cs@lock{tud@ttfont@num}{0}
+\TUD@key{ttfont}[true]{%
+  \TUD@set@numkey{ttfont}{@tempa}{%
+    \TUD@bool@numkey,%
+    {lm}{1},{lmtt}{1},{lmodern}{1},%
+    {roboto}{2},{roboto-mono}{2}%
+  }{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \ifcase\@tempa\relax% false
+      \cs@set@lock{tud@ttfont@num}{0}%
+    \or% lmodern
+      \cs@set@lock{tud@ttfont@num}{1}%
+    \or% roboto
+      \cs@set@lock{tud@ttfont@num}{2}%
+    \fi%
+  \fi%
 }
 \newif\if@tud@relspacing
 \TUD@key{relspacing}[true]{%
@@ -1474,11 +1489,16 @@
 \newcommand*\tud@cdfont@fam{fdd}
 \newcommand*\tud@cdfont@fam@lf{fdd}
 \newcommand*\tud@cdfont@fam@osf{fddj}
-\newif\if@tud@cdfont@roboto
-\newcommand*\tud@cdfont@fam@tt{fddt}
+\newif\if@tud@ttfont@roboto
+\newcommand*\tud@ttfont@fam{fddt}
+\newcommand*\tud@ttfont@fam@roboto{fddt}
+\newcommand*\tud@ttfont@fam@lmodern{lmtt}
 \IfFileExists{roboto-mono.sty}{%
-  \@tud@cdfont@robototrue%
-}{}%
+  \@tud@ttfont@robototrue%
+  \cs@std@lock{tud@ttfont@num}{2}%
+}{%
+  \cs@std@lock{tud@ttfont@num}{1}%
+}%
 \newcommand*\tud@cdfont@check{%
   \@tud@cdfont@opensanstrue%
   \def\@tempa##1{%
@@ -1522,7 +1542,7 @@
         It seems, you haven't installed the required\MessageBreak%
         OTF-font on your system. You should either\MessageBreak%
         provide the fonts manually to your OS or\MessageBreak%
-        install package `opensans'.
+        install package `opensans'%
       }%
     \else%
       \ifstr{TU}{\encodingdefault}{%
@@ -1572,6 +1592,9 @@
 \PreventPackageFromLoading[\@tud@x@bm@requestedtrue]{bm}
 \RequirePackage{trimspaces}[2009/09/17]
 \newif\if@tud@x@mweights@enabled
+\IfFileExists{mweights.sty}{%
+  \RequirePackage{mweights}[2017/03/30]%
+}{}
 \AfterPackage*{mweights}{\@tud@x@mweights@enabledtrue}
 \newcommand*\tud@font@set{%
   \if@tud@cdfont@active%
@@ -1602,13 +1625,16 @@
     \renewcommand*\seriesdefault{\mddefault}%
     \renewcommand*\shapedefault{\updefault}%
     \tud@cdfont@set%
+    \tud@ttfont@set%
+    \let\bfdefault\tud@cdfont@bf%
+    \let\mddefault\tud@cdfont@md%
     \if@tud@x@mweights@enabled%
-      \edef\bfseries@rm{\bfdefault}%
-      \edef\mdseries@rm{\mddefault}%
-      \edef\bfseries@sf{\bfdefault}%
-      \edef\mdseries@sf{\mddefault}%
-      \edef\bfseries@tt{\bfdefault}%
-      \edef\mdseries@tt{\mddefault}%
+      \edef\bfseries@rm{\tud@cdfont@bf}%
+      \edef\mdseries@rm{\tud@cdfont@md}%
+      \edef\bfseries@sf{\tud@cdfont@bf}%
+      \edef\mdseries@sf{\tud@cdfont@md}%
+      \edef\bfseries@tt{\tud@ttfont@bf}%
+      \edef\mdseries@tt{\tud@ttfont@md}%
     \fi%
   \else%
     \tud@cmd@restore{rmdefault}%
@@ -1658,17 +1684,6 @@
       \renewcommand*\sfdefault{\tud@cdfont@fam}%
     \fi%
     \tud@cdfont@@set%
-    \let\mddefault\tud@cdfont@md%
-    \let\bfdefault\tud@cdfont@bf%
-  \fi%
-  \if@tud@cdfont@roboto%
-    \if@tud@cdfont@typewriter%
-      \if@tud@x@fontspec@enabled%
-        \setmonofont{\tud@cdfont@fam@tt}%
-      \else%
-        \renewcommand*\ttdefault{\tud@cdfont@fam@tt}%
-      \fi%
-    \fi%
   \fi%
 }
 \newcommand*\tud@cdfont@md{}
@@ -1693,6 +1708,55 @@
       \renewcommand*\tud@cdfont@bf{m}%
       \renewcommand*\tud@cdfont@ebf{sb}%
     \fi%
+  \fi%
+}
+\newcommand*\tud@ttfont@set{%
+  \if@tud@ttfont@roboto\else\ifnum\tud@ttfont@num=\tw@\relax%
+    \ClassWarning{\TUD@Class@Name}%
+    {%
+      The package `roboto-mono' is missing so the\MessageBreak%
+      typewriter font of package `lmodern' is used%
+    }%
+    \cs@set@lock{tud@ttfont@num}{1}%
+  \fi\fi
+  \ifcase\tud@ttfont@num\relax% false
+    \let\tud@ttfont@fam\ttdefault%
+  \or% lmodern
+    \let\tud@ttfont@fam\tud@ttfont@fam@lmodern%
+  \or% roboto
+    \let\tud@ttfont@fam\tud@ttfont@fam@roboto%
+  \fi%
+  \ifcase\tud@ttfont@num\relax\else% lmodern
+    \if@tud@x@fontspec@enabled%
+      \ifx\ttdefault\tud@ttfont@fam\else%
+        \setmonofont{\tud@ttfont@fam}%
+      \fi%
+    \else%
+      \renewcommand*\ttdefault{\tud@ttfont@fam}%
+    \fi%
+  \fi%
+  \tud@ttfont@@set%
+}
+\newcommand*\tud@ttfont@md{}
+\newcommand*\tud@ttfont@bf{}
+\newcommand*\tud@ttfont@@set{%
+  \ifcase\tud@ttfont@num\relax%
+    \ifundef{\mdseries@tt}{%
+      \edef\tud@ttfont@md{\tud@cmd@use{mddefault}}%
+    }{%
+      \edef\tud@ttfont@md{\mdseries@tt}%
+    }%
+    \ifundef{\bfseries@tt}{%
+      \edef\tud@ttfont@bf{\tud@cmd@use{bfdefault}}%
+    }{%
+      \edef\tud@ttfont@bf{\bfseries@tt}%
+    }%
+  \or% lmodern
+    \renewcommand*\tud@ttfont@md{m}%
+    \renewcommand*\tud@ttfont@bf{b}%
+  \else%
+    \renewcommand*\tud@ttfont@md{\tud@cdfont@md}%
+    \renewcommand*\tud@ttfont@bf{\tud@cdfont@bf}%
   \fi%
 }
 \newcommand*\tud@font@skip@set{%
@@ -1725,31 +1789,30 @@
 }
 \newcommand*\tud@x@fontspec@init[2]{%
   \begingroup%
-    \def\@tempa{%
-      NFSSFamily=#1,%
-      Ligatures=TeX,%
-      BoldFont={},%
-      ItalicFont={},%
-      BoldItalicFont={},%
-      SmallCapsFont={},%
-      #2%
+    \edef\tud@res@a{%
+      \noexpand\defaultfontfeatures[#1]{
+        NFSSFamily=#1,%
+        Ligatures=TeX,%
+        BoldFont={},%
+        ItalicFont={},%
+        BoldItalicFont={},%
+        SmallCapsFont={},%
+        #2%
+      }%
     }%
-    \edef\@tempa{%
-      \noexpand\defaultfontfeatures[#1]{\@tempa}%
-    }%
-    \edef\@tempb{%
+    \edef\tud@res@b{%
       \noexpand\newfontfamily%
         \expandafter\noexpand\csname tud@x@fontspec@#1\endcsname{#1}%
     }%
-    \edef\@tempc{%
-      \endgroup\expandonce\@tempa\expandonce\@tempb%
+    \edef\tud@res@c{%
+      \endgroup\expandonce\tud@res@a\expandonce\tud@res@b%
     }%
-  \@tempc%
+  \tud@res@c%
 }
 \newcommand*\tud@cdfont@init{%
   \if@tud@cdfont@opensans%
     \if@tud@x@fontspec@enabled%
-      \def\@tempa{%
+      \def\tud@res@a{%
         UprightFont={OpenSansRegular},%
         FontFace={l}{n}{OpenSansLight},%
         FontFace={m}{n}{OpenSansRegular},%
@@ -1764,8 +1827,8 @@
         FontFace={bx}{sl}{OpenSansBoldItalic},%
         FontFace={eb}{sl}{OpenSansExtraBoldItalic}%
       }%
-      \tud@x@fontspec@init{\tud@cdfont@fam@lf}{\@tempa}%
-      \tud@x@fontspec@init{\tud@cdfont@fam@of}{Numbers=OldStyle,\@tempa}%
+      \tud@x@fontspec@init{\tud@cdfont@fam@lf}{\tud@res@a}%
+      \tud@x@fontspec@init{\tud@cdfont@fam@osf}{Numbers=OldStyle,\tud@res@a}%
     \fi%
     \newrobustcmd*\cdfontln{\usefont{\encodingdefault}{\tud@cdfont@fam}{l}{n}}
     \newrobustcmd*\cdfontrn{\usefont{\encodingdefault}{\tud@cdfont@fam}{m}{n}}
@@ -1809,10 +1872,25 @@
   \DeclareTextFontCommand\textcdsi{\cdfontsi}%
   \DeclareTextFontCommand\textcdbi{\cdfontbi}%
   \DeclareTextFontCommand\textcdxi{\cdfontxi}%
-  % TODO wann und wie wird welche ttfamily ausgewählt?
+  \undef\tud@cdfont@init%
+}
+\newcommand*\tud@cdfont@fallback[4]{%
+  \newrobustcmd*#1{%
+    \tud@cdfont@wrn{#2}%
+    \sffamily\csuse{#3series}\csuse{#4shape}%
+  }%
+}
+\newcommand*\tud@cdfont@wrn[1]{%
+  \ClassWarning{\TUD@Class@Name}%
+  {%
+    The requested font `#1'\MessageBreak%
+    is not available, a fallback layout is used%
+  }%
+}
+\newcommand*\tud@ttfont@init{%
   \if@tud@x@fontspec@enabled%
-    \if@tud@cdfont@roboto%
-      \tud@x@fontspec@init{\tud@cdfont@fam@tt}{%
+    \if@tud@ttfont@roboto%
+      \tud@x@fontspec@init{\tud@ttfont@fam@roboto}{%
         Extension={.ttf},%
         UprightFont={RobotoMono-Regular},%
         FontFace={l}{n}{RobotoMono-Light},%
@@ -1828,8 +1906,9 @@
         FontFace={bx}{sl}{RobotoMono-BoldItalic},%
         FontFace={eb}{sl}{RobotoMono-BoldItalic}%
       }%
-    \else%
-      \tud@x@fontspec@init{\tud@cdfont@fam@tt}{%
+    \fi%
+    \ifx\ttdefault\tud@ttfont@fam@lmodern\else%
+      \tud@x@fontspec@init{\tud@ttfont@fam@lmodern}{%
         UprightFont={LMMono10-Regular},%
         FontFace={l}{n}{LMMonoLt10-Regular},%
         FontFace={m}{n}{LMMono10-Regular},%
@@ -1846,20 +1925,7 @@
       }%
     \fi%
   \fi%
-  \undef\tud@cdfont@init%
-}
-\newcommand*\tud@cdfont@fallback[4]{%
-  \newrobustcmd*#1{%
-    \tud@cdfont@wrn{#2}%
-    \sffamily\csuse{#3series}\csuse{#4shape}%
-  }%
-}
-\newcommand*\tud@cdfont@wrn[1]{%
-  \ClassWarning{\TUD@Class@Name}%
-  {%
-    The requested font `#1'\MessageBreak%
-    is not available, a fallback layout is used%
-  }%
+  \undef\tud@ttfont@init%
 }
 \newcommand*\cdfont[1]{%
   \tud@cdfont@get{#1}%
@@ -1967,13 +2033,16 @@
 \newcommand*\mv@tud@nm{}
 \newcommand*\mv@tud@bm{}
 \newcommand*\tud@cdmath@init{%
-  \tud@cdmath@declare{\tud@cdfont@fam@lf}{\tud@cdfont@fam@tt}%
+  \if@tud@cdfont@opensans%
+    \tud@cdmath@declare{\tud@cdfont@fam@lf}{\tud@ttfont@fam}%
+  \fi%
 }
 % TODO Warnung by amssymb Laden verhindern und mdsymbol verwenden?
 \newcommand*\tud@cdmath@declare[2]{%
   \DeclareMathVersion{tud@nm}%
   \DeclareMathVersion{tud@bm}%
   \tud@cdfont@@set%
+  \tud@ttfont@@set%
   \SetSymbolFont{operators}{tud@nm}{OT1}{#1}{\tud@cdfont@md}{n}%
   \SetSymbolFont{operators}{tud@bm}{OT1}{#1}{\tud@cdfont@bf}{n}%
   \SetSymbolFont{letters}{tud@nm}{OML}{#1}{\tud@cdfont@md}{sl}%
@@ -1992,12 +2061,13 @@
   \SetMathAlphabet{\mathit}{tud@bm}{OT1}{#1}{\tud@cdfont@bf}{sl}%
   \SetMathAlphabet{\mathbf}{tud@nm}{OT1}{#1}{\tud@cdfont@bf}{n}%
   \SetMathAlphabet{\mathbf}{tud@bm}{OT1}{#1}{\tud@cdfont@ebf}{n}%
-  \if@tud@cdfont@typewriter%
-    \SetMathAlphabet{\mathtt}{tud@nm}{OT1}{#2}{\tud@cdfont@md}{n}%
-    \SetMathAlphabet{\mathtt}{tud@bm}{OT1}{#2}{\tud@cdfont@bf}{n}%
-  \else%
-    \SetMathAlphabet{\mathtt}{tud@nm}{OT1}{\ttdefault}{m}{n}%
-    \SetMathAlphabet{\mathtt}{tud@bm}{OT1}{\ttdefault}{b}{n}%
+  \SetMathAlphabet{\mathtt}{tud@nm}{OT1}{#2}{\tud@ttfont@md}{n}%
+  \SetMathAlphabet{\mathtt}{tud@bm}{OT1}{#2}{\tud@ttfont@bf}{n}%
+  \ifcase\tud@ttfont@num\relax%
+    \if@tud@x@fontspec@enabled%
+      \SetMathAlphabet{\mathtt}{tud@nm}{\encodingdefault}{#2}{\tud@ttfont@md}{n}
+      \SetMathAlphabet{\mathtt}{tud@bm}{\encodingdefault}{#2}{\tud@ttfont@bf}{n}
+    \fi%
   \fi%
   \IfFileExists{ueus.fd}{%
     \SetMathAlphabet{\mathcal}{tud@nm}{U}{eus}{m}{n}%
@@ -2105,6 +2175,7 @@
   \fi%
   \tud@cdfont@check%
   \tud@cdfont@init%
+  \tud@ttfont@init%
   \if@tud@x@siunitx@enabled%
     \if@tud@cdfont@active%
       \if@tud@cdfont@heavy%
