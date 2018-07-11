@@ -140,7 +140,10 @@
 \newif\if@tud@cdfont@heavy
 \newif\if@tud@cdfont@ultrabold
 % TODO oldstylenum
+\newif\if@tud@cdfont@lining
+\@tud@cdfont@liningtrue
 % TODO cdfonttt
+\newif\if@tud@cdfont@typewriter
 \TUD@key{cdfont}[true]{%
   \TUD@set@numkey{cdfont}{@tempa}{%
     \TUD@bool@numkey,%
@@ -149,8 +152,11 @@
     {normalbold}{3},{boldnormal}{3},%
     {ultrabold}{4},{boldultra}{4},{heavybold}{4},{boldheavy}{4},%
     {extendedbold}{4},{boldextended}{4},%
+    {osf}{5},{oldstyle}{5},{osfigures}{5},{oldstylefigures}{5},{oldnumbers}{5},
+    {lf}{6},{nf}{6},{lining}{6},{liningfigures}{6},{normalfigures}{6},
 %    {nodin}{5},{nodinbold}{5},{noDIN}{5},{noDINBold}{5},%
 %    {din}{6},{dinbold}{6},{DIN}{6},{DINBold}{6},%
+    % TODO ans Ende der Optionen
     {nohead}{7},{nocdhead}{7},{noheadfont}{7},{noheadcdfont}{7},%
     {nocdheadfont}{7},{nobar}{7},{nobarfont}{7},%
     {head}{8},{headfont}{8},{cdhead}{8},{headcdfont}{8},{cdheadfont}{8},%
@@ -179,6 +185,7 @@
     {headheavy}{9},{headfontheavy}{9},{headheavyfont}{9},%
     {cdheadheavy}{9},{headcdfontheavy}{9},{cdheadfontheavy}{9},%
     {barheavy}{9},{barfontheavy}{9},{barheavyfont}{9},%
+    % TODO ans Ende der Optionen
     {nomath}{10},{nocdmath}{10},%
     {serifmath}{10},{serif}{10},{nosansmath}{10},{nosans}{10},%
     {math}{11},{cdmath}{11},{sansmath}{11},{sans}{11},%
@@ -205,12 +212,16 @@
     \or% ultrabold
       \@tud@cdfont@ultraboldtrue%
       \tud@cdfont@activate%
-    \or% nodin
+    \or% osf
       % TODO PassOptionsToPackage, tudscroldfonts laden
-      \TUD@deprecated@key{cdfont=#1}{cdoldfont=#1}%
-    \or% din
+%      \TUD@deprecated@key{cdfont=#1}{cdoldfont=#1}%
+      \@tud@cdfont@liningfalse%
+      \tud@cdfont@activate%
+    \or% lining
       % TODO PassOptionsToPackage, tudscroldfonts laden
-      \TUD@deprecated@key{cdfont=#1}{cdoldfont=#1}%
+%      \TUD@deprecated@key{cdfont=#1}{cdoldfont=#1}%
+      \@tud@cdfont@liningtrue%
+      \tud@cdfont@activate%
     \or% nohead
       \TUDoptions{cdhead=false}%
     \or% head
@@ -243,12 +254,12 @@
 }
 \newcommand*\tud@cdfont@activate{%
   \@tud@cdfont@activetrue%
+  \bool@std@lock{@tud@cdmath@active}{true}%
   \if@tud@cdfont@heavy%
     \cs@std@lock{tud@head@font@num}{2}%
   \else%
     \cs@std@lock{tud@head@font@num}{1}%
   \fi%
-  \bool@std@lock{@tud@cdmath@active}{true}%
   \TUD@SpecialOptionAtDocument{tud@font@set}%
 }
 \newif\if@tud@relspacing
@@ -1100,7 +1111,6 @@
 \csdef{tud@v@2.01a}{0}
 \csdef{tud@v@2.01b}{0}
 \csdef{tud@v@2.02}{0}
-\csdef{tud@v@2.02}{0}
 \csdef{tud@v@2.03}{1}
 \csdef{tud@v@2.03a}{1}
 \csdef{tud@v@2.04}{2}
@@ -1460,16 +1470,19 @@
   \RequirePackage{tudscrcolor}[\TUD@Version]%
 }
 %%% From File: tudscr-fonts.dtx
-\newcommand*\tud@cdfont@os{fdd}
-% TODO oldsytlefigures
-%\newcommand*\tud@cdfont@os{fddj}
-\newif\if@tud@cdfont@os
-\newcommand*\tud@cdfont@tt{fddt}
-\newif\if@tud@cdfont@tt
+\newif\if@tud@cdfont@opensans
+\newcommand*\tud@cdfont@fam{fdd}
+\newcommand*\tud@cdfont@fam@lf{fdd}
+\newcommand*\tud@cdfont@fam@osf{fddj}
+\newif\if@tud@cdfont@roboto
+\newcommand*\tud@cdfont@fam@tt{fddt}
+\IfFileExists{roboto-mono.sty}{%
+  \@tud@cdfont@robototrue%
+}{}%
 \newcommand*\tud@cdfont@check{%
-  \@tud@cdfont@ostrue%
+  \@tud@cdfont@opensanstrue%
   \def\@tempa##1{%
-    \@tud@cdfont@osfalse%
+    \@tud@cdfont@opensansfalse%
     \if@tud@cdfont@active%
       \tud@cdfont@missing{##1}%
     \fi%
@@ -1488,15 +1501,15 @@
     \@tempb{OpenSansExtraBoldItalic}%
   \else%
     \edef\@tempb##1{%
-      \lowercase{\noexpand\IfFileExists{##1\tud@cdfont@os.fd}}{}{%
-        \noexpand\@tempa{##1\tud@cdfont@os.fd}%
+      \lowercase{\noexpand\IfFileExists{##1\tud@cdfont@fam@lf.fd}}{}{%
+        \noexpand\@tempa{##1\tud@cdfont@fam@lf.fd}%
+      }%
+      \lowercase{\noexpand\IfFileExists{##1\tud@cdfont@fam@osf.fd}}{}{%
+        \noexpand\@tempa{##1\tud@cdfont@fam@osf.fd}%
       }%
     }%
     \expandafter\@tempb\expandafter{\encodingdefault}%
   \fi%
-  \IfFileExists{roboto-mono.sty}{%
-    \@tud@cdfont@tttrue%
-  }{}%
   \undef\tud@cdfont@check%
 }
 \newcommand*\tud@cdfont@missing[1]{%
@@ -1545,9 +1558,9 @@
 \newcommand*\tud@raggedright{\raggedright}
 \newcommand*\tud@RaggedRight{\raggedright}
 \AfterPackage*{ragged2e}{%
-  \ifdef{\LaTeXraggedright}{%
+  \ifundef{\LaTeXraggedright}{}{%
     \renewcommand*\tud@raggedright{\LaTeXraggedright}%
-  }{}%
+  }%
   \renewcommand*\tud@RaggedRight{\RaggedRight}%
 }
 \newif\if@tud@x@siunitx@enabled
@@ -1633,21 +1646,29 @@
   \global\@tud@head@font@settrue%
 }
 \newcommand*\tud@cdfont@set{%
-  \if@tud@cdfont@os%
-    \if@tud@x@fontspec@enabled%
-      \setsansfont{\tud@cdfont@os}%
-      \if@tud@cdfont@tt%
-        \setmonofont{\tud@cdfont@tt}%
-      \fi%
+  \if@tud@cdfont@opensans%
+    \if@tud@cdfont@lining%
+      \let\tud@cdfont@fam\tud@cdfont@fam@lf%
     \else%
-      \renewcommand*\sfdefault{\tud@cdfont@os}%
-      \if@tud@cdfont@tt%
-        \renewcommand*\ttdefault{\tud@cdfont@tt}%
-      \fi%
+      \let\tud@cdfont@fam\tud@cdfont@fam@osf%
+    \fi%
+    \if@tud@x@fontspec@enabled%
+      \setsansfont{\tud@cdfont@fam}%
+    \else%
+      \renewcommand*\sfdefault{\tud@cdfont@fam}%
     \fi%
     \tud@cdfont@@set%
     \let\mddefault\tud@cdfont@md%
     \let\bfdefault\tud@cdfont@bf%
+  \fi%
+  \if@tud@cdfont@roboto%
+    \if@tud@cdfont@typewriter%
+      \if@tud@x@fontspec@enabled%
+        \setmonofont{\tud@cdfont@fam@tt}%
+      \else%
+        \renewcommand*\ttdefault{\tud@cdfont@fam@tt}%
+      \fi%
+    \fi%
   \fi%
 }
 \newcommand*\tud@cdfont@md{}
@@ -1703,28 +1724,33 @@
   \tud@skip@set{columnsep}{1.1\baselineskip}%
 }
 \newcommand*\tud@x@fontspec@init[2]{%
-  \def\@tempa{%
-    NFSSFamily=#1,%
-    Ligatures=TeX,%
-    BoldFont={},%
-    ItalicFont={},%
-    BoldItalicFont={},%
-    SmallCapsFont={},%
-    #2%
-  }%
-  \edef\@tempa{%
-    \noexpand\defaultfontfeatures[#1]{\@tempa}%
-  }\@tempa%
-  \edef\@tempb{%
-    \noexpand\newfontfamily%
-      \expandafter\noexpand\csname tud@x@fontspec@#1\endcsname{#1}%
-  }\@tempb%
+  \begingroup%
+    \def\@tempa{%
+      NFSSFamily=#1,%
+      Ligatures=TeX,%
+      BoldFont={},%
+      ItalicFont={},%
+      BoldItalicFont={},%
+      SmallCapsFont={},%
+      #2%
+    }%
+    \edef\@tempa{%
+      \noexpand\defaultfontfeatures[#1]{\@tempa}%
+    }%
+    \edef\@tempb{%
+      \noexpand\newfontfamily%
+        \expandafter\noexpand\csname tud@x@fontspec@#1\endcsname{#1}%
+    }%
+    \edef\@tempc{%
+      \endgroup\expandonce\@tempa\expandonce\@tempb%
+    }%
+  \@tempc%
 }
 \newcommand*\tud@cdfont@init{%
-  \if@tud@cdfont@os%
+  \if@tud@cdfont@opensans%
     \if@tud@x@fontspec@enabled%
       % TODO oldsytlefigures Numbers=OldStyle
-      \tud@x@fontspec@init{\tud@cdfont@os}{%
+      \def\tud@reserved{%
         UprightFont={OpenSansRegular},%
         FontFace={l}{n}{OpenSansLight},%
         FontFace={m}{n}{OpenSansRegular},%
@@ -1739,17 +1765,19 @@
         FontFace={bx}{sl}{OpenSansBoldItalic},%
         FontFace={eb}{sl}{OpenSansExtraBoldItalic}%
       }%
+      \tud@x@fontspec@init{\tud@cdfont@fam@lf}{\tud@reserved}%
+      \tud@x@fontspec@init{\tud@cdfont@fam@osf}{Numbers=OldStyle,\tud@reserved}%
     \fi%
-    \newrobustcmd*\osln{\usefont{\encodingdefault}{\tud@cdfont@os}{l}{n}}%
-    \newrobustcmd*\osrn{\usefont{\encodingdefault}{\tud@cdfont@os}{m}{n}}%
-    \newrobustcmd*\ossn{\usefont{\encodingdefault}{\tud@cdfont@os}{sb}{n}}%
-    \newrobustcmd*\osbn{\usefont{\encodingdefault}{\tud@cdfont@os}{b}{n}}%
-    \newrobustcmd*\osxn{\usefont{\encodingdefault}{\tud@cdfont@os}{eb}{n}}%
-    \newrobustcmd*\osli{\usefont{\encodingdefault}{\tud@cdfont@os}{l}{sl}}%
-    \newrobustcmd*\osri{\usefont{\encodingdefault}{\tud@cdfont@os}{m}{sl}}%
-    \newrobustcmd*\ossi{\usefont{\encodingdefault}{\tud@cdfont@os}{sb}{sl}}%
-    \newrobustcmd*\osbi{\usefont{\encodingdefault}{\tud@cdfont@os}{b}{sl}}%
-    \newrobustcmd*\osxi{\usefont{\encodingdefault}{\tud@cdfont@os}{eb}{sl}}%
+    \newrobustcmd*\osln{\usefont{\encodingdefault}{\tud@cdfont@fam}{l}{n}}%
+    \newrobustcmd*\osrn{\usefont{\encodingdefault}{\tud@cdfont@fam}{m}{n}}%
+    \newrobustcmd*\ossn{\usefont{\encodingdefault}{\tud@cdfont@fam}{sb}{n}}%
+    \newrobustcmd*\osbn{\usefont{\encodingdefault}{\tud@cdfont@fam}{b}{n}}%
+    \newrobustcmd*\osxn{\usefont{\encodingdefault}{\tud@cdfont@fam}{eb}{n}}%
+    \newrobustcmd*\osli{\usefont{\encodingdefault}{\tud@cdfont@fam}{l}{sl}}%
+    \newrobustcmd*\osri{\usefont{\encodingdefault}{\tud@cdfont@fam}{m}{sl}}%
+    \newrobustcmd*\ossi{\usefont{\encodingdefault}{\tud@cdfont@fam}{sb}{sl}}%
+    \newrobustcmd*\osbi{\usefont{\encodingdefault}{\tud@cdfont@fam}{b}{sl}}%
+    \newrobustcmd*\osxi{\usefont{\encodingdefault}{\tud@cdfont@fam}{eb}{sl}}%
   \else%
     \newrobustcmd*\osln{\tud@cdfont@fallback{OpenSansLight}{md}{up}}%
     \newrobustcmd*\osrn{\tud@cdfont@fallback{OpenSansRegular}{md}{up}}%
@@ -1782,9 +1810,10 @@
   \DeclareTextFontCommand\textossi{\ossi}%
   \DeclareTextFontCommand\textosbi{\osbi}%
   \DeclareTextFontCommand\textosxi{\osxi}%
+  % TODO wann und wie wird welche ttfamily ausgewählt?
   \if@tud@x@fontspec@enabled%
-    \if@tud@cdfont@tt%
-      \tud@x@fontspec@init{\tud@cdfont@tt}{%
+    \if@tud@cdfont@roboto%
+      \tud@x@fontspec@init{\tud@cdfont@fam@tt}{%
         Extension={.ttf},%
         UprightFont={RobotoMono-Regular},%
         FontFace={l}{n}{RobotoMono-Light},%
@@ -1801,7 +1830,7 @@
         FontFace={eb}{sl}{RobotoMono-BoldItalic}%
       }%
     \else%
-      \tud@x@fontspec@init{\tud@cdfont@tt}{%
+      \tud@x@fontspec@init{\tud@cdfont@fam@tt}{%
         UprightFont={LMMono10-Regular},%
         FontFace={l}{n}{LMMonoLt10-Regular},%
         FontFace={m}{n}{LMMono10-Regular},%
@@ -1837,6 +1866,7 @@
     \csuse{os\@tempc}%
   \fi%
 }
+\providecommand*\tudfont[1]{\cdfont{#1}}
 \newcommand*\textcdfont[2]{%
   \tud@cdfont@get{#1}%
   \ifx\@tempc\relax\else%
@@ -1896,50 +1926,6 @@
     \@expandtwoargs\in@{#1}{\@tempa}%
   }%
 }
-\providecommand*\tudfont[1]{\cdfont{#1}}
-\newcommand*\tud@head@font@light{}
-\newcommand*\tud@head@font@bold{}
-\newcommand*\tud@head@font@set{%
-  \if@tud@cdfont@active\ifcase\tud@head@font@num\relax% false
-    \if@tud@head@font@set%
-      \ClassWarning{\TUD@Class@Name}{%
-        It isn't possible to use `cdhead=false'\MessageBreak%
-        together with `cdfont=true'%
-      }%
-    \fi%
-    \if@tud@cdfont@heavy%
-      \TUDoptions{cdhead=heavy}%
-    \else%
-      \TUDoptions{cdhead=true}%
-    \fi%
-  \fi\fi%
-  \if@tud@head@font@set%
-    \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
-      {\sfdefault}{\mddefault}{\updefault}{\tud@head@fontsize}%
-    \DeclareFixedFont{\tud@head@font@bold}{\encodingdefault}%
-      {\sfdefault}{\bfdefault}{\updefault}{\tud@head@fontsize}%
-    \ifcase\tud@head@font@num\relax\else% true/heavy
-      \tud@head@cdfont@set%
-    \fi%
-    \global\@tud@head@font@setfalse%
-    \global\@tud@head@text@settrue%
-  \fi%
-}
-\newcommand*\tud@head@cdfont@set{%
-  \if@tud@cdfont@os%
-    \ifcase\tud@head@font@num\relax\or% true
-      \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
-        {\tud@cdfont@os}{l}{n}{\tud@head@fontsize}%
-      \DeclareFixedFont{\tud@head@font@bold}{\encodingdefault}%
-        {\tud@cdfont@os}{sb}{n}{\tud@head@fontsize}%
-    \or% heavy
-      \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
-        {\tud@cdfont@os}{m}{n}{\tud@head@fontsize}%
-      \DeclareFixedFont{\tud@head@font@bold}{\encodingdefault}%
-        {\tud@cdfont@os}{b}{n}{\tud@head@fontsize}%
-    \fi%
-  \fi%
-}
 \newcommand*\tud@font@greek@loop[1]{%
   \@for\@tempa:={%
     Gamma,Delta,Theta,Lambda,Xi,Pi,Sigma,Upsilon,Phi,Psi,Omega%
@@ -1959,8 +1945,6 @@
 }
 \@tempcnta=\z@\relax
 \tud@font@greek@loop\tud@font@greek@declare
-\newcommand*\mv@tud@nm{}
-\newcommand*\mv@tud@bm{}
 \newcommand*\tud@math@init{%
   \@ifpackageloaded{unicode-math}{%
     \if@tud@cdmath@active%
@@ -1979,8 +1963,10 @@
     \tud@math@set%
   }%
 }
+\newcommand*\mv@tud@nm{}
+\newcommand*\mv@tud@bm{}
 \newcommand*\tud@cdmath@init{%
-  \tud@cdmath@declare{\tud@cdfont@os}{\tud@cdfont@tt}%
+  \tud@cdmath@declare{\tud@cdfont@fam@lf}{\tud@cdfont@fam@tt}%
 }
 % TODO Warnung by amssymb Laden verhindern und mdsymbol verwenden?
 \newcommand*\tud@cdmath@declare[2]{%
@@ -2005,15 +1991,18 @@
   \SetMathAlphabet{\mathit}{tud@bm}{OT1}{#1}{\tud@cdfont@bf}{sl}%
   \SetMathAlphabet{\mathbf}{tud@nm}{OT1}{#1}{\tud@cdfont@bf}{n}%
   \SetMathAlphabet{\mathbf}{tud@bm}{OT1}{#1}{\tud@cdfont@ebf}{n}%
-  \if@tud@cdfont@tt%
+  \if@tud@cdfont@typewriter%
     \SetMathAlphabet{\mathtt}{tud@nm}{OT1}{#2}{\tud@cdfont@md}{n}%
     \SetMathAlphabet{\mathtt}{tud@bm}{OT1}{#2}{\tud@cdfont@bf}{n}%
+  \else%
+    \SetMathAlphabet{\mathtt}{tud@nm}{OT1}{\ttdefault}{m}{n}%
+    \SetMathAlphabet{\mathtt}{tud@bm}{OT1}{\ttdefault}{b}{n}%
   \fi%
   \IfFileExists{ueus.fd}{%
     \SetMathAlphabet{\mathcal}{tud@nm}{U}{eus}{m}{n}%
     \SetMathAlphabet{\mathcal}{tud@bm}{U}{eus}{b}{n}%
   }{}%
-  \@ifundefined{mathfrak}{}{%
+  \ifundef{\mathfrak}{}{%
     \IfFileExists{ueuf.fd}{%
       \SetMathAlphabet{\mathfrak}{tud@nm}{U}{euf}{m}{n}%
       \SetMathAlphabet{\mathfrak}{tud@bm}{U}{euf}{b}{n}%
@@ -2151,6 +2140,49 @@
 \RequirePackage{textcase}[2004/10/07]
 \newcommand*\tud@makeuppercase[1]{%
   \protect\vphantom{\"A\"O\"U}#1%
+}
+\newcommand*\tud@head@font@light{}
+\newcommand*\tud@head@font@bold{}
+\newcommand*\tud@head@font@set{%
+  \if@tud@cdfont@active\ifcase\tud@head@font@num\relax% false
+    \if@tud@head@font@set%
+      \ClassWarning{\TUD@Class@Name}{%
+        It isn't possible to use `cdhead=false'\MessageBreak%
+        together with `cdfont=true'%
+      }%
+    \fi%
+    \if@tud@cdfont@heavy%
+      \TUDoptions{cdhead=heavy}%
+    \else%
+      \TUDoptions{cdhead=true}%
+    \fi%
+  \fi\fi%
+  \if@tud@head@font@set%
+    \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
+      {\sfdefault}{\mddefault}{\updefault}{\tud@head@fontsize}%
+    \DeclareFixedFont{\tud@head@font@bold}{\encodingdefault}%
+      {\sfdefault}{\bfdefault}{\updefault}{\tud@head@fontsize}%
+    \ifcase\tud@head@font@num\relax\else% true/heavy
+      \tud@head@cdfont@set%
+    \fi%
+    \global\@tud@head@font@setfalse%
+    \global\@tud@head@text@settrue%
+  \fi%
+}
+\newcommand*\tud@head@cdfont@set{%
+  \if@tud@cdfont@opensans%
+    \ifcase\tud@head@font@num\relax\or% true
+      \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
+        {\tud@cdfont@fam@lf}{l}{n}{\tud@head@fontsize}%
+      \DeclareFixedFont{\tud@head@font@bold}{\encodingdefault}%
+        {\tud@cdfont@fam@lf}{sb}{n}{\tud@head@fontsize}%
+    \or% heavy
+      \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
+        {\tud@cdfont@fam@lf}{m}{n}{\tud@head@fontsize}%
+      \DeclareFixedFont{\tud@head@font@bold}{\encodingdefault}%
+        {\tud@cdfont@fam@lf}{b}{n}{\tud@head@fontsize}%
+    \fi%
+  \fi%
 }
 %%% From File: tudscr-fields.dtx
 \newcommand*\@faculty{}
@@ -6484,6 +6516,11 @@
   \TUD@deprecated@cs{finaldate}{duedate}%
   \TUD@deprecated@cs{maturitydate}{duedate}%
 }
+\AtEndOfClass%
+{%
+  \tud@if@v@lower{2.04}{\TUDoptions{relspacing=false}}{}%
+  \tud@if@v@lower{2.06}{\RequirePackage{tudscroldfonts}[\TUD@Version]}{}%
+}
 \TUD@deprecated@cs{univln}{osln}%
 \TUD@deprecated@cs{univrn}{osrn}%
 \TUD@deprecated@cs{univbn}{ossn}%
@@ -6502,11 +6539,6 @@
 \TUD@deprecated@cs{textuxs}{textosbi}%
 \TUD@deprecated@cs{dinbn}{osxn}%
 \TUD@deprecated@cs{textdbn}{textosxn}%
-\AtEndOfClass%
-{%
-  \tud@if@v@lower{2.04}{\TUDoptions{relspacing=false}}{}%
-  \tud@if@v@lower{2.06}{\RequirePackage{tudscroldfonts}[\TUD@Version]}{}%
-}
 %%% From File: tudscr-misc.dtx
 \newcommand*\tud@atdocument@hook{}
 \let\tud@atdocument@hook\relax
