@@ -1,4 +1,4 @@
-% \CheckSum{413}
+% \CheckSum{414}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-misc.dtx}[%
-  2018/07/11 v2.06 TUD-Script (miscellaneous)%
+  2018/07/12 v2.06 TUD-Script (miscellaneous)%
 ]
 \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman,xindy]{tudscrdoc}
@@ -591,32 +591,34 @@
 % }[v2.06]
 % \ToDo{Ist der Kram noch notwendig?}[v2.06]
 %    \begin{macrocode}
-\CheckCommand*\@uclcnotmath[4]{%
-  \begingroup
-    #1%
-    \def\({$}\let\)\(%
-    \def\NoCaseChange##1{\noexpand\NoCaseChange{\noexpand##1}}%
-    \@nonchangecase\label
-    \@nonchangecase\ref
-    \@nonchangecase\ensuremath
-    \def\cite##1##{\toks@{\noexpand\cite##1}\@citex}%
-    \def\@citex##1{\NoCaseChange{\the\toks@{##1}}}%
-    \def\reserved@a##1##2{\let#2\reserved@a}%
-    \expandafter\reserved@a\@uclclist\reserved@b{\reserved@b\@gobble}%
-    \protected@edef\reserved@a{%
-      \endgroup
-      \noexpand\@skipmath#3#4$\valign$%
-    }%
-  \reserved@a%
-}
 \newcommand*\tud@x@textcase@uclcnotmath{%
   \def\footnote##1##{\toks@{\noexpand\footnote##1}\@footnote}%
   \def\@footnote##1{\NoCaseChange{\the\toks@{##1}}}%
   \def\@mkboth##1##2{\NoCaseChange{\@mkboth{##1}{##2}}}%
 }
-\patchcmd{\@uclcnotmath}{\@nonchangecase\ensuremath}{%
-  \@nonchangecase\ensuremath\tud@x@textcase@uclcnotmath%
-}{}{\tud@patch@wrn{@uclcnotmath}}
+\AfterPackage*{textcase}{%
+  \CheckCommand*\@uclcnotmath[4]{%
+    \begingroup
+      #1%
+      \def\({$}\let\)\(%
+      \def\NoCaseChange##1{\noexpand\NoCaseChange{\noexpand##1}}%
+      \@nonchangecase\label
+      \@nonchangecase\ref
+      \@nonchangecase\ensuremath
+      \def\cite##1##{\toks@{\noexpand\cite##1}\@citex}%
+      \def\@citex##1{\NoCaseChange{\the\toks@{##1}}}%
+      \def\reserved@a##1##2{\let#2\reserved@a}%
+      \expandafter\reserved@a\@uclclist\reserved@b{\reserved@b\@gobble}%
+      \protected@edef\reserved@a{%
+        \endgroup
+        \noexpand\@skipmath#3#4$\valign$%
+      }%
+    \reserved@a%
+  }
+  \patchcmd{\@uclcnotmath}{\@nonchangecase\ensuremath}{%
+    \@nonchangecase\ensuremath\tud@x@textcase@uclcnotmath%
+  }{}{\tud@patch@wrn{@uclcnotmath}}
+}
 %    \end{macrocode}
 % \end{macro}^^A \@uclcnotmath
 % \end{macro}^^A \tud@x@textcase@uclcnotmath
@@ -637,12 +639,12 @@
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{\TUD@Class@Parent}}
 %</class&inherit>
 %<package&fonts>\DeclareOption*{\KOMAoptions{\CurrentOption}}
-%<package&(comp|oldfonts)>\DeclareOption*{\TUDoptions{\CurrentOption}}
+%<package&comp>\DeclareOption*{\TUDoptions{\CurrentOption}}
 %    \end{macrocode}
 % Es werden die Standardoptionen ausgeführt. Für die Klasse \cls{tudscrposter} 
 % werden die Farben aktiviert.
 %    \begin{macrocode}
-%<*class&!inherit|package&(fonts|oldfonts)>
+%<*class&!inherit|package&fonts>
 \TUDExecuteOptions{%
 %<*class&(book|report|article)>
   cd=true,cdfont=true,relspacing=true,tudbookmarks=true%
@@ -653,11 +655,8 @@
 %<*package&fonts>
   cdfont=true,relspacing=true%
 %</package&fonts>
-%<*package&oldfonts>
-  cdfont=din%
-%</package&oldfonts>
 }
-%</class&!inherit|package&(fonts|oldfonts)>
+%</class&!inherit|package&fonts>
 %<*package&tutorial>
 \KOMAoptions{headings=small}
 \TUDoptions{cdfoot=true}
