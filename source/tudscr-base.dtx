@@ -1,4 +1,4 @@
-% \CheckSum{716}
+% \CheckSum{731}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-base.dtx}[%
-  2018/07/11 v2.06 TUD-Script\space%
+  2018/07/12 v2.06 TUD-Script\space%
 %</driver>
 %<package&base>\ProvidesPackage{tudscrbase}[%
 %<*driver|package&base>
@@ -158,8 +158,13 @@
 % \begin{macro}{\tud@reserved}
 % \changes{v2.05}{2015/10/27}{neu}^^A
 % \begin{macro}{\tud@res@a}
+% \changes{v2.06}{2018/07/12}{neu}^^A
 % \begin{macro}{\tud@res@b}
+% \changes{v2.06}{2018/07/12}{neu}^^A
 % \begin{macro}{\tud@res@c}
+% \changes{v2.06}{2018/07/12}{neu}^^A
+% \begin{macro}{\if@tud@res@swa}
+% \changes{v2.06}{2018/07/12}{neu}^^A
 % Makros zur temporären Verwendung.
 % \ToDo{alle Makros \cs{@temp\dots} mit neuen internen Makros ersetzen}[v2.07]
 %    \begin{macrocode}
@@ -167,7 +172,9 @@
 \newcommand*\tud@res@a{}
 \newcommand*\tud@res@b{}
 \newcommand*\tud@res@c{}
+\newif\if@tud@res@swa
 %    \end{macrocode}
+% \end{macro}^^A \if@tud@res@swa
 % \end{macro}^^A \tud@res@c
 % \end{macro}^^A \tud@res@b
 % \end{macro}^^A \tud@res@a
@@ -1080,6 +1087,30 @@
 \newcommand*\TUD@UnwindPackage[2]{\AtEndPreamble{\@ifpackageloaded{#1}{}{#2}}}
 %    \end{macrocode}
 % \end{macro}^^A \TUD@UnwindPackage
+% \begin{macro}{\TUD@RecommendPackage}
+% \changes{v2.06}{2018/07/12}{neu}^^A
+% Bestimmte Pakete sind für die Funktionalität von \TUDScript empfohlen, aber 
+% nicht zwingend erforderlich. Sind diese nicht vorhanden, wird eine Warnung 
+% ausgegeben.
+%    \begin{macrocode}
+\newcommand*\TUD@RecommendPackage[1]{%
+  \kernel@ifnextchar[%]
+    {\TUD@@RecommendPackage#1}%
+    {\TUD@@RecommendPackage#1[]}%
+}
+\newcommand*\TUD@@RecommendPackage{}
+\def\TUD@@RecommendPackage#1[#2]{%
+  \IfFileExists{#1.sty}{%
+    \RequirePackage{#1}[#2]%
+  }{%
+    \PackageWarning{tudscrbase}{%
+      The usage of package `#1' (#2) is\MessageBreak%
+      recommended but it isn't installed%
+    }%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \TUD@RecommendPackage
 % \begin{macro}{\TUD@AfterPackage@set}
 % \changes{v2.04}{2015/03/09}{neu}^^A
 % \begin{macro}{\TUD@AfterPackage@do}
