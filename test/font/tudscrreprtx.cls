@@ -240,6 +240,9 @@
       \fi%
     }{}%
   \fi%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \@tud@cdoldfont@activefalse%
+  \fi%
 }
 \newcommand*\tud@cdfont@activate{%
   \@tud@cdfont@activetrue%
@@ -271,6 +274,9 @@
     \fi%
   \else%
     \TUDoptions{cdfont=#1}%
+  \fi%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \@tud@cdoldfont@activetrue%
   \fi%
 }
 % TODO verwendete Version auf höchstens v2.05 setzen
@@ -1838,6 +1844,12 @@
         FontFace={b}{n}{OpenSansBold},%
         FontFace={bx}{n}{OpenSansBold},%
         FontFace={eb}{n}{OpenSansExtraBold},%
+        FontFace={l}{it}{OpenSansLightItalic},%
+        FontFace={m}{it}{OpenSansItalic},%
+        FontFace={sb}{it}{OpenSansSemiBoldItalic},%
+        FontFace={b}{it}{OpenSansBoldItalic},%
+        FontFace={bx}{it}{OpenSansBoldItalic},%
+        FontFace={eb}{it}{OpenSansExtraBoldItalic},%
         FontFace={l}{sl}{OpenSansLightItalic},%
         FontFace={m}{sl}{OpenSansItalic},%
         FontFace={sb}{sl}{OpenSansSemiBoldItalic},%
@@ -1902,6 +1914,11 @@
           FontFace={b}{n}{UniversBold},%
           FontFace={bx}{n}{UniversBold},%
           FontFace={eb}{n}{UniversBlack},%
+          FontFace={l}{it}{UniversLightOblique},%
+          FontFace={m}{it}{UniversOblique},%
+          FontFace={b}{it}{UniversBoldOblique},%
+          FontFace={bx}{it}{UniversBoldOblique},%
+          FontFace={eb}{it}{UniversBlackOblique},%
           FontFace={l}{sl}{UniversLightOblique},%
           FontFace={m}{sl}{UniversOblique},%
           FontFace={b}{sl}{UniversBoldOblique},%
@@ -1954,6 +1971,11 @@
           FontFace={b}{n}{DIN-Bold},%
           FontFace={bx}{n}{DIN-Bold},%
           FontFace={eb}{n}{DIN-Bold},%
+          FontFace={l}{it}{Font=DIN-Bold,FakeSlant=0.15},%
+          FontFace={m}{it}{Font=DIN-Bold,FakeSlant=0.15},%
+          FontFace={b}{it}{Font=DIN-Bold,FakeSlant=0.15},%
+          FontFace={bx}{it}{Font=DIN-Bold,FakeSlant=0.15},%
+          FontFace={eb}{it}{Font=DIN-Bold,FakeSlant=0.15},%
           FontFace={l}{sl}{Font=DIN-Bold,FakeSlant=0.15},%
           FontFace={m}{sl}{Font=DIN-Bold,FakeSlant=0.15},%
           FontFace={b}{sl}{Font=DIN-Bold,FakeSlant=0.15},%
@@ -2190,6 +2212,12 @@
         FontFace={b}{n}{RobotoMono-Bold},%
         FontFace={bx}{n}{RobotoMono-Bold},%
         FontFace={eb}{n}{RobotoMono-Bold},%
+        FontFace={l}{it}{RobotoMono-LightItalic},%
+        FontFace={m}{it}{RobotoMono-Italic},%
+        FontFace={sb}{it}{RobotoMono-MediumItalic},%
+        FontFace={b}{it}{RobotoMono-BoldItalic},%
+        FontFace={bx}{it}{RobotoMono-BoldItalic},%
+        FontFace={eb}{it}{RobotoMono-BoldItalic},%
         FontFace={l}{sl}{RobotoMono-LightItalic},%
         FontFace={m}{sl}{RobotoMono-Italic},%
         FontFace={sb}{sl}{RobotoMono-MediumItalic},%
@@ -2207,6 +2235,12 @@
         FontFace={b}{n}{LMMonoLt10-Bold},%
         FontFace={bx}{n}{LMMonoLt10-Bold},%
         FontFace={eb}{n}{LMMonoLt10-Bold},%
+        FontFace={l}{it}{LMMonoLt10-Oblique},%
+        FontFace={m}{it}{LMMonoSlant10-Regular},%
+        FontFace={sb}{it}{LMMonoSlant10-Regular},%
+        FontFace={b}{it}{LMMonoLt10-BoldOblique},%
+        FontFace={bx}{it}{LMMonoLt10-BoldOblique},%
+        FontFace={eb}{it}{LMMonoLt10-BoldOblique},%
         FontFace={l}{sl}{LMMonoLt10-Oblique},%
         FontFace={m}{sl}{LMMonoSlant10-Regular},%
         FontFace={sb}{sl}{LMMonoSlant10-Regular},%
@@ -6892,7 +6926,6 @@
 \AtEndOfClass%
 {%
   \tud@if@v@lower{2.04}{\TUDoptions{relspacing=false}}{}%
-%  \tud@if@v@lower{2.06}{\RequirePackage{tudscroldfonts}[\TUD@Version]}{}%
 }
 \TUD@deprecated@cs{univln}{cdfontln}%
 \TUD@deprecated@cs{univrn}{cdfontrn}%
