@@ -29,7 +29,7 @@
 %% 
 %% TUD-Script -- Corporate Design of Technische Universitaet Dresden
 %% 
-%%   2018/07/03 v2.06 TUD-Script
+%%   2018/07/13 v2.06 TUD-Script
 %% 
 %% Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2018
 %% 
@@ -72,13 +72,13 @@
       \fi%
     }
   \fi
-  \TUD@Version@Check{2018/07/03 v2.06 TUD-Script}
+  \TUD@Version@Check{2018/07/13 v2.06 TUD-Script}
 \endgroup
 \NeedsTeXFormat{LaTeX2e}
 \providecommand*\tudscrmail{hanisch.latex@outlook.com}
 \newcommand*\TUD@ProvidesClass[3]{%
   \ProvidesClass{#1}[%
-  2018/07/03 v2.06 TUD-Script
+  2018/07/13 v2.06 TUD-Script
     ^^J#3 (#2)%
   ]%
   \newcommand*\TUD@Class@KOMA{#2}%
@@ -1355,7 +1355,6 @@
     \FamilyKeyStateProcessed%
   }%
   \if@tud@x@fontspec@requested%
-    \PassOptionsToPackage{no-math}{fontspec}%
     \RequirePackage{fontspec}[2017/01/24]%
   \fi%
 }
@@ -1484,6 +1483,7 @@
 %%% From File: tudscr-fonts.dtx
 \newif\if@tud@x@fontspec@enabled
 \newif\if@tud@x@fontspec@math@enabled
+\PassOptionsToPackage{no-math}{fontspec}
 \AfterPackage*{fontspec}{%
   \@ifpackagelater{fontspec}{2017/01/24}{%
     \@tud@x@fontspec@enabledtrue%
@@ -1593,9 +1593,17 @@
           \fi%
         }%
       \else%
+        \ifstr{\encodingdefault}{TU}{%
+          \appto\tud@res@a{%
+            You should either load package `fontspec'\MessageBreak%
+            or %
+          }%
+        }{%
+          \appto\tud@res@a{Please }%
+        }%
         \appto\tud@res@a{%
-          Please choose a possible encoding with\MessageBreak%
-          package `fontenc' (\tud@res@b)%
+          choose a possible encoding with package\MessageBreak%
+          `fontenc' (\tud@res@b)%
         }%
       \fi%
     \fi%
@@ -2367,6 +2375,8 @@
   \let\tud@font@greek@check@slanted\relax%
 }
 \BeforePackage{flexisym}{\tud@font@greek@check@slanted}
+% TODO aufrechte minuskeln
+% TODO kursive Varianten nicht mit \var... sondern \sl... oder \it...
 \newcommand*\tud@font@greek@init[1]{%
   \ifcsundef{up#1}{%
     \if@tud@slantedgreek%

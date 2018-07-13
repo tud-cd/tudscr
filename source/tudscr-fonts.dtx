@@ -1,4 +1,4 @@
-% \CheckSum{2071}
+% \CheckSum{2079}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -61,12 +61,11 @@
 ]
 %</driver|package&identify>
 %<*driver>
-\RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman,xindy]{tudscrdoc}
 \usepackage[T1]{fontenc}
-\usepackage{selinput}\SelectInputMappings{adieresis={ä},germandbls={ß}}
+\ifpdftex{\usepackage[ngerman=ngerman-x-latest]{hyphsubst}}{}
 \usepackage{babel}
-\usepackage{tudscrfonts} % only load this package, if the fonts are installed
+\usepackage{tudscrfonts}
 \KOMAoptions{parskip=half-}
 \usepackage{bookmark}
 \usepackage[babel]{microtype}
@@ -195,6 +194,7 @@
 %    \begin{macrocode}
 \newif\if@tud@x@fontspec@enabled
 \newif\if@tud@x@fontspec@math@enabled
+\PassOptionsToPackage{no-math}{fontspec}
 \AfterPackage*{fontspec}{%
   \@ifpackagelater{fontspec}{2017/01/24}{%
     \@tud@x@fontspec@enabledtrue%
@@ -410,9 +410,17 @@
           \fi%
         }%
       \else%
+        \ifstr{\encodingdefault}{TU}{%
+          \appto\tud@res@a{%
+            You should either load package `fontspec'\MessageBreak%
+            or %
+          }%
+        }{%
+          \appto\tud@res@a{Please }%
+        }%
         \appto\tud@res@a{%
-          Please choose a possible encoding with\MessageBreak%
-          package `fontenc' (\tud@res@b)%
+          choose a possible encoding with package\MessageBreak%
+          `fontenc' (\tud@res@b)%
         }%
       \fi%
     \fi%
