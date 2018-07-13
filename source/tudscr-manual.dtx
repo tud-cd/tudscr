@@ -1,4 +1,4 @@
-% \CheckSum{4373}
+% \CheckSum{4369}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -101,7 +101,6 @@
 % Menge an Überschneidungen gibt, basieren diese auf der gleichen Quelldatei. 
 % Einiges davon wird auch für die Quelltextdokumentationsklasse \cls{tudscrdoc} 
 % verwendet.
-% \ToDo{\cs{write18} durch \cs{ShellEscape} ersetzen}[v2.06]
 %
 % \StopEventually{\PrintIndex\PrintChanges\PrintToDos}
 %
@@ -191,10 +190,13 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@english
-% Sollte \app{lualatex} als Dokumentprozessor eingesetzt werden, sind dennoch  
-% die \app{pdflatex}-Primitiven \cs{pdf(@)strcmp} und \cs{pdf(@)shellescape}
-% notwendig, wofür das Paket \pkg{pdftexcmds} geladen wird.
+% Das Paket \pkg{shellesc} ermöglicht mit dem Befehl \cs{ShellEscape} die 
+% Verwendung von Systembefehlen auf der Kommandozeile unabhängig von der 
+% genutzten Engine. Sollte \app{lualatex} als Dokumentprozessor eingesetzt
+% werden, sind dennoch die \app{pdflatex}-Primitiven \cs{pdf(@)strcmp} und
+% \cs{pdf(@)shellescape} nötig, wofür das Paket \pkg{pdftexcmds} geladen wird.
 %    \begin{macrocode}
+\RequirePackage{shellesc}[2016/06/07]
 \RequirePackage{pdftexcmds}[2016/05/21]
 %    \end{macrocode}
 %
@@ -2933,7 +2935,10 @@
 % Überschrift gesetzt werden, wird lediglich das Hauptargument unformatiert 
 % ausgegeben.
 %    \begin{macrocode}
-  \def\Markup@Format{\ifdisposition{\MakeTextUppercase}{#1}}%
+  \def\Markup@Format{\ifdisposition{}{#1}}%
+  \if@tud@cdoldfont@active\if@tud@cdoldfont@usedin%
+    \def\Markup@Format{\ifdin{\MakeTextUppercase}{#1}}%
+  \fi\fi%
   \IfValueT{#2}{\def\Markup@Suffix{\suffix{#2}}}%
 %<*class>
   \IfValueT{#3}{\renewcommand*\Markup@Declare[1]{#3\Markup@Suffix}}%
@@ -2974,7 +2979,6 @@
 % Ignorieren hinzugefügt. Damit aber bei der eigentlichen Ausgabe alles in
 % Majuskeln erscheint, wird für diesen Fall \cs{Markup@Format} genutzt.
 %    \begin{macrocode}
-\robustify\NoCaseChange
 \NewDocumentCommand\tud@nonchangecase{m}{%
   \DeclareExpandableDocumentCommand#1{sm}{%
     \IfBooleanT{##1}{\noexpand\@tud@indextrue}%
@@ -4842,7 +4846,7 @@
 %    \begin{macrocode}
 \RequirePackage{filemod}[2011/09/19]
 %    \end{macrocode}
-% Um die \cs{write18} sowohl für Windows als auch für unixoide Betriebssysteme 
+% Um \cs{ShellEscape} sowohl für Windows als auch für unixoide Betriebssysteme 
 % nutzen zu können, wird das Paket \pkg{ifplatform} geladen.
 %    \begin{macrocode}
 \RequirePackage{ifplatform}[2010/10/22]
@@ -4902,12 +4906,12 @@
 % Hier erfolgt die Unterscheidung der Befehle für die unterschiedlichen OS.
 %    \begin{macrocode}
         \ifwindows%
-          \immediate\write18{rename tutorials.sh tutorials.bat}%
-          \immediate\write18{tutorials.bat}%
-          \immediate\write18{del tutorials.bat}%
+          \ShellEscape{rename tutorials.sh tutorials.bat}%
+          \ShellEscape{tutorials.bat}%
+          \ShellEscape{del tutorials.bat}%
         \else%
-          \immediate\write18{bash tutorials.sh}%
-          \immediate\write18{rm tutorials.sh}%
+          \ShellEscape{bash tutorials.sh}%
+          \ShellEscape{rm tutorials.sh}%
         \fi%
       }%
       \@tempb{pdflatex -shell-escape "\@tempa"}%
@@ -4958,7 +4962,7 @@
 %    \begin{macrocode}
   \ifnum\pdf@shellescape=\@ne\relax%
     \filemodCmp{examples/#1.pdf}{examples/#1.tex}{}{%
-      \immediate\write18{%
+      \ShellEscape{%
         pdflatex -output-directory examples examples/#1.tex^^J%
         pdflatex -output-directory examples examples/#1.tex%
       }%
@@ -4968,7 +4972,7 @@
 % wird auch dieses kompiliert.
 %    \begin{macrocode}
     \filemodCmp{examples/#1_print.pdf}{examples/#1_print.tex}{}{%
-      \immediate\write18{%
+      \ShellEscape{%
         pdflatex -output-directory examples examples/#1_print.tex^^J%
         pdflatex -output-directory examples examples/#1_print.tex%
       }%
@@ -5151,7 +5155,7 @@
     \else%
       \def\@tempa{rm}%
     \fi%
-    \immediate\write18{\@tempa\space\tud@tut@temp*.*}%
+    \ShellEscape{\@tempa\space\tud@tut@temp*.*}%
   \fi%
 }
 %    \end{macrocode}
@@ -5476,8 +5480,8 @@
 % Quelltextes diesen abermals, um daraus eine PDF-Datei zu erzeugen. Dafür wird
 % eine temporäre \LaTeX-Datei mithilfe einer \env{filecontents}-Umgebung 
 % erzeugt. Diese bindet die mit \env{Trunk!} erzeugte Datei ein und wird
-% anschließend via \cs{write18} kompiliert. Dabei sollte man sich nicht von der 
-% doppelten Verwendung von \cs{jobname} verwirren lassen. Der Dateiname der
+% anschließend via \cs{ShellEscape} kompiliert. Dabei sollte man sich nicht von 
+% der doppelten Verwendung von \cs{jobname} verwirren lassen. Der Dateiname der
 % temporär erzeugten \LaTeX-Datei ist abhängig vom gesetzten Tutorial. Beim
 % Aufruf dieser wird über die Optionen von \app{pdflatex} der verwendete
 % \cs{jobname} angepasst (siehe \cs{tud@tut@pdf}).
@@ -5532,13 +5536,13 @@
           "\noexpand\unexpanded{\expandonce\@tempb\noexpand\input}%
             {\tud@tut@temp-standalone.tex}"%
         }%
-        \immediate\write18{\@tempa^^J\@tempa^^J\@tempa}%
+        \ShellEscape{\@tempa^^J\@tempa^^J\@tempa}%
         \ifwindows%
           \def\@tempa{rename}%
         \else%
           \def\@tempa{mv}%
         \fi%
-        \immediate\write18{%
+        \ShellEscape{%
           \@tempa\space\tud@tut@temp.pdf\space%
           \jobname-standalone-\StandaloneFile.pdf%
         }%
