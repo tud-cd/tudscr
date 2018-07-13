@@ -1,11 +1,10 @@
-\RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[%
   english,ngerman,%
   cdgeometry=no,DIV=12,automark,%
 ]{tudscrartcl}
 \usepackage{tudscrtutorial}
 \usepackage[T1]{fontenc}
-\usepackage{selinput}\SelectInputMappings{adieresis={ä},germandbls={ß}}
+\ifpdftex{\usepackage[ngerman=ngerman-x-latest]{hyphsubst}}{}
 \lstset{%
   inputencoding=utf8,extendedchars=true,
   literate=%
@@ -235,16 +234,6 @@ Dokument verwendet werden sollten. Alle weiteren in diesem Tutorial genutzten
 und/oder empfohlenen Pakete werden in den relevanten Abschnitten des Tutorials 
 genauer erläutert. 
 
-Den Anfang macht das Paket \Package{hyphsubst}. Dieses wird für eine wesentlich 
-verbesserte Worttrennung für die deutsche Sprache benötigt und muss bereits 
-\emph{vor} der Klasse geladen werden, damit es problemlos funktioniert. In 
-\autoref{sec:hyphenation} können Sie weitere Informationen zur Verwendung von 
-\Package{hyphsubst} sowie zum Thema \emph{Worttrennung} finden.
-%
-\begin{Preamble}
-\RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
-\end{Preamble}
-%
 Beim Laden der Klasse mit \Macro*{documentclass} können Sie globale Optionen 
 angeben. Diese werden sowohl an die Klasse selbst weitergereicht als auch allen 
 in der Präambel geladenen Pakete zur Verfügung gestellt. Falls das Paket 
@@ -259,20 +248,35 @@ diese nicht nur an das Paket \Package{babel} sondern auch an andere Pakete
 \usepackage{babel}
 \end{Preamble}
 %
-Bei der Verwendung von \Engine{pdfLaTeX} sollte zum einen die Eingabekodierung 
-des erstellten Datei spezifiziert werden. Das Paket \Package{selinput} erkennt 
-automatisch, welche Kodierung der genutzte Editor verwendet. Alternativ lässt 
-sich die Eingabekodierung mit dem Paket \Package{inputenc} auch manuell 
-festgelegen. Zum anderen werden die Schriften in der Ausgabe ebenfalls kodiert. 
-Mit dem Paket \Package{fontenc} lässt sich die verwendete Schriftkodierung für 
-das Dokument spezifizieren, wobei im Normalfall die europäischen Zeichen mit 
-der Option~\Option{T1}(\Package{fontenc}) aktiviert werden sollten. Es wird 
-empfohlen, das Paket \Package{fontenc} \emph{vor} \Package{selinput} respektive 
-\Package{inputenc} zu laden.
+Mit dem Paket \Package{fontenc} lässt sich die Kodierung der für die Ausgabe 
+der verwendeten Schriften im Dokument spezifizieren, wobei die europäische 
+Zeichenkodierung mit der Option~\Option{T1}(\Package{fontenc}) aktiviert wird. 
+Kommt mit \Engine{LuaLaTeX} oder \Engine{XeLaTeX} ein Unicode"=Textsatzsystem 
+zum Einsatz, kann alternativ das Paket \Package{fontspec} geladen werden.
+
+Weiterhin kann die Eingabekodierung der kompilierten Datei eingestellt werden. 
+Diese ist standardmäßig \PValue{utf8}. Bei der Verwendung von \Engine{pdfLaTeX} 
+sind auch andere Kodierungen möglich.%
+\footnote{%
+  Sollte die Datei in einer anderen Kodierung gespeichert sein, so kann das 
+  Paket \Package{selinput} genutzt werden, um automatisch zu erkennen, welche 
+  Kodierung der genutzte Editor verwendet. Alternativ lässt sich die 
+  Eingabekodierung mit dem Paket \Package{inputenc} auch manuell festgelegen. 
+  In beiden Fällen sollte das Paket \Package{fontenc} \emph{vorher} geladen 
+  worden sein.
+} 
+
+Wurde ein Sprachpaket für die deutsche Sprache geladen (\Package{babel} oder 
+\Package{polyglossia}), so werden für \Engine{LuaLaTeX} und \Engine{XeLaTeX} 
+erweiterte Trennmuster verwendet. Für \Engine{pdfLaTeX} lässt sich eine 
+wesentlich verbesserte Worttrennung für die deutsche Sprache mit dem Paket 
+\Package{hyphsubst} aktivieren. In \autoref{sec:hyphenation} können Sie weitere 
+Informationen zur Verwendung von \Package{hyphsubst} sowie zum Thema 
+\emph{Worttrennung} finden.
 %
 \begin{Preamble}
 \usepackage[T1]{fontenc}
-\usepackage{selinput}\SelectInputMappings{adieresis={ä},germandbls={ß}}
+\ifpdftex{\usepackage[ngerman=ngerman-x-latest]{hyphsubst}}{}
 \end{Preamble}
 %
 Für die \KOMAScript-Klassen wird außerdem das Paket \Package{scrhack} 
@@ -2626,17 +2630,18 @@ heute noch teilweise falsche Trennstellen gefunden werden.
 Zu Beginn wurde bei der Einleitung in \autoref{sec:introduction} auf das Paket 
 \Package{hyphsubst} hingewiesen, welches dieses Manko~-- aufgrund der nicht 
 mehr so stark gegebenen Restriktionen bezüglich des Speicherbedarfes~-- mit 
-einem Wörterbuch behebt. Dieses Paket muss \emph{vor} dem Laden der 
-Dokumentklasse eingebunden werden. Außerdem wird das Paket \Package{babel} 
-benötigt. Damit auch Wörter mit Umlauten richtig getrennt werden, ist zudem die 
-Verwendung der \PValue{T1}"~Schriftkodierung notwendig. Der Beginn einer 
-Dokumentpräambel könnte folgendermaßen aussehen:
+einem Wörterbuch behebt. Dieses Paket muss für \Engine{pdfLaTeX} vom Anwender 
+eingebunden werden, \Engine{LuaLaTeX} und \Engine{XeLaTeX} verwenden die 
+Trennmuster~-- ein geladenes Sprachpaket wie \Package{polyglossia} oder 
+\Package{babel} vorausgesetzt~-- automatisch. Damit auch Wörter mit Umlauten 
+richtig getrennt werden, ist zudem das Paket \Package{fontspec} respektive 
+\Package{fontenc} mit der \PValue{T1}"~Schriftkodierung notwendig. Der Beginn 
+einer Dokumentpräambel könnte folgendermaßen aussehen:
 %
 \begin{Hint}
-\RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[ngerman,§\PName{Klassenoptionen}§]§\Parameter{Dokumentklasse}§
 \usepackage[T1]{fontenc}
-\usepackage{selinput}\SelectInputMappings{adieresis={ä},germandbls={ß}}
+\ifpdftex{\usepackage[ngerman=ngerman-x-latest]{hyphsubst}}{}
 \usepackage{babel}
 §\dots§
 \end{Hint}

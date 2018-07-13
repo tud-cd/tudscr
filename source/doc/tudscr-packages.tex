@@ -142,34 +142,26 @@ Die hier vorgestellten Pakete gehören meiner Meinung nach in die Präambel eine
 jeden Dokumentes. Egal, in welcher Sprache das Dokument verfasst wird, sollte 
 diese mit dem Paket \Package{babel} definiert werden~-- auch wenn dies 
 Englisch ist. Für deutschsprachige Dokumente ist für eine annehmbare 
-Worttrennung das Paket \Package{hyphsubst} unbedingt zu verwenden.
+Worttrennung beim Einsatz von \Engine{pdfLaTeX} das Paket \Package{hyphsubst} 
+unbedingt zu verwenden.
 
 \begin{packages}
-\item[fontenc]
+\item[fontenc,fontspec]
   \index{Zeichensatzkodierung}%
-  Das Paket erlaubt Festlegung der Zeichensatzkodierung des Ausgabefonts. Als 
-  Voreinstellung ist die Ausgabe als 7"~bit kodierte Schrift gewählt, was unter 
-  anderem dazu führt, dass keine echten Umlaute im erzeugten PDF"~Dokument 
-  verwendet werden. Um auf 8"~bit"~Schriften zu schalten, ist
-  \Macro*{usepackage}[\POParameter{T1}\PParameter{fontenc}] zu nutzen.
-\item[selinput,inputenc]
-  \index{Eingabekodierung}%
-  \index{Minimalbeispiel|?}%
-  Hiermit erfolgt die (automatische) Festlegung der Eingabekodierung. Diese ist 
-  vom genutzten \hyperref[sec:tips:editor]{Editors (\autoref{sec:tips:editor})} 
-  und den darin gewählten Einstellung abhängig. Mit:
-  \begin{Code}
-    \usepackage{selinput}
-    \SelectInputMappings{adieresis={ä},germandbls={ß}}
-  \end{Code}\vspace{-\baselineskip}%
-  wird es verwendet. Dies macht den Quelltext zum einen für unterschiedliche 
-  Betriebssystem portabel und es kann beispielsweise einfach via Copy~\&~Paste 
-  ein \hrfn{http://www.komascript.de/minimalbeispiel}{Minimalbeispiel} bei 
-  Problemstellungen in einem Forum bereitgestellt werden. Alternativ dazu lässt 
-  sich mit dem Paket \Package{inputenc} 
-  (\Macro*{usepackage}[\OParameter{Eingabekodierung}\PParameter{inputenc}])
-  die Eingabekodierung manuell einstellen. Das Paket \Package{fontenc} sollte 
-  in jedem Fall \emph{zuvor} geladen werden.
+  \ChangedAt{v2.02:\RecPack \Package{fontspec}}
+  In jedem Dokument sollte die Zeichensatzkodierung des Ausgabefonts festgelegt
+  werden. Für \Engine{pdfLaTeX} ist die Ausgabe als 7"~bit"~kodierte Schrift in 
+  der Voreinstellung gewählt, was unter anderem dazu führt, dass keine echten
+  Umlaute im erzeugten PDF"~Dokument verwendet werden. Um auf 8"~bit"~Schriften
+  zu schalten, ist \Macro*{usepackage}[\POParameter{T1}\PParameter{fontenc}] zu
+  nutzen.
+  
+  Dieses Vorgehen ist auch für die Unicode"=Textsatzsysteme \Engine{LuaLaTeX} 
+  oder \Engine{XeLaTeX} zulässig. Allerdings kann für diese alternativ dazu das
+  Paket \Package{fontspec} verwendet werden. Damit können Systemschriften im 
+  OpenType"~Format und einer beliebigen Zeichensatzkodierung eingebunden 
+  werden, womit sich die Auswahl der verwendbaren Schriften stark erweitert. 
+  Das Paket wird durch \TUDScript unterstützt.
 \item[babel,polyglossia]
   \index{Sprachunterstützung}%
   \index{Bezeichner}%
@@ -199,13 +191,14 @@ Worttrennung das Paket \Package{hyphsubst} unbedingt zu verwenden.
   \index{Worttrennung|!}%
   Die möglichen Trennstellen von Wörtern wird von \hologo{LaTeX} mithilfe 
   eines Algorithmus berechnet. Dieser wird für deutschsprachige Texte mit dem 
-  Paket \Package{hyphsubst} entscheidend verbessert. Es muss bereits \emph{vor} 
-  der Dokumentklasse wie folgt geladen werden:
+  Paket \Package{hyphsubst} entscheidend verbessert. \Engine{LuaLaTeX} und 
+  \Engine{XeLaTeX} nutzen diese Trennmuster automatisch, für \Engine{pdfLaTeX} 
+  müssen diese mit folgendermaßen eingebunden werden:
   \begin{Code}[escapechar=§]
-    \RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
+    \usepackage[ngerman=ngerman-x-latest]{hyphsubst}
   \end{Code}\vspace{-\baselineskip}%
   In \autoref{sec:tips:hyphenation} wird genauer auf das Zusammenspiel von 
-  \Package{hyphsubst} und \Package{babel} sowie \Package{fontenc} eingegangen,
+  \Package{hyphsubst} und \Package{babel} sowie \Package{fontenc} eingegangen, 
   ein Blick dahin wird dringend empfohlen. Zusätzliche werden dort weitere 
   Hinweise für eine verbesserte Worttrennung gegeben. 
 \end{packages}
@@ -418,14 +411,6 @@ widmen. Diese sind jedoch ausschließlich nutzbar, wenn als Textsatzsystem
   kann es unter Umständen zu Problemen bei den Schriftstärken kommen. Das Paket 
   \Package{mweights} erlaubt die individuelle Definition der Schriftstärke für 
   jede der drei Schriftfamilien.
-\item[fontspec]
-  \index{Zeichensatzkodierung}%
-  \ChangedAt{v2.02:\RecPack \Package{fontspec}}
-  Wird als Textsatzsystem nicht \Engine{pdfLaTeX} sondern \Engine{XeLaTeX}   
-  oder \Engine{LuaLaTeX} verwendet, können mit diesem Paket Systemschriften im 
-  OpenType"~Format und einer beliebigen Zeichensatzkodierung eingebunden 
-  werden, womit sich die Auswahl der verwendbaren Schriften stark erweitert. 
-  Das Paket wird durch \TUDScript unterstützt.
 \item[relsize]
   \index{Schriftgröße}%
   Die Größe einer Textauszeichnung kann relativ zur aktuellen Schriftgröße 
@@ -1034,6 +1019,25 @@ werden konnte.
   direkt davor oder danach zu reagieren, um beispielsweise Paketabhängigkeiten 
   aufzulösen oder nach dem Laden eines bestimmten Paketes gezielt Befehle 
   anzupassen. Mehr dazu ist im \scrguide zu finden.
+\item[selinput,inputenc]
+  \index{Eingabekodierung}%
+  \index{Minimalbeispiel|?}%
+  Die verwendete Eingabekodierung ist standardmäßig auf \PValue{utf8}
+  festgelegt, was von (fast) allen \LaTeX-Editoren unterstützt wird. Dies 
+  sollte im Normalfall auch nicht geändert werden. Ältere Dokumente sind aber 
+  vielleicht noch in einer anderen Eingabekodierung gespeichert. Kann diese 
+  nicht geändert werden, so ist es für \Engine{pdfLaTeX} möglich, eine 
+  andere~-- im \hyperref[sec:tips:editor]{Editor (\autoref{sec:tips:editor})} 
+  vom Anwender eingestellte~-- Eingabekodierungen zu nutzen. Diese kann mit dem 
+  Paket \Package{selinput} (automatisch) für \LaTeX festgelegt werden Mit:
+  \begin{Code}
+    \usepackage{selinput}
+    \SelectInputMappings{adieresis={ä},germandbls={ß}}
+  \end{Code}\vspace{-\baselineskip}%
+  wird es verwendet. Alternativ dazu lässt sich die Eingabekodierung manuell 
+  mit \Macro*{usepackage}[\OParameter{Eingabekodierung}\PParameter{inputenc}]
+  einstellen. Das Paket \Package{fontenc} sollte in jedem Fall \emph{zuvor} 
+  geladen werden.
 \end{packages}
 
 \subsubsection{Bugfixes}
