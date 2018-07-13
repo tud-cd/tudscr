@@ -117,25 +117,6 @@
     a TUD-Script class%
   }%
 ]{tudscrfonts}
-\newif\if@tud@x@fontspec@enabled
-\newif\if@tud@x@fontspec@math@enabled
-\AfterPackage*{fontspec}{%
-  \@ifpackagelater{fontspec}{2017/01/24}{%
-    \@tud@x@fontspec@enabledtrue%
-    \@ifpackagewith{fontspec}{no-math}{}{%
-      \@tud@x@fontspec@math@enabledtrue%
-    }%
-  }{%
-    \@tud@x@fontspec@enabledfalse%
-    \ClassWarningNoLine{\TUD@Class@Name}%
-    {%
-      Version `2017/01/24' of package `fontspec' is needed,\MessageBreak
-      but only version\MessageBreak
-      `\csname ver@fontspec.sty\endcsname'\MessageBreak
-      is available, so a fallback layout is used%
-    }%
-  }%
-}
 \newif\if@tud@cdfont@active
 \newif\if@tud@cdfont@heavy
 \newif\if@tud@cdfont@ultrabold
@@ -1213,31 +1194,6 @@
     }%
   \tud@reserved%
 }
-\TUD@key{fontspec}[true]{%
-  \ClassWarningNoLine{\TUD@Class@Name}%
-  {%
-    The option key `fontspec' is deprecated\MessageBreak%
-    You should load the package `fontspec' manually%
-  }%
-  \TUD@set@ifkey{fontspec}{@tud@x@fontspec@enabled}{#1}%
-}
-\AtEndOfClass%
-{%
-  \TUD@key{fontspec}[]%
-  {%
-    \ClassError{\TUD@Class@Name}%
-      {Option `fontspec' too late}{%
-      Option `fontspec' can only be set while loading the\MessageBreak%
-      class `\TUD@Class@Name'
-      but you have tried to set it up later.%
-    }%
-    \FamilyKeyStateProcessed%
-  }%
-  \if@tud@x@fontspec@enabled%
-    \PassOptionsToPackage{no-math}{fontspec}%
-    \RequirePackage{fontspec}[2017/01/24]%
-  \fi%
-}
 \TUD@key{cdfonts}[true]{%
   \TUD@set@ifkey{cdfonts}{@tempswa}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
@@ -1260,36 +1216,6 @@
     \fi%
   \fi%
 }
-\TUD@key{din}[true]{%
-  \TUD@set@ifkey{din}{@tempswa}{#1}%
-  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \if@tempswa%
-      \TUD@deprecated@key{din}{cdfont=din}%
-    \else%
-      \TUD@deprecated@key{din=#1}{cdfont=nodin}%
-    \fi%
-  \fi%
-}
-\TUD@key{nodin}[true]{%
-  \TUD@set@ifkey{nodin}{@tempswa}{#1}%
-  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \if@tempswa%
-      \TUD@deprecated@key{nodin}{cdfont=nodin}%
-    \else%
-      \TUD@deprecated@key{nodin=#1}{cdfont=din}%
-    \fi%
-  \fi%
-}
-\TUD@key{noDIN}[true]{%
-  \TUD@set@ifkey{noDIN}{@tempswa}{#1}%
-  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \if@tempswa%
-      \TUD@deprecated@key{noDIN}{cdfont=nodin}%
-    \else%
-      \TUD@deprecated@key{noDIN=#1}{cdfont=din}%
-    \fi%
-  \fi%
-}
 \TUD@key{sansmath}[true]{%
   \TUD@set@ifkey{sansmath}{@tempswa}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
@@ -1307,6 +1233,36 @@
       \TUD@deprecated@key{serifmath}{cdmath=false}%
     \else%
       \TUD@deprecated@key{serifmath=#1}{cdmath=true}%
+    \fi%
+  \fi%
+}
+\TUD@key{din}[true]{%
+  \TUD@set@ifkey{din}{@tempswa}{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \if@tempswa%
+      \TUD@deprecated@key{din}{cdoldfont=din}%
+    \else%
+      \TUD@deprecated@key{din=#1}{cdoldfont=nodin}%
+    \fi%
+  \fi%
+}
+\TUD@key{nodin}[true]{%
+  \TUD@set@ifkey{nodin}{@tempswa}{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \if@tempswa%
+      \TUD@deprecated@key{nodin}{cdoldfont=nodin}%
+    \else%
+      \TUD@deprecated@key{nodin=#1}{cdoldfont=din}%
+    \fi%
+  \fi%
+}
+\TUD@key{noDIN}[true]{%
+  \TUD@set@ifkey{noDIN}{@tempswa}{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \if@tempswa%
+      \TUD@deprecated@key{noDIN}{cdoldfont=nodin}%
+    \else%
+      \TUD@deprecated@key{noDIN=#1}{cdoldfont=din}%
     \fi%
   \fi%
 }
@@ -1377,6 +1333,32 @@
   \fi%
 }
 \TUD@key{colour}[true]{\TUDoptions{color=#1}}
+\newif\if@tud@x@fontspec@requested
+\TUD@key{fontspec}[true]{%
+  \ClassWarningNoLine{\TUD@Class@Name}%
+  {%
+    The option key `fontspec' is deprecated\MessageBreak%
+    You should load the package `fontspec' manually%
+  }%
+  \TUD@set@ifkey{fontspec}{@tud@x@fontspec@requested}{#1}%
+}
+\AtEndOfClass%
+{%
+  \TUD@key{fontspec}[]%
+  {%
+    \ClassError{\TUD@Class@Name}%
+      {Option `fontspec' too late}{%
+      Option `fontspec' can only be set while loading the\MessageBreak%
+      class `\TUD@Class@Name'
+      but you have tried to set it up later.%
+    }%
+    \FamilyKeyStateProcessed%
+  }%
+  \if@tud@x@fontspec@requested%
+    \PassOptionsToPackage{no-math}{fontspec}%
+    \RequirePackage{fontspec}[2017/01/24]%
+  \fi%
+}
 %%% From File: tudscr-misc.dtx
 \newif\if@tud@x@scr@paper@set
 \TUD@key{paper}{%
@@ -1500,6 +1482,28 @@
   \RequirePackage{tudscrcolor}[\TUD@Version]%
 }
 %%% From File: tudscr-fonts.dtx
+\newif\if@tud@x@fontspec@enabled
+\newif\if@tud@x@fontspec@math@enabled
+\AfterPackage*{fontspec}{%
+  \@ifpackagelater{fontspec}{2017/01/24}{%
+    \@tud@x@fontspec@enabledtrue%
+    \@ifpackagewith{fontspec}{no-math}{}{%
+      \@tud@x@fontspec@math@enabledtrue%
+    }%
+  }{%
+    \@tud@x@fontspec@enabledfalse%
+    \ClassWarningNoLine{\TUD@Class@Name}%
+    {%
+      Version `2017/01/24' of package `fontspec' is needed,\MessageBreak
+      but only version\MessageBreak
+      `\csname ver@fontspec.sty\endcsname'\MessageBreak
+      is available, so a fallback layout is used%
+    }%
+  }%
+}
+\TUD@RecommendPackage{mweights}[2017/03/30]%
+\newif\if@tud@x@mweights@enabled
+\AfterPackage*{mweights}{\@tud@x@mweights@enabledtrue}
 \newif\if@tud@cdfont@fam@exist
 \newif\if@tud@cdfont@db@exist
 \newcommand*\tud@cdfont@fam{fdd}
@@ -1631,9 +1635,6 @@
 \newif\if@tud@x@bm@requested
 \PreventPackageFromLoading[\@tud@x@bm@requestedtrue]{bm}
 \RequirePackage{trimspaces}[2009/09/17]
-\newif\if@tud@x@mweights@enabled
-\TUD@RecommendPackage{mweights}[2017/03/30]%
-\AfterPackage*{mweights}{\@tud@x@mweights@enabledtrue}
 \newcommand*\tud@font@set{%
   \if@tud@cdfont@active%
     \tud@cmd@store{rmdefault}%
@@ -1655,6 +1656,11 @@
       \tud@cmd@store{bfseries@tt}%
       \tud@cmd@store{mdseries@tt}%
     \fi%
+    \if@tud@x@fontspec@enabled%
+      \tud@cmd@store{rmfamily }%
+      \tud@cmd@store{sffamily }%
+      \tud@cmd@store{ttfamily }%
+    \fi%
     \renewcommand*\rmdefault{\sfdefault}%
     \renewcommand*\updefault{n}%
     \renewcommand*\sldefault{sl}%
@@ -1672,6 +1678,8 @@
       \edef\bfseries@tt{\tud@ttfont@bf}%
       \edef\mdseries@tt{\tud@ttfont@md}%
     \fi%
+    \let\bfdefault\tud@cdfont@bf%
+    \let\mddefault\tud@cdfont@md%
   \else%
     \tud@cmd@restore{rmdefault}%
     \tud@cmd@restore{sfdefault}%
@@ -1691,6 +1699,11 @@
       \tud@cmd@restore{mdseries@sf}%
       \tud@cmd@restore{bfseries@tt}%
       \tud@cmd@restore{mdseries@tt}%
+    \fi%
+    \if@tud@x@fontspec@enabled%
+      \tud@cmd@restore{rmfamily }%
+      \tud@cmd@restore{sffamily }%
+      \tud@cmd@restore{ttfamily }%
     \fi%
   \fi%
   \if@tud@x@mweights@enabled%
@@ -1720,8 +1733,6 @@
       \renewcommand*\sfdefault{\tud@cdfont@fam}%
     \fi%
     \tud@cdfont@@set%
-    \let\bfdefault\tud@cdfont@bf%
-    \let\mddefault\tud@cdfont@md%
   \fi%
   \@tud@res@swafalse%
   \if@tud@cdfont@fam@exist\else%
@@ -1849,13 +1860,7 @@
         FontFace={sb}{it}{OpenSansSemiBoldItalic},%
         FontFace={b}{it}{OpenSansBoldItalic},%
         FontFace={bx}{it}{OpenSansBoldItalic},%
-        FontFace={eb}{it}{OpenSansExtraBoldItalic},%
-        FontFace={l}{sl}{OpenSansLightItalic},%
-        FontFace={m}{sl}{OpenSansItalic},%
-        FontFace={sb}{sl}{OpenSansSemiBoldItalic},%
-        FontFace={b}{sl}{OpenSansBoldItalic},%
-        FontFace={bx}{sl}{OpenSansBoldItalic},%
-        FontFace={eb}{sl}{OpenSansExtraBoldItalic}%
+        FontFace={eb}{it}{OpenSansExtraBoldItalic}%
       }%
       \tud@x@fontspec@init{\tud@cdfont@fam@osf}{Numbers=OldStyle,\tud@res@a}%
       \tud@x@fontspec@init{\tud@cdfont@fam@lf}{\tud@res@a}%
@@ -1918,12 +1923,7 @@
           FontFace={m}{it}{UniversOblique},%
           FontFace={b}{it}{UniversBoldOblique},%
           FontFace={bx}{it}{UniversBoldOblique},%
-          FontFace={eb}{it}{UniversBlackOblique},%
-          FontFace={l}{sl}{UniversLightOblique},%
-          FontFace={m}{sl}{UniversOblique},%
-          FontFace={b}{sl}{UniversBoldOblique},%
-          FontFace={bx}{sl}{UniversBoldOblique},%
-          FontFace={eb}{sl}{UniversBlackOblique}%
+          FontFace={eb}{it}{UniversBlackOblique}%
         }%
         \tud@x@fontspec@init{\tud@cdfont@fam@osf}{\tud@res@a}%
         \tud@x@fontspec@init{\tud@cdfont@fam@lf}{\tud@res@a}%
@@ -1975,12 +1975,7 @@
           FontFace={m}{it}{Font=DIN-Bold,FakeSlant=0.15},%
           FontFace={b}{it}{Font=DIN-Bold,FakeSlant=0.15},%
           FontFace={bx}{it}{Font=DIN-Bold,FakeSlant=0.15},%
-          FontFace={eb}{it}{Font=DIN-Bold,FakeSlant=0.15},%
-          FontFace={l}{sl}{Font=DIN-Bold,FakeSlant=0.15},%
-          FontFace={m}{sl}{Font=DIN-Bold,FakeSlant=0.15},%
-          FontFace={b}{sl}{Font=DIN-Bold,FakeSlant=0.15},%
-          FontFace={bx}{sl}{Font=DIN-Bold,FakeSlant=0.15},%
-          FontFace={eb}{sl}{Font=DIN-Bold,FakeSlant=0.15}%
+          FontFace={eb}{it}{Font=DIN-Bold,FakeSlant=0.15}%
         }%
         \tud@x@fontspec@init{\tud@cdfont@db}{\tud@res@a}%
       \fi%
@@ -2217,13 +2212,7 @@
         FontFace={sb}{it}{RobotoMono-MediumItalic},%
         FontFace={b}{it}{RobotoMono-BoldItalic},%
         FontFace={bx}{it}{RobotoMono-BoldItalic},%
-        FontFace={eb}{it}{RobotoMono-BoldItalic},%
-        FontFace={l}{sl}{RobotoMono-LightItalic},%
-        FontFace={m}{sl}{RobotoMono-Italic},%
-        FontFace={sb}{sl}{RobotoMono-MediumItalic},%
-        FontFace={b}{sl}{RobotoMono-BoldItalic},%
-        FontFace={bx}{sl}{RobotoMono-BoldItalic},%
-        FontFace={eb}{sl}{RobotoMono-BoldItalic}%
+        FontFace={eb}{it}{RobotoMono-BoldItalic}%
       }%
     \fi%
     \ifx\ttdefault\tud@ttfont@lm\else%
@@ -2240,13 +2229,7 @@
         FontFace={sb}{it}{LMMonoSlant10-Regular},%
         FontFace={b}{it}{LMMonoLt10-BoldOblique},%
         FontFace={bx}{it}{LMMonoLt10-BoldOblique},%
-        FontFace={eb}{it}{LMMonoLt10-BoldOblique},%
-        FontFace={l}{sl}{LMMonoLt10-Oblique},%
-        FontFace={m}{sl}{LMMonoSlant10-Regular},%
-        FontFace={sb}{sl}{LMMonoSlant10-Regular},%
-        FontFace={b}{sl}{LMMonoLt10-BoldOblique},%
-        FontFace={bx}{sl}{LMMonoLt10-BoldOblique},%
-        FontFace={eb}{sl}{LMMonoLt10-BoldOblique}%
+        FontFace={eb}{it}{LMMonoLt10-BoldOblique}%
       }%
     \fi%
   \fi%
@@ -2550,10 +2533,17 @@
     \fi%
   \fi\fi%
   \if@tud@head@font@set%
-    \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
-      {\sfdefault}{\mddefault}{\updefault}{\tud@head@fontsize}%
-    \DeclareFixedFont{\tud@head@font@bold}{\encodingdefault}%
-      {\sfdefault}{\bfdefault}{\updefault}{\tud@head@fontsize}%
+    \if@tud@x@mweights@enabled%
+      \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
+        {\sfdefault}{\mdseries@sf}{\updefault}{\tud@head@fontsize}%
+      \DeclareFixedFont{\tud@head@font@bold}{\encodingdefault}%
+        {\sfdefault}{\bfseries@sf}{\updefault}{\tud@head@fontsize}%
+    \else%
+      \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
+        {\sfdefault}{\mddefault}{\updefault}{\tud@head@fontsize}%
+      \DeclareFixedFont{\tud@head@font@bold}{\encodingdefault}%
+        {\sfdefault}{\bfdefault}{\updefault}{\tud@head@fontsize}%
+    \fi%
     \ifcase\tud@head@font@num\relax\else% true/heavy
       \tud@head@cdfont@set%
     \fi%
@@ -7083,6 +7073,7 @@
   \def\@mkboth##1##2{\NoCaseChange{\@mkboth{##1}{##2}}}%
 }
 \AfterPackage*{textcase}{%
+  \robustify\NoCaseChange
   \CheckCommand*\@uclcnotmath[4]{%
     \begingroup
       #1%
@@ -7105,6 +7096,7 @@
     \@nonchangecase\ensuremath\tud@x@textcase@uclcnotmath%
   }{}{\tud@patch@wrn{@uclcnotmath}}
 }
+\TUD@UnwindPackage{textcase}{\providecommand*\NoCaseChange[1]{#1}}
 \endinput
 %%
 %% End of file `tudscrreprt.cls'.

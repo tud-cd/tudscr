@@ -1,4 +1,4 @@
-% \CheckSum{2036}
+% \CheckSum{2071}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -171,7 +171,7 @@
 %
 % \iffalse
 %</package&identify>
-%<*option>
+%<*body>
 % \fi
 %
 % \subsection{Auswahl des Fontformates}
@@ -181,10 +181,7 @@
 % OpenType"=Format aus dem System über das Paket \pkg{fontspec} für Lua\LaTeX 
 % bzw. Xe\LaTeX, wobei die letztere Variante nicht ideal ist. Zum einen 
 % funktioniert das Kerning nicht sonderlich gut und zum anderen sind keine 
-% Schriften für den mathematischen Satz vorhanden. Da die skriptbasierte
-% Installation der PostScript"=Schriften gut funktioniert, ist diese Variante 
-% zu bevorzugen. Trotzdem werden beide Varianten, die Schriftfamilie des \CDs 
-% für den Fließtext und die Überschriften zu verwenden, angeboten.
+% Schriften für den mathematischen Satz vorhanden.
 %
 % \begin{macro}{\if@tud@x@fontspec@enabled}
 % \changes{v2.02}{2014/08/29}{neu}^^A
@@ -223,11 +220,16 @@
 %    \end{macrocode}
 % \end{macro}^^A \if@tud@x@fontspec@math@enabled
 % \end{macro}^^A \if@tud@x@fontspec@enabled
-%
-% \iffalse
-%</option>
-%<*body>
-% \fi
+% \begin{macro}{\if@tud@x@mweights@enabled}
+% \changes{v2.04}{2015/04/24}{Erkennung des Paketes \pkg{mweights}}^^A
+% Das Paket \pkg{mweights} wird geladen, um unterschiedliche Schriftschnitte
+% für beispielsweise die TypeWriter-Schriften nutzen zu können.
+%    \begin{macrocode}
+\TUD@RecommendPackage{mweights}[2017/03/30]%
+\newif\if@tud@x@mweights@enabled
+\AfterPackage*{mweights}{\@tud@x@mweights@enabledtrue}
+%    \end{macrocode}
+% \end{macro}^^A \if@tud@x@mweights@enabled
 %
 % \subsection{Prüfen der Schriftverfügbarkeit}
 %
@@ -859,8 +861,6 @@
 %    \end{macrocode}
 % \begin{macro}{\tud@font@set}
 % \changes{v2.04}{2015/03/01}{Unterstützung für das Paket \pkg{mweights}}^^A
-% \begin{macro}{\if@tud@x@mweights@enabled}
-% \changes{v2.04}{2015/04/24}{Erkennung des Paketes \pkg{mweights}}^^A
 % \begin{macro}{\bfseries@rm}
 % \changes{v2.04}{2015/04/24}{Unterstützung für das Paket \pkg{mweights}}^^A
 % \begin{macro}{\mdseries@rm}
@@ -884,13 +884,9 @@
 % \begin{macro}{\mddef@ult}
 % \changes{v2.04}{2015/04/24}{Unterstützung für das Paket \pkg{mweights}}^^A
 % Mit \cs{tud@font@set} werden entweder die normalen oder aber die Schriften 
-% des \CDs aktiviert. Dabei wird die Option \opt{fontspec} beachtet. Das Paket
-% \pkg{mweights} wird geladen, um unterschiedliche Schriftschnitte für die 
-% TypeWriter-Schriften nutzen zu können.
+% des \CDs aktiviert. Dabei werden die Pakete \pkg{fontspec} und \pkg{mweights} 
+% beachtet. 
 %    \begin{macrocode}
-\newif\if@tud@x@mweights@enabled
-\TUD@RecommendPackage{mweights}[2017/03/30]%
-\AfterPackage*{mweights}{\@tud@x@mweights@enabledtrue}
 \newcommand*\tud@font@set{%
 %    \end{macrocode}
 % Ist die Verwendung der Schriften des \CDs gewünscht, werden die Schnitte der 
@@ -918,6 +914,16 @@
       \tud@cmd@store{mdseries@tt}%
     \fi%
 %    \end{macrocode}
+% Das Paket \pkg{fontspec} definiert u.\,U. die Familienauswahlbefehle um, so
+% dass diese ebenfalls gesichert werden. Das Leerzeichen nach dem Befehlsnamen 
+% ist beabsichtigt!
+%    \begin{macrocode}
+    \if@tud@x@fontspec@enabled%
+      \tud@cmd@store{rmfamily }%
+      \tud@cmd@store{sffamily }%
+      \tud@cmd@store{ttfamily }%
+    \fi%
+%    \end{macrocode}
 % Zunächst werden die Standardwerte für die Schriftfamilien gesetzt.
 %    \begin{macrocode}
     \renewcommand*\rmdefault{\sfdefault}%
@@ -940,6 +946,8 @@
       \edef\bfseries@tt{\tud@ttfont@bf}%
       \edef\mdseries@tt{\tud@ttfont@md}%
     \fi%
+    \let\bfdefault\tud@cdfont@bf%
+    \let\mddefault\tud@cdfont@md%
 %    \end{macrocode}
 % Werden die Schriften des \CDs deaktiviert, wird auf die zu Dokumentbeginn
 % gesicherten Schriften\footnote{mit und ohne Serifen} zurückgeschaltet.
@@ -963,6 +971,11 @@
       \tud@cmd@restore{mdseries@sf}%
       \tud@cmd@restore{bfseries@tt}%
       \tud@cmd@restore{mdseries@tt}%
+    \fi%
+    \if@tud@x@fontspec@enabled%
+      \tud@cmd@restore{rmfamily }%
+      \tud@cmd@restore{sffamily }%
+      \tud@cmd@restore{ttfamily }%
     \fi%
   \fi%
   \if@tud@x@mweights@enabled%
@@ -998,7 +1011,6 @@
 % \end{macro}^^A \bfseries@sf
 % \end{macro}^^A \mdseries@rm
 % \end{macro}^^A \bfseries@rm
-% \end{macro}^^A \if@tud@x@mweights@enabled
 % \end{macro}^^A \tud@font@set
 % \begin{macro}{\tud@cdfont@set}
 % \changes{v2.06}{2018/06/28}{neu}^^A
@@ -1032,8 +1044,6 @@
       \renewcommand*\sfdefault{\tud@cdfont@fam}%
     \fi%
     \tud@cdfont@@set%
-    \let\bfdefault\tud@cdfont@bf%
-    \let\mddefault\tud@cdfont@md%
   \fi%
 %    \end{macrocode}
 % Sollte versucht worden sein, die Schriften zu aktivieren, obwohl diese nicht
@@ -1279,13 +1289,7 @@
         FontFace={sb}{it}{OpenSansSemiBoldItalic},%
         FontFace={b}{it}{OpenSansBoldItalic},%
         FontFace={bx}{it}{OpenSansBoldItalic},%
-        FontFace={eb}{it}{OpenSansExtraBoldItalic},%
-        FontFace={l}{sl}{OpenSansLightItalic},%
-        FontFace={m}{sl}{OpenSansItalic},%
-        FontFace={sb}{sl}{OpenSansSemiBoldItalic},%
-        FontFace={b}{sl}{OpenSansBoldItalic},%
-        FontFace={bx}{sl}{OpenSansBoldItalic},%
-        FontFace={eb}{sl}{OpenSansExtraBoldItalic}%
+        FontFace={eb}{it}{OpenSansExtraBoldItalic}%
       }%
       \tud@x@fontspec@init{\tud@cdfont@fam@osf}{Numbers=OldStyle,\tud@res@a}%
       \tud@x@fontspec@init{\tud@cdfont@fam@lf}{\tud@res@a}%
@@ -1409,12 +1413,7 @@
           FontFace={m}{it}{UniversOblique},%
           FontFace={b}{it}{UniversBoldOblique},%
           FontFace={bx}{it}{UniversBoldOblique},%
-          FontFace={eb}{it}{UniversBlackOblique},%
-          FontFace={l}{sl}{UniversLightOblique},%
-          FontFace={m}{sl}{UniversOblique},%
-          FontFace={b}{sl}{UniversBoldOblique},%
-          FontFace={bx}{sl}{UniversBoldOblique},%
-          FontFace={eb}{sl}{UniversBlackOblique}%
+          FontFace={eb}{it}{UniversBlackOblique}%
         }%
         \tud@x@fontspec@init{\tud@cdfont@fam@osf}{\tud@res@a}%
         \tud@x@fontspec@init{\tud@cdfont@fam@lf}{\tud@res@a}%
@@ -1480,12 +1479,7 @@
           FontFace={m}{it}{Font=DIN-Bold,FakeSlant=0.15},%
           FontFace={b}{it}{Font=DIN-Bold,FakeSlant=0.15},%
           FontFace={bx}{it}{Font=DIN-Bold,FakeSlant=0.15},%
-          FontFace={eb}{it}{Font=DIN-Bold,FakeSlant=0.15},%
-          FontFace={l}{sl}{Font=DIN-Bold,FakeSlant=0.15},%
-          FontFace={m}{sl}{Font=DIN-Bold,FakeSlant=0.15},%
-          FontFace={b}{sl}{Font=DIN-Bold,FakeSlant=0.15},%
-          FontFace={bx}{sl}{Font=DIN-Bold,FakeSlant=0.15},%
-          FontFace={eb}{sl}{Font=DIN-Bold,FakeSlant=0.15}%
+          FontFace={eb}{it}{Font=DIN-Bold,FakeSlant=0.15}%
         }%
         \tud@x@fontspec@init{\tud@cdfont@db}{\tud@res@a}%
       \fi%
@@ -1868,13 +1862,7 @@
         FontFace={sb}{it}{RobotoMono-MediumItalic},%
         FontFace={b}{it}{RobotoMono-BoldItalic},%
         FontFace={bx}{it}{RobotoMono-BoldItalic},%
-        FontFace={eb}{it}{RobotoMono-BoldItalic},%
-        FontFace={l}{sl}{RobotoMono-LightItalic},%
-        FontFace={m}{sl}{RobotoMono-Italic},%
-        FontFace={sb}{sl}{RobotoMono-MediumItalic},%
-        FontFace={b}{sl}{RobotoMono-BoldItalic},%
-        FontFace={bx}{sl}{RobotoMono-BoldItalic},%
-        FontFace={eb}{sl}{RobotoMono-BoldItalic}%
+        FontFace={eb}{it}{RobotoMono-BoldItalic}%
       }%
     \fi%
 %    \end{macrocode}
@@ -1897,13 +1885,7 @@
         FontFace={sb}{it}{LMMonoSlant10-Regular},%
         FontFace={b}{it}{LMMonoLt10-BoldOblique},%
         FontFace={bx}{it}{LMMonoLt10-BoldOblique},%
-        FontFace={eb}{it}{LMMonoLt10-BoldOblique},%
-        FontFace={l}{sl}{LMMonoLt10-Oblique},%
-        FontFace={m}{sl}{LMMonoSlant10-Regular},%
-        FontFace={sb}{sl}{LMMonoSlant10-Regular},%
-        FontFace={b}{sl}{LMMonoLt10-BoldOblique},%
-        FontFace={bx}{sl}{LMMonoLt10-BoldOblique},%
-        FontFace={eb}{sl}{LMMonoLt10-BoldOblique}%
+        FontFace={eb}{it}{LMMonoLt10-BoldOblique}%
       }%
     \fi%
   \fi%
@@ -2718,15 +2700,27 @@
 % serifenlose Standardschrift für die Kopfzeile verwendet. Die Rückfallebene:
 %    \begin{macrocode}
   \if@tud@head@font@set%
-    \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
-      {\sfdefault}{\mddefault}{\updefault}{\tud@head@fontsize}%
-    \DeclareFixedFont{\tud@head@font@bold}{\encodingdefault}%
-      {\sfdefault}{\bfdefault}{\updefault}{\tud@head@fontsize}%
+    \if@tud@x@mweights@enabled%
+      \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
+        {\sfdefault}{\mdseries@sf}{\updefault}{\tud@head@fontsize}%
+      \DeclareFixedFont{\tud@head@font@bold}{\encodingdefault}%
+        {\sfdefault}{\bfseries@sf}{\updefault}{\tud@head@fontsize}%
 %<*poster>
-    \protected\gdef\tud@head@font@@bold{%
-      \usefont{\encodingdefault}{\sfdefault}{\bfdefault}{\updefault}%
-    }%
+      \protected\gdef\tud@head@font@@bold{%
+        \usefont{\encodingdefault}{\sfdefault}{\bfseries@sf}{\updefault}%
+      }%
 %</poster>
+    \else%
+      \DeclareFixedFont{\tud@head@font@light}{\encodingdefault}%
+        {\sfdefault}{\mddefault}{\updefault}{\tud@head@fontsize}%
+      \DeclareFixedFont{\tud@head@font@bold}{\encodingdefault}%
+        {\sfdefault}{\bfdefault}{\updefault}{\tud@head@fontsize}%
+%<*poster>
+      \protected\gdef\tud@head@font@@bold{%
+        \usefont{\encodingdefault}{\sfdefault}{\bfdefault}{\updefault}%
+      }%
+%</poster>
+    \fi%
     \ifcase\tud@head@font@num\relax\else% true/heavy
       \tud@head@cdfont@set%
     \fi%
