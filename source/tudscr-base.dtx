@@ -1,4 +1,4 @@
-% \CheckSum{731}
+% \CheckSum{725}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-base.dtx}[%
-  2018/07/12 v2.06 TUD-Script\space%
+  2018/07/13 v2.06 TUD-Script\space%
 %</driver>
 %<package&base>\ProvidesPackage{tudscrbase}[%
 %<*driver|package&base>
@@ -115,40 +115,25 @@
 % \subsection{Notwendige Pakete für \TUDScript}
 %
 % \iffalse
-%<*package|class&doc>
+%<*package&base>
 % \fi
 %
 % Das Paket \pkg{scrbase} wird zur Optionsdefinition benötigt, \pkg{scrlfile} 
 % für verschiedene Hooks vor sowie nach Klassen und Paketen.
 %    \begin{macrocode}
-%<*base>
 \RequirePackage{scrbase}[2018/03/30]
-%</base>
-%    \end{macrocode}
-% Das Paket \pkg{fix-tudscrfonts} muss bereits vor der Dokumentklasse geladen 
-% werden und führt anschließend spezifische Anpassungen an diese aus. Dafür 
-% ist das Paket \pkg{scrlfile} notwendig.
-%    \begin{macrocode}
-%<fixfonts|doc>\RequirePackage{scrlfile}[2013/12/19]
 %    \end{macrocode}
 % Das Paket \pkg{etoolbox} wird für die Manipulation bereits definierter
 % Makros sowie zur erweiterten Auswertung boolescher Ausdrücke benötigt.
 %    \begin{macrocode}
-%<base|fixfonts|doc>\RequirePackage{etoolbox}[2011/01/03]
+\RequirePackage{etoolbox}[2011/01/03]
 %    \end{macrocode}
 % Das Paket \pkg{kvsetkeys} erweitert \pkg{keyval} um die Möglichkeit, das
 % Verhalten bei der Angabe eines nicht definierten Schlüssels festzulegen.
 %    \begin{macrocode}
-%<*base>
 \RequirePackage{etexcmds}[2011/02/16]
 \RequirePackage{kvsetkeys}[2012/04/25]
-%</base>
 %    \end{macrocode}
-%
-% \iffalse
-%</package|class&doc>
-%<*package&base>
-% \fi
 %
 % \subsection{Grundlegende Befehle für \TUDScript}
 % \subsubsection{Temporäre Makros zur internen Verwendung durch \TUDScript}
@@ -673,12 +658,6 @@
 % \end{macro}^^A \bool@std@lock
 % \end{macro}^^A \bool@lock
 % \end{macro}^^A \tud@setbool
-%
-% \iffalse
-%</package&base>
-%<*package&(base|fixfonts)>
-% \fi
-%
 % \begin{macro}{\tud@cmd@store}
 % \begin{macro}{\tud@cmd@restore}
 % \begin{macro}{\tud@cmd@reset}
@@ -708,7 +687,6 @@
   \tud@cmd@check{#1}%
   \ifcsdef{@@tud@#1}{}{\csletcs{@@tud@#1}{#1}}%
 }
-%<*base>
 \newcommand*\tud@cmd@restore[1]{%
   \tud@cmd@check{#1}%
   \ifcsdef{@@tud@#1}{%
@@ -732,7 +710,6 @@
     \csuse{#1}%
   }%
 }
-%</base>
 %    \end{macrocode}
 % Dieses Makro dient zum Überprüfen, ob der zu sichernde beziehungsweise 
 % wiederherzustellende Befehl überhaupt definiert ist. Sollte das nicht der 
@@ -740,10 +717,8 @@
 %    \begin{macrocode}
 \newcommand*\tud@cmd@check[1]{%
   \ifcsdef{#1}{}{%
-    \PackageError{%
-%<base>      tudscrbase%
-%<fixfonts>      fix-tudscrfonts%
-    }{`\@backslashchar#1' is not defined}{%
+    \PackageError{tudscrbase}{%
+      `\@backslashchar#1' is not defined}{%
       The command `\@backslashchar#1' was never defined\MessageBreak%
       Please contact the TUD-Script maintainer\MessageBreak%
       via \tudscrmail. A bugfix is urgently required.%
@@ -751,30 +726,12 @@
   }%
 }
 %    \end{macrocode}
-% Die Befehle \cs{tud@cmd@store} und \cs{tud@cmd@check} werden für das Paket 
-% \pkg{fix-tudscrfonts} bereits außerhalb von \pkg{tudscrbase} definiert. Damit 
-% deshalb keine Probleme entstehen, werden diese kurzerhand vor dem Laden von
-% \pkg{tudscrbase} undefiniert gesetzt.
-%    \begin{macrocode}
-%<*fixfonts>
-\BeforePackage{tudscrbase}{%
-  \undef\tud@cmd@store%
-  \undef\tud@cmd@check%
-}
-%</fixfonts>
-%    \end{macrocode}
 % \end{macro}^^A \tud@cmd@check
 % \end{macro}^^A \tud@cmd@use
 % \end{macro}^^A \tud@cmd@update
 % \end{macro}^^A \tud@cmd@reset
 % \end{macro}^^A \tud@cmd@restore
 % \end{macro}^^A \tud@cmd@store
-%
-% \iffalse
-%</package&(base|fixfonts)>
-%<*package&base>
-% \fi
-%
 % \begin{macro}{\tud@skip@store}
 % \changes{v2.04}{2015/03/02}{neu}^^A
 % \changes{v2.05}{2016/07/13}{Verwendung von \cs{tud@skip@check}}^^A
