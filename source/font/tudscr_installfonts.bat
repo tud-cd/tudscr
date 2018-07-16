@@ -25,8 +25,9 @@ echo     2018/06/15 v2.06 TUD-Script
 echo.
 cd /d %~dp0
 set familyname=fdd
-set destinationpath=%~dp0created
 set temppath=%~dp0%familyname%temp
+set sourcepath=%~dp0%familyname%
+set destfolder=tudscros
 if exist %temppath% rmdir /s /q %temppath%> nul
 if not exist %temppath% mkdir %temppath%
 cd %temppath%
@@ -128,8 +129,13 @@ set updmapsys=true
 kpsewhich --var-value=TEXMFVAR> texmfvar.tmp
 set /p texmfvar=< texmfvar.tmp
 if exist "%texmfvar%\fonts\map" set updmapsys=false
-xcopy "%destinationpath%\fonts\*.*" "%texmfpath%\fonts\" /s /y
-xcopy "%destinationpath%\tex\*.*" "%texmfpath%\tex\" /s /y
+xcopy "%sourcepath%\type1\*.*" "%texmfpath%\fonts\type1\%destfolder%\"     /s /y
+xcopy "%sourcepath%\afm\*.*"   "%texmfpath%\fonts\afm\%destfolder%\"       /s /y
+xcopy "%sourcepath%\tfm\*.*"   "%texmfpath%\fonts\tfm\%destfolder%\"       /s /y
+xcopy "%sourcepath%\vf\*.*"    "%texmfpath%\fonts\vf\%destfolder%\"        /s /y
+xcopy "%sourcepath%\enc\*.*"   "%texmfpath%\fonts\enc\dvips\%destfolder%\" /s /y
+xcopy "%sourcepath%\map\*.*"   "%texmfpath%\fonts\map\dvips\%destfolder%\" /s /y
+xcopy "%sourcepath%\fd\*.*"    "%texmfpath%\tex\latex\%destfolder%\fonts\" /s /y
 set "texmfpath=%texmfpath:\=/%"
 set mapfile=%familyname%.map
 if "%miktex%"=="true" goto :MiKTeXHash

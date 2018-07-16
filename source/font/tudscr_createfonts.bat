@@ -17,9 +17,9 @@ echo   Erstellen der Open Sans Schriften zur Verwendung mit TUD-Script
 echo.
 cd /d %~dp0
 set familyname=fdd
-set destinationpath=%~dp0%familyname%
-set externalpath=%~dp0external
 set temppath=%~dp0%familyname%temp
+set externalpath=%~dp0external
+set destpath=%~dp0%familyname%
 if exist %temppath% rmdir /s /q %temppath%> nul
 if not exist %temppath% mkdir %temppath%
 cd %temppath%
@@ -98,21 +98,21 @@ echo  =====================================================================
 echo   Konvertierung abgeschlossen.
 echo  =====================================================================
 echo.
-if exist %destinationpath% rmdir /s /q %destinationpath%> nul
-mkdir "%destinationpath%\type1"
-mkdir "%destinationpath%\afm"
-mkdir "%destinationpath%\tfm"
-mkdir "%destinationpath%\vf"
-mkdir "%destinationpath%\enc\dvips"
-mkdir "%destinationpath%\map\dvips"
-mkdir "%destinationpath%\fd"
-move /y *.pfb "%destinationpath%\type1\"
-move /y *.afm "%destinationpath%\afm\"
-move /y *.tfm "%destinationpath%\tfm\"
-move /y *.vf  "%destinationpath%\vf\"
-move /y *.enc "%destinationpath%\enc\dvips\"
-move /y *.map "%destinationpath%\map\dvips\"
-move /y *.fd  "%destinationpath%\fd"
+if exist %destpath% rmdir /s /q %destpath%> nul
+mkdir "%destpath%\type1"
+mkdir "%destpath%\afm"
+mkdir "%destpath%\tfm"
+mkdir "%destpath%\vf"
+mkdir "%destpath%\enc"
+mkdir "%destpath%\map"
+mkdir "%destpath%\fd"
+copy /y *.pfb "%destpath%\type1\"
+copy /y *.afm "%destpath%\afm\"
+copy /y *.tfm "%destpath%\tfm\"
+copy /y *.vf  "%destpath%\vf\"
+copy /y *.enc "%destpath%\enc\"
+copy /y *.map "%destpath%\map\"
+copy /y *.fd  "%destpath%\fd"
 :end
   echo.
   echo  =====================================================================
