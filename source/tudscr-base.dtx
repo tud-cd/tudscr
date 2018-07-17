@@ -1,4 +1,4 @@
-% \CheckSum{725}
+% \CheckSum{738}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-base.dtx}[%
-  2018/07/13 v2.06 TUD-Script\space%
+  2018/07/17 v2.06 TUD-Script\space%
 %</driver>
 %<package&base>\ProvidesPackage{tudscrbase}[%
 %<*driver|package&base>
@@ -657,56 +657,76 @@
 % \end{macro}^^A \bool@std@lock
 % \end{macro}^^A \bool@lock
 % \end{macro}^^A \tud@setbool
-% \begin{macro}{\tud@cmd@store}
-% \begin{macro}{\tud@cmd@restore}
-% \begin{macro}{\tud@cmd@reset}
-% \begin{macro}{\tud@cmd@update}
+% \begin{macro}{\tud@cs@store}
+% \changes{v2.06}{2018/07/15}{%
+%   mit \cs{DeclareRobustCommand} definierte Befehle unterstüzt%
+% }^^A
+% \begin{macro}{\tud@cs@restore}
+% \begin{macro}{\tud@cs@reset}
+% \begin{macro}{\tud@cs@update}
 % \changes{v2.04}{2015/03/03}{neu}^^A
-% \begin{macro}{\tud@cmd@use}
-% \begin{macro}{\tud@cmd@check}
+% \begin{macro}{\tud@cs@use}
+% \begin{macro}{\tud@cs@check}
 % \changes{v2.03}{2015/01/09}{neu}^^A
 % Mit diesen Befehlen wird es möglich, Originalbefehle sichern, nutzen und
 % wiederherstellen zu können. Dies wird benötigt, um zwischen den einzelnen
 % Layouts über Optionseinstellungen zu wechseln und dabei von einem definierten
 % Anfangszustand auszugehen.
 %
-% Mit dem Aufruf \cs{tud@cmd@store}\marg{Befehlsname} wird der im Argument 
+% Mit dem Aufruf \cs{tud@cs@store}\marg{Befehlsname} wird der im Argument 
 % angegebene Befehl in einem neuem Makro \cs{@@tud@\meta{Befehlsname}}
 % gespeichert. Dieser kann danach beliebig angepasst werden. Soll der Befehl zu
 % einem späteren Zeitpunkt auf den Orginalzustand zurücksetzen, kann hierfür
-% jederzeit der Befehl \cs{tud@cmd@reset}\marg{Befehlsname} verwendet werden.
-% Durch das Makro \cs{tud@cmd@restore}\marg{Befehlsname} wird das mit
-% \cs{tud@cmd@store} erstellte Hilfsmakro zusätzlich noch  gelöscht. Der
-% ursprüngliche Befehl kann als solcher mit \cs{tud@cmd@use}\marg{Befehlsname}
+% jederzeit der Befehl \cs{tud@cs@reset}\marg{Befehlsname} verwendet werden.
+% Durch das Makro \cs{tud@cs@restore}\marg{Befehlsname} wird das mit
+% \cs{tud@cs@store} erstellte Hilfsmakro zusätzlich noch  gelöscht. Der
+% ursprüngliche Befehl kann als solcher mit \cs{tud@cs@use}\marg{Befehlsname}
 % weiterhin genutzt werden. Ein zuvor bereits gesicherter Befehl kann mit 
-% \cs{tud@cmd@update}\marg{Befehlsname} auf die momentane Definition 
+% \cs{tud@cs@update}\marg{Befehlsname} auf die momentane Definition 
 % aktualisiert werden.
 %    \begin{macrocode}
-\newcommand*\tud@cmd@store[1]{%
-  \tud@cmd@check{#1}%
-  \ifcsdef{@@tud@#1}{}{\csletcs{@@tud@#1}{#1}}%
+\newrobustcmd*\tud@cs@store[1]{%
+  \tud@cs@check{#1}%
+  \ifcsdef{@@tud@#1}{}{%
+    \csletcs{@@tud@#1}{#1}%
+    \ifcsltxprotect{#1}{\csletcs{@@tud@#1 }{#1 }}{}%
+  }%
 }
-\newcommand*\tud@cmd@restore[1]{%
-  \tud@cmd@check{#1}%
+\newrobustcmd*\tud@cs@restore[1]{%
+  \tud@cs@check{#1}%
   \ifcsdef{@@tud@#1}{%
     \csletcs{#1}{@@tud@#1}%
     \csundef{@@tud@#1}%
+    \ifcsdef{@@tud@#1 }{%
+      \csletcs{#1 }{@@tud@#1 }%
+      \csundef{@@tud@#1 }%
+    }{}%
   }{}%
 }
-\newcommand*\tud@cmd@reset[1]{%
-  \tud@cmd@check{#1}%
-  \ifcsdef{@@tud@#1}{\csletcs{#1}{@@tud@#1}}{}%
-}
-\newcommand*\tud@cmd@update[1]{%
-  \tud@cmd@check{#1}%
-  \ifcsdef{@@tud@#1}{\csletcs{@@tud@#1}{#1}}{}%
-}
-\newcommand*\tud@cmd@use[1]{%
-  \tud@cmd@check{#1}%
+\newrobustcmd*\tud@cs@reset[1]{%
+  \tud@cs@check{#1}%
   \ifcsdef{@@tud@#1}{%
-    \csuse{@@tud@#1}%
+    \csletcs{#1}{@@tud@#1}%
+    \ifcsdef{@@tud@#1 }{\csletcs{#1 }{@@tud@#1 }}{}%
+  }{}%
+}
+\newrobustcmd*\tud@cs@update[1]{%
+  \tud@cs@check{#1}%
+  \ifcsdef{@@tud@#1}{%
+    \csletcs{@@tud@#1}{#1}%
+    \ifcsdef{@@tud@#1 }{\csletcs{@@tud@#1 }{#1 }}{}%
+  }{}%
+}
+\newrobustcmd*\tud@cs@use[1]{%
+  \tud@cs@check{#1}%
+  \ifcsdef{@@tud@#1 }{%
+    \expandafter\protect\csuse{@@tud@#1 }%
   }{%
-    \csuse{#1}%
+    \ifcsdef{@@tud@#1}{%
+      \csuse{@@tud@#1}%
+    }{%
+      \csuse{#1}%
+    }%
   }%
 }
 %    \end{macrocode}
@@ -714,23 +734,23 @@
 % wiederherzustellende Befehl überhaupt definiert ist. Sollte das nicht der 
 % Fall sein, wird ein Fehler ausgegeben.
 %    \begin{macrocode}
-\newcommand*\tud@cmd@check[1]{%
+\newrobustcmd*\tud@cs@check[1]{%
   \ifcsdef{#1}{}{%
     \PackageError{tudscrbase}{%
       `\@backslashchar#1' is not defined}{%
-      The command `\@backslashchar#1' was never defined\MessageBreak%
+      The command `\@backslashchar#1' was never defined.\MessageBreak%
       Please contact the TUD-Script maintainer\MessageBreak%
       via \tudscrmail. A bugfix is urgently required.%
     }%
   }%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@cmd@check
-% \end{macro}^^A \tud@cmd@use
-% \end{macro}^^A \tud@cmd@update
-% \end{macro}^^A \tud@cmd@reset
-% \end{macro}^^A \tud@cmd@restore
-% \end{macro}^^A \tud@cmd@store
+% \end{macro}^^A \tud@cs@check
+% \end{macro}^^A \tud@cs@use
+% \end{macro}^^A \tud@cs@update
+% \end{macro}^^A \tud@cs@reset
+% \end{macro}^^A \tud@cs@restore
+% \end{macro}^^A \tud@cs@store
 % \begin{macro}{\tud@skip@store}
 % \changes{v2.04}{2015/03/02}{neu}^^A
 % \changes{v2.05}{2016/07/13}{Verwendung von \cs{tud@skip@check}}^^A

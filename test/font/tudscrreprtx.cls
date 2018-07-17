@@ -1645,34 +1645,34 @@
 \RequirePackage{trimspaces}[2009/09/17]
 \newcommand*\tud@font@set{%
   \if@tud@cdfont@active%
-    \tud@cmd@store{rmdefault}%
-    \tud@cmd@store{sfdefault}%
-    \tud@cmd@store{ttdefault}%
-    \tud@cmd@store{bfdefault}%
-    \tud@cmd@store{mddefault}%
-    \tud@cmd@store{updefault}%
-    \tud@cmd@store{sldefault}%
-    \tud@cmd@store{itdefault}%
-    \tud@cmd@store{familydefault}%
-    \tud@cmd@store{seriesdefault}%
-    \tud@cmd@store{shapedefault}%
+    \tud@cs@store{rmdefault}%
+    \tud@cs@store{sfdefault}%
+    \tud@cs@store{ttdefault}%
+    \tud@cs@store{bfdefault}%
+    \tud@cs@store{mddefault}%
+    \tud@cs@store{updefault}%
+    \tud@cs@store{sldefault}%
+    \tud@cs@store{itdefault}%
+    \tud@cs@store{familydefault}%
+    \tud@cs@store{seriesdefault}%
+    \tud@cs@store{shapedefault}%
     \if@tud@x@mweights@enabled%
-      \tud@cmd@store{bfseries@rm}%
-      \tud@cmd@store{mdseries@rm}%
-      \tud@cmd@store{bfseries@sf}%
-      \tud@cmd@store{mdseries@sf}%
-      \tud@cmd@store{bfseries@tt}%
-      \tud@cmd@store{mdseries@tt}%
+      \tud@cs@store{bfseries@rm}%
+      \tud@cs@store{mdseries@rm}%
+      \tud@cs@store{bfseries@sf}%
+      \tud@cs@store{mdseries@sf}%
+      \tud@cs@store{bfseries@tt}%
+      \tud@cs@store{mdseries@tt}%
     \fi%
     \if@tud@x@fontspec@enabled%
-      \tud@cmd@store{rmfamily }%
-      \tud@cmd@store{sffamily }%
-      \tud@cmd@store{ttfamily }%
+      \tud@cs@store{rmfamily}%
+      \tud@cs@store{sffamily}%
+      \tud@cs@store{ttfamily}%
     \fi%
     \renewcommand*\rmdefault{\sfdefault}%
     \renewcommand*\updefault{n}%
+    \renewcommand*\itdefault{it}%
     \renewcommand*\sldefault{sl}%
-    \renewcommand*\itdefault{\sldefault}%
     \renewcommand*\familydefault{\sfdefault}%
     \renewcommand*\seriesdefault{\mddefault}%
     \renewcommand*\shapedefault{\updefault}%
@@ -1689,29 +1689,29 @@
     \let\bfdefault\tud@cdfont@bf%
     \let\mddefault\tud@cdfont@md%
   \else%
-    \tud@cmd@restore{rmdefault}%
-    \tud@cmd@restore{sfdefault}%
-    \tud@cmd@restore{ttdefault}%
-    \tud@cmd@restore{bfdefault}%
-    \tud@cmd@restore{mddefault}%
-    \tud@cmd@restore{updefault}%
-    \tud@cmd@restore{sldefault}%
-    \tud@cmd@restore{itdefault}%
-    \tud@cmd@restore{familydefault}%
-    \tud@cmd@restore{seriesdefault}%
-    \tud@cmd@restore{shapedefault}%
+    \tud@cs@restore{rmdefault}%
+    \tud@cs@restore{sfdefault}%
+    \tud@cs@restore{ttdefault}%
+    \tud@cs@restore{bfdefault}%
+    \tud@cs@restore{mddefault}%
+    \tud@cs@restore{updefault}%
+    \tud@cs@restore{sldefault}%
+    \tud@cs@restore{itdefault}%
+    \tud@cs@restore{familydefault}%
+    \tud@cs@restore{seriesdefault}%
+    \tud@cs@restore{shapedefault}%
     \if@tud@x@mweights@enabled%
-      \tud@cmd@restore{bfseries@rm}%
-      \tud@cmd@restore{mdseries@rm}%
-      \tud@cmd@restore{bfseries@sf}%
-      \tud@cmd@restore{mdseries@sf}%
-      \tud@cmd@restore{bfseries@tt}%
-      \tud@cmd@restore{mdseries@tt}%
+      \tud@cs@restore{bfseries@rm}%
+      \tud@cs@restore{mdseries@rm}%
+      \tud@cs@restore{bfseries@sf}%
+      \tud@cs@restore{mdseries@sf}%
+      \tud@cs@restore{bfseries@tt}%
+      \tud@cs@restore{mdseries@tt}%
     \fi%
     \if@tud@x@fontspec@enabled%
-      \tud@cmd@restore{rmfamily }%
-      \tud@cmd@restore{sffamily }%
-      \tud@cmd@restore{ttfamily }%
+      \tud@cs@restore{rmfamily}%
+      \tud@cs@restore{sffamily}%
+      \tud@cs@restore{ttfamily}%
     \fi%
   \fi%
   \if@tud@x@mweights@enabled%
@@ -1878,22 +1878,22 @@
     \newrobustcmd*\cdfontsn{\usefont{\encodingdefault}{\tud@cdfont@fam}{sb}{n}}
     \newrobustcmd*\cdfontbn{\usefont{\encodingdefault}{\tud@cdfont@fam}{b}{n}}
     \newrobustcmd*\cdfontxn{\usefont{\encodingdefault}{\tud@cdfont@fam}{eb}{n}}
-    \newrobustcmd*\cdfontli{\usefont{\encodingdefault}{\tud@cdfont@fam}{l}{sl}}
-    \newrobustcmd*\cdfontri{\usefont{\encodingdefault}{\tud@cdfont@fam}{m}{sl}}
-    \newrobustcmd*\cdfontsi{\usefont{\encodingdefault}{\tud@cdfont@fam}{sb}{sl}}
-    \newrobustcmd*\cdfontbi{\usefont{\encodingdefault}{\tud@cdfont@fam}{b}{sl}}
-    \newrobustcmd*\cdfontxi{\usefont{\encodingdefault}{\tud@cdfont@fam}{eb}{sl}}
+    \newrobustcmd*\cdfontli{\usefont{\encodingdefault}{\tud@cdfont@fam}{l}{it}}
+    \newrobustcmd*\cdfontri{\usefont{\encodingdefault}{\tud@cdfont@fam}{m}{it}}
+    \newrobustcmd*\cdfontsi{\usefont{\encodingdefault}{\tud@cdfont@fam}{sb}{it}}
+    \newrobustcmd*\cdfontbi{\usefont{\encodingdefault}{\tud@cdfont@fam}{b}{it}}
+    \newrobustcmd*\cdfontxi{\usefont{\encodingdefault}{\tud@cdfont@fam}{eb}{it}}
   \else%
     \tud@cdfont@fallback\cdfontln{OpenSansLight}{md}{up}
     \tud@cdfont@fallback\cdfontrn{OpenSansRegular}{md}{up}
     \tud@cdfont@fallback\cdfontsn{OpenSansSemiBold}{md}{up}
     \tud@cdfont@fallback\cdfontbn{OpenSansBold}{bf}{up}
     \tud@cdfont@fallback\cdfontxn{OpenSansExtraBold}{bf}{up}
-    \tud@cdfont@fallback\cdfontli{OpenSansLightItalic}{md}{sl}
-    \tud@cdfont@fallback\cdfontri{OpenSansItalic}{md}{sl}
-    \tud@cdfont@fallback\cdfontsi{OpenSansSemiBoldItalic}{md}{sl}
-    \tud@cdfont@fallback\cdfontbi{OpenSansBoldItalic}{bf}{sl}
-    \tud@cdfont@fallback\cdfontxi{OpenSansExtraBoldItalic}{bf}{sl}
+    \tud@cdfont@fallback\cdfontli{OpenSansLightItalic}{md}{it}
+    \tud@cdfont@fallback\cdfontri{OpenSansItalic}{md}{it}
+    \tud@cdfont@fallback\cdfontsi{OpenSansSemiBoldItalic}{md}{it}
+    \tud@cdfont@fallback\cdfontbi{OpenSansBoldItalic}{bf}{it}
+    \tud@cdfont@fallback\cdfontxi{OpenSansExtraBoldItalic}{bf}{it}
   \fi%
   \newcommand*\textcdln{}%
   \newcommand*\textcdrn{}%
@@ -2177,12 +2177,12 @@
 \newcommand*\tud@ttfont@@set{%
   \ifcase\tud@ttfont@num\relax%
     \ifundef{\mdseries@tt}{%
-      \edef\tud@ttfont@md{\tud@cmd@use{mddefault}}%
+      \edef\tud@ttfont@md{\tud@cs@use{mddefault}}%
     }{%
       \edef\tud@ttfont@md{\mdseries@tt}%
     }%
     \ifundef{\bfseries@tt}{%
-      \edef\tud@ttfont@bf{\tud@cmd@use{bfdefault}}%
+      \edef\tud@ttfont@bf{\tud@cs@use{bfdefault}}%
     }{%
       \edef\tud@ttfont@bf{\bfseries@tt}%
     }%
@@ -2242,12 +2242,23 @@
     \fi%
   \fi%
 }
-\newcommand*\tud@font@greek@loop[1]{%
+\newcommand*\tud@font@greek@loop@uc[1]{%
   \@for\@tempa:={%
     Gamma,Delta,Theta,Lambda,Xi,Pi,Sigma,Upsilon,Phi,Psi,Omega%
   }\do{#1{\@tempa}}%
 }
-\newcommand*\tud@font@greek@declare[1]{%
+\newcommand*\tud@font@greek@loop@lc[1]{%
+%  \@for\@tempa:={%
+%    alpha,beta,gamma,delta,epsilon,zeta,eta,theta,iota,kappa,lambda,%
+%    mu,nu,xi,pi,rho,sigma,tau,upsilon,phi,chi,psi,omega,%
+%    varepsilon,vartheta,varpi,varrho,varsigma,varphi%
+%  }\do{#1{\@tempa}}%
+}
+\newcommand*\tud@font@greek@loop[1]{%
+  \tud@font@greek@loop@uc{#1}%
+  \tud@font@greek@loop@lc{#1}%
+}
+\newcommand*\tud@font@greek@declare@uc[1]{%
   \edef\@tempb{%
     \noexpand\DeclareMathSymbol{\csname tud@up#1\endcsname}%
       {\noexpand\mathalpha}{operators}{\the\@tempcnta}%
@@ -2259,8 +2270,21 @@
   \csletcs{tud@#1}{tud@up#1}%
   \advance \@tempcnta by 1%
 }
+\newcommand*\tud@font@greek@declare@lc[1]{%
+  \edef\@tempb{%
+    \noexpand\DeclareMathSymbol{\csname tud@up#1\endcsname}%
+      {\noexpand\mathalpha}{upgreek}{\the\@tempcnta}%
+  }\@tempb%
+  \edef\@tempb{%
+    \noexpand\DeclareMathSymbol{\csname tud@var#1\endcsname}%
+      {\noexpand\mathalpha}{letters}{\the\@tempcnta}%
+  }\@tempb%
+  \csletcs{tud@#1}{tud@up#1}%
+  \advance \@tempcnta by 1%
+}
 \@tempcnta=\z@\relax
-\tud@font@greek@loop\tud@font@greek@declare
+\tud@font@greek@loop@uc\tud@font@greek@declare@uc
+%\tud@font@greek@loop@lc\tud@font@greek@declare@lc
 \newcommand*\tud@math@init{%
   \@ifpackageloaded{unicode-math}{%
     \if@tud@cdmath@active%
@@ -2325,6 +2349,10 @@
   \fi%
 }
 % TODO Warnung by amssymb Laden verhindern und mdsymbol verwenden?
+\ifundef{\symupletters}{%
+  \DeclareSymbolFont{upletters}{OML}{cmm}{m}{n}
+  \SetSymbolFont{upletters}{bold}{OML}{cmm}{b}{n}
+}{}%
 \newcommand*\tud@cdmath@declare[3]{%
   \DeclareMathVersion{tud@nm}%
   \DeclareMathVersion{tud@bm}%
@@ -2332,20 +2360,20 @@
   \tud@ttfont@@set%
   \SetSymbolFont{operators}{tud@nm}{#1}{#2}{\tud@cdfont@md}{n}%
   \SetSymbolFont{operators}{tud@bm}{#1}{#2}{\tud@cdfont@bf}{n}%
-  \SetSymbolFont{letters}{tud@nm}{OML}{#2}{\tud@cdfont@md}{sl}%
-  \SetSymbolFont{letters}{tud@bm}{OML}{#2}{\tud@cdfont@bf}{sl}%
+  \SetSymbolFont{letters}{tud@nm}{OML}{#2}{\tud@cdfont@md}{it}%
+  \SetSymbolFont{letters}{tud@bm}{OML}{#2}{\tud@cdfont@bf}{it}%
   \SetSymbolFont{symbols}{tud@nm}{OMS}{#2}{\tud@cdfont@md}{n}%
   \SetSymbolFont{symbols}{tud@bm}{OMS}{#2}{\tud@cdfont@bf}{n}%
   \SetSymbolFont{largesymbols}{tud@nm}{OMX}{#2}{\tud@cdfont@md}{n}%
   \SetSymbolFont{largesymbols}{tud@bm}{OMX}{#2}{\tud@cdfont@bf}{n}%
-  \SetMathAlphabet{\mathnormal}{tud@nm}{OML}{#2}{\tud@cdfont@md}{sl}%
-  \SetMathAlphabet{\mathnormal}{tud@bm}{OML}{#2}{\tud@cdfont@bf}{sl}%
+  \SetMathAlphabet{\mathnormal}{tud@nm}{OML}{#2}{\tud@cdfont@md}{it}%
+  \SetMathAlphabet{\mathnormal}{tud@bm}{OML}{#2}{\tud@cdfont@bf}{it}%
   \SetMathAlphabet{\mathrm}{tud@nm}{#1}{#2}{\tud@cdfont@md}{n}%
   \SetMathAlphabet{\mathrm}{tud@bm}{#1}{#2}{\tud@cdfont@bf}{n}%
   \SetMathAlphabet{\mathsf}{tud@nm}{#1}{#2}{\tud@cdfont@md}{n}%
   \SetMathAlphabet{\mathsf}{tud@bm}{#1}{#2}{\tud@cdfont@bf}{n}%
-  \SetMathAlphabet{\mathit}{tud@nm}{#1}{#2}{\tud@cdfont@md}{sl}%
-  \SetMathAlphabet{\mathit}{tud@bm}{#1}{#2}{\tud@cdfont@bf}{sl}%
+  \SetMathAlphabet{\mathit}{tud@nm}{#1}{#2}{\tud@cdfont@md}{it}%
+  \SetMathAlphabet{\mathit}{tud@bm}{#1}{#2}{\tud@cdfont@bf}{it}%
   \SetMathAlphabet{\mathbf}{tud@nm}{#1}{#2}{\tud@cdfont@bf}{n}%
   \SetMathAlphabet{\mathbf}{tud@bm}{#1}{#2}{\tud@cdfont@ebf}{n}%
   \SetMathAlphabet{\mathtt}{tud@nm}{#1}{#3}{\tud@ttfont@md}{n}%
@@ -2360,7 +2388,13 @@
       \SetMathAlphabet{\mathfrak}{tud@bm}{U}{euf}{b}{n}%
     }{}%
   }%
+  \SetSymbolFont{upletters}{tud@nm}{OML}{\tud@cdfont@fam@lf}{\tud@cdfont@md}{n}%
+  \SetSymbolFont{upletters}{tud@bm}{OML}{\tud@cdfont@fam@lf}{\tud@cdfont@bf}{n}%
+%  \DeclareMathSymbol{\upalpha}{\mathalpha}{upgreek}{97}%
 }
+
+
+
 \newcommand*\tud@font@greek@check@slanted{%
   \let\@tempb\relax%
   \let\@tempc\relax%
@@ -2377,6 +2411,10 @@
 \BeforePackage{flexisym}{\tud@font@greek@check@slanted}
 % TODO aufrechte minuskeln
 % TODO kursive Varianten nicht mit \var... sondern \sl... oder \it...
+% otheralpha, otherGamma,
+% alphaup, Gammaup
+% alphait, Gammait, alphasl, Gammasl
+% varGamma
 \newcommand*\tud@font@greek@init[1]{%
   \ifcsundef{up#1}{%
     \if@tud@slantedgreek%
@@ -2404,14 +2442,14 @@
     \@tud@x@fontspec@math@enabledfalse%
   \fi\fi%
   \if@tud@cdmath@active%
-    \tud@cmd@store{mv@normal}%
-    \tud@cmd@store{mv@bold}%
+    \tud@cs@store{mv@normal}%
+    \tud@cs@store{mv@bold}%
     \let\mv@normal\mv@tud@nm%
     \let\mv@bold\mv@tud@bm%
     \tud@font@greek@loop\tud@cdmath@greekshape@set%
   \else%
-    \tud@cmd@restore{mv@normal}%
-    \tud@cmd@restore{mv@bold}%
+    \tud@cs@restore{mv@normal}%
+    \tud@cs@restore{mv@bold}%
     \tud@font@greek@loop\tud@cdmath@greekshape@reset%
   \fi%
   \if@tud@slantedgreek%
@@ -2422,17 +2460,17 @@
   \mathversion{normal}%
 }
 \newcommand*\tud@cdmath@greekshape@set[1]{%
-  \tud@cmd@store{#1}%
-  \tud@cmd@store{up#1}%
-  \tud@cmd@store{var#1}%
+  \tud@cs@store{#1}%
+  \tud@cs@store{up#1}%
+  \tud@cs@store{var#1}%
   \csletcs{#1}{tud@#1}%
   \csletcs{up#1}{tud@up#1}%
   \csletcs{var#1}{tud@var#1}%
 }
 \newcommand*\tud@cdmath@greekshape@reset[1]{%
-  \tud@cmd@restore{#1}%
-  \tud@cmd@restore{up#1}%
-  \tud@cmd@restore{var#1}%
+  \tud@cs@restore{#1}%
+  \tud@cs@restore{up#1}%
+  \tud@cs@restore{var#1}%
 }
 \newcommand*\tud@font@greek@upright[1]{\csletcs{#1}{up#1}}
 \newcommand*\tud@font@greek@slanted[1]{\csletcs{#1}{var#1}}
@@ -2848,7 +2886,7 @@
   \@tempb%
 }
 \newcommand*\tud@multiple@fields@store[2]{%
-  \def\@tempa##1{\ifcsdef{@##1}{\tud@cmd@store{@##1}}{}}%
+  \def\@tempa##1{\ifcsdef{@##1}{\tud@cs@store{@##1}}{}}%
   \letcs\@tempb{tud@split#1@list}%
   \let\and\relax%
   \expandafter\forcsvlist\expandafter\@tempa\expandafter{\@tempb}%
@@ -2861,7 +2899,7 @@
 \newcommand*\tud@multiple@fields@restore[1]{%
   \def\@tempa##1{%
     \ifcsdef{@##1}{%
-      \tud@cmd@restore{@##1}%
+      \tud@cs@restore{@##1}%
       \global\csletcs{@##1}{@##1}%
     }{}%
   }%
@@ -3544,8 +3582,8 @@
     }{\@nameuse{Gm@restore@@#1}%
     \Gm@changelayout}%
   }%
-  \tud@cmd@store{geometry}
-  \tud@cmd@store{newgeometry}
+  \tud@cs@store{geometry}
+  \tud@cs@store{newgeometry}
   \newif\if@tud@x@geometry@enabled%
   \@tud@x@geometry@enabledtrue%
   \newcommand*\tud@setgeometry[1]{%
@@ -3560,20 +3598,20 @@
     \fi%
     \if@atdocument%
       \edef\@tempa{\@tempb,#1}%
-      \tud@cmd@store{Gm@restore@org}%
+      \tud@cs@store{Gm@restore@org}%
       \eappto\Gm@restore@org{%
         \paperwidth=\the\paperwidth\relax%
         \paperheight=\the\paperheight\relax%
       }%
-      \def\@tempc{\tud@cmd@use{newgeometry}}%
+      \def\@tempc{\tud@cs@use{newgeometry}}%
       \expandafter\@tempc\expandafter{\@tempa}%
-      \tud@cmd@restore{Gm@restore@org}%
+      \tud@cs@restore{Gm@restore@org}%
     \else%
       \Gm@initnewgm%
       \edef\@tempa{%
         paperwidth=\the\paperwidth,paperheight=\the\paperheight,\@tempb,#1%
       }%
-      \def\@tempc{\tud@cmd@use{geometry}}%
+      \def\@tempc{\tud@cs@use{geometry}}%
       \expandafter\@tempc\expandafter{\@tempa}%
     \fi%
     \@tud@x@geometry@enabledtrue%
@@ -3731,9 +3769,9 @@
     \letcs{\@tempa}{tud@x@geometry@#1}%
     \ifdefvoid{\@tempa}{}{%
       \def\@tempb##1:##2:##3\@nil{%
-        \tud@cmd@store{@tempa}%
-        \tud@cmd@store{@tempb}%
-        \tud@cmd@store{@tempc}%
+        \tud@cs@store{@tempa}%
+        \tud@cs@store{@tempb}%
+        \tud@cs@store{@tempc}%
         \IfArgIsEmpty{##2}{%
           \KOMAoption{paper}{##1}%
         }{%
@@ -3743,9 +3781,9 @@
             \KOMAoption{paper}{##1:##2}%
           \fi%
         }%
-        \tud@cmd@restore{@tempa}%
-        \tud@cmd@restore{@tempb}%
-        \tud@cmd@restore{@tempc}%
+        \tud@cs@restore{@tempa}%
+        \tud@cs@restore{@tempb}%
+        \tud@cs@restore{@tempc}%
       }%
       \def\@tempc##1{\@tempb##1::\@nil}%
       \expandafter\forcsvlist\expandafter\@tempc\expandafter{\@tempa}%
@@ -3791,7 +3829,7 @@
         }%
       \tud@reserved%
     \fi%
-    \def\@tempa{\tud@cmd@use{#2}}%
+    \def\@tempa{\tud@cs@use{#2}}%
     \expandafter\@tempa\expandafter{\tud@x@geometry@parameter}%
     \ifstr{#2}{geometry}{%
       \ifbool{@tud@x@geometry@enabled}{%
@@ -3801,9 +3839,9 @@
   }
   \renewcommand*\geometry[1]{\tud@geometry{#1}{geometry}}
   \renewcommand*\newgeometry[1]{%
-    \tud@cmd@store{Gm@restore@org}%
+    \tud@cs@store{Gm@restore@org}%
     \tud@geometry{#1}{newgeometry}%
-    \tud@cmd@restore{Gm@restore@org}%
+    \tud@cs@restore{Gm@restore@org}%
   }
   \apptocmd{\Gm@changelayout}{%
     \ifboolexpr{bool {@tud@x@geometry@enabled} and bool {@atdocument}}{%
@@ -3812,10 +3850,10 @@
   }{}{\tud@patch@wrn{Gm@changelayout}}%
   \renewcommand*\restoregeometry[1][]{%
     \IfArgIsEmpty{#1}{}{%
-      \tud@cmd@store{TUD@SpecialOptionAtDocument}%
+      \tud@cs@store{TUD@SpecialOptionAtDocument}%
       \let\TUD@SpecialOptionAtDocument\@gobble%
       \TUDoption{cdgeometry}{#1}%
-      \tud@cmd@restore{TUD@SpecialOptionAtDocument}%
+      \tud@cs@restore{TUD@SpecialOptionAtDocument}%
     }%
     \ifnum\tud@cdgeometry@num=\@ne\relax
       \tud@loadgeometry{init@custom}%
@@ -3842,8 +3880,8 @@
           \setlength\paperheight{\tud@len@layoutheight}%
           \setlength\paperwidth{\tud@len@layoutwidth}%
         \fi%
-        \tud@cmd@store{activateareas}%
-        \tud@cmd@store{tud@AfterChangingArea}%
+        \tud@cs@store{activateareas}%
+        \tud@cs@store{tud@AfterChangingArea}%
         \let\activateareas\relax%
         \let\tud@AfterChangingArea\relax%
         \recalctypearea%
@@ -3851,8 +3889,8 @@
           \tud@skip@restore{paperheight}%
           \tud@skip@restore{paperwidth}%
         \fi%
-        \tud@cmd@restore{activateareas}%
-        \tud@cmd@restore{tud@AfterChangingArea}%
+        \tud@cs@restore{activateareas}%
+        \tud@cs@restore{tud@AfterChangingArea}%
         \edef\tud@cdgeometry@hmargin{%
           left=\the\dimexpr\oddsidemargin+1in-\ta@bcor\relax,%
           textwidth=\the\textwidth,%
@@ -4616,10 +4654,10 @@
   \tud@BeforeSelectAnyPageStyle{#1}%
   \edef\currentpagestyle{#1}%
 }{}{\tud@patch@wrn{pagestyle}}
-\tud@cmd@store{pagestyle}
+\tud@cs@store{pagestyle}
 \renewcommand*\pagestyle[1]{\AfterPackage!{scrlayer-scrpage}{\pagestyle{#1}}}
 \BeforePackage{scrlayer-scrpage}{%
-  \tud@cmd@restore{pagestyle}%
+  \tud@cs@restore{pagestyle}%
   \undef\tud@pagestyle%
 }
 \TUD@UnwindPackage{scrlayer-scrpage}{%
@@ -5364,7 +5402,7 @@
     \bool@std@lock{@tud@cdgeometry@cover}{true}%
   \fi%
   \ifcase\tud@layout@title@num\relax% false
-    \tud@cmd@restore{titlepagestyle}%
+    \tud@cs@restore{titlepagestyle}%
     \tud@komafont@unset{titlehead}%
     \tud@komafont@unset{title}%
     \tud@komafont@unset{subtitle}%
@@ -5373,7 +5411,7 @@
     \tud@komafont@unset{date}%
     \tud@komafont@unset{publishers}%
   \else% !false
-    \tud@cmd@store{titlepagestyle}%
+    \tud@cs@store{titlepagestyle}%
     \renewcommand*\titlepagestyle{plain.tudheadings}%
     \tud@komafont@set{titlehead}{\usekomafont{titlepage}}%
     \tud@komafont@set{title}{%
@@ -5405,27 +5443,27 @@
     \tud@komafont@set{publishers}{\usekomafont{author}}%
   \fi%
   \ifcase\tud@layout@part@num\relax% false
-    \tud@cmd@restore{partheadstartvskip}%
-    \tud@cmd@restore{partheadendvskip}%
-    \tud@cmd@restore{partheademptypage}%
-    \tud@cmd@restore{partpagestyle}%
-    \tud@cmd@restore{scr@@startpart}%
-    \tud@cmd@restore{scr@@startspart}%
+    \tud@cs@restore{partheadstartvskip}%
+    \tud@cs@restore{partheadendvskip}%
+    \tud@cs@restore{partheademptypage}%
+    \tud@cs@restore{partpagestyle}%
+    \tud@cs@restore{scr@@startpart}%
+    \tud@cs@restore{scr@@startspart}%
     \tud@sectioning@reset[addpart]{part}%
     \tud@komafont@unset{partnumber}%
-    \tud@cmd@restore{raggedpart}%
+    \tud@cs@restore{raggedpart}%
   \else% !false
-    \tud@cmd@store{partheadstartvskip}%
+    \tud@cs@store{partheadstartvskip}%
     \let\partheadstartvskip\tud@partheadstartvskip%
-    \tud@cmd@store{partheadendvskip}%
+    \tud@cs@store{partheadendvskip}%
     \let\partheadendvskip\tud@partheadendvskip%
-    \tud@cmd@store{partheademptypage}%
+    \tud@cs@store{partheademptypage}%
     \let\partheademptypage\relax%
-    \tud@cmd@store{partpagestyle}%
+    \tud@cs@store{partpagestyle}%
     \renewcommand*\partpagestyle{plain.tudheadings}%
-    \tud@cmd@store{scr@@startpart}%
+    \tud@cs@store{scr@@startpart}%
     \let\scr@@startpart\tud@@startpart%
-    \tud@cmd@store{scr@@startspart}%
+    \tud@cs@store{scr@@startspart}%
     \let\scr@@startspart\tud@@startspart%
     \tud@sectioning@set{part}{%
       \tud@sec@fontface%
@@ -5435,25 +5473,25 @@
       \tud@sec@fontface%
       \tud@color{\tud@part@fontcolor}%
     }%
-    \tud@cmd@store{raggedpart}%
+    \tud@cs@store{raggedpart}%
     \renewcommand*\raggedpart{\tud@raggedright}%
   \fi%
   \ifcase\tud@layout@chapter@num\relax% false
-    \tud@cmd@restore{chapterheadstartvskip}%
-    \tud@cmd@restore{chapterformat}%
-    \tud@cmd@restore{@chapter}%
-    \tud@cmd@restore{@schapter}%
-    \tud@cmd@restore{scr@@makechapterhead}%
+    \tud@cs@restore{chapterheadstartvskip}%
+    \tud@cs@restore{chapterformat}%
+    \tud@cs@restore{@chapter}%
+    \tud@cs@restore{@schapter}%
+    \tud@cs@restore{scr@@makechapterhead}%
     \tud@sectioning@reset[addchap]{chapter}%
     \tud@komafont@unset{chapterprefix}%
-    \tud@cmd@restore{raggedchapter}%
+    \tud@cs@restore{raggedchapter}%
   \else% !false
-    \tud@cmd@store{chapterheadstartvskip}%
+    \tud@cs@store{chapterheadstartvskip}%
     \let\chapterheadstartvskip\tud@chapterheadstartvskip%
-    \tud@cmd@store{chapterformat}%
-    \tud@cmd@store{@chapter}%
-    \tud@cmd@store{@schapter}%
-    \tud@cmd@store{scr@@makechapterhead}%
+    \tud@cs@store{chapterformat}%
+    \tud@cs@store{@chapter}%
+    \tud@cs@store{@schapter}%
+    \tud@cs@store{scr@@makechapterhead}%
     \let\scr@@makechapterhead\tud@@makechapterhead%
     \tud@sectioning@set{chapter}{%
       \tud@sec@fontface%
@@ -5461,7 +5499,7 @@
       \tud@color{\tud@chapter@fontcolor}%
     }%
     \tud@komafont@set{chapterprefix}{\usesizeofkomafont{partnumber}}%
-    \tud@cmd@store{raggedchapter}%
+    \tud@cs@store{raggedchapter}%
     \renewcommand*\raggedchapter{\tud@raggedright}%
   \fi%
   \ifcase\tud@layout@section@num\relax% false
@@ -5471,7 +5509,7 @@
     \tud@sectioning@reset{minisec}%
     \tud@sectioning@reset{paragraph}%
     \tud@sectioning@reset{subparagraph}%
-    \tud@cmd@restore{raggedsection}%
+    \tud@cs@restore{raggedsection}%
   \else% !false
     \renewcommand*\tud@section@fontcolor{}%
     \ifcase\tud@layout@section@num\relax\or\else% *color
@@ -5499,7 +5537,7 @@
     \tud@sectioning@set{subparagraph}{%
       \ifstr{\tud@pagecolor}{HKS41}{}{\tud@color{\tud@section@fontcolor}}%
     }%
-    \tud@cmd@store{raggedsection}%
+    \tud@cs@store{raggedsection}%
     \renewcommand*\raggedsection{\tud@raggedright}%
   \fi%
 }
@@ -5511,12 +5549,12 @@
       }%
     }\@tempa%
   }%
-  \tud@cmd@store{footnoterule}%
+  \tud@cs@store{footnoterule}%
   \let\footnoterule\relax%
 }
 \newcommand*\tud@layout@specialpage@unset{%
   \tud@komafont@unset{footnote}%
-  \tud@cmd@restore{footnoterule}%
+  \tud@cs@restore{footnoterule}%
 }
 \newcommand*\tud@partheadstartvskip{%
   \renewcommand*\tud@part@fontcolor{}% false/true
@@ -5779,7 +5817,7 @@
 \newcommand*\tud@subsubsection{}
 \newcommand*\tud@ssubsubsection{}
 \newcommand*\tud@sectioning@set[2]{%
-  \tud@cmd@store{#1}%
+  \tud@cs@store{#1}%
   \ifstr{#1}{minisec}{%
     \renewcommand\minisec[1]{\@@tud@minisec{\tud@makeuppercase{##1}}}%
   }{%
@@ -5818,8 +5856,8 @@
   }{}%
 }
 \newcommand*\tud@sectioning@reset[2][]{%
-  \tud@cmd@restore{#2}%
-  \ifblank{#1}{}{\tud@cmd@restore{#1}}%
+  \tud@cs@restore{#2}%
+  \ifblank{#1}{}{\tud@cs@restore{#1}}%
   \tud@komafont@unset{#2}%
 }
 \robustify{\footnote}
@@ -5853,7 +5891,7 @@
     \TUD@parameter@set{title}{#1}%
     \ifcase\tud@layout@title@num\relax% false
       \ifx\tud@title@pagenumber\relax\gdef\tud@title@pagenumber{1}\fi%
-      \tud@cmd@use{maketitle}[\tud@title@pagenumber]%
+      \tud@cs@use{maketitle}[\tud@title@pagenumber]%
       \tud@if@tudheadings{\currentpagestyle}{%
         \ifstr{\titlepagestyle}{empty}{\thispagestyle{empty.tudheadings}}{}%
       }{}%
@@ -5884,7 +5922,7 @@
     \thispagestyle{empty}%
   }%
 }{}{\tud@patch@wrn{titlepage}}
-\tud@cmd@store{maketitle}
+\tud@cs@store{maketitle}
 \let\maketitle\tud@maketitle
 \TUD@parameter@family{title}{%
   \TUD@parameter@def{cdtitle}[true]{\TUDoption{cdtitle}{#1}}%
@@ -6406,7 +6444,7 @@
       \let\@lowertitleback\@empty%
       \let\@dedication\@empty%
       \ifx\tud@title@pagenumber\relax\gdef\tud@title@pagenumber{1}\fi%
-      \tud@cmd@use{maketitle}[\tud@title@pagenumber]%
+      \tud@cs@use{maketitle}[\tud@title@pagenumber]%
     \else% !false
       \@tud@covertrue%
       \@titlepagetrue%
@@ -7056,10 +7094,10 @@
   \iftocfeature{toc}{totoc}{}{%
     \if@tud@bookmarks%
       \setuptoc{toc}{totoc}%
-      \tud@cmd@store{addtocontents}%
+      \tud@cs@store{addtocontents}%
       \def\@tempc{%
         \unsettoc{toc}{totoc}%
-        \tud@cmd@restore{addtocontents}%
+        \tud@cs@restore{addtocontents}%
       }%
       \let\addtocontents\@gobbletwo%
     \fi%

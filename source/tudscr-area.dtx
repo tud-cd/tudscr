@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-area.dtx}[%
-  2018/07/13 v2.06 TUD-Script (type or page area)%
+  2018/07/17 v2.06 TUD-Script (type or page area)%
 ]
 \documentclass[english,ngerman,xindy]{tudscrdoc}
 \usepackage[T1]{fontenc}
@@ -870,8 +870,8 @@
 % \KOMAScript{} beachtet. Hierfür werden die originalen Befehle \cs{geometry}
 % und \cs{newgeometry} angepasst, weshalb diese vorher gesichert werden.
 %    \begin{macrocode}
-  \tud@cmd@store{geometry}
-  \tud@cmd@store{newgeometry}
+  \tud@cs@store{geometry}
+  \tud@cs@store{newgeometry}
 %    \end{macrocode}
 % Mit dem Befehl \cs{tud@setgeometry} wird abhängig davon, ob dieser in der
 % Präambel oder im Dokument von \cs{tud@cdgeometry@@process} verwendet wird,
@@ -904,14 +904,14 @@
 %    \begin{macrocode}
     \if@atdocument%
       \edef\@tempa{\@tempb,#1}%
-      \tud@cmd@store{Gm@restore@org}%
+      \tud@cs@store{Gm@restore@org}%
       \eappto\Gm@restore@org{%
         \paperwidth=\the\paperwidth\relax%
         \paperheight=\the\paperheight\relax%
       }%
-      \def\@tempc{\tud@cmd@use{newgeometry}}%
+      \def\@tempc{\tud@cs@use{newgeometry}}%
       \expandafter\@tempc\expandafter{\@tempa}%
-      \tud@cmd@restore{Gm@restore@org}%
+      \tud@cs@restore{Gm@restore@org}%
     \else%
 %    \end{macrocode}
 % Zu Beginn des Dokumentes werden mit \cs{Gm@initnewgm} vor jedem Satzspiegel
@@ -921,7 +921,7 @@
       \edef\@tempa{%
         paperwidth=\the\paperwidth,paperheight=\the\paperheight,\@tempb,#1%
       }%
-      \def\@tempc{\tud@cmd@use{geometry}}%
+      \def\@tempc{\tud@cs@use{geometry}}%
       \expandafter\@tempc\expandafter{\@tempa}%
     \fi%
     \@tud@x@geometry@enabledtrue%
@@ -1146,9 +1146,9 @@
     \letcs{\@tempa}{tud@x@geometry@#1}%
     \ifdefvoid{\@tempa}{}{%
       \def\@tempb##1:##2:##3\@nil{%
-        \tud@cmd@store{@tempa}%
-        \tud@cmd@store{@tempb}%
-        \tud@cmd@store{@tempc}%
+        \tud@cs@store{@tempa}%
+        \tud@cs@store{@tempb}%
+        \tud@cs@store{@tempc}%
         \IfArgIsEmpty{##2}{%
           \KOMAoption{paper}{##1}%
         }{%
@@ -1158,9 +1158,9 @@
             \KOMAoption{paper}{##1:##2}%
           \fi%
         }%
-        \tud@cmd@restore{@tempa}%
-        \tud@cmd@restore{@tempb}%
-        \tud@cmd@restore{@tempc}%
+        \tud@cs@restore{@tempa}%
+        \tud@cs@restore{@tempb}%
+        \tud@cs@restore{@tempc}%
       }%
       \def\@tempc##1{\@tempb##1::\@nil}%
       \expandafter\forcsvlist\expandafter\@tempc\expandafter{\@tempa}%
@@ -1211,7 +1211,7 @@
         }%
       \tud@reserved%
     \fi%
-    \def\@tempa{\tud@cmd@use{#2}}%
+    \def\@tempa{\tud@cs@use{#2}}%
     \expandafter\@tempa\expandafter{\tud@x@geometry@parameter}%
     \ifstr{#2}{geometry}{%
       \ifbool{@tud@x@geometry@enabled}{%
@@ -1221,9 +1221,9 @@
   }
   \renewcommand*\geometry[1]{\tud@geometry{#1}{geometry}}
   \renewcommand*\newgeometry[1]{%
-    \tud@cmd@store{Gm@restore@org}%
+    \tud@cs@store{Gm@restore@org}%
     \tud@geometry{#1}{newgeometry}%
-    \tud@cmd@restore{Gm@restore@org}%
+    \tud@cs@restore{Gm@restore@org}%
   }
 %    \end{macrocode}
 % \end{macro}^^A \tud@x@geometry@parameter
@@ -1266,10 +1266,10 @@
 %    \begin{macrocode}
   \renewcommand*\restoregeometry[1][]{%
     \IfArgIsEmpty{#1}{}{%
-      \tud@cmd@store{TUD@SpecialOptionAtDocument}%
+      \tud@cs@store{TUD@SpecialOptionAtDocument}%
       \let\TUD@SpecialOptionAtDocument\@gobble%
       \TUDoption{cdgeometry}{#1}%
-      \tud@cmd@restore{TUD@SpecialOptionAtDocument}%
+      \tud@cs@restore{TUD@SpecialOptionAtDocument}%
     }%
     \ifnum\tud@cdgeometry@num=\@ne\relax
       \tud@loadgeometry{init@custom}%
@@ -1366,8 +1366,8 @@
           \setlength\paperheight{\tud@len@layoutheight}%
           \setlength\paperwidth{\tud@len@layoutwidth}%
         \fi%
-        \tud@cmd@store{activateareas}%
-        \tud@cmd@store{tud@AfterChangingArea}%
+        \tud@cs@store{activateareas}%
+        \tud@cs@store{tud@AfterChangingArea}%
         \let\activateareas\relax%
         \let\tud@AfterChangingArea\relax%
         \recalctypearea%
@@ -1375,8 +1375,8 @@
           \tud@skip@restore{paperheight}%
           \tud@skip@restore{paperwidth}%
         \fi%
-        \tud@cmd@restore{activateareas}%
-        \tud@cmd@restore{tud@AfterChangingArea}%
+        \tud@cs@restore{activateareas}%
+        \tud@cs@restore{tud@AfterChangingArea}%
 %    \end{macrocode}
 % Nachdem der Satzspiegel im Zweifelsfall neu berechnet wurde, werden die von 
 % \pkg{typearea} berechneten Seitenränder an \pkg{geometry} weitergereicht.
