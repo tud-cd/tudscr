@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-fields.dtx}[%
-  2018/07/17 v2.06 TUD-Script (input fields)%
+  2018/07/19 v2.06 TUD-Script (input fields)%
 ]
 \documentclass[english,ngerman,xindy]{tudscrdoc}
 \usepackage[T1]{fontenc}
@@ -411,9 +411,9 @@
         Field `thesis' is overwritten by `subject'%
       }%
     \fi%
-    \TUD@std@ifkey@lock{subjectthesis}{@tud@subjectthesis}{true}%
+    \TUD@key@preset{subjectthesis}{true}%
   }{%
-    \TUD@std@ifkey@lock{subjectthesis}{@tud@subjectthesis}{false}%
+    \TUD@key@preset{subjectthesis}{false}%
   }%
   \ifx\tud@thanks\relax%
     \gdef\@thesis{#2}%
@@ -731,15 +731,15 @@
 % \begin{macro}{\tud@date@set}
 % \changes{v2.05}{2016/05/27}{neu}^^A
 % \begin{field}{\@date}
-% \begin{field}{\tud@date@pre}
+% \begin{field}{\@beforedate}
 % \changes{v2.05}{2016/05/27}{neu}^^A
-% \begin{field}{\tud@date@app}
+% \begin{field}{\@afterdate}
 % \changes{v2.05}{2016/05/27}{neu}^^A
 % Das Abgabedatum der Arbeit für den Titel, wird im originalen Makro \cs{@date}
 % gespeichert. Zusätzlich kann über die Parameter im optionalen Argument eine 
 % Ergänzung davorgesetzt angehängt werden~-- beispielsweise als Erklärung für
 % eine verspätete Abgabe aufgrund einer Verlängerung der Bearbeitungszeit~--
-% welche in den Feldern \cs{tud@date@pre} und \cs{tud@date@app} gespeichert
+% welche in den Feldern \cs{@beforedate} und \cs{@afterdate} gespeichert
 % wird. Hierfür wird der originale Befehl für das Datum \cs{date} erweitert, 
 % wobei die Sternversion \cs{date*} den angegebenen Ort als Präfix verwendet.
 %    \begin{macrocode}
@@ -754,21 +754,21 @@
   \tud@x@isodate@printdate{\@date}{#2}%
   \global\let\tud@date@check\relax%
 }
-\newcommand*\tud@date@pre{}
-\newcommand*\tud@date@app{}
+\newcommand*\@beforedate{}
+\newcommand*\@afterdate{}
 \TUD@parameter@family{date}{%
-  \TUD@parameter@def{before}{\def\tud@date@pre{#1}}%
+  \TUD@parameter@def{before}{\def\@beforedate{#1}}%
   \TUD@parameter@let{pre}{before}%
   \TUD@parameter@let{prefix}{before}%
-  \TUD@parameter@def{after}{\def\tud@date@app{#1}}%
+  \TUD@parameter@def{after}{\def\@afterdate{#1}}%
   \TUD@parameter@let{app}{after}%
   \TUD@parameter@let{suffix}{after}%
-  \TUD@parameter@def{place}{\def\@place{#1}\def\tud@date@pre{#1,}}%
+  \TUD@parameter@def{place}{\def\@place{#1}\def\@beforedate{#1,}}%
   \TUD@parameter@handler@value{after}%
 }
 %    \end{macrocode}
-% \end{field}^^A \tud@date@app
-% \end{field}^^A \tud@date@pre
+% \end{field}^^A \@afterdate
+% \end{field}^^A \@beforedate
 % \end{field}^^A \@date
 % \end{macro}^^A \tud@date@set
 % \end{parameter}^^A place
@@ -786,12 +786,12 @@
 %    \begin{macrocode}
 \newcommand*\tud@date@print{%
   \ifx\@date\@empty\else%
-    \ifx\tud@date@pre\@empty\else%
-      \expandafter\trim@spaces@noexp\expandafter{\tud@date@pre}\nobreakspace%
+    \ifx\@beforedate\@empty\else%
+      \expandafter\trim@spaces@noexp\expandafter{\@beforedate}\nobreakspace%
     \fi%
     \@date%
-    \ifx\tud@date@app\@empty\else%
-      \nobreakspace\expandafter\trim@spaces@noexp\expandafter{\tud@date@app}%
+    \ifx\@afterdate\@empty\else%
+      \nobreakspace\expandafter\trim@spaces@noexp\expandafter{\@afterdate}%
     \fi%
   \fi%
 }

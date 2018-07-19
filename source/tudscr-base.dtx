@@ -1,4 +1,4 @@
-% \CheckSum{738}
+% \CheckSum{723}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-base.dtx}[%
-  2018/07/17 v2.06 TUD-Script\space%
+  2018/07/19 v2.06 TUD-Script\space%
 %</driver>
 %<package&base>\ProvidesPackage{tudscrbase}[%
 %<*driver|package&base>
@@ -444,48 +444,92 @@
 % \end{macro}^^A \TUDExecuteOptions
 % \end{macro}^^A \TUDProcessOptions
 % \begin{macro}{\TUD@key}
-% \begin{macro}{\TUD@ifkey}
+% \begin{macro}{\TUD@key@define}
+% \changes{v2.06}{2018/07/19}{neu}^^A
+% \begin{macro}{\TUD@key@@define}
+% \changes{v2.06}{2018/07/19}{neu}^^A
+% \begin{macro}{\TUD@key@preset}
+% \changes{v2.06}{2018/07/19}{neu}^^A
+% Dies ist der zentrale Befehl zur Definition von Optionen, welcher die von
+% \KOMAScript{} Schnittstelle \cs{DefineFamilyKey} nutzt.
+%
+% Da sich die Klassenoptionen teilweise selbst gegenseitig beeinflussen oder
+% aber in bestimmten Fällen eine Option in Abhängigkeit von einer anderen
+% unterschiedliche Standardwerte annehmen soll, wird dafür eine Möglichkeit
+% geschaffen. Hierfür wird für jede Option ein korrelierende Schalter 
+% \cs{if@tud@key@\meta{Schlüssel}@set} definiert. Dieser wird auf \val{true} 
+% gesetzt, sobald der Schlüssel explizit gesetzt wurde, womit ein Standardwert 
+% einer Klassenoption überschrieben werden kann. Das Setzen der Standardwerte 
+% erfolgt intern mit dem Befehl \cs{TUD@key@preset}.
+% \ToDo{%
+%   \cs{cs@lock} und \cs{bool@lock} prüfen, ggf. mit \cs{TUD@key@preset} 
+%   ersetzen}[v2.06]
+%    \begin{macrocode}
+\newcommand*\TUD@key[2][.\@currname.\@currext]{%
+%    \end{macrocode}
+% Basierend auf dem Namen des Schalters wird die notwendige, boolesche Variable
+% erzeugt (\cs{if@tud@key@\meta{Schlüssel}@set}), welche im Falle des direkten
+% Aufrufs des Schlüssels, ein Überschreiben mit einem Standardwert verhindert.
+%    \begin{macrocode}
+  \providebool{@tud@key@#2@set}%
+  \DefineFamilyMember[{#1}]{TUD}%
+  \kernel@ifnextchar[%]
+    {\TUD@key@define{#1}{#2}}%
+    {\TUD@key@@define{#1}{#2}}%
+}
+\newcommand*\TUD@key@define{}
+\def\TUD@key@define#1#2[#3]#4{%
+  \DefineFamilyKey[{#1}]{TUD}{#2}[{#3}]{%
+    #4%
+    \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+      \booltrue{@tud@key@#2@set}%
+    \fi%
+  }%
+}
+\newcommand*\TUD@key@@define{}
+\def\TUD@key@@define#1#2#3{%
+  \DefineFamilyKey[{#1}]{TUD}{#2}{%
+    #3
+    \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+      \booltrue{@tud@key@#2@set}%
+    \fi%
+  }%
+}
+%    \end{macrocode}
+% Es kann intern über \cs{if@tud@key@\meta{Schlüssel}@set} geprüft werden, ob
+% einem Schlüssel ein explizites Wert zugewiesen wurde. Sollte dies nicht der
+% Fall sein, kann dieser hiermit intern beliebig angepasst werden. Da es durch 
+% das Setzen der Option mit \cs{TUDoption} zu einer Sperrung kommt, muss diese
+% folgend wieder rückgängig gemacht werden.
+%    \begin{macrocode}
+\newcommand*\TUD@key@preset[2]{%
+  \ifbool{@tud@key@#1@set}{}{%
+    \TUDoption{#1}{#2}%
+    \boolfalse{@tud@key@#1@set}%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \TUD@key@preset
+% \end{macro}^^A \TUD@key@@define
+% \end{macro}^^A \TUD@key@define
+% \end{macro}^^A \TUD@key
 % \begin{macro}{\TUD@set@ifkey}
-% \begin{macro}{\TUD@numkey}
-% \begin{macro}{\TUD@bool@numkey}
-% \changes{v2.03}{2015/01/09}{neu}^^A
 % \begin{macro}{\TUD@set@numkey}
 % \changes{v2.02}{2014/11/05}{neu}^^A
-% \begin{macro}{\TUD@lengthkey}
+% \begin{macro}{\TUD@bool@numkey}
 % \changes{v2.03}{2015/01/09}{neu}^^A
-% \begin{macro}{\TUD@set@lengthkey}
 % \begin{macro}{\TUD@set@dimenkey}
 % \changes{v2.05}{2016/06/15}{neu}^^A
 % \begin{macro}{\TUD@unknown@keyval}
-% Dies sind die Befehle zur Definition der Optionen. Klassenoptionen können
-% entweder als Schalter (\cs{TUD@ifkey}) oder aber mit mehreren möglichen
-% Werten (\cs{TUD@numkey}) definiert werden. Prinzipiell ist auch eine freie
+% Dies sind die Befehle zum Setzen der Optionen. Diese können entweder als
+% Schalter (\cs{TUD@set@ifkey}) oder aber mit mehreren möglichen Werten
+% (\cs{TUD@set@numkey}) definiert werden. Prinzipiell ist auch eine freie
 % Definition mit anschließender Abarbeitung ohne die zuvor genannten Befehle
 % möglich.
-% \ToDo{%
-%   \cs{TUD@bool@numkey} evtl. ersetzen durch \cs{TUD@set@ifkey} und 
-%   \cs{FamilyKeyState} abfragen, danach den Rest auswerten%
-% }[v2.06]%
+% \ToDo{TUD@set@numkey: lowercase value}[v2.06]
 %    \begin{macrocode}
-\newcommand*\TUD@key[1][.\@currname.\@currext]{%
-  \DefineFamilyMember[{#1}]{TUD}%
-  \DefineFamilyKey[{#1}]{TUD}%
-}
-%    \end{macrocode}
-% Dies sind die Befehle zur Definition einer booleschen Option.
-%    \begin{macrocode}
-\newcommand*\TUD@ifkey[1][.\@currname.\@currext]{%
-  \DefineFamilyMember{TUD}%
-  \FamilyBoolKey[#1]{TUD}%
-}
 \newcommand*\TUD@set@ifkey{\FamilySetBool{TUD}}
-%    \end{macrocode}
-% Dies sind die Befehle zur Definition einer Option mit definierten Werten.
-%    \begin{macrocode}
-\newcommand*\TUD@numkey[1][.\@currname.\@currext]{%
-  \DefineFamilyMember{TUD}%
-  \FamilyNumericalKey[#1]{TUD}%
-}
+\newcommand*\TUD@set@numkey{\FamilySetNumerical{TUD}}
 %    \end{macrocode}
 % Um Dopplungen im Code zu vermeiden, werden für die numerische Schlüssel die 
 % booleschen Standardwertzuweisungen in einem Makro gespeichert.
@@ -493,18 +537,10 @@
 \newcommand*\TUD@bool@numkey{%
   {false}{0},{off}{0},{no}{0},{true}{1},{on}{1},{yes}{1}%
 }
-\newcommand*\TUD@set@numkey{\FamilySetNumerical{TUD}}
-%    \end{macrocode}
-% Dies sind die Befehle zur Definition einer Option zur Festlegung einer Länge.
-%    \begin{macrocode}
-\newcommand*\TUD@lengthkey[1][.\@currname.\@currext]{%
-  \DefineFamilyMember{TUD}%
-  \FamilyLengthKey[#1]{TUD}%
-}
-\newcommand*\TUD@set@lengthkey{\FamilySetLength{TUD}}
 %    \end{macrocode}
 % Mit \cs{TUD@set@dimenkey} wird der übergebene Längenwert im spezifiezierten 
 % Makro gespeichert.
+% \ToDo{mit \cs{FamilyLengthMacroKey} ersetzen?!}[v2.06]
 %    \begin{macrocode}
 \newcommand*\TUD@set@dimenkey[3]{%
   \ifxlen{#3}{%
@@ -523,70 +559,9 @@
 %    \end{macrocode}
 % \end{macro}^^A \TUD@unknown@keyval
 % \end{macro}^^A \TUD@set@dimenkey
-% \end{macro}^^A \TUD@set@lengthkey
-% \end{macro}^^A \TUD@lengthkey
 % \end{macro}^^A \TUD@set@numkey
 % \end{macro}^^A \TUD@bool@numkey
-% \end{macro}^^A \TUD@numkey
 % \end{macro}^^A \TUD@set@ifkey
-% \end{macro}^^A \TUD@ifkey
-% \end{macro}^^A \TUD@key
-% \begin{macro}{\TUD@key@lock}
-% \begin{macro}{\TUD@std@ifkey@lock}
-% \begin{macro}{\TUD@std@numkey@lock}
-% \begin{macro}{\TUD@set@ifkey@lock}
-% \begin{macro}{\TUD@set@numkey@lock}
-% Da sich die Klassenoptionen teilweise selbst gegenseitig beeinflussen oder
-% aber in bestimmten Fällen eine Option in Abhängigkeit von einer anderen
-% unterschiedliche Standardwerte annehmen soll, wird dafür eine Möglichkeit
-% geschaffen. Dabei kann der Nutzer jederzeit einen von einer Option abhängigen
-% Standardwert einer Klassenoption überschreiben. Die Klassenoptionen selber
-% werden intern mit dem Befehl \cs{TUD@key@lock} definiert und die Standardwerte
-% sowie deren Manipulation innerhalb der Optionen mit \cs{TUD@std@ifkey@lock}
-% bzw. \cs{TUD@std@numkey@lock} gesetzt. Mit \cs{TUD@set@ifkey@lock} und
-% \cs{TUD@set@numkey@lock} werden bei der expliziten Anwendung einer Option
-% durch den Nutzer die entsprechenden Werte geändert und gegen ein internes
-% Überschreiben gesperrt.
-%    \begin{macrocode}
-\newcommand*\TUD@key@lock[2][.\@currname.\@currext]{%
-%    \end{macrocode}
-% Basierend auf dem Namen des Schalters wird die notwendige, boolesche Variable
-% erzeugt (\cs{if@tud@\meta{Schaltername}@lock}), welche im Falle des direkten
-% Aufrufs des Schlüssels durch den Anwender, ein internes Überschreiben
-% verhindert.
-%    \begin{macrocode}
-  \newbool{@tud@#2@locked}%
-  \TUD@key[{#1}]{#2}%
-}
-%    \end{macrocode}
-% Es kann intern über \cs{if\meta{Schaltername}@lock} geprüft werden, ob einem
-% mit Schlüssel, der mit \cs{TUD@key@lock} definiert wurde, durch den Anwender
-% ein explizites Verhalten zugewiesen wurde. Sollte dies nicht der Fall sein,
-% kann dieser hiermit intern beliebig angepasst werden. Da es durch das Setzen
-% der Option mit \cs{TUDoption} zu einer Sperrung kommt, muss diese folgend
-% wieder rückgängig gemacht werden.
-%    \begin{macrocode}
-\newcommand*\TUD@std@ifkey@lock[3]{%
-  \ifbool{@tud@#1@locked}{}{%
-    \TUD@set@ifkey{#1}{#2}{#3}%
-    \boolfalse{@tud@#1@locked}%
-  }%
-}
-\newcommand*\TUD@set@ifkey@lock[1]{%
-  \booltrue{@tud@#1@locked}%
-  \TUD@set@ifkey{#1}%
-}
-\let\TUD@std@numkey@lock\TUD@std@ifkey@lock
-\newcommand*\TUD@set@numkey@lock[1]{%
-  \booltrue{@tud@#1@locked}%
-  \TUD@set@numkey{#1}%
-}
-%    \end{macrocode}
-% \end{macro}^^A \TUD@set@numkey@lock
-% \end{macro}^^A \TUD@set@ifkey@lock
-% \end{macro}^^A \TUD@std@numkey@lock
-% \end{macro}^^A \TUD@std@ifkey@lock
-% \end{macro}^^A \TUD@key@lock
 % \begin{macro}{\cs@lock}
 % \begin{macro}{\cs@std@lock}
 % \begin{macro}{\cs@set@lock}
@@ -594,8 +569,7 @@
 % werden, welcher intern nur mit \cs{cs@std@lock}\marg{Name}\marg{Definition}
 % geschrieben wird, wenn nicht über eine entsprechende Option ein explizites
 % Verhalten mit \cs{cs@set@lock}\marg{Name}\marg{Definition} zugewiesen wurde.
-% Dies ist äquivalent zu \cs{TUD@std@ifkey@lock} und \cs{TUD@set@ifkey@lock}
-% beziehungsweise \cs{TUD@std@numkey@lock} und \cs{TUD@set@numkey@lock}
+% \ToDo{umbenennen, tud@ prefix}[v2.06]
 %    \begin{macrocode}
 \newcommand*\cs@lock[2]{%
   \expandafter\newcommand\expandafter*\csname#1\endcsname{#2}%
@@ -625,6 +599,7 @@
 % um nicht nur \val{true} und \val{false} sondern auch alle anderen bekannten 
 % booleschen Zuweisungen (\val{yes} und \val{on} sowie \val{no} und \val{off})
 % mit diesen Befehlen verwenden zu können.
+% \ToDo{umbenennen, tud@ prefix}[v2.06]
 %    \begin{macrocode}
 \newcommand*\tud@setbool[2]{%
   \ifstrbool{#2}{\booltrue{#1}}{\boolfalse{#1}}{%
@@ -1194,6 +1169,7 @@
 % Layout~-- auch konträr zu den globalen Dokumenteinstellungen~-- zu verwenden.
 % Mit diesen Befehlen lässt sich die Anzahl der Spalten über einen Parameter
 % anpassen, falls das Paket \pkg{multicol} geladen wurde.
+% \ToDo{\cs{cs@lock} ist sinnfrei, Parameter nur setzen, wenn möglich}[v2.06]
 % \begin{macro}{\tud@x@multicol@num}
 % \begin{macro}{\tud@x@multicol@check}
 % Im Makro \cs{tud@x@multicol@num} wird die Anzahl der gewünschten Spalten in 

@@ -299,7 +299,7 @@
   \TUD@SpecialOptionAtDocument{tud@font@skip@set}%
   \FamilyKeyStateProcessed%
 }
-\cs@lock{tud@ttfont@num}{0}
+\newcommand*\tud@ttfont@num{0}
 \TUD@key{ttfont}[true]{%
   \TUD@set@numkey{ttfont}{@tempa}{%
     \TUD@bool@numkey,%
@@ -308,12 +308,13 @@
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax% false
-      \cs@set@lock{tud@ttfont@num}{0}%
+      \renewcommand*\tud@ttfont@num{0}%
     \or% lmodern
-      \cs@set@lock{tud@ttfont@num}{1}%
+      \renewcommand*\tud@ttfont@num{1}%
     \or% roboto
-      \cs@set@lock{tud@ttfont@num}{2}%
+      \renewcommand*\tud@ttfont@num{2}%
     \fi%
+    \TUD@SpecialOptionAtDocument{tud@font@set}%
   \fi%
 }
 \bool@lock{@tud@cdmath@active}
@@ -345,7 +346,7 @@
     \fi%
   \fi%
 }
-\cs@lock{tud@slantedgreek@num}{0}
+\newcommand*\tud@slantedgreek@num{0}
 \TUD@key{slantedgreek}[true]{%
   \TUD@set@numkey{slantedgreek}{@tempa}{%
     \TUD@bool@numkey,%
@@ -356,11 +357,11 @@
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax% upright
-      \cs@set@lock{tud@slantedgreek@num}{0}%
+      \renewcommand*\tud@slantedgreek@num{0}%
     \or% slanted
-      \cs@set@lock{tud@slantedgreek@num}{1}%
+      \renewcommand*\tud@slantedgreek@num{1}%
     \or% standard
-      \cs@set@lock{tud@slantedgreek@num}{2}%
+      \renewcommand*\tud@slantedgreek@num{2}%
     \fi%
     \TUD@SpecialOptionAtDocument{tud@math@set}%
   \fi%
@@ -611,6 +612,22 @@
 \newif\if@tud@ddc@internal
 \newcommand*\tud@comp@clearpage{}%
 \newcommand*\tud@comp@resetpagestyle{}%
+\AfterEndPreamble{%
+  \tud@if@v@lower{2.04}{%
+    \renewcommand*\tud@comp@clearpage{%
+      \if@tud@ddc@internal\else%
+        \tud@if@tudheadings{\currentpagestyle}{\clearpage}{}%
+      \fi%
+    }%
+    \renewcommand*\tud@comp@resetpagestyle{%
+      \if@tud@ddc@internal\else%
+        \tud@if@tudheadings{\currentpagestyle}{%
+          \expandafter\pagestyle\expandafter{\currentpagestyle}%
+        }{}%
+      \fi%
+    }%
+  }{}%
+}
 \newcommand*\tud@ddc@switch{}
 \edef\tud@ddc@switch{%
   \TUD@bool@numkey,%
@@ -699,49 +716,49 @@
       \cs@std@lock{tud@layout@title@num}{0}%
       \cs@std@lock{tud@layout@part@num}{0}%
       \cs@std@lock{tud@layout@chapter@num}{0}%
-      \TUD@std@ifkey@lock{chapterpage}{@tud@chapterpage}{false}%
+      \TUD@key@preset{chapterpage}{false}%
       \cs@std@lock{tud@layout@section@num}{0}%
     \or% true
       \cs@std@lock{tud@layout@cover@num}{1}%
       \cs@std@lock{tud@layout@title@num}{1}%
       \cs@std@lock{tud@layout@part@num}{1}%
       \cs@std@lock{tud@layout@chapter@num}{1}%
-      \TUD@std@ifkey@lock{chapterpage}{@tud@chapterpage}{false}%
+      \TUD@key@preset{chapterpage}{false}%
       \cs@std@lock{tud@layout@section@num}{1}%
     \or% litecolor
       \cs@std@lock{tud@layout@cover@num}{1}%
       \cs@std@lock{tud@layout@title@num}{2}%
       \cs@std@lock{tud@layout@part@num}{2}%
       \cs@std@lock{tud@layout@chapter@num}{2}%
-      \TUD@std@ifkey@lock{chapterpage}{@tud@chapterpage}{false}%
+      \TUD@key@preset{chapterpage}{false}%
       \cs@std@lock{tud@layout@section@num}{2}%
     \or% barcolor
       \cs@std@lock{tud@layout@cover@num}{1}%
       \cs@std@lock{tud@layout@title@num}{3}%
       \cs@std@lock{tud@layout@part@num}{3}%
       \cs@std@lock{tud@layout@chapter@num}{3}%
-      \TUD@std@ifkey@lock{chapterpage}{@tud@chapterpage}{false}%
+      \TUD@key@preset{chapterpage}{false}%
       \cs@std@lock{tud@layout@section@num}{2}%
     \or% bicolor
       \cs@std@lock{tud@layout@cover@num}{1}%
       \cs@std@lock{tud@layout@title@num}{4}%
       \cs@std@lock{tud@layout@part@num}{4}%
       \cs@std@lock{tud@layout@chapter@num}{4}%
-      \TUD@std@ifkey@lock{chapterpage}{@tud@chapterpage}{false}%
+      \TUD@key@preset{chapterpage}{false}%
       \cs@std@lock{tud@layout@section@num}{2}%
     \or% color
       \cs@std@lock{tud@layout@cover@num}{1}%
       \cs@std@lock{tud@layout@title@num}{5}%
       \cs@std@lock{tud@layout@part@num}{5}%
       \cs@std@lock{tud@layout@chapter@num}{5}%
-      \TUD@std@ifkey@lock{chapterpage}{@tud@chapterpage}{true}%
+      \TUD@key@preset{chapterpage}{true}%
       \cs@std@lock{tud@layout@section@num}{2}%
     \or% full
       \cs@std@lock{tud@layout@cover@num}{1}%
       \cs@std@lock{tud@layout@title@num}{6}%
       \cs@std@lock{tud@layout@part@num}{6}%
       \cs@std@lock{tud@layout@chapter@num}{6}%
-      \TUD@std@ifkey@lock{chapterpage}{@tud@chapterpage}{true}%
+      \TUD@key@preset{chapterpage}{true}%
       \cs@std@lock{tud@layout@section@num}{2}%
     \fi%
     \TUD@SpecialOptionAtDocument{tud@layout@process}%
@@ -822,25 +839,25 @@
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax% false
       \cs@set@lock{tud@layout@chapter@num}{0}%
-      \TUD@std@ifkey@lock{chapterpage}{@tud@chapterpage}{false}%
+      \TUD@key@preset{chapterpage}{false}%
     \or% true
       \cs@set@lock{tud@layout@chapter@num}{1}%
-      \TUD@std@ifkey@lock{chapterpage}{@tud@chapterpage}{false}%
+      \TUD@key@preset{chapterpage}{false}%
     \or% litecolor
       \cs@set@lock{tud@layout@chapter@num}{2}%
-      \TUD@std@ifkey@lock{chapterpage}{@tud@chapterpage}{false}%
+      \TUD@key@preset{chapterpage}{false}%
     \or% barcolor
       \cs@set@lock{tud@layout@chapter@num}{3}%
-      \TUD@std@ifkey@lock{chapterpage}{@tud@chapterpage}{false}%
+      \TUD@key@preset{chapterpage}{false}%
     \or% bicolor
       \cs@set@lock{tud@layout@chapter@num}{4}%
-      \TUD@std@ifkey@lock{chapterpage}{@tud@chapterpage}{false}%
+      \TUD@key@preset{chapterpage}{false}%
     \or% color
       \cs@set@lock{tud@layout@chapter@num}{5}%
-      \TUD@std@ifkey@lock{chapterpage}{@tud@chapterpage}{true}%
+      \TUD@key@preset{chapterpage}{true}%
     \or% full
       \cs@set@lock{tud@layout@chapter@num}{6}%
-      \TUD@std@ifkey@lock{chapterpage}{@tud@chapterpage}{true}%
+      \TUD@key@preset{chapterpage}{true}%
     \fi%
     \TUD@SpecialOptionAtDocument{tud@layout@process}%
   \fi%
@@ -859,8 +876,8 @@
   \fi%
 }
 \newif\if@tud@chapterpage
-\TUD@key@lock{chapterpage}[true]{%
-  \TUD@set@ifkey@lock{chapterpage}{@tud@chapterpage}{#1}%
+\TUD@key{chapterpage}[true]{%
+  \TUD@set@ifkey{chapterpage}{@tud@chapterpage}{#1}%
 }
 \newcommand*\tud@cleardoublepage{\cleardoubleoddpage}
 \TUD@key{cleardoublespecialpage}[true]{%
@@ -920,8 +937,12 @@
   \@afterindentfalse\@afterheading%
 }
 \newif\if@tud@clearcolor
-\TUD@ifkey{clearcolor}{@tud@clearcolor}
-\TUD@ifkey{clearcolour}{@tud@clearcolor}
+\TUD@key{clearcolor}[true]{%
+  \TUD@set@ifkey{clearcolor}{@tud@clearcolor}{#1}%
+}
+\TUD@key{clearcolour}[true]{%
+  \TUD@set@ifkey{clearcolour}{@tud@clearcolor}{#1}%
+}
 \newcommand*\tud@pagecolor{}%
 \DefineFamilyMember{KOMA}
 \DefineFamilyKey{KOMA}{headings}{%
@@ -946,8 +967,8 @@
 }
 %%% From File: tudscr-title.dtx
 \newif\if@tud@subjectthesis
-\TUD@key@lock{subjectthesis}[true]{%
-  \TUD@set@ifkey@lock{subjectthesis}{@tud@subjectthesis}{#1}%
+\TUD@key{subjectthesis}[true]{%
+  \TUD@set@ifkey{subjectthesis}{@tud@subjectthesis}{#1}%
 }
 %%% From File: tudscr-frontmatter.dtx
 \newcommand*\tud@fm@switch{%
@@ -1121,7 +1142,7 @@
   }{%
     \ClassInfoNoLine{\TUD@Class@Name}%
     {%
-      Switching compatibility level to `\@tempa'%
+      Switching compatibility level to `v\@tempa'%
     }%
     \edef\tud@v@comp{\csuse{tud@v@\@tempa}}%
   }%
@@ -1381,6 +1402,19 @@
     \RequirePackage{fontspec}[2017/01/24]%
   \fi%
 }
+\AtEndOfClass%
+{%
+  \tud@if@v@lower{2.05}{%
+    \TUD@key@preset{relspacing}{false}%
+  }{%
+    \TUD@key@preset{relspacing}{true}%
+  }%
+  \tud@if@v@lower{2.06}{%
+    \TUD@key@preset{slantedgreek}{standard}%
+  }{%
+    \TUD@key@preset{slantedgreek}{true}%
+  }%
+}
 %%% From File: tudscr-misc.dtx
 \newif\if@tud@x@scr@paper@set
 \TUD@key{paper}{%
@@ -1436,7 +1470,9 @@
   }{}%
 }
 \newif\if@tud@bookmarks
-\TUD@ifkey{tudbookmarks}{@tud@bookmarks}
+\TUD@key{tudbookmarks}[true]{%
+  \TUD@set@ifkey{tudbookmarks}{@tud@bookmarks}{#1}%
+}
 \newif\if@tud@symbolheadings
 \TUD@key{footnotes}{%
   \TUD@set@numkey{footnotes}{@tempa}{%
@@ -1454,6 +1490,7 @@
 \AtEndOfClass{%
   \newcounter{symbolheadings}[chapter]
 }
+% TODO Dateien misc mit comp tauschen, \TUDExecuteOptions verschieben
 %%% From File: tudscr-misc.dtx
 \newcommand*\TUD@SpecialOptionAtDocument[1]{}
 \newcommand*\tud@x@scr@paper{%
@@ -1474,7 +1511,7 @@
 }
 \DeclareOption*{\tud@x@scr@paper}
 \TUDExecuteOptions{%
-  cd=true,cdfont=true,relspacing=true,tudbookmarks=true%
+  cd=true,cdfont=true,tudbookmarks=true%
 }
 \TUDProcessOptions\relax
 \LoadClass{\TUD@Class@KOMA}[2018/03/30]
@@ -1538,19 +1575,13 @@
   \renewcommand*\tud@cdfont@fam@osf{lun}
   \newcommand*\tud@cdfont@db{0m6}
 \fi
-\newif\if@tud@ttfont@rb@exist
 \newcommand*\tud@ttfont@fam{fddt}
 \newcommand*\tud@ttfont@rb{fddt}
 \newcommand*\tud@ttfont@lm{lmtt}
+\newif\if@tud@ttfont@rb@exist
 \IfFileExists{roboto-mono.sty}{%
   \@tud@ttfont@rb@existtrue%
-  \cs@std@lock{tud@ttfont@num}{2}%
-}{%
-  \cs@std@lock{tud@ttfont@num}{1}%
-}
-\if@tud@cdoldfont@active
-  \cs@std@lock{tud@ttfont@num}{1}%
-\fi
+}{}
 \newcommand*\tud@cdfont@check[4][]{%
   \@tud@res@swatrue%
   \def\tud@res@a##1{%
@@ -2175,7 +2206,7 @@
       The package `roboto-mono' is missing so the\MessageBreak%
       typewriter font of package `lmodern' is used%
     }%
-    \cs@set@lock{tud@ttfont@num}{1}%
+    \renewcommand*\tud@ttfont@num{1}%
   \fi\fi
   \ifcase\tud@ttfont@num\relax% false
     \let\tud@ttfont@fam\ttdefault%
@@ -2340,8 +2371,9 @@
   \@tud@math@greek@slantedfalse%
   \ifx\Gamma\@tempb\relax\@tud@math@greek@slantedtrue\fi%
   \ifx\Gamma\@tempc\relax\@tud@math@greek@slantedtrue\fi%
+  % TODO weitere Varianten erkennen!
   \if@tud@math@greek@slanted%
-    \cs@std@lock{tud@slantedgreek@num}{1}%
+    \TUD@key@preset{slantedgreek}{true}%
   \fi%
   \let\tud@math@greek@check@slanted\relax%
 }
@@ -2807,9 +2839,9 @@
         Field `thesis' is overwritten by `subject'%
       }%
     \fi%
-    \TUD@std@ifkey@lock{subjectthesis}{@tud@subjectthesis}{true}%
+    \TUD@key@preset{subjectthesis}{true}%
   }{%
-    \TUD@std@ifkey@lock{subjectthesis}{@tud@subjectthesis}{false}%
+    \TUD@key@preset{subjectthesis}{false}%
   }%
   \ifx\tud@thanks\relax%
     \gdef\@thesis{#2}%
@@ -2899,26 +2931,26 @@
   \tud@x@isodate@printdate{\@date}{#2}%
   \global\let\tud@date@check\relax%
 }
-\newcommand*\tud@date@pre{}
-\newcommand*\tud@date@app{}
+\newcommand*\@beforedate{}
+\newcommand*\@afterdate{}
 \TUD@parameter@family{date}{%
-  \TUD@parameter@def{before}{\def\tud@date@pre{#1}}%
+  \TUD@parameter@def{before}{\def\@beforedate{#1}}%
   \TUD@parameter@let{pre}{before}%
   \TUD@parameter@let{prefix}{before}%
-  \TUD@parameter@def{after}{\def\tud@date@app{#1}}%
+  \TUD@parameter@def{after}{\def\@afterdate{#1}}%
   \TUD@parameter@let{app}{after}%
   \TUD@parameter@let{suffix}{after}%
-  \TUD@parameter@def{place}{\def\@place{#1}\def\tud@date@pre{#1,}}%
+  \TUD@parameter@def{place}{\def\@place{#1}\def\@beforedate{#1,}}%
   \TUD@parameter@handler@value{after}%
 }
 \newcommand*\tud@date@print{%
   \ifx\@date\@empty\else%
-    \ifx\tud@date@pre\@empty\else%
-      \expandafter\trim@spaces@noexp\expandafter{\tud@date@pre}\nobreakspace%
+    \ifx\@beforedate\@empty\else%
+      \expandafter\trim@spaces@noexp\expandafter{\@beforedate}\nobreakspace%
     \fi%
     \@date%
-    \ifx\tud@date@app\@empty\else%
-      \nobreakspace\expandafter\trim@spaces@noexp\expandafter{\tud@date@app}%
+    \ifx\@afterdate\@empty\else%
+      \nobreakspace\expandafter\trim@spaces@noexp\expandafter{\@afterdate}%
     \fi%
   \fi%
 }
@@ -5284,22 +5316,6 @@
     \hbox to #2{}%
   \fi%
 }
-\AtBeginDocument{%
-  \tud@if@v@lower{2.04}{%
-    \renewcommand*\tud@comp@clearpage{%
-      \if@tud@ddc@internal\else%
-        \tud@if@tudheadings{\currentpagestyle}{\clearpage}{}%
-      \fi%
-    }%
-    \renewcommand*\tud@comp@resetpagestyle{%
-      \if@tud@ddc@internal\else%
-        \tud@if@tudheadings{\currentpagestyle}{%
-          \expandafter\pagestyle\expandafter{\currentpagestyle}%
-        }{}%
-      \fi%
-    }%
-  }{}%
-}
 \newcommand*\tud@ddc@check{%
   \let\@tempa\tud@ddc@head@num%
   \let\@tempb\tud@ddc@foot@num%
@@ -6579,9 +6595,13 @@
     }{%
       \bool@set@lock{@tud@cdgeometry@cover}{false}%
     }{%
-      \ifstr{#1}{custom}{\bool@set@lock{@tud@cdgeometry@cover}{false}}{%
-        \ifstr{#1}{user}{\bool@set@lock{@tud@cdgeometry@cover}{false}}{%
-          \TUD@parameter@error{cdgeometry}{true, false}%
+      \ifstr{#1}{custom}{%
+        \bool@set@lock{@tud@cdgeometry@cover}{false}%
+      }{%
+        \ifstr{#1}{user}{%
+          \bool@set@lock{@tud@cdgeometry@cover}{false}%
+        }{%
+          \TUD@parameter@error{cdgeometry}{true,false}%
         }%
       }%
     }%
@@ -6980,7 +7000,7 @@
 }
 %%% From File: tudscr-comp.dtx
 \newcommand*\TUD@deprecated@cs[2]{%
-  \AtBeginDocument{%
+  \AfterEndPreamble{%
     \ifcsundef{#1}{%
       \expandafter\newrobustcmd\csname #1\endcsname{%
         \ClassWarning{\TUD@Class@Name}%
@@ -7030,12 +7050,6 @@
   \TUD@deprecated@cs{finaldate}{duedate}%
   \TUD@deprecated@cs{maturitydate}{duedate}%
 }
-% TODO das funktioniert so doch nicht, was, wenn relspacing gesetzt wurde?!
-% TODO Lösung finden, auch für slantedgreek
-\AtEndOfClass%
-{%
-  \tud@if@v@lower{2.04}{\TUDoptions{relspacing=false}}{}%
-}
 \TUD@deprecated@cs{univln}{cdfontln}%
 \TUD@deprecated@cs{univrn}{cdfontrn}%
 \TUD@deprecated@cs{univbn}{cdfontsn}%
@@ -7057,7 +7071,7 @@
 %%% From File: tudscr-misc.dtx
 \newcommand*\tud@atdocument@hook{}
 \let\tud@atdocument@hook\relax
-\AtBeginDocument{%
+\AfterEndPreamble{%
   \renewcommand*\TUD@SpecialOptionAtDocument[1]{%
     \ifx\tud@atdocument@hook\relax%
       \gdef\tud@atdocument@hook{\global\let\tud@atdocument@hook\relax}%

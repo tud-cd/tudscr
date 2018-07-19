@@ -1,4 +1,4 @@
-% \CheckSum{1428}
+% \CheckSum{1432}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-comp.dtx}[%
-  2018/07/17 v2.06 TUD-Script\space%
+  2018/07/19 v2.06 TUD-Script\space%
 %</driver>
 %<package&identify&comp&base>\ProvidesPackage{tudscrcomp}[%
 %<package&identify&comp&book>\ProvidesPackage{tudscrcomp-book}[%
@@ -145,7 +145,7 @@
 %    \begin{macrocode}
 %<*body>
 \newcommand*\TUD@deprecated@cs[2]{%
-  \AtBeginDocument{%
+  \AfterEndPreamble{%
     \ifcsundef{#1}{%
       \expandafter\newrobustcmd\csname #1\endcsname{%
 %<*class>
@@ -224,7 +224,7 @@
     \PackageInfoNoLine{tudscrfonts}%
 %</package&fonts>
     {%
-      Switching compatibility level to `\@tempa'%
+      Switching compatibility level to `v\@tempa'%
     }%
     \edef\tud@v@comp{\csuse{tud@v@\@tempa}}%
   }%
@@ -749,6 +749,41 @@
 % \end{macro}^^A \if@tud@x@fontspec@requested
 % \end{option}^^A fontspec
 %
+% \subsection{Versionsabhängige Voreinstellungen}
+%
+% Voreinstellungen von neu eingeführten Optionen, welche die resultierende 
+% Ausgabe entscheidend verändern könnten, werden hier versionsabhängig gesetzt.
+%    \begin{macrocode}
+%<*class>
+\AtEndOfClass%
+%</class>
+%<*package&fonts>
+\AtEndOfPackage%
+%</package&fonts>
+{%
+%    \end{macrocode}
+% Ab der \TUDScript-Version~v2.05 werden einige vertikale Abstände abhängig von 
+% der Schriftgröße definiert. Sollte eine frühere Kompatibilitätseinstellung 
+% angegeben worden sein, wird dieses verhalten deaktiviert.
+%    \begin{macrocode}
+  \tud@if@v@lower{2.05}{%
+    \TUD@key@preset{relspacing}{false}%
+  }{%
+    \TUD@key@preset{relspacing}{true}%
+  }%
+%    \end{macrocode}
+% Im Mathematikmodus werden griechische Glyphen ab der \TUDScript-Version~v2.06 
+% kursiv gesetzt. Dies betrifft insbesondere die Majuskeln, welche bei \LaTeX 
+% normalerweise aufrecht gesetzt werden.
+%    \begin{macrocode}
+  \tud@if@v@lower{2.06}{%
+    \TUD@key@preset{slantedgreek}{standard}%
+  }{%
+    \TUD@key@preset{slantedgreek}{true}%
+  }%
+}
+%    \end{macrocode}
+%
 % \iffalse
 %</option>
 %</class|(package&fonts)>
@@ -893,20 +928,6 @@
 %<*class|(package&fonts)>
 % \fi
 %
-% Ab der \TUDScript-Version~v2.04 werden einige vertikale Abstände abhängig von 
-% der Schriftgröße definiert. Sollte eine frühere Kompatibilitätseinstellung 
-% angegeben worden sein, wird dieses verhalten deaktiviert.
-%    \begin{macrocode}
-%<*class>
-\AtEndOfClass%
-%</class>
-%<*package&fonts>
-\AtEndOfPackage%
-%</package&fonts>
-{%
-  \tud@if@v@lower{2.04}{\TUDoptions{relspacing=false}}{}%
-}
-%    \end{macrocode}
 % Für die Klassen und das Paket \pkg{tudscrfonts} werden die expliziten Befehle 
 % zur Schriftauswahl zumindest vorgehalten und auf die neuen Schriften gelegt.
 % \ToDo{mappen der alten Familie auf neue Befehle}[v2.06]

@@ -1,4 +1,4 @@
-% \CheckSum{2212}
+% \CheckSum{2217}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-fonts.dtx}[%
-  2018/07/18 v2.06 TUD-Script\space%
+  2018/07/19 v2.06 TUD-Script\space%
 %</driver>
 %<package&identify>\ProvidesPackage{tudscrfonts}[%
 %<*driver|package&identify>
@@ -270,8 +270,6 @@
 % \end{macro}^^A \tud@cdfont@fam
 % \end{macro}^^A \if@tud@cdfont@db@exist
 % \end{macro}^^A \if@tud@cdfont@fam@exist
-% \begin{macro}{\if@tud@ttfont@rb@exist}
-% \changes{v2.06}{2018/07/12}{neu}^^A
 % \begin{macro}{\tud@ttfont@fam}
 % \changes{v2.06}{2018/07/12}{neu}^^A
 % \begin{macro}{\tud@ttfont@rb}
@@ -280,27 +278,23 @@
 % \changes{v2.06}{2018/07/12}{neu}^^A
 % \dots als auch für die TypeWriter-Schriften definiert.
 %    \begin{macrocode}
-\newif\if@tud@ttfont@rb@exist
 \newcommand*\tud@ttfont@fam{fddt}
 \newcommand*\tud@ttfont@rb{fddt}
 \newcommand*\tud@ttfont@lm{lmtt}
 %    \end{macrocode}
-% Die TypeWriter-Schrift aus \pkg{roboto-mono} wird nur genutzt, wenn diese 
-% auch vorhanden ist.
-%    \begin{macrocode}
-\IfFileExists{roboto-mono.sty}{%
-  \@tud@ttfont@rb@existtrue%
-  \cs@std@lock{tud@ttfont@num}{2}%
-}{%
-  \cs@std@lock{tud@ttfont@num}{1}%
-}
-\if@tud@cdoldfont@active
-  \cs@std@lock{tud@ttfont@num}{1}%
-\fi
-%    \end{macrocode}
 % \end{macro}^^A \tud@ttfont@lm
 % \end{macro}^^A \tud@ttfont@rb
 % \end{macro}^^A \tud@ttfont@fam
+% \begin{macro}{\if@tud@ttfont@rb@exist}
+% \changes{v2.06}{2018/07/12}{neu}^^A
+% Die TypeWriter-Schrift aus \pkg{roboto-mono} kann nur genutzt werden, wenn
+% diese tatsächlich auch vorhanden ist.
+%    \begin{macrocode}
+\newif\if@tud@ttfont@rb@exist
+\IfFileExists{roboto-mono.sty}{%
+  \@tud@ttfont@rb@existtrue%
+}{}
+%    \end{macrocode}
 % \end{macro}^^A \if@tud@ttfont@rb@exist
 % \begin{macro}{\tud@cdfont@check}
 % \changes{v2.04}{2015/03/10}{neu}^^A
@@ -498,7 +492,7 @@
 % \subsubsection{Anpassungen für das Paket \pkg{siunitx}}
 %
 % \begin{macro}{\lseries}
-% \begin{macro}{\@tud@x@siunitx@enabledtrue}
+% \begin{macro}{\if@tud@x@siunitx@enabled}
 % \changes{v2.05m}{2017/05/29}{neu}
 % Das Paket \pkg{siunitx} nutzt den Befehl \cs{lseries} für den Fall, dass für
 % den Fließtext eine Schrift die Serie \val{l} verwendet. Dem wird hier 
@@ -512,7 +506,7 @@
   \providecommand*\lseries{\fontseries{l}\selectfont}%
 }
 %    \end{macrocode}
-% \end{macro}^^A \if@tud@x@siunitx@enabledes
+% \end{macro}^^A \if@tud@x@siunitx@enabled
 % \end{macro}^^A \lseries
 %
 % \subsubsection{Anpassungen für die Klasse \cls{beamer}}
@@ -1747,13 +1741,11 @@
 % \changes{v2.06}{2018/07/12}{neu}^^A
 % \begin{macro}{\tud@ttfont@num}
 % \changes{v2.06}{2018/07/12}{neu}^^A
-% \begin{macro}{\if@tud@ttfont@num@locked}
-% \changes{v2.06}{2018/07/12}{neu}^^A
 % Mit dieser Option regelt, ob die TypeWriter-Schriften durch den Anwender
 % manuell eingestellt werden oder aber die entsprechenden Schriften aus den 
 % Paketen \pkg{lmodern} oder \pkg{roboto-mono} zum Einsatz kommt.
 %    \begin{macrocode}
-\cs@lock{tud@ttfont@num}{0}
+\newcommand*\tud@ttfont@num{0}
 \TUD@key{ttfont}[true]{%
   \TUD@set@numkey{ttfont}{@tempa}{%
     \TUD@bool@numkey,%
@@ -1762,16 +1754,16 @@
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax% false
-      \cs@set@lock{tud@ttfont@num}{0}%
+      \renewcommand*\tud@ttfont@num{0}%
     \or% lmodern
-      \cs@set@lock{tud@ttfont@num}{1}%
+      \renewcommand*\tud@ttfont@num{1}%
     \or% roboto
-      \cs@set@lock{tud@ttfont@num}{2}%
+      \renewcommand*\tud@ttfont@num{2}%
     \fi%
+    \TUD@SpecialOptionAtDocument{tud@font@set}%
   \fi%
 }
 %    \end{macrocode}
-% \end{macro}^^A \if@tud@ttfont@num@locked
 % \end{macro}^^A \tud@ttfont@num
 % \end{option}^^A ttfont
 %
@@ -1797,7 +1789,7 @@
       The package `roboto-mono' is missing so the\MessageBreak%
       typewriter font of package `lmodern' is used%
     }%
-    \cs@set@lock{tud@ttfont@num}{1}%
+    \renewcommand*\tud@ttfont@num{1}%
   \fi\fi
   \ifcase\tud@ttfont@num\relax% false
     \let\tud@ttfont@fam\ttdefault%
@@ -1967,10 +1959,10 @@
 % \begin{option}{slantedGreeks}
 % \changes{v2.04}{2015/02/27}{neu}^^A
 % \begin{macro}{\if@tud@slantedgreek}
-% \begin{macro}{\if@tud@slantedgreek@locked}
 % Mit dieser Option kann die Neigung der griechischen Majuskeln geändert werden.
+% \ToDo{mit TUD@key@lock arbeiten}[v2.06]
 %    \begin{macrocode}
-\cs@lock{tud@slantedgreek@num}{0}
+\newcommand*\tud@slantedgreek@num{0}
 \TUD@key{slantedgreek}[true]{%
   \TUD@set@numkey{slantedgreek}{@tempa}{%
     \TUD@bool@numkey,%
@@ -1981,11 +1973,11 @@
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax% upright
-      \cs@set@lock{tud@slantedgreek@num}{0}%
+      \renewcommand*\tud@slantedgreek@num{0}%
     \or% slanted
-      \cs@set@lock{tud@slantedgreek@num}{1}%
+      \renewcommand*\tud@slantedgreek@num{1}%
     \or% standard
-      \cs@set@lock{tud@slantedgreek@num}{2}%
+      \renewcommand*\tud@slantedgreek@num{2}%
     \fi%
     \TUD@SpecialOptionAtDocument{tud@math@set}%
   \fi%
@@ -1993,7 +1985,6 @@
 \TUD@key{slantedGreek}[true]{\TUDoptions{slantedgreek=#1}}
 \TUD@key{slantedGreeks}[true]{\TUDoptions{slantedgreek=#1}}
 %    \end{macrocode}
-% \end{macro}^^A \if@tud@slantedgreek@locked
 % \end{macro}^^A \if@tud@slantedgreek
 % \end{option}^^A slantedGreeks
 % \end{option}^^A slantedGreek
@@ -2324,7 +2315,7 @@
   \ifx\Gamma\@tempb\relax\@tud@math@greek@slantedtrue\fi%
   \ifx\Gamma\@tempc\relax\@tud@math@greek@slantedtrue\fi%
   \if@tud@math@greek@slanted%
-    \cs@std@lock{tud@slantedgreek@num}{1}%
+    \TUD@key@preset{slantedgreek}{true}%
   \fi%
   \let\tud@math@greek@check@slanted\relax%
 }
