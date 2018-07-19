@@ -689,8 +689,8 @@
   \tud@comp@resetpagestyle%
 }
 %%% From File: tudscr-layout.dtx
-\newcommand*\tud@layout@switch{}
-\edef\tud@layout@switch{%
+\newcommand*\tud@cd@switch{}
+\edef\tud@cd@switch{%
   \TUD@bool@numkey,%
   {nocolor}{1},{nocolour}{1},{monochrome}{1},{monochromatic}{1},%
   {lite}{2},{colorlite}{2},{litecolor}{2},{colourlite}{2},{litecolour}{2},%
@@ -702,66 +702,20 @@
   {color}{5},{colour}{5},%
   {full}{6},{colorfull}{6},{fullcolor}{6},{colourfull}{6},{fullcolour}{6}%
 }
-\cs@lock{tud@layout@cover@num}{0}
-\cs@lock{tud@layout@title@num}{0}
-\cs@lock{tud@layout@part@num}{0}
-\cs@lock{tud@layout@chapter@num}{0}
-\cs@lock{tud@layout@section@num}{0}
 \newcommand*\tud@cd@num{0}
 \TUD@key{cd}[true]{%
-  \TUD@set@numkey{cd}{tud@cd@num}{\tud@layout@switch}{#1}%
+  \TUD@set@numkey{cd}{tud@cd@num}{\tud@cd@switch}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\tud@cd@num\relax% false
-      \cs@std@lock{tud@layout@cover@num}{0}%
-      \cs@std@lock{tud@layout@title@num}{0}%
-      \cs@std@lock{tud@layout@part@num}{0}%
-      \cs@std@lock{tud@layout@chapter@num}{0}%
-      \TUD@key@preset{chapterpage}{false}%
-      \cs@std@lock{tud@layout@section@num}{0}%
-    \or% true
-      \cs@std@lock{tud@layout@cover@num}{1}%
-      \cs@std@lock{tud@layout@title@num}{1}%
-      \cs@std@lock{tud@layout@part@num}{1}%
-      \cs@std@lock{tud@layout@chapter@num}{1}%
-      \TUD@key@preset{chapterpage}{false}%
-      \cs@std@lock{tud@layout@section@num}{1}%
-    \or% litecolor
-      \cs@std@lock{tud@layout@cover@num}{1}%
-      \cs@std@lock{tud@layout@title@num}{2}%
-      \cs@std@lock{tud@layout@part@num}{2}%
-      \cs@std@lock{tud@layout@chapter@num}{2}%
-      \TUD@key@preset{chapterpage}{false}%
-      \cs@std@lock{tud@layout@section@num}{2}%
-    \or% barcolor
-      \cs@std@lock{tud@layout@cover@num}{1}%
-      \cs@std@lock{tud@layout@title@num}{3}%
-      \cs@std@lock{tud@layout@part@num}{3}%
-      \cs@std@lock{tud@layout@chapter@num}{3}%
-      \TUD@key@preset{chapterpage}{false}%
-      \cs@std@lock{tud@layout@section@num}{2}%
-    \or% bicolor
-      \cs@std@lock{tud@layout@cover@num}{1}%
-      \cs@std@lock{tud@layout@title@num}{4}%
-      \cs@std@lock{tud@layout@part@num}{4}%
-      \cs@std@lock{tud@layout@chapter@num}{4}%
-      \TUD@key@preset{chapterpage}{false}%
-      \cs@std@lock{tud@layout@section@num}{2}%
-    \or% color
-      \cs@std@lock{tud@layout@cover@num}{1}%
-      \cs@std@lock{tud@layout@title@num}{5}%
-      \cs@std@lock{tud@layout@part@num}{5}%
-      \cs@std@lock{tud@layout@chapter@num}{5}%
-      \TUD@key@preset{chapterpage}{true}%
-      \cs@std@lock{tud@layout@section@num}{2}%
-    \or% full
-      \cs@std@lock{tud@layout@cover@num}{1}%
-      \cs@std@lock{tud@layout@title@num}{6}%
-      \cs@std@lock{tud@layout@part@num}{6}%
-      \cs@std@lock{tud@layout@chapter@num}{6}%
-      \TUD@key@preset{chapterpage}{true}%
-      \cs@std@lock{tud@layout@section@num}{2}%
+      \TUD@key@preset{cdcover}{false}%
+    \else% !false
+      \TUD@key@preset{cdcover}{true}%
     \fi%
-    \TUD@SpecialOptionAtDocument{tud@layout@process}%
+    \TUD@key@preset{cdtitle}{#1}%
+    \TUD@key@preset{cdpart}{#1}%
+    \TUD@key@preset{cdchapter}{#1}%
+    \TUD@key@preset{cdsection}{#1}%
+    \TUD@SpecialOptionAtDocument{tud@cd@process}%
     \if@atdocument\else%
       \ifcase\tud@cd@num\relax% false
         \cs@std@lock{tud@cdgeometry@num}{0}%
@@ -771,108 +725,44 @@
     \fi%
   \fi%
 }
+\newcommand*\tud@cd@cover@num{0}
 \TUD@key{cdcover}[true]{%
-  \TUD@set@numkey{cdcover}{@tempa}{\tud@layout@switch}{#1}%
+  \TUD@set@numkey{cdcover}{tud@cd@cover@num}{\tud@cd@switch}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \ifcase\@tempa\relax% false
-      \cs@set@lock{tud@layout@cover@num}{0}%
-    \or% true
-      \cs@set@lock{tud@layout@cover@num}{1}%
-    \or% litecolor
-      \cs@set@lock{tud@layout@cover@num}{2}%
-    \or% barcolor
-      \cs@set@lock{tud@layout@cover@num}{3}%
-    \or% bicolor
-      \cs@set@lock{tud@layout@cover@num}{4}%
-    \or% color
-      \cs@set@lock{tud@layout@cover@num}{5}%
-    \or% full
-      \cs@set@lock{tud@layout@cover@num}{6}%
-    \fi%
-    \TUD@SpecialOptionAtDocument{tud@layout@process}%
+    \TUD@SpecialOptionAtDocument{tud@cd@process}%
   \fi%
 }
+\newcommand*\tud@cd@title@num{0}
 \TUD@key{cdtitle}[true]{%
-  \TUD@set@numkey{cdtitle}{@tempa}{\tud@layout@switch}{#1}%
+  \TUD@set@numkey{cdtitle}{tud@cd@title@num}{\tud@cd@switch}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \ifcase\@tempa\relax% false
-      \cs@set@lock{tud@layout@title@num}{0}%
-    \or% true
-      \cs@set@lock{tud@layout@title@num}{1}%
-    \or% litecolor
-      \cs@set@lock{tud@layout@title@num}{2}%
-    \or% barcolor
-      \cs@set@lock{tud@layout@title@num}{3}%
-    \or% bicolor
-      \cs@set@lock{tud@layout@title@num}{4}%
-    \or% color
-      \cs@set@lock{tud@layout@title@num}{5}%
-    \or% full
-      \cs@set@lock{tud@layout@title@num}{6}%
-    \fi%
-    \TUD@SpecialOptionAtDocument{tud@layout@process}%
+    \TUD@SpecialOptionAtDocument{tud@cd@process}%
   \fi%
 }
+\newcommand*\tud@cd@part@num{0}
 \TUD@key{cdpart}[true]{%
-  \TUD@set@numkey{cdpart}{@tempa}{\tud@layout@switch}{#1}%
+  \TUD@set@numkey{cdpart}{tud@cd@part@num}{\tud@cd@switch}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \ifcase\@tempa\relax% false
-      \cs@set@lock{tud@layout@part@num}{0}%
-    \or% true
-      \cs@set@lock{tud@layout@part@num}{1}%
-    \or% litecolor
-      \cs@set@lock{tud@layout@part@num}{2}%
-    \or% barcolor
-      \cs@set@lock{tud@layout@part@num}{3}%
-    \or% bicolor
-      \cs@set@lock{tud@layout@part@num}{4}%
-    \or% color
-      \cs@set@lock{tud@layout@part@num}{5}%
-    \or% full
-      \cs@set@lock{tud@layout@part@num}{6}%
-    \fi%
-    \TUD@SpecialOptionAtDocument{tud@layout@process}%
+    \TUD@SpecialOptionAtDocument{tud@cd@process}%
   \fi%
 }
+\newcommand*\tud@cd@chapter@num{0}
 \TUD@key{cdchapter}[true]{%
-  \TUD@set@numkey{cdchapter}{@tempa}{\tud@layout@switch}{#1}%
+  \TUD@set@numkey{cdchapter}{tud@cd@chapter@num}{\tud@cd@switch}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \ifcase\@tempa\relax% false
-      \cs@set@lock{tud@layout@chapter@num}{0}%
-      \TUD@key@preset{chapterpage}{false}%
-    \or% true
-      \cs@set@lock{tud@layout@chapter@num}{1}%
-      \TUD@key@preset{chapterpage}{false}%
-    \or% litecolor
-      \cs@set@lock{tud@layout@chapter@num}{2}%
-      \TUD@key@preset{chapterpage}{false}%
-    \or% barcolor
-      \cs@set@lock{tud@layout@chapter@num}{3}%
-      \TUD@key@preset{chapterpage}{false}%
-    \or% bicolor
-      \cs@set@lock{tud@layout@chapter@num}{4}%
-      \TUD@key@preset{chapterpage}{false}%
-    \or% color
-      \cs@set@lock{tud@layout@chapter@num}{5}%
+    \ifnum\tud@cd@chapter@num>4\relax% color/full
       \TUD@key@preset{chapterpage}{true}%
-    \or% full
-      \cs@set@lock{tud@layout@chapter@num}{6}%
-      \TUD@key@preset{chapterpage}{true}%
+    \else%
+      \TUD@key@preset{chapterpage}{false}%
     \fi%
-    \TUD@SpecialOptionAtDocument{tud@layout@process}%
+    \TUD@SpecialOptionAtDocument{tud@cd@process}%
   \fi%
 }
+\newcommand*\tud@cd@section@num{0}
 \TUD@key{cdsection}[true]{%
-  \TUD@set@numkey{cdsection}{@tempa}{\tud@layout@switch}{#1}%
+  \TUD@set@numkey{cdsection}{tud@cd@section@num}{\tud@cd@switch}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \ifcase\@tempa\relax% false
-      \cs@set@lock{tud@layout@section@num}{0}%
-    \or% true
-      \cs@set@lock{tud@layout@section@num}{1}%
-    \else% *color
-      \cs@set@lock{tud@layout@section@num}{2}%
-    \fi%
-    \TUD@SpecialOptionAtDocument{tud@layout@process}%
+    \TUD@SpecialOptionAtDocument{tud@cd@process}%
   \fi%
 }
 \newif\if@tud@chapterpage
@@ -1779,7 +1669,7 @@
   \ifundef{\tud@math@init}{\tud@math@set}{}%
   \tud@font@skip@set%
   \normalfont\selectfont%
-  \tud@layout@process%
+  \tud@cd@process%
   \global\@tud@head@font@settrue%
 }
 \newcommand*\tud@cdfont@set{%
@@ -5453,17 +5343,17 @@
 }
 \AtEndPreamble{\tud@x@scr@headings@set}
 \newcommand*\tud@x@scr@headings@reset{%
-  \tud@layout@process%
+  \tud@cd@process%
   \tud@x@scr@headings@set[%
-    \ifcase\tud@layout@part@num\relax\else% !false
+    \ifcase\tud@cd@part@num\relax\else% !false
       \tud@komafont@reset{part}%
       \tud@komafont@reset{partnumber}%
     \fi%
-    \ifcase\tud@layout@chapter@num\relax\else% !false
+    \ifcase\tud@cd@chapter@num\relax\else% !false
       \tud@komafont@reset{chapter}%
       \tud@komafont@reset{chapterprefix}%
     \fi%
-    \ifcase\tud@layout@section@num\relax\else% !false
+    \ifcase\tud@cd@section@num\relax\else% !false
       \tud@komafont@reset{section}%
       \tud@komafont@reset{subsection}%
       \tud@komafont@reset{subsubsection}%
@@ -5480,13 +5370,13 @@
 \newcommand*\tud@chapter@fontcolor{}
 \newcommand*\tud@section@fontcolor{}
 \providecommand*\raggedtitle{\tud@raggedright}
-\newcommand*\tud@layout@process{%
-  \ifcase\tud@layout@cover@num\relax% false
+\newcommand*\tud@cd@process{%
+  \ifcase\tud@cd@cover@num\relax% false
     \bool@std@lock{@tud@cdgeometry@cover}{false}%
   \else% !false
     \bool@std@lock{@tud@cdgeometry@cover}{true}%
   \fi%
-  \ifcase\tud@layout@title@num\relax% false
+  \ifcase\tud@cd@title@num\relax% false
     \tud@cs@restore{titlepagestyle}%
     \tud@komafont@unset{titlehead}%
     \tud@komafont@unset{title}%
@@ -5527,7 +5417,7 @@
     \tud@komafont@set{date}{\usekomafont{titlepage}}%
     \tud@komafont@set{publishers}{\usekomafont{author}}%
   \fi%
-  \ifcase\tud@layout@part@num\relax% false
+  \ifcase\tud@cd@part@num\relax% false
     \tud@cs@restore{partheadstartvskip}%
     \tud@cs@restore{partheadendvskip}%
     \tud@cs@restore{partheademptypage}%
@@ -5561,7 +5451,7 @@
     \tud@cs@store{raggedpart}%
     \renewcommand*\raggedpart{\tud@raggedright}%
   \fi%
-  \ifcase\tud@layout@chapter@num\relax% false
+  \ifcase\tud@cd@chapter@num\relax% false
     \tud@cs@restore{chapterheadstartvskip}%
     \tud@cs@restore{chapterformat}%
     \tud@cs@restore{@chapter}%
@@ -5587,7 +5477,7 @@
     \tud@cs@store{raggedchapter}%
     \renewcommand*\raggedchapter{\tud@raggedright}%
   \fi%
-  \ifcase\tud@layout@section@num\relax% false
+  \ifcase\tud@cd@section@num\relax% false
     \tud@sectioning@reset[addsec]{section}%
     \tud@sectioning@reset{subsection}%
     \tud@sectioning@reset{subsubsection}%
@@ -5597,7 +5487,7 @@
     \tud@cs@restore{raggedsection}%
   \else% !false
     \renewcommand*\tud@section@fontcolor{}%
-    \ifcase\tud@layout@section@num\relax\or\else% *color
+    \ifcase\tud@cd@section@num\relax\or\else% *color
       \renewcommand*\tud@section@fontcolor{HKS41}%
     \fi%
     \tud@sectioning@set{section}{%
@@ -5626,7 +5516,7 @@
     \renewcommand*\raggedsection{\tud@raggedright}%
   \fi%
 }
-\newcommand*\tud@layout@specialpage@set[1]{%
+\newcommand*\tud@cd@specialpage@set[1]{%
   \tud@komafont@set{footnote}{%
     \edef\@tempa{%
       \noexpand\tud@color{%
@@ -5637,13 +5527,13 @@
   \tud@cs@store{footnoterule}%
   \let\footnoterule\relax%
 }
-\newcommand*\tud@layout@specialpage@unset{%
+\newcommand*\tud@cd@specialpage@unset{%
   \tud@komafont@unset{footnote}%
   \tud@cs@restore{footnoterule}%
 }
 \newcommand*\tud@partheadstartvskip{%
   \renewcommand*\tud@part@fontcolor{}% false/true
-  \ifcase\tud@layout@part@num\relax\or\or% litecolor
+  \ifcase\tud@cd@part@num\relax\or\or% litecolor
     \renewcommand*\tud@part@fontcolor{HKS41}%
   \or% barcolor
     \renewcommand*\tud@part@fontcolor{HKS41}%
@@ -5654,7 +5544,7 @@
   \or% full
     \renewcommand*\tud@part@fontcolor{HKS41!30}%
   \fi%
-  \tud@layout@specialpage@set{part}%
+  \tud@cd@specialpage@set{part}%
   \begingroup%
     \vspace*{%
       \dimexpr\tud@len@areavskip+\tud@len@areaheadvskip-\baselineskip\relax%
@@ -5668,7 +5558,7 @@
 \newcommand*\tud@partheadendvskip{%
   \tud@cleardoublespecialpage{%
     \renewcommand*\tud@pagecolor{}%
-    \ifcase\tud@layout@part@num\relax\or% true
+    \ifcase\tud@cd@part@num\relax\or% true
       \cs@std@lock{tud@head@bar@num}{0}%
     \or% litecolor
       \cs@set@lock{tud@head@bar@num}{1}%
@@ -5687,7 +5577,7 @@
     \addtokomafont{pagefoot}{\usekomafont{tudheadings}}%
     \clearpage%
   }%
-  \tud@layout@specialpage@unset%
+  \tud@cd@specialpage@unset%
 }
 \newcommand*\tud@partpreamble{%
   \ifnum\tud@abstract@level@num>\@ne\relax% sec/chap
@@ -5787,7 +5677,7 @@
 }{}{\tud@patch@wrn{scr@@startspart}}%
 \newcommand*\tud@chapterheadstartvskip{%
   \renewcommand*\tud@chapter@fontcolor{}%
-  \ifcase\tud@layout@chapter@num\relax\or\else% *color
+  \ifcase\tud@cd@chapter@num\relax\or\else% *color
     \renewcommand*\tud@chapter@fontcolor{HKS41}%
   \fi%
   \vspace*{%
@@ -5817,7 +5707,7 @@
   \if@tud@chapterpage%
     \@restonecolfalse%
     \if@twocolumn\@restonecoltrue\onecolumn\fi%
-    \tud@layout@specialpage@set{chapter}%
+    \tud@cd@specialpage@set{chapter}%
   \fi%
 }
 \newcommand*\tud@head@bar@store{}
@@ -5829,7 +5719,7 @@
     \tud@cleardoublespecialpage{%
       \renewcommand*\tud@pagecolor{}%
       \let\tud@foot@fontcolor\tud@chapter@fontcolor%
-      \ifcase\tud@layout@chapter@num\relax\or% true
+      \ifcase\tud@cd@chapter@num\relax\or% true
         \cs@std@lock{tud@head@bar@num}{0}%
       \or% litecolor
         \cs@set@lock{tud@head@bar@num}{1}%
@@ -5848,7 +5738,7 @@
       \addtokomafont{pagefoot}{\usekomafont{tudheadings}}%
       \clearpage%
     }%
-    \tud@layout@specialpage@unset%
+    \tud@cd@specialpage@unset%
     \if@restonecol\twocolumn\fi%
   \else%
     \edef\tud@head@bar@store{\tud@head@bar@num}%
@@ -5857,7 +5747,7 @@
       \global\let\noexpand\tud@head@bar@store\relax%
       \global\let\noexpand\tud@head@bar@restore\relax%
     }%
-    \ifcase\tud@layout@chapter@num\relax\or% true
+    \ifcase\tud@cd@chapter@num\relax\or% true
       \cs@std@lock{tud@head@bar@num}{0}%
     \or% litecolor
       \cs@set@lock{tud@head@bar@num}{1}%
@@ -5974,7 +5864,7 @@
   \begingroup%
     \cleardoublepage%
     \TUD@parameter@set{title}{#1}%
-    \ifcase\tud@layout@title@num\relax% false
+    \ifcase\tud@cd@title@num\relax% false
       \ifx\tud@title@pagenumber\relax\gdef\tud@title@pagenumber{1}\fi%
       \tud@cs@use{maketitle}[\tud@title@pagenumber]%
       \tud@if@tudheadings{\currentpagestyle}{%
@@ -6019,7 +5909,7 @@
 \newcommand*\tud@titleback{}
 \newcommand*\tud@make@titlepage{%
   \renewcommand*\tud@title@fontcolor{}%
-  \ifcase\tud@layout@title@num\relax\or\or% litecolor
+  \ifcase\tud@cd@title@num\relax\or\or% litecolor
     \renewcommand*\tud@title@fontcolor{HKS41}%
   \or% barcolor
     \renewcommand*\tud@title@fontcolor{HKS41}%
@@ -6031,7 +5921,7 @@
     \renewcommand*\tud@title@fontcolor{HKS41!30}%
   \fi%
   \begin{titlepage}%
-    \tud@layout@specialpage@set{title}%
+    \tud@cd@specialpage@set{title}%
     \ifx\tud@title@pagenumber\relax\else%
       \setcounter{page}{\tud@title@pagenumber}%
     \fi%
@@ -6199,7 +6089,7 @@
     \fi%
     \def\@tempa{%
       \renewcommand*\tud@pagecolor{}%
-      \ifcase\tud@layout@title@num\relax\or% true
+      \ifcase\tud@cd@title@num\relax\or% true
         \cs@std@lock{tud@head@bar@num}{0}%
       \or% litecolor
         \cs@set@lock{tud@head@bar@num}{1}%
@@ -6245,7 +6135,7 @@
 }
 \newcommand*\tud@make@titlehead{%
   \renewcommand*\tud@title@fontcolor{}%
-  \ifcase\tud@layout@title@num\relax\or\else% *color
+  \ifcase\tud@cd@title@num\relax\or\else% *color
     \ifstr{\tud@pagecolor}{HKS41}{}{\renewcommand*\tud@title@fontcolor{HKS41}}%
   \fi%
   \par%
@@ -6510,8 +6400,8 @@
     \let\thanks\@gobble%
     \let\footnote\@gobble%
     \TUD@parameter@set{cover}{#1}%
-    \let\tud@layout@title@num\tud@layout@cover@num%
-    \tud@layout@process%
+    \let\tud@cd@title@num\tud@cd@cover@num%
+    \tud@cd@process%
     \if@tud@cdgeometry@cover%
       \let\coverpagetopmargin\tud@len@slimmargin%
       \let\coverpagebottommargin\tud@len@widemargin%
@@ -6522,7 +6412,7 @@
         \def\coverpagebottommargin{.5\tud@len@both}%
       }{}%
     \fi%
-    \ifcase\tud@layout@cover@num\relax% false
+    \ifcase\tud@cd@cover@num\relax% false
       \KOMAoptions{titlepage=firstiscover}%
       \let\@extratitle\@empty%
       \let\@uppertitleback\@empty%
@@ -7087,7 +6977,7 @@
 \newif\if@tud@math@set
 \newif\if@tud@font@skip@set
 \newif\if@tud@x@scr@headings@reset
-\newif\if@tud@layout@process
+\newif\if@tud@cd@process
 \newif\if@tud@cdgeometry@process
 \newif\if@tud@cdgeometry@@process
 \newcommand*\tud@atdocument@process{%
@@ -7096,7 +6986,7 @@
     \global\@tud@font@setfalse%
     \global\@tud@math@setfalse%
     \global\@tud@font@skip@setfalse%
-    \global\@tud@layout@processfalse%
+    \global\@tud@cd@processfalse%
   \fi%
   \if@tud@math@set%
     \tud@math@set%
@@ -7109,11 +6999,11 @@
   \if@tud@x@scr@headings@reset%
     \tud@x@scr@headings@reset%
     \global\@tud@x@scr@headings@resetfalse%
-    \global\@tud@layout@processfalse%
+    \global\@tud@cd@processfalse%
   \fi%
-  \if@tud@layout@process%
-    \tud@layout@process%
-    \global\@tud@layout@processfalse%
+  \if@tud@cd@process%
+    \tud@cd@process%
+    \global\@tud@cd@processfalse%
   \fi%
   \if@tud@cdgeometry@process%
     \tud@cdgeometry@process%
