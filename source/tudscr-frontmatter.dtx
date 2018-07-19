@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-frontmatter.dtx}[%
-  2018/07/13 v2.06 TUD-Script (frontmatter)%
+  2018/07/20 v2.06 TUD-Script (frontmatter)%
 ]
 \documentclass[english,ngerman,xindy]{tudscrdoc}
 \usepackage[T1]{fontenc}
@@ -224,7 +224,7 @@
       with `#1=tocmultiple'%
     }%
     \edef\@tempa{%
-      \noexpand\cs@set@lock{tud@#1@toc@num}{%
+      \noexpand\tud@locked@num@set{tud@#1@toc@num}{%
         \the\numexpr\csuse{tud@#1@toc@num}-2\relax%
       }%
     }%
@@ -611,11 +611,11 @@
 %    \begin{macrocode}
 %<*report|article|poster>
 \newcommand*\tud@abstract@level@num{0}
-%<report|article>\cs@lock{tud@abstract@toc@num}{0}
+%<report|article>\tud@locked@newnum{tud@abstract@toc@num}{0}
 %</report|article|poster>
 %<*book>
 \newcommand*\tud@abstract@level@num{3}
-\cs@lock{tud@abstract@toc@num}{1}
+\tud@locked@newnum{tud@abstract@toc@num}{1}
 %</book>
 %    \end{macrocode}
 % \end{macro}^^A \tud@abstract@toc@num@locked
@@ -682,21 +682,21 @@
     \ifcase\@tempa\relax% false
 %<*report|article|poster>
       \renewcommand*\tud@abstract@level@num{0}%
-%<report|article>      \cs@std@lock{tud@abstract@toc@num}{0}%
+%<report|article>      \tud@locked@num@preset{tud@abstract@toc@num}{0}%
 %</report|article|poster>
     \or% true
 %<*report|article|poster>
       \renewcommand*\tud@abstract@level@num{1}%
-%<report|article>      \cs@std@lock{tud@abstract@toc@num}{0}%
+%<report|article>      \tud@locked@num@preset{tud@abstract@toc@num}{0}%
 %</report|article|poster>
     \or% section
       \renewcommand*\tud@abstract@level@num{2}%
 %<*book|report|article>
-      \cs@std@lock{tud@abstract@toc@num}{1}%
+      \tud@locked@num@preset{tud@abstract@toc@num}{1}%
     \or% chapter
 %<*book|report>
       \renewcommand*\tud@abstract@level@num{3}%
-      \cs@std@lock{tud@abstract@toc@num}{1}%
+      \tud@locked@num@preset{tud@abstract@toc@num}{1}%
 %</book|report>
 %</book|report|article>
 %    \end{macrocode}
@@ -723,26 +723,26 @@
 % Möglichkeiten im Makro \cs{tud@abstract@toc@num} zusammengefasst.
 %    \begin{macrocode}
     \or% nottotoc
-      \cs@set@lock{tud@abstract@toc@num}{0}%
+      \tud@locked@num@set{tud@abstract@toc@num}{0}%
     \or% totoc
       \ifnum\tud@abstract@toc@num<\thr@@\relax%
-        \cs@set@lock{tud@abstract@toc@num}{1}%
+        \tud@locked@num@set{tud@abstract@toc@num}{1}%
       \else%
-        \cs@set@lock{tud@abstract@toc@num}{3}%
+        \tud@locked@num@set{tud@abstract@toc@num}{3}%
       \fi%
     \or% totocleveldown
       \ifnum\tud@abstract@toc@num<\thr@@\relax%
-        \cs@set@lock{tud@abstract@toc@num}{2}%
+        \tud@locked@num@set{tud@abstract@toc@num}{2}%
       \else%
-        \cs@set@lock{tud@abstract@toc@num}{4}%
+        \tud@locked@num@set{tud@abstract@toc@num}{4}%
       \fi%
     \or% totocmutliple
       \ifnum\tud@abstract@toc@num=\z@\relax%
-        \cs@set@lock{tud@abstract@toc@num}{1}%
+        \tud@locked@num@set{tud@abstract@toc@num}{1}%
       \fi%
       \ifnum\tud@abstract@toc@num<\thr@@\relax%
         \edef\@tempa{%
-          \noexpand\cs@set@lock{tud@abstract@toc@num}{%
+          \noexpand\tud@locked@num@set{tud@abstract@toc@num}{%
             \the\numexpr\tud@abstract@toc@num+2\relax%
           }%
         }\@tempa%
@@ -875,7 +875,7 @@
 %    \begin{macrocode}
 \TUD@parameter@family{abstract}{%
   \TUD@parameter@def{language}{\selectlanguage{#1}}%
-  \TUD@parameter@def{columns}{\cs@std@lock{tud@x@multicol@num}{#1}}%
+  \TUD@parameter@def{columns}{\tud@locked@num@preset{tud@x@multicol@num}{#1}}%
 %<*book|report|article>
   \TUD@parameter@def{pagestyle}{\tud@fm@pagestyle{abstract}{#1}}%
 %    \end{macrocode}
@@ -949,11 +949,11 @@
 %    \begin{macrocode}
 %<*report|article>
 \newcommand*\tud@declaration@level@num{1}
-\cs@lock{tud@declaration@toc@num}{0}
+\tud@locked@newnum{tud@declaration@toc@num}{0}
 %</report|article>
 %<*book>
 \newcommand*\tud@declaration@level@num{3}
-\cs@lock{tud@declaration@toc@num}{1}
+\tud@locked@newnum{tud@declaration@toc@num}{1}
 %</book>
 \newif\if@tud@declaration@multi
 \@tud@declaration@multitrue
@@ -981,17 +981,17 @@
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax% false
       \renewcommand*\tud@declaration@level@num{0}%
-      \cs@std@lock{tud@declaration@toc@num}{0}%
+      \tud@locked@num@preset{tud@declaration@toc@num}{0}%
     \or% true
       \renewcommand*\tud@declaration@level@num{1}%
-      \cs@std@lock{tud@declaration@toc@num}{0}%
+      \tud@locked@num@preset{tud@declaration@toc@num}{0}%
     \or% section
       \renewcommand*\tud@declaration@level@num{2}%
-      \cs@std@lock{tud@declaration@toc@num}{1}%
+      \tud@locked@num@preset{tud@declaration@toc@num}{1}%
     \or% chapter
 %<*book|report>
       \renewcommand*\tud@declaration@level@num{3}%
-      \cs@std@lock{tud@declaration@toc@num}{1}%
+      \tud@locked@num@preset{tud@declaration@toc@num}{1}%
 %</book|report>
     \or% single
       \@tud@declaration@multifalse%
@@ -1006,26 +1006,26 @@
     \or% nomarkboth
       \@tud@declaration@markbothfalse%
     \or% nottotoc
-      \cs@set@lock{tud@declaration@toc@num}{0}%
+      \tud@locked@num@set{tud@declaration@toc@num}{0}%
     \or% totoc
       \ifnum\tud@declaration@toc@num<\thr@@\relax%
-        \cs@set@lock{tud@declaration@toc@num}{1}%
+        \tud@locked@num@set{tud@declaration@toc@num}{1}%
       \else%
-        \cs@set@lock{tud@declaration@toc@num}{3}%
+        \tud@locked@num@set{tud@declaration@toc@num}{3}%
       \fi%
     \or% totocleveldown
       \ifnum\tud@declaration@toc@num<\thr@@\relax%
-        \cs@set@lock{tud@declaration@toc@num}{2}%
+        \tud@locked@num@set{tud@declaration@toc@num}{2}%
       \else%
-        \cs@set@lock{tud@declaration@toc@num}{4}%
+        \tud@locked@num@set{tud@declaration@toc@num}{4}%
       \fi%
     \or% totocmutliple
       \ifnum\tud@declaration@toc@num=\z@\relax%
-        \cs@set@lock{tud@declaration@toc@num}{1}%
+        \tud@locked@num@set{tud@declaration@toc@num}{1}%
       \fi%
       \ifnum\tud@declaration@toc@num<\thr@@\relax%
         \edef\@tempa{%
-          \noexpand\cs@set@lock{tud@declaration@toc@num}{%
+          \noexpand\tud@locked@num@set{tud@declaration@toc@num}{%
             \the\numexpr\tud@declaration@toc@num+2\relax%
           }%
         }\@tempa%
@@ -1126,7 +1126,7 @@
 %    \begin{macrocode}
 \TUD@parameter@family{declaration}{%
   \TUD@parameter@def{language}{\selectlanguage{#1}}%
-  \TUD@parameter@def{columns}{\cs@std@lock{tud@x@multicol@num}{#1}}%
+  \TUD@parameter@def{columns}{\tud@locked@num@preset{tud@x@multicol@num}{#1}}%
   \TUD@parameter@def{pagestyle}{\tud@fm@pagestyle{declaration}{#1}}%
   \TUD@parameter@def{markboth}[true]{%
     \ifstrbool{#1}{%

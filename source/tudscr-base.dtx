@@ -1,4 +1,4 @@
-% \CheckSum{729}
+% \CheckSum{744}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-base.dtx}[%
-  2018/07/19 v2.06 TUD-Script\space%
+  2018/07/20 v2.06 TUD-Script\space%
 %</driver>
 %<package&base>\ProvidesPackage{tudscrbase}[%
 %<*driver|package&base>
@@ -461,9 +461,6 @@
 % gesetzt, sobald der Schlüssel explizit gesetzt wurde, womit ein Standardwert 
 % einer Klassenoption überschrieben werden kann. Das Setzen der Standardwerte 
 % erfolgt intern mit dem Befehl \cs{TUD@key@preset}.
-% \ToDo{%
-%   \cs{cs@lock} und \cs{bool@lock} prüfen, ggf. mit \cs{TUD@key@preset} 
-%   ersetzen}[v2.06]
 %    \begin{macrocode}
 \newcommand*\TUD@key[2][.\@currname.\@currext]{%
 %    \end{macrocode}
@@ -568,46 +565,84 @@
 % \end{macro}^^A \TUD@set@numkey
 % \end{macro}^^A \TUD@bool@numkey
 % \end{macro}^^A \TUD@set@ifkey
-% \begin{macro}{\cs@lock}
-% \begin{macro}{\cs@std@lock}
-% \begin{macro}{\cs@set@lock}
-% Mit \cs{cs@lock}\marg{Name}\marg{Definition} kann ein Befehl definiert
-% werden, welcher intern nur mit \cs{cs@std@lock}\marg{Name}\marg{Definition}
-% geschrieben wird, wenn nicht über eine entsprechende Option ein explizites
-% Verhalten mit \cs{cs@set@lock}\marg{Name}\marg{Definition} zugewiesen wurde.
-% \ToDo{umbenennen, tud@ prefix}[v2.06]
+% \begin{macro}{\tud@locked@newnum}
+% \begin{macro}{\tud@locked@num@preset}
+% \begin{macro}{\tud@locked@num@set}
+% Mit \cs{tud@locked@newnum}\marg{Name}\marg{Definition} lässt sich ein Makro 
+% definieren, dem mit \cs{tud@locked@num@preset}\marg{Name}\marg{Definition}
+% eine Voreinstellung gegeben werden kann, solange der nummerische Wert nicht 
+% mit \cs{tud@locked@num@set}\marg{Name}\marg{Definition} explizites und fest
+% überschrieben wurde.
+% \ToDo{numerischen Ausdruck prüfen}[v2.06]
 %    \begin{macrocode}
-\newcommand*\cs@lock[2]{%
+\newcommand*\tud@locked@newnum[2]{%
   \expandafter\newcommand\expandafter*\csname#1\endcsname{#2}%
   \newbool{#1@locked}%
+  \tud@num@set{#1}{#2}%
 }
-\newcommand*\cs@std@lock[2]{%
+\newcommand*\tud@locked@num@preset[2]{%
   \ifbool{#1@locked}{}{%
-    \csdef{#1}{#2}%
+    \tud@num@set{#1}{#2}%
     \boolfalse{#1@locked}%
   }%
 }
-\newcommand*\cs@set@lock[2]{%
-  \csdef{#1}{#2}%
+\newcommand*\tud@locked@num@set[2]{%
+  \tud@num@set{#1}{#2}%
   \booltrue{#1@locked}%
 }
+\newcommand*\tud@num@set[2]{%
+  \ifcsdef{#1}{%
+    \ifnumber{#2}{%
+      \csdef{#1}{#2}%
+    }{%
+      \PackageError{tudscrbase}{%
+        `#2' is not a valid numerical expression%
+      }{%
+        You set the numerical expression `\@backslashchar#1'\MessageBreak%
+        to value `#2', which isn't numerical.%
+      }%
+    }%
+  }{%
+    \PackageError{tudscrbase}{%
+      `\@backslashchar#1' was never defined%
+    }{%
+      You tried using the numerical expression `\@backslashchar#1'\MessageBreak%
+      but you didn't define it with `\string\tud@locked@newnum'.%
+    }%
+  }%
+}
 %    \end{macrocode}
-% \end{macro}^^A \cs@set@lock
-% \end{macro}^^A \cs@std@lock
-% \end{macro}^^A \cs@lock
-% \begin{macro}{\tud@setbool}
+% \end{macro}^^A \tud@locked@num@set
+% \end{macro}^^A \tud@locked@num@preset
+% \end{macro}^^A \tud@locked@newnum
+% \begin{macro}{\tud@locked@newbool}
+% \begin{macro}{\tud@locked@bool@preset}
+% \begin{macro}{\tud@locked@bool@set}
+% \begin{macro}{\tud@bool@set}
 % \changes{v2.05}{2015/07/03}{neu}^^A
-% \begin{macro}{\bool@lock}
-% \begin{macro}{\bool@std@lock}
-% \begin{macro}{\bool@set@lock}
 % Diese Makros dienen in Anlehnung an die vorherigen zum Definieren und Setzen
-% von sperrbaren booleschen Schaltern. Dabei wird \cs{tud@setbool} definiert, 
+% von sperrbaren booleschen Schaltern. Dabei wird \cs{tud@bool@set} definiert, 
 % um nicht nur \val{true} und \val{false} sondern auch alle anderen bekannten 
 % booleschen Zuweisungen (\val{yes} und \val{on} sowie \val{no} und \val{off})
 % mit diesen Befehlen verwenden zu können.
 % \ToDo{umbenennen, tud@ prefix}[v2.06]
 %    \begin{macrocode}
-\newcommand*\tud@setbool[2]{%
+\newcommand*\tud@locked@newbool[2][false]{%
+  \newbool{#2}%
+  \newbool{#2@locked}%
+  \tud@bool@set{#2}{#1}%
+}
+\newcommand*\tud@locked@bool@preset[2]{%
+  \ifbool{#1@locked}{}{%
+    \tud@bool@set{#1}{#2}%
+    \boolfalse{#1@locked}%
+  }%
+}
+\newcommand*\tud@locked@bool@set[2]{%
+  \tud@bool@set{#1}{#2}%
+  \booltrue{#1@locked}%
+}
+\newcommand*\tud@bool@set[2]{%
   \ifstrbool{#2}{\booltrue{#1}}{\boolfalse{#1}}{%
     \PackageError{tudscrbase}{%
       `#2' is not a valid boolean expression%
@@ -618,26 +653,11 @@
     }%
   }%
 }
-\newcommand*\bool@lock[2][false]{%
-  \newbool{#2}%
-  \newbool{#2@locked}%
-  \tud@setbool{#2}{#1}%
-}
-\newcommand*\bool@std@lock[2]{%
-  \ifbool{#1@locked}{}{%
-    \tud@setbool{#1}{#2}%
-    \boolfalse{#1@locked}%
-  }%
-}
-\newcommand*\bool@set@lock[2]{%
-  \tud@setbool{#1}{#2}%
-  \booltrue{#1@locked}%
-}
 %    \end{macrocode}
-% \end{macro}^^A \bool@set@lock
-% \end{macro}^^A \bool@std@lock
-% \end{macro}^^A \bool@lock
-% \end{macro}^^A \tud@setbool
+% \end{macro}^^A \tud@bool@set
+% \end{macro}^^A \tud@locked@bool@set
+% \end{macro}^^A \tud@locked@bool@preset
+% \end{macro}^^A \tud@locked@newbool
 % \begin{macro}{\tud@cs@store}
 % \changes{v2.06}{2018/07/15}{%
 %   mit \cs{DeclareRobustCommand} definierte Befehle unterstüzt%
@@ -1175,19 +1195,20 @@
 % Layout~-- auch konträr zu den globalen Dokumenteinstellungen~-- zu verwenden.
 % Mit diesen Befehlen lässt sich die Anzahl der Spalten über einen Parameter
 % anpassen, falls das Paket \pkg{multicol} geladen wurde.
-% \ToDo{\cs{cs@lock} ist sinnfrei, Parameter nur setzen, wenn möglich}[v2.06]
+% \ToDo{%
+%   \cs{tud@locked@newnum} ist sinnfrei, Parameter nur setzen, wenn möglich%
+% }[v2.06]
 % \begin{macro}{\tud@x@multicol@num}
 % \begin{macro}{\tud@x@multicol@check}
 % Im Makro \cs{tud@x@multicol@num} wird die Anzahl der gewünschten Spalten in 
 % einer Umgebung für die Verwendung des \pkg{multicol}-Paketes gespeichert.
 %    \begin{macrocode}
-\cs@lock{tud@x@multicol@num}{1}
+\tud@locked@newnum{tud@x@multicol@num}{1}
 %    \end{macrocode}
 % Der Befehl \cs{tud@x@multicol@check} prüft, ob das Paket \pkg{multicol} 
 % geladen wurde. Falls dies nicht der Fall ist, wird eine Warnung ausgegeben 
 % und die Änderung des Wertes über einen Parameter der Umgebungen \env{tudpage} 
-% respektive \env{abstract} sowie \env{declarations} über \cs{set@set@lock} 
-% verhindert.
+% respektive \env{abstract} sowie \env{declarations} verhindert.
 %    \begin{macrocode}
 \newcommand*\tud@x@multicol@check{%
   \ifnum\tud@x@multicol@num>\@ne\relax%
@@ -1195,7 +1216,7 @@
       The option `columns=\tud@x@multicol@num' is only\MessageBreak%
       supported, when package `multicol' is loaded%
     }%
-    \cs@set@lock{tud@x@multicol@num}{1}%
+    \tud@locked@num@set{tud@x@multicol@num}{1}%
   \fi%
 }
 \AfterPackage{multicol}{\renewcommand*\tud@x@multicol@check{\relax}}

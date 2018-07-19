@@ -174,8 +174,8 @@
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax% false
       \@tud@cdfont@activefalse%
-      \bool@std@lock{@tud@cdmath@active}{false}%
-      \cs@std@lock{tud@head@font@num}{0}%
+      \tud@locked@bool@preset{@tud@cdmath@active}{false}%
+      \tud@locked@num@preset{tud@head@font@num}{0}%
       \TUD@SpecialOptionAtDocument{tud@font@set}%
     \or% true
       \@tud@cdfont@heavyfalse%
@@ -232,11 +232,11 @@
 }
 \newcommand*\tud@cdfont@activate{%
   \@tud@cdfont@activetrue%
-  \bool@std@lock{@tud@cdmath@active}{true}%
+  \tud@locked@bool@preset{@tud@cdmath@active}{true}%
   \if@tud@cdfont@heavy%
-    \cs@std@lock{tud@head@font@num}{2}%
+    \tud@locked@num@preset{tud@head@font@num}{2}%
   \else%
-    \cs@std@lock{tud@head@font@num}{1}%
+    \tud@locked@num@preset{tud@head@font@num}{1}%
   \fi%
   \TUD@SpecialOptionAtDocument{tud@font@set}%
 }
@@ -317,8 +317,8 @@
     \TUD@SpecialOptionAtDocument{tud@font@set}%
   \fi%
 }
-\bool@lock{@tud@cdmath@active}
-\bool@std@lock{@tud@cdmath@active}{true}%
+\tud@locked@newbool{@tud@cdmath@active}
+\tud@locked@bool@preset{@tud@cdmath@active}{true}%
 \TUD@key{cdmath}[true]{%
   \TUD@set@numkey{cdmath}{@tempa}{%
     \TUD@bool@numkey,%
@@ -332,10 +332,10 @@
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax% false
-      \bool@set@lock{@tud@cdmath@active}{false}%
+      \tud@locked@bool@set{@tud@cdmath@active}{false}%
       \TUD@SpecialOptionAtDocument{tud@math@set}%
     \or% true
-      \bool@set@lock{@tud@cdmath@active}{true}%
+      \tud@locked@bool@set{@tud@cdmath@active}{true}%
       \TUD@SpecialOptionAtDocument{tud@math@set}%
     \or% uprightgreek
       \TUDoptions{slantedgreek=false}%
@@ -369,7 +369,7 @@
 \TUD@key{slantedGreek}[true]{\TUDoptions{slantedgreek=#1}}
 \TUD@key{slantedGreeks}[true]{\TUDoptions{slantedgreek=#1}}
 %%% From File: tudscr-area.dtx
-\cs@lock{tud@cdgeometry@num}{0}
+\tud@locked@newnum{tud@cdgeometry@num}{0}
 \newcommand*\tud@cdgeometry@calc@num{0}
 \TUD@key{cdgeometry}[true]{%
   \let\@tempb\tud@cdgeometry@num%
@@ -389,30 +389,30 @@
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax% false/typearea
-      \cs@set@lock{tud@cdgeometry@num}{0}%
+      \tud@locked@num@set{tud@cdgeometry@num}{0}%
     \or% true/cd
-      \cs@set@lock{tud@cdgeometry@num}{2}%
+      \tud@locked@num@set{tud@cdgeometry@num}{2}%
     \or% symmetric
-      \cs@set@lock{tud@cdgeometry@num}{3}%
+      \tud@locked@num@set{tud@cdgeometry@num}{3}%
     \or% twoside
-      \cs@set@lock{tud@cdgeometry@num}{4}%
+      \tud@locked@num@set{tud@cdgeometry@num}{4}%
       \TUD@KOMAoptions{twoside=true}%
     \or% oneside
       \ifnum\tud@cdgeometry@num>\thr@@\relax%
-        \cs@set@lock{tud@cdgeometry@num}{3}%
+        \tud@locked@num@set{tud@cdgeometry@num}{3}%
       \fi%
       \TUD@KOMAoptions{twoside=false}%
     \or% restricted
-      \cs@std@lock{tud@cdgeometry@num}{2}%
+      \tud@locked@num@preset{tud@cdgeometry@num}{2}%
       \renewcommand*\tud@cdgeometry@calc@num{0}%
     \or% adapted
-      \cs@std@lock{tud@cdgeometry@num}{2}%
+      \tud@locked@num@preset{tud@cdgeometry@num}{2}%
       \renewcommand*\tud@cdgeometry@calc@num{1}%
     \or% calculated
-      \cs@std@lock{tud@cdgeometry@num}{2}%
+      \tud@locked@num@preset{tud@cdgeometry@num}{2}%
       \renewcommand*\tud@cdgeometry@calc@num{2}%
     \or% custom
-      \cs@set@lock{tud@cdgeometry@num}{1}%
+      \tud@locked@num@set{tud@cdgeometry@num}{1}%
     \fi%
     \@tempswafalse%
     \ifx\@tempb\tud@cdgeometry@num\relax\else\@tempswatrue\fi%
@@ -462,9 +462,9 @@
   \AfterPackage{typearea}{\tud@x@ta@verbose}%
 }
 %%% From File: tudscr-pagestyle.dtx
-\cs@lock{tud@head@font@num}{0}
-\cs@lock{tud@head@bar@num}{0}
-\bool@lock{@tud@head@widebar}
+\tud@locked@newnum{tud@head@font@num}{0}
+\tud@locked@newnum{tud@head@bar@num}{0}
+\tud@locked@newbool{@tud@head@widebar}
 \newif\if@tud@head@font@set
 \newif\if@tud@head@date
 \TUD@key{cdhead}[true]{%
@@ -491,23 +491,23 @@
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax% false
-      \cs@set@lock{tud@head@font@num}{0}%
+      \tud@locked@num@set{tud@head@font@num}{0}%
     \or% true
-      \cs@set@lock{tud@head@font@num}{1}%
+      \tud@locked@num@set{tud@head@font@num}{1}%
     \or% heavy
-      \cs@set@lock{tud@head@font@num}{2}%
+      \tud@locked@num@set{tud@head@font@num}{2}%
     \or% nocolor
-      \cs@set@lock{tud@head@bar@num}{0}%
+      \tud@locked@num@set{tud@head@bar@num}{0}%
     \or% litecolor
-      \cs@set@lock{tud@head@bar@num}{1}%
+      \tud@locked@num@set{tud@head@bar@num}{1}%
     \or% barcolor
-      \cs@set@lock{tud@head@bar@num}{2}%
+      \tud@locked@num@set{tud@head@bar@num}{2}%
     \or% color
-      \cs@set@lock{tud@head@bar@num}{3}%
+      \tud@locked@num@set{tud@head@bar@num}{3}%
     \or% textwidth
-      \bool@set@lock{@tud@head@widebar}{false}%
+      \tud@locked@bool@set{@tud@head@widebar}{false}%
     \or% paperwidth
-      \bool@set@lock{@tud@head@widebar}{true}%
+      \tud@locked@bool@set{@tud@head@widebar}{true}%
     \or% date
       \@tud@head@datetrue%
     \or% nodate
@@ -519,7 +519,7 @@
   \fi%
 }
 \TUD@AfterPackage@set{scrlayer-scrpage}
-\bool@lock{@tud@foot@colored}
+\tud@locked@newbool{@tud@foot@colored}
 \TUD@key{cdfoot}[true]{%
   \TUD@set@numkey{cdfoot}{@tempa}{%
     \TUD@bool@numkey,%
@@ -550,9 +550,9 @@
         \ifx\@mkdouble\@gobble\else\KOMAoptions{automark}\fi%
       }%
     \or% nocolor
-      \bool@set@lock{@tud@foot@colored}{false}%
+      \tud@locked@bool@set{@tud@foot@colored}{false}%
     \or% color
-      \bool@set@lock{@tud@foot@colored}{true}%
+      \tud@locked@bool@set{@tud@foot@colored}{true}%
     \fi%
   \else%
     \ifdimen{#1}{\TUDoptions{extrabottommargin=#1}}{}%
@@ -718,9 +718,9 @@
     \TUD@SpecialOptionAtDocument{tud@cd@process}%
     \if@atdocument\else%
       \ifcase\tud@cd@num\relax% false
-        \cs@std@lock{tud@cdgeometry@num}{0}%
+        \tud@locked@num@preset{tud@cdgeometry@num}{0}%
       \else% !false
-        \cs@std@lock{tud@cdgeometry@num}{2}%
+        \tud@locked@num@preset{tud@cdgeometry@num}{2}%
       \fi%
     \fi%
   \fi%
@@ -879,7 +879,7 @@
   {totocmultiple}{13},{totocmulti}{13},{totocall}{13},{totocaggregate}{13}%
 }
 \newcommand*\tud@abstract@level@num{0}
-\cs@lock{tud@abstract@toc@num}{0}
+\tud@locked@newnum{tud@abstract@toc@num}{0}
 \newif\if@tud@abstract@multi
 \@tud@abstract@multitrue
 \newif\if@tud@abstract@fil
@@ -891,16 +891,16 @@
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax% false
       \renewcommand*\tud@abstract@level@num{0}%
-      \cs@std@lock{tud@abstract@toc@num}{0}%
+      \tud@locked@num@preset{tud@abstract@toc@num}{0}%
     \or% true
       \renewcommand*\tud@abstract@level@num{1}%
-      \cs@std@lock{tud@abstract@toc@num}{0}%
+      \tud@locked@num@preset{tud@abstract@toc@num}{0}%
     \or% section
       \renewcommand*\tud@abstract@level@num{2}%
-      \cs@std@lock{tud@abstract@toc@num}{1}%
+      \tud@locked@num@preset{tud@abstract@toc@num}{1}%
     \or% chapter
       \renewcommand*\tud@abstract@level@num{3}%
-      \cs@std@lock{tud@abstract@toc@num}{1}%
+      \tud@locked@num@preset{tud@abstract@toc@num}{1}%
     \or% single
       \@tud@abstract@multifalse%
     \or% multiple
@@ -914,26 +914,26 @@
     \or% nomarkboth
       \@tud@abstract@markbothfalse%
     \or% nottotoc
-      \cs@set@lock{tud@abstract@toc@num}{0}%
+      \tud@locked@num@set{tud@abstract@toc@num}{0}%
     \or% totoc
       \ifnum\tud@abstract@toc@num<\thr@@\relax%
-        \cs@set@lock{tud@abstract@toc@num}{1}%
+        \tud@locked@num@set{tud@abstract@toc@num}{1}%
       \else%
-        \cs@set@lock{tud@abstract@toc@num}{3}%
+        \tud@locked@num@set{tud@abstract@toc@num}{3}%
       \fi%
     \or% totocleveldown
       \ifnum\tud@abstract@toc@num<\thr@@\relax%
-        \cs@set@lock{tud@abstract@toc@num}{2}%
+        \tud@locked@num@set{tud@abstract@toc@num}{2}%
       \else%
-        \cs@set@lock{tud@abstract@toc@num}{4}%
+        \tud@locked@num@set{tud@abstract@toc@num}{4}%
       \fi%
     \or% totocmutliple
       \ifnum\tud@abstract@toc@num=\z@\relax%
-        \cs@set@lock{tud@abstract@toc@num}{1}%
+        \tud@locked@num@set{tud@abstract@toc@num}{1}%
       \fi%
       \ifnum\tud@abstract@toc@num<\thr@@\relax%
         \edef\@tempa{%
-          \noexpand\cs@set@lock{tud@abstract@toc@num}{%
+          \noexpand\tud@locked@num@set{tud@abstract@toc@num}{%
             \the\numexpr\tud@abstract@toc@num+2\relax%
           }%
         }\@tempa%
@@ -946,7 +946,7 @@
   \AtEndOfFamilyOptions{\TUDoptions{abstract=#1}}%
 }
 \newcommand*\tud@declaration@level@num{1}
-\cs@lock{tud@declaration@toc@num}{0}
+\tud@locked@newnum{tud@declaration@toc@num}{0}
 \newif\if@tud@declaration@multi
 \@tud@declaration@multitrue
 \newif\if@tud@declaration@fil
@@ -958,16 +958,16 @@
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax% false
       \renewcommand*\tud@declaration@level@num{0}%
-      \cs@std@lock{tud@declaration@toc@num}{0}%
+      \tud@locked@num@preset{tud@declaration@toc@num}{0}%
     \or% true
       \renewcommand*\tud@declaration@level@num{1}%
-      \cs@std@lock{tud@declaration@toc@num}{0}%
+      \tud@locked@num@preset{tud@declaration@toc@num}{0}%
     \or% section
       \renewcommand*\tud@declaration@level@num{2}%
-      \cs@std@lock{tud@declaration@toc@num}{1}%
+      \tud@locked@num@preset{tud@declaration@toc@num}{1}%
     \or% chapter
       \renewcommand*\tud@declaration@level@num{3}%
-      \cs@std@lock{tud@declaration@toc@num}{1}%
+      \tud@locked@num@preset{tud@declaration@toc@num}{1}%
     \or% single
       \@tud@declaration@multifalse%
     \or% multiple
@@ -981,26 +981,26 @@
     \or% nomarkboth
       \@tud@declaration@markbothfalse%
     \or% nottotoc
-      \cs@set@lock{tud@declaration@toc@num}{0}%
+      \tud@locked@num@set{tud@declaration@toc@num}{0}%
     \or% totoc
       \ifnum\tud@declaration@toc@num<\thr@@\relax%
-        \cs@set@lock{tud@declaration@toc@num}{1}%
+        \tud@locked@num@set{tud@declaration@toc@num}{1}%
       \else%
-        \cs@set@lock{tud@declaration@toc@num}{3}%
+        \tud@locked@num@set{tud@declaration@toc@num}{3}%
       \fi%
     \or% totocleveldown
       \ifnum\tud@declaration@toc@num<\thr@@\relax%
-        \cs@set@lock{tud@declaration@toc@num}{2}%
+        \tud@locked@num@set{tud@declaration@toc@num}{2}%
       \else%
-        \cs@set@lock{tud@declaration@toc@num}{4}%
+        \tud@locked@num@set{tud@declaration@toc@num}{4}%
       \fi%
     \or% totocmutliple
       \ifnum\tud@declaration@toc@num=\z@\relax%
-        \cs@set@lock{tud@declaration@toc@num}{1}%
+        \tud@locked@num@set{tud@declaration@toc@num}{1}%
       \fi%
       \ifnum\tud@declaration@toc@num<\thr@@\relax%
         \edef\@tempa{%
-          \noexpand\cs@set@lock{tud@declaration@toc@num}{%
+          \noexpand\tud@locked@num@set{tud@declaration@toc@num}{%
             \the\numexpr\tud@declaration@toc@num+2\relax%
           }%
         }\@tempa%
@@ -1407,14 +1407,14 @@
 \LoadClass{\TUD@Class@KOMA}[2018/03/30]
 %%% From File: tudscr-base.dtx
 \RequirePackage{environ}[2013/04/01]
-\cs@lock{tud@x@multicol@num}{1}
+\tud@locked@newnum{tud@x@multicol@num}{1}
 \newcommand*\tud@x@multicol@check{%
   \ifnum\tud@x@multicol@num>\@ne\relax%
     \ClassWarning{\TUD@Class@Name}{%
       The option `columns=\tud@x@multicol@num' is only\MessageBreak%
       supported, when package `multicol' is loaded%
     }%
-    \cs@set@lock{tud@x@multicol@num}{1}%
+    \tud@locked@num@set{tud@x@multicol@num}{1}%
   \fi%
 }
 \AfterPackage{multicol}{\renewcommand*\tud@x@multicol@check{\relax}}
@@ -2195,7 +2195,7 @@
         corporate design fonts in math mode is deactivated%
       }%
     \fi%
-    \bool@set@lock{@tud@cdmath@active}{false}%
+    \tud@locked@bool@set{@tud@cdmath@active}{false}%
     \let\tud@math@set\relax%
   }{%
     \ifundef{\symupletters}{%
@@ -2490,7 +2490,7 @@
   \IfFileExists{oml\tud@cdfont@fam@lf.fd}{}{\@tud@res@swatrue}%
   \IfFileExists{oms\tud@cdfont@fam@lf.fd}{}{\@tud@res@swatrue}%
   \if@tud@res@swa%
-    \bool@std@lock{@tud@cdmath@active}{false}%
+    \tud@locked@bool@preset{@tud@cdmath@active}{false}%
   \fi%
   \tud@cdfont@init%
   \tud@ttfont@init%
@@ -4719,7 +4719,7 @@
       \else%
         \renewcommand*\tud@foot@fontcolor{HKS41!30}%
       \fi%
-      \bool@std@lock{@tud@head@widebar}{true}%
+      \tud@locked@bool@preset{@tud@head@widebar}{true}%
     }{%
       \renewcommand*\tud@head@logocolor{HKS41}%
       \renewcommand*\tud@head@fontcolor{HKS41}%
@@ -4734,7 +4734,7 @@
         \renewcommand*\tud@foot@logocolor{HKS41}%
         \renewcommand*\tud@foot@fontcolor{HKS41}%
       \fi%
-      \bool@std@lock{@tud@head@widebar}{true}%
+      \tud@locked@bool@preset{@tud@head@widebar}{true}%
     }%
   }%
   \let\tud@len@line\tud@len@thinline%
@@ -5298,7 +5298,7 @@
 ]
 \TUD@parameter@family{tudpage}{%
   \TUD@parameter@def{language}{\selectlanguage{#1}}%
-  \TUD@parameter@def{columns}{\cs@std@lock{tud@x@multicol@num}{#1}}%
+  \TUD@parameter@def{columns}{\tud@locked@num@preset{tud@x@multicol@num}{#1}}%
   \TUD@parameter@def{pagestyle}{%
     \tud@if@tudheadings{#1}{\renewcommand*\tud@envir@ps{#1}}{%
       \ifstr{#1}{empty}{\renewcommand*\tud@envir@ps{empty.tudheadings}}{%
@@ -5372,9 +5372,9 @@
 \providecommand*\raggedtitle{\tud@raggedright}
 \newcommand*\tud@cd@process{%
   \ifcase\tud@cd@cover@num\relax% false
-    \bool@std@lock{@tud@cdgeometry@cover}{false}%
+    \tud@locked@bool@preset{@tud@cdgeometry@cover}{false}%
   \else% !false
-    \bool@std@lock{@tud@cdgeometry@cover}{true}%
+    \tud@locked@bool@preset{@tud@cdgeometry@cover}{true}%
   \fi%
   \ifcase\tud@cd@title@num\relax% false
     \tud@cs@restore{titlepagestyle}%
@@ -5559,19 +5559,19 @@
   \tud@cleardoublespecialpage{%
     \renewcommand*\tud@pagecolor{}%
     \ifcase\tud@cd@part@num\relax\or% true
-      \cs@std@lock{tud@head@bar@num}{0}%
+      \tud@locked@num@preset{tud@head@bar@num}{0}%
     \or% litecolor
-      \cs@set@lock{tud@head@bar@num}{1}%
+      \tud@locked@num@set{tud@head@bar@num}{1}%
     \or% barcolor
-      \cs@set@lock{tud@head@bar@num}{2}%
+      \tud@locked@num@set{tud@head@bar@num}{2}%
     \or% bicolor
-      \cs@set@lock{tud@head@bar@num}{3}%
+      \tud@locked@num@set{tud@head@bar@num}{3}%
     \or% color
       \renewcommand*\tud@pagecolor{HKS41}%
-      \cs@set@lock{tud@head@bar@num}{1}%
+      \tud@locked@num@set{tud@head@bar@num}{1}%
     \or% full
       \renewcommand*\tud@pagecolor{HKS41}%
-      \cs@set@lock{tud@head@bar@num}{3}%
+      \tud@locked@num@set{tud@head@bar@num}{3}%
     \fi%
     \addtokomafont{pagenumber}{\usekomafont{tudheadings}}%
     \addtokomafont{pagefoot}{\usekomafont{tudheadings}}%
@@ -5720,19 +5720,19 @@
       \renewcommand*\tud@pagecolor{}%
       \let\tud@foot@fontcolor\tud@chapter@fontcolor%
       \ifcase\tud@cd@chapter@num\relax\or% true
-        \cs@std@lock{tud@head@bar@num}{0}%
+        \tud@locked@num@preset{tud@head@bar@num}{0}%
       \or% litecolor
-        \cs@set@lock{tud@head@bar@num}{1}%
+        \tud@locked@num@set{tud@head@bar@num}{1}%
       \or% barcolor
-        \cs@set@lock{tud@head@bar@num}{2}%
+        \tud@locked@num@set{tud@head@bar@num}{2}%
       \or% bicolor
-        \cs@set@lock{tud@head@bar@num}{3}%
+        \tud@locked@num@set{tud@head@bar@num}{3}%
       \or% color
         \renewcommand*\tud@pagecolor{HKS41!10}%
-        \cs@set@lock{tud@head@bar@num}{1}%
+        \tud@locked@num@set{tud@head@bar@num}{1}%
       \or% fullcolor
         \renewcommand*\tud@pagecolor{HKS41!10}%
-        \cs@set@lock{tud@head@bar@num}{3}%
+        \tud@locked@num@set{tud@head@bar@num}{3}%
       \fi%
       \addtokomafont{pagenumber}{\usekomafont{tudheadings}}%
       \addtokomafont{pagefoot}{\usekomafont{tudheadings}}%
@@ -5748,17 +5748,17 @@
       \global\let\noexpand\tud@head@bar@restore\relax%
     }%
     \ifcase\tud@cd@chapter@num\relax\or% true
-      \cs@std@lock{tud@head@bar@num}{0}%
+      \tud@locked@num@preset{tud@head@bar@num}{0}%
     \or% litecolor
-      \cs@set@lock{tud@head@bar@num}{1}%
+      \tud@locked@num@set{tud@head@bar@num}{1}%
     \or% barcolor
-      \cs@set@lock{tud@head@bar@num}{2}%
+      \tud@locked@num@set{tud@head@bar@num}{2}%
     \or% bicolor
-      \cs@set@lock{tud@head@bar@num}{3}%
+      \tud@locked@num@set{tud@head@bar@num}{3}%
     \or% color
-      \cs@set@lock{tud@head@bar@num}{1}%
+      \tud@locked@num@set{tud@head@bar@num}{1}%
     \or% fullcolor
-      \cs@set@lock{tud@head@bar@num}{3}%
+      \tud@locked@num@set{tud@head@bar@num}{3}%
     \fi%
     \tud@if@v@lower{2.03}{\tud@ddc@enlargepage[\chapterpagestyle]}{}%
   \fi%
@@ -6090,19 +6090,19 @@
     \def\@tempa{%
       \renewcommand*\tud@pagecolor{}%
       \ifcase\tud@cd@title@num\relax\or% true
-        \cs@std@lock{tud@head@bar@num}{0}%
+        \tud@locked@num@preset{tud@head@bar@num}{0}%
       \or% litecolor
-        \cs@set@lock{tud@head@bar@num}{1}%
+        \tud@locked@num@set{tud@head@bar@num}{1}%
       \or% barcolor
-        \cs@set@lock{tud@head@bar@num}{2}%
+        \tud@locked@num@set{tud@head@bar@num}{2}%
       \or% bicolor
-        \cs@set@lock{tud@head@bar@num}{3}%
+        \tud@locked@num@set{tud@head@bar@num}{3}%
       \or% color
         \renewcommand*\tud@pagecolor{HKS41}%
-        \cs@set@lock{tud@head@bar@num}{1}%
+        \tud@locked@num@set{tud@head@bar@num}{1}%
       \or% full
         \renewcommand*\tud@pagecolor{HKS41}%
-        \cs@set@lock{tud@head@bar@num}{3}%
+        \tud@locked@num@set{tud@head@bar@num}{3}%
       \fi%
       \tud@color{\tud@title@fontcolor}%
       \addtokomafont{pagenumber}{\usekomafont{tudheadings}}%
@@ -6475,21 +6475,21 @@
     \fi%
   \endgroup%
 }
-\bool@lock{@tud@cdgeometry@cover}
+\tud@locked@newbool{@tud@cdgeometry@cover}
 \TUD@parameter@family{cover}{%
   \TUD@parameter@def{cdcover}[true]{\TUDoption{cdcover}{#1}}%
   \TUD@parameter@let{cd}{cdcover}%
   \TUD@parameter@def{cdgeometry}[true]{%
     \ifstrbool{#1}{%
-      \bool@set@lock{@tud@cdgeometry@cover}{true}%
+      \tud@locked@bool@set{@tud@cdgeometry@cover}{true}%
     }{%
-      \bool@set@lock{@tud@cdgeometry@cover}{false}%
+      \tud@locked@bool@set{@tud@cdgeometry@cover}{false}%
     }{%
       \ifstr{#1}{custom}{%
-        \bool@set@lock{@tud@cdgeometry@cover}{false}%
+        \tud@locked@bool@set{@tud@cdgeometry@cover}{false}%
       }{%
         \ifstr{#1}{user}{%
-          \bool@set@lock{@tud@cdgeometry@cover}{false}%
+          \tud@locked@bool@set{@tud@cdgeometry@cover}{false}%
         }{%
           \TUD@parameter@error{cdgeometry}{true,false}%
         }%
@@ -6559,7 +6559,7 @@
       with `#1=tocmultiple'%
     }%
     \edef\@tempa{%
-      \noexpand\cs@set@lock{tud@#1@toc@num}{%
+      \noexpand\tud@locked@num@set{tud@#1@toc@num}{%
         \the\numexpr\csuse{tud@#1@toc@num}-2\relax%
       }%
     }%
@@ -6724,7 +6724,7 @@
 ]
 \TUD@parameter@family{abstract}{%
   \TUD@parameter@def{language}{\selectlanguage{#1}}%
-  \TUD@parameter@def{columns}{\cs@std@lock{tud@x@multicol@num}{#1}}%
+  \TUD@parameter@def{columns}{\tud@locked@num@preset{tud@x@multicol@num}{#1}}%
   \TUD@parameter@def{pagestyle}{\tud@fm@pagestyle{abstract}{#1}}%
   \TUD@parameter@def{markboth}[true]{%
     \ifstrbool{#1}{%
@@ -6783,7 +6783,7 @@
 ]
 \TUD@parameter@family{declaration}{%
   \TUD@parameter@def{language}{\selectlanguage{#1}}%
-  \TUD@parameter@def{columns}{\cs@std@lock{tud@x@multicol@num}{#1}}%
+  \TUD@parameter@def{columns}{\tud@locked@num@preset{tud@x@multicol@num}{#1}}%
   \TUD@parameter@def{pagestyle}{\tud@fm@pagestyle{declaration}{#1}}%
   \TUD@parameter@def{markboth}[true]{%
     \ifstrbool{#1}{%
