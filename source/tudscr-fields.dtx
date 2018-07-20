@@ -1,4 +1,4 @@
-% \CheckSum{838}
+% \CheckSum{850}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-fields.dtx}[%
-  2018/07/19 v2.06 TUD-Script (input fields)%
+  2018/07/20 v2.06 TUD-Script (input fields)%
 ]
 \documentclass[english,ngerman,xindy]{tudscrdoc}
 \usepackage[T1]{fontenc}
@@ -100,27 +100,44 @@
 %<*class&!manual>
 % \fi
 %
+% \begin{macro}{\getfield}
+% Hiermit wird der Inhalt des im zweiten Argument namentlich genannten Feldes 
+% in das im ersten Argument gegebene Makro geschrieben.
+%    \begin{macrocode} 
+\newcommand*\getfield[2]{%
+  \ifcsdef{@@#2}{%
+    \letcs#1{@@#2}%
+  }{%
+    \ifcsdef{@#2}{%
+      \letcs#1{@#2}%
+    }{%
+      \let#1\relax%
+    }%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \getfield
+%
 % \subsection{Textfelder für die \TUDScript-Klassen}
 %
 % Von den Klassen benötigte Formularfelder werden definiert. Für das Setzen von 
 % Feldern werden mit dem Makro \cs{trim@spaces} aus dem Paket \pkg{trimspaces} 
 % bei einem übergebenen Argument führende und angehängte Leerzeichen beseitigt.
-% \ToDo{Anwenderbefehl, für die Ausgabe aller Feldinhalte}[v2.06]
 % \begin{macro}{\faculty}
 % \begin{field}{\@faculty}
-% \begin{field}{\@@faculty}
+% \begin{field}{\@facultyfoot}
 % \changes{v2.05}{2015/07/06}{neu}^^A
 % \begin{macro}{\department}
 % \begin{field}{\@department}
-% \begin{field}{\@@department}
+% \begin{field}{\@departmentfoot}
 % \changes{v2.05}{2015/07/06}{neu}^^A
 % \begin{macro}{\institute}
 % \begin{field}{\@institute}
-% \begin{field}{\@@institute}
+% \begin{field}{\@institutefoot}
 % \changes{v2.05}{2015/07/06}{neu}^^A
 % \begin{macro}{\chair}
 % \begin{field}{\@chair}
-% \begin{field}{\@@chair}
+% \begin{field}{\@chairfoot}
 % \changes{v2.05}{2015/07/06}{neu}^^A
 % Für die für die TUD-Kopfzeile kann mit \cs{faculty}\marg{Fakultät} die 
 % Fakultät angegeben werden, welche im Makro \cs{@faculty} gespeichert wird. 
@@ -132,7 +149,8 @@
 % Das optionale Argument wird zur Kompatibilität zur Klasse \cls{tudscrposter}
 % vorgehalten. Wird das Paket geladen, kann mit dem optionalen Argument die 
 % Angabe der Struktureinheiten im Fußbereich variiert werden. Dafür werden die 
-% Felder \cs{@@faculty}, \cs{@@department}, \cs{@@institute} sowie \cs{@@chair} 
+% Felder \cs{@facultyfoot}, \cs{@departmentfoot}, \cs{@institutefoot} sowie 
+% \cs{@chairfoot} 
 % definiert.
 %    \begin{macrocode}
 \newcommand*\@faculty{}
@@ -146,26 +164,26 @@
 \newcommand*\chair[2][]{\tud@head@text@field{chair}{#2}}
 %</book|report|article>
 %<*poster>
-\newcommand*\@@faculty{}
-\newcommand*\@@department{}
-\newcommand*\@@institute{}
-\newcommand*\@@chair{}
+\newcommand*\@facultyfoot{}
+\newcommand*\@departmentfoot{}
+\newcommand*\@institutefoot{}
+\newcommand*\@chairfoot{}
 \newcommand*\faculty[2][\@empty]{\tud@foot@line@add{faculty}{#2}{#1}}
 \newcommand*\department[2][\@empty]{\tud@foot@line@add{department}{#2}{#1}}
 \newcommand*\institute[2][\@empty]{\tud@foot@line@add{institute}{#2}{#1}}
 \newcommand*\chair[2][\@empty]{\tud@foot@line@add{chair}{#2}{#1}}
 %</poster>
 %    \end{macrocode}
-% \end{field}^^A \@@chair
+% \end{field}^^A \@chairfoot
 % \end{field}^^A \@chair
 % \end{macro}^^A \chair
-% \end{field}^^A \@@institute
+% \end{field}^^A \@institutefoot
 % \end{field}^^A \@institute
 % \end{macro}^^A \institute
-% \end{field}^^A \@@department
+% \end{field}^^A \@departmentfoot
 % \end{field}^^A \@department
 % \end{macro}^^A \department
-% \end{field}^^A \@@faculty
+% \end{field}^^A \@facultyfoot
 % \end{field}^^A \@faculty
 % \end{macro}^^A \faculty
 % \begin{macro}{\extraheadline}
@@ -195,7 +213,7 @@
 % Mit \cs{tud@foot@line@add} wird der Inhalt eines Feldes in \cs{@\meta{Feld}} 
 % gespeichert. Der Befehl erwartet als erstes obligatorisches Argument den
 % Feldnamen und als zweites den Inhalt. Entspricht das dritte obligatorische 
-% Argument \cs{@empty}, so wird in \cs{@@\meta{Feld}} ebenfalls das zweite 
+% Argument \cs{@empty}, so wird in \cs{@\meta{Feld}foot} ebenfalls das zweite 
 % Argument abgelegt, andernfalls das dritte.
 %
 % Damit wird es für Poster möglich, die Befehle \cs{faculty}, \cs{department}, 
@@ -210,14 +228,14 @@
 \newcommand*\tud@foot@line@add[3]{%
   \tud@head@text@field{#1}{#2}%
   \ifx\@empty#3\relax%
-    \global\csletcs{@@#1}{@#1}%
+    \global\csletcs{@#1foot}{@#1}%
   \else%
-    \csgdef{@@#1}{\trim@spaces{#3}}%
+    \csgdef{@#1foot}{\trim@spaces{#3}}%
   \fi%
 }
 \newcommand*\tud@foot@line@write[1]{%
-  \protected@edef\@tempa{\csuse{@@#1}}%
-  \ifx\@tempa\@empty\else\newline\mbox{\csuse{@@#1}}\fi%
+  \protected@edef\@tempa{\csuse{@#1foot}}%
+  \ifx\@tempa\@empty\else\newline\mbox{\csuse{@#1foot}}\fi%
 }
 %</poster>
 %    \end{macrocode}
@@ -435,22 +453,22 @@
 % \changes{v2.02}{2014/05/16}{neu, von \cs{degree} umbenannt}^^A
 % \begin{field}{\@graduation}
 % \changes{v2.02}{2014/05/16}{neu, von \cs{@degree} umbenannt}^^A
-% \begin{field}{\@@graduation}
+% \begin{field}{\@graduationabbr}
 % \changes{v2.02}{2014/05/16}{neu, \cs{@degreeabbr} umbenannt}^^A
 % Der angestrebte Abschluss bzw. der zu erwerbende akademische Grad, welcher
 % auf der Titelseite ausgegeben werden soll, wird im Makro \cs{@graduation}
 % gespeichert. Zusätzlich kann als optionales Argument die Kurzform des
-% akademischen Grades angegeben werden, wird in \cs{@@graduation} 
+% akademischen Grades angegeben werden, wird in \cs{@graduationabbr} 
 % gespeichert.
 %    \begin{macrocode}
 \newcommand*\@graduation{}
-\newcommand*\@@graduation{}
+\newcommand*\@graduationabbr{}
 \newcommand*\graduation[2][]{%
-  \ifxblank{#1}{\gdef\@@graduation{}}{\gdef\@@graduation{(#1)}}%
+  \ifxblank{#1}{\gdef\@graduationabbr{}}{\gdef\@graduationabbr{(#1)}}%
   \gdef\@graduation{#2}%
 }
 %    \end{macrocode}
-% \end{field}^^A \@@graduation
+% \end{field}^^A \@graduationabbr
 % \end{field}^^A \@graduation
 % \end{macro}^^A \graduation
 %
@@ -460,7 +478,7 @@
 %
 % \begin{macro}{\professor}
 % \begin{field}{\@professor}
-% \begin{field}{\@@professor}
+% \begin{field}{\@professorfoot}
 % \changes{v2.05}{2015/07/06}{neu}^^A
 % Angabe des verantwortlichen Hochschullehrers für Titel und Aufgabenstellung,
 % wird im Makro \cs{@professor} gespeichert.
@@ -470,11 +488,11 @@
 \newcommand*\professor[1]{\gdef\@professor{#1}}
 %</book|report|article>
 %<*poster>
-\newcommand*\@@professor{}
-\newcommand*\professor[1]{\gdef\@@professor{#1}}
+\newcommand*\@professorfoot{}
+\newcommand*\professor[1]{\gdef\@professorfoot{#1}}
 %</poster>
 %    \end{macrocode}
-% \end{field}^^A \@@professor
+% \end{field}^^A \@professorfoot
 % \end{field}^^A \@professor
 % \end{macro}^^A \professor
 % \begin{macro}{\supervisor}
@@ -660,24 +678,31 @@
 %
 % \begin{macro}{\printdate}
 % Im Folgenden werden mehrere Datumsfelder definiert. Damit diese optional
-% durch das \pkg{isodate}-Paket formatiert werden können, wird der zu
-% diesem Paket gehörende Befehl \cs{printdate} in die Definition der
-% eigentlichen Datumsfelder integriert. Sollte das Paket nicht geladen werden,
-% so muss dieser Befehl trotzdem definiert sein.
-% \ToDo{Unterstützung für \pkg{datetime2}}[v2.06]
+% durch eines der Pakete \pkg{isodate} oder \pkg{datetime2} formatiert werden 
+% können, wird der zu \pkg{isodate} gehörende Befehl \cs{printdate} in die
+% Definition der eigentlichen Datumsfelder integriert. Sollte das Paket nicht
+% geladen sein, so verwendet der Befehl die Schnittstelle von \pkg{datetime2},
+% welches nur ein spezielles Datenformat als Eingabe akzeptiert. Wird keines 
+% der beiden Pakete verwendet, wird das Argument direkt durchgereicht.
 %    \begin{macrocode}
-\TUD@UnwindPackage{isodate}{\providecommand*\printdate[1]{#1}}
+\TUD@UnwindPackage{isodate}{%
+  \@ifpackageloaded{datetime2}{%
+    \providecommand*\printdate[1]{\DTMDate{#1}}%
+  }{%
+    \providecommand*\printdate[1]{#1}%
+  }%
+}
 %    \end{macrocode}
 % \end{macro}^^A \printdate
-% \begin{macro}{\tud@x@isodate@printdate}
-% Damit die Datumsfelder definiert werden können und das \pkg{isodate}-Paket
+% \begin{macro}{\tud@printdate}
+% Damit die Datumsfelder definiert werden können und eines der Datumspakete
 % unterstützen, muss beim Festlegen der Datumsfelder einiges beachtet werden.
 % So müssen beispielsweise leere Argumente und Sonderfälle separat betrachtet
 % werden. Damit dies einheitlich für alle Felder geschehen kann, wird dieser
 % Befehl genutzt. Dabei wird als erstes Argument der Befehlsname für das
 % Datumsfeld übergeben, als zweites Argument der gewünschte Inhalt.
 %    \begin{macrocode}
-\newcommand*\tud@x@isodate@printdate[2]{%
+\newcommand*\tud@printdate[2]{%
   \ifx\today#2\relax%
     \gdef#1{#2}%
   \else%
@@ -687,12 +712,12 @@
   \fi%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@x@isodate@printdate
+% \end{macro}^^A \tud@printdate
 % \begin{macro}{\tud@date@check}
 % \changes{v2.04}{2015/05/06}{neu}^^A
-% Das Makro wird vor der Nutzung des Datumfeldes genutzt um zu prüfen, ob ein
-% selbiges explizit angegeben wurde. Falls dies nicht der Fall ist, wird eine
-% Warnung ausgegeben.
+% Das Makro prüft vor der Nutzung des Datumfeldes \cs{@date}, ob selbiges
+% explizit angegeben wurde. Falls dies nicht der Fall ist, wird eine Warnung
+% ausgegeben.
 %    \begin{macrocode}
 \newcommand*\tud@date@check{%
   \ifdefvoid{\@duedate}{%
@@ -751,7 +776,7 @@
 }
 \newcommand*\tud@date@set[2][]{%
   \TUD@parameter@set{date}{#1}%
-  \tud@x@isodate@printdate{\@date}{#2}%
+  \tud@printdate{\@date}{#2}%
   \global\let\tud@date@check\relax%
 }
 \newcommand*\@beforedate{}
@@ -808,7 +833,7 @@
 % gespeichert.
 %    \begin{macrocode}
 \newcommand*\@defensedate{}
-\newcommand*\defensedate[1]{\tud@x@isodate@printdate{\@defensedate}{#1}}
+\newcommand*\defensedate[1]{\tud@printdate{\@defensedate}{#1}}
 %    \end{macrocode}
 % \end{field}^^A \@defensedate
 % \end{macro}^^A \defensedate
@@ -819,7 +844,7 @@
 %    \begin{macrocode}
 \newcommand*\@dateofbirth{}
 \newrobustcmd*\dateofbirth[1]{%
-  \tud@x@isodate@printdate{\@dateofbirth}{#1}\ignorespaces%
+  \tud@printdate{\@dateofbirth}{#1}\ignorespaces%
 }
 %    \end{macrocode}
 % \end{field}^^A \@dateofbirth
@@ -868,7 +893,7 @@
 % \cs{@issuedate} gespeichert.
 %    \begin{macrocode}
 \newcommand*\@issuedate{}
-\newcommand*\issuedate[1]{\tud@x@isodate@printdate{\@issuedate}{#1}}
+\newcommand*\issuedate[1]{\tud@printdate{\@issuedate}{#1}}
 %    \end{macrocode}
 % \end{field}^^A \@issuedate
 % \end{macro}^^A \issuedate
@@ -878,7 +903,7 @@
 % \cs{@duedate} gespeichert.
 %    \begin{macrocode}
 \newcommand*\@duedate{}
-\newcommand*\duedate[1]{\tud@x@isodate@printdate{\@duedate}{#1}}
+\newcommand*\duedate[1]{\tud@printdate{\@duedate}{#1}}
 %    \end{macrocode}
 % \end{field}^^A \@duedate
 % \end{macro}^^A \duedate

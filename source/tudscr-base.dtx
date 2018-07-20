@@ -1,4 +1,4 @@
-% \CheckSum{744}
+% \CheckSum{732}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -100,7 +100,6 @@
 %    von Elementen aus \pkg{etoolbox}-Listen mit \cs{list(cs)(g/e/x)}rem oder 
 %    ähnlich ermöglichen%
 % }[v2.07]
-% \ToDo{alle benötigten Pakete zur Not mit Unwind@Package abfangen}[v2.06]
 %
 %
 % \StopEventually{\PrintIndex\PrintChanges\PrintToDos}
@@ -150,7 +149,8 @@
 % \begin{macro}{\if@tud@res@swa}
 % \changes{v2.06}{2018/07/12}{neu}^^A
 % Makros zur temporären Verwendung.
-% \ToDo{alle Makros \cs{@temp\dots} mit neuen internen Makros ersetzen}[v2.07]
+% \ToDo{Sämtliche \cs{@temp\dots}-Makros auf \cs{tud@res@\dots} ändern}[v2.??]
+% \ToDo{\cs{tud@reserved} in \cs{tud@res@?}, Achtung bei Dopplungen!}[v2.??]
 %    \begin{macrocode}
 \newcommand*\tud@reserved{}
 \newcommand*\tud@res@a{}
@@ -190,23 +190,6 @@
 \newcommand*\ifxblank{\ifstr{}}
 %    \end{macrocode}
 % \end{macro}^^A \ifxblank
-%
-% \subsubsection{Robuster Test auf numerischen Ausdruck}
-%
-% \begin{macro}{\ifxnumber}
-% Dieser Befehl dient zum Testen, ob ein gegebenes Argument eine Zahl ist.
-% Die Syntax lautet: \cs{ifxnumber}\marg{Argument}\marg{Wahr}\marg{Falsch}
-% \ToDo{kann eigentlich raus, geht auch mit \cs{expandafter}}[v2.06]
-%    \begin{macrocode}
-\newcommand*\ifxnumber[1]{%
-  \if\relax\detokenize\expandafter{\romannumeral-0#1}\relax%
-    \expandafter\@firstoftwo%
-  \else%
-    \expandafter\@secondoftwo%
-  \fi%
-}
-%    \end{macrocode}
-% \end{macro}^^A \ifxnumber
 %
 % \subsubsection{Test auf booleschen Ausdruck in Form eines Strings}
 %
@@ -523,7 +506,6 @@
 % (\cs{TUD@set@numkey}) definiert werden. Prinzipiell ist auch eine freie
 % Definition mit anschließender Abarbeitung ohne die zuvor genannten Befehle
 % möglich.
-% \ToDo{TUD@set@numkey: lowercase value}[v2.06]
 %    \begin{macrocode}
 \newcommand*\TUD@set@ifkey[3]{%
   \tud@lowerstring\tud@res@a{#3}%
@@ -543,15 +525,10 @@
 %    \end{macrocode}
 % Mit \cs{TUD@set@dimenkey} wird der übergebene Längenwert im spezifiezierten 
 % Makro gespeichert.
-% \ToDo{mit \cs{FamilyLengthMacroKey} ersetzen?!}[v2.06]
 %    \begin{macrocode}
 \newcommand*\TUD@set@dimenkey[3]{%
-  \ifxlen{#3}{%
-    \def#2{#3}%
-    \FamilyKeyStateProcessed%
-  }{%
-    \TUD@unknown@keyval{#1}{#3}{dimens}%
-  }%
+  \tud@lowerstring\tud@res@a{#3}%
+  \FamilySetLengthMacro{TUD}{#1}{#2}{\tud@res@a}%
 }
 %    \end{macrocode}
 % Dieser Befehl wird lediglich pro forma definiert. An diesen kann eine Liste 
@@ -573,7 +550,6 @@
 % eine Voreinstellung gegeben werden kann, solange der nummerische Wert nicht 
 % mit \cs{tud@locked@num@set}\marg{Name}\marg{Definition} explizites und fest
 % überschrieben wurde.
-% \ToDo{numerischen Ausdruck prüfen}[v2.06]
 %    \begin{macrocode}
 \newcommand*\tud@locked@newnum[2]{%
   \expandafter\newcommand\expandafter*\csname#1\endcsname{#2}%
@@ -625,7 +601,6 @@
 % um nicht nur \val{true} und \val{false} sondern auch alle anderen bekannten 
 % booleschen Zuweisungen (\val{yes} und \val{on} sowie \val{no} und \val{off})
 % mit diesen Befehlen verwenden zu können.
-% \ToDo{umbenennen, tud@ prefix}[v2.06]
 %    \begin{macrocode}
 \newcommand*\tud@locked@newbool[2][false]{%
   \newbool{#2}%
@@ -1015,7 +990,7 @@
   }%
   \appto\@tempa{%
     \ifstr{\kv@value}{twocolumn}{\def\kv@value{2}}{}%
-    \ifxnumber{\kv@value}{\def\tud@reserved{columns=\kv@value}}{}%
+    \ifnumber{\kv@value}{\def\tud@reserved{columns=\kv@value}}{}%
     \iflanguageloaded{\kv@value}{\def\tud@reserved{language=\kv@value}}{}%
     \ifx\tud@reserved\relax%
       \PackageError{tudscrbase}{%
@@ -1195,15 +1170,12 @@
 % Layout~-- auch konträr zu den globalen Dokumenteinstellungen~-- zu verwenden.
 % Mit diesen Befehlen lässt sich die Anzahl der Spalten über einen Parameter
 % anpassen, falls das Paket \pkg{multicol} geladen wurde.
-% \ToDo{%
-%   \cs{tud@locked@newnum} ist sinnfrei, Parameter nur setzen, wenn möglich%
-% }[v2.06]
 % \begin{macro}{\tud@x@multicol@num}
 % \begin{macro}{\tud@x@multicol@check}
 % Im Makro \cs{tud@x@multicol@num} wird die Anzahl der gewünschten Spalten in 
 % einer Umgebung für die Verwendung des \pkg{multicol}-Paketes gespeichert.
 %    \begin{macrocode}
-\tud@locked@newnum{tud@x@multicol@num}{1}
+\newcommand*\tud@x@multicol@num{1}
 %    \end{macrocode}
 % Der Befehl \cs{tud@x@multicol@check} prüft, ob das Paket \pkg{multicol} 
 % geladen wurde. Falls dies nicht der Fall ist, wird eine Warnung ausgegeben 
@@ -1216,10 +1188,10 @@
       The option `columns=\tud@x@multicol@num' is only\MessageBreak%
       supported, when package `multicol' is loaded%
     }%
-    \tud@locked@num@set{tud@x@multicol@num}{1}%
+    \renewcommand*\tud@x@multicol@num{1}%
   \fi%
 }
-\AfterPackage{multicol}{\renewcommand*\tud@x@multicol@check{\relax}}
+\AfterPackage{multicol}{\let\tud@x@multicol@check\relax}
 %    \end{macrocode}
 % \end{macro}^^A \tud@x@multicol@check
 % \end{macro}^^A \tud@x@multicol@num

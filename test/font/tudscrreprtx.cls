@@ -220,7 +220,6 @@
     \ifdimen{#1}{%
       \ifdim#1>\z@\relax%
         \TUD@KOMAoptions{fontsize=#1}%
-        \csname @tud@fontsize@settrue\endcsname%
         \tud@cdfont@activate%
         \FamilyKeyStateProcessed%
       \fi%
@@ -271,10 +270,31 @@
   \TUD@key{cdoldfont}[]{%
     \ClassError{\TUD@Class@Name}%
     {Option `cdoldfont' too late}{%
-      Option `cdoldfont' can only be set while loading the\MessageBreak%
+      Option `cdoldfont=#1' can only be set while loading the\MessageBreak%
       class `\TUD@Class@Name'
       but you have tried to set it up later.%
     }%
+    \FamilyKeyStateProcessed%
+  }%
+}
+\newif\if@tud@fontsize@set
+\TUD@key{fontsize}{%
+  \@tud@fontsize@settrue%
+  \TUD@KOMAoptions{fontsize=#1}%
+  \FamilyKeyStateProcessed%
+}
+\AtEndOfClass%
+{%
+  \RelaxFamilyKey{TUD}{fontsize}%
+  \DefineFamilyMember{KOMA}
+  \DefineFamilyKey{KOMA}{fontsize}{%
+    \@tud@fontsize@settrue%
+    \ClassWarning{\TUD@Class@Name}%
+    {%
+      The key `fontsize=#1' should only be used\MessageBreak%
+      as class option%
+    }%
+    \TUD@SpecialOptionAtDocument{tud@font@set}%
     \FamilyKeyStateProcessed%
   }%
 }
@@ -293,11 +313,6 @@
     \fi%
     \TUD@SpecialOptionAtDocument{tud@font@skip@set}%
   \fi%
-}
-\DefineFamilyMember{KOMA}
-\DefineFamilyKey{KOMA}{fontsize}{%
-  \TUD@SpecialOptionAtDocument{tud@font@skip@set}%
-  \FamilyKeyStateProcessed%
 }
 \newcommand*\tud@ttfont@num{0}
 \TUD@key{ttfont}[true]{%
@@ -1028,7 +1043,7 @@
       this value is not supported. Because of this, the\MessageBreak%
       value for `tudscrver' was set to `first'%
     }%
-    \def\tud@v@comp{0}%
+    \renewcommand*\tud@v@comp{0}%
   }{%
     \ClassInfoNoLine{\TUD@Class@Name}%
     {%
@@ -1339,15 +1354,8 @@
     \FamilyKeyStateUnknownValue%
   \fi%
 }
-\newif\if@tud@fontsize@set
-\TUD@key{fontsize}{%
-  \@tud@fontsize@settrue%
-  \PassOptionsToClass{fontsize=#1}{\TUD@Class@KOMA}%
-  \FamilyKeyStateProcessed%
-}
 \AtEndOfClass{%
   \RelaxFamilyKey{TUD}{paper}%
-  \RelaxFamilyKey{TUD}{fontsize}%
   \ifboolexpr{bool {@tud@x@scr@paper@set} or bool {@landscape}}{%
     \if@tud@fontsize@set\else%
       \ClassWarningNoLine{\TUD@Class@Name}{%
@@ -1380,7 +1388,7 @@
 \AtEndOfClass{%
   \newcounter{symbolheadings}[chapter]
 }
-% TODO Dateien misc mit comp tauschen, \TUDExecuteOptions verschieben
+% TODO Dateien misc mit comp tauschen
 %%% From File: tudscr-misc.dtx
 \newcommand*\TUD@SpecialOptionAtDocument[1]{}
 \newcommand*\tud@x@scr@paper{%
@@ -1407,17 +1415,17 @@
 \LoadClass{\TUD@Class@KOMA}[2018/03/30]
 %%% From File: tudscr-base.dtx
 \RequirePackage{environ}[2013/04/01]
-\tud@locked@newnum{tud@x@multicol@num}{1}
+\newcommand*\tud@x@multicol@num{1}
 \newcommand*\tud@x@multicol@check{%
   \ifnum\tud@x@multicol@num>\@ne\relax%
     \ClassWarning{\TUD@Class@Name}{%
       The option `columns=\tud@x@multicol@num' is only\MessageBreak%
       supported, when package `multicol' is loaded%
     }%
-    \tud@locked@num@set{tud@x@multicol@num}{1}%
+    \renewcommand*\tud@x@multicol@num{1}%
   \fi%
 }
-\AfterPackage{multicol}{\renewcommand*\tud@x@multicol@check{\relax}}
+\AfterPackage{multicol}{\let\tud@x@multicol@check\relax}
 \AtEndPreamble{%
   \@ifpackageloaded{graphicx}{}{%
     \@ifpackageloaded{graphics}{%
@@ -2515,6 +2523,22 @@
   \fi%
   \AtBeginDocument{\tud@math@init\let\tud@math@init\relax}%
 }
+\AtEndPreamble{%
+  \if@tud@cdoldfont@active\else%
+    \@ifpackageloaded{mdsymbol}{}{%
+      \@tud@res@swafalse%
+      \ifundef{\symAMSa}{}{\@tud@res@swatrue}%
+      \ifundef{\symAMSb}{}{\@tud@res@swatrue}%
+      \if@tud@res@swa%
+        \ClassInfoNoLine{\TUD@Class@Name}%
+        {%
+          You should load package `mdsymbol' in order to\MessageBreak%
+          get symbols matching the used math font%
+        }%
+      \fi%
+    }%
+  \fi%
+}
 % TODO überarbeiten oder raus?
 \newrobustcmd*\ifdin{%
   \ClassWarning{\TUD@Class@Name}%
@@ -2621,6 +2645,17 @@
   }
 \fi
 %%% From File: tudscr-fields.dtx
+\newcommand*\getfield[2]{%
+  \ifcsdef{@@#2}{%
+    \letcs#1{@@#2}%
+  }{%
+    \ifcsdef{@#2}{%
+      \letcs#1{@#2}%
+    }{%
+      \let#1\relax%
+    }%
+  }%
+}
 \newcommand*\@faculty{}
 \newcommand*\@department{}
 \newcommand*\@institute{}
@@ -2741,9 +2776,9 @@
   \protected@xdef\@@thesis{\trim@spaces{#2}}%
 }
 \newcommand*\@graduation{}
-\newcommand*\@@graduation{}
+\newcommand*\@graduationabbr{}
 \newcommand*\graduation[2][]{%
-  \ifxblank{#1}{\gdef\@@graduation{}}{\gdef\@@graduation{(#1)}}%
+  \ifxblank{#1}{\gdef\@graduationabbr{}}{\gdef\@graduationabbr{(#1)}}%
   \gdef\@graduation{#2}%
 }
 \newcommand*\@professor{}
@@ -2783,8 +2818,14 @@
 \newcommand*\confirmationclosing[1]{\gdef\@confirmationclosing{#1}}
 \newcommand*\@place{Dresden}
 \newcommand*\place[1]{\gdef\@place{#1}}
-\TUD@UnwindPackage{isodate}{\providecommand*\printdate[1]{#1}}
-\newcommand*\tud@x@isodate@printdate[2]{%
+\TUD@UnwindPackage{isodate}{%
+  \@ifpackageloaded{datetime2}{%
+    \providecommand*\printdate[1]{\DTMDate{#1}}%
+  }{%
+    \providecommand*\printdate[1]{#1}%
+  }%
+}
+\newcommand*\tud@printdate[2]{%
   \ifx\today#2\relax%
     \gdef#1{#2}%
   \else%
@@ -2818,7 +2859,7 @@
 }
 \newcommand*\tud@date@set[2][]{%
   \TUD@parameter@set{date}{#1}%
-  \tud@x@isodate@printdate{\@date}{#2}%
+  \tud@printdate{\@date}{#2}%
   \global\let\tud@date@check\relax%
 }
 \newcommand*\@beforedate{}
@@ -2845,10 +2886,10 @@
   \fi%
 }
 \newcommand*\@defensedate{}
-\newcommand*\defensedate[1]{\tud@x@isodate@printdate{\@defensedate}{#1}}
+\newcommand*\defensedate[1]{\tud@printdate{\@defensedate}{#1}}
 \newcommand*\@dateofbirth{}
 \newrobustcmd*\dateofbirth[1]{%
-  \tud@x@isodate@printdate{\@dateofbirth}{#1}\ignorespaces%
+  \tud@printdate{\@dateofbirth}{#1}\ignorespaces%
 }
 \newcommand*\tud@multiple@@split{}
 \newcommand*\tud@multiple@split[1]{%
@@ -3435,8 +3476,6 @@
   \PreventPackageFromLoading{geometry}%
 \else
   \RequirePackage{geometry}[2010/09/12]%
-\fi
-\AfterPackage*{geometry}{%
   \CheckCommand*\Gm@initnewgm{%
     \Gm@passfalse
     \Gm@swap@papersizefalse
@@ -4166,7 +4205,7 @@
       includemp=false%
     \fi%
   }%
-}
+\fi
 \newcommand*\tud@currentgeometry{}
 \newcommand*\tud@BeforeSelectAnyPageStyle[1]{%
   \ifstr{#1}{\GetRealPageStyle{#1}}{%
@@ -5298,7 +5337,7 @@
 ]
 \TUD@parameter@family{tudpage}{%
   \TUD@parameter@def{language}{\selectlanguage{#1}}%
-  \TUD@parameter@def{columns}{\tud@locked@num@preset{tud@x@multicol@num}{#1}}%
+  \TUD@parameter@def{columns}{\renewcommand*\tud@x@multicol@num{#1}}%
   \TUD@parameter@def{pagestyle}{%
     \tud@if@tudheadings{#1}{\renewcommand*\tud@envir@ps{#1}}{%
       \ifstr{#1}{empty}{\renewcommand*\tud@envir@ps{empty.tudheadings}}{%
@@ -6724,7 +6763,7 @@
 ]
 \TUD@parameter@family{abstract}{%
   \TUD@parameter@def{language}{\selectlanguage{#1}}%
-  \TUD@parameter@def{columns}{\tud@locked@num@preset{tud@x@multicol@num}{#1}}%
+  \TUD@parameter@def{columns}{\renewcommand*\tud@x@multicol@num{#1}}%
   \TUD@parameter@def{pagestyle}{\tud@fm@pagestyle{abstract}{#1}}%
   \TUD@parameter@def{markboth}[true]{%
     \ifstrbool{#1}{%
@@ -6783,7 +6822,7 @@
 ]
 \TUD@parameter@family{declaration}{%
   \TUD@parameter@def{language}{\selectlanguage{#1}}%
-  \TUD@parameter@def{columns}{\tud@locked@num@preset{tud@x@multicol@num}{#1}}%
+  \TUD@parameter@def{columns}{\renewcommand*\tud@x@multicol@num{#1}}%
   \TUD@parameter@def{pagestyle}{\tud@fm@pagestyle{declaration}{#1}}%
   \TUD@parameter@def{markboth}[true]{%
     \ifstrbool{#1}{%

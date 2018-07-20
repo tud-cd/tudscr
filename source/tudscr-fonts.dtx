@@ -1,4 +1,4 @@
-% \CheckSum{2217}
+% \CheckSum{2248}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -147,7 +147,6 @@
 % Wird das Paket \pkg{tudscrfonts} nach einer der Klassen verwendet, welche die 
 % veralteten Schriftfamilien für \Univers und \DIN definieren, so wird eine 
 % Warnung mit dem Hinweis auf das Paket \pkg{fix-tudscrfonts} ausgegeben.
-% \ToDo{Paket \pkg{fix-tudscrfonts} an neue Schriften anpassen}[v2.06]
 %    \begin{macrocode}
 \@tempswafalse%
 \@for\@tempa:={%
@@ -575,7 +574,6 @@
 % der Schrift geändert werden. Zusätzlich lässt sich die Verwendung von 
 % Minuskelziffern im Fließtext aktivieren. Außerdem kann eingestellt werden, ob 
 % für den Mathematiksatz serifenlose Schriften zum Einsatz kommen sollen.
-% \ToDo{Lösung für din/nodin finden}[v2.06]
 %    \begin{macrocode}
 \newif\if@tud@cdfont@active
 \newif\if@tud@cdfont@heavy
@@ -666,7 +664,6 @@
       \tud@cdfont@activate%
 %    \end{macrocode}
 % Hier wird die Art der Ziffern für den Fleißtext festgelegt.
-% \ToDo{Auflösen des Problems! Paket und/oder Option}[v2.06]
 %    \begin{macrocode}
     \or% liningfigures
       \@tud@cdfont@liningtrue%
@@ -717,7 +714,6 @@
     \ifdimen{#1}{%
       \ifdim#1>\z@\relax%
         \TUD@KOMAoptions{fontsize=#1}%
-        \csname @tud@fontsize@settrue\endcsname%
         \tud@cdfont@activate%
         \FamilyKeyStateProcessed%
       \fi%
@@ -757,7 +753,6 @@
 % die Option \pkg{cdoldfont} bereitgestellt. Damit werden die Befehle zur 
 % Schriftauswahl für die \TUDScript-Klassen oder das Paket \pkg{tudscrfonts} 
 % entsprechend angepasst.
-% \ToDo{verwendete Version auf höchstens v2.05 setzen?}[v2.06]
 %    \begin{macrocode}
 \newif\if@tud@cdoldfont@active
 \newif\if@tud@cdoldfont@usedin
@@ -784,7 +779,9 @@
     \@tud@cdoldfont@activetrue%
   \fi%
 }
-% TODO
+%    \end{macrocode}
+% \ToDo{verwendete Version auf höchstens v2.05 setzen?}[v2.06]
+%    \begin{macrocode}
 %<*class>
 \AtEndOfClass%
 %</class>
@@ -800,7 +797,7 @@
     \PackageError{tudscrfonts}%
 %</package>
     {Option `cdoldfont' too late}{%
-      Option `cdoldfont' can only be set while loading the\MessageBreak%
+      Option `cdoldfont=#1' can only be set while loading the\MessageBreak%
 %<*class>
       class `\TUD@Class@Name'
 %</class>
@@ -816,18 +813,58 @@
 % \end{macro}^^A \if@tud@cdoldfont@usedin
 % \end{macro}^^A \if@tud@cdoldfont@active
 % \end{option}^^A cdoldfont
+% \begin{option}{fontsize}
+% \changes{v2.04}{2015/04/24}{Option aus \KOMAScript{} erweitert}^^A
+% \begin{macro}{\if@tud@fontsize@set}
+% \changes{v2.05}{2015/07/24}{neu}^^A
+% Die genutzte Grundschriftgröße kann mit der \KOMAScript-Option \opt{fontsize} 
+% eingestellt werden. Um ein aktives Setzen der Schriftgröße zu erkennen, wird 
+% für das Laden der \TUDScript-Klasse ein Schlüssel definiert, der den Wert an
+% \KOMAScript{} weiterreicht.
+%    \begin{macrocode}
+\newif\if@tud@fontsize@set
+\TUD@key{fontsize}{%
+  \@tud@fontsize@settrue%
+  \TUD@KOMAoptions{fontsize=#1}%
+  \FamilyKeyStateProcessed%
+}
+%<*class>
+\AtEndOfClass%
+%</class>
+%<*package>
+\AtEndOfPackage%
+%</package>
+{%
+  \RelaxFamilyKey{TUD}{fontsize}%
+  \DefineFamilyMember{KOMA}
+  \DefineFamilyKey{KOMA}{fontsize}{%
+    \@tud@fontsize@settrue%
+%<*class>
+    \ClassWarning{\TUD@Class@Name}%
+%</class>
+%<*package>
+    \PackageWarning{tudscrfonts}%
+%</package>
+    {%
+      The key `fontsize=#1' should only be used\MessageBreak%
+      as class option%
+    }%
+    \TUD@SpecialOptionAtDocument{tud@font@set}%
+    \FamilyKeyStateProcessed%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \if@tud@fontsize@set
+% \end{option}^^A fontsize
 % \begin{option}{relspacing}
 % \changes{v2.05}{2015/12/17}{neu}^^A
 % \begin{macro}{\if@tud@relspacing}
-% \changes{v2.05}{2015/12/17}{neu}^^A
-% \begin{option}{fontsize}
-% \changes{v2.04}{2015/04/24}{Option aus \KOMAScript{} erweitert}^^A
+% \changes{v2.05}{2015/12/17}{neu}^^
 % Die Option \opt{relspacing} setzt einige Abstände und Längen in Abhängigkeit 
 % der aktuellen Grundschriftgröße, wenn sie aktiviert wurde. Die verwendete 
 % Grundschriftgröße kann mit der \KOMAScript-Option \opt{fontsize} eingestellt
 % werden. Die Definiton der Längen wird durch das Makro \cs{tud@font@skip@set} 
 % vorgenommen.
-% \ToDo{Warnung, wenn fontsize nicht als Klassenoption verwendet wird}[v2.06]
 %    \begin{macrocode}
 \newif\if@tud@relspacing
 \TUD@key{relspacing}[true]{%
@@ -845,13 +882,7 @@
     \TUD@SpecialOptionAtDocument{tud@font@skip@set}%
   \fi%
 }
-\DefineFamilyMember{KOMA}
-\DefineFamilyKey{KOMA}{fontsize}{%
-  \TUD@SpecialOptionAtDocument{tud@font@skip@set}%
-  \FamilyKeyStateProcessed%
-}
 %    \end{macrocode}
-% \end{option}^^A fontsize
 % \end{macro}^^A \if@tud@relspacing
 % \end{option}^^A relspacing
 %
@@ -1784,7 +1815,12 @@
 %    \begin{macrocode}
 \newcommand*\tud@ttfont@set{%
   \if@tud@ttfont@rb@exist\else\ifnum\tud@ttfont@num=\tw@\relax%
+%<*class>
     \ClassWarning{\TUD@Class@Name}%
+%</class>
+%<*package>
+    \PackageWarning{tudscrfonts}%
+%</package>
     {%
       The package `roboto-mono' is missing so the\MessageBreak%
       typewriter font of package `lmodern' is used%
@@ -1960,7 +1996,6 @@
 % \changes{v2.04}{2015/02/27}{neu}^^A
 % \begin{macro}{\if@tud@slantedgreek}
 % Mit dieser Option kann die Neigung der griechischen Majuskeln geändert werden.
-% \ToDo{mit TUD@key@lock arbeiten}[v2.06]
 %    \begin{macrocode}
 \newcommand*\tud@slantedgreek@num{0}
 \TUD@key{slantedgreek}[true]{%
@@ -3003,6 +3038,32 @@
   \AtBeginDocument{\tud@math@init\let\tud@math@init\relax}%
 }
 %    \end{macrocode}
+% Wurde ein Paket geladen, welches die \pkg{amsfonts}-Schriftfamilie definiert,
+% so wird eine Information ausgegeben, dass im Zweifel das Paket \pkg{mdsymbol} 
+% besser zu den Schriften des \CDs passt.
+%    \begin{macrocode}
+\AtEndPreamble{%
+  \if@tud@cdoldfont@active\else%
+    \@ifpackageloaded{mdsymbol}{}{%
+      \@tud@res@swafalse%
+      \ifundef{\symAMSa}{}{\@tud@res@swatrue}%
+      \ifundef{\symAMSb}{}{\@tud@res@swatrue}%
+      \if@tud@res@swa%
+%<*class>
+        \ClassInfoNoLine{\TUD@Class@Name}%
+%</class>
+%<*package>
+        \PackageInfoNoLine{tudscrfonts}%
+%</package>
+        {%
+          You should load package `mdsymbol' in order to\MessageBreak%
+          get symbols matching the used math font%
+        }%
+      \fi%
+    }%
+  \fi%
+}
+%    \end{macrocode}
 %
 % \subsubsection{Schrifteinstellungen für Überschriften}
 %
@@ -3114,7 +3175,6 @@
 % in \cs{tud@head@fontsize} gespeichert. Das Makro \cs{tud@head@font@@bold} 
 % wird verwendet, um die Einstellung der fetten Schriften ohne die fixierte 
 % Schriftgröße nutzen zu können.
-% \ToDo{Die Nummer mit \cs{tud@head@font@@bold} nochmals prüfen}[v2.06]
 %    \begin{macrocode}
 \newcommand*\tud@head@font@light{}
 \newcommand*\tud@head@font@bold{}
