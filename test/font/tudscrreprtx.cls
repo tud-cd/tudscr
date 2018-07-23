@@ -2569,14 +2569,28 @@
   }
 \fi
 % TODO überarbeiten oder raus?
-\newcommand*\tud@makeuppercase[1]{%
-  \protect\vphantom{\"A\"O\"U}#1%
+\newcommand*\tud@makeuppercase[2][]{%
+%  \protect\vphantom{\"A\"O\"U}
+  #2%
 }
 \if@tud@cdoldfont@active
   \RequirePackage{textcase}[2004/10/07]
-  \renewcommand*\tud@makeuppercase[1]{%
-    \protect\vphantom{\"A\"O\"U}%
-    \ifdin{\begingroup\MakeTextUppercase{#1}\endgroup}{#1}%
+  \renewcommand*\tud@makeuppercase[2][]{%
+%    \protect\vphantom{\"A\"O\"U}%
+    \@tud@res@swafalse%
+    \ifx\relax#1\relax%
+      \ifdin{\@tud@res@swatrue}{}%
+    \else%
+      \begingroup%
+        \usekomafont{#1}%
+        \ifdin{\aftergroup\@tud@res@swatrue}{}%
+      \endgroup%
+    \fi%
+    \if@tud@res@swa%
+      \begingroup\MakeTextUppercase{#2}\endgroup%
+    \else%
+      #2%
+    \fi%
   }
 \fi
 \newcommand*\tud@head@font@light{}
@@ -4140,9 +4154,9 @@
     \ifdim\tud@len@areadiff<\z@\relax\setlength\tud@len@areadiff{\z@}\fi%
     \global\tud@len@areadiff=\tud@len@areadiff%
     \if@tud@cdgeometry@adjust%
-      \setlength\tud@len@areaheadvskip{.3\tud@len@topmargin}%
+      \setlength\tud@len@areaheadvskip{.11\tud@len@topmargin}%
     \else%
-      \setlength\tud@len@areaheadvskip{.6\tud@len@topmargin}%
+      \setlength\tud@len@areaheadvskip{.22\tud@len@topmargin}%
     \fi%
     \global\tud@len@areaheadvskip=\tud@len@areaheadvskip%
     \tud@if@v@lower{2.03}{%
@@ -5399,7 +5413,7 @@
     \fi%
   ]%
 }
-\newcommand*\tud@headmidvskip@normal{\par\nobreak\vspace{.5\baselineskip}}
+%\newcommand*\tud@headmidvskip@normal{\par\nobreak\vspace{.5\baselineskip}}
 \newcommand*\tud@headmidvskip@reverse{%
   \setbox\z@\vbox{\tud@headmidvskip@normal}%
   \vspace*{\dimexpr-\dp\strutbox-\ht\strutbox-\ht\z@\relax}%
@@ -5458,28 +5472,44 @@
   \fi%
   \ifcase\tud@cd@part@num\relax% false
     \tud@cs@restore{partheadstartvskip}%
+    \tud@cs@restore{scr@part@beforeskip}%
+    \tud@cs@restore{scr@part@innerskip}%
+    \tud@cs@restore{scr@part@afterskip}%
     \tud@cs@restore{partheadendvskip}%
     \tud@cs@restore{partheademptypage}%
     \tud@cs@restore{partpagestyle}%
-    \tud@cs@restore{scr@@startpart}%
-    \tud@cs@restore{scr@@startspart}%
-    \tud@sectioning@reset[addpart]{part}%
+%
+%    \tud@cs@restore{scr@@startpart}%
+%    \tud@cs@restore{scr@@startspart}%
+%
+    \tud@cs@restore{partlineswithprefixformat}%
+    \tud@komafont@unset{part}%
     \tud@komafont@unset{partnumber}%
     \tud@cs@restore{raggedpart}%
   \else% !false
     \tud@cs@store{partheadstartvskip}%
     \let\partheadstartvskip\tud@partheadstartvskip%
+    \tud@cs@store{scr@part@beforeskip}%
+    \tud@cs@store{scr@part@innerskip}%
+    \tud@cs@store{scr@part@afterskip}%
+    \renewcommand*\scr@part@beforeskip{\scr@chapter@beforeskip}%
+    \renewcommand*\scr@part@innerskip{\scr@chapter@innerskip}%
+    \renewcommand*\scr@part@afterskip{\scr@chapter@afterskip}%
     \tud@cs@store{partheadendvskip}%
-    \let\partheadendvskip\tud@partheadendvskip%
+    \let\partheadendvskip\relax%
     \tud@cs@store{partheademptypage}%
-    \let\partheademptypage\relax%
+    \let\partheademptypage\tud@partheademptypage%
     \tud@cs@store{partpagestyle}%
     \renewcommand*\partpagestyle{plain.tudheadings}%
-    \tud@cs@store{scr@@startpart}%
-    \let\scr@@startpart\tud@@startpart%
-    \tud@cs@store{scr@@startspart}%
-    \let\scr@@startspart\tud@@startspart%
-    \tud@sectioning@set{part}{%
+%
+%    \tud@cs@store{scr@@startpart}%
+%    \let\scr@@startpart\tud@@startpart%
+%%    \tud@cs@store{scr@@startspart}%
+%%    \let\scr@@startspart\tud@@startspart%
+%
+    \tud@cs@store{partlineswithprefixformat}%
+    \let\partlineswithprefixformat\tud@partlineswithprefixformat%
+    \tud@komafont@set{part}{%
       \tud@sec@fontface%
       \tud@color{\tud@part@fontcolor}%
     }%
@@ -5489,25 +5519,29 @@
     }%
     \tud@cs@store{raggedpart}%
     \renewcommand*\raggedpart{\tud@raggedright}%
+
   \fi%
   \ifcase\tud@cd@chapter@num\relax% false
     \tud@cs@restore{chapterheadstartvskip}%
-    \tud@cs@restore{chapterformat}%
-    \tud@cs@restore{@chapter}%
-    \tud@cs@restore{@schapter}%
-    \tud@cs@restore{scr@@makechapterhead}%
-    \tud@sectioning@reset[addchap]{chapter}%
+    \tud@cs@restore{chapterlinesformat}%
+% TODO
+%    \tud@cs@restore{scr@@makechapterhead}%
+%
+    \tud@komafont@unset{chapter}%
     \tud@komafont@unset{chapterprefix}%
     \tud@cs@restore{raggedchapter}%
   \else% !false
     \tud@cs@store{chapterheadstartvskip}%
     \let\chapterheadstartvskip\tud@chapterheadstartvskip%
-    \tud@cs@store{chapterformat}%
-    \tud@cs@store{@chapter}%
-    \tud@cs@store{@schapter}%
-    \tud@cs@store{scr@@makechapterhead}%
-    \let\scr@@makechapterhead\tud@@makechapterhead%
-    \tud@sectioning@set{chapter}{%
+    \tud@cs@store{chapterlineswithprefixformat}%
+    \let\chapterlineswithprefixformat\tud@chapterlineswithprefixformat%
+    \tud@cs@store{chapterlinesformat}%
+    \let\chapterlinesformat\tud@chapterlinesformat%
+%
+%    \tud@cs@store{scr@@makechapterhead}%
+%    \let\scr@@makechapterhead\tud@@makechapterhead%
+%
+    \tud@komafont@set{chapter}{%
       \tud@sec@fontface%
       \tud@sec@fontsize%
       \tud@color{\tud@chapter@fontcolor}%
@@ -5516,44 +5550,44 @@
     \tud@cs@store{raggedchapter}%
     \renewcommand*\raggedchapter{\tud@raggedright}%
   \fi%
-  \ifcase\tud@cd@section@num\relax% false
-    \tud@sectioning@reset[addsec]{section}%
-    \tud@sectioning@reset{subsection}%
-    \tud@sectioning@reset{subsubsection}%
-    \tud@sectioning@reset{minisec}%
-    \tud@sectioning@reset{paragraph}%
-    \tud@sectioning@reset{subparagraph}%
-    \tud@cs@restore{raggedsection}%
-  \else% !false
-    \renewcommand*\tud@section@fontcolor{}%
-    \ifcase\tud@cd@section@num\relax\or\else% *color
-      \renewcommand*\tud@section@fontcolor{HKS41}%
-    \fi%
-    \tud@sectioning@set{section}{%
-      \tud@sec@fontface%
-      \ifstr{\tud@pagecolor}{HKS41}{}{\tud@color{\tud@section@fontcolor}}%
-    }%
-    \tud@sectioning@set{subsection}{%
-      \tud@sec@fontface%
-      \ifstr{\tud@pagecolor}{HKS41}{}{\tud@color{\tud@section@fontcolor}}%
-    }%
-    \tud@sectioning@set{subsubsection}{%
-      \tud@sec@fontface%
-      \ifstr{\tud@pagecolor}{HKS41}{}{\tud@color{\tud@section@fontcolor}}%
-    }%
-    \tud@sectioning@set{minisec}{%
-      \tud@sec@fontface%
-      \ifstr{\tud@pagecolor}{HKS41}{}{\tud@color{\tud@section@fontcolor}}%
-    }%
-    \tud@sectioning@set{paragraph}{%
-      \ifstr{\tud@pagecolor}{HKS41}{}{\tud@color{\tud@section@fontcolor}}%
-    }%
-    \tud@sectioning@set{subparagraph}{%
-      \ifstr{\tud@pagecolor}{HKS41}{}{\tud@color{\tud@section@fontcolor}}%
-    }%
-    \tud@cs@store{raggedsection}%
-    \renewcommand*\raggedsection{\tud@raggedright}%
-  \fi%
+%  \ifcase\tud@cd@section@num\relax% false
+%    \tud@sectioning@reset[addsec]{section}%
+%    \tud@sectioning@reset{subsection}%
+%    \tud@sectioning@reset{subsubsection}%
+%    \tud@sectioning@reset{minisec}%
+%    \tud@sectioning@reset{paragraph}%
+%    \tud@sectioning@reset{subparagraph}%
+%    \tud@cs@restore{raggedsection}%
+%  \else% !false
+%    \renewcommand*\tud@section@fontcolor{}%
+%    \ifcase\tud@cd@section@num\relax\or\else% *color
+%      \renewcommand*\tud@section@fontcolor{HKS41}%
+%    \fi%
+%    \tud@sectioning@set{section}{%
+%      \tud@sec@fontface%
+%      \ifstr{\tud@pagecolor}{HKS41}{}{\tud@color{\tud@section@fontcolor}}%
+%    }%
+%    \tud@sectioning@set{subsection}{%
+%      \tud@sec@fontface%
+%      \ifstr{\tud@pagecolor}{HKS41}{}{\tud@color{\tud@section@fontcolor}}%
+%    }%
+%    \tud@sectioning@set{subsubsection}{%
+%      \tud@sec@fontface%
+%      \ifstr{\tud@pagecolor}{HKS41}{}{\tud@color{\tud@section@fontcolor}}%
+%    }%
+%    \tud@sectioning@set{minisec}{%
+%      \tud@sec@fontface%
+%      \ifstr{\tud@pagecolor}{HKS41}{}{\tud@color{\tud@section@fontcolor}}%
+%    }%
+%    \tud@sectioning@set{paragraph}{%
+%      \ifstr{\tud@pagecolor}{HKS41}{}{\tud@color{\tud@section@fontcolor}}%
+%    }%
+%    \tud@sectioning@set{subparagraph}{%
+%      \ifstr{\tud@pagecolor}{HKS41}{}{\tud@color{\tud@section@fontcolor}}%
+%    }%
+%    \tud@cs@store{raggedsection}%
+%    \renewcommand*\raggedsection{\tud@raggedright}%
+%  \fi%
 }
 \newcommand*\tud@cd@specialpage@set[1]{%
   \tud@komafont@set{footnote}{%
@@ -5570,54 +5604,6 @@
   \tud@komafont@unset{footnote}%
   \tud@cs@restore{footnoterule}%
 }
-\newcommand*\tud@partheadstartvskip{%
-  \renewcommand*\tud@part@fontcolor{}% false/true
-  \ifcase\tud@cd@part@num\relax\or\or% litecolor
-    \renewcommand*\tud@part@fontcolor{HKS41}%
-  \or% barcolor
-    \renewcommand*\tud@part@fontcolor{HKS41}%
-  \or% bicolor
-    \renewcommand*\tud@part@fontcolor{HKS41}%
-  \or% color
-    \renewcommand*\tud@part@fontcolor{HKS41!30}%
-  \or% full
-    \renewcommand*\tud@part@fontcolor{HKS41!30}%
-  \fi%
-  \tud@cd@specialpage@set{part}%
-  \begingroup%
-    \vspace*{%
-      \dimexpr\tud@len@areavskip+\tud@len@areaheadvskip-\baselineskip\relax%
-    }%
-    \TUD@deprecated@lengthcs{pageheadingsvskip}%
-    \vspace*{\tud@dim@pageheadingsvskip}%
-    \setparsizes{\z@}{\z@}{\z@\@plus1fil}\par@updaterelative%
-    \usekomafont{partnumber}{\tud@headmidvskip@reverse}%
-  \endgroup%
-}
-\newcommand*\tud@partheadendvskip{%
-  \tud@cleardoublespecialpage{%
-    \renewcommand*\tud@pagecolor{}%
-    \ifcase\tud@cd@part@num\relax\or% true
-      \tud@locked@num@preset{tud@head@bar@num}{0}%
-    \or% litecolor
-      \tud@locked@num@set{tud@head@bar@num}{1}%
-    \or% barcolor
-      \tud@locked@num@set{tud@head@bar@num}{2}%
-    \or% bicolor
-      \tud@locked@num@set{tud@head@bar@num}{3}%
-    \or% color
-      \renewcommand*\tud@pagecolor{HKS41}%
-      \tud@locked@num@set{tud@head@bar@num}{1}%
-    \or% full
-      \renewcommand*\tud@pagecolor{HKS41}%
-      \tud@locked@num@set{tud@head@bar@num}{3}%
-    \fi%
-    \addtokomafont{pagenumber}{\usekomafont{tudheadings}}%
-    \addtokomafont{pagefoot}{\usekomafont{tudheadings}}%
-    \clearpage%
-  }%
-  \tud@cd@specialpage@unset%
-}
 \newcommand*\tud@partpreamble{%
   \ifnum\tud@abstract@level@num>\@ne\relax% sec/chap
     \renewcommand*\tud@abstract@level@num{1}%
@@ -5626,7 +5612,9 @@
   \addtokomafont{disposition}{\tud@color{\tud@part@fontcolor}}%
   \addtokomafont{dictum}{\tud@color{\tud@part@fontcolor}}%
   \tud@color{\tud@part@fontcolor}%
-  \vskip\dimexpr\topskip+.9\baselineskip\relax%
+  \@tempskipa=\glueexpr\scr@chapter@afterskip\relax%
+  \ifdim\@tempskipa<\z@\@tempskipa-\@tempskipa\fi%
+  \tud@cs@use{chapterheadendvskip}%
   \@afterindentfalse\@afterheading%
 }
 \newcommand*\tud@chapterpreamble{%
@@ -5658,90 +5646,122 @@
     #4\parbox[{#2}]{#3}{\@tempa#1#6\par}#5\par%
   }%
 }{}{\tud@patch@wrn{set@@@@preamble}}
+\newcommand*\tud@partheadstartvskip{%
+  \renewcommand*\tud@part@fontcolor{}% false/true
+  \ifcase\tud@cd@part@num\relax\or\or% litecolor
+    \renewcommand*\tud@part@fontcolor{HKS41}%
+  \or% barcolor
+    \renewcommand*\tud@part@fontcolor{HKS41}%
+  \or% bicolor
+    \renewcommand*\tud@part@fontcolor{HKS41}%
+  \or% color
+    \renewcommand*\tud@part@fontcolor{HKS41!30}%
+  \or% full
+    \renewcommand*\tud@part@fontcolor{HKS41!30}%
+  \fi%
+  \tud@cd@specialpage@set{part}%
+  \null\vskip-\baselineskip%
+  \vskip\dimexpr\tud@len@areavskip+\tud@len@areaheadvskip\relax%
+  \TUD@deprecated@lengthcs{pageheadingsvskip}%
+  \vspace*{\tud@dim@pageheadingsvskip}%
+}
+\newcommand*\tud@partheademptypage{%
+  \tud@cleardoublespecialpage{%
+    \renewcommand*\tud@pagecolor{}%
+    \ifcase\tud@cd@part@num\relax\or% true
+      \tud@locked@num@preset{tud@head@bar@num}{0}%
+    \or% litecolor
+      \tud@locked@num@set{tud@head@bar@num}{1}%
+    \or% barcolor
+      \tud@locked@num@set{tud@head@bar@num}{2}%
+    \or% bicolor
+      \tud@locked@num@set{tud@head@bar@num}{3}%
+    \or% color
+      \renewcommand*\tud@pagecolor{HKS41}%
+      \tud@locked@num@set{tud@head@bar@num}{1}%
+    \or% full
+      \renewcommand*\tud@pagecolor{HKS41}%
+      \tud@locked@num@set{tud@head@bar@num}{3}%
+    \fi%
+    \addtokomafont{pagenumber}{\usekomafont{tudheadings}}%
+    \addtokomafont{pagefoot}{\usekomafont{tudheadings}}%
+    \clearpage%
+  }%
+  \tud@cd@specialpage@unset%
+}
+
 % TODO DeclareSectionCommand verwenden
-\newcommand*\tud@@startpart{}%
-\let\tud@@startpart\scr@@startpart%
-\patchcmd{\tud@@startpart}{%
-  \IfUseNumber{%
-    \partlineswithprefixformat{#1}{%
-      \usekomafont{#1prefix}{\nobreak\@nameuse{#1format}}%
+\newcommand*\tud@partformat{}%
+\newcommand*\tud@partlineswithprefixformat[3]{%
+  \edef\tud@partformat{\noexpand\tud@makeuppercase{\expandonce\partformat}}%
+  \let\partformat\tud@partformat%
+  \IfUseNumber{}{%
+    \usekomafont{#1prefix}{\nobreak\null}%
     \setlength{\@tempskipa}{\@nameuse{scr@#1@innerskip}}%
-      \partheadmidvskip
-    }{%
-      \usekomafont{#1}{\nobreak\interlinepenalty \@M#3\strut\@@par}%
-    }%
-  }{%
-    \partlineswithprefixformat{#1}{}{%
-      \usekomafont{#1}{\nobreak\interlinepenalty \@M#3\strut\@@par}%
-    }
+    \partheadmidvskip%
   }%
-}{%
-  \IfUseNumber{%
-    \partlineswithprefixformat{#1}{%
-      \usekomafont{#1prefix}{%
-        \nobreak\tud@makeuppercase{\@nameuse{#1format}}%
-      }%
-      \tud@headmidvskip@normal%
-    }{%
-      \usekomafont{#1}{\nobreak\interlinepenalty \@M#3\strut\@@par}%
-    }%
-  }{%
-    \partlineswithprefixformat{#1}{}{%
-      \usekomafont{#1prefix}{\vphantom{\partname}}%
-      \tud@headmidvskip@normal%
-      \usekomafont{#1}{\nobreak\interlinepenalty \@M#3\strut\@@par}%
-    }%
-  }%
-}{}{\tud@patch@wrn{scr@@startpart}}%
-\newcommand*\tud@@startspart{}%
-\let\tud@@startspart\scr@@startspart%
-\patchcmd{\tud@@startspart}{%
-  \normalfont\usekomafont{disposition}{%
-    \nobreak
-    \partlineswithprefixformat{#1}{}{%
-      \usekomafont{#1}{\nobreak\interlinepenalty \@M#2\strut\@@par}%
-    }%
-    \@mkboth{}{}%
-  }%
-}{%
-  \normalfont\usekomafont{disposition}{%
-    \nobreak%
-    \size@partnumber{\vphantom{\partname}}%
-    \tud@headmidvskip@normal\nobreak%
-    \partlineswithprefixformat{#1}{}{%
-      \usekomafont{#1}{\nobreak\interlinepenalty \@M#2\strut\@@par}%
-    }%
-    \@mkboth{}{}%
-  }%
-}{}{\tud@patch@wrn{scr@@startspart}}%
+  #2\tud@makeuppercase[#1]{\strut#3}%
+}
 \newcommand*\tud@chapterheadstartvskip{%
   \renewcommand*\tud@chapter@fontcolor{}%
   \ifcase\tud@cd@chapter@num\relax\or\else% *color
     \renewcommand*\tud@chapter@fontcolor{HKS41}%
   \fi%
-  \vspace*{%
-    \dimexpr\tud@len@areavskip+\tud@len@areaheadvskip\relax%
-  }%
+  \vskip\dimexpr\tud@len@areavskip+\tud@len@areaheadvskip\relax%
   \if@tud@chapterpage%
     \TUD@deprecated@lengthcs{pageheadingsvskip}%
     \vspace*{\tud@dim@pageheadingsvskip}%
   \else%
     \TUD@deprecated@lengthcs{headingsvskip}%
     \vspace*{\tud@dim@headingsvskip}%
-  \fi%
+  \fi
 }
-\newcommand*\tud@@makechapterhead{}%
-\let\tud@@makechapterhead\scr@@makechapterhead%
-\patchcmd{\tud@@makechapterhead}{%
-  \csname #1format\endcsname%
-  \setlength{\@tempskipa}{\csname scr@#1@innerskip\endcsname}%
-  \chapterheadmidvskip
-}{%
-  \tud@headmidvskip@reverse%
-  \vskip-\parskip%
-  \tud@makeuppercase{\csname #1format\endcsname}%
-  \tud@headmidvskip@normal%
-}{}{\tud@patch@wrn{scr@@makechapterhead}}%
+\newcommand*\tud@chapterformat{}%
+\newcommand*\tud@chapterlineswithprefixformat[3]{%
+  \edef\tud@chapterformat{%
+    \noexpand\tud@makeuppercase{\expandonce\chapterformat}%
+  }%
+  \let\chapterformat\tud@chapterformat%
+  \IfUseNumber{}{%
+    {%
+      \usekomafont{#1prefix}{\nobreak\null}%
+      \setlength{\@tempskipa}{\@nameuse{scr@#1@innerskip}}%
+      \chapterheadmidvskip%
+    }%
+  }%
+   #2\tud@makeuppercase[#1]{\strut#3}%
+}
+\newcommand*\tud@chapterlinesformat[3]{%
+  {%
+    \usekomafont{#1prefix}{\nobreak\null}%
+    \setlength{\@tempskipa}{\@nameuse{scr@#1@innerskip}}%
+    \chapterheadmidvskip%
+  }%
+  \@hangfrom{#2}{\tud@makeuppercase[#1]{\strut#3}}%
+}
+%
+%\newcommand*\tud@@makechapterhead{}%
+%\let\tud@@makechapterhead\scr@@makechapterhead%
+%\patchcmd{\tud@@makechapterhead}{%
+%  \csname #1format\endcsname%
+%  \setlength{\@tempskipa}{\csname scr@#1@innerskip\endcsname}%
+%  \chapterheadmidvskip
+%}{%
+%  \tud@headmidvskip@reverse%
+%  \vskip-\parskip%
+%  \tud@makeuppercase{\csname #1format\endcsname}%
+%  \tud@headmidvskip@normal%
+%}{}{\tud@patch@wrn{scr@@makechapterhead}}%
+% TODO!!!
+%\newcommand*\tud@@makechapterhead{}%
+%\let\tud@@makechapterhead\scr@@makechapterhead%
+%\pretocmd\tud@@makechapterhead{%
+%  \tud@chapter@pre%
+%}{}{\tud@patch@wrn{scr@@makechapterhead}}%
+%\apptocmd\tud@@makechapterhead{%
+%  \tud@chapter@app%
+%}{}{\tud@patch@wrn{scr@@makechapterhead}}%
+%
 \newcommand*\tud@chapter@pre{%
   \if@tud@chapterpage%
     \@restonecolfalse%
@@ -5831,12 +5851,12 @@
 \newcommand*\tud@subsubsection{}
 \newcommand*\tud@ssubsubsection{}
 \newcommand*\tud@sectioning@set[2]{%
-  \tud@cs@store{#1}%
-  \ifstr{#1}{minisec}{%
-    \renewcommand\minisec[1]{\@@tud@minisec{\tud@makeuppercase{##1}}}%
-  }{%
-    \tud@sectioning@case{#1}%
-  }%
+%  \tud@cs@store{#1}%
+%  \ifstr{#1}{minisec}{%
+%    \renewcommand\minisec[1]{\@@tud@minisec{\tud@makeuppercase{##1}}}%
+%  }{%
+%    \tud@sectioning@case{#1}%
+%  }%
   \tud@komafont@set{#1}{#2}%
 }
 \newcommand*\tud@sectioning@case[1]{%
@@ -5870,8 +5890,8 @@
   }{}%
 }
 \newcommand*\tud@sectioning@reset[2][]{%
-  \tud@cs@restore{#2}%
-  \ifblank{#1}{}{\tud@cs@restore{#1}}%
+%  \tud@cs@restore{#2}%
+%  \ifblank{#1}{}{\tud@cs@restore{#1}}%
   \tud@komafont@unset{#2}%
 }
 \robustify{\footnote}

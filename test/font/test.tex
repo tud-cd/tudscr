@@ -6,14 +6,18 @@
 \ReplaceClass{tudscrreprt}{../../source/tudscrreprt}
 \ReplacePackage{tudscrbase}{../../source/tudscrbase}
 \ReplacePackage{tudscrfonts}{../../source/tudscrfonts}
-%\ReplaceClass{tudscrreprt}{tudscrreprtx}
-
+\ReplacePackage{tudscrcolor}{../../source/tudscrcolor}
+\ReplaceClass{tudscrreprt}{tudscrreprtx}
 \RequirePackage{fix-cm}
 \documentclass[ngerman,
-cd=true,
-cdfont=normalbold,
+cd=full,
+%cdoldfont=din,
+%cdgeometry=false,
+chapterprefix=true,
+chapterpage
+%cdfont=normalbold,
 %cdfont=heavy,
-cdfont=ultrabold,
+%cdfont=ultrabold,
 %cdfont=false,
 %9pt
 %fontsize=12pt
@@ -26,22 +30,13 @@ cdfont=ultrabold,
 %  \usepackage{fontspec}
 }
 \usepackage{babel}
-\usepackage[math]{blindtext}
+\usepackage[]{blindtext}
 
 \usepackage{lmodern}
 
 \usepackage{fonttable}
 
 %\makeatletter
-%\renewcommand{\partlineswithprefixformat}[3]{%
-%  #2#3%
-%}
-%\renewcommand{\chapterlinesformat}[3]{%
-%  \@hangfrom{#2}{#3}%
-%}
-%\renewcommand{\chapterlineswithprefixformat}[3]{%
-%  #2#3%
-%}
 %\renewcommand{\sectionlinesformat}[4]{%
 %  \@hangfrom{\hskip #2#3}{#4}%
 %}
@@ -58,9 +53,7 @@ cdfont=ultrabold,
 
 %\usepackage[din]{tudscrfonts}
 
-\typeout{+++++++++++++ \meaning\shellescape}
 \usepackage{imakeidx}
-\typeout{+++++++++++++ \meaning\shellescape}
 
 %\usepackage[
 %slantedGreeks
@@ -69,40 +62,101 @@ cdfont=ultrabold,
 %\usepackage[]{libertinust1math}
 %\TUDoptions{}
 \begin{document}
+\providecommand*\TUDoptions[1]{}
+\makeatletter
+
 \date{\today}
-aaa
-\clearpage
-
-%\meaning\today
-%
-%\expandafter\meaning\csname today \endcsname
-%
-%\today
-%
-%\DTMnow
-%
-%\meaning\DTMdate
-%
-%\meaning\formatdate
-%
-%\DTMdate{2019-1-1}
-%
-%\DTMDate{2019-1-1}
-%%
-%$\rightsquigarrow$
-
-%\KOMAoptions{fontsize=12pt}
-
 \title{Das ist ein Titel}
 \author{Ich bin's\thanks{text}\and du auch\thanks{text}}
 
-\makeatletter
+% \renewcommand*{\scr@chapter@afterskip}{0pt}
+\ifcsdef{ps@plain.tudheadings}{
+  \renewcommand{\chapterpagestyle}{plain.tudheadings}%
+}{}
 
 
 %\makecover
-\maketitle
+%\maketitle
+
+%\let\partheadstartvskip\chapterheadstartvskip
+%\let\partpagestyle\chapterpagestyle
+%\let\raggedpart\raggedchapter
+%\setkomafont{chapterprefix}{\usekomafont{partnumber}}%
+%\setkomafont{chapter}{\usekomafont{part}}%
+%    \renewcommand*\scr@part@beforeskip{\scr@chapter@beforeskip}%
+%    \renewcommand*\scr@part@innerskip{\scr@chapter@innerskip}%
+%    \renewcommand*\scr@part@afterskip{\scr@chapter@afterskip}%
+
+%\let\setpartpreamble\@gobble
+%\let\setchapterpreamble\@gobble
+
+%\def\scr@chapter@afterskip{\z@}
 
 
+\setchapterpreamble{\blindtext \footnote{text}}
+\chapter{Nummerierter Teil}
+\blindtext
+
+\setchapterpreamble{\blindtext \footnote{text}}
+\chapter*{Nummerierter Teil ÄÖÜ}
+\blindtext
+
+\end{document}
+
+\setcounter{secnumdepth}{-2}
+\begingroup
+%\TUDoptions{cd=true}
+\setpartpreamble{\blindtext \footnote{text}}
+\part{Nummerierter Teil}
+\endgroup
+\setcounter{secnumdepth}{\subparagraphnumdepth}
+
+\setpartpreamble{\blindtext}
+\part*{Unnummerierter Teil\footnote{text}}
+\setchapterpreamble{\blindtext}
+\chapter*{Unnummeriertes Kapitel}
+\addchap{Unnummeriertes Kapitel KOMA}
+\setpartpreamble{\blindtext}
+\addpart{Nummerierter Teil KOMA}
+\setpartpreamble{\blindtext}
+\addpart*{Unnummerierter Teil KOMA}
+
+\part{Nummerierter Teil}
+\setchapterpreamble{\blindtext}
+\chapter{Nummeriertes Kapitel}
+\setcounter{secnumdepth}{-2}
+\begingroup
+%\TUDoptions{cd=true}
+\setchapterpreamble{\blindtext}
+\chapter{Nummeriertes Kapitel}
+\endgroup
+\setcounter{secnumdepth}{\subparagraphnumdepth}
+\setchapterpreamble{\blindtext}
+\chapter*{Unnummeriertes Kapitel}
+\setchapterpreamble{\blindtext}
+\addchap{Nummeriertes Kapitel KOMA}
+\blindtext
+\setchapterpreamble{\begin{center}\blindtext\end{center}}
+\addchap*{Unnummeriertes Kapitel KOMA}
+\blindtext
+
+\meaning\endtrivlist
+
+\section{Nummerierter Abschnitt}
+\section*{Unnummerierter Abschnitt}
+\addsec{Nummerierter Abschnitt KOMA}
+\addsec*{Unnummerierter Abschnitt KOMA}
+
+\subsection{Überschrift}
+\subsection*{Überschrift}
+\subsubsection{Überschrift}
+\subsubsection*{Überschrift}
+\paragraph{Überschrift}
+\paragraph*{Überschrift}
+\subparagraph{Überschrift}
+\subparagraph*{Überschrift}
+
+\end{document}
 
 \section{title}
 \meaning\sectfont
