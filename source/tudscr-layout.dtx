@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-layout.dtx}[%
-  2018/07/20 v2.06 TUD-Script (layout)%
+  2018/07/24 v2.06 TUD-Script (layout)%
 ]
 \documentclass[english,ngerman,xindy]{tudscrdoc}
 \usepackage[T1]{fontenc}
@@ -298,7 +298,9 @@
 % \end{option}^^A cdsection
 %
 % \iffalse
+%</class&option>
 %<*book|report>
+%<*class&option>
 % \fi
 %
 % Die nun folgenden Optionen und Befehle werden nur für die beiden Klassen 
@@ -315,13 +317,33 @@
 %    \end{macrocode}
 % \end{macro}^^A \if@tud@chapterpage
 % \end{option}^^A chapterpage
+% \begin{option}{clearcolor}
+% \begin{option}{clearcolour}
+% \begin{macro}{\if@tud@clearcolor}
+% Wird auf Titel- Teil- oder Kapitelseiten eine Hintergrundfarbe im Stile des 
+% \CDs verwendet (\opt{cd\dots}|=|\val{color}) wird die entsprechende Rückseite 
+% in der gleichen Farbe wie die Vorderseite gestaltet. Für Teile- bzw.
+% Kapitelseiten muss dafür die passende Option (\opt{cleardoublespecialpage})
+% aktiviert sein.
+% 
+%    \begin{macrocode}
+\newif\if@tud@clearcolor
+\TUD@key{clearcolor}[true]{%
+  \TUD@set@ifkey{clearcolor}{@tud@clearcolor}{#1}%
+}
+\TUD@key{clearcolour}[true]{%
+  \TUD@set@ifkey{clearcolour}{@tud@clearcolor}{#1}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \if@tud@clearcolor
+% \end{option}^^A clearcolour
+% \end{option}^^A clearcolor
 % \begin{option}{cleardoublespecialpage}
 % \changes{v2.02}{2014/07/08}{Werte für Seitenstil aus den \TUDScript- bzw.
 %   \KOMAScript-Klassen möglich}^^A
 % \changes{v2.03}{2015/01/09}{Prüfung des Seitenstils mit \cs{AfterPreamble}
 %   auf Beginn des Dokumentes verzögert}^^A
 % \begin{macro}{\tud@cleardoublepage}
-% \begin{macro}{\tud@cleardoublespecialpage}
 % Für Klassen mit separaten Teileseiten und Kapiteln wird eine zusätzliche
 % Option definiert, welche nur bei zweiseitigem Satz (\opt{twoside}) und
 % zusätzlich immer auf nur der rechten Seite öffnenden Teilen bzw. Kapiteln
@@ -385,6 +407,16 @@
   \fi%
 }
 %    \end{macrocode}
+% \end{macro}^^A \tud@cleardoublepage
+% \end{option}^^A cleardoublespecialpage
+%
+% \iffalse
+%</class&option>
+%<*class&body>
+% \fi
+%
+% \begin{macro}{\tud@cleardoublespecialpage}
+% \begin{macro}{\tud@clearcolor@wrn}
 % Der Befehl \cs{tud@cleardoublespecialpage} dient zur eigentlichen Umsetzung.
 % Das obligatorische Argument enthält alles, was innerhalb der Gruppe an
 % lokalen Einstellungen vorgenommen werden soll. Das optionale Argument wird 
@@ -418,36 +450,27 @@
   \@afterindentfalse\@afterheading%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@cleardoublespecialpage
-% \end{macro}^^A \tud@cleardoublepage
-% \end{option}^^A cleardoublespecialpage
-% \begin{option}{clearcolor}
-% \begin{option}{clearcolour}
-% \begin{macro}{\if@tud@clearcolor}
-% Wird auf Titel- Teil- oder Kapitelseiten eine Hintergrundfarbe im Stile des 
-% \CDs verwendet (\opt{cd\dots}|=|\val{color}) wird die entsprechende Rückseite 
-% in der gleichen Farbe wie die Vorderseite gestaltet. Für Teile- bzw.
-% Kapitelseiten muss dafür die passende Option (\opt{cleardoublespecialpage})
-% aktiviert sein.
-% 
+% Die Warnung für den Fall, dass die Option \opt{clearcolor} ohne 
+% \opt{open}|=|\val{right} und \opt{twoside} verwendet wird.
 %    \begin{macrocode}
-\newif\if@tud@clearcolor
-\TUD@key{clearcolor}[true]{%
-  \TUD@set@ifkey{clearcolor}{@tud@clearcolor}{#1}%
-}
-\TUD@key{clearcolour}[true]{%
-  \TUD@set@ifkey{clearcolour}{@tud@clearcolor}{#1}%
+\newcommand*\tud@clearcolor@wrn{%
+  \ClassWarning{\TUD@Class@Name}{%
+    Option `clearcolor' is only available together with\MessageBreak%
+    options `twoside' and `open=right'%
+  }%
+  \global\let\tud@clearcolor@wrn\relax%
 }
 %    \end{macrocode}
-% \end{macro}^^A \if@tud@clearcolor
-% \end{option}^^A clearcolour
-% \end{option}^^A clearcolor
-% Damit endet der exklusive Abschnitt für \cls{tudscrbook}- und
-% \cls{tudscrreprt}-Klasse.
+% \end{macro}^^A \tud@clearcolor@wrn
+% \end{macro}^^A \tud@cleardoublespecialpage
 %
 % \iffalse
+%</class&body>
 %</book|report>
+%<*class&option>
 % \fi
+%
+% Damit endet der Abschnitt für \cls{tudscrbook}- und \cls{tudscrreprt}-Klasse.
 %
 % \begin{macro}{\tud@pagecolor}
 % Der Befehl \cs{tud@pagecolor} dient für die Hauptklassen als Hilfsmakro, um 
@@ -1461,25 +1484,13 @@
 % \end{macro}^^A \tud@head@bar@store
 % \end{macro}^^A \tud@chapter@pre
 % \end{macro}^^A \tud@chapter@app
-% \begin{macro}{\tud@clearcolor@wrn}
-% Die Warnung für den Fall, dass die Option \opt{clearcolor} ohne 
-% \opt{open}|=|\val{right} und \opt{twoside} verwendet wird.
-%    \begin{macrocode}
-\newcommand*\tud@clearcolor@wrn{%
-  \ClassWarning{\TUD@Class@Name}{%
-    Option `clearcolor' is only available together with\MessageBreak%
-    options `twoside' and `open=right'%
-  }%
-  \global\let\tud@clearcolor@wrn\relax%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@clearcolor@wrn
-% Damit ist das Intermezzo für die beiden Klassen \cls{tudscrbook} und
-% \cls{tudscrreprt} beendet.
 %
 % \iffalse
 %</book|report>
 % \fi
+%
+% Damit ist das Intermezzo für die beiden Klassen \cls{tudscrbook} und
+% \cls{tudscrreprt} beendet.
 %
 % \subsubsection{Erzwungene Majuskeln für Überschriften}
 %
