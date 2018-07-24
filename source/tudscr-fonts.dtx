@@ -1,4 +1,4 @@
-% \CheckSum{2248}
+% \CheckSum{2259}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-fonts.dtx}[%
-  2018/07/20 v2.06 TUD-Script\space%
+  2018/07/24 v2.06 TUD-Script\space%
 %</driver>
 %<package&identify>\ProvidesPackage{tudscrfonts}[%
 %<*driver|package&identify>
@@ -209,9 +209,9 @@
     \PackageWarningNoLine{tudscrfonts}%
 %</package>
     {%
-      Version `2017/01/24' of package `fontspec' is needed,\MessageBreak
-      but only version\MessageBreak
-      `\csname ver@fontspec.sty\endcsname'\MessageBreak
+      Version `2017/01/24' of package `fontspec' is needed,\MessageBreak%
+      but only version\MessageBreak%
+      `\csname ver@fontspec.sty\endcsname'\MessageBreak%
       is available, so a fallback layout is used%
     }%
   }%
@@ -568,6 +568,8 @@
 % \changes{v2.06}{2018/07/10}{neu}^^A
 % \begin{macro}{\tud@cdfont@activate}
 % \changes{v2.06}{2018/07/02}{neu}^^A
+% \begin{macro}{\tud@cdfont@deactivate}
+% \changes{v2.06}{2018/07/24}{neu}^^A
 % Mit dieser Option wird die zentrale Benutzerschnittstelle für alle möglichen
 % Schrifteinstellungen innerhalb Dokumentes geschaffen. Durch diese Option
 % können sowohl die verwendete Schrift für den Fließtext, als auch die Stärke
@@ -593,11 +595,11 @@
     {nomath}{7},{nocdmath}{7},%
     {serifmath}{7},{serif}{7},{nosansmath}{7},{nosans}{7},%
     {math}{8},{cdmath}{8},{sansmath}{8},{sans}{8},%
-    {upgreek}{9},{uprightgreek}{9},{uprightGreek}{9},{uprightGreeks}{9},%
-    {slgreek}{10},{slantedgreek}{10},{slantedGreek}{10},{slantedGreeks}{10},%
-    {itgreek}{10},{italicgreek}{10},{italicGreek}{10},{italicGreeks}{10},%
-    {texgreek}{11},{latexgreek}{11},{TeXgreek}{11},{LaTeXgreek}{11},%
-    {standardgreek}{11},%
+    {upgreek}{9},{uprightgreek}{9},{uprightgreeks}{9},%
+    {slgreek}{10},{slantedgreek}{10},{slantedgreeks}{10},%
+    {itgreek}{10},{italicgreek}{10},{italicgreeks}{10},%
+    {texgreek}{11},{latexgreek}{11},{texgreeks}{11},{latexgreeks}{11},%
+    {standardgreek}{11},{standardgreeks}{11},%
     {fontspec}{12},{luatex}{12},{lualatex}{12}{xetex}{12},{xelatex}{12},%
     {nofontspec}{13},{nfss}{13},{pdftex}{13},{pdflatex}{13}%
 %<*class>
@@ -637,15 +639,7 @@
 % den Fließtext.
 %    \begin{macrocode}
     \ifcase\@tempa\relax% false
-      \@tud@cdfont@activefalse%
-      \tud@locked@bool@preset{@tud@cdmath@active}{false}%
-%    \end{macrocode}
-% Die Schrift im Querbalken wird bei den Klassen angepasst.
-%    \begin{macrocode}
-%<*class>
-      \tud@locked@num@preset{tud@head@font@num}{0}%
-%</class>
-      \TUD@SpecialOptionAtDocument{tud@font@set}%
+      \tud@cdfont@deactivate%
     \or% true
       \@tud@cdfont@heavyfalse%
       \tud@cdfont@activate%
@@ -719,13 +713,13 @@
       \fi%
     }{}%
   \fi%
-  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \@tud@cdoldfont@activefalse%
-  \fi%
 }
 \newcommand*\tud@cdfont@activate{%
   \@tud@cdfont@activetrue%
   \tud@locked@bool@preset{@tud@cdmath@active}{true}%
+%    \end{macrocode}
+% Die Schrift im Querbalken wird bei den Klassen angepasst.
+%    \begin{macrocode}
 %<*class>
   \if@tud@cdfont@heavy%
     \tud@locked@num@preset{tud@head@font@num}{2}%
@@ -735,7 +729,16 @@
 %</class>
   \TUD@SpecialOptionAtDocument{tud@font@set}%
 }
+\newcommand*\tud@cdfont@deactivate{%
+  \@tud@cdfont@activefalse%
+  \tud@locked@bool@preset{@tud@cdmath@active}{false}%
+%<*class>
+  \tud@locked@num@preset{tud@head@font@num}{0}%
+%</class>
+  \TUD@SpecialOptionAtDocument{tud@font@set}%
+}
 %    \end{macrocode}
+% \end{macro}^^A \tud@cdfont@deactivate
 % \end{macro}^^A \tud@cdfont@activate
 % \end{macro}^^A \if@tud@cdfont@lining
 % \end{macro}^^A \if@tud@cdfont@ultrabold
@@ -746,7 +749,7 @@
 % \changes{v2.06}{2018/07/12}{neu}^^A
 % \begin{macro}{\if@tud@cdoldfont@active}
 % \changes{v2.06}{2018/07/12}{neu}^^A
-% \begin{macro}{\if@tud@cdoldfont@usedin}
+% \begin{macro}{\if@tud@cdoldfont@nodin}
 % \changes{v2.06}{2018/07/12}{neu}^^A
 % Seit 2018 wird \OpenSans als Hausschrift im \TUDCD genutzt. Für die Nutzung 
 % der vormals verwendeten Schriften \Univers und \DIN für ältere Dokumente wird 
@@ -755,32 +758,43 @@
 % entsprechend angepasst.
 %    \begin{macrocode}
 \newif\if@tud@cdoldfont@active
-\newif\if@tud@cdoldfont@usedin
+\newif\if@tud@cdoldfont@nodin
 \TUD@key{cdoldfont}[true]{%
   \TUD@set@numkey{cdoldfont}{@tempa}{%
     \TUD@bool@numkey,%
-    {din}{1},{dinbold}{1},{DIN}{1},{DINBold}{1},%
-    {nodin}{2},{nodinbold}{2},{noDIN}{2},{noDINBold}{2}%
+    {din}{1},{dinbold}{1},%
+    {nodin}{2},{nodinbold}{2},%
+    {onlydin}{3},{onlydinbold}{3}%
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax% false
-      \TUDoptions{cdfont=false}%
+      \@tud@cdoldfont@activefalse%
+      \@tud@cdoldfont@nodintrue%
+      \tud@cdfont@deactivate%
     \or% true/din
-      \@tud@cdoldfont@usedintrue%
+      \@tud@cdoldfont@activetrue%
+      \@tud@cdoldfont@nodinfalse%
       \tud@cdfont@activate%
     \or% nodin
-      \@tud@cdoldfont@usedinfalse%
+      \@tud@cdoldfont@activetrue%
+      \@tud@cdoldfont@nodintrue%
       \tud@cdfont@activate%
+    \or% onlydin
+      \@tud@cdoldfont@activetrue%
+      \@tud@cdoldfont@nodinfalse%
+      \tud@cdfont@deactivate%
     \fi%
   \else%
-    \TUDoptions{cdfont=#1}%
-  \fi%
-  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \@tud@cdoldfont@activetrue%
+    \TUDoptions{cdfont=#1}%
   \fi%
 }
 %    \end{macrocode}
-% \ToDo{verwendete Version auf höchstens v2.05 setzen?}[v2.06]
+% Wenn die Option \opt{cdoldfont} beim Laden der Klasse genutzt wurde, kann sie
+% auch im Dokument genutzt werden. Um möglichst einfach alte Dokumente mit den 
+% alten Schriften setzen zu können, wird in diesem Fall die Option \opt{cdfont}
+% um die alten Werte erweitert. Andernfalls wird \opt{cdoldfont} schlichtweg
+% deaktiviert.
 %    \begin{macrocode}
 %<*class>
 \AtEndOfClass%
@@ -789,28 +803,34 @@
 \AtEndOfPackage%
 %</package>
 {%
-  \TUD@key{cdoldfont}[]{%
-%<*class>
-    \ClassError{\TUD@Class@Name}%
-%</class>
-%<*package>
-    \PackageError{tudscrfonts}%
-%</package>
-    {Option `cdoldfont' too late}{%
-      Option `cdoldfont=#1' can only be set while loading the\MessageBreak%
-%<*class>
-      class `\TUD@Class@Name'
-%</class>
-%<*package>
-      package `tudscrfonts'
-%</package>
-      but you have tried to set it up later.%
+  \if@tud@cdoldfont@active%
+    \TUD@key[.comp]{cdfont}{%
+      \TUDoptions{cdoldfont=#1}%
     }%
-    \FamilyKeyStateProcessed%
-  }%
+  \else%
+    \TUD@key{cdoldfont}[]{%
+%<*class>
+      \ClassError{\TUD@Class@Name}%
+%</class>
+%<*package>
+      \PackageError{tudscrfonts}%
+%</package>
+      {Option `cdoldfont' not active}{%
+        Option `cdoldfont' must be activated while loading the\MessageBreak%
+%<*class>
+        class `\TUD@Class@Name'\space%
+%</class>
+%<*package>
+        package `tudscrfonts'\space%
+%</package>
+        but you have tried to set it up later.%
+      }%
+      \FamilyKeyStateProcessed%
+    }%
+  \fi%
 }
 %    \end{macrocode}
-% \end{macro}^^A \if@tud@cdoldfont@usedin
+% \end{macro}^^A \if@tud@cdoldfont@nodin
 % \end{macro}^^A \if@tud@cdoldfont@active
 % \end{option}^^A cdoldfont
 % \begin{option}{fontsize}
@@ -836,7 +856,7 @@
 %</package>
 {%
   \RelaxFamilyKey{TUD}{fontsize}%
-  \DefineFamilyMember{KOMA}
+  \DefineFamilyMember{KOMA}%
   \DefineFamilyKey{KOMA}{fontsize}{%
     \@tud@fontsize@settrue%
 %<*class>
@@ -1091,11 +1111,11 @@
     \@tud@res@swatrue%
   \fi%
   \if@tud@cdoldfont@active%
-    \if@tud@cdoldfont@usedin\if@tud@cdfont@db@exist\else%
+    \if@tud@cdoldfont@nodin\else\if@tud@cdfont@db@exist\else%
       \@tud@res@swatrue%
     \fi\fi%
   \fi%
-  \if@tud@res@swa
+  \if@tud@res@swa%
     \tud@cdfont@missing@wrn%
   \fi%
 }
@@ -1144,7 +1164,7 @@
         \renewcommand*\tud@cdfont@ebf{b}%
       \fi%
     \fi%
-  }
+  }%
 \fi
 %    \end{macrocode}
 % \end{macro}^^A \tud@cdfont@ebf
@@ -1539,7 +1559,7 @@
     \fi%
     \newcommand*\textdbn{}%
     \DeclareTextFontCommand\textdbn{\dinbn}%
-  }
+  }%
 \fi
 %    \end{macrocode}
 % \end{macro}^^A \textdbn
@@ -1631,7 +1651,7 @@
     \ifx\@tempc\relax\else%
       \ifstr{\@tempc}{dinbn}{\dinbn}{\csuse{univ\@tempc}}%
     \fi%
-  }
+  }%
   \renewcommand*\textcdfont[2]{%
     \tud@cdfont@get{#1}%
     \ifx\@tempc\relax%
@@ -1639,7 +1659,7 @@
     \else%
       \ifstr{\@tempc}{dinbn}{\textdbn{#2}}{\csuse{textu\@tempc}{#2}}%
     \fi%
-  }
+  }%
 \fi
 \newcommand*\tud@cdfont@get[1]{%
   \tud@cdfont@trim\@tempa{#1}%
@@ -1696,7 +1716,7 @@
 %</package>
       {The font `#1' is unknown}%
     }}}}}}}}}}}}}}%
-  }
+  }%
 \fi
 \newcommand*\tud@cdfont@trim[2]{%
   \protected@edef\@tempa{\trim@spaces{#2}}%
@@ -1742,7 +1762,7 @@
     \tud@cdfont@@trim{italic}{oblique}%
     \tud@cdfont@@trim{slanted}{oblique}%
     \let#1\@tempa%
-  }
+  }%
 \fi
 \newcommand*\tud@cdfont@@trim[2]{%
   \def\@tempb##1#1##2\relax{\def\@tempa{##1#2##2}}%
@@ -1826,7 +1846,7 @@
       typewriter font of package `lmodern' is used%
     }%
     \renewcommand*\tud@ttfont@num{1}%
-  \fi\fi
+  \fi\fi%
   \ifcase\tud@ttfont@num\relax% false
     \let\tud@ttfont@fam\ttdefault%
   \or% lmodern
@@ -1964,11 +1984,11 @@
     \TUD@bool@numkey,%
     {serifmath}{0},{serif}{0},{nosansmath}{0},{nosans}{0},%
     {sansmath}{1},{sans}{1},%
-    {upgreek}{2},{uprightgreek}{2},{uprightGreek}{2},{uprightGreeks}{2},%
-    {slgreek}{3},{slantedgreek}{3},{slantedGreek}{3},{slantedGreeks}{3},%
-    {itgreek}{3},{italicgreek}{3},{italicGreek}{3},{italicGreeks}{3},%
-    {texgreek}{4},{latexgreek}{4},{TeXgreek}{4},{LaTeXgreek}{4},%
-    {standardgreek}{4}%
+    {upgreek}{2},{uprightgreek}{2},{uprightgreeks}{2},%
+    {slgreek}{3},{slantedgreek}{3},{slantedgreeks}{3},%
+    {itgreek}{3},{italicgreek}{3},{italicgreeks}{3},%
+    {texgreek}{4},{latexgreek}{4},{texgreeks}{4},{latexgreeks}{4},%
+    {standardgreek}{4},{standardgreeks}{4}%
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax% false
@@ -2003,8 +2023,8 @@
     \TUD@bool@numkey,%
     {up}{0},{upright}{0},%
     {sl}{1},{slanted}{1},{it}{1},{italic}{1},%
-    {standard}{2},{tex}{2},{latex}{2},{TeX}{2},{LaTeX}{2},{standardgreek}{2},%
-    {texgreek}{2},{latexgreek}{2},{TeXgreek}{2},{LaTeXgreek}{2}%
+    {standard}{2},{tex}{2},{latex}{2},{standardgreek}{2},{standardgreeks}{2},%
+    {texgreek}{2},{latexgreek}{2},{texgreeks}{2},{latexgreeks}{2}%
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax% upright
@@ -2060,8 +2080,8 @@
 % genutzt, wenn die \OpenSans nicht für den Mathematikmodus verwendet wird.
 %    \begin{macrocode}
     \ifundef{\symupletters}{%
-      \DeclareSymbolFont{upletters}{OML}{cmm}{m}{it}
-      \SetSymbolFont{upletters}{bold}{OML}{cmm}{b}{it}
+      \DeclareSymbolFont{upletters}{OML}{cmm}{m}{it}%
+      \SetSymbolFont{upletters}{bold}{OML}{cmm}{b}{it}%
     }{}%
 %    \end{macrocode}
 % Die Symbole für aufrechte und kursive griechische Glyphen werden definiert.
@@ -3070,35 +3090,23 @@
 % \begin{macro}{\ifdin}
 % \changes{v2.02}{2014/08/29}{Anpassungen für \pkg{fontspec}}^^A
 % \changes{v2.06}{2018/07/10}{für \OpenSans hinfällig}^^A
-% Der Befehl \cs{ifdin} ist ab v2.06 hinfällig.
+% Der Befehl \cs{ifdin} ist für \OpenSans hinfällig.
 %    \begin{macrocode}
-\newrobustcmd*\ifdin{%
-%<*class>
-  \ClassWarning{\TUD@Class@Name}%
-%</class>
-%<*package>
-  \PackageWarning{tudscrfonts}%
-%</package>
-  {%
-    The command `\string\ifdin' is deprecated, the second\MessageBreak%
-    argument is used in any case%
-  }%
-  \@secondoftwo%
-}
+\TUD@deprecated@cs{ifdin}{@secondoftwo}
 %    \end{macrocode}
-% Der Befehl \cs{ifdin} prüft auf die Verwendung von \DIN. Davon abhängig wird
-% entweder das erste oder das zweite Argument ausgeführt. Dies kann für die
+% Für die alten SChriften prüft er auf die Verwendung von \DIN. Davon abhängig 
+% wird entweder das erste oder das zweite Argument ausgeführt. Dies kann für die
 % Befehle aller Gliederungsebenen genutzt werden, um zwischen der Ausgabe im
 % Dokument sowie Inhaltsverzeichnis und/oder Kolumnentitel zu unterscheiden.
 %    \begin{macrocode}
 \if@tud@cdoldfont@active
-  \renewrobustcmd*\ifdin{%
+  \newrobustcmd*\ifdin{%
     \ifx\f@family\tud@cdfont@db%
       \expandafter\@firstoftwo%
     \else%
       \expandafter\@secondoftwo%
     \fi%
-  }
+  }%
 \fi
 %    \end{macrocode}
 % \end{macro}^^A \ifdin
@@ -3116,39 +3124,72 @@
 %    \begin{macrocode}
 \if@tud@cdoldfont@active
   \renewcommand*\tud@sec@fontface[1][]{%
-    \if@tud@cdoldfont@usedin%
-      \tud@db\tud@raggedright%
-    \else%
+    \if@tud@cdoldfont@nodin%
       \sectfont#1%
+    \else%
+      \tud@db\tud@raggedright%
     \fi%
-  }
+  }%
 \fi
 %    \end{macrocode}
 % \end{macro}^^A \tud@sec@fontface
 % \begin{macro}{\tud@makeuppercase}
-% Der Befehl führt \cs{MakeTextUppercase}\marg{Text} nur dann aus, wenn die 
-% richtige Schriftfamilie~-- sprich \DIN~-- verwendet wird.
-% \ToDo{\cs{tud@makeuppercase} raus? zumindest umbenennen}[v2.06]
-% \ToDo{sämtliche Hinweise zu \pkg{textcase} raus}[v2.06]
+% \begin{macro}{\tud@sec@strut}
+% \changes{v2.06}{2018/07/24}{neu}^^A
+% Für Abschnitte etc. liegt auf einer neuen Seite dier erste Grundlinie höher,
+% als für Großbuchstaben in der größeren Schrift für \cs{section} etc. benötigt 
+% wird. Deshalb wird die Grundlinie \enquote{notfallmäßig} so weit nach unten
+% verschoben, wie für den höchsten Buchstabe benötigt wird. Mit dem Befehl 
+% \cs{tud@sec@strut} wird für alle Überschriften dafür gesorgt, dass immer der 
+% gleiche Freiraum bereitgehalten wird, unabhängig vom Inhalt der spezifischen 
+% Überschrift. Hierfür wird \cs{strutbox} aus dem \LaTeXe"~Kernel~-- nachdem 
+% \cs{strut} zuvor bereits einmal ausgeführt wird, um die Standardgröße der Box 
+% zu verwenden~-- temporär umdefiniert.
 %    \begin{macrocode}
-\newcommand*\tud@makeuppercase[1]{%
-  \protect\vphantom{\"A\"O\"U}#1%
+\newrobustcmd*\tud@sec@strut{%
+  \begingroup%
+    \strut\setbox\strutbox\hbox{\vphantom{\"A\"O\"U}}\strut%
+  \endgroup%
 }
 %    \end{macrocode}
-% Der Befehl führt \cs{MakeTextUppercase}\marg{Text} nur dann aus, wenn die 
-% richtige Schriftfamilie~-- sprich \DIN~-- verwendet wird.
-% Für Überschriften in Majuskeln\footnote{Großbuchstaben} wird der Befehl
-% \cs{MakeTextUppercase}, was den internen \LaTeX-Befehl \cs{MakeUppercase}
-% verbessert, aus dem Paket \pkg{textcase} genutzt.
+% Der Befehl führt \cs{tud@makeuppercase} wird für alle Überschriften zur 
+% Formatierung genutzt. Für die \OpenSans führt er lediglich \cs{tud@sec@strut}
+% aus.
+% \ToDo{\cs{tud@makeuppercase} umbenennen}[v2.06]
+%    \begin{macrocode}
+\newcommand*\tud@makeuppercase[2][]{\tud@sec@strut#2}
+%    \end{macrocode}
+% Für die alten Schriften hat der Befehl nur eine Funktionalität, wenn die
+% Schriftfamilie \DIN aktiv ist. Dies ist insbesondere bei Überschriften der 
+% Fall, welche zwingend in Majuskeln\footnote{Großbuchstaben} zu setzen sind. 
+% Dafür wird der Befehl \cs{MakeTextUppercase} aus dem Paket \pkg{textcase} 
+% genutzt, welcher den internen \LaTeX-Befehl \cs{MakeUppercase} verbessert.
+% Das optionale Argument kann genutzt werden, wenn nicht die aktuelle, sondern
+% ein durch \KOMAScript{} definiertes Schriftelement ausgewertet werden soll, 
+% um zu erkennen, ob \DIN zum Einsatz kommt.
 %    \begin{macrocode}
 \if@tud@cdoldfont@active
   \RequirePackage{textcase}[2004/10/07]
-  \renewcommand*\tud@makeuppercase[1]{%
-    \protect\vphantom{\"A\"O\"U}%
-    \ifdin{\begingroup\MakeTextUppercase{#1}\endgroup}{#1}%
-  }
+  \renewcommand*\tud@makeuppercase[2][]{%
+    \@tud@res@swafalse%
+    \IfArgIsEmpty{#1}{%
+      \ifdin{\@tud@res@swatrue}{}%
+    }{%
+      \begingroup%
+        \usekomafont{#1}%
+        \ifdin{\aftergroup\@tud@res@swatrue}{}%
+      \endgroup%
+    }%
+    \tud@sec@strut%
+    \if@tud@res@swa%
+      \begingroup\MakeTextUppercase{#2}\endgroup%
+    \else%
+      #2%
+    \fi%
+  }%
 \fi
 %    \end{macrocode}
+% \end{macro}^^A \tud@sec@strut
 % \end{macro}^^A \tud@makeuppercase
 %
 % \iffalse
@@ -3280,7 +3321,7 @@
       }%
 %</poster>
     \fi%
-  }
+  }%
 \fi
 %    \end{macrocode}
 % \end{macro}^^A \tud@head@font@@bold
