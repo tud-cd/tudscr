@@ -1,4 +1,4 @@
-% \CheckSum{4360}
+% \CheckSum{4345}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-manual.dtx}[%
-  2018/07/23 v2.06 TUD-Script\space%
+  2018/07/24 v2.06 TUD-Script\space%
 %</driver>
 %<package&identify>\ProvidesPackage{tudscrtutorial}[%
 %<*driver|package&identify>
@@ -1694,7 +1694,8 @@
 % \ToDo{%
 %   Eigentlich sollte der Wert hier formatiert werden. Wünschenswert wäre die 
 %   Angabe von \val{Option=Wert} und \val{Option=<Spezialwert>}, damit das 
-%   Gezerre mit der Spezialbehandlung von \cs{PSet} etc. wegfallen könnte.
+%   Gezerre mit der Spezialbehandlung von \cs{PSet} etc. wegfallen könnte,
+%   siehe \cs{tud@declare@start}
 % }[v2.??]%
 %    \begin{macrocode}
 \NewDocumentCommand\Option@Value{mmd==d==d()d''d||}{%
@@ -1772,7 +1773,7 @@
     \Process@ChangedAt{\Macro{#2}}[Befehl](#4)%
   \else%
 %</class>
-    \Markup@SetFormat{\ttfamily\bsc}%
+    \Markup@SetFormat[\bsc]{\ttfamily}%
     \Process@Markup{\Macro{#2}}[#3](#4)'#5'%
     \Process@Index{#1}{\Macro{#2}}(#4)|#6|%
 %<*class>
@@ -1794,7 +1795,7 @@
     \Process@ChangedAt{\Length{#2}}[L\"ange](#3)%
   \else%
 %</class>
-    \Markup@SetFormat{\ttfamily\bsc}[L\"ange]%
+    \Markup@SetFormat[\bsc]{\ttfamily}[L\"ange]%
     \Process@Markup{\Length{#2}}(#3)'#4'%
     \Process@Index{#1}{\Length{#2}}[L\"ange](#3)|#5|%
 %<*class>
@@ -1846,7 +1847,8 @@
 % \ToDo{%
 %   Eigentlich sollte der Wert hier formatiert werden. Wünschenswert wäre die 
 %   Angabe von \val{Parameter=Wert} und \val{Parameter=<Spezialwert>}, damit
-%   das Gezerre mit der Spezialbehandlung von \cs{PSet} etc. wegfallen könnte.
+%   das Gezerre mit der Spezialbehandlung von \cs{PSet} etc. wegfallen könnte,
+%   siehe \cs{tud@declare@start}
 % }[v2.??]%
 %    \begin{macrocode}
 \NewExpandableDocumentCommand\@Key{smm}{#2!#3}
@@ -1877,7 +1879,7 @@
   \if@tud@changedat%
     \Process@ChangedAt{\Term{#2}}[Bezeichner](#3)%
   \else%
-    \Markup@SetFormat{\ttfamily\bsc}[Bezeichner]%
+    \Markup@SetFormat[\bsc]{\ttfamily}[Bezeichner]%
     \Process@Markup{\Term{#2}}(#3)'#4'%
     \Process@Index{#1}{\Term{#2}}(#3)|#5|%
   \fi%
@@ -2965,19 +2967,16 @@
 %    \begin{macrocode}
 \newcommand*\Markup@Format{}
 \newcommand*\Markup@Suffix{}
-\NewDocumentCommand\Markup@SetFormat{mod()}{%
+\NewDocumentCommand\Markup@SetFormat{omod()}{%
 %    \end{macrocode}
 % Außerdem ist noch eine weitere Besonderheit zu beachten. Sollte gerade eine
 % Überschrift gesetzt werden, wird lediglich das Hauptargument unformatiert 
 % ausgegeben.
 %    \begin{macrocode}
-  \def\Markup@Format{\ifdisposition{}{#1}}%
-  \if@tud@cdoldfont@active\if@tud@cdoldfont@usedin%
-    \def\Markup@Format{\ifdin{\MakeTextUppercase}{#1}}%
-  \fi\fi%
-  \IfValueT{#2}{\def\Markup@Suffix{\suffix{#2}}}%
+  \def\Markup@Format{\ifdisposition{}{#2}\IfValueT{#1}{#1}}%
+  \IfValueT{#3}{\def\Markup@Suffix{\suffix{#3}}}%
 %<*class>
-  \IfValueT{#3}{\renewcommand*\Markup@Declare[1]{#3\Markup@Suffix}}%
+  \IfValueT{#4}{\renewcommand*\Markup@Declare[1]{#4\Markup@Suffix}}%
 %</class>
 }
 %    \end{macrocode}
@@ -5174,7 +5173,7 @@
 % gibt den vorgestellten Quelltext vollständig aus.
 %    \begin{macrocode}
 \newcommand\FinishTutorial[1][]{%
-  \immediate\write\tud@write@b{^^J\string\end{document}^^J}
+  \immediate\write\tud@write@b{^^J\string\end{document}^^J}%
   \immediate\closeout\tud@write@b%
   \immediate\closeout\tud@write@a%
   \immediate\openout\tud@write@a\jobname-example.tex\relax%
@@ -5734,17 +5733,17 @@
 %    \begin{macrocode}
     \def\@tempa not##1##2##3##4\@nil{%
       \ifstr{##1##2##3}{not}{%
-        \if\relax##4\relax\else%
+        \IfArgIsEmpty{##4}{}{%
           \listeadd\tud@todo@type@neg{##4}%
           \@tud@todotrue%
           \FamilyKeyStateProcessed%
-        \fi%
+        }%
       }{%
-        \if\relax##1\relax\else%
+        \IfArgIsEmpty{##1}{}{%
           \listeadd\tud@todo@type@pos{##1##2##3##4}%
           \@tud@todotrue%
           \FamilyKeyStateProcessed%
-        \fi%
+        }%
       }%
     }%
     \edef\@tempb{not\trim@spaces{#1}}%
@@ -6118,7 +6117,7 @@
 %    \begin{macrocode}
 \newcommand*\Attention[2][\z@]{%
   \marginnote{%
-    \setlength\fboxsep{0.25em}
+    \setlength\fboxsep{0.25em}%
     \fbox{Achtung!}%
   }[#1]%
   \emph{\trim@spaces{#2}}%
