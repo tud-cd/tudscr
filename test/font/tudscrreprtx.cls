@@ -216,7 +216,7 @@
   \else%
     \ifdimen{#1}{%
       \ifdim#1>\z@\relax%
-        \TUD@KOMAoptions{fontsize=#1}%
+        \TUDoptions{fontsize=#1}%
         \tud@cdfont@activate%
         \FamilyKeyStateProcessed%
       \fi%
@@ -252,7 +252,9 @@
     \ifcase\@tempa\relax% false
       \@tud@cdoldfont@activefalse%
       \@tud@cdoldfont@nodintrue%
-%      \tud@cdfont@deactivate%
+      \if@tud@cdoldfont@active%
+        \tud@cdfont@deactivate%
+      \fi%
     \or% true/din
       \@tud@cdoldfont@activetrue%
       \@tud@cdoldfont@nodinfalse%
@@ -274,8 +276,16 @@
 \AtEndOfClass%
 {%
   \if@tud@cdoldfont@active%
+    \let\@tud@cdoldfont@activefalse\@tud@cdoldfont@activetrue%
     \TUD@key[.comp]{cdfont}{%
-      \TUDoptions{cdoldfont=#1}%
+      \TUD@set@numkey{cdfont}{@tempa}{%
+        {din}{1},{dinbold}{1},%
+        {nodin}{2},{nodinbold}{2},%
+        {onlydin}{3},{onlydinbold}{3}%
+      }{#1}%
+      \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+        \TUDoptions{cdoldfont=#1}%
+      \fi%
     }%
   \else%
     \TUD@key{cdoldfont}[]{%
@@ -289,18 +299,20 @@
     }%
   \fi%
 }
-\newif\if@tud@fontsize@set
+\newif\if@tud@x@scr@fontsize@set
 \TUD@key{fontsize}{%
-  \@tud@fontsize@settrue%
-  \TUD@KOMAoptions{fontsize=#1}%
-  \FamilyKeyStateProcessed%
+  \ifdimen{#1}{%
+    \@tud@x@scr@fontsize@settrue%
+    \TUD@KOMAoptions{fontsize=#1}%
+    \FamilyKeyStateProcessed%
+  }{}%
 }
 \AtEndOfClass%
 {%
   \RelaxFamilyKey{TUD}{fontsize}%
   \DefineFamilyMember{KOMA}%
   \DefineFamilyKey{KOMA}{fontsize}{%
-    \@tud@fontsize@settrue%
+    \@tud@x@scr@fontsize@settrue%
     \ClassWarning{\TUD@Class@Name}%
     {%
       The key `fontsize=#1' should only be used\MessageBreak%
@@ -1028,8 +1040,8 @@
         \def\tud@res@b##1@##2\@nil{%
           \IfArgIsEmpty{##2}{%
             \appto\tud@res@a{%
-          You should use `\@backslashchar#2' instead%
-        }%
+              You should use `\@backslashchar#2' instead%
+            }%
           }{%
             \appto\tud@res@a{%
               You should not use this command. It is substituted\MessageBreak%
@@ -1045,7 +1057,7 @@
             {\tud@res@a}%
             \noexpand\csletcs{#1}{#2}%
             \noexpand\csuse{#2}%
-      }%
+          }%
         }%
       \tud@res@c%
     }{}%
@@ -1340,52 +1352,6 @@
   \fi%
 }
 %%% From File: tudscr-misc.dtx
-\newif\if@tud@x@scr@paper@set
-\TUD@key{paper}{%
-  \tud@lowerstring{\@tempa}{#1}%
-  \def\@tempb##1##2\@nil{%
-    \@tempswafalse%
-    \if ##1a\@tempswatrue%
-      \else\if ##1b\@tempswatrue%
-        \else\if ##1c\@tempswatrue%
-          \else\if ##1d\@tempswatrue%
-    \fi\fi\fi\fi%
-    \if@tempswa%
-      \ifnumber{##2}{}{\@tempswafalse}%
-    \fi%
-  }%
-  \expandafter\@tempb\@tempa\@nil%
-  \if@tempswa\else%
-    \def\@tempb##1:##2:##3\@nil{%
-      \edef\@tempc{##1}%
-      \ifx\@tempc\@empty\@tempswafalse\else%
-        \edef\@tempc{##2}%
-        \ifx\@tempc\@empty\@tempswafalse\else\@tempswatrue\fi%
-      \fi%
-    }%
-    \expandafter\@tempb\@tempa::\@nil%
-  \fi%
-  \@tud@x@scr@paper@setfalse%
-  \if@tempswa%
-    \ifstr{\@tempa}{a4}{}{\@tud@x@scr@paper@settrue}%
-    \FamilyKeyStateProcessed%
-  \else%
-    \FamilyKeyStateUnknownValue%
-  \fi%
-}
-\AtEndOfClass{%
-  \RelaxFamilyKey{TUD}{paper}%
-  \ifboolexpr{bool {@tud@x@scr@paper@set} or bool {@landscape}}{%
-    \if@tud@fontsize@set\else%
-      \ClassWarningNoLine{\TUD@Class@Name}{%
-        You've set a paper size, which is different from\MessageBreak%
-        default (paper=a4, paper=portrait). Therefore you\MessageBreak%
-        should additionally specify an explicit font size.\MessageBreak%
-        See the manual for further information%
-      }%
-    \fi%
-  }{}%
-}
 \newif\if@tud@bookmarks
 \TUD@key{tudbookmarks}[true]{%
   \TUD@set@ifkey{tudbookmarks}{@tud@bookmarks}{#1}%
@@ -1410,31 +1376,17 @@
 % TODO Dateien misc mit comp tauschen
 %%% From File: tudscr-misc.dtx
 \newcommand*\TUD@SpecialOptionAtDocument[1]{}
-\newcommand*\tud@x@scr@paper{%
-  \expandafter\tud@x@scr@@paper\CurrentOption paper\tud@x@scr@@paper%
-}
-\newcommand*\tud@x@scr@@paper{}
-\def\tud@x@scr@@paper #1#2paper#3\tud@x@scr@@paper{%
-  \@tempswafalse%
-  \ifstr{#3}{paper}{\ifnumber{#2}{%
-    \ifstr{#1}{a}{\@tempswatrue}{%
-    \ifstr{#1}{b}{\@tempswatrue}{%
-    \ifstr{#1}{c}{\@tempswatrue}{%
-    \ifstr{#1}{d}{\@tempswatrue}{%
-    }}}}%
-  }{}}{}%
-  \if@tempswa\TUDExecuteOptions{#3=#1#2}\fi%
+\newcommand*\tud@x@scr@checkoptions{%
+  \expandafter\tud@x@scr@pt\CurrentOption pt\@nil%
   \PassOptionsToClass{\CurrentOption}{\TUD@Class@KOMA}%
 }
-% TODO Ordnung in das Chaos bringen!
-% - tudscrver=2.05 & cdoldfont=false vs cdfont=false
+\newcommand*\tud@x@scr@pt{}
+\def\tud@x@scr@pt #1pt#2\@nil{%
+  \ifstr{#2}{pt}{\ifnumber{#1}{\@tud@x@scr@fontsize@settrue}{}}{}%
+}
 % TODO Mitglied nur für 4 Hauptklassen und tudscrfonts
 \FamilyProcessOptions[.comp]{TUD}\relax
 % TODO preset notwendig oder einfach mit \TUDExecuteOptions?!
-\TUDExecuteOptions{%
-  cd=true,tudbookmarks=true%
-}
-\DeclareOption*{\tud@x@scr@paper}
 \tud@if@v@lower{2.05}{%
   \TUD@key@preset{relspacing}{false}%
 }{%
@@ -1447,6 +1399,10 @@
   \TUD@key@preset{cdfont}{true}%
   \TUD@key@preset{slantedgreek}{true}%
 }%
+\TUDExecuteOptions{%
+  cd=true,tudbookmarks=true%
+}
+\DeclareOption*{\tud@x@scr@checkoptions}
 \TUDProcessOptions\relax
 \LoadClass{\TUD@Class@KOMA}[2018/03/30]
 %%% From File: tudscr-base.dtx
@@ -6982,6 +6938,23 @@
 \TUD@deprecated@cs{dinbn}{cdfontxn}%
 \TUD@deprecated@cs{textdbn}{textcdxn}%
 %%% From File: tudscr-misc.dtx
+\AtBeginDocument{%
+  \if@tud@x@scr@fontsize@set\else%
+    \@tud@res@swafalse%
+    \ifdim\tud@len@layoutheight<295mm\relax\@tud@res@swatrue\fi%
+    \ifdim\tud@len@layoutheight>299mm\relax\@tud@res@swatrue\fi%
+    \ifdim\tud@len@layoutwidth<208mm\relax\@tud@res@swatrue\fi%
+    \ifdim\tud@len@layoutwidth>212mm\relax\@tud@res@swatrue\fi%
+    \if@tud@res@swa%
+      \ClassWarningNoLine{\TUD@Class@Name}{%
+        You've set a layout size, which is different from\MessageBreak%
+        default (paper=a4, paper=portrait). Therefore you\MessageBreak%
+        should additionally specify an explicit font size.\MessageBreak%
+        See the manual for further information%
+      }%
+    \fi%
+  \fi%
+}
 \newcommand*\tud@atdocument@hook{}
 \let\tud@atdocument@hook\relax
 \AfterEndPreamble{%

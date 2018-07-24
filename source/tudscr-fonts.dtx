@@ -1,4 +1,4 @@
-% \CheckSum{2259}
+% \CheckSum{2278}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -707,7 +707,7 @@
   \else%
     \ifdimen{#1}{%
       \ifdim#1>\z@\relax%
-        \TUD@KOMAoptions{fontsize=#1}%
+        \TUDoptions{fontsize=#1}%
         \tud@cdfont@activate%
         \FamilyKeyStateProcessed%
       \fi%
@@ -770,7 +770,18 @@
     \ifcase\@tempa\relax% false
       \@tud@cdoldfont@activefalse%
       \@tud@cdoldfont@nodintrue%
-      \tud@cdfont@deactivate%
+%    \end{macrocode}
+% Achtung, nicht verwirren lassen! Mit \opt{cdoldfonts=false} kann beim Laden
+% der Klasse die Verwendung der alten Schriften deaktiviert werden. Dabei wird 
+% nicht beeinflusst, ob die Schriften des \CDs (\opt{cdfont=true/false}) denn 
+% überhaupt zum Einsatz kommen. Nachdem die Klasse geladen wurde, wird jedoch 
+% \opt{cdoldfonts} eingefroren, ist diese aktiv, kann sie ab diesem Zeitpunkt 
+% nicht mehr deaktiviert werden. Dann kann mit \opt{cdoldfonts=false} quasi das 
+% gleiche Verhalten wie mit \opt{cdfont=false} erzeugt werden.
+%    \begin{macrocode}
+      \if@tud@cdoldfont@active%
+        \tud@cdfont@deactivate%
+      \fi%
     \or% true/din
       \@tud@cdoldfont@activetrue%
       \@tud@cdoldfont@nodinfalse%
@@ -789,13 +800,6 @@
     \TUDoptions{cdfont=#1}%
   \fi%
 }
-%    \end{macrocode}
-% Wenn die Option \opt{cdoldfont} beim Laden der Klasse genutzt wurde, kann sie
-% auch im Dokument genutzt werden. Um möglichst einfach alte Dokumente mit den 
-% alten Schriften setzen zu können, wird in diesem Fall die Option \opt{cdfont}
-% um die alten Werte erweitert. Andernfalls wird \opt{cdoldfont} schlichtweg
-% deaktiviert.
-%    \begin{macrocode}
 %<*class>
 \AtEndOfClass%
 %</class>
@@ -804,9 +808,29 @@
 %</package>
 {%
   \if@tud@cdoldfont@active%
+%    \end{macrocode}
+% Der aktive Zustand der Option \opt{cdoldfont} wird \enquote{eingefroren}.
+%    \begin{macrocode}
+    \let\@tud@cdoldfont@activefalse\@tud@cdoldfont@activetrue%
+%    \end{macrocode}
+% Wenn die Option \opt{cdoldfont} beim Laden der Klasse aktiviert wurde, kann 
+% sie auch im Dokument genutzt werden. Um möglichst einfach alte Dokumente mit
+% den alten Schriften setzen zu können, wird die Option \opt{cdfont} in diesem 
+% Fall um die alten Werte erweitert.
+%    \begin{macrocode}
     \TUD@key[.comp]{cdfont}{%
-      \TUDoptions{cdoldfont=#1}%
+      \TUD@set@numkey{cdfont}{@tempa}{%
+        {din}{1},{dinbold}{1},%
+        {nodin}{2},{nodinbold}{2},%
+        {onlydin}{3},{onlydinbold}{3}%
+      }{#1}%
+      \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+        \TUDoptions{cdoldfont=#1}%
+      \fi%
     }%
+%    \end{macrocode}
+% Andernfalls wird \opt{cdoldfont} schlichtweg deaktiviert.
+%    \begin{macrocode}
   \else%
     \TUD@key{cdoldfont}[]{%
 %<*class>
@@ -835,18 +859,20 @@
 % \end{option}^^A cdoldfont
 % \begin{option}{fontsize}
 % \changes{v2.04}{2015/04/24}{Option aus \KOMAScript{} erweitert}^^A
-% \begin{macro}{\if@tud@fontsize@set}
+% \begin{macro}{\if@tud@x@scr@fontsize@set}
 % \changes{v2.05}{2015/07/24}{neu}^^A
 % Die genutzte Grundschriftgröße kann mit der \KOMAScript-Option \opt{fontsize} 
 % eingestellt werden. Um ein aktives Setzen der Schriftgröße zu erkennen, wird 
 % für das Laden der \TUDScript-Klasse ein Schlüssel definiert, der den Wert an
 % \KOMAScript{} weiterreicht.
 %    \begin{macrocode}
-\newif\if@tud@fontsize@set
+\newif\if@tud@x@scr@fontsize@set
 \TUD@key{fontsize}{%
-  \@tud@fontsize@settrue%
-  \TUD@KOMAoptions{fontsize=#1}%
-  \FamilyKeyStateProcessed%
+  \ifdimen{#1}{%
+    \@tud@x@scr@fontsize@settrue%
+    \TUD@KOMAoptions{fontsize=#1}%
+    \FamilyKeyStateProcessed%
+  }{}%
 }
 %<*class>
 \AtEndOfClass%
@@ -858,7 +884,7 @@
   \RelaxFamilyKey{TUD}{fontsize}%
   \DefineFamilyMember{KOMA}%
   \DefineFamilyKey{KOMA}{fontsize}{%
-    \@tud@fontsize@settrue%
+    \@tud@x@scr@fontsize@settrue%
 %<*class>
     \ClassWarning{\TUD@Class@Name}%
 %</class>
@@ -874,7 +900,7 @@
   }%
 }
 %    \end{macrocode}
-% \end{macro}^^A \if@tud@fontsize@set
+% \end{macro}^^A \if@tud@x@scr@fontsize@set
 % \end{option}^^A fontsize
 % \begin{option}{relspacing}
 % \changes{v2.05}{2015/12/17}{neu}^^A
@@ -2086,9 +2112,9 @@
 %    \end{macrocode}
 % Die Symbole für aufrechte und kursive griechische Glyphen werden definiert.
 %    \begin{macrocode}
-  \@tempcnta=\z@\relax%
-  \tud@math@greek@loop@uc\tud@math@greek@declare@uc%
-  \tud@math@greek@loop@lc\tud@math@greek@declare@lc%
+    \@tempcnta=\z@\relax%
+    \tud@math@greek@loop@uc\tud@math@greek@declare@uc%
+    \tud@math@greek@loop@lc\tud@math@greek@declare@lc%
 %    \end{macrocode}
 % Für die griechischen Buchstaben wird mit \cs{tud@math@greek@check@slanted}
 % geprüft, ob durch ein Paket diese auf die kursive Variante gesetzt wurden.
