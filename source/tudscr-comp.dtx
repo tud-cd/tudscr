@@ -1,4 +1,4 @@
-% \CheckSum{1432}
+% \CheckSum{1461}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-comp.dtx}[%
-  2018/07/20 v2.06 TUD-Script\space%
+  2018/07/24 v2.06 TUD-Script\space%
 %</driver>
 %<package&identify&comp&base>\ProvidesPackage{tudscrcomp}[%
 %<package&identify&comp&book>\ProvidesPackage{tudscrcomp-book}[%
@@ -110,6 +110,7 @@
 %
 % \iffalse
 %<*class|(package&fonts)>
+%<*option>
 % \fi
 %
 % \begin{macro}{\TUD@deprecated@key}
@@ -123,7 +124,6 @@
 % lediglich die empfohlene Option ausgegeben. Das Ausführen dieser wird später
 % definert.
 %    \begin{macrocode}
-%<*option>
 \newcommand*\TUD@deprecated@key[2]{%
 %<*class>
   \ClassWarning{\TUD@Class@Name}%
@@ -138,29 +138,45 @@
   }%
   \TUDoptions{#2}%
 }
-%</option>
 %    \end{macrocode}
 % Bei alten Befehlen wird nach der Warnung die Definition des neuen Befehls auf 
 % den alten überschrieben.
 %    \begin{macrocode}
-%<*body>
 \newcommand*\TUD@deprecated@cs[2]{%
   \AfterEndPreamble{%
     \ifcsundef{#1}{%
-      \expandafter\newrobustcmd\csname #1\endcsname{%
+      \begingroup%
+        \def\tud@res@a{%
+          The command `\@backslashchar#1' is deprecated.\MessageBreak%
+        }%
+        \def\tud@res@b##1@##2\@nil{%
+          \IfArgIsEmpty{##2}{%
+            \appto\tud@res@a{%
+              You should use `\@backslashchar#2' instead%
+            }%
+          }{%
+            \appto\tud@res@a{%
+              You should not use this command. It is substituted\MessageBreak%
+              with `\@backslashchar#2' internally%
+            }%
+          }%
+        }%
+        \tud@res@b#2@\@nil%
+        \edef\tud@res@c{%
+          \endgroup%
+          \noexpand\newrobustcmd\csname #1\endcsname{%
 %<*class>
-        \ClassWarning{\TUD@Class@Name}%
+            \noexpand\ClassWarning{\noexpand\TUD@Class@Name}%
 %</class>
 %<*package&fonts>
-        \PackageWarning{tudscrfonts}%
+            \noexpand\PackageWarning{tudscrfonts}%
 %</package&fonts>
-        {%
-          The command `\@backslashchar#1' is deprecated.\MessageBreak%
-          You should use `\@backslashchar#2' instead%
+            {\tud@res@a}%
+            \noexpand\csletcs{#1}{#2}%
+            \noexpand\csuse{#2}%
+          }%
         }%
-        \csletcs{#1}{#2}%
-        \csuse{#2}%
-      }%
+      \tud@res@c%
     }{}%
   }%
 }
@@ -178,15 +194,10 @@
   \fi%
 }
 %</class>
-%</body>
 %    \end{macrocode}
 % \end{macro}^^A \TUD@deprecated@lengthcs
 % \end{macro}^^A \TUD@deprecated@cs
 % \end{macro}^^A \TUD@deprecated@key
-%
-% \iffalse
-%<*option>
-% \fi
 %
 % \begin{option}{tudscrver}
 % \changes{v2.02}{2014/08/22}{neu}^^A
@@ -251,10 +262,10 @@
     {Option `tudscrver' too late}{%
       Option `tudscrver' can only be set while loading the\MessageBreak%
 %<*class>
-      class `\TUD@Class@Name'
+      class `\TUD@Class@Name'\space%
 %</class>
 %<*package&fonts>
-      package `tudscrfonts'
+      package `tudscrfonts'\space%
 %</package&fonts>
       but you have tried to set it up later.%
     }%
@@ -731,10 +742,10 @@
       {Option `fontspec' too late}{%
       Option `fontspec' can only be set while loading the\MessageBreak%
 %<*class>
-      class `\TUD@Class@Name'
+      class `\TUD@Class@Name'\space%
 %</class>
 %<*package&fonts>
-      package `tudscrfonts'
+      package `tudscrfonts'\space%
 %</package&fonts>
       but you have tried to set it up later.%
     }%
@@ -1211,6 +1222,7 @@
 % \begin{macro}{\tud@addchap}
 % \begin{macro}{\tud@saddchap}
 % Hier erfolgt die notwendige Anpassungen der internen Gliederungsbefehle.
+% \ToDo{überprüfen/anpassen}[v2.06]
 %    \begin{macrocode}
 \AtEndPreamble{%
   \if@chapter%
@@ -1354,7 +1366,7 @@
 }
 \newcommand*\drittlogofile[1]{%
   \PackageWarning{tudscrcomp}{%
-    Nothing happened, you should use \string\footlogo\MessageBreak
+    Nothing happened, you should use \string\footlogo\MessageBreak%
     instead. Please see the documentation of \string\footlogo\MessageBreak%
     and option `ddc' or `ddcfoot'%
   }%
@@ -1410,7 +1422,7 @@
 \newcommand*\l@topsection{\l@section}
 \DeclareNewSectionCommand[%
   style=section,%
-  font={\usekomafont{section}},
+  font={\usekomafont{section}},%
   beforeskip=\z@,%
 ]{topsection}
 \newcounter{topsubsection}
@@ -1425,7 +1437,7 @@
 \newcommand*\l@topsubsection{\l@subsection}
 \DeclareNewSectionCommand[%
   style=section,%
-  font={\usekomafont{subsection}},
+  font={\usekomafont{subsection}},%
   beforeskip=\z@,%
 ]{topsubsection}
 %    \end{macrocode}
@@ -1689,7 +1701,7 @@
 \newcommand*\grautabelle{\@tud@comp@graytabletrue}
 \newenvironment{farbtabellen}{%
   \if@tud@comp@graytable%
-    \rowcolors{1}{HKS92!20}{HKS92!10}
+    \rowcolors{1}{HKS92!20}{HKS92!10}%
   \else%
     \rowcolors{1}{HKS41!20}{HKS41!10}%
   \fi%
@@ -1715,7 +1727,7 @@
       layout=\the\paperwidth:\the\paperheight,%
       layoutoffset=\the\dimexpr\schnittrand\relax,%
       showcrop%
-    }
+    }%
     \expandafter\geometry\expandafter{\@tempa}%
   }{%
     \PackageErrorNoLine{tudscrcomp}{%
@@ -1723,8 +1735,8 @@
     }{%
       The definition of `\string\schnittrand' does not expand to\MessageBreak%
       a valid dimension expression.%
-    }
-  }
+    }%
+  }%
 }%
 %    \end{macrocode}
 % \end{macro}^^A \schnittrand
