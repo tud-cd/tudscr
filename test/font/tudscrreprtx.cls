@@ -29,7 +29,7 @@
 %% 
 %% TUD-Script -- Corporate Design of Technische Universitaet Dresden
 %% 
-%%   2018/07/13 v2.06 TUD-Script
+%%   2018/07/24 v2.06 TUD-Script
 %% 
 %% Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2018
 %% 
@@ -72,13 +72,13 @@
       \fi%
     }
   \fi
-  \TUD@Version@Check{2018/07/13 v2.06 TUD-Script}
+  \TUD@Version@Check{2018/07/24 v2.06 TUD-Script}
 \endgroup
 \NeedsTeXFormat{LaTeX2e}
 \providecommand*\tudscrmail{hanisch.latex@outlook.com}
 \newcommand*\TUD@ProvidesClass[3]{%
   \ProvidesClass{#1}[%
-  2018/07/13 v2.06 TUD-Script
+  2018/07/24 v2.06 TUD-Script
     ^^J#3 (#2)%
   ]%
   \newcommand*\TUD@Class@KOMA{#2}%
@@ -135,11 +135,11 @@
     {nomath}{7},{nocdmath}{7},%
     {serifmath}{7},{serif}{7},{nosansmath}{7},{nosans}{7},%
     {math}{8},{cdmath}{8},{sansmath}{8},{sans}{8},%
-    {upgreek}{9},{uprightgreek}{9},{uprightGreek}{9},{uprightGreeks}{9},%
-    {slgreek}{10},{slantedgreek}{10},{slantedGreek}{10},{slantedGreeks}{10},%
-    {itgreek}{10},{italicgreek}{10},{italicGreek}{10},{italicGreeks}{10},%
-    {texgreek}{11},{latexgreek}{11},{TeXgreek}{11},{LaTeXgreek}{11},%
-    {standardgreek}{11},%
+    {upgreek}{9},{uprightgreek}{9},{uprightgreeks}{9},%
+    {slgreek}{10},{slantedgreek}{10},{slantedgreeks}{10},%
+    {itgreek}{10},{italicgreek}{10},{italicgreeks}{10},%
+    {texgreek}{11},{latexgreek}{11},{texgreeks}{11},{latexgreeks}{11},%
+    {standardgreek}{11},{standardgreeks}{11},%
     {fontspec}{12},{luatex}{12},{lualatex}{12}{xetex}{12},{xelatex}{12},%
     {nofontspec}{13},{nfss}{13},{pdftex}{13},{pdflatex}{13}%
     ,{nohead}{14},{nocdhead}{14},{noheadfont}{14},{noheadcdfont}{14},%
@@ -173,10 +173,7 @@
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax% false
-      \@tud@cdfont@activefalse%
-      \tud@locked@bool@preset{@tud@cdmath@active}{false}%
-      \tud@locked@num@preset{tud@head@font@num}{0}%
-      \TUD@SpecialOptionAtDocument{tud@font@set}%
+      \tud@cdfont@deactivate%
     \or% true
       \@tud@cdfont@heavyfalse%
       \tud@cdfont@activate%
@@ -225,9 +222,6 @@
       \fi%
     }{}%
   \fi%
-  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \@tud@cdoldfont@activefalse%
-  \fi%
 }
 \newcommand*\tud@cdfont@activate{%
   \@tud@cdfont@activetrue%
@@ -239,43 +233,61 @@
   \fi%
   \TUD@SpecialOptionAtDocument{tud@font@set}%
 }
+\newcommand*\tud@cdfont@deactivate{%
+  \@tud@cdfont@activefalse%
+  \tud@locked@bool@preset{@tud@cdmath@active}{false}%
+  \tud@locked@num@preset{tud@head@font@num}{0}%
+  \TUD@SpecialOptionAtDocument{tud@font@set}%
+}
 \newif\if@tud@cdoldfont@active
-\newif\if@tud@cdoldfont@usedin
+\newif\if@tud@cdoldfont@nodin
 \TUD@key{cdoldfont}[true]{%
   \TUD@set@numkey{cdoldfont}{@tempa}{%
     \TUD@bool@numkey,%
-    {din}{1},{dinbold}{1},{DIN}{1},{DINBold}{1},%
-    {nodin}{2},{nodinbold}{2},{noDIN}{2},{noDINBold}{2}%
+    {din}{1},{dinbold}{1},%
+    {nodin}{2},{nodinbold}{2},%
+    {onlydin}{3},{onlydinbold}{3}%
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax% false
-      \TUDoptions{cdfont=false}%
+      \@tud@cdoldfont@activefalse%
+      \@tud@cdoldfont@nodintrue%
+%      \tud@cdfont@deactivate%
     \or% true/din
-      \@tud@cdoldfont@usedintrue%
+      \@tud@cdoldfont@activetrue%
+      \@tud@cdoldfont@nodinfalse%
       \tud@cdfont@activate%
     \or% nodin
-      \@tud@cdoldfont@usedinfalse%
+      \@tud@cdoldfont@activetrue%
+      \@tud@cdoldfont@nodintrue%
       \tud@cdfont@activate%
+    \or% onlydin
+      \@tud@cdoldfont@activetrue%
+      \@tud@cdoldfont@nodinfalse%
+      \tud@cdfont@deactivate%
     \fi%
   \else%
+    \@tud@cdoldfont@activetrue%
     \TUDoptions{cdfont=#1}%
   \fi%
-  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \@tud@cdoldfont@activetrue%
-  \fi%
 }
-% TODO verwendete Version auf höchstens v2.05 setzen
 \AtEndOfClass%
 {%
-  \TUD@key{cdoldfont}[]{%
-    \ClassError{\TUD@Class@Name}%
-    {Option `cdoldfont' too late}{%
-      Option `cdoldfont=#1' can only be set while loading the\MessageBreak%
-      class `\TUD@Class@Name'
-      but you have tried to set it up later.%
+  \if@tud@cdoldfont@active%
+    \TUD@key[.comp]{cdfont}{%
+      \TUDoptions{cdoldfont=#1}%
     }%
-    \FamilyKeyStateProcessed%
-  }%
+  \else%
+    \TUD@key{cdoldfont}[]{%
+      \ClassError{\TUD@Class@Name}%
+      {Option `cdoldfont' not active}{%
+        Option `cdoldfont' must be activated while loading the\MessageBreak%
+        class `\TUD@Class@Name'\space%
+        but you have tried to set it up later.%
+      }%
+      \FamilyKeyStateProcessed%
+    }%
+  \fi%
 }
 \newif\if@tud@fontsize@set
 \TUD@key{fontsize}{%
@@ -286,7 +298,7 @@
 \AtEndOfClass%
 {%
   \RelaxFamilyKey{TUD}{fontsize}%
-  \DefineFamilyMember{KOMA}
+  \DefineFamilyMember{KOMA}%
   \DefineFamilyKey{KOMA}{fontsize}{%
     \@tud@fontsize@settrue%
     \ClassWarning{\TUD@Class@Name}%
@@ -339,11 +351,11 @@
     \TUD@bool@numkey,%
     {serifmath}{0},{serif}{0},{nosansmath}{0},{nosans}{0},%
     {sansmath}{1},{sans}{1},%
-    {upgreek}{2},{uprightgreek}{2},{uprightGreek}{2},{uprightGreeks}{2},%
-    {slgreek}{3},{slantedgreek}{3},{slantedGreek}{3},{slantedGreeks}{3},%
-    {itgreek}{3},{italicgreek}{3},{italicGreek}{3},{italicGreeks}{3},%
-    {texgreek}{4},{latexgreek}{4},{TeXgreek}{4},{LaTeXgreek}{4},%
-    {standardgreek}{4}%
+    {upgreek}{2},{uprightgreek}{2},{uprightgreeks}{2},%
+    {slgreek}{3},{slantedgreek}{3},{slantedgreeks}{3},%
+    {itgreek}{3},{italicgreek}{3},{italicgreeks}{3},%
+    {texgreek}{4},{latexgreek}{4},{texgreeks}{4},{latexgreeks}{4},%
+    {standardgreek}{4},{standardgreeks}{4}%
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax% false
@@ -367,8 +379,8 @@
     \TUD@bool@numkey,%
     {up}{0},{upright}{0},%
     {sl}{1},{slanted}{1},{it}{1},{italic}{1},%
-    {standard}{2},{tex}{2},{latex}{2},{TeX}{2},{LaTeX}{2},{standardgreek}{2},%
-    {texgreek}{2},{latexgreek}{2},{TeXgreek}{2},{LaTeXgreek}{2}%
+    {standard}{2},{tex}{2},{latex}{2},{standardgreek}{2},{standardgreeks}{2},%
+    {texgreek}{2},{latexgreek}{2},{texgreeks}{2},{latexgreeks}{2}%
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax% upright
@@ -471,8 +483,8 @@
   \WarningFilter[typearea]{typearea}{Bad type area settings!}%
   \WarningFilter[typearea]{typearea}{Maybe no optimal type area settings!}%
   \WarningFilter[typearea]{typearea}{Very low DIV value!}%
-  \renewcommand*\tud@x@ta@silent{\ActivateWarningFilters[typearea]}
-  \renewcommand*\tud@x@ta@verbose{\DeactivateWarningFilters[typearea]}
+  \renewcommand*\tud@x@ta@silent{\ActivateWarningFilters[typearea]}%
+  \renewcommand*\tud@x@ta@verbose{\DeactivateWarningFilters[typearea]}%
   \BeforePackage{typearea}{\tud@x@ta@silent}%
   \AfterPackage{typearea}{\tud@x@ta@verbose}%
 }
@@ -648,9 +660,9 @@
   \TUD@bool@numkey,%
   {color}{2},{colour}{2},{cdcolor}{2},{cdcolour}{2},%
   {colorblack}{3},{colourblack}{3},{cdcolorblack}{3},{cdcolourblack}{3},%
-  {gray}{4},{grey}{4},{HKS92}{4},{cdgray}{4},{cdgrey}{4},%
+  {gray}{4},{grey}{4},{hks92}{4},{cdgray}{4},{cdgrey}{4},%
   {black}{5},{cdblack}{5},%
-  {blue}{6},{HKS41}{6},{cdblue}{6},{cddarkblue}{6},%
+  {blue}{6},{hks41}{6},{cdblue}{6},{cddarkblue}{6},%
   {white}{7},{cdwhite}{7}%
 }
 \newif\if@tud@headlogo@option@set
@@ -784,6 +796,13 @@
 \TUD@key{chapterpage}[true]{%
   \TUD@set@ifkey{chapterpage}{@tud@chapterpage}{#1}%
 }
+\newif\if@tud@clearcolor
+\TUD@key{clearcolor}[true]{%
+  \TUD@set@ifkey{clearcolor}{@tud@clearcolor}{#1}%
+}
+\TUD@key{clearcolour}[true]{%
+  \TUD@set@ifkey{clearcolour}{@tud@clearcolor}{#1}%
+}
 \newcommand*\tud@cleardoublepage{\cleardoubleoddpage}
 \TUD@key{cleardoublespecialpage}[true]{%
   \TUD@set@ifkey{cleardoublespecialpage}{@tempswa}{#1}%
@@ -813,40 +832,6 @@
       \FamilyKeyStateProcessed%
     }}}%
   \fi%
-}
-\newcommand*\tud@cleardoublespecialpage[2][]{%
-  \begingroup%
-    #2%
-    \ifboolexpr{bool {@twoside} and bool {@openright}}{%
-      \if@tud@clearcolor%
-        \def\@tempa{%
-          #1%
-          \tud@cleardoublepage%
-          \endgroup%
-        }%
-      \else%
-        \def\@tempa{%
-          \endgroup%
-          #1%
-          \tud@cleardoublepage%
-        }%
-      \fi%
-    }{%
-      \if@tud@clearcolor\tud@clearcolor@wrn\fi%
-      \def\@tempa{%
-        \endgroup%
-        #1%
-      }%
-    }%
-  \@tempa%
-  \@afterindentfalse\@afterheading%
-}
-\newif\if@tud@clearcolor
-\TUD@key{clearcolor}[true]{%
-  \TUD@set@ifkey{clearcolor}{@tud@clearcolor}{#1}%
-}
-\TUD@key{clearcolour}[true]{%
-  \TUD@set@ifkey{clearcolour}{@tud@clearcolor}{#1}%
 }
 \newcommand*\tud@pagecolor{}%
 \DefineFamilyMember{KOMA}
@@ -1033,8 +1018,53 @@
   }%
   \TUDoptions{#2}%
 }
+\newcommand*\TUD@deprecated@cs[2]{%
+  \AfterEndPreamble{%
+    \ifcsundef{#1}{%
+      \begingroup%
+        \def\tud@res@a{%
+          The command `\@backslashchar#1' is deprecated.\MessageBreak%
+        }%
+        \def\tud@res@b##1@##2\@nil{%
+          \IfArgIsEmpty{##2}{%
+            \appto\tud@res@a{%
+          You should use `\@backslashchar#2' instead%
+        }%
+          }{%
+            \appto\tud@res@a{%
+              You should not use this command. It is substituted\MessageBreak%
+              with `\@backslashchar#2' internally%
+            }%
+          }%
+        }%
+        \tud@res@b#2@\@nil%
+        \edef\tud@res@c{%
+          \endgroup%
+          \noexpand\newrobustcmd\csname #1\endcsname{%
+            \noexpand\ClassWarning{\noexpand\TUD@Class@Name}%
+            {\tud@res@a}%
+            \noexpand\csletcs{#1}{#2}%
+            \noexpand\csuse{#2}%
+      }%
+        }%
+      \tud@res@c%
+    }{}%
+  }%
+}
+\newcommand*\TUD@deprecated@lengthcs[2][]{%
+  \ifdim\csuse{#2}<\maxdimen\relax%
+    \ClassWarning{\TUD@Class@Name}{%
+      Using the length `\@backslashchar#2' is deprecated.\MessageBreak%
+      You should use option `#2' instead%
+    }%
+    \csxdef{tud@dim@#2}{\the\csuse{#2}}%
+    \expandafter\setlength\csname #2\endcsname{\maxdimen}%
+    \global\csuse{#2}=\csuse{#2}%
+    #1%
+  \fi%
+}
 \newcommand*\tud@v@comp{\tud@v@last}
-\TUD@key{tudscrver}[last]{%
+\TUD@key[.comp]{tudscrver}[last]{%
   \tud@v@get\@tempa{#1}%
   \ifcsundef{tud@v@\@tempa}{%
     \ClassWarningNoLine{\TUD@Class@Name}%
@@ -1053,13 +1083,15 @@
   }%
   \FamilyKeyStateProcessed%
 }
+\TUD@key{tudscrver}{\FamilyKeyStateProcessed}%
 \AtEndOfClass%
 {%
+  \RelaxFamilyKey[.comp]{TUD}{tudscrver}%
   \TUD@key{tudscrver}[]{%
     \ClassError{\TUD@Class@Name}%
     {Option `tudscrver' too late}{%
       Option `tudscrver' can only be set while loading the\MessageBreak%
-      class `\TUD@Class@Name'
+      class `\TUD@Class@Name'\space%
       but you have tried to set it up later.%
     }%
     \FamilyKeyStateProcessed%
@@ -1298,7 +1330,7 @@
     \ClassError{\TUD@Class@Name}%
       {Option `fontspec' too late}{%
       Option `fontspec' can only be set while loading the\MessageBreak%
-      class `\TUD@Class@Name'
+      class `\TUD@Class@Name'\space%
       but you have tried to set it up later.%
     }%
     \FamilyKeyStateProcessed%
@@ -1306,19 +1338,6 @@
   \if@tud@x@fontspec@requested%
     \RequirePackage{fontspec}[2017/01/24]%
   \fi%
-}
-\AtEndOfClass%
-{%
-  \tud@if@v@lower{2.05}{%
-    \TUD@key@preset{relspacing}{false}%
-  }{%
-    \TUD@key@preset{relspacing}{true}%
-  }%
-  \tud@if@v@lower{2.06}{%
-    \TUD@key@preset{slantedgreek}{standard}%
-  }{%
-    \TUD@key@preset{slantedgreek}{true}%
-  }%
 }
 %%% From File: tudscr-misc.dtx
 \newif\if@tud@x@scr@paper@set
@@ -1407,10 +1426,27 @@
   \if@tempswa\TUDExecuteOptions{#3=#1#2}\fi%
   \PassOptionsToClass{\CurrentOption}{\TUD@Class@KOMA}%
 }
-\DeclareOption*{\tud@x@scr@paper}
+% TODO Ordnung in das Chaos bringen!
+% - tudscrver=2.05 & cdoldfont=false vs cdfont=false
+% TODO Mitglied nur für 4 Hauptklassen und tudscrfonts
+\FamilyProcessOptions[.comp]{TUD}\relax
+% TODO preset notwendig oder einfach mit \TUDExecuteOptions?!
 \TUDExecuteOptions{%
-  cd=true,cdfont=true,tudbookmarks=true%
+  cd=true,tudbookmarks=true%
 }
+\DeclareOption*{\tud@x@scr@paper}
+\tud@if@v@lower{2.05}{%
+  \TUD@key@preset{relspacing}{false}%
+}{%
+  \TUD@key@preset{relspacing}{true}%
+}%
+\tud@if@v@lower{2.06}{%
+  \TUD@key@preset{cdoldfont}{true}%
+  \TUD@key@preset{slantedgreek}{standard}%
+}{%
+  \TUD@key@preset{cdfont}{true}%
+  \TUD@key@preset{slantedgreek}{true}%
+}%
 \TUDProcessOptions\relax
 \LoadClass{\TUD@Class@KOMA}[2018/03/30]
 %%% From File: tudscr-base.dtx
@@ -1452,9 +1488,9 @@
     \@tud@x@fontspec@enabledfalse%
     \ClassWarningNoLine{\TUD@Class@Name}%
     {%
-      Version `2017/01/24' of package `fontspec' is needed,\MessageBreak
-      but only version\MessageBreak
-      `\csname ver@fontspec.sty\endcsname'\MessageBreak
+      Version `2017/01/24' of package `fontspec' is needed,\MessageBreak%
+      but only version\MessageBreak%
+      `\csname ver@fontspec.sty\endcsname'\MessageBreak%
       is available, so a fallback layout is used%
     }%
   }%
@@ -1699,11 +1735,11 @@
     \@tud@res@swatrue%
   \fi%
   \if@tud@cdoldfont@active%
-    \if@tud@cdoldfont@usedin\if@tud@cdfont@db@exist\else%
+    \if@tud@cdoldfont@nodin\else\if@tud@cdfont@db@exist\else%
       \@tud@res@swatrue%
     \fi\fi%
   \fi%
-  \if@tud@res@swa
+  \if@tud@res@swa%
     \tud@cdfont@missing@wrn%
   \fi%
 }
@@ -1752,7 +1788,7 @@
         \renewcommand*\tud@cdfont@ebf{b}%
       \fi%
     \fi%
-  }
+  }%
 \fi
 \newcommand*\tud@font@skip@set{%
   \if@tud@relspacing%
@@ -1950,7 +1986,7 @@
     \fi%
     \newcommand*\textdbn{}%
     \DeclareTextFontCommand\textdbn{\dinbn}%
-  }
+  }%
 \fi
 \newcommand*\tud@cdfont@fallback[4]{%
   \newrobustcmd*#1{%
@@ -1986,7 +2022,7 @@
     \ifx\@tempc\relax\else%
       \ifstr{\@tempc}{dinbn}{\dinbn}{\csuse{univ\@tempc}}%
     \fi%
-  }
+  }%
   \renewcommand*\textcdfont[2]{%
     \tud@cdfont@get{#1}%
     \ifx\@tempc\relax%
@@ -1994,7 +2030,7 @@
     \else%
       \ifstr{\@tempc}{dinbn}{\textdbn{#2}}{\csuse{textu\@tempc}{#2}}%
     \fi%
-  }
+  }%
 \fi
 \newcommand*\tud@cdfont@get[1]{%
   \tud@cdfont@trim\@tempa{#1}%
@@ -2041,7 +2077,7 @@
       \ClassWarning{\TUD@Class@Name}%
       {The font `#1' is unknown}%
     }}}}}}}}}}}}}}%
-  }
+  }%
 \fi
 \newcommand*\tud@cdfont@trim[2]{%
   \protected@edef\@tempa{\trim@spaces{#2}}%
@@ -2087,7 +2123,7 @@
     \tud@cdfont@@trim{italic}{oblique}%
     \tud@cdfont@@trim{slanted}{oblique}%
     \let#1\@tempa%
-  }
+  }%
 \fi
 \newcommand*\tud@cdfont@@trim[2]{%
   \def\@tempb##1#1##2\relax{\def\@tempa{##1#2##2}}%
@@ -2105,7 +2141,7 @@
       typewriter font of package `lmodern' is used%
     }%
     \renewcommand*\tud@ttfont@num{1}%
-  \fi\fi
+  \fi\fi%
   \ifcase\tud@ttfont@num\relax% false
     \let\tud@ttfont@fam\ttdefault%
   \or% lmodern
@@ -2207,8 +2243,8 @@
     \let\tud@math@set\relax%
   }{%
     \ifundef{\symupletters}{%
-      \DeclareSymbolFont{upletters}{OML}{cmm}{m}{it}
-      \SetSymbolFont{upletters}{bold}{OML}{cmm}{b}{it}
+      \DeclareSymbolFont{upletters}{OML}{cmm}{m}{it}%
+      \SetSymbolFont{upletters}{bold}{OML}{cmm}{b}{it}%
     }{}%
     \@tempcnta=\z@\relax%
     \tud@math@greek@loop@uc\tud@math@greek@declare@uc%
@@ -2311,7 +2347,6 @@
 \newcommand*\mv@tud@nm{}
 \newcommand*\mv@tud@bm{}
 \newcommand*\mv@tud@dm{}
-% TODO Warnung by amssymb Laden verhindern und mdsymbol verwenden?
 \newcommand*\tud@cdmath@declare[3]{%
   \DeclareMathVersion{tud@nm}%
   \DeclareMathVersion{tud@bm}%
@@ -2539,59 +2574,53 @@
     }%
   \fi%
 }
-% TODO überarbeiten oder raus?
-\newrobustcmd*\ifdin{%
-  \ClassWarning{\TUD@Class@Name}%
-  {%
-    The command `\string\ifdin' is deprecated, the second\MessageBreak%
-    argument is used in any case%
-  }%
-  \@secondoftwo%
-}
+\TUD@deprecated@cs{ifdin}{@secondoftwo}
 \if@tud@cdoldfont@active
-  \renewrobustcmd*\ifdin{%
+  \newrobustcmd*\ifdin{%
     \ifx\f@family\tud@cdfont@db%
       \expandafter\@firstoftwo%
     \else%
       \expandafter\@secondoftwo%
     \fi%
-  }
+  }%
 \fi
-% TODO überarbeiten oder raus?
+% TODO überarbeiten (und in tudscr-layout?) oder raus?
 \newcommand*\tud@sec@fontface[1][]{\sectfont#1}
 \if@tud@cdoldfont@active
   \renewcommand*\tud@sec@fontface[1][]{%
-    \if@tud@cdoldfont@usedin%
-      \tud@db\tud@raggedright%
-    \else%
+    \if@tud@cdoldfont@nodin%
       \sectfont#1%
+    \else%
+      \tud@db\tud@raggedright%
     \fi%
-  }
+  }%
 \fi
-% TODO überarbeiten oder raus?
-\newcommand*\tud@makeuppercase[2][]{%
-%  \protect\vphantom{\"A\"O\"U}
-  #2%
+% TODO umbenennen in \tud@sec@makecase; in tudscr-layout?
+\newrobustcmd*\tud@sec@strut{%
+  \begingroup%
+    \strut\setbox\strutbox\hbox{\vphantom{\"A\"O\"U}}\strut%
+  \endgroup%
 }
+\newcommand*\tud@makeuppercase[2][]{\tud@sec@strut#2}
 \if@tud@cdoldfont@active
   \RequirePackage{textcase}[2004/10/07]
   \renewcommand*\tud@makeuppercase[2][]{%
-%    \protect\vphantom{\"A\"O\"U}%
     \@tud@res@swafalse%
-    \ifx\relax#1\relax%
+    \IfArgIsEmpty{#1}{%
       \ifdin{\@tud@res@swatrue}{}%
-    \else%
+    }{%
       \begingroup%
         \usekomafont{#1}%
         \ifdin{\aftergroup\@tud@res@swatrue}{}%
       \endgroup%
-    \fi%
+    }%
+    \tud@sec@strut%
     \if@tud@res@swa%
       \begingroup\MakeTextUppercase{#2}\endgroup%
     \else%
       #2%
     \fi%
-  }
+  }%
 \fi
 \newcommand*\tud@head@font@light{}
 \newcommand*\tud@head@font@bold{}
@@ -2656,7 +2685,7 @@
       \DeclareFixedFont{\tud@head@font@bold}{\encodingdefault}%
         {\tud@cdfont@fam@lf}{b}{n}{\tud@head@fontsize}%
     \fi%
-  }
+  }%
 \fi
 %%% From File: tudscr-fields.dtx
 \newcommand*\getfield[2]{%
@@ -3290,7 +3319,7 @@
   }%
   \pretocmd{\CROP@center}{%
     \@tud@x@crop@centertrue%
-  }{}{\tud@patch@wrn{CROP@center}}
+  }{}{\tud@patch@wrn{CROP@center}}%
 }
 \newif\if@tud@x@standalone@crop
 \AfterClass*{standalone}{\let\if@tud@x@standalone@crop\ifsa@crop}
@@ -3626,8 +3655,8 @@
     }{\@nameuse{Gm@restore@@#1}%
     \Gm@changelayout}%
   }%
-  \tud@cs@store{geometry}
-  \tud@cs@store{newgeometry}
+  \tud@cs@store{geometry}%
+  \tud@cs@store{newgeometry}%
   \newif\if@tud@x@geometry@enabled%
   \@tud@x@geometry@enabledtrue%
   \newcommand*\tud@setgeometry[1]{%
@@ -3727,7 +3756,7 @@
     }{%
       \tud@area@def{paper}{#2}%
     }%
-  }
+  }%
   \newcommand*\tud@area@def[2]{%
     \tud@lowerstring{\@tempa}{#2}%
     \def\@tempb##1paper##2\@nil{%
@@ -3808,7 +3837,7 @@
     \else%
       \appto\tud@x@geometry@parameter{#2,}%
     \fi%
-  }
+  }%
   \newcommand*\tud@area@set[1]{%
     \letcs{\@tempa}{tud@x@geometry@#1}%
     \ifdefvoid{\@tempa}{}{%
@@ -3832,11 +3861,11 @@
       \def\@tempc##1{\@tempb##1::\@nil}%
       \expandafter\forcsvlist\expandafter\@tempc\expandafter{\@tempa}%
     }%
-  }
-  \newcommand*\tud@x@geometry@init{}
-  \newcommand*\tud@x@geometry@paper{}
-  \newcommand*\tud@x@geometry@layout{}
-  \newcommand*\tud@x@geometry@parameter{}
+  }%
+  \newcommand*\tud@x@geometry@init{}%
+  \newcommand*\tud@x@geometry@paper{}%
+  \newcommand*\tud@x@geometry@layout{}%
+  \newcommand*\tud@x@geometry@parameter{}%
   \newcommand*\tud@geometry[2]{%
     \ifGm@layout%
       \setlength\tud@len@layoutheight{\Gm@layoutheight}%
@@ -3880,13 +3909,13 @@
         \eappto\tud@x@geometry@init{,\expandonce\tud@x@geometry@parameter}%
       }{}%
     }{}%
-  }
+  }%
   \renewcommand*\geometry[1]{\tud@geometry{#1}{geometry}}
   \renewcommand*\newgeometry[1]{%
     \tud@cs@store{Gm@restore@org}%
     \tud@geometry{#1}{newgeometry}%
     \tud@cs@restore{Gm@restore@org}%
-  }
+  }%
   \apptocmd{\Gm@changelayout}{%
     \ifboolexpr{bool {@tud@x@geometry@enabled} and bool {@atdocument}}{%
       \tud@cdgeometry@process%
@@ -3899,7 +3928,7 @@
       \TUDoption{cdgeometry}{#1}%
       \tud@cs@restore{TUD@SpecialOptionAtDocument}%
     }%
-    \ifnum\tud@cdgeometry@num=\@ne\relax
+    \ifnum\tud@cdgeometry@num=\@ne\relax%
       \tud@loadgeometry{init@custom}%
     \else%
       \tud@loadgeometry{init@typearea}%
@@ -4153,10 +4182,10 @@
     \fi%
     \ifdim\tud@len@areadiff<\z@\relax\setlength\tud@len@areadiff{\z@}\fi%
     \global\tud@len@areadiff=\tud@len@areadiff%
+% TODO \tud@if@v@lower{2.06}{}{}
+    \setlength\tud@len@areaheadvskip{.22\tud@len@topmargin}%
     \if@tud@cdgeometry@adjust%
-      \setlength\tud@len@areaheadvskip{.11\tud@len@topmargin}%
-    \else%
-      \setlength\tud@len@areaheadvskip{.22\tud@len@topmargin}%
+      \setlength\tud@len@areaheadvskip{.5\tud@len@areaheadvskip}%
     \fi%
     \global\tud@len@areaheadvskip=\tud@len@areaheadvskip%
     \tud@if@v@lower{2.03}{%
@@ -5090,7 +5119,7 @@
         }%
         \vss\vss%
       }{%
-        You should reduce `footlogoheight', because it is\MessageBreak
+        You should reduce `footlogoheight', because it is\MessageBreak%
         too high (\the\dimexpr\tud@dim@footlogoheight\relax).%
         \ifnum\tud@cdgeometry@num>\@ne% true/symmetric/twoside
           \MessageBreak%
@@ -5374,6 +5403,40 @@
   }%
 ]{fancyhdr}
 %%% From File: tudscr-layout.dtx
+\newcommand*\tud@cleardoublespecialpage[2][]{%
+  \begingroup%
+    #2%
+    \ifboolexpr{bool {@twoside} and bool {@openright}}{%
+      \if@tud@clearcolor%
+        \def\@tempa{%
+          #1%
+          \tud@cleardoublepage%
+          \endgroup%
+        }%
+      \else%
+        \def\@tempa{%
+          \endgroup%
+          #1%
+          \tud@cleardoublepage%
+        }%
+      \fi%
+    }{%
+      \if@tud@clearcolor\tud@clearcolor@wrn\fi%
+      \def\@tempa{%
+        \endgroup%
+        #1%
+      }%
+    }%
+  \@tempa%
+  \@afterindentfalse\@afterheading%
+}
+\newcommand*\tud@clearcolor@wrn{%
+  \ClassWarning{\TUD@Class@Name}{%
+    Option `clearcolor' is only available together with\MessageBreak%
+    options `twoside' and `open=right'%
+  }%
+  \global\let\tud@clearcolor@wrn\relax%
+}
 \newcommand*\tud@x@scr@headings@current{}
 \newcommand*\tud@sec@fontsize{}
 \newcommand*\tud@thesis@fontsize{}
@@ -5412,11 +5475,6 @@
       \tud@komafont@reset{subsubsection}%
     \fi%
   ]%
-}
-%\newcommand*\tud@headmidvskip@normal{\par\nobreak\vspace{.5\baselineskip}}
-\newcommand*\tud@headmidvskip@reverse{%
-  \setbox\z@\vbox{\tud@headmidvskip@normal}%
-  \vspace*{\dimexpr-\dp\strutbox-\ht\strutbox-\ht\z@\relax}%
 }
 \newcommand*\tud@title@fontcolor{}
 \newcommand*\tud@part@fontcolor{}
@@ -5478,10 +5536,6 @@
     \tud@cs@restore{partheadendvskip}%
     \tud@cs@restore{partheademptypage}%
     \tud@cs@restore{partpagestyle}%
-%
-%    \tud@cs@restore{scr@@startpart}%
-%    \tud@cs@restore{scr@@startspart}%
-%
     \tud@cs@restore{partlineswithprefixformat}%
     \tud@komafont@unset{part}%
     \tud@komafont@unset{partnumber}%
@@ -5501,12 +5555,6 @@
     \let\partheademptypage\tud@partheademptypage%
     \tud@cs@store{partpagestyle}%
     \renewcommand*\partpagestyle{plain.tudheadings}%
-%
-%    \tud@cs@store{scr@@startpart}%
-%    \let\scr@@startpart\tud@@startpart%
-%%    \tud@cs@store{scr@@startspart}%
-%%    \let\scr@@startspart\tud@@startspart%
-%
     \tud@cs@store{partlineswithprefixformat}%
     \let\partlineswithprefixformat\tud@partlineswithprefixformat%
     \tud@komafont@set{part}{%
@@ -5523,10 +5571,10 @@
   \fi%
   \ifcase\tud@cd@chapter@num\relax% false
     \tud@cs@restore{chapterheadstartvskip}%
+    \tud@cs@restore{chapterlineswithprefixformat}%
     \tud@cs@restore{chapterlinesformat}%
-% TODO
-%    \tud@cs@restore{scr@@makechapterhead}%
-%
+    \tud@cs@restore{tud@chapter@before@hook}%
+    \tud@cs@restore{tud@chapter@after@hook}%
     \tud@komafont@unset{chapter}%
     \tud@komafont@unset{chapterprefix}%
     \tud@cs@restore{raggedchapter}%
@@ -5537,10 +5585,10 @@
     \let\chapterlineswithprefixformat\tud@chapterlineswithprefixformat%
     \tud@cs@store{chapterlinesformat}%
     \let\chapterlinesformat\tud@chapterlinesformat%
-%
-%    \tud@cs@store{scr@@makechapterhead}%
-%    \let\scr@@makechapterhead\tud@@makechapterhead%
-%
+    \tud@cs@store{tud@chapter@before@hook}%
+    \let\tud@chapter@before@hook\tud@chapter@pre%
+    \tud@cs@store{tud@chapter@after@hook}%
+    \let\tud@chapter@after@hook\tud@chapter@app%
     \tud@komafont@set{chapter}{%
       \tud@sec@fontface%
       \tud@sec@fontsize%
@@ -5550,44 +5598,53 @@
     \tud@cs@store{raggedchapter}%
     \renewcommand*\raggedchapter{\tud@raggedright}%
   \fi%
-%  \ifcase\tud@cd@section@num\relax% false
-%    \tud@sectioning@reset[addsec]{section}%
-%    \tud@sectioning@reset{subsection}%
-%    \tud@sectioning@reset{subsubsection}%
-%    \tud@sectioning@reset{minisec}%
-%    \tud@sectioning@reset{paragraph}%
-%    \tud@sectioning@reset{subparagraph}%
-%    \tud@cs@restore{raggedsection}%
-%  \else% !false
-%    \renewcommand*\tud@section@fontcolor{}%
-%    \ifcase\tud@cd@section@num\relax\or\else% *color
-%      \renewcommand*\tud@section@fontcolor{HKS41}%
-%    \fi%
-%    \tud@sectioning@set{section}{%
-%      \tud@sec@fontface%
-%      \ifstr{\tud@pagecolor}{HKS41}{}{\tud@color{\tud@section@fontcolor}}%
-%    }%
-%    \tud@sectioning@set{subsection}{%
-%      \tud@sec@fontface%
-%      \ifstr{\tud@pagecolor}{HKS41}{}{\tud@color{\tud@section@fontcolor}}%
-%    }%
-%    \tud@sectioning@set{subsubsection}{%
-%      \tud@sec@fontface%
-%      \ifstr{\tud@pagecolor}{HKS41}{}{\tud@color{\tud@section@fontcolor}}%
-%    }%
-%    \tud@sectioning@set{minisec}{%
-%      \tud@sec@fontface%
-%      \ifstr{\tud@pagecolor}{HKS41}{}{\tud@color{\tud@section@fontcolor}}%
-%    }%
-%    \tud@sectioning@set{paragraph}{%
-%      \ifstr{\tud@pagecolor}{HKS41}{}{\tud@color{\tud@section@fontcolor}}%
-%    }%
-%    \tud@sectioning@set{subparagraph}{%
-%      \ifstr{\tud@pagecolor}{HKS41}{}{\tud@color{\tud@section@fontcolor}}%
-%    }%
-%    \tud@cs@store{raggedsection}%
-%    \renewcommand*\raggedsection{\tud@raggedright}%
-%  \fi%
+  \ifcase\tud@cd@section@num\relax% false
+    \tud@cs@restore{sectionlinesformat}%
+    \tud@cs@restore{sectioncatchphraseformat}%
+    \tud@komafont@unset{section}%
+    \tud@komafont@unset{subsection}%
+    \tud@komafont@unset{subsubsection}%
+    \tud@komafont@unset{paragraph}%
+    \tud@komafont@unset{subparagraph}%
+    \tud@cs@restore{raggedsection}%
+    \tud@cs@restore{minisec}%
+    \tud@komafont@unset{minisec}%
+  \else% !false
+    \tud@cs@store{sectionlinesformat}%
+    \let\sectionlinesformat\tud@sectionlinesformat%
+    \tud@cs@store{sectioncatchphraseformat}%
+    \let\sectioncatchphraseformat\tud@sectioncatchphraseformat%
+    \tud@komafont@set{section}{%
+      \tud@sec@fontface%
+      \tud@color{\tud@section@fontcolor}%
+    }%
+    \tud@komafont@set{subsection}{%
+      \tud@sec@fontface%
+      \tud@color{\tud@section@fontcolor}%
+    }%
+    \tud@komafont@set{subsubsection}{%
+      \tud@sec@fontface%
+      \tud@color{\tud@section@fontcolor}%
+    }%
+    \tud@komafont@set{paragraph}{%
+      \tud@color{\tud@section@fontcolor}%
+    }%
+    \tud@komafont@set{subparagraph}{%
+      \tud@color{\tud@section@fontcolor}%
+    }%
+    \tud@cs@store{raggedsection}%
+    \renewcommand*\raggedsection{\tud@raggedright}%
+    \tud@cs@store{minisec}%
+    \renewcommand\minisec[1]{%
+      \tud@cs@use{minisec}{\tud@makeuppercase{##1}}%
+    }%
+    \tud@komafont@set{minisec}{%
+      \tud@sec@fontface%
+      \ifcase\tud@cd@section@num\relax\or\else% *color
+        \ifstr{\tud@pagecolor}{HKS41}{}{\color{HKS41}}%
+      \fi%
+    }%
+  \fi%
 }
 \newcommand*\tud@cd@specialpage@set[1]{%
   \tud@komafont@set{footnote}{%
@@ -5689,8 +5746,6 @@
   }%
   \tud@cd@specialpage@unset%
 }
-
-% TODO DeclareSectionCommand verwenden
 \newcommand*\tud@partformat{}%
 \newcommand*\tud@partlineswithprefixformat[3]{%
   \edef\tud@partformat{\noexpand\tud@makeuppercase{\expandonce\partformat}}%
@@ -5700,7 +5755,7 @@
     \setlength{\@tempskipa}{\@nameuse{scr@#1@innerskip}}%
     \partheadmidvskip%
   }%
-  #2\tud@makeuppercase[#1]{\strut#3}%
+  #2\tud@makeuppercase[#1]{#3}%
 }
 \newcommand*\tud@chapterheadstartvskip{%
   \renewcommand*\tud@chapter@fontcolor{}%
@@ -5716,6 +5771,26 @@
     \vspace*{\tud@dim@headingsvskip}%
   \fi
 }
+\newcommand*\tud@chapter@before@hook{}
+\let\tud@chapter@before@hook\relax
+\newcommand*\tud@chapter@after@hook{}
+\let\tud@chapter@after@hook\relax
+\pretocmd\scr@startchapter{%
+  \tud@chapter@before@hook%
+}{}{\tud@patch@wrn{scr@startchapter}}
+\apptocmd\scr@@startchapter{%
+  \tud@chapter@after@hook%
+}{}{\tud@patch@wrn{scr@@startchapter}}
+\apptocmd\scr@@startschapter{%
+  \tud@chapter@after@hook%
+}{}{\tud@patch@wrn{scr@@startschapter}}
+\newcommand*\tud@chapter@pre{%
+  \if@tud@chapterpage%
+    \@restonecolfalse%
+    \if@twocolumn\@restonecoltrue\onecolumn\fi%
+    \tud@cd@specialpage@set{chapter}%
+  \fi%
+}
 \newcommand*\tud@chapterformat{}%
 \newcommand*\tud@chapterlineswithprefixformat[3]{%
   \edef\tud@chapterformat{%
@@ -5729,7 +5804,7 @@
       \chapterheadmidvskip%
     }%
   }%
-   #2\tud@makeuppercase[#1]{\strut#3}%
+   #2\tud@makeuppercase[#1]{#3}%
 }
 \newcommand*\tud@chapterlinesformat[3]{%
   {%
@@ -5737,37 +5812,7 @@
     \setlength{\@tempskipa}{\@nameuse{scr@#1@innerskip}}%
     \chapterheadmidvskip%
   }%
-  \@hangfrom{#2}{\tud@makeuppercase[#1]{\strut#3}}%
-}
-%
-%\newcommand*\tud@@makechapterhead{}%
-%\let\tud@@makechapterhead\scr@@makechapterhead%
-%\patchcmd{\tud@@makechapterhead}{%
-%  \csname #1format\endcsname%
-%  \setlength{\@tempskipa}{\csname scr@#1@innerskip\endcsname}%
-%  \chapterheadmidvskip
-%}{%
-%  \tud@headmidvskip@reverse%
-%  \vskip-\parskip%
-%  \tud@makeuppercase{\csname #1format\endcsname}%
-%  \tud@headmidvskip@normal%
-%}{}{\tud@patch@wrn{scr@@makechapterhead}}%
-% TODO!!!
-%\newcommand*\tud@@makechapterhead{}%
-%\let\tud@@makechapterhead\scr@@makechapterhead%
-%\pretocmd\tud@@makechapterhead{%
-%  \tud@chapter@pre%
-%}{}{\tud@patch@wrn{scr@@makechapterhead}}%
-%\apptocmd\tud@@makechapterhead{%
-%  \tud@chapter@app%
-%}{}{\tud@patch@wrn{scr@@makechapterhead}}%
-%
-\newcommand*\tud@chapter@pre{%
-  \if@tud@chapterpage%
-    \@restonecolfalse%
-    \if@twocolumn\@restonecoltrue\onecolumn\fi%
-    \tud@cd@specialpage@set{chapter}%
-  \fi%
+  \@hangfrom{#2}{\tud@makeuppercase[#1]{#3}}%
 }
 \newcommand*\tud@head@bar@store{}
 \let\tud@head@bar@store\relax
@@ -5825,75 +5870,21 @@
     \@afterindentfalse\@afterheading%
   \fi%
 }
-\newcommand*\tud@clearcolor@wrn{%
-  \ClassWarning{\TUD@Class@Name}{%
-    Option `clearcolor' is only available together with\MessageBreak%
-    options `twoside' and `open=right'%
-  }%
-  \global\let\tud@clearcolor@wrn\relax%
-}
-% TODO der Kram sollte in den comp-Teil
-% \partlineswithprefixformat
-% \chapterlinesformat
-% \chapterlineswithprefixformat
-% \sectionlinesformat
-% \sectioncatchphraseformat
-% + minisec
-% hooks für chapter nutzen
-\newcommand*\tud@part{}
-\newcommand*\tud@spart{}
-\newcommand*\tud@chapter{}
-\newcommand*\tud@schapter{}
-\newcommand*\tud@section{}
-\newcommand*\tud@ssection{}
-\newcommand*\tud@subsection{}
-\newcommand*\tud@ssubsection{}
-\newcommand*\tud@subsubsection{}
-\newcommand*\tud@ssubsubsection{}
-\newcommand*\tud@sectioning@set[2]{%
-%  \tud@cs@store{#1}%
-%  \ifstr{#1}{minisec}{%
-%    \renewcommand\minisec[1]{\@@tud@minisec{\tud@makeuppercase{##1}}}%
-%  }{%
-%    \tud@sectioning@case{#1}%
-%  }%
-  \tud@komafont@set{#1}{#2}%
-}
-\newcommand*\tud@sectioning@case[1]{%
-  \csedef{#1}{%
-    \noexpand\SecDef%
-    \expandafter\expandafter\expandafter\noexpand%
-      \expandafter\csname tud@#1\endcsname%
-    \expandafter\expandafter\expandafter\noexpand%
-      \expandafter\csname tud@s#1\endcsname%
-  }%
-  \csedef{tud@#1}[##1]##2{%
-    \expandafter\expandafter\expandafter\noexpand%
-      \expandafter\csname @@tud@#1\endcsname%
-      [{##1}]{\noexpand\tud@sectioning@uppercase{##2}}%
-  }%
-  \csedef{tud@s#1}##1{%
-    \expandafter\expandafter\expandafter\noexpand%
-      \expandafter\csname @@tud@#1\endcsname*%
-      {\noexpand\tud@sectioning@uppercase{##1}}%
-  }%
-  \ifstr{#1}{chapter}{%
-    \def\@tempa{,s}%
-    \@for\@tempb:=\@tempa\do{%
-      \expandafter\pretocmd\expandafter{\csname tud@\@tempb#1\endcsname}{%
-        \tud@chapter@pre%
-      }{}{\tud@patch@wrn{tud@sectioning@case}}%
-      \expandafter\apptocmd\expandafter{\csname tud@\@tempb#1\endcsname}{%
-        \tud@chapter@app%
-      }{}{\tud@patch@wrn{tud@sectioning@case}}%
+\At@startsection{%
+  \renewcommand*\tud@section@fontcolor{}%
+  \ifcase\tud@cd@section@num\relax\or\else% *color
+    \ifstr{\tud@pagecolor}{HKS41}{}{%
+      \renewcommand*\tud@section@fontcolor{HKS41}%
     }%
-  }{}%
+  \fi%
 }
-\newcommand*\tud@sectioning@reset[2][]{%
-%  \tud@cs@restore{#2}%
-%  \ifblank{#1}{}{\tud@cs@restore{#1}}%
-  \tud@komafont@unset{#2}%
+\newcommand*\tud@sectionlinesformat[4]{%
+  \@hangfrom{\hskip #2#3}{\tud@makeuppercase[#1]{#4}}%
 }
+\newcommand*\tud@sectioncatchphraseformat[4]{%
+  \hskip #2#3\tud@makeuppercase[#1]{#4}%
+}
+% TODO überarbeiten der symbole für Fußnoten in Überschriften
 \robustify{\footnote}
 \newcommand*\tud@sectioning@uppercase[1]{%
   \begingroup%
@@ -6614,7 +6605,7 @@
   }{%
     \ClassWarning{\TUD@Class@Name}{%
       It isn't possible to use `#1=single'\MessageBreak%
-      or `#1=chapter'
+      or `#1=chapter'\space%
       with `#1=tocmultiple'%
     }%
     \edef\@tempa{%
@@ -6948,33 +6939,6 @@
   \tud@fm@body@end{declaration}%
 }
 %%% From File: tudscr-comp.dtx
-\newcommand*\TUD@deprecated@cs[2]{%
-  \AfterEndPreamble{%
-    \ifcsundef{#1}{%
-      \expandafter\newrobustcmd\csname #1\endcsname{%
-        \ClassWarning{\TUD@Class@Name}%
-        {%
-          The command `\@backslashchar#1' is deprecated.\MessageBreak%
-          You should use `\@backslashchar#2' instead%
-        }%
-        \csletcs{#1}{#2}%
-        \csuse{#2}%
-      }%
-    }{}%
-  }%
-}
-\newcommand*\TUD@deprecated@lengthcs[2][]{%
-  \ifdim\csuse{#2}<\maxdimen\relax%
-    \ClassWarning{\TUD@Class@Name}{%
-      Using the length `\@backslashchar#2' is deprecated.\MessageBreak%
-      You should use option `#2' instead%
-    }%
-    \csxdef{tud@dim@#2}{\the\csuse{#2}}%
-    \expandafter\setlength\csname #2\endcsname{\maxdimen}%
-    \global\csuse{#2}=\csuse{#2}%
-    #1%
-  \fi%
-}
 \newlength\footlogoheight
 \setlength\footlogoheight{\maxdimen}
 \newlength\pageheadingsvskip
@@ -7146,7 +7110,7 @@
   \def\@mkboth##1##2{\NoCaseChange{\@mkboth{##1}{##2}}}%
 }
 \AfterPackage*{textcase}{%
-  \robustify\NoCaseChange
+  \robustify\NoCaseChange%
   \CheckCommand*\@uclcnotmath[4]{%
     \begingroup
       #1%
@@ -7164,10 +7128,10 @@
         \noexpand\@skipmath#3#4$\valign$%
       }%
     \reserved@a%
-  }
+  }%
   \patchcmd{\@uclcnotmath}{\@nonchangecase\ensuremath}{%
     \@nonchangecase\ensuremath\tud@x@textcase@uclcnotmath%
-  }{}{\tud@patch@wrn{@uclcnotmath}}
+  }{}{\tud@patch@wrn{@uclcnotmath}}%
 }
 \TUD@UnwindPackage{textcase}{\providecommand*\NoCaseChange[1]{#1}}
 \endinput
