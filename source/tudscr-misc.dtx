@@ -1,4 +1,4 @@
-% \CheckSum{405}
+% \CheckSum{359}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-misc.dtx}[%
-  2018/07/24 v2.06 TUD-Script (miscellaneous)%
+  2018/07/31 v2.06 TUD-Script (miscellaneous)%
 ]
 \documentclass[english,ngerman,xindy]{tudscrdoc}
 \usepackage[T1]{fontenc}
@@ -88,264 +88,7 @@
 %
 % \StopEventually{\PrintIndex\PrintChanges\PrintToDos}
 %
-% \subsection{Sukkzessives Abarbeiten von Layoutoptionen im Dokument}
-%
-% Werden mit \cs{TUDoptions} nach \cs{begin\{document\}} mehrere Layoutoptionen 
-% gleichzeitig angegeben, muss dafür Sorge getragen werden, dass diese in der 
-% korrekten Reihenfolge abgearbeitet werden. 
-%
-% Das Makro \cs{TUD@SpecialOptionAtDocument} kann innerhalb von \cs{TUD@key} 
-% verwendet werden, um einen im obligatorischen Argument angegebenen Schalter 
-% zu aktivieren. Dabei wird über \cs{tud@atdocument@hook} garantiert, dass der 
-% Befehl \cs{tud@atdocument@process}, welcher für die Abarbeitung der einzelnen 
-% Makros in der richtigen Reihenfolge verantwortlich ist, lediglich einmal über 
-% \cs{AtEndOfFamilyOptions} ausgeführt wird.
-% \ToDo{Evtl. in \file{tudscr-layout.dtx} verschieben?}[v2.06]
-% \ToDo{%
-%   Problem bei \cs{TUDoptions} mit \cs{AtEndOfFamilyOptions} beheben, 
-%   Unterscheidung durch AfterEndPreamble eigentlich nicht notwendig
-% }[v2.06]
-% \ToDo{Überarbeiten, verwenden von \cs{AtEndOfFamilyOptions*} aus v3.23}[v2.06]
-%
-% \begin{macro}{\TUD@SpecialOptionAtDocument}
-% \changes{v2.05}{2016/06/14}{neu}^^A
-% \begin{macro}{\tud@atdocument@hook}
-% \changes{v2.05}{2016/06/14}{neu}^^A
-%    \begin{macrocode}
-%<*execute&(class&!inherit|package&fonts)>
-\newcommand*\TUD@SpecialOptionAtDocument[1]{}
-%</execute&(class&!inherit|package&fonts)>
-%<*body>
-\newcommand*\tud@atdocument@hook{}
-\let\tud@atdocument@hook\relax
-\AfterEndPreamble{%
-  \renewcommand*\TUD@SpecialOptionAtDocument[1]{%
-    \ifx\tud@atdocument@hook\relax%
-      \gdef\tud@atdocument@hook{\global\let\tud@atdocument@hook\relax}%
-      \AtEndOfFamilyOptions{%
-        \tud@atdocument@hook%
-        \tud@atdocument@process%
-      }%
-    \fi%
-    \gappto\tud@atdocument@hook{\global\booltrue{@#1}}%
-  }%
-}
-%</body>
-%    \end{macrocode}
-% \end{macro}^^A \tud@atdocument@hook
-% \end{macro}^^A \TUD@SpecialOptionAtDocument
-%
 % \iffalse
-%<*body>
-% \fi
-%
-% \begin{macro}{\tud@atdocument@process}
-% \changes{v2.05}{2016/06/14}{neu}^^A
-% \begin{macro}{\if@tud@font@set}
-% \changes{v2.05}{2016/06/14}{neu}^^A
-% \begin{macro}{\if@tud@math@set}
-% \changes{v2.05}{2016/06/14}{neu}^^A
-% \begin{macro}{\if@tud@font@skip@set}
-% \changes{v2.05}{2016/06/14}{neu}^^A
-% \begin{macro}{\if@tud@x@scr@headings@reset}
-% \changes{v2.05}{2016/06/14}{neu}^^A
-% \begin{macro}{\if@tud@cd@process}
-% \changes{v2.05}{2016/06/14}{neu}^^A
-% \begin{macro}{\if@tud@cdgeometry@process}
-% \changes{v2.05}{2016/06/14}{neu}^^A
-% \begin{macro}{\if@tud@cdgeometry@@process}
-% \changes{v2.05}{2016/06/14}{neu}^^A
-% Das Makro \cs{tud@atdocument@process} wird im Dokument ausgeführt, wenn 
-% mindestens eine Option gesetzt wurde, welche \cs{TUD@SpecialOptionAtDocument} 
-% verwendet. Je nachdem, welche Schalter insgesamt aktiviert wurden, werden die 
-% dazugehörigen Befehle für die Einstellungen von Schriften, Layout und/oder 
-% Satzspiegel in der richtigen Reihenfolge ausgeführt.
-%    \begin{macrocode}
-\newif\if@tud@font@set
-\newif\if@tud@math@set
-\newif\if@tud@font@skip@set
-\newif\if@tud@x@scr@headings@reset
-\newif\if@tud@cd@process
-\newif\if@tud@cdgeometry@process
-\newif\if@tud@cdgeometry@@process
-\newcommand*\tud@atdocument@process{%
-  \if@tud@font@set%
-    \tud@font@set%
-    \global\@tud@font@setfalse%
-    \global\@tud@math@setfalse%
-    \global\@tud@font@skip@setfalse%
-    \global\@tud@cd@processfalse%
-  \fi%
-  \if@tud@math@set%
-    \tud@math@set%
-    \global\@tud@math@setfalse%
-  \fi%
-  \if@tud@font@skip@set%
-    \tud@font@skip@set%
-    \global\@tud@font@skip@setfalse%
-  \fi%
-%<*class>
-  \if@tud@x@scr@headings@reset%
-    \tud@x@scr@headings@reset%
-    \global\@tud@x@scr@headings@resetfalse%
-    \global\@tud@cd@processfalse%
-  \fi%
-  \if@tud@cd@process%
-    \tud@cd@process%
-    \global\@tud@cd@processfalse%
-  \fi%
-  \if@tud@cdgeometry@process%
-    \tud@cdgeometry@process%
-    \global\@tud@cdgeometry@processfalse%
-    \global\@tud@cdgeometry@@processfalse%
-  \fi%
-  \if@tud@cdgeometry@@process%
-    \tud@cdgeometry@@process%
-    \global\@tud@cdgeometry@@processfalse%
-  \fi%
-%</class>
-}
-%    \end{macrocode}
-% \end{macro}^^A \if@tud@cdgeometry@@process
-% \end{macro}^^A \if@tud@cdgeometry@process
-% \end{macro}^^A \if@tud@cd@process
-% \end{macro}^^A \if@tud@x@scr@headings@reset
-% \end{macro}^^A \if@tud@font@skip@set
-% \end{macro}^^A \if@tud@math@set
-% \end{macro}^^A \if@tud@font@set
-% \end{macro}^^A \tud@atdocument@process
-%
-% \iffalse
-%</body>
-%<*class&option>
-% \fi
-%
-% \subsection{Papierformat und Schriftgröße}
-%
-% Insbesondere für Poster aber auch für alle anderen \TUDScript-Klassen wird
-% überprüft, ob nach einer Änderung des Standardpapierformates auch die
-% Schriftgröße durch den Anwender angepasst wurde. Diese wird jedoch nicht auf
-% Plausibilität geprüft, da der Aufwand hierfür relativ hoch wäre. Vielmehr 
-% wird davon ausgegangen, dass die explizite Angabe der Schriftgröße bewusst 
-% und dem Papierformat sowie den verwendeten Textspalten entsprechend erfolgt.
-%
-% Die nachfolgend definierten Optionen und Befehle orientieren sich dabei stark 
-% an internen \KOMAScript-Makros.
-% \ToDo{Evtl. in \file{tudscr-area.dtx} verschieben?}[v2.06]
-% \ToDo{%
-%   Wie mit \opt{layout} von \pkg{geometry} umgehen? Wann Papierformat prüfen?
-%   Vielleicht mit \cs{KOMAoptionOf\{paper\}} prüfen? Oder ganz raus?
-% }[v2.06]
-%
-% \begin{option}{paper}
-% \changes{v2.05}{2015/07/24}{neu}^^A
-% \begin{macro}{\if@tud@x@scr@paper@set}
-% \changes{v2.05}{2015/07/24}{neu}^^A
-% Da die \KOMAScript-Option \opt{paper} eine Menge an Einstellmöglichkeiten 
-% bietet, müssen die relevanten hier abgefangen werden.
-%    \begin{macrocode}
-\newif\if@tud@x@scr@paper@set
-\TUD@key{paper}{%
-  \tud@lowerstring{\@tempa}{#1}%
-%    \end{macrocode}
-% Sowohl ISO/DIN-Formate\dots
-%    \begin{macrocode}
-  \def\@tempb##1##2\@nil{%
-    \@tempswafalse%
-    \if ##1a\@tempswatrue%
-      \else\if ##1b\@tempswatrue%
-        \else\if ##1c\@tempswatrue%
-          \else\if ##1d\@tempswatrue%
-    \fi\fi\fi\fi%
-    \if@tempswa%
-      \ifnumber{##2}{}{\@tempswafalse}%
-    \fi%
-  }%
-  \expandafter\@tempb\@tempa\@nil%
-%    \end{macrocode}
-% \dots als auch frei gewählte Papierformate werden erkannt.
-%    \begin{macrocode}
-  \if@tempswa\else%
-    \def\@tempb##1:##2:##3\@nil{%
-      \edef\@tempc{##1}%
-      \ifx\@tempc\@empty\@tempswafalse\else%
-        \edef\@tempc{##2}%
-        \ifx\@tempc\@empty\@tempswafalse\else\@tempswatrue\fi%
-      \fi%
-    }%
-    \expandafter\@tempb\@tempa::\@nil%
-  \fi%
-%    \end{macrocode}
-% Die Standardpapiergröße spielt allerdings keine Rolle für eine Warnung.
-%    \begin{macrocode}
-  \@tud@x@scr@paper@setfalse%
-  \if@tempswa%
-    \ifstr{\@tempa}{a4}{}{\@tud@x@scr@paper@settrue}%
-    \FamilyKeyStateProcessed%
-  \else%
-    \FamilyKeyStateUnknownValue%
-  \fi%
-}
-%    \end{macrocode}
-% \end{macro}^^A \if@tud@x@scr@paper@set
-% \end{option}^^A paper
-% Die Schlüssel sollen lediglich beim Laden der Dokumentklasse die angegebenen 
-% Optionen abfangen. Wurde das Papierformat jedoch nicht die Schriftgröße 
-% geändert, wird nun eine Warnung erzeugt.
-% \ToDo{%
-%   Warnung überarbeiten erst zu Dokumentbeginn prüfen, \opt{layout} beachten!%
-% }[v2.06]
-%    \begin{macrocode}
-\AtEndOfClass{%
-  \RelaxFamilyKey{TUD}{paper}%
-  \ifboolexpr{bool {@tud@x@scr@paper@set} or bool {@landscape}}{%
-    \if@tud@fontsize@set\else%
-      \ClassWarningNoLine{\TUD@Class@Name}{%
-        You've set a paper size, which is different from\MessageBreak%
-        default (paper=a4, paper=portrait). Therefore you\MessageBreak%
-        should additionally specify an explicit font size.\MessageBreak%
-        See the manual for further information%
-      }%
-    \fi%
-  }{}%
-}
-%    \end{macrocode}
-%
-% \iffalse
-%</class&option>
-%<*class&execute&!inherit>
-% \fi
-%
-% \begin{macro}{\tud@x@scr@paper}
-% \changes{v2.05}{2015/07/24}{neu}^^A
-% \begin{macro}{\tud@x@scr@@paper}
-% \changes{v2.05}{2015/07/24}{neu}^^A
-% Um die Änderung des Papierformats auch über die \LaTeX-Standardoptionen wie 
-% beispielsweise \opt{a5paper} abfangen zu können, müssen auch die äquivalent 
-% zu \KOMAScript{} ausgewertet werden.
-%    \begin{macrocode}
-\newcommand*\tud@x@scr@paper{%
-  \expandafter\tud@x@scr@@paper\CurrentOption paper\tud@x@scr@@paper%
-}
-\newcommand*\tud@x@scr@@paper{}
-\def\tud@x@scr@@paper #1#2paper#3\tud@x@scr@@paper{%
-  \@tempswafalse%
-  \ifstr{#3}{paper}{\ifnumber{#2}{%
-    \ifstr{#1}{a}{\@tempswatrue}{%
-    \ifstr{#1}{b}{\@tempswatrue}{%
-    \ifstr{#1}{c}{\@tempswatrue}{%
-    \ifstr{#1}{d}{\@tempswatrue}{%
-    }}}}%
-  }{}}{}%
-  \if@tempswa\TUDExecuteOptions{#3=#1#2}\fi%
-  \PassOptionsToClass{\CurrentOption}{\TUD@Class@KOMA}%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@x@scr@@paper
-% \end{macro}^^A \tud@x@scr@paper
-%
-% \iffalse
-%</class&execute&!inherit>
 %<*class&option>
 % \fi
 %
@@ -538,10 +281,288 @@
 %    \end{macrocode}
 % \end{counter}^^A symbolheadings
 %
+% \subsection{Papierformat und Schriftgröße}
+%
+% Insbesondere für Poster aber auch für alle anderen \TUDScript-Klassen wird
+% überprüft, ob nach einer Änderung des Standardpapierformates auch die
+% Schriftgröße durch den Anwender angepasst wurde. Diese wird jedoch nicht auf
+% Plausibilität geprüft, da der Aufwand hierfür relativ hoch wäre. Vielmehr 
+% wird davon ausgegangen, dass die explizite Angabe der Schriftgröße bewusst 
+% und dem Papierformat sowie den verwendeten Textspalten entsprechend erfolgt.
+%
+% \begin{macro}{\tud@x@scr@checkoptions}
+% \changes{v2.06}{2018/07/31}{neu}^^A
+% \begin{macro}{\tud@x@scr@pt}
+% \changes{v2.06}{2018/07/31}{neu}^^A
+% Das Makro \cs{tud@x@scr@checkoptions} wird mit \cs{DeclareOption*} für alle 
+% Optionen aufgerufen, welche kein Mitglied der Familie~\val{TUD} sind. Damit 
+% kann auf nicht definierte Schlüssel reagiert werden. Anschließend werden diese
+% an die zugrundeliegende \KOMAScript-Klasse weitergereicht.
+%    \begin{macrocode}
+\newcommand*\tud@x@scr@checkoptions{%
+  \expandafter\tud@x@scr@pt\CurrentOption pt\@nil%
+  \PassOptionsToClass{\CurrentOption}{\TUD@Class@KOMA}%
+}
+%    \end{macrocode}
+% Wird die Schriftgröße im veralteten Format \val{\dots pt} übergeben, so wird 
+% der Schalter \cs{if@tud@x@scr@fontsize@set} auf \val{true} gesetzt.
+%    \begin{macrocode}
+\newcommand*\tud@x@scr@pt{}
+\def\tud@x@scr@pt #1pt#2\@nil{%
+  \ifstr{#2}{pt}{\ifnumber{#1}{\@tud@x@scr@fontsize@settrue}{}}{}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@x@scr@pt
+% \end{macro}^^A \tud@x@scr@checkoptions
+% Wurde das Papierformat jedoch nicht die Schriftgröße geändert, wird eine
+% Warnung erzeugt.
+%    \begin{macrocode}
+\AtBeginDocument{%
+  \if@tud@x@scr@fontsize@set\else%
+    \@tud@res@swafalse%
+    \ifdim\tud@len@layoutheight<295mm\relax\@tud@res@swatrue\fi%
+    \ifdim\tud@len@layoutheight>299mm\relax\@tud@res@swatrue\fi%
+    \ifdim\tud@len@layoutwidth<208mm\relax\@tud@res@swatrue\fi%
+    \ifdim\tud@len@layoutwidth>212mm\relax\@tud@res@swatrue\fi%
+    \if@tud@res@swa%
+      \ClassWarningNoLine{\TUD@Class@Name}{%
+        You've set a layout size, which is different from\MessageBreak%
+        default (paper=a4, paper=portrait). Therefore you\MessageBreak%
+        should additionally specify an explicit font size.\MessageBreak%
+        See the manual for further information%
+      }%
+    \fi%
+  \fi%
+}
+%    \end{macrocode}
+%
 % \iffalse
 %</class&option>
+%<*option>
+% \fi
+%
+% \subsection{Sukkzessives Abarbeiten von Layoutoptionen im Dokument}
+%
+% Werden mit \cs{TUDoptions} nach \cs{begin\{document\}} mehrere Layoutoptionen 
+% gleichzeitig angegeben, muss dafür Sorge getragen werden, dass diese in der 
+% korrekten Reihenfolge abgearbeitet werden. 
+%
+% Das Makro \cs{TUD@SpecialOptionAtDocument} kann innerhalb von \cs{TUD@key} 
+% verwendet werden, um einen im obligatorischen Argument angegebenen Schalter 
+% zu aktivieren. Dabei wird über \cs{tud@atdocument@hook} garantiert, dass der 
+% Befehl \cs{tud@atdocument@process}, welcher für die Abarbeitung der einzelnen 
+% Makros in der richtigen Reihenfolge verantwortlich ist, lediglich einmal über 
+% \cs{AtEndOfFamilyOptions} ausgeführt wird.
+% \ToDo{Überarbeiten, verwenden von \cs{AtEndOfFamilyOptions*} aus v3.23}[v2.06]
+% \ToDo{%
+%   Problem bei \cs{TUDoptions} mit \cs{AtEndOfFamilyOptions} beheben, 
+%   Unterscheidung durch AfterEndPreamble eigentlich nicht notwendig
+% }[v2.06]
+%
+% \begin{macro}{\TUD@SpecialOptionAtDocument}
+% \changes{v2.05}{2016/06/14}{neu}^^A
+% \begin{macro}{\tud@atdocument@hook}
+% \changes{v2.05}{2016/06/14}{neu}^^A
+%    \begin{macrocode}
+%<*class&!inherit|package&fonts>
+\newcommand*\tud@atdocument@hook{}
+\let\tud@atdocument@hook\relax
+\newcommand*\TUD@SpecialOptionAtDocument[1]{}
+\AfterEndPreamble{%
+  \renewcommand*\TUD@SpecialOptionAtDocument[1]{%
+    \ifx\tud@atdocument@hook\relax%
+      \gdef\tud@atdocument@hook{\global\let\tud@atdocument@hook\relax}%
+      \AtEndOfFamilyOptions{%
+        \tud@atdocument@hook%
+        \tud@atdocument@process%
+      }%
+    \fi%
+    \gappto\tud@atdocument@hook{\global\booltrue{@#1}}%
+  }%
+}
+%</class&!inherit|package&fonts>
+%    \end{macrocode}
+% \end{macro}^^A \tud@atdocument@hook
+% \end{macro}^^A \TUD@SpecialOptionAtDocument
+%
+% \iffalse
+%</option>
 %<*body>
 % \fi
+%
+% \begin{macro}{\tud@atdocument@process}
+% \changes{v2.05}{2016/06/14}{neu}^^A
+% \begin{macro}{\if@tud@font@set}
+% \changes{v2.05}{2016/06/14}{neu}^^A
+% \begin{macro}{\if@tud@math@set}
+% \changes{v2.05}{2016/06/14}{neu}^^A
+% \begin{macro}{\if@tud@font@skip@set}
+% \changes{v2.05}{2016/06/14}{neu}^^A
+% \begin{macro}{\if@tud@x@scr@headings@reset}
+% \changes{v2.05}{2016/06/14}{neu}^^A
+% \begin{macro}{\if@tud@cd@process}
+% \changes{v2.05}{2016/06/14}{neu}^^A
+% \begin{macro}{\if@tud@cdgeometry@process}
+% \changes{v2.05}{2016/06/14}{neu}^^A
+% \begin{macro}{\if@tud@cdgeometry@@process}
+% \changes{v2.05}{2016/06/14}{neu}^^A
+% Das Makro \cs{tud@atdocument@process} wird im Dokument ausgeführt, wenn 
+% mindestens eine Option gesetzt wurde, welche \cs{TUD@SpecialOptionAtDocument} 
+% verwendet. Je nachdem, welche Schalter insgesamt aktiviert wurden, werden die 
+% dazugehörigen Befehle für die Einstellungen von Schriften, Layout und/oder 
+% Satzspiegel in der richtigen Reihenfolge ausgeführt.
+%    \begin{macrocode}
+\newif\if@tud@font@set
+\newif\if@tud@math@set
+\newif\if@tud@font@skip@set
+\newif\if@tud@x@scr@headings@reset
+\newif\if@tud@cd@process
+\newif\if@tud@cdgeometry@process
+\newif\if@tud@cdgeometry@@process
+\newcommand*\tud@atdocument@process{%
+  \if@tud@font@set%
+    \tud@font@set%
+    \global\@tud@font@setfalse%
+    \global\@tud@math@setfalse%
+    \global\@tud@font@skip@setfalse%
+    \global\@tud@cd@processfalse%
+  \fi%
+  \if@tud@math@set%
+    \tud@math@set%
+    \global\@tud@math@setfalse%
+  \fi%
+  \if@tud@font@skip@set%
+    \tud@font@skip@set%
+    \global\@tud@font@skip@setfalse%
+  \fi%
+%<*class>
+  \if@tud@x@scr@headings@reset%
+    \tud@x@scr@headings@reset%
+    \global\@tud@x@scr@headings@resetfalse%
+    \global\@tud@cd@processfalse%
+  \fi%
+  \if@tud@cd@process%
+    \tud@cd@process%
+    \global\@tud@cd@processfalse%
+  \fi%
+  \if@tud@cdgeometry@process%
+    \tud@cdgeometry@process%
+    \global\@tud@cdgeometry@processfalse%
+    \global\@tud@cdgeometry@@processfalse%
+  \fi%
+  \if@tud@cdgeometry@@process%
+    \tud@cdgeometry@@process%
+    \global\@tud@cdgeometry@@processfalse%
+  \fi%
+%</class>
+}
+%    \end{macrocode}
+% \end{macro}^^A \if@tud@cdgeometry@@process
+% \end{macro}^^A \if@tud@cdgeometry@process
+% \end{macro}^^A \if@tud@cd@process
+% \end{macro}^^A \if@tud@x@scr@headings@reset
+% \end{macro}^^A \if@tud@font@skip@set
+% \end{macro}^^A \if@tud@math@set
+% \end{macro}^^A \if@tud@font@set
+% \end{macro}^^A \tud@atdocument@process
+%
+% \iffalse
+%</body>
+%<*execute>
+%<*class&!inherit|package&fonts>
+% \fi
+%
+% \subsection{Versionsabhängige Voreinstellungen}
+%
+% Voreinstellungen von neu eingeführten Optionen, welche die resultierende 
+% Ausgabe entscheidend verändern könnten, werden hier versionsabhängig gesetzt.
+% Hierfür wird der Schlüssel \opt{tudscrver} des Mitglieds \val{.comp} vor 
+% allen anderen Schlüsseln ausgewertet. Danach kann mit \cs{tud@if@v@lower} auf 
+% die gewählte Kompatibilitäsversion getestet werden.
+%    \begin{macrocode}
+\DeclareOption*{}
+\FamilyProcessOptions[.comp]{TUD}\relax
+%    \end{macrocode}
+% Ab der \TUDScript-Version~v2.05 werden einige vertikale Abstände abhängig von 
+% der Schriftgröße definiert. Sollte eine frühere Kompatibilitätseinstellung 
+% angegeben worden sein, wird dieses verhalten deaktiviert.
+%    \begin{macrocode}
+\tud@if@v@lower{2.05}{%
+  \TUD@key@preset{relspacing}{false}%
+}{%
+  \TUD@key@preset{relspacing}{true}%
+}%
+%    \end{macrocode}
+% Ab \TUDScript-Version~v2.06 werden die verwendeten Schriften auf \OpenSans 
+% gesetzt, für vorherige Versionen auf \Univers. Weiterhin werden griechische 
+% Glyphen im Mathematikmodus ab der \TUDScript-Version~v2.06 kursiv gesetzt. 
+% Dies betrifft insbesondere die Majuskeln, welche bei \LaTeX normalerweise
+% aufrecht gesetzt werden.
+%    \begin{macrocode}
+\tud@if@v@lower{2.06}{%
+%<!(class&poster)>  \TUD@key@preset{cdoldfont}{true}%
+%<class&poster>  \TUD@key@preset{cdoldfont}{ultrabold}%
+  \TUD@key@preset{slantedgreek}{standard}%
+}{%
+%<!(class&poster)>  \TUD@key@preset{cdfont}{true}%
+%<class&poster>  \TUD@key@preset{cdfont}{ultrabold}%
+  \TUD@key@preset{slantedgreek}{true}%
+}%
+%    \end{macrocode}
+%
+% \iffalse
+%</class&!inherit|package&fonts>
+% \fi
+%
+% \subsection{Durchreichen von Optionen und Standardoptionen}
+%
+% Durchreichen aller Klassenoptionen an die \KOMAScript-Klasse bzw. an die
+% genutzte \TUDScript-Elternklasse. Für Klassen wird vor dem Durchreichen noch 
+% geprüft, ob ein spezielles Papierformat angegeben wurde.
+%    \begin{macrocode}
+%<class&!inherit>\DeclareOption*{\tud@x@scr@checkoptions}
+%<*class&inherit>
+\DeclareOption*{\PassOptionsToClass{\CurrentOption}{\TUD@Class@Parent}}
+%</class&inherit>
+%<package&fonts>\DeclareOption*{\KOMAoptions{\CurrentOption}}
+%<package&comp>\DeclareOption*{\TUDoptions{\CurrentOption}}
+%    \end{macrocode}
+% Es werden die Standardoptionen ausgeführt. Für die Klasse \cls{tudscrposter} 
+% werden die Farben aktiviert.
+%    \begin{macrocode}
+%<*class&!inherit>
+\TUDExecuteOptions{%
+%<*class&(book|report|article)>
+  cd=true,tudbookmarks=true%
+%</class&(book|report|article)> 
+%<*class&poster>
+  cd=bicolor,tudbookmarks=false%
+%</class&poster>
+}
+%</class&!inherit>
+%<*package&tutorial>
+\KOMAoptions{headings=small}
+\TUDExecuteOptions{cdfoot=true,ToDo=true}
+%</package&tutorial>
+\TUDProcessOptions\relax
+%    \end{macrocode}
+% Die korrespindierende \KOMAScript-Klasse bzw. \TUDScript-Elternklasse wird 
+% geladen.
+%    \begin{macrocode}
+%<*class&!inherit>
+\LoadClass{\TUD@Class@KOMA}[2018/03/30]
+%</class&!inherit>
+%<*class&inherit>
+\LoadClass{\TUD@Class@Parent}
+%</class&inherit>
+%    \end{macrocode}
+%
+% \iffalse
+%</execute>
+%<*body>
+% \fi
+%
+% \subsection{Anpassungen für das Paket \pkg{textcase}}
 %
 % \begin{macro}{\tud@x@textcase@uclcnotmath}
 % \changes{v2.02}{2014/06/27}{\pkg{textcase}: Ignorieren von Fußnoten im 
@@ -595,58 +616,6 @@
 %
 % \iffalse
 %</body>
-%<*execute>
-% \fi
-%
-% \subsection{Durchreichen von Optionen und Standardoptionen}
-%
-% Durchreichen aller Klassenoptionen an die \KOMAScript-Klasse bzw. an die
-% genutzte \TUDScript-Elternklasse. Für Klassen wird vor dem Durchreichen noch 
-% geprüft, ob ein spezielles Papierformat angegeben wurde.
-%    \begin{macrocode}
-%<class&!inherit>\DeclareOption*{\tud@x@scr@paper}
-%<*class&inherit>
-\DeclareOption*{\PassOptionsToClass{\CurrentOption}{\TUD@Class@Parent}}
-%</class&inherit>
-%<package&fonts>\DeclareOption*{\KOMAoptions{\CurrentOption}}
-%<package&comp>\DeclareOption*{\TUDoptions{\CurrentOption}}
-%    \end{macrocode}
-% Es werden die Standardoptionen ausgeführt. Für die Klasse \cls{tudscrposter} 
-% werden die Farben aktiviert.
-%    \begin{macrocode}
-%<*class&!inherit|package&fonts>
-\TUDExecuteOptions{%
-%<*class&(book|report|article)>
-  cd=true,cdfont=true,tudbookmarks=true%
-%</class&(book|report|article)> 
-%<*class&poster>
-  cd=bicolor,cdfont=ultrabold,tudbookmarks=false%
-%</class&poster>
-%<*package&fonts>
-  cdfont=true%
-%</package&fonts>
-}
-%</class&!inherit|package&fonts>
-%<*package&tutorial>
-\KOMAoptions{headings=small}
-\TUDoptions{cdfoot=true}
-\TUDExecuteOptions{ToDo=true}
-%</package&tutorial>
-\TUDProcessOptions\relax
-%    \end{macrocode}
-% Die korrespindierende \KOMAScript-Klasse bzw. \TUDScript-Elternklasse wird 
-% geladen.
-%    \begin{macrocode}
-%<*class&!inherit>
-\LoadClass{\TUD@Class@KOMA}[2018/03/30]
-%</class&!inherit>
-%<*class&inherit>
-\LoadClass{\TUD@Class@Parent}
-%</class&inherit>
-%    \end{macrocode}
-%
-% \iffalse
-%</execute>
 % \fi
 %
 % \Finale
