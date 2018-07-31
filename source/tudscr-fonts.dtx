@@ -1,4 +1,4 @@
-% \CheckSum{2278}
+% \CheckSum{2299}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-fonts.dtx}[%
-  2018/07/24 v2.06 TUD-Script\space%
+  2018/07/31 v2.06 TUD-Script\space%
 %</driver>
 %<package&identify>\ProvidesPackage{tudscrfonts}[%
 %<*driver|package&identify>
@@ -868,11 +868,30 @@
 %    \begin{macrocode}
 \newif\if@tud@x@scr@fontsize@set
 \TUD@key{fontsize}{%
-  \ifdimen{#1}{%
+  \TUD@set@dimenkey{fontsize}{\@tempa}{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+%    \end{macrocode}
+% Für das Paket wird geprüft, ob die gerade abgearbeitete Option global als
+% Klassenoption angegeben wurde. Für den Fall, dass dies nicht so ist~-- die 
+% Option also lokal dem Paket selbst übergeben wurde~--, wird eine Warnung mit
+% dem Hinweis auf das vorgeschlagene Vorgehen ausgegeben.
+%    \begin{macrocode}
+%<*package>
+    \@expandtwoargs\in@{,\CurrentOption,}{,\@globaloptionslist,}%
+    \ifin@\else%
+      \edef\tud@res@a{%
+        \noexpand\PackageWarning{tudscrfonts}%
+        {%
+          The key `\CurrentOption' should only be\MessageBreak%
+          used as class option%
+        }%
+      }%
+      \expandafter\AtEndOfPackage\expandafter{\tud@res@a}%
+    \fi
+%</package>
     \@tud@x@scr@fontsize@settrue%
     \TUD@KOMAoptions{fontsize=#1}%
-    \FamilyKeyStateProcessed%
-  }{}%
+  \fi%
 }
 %<*class>
 \AtEndOfClass%
@@ -892,8 +911,8 @@
     \PackageWarning{tudscrfonts}%
 %</package>
     {%
-      The key `fontsize=#1' should only be used\MessageBreak%
-      as class option%
+      The key `fontsize=#1' should only be\MessageBreak%
+      used as class option%
     }%
     \TUD@SpecialOptionAtDocument{tud@font@set}%
     \FamilyKeyStateProcessed%
