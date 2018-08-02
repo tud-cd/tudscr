@@ -1,4 +1,4 @@
-% \CheckSum{2185}
+% \CheckSum{2195}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-area.dtx}[%
-  2018/07/24 v2.06 TUD-Script (type or page area)%
+  2018/08/02 v2.06 TUD-Script (type or page area)%
 ]
 \documentclass[english,ngerman,xindy]{tudscrdoc}
 \usepackage[T1]{fontenc}
@@ -716,6 +716,8 @@
   \PreventPackageFromLoading{geometry}%
 \else
   \RequirePackage{geometry}[2010/09/12]%
+\fi%
+\AfterPackage*{geometry}{
   \CheckCommand*\Gm@initnewgm{%
     \Gm@passfalse
     \Gm@swap@papersizefalse
@@ -904,8 +906,8 @@
       \edef\@tempa{\@tempb,#1}%
       \tud@cs@store{Gm@restore@org}%
       \eappto\Gm@restore@org{%
-        \paperwidth=\the\paperwidth\relax%
-        \paperheight=\the\paperheight\relax%
+        \noexpand\paperwidth=\the\paperwidth\relax%
+        \noexpand\paperheight=\the\paperheight\relax%
       }%
       \def\@tempc{\tud@cs@use{newgeometry}}%
       \expandafter\@tempc\expandafter{\@tempa}%
@@ -1188,8 +1190,8 @@
     \tud@area@set{paper}%
     \ifstr{#2}{newgeometry}{%
       \eappto\Gm@restore@org{%
-        \paperwidth=\the\paperwidth\relax%
-        \paperheight=\the\paperheight\relax%
+        \noexpand\paperwidth=\the\paperwidth\relax%
+        \noexpand\paperheight=\the\paperheight\relax%
       }%
     }{%
       \etex@unexpanded{\epreto{\tud@x@geometry@parameter}}{%
@@ -1279,27 +1281,6 @@
 %    \end{macrocode}
 % \end{macro}^^A \Gm@changelayout
 % \end{macro}^^A \restoregeometry
-% \begin{macro}{\tud@cdgeometry@hmargin}
-% \begin{macro}{\tud@cdgeometry@vmargin}
-% \begin{macro}{\tud@cdgeometry@tudmargin}
-% \begin{macro}{\tud@cdgeometry@ddcmargin}
-% Dies sind Hilfsmakros für die Definition der unterschiedichen Seitenlayouts
-% (horizontale und vertikale Ränder). Es handelt sich dabei um die Seitenränder 
-% für den normalen Textbereich sowie die angepassten vertikalen Einstellungen
-% für die Seitenstilvarianten mit TUD-Kopf. Im Kompatibilitätsmodus für die 
-% Version~v2.02 gibt es außerdem einen separaten Satzspiegel für den \DDC-Fuß.
-% Gesetzt werden diese in Abhängigkeit von der Option \opt{cdgeometry} im
-% Makro \cs{tud@cdgeometry@@process} bzw. \cs{tud@cdgeometry@@@process}.
-%    \begin{macrocode}
-  \newcommand*\tud@cdgeometry@hmargin{}%
-  \newcommand*\tud@cdgeometry@vmargin{}%
-  \newcommand*\tud@cdgeometry@tudmargin{}%
-  \tud@if@v@lower{2.03}{\newcommand*\tud@cdgeometry@ddcmargin{}}{}%
-%    \end{macrocode}
-% \end{macro}^^A \tud@cdgeometry@ddcmargin
-% \end{macro}^^A \tud@cdgeometry@tudmargin
-% \end{macro}^^A \tud@cdgeometry@vmargin
-% \end{macro}^^A \tud@cdgeometry@hmargin
 % \begin{macro}{\tud@cdgeometry@process}
 % \changes{v2.05}{2015/11/29}{neu}^^A
 % Nur falls \pkg{typearea} zum Einsatz kommt, wird am Ende der Präambel die 
@@ -1323,6 +1304,23 @@
 % \changes{v2.03}{2015/01/09}{intiale Festlegung der Länge \cs{marginpar}}^^A
 % \changes{v2.03}{2015/01/13}{Satzspiegel kompatibilitätsabhängig}^^A
 % \begin{macro}{\tud@cdgeometry@@@process}
+% \begin{macro}{\tud@cdgeometry@hmargin}
+% \begin{macro}{\tud@cdgeometry@vmargin}
+% \begin{macro}{\tud@cdgeometry@tudmargin}
+% \begin{macro}{\tud@cdgeometry@ddcmargin}
+% Dies sind Hilfsmakros für die Definition der unterschiedichen Seitenlayouts
+% (horizontale und vertikale Ränder). Es handelt sich dabei um die Seitenränder 
+% für den normalen Textbereich sowie die angepassten vertikalen Einstellungen
+% für die Seitenstilvarianten mit TUD-Kopf. Im Kompatibilitätsmodus für die 
+% Version~v2.02 gibt es außerdem einen separaten Satzspiegel für den \DDC-Fuß.
+% Gesetzt werden diese in Abhängigkeit von der Option \opt{cdgeometry} im
+% Makro \cs{tud@cdgeometry@@process} bzw. \cs{tud@cdgeometry@@@process}.
+%    \begin{macrocode}
+  \newcommand*\tud@cdgeometry@hmargin{}%
+  \newcommand*\tud@cdgeometry@vmargin{}%
+  \newcommand*\tud@cdgeometry@tudmargin{}%
+  \tud@if@v@lower{2.03}{\newcommand*\tud@cdgeometry@ddcmargin{}}{}%
+%    \end{macrocode}
 % Das Makro \cs{tud@cdgeometry@@process} setzt die Option für den gewünschten
 % Satzspiegel um, sowohl für die Seitenränder als auch zur Einberechnung der
 % Kopf- und/oder Fußzeile. Um mehrere Satzspiegel verwenden zu können~-- was
@@ -1501,8 +1499,8 @@
       \ifdim\dimexpr\tud@dim@extrabottommargin\relax=\z@\relax\else%
         \ClassWarning{\TUD@Class@Name}{%
           Option `extrabottommargin' is ineffective when\MessageBreak%
-          package typearea or custom layout is used\MessageBreak%
-          (`cdgeometry=false/custom')%
+          package `typearea' or custom layout is used\MessageBreak%
+          with `cdgeometry=false/custom'%
         }%
       \fi%
 %    \end{macrocode}
@@ -1661,12 +1659,13 @@
 %    \begin{macrocode}
     \ifdim\tud@len@areadiff<\z@\relax\setlength\tud@len@areadiff{\z@}\fi%
     \global\tud@len@areadiff=\tud@len@areadiff%
+%<*book|report|article>
+    \setlength\tud@len@areaheadvskip{.22\tud@len@topmargin}%
     \if@tud@cdgeometry@adjust%
-      \setlength\tud@len@areaheadvskip{.3\tud@len@topmargin}%
-    \else%
-      \setlength\tud@len@areaheadvskip{.6\tud@len@topmargin}%
+      \setlength\tud@len@areaheadvskip{.5\tud@len@areaheadvskip}%
     \fi%
     \global\tud@len@areaheadvskip=\tud@len@areaheadvskip%
+%</book|report|article>
 %    \end{macrocode}
 % Für den Satzspiegel der Version~v2.02 wird außerdem die Länge für den höheren 
 % Seitenfuß gesetzt.
@@ -1741,6 +1740,10 @@
     \fi%
   }%
 %    \end{macrocode}
+% \end{macro}^^A \tud@cdgeometry@ddcmargin
+% \end{macro}^^A \tud@cdgeometry@tudmargin
+% \end{macro}^^A \tud@cdgeometry@vmargin
+% \end{macro}^^A \tud@cdgeometry@hmargin
 % \end{macro}^^A \tud@cdgeometry@@@process
 % \end{macro}^^A \tud@cdgeometry@@process
 % \begin{macro}{\tud@cdgeometry@hincl}
@@ -1781,7 +1784,7 @@
 % benötigten Satzspiegel erstellt. Mit dem Setzen des Seitenstils wird der
 % jeweils richtige bzw. benötigte Satzspiegel ausgewählt.
 %    \begin{macrocode}
-\fi
+}
 %    \end{macrocode}
 % \begin{macro}{\tud@BeforeSelectAnyPageStyle}
 % \changes{v2.02}{2014/06/23}{neu}^^A
@@ -1863,8 +1866,8 @@
 % Im Seitenfuß wird für die Seitenzahl und ggf. die Kolumnentitel die passende 
 % Schrift verwendet.
 %    \begin{macrocode}
-      \tud@komafont@set{pagefoot}{\usekomafont{tudheadings}}%
       \tud@komafont@set{pagenumber}{\usekomafont{tudheadings}}%
+      \tud@komafont@set{pagefoot}{\usekomafont{tudheadings}}%
 %    \end{macrocode}
 % Dies ist der Fall, wenn kein \pgs{tudheadings}-Seitenstil geladen werden soll.
 % Zusätzlich zum Satzspeigel wird außerdem der Seitenstil \pgs{empty} 
@@ -1892,8 +1895,8 @@
 %    \end{macrocode}
 % Die Schriften für Seitenzahl und Kolumnentitel werden zurückgesetzt.
 %    \begin{macrocode}
-      \tud@komafont@unset{pagefoot}%
       \tud@komafont@unset{pagenumber}%
+      \tud@komafont@unset{pagefoot}%
     }%
 %    \end{macrocode}
 % Die Länge \cs{tud@len@areavskip} wird vorsichtshalber global gesetzt.
@@ -2060,6 +2063,8 @@
   \let\Gm@layoutwidth\paperwidth%
   \let\Gm@layouthoffset\z@%
   \let\Gm@layoutvoffset\z@%
+  \setlength\tud@len@layoutheight{\paperheight}%
+  \setlength\tud@len@layoutwidth{\paperwidth}%
   \renewcommand*\tud@cdgeometry@@process{\tud@cdgeometry@set}%
   \let\tud@BeforeSelectAnyPageStyle\@gobble%
   \providecommand*\tud@setgeometry[1]{}%
