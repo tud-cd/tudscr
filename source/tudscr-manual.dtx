@@ -1,4 +1,4 @@
-% \CheckSum{4334}
+% \CheckSum{4406}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -5762,34 +5762,19 @@
 % \changes{v2.02}{2014/07/10}{Verwendung von \pkg{todonotes}}^^A
 % \changes{v2.03}{2015/01/25}{Ausgabe auf bestimmten Typ beschränkbar}^^A
 % \changes{v2.05}{2015/11/02}{Farbkodierung durch optionale Versionsnummer}^^A
-% \begin{macro}{\tud@todo@type@color}
-% \changes{v2.05}{2015/11/02}{neu}^^A
-% \begin{macro}{\tud@todo@marginnote}
-% \changes{v2.05}{2016/05/31}{neu}^^A
+% \changes{v2.06}{2018/08/02}{farbige Ausgabe abhängig von Versionsnummer}^^A
+% \begin{macro}{\tud@todo@type@use}
+% \changes{v2.06}{2018/08/02}{neu}^^A
 % \begin{macro}{\ListOfToDo}
 % \changes{v2.02}{2014/07/10}{neu}^^A
 % Mit dem Befehl \cs{ToDo}\oarg{Option}\marg{ToDo-Notiz}\oarg{Versionsnummer}
 % kann bei aktivierter Option \opt{ToDo} eine Notiz mit einer offenen Aufgabe
-% erstellt werden. Das vorangestellte Argument kann Optionen beinhalten, welche
-% durch \pkg{todonotes} unterstützt werden. Außerdem werden die fünf booleschen
-% Schlüssel \val{doc}, \val{man}, \val{imp}, \val{urg} und \val{nxt} definiert,
-% welche eine farbliche Kodierung erzeugen, um die Aufgaben tu kategorisieren.
+% erstellt werden. Das erste optionale Argument kann die Kategorisierungstypen
+% \val{doc}, \val{imp} und \val{rls} beinhalten, welche für eine spezifische
+% farbliche Kodierung sorgen, um die Aufgaben zu kategorisieren.
 %    \begin{macrocode}
 \AfterPackage*{todonotes}{%
-  \newcommand*\tud@todo@type@color[2]{%
-    \define@boolkey{todonotes}{#1}[true]{%
-      \ifdef{\tudprintflag}{}{%
-        \ifbool{KV@todonotes@#1}{\setkeys{todonotes}{color=#2}}{}%
-      }%
-    }%
-  }%
-  \tud@todo@type@color{doc}{HKS41!30}%
-  \tud@todo@type@color{rls}{HKS44!30}%
-  \tud@todo@type@color{imp}{HKS57!50}%
-  \tud@todo@type@color{urg}{HKS07!50}%
-  \tud@todo@type@color{nxt}{HKS92!30}%
-  \undef\tud@todo@type@color%
-  \newcommand*\tud@todo@marginnote{}%
+  \newcommand*\tud@todo@type@use{}%
 %    \end{macrocode}
 % Nun folgt die Definition des eigentlichen Befehls. Dabei wird zu Beginn
 % \cs{@currentHref} gesichert und am Ende wiederhergestellt.
@@ -5799,69 +5784,122 @@
       \global\let\tud@currentHref\@currentHref%
       \begingroup%
 %    \end{macrocode}
-% In \cs{@tempa} wird das optionale Argument für den \cs{todo}-Befehl aus dem 
-% Paket \pkg{todonotes} erstellt.
+% In \cs{tud@todo@type@use} werden alle im optionalen Argument angegeben Werte 
+% gesischer, welche entweder über die Liste \cs{tud@todo@type@pos} explizit 
+% angefordert oder nicht über die Liste \cs{tud@todo@type@neg} ausgeschlossen 
+% wurden.
 %    \begin{macrocode}
-        \let\@tempa\@empty%
+        \let\tud@todo@type@use\@empty%
+%    \end{macrocode}
+% Das optionale Argument enthält die gewüscnhten Kategorisierungstypen.
+%    \begin{macrocode}
+        \IfValueTF{#2}{%
+          \IfArgIsEmpty{#2}{}{%
+%    \end{macrocode}
+% Die Ausgabe erfolgt entweder für alle ToDo-Notizen oder nur für die per 
+% Option festgelegten Typen. Dabei wird in einer Schleife geprüft, ob der in 
+% der aktuellen Notiz angegebene Kategorisierungstyp entweder in der Positv- 
+% oder aber in der Negativ-Liste enthalten ist.
+%    \begin{macrocode}
+            \let\tud@todo@type@use\relax%
+            \ifx\tud@todo@type@pos\relax%
+              \def\tud@res@a##1{%
+                \ifinlist{##1}{\tud@todo@type@use}{}{%
+                  \ifinlist{##1}{\tud@todo@type@neg}{}{%
+                    \listadd\tud@todo@type@use{##1}%
+                  }%
+                }%
+              }%
+            \else%
+              \def\tud@res@a##1{%
+                \ifinlist{##1}{\tud@todo@type@use}{}{%
+                  \ifinlist{##1}{\tud@todo@type@pos}{%
+                    \listadd\tud@todo@type@use{##1}%
+                  }{}%
+                }%
+              }%
+            \fi%
+            \forcsvlist\tud@res@a{#2}%
+          }%
+        }{}%
+%    \end{macrocode}
+% Nur wenn mindestens ein aktiver Kategorisierungstyp gefunden wurde oder aber
+% gar keine Angabe gemacht wurde, erfolgt die Ausgabe.
+%    \begin{macrocode}
+        \ifx\tud@todo@type@use\relax\else%
+%    \end{macrocode}
+% In den temporären Makros werden die Einstellungen für die farbige Ausprägung 
+% von Randnotiz (\cs{tud@res@a}) und der Textbox im Fließtex(\cs{tud@res@b}) 
+% sowie das Label der Randnotiz (\cs{tud@res@c}) gespeichert.
+%    \begin{macrocode}
+          \let\tud@res@a\@empty%
+          \let\tud@res@b\@empty%
+          \let\tud@res@c\@empty%
+%    \end{macrocode}
+% Der Kategorisierungstyp für Releases \val{rls} ist quasi vorkonfiguriert. 
+% Sind weitere Kategorisierungstypen angegeben, werden diese ignoriert. Der Typ 
+% für Implemtierung \val{imp} wird vorangig zur Dokumentation \val{doc} 
+% behandelt.
+%    \begin{macrocode}
+          \ifinlist{rls}{\tud@todo@type@use}{%
+            \def\tud@res@a{color=HKS44!30,}%
+            \def\tud@res@b{color=HKS44!30,}%
+            \edef\tud@res@c{v\TUDScriptVersionNumber}%
+          }{%
+            \ifinlist{imp}{\tud@todo@type@use}{%
+              \def\tud@res@a{color=HKS57!50,}%
+            }{%
+              \ifinlist{doc}{\tud@todo@type@use}{%
+                \def\tud@res@a{color=HKS41!30,}%
+              }{}%
+            }%
 %    \end{macrocode}
 % Das angestellte optionale Argument erzeugt zusätzlich eine Notiz am Rand, in
 % welcher vorzugsweise die angedachte Version eingetragen werden kann. Sollte 
 % dieser angegeben sein, wird auf eine gültige Versionsnummer geprüft. Dabei 
 % wird ein möglicherweise vorangestelltes |v| entfernt.
 %    \begin{macrocode}
-        \def\tud@todo@marginnote{ToDo}%
-        \IfValueT{#4}{%
-          \def\tud@todo@marginnote{#4}%
-          \tud@v@get\@tempc{#4}%
+            \def\tud@res@c{ToDo}%
+            \IfValueT{#4}{%
+              \begingroup%
 %    \end{macrocode}
-% Exisitiert die angegebene Versionsnummer, so wird geprüft, ob die des 
-% optionalen Argumentes bereits veraltet ist. Ist dies der Fall, wird die 
-% ToDo-Notiz als dringlich (\val{urg}) gekennzeichnet.
+% Die angegebene Versionsnummer wird geprüft, ob bereits zu einer vergangenen 
+% Version gehört. In diesem Fall wird die ToDo-Notiz entsprechend als dringlich 
+% gekennzeichnet. Entspricht die angegebene Versionsnummer einer späteren 
+% Version, so wird ToDo-Notiz ebenfalls für diese gekennzeichnet.
 %    \begin{macrocode}
-          \ifcsdef{tud@v@\@tempc}{%
-            \ifstr{\@tempc}{\TUDScriptVersionNumber}{}{\def\@tempa{urg}}%
-            \edef\tud@todo@marginnote{v\@tempc}%
-%    \end{macrocode}
-% Exisitiert die angegebene Versionsnummer nicht, so wird geprüft, ob es sich 
-% überhaupt um eine Versionsnummer handelt. Ist dies der Fall, wird die 
-% ToDo-Notiz als Aufgabe für eine spätere Version (\val{nxt}) gekennzeichnet.
-%    \begin{macrocode}
-          }{%
-            \def\@tempa##1.##2##3##4\@nil{##1##2##3}%
-            \edef\@tempb{\expandafter\@tempa\@tempc.000\@nil}%
-            \ifnumber{\@tempb}{%
-              \def\@tempa{nxt}%
-              \edef\tud@todo@marginnote{v\@tempc}%
-            }{\let\@tempa\@empty}%
+                \tud@v@get\tud@res@a{#4}%
+                \def\tud@res@c##1.##2##3##4\@nil{##1##2##3}%
+                \edef\tud@res@b{\expandafter\tud@res@c\tud@res@a.000\@nil}%
+                \ifnumber{\tud@res@b}{%
+                  \edef\tud@res@c{%
+                    \expandafter\tud@res@c\TUDScriptVersionNumber.000\@nil%
+                  }%
+                  \ifnum\tud@res@b>\tud@res@c\relax%
+                    \def\tud@res@b{color=HKS92!30,}%
+                  \else%
+                    \ifnum\tud@res@b<\tud@res@c\relax%
+                      \def\tud@res@b{color=HKS07!50,}%
+                    \else%
+                      \def\tud@res@b{color=HKS41!30,}%
+                    \fi%
+                  \fi%
+                  \def\tud@res@c{v\tud@res@a}%
+                }{%
+                  \let\tud@res@b\@empty%
+                  \def\tud@res@c{#4}%
+                }%
+                \edef\tud@res@c{%
+                  \endgroup%
+                  \def\noexpand\tud@res@b{\tud@res@b}%
+                  \def\noexpand\tud@res@c{\tud@res@c}%
+                }%
+              \tud@res@c%
+            }%
           }%
-        }%
-%    \end{macrocode}
-% Anschließend wird das eigentliche optionale Argument vorangestellt, wobei in
-% diesem ggf. auch der Kategorisierungstyp enthalten ist.
-%    \begin{macrocode}
-        \IfValueT{#2}{\preto\@tempa{#2,}}%
-%    \end{macrocode}
-% Die Ausgabe erfolgt entweder für alle ToDo-Notizen oder nur für die per 
-% Option festgelegten Typen. Dabei wird in einer Schleife geprüft, ob der in 
-% der aktuellen Notiz angegebene Kategorisierungstyp entweder in der Positv- 
-% oder aber in der Negativ-Liste enthalten ist. Soll der aktuelle Typ  
-% ausgegeben werden, wird der Schalter \cs{@tempswa} gesetzt.
-%    \begin{macrocode}
-        \@tempswafalse%
-        \ifx\tud@todo@type@pos\relax\@tempswatrue\fi%
-        \toks@{\forcsvlist\@tempb}%
-        \eaddto@hook\toks@{\expandafter{\@tempa}}%
-        \let\@tempa\@empty%
-        \def\@tempb##1{%
-          \eappto\@tempa{##1,}%
-          \ifinlist{##1}{\tud@todo@type@pos}{\@tempswatrue}{}%
-          \ifinlist{##1}{\tud@todo@type@neg}{\@tempswafalse}{}%
-        }%
-        \the\toks@%
 %    \end{macrocode}
 % Vor der Ausgabe wird ein kleiner vertikaler Abstand eingefügt.
 %    \begin{macrocode}
-        \if@tempswa%
           \ifhmode\par\fi%
           \let\par\relax%
           \vskip\medskipamount%
@@ -5870,7 +5908,7 @@
 % Dann erfolgt die Ausgabe der eigentlichen ToDo-Notiz im Textbereich. Die 
 % Sternversion von \cs{ToDo} unterdrückt dabei die Aufnahme in die ToDo-Liste.
 %    \begin{macrocode}
-          \toks@\expandafter{\@tempa inline}%
+          \toks@\expandafter{\tud@res@b inline}%
           \IfBooleanT{#1}{\addto@hook\toks@{,nolist}}%
           \sbox\z@{%
             \expandafter\todo\expandafter[\the\toks@]{\trim@spaces{#3}\strut}%
@@ -5884,11 +5922,34 @@
           \renewcommand*\marginpar[2][]{%
             \marginnote[##1]{##2}[\dimexpr-\ht\z@+1.6ex+1.75pt\relax]%
           }%
-          \toks@\expandafter{\@tempa noline,nolist}%
-          \settowidth\marginparwidth{\tud@todo@marginnote}%
+          \toks@\expandafter{\tud@res@a noline,nolist}%
+          \settowidth\marginparwidth{\tud@res@c}%
           \addtolength\marginparwidth{\dimexpr1.6ex+1pt\relax}%
-          \expandafter\todo\expandafter[\the\toks@]{\tud@todo@marginnote\strut}%
+          \expandafter\todo\expandafter[\the\toks@]{\tud@res@c\strut}%
           \aftergroup\par\aftergroup\noindent%
+%    \end{macrocode}
+% Wurden im ersten optionalen Argument unbekannte Werte gefunden, werden diese 
+% mit einer Warnung gemeldet.
+%    \begin{macrocode}
+          \listremove{\tud@todo@type@use}{rls}%
+          \listremove{\tud@todo@type@use}{imp}%
+          \listremove{\tud@todo@type@use}{doc}%
+          \ifx\tud@todo@type@use\@empty\else%
+            \begingroup%
+              \let\tud@res@c\@empty%
+              \renewcommand*{\do}[1]{%
+                \appto\tud@res@c{,##1}%
+              }%
+              \dolistloop{\tud@todo@type@use}%
+              \edef\tud@res@c{%
+                \endgroup%
+                \edef\noexpand\tud@res@c{\expandafter\@gobble\tud@res@c}%
+              }%
+            \tud@res@c%
+            \ClassWarning{tudscrmanual}{%
+              Unknown key(s) `\string\ToDo[\tud@res@c]'%
+            }%
+          \fi%
         \fi%
       \endgroup%
       \global\let\@currentHref\tud@currentHref%
@@ -5911,8 +5972,7 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \ListOfToDo
-% \end{macro}^^A \tud@todo@marginnote
-% \end{macro}^^A \tud@todo@type@color
+% \end{macro}^^A \tud@todo@type@use
 % \end{macro}^^A \ToDo
 %
 % \iffalse
