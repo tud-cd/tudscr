@@ -1,4 +1,4 @@
-% \CheckSum{2033}
+% \CheckSum{2045}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-pagestyle.dtx}[%
-  2018/07/24 v2.06 TUD-Script (pagestyle)%
+  2018/08/02 v2.06 TUD-Script (pagestyle)%
 ]
 \documentclass[english,ngerman,xindy]{tudscrdoc}
 \usepackage[T1]{fontenc}
@@ -1546,7 +1546,8 @@
 % Außerdem kann mit der Option \opt{extrabottommargin} gesetzt werden.
 %    \begin{macrocode}
   \else%
-    \ifdimen{#1}{\TUDoptions{extrabottommargin=#1}}{}%
+    \tud@lowerstring\tud@res@a{#1}%
+    \ifdimen{\tud@res@a}{\TUDoptions{extrabottommargin=#1}}{}%
   \fi%
 }
 %    \end{macrocode}
@@ -1782,6 +1783,14 @@
 % \changes{v2.03}{2015/01/27}{neu}^^A
 % \begin{macro}{\footlogosep}
 % \changes{v2.03}{2015/01/27}{neu}^^A
+% \begin{macro}{\tud@footlogo@cmd@set}
+% \changes{v2.04}{2015/06/01}{neu}^^A
+% \begin{macro}{\tud@footlogo@cmd@@set}
+% \changes{v2.03}{2015/01/27}{neu}^^A
+% \changes{v2.03}{2015/02/02}{optionale Parameter für unterschiedliche Dateien 
+% individuell nutzbar}^^A
+% \begin{macro}{\if@tud@footlogo@cmd@set}
+% \changes{v2.04}{2015/06/01}{neu}^^A
 % Mit dem Befehl \cs{footlogo} kann eine kommasparierte Liste für Logos im 
 % Fuß angegeben werden, die mit \cs{footlogosep} voneinander getrennt werden.
 %    \begin{macrocode}
@@ -1796,18 +1805,6 @@
   \tud@comp@resetpagestyle%
 }
 %    \end{macrocode}
-% \end{macro}^^A \footlogosep
-% \end{macro}^^A \tud@footlogo@fileoptions
-% \end{macro}^^A \tud@footlogo@filenames
-% \end{macro}^^A \footlogo
-% \begin{macro}{\tud@footlogo@cmd@set}
-% \changes{v2.04}{2015/06/01}{neu}^^A
-% \begin{macro}{\tud@footlogo@cmd@@set}
-% \changes{v2.03}{2015/01/27}{neu}^^A
-% \changes{v2.03}{2015/02/02}{optionale Parameter für unterschiedliche Dateien 
-% individuell nutzbar}^^A
-% \begin{macro}{\if@tud@footlogo@cmd@set}
-% \changes{v2.04}{2015/06/01}{neu}^^A
 % Die mit \cs{footlogo} angegeben Logos und die dazugehörigen Einstellungen, 
 % welche entweder allgemein über das optionale Argument oder aber individuell 
 % durch \val{:} an den Dateinamen angehängt übergeben wurden, werden hier in
@@ -1894,6 +1891,10 @@
 % \end{macro}^^A \if@tud@footlogo@cmd@set
 % \end{macro}^^A \tud@footlogo@cmd@@set
 % \end{macro}^^A \tud@footlogo@cmd@set
+% \end{macro}^^A \footlogosep
+% \end{macro}^^A \tud@footlogo@fileoptions
+% \end{macro}^^A \tud@footlogo@filenames
+% \end{macro}^^A \footlogo
 % \begin{macro}{\tud@footlogo@cmd@use}
 % \changes{v2.04}{2015/06/01}{neu}^^A
 % Der Befehl \cs{tud@footlogo@cmd@use} wird genutzt, um die einzelnen Logos für
@@ -1919,6 +1920,10 @@
 % \begin{macro}{\tud@footcontent@@do}
 % \changes{v2.04}{2015/04/21}{neu}^^A
 % \changes{v2.05}{2016/04/17}{Stern im Argument erhält aktuellen Inhalt}^^A
+% \begin{macro}{\tud@footcontent@usefont}
+% \changes{v2.06}{2018/08/01}{neu}^^A
+% \begin{macro}{\tud@footcontent@fontsize}
+% \changes{v2.06}{2018/08/01}{neu}^^A
 % \begin{macro}{\tud@footcontent@fontface}
 % \changes{v2.04}{2015/06/01}{neu}^^A
 % \changes{v2.05}{2015/07/21}{Bugfix für die Schriftgröße und den Durchschuss 
@@ -1934,10 +1939,22 @@
 %    \begin{macrocode}
 \newkomafont{tudheadings}{\tud@color{\tud@foot@fontcolor}}
 %    \end{macrocode}
-% Die mit \cs{footcontent} angegebenen Inhalte werden in diesen drei Makros 
-% gesichert, weshalb diese vorher alloziert werden. Anschließend erfolgt die 
-% Definition des Befehls.
+% Dieser Befehl wird zur Formatierung der Schrift im Fußbereich definiert.
 %    \begin{macrocode}
+\newcommand*\tud@footcontent@usefont[1]{%
+  \usekomafont{tudheadings}{%
+    \tud@footcontent@fontsize%
+    \tud@footcontent@fontface%
+    \selectfont%
+    #1%
+  }%
+}
+%    \end{macrocode}
+% Die mit \cs{footcontent} angegebenen Einstellungen und Inhalte werden in 
+% diesen Makros gesichert, weshalb diese vorher alloziert werden. Anschließend
+% erfolgt die Definition des Befehls.
+%    \begin{macrocode}
+\newcommand*\tud@footcontent@fontsize{}
 \newcommand*\tud@footcontent@fontface{}
 \newcommand*\tud@footcontent@left{}
 \newcommand*\tud@footcontent@right{\@nil}
@@ -1947,14 +1964,12 @@
 %    \begin{macrocode}
 \newcommand*\footcontent{%
   \kernel@ifstar{%
-    \renewcommand*\tud@footcontent@fontface{\usekomafont{tudheadings}}%
+    \renewcommand*\tud@footcontent@fontsize{}%
     \tud@footcontent@do%
   }{%
-    \renewcommand*\tud@footcontent@fontface{%
-      \usekomafont{tudheadings}%
+    \renewcommand*\tud@footcontent@fontsize{%
       \setlength\@tempdima{\tud@head@fontsize\p@}%
-      \fontsize{\tud@head@fontsize}{1.25\@tempdima}%
-      \selectfont%
+      \fontsize{\@tempdima}{1.25\@tempdima}%
     }%
     \tud@footcontent@do%
   }%
@@ -1972,7 +1987,13 @@
 }
 \newcommand*\tud@footcontent@@do{}
 \def\tud@footcontent@@do#1#2[#3]{%
-  \appto\tud@footcontent@fontface{#1\selectfont}%
+%    \end{macrocode}
+% Wurde im optionalen Argument für zusätzliche Schrifteinstellungen ein Stern 
+% verwendet, bleibt die bisherige Definition bestehen.
+%    \begin{macrocode}
+  \if\detokenize{*#1}\relax\else%
+    \renewcommand*\tud@footcontent@fontface{#1}%
+  \fi%
 %    \end{macrocode}
 % Wurde in einem der Argumente für den linken und/oder rechten Inhalt ein Stern 
 % verwendet, bleibt die bisherige Definition bestehen.
@@ -1987,7 +2008,9 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@footcontent@right
 % \end{macro}^^A \tud@footcontent@left
+% \end{macro}^^A \tud@footcontent@fontsize
 % \end{macro}^^A \tud@footcontent@fontface
+% \end{macro}^^A \tud@footcontent@usefont
 % \end{macro}^^A \tud@footcontent@@do
 % \end{macro}^^A \tud@footcontent@do
 % \end{KOMAfont}^^A tudheadings
@@ -2158,33 +2181,34 @@
       \linespread{1}%
       \vss%
       \hbox to #2{%
-        \tud@footcontent@fontface%
+        \tud@footcontent@usefont{%
 %    \end{macrocode}
 % Wurde das optionale Argument nach dem obligatorischen nicht genutzt, so wird 
 % der Inhalt über die komplette Breite des Textbereiches ausgegeben.
 %    \begin{macrocode}
-        \def\@tempa{\@nil}%
-        \ifx\@tempa\tud@footcontent@right\relax%
-          \vtop{%
-            \hsize=\dimexpr#2-\@tempdimc\relax%
-            \strut\ignorespaces\tud@footcontent@left\strut%
-          }%
+          \def\@tempa{\@nil}%
+          \ifx\@tempa\tud@footcontent@right\relax%
+            \vtop{%
+              \hsize=\dimexpr#2-\@tempdimc\relax%
+              \strut\ignorespaces\tud@footcontent@left\strut%
+            }%
 %    \end{macrocode}
 % Im zweispaltigen modus werden zwei vertikale Boxen erzeugt, zwischen denen
 % der Abstand \cs{columnsep} eingefügt wird.
 %    \begin{macrocode}
-        \else%
-          \vtop{%
-            \hsize=\dimexpr(#2-\columnsep)/2\relax%
-            \strut\ignorespaces\tud@footcontent@left\strut%
-          }%
-          \hspace{\columnsep}%
-          \vtop{%
-            \hsize=\dimexpr(#2-\columnsep)/2-\@tempdimc\relax%
-            \strut\ignorespaces\tud@footcontent@right\strut%
-          }%
-        \fi%
-        \hss%
+          \else%
+            \vtop{%
+              \hsize=\dimexpr(#2-\columnsep)/2\relax%
+              \strut\ignorespaces\tud@footcontent@left\strut%
+            }%
+            \hspace{\columnsep}%
+            \vtop{%
+              \hsize=\dimexpr(#2-\columnsep)/2-\@tempdimc\relax%
+              \strut\ignorespaces\tud@footcontent@right\strut%
+            }%
+          \fi%
+          \hss%
+        }%
       }%
       \vss\vss%
 %    \end{macrocode}
