@@ -5395,12 +5395,12 @@
     \@tud@res@swafalse%
     \IfArgIsEmpty{#1}{%
       \tud@sec@strut%
-      \ifdin{\@tud@res@swatrue}{}%
+      \tud@ifdin{\@tud@res@swatrue}{}%
     }{%
       \begingroup%
         \usefontofkomafont{#1}%
         \tud@sec@strut%
-        \ifdin{\aftergroup\@tud@res@swatrue}{}%
+        \tud@ifdin{\aftergroup\@tud@res@swatrue}{}%
       \endgroup%
     }%
     \tud@sec@strut%
@@ -6962,14 +6962,16 @@
 \TUD@deprecated@cs{dinbn}{cdfontxn}%
 \TUD@deprecated@cs{textdbn}{textcdxn}%
 \TUD@deprecated@cs{ifdin}{@secondoftwo}
+\newrobustcmd*\tud@ifdin{%
+  \ifx\f@family\tud@cdfont@db%
+    \expandafter\@firstoftwo%
+  \else%
+    \expandafter\@secondoftwo%
+  \fi%
+}
 \if@tud@cdoldfont@active
-  \newrobustcmd*\ifdin{%
-    \ifx\f@family\tud@cdfont@db%
-      \expandafter\@firstoftwo%
-    \else%
-      \expandafter\@secondoftwo%
-    \fi%
-  }%
+  \newcommand*\ifdin{}%
+  \let\ifdin\tud@ifdin%
 \fi
 %%% From File: tudscr-misc.dtx
 \newcommand*\tudbookmark[1][]{\@gobbletwo}

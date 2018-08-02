@@ -1,4 +1,4 @@
-% \CheckSum{1472}
+% \CheckSum{1477}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -977,6 +977,8 @@
 % \begin{macro}{\ifdin}
 % \changes{v2.02}{2014/08/29}{Anpassungen für \pkg{fontspec}}^^A
 % \changes{v2.06}{2018/07/10}{für \OpenSans hinfällig}^^A
+% \begin{macro}{\tud@ifdin}
+% \changes{v2.06}{2018/08/02}{neu}^^A
 % Der Befehl \cs{ifdin} ist für \OpenSans hinfällig.
 %    \begin{macrocode}
 \TUD@deprecated@cs{ifdin}{@secondoftwo}
@@ -985,17 +987,23 @@
 % wird entweder das erste oder das zweite Argument ausgeführt. Dies kann für die
 % Befehle aller Gliederungsebenen genutzt werden, um zwischen der Ausgabe im
 % Dokument sowie Inhaltsverzeichnis und/oder Kolumnentitel zu unterscheiden.
+% Um nicht alle Klassen und Pakete anpassen zu müssen, wird \cs{tud@ifdin} zur 
+% internen Nutzung in jedem Fall definiert, um die Kompatibilität gewährleisten
+% zu können.
 %    \begin{macrocode}
+\newrobustcmd*\tud@ifdin{%
+  \ifx\f@family\tud@cdfont@db%
+    \expandafter\@firstoftwo%
+  \else%
+    \expandafter\@secondoftwo%
+  \fi%
+}
 \if@tud@cdoldfont@active
-  \newrobustcmd*\ifdin{%
-    \ifx\f@family\tud@cdfont@db%
-      \expandafter\@firstoftwo%
-    \else%
-      \expandafter\@secondoftwo%
-    \fi%
-  }%
+  \newcommand*\ifdin{}%
+  \let\ifdin\tud@ifdin%
 \fi
 %    \end{macrocode}
+% \end{macro}^^A \tud@ifdin
 % \end{macro}^^A \ifdin
 %
 % \iffalse
