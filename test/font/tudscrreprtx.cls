@@ -12,8 +12,8 @@
 %% tudscr-layout.dtx  (with options: `class,report,option')
 %% tudscr-title.dtx  (with options: `class,report,option')
 %% tudscr-frontmatter.dtx  (with options: `class,report,option')
-%% tudscr-comp.dtx  (with options: `class,report,option')
 %% tudscr-misc.dtx  (with options: `class,report,option')
+%% tudscr-comp.dtx  (with options: `class,report,option')
 %% tudscr-misc.dtx  (with options: `class,report,execute')
 %% tudscr-base.dtx  (with options: `class,report,body')
 %% tudscr-fonts.dtx  (with options: `class,report,body')
@@ -214,8 +214,9 @@
       \TUDoptions{cdhead=heavy}%
     \fi%
   \else%
-    \ifdimen{#1}{%
-      \ifdim#1>\z@\relax%
+    \tud@lowerstring\tud@res@a{#1}%
+    \ifdimen{\tud@res@a}{%
+      \ifdim\tud@res@a>\z@\relax%
         \TUDoptions{fontsize=#1}%
         \tud@cdfont@activate%
         \FamilyKeyStateProcessed%
@@ -301,11 +302,11 @@
 }
 \newif\if@tud@x@scr@fontsize@set
 \TUD@key{fontsize}{%
-  \ifdimen{#1}{%
+  \TUD@set@dimenkey{fontsize}{\@tempa}{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \@tud@x@scr@fontsize@settrue%
     \TUD@KOMAoptions{fontsize=#1}%
-    \FamilyKeyStateProcessed%
-  }{}%
+  \fi%
 }
 \AtEndOfClass%
 {%
@@ -315,8 +316,8 @@
     \@tud@x@scr@fontsize@settrue%
     \ClassWarning{\TUD@Class@Name}%
     {%
-      The key `fontsize=#1' should only be used\MessageBreak%
-      as class option%
+      The key `fontsize=#1' should only be\MessageBreak%
+      used as class option%
     }%
     \TUD@SpecialOptionAtDocument{tud@font@set}%
     \FamilyKeyStateProcessed%
@@ -487,19 +488,6 @@
   \TUD@SpecialOptionAtDocument{tud@cdgeometry@@process}%
   \FamilyKeyStateProcessed%
 }
-\newcommand*\tud@x@ta@silent{}
-\newcommand*\tud@x@ta@verbose{}
-\TUD@RecommendPackage{silence}[2012/07/02]%
-\AfterPackage*{silence}{%
-  \WarningFilter[typearea]{typearea}{DIV for}%
-  \WarningFilter[typearea]{typearea}{Bad type area settings!}%
-  \WarningFilter[typearea]{typearea}{Maybe no optimal type area settings!}%
-  \WarningFilter[typearea]{typearea}{Very low DIV value!}%
-  \renewcommand*\tud@x@ta@silent{\ActivateWarningFilters[typearea]}%
-  \renewcommand*\tud@x@ta@verbose{\DeactivateWarningFilters[typearea]}%
-  \BeforePackage{typearea}{\tud@x@ta@silent}%
-  \AfterPackage{typearea}{\tud@x@ta@verbose}%
-}
 %%% From File: tudscr-pagestyle.dtx
 \tud@locked@newnum{tud@head@font@num}{0}
 \tud@locked@newnum{tud@head@bar@num}{0}
@@ -594,7 +582,8 @@
       \tud@locked@bool@set{@tud@foot@colored}{true}%
     \fi%
   \else%
-    \ifdimen{#1}{\TUDoptions{extrabottommargin=#1}}{}%
+    \tud@lowerstring\tud@res@a{#1}%
+    \ifdimen{\tud@res@a}{\TUDoptions{extrabottommargin=#1}}{}%
   \fi%
 }
 \newcommand*\tud@ps@store[1]{%
@@ -825,9 +814,10 @@
       \renewcommand*\tud@cleardoublepage{\null\thispagestyle{empty}\newpage}%
     \fi%
   \else%
-    \ifstr{#1}{color}{\TUDoptions{clearcolor=true}}{%
-    \ifstr{#1}{colour}{\TUDoptions{clearcolor=true}}{%
-    \ifstr{#1}{current}{%
+    \tud@lowerstring\tud@res@a{#1}%
+    \ifstr{\tud@res@a}{color}{\TUDoptions{clearcolor=true}}{%
+    \ifstr{\tud@res@a}{colour}{\TUDoptions{clearcolor=true}}{%
+    \ifstr{\tud@res@a}{current}{%
       \renewcommand*\tud@cleardoublepage{\cleardoubleoddstandardpage}%
       \FamilyKeyStateProcessed%
     }{%
@@ -846,6 +836,14 @@
   \fi%
 }
 \newcommand*\tud@pagecolor{}%
+\newcommand*\tud@dim@pageheadingsvskip{0pt}
+\TUD@key{pageheadingsvskip}{%
+  \TUD@set@dimenkey{pageheadingsvskip}{\tud@dim@pageheadingsvskip}{#1}%
+}
+\newcommand*\tud@dim@headingsvskip{0pt}
+\TUD@key{headingsvskip}{%
+  \TUD@set@dimenkey{headingsvskip}{\tud@dim@headingsvskip}{#1}%
+}
 \DefineFamilyMember{KOMA}
 \DefineFamilyKey{KOMA}{headings}{%
   \TUD@SpecialOptionAtDocument{tud@x@scr@headings@reset}%
@@ -858,14 +856,6 @@
 \DefineFamilyKey{KOMA}{chapterprefix}{%
   \TUD@SpecialOptionAtDocument{tud@x@scr@headings@reset}%
   \FamilyKeyStateProcessed%
-}
-\newcommand*\tud@dim@pageheadingsvskip{0pt}
-\TUD@key{pageheadingsvskip}{%
-  \TUD@set@dimenkey{pageheadingsvskip}{\tud@dim@pageheadingsvskip}{#1}%
-}
-\newcommand*\tud@dim@headingsvskip{0pt}
-\TUD@key{headingsvskip}{%
-  \TUD@set@dimenkey{headingsvskip}{\tud@dim@headingsvskip}{#1}%
 }
 %%% From File: tudscr-title.dtx
 \newif\if@tud@subjectthesis
@@ -1019,6 +1009,62 @@
       \fi%
     \fi%
   \fi%
+}
+%%% From File: tudscr-misc.dtx
+\newif\if@tud@bookmarks
+\TUD@key{tudbookmarks}[true]{%
+  \TUD@set@ifkey{tudbookmarks}{@tud@bookmarks}{#1}%
+}
+% TODO überarbeiten der symbole für Fußnoten in Überschriften
+\newif\if@tud@symbolheadings
+\TUD@key{footnotes}{%
+  \TUD@set@numkey{footnotes}{@tempa}{%
+    {nosymbolheadings}{0},{numberheadings}{0},%
+    {symbolheadings}{1}%
+  }{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \ifcase\@tempa\relax% nosymbolheadings
+      \@tud@symbolheadingsfalse%
+    \or% symbolheadings
+      \@tud@symbolheadingstrue%
+    \fi%
+  \fi%
+}
+\robustify{\footnote}
+\newcommand*\tud@sec@symbolheadings[1]{%
+  \begingroup%
+    \if@tud@symbolheadings%
+      \let\c@footnote\c@symbolheadings%
+      \renewcommand*\thefootnote{\fnsymbol{symbolheadings}}%
+    \fi%
+    \tud@sec@format{#1}%
+  \endgroup%
+}
+\AtEndOfClass{%
+  \newcounter{symbolheadings}[chapter]
+}
+\newcommand*\tud@x@scr@checkoptions{%
+  \expandafter\tud@x@scr@pt\CurrentOption pt\@nil%
+  \PassOptionsToClass{\CurrentOption}{\TUD@Class@KOMA}%
+}
+\newcommand*\tud@x@scr@pt{}
+\def\tud@x@scr@pt #1pt#2\@nil{%
+  \ifstr{#2}{pt}{\ifnumber{#1}{\@tud@x@scr@fontsize@settrue}{}}{}%
+}
+\newcommand*\tud@atdocument@hook{}
+\let\tud@atdocument@hook\relax
+\newcommand*\TUD@SpecialOptionAtDocument[1]{}
+\AfterEndPreamble{%
+  \renewcommand*\TUD@SpecialOptionAtDocument[1]{%
+    \ifx\tud@atdocument@hook\relax%
+      \gdef\tud@atdocument@hook{\global\let\tud@atdocument@hook\relax}%
+      \AtEndOfFamilyOptions{%
+        \tud@atdocument@hook%
+        \tud@atdocument@process%
+      }%
+    \fi%
+    \gappto\tud@atdocument@hook{\global\booltrue{@#1}}%
+  }%
 }
 %%% From File: tudscr-comp.dtx
 \newcommand*\TUD@deprecated@key[2]{%
@@ -1328,12 +1374,14 @@
 \TUD@key{colour}[true]{\TUDoptions{color=#1}}
 \newif\if@tud@x@fontspec@requested
 \TUD@key{fontspec}[true]{%
-  \ClassWarningNoLine{\TUD@Class@Name}%
-  {%
-    The option key `fontspec' is deprecated\MessageBreak%
-    You should load the package `fontspec' manually%
-  }%
   \TUD@set@ifkey{fontspec}{@tud@x@fontspec@requested}{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \ClassWarningNoLine{\TUD@Class@Name}%
+    {%
+      The option key `fontspec' is deprecated\MessageBreak%
+      You should load the package `fontspec' manually%
+    }%
+  \fi%
 }
 \AtEndOfClass%
 {%
@@ -1352,57 +1400,25 @@
   \fi%
 }
 %%% From File: tudscr-misc.dtx
-\newif\if@tud@bookmarks
-\TUD@key{tudbookmarks}[true]{%
-  \TUD@set@ifkey{tudbookmarks}{@tud@bookmarks}{#1}%
-}
-\newif\if@tud@symbolheadings
-\TUD@key{footnotes}{%
-  \TUD@set@numkey{footnotes}{@tempa}{%
-    {nosymbolheadings}{0},{numberheadings}{0},%
-    {symbolheadings}{1}%
-  }{#1}%
-  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \ifcase\@tempa\relax% nosymbolheadings
-      \@tud@symbolheadingsfalse%
-    \or% symbolheadings
-      \@tud@symbolheadingstrue%
-    \fi%
-  \fi%
-}
-\AtEndOfClass{%
-  \newcounter{symbolheadings}[chapter]
-}
-% TODO Dateien misc mit comp tauschen
-%%% From File: tudscr-misc.dtx
-\newcommand*\TUD@SpecialOptionAtDocument[1]{}
-\newcommand*\tud@x@scr@checkoptions{%
-  \expandafter\tud@x@scr@pt\CurrentOption pt\@nil%
-  \PassOptionsToClass{\CurrentOption}{\TUD@Class@KOMA}%
-}
-\newcommand*\tud@x@scr@pt{}
-\def\tud@x@scr@pt #1pt#2\@nil{%
-  \ifstr{#2}{pt}{\ifnumber{#1}{\@tud@x@scr@fontsize@settrue}{}}{}%
-}
-% TODO Mitglied nur für 4 Hauptklassen und tudscrfonts
+\DeclareOption*{}
 \FamilyProcessOptions[.comp]{TUD}\relax
-% TODO preset notwendig oder einfach mit \TUDExecuteOptions?!
 \tud@if@v@lower{2.05}{%
   \TUD@key@preset{relspacing}{false}%
 }{%
   \TUD@key@preset{relspacing}{true}%
-}%
+}
 \tud@if@v@lower{2.06}{%
   \TUD@key@preset{cdoldfont}{true}%
   \TUD@key@preset{slantedgreek}{standard}%
 }{%
   \TUD@key@preset{cdfont}{true}%
   \TUD@key@preset{slantedgreek}{true}%
-}%
+}
+\PassOptionsToPackage{DIV=calc}{typearea}
+\DeclareOption*{\tud@x@scr@checkoptions}
 \TUDExecuteOptions{%
   cd=true,tudbookmarks=true%
 }
-\DeclareOption*{\tud@x@scr@checkoptions}
 \TUDProcessOptions\relax
 \LoadClass{\TUD@Class@KOMA}[2018/03/30]
 %%% From File: tudscr-base.dtx
@@ -2503,7 +2519,7 @@
     \else%
       \def\tud@reserved{\TUDoptions{cdfont=false}}%
     \fi%
-    \expandafter\AtBeginDocument\expandafter{\tud@reserved}%
+    \expandafter\AfterEndPreamble\expandafter{\tud@reserved}%
     \TUDoptions{cdfont=false}%
   \fi%
   \tud@font@set%
@@ -2530,54 +2546,6 @@
     }%
   \fi%
 }
-\TUD@deprecated@cs{ifdin}{@secondoftwo}
-\if@tud@cdoldfont@active
-  \newrobustcmd*\ifdin{%
-    \ifx\f@family\tud@cdfont@db%
-      \expandafter\@firstoftwo%
-    \else%
-      \expandafter\@secondoftwo%
-    \fi%
-  }%
-\fi
-% TODO überarbeiten (und in tudscr-layout?) oder raus?
-\newcommand*\tud@sec@fontface[1][]{\sectfont#1}
-\if@tud@cdoldfont@active
-  \renewcommand*\tud@sec@fontface[1][]{%
-    \if@tud@cdoldfont@nodin%
-      \sectfont#1%
-    \else%
-      \tud@db\tud@raggedright%
-    \fi%
-  }%
-\fi
-% TODO umbenennen in \tud@sec@makecase; in tudscr-layout?
-\newrobustcmd*\tud@sec@strut{%
-  \begingroup%
-    \strut\setbox\strutbox\hbox{\vphantom{\"A\"O\"U}}\strut%
-  \endgroup%
-}
-\newcommand*\tud@makeuppercase[2][]{\tud@sec@strut#2}
-\if@tud@cdoldfont@active
-  \RequirePackage{textcase}[2004/10/07]
-  \renewcommand*\tud@makeuppercase[2][]{%
-    \@tud@res@swafalse%
-    \IfArgIsEmpty{#1}{%
-      \ifdin{\@tud@res@swatrue}{}%
-    }{%
-      \begingroup%
-        \usekomafont{#1}%
-        \ifdin{\aftergroup\@tud@res@swatrue}{}%
-      \endgroup%
-    }%
-    \tud@sec@strut%
-    \if@tud@res@swa%
-      \begingroup\MakeTextUppercase{#2}\endgroup%
-    \else%
-      #2%
-    \fi%
-  }%
-\fi
 \newcommand*\tud@head@font@light{}
 \newcommand*\tud@head@font@bold{}
 \newcommand*\tud@head@font@set{%
@@ -3475,6 +3443,8 @@
   \PreventPackageFromLoading{geometry}%
 \else
   \RequirePackage{geometry}[2010/09/12]%
+\fi%
+\AfterPackage*{geometry}{
   \CheckCommand*\Gm@initnewgm{%
     \Gm@passfalse
     \Gm@swap@papersizefalse
@@ -3629,8 +3599,8 @@
       \edef\@tempa{\@tempb,#1}%
       \tud@cs@store{Gm@restore@org}%
       \eappto\Gm@restore@org{%
-        \paperwidth=\the\paperwidth\relax%
-        \paperheight=\the\paperheight\relax%
+        \noexpand\paperwidth=\the\paperwidth\relax%
+        \noexpand\paperheight=\the\paperheight\relax%
       }%
       \def\@tempc{\tud@cs@use{newgeometry}}%
       \expandafter\@tempc\expandafter{\@tempa}%
@@ -3837,8 +3807,8 @@
     \tud@area@set{paper}%
     \ifstr{#2}{newgeometry}{%
       \eappto\Gm@restore@org{%
-        \paperwidth=\the\paperwidth\relax%
-        \paperheight=\the\paperheight\relax%
+        \noexpand\paperwidth=\the\paperwidth\relax%
+        \noexpand\paperheight=\the\paperheight\relax%
       }%
     }{%
       \etex@unexpanded{\epreto{\tud@x@geometry@parameter}}{%
@@ -3891,13 +3861,13 @@
     \fi%
     \tud@AfterChangingArea%
   }%
+  \renewcommand*\tud@cdgeometry@process{%
+      \tud@AfterChangingArea%
+  }%
   \newcommand*\tud@cdgeometry@hmargin{}%
   \newcommand*\tud@cdgeometry@vmargin{}%
   \newcommand*\tud@cdgeometry@tudmargin{}%
   \tud@if@v@lower{2.03}{\newcommand*\tud@cdgeometry@ddcmargin{}}{}%
-  \renewcommand*\tud@cdgeometry@process{%
-      \tud@AfterChangingArea%
-  }%
   \renewcommand*\tud@cdgeometry@@process{%
     \csuse{@ta@usegeometryfalse}%
     \tud@cdgeometry@set%
@@ -4021,8 +3991,8 @@
       \ifdim\dimexpr\tud@dim@extrabottommargin\relax=\z@\relax\else%
         \ClassWarning{\TUD@Class@Name}{%
           Option `extrabottommargin' is ineffective when\MessageBreak%
-          package typearea or custom layout is used\MessageBreak%
-          (`cdgeometry=false/custom')%
+          package `typearea' or custom layout is used\MessageBreak%
+          with `cdgeometry=false/custom'%
         }%
       \fi%
     \else%  true/symmetric/twoside
@@ -4138,7 +4108,6 @@
     \fi%
     \ifdim\tud@len@areadiff<\z@\relax\setlength\tud@len@areadiff{\z@}\fi%
     \global\tud@len@areadiff=\tud@len@areadiff%
-% TODO \tud@if@v@lower{2.06}{}{}
     \setlength\tud@len@areaheadvskip{.22\tud@len@topmargin}%
     \if@tud@cdgeometry@adjust%
       \setlength\tud@len@areaheadvskip{.5\tud@len@areaheadvskip}%
@@ -4204,7 +4173,7 @@
       includemp=false%
     \fi%
   }%
-\fi
+}
 \newcommand*\tud@currentgeometry{}
 \newcommand*\tud@BeforeSelectAnyPageStyle[1]{%
   \ifstr{#1}{\GetRealPageStyle{#1}}{%
@@ -4229,8 +4198,8 @@
         }%
       }%
       \setlength\tud@len@areavskip{\z@}%
-      \tud@komafont@set{pagefoot}{\usekomafont{tudheadings}}%
       \tud@komafont@set{pagenumber}{\usekomafont{tudheadings}}%
+      \tud@komafont@set{pagefoot}{\usekomafont{tudheadings}}%
     }{%
       \ifstr{\tud@currentgeometry}{stdarea}{}{%
         \tud@loadgeometry{stdarea}%
@@ -4244,8 +4213,8 @@
           }%
         \fi%
       \fi%
-      \tud@komafont@unset{pagefoot}%
       \tud@komafont@unset{pagenumber}%
+      \tud@komafont@unset{pagefoot}%
     }%
     \global\tud@len@areavskip=\tud@len@areavskip%
   }{}%
@@ -4289,7 +4258,8 @@
         \setlength\paperheight{\Gm@layoutheight}%
         \setlength\paperwidth{\Gm@layoutwidth}%
         \let\activateareas\relax%
-        \tud@x@ta@silent%
+%        \tud@x@ta@silent%
+        % TODO was genau passiert hier?
         \KOMAoptionOf[\def\@tempa]{typearea.\scr@pkgextension}{DIV}%
         \def\@tempb{{0}}%
         \ifx\@tempa\@tempb\relax%
@@ -4305,7 +4275,7 @@
           \fi%
         \fi%
         \recalctypearea%
-        \tud@x@ta@verbose%
+%        \tud@x@ta@verbose%
         \edef\tud@x@geometry@init{%
           left=\the\dimexpr\oddsidemargin+1in-\ta@bcor\relax,%
           textwidth=\the\textwidth,%
@@ -4345,6 +4315,8 @@
   \let\Gm@layoutwidth\paperwidth%
   \let\Gm@layouthoffset\z@%
   \let\Gm@layoutvoffset\z@%
+  \setlength\tud@len@layoutheight{\paperheight}%
+  \setlength\tud@len@layoutwidth{\paperwidth}%
   \renewcommand*\tud@cdgeometry@@process{\tud@cdgeometry@set}%
   \let\tud@BeforeSelectAnyPageStyle\@gobble%
   \providecommand*\tud@setgeometry[1]{}%
@@ -5153,19 +5125,26 @@
   \usebox\z@\hspace*{-\wd\z@}%
 }
 \newkomafont{tudheadings}{\tud@color{\tud@foot@fontcolor}}
+\newcommand*\tud@footcontent@usefont[1]{%
+  \usekomafont{tudheadings}{%
+    \tud@footcontent@fontsize%
+    \tud@footcontent@fontface%
+    \selectfont%
+    #1%
+  }%
+}
+\newcommand*\tud@footcontent@fontsize{}
 \newcommand*\tud@footcontent@fontface{}
 \newcommand*\tud@footcontent@left{}
 \newcommand*\tud@footcontent@right{\@nil}
 \newcommand*\footcontent{%
   \kernel@ifstar{%
-    \renewcommand*\tud@footcontent@fontface{\usekomafont{tudheadings}}%
+    \renewcommand*\tud@footcontent@fontsize{}%
     \tud@footcontent@do%
   }{%
-    \renewcommand*\tud@footcontent@fontface{%
-      \usekomafont{tudheadings}%
+    \renewcommand*\tud@footcontent@fontsize{%
       \setlength\@tempdima{\tud@head@fontsize\p@}%
-      \fontsize{\tud@head@fontsize}{1.25\@tempdima}%
-      \selectfont%
+      \fontsize{\@tempdima}{1.25\@tempdima}%
     }%
     \tud@footcontent@do%
   }%
@@ -5177,7 +5156,9 @@
 }
 \newcommand*\tud@footcontent@@do{}
 \def\tud@footcontent@@do#1#2[#3]{%
-  \appto\tud@footcontent@fontface{#1\selectfont}%
+  \if\detokenize{*#1}\relax\else%
+    \renewcommand*\tud@footcontent@fontface{#1}%
+  \fi%
   \if\detokenize{*#2}\relax\else%
     \renewcommand*\tud@footcontent@left{#2}%
   \fi%
@@ -5209,25 +5190,26 @@
       \linespread{1}%
       \vss%
       \hbox to #2{%
-        \tud@footcontent@fontface%
-        \def\@tempa{\@nil}%
-        \ifx\@tempa\tud@footcontent@right\relax%
-          \vtop{%
-            \hsize=\dimexpr#2-\@tempdimc\relax%
-            \strut\ignorespaces\tud@footcontent@left\strut%
-          }%
-        \else%
-          \vtop{%
-            \hsize=\dimexpr(#2-\columnsep)/2\relax%
-            \strut\ignorespaces\tud@footcontent@left\strut%
-          }%
-          \hspace{\columnsep}%
-          \vtop{%
-            \hsize=\dimexpr(#2-\columnsep)/2-\@tempdimc\relax%
-            \strut\ignorespaces\tud@footcontent@right\strut%
-          }%
-        \fi%
-        \hss%
+        \tud@footcontent@usefont{%
+          \def\@tempa{\@nil}%
+          \ifx\@tempa\tud@footcontent@right\relax%
+            \vtop{%
+              \hsize=\dimexpr#2-\@tempdimc\relax%
+              \strut\ignorespaces\tud@footcontent@left\strut%
+            }%
+          \else%
+            \vtop{%
+              \hsize=\dimexpr(#2-\columnsep)/2\relax%
+              \strut\ignorespaces\tud@footcontent@left\strut%
+            }%
+            \hspace{\columnsep}%
+            \vtop{%
+              \hsize=\dimexpr(#2-\columnsep)/2-\@tempdimc\relax%
+              \strut\ignorespaces\tud@footcontent@right\strut%
+            }%
+          \fi%
+          \hss%
+        }%
       }%
       \vss\vss%
     }{%
@@ -5361,6 +5343,8 @@
 %%% From File: tudscr-layout.dtx
 \newcommand*\tud@cleardoublespecialpage[2][]{%
   \begingroup%
+    \addtokomafont{pagenumber}{\usekomafont{tudheadings}}%
+    \addtokomafont{pagefoot}{\usekomafont{tudheadings}}%
     #2%
     \ifboolexpr{bool {@twoside} and bool {@openright}}{%
       \if@tud@clearcolor%
@@ -5393,44 +5377,44 @@
   }%
   \global\let\tud@clearcolor@wrn\relax%
 }
-\newcommand*\tud@x@scr@headings@current{}
-\newcommand*\tud@sec@fontsize{}
-\newcommand*\tud@thesis@fontsize{}
-\newcommand*\tud@x@scr@headings@set[1][]{%
-  \def\@tempa##1##2##3{%
-    \ifstr{##1}{\tud@x@scr@headings@current}{}{%
-      \renewcommand*\tud@x@scr@headings@current{##1}%
-      \renewcommand*\tud@sec@fontsize{##2}%
-      \renewcommand*\tud@thesis@fontsize{##3}%
-      #1%
+% TODO 
+\newcommand*\tud@sec@fontface[1][]{\sectfont#1\selectfont}
+\if@tud@cdoldfont@active
+  \renewcommand*\tud@sec@fontface[1][]{%
+    \if@tud@cdoldfont@nodin%
+      \sectfont#1\selectfont%
+    \else%
+      \tud@db\tud@raggedright%
+    \fi%
+  }%
+\fi
+\newcommand*\tud@sec@format[2][]{\tud@sec@strut#2}
+\if@tud@cdoldfont@active
+  \RequirePackage{textcase}[2004/10/07]
+  \renewcommand*\tud@sec@format[2][]{%
+    \@tud@res@swafalse%
+    \IfArgIsEmpty{#1}{%
+      \tud@sec@strut%
+      \ifdin{\@tud@res@swatrue}{}%
+    }{%
+      \begingroup%
+        \usefontofkomafont{#1}%
+        \tud@sec@strut%
+        \ifdin{\aftergroup\@tud@res@swatrue}{}%
+      \endgroup%
     }%
+    \tud@sec@strut%
+    \if@tud@res@swa%
+      \begingroup\MakeTextUppercase{#2}\endgroup%
+    \else%
+      #2%
+    \fi%
   }%
-  \KOMAoptionOf[\def\@tempb]{\KOMAClassFileName}{headings}%
-  \@for\@tempc:=\@tempb\do{%
-    \ifstr{standardclasses}{\@tempc}{\@tempa{standardclasses}{\Huge}{\LARGE}}{%
-    \ifstr{big}{\@tempc}{\@tempa{big}{\Huge}{\LARGE}}{%
-    \ifstr{normal}{\@tempc}{\@tempa{normal}{\huge}{\Large}}{%
-    \ifstr{small}{\@tempc}{\@tempa{small}{\LARGE}{\Large}}{}}}}%
-  }%
-}
-\AtEndPreamble{\tud@x@scr@headings@set}
-\newcommand*\tud@x@scr@headings@reset{%
-  \tud@cd@process%
-  \tud@x@scr@headings@set[%
-    \ifcase\tud@cd@part@num\relax\else% !false
-      \tud@komafont@reset{part}%
-      \tud@komafont@reset{partnumber}%
-    \fi%
-    \ifcase\tud@cd@chapter@num\relax\else% !false
-      \tud@komafont@reset{chapter}%
-      \tud@komafont@reset{chapterprefix}%
-    \fi%
-    \ifcase\tud@cd@section@num\relax\else% !false
-      \tud@komafont@reset{section}%
-      \tud@komafont@reset{subsection}%
-      \tud@komafont@reset{subsubsection}%
-    \fi%
-  ]%
+\fi
+\newrobustcmd*\tud@sec@strut{%
+  \begingroup%
+    \strut\setbox\strutbox\hbox{\vphantom{\textsuperscript{\"A\"O\"U}}}\strut%
+  \endgroup%
 }
 \newcommand*\tud@title@fontcolor{}
 \newcommand*\tud@part@fontcolor{}
@@ -5464,6 +5448,7 @@
       \tud@color{\tud@title@fontcolor}%
     }%
     % TODO opt headings=small --> Größe der restlichen Elemente auf Titel/Cover?
+    % TODO nutzen von \tud@thesis@fontsize?
     \tud@komafont@set{subtitle}{%
       \raggedtitle%
       % TODO bfseries?
@@ -5485,10 +5470,10 @@
     \tud@komafont@set{publishers}{\usekomafont{author}}%
   \fi%
   \ifcase\tud@cd@part@num\relax% false
-    \tud@cs@restore{partheadstartvskip}%
     \tud@cs@restore{scr@part@beforeskip}%
     \tud@cs@restore{scr@part@innerskip}%
     \tud@cs@restore{scr@part@afterskip}%
+    \tud@cs@restore{partheadstartvskip}%
     \tud@cs@restore{partheadendvskip}%
     \tud@cs@restore{partheademptypage}%
     \tud@cs@restore{partpagestyle}%
@@ -5497,14 +5482,14 @@
     \tud@komafont@unset{partnumber}%
     \tud@cs@restore{raggedpart}%
   \else% !false
+    \tud@cs@store{scr@part@beforeskip}%
+    \renewcommand*\scr@part@beforeskip{\tud@cd@beforeskip}%
+    \tud@cs@store{scr@part@innerskip}%
+    \renewcommand*\scr@part@innerskip{\tud@cd@innerskip}%
+    \tud@cs@store{scr@part@afterskip}%
+    \renewcommand*\scr@part@afterskip{\tud@cd@afterskip}%
     \tud@cs@store{partheadstartvskip}%
     \let\partheadstartvskip\tud@partheadstartvskip%
-    \tud@cs@store{scr@part@beforeskip}%
-    \tud@cs@store{scr@part@innerskip}%
-    \tud@cs@store{scr@part@afterskip}%
-    \renewcommand*\scr@part@beforeskip{\scr@chapter@beforeskip}%
-    \renewcommand*\scr@part@innerskip{\scr@chapter@innerskip}%
-    \renewcommand*\scr@part@afterskip{\scr@chapter@afterskip}%
     \tud@cs@store{partheadendvskip}%
     \let\partheadendvskip\relax%
     \tud@cs@store{partheademptypage}%
@@ -5523,9 +5508,11 @@
     }%
     \tud@cs@store{raggedpart}%
     \renewcommand*\raggedpart{\tud@raggedright}%
-
   \fi%
   \ifcase\tud@cd@chapter@num\relax% false
+    \tud@cs@restore{scr@chapter@beforeskip}%
+    \tud@cs@restore{scr@chapter@innerskip}%
+    \tud@cs@restore{scr@chapter@afterskip}%
     \tud@cs@restore{chapterheadstartvskip}%
     \tud@cs@restore{chapterlineswithprefixformat}%
     \tud@cs@restore{chapterlinesformat}%
@@ -5535,6 +5522,12 @@
     \tud@komafont@unset{chapterprefix}%
     \tud@cs@restore{raggedchapter}%
   \else% !false
+    \tud@cs@store{scr@chapter@beforeskip}%
+    \renewcommand*\scr@chapter@beforeskip{\tud@cd@beforeskip}%
+    \tud@cs@store{scr@chapter@innerskip}%
+    \renewcommand*\scr@chapter@innerskip{\tud@cd@innerskip}%
+    \tud@cs@store{scr@chapter@afterskip}%
+    \renewcommand*\scr@chapter@afterskip{\tud@cd@afterskip}%
     \tud@cs@store{chapterheadstartvskip}%
     \let\chapterheadstartvskip\tud@chapterheadstartvskip%
     \tud@cs@store{chapterlineswithprefixformat}%
@@ -5592,12 +5585,12 @@
     \renewcommand*\raggedsection{\tud@raggedright}%
     \tud@cs@store{minisec}%
     \renewcommand\minisec[1]{%
-      \tud@cs@use{minisec}{\tud@makeuppercase{##1}}%
+      \tud@cs@use{minisec}{\tud@sec@format{##1}}%
     }%
     \tud@komafont@set{minisec}{%
       \tud@sec@fontface%
       \ifcase\tud@cd@section@num\relax\or\else% *color
-        \ifstr{\tud@pagecolor}{HKS41}{}{\color{HKS41}}%
+        \ifstr{\tud@pagecolor}{HKS41}{}{\tud@color{HKS41}}%
       \fi%
     }%
   \fi%
@@ -5617,17 +5610,196 @@
   \tud@komafont@unset{footnote}%
   \tud@cs@restore{footnoterule}%
 }
+\newcommand*\tud@cd@beforeskip{%
+  \dimexpr\tud@len@areavskip+\tud@len@areaheadvskip\relax%
+}
+\newcommand*\tud@cd@innerskip{.25\baselineskip}%
+\newcommand*\tud@cd@afterskip{%
+  .75\baselineskip \@plus .05\baselineskip \@minus .1\baselineskip%
+}
+\newcommand*\tud@cd@headstartvskip{
+  \@tempskipa=\glueexpr\tud@cd@beforeskip\relax\relax%
+  \ifdim\@tempskipa<\z@\@tempskipa-\@tempskipa\fi%
+  \null\vskip-\baselineskip\vskip\@tempskipa%
+}
+\newcommand*\tud@cd@vphantom{%
+  \begingroup%
+    \usekomafont{partnumber}{\nobreak\tud@sec@strut}%
+    \setlength{\@tempskipa}{\tud@cd@innerskip}%
+    \par\nobreak\vskip\@tempskipa%
+  \endgroup%
+}
+\newcommand*\tud@partheadstartvskip{%
+  \renewcommand*\tud@part@fontcolor{}% false/true
+  \ifcase\tud@cd@part@num\relax\or\or% litecolor
+    \renewcommand*\tud@part@fontcolor{HKS41}%
+  \or% barcolor
+    \renewcommand*\tud@part@fontcolor{HKS41}%
+  \or% bicolor
+    \renewcommand*\tud@part@fontcolor{HKS41}%
+  \or% color
+    \renewcommand*\tud@part@fontcolor{HKS41!30}%
+  \or% full
+    \renewcommand*\tud@part@fontcolor{HKS41!30}%
+  \fi%
+  \tud@cd@specialpage@set{part}%
+  \tud@cd@headstartvskip%
+  \TUD@deprecated@lengthcs{pageheadingsvskip}%
+  \vspace*{\tud@dim@pageheadingsvskip}%
+}
+\newcommand*\tud@partheademptypage{%
+  \tud@cleardoublespecialpage{%
+    \renewcommand*\tud@pagecolor{}%
+    \ifcase\tud@cd@part@num\relax\or% true
+      \tud@locked@num@preset{tud@head@bar@num}{0}%
+    \or% litecolor
+      \tud@locked@num@set{tud@head@bar@num}{1}%
+    \or% barcolor
+      \tud@locked@num@set{tud@head@bar@num}{2}%
+    \or% bicolor
+      \tud@locked@num@set{tud@head@bar@num}{3}%
+    \or% color
+      \renewcommand*\tud@pagecolor{HKS41}%
+      \tud@locked@num@set{tud@head@bar@num}{1}%
+    \or% full
+      \renewcommand*\tud@pagecolor{HKS41}%
+      \tud@locked@num@set{tud@head@bar@num}{3}%
+    \fi%
+    \clearpage%
+  }%
+  \tud@cd@specialpage@unset%
+}
+\newcommand*\tud@partformat{}%
+\newcommand*\tud@partlineswithprefixformat[3]{%
+  \edef\tud@partformat{\noexpand\tud@sec@format{\expandonce\partformat}}%
+  \let\partformat\tud@partformat%
+  \IfUseNumber{}{\tud@cd@vphantom}%
+  #2\tud@sec@format[#1]{#3}%
+}
+\newcommand*\tud@chapterheadstartvskip{%
+  \renewcommand*\tud@chapter@fontcolor{}%
+  \ifcase\tud@cd@chapter@num\relax\or\else% *color
+    \renewcommand*\tud@chapter@fontcolor{HKS41}%
+  \fi%
+  \tud@cd@headstartvskip%
+  \if@tud@chapterpage%
+    \TUD@deprecated@lengthcs{pageheadingsvskip}%
+    \vspace*{\tud@dim@pageheadingsvskip}%
+  \else%
+    \TUD@deprecated@lengthcs{headingsvskip}%
+    \vspace*{\tud@dim@headingsvskip}%
+  \fi%
+}
+\newcommand*\tud@chapterformat{}%
+\newcommand*\tud@chapterlineswithprefixformat[3]{%
+  \edef\tud@chapterformat{%
+    \noexpand\tud@sec@format{\expandonce\chapterformat}%
+  }%
+  \let\chapterformat\tud@chapterformat%
+  \IfUseNumber{}{\tud@cd@vphantom}%
+  #2\tud@sec@format[#1]{#3}%
+}
+\newcommand*\tud@chapterlinesformat[3]{%
+  \tud@cd@vphantom%
+  \@hangfrom{#2}{\tud@sec@format[#1]{#3}}%
+}
+\newcommand*\tud@chapter@pre{%
+  \if@tud@chapterpage%
+    \@restonecolfalse%
+    \if@twocolumn\@restonecoltrue\onecolumn\fi%
+    \tud@cd@specialpage@set{chapter}%
+  \fi%
+}
+\newcommand*\tud@head@bar@restore{}
+\let\tud@head@bar@restore\relax
+\newcommand*\tud@chapter@app{%
+  \if@tud@chapterpage%
+    \tud@cleardoublespecialpage{%
+      \renewcommand*\tud@pagecolor{}%
+      \let\tud@foot@fontcolor\tud@chapter@fontcolor%
+      \ifcase\tud@cd@chapter@num\relax\or% true
+        \tud@locked@num@preset{tud@head@bar@num}{0}%
+      \or% litecolor
+        \tud@locked@num@set{tud@head@bar@num}{1}%
+      \or% barcolor
+        \tud@locked@num@set{tud@head@bar@num}{2}%
+      \or% bicolor
+        \tud@locked@num@set{tud@head@bar@num}{3}%
+      \or% color
+        \renewcommand*\tud@pagecolor{HKS41!10}%
+        \tud@locked@num@set{tud@head@bar@num}{1}%
+      \or% fullcolor
+        \renewcommand*\tud@pagecolor{HKS41!10}%
+        \tud@locked@num@set{tud@head@bar@num}{3}%
+      \fi%
+      \clearpage%
+    }%
+    \tud@cd@specialpage@unset%
+    \if@restonecol\twocolumn\fi%
+  \else%
+    \edef\tud@head@bar@restore{%
+      \gdef\noexpand\tud@head@bar@num{\tud@head@bar@num}%
+      \global\let\noexpand\tud@head@bar@restore\relax%
+    }%
+    \ifcase\tud@cd@chapter@num\relax\or% true
+      \tud@locked@num@preset{tud@head@bar@num}{0}%
+    \or% litecolor
+      \tud@locked@num@set{tud@head@bar@num}{1}%
+    \or% barcolor
+      \tud@locked@num@set{tud@head@bar@num}{2}%
+    \or% bicolor
+      \tud@locked@num@set{tud@head@bar@num}{3}%
+    \or% color
+      \tud@locked@num@set{tud@head@bar@num}{1}%
+    \or% fullcolor
+      \tud@locked@num@set{tud@head@bar@num}{3}%
+    \fi%
+    \tud@if@v@lower{2.03}{\tud@ddc@enlargepage[\chapterpagestyle]}{}%
+  \fi%
+  \if@twocolumn%
+    \@afterindentfalse\@afterheading%
+  \fi%
+}
+\newcommand*\tud@chapter@before@hook{}
+\let\tud@chapter@before@hook\relax
+\newcommand*\tud@chapter@after@hook{}
+\let\tud@chapter@after@hook\relax
+\pretocmd\scr@startchapter{%
+  \tud@chapter@before@hook%
+}{}{\tud@patch@wrn{scr@startchapter}}
+\apptocmd\scr@@startchapter{%
+  \tud@chapter@after@hook%
+}{}{\tud@patch@wrn{scr@@startchapter}}
+\apptocmd\scr@@startschapter{%
+  \tud@chapter@after@hook%
+}{}{\tud@patch@wrn{scr@@startschapter}}
+\At@startsection{%
+  \renewcommand*\tud@section@fontcolor{}%
+  \ifcase\tud@cd@section@num\relax\or\else% *color
+    \ifstr{\tud@pagecolor}{HKS41}{}{%
+      \renewcommand*\tud@section@fontcolor{HKS41}%
+    }%
+  \fi%
+}
+\newcommand*\tud@sectionlinesformat[4]{%
+  \@hangfrom{\hskip #2#3}{\tud@sec@format[#1]{#4}}%
+}
+\newcommand*\tud@sectioncatchphraseformat[4]{%
+  \let\tud@sec@strut\relax%
+  \hskip #2#3\tud@sec@format[#1]{#4}%
+}
 \newcommand*\tud@partpreamble{%
+  \@tempskipa=\glueexpr\tud@cd@afterskip\relax%
+  \ifdim\@tempskipa<\z@\@tempskipa-\@tempskipa\fi%
+  \vskip\@tempskipa%
   \ifnum\tud@abstract@level@num>\@ne\relax% sec/chap
     \renewcommand*\tud@abstract@level@num{1}%
   \fi%
   \KOMAoptions{titlepage=false}%
+  \null\vskip-.5\baselineskip%
   \addtokomafont{disposition}{\tud@color{\tud@part@fontcolor}}%
   \addtokomafont{dictum}{\tud@color{\tud@part@fontcolor}}%
   \tud@color{\tud@part@fontcolor}%
-  \@tempskipa=\glueexpr\scr@chapter@afterskip\relax%
-  \ifdim\@tempskipa<\z@\@tempskipa-\@tempskipa\fi%
-  \tud@cs@use{chapterheadendvskip}%
   \@afterindentfalse\@afterheading%
 }
 \newcommand*\tud@chapterpreamble{%
@@ -5635,6 +5807,7 @@
     \renewcommand*\tud@abstract@level@num{1}%
   \fi%
   \KOMAoptions{titlepage=false}%
+  \null\vskip-.5\baselineskip%
   \if@tud@chapterpage%
     \addtokomafont{disposition}{\tud@color{\tud@chapter@fontcolor}}%
     \addtokomafont{dictum}{\tud@color{\tud@chapter@fontcolor}}%
@@ -5659,197 +5832,54 @@
     #4\parbox[{#2}]{#3}{\@tempa#1#6\par}#5\par%
   }%
 }{}{\tud@patch@wrn{set@@@@preamble}}
-\newcommand*\tud@partheadstartvskip{%
-  \renewcommand*\tud@part@fontcolor{}% false/true
-  \ifcase\tud@cd@part@num\relax\or\or% litecolor
-    \renewcommand*\tud@part@fontcolor{HKS41}%
-  \or% barcolor
-    \renewcommand*\tud@part@fontcolor{HKS41}%
-  \or% bicolor
-    \renewcommand*\tud@part@fontcolor{HKS41}%
-  \or% color
-    \renewcommand*\tud@part@fontcolor{HKS41!30}%
-  \or% full
-    \renewcommand*\tud@part@fontcolor{HKS41!30}%
-  \fi%
-  \tud@cd@specialpage@set{part}%
-  \null\vskip-\baselineskip%
-  \vskip\dimexpr\tud@len@areavskip+\tud@len@areaheadvskip\relax%
-  \TUD@deprecated@lengthcs{pageheadingsvskip}%
-  \vspace*{\tud@dim@pageheadingsvskip}%
+\newcommand*\tud@x@scr@headings@current{}
+\newcommand*\tud@sec@fontsize{}
+\newcommand*\tud@thesis@fontsize{}
+\newcommand*\tud@x@scr@headings@set[1][]{%
+  \def\@tempa##1##2##3{%
+    \ifstr{##1}{\tud@x@scr@headings@current}{}{%
+      \renewcommand*\tud@x@scr@headings@current{##1}%
+      \renewcommand*\tud@sec@fontsize{##2}%
+      \renewcommand*\tud@thesis@fontsize{##3}%
+      #1%
+    }%
+  }%
+  \KOMAoptionOf[\def\@tempb]{\KOMAClassFileName}{headings}%
+  \@for\@tempc:=\@tempb\do{%
+    \ifstr{standardclasses}{\@tempc}{\@tempa{standardclasses}{\Huge}{\LARGE}}{%
+    \ifstr{big}{\@tempc}{\@tempa{big}{\Huge}{\LARGE}}{%
+    \ifstr{normal}{\@tempc}{\@tempa{normal}{\huge}{\Large}}{%
+    \ifstr{small}{\@tempc}{\@tempa{small}{\LARGE}{\large}}{}}}}%
+  }%
+  \begingroup
+    \tud@sec@fontsize%
+    \@tempskipa=\glueexpr%
+      .8\baselineskip \@plus .05\baselineskip \@minus .1\baselineskip%
+    \relax\relax%
+    \edef\tud@res@a{%
+      \endgroup%
+      \def\noexpand\tud@cd@afterskip{\the\@tempskipa}%
+    }%
+  \tud@res@a%
 }
-\newcommand*\tud@partheademptypage{%
-  \tud@cleardoublespecialpage{%
-    \renewcommand*\tud@pagecolor{}%
-    \ifcase\tud@cd@part@num\relax\or% true
-      \tud@locked@num@preset{tud@head@bar@num}{0}%
-    \or% litecolor
-      \tud@locked@num@set{tud@head@bar@num}{1}%
-    \or% barcolor
-      \tud@locked@num@set{tud@head@bar@num}{2}%
-    \or% bicolor
-      \tud@locked@num@set{tud@head@bar@num}{3}%
-    \or% color
-      \renewcommand*\tud@pagecolor{HKS41}%
-      \tud@locked@num@set{tud@head@bar@num}{1}%
-    \or% full
-      \renewcommand*\tud@pagecolor{HKS41}%
-      \tud@locked@num@set{tud@head@bar@num}{3}%
+\AtEndPreamble{\tud@x@scr@headings@set}
+\newcommand*\tud@x@scr@headings@reset{%
+  \tud@cd@process%
+  \tud@x@scr@headings@set[%
+    \ifcase\tud@cd@part@num\relax\else% !false
+      \tud@komafont@reset{part}%
+      \tud@komafont@reset{partnumber}%
     \fi%
-    \addtokomafont{pagenumber}{\usekomafont{tudheadings}}%
-    \addtokomafont{pagefoot}{\usekomafont{tudheadings}}%
-    \clearpage%
-  }%
-  \tud@cd@specialpage@unset%
-}
-\newcommand*\tud@partformat{}%
-\newcommand*\tud@partlineswithprefixformat[3]{%
-  \edef\tud@partformat{\noexpand\tud@makeuppercase{\expandonce\partformat}}%
-  \let\partformat\tud@partformat%
-  \IfUseNumber{}{%
-    \usekomafont{#1prefix}{\nobreak\null}%
-    \setlength{\@tempskipa}{\@nameuse{scr@#1@innerskip}}%
-    \partheadmidvskip%
-  }%
-  #2\tud@makeuppercase[#1]{#3}%
-}
-\newcommand*\tud@chapterheadstartvskip{%
-  \renewcommand*\tud@chapter@fontcolor{}%
-  \ifcase\tud@cd@chapter@num\relax\or\else% *color
-    \renewcommand*\tud@chapter@fontcolor{HKS41}%
-  \fi%
-  \vskip\dimexpr\tud@len@areavskip+\tud@len@areaheadvskip\relax%
-  \if@tud@chapterpage%
-    \TUD@deprecated@lengthcs{pageheadingsvskip}%
-    \vspace*{\tud@dim@pageheadingsvskip}%
-  \else%
-    \TUD@deprecated@lengthcs{headingsvskip}%
-    \vspace*{\tud@dim@headingsvskip}%
-  \fi
-}
-\newcommand*\tud@chapter@before@hook{}
-\let\tud@chapter@before@hook\relax
-\newcommand*\tud@chapter@after@hook{}
-\let\tud@chapter@after@hook\relax
-\pretocmd\scr@startchapter{%
-  \tud@chapter@before@hook%
-}{}{\tud@patch@wrn{scr@startchapter}}
-\apptocmd\scr@@startchapter{%
-  \tud@chapter@after@hook%
-}{}{\tud@patch@wrn{scr@@startchapter}}
-\apptocmd\scr@@startschapter{%
-  \tud@chapter@after@hook%
-}{}{\tud@patch@wrn{scr@@startschapter}}
-\newcommand*\tud@chapter@pre{%
-  \if@tud@chapterpage%
-    \@restonecolfalse%
-    \if@twocolumn\@restonecoltrue\onecolumn\fi%
-    \tud@cd@specialpage@set{chapter}%
-  \fi%
-}
-\newcommand*\tud@chapterformat{}%
-\newcommand*\tud@chapterlineswithprefixformat[3]{%
-  \edef\tud@chapterformat{%
-    \noexpand\tud@makeuppercase{\expandonce\chapterformat}%
-  }%
-  \let\chapterformat\tud@chapterformat%
-  \IfUseNumber{}{%
-    {%
-      \usekomafont{#1prefix}{\nobreak\null}%
-      \setlength{\@tempskipa}{\@nameuse{scr@#1@innerskip}}%
-      \chapterheadmidvskip%
-    }%
-  }%
-   #2\tud@makeuppercase[#1]{#3}%
-}
-\newcommand*\tud@chapterlinesformat[3]{%
-  {%
-    \usekomafont{#1prefix}{\nobreak\null}%
-    \setlength{\@tempskipa}{\@nameuse{scr@#1@innerskip}}%
-    \chapterheadmidvskip%
-  }%
-  \@hangfrom{#2}{\tud@makeuppercase[#1]{#3}}%
-}
-\newcommand*\tud@head@bar@store{}
-\let\tud@head@bar@store\relax
-\newcommand*\tud@head@bar@restore{}
-\let\tud@head@bar@restore\relax
-\newcommand*\tud@chapter@app{%
-  \if@tud@chapterpage%
-    \tud@cleardoublespecialpage{%
-      \renewcommand*\tud@pagecolor{}%
-      \let\tud@foot@fontcolor\tud@chapter@fontcolor%
-      \ifcase\tud@cd@chapter@num\relax\or% true
-        \tud@locked@num@preset{tud@head@bar@num}{0}%
-      \or% litecolor
-        \tud@locked@num@set{tud@head@bar@num}{1}%
-      \or% barcolor
-        \tud@locked@num@set{tud@head@bar@num}{2}%
-      \or% bicolor
-        \tud@locked@num@set{tud@head@bar@num}{3}%
-      \or% color
-        \renewcommand*\tud@pagecolor{HKS41!10}%
-        \tud@locked@num@set{tud@head@bar@num}{1}%
-      \or% fullcolor
-        \renewcommand*\tud@pagecolor{HKS41!10}%
-        \tud@locked@num@set{tud@head@bar@num}{3}%
-      \fi%
-      \addtokomafont{pagenumber}{\usekomafont{tudheadings}}%
-      \addtokomafont{pagefoot}{\usekomafont{tudheadings}}%
-      \clearpage%
-    }%
-    \tud@cd@specialpage@unset%
-    \if@restonecol\twocolumn\fi%
-  \else%
-    \edef\tud@head@bar@store{\tud@head@bar@num}%
-    \edef\tud@head@bar@restore{%
-      \gdef\noexpand\tud@head@bar@num{\tud@head@bar@store}%
-      \global\let\noexpand\tud@head@bar@store\relax%
-      \global\let\noexpand\tud@head@bar@restore\relax%
-    }%
-    \ifcase\tud@cd@chapter@num\relax\or% true
-      \tud@locked@num@preset{tud@head@bar@num}{0}%
-    \or% litecolor
-      \tud@locked@num@set{tud@head@bar@num}{1}%
-    \or% barcolor
-      \tud@locked@num@set{tud@head@bar@num}{2}%
-    \or% bicolor
-      \tud@locked@num@set{tud@head@bar@num}{3}%
-    \or% color
-      \tud@locked@num@set{tud@head@bar@num}{1}%
-    \or% fullcolor
-      \tud@locked@num@set{tud@head@bar@num}{3}%
+    \ifcase\tud@cd@chapter@num\relax\else% !false
+      \tud@komafont@reset{chapter}%
+      \tud@komafont@reset{chapterprefix}%
     \fi%
-    \tud@if@v@lower{2.03}{\tud@ddc@enlargepage[\chapterpagestyle]}{}%
-  \fi%
-  \if@twocolumn%
-    \@afterindentfalse\@afterheading%
-  \fi%
-}
-\At@startsection{%
-  \renewcommand*\tud@section@fontcolor{}%
-  \ifcase\tud@cd@section@num\relax\or\else% *color
-    \ifstr{\tud@pagecolor}{HKS41}{}{%
-      \renewcommand*\tud@section@fontcolor{HKS41}%
-    }%
-  \fi%
-}
-\newcommand*\tud@sectionlinesformat[4]{%
-  \@hangfrom{\hskip #2#3}{\tud@makeuppercase[#1]{#4}}%
-}
-\newcommand*\tud@sectioncatchphraseformat[4]{%
-  \hskip #2#3\tud@makeuppercase[#1]{#4}%
-}
-% TODO überarbeiten der symbole für Fußnoten in Überschriften
-\robustify{\footnote}
-\newcommand*\tud@sectioning@uppercase[1]{%
-  \begingroup%
-    \if@tud@symbolheadings%
-      \let\c@footnote\c@symbolheadings%
-      \renewcommand*\thefootnote{\fnsymbol{symbolheadings}}%
+    \ifcase\tud@cd@section@num\relax\else% !false
+      \tud@komafont@reset{section}%
+      \tud@komafont@reset{subsection}%
+      \tud@komafont@reset{subsubsection}%
     \fi%
-    \tud@makeuppercase{#1}%
-  \endgroup%
+  ]%
 }
 %%% From File: tudscr-title.dtx
 \newkomafont{thesis}{%
@@ -5860,7 +5890,7 @@
   \usekomafont{subject}%
   \mdseries%
   \large%
-  \tud@raggedright%
+  \raggedtitle%
 }
 \robustify{\thanks}
 \robustify{\footnotemark}
@@ -5887,24 +5917,15 @@
         \fi%
       \fi%
       \if@titlepage%
-        \tud@make@titlepage%
+        \tud@maketitle@page%
       \else%
-        \tud@make@titlehead%
+        \tud@maketitle@head%
       \fi%
     \fi%
   \endgroup%
   \setcounter{footnote}{0}%
   \global\let\and\relax%
 }
-\patchcmd{\titlepage}{\thispagestyle{empty}}{%
-  \tud@if@tudheadings{\currentpagestyle}{%
-    \thispagestyle{empty.tudheadings}%
-  }{%
-    \thispagestyle{empty}%
-  }%
-}{}{\tud@patch@wrn{titlepage}}
-\tud@cs@store{maketitle}
-\let\maketitle\tud@maketitle
 \TUD@parameter@family{title}{%
   \TUD@parameter@def{cdtitle}[true]{\TUDoption{cdtitle}{#1}}%
   \TUD@parameter@let{cd}{cdtitle}%
@@ -5912,8 +5933,17 @@
   \TUD@parameter@ps@def{#1}%
   \TUD@parameter@handler@value{pagenumber}%
 }
+\tud@cs@store{maketitle}
+\let\maketitle\tud@maketitle
+\patchcmd{\titlepage}{\thispagestyle{empty}}{%
+  \tud@if@tudheadings{\currentpagestyle}{%
+    \thispagestyle{empty.tudheadings}%
+  }{%
+    \thispagestyle{empty}%
+  }%
+}{}{\tud@patch@wrn{titlepage}}
 \newcommand*\tud@titleback{}
-\newcommand*\tud@make@titlepage{%
+\newcommand*\tud@maketitle@page{%
   \renewcommand*\tud@title@fontcolor{}%
   \ifcase\tud@cd@title@num\relax\or\or% litecolor
     \renewcommand*\tud@title@fontcolor{HKS41}%
@@ -5980,14 +6010,12 @@
         \noindent\@extratitle\next@tdpage%
       \fi%
     \fi%
-    \vspace*{%
-      \dimexpr\tud@len@areavskip+\tud@len@areaheadvskip-\baselineskip\relax%
-    }%
+    \tud@cd@headstartvskip%
     \TUD@deprecated@lengthcs{pageheadingsvskip}%
     \vspace*{\tud@dim@pageheadingsvskip}%
+    \tud@cd@vphantom%
     \setparsizes{\z@}{\z@}{\z@\@plus1fil}\par@updaterelative%
-    \begingroup%
-      \usekomafont{titlepage}%
+    {\usekomafont{titlepage}{%
       \setlength\@tempdima{\z@}%
       \ifx\@titlehead\@empty\else%
         \sbox\z@{\vbox{%
@@ -6033,7 +6061,7 @@
           \ifx\@graduation\@empty\else%
             \def\@tempc{%
               \@graduation%
-              \ifx\@@graduation\@empty\else\nobreakspace\@@graduation\fi%
+              \ifx\@graduationabbr\@empty\else\nobreakspace\@graduationabbr\fi%
             }%
             {\usekomafont{titlepage}{\graduationtext\par}}%
             \vskip 2ex\@plus1ex\@minus1ex%
@@ -6072,7 +6100,7 @@
         {\usekomafont{publishers}{\@publishers\par}}%
         \vskip\z@\@plus.25fill%
       \fi%
-    \endgroup%
+    }}%
     \let\tud@titleback\relax%
     \if@twoside%
       \@tempswatrue%
@@ -6111,8 +6139,6 @@
         \tud@locked@num@set{tud@head@bar@num}{3}%
       \fi%
       \tud@color{\tud@title@fontcolor}%
-      \addtokomafont{pagenumber}{\usekomafont{tudheadings}}%
-      \addtokomafont{pagefoot}{\usekomafont{tudheadings}}%
       \thispagestyle{empty.tudheadings}%
       \tud@if@v@lower{2.03}{\tud@ddc@enlargepage}{}%
     }%
@@ -6139,7 +6165,7 @@
     \fi%
   \end{titlepage}%
 }
-\newcommand*\tud@make@titlehead{%
+\newcommand*\tud@maketitle@head{%
   \renewcommand*\tud@title@fontcolor{}%
   \ifcase\tud@cd@title@num\relax\or\else% *color
     \ifstr{\tud@pagecolor}{HKS41}{}{\renewcommand*\tud@title@fontcolor{HKS41}}%
@@ -6167,27 +6193,25 @@
       \ifx\@extratitle\@empty\else%
         \twocolumn[\@makeextratitle]\next@tdpage%
       \fi%
-      \twocolumn[\tud@make@@titlehead]%
+      \twocolumn[\tud@maketitle@@head]%
     \else%
       \ifx\@extratitle\@empty\else%
         \@makeextratitle\next@tdpage%
       \fi%
-      \tud@make@@titlehead%
+      \tud@maketitle@@head%
     \fi%
     \ifx\titlepagestyle\@empty\else\thispagestyle{\titlepagestyle}\fi%
     \@thanks%
   \endgroup%
 }
-\newcommand*\tud@make@@titlehead{%
+\newcommand*\tud@maketitle@@head{%
   \global\@topnum=\z@%
-  \vspace*{%
-    \dimexpr\tud@len@areavskip+\tud@len@areaheadvskip-\baselineskip\relax%
-  }%
+  \tud@cd@headstartvskip%
   \TUD@deprecated@lengthcs{headingsvskip}%
   \vspace*{\tud@dim@headingsvskip}%
+  \tud@cd@vphantom%
   \setparsizes{\z@}{\z@}{\z@\@plus1fil}\par@updaterelative%
-  \begingroup%
-    \usekomafont{titlepage}%
+  {\usekomafont{titlepage}{%
     \tud@x@hyperref@realfootnotes%
     \setlength\@tempdima{\z@}%
     \ifx\@titlehead\@empty\else%
@@ -6240,7 +6264,7 @@
       }%
     \fi%
     \tud@if@v@lower{2.03}{\tud@ddc@enlargepage[\titlepagestyle]}{}%
-  \endgroup%
+  }}%
 }
 \newcommand*\tud@title@uppercase[1]{%
   \let\@tempa\relax%
@@ -6251,7 +6275,7 @@
     \sbox\z@{#1}%
     \let\thanks\@gobble%
     \let\footnote\@gobble%
-    \tud@makeuppercase{#1}%
+    \tud@sec@format{#1}%
   \endgroup%
   \ifx\@tempa\relax\else\thanks\@tempa\fi%
 }
@@ -6497,7 +6521,7 @@
         \ifstr{#1}{user}{%
           \tud@locked@bool@set{@tud@cdgeometry@cover}{false}%
         }{%
-          \TUD@parameter@error{cdgeometry}{true,false}%
+          \TUD@parameter@error{cdgeometry}{true, false or custom}%
         }%
       }%
     }%
@@ -6937,7 +6961,83 @@
 \TUD@deprecated@cs{textuxs}{textcdbi}%
 \TUD@deprecated@cs{dinbn}{cdfontxn}%
 \TUD@deprecated@cs{textdbn}{textcdxn}%
+\TUD@deprecated@cs{ifdin}{@secondoftwo}
+\if@tud@cdoldfont@active
+  \newrobustcmd*\ifdin{%
+    \ifx\f@family\tud@cdfont@db%
+      \expandafter\@firstoftwo%
+    \else%
+      \expandafter\@secondoftwo%
+    \fi%
+  }%
+\fi
 %%% From File: tudscr-misc.dtx
+\newcommand*\tudbookmark[1][]{\@gobbletwo}
+\newcommand*\tud@x@hyperref@realfootnotes{}
+\AfterPackage{hyperref}{%
+  \renewcommand*\tudbookmark[3][]{%
+    \relax%
+    \if@tud@bookmarks%
+      \phantomsection%
+      \ifblank{#1}{\pdfbookmark{#2}{#3}}{\pdfbookmark[#1]{#2}{#3}}%
+    \fi%
+  }%
+  \renewcommand*\tud@x@hyperref@realfootnotes{%
+    \let\Hy@saved@footnotemark\@footnotemark%
+    \let\Hy@saved@footnotetext\@footnotetext%
+    \let\@footnotemark\H@@footnotemark%
+    \let\@footnotetext\H@@footnotetext%
+  }%
+  \pdfstringdefDisableCommands{\let\NoCaseChange\@firstofone}%
+}
+\newcommand*\tud@x@bookmark@startatroot{\relax}
+\AfterPackage{bookmark}{%
+  \renewcommand*\tud@x@bookmark@startatroot{%
+    \if@tud@bookmarks\bookmarksetup{startatroot}\fi%
+  }%
+}
+\apptocmd{\titlepage}{%
+  \tud@x@bookmark@startatroot%
+  \if@tud@cover%
+    \tudbookmark[%
+    0%
+    ]{\coverpagename}{cover}%
+  \else%
+    \tudbookmark[%
+    0%
+    ]{\titlepagename}{title}%
+  \fi%
+}{}{\tud@patch@wrn{titlepage}}
+\pretocmd{\tud@maketitle@head}{%
+  \tud@x@bookmark@startatroot%
+  \tudbookmark[%
+  0%
+  ]{\titlename}{title}%
+}{}{\tud@patch@wrn{tud@maketitle@head}}
+\pretocmd{\@maketitle}{%
+  \tud@x@bookmark@startatroot%
+  \tudbookmark[%
+  0%
+  ]{\titlename}{title}%
+}{}{\tud@patch@wrn{@maketitle}}
+\BeforeTOCHead[toc]{%
+  \tud@x@bookmark@startatroot%
+  \let\@tempc\relax%
+  \iftocfeature{toc}{totoc}{}{%
+    \if@tud@bookmarks%
+      \setuptoc{toc}{totoc}%
+      \tud@cs@store{addtocontents}%
+      \def\@tempc{%
+        \unsettoc{toc}{totoc}%
+        \tud@cs@restore{addtocontents}%
+      }%
+      \let\addtocontents\@gobbletwo%
+    \fi%
+  }%
+}
+\AfterTOCHead[toc]{\@tempc}
+\BeforeTOCHead[lof]{\tud@x@bookmark@startatroot}
+\BeforeTOCHead[lot]{\tud@x@bookmark@startatroot}
 \AtBeginDocument{%
   \if@tud@x@scr@fontsize@set\else%
     \@tud@res@swafalse%
@@ -6954,20 +7054,6 @@
       }%
     \fi%
   \fi%
-}
-\newcommand*\tud@atdocument@hook{}
-\let\tud@atdocument@hook\relax
-\AfterEndPreamble{%
-  \renewcommand*\TUD@SpecialOptionAtDocument[1]{%
-    \ifx\tud@atdocument@hook\relax%
-      \gdef\tud@atdocument@hook{\global\let\tud@atdocument@hook\relax}%
-      \AtEndOfFamilyOptions{%
-        \tud@atdocument@hook%
-        \tud@atdocument@process%
-      }%
-    \fi%
-    \gappto\tud@atdocument@hook{\global\booltrue{@#1}}%
-  }%
 }
 \newif\if@tud@font@set
 \newif\if@tud@math@set
@@ -7011,72 +7097,6 @@
     \global\@tud@cdgeometry@@processfalse%
   \fi%
 }
-\newcommand*\tudbookmark[1][]{\@gobbletwo}
-\newcommand*\tud@x@hyperref@realfootnotes{}
-\AfterPackage{hyperref}{%
-  \renewcommand*\tudbookmark[3][]{%
-    \relax%
-    \if@tud@bookmarks%
-      \phantomsection%
-      \ifblank{#1}{\pdfbookmark{#2}{#3}}{\pdfbookmark[#1]{#2}{#3}}%
-    \fi%
-  }%
-  \renewcommand*\tud@x@hyperref@realfootnotes{%
-    \let\Hy@saved@footnotemark\@footnotemark%
-    \let\Hy@saved@footnotetext\@footnotetext%
-    \let\@footnotemark\H@@footnotemark%
-    \let\@footnotetext\H@@footnotetext%
-  }%
-  \pdfstringdefDisableCommands{\let\NoCaseChange\@firstofone}%
-}
-\newcommand*\tud@x@bookmark@startatroot{\relax}
-\AfterPackage{bookmark}{%
-  \renewcommand*\tud@x@bookmark@startatroot{%
-    \if@tud@bookmarks\bookmarksetup{startatroot}\fi%
-  }%
-}
-\apptocmd{\titlepage}{%
-  \tud@x@bookmark@startatroot%
-  \if@tud@cover%
-    \tudbookmark[%
-    0%
-    ]{\coverpagename}{cover}%
-  \else%
-    \tudbookmark[%
-    0%
-    ]{\titlepagename}{title}%
-  \fi%
-}{}{\tud@patch@wrn{titlepage}}
-\pretocmd{\tud@make@titlehead}{%
-  \tud@x@bookmark@startatroot%
-  \tudbookmark[%
-  0%
-  ]{\titlename}{title}%
-}{}{\tud@patch@wrn{tud@make@titlehead}}
-\pretocmd{\@maketitle}{%
-  \tud@x@bookmark@startatroot%
-  \tudbookmark[%
-  0%
-  ]{\titlename}{title}%
-}{}{\tud@patch@wrn{@maketitle}}
-\BeforeTOCHead[toc]{%
-  \tud@x@bookmark@startatroot%
-  \let\@tempc\relax%
-  \iftocfeature{toc}{totoc}{}{%
-    \if@tud@bookmarks%
-      \setuptoc{toc}{totoc}%
-      \tud@cs@store{addtocontents}%
-      \def\@tempc{%
-        \unsettoc{toc}{totoc}%
-        \tud@cs@restore{addtocontents}%
-      }%
-      \let\addtocontents\@gobbletwo%
-    \fi%
-  }%
-}
-\AfterTOCHead[toc]{\@tempc}
-\BeforeTOCHead[lof]{\tud@x@bookmark@startatroot}
-\BeforeTOCHead[lot]{\tud@x@bookmark@startatroot}
 \newcommand*\tud@x@textcase@uclcnotmath{%
   \def\footnote##1##{\toks@{\noexpand\footnote##1}\@footnote}%
   \def\@footnote##1{\NoCaseChange{\the\toks@{##1}}}%
