@@ -1,4 +1,4 @@
-% \CheckSum{1395}
+% \CheckSum{1374}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-title.dtx}[%
-  2018/07/23 v2.06 TUD-Script (title)%
+  2018/08/02 v2.06 TUD-Script (title)%
 ]
 \documentclass[english,ngerman,xindy]{tudscrdoc}
 \usepackage[T1]{fontenc}
@@ -185,7 +185,7 @@
   \usekomafont{subject}%
   \mdseries%
   \large%
-  \tud@raggedright%
+  \raggedtitle%
 }
 %    \end{macrocode}
 % \end{KOMAfont}^^A titlepage
@@ -205,28 +205,27 @@
 %    \end{macrocode}
 % \end{macro}^^A \footnotemark
 % \end{macro}^^A \thanks
-% \begin{macro}{\maketitle}
+% \begin{macro}{\tud@maketitle}
 % \changes{v2.01a}{2014/06/03}{Fehler bei Nutzung von \cs{subtitle} behoben}^^A
 % \changes{v2.02}{2014/06/23}{\val{firstiscover} wird als Wert für die Option 
 %   \opt{titlepage} unterstützt}^^A
 % \changes{v2.02}{2014/07/19}{Im zweispaltigen Satz wird für den Titelkopf
 %   \cs{tud@title@twocolumn} verwendet}^^A
-% \changes{v2.02}{2014/09/05}{Titelseite mit \cs{tud@make@titlepage}}^^A
+% \changes{v2.02}{2014/09/05}{Titelseite mit \cs{tud@maketitle@page}}^^A
+% \begin{macro}{\tud@title@pagenumber}
+% \changes{v2.02}{2014/06/23}{neu}^^A
 % \begin{parameter}{cdtitle}
 % \changes{v2.03}{2015/01/12}{neu}^^A
 % \begin{parameter}{cd}
 % \changes{v2.03}{2015/01/12}{neu}^^A
 % \begin{parameter}{pagenumber}
 % \changes{v2.02}{2014/09/05}{neu}^^A
-% \begin{macro}{\tud@maketitle}
-% \begin{macro}{\tud@title@pagenumber}
-% \changes{v2.02}{2014/06/23}{neu}^^A
 % Bei der entsprechend gewählten Layoutoption, wird eine neue Titelseite im \CD
 % gesetzt. Damit auf das Standardverhalten von \KOMAScript{} zurückgestellt
 % werden kann, wird der ursprüngliche \cs{maketitle}-Befehl bei der Abarbeitung 
-% der Layoutoptionen gesichert. (siehe \cs{tud@cd@process}) und kann ggf. 
+% der Layoutoptionen gesichert (siehe \cs{tud@cd@process}) und kann ggf. 
 % wiederhergestellt bzw. mit \cs{tud@cs@use} verwendet werden. Ist das Layout 
-% des \CDs gefordert wird entweder mit \cs{tud@make@titlepage} eine Titelseite 
+% des \CDs gefordert wird entweder mit \cs{tud@maketitle@page} eine Titelseite 
 % gesetzt~-- wobei sich diese in ihrer Struktur am originalen \cs{maketitle}
 % orientiert~-- oder das Titelkopflayout wird angepasst.
 % \ToDo{cdgeometry=true als default?}[v2.06]
@@ -269,10 +268,10 @@
       \fi%
 %<*book|report|article>
       \if@titlepage%
-        \tud@make@titlepage%
+        \tud@maketitle@page%
       \else%
 %</book|report|article>
-        \tud@make@titlehead%
+        \tud@maketitle@head%
 %<*book|report|article>
       \fi%
 %</book|report|article>
@@ -281,20 +280,6 @@
   \setcounter{footnote}{0}%
   \global\let\and\relax%
 }
-%    \end{macrocode}
-% Abschließend wird dafür Sorge getragen, dass bei einem aktivierten Seitenstil 
-% aus der \pgs{tudheadings}-Reihe ebenfalls der Titel in diesem gesetzt wird,
-% auch wenn das Layout des \CDs selber nicht aktiv ist.
-%    \begin{macrocode}
-\patchcmd{\titlepage}{\thispagestyle{empty}}{%
-  \tud@if@tudheadings{\currentpagestyle}{%
-    \thispagestyle{empty.tudheadings}%
-  }{%
-    \thispagestyle{empty}%
-  }%
-}{}{\tud@patch@wrn{titlepage}}
-\tud@cs@store{maketitle}
-\let\maketitle\tud@maketitle
 %    \end{macrocode}
 % Die einzelnen Parameter dienen zur Einstellung der Titelseite und entsprechen
 % in ihrem Verhalten den gleichnamigen Klassenoptionen.
@@ -315,11 +300,31 @@
   \TUD@parameter@handler@value{pagenumber}%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@title@pagenumber
-% \end{macro}^^A \tud@maketitle
 % \end{parameter}^^A pagenumber
 % \end{parameter}^^A cd
 % \end{parameter}^^A cdtitle
+% \end{macro}^^A \tud@title@pagenumber
+% \end{macro}^^A \tud@maketitle
+% \begin{macro}{\maketitle}
+% \begin{environment}{titlepage}
+% Der originale Befehl wird gesichert und danach überschrieben.
+%    \begin{macrocode}
+\tud@cs@store{maketitle}
+\let\maketitle\tud@maketitle
+%    \end{macrocode}
+% Abschließend wird dafür Sorge getragen, dass bei einem aktivierten Seitenstil 
+% aus der \pgs{tudheadings}-Reihe der Titel ebenfalls in diesem gesetzt wird,
+% auch wenn das Layout des \CDs selber nicht aktiv ist.
+%    \begin{macrocode}
+\patchcmd{\titlepage}{\thispagestyle{empty}}{%
+  \tud@if@tudheadings{\currentpagestyle}{%
+    \thispagestyle{empty.tudheadings}%
+  }{%
+    \thispagestyle{empty}%
+  }%
+}{}{\tud@patch@wrn{titlepage}}
+%    \end{macrocode}
+% \end{environment}^^A titlepage
 % \end{macro}^^A \maketitle
 %
 % \iffalse
@@ -328,7 +333,7 @@
 %
 % \subsubsection{Die Definition der Titelseite}
 %
-% \begin{macro}{\tud@make@titlepage}
+% \begin{macro}{\tud@maketitle@page}
 % \changes{v2.02}{2014/09/05}{neu}^^A
 % \begin{macro}{\tud@titleback}
 % Bei der entsprechend gewählten Layoutoption, wird eine neue Titelseite im \CD
@@ -341,7 +346,7 @@
 % Titel kann mit \cs{tud@title@pagenumber} angegeben werden.
 %    \begin{macrocode}
 \newcommand*\tud@titleback{}
-\newcommand*\tud@make@titlepage{%
+\newcommand*\tud@maketitle@page{%
 %    \end{macrocode}
 % Es wird durch die \KOMAScript-Option \opt{titlepage} unterschieden, ob eine
 % Titelseite oder aber ein Titelkopf gesetzt werden soll. In Abhängigkeit davon
@@ -450,18 +455,16 @@
 % Das ganze Layout wird vertikal so verschoben, dass der Titel auf der gleichen
 % Höhe steht wie die Überschriften auf Teil- und Kapitelseiten.
 %    \begin{macrocode}
-    \vspace*{%
-      \dimexpr\tud@len@areavskip+\tud@len@areaheadvskip-\baselineskip\relax%
-    }%
+    \tud@cd@headstartvskip%
     \TUD@deprecated@lengthcs{pageheadingsvskip}%
     \vspace*{\tud@dim@pageheadingsvskip}%
+    \tud@cd@vphantom%
     \setparsizes{\z@}{\z@}{\z@\@plus1fil}\par@updaterelative%
 %    \end{macrocode}
 % Damit die Farbeinstellungen der Schriften lokal begrenzt bleiben, wird dieser
-% Teil des Titels in einer Gruppe (\cs{begingroup}) gesetzt.
+% Teil des Titels in einer Gruppe gesetzt.
 %    \begin{macrocode}
-    \begingroup%
-      \usekomafont{titlepage}%
+    {\usekomafont{titlepage}{%
 %    \end{macrocode}
 % Da die Überschrift auf einer festen Position liegen soll, muss von allem, was
 % über der Überschrift positioniert werden soll, die Höhe bestimmt werden, um
@@ -557,7 +560,7 @@
           \ifx\@graduation\@empty\else%
             \def\@tempc{%
               \@graduation%
-              \ifx\@@graduation\@empty\else\nobreakspace\@@graduation\fi%
+              \ifx\@graduationabbr\@empty\else\nobreakspace\@graduationabbr\fi%
             }%
             {\usekomafont{titlepage}{\graduationtext\par}}%
             \vskip 2ex\@plus1ex\@minus1ex%
@@ -622,7 +625,7 @@
         {\usekomafont{publishers}{\@publishers\par}}%
         \vskip\z@\@plus.25fill%
       \fi%
-    \endgroup%
+    }}%
 %    \end{macrocode}
 % Die Rückseite des Titels wird~-- wie bei \KOMAScript~-- bloß bei zweiseitigem
 % Satz ausgegeben. Für diese Klassen wird aufgrund der möglicherweise farbigen
@@ -671,8 +674,6 @@
         \tud@locked@num@set{tud@head@bar@num}{3}%
       \fi%
       \tud@color{\tud@title@fontcolor}%
-      \addtokomafont{pagenumber}{\usekomafont{tudheadings}}%
-      \addtokomafont{pagefoot}{\usekomafont{tudheadings}}%
       \thispagestyle{empty.tudheadings}%
 %    \end{macrocode}
 % Im Kompatibilitätsmodus für die Version~v2.02 wird im Zweifelsfall die Seite 
@@ -731,7 +732,7 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@titleback
-% \end{macro}^^A \tud@make@titlepage
+% \end{macro}^^A \tud@maketitle@page
 %
 % \iffalse
 %</book|report|article>
@@ -739,14 +740,14 @@
 %
 % \subsubsection{Die Definition des Titelkopfes}
 %
-% \begin{macro}{\tud@make@titlehead}
+% \begin{macro}{\tud@maketitle@head}
 % \changes{v2.05}{2015/07/13}{neu}^^A
-% \begin{macro}{\tud@make@@titlehead}
+% \begin{macro}{\tud@maketitle@@head}
 % \changes{v2.05}{2015/07/13}{neu}^^A
 % Das sind die internen Makros für einen Titelkopf (\opt{titlepage}|=|\val{no}),
 % welche sich stark an den orginalen \KOMAScript-Befehlen orientieren.
 %    \begin{macrocode}
-\newcommand*\tud@make@titlehead{%
+\newcommand*\tud@maketitle@head{%
   \renewcommand*\tud@title@fontcolor{}%
   \ifcase\tud@cd@title@num\relax\or\else% *color
     \ifstr{\tud@pagecolor}{HKS41}{}{\renewcommand*\tud@title@fontcolor{HKS41}}%
@@ -783,12 +784,12 @@
       \ifx\@extratitle\@empty\else%
         \twocolumn[\@makeextratitle]\next@tdpage%
       \fi%
-      \twocolumn[\tud@make@@titlehead]%
+      \twocolumn[\tud@maketitle@@head]%
     \else%
       \ifx\@extratitle\@empty\else%
         \@makeextratitle\next@tdpage%
       \fi%
-      \tud@make@@titlehead%
+      \tud@maketitle@@head%
     \fi%
     \ifx\titlepagestyle\@empty\else\thispagestyle{\titlepagestyle}\fi%
     \@thanks%
@@ -797,26 +798,21 @@
 %    \end{macrocode}
 % Hier erfolgt die Ausgabe des Titelkopfes.
 %    \begin{macrocode}
-\newcommand*\tud@make@@titlehead{%
+\newcommand*\tud@maketitle@@head{%
   \global\@topnum=\z@%
+  \tud@cd@headstartvskip%
 %<*book|report|article>
-  \vspace*{%
-    \dimexpr\tud@len@areavskip+\tud@len@areaheadvskip-\baselineskip\relax%
-  }%
   \TUD@deprecated@lengthcs{headingsvskip}%
   \vspace*{\tud@dim@headingsvskip}%
+  \tud@cd@vphantom%
 %</book|report|article>
-%<*poster>
-  \vspace*{\dimexpr\tud@len@areavskip-\baselineskip\relax}%
-%</poster>
   \setparsizes{\z@}{\z@}{\z@\@plus1fil}\par@updaterelative%
 %    \end{macrocode}
 % Damit die Farbeinstellungen der Schriften lokal begrenzt bleiben, wird dieser
-% Teil des Titels in einer Gruppe (\cs{begingroup}) gesetzt. Außerdem werden 
+% Teil des Titels in einer Gruppe gesetzt. Außerdem werden 
 % wie auch für die Titelseite die Hyperlinks der Fußnoten deaktiviert.
 %    \begin{macrocode}
-  \begingroup%
-    \usekomafont{titlepage}%
+  {\usekomafont{titlepage}{%
     \tud@x@hyperref@realfootnotes%
 %    \end{macrocode}
 % Ähnlich wie bei der Titelseite wird auch beim Titelkopf die Inhalte von 
@@ -901,11 +897,11 @@
 % muss dafür am unteren Rand entsprechend Platz gelassen werden.
 %    \begin{macrocode}
     \tud@if@v@lower{2.03}{\tud@ddc@enlargepage[\titlepagestyle]}{}%
-  \endgroup%
+  }}%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@make@@titlehead
-% \end{macro}^^A \tud@make@titlehead
+% \end{macro}^^A \tud@maketitle@@head
+% \end{macro}^^A \tud@maketitle@head
 %
 % \subsubsection{Hilfsmakros für die Ausgabe}
 %
@@ -922,8 +918,8 @@
 % Der Befehl \cs{thanks} wird so umdefiniert, dass der Inhalt in ein temporäres
 % Makro gespeichert wird. Danach wird durch das Setzen einer temporären Box der
 % Befehl \cs{thanks} ausgeführt und der Inhalt gesichert. Für die Ausführung von
-% \cs{tud@makeuppercase} wird das Argument von \cs{thanks} ignoriert. Nachdem 
-% das gewünschte Feld in Majuskeln gesetzt wurde, wird die gespeicherte Fußnote
+% \cs{tud@sec@format} wird das Argument von \cs{thanks} ignoriert. Nachdem das
+% gewünschte Feld in Majuskeln gesetzt wurde, wird die gespeicherte Fußnote
 % ausgegeben.
 %    \begin{macrocode}
     \def\thanks##1{\gdef\@tempa{##1}}%
@@ -931,7 +927,7 @@
     \sbox\z@{#1}%
     \let\thanks\@gobble%
     \let\footnote\@gobble%
-    \tud@makeuppercase{#1}%
+    \tud@sec@format{#1}%
   \endgroup%
   \ifx\@tempa\relax\else\thanks\@tempa\fi%
 }
@@ -1437,7 +1433,7 @@
         \ifstr{#1}{user}{%
           \tud@locked@bool@set{@tud@cdgeometry@cover}{false}%
         }{%
-          \TUD@parameter@error{cdgeometry}{true, false}%
+          \TUD@parameter@error{cdgeometry}{true, false or custom}%
         }%
       }%
     }%

@@ -1,4 +1,4 @@
-% \CheckSum{359}
+% \CheckSum{375}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-misc.dtx}[%
-  2018/07/31 v2.06 TUD-Script (miscellaneous)%
+  2018/08/02 v2.06 TUD-Script (miscellaneous)%
 ]
 \documentclass[english,ngerman,xindy]{tudscrdoc}
 \usepackage[T1]{fontenc}
@@ -161,7 +161,7 @@
 % \changes{v2.05}{2015/08/05}{neu}^^A
 % \begin{macro}{\@maketitle}
 % \changes{v2.05}{2015/08/05}{neu}^^A
-% \begin{macro}{\tud@make@titlehead}
+% \begin{macro}{\tud@maketitle@head}
 % \changes{v2.05}{2015/08/05}{neu}^^A
 % Ist die Option \opt{tudbookmarks} aktiviert, werden für Umschlag- und 
 % Titelseite PDF"=Lesezeichen bzw. Outline-Einträge erzeugt.
@@ -185,13 +185,13 @@
 %    \end{macrocode}
 % Dies geschieht außerdem auch für die Titelköpfe.
 %    \begin{macrocode}
-\pretocmd{\tud@make@titlehead}{%
+\pretocmd{\tud@maketitle@head}{%
   \tud@x@bookmark@startatroot%
   \tudbookmark[%
 %<book|report>  0%
 %<article|poster>  1%
   ]{\titlename}{title}%
-}{}{\tud@patch@wrn{tud@make@titlehead}}
+}{}{\tud@patch@wrn{tud@maketitle@head}}
 \pretocmd{\@maketitle}{%
   \tud@x@bookmark@startatroot%
   \tudbookmark[%
@@ -200,7 +200,7 @@
   ]{\titlename}{title}%
 }{}{\tud@patch@wrn{@maketitle}}
 %    \end{macrocode}
-% \end{macro}^^A \tud@make@titlehead
+% \end{macro}^^A \tud@maketitle@head
 % \end{macro}^^A \@maketitle
 % \end{environment}^^A titlepage
 % \begin{macro}{\tableofcontents}
@@ -246,11 +246,14 @@
 % \changes{v2.02}{2014/06/27}{neu}^^A
 % \begin{macro}{\if@tud@symbolheadings}
 % \changes{v2.02}{2014/06/27}{neu}^^A
+% \begin{macro}{\tud@sec@symbolheadings}
+% \changes{v2.02}{2014/06/27}{neu}^^A
 % Die \KOMAScript-Option \opt{footnotes} wird um den Schlüssel 
 % \val{symbolheadings} erweitert, mit welchem eingestellt werden kann, ob in den
 % Überschriften Symbole für die Fußnoten anstelle von Zahlen verwendet werden
 % sollen.
-% \ToDo{\opt{footnotes}=\val{symbolheadings} komplett überarbeiten}[v2.07]
+% \ToDo{Befehle umbenennen}[v2.06]
+% \ToDo{\opt{footnotes}=\val{symbolheadings} überarbeiten}[v2.06]
 %    \begin{macrocode}
 \newif\if@tud@symbolheadings
 \TUD@key{footnotes}{%
@@ -267,6 +270,22 @@
   \fi%
 }
 %    \end{macrocode}
+% Der Befehl \cs{tud@sec@symbolheadings} ist für das Setzen der 
+% Gliederungsüberschriften in Majuskeln verantwortlich. Außerdem wird ggf. die
+% Option \opt{footnotes}|=|\val{symbolheadings} umgesetzt.
+%    \begin{macrocode}
+\robustify{\footnote}
+\newcommand*\tud@sec@symbolheadings[1]{%
+  \begingroup%
+    \if@tud@symbolheadings%
+      \let\c@footnote\c@symbolheadings%
+      \renewcommand*\thefootnote{\fnsymbol{symbolheadings}}%
+    \fi%
+    \tud@sec@format{#1}%
+  \endgroup%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@sec@symbolheadings
 % \end{macro}^^A \if@tud@symbolheadings
 % \end{option}^^A footnotes
 % \begin{counter}{symbolheadings}
@@ -314,6 +333,12 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@x@scr@pt
 % \end{macro}^^A \tud@x@scr@checkoptions
+%
+% \iffalse
+%</class&option>
+%<*class&body>
+% \fi
+%
 % Wurde das Papierformat jedoch nicht die Schriftgröße geändert, wird eine
 % Warnung erzeugt.
 %    \begin{macrocode}
@@ -337,7 +362,7 @@
 %    \end{macrocode}
 %
 % \iffalse
-%</class&option>
+%</class&body>
 %<*option>
 % \fi
 %
@@ -542,7 +567,8 @@
 %</class&!inherit>
 %<*package&tutorial>
 \KOMAoptions{headings=small}
-\TUDExecuteOptions{cdfoot=true,ToDo=true}
+\TUDoptions{cdfoot=true}
+\TUDExecuteOptions{ToDo=true}
 %</package&tutorial>
 \TUDProcessOptions\relax
 %    \end{macrocode}
@@ -576,7 +602,8 @@
 % \ToDo{%
 %   Schnittstelle in \cs{tud@x@textcase@uclcnotmath} implementieren zum Umgehen 
 %   respektive Ignorieren von \cs{MakeTextUppercase},\newline
-%   siehe \url{https://github.com/tud-cd/tudscr/issues/23}
+%   siehe \url{https://github.com/tud-cd/tudscr/issues/23};
+%   hängt aber an den Klassen selbst, silence ist schuld???
 % }[v2.06]
 % \ToDo{Ist der Kram noch notwendig? in tudscr-comp verschieben}[v2.06]
 %    \begin{macrocode}

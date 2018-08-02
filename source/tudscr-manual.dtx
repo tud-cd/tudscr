@@ -1,4 +1,4 @@
-% \CheckSum{4345}
+% \CheckSum{4334}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-manual.dtx}[%
-  2018/07/24 v2.06 TUD-Script\space%
+  2018/08/02 v2.06 TUD-Script\space%
 %</driver>
 %<package&identify>\ProvidesPackage{tudscrtutorial}[%
 %<*driver|package&identify>
@@ -901,6 +901,7 @@
 % \cs{pdfstringdef} ziemlich viele und absolut unnötige Infos in der Form
 % \texttt{Package babel Info: Redefining ngerman shorthand}. Dieser Patch dient
 % zum Unterdrücken dieser Infos.
+% \begin{macro}{\pdfstringdef}
 %    \begin{macrocode}
 \AfterPackage*{hyperref}{%
   \patchcmd{\pdfstringdef}{\csname HyPsd@babel@}{%
@@ -908,6 +909,7 @@
   }{}{\tud@patch@wrn{pdfstringdef}}%
 }
 %    \end{macrocode}
+% \end{macro}^^A \pdfstringdef
 %
 % \iffalse
 %</body|class&doc>
@@ -1526,7 +1528,7 @@
 %    \end{macrocode}
 % Diese Makros werden für das Definieren eines Bundle-Elements und ggf. das 
 % Prüfen des selbigen benötigt.
-% \ToDo{Suffixe wie Klasse, Paket etc. lokalisieren}[v2.??]
+% \ToDo{Suffixe wie Klasse, Paket etc. lokalisieren (locale)}[v2.??]
 %    \begin{macrocode}
 \newcommand*\tud@bdl@curr{}
 \newcommand*\tud@bdl@dflt{tudscr}
@@ -2283,8 +2285,8 @@
 %</class>
 }
 %    \end{macrocode}
-% Mit \cs{tud@lbl@get@@curr} wird das generierte Label in das beim Aufruf von
-% \cs{tud@lbl@get@curr} angegebenen Makro gespeichert.
+% Mit \cs{tud@lbl@get@@curr} wird das generierte Label in Makro gespeichert, 
+% welches beim Aufruf von \cs{tud@lbl@get@curr} angegebenen wurde.
 %    \begin{macrocode}
 \NewDocumentCommand\tud@lbl@get@@curr{mmd==}{%
   \def#1{#2}%
@@ -2475,10 +2477,11 @@
 %
 % \begin{macro}{\ifdisposition}
 % \begin{macro}{\if@tud@disposition}
-% Das Markup soll lediglich im Fließtext erfolgen, in Überschriften soll 
-% lediglich das Hauptargument ausgegeben werden. Hierfür wird ein Schalter und 
-% der auswertende Befehl definiert. Der Schalter wird in die notwendigen 
-% Befehle gepatcht.
+% \begin{macro}{\tud@sec@format}
+% Das Markup soll lediglich im Fließtext erfolgen, in Überschriften soll nur
+% das Hauptargument ausgegeben werden. Hierfür wird ein Schalter und der
+% auswertende Befehl definiertm wobei das Setzen des Schalter in
+% \cs{tud@sec@format} gepatcht wird.
 %    \begin{macrocode}
 \newif\if@tud@disposition
 \newcommand*\ifdisposition{%
@@ -2488,22 +2491,11 @@
     \expandafter\@secondoftwo%
   \fi%
 }
-\pretocmd{\partlineswithprefixformat}{%
+\pretocmd{\tud@sec@format}{%
   \@tud@dispositiontrue%
-}{}{\tud@patch@wrn{partlineswithprefixformat}}
-\pretocmd{\chapterlinesformat}{%
-  \@tud@dispositiontrue%
-}{}{\tud@patch@wrn{chapterlinesformat}}
-\pretocmd{\chapterlineswithprefixformat}{%
-  \@tud@dispositiontrue%
-}{}{\tud@patch@wrn{chapterlineswithprefixformat}}
-\pretocmd{\sectionlinesformat}{%
-  \@tud@dispositiontrue%
-}{}{\tud@patch@wrn{sectionlinesformat}}
-\pretocmd{\sectioncatchphraseformat}{%
-  \@tud@dispositiontrue%
-}{}{\tud@patch@wrn{sectioncatchphraseformat}}
+}{}{\tud@patch@wrn{tud@sec@format}}
 %    \end{macrocode}
+% \end{macro}^^A \tud@sec@format
 % \end{macro}^^A \if@tud@disposition
 % \end{macro}^^A \tud@if@disposition
 %
@@ -2937,9 +2929,7 @@
 \newcommand*\Markup@Inline[1]{\mbox{\Markup@Format{#1}}}
 %<*class>
 \newcommand*\Markup@Declare{}
-\newcommand*\Markup@@Declare[1]{%
-  \begingroup\Markup@Format{#1}\endgroup\Markup@Suffix%
-}
+\newcommand*\Markup@@Declare[1]{\Markup@Format{#1}\Markup@Suffix}
 %</class>
 %    \end{macrocode}
 % \end{macro}^^A \Markup@@Declare
@@ -2966,14 +2956,19 @@
 % Tabelle zu erzeugen.
 %    \begin{macrocode}
 \newcommand*\Markup@Format{}
+\undef\Markup@Format
 \newcommand*\Markup@Suffix{}
 \NewDocumentCommand\Markup@SetFormat{omod()}{%
 %    \end{macrocode}
 % Außerdem ist noch eine weitere Besonderheit zu beachten. Sollte gerade eine
-% Überschrift gesetzt werden, wird lediglich das Hauptargument unformatiert 
-% ausgegeben.
+% Überschrift gesetzt werden, wird das Hauptargument nicht formatiert sondern 
+% lediglich mit \cs{tud@sec@format} ausgegeben.
 %    \begin{macrocode}
-  \def\Markup@Format{\ifdisposition{}{#2}\IfValueT{#1}{#1}}%
+  \def\Markup@Format##1{%
+    \def\tud@res@a{#2}%
+    \ifdisposition{\let\tud@res@a\tud@sec@format}{}%
+    \begingroup\tud@res@a{\IfValueT{#1}{#1}##1}\endgroup%
+  }%
   \IfValueT{#3}{\def\Markup@Suffix{\suffix{#3}}}%
 %<*class>
   \IfValueT{#4}{\renewcommand*\Markup@Declare[1]{#4\Markup@Suffix}}%
@@ -2986,13 +2981,13 @@
 % \cs{Markup@SetFormat} prüfen zu können.
 %    \begin{macrocode}
 \newcommand*\Markup@ClearFormat{%
-  \let\Markup@Format\relax%
+  \undef\Markup@Format%
   \let\Markup@Declare\Markup@@Declare%
   \let\Markup@Suffix\relax%
 }
 \Markup@ClearFormat
 \newcommand*\Markup@CheckFormat{%
-  \ifx\Markup@Format\relax%
+  \ifundef\Markup@Format{%
 %<*class>
     \ClassError{tudscrmanual}%
 %</class>
@@ -3001,7 +2996,7 @@
 %</package>
       {\string\Markup@SetFormat\space unused}%
       {It seems you have forgotten to use \string\Markup@SetFormat.}%
-  \fi%
+  }{}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \Markup@Suffix
@@ -4335,6 +4330,7 @@
 % verfahren. 
 %
 % \begin{macro}{\PrintChangelog}
+% \begin{environment}{theindex}
 % Mit \cs{PrintChangelog} erfolgt die Ausgabe der Änderungsliste. Dabei ist zu 
 % beachten, dass die Einträge im Index bis zur vierten Ebene erfolgen.
 %    \begin{macrocode}
@@ -4384,6 +4380,7 @@
   \endgroup%
 }
 %    \end{macrocode}
+% \end{environment}^^A theindex
 % \end{macro}^^A \PrintChangelog
 % \begin{macro}{\print@changedatlist}
 % \changes{v2.02}{2014/10/09}{neu}^^A
@@ -4786,8 +4783,8 @@
   \addvspace{-\topsep}%
 }
 \newenvironment{Example*}{%
-  \labeling{{\usekomafont{disposition}Beispiel:\nobreakspace}}%
-  \item[{\usekomafont{disposition}Beispiel:\nobreakspace}]%
+  \labeling{{\usekomafont{disposition}{Beispiel:\nobreakspace}}}%
+  \item[{\usekomafont{disposition}{Beispiel:\nobreakspace}}]%
 }{%
   \endlabeling%
 }
@@ -6219,6 +6216,7 @@
 % \begin{macro}{\Univers}
 % \begin{macro}{\DIN}
 % Für die Nennung der Schriften spezielle Markos bereitgestellt.
+% \ToDo[rls]{in tudscr-manual.dtx \cs{Univers} und \cs{DIN} ändern}[v2.06]
 %    \begin{macrocode}
 \newcommand*\OpenSans{\texorpdfstring{\textcdbn{Open~Sans}}{Open Sans}\xspace}
 \newcommand*\Univers{\texorpdfstring{\textubn{Univers}}{Univers}\xspace}
