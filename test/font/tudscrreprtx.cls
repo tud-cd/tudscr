@@ -1027,18 +1027,28 @@
       \@tud@symbolheadingsfalse%
     \or% symbolheadings
       \@tud@symbolheadingstrue%
+      \AfterPreamble{\tud@symbolheadings@wrn}%
     \fi%
   \fi%
 }
-\robustify{\footnote}
-\newcommand*\tud@sec@symbolheadings[1]{%
-  \begingroup%
-    \if@tud@symbolheadings%
-      \let\c@footnote\c@symbolheadings%
-      \renewcommand*\thefootnote{\fnsymbol{symbolheadings}}%
-    \fi%
-    \tud@sec@format{#1}%
-  \endgroup%
+\newcommand*\tud@symbolheadings@wrn{%
+  \ClassWarning{\TUD@Class@Name}{%
+    You have to load package `footmisc' with\MessageBreak%
+    option `stable' in order to use\MessageBreak%
+    footnotes with symbols in headings%
+  }%
+}
+\newcommand*\tud@sec@symbolheadings{}%
+\AfterPackage{footmisc}{%
+  \@ifpackagewith{footmisc}{stable}{%
+    \let\tud@symbolheadings@wrn\relax%
+    \renewcommand*\tud@sec@symbolheadings{%
+      \if@tud@symbolheadings%
+        \let\c@footnote\c@symbolheadings%
+        \renewcommand*\thefootnote{\fnsymbol{symbolheadings}}%
+      \fi%
+    }%
+  }{}%
 }
 \AtEndOfClass{%
   \newcounter{symbolheadings}[chapter]
@@ -1409,10 +1419,8 @@
 }
 \tud@if@v@lower{2.06}{%
   \TUD@key@preset{cdoldfont}{true}%
-  \TUD@key@preset{slantedgreek}{standard}%
 }{%
   \TUD@key@preset{cdfont}{true}%
-  \TUD@key@preset{slantedgreek}{true}%
 }
 \PassOptionsToPackage{DIV=calc}{typearea}
 \DeclareOption*{\tud@x@scr@checkoptions}
@@ -2202,6 +2210,44 @@
     \fi%
   \fi%
 }
+\newcommand*\tud@slantedgreek@check{%
+  \begingroup%
+    \def\tud@res@c{%
+      \tud@if@v@lower{2.06}{%
+        \TUD@key@preset{slantedgreek}{standard}%
+      }{%
+        \TUD@key@preset{slantedgreek}{true}%
+      }%
+    }%
+    \@tud@res@swafalse%
+    \ifcsdef{upalpha}{%
+      \ifx\upalpha\alpha%
+        \@tud@res@swatrue%
+      \fi%
+    }{}%
+    \if@tud@res@swa%
+      \def\tud@res@c{\TUD@key@preset{slantedgreek}{false}}%
+    \else%
+      \ifcsdef{itGamma}{%
+        \ifx\itGamma\Gamma%
+          \@tud@res@swatrue%
+        \fi%
+      }{%
+        \let\tud@res@a\relax%
+        \let\tud@res@b\relax%
+        \DeclareMathSymbol{\tud@res@a}{\mathalpha}{letters}{0}%
+        \DeclareMathSymbol{\tud@res@b}{\mathord}{letters}{0}%
+        \ifx\Gamma\tud@res@a\relax\@tud@res@swatrue\fi%
+        \ifx\Gamma\tud@res@b\relax\@tud@res@swatrue\fi%
+      }%
+      \if@tud@res@swa%
+        \def\tud@res@c{\TUD@key@preset{slantedgreek}{true}}%
+      \fi%
+    \fi%
+    \edef\tud@res@c{\endgroup\expandonce\tud@res@c}%
+  \tud@res@c%
+  \let\tud@slantedgreek@check\relax%
+}
 \newcommand*\tud@math@init{%
   \@ifpackageloaded{unicode-math}{%
     \if@tud@cdmath@active%
@@ -2221,14 +2267,41 @@
     \@tempcnta=\z@\relax%
     \tud@math@greek@loop@uc\tud@math@greek@declare@uc%
     \tud@math@greek@loop@lc\tud@math@greek@declare@lc%
-    \tud@math@greek@check@slanted%
-    \tud@math@greek@loop\tud@math@greek@init%
-    \ifnum\tud@slantedgreek@num=\@ne\relax%
-      \tud@math@greek@loop@uc\tud@math@greek@slanted%
+    \tud@slantedgreek@check%
+    \ifcase\tud@slantedgreek@num\relax% upright
+      \tud@math@greek@loop{\tud@math@greek@init{false}}%
+    \or% slanted
+      \tud@math@greek@loop{\tud@math@greek@init{true}}%
+    \or% standard
+      \tud@math@greek@loop@uc{\tud@math@greek@init{false}}%
+      \tud@math@greek@loop@lc{\tud@math@greek@init{true}}%
     \fi%
     \tud@cdmath@init%
     \tud@math@set%
   }%
+}
+\newcommand*\tud@math@greek@init[2]{%
+  \ifcsundef{up#2}{%
+    \csname if#1\endcsname%
+      \csletcs{up#2}{tud@math@greek@up#2}%
+    \else%
+      \csletcs{up#2}{#2}%
+    \fi%
+  }{}%
+  \ifcsundef{it#2}{%
+    \csname if#1\endcsname%
+      \csletcs{it#2}{#2}%
+    \else%
+      \csletcs{it#2}{tud@math@greek@it#2}%
+    \fi%
+  }{}%
+  \ifcsundef{other#2}{%
+    \csname if#1\endcsname%
+      \csletcs{other#2}{up#2}%
+    \else%
+      \csletcs{other#2}{it#2}%
+    \fi%
+  }{}%
 }
 \newcommand*\tud@math@greek@loop[1]{%
   \tud@math@greek@loop@uc{#1}%
@@ -2255,6 +2328,7 @@
     \noexpand\DeclareMathSymbol{\csname tud@math@greek@it#1\endcsname}%
       {\noexpand\mathalpha}{letters}{\the\@tempcnta}%
   }\@tempb%
+  \tud@math@greek@declare@comp{#1}%
   \advance \@tempcnta by 1%
 }
 \newcommand*\tud@math@greek@declare@lc[1]{%
@@ -2266,54 +2340,19 @@
     \noexpand\DeclareMathSymbol{\csname tud@math@greek@it#1\endcsname}%
       {\noexpand\mathalpha}{letters}{\the\@tempcnta}%
   }\@tempb%
+  \tud@math@greek@declare@comp{#1}%
   \advance \@tempcnta by 1%
 }
-\newif\if@tud@math@greek@slanted
-\newcommand*\tud@math@greek@check@slanted{%
-  \let\@tempb\relax%
-  \let\@tempc\relax%
-  \DeclareMathSymbol{\@tempb}{\mathalpha}{letters}{0}%
-  \DeclareMathSymbol{\@tempc}{\mathord}{letters}{0}%
-  \@tud@math@greek@slantedfalse%
-  \ifx\Gamma\@tempb\relax\@tud@math@greek@slantedtrue\fi%
-  \ifx\Gamma\@tempc\relax\@tud@math@greek@slantedtrue\fi%
-  % TODO weitere Varianten erkennen!
-  \if@tud@math@greek@slanted%
-    \TUD@key@preset{slantedgreek}{true}%
-  \fi%
-  \let\tud@math@greek@check@slanted\relax%
-}
-\newcommand*\tud@math@greek@init[1]{%
+\newcommand*\tud@math@greek@declare@comp[1]{%
   \ifcsundef{up#1}{%
     \@for\tud@res@a:={#1up}\do{%
       \ifcsundef{\tud@res@a}{}{\csletcs{up#1}{\tud@res@a}}%
     }%
   }{}%
-  \ifcsundef{up#1}{%
-    \if@tud@math@greek@slanted%
-      \csletcs{up#1}{tud@math@greek@up#1}%
-    \else%
-      \csletcs{up#1}{#1}%
-    \fi%
-  }{}%
   \ifcsundef{it#1}{%
     \@for\tud@res@a:={#1sl,sl#1,#1it}\do{%
       \ifcsundef{\tud@res@a}{}{\csletcs{it#1}{\tud@res@a}}%
     }%
-  }{}%
-  \ifcsundef{it#1}{%
-    \if@tud@math@greek@slanted%
-      \csletcs{it#1}{#1}%
-    \else%
-      \csletcs{it#1}{tud@math@greek@it#1}%
-    \fi%
-  }{}%
-  \ifcsundef{other#1}{%
-    \if@tud@math@greek@slanted%
-      \csletcs{other#1}{up#1}%
-    \else%
-      \csletcs{other#1}{it#1}%
-    \fi%
   }{}%
 }
 \newcommand*\mv@tud@nm{}
@@ -2445,32 +2484,32 @@
   \tud@cs@store{other#1}%
   \csletcs{up#1}{tud@math@greek@up#1}%
   \csletcs{it#1}{tud@math@greek@it#1}%
-  \tud@math@greek@comp@set{#1up}{up#1}%
-  \tud@math@greek@comp@set{#1it}{it#1}%
-  \tud@math@greek@comp@set{sl#1}{it#1}%
-  \tud@math@greek@comp@set{#1sl}{it#1}%
+  \tud@cdmath@greek@comp@set{#1up}{up#1}%
+  \tud@cdmath@greek@comp@set{#1it}{it#1}%
+  \tud@cdmath@greek@comp@set{sl#1}{it#1}%
+  \tud@cdmath@greek@comp@set{#1sl}{it#1}%
 }
 \newcommand*\tud@cdmath@greek@shape@reset[1]{%
   \tud@cs@restore{#1}%
   \tud@cs@restore{up#1}%
   \tud@cs@restore{it#1}%
   \tud@cs@restore{other#1}%
-  \tud@math@greek@comp@reset{#1up}%
-  \tud@math@greek@comp@reset{#1it}%
-  \tud@math@greek@comp@reset{sl#1}%
-  \tud@math@greek@comp@reset{#1sl}%
+  \tud@cdmath@greek@comp@reset{#1up}%
+  \tud@cdmath@greek@comp@reset{#1it}%
+  \tud@cdmath@greek@comp@reset{sl#1}%
+  \tud@cdmath@greek@comp@reset{#1sl}%
 }
-\newcommand*\tud@math@greek@comp@set[2]{%
+\newcommand*\tud@cdmath@greek@comp@set[2]{%
   \ifcsdef{#1}{\tud@cs@store{#1}\csletcs{#1}{#2}}{}%
 }
-\newcommand*\tud@math@greek@comp@reset[1]{%
+\newcommand*\tud@cdmath@greek@comp@reset[1]{%
   \ifcsdef{#1}{\tud@cs@restore{#1}}{}%
 }
 \newcommand*\tud@cdmath@greek@var@set[1]{%
-  \tud@math@greek@comp@set{var#1}{it#1}%
+  \tud@cdmath@greek@comp@set{var#1}{it#1}%
 }
 \newcommand*\tud@cdmath@greek@var@reset[1]{%
-  \tud@math@greek@comp@reset{var#1}%
+  \tud@cdmath@greek@comp@reset{var#1}%
 }
 \newcommand*\tud@math@greek@upright[1]{%
   \csletcs{#1}{up#1}%
@@ -5388,7 +5427,7 @@
     \fi%
   }%
 \fi
-\newcommand*\tud@sec@format[2][]{\tud@sec@strut#2}
+\newcommand*\tud@sec@format[2][]{\tud@sec@symbolheadings\tud@sec@strut#2}
 \if@tud@cdoldfont@active
   \RequirePackage{textcase}[2004/10/07]
   \renewcommand*\tud@sec@format[2][]{%
@@ -5403,6 +5442,7 @@
         \tud@ifdin{\aftergroup\@tud@res@swatrue}{}%
       \endgroup%
     }%
+    \tud@sec@symbolheadings%
     \tud@sec@strut%
     \if@tud@res@swa%
       \begingroup\MakeTextUppercase{#2}\endgroup%
@@ -5585,7 +5625,7 @@
     \renewcommand*\raggedsection{\tud@raggedright}%
     \tud@cs@store{minisec}%
     \renewcommand\minisec[1]{%
-      \tud@cs@use{minisec}{\tud@sec@format{##1}}%
+      \begingroup\tud@cs@use{minisec}{\tud@sec@format{##1}}\endgroup%
     }%
     \tud@komafont@set{minisec}{%
       \tud@sec@fontface%

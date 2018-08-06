@@ -1,4 +1,4 @@
-% \CheckSum{2238}
+% \CheckSum{2280}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-fonts.dtx}[%
-  2018/08/02 v2.06 TUD-Script\space%
+  2018/08/06 v2.06 TUD-Script\space%
 %</driver>
 %<package&identify>\ProvidesPackage{tudscrfonts}[%
 %<*driver|package&identify>
@@ -2096,6 +2096,75 @@
 %<*body>
 % \fi
 %
+% \begin{macro}{\tud@slantedgreek@check}
+% \changes{v2.05d}{2016/09/22}{neu}^^A
+% Für die Verwendung der griechischen Glyphen im Mathematikmodus wird versucht, 
+% ein hohes Maß an Kompatibilität für andere Pakete zu gewährleisten. Es wird 
+% versucht zu erkennen, ob Pakete mit einer Option wie \opt{slantedGreek}, 
+% \opt{frenchmath} oder ähnlichem geladen wurde. Hierfür wird nach Definitionen 
+% für \cs{upalpha} als auch \cs{itGamma} gesucht. Existieren die Makros nicht, 
+% wird zumindest auf die aktuelle Definition von \cs{Gamma} geprüft und mit der 
+% standardmäßigen Variant der Glyphe verglichen. Wurde eine passende Definition 
+% gefunden, wird die Option \opt{slantedgreek} voreingestellt.
+%    \begin{macrocode}
+\newcommand*\tud@slantedgreek@check{%
+  \begingroup%
+%    \end{macrocode}
+% Wird keine Änderung durch ein Paket erkannt, werden die Glyphen ab der 
+% \TUDScript-Version~v2.06 kursiv gesetzt. Dies betrifft insbesondere die
+% Majuskeln, welche bei \LaTeX normalerweise aufrecht gesetzt werden.
+%    \begin{macrocode}
+    \def\tud@res@c{%
+      \tud@if@v@lower{2.06}{%
+        \TUD@key@preset{slantedgreek}{standard}%
+      }{%
+        \TUD@key@preset{slantedgreek}{true}%
+      }%
+    }%
+    \@tud@res@swafalse%
+    \ifcsdef{upalpha}{%
+      \ifx\upalpha\alpha%
+        \@tud@res@swatrue%
+      \fi%
+    }{}%
+%    \end{macrocode}
+% Existiert \cs{upalpha} und ist mit \cs{alpha} identisch, werden \emph{alle} 
+% griechischen Glyphen aufrecht gesetzt.
+%    \begin{macrocode}
+    \if@tud@res@swa%
+      \def\tud@res@c{\TUD@key@preset{slantedgreek}{false}}%
+    \else%
+%    \end{macrocode}
+% Existiert \cs{itGamma} und ist mit \cs{Gamma} oder\dots
+%    \begin{macrocode}
+      \ifcsdef{itGamma}{%
+        \ifx\itGamma\Gamma%
+          \@tud@res@swatrue%
+        \fi%
+      }{%
+%    \end{macrocode}
+% \dots\cs{Gamma} entspricht einer möglichen Standarddefnition,\dots
+%    \begin{macrocode}
+        \let\tud@res@a\relax%
+        \let\tud@res@b\relax%
+        \DeclareMathSymbol{\tud@res@a}{\mathalpha}{letters}{0}%
+        \DeclareMathSymbol{\tud@res@b}{\mathord}{letters}{0}%
+        \ifx\Gamma\tud@res@a\relax\@tud@res@swatrue\fi%
+        \ifx\Gamma\tud@res@b\relax\@tud@res@swatrue\fi%
+      }%
+%    \end{macrocode}
+%\dots werden \emph{alle} griechischen Glyphen kursiv gesetzt.
+%    \begin{macrocode}
+      \if@tud@res@swa%
+        \def\tud@res@c{\TUD@key@preset{slantedgreek}{true}}%
+      \fi%
+    \fi%
+    \edef\tud@res@c{\endgroup\expandonce\tud@res@c}%
+  \tud@res@c%
+  \let\tud@slantedgreek@check\relax%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@slantedgreek@check
 % \begin{macro}{\tud@math@init}
 % \changes{v2.04}{2015/03/10}{neu}^^A
 %    \begin{macrocode}
@@ -2136,21 +2205,25 @@
     \tud@math@greek@loop@uc\tud@math@greek@declare@uc%
     \tud@math@greek@loop@lc\tud@math@greek@declare@lc%
 %    \end{macrocode}
-% Für die griechischen Buchstaben wird mit \cs{tud@math@greek@check@slanted}
-% geprüft, ob durch ein Paket diese auf die kursive Variante gesetzt wurden.
-% Ist dies der Fall, wird der Standardwert für die Option \opt{slantedgreek}
-% auf \val{true} gesetzt. Anschließend erfolgt die \emph{Intialisierung} der
-% griechischen Großbuchstaben mit dem Befehl \cs{tud@math@greek@init}.
+% Für die griechischen Glyphen wird mit \cs{tud@slantedgreek@check} geprüft, ob
+% diese durch ein Paket explizit auf kursive Majuskeln oder eine vollständig 
+% aufrechte Variante gesetzt wurden. Ist dies der Fall, wird der Standardwert
+% für die Option \opt{slantedgreek} entsprechend angepasst.
 %    \begin{macrocode}
-    \tud@math@greek@check@slanted%
-    \tud@math@greek@loop\tud@math@greek@init%
+    \tud@slantedgreek@check%
 %    \end{macrocode}
-% Wurde angegeben, dass kursive griechische Majuskeln genutzt werden sollen, so 
-% werden diese initialisiert. Dies ist insbesondere notwendig, wenn die
+% Anschließend erfolgt die \emph{Intialisierung} mit \cs{tud@math@greek@init}, 
+% wobei das obligatorische Argument angibt, ob die Glyphen der Schleife kursiv 
+% gesetzt werden sollen oder nicht. Dies ist insbesondere notwendig, wenn die
 % Standardschriften für den Mathematiksatz genutzt werden.
 %    \begin{macrocode}
-    \ifnum\tud@slantedgreek@num=\@ne\relax%
-      \tud@math@greek@loop@uc\tud@math@greek@slanted%
+    \ifcase\tud@slantedgreek@num\relax% upright
+      \tud@math@greek@loop{\tud@math@greek@init{false}}%
+    \or% slanted
+      \tud@math@greek@loop{\tud@math@greek@init{true}}%
+    \or% standard
+      \tud@math@greek@loop@uc{\tud@math@greek@init{false}}%
+      \tud@math@greek@loop@lc{\tud@math@greek@init{true}}%
     \fi%
 %    \end{macrocode}
 % Hier werden die Schriften des \CDs für den Mathematikmodus initialisiert.
@@ -2165,264 +2238,6 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@math@init
-% \begin{macro}{\tud@math@greek@loop}
-% \changes{v2.04}{2015/03/10}{neu}^^A
-% \begin{macro}{\tud@math@greek@loop@uc}
-% \changes{v2.06}{2018/07/17}{neu}^^A
-% \begin{macro}{\tud@math@greek@loop@lc}
-% \changes{v2.06}{2018/07/17}{neu}^^A
-% Um Änderungen an den griechischen Glyphen vornehmen zu können, wird das Makro
-% \cs{tud@math@greek@loop} definert, mit dem eine Namensliste der Buchstaben
-% durchlaufen wird. Dabei wird in Majuskeln und Minuskeln unterschieden.
-%    \begin{macrocode}
-\newcommand*\tud@math@greek@loop[1]{%
-  \tud@math@greek@loop@uc{#1}%
-  \tud@math@greek@loop@lc{#1}%
-}
-\newcommand*\tud@math@greek@loop@uc[1]{%
-  \@for\@tempa:={%
-    Gamma,Delta,Theta,Lambda,Xi,Pi,Sigma,Upsilon,Phi,Psi,Omega%
-  }\do{#1{\@tempa}}%
-}
-\newcommand*\tud@math@greek@loop@lc[1]{%
-  \@for\@tempa:={%
-    alpha,beta,gamma,delta,epsilon,zeta,eta,theta,iota,kappa,lambda,%
-    mu,nu,xi,pi,rho,sigma,tau,upsilon,phi,chi,psi,omega,%
-    varepsilon,vartheta,varpi,varrho,varsigma,varphi%
-  }\do{#1{\@tempa}}%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@math@greek@loop@lc
-% \end{macro}^^A \tud@math@greek@loop@uc
-% \end{macro}^^A \tud@math@greek@loop
-% \begin{macro}{\tud@math@greek@declare@uc}
-% \changes{v2.04}{2015/03/10}{neu}^^A
-% \begin{macro}{\tud@math@greek@upGamma}
-% \begin{macro}{\tud@math@greek@upDelta}
-% \begin{macro}{\tud@math@greek@upTheta}
-% \begin{macro}{\tud@math@greek@upLambda}
-% \begin{macro}{\tud@math@greek@upXi}
-% \begin{macro}{\tud@math@greek@upPi}
-% \begin{macro}{\tud@math@greek@upSigma}
-% \begin{macro}{\tud@math@greek@upUpsilon}
-% \begin{macro}{\tud@math@greek@upPhi}
-% \begin{macro}{\tud@math@greek@upPsi}
-% \begin{macro}{\tud@math@greek@upOmega}
-% \begin{macro}{\tud@math@greek@itGamma}
-% \begin{macro}{\tud@math@greek@itDelta}
-% \begin{macro}{\tud@math@greek@itTheta}
-% \begin{macro}{\tud@math@greek@itLambda}
-% \begin{macro}{\tud@math@greek@itXi}
-% \begin{macro}{\tud@math@greek@itPi}
-% \begin{macro}{\tud@math@greek@itSigma}
-% \begin{macro}{\tud@math@greek@itUpsilon}
-% \begin{macro}{\tud@math@greek@itPhi}
-% \begin{macro}{\tud@math@greek@itPsi}
-% \begin{macro}{\tud@math@greek@itOmega}
-% In Anlehnung an verschiedene Pakete für Mathematikschriften werden Symbole 
-% für aufrechte und kursive Majuskeln der griechischen Lettern definiert. Damit 
-% auch bei diesen Buchstaben ein Umschalten für die unterschiedlichen Schriften 
-% möglich ist, wird eine interne Version definiert und im Bedarfsfall der
-% dazugehörige \LaTeX-Befehl mit dieser überschrieben. Hierfür sind die beiden 
-% Befehle \cs{tud@cdmath@greek@shape@set} und \cs{tud@cdmath@greek@shape@reset}
-% verantwortlich.
-%    \begin{macrocode}
-\newcommand*\tud@math@greek@declare@uc[1]{%
-  \edef\@tempb{%
-    \noexpand\DeclareMathSymbol{\csname tud@math@greek@up#1\endcsname}%
-      {\noexpand\mathalpha}{operators}{\the\@tempcnta}%
-  }\@tempb%
-  \edef\@tempb{%
-    \noexpand\DeclareMathSymbol{\csname tud@math@greek@it#1\endcsname}%
-      {\noexpand\mathalpha}{letters}{\the\@tempcnta}%
-  }\@tempb%
-  \advance \@tempcnta by 1%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@math@greek@itOmega
-% \end{macro}^^A \tud@math@greek@itPsi
-% \end{macro}^^A \tud@math@greek@itPhi
-% \end{macro}^^A \tud@math@greek@itUpsilon
-% \end{macro}^^A \tud@math@greek@itSigma
-% \end{macro}^^A \tud@math@greek@itPi
-% \end{macro}^^A \tud@math@greek@itXi
-% \end{macro}^^A \tud@math@greek@itLambda
-% \end{macro}^^A \tud@math@greek@itTheta
-% \end{macro}^^A \tud@math@greek@itDelta
-% \end{macro}^^A \tud@math@greek@itGamma
-% \end{macro}^^A \tud@math@greek@upOmega
-% \end{macro}^^A \tud@math@greek@upPsi
-% \end{macro}^^A \tud@math@greek@upPhi
-% \end{macro}^^A \tud@math@greek@upUpsilon
-% \end{macro}^^A \tud@math@greek@upSigma
-% \end{macro}^^A \tud@math@greek@upPi
-% \end{macro}^^A \tud@math@greek@upXi
-% \end{macro}^^A \tud@math@greek@upLambda
-% \end{macro}^^A \tud@math@greek@upTheta
-% \end{macro}^^A \tud@math@greek@upDelta
-% \end{macro}^^A \tud@math@greek@upGamma
-% \end{macro}^^A \tud@math@greek@declare@uc
-% \begin{macro}{\tud@math@greek@declare@lc}
-% \changes{v2.06}{2018/07/17}{neu}^^A
-% \begin{macro}{\tud@math@greek@upalpha}
-% \begin{macro}{\tud@math@greek@upbeta}
-% \begin{macro}{\tud@math@greek@upgamma}
-% \begin{macro}{\tud@math@greek@updelta}
-% \begin{macro}{\tud@math@greek@upepsilon}
-% \begin{macro}{\tud@math@greek@upzeta}
-% \begin{macro}{\tud@math@greek@upeta}
-% \begin{macro}{\tud@math@greek@uptheta}
-% \begin{macro}{\tud@math@greek@upiota}
-% \begin{macro}{\tud@math@greek@upkappa}
-% \begin{macro}{\tud@math@greek@uplambda}
-% \begin{macro}{\tud@math@greek@upmu}
-% \begin{macro}{\tud@math@greek@upnu}
-% \begin{macro}{\tud@math@greek@upxi}
-% \begin{macro}{\tud@math@greek@uppi}
-% \begin{macro}{\tud@math@greek@uprho}
-% \begin{macro}{\tud@math@greek@upsigma}
-% \begin{macro}{\tud@math@greek@uptau}
-% \begin{macro}{\tud@math@greek@upupsilon}
-% \begin{macro}{\tud@math@greek@upphi}
-% \begin{macro}{\tud@math@greek@upchi}
-% \begin{macro}{\tud@math@greek@uppsi}
-% \begin{macro}{\tud@math@greek@upomega}
-% \begin{macro}{\tud@math@greek@upvarepsilon}
-% \begin{macro}{\tud@math@greek@upvartheta}
-% \begin{macro}{\tud@math@greek@upvarpi}
-% \begin{macro}{\tud@math@greek@upvarrho}
-% \begin{macro}{\tud@math@greek@upvarsigma}
-% \begin{macro}{\tud@math@greek@upvarphi}
-% \begin{macro}{\tud@math@greek@italpha}
-% \begin{macro}{\tud@math@greek@itbeta}
-% \begin{macro}{\tud@math@greek@itgamma}
-% \begin{macro}{\tud@math@greek@itdelta}
-% \begin{macro}{\tud@math@greek@itepsilon}
-% \begin{macro}{\tud@math@greek@itzeta}
-% \begin{macro}{\tud@math@greek@iteta}
-% \begin{macro}{\tud@math@greek@ittheta}
-% \begin{macro}{\tud@math@greek@itiota}
-% \begin{macro}{\tud@math@greek@itkappa}
-% \begin{macro}{\tud@math@greek@itlambda}
-% \begin{macro}{\tud@math@greek@itmu}
-% \begin{macro}{\tud@math@greek@itnu}
-% \begin{macro}{\tud@math@greek@itxi}
-% \begin{macro}{\tud@math@greek@itpi}
-% \begin{macro}{\tud@math@greek@itrho}
-% \begin{macro}{\tud@math@greek@itsigma}
-% \begin{macro}{\tud@math@greek@ittau}
-% \begin{macro}{\tud@math@greek@itupsilon}
-% \begin{macro}{\tud@math@greek@itphi}
-% \begin{macro}{\tud@math@greek@itchi}
-% \begin{macro}{\tud@math@greek@itpsi}
-% \begin{macro}{\tud@math@greek@itomega}
-% \begin{macro}{\tud@math@greek@itvarepsilon}
-% \begin{macro}{\tud@math@greek@itvartheta}
-% \begin{macro}{\tud@math@greek@itvarpi}
-% \begin{macro}{\tud@math@greek@itvarrho}
-% \begin{macro}{\tud@math@greek@itvarsigma}
-% \begin{macro}{\tud@math@greek@itvarphi}
-% Mit der Version~v2.06 und der eingeführten \OpenSans ist auch für griechische 
-% Minuskeln eine aufrechte Variante verfügbar.
-%    \begin{macrocode}
-\newcommand*\tud@math@greek@declare@lc[1]{%
-  \edef\@tempb{%
-    \noexpand\DeclareMathSymbol{\csname tud@math@greek@up#1\endcsname}%
-      {\noexpand\mathalpha}{upletters}{\the\@tempcnta}%
-  }\@tempb%
-  \edef\@tempb{%
-    \noexpand\DeclareMathSymbol{\csname tud@math@greek@it#1\endcsname}%
-      {\noexpand\mathalpha}{letters}{\the\@tempcnta}%
-  }\@tempb%
-  \advance \@tempcnta by 1%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@math@greek@itvarphi
-% \end{macro}^^A \tud@math@greek@itvarsigma
-% \end{macro}^^A \tud@math@greek@itvarrho
-% \end{macro}^^A \tud@math@greek@itvarpi
-% \end{macro}^^A \tud@math@greek@itvartheta
-% \end{macro}^^A \tud@math@greek@itvarepsilon
-% \end{macro}^^A \tud@math@greek@itomega
-% \end{macro}^^A \tud@math@greek@itpsi
-% \end{macro}^^A \tud@math@greek@itchi
-% \end{macro}^^A \tud@math@greek@itphi
-% \end{macro}^^A \tud@math@greek@itupsilon
-% \end{macro}^^A \tud@math@greek@ittau
-% \end{macro}^^A \tud@math@greek@itsigma
-% \end{macro}^^A \tud@math@greek@itrho
-% \end{macro}^^A \tud@math@greek@itpi
-% \end{macro}^^A \tud@math@greek@itxi
-% \end{macro}^^A \tud@math@greek@itnu
-% \end{macro}^^A \tud@math@greek@itmu
-% \end{macro}^^A \tud@math@greek@itlambda
-% \end{macro}^^A \tud@math@greek@itkappa
-% \end{macro}^^A \tud@math@greek@itiota
-% \end{macro}^^A \tud@math@greek@ittheta
-% \end{macro}^^A \tud@math@greek@iteta
-% \end{macro}^^A \tud@math@greek@itzeta
-% \end{macro}^^A \tud@math@greek@itepsilon
-% \end{macro}^^A \tud@math@greek@itdelta
-% \end{macro}^^A \tud@math@greek@itgamma
-% \end{macro}^^A \tud@math@greek@itbeta
-% \end{macro}^^A \tud@math@greek@italpha
-% \end{macro}^^A \tud@math@greek@upvarphi
-% \end{macro}^^A \tud@math@greek@upvarsigma
-% \end{macro}^^A \tud@math@greek@upvarrho
-% \end{macro}^^A \tud@math@greek@upvarpi
-% \end{macro}^^A \tud@math@greek@upvartheta
-% \end{macro}^^A \tud@math@greek@upvarepsilon
-% \end{macro}^^A \tud@math@greek@upomega
-% \end{macro}^^A \tud@math@greek@uppsi
-% \end{macro}^^A \tud@math@greek@upchi
-% \end{macro}^^A \tud@math@greek@upphi
-% \end{macro}^^A \tud@math@greek@upupsilon
-% \end{macro}^^A \tud@math@greek@uptau
-% \end{macro}^^A \tud@math@greek@upsigma
-% \end{macro}^^A \tud@math@greek@uprho
-% \end{macro}^^A \tud@math@greek@uppi
-% \end{macro}^^A \tud@math@greek@upxi
-% \end{macro}^^A \tud@math@greek@upnu
-% \end{macro}^^A \tud@math@greek@upmu
-% \end{macro}^^A \tud@math@greek@uplambda
-% \end{macro}^^A \tud@math@greek@upkappa
-% \end{macro}^^A \tud@math@greek@upiota
-% \end{macro}^^A \tud@math@greek@uptheta
-% \end{macro}^^A \tud@math@greek@upeta
-% \end{macro}^^A \tud@math@greek@upzeta
-% \end{macro}^^A \tud@math@greek@upepsilon
-% \end{macro}^^A \tud@math@greek@updelta
-% \end{macro}^^A \tud@math@greek@upgamma
-% \end{macro}^^A \tud@math@greek@upbeta
-% \end{macro}^^A \tud@math@greek@upalpha
-% \end{macro}^^A \tud@math@greek@declare@lc
-% \begin{macro}{\tud@math@greek@check@slanted}
-% \changes{v2.05d}{2016/09/22}{neu}^^A
-% \begin{macro}{\if@tud@math@greek@slanted}
-% \changes{v2.06}{2018/07/17}{neu}^^A
-% Dieser Befehl prüft die aktuelle Definition von \cs{Gamma} und vergleicht 
-% diese mit den kursiven Varianten des Buchstabens. Sind diese identisch, wird 
-% davon ausgegangen, dass ein Paket mit der Option \opt{slantedGreek} oder 
-% ähnlich geladen wurde. In diesem Fall wird der voreingestellte Wert für die 
-% entsprechende \TUDScript-Option gesetzt.
-%    \begin{macrocode}
-\newif\if@tud@math@greek@slanted
-\newcommand*\tud@math@greek@check@slanted{%
-  \let\@tempb\relax%
-  \let\@tempc\relax%
-  \DeclareMathSymbol{\@tempb}{\mathalpha}{letters}{0}%
-  \DeclareMathSymbol{\@tempc}{\mathord}{letters}{0}%
-  \@tud@math@greek@slantedfalse%
-  \ifx\Gamma\@tempb\relax\@tud@math@greek@slantedtrue\fi%
-  \ifx\Gamma\@tempc\relax\@tud@math@greek@slantedtrue\fi%
-  \if@tud@math@greek@slanted%
-    \TUD@key@preset{slantedgreek}{true}%
-  \fi%
-  \let\tud@math@greek@check@slanted\relax%
-}
-%    \end{macrocode}
-% \end{macro}^^A \if@tud@math@greek@slanted
-% \end{macro}^^A \tud@math@greek@check@slanted
 % \begin{macro}{\tud@math@greek@init}
 % \changes{v2.04}{2015/03/10}{neu}^^A
 % \begin{macro}{\upDelta}
@@ -2549,55 +2364,34 @@
 % Majuskeln die zusätzlichen Befehle für das explizite Auswählen aufrechter und 
 % kursiver Buchstaben bereitstehen.
 %    \begin{macrocode}
-\newcommand*\tud@math@greek@init[1]{%
+\newcommand*\tud@math@greek@init[2]{%
 %    \end{macrocode}
-% Zunächst wird nach möglichen Aliasbefehlen gesucht, um \cs{up\dots} für 
-% griechische Glyphen zu definieren.
+% Wurde bei der Deklaration mit \cs{tud@math@greek@declare@comp} kein
+% Aliasbefehl gefunden, werden abhängig vom ersten Argument (\val{true/false}) 
+% die normalen oder die mit \cs{tud@math@greek@declare@\dots} Glyphen genutzt.
 %    \begin{macrocode}
-  \ifcsundef{up#1}{%
-    \@for\tud@res@a:={#1up}\do{%
-      \ifcsundef{\tud@res@a}{}{\csletcs{up#1}{\tud@res@a}}%
-    }%
-  }{}%
-%    \end{macrocode}
-% Wurde kein Aliasbefehl gefunden, werden entweder die normalen oder ggf. die 
-% mit \cs{tud@math@greek@declare@\dots} Glyphen verwendet.
-%    \begin{macrocode}
-  \ifcsundef{up#1}{%
-    \if@tud@math@greek@slanted%
-      \csletcs{up#1}{tud@math@greek@up#1}%
+  \ifcsundef{up#2}{%
+    \csname if#1\endcsname%
+      \csletcs{up#2}{tud@math@greek@up#2}%
     \else%
-      \csletcs{up#1}{#1}%
+      \csletcs{up#2}{#2}%
     \fi%
   }{}%
-%    \end{macrocode}
-% Suchen nach möglichen Aliasbefehlen zum Definieren von \cs{it\dots} für 
-% griechische Glyphen. 
-%    \begin{macrocode}
-  \ifcsundef{it#1}{%
-    \@for\tud@res@a:={#1sl,sl#1,#1it}\do{%
-      \ifcsundef{\tud@res@a}{}{\csletcs{it#1}{\tud@res@a}}%
-    }%
-  }{}%
-%    \end{macrocode}
-% Wurde kein Aliasbefehl gefunden, werden entweder die normalen oder ggf. die 
-% mit \cs{tud@math@greek@declare@\dots} Glyphen verwendet.
-%    \begin{macrocode}
-  \ifcsundef{it#1}{%
-    \if@tud@math@greek@slanted%
-      \csletcs{it#1}{#1}%
+  \ifcsundef{it#2}{%
+    \csname if#1\endcsname%
+      \csletcs{it#2}{#2}%
     \else%
-      \csletcs{it#1}{tud@math@greek@it#1}%
+      \csletcs{it#2}{tud@math@greek@it#2}%
     \fi%
   }{}%
 %    \end{macrocode}
 % Zuletzt werden die invertierenden Makros definiert.
 %    \begin{macrocode}
-  \ifcsundef{other#1}{%
-    \if@tud@math@greek@slanted%
-      \csletcs{other#1}{up#1}%
+  \ifcsundef{other#2}{%
+    \csname if#1\endcsname%
+      \csletcs{other#2}{up#2}%
     \else%
-      \csletcs{other#1}{it#1}%
+      \csletcs{other#2}{it#2}%
     \fi%
   }{}%
 }
@@ -2723,6 +2517,259 @@
 % \end{macro}^^A \upGamma
 % \end{macro}^^A \upDelta
 % \end{macro}^^A \tud@math@greek@init
+% \begin{macro}{\tud@math@greek@loop}
+% \changes{v2.04}{2015/03/10}{neu}^^A
+% \begin{macro}{\tud@math@greek@loop@uc}
+% \changes{v2.06}{2018/07/17}{neu}^^A
+% \begin{macro}{\tud@math@greek@loop@lc}
+% \changes{v2.06}{2018/07/17}{neu}^^A
+% Um Änderungen an den griechischen Glyphen vornehmen zu können, wird das Makro
+% \cs{tud@math@greek@loop} definert, mit dem eine Namensliste der Buchstaben
+% durchlaufen wird. Dabei wird in Majuskeln und Minuskeln unterschieden.
+%    \begin{macrocode}
+\newcommand*\tud@math@greek@loop[1]{%
+  \tud@math@greek@loop@uc{#1}%
+  \tud@math@greek@loop@lc{#1}%
+}
+\newcommand*\tud@math@greek@loop@uc[1]{%
+  \@for\@tempa:={%
+    Gamma,Delta,Theta,Lambda,Xi,Pi,Sigma,Upsilon,Phi,Psi,Omega%
+  }\do{#1{\@tempa}}%
+}
+\newcommand*\tud@math@greek@loop@lc[1]{%
+  \@for\@tempa:={%
+    alpha,beta,gamma,delta,epsilon,zeta,eta,theta,iota,kappa,lambda,%
+    mu,nu,xi,pi,rho,sigma,tau,upsilon,phi,chi,psi,omega,%
+    varepsilon,vartheta,varpi,varrho,varsigma,varphi%
+  }\do{#1{\@tempa}}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@math@greek@loop@lc
+% \end{macro}^^A \tud@math@greek@loop@uc
+% \end{macro}^^A \tud@math@greek@loop
+% \begin{macro}{\tud@math@greek@declare@uc}
+% \changes{v2.04}{2015/03/10}{neu}^^A
+% \begin{macro}{\tud@math@greek@upGamma}
+% \begin{macro}{\tud@math@greek@upDelta}
+% \begin{macro}{\tud@math@greek@upTheta}
+% \begin{macro}{\tud@math@greek@upLambda}
+% \begin{macro}{\tud@math@greek@upXi}
+% \begin{macro}{\tud@math@greek@upPi}
+% \begin{macro}{\tud@math@greek@upSigma}
+% \begin{macro}{\tud@math@greek@upUpsilon}
+% \begin{macro}{\tud@math@greek@upPhi}
+% \begin{macro}{\tud@math@greek@upPsi}
+% \begin{macro}{\tud@math@greek@upOmega}
+% \begin{macro}{\tud@math@greek@itGamma}
+% \begin{macro}{\tud@math@greek@itDelta}
+% \begin{macro}{\tud@math@greek@itTheta}
+% \begin{macro}{\tud@math@greek@itLambda}
+% \begin{macro}{\tud@math@greek@itXi}
+% \begin{macro}{\tud@math@greek@itPi}
+% \begin{macro}{\tud@math@greek@itSigma}
+% \begin{macro}{\tud@math@greek@itUpsilon}
+% \begin{macro}{\tud@math@greek@itPhi}
+% \begin{macro}{\tud@math@greek@itPsi}
+% \begin{macro}{\tud@math@greek@itOmega}
+% In Anlehnung an verschiedene Pakete für Mathematikschriften werden Symbole 
+% für aufrechte und kursive Majuskeln der griechischen Lettern definiert. Damit 
+% auch bei diesen Buchstaben ein Umschalten für die unterschiedlichen Schriften 
+% möglich ist, wird eine interne Version definiert und im Bedarfsfall der
+% dazugehörige \LaTeX-Befehl mit dieser überschrieben. Hierfür sind die beiden 
+% Befehle \cs{tud@cdmath@greek@shape@set} und \cs{tud@cdmath@greek@shape@reset}
+% verantwortlich.
+%    \begin{macrocode}
+\newcommand*\tud@math@greek@declare@uc[1]{%
+  \edef\@tempb{%
+    \noexpand\DeclareMathSymbol{\csname tud@math@greek@up#1\endcsname}%
+      {\noexpand\mathalpha}{operators}{\the\@tempcnta}%
+  }\@tempb%
+  \edef\@tempb{%
+    \noexpand\DeclareMathSymbol{\csname tud@math@greek@it#1\endcsname}%
+      {\noexpand\mathalpha}{letters}{\the\@tempcnta}%
+  }\@tempb%
+  \tud@math@greek@declare@comp{#1}%
+  \advance \@tempcnta by 1%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@math@greek@itOmega
+% \end{macro}^^A \tud@math@greek@itPsi
+% \end{macro}^^A \tud@math@greek@itPhi
+% \end{macro}^^A \tud@math@greek@itUpsilon
+% \end{macro}^^A \tud@math@greek@itSigma
+% \end{macro}^^A \tud@math@greek@itPi
+% \end{macro}^^A \tud@math@greek@itXi
+% \end{macro}^^A \tud@math@greek@itLambda
+% \end{macro}^^A \tud@math@greek@itTheta
+% \end{macro}^^A \tud@math@greek@itDelta
+% \end{macro}^^A \tud@math@greek@itGamma
+% \end{macro}^^A \tud@math@greek@upOmega
+% \end{macro}^^A \tud@math@greek@upPsi
+% \end{macro}^^A \tud@math@greek@upPhi
+% \end{macro}^^A \tud@math@greek@upUpsilon
+% \end{macro}^^A \tud@math@greek@upSigma
+% \end{macro}^^A \tud@math@greek@upPi
+% \end{macro}^^A \tud@math@greek@upXi
+% \end{macro}^^A \tud@math@greek@upLambda
+% \end{macro}^^A \tud@math@greek@upTheta
+% \end{macro}^^A \tud@math@greek@upDelta
+% \end{macro}^^A \tud@math@greek@upGamma
+% \end{macro}^^A \tud@math@greek@declare@uc
+% \begin{macro}{\tud@math@greek@declare@lc}
+% \changes{v2.06}{2018/07/17}{neu}^^A
+% \begin{macro}{\tud@math@greek@upalpha}
+% \begin{macro}{\tud@math@greek@upbeta}
+% \begin{macro}{\tud@math@greek@upgamma}
+% \begin{macro}{\tud@math@greek@updelta}
+% \begin{macro}{\tud@math@greek@upepsilon}
+% \begin{macro}{\tud@math@greek@upzeta}
+% \begin{macro}{\tud@math@greek@upeta}
+% \begin{macro}{\tud@math@greek@uptheta}
+% \begin{macro}{\tud@math@greek@upiota}
+% \begin{macro}{\tud@math@greek@upkappa}
+% \begin{macro}{\tud@math@greek@uplambda}
+% \begin{macro}{\tud@math@greek@upmu}
+% \begin{macro}{\tud@math@greek@upnu}
+% \begin{macro}{\tud@math@greek@upxi}
+% \begin{macro}{\tud@math@greek@uppi}
+% \begin{macro}{\tud@math@greek@uprho}
+% \begin{macro}{\tud@math@greek@upsigma}
+% \begin{macro}{\tud@math@greek@uptau}
+% \begin{macro}{\tud@math@greek@upupsilon}
+% \begin{macro}{\tud@math@greek@upphi}
+% \begin{macro}{\tud@math@greek@upchi}
+% \begin{macro}{\tud@math@greek@uppsi}
+% \begin{macro}{\tud@math@greek@upomega}
+% \begin{macro}{\tud@math@greek@upvarepsilon}
+% \begin{macro}{\tud@math@greek@upvartheta}
+% \begin{macro}{\tud@math@greek@upvarpi}
+% \begin{macro}{\tud@math@greek@upvarrho}
+% \begin{macro}{\tud@math@greek@upvarsigma}
+% \begin{macro}{\tud@math@greek@upvarphi}
+% \begin{macro}{\tud@math@greek@italpha}
+% \begin{macro}{\tud@math@greek@itbeta}
+% \begin{macro}{\tud@math@greek@itgamma}
+% \begin{macro}{\tud@math@greek@itdelta}
+% \begin{macro}{\tud@math@greek@itepsilon}
+% \begin{macro}{\tud@math@greek@itzeta}
+% \begin{macro}{\tud@math@greek@iteta}
+% \begin{macro}{\tud@math@greek@ittheta}
+% \begin{macro}{\tud@math@greek@itiota}
+% \begin{macro}{\tud@math@greek@itkappa}
+% \begin{macro}{\tud@math@greek@itlambda}
+% \begin{macro}{\tud@math@greek@itmu}
+% \begin{macro}{\tud@math@greek@itnu}
+% \begin{macro}{\tud@math@greek@itxi}
+% \begin{macro}{\tud@math@greek@itpi}
+% \begin{macro}{\tud@math@greek@itrho}
+% \begin{macro}{\tud@math@greek@itsigma}
+% \begin{macro}{\tud@math@greek@ittau}
+% \begin{macro}{\tud@math@greek@itupsilon}
+% \begin{macro}{\tud@math@greek@itphi}
+% \begin{macro}{\tud@math@greek@itchi}
+% \begin{macro}{\tud@math@greek@itpsi}
+% \begin{macro}{\tud@math@greek@itomega}
+% \begin{macro}{\tud@math@greek@itvarepsilon}
+% \begin{macro}{\tud@math@greek@itvartheta}
+% \begin{macro}{\tud@math@greek@itvarpi}
+% \begin{macro}{\tud@math@greek@itvarrho}
+% \begin{macro}{\tud@math@greek@itvarsigma}
+% \begin{macro}{\tud@math@greek@itvarphi}
+% Mit der Version~v2.06 und der eingeführten \OpenSans ist auch für griechische 
+% Minuskeln eine aufrechte Variante verfügbar.
+%    \begin{macrocode}
+\newcommand*\tud@math@greek@declare@lc[1]{%
+  \edef\@tempb{%
+    \noexpand\DeclareMathSymbol{\csname tud@math@greek@up#1\endcsname}%
+      {\noexpand\mathalpha}{upletters}{\the\@tempcnta}%
+  }\@tempb%
+  \edef\@tempb{%
+    \noexpand\DeclareMathSymbol{\csname tud@math@greek@it#1\endcsname}%
+      {\noexpand\mathalpha}{letters}{\the\@tempcnta}%
+  }\@tempb%
+  \tud@math@greek@declare@comp{#1}%
+  \advance \@tempcnta by 1%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@math@greek@itvarphi
+% \end{macro}^^A \tud@math@greek@itvarsigma
+% \end{macro}^^A \tud@math@greek@itvarrho
+% \end{macro}^^A \tud@math@greek@itvarpi
+% \end{macro}^^A \tud@math@greek@itvartheta
+% \end{macro}^^A \tud@math@greek@itvarepsilon
+% \end{macro}^^A \tud@math@greek@itomega
+% \end{macro}^^A \tud@math@greek@itpsi
+% \end{macro}^^A \tud@math@greek@itchi
+% \end{macro}^^A \tud@math@greek@itphi
+% \end{macro}^^A \tud@math@greek@itupsilon
+% \end{macro}^^A \tud@math@greek@ittau
+% \end{macro}^^A \tud@math@greek@itsigma
+% \end{macro}^^A \tud@math@greek@itrho
+% \end{macro}^^A \tud@math@greek@itpi
+% \end{macro}^^A \tud@math@greek@itxi
+% \end{macro}^^A \tud@math@greek@itnu
+% \end{macro}^^A \tud@math@greek@itmu
+% \end{macro}^^A \tud@math@greek@itlambda
+% \end{macro}^^A \tud@math@greek@itkappa
+% \end{macro}^^A \tud@math@greek@itiota
+% \end{macro}^^A \tud@math@greek@ittheta
+% \end{macro}^^A \tud@math@greek@iteta
+% \end{macro}^^A \tud@math@greek@itzeta
+% \end{macro}^^A \tud@math@greek@itepsilon
+% \end{macro}^^A \tud@math@greek@itdelta
+% \end{macro}^^A \tud@math@greek@itgamma
+% \end{macro}^^A \tud@math@greek@itbeta
+% \end{macro}^^A \tud@math@greek@italpha
+% \end{macro}^^A \tud@math@greek@upvarphi
+% \end{macro}^^A \tud@math@greek@upvarsigma
+% \end{macro}^^A \tud@math@greek@upvarrho
+% \end{macro}^^A \tud@math@greek@upvarpi
+% \end{macro}^^A \tud@math@greek@upvartheta
+% \end{macro}^^A \tud@math@greek@upvarepsilon
+% \end{macro}^^A \tud@math@greek@upomega
+% \end{macro}^^A \tud@math@greek@uppsi
+% \end{macro}^^A \tud@math@greek@upchi
+% \end{macro}^^A \tud@math@greek@upphi
+% \end{macro}^^A \tud@math@greek@upupsilon
+% \end{macro}^^A \tud@math@greek@uptau
+% \end{macro}^^A \tud@math@greek@upsigma
+% \end{macro}^^A \tud@math@greek@uprho
+% \end{macro}^^A \tud@math@greek@uppi
+% \end{macro}^^A \tud@math@greek@upxi
+% \end{macro}^^A \tud@math@greek@upnu
+% \end{macro}^^A \tud@math@greek@upmu
+% \end{macro}^^A \tud@math@greek@uplambda
+% \end{macro}^^A \tud@math@greek@upkappa
+% \end{macro}^^A \tud@math@greek@upiota
+% \end{macro}^^A \tud@math@greek@uptheta
+% \end{macro}^^A \tud@math@greek@upeta
+% \end{macro}^^A \tud@math@greek@upzeta
+% \end{macro}^^A \tud@math@greek@upepsilon
+% \end{macro}^^A \tud@math@greek@updelta
+% \end{macro}^^A \tud@math@greek@upgamma
+% \end{macro}^^A \tud@math@greek@upbeta
+% \end{macro}^^A \tud@math@greek@upalpha
+% \end{macro}^^A \tud@math@greek@declare@lc
+% \begin{macro}{\tud@math@greek@declare@comp}
+% \changes{v2.06}{2018/08/06}{neu}^^A
+% Sollte ein Paket geladen sein, welches griechichsche Glyphen definiert, wird 
+% nach Auswahlbefehlen für aufrechte und kursive Glyphen gesucht, um damit 
+% \cs{up\dots} und \cs{it\dots} für griechische Glyphen zu definieren.
+%    \begin{macrocode}
+\newcommand*\tud@math@greek@declare@comp[1]{%
+  \ifcsundef{up#1}{%
+    \@for\tud@res@a:={#1up}\do{%
+      \ifcsundef{\tud@res@a}{}{\csletcs{up#1}{\tud@res@a}}%
+    }%
+  }{}%
+  \ifcsundef{it#1}{%
+    \@for\tud@res@a:={#1sl,sl#1,#1it}\do{%
+      \ifcsundef{\tud@res@a}{}{\csletcs{it#1}{\tud@res@a}}%
+    }%
+  }{}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@math@greek@declare@comp
 % \begin{macro}{\tud@cdmath@init}
 % \changes{v2.06}{2018/07/02}{neu}^^A
 % \begin{macro}{\tud@cdmath@enc}
@@ -2936,27 +2983,27 @@
   \tud@cs@store{other#1}%
   \csletcs{up#1}{tud@math@greek@up#1}%
   \csletcs{it#1}{tud@math@greek@it#1}%
-  \tud@math@greek@comp@set{#1up}{up#1}%
-  \tud@math@greek@comp@set{#1it}{it#1}%
-  \tud@math@greek@comp@set{sl#1}{it#1}%
-  \tud@math@greek@comp@set{#1sl}{it#1}%
+  \tud@cdmath@greek@comp@set{#1up}{up#1}%
+  \tud@cdmath@greek@comp@set{#1it}{it#1}%
+  \tud@cdmath@greek@comp@set{sl#1}{it#1}%
+  \tud@cdmath@greek@comp@set{#1sl}{it#1}%
 }
 \newcommand*\tud@cdmath@greek@shape@reset[1]{%
   \tud@cs@restore{#1}%
   \tud@cs@restore{up#1}%
   \tud@cs@restore{it#1}%
   \tud@cs@restore{other#1}%
-  \tud@math@greek@comp@reset{#1up}%
-  \tud@math@greek@comp@reset{#1it}%
-  \tud@math@greek@comp@reset{sl#1}%
-  \tud@math@greek@comp@reset{#1sl}%
+  \tud@cdmath@greek@comp@reset{#1up}%
+  \tud@cdmath@greek@comp@reset{#1it}%
+  \tud@cdmath@greek@comp@reset{sl#1}%
+  \tud@cdmath@greek@comp@reset{#1sl}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@cdmath@greek@shape@reset
 % \end{macro}^^A \tud@cdmath@greek@shape@set
-% \begin{macro}{\tud@math@greek@comp@set}
+% \begin{macro}{\tud@cdmath@greek@comp@set}
 % \changes{v2.06}{2018/07/02}{neu}^^A
-% \begin{macro}{\tud@math@greek@comp@reset}
+% \begin{macro}{\tud@cdmath@greek@comp@reset}
 % \changes{v2.06}{2018/07/02}{neu}^^A
 % Es gibt eine Vielzahl von Paketen, die das Setzen von aufrechten griechischen 
 % Glyphen adressieren. Allerdings gibt es keinen einheitlichen Standard, was 
@@ -2964,15 +3011,15 @@
 % überschireben werden, wobei dies nur geschieht, wenn ein Paket diese zuvor
 % auch definert hat.
 %    \begin{macrocode}
-\newcommand*\tud@math@greek@comp@set[2]{%
+\newcommand*\tud@cdmath@greek@comp@set[2]{%
   \ifcsdef{#1}{\tud@cs@store{#1}\csletcs{#1}{#2}}{}%
 }
-\newcommand*\tud@math@greek@comp@reset[1]{%
+\newcommand*\tud@cdmath@greek@comp@reset[1]{%
   \ifcsdef{#1}{\tud@cs@restore{#1}}{}%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@math@greek@comp@reset
-% \end{macro}^^A \tud@math@greek@comp@set
+% \end{macro}^^A \tud@cdmath@greek@comp@reset
+% \end{macro}^^A \tud@cdmath@greek@comp@set
 % \begin{macro}{\tud@math@greek@var@set}
 % \changes{v2.06}{2018/07/02}{neu}^^A
 % \begin{macro}{\tud@math@greek@var@reset}
@@ -2983,10 +3030,10 @@
 % dieser umdefiniert.
 %    \begin{macrocode}
 \newcommand*\tud@cdmath@greek@var@set[1]{%
-  \tud@math@greek@comp@set{var#1}{it#1}%
+  \tud@cdmath@greek@comp@set{var#1}{it#1}%
 }
 \newcommand*\tud@cdmath@greek@var@reset[1]{%
-  \tud@math@greek@comp@reset{var#1}%
+  \tud@cdmath@greek@comp@reset{var#1}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@math@greek@var@reset
