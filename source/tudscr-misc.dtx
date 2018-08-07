@@ -1,4 +1,4 @@
-% \CheckSum{373}
+% \CheckSum{340}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-misc.dtx}[%
-  2018/08/06 v2.06 TUD-Script (miscellaneous)%
+  2018/08/07 v2.06 TUD-Script (miscellaneous)%
 ]
 \documentclass[english,ngerman,xindy]{tudscrdoc}
 \usepackage[T1]{fontenc}
@@ -242,63 +242,76 @@
 %
 % \subsection{Fußnoten in Überschriften}
 %
-% \begin{option}{footnotes}
-% \changes{v2.02}{2014/06/27}{neu}^^A
-% \begin{macro}{\if@tud@symbolheadings}
-% \changes{v2.02}{2014/06/27}{neu}^^A
-% \begin{macro}{\tud@sec@symbolheadings}
-% \changes{v2.02}{2014/06/27}{neu}^^A
-% Die \KOMAScript-Option \opt{footnotes} wird um den Schlüssel 
-% \val{symbolheadings} erweitert, mit welchem eingestellt werden kann, ob in den
-% Überschriften Symbole für die Fußnoten anstelle von Zahlen verwendet werden
-% sollen.
-% \ToDo{Befehle umbenennen}[v2.06]
-% \ToDo{\opt{footnotes}=\val{symbolheadings} überarbeiten}[v2.06]
-%    \begin{macrocode}
-\newif\if@tud@symbolheadings
-\TUD@key{footnotes}{%
-  \TUD@set@numkey{footnotes}{@tempa}{%
-    {nosymbolheadings}{0},{numberheadings}{0},%
-    {symbolheadings}{1}%
-  }{#1}%
-  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \ifcase\@tempa\relax% nosymbolheadings
-      \@tud@symbolheadingsfalse%
-    \or% symbolheadings
-      \@tud@symbolheadingstrue%
-    \fi%
-  \fi%
-}
-%    \end{macrocode}
-% Der Befehl \cs{tud@sec@symbolheadings} ist für das Setzen der 
-% Gliederungsüberschriften in Majuskeln verantwortlich. Außerdem wird ggf. die
-% Option \opt{footnotes}|=|\val{symbolheadings} umgesetzt.
-%    \begin{macrocode}
-\robustify{\footnote}
-\newcommand*\tud@sec@symbolheadings[1]{%
-  \begingroup%
-    \if@tud@symbolheadings%
-      \let\c@footnote\c@symbolheadings%
-      \renewcommand*\thefootnote{\fnsymbol{symbolheadings}}%
-    \fi%
-    \tud@sec@format{#1}%
-  \endgroup%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@sec@symbolheadings
-% \end{macro}^^A \if@tud@symbolheadings
-% \end{option}^^A footnotes
-% \begin{counter}{symbolheadings}
-% \changes{v2.02}{2014/06/27}{neu}^^A
-% Bei aktivierter Option \opt{footnotes}|=|\val{symbolheadings} wird dieser 
-% Zähler für die Symboleauswahl von Fußnoten in Überschirften inkrementiert.
-%    \begin{macrocode}
-\AtEndOfClass{%
-%<book|report>  \newcounter{symbolheadings}[chapter]
-%<article|poster>  \newcounter{symbolheadings}
-}
-%    \end{macrocode}
-% \end{counter}^^A symbolheadings
+% Eigentlich sollte die Option \opt{footnotes}|=|\val{symbolheadings} es 
+% ermöglichen, Fußnoten mit Symbolen in Überschriften zu verwenden. Umgesetzt 
+% werden sollte dies mit dem Paket \pkg{footmisc}. Da dieses aber mit 
+% Inkompatibilitäten zu \pkg{hyperref} und \KOMAScript{} aufwartet, wird darauf 
+% leider verzichtet.
+%^^A% \begin{option}{footnotes}
+%^^A% \changes{v2.02}{2014/06/27}{neu}^^A
+%^^A% \begin{macro}{\if@tud@symbolheadings}
+%^^A% \changes{v2.02}{2014/06/27}{neu}^^A
+%^^A% \begin{macro}{\tud@sec@note}
+%^^A% \changes{v2.02}{2014/06/27}{neu}^^A
+%^^A% \begin{counter}{symbolheadings}
+%^^A% \changes{v2.02}{2014/06/27}{neu}^^A
+%^^A% Die \KOMAScript-Option \opt{footnotes} wird um den Schlüssel 
+%^^A% \val{symbolheadings} erweitert, mit welchem eingestellt werden kann, ob 
+%^^A% in den Überschriften Symbole für die Fußnoten anstelle von Zahlen 
+%^^A% verwendet werden sollen.
+%^^A%    \begin{macrocode}
+%^^A\newif\if@tud@symbolheadings
+%^^A\TUD@key{footnotes}{%
+%^^A  \TUD@set@numkey{footnotes}{@tempa}{%
+%^^A    {nosymbolheadings}{0},{numberheadings}{0},%
+%^^A    {symbolheadings}{1}%
+%^^A  }{#1}%
+%^^A  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+%^^A    \ifcase\@tempa\relax% nosymbolheadings
+%^^A      \@tud@symbolheadingsfalse%
+%^^A    \or% symbolheadings
+%^^A      \@tud@symbolheadingstrue%
+%^^A    \fi%
+%^^A  \fi%
+%^^A}
+%^^A%    \end{macrocode}
+%^^A% Mit \cs{tud@sec@note} wird die Option \opt{footnotes=symbolheadings} 
+%^^A% umgesetzt. Hierfür wird das Paket \pkg{footmisc} benötigt.
+%^^A%    \begin{macrocode}
+%^^A\newcommand*\tud@sec@note[1]{%
+%^^A  \ClassWarning{\TUD@Class@Name}{%
+%^^A    You have to load package `footmisc' with\MessageBreak%
+%^^A    option `stable' in order to use\MessageBreak%
+%^^A    footnotes with symbols in headings%
+%^^A  }%
+%^^A}
+%^^A\AfterPackage{footmisc}{%
+%^^A  \@ifpackagewith{footmisc}{stable}{%
+%^^A    \renewcommand*\tud@sec@note[1]{%
+%^^A      \begingroup%
+%^^A        \if@tud@symbolheadings%
+%^^A          \let\c@footnote\c@symbolheadings%
+%^^A          \def\thefootnote{\fnsymbol{symbolheadings}}%
+%^^A        \fi%
+%^^A        \footnote{#1}%
+%^^A      \endgroup%
+%^^A    }%
+%^^A  }{}%
+%^^A}
+%^^A%    \end{macrocode}
+%^^A% Bei aktivierter Option \opt{footnotes}|=|\val{symbolheadings} wird  
+%^^A% dieser Zähler für die Symboleauswahl von Fußnoten in Überschirften 
+%^^A% inkrementiert.
+%^^A%    \begin{macrocode}
+%^^A\AtEndOfClass{%
+%^^A%<book|report>  \newcounter{symbolheadings}[chapter]
+%^^A%<article|poster>  \newcounter{symbolheadings}
+%^^A}
+%^^A%    \end{macrocode}
+%^^A% \end{counter}^^A symbolheadings
+%^^A% \end{macro}^^A \tud@sec@note
+%^^A% \end{macro}^^A \if@tud@symbolheadings
+%^^A% \end{option}^^A footnotes
 %
 % \subsection{Papierformat und Schriftgröße}
 %
