@@ -1,4 +1,4 @@
-% \CheckSum{2045}
+% \CheckSum{2044}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-pagestyle.dtx}[%
-  2018/08/02 v2.06 TUD-Script (pagestyle)%
+  2018/08/07 v2.06 TUD-Script (pagestyle)%
 ]
 \documentclass[english,ngerman,xindy]{tudscrdoc}
 \usepackage[T1]{fontenc}
@@ -2233,53 +2233,55 @@
 %
 % \iffalse
 %</class&body>
-%<*class&option>
 % \fi
 %
 % \subsection{Optionen für das \DDC-Logo}
-%
-% \begin{macro}{\if@tud@ddc@internal}
-% \changes{v2.02}{2014/07/08}{neu}^^A
-% Dieser Schalter wird intern von den Optionen \opt{ddc}, \opt{ddchead} und 
-% \opt{ddcfoot} verwendet, um rekursive Aufrufe der Optionen zu verhindern.
-%    \begin{macrocode}
-\newif\if@tud@ddc@internal
-%    \end{macrocode}
-% \end{macro}^^A \if@tud@ddc@internal
 %
 % \begin{macro}{\tud@comp@clearpage}
 % \changes{v2.04}{2015/05/31}{neu}^^A
 % \begin{macro}{\tud@comp@resetpagestyle}
 % \changes{v2.04}{2015/05/31}{neu}^^A
+% \begin{macro}{\if@tud@ddc@internal}
+% \changes{v2.02}{2014/07/08}{neu}^^A
 % Bis zur Version~v2.02 wurden unterschiedliche Satzsiegel für den Seitenfuß 
 % mit und ohne \DDC-Logo verwendet. Damit dieser im Zweifelsfall umgestellt 
 % werden kann, wurde vor dem Ausführen der entsprechenden Optionen ein 
 % Seitenumbruch erzwungen und nach dem Verarbeiten der Optionen der aktuelle 
 % Seitenstil erneut aufgerufen. Die beiden folgenden Makros werden für dieses 
 % Unterfangen definiert, jedoch bei der Abarbeitung der Optionen nur noch im 
-% Kompatibilitätmodus ausgeführt.
+% Kompatibilitätmodus ausgeführt. Der Schalter \cs{if@tud@ddc@internal} wird 
+% intern von den Optionen \opt{ddc}, \opt{ddchead} und \opt{ddcfoot} verwendet,
+% um rekursive Aufrufe der Optionen zu verhindern.
 %    \begin{macrocode}
+%<*class&option>
+\newif\if@tud@ddc@internal
 \newcommand*\tud@comp@clearpage{}%
 \newcommand*\tud@comp@resetpagestyle{}%
-\AfterEndPreamble{%
-  \tud@if@v@lower{2.04}{%
-    \renewcommand*\tud@comp@clearpage{%
-      \if@tud@ddc@internal\else%
-        \tud@if@tudheadings{\currentpagestyle}{\clearpage}{}%
-      \fi%
-    }%
-    \renewcommand*\tud@comp@resetpagestyle{%
-      \if@tud@ddc@internal\else%
-        \tud@if@tudheadings{\currentpagestyle}{%
-          \expandafter\pagestyle\expandafter{\currentpagestyle}%
-        }{}%
-      \fi%
-    }%
-  }{}%
-}
+%</class&option>
+%<*class&body>
+\tud@if@v@lower{2.04}{%
+  \renewcommand*\tud@comp@clearpage{%
+    \if@tud@ddc@internal\else%
+      \tud@if@tudheadings{\currentpagestyle}{\clearpage}{}%
+    \fi%
+  }%
+  \renewcommand*\tud@comp@resetpagestyle{%
+    \if@tud@ddc@internal\else%
+      \tud@if@tudheadings{\currentpagestyle}{%
+        \expandafter\pagestyle\expandafter{\currentpagestyle}%
+      }{}%
+    \fi%
+  }%
+}{}%
+%</class&body>
 %    \end{macrocode}
+% \end{macro}^^A \if@tud@ddc@internal
 % \end{macro}^^A \tud@comp@clearpage
 % \end{macro}^^A \tud@comp@resetpagestyle
+%
+% \iffalse
+%<*class&option>
+% \fi
 %
 % \begin{option}{ddc}
 % \changes{v2.02}{2014/06/23}{automatische Logowahl}^^A
