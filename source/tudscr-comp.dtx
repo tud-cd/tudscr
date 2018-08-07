@@ -1,4 +1,4 @@
-% \CheckSum{1477}
+% \CheckSum{1492}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-comp.dtx}[%
-  2018/08/02 v2.06 TUD-Script\space%
+  2018/08/07 v2.06 TUD-Script\space%
 %</driver>
 %<package&identify&comp&base>\ProvidesPackage{tudscrcomp}[%
 %<package&identify&comp&book>\ProvidesPackage{tudscrcomp-book}[%
@@ -117,6 +117,8 @@
 % \changes{v2.03}{2015/02/05}{neu}^^A
 % \begin{macro}{\TUD@deprecated@cs}
 % \changes{v2.03}{2015/02/05}{neu}^^A
+% \begin{macro}{\TUD@deprecated@@cs}
+% \changes{v2.06}{2018/08/07}{neu}^^A
 % \begin{macro}{\TUD@deprecated@lengthcs}
 % \changes{v2.05}{2016/06/20}{neu}^^A
 % Um alte Optionen und Befehle dem Anwender bei der Verwendung kenntlich zu 
@@ -143,42 +145,50 @@
 % den alten überschrieben.
 %    \begin{macrocode}
 \newcommand*\TUD@deprecated@cs[2]{%
-  \AfterEndPreamble{%
-    \ifcsundef{#1}{%
-      \begingroup%
-        \def\tud@res@a{%
-          The command `\@backslashchar#1' is deprecated.\MessageBreak%
-        }%
-        \def\tud@res@b##1@##2\@nil{%
-          \IfArgIsEmpty{##2}{%
-            \appto\tud@res@a{%
-              You should use `\@backslashchar#2' instead%
-            }%
-          }{%
-            \appto\tud@res@a{%
-              You should not use this command. It is substituted\MessageBreak%
-              with `\@backslashchar#2' internally%
-            }%
+  \begingroup%
+    \edef\tud@res@a{%
+      \endgroup%
+      \noexpand\AfterEndPreamble{%
+        \noexpand\TUD@deprecated@@cs{#1}{#2}%
+      }%
+    }%
+  \tud@res@a%
+}
+\newcommand*\TUD@deprecated@@cs[2]{%
+  \ifcsundef{#1}{%
+    \begingroup%
+      \def\tud@res@a{%
+        The command `\@backslashchar#1' is deprecated.\MessageBreak%
+      }%
+      \def\tud@res@b##1@##2\@nil{%
+        \IfArgIsEmpty{##2}{%
+          \appto\tud@res@a{%
+            You should use `\@backslashchar#2' instead%
+          }%
+        }{%
+          \appto\tud@res@a{%
+            You should not use this command. It is substituted\MessageBreak%
+            with `\@backslashchar#2' internally%
           }%
         }%
-        \tud@res@b#2@\@nil%
-        \edef\tud@res@c{%
-          \endgroup%
-          \noexpand\newrobustcmd\csname #1\endcsname{%
+      }%
+      \tud@res@b#2@\@nil%
+      \edef\tud@res@c{%
+        \endgroup%
+        \noexpand\newrobustcmd\csname #1\endcsname{%
 %<*class>
-            \noexpand\ClassWarning{\noexpand\TUD@Class@Name}%
+          \noexpand\ClassWarning{\noexpand\TUD@Class@Name}%
 %</class>
 %<*package&fonts>
-            \noexpand\PackageWarning{tudscrfonts}%
+          \noexpand\PackageWarning{tudscrfonts}%
 %</package&fonts>
-            {\tud@res@a}%
-            \noexpand\csletcs{#1}{#2}%
-            \noexpand\csuse{#2}%
-          }%
+          {\tud@res@a}%
+          \noexpand\csletcs{#1}{#2}%
+          \noexpand\csuse{#2}%
         }%
-      \tud@res@c%
-    }{}%
-  }%
+      }%
+    \tud@res@c%
+  }{}%
 }
 %<*class>
 \newcommand*\TUD@deprecated@lengthcs[2][]{%
@@ -196,6 +206,7 @@
 %</class>
 %    \end{macrocode}
 % \end{macro}^^A \TUD@deprecated@lengthcs
+% \end{macro}^^A \TUD@deprecated@@cs
 % \end{macro}^^A \TUD@deprecated@cs
 % \end{macro}^^A \TUD@deprecated@key
 %
@@ -1005,6 +1016,35 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@ifdin
 % \end{macro}^^A \ifdin
+% \begin{macro}{\varGamma}
+% \begin{macro}{\varDelta}
+% \begin{macro}{\varTheta}
+% \begin{macro}{\varLambda}
+% \begin{macro}{\varXi}
+% \begin{macro}{\varPi}
+% \begin{macro}{\varSigma}
+% \begin{macro}{\varUpsilon}
+% \begin{macro}{\varPhi}
+% \begin{macro}{\varPsi}
+% \begin{macro}{\varOmega}
+% Die veralteten Befehle für kursive griechische Majuskeln.
+%    \begin{macrocode}
+\def\tud@res@a#1{%
+  \TUD@deprecated@cs{var#1}{it#1}%
+}
+\tud@math@greek@loop@uc\tud@res@a%
+%    \end{macrocode}
+% \end{macro}^^A \varOmega
+% \end{macro}^^A \varPsi
+% \end{macro}^^A \varPhi
+% \end{macro}^^A \varUpsilon
+% \end{macro}^^A \varSigma
+% \end{macro}^^A \varPi
+% \end{macro}^^A \varXi
+% \end{macro}^^A \varLambda
+% \end{macro}^^A \varTheta
+% \end{macro}^^A \varDelta
+% \end{macro}^^A \varGamma
 %
 % \iffalse
 %</class|package&fonts>
