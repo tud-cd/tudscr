@@ -640,22 +640,6 @@
 \newif\if@tud@ddc@internal
 \newcommand*\tud@comp@clearpage{}%
 \newcommand*\tud@comp@resetpagestyle{}%
-\AfterEndPreamble{%
-  \tud@if@v@lower{2.04}{%
-    \renewcommand*\tud@comp@clearpage{%
-      \if@tud@ddc@internal\else%
-        \tud@if@tudheadings{\currentpagestyle}{\clearpage}{}%
-      \fi%
-    }%
-    \renewcommand*\tud@comp@resetpagestyle{%
-      \if@tud@ddc@internal\else%
-        \tud@if@tudheadings{\currentpagestyle}{%
-          \expandafter\pagestyle\expandafter{\currentpagestyle}%
-        }{}%
-      \fi%
-    }%
-  }{}%
-}
 \newcommand*\tud@ddc@switch{}
 \edef\tud@ddc@switch{%
   \TUD@bool@numkey,%
@@ -1015,44 +999,6 @@
 \TUD@key{tudbookmarks}[true]{%
   \TUD@set@ifkey{tudbookmarks}{@tud@bookmarks}{#1}%
 }
-% TODO überarbeiten der symbole für Fußnoten in Überschriften
-\newif\if@tud@symbolheadings
-\TUD@key{footnotes}{%
-  \TUD@set@numkey{footnotes}{@tempa}{%
-    {nosymbolheadings}{0},{numberheadings}{0},%
-    {symbolheadings}{1}%
-  }{#1}%
-  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \ifcase\@tempa\relax% nosymbolheadings
-      \@tud@symbolheadingsfalse%
-    \or% symbolheadings
-      \@tud@symbolheadingstrue%
-      \AfterPreamble{\tud@symbolheadings@wrn}%
-    \fi%
-  \fi%
-}
-\newcommand*\tud@symbolheadings@wrn{%
-  \ClassWarning{\TUD@Class@Name}{%
-    You have to load package `footmisc' with\MessageBreak%
-    option `stable' in order to use\MessageBreak%
-    footnotes with symbols in headings%
-  }%
-}
-\newcommand*\tud@sec@symbolheadings{}%
-\AfterPackage{footmisc}{%
-  \@ifpackagewith{footmisc}{stable}{%
-    \let\tud@symbolheadings@wrn\relax%
-    \renewcommand*\tud@sec@symbolheadings{%
-      \if@tud@symbolheadings%
-        \let\c@footnote\c@symbolheadings%
-        \renewcommand*\thefootnote{\fnsymbol{symbolheadings}}%
-      \fi%
-    }%
-  }{}%
-}
-\AtEndOfClass{%
-  \newcounter{symbolheadings}[chapter]
-}
 \newcommand*\tud@x@scr@checkoptions{%
   \expandafter\tud@x@scr@pt\CurrentOption pt\@nil%
   \PassOptionsToClass{\CurrentOption}{\TUD@Class@KOMA}%
@@ -1087,37 +1033,45 @@
   \TUDoptions{#2}%
 }
 \newcommand*\TUD@deprecated@cs[2]{%
-  \AfterEndPreamble{%
-    \ifcsundef{#1}{%
-      \begingroup%
-        \def\tud@res@a{%
-          The command `\@backslashchar#1' is deprecated.\MessageBreak%
-        }%
-        \def\tud@res@b##1@##2\@nil{%
-          \IfArgIsEmpty{##2}{%
-            \appto\tud@res@a{%
-              You should use `\@backslashchar#2' instead%
-            }%
-          }{%
-            \appto\tud@res@a{%
-              You should not use this command. It is substituted\MessageBreak%
-              with `\@backslashchar#2' internally%
-            }%
+  \begingroup%
+    \edef\tud@res@a{%
+      \endgroup%
+      \noexpand\AfterEndPreamble{%
+        \noexpand\TUD@deprecated@@cs{#1}{#2}%
+      }%
+    }%
+  \tud@res@a%
+}
+\newcommand*\TUD@deprecated@@cs[2]{%
+  \ifcsundef{#1}{%
+    \begingroup%
+      \def\tud@res@a{%
+        The command `\@backslashchar#1' is deprecated.\MessageBreak%
+      }%
+      \def\tud@res@b##1@##2\@nil{%
+        \IfArgIsEmpty{##2}{%
+          \appto\tud@res@a{%
+            You should use `\@backslashchar#2' instead%
+          }%
+        }{%
+          \appto\tud@res@a{%
+            You should not use this command. It is substituted\MessageBreak%
+            with `\@backslashchar#2' internally%
           }%
         }%
-        \tud@res@b#2@\@nil%
-        \edef\tud@res@c{%
-          \endgroup%
-          \noexpand\newrobustcmd\csname #1\endcsname{%
-            \noexpand\ClassWarning{\noexpand\TUD@Class@Name}%
-            {\tud@res@a}%
-            \noexpand\csletcs{#1}{#2}%
-            \noexpand\csuse{#2}%
-          }%
+      }%
+      \tud@res@b#2@\@nil%
+      \edef\tud@res@c{%
+        \endgroup%
+        \noexpand\newrobustcmd\csname #1\endcsname{%
+          \noexpand\ClassWarning{\noexpand\TUD@Class@Name}%
+          {\tud@res@a}%
+          \noexpand\csletcs{#1}{#2}%
+          \noexpand\csuse{#2}%
         }%
-      \tud@res@c%
-    }{}%
-  }%
+      }%
+    \tud@res@c%
+  }{}%
 }
 \newcommand*\TUD@deprecated@lengthcs[2][]{%
   \ifdim\csuse{#2}<\maxdimen\relax%
@@ -2248,6 +2202,22 @@
   \tud@res@c%
   \let\tud@slantedgreek@check\relax%
 }
+\newcommand*\tud@math@greek@loop[1]{%
+  \tud@math@greek@loop@uc{#1}%
+  \tud@math@greek@loop@lc{#1}%
+}
+\newcommand*\tud@math@greek@loop@uc[1]{%
+  \@for\@tempa:={%
+    Gamma,Delta,Theta,Lambda,Xi,Pi,Sigma,Upsilon,Phi,Psi,Omega%
+  }\do{#1{\@tempa}}%
+}
+\newcommand*\tud@math@greek@loop@lc[1]{%
+  \@for\@tempa:={%
+    alpha,beta,gamma,delta,epsilon,zeta,eta,theta,iota,kappa,lambda,%
+    mu,nu,xi,pi,rho,sigma,tau,upsilon,phi,chi,psi,omega,%
+    varepsilon,vartheta,varpi,varrho,varsigma,varphi%
+  }\do{#1{\@tempa}}%
+}
 \newcommand*\tud@math@init{%
   \@ifpackageloaded{unicode-math}{%
     \if@tud@cdmath@active%
@@ -2303,22 +2273,6 @@
     \fi%
   }{}%
 }
-\newcommand*\tud@math@greek@loop[1]{%
-  \tud@math@greek@loop@uc{#1}%
-  \tud@math@greek@loop@lc{#1}%
-}
-\newcommand*\tud@math@greek@loop@uc[1]{%
-  \@for\@tempa:={%
-    Gamma,Delta,Theta,Lambda,Xi,Pi,Sigma,Upsilon,Phi,Psi,Omega%
-  }\do{#1{\@tempa}}%
-}
-\newcommand*\tud@math@greek@loop@lc[1]{%
-  \@for\@tempa:={%
-    alpha,beta,gamma,delta,epsilon,zeta,eta,theta,iota,kappa,lambda,%
-    mu,nu,xi,pi,rho,sigma,tau,upsilon,phi,chi,psi,omega,%
-    varepsilon,vartheta,varpi,varrho,varsigma,varphi%
-  }\do{#1{\@tempa}}%
-}
 \newcommand*\tud@math@greek@declare@uc[1]{%
   \edef\@tempb{%
     \noexpand\DeclareMathSymbol{\csname tud@math@greek@up#1\endcsname}%
@@ -2358,38 +2312,38 @@
 \newcommand*\mv@tud@nm{}
 \newcommand*\mv@tud@bm{}
 \newcommand*\mv@tud@dm{}
-\newcommand*\tud@cdmath@declare[3]{%
+\newcommand*\tud@cdmath@declare[2]{%
   \DeclareMathVersion{tud@nm}%
   \DeclareMathVersion{tud@bm}%
   \tud@cdfont@@set%
   \tud@ttfont@@set%
-  \SetSymbolFont{operators}{tud@nm}{OT1}{#2}{\tud@cdfont@md}{n}%
-  \SetSymbolFont{operators}{tud@bm}{OT1}{#2}{\tud@cdfont@bf}{n}%
-  \SetSymbolFont{letters}{tud@nm}{OML}{#2}{\tud@cdfont@md}{it}%
-  \SetSymbolFont{letters}{tud@bm}{OML}{#2}{\tud@cdfont@bf}{it}%
+  \SetSymbolFont{operators}{tud@nm}{OT1}{#1}{\tud@cdfont@md}{n}%
+  \SetSymbolFont{operators}{tud@bm}{OT1}{#1}{\tud@cdfont@bf}{n}%
+  \SetSymbolFont{letters}{tud@nm}{OML}{#1}{\tud@cdfont@md}{it}%
+  \SetSymbolFont{letters}{tud@bm}{OML}{#1}{\tud@cdfont@bf}{it}%
   \if@tud@cdoldfont@active%
-    \SetSymbolFont{upletters}{tud@nm}{OML}{#2}{\tud@cdfont@md}{it}%
-    \SetSymbolFont{upletters}{tud@bm}{OML}{#2}{\tud@cdfont@bf}{it}%
+    \SetSymbolFont{upletters}{tud@nm}{OML}{#1}{\tud@cdfont@md}{it}%
+    \SetSymbolFont{upletters}{tud@bm}{OML}{#1}{\tud@cdfont@bf}{it}%
   \else%
-    \SetSymbolFont{upletters}{tud@nm}{OML}{#2}{\tud@cdfont@md}{n}%
-    \SetSymbolFont{upletters}{tud@bm}{OML}{#2}{\tud@cdfont@bf}{n}%
+    \SetSymbolFont{upletters}{tud@nm}{OML}{#1}{\tud@cdfont@md}{n}%
+    \SetSymbolFont{upletters}{tud@bm}{OML}{#1}{\tud@cdfont@bf}{n}%
   \fi%
-  \SetSymbolFont{symbols}{tud@nm}{OMS}{#2}{\tud@cdfont@md}{n}%
-  \SetSymbolFont{symbols}{tud@bm}{OMS}{#2}{\tud@cdfont@bf}{n}%
-  \SetSymbolFont{largesymbols}{tud@nm}{OMX}{#2}{\tud@cdfont@md}{n}%
-  \SetSymbolFont{largesymbols}{tud@bm}{OMX}{#2}{\tud@cdfont@bf}{n}%
-  \SetMathAlphabet{\mathnormal}{tud@nm}{OML}{#2}{\tud@cdfont@md}{it}%
-  \SetMathAlphabet{\mathnormal}{tud@bm}{OML}{#2}{\tud@cdfont@bf}{it}%
-  \SetMathAlphabet{\mathrm}{tud@nm}{#1}{#2}{\tud@cdfont@md}{n}%
-  \SetMathAlphabet{\mathrm}{tud@bm}{#1}{#2}{\tud@cdfont@bf}{n}%
-  \SetMathAlphabet{\mathsf}{tud@nm}{#1}{#2}{\tud@cdfont@md}{n}%
-  \SetMathAlphabet{\mathsf}{tud@bm}{#1}{#2}{\tud@cdfont@bf}{n}%
-  \SetMathAlphabet{\mathit}{tud@nm}{#1}{#2}{\tud@cdfont@md}{it}%
-  \SetMathAlphabet{\mathit}{tud@bm}{#1}{#2}{\tud@cdfont@bf}{it}%
-  \SetMathAlphabet{\mathbf}{tud@nm}{#1}{#2}{\tud@cdfont@bf}{n}%
-  \SetMathAlphabet{\mathbf}{tud@bm}{#1}{#2}{\tud@cdfont@ebf}{n}%
-  \SetMathAlphabet{\mathtt}{tud@nm}{#1}{#3}{\tud@ttfont@md}{n}%
-  \SetMathAlphabet{\mathtt}{tud@bm}{#1}{#3}{\tud@ttfont@bf}{n}%
+  \SetSymbolFont{symbols}{tud@nm}{OMS}{#1}{\tud@cdfont@md}{n}%
+  \SetSymbolFont{symbols}{tud@bm}{OMS}{#1}{\tud@cdfont@bf}{n}%
+  \SetSymbolFont{largesymbols}{tud@nm}{OMX}{#1}{\tud@cdfont@md}{n}%
+  \SetSymbolFont{largesymbols}{tud@bm}{OMX}{#1}{\tud@cdfont@bf}{n}%
+  \SetMathAlphabet{\mathnormal}{tud@nm}{OML}{#1}{\tud@cdfont@md}{it}%
+  \SetMathAlphabet{\mathnormal}{tud@bm}{OML}{#1}{\tud@cdfont@bf}{it}%
+  \SetMathAlphabet{\mathrm}{tud@nm}{OML}{#1}{\tud@cdfont@md}{n}%
+  \SetMathAlphabet{\mathrm}{tud@bm}{OML}{#1}{\tud@cdfont@bf}{n}%
+  \SetMathAlphabet{\mathsf}{tud@nm}{OML}{#1}{\tud@cdfont@md}{n}%
+  \SetMathAlphabet{\mathsf}{tud@bm}{OML}{#1}{\tud@cdfont@bf}{n}%
+  \SetMathAlphabet{\mathit}{tud@nm}{OML}{#1}{\tud@cdfont@md}{it}%
+  \SetMathAlphabet{\mathit}{tud@bm}{OML}{#1}{\tud@cdfont@bf}{it}%
+  \SetMathAlphabet{\mathbf}{tud@nm}{OML}{#1}{\tud@cdfont@bf}{n}%
+  \SetMathAlphabet{\mathbf}{tud@bm}{OML}{#1}{\tud@cdfont@ebf}{n}%
+  \SetMathAlphabet{\mathtt}{tud@nm}{OT1}{#2}{\tud@ttfont@md}{n}%
+  \SetMathAlphabet{\mathtt}{tud@bm}{OT1}{#2}{\tud@ttfont@bf}{n}%
   \IfFileExists{ueus.fd}{%
     \SetMathAlphabet{\mathcal}{tud@nm}{U}{eus}{m}{n}%
     \SetMathAlphabet{\mathcal}{tud@bm}{U}{eus}{b}{n}%
@@ -2401,13 +2355,8 @@
     }{}%
   }%
 }
-\newcommand*\tud@cdmath@enc{}%
 \newcommand*\tud@cdmath@init{%
-  \edef\tud@cdmath@enc{\encodingdefault}%
-  \if@tud@x@fontspec@enabled\else%
-    \ifstr{T1}{\tud@cdmath@enc}{}{\def\tud@cdmath@enc{OT1}}%
-  \fi%
-  \tud@cdmath@declare{\tud@cdmath@enc}{\tud@cdfont@fam@lf}{\tud@ttfont@fam}%
+  \tud@cdmath@declare{\tud@cdfont@fam@lf}{\tud@ttfont@fam}%
   \if@tud@cdoldfont@active%
     \SetSymbolFont{largesymbols}{tud@nm}{OMX}{iwona}{m}{n}%
     \SetSymbolFont{largesymbols}{tud@bm}{OMX}{iwona}{b}{n}%
@@ -2428,11 +2377,11 @@
     \SetSymbolFont{symbols}{tud@dm}{OMS}{\tud@cdfont@db}{b}{n}%
     \SetSymbolFont{largesymbols}{tud@dm}{OMX}{iwona}{ebc}{n}%
     \SetMathAlphabet{\mathnormal}{tud@dm}{OML}{\tud@cdfont@db}{b}{sl}%
-    \SetMathAlphabet{\mathrm}{tud@dm}{\tud@cdmath@enc}{\tud@cdfont@db}{b}{n}%
-    \SetMathAlphabet{\mathsf}{tud@dm}{\tud@cdmath@enc}{\tud@cdfont@db}{b}{n}%
-    \SetMathAlphabet{\mathit}{tud@dm}{\tud@cdmath@enc}{\tud@cdfont@db}{b}{sl}%
-    \SetMathAlphabet{\mathbf}{tud@dm}{\tud@cdmath@enc}{\tud@cdfont@db}{b}{n}%
-    \SetMathAlphabet{\mathtt}{tud@dm}{\tud@cdmath@enc}{\tud@ttfont@fam}{b}{n}%
+    \SetMathAlphabet{\mathrm}{tud@dm}{OML}{\tud@cdfont@db}{b}{n}%
+    \SetMathAlphabet{\mathsf}{tud@dm}{OML}{\tud@cdfont@db}{b}{n}%
+    \SetMathAlphabet{\mathit}{tud@dm}{OML}{\tud@cdfont@db}{b}{sl}%
+    \SetMathAlphabet{\mathbf}{tud@dm}{OML}{\tud@cdfont@db}{b}{n}%
+    \SetMathAlphabet{\mathtt}{tud@dm}{OT1}{\tud@ttfont@fam}{b}{n}%
     \IfFileExists{ueus.fd}{%
       \SetMathAlphabet{\mathcal}{tud@dm}{U}{eus}{b}{n}%
     }{}%
@@ -3922,6 +3871,10 @@
         \tud@cs@store{tud@AfterChangingArea}%
         \let\activateareas\relax%
         \let\tud@AfterChangingArea\relax%
+% TODO vergleichen der gesicherten mit aktueller Einstellung für Satzspiegel
+%        \KOMAoptionOf[\def\@tempa]{typearea.\scr@pkgextension}{BCOR}%
+%        \KOMAoptionOf[\def\@tempa]{typearea.\scr@pkgextension}{DIV}%
+%        \KOMAoptionOf[\def\@tempa]{typearea.\scr@pkgextension}{paper}%
         \recalctypearea%
         \ifGm@layout%
           \tud@skip@restore{paperheight}%
@@ -4293,27 +4246,28 @@
         \tud@savegeometry{init@##1}%
       }%
       \begingroup%
-        \let\scr@grouplevel@test\@gobble%
+        % TODO was genau passiert hier?
+        % vermeintlich wird der Satzspiegel von typearea gesichert...
         \setlength\paperheight{\Gm@layoutheight}%
         \setlength\paperwidth{\Gm@layoutwidth}%
-        \let\activateareas\relax%
 %        \tud@x@ta@silent%
-        % TODO was genau passiert hier?
-        \KOMAoptionOf[\def\@tempa]{typearea.\scr@pkgextension}{DIV}%
-        \def\@tempb{{0}}%
-        \ifx\@tempa\@tempb\relax%
-          \KOMAoptionOf[\def\@tempa]{typearea.\scr@pkgextension}{paper}%
-          \@for\@tempb:=\@tempa\do{%
-            \@tempswatrue%
-            \ifx\@tempb\defaultpapersize\relax%
-              \@tempswafalse%
-            \fi%
-          }%
-          \if@tempswa%
-            \KOMAoptions{DIV=11}%
-          \fi%
-        \fi%
-        \recalctypearea%
+%        \let\scr@grouplevel@test\@gobble%
+%        \let\activateareas\relax%
+%        \KOMAoptionOf[\def\@tempa]{typearea.\scr@pkgextension}{DIV}%
+%        \def\@tempb{{0}}%
+%        \ifx\@tempa\@tempb\relax%
+%          \KOMAoptionOf[\def\@tempa]{typearea.\scr@pkgextension}{paper}%
+%          \@for\@tempb:=\@tempa\do{%
+%            \@tempswatrue%
+%            \ifx\@tempb\defaultpapersize\relax%
+%              \@tempswafalse%
+%            \fi%
+%          }%
+%          \if@tempswa%
+%            \KOMAoptions{DIV=11}%
+%          \fi%
+%        \fi%
+%        \recalctypearea%
 %        \tud@x@ta@verbose%
         \edef\tud@x@geometry@init{%
           left=\the\dimexpr\oddsidemargin+1in-\ta@bcor\relax,%
@@ -4837,10 +4791,10 @@
   \fi%
 }
 \newcommand*\tud@head@text@box{%
-  \ifx\@faculty\@empty%
-    \ClassWarningNoLine{\TUD@Class@Name}{No `\string\faculty' given}%
-    \faculty{}%
-  \fi%
+%  \ifx\@faculty\@empty%
+%    \ClassWarningNoLine{\TUD@Class@Name}{No `\string\faculty' given}%
+%    \faculty{}%
+%  \fi%
   \def\@tempb{\tud@color{\tud@head@fontcolor}}%
   \def\@tempc{\depth+\tud@len@heavyline}%
   \def\@tempa##1{%
@@ -5265,6 +5219,20 @@
     \hbox to #2{}%
   \fi%
 }
+\tud@if@v@lower{2.04}{%
+  \renewcommand*\tud@comp@clearpage{%
+    \if@tud@ddc@internal\else%
+      \tud@if@tudheadings{\currentpagestyle}{\clearpage}{}%
+    \fi%
+  }%
+  \renewcommand*\tud@comp@resetpagestyle{%
+    \if@tud@ddc@internal\else%
+      \tud@if@tudheadings{\currentpagestyle}{%
+        \expandafter\pagestyle\expandafter{\currentpagestyle}%
+      }{}%
+    \fi%
+  }%
+}{}%
 \newcommand*\tud@ddc@check{%
   \let\@tempa\tud@ddc@head@num%
   \let\@tempb\tud@ddc@foot@num%
@@ -5416,7 +5384,7 @@
   }%
   \global\let\tud@clearcolor@wrn\relax%
 }
-% TODO 
+% TODO optionales Argument auflösen, warum \selectfont notwendig?
 \newcommand*\tud@sec@fontface[1][]{\sectfont#1\selectfont}
 \if@tud@cdoldfont@active
   \renewcommand*\tud@sec@fontface[1][]{%
@@ -5427,7 +5395,17 @@
     \fi%
   }%
 \fi
-\newcommand*\tud@sec@format[2][]{\tud@sec@symbolheadings\tud@sec@strut#2}
+\newcommand*\tud@sec@format[2][]{%
+  \IfArgIsEmpty{#1}{%
+    \tud@sec@strut%
+  }{%
+    \begingroup%
+      \usefontofkomafont{#1}%
+      \tud@sec@strut%
+    \endgroup%
+  }%
+  #2%
+}
 \if@tud@cdoldfont@active
   \RequirePackage{textcase}[2004/10/07]
   \renewcommand*\tud@sec@format[2][]{%
@@ -5442,10 +5420,9 @@
         \tud@ifdin{\aftergroup\@tud@res@swatrue}{}%
       \endgroup%
     }%
-    \tud@sec@symbolheadings%
     \tud@sec@strut%
     \if@tud@res@swa%
-      \begingroup\MakeTextUppercase{#2}\endgroup%
+      \MakeTextUppercase{#2}%
     \else%
       #2%
     \fi%
@@ -7013,6 +6990,10 @@
   \newcommand*\ifdin{}%
   \let\ifdin\tud@ifdin%
 \fi
+\def\tud@res@a#1{%
+  \TUD@deprecated@cs{var#1}{it#1}%
+}
+\tud@math@greek@loop@uc\tud@res@a%
 %%% From File: tudscr-misc.dtx
 \newcommand*\tudbookmark[1][]{\@gobbletwo}
 \newcommand*\tud@x@hyperref@realfootnotes{}
