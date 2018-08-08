@@ -1376,7 +1376,6 @@
 }{%
   \TUD@key@preset{cdfont}{true}%
 }
-\PassOptionsToPackage{DIV=calc}{typearea}
 \DeclareOption*{\tud@x@scr@checkoptions}
 \TUDExecuteOptions{%
   cd=true,tudbookmarks=true%
@@ -2692,8 +2691,11 @@
     \let\footnote\@gobble%
     \tud@lowerstring{\@tempa}{#2}%
     \ifstr{#1}{thesis}{\protected@xdef\@@thesis{#2}}{}%
-    \global\let\@tempa\@tempa%
-  \endgroup%
+    \edef\@tempa{%
+      \endgroup%
+      \def\noexpand\@tempa{\@tempa}%
+    }%
+  \@tempa%
   \ifstr{\@tempa}{diss}{\tud@thesis@@do{#1}{\dissertationname}}{%
   \ifstr{\@tempa}{doctoral}{\tud@thesis@@do{#1}{\dissertationname}}{%
   \ifstr{\@tempa}{phd}{\tud@thesis@@do{#1}{\dissertationname}}{%
@@ -2813,7 +2815,8 @@
   }{\tud@date@set}%
 }
 \newcommand*\tud@date@set[2][]{%
-  \TUD@parameter@set{date}{#1}%
+  \tud@toks@{#1}%
+  \TUD@parameter@set{date}{\the\tud@toks@}%
   \tud@printdate{\@date}{#2}%
   \global\let\tud@date@check\relax%
 }
@@ -3850,7 +3853,7 @@
     \tud@AfterChangingArea%
   }%
   \renewcommand*\tud@cdgeometry@process{%
-      \tud@AfterChangingArea%
+    \tud@AfterChangingArea%
   }%
   \newcommand*\tud@cdgeometry@hmargin{}%
   \newcommand*\tud@cdgeometry@vmargin{}%
@@ -4248,25 +4251,12 @@
       \begingroup%
         % TODO was genau passiert hier?
         % vermeintlich wird der Satzspiegel von typearea gesichert...
+        % TODO sichern des Satzspiegels nach jeder typearea-Aktion in Präambel
         \setlength\paperheight{\Gm@layoutheight}%
         \setlength\paperwidth{\Gm@layoutwidth}%
+        \let\scr@grouplevel@test\@gobble%
+        \let\activateareas\relax%
 %        \tud@x@ta@silent%
-%        \let\scr@grouplevel@test\@gobble%
-%        \let\activateareas\relax%
-%        \KOMAoptionOf[\def\@tempa]{typearea.\scr@pkgextension}{DIV}%
-%        \def\@tempb{{0}}%
-%        \ifx\@tempa\@tempb\relax%
-%          \KOMAoptionOf[\def\@tempa]{typearea.\scr@pkgextension}{paper}%
-%          \@for\@tempb:=\@tempa\do{%
-%            \@tempswatrue%
-%            \ifx\@tempb\defaultpapersize\relax%
-%              \@tempswafalse%
-%            \fi%
-%          }%
-%          \if@tempswa%
-%            \KOMAoptions{DIV=11}%
-%          \fi%
-%        \fi%
 %        \recalctypearea%
 %        \tud@x@ta@verbose%
         \edef\tud@x@geometry@init{%
@@ -4290,6 +4280,7 @@
         \global\let\Gm@restore@@init@typearea\Gm@restore@@init@typearea%
       \endgroup%
       \tud@reserved{custom}%
+      % TODO \let\tud@x@ta@init\relax%
       \AfterCalculatingTypearea{\tud@AfterChangingArea}%
       \AfterSettingArea{\tud@AfterChangingArea}%
       \AfterRestoreareas{\tud@AfterChangingArea}%
@@ -4299,7 +4290,33 @@
     \let\tud@cdgeometry@init\relax%
   }%
 }
+\newcommand*\tud@cdgeometry@@init[1]{%
+  \tud@setgeometry{%
+    \tud@cdgeometry@mpincl,%
+    \if@reversemargin%
+      reversemarginpar=true,%
+    \else%
+      reversemarginpar=false,%
+    \fi%
+    bindingoffset=\the\ta@bcor,%
+    \tud@cdgeometry@hincl,%
+    \tud@cdgeometry@fincl,%
+    \tud@x@geometry@init,%
+    driver=none%
+  }%
+  \addtolength\oddsidemargin{-\Gm@layouthoffset}%
+  \addtolength\evensidemargin{-\Gm@layouthoffset}%
+  \addtolength\topmargin{-\Gm@layoutvoffset}%
+  \tud@savegeometry{init@#1}%
+}%
+% TODO Initialisierung Satzspiegel mit eigenem Makro
+%\AfterPackage*{typearea}{
+%  \AfterCalculatingTypearea{...}%
+%  \AfterSettingArea{...}%
+%  \AfterRestoreareas{...}%
+%}
 \AfterPackage!{scrlayer-scrpage}{\tud@cdgeometry@init}
+% TODO mögliches Problem mit typearea!
 \TUD@UnwindPackage{geometry}{%
   \newif\ifGm@layout%
   \newif\ifGm@showcrop%
@@ -4791,10 +4808,6 @@
   \fi%
 }
 \newcommand*\tud@head@text@box{%
-%  \ifx\@faculty\@empty%
-%    \ClassWarningNoLine{\TUD@Class@Name}{No `\string\faculty' given}%
-%    \faculty{}%
-%  \fi%
   \def\@tempb{\tud@color{\tud@head@fontcolor}}%
   \def\@tempc{\depth+\tud@len@heavyline}%
   \def\@tempa##1{%
@@ -5628,7 +5641,7 @@
   \tud@cs@restore{footnoterule}%
 }
 \newcommand*\tud@cd@beforeskip{%
-  \dimexpr\tud@len@areavskip+\tud@len@areaheadvskip\relax%
+  \dimexpr-\tud@len@areavskip-\tud@len@areaheadvskip\relax%
 }
 \newcommand*\tud@cd@innerskip{.25\baselineskip}%
 \newcommand*\tud@cd@afterskip{%
@@ -5805,6 +5818,7 @@
   \let\tud@sec@strut\relax%
   \hskip #2#3\tud@sec@format[#1]{#4}%
 }
+\newcommand*\tud@preamble@fontcolor{}
 \newcommand*\tud@partpreamble{%
   \@tempskipa=\glueexpr\tud@cd@afterskip\relax%
   \ifdim\@tempskipa<\z@\@tempskipa-\@tempskipa\fi%
@@ -5813,10 +5827,10 @@
     \renewcommand*\tud@abstract@level@num{1}%
   \fi%
   \KOMAoptions{titlepage=false}%
-  \null\vskip-.5\baselineskip%
+  \null\vskip-\baselineskip%
   \addtokomafont{disposition}{\tud@color{\tud@part@fontcolor}}%
   \addtokomafont{dictum}{\tud@color{\tud@part@fontcolor}}%
-  \tud@color{\tud@part@fontcolor}%
+  \let\tud@preamble@fontcolor\tud@part@fontcolor%
   \@afterindentfalse\@afterheading%
 }
 \newcommand*\tud@chapterpreamble{%
@@ -5824,11 +5838,11 @@
     \renewcommand*\tud@abstract@level@num{1}%
   \fi%
   \KOMAoptions{titlepage=false}%
-  \null\vskip-.5\baselineskip%
+  \null\vskip-\baselineskip%
   \if@tud@chapterpage%
     \addtokomafont{disposition}{\tud@color{\tud@chapter@fontcolor}}%
     \addtokomafont{dictum}{\tud@color{\tud@chapter@fontcolor}}%
-    \tud@color{\tud@chapter@fontcolor}%
+    \let\tud@preamble@fontcolor\tud@chapter@fontcolor%
   \fi%
   \@afterindentfalse\@afterheading%
 }
@@ -5842,11 +5856,12 @@
 }{%
   \def\@tempa####1@####2{%
     \@nameuse{tud@####1preamble}%
+    \tud@color{\tud@preamble@fontcolor}%
     \KOMAoptionOf[\KOMAoption{parskip}]{\KOMAClassFileName}{parskip}%
   }%
   \hbox to\hsize{%
     \let\phantomsection\relax%
-    #4\parbox[{#2}]{#3}{\@tempa#1#6\par}#5\par%
+    #4\parbox[{#2}]{#3}{\@tempa#1#6\par\bigskip}#5\par%
   }%
 }{}{\tud@patch@wrn{set@@@@preamble}}
 \newcommand*\tud@x@scr@headings@current{}
