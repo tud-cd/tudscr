@@ -1,4 +1,4 @@
-% \CheckSum{850}
+% \CheckSum{856}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -402,8 +402,11 @@
     \let\footnote\@gobble%
     \tud@lowerstring{\@tempa}{#2}%
     \ifstr{#1}{thesis}{\protected@xdef\@@thesis{#2}}{}%
-    \global\let\@tempa\@tempa%
-  \endgroup%
+    \edef\@tempa{%
+      \endgroup%
+      \def\noexpand\@tempa{\@tempa}%
+    }%
+  \@tempa%
   \ifstr{\@tempa}{diss}{\tud@thesis@@do{#1}{\dissertationname}}{%
   \ifstr{\@tempa}{doctoral}{\tud@thesis@@do{#1}{\dissertationname}}{%
   \ifstr{\@tempa}{phd}{\tud@thesis@@do{#1}{\dissertationname}}{%
@@ -755,6 +758,7 @@
 % \changes{v2.05}{2016/05/27}{neu}^^A
 % \begin{macro}{\tud@date@set}
 % \changes{v2.05}{2016/05/27}{neu}^^A
+% \changes{v2.06}{2018/08/08}{optionales Argument nutzt \cs{tud@toks@}}^^A
 % \begin{field}{\@date}
 % \begin{field}{\@beforedate}
 % \changes{v2.05}{2016/05/27}{neu}^^A
@@ -775,7 +779,8 @@
   }{\tud@date@set}%
 }
 \newcommand*\tud@date@set[2][]{%
-  \TUD@parameter@set{date}{#1}%
+  \tud@toks@{#1}%
+  \TUD@parameter@set{date}{\the\tud@toks@}%
   \tud@printdate{\@date}{#2}%
   \global\let\tud@date@check\relax%
 }
