@@ -1,4 +1,4 @@
-% \CheckSum{1121}
+% \CheckSum{1128}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -1057,7 +1057,7 @@
 % Abstand ist abhängig von der gewählten Einstellung für \opt{headings}.
 %    \begin{macrocode}
 \newcommand*\tud@cd@beforeskip{%
-  \dimexpr\tud@len@areavskip+\tud@len@areaheadvskip\relax%
+  \dimexpr-\tud@len@areavskip-\tud@len@areaheadvskip\relax%
 }
 \newcommand*\tud@cd@innerskip{.25\baselineskip}%
 \newcommand*\tud@cd@afterskip{%
@@ -1430,6 +1430,14 @@
 %
 % \subsection{Präambeln für Teile und Kapitel}
 %
+% \begin{macro}{\tud@preamble@fontcolor}
+% \changes{v2.06}{2018/08/08}{neu}^^A
+% Der Befehl wird innerhalb von \cs{set@@@@preamble} genutzt, um die notwendige 
+% Farbe des Textes zu aktivieren.
+%    \begin{macrocode}
+\newcommand*\tud@preamble@fontcolor{}
+%    \end{macrocode}
+% \end{macro}^^A \tud@preamble@fontcolor
 % \begin{macro}{\tud@partpreamble}
 % Um die \KOMAScript-Befehle für die Teilepräambel auch für das farbige Layout
 % nutzen zu können, müssen diese leicht angepasst werden. Für die Präambeln wird
@@ -1453,10 +1461,10 @@
     \renewcommand*\tud@abstract@level@num{1}%
   \fi%
   \KOMAoptions{titlepage=false}%
-  \null\vskip-.5\baselineskip%
+  \null\vskip-\baselineskip%
   \addtokomafont{disposition}{\tud@color{\tud@part@fontcolor}}%
   \addtokomafont{dictum}{\tud@color{\tud@part@fontcolor}}%
-  \tud@color{\tud@part@fontcolor}%
+  \let\tud@preamble@fontcolor\tud@part@fontcolor%
   \@afterindentfalse\@afterheading%
 }
 %    \end{macrocode}
@@ -1472,14 +1480,14 @@
     \renewcommand*\tud@abstract@level@num{1}%
   \fi%
   \KOMAoptions{titlepage=false}%
-  \null\vskip-.5\baselineskip%
+  \null\vskip-\baselineskip%
 %    \end{macrocode}
 % Die Farb- und Schrifteinstellungen sind nur für reine Kapitelseiten notwendig.
 %    \begin{macrocode}
   \if@tud@chapterpage%
     \addtokomafont{disposition}{\tud@color{\tud@chapter@fontcolor}}%
     \addtokomafont{dictum}{\tud@color{\tud@chapter@fontcolor}}%
-    \tud@color{\tud@chapter@fontcolor}%
+    \let\tud@preamble@fontcolor\tud@chapter@fontcolor%
   \fi%
   \@afterindentfalse\@afterheading%
 }
@@ -1507,11 +1515,12 @@
 }{%
   \def\@tempa####1@####2{%
     \@nameuse{tud@####1preamble}%
+    \tud@color{\tud@preamble@fontcolor}%
     \KOMAoptionOf[\KOMAoption{parskip}]{\KOMAClassFileName}{parskip}%
   }%
   \hbox to\hsize{%
     \let\phantomsection\relax%
-    #4\parbox[{#2}]{#3}{\@tempa#1#6\par}#5\par%
+    #4\parbox[{#2}]{#3}{\@tempa#1#6\par\bigskip}#5\par%
   }%
 }{}{\tud@patch@wrn{set@@@@preamble}}
 %    \end{macrocode}
