@@ -1,4 +1,4 @@
-% \CheckSum{708}
+% \CheckSum{750}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-base.dtx}[%
-  2018/08/02 v2.06 TUD-Script\space%
+  2018/08/10 v2.06 TUD-Script\space%
 %</driver>
 %<package&base>\ProvidesPackage{tudscrbase}[%
 %<*driver|package&base>
@@ -650,38 +650,38 @@
   \tud@cs@check{#1}%
   \ifcsdef{@@tud@#1}{}{%
     \csletcs{@@tud@#1}{#1}%
-    \ifcsltxprotect{#1}{\csletcs{@@tud@#1 }{#1 }}{}%
+    \ifcsltxprotect{#1}{\csletcs{@@tud@#1@protect}{#1 }}{}%
   }%
 }
 \newrobustcmd*\tud@cs@restore[1]{%
   \tud@cs@check{#1}%
   \ifcsdef{@@tud@#1}{%
     \csletcs{#1}{@@tud@#1}%
-    \csundef{@@tud@#1}%
-    \ifcsdef{@@tud@#1 }{%
-      \csletcs{#1 }{@@tud@#1 }%
-      \csundef{@@tud@#1 }%
+    \ifcsdef{@@tud@#1@protect}{%
+      \csletcs{#1 }{@@tud@#1@protect}%
+      \csundef{@@tud@#1@protect}%
     }{}%
+    \csundef{@@tud@#1}%
   }{}%
 }
 \newrobustcmd*\tud@cs@reset[1]{%
   \tud@cs@check{#1}%
   \ifcsdef{@@tud@#1}{%
     \csletcs{#1}{@@tud@#1}%
-    \ifcsdef{@@tud@#1 }{\csletcs{#1 }{@@tud@#1 }}{}%
+    \ifcsdef{@@tud@#1@protect}{\csletcs{#1 }{@@tud@#1@protect}}{}%
   }{}%
 }
 \newrobustcmd*\tud@cs@update[1]{%
   \tud@cs@check{#1}%
   \ifcsdef{@@tud@#1}{%
     \csletcs{@@tud@#1}{#1}%
-    \ifcsdef{@@tud@#1 }{\csletcs{@@tud@#1 }{#1 }}{}%
+    \ifcsdef{@@tud@#1@protect}{\csletcs{@@tud@#1@protect}{#1 }}{}%
   }{}%
 }
 \newrobustcmd*\tud@cs@use[1]{%
   \tud@cs@check{#1}%
-  \ifcsdef{@@tud@#1 }{%
-    \expandafter\protect\csuse{@@tud@#1 }%
+  \ifcsdef{@@tud@#1@protect}{%
+    \expandafter\protect\csuse{@@tud@#1@protect}%
   }{%
     \ifcsdef{@@tud@#1}{%
       \csuse{@@tud@#1}%
@@ -773,6 +773,41 @@
 % \end{macro}^^A \tud@skip@reset
 % \end{macro}^^A \tud@skip@restore
 % \end{macro}^^A \tud@skip@store
+% \begin{macro}{\tud@patchcmd}
+% \changes{v2.06}{2018/08/10}{neu}^^A
+% \begin{macro}{\tud@pretocmd}
+% \changes{v2.06}{2018/08/10}{neu}^^A
+% \begin{macro}{\tud@apptocmd}
+% \changes{v2.06}{2018/08/10}{neu}^^A
+% \begin{macro}{\tud@patch@testopt}
+% \changes{v2.06}{2018/08/10}{neu}^^A
+% Die aus dem Paket \pkg{etoolbox} stammenden Befehle zum Patchen können nicht
+% mit Makros umgehen, die mit \cs{newcommand} mit einem optionalen Argument 
+% definiert wurden. Diese Befehle lösen das Problem.
+%    \begin{macrocode}
+\newcommand*\tud@patch@testopt[2]{%
+  \begingroup%
+    \expandafter\def\expandafter\tud@res@a\expandafter{%
+      \csname\string#2\endcsname%
+    }%
+    \expandafter\ifundef\expandafter{\tud@res@a}{%
+      \def\tud@res@b{#1#2}%
+    }{%
+      \expandafter\def\expandafter\tud@res@b\expandafter{%
+        \expandafter#1\tud@res@a%
+      }%
+    }%
+    \edef\tud@res@b{\endgroup\expandonce\tud@res@b}%
+  \tud@res@b%
+}
+\newcommand*\tud@patchcmd[1]{\tud@patch@testopt\patchcmd#1}
+\newcommand*\tud@pretocmd[1]{\tud@patch@testopt\pretocmd#1}
+\newcommand*\tud@apptocmd[1]{\tud@patch@testopt\apptocmd#1}
+%    \end{macrocode}
+% \end{macro}^^A \tud@patch@testopt
+% \end{macro}^^A \tud@apptocmd
+% \end{macro}^^A \tud@pretocmd
+% \end{macro}^^A \tud@patchcmd
 % \begin{macro}{\tud@patch@wrn}
 % Dieses Makro wird verwendet, wenn mit den Mitteln von \pkg{etoolbox} bereits
 % vorhandene Befehle angepasst werden sollen (\cs{apptocmd}, \cs{pretocmd},
