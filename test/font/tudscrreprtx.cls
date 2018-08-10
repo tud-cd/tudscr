@@ -466,7 +466,7 @@
 \TUD@key{extrabottommargin}{%
   \TUD@set@dimenkey{extrabottommargin}{\tud@dim@extrabottommargin}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \TUD@SpecialOptionAtDocument{tud@cdgeometry@@process}%
+    \TUD@SpecialOptionAtDocument{tud@cdgeometry@process}%
   \fi%
 }
 \newcommand*\tud@dim@bleedmargin{.2in}
@@ -481,11 +481,11 @@
 }
 \DefineFamilyMember{KOMA}
 \DefineFamilyKey{KOMA}{twoside}{%
-  \TUD@SpecialOptionAtDocument{tud@cdgeometry@@process}%
+  \TUD@SpecialOptionAtDocument{tud@cdgeometry@process}%
   \FamilyKeyStateProcessed%
 }
 \DefineFamilyKey{KOMA}{twocolumn}{%
-  \TUD@SpecialOptionAtDocument{tud@cdgeometry@@process}%
+  \TUD@SpecialOptionAtDocument{tud@cdgeometry@process}%
   \FamilyKeyStateProcessed%
 }
 %%% From File: tudscr-pagestyle.dtx
@@ -3257,20 +3257,20 @@
 \tud@if@v@lower{2.03}{\newlength\tud@len@ddcdiff}{}
 \newcommand*\tud@head@fontsize{}
 \newif\if@tud@cdgeometry@adjust
-\newlength\tud@len@layoutheight
 \newlength\tud@len@layoutwidth
+\newlength\tud@len@layoutheight
 \newlength\tud@len@layouthoffset
 \newlength\tud@len@layoutvoffset
-\newcommand*\tud@cdgeometry@set{%
-  \ifGm@layout%
-    \setlength\tud@len@layoutheight{\Gm@layoutheight}%
-    \setlength\tud@len@layoutwidth{\Gm@layoutwidth}%
-  \else%
-    \setlength\tud@len@layoutheight{\paperheight}%
+\newcommand*\tud@cdgeometry@assignlayout{%
+  \ifdim\tud@len@layoutwidth<\p@\relax%
     \setlength\tud@len@layoutwidth{\paperwidth}%
   \fi%
-  \setlength\tud@len@layouthoffset{\Gm@layouthoffset}%
-  \setlength\tud@len@layoutvoffset{\Gm@layoutvoffset}%
+  \ifdim\tud@len@layoutheight<\p@\relax%
+    \setlength\tud@len@layoutheight{\paperheight}%
+  \fi%
+}
+\newcommand*\tud@cdgeometry@set{%
+  \tud@cdgeometry@assignlayout{}%
   \tud@if@v@lower{2.05}{%
     \ifdim\tud@len@layoutheight<\dimexpr105mm+1.5mm\relax%
       \def\@tempa{0}%
@@ -3435,7 +3435,7 @@
 \else
   \RequirePackage{geometry}[2010/09/12]%
 \fi%
-\AfterPackage*{geometry}{
+\AfterPackage*{geometry}{%
   \CheckCommand*\Gm@initnewgm{%
     \Gm@passfalse
     \Gm@swap@papersizefalse
@@ -3572,109 +3572,143 @@
     }{\@nameuse{Gm@restore@@#1}%
     \Gm@changelayout}%
   }%
-  \tud@cs@store{geometry}%
-  \tud@cs@store{newgeometry}%
+  % TODO Schalter notwendig?
   \newif\if@tud@x@geometry@enabled%
   \@tud@x@geometry@enabledtrue%
-  \newcommand*\tud@setgeometry[1]{%
-    \@tud@x@geometry@enabledfalse%
-    \ifGm@pass%
-      \def\@tempb{}%
-    \else%
-      \edef\@tempb{layoutoffset={\the\Gm@layouthoffset,\the\Gm@layoutvoffset}}%
-      \ifGm@layout%
-        \eappto\@tempb{,layoutsize={\the\Gm@layoutwidth,\the\Gm@layoutheight}}%
+  \tud@cs@store{geometry}%
+  \tud@cs@store{newgeometry}%  
+  \renewcommand*\geometry[1]{\tud@x@geometry@user{#1}{geometry}}%
+  \renewcommand*\newgeometry[1]{%
+    \tud@cs@store{Gm@restore@org}%
+    \tud@x@geometry@user{#1}{newgeometry}%
+    \tud@cs@restore{Gm@restore@org}%
+  }%
+  \apptocmd{\Gm@changelayout}{%
+    \if@atdocument\if@tud@x@geometry@enabled%
+      \tud@cdgeometry@process%
+    \fi\fi%
+  }{}{\tud@patch@wrn{Gm@changelayout}}%
+  \renewcommand*\restoregeometry[1][]{%
+    \IfArgIsEmpty{#1}{}{%
+      \tud@cs@store{TUD@SpecialOptionAtDocument}%
+      \let\TUD@SpecialOptionAtDocument\@gobble%
+      \TUDoption{cdgeometry}{#1}%
+      \tud@cs@restore{TUD@SpecialOptionAtDocument}%
+    }%
+    \if@atdocument%
+      \ifcase\tud@cdgeometry@num\relax% false
+        \tud@loadgeometry{init@typearea}%
+      \or% custom
+        \tud@loadgeometry{init@custom}%
+      \fi%
+      \if@tud@x@geometry@enabled%
+        \tud@cdgeometry@process%
       \fi%
     \fi%
-    \if@atdocument%
-      \edef\@tempa{\@tempb,#1}%
-      \tud@cs@store{Gm@restore@org}%
+  }%
+  \newcommand*\tud@x@geometry@paper{}%
+  \newcommand*\tud@x@geometry@layout{}%
+  \newcommand*\tud@x@geometry@parameter{}%
+  \newcommand*\tud@x@geometry@init{}%
+  \newcommand*\tud@x@geometry@user[2]{%
+    \let\tud@x@geometry@paper\@empty%
+    \let\tud@x@geometry@layout\@empty%
+    \let\tud@x@geometry@parameter\@empty%
+    \TUD@parameter@set{geometry}{#1}%
+    \ifx\tud@x@geometry@layout\@empty\else%
+      \begingroup%
+        \tud@x@geometry@area@set{layout}%
+        \edef\tud@res@a{%
+          \endgroup%
+            \noexpand\setlength\noexpand\tud@len@layoutwidth{\the\paperwidth}%
+            \noexpand\setlength\noexpand\tud@len@layoutheight{\the\paperheight}%
+        }%
+      \tud@res@a%
+    \fi%
+    \tud@x@geometry@area@set{paper}%
+    \ifstr{#2}{newgeometry}{%
       \eappto\Gm@restore@org{%
         \noexpand\paperwidth=\the\paperwidth\relax%
         \noexpand\paperheight=\the\paperheight\relax%
       }%
-      \def\@tempc{\tud@cs@use{newgeometry}}%
-      \expandafter\@tempc\expandafter{\@tempa}%
-      \tud@cs@restore{Gm@restore@org}%
-    \else%
-      \Gm@initnewgm%
-      \edef\@tempa{%
-        paperwidth=\the\paperwidth,paperheight=\the\paperheight,\@tempb,#1%
-      }%
-      \def\@tempc{\tud@cs@use{geometry}}%
-      \expandafter\@tempc\expandafter{\@tempa}%
-    \fi%
-    \@tud@x@geometry@enabledtrue%
-  }%
-  \newcommand*\tud@savegeometry[1]{%
-    \def\Gm@restore{}%
-    \savegeometry{#1}%
-    \csepreto{Gm@restore@@#1}{%
-      \etex@unexpanded{\def\Gm@lmargin}{\Gm@lmargin}%
-      \etex@unexpanded{\def\Gm@rmargin}{\Gm@rmargin}%
-      \noexpand\Gm@bindingoffset=\the\Gm@bindingoffset%
-      \ifGm@includemp%
-        \noexpand\Gm@includemptrue%
-      \else%
-        \noexpand\Gm@includempfalse%
-      \fi%
-      \ifGm@layout%
-        \noexpand\Gm@layouttrue%
-      \else%
-        \noexpand\Gm@layoutfalse%
-      \fi%
+    }{%
+%      \edef\tud@x@geometry@paper{%
+%        paperwidth=\the\paperwidth,paperheight=\the\paperheight,%
+%      }%
     }%
-  }%
-  \newcommand*\tud@loadgeometry[1]{%
-    \@tud@x@geometry@enabledfalse%
-    \loadgeometry{#1}%
-    \@currsize%
-    \if@tud@x@crop@center\CROP@center\fi%
-    \@tud@x@geometry@enabledtrue%
-  }%
+    \ifstr{#2}{newgeometry}{%
+      \tud@x@geometry@getlayout{\@tempb}%
+      \epreto{\tud@x@geometry@parameter}{\@tempb,}%
+      \def\@tempa{\tud@cs@use{newgeometry}}%
+      \expandafter\@tempa\expandafter{\tud@x@geometry@parameter}%
+    }{%
+      \eappto\tud@x@geometry@init{\tud@x@geometry@parameter}%
+    }%
+  }%  
   \TUD@parameter@family{geometry}{%
-    \TUD@parameter@def{paper}{\tud@area@def{paper}{#1}}%
+    \TUD@parameter@def{paper}{\tud@x@geometry@area@def{paper}{#1}}%
     \TUD@parameter@let{papername}{paper}%
-    \TUD@parameter@def{paperwidth}{\tud@area@def{paper}{#1:\the\paperheight}}%
-    \TUD@parameter@def{paperheight}{\tud@area@def{paper}{\the\paperwidth:#1}}%
     \TUD@parameter@def{papersize}{%
       \def\@tempa##1,##2,##3\@nil{%
         \IfArgIsEmpty{##2}{%
-          \tud@area@def{paper}{##1:##1}%
+          \tud@x@geometry@area@def{paper}{##1:##1}%
         }{%
-          \tud@area@def{paper}{##1:##2}%
+          \tud@x@geometry@area@def{paper}{##1:##2}%
         }%
       }%
       \@tempa#1,,\@nil%
     }%
-    \TUD@parameter@def{layout}{\tud@area@def{layout}{#1}}%
+    \TUD@parameter@def{paperwidth}{%
+      \tud@x@geometry@area@def{paper}{#1:\paperheight}%
+    }%
+    \TUD@parameter@def{paperheight}{%
+      \tud@x@geometry@area@def{paper}{\paperwidth:#1}%
+    }%
+    \TUD@parameter@def{layout}{%
+      \ifstr{#1}{false}{%
+        \setlength\tud@len@layoutwidth{\z@}%
+        \setlength\tud@len@layoutheight{\z@}%
+      }{%
+        \tud@x@geometry@area@def{layout}{#1}%
+      }%
+    }%
     \TUD@parameter@let{layoutname}{layout}%
-    \TUD@parameter@def{layoutwidth}{%
-      \tud@area@def{layout}{#1:\the\tud@len@layoutheight}%
-    }%
-    \TUD@parameter@def{layoutheight}{%
-      \tud@area@def{layout}{\the\tud@len@layoutwidth:#1}%
-    }%
     \TUD@parameter@def{layoutsize}{%
       \def\@tempa##1,##2,##3\@nil{%
         \IfArgIsEmpty{##2}{%
-          \tud@area@def{layout}{##1:##1}%
+          \tud@x@geometry@area@def{layout}{##1:##1}%
         }{%
-          \tud@area@def{layout}{##1:##2}%
+          \tud@x@geometry@area@def{layout}{##1:##2}%
         }%
       }%
       \@tempa#1,,\@nil%
     }%
+    \TUD@parameter@def{layoutwidth}{\setlength\tud@len@layoutwidth{#1}}%
+    \TUD@parameter@def{layoutheight}{\setlength\tud@len@layoutheight{#1}}%
+    \TUD@parameter@def{layoutoffset}{%
+      \def\@tempa##1,##2,##3\@nil{%
+        \IfArgIsEmpty{##2}{%
+          \setlength\tud@len@layouthoffset{##1}%
+          \setlength\tud@len@layoutvoffset{##1}%
+        }{%
+          \setlength\tud@len@layouthoffset{##1}%
+          \setlength\tud@len@layoutvoffset{##2}%
+        }%
+      }%
+      \@tempa#1,,\@nil%
+    }%
+    \TUD@parameter@def{layouthoffset}{\setlength\tud@len@layouthoffset{#1}}%
+    \TUD@parameter@def{layoutvoffset}{\setlength\tud@len@layoutvoffset{#1}}%
     \TUD@parameter@def{bleedmargin}{\TUDoption{bleedmargin}{#1}}%
     \TUD@parameter@handler@macro{%
       \eappto\tud@x@geometry@parameter{%
         \expandonce\kv@key=\expandonce\kv@value,%
       }%
     }{%
-      \tud@area@def{paper}{#2}%
+      \tud@x@geometry@area@def{paper}{#2}%
     }%
   }%
-  \newcommand*\tud@area@def[2]{%
+  \newcommand*\tud@x@geometry@area@def[2]{%
     \tud@lowerstring{\@tempa}{#2}%
     \def\@tempb##1paper##2\@nil{%
       \ifstr{##2}{paper}{\def\@tempa{##1}}{}%
@@ -3737,154 +3771,133 @@
     \fi%
     \if@tempswa%
       \cseappto{tud@x@geometry@#1}{\@tempa,}%
-      \def\@tempb##1:##2:##3\@nil{%
-        \IfArgIsEmpty{##2}{}{%
-          \ifstr{#1}{paper}{%
-            \setlength\paperwidth{##1}%
-            \setlength\paperheight{##2}%
-          }{%
-            \ifstr{#1}{layout}{%
-              \setlength\tud@len@layoutwidth{##1}%
-              \setlength\tud@len@layoutheight{##2}%
-            }{}%
-          }%
-        }%
-      }%
-      \expandafter\@tempb\@tempa::\@nil%
     \else%
       \appto\tud@x@geometry@parameter{#2,}%
     \fi%
   }%
-  \newcommand*\tud@area@set[1]{%
+  \newcommand*\tud@x@geometry@area@set[1]{%
     \letcs{\@tempa}{tud@x@geometry@#1}%
     \ifdefvoid{\@tempa}{}{%
       \def\@tempb##1:##2:##3\@nil{%
-        \tud@cs@store{@tempa}%
-        \tud@cs@store{@tempb}%
-        \tud@cs@store{@tempc}%
-        \IfArgIsEmpty{##2}{%
-          \KOMAoption{paper}{##1}%
-        }{%
-          \if@landscape%
-            \KOMAoption{paper}{##2:##1}%
-          \else%
-            \KOMAoption{paper}{##1:##2}%
-          \fi%
-        }%
-        \tud@cs@restore{@tempa}%
-        \tud@cs@restore{@tempb}%
-        \tud@cs@restore{@tempc}%
+        \begingroup%
+            \IfArgIsEmpty{##2}{%
+              \def\@tempb{\KOMAoption{paper}{##1}}%
+            }{%
+              \if@landscape%
+                \def\@tempb{\KOMAoption{paper}{##2:##1}}%
+              \else%
+                \def\@tempb{\KOMAoption{paper}{##1:##2}}%
+              \fi%
+            }%
+          \edef\@tempb{\endgroup\expandonce\@tempb}%
+        \@tempb%
       }%
       \def\@tempc##1{\@tempb##1::\@nil}%
       \expandafter\forcsvlist\expandafter\@tempc\expandafter{\@tempa}%
     }%
   }%
-  \newcommand*\tud@x@geometry@init{}%
-  \newcommand*\tud@x@geometry@paper{}%
-  \newcommand*\tud@x@geometry@layout{}%
-  \newcommand*\tud@x@geometry@parameter{}%
-  \newcommand*\tud@geometry[2]{%
-    \ifGm@layout%
-      \setlength\tud@len@layoutheight{\Gm@layoutheight}%
-      \setlength\tud@len@layoutwidth{\Gm@layoutwidth}%
+  \newcommand*\tud@x@geometry@getlayout[1]{%
+    \ifGm@pass%
+      \let#1\@empty%
     \else%
-      \setlength\tud@len@layoutheight{\paperheight}%
-      \setlength\tud@len@layoutwidth{\paperwidth}%
+      \tud@cdgeometry@assignlayout%
+      \begingroup%
+        \@tud@res@swafalse%
+        \ifdim\tud@len@layoutwidth=\paperwidth\relax\else\@tud@res@swatrue\fi%
+        \ifdim\tud@len@layoutheight=\paperheight\relax\else\@tud@res@swatrue\fi%
+        \edef\tud@res@a{%
+          \endgroup%
+          \etex@unexpanded{\def#1}{%
+            layoutoffset={%
+              \the\tud@len@layouthoffset,\the\tud@len@layoutvoffset%
+            }%
+            \if@tud@res@swa%
+              ,layoutsize={\the\tud@len@layoutwidth,\the\tud@len@layoutheight}%
+            \fi%
+          }%
+        }%
+      \tud@res@a%
     \fi%
-    \let\tud@x@geometry@paper\@empty%
-    \let\tud@x@geometry@layout\@empty%
-    \let\tud@x@geometry@parameter\@empty%
-    \TUD@parameter@set{geometry}{#1}%
-    \tud@area@set{paper}%
-    \ifstr{#2}{newgeometry}{%
+  }%
+  \newcommand*\tud@x@geometry@set[1]{%
+    \typeout{************ layoutwidth \the\tud@len@layoutwidth}%
+    \typeout{************ layoutheight \the\tud@len@layoutheight}%
+    \typeout{************ paperwidth \the\paperwidth}%
+    \typeout{************ paperheight \the\paperheight}%
+    \@tud@x@geometry@enabledfalse%
+    \if@atdocument%
+      \edef\@tempa{#1}%
+      \tud@cs@store{Gm@restore@org}%
       \eappto\Gm@restore@org{%
         \noexpand\paperwidth=\the\paperwidth\relax%
         \noexpand\paperheight=\the\paperheight\relax%
       }%
-    }{%
-      \etex@unexpanded{\epreto{\tud@x@geometry@parameter}}{%
-        paperwidth=\the\paperwidth,paperheight=\the\paperheight,%
-      }%
-    }%
-    \ifx\tud@x@geometry@layout\@empty\else%
-      \begingroup%
-        \setlength\paperwidth{\Gm@layoutwidth}%
-        \setlength\paperheight{\Gm@layoutheight}%
-        \tud@area@set{layout}%
-        \edef\tud@reserved{%
-          \endgroup%
-          \etex@unexpanded{\epreto{\tud@x@geometry@parameter}}{%
-            layoutwidth=\the\paperwidth,layoutheight=\the\paperheight,%
-          }%
-        }%
-      \tud@reserved%
-    \fi%
-    \def\@tempa{\tud@cs@use{#2}}%
-    \expandafter\@tempa\expandafter{\tud@x@geometry@parameter}%
-    \ifstr{#2}{geometry}{%
-      \ifbool{@tud@x@geometry@enabled}{%
-        \eappto\tud@x@geometry@init{,\expandonce\tud@x@geometry@parameter}%
-      }{}%
-    }{}%
-  }%
-  \renewcommand*\geometry[1]{\tud@geometry{#1}{geometry}}
-  \renewcommand*\newgeometry[1]{%
-    \tud@cs@store{Gm@restore@org}%
-    \tud@geometry{#1}{newgeometry}%
-    \tud@cs@restore{Gm@restore@org}%
-  }%
-  \apptocmd{\Gm@changelayout}{%
-    \ifboolexpr{bool {@tud@x@geometry@enabled} and bool {@atdocument}}{%
-      \tud@cdgeometry@process%
-    }{}%
-  }{}{\tud@patch@wrn{Gm@changelayout}}%
-  \renewcommand*\restoregeometry[1][]{%
-    \IfArgIsEmpty{#1}{}{%
-      \tud@cs@store{TUD@SpecialOptionAtDocument}%
-      \let\TUD@SpecialOptionAtDocument\@gobble%
-      \TUDoption{cdgeometry}{#1}%
-      \tud@cs@restore{TUD@SpecialOptionAtDocument}%
-    }%
-    \ifnum\tud@cdgeometry@num=\@ne\relax%
-      \tud@loadgeometry{init@custom}%
+      \def\@tempc{\tud@cs@use{newgeometry}}%
+      \expandafter\@tempc\expandafter{\@tempa}%
+      \tud@cs@restore{Gm@restore@org}%
     \else%
-      \tud@loadgeometry{init@typearea}%
+      \Gm@initnewgm%
+      \edef\@tempa{%
+        paperwidth=\the\paperwidth,paperheight=\the\paperheight,#1%
+      }%
+      \def\@tempc{\tud@cs@use{geometry}}%
+      \expandafter\@tempc\expandafter{\@tempa,driver=none}%
     \fi%
-    \tud@AfterChangingArea%
+    \@tud@x@geometry@enabledtrue%
   }%
-  \renewcommand*\tud@cdgeometry@process{%
-    \tud@AfterChangingArea%
+  \newcommand*\tud@savegeometry[1]{%
+    \typeout{!!!!! #1}%
+    \def\Gm@restore{}%
+    \savegeometry{#1}%
+    \csepreto{Gm@restore@@#1}{%
+      \noexpand\Gm@bindingoffset=\the\Gm@bindingoffset%
+      \ifGm@includehead%
+        \noexpand\Gm@includeheadtrue%
+      \else%
+        \noexpand\Gm@includeheadfalse%
+      \fi%
+      \ifGm@includefoot%
+        \noexpand\Gm@includefootdtrue%
+      \else%
+        \noexpand\Gm@includefootfalse%
+      \fi
+      \ifGm@includemp%
+        \noexpand\Gm@includemptrue%
+      \else%
+        \noexpand\Gm@includempfalse%
+      \fi%
+      \ifGm@layout%
+        \noexpand\Gm@layouttrue%
+      \else%
+        \noexpand\Gm@layoutfalse%
+      \fi%
+    }%
+    \typeout{\expandafter\meaning\csname Gm@restore@@#1\endcsname}%
   }%
+  \newcommand*\tud@loadgeometry[1]{%
+    \@tud@x@geometry@enabledfalse%
+    \loadgeometry{#1}%
+    \@currsize%
+    \if@tud@x@crop@center\CROP@center\fi%
+    \@tud@x@geometry@enabledtrue%
+  }%
+  \newcommand*\tud@cdgeometry@layout{}%
   \newcommand*\tud@cdgeometry@hmargin{}%
   \newcommand*\tud@cdgeometry@vmargin{}%
   \newcommand*\tud@cdgeometry@tudmargin{}%
   \tud@if@v@lower{2.03}{\newcommand*\tud@cdgeometry@ddcmargin{}}{}%
+  \renewcommand*\tud@cdgeometry@process{%
+    \tud@cdgeometry@@process%
+    \KOMAoptions{pagesize=\@pagesizelast}%
+    \global\@tud@mainlogo@settrue%
+    \gdef\tud@currentgeometry{}%
+    \expandafter\pagestyle\expandafter{\currentpagestyle}%
+  }%
   \renewcommand*\tud@cdgeometry@@process{%
     \csuse{@ta@usegeometryfalse}%
     \tud@cdgeometry@set%
     \ifnum\tud@cdgeometry@num<\tw@\relax% false/custom
       \ifcase\tud@cdgeometry@num\relax%
-        \ifGm@layout%
-          \tud@skip@store{paperheight}%
-          \tud@skip@store{paperwidth}%
-          \setlength\paperheight{\tud@len@layoutheight}%
-          \setlength\paperwidth{\tud@len@layoutwidth}%
-        \fi%
-        \tud@cs@store{activateareas}%
-        \tud@cs@store{tud@AfterChangingArea}%
-        \let\activateareas\relax%
-        \let\tud@AfterChangingArea\relax%
-% TODO vergleichen der gesicherten mit aktueller Einstellung für Satzspiegel
-%        \KOMAoptionOf[\def\@tempa]{typearea.\scr@pkgextension}{BCOR}%
-%        \KOMAoptionOf[\def\@tempa]{typearea.\scr@pkgextension}{DIV}%
-%        \KOMAoptionOf[\def\@tempa]{typearea.\scr@pkgextension}{paper}%
-        \recalctypearea%
-        \ifGm@layout%
-          \tud@skip@restore{paperheight}%
-          \tud@skip@restore{paperwidth}%
-        \fi%
-        \tud@cs@restore{activateareas}%
-        \tud@cs@restore{tud@AfterChangingArea}%
         \edef\tud@cdgeometry@hmargin{%
           left=\the\dimexpr\oddsidemargin+1in-\ta@bcor\relax,%
           textwidth=\the\textwidth,%
@@ -3915,9 +3928,12 @@
         }%
       \else% custom
         \ifGm@pass\else%
+          \addtolength\oddsidemargin{-\tud@len@layouthoffset}%
+          \addtolength\evensidemargin{-\tud@len@layouthoffset}%
+          \addtolength\topmargin{-\tud@len@layoutvoffset}%
           \edef\tud@cdgeometry@hmargin{%
-            left=\Gm@lmargin,%
-            right=\Gm@rmargin,%
+            left=\the\dimexpr\oddsidemargin+1in-\Gm@bindingoffset\relax,%
+            textwidth=\the\textwidth,%
             \ifGm@includemp%
               includemp=true,%
             \else%
@@ -4115,32 +4131,39 @@
     \tud@cdgeometry@@@process%
   }%
   \newcommand*\tud@cdgeometry@@@process{%
-    \eappto\tud@cdgeometry@hmargin{,layouthoffset=\the\Gm@layouthoffset}%
-    \eappto\tud@cdgeometry@vmargin{,layoutvoffset=\the\Gm@layoutvoffset}%
+%    \eappto\tud@cdgeometry@hmargin{,layouthoffset=\the\tud@len@layouthoffset}%
+%    \eappto\tud@cdgeometry@vmargin{,layoutvoffset=\the\tud@len@layoutvoffset}%
+    \tud@x@geometry@getlayout{\tud@cdgeometry@layout}%
     \tud@if@v@lower{2.03}{%
-      \edef\@tempa{%
+      \edef\tud@res@a{%
+        \tud@cdgeometry@layout,%
         \tud@cdgeometry@hmargin,%
         \tud@cdgeometry@vmargin,%
         \tud@cdgeometry@tudmargin,%
         \tud@cdgeometry@ddcmargin,%
         ignorehead,ignorefoot%
-      }%
-      \tud@setgeometry{\@tempa}%
+      }%      
+      \tud@x@geometry@set{\tud@res@a}%
       \tud@savegeometry{tudareaddc}%
+      \typeout{///// (\tud@cdgeometry@num) \meaning\tud@res@a}%
     }{}%
-    \edef\@tempa{%
+    \edef\tud@res@a{%
+      \tud@cdgeometry@layout,%
       \tud@cdgeometry@hmargin,%
       \tud@cdgeometry@vmargin,%
       \tud@cdgeometry@tudmargin%
     }%
-    \tud@setgeometry{\@tempa}%
+    \tud@x@geometry@set{\tud@res@a}%
     \tud@savegeometry{tudarea}%
-    \edef\@tempa{%
+    \typeout{///// (\tud@cdgeometry@num) \meaning\tud@res@a}%
+    \edef\tud@res@a{%
+      \tud@cdgeometry@layout,%
       \tud@cdgeometry@hmargin,%
       \tud@cdgeometry@vmargin%
     }%
-    \tud@setgeometry{\@tempa}%
+    \tud@x@geometry@set{\tud@res@a}%
     \tud@savegeometry{stdarea}%
+    \typeout{///// (\tud@cdgeometry@num) \meaning\tud@res@a}%
     \if@atdocument%
       \ifstr{\tud@currentgeometry}{stdarea}{}{%
         \expandafter\tud@loadgeometry\expandafter{\tud@currentgeometry}%
@@ -4214,123 +4237,122 @@
     \global\tud@len@areavskip=\tud@len@areavskip%
   }{}%
 }
-\newcommand*\tud@AfterChangingArea{%
-  \tud@cdgeometry@@process%
-  \KOMAoptions{pagesize=\@pagesizelast}%
-  \global\@tud@mainlogo@settrue%
-  \gdef\tud@currentgeometry{}%
-  \expandafter\pagestyle\expandafter{\currentpagestyle}%
-}
-\newcommand*\tud@cdgeometry@init{%
-  \AtEndPreamble{%
-    \if@tud@x@standalone@crop%
-      \pagestyle{empty}%
-      \let\tud@AfterChangingArea\relax%
-      \let\tud@cdgeometry@process\relax%
-    \else%
-      \csuse{@ta@usegeometryfalse}%
-      \def\tud@reserved##1{%
-        \tud@setgeometry{%
-          \tud@cdgeometry@mpincl,%
-          \if@reversemargin%
-            reversemarginpar=true,%
-          \else%
-            reversemarginpar=false,%
-          \fi%
-          bindingoffset=\the\ta@bcor,%
-          \tud@cdgeometry@hincl,%
-          \tud@cdgeometry@fincl,%
-          \tud@x@geometry@init,%
-          driver=none%
-        }%
-        \addtolength\oddsidemargin{-\Gm@layouthoffset}%
-        \addtolength\evensidemargin{-\Gm@layouthoffset}%
-        \addtolength\topmargin{-\Gm@layoutvoffset}%
-        \tud@savegeometry{init@##1}%
-      }%
-      \begingroup%
-        % TODO was genau passiert hier?
-        % vermeintlich wird der Satzspiegel von typearea gesichert...
-        % TODO sichern des Satzspiegels nach jeder typearea-Aktion in Präambel
-        \setlength\paperheight{\Gm@layoutheight}%
-        \setlength\paperwidth{\Gm@layoutwidth}%
-        \let\scr@grouplevel@test\@gobble%
-        \let\activateareas\relax%
-%        \tud@x@ta@silent%
-%        \recalctypearea%
-%        \tud@x@ta@verbose%
-        \edef\tud@x@geometry@init{%
-          left=\the\dimexpr\oddsidemargin+1in-\ta@bcor\relax,%
-          textwidth=\the\textwidth,%
-          marginparwidth=\the\marginparwidth,%
-          marginparsep=\the\marginparsep,%
-          bindingoffset=\the\ta@bcor,%
-          \if@hincl%
-            top=\the\dimexpr\topmargin+1in\relax,%
-          \else%
-            top=\the\dimexpr\topmargin%
-              +\headheight+\headsep+1in\relax,%
-          \fi%
-          headheight=\the\headheight,%
-          headsep=\the\headsep,%
-          textheight=\the\textheight,%
-          footskip=\the\footskip%
-        }%
-        \tud@reserved{typearea}%
-        \global\let\Gm@restore@@init@typearea\Gm@restore@@init@typearea%
+% TODO sammeln der typearea-Befehle?
+\newcommand*\tud@x@typearea@before{%
+  \tud@skip@store{paperheight}%
+  \tud@skip@store{paperwidth}%
+  \begingroup%
+    \tud@cdgeometry@assignlayout%
+    \edef\tud@res@a{%
       \endgroup%
-      \tud@reserved{custom}%
-      % TODO \let\tud@x@ta@init\relax%
-      \AfterCalculatingTypearea{\tud@AfterChangingArea}%
-      \AfterSettingArea{\tud@AfterChangingArea}%
-      \AfterRestoreareas{\tud@AfterChangingArea}%
-      \BeforeSelectAnyPageStyle{\tud@BeforeSelectAnyPageStyle{##1}}%
-      \tud@cdgeometry@process%
-    \fi%
-    \let\tud@cdgeometry@init\relax%
-  }%
+      \etex@unexpanded{\setlength\paperheight}{\the\tud@len@layoutheight}%
+      \etex@unexpanded{\setlength\paperwidth}{\the\tud@len@layoutwidth}%
+    }%
+  \tud@res@a%
 }
-\newcommand*\tud@cdgeometry@@init[1]{%
-  \tud@setgeometry{%
-    \tud@cdgeometry@mpincl,%
-    \if@reversemargin%
-      reversemarginpar=true,%
-    \else%
-      reversemarginpar=false,%
-    \fi%
-    bindingoffset=\the\ta@bcor,%
-    \tud@cdgeometry@hincl,%
-    \tud@cdgeometry@fincl,%
-    \tud@x@geometry@init,%
-    driver=none%
-  }%
-  \addtolength\oddsidemargin{-\Gm@layouthoffset}%
-  \addtolength\evensidemargin{-\Gm@layouthoffset}%
-  \addtolength\topmargin{-\Gm@layoutvoffset}%
-  \tud@savegeometry{init@#1}%
-}%
-% TODO Initialisierung Satzspiegel mit eigenem Makro
-%\AfterPackage*{typearea}{
-%  \AfterCalculatingTypearea{...}%
-%  \AfterSettingArea{...}%
-%  \AfterRestoreareas{...}%
-%}
-\AfterPackage!{scrlayer-scrpage}{\tud@cdgeometry@init}
+\newcommand*\tud@x@typearea@after{%
+  \tud@skip@restore{paperheight}%
+  \tud@skip@restore{paperwidth}%
+  \if@atdocument\tud@cdgeometry@process\fi%
+}
+\newcommand*\tud@x@typearea@init{\recalctypearea}%
+\tud@pretocmd{\typearea}{%
+  \tud@x@typearea@before%
+  \def\tud@x@typearea@init{\typearea[#1]{#2}}%
+}{}{\tud@patch@wrn{typearea}}
+\tud@apptocmd{\typearea}{\tud@x@typearea@after}{}{\tud@patch@wrn{typearea}}
+\tud@pretocmd{\areaset}{%
+  \tud@x@typearea@before%
+  \begingroup%
+    \setlength\@tempdima{#2}%
+    \setlength\@tempdimb{#3}%
+    \edef\tud@res@a{%
+      \endgroup%
+      \noexpand\def\noexpand\tud@x@typearea@init{%
+        \noexpand\areaset[#1]{\the\@tempdima}{\the\@tempdimb}%
+      }%
+    }%
+  \tud@res@a%
+}{}{\tud@patch@wrn{areaset}}
+\tud@apptocmd{\areaset}{\tud@x@typearea@after}{}{\tud@patch@wrn{areaset}}
+\newcommand*\tud@cdgeometry@init{%
+  \if@tud@x@standalone@crop%
+    \pagestyle{empty}%
+    \let\tud@cdgeometry@process\relax%
+  \else%
+    \csuse{@ta@usegeometryfalse}%
+    \tud@x@geometry@getlayout{\tud@cdgeometry@layout}%
+    \tud@cs@store{tud@cdgeometry@num}%
+    \def\tud@cdgeometry@num{1}%
+    \begingroup%
+      \epreto\tud@x@geometry@init{%
+        paperwidth=\the\paperwidth,paperheight=\the\paperheight,%
+        \tud@cdgeometry@layout,%
+        \tud@cdgeometry@mpincl,%
+        \if@reversemargin%
+          reversemarginpar=true,%
+        \else%
+          reversemarginpar=false,%
+        \fi%
+        \tud@cdgeometry@hincl,%
+        \tud@cdgeometry@fincl,%
+        bindingoffset=\the\ta@bcor,%
+      }%
+      \edef\tud@res@a{%
+        \endgroup%
+        % TODO warum?
+        \noexpand\tud@cs@use{geometry}{\tud@x@geometry@init,driver=none}%
+      }%
+    \tud@res@a%
+    \tud@cdgeometry@@process%
+    \tud@savegeometry{init@custom}%
+    \def\tud@cdgeometry@num{0}%
+    \tud@x@typearea@init%
+    \tud@cdgeometry@@process%
+    \addtolength\oddsidemargin{-\tud@len@layouthoffset}%
+    \addtolength\evensidemargin{-\tud@len@layouthoffset}%
+    \addtolength\topmargin{-\tud@len@layoutvoffset}%
+    \tud@savegeometry{init@typearea}%
+    \tud@cs@restore{tud@cdgeometry@num}%
+    \BeforeSelectAnyPageStyle{\tud@BeforeSelectAnyPageStyle{##1}}%
+    \tud@cdgeometry@process%
+  \fi%
+  \let\tud@cdgeometry@init\relax%
+}
+% TODO kann theoretisch raus, evtl. die drei Zeilen noch mal überprüfen
+%\newcommand*\tud@cdgeometry@@init[2]{%
+%  \tud@x@geometry@set{%
+%    \tud@cdgeometry@mpincl,%
+%    \if@reversemargin%
+%      reversemarginpar=true,%
+%    \else%
+%      reversemarginpar=false,%
+%    \fi%
+%    bindingoffset=\the\ta@bcor,%
+%    \tud@cdgeometry@hincl,%
+%    \tud@cdgeometry@fincl,%
+%    #2,%
+%    driver=none%
+%  }%
+%  % TODO was sollen die drei Zeilen?
+%  \addtolength\oddsidemargin{-\Gm@layouthoffset}%
+%  \addtolength\evensidemargin{-\Gm@layouthoffset}%
+%  \addtolength\topmargin{-\Gm@layoutvoffset}%
+%  \tud@savegeometry{init@#1}%
+%}%
+\AfterPackage!{scrlayer-scrpage}{\AtEndPreamble{\tud@cdgeometry@init}}
 % TODO mögliches Problem mit typearea!
 \TUD@UnwindPackage{geometry}{%
   \newif\ifGm@layout%
-  \newif\ifGm@showcrop%
   \newif\ifGm@pass%
-  \let\Gm@layoutheight\paperheight%
-  \let\Gm@layoutwidth\paperwidth%
-  \let\Gm@layouthoffset\z@%
-  \let\Gm@layoutvoffset\z@%
-  \setlength\tud@len@layoutheight{\paperheight}%
-  \setlength\tud@len@layoutwidth{\paperwidth}%
-  \renewcommand*\tud@cdgeometry@@process{\tud@cdgeometry@set}%
-  \let\tud@BeforeSelectAnyPageStyle\@gobble%
-  \providecommand*\tud@setgeometry[1]{}%
+  \providecommand*\tud@x@geometry@set[1]{}%
   \providecommand*\tud@savegeometry[1]{}%
+  \renewcommand*\tud@cdgeometry@@process{%
+    \setlength\tud@len@layoutwidth{\paperwidth}%
+    \setlength\tud@len@layoutheight{\paperheight}%
+    \tud@cdgeometry@set%
+  }%
+  \let\tud@BeforeSelectAnyPageStyle\@gobble%
 }
 \patchcmd{\cleardoubleoddpageusingstyle}{\pagestyle}{%
   \let\tud@BeforeSelectAnyPageStyle\@gobble\pagestyle%
@@ -5975,6 +5997,7 @@
   }%
 }{}{\tud@patch@wrn{titlepage}}
 \newcommand*\tud@titleback{}
+% TODO layout und coverpage?!
 \newcommand*\tud@maketitle@page{%
   \renewcommand*\tud@title@fontcolor{}%
   \ifcase\tud@cd@title@num\relax\or\or% litecolor
@@ -7079,10 +7102,10 @@
 \AtBeginDocument{%
   \if@tud@x@scr@fontsize@set\else%
     \@tud@res@swafalse%
-    \ifdim\tud@len@layoutheight<295mm\relax\@tud@res@swatrue\fi%
-    \ifdim\tud@len@layoutheight>299mm\relax\@tud@res@swatrue\fi%
     \ifdim\tud@len@layoutwidth<208mm\relax\@tud@res@swatrue\fi%
     \ifdim\tud@len@layoutwidth>212mm\relax\@tud@res@swatrue\fi%
+    \ifdim\tud@len@layoutheight<295mm\relax\@tud@res@swatrue\fi%
+    \ifdim\tud@len@layoutheight>299mm\relax\@tud@res@swatrue\fi%
     \if@tud@res@swa%
       \ClassWarningNoLine{\TUD@Class@Name}{%
         You've set a layout size, which is different from\MessageBreak%
@@ -7099,7 +7122,6 @@
 \newif\if@tud@x@scr@headings@reset
 \newif\if@tud@cd@process
 \newif\if@tud@cdgeometry@process
-\newif\if@tud@cdgeometry@@process
 \newcommand*\tud@atdocument@process{%
   \if@tud@font@set%
     \tud@font@set%
@@ -7128,11 +7150,6 @@
   \if@tud@cdgeometry@process%
     \tud@cdgeometry@process%
     \global\@tud@cdgeometry@processfalse%
-    \global\@tud@cdgeometry@@processfalse%
-  \fi%
-  \if@tud@cdgeometry@@process%
-    \tud@cdgeometry@@process%
-    \global\@tud@cdgeometry@@processfalse%
   \fi%
 }
 \newcommand*\tud@x@textcase@uclcnotmath{%
