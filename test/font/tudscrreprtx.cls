@@ -3270,7 +3270,7 @@
   \fi%
 }
 \newcommand*\tud@cdgeometry@set{%
-  \tud@cdgeometry@assignlayout{}%
+  \tud@cdgeometry@assignlayout%
   \tud@if@v@lower{2.05}{%
     \ifdim\tud@len@layoutheight<\dimexpr105mm+1.5mm\relax%
       \def\@tempa{0}%
@@ -3428,10 +3428,16 @@
     \setlength\tud@len@footsep{\dimexpr.707107\tud@len@footsep\relax}%
   \fi%
 }
-\newcommand*\tud@cdgeometry@process{}
-\newcommand*\tud@cdgeometry@@process{}
+\newcommand*\tud@cdgeometry@process{%
+  \tud@cdgeometry@@process%
+  \KOMAoptions{pagesize=\@pagesizelast}%
+  \global\@tud@mainlogo@settrue%
+  \gdef\tud@currentgeometry{}%
+  \expandafter\pagestyle\expandafter{\currentpagestyle}%
+}
 \if@tud@x@standalone@crop
   \PreventPackageFromLoading{geometry}%
+  \let\tud@cdgeometry@process\relax%
 \else
   \RequirePackage{geometry}[2010/09/12]%
 \fi%
@@ -3572,22 +3578,19 @@
     }{\@nameuse{Gm@restore@@#1}%
     \Gm@changelayout}%
   }%
-  % TODO Schalter notwendig?
   \newif\if@tud@x@geometry@enabled%
   \@tud@x@geometry@enabledtrue%
   \tud@cs@store{geometry}%
-  \tud@cs@store{newgeometry}%  
-  \renewcommand*\geometry[1]{\tud@x@geometry@user{#1}{geometry}}%
+  \tud@cs@store{newgeometry}%
+  \renewcommand*\geometry[1]{%
+    \tud@x@geometry@user{#1}{geometry}%
+    \TUD@key@preset{cdgeometry}{custom}%
+  }%
   \renewcommand*\newgeometry[1]{%
     \tud@cs@store{Gm@restore@org}%
     \tud@x@geometry@user{#1}{newgeometry}%
     \tud@cs@restore{Gm@restore@org}%
   }%
-  \apptocmd{\Gm@changelayout}{%
-    \if@atdocument\if@tud@x@geometry@enabled%
-      \tud@cdgeometry@process%
-    \fi\fi%
-  }{}{\tud@patch@wrn{Gm@changelayout}}%
   \renewcommand*\restoregeometry[1][]{%
     \IfArgIsEmpty{#1}{}{%
       \tud@cs@store{TUD@SpecialOptionAtDocument}%
@@ -3598,12 +3601,27 @@
     \if@atdocument%
       \ifcase\tud@cdgeometry@num\relax% false
         \tud@loadgeometry{init@typearea}%
+        \@tud@x@geometry@fixmarginstrue%
       \or% custom
         \tud@loadgeometry{init@custom}%
+        \@tud@x@geometry@fixmarginstrue%
       \fi%
-      \if@tud@x@geometry@enabled%
-        \tud@cdgeometry@process%
-      \fi%
+      \tud@cdgeometry@process%
+    \fi%
+  }%
+  \apptocmd{\Gm@changelayout}{%
+    \if@atdocument\if@tud@x@geometry@enabled%
+      \@tud@x@geometry@fixmarginstrue%
+      \TUDoptions{cdgeometry=custom}%
+    \fi\fi%
+  }{}{\tud@patch@wrn{Gm@changelayout}}%
+  \newif\if@tud@x@geometry@fixmargins%
+  \newcommand*\tud@x@geometry@fixmargins{%
+    \ifGm@pass\else%
+      \addtolength\oddsidemargin{-\tud@len@layouthoffset}%
+      \addtolength\evensidemargin{-\tud@len@layouthoffset}%
+      \addtolength\topmargin{-\tud@len@layoutvoffset}%
+      \@tud@x@geometry@fixmarginsfalse%
     \fi%
   }%
   \newcommand*\tud@x@geometry@paper{}%
@@ -3631,20 +3649,14 @@
         \noexpand\paperwidth=\the\paperwidth\relax%
         \noexpand\paperheight=\the\paperheight\relax%
       }%
-    }{%
-%      \edef\tud@x@geometry@paper{%
-%        paperwidth=\the\paperwidth,paperheight=\the\paperheight,%
-%      }%
-    }%
-    \ifstr{#2}{newgeometry}{%
-      \tud@x@geometry@getlayout{\@tempb}%
-      \epreto{\tud@x@geometry@parameter}{\@tempb,}%
-      \def\@tempa{\tud@cs@use{newgeometry}}%
-      \expandafter\@tempa\expandafter{\tud@x@geometry@parameter}%
+      \tud@x@geometry@getlayout{\tud@res@a}%
+      \epreto{\tud@x@geometry@parameter}{\tud@res@a,}%
+      \def\tud@res@a{\tud@cs@use{newgeometry}}%
+      \expandafter\tud@res@a\expandafter{\tud@x@geometry@parameter}%
     }{%
       \eappto\tud@x@geometry@init{\tud@x@geometry@parameter}%
     }%
-  }%  
+  }%
   \TUD@parameter@family{geometry}{%
     \TUD@parameter@def{paper}{\tud@x@geometry@area@def{paper}{#1}}%
     \TUD@parameter@let{papername}{paper}%
@@ -3668,6 +3680,8 @@
       \ifstr{#1}{false}{%
         \setlength\tud@len@layoutwidth{\z@}%
         \setlength\tud@len@layoutheight{\z@}%
+        \setlength\tud@len@layouthoffset{\z@}%
+        \setlength\tud@len@layoutvoffset{\z@}%
       }{%
         \tud@x@geometry@area@def{layout}{#1}%
       }%
@@ -3780,15 +3794,15 @@
     \ifdefvoid{\@tempa}{}{%
       \def\@tempb##1:##2:##3\@nil{%
         \begingroup%
-            \IfArgIsEmpty{##2}{%
-              \def\@tempb{\KOMAoption{paper}{##1}}%
-            }{%
-              \if@landscape%
-                \def\@tempb{\KOMAoption{paper}{##2:##1}}%
-              \else%
-                \def\@tempb{\KOMAoption{paper}{##1:##2}}%
-              \fi%
-            }%
+          \IfArgIsEmpty{##2}{%
+            \def\@tempb{\KOMAoption{paper}{##1}}%
+          }{%
+            \if@landscape%
+              \def\@tempb{\KOMAoption{paper}{##2:##1}}%
+            \else%
+              \def\@tempb{\KOMAoption{paper}{##1:##2}}%
+            \fi%
+          }%
           \edef\@tempb{\endgroup\expandonce\@tempb}%
         \@tempb%
       }%
@@ -3820,10 +3834,6 @@
     \fi%
   }%
   \newcommand*\tud@x@geometry@set[1]{%
-    \typeout{************ layoutwidth \the\tud@len@layoutwidth}%
-    \typeout{************ layoutheight \the\tud@len@layoutheight}%
-    \typeout{************ paperwidth \the\paperwidth}%
-    \typeout{************ paperheight \the\paperheight}%
     \@tud@x@geometry@enabledfalse%
     \if@atdocument%
       \edef\@tempa{#1}%
@@ -3846,7 +3856,6 @@
     \@tud@x@geometry@enabledtrue%
   }%
   \newcommand*\tud@savegeometry[1]{%
-    \typeout{!!!!! #1}%
     \def\Gm@restore{}%
     \savegeometry{#1}%
     \csepreto{Gm@restore@@#1}{%
@@ -3857,10 +3866,10 @@
         \noexpand\Gm@includeheadfalse%
       \fi%
       \ifGm@includefoot%
-        \noexpand\Gm@includefootdtrue%
+        \noexpand\Gm@includefoottrue%
       \else%
         \noexpand\Gm@includefootfalse%
-      \fi
+      \fi%
       \ifGm@includemp%
         \noexpand\Gm@includemptrue%
       \else%
@@ -3872,7 +3881,6 @@
         \noexpand\Gm@layoutfalse%
       \fi%
     }%
-    \typeout{\expandafter\meaning\csname Gm@restore@@#1\endcsname}%
   }%
   \newcommand*\tud@loadgeometry[1]{%
     \@tud@x@geometry@enabledfalse%
@@ -3886,17 +3894,13 @@
   \newcommand*\tud@cdgeometry@vmargin{}%
   \newcommand*\tud@cdgeometry@tudmargin{}%
   \tud@if@v@lower{2.03}{\newcommand*\tud@cdgeometry@ddcmargin{}}{}%
-  \renewcommand*\tud@cdgeometry@process{%
-    \tud@cdgeometry@@process%
-    \KOMAoptions{pagesize=\@pagesizelast}%
-    \global\@tud@mainlogo@settrue%
-    \gdef\tud@currentgeometry{}%
-    \expandafter\pagestyle\expandafter{\currentpagestyle}%
-  }%
-  \renewcommand*\tud@cdgeometry@@process{%
+  \newcommand*\tud@cdgeometry@@process{%
     \csuse{@ta@usegeometryfalse}%
     \tud@cdgeometry@set%
     \ifnum\tud@cdgeometry@num<\tw@\relax% false/custom
+      \if@tud@x@geometry@fixmargins%
+        \tud@x@geometry@fixmargins%
+      \fi%
       \ifcase\tud@cdgeometry@num\relax%
         \edef\tud@cdgeometry@hmargin{%
           left=\the\dimexpr\oddsidemargin+1in-\ta@bcor\relax,%
@@ -3928,9 +3932,6 @@
         }%
       \else% custom
         \ifGm@pass\else%
-          \addtolength\oddsidemargin{-\tud@len@layouthoffset}%
-          \addtolength\evensidemargin{-\tud@len@layouthoffset}%
-          \addtolength\topmargin{-\tud@len@layoutvoffset}%
           \edef\tud@cdgeometry@hmargin{%
             left=\the\dimexpr\oddsidemargin+1in-\Gm@bindingoffset\relax,%
             textwidth=\the\textwidth,%
@@ -4131,8 +4132,6 @@
     \tud@cdgeometry@@@process%
   }%
   \newcommand*\tud@cdgeometry@@@process{%
-%    \eappto\tud@cdgeometry@hmargin{,layouthoffset=\the\tud@len@layouthoffset}%
-%    \eappto\tud@cdgeometry@vmargin{,layoutvoffset=\the\tud@len@layoutvoffset}%
     \tud@x@geometry@getlayout{\tud@cdgeometry@layout}%
     \tud@if@v@lower{2.03}{%
       \edef\tud@res@a{%
@@ -4142,10 +4141,9 @@
         \tud@cdgeometry@tudmargin,%
         \tud@cdgeometry@ddcmargin,%
         ignorehead,ignorefoot%
-      }%      
+      }%
       \tud@x@geometry@set{\tud@res@a}%
       \tud@savegeometry{tudareaddc}%
-      \typeout{///// (\tud@cdgeometry@num) \meaning\tud@res@a}%
     }{}%
     \edef\tud@res@a{%
       \tud@cdgeometry@layout,%
@@ -4155,7 +4153,6 @@
     }%
     \tud@x@geometry@set{\tud@res@a}%
     \tud@savegeometry{tudarea}%
-    \typeout{///// (\tud@cdgeometry@num) \meaning\tud@res@a}%
     \edef\tud@res@a{%
       \tud@cdgeometry@layout,%
       \tud@cdgeometry@hmargin,%
@@ -4163,7 +4160,6 @@
     }%
     \tud@x@geometry@set{\tud@res@a}%
     \tud@savegeometry{stdarea}%
-    \typeout{///// (\tud@cdgeometry@num) \meaning\tud@res@a}%
     \if@atdocument%
       \ifstr{\tud@currentgeometry}{stdarea}{}{%
         \expandafter\tud@loadgeometry\expandafter{\tud@currentgeometry}%
@@ -4191,53 +4187,90 @@
       includemp=false%
     \fi%
   }%
-}
-\newcommand*\tud@currentgeometry{}
-\newcommand*\tud@BeforeSelectAnyPageStyle[1]{%
-  \ifstr{#1}{\GetRealPageStyle{#1}}{%
-    \tud@if@tudheadings{#1}{%
-      \tud@if@v@lower{2.03}{%
-        \tud@ddc@check%
-        \ifcase\@tempb\relax% \tud@ddc@foot@num=false
+  \newcommand*\tud@cdgeometry@init{%
+    \csuse{@ta@usegeometryfalse}%
+    \tud@x@geometry@getlayout{\tud@cdgeometry@layout}%
+    \tud@cs@store{tud@cdgeometry@num}%
+    \def\tud@cdgeometry@num{1}%
+    \begingroup%
+      \epreto\tud@x@geometry@init{%
+        paperwidth=\the\paperwidth,paperheight=\the\paperheight,%
+        \tud@cdgeometry@layout,%
+        \tud@cdgeometry@mpincl,%
+        \if@reversemargin%
+          reversemarginpar=true,%
+        \else%
+          reversemarginpar=false,%
+        \fi%
+        bindingoffset=\the\ta@bcor,%
+        \tud@cdgeometry@hincl,%
+        \tud@cdgeometry@fincl,%
+      }%
+      \edef\tud@res@a{%
+        \endgroup%
+        \noexpand\tud@cs@use{geometry}{\tud@x@geometry@init,driver=none}%
+        \noexpand\@tud@x@geometry@fixmarginstrue%
+      }%
+    \tud@res@a%
+    \tud@cdgeometry@@process%
+    \tud@savegeometry{init@custom}%
+    \def\tud@cdgeometry@num{0}%
+    \tud@x@typearea@init%
+    \tud@cdgeometry@@process%
+    \tud@savegeometry{init@typearea}%
+    \tud@cs@restore{tud@cdgeometry@num}%
+    \AfterRestoreareas{\tud@cdgeometry@process}%
+    \BeforeSelectAnyPageStyle{\tud@BeforeSelectAnyPageStyle{##1}}%
+    \@tud@x@geometry@fixmarginstrue%
+    \tud@cdgeometry@process%
+    \let\tud@cdgeometry@init\relax%
+  }%
+  \newcommand*\tud@currentgeometry{}
+  \newcommand*\tud@BeforeSelectAnyPageStyle[1]{%
+    \ifstr{#1}{\GetRealPageStyle{#1}}{%
+      \tud@if@tudheadings{#1}{%
+        \tud@if@v@lower{2.03}{%
+          \tud@ddc@check%
+          \ifcase\@tempb\relax% \tud@ddc@foot@num=false
+            \ifstr{\tud@currentgeometry}{tudarea}{}{%
+              \tud@loadgeometry{tudarea}%
+              \gdef\tud@currentgeometry{tudarea}%
+            }%
+          \else% \tud@ddc@foot@num!=false
+            \ifstr{\tud@currentgeometry}{tudareaddc}{}{%
+              \tud@loadgeometry{tudareaddc}%
+              \gdef\tud@currentgeometry{tudareaddc}%
+            }%
+          \fi%
+        }{%
           \ifstr{\tud@currentgeometry}{tudarea}{}{%
             \tud@loadgeometry{tudarea}%
             \gdef\tud@currentgeometry{tudarea}%
           }%
-        \else% \tud@ddc@foot@num!=false
-          \ifstr{\tud@currentgeometry}{tudareaddc}{}{%
-            \tud@loadgeometry{tudareaddc}%
-            \gdef\tud@currentgeometry{tudareaddc}%
-          }%
-        \fi%
-      }{%
-        \ifstr{\tud@currentgeometry}{tudarea}{}{%
-          \tud@loadgeometry{tudarea}%
-          \gdef\tud@currentgeometry{tudarea}%
         }%
-      }%
-      \setlength\tud@len@areavskip{\z@}%
-      \tud@komafont@set{pagenumber}{\usekomafont{tudheadings}}%
-      \tud@komafont@set{pagefoot}{\usekomafont{tudheadings}}%
-    }{%
-      \ifstr{\tud@currentgeometry}{stdarea}{}{%
-        \tud@loadgeometry{stdarea}%
-        \gdef\tud@currentgeometry{stdarea}%
-      }%
-      \setlength\tud@len@areavskip{\tud@len@areadiff}%
-      \ifnum\tud@cdgeometry@num>\@ne\relax% true/symmetric/twoside
-        \if@hincl%
-          \addtolength\tud@len@areavskip{%
-            \dimexpr-\headheight-\tud@len@headsep\relax%
-          }%
+        \setlength\tud@len@areavskip{\z@}%
+        \tud@komafont@set{pagenumber}{\usekomafont{tudheadings}}%
+        \tud@komafont@set{pagefoot}{\usekomafont{tudheadings}}%
+      }{%
+        \ifstr{\tud@currentgeometry}{stdarea}{}{%
+          \tud@loadgeometry{stdarea}%
+          \gdef\tud@currentgeometry{stdarea}%
+        }%
+        \setlength\tud@len@areavskip{\tud@len@areadiff}%
+        \ifnum\tud@cdgeometry@num>\@ne\relax% true/symmetric/twoside
+          \if@hincl%
+            \addtolength\tud@len@areavskip{%
+              \dimexpr-\headheight-\tud@len@headsep\relax%
+            }%
+          \fi%
         \fi%
-      \fi%
-      \tud@komafont@unset{pagenumber}%
-      \tud@komafont@unset{pagefoot}%
-    }%
-    \global\tud@len@areavskip=\tud@len@areavskip%
-  }{}%
+        \tud@komafont@unset{pagenumber}%
+        \tud@komafont@unset{pagefoot}%
+      }%
+      \global\tud@len@areavskip=\tud@len@areavskip%
+    }{}%
+  }
 }
-% TODO sammeln der typearea-Befehle?
 \newcommand*\tud@x@typearea@before{%
   \tud@skip@store{paperheight}%
   \tud@skip@store{paperwidth}%
@@ -4253,7 +4286,11 @@
 \newcommand*\tud@x@typearea@after{%
   \tud@skip@restore{paperheight}%
   \tud@skip@restore{paperwidth}%
-  \if@atdocument\tud@cdgeometry@process\fi%
+  \if@atdocument%
+    \TUDoptions{cdgeometry=false}%
+  \else%
+    \TUD@key@preset{cdgeometry}{false}%
+  \fi%
 }
 \newcommand*\tud@x@typearea@init{\recalctypearea}%
 \tud@pretocmd{\typearea}{%
@@ -4275,84 +4312,18 @@
   \tud@res@a%
 }{}{\tud@patch@wrn{areaset}}
 \tud@apptocmd{\areaset}{\tud@x@typearea@after}{}{\tud@patch@wrn{areaset}}
-\newcommand*\tud@cdgeometry@init{%
-  \if@tud@x@standalone@crop%
-    \pagestyle{empty}%
-    \let\tud@cdgeometry@process\relax%
-  \else%
-    \csuse{@ta@usegeometryfalse}%
-    \tud@x@geometry@getlayout{\tud@cdgeometry@layout}%
-    \tud@cs@store{tud@cdgeometry@num}%
-    \def\tud@cdgeometry@num{1}%
-    \begingroup%
-      \epreto\tud@x@geometry@init{%
-        paperwidth=\the\paperwidth,paperheight=\the\paperheight,%
-        \tud@cdgeometry@layout,%
-        \tud@cdgeometry@mpincl,%
-        \if@reversemargin%
-          reversemarginpar=true,%
-        \else%
-          reversemarginpar=false,%
-        \fi%
-        \tud@cdgeometry@hincl,%
-        \tud@cdgeometry@fincl,%
-        bindingoffset=\the\ta@bcor,%
-      }%
-      \edef\tud@res@a{%
-        \endgroup%
-        % TODO warum?
-        \noexpand\tud@cs@use{geometry}{\tud@x@geometry@init,driver=none}%
-      }%
-    \tud@res@a%
-    \tud@cdgeometry@@process%
-    \tud@savegeometry{init@custom}%
-    \def\tud@cdgeometry@num{0}%
-    \tud@x@typearea@init%
-    \tud@cdgeometry@@process%
-    \addtolength\oddsidemargin{-\tud@len@layouthoffset}%
-    \addtolength\evensidemargin{-\tud@len@layouthoffset}%
-    \addtolength\topmargin{-\tud@len@layoutvoffset}%
-    \tud@savegeometry{init@typearea}%
-    \tud@cs@restore{tud@cdgeometry@num}%
-    \BeforeSelectAnyPageStyle{\tud@BeforeSelectAnyPageStyle{##1}}%
-    \tud@cdgeometry@process%
-  \fi%
-  \let\tud@cdgeometry@init\relax%
-}
-% TODO kann theoretisch raus, evtl. die drei Zeilen noch mal überprüfen
-%\newcommand*\tud@cdgeometry@@init[2]{%
-%  \tud@x@geometry@set{%
-%    \tud@cdgeometry@mpincl,%
-%    \if@reversemargin%
-%      reversemarginpar=true,%
-%    \else%
-%      reversemarginpar=false,%
-%    \fi%
-%    bindingoffset=\the\ta@bcor,%
-%    \tud@cdgeometry@hincl,%
-%    \tud@cdgeometry@fincl,%
-%    #2,%
-%    driver=none%
-%  }%
-%  % TODO was sollen die drei Zeilen?
-%  \addtolength\oddsidemargin{-\Gm@layouthoffset}%
-%  \addtolength\evensidemargin{-\Gm@layouthoffset}%
-%  \addtolength\topmargin{-\Gm@layoutvoffset}%
-%  \tud@savegeometry{init@#1}%
-%}%
 \AfterPackage!{scrlayer-scrpage}{\AtEndPreamble{\tud@cdgeometry@init}}
-% TODO mögliches Problem mit typearea!
 \TUD@UnwindPackage{geometry}{%
-  \newif\ifGm@layout%
-  \newif\ifGm@pass%
-  \providecommand*\tud@x@geometry@set[1]{}%
-  \providecommand*\tud@savegeometry[1]{}%
-  \renewcommand*\tud@cdgeometry@@process{%
+  \newcommand*\tud@cdgeometry@init{%
+    \AfterRestoreareas{\tud@cdgeometry@process}%
+    \tud@cdgeometry@process%
+    \let\tud@cdgeometry@init\relax%
+  }%
+  \newcommand*\tud@cdgeometry@@process{%
     \setlength\tud@len@layoutwidth{\paperwidth}%
     \setlength\tud@len@layoutheight{\paperheight}%
     \tud@cdgeometry@set%
   }%
-  \let\tud@BeforeSelectAnyPageStyle\@gobble%
 }
 \patchcmd{\cleardoubleoddpageusingstyle}{\pagestyle}{%
   \let\tud@BeforeSelectAnyPageStyle\@gobble\pagestyle%
