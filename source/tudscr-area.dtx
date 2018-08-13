@@ -1,4 +1,4 @@
-% \CheckSum{2160}
+% \CheckSum{2177}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -1859,12 +1859,6 @@
     \tud@savegeometry{init@typearea}%
     \tud@cs@restore{tud@cdgeometry@num}%
 %    \end{macrocode}
-% Nach einer Wiederherstellung gespeicherter Satzspiegel durch \pkg{typearea} 
-% werden die für die Seitenstile benötigten Satzspiegel mit \pkg{geometry} neu
-% erstellt.
-%    \begin{macrocode}
-    \AfterRestoreareas{\tud@cdgeometry@process}%
-%    \end{macrocode}
 % Der Kopf im \CD der \TnUD erfordert einen eigenen Satzspiegel, der ggf. durch 
 % \cs{tud@BeforeSelectAnyPageStyle} aktiviert bzw. deaktiviert wird.
 %    \begin{macrocode}
@@ -2009,6 +2003,7 @@
 %    \end{macrocode}
 % \begin{macro}{\typearea}
 % \begin{macro}{\areaset}
+% \begin{macro}{\storereareas}
 % \begin{macro}{\tud@x@typearea@before}
 % \changes{v2.06}{2018/08/13}{neu}^^A
 % \begin{macro}{\tud@x@typearea@after}
@@ -2066,9 +2061,31 @@
 }{}{\tud@patch@wrn{areaset}}
 \tud@apptocmd{\areaset}{\tud@x@typearea@after}{}{\tud@patch@wrn{areaset}}
 %    \end{macrocode}
+% Nach einer Wiederherstellung gespeicherter Satzspiegel durch \pkg{typearea} 
+% werden die für die Seitenstile benötigten Satzspiegel mit \pkg{geometry} neu
+% erstellt.
+%    \begin{macrocode}
+\tud@cs@store{storeareas}
+\renewcommand*\storeareas[1]{%
+  \begingroup
+    \tud@x@geometry@fixmargins%
+    \tud@cs@use{storeareas}{#1}%
+    \edef\tud@res@a{%
+      \endgroup%
+      \etex@unexpanded{\def#1}{%
+        \expandonce#1%
+        \def\noexpand\tud@cdgeometry@num{\tud@cdgeometry@num}%
+      }%
+    }%
+    \meaning\tud@res@a
+  \tud@res@a%
+}
+\AfterRestoreareas{\tud@cdgeometry@process}%
+%    \end{macrocode}
 % \end{macro}^^A \tud@x@typearea@init
 % \end{macro}^^A \tud@x@typearea@after
 % \end{macro}^^A \tud@x@typearea@before
+% \end{macro}^^A \storereareas
 % \end{macro}^^A \areaset
 % \end{macro}^^A \typearea
 % Die Seitenstile und Satzspiegel korrelieren sehr stark, weshalb das Paket 
@@ -2083,7 +2100,6 @@
 %    \begin{macrocode}
 \TUD@UnwindPackage{geometry}{%
   \newcommand*\tud@cdgeometry@init{%
-    \AfterRestoreareas{\tud@cdgeometry@process}%
     \tud@cdgeometry@process%
     \let\tud@cdgeometry@init\relax%
   }%
