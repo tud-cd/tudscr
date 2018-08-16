@@ -2691,7 +2691,7 @@
     \let\footnote\@gobble%
     \tud@lowerstring{\@tempa}{#2}%
     \ifstr{#1}{thesis}{\protected@xdef\@@thesis{#2}}{}%
-    \edef\@tempa{%
+    \protected@edef\@tempa{%
       \endgroup%
       \def\noexpand\@tempa{\@tempa}%
     }%
@@ -3584,7 +3584,6 @@
   \tud@cs@store{newgeometry}%
   \renewcommand*\geometry[1]{%
     \tud@x@geometry@user{#1}{geometry}%
-    \TUD@key@preset{cdgeometry}{custom}%
   }%
   \renewcommand*\newgeometry[1]{%
     \tud@cs@store{Gm@restore@org}%
@@ -4219,7 +4218,6 @@
     \tud@cdgeometry@@process%
     \tud@savegeometry{init@typearea}%
     \tud@cs@restore{tud@cdgeometry@num}%
-    \AfterRestoreareas{\tud@cdgeometry@process}%
     \BeforeSelectAnyPageStyle{\tud@BeforeSelectAnyPageStyle{##1}}%
     \@tud@x@geometry@fixmarginstrue%
     \tud@cdgeometry@process%
@@ -4312,10 +4310,25 @@
   \tud@res@a%
 }{}{\tud@patch@wrn{areaset}}
 \tud@apptocmd{\areaset}{\tud@x@typearea@after}{}{\tud@patch@wrn{areaset}}
+\tud@cs@store{storeareas}
+\renewcommand*\storeareas[1]{%
+  \begingroup
+    \tud@x@geometry@fixmargins%
+    \tud@cs@use{storeareas}{#1}%
+    \edef\tud@res@a{%
+      \endgroup%
+      \etex@unexpanded{\def#1}{%
+        \expandonce#1%
+        \def\noexpand\tud@cdgeometry@num{\tud@cdgeometry@num}%
+      }%
+    }%
+    \meaning\tud@res@a
+  \tud@res@a%
+}
+\AfterRestoreareas{\tud@cdgeometry@process}%
 \AfterPackage!{scrlayer-scrpage}{\AtEndPreamble{\tud@cdgeometry@init}}
 \TUD@UnwindPackage{geometry}{%
   \newcommand*\tud@cdgeometry@init{%
-    \AfterRestoreareas{\tud@cdgeometry@process}%
     \tud@cdgeometry@process%
     \let\tud@cdgeometry@init\relax%
   }%
@@ -4324,6 +4337,7 @@
     \setlength\tud@len@layoutheight{\paperheight}%
     \tud@cdgeometry@set%
   }%
+  \newcommand*\tud@x@geometry@fixmargins{}%
 }
 \patchcmd{\cleardoubleoddpageusingstyle}{\pagestyle}{%
   \let\tud@BeforeSelectAnyPageStyle\@gobble\pagestyle%
@@ -5390,7 +5404,6 @@
   }%
   \global\let\tud@clearcolor@wrn\relax%
 }
-% TODO optionales Argument auflösen, warum \selectfont notwendig?
 \newcommand*\tud@sec@fontface[1][]{\sectfont#1\selectfont}
 \if@tud@cdoldfont@active
   \renewcommand*\tud@sec@fontface[1][]{%
@@ -5445,11 +5458,6 @@
 \newcommand*\tud@section@fontcolor{}
 \providecommand*\raggedtitle{\tud@raggedright}
 \newcommand*\tud@cd@process{%
-  \ifcase\tud@cd@cover@num\relax% false
-    \tud@locked@bool@preset{@tud@cdgeometry@cover}{false}%
-  \else% !false
-    \tud@locked@bool@preset{@tud@cdgeometry@cover}{true}%
-  \fi%
   \ifcase\tud@cd@title@num\relax% false
     \tud@cs@restore{titlepagestyle}%
     \tud@komafont@unset{titlehead}%
@@ -5926,8 +5934,14 @@
     \cleardoublepage%
     \TUD@parameter@set{title}{#1}%
     \ifcase\tud@cd@title@num\relax% false
-      \ifx\tud@title@pagenumber\relax\gdef\tud@title@pagenumber{1}\fi%
-      \tud@cs@use{maketitle}[\tud@title@pagenumber]%
+      \if@titlepageiscoverpage%
+        \tud@cover@fixmargins%
+      \fi%
+      \ifx\tud@title@pagenumber\relax%
+        \tud@cs@use{maketitle}%
+      \else%
+        \tud@cs@use{maketitle}[\tud@title@pagenumber]%
+      \fi%
       \tud@if@tudheadings{\currentpagestyle}{%
         \ifstr{\titlepagestyle}{empty}{\thispagestyle{empty.tudheadings}}{}%
       }{}%
@@ -5968,7 +5982,6 @@
   }%
 }{}{\tud@patch@wrn{titlepage}}
 \newcommand*\tud@titleback{}
-% TODO layout und coverpage?!
 \newcommand*\tud@maketitle@page{%
   \renewcommand*\tud@title@fontcolor{}%
   \ifcase\tud@cd@title@num\relax\or\or% litecolor
@@ -5987,7 +6000,7 @@
     \ifx\tud@title@pagenumber\relax\else%
       \setcounter{page}{\tud@title@pagenumber}%
     \fi%
-    \if@tud@cover\else%
+    \if@tud@coverpage\else%
       \let\footnotesize\small%
       \let\footnoterule\relax%
       \let\footnote\thanks%
@@ -6002,6 +6015,10 @@
             possible with an extra title. Alternatively you can\MessageBreak%
             create a cover with `\string\makecover'%
           }%
+          \@titlepageiscoverpagefalse%
+        \fi%
+        \ifx\@frontispiece\@empty\else%
+          \if@twoside\null\fi%
         \fi%
       \else%
         \if@titlepageiscoverpage%
@@ -6014,27 +6031,17 @@
             \noexpand\let\noexpand\titlepage@restore\noexpand\relax%
           }%
           \begingroup%
-          \topmargin=\dimexpr\coverpagetopmargin-1in\relax%
-          \oddsidemargin=\dimexpr\coverpageleftmargin-1in\relax%
-          \evensidemargin=\dimexpr\coverpageleftmargin-1in\relax%
-          \textwidth=\dimexpr\tud@len@layoutwidth-\coverpageleftmargin%
-            -\coverpagerightmargin\relax%
-          \textheight=\dimexpr\tud@len@layoutheight-\coverpagetopmargin%
-            -\coverpagebottommargin\relax%
-          \headheight=0pt%
-          \headsep=0pt%
-          \footskip=\baselineskip%
-          \@colht=\textheight%
-          \@colroom=\textheight%
-          \vsize=\textheight%
-          \columnwidth=\textwidth%
-          \hsize=\columnwidth%
-          \linewidth=\hsize%
+          \tud@cover@setmargins%
         \else%
           \let\titlepage@restore\relax%
         \fi%
-        \noindent\@extratitle\next@tdpage%
+        \noindent\@extratitle%
       \fi%
+      \next@tpage%
+      \ifx\@frontispiece\@empty\else%
+        \noindent\@frontispiece%
+      \fi%
+      \next@tdpage%
     \fi%
     \tud@cd@headstartvskip%
     \TUD@deprecated@lengthcs{pageheadingsvskip}%
@@ -6070,7 +6077,7 @@
       \tud@multiple@split{@author}\par%
       \vskip 2ex\@plus1ex\@minus1ex%
       \ifx\@thesis\@empty%
-        \if@tud@cover\else%
+        \if@tud@coverpage\else%
           \ifx\@date\@empty\else%
             \vskip 2ex\@plus.1fill%
             {\usekomafont{date}{\tud@date@print\par}}%
@@ -6083,7 +6090,7 @@
           {\usekomafont{thesis}{\tud@title@uppercase{\@thesis}\par}}%
           \vskip 2ex\@plus1ex\@minus1ex%
         \fi%
-        \if@tud@cover\else%
+        \if@tud@coverpage\else%
           \ifx\@graduation\@empty\else%
             \def\@tempc{%
               \@graduation%
@@ -6101,7 +6108,7 @@
         \fi%
         \vskip 2ex\@plus.5fill%
       \fi%
-      \if@tud@cover\else%
+      \if@tud@coverpage\else%
         \tud@title@names{referee}%
         \tud@title@names{advisor}%
         \tud@title@names{supervisor}%
@@ -6168,7 +6175,7 @@
       \thispagestyle{empty.tudheadings}%
       \tud@if@v@lower{2.03}{\tud@ddc@enlargepage}{}%
     }%
-    \if@tud@cover%
+    \if@tud@coverpage%
       \begingroup%
         \@tempa%
         \cleardoubleemptypage%
@@ -6211,21 +6218,23 @@
     \let\@oldmakefnmark\@makefnmark%
     \renewcommand*\@makefnmark{\rlap\@oldmakefnmark}%
     \next@tdpage%
-    \@tempswafalse%
+    \def\tud@res@a##1{##1}%
     \if@twocolumn\ifnum\col@number>\@ne\relax%
-      \@tempswatrue%
+      \def\tud@res@a##1{\twocolumn[{##1}]}%
     \fi\fi%
-    \if@tempswa%
-      \ifx\@extratitle\@empty\else%
-        \twocolumn[\@makeextratitle]\next@tdpage%
-      \fi%
-      \twocolumn[\tud@maketitle@@head]%
+    \ifx\@extratitle\@empty%
+      \ifx\@frontispiece\@empty\else%
+        \if@twoside\null\fi%
+      \fi
     \else%
-      \ifx\@extratitle\@empty\else%
-        \@makeextratitle\next@tdpage%
-      \fi%
-      \tud@maketitle@@head%
+      \tud@res@a{\@makeextratitle}%
     \fi%
+    \next@tpage%
+    \ifx\@frontispiece\@empty\else%
+      \tud@res@a{\@makefrontispiece}%
+    \fi%
+    \next@tdpage%
+    \tud@res@a{\tud@maketitle@@head}%
     \ifx\titlepagestyle\@empty\else\thispagestyle{\titlepagestyle}\fi%
     \@thanks%
   \endgroup%
@@ -6339,7 +6348,7 @@
   \tud@multiple@fields@store{@author}{#1}%
   \renewcommand*\tud@newline@title{\vskip .5ex\let\tud@newline@title\newline}%
   {\usekomafont{author}{\ignorespaces#1\unskip}}%
-  \if@tud@cover\else%
+  \if@tud@coverpage\else%
     \ifx\@authormore\@empty\else%
       \tud@newline@title%
       \@authormore%
@@ -6438,7 +6447,7 @@
     \fi%
   }{}%
 }
-\newif\if@tud@cover
+\newif\if@tud@coverpage
 \newcommand*\makecover[1][]{%
   \if@titlepageiscoverpage%
     \ClassWarning{\TUD@Class@Name}{%
@@ -6458,76 +6467,64 @@
     \TUD@parameter@set{cover}{#1}%
     \let\tud@cd@title@num\tud@cd@cover@num%
     \tud@cd@process%
-    \if@tud@cdgeometry@cover%
-      \let\coverpagetopmargin\tud@len@slimmargin%
-      \let\coverpagebottommargin\tud@len@widemargin%
-      \let\coverpageleftmargin\tud@len@widemargin%
-      \let\coverpagerightmargin\tud@len@slimmargin%
-      \tud@if@v@lower{2.03}{%
-        \def\coverpagetopmargin{.5\tud@len@both}%
-        \def\coverpagebottommargin{.5\tud@len@both}%
-      }{}%
-    \fi%
     \ifcase\tud@cd@cover@num\relax% false
-      \KOMAoptions{titlepage=firstiscover}%
-      \let\@extratitle\@empty%
-      \let\@uppertitleback\@empty%
-      \let\@lowertitleback\@empty%
-      \let\@dedication\@empty%
-      \ifx\tud@title@pagenumber\relax\gdef\tud@title@pagenumber{1}\fi%
-      \tud@cs@use{maketitle}[\tud@title@pagenumber]%
+      \tud@locked@bool@preset{@tud@cdgeometry@cover}{false}%
+      \@tud@coverpagefalse%
     \else% !false
-      \@tud@covertrue%
-      \@titlepagetrue%
+      \tud@locked@bool@preset{@tud@cdgeometry@cover}{true}%
+      \@tud@coverpagetrue%
+    \fi%
+    \ifundef{\hypersetup}{}{\hypersetup{pageanchor=false}}%
+    \@titlepagetrue%
+    \let\@extratitle\@empty%
+    \let\@frontispiece\@empty%
+    \let\@uppertitleback\@empty%
+    \let\@lowertitleback\@empty%
+    \let\@dedication\@empty%
+    \if@tud@cdgeometry@cover%
+      \if@tud@coverpage%
+        \def\coverpagetopmargin{%
+          \dimexpr\tud@len@topmargin+\tud@len@barheight%
+            +\tud@len@headsep\relax%
+        }%
+      \else%
+        \tud@if@v@lower{2.03}{%
+          \def\coverpagetopmargin{.5\tud@len@both}%
+        }{%
+          \def\coverpagetopmargin{\tud@len@slimmargin}%
+        }%
+      \fi%
+      \tud@if@v@lower{2.03}{%
+        \def\coverpagebottommargin{.5\tud@len@both}%
+      }{%
+        \def\coverpagebottommargin{\tud@len@widemargin}%
+      }%
+      \def\coverpageleftmargin{\tud@len@widemargin}%
+      \def\coverpagerightmargin{\tud@len@slimmargin}%
+    \fi%
+    \if@tud@coverpage%
       \edef\titlepage@restore{%
         \noexpand\endgroup%
         \noexpand\global\noexpand\@colht\the\@colht%
         \noexpand\global\noexpand\@colroom\the\@colroom%
         \noexpand\global\vsize\the\vsize%
+        \noexpand\global\noexpand\@titlepageiscoverpagefalse%
         \noexpand\let\noexpand\titlepage@restore\noexpand\relax%
       }%
       \begingroup%
-        \oddsidemargin=\dimexpr\coverpageleftmargin-1in\relax%
-        \evensidemargin=\dimexpr\coverpageleftmargin-1in\relax%
-        \textwidth=\dimexpr\tud@len@layoutwidth-\coverpageleftmargin%
-          -\coverpagerightmargin\relax%
-        \headheight=0pt%
-        \headsep=0pt%
-        \footskip=\dimexpr\tud@len@footsep+\footheight\relax%
-        \tud@if@v@lower{2.03}{%
-          \footskip=\dimexpr\tud@len@headsep+\footheight%
-            -1.25\baselineskip\relax%
-        }{}%
-        \if@tud@cdgeometry@cover%
-          \def\coverpagetopmargin{%
-            \dimexpr\tud@len@topmargin+\tud@len@barheight%
-              +\tud@len@headsep\relax%
-          }%
-        \else%
-          \topmargin=\dimexpr\tud@len@topmargin+\tud@len@barheight%
-            +\tud@len@headsep-1in\relax%
-          \def\@tempa{2\dimexpr\coverpagetopmargin\relax}%
-          \ifx\@tempa\coverpagebottommargin\relax%
-            \let\coverpagebottommargin\tud@len@widemargin%
-            \tud@if@v@lower{2.03}{%
-              \def\coverpagebottommargin{.5\tud@len@both}%
-            }{}%
-          \fi%
-        \fi%
-        \textheight=\dimexpr\tud@len@layoutheight-\coverpagetopmargin%
-          -\coverpagebottommargin-\tud@dim@extrabottommargin\relax%
-        \topmargin=\dimexpr\coverpagetopmargin-1in\relax%
-        \@colht=\textheight%
-        \@colroom=\textheight%
-        \vsize=\textheight%
-        \columnwidth=\textwidth%
-        \hsize=\columnwidth%
-        \linewidth=\hsize%
+        \tud@cover@setmargins%
         \tud@len@areavskip=\z@%
-        \ifundef{\hypersetup}{}{\hypersetup{pageanchor=false}}%
         \tud@maketitle%
         \clearpage%
       \titlepage@restore%
+    \else%
+      \@titlepageiscoverpagetrue%
+      \tud@cover@fixmargins%
+      \ifx\tud@title@pagenumber\relax%
+        \tud@cs@use{maketitle}%
+      \else%
+        \tud@cs@use{maketitle}[\tud@title@pagenumber]%
+      \fi%
     \fi%
   \endgroup%
 }
@@ -6555,6 +6552,70 @@
   \TUD@parameter@def{pagenumber}{\def\tud@title@pagenumber{#1}}%
   \TUD@parameter@ps@def{#1}%
   \TUD@parameter@handler@value{pagenumber}%
+}
+\renewcommand*{\coverpagetopmargin}{%
+  \if@tud@coverpage%
+    \dimexpr\tud@len@topmargin+\tud@len@barheight+\tud@len@headsep\relax%
+  \else%
+    \dimexpr\topmargin+1in\relax%
+  \fi%
+}
+\renewcommand*{\coverpagebottommargin}{%
+  \if@tud@coverpage%
+    \dimexpr\tud@len@widemargin\relax%
+  \else%
+    2\dimexpr\coverpagetopmargin\relax%
+  \fi%
+}
+\newcommand*\tud@cover@fixmargins{%
+  \begingroup%
+    \tud@cdgeometry@assignlayout%
+    \tud@x@geometry@fixmargins%
+    \setlength{\@tempdima}{%
+      \dimexpr\coverpagebottommargin-\tud@len@layoutvoffset
+      +\paperheight-\tud@len@layoutheight\relax%
+    }%
+    \edef\coverpagebottommargin{\the\@tempdima}%
+    \setlength{\@tempdima}{%
+      \dimexpr\coverpagetopmargin+\tud@len@layoutvoffset\relax%
+    }%
+    \edef\coverpagetopmargin{\the\@tempdima}%
+    \setlength{\@tempdima}{%
+      \dimexpr\coverpagerightmargin-\tud@len@layouthoffset
+      +\paperwidth-\tud@len@layoutwidth\relax%
+    }%
+    \edef\coverpagerightmargin{\the\@tempdima}%
+    \setlength{\@tempdima}{%
+      \dimexpr\coverpageleftmargin+\tud@len@layouthoffset\relax%
+    }%
+    \edef\coverpageleftmargin{\the\@tempdima}%
+    \edef\tud@res@a{%
+      \endgroup%
+      \def\noexpand\coverpagetopmargin{\coverpagetopmargin}%
+      \def\noexpand\coverpagebottommargin{\coverpagebottommargin}%
+      \def\noexpand\coverpageleftmargin{\coverpageleftmargin}%
+      \def\noexpand\coverpagerightmargin{\coverpagerightmargin}%
+    }%
+  \tud@res@a%
+}
+\newcommand*\tud@cover@setmargins{%
+  \tud@cover@fixmargins%
+  \topmargin=\dimexpr\coverpagetopmargin-1in\relax%
+  \oddsidemargin=\dimexpr\coverpageleftmargin-1in\relax%
+  \evensidemargin=\dimexpr\coverpageleftmargin-1in\relax%
+  \textwidth=\dimexpr\paperwidth-\coverpageleftmargin%
+    -\coverpagerightmargin\relax%
+  \textheight=\dimexpr\paperheight-\coverpagetopmargin%
+    -\coverpagebottommargin\relax%
+  \headheight=0pt%
+  \headsep=0pt%
+  \footskip=\baselineskip%
+  \@colht=\textheight%
+  \@colroom=\textheight%
+  \vsize=\textheight%
+  \columnwidth=\textwidth%
+  \hsize=\columnwidth%
+  \linewidth=\hsize%
 }
 %%% From File: tudscr-frontmatter.dtx
 \newcommand*\tud@fm@check[2]{%
@@ -7030,7 +7091,10 @@
 }
 \apptocmd{\titlepage}{%
   \tud@x@bookmark@startatroot%
-  \if@tud@cover%
+  \@tud@res@swafalse%
+  \if@tud@coverpage\@tud@res@swatrue\fi%
+  \if@titlepageiscoverpage\@tud@res@swatrue\fi%
+  \if@tud@res@swa%
     \tudbookmark[%
     0%
     ]{\coverpagename}{cover}%

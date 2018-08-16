@@ -1,4 +1,4 @@
-% \CheckSum{1374}
+% \CheckSum{1441}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-title.dtx}[%
-  2018/08/06 v2.06 TUD-Script (title)%
+  2018/08/16 v2.06 TUD-Script (title)%
 ]
 \documentclass[english,ngerman,xindy]{tudscrdoc}
 \usepackage[T1]{fontenc}
@@ -212,6 +212,7 @@
 % \changes{v2.02}{2014/07/19}{Im zweispaltigen Satz wird für den Titelkopf
 %   \cs{tud@title@twocolumn} verwendet}^^A
 % \changes{v2.02}{2014/09/05}{Titelseite mit \cs{tud@maketitle@page}}^^A
+% \changes{v2.06}{2018/08/16}{Unterstützung von \cs{frontispiece}}^^A
 % \begin{macro}{\tud@title@pagenumber}
 % \changes{v2.02}{2014/06/23}{neu}^^A
 % \begin{parameter}{cdtitle}
@@ -242,12 +243,20 @@
 %    \begin{macrocode}
     \TUD@parameter@set{title}{#1}%
 %    \end{macrocode}
-% Ist das \CD für den Titel deaktiviert, wird mit \cs{tud@cs@use} der 
-% originale \KOMAScript-Befehl \cs{maketitle} aufgerufen. 
+% Ist das \CD für den Titel deaktiviert, wird mit \cs{tud@cs@use} der originale
+% \KOMAScript-Befehl \cs{maketitle} aufgerufen. Wird die erste Seite als Cover
+% gesetzt, werden mit \cs{tud@cover@fixmargins} ggf. die Ränder an das gegebene
+% Layout von \pkg{geometry} angepasst.
 %    \begin{macrocode}
     \ifcase\tud@cd@title@num\relax% false
-      \ifx\tud@title@pagenumber\relax\gdef\tud@title@pagenumber{1}\fi%
-      \tud@cs@use{maketitle}[\tud@title@pagenumber]%
+      \if@titlepageiscoverpage%
+        \tud@cover@fixmargins%
+      \fi%
+      \ifx\tud@title@pagenumber\relax%
+        \tud@cs@use{maketitle}%
+      \else%
+        \tud@cs@use{maketitle}[\tud@title@pagenumber]%
+      \fi%
       \tud@if@tudheadings{\currentpagestyle}{%
         \ifstr{\titlepagestyle}{empty}{\thispagestyle{empty.tudheadings}}{}%
       }{}%
@@ -383,7 +392,7 @@
 % Dieser Teil entspricht der Standarddefinition. Für das Setzen des Covers ist
 % ein Großteil der Einstellungen irrelevant und wird übersrpungen.
 %    \begin{macrocode}
-    \if@tud@cover\else%
+    \if@tud@coverpage\else%
       \let\footnotesize\small%
       \let\footnoterule\relax%
       \let\footnote\thanks%
@@ -414,10 +423,15 @@
             possible with an extra title. Alternatively you can\MessageBreak%
             create a cover with `\string\makecover'%
           }%
+          \@titlepageiscoverpagefalse%
+        \fi%
+        \ifx\@frontispiece\@empty\else%
+          \if@twoside\null\fi%
         \fi%
       \else%
 %    \end{macrocode}
-% Der Teil ist aus den \KOMAScript-Klassen kopiert\dots
+% Der Teil ist aus den \KOMAScript-Klassen übernommen, damit werden die 
+% Seitenränder für ein Cover festgelegt.
 %    \begin{macrocode}
         \if@titlepageiscoverpage%
           \edef\titlepage@restore{%
@@ -429,27 +443,17 @@
             \noexpand\let\noexpand\titlepage@restore\noexpand\relax%
           }%
           \begingroup%
-          \topmargin=\dimexpr\coverpagetopmargin-1in\relax%
-          \oddsidemargin=\dimexpr\coverpageleftmargin-1in\relax%
-          \evensidemargin=\dimexpr\coverpageleftmargin-1in\relax%
-          \textwidth=\dimexpr\tud@len@layoutwidth-\coverpageleftmargin%
-            -\coverpagerightmargin\relax%
-          \textheight=\dimexpr\tud@len@layoutheight-\coverpagetopmargin%
-            -\coverpagebottommargin\relax%
-          \headheight=0pt%
-          \headsep=0pt%
-          \footskip=\baselineskip%
-          \@colht=\textheight%
-          \@colroom=\textheight%
-          \vsize=\textheight%
-          \columnwidth=\textwidth%
-          \hsize=\columnwidth%
-          \linewidth=\hsize%
+          \tud@cover@setmargins%
         \else%
           \let\titlepage@restore\relax%
         \fi%
-        \noindent\@extratitle\next@tdpage%
+        \noindent\@extratitle%
       \fi%
+      \next@tpage%
+      \ifx\@frontispiece\@empty\else%
+        \noindent\@frontispiece%
+      \fi%
+      \next@tdpage%
     \fi%
 %    \end{macrocode}
 % Das ganze Layout wird vertikal so verschoben, dass der Titel auf der gleichen
@@ -531,7 +535,7 @@
 % wird das angegebene bzw. das heutige Datum und ggf. die Ergänzung ausgegeben.
 %    \begin{macrocode}
       \ifx\@thesis\@empty%
-        \if@tud@cover\else%
+        \if@tud@coverpage\else%
           \ifx\@date\@empty\else%
             \vskip 2ex\@plus.1fill%
             {\usekomafont{date}{\tud@date@print\par}}%
@@ -556,7 +560,7 @@
 % Ebenfalls wird in Abhängigkeit von der Option \opt{subjectthesis} der 
 % angestrebte akademische Grad ausgegeben.
 %    \begin{macrocode}
-        \if@tud@cover\else%
+        \if@tud@coverpage\else%
           \ifx\@graduation\@empty\else%
             \def\@tempc{%
               \@graduation%
@@ -582,7 +586,7 @@
 % Fachreferenten bereitgehalten. Das Format der Ausgabe ist dabei identisch.
 % Darauf folgend wird der betreuende Hochschullehrer ausgegeben.
 %    \begin{macrocode}
-      \if@tud@cover\else%
+      \if@tud@coverpage\else%
         \tud@title@names{referee}%
         \tud@title@names{advisor}%
         \tud@title@names{supervisor}%
@@ -685,7 +689,7 @@
 % Bei der Ausgabe des Covers werden lediglich die Farb- und Schriftdefinitionen
 % benötigt, die Seite kann danach beendet werden.
 %    \begin{macrocode}
-    \if@tud@cover%
+    \if@tud@coverpage%
       \begingroup%
         \@tempa%
         \cleardoubleemptypage%
@@ -776,21 +780,23 @@
 % der Titel einspaltig ausgegeben und anschließend der im Zweispaltensatz 
 % begonnen.
 %    \begin{macrocode}
-    \@tempswafalse%
+    \def\tud@res@a##1{##1}%
     \if@twocolumn\ifnum\col@number>\@ne\relax%
-      \@tempswatrue%
+      \def\tud@res@a##1{\twocolumn[{##1}]}%
     \fi\fi%
-    \if@tempswa%
-      \ifx\@extratitle\@empty\else%
-        \twocolumn[\@makeextratitle]\next@tdpage%
-      \fi%
-      \twocolumn[\tud@maketitle@@head]%
+    \ifx\@extratitle\@empty%
+      \ifx\@frontispiece\@empty\else%
+        \if@twoside\null\fi%
+      \fi
     \else%
-      \ifx\@extratitle\@empty\else%
-        \@makeextratitle\next@tdpage%
-      \fi%
-      \tud@maketitle@@head%
+      \tud@res@a{\@makeextratitle}%
     \fi%
+    \next@tpage%
+    \ifx\@frontispiece\@empty\else%
+      \tud@res@a{\@makefrontispiece}%
+    \fi%
+    \next@tdpage%
+    \tud@res@a{\tud@maketitle@@head}%
     \ifx\titlepagestyle\@empty\else\thispagestyle{\titlepagestyle}\fi%
     \@thanks%
   \endgroup%
@@ -1019,7 +1025,7 @@
 % ausgegeben.
 %    \begin{macrocode}
   {\usekomafont{author}{\ignorespaces#1\unskip}}%
-  \if@tud@cover\else%
+  \if@tud@coverpage\else%
     \ifx\@authormore\@empty\else%
       \tud@newline@title%
       \@authormore%
@@ -1239,11 +1245,11 @@
 % \changes{v2.02}{2014/06/23}{neu}^^A
 % \begin{macro}{\if@tud@cdgeometry@cover}
 % \begin{macro}{\if@tud@cdgeometry@cover@locked}
-% \begin{macro}{\if@tud@cover}
+% \begin{macro}{\if@tud@coverpage}
 % Der Befehl \cs{makecover} ist für eine Umschlagseite bei einem gebundenen 
 % Werk zu verwenden.
 %    \begin{macrocode}
-\newif\if@tud@cover
+\newif\if@tud@coverpage
 \newcommand*\makecover[1][]{%
 %    \end{macrocode}
 % Ist die Option \opt{titlepage}|=|\val{firstiscover} aktiv, wird eine Warnung 
@@ -1277,46 +1283,69 @@
     \let\tud@cd@title@num\tud@cd@cover@num%
     \tud@cd@process%
 %    \end{macrocode}
+% Je nachdem, ob das \CD verwendet wird, wird der Satzspiegel standardmäßig
+% umgestellt oder eben nicht. Der Schalter \cs{if@tud@coverpage} wird innerhalb 
+% des Befehles \cs{tud@maketitle} genutzt, um die Unterscheidung zu machen, ob
+% es sich bei der aktuellen Ausgabe um das Cover im \CD oder eine beliebige
+% Titelseite handelt.
+%    \begin{macrocode}
+    \ifcase\tud@cd@cover@num\relax% false
+      \tud@locked@bool@preset{@tud@cdgeometry@cover}{false}%
+      \@tud@coverpagefalse%
+    \else% !false
+      \tud@locked@bool@preset{@tud@cdgeometry@cover}{true}%
+      \@tud@coverpagetrue%
+    \fi%
+%    \end{macrocode}
+% Weil bereits die Titelseite normalerweise die Seitenzahl eins bekommt, kann es
+% bei der Verwendung des Paketes \pkg{hyperref} zu einer Warnung aufgrund der
+% doppelt verwendeten Seitenzahl kommen. Um dies zu verhindern, werden die
+% Seitenanker für das Cover deaktiviert.
+%    \begin{macrocode}
+    \ifundef{\hypersetup}{}{\hypersetup{pageanchor=false}}%
+%    \end{macrocode}
+% Ein Cover wird immer als komplette Seite und nie als Kopf gesetzt. Außerdem
+% werden ein mit \cs{extatitle} gegebener Schmutztitel ebenso ignoriert, wie 
+% die dazugehörige Rückseite, Danksagung oder Einträge für die Titelrückseite.
+%    \begin{macrocode}
+    \@titlepagetrue%
+    \let\@extratitle\@empty%
+    \let\@frontispiece\@empty%
+    \let\@uppertitleback\@empty%
+    \let\@lowertitleback\@empty%
+    \let\@dedication\@empty%
+%    \end{macrocode}
 % Wird der Parameter \opt{cdgeometry} aktiviert, werden die Seitenränder wie 
 % durch das \CD vorgegeben eingestellt. Andernfalls entsprechen diese den 
 % Einstellungen des Satzspiegels und können mit \cs{coverpage\dots margin} 
 % durch den Anwender angepasst werden.
 %    \begin{macrocode}
     \if@tud@cdgeometry@cover%
-      \let\coverpagetopmargin\tud@len@slimmargin%
-      \let\coverpagebottommargin\tud@len@widemargin%
-      \let\coverpageleftmargin\tud@len@widemargin%
-      \let\coverpagerightmargin\tud@len@slimmargin%
+%    \end{macrocode}
+% Bei der Höhe des oberen Seitenrandes muss unterschieden werden, ob der
+% Satzspiegel im \CD oder aber im Buchblock erscheinen soll.
+%    \begin{macrocode}
+      \if@tud@coverpage%
+        \def\coverpagetopmargin{%
+          \dimexpr\tud@len@topmargin+\tud@len@barheight%
+            +\tud@len@headsep\relax%
+        }%        
+      \else%
+        \tud@if@v@lower{2.03}{%
+          \def\coverpagetopmargin{.5\tud@len@both}%
+        }{%
+          \def\coverpagetopmargin{\tud@len@slimmargin}%
+        }%
+      \fi%
       \tud@if@v@lower{2.03}{%
-        \def\coverpagetopmargin{.5\tud@len@both}%
         \def\coverpagebottommargin{.5\tud@len@both}%
-      }{}%
+      }{%
+        \def\coverpagebottommargin{\tud@len@widemargin}%
+      }%
+      \def\coverpageleftmargin{\tud@len@widemargin}%
+      \def\coverpagerightmargin{\tud@len@slimmargin}%
     \fi%
-%    \end{macrocode}
-% Für den Fall, dass eine Umschlagseite gesetzt werden soll, die nicht im \CD 
-% erscheint, wird einfach das originale \cs{maketitle} aufgerufen und die 
-% Option \opt{titlepage}|=|\val{firstiscover} verwendet, um die Seitenränder
-% anpassen zu können. Außerdem werden ein mit \cs{extatitle} gegebener
-% Schmutztitel ebenso ignoriert, wie Danksagung oder Einträge für die Rückseite.
-%    \begin{macrocode}
-    \ifcase\tud@cd@cover@num\relax% false
-      \KOMAoptions{titlepage=firstiscover}%
-      \let\@extratitle\@empty%
-      \let\@uppertitleback\@empty%
-      \let\@lowertitleback\@empty%
-      \let\@dedication\@empty%
-      \ifx\tud@title@pagenumber\relax\gdef\tud@title@pagenumber{1}\fi%
-      \tud@cs@use{maketitle}[\tud@title@pagenumber]%
-    \else% !false
-%    \end{macrocode}
-% Der Befehl verwendet das Layout des Titels im \CD. Allerdings werden nicht
-% alle sondern nur für ein Cover relavante Angaben ausgegeben. Der Schalter
-% \cs{if@tud@cover} wird innerhalb des Befehles \cs{tud@maketitle} genutzt, um 
-% die Unterscheidung zu machen, ob es sich bei der aktuellen Ausgabe um das
-% Cover oder aber die Titelseite handelt.
-%    \begin{macrocode}
-      \@tud@covertrue%
-      \@titlepagetrue%
+    \if@tud@coverpage%
 %    \end{macrocode}
 % Der Satzspiegel wird hierfür äquivalent zu den \KOMAScript-Klassen gesetzt,
 % wenn die Option \opt{titlepage}|=|\val{firstiscover} aktiviert ist.
@@ -1326,82 +1355,37 @@
         \noexpand\global\noexpand\@colht\the\@colht%
         \noexpand\global\noexpand\@colroom\the\@colroom%
         \noexpand\global\vsize\the\vsize%
+        \noexpand\global\noexpand\@titlepageiscoverpagefalse%
         \noexpand\let\noexpand\titlepage@restore\noexpand\relax%
       }%
 %    \end{macrocode}
 % Linker und rechter Rand sowie die Textbreite werden identisch erzeugt. Für 
 % das Layout im \CD wurden die Seitenränder (\cs{coverpage\dots margin}) zuvor 
-% angepasst. Die Höhe der Kopfzeile wird auf \val{0pt} gesetzt, die Fußzeile 
-% entspricht dem normalen Satzspiegel im \CD.
+% angepasst.
 %    \begin{macrocode}
       \begingroup%
-        \oddsidemargin=\dimexpr\coverpageleftmargin-1in\relax%
-        \evensidemargin=\dimexpr\coverpageleftmargin-1in\relax%
-        \textwidth=\dimexpr\tud@len@layoutwidth-\coverpageleftmargin%
-          -\coverpagerightmargin\relax%
-        \headheight=0pt%
-        \headsep=0pt%
-        \footskip=\dimexpr\tud@len@footsep+\footheight\relax%
-        \tud@if@v@lower{2.03}{%
-          \footskip=\dimexpr\tud@len@headsep+\footheight%
-            -1.25\baselineskip\relax%
-        }{}%
-%    \end{macrocode}
-% Bei der Höhe des oberen Seitenrandes muss unterschieden werden, ob der
-% Satzspiegel im \CD oder aber im Buchblock erscheinen soll.
-%    \begin{macrocode}
-        \if@tud@cdgeometry@cover%
-          \def\coverpagetopmargin{%
-            \dimexpr\tud@len@topmargin+\tud@len@barheight%
-              +\tud@len@headsep\relax%
-          }%
-        \else%
-%    \end{macrocode}
-% Bei der Verwendung eines eigenen Satzspiegels kann der obere Seitenrand über 
-% das Makro \cs{coverpagetopmargin} geändert werden. Das Vermeiden einer
-% unerwünschten Überdeckung des Kopfes oder ein zu kleiner Fußbereich muss
-% durch den Anwender korrigiert werden. Standardmäßig wird die Höhe jedoch für
-% das \CD angepasst. Auch die Fußhöhe wird im Zweifelsfall gesetzt.
-%    \begin{macrocode}
-          \topmargin=\dimexpr\tud@len@topmargin+\tud@len@barheight%
-            +\tud@len@headsep-1in\relax%
-          \def\@tempa{2\dimexpr\coverpagetopmargin\relax}%
-          \ifx\@tempa\coverpagebottommargin\relax%
-            \let\coverpagebottommargin\tud@len@widemargin%
-            \tud@if@v@lower{2.03}{%
-              \def\coverpagebottommargin{.5\tud@len@both}%
-            }{}%
-          \fi%
-        \fi%
-%    \end{macrocode}
-% Damit alle Einstellungen korrekt und wie gewünscht übernommen werden, muss 
-% die Höhe des Textbereiches \cs{textheight} \emph{vor} der Größe des oberen 
-% Seitenrande gesetzt werden. Dies hat mit der originären Definition von 
-% \cs{coverpagetopmargin} zu tun. 
-%    \begin{macrocode}
-        \textheight=\dimexpr\tud@len@layoutheight-\coverpagetopmargin%
-          -\coverpagebottommargin-\tud@dim@extrabottommargin\relax%
-        \topmargin=\dimexpr\coverpagetopmargin-1in\relax%
-        \@colht=\textheight%
-        \@colroom=\textheight%
-        \vsize=\textheight%
-        \columnwidth=\textwidth%
-        \hsize=\columnwidth%
-        \linewidth=\hsize%
+        \tud@cover@setmargins%
         \tud@len@areavskip=\z@%
-%    \end{macrocode}
-% Weil bereits die Titelseite normalerweise die Seitenzahl eins bekommt, kann es
-% bei der Verwendung des Paketes \pkg{hyperref} zu einer Warnung aufgrund der
-% doppelt verwendeten Seitenzahl kommen. Um dies zu verhindern, werden die
-% Seitenanker für das Cover deaktiviert.
-%    \begin{macrocode}
-        \ifundef{\hypersetup}{}{\hypersetup{pageanchor=false}}%
 %    \end{macrocode}
 % Die Ausgabe des Covers und ggf. das Wiederherstellen des Satzspiegels.
 %    \begin{macrocode}
         \tud@maketitle%
         \clearpage%
       \titlepage@restore%
+%    \end{macrocode}
+% Für den Fall, dass eine Umschlagseite gesetzt werden soll, die nicht im \CD 
+% erscheint, wird einfach das originale \cs{maketitle} aufgerufen und die 
+% Option \opt{titlepage}|=|\val{firstiscover} verwendet, um die Seitenränder
+% anpassen zu können. 
+%    \begin{macrocode}
+    \else%
+      \@titlepageiscoverpagetrue%
+      \tud@cover@fixmargins%
+      \ifx\tud@title@pagenumber\relax%
+        \tud@cs@use{maketitle}%
+      \else%
+        \tud@cs@use{maketitle}[\tud@title@pagenumber]%
+      \fi%
     \fi%
   \endgroup%
 }
@@ -1452,7 +1436,7 @@
   \TUD@parameter@handler@value{pagenumber}%
 }
 %    \end{macrocode}
-% \end{macro}^^A \if@tud@cover
+% \end{macro}^^A \if@tud@coverpage
 % \end{macro}^^A \if@tud@cdgeometry@cover@locked
 % \end{macro}^^A \if@tud@cdgeometry@cover
 % \end{parameter}^^A cdgeometry
@@ -1460,6 +1444,104 @@
 % \end{parameter}^^A cd
 % \end{parameter}^^A cdcover
 % \end{macro}^^A \makecover
+% \begin{macro}{\coverpagetopmargin}
+% \begin{macro}{\coverpagebottommargin}
+% Bei der Verwendung eines eigenen Satzspiegels kann der obere Seitenrand über 
+% das Makro \cs{coverpagetopmargin} geändert werden. Die \KOMAScript-Befehle
+% werden so angepasst, dass die Ränder für eine Cover im des \CDs korrekt
+% voreingestellt sind. Das Vermeiden einer unerwünschten Überdeckung des Kopfes
+% oder ein zu kleiner Fußbereich muss durch den Anwender korrigiert werden. 
+%    \begin{macrocode}
+\renewcommand*{\coverpagetopmargin}{%
+  \if@tud@coverpage%
+    \dimexpr\tud@len@topmargin+\tud@len@barheight+\tud@len@headsep\relax%
+  \else%
+    \dimexpr\topmargin+1in\relax%
+  \fi%
+}
+\renewcommand*{\coverpagebottommargin}{%
+  \if@tud@coverpage%
+    \dimexpr\tud@len@widemargin\relax%
+  \else%
+    2\dimexpr\coverpagetopmargin\relax%
+  \fi%
+}
+%    \end{macrocode}
+% \end{macro}^^A \coverpagebottommargin
+% \end{macro}^^A \coverpagetopmargin
+% \begin{macro}{\tud@cover@fixmargins}
+% \changes{v2.06}{2018/08/16}{neu}^^A
+% \begin{macro}{\tud@cover@setmargins}
+% \changes{v2.06}{2018/08/16}{neu}^^A
+% Diese beiden Befehle werden verwendet, um die von \KOMAScript{} zur Verfügung 
+% gestellten Befehle für die Definition der Cover-Seitenränder so anzupassen, 
+% dass diese auch mit der Option \opt{layout} aus dem Paket \pkg{geometry} 
+% genutzt werden können. Dafür werden die vom Anwender definierten Seitenränder 
+% expandiert und mit dem notwendigen Offset beaufschlagt.
+%    \begin{macrocode}
+\newcommand*\tud@cover@fixmargins{%
+  \begingroup%
+    \tud@cdgeometry@assignlayout%
+    \tud@x@geometry@fixmargins%
+%    \end{macrocode}
+% Standardmäßig ist \cs{coverbottommargin} abhängig von \cs{covertopmargin}, 
+% weshalb dieses Makro als erstes expandiert wird.
+%    \begin{macrocode}
+    \setlength{\@tempdima}{%
+      \dimexpr\coverpagebottommargin-\tud@len@layoutvoffset
+      +\paperheight-\tud@len@layoutheight\relax%
+    }%
+    \edef\coverpagebottommargin{\the\@tempdima}%
+    \setlength{\@tempdima}{%
+      \dimexpr\coverpagetopmargin+\tud@len@layoutvoffset\relax%
+    }%
+    \edef\coverpagetopmargin{\the\@tempdima}%
+%    \end{macrocode}
+% Selbiges gilt für \cs{coverrightmargin} und \cs{coverleftmargin}.
+%    \begin{macrocode}
+    \setlength{\@tempdima}{%
+      \dimexpr\coverpagerightmargin-\tud@len@layouthoffset
+      +\paperwidth-\tud@len@layoutwidth\relax%
+    }%
+    \edef\coverpagerightmargin{\the\@tempdima}%   
+    \setlength{\@tempdima}{%
+      \dimexpr\coverpageleftmargin+\tud@len@layouthoffset\relax%
+    }%
+    \edef\coverpageleftmargin{\the\@tempdima}%
+%    \end{macrocode}
+% Abschließend werden die gewünschten Längen nach der lokalen Gruppe definiert.
+%    \begin{macrocode}
+    \edef\tud@res@a{%
+      \endgroup%
+      \def\noexpand\coverpagetopmargin{\coverpagetopmargin}%
+      \def\noexpand\coverpagebottommargin{\coverpagebottommargin}%
+      \def\noexpand\coverpageleftmargin{\coverpageleftmargin}%
+      \def\noexpand\coverpagerightmargin{\coverpagerightmargin}%
+    }%
+  \tud@res@a%
+}
+\newcommand*\tud@cover@setmargins{%
+  \tud@cover@fixmargins%
+  \topmargin=\dimexpr\coverpagetopmargin-1in\relax%
+  \oddsidemargin=\dimexpr\coverpageleftmargin-1in\relax%
+  \evensidemargin=\dimexpr\coverpageleftmargin-1in\relax%
+  \textwidth=\dimexpr\paperwidth-\coverpageleftmargin%
+    -\coverpagerightmargin\relax%
+  \textheight=\dimexpr\paperheight-\coverpagetopmargin%
+    -\coverpagebottommargin\relax%
+  \headheight=0pt%
+  \headsep=0pt%
+  \footskip=\baselineskip%
+  \@colht=\textheight%
+  \@colroom=\textheight%
+  \vsize=\textheight%
+  \columnwidth=\textwidth%
+  \hsize=\columnwidth%
+  \linewidth=\hsize%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@cover@setmargins
+% \end{macro}^^A \tud@cover@fixmargins
 %
 % \iffalse
 %</book|report|article>
