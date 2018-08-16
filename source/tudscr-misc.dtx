@@ -1,4 +1,4 @@
-% \CheckSum{338}
+% \CheckSum{291}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -594,41 +594,23 @@
 %
 % \subsection{Anpassungen für das Paket \pkg{textcase}}
 %
+% \begin{macro}{\@uclcnotmath}
 % \begin{macro}{\tud@x@textcase@uclcnotmath}
 % \changes{v2.02}{2014/06/27}{\pkg{textcase}: Ignorieren von Fußnoten im 
 %   Argument des Befehls \cs{MakeTextUppercase}}^^A
 % \changes{v2.03}{2015/01/21}{\pkg{textcase}: Ignorieren des Befehls 
 %   \cs{@mkboth} im Argument des Befehls \cs{MakeTextUppercase}}^^A
-% \begin{macro}{\@uclcnotmath}
 % Damit Fußnoten innerhalb von \cs{MakeTextUppercase} nicht in Majuskeln
 % gesetzt werden, wird der interne Befehl \cs{@uclcnotmath} aus dem Paket
 % \pkg{textcase} angepasst.
-% \ToDo{Ist der Kram noch notwendig? in tudscr-comp verschieben}[v2.06]
+% \ToDo{Vorhalten von \cs{NoCaseChange} raus}[v2.??]
 %    \begin{macrocode}
-\newcommand*\tud@x@textcase@uclcnotmath{%
-  \def\footnote##1##{\toks@{\noexpand\footnote##1}\@footnote}%
-  \def\@footnote##1{\NoCaseChange{\the\toks@{##1}}}%
-  \def\@mkboth##1##2{\NoCaseChange{\@mkboth{##1}{##2}}}%
-}
 \AfterPackage*{textcase}{%
   \robustify\NoCaseChange%
-  \CheckCommand*\@uclcnotmath[4]{%
-    \begingroup
-      #1%
-      \def\({$}\let\)\(%
-      \def\NoCaseChange##1{\noexpand\NoCaseChange{\noexpand##1}}%
-      \@nonchangecase\label
-      \@nonchangecase\ref
-      \@nonchangecase\ensuremath
-      \def\cite##1##{\toks@{\noexpand\cite##1}\@citex}%
-      \def\@citex##1{\NoCaseChange{\the\toks@{##1}}}%
-      \def\reserved@a##1##2{\let#2\reserved@a}%
-      \expandafter\reserved@a\@uclclist\reserved@b{\reserved@b\@gobble}%
-      \protected@edef\reserved@a{%
-        \endgroup
-        \noexpand\@skipmath#3#4$\valign$%
-      }%
-    \reserved@a%
+  \newcommand*\tud@x@textcase@uclcnotmath{%
+    \def\footnote##1##{\toks@{\noexpand\footnote##1}\@footnote}%
+    \def\@footnote##1{\NoCaseChange{\the\toks@{##1}}}%
+    \def\@mkboth##1##2{\NoCaseChange{\@mkboth{##1}{##2}}}%
   }%
   \patchcmd{\@uclcnotmath}{\@nonchangecase\ensuremath}{%
     \@nonchangecase\ensuremath\tud@x@textcase@uclcnotmath%
@@ -636,8 +618,8 @@
 }
 \TUD@UnwindPackage{textcase}{\providecommand*\NoCaseChange[1]{#1}}
 %    \end{macrocode}
-% \end{macro}^^A \@uclcnotmath
 % \end{macro}^^A \tud@x@textcase@uclcnotmath
+% \end{macro}^^A \@uclcnotmath
 %
 % \iffalse
 %</body>
