@@ -5566,9 +5566,9 @@
     \tud@cs@store{chapterlinesformat}%
     \let\chapterlinesformat\tud@chapterlinesformat%
     \tud@cs@store{tud@chapter@before@hook}%
-    \let\tud@chapter@before@hook\tud@chapter@pre%
+    \renewcommand*\tud@chapter@before@hook{\tud@chapter@pre}%
     \tud@cs@store{tud@chapter@after@hook}%
-    \let\tud@chapter@after@hook\tud@chapter@app%
+    \renewcommand*\tud@chapter@after@hook{\tud@chapter@app}%
     \tud@komafont@set{chapter}{%
       \tud@sec@fontface%
       \tud@sec@fontsize%
@@ -5792,9 +5792,7 @@
   \fi%
 }
 \newcommand*\tud@chapter@before@hook{}
-\let\tud@chapter@before@hook\relax
 \newcommand*\tud@chapter@after@hook{}
-\let\tud@chapter@after@hook\relax
 \pretocmd\scr@startchapter{%
   \tud@chapter@before@hook%
 }{}{\tud@patch@wrn{scr@startchapter}}
