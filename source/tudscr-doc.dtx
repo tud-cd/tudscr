@@ -1,4 +1,4 @@
-% \CheckSum{2082}
+% \CheckSum{2093}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-doc.dtx}[%
-  2018/08/02 v2.06 TUD-Script\space%
+  2018/08/16 v2.06 TUD-Script\space%
   (source code documentation based on scrartcl/scrdoc)%
 ]
 \documentclass[english,ngerman,xindy]{tudscrdoc}
@@ -1352,84 +1352,13 @@
 % \end{macro}^^A \@ToDo
 % \end{macro}^^A \ToDo
 %
-% \subsection{Satzspiegel}
+% \subsection{Schriften und Satzspiegel}
 %
-% Um den zur Verfügung stehenden Platz möglichst effektiv zu nutzen, soll der 
-% Satzspiegel dahingehend aufgeteilt werden, dass für die Darstellung jeder
-% Quelltextzeile genau 80~Zeichen zur Verfügung stehen. Dies ist allerdings 
-% abhängig von der geladenen TypeWriter-Schrift. Deshalb wird die Berechnung 
-% des Satzspiegels erst zum Ende der Präambel ausgeführt, um auf etwaige Pakete
-% zur Schriftauswahl reagieren zu können.
-%
-% \begin{macro}{\calculatearea}
-% \changes{v2.05g}{2016/11/10}{neu}^^A
-% \begin{length}{\topmargin}
-% \begin{length}{\headheight}
-% \begin{length}{\headsep}
-% \begin{length}{\footskip}
-% \begin{length}{\textheight}
-% \begin{length}{\textwidth}
-% \begin{length}{\columnsep}
-% \begin{length}{\marginparsep}
-% \begin{length}{\marginparwidth}
-% \begin{length}{\oddsidemargin}
-% Hiermit wird die Berechnung des Satzspiegels ausgeführt.
-%    \begin{macrocode}
-\newcommand*\calculatearea{%
-  \setlength\topmargin{-1in}%
-  \setlength\headheight{0pt}%
-  \setlength\headsep{3em}%
-  \setlength\footskip{1.5\headsep}%
-  \setlength\textheight{\dimexpr\paperheight-2.5\headsep-\footskip\relax}%
-  \settowidth\MacroIndent{\rmfamily\scriptsize 0000\ }%
-  \begingroup%
-    \MacroFont\selectfont%
-    \settowidth\@tempdima{\space}%
-    \setlength\@tempdima{80\@tempdima}%
-%^^A    \addtolength\@tempdima{\dimexpr\MacroIndent+.1\p@\relax}%
-    \addtolength\@tempdima{\MacroIndent}%
-    \edef\@tempa{%
-      \endgroup%
-      \noexpand\setlength\noexpand\textwidth{\the\@tempdima}%
-    }%
-  \@tempa%
-  \setlength\columnsep{1em}%
-  \setlength\marginparsep{1em}%
-  \setlength\marginparwidth{%
-    \dimexpr\paperwidth-\textwidth-2\marginparsep\relax%
-  }%
-  \setlength\oddsidemargin{\dimexpr\marginparwidth+\marginparsep-1in\relax}%
-}
-\AtEndPreamble{\calculatearea}
-%    \end{macrocode}
-% \end{length}^^A \oddsidemargin
-% \end{length}^^A \marginparwidth
-% \end{length}^^A \marginparsep
-% \end{length}^^A \columnsep
-% \end{length}^^A \textwidth
-% \end{length}^^A \textheight
-% \end{length}^^A \footskip
-% \end{length}^^A \headsep
-% \end{length}^^A \headheight
-% \end{length}^^A \topmargin
-% \end{macro}^^A \calculatearea
-% \begin{macro}{\saved@calculatearea}
-% \changes{v2.05g}{2016/11/10}{neu}^^A
-% \begin{macro}{\tud@font@set}
 % \begin{macro}{\MacroFont}
 % \begin{macro}{\AltMacroFont}
-% Etwas komplizierter wird es, wenn das paket \pkg{tudscrfonts} geladen wird. 
-% Die darin ausgewählten TypeWriter-Schriften sind zur Quelltextdokumentation 
-% zu schlank. Deshalb wird das Paket \pkg{mweights} genutzt, um die Stärke 
-% etwas zu erhöhen. Damit dies mit dem Paket \pkg{doc} funktioniert, muss der 
-% Befehl \cs{MacroFont} leicht angepasst werden.
-%
-% Da das Paket \pkg{tudscrfonts} das Festlegen der Schriften selbst auf das 
-% Ende der Präambel verzögert, muss sichergestellt werden, dass die Berechnung 
-% des Satzspiegels erst nach der Schriftauswahl erfolgt. Deshalb wird der 
-% Inhalt von \cs{calculatearea} in \cs{saved@calculatearea} gesichert und 
-% anschließend unschädlich gemacht. Danach wird die Satzspiegelberechnung an 
-% das Makro \cs{tud@font@set} angehangen.
+% Wird das Paket \pkg{mweights} geladen, so soll der passende Schriftschnitt 
+% für die ausgewählten TypeWriter-Schriften genutzt werden. Damit dies mit dem 
+% Paket \pkg{doc} funktioniert, muss der Befehl \cs{MacroFont} angepasst werden.
 %    \begin{macrocode}
 \AfterPackage{mweights}{%
   \CheckCommand*\MacroFont{%
@@ -1460,27 +1389,95 @@
     \fontshape\sldefault%
     \small%
   }%
-}
-\PassOptionsToPackage{ttfont=lmtt}{tudscrfonts}
 %    \end{macrocode}
-% \ToDo{warum ist \cs{mdseries@tt} undefiniert, wenn typearea aktiv?}[v2.06]
+% Am Ende der Präambel wird dafür gesorgt, dass der Befehl \cs{mdseries@tt} in 
+% jedem Fall definiert ist.
 %    \begin{macrocode}
+  \AtEndPreamble{%
+    \ifundef{\mdseries@tt}{\edef\mdseries@tt{\mddefault}}{}%
+  }%
+}
+%    \end{macrocode}
+% Wird das Paket \pkg{tudscrfonts} genutzt, erscheinen die TypeWriter-Schriften
+% zur Quelltextdokumentation etwas zu schlank. 
+%    \begin{macrocode}
+\PassOptionsToPackage{ttfont=lmtt}{tudscrfonts}
 \AfterPackage{tudscrfonts}{%
-  \newcommand*\saved@calculatearea{}%
-  \let\saved@calculatearea\calculatearea%
-  \let\calculatearea\relax%
-  \appto\tud@font@set{%
-    \if@tud@cdfont@active%
+  \AtEndPreamble{%
+    \ifnum\tud@ttfont@num>\z@\relax%
       \def\mdseries@tt{m}%
     \fi%
-    \saved@calculatearea%
   }%
 }
 %    \end{macrocode}
 % \end{macro}^^A \AltMacroFont
 % \end{macro}^^A \MacroFont
-% \end{macro}^^A \tud@font@set
-% \end{macro}^^A \saved@calculatearea
+%
+% Um den zur Verfügung stehenden Platz möglichst effektiv zu nutzen, soll der 
+% Satzspiegel dahingehend aufgeteilt werden, dass für die Darstellung jeder
+% Quelltextzeile genau 80~Zeichen zur Verfügung stehen. Dies ist allerdings 
+% abhängig von der geladenen TypeWriter-Schrift. Deshalb wird die Berechnung 
+% des Satzspiegels erst zum Beginn des Dokumentes ausgeführt, um auf etwaige 
+% Pakete zur Schriftauswahl reagieren zu können.
+%
+% \begin{macro}{\tud@setarea}
+% \changes{v2.05g}{2016/11/10}{neu}^^A
+% \begin{length}{\topmargin}
+% \begin{length}{\headheight}
+% \begin{length}{\headsep}
+% \begin{length}{\footskip}
+% \begin{length}{\textheight}
+% \begin{length}{\textwidth}
+% \begin{length}{\columnsep}
+% \begin{length}{\marginparsep}
+% \begin{length}{\marginparwidth}
+% \begin{length}{\oddsidemargin}
+% Hiermit wird die Berechnung des Satzspiegels ausgeführt.
+%    \begin{macrocode}
+\newcommand*\tud@setarea{%
+  \setlength\topmargin{-1in}%
+  \setlength\headheight{0pt}%
+  \setlength\headsep{3em}%
+  \setlength\footskip{1.5\headsep}%
+  \setlength\textheight{\dimexpr\paperheight-2.5\headsep-\footskip\relax}%
+  \@colht=\textheight%
+  \@colroom=\textheight%
+  \vsize=\textheight%
+  \settowidth\MacroIndent{\rmfamily\scriptsize 0000\ }%
+  \begingroup%
+    \MacroFont\selectfont%
+    \settowidth\@tempdima{\space}%
+    \setlength\@tempdima{80\@tempdima}%
+%^^A    \addtolength\@tempdima{\dimexpr\MacroIndent+.1\p@\relax}%
+    \addtolength\@tempdima{\MacroIndent}%
+    \edef\@tempa{%
+      \endgroup%
+      \noexpand\setlength\noexpand\textwidth{\the\@tempdima}%
+    }%
+  \@tempa%
+  \columnwidth=\textwidth%
+  \hsize=\columnwidth%
+  \linewidth=\hsize%
+  \setlength\columnsep{1em}%
+  \setlength\marginparsep{1em}%
+  \setlength\marginparwidth{%
+    \dimexpr\paperwidth-\textwidth-2\marginparsep\relax%
+  }%
+  \setlength\oddsidemargin{\dimexpr\marginparwidth+\marginparsep-1in\relax}%
+}
+\AtBeginDocument{\tud@setarea}
+%    \end{macrocode}
+% \end{length}^^A \oddsidemargin
+% \end{length}^^A \marginparwidth
+% \end{length}^^A \marginparsep
+% \end{length}^^A \columnsep
+% \end{length}^^A \textwidth
+% \end{length}^^A \textheight
+% \end{length}^^A \footskip
+% \end{length}^^A \headsep
+% \end{length}^^A \headheight
+% \end{length}^^A \topmargin
+% \end{macro}^^A \tud@setarea
 %
 % \subsection{Zusätzliche Markup-Befehle}
 %
