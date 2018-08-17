@@ -291,9 +291,9 @@
 % in ihrem Verhalten den gleichnamigen Klassenoptionen.
 %    \begin{macrocode}
 \TUD@parameter@family{title}{%
+  \TUD@parameter@def{pagenumber}{\def\tud@title@pagenumber{#1}}%
   \TUD@parameter@def{cdtitle}[true]{\TUDoption{cdtitle}{#1}}%
   \TUD@parameter@let{cd}{cdtitle}%
-  \TUD@parameter@def{pagenumber}{\def\tud@title@pagenumber{#1}}%
   \TUD@parameter@def{cdgeometry}[true]{\TUDoption{cdgeometry}{#1}}%
 %    \end{macrocode}
 % Mit \cs{TUD@parameter@ps@def} werden alle verfügbaren Parameter für
@@ -1392,33 +1392,20 @@
 % booleschen Werten verwenet werden. Für einen benutzerdefinierten Satzspiegel 
 % der Umschlagseite müssen die \KOMAScript-Makros \cs{coverpage\dots{}margin} 
 % angepasst werden.
-% \ToDo{%
-%   Parametersatz mit title vereinheitlichen bzw. Untermenge an
-%  \cs{tud@maketitle} durchreichen%
-% }[v2.06]
 %    \begin{macrocode}
 \tud@locked@newbool{@tud@cdgeometry@cover}
 \TUD@parameter@family{cover}{%
+  \TUD@parameter@def{pagenumber}{\def\tud@title@pagenumber{#1}}%
   \TUD@parameter@def{cdcover}[true]{\TUDoption{cdcover}{#1}}%
   \TUD@parameter@let{cd}{cdcover}%
   \TUD@parameter@def{cdgeometry}[true]{%
-    \ifstrbool{#1}{%
+    \TUDoption{cdgeometry}{#1}%
+    \ifnum\tud@cdgeometry@num>\@ne\relax% true/symmetric/twoside
       \tud@locked@bool@set{@tud@cdgeometry@cover}{true}%
-    }{%
+    \else%
       \tud@locked@bool@set{@tud@cdgeometry@cover}{false}%
-    }{%
-      \ifstr{#1}{custom}{%
-        \tud@locked@bool@set{@tud@cdgeometry@cover}{false}%
-      }{%
-        \ifstr{#1}{user}{%
-          \tud@locked@bool@set{@tud@cdgeometry@cover}{false}%
-        }{%
-          \TUD@parameter@error{cdgeometry}{true, false or custom}%
-        }%
-      }%
-    }%
+    \fi%
   }%
-  \TUD@parameter@def{pagenumber}{\def\tud@title@pagenumber{#1}}%
 %    \end{macrocode}
 % Mit \cs{TUD@parameter@ps@def} werden alle verfügbaren Parameter für 
 % die Kopf- und Fußzeilen definiert.
@@ -1483,24 +1470,24 @@
 % Standardmäßig ist \cs{coverbottommargin} abhängig von \cs{covertopmargin}, 
 % weshalb dieses Makro als erstes expandiert wird.
 %    \begin{macrocode}
-    \setlength{\@tempdima}{%
+    \setlength\@tempdima{%
       \dimexpr\coverpagebottommargin-\tud@len@layoutvoffset
       +\paperheight-\tud@len@layoutheight\relax%
     }%
     \edef\coverpagebottommargin{\the\@tempdima}%
-    \setlength{\@tempdima}{%
+    \setlength\@tempdima{%
       \dimexpr\coverpagetopmargin+\tud@len@layoutvoffset\relax%
     }%
     \edef\coverpagetopmargin{\the\@tempdima}%
 %    \end{macrocode}
 % Selbiges gilt für \cs{coverrightmargin} und \cs{coverleftmargin}.
 %    \begin{macrocode}
-    \setlength{\@tempdima}{%
+    \setlength\@tempdima{%
       \dimexpr\coverpagerightmargin-\tud@len@layouthoffset
       +\paperwidth-\tud@len@layoutwidth\relax%
     }%
     \edef\coverpagerightmargin{\the\@tempdima}%   
-    \setlength{\@tempdima}{%
+    \setlength\@tempdima{%
       \dimexpr\coverpageleftmargin+\tud@len@layouthoffset\relax%
     }%
     \edef\coverpageleftmargin{\the\@tempdima}%
