@@ -409,11 +409,15 @@
 \TUD@key{slantedGreek}[true]{\TUDoptions{slantedgreek=#1}}
 \TUD@key{slantedGreeks}[true]{\TUDoptions{slantedgreek=#1}}
 %%% From File: tudscr-area.dtx
+\newif\if@tud@cdgeometry@reset
+\newcommand*\tud@cdgeometry@reset[1]{%
+  \@tud@cdgeometry@resettrue%
+  \TUDoptions{cdgeometry=#1}%
+  \@tud@cdgeometry@resetfalse%
+}
 \tud@locked@newnum{tud@cdgeometry@num}{0}
 \newcommand*\tud@cdgeometry@calc@num{0}
 \TUD@key{cdgeometry}[true]{%
-  \let\@tempb\tud@cdgeometry@num%
-  \let\@tempc\tud@cdgeometry@calc@num%
   \TUD@set@numkey{cdgeometry}{@tempa}{%
     \TUD@bool@numkey,%
     {typearea}{0},%
@@ -454,11 +458,17 @@
     \or% custom
       \tud@locked@num@set{tud@cdgeometry@num}{1}%
     \fi%
-    \@tempswafalse%
-    \ifx\@tempb\tud@cdgeometry@num\relax\else\@tempswatrue\fi%
-    \ifx\@tempc\tud@cdgeometry@calc@num\relax\else\@tempswatrue\fi%
-    \if@tempswa%
-      \TUD@SpecialOptionAtDocument{tud@cdgeometry@process}%
+    \if@atdocument%
+      \if@tud@cdgeometry@reset\else%
+        \ifcase\tud@cdgeometry@num\relax%
+          \tud@loadgeometry{current@typearea}%
+          \@tud@x@geometry@fixmarginstrue%
+        \or%
+          \tud@loadgeometry{current@custom}%
+          \@tud@x@geometry@fixmarginstrue%
+        \fi%
+        \TUD@SpecialOptionAtDocument{tud@cdgeometry@process}%
+      \fi%
     \fi%
   \fi%
 }
@@ -3590,13 +3600,8 @@
     \tud@x@geometry@user{#1}{newgeometry}%
     \tud@cs@restore{Gm@restore@org}%
   }%
-  \renewcommand*\restoregeometry[1][]{%
-    \IfArgIsEmpty{#1}{}{%
-      \tud@cs@store{TUD@SpecialOptionAtDocument}%
-      \let\TUD@SpecialOptionAtDocument\@gobble%
-      \TUDoption{cdgeometry}{#1}%
-      \tud@cs@restore{TUD@SpecialOptionAtDocument}%
-    }%
+  \renewcommand*\restoregeometry[1][custom]{%
+    \tud@cdgeometry@reset{#1}%
     \if@atdocument%
       \ifcase\tud@cdgeometry@num\relax% false
         \tud@loadgeometry{init@typearea}%
@@ -3609,10 +3614,13 @@
     \fi%
   }%
   \apptocmd{\Gm@changelayout}{%
-    \if@atdocument\if@tud@x@geometry@enabled%
-      \@tud@x@geometry@fixmarginstrue%
-      \TUDoptions{cdgeometry=custom}%
-    \fi\fi%
+    \if@tud@x@geometry@enabled%
+      \if@atdocument%
+        \@tud@x@geometry@fixmarginstrue%
+        \tud@cdgeometry@reset{custom}%
+        \tud@cdgeometry@process%
+      \fi%
+    \fi%
   }{}{\tud@patch@wrn{Gm@changelayout}}%
   \newif\if@tud@x@geometry@fixmargins%
   \newcommand*\tud@x@geometry@fixmargins{%
@@ -3652,6 +3660,7 @@
       \epreto{\tud@x@geometry@parameter}{\tud@res@a,}%
       \def\tud@res@a{\tud@cs@use{newgeometry}}%
       \expandafter\tud@res@a\expandafter{\tud@x@geometry@parameter}%
+      \edef\tud@x@geometry@init{\tud@x@geometry@parameter}%
     }{%
       \eappto\tud@x@geometry@init{\tud@x@geometry@parameter}%
     }%
@@ -4159,6 +4168,11 @@
     }%
     \tud@x@geometry@set{\tud@res@a}%
     \tud@savegeometry{stdarea}%
+    \ifcase\tud@cdgeometry@num\relax% false
+      \tud@savegeometry{current@typearea}%
+    \or% custom
+      \tud@savegeometry{current@custom}%
+    \fi%
     \if@atdocument%
       \ifstr{\tud@currentgeometry}{stdarea}{}{%
         \expandafter\tud@loadgeometry\expandafter{\tud@currentgeometry}%
@@ -4219,6 +4233,9 @@
     \tud@savegeometry{init@typearea}%
     \tud@cs@restore{tud@cdgeometry@num}%
     \BeforeSelectAnyPageStyle{\tud@BeforeSelectAnyPageStyle{##1}}%
+    \ifnum\tud@cdgeometry@num=\@ne%
+      \tud@loadgeometry{init@custom}%
+    \fi%
     \@tud@x@geometry@fixmarginstrue%
     \tud@cdgeometry@process%
     \let\tud@cdgeometry@init\relax%
@@ -4285,7 +4302,8 @@
   \tud@skip@restore{paperheight}%
   \tud@skip@restore{paperwidth}%
   \if@atdocument%
-    \TUDoptions{cdgeometry=false}%
+    \tud@cdgeometry@reset{typearea}%
+    \tud@cdgeometry@process%
   \else%
     \TUD@key@preset{cdgeometry}{false}%
   \fi%
@@ -4322,7 +4340,6 @@
         \def\noexpand\tud@cdgeometry@num{\tud@cdgeometry@num}%
       }%
     }%
-    \meaning\tud@res@a
   \tud@res@a%
 }
 \AfterRestoreareas{\tud@cdgeometry@process}%
@@ -4668,6 +4685,7 @@
 }{}{\tud@patch@wrn{thispagestyle}}
 \newcommand*\tud@pagestyle{}
 \let\tud@pagestyle\pagestyle
+\newcommand*\currentpagestyle{plain}
 \pretocmd{\tud@pagestyle}{%
   \tud@BeforeSelectAnyPageStyle{#1}%
   \edef\currentpagestyle{#1}%
@@ -4677,6 +4695,7 @@
 \BeforePackage{scrlayer-scrpage}{%
   \tud@cs@restore{pagestyle}%
   \undef\tud@pagestyle%
+  \undef\currentpagestyle%
 }
 \TUD@UnwindPackage{scrlayer-scrpage}{%
   \ifcsundef{if@chapter}{%
@@ -5967,6 +5986,7 @@
   \TUD@parameter@def{cdtitle}[true]{\TUDoption{cdtitle}{#1}}%
   \TUD@parameter@let{cd}{cdtitle}%
   \TUD@parameter@def{pagenumber}{\def\tud@title@pagenumber{#1}}%
+  \TUD@parameter@def{cdgeometry}[true]{\TUDoption{cdgeometry}{#1}}%
   \TUD@parameter@ps@def{#1}%
   \TUD@parameter@handler@value{pagenumber}%
 }
@@ -7185,30 +7205,12 @@
     \global\@tud@cdgeometry@processfalse%
   \fi%
 }
-\newcommand*\tud@x@textcase@uclcnotmath{%
-  \def\footnote##1##{\toks@{\noexpand\footnote##1}\@footnote}%
-  \def\@footnote##1{\NoCaseChange{\the\toks@{##1}}}%
-  \def\@mkboth##1##2{\NoCaseChange{\@mkboth{##1}{##2}}}%
-}
 \AfterPackage*{textcase}{%
   \robustify\NoCaseChange%
-  \CheckCommand*\@uclcnotmath[4]{%
-    \begingroup
-      #1%
-      \def\({$}\let\)\(%
-      \def\NoCaseChange##1{\noexpand\NoCaseChange{\noexpand##1}}%
-      \@nonchangecase\label
-      \@nonchangecase\ref
-      \@nonchangecase\ensuremath
-      \def\cite##1##{\toks@{\noexpand\cite##1}\@citex}%
-      \def\@citex##1{\NoCaseChange{\the\toks@{##1}}}%
-      \def\reserved@a##1##2{\let#2\reserved@a}%
-      \expandafter\reserved@a\@uclclist\reserved@b{\reserved@b\@gobble}%
-      \protected@edef\reserved@a{%
-        \endgroup
-        \noexpand\@skipmath#3#4$\valign$%
-      }%
-    \reserved@a%
+  \newcommand*\tud@x@textcase@uclcnotmath{%
+    \def\footnote##1##{\toks@{\noexpand\footnote##1}\@footnote}%
+    \def\@footnote##1{\NoCaseChange{\the\toks@{##1}}}%
+    \def\@mkboth##1##2{\NoCaseChange{\@mkboth{##1}{##2}}}%
   }%
   \patchcmd{\@uclcnotmath}{\@nonchangecase\ensuremath}{%
     \@nonchangecase\ensuremath\tud@x@textcase@uclcnotmath%

@@ -1,4 +1,4 @@
-% \CheckSum{2178}
+% \CheckSum{2185}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-area.dtx}[%
-  2018/08/16 v2.06 TUD-Script (type or page area)%
+  2018/08/17 v2.06 TUD-Script (type or page area)%
 ]
 \documentclass[english,ngerman,xindy]{tudscrdoc}
 \usepackage[T1]{fontenc}
@@ -533,6 +533,23 @@
 %<*class&option>
 % \fi
 %
+% \begin{macro}{\tud@cdgeometry@reset}
+% \changes{v2.06}{2018/08/17}{neu}^^A
+% \begin{macro}{\if@tud@cdgeometry@reset}
+% \changes{v2.06}{2018/08/17}{neu}^^A
+% Mit diesem Befehl wird das Laden von zuvor definierte Satzspiegeln durch die 
+% Option \opt{cdgeometry} temporär deaktiviert. Dies geschieht, um lediglich 
+% die im Hintergrund verwendeten Makros neu zu setzen.
+%    \begin{macrocode}
+\newif\if@tud@cdgeometry@reset
+\newcommand*\tud@cdgeometry@reset[1]{%
+  \@tud@cdgeometry@resettrue%
+  \TUDoptions{cdgeometry=#1}%
+  \@tud@cdgeometry@resetfalse%
+}
+%    \end{macrocode}
+% \end{macro}^^A \if@tud@cdgeometry@reset
+% \end{macro}^^A \tud@cdgeometry@reset
 % \subsection{Optionen für den Satzspiegel}
 % \begin{option}{cdgeometry}
 % \changes{v2.05}{2016/03/06}{\val{custom} neu}^^A
@@ -556,8 +573,6 @@
 \tud@locked@newnum{tud@cdgeometry@num}{0}
 \newcommand*\tud@cdgeometry@calc@num{0}
 \TUD@key{cdgeometry}[true]{%
-  \let\@tempb\tud@cdgeometry@num%
-  \let\@tempc\tud@cdgeometry@calc@num%
   \TUD@set@numkey{cdgeometry}{@tempa}{%
     \TUD@bool@numkey,%
     {typearea}{0},%
@@ -598,11 +613,25 @@
     \or% custom
       \tud@locked@num@set{tud@cdgeometry@num}{1}%
     \fi%
-    \@tempswafalse%
-    \ifx\@tempb\tud@cdgeometry@num\relax\else\@tempswatrue\fi%
-    \ifx\@tempc\tud@cdgeometry@calc@num\relax\else\@tempswatrue\fi%
-    \if@tempswa%
-      \TUD@SpecialOptionAtDocument{tud@cdgeometry@process}%
+%    \end{macrocode}
+% Innerhalb des Dokumentes kann die Option genutzt werden, um zwischen den 
+% unterschiedlichen Satzspiegeln zu wechseln. Da bei der Konstruktion dieser 
+% die internen Längen verwendet werden, welche von \pkg{typearea} respektive 
+% \pkg{geometry} definiert werden, muss beim Umschalten der jeweils zuletzt 
+% definierte Satzspiegel geladen werden. Falls jedoch eine Neuberechnung 
+% erfolgte, wird auf das Laden verzichtet (\cs{if@tud@cdgeometry@reset}).
+%    \begin{macrocode}
+    \if@atdocument%
+      \if@tud@cdgeometry@reset\else%
+        \ifcase\tud@cdgeometry@num\relax%
+          \tud@loadgeometry{current@typearea}%
+          \@tud@x@geometry@fixmarginstrue%
+        \or%
+          \tud@loadgeometry{current@custom}%
+          \@tud@x@geometry@fixmarginstrue%
+        \fi%
+        \TUD@SpecialOptionAtDocument{tud@cdgeometry@process}%
+      \fi%
     \fi%
   \fi%
 }
@@ -897,13 +926,8 @@
 % Satzspiegel geladen. Über das optinale Argument kann der gewünschte Wert für 
 % die Option \opt{cdgeometry} angegeben werden.
 %    \begin{macrocode}
-  \renewcommand*\restoregeometry[1][]{%
-    \IfArgIsEmpty{#1}{}{%
-      \tud@cs@store{TUD@SpecialOptionAtDocument}%
-      \let\TUD@SpecialOptionAtDocument\@gobble%
-      \TUDoption{cdgeometry}{#1}%
-      \tud@cs@restore{TUD@SpecialOptionAtDocument}%
-    }%
+  \renewcommand*\restoregeometry[1][custom]{%
+    \tud@cdgeometry@reset{#1}%
     \if@atdocument%
       \ifcase\tud@cdgeometry@num\relax% false
         \tud@loadgeometry{init@typearea}%
@@ -922,10 +946,13 @@
 % eingehängt.
 %    \begin{macrocode}
   \apptocmd{\Gm@changelayout}{%
-    \if@atdocument\if@tud@x@geometry@enabled%
-      \@tud@x@geometry@fixmarginstrue%
-      \TUDoptions{cdgeometry=custom}%
-    \fi\fi%
+    \if@tud@x@geometry@enabled%
+      \if@atdocument%
+        \@tud@x@geometry@fixmarginstrue%
+        \tud@cdgeometry@reset{custom}%
+        \tud@cdgeometry@process%
+      \fi%
+    \fi%
   }{}{\tud@patch@wrn{Gm@changelayout}}%
 %    \end{macrocode}
 % Das Paket \pkg{geometry} bietet die Möglichkeit, den kompletten Satzspiegel 
@@ -1009,6 +1036,7 @@
       \epreto{\tud@x@geometry@parameter}{\tud@res@a,}%
       \def\tud@res@a{\tud@cs@use{newgeometry}}%
       \expandafter\tud@res@a\expandafter{\tud@x@geometry@parameter}%
+      \edef\tud@x@geometry@init{\tud@x@geometry@parameter}%
     }{%
       \eappto\tud@x@geometry@init{\tud@x@geometry@parameter}%
     }%
@@ -1760,6 +1788,15 @@
     \tud@x@geometry@set{\tud@res@a}%
     \tud@savegeometry{stdarea}%
 %    \end{macrocode}
+% Je nach gewählter Option wird der aktuelle Satzspiegel für \pkg{typearea} 
+% oder \pkg{geometry} gesichert.
+%    \begin{macrocode}
+    \ifcase\tud@cdgeometry@num\relax% false
+      \tud@savegeometry{current@typearea}%
+    \or% custom
+      \tud@savegeometry{current@custom}%
+    \fi%
+%    \end{macrocode}
 % Falls die (abermalige) Erstellung der Satzspiegel im Dokument erfolgt, sollte 
 % anschließend auch der richtige Satzspiegel wieder ausgewählt werden.
 %    \begin{macrocode}
@@ -1866,6 +1903,9 @@
 % Ganz zum Schluss wird der Satzspiegel für die aktuelle Einstellung von 
 % \opt{cdgeometry} gesetzt.
 %    \begin{macrocode}
+    \ifnum\tud@cdgeometry@num=\@ne%
+      \tud@loadgeometry{init@custom}%
+    \fi%
     \@tud@x@geometry@fixmarginstrue%
     \tud@cdgeometry@process%
     \let\tud@cdgeometry@init\relax%
@@ -2031,7 +2071,8 @@
   \tud@skip@restore{paperheight}%
   \tud@skip@restore{paperwidth}%
   \if@atdocument%
-    \TUDoptions{cdgeometry=false}%
+    \tud@cdgeometry@reset{typearea}%
+    \tud@cdgeometry@process%
   \else%
     \TUD@key@preset{cdgeometry}{false}%
   \fi%
@@ -2076,7 +2117,6 @@
         \def\noexpand\tud@cdgeometry@num{\tud@cdgeometry@num}%
       }%
     }%
-    \meaning\tud@res@a
   \tud@res@a%
 }
 \AfterRestoreareas{\tud@cdgeometry@process}%
