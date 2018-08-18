@@ -1,4 +1,4 @@
-% \CheckSum{1443}
+% \CheckSum{1365}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-title.dtx}[%
-  2018/08/17 v2.06 TUD-Script (title)%
+  2018/08/18 v2.06 TUD-Script (title)%
 ]
 \documentclass[english,ngerman,xindy]{tudscrdoc}
 \usepackage[T1]{fontenc}
@@ -277,7 +277,7 @@
         \tud@maketitle@page%
       \else%
 %</book|report|article>
-        \tud@maketitle@head%
+        \tud@maketitle@inpage%
 %<*book|report|article>
       \fi%
 %</book|report|article>
@@ -467,55 +467,22 @@
 %    \begin{macrocode}
     {\usekomafont{titlepage}{%
 %    \end{macrocode}
-% Da die Überschrift auf einer festen Position liegen soll, muss von allem, was
-% über der Überschrift positioniert werden soll, die Höhe bestimmt werden, um
-% einen entsprechenden Offset einfügen zu können. Dafür werden zwei temporäre
-% Standardboxen verwendet. In diesen wird der gewünschte Inhalt für die beiden
-% Felder \cs{@titlehead} bzw. \cs{@subject} abgelegt und die sich daraus
-% kumulierende Höhe in \cs{@tempdima} gespeichert. Vor dem Setzen der Felder
-% kann nun der \textbf{insgesamt} notwendige vertikaler Freiraum vor dem
-% eigentlichen Titel für \cs{@titlehead} \textbf{und} \cs{@subject} abgezogen
-% werden. Anschließend werden die beiden Boxen ausgegeben und der Aufbau der
-% Titelseite kann beginnen.
-% \ToDo{%
-%   Der Kram mit Absatz und neuer Zeile ist nicht ganz stimmig, die Länge zum 
-%   Verschieben wird nicht suaber berechnet. Alles in eine Box der Höhe 0?
-% }[v2.06]
+% Zunächst der Kopf des Titels.
 %    \begin{macrocode}
-      \setlength\@tempdima{\z@}%
-      \ifx\@titlehead\@empty\else%
-        \sbox\z@{\vbox{%
-          \begin{minipage}[t]{\textwidth}%
-            {\usekomafont{titlehead}{\@titlehead\par\null}}%
-          \end{minipage}\newline\null%
-        }}%
-        \addtolength\@tempdima{\dimexpr\ht\z@+\dp\z@\relax}%
-      \fi%
-%    \end{macrocode}
-% Erkennen, ob in der Betreffzeile eine Abschlussarbeit ausgegeben werden soll
-% und kann.
-%    \begin{macrocode}
-      \tud@thesis@tosubject%
-      \ifx\@subject\@empty\else%
-        \sbox\@ne{\vbox{{\usekomafont{subject}{\@subject\par\null}}}}%
-        \addtolength\@tempdima{\dimexpr\ht\@ne+\dp\@ne+\p@\relax}%
-      \fi%
-      \vspace*{-\@tempdima}%
-      \ifx\@titlehead\@empty\else\usebox\z@\par\fi%
-      \ifx\@subject\@empty\else\usebox\@ne\par\fi%
+      \tud@maketitle@head%
 %    \end{macrocode}
 % Nachdem bereits \cs{@titlehead} und \cs{@subject} gesetzt worden, folgen nun
 % die weiteren Felder wie vom \CD~-- mehr oder weniger~-- vorgegeben auf der
 % Titelseite in unterschiedlichen Größen und Schriftstärken.
 %    \begin{macrocode}
-      {\usekomafont{title}{\tud@title@uppercase{\@title}\par}}%
+      {\usekomafont{title}{\tud@title@format{\@title}\par}}%
 %    \end{macrocode}
 % Der Untertitel wird ggf. in der gleichen Schrift gesetzt wie der Titel,
 % allerdings etwas kleiner.
 %    \begin{macrocode}
       \ifx\@subtitle\@empty\else%
         \vskip 1ex\@plus.5ex\@minus.5ex%
-        {\usekomafont{subtitle}{\tud@title@uppercase{\@subtitle}\par}}%
+        {\usekomafont{subtitle}{\tud@title@format{\@subtitle}\par}}%
       \fi%
       \vskip 2ex\@plus1ex\@minus1ex%
       \vskip 2\bigskipamount%
@@ -549,7 +516,7 @@
       \else%
         \vskip 2ex\@plus.25fill%
         \if@tud@subjectthesis\else%
-          {\usekomafont{thesis}{\tud@title@uppercase{\@thesis}\par}}%
+          {\usekomafont{thesis}{\tud@title@format{\@thesis}\par}}%
           \vskip 2ex\@plus1ex\@minus1ex%
         \fi%
 %    \end{macrocode}
@@ -567,7 +534,7 @@
             \if@tud@subjectthesis%
               {\usekomafont{subject}{\@tempc\par}}%
             \else%
-              {\usekomafont{thesis}{\tud@title@uppercase{\@tempc}\par}}%
+              {\usekomafont{thesis}{\tud@title@format{\@tempc}\par}}%
             \fi%
             \vskip 3ex\@plus1ex\@minus1ex%
           \fi%
@@ -740,14 +707,14 @@
 %
 % \subsubsection{Die Definition des Titelkopfes}
 %
-% \begin{macro}{\tud@maketitle@head}
+% \begin{macro}{\tud@maketitle@inpage}
 % \changes{v2.05}{2015/07/13}{neu}^^A
-% \begin{macro}{\tud@maketitle@@head}
+% \begin{macro}{\tud@maketitle@@inpage}
 % \changes{v2.05}{2015/07/13}{neu}^^A
 % Das sind die internen Makros für einen Titelkopf (\opt{titlepage}|=|\val{no}),
 % welche sich stark an den orginalen \KOMAScript-Befehlen orientieren.
 %    \begin{macrocode}
-\newcommand*\tud@maketitle@head{%
+\newcommand*\tud@maketitle@inpage{%
   \renewcommand*\tud@title@fontcolor{}%
   \ifcase\tud@cd@title@num\relax\or\else% *color
     \ifstr{\tud@pagecolor}{HKS41}{}{\renewcommand*\tud@title@fontcolor{HKS41}}%
@@ -792,7 +759,7 @@
       \tud@res@a{\@makefrontispiece}%
     \fi%
     \next@tdpage%
-    \tud@res@a{\tud@maketitle@@head}%
+    \tud@res@a{\tud@maketitle@@inpage}%
     \ifx\titlepagestyle\@empty\else\thispagestyle{\titlepagestyle}\fi%
     \@thanks%
   \endgroup%
@@ -800,7 +767,7 @@
 %    \end{macrocode}
 % Hier erfolgt die Ausgabe des Titelkopfes.
 %    \begin{macrocode}
-\newcommand*\tud@maketitle@@head{%
+\newcommand*\tud@maketitle@@inpage{%
   \global\@topnum=\z@%
   \tud@cd@headstartvskip%
 %<*book|report|article>
@@ -817,40 +784,25 @@
   {\usekomafont{titlepage}{%
     \tud@x@hyperref@realfootnotes%
 %    \end{macrocode}
+% Bei einem Titelkopf ist nur die Variante möglich, dass eine Abschlussarbeit 
+% in der Betreffzeile angegeben wird.
+%    \begin{macrocode}
+%<*book|report|article>
+    \TUDoptions{subjectthesis=true}%
+%</book|report|article>
+%    \end{macrocode}
 % Ähnlich wie bei der Titelseite wird auch beim Titelkopf die Inhalte von 
 % \cs{@titlehead} und \cs{@subject} so nach oben verschoben, dass der Titel 
 % selbst auf der gewünschten Höhe landet.
 %    \begin{macrocode}
-    \setlength\@tempdima{\z@}%
-    \ifx\@titlehead\@empty\else%
-      \sbox\z@{\vbox{%
-        \begin{minipage}[t]{\textwidth}%
-          {\usekomafont{titlehead}{\@titlehead\par\null}}%
-        \end{minipage}\newline\null%
-      }}%
-      \addtolength\@tempdima{\dimexpr\ht\z@+\dp\z@\relax}%
-    \fi%
+    \tud@maketitle@head%
 %    \end{macrocode}
-% Erkennen, ob in der Betreffzeile eine Abschlussarbeit ausgegeben werden soll
-% und kann. Bei einem Titelkopf ist nur diese Variante möglich.
+% Der eigentliche Titel nach dem Titelkopf.
 %    \begin{macrocode}
-%<*book|report|article>
-    \TUDoptions{subjectthesis=true}%
-    \tud@thesis@tosubject%
-%</book|report|article>
-    \ifx\@subject\@empty\else%
-      \sbox\@ne{\vbox{{\usekomafont{subject}{\@subject\par\null}}}}%
-      \addtolength\@tempdima{\dimexpr\ht\@ne+\dp\@ne+\p@\relax}%
-    \fi%
-%<*book|report|article>
-    \vspace*{-\@tempdima}%
-%</book|report|article>
-    \ifx\@titlehead\@empty\else\usebox\z@\par\fi%
-    \ifx\@subject\@empty\else\usebox\@ne\par\fi%
-    {\usekomafont{title}{\tud@title@uppercase{\@title}\par}}%
+    {\usekomafont{title}{\tud@title@format{\@title}\par}}%
     \ifx\@subtitle\@empty\else%
       \vskip 1ex\@plus.5ex\@minus.5ex%
-      {\usekomafont{subtitle}{\tud@title@uppercase{\@subtitle}\par}}%
+      {\usekomafont{subtitle}{\tud@title@format{\@subtitle}\par}}%
     \fi%
     \vskip 2ex\@plus1ex\@minus1ex%
 %    \end{macrocode}
@@ -902,18 +854,64 @@
   }}%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@maketitle@@head
-% \end{macro}^^A \tud@maketitle@head
+% \end{macro}^^A \tud@maketitle@@inpage
+% \end{macro}^^A \tud@maketitle@inpage
+% \begin{macro}{\tud@maketitle@head}
+% \changes{v2.06}{2018/08/17}{neu}^^A
+% Mit diesem Makro wird dafür gesorgt, dass Titelkopf und Typisierung so 
+% postioniert werden, dass der Titel selbst vertikal nicht verschoben wird.
+% Hierfür wird von allem, was über der Überschrift positioniert werden soll,
+% die Höhe bestimmt werden, um einen entsprechenden Offset einfügen zu können. 
+% Dafür wird eine temporäre Standardbox verwendet. In diesen wird der Inhalt
+% für die beiden Felder \cs{@titlehead} bzw. \cs{@subject} abgelegt und die
+% sich daraus kumulierende Höhe in \cs{@tempdima} gespeichert. Vor dem Setzen 
+% der Felder kann nun der notwendige vertikale Freiraum vor dem eigentlichen
+% Titel für \cs{@titlehead} und \cs{@subject} abgezogen werden. Anschließend
+% wird die Box ausgegeben und der Aufbau der Titelseite kann beginnen.
+%    \begin{macrocode}
+\newcommand*\tud@maketitle@head{%
+  \setbox\z@\vbox{%
+    \ifx\@titlehead\@empty\else%
+      {\usekomafont{titlehead}{%
+        \begin{minipage}[t]{\textwidth}%
+          \@titlehead\tud@sec@strut%
+        \end{minipage}%
+      }}%
+    \fi%
+%<*book|report|article>
+    \tud@thesis@tosubject%
+%</book|report|article>
+    \ifx\@subject\@empty\else%
+      \par\medskip%
+      {\usekomafont{subject}{%
+        \@subject\tud@sec@strut%
+      }}%
+    \fi%
+  }%
+%    \end{macrocode}
+% Der ermittelte Offset muss~-- warum auch immer~-- um \val{1pt} vergrößert
+% werden. Zusätzlich wird ein mittlerer Abstand zwischen Kopf und Titel gesetzt.
+%    \begin{macrocode}
+  \setlength\@tempdima{\dimexpr\ht\z@+\dp\z@\relax}%
+  \ifdim\@tempdima>\z@\relax%
+%<*book|report|article>
+    \vskip\dimexpr-\@tempdima-\p@-\medskipamount\relax%
+%</book|report|article>
+    \usebox\z@\par\medskip%
+  \fi%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@maketitle@inpage
 %
 % \subsubsection{Hilfsmakros für die Ausgabe}
 %
-% \begin{macro}{\tud@title@uppercase}
-% Für das Setzen einzelner Felder in Majuskeln werden diese beiden Befehle
-% definiert. Bei der Verwendung des Befehls \cs{thanks} auf der Titelseite soll
-% sichergestellt werden, dass der Inhalt selbst nicht in Majuskeln gesetzt wird.
+% \begin{macro}{\tud@title@format}
+% Für das Formatieren einzelner Felder auf dem Titel mit \cs{tud@sec@format}  
+% wird dieser Befehl definiert. Bei der Verwendung des Befehls \cs{thanks} auf
+% der Titelseite soll sichergestellt werden, dass der Inhalt selbst nicht in
+% Majuskeln gesetzt wird.
 %    \begin{macrocode}
-\newcommand*\tud@title@uppercase[1]{%
-  \let\@tempa\relax%
+\newcommand*\tud@title@format[1]{%
   \begingroup%
     \let\\\newline%
 %    \end{macrocode}
@@ -924,17 +922,23 @@
 % gewünschte Feld in Majuskeln gesetzt wurde, wird die gespeicherte Fußnote
 % ausgegeben.
 %    \begin{macrocode}
-    \def\thanks##1{\gdef\@tempa{##1}}%
+    \let\tud@thanks\relax%
+    \def\thanks##1{\gdef\tud@thanks{##1}}%
     \let\footnote\thanks%
     \sbox\z@{#1}%
     \let\thanks\@gobble%
     \let\footnote\@gobble%
     \tud@sec@format{#1}%
-  \endgroup%
-  \ifx\@tempa\relax\else\thanks\@tempa\fi%
+    \edef\tud@res@a{%
+      \endgroup%
+      \ifx\tud@thanks\relax\else%
+        \noexpand\thanks{\expandonce\tud@thanks}%
+      \fi%
+    }%
+  \tud@res@a%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@title@uppercase
+% \end{macro}^^A \tud@title@format
 %
 % \iffalse
 %<*book|report|article>
@@ -1325,7 +1329,7 @@
         \def\coverpagetopmargin{%
           \dimexpr\tud@len@topmargin+\tud@len@barheight%
             +\tud@len@headsep\relax%
-        }%        
+        }%
       \else%
         \tud@if@v@lower{2.03}{%
           \def\coverpagetopmargin{.5\tud@len@both}%

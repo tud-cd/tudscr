@@ -3346,8 +3346,8 @@
     \setlength\tud@len@heavyline{\@tempa\tud@len@heavyline}%
     \setlength\tud@len@thinline{0.25pt}%
     \setlength\tud@len@thinline{\@tempa\tud@len@thinline}%
-    \setlength{\@tempdima}{4.5pt}%
-    \setlength{\@tempdima}{\@tempa\@tempdima}%
+    \setlength\@tempdima{4.5pt}%
+    \setlength\@tempdima{\@tempa\@tempdima}%
     \edef\tud@head@fontsize{\strip@pt\@tempdima}%
   \or% <=A6/B6
     \setlength\tud@len@widemargin{15mm}%
@@ -3408,8 +3408,8 @@
     \setlength\tud@len@heavyline{\@tempa\tud@len@heavyline}%
     \setlength\tud@len@thinline{2pt}%
     \setlength\tud@len@thinline{\@tempa\tud@len@thinline}%
-    \setlength{\@tempdima}{36pt}%
-    \setlength{\@tempdima}{\@tempa\@tempdima}%
+    \setlength\@tempdima{36pt}%
+    \setlength\@tempdima{\@tempa\@tempdima}%
     \edef\tud@head@fontsize{\strip@pt\@tempdima}%
   \fi%
   \ifnum\tud@cdgeometry@calc@num=\tw@\relax%
@@ -3417,8 +3417,8 @@
     \setlength\tud@len@widemargin{\@tempa\tud@len@widemargin}%
     \setlength\tud@len@heavyline{\@tempa\tud@len@heavyline}%
     \setlength\tud@len@thinline{\@tempa\tud@len@thinline}%
-    \setlength{\@tempdima}{\tud@head@fontsize pt}%
-    \setlength{\@tempdima}{\@tempa\@tempdima}%
+    \setlength\@tempdima{\tud@head@fontsize pt}%
+    \setlength\@tempdima{\@tempa\@tempdima}%
     \edef\tud@head@fontsize{\strip@pt\@tempdima}%
   \fi%
   \global\@tud@head@font@settrue%
@@ -4204,7 +4204,7 @@
     \csuse{@ta@usegeometryfalse}%
     \tud@x@geometry@getlayout{\tud@cdgeometry@layout}%
     \tud@cs@store{tud@cdgeometry@num}%
-    \def\tud@cdgeometry@num{1}%
+    \tud@cdgeometry@reset{custom}%
     \begingroup%
       \epreto\tud@x@geometry@init{%
         paperwidth=\the\paperwidth,paperheight=\the\paperheight,%
@@ -4227,7 +4227,7 @@
     \tud@res@a%
     \tud@cdgeometry@@process%
     \tud@savegeometry{init@custom}%
-    \def\tud@cdgeometry@num{0}%
+    \tud@cdgeometry@reset{typearea}%
     \tud@x@typearea@init%
     \tud@cdgeometry@@process%
     \tud@savegeometry{init@typearea}%
@@ -4419,7 +4419,7 @@
     contents={%
       \ifnum\tud@head@bar@num>\@ne\relax% cdhead=barcolor/color
         \color{HKS41!60}%
-        \setlength{\@tempdima}{\dimexpr\ht\strutbox-\tud@len@barheight\relax}%
+        \setlength\@tempdima{\dimexpr\ht\strutbox-\tud@len@barheight\relax}%
         \ifdim\@tempdima<\z@\relax\setlength\@tempdima{\z@}\fi%
         \raisebox{\@tempdima}{\rule{\layerwidth}{\layerheight}}%
       \fi%
@@ -5675,7 +5675,7 @@
 \newcommand*\tud@cd@vphantom{%
   \begingroup%
     \usekomafont{partnumber}{\nobreak\tud@sec@strut}%
-    \setlength{\@tempskipa}{\tud@cd@innerskip}%
+    \setlength\@tempskipa{\tud@cd@innerskip}%
     \par\nobreak\vskip\@tempskipa%
   \endgroup%
 }
@@ -5975,7 +5975,7 @@
       \if@titlepage%
         \tud@maketitle@page%
       \else%
-        \tud@maketitle@head%
+        \tud@maketitle@inpage%
       \fi%
     \fi%
   \endgroup%
@@ -5983,9 +5983,9 @@
   \global\let\and\relax%
 }
 \TUD@parameter@family{title}{%
+  \TUD@parameter@def{pagenumber}{\def\tud@title@pagenumber{#1}}%
   \TUD@parameter@def{cdtitle}[true]{\TUDoption{cdtitle}{#1}}%
   \TUD@parameter@let{cd}{cdtitle}%
-  \TUD@parameter@def{pagenumber}{\def\tud@title@pagenumber{#1}}%
   \TUD@parameter@def{cdgeometry}[true]{\TUDoption{cdgeometry}{#1}}%
   \TUD@parameter@ps@def{#1}%
   \TUD@parameter@handler@value{pagenumber}%
@@ -6067,27 +6067,11 @@
     \tud@cd@vphantom%
     \setparsizes{\z@}{\z@}{\z@\@plus1fil}\par@updaterelative%
     {\usekomafont{titlepage}{%
-      \setlength\@tempdima{\z@}%
-      \ifx\@titlehead\@empty\else%
-        \sbox\z@{\vbox{%
-          \begin{minipage}[t]{\textwidth}%
-            {\usekomafont{titlehead}{\@titlehead\par\null}}%
-          \end{minipage}\newline\null%
-        }}%
-        \addtolength\@tempdima{\dimexpr\ht\z@+\dp\z@\relax}%
-      \fi%
-      \tud@thesis@tosubject%
-      \ifx\@subject\@empty\else%
-        \sbox\@ne{\vbox{{\usekomafont{subject}{\@subject\par\null}}}}%
-        \addtolength\@tempdima{\dimexpr\ht\@ne+\dp\@ne+\p@\relax}%
-      \fi%
-      \vspace*{-\@tempdima}%
-      \ifx\@titlehead\@empty\else\usebox\z@\par\fi%
-      \ifx\@subject\@empty\else\usebox\@ne\par\fi%
-      {\usekomafont{title}{\tud@title@uppercase{\@title}\par}}%
+      \tud@maketitle@head%
+      {\usekomafont{title}{\tud@title@format{\@title}\par}}%
       \ifx\@subtitle\@empty\else%
         \vskip 1ex\@plus.5ex\@minus.5ex%
-        {\usekomafont{subtitle}{\tud@title@uppercase{\@subtitle}\par}}%
+        {\usekomafont{subtitle}{\tud@title@format{\@subtitle}\par}}%
       \fi%
       \vskip 2ex\@plus1ex\@minus1ex%
       \vskip 2\bigskipamount%
@@ -6105,7 +6089,7 @@
       \else%
         \vskip 2ex\@plus.25fill%
         \if@tud@subjectthesis\else%
-          {\usekomafont{thesis}{\tud@title@uppercase{\@thesis}\par}}%
+          {\usekomafont{thesis}{\tud@title@format{\@thesis}\par}}%
           \vskip 2ex\@plus1ex\@minus1ex%
         \fi%
         \if@tud@coverpage\else%
@@ -6119,7 +6103,7 @@
             \if@tud@subjectthesis%
               {\usekomafont{subject}{\@tempc\par}}%
             \else%
-              {\usekomafont{thesis}{\tud@title@uppercase{\@tempc}\par}}%
+              {\usekomafont{thesis}{\tud@title@format{\@tempc}\par}}%
             \fi%
             \vskip 3ex\@plus1ex\@minus1ex%
           \fi%
@@ -6216,7 +6200,7 @@
     \fi%
   \end{titlepage}%
 }
-\newcommand*\tud@maketitle@head{%
+\newcommand*\tud@maketitle@inpage{%
   \renewcommand*\tud@title@fontcolor{}%
   \ifcase\tud@cd@title@num\relax\or\else% *color
     \ifstr{\tud@pagecolor}{HKS41}{}{\renewcommand*\tud@title@fontcolor{HKS41}}%
@@ -6252,12 +6236,12 @@
       \tud@res@a{\@makefrontispiece}%
     \fi%
     \next@tdpage%
-    \tud@res@a{\tud@maketitle@@head}%
+    \tud@res@a{\tud@maketitle@@inpage}%
     \ifx\titlepagestyle\@empty\else\thispagestyle{\titlepagestyle}\fi%
     \@thanks%
   \endgroup%
 }
-\newcommand*\tud@maketitle@@head{%
+\newcommand*\tud@maketitle@@inpage{%
   \global\@topnum=\z@%
   \tud@cd@headstartvskip%
   \TUD@deprecated@lengthcs{headingsvskip}%
@@ -6266,28 +6250,12 @@
   \setparsizes{\z@}{\z@}{\z@\@plus1fil}\par@updaterelative%
   {\usekomafont{titlepage}{%
     \tud@x@hyperref@realfootnotes%
-    \setlength\@tempdima{\z@}%
-    \ifx\@titlehead\@empty\else%
-      \sbox\z@{\vbox{%
-        \begin{minipage}[t]{\textwidth}%
-          {\usekomafont{titlehead}{\@titlehead\par\null}}%
-        \end{minipage}\newline\null%
-      }}%
-      \addtolength\@tempdima{\dimexpr\ht\z@+\dp\z@\relax}%
-    \fi%
     \TUDoptions{subjectthesis=true}%
-    \tud@thesis@tosubject%
-    \ifx\@subject\@empty\else%
-      \sbox\@ne{\vbox{{\usekomafont{subject}{\@subject\par\null}}}}%
-      \addtolength\@tempdima{\dimexpr\ht\@ne+\dp\@ne+\p@\relax}%
-    \fi%
-    \vspace*{-\@tempdima}%
-    \ifx\@titlehead\@empty\else\usebox\z@\par\fi%
-    \ifx\@subject\@empty\else\usebox\@ne\par\fi%
-    {\usekomafont{title}{\tud@title@uppercase{\@title}\par}}%
+    \tud@maketitle@head%
+    {\usekomafont{title}{\tud@title@format{\@title}\par}}%
     \ifx\@subtitle\@empty\else%
       \vskip 1ex\@plus.5ex\@minus.5ex%
-      {\usekomafont{subtitle}{\tud@title@uppercase{\@subtitle}\par}}%
+      {\usekomafont{subtitle}{\tud@title@format{\@subtitle}\par}}%
     \fi%
     \vskip 2ex\@plus1ex\@minus1ex%
     \vskip 2\bigskipamount%
@@ -6319,18 +6287,46 @@
     \tud@if@v@lower{2.03}{\tud@ddc@enlargepage[\titlepagestyle]}{}%
   }}%
 }
-\newcommand*\tud@title@uppercase[1]{%
-  \let\@tempa\relax%
+\newcommand*\tud@maketitle@head{%
+  \setbox\z@\vbox{%
+    \ifx\@titlehead\@empty\else%
+      {\usekomafont{titlehead}{%
+        \begin{minipage}[t]{\textwidth}%
+          \@titlehead\tud@sec@strut%
+        \end{minipage}%
+      }}%
+    \fi%
+    \tud@thesis@tosubject%
+    \ifx\@subject\@empty\else%
+      \par\medskip%
+      {\usekomafont{subject}{%
+        \@subject\tud@sec@strut%
+      }}%
+    \fi%
+  }%
+  \setlength\@tempdima{\dimexpr\ht\z@+\dp\z@\relax}%
+  \ifdim\@tempdima>\z@\relax%
+    \vskip\dimexpr-\@tempdima-\p@-\medskipamount\relax%
+    \usebox\z@\par\medskip%
+  \fi%
+}
+\newcommand*\tud@title@format[1]{%
   \begingroup%
     \let\\\newline%
-    \def\thanks##1{\gdef\@tempa{##1}}%
+    \let\tud@thanks\relax%
+    \def\thanks##1{\gdef\tud@thanks{##1}}%
     \let\footnote\thanks%
     \sbox\z@{#1}%
     \let\thanks\@gobble%
     \let\footnote\@gobble%
     \tud@sec@format{#1}%
-  \endgroup%
-  \ifx\@tempa\relax\else\thanks\@tempa\fi%
+    \edef\tud@res@a{%
+      \endgroup%
+      \ifx\tud@thanks\relax\else%
+        \noexpand\thanks{\expandonce\tud@thanks}%
+      \fi%
+    }%
+  \tud@res@a%
 }
 \newcommand*\tud@thesis@tosubject{%
   \if@tud@subjectthesis\ifx\@thesis\@empty\else%
@@ -6548,26 +6544,17 @@
 }
 \tud@locked@newbool{@tud@cdgeometry@cover}
 \TUD@parameter@family{cover}{%
+  \TUD@parameter@def{pagenumber}{\def\tud@title@pagenumber{#1}}%
   \TUD@parameter@def{cdcover}[true]{\TUDoption{cdcover}{#1}}%
   \TUD@parameter@let{cd}{cdcover}%
   \TUD@parameter@def{cdgeometry}[true]{%
-    \ifstrbool{#1}{%
+    \TUDoption{cdgeometry}{#1}%
+    \ifnum\tud@cdgeometry@num>\@ne\relax% true/symmetric/twoside
       \tud@locked@bool@set{@tud@cdgeometry@cover}{true}%
-    }{%
+    \else%
       \tud@locked@bool@set{@tud@cdgeometry@cover}{false}%
-    }{%
-      \ifstr{#1}{custom}{%
-        \tud@locked@bool@set{@tud@cdgeometry@cover}{false}%
-      }{%
-        \ifstr{#1}{user}{%
-          \tud@locked@bool@set{@tud@cdgeometry@cover}{false}%
-        }{%
-          \TUD@parameter@error{cdgeometry}{true, false or custom}%
-        }%
-      }%
-    }%
+    \fi%
   }%
-  \TUD@parameter@def{pagenumber}{\def\tud@title@pagenumber{#1}}%
   \TUD@parameter@ps@def{#1}%
   \TUD@parameter@handler@value{pagenumber}%
 }
@@ -6589,21 +6576,21 @@
   \begingroup%
     \tud@cdgeometry@assignlayout%
     \tud@x@geometry@fixmargins%
-    \setlength{\@tempdima}{%
+    \setlength\@tempdima{%
       \dimexpr\coverpagebottommargin-\tud@len@layoutvoffset
       +\paperheight-\tud@len@layoutheight\relax%
     }%
     \edef\coverpagebottommargin{\the\@tempdima}%
-    \setlength{\@tempdima}{%
+    \setlength\@tempdima{%
       \dimexpr\coverpagetopmargin+\tud@len@layoutvoffset\relax%
     }%
     \edef\coverpagetopmargin{\the\@tempdima}%
-    \setlength{\@tempdima}{%
+    \setlength\@tempdima{%
       \dimexpr\coverpagerightmargin-\tud@len@layouthoffset
       +\paperwidth-\tud@len@layoutwidth\relax%
     }%
     \edef\coverpagerightmargin{\the\@tempdima}%
-    \setlength{\@tempdima}{%
+    \setlength\@tempdima{%
       \dimexpr\coverpageleftmargin+\tud@len@layouthoffset\relax%
     }%
     \edef\coverpageleftmargin{\the\@tempdima}%
@@ -7122,12 +7109,12 @@
     ]{\titlepagename}{title}%
   \fi%
 }{}{\tud@patch@wrn{titlepage}}
-\pretocmd{\tud@maketitle@head}{%
+\pretocmd{\tud@maketitle@inpage}{%
   \tud@x@bookmark@startatroot%
   \tudbookmark[%
   0%
   ]{\titlename}{title}%
-}{}{\tud@patch@wrn{tud@maketitle@head}}
+}{}{\tud@patch@wrn{tud@maketitle@inpage}}
 \pretocmd{\@maketitle}{%
   \tud@x@bookmark@startatroot%
   \tudbookmark[%
