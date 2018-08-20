@@ -1,4 +1,4 @@
-% \CheckSum{865}
+% \CheckSum{876}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-fields.dtx}[%
-  2018/08/18 v2.06 TUD-Script (input fields)%
+  2018/08/20 v2.06 TUD-Script (input fields)%
 ]
 \documentclass[english,ngerman,xindy]{tudscrdoc}
 \usepackage[T1]{fontenc}
@@ -101,23 +101,30 @@
 % \fi
 %
 % \begin{macro}{\getfield}
-% Hiermit wird der Inhalt des im zweiten Argument namentlich genannten Feldes 
-% in das im ersten Argument gegebene Makro geschrieben.
+% Hiermit wird der Inhalt des im zweiten (obligatorischen) Argument namentlich 
+% genannten Feldes in die im ersten (optionalen) Argument gegebene Anweisung 
+% expandiert.
 %    \begin{macrocode} 
-\newcommand*\getfield[2]{%
-  \ifcsdef{@@#2}{%
-    \letcs#1{@@#2}%
-  }{%
-    \ifcsdef{@#2}{%
-      \letcs#1{@#2}%
+\newcommand*\getfield[2][\@firstofone]{%
+  \begingroup%
+    \def\tud@res@b{#1}%
+    \ifcsdef{@@#2}{%
+      \letcs\tud@res@a{@@#2}%
     }{%
-      \let#1\relax%
-      \ClassWarning{\TUD@Class@Name}{%
-        The internal field `@#2' does not exist,\MessageBreak%
-        macro `\string#1' is defined as `\string\relax'%
+      \ifcsdef{@#2}{%
+        \letcs\tud@res@a{@#2}%
+      }{%
+        \let\tud@res@a\@empty%
+        \ClassWarning{\TUD@Class@Name}{%
+          The internal field `@#2' does not exist%
+        }%
       }%
     }%
-  }%
+    \edef\tud@res@a{%
+      \endgroup%
+      \expandonce\tud@res@b{\expandonce\tud@res@a}%
+    }%
+  \tud@res@a%
 }
 %    \end{macrocode}
 % \end{macro}^^A \getfield
