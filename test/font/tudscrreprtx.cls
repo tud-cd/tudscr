@@ -787,6 +787,10 @@
     \TUD@SpecialOptionAtDocument{tud@cd@process}%
   \fi%
 }
+\newif\if@tud@parttitle
+\TUD@key{parttitle}[true]{%
+  \TUD@set@ifkey{parttitle}{@tud@parttitle}{#1}%
+}
 \newif\if@tud@chapterpage
 \TUD@key{chapterpage}[true]{%
   \TUD@set@ifkey{chapterpage}{@tud@chapterpage}{#1}%
@@ -837,6 +841,20 @@
 \newcommand*\tud@dim@headingsvskip{0pt}
 \TUD@key{headingsvskip}{%
   \TUD@set@dimenkey{headingsvskip}{\tud@dim@headingsvskip}{#1}%
+}
+\newif\if@tud@heavyheadings
+\TUD@key{headings}{%
+  \TUD@set@numkey{headings}{@tempa}{%
+    {light}{0},{lightfont}{0},{lite}{0},{litefont}{0},{noheavyfont}{0},%
+    {heavy}{1},{heavyfont}{1},{bold}{1},{boldfont}{1}%
+  }{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \ifcase\@tempa\relax% light
+      \@tud@heavyheadingsfalse%
+    \or% heavy
+      \@tud@heavyheadingstrue%
+    \fi%
+  \fi%
 }
 \DefineFamilyMember{KOMA}
 \DefineFamilyKey{KOMA}{headings}{%
@@ -1383,8 +1401,10 @@
 }
 \tud@if@v@lower{2.06}{%
   \TUD@key@preset{cdoldfont}{true}%
+  \TUD@key@preset{headings}{light}%
 }{%
   \TUD@key@preset{cdfont}{true}%
+  \TUD@key@preset{headings}{heavy}%
 }
 \DeclareOption*{\tud@x@scr@checkoptions}
 \TUDExecuteOptions{%
@@ -2609,16 +2629,26 @@
   }%
 \fi
 %%% From File: tudscr-fields.dtx
-\newcommand*\getfield[2]{%
-  \ifcsdef{@@#2}{%
-    \letcs#1{@@#2}%
-  }{%
-    \ifcsdef{@#2}{%
-      \letcs#1{@#2}%
+\newcommand*\getfield[2][\@firstofone]{%
+  \begingroup%
+    \def\tud@res@b{#1}%
+    \ifcsdef{@@#2}{%
+      \letcs\tud@res@a{@@#2}%
     }{%
-      \let#1\relax%
+      \ifcsdef{@#2}{%
+        \letcs\tud@res@a{@#2}%
+      }{%
+        \let\tud@res@a\@empty%
+        \ClassWarning{\TUD@Class@Name}{%
+          The internal field `@#2' does not exist%
+        }%
+      }%
     }%
-  }%
+    \edef\tud@res@a{%
+      \endgroup%
+      \expandonce\tud@res@b{\expandonce\tud@res@a}%
+    }%
+  \tud@res@a%
 }
 \newcommand*\@faculty{}
 \newcommand*\@department{}
@@ -2744,6 +2774,7 @@
 }
 \newcommand*\@graduation{}
 \newcommand*\@graduationabbr{}
+\newcommand*\@graduationabbreviation{\@graduationabbr}
 \newcommand*\graduation[2][]{%
   \ifxblank{#1}{\gdef\@graduationabbr{}}{\gdef\@graduationabbr{(#1)}}%
   \gdef\@graduation{#2}%
@@ -5423,11 +5454,70 @@
   }%
   \global\let\tud@clearcolor@wrn\relax%
 }
-\newcommand*\tud@sec@fontface[1][]{\sectfont#1\selectfont}
+\newcommand*\tud@x@scr@headings@current{}
+\newcommand*\tud@sec@fontsize{}
+\newcommand*\tud@thesis@fontsize{}
+\newcommand*\tud@x@scr@headings@set[1][]{%
+  \def\@tempa##1##2##3{%
+    \ifstr{##1}{\tud@x@scr@headings@current}{}{%
+      \renewcommand*\tud@x@scr@headings@current{##1}%
+      \renewcommand*\tud@sec@fontsize{##2}%
+      \renewcommand*\tud@thesis@fontsize{##3}%
+      #1%
+    }%
+  }%
+  \KOMAoptionOf[\def\@tempb]{\KOMAClassFileName}{headings}%
+  \@for\@tempc:=\@tempb\do{%
+    \ifstr{standardclasses}{\@tempc}{\@tempa{standardclasses}{\Huge}{\LARGE}}{%
+    \ifstr{big}{\@tempc}{\@tempa{big}{\Huge}{\LARGE}}{%
+    \ifstr{normal}{\@tempc}{\@tempa{normal}{\huge}{\Large}}{%
+    \ifstr{small}{\@tempc}{\@tempa{small}{\LARGE}{\large}}{}}}}%
+  }%
+  \begingroup
+    \tud@sec@fontsize%
+    \@tempskipa=\glueexpr%
+      .8\baselineskip \@plus .05\baselineskip \@minus .1\baselineskip%
+    \relax\relax%
+    \edef\tud@res@a{%
+      \endgroup%
+      \def\noexpand\tud@cd@afterskip{\the\@tempskipa}%
+    }%
+  \tud@res@a%
+}
+\AtEndPreamble{\tud@x@scr@headings@set}
+\newcommand*\tud@x@scr@headings@reset{%
+  \tud@cd@process%
+  \tud@x@scr@headings@set[%
+    \ifcase\tud@cd@part@num\relax\else% !false
+      \tud@komafont@reset{part}%
+      \tud@komafont@reset{partnumber}%
+    \fi%
+    \ifcase\tud@cd@chapter@num\relax\else% !false
+      \tud@komafont@reset{chapter}%
+      \tud@komafont@reset{chapterprefix}%
+    \fi%
+    \ifcase\tud@cd@section@num\relax\else% !false
+      \tud@komafont@reset{section}%
+      \tud@komafont@reset{subsection}%
+      \tud@komafont@reset{subsubsection}%
+    \fi%
+  ]%
+}
+\newcommand*\tud@sec@fontface[1][]{%
+  \sectfont%
+  \if@tud@heavyheadings%
+    \fontseries{\tud@cdfont@ebf}\selectfont%
+  \fi%
+%  #1\selectfont%
+}
 \if@tud@cdoldfont@active
   \renewcommand*\tud@sec@fontface[1][]{%
     \if@tud@cdoldfont@nodin%
-      \sectfont#1\selectfont%
+      \sectfont%
+      \if@tud@heavyheadings%
+        \fontseries{\tud@cdfont@ebf}\selectfont%
+      \fi%
+%      #1\selectfont%
     \else%
       \tud@db\tud@raggedright%
     \fi%
@@ -5491,33 +5581,21 @@
     \renewcommand*\titlepagestyle{plain.tudheadings}%
     \tud@komafont@set{titlehead}{\usekomafont{titlepage}}%
     \tud@komafont@set{title}{%
-      \raggedtitle%
       \usekomafont{disposition}%
+      \raggedtitle%
       \tud@sec@fontface%
       \tud@sec@fontsize%
       \tud@color{\tud@title@fontcolor}%
     }%
-    % TODO opt headings=small --> Größe der restlichen Elemente auf Titel/Cover?
-    % TODO nutzen von \tud@thesis@fontsize?
-    \tud@komafont@set{subtitle}{%
-      \raggedtitle%
-      % TODO bfseries?
-      \ifstr{\mddefault}{l}{%
-        \tud@sec@fontface[\fontseries{m}]%
-      }{%
-        \tud@sec@fontface[\fontseries{bx}]%
-      }%
+    \tud@komafont@set{subtitle}{\tud@thesis@fontsize\bfseries}%
+    \tud@komafont@set{subject}{%
+      \sffamily%
       \usesizeofkomafont{section}%
       \tud@color{\tud@title@fontcolor}%
     }%
-    \tud@komafont@set{subject}{%
-      \sffamily%
-      \bfseries%
-      \tud@color{\tud@title@fontcolor}%
-    }%
     \tud@komafont@set{author}{\usekomafont{subject}}%
-    \tud@komafont@set{date}{\usekomafont{titlepage}}%
     \tud@komafont@set{publishers}{\usekomafont{author}}%
+    \tud@komafont@set{date}{\usekomafont{titlepage}}%
   \fi%
   \ifcase\tud@cd@part@num\relax% false
     \tud@cs@restore{scr@part@beforeskip}%
@@ -5679,6 +5757,71 @@
     \par\nobreak\vskip\@tempskipa%
   \endgroup%
 }
+\newcommand*\tud@preamble@fontcolor{}
+\newcommand*\tud@partpreamble{%
+  \@tempskipa=\glueexpr\tud@cd@afterskip\relax%
+  \ifdim\@tempskipa<\z@\@tempskipa-\@tempskipa\fi%
+  \vskip\@tempskipa%
+  \ifnum\tud@abstract@level@num>\@ne\relax% sec/chap
+    \renewcommand*\tud@abstract@level@num{1}%
+  \fi%
+  \KOMAoptions{titlepage=false}%
+  \null\vskip-\baselineskip%
+  \addtokomafont{disposition}{\tud@color{\tud@part@fontcolor}}%
+  \addtokomafont{dictum}{\tud@color{\tud@part@fontcolor}}%
+  \let\tud@preamble@fontcolor\tud@part@fontcolor%
+  \@afterindentfalse\@afterheading%
+}
+\newcommand*\tud@chapterpreamble{%
+  \ifnum\tud@abstract@level@num>\@ne\relax% sec/chap
+    \renewcommand*\tud@abstract@level@num{1}%
+  \fi%
+  \KOMAoptions{titlepage=false}%
+  \null\vskip-\baselineskip%
+  \if@tud@chapterpage%
+    \addtokomafont{disposition}{\tud@color{\tud@chapter@fontcolor}}%
+    \addtokomafont{dictum}{\tud@color{\tud@chapter@fontcolor}}%
+    \let\tud@preamble@fontcolor\tud@chapter@fontcolor%
+  \fi%
+  \@afterindentfalse\@afterheading%
+}
+\CheckCommand\set@@@@preamble[6]{%
+  \expandafter\gdef\csname #1@preamble\endcsname{%
+    \hbox to\hsize{#4\parbox[{#2}]{#3}{#6\par}#5\par}%
+  }%
+}
+\patchcmd{\set@@@@preamble}{%
+  \hbox to\hsize{#4\parbox[{#2}]{#3}{#6\par}#5\par}%
+}{%
+  \def\@tempa####1@####2{%
+    \@nameuse{tud@####1preamble}%
+    \tud@color{\tud@preamble@fontcolor}%
+    \KOMAoptionOf[\KOMAoption{parskip}]{\KOMAClassFileName}{parskip}%
+  }%
+  \hbox to\hsize{%
+    \let\phantomsection\relax%
+    #4\parbox[{#2}]{#3}{\@tempa#1#6\par\bigskip}#5\par%
+  }%
+}{}{\tud@patch@wrn{set@@@@preamble}}
+\newcommand*\tud@part@subtitle{}
+\newcommand*\setpartsubtitle[1]{\gdef\tud@part@subtitle{#1}}
+\newkomafont{partsubtitle}{%
+  \tud@thesis@fontsize\bfseries%
+  \tud@color{\tud@part@fontcolor}%
+}
+\aliaskomafont{parttitle}{partsubtitle}
+\newcommand*\tud@chapter@subtitle{}
+\newcommand*\setchaptersubtitle[1]{\gdef\tud@chapter@subtitle{#1}}
+\newkomafont{chaptersubtitle}{%
+  \tud@thesis@fontsize\bfseries%
+  \tud@color{\tud@chapter@fontcolor}%
+}
+\newcommand*\tud@sec@subtitle[1]{%
+  \ifcsvoid{tud@#1@subtitle}{}{%
+    {\usekomafont{#1subtitle}{\tud@sec@format{\csuse{tud@#1@subtitle}}}}\par%
+    \global\cslet{tud@#1@subtitle}{\@empty}%
+  }%
+}
 \newcommand*\tud@partheadstartvskip{%
   \renewcommand*\tud@part@fontcolor{}% false/true
   \ifcase\tud@cd@part@num\relax\or\or% litecolor
@@ -5721,10 +5864,28 @@
 }
 \newcommand*\tud@partformat{}%
 \newcommand*\tud@partlineswithprefixformat[3]{%
-  \edef\tud@partformat{\noexpand\tud@sec@format{\expandonce\partformat}}%
-  \let\partformat\tud@partformat%
-  \IfUseNumber{}{\tud@cd@vphantom}%
-  #2\tud@sec@format[#1]{#3}%
+  \if@tud@parttitle%
+    \ifx\@@title\@empty%
+      \ClassWarning{\TUD@Class@Name}{%
+        You activated the option `parttitle' but\MessageBreak%
+        no title was given%
+      }%
+    \fi%
+    \tud@cd@vphantom%
+    \tud@sec@format[#1]{%
+      \usekomafont{#1}{\nobreak\interlinepenalty \@M\@@title\strut\@@par}%
+    }%
+    \setpartsubtitle{%
+      \setkomafont{part}{}%
+      \tud@sec@format[partnumber]{\IfUseNumber{\partformat\enskip}{}#3}%
+    }%
+  \else%
+    \edef\tud@partformat{\noexpand\tud@sec@format{\expandonce\partformat}}%
+    \let\partformat\tud@partformat%
+    \IfUseNumber{}{\tud@cd@vphantom}%
+    #2\tud@sec@format[#1]{#3}%
+  \fi%
+  \tud@sec@subtitle{#1}%
 }
 \newcommand*\tud@chapterheadstartvskip{%
   \renewcommand*\tud@chapter@fontcolor{}%
@@ -5748,10 +5909,12 @@
   \let\chapterformat\tud@chapterformat%
   \IfUseNumber{}{\tud@cd@vphantom}%
   #2\tud@sec@format[#1]{#3}%
+  \tud@sec@subtitle{#1}%
 }
 \newcommand*\tud@chapterlinesformat[3]{%
   \tud@cd@vphantom%
   \@hangfrom{#2}{\tud@sec@format[#1]{#3}}%
+  \tud@sec@subtitle{#1}%
 }
 \newcommand*\tud@chapter@pre{%
   \if@tud@chapterpage%
@@ -5836,111 +5999,17 @@
   \let\tud@sec@strut\relax%
   \hskip #2#3\tud@sec@format[#1]{#4}%
 }
-\newcommand*\tud@preamble@fontcolor{}
-\newcommand*\tud@partpreamble{%
-  \@tempskipa=\glueexpr\tud@cd@afterskip\relax%
-  \ifdim\@tempskipa<\z@\@tempskipa-\@tempskipa\fi%
-  \vskip\@tempskipa%
-  \ifnum\tud@abstract@level@num>\@ne\relax% sec/chap
-    \renewcommand*\tud@abstract@level@num{1}%
-  \fi%
-  \KOMAoptions{titlepage=false}%
-  \null\vskip-\baselineskip%
-  \addtokomafont{disposition}{\tud@color{\tud@part@fontcolor}}%
-  \addtokomafont{dictum}{\tud@color{\tud@part@fontcolor}}%
-  \let\tud@preamble@fontcolor\tud@part@fontcolor%
-  \@afterindentfalse\@afterheading%
-}
-\newcommand*\tud@chapterpreamble{%
-  \ifnum\tud@abstract@level@num>\@ne\relax% sec/chap
-    \renewcommand*\tud@abstract@level@num{1}%
-  \fi%
-  \KOMAoptions{titlepage=false}%
-  \null\vskip-\baselineskip%
-  \if@tud@chapterpage%
-    \addtokomafont{disposition}{\tud@color{\tud@chapter@fontcolor}}%
-    \addtokomafont{dictum}{\tud@color{\tud@chapter@fontcolor}}%
-    \let\tud@preamble@fontcolor\tud@chapter@fontcolor%
-  \fi%
-  \@afterindentfalse\@afterheading%
-}
-\CheckCommand\set@@@@preamble[6]{%
-  \expandafter\gdef\csname #1@preamble\endcsname{%
-    \hbox to\hsize{#4\parbox[{#2}]{#3}{#6\par}#5\par}%
-  }%
-}
-\patchcmd{\set@@@@preamble}{%
-  \hbox to\hsize{#4\parbox[{#2}]{#3}{#6\par}#5\par}%
-}{%
-  \def\@tempa####1@####2{%
-    \@nameuse{tud@####1preamble}%
-    \tud@color{\tud@preamble@fontcolor}%
-    \KOMAoptionOf[\KOMAoption{parskip}]{\KOMAClassFileName}{parskip}%
-  }%
-  \hbox to\hsize{%
-    \let\phantomsection\relax%
-    #4\parbox[{#2}]{#3}{\@tempa#1#6\par\bigskip}#5\par%
-  }%
-}{}{\tud@patch@wrn{set@@@@preamble}}
-\newcommand*\tud@x@scr@headings@current{}
-\newcommand*\tud@sec@fontsize{}
-\newcommand*\tud@thesis@fontsize{}
-\newcommand*\tud@x@scr@headings@set[1][]{%
-  \def\@tempa##1##2##3{%
-    \ifstr{##1}{\tud@x@scr@headings@current}{}{%
-      \renewcommand*\tud@x@scr@headings@current{##1}%
-      \renewcommand*\tud@sec@fontsize{##2}%
-      \renewcommand*\tud@thesis@fontsize{##3}%
-      #1%
-    }%
-  }%
-  \KOMAoptionOf[\def\@tempb]{\KOMAClassFileName}{headings}%
-  \@for\@tempc:=\@tempb\do{%
-    \ifstr{standardclasses}{\@tempc}{\@tempa{standardclasses}{\Huge}{\LARGE}}{%
-    \ifstr{big}{\@tempc}{\@tempa{big}{\Huge}{\LARGE}}{%
-    \ifstr{normal}{\@tempc}{\@tempa{normal}{\huge}{\Large}}{%
-    \ifstr{small}{\@tempc}{\@tempa{small}{\LARGE}{\large}}{}}}}%
-  }%
-  \begingroup
-    \tud@sec@fontsize%
-    \@tempskipa=\glueexpr%
-      .8\baselineskip \@plus .05\baselineskip \@minus .1\baselineskip%
-    \relax\relax%
-    \edef\tud@res@a{%
-      \endgroup%
-      \def\noexpand\tud@cd@afterskip{\the\@tempskipa}%
-    }%
-  \tud@res@a%
-}
-\AtEndPreamble{\tud@x@scr@headings@set}
-\newcommand*\tud@x@scr@headings@reset{%
-  \tud@cd@process%
-  \tud@x@scr@headings@set[%
-    \ifcase\tud@cd@part@num\relax\else% !false
-      \tud@komafont@reset{part}%
-      \tud@komafont@reset{partnumber}%
-    \fi%
-    \ifcase\tud@cd@chapter@num\relax\else% !false
-      \tud@komafont@reset{chapter}%
-      \tud@komafont@reset{chapterprefix}%
-    \fi%
-    \ifcase\tud@cd@section@num\relax\else% !false
-      \tud@komafont@reset{section}%
-      \tud@komafont@reset{subsection}%
-      \tud@komafont@reset{subsubsection}%
-    \fi%
-  ]%
-}
 %%% From File: tudscr-title.dtx
 \newkomafont{thesis}{%
   \usekomafont{title}%
   \tud@thesis@fontsize%
 }
 \newkomafont{titlepage}{%
-  \usekomafont{subject}%
-  \mdseries%
-  \large%
   \raggedtitle%
+  \sffamily%
+  \mdseries%
+  \usesizeofkomafont{subsection}%
+  \tud@color{\tud@title@fontcolor}%
 }
 \robustify{\thanks}
 \robustify{\footnotemark}
@@ -6019,6 +6088,7 @@
       \setcounter{page}{\tud@title@pagenumber}%
     \fi%
     \if@tud@coverpage\else%
+      \addtokomafont{footnote}{\sffamily}%
       \let\footnotesize\small%
       \let\footnoterule\relax%
       \let\footnote\thanks%
@@ -6070,10 +6140,9 @@
       \tud@maketitle@head%
       {\usekomafont{title}{\tud@title@format{\@title}\par}}%
       \ifx\@subtitle\@empty\else%
-        \vskip 1ex\@plus.5ex\@minus.5ex%
+        {\usekomafont{partnumber}{\nobreak\tud@sec@strut}}%
         {\usekomafont{subtitle}{\tud@title@format{\@subtitle}\par}}%
       \fi%
-      \vskip 2ex\@plus1ex\@minus1ex%
       \vskip 2\bigskipamount%
       \let\tud@split@author@do\tud@split@author@title%
       \tud@multiple@split{@author}\par%
@@ -6099,12 +6168,8 @@
               \ifx\@graduationabbr\@empty\else\nobreakspace\@graduationabbr\fi%
             }%
             {\usekomafont{titlepage}{\graduationtext\par}}%
-            \vskip 2ex\@plus1ex\@minus1ex%
-            \if@tud@subjectthesis%
-              {\usekomafont{subject}{\@tempc\par}}%
-            \else%
-              {\usekomafont{thesis}{\tud@title@format{\@tempc}\par}}%
-            \fi%
+            \vskip 2.5ex\@plus1ex\@minus1ex%
+            {\usekomafont{thesis}{\tud@title@format{\@tempc}\par}}%
             \vskip 3ex\@plus1ex\@minus1ex%
           \fi%
         \fi%
@@ -6360,8 +6425,11 @@
 \newcommand*\tud@newline@title{}
 \newcommand*\tud@split@author@title[2]{%
   \tud@multiple@fields@store{@author}{#1}%
-  \renewcommand*\tud@newline@title{\vskip .5ex\let\tud@newline@title\newline}%
-  {\usekomafont{author}{\ignorespaces#1\unskip}}%
+  \renewcommand*\tud@newline@title{%
+    \vskip .5ex\strut%
+    \def\tud@newline@title{\newline\strut}%
+  }%
+  {\usekomafont{author}{\ignorespaces#1\strut\unskip}}%
   \if@tud@coverpage\else%
     \ifx\@authormore\@empty\else%
       \tud@newline@title%
@@ -6396,7 +6464,7 @@
     \@tempc{matriculationyear}%
   \fi%
   \tud@multiple@fields@restore{@author}%
-  \tud@multiple@@@split{#2}{\vskip 2ex}%
+  \tud@multiple@@@split{#2}{\vskip 1.5ex}%
 }
 \newcommand*\tud@title@wrn[1]{%
   \ClassWarning{\TUD@Class@Name}{%
