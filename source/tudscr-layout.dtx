@@ -1,4 +1,4 @@
-% \CheckSum{1197}
+% \CheckSum{1194}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-layout.dtx}[%
-  2018/08/20 v2.06 TUD-Script (layout)%
+  2018/08/21 v2.06 TUD-Script (layout)%
 ]
 \documentclass[english,ngerman,xindy]{tudscrdoc}
 \usepackage[T1]{fontenc}
@@ -582,12 +582,16 @@
 % \end{macro}^^A \tud@dim@pageheadingsvskip
 % \end{option}^^A pageheadingsvskip
 %
+% \iffalse
+%</class&option>
+%<*class|package&fixfonts>
+%<*option>
+% \fi
+%
 % \subsection{Schrifteinstellung und -größe der Überschriften}
 %
 % \begin{option}{headings}
 % \begin{macro}{\if@tud@heavyheadings}
-% \begin{option}{open}
-% \begin{option}{chapterprefix}
 % Die Option wird dahingehend erweitert, dass die Überschriften auch im 
 % extra-fetten Schnitt gesetzt werden können.
 %    \begin{macrocode}
@@ -606,6 +610,18 @@
   \fi%
 }
 %    \end{macrocode}
+% \end{macro}^^A \if@tud@heavyheadings
+% \end{option}^^A headings
+%
+% \iffalse
+%</option>
+%</class|package&fixfonts>
+%<*class&option>
+% \fi
+%
+% \begin{option}{headings}
+% \begin{option}{open}
+% \begin{option}{chapterprefix}
 % Die \KOMAScript-Option \opt{headings} setzt für alle Überschriften die 
 % Formatierung zurück. Um die Einstellungen für das \CD aktiv zu halten, werden 
 % nach der Ausführung der Option durch \cs{tud@x@scr@headings@reset} die mit 
@@ -633,7 +649,6 @@
 %    \end{macrocode}
 % \end{option}^^A chapterprefix
 % \end{option}^^A open
-% \end{macro}^^A \if@tud@heavyheadings
 % \end{option}^^A headings
 %
 % \iffalse
@@ -756,11 +771,11 @@
 %    \begin{macrocode}
 %<package&fixfonts>\AfterPackage*{tudscrfonts}{%
 \newcommand*\tud@sec@fontface[1][]{%
-  \sectfont%
+  \sectfont#1%
   \if@tud@heavyheadings%
-    \fontseries{\tud@cdfont@ebf}\selectfont%
+    \fontseries{\tud@cdfont@ebf}%
   \fi%
-  #1\selectfont%
+  \selectfont%
 }
 %    \end{macrocode}
 % Mit \cs{tud@sec@fontface} wird die Schriftart für Überschriften im 
@@ -770,11 +785,11 @@
 \if@tud@cdoldfont@active
   \renewcommand*\tud@sec@fontface[1][]{%
     \if@tud@cdoldfont@nodin%
-      \sectfont%
+      \sectfont#1%
       \if@tud@heavyheadings%
-        \fontseries{\tud@cdfont@ebf}\selectfont%
+        \fontseries{\tud@cdfont@ebf}%
       \fi%
-      #1\selectfont%
+      \selectfont%
     \else%
       \tud@db\tud@raggedright%
     \fi%
@@ -829,7 +844,6 @@
         \tud@ifdin{\aftergroup\@tud@res@swatrue}{}%
       \endgroup%
     }%
-    \tud@sec@strut%
     \if@tud@res@swa%
       \MakeTextUppercase{#2}%
     \else%
@@ -849,9 +863,11 @@
 % zu verwenden~-- temporär umdefiniert.
 %    \begin{macrocode}
 \newrobustcmd*\tud@sec@strut{%
+%<*class>
   \begingroup%
     \strut\setbox\strutbox\hbox{\vphantom{\textsuperscript{\"A\"O\"U}}}\strut%
   \endgroup%
+%</class>
 }
 %<package&fixfonts>}
 %    \end{macrocode}
@@ -899,8 +915,7 @@
 % Seitenstil auch umgesetzt werden. Dabei wird insbesondere darauf Wert gelegt,
 % dass die Optionen auch im Dokument geändert und wiederhergestellt werden
 % können.
-% \ToDo{\cs{...pagecolor} (part/chapter/title)}[v2.07]
-% \ToDo{\cs{...fontcolor} (part/chapter/title)}[v2.07]
+% \ToDo{\cs{...pagecolor} und {\cs{...fontcolor} (part/chapter/title)}}[v2.07]
 % \ToDo{Schriftfarbauswahl in \cs{tud@cd@process}}[v2.07]
 %    \begin{macrocode}
 \newcommand*\tud@cd@process{%

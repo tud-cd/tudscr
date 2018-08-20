@@ -5504,20 +5504,20 @@
   ]%
 }
 \newcommand*\tud@sec@fontface[1][]{%
-  \sectfont%
+  \sectfont#1%
   \if@tud@heavyheadings%
-    \fontseries{\tud@cdfont@ebf}\selectfont%
+    \fontseries{\tud@cdfont@ebf}%
   \fi%
-%  #1\selectfont%
+  \selectfont%
 }
 \if@tud@cdoldfont@active
   \renewcommand*\tud@sec@fontface[1][]{%
     \if@tud@cdoldfont@nodin%
-      \sectfont%
+      \sectfont#1%
       \if@tud@heavyheadings%
-        \fontseries{\tud@cdfont@ebf}\selectfont%
+        \fontseries{\tud@cdfont@ebf}%
       \fi%
-%      #1\selectfont%
+      \selectfont%
     \else%
       \tud@db\tud@raggedright%
     \fi%
@@ -5548,7 +5548,6 @@
         \tud@ifdin{\aftergroup\@tud@res@swatrue}{}%
       \endgroup%
     }%
-    \tud@sec@strut%
     \if@tud@res@swa%
       \MakeTextUppercase{#2}%
     \else%
