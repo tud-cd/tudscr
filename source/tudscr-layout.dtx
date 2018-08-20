@@ -1,4 +1,4 @@
-% \CheckSum{1115}
+% \CheckSum{1197}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-layout.dtx}[%
-  2018/08/17 v2.06 TUD-Script (layout)%
+  2018/08/20 v2.06 TUD-Script (layout)%
 ]
 \documentclass[english,ngerman,xindy]{tudscrdoc}
 \usepackage[T1]{fontenc}
@@ -305,6 +305,18 @@
 %
 % Die nun folgenden Optionen und Befehle werden nur für die beiden Klassen 
 % \cls{tudscrbook} und \cls{tudscrreprt} definiert.
+% \begin{option}{parttitle}
+% \begin{macro}{\if@tud@parttitle}
+% Der Schalter dient zur Steuerung, ob der Titel des Dokumentes wie im Handbuch
+% des \CDs auf den Teileseiten stehen soll.
+%    \begin{macrocode}
+\newif\if@tud@parttitle
+\TUD@key{parttitle}[true]{%
+  \TUD@set@ifkey{parttitle}{@tud@parttitle}{#1}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \if@tud@parttitle
+% \end{option}^^A parttitle
 % \begin{option}{chapterpage}
 % \begin{macro}{\if@tud@chapterpage}
 % Mit dieser Option können Kapitelüberschriften alleine auf einer Seite stehen.
@@ -570,8 +582,163 @@
 % \end{macro}^^A \tud@dim@pageheadingsvskip
 % \end{option}^^A pageheadingsvskip
 %
+% \subsection{Schrifteinstellung und -größe der Überschriften}
+%
+% \begin{option}{headings}
+% \begin{macro}{\if@tud@heavyheadings}
+% \begin{option}{open}
+% \begin{option}{chapterprefix}
+% Die Option wird dahingehend erweitert, dass die Überschriften auch im 
+% extra-fetten Schnitt gesetzt werden können.
+%    \begin{macrocode}
+\newif\if@tud@heavyheadings
+\TUD@key{headings}{%
+  \TUD@set@numkey{headings}{@tempa}{%
+    {light}{0},{lightfont}{0},{lite}{0},{litefont}{0},{noheavyfont}{0},%
+    {heavy}{1},{heavyfont}{1},{bold}{1},{boldfont}{1}%
+  }{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \ifcase\@tempa\relax% light
+      \@tud@heavyheadingsfalse%
+    \or% heavy
+      \@tud@heavyheadingstrue%
+    \fi%
+  \fi%
+}
+%    \end{macrocode}
+% Die \KOMAScript-Option \opt{headings} setzt für alle Überschriften die 
+% Formatierung zurück. Um die Einstellungen für das \CD aktiv zu halten, werden 
+% nach der Ausführung der Option durch \cs{tud@x@scr@headings@reset} die mit 
+% \cs{tud@komafont@set} definierten Makros \cs{tud@komafont@\meta{Element}}
+% erneut an die entsprechenden Schriftelemente angehängt. Bei der Verwendung 
+% der \KOMAScript-Option \opt{headings}|=|\val{standardclasses} werden außerdem 
+% noch die Optionen \opt{open} und \opt{chapterprefix} ausgeführt, weshalb auch
+% auf diese reagiert werden muss.
+%    \begin{macrocode}
+\DefineFamilyMember{KOMA}
+\DefineFamilyKey{KOMA}{headings}{%
+  \TUD@SpecialOptionAtDocument{tud@x@scr@headings@reset}%
+  \FamilyKeyStateProcessed%
+}
+%<*book|report>
+\DefineFamilyKey{KOMA}{open}{%
+  \TUD@SpecialOptionAtDocument{tud@x@scr@headings@reset}%  
+  \FamilyKeyStateProcessed%
+}
+\DefineFamilyKey{KOMA}{chapterprefix}{%
+  \TUD@SpecialOptionAtDocument{tud@x@scr@headings@reset}%
+  \FamilyKeyStateProcessed%
+}
+%</book|report>
+%    \end{macrocode}
+% \end{option}^^A chapterprefix
+% \end{option}^^A open
+% \end{macro}^^A \if@tud@heavyheadings
+% \end{option}^^A headings
+%
 % \iffalse
 %</class&option>
+%<*class&body>
+% \fi
+%
+% \begin{macro}{\tud@x@scr@headings@set}
+% \changes{v2.05}{2015/11/24}{neu}^^A
+% \begin{macro}{\tud@x@scr@headings@current}
+% \changes{v2.05}{2015/11/24}{neu}^^A
+% \begin{macro}{\tud@sec@fontsize}
+% \changes{v2.05}{2015/11/24}{neu}^^A
+% \begin{macro}{\tud@thesis@fontsize}
+% \changes{v2.05}{2015/11/24}{neu}^^A
+% Als erstes werden die Optionen verarbeitet, welche einen Einfluss auf die 
+% Formatierung respektive die Schriftgröße der Überschriften haben. Wird über
+% die Option \opt{headings} eine andere Überschriftengröße gewählt, werden mit
+% dem Makro \cs{tud@x@scr@headings@set} die passenden Schriftgrößen sowohl für
+% die Überschriften (\cs{tud@sec@fontsize}) als auch die Titelseite
+% (\cs{tud@thesis@fontsize}) gesetzt. Dafür wird gewählte Schriftgröße 
+% der Überschriften\footnote{\ignorespaces%
+%   Option \opt{headings}|=|\val{standardclasses/big/normal/small}\ignorespaces%
+% } im Hilfsmakro \cs{tud@x@scr@headings@current} gesichert.
+%    \begin{macrocode}
+\newcommand*\tud@x@scr@headings@current{}
+\newcommand*\tud@sec@fontsize{}
+%<book|report|article>\newcommand*\tud@thesis@fontsize{}
+\newcommand*\tud@x@scr@headings@set[1][]{%
+  \def\@tempa##1##2##3{%
+    \ifstr{##1}{\tud@x@scr@headings@current}{}{%
+      \renewcommand*\tud@x@scr@headings@current{##1}%
+      \renewcommand*\tud@sec@fontsize{##2}%
+%<book|report|article>      \renewcommand*\tud@thesis@fontsize{##3}%
+      #1%
+    }%
+  }%
+%    \end{macrocode}
+% Wird \cs{tud@x@scr@headings@set} aufgerufen, so werden mit \cs{KOMAoptionOf} 
+% die aktuellen Werte der Option \opt{headings} ausgelesen, welche in einer
+% Liste ausgegeben werden. Diese wird durchlaufen und dabei auf die relevanten
+% Werte reagiert.
+%    \begin{macrocode}
+  \KOMAoptionOf[\def\@tempb]{\KOMAClassFileName}{headings}%
+  \@for\@tempc:=\@tempb\do{%
+    \ifstr{standardclasses}{\@tempc}{\@tempa{standardclasses}{\Huge}{\LARGE}}{%
+    \ifstr{big}{\@tempc}{\@tempa{big}{\Huge}{\LARGE}}{%
+    \ifstr{normal}{\@tempc}{\@tempa{normal}{\huge}{\Large}}{%
+    \ifstr{small}{\@tempc}{\@tempa{small}{\LARGE}{\large}}{}}}}%
+  }%
+%    \end{macrocode}
+% Der Abstand nach Teil- und Kapitelüberschriften wird ebenso in Abhängigkeit 
+% der gewählten Einstellung für \opt{headings} definiert.
+%    \begin{macrocode}
+  \begingroup
+    \tud@sec@fontsize%
+    \@tempskipa=\glueexpr%
+      .8\baselineskip \@plus .05\baselineskip \@minus .1\baselineskip%
+    \relax\relax%
+    \edef\tud@res@a{%
+      \endgroup%
+      \def\noexpand\tud@cd@afterskip{\the\@tempskipa}%
+    }%
+  \tud@res@a%
+}
+%    \end{macrocode}
+% Damit die Einstellungen für die Größe wirksam werden, wird das Makro einmalig
+% zu Beginn des Dokumentes ausgeführt.
+%    \begin{macrocode}
+\AtEndPreamble{\tud@x@scr@headings@set}
+%    \end{macrocode}
+% \end{macro}^^A \tud@thesis@fontsize
+% \end{macro}^^A \tud@sec@fontsize
+% \end{macro}^^A \tud@x@scr@headings@current
+% \end{macro}^^A \tud@x@scr@headings@set
+% \begin{macro}{\tud@x@scr@headings@reset}
+% \changes{v2.05}{2015/11/24}{neu}^^A
+% Hiermit wird nach dem Ausführen der Option \opt{headings} im Zweifelsfall die 
+% Größe und Formatierung der Überschriften neu gesetzt.
+%    \begin{macrocode}
+\newcommand*\tud@x@scr@headings@reset{%
+  \tud@cd@process%
+  \tud@x@scr@headings@set[%
+    \ifcase\tud@cd@part@num\relax\else% !false
+      \tud@komafont@reset{part}%
+      \tud@komafont@reset{partnumber}%
+    \fi%
+%<*book|report>
+    \ifcase\tud@cd@chapter@num\relax\else% !false
+      \tud@komafont@reset{chapter}%
+      \tud@komafont@reset{chapterprefix}%
+    \fi%
+%</book|report>
+    \ifcase\tud@cd@section@num\relax\else% !false
+      \tud@komafont@reset{section}%
+      \tud@komafont@reset{subsection}%
+      \tud@komafont@reset{subsubsection}%
+    \fi%
+  ]%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@x@scr@headings@reset
+%
+% \iffalse
+%</class&body>
 %<*body>
 %<*class|package&fixfonts>
 % \fi
@@ -580,15 +747,21 @@
 %
 % \begin{macro}{\tud@sec@fontface}
 % \changes{v2.05}{2016/04/04}{Optionales Argument für \pkg{tudscrcomp}}^^A
+% \changes{v2.06}{2018/08/20}{extra-fette Überschriften möglich}^^A
 % \begin{macro}{\tud@sec@format}
 % \begin{macro}{\tud@sec@strut}
 % \changes{v2.06}{2018/07/24}{neu}^^A
 % Mit \cs{tud@sec@fontface} wird die Schriftart für Überschriften im 
 % Layout des \CDs definiert.
-% \ToDo{optional fetterer Schnitt \cs{tud@cdfont@ebf} in Überschriften}[v2.06]
 %    \begin{macrocode}
 %<package&fixfonts>\AfterPackage*{tudscrfonts}{%
-\newcommand*\tud@sec@fontface[1][]{\sectfont#1\selectfont}
+\newcommand*\tud@sec@fontface[1][]{%
+  \sectfont%
+  \if@tud@heavyheadings%
+    \fontseries{\tud@cdfont@ebf}\selectfont%
+  \fi%
+  #1\selectfont%
+}
 %    \end{macrocode}
 % Mit \cs{tud@sec@fontface} wird die Schriftart für Überschriften im 
 % Layout des \CDs definiert. Normalerweise wird hierfür \DIN verwendet, was
@@ -597,7 +770,11 @@
 \if@tud@cdoldfont@active
   \renewcommand*\tud@sec@fontface[1][]{%
     \if@tud@cdoldfont@nodin%
-      \sectfont#1\selectfont%
+      \sectfont%
+      \if@tud@heavyheadings%
+        \fontseries{\tud@cdfont@ebf}\selectfont%
+      \fi%
+      #1\selectfont%
     \else%
       \tud@db\tud@raggedright%
     \fi%
@@ -758,31 +935,22 @@
 %</poster>
     \tud@komafont@set{titlehead}{\usekomafont{titlepage}}%
     \tud@komafont@set{title}{%
-      \raggedtitle%
       \usekomafont{disposition}%
+      \raggedtitle%
       \tud@sec@fontface%
       \tud@sec@fontsize%
       \tud@color{\tud@title@fontcolor}%
     }%
-    \tud@komafont@set{subtitle}{%
-      \raggedtitle%
-      \ifstr{\mddefault}{l}{%
-        \tud@sec@fontface[\fontseries{m}]%
-      }{%
-        \tud@sec@fontface[\fontseries{bx}]%
-      }%
-      \usesizeofkomafont{section}%
-      \tud@color{\tud@title@fontcolor}%
-    }%
+    \tud@komafont@set{subtitle}{\tud@thesis@fontsize\bfseries}%
     \tud@komafont@set{subject}{%
       \sffamily%
-      \bfseries%
+      \usesizeofkomafont{section}%
       \tud@color{\tud@title@fontcolor}%
     }%
 %<*book|report|article>
     \tud@komafont@set{author}{\usekomafont{subject}}%
-    \tud@komafont@set{date}{\usekomafont{titlepage}}%
     \tud@komafont@set{publishers}{\usekomafont{author}}%
+    \tud@komafont@set{date}{\usekomafont{titlepage}}%
 %</book|report|article>
   \fi%
 %    \end{macrocode}
@@ -1076,8 +1244,181 @@
 % \end{macro}^^A \tud@cd@vphantom
 % \end{macro}^^A \tud@cd@headstartvskip
 %
+% \iffalse
+%<*book|report>
+% \fi
+%
 % \subsection{Positionierung und Formatierung von Überschriften}
-% \subsubsection{Umsetzung für Teilen}
+% \subsubsection{Präambeln für Teile und Kapitel}
+%
+% \begin{macro}{\tud@preamble@fontcolor}
+% \changes{v2.06}{2018/08/08}{neu}^^A
+% Der Befehl wird innerhalb von \cs{set@@@@preamble} genutzt, um die notwendige 
+% Farbe des Textes zu aktivieren.
+%    \begin{macrocode}
+\newcommand*\tud@preamble@fontcolor{}
+%    \end{macrocode}
+% \end{macro}^^A \tud@preamble@fontcolor
+% \begin{macro}{\tud@partpreamble}
+% Um die \KOMAScript-Befehle für die Teilepräambel auch für das farbige Layout
+% nutzen zu können, müssen diese leicht angepasst werden. Für die Präambeln wird
+% die Überschrift einer Zusammenfassung ausschließlich zentriert und relativ
+% klein gesetzt. Außerdem wird für eine mögliche Zusammenfassung die
+% \opt{titlepage}-Option deaktiviert. Aufgerufen wird der Befehl durch die
+% gepatchte Version von \cs{set@@@@preamble}.
+%    \begin{macrocode}
+\newcommand*\tud@partpreamble{%
+%    \end{macrocode}
+% Zunächst wird der unterschiedliche Abstand bei Teil- und Kapitelpräambeln 
+% ausgeglichen.
+%    \begin{macrocode}
+  \@tempskipa=\glueexpr\tud@cd@afterskip\relax%
+  \ifdim\@tempskipa<\z@\@tempskipa-\@tempskipa\fi%
+  \vskip\@tempskipa%
+%    \end{macrocode}
+% Anschließend folgen die Anpassungen für die Teilpräambel.
+%    \begin{macrocode}
+  \ifnum\tud@abstract@level@num>\@ne\relax% sec/chap
+    \renewcommand*\tud@abstract@level@num{1}%
+  \fi%
+  \KOMAoptions{titlepage=false}%
+  \null\vskip-\baselineskip%
+  \addtokomafont{disposition}{\tud@color{\tud@part@fontcolor}}%
+  \addtokomafont{dictum}{\tud@color{\tud@part@fontcolor}}%
+  \let\tud@preamble@fontcolor\tud@part@fontcolor%
+  \@afterindentfalse\@afterheading%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@partpreamble
+% \begin{macro}{\tud@chapterpreamble}
+% Um die \KOMAScript-Befehle für die Kapitelpräambel auch für das farbige Layout
+% nutzen zu können, müssen diese leicht angepasst werden. Für die Präambeln der
+% Kapitel gilt das gleiche wie für die der Teileseiten. Auch hier erfolgt die 
+% Ausführung des Befehls durch die gepatchte Version von \cs{set@@@@preamble}.
+%    \begin{macrocode}
+\newcommand*\tud@chapterpreamble{%
+  \ifnum\tud@abstract@level@num>\@ne\relax% sec/chap
+    \renewcommand*\tud@abstract@level@num{1}%
+  \fi%
+  \KOMAoptions{titlepage=false}%
+  \null\vskip-\baselineskip%
+%    \end{macrocode}
+% Die Farb- und Schrifteinstellungen sind nur für reine Kapitelseiten notwendig.
+%    \begin{macrocode}
+  \if@tud@chapterpage%
+    \addtokomafont{disposition}{\tud@color{\tud@chapter@fontcolor}}%
+    \addtokomafont{dictum}{\tud@color{\tud@chapter@fontcolor}}%
+    \let\tud@preamble@fontcolor\tud@chapter@fontcolor%
+  \fi%
+  \@afterindentfalse\@afterheading%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@chapterpreamble
+% \begin{macro}{\set@@@@preamble}
+% Die beiden Befehle für Präambeln aus \KOMAScript{} ignorieren in ihrer
+% ursprünglichen Form die Einstellungen für \opt{parskip}. Dies wird mit diesem
+% Patch beseitigt. Außerdem wird das Makro für die Layouteinstellungen für 
+% Teile (\cs{tud@partpreamble}) respektive Kapitel (\cs{tud@chapterpreamble})
+% aufgerufen. Für die Verwendung der \env{abstract}-Umgebung in den Präambeln
+% wird außerdem der Befehl \cs{phantomsection} auf \cs{relax} gesetzt, um mit
+% \cs{autoref} automatisch generierte Querverweise aus dem Paket \pkg{hyperref}
+% nicht zu verändern. Alternativ zu \cs{let}\cs{@parboxrestore}\cs{relax} 
+% müsste innerhalb des Argumentes von \cs{parbox} die \KOMAScript-Option 
+% \opt{parskip} neu gesetzt werden.
+%    \begin{macrocode}
+\CheckCommand\set@@@@preamble[6]{%
+  \expandafter\gdef\csname #1@preamble\endcsname{%
+    \hbox to\hsize{#4\parbox[{#2}]{#3}{#6\par}#5\par}%
+  }%
+}
+\patchcmd{\set@@@@preamble}{%
+  \hbox to\hsize{#4\parbox[{#2}]{#3}{#6\par}#5\par}%
+}{%
+  \def\@tempa####1@####2{%
+    \@nameuse{tud@####1preamble}%
+    \tud@color{\tud@preamble@fontcolor}%
+    \KOMAoptionOf[\KOMAoption{parskip}]{\KOMAClassFileName}{parskip}%
+  }%
+  \hbox to\hsize{%
+    \let\phantomsection\relax%
+    #4\parbox[{#2}]{#3}{\@tempa#1#6\par\bigskip}#5\par%
+  }%
+}{}{\tud@patch@wrn{set@@@@preamble}}
+%    \end{macrocode}
+% \end{macro}^^A \set@@@@preamble
+%
+% \iffalse
+%</book|report>
+% \fi
+%
+% \subsubsection{Untertitel für Teile und Kapitel}
+% Im Layout des \CDs können für Teile und Kapitel auch Untertitel angegeben 
+% werden.
+%
+% \begin{macro}{\setpartsubtitle}
+% \changes{v2.06}{2018/08/20}{neu}^^A
+% \begin{KOMAfont}{partsubtitle}
+% \changes{v2.06}{2018/08/20}{neu}^^A
+% \begin{KOMAfont}{parttitle}
+% \changes{v2.06}{2018/08/20}{neu}^^A
+% \begin{macro}{\tud@part@subtitle}
+% \changes{v2.06}{2018/08/01}{neu}^^A
+% Auf Anwenderebene können mit \cs{setpartsubtitle} und \cs{setchaptersubtitle}
+% die gewünschten Untertitel angegegben werden.
+%    \begin{macrocode}
+\newcommand*\tud@part@subtitle{}
+\newcommand*\setpartsubtitle[1]{\gdef\tud@part@subtitle{#1}}
+%    \end{macrocode}
+% Die Schriftelement für die Untertitel von Teilen.
+%    \begin{macrocode}
+\newkomafont{partsubtitle}{%
+  \tud@thesis@fontsize\bfseries%
+  \tud@color{\tud@part@fontcolor}%
+}
+\aliaskomafont{parttitle}{partsubtitle}
+%    \end{macrocode}
+% \end{macro}^^A \tud@part@subtitle
+% \end{KOMAfont}^^A parttitle
+% \end{KOMAfont}^^A partsubtitle
+% \end{macro}^^A \setpartsubtitle
+% \begin{macro}{\setchaptersubtitle}
+% \changes{v2.06}{2018/08/01}{neu}^^A
+% \begin{KOMAfont}{chaptersubtitle}
+% \changes{v2.06}{2018/08/20}{neu}^^A
+% \begin{macro}{\tud@chapter@subtitle}
+% \changes{v2.06}{2018/08/01}{neu}^^A
+% Das gleiche Spiel für Kapitel.
+%    \begin{macrocode}
+%<*book|report>
+\newcommand*\tud@chapter@subtitle{}
+\newcommand*\setchaptersubtitle[1]{\gdef\tud@chapter@subtitle{#1}}
+%    \end{macrocode}
+% Die Schriftelement für die Untertitel von Kapiteln.
+%    \begin{macrocode}
+\newkomafont{chaptersubtitle}{%
+  \tud@thesis@fontsize\bfseries%
+  \tud@color{\tud@chapter@fontcolor}%
+}
+%</book|report>
+%    \end{macrocode}
+% \end{macro}^^A \tud@chapter@subtitle
+% \end{KOMAfont}^^A chaptersubtitle
+% \end{macro}^^A \setchaptersubtitle
+% \begin{macro}{\tud@sec@subtitle}
+% \changes{v2.06}{2018/08/01}{neu}^^A
+% Dieses Makro dient zur Umsetzung der Untertitel.
+%    \begin{macrocode}
+\newcommand*\tud@sec@subtitle[1]{%
+  \ifcsvoid{tud@#1@subtitle}{}{%
+    {\usekomafont{#1subtitle}{\tud@sec@format{\csuse{tud@#1@subtitle}}}}\par%
+    \global\cslet{tud@#1@subtitle}{\@empty}%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@sec@subtitle
+%
+%
+% \subsubsection{Umsetzung für Teile}
 %
 % \begin{macro}{\tud@partheadstartvskip}
 % \begin{macro}{\partheadstartvskip}
@@ -1168,10 +1509,32 @@
 %    \begin{macrocode}
 \newcommand*\tud@partformat{}%
 \newcommand*\tud@partlineswithprefixformat[3]{%
-  \edef\tud@partformat{\noexpand\tud@sec@format{\expandonce\partformat}}%
-  \let\partformat\tud@partformat%
-  \IfUseNumber{}{\tud@cd@vphantom}%
-  #2\tud@sec@format[#1]{#3}%
+%<*book|report>
+  \if@tud@parttitle%
+    \ifx\@@title\@empty%
+      \ClassWarning{\TUD@Class@Name}{%
+        You activated the option `parttitle' but\MessageBreak%
+        no title was given%
+      }%
+    \fi%
+    \tud@cd@vphantom%
+    \tud@sec@format[#1]{%
+      \usekomafont{#1}{\nobreak\interlinepenalty \@M\@@title\strut\@@par}%
+    }%
+    \setpartsubtitle{%
+      \setkomafont{part}{}%
+      \tud@sec@format[partnumber]{\IfUseNumber{\partformat\enskip}{}#3}%
+    }%
+  \else%
+%</book|report>
+    \edef\tud@partformat{\noexpand\tud@sec@format{\expandonce\partformat}}%
+    \let\partformat\tud@partformat%
+    \IfUseNumber{}{\tud@cd@vphantom}%
+    #2\tud@sec@format[#1]{#3}%
+%<*book|report>
+  \fi%
+%</book|report>
+  \tud@sec@subtitle{#1}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@partformat
@@ -1222,10 +1585,12 @@
   \let\chapterformat\tud@chapterformat%
   \IfUseNumber{}{\tud@cd@vphantom}%
   #2\tud@sec@format[#1]{#3}%
+  \tud@sec@subtitle{#1}%
 }
 \newcommand*\tud@chapterlinesformat[3]{%
   \tud@cd@vphantom%
   \@hangfrom{#2}{\tud@sec@format[#1]{#3}}%
+  \tud@sec@subtitle{#1}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@chapterlinesformat
@@ -1410,245 +1775,6 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@sectioncatchphraseformat
 % \end{macro}^^A \tud@sectionlinesformat
-%
-% \iffalse
-%<*book|report>
-% \fi
-%
-% \subsection{Präambeln für Teile und Kapitel}
-%
-% \begin{macro}{\tud@preamble@fontcolor}
-% \changes{v2.06}{2018/08/08}{neu}^^A
-% Der Befehl wird innerhalb von \cs{set@@@@preamble} genutzt, um die notwendige 
-% Farbe des Textes zu aktivieren.
-%    \begin{macrocode}
-\newcommand*\tud@preamble@fontcolor{}
-%    \end{macrocode}
-% \end{macro}^^A \tud@preamble@fontcolor
-% \begin{macro}{\tud@partpreamble}
-% Um die \KOMAScript-Befehle für die Teilepräambel auch für das farbige Layout
-% nutzen zu können, müssen diese leicht angepasst werden. Für die Präambeln wird
-% die Überschrift einer Zusammenfassung ausschließlich zentriert und relativ
-% klein gesetzt. Außerdem wird für eine mögliche Zusammenfassung die
-% \opt{titlepage}-Option deaktiviert. Aufgerufen wird der Befehl durch die
-% gepatchte Version von \cs{set@@@@preamble}.
-%    \begin{macrocode}
-\newcommand*\tud@partpreamble{%
-%    \end{macrocode}
-% Zunächst wird der unterschiedliche Abstand bei Teil- und Kapitelpräambeln 
-% ausgeglichen.
-%    \begin{macrocode}
-  \@tempskipa=\glueexpr\tud@cd@afterskip\relax%
-  \ifdim\@tempskipa<\z@\@tempskipa-\@tempskipa\fi%
-  \vskip\@tempskipa%
-%    \end{macrocode}
-% Anschließend folgen die Anpassungen für die Teilpräambel.
-%    \begin{macrocode}
-  \ifnum\tud@abstract@level@num>\@ne\relax% sec/chap
-    \renewcommand*\tud@abstract@level@num{1}%
-  \fi%
-  \KOMAoptions{titlepage=false}%
-  \null\vskip-\baselineskip%
-  \addtokomafont{disposition}{\tud@color{\tud@part@fontcolor}}%
-  \addtokomafont{dictum}{\tud@color{\tud@part@fontcolor}}%
-  \let\tud@preamble@fontcolor\tud@part@fontcolor%
-  \@afterindentfalse\@afterheading%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@partpreamble
-% \begin{macro}{\tud@chapterpreamble}
-% Um die \KOMAScript-Befehle für die Kapitelpräambel auch für das farbige Layout
-% nutzen zu können, müssen diese leicht angepasst werden. Für die Präambeln der
-% Kapitel gilt das gleiche wie für die der Teileseiten. Auch hier erfolgt die 
-% Ausführung des Befehls durch die gepatchte Version von \cs{set@@@@preamble}.
-%    \begin{macrocode}
-\newcommand*\tud@chapterpreamble{%
-  \ifnum\tud@abstract@level@num>\@ne\relax% sec/chap
-    \renewcommand*\tud@abstract@level@num{1}%
-  \fi%
-  \KOMAoptions{titlepage=false}%
-  \null\vskip-\baselineskip%
-%    \end{macrocode}
-% Die Farb- und Schrifteinstellungen sind nur für reine Kapitelseiten notwendig.
-%    \begin{macrocode}
-  \if@tud@chapterpage%
-    \addtokomafont{disposition}{\tud@color{\tud@chapter@fontcolor}}%
-    \addtokomafont{dictum}{\tud@color{\tud@chapter@fontcolor}}%
-    \let\tud@preamble@fontcolor\tud@chapter@fontcolor%
-  \fi%
-  \@afterindentfalse\@afterheading%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@chapterpreamble
-% \begin{macro}{\set@@@@preamble}
-% Die beiden Befehle für Präambeln aus \KOMAScript{} ignorieren in ihrer
-% ursprünglichen Form die Einstellungen für \opt{parskip}. Dies wird mit diesem
-% Patch beseitigt. Außerdem wird das Makro für die Layouteinstellungen für 
-% Teile (\cs{tud@partpreamble}) respektive Kapitel (\cs{tud@chapterpreamble})
-% aufgerufen. Für die Verwendung der \env{abstract}-Umgebung in den Präambeln
-% wird außerdem der Befehl \cs{phantomsection} auf \cs{relax} gesetzt, um mit
-% \cs{autoref} automatisch generierte Querverweise aus dem Paket \pkg{hyperref}
-% nicht zu verändern. Alternativ zu \cs{let}\cs{@parboxrestore}\cs{relax} 
-% müsste innerhalb des Argumentes von \cs{parbox} die \KOMAScript-Option 
-% \opt{parskip} neu gesetzt werden.
-%    \begin{macrocode}
-\CheckCommand\set@@@@preamble[6]{%
-  \expandafter\gdef\csname #1@preamble\endcsname{%
-    \hbox to\hsize{#4\parbox[{#2}]{#3}{#6\par}#5\par}%
-  }%
-}
-\patchcmd{\set@@@@preamble}{%
-  \hbox to\hsize{#4\parbox[{#2}]{#3}{#6\par}#5\par}%
-}{%
-  \def\@tempa####1@####2{%
-    \@nameuse{tud@####1preamble}%
-    \tud@color{\tud@preamble@fontcolor}%
-    \KOMAoptionOf[\KOMAoption{parskip}]{\KOMAClassFileName}{parskip}%
-  }%
-  \hbox to\hsize{%
-    \let\phantomsection\relax%
-    #4\parbox[{#2}]{#3}{\@tempa#1#6\par\bigskip}#5\par%
-  }%
-}{}{\tud@patch@wrn{set@@@@preamble}}
-%    \end{macrocode}
-% \end{macro}^^A \set@@@@preamble
-%
-% \iffalse
-%</book|report>
-%</class&body>
-%<*class&option>
-% \fi
-%
-% \subsection{Schrifteinstellung und -größe der Überschriften}
-%
-% \begin{option}{headings}
-% Die \KOMAScript-Option \opt{headings} setzt für alle Überschriften die 
-% Formatierung zurück. Um die Einstellungen für das \CD aktiv zu halten, werden 
-% nach der Ausführung der Option durch \cs{tud@x@scr@headings@reset} die mit 
-% \cs{tud@komafont@set} definierten Makros \cs{tud@komafont@\meta{Element}}
-% erneut an die entsprechenden Schriftelemente angehängt. Bei der Verwendung 
-% der \KOMAScript-Option \opt{headings}|=|\val{standardclasses} werden außerdem 
-% noch die Optionen \opt{open} und \opt{chapterprefix} ausgeführt, weshalb auch
-% auf diese reagiert werden muss.
-%    \begin{macrocode}
-\DefineFamilyMember{KOMA}
-\DefineFamilyKey{KOMA}{headings}{%
-  \TUD@SpecialOptionAtDocument{tud@x@scr@headings@reset}%
-  \FamilyKeyStateProcessed%
-}
-%<*book|report>
-\DefineFamilyKey{KOMA}{open}{%
-  \TUD@SpecialOptionAtDocument{tud@x@scr@headings@reset}%  
-  \FamilyKeyStateProcessed%
-}
-\DefineFamilyKey{KOMA}{chapterprefix}{%
-  \TUD@SpecialOptionAtDocument{tud@x@scr@headings@reset}%
-  \FamilyKeyStateProcessed%
-}
-%</book|report>
-%    \end{macrocode}
-% \end{option}^^A headings
-%
-% \iffalse
-%</class&option>
-%<*class&body>
-% \fi
-%
-% \begin{macro}{\tud@x@scr@headings@set}
-% \changes{v2.05}{2015/11/24}{neu}^^A
-% \begin{macro}{\tud@x@scr@headings@current}
-% \changes{v2.05}{2015/11/24}{neu}^^A
-% \begin{macro}{\tud@sec@fontsize}
-% \changes{v2.05}{2015/11/24}{neu}^^A
-% \begin{macro}{\tud@thesis@fontsize}
-% \changes{v2.05}{2015/11/24}{neu}^^A
-% Als erstes werden die Optionen verarbeitet, welche einen Einfluss auf die 
-% Formatierung respektive die Schriftgröße der Überschriften haben. Wird über
-% die Option \opt{headings} eine andere Überschriftengröße gewählt, werden mit
-% dem Makro \cs{tud@x@scr@headings@set} die passenden Schriftgrößen sowohl für
-% die Überschriften (\cs{tud@sec@fontsize}) als auch die Titelseite
-% (\cs{tud@thesis@fontsize}) gesetzt. Dafür wird gewählte Schriftgröße 
-% der Überschriften\footnote{\ignorespaces%
-%   Option \opt{headings}|=|\val{standardclasses/big/normal/small}\ignorespaces%
-% } im Hilfsmakro \cs{tud@x@scr@headings@current} gesichert.
-%    \begin{macrocode}
-\newcommand*\tud@x@scr@headings@current{}
-\newcommand*\tud@sec@fontsize{}
-%<book|report|article>\newcommand*\tud@thesis@fontsize{}
-\newcommand*\tud@x@scr@headings@set[1][]{%
-  \def\@tempa##1##2##3{%
-    \ifstr{##1}{\tud@x@scr@headings@current}{}{%
-      \renewcommand*\tud@x@scr@headings@current{##1}%
-      \renewcommand*\tud@sec@fontsize{##2}%
-%<book|report|article>      \renewcommand*\tud@thesis@fontsize{##3}%
-      #1%
-    }%
-  }%
-%    \end{macrocode}
-% Wird \cs{tud@x@scr@headings@set} aufgerufen, so werden mit \cs{KOMAoptionOf} 
-% die aktuellen Werte der Option \opt{headings} ausgelesen, welche in einer
-% Liste ausgegeben werden. Diese wird durchlaufen und dabei auf die relevanten
-% Werte reagiert.
-%    \begin{macrocode}
-  \KOMAoptionOf[\def\@tempb]{\KOMAClassFileName}{headings}%
-  \@for\@tempc:=\@tempb\do{%
-    \ifstr{standardclasses}{\@tempc}{\@tempa{standardclasses}{\Huge}{\LARGE}}{%
-    \ifstr{big}{\@tempc}{\@tempa{big}{\Huge}{\LARGE}}{%
-    \ifstr{normal}{\@tempc}{\@tempa{normal}{\huge}{\Large}}{%
-    \ifstr{small}{\@tempc}{\@tempa{small}{\LARGE}{\large}}{}}}}%
-  }%
-%    \end{macrocode}
-% Der Abstand nach Teil- und Kapitelüberschriften wird ebenso in Abhängigkeit 
-% der gewählten Einstellung für \opt{headings} definiert.
-%    \begin{macrocode}
-  \begingroup
-    \tud@sec@fontsize%
-    \@tempskipa=\glueexpr%
-      .8\baselineskip \@plus .05\baselineskip \@minus .1\baselineskip%
-    \relax\relax%
-    \edef\tud@res@a{%
-      \endgroup%
-      \def\noexpand\tud@cd@afterskip{\the\@tempskipa}%
-    }%
-  \tud@res@a%
-}
-%    \end{macrocode}
-% Damit die Einstellungen für die Größe wirksam werden, wird das Makro einmalig
-% zu Beginn des Dokumentes ausgeführt.
-%    \begin{macrocode}
-\AtEndPreamble{\tud@x@scr@headings@set}
-%    \end{macrocode}
-% \end{macro}^^A \tud@thesis@fontsize
-% \end{macro}^^A \tud@sec@fontsize
-% \end{macro}^^A \tud@x@scr@headings@current
-% \end{macro}^^A \tud@x@scr@headings@set
-% \begin{macro}{\tud@x@scr@headings@reset}
-% \changes{v2.05}{2015/11/24}{neu}^^A
-% Hiermit wird nach dem Ausführen der Option \opt{headings} im Zweifelsfall die 
-% Größe und Formatierung der Überschriften neu gesetzt.
-%    \begin{macrocode}
-\newcommand*\tud@x@scr@headings@reset{%
-  \tud@cd@process%
-  \tud@x@scr@headings@set[%
-    \ifcase\tud@cd@part@num\relax\else% !false
-      \tud@komafont@reset{part}%
-      \tud@komafont@reset{partnumber}%
-    \fi%
-%<*book|report>
-    \ifcase\tud@cd@chapter@num\relax\else% !false
-      \tud@komafont@reset{chapter}%
-      \tud@komafont@reset{chapterprefix}%
-    \fi%
-%</book|report>
-    \ifcase\tud@cd@section@num\relax\else% !false
-      \tud@komafont@reset{section}%
-      \tud@komafont@reset{subsection}%
-      \tud@komafont@reset{subsubsection}%
-    \fi%
-  ]%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@x@scr@headings@reset
 %
 % \iffalse
 %</class&body>
