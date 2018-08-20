@@ -1,4 +1,4 @@
-% \CheckSum{1365}
+% \CheckSum{1363}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-title.dtx}[%
-  2018/08/18 v2.06 TUD-Script (title)%
+  2018/08/20 v2.06 TUD-Script (title)%
 ]
 \documentclass[english,ngerman,xindy]{tudscrdoc}
 \usepackage[T1]{fontenc}
@@ -182,10 +182,11 @@
 }
 %</book|report|article>
 \newkomafont{titlepage}{%
-  \usekomafont{subject}%
-  \mdseries%
-  \large%
   \raggedtitle%
+  \sffamily%
+  \mdseries%
+  \usesizeofkomafont{subsection}%
+  \tud@color{\tud@title@fontcolor}%
 }
 %    \end{macrocode}
 % \end{KOMAfont}^^A titlepage
@@ -390,6 +391,7 @@
 % ein Großteil der Einstellungen irrelevant und wird übersrpungen.
 %    \begin{macrocode}
     \if@tud@coverpage\else%
+      \addtokomafont{footnote}{\sffamily}%
       \let\footnotesize\small%
       \let\footnoterule\relax%
       \let\footnote\thanks%
@@ -481,10 +483,9 @@
 % allerdings etwas kleiner.
 %    \begin{macrocode}
       \ifx\@subtitle\@empty\else%
-        \vskip 1ex\@plus.5ex\@minus.5ex%
+        {\usekomafont{partnumber}{\nobreak\tud@sec@strut}}%
         {\usekomafont{subtitle}{\tud@title@format{\@subtitle}\par}}%
       \fi%
-      \vskip 2ex\@plus1ex\@minus1ex%
       \vskip 2\bigskipamount%
 %    \end{macrocode}
 % Ausgabe eines Autors oder mehrerer Autoren ggf. mit Zusatzinformationen.
@@ -530,12 +531,8 @@
               \ifx\@graduationabbr\@empty\else\nobreakspace\@graduationabbr\fi%
             }%
             {\usekomafont{titlepage}{\graduationtext\par}}%
-            \vskip 2ex\@plus1ex\@minus1ex%
-            \if@tud@subjectthesis%
-              {\usekomafont{subject}{\@tempc\par}}%
-            \else%
-              {\usekomafont{thesis}{\tud@title@format{\@tempc}\par}}%
-            \fi%
+            \vskip 2.5ex\@plus1ex\@minus1ex%
+            {\usekomafont{thesis}{\tud@title@format{\@tempc}\par}}%
             \vskip 3ex\@plus1ex\@minus1ex%
           \fi%
         \fi%
@@ -1018,13 +1015,16 @@
 % etwas kleiner Abstand eingefügt. Anschließend wird jede Information einfach 
 % in einer neuen Zeile ausgegeben.
 %    \begin{macrocode}
-  \renewcommand*\tud@newline@title{\vskip .5ex\let\tud@newline@title\newline}%
+  \renewcommand*\tud@newline@title{%
+    \vskip .5ex\strut%
+    \def\tud@newline@title{\newline\strut}%
+  }%
 %    \end{macrocode}
 % Die Felder \cs{@author} und ggf. \cs{@authormore} werden sowohl auf der
 % Titelseite als auch im Titelkopf jedoch nicht auf der Umschlagseite 
 % ausgegeben.
 %    \begin{macrocode}
-  {\usekomafont{author}{\ignorespaces#1\unskip}}%
+  {\usekomafont{author}{\ignorespaces#1\strut\unskip}}%
   \if@tud@coverpage\else%
     \ifx\@authormore\@empty\else%
       \tud@newline@title%
@@ -1069,7 +1069,7 @@
 % \meta{Feld} sukzessive abgearbeitet.
 %    \begin{macrocode}
   \tud@multiple@fields@restore{@author}%
-  \tud@multiple@@@split{#2}{\vskip 2ex}%
+  \tud@multiple@@@split{#2}{\vskip 1.5ex}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@newline@title
