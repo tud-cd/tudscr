@@ -5523,8 +5523,10 @@
 }
 \newcommand*\tud@sec@fontface[1][]{%
   \sectfont#1%
-  \if@tud@heavyheadings%
-    \fontseries{\tud@cdfont@ebf}%
+  \ifx\f@family\tud@cdfont@fam%
+    \if@tud@heavyheadings%
+      \fontseries{\tud@cdfont@ebf}%
+    \fi%
   \fi%
   \selectfont%
 }
@@ -5730,12 +5732,12 @@
     \renewcommand*\raggedsection{\tud@raggedright}%
     \tud@cs@store{minisec}%
     \renewcommand\minisec[1]{%
-      \begingroup\tud@cs@use{minisec}{\tud@sec@format{##1}}\endgroup%
+      \tud@cs@use{minisec}{\tud@sec@format{##1}}%
     }%
     \tud@komafont@set{minisec}{%
       \tud@sec@fontface%
       \ifcase\tud@cd@section@num\relax\or\else% *color
-        \ifstr{\tud@pagecolor}{HKS41}{}{\tud@color{HKS41}}%
+        \ifstr{\tud@pagecolor}{HKS41}{}{\color{HKS41}}%
       \fi%
     }%
   \fi%
