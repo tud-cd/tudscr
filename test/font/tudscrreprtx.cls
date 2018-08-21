@@ -874,6 +874,10 @@
 \TUD@key{subjectthesis}[true]{%
   \TUD@set@ifkey{subjectthesis}{@tud@subjectthesis}{#1}%
 }
+\newif\if@tud@titlesignature
+\TUD@key{titlesignature}[true]{%
+  \TUD@set@ifkey{titlesignature}{@tud@titlesignature}{#1}%
+}
 %%% From File: tudscr-frontmatter.dtx
 \newcommand*\tud@fm@switch{%
   {section}{2},{sect}{2},{sec}{2},{addsec}{2},%
@@ -6070,6 +6074,7 @@
 }
 \TUD@parameter@family{title}{%
   \TUD@parameter@def{titlepage}[true]{\KOMAoption{titlepage}{#1}}%
+  \TUD@parameter@def{titlesignature}[true]{\TUDoption{titlesignature}{#1}}%
   \TUD@parameter@def{pagenumber}{\def\tud@title@pagenumber{#1}}%
   \TUD@parameter@def{cdtitle}[true]{\TUDoption{cdtitle}{#1}}%
   \TUD@parameter@let{cd}{cdtitle}%
@@ -6213,6 +6218,12 @@
               {\usekomafont{date}{\@defensedate\par}}%
             \fi%
           \fi%
+        \fi%
+        \if@tud@titlesignature%
+          \let\tud@split@@author@do\tud@split@author@signature%
+          \vskip\tud@len@signatureskip\noindent%
+          \tud@ifin@and{\@@author}{}{\hfill}%
+          \tud@multiple@split{@@author}%
         \fi%
       \fi%
       \ifx\@publishers\@empty\else%
@@ -6495,6 +6506,17 @@
     `\@backslashchar#1' has to be used with\MessageBreak%
     activated titlepage option%
   }%
+}
+\newcommand*\tud@split@author@signature[2]{%
+  \tud@multiple@fields@store{@author}{#1}%
+  \vbox{%
+    \hsize=.3\textwidth%
+    \centering%
+    \rule{.3\textwidth}{.05pt}\newline%
+    \ignorespaces#1\strut\unskip%
+  }%
+  \tud@multiple@fields@restore{@author}%
+  \tud@multiple@@@split{#2}{\hfill}%
 }
 \newcommand\maketitleonecolumn[2][]{%
   \if@twocolumn%

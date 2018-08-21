@@ -1,4 +1,4 @@
-% \CheckSum{1372}
+% \CheckSum{1406}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -121,6 +121,19 @@
 %    \end{macrocode}
 % \end{macro}^^A \if@tud@subjectthesis
 % \end{option}^^A subjectthesis
+% \begin{option}{titlesignature}
+% \begin{macro}{\if@tud@titlesignature}
+% Von einigen Fakultäten wird eine Unterschrift der Autoren auf der Titelseite 
+% verlangt. Diese Option dient zum Aktivieren dieser Unterschriftenzeile am
+% Ende der Titelseite.
+%    \begin{macrocode}
+\newif\if@tud@titlesignature
+\TUD@key{titlesignature}[true]{%
+  \TUD@set@ifkey{titlesignature}{@tud@titlesignature}{#1}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \if@tud@titlesignature
+% \end{option}^^A titlesignature
 %
 % \iffalse
 %</book|report|article>
@@ -295,6 +308,7 @@
 \TUD@parameter@family{title}{%
 %<*book|report|article>
   \TUD@parameter@def{titlepage}[true]{\KOMAoption{titlepage}{#1}}%
+  \TUD@parameter@def{titlesignature}[true]{\TUDoption{titlesignature}{#1}}%
 %</book|report|article>
   \TUD@parameter@def{pagenumber}{\def\tud@title@pagenumber{#1}}%
   \TUD@parameter@def{cdtitle}[true]{\TUDoption{cdtitle}{#1}}%
@@ -581,14 +595,19 @@
             \fi%
           \fi%
         \fi%
+%    \end{macrocode}
+% Hier erfolgt die Ausgabe der Unterschriftenzeile, falls gewünscht. Ist nur 
+% ein Autor angegeben, wird die Box für die Unterschrift rechtsbündig erzeugt.
+%    \begin{macrocode}
+        \if@tud@titlesignature%
+          \let\tud@split@@author@do\tud@split@author@signature%
+          \vskip\tud@len@signatureskip\noindent%
+          \tud@ifin@and{\@@author}{}{\hfill}%
+          \tud@multiple@split{@@author}%
+        \fi%
       \fi%
 %    \end{macrocode}
 % Zu guter Letzt kann das Standard-Verlagsfeld befüllt werden.
-% \ToDo{Unterschriftenfeld auf Titelseite, siehe 
-%   \href{%
-%     http://latex.wcms-file3.tu-dresden.de/phpBB3/viewtopic.php?p=1523\#p1523%
-%   }{Forumsbeitrag}%
-% }[v2.06]
 %    \begin{macrocode}
       \ifx\@publishers\@empty\else%
         \vskip 2ex\@plus.25fill%
@@ -1091,6 +1110,38 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@title@wrn
+% \begin{macro}{\tud@split@author@signature}
+% \changes{v2.04}{2015/05/12}{neu}^^A
+% Das Makro \cs{tud@split@author@signature} dient zum Erstellen von Feldern für 
+% Unterschriften der Autoren am Ende der Titelseite.
+%    \begin{macrocode}
+\newcommand*\tud@split@author@signature[2]{%
+%    \end{macrocode}
+% Zu Beginn werden alle Felder, welche innerhalb von \cs{@author} angegeben
+% sind, gesichert. 
+%    \begin{macrocode}
+  \tud@multiple@fields@store{@author}{#1}%
+%    \end{macrocode}
+% Für jeden Autor wird in einer Box ein Unterschriftenfeld mit fester Breite
+% erzeugt. Innerhalb der Box wird erst eine Linie und darunter der Name des 
+% Autors zentriert ausgegeben.
+%    \begin{macrocode}
+  \vbox{%
+    \hsize=.3\textwidth%
+    \centering%
+    \rule{.3\textwidth}{.05pt}\newline%
+    \ignorespaces#1\strut\unskip%
+  }%
+%    \end{macrocode}
+% Zunächst werden die zuvor bestehenden Feldinhalte wiederhergestellt. Danach 
+% wird durch den Aufruf von \cs{tud@multiple@@@split} wird das übergebene
+% \meta{Feld} sukzessive abgearbeitet.
+%    \begin{macrocode}
+  \tud@multiple@fields@restore{@author}%
+  \tud@multiple@@@split{#2}{\hfill}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@split@author@signature
 %
 % \iffalse
 %</book|report|article>
