@@ -1046,7 +1046,7 @@
   \renewcommand*\TUD@SpecialOptionAtDocument[1]{%
     \ifx\tud@atdocument@hook\relax%
       \gdef\tud@atdocument@hook{\global\let\tud@atdocument@hook\relax}%
-      \AtEndOfFamilyOptions{%
+      \AtEndOfFamilyOptions*{%
         \tud@atdocument@hook%
         \tud@atdocument@process%
       }%
@@ -1601,9 +1601,7 @@
   }%
   \renewcommand*\tud@RaggedRight{\RaggedRight}%
 }
-\newif\if@tud@x@siunitx@enabled
 \AfterPackage*{siunitx}{%
-  \@tud@x@siunitx@enabledtrue%
   \providecommand*\lseries{\fontseries{l}\selectfont}%
 }
 \newif\if@tud@x@bm@requested
@@ -2541,19 +2539,6 @@
   \fi%
   \tud@cdfont@init%
   \tud@ttfont@init%
-  \if@tud@x@siunitx@enabled%
-    \if@tud@cdfont@active%
-      \if@tud@cdfont@heavy%
-        \def\tud@reserved{\TUDoptions{cdfont=heavy}}%
-      \else%
-        \def\tud@reserved{\TUDoptions{cdfont=true}}%
-      \fi%
-    \else%
-      \def\tud@reserved{\TUDoptions{cdfont=false}}%
-    \fi%
-    \expandafter\AfterEndPreamble\expandafter{\tud@reserved}%
-    \TUDoptions{cdfont=false}%
-  \fi%
   \tud@font@set%
   \if@tud@x@bm@requested%
     \tud@math@init%
