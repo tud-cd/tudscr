@@ -1,4 +1,4 @@
-% \CheckSum{4408}
+% \CheckSum{4420}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -1268,7 +1268,7 @@
 % gesetzt.
 %    \begin{macrocode}
       \@tempskipa=\glueexpr\medskipamount-\tud@lastskip\relax%
-      \ifdim\@tempskipa>\z@%
+      \ifdim\@tempskipa>\z@\relax%
         \addpenalty{\@beginparpenalty}%
         \addvspace{\@tempskipa}%
       \fi%
@@ -5689,6 +5689,11 @@
   \PassOptionsToPackage{colorinlistoftodos,color=HKS92!10}{todonotes}%
 }
 \RequirePackage{todonotes}[2012/07/25]
+\AtEndPreamble{%
+  \ifdim\marginparwidth<2cm\relax%
+    \setlength\marginparwidth{2cm}%
+  \fi%
+}
 %    \end{macrocode}
 %
 % \iffalse
@@ -6197,10 +6202,13 @@
   \the\toks@\xspace%
 }
 %<*class>
-\NewDocumentCommand\GitHubRepo{!s}{%
+\NewDocumentCommand\GitHubRepo{!s !t' !O{releases}}{%
   \IfBooleanTF{#1}{\toks@{\href}}{\toks@{\hrfn}}%
-  \addto@hook\toks@{{https://github.com/tud-cd/tudscr/releases}}%
-  \addto@hook\toks@{{\tud@english{GitHub-Repository~\Distribution*{tudscr}}}}%
+  \IfBooleanT{#2}{\toks@{\url}}%
+  \addto@hook\toks@{{https://github.com/tud-cd/tudscr/#3}}%
+  \IfBooleanF{#2}{
+    \addto@hook\toks@{{\tud@english{GitHub-Repository~\Distribution*{tudscr}}}}%
+  }%
   \the\toks@\xspace%
 }
 \newcommand*\Download[1]{%
