@@ -2773,10 +2773,10 @@
   \protected@xdef\@@thesis{\trim@spaces{#2}}%
 }
 \newcommand*\@graduation{}
-\newcommand*\@graduationabbr{}
-\newcommand*\@graduationabbreviation{\@graduationabbr}
+\newcommand*\@graduationabbreviation{}
 \newcommand*\graduation[2][]{%
-  \ifxblank{#1}{\gdef\@graduationabbr{}}{\gdef\@graduationabbr{(#1)}}%
+  \gdef\@graduationabbreviation{}%
+  \ifxblank{#1}{}{\gdef\@graduationabbreviation{(#1)}}%
   \gdef\@graduation{#2}%
 }
 \newcommand*\@professor{}
@@ -3025,6 +3025,7 @@
 \newcommand*\tud@ifin@and[1]{%
   \begingroup%
     \let\and\relax%
+    \robustify\\%
     \protected@edef\@tempb{#1}%
     \def\@tempa##1\and##2\relax{%
       \IfArgIsEmpty{##2}{%
@@ -6164,7 +6165,9 @@
           \ifx\@graduation\@empty\else%
             \def\@tempc{%
               \@graduation%
-              \ifx\@graduationabbr\@empty\else\nobreakspace\@graduationabbr\fi%
+              \ifx\@graduationabbreviation\@empty\else%
+                \nobreakspace\@graduationabbreviation%
+              \fi%
             }%
             {\usekomafont{titlepage}{\graduationtext\par}}%
             \vskip 2.5ex\@plus1ex\@minus1ex%
