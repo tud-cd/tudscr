@@ -1,4 +1,4 @@
-% \CheckSum{1363}
+% \CheckSum{1372}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -214,6 +214,7 @@
 %   \cs{tud@title@twocolumn} verwendet}^^A
 % \changes{v2.02}{2014/09/05}{Titelseite mit \cs{tud@maketitle@page}}^^A
 % \changes{v2.06}{2018/08/16}{Unterstützung von \cs{frontispiece}}^^A
+% \changes{v2.06}{2018/08/21}{\cs{emailaddress} für Autorangaben}^^A
 % \begin{macro}{\tud@title@pagenumber}
 % \changes{v2.02}{2014/06/23}{neu}^^A
 % \begin{parameter}{cdtitle}
@@ -292,6 +293,9 @@
 % in ihrem Verhalten den gleichnamigen Klassenoptionen.
 %    \begin{macrocode}
 \TUD@parameter@family{title}{%
+%<*book|report|article>
+  \TUD@parameter@def{titlepage}[true]{\KOMAoption{titlepage}{#1}}%
+%</book|report|article>
   \TUD@parameter@def{pagenumber}{\def\tud@title@pagenumber{#1}}%
   \TUD@parameter@def{cdtitle}[true]{\TUDoption{cdtitle}{#1}}%
   \TUD@parameter@let{cd}{cdtitle}%
@@ -998,7 +1002,6 @@
 % \begin{macro}{\tud@newline@title}
 % Das Makro \cs{tud@split@author@title} dient der formatierten Ausgabe aller 
 % Informationen für mehrere Autoren auf der Titelseite.
-% \ToDo{\cs{emailaddress} für Autorangaben}[v2.06]
 %    \begin{macrocode}
 \newcommand*\tud@newline@title{}
 \newcommand*\tud@split@author@title[2]{%
@@ -1020,13 +1023,17 @@
 %    \end{macrocode}
 % Die Felder \cs{@author} und ggf. \cs{@authormore} werden sowohl auf der
 % Titelseite als auch im Titelkopf jedoch nicht auf der Umschlagseite 
-% ausgegeben.
+% ausgegeben. Gleiches gilt für E"~Mail-Adressen.
 %    \begin{macrocode}
   {\usekomafont{author}{\ignorespaces#1\strut\unskip}}%
   \if@tud@coverpage\else%
     \ifx\@authormore\@empty\else%
       \tud@newline@title%
       \@authormore%
+    \fi%
+    \ifx\@emailaddress\@empty\else%
+      \tud@newline@title%
+      \@emailaddress%
     \fi%
 %    \end{macrocode}
 % Nur auf der Titelseite erfolgt die Ausgabe von Geburtsdatum, Geburtsort,

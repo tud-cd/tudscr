@@ -2711,11 +2711,35 @@
 }
 \newcommand*\@authormore{}
 \newrobustcmd*\authormore[1]{\gdef\@authormore{#1}\ignorespaces}
+\newcommand*\@emailaddress{}
+\newrobustcmd*\emailaddress{%
+  \kernel@ifstar{\tud@emailaddress@simple}{\tud@emailaddress@hyper}%
+}
+\newrobustcmd*\tud@emailaddress@simple[1]{\gdef\@emailaddress{#1}}
+\newrobustcmd*\tud@emailaddress@hyper[2][]{\gdef\@emailaddress{#2}}
+\AfterPackage*{hyperref}{%
+  \renewrobustcmd*\tud@emailaddress@hyper[2][hidelinks]{%
+    \gdef\@emailaddress{%
+      \begingroup%
+        \urlstyle{same}%
+        \hypersetup{#1}%
+        \href{mailto:#2}{\nolinkurl{#2}}%
+      \endgroup%
+    }%
+  }%
+}
 \newcommand*\@course{}
 \newrobustcmd*\course[1]{\gdef\@course{#1}\ignorespaces}
 \newcommand*\@discipline{}
 \newrobustcmd*\discipline[1]{\gdef\@discipline{#1}\ignorespaces}
-\providecommand*\publisher[1]{\publishers{#1}}
+\newcommand*\@matriculationnumber{}
+\newrobustcmd*\matriculationnumber[1]{%
+  \gdef\@matriculationnumber{#1}\ignorespaces%
+}
+\newcommand*\@matriculationyear{}
+\newrobustcmd*\matriculationyear[1]{\gdef\@matriculationyear{#1}\ignorespaces}
+\newcommand*\@placeofbirth{}
+\newrobustcmd*\placeofbirth[1]{\gdef\@placeofbirth{#1}\ignorespaces}
 \newcommand*\@thesis{}
 \newcommand*\@@thesis{}
 \newcommand*\thesis[1]{\tud@thesis@do{thesis}{#1}}
@@ -2791,14 +2815,6 @@
 \newcommand*\referee[1]{\gdef\@referee{#1}}
 \newcommand*\@advisor{}
 \newcommand*\advisor[1]{\gdef\@advisor{#1}}
-\newcommand*\@matriculationnumber{}
-\newrobustcmd*\matriculationnumber[1]{%
-  \gdef\@matriculationnumber{#1}\ignorespaces%
-}
-\newcommand*\@matriculationyear{}
-\newrobustcmd*\matriculationyear[1]{\gdef\@matriculationyear{#1}\ignorespaces}
-\newcommand*\@placeofbirth{}
-\newrobustcmd*\placeofbirth[1]{\gdef\@placeofbirth{#1}\ignorespaces}
 \newlength\tud@len@signatureskip
 \setlength\tud@len@signatureskip{8ex plus 6ex minus 6ex}
 \newcommand*\@confirmationclosing{%
@@ -2816,6 +2832,7 @@
 \newcommand*\confirmationclosing[1]{\gdef\@confirmationclosing{#1}}
 \newcommand*\@place{Dresden}
 \newcommand*\place[1]{\gdef\@place{#1}}
+\providecommand*\publisher[1]{\publishers{#1}}
 \TUD@UnwindPackage{isodate}{%
   \@ifpackageloaded{datetime2}{%
     \providecommand*\printdate[1]{\DTMDate{#1}}%
@@ -2963,7 +2980,7 @@
 }
 \newcommand*\tud@split@author@do[2]{}
 \newcommand*\tud@split@author@list{%
-  authormore,course,discipline,%
+  authormore,course,discipline,emailaddress,%
   matriculationyear,enrolmentyear,%
   matriculationnumber,studentid,matriculationid,%
   placeofbirth,birthplace,dateofbirth,birthday,%
@@ -6052,6 +6069,7 @@
   \global\let\and\relax%
 }
 \TUD@parameter@family{title}{%
+  \TUD@parameter@def{titlepage}[true]{\KOMAoption{titlepage}{#1}}%
   \TUD@parameter@def{pagenumber}{\def\tud@title@pagenumber{#1}}%
   \TUD@parameter@def{cdtitle}[true]{\TUDoption{cdtitle}{#1}}%
   \TUD@parameter@let{cd}{cdtitle}%
@@ -6436,6 +6454,10 @@
     \ifx\@authormore\@empty\else%
       \tud@newline@title%
       \@authormore%
+    \fi%
+    \ifx\@emailaddress\@empty\else%
+      \tud@newline@title%
+      \@emailaddress%
     \fi%
     \ifx\@dateofbirth\@empty\else%
       \if@titlepage%

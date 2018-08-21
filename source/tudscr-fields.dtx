@@ -340,6 +340,37 @@
 % \end{field}^^A \@@author
 % \end{field}^^A \@author
 % \end{macro}^^A \author
+% \begin{macro}{\emailaddress}
+% \changes{v2.02}{2014/05/16}{neu, Umbenennung des Makros \cs{email}}^^A
+% \begin{field}{\@emailaddress}
+% \changes{v2.02}{2014/05/16}{neu, Umbenennung des Makros \cs{@email}}^^A
+% \begin{macro}{\tud@emailaddress@simple}
+% \changes{v2.05}{2016/07/09}{neu}^^A
+% \begin{macro}{\tud@emailaddress@hyper}
+% \changes{v2.05}{2016/07/09}{neu}^^A
+%    \begin{macrocode}
+\newcommand*\@emailaddress{}
+\newrobustcmd*\emailaddress{%
+  \kernel@ifstar{\tud@emailaddress@simple}{\tud@emailaddress@hyper}%
+}
+\newrobustcmd*\tud@emailaddress@simple[1]{\gdef\@emailaddress{#1}}
+\newrobustcmd*\tud@emailaddress@hyper[2][]{\gdef\@emailaddress{#2}}
+\AfterPackage*{hyperref}{%
+  \renewrobustcmd*\tud@emailaddress@hyper[2][hidelinks]{%
+    \gdef\@emailaddress{%
+      \begingroup%
+        \urlstyle{same}%
+        \hypersetup{#1}%
+        \href{mailto:#2}{\nolinkurl{#2}}%
+      \endgroup%
+    }%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@emailaddress@hyper
+% \end{macro}^^A \tud@emailaddress@simple
+% \end{field}^^A \@emailaddress
+% \end{macro}^^A \emailaddress
 % \begin{macro}{\course}
 % \begin{field}{\@course}
 % Studiengang für den Titel sowie den Kopf der Aufgabenstellung, wird im Makro 
@@ -362,17 +393,42 @@
 %    \end{macrocode}
 % \end{field}^^A \@discipline
 % \end{macro}^^A \discipline
-% \begin{macro}{\publisher}
-% Kleine Korrektur für \KOMAScript, der Befehl sollte im Singular stehen.
-%    \begin{macrocode}
-\providecommand*\publisher[1]{\publishers{#1}}
-%    \end{macrocode}
-% \end{macro}^^A \publisher
 %
 % \iffalse
 %<*book|report|article>
 % \fi
 %
+% \begin{macro}{\matriculationnumber}
+% \begin{field}{\@matriculationnumber}
+% Die Matrikelnummer für Titelseite und Aufgabenstellung, wird in 
+% \cs{@matriculationid} gespeichert.
+%    \begin{macrocode}
+\newcommand*\@matriculationnumber{}
+\newrobustcmd*\matriculationnumber[1]{%
+  \gdef\@matriculationnumber{#1}\ignorespaces%
+}
+%    \end{macrocode}
+% \end{field}^^A \@matriculationnumber
+% \end{macro}^^A \matriculationnumber
+% \begin{macro}{\matriculationyear}
+% \begin{field}{\@matriculationyear}
+% Das Immatrikulationsjahr für den Titel wird in \cs{@matriculationyear}
+% gespeichert.
+%    \begin{macrocode}
+\newcommand*\@matriculationyear{}
+\newrobustcmd*\matriculationyear[1]{\gdef\@matriculationyear{#1}\ignorespaces}
+%    \end{macrocode}
+% \end{field}^^A \@matriculationyear
+% \end{macro}^^A \matriculationyear
+% \begin{macro}{\placeofbirth}
+% \begin{field}{\@placeofbirth}
+% Der Geburtsort für den Titel wird in \cs{@placeofbirth} gespeichert.
+%    \begin{macrocode}
+\newcommand*\@placeofbirth{}
+\newrobustcmd*\placeofbirth[1]{\gdef\@placeofbirth{#1}\ignorespaces}
+%    \end{macrocode}
+% \end{field}^^A \@placeofbirth
+% \end{macro}^^A \placeofbirth
 % \begin{macro}{\thesis}
 % \begin{field}{\@thesis}
 % \changes{v2.02}{2014/11/06}{\cs{protected@xdef} genutzt}^^A
@@ -575,37 +631,6 @@
 %    \end{macrocode}
 % \end{field}^^A \@advisor
 % \end{macro}^^A \advisor
-% \begin{macro}{\matriculationnumber}
-% \begin{field}{\@matriculationnumber}
-% Die Matrikelnummer für Titelseite und Aufgabenstellung, wird in 
-% \cs{@matriculationid} gespeichert.
-%    \begin{macrocode}
-\newcommand*\@matriculationnumber{}
-\newrobustcmd*\matriculationnumber[1]{%
-  \gdef\@matriculationnumber{#1}\ignorespaces%
-}
-%    \end{macrocode}
-% \end{field}^^A \@matriculationnumber
-% \end{macro}^^A \matriculationnumber
-% \begin{macro}{\matriculationyear}
-% \begin{field}{\@matriculationyear}
-% Das Immatrikulationsjahr für den Titel wird in \cs{@matriculationyear}
-% gespeichert.
-%    \begin{macrocode}
-\newcommand*\@matriculationyear{}
-\newrobustcmd*\matriculationyear[1]{\gdef\@matriculationyear{#1}\ignorespaces}
-%    \end{macrocode}
-% \end{field}^^A \@matriculationyear
-% \end{macro}^^A \matriculationyear
-% \begin{macro}{\placeofbirth}
-% \begin{field}{\@placeofbirth}
-% Der Geburtsort für den Titel wird in \cs{@placeofbirth} gespeichert.
-%    \begin{macrocode}
-\newcommand*\@placeofbirth{}
-\newrobustcmd*\placeofbirth[1]{\gdef\@placeofbirth{#1}\ignorespaces}
-%    \end{macrocode}
-% \end{field}^^A \@placeofbirth
-% \end{macro}^^A \placeofbirth
 % \begin{length}{\tud@len@signatureskip}
 % \changes{v2.04}{2015/05/06}{neu}^^A
 % Für alle Formatvorlagen, welche eine Unterschriftenzeile bereitstellen, wird 
@@ -649,6 +674,16 @@
 %
 % \iffalse
 %</book|report|article>
+% \fi
+%
+% \begin{macro}{\publisher}
+% Kleine Korrektur für \KOMAScript, der Befehl sollte im Singular stehen.
+%    \begin{macrocode}
+\providecommand*\publisher[1]{\publishers{#1}}
+%    \end{macrocode}
+% \end{macro}^^A \publisher
+%
+% \iffalse
 %<*poster>
 % \fi
 %
@@ -952,14 +987,6 @@
 % \changes{v2.05}{2016/04/05}{neu}^^A
 % \begin{field}{\@telefax}
 % \changes{v2.05}{2016/04/05}{neu}^^A
-% \begin{macro}{\emailaddress}
-% \changes{v2.02}{2014/05/16}{neu, Umbenennung des Makros \cs{email}}^^A
-% \begin{field}{\@emailaddress}
-% \changes{v2.02}{2014/05/16}{neu, Umbenennung des Makros \cs{@email}}^^A
-% \begin{macro}{\tud@emailaddress@simple}
-% \changes{v2.05}{2016/07/09}{neu}^^A
-% \begin{macro}{\tud@emailaddress@hyper}
-% \changes{v2.05}{2016/07/09}{neu}^^A
 % Für einen Aushang bzw. ein Poster kann eine oder mehrere Kontaktpersonen 
 % angegeben werden. Zusätzlich lassen sich für jede einzelne Person ein Raum,
 % eine Telefonnummer und die E"~Mail-Adresse hinzugefügen.
@@ -975,28 +1002,7 @@
 \newrobustcmd*\telephone[1]{\gdef\@telephone{#1}}
 \newcommand*\@telefax{}
 \newrobustcmd*\telefax[1]{\gdef\@telefax{#1}}
-\newcommand*\@emailaddress{}
-\newrobustcmd*\emailaddress{%
-  \kernel@ifstar{\tud@emailaddress@simple}{\tud@emailaddress@hyper}%
-}
-\newrobustcmd*\tud@emailaddress@simple[1]{\gdef\@emailaddress{#1}}
-\newrobustcmd*\tud@emailaddress@hyper[2][]{\gdef\@emailaddress{#2}}
-\AfterPackage*{hyperref}{%
-  \renewrobustcmd*\tud@emailaddress@hyper[2][hidelinks]{%
-    \gdef\@emailaddress{%
-      \begingroup%
-        \urlstyle{same}%
-        \hypersetup{#1}%
-        \href{mailto:#2}{\nolinkurl{#2}}%
-      \endgroup%
-    }%
-  }%
-}
 %    \end{macrocode}
-% \end{macro}^^A \tud@emailaddress@hyper
-% \end{macro}^^A \tud@emailaddress@simple
-% \end{field}^^A \@emailaddress
-% \end{macro}^^A \emailaddress
 % \end{field}^^A \@telefax
 % \end{macro}^^A \telefax
 % \end{field}^^A \@telephone
@@ -1196,7 +1202,7 @@
 \newcommand*\tud@split@author@do[2]{}
 %<*book|report|article>
 \newcommand*\tud@split@author@list{%
-  authormore,course,discipline,%
+  authormore,course,discipline,emailaddress,%
   matriculationyear,enrolmentyear,%
   matriculationnumber,studentid,matriculationid,%
   placeofbirth,birthplace,dateofbirth,birthday,%
@@ -1207,13 +1213,13 @@
 %    \begin{macrocode}
 %<*poster>
 \newcommand*\tud@split@author@list{%
-  authormore,course,discipline,office,telephone,telefax,emailaddress%
+  authormore,course,discipline,emailaddress,office,telephone,telefax%
 }
 %</poster>
 %</class>
 %<*class&poster|package&supervisor>
 \newcommand*\tud@split@contactperson@do[2]{}
-\newcommand*\tud@split@contactperson@list{office,telephone,telefax,emailaddress}
+\newcommand*\tud@split@contactperson@list{emailaddress,office,telephone,telefax}
 %</class&poster|package&supervisor>
 %    \end{macrocode}
 % Damit ist der Teil für das Paket \pkg{tudscrsupervisor} abgeschlossen, wo 
