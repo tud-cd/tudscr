@@ -1,4 +1,4 @@
-% \CheckSum{1194}
+% \CheckSum{1187}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -329,33 +329,14 @@
 %    \end{macrocode}
 % \end{macro}^^A \if@tud@chapterpage
 % \end{option}^^A chapterpage
-% \begin{option}{clearcolor}
-% \begin{option}{clearcolour}
-% \begin{macro}{\if@tud@clearcolor}
-% Wird auf Titel- Teil- oder Kapitelseiten eine Hintergrundfarbe im Stile des 
-% \CDs verwendet (\opt{cd\dots}|=|\val{color}) wird die entsprechende Rückseite 
-% in der gleichen Farbe wie die Vorderseite gestaltet. Für Teile- bzw.
-% Kapitelseiten muss dafür die passende Option (\opt{cleardoublespecialpage})
-% aktiviert sein.
-% 
-%    \begin{macrocode}
-\newif\if@tud@clearcolor
-\TUD@key{clearcolor}[true]{%
-  \TUD@set@ifkey{clearcolor}{@tud@clearcolor}{#1}%
-}
-\TUD@key{clearcolour}[true]{%
-  \TUD@set@ifkey{clearcolour}{@tud@clearcolor}{#1}%
-}
-%    \end{macrocode}
-% \end{macro}^^A \if@tud@clearcolor
-% \end{option}^^A clearcolour
-% \end{option}^^A clearcolor
 % \begin{option}{cleardoublespecialpage}
 % \changes{v2.02}{2014/07/08}{Werte für Seitenstil aus den \TUDScript- bzw.
 %   \KOMAScript-Klassen möglich}^^A
 % \changes{v2.03}{2015/01/09}{Prüfung des Seitenstils mit \cs{AfterPreamble}
 %   auf Beginn des Dokumentes verzögert}^^A
+% \changes{v2.06}{2018/08/21}{Farbeinstellungen integriert}^^A
 % \begin{macro}{\tud@cleardoublepage}
+% \begin{macro}{\if@tud@clearcolor}
 % Für Klassen mit separaten Teileseiten und Kapiteln wird eine zusätzliche
 % Option definiert, welche nur bei zweiseitigem Satz (\opt{twoside}) und
 % zusätzlich immer auf nur der rechten Seite öffnenden Teilen bzw. Kapiteln
@@ -365,62 +346,74 @@
 % separaten Kapitelseiten\footnote{bei aktivierter \opt{chapterpage}-Option}
 % entweder zwingend als leere Seite oder~-- abhängig von der \KOMAScript-Option
 % \opt{cleardoublepage}~-- als Vakatseite ausgegeben werden. Außerdem ist die
-% Festlegung eines bestimmten Seitenstiles möglich.
+% Festlegung eines bestimmten Seitenstiles möglich. Weiterhin kann eingestellt 
+% werden, ob bei der Verwendung einer Hintergrundfarbe auf Titel- Teil- oder 
+% Kapitelseiten im Stile des \CDs verwendet (\opt{cd\dots}|=|\val{color}) die
+% entsprechende Rückseite in der gleichen Farbe wie die Vorderseite erschienen 
+% soll. Dafür muss die Option \opt{cleardoublespecialpage} aktiviert sein.
 %
 % Der Befehl \cs{tud@cleardoublepage} enthält die Definition der zu erzeugenden
 % Doppelseite.
 %    \begin{macrocode}
+\newif\if@tud@clearcolor
 \newcommand*\tud@cleardoublepage{\cleardoubleoddpage}
 %    \end{macrocode}
 % Mit der Option \opt{cleardoublespecialpage} kann dieser festgelegt werden.
 %    \begin{macrocode}
 \TUD@key{cleardoublespecialpage}[true]{%
-  \TUD@set@ifkey{cleardoublespecialpage}{@tempswa}{#1}%
+  \TUD@set@numkey{cleardoublespecialpage}{@tempa}{%
+    \TUD@bool@numkey,%
+    {nocolor}{2},{nocolour}{2},{monochrome}{2},{monochromatic}{2},%
+    {bicolor}{3},{bicolour}{3},{twocolor}{3},{twocolour}{3},%
+    {bichrome}{3},{bichromatic}{3},{dichrome}{3},{dichromatic}{3},%
+    {color}{3},{colour}{3},%
+    {full}{3},{colorfull}{3},{fullcolor}{3},{colourfull}{3},{fullcolour}{3},%
+    {current}{4}%
+  }{#1}%
 %    \end{macrocode}
 % Dabei wird die Rückseite entweder wie alle Vakatseiten oder leer gesetzt.
 %    \begin{macrocode}
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \if@tempswa%
-      \renewcommand*\tud@cleardoublepage{\cleardoubleoddpage}%
-    \else%
+    \ifcase\@tempa\relax% false
       \renewcommand*\tud@cleardoublepage{\null\thispagestyle{empty}\newpage}%
-    \fi%
-  \else%
+    \or% true
+      \renewcommand*\tud@cleardoublepage{\cleardoubleoddpage}%
 %    \end{macrocode}
-% Zusätzlich wird die Seite ggf. auch farbig ausgegeben (s. \opt{color}).
-% \ToDo{\opt{cleardoublespecialpage=nocolor/nocolour}}[v2.06]
+% Zusätzlich kann die Vakatseite gegebenenfalls auch farbig ausgegeben werden 
+% (s. \opt{cd=true/color/pale/bicolor/fullcolor}).
 %    \begin{macrocode}
-    \tud@lowerstring\tud@res@a{#1}%
-    \ifstr{\tud@res@a}{color}{\TUDoptions{clearcolor=true}}{%
-    \ifstr{\tud@res@a}{colour}{\TUDoptions{clearcolor=true}}{%
+    \or% nocolor
+      \@tud@clearcolorfalse%
+    \or% color
+      \@tud@clearcolortrue%
 %    \end{macrocode}
 % Außerdem kann ein Seitenstil gezielt ausgewählt werden.
 %    \begin{macrocode}
-    \ifstr{\tud@res@a}{current}{%
+    \or% current
       \renewcommand*\tud@cleardoublepage{\cleardoubleoddstandardpage}%
-      \FamilyKeyStateProcessed%
-    }{%
+    \fi%
 %    \end{macrocode}
 % Beim Laden der Klasse selbst sind die speziellen Seitenstile der \KOMAScript-
 % bzw. \TUDScript-Klassen noch nicht definiert. Diese sollen als Werte jedoch
 % trotzdem erlaubt sein. Deshalb wird für diesen Fall das Überprüfen mit
 % \cs{AfterPreamble} auf den Beginn des Dokumentes verzögert.
 %    \begin{macrocode}
-      \AfterPreamble{%
-        \ifcsundef{ps@#1}{%
-          \ClassError{\TUD@Class@Name}{`#1' is no valid pagestyle}{%
-            You tried to use `#1' as a pagestyle for option\MessageBreak%
-            `cleardoublespecialpage', but it was never defined.%
-          }%
-        }{%
-          \renewcommand*\tud@cleardoublepage{\cleardoubleoddpageusingstyle{#1}}%
+  \else%
+    \AfterPreamble{%
+      \ifcsundef{ps@#1}{%
+        \ClassError{\TUD@Class@Name}{`#1' is no valid pagestyle}{%
+          You tried to use `#1' as a pagestyle for option\MessageBreak%
+          `cleardoublespecialpage', but it was never defined.%
         }%
+      }{%
+        \renewcommand*\tud@cleardoublepage{\cleardoubleoddpageusingstyle{#1}}%
       }%
-      \FamilyKeyStateProcessed%
-    }}}%
+    }%
+    \FamilyKeyStateProcessed%
   \fi%
 }
 %    \end{macrocode}
+% \end{macro}^^A \if@tud@clearcolor
 % \end{macro}^^A \tud@cleardoublepage
 % \end{option}^^A cleardoublespecialpage
 %
@@ -591,7 +584,9 @@
 % \subsection{Schrifteinstellung und -größe der Überschriften}
 %
 % \begin{option}{headings}
+% \changes{v2.06}{2018/08/20}{neu}^^A
 % \begin{macro}{\if@tud@heavyheadings}
+% \changes{v2.06}{2018/08/20}{neu}^^A
 % Die Option wird dahingehend erweitert, dass die Überschriften auch im 
 % extra-fetten Schnitt gesetzt werden können.
 %    \begin{macrocode}
@@ -1375,9 +1370,8 @@
 % \begin{KOMAfont}{partsubtitle}
 % \changes{v2.06}{2018/08/20}{neu}^^A
 % \begin{KOMAfont}{parttitle}
-% \changes{v2.06}{2018/08/20}{neu}^^A
 % \begin{macro}{\tud@part@subtitle}
-% \changes{v2.06}{2018/08/01}{neu}^^A
+% \changes{v2.06}{2018/08/20}{neu}^^A
 % Auf Anwenderebene können mit \cs{setpartsubtitle} und \cs{setchaptersubtitle}
 % die gewünschten Untertitel angegegben werden.
 %    \begin{macrocode}
@@ -1397,11 +1391,11 @@
 % \end{KOMAfont}^^A partsubtitle
 % \end{macro}^^A \setpartsubtitle
 % \begin{macro}{\setchaptersubtitle}
-% \changes{v2.06}{2018/08/01}{neu}^^A
+% \changes{v2.06}{2018/08/20}{neu}^^A
 % \begin{KOMAfont}{chaptersubtitle}
 % \changes{v2.06}{2018/08/20}{neu}^^A
 % \begin{macro}{\tud@chapter@subtitle}
-% \changes{v2.06}{2018/08/01}{neu}^^A
+% \changes{v2.06}{2018/08/20}{neu}^^A
 % Das gleiche Spiel für Kapitel.
 %    \begin{macrocode}
 %<*book|report>

@@ -796,41 +796,41 @@
   \TUD@set@ifkey{chapterpage}{@tud@chapterpage}{#1}%
 }
 \newif\if@tud@clearcolor
-\TUD@key{clearcolor}[true]{%
-  \TUD@set@ifkey{clearcolor}{@tud@clearcolor}{#1}%
-}
-\TUD@key{clearcolour}[true]{%
-  \TUD@set@ifkey{clearcolour}{@tud@clearcolor}{#1}%
-}
 \newcommand*\tud@cleardoublepage{\cleardoubleoddpage}
 \TUD@key{cleardoublespecialpage}[true]{%
-  \TUD@set@ifkey{cleardoublespecialpage}{@tempswa}{#1}%
+  \TUD@set@numkey{cleardoublespecialpage}{@tempa}{%
+    \TUD@bool@numkey,%
+    {nocolor}{2},{nocolour}{2},{monochrome}{2},{monochromatic}{2},%
+    {bicolor}{3},{bicolour}{3},{twocolor}{3},{twocolour}{3},%
+    {bichrome}{3},{bichromatic}{3},{dichrome}{3},{dichromatic}{3},%
+    {color}{3},{colour}{3},%
+    {full}{3},{colorfull}{3},{fullcolor}{3},{colourfull}{3},{fullcolour}{3},%
+    {current}{4}%
+  }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \if@tempswa%
-      \renewcommand*\tud@cleardoublepage{\cleardoubleoddpage}%
-    \else%
+    \ifcase\@tempa\relax% false
       \renewcommand*\tud@cleardoublepage{\null\thispagestyle{empty}\newpage}%
+    \or% true
+      \renewcommand*\tud@cleardoublepage{\cleardoubleoddpage}%
+    \or% nocolor
+      \@tud@clearcolorfalse%
+    \or% color
+      \@tud@clearcolortrue%
+    \or% current
+      \renewcommand*\tud@cleardoublepage{\cleardoubleoddstandardpage}%
     \fi%
   \else%
-    \tud@lowerstring\tud@res@a{#1}%
-    \ifstr{\tud@res@a}{color}{\TUDoptions{clearcolor=true}}{%
-    \ifstr{\tud@res@a}{colour}{\TUDoptions{clearcolor=true}}{%
-    \ifstr{\tud@res@a}{current}{%
-      \renewcommand*\tud@cleardoublepage{\cleardoubleoddstandardpage}%
-      \FamilyKeyStateProcessed%
-    }{%
-      \AfterPreamble{%
-        \ifcsundef{ps@#1}{%
-          \ClassError{\TUD@Class@Name}{`#1' is no valid pagestyle}{%
-            You tried to use `#1' as a pagestyle for option\MessageBreak%
-            `cleardoublespecialpage', but it was never defined.%
-          }%
-        }{%
-          \renewcommand*\tud@cleardoublepage{\cleardoubleoddpageusingstyle{#1}}%
+    \AfterPreamble{%
+      \ifcsundef{ps@#1}{%
+        \ClassError{\TUD@Class@Name}{`#1' is no valid pagestyle}{%
+          You tried to use `#1' as a pagestyle for option\MessageBreak%
+          `cleardoublespecialpage', but it was never defined.%
         }%
+      }{%
+        \renewcommand*\tud@cleardoublepage{\cleardoubleoddpageusingstyle{#1}}%
       }%
-      \FamilyKeyStateProcessed%
-    }}}%
+    }%
+    \FamilyKeyStateProcessed%
   \fi%
 }
 \newcommand*\tud@pagecolor{}%
@@ -1058,8 +1058,8 @@
 \newcommand*\TUD@deprecated@key[2]{%
   \ClassWarning{\TUD@Class@Name}%
   {%
-    The option key `#1' is deprecated\MessageBreak%
-    It's recommended to use `#2'\MessageBreak%
+    The key `#1' is deprecated. It's\MessageBreak%
+    recommended to use `#2'\MessageBreak%
     instead%
   }%
   \TUDoptions{#2}%
@@ -1368,13 +1368,24 @@
   \fi%
 }
 \TUD@key{colour}[true]{\TUDoptions{color=#1}}
+\TUD@key{clearcolor}[true]{%
+  \TUD@set@ifkey{clearcolor}{@tempswa}{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \if@tempswa%
+      \TUD@deprecated@key{clearcolor}{cleardoublespecialpage=color}%
+    \else%
+      \TUD@deprecated@key{clearcolor=#1}{cleardoublespecialpage=nocolor}%
+    \fi%
+  \fi%
+}
+\TUD@key{clearcolour}[true]{\TUDoptions{clearcolor=#1}}
 \newif\if@tud@x@fontspec@requested
 \TUD@key{fontspec}[true]{%
   \TUD@set@ifkey{fontspec}{@tud@x@fontspec@requested}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ClassWarningNoLine{\TUD@Class@Name}%
     {%
-      The option key `fontspec' is deprecated\MessageBreak%
+      The key `fontspec' is deprecated.\MessageBreak%
       You should load the package `fontspec' manually%
     }%
   \fi%
