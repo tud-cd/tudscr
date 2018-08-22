@@ -1,4 +1,4 @@
-% \CheckSum{4420}
+% \CheckSum{4435}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -335,13 +335,20 @@
 % Varianten nutzen das Paket \pkg{filecontents}, um ihren Inhalt in eine
 % temporäre Datei zu schreiben und diese direkt mit dem Paket \pkg{listings}
 % darzustellen sowie ggf. den Quelltext auszuführen. Beim Überschreiben einer
-% Datei wird für gewöhnlich eine Warnung erzeugt. Mit dem Paket \pkg{silence}
-% wird diese innerhalb der genannten Umgebungen deaktiviert.
+% Datei wird für gewöhnlich eine Warnung erzeugt. Dies wird mit dem Patch 
+% unterbunden.
 %    \begin{macrocode}
-\RequirePackage{silence}[2012/07/02]
 \RequirePackage{filecontents}[2011/10/08]
-\WarningFilter[Tutorial]{latex}{Overwriting file}%
-\WarningFilter[Tutorial]{latex}{Writing file}%
+\begingroup%
+  \catcode`\*=11%
+  \catcode`\^^M\active%
+  \catcode`\^^L\active\let^^L\relax%
+  \catcode`\^^I\active%
+  \patchcmd{\filec@ntents}{%
+    \@latex@warning@no@line{Overwriting file `\@currdir#1'}%
+  }{}{}{\tud@patch@wrn{filec@tents}}%
+  \global\let\filec@ntents\filec@ntents%
+\endgroup%
 %    \end{macrocode}
 %
 % \iffalse
@@ -2423,7 +2430,7 @@
       \edef\@tempa{#1:#2:#3}%
     }{%
 %    \end{macrocode}
-% Hier geschieht der eigentliche Vorgang der Labelgenerierung. Dabei wird mit 
+% Hier geschieht die eigentliche Erzeugung der Labels. Dabei wird mit 
 % \cs{tud@attr@get} der für den jeweiligen Markup-Befehl aus dem zweiten
 % obligatorischen Argument spezifische Labelpräfix generiert. Abhängig davon,
 % ob im ersten obligatorischen Argument ein spezieller Bundlepräfix angegeben
@@ -2746,7 +2753,7 @@
 % \changes{v2.05}{2015/11/05}{neu}^^A
 % Mit \cs{Process@@MarkupInline} wird die formatierte Ausgabe außerhalb der 
 % Deklarationsumgebungen umgesetzt. Die ersten vier Argument entsprechen denen
-% von \cs{Process@@MarkupDeclare} und werden bis auf das Label ebenso an
+% des Befehls \cs{Process@@MarkupDeclare} und werden bis auf das Label ebenso an
 % \cs{Markup@Output} übergeben, nachdem mit dem Befehl \cs{Markup@CheckFormat} 
 % auf eine existierende Markup-Definition geprüft wurde.
 % \ToDo{%
@@ -5118,7 +5125,7 @@
 % Der innerhalb der Umgebungen \env{Preamble} und \env{Trunk}~-- sowie deren 
 % Derivaten~-- angegebene Inhalt wird beim Schließen dieser Umgebungen in die 
 % Hilfsdatei \cs{tud@tut@temp.tex} zwischengespeichert. Mit \cs{tud@tut@append}
-% wird der Inhalt dieser Datei ausgelesen und den zusätzlichen Hilfsdateien
+% wird der Inhalt dieser Datei ausgelesen und den Hilfsdateien
 % \cs{tud@tut@temp-preamble.tex} respektive \cs{tud@tut@temp-trunk.tex}
 % angehangen und damit gesichert, um die jeweiligen Quelltextauszüge aus dem
 % Tutorial für die Präambel sowie den Dokumentteil trennen beziehungsweise
@@ -5262,12 +5269,10 @@
 % genutzt wird.
 %    \begin{macrocode}
 \newcommand*\tud@tut@pre{%
-  \ActivateWarningFilters[Tutorial]%
   \csuse{filecontents*}{\tud@tut@temp.tex}%
 }
 \newcommand*\tud@tut@post{%
   \csuse{endfilecontents*}%
-  \DeactivateWarningFilters[Tutorial]%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@tut@post
@@ -5508,9 +5513,7 @@
 % diese Konflikte durch eine lokale Redefinition ebensolcher Befehle auflösen
 % (bspw. \cs{let}\cs{newcommand}\cs{renewcommand}).
 %    \begin{macrocode}
-  \ActivateWarningFilters[Tutorial]%
   \@tempa{\input{\tud@tut@temp.tex}}{\Code@Hook}%
-  \DeactivateWarningFilters[Tutorial]%
   \global\let\Code@Hook\relax%
   \setlength\leftskip{\@tempdimc}%
   \noindent\ignorespaces%
@@ -5540,7 +5543,6 @@
 %    \begin{macrocode}
 \IfFileExists{\tud@tut@temp-standalone.tex}{\@tempswafalse}{\@tempswatrue}
 \if@tempswa%
-\ActivateWarningFilters[Tutorial]%
 \begin{filecontents*}{\tud@tut@temp-standalone.tex}
 \documentclass[english,ngerman]{tudscrreprt}
 \usepackage[T1]{fontenc}
@@ -5555,7 +5557,6 @@
 \input{\jobname.tex}%
 \end{document}
 \end{filecontents*}
-\DeactivateWarningFilters[Tutorial]%
 \fi
 %    \end{macrocode}
 % Der Quelltext aus den Umgebungen \env{Trunk!} und \env{Hint!} wird~-- wie bei
