@@ -498,6 +498,34 @@
   \TUD@SpecialOptionAtDocument{tud@cdgeometry@process}%
   \FamilyKeyStateProcessed%
 }
+\newcommand*\tud@x@typearea@warnings@off[1][]{%
+  \IfArgIsEmpty{#1}{}{\let#1\@empty}%
+  \tud@cs@store{PackageWarningNoLine}%
+  \renewcommand*\PackageWarningNoLine[2]{%
+    \@tud@res@swatrue%
+    \ifstr{##1}{typearea}{%
+      \ifstrstart{##2}{Bad type area settings!}{\@tud@res@swafalse}{}%
+      \ifstrstart{##2}{%
+        Maybe no optimal type area settings!%
+      }{\@tud@res@swafalse}{}%
+      \ifstrstart{##2}{Very low DIV value!}{\@tud@res@swafalse}{}%
+    }{}%
+    \if@tud@res@swa%
+      \tud@cs@use{PackageWarning}{##1}{##2}%
+    \else%
+      \IfArgIsEmpty{#1}{}{\listeadd#1{##2}}%
+    \fi%
+  }%
+}
+\newcommand*\tud@x@typearea@warnings@on{%
+  \tud@cs@restore{PackageWarningNoLine}%
+}
+\BeforePackage{typearea}{%
+  \tud@x@typearea@warnings@off%
+}
+\AfterPackage{typearea}{%
+  \tud@x@typearea@warnings@on%
+}
 %%% From File: tudscr-pagestyle.dtx
 \tud@locked@newnum{tud@head@font@num}{0}
 \tud@locked@newnum{tud@head@bar@num}{0}
@@ -4058,11 +4086,23 @@
         }%
       }{}%
       \ifdim\dimexpr\tud@dim@extrabottommargin\relax=\z@\relax\else%
-        \ClassWarning{\TUD@Class@Name}{%
-          Option `extrabottommargin' is ineffective when\MessageBreak%
-          package `typearea' or custom layout is used\MessageBreak%
-          with `cdgeometry=false/custom'%
-        }%
+        \begingroup%
+          \edef\tud@res@a{%
+            The key `extrabottommargin' is ineffective\MessageBreak%
+            when\space%
+            \ifcase\tud@cdgeometry@num%
+              package `typearea' is used for layout with\MessageBreak%
+              `cdgeometry=typearea'%
+            \else%
+              a user-defined layout is used with\MessageBreak%
+              `cdgeometry=custom'%
+            \fi%
+          }%
+          \edef\tud@res@a{%
+            \endgroup%
+            \noexpand\ClassWarning{\noexpand\TUD@Class@Name}{\tud@res@a}%
+          }%
+        \tud@res@a%
       \fi%
     \else%  true/symmetric/twoside
       \ifcase\tud@cdgeometry@num\relax\or\or%  true
@@ -4191,7 +4231,7 @@
   \newcommand*\tud@cdgeometry@@@process{%
     \tud@x@geometry@getlayout{\tud@cdgeometry@layout}%
     \tud@if@v@lower{2.03}{%
-      \edef\tud@res@a{%
+      \tud@x@geometry@set{%
         \tud@cdgeometry@layout,%
         \tud@cdgeometry@hmargin,%
         \tud@cdgeometry@vmargin,%
@@ -4199,23 +4239,20 @@
         \tud@cdgeometry@ddcmargin,%
         ignorehead,ignorefoot%
       }%
-      \tud@x@geometry@set{\tud@res@a}%
       \tud@savegeometry{tudareaddc}%
     }{}%
-    \edef\tud@res@a{%
+    \tud@x@geometry@set{%
       \tud@cdgeometry@layout,%
       \tud@cdgeometry@hmargin,%
       \tud@cdgeometry@vmargin,%
       \tud@cdgeometry@tudmargin%
     }%
-    \tud@x@geometry@set{\tud@res@a}%
     \tud@savegeometry{tudarea}%
-    \edef\tud@res@a{%
+    \tud@x@geometry@set{%
       \tud@cdgeometry@layout,%
       \tud@cdgeometry@hmargin,%
       \tud@cdgeometry@vmargin%
     }%
-    \tud@x@geometry@set{\tud@res@a}%
     \tud@savegeometry{stdarea}%
     \ifcase\tud@cdgeometry@num\relax% false
       \tud@savegeometry{current@typearea}%
@@ -4253,6 +4290,8 @@
     \csuse{@ta@usegeometryfalse}%
     \tud@x@geometry@getlayout{\tud@cdgeometry@layout}%
     \tud@cs@store{tud@cdgeometry@num}%
+    \tud@cs@store{tud@dim@extrabottommargin}%
+    \def\tud@dim@extrabottommargin{\z@}%
     \tud@cdgeometry@reset{custom}%
     \begingroup%
       \epreto\tud@x@geometry@init{%
@@ -4277,12 +4316,23 @@
     \tud@cdgeometry@@process%
     \tud@savegeometry{init@custom}%
     \tud@cdgeometry@reset{typearea}%
+    \tud@x@typearea@warnings@off[\tud@res@a]%
     \tud@x@typearea@init%
+    \tud@x@typearea@warnings@on%
     \tud@cdgeometry@@process%
     \tud@savegeometry{init@typearea}%
+    \def\tud@res@b##1{%
+      \eappto\Gm@restore@@init@typearea{%
+        \noexpand\ClassWarningNoLine{typearea}{##1}%
+      }%
+    }%
+    \forlistloop\tud@res@b{\tud@res@a}%
     \tud@cs@restore{tud@cdgeometry@num}%
+    \tud@cs@restore{tud@dim@extrabottommargin}%
     \BeforeSelectAnyPageStyle{\tud@BeforeSelectAnyPageStyle{##1}}%
-    \ifnum\tud@cdgeometry@num=\@ne%
+    \ifcase\tud@cdgeometry@num\relax% typearea
+      \tud@loadgeometry{init@typearea}%
+    \or% custom
       \tud@loadgeometry{init@custom}%
     \fi%
     \@tud@x@geometry@fixmarginstrue%
@@ -5523,20 +5573,18 @@
 }
 \newcommand*\tud@sec@fontface[1][]{%
   \sectfont#1%
-  \ifx\f@family\tud@cdfont@fam%
-    \if@tud@heavyheadings%
-      \fontseries{\tud@cdfont@ebf}%
-    \fi%
-  \fi%
+  \if@tud@cdfont@active\if@tud@heavyheadings%
+    \fontseries{\tud@cdfont@ebf}%
+  \fi\fi%
   \selectfont%
 }
 \if@tud@cdoldfont@active
   \renewcommand*\tud@sec@fontface[1][]{%
     \if@tud@cdoldfont@nodin%
       \sectfont#1%
-      \if@tud@heavyheadings%
+      \if@tud@cdfont@active\if@tud@heavyheadings%
         \fontseries{\tud@cdfont@ebf}%
-      \fi%
+      \fi\fi%
       \selectfont%
     \else%
       \tud@db\tud@raggedright%

@@ -1,4 +1,4 @@
-% \CheckSum{2183}
+% \CheckSum{2238}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-area.dtx}[%
-  2018/08/21 v2.06 TUD-Script (type or page area)%
+  2018/08/22 v2.06 TUD-Script (type or page area)%
 ]
 \documentclass[english,ngerman,xindy]{tudscrdoc}
 \usepackage[T1]{fontenc}
@@ -1002,9 +1002,9 @@
 % \changes{v2.05}{2016/07/20}{neu}^^A
 % \begin{macro}{\tud@x@geometry@init}
 % \changes{v2.05}{2016/03/06}{neu}^^A
-% Bei der Redefinition von \cs{geometry} und \cs{newgeometry} kommt intern 
-% \cs{tud@x@geometry@user} zum Einsatz, womit kleinere Feinheiten zwischen den 
-% beiden Befehlen unterschieden werden können.
+% Bei der Redefinition der Befehle \cs{geometry} und \cs{newgeometry} kommt
+% intern das Makro \cs{tud@x@geometry@user} zum Einsatz, womit kleinere
+% Feinheiten zwischen den beiden Befehlen unterschieden werden können.
 %    \begin{macrocode}
   \newcommand*\tud@x@geometry@paper{}%
   \newcommand*\tud@x@geometry@layout{}%
@@ -1547,11 +1547,23 @@
 % ist.
 %    \begin{macrocode}
       \ifdim\dimexpr\tud@dim@extrabottommargin\relax=\z@\relax\else%
-        \ClassWarning{\TUD@Class@Name}{%
-          Option `extrabottommargin' is ineffective when\MessageBreak%
-          package `typearea' or custom layout is used\MessageBreak%
-          with `cdgeometry=false/custom'%
-        }%
+        \begingroup%
+          \edef\tud@res@a{%
+            The key `extrabottommargin' is ineffective\MessageBreak%
+            when\space%
+            \ifcase\tud@cdgeometry@num%
+              package `typearea' is used for layout with\MessageBreak%
+              `cdgeometry=typearea'%
+            \else%
+              a user-defined layout is used with\MessageBreak%
+              `cdgeometry=custom'%
+            \fi%
+          }%
+          \edef\tud@res@a{%
+            \endgroup%
+            \noexpand\ClassWarning{\noexpand\TUD@Class@Name}{\tud@res@a}%
+          }%
+        \tud@res@a%
       \fi%
 %    \end{macrocode}
 % Hier erfolgt die Definition der Hilfsmakros für das CD-konforme asymmetrische
@@ -1749,7 +1761,7 @@
 % manuell bei der Definition von \cs{tud@cdgeometry@ddcmargin}.
 %    \begin{macrocode}
     \tud@if@v@lower{2.03}{%
-      \edef\tud@res@a{%
+      \tud@x@geometry@set{%
         \tud@cdgeometry@layout,%
         \tud@cdgeometry@hmargin,%
         \tud@cdgeometry@vmargin,%
@@ -1757,29 +1769,26 @@
         \tud@cdgeometry@ddcmargin,%
         ignorehead,ignorefoot%
       }%
-      \tud@x@geometry@set{\tud@res@a}%
       \tud@savegeometry{tudareaddc}%
     }{}%
 %    \end{macrocode}
 % Danach folgt der Seitenstil, mit dem TUD-Kopf und der Standardfußzeile.
 %    \begin{macrocode}
-    \edef\tud@res@a{%
+    \tud@x@geometry@set{%
       \tud@cdgeometry@layout,%
       \tud@cdgeometry@hmargin,%
       \tud@cdgeometry@vmargin,%
       \tud@cdgeometry@tudmargin%
     }%
-    \tud@x@geometry@set{\tud@res@a}%
     \tud@savegeometry{tudarea}%
 %    \end{macrocode}
 % Als letztes wird der Standardsatzspiegel erstellt.
 %    \begin{macrocode}
-    \edef\tud@res@a{%
+    \tud@x@geometry@set{%
       \tud@cdgeometry@layout,%
       \tud@cdgeometry@hmargin,%
       \tud@cdgeometry@vmargin%
     }%
-    \tud@x@geometry@set{\tud@res@a}%
     \tud@savegeometry{stdarea}%
 %    \end{macrocode}
 % Je nach gewählter Option wird der aktuelle Satzspiegel für \pkg{typearea} 
@@ -1854,6 +1863,12 @@
     \tud@x@geometry@getlayout{\tud@cdgeometry@layout}%
     \tud@cs@store{tud@cdgeometry@num}%
 %    \end{macrocode}
+% Bei der Initialisierung der zusätzlichen Satzspiegel soll keine Warnung 
+% bezüglich der Angabe eines vergrößerten Fußbereichs erscheinen.
+%    \begin{macrocode}
+    \tud@cs@store{tud@dim@extrabottommargin}%
+    \def\tud@dim@extrabottommargin{\z@}%
+%    \end{macrocode}
 % Zunächst werden die benutzerdefinierten Einstellungen für den Satzspiegel 
 % gesichert.
 %    \begin{macrocode}
@@ -1881,13 +1896,32 @@
     \tud@cdgeometry@@process%
     \tud@savegeometry{init@custom}%
 %    \end{macrocode}
-% Und nun der Teil für \pkg{typearea}.
+% Und nun der Teil für \pkg{typearea}. Bei der Initialisierung werden mögliche 
+% Warnungen des Paketes deaktiviert. Diese werden nur ausgegeben, wenn der 
+% Schlüssel \opt{cdgeometry=typearea} angegeben wurde oder im Dokument mit 
+% \cs{restoregeometry[typearea]} auf den initialen Satzspiegel umgestellt wird.
 %    \begin{macrocode}
     \tud@cdgeometry@reset{typearea}%
+    \tud@x@typearea@warnings@off[\tud@res@a]%
     \tud@x@typearea@init%
+    \tud@x@typearea@warnings@on%
     \tud@cdgeometry@@process%
     \tud@savegeometry{init@typearea}%
+%    \end{macrocode}
+% Alle gesammelten Warnungen von \pkg{typearea} werden dem initialisierten
+% Satzspiegel hinzugefügt.
+%    \begin{macrocode}
+    \def\tud@res@b##1{%
+      \eappto\Gm@restore@@init@typearea{%
+        \noexpand\ClassWarningNoLine{typearea}{##1}%
+      }%
+    }%
+    \forlistloop\tud@res@b{\tud@res@a}%
+%    \end{macrocode}
+% Hier werden die temporär geäanderten Einstellungen zurückgesetzt.
+%    \begin{macrocode}
     \tud@cs@restore{tud@cdgeometry@num}%
+    \tud@cs@restore{tud@dim@extrabottommargin}%
 %    \end{macrocode}
 % Der Kopf im \CD der \TnUD erfordert einen eigenen Satzspiegel, der ggf. durch 
 % \cs{tud@BeforeSelectAnyPageStyle} aktiviert bzw. deaktiviert wird.
@@ -1897,7 +1931,9 @@
 % Ganz zum Schluss wird der Satzspiegel für die aktuelle Einstellung von 
 % \opt{cdgeometry} gesetzt.
 %    \begin{macrocode}
-    \ifnum\tud@cdgeometry@num=\@ne%
+    \ifcase\tud@cdgeometry@num\relax% typearea
+      \tud@loadgeometry{init@typearea}%
+    \or% custom
       \tud@loadgeometry{init@custom}%
     \fi%
     \@tud@x@geometry@fixmarginstrue%
@@ -2121,6 +2157,66 @@
 % \end{macro}^^A \storereareas
 % \end{macro}^^A \areaset
 % \end{macro}^^A \typearea
+%
+% \iffalse
+%</class&body>
+%<*class&option>
+% \fi
+%
+% \begin{macro}{\tud@x@typearea@warnings@off}
+% \changes{v2.06}{2018/08/22}{neu}^^A
+% \begin{macro}{\tud@x@typearea@warnings@on}
+% \changes{v2.06}{2018/08/22}{neu}^^A
+% Das Paket \pkg{typearea} meldet schlechte Einstellungen für den Satzspiegel 
+% mittels Warnungen an den Anwender. Diese sind allerdings~-- abhängig von der 
+% gewählten Option opt{cdgeometry} für den Satzspiegel~-- gegebenefalls nicht 
+% relevant. Da \TUDScript innerhalb von \cs{tud@cdgeometry@init} am Ende der
+% Präambel ohnehin anhand von \cs{tud@x@typearea@init} den Satzspiegel von 
+% \pkg{typearea} neu berechnet, werden alle relevanten Warnungen beim Laden des 
+% Paketes deaktivert.
+%
+% Dem Befehl \cs{tud@x@typearea@warnings@off} kann im optionalen Argument ein
+% Makro übergeben werden, für welches eine \pkg{etoolbox}-Liste erzeugt wird, 
+% in der alle Inhalte der ignorierten Warnungen gepseichert wird, um später auf 
+% diese zurückgreifen zu können.
+%    \begin{macrocode}
+\newcommand*\tud@x@typearea@warnings@off[1][]{%
+  \IfArgIsEmpty{#1}{}{\let#1\@empty}%
+  \tud@cs@store{PackageWarningNoLine}%
+  \renewcommand*\PackageWarningNoLine[2]{%
+    \@tud@res@swatrue%
+    \ifstr{##1}{typearea}{%
+      \ifstrstart{##2}{Bad type area settings!}{\@tud@res@swafalse}{}%
+      \ifstrstart{##2}{%
+        Maybe no optimal type area settings!%
+      }{\@tud@res@swafalse}{}%
+      \ifstrstart{##2}{Very low DIV value!}{\@tud@res@swafalse}{}%
+    }{}%
+    \if@tud@res@swa%
+      \tud@cs@use{PackageWarning}{##1}{##2}%
+    \else%
+      \IfArgIsEmpty{#1}{}{\listeadd#1{##2}}%
+    \fi%
+  }%
+}
+\newcommand*\tud@x@typearea@warnings@on{%
+  \tud@cs@restore{PackageWarningNoLine}%
+}
+\BeforePackage{typearea}{%
+  \tud@x@typearea@warnings@off%
+}
+\AfterPackage{typearea}{%
+  \tud@x@typearea@warnings@on%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@x@typearea@warnings@on
+% \end{macro}^^A \tud@x@typearea@warnings@off
+%
+% \iffalse
+%</class&option>
+%<*class&body>
+% \fi
+%
 % Die Seitenstile und Satzspiegel korrelieren sehr stark, weshalb das Paket 
 % \pkg{scrlayer-scrpage} geladen sein muss und auch alle darauf aufbauenden 
 % Einstellungen abgeschlossen sein müssen, um die Satzspiegel zu definieren.
