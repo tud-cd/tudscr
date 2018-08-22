@@ -1,4 +1,4 @@
-% \CheckSum{1189}
+% \CheckSum{1199}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -758,6 +758,7 @@
 % \begin{macro}{\tud@sec@fontface}
 % \changes{v2.05}{2016/04/04}{Optionales Argument für \pkg{tudscrcomp}}^^A
 % \changes{v2.06}{2018/08/20}{extra-fette Überschriften möglich}^^A
+% \begin{macro}{\tud@sec@@fontface}
 % \begin{macro}{\tud@sec@format}
 % \begin{macro}{\tud@sec@strut}
 % \changes{v2.06}{2018/07/24}{neu}^^A
@@ -765,9 +766,16 @@
 % Layout des \CDs definiert.
 %    \begin{macrocode}
 %<package&fixfonts>\AfterPackage*{tudscrfonts}{%
-\newcommand*\tud@sec@fontface[1][]{%
+\newcommand*\tud@sec@fontface[1][]{\tud@sec@@fontface{#1}}%
+\newcommand*\tud@sec@@fontface[1]{%
   \sectfont#1%
   \if@tud@cdfont@active\if@tud@heavyheadings%
+    \if@tud@x@mweights@enabled%
+      \edef\bfseries@rm{\tud@cdfont@ebf}%
+      \edef\bfseries@sf{\tud@cdfont@ebf}%
+      \edef\bfseries@tt{\tud@ttfont@ebf}%
+    \fi%
+    \let\bfdefault\tud@cdfont@ebf%
     \fontseries{\tud@cdfont@ebf}%
   \fi\fi%
   \selectfont%
@@ -780,11 +788,7 @@
 \if@tud@cdoldfont@active
   \renewcommand*\tud@sec@fontface[1][]{%
     \if@tud@cdoldfont@nodin%
-      \sectfont#1%
-      \if@tud@cdfont@active\if@tud@heavyheadings%
-        \fontseries{\tud@cdfont@ebf}%
-      \fi\fi%
-      \selectfont%
+      \tud@sec@@fontface{#1}%
     \else%
       \tud@db\tud@raggedright%
     \fi%
@@ -868,6 +872,7 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@sec@strut
 % \end{macro}^^A \tud@sec@format
+% \end{macro}^^A \tud@sec@@fontface
 % \end{macro}^^A \tud@sec@fontface
 %
 % \iffalse

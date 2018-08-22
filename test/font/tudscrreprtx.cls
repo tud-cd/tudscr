@@ -2166,6 +2166,7 @@
 }
 \newcommand*\tud@ttfont@md{}
 \newcommand*\tud@ttfont@bf{}
+\newcommand*\tud@ttfont@ebf{}
 \newcommand*\tud@ttfont@@set{%
   \ifcase\tud@ttfont@num\relax%
     \ifundef{\mdseries@tt}{%
@@ -2178,21 +2179,26 @@
     }{%
       \edef\tud@ttfont@bf{\bfseries@tt}%
     }%
+    \edef\tud@ttfont@ebf{\bfseries@tt}%
   \or% lmodern
     \if@tud@cdfont@heavy%
       \renewcommand*\tud@ttfont@md{m}%
       \renewcommand*\tud@ttfont@bf{b}%
+      \renewcommand*\tud@ttfont@ebf{b}%
     \else%
       \renewcommand*\tud@ttfont@md{l}%
       \if@tud@cdfont@ultrabold%
         \renewcommand*\tud@ttfont@bf{b}%
+        \renewcommand*\tud@ttfont@ebf{b}%
       \else%
         \renewcommand*\tud@ttfont@bf{m}%
+        \renewcommand*\tud@ttfont@ebf{b}%
       \fi%
     \fi%
   \else%
     \renewcommand*\tud@ttfont@md{\tud@cdfont@md}%
     \renewcommand*\tud@ttfont@bf{\tud@cdfont@bf}%
+    \renewcommand*\tud@ttfont@ebf{\tud@cdfont@ebf}%
   \fi%
 }
 \newcommand*\tud@ttfont@init{%
@@ -5571,9 +5577,16 @@
     \fi%
   ]%
 }
-\newcommand*\tud@sec@fontface[1][]{%
+\newcommand*\tud@sec@fontface[1][]{\tud@sec@@fontface{#1}}%
+\newcommand*\tud@sec@@fontface[1]{%
   \sectfont#1%
   \if@tud@cdfont@active\if@tud@heavyheadings%
+    \if@tud@x@mweights@enabled%
+      \edef\bfseries@rm{\tud@cdfont@ebf}%
+      \edef\bfseries@sf{\tud@cdfont@ebf}%
+      \edef\bfseries@tt{\tud@ttfont@ebf}%
+    \fi%
+    \let\bfdefault\tud@cdfont@ebf%
     \fontseries{\tud@cdfont@ebf}%
   \fi\fi%
   \selectfont%
@@ -5581,11 +5594,7 @@
 \if@tud@cdoldfont@active
   \renewcommand*\tud@sec@fontface[1][]{%
     \if@tud@cdoldfont@nodin%
-      \sectfont#1%
-      \if@tud@cdfont@active\if@tud@heavyheadings%
-        \fontseries{\tud@cdfont@ebf}%
-      \fi\fi%
-      \selectfont%
+      \tud@sec@@fontface{#1}%
     \else%
       \tud@db\tud@raggedright%
     \fi%
