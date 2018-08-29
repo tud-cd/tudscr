@@ -2179,7 +2179,7 @@
     }{%
       \edef\tud@ttfont@bf{\bfseries@tt}%
     }%
-    \edef\tud@ttfont@ebf{\bfseries@tt}%
+    \edef\tud@ttfont@ebf{\tud@ttfont@bf}%
   \or% lmodern
     \if@tud@cdfont@heavy%
       \renewcommand*\tud@ttfont@md{m}%
