@@ -42,11 +42,6 @@ eingebunden, falls dies nicht durch den Anwender in der Präambel geschieht.
   Das Paket wird zum Festlegen der Seitenränder respektive des Satzspiegels 
   verwendet. Ein Weiterreichen zusätzlicher Optionen an das Paket wird 
   dringlich nicht empfohlen.
-\item[textcase]
-  \index{Schriftauszeichnung}%
-  Mit dem Befehl \Macro{MakeTextUppercase}(\Package{textcase})'none' wird bei
-  Überschriften in \DIN die Großschreibung erzwungen. Im \emph{Ausnahmefall} 
-  kann dies mit \Macro{NoCaseChange}(\Package{textcase}) unterbunden werden.
 \item[trimspaces]
   Bei mehreren Eingabefeldern für den Anwender werden die Argumente mithilfe 
   dieses Paketes um eventuell angegebene, unnötige Leerzeichen befreit.
@@ -613,14 +608,14 @@ deshalb Pakete vorgestellt, die sich zusätzlich verwenden lassen.
   häufig angegeben werden kann 
   (\Macro*{begin}[\PParameter{tabularx}\Parameter{Breite}\Parameter{Spalten}]). 
   Die \PValue{X}"~Spalten ähneln denen vom Typ~\PValue{p}\Parameter{Breite}, 
-  wobei die Breite dieser aus der gewünschten Tabellengesamtbreite und dem 
-  benötigten Platz der gegebenenfalls vorhandenen Standardspalten automatisch 
-  berechnet wird.
+  wobei die Breite dieser aus der gewünschten Tabellengesamtbreite abzüglich 
+  dem benötigten Platz der gegebenenfalls vorhandenen Standardspalten 
+  automatisch berechnet wird.
 \item[tabulary]
   Dies ist ein weiteres Paket zur automatischen Berechnung von Spaltenbreiten. 
   Der zur Verfügung stehende Platz~-- gewünschte Gesamtbreite abzüglich der 
-  notwendigen Breite für die Standardspalten~-- wird jedoch nicht wie bei der 
-  Umgebung \Environment{tabularx}(\Package{tabularx})'none' auf alle Spalten 
+  notwendigen Breite für Standardspalten~-- wird jedoch nicht wie bei der 
+  \Environment{tabularx}(\Package{tabularx})'none' auf alle Spalten 
   gleichmäßig verteilt sondern in der 
   \Environment{tabulary}(\Package{tabulary})'none'"=Umgebung für die 
   Spaltentypen~\PValue{LCRJ} anhand ihres Zellinhaltes gewichtet vergeben. 
@@ -694,20 +689,21 @@ finden.
 \item[floatrow]
   Mit diesem Paket können global wirksame Einstellungen und Formatierungen für 
   \emph{alle} Gleitobjekte eines Dokumentes über die Paketoptionen oder mit 
-  \Macro{floatsetup}[\PParameter{\dots}](\Package{floatrow})'none' 
-  vorgenommen werden. So kann unter anderem die verwendete Schrift innerhalb 
-  der Umgebungen \Environment{figure} und \Environment{table} eingestellt 
-  werden (\Macro*{floatsetup}[\PParameter{font=\dots}]). Das typografisch 
-  richtige Setzen von Abbildungs\emph{unterschriften} 
-  \Macro*{floatsetup}[\POParameter{figure}\PParameter{capposition=bottom}])
-  sowie Tabellen\emph{überschriften} 
-  (\Macro*{floatsetup}[\POParameter{table}\PParameter{capposition=top}])
-  kann mit Paket \Package{floatrow} automatisch erzwungen werden~-- unabhängig 
-  von der Position des Befehls zur Beschriftung 
+  \Macro{floatsetup}[\PParameter{\dots}](\Package{floatrow})'none' vorgenommen 
+  werden. So lässt sich unter anderem die verwendete Schrift innerhalb der 
+  Umgebungen \Environment{figure} und \Environment{table} mit
+  \Macro*{floatsetup}[\PParameter{font=\dots}] einstellen. Mit 
+  \begin{Code}
+    \floatsetup[figure]{capposition=bottom}
+    \floatsetup[table]{capposition=top}
+  \end{Code}\vspace{-\baselineskip}%
+  lässt sich automatisch das typografisch korrekte Setzen von 
+  Abbildungs\emph{unterschriften} sowie Tabellen\emph{überschriften} 
+  erzwingen~-- unabhängig von der Position des Befehls zur Beschriftung 
   \Macro{caption}(\Package{koma-script},\Package{caption})'none' 
   innerhalb der jeweiligen Gleitobjektumgebung. Wird das Verhalten wie  
-  empfohlen eingestellt, sollte für eine korrekte Platzierung der 
-  Tabellenüberschriften außerdem zusätzlich die 
+  empfohlen eingestellt, sollte für eine gute vertikale Platzierung der 
+  Tabellenüberschriften zusätzlich die 
   \KOMAScript-Option \Option{captions=tableheading}(\Package{koma-script})'none'
   genutzt werden.
 \index{Gleitobjekte|?)}%
@@ -750,10 +746,10 @@ Text an \hologo{LaTeX} unterstützen, werden genutzt.
   
   Die Grafiken aus den Umgebungen 
   \Environment{pspicture}(\Package{pstricks})'none' müssen deshalb zunächst
-  über den Pfad \Path{latex \textrightarrow{} dvips \textrightarrow{} ps2pdf}
-  in PDF"~Dateien gewandelt werden. Diese lassen sich von \Engine{pdfLaTeX} 
-  anschließend als Abbildungen einbinden. Um dieses Vorgehen zu ermöglichen, 
-  können folgende Pakete genutzt werden:
+  über den Pfad \Path{latex > dvips > ps2pdf} in PDF"~Dateien gewandelt werden. 
+  Diese lassen sich von \Engine{pdfLaTeX} anschließend als Abbildungen 
+  einbinden. Um dieses Vorgehen zu ermöglichen, können folgende Pakete genutzt 
+  werden:
   %
   \begin{packages}
   \item[pst-pdf]
@@ -763,12 +759,12 @@ Text an \hologo{LaTeX} unterstützen, werden genutzt.
     die Ausgaberoutinen des verwendeten Editors durchgeführt werden.
   \item[auto-pst-pdf,pdftricks2]
     Das Paket automatisiert die Erzeugung der \Package{pstricks}"=Grafiken mit 
-    dem Paket \Package{pst-pdf}. Dafür muss \Engine{pdfLaTeX} per Option mit 
-    Schreibrechten ausgeführt werden. Dazu ist der Aufruf von \Path{pdflatex} 
-    mit der Option \Path{-{}-shell-escape} respektive \Path{-{}-enable-write18} 
-    notwendig. Bitte beachten Sie dazu ebenfalls die Hinweise in 
-    \autoref{sec:tips:auto-pst-pdf}. Eine Alternative dazu ist das Paket 
-    \Package{pdftricks2}.
+    dem Paket \Package{pst-pdf}. Hierfür muss \Engine{pdfLaTeX} per Option mit 
+    erweiterten Schreibrechten ausgeführt werden. Dazu ist der Aufruf von 
+    \Path{pdflatex} mit der Option \Path{-{}-shell-escape} respektive 
+    \Path{-{}-enable-write18} notwendig. Bitte beachten Sie dazu ebenfalls die 
+    Hinweise in \autoref{sec:tips:auto-pst-pdf}. Eine Alternative dazu ist das 
+    Paket \Package{pdftricks2}.
   \end{packages}
 \end{packages}
 %
@@ -923,8 +919,8 @@ werden konnte.
   Das Paket ermöglicht die Einbindung von einzelnen oder mehreren PDF"~Dateien.
 \item[filecontents]
   \index{Minimalbeispiel|?}%
-  Dieses Paket erweitert die durch den \hologo{LaTeX}"=Kernel bereitgestellte 
-  Umgebung \Environment{filecontents}(\Package{filecontents})'none' dahingehend,
+  Dieses Paket erweitert die im \hologo{LaTeX}"=Kernel definierte Umgebung 
+  \Environment{filecontents}(\Package{filecontents})'none' dahingehend,
   dass bereits existierende Dateien überschrieben werden können.
 \item[mwe,blindtext]
   \index{Minimalbeispiel|?}%
