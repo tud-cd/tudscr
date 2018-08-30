@@ -102,7 +102,14 @@
 \providecommand*\TUDClassName{\TUDScriptClassName}
 \@ifundefined{TUDScript}{%
   \DeclareRobustCommand\TUDScript{%
-    \textsf{T\kern.05em U\kern.05em D\kern.1em-\kern.1em Script}%
+    \begingroup%
+      \def\tud@res@b##1{T\kern.05em U\kern.05em D\kern.1em-\kern.1em ##1}%
+      \tud@ifdin{%
+        \edef\tud@res@a{\tud@res@b{SCRIPT}}%
+      }{%
+        \edef\tud@res@a{\noexpand\textsf{\tud@res@b{Script}}}%
+      }%
+    \expandafter\endgroup\tud@res@a%
     \csname xspace\endcsname%
   }%
 }{}
@@ -1962,6 +1969,36 @@
     \DeclareTextFontCommand\texturs{\univrs}%
     \DeclareTextFontCommand\textubs{\univbs}%
     \DeclareTextFontCommand\textuxs{\univxs}%
+    \newrobustcmd*\cdfontln{\univln}%
+    \newrobustcmd*\cdfontrn{\univrn}%
+    \newrobustcmd*\cdfontsn{\univrn}%
+    \newrobustcmd*\cdfontbn{\univbn}%
+    \newrobustcmd*\cdfontxn{\univxn}%
+    \newrobustcmd*\cdfontli{\univls}%
+    \newrobustcmd*\cdfontri{\univrs}%
+    \newrobustcmd*\cdfontsi{\univrs}%
+    \newrobustcmd*\cdfontbi{\univbs}%
+    \newrobustcmd*\cdfontxi{\univxs}%
+    \newcommand*\textcdln{}%
+    \newcommand*\textcdrn{}%
+    \newcommand*\textcdsn{}%
+    \newcommand*\textcdbn{}%
+    \newcommand*\textcdxn{}%
+    \newcommand*\textcdli{}%
+    \newcommand*\textcdri{}%
+    \newcommand*\textcdsi{}%
+    \newcommand*\textcdbi{}%
+    \newcommand*\textcdxi{}%
+    \DeclareTextFontCommand\textcdln{\cdfontln}%
+    \DeclareTextFontCommand\textcdrn{\cdfontrn}%
+    \DeclareTextFontCommand\textcdsn{\cdfontsn}%
+    \DeclareTextFontCommand\textcdbn{\cdfontbn}%
+    \DeclareTextFontCommand\textcdxn{\cdfontxn}%
+    \DeclareTextFontCommand\textcdli{\cdfontli}%
+    \DeclareTextFontCommand\textcdri{\cdfontri}%
+    \DeclareTextFontCommand\textcdsi{\cdfontsi}%
+    \DeclareTextFontCommand\textcdbi{\cdfontbi}%
+    \DeclareTextFontCommand\textcdxi{\cdfontxi}%
     \if@tud@cdfont@db@exist%
       \if@tud@x@fontspec@enabled%
         \def\tud@res@a{%
@@ -2410,14 +2447,14 @@
   \SetSymbolFont{largesymbols}{tud@bm}{OMX}{#1}{\tud@cdfont@bf}{n}%
   \SetMathAlphabet{\mathnormal}{tud@nm}{OML}{#1}{\tud@cdfont@md}{it}%
   \SetMathAlphabet{\mathnormal}{tud@bm}{OML}{#1}{\tud@cdfont@bf}{it}%
-  \SetMathAlphabet{\mathrm}{tud@nm}{OML}{#1}{\tud@cdfont@md}{n}%
-  \SetMathAlphabet{\mathrm}{tud@bm}{OML}{#1}{\tud@cdfont@bf}{n}%
-  \SetMathAlphabet{\mathsf}{tud@nm}{OML}{#1}{\tud@cdfont@md}{n}%
-  \SetMathAlphabet{\mathsf}{tud@bm}{OML}{#1}{\tud@cdfont@bf}{n}%
-  \SetMathAlphabet{\mathit}{tud@nm}{OML}{#1}{\tud@cdfont@md}{it}%
-  \SetMathAlphabet{\mathit}{tud@bm}{OML}{#1}{\tud@cdfont@bf}{it}%
-  \SetMathAlphabet{\mathbf}{tud@nm}{OML}{#1}{\tud@cdfont@bf}{n}%
-  \SetMathAlphabet{\mathbf}{tud@bm}{OML}{#1}{\tud@cdfont@ebf}{n}%
+  \SetMathAlphabet{\mathrm}{tud@nm}{OT1}{#1}{\tud@cdfont@md}{n}%
+  \SetMathAlphabet{\mathrm}{tud@bm}{OT1}{#1}{\tud@cdfont@bf}{n}%
+  \SetMathAlphabet{\mathsf}{tud@nm}{OT1}{#1}{\tud@cdfont@md}{n}%
+  \SetMathAlphabet{\mathsf}{tud@bm}{OT1}{#1}{\tud@cdfont@bf}{n}%
+  \SetMathAlphabet{\mathit}{tud@nm}{OT1}{#1}{\tud@cdfont@md}{it}%
+  \SetMathAlphabet{\mathit}{tud@bm}{OT1}{#1}{\tud@cdfont@bf}{it}%
+  \SetMathAlphabet{\mathbf}{tud@nm}{OT1}{#1}{\tud@cdfont@bf}{n}%
+  \SetMathAlphabet{\mathbf}{tud@bm}{OT1}{#1}{\tud@cdfont@ebf}{n}%
   \SetMathAlphabet{\mathtt}{tud@nm}{OT1}{#2}{\tud@ttfont@md}{n}%
   \SetMathAlphabet{\mathtt}{tud@bm}{OT1}{#2}{\tud@ttfont@bf}{n}%
   \IfFileExists{ueus.fd}{%
@@ -5612,7 +5649,10 @@
   #2%
 }
 \if@tud@cdoldfont@active
-  \RequirePackage{textcase}[2004/10/07]
+  \newcommand*\tud@sec@uppercase{\MakeUppercase}%
+  \AfterPackage*{textcase}{%
+    \renewcommand*\tud@sec@uppercase{\MakeTextUppercase}%
+  }%
   \renewcommand*\tud@sec@format[2][]{%
     \@tud@res@swafalse%
     \IfArgIsEmpty{#1}{%
@@ -5626,7 +5666,7 @@
       \endgroup%
     }%
     \if@tud@res@swa%
-      \MakeTextUppercase{#2}%
+      \tud@sec@uppercase{#2}%
     \else%
       #2%
     \fi%
@@ -5821,7 +5861,7 @@
 \newcommand*\tud@cd@afterskip{%
   .75\baselineskip \@plus .05\baselineskip \@minus .1\baselineskip%
 }
-\newcommand*\tud@cd@headstartvskip{
+\newcommand*\tud@cd@headstartvskip{%
   \@tempskipa=\glueexpr\tud@cd@beforeskip\relax\relax%
   \ifdim\@tempskipa<\z@\@tempskipa-\@tempskipa\fi%
   \null\vskip-\baselineskip\vskip\@tempskipa%
@@ -7361,17 +7401,20 @@
     \global\@tud@cdgeometry@processfalse%
   \fi%
 }
-\AfterPackage*{textcase}{%
-  \robustify\NoCaseChange%
-  \newcommand*\tud@x@textcase@uclcnotmath{%
-    \def\footnote##1##{\toks@{\noexpand\footnote##1}\@footnote}%
-    \def\@footnote##1{\NoCaseChange{\the\toks@{##1}}}%
-    \def\@mkboth##1##2{\NoCaseChange{\@mkboth{##1}{##2}}}%
+\if@tud@cdoldfont@active
+  \RequirePackage{textcase}[2004/10/07]
+  \AfterPackage*{textcase}{%
+    \robustify\NoCaseChange%
+    \newcommand*\tud@x@textcase@uclcnotmath{%
+      \def\footnote##1##{\toks@{\noexpand\footnote##1}\@footnote}%
+      \def\@footnote##1{\NoCaseChange{\the\toks@{##1}}}%
+      \def\@mkboth##1##2{\NoCaseChange{\@mkboth{##1}{##2}}}%
+    }%
+    \patchcmd{\@uclcnotmath}{\@nonchangecase\ensuremath}{%
+      \@nonchangecase\ensuremath\tud@x@textcase@uclcnotmath%
+    }{}{\tud@patch@wrn{@uclcnotmath}}%
   }%
-  \patchcmd{\@uclcnotmath}{\@nonchangecase\ensuremath}{%
-    \@nonchangecase\ensuremath\tud@x@textcase@uclcnotmath%
-  }{}{\tud@patch@wrn{@uclcnotmath}}%
-}
+\fi
 \TUD@UnwindPackage{textcase}{\providecommand*\NoCaseChange[1]{#1}}
 \endinput
 %%
