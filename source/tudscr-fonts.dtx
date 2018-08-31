@@ -96,7 +96,7 @@
 % \changes{v2.04c}{2015/11/29}{Bugfix für \pkg{fontspec} bei fehlenden 
 %   Schriften}^^A
 %
-% \section{Die Hausschriften der \TnUD}
+% \section{Die Hausschrift der \TnUD}
 %
 % Für das \TUDCD wird die Schrift \OpenSans benötigt. Die Type1-Variante wird 
 % mit diesen Klassen mitgeliefert, die OTF-Variante muss entweder durch das 
@@ -276,7 +276,6 @@
 % \begin{macro}{\tud@ttfont@lm}
 % \changes{v2.06}{2018/07/12}{neu}^^A
 % \dots als auch für die TypeWriter-Schriften definiert.
-% \ToDo{roboto-mono nicht installieren sondern direkt definieren}[v2.06]
 %    \begin{macrocode}
 \newcommand*\tud@ttfont@fam{tudtt}
 \newcommand*\tud@ttfont@rb{tudtt}
@@ -293,7 +292,9 @@
 \newif\if@tud@ttfont@rb@exist
 \IfFileExists{roboto-mono.sty}{%
   \@tud@ttfont@rb@existtrue%
-}{}
+}{%
+  \TUD@key@preset{ttfont}{lmodern}%
+}
 %    \end{macrocode}
 % \end{macro}^^A \if@tud@ttfont@rb@exist
 % \begin{macro}{\tud@cdfont@check}
@@ -1900,15 +1901,15 @@
 \TUD@key{ttfont}[true]{%
   \TUD@set@numkey{ttfont}{@tempa}{%
     \TUD@bool@numkey,%
-    {lm}{1},{lmtt}{1},{lmodern}{1},%
-    {roboto}{2},{roboto-mono}{2},{robo}{2}%
+    {roboto}{1},{roboto-mono}{1},{robo}{1},%
+    {lm}{2},{lmtt}{2},{lmodern}{2}%
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax% false
       \renewcommand*\tud@ttfont@num{0}%
-    \or% lmodern
-      \renewcommand*\tud@ttfont@num{1}%
     \or% roboto
+      \renewcommand*\tud@ttfont@num{1}%
+    \or% lmodern
       \renewcommand*\tud@ttfont@num{2}%
     \fi%
     \TUD@SpecialOptionAtDocument{tud@font@set}%
@@ -1936,7 +1937,7 @@
 % Die Auswahl der TypeWriter-Schrift.
 %    \begin{macrocode}
 \newcommand*\tud@ttfont@set{%
-  \if@tud@ttfont@rb@exist\else\ifnum\tud@ttfont@num=\tw@\relax%
+  \if@tud@ttfont@rb@exist\else\ifnum\tud@ttfont@num=\@ne\relax%
 %<*class>
     \ClassWarning{\TUD@Class@Name}%
 %</class>
@@ -1947,17 +1948,21 @@
       The package `roboto-mono' is missing so the\MessageBreak%
       typewriter font of package `lmodern' is used%
     }%
-    \renewcommand*\tud@ttfont@num{1}%
+    \TUDoptions{ttfont=lmodern}%
   \fi\fi%
   \ifcase\tud@ttfont@num\relax% false
     \let\tud@ttfont@fam\ttdefault%
-  \or% lmodern
-    \let\tud@ttfont@fam\tud@ttfont@lm%
   \or% roboto
     \let\tud@ttfont@fam\tud@ttfont@rb%
+  \or% lmodern
+    \let\tud@ttfont@fam\tud@ttfont@lm%
   \fi%
-  \ifcase\tud@ttfont@num\relax\else% lmodern
+  \ifcase\tud@ttfont@num\relax\else% !false
     \if@tud@x@fontspec@enabled%
+%    \end{macrocode}
+% Das Setzen der TypeWriter-Schriften aus dem Paket \pkg{lmodern} erfolgt nur,
+% wenn diese nicht standardmäßig aktiviert durch \pkg{fontspec} ist.
+%    \begin{macrocode}
       \ifx\ttdefault\tud@ttfont@fam\else%
         \tud@x@fontspec@set{tt}{\tud@ttfont@fam}%
       \fi%
@@ -1983,7 +1988,11 @@
       \edef\tud@ttfont@bf{\bfseries@tt}%
     }%
     \edef\tud@ttfont@ebf{\tud@ttfont@bf}%
-  \or% lmodern
+  \or% roboto
+    \renewcommand*\tud@ttfont@md{\tud@cdfont@md}%
+    \renewcommand*\tud@ttfont@bf{\tud@cdfont@bf}%
+    \renewcommand*\tud@ttfont@ebf{\tud@cdfont@ebf}%
+  \else% lmodern
     \if@tud@cdfont@heavy%
       \renewcommand*\tud@ttfont@md{m}%
       \renewcommand*\tud@ttfont@bf{b}%
@@ -1998,10 +2007,6 @@
         \renewcommand*\tud@ttfont@ebf{b}%
       \fi%
     \fi%
-  \else%
-    \renewcommand*\tud@ttfont@md{\tud@cdfont@md}%
-    \renewcommand*\tud@ttfont@bf{\tud@cdfont@bf}%
-    \renewcommand*\tud@ttfont@ebf{\tud@cdfont@ebf}%
   \fi%
 }
 %    \end{macrocode}
