@@ -1,4 +1,4 @@
-% \CheckSum{2356}
+% \CheckSum{2435}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-fonts.dtx}[%
-  2018/08/30 v2.06 TUD-Script\space%
+  2018/08/31 v2.06 TUD-Script\space%
 %</driver>
 %<package&identify>\ProvidesPackage{tudscrfonts}[%
 %<*driver|package&identify>
@@ -278,8 +278,8 @@
 % \dots als auch für die TypeWriter-Schriften definiert.
 % \ToDo{roboto-mono nicht installieren sondern direkt definieren}[v2.06]
 %    \begin{macrocode}
-\newcommand*\tud@ttfont@fam{fddt}
-\newcommand*\tud@ttfont@rb{fddt}
+\newcommand*\tud@ttfont@fam{tudtt}
+\newcommand*\tud@ttfont@rb{tudtt}
 \newcommand*\tud@ttfont@lm{lmtt}
 %    \end{macrocode}
 % \end{macro}^^A \tud@ttfont@lm
@@ -341,8 +341,7 @@
 % Der zu prüfenden Schriftname wird mit \cs{lowercase} in Minuskeln in 
 % \cs{tud@res@c} expandiert.
 %    \begin{macrocode}
-        \edef\tud@res@c{\lowercase{\def\noexpand\tud@res@c{##1##2.fd}}}%
-        \tud@res@c%
+        \tud@lowerstring\tud@res@c{##1##2.fd}%
 %    \end{macrocode}
 % Existiert die Schrift nicht, wird die entsprechende Warnung ausgegeben.
 %    \begin{macrocode}
@@ -368,8 +367,8 @@
 \newcommand*\tud@cdfont@missing[1]{%
   \begingroup%
     \def\tud@res@a{%
-      `#1' font not found\MessageBreak%
-      for `\encodingdefault' encoding.\MessageBreak%
+      `#1' font\MessageBreak%
+      not found for `\encodingdefault' encoding.\MessageBreak%
     }%
     \if@tud@x@fontspec@enabled%
       \appto\tud@res@a{%
@@ -962,12 +961,76 @@
 %<*body>
 % \fi
 %
-% Mit dem Paket \pkg{trimspaces} werden für die alternative Schriftauswahl mit 
-% \cs{cdfont} bzw. \cs{textcdfont} eventuell vorhandene Leerzeichen aus dem 
-% Argument entfernt. Auch beim Einlesen von Feldern wird dies genutzt.
+% \begin{macro}{\tud@x@fontspec@init}
+% \changes{v2.06}{2018/06/28}{neu}^^A
+% Dieses Makro wird bei der Initialisierun der Schriftfamilien aufgerufen, 
+% falls \pkg{fontspec} aktiv ist. Das erste Argument enthält den NFSS-Namen 
+% der Schriftfamilie, das zweite Argument spezifiziert die Schriften für die 
+% jeweiligen Schriftschnitte.
 %    \begin{macrocode}
-\RequirePackage{trimspaces}[2009/09/17]
+\newcommand*\tud@x@fontspec@init[2]{%
 %    \end{macrocode}
+% Durch die Verwendung des optionalen Argumentes von \cs{defaultfontfeatures} 
+% werden die gewünschten Features einem Schriftfamiliennamen zugewiesen. Diese 
+% können anschließend einfach bspw. mit \cs{setsansfont}\marg{Name} genutzt 
+% werden. Damit alle Änderungen lokal bleiben, werden die Argumente in einer 
+% Gruppe expandiert.
+%    \begin{macrocode}
+  \begingroup%
+    \edef\tud@res@a{%
+      \noexpand\defaultfontfeatures[#1]{%
+        NFSSFamily=#1,%
+        Ligatures=TeX,%
+        BoldFont={},%
+        ItalicFont={},%
+        BoldItalicFont={},%
+        SmallCapsFont={},%
+        #2%
+      }%
+    }%
+%    \end{macrocode}
+% Damit die Schrift mit ihrem NFSS-Namen auf jeden Fall definiert ist, auch 
+% wenn die Schriften des \CDs nicht aktiviert wurden, wird \cs{newfontfamily} 
+% aufgerufen.
+%    \begin{macrocode}
+    \edef\tud@res@b{%
+      \noexpand\newfontfamily%
+        \expandafter\noexpand\csname tud@x@fontspec@fam@#1\endcsname{#1}%
+    }%
+%    \end{macrocode}
+% Die expandierten Argumente werden nach der Gruppe ausgeführt.
+%    \begin{macrocode}
+    \edef\tud@res@c{%
+      \endgroup\expandonce\tud@res@a\expandonce\tud@res@b%
+    }%
+  \tud@res@c%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@x@fontspec@init
+% \begin{macro}{\tud@x@fontspec@set}
+% \changes{v2.06}{2018/08/31}{neu}^^A
+% Das Paket \pkg{fontspec} ermöglicht es leider nicht, mit \cs{newfontfamily} 
+% bereits definierte Schriftfamilien für die Zuweisung mit \cs{setmainfont} 
+% etc. zu nutzen. Deshalb wird folgendes Hilfsmakro definiert, welches diese 
+% Aufgabe übernimmt.
+%    \begin{macrocode}
+\newcommand*\tud@x@fontspec@set[2]{%
+  \begingroup%
+    \edef\tud@res@a{%
+      \expandafter\noexpand\csname tud@x@fontspec@fam@#2\endcsname%
+    }%
+    \edef\tud@res@a{%
+      \endgroup%
+      \noexpand\DeclareRobustCommand%
+          \expandafter\noexpand\csname #1family\endcsname{%
+        \expandafter\noexpand\csname tud@x@fontspec@fam@#2\endcsname%
+      }%
+      \def\expandafter\noexpand\csname #1default\endcsname{\tud@cdfont@fam}%
+    }%
+  \tud@res@a%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@x@fontspec@set
 % \begin{macro}{\tud@font@set}
 % \changes{v2.04}{2015/03/01}{Unterstützung für das Paket \pkg{mweights}}^^A
 % \begin{macro}{\bfseries@rm}
@@ -1144,7 +1207,7 @@
 % oder\dots
 %    \begin{macrocode}
     \if@tud@x@fontspec@enabled%
-      \setsansfont{\tud@cdfont@fam}%
+      \tud@x@fontspec@set{sf}{\tud@cdfont@fam}%
 %    \end{macrocode}
 % \dots nach dem NFSS.
 %    \begin{macrocode}
@@ -1286,52 +1349,6 @@
 % \end{macro}^^A \smallskipamount
 % \end{macro}^^A \tud@font@skip@@set
 % \end{macro}^^A \tud@font@skip@set
-% \begin{macro}{\tud@x@fontspec@init}
-% \changes{v2.06}{2018/06/28}{neu}^^A
-% Dieses Makro wird innerhalb von \cs{tud@cdfont@init} aufgerufen, falls 
-% \pkg{fontspec} aktiv ist. Das erste Argument enthält den NFSS-Namen der 
-% Schriftfamilie, das zweite Argument spezifiziert die Schriften für die 
-% jeweiligen Schriftschnitte.
-%    \begin{macrocode}
-\newcommand*\tud@x@fontspec@init[2]{%
-%    \end{macrocode}
-% Durch die Verwendung des optionalen Argumentes von \cs{defaultfontfeatures} 
-% werden die gewünschten Features einem Schriftfamiliennamen zugewiesen. Diese 
-% können anschließend einfach bspw. mit \cs{setsansfont}\marg{Name} genutzt 
-% werden. Damit alle Änderungen lokal bleiben, werden die Argumente in einer 
-% Gruppe expandiert.
-%    \begin{macrocode}
-  \begingroup%
-    \edef\tud@res@a{%
-      \noexpand\defaultfontfeatures[#1]{%
-        NFSSFamily=#1,%
-        Ligatures=TeX,%
-        BoldFont={},%
-        ItalicFont={},%
-        BoldItalicFont={},%
-        SmallCapsFont={},%
-        #2%
-      }%
-    }%
-%    \end{macrocode}
-% Damit die Schrift mit ihrem NFSS-Namen auf jeden Fall definiert ist, auch 
-% wenn die Schriften des \CDs nicht aktiviert wurden, wird \cs{newfontfamily} 
-% aufgerufen.
-%    \begin{macrocode}
-    \edef\tud@res@b{%
-      \noexpand\newfontfamily%
-        \expandafter\noexpand\csname tud@x@fontspec@fam@#1\endcsname{#1}%
-    }%
-%    \end{macrocode}
-% Die expandierten Argumente werden nach der Gruppe ausgeführt.
-%    \begin{macrocode}
-    \edef\tud@res@c{%
-      \endgroup\expandonce\tud@res@a\expandonce\tud@res@b%
-    }%
-  \tud@res@c%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@x@fontspec@init
 % \begin{macro}{\tud@cdfont@init}
 % \changes{v2.04}{2015/03/10}{neu}^^A
 % \begin{macro}{\cdfontln}
@@ -1942,7 +1959,7 @@
   \ifcase\tud@ttfont@num\relax\else% lmodern
     \if@tud@x@fontspec@enabled%
       \ifx\ttdefault\tud@ttfont@fam\else%
-        \setmonofont{\tud@ttfont@fam}%
+        \tud@x@fontspec@set{tt}{\tud@ttfont@fam}%
       \fi%
     \else%
       \renewcommand*\ttdefault{\tud@ttfont@fam}%
@@ -1995,13 +2012,19 @@
 % \end{macro}^^A \tud@ttfont@set
 % \begin{macro}{\tud@ttfont@init}
 % \changes{v2.06}{2018/07/12}{neu}^^A
+% \begin{macro}{\tud@ttfont@rb@scale}
+% \changes{v2.06}{2018/08/30}{neu}^^A
 % Mit \cs{tud@ttfont@init} erfolgt die Defintion der TypeWriter-Schriften.
 %    \begin{macrocode}
 \newcommand*\tud@ttfont@init{%
+%    \end{macrocode}
+% Für die \texttt{RobotoMono} wird der Skalierungsfaktor fest definiert.
+%    \begin{macrocode}
+  \newcommand*\tud@ttfont@rb@scale{0.9}%
   \if@tud@x@fontspec@enabled%
     \if@tud@ttfont@rb@exist%
       \tud@x@fontspec@init{\tud@ttfont@rb}{%
-        Extension={.ttf},%
+        Scale={\tud@ttfont@rb@scale},%
         UprightFont={RobotoMono-Regular},%
         FontFace={l}{n}{RobotoMono-Light},%
         FontFace={m}{n}{RobotoMono-Regular},%
@@ -2028,21 +2051,75 @@
         UprightFont={LMMono10-Regular},%
         FontFace={l}{n}{LMMonoLt10-Regular},%
         FontFace={m}{n}{LMMono10-Regular},%
-        FontFace={sb}{n}{LMMono10-Regular},%
         FontFace={b}{n}{LMMonoLt10-Bold},%
         FontFace={bx}{n}{LMMonoLt10-Bold},%
-        FontFace={eb}{n}{LMMonoLt10-Bold},%
         FontFace={l}{it}{LMMonoLt10-Oblique},%
         FontFace={m}{it}{LMMonoSlant10-Regular},%
-        FontFace={sb}{it}{LMMonoSlant10-Regular},%
         FontFace={b}{it}{LMMonoLt10-BoldOblique},%
-        FontFace={bx}{it}{LMMonoLt10-BoldOblique},%
-        FontFace={eb}{it}{LMMonoLt10-BoldOblique}%
+        FontFace={bx}{it}{LMMonoLt10-BoldOblique}%
       }%
+    \fi%
+  \else%
+%    \end{macrocode}
+% Existiert das Paket \pkg{roboto-mono}, wird die Schriftfamilie \val{tudtt} 
+% definiert und die passenden Type1-Schriften für diese definiert.
+%    \begin{macrocode}
+    \if@tud@ttfont@rb@exist%
+%    \end{macrocode}
+% Der Skalierungsfaktor für das NFSS gesetzt.
+%    \begin{macrocode}
+      \edef\tud@ttfont@rb@scale{s*[\tud@ttfont@rb@scale]}%
+      \begingroup%
+        \def\tud@res@c##1##2{%
+          \tud@lowerstring\tud@res@a{##1}%
+          \DeclareFontFamily{##1}{\tud@ttfont@rb}{\hyphenchar\font=\m@ne}%
+%    \end{macrocode}
+% Das temporäre Makro verlangt im ersten Argument die NFSS-Serie, im zweiten 
+% den Teil des Dateinamens der \texttt{RobotoMono} für aufrechte Metriken und 
+% im dritten Argument den für kursive. 
+%    \begin{macrocode}
+          \def\tud@res@b####1####2####3{%
+            \DeclareFontShape{##1}{\tud@ttfont@rb}{####1}{n}{%
+               <->\tud@ttfont@rb@scale RobotoMono-####2-tlf-\tud@res@a%
+            }{}%
+            \DeclareFontShape{##1}{\tud@ttfont@rb}{####1}{it}{%
+               <->\tud@ttfont@rb@scale RobotoMono-####3-tlf-\tud@res@a%
+            }{}%
+            \DeclareFontShape{##1}{\tud@ttfont@rb}{####1}{sl}{%
+              <->ssub*\tud@ttfont@rb/####1/it%
+            }{}%
+%    \end{macrocode}
+% Kapitälchen sind nicht für alle Kodierungen definiert, weshalb diese nur 
+% optional definiert werden. 
+%    \begin{macrocode}
+            \ifbool{##2}{%
+              \DeclareFontShape{##1}{\tud@ttfont@rb}{####1}{sc}{%
+                 <->\tud@ttfont@rb@scale RobotoMono-####2-tlf-sc-\tud@res@a%
+              }{}%
+              \DeclareFontShape{##1}{\tud@ttfont@rb}{####1}{scit}{%
+                 <->\tud@ttfont@rb@scale RobotoMono-####3-tlf-sc-\tud@res@a%
+              }{}%
+              \DeclareFontShape{##1}{\tud@ttfont@rb}{####1}{scsl}{%
+                <->ssub*\tud@ttfont@rb/####1/scit%
+              }{}%
+            }{}%
+          }%
+          \tud@res@b{l}{Light}{LightItalic}%
+          \tud@res@b{m}{Regular}{Italic}%
+          \tud@res@b{sb}{Medium}{MediumItalic}%
+          \tud@res@b{b}{Bold}{BoldItalic}%
+          \tud@res@b{bx}{Bold}{BoldItalic}%
+        }%
+        \tud@res@c{OT1}{true}%
+        \tud@res@c{T1}{true}%
+        \ifcsundef{T@LY1}{}{\tud@res@c{LY1}{true}}%
+        \ifcsundef{T@TS1}{}{\tud@res@c{TS1}{false}}%
+      \endgroup%
     \fi%
   \fi%
 }
 %    \end{macrocode}
+% \end{macro}^^A \tud@ttfont@rb@scale
 % \end{macro}^^A \tud@ttfont@init
 %
 % \iffalse

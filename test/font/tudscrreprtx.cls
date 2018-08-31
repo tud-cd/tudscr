@@ -137,8 +137,12 @@
     {normalbold}{3},{boldnormal}{3},%
     {ultrabold}{4},{boldultra}{4},{heavybold}{4},{boldheavy}{4},%
     {extendedbold}{4},{boldextended}{4},%
-    {lf}{5},{nf}{5},{lining}{5},{liningfigures}{5},{normalfigures}{5},%
-    {osf}{6},{osfigures}{6},{oldstyle}{6},{oldstylefigures}{6},{oldnumbers}{6},%
+    {lf}{5},{lfigures}{5},{liningfigures}{5},{lining}{5},%
+    {ln}{5},{lnumbers}{5},{liningnumbers}{5},%
+    {nf}{5},{nfigures}{5},{normalfigures}{5},%
+    {nn}{5},{nnumbers}{5},{normalnumbers}{5},%
+    {osf}{6},{osfigures}{6},{oldfigures}{6},{oldstylefigures}{6},{oldstyle}{6},%
+    {osn}{6},{osnumbers}{6},{oldnumbers}{6},{oldstylenumbers}{6},%
     {nomath}{7},{nocdmath}{7},%
     {serifmath}{7},{serif}{7},{nosansmath}{7},{nosans}{7},%
     {math}{8},{cdmath}{8},{sansmath}{8},{sans}{8},%
@@ -1522,8 +1526,8 @@
   \renewcommand*\tud@cdfont@fam@osf{lun}
   \newcommand*\tud@cdfont@db{0m6}
 \fi
-\newcommand*\tud@ttfont@fam{fddt}
-\newcommand*\tud@ttfont@rb{fddt}
+\newcommand*\tud@ttfont@fam{tudtt}
+\newcommand*\tud@ttfont@rb{tudtt}
 \newcommand*\tud@ttfont@lm{lmtt}
 \newif\if@tud@ttfont@rb@exist
 \IfFileExists{roboto-mono.sty}{%
@@ -1541,8 +1545,7 @@
   \else%
     \def\tud@res@b##1##2{%
       \begingroup%
-        \edef\tud@res@c{\lowercase{\def\noexpand\tud@res@c{##1##2.fd}}}%
-        \tud@res@c%
+        \tud@lowerstring\tud@res@c{##1##2.fd}%
         \edef\tud@res@a{%
           \endgroup%
           \noexpand\IfFileExists{\tud@res@c}{}{\noexpand\tud@res@a{\tud@res@c}}%
@@ -1562,8 +1565,8 @@
 \newcommand*\tud@cdfont@missing[1]{%
   \begingroup%
     \def\tud@res@a{%
-      `#1' font not found\MessageBreak%
-      for `\encodingdefault' encoding.\MessageBreak%
+      `#1' font\MessageBreak%
+      not found for `\encodingdefault' encoding.\MessageBreak%
     }%
     \if@tud@x@fontspec@enabled%
       \appto\tud@res@a{%
@@ -1641,7 +1644,43 @@
 }
 \newif\if@tud@x@bm@requested
 \PreventPackageFromLoading[\@tud@x@bm@requestedtrue]{bm}
-\RequirePackage{trimspaces}[2009/09/17]
+\newcommand*\tud@x@fontspec@init[2]{%
+  \begingroup%
+    \edef\tud@res@a{%
+      \noexpand\defaultfontfeatures[#1]{%
+        NFSSFamily=#1,%
+        Ligatures=TeX,%
+        BoldFont={},%
+        ItalicFont={},%
+        BoldItalicFont={},%
+        SmallCapsFont={},%
+        #2%
+      }%
+    }%
+    \edef\tud@res@b{%
+      \noexpand\newfontfamily%
+        \expandafter\noexpand\csname tud@x@fontspec@fam@#1\endcsname{#1}%
+    }%
+    \edef\tud@res@c{%
+      \endgroup\expandonce\tud@res@a\expandonce\tud@res@b%
+    }%
+  \tud@res@c%
+}
+\newcommand*\tud@x@fontspec@set[2]{%
+  \begingroup%
+    \edef\tud@res@a{%
+      \expandafter\noexpand\csname tud@x@fontspec@fam@#2\endcsname%
+    }%
+    \edef\tud@res@a{%
+      \endgroup%
+      \noexpand\DeclareRobustCommand%
+          \expandafter\noexpand\csname #1family\endcsname{%
+        \expandafter\noexpand\csname tud@x@fontspec@fam@#2\endcsname%
+      }%
+      \def\expandafter\noexpand\csname #1default\endcsname{\tud@cdfont@fam}%
+    }%
+  \tud@res@a%
+}
 \newcommand*\tud@font@set{%
   \if@tud@cdfont@active%
     \tud@cs@store{rmdefault}%
@@ -1735,7 +1774,7 @@
       \let\tud@cdfont@fam\tud@cdfont@fam@osf%
     \fi%
     \if@tud@x@fontspec@enabled%
-      \setsansfont{\tud@cdfont@fam}%
+      \tud@x@fontspec@set{sf}{\tud@cdfont@fam}%
     \else%
       \renewcommand*\sfdefault{\tud@cdfont@fam}%
     \fi%
@@ -1828,28 +1867,6 @@
   \tud@skip@set{abovecaptionskip}{\dimexpr\bigskipamount*5/6\relax}%
   \tud@skip@set{belowcaptionskip}{\z@}%
   \tud@skip@set{columnsep}{1.1\baselineskip}%
-}
-\newcommand*\tud@x@fontspec@init[2]{%
-  \begingroup%
-    \edef\tud@res@a{%
-      \noexpand\defaultfontfeatures[#1]{%
-        NFSSFamily=#1,%
-        Ligatures=TeX,%
-        BoldFont={},%
-        ItalicFont={},%
-        BoldItalicFont={},%
-        SmallCapsFont={},%
-        #2%
-      }%
-    }%
-    \edef\tud@res@b{%
-      \noexpand\newfontfamily%
-        \expandafter\noexpand\csname tud@x@fontspec@fam@#1\endcsname{#1}%
-    }%
-    \edef\tud@res@c{%
-      \endgroup\expandonce\tud@res@a\expandonce\tud@res@b%
-    }%
-  \tud@res@c%
 }
 \newcommand*\tud@cdfont@init{%
   \if@tud@cdfont@fam@exist%
@@ -2193,7 +2210,7 @@
   \ifcase\tud@ttfont@num\relax\else% lmodern
     \if@tud@x@fontspec@enabled%
       \ifx\ttdefault\tud@ttfont@fam\else%
-        \setmonofont{\tud@ttfont@fam}%
+        \tud@x@fontspec@set{tt}{\tud@ttfont@fam}%
       \fi%
     \else%
       \renewcommand*\ttdefault{\tud@ttfont@fam}%
@@ -2239,10 +2256,11 @@
   \fi%
 }
 \newcommand*\tud@ttfont@init{%
+  \newcommand*\tud@ttfont@rb@scale{0.9}%
   \if@tud@x@fontspec@enabled%
     \if@tud@ttfont@rb@exist%
       \tud@x@fontspec@init{\tud@ttfont@rb}{%
-        Extension={.ttf},%
+        Scale={\tud@ttfont@rb@scale},%
         UprightFont={RobotoMono-Regular},%
         FontFace={l}{n}{RobotoMono-Light},%
         FontFace={m}{n}{RobotoMono-Regular},%
@@ -2263,17 +2281,54 @@
         UprightFont={LMMono10-Regular},%
         FontFace={l}{n}{LMMonoLt10-Regular},%
         FontFace={m}{n}{LMMono10-Regular},%
-        FontFace={sb}{n}{LMMono10-Regular},%
         FontFace={b}{n}{LMMonoLt10-Bold},%
         FontFace={bx}{n}{LMMonoLt10-Bold},%
-        FontFace={eb}{n}{LMMonoLt10-Bold},%
         FontFace={l}{it}{LMMonoLt10-Oblique},%
         FontFace={m}{it}{LMMonoSlant10-Regular},%
-        FontFace={sb}{it}{LMMonoSlant10-Regular},%
         FontFace={b}{it}{LMMonoLt10-BoldOblique},%
-        FontFace={bx}{it}{LMMonoLt10-BoldOblique},%
-        FontFace={eb}{it}{LMMonoLt10-BoldOblique}%
+        FontFace={bx}{it}{LMMonoLt10-BoldOblique}%
       }%
+    \fi%
+  \else%
+    \if@tud@ttfont@rb@exist%
+      \edef\tud@ttfont@rb@scale{s*[\tud@ttfont@rb@scale]}%
+      \begingroup%
+        \def\tud@res@c##1##2{%
+          \tud@lowerstring\tud@res@a{##1}%
+          \DeclareFontFamily{##1}{\tud@ttfont@rb}{\hyphenchar\font=\m@ne}%
+          \def\tud@res@b####1####2####3{%
+            \DeclareFontShape{##1}{\tud@ttfont@rb}{####1}{n}{%
+               <->\tud@ttfont@rb@scale RobotoMono-####2-tlf-\tud@res@a%
+            }{}%
+            \DeclareFontShape{##1}{\tud@ttfont@rb}{####1}{it}{%
+               <->\tud@ttfont@rb@scale RobotoMono-####3-tlf-\tud@res@a%
+            }{}%
+            \DeclareFontShape{##1}{\tud@ttfont@rb}{####1}{sl}{%
+              <->ssub*\tud@ttfont@rb/####1/it%
+            }{}%
+            \ifbool{##2}{%
+              \DeclareFontShape{##1}{\tud@ttfont@rb}{####1}{sc}{%
+                 <->\tud@ttfont@rb@scale RobotoMono-####2-tlf-sc-\tud@res@a%
+              }{}%
+              \DeclareFontShape{##1}{\tud@ttfont@rb}{####1}{scit}{%
+                 <->\tud@ttfont@rb@scale RobotoMono-####3-tlf-sc-\tud@res@a%
+              }{}%
+              \DeclareFontShape{##1}{\tud@ttfont@rb}{####1}{scsl}{%
+                <->ssub*\tud@ttfont@rb/####1/scit%
+              }{}%
+            }{}%
+          }%
+          \tud@res@b{l}{Light}{LightItalic}%
+          \tud@res@b{m}{Regular}{Italic}%
+          \tud@res@b{sb}{Medium}{MediumItalic}%
+          \tud@res@b{b}{Bold}{BoldItalic}%
+          \tud@res@b{bx}{Bold}{BoldItalic}%
+        }%
+        \tud@res@c{OT1}{true}%
+        \tud@res@c{T1}{true}%
+        \ifcsundef{T@LY1}{}{\tud@res@c{LY1}{true}}%
+        \ifcsundef{T@TS1}{}{\tud@res@c{TS1}{false}}%
+      \endgroup%
     \fi%
   \fi%
 }
