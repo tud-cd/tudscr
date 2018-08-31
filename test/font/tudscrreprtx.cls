@@ -354,15 +354,15 @@
 \TUD@key{ttfont}[true]{%
   \TUD@set@numkey{ttfont}{@tempa}{%
     \TUD@bool@numkey,%
-    {lm}{1},{lmtt}{1},{lmodern}{1},%
-    {roboto}{2},{roboto-mono}{2},{robo}{2}%
+    {roboto}{1},{roboto-mono}{1},{robo}{1},%
+    {lm}{2},{lmtt}{2},{lmodern}{2}%
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax% false
       \renewcommand*\tud@ttfont@num{0}%
-    \or% lmodern
-      \renewcommand*\tud@ttfont@num{1}%
     \or% roboto
+      \renewcommand*\tud@ttfont@num{1}%
+    \or% lmodern
       \renewcommand*\tud@ttfont@num{2}%
     \fi%
     \TUD@SpecialOptionAtDocument{tud@font@set}%
@@ -885,7 +885,10 @@
 \TUD@key{headings}{%
   \TUD@set@numkey{headings}{@tempa}{%
     {light}{0},{lightfont}{0},{lite}{0},{litefont}{0},{noheavyfont}{0},%
-    {heavy}{1},{heavyfont}{1},{bold}{1},{boldfont}{1}%
+    {normal}{0},{standard}{0},{std}{0},{normalbold}{0},{boldnormal}{0},%
+    {heavy}{1},{heavyfont}{1},{bold}{1},{boldfont}{1},%
+    {ultrabold}{1},{boldultra}{1},{heavybold}{1},{boldheavy}{1},%
+    {extendedbold}{1},{boldextended}{1}%
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax% light
@@ -1455,9 +1458,11 @@
 }
 \tud@if@v@lower{2.06}{%
   \TUD@key@preset{cdoldfont}{true}%
+  \TUD@key@preset{ttfont}{lmodern}%
   \TUD@key@preset{headings}{light}%
 }{%
   \TUD@key@preset{cdfont}{true}%
+  \TUD@key@preset{ttfont}{roboto}%
   \TUD@key@preset{headings}{heavy}%
 }
 \DeclareOption*{\tud@x@scr@checkoptions}
@@ -1532,7 +1537,9 @@
 \newif\if@tud@ttfont@rb@exist
 \IfFileExists{roboto-mono.sty}{%
   \@tud@ttfont@rb@existtrue%
-}{}
+}{%
+  \TUD@key@preset{ttfont}{lmodern}%
+}
 \newcommand*\tud@cdfont@check[4][]{%
   \@tud@res@swatrue%
   \def\tud@res@a##1{%
@@ -2192,22 +2199,22 @@
   }%
 }
 \newcommand*\tud@ttfont@set{%
-  \if@tud@ttfont@rb@exist\else\ifnum\tud@ttfont@num=\tw@\relax%
+  \if@tud@ttfont@rb@exist\else\ifnum\tud@ttfont@num=\@ne\relax%
     \ClassWarning{\TUD@Class@Name}%
     {%
       The package `roboto-mono' is missing so the\MessageBreak%
       typewriter font of package `lmodern' is used%
     }%
-    \renewcommand*\tud@ttfont@num{1}%
+    \TUDoptions{ttfont=lmodern}%
   \fi\fi%
   \ifcase\tud@ttfont@num\relax% false
     \let\tud@ttfont@fam\ttdefault%
-  \or% lmodern
-    \let\tud@ttfont@fam\tud@ttfont@lm%
   \or% roboto
     \let\tud@ttfont@fam\tud@ttfont@rb%
+  \or% lmodern
+    \let\tud@ttfont@fam\tud@ttfont@lm%
   \fi%
-  \ifcase\tud@ttfont@num\relax\else% lmodern
+  \ifcase\tud@ttfont@num\relax\else% !false
     \if@tud@x@fontspec@enabled%
       \ifx\ttdefault\tud@ttfont@fam\else%
         \tud@x@fontspec@set{tt}{\tud@ttfont@fam}%
@@ -2234,7 +2241,11 @@
       \edef\tud@ttfont@bf{\bfseries@tt}%
     }%
     \edef\tud@ttfont@ebf{\tud@ttfont@bf}%
-  \or% lmodern
+  \or% roboto
+    \renewcommand*\tud@ttfont@md{\tud@cdfont@md}%
+    \renewcommand*\tud@ttfont@bf{\tud@cdfont@bf}%
+    \renewcommand*\tud@ttfont@ebf{\tud@cdfont@ebf}%
+  \else% lmodern
     \if@tud@cdfont@heavy%
       \renewcommand*\tud@ttfont@md{m}%
       \renewcommand*\tud@ttfont@bf{b}%
@@ -2249,10 +2260,6 @@
         \renewcommand*\tud@ttfont@ebf{b}%
       \fi%
     \fi%
-  \else%
-    \renewcommand*\tud@ttfont@md{\tud@cdfont@md}%
-    \renewcommand*\tud@ttfont@bf{\tud@cdfont@bf}%
-    \renewcommand*\tud@ttfont@ebf{\tud@cdfont@ebf}%
   \fi%
 }
 \newcommand*\tud@ttfont@init{%
