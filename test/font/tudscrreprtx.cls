@@ -2066,14 +2066,13 @@
     is not available, a fallback layout is used%
   }%
 }
-\providecommand*\tudfont[1]{\cdfont{#1}}
 \newcommand*\cdfont[1]{%
   \tud@cdfont@get{#1}%
   \ifx\@tempc\relax\else%
-    \csuse{os\@tempc}%
+    \csuse{cdfont\@tempc}%
   \fi%
 }
-\newcommand*\textcdfont[2]{%
+\newcommand*\textcd[2]{%
   \tud@cdfont@get{#1}%
   \ifx\@tempc\relax%
     \textsf{#2}%
@@ -2088,7 +2087,7 @@
       \ifstr{\@tempc}{dinbn}{\dinbn}{\csuse{univ\@tempc}}%
     \fi%
   }%
-  \renewcommand*\textcdfont[2]{%
+  \renewcommand*\textcd[2]{%
     \tud@cdfont@get{#1}%
     \ifx\@tempc\relax%
       \textsf{#2}%
@@ -2157,9 +2156,9 @@
   \tud@cdfont@@trim{book}{r}%
   \tud@cdfont@@trim{semibold}{s}%
   \tud@cdfont@@trim{demi}{s}%
-  \tud@cdfont@@trim{bold}{b}%
   \tud@cdfont@@trim{extrabold}{x}%
   \tud@cdfont@@trim{black}{x}%
+  \tud@cdfont@@trim{bold}{b}%
   \tud@cdfont@@trim{italic}{i}%
   \tud@cdfont@@trim{oblique}{i}%
   \tud@cdfont@@trim{slanted}{i}%
@@ -4960,6 +4959,7 @@
       \fi%
     \fi%
   }{%
+    \tud@locked@bool@preset{@tud@head@widebar}{true}%
     \ifstr{\tud@pagecolor}{HKS41}{%
       \renewcommand*\tud@head@logocolor{white}%
       \renewcommand*\tud@head@fontcolor{white}%
@@ -4969,7 +4969,6 @@
       \else%
         \renewcommand*\tud@foot@fontcolor{HKS41!30}%
       \fi%
-      \tud@locked@bool@preset{@tud@head@widebar}{true}%
     }{%
       \renewcommand*\tud@head@logocolor{HKS41}%
       \renewcommand*\tud@head@fontcolor{HKS41}%
@@ -4984,7 +4983,6 @@
         \renewcommand*\tud@foot@logocolor{HKS41}%
         \renewcommand*\tud@foot@fontcolor{HKS41}%
       \fi%
-      \tud@locked@bool@preset{@tud@head@widebar}{true}%
     }%
   }%
   \let\tud@len@line\tud@len@thinline%
@@ -7306,6 +7304,8 @@
   \TUD@deprecated@cs{finaldate}{duedate}%
   \TUD@deprecated@cs{maturitydate}{duedate}%
 }
+\TUD@deprecated@cs{textcdfont}{textcd}%
+\TUD@deprecated@cs{tudfont}{cdfont}%
 \TUD@deprecated@cs{univln}{cdfontln}%
 \TUD@deprecated@cs{univrn}{cdfontrn}%
 \TUD@deprecated@cs{univbn}{cdfontsn}%
