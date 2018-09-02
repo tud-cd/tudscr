@@ -5763,7 +5763,10 @@
       \tud@sec@fontsize%
       \tud@color{\tud@title@fontcolor}%
     }%
-    \tud@komafont@set{subtitle}{\tud@thesis@fontsize\bfseries}%
+    \tud@komafont@set{subtitle}{%
+      \tud@thesis@fontsize%
+      \fontseries{\tud@cdfont@bf}\selectfont%
+    }%
     \tud@komafont@set{subject}{%
       \sffamily%
       \usesizeofkomafont{section}%
@@ -5982,14 +5985,16 @@
 \newcommand*\tud@part@subtitle{}
 \newcommand*\setpartsubtitle[1]{\gdef\tud@part@subtitle{#1}}
 \newkomafont{partsubtitle}{%
-  \tud@thesis@fontsize\bfseries%
+  \tud@thesis@fontsize%
+  \fontseries{\tud@cdfont@bf}\selectfont%
   \tud@color{\tud@part@fontcolor}%
 }
 \aliaskomafont{parttitle}{partsubtitle}
 \newcommand*\tud@chapter@subtitle{}
 \newcommand*\setchaptersubtitle[1]{\gdef\tud@chapter@subtitle{#1}}
 \newkomafont{chaptersubtitle}{%
-  \tud@thesis@fontsize\bfseries%
+  \tud@thesis@fontsize%
+  \fontseries{\tud@cdfont@bf}\selectfont%
   \tud@color{\tud@chapter@fontcolor}%
 }
 \newcommand*\tud@sec@subtitle[1]{%
