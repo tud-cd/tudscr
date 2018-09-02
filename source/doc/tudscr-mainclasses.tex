@@ -77,7 +77,8 @@ dieser lokal begrenzt.
 %
 \ChangedAt*{%
   v2.00:Schriften~-- insbesondere für den mathematischen Satz~-- verbessert;%
-  v2.01:Unterschneidung (Kerning) der Ziffern für \Univers verbessert%
+  v2.01:Unterschneidung (Kerning) der Ziffern verbessert;%
+  v2.06:\OpenSans als neue Schrift im \TUDCD;%
 }
 %
 Das \TUDCD gibt die Verwendung der Schriftfamilie \OpenSans für den Fließtext 
@@ -322,7 +323,7 @@ ist nicht notwendig.
 
 
 
-\subsubsection{Auszeichnungen im Text}
+\minisec{Auszeichnungen im Text}
 \index{Schriftstärke}%
 \index{Schriftauszeichnung}%
 %
@@ -338,26 +339,6 @@ angegebene Argument zum Einsatz, wie bei \Macro*{textbf}[\Parameter{Text}].
 \begin{Declaration}[v2.04]{%
   \Macro{textcd}[\Parameter{Schriftart}\Parameter{Text}]%
 }
-\begin{Declaration*}{\Macro{cdfontln}}
-\begin{Declaration*}{\Macro{cdfontrn}}
-\begin{Declaration*}{\Macro{cdfontbn}}
-\begin{Declaration*}{\Macro{cdfontsn}}
-\begin{Declaration*}{\Macro{cdfontxn}}
-\begin{Declaration*}{\Macro{cdfontli}}
-\begin{Declaration*}{\Macro{cdfontri}}
-\begin{Declaration*}{\Macro{cdfontsi}}
-\begin{Declaration*}{\Macro{cdfontbi}}
-\begin{Declaration*}{\Macro{cdfontxi}}
-\begin{Declaration*}{\Macro{textcdln}[\Parameter{Text}]}
-\begin{Declaration*}{\Macro{textcdrn}[\Parameter{Text}]}
-\begin{Declaration*}{\Macro{textcdsn}[\Parameter{Text}]}
-\begin{Declaration*}{\Macro{textcdbn}[\Parameter{Text}]}
-\begin{Declaration*}{\Macro{textcdxn}[\Parameter{Text}]}
-\begin{Declaration*}{\Macro{textcdli}[\Parameter{Text}]}
-\begin{Declaration*}{\Macro{textcdri}[\Parameter{Text}]}
-\begin{Declaration*}{\Macro{textcdsi}[\Parameter{Text}]}
-\begin{Declaration*}{\Macro{textcdbi}[\Parameter{Text}]}
-\begin{Declaration*}{\Macro{textcdxi}[\Parameter{Text}]}
 \printdeclarationlist
 Diese beiden Befehle dienen zur gezielten Aktivierung einer Schriftart des \CDs 
 in Stärke und Schnitt. Hierbei entspricht \Macro{cdfont} einem Textschalter und 
@@ -377,8 +358,15 @@ oder \PValue{Slanted} als Alias für die kursiven Schriftlagen möglich.
 %
 \begin{center}%
   \newcommand*\listfonts[2]{%
-    \csuse{textcd#2}{Open Sans #1} & \Macro{cdfont#2} 
-      & \Macro{textcd#2}[\Parameter{Text}]\tabularnewline
+    \csuse{textcd#2}{Open Sans #1} & 
+    \begin{Declaration*}{\Macro{cdfont#2}}
+    \Macro*{cdfont#2}'none'%
+    \end{Declaration*}
+    & 
+    \begin{Declaration*}{\Macro{textcd#2}[\Parameter{Text}]}
+    \Macro*{textcd#2}[\Parameter{Text}]'none'%
+    \end{Declaration*}
+    \tabularnewline
   }%
   \begin{tabular}{lll}%
     \toprule%
@@ -403,26 +391,6 @@ Alternativ zu \Macro{cdfont} und \Macro{textcd} werden für jeden Schriftschnitt
 auch explizite Textschalter und "~kommandos bereitgestellt, bei denen das 
 Argument für die Bezeichnung der Schriftart entfällt. Diese sind in der zweiten 
 und dritten Spalte der Tabelle aufgeführt.
-\end{Declaration*}
-\end{Declaration*}
-\end{Declaration*}
-\end{Declaration*}
-\end{Declaration*}
-\end{Declaration*}
-\end{Declaration*}
-\end{Declaration*}
-\end{Declaration*}
-\end{Declaration*}
-\end{Declaration*}
-\end{Declaration*}
-\end{Declaration*}
-\end{Declaration*}
-\end{Declaration*}
-\end{Declaration*}
-\end{Declaration*}
-\end{Declaration*}
-\end{Declaration*}
-\end{Declaration*}
 \end{Declaration}
 \end{Declaration}
 
@@ -431,81 +399,113 @@ und dritten Spalte der Tabelle aufgeführt.
 \subsection{Schriften für den Mathematiksatz}
 \tudhyperdef*{sec:math}%
 \index{Mathematiksatz|?(}%
-\index{Griechische Buchstaben|(}%
 %
 \begin{Declaration}[v2.03]{\Option{cdmath=\PBoolean}}%
   [true][\Option{cdfont=false}:false]
 \printdeclarationlist%
 %
 Diese Option dient zur Anpassung der Mathematikschriften. Wird diese aktiviert, 
-so werden zur Hausschrift passende Glyphen im Mathematikmodus genutzt, mit 
-\Option{cdmath=false} wird auf die Standardschriften zurückgeschaltet. Ein 
-Umschalten innerhalb des Dokumentes ist~-- beispielsweise für Abbildungen oder 
-Tabellen~-- durch \Macro{TUDoptions}[\PParameter{\Option{cdmath=true}}] sowie 
-\Macro{TUDoptions}[\PParameter{\Option{cdmath=false}}] möglich. Auf fette 
-Mathematikschriften kann mit \Macro{boldmath} umgeschaltet werden. Gültige 
-Werte für die Option \Option{cdmath} sind:
-\ToDo[doc]{standardgreek rein}[v2.06]
-\ToDo[doc]{hinweis zu mdsymbol}[v2.06]
+so werden zur Hausschrift passende Glyphen im Mathematikmodus genutzt. Normale 
+sowie fette Schriftstärke werden zu \emph{Beginn des Dokuments} abhängig von 
+der zu diesem Zeitpunkt aktiven Einstellung für die Schriften des Fließtexts 
+(\seeref{\Option{cdfont}}) definiert. Auf fette Mathematikschriften kann im 
+Dokument mit \Macro{boldmath} umgeschaltet werden, eine Anpassung der 
+Einstellungen ist durch \Macro{TUDoptions} möglich. Gültige Werte für die 
+Option \Option{cdmath} sind:
 %
 \begin{values}{\Option{cdmath}}
 \itemfalse
   Es werden die normalen \hologo{LaTeX}"=Serifenschriften beziehungsweise die 
   Schriften beliebig nutzbarer Pakete für den Mathematiksatz verwendet.
 \itemtrue*
-  Im Mathematikmodus wird \Univers genutzt. Außerdem kommen die griechischen 
-  Buchstaben aus dem Paket \Package{cmbright} sowie Symbole aus dem Paket 
-  \Package{iwona} zum Einsatz.
-\item[upgreek/uprightgreek]
-  Die griechischen Majuskeln werden aufrecht gesetzt, 
-  \seeref{\Option{slantedgreek=false}}.
-\item[slgreek/slantedgreek]
-  Die Ausgabe der griechischen Großbuchstaben erfolgt kursiv, 
-  \seeref{\Option{slantedgreek=true}}.
+  Im Mathematikmodus kommt \OpenSans sowohl für lateinische als auch 
+  griechische Buchstaben zum Einsatz.
 \end{values}
 \end{Declaration}
 
-
-\subsubsection{Griechischen Buchstaben}
-\tudhyperdef*{sec:greek}%
+\begin{Declaration}[%
+  v2.06!\Option{slantedgreek=standard};
+]{\Option{slantedgreek=\PBoolean}}[false]
+\printdeclarationlist%
+\index{Griechische Buchstaben|(}%
 %
-\ToDo[doc]{\Macro*{var\dots} raus, \Macro*{it\dots} rein}[v2.06]
-\ToDo[doc]{alles in eine Tabelle, explizite Deklaration der Basismakros}[v2.06]
-\begin{Declaration}{\Macro{varGamma}}
-\begin{Declaration}{\Macro{varDelta}}
-\begin{Declaration}{\Macro{varTheta}}
-\begin{Declaration}{\Macro{varLambda}}
-\begin{Declaration}{\Macro{varXi}}
-\begin{Declaration}{\Macro{varPi}}
-\begin{Declaration}{\Macro{varSigma}}
-\begin{Declaration}{\Macro{varUpsilon}}
-\begin{Declaration}{\Macro{varPhi}}
-\begin{Declaration}{\Macro{varPsi}}
-\begin{Declaration}{\Macro{varOmega}}
-\begin{Declaration}{\Macro{upGamma}}
-\begin{Declaration}{\Macro{upDelta}}
-\begin{Declaration}{\Macro{upTheta}}
-\begin{Declaration}{\Macro{upLambda}}
-\begin{Declaration}{\Macro{upXi}}
-\begin{Declaration}{\Macro{upPi}}
-\begin{Declaration}{\Macro{upSigma}}
-\begin{Declaration}{\Macro{upUpsilon}}
-\begin{Declaration}{\Macro{upPhi}}
-\begin{Declaration}{\Macro{upPsi}}
-\begin{Declaration}{\Macro{upOmega}}
-\settowidth\tempdim{\Macro{varUpsilon}}%
+Die Option ändert die standardmäßige Neigung der griechischen Großbuchstaben im 
+Mathematikmodus bei der Verwendung der Standardbefehle für griechische 
+Buchstaben.
+%
+\begin{values}{\Option{slantedgreek}}
+\itemfalse
+  Die griechischen Glyphen werden im Mathematiksatz allesamt aufrecht gesetzt.
+\itemtrue*
+  Alle griechischen Buchstaben werden im Mathematikmodus kursiv ausgegeben.
+\item[standard/latex]
+  Die Ausgabe entspricht mit aufrechten Majuskeln und kursiven Minuskeln der 
+  griechischen Lettern dem \LaTeX-Standard beim mathematischen Satz.
+\end{values}
+\end{Declaration}
+
+\begin{Declaration}{\Macro{Gamma}}
+\begin{Declaration}{\Macro{Delta}}
+\begin{Declaration}{\Macro{Theta}}
+\begin{Declaration}{\Macro{Lambda}}
+\begin{Declaration}{\Macro{Xi}}
+\begin{Declaration}{\Macro{Pi}}
+\begin{Declaration}{\Macro{Sigma}}
+\begin{Declaration}{\Macro{Upsilon}}
+\begin{Declaration}{\Macro{Phi}}
+\begin{Declaration}{\Macro{Psi}}
+\begin{Declaration}{\Macro{Omega}}
+\begin{Declaration}{\Macro{alpha}}
+\begin{Declaration}{\Macro{beta}}
+\begin{Declaration}{\Macro{gamma}}
+\begin{Declaration}{\Macro{delta}}
+\begin{Declaration}{\Macro{epsilon}}
+\begin{Declaration}{\Macro{varepsilon}}
+\begin{Declaration}{\Macro{zeta}}
+\begin{Declaration}{\Macro{eta}}
+\begin{Declaration}{\Macro{theta}}
+\begin{Declaration}{\Macro{vartheta}}
+\begin{Declaration}{\Macro{iota}}
+\begin{Declaration}{\Macro{kappa}}
+\begin{Declaration}{\Macro{lambda}}
+\begin{Declaration}{\Macro{mu}}
+\begin{Declaration}{\Macro{nu}}
+\begin{Declaration}{\Macro{xi}}
+\begin{Declaration}{\Macro{pi}}
+\begin{Declaration}{\Macro{varpi}}
+\begin{Declaration}{\Macro{rho}}
+\begin{Declaration}{\Macro{varrho}}
+\begin{Declaration}{\Macro{sigma}}
+\begin{Declaration}{\Macro{varsigma}}
+\begin{Declaration}{\Macro{tau}}
+\begin{Declaration}{\Macro{upsilon}}
+\begin{Declaration}{\Macro{phi}}
+\begin{Declaration}{\Macro{varphi}}
+\begin{Declaration}{\Macro{chi}}
+\begin{Declaration}{\Macro{psi}}
+\begin{Declaration}{\Macro{omega}}
+\settowidth\tempdim{\Macro{varepsilon}}%
 \addtolength\tempdim{\dimexpr 2\tabcolsep+2\arrayrulewidth-\textwidth\relax}%
 \printdeclarationlist(%
   \begin{minipage}{-\tempdim}%
+    \small%
     \newcommand\tablecontent{}%
     \newcommand*\greekLetters{%
-      % TODO die hier explizit deklarieren, Tabelle daneben
-      Gamma,Delta,Theta,Lambda,Xi,Pi,Sigma,Upsilon,Phi,Psi,Omega%
+      Gamma,Delta,Theta,Lambda,Xi,Pi,Sigma,Upsilon,Phi,Psi,Omega,%
+      alpha, beta, gamma, delta, epsilon, varepsilon, zeta, eta,%
+      theta, vartheta, iota, kappa, lambda, mu, nu, xi, pi, varpi,%
+      rho, varrho, sigma, varsigma, tau, upsilon, phi, varphi, chi, psi, omega%
     }%
     \def\do#1{%
       \appto\tablecontent{%
-        \Macro*{var#1} & $\csuse{var#1}$ & & 
-        \Macro*{up#1} & $\csuse{up#1}$\tabularnewline
+        \begin{Declaration*}{\Macro{up#1}}
+        \Macro*{up#1}'none'%
+        \end{Declaration*}
+        & $\csuse{up#1}$ & & 
+        \begin{Declaration*}{\Macro{it#1}}
+        \Macro*{it#1}'none'%
+        \end{Declaration*}
+        & $\csuse{it#1}$\tabularnewline
       }%
     }%
     \expandafter\docsvlist\expandafter{\greekLetters}%
@@ -513,73 +513,80 @@ Werte für die Option \Option{cdmath} sind:
     \vspace{\intextsep}\noindent
     \begin{tabularm}{5}
       \toprule%
-      \textbf{Befehl (kursiv)} & \textbf{Symbol} & &
-      \textbf{Befehl (aufrecht)} & \textbf{Symbol}
+      \textbf{Befehl (aufrecht)} & \textbf{Symbol} & &
+      \textbf{Befehl (kursiv)} & \textbf{Symbol}
       \tabularnewline\midrule\tablecontent\bottomrule%
-      \allcolumnpar{\footnotesize\vskip0pt%
-        Die Befehle \Macro*{up}[\PName{Name}] und \Macro*{var}[\PName{Name}]
-        werden normalerweise durch einige Pakete, unter anderem auch von 
-        \Package{cmbright} oder \Package{amsmath}, bereitgestellt.
-      }
+%      \allcolumnpar{\footnotesize\vskip0pt%
+%        Die Befehle \Macro*{up}[\PName{Name}] und \Macro*{var}[\PName{Name}]
+%        werden normalerweise durch einige Pakete, unter anderem auch von 
+%        \Package{amsmath}, bereitgestellt.
+%      }
     \end{tabularm}
   \end{minipage}%
 )%
 %
-Unabhängig von den beiden Optionen \Option{cdmath} und \Option{slantedgreek} 
-können sowohl kursive als auch aufrechte griechischen Großbuchstaben im 
-Mathematikmodus mit diesen Befehlen direkt verwendet werden. Dies ist nützlich, 
-um zwischen kursiven Variablen und aufrechten Konstanten zu unterscheiden. Die 
-griechischen Minuskeln sind leider nur in der kursiven Variante verfügbar.
-\end{Declaration}
-\end{Declaration}
-\end{Declaration}
-\end{Declaration}
-\end{Declaration}
-\end{Declaration}
-\end{Declaration}
-\end{Declaration}
-\end{Declaration}
-\end{Declaration}
-\end{Declaration}
-\end{Declaration}
-\end{Declaration}
-\end{Declaration}
-\end{Declaration}
-\end{Declaration}
-\end{Declaration}
-\end{Declaration}
-\end{Declaration}
-\end{Declaration}
-\end{Declaration}
-\end{Declaration}
-
-\begin{Declaration}{\Option{slantedgreek=\PBoolean}}[false]
-\printdeclarationlist%
-%
-Die Option ändert die standardmäßige Neigung der griechischen Großbuchstaben im 
-Mathematikmodus bei der Verwendung der Befehle \Macro*{Delta}, \Macro*{Theta}, 
-\Macro*{Lambda}, \Macro*{Xi}, \Macro*{Pi}, \Macro*{Sigma}, \Macro*{Upsilon}, 
-\Macro*{Phi}, \Macro*{Psi} und \Macro*{Omega}.
-\ToDo[doc]{standardgreek rein}[v2.06]
-%
-\begin{values}{\Option{slantedgreek}}
-\itemfalse
-  Die griechischen Majuskeln werden in Umgebungen für den Mathematiksatz wie 
-  bei den Standardklassen aufrecht gesetzt.
-\itemtrue*
-  Die Ausgabe der griechischen Großbuchstaben erfolgt im Mathematikmodus kursiv.
-\end{values}
-%
-Wie unabhängig von der Option \Option{slantedgreek} gezielt kursive und 
-aufrechte Buchstaben gesetzt werden können, wurde zuvor \vpageref{sec:greek} 
-beschrieben.
+Unabhängig von der Option \Option{slantedgreek} können sowohl kursive als auch 
+aufrechte griechischen Glyphen im Mathematikmodus mit diesen Befehlen direkt 
+verwendet werden. Dies ist nützlich, um zwischen \emph{kursiven Variablen} und 
+\emph{aufrechten Konstanten} zu unterscheiden. Weiterhin kann anstelle von 
+\Macro*{up\Parameter{Glyphe}} oder \Macro*{it\Parameter{Glyphe}} auch der 
+Präfix \Macro*{other\Parameter{Glyphe}} genutzt werden. Damit wird~-- abhängig 
+von der Option \Option{slantedgreek}~-- die komplementäre Schriftlage der 
+angegebenen Glyphe gesetzt.
 \index{Griechische Buchstaben|)}%
 \end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
 
 
-\subsubsection{Zusätzliche Hinweise zum Mathematiksatz}
-Weitere Hinweise zum typografisch guten Mathematiksatz sind außerdem in 
-\autoref{sec:tut} zu finden.
+
+\minisec{Zusätzliche Hinweise zum Mathematiksatz}
+Unter Umständen werden zusätzliche Symbole für den Mathematiksatz benötigt. 
+Sehr oft kommt hierfür das Paket \Package{amssymb} zum Einsatz. Dieses stellt 
+zahlreiche zusätzliche für die \hologo{LaTeX}"=Standardschriften zur Verfügung. 
+Diese sind in Verbindung mit der \OpenSans aus typografischer Sicht jedoch 
+keine ideale Lösung. Die Symbole aus dem Paket \Package{mdsymbol} passen 
+wesentlich besser zu besagter Schriftfamilie, weshalb diesem Paket der Vorzug 
+gegeben werden sollte, falls die Schriften des \CDs für den mathematischen Satz 
+genutzt werden. Weitere Hinweise zum typografisch guten Mathematiksatz sind 
+außerdem in \autoref{sec:tut} zu finden.
 \index{Mathematiksatz|?)}%
 
 
@@ -665,8 +672,8 @@ vornehmen zu lassen. Hier hat insbesondere die Klassenoption
 den Satzspiegel. Mehr dazu ist in der \scrguide[Dokumentation von \KOMAScript] 
 zu finden.
 \ChangedAt{v2.05}
-Mit der Einstellung \Option{cdgeometry=custom} kann der Satzspiegel auch durch 
-den Anwender (fast) beliebig festgelegt werden.
+Zusätzlich lässt sich mit \Option{cdgeometry=custom} der Satzspiegel durch den 
+Anwender (fast) beliebig festlegen.
 %
 \begin{values}{\Option{cdgeometry}}
 \itemfalse
@@ -687,12 +694,11 @@ den Anwender (fast) beliebig festgelegt werden.
   derart, dass die Ränder der inneren Seiten schmaler sind als die der äußeren.%
   \footnote{innen: 20\,mm, außen: 30\,mm, oben: 25\,mm, unten: 30\,mm}
   \Attention{%
-    Der so erzeugte Satzspiegel ist jedoch nicht sehr vorteilhaft. Es ist zu 
-    beachten, dass dabei das Logo der \TnUD sehr nah am inneren Seitenrand 
-    des Dokumentes gesetzt wird, folglich insbesondere auf rechten respektive 
-    ungeraden Seiten sehr weit an den Blattrand rückt.
+    Der so erzeugte Satzspiegel ist jedoch unvorteilhaft, da das Logo der \TnUD 
+    sehr nah am inneren Seitenrand des Dokumentes gesetzt wird und folglich auf 
+    rechten respektive ungeraden Seiten sehr weit an den Blattrand rückt.
   }
-  Diesem Problem kann~-- bei \Class{tudscrbook} sowie \Class{tudscrreprt}~-- 
+  Dieses Problem kann~-- bei \Class{tudscrbook} sowie \Class{tudscrreprt}~-- 
   prinzipiell gelöst werden, indem Titel, Teile und Kapitel über das Aktivieren 
   der \KOMAScript-Option \Option{open=left}(\Package{koma-script})'none' immer 
   auf einer linken Seite beginnen, was allerdings aus typografischer Sicht eher 
@@ -705,14 +711,15 @@ Satzspiegel nach dem \TUDCD erstellt werden soll.
 %
 \begin{values}{\Option{cdgeometry}}
 \item[restricted]
-  Der Satzspiegel entspricht den expliziten Vorgaben des \CDs (Voreinstellung).
+  Der Satzspiegel entspricht den expliziten Vorgaben des \CDs.
 \item[adapted]
   Laut dem Handbuch zum \CD werden für Papierformate zwischen DIN~A6 und DIN~A4 
   \enquote{im Interesse größter Einheitlichkeit die Maßverhältnisse über einen 
   größeren Formatbereich hinweg \enquote{eingefroren}.} Dies kann jedoch zu 
-  schlecht nutzbaren Satzspiegeln führen. Mit dieser Einstellung kann der 
-  äquivalente Satzspiegel für das Format~DIN~A5 aktiviert werden, bei allen 
-  anderen Formaten hat diese Einstellung keinen Einfluss. 
+  schlecht nutzbaren Satzspiegeln führen. Mit dieser Einstellung kann die 
+  Fixierung deaktiviert und der äquivalente Satzspiegel beispielsweise für das 
+  Format~DIN~A5 aktiviert werden. Bei Formaten außerhalb des fixierten Bereichs 
+  hat diese Einstellung keinen Einfluss. 
 \item[calculated]
   Der Satzspiegel wird anhand der Referenzmaße für das Format~DIN~A4 für das 
   eingestellte Papierformat \emph{skaliert}. Die eigentlich definierten 
@@ -754,25 +761,6 @@ ein \hologo{TeX}"=Abstand oder eine \hologo{TeX}"=Ausdehnung als Länge bei der
 Wertzuweisung verwendet wird.
 \end{Declaration}
 
-\minisec{Kopf"~ und Fußzeile im Zusammenspiel mit dem Satzspiegel}
-\index{Layout!Kopfzeile|?}%
-\index{Layout!Fußzeile|?}%
-%
-Da im \CD nicht festgelegt ist, wie die Gestaltung der Kopf"~ und Fußzeilen in 
-einer wissenschaftlichen Arbeit auszuführen ist, bleibt dem Nutzer dafür eine 
-gewisse Freiheit. Dafür sollte idealerweise das zu \KOMAScript{} gehörige Paket 
-\Package{scrlayer-scrpage} genutzt werden. 
-
-In der Dokumentation zu \Package{typearea} wird auch darauf eingegangen, wann 
-Kopf"~ und Fußzeile bei der Satzspiegelkonstruktion entweder dem Rand oder dem 
-Textkörper zugeschlagen werden sollten. Dies sollte bei der Erstellung eigener 
-Kopf"~ und Fußzeilen beachtet werden. Die Einstellung dafür erfolgt mit den 
-beiden \KOMAScript"=Optionen 
-\Option{headinclude=\PBoolean}(\Package{typearea})'none'|declare| sowie 
-\Option{footinclude=\PBoolean}(\Package{typearea})'none'|declare|.
-Diese können~-- unabhängig von der Einstellung zur Satzspiegelgestaltung durch 
-die Option \Option{cdgeometry}~-- verwendet werden.
-
 \minisec{Bindekorrektur}
 \index{Satzspiegel!Bindekorrektur|!}%
 %
@@ -804,6 +792,25 @@ Dementsprechend wäre eine Bindekorrektur von \Option*{BCOR=5mm} beziehungsweise
 \Option*{BCOR=6mm} bei diesem Beispiel zu wählen.
 \index{Satzspiegel|)}%
 \end{Example}
+
+\minisec{Kopf"~ und Fußzeile im Zusammenspiel mit dem Satzspiegel}
+\index{Layout!Kopfzeile|?}%
+\index{Layout!Fußzeile|?}%
+%
+Da im \CD nicht festgelegt ist, wie die Gestaltung der Kopf"~ und Fußzeilen in 
+einer wissenschaftlichen Arbeit auszuführen ist, bleibt dem Nutzer dafür eine 
+gewisse Freiheit. Dafür sollte idealerweise das zu \KOMAScript{} gehörige Paket 
+\Package{scrlayer-scrpage} genutzt werden. 
+
+In der Dokumentation zu \Package{typearea} wird auch darauf eingegangen, wann 
+Kopf"~ und Fußzeile bei der Satzspiegelkonstruktion entweder dem Rand oder dem 
+Textkörper zugeschlagen werden sollten. Dies sollte bei der Erstellung eigener 
+Kopf"~ und Fußzeilen beachtet werden. Die Einstellung dafür erfolgt mit den 
+beiden \KOMAScript"=Optionen 
+\Option{headinclude=\PBoolean}(\Package{typearea})'none'|declare| sowie 
+\Option{footinclude=\PBoolean}(\Package{typearea})'none'|declare|.
+Diese können~-- unabhängig von der Einstellung zur Satzspiegelgestaltung durch 
+die Option \Option{cdgeometry}~-- verwendet werden.
 
 
 \subsection{Die Gestalt von Titel, Umschlagseite, Teilen sowie Kapiteln \& Co.}
@@ -847,7 +854,7 @@ Kapitelseiten sowie die Überschriften der weiteren Gliederungsebenen.
 \item[lightcolor/pale]
   Die Einstellung entspricht weitestgehend der Option \Option{cd=true}, 
   allerdings wird die primäre Hausfarbe \Color{HKS41} für den Kopf des 
-  \PageStyle{tudheadings}"=Seitenstils und die Überschriften genutzt.
+  \PageStyle{tudheadings}"=Seitenstils und Überschriften genutzt.
 \item[barcolor]
   \ChangedAt{v2.04}
   Zusätzlich zur vorherigen Einstellung wird außerdem der Querbalken farbig 
@@ -858,9 +865,9 @@ Kapitelseiten sowie die Überschriften der weiteren Gliederungsebenen.
   der Querbalken wird farbig hinterlegt. Für die Überschriften wird die 
   primären Hausfarbe verwendet.
 \item[color]
-  Der Titel sowie Teil"~ und Kapitelseiten werden allesamt farbig und im \CD 
-  gestaltet, der Seitenkopf wird in der primären Hausfarbe \Color{HKS41} 
-  gesetzt, der Querbalken erhält Linien als Begrenzung.
+  Der Titel sowie Teil"~ und Kapitelseiten werden allesamt farbig gestaltet, 
+  der Seitenkopf wird in der primären Hausfarbe \Color{HKS41} gesetzt, der 
+  Querbalken erhält Linien als Begrenzung.
 \item[fullcolor/full]
   \ChangedAt{v2.03}
   Entspricht der vorherigen Einstellung, allerdings wird der Querbalken nicht 
@@ -924,17 +931,20 @@ und dem im \CD umgeschaltet werden. Die neue Titelseite unterstützt alle durch
 \KOMAScript{} definierten Befehle für den Titel.%
 \footnote{%
   \Macro{extratitle}[\Parameter{Schmutztitel}](\Package{koma-script}),
-  \Macro{frontispiece}[\Parameter{Frontispiz}](\Package{koma-script}),
+  \Macro{frontispiece}[\Parameter{Frontispiz}](\Package{koma-script}) für eine 
+  Seite vor dem eigentlichen Haupttitel sowie
   \Macro{titlehead}[\Parameter{Kopf}](\Package{koma-script}),
   \Macro{subject}[\Parameter{Typisierung}], \Macro{title}[\Parameter{Titel}],
   \Macro{subtitle}[\Parameter{Untertitel}], \Macro{author}[\Parameter{Autor}],
   \Macro{and}, \Macro{thanks}[\Parameter{Fußnote}](\Package{koma-script}), 
-  \Macro{publishers}[\Parameter{Verlag}](\Package{koma-script}),
-  \Macro{date}[\Parameter{Datum}] und   
-  \Macro{dedication}[\Parameter{Widmung}](\Package{koma-script}) sowie
+  \Macro{publishers}[\Parameter{Verlag}](\Package{koma-script}) und 
+  \Macro{date}[\Parameter{Datum}] für den Titel selbst sowie 
   \Macro{uppertitleback}[\Parameter{Titelrückseitenkopf}](\Package{koma-script})
   und
-  \Macro{lowertitleback}[\Parameter{Titelrückseitenfuß}](\Package{koma-script})%
+  \Macro{lowertitleback}[\Parameter{Titelrückseitenfuß}](\Package{koma-script}) 
+  für die Rückseite des Titels sowie abschließend 
+  \Macro{dedication}[\Parameter{Widmung}](\Package{koma-script}) für eine 
+  Danksagung.
 }
 Zusätzlich werden viele neue Felder definiert, welche vor allem für eine 
 wissenschaftliche Arbeit von Relevanz sind. Genaueres dazu 
@@ -1181,15 +1191,16 @@ der Schriftart im Balken verwendet werden:
 \itemfalse
   Sollte mit \Option{cdfont=false} die Verwendung der Hausschrift im Stil des 
   \TUDCDs deaktiviert worden sein, wird die Kopfzeile im Querbalken in den 
-  Serifenlosen der genutzten Schrift gesetzt. Ist die Hausschrift aktiviert, 
+  Serifenlosen der aktiven Schrift gesetzt. Ist die Hausschrift aktiviert, 
   hat diese Einstellung keinen Einfluss.
 \itemtrue*[light/lightfont/noheavyfont]
-  Im Querbalken wird für \Macro{faculty} \textubn{Univers~65~Bold} verwendet, 
-  die Felder \Macro{department}, \Macro{institute}, \Macro{chair} und 
-  \Macro{extraheadline} kommt \textuln{Univers~45~Light} zum Einsatz.
+  Im Querbalken wird für \Macro{faculty} \textcdsn{Open~Sans~Semi"~Bold} 
+  verwendet, für \Macro{department}, \Macro{institute}, 
+  \Macro{chair} und \Macro{extraheadline} kommt \textcdln{Open~Sans~Light} zum 
+  Einsatz.
 \item[heavy/heavyfont]
-  Der Inhalt von \Macro{faculty} wird weiterhin in \textubn{Univers~65~Bold} 
-  gesetzt, für die restlichen Felder wird \texturn{Univers~55~Regular} genutzt.
+  Der Inhalt von \Macro{faculty} wird in \textcdbn{Open~Sans~Bold} gesetzt, für 
+  die restlichen Felder wird \textcdrn{Open~Sans~Regular} genutzt.
 \end{values}
 %
 Bei der Ausprägung des Kopfes und des Querbalkens gibt es mehrere Varianten. 
@@ -1533,11 +1544,6 @@ Option \Option{ddc}.
 \end{Declaration}
 \end{Declaration}
 
-\ToDo[imp]{%
-  Spezialseite zur freien Gestaltung mit Hintergrundebene für Bilder und Texte 
-  (CD-Handbuch S. 80 ff.); Seitenstil: \PageStyle*{special.tudheadings}
-}[v2.07]
-
 \begin{Declaration}{\Environment{tudpage}[\OLParameter{Sprache}]}
 \begin{Declaration}{\Key{\Environment{tudpage}}{language=\PName{Sprache}}}
 \begin{Declaration}{\Key{\Environment{tudpage}}{columns=\PName{Anzahl}}}
@@ -1658,22 +1664,15 @@ bereits durch \KOMAScript{} bereitgestellten Schriftelemente
 \Font{date}(\Package{koma-script})'none' und 
 \Font{dedication}(\Package{koma-script})'none'
 als auch die neuen \Font{titlepage} und \Font{thesis} unterstützt.
-%
-\begin{Example}
-In diesem Dokument wurde der Untertitel derart geändert, dass dieser nicht 
-standardmäßig in \DIN sondern in \textubn{Univers~65~Bold} ausgegeben wird.
-\begin{Code}[escapechar=§]
-\addtokomafont{subtitle}{\univbn}
-\end{Code}
-\end{Example}
 \end{Declaration}
 \end{Declaration}
 
-\ToDo[doc]{%
-  \Key*{\Macro*{maketitle}}{cd=\PSet}, \Key*{\Macro*{maketitle}}{cdfont=\PSet} 
-  und \Key*{\Macro*{maketitle}}{cdgeometry=\PSet} dokumentieren%
-}[v2.06]
+\begin{Declaration}[v2.06]{\Macro{raggedtitle}}
+\printdeclarationlist%
+%
 \ToDo[doc]{\Macro*{raggedtitle} dokumentieren}[v2.06]
+\end{Declaration}
+
 \begin{Declaration}[%
   v2.01:Bugfix für Schriftstärke auf Titelseite;%
   v2.02:Unterstützung der Schriftelemente \Font*{titlehead}, 
@@ -1711,6 +1710,11 @@ standardmäßig in \DIN sondern in \textubn{Univers~65~Bold} ausgegeben wird.
 \printdeclarationlist%
 \index{Titel|!(}%
 \index{Satzspiegel!doppelseitig}%
+%
+\ToDo[doc]{%
+  \Key*{\Macro*{maketitle}}{cd=\PSet}, \Key*{\Macro*{maketitle}}{cdfont=\PSet}, 
+  \Key*{\Macro*{maketitle}}{cdgeometry=\PSet} dokumentieren%
+}[v2.06]
 %
 Der Befehl \Macro{maketitle} setzt für \Option{cdtitle=false} den normalen 
 \KOMAScript"=Titel{}, ansonsten wird die Titelseite im \TUDCD erzeugt. Die 
@@ -1883,8 +1887,8 @@ einzig auf die Umschlagseite aus.
 \index{Titel!Felder|(}%
 %
 Die Befehle \Macro{title} und \Macro{subtitle} sind selbsterklärend. Anzumerken 
-ist, dass sowohl Titel als auch Untertitel normalerweise in \DIN und deshalb 
-mit Majuskeln gesetzt werden. 
+ist, dass die Schriftstärke des Titels von der Option \Option{headings} abhängt
+und der Untertitel immer im fetten Schnitt erscheint. 
 \end{Declaration}
 \end{Declaration}
 
@@ -2075,13 +2079,12 @@ Dokumentes und folglich auch für die beiden Felder \Macro{date} und
 %
 Mit diesen beiden Befehlen kann der Typ der Dokumentes beziehungsweise der 
 Abschlussarbeit angegeben werden. Während der Befehl \Macro{thesis} den Inhalt 
-des Feldes unter dem Titel vertikal zentriert und in \DIN auf der Titelseite 
-ausgibt, erscheint der Inhalt des Befehls \Macro{subject} in \Univers oberhalb 
-des Titels. Es können auch beide Befehle parallel mit unterschiedlichen 
-Inhalten verwendet werden. Der Befehl \Macro{thesis} dient den 
-\TUDScript"=Dokumentklassen außerdem zur Erkennung von Abschlussarbeiten 
-gedacht, da für diese spezielle Felder bereitgehalten werden und auch die 
-Titelseite leicht geändert gesetzt wird.
+des Feldes unter dem Titel vertikal zentriert auf der Titelseite ausgibt, 
+erscheint der Inhalt des Befehls \Macro{subject} oberhalb des Titels. Es können 
+auch beide Befehle parallel mit unterschiedlichen Inhalten verwendet werden. 
+Der Befehl \Macro{thesis} dient den \TUDScript"=Dokumentklassen außerdem zur 
+Erkennung von Abschlussarbeiten gedacht, da für diese spezielle Felder 
+bereitgehalten werden und auch die Titelseite leicht geändert gesetzt wird.
 
 Des Weiteren ist es bei beiden Befehlen möglich, spezielle Werte als Argument 
 zur Typisierung des Dokumentes zu verwenden. Diese werden entsprechend der 
@@ -2163,12 +2166,12 @@ diesem Fall ignoriert.
 \begin{values}{\Option{subjectthesis}}
 \itemfalse
   Die Ausgabe des Typs der Abschlussarbeit (\Macro{thesis}) selbst sowie des 
-  angestrebten Abschlusses (\Macro{graduation}) erfolgt in großen Lettern in 
-  \DIN zentral auf der Titelseite.
+  angestrebten Abschlusses (\Macro{graduation}) erfolgt in großen Lettern 
+  zentral auf der Titelseite.
 \itemtrue*
   Der Typ der Abschlussarbeit (\Macro{thesis}) wird oberhalb des Titels in der 
   Betreffzeile gesetzt. Der angestrebte Abschluss (\Macro{graduation}) wird 
-  zentral in \Univers ausgegeben.
+  zentral ausgegeben.
 \end{values}
 \end{Declaration}
 
@@ -2420,15 +2423,6 @@ Für die Vakatseiten kann der Seitenstil mit der \KOMAScript"=Option
 \Option{cleardoublepage=\PSet}(\Package{koma-script})'none'|declare| 
 eingestellt werden.
 
-\ToDo[doc,imp]{%
-  Rückseite bei Kapitelseiten (auch bei Teilen?) im doppelseitigen Satz per 
-  Option nicht als Vakatseite setzen. Implementierung von farbigen Seiten 
-  davor (\Option*{open=right}) sowie danach (\Option*{open=left}). Setzen von 
-  speziellen Inhalten auf diesen Seiten äquivalent zu \Macro*{setpartpreamble} 
-  bzw. \Macro*{setchapterpreamble}; ggf. temporär umschalten bzw. Warnung bei 
-  Konflikt.
-  \url{http://latex.wcms-file3.tu-dresden.de/phpBB3/viewtopic.php?f=11&t=396}
-}[v2.07]
 \begin{Declaration}[%
   v2.06:Einstellung für farbige Rückseiten integriert%
 ]{\Option{cleardoublespecialpage=\PSet}}[true]%
@@ -2845,10 +2839,10 @@ geschieht dies hier in einer etwas kürzeren Ausführung. Sollte Ihnen eine
 Erläuterung etwas dürftig erscheinen, so hilft mit Sicherheit ein Blick zur 
 Erklärung der Option \Option{abstract}'full'.
 
-Die möglichen Werte für die Gestaltung der Überschrift werden folgend genannt. 
-Im Gegensatz zur Option \Option{abstract} stehen die Einstellungen 
-\Option{declaration=true} und \Option{declaration=false} auch für die Klasse 
-\Class{tudscrbook} zur Verfügung.
+Die möglichen Werte für die Gestaltung der Überschrift werden nachfolgend 
+genannt. Im Gegensatz zur Option \Option{abstract} stehen die beiden 
+Einstellungen \Option{declaration=true} und \Option{declaration=false} auch für 
+die Klasse \Class{tudscrbook} zur Verfügung.
 %
 \begin{values}{\Option{declaration}}
 \itemfalse
@@ -2990,7 +2984,7 @@ Möglichkeit, eine Erklärung völlig frei zu verfassen. Dieser Befehl kann
 genutzt werden, wobei im ersten Argument die gewünschte Überschrift und im 
 zweiten der Inhalt respektive Text der Erklärung selbst angegeben werden muss.
 
-Die im Folgenden beschriebenen Parameter können sowohl für die Umgebung 
+Die folgend beschriebenen Parameter können sowohl für die Umgebung 
 \Environment{declarations} selbst als auch für die zuvor genannten Befehle als 
 optionales Argument verwendet werden. Ähnlich wie die gleichnamigen Optionen 
 sind auch die Umgebungen \Environment{abstract} und \Environment{declarations} 
