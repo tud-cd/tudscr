@@ -3979,6 +3979,7 @@
 % \begin{macro}{\ChangedAt}
 % \changes{v2.02}{2014/07/25}{erweitert}^^A
 % \changes{v2.02}{2014/10/15}{Sternversion neu (keine Randnotiz)}^^A
+% \changes{v2.06}{2018/09/03}{optionale Angabe des Bundles}^^A
 % \begin{length}{\changedatskip}
 % \changes{v2.04}{2015/06/08}{neu}^^A
 % Der Befehl \cs{ChangedAt} kann im Fließtext für das Erstellen einer freien 
@@ -4001,17 +4002,17 @@
 % unterdrückt die Ausgabe der Randnotiz. 
 %    \begin{macrocode}
 \newlength\changedatskip
-\NewDocumentCommand\ChangedAt{!s !o !m !O{\changedatskip}}{%
+\NewDocumentCommand\ChangedAt{!s !o !d() !m !O{\changedatskip}}{%
   \IfValueTF{#2}{%
-    \Changed@At@CreateList[#2]{#3}%
+    \Changed@At@CreateList[#2](#3){#4}%
   }{%
-    \Changed@At@CreateList{#3}%
+    \Changed@At@CreateList(#3){#4}%
   }%
 %    \end{macrocode}
 % Nach dem Erstellen der Liste wird diese abgearbeitet und ggf. die Randnotiz 
 % ausgegeben.
 %    \begin{macrocode}
-  \print@changedatlist{#1}{#4}%
+  \print@changedatlist{#1}{#5}%
 }
 %    \end{macrocode}
 % \end{length}^^A \changedatskip
@@ -4770,7 +4771,7 @@
   \bottomrule%
 }
 \newcommand*\Term@@Table[1]{%
-  \Term{#1} & % 
+  \Term{#1}'none' & % 
   \ifstr{\csuse{#1}}{}{\PName{leer}}{\csuse{#1}} & %
   \selectlanguage{english}\vspace*{\@tempdimc}%
   \ifstr{\csuse{#1}}{}{\PName{empty}}{\csuse{#1}}\tabularnewline%
