@@ -29,7 +29,7 @@
 %% 
 %% TUD-Script -- Corporate Design of Technische Universitaet Dresden
 %% 
-%%   2018/07/24 v2.06 TUD-Script
+%%   2018/09/10 v2.06 TUD-Script
 %% 
 %% Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2018
 %% 
@@ -72,13 +72,13 @@
       \fi%
     }
   \fi
-  \TUD@Version@Check{2018/07/24 v2.06 TUD-Script}
+  \TUD@Version@Check{2018/09/10 v2.06 TUD-Script}
 \endgroup
 \NeedsTeXFormat{LaTeX2e}
 \providecommand*\tudscrmail{hanisch.latex@outlook.com}
 \newcommand*\TUD@ProvidesClass[3]{%
   \ProvidesClass{#1}[%
-  2018/07/24 v2.06 TUD-Script
+  2018/09/10 v2.06 TUD-Script
     ^^J#3 (#2)%
   ]%
   \newcommand*\TUD@Class@KOMA{#2}%
@@ -4390,7 +4390,7 @@
       includemp=false%
     \fi%
   }%
-  \newcommand*\tud@cdgeometry@init{%
+  \newcommand*\tud@cdgeometry@@init{%
     \csuse{@ta@usegeometryfalse}%
     \tud@x@geometry@getlayout{\tud@cdgeometry@layout}%
     \tud@cs@store{tud@cdgeometry@num}%
@@ -4441,7 +4441,7 @@
     \fi%
     \@tud@x@geometry@fixmarginstrue%
     \tud@cdgeometry@process%
-    \let\tud@cdgeometry@init\relax%
+    \let\tud@cdgeometry@@init\relax%
   }%
   \newcommand*\tud@currentgeometry{}
   \newcommand*\tud@BeforeSelectAnyPageStyle[1]{%
@@ -4546,11 +4546,10 @@
   \tud@res@a%
 }
 \AfterRestoreareas{\tud@cdgeometry@process}%
-\AfterPackage!{scrlayer-scrpage}{\AtEndPreamble{\tud@cdgeometry@init}}
 \TUD@UnwindPackage{geometry}{%
-  \newcommand*\tud@cdgeometry@init{%
+  \newcommand*\tud@cdgeometry@@init{%
     \tud@cdgeometry@process%
-    \let\tud@cdgeometry@init\relax%
+    \let\tud@cdgeometry@@init\relax%
   }%
   \newcommand*\tud@cdgeometry@@process{%
     \setlength\tud@len@layoutwidth{\paperwidth}%
@@ -4558,6 +4557,16 @@
     \tud@cdgeometry@set%
   }%
   \newcommand*\tud@x@geometry@fixmargins{}%
+}
+\newcommand*\tud@cdgeometry@init{\tud@cdgeometry@@init}%
+\AfterPackage{svg-extract}{%
+  \renewcommand*\tud@cdgeometry@init{%
+    \if@svgx@standalone%
+      \@tud@x@scr@fontsize@settrue%
+    \else%
+      \tud@cdgeometry@@init%
+    \fi%
+  }%
 }
 \patchcmd{\cleardoubleoddpageusingstyle}{\pagestyle}{%
   \let\tud@BeforeSelectAnyPageStyle\@gobble\pagestyle%
@@ -4900,6 +4909,7 @@
   \undef\tud@pagestyle%
   \undef\currentpagestyle%
 }
+\AfterPackage!{scrlayer-scrpage}{\AtEndPreamble{\tud@cdgeometry@init}}
 \TUD@UnwindPackage{scrlayer-scrpage}{%
   \ifcsundef{if@chapter}{%
     \newif\if@chapter%

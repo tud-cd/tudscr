@@ -1,4 +1,4 @@
-% \CheckSum{2238}
+% \CheckSum{2246}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-area.dtx}[%
-  2018/08/22 v2.06 TUD-Script (type or page area)%
+  2018/09/10 v2.06 TUD-Script (type or page area)%
 ]
 \documentclass[english,ngerman,xindy]{tudscrdoc}
 \usepackage[T1]{fontenc}
@@ -1850,7 +1850,7 @@
 % \end{macro}^^A \tud@cdgeometry@mpincl
 % \end{macro}^^A \tud@cdgeometry@fincl
 % \end{macro}^^A \tud@cdgeometry@hincl
-% \begin{macro}{\tud@cdgeometry@init}
+% \begin{macro}{\tud@cdgeometry@@init}
 % \changes{v2.04}{2015/03/10}{neu}^^A
 % Damit alle Satzspiegeleinstellungen korrekt vorgenommen und auch alle
 % Klassenoptionen korrekt verarbeitet werden, wird die Berechnung erstmalig mit
@@ -1858,7 +1858,7 @@
 % benutzerdefinierte Satzspiegel als auch die durch \pkg{typearea} berechneten
 % Einstellungen gesichert.
 %    \begin{macrocode}
-  \newcommand*\tud@cdgeometry@init{%
+  \newcommand*\tud@cdgeometry@@init{%
     \csuse{@ta@usegeometryfalse}%
     \tud@x@geometry@getlayout{\tud@cdgeometry@layout}%
     \tud@cs@store{tud@cdgeometry@num}%
@@ -1938,10 +1938,10 @@
     \fi%
     \@tud@x@geometry@fixmarginstrue%
     \tud@cdgeometry@process%
-    \let\tud@cdgeometry@init\relax%
+    \let\tud@cdgeometry@@init\relax%
   }%
 %    \end{macrocode}
-% \end{macro}^^A \tud@cdgeometry@init
+% \end{macro}^^A \tud@cdgeometry@@init
 % \begin{macro}{\tud@BeforeSelectAnyPageStyle}
 % \changes{v2.02}{2014/06/23}{neu}^^A
 % \changes{v2.04}{2015/04/21}{Auswahl der Schriften für Fußbereich ergänzt}^^A
@@ -2170,7 +2170,7 @@
 % Das Paket \pkg{typearea} meldet schlechte Einstellungen für den Satzspiegel 
 % mittels Warnungen an den Anwender. Diese sind allerdings~-- abhängig von der 
 % gewählten Option opt{cdgeometry} für den Satzspiegel~-- gegebenefalls nicht 
-% relevant. Da \TUDScript innerhalb von \cs{tud@cdgeometry@init} am Ende der
+% relevant. Da \TUDScript innerhalb von \cs{tud@cdgeometry@@init} am Ende der
 % Präambel ohnehin anhand von \cs{tud@x@typearea@init} den Satzspiegel von 
 % \pkg{typearea} neu berechnet, werden alle relevanten Warnungen beim Laden des 
 % Paketes deaktivert.
@@ -2220,17 +2220,15 @@
 % Die Seitenstile und Satzspiegel korrelieren sehr stark, weshalb das Paket 
 % \pkg{scrlayer-scrpage} geladen sein muss und auch alle darauf aufbauenden 
 % Einstellungen abgeschlossen sein müssen, um die Satzspiegel zu definieren.
-% \ToDo{Abhängigkeiten Satzspiegel<>Seitenstil beseitigen}[v2.07]
-%    \begin{macrocode}
-\AfterPackage!{scrlayer-scrpage}{\AtEndPreamble{\tud@cdgeometry@init}}
-%    \end{macrocode}
+% Deshalb wird \cs{tud@cdgeometry@init} erst nach besagtem Paket aufgerufen.
 % Sollte das Laden des Paketes \pkg{geometry} verhindert werden, sind einige
 % wenige Befehle vorzuhalten.
+% \ToDo{Abhängigkeiten Satzspiegel<>Seitenstil beseitigen}[v2.07]
 %    \begin{macrocode}
 \TUD@UnwindPackage{geometry}{%
-  \newcommand*\tud@cdgeometry@init{%
+  \newcommand*\tud@cdgeometry@@init{%
     \tud@cdgeometry@process%
-    \let\tud@cdgeometry@init\relax%
+    \let\tud@cdgeometry@@init\relax%
   }%
   \newcommand*\tud@cdgeometry@@process{%
     \setlength\tud@len@layoutwidth{\paperwidth}%
@@ -2240,6 +2238,24 @@
   \newcommand*\tud@x@geometry@fixmargins{}%
 }
 %    \end{macrocode}
+% \begin{macro}{\tud@cdgeometry@@init}
+% \changes{v2.04}{2015/03/10}{neu}^^A
+% Wird das Paket \pkg{svg-extract} für das Erzeugen einer solitären Grafik 
+% genutzt, so sollen keinerlei Einstellungen für den Satzspiegel vorgenommen 
+% werden.
+%    \begin{macrocode}
+\newcommand*\tud@cdgeometry@init{\tud@cdgeometry@@init}%
+\AfterPackage{svg-extract}{%
+  \renewcommand*\tud@cdgeometry@init{%
+    \if@svgx@standalone%
+      \@tud@x@scr@fontsize@settrue%
+    \else%
+      \tud@cdgeometry@@init%
+    \fi%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@cdgeometry@@init
 % \begin{macro}{\cleardoubleoddpageusingstyle}
 % \begin{macro}{\cleardoubleevenpageusingstyle}
 % \begin{macro}{\cleardoublepageusingstyle}
