@@ -13,7 +13,7 @@ echo   %~dp0
 echo.
 echo  =====================================================================
 echo.
-echo   Erstellen der Open Sans Schriften zur Verwendung mit TUD-Script
+echo   Erstellen der Open Sans Schriften
 echo.
 cd /d %~dp0
 set familyname=fdd
@@ -37,6 +37,7 @@ call :checkpackage "fontinst.sty" "fontinst"
 call :checkscript  "tftopl"       "fontware"
 call :checkscript  "pltotf"       "fontware"
 call :checkscript  "vptovf"       "fontware"
+call :checkscript  "fontforge"    "fontforge"
 if "%missing%"=="true" goto :abort
 echo.
 echo   Es wurden alle notwendigen Dateien und Pakete gefunden.
@@ -58,9 +59,9 @@ call :provideosfetx lgr-lig
 call :provideosfetx lgr-ligc
 echo.
 echo  =====================================================================
+call :gettexpath
 echo  =====================================================================
 echo.
-call :gettexpath
 if "%texpath%"=="" goto :abort
 call :createfontfile %familyname%l8a  OpenSans-Light.ttf           MdSymbol-Light.otf
 call :createfontfile %familyname%lo8a OpenSans-LightItalic.ttf     MdSymbol-Light.otf
@@ -118,9 +119,6 @@ copy /y *.fd  "%destpath%\fd"
   echo  =====================================================================
   echo   Die Installation wird beendet.
   echo   Der Ordner mitsamt aller temporaeren Dateien wird geloescht.
-  echo  =====================================================================
-  echo   Dokumentation und Beispiele fuer das TUD-Script-Bundle sind
-  echo   ueber den Konsolenaufruf 'texdoc tudscr' zu finden.
   echo  =====================================================================
   echo.
   pause
@@ -300,7 +298,7 @@ copy /y *.fd  "%destpath%\fd"
   set /p file=< filepath.tmp
   set "file=%file:/=\%"
   copy "%file%"> nul
-  fontforge ttf2afm.ff %2 %3
+  call fontforge ttf2afm.ff %2 %3
   move %~n2.pfb %~1.pfb
   move %~n2.afm %~1.afm
   goto :eof
