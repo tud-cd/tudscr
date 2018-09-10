@@ -56,28 +56,28 @@
 \askforoverwritefalse
 \generate{%
   \nopreamble\nopostamble%
-  \file{tudscr_fonts_install.bxt}   {\from{tudscr-scripts.dtx}{win,font}}%
-  \file{tudscr_V_full_install.bxt}  {\from{tudscr-scripts.dtx}{win,full}}%
-  \file{tudscr_V_update_install.bxt}{\from{tudscr-scripts.dtx}{win,update}}%
-  \file{tudscr_fonts_install.sh}    {\from{tudscr-scripts.dtx}{unix,font}}%
-  \file{tudscr_V_full_install.sh}   {\from{tudscr-scripts.dtx}{unix,full}}%
-  \file{tudscr_V_update_install.sh} {\from{tudscr-scripts.dtx}{unix,update}}%
-  \file{tudscr_uninstall.bxt}       {\from{tudscr-scripts.dtx}{win,uninstall}}%
-  \file{tudscr_uninstall.sh}        {\from{tudscr-scripts.dtx}{unix,uninstall}}%
-  \file{tud_fonts_install.bxt}      {\from{tudscr-scripts.dtx}{win,font,old}}%
-  \file{tud_fonts_install.sh}       {\from{tudscr-scripts.dtx}{unix,font,old}}%
+  \file{tudscr_V_install.bxt}     {\from{tudscr-scripts.dtx}{win,bundle}}%
+%\file{tudscr_V_full_install.bxt}{\from{tudscr-scripts.dtx}{win,bundle,font}}%
+  \file{tudscr_fonts_install.bxt} {\from{tudscr-scripts.dtx}{win,font}}%
+  \file{tud_fonts_install.bxt}    {\from{tudscr-scripts.dtx}{win,font,old}}%
+  \file{tudscr_uninstall.bxt}     {\from{tudscr-scripts.dtx}{win,uninstall}}%
+  \file{tudscr_V_install.sh}      {\from{tudscr-scripts.dtx}{unix,bundle}}%
+%\file{tudscr_V_full_install.sh} {\from{tudscr-scripts.dtx}{unix,bundle,font}}%
+  \file{tudscr_fonts_install.sh}  {\from{tudscr-scripts.dtx}{unix,font}}%
+  \file{tud_fonts_install.sh}     {\from{tudscr-scripts.dtx}{unix,font,old}}%
+  \file{tudscr_uninstall.sh}      {\from{tudscr-scripts.dtx}{unix,uninstall}}%
 }
-\generate{%
-  \nopreamble\nopostamble%
-  \file{tudscr_fonts_convert.bxt}{\from{tudscr-scripts.dtx}{win,convert}}%
-  \file{tudscr_fonts_convert.sh}{\from{tudscr-scripts.dtx}{unix,convert}}%
-  \file{tudscr_fonts_converted_install.bxt}{%
-    \from{tudscr-scripts.dtx}{win,converted}%
-  }%
-  \file{tudscr_fonts_converted_install.sh}{%
-    \from{tudscr-scripts.dtx}{unix,converted}%
-  }%
-}
+%\generate{%
+%  \nopreamble\nopostamble%
+%  \file{tudscr_fonts_convert.bxt}{\from{tudscr-scripts.dtx}{win,convert}}%
+%  \file{tudscr_fonts_convert.sh}{\from{tudscr-scripts.dtx}{unix,convert}}%
+%  \file{tudscr_fonts_converted_install.bxt}{%
+%    \from{tudscr-scripts.dtx}{win,converted}%
+%  }%
+%  \file{tudscr_fonts_converted_install.sh}{%
+%    \from{tudscr-scripts.dtx}{unix,converted}%
+%  }%
+%}
 \else
 \let\endbatchfile\relax
 \fi
@@ -106,7 +106,7 @@
 %<*driver>
 \ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-scripts.dtx}[%
-  2018/07/13 v2.06 TUD-Script (installation scripts)%
+  2018/10/09 v2.06 TUD-Script (installation scripts)%
 ]
 \documentclass[english,ngerman,xindy]{tudscrdoc}
 \usepackage[T1]{fontenc}
@@ -142,17 +142,21 @@
 % \changes{v2.04}{2015/05/12}{Pakete für T1-Kodierung obligatorisch}^^A
 % \changes{v2.04}{2015/06/17}{Unix-Bash-Skripte verbessert}^^A
 % \changes{v2.04}{2015/07/02}{Windows-Batch-Skripte verbessert}^^A
+% \changes{v2.06}{2018/09/10}{Schriftinstallation entfällt mit \OpenSans}^^A
 %
 % \section{Installationsskripte}
 %
 % Es werden mehrere Varianten von Installationsskripte für Windows und Linux 
-% automatisch generiert. Das wichtigste ist das Skript zur Installation der 
-% Schriften, welches mit dem Tag \texttt{<font>} versehen ist. Das Skript zur 
-% automatisierten lokalen Benutzerinstallation der Schriften \emph{und} der 
-% Klassen und Pakete ist mit \texttt{<full>} markiert. Für ein Update der 
-% lokalen Benutzerinstallation ist das mit \texttt{<update>} gekennzeichnete 
-% Skript zuständig. Zur Deinstallation der lokalen Installation wird ein 
-% separates, weitgehend unabhängiges Skript mit \texttt{<uninstall>} erzeugt.
+% automatisch generiert. Für eine Installation oder ein Update der lokalen
+% Benutzerinstallation ist das mit \texttt{<bundle>} gekennzeichnete Skript
+% zuständig. Das Skript zur Installation der alten Schriften ist mit dem Tag
+% \texttt{<font>} versehen. Die Klassen von Klaus~Bergmann nutzen die gleichen 
+% Schriften, definieren aber eine andere Familie, wofür zusätzlich der Tag 
+% \texttt{<old>} verwendet wird. Das Skript zur automatisierten lokalen
+% Benutzerinstallation der Schriften \emph{und} der Klassen und Pakete wird 
+% durch die Kombination von \texttt{<bundle>} und \texttt{<font>}  markiert. 
+% Zur Deinstallation der lokalen Installation wird ein separates, weitgehend
+% unabhängiges Skript mit \texttt{<uninstall>} erzeugt.
 %
 % Für die interne Verwendung gibt es außerdem noch \texttt{<convert>}, womit 
 % die konvertierten Schriften zwar erzeugt, aber nicht installiert werden. 
@@ -199,10 +203,9 @@ echo   %~dp0
 echo.
 echo  =====================================================================
 echo.
-%<convert>echo   Konvertieren der TUD-CD-Schriften unter Windows
-%<full>echo   Installation TUD-Script + TUD-CD-Schriften unter Windows
-%<update>echo   Update TUD-Script unter Windows
+%<bundle>echo   Installation TUD-Script unter Windows
 %<font>echo   Installation TUD-CD-Schriften unter Windows
+%<convert>echo   Konvertieren der TUD-CD-Schriften unter Windows
 %<converted>echo   Installation der konvertierten TUD-CD-Schriften unter Windows
 %<uninstall>echo   Deinstallation TUD-Script unter Windows
 %<old>echo   fuer obsolete Klassen und Pakete
@@ -232,8 +235,8 @@ if "%texpath%"=="" goto :nothing
 %
 % \subsubsection{Installationsskripte für Windows}
 %
-% Die Batch-Skripte werden für die Schriftinstallation sowie für eine lokale
-% Installation von \TUDScript unter Windows angeboten.
+% Die Batch-Skripte werden für eine lokale Installation von \TUDScript sowie 
+% die Schriftinstallation unter Windows angeboten.
 %
 % Es wird unterschieden, ob es sich um eine normale oder eine portable 
 % Installation handelt. Mit |wmic| werden alle vorhandenen Laufwerke und deren
@@ -298,16 +301,16 @@ set missing=false
 % im Dateinamen des Skriptes hinterlegt. Das dazugehörige Archiv wird mit 
 % dieser gesucht.
 %    \begin{macrocode}
-%<*full|update>
+%<*bundle>
 set version=%~n0
 set version=%version:~7,-8%
 call :checkfile    "tudscr_%version%.zip"
-%</full|update>
+%</bundle>
 %    \end{macrocode}
 % Die Archive, Skripte und Pakete für die Schriftumwandlung werden gesucht.
 %    \begin{macrocode}
 %<converted>call :checkfile    "tudscr_fonts_converted.zip"
-%<*full|font|convert>
+%<*font|convert>
 call :checkfile    "Univers_PS.zip"
 call :checkfile    "DIN_Bd_PS.zip"
 %<!old>call :checkfile    "tudscr_fonts_install.zip"
@@ -316,18 +319,18 @@ call :checkscript  "tftopl"       "fontware"
 call :checkscript  "pltotf"       "fontware"
 call :checkscript  "vptovf"       "fontware"
 call :checkpackage "fontinst.sty" "fontinst"
-%</full|font|convert>
+%</font|convert>
 %    \end{macrocode}
 % Für die Schriftfamilien im Stil von \TUDScript werden einige zusätzliche 
 % Pakete benötigt.
 %    \begin{macrocode}
-%<*!old>
+%<*font&!old|convert|converted>
 call :checkpackage "type1ec.sty"  "cm-super"
 call :checkpackage "lmodern.sty"  "lm"
 call :checkpackage "cmbright.sty" "cmbright"
 call :checkpackage "hfbright.map" "hfbright"
 call :checkpackage "iwona.sty"    "iwona"
-%</!old>
+%</font&!old|convert|converted>
 %    \end{macrocode}
 % Wenn auch nur eine benötigte Datei nicht vorhanden ist, wird die Installation 
 % abgebrochen.
@@ -475,16 +478,16 @@ echo.
 % ob die nutzerindividuelle Variante mit \textbf{updmap} notwendig ist. Dies 
 % ist jedoch lediglich für \TeX~Live relevant.
 %    \begin{macrocode}
-%<*full|font|converted>
+%<*font|converted>
 set updmapsys=true
 kpsewhich --var-value=TEXMFVAR> texmfvar.tmp
 set /p texmfvar=< texmfvar.tmp
 if exist "%texmfvar%\fonts\map" set updmapsys=false
-%</full|font|converted>
+%</font|converted>
 %    \end{macrocode}
 % Die benötigten Verzeichnisse für die konvertierten Schriften werden erzeugt.
 %    \begin{macrocode}
-%<*full|font|convert>
+%<*font|convert>
 %<old>set localfolder=tud
 %<!old>set localfolder=tudscr
 if not exist "%texmfpath%\tex\latex\%localfolder%\fonts" (
@@ -505,19 +508,19 @@ if not exist "%texmfpath%\fonts\type1\%localfolder%" (
 if not exist "%texmfpath%\fonts\map\dvips\%localfolder%" (
   mkdir "%texmfpath%\fonts\map\dvips\%localfolder%"
 )
-%</full|font|convert>
+%</font|convert>
 %    \end{macrocode}
 % Für Komplettinstallationen wird das \TUDScript-Bundle in den eingestellten 
 % Pfad entpackt.
 %    \begin{macrocode}
 cd /d %~dp0
-%<full|update>call :unzip tudscr_%version%.zip %texmfpath%
+%<bundle>call :unzip tudscr_%version%.zip %texmfpath%
 %<converted>call :unzip tudscr_fonts_converted.zip %texmfpath%
 %    \end{macrocode}
 % Anschließend werden die PostScript-Schriften für die Konvertierung in den 
 % temporären Ordner extrahiert.
 %    \begin{macrocode}
-%<*full|font|convert>
+%<*font|convert>
 call :unzip Univers_PS.zip tudscrtemp
 call :unzip DIN_Bd_PS.zip tudscrtemp
 %<!old>call :unzip tudscr_fonts_install.zip tudscrtemp\converted
@@ -662,7 +665,7 @@ copy /y *.vf  "%texmfpath%\fonts\vf\%localfolder%"
 copy /y *.pfb "%texmfpath%\fonts\type1\%localfolder%"
 copy /y *.map "%texmfpath%\fonts\map\dvips\%localfolder%"
 %<convert>goto :end
-%</full|font|convert>
+%</font|convert>
 %    \end{macrocode}
 %
 % \iffalse
@@ -675,7 +678,7 @@ set "texmfpath=%texmfpath:\=/%"
 if %texdistrib%=="MiKTeX" goto :MiKTeXHash
 :TeXLiveHash
 texhash
-%<*full|font|converted>
+%<*font|converted>
 if "%admin%" == "true"      goto :TeXLiveSysMap
 if "%updmapsys%" == "false" goto :TeXLiveUserMap
 :TeXLiveSysMap
@@ -691,10 +694,10 @@ echo   Aufruf von 'updmap'
 echo  =====================================================================
 %<old>updmap --enable Map=tud.map --force
 %<!old>updmap --enable Map=tudscr.map --force
-%</full|font|converted>
+%</font|converted>
 goto :end
 :MiKTeXHash
-%<*full|font|converted>
+%<*font|converted>
 set "texmfpath=%texmfpath:/=\%"
 set mapcfg=%texmfpath%\miktex\config\updmap.cfg
 if not exist "%mapcfg%" (
@@ -713,15 +716,15 @@ if not exist "%mapcfg%" (
   if errorlevel 1 echo Map tudscr.map>> "%mapcfg%"
 %</!old>
 )
-%</full|font|converted>
+%</font|converted>
 if "%admin%" == "true" (
   if "%portable%" == "true" initexmf --admin --register-root="%texmfpath%"
   initexmf --admin --update-fndb="%texmfpath%"
-%<full|font|converted>  initexmf --admin --mkmaps
+%<font|converted>  initexmf --admin --mkmaps
 ) else (
   if "%portable%" == "true" initexmf --register-root="%texmfpath%"
   initexmf --update-fndb="%texmfpath%"
-%<full|font|converted>  initexmf --mkmaps
+%<font|converted>  initexmf --mkmaps
 )
 set "texmfpath=%texmfpath:\=/%"
 goto :end
@@ -939,15 +942,14 @@ goto :end
 %<*!convert>
   echo.
   echo  =====================================================================
-%<full|font|converted>  echo   Die Installation wird beendet.
-%<update>  echo   Das Update wird beendet.
+%<bundle|font|converted>  echo   Die Installation wird beendet.
 %<uninstall>  echo   Es wurde keine ^(weitere^) lokale Nutzerinstallation von
 %<uninstall>  echo   TUD-Script gefunden. Die Deinstallation wird beendet.
   echo   Der Ordner mitsamt aller temporaeren Dateien wird geloescht.
   echo  =====================================================================
 %<*!old>
   echo   Dokumentation und Beispiele fuer das TUD-Script-Bundle sind
-%<full|update>  echo   unter '%texmfpath%/doc/latex/tudscr' oder
+%<bundle>  echo   unter '%texmfpath%/doc/latex/tudscr' oder
   echo   ueber den Konsolenaufruf 'texdoc tudscr' zu finden.
   echo  =====================================================================
 %</!old>
@@ -1004,7 +1006,7 @@ goto :end
 # '~/Library/texmf'. Wird das Skript mit 'sudo' ausgefuehrt, erfolgt die
 # systemweite Installation fuer alle Nutzer in $TEXMFLOCAL.
 #
-%<*full|font|converted>
+%<*font|converted>
 # Fuer die lokale Benutzerinstallation wird waehrend des Installationsprozesses
 # geprueft, ob die Schriften mit dem Befehl 'updmap-sys' systemweit registriert
 # werden koennen oder ob dies im Zweifelsfall mit 'updmap' fuer den aktuellen
@@ -1017,7 +1019,7 @@ goto :end
 # Bei Mac OS kann dies automatisch mit "TeX Live Utility.app": "Preferences..."
 # -> "Automatically enable fonts in my home directory." erfolgen.
 #
-%</full|font|converted>
+%</font|converted>
 %</!uninstall>
 SOURCE="${BASH_SOURCE[0]}"
 # if $SOURCE was a relative symlink, we need to resolve it relative to the path
@@ -1035,10 +1037,9 @@ echo   $DIR
 echo
 echo  =====================================================================
 echo
-%<convert>echo   Konvertieren der TUD-CD-Schriften unter Unix
-%<full>echo   Installation TUD-Script + TUD-CD-Schriften unter Unix
-%<update>echo   Update TUD-Script unter Unix
+%<bundle>echo   Installation TUD-Script unter Unix
 %<font>echo   Installation TUD-CD-Schriften unter Unix
+%<convert>echo   Konvertieren der TUD-CD-Schriften unter Unix
 %<converted>echo   Installation der konvertierten TUD-CD-Schriften unter Unix
 %<uninstall>echo   Deinstallation TUD-Script unter Unix
 %<old>echo   fuer obsolete Klassen und Pakete
@@ -1223,17 +1224,17 @@ missing=false
 % im Dateinamen des Skriptes hinterlegt. Das dazugehörige Archiv wird mit 
 % dieser gesucht.
 %    \begin{macrocode}
-%<*full|update>
+%<*bundle>
 version="$(basename $0)"
 version=$(echo $version|cut -c8-)
 version=$(echo $version|rev|cut -c12-|rev)
 checkfile "tudscr_$version.zip"
-%</full|update>
+%</bundle>
 %    \end{macrocode}
 % Die Archive, Skripte und Pakete für die Schriftumwandlung werden gesucht.
 %    \begin{macrocode}
 %<converted>checkfile "tudscr_fonts_converted.zip"
-%<*full|font|convert>
+%<*font|convert>
 checkfile "Univers_PS.zip"
 checkfile "DIN_Bd_PS.zip"
 %<!old>checkfile "tudscr_fonts_install.zip"
@@ -1244,18 +1245,18 @@ checkscript "tftopl"        "fontware"
 checkscript "pltotf"        "fontware"
 checkscript "vptovf"        "fontware"
 checkpackage "fontinst.sty" "fontinst"
-%</full|font|convert>
+%</font|convert>
 %    \end{macrocode}
 % Für die Schriftfamilien im Stil von \TUDScript werden einige zusätzliche 
 % Pakete benötigt.
 %    \begin{macrocode}
-%<*!old>
+%<*font&!old|convert|converted>>
 checkpackage "type1ec.sty"  "cm-super"
 checkpackage "lmodern.sty"  "lm"
 checkpackage "cmbright.sty" "cmbright"
 checkpackage "hfbright.map" "hfbright"
 checkpackage "iwona.sty"    "iwona"
-%</!old>
+%</font&!old|convert|converted>>
 %    \end{macrocode}
 % Wenn auch nur eine benötigte Datei nicht vorhanden ist, wird die Installation 
 % abgebrochen.
@@ -1319,7 +1320,7 @@ echo
 % geprüft, ob dies für alle Nutzer mit \textbf{updmap-sys} erfolgen kann oder 
 % ob die nutzerindividuelle Variante mit \textbf{updmap} notwendig ist.
 %    \begin{macrocode}
-%<*full|font|converted>
+%<*font|converted>
 updmapsys=true
 if [ -d "$(kpsewhich --var-value=TEXMFVAR)/fonts/map/" ] ; then
   updmapsys=false
@@ -1392,11 +1393,11 @@ else
     done
   fi
 fi
-%</full|font|converted>
+%</font|converted>
 %    \end{macrocode}
 % Die benötigten Verzeichnisse für die konvertierten Schriften werden erzeugt.
 %    \begin{macrocode}
-%<*full|font|convert>
+%<*font|convert>
 %<old>localfolder=tud
 %<!old>localfolder=tudscr
 mkvaldir $texmfpath/tex/latex/$localfolder/fonts
@@ -1405,18 +1406,18 @@ mkvaldir $texmfpath/fonts/afm/$localfolder
 mkvaldir $texmfpath/fonts/vf/$localfolder
 mkvaldir $texmfpath/fonts/type1/$localfolder
 mkvaldir $texmfpath/fonts/map/dvips/$localfolder
-%</full|font|convert>
+%</font|convert>
 %    \end{macrocode}
 % Für Komplettinstallationen wird das \TUDScript-Bundle in den eingestellten 
 % Pfad entpackt.
 %    \begin{macrocode}
-%<full|update>unzip -o tudscr_$version.zip -d $texmfpath
+%<bundle>unzip -o tudscr_$version.zip -d $texmfpath
 %<converted>unzip -o tudscr_fonts_converted.zip -d $texmfpath
 %    \end{macrocode}
 % Anschließend werden die PostScript-Schriften für die Konvertierung in den 
 % temporären Ordner extrahiert.
 %    \begin{macrocode}
-%<*full|font|convert>
+%<*font|convert>
 unzip Univers_PS.zip -d tudscrtemp
 unzip DIN_Bd_PS.zip -d tudscrtemp
 %<!old>unzip tudscr_fonts_install.zip -d tudscrtemp/converted
@@ -1562,13 +1563,13 @@ cp -f *.afm $texmfpath/fonts/afm/$localfolder
 cp -f *.vf  $texmfpath/fonts/vf/$localfolder
 cp -f *.pfb $texmfpath/fonts/type1/$localfolder
 cp -f *.map $texmfpath/fonts/map/dvips/$localfolder
-%</full|font|convert>
+%</font|convert>
 %    \end{macrocode}
 % Nun werden die Schriften registriert.
 %    \begin{macrocode}
 %<*!convert>
 texhash
-%<*full|font|converted>
+%<*font|converted>
 if $updmapsys || [ "$EUID" -eq 0 ] ; then
   echo  =====================================================================
   echo   Aufruf von \'updmap-sys\'
@@ -1583,19 +1584,18 @@ if ! $updmapsys ; then
 %<old>  updmap --enable Map=tud.map --force
 %<!old>  updmap --enable Map=tudscr.map --force
 fi
-%</full|font|converted>
+%</font|converted>
 %    \end{macrocode}
 % Damit ist die Installation abgeschlossen. 
 %    \begin{macrocode}
 echo
 echo  =====================================================================
-%<full|font|converted>echo   Die Installation wird beendet.
-%<update>echo   Das Update wird beendet.
+%<bundle|font|converted>echo   Die Installation wird beendet.
 echo   Der Ordner mitsamt aller temporaeren Dateien wird geloescht.
 echo  =====================================================================
 %<*!old>
 echo   Dokumentation und Beispiele fuer das TUD-Script-Bundle sind
-%<full|update>echo   unter $texmfpath/doc/latex/tudscr oder
+%<bundle>echo   unter $texmfpath/doc/latex/tudscr oder
 echo   ueber den Terminalaufruf \'texdoc tudscr\' zu finden.
 echo  =====================================================================
 %</!old>
