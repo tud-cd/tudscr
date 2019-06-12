@@ -577,6 +577,10 @@
 % der Schrift geändert werden. Zusätzlich lässt sich die Verwendung von 
 % Minuskelziffern im Fließtext aktivieren. Außerdem kann eingestellt werden, ob 
 % für den Mathematiksatz serifenlose Schriften zum Einsatz kommen sollen.
+% \ToDo{%
+%   Option evtl. überarbeiten und nicht mehr im Dokument zulassen;
+%   das macht alles um einiges einfacher, siehe \opt{cdoldfont}, \opt{cdmath}
+% }[v2.07]
 %    \begin{macrocode}
 \newif\if@tud@cdfont@active
 \newif\if@tud@cdfont@heavy
@@ -2149,6 +2153,12 @@
 % \begin{macro}{\if@tud@cdmath@active@locked}
 % Mit dieser Option kann die genutzte Standardschrift für den Mathematiksatz
 % für das gesamte Dokument umgestellt werden.
+% \ToDo{%
+%   Option evtl. überarbeiten und nicht mehr im Dokument zulassen;
+%   andernfalls müssten alle bereitgestellte Befehle für den Mathematiksatz
+%   gesichert und neu definiert werden, weil diese ggf. von anderen Paketen
+%   umdefiniert werden. Bspw. \cs{the}\cs{mathcode`!}
+% }[v2.07]
 %    \begin{macrocode}
 \tud@locked@newbool{@tud@cdmath@active}
 \tud@locked@bool@preset{@tud@cdmath@active}{true}%
@@ -2706,6 +2716,7 @@
 % dazugehörige \LaTeX-Befehl mit dieser überschrieben. Hierfür sind die beiden 
 % Befehle \cs{tud@cdmath@greek@shape@set} und \cs{tud@cdmath@greek@shape@reset}
 % verantwortlich.
+% \ToDo{Codierungen \val{LS1/LS2}; siehe \pkg{stix,libertinust1math}}[v2.07]
 %    \begin{macrocode}
 \newcommand*\tud@math@greek@declare@uc[1]{%
   \edef\@tempb{%
@@ -2912,6 +2923,7 @@
 %    \end{macrocode}
 % Mit \cs{tud@cdmath@declare} werden für den Mathematikmodus die Schriften im 
 % \CD deklariert.
+% \ToDo{mathversion heavy?}[v2.07]
 %    \begin{macrocode}
 \newcommand*\tud@cdmath@declare[2]{%
   \DeclareMathVersion{tud@nm}%
@@ -3040,6 +3052,9 @@
 % Wird das Paket \pkg{fontspec} verwendet, sollte die Option \opt{no-math} 
 % übergeben werden, falls die Mathematikschriften des \CDs zum Einsatz kommen. 
 % Wurde dieser nicht angegeben, wird eine einmalige Warnung erzeugt.
+% \ToDo{%
+%   nicht mv@normal überschreiben, sondern wrapper um \cs{mathversion} nutzen%
+% }[v2.06]
 %    \begin{macrocode}
   \if@tud@cdmath@active\if@tud@x@fontspec@math@enabled%
 %<*class>
@@ -3168,7 +3183,7 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@math@greek@slanted
 % \end{macro}^^A \tud@math@greek@upright
-% Samtliche Schrifteinstellungen erfolgen erst am Ende der Präambel, um etwaige
+% Sämtliche Schrifteinstellungen erfolgen erst am Ende der Präambel, um etwaige
 % Einstellungen irgendwelcher Schriftpakete beachten zu können. Dabei erfolgt 
 % das Setzen der Mathematikschriften durch \cs{AtBeginDocument} innerhalb von 
 % \cs{AtEndPreamble} am Ende \emph{aller} \cs{AtBeginDocument}.
@@ -3248,6 +3263,7 @@
 %    \begin{macrocode}
   \tud@font@set%
 %    \end{macrocode}
+% \ToDo{Laden des Paketes \pkg{textcomp} ggf. verzögern, hier ausführen}[v2.06]
 % Die Einstellungen für den Mathematiksatz erfolgen erst zu Dokumentbeginn, um
 % insbesondere auf Einstellungen von \pkg{fontspec} reagieren zu können. Da es
 % so gut wie keine freien OpenType"=Schriften für den mathmatischen Formelsatz
@@ -3260,6 +3276,10 @@
     \UnPreventPackageFromLoading{bm}%
     \RequirePackage{bm}[2017/01/16]%
   \fi%
+%    \end{macrocode}
+% \ToDo{Verzögern notwendig?; nur spezifisches für fontspec ausführen?}[v2.06]
+% \ToDo{Hook definieren, damit sich Mathekram (mathabx) ausführen lässt?}[v2.06]
+%    \begin{macrocode}
   \AtBeginDocument{\tud@math@init\let\tud@math@init\relax}%
 }
 %    \end{macrocode}
