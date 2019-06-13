@@ -2655,7 +2655,7 @@
   \fi%
   \if@tud@cdoldfont@active\else%
     \PassOptionsToPackage{%
-      subdued,defaultalphabets,defaultmathsizes,nohbar,nosmalldelims%
+      noequal,subdued,defaultalphabets,defaultmathsizes,nohbar,nosmalldelims%
     }{mathastext}
     \RequirePackage{mathastext}[2018/08/22]%
   \fi%
@@ -2699,12 +2699,14 @@
     \MTDeclareVersion[it]{tudnormal}{T1}{#1}{\tud@cdfont@md}{n}%
     \MTDeclareVersion[it]{tudbold}{T1}{#1}{\tud@cdfont@bf}{n}%
   \fi%
-  \SetSymbolFont{operators}{tudnormal}{OT1}{#1}{\tud@cdfont@md}{n}%
-  \SetSymbolFont{operators}{tudbold}{OT1}{#1}{\tud@cdfont@bf}{n}%
   \if@tud@cdoldfont@active%
+    \SetSymbolFont{operators}{tudnormal}{OT1}{#1}{\tud@cdfont@md}{n}%
+    \SetSymbolFont{operators}{tudbold}{OT1}{#1}{\tud@cdfont@bf}{n}%
     \SetSymbolFont{letters}{tudnormal}{OML}{#1}{\tud@cdfont@md}{it}%
     \SetSymbolFont{letters}{tudbold}{OML}{#1}{\tud@cdfont@bf}{it}%
   \else%
+    \SetSymbolFont{operators}{tudnormal}{OT1}{iwona}{\tud@cdfont@md}{n}%
+    \SetSymbolFont{operators}{tudbold}{OT1}{iwona}{\tud@cdfont@bf}{n}%
     \SetSymbolFont{letters}{tudnormal}{OML}{iwona}{\tud@cdfont@md}{it}%
     \SetSymbolFont{letters}{tudbold}{OML}{iwona}{\tud@cdfont@bf}{it}%
 %    \SetSymbolFont{letters}{tudnormal}{OML}{#1}{\tud@cdfont@md}{it}%
@@ -2735,8 +2737,8 @@
     \SetSymbolFont{symbols}{tudnormal}{OMS}{iwona}{\tud@cdfont@md}{n}%
     \SetSymbolFont{symbols}{tudbold}{OMS}{iwona}{\tud@cdfont@bf}{n}%
   \fi%
-  \SetSymbolFont{largesymbols}{tudnormal}{OMX}{iwona}{m}{n}%
-  \SetSymbolFont{largesymbols}{tudbold}{OMX}{iwona}{b}{n}%
+  \SetSymbolFont{largesymbols}{tudnormal}{OMX}{iwona}{\tud@cdfont@md}{n}%
+  \SetSymbolFont{largesymbols}{tudbold}{OMX}{iwona}{\tud@cdfont@bf}{n}%
   \AtBeginDocument{%
     \ifundef{\symlegacymaths}{}{%
       \SetSymbolFont{legacymaths}{tudnormal}{OT1}{#1}{\tud@cdfont@md}{n}%
