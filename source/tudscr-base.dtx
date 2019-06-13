@@ -1,10 +1,10 @@
-% \CheckSum{751}
+% \CheckSum{716}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
 % ----------------------------------------------------------------------------
 %
-%  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2018
+%  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2019
 %
 % ----------------------------------------------------------------------------
 %
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-base.dtx}[%
-  2018/09/04 v2.06 TUD-Script\space%
+  2019/06/13 v2.06 TUD-Script\space%
 %</driver>
 %<package&base>\ProvidesPackage{tudscrbase}[%
 %<*driver|package&base>
@@ -120,10 +120,12 @@
 %    \begin{macrocode}
 \RequirePackage{scrbase}[2018/03/30]
 %    \end{macrocode}
-% Das Paket \pkg{etoolbox} wird für die Manipulation bereits definierter
+% Die folgenden Pakete werden für die Manipulation bereits definierter
 % Makros sowie zur erweiterten Auswertung boolescher Ausdrücke benötigt.
 %    \begin{macrocode}
 \RequirePackage{etoolbox}[2011/01/03]
+\RequirePackage{xpatch}[2012/10/02]
+\RequirePackage{letltxmacro}[2016/05/16]
 %    \end{macrocode}
 % Das Paket \pkg{kvsetkeys} erweitert \pkg{keyval} um die Möglichkeit, das
 % Verhalten bei der Angabe eines nicht definierten Schlüssels festzulegen.
@@ -155,6 +157,8 @@
 % \changes{v2.06}{2018/07/12}{neu}^^A
 % \begin{macro}{\if@tud@res@swa}
 % \changes{v2.06}{2018/07/12}{neu}^^A
+% \begin{macro}{\tud@cnt}
+% \changes{v2.06}{2019/06/13}{neu}^^A
 % Makros zur temporären Verwendung.
 %    \begin{macrocode}
 \newcommand*\tud@reserved{}
@@ -162,7 +166,9 @@
 \newcommand*\tud@res@b{}
 \newcommand*\tud@res@c{}
 \newif\if@tud@res@swa
+\newcount\tud@cnt
 %    \end{macrocode}
+% \end{macro}^^A \tud@cnt
 % \end{macro}^^A \if@tud@res@swa
 % \end{macro}^^A \tud@res@c
 % \end{macro}^^A \tud@res@b
@@ -623,11 +629,17 @@
 % \end{macro}^^A \tud@locked@bool@set
 % \end{macro}^^A \tud@locked@bool@preset
 % \end{macro}^^A \tud@locked@newbool
+% \begin{macro}{\tud@cs@letltx}
+% \changes{v2.06}{2019/06/13}{\cs{LetLtxMacro} zum Sichern originärer Makros}^^A
 % \begin{macro}{\tud@cs@store}
 % \changes{v2.06}{2018/07/15}{%
 %   mit \cs{DeclareRobustCommand} definierte Befehle unterstüzt%
 % }^^A
 % \begin{macro}{\tud@cs@restore}
+% \changes{v2.06}{2018/07/15}{%
+%    stellt originäre Makros auch wieder her, wenn diese mit \cs{undef} 
+%    zwischendurch \emph{undefiniert} gesetzt wurden%
+% }^^A
 % \begin{macro}{\tud@cs@reset}
 % \begin{macro}{\tud@cs@update}
 % \changes{v2.04}{2015/03/03}{neu}^^A
@@ -639,6 +651,14 @@
 % Layouts über Optionseinstellungen zu wechseln und dabei von einem definierten
 % Anfangszustand auszugehen.
 %
+% Der Befehl \cs{tud@cs@letltx} nutzt intern \cs{LetLtxMacro} aus dem Paket 
+% \pkg{letltxmacro}, um auch robust definierte Befehle korrekt zu sichern.
+%    \begin{macrocode}
+\newcommand*\tud@cs@letltx[2]{%
+  \expandafter\expandafter\expandafter\LetLtxMacro%
+  \expandafter\csname #1\expandafter\endcsname\csname #2\endcsname%
+}
+%    \end{macrocode}
 % Mit dem Aufruf \cs{tud@cs@store}\marg{Befehlsname} wird der im Argument 
 % angegebene Befehl in einem neuem Makro \cs{@@tud@\meta{Befehlsname}}
 % gespeichert. Dieser kann danach beliebig angepasst werden. Soll der Befehl zu
@@ -650,50 +670,52 @@
 % weiterhin genutzt werden. Ein zuvor bereits gesicherter Befehl kann mit 
 % \cs{tud@cs@update}\marg{Befehlsname} auf die momentane Definition 
 % aktualisiert werden.
-% \ToDo{ifcsltxprotect bzw. @@tud@\#1@protect umgehen, Paket letltxmacro}[v2.06]
 %    \begin{macrocode}
 \newrobustcmd*\tud@cs@store[1]{%
   \tud@cs@check{#1}%
   \ifcsdef{@@tud@#1}{}{%
-    \csletcs{@@tud@#1}{#1}%
-    \ifcsltxprotect{#1}{\csletcs{@@tud@#1@protect}{#1 }}{}%
+    \tud@cs@letltx{@@tud@#1}{#1}%
   }%
 }
 \newrobustcmd*\tud@cs@restore[1]{%
+%    \end{macrocode}
+% Sollte ein zuvor gesichertes Makro mit \cs{undef} oder \cs{csundef} 
+% zwischenzeitlich \emph{undefiniert} gesetzt worden sein, wird das originäre 
+% Makro dennoch wiederhergestellt. Hierfür wird es zu \cs{relax} gesetzt, damit
+% die Überprüfung mit \cs{tud@cs@check} keinen Fehler erzeugt.
+%    \begin{macrocode}
+  \ifcsdef{#1}{}{%
+    \ifcsdef{@@tud@#1}{%
+      \cslet{#1}{\relax}%
+    }{}%
+  }%
+%    \end{macrocode}
+% Die eigentliche Wiederherstellung.
+%    \begin{macrocode}
   \tud@cs@check{#1}%
   \ifcsdef{@@tud@#1}{%
-    \csletcs{#1}{@@tud@#1}%
-    \ifcsdef{@@tud@#1@protect}{%
-      \csletcs{#1 }{@@tud@#1@protect}%
-      \csundef{@@tud@#1@protect}%
-    }{}%
+    \tud@cs@letltx{#1}{@@tud@#1}%
     \csundef{@@tud@#1}%
   }{}%
 }
 \newrobustcmd*\tud@cs@reset[1]{%
   \tud@cs@check{#1}%
   \ifcsdef{@@tud@#1}{%
-    \csletcs{#1}{@@tud@#1}%
-    \ifcsdef{@@tud@#1@protect}{\csletcs{#1 }{@@tud@#1@protect}}{}%
+    \tud@cs@letltx{#1}{@@tud@#1}%
   }{}%
 }
 \newrobustcmd*\tud@cs@update[1]{%
   \tud@cs@check{#1}%
   \ifcsdef{@@tud@#1}{%
-    \csletcs{@@tud@#1}{#1}%
-    \ifcsdef{@@tud@#1@protect}{\csletcs{@@tud@#1@protect}{#1 }}{}%
+    \tud@cs@letltx{@@tud@#1}{#1}%
   }{}%
 }
 \newrobustcmd*\tud@cs@use[1]{%
   \tud@cs@check{#1}%
-  \ifcsdef{@@tud@#1@protect}{%
-    \expandafter\protect\csuse{@@tud@#1@protect}%
+  \ifcsdef{@@tud@#1}{%
+    \csuse{@@tud@#1}%
   }{%
-    \ifcsdef{@@tud@#1}{%
-      \csuse{@@tud@#1}%
-    }{%
-      \csuse{#1}%
-    }%
+    \csuse{#1}%
   }%
 }
 %    \end{macrocode}
@@ -718,6 +740,7 @@
 % \end{macro}^^A \tud@cs@reset
 % \end{macro}^^A \tud@cs@restore
 % \end{macro}^^A \tud@cs@store
+% \end{macro}^^A \tud@cs@letltx
 % \begin{macro}{\tud@skip@store}
 % \changes{v2.04}{2015/03/02}{neu}^^A
 % \changes{v2.05}{2016/07/13}{Verwendung von \cs{tud@skip@check}}^^A
@@ -779,42 +802,6 @@
 % \end{macro}^^A \tud@skip@reset
 % \end{macro}^^A \tud@skip@restore
 % \end{macro}^^A \tud@skip@store
-% \begin{macro}{\tud@patchcmd}
-% \changes{v2.06}{2018/08/10}{neu}^^A
-% \begin{macro}{\tud@pretocmd}
-% \changes{v2.06}{2018/08/10}{neu}^^A
-% \begin{macro}{\tud@apptocmd}
-% \changes{v2.06}{2018/08/10}{neu}^^A
-% \begin{macro}{\tud@patch@testopt}
-% \changes{v2.06}{2018/08/10}{neu}^^A
-% Die aus dem Paket \pkg{etoolbox} stammenden Befehle zum Patchen können nicht
-% mit Makros umgehen, die mit \cs{newcommand} mit einem optionalen Argument 
-% definiert wurden. Diese Befehle lösen das Problem.
-% \ToDo{mit dem Paket \pkg{xpatch} geht das auch}[v2.06]
-%    \begin{macrocode}
-\newcommand*\tud@patch@testopt[2]{%
-  \begingroup%
-    \expandafter\def\expandafter\tud@res@a\expandafter{%
-      \csname\string#2\endcsname%
-    }%
-    \expandafter\ifundef\expandafter{\tud@res@a}{%
-      \def\tud@res@b{#1#2}%
-    }{%
-      \expandafter\def\expandafter\tud@res@b\expandafter{%
-        \expandafter#1\tud@res@a%
-      }%
-    }%
-    \edef\tud@res@b{\endgroup\expandonce\tud@res@b}%
-  \tud@res@b%
-}
-\newcommand*\tud@patchcmd[1]{\tud@patch@testopt\patchcmd#1}
-\newcommand*\tud@pretocmd[1]{\tud@patch@testopt\pretocmd#1}
-\newcommand*\tud@apptocmd[1]{\tud@patch@testopt\apptocmd#1}
-%    \end{macrocode}
-% \end{macro}^^A \tud@patch@testopt
-% \end{macro}^^A \tud@apptocmd
-% \end{macro}^^A \tud@pretocmd
-% \end{macro}^^A \tud@patchcmd
 % \begin{macro}{\tud@patch@wrn}
 % Dieses Makro wird verwendet, wenn mit den Mitteln von \pkg{etoolbox} bereits
 % vorhandene Befehle angepasst werden sollen (\cs{apptocmd}, \cs{pretocmd},
