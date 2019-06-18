@@ -1,4 +1,4 @@
-% \CheckSum{2432}
+% \CheckSum{2563}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -172,6 +172,22 @@
 %<*body>
 % \fi
 %
+% \begin{macro}{\tud@cdfont@wrn}
+% \changes{v2.06}{2018/06/17}{neu}^^A
+% \begin{macro}{\tud@cdmath@wrn}
+% \changes{v2.06}{2019/06/17}{neu}^^A
+% Diese beiden Makros dienen als zentrale Hooks, die während der Initialiserung
+% der Schrfiten des \CDs befüllt werden, falls beispielsweise Warnungen wegen 
+% fehlender Schriftdateien oder inkompatibler Pakete ausgegeben werden müssen.
+% Diese werden gegebebfalls nur einmalig bei der Aktivierung der Schriften des 
+% \CDs ausgegeben.
+%    \begin{macrocode}
+\newcommand*\tud@cdfont@wrn{\global\let\tud@cdfont@wrn\relax}
+\newcommand*\tud@cdmath@wrn{\global\let\tud@cdmath@wrn\relax}
+%    \end{macrocode}
+% \end{macro}^^A \tud@cdmath@wrn
+% \end{macro}^^A \tud@cdfont@wrn
+%
 % \subsection{Auswahl des Fontformates}
 %
 % Das \TUDScript-Bundle unterstützt sowohl die Schriftauswahl im klassischen 
@@ -183,23 +199,37 @@
 %
 % \begin{macro}{\if@tud@x@fontspec@enabled}
 % \changes{v2.02}{2014/08/29}{neu}^^A
-% \begin{macro}{\if@tud@x@fontspec@math@enabled}
-% \changes{v2.06}{2018/07/02}{neu}^^A
 % Wird das Paket \pkg{fontspec} durch den Nutzer geladen, wird der passende 
 % Schlüssel gesetzt und die Schrifteinstellungen erfolgen mit den dazugehörigen 
 % Befehlen. Dies wurde in früheren Versionen mit der Option \opt{fontspec} 
-% realisiert, die auch weiterhin bereitgehalten wird. Deshalb muss der Schalter 
-% bereits vor der Abarbeitung der Optionen definiert werden. 
+% realisiert, die auch weiterhin bereitgehalten wird. Nach dem Laden des Paketes
+% wird geprüft, ob diesem mit den entsprechenden Optionen das Bereitstellen der 
+% Mathematikschriften überlassen wurde. In diesem Fall wird eine entsprechende 
+% Warnung an \cs{tud@cdmath@wrn} angehängt.
 %    \begin{macrocode}
 \newif\if@tud@x@fontspec@enabled
-\newif\if@tud@x@fontspec@math@enabled
 \PassOptionsToPackage{no-math}{fontspec}
 \AfterPackage*{fontspec}{%
   \@ifpackagelater{fontspec}{2017/01/24}{%
     \@tud@x@fontspec@enabledtrue%
-    \@ifpackagewith{fontspec}{no-math}{}{%
-      \@tud@x@fontspec@math@enabledtrue%
-    }%
+    \@tud@res@swafalse%
+    \@ifpackagewith{fontspec}{no-math}{}{\@tud@res@swatrue}%
+    \@ifpackagewith{fontspec}{math}{\@tud@res@swatrue}{}%
+    \if@tud@res@swa%
+      \appto\tud@cdmath@wrn{%
+%<*class>
+        \ClassWarningNoLine{\TUD@Class@Name}%
+%</class>
+%<*package>
+        \PackageWarningNoLine{tudscrfonts}%
+%</package>
+        {%
+          It's recommended to load package `fontspec'\MessageBreak%
+          with option `no-math', if you want to use the\MessageBreak%
+          corporate design fonts in math mode%
+        }%
+      }%
+    \fi%
   }{%
     \@tud@x@fontspec@enabledfalse%
 %<*class>
@@ -217,7 +247,26 @@
   }%
 }
 %    \end{macrocode}
-% \end{macro}^^A \if@tud@x@fontspec@math@enabled
+% Bei der Nutzung des Pakets \pkg{unicode-math} kann es ebenfalls zu Problemen 
+% mit den mathematischen Schriften kommen, weshalb auch hier eine Warnung an
+% \cs{tud@cdmath@wrn} angehängt wird.
+%    \begin{macrocode}
+\AfterPackage*{unicode-math}{%
+  \appto\tud@cdmath@wrn{%
+%<*class>
+    \ClassWarningNoLine{\TUD@Class@Name}%
+%</class>
+%<*package>
+    \PackageWarningNoLine{tudscrfonts}%
+%</package>
+    {%
+      The usage of package `unicode-math' will\MessageBreak%
+      most likely cause erroneous outputs in math mode\MessageBreak%
+      with corporate design fonts%
+    }%
+  }%
+}
+%    \end{macrocode}
 % \end{macro}^^A \if@tud@x@fontspec@enabled
 % \begin{macro}{\if@tud@x@mweights@enabled}
 % \changes{v2.04}{2015/04/24}{Erkennung des Paketes \pkg{mweights}}^^A
@@ -253,9 +302,9 @@
 %    \begin{macrocode}
 \newif\if@tud@cdfont@fam@exist
 \newif\if@tud@cdfont@db@exist
-\newcommand*\tud@cdfont@fam{fdd}
-\newcommand*\tud@cdfont@fam@lf{fdd}
-\newcommand*\tud@cdfont@fam@osf{fddj}
+\newcommand*\tud@cdfont@fam{fos}
+\newcommand*\tud@cdfont@fam@lf{fos}
+\newcommand*\tud@cdfont@fam@osf{fosj}
 \if@tud@cdoldfont@active
   \renewcommand*\tud@cdfont@fam{lun}
   \renewcommand*\tud@cdfont@fam@lf{lun}
@@ -299,28 +348,51 @@
 % \end{macro}^^A \if@tud@ttfont@rb@exist
 % \begin{macro}{\tud@cdfont@check}
 % \changes{v2.04}{2015/03/10}{neu}^^A
-% \changes{v2.06}{2018/07/12}{zur Auswahl der Schriftfamilie angepasst}^^A
+% \begin{macro}{\tud@cdfont@@check}
+% \changes{v2.06}{2018/07/12}{Auswahl der Schriftfamilie angepasst}^^A
+% \begin{macro}{\tud@cdfont@@@check}
+% \changes{v2.06}{2019/06/18}{neu}^^A
 % \begin{macro}{\tud@cdfont@missing}
 % \changes{v2.05l}{2017/03/29}{neu}^^A
-% \begin{macro}{\tud@cdfont@missing@wrn}
-% \changes{v2.06}{2018/07/12}{neu}^^A
 % Mit \cs{tud@cdfont@check} wird geprüft, ob die Schrift \OpenSans respektive 
 % die veralteten Schriften \Univers und \DIN im OTF-Format installiert sind. 
-% Die Schrift \OpenSans im PostScript-Format wird mit dem Bundle mitgeliefert, 
-% die veralteten müssen aus lizenrechtlichen Gründen installiert werden. Beim
-% Nichtvorhandensein der Schriften wird eine Warnung ausgegeben und eine
-% Rückfallebene definiert.
-% 
+% Die Schrift \OpenSans im PostScript-Format wird vom Paket \pkg{opensans} 
+% geliefert, die veralteten Schriften müssen aus lizenrechtlichen Gründen 
+% installiert werden. Beim Nichtvorhandensein der Schriften wird eine Warnung 
+% ausgegeben und eine Rückfallebene definiert.
+% \ToDo{Warnung, falls Paket \pkg{opensans} manuell geladen wurde}[v2.06]
+%    \begin{macrocode}
+\newcommand*\tud@cdfont@check{%
+  \if@tud@cdoldfont@active%
+    \tud@cdfont@@check[Univers]{%
+      Light,,Bold,Black,%
+      LightOblique,Oblique,BoldOblique,BlackOblique%
+    }{\tud@cdfont@fam@lf}{@tud@cdfont@fam@exist}%
+    \tud@cdfont@@check{DIN-Bold}{\tud@cdfont@db}{@tud@cdfont@db@exist}%
+    \tud@cdfont@@@check{OML,OMS}{\tud@cdfont@fam@lf}%
+    \tud@cdfont@@@check{OML,OMS}{\tud@cdfont@db}%
+  \else%
+    \if@tud@cdfont@active%
+      \IfFileExists{opensans.sty}{}{\RequirePackage{opensans}}%
+    \fi%
+    \tud@cdfont@@check[OpenSans]{%
+      Light,Regular,SemiBold,Bold,ExtraBold,%
+      LightItalic,Italic,SemiBoldItalic,BoldItalic,ExtraBoldItalic%
+    }{\tud@cdfont@fam@lf,\tud@cdfont@fam@osf}{@tud@cdfont@fam@exist}%
+  \fi%
+}
+%    \end{macrocode}
+% Dieses Makro prüft auf das Vorhandensein der Schriften für den Fließtext. 
 % Im optionalen Argument wird der Präfix für die OTF-Schriften angegeben, im
 % ersten obligatorischen Argument die einzelnen Suffixe für die verschiedenen
 % Schnitte. Im zweiten Argument die zu prüfenden Postscript-Schriftfamilien und
 % im letzten der zu setzende Schalter.
 %    \begin{macrocode}
-\newcommand*\tud@cdfont@check[4][]{%
+\newcommand*\tud@cdfont@@check[4][]{%
   \@tud@res@swatrue%
   \def\tud@res@a##1{%
     \@tud@res@swafalse%
-    \tud@cdfont@missing{##1}%
+    \tud@cdfont@missing{##1}{\tud@cdfont@wrn}%
   }%
 %    \end{macrocode}
 % Für jede der OTF-Schriften wird eine Warnung ausgegeben, falls diese nicht 
@@ -342,13 +414,15 @@
 % Der zu prüfenden Schriftname wird mit \cs{lowercase} in Minuskeln in 
 % \cs{tud@res@c} expandiert.
 %    \begin{macrocode}
-        \tud@lowerstring\tud@res@c{##1##2.fd}%
+        \tud@lowerstring\tud@res@b{##1##2.fd}%
 %    \end{macrocode}
 % Existiert die Schrift nicht, wird die entsprechende Warnung ausgegeben.
 %    \begin{macrocode}
         \edef\tud@res@a{%
           \endgroup%
-          \noexpand\IfFileExists{\tud@res@c}{}{\noexpand\tud@res@a{\tud@res@c}}%
+          \noexpand\IfFileExists{\tud@res@b}{}{%
+            \noexpand\tud@res@a{\tud@res@b}%
+          }%
         }%
       \tud@res@a%
     }%
@@ -364,12 +438,37 @@
     \boolfalse{#4}%
   \fi%
 }
-\newcommand*\tud@cdfont@missing@wrn{}
-\newcommand*\tud@cdfont@missing[1]{%
+%    \end{macrocode}
+% Hiermit wird auf die PostScript"=Schriften in den Kodierungen für den 
+% Mathematiksatz geprüft.
+%    \begin{macrocode}
+\newcommand*\tud@cdfont@@@check[2]{%
+  \def\tud@res@a##1##2{%
+    \tud@cdfont@missing[##1]{##2}{\tud@cdmath@wrn}%
+    \tud@locked@bool@preset{@tud@cdmath@active}{false}%
+  }%
+  \def\tud@res@b##1##2{%
+    \begingroup%
+      \tud@lowerstring\tud@res@b{##1##2.fd}%
+      \edef\tud@res@a{%
+        \endgroup%
+        \noexpand\IfFileExists{\tud@res@b}{}{%
+          \noexpand\tud@res@a{##1}{\tud@res@b}%
+        }%
+      }%
+    \tud@res@a%
+  }%
+  \@for\tud@res@c:={#1}\do{\tud@res@b{\tud@res@c}{#2}}%
+}
+%    \end{macrocode}
+% Das Makro für die Erstellung einer Warnung bei fehlenden Schriften. Diese 
+% wird an den Hook im letzten Argument angehängt.
+%    \begin{macrocode}
+\newcommand*\tud@cdfont@missing[3][\encodingdefault]{%
   \begingroup%
     \def\tud@res@a{%
-      `#1' font\MessageBreak%
-      not found for `\encodingdefault' encoding.\MessageBreak%
+      `#2' font\MessageBreak%
+      not found for `#1' encoding.\MessageBreak%
     }%
     \if@tud@x@fontspec@enabled%
       \appto\tud@res@a{%
@@ -384,11 +483,11 @@
       \if@tud@cdoldfont@active%
         \def\tud@res@b{T1,OT1}%
       \else%
-        \def\tud@res@b{T1,LY1,OT1,T2A,T2B,T2C,X2,OT2}%
+        \def\tud@res@b{T1,OT1,T2A,T2B,T2C,X2,LGR}%
       \fi%
       \@tud@res@swafalse%
       \@for\tud@res@c:=\tud@res@b\do{%
-        \ifstr{\tud@res@c}{\encodingdefault}{\@tud@res@swatrue}{}%
+        \ifstr{\tud@res@c}{#1}{\@tud@res@swatrue}{}%
       }%
 %    \end{macrocode}
 % Wird eine unterstützte Kodierung verwendet, müssen die Schriften installiert 
@@ -396,43 +495,48 @@
 %    \begin{macrocode}
       \if@tud@res@swa%
         \appto\tud@res@a{%
-          You should try to install the necessary fonts\MessageBreak%
+          You should %
           \if@tud@cdoldfont@active%
+            try to install the necessary fonts\MessageBreak%
             with a installation script listed in the manual%
           \else%
-            by updating your distribution%
+            install package `opensans'%
           \fi%
         }%
       \else%
-        \ifstr{\encodingdefault}{TU}{%
-          \appto\tud@res@a{%
-            You should either load package `fontspec'\MessageBreak%
-            or %
+        \ifstr{\encodingdefault}{#1}{%
+          \ifstr{TU}{#1}{%
+            \appto\tud@res@a{%
+              You should either load package `fontspec'\MessageBreak%
+              or %
+            }%
+          }{%
+            \appto\tud@res@a{Please }%
           }%
-        }{%
-          \appto\tud@res@a{Please }%
-        }%
-        \appto\tud@res@a{%
-          choose a possible encoding with package\MessageBreak%
-          `fontenc' (\tud@res@b)%
-        }%
+          \appto\tud@res@a{%
+            choose a possible encoding with package\MessageBreak%
+            `fontenc' (\tud@res@b).\MessageBreak%
+          }%
+        }{}%
       \fi%
     \fi%
-    \appto\tud@res@a{.\MessageBreak A fallback layout is used}%
+    \appto\tud@res@a{A fallback layout is used}%
     \edef\tud@res@c{%
 %<*class>
-      \noexpand\ClassWarning{\TUD@Class@Name}{\tud@res@a}%
+      \etex@unexpanded{\ClassWarning{\TUD@Class@Name}}%
 %</class>
 %<*package>
-      \noexpand\PackageWarning{tudscrfonts}{\tud@res@a}%
+      \etex@unexpanded{\PackageWarning{tudscrfonts}}%
 %</package>
+        {\tud@res@a}
     }%
-    \xappto\tud@cdfont@missing@wrn{\expandonce\tud@res@c}%
+    \xappto#3{\expandonce\tud@res@c}%
   \endgroup%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@cdfont@missing@wrn
 % \end{macro}^^A \tud@cdfont@missing
+% \end{macro}^^A \tud@cdfont@@@check
+% \end{macro}^^A \tud@cdfont@@check
 % \end{macro}^^A \tud@cdfont@check
 %
 % \subsection{Kompatibilität der Schriften}
@@ -726,7 +830,6 @@
 }
 \newcommand*\tud@cdfont@activate{%
   \@tud@cdfont@activetrue%
-  \tud@locked@bool@preset{@tud@cdmath@active}{true}%
 %    \end{macrocode}
 % Die Schrift im Querbalken wird bei den Klassen angepasst.
 %    \begin{macrocode}
@@ -738,14 +841,17 @@
   \fi%
 %</class>
   \TUD@SpecialOptionAtDocument{tud@font@set}%
+  \tud@locked@bool@preset{@tud@cdmath@active}{true}%
+  \TUD@SpecialOptionAtDocument{tud@math@set}%
 }
 \newcommand*\tud@cdfont@deactivate{%
   \@tud@cdfont@activefalse%
-  \tud@locked@bool@preset{@tud@cdmath@active}{false}%
 %<*class>
   \tud@locked@num@preset{tud@head@font@num}{0}%
 %</class>
   \TUD@SpecialOptionAtDocument{tud@font@set}%
+  \tud@locked@bool@preset{@tud@cdmath@active}{false}%
+  \TUD@SpecialOptionAtDocument{tud@math@set}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@cdfont@deactivate
@@ -1164,10 +1270,9 @@
   \fi%
 %    \end{macrocode}
 % Zum Ende werden einige Abstände abhängig von der gewählten Schriftgröße 
-% definiert. Danach erfolgt die Behandlung der Mathematikschriften und die 
-% gewählte Standardschrift aktiviert. Zum Schluss wird das Layout erneuert.
+% definiert. Danach wird gewählte Standardschrift aktiviert und für die Klassen 
+% das Layout erneuert.
 %    \begin{macrocode}
-  \ifundef{\tud@math@init}{\tud@math@set}{}%
   \tud@font@skip@set%
   \normalfont\selectfont%
 %<*class>
@@ -1235,12 +1340,12 @@
     \fi\fi%
   \fi%
   \if@tud@res@swa%
-    \tud@cdfont@missing@wrn%
+    \tud@cdfont@wrn%
   \fi%
 }
-\newcommand*\tud@cdfont@md{}
-\newcommand*\tud@cdfont@bf{}
-\newcommand*\tud@cdfont@ebf{}
+\newcommand*\tud@cdfont@md{m}
+\newcommand*\tud@cdfont@bf{b}
+\newcommand*\tud@cdfont@ebf{bx}
 \newcommand*\tud@cdfont@@set{%
   \if@tud@cdfont@heavy%
     \renewcommand*\tud@cdfont@md{m}%
@@ -1545,7 +1650,6 @@
           FontFace={bx}{it}{UniversBoldOblique},%
           FontFace={eb}{it}{UniversBlackOblique}%
         }%
-        \tud@x@fontspec@init{\tud@cdfont@fam@osf}{\tud@res@a}%
         \tud@x@fontspec@init{\tud@cdfont@fam@lf}{\tud@res@a}%
       \fi%
 %    \end{macrocode}
@@ -1651,7 +1755,7 @@
 %    \begin{macrocode}
       \newrobustcmd*\tud@db{%
         \usefont{\encodingdefault}{\tud@cdfont@db}{b}{n}%
-        \mathversion{tud@dm}%
+        \mathversion{tuddin}%
       }%
       \newrobustcmd*\dinbn{\tud@db}%
 %    \end{macrocode}
@@ -1661,7 +1765,7 @@
 %    \begin{macrocode}
     \else%
       \newrobustcmd*\tud@db{\sectfont}%
-      \newrobustcmd*\dinbn{\tud@cdfont@wrn{DIN-Bold}\tud@db}%
+      \newrobustcmd*\dinbn{\tud@cdfont@fallback@wrn{DIN-Bold}\tud@db}%
     \fi%
     \newcommand*\textdbn{}%
     \DeclareTextFontCommand\textdbn{\dinbn}%
@@ -1689,18 +1793,18 @@
 % \end{macro}^^A \univln
 % \begin{macro}{\tud@cdfont@fallback}
 % \changes{v2.05}{2015/12/14}{neu}^^A
-% \begin{macro}{\tud@cdfont@wrn}
+% \begin{macro}{\tud@cdfont@fallback@wrn}
 % \changes{v2.05}{2015/12/14}{neu}^^A
 % Hier wird die Rückfallebene für die Schriftschalter sowie die dazugehörige 
 % Warnung definiert.
 %    \begin{macrocode}
 \newcommand*\tud@cdfont@fallback[4]{%
   \newrobustcmd*#1{%
-    \tud@cdfont@wrn{#2}%
+    \tud@cdfont@fallback@wrn{#2}%
     \sffamily\csuse{#3series}\csuse{#4shape}%
   }%
 }
-\newcommand*\tud@cdfont@wrn[1]{%
+\newcommand*\tud@cdfont@fallback@wrn[1]{%
 %<*class>
   \ClassWarning{\TUD@Class@Name}%
 %</class>
@@ -1713,7 +1817,7 @@
   }%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@cdfont@wrn
+% \end{macro}^^A \tud@cdfont@fallback@wrn
 % \end{macro}^^A \tud@cdfont@fallback
 % \begin{macro}{\cdfont}
 % \changes{v2.04}{2015/03/04}{neu}^^A
@@ -2206,7 +2310,8 @@
     \TUD@bool@numkey,%
     {up}{0},{upright}{0},%
     {sl}{1},{slanted}{1},{it}{1},{italic}{1},%
-    {standard}{2},{tex}{2},{latex}{2},{standardgreek}{2},{standardgreeks}{2},%
+    {standard}{2},{std}{2},{tex}{2},{latex}{2},{stdgrk}{2},{stdgrks}{2},%
+    {standardgreek}{2},{standardgreeks}{2},%
     {texgreek}{2},{latexgreek}{2},{texgreeks}{2},{latexgreeks}{2}%
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
@@ -2227,158 +2332,205 @@
 % \end{option}^^A slantedGreeks
 % \end{option}^^A slantedGreek
 % \end{option}^^A slantedgreek
+% \begin{option}{lgrgreek}
+% \changes{v2.06}{2019/06/13}{neu}^^A
+% \begin{option}{lgrgreeks}
+% \changes{v2.06}{2019/06/13}{neu}^^A
+% \begin{option}{LGRgreek}
+% \changes{v2.06}{2019/06/13}{neu}^^A
+% \begin{option}{LGRgreeks}
+% \changes{v2.06}{2019/06/13}{neu}^^A
+% \begin{macro}{\if@tud@lgrgreek}
+% \changes{v2.06}{2019/06/13}{neu}^^A
+% Mit dieser Option lässt sich die Nutzung von griechischen Glyphen der aus der 
+% LGR-Kodierung der aktuellen Schriftfamilie für den Mathematiksatz aktivieren.
+%    \begin{macrocode}
+\newif\if@tud@lgrgreek
+\TUD@key{lgrgreek}[true]{\TUD@set@ifkey{lgrgreek}{@tud@lgrgreek}{#1}}
+\TUD@key{lgrgreeks}[true]{\TUDoptions{lgrgreek=#1}}
+\TUD@key{LGRgreek}[true]{\TUDoptions{lgrgreek=#1}}
+\TUD@key{LGRgreeks}[true]{\TUDoptions{lgrgreek=#1}}
+%    \end{macrocode}
+% \end{macro}^^A \if@tud@lgrgreek
+% \end{option}^^A LGRgreeks
+% \end{option}^^A LGRgreek
+% \end{option}^^A lgrgreeks
+% \end{option}^^A lgrgreek
 %
 % \iffalse
 %</option>
 %<*body>
 % \fi
 %
-% \begin{macro}{\tud@slantedgreek@check}
-% \changes{v2.05d}{2016/09/22}{neu}^^A
-% Für die Verwendung der griechischen Glyphen im Mathematikmodus wird versucht, 
-% ein hohes Maß an Kompatibilität für andere Pakete zu gewährleisten. Es wird 
-% versucht zu erkennen, ob Pakete mit einer Option wie \opt{slantedGreek}, 
-% \opt{frenchmath} oder ähnlichem geladen wurde. Hierfür wird nach Definitionen 
-% für \cs{upalpha} als auch \cs{itGamma} gesucht. Existieren die Makros nicht, 
-% wird zumindest auf die aktuelle Definition von \cs{Gamma} geprüft und mit der 
-% standardmäßigen Variant der Glyphe verglichen. Wurde eine passende Definition 
-% gefunden, wird die Option \opt{slantedgreek} voreingestellt.
+% \begin{macro}{\tud@if@issymbolfont}
+% \changes{v2.06}{2019/06/17}{neu}^^A
+% \begin{macro}{\tud@if@ismathalphabet}
+% \changes{v2.06}{2019/06/17}{neu}^^A
+% Diese Abfragen prüfen, ob der gegebene Bezeichner bzw. das gegebene Makro 
+% für eine Deklaration mit \cs{DeclareSymbolFont} bzw. \cs{DeclareMathAlphabet} 
+% verwendet wurde.
 %    \begin{macrocode}
-\newcommand*\tud@slantedgreek@check{%
+\newcommand*\tud@if@issymbolfont[1]{%
   \begingroup%
-%    \end{macrocode}
-% Wird keine Änderung durch ein Paket erkannt, werden die Glyphen ab der 
-% \TUDScript-Version~v2.06 kursiv gesetzt. Dies betrifft insbesondere die
-% Majuskeln, welche bei \LaTeX{} normalerweise aufrecht gesetzt werden.
-%    \begin{macrocode}
-    \def\tud@res@c{%
-      \tud@if@v@lower{2.06}{%
-        \TUD@key@preset{slantedgreek}{standard}%
-      }{%
-        \TUD@key@preset{slantedgreek}{true}%
-      }%
+    \edef\tud@res@a{%
+      \noexpand\in@\expandafter\noexpand%
+        \csname sym#1\endcsname%
+        {\expandonce\group@list}%
     }%
-    \@tud@res@swafalse%
-    \ifcsdef{upalpha}{%
-      \ifx\upalpha\alpha%
-        \@tud@res@swatrue%
-      \fi%
-    }{}%
-%    \end{macrocode}
-% Existiert \cs{upalpha} und ist mit \cs{alpha} identisch, werden \emph{alle} 
-% griechischen Glyphen aufrecht gesetzt.
-%    \begin{macrocode}
-    \if@tud@res@swa%
-      \def\tud@res@c{\TUD@key@preset{slantedgreek}{false}}%
+    \tud@res@a%
+    \ifin@%
+      \aftergroup\@firstoftwo%
     \else%
-%    \end{macrocode}
-% Existiert \cs{itGamma} und ist mit \cs{Gamma} oder\dots
-%    \begin{macrocode}
-      \ifcsdef{itGamma}{%
-        \ifx\itGamma\Gamma%
-          \@tud@res@swatrue%
-        \fi%
-      }{%
-%    \end{macrocode}
-% \dots\cs{Gamma} entspricht einer möglichen Standarddefnition,\dots
-%    \begin{macrocode}
-        \let\tud@res@a\relax%
-        \let\tud@res@b\relax%
-        \DeclareMathSymbol{\tud@res@a}{\mathalpha}{letters}{0}%
-        \DeclareMathSymbol{\tud@res@b}{\mathord}{letters}{0}%
-        \ifx\Gamma\tud@res@a\relax\@tud@res@swatrue\fi%
-        \ifx\Gamma\tud@res@b\relax\@tud@res@swatrue\fi%
-      }%
-%    \end{macrocode}
-%\dots werden \emph{alle} griechischen Glyphen kursiv gesetzt.
-%    \begin{macrocode}
-      \if@tud@res@swa%
-        \def\tud@res@c{\TUD@key@preset{slantedgreek}{true}}%
-      \fi%
+      \aftergroup\@secondoftwo%
     \fi%
-    \edef\tud@res@c{\endgroup\expandonce\tud@res@c}%
-  \tud@res@c%
-  \let\tud@slantedgreek@check\relax%
+  \endgroup%
 }
+\@onlypreamble\tud@if@issymbolfont
+\newcommand*\tud@if@ismathalphabet[1]{%
+  \begingroup%
+    \edef\tud@res@a{%
+      \noexpand\in@\expandafter\noexpand%
+        \csname\expandafter\@gobble\string#1\space\endcsname%
+        {\expandonce\alpha@list}%
+    }%
+    \tud@res@a%
+    \ifin@%
+      \aftergroup\@firstoftwo%
+    \else%
+      \aftergroup\@secondoftwo%
+    \fi%
+  \endgroup%
+}
+\@onlypreamble\tud@if@ismathalphabet
 %    \end{macrocode}
-% \end{macro}^^A \tud@slantedgreek@check
-% \begin{macro}{\tud@math@greek@loop}
+% \end{macro}^^A \tud@if@ismathalphabet
+% \end{macro}^^A \tud@if@issymbolfont
+% \begin{macro}{\tud@math@loop@greeks@all}
 % \changes{v2.04}{2015/03/10}{neu}^^A
-% \begin{macro}{\tud@math@greek@loop@uc}
+% \begin{macro}{\tud@math@loop@greeks@uc}
 % \changes{v2.06}{2018/07/17}{neu}^^A
-% \begin{macro}{\tud@math@greek@loop@lc}
+% \begin{macro}{\tud@math@loop@greeks@lc}
 % \changes{v2.06}{2018/07/17}{neu}^^A
 % Um Änderungen an den griechischen Glyphen vornehmen zu können, wird das Makro
-% \cs{tud@math@greek@loop} definert, mit dem eine Namensliste der Buchstaben
+% \cs{tud@math@loop@greeks@all} definert, mit dem eine Namensliste der Glyphen
 % durchlaufen wird. Dabei wird in Majuskeln und Minuskeln unterschieden.
 %    \begin{macrocode}
-\newcommand*\tud@math@greek@loop[1]{%
-  \tud@math@greek@loop@uc{#1}%
-  \tud@math@greek@loop@lc{#1}%
+\newcommand*\tud@math@loop@greeks@all[1]{%
+  \tud@math@loop@greeks@uc{#1}%
+  \tud@math@loop@greeks@lc{#1}%
 }
-\newcommand*\tud@math@greek@loop@uc[1]{%
+\newcommand*\tud@math@loop@greeks@uc[1]{%
   \@for\@tempa:={%
     Gamma,Delta,Theta,Lambda,Xi,Pi,Sigma,Upsilon,Phi,Psi,Omega%
-  }\do{#1{\@tempa}}%
+  }\do{\expandafter#1\expandafter{\@tempa}}%
 }
-\newcommand*\tud@math@greek@loop@lc[1]{%
+\newcommand*\tud@math@loop@greeks@lc[1]{%
   \@for\@tempa:={%
     alpha,beta,gamma,delta,epsilon,zeta,eta,theta,iota,kappa,lambda,%
     mu,nu,xi,pi,rho,sigma,tau,upsilon,phi,chi,psi,omega,%
     varepsilon,vartheta,varpi,varrho,varsigma,varphi%
-  }\do{#1{\@tempa}}%
+  }\do{\expandafter#1\expandafter{\@tempa}}%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@math@greek@loop@lc
-% \end{macro}^^A \tud@math@greek@loop@uc
-% \end{macro}^^A \tud@math@greek@loop
-% \begin{macro}{\tud@math@init}
-% \changes{v2.04}{2015/03/10}{neu}^^A
+% \end{macro}^^A \tud@math@loop@greeks@lc
+% \end{macro}^^A \tud@math@loop@greeks@uc
+% \end{macro}^^A \tud@math@loop@greeks@all
+% \begin{macro}{\tud@cdmath@init}
+% \changes{v2.06}{2018/07/02}{neu}^^A
+% \begin{macro}{\tud@cdmath@@init}
+% \changes{v2.06}{2018/07/02}{neu}^^A
+% \begin{macro}{\mv@tudnormal}
+% \begin{macro}{\mv@tudbold}
+% \begin{macro}{\mv@tuddin}
+% \begin{macro}{\tud@mathversion}
+% \changes{v2.06}{2019/06/17}{neu}^^A
+% \begin{macro}{\MTDeclareVersion}
+% \changes{v2.06}{2019/06/17}{neu}^^A
+% \begin{macro}{\MTversion@@}
+% \changes{v2.06}{2019/06/17}{neu}^^A
+% Die folgenden Befehle dienen allesamt für das Bereitstellen der Schriften des 
+% \CDs im mathematischen Satz. Hierbei kommt das Paket \pkg{mathastext} zum 
+% Einsatz, falls \OpenSans verwendet wird.
 %    \begin{macrocode}
-\newcommand*\tud@math@init{%
+\newcommand*\mv@tudnormal{}
+\newcommand*\mv@tudbold{}
+\newcommand*\mv@tuddin{}
 %    \end{macrocode}
-% Wird das Paket \pkg{unicode-math} verwendet, werden keine Einstellungen für 
-% die Mathematikschriften vorgenommen\dots
+% Um das Umschalten der Mathematikversion mit \cs{mathversion} auch nutzen zu 
+% können, wenn \pkg{mathastext} für die Schriften des \CDs aktiv ist, wird ein 
+% Wrappermakro benötigt, welches im Bedarfsfall nachträglich \cs{MTversion@@} 
+% aufruft, was normalerweise mit \cs{MTversion*} geschieht.
 %    \begin{macrocode}
-  \@ifpackageloaded{unicode-math}{%
+\AfterPackage*{mathastext}{%
+  \CheckCommand*\MTversion{\@ifstar\MTversion@s\MTversion@}%
+  \CheckCommand*\MTversion@s[1]{\mathversion{#1}\MTversion@@{#1}}%
+  \newrobustcmd*\tud@mathversion[1]{%
+    \tud@cs@use{mathversion}{#1}%
     \if@tud@cdmath@active%
-%<*class>
-      \ClassWarningNoLine{\TUD@Class@Name}%
-%</class>
-%<*package>
-      \PackageWarningNoLine{tudscrfonts}%
-%</package>
-      {%
-        Because package `unicode-math' was loaded, setting up\MessageBreak%
-        corporate design fonts in math mode is deactivated%
+      \ifstr{#1}{normal}{%
+        \MTversion@@{tudnormal}%
+      }{%
+        \ifstr{#1}{bold}{%
+          \MTversion@@{tudbold}%
+        }{}%
       }%
     \fi%
-    \tud@locked@bool@set{@tud@cdmath@active}{false}%
-    \let\tud@math@set\relax%
-  }{%
+  }%
+  \AtEndPreamble{%
+    \tud@cs@store{mathversion}%
+    \tud@cs@letltx{mathversion}{tud@mathversion}%
+  }%
+}
+%    \end{macrocode}
+% Mit \cs{tud@cdmath@init} werden für den Mathematikmodus die Schriften im 
+% \CD deklariert.
+%    \begin{macrocode}
+\newcommand*\tud@cdmath@init{%
+%    \end{macrocode}
+% Das Paket \pkg{iwona} wird genutzt, um fehlende Glyphen und Symbole für die 
+% Schriften des \CDs zu ergänzen.
+%    \begin{macrocode}
+  \if@tud@cdmath@active%
+    \IfFileExists{iwona.sty}{}{\RequirePackage{iwona}}%
+  \fi%
+%    \end{macrocode}
+% Für die Schriftfamilie \OpenSans existieren leider bisher keine Kodierung für 
+% den Mathematikmodus (\val{OML}, \val{OMS}, \val{OMX}), weshalb hierfür das 
+% Paket \pkg{mathastext} genutzt wird, um trotzdem einen mathematischen Satz zu 
+% ermöglichen.
+%    \begin{macrocode}
+  \if@tud@cdoldfont@active\else%
+    \PassOptionsToPackage{%
+      noequal,subdued,defaultalphabets,defaultmathsizes,nohbar,nosmalldelims%
+    }{mathastext}%
+    \RequirePackage{mathastext}[2018/08/22]%
+  \fi%
+  \providecommand*\MTDeclareVersion[6][]{\DeclareMathVersion{##2}}%
+  \providecommand*\MTversion@@[1]{}%
+  \tud@cdmath@@init{\tud@cdfont@fam@lf}{\tud@ttfont@fam}%
 %    \end{macrocode}
 % Die aufrechten griechischen Minuskeln sind in den Type1-Schriften von 
 % \LaTeXe{} leider nicht enthalten. Deshalb werden behelfsmäßig die kursiven
 % Minuskeln genutzt, wenn die \OpenSans nicht für den Mathematikmodus verwendet
 % wird.
 %    \begin{macrocode}
-    \ifundef{\symupletters}{%
-      \DeclareSymbolFont{upletters}{OML}{cmm}{m}{it}%
-      \SetSymbolFont{upletters}{bold}{OML}{cmm}{b}{it}%
+    \ifundef{\symlettersupright}{%
+      \DeclareSymbolFont{lettersupright}{OML}{cmm}{m}{it}%
+      \SetSymbolFont{lettersupright}{bold}{OML}{cmm}{b}{it}%
     }{}%
 %    \end{macrocode}
 % Die Symbole für aufrechte und kursive griechische Glyphen werden definiert.
 %    \begin{macrocode}
     \@tempcnta=\z@\relax%
-    \tud@math@greek@loop@uc\tud@math@greek@declare@uc%
-    \tud@math@greek@loop@lc\tud@math@greek@declare@lc%
+    \tud@math@loop@greeks@uc\tud@math@greek@declare@uc%
+    \tud@math@loop@greeks@lc\tud@math@greek@declare@lc%
 %    \end{macrocode}
-% Für die griechischen Glyphen wird mit \cs{tud@slantedgreek@check} geprüft, ob
-% diese durch ein Paket explizit auf kursive Majuskeln oder eine vollständig 
-% aufrechte Variante gesetzt wurden. Ist dies der Fall, wird der Standardwert
-% für die Option \opt{slantedgreek} entsprechend angepasst.
+% Für die griechischen Glyphen wird mit \cs{tud@math@checkslanted@greeks} 
+% geprüft, ob diese durch ein Paket explizit auf kursive Majuskeln oder eine 
+% vollständig aufrechte Variante gesetzt wurden. Ist dies der Fall, wird der
+% Standardwert für die Option \opt{slantedgreek} entsprechend angepasst.
 %    \begin{macrocode}
-    \tud@slantedgreek@check%
+    \tud@math@checkslanted@greeks%
 %    \end{macrocode}
 % Anschließend erfolgt die \emph{Intialisierung} mit \cs{tud@math@greek@init}, 
 % wobei das obligatorische Argument angibt, ob die Glyphen der Schleife kursiv 
@@ -2386,12 +2538,12 @@
 % Standardschriften für den Mathematiksatz genutzt werden.
 %    \begin{macrocode}
     \ifcase\tud@slantedgreek@num\relax% upright
-      \tud@math@greek@loop{\tud@math@greek@init{false}}%
+      \tud@math@loop@greeks@all{\tud@math@greek@init{false}}%
     \or% slanted
-      \tud@math@greek@loop{\tud@math@greek@init{true}}%
+      \tud@math@loop@greeks@all{\tud@math@greek@init{true}}%
     \or% standard
-      \tud@math@greek@loop@uc{\tud@math@greek@init{false}}%
-      \tud@math@greek@loop@lc{\tud@math@greek@init{true}}%
+      \tud@math@loop@greeks@uc{\tud@math@greek@init{false}}%
+      \tud@math@loop@greeks@lc{\tud@math@greek@init{true}}%
     \fi%
 %    \end{macrocode}
 % Hier werden die Schriften des \CDs für den Mathematikmodus initialisiert.
@@ -2402,10 +2554,262 @@
 % der Option \opt{cdfont} die benötigten Mathematikversionen geladen.
 %    \begin{macrocode}
     \tud@math@set%
+}
+\newcommand*\tud@cdmath@@init[2]{%
+%    \end{macrocode}
+% Mit \cs{tud@cdfont@@set} werden die Schriftstärken gemäß den ausgewählten 
+% Schriftoptionen aktiviert (\cs{tud@cdfont@md}, \cs{tud@cdfont@bf}, 
+% \cs{tud@cdfont@ebf}), um diese auch für die Mathematikschriften zu nutzen.
+%    \begin{macrocode}
+  \tud@cdfont@@set%
+  \tud@ttfont@@set%
+%    \end{macrocode}
+% Für \OpenSans wird mangels der Kodierungen \val{OML}, \val{OMS} und \val{OMX} 
+% zur Deklaration der Mathematikversionen der Befehl \cs{MTDeclareVersion} aus
+% dem Paket \pkg{mathastext} genutzt.
+%    \begin{macrocode}
+  \if@tud@cdoldfont@active%
+    \DeclareMathVersion{tudnormal}%
+    \DeclareMathVersion{tudbold}%
+  \else%
+    \MTDeclareVersion[it]{tudnormal}{T1}{#1}{\tud@cdfont@md}{n}%
+    \MTDeclareVersion[it]{tudbold}{T1}{#1}{\tud@cdfont@bf}{n}%
+  \fi%
+  \SetSymbolFont{operators}{tudnormal}{OT1}{#1}{\tud@cdfont@md}{n}%
+  \SetSymbolFont{operators}{tudbold}{OT1}{#1}{\tud@cdfont@bf}{n}%
+  \SetSymbolFont{letters}{tudnormal}{OML}{#1}{\tud@cdfont@md}{it}%
+  \SetSymbolFont{letters}{tudbold}{OML}{#1}{\tud@cdfont@bf}{it}%
+%    \end{macrocode}
+% Für die alten Schriften exisiteren keine aufrechten griechischen Minuskeln.
+%    \begin{macrocode}
+  \if@tud@cdoldfont@active%
+    \SetSymbolFont{lettersupright}{tudnormal}{OML}{#1}{\tud@cdfont@md}{it}%
+    \SetSymbolFont{lettersupright}{tudbold}{OML}{#1}{\tud@cdfont@bf}{it}%
+  \else%
+    \SetSymbolFont{lettersupright}{tudnormal}{OML}{#1}{\tud@cdfont@md}{n}%
+    \SetSymbolFont{lettersupright}{tudbold}{OML}{#1}{\tud@cdfont@bf}{n}%
+  \fi%
+  \SetSymbolFont{symbols}{tudnormal}{OMS}{#1}{\tud@cdfont@md}{n}%
+  \SetSymbolFont{symbols}{tudbold}{OMS}{#1}{\tud@cdfont@bf}{n}%
+  \SetSymbolFont{largesymbols}{tudnormal}{OMX}{#1}{\tud@cdfont@md}{n}%
+  \SetSymbolFont{largesymbols}{tudbold}{OMX}{#1}{\tud@cdfont@bf}{n}%
+  \SetMathAlphabet{\mathnormal}{tudnormal}{OML}{#1}{\tud@cdfont@md}{it}%
+  \SetMathAlphabet{\mathnormal}{tudbold}{OML}{#1}{\tud@cdfont@bf}{it}%
+  \SetMathAlphabet{\mathrm}{tudnormal}{OT1}{#1}{\tud@cdfont@md}{n}%
+  \SetMathAlphabet{\mathrm}{tudbold}{OT1}{#1}{\tud@cdfont@bf}{n}%
+  \SetMathAlphabet{\mathsf}{tudnormal}{OT1}{#1}{\tud@cdfont@md}{n}%
+  \SetMathAlphabet{\mathsf}{tudbold}{OT1}{#1}{\tud@cdfont@bf}{n}%
+  \SetMathAlphabet{\mathit}{tudnormal}{OT1}{#1}{\tud@cdfont@md}{it}%
+  \SetMathAlphabet{\mathit}{tudbold}{OT1}{#1}{\tud@cdfont@bf}{it}%
+  \SetMathAlphabet{\mathbf}{tudnormal}{OT1}{#1}{\tud@cdfont@bf}{n}%
+  \SetMathAlphabet{\mathbf}{tudbold}{OT1}{#1}{\tud@cdfont@ebf}{n}%
+  \SetMathAlphabet{\mathtt}{tudnormal}{OT1}{#2}{\tud@ttfont@md}{n}%
+  \SetMathAlphabet{\mathtt}{tudbold}{OT1}{#2}{\tud@ttfont@bf}{n}%
+  \IfFileExists{ueus.fd}{%
+    \SetMathAlphabet{\mathcal}{tudnormal}{U}{eus}{m}{n}%
+    \SetMathAlphabet{\mathcal}{tudbold}{U}{eus}{b}{n}%
+  }{}%
+  \ifundef{\mathfrak}{}{%
+    \IfFileExists{ueuf.fd}{%
+      \SetMathAlphabet{\mathfrak}{tudnormal}{U}{euf}{m}{n}%
+      \SetMathAlphabet{\mathfrak}{tudbold}{U}{euf}{b}{n}%
+    }{}%
+  }%
+%    \end{macrocode}
+% Für die alten Schriften sind noch Nacharbeiten notwendig. Im Fließtext werden 
+% für die lateinischen Lettern die \Univers"=Schriften des \CDs verwendet.
+% Darin enthalten sind die auch die griechischen Buchstaben aus dem Paket
+% \pkg{cmbright}. Zusätzlich werden aus dem \pkg{iwona}-Paket die mathematische
+% Symbole verwendet.
+%    \begin{macrocode}
+  \if@tud@cdoldfont@active%
+    \SetSymbolFont{largesymbols}{tudnormal}{OMX}{iwona}{m}{n}%
+    \SetSymbolFont{largesymbols}{tudbold}{OMX}{iwona}{b}{n}%
+%    \end{macrocode}
+% Das Paket \pkg{cmbright} bringt zusätzlich noch Schriftschnitte für das Paket
+% \pkg{amsfonts} mit. Diese werden gegebenenfalls geladen.
+%    \begin{macrocode}
+    \@ifpackageloaded{amsfonts}{%
+      \DeclareFontFamily{U}{\tud@cdfont@fam@lf a}{}%
+      \DeclareFontShape{U}{\tud@cdfont@fam@lf a}{m}{n}{<->cmbras10}{}%
+      \SetSymbolFont{AMSa}{tudnormal}{U}{\tud@cdfont@fam@lf a}{m}{n}%
+      \SetSymbolFont{AMSa}{tudbold}{U}{\tud@cdfont@fam@lf a}{m}{n}%
+      \DeclareFontFamily{U}{\tud@cdfont@fam@lf b}{}%
+      \DeclareFontShape{U}{\tud@cdfont@fam@lf b}{m}{n}{<->cmbrbs10}{}%
+      \SetSymbolFont{AMSb}{tudnormal}{U}{\tud@cdfont@fam@lf b}{m}{n}%
+      \SetSymbolFont{AMSb}{tudbold}{U}{\tud@cdfont@fam@lf b}{m}{n}%
+    }{}%
+%    \end{macrocode}
+% Auch für die Schrift \DIN werden mathematische Glyphen bereitgestellt. Diese
+% wurden aus dem \pkg{iwona}-Paket entnommen. Auch die verwendeten Symbole
+% stammen aus diesem Paket.
+%    \begin{macrocode}
+    \DeclareMathVersion{tuddin}%
+    \SetSymbolFont{operators}{tuddin}{OT1}{\tud@cdfont@db}{b}{n}%
+    \SetSymbolFont{letters}{tuddin}{OML}{\tud@cdfont@db}{b}{sl}%
+    \SetSymbolFont{lettersupright}{tuddin}{OML}{\tud@cdfont@db}{b}{sl}%
+    \SetSymbolFont{symbols}{tuddin}{OMS}{\tud@cdfont@db}{b}{n}%
+    \SetSymbolFont{largesymbols}{tuddin}{OMX}{iwona}{ebc}{n}%
+    \SetMathAlphabet{\mathnormal}{tuddin}{OML}{\tud@cdfont@db}{b}{sl}%
+    \SetMathAlphabet{\mathrm}{tuddin}{OT1}{\tud@cdfont@db}{b}{n}%
+    \SetMathAlphabet{\mathsf}{tuddin}{OT1}{\tud@cdfont@db}{b}{n}%
+    \SetMathAlphabet{\mathit}{tuddin}{OT1}{\tud@cdfont@db}{b}{sl}%
+    \SetMathAlphabet{\mathbf}{tuddin}{OT1}{\tud@cdfont@db}{b}{n}%
+    \SetMathAlphabet{\mathtt}{tuddin}{OT1}{\tud@ttfont@fam}{b}{n}%
+    \IfFileExists{ueus.fd}{%
+      \SetMathAlphabet{\mathcal}{tuddin}{U}{eus}{b}{n}%
+    }{}%
+    \ifundef{\mathfrak}{}{%
+      \IfFileExists{ueuf.fd}{%
+        \SetMathAlphabet{\mathfrak}{tuddin}{U}{euf}{b}{n}%
+      }{}%
+    }%
+%    \end{macrocode}
+% Daran anschließend wird die zuvor definierte Schrift in einer Box verwendet,
+% um das Laden der Schriftdefinitionen am Dokumentbeginn zu forcieren.
+%    \begin{macrocode}
+    \AtBeginDocument{\sbox\z@{\tud@db$ $}}%
+  \fi%
+}
+%    \end{macrocode}
+% \end{macro}^^A \MTversion@@
+% \end{macro}^^A \MTDeclareVersion
+% \end{macro}^^A \tud@mathversion
+% \end{macro}^^A \mv@tuddin
+% \end{macro}^^A \mv@tudbold
+% \end{macro}^^A \mv@tudnormal
+% \end{macro}^^A \tud@cdmath@@init
+% \end{macro}^^A \tud@cdmath@init
+% \begin{macro}{\tud@math@set}
+% Mit diesem Befehl werden die Einstellungen für den Mathematiksatz übernommen.
+% Die Option \opt{cdmath} wird ausgewertet, um zwischen dem Standard"~ und
+% neuem Mathematiksatz hin"~ und herschalten zu können. Dabei wird zum einen
+% das Mapping der griechischen Glyphen geändert, zum anderen werden die
+% originalen Mathematikversionen überschrieben respektive wiederhergestellt.
+%    \begin{macrocode}
+\newcommand*\tud@math@set{%
+%    \end{macrocode}
+% Wird das Paket \pkg{fontspec} verwendet, sollte die Option \opt{no-math} 
+% übergeben werden, falls die Mathematikschriften des \CDs zum Einsatz kommen. 
+% Wurde dieser nicht angegeben, wird eine einmalige Warnung erzeugt.
+%    \begin{macrocode}
+  \if@tud@cdmath@active%
+    \tud@cs@store{mv@normal}%
+    \tud@cs@store{mv@bold}%
+    \let\mv@normal\mv@tudnormal%
+    \let\mv@bold\mv@tudbold%
+    \tud@math@loop@greeks@all\tud@cdmath@greek@shape@set%
+    \tud@math@loop@greeks@uc\tud@cdmath@greek@var@set%
+    \ifcase\tud@slantedgreek@num\relax% upright
+      \tud@math@loop@greeks@all\tud@math@greek@upright%
+    \or% slanted
+      \tud@math@loop@greeks@all\tud@math@greek@slanted%
+    \or% standard
+      \tud@math@loop@greeks@uc\tud@math@greek@upright%
+      \tud@math@loop@greeks@lc\tud@math@greek@slanted%
+    \fi%
+  \else%
+    \tud@cs@restore{mv@normal}%
+    \tud@cs@restore{mv@bold}%
+    \tud@math@loop@greeks@all\tud@cdmath@greek@shape@reset%
+    \tud@math@loop@greeks@uc\tud@cdmath@greek@var@reset%
+  \fi%
+  \mathversion{normal}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@math@set
+% \begin{macro}{\tud@cdmath@greek@shape@set}
+% \changes{v2.04}{2015/03/10}{neu}^^A
+% \begin{macro}{\tud@cdmath@greek@shape@reset}
+% \changes{v2.04}{2015/03/10}{neu}^^A
+% Mit diesen beiden Befehlen kann innerhalb des Dokumentes problemlos zwischen 
+% griechischen Buchstaben für die CD-Schriften und den normalen gewechselt 
+% werden.
+%    \begin{macrocode}
+\newcommand*\tud@cdmath@greek@shape@set[1]{%
+  \tud@cs@store{#1}%
+  \tud@cs@store{up#1}%
+  \tud@cs@store{it#1}%
+  \tud@cs@store{other#1}%
+  \csletcs{up#1}{tud@math@greek@up#1}%
+  \csletcs{it#1}{tud@math@greek@it#1}%
+  \tud@cdmath@greek@comp@set{#1up}{up#1}%
+  \tud@cdmath@greek@comp@set{#1it}{it#1}%
+  \tud@cdmath@greek@comp@set{sl#1}{it#1}%
+  \tud@cdmath@greek@comp@set{#1sl}{it#1}%
+}
+\newcommand*\tud@cdmath@greek@shape@reset[1]{%
+  \tud@cs@restore{#1}%
+  \tud@cs@restore{up#1}%
+  \tud@cs@restore{it#1}%
+  \tud@cs@restore{other#1}%
+  \tud@cdmath@greek@comp@reset{#1up}%
+  \tud@cdmath@greek@comp@reset{#1it}%
+  \tud@cdmath@greek@comp@reset{sl#1}%
+  \tud@cdmath@greek@comp@reset{#1sl}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@cdmath@greek@shape@reset
+% \end{macro}^^A \tud@cdmath@greek@shape@set
+% \begin{macro}{\tud@cdmath@greek@comp@set}
+% \changes{v2.06}{2018/07/02}{neu}^^A
+% \begin{macro}{\tud@cdmath@greek@comp@reset}
+% \changes{v2.06}{2018/07/02}{neu}^^A
+% Es gibt eine Vielzahl von Paketen, die das Setzen von aufrechten griechischen 
+% Glyphen adressieren. Allerdings gibt es keinen einheitlichen Standard, was 
+% die Nomenklatur der Auswahlbefehle betrifft. Hiermit können Aliasbefehle 
+% überschireben werden, wobei dies nur geschieht, wenn ein Paket diese zuvor
+% auch definert hat.
+%    \begin{macrocode}
+\newcommand*\tud@cdmath@greek@comp@set[2]{%
+  \ifcsdef{#1}{\tud@cs@store{#1}\csletcs{#1}{#2}}{}%
+}
+\newcommand*\tud@cdmath@greek@comp@reset[1]{%
+  \ifcsdef{#1}{\tud@cs@restore{#1}}{}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@cdmath@greek@comp@reset
+% \end{macro}^^A \tud@cdmath@greek@comp@set
+% \begin{macro}{\tud@math@greek@var@set}
+% \changes{v2.06}{2018/07/02}{neu}^^A
+% \begin{macro}{\tud@math@greek@var@reset}
+% \changes{v2.06}{2018/07/02}{neu}^^A
+% Einige Pakete stellen für griechische Majuskeln die Befehle \cs{var\dots} 
+% bereit, um diese im kursiven Schnitt zu setzen. Sollte eines dieser Pakete 
+% geladen worden sein und ein entsprechender Befehl existieren, dann wird 
+% dieser umdefiniert.
+%    \begin{macrocode}
+\newcommand*\tud@cdmath@greek@var@set[1]{%
+  \tud@cdmath@greek@comp@set{var#1}{it#1}%
+}
+\newcommand*\tud@cdmath@greek@var@reset[1]{%
+  \tud@cdmath@greek@comp@reset{var#1}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@math@greek@var@reset
+% \end{macro}^^A \tud@math@greek@var@set
+% \begin{macro}{\tud@math@greek@upright}
+% \changes{v2.06}{2018/07/02}{neu}^^A
+% \begin{macro}{\tud@math@greek@slanted}
+% \changes{v2.06}{2018/07/02}{neu}^^A
+% Mit den beiden Befehlen kann die Definition der griechischen Buchstaben 
+% entweder auf aufrecht bzw. kursiv gesetzt werden.
+%    \begin{macrocode}
+\newcommand*\tud@math@greek@upright[1]{%
+  \ifcsundef{up#1}{}{%
+    \csletcs{#1}{up#1}%
+    \csletcs{other#1}{it#1}%
+  }%
+}
+\newcommand*\tud@math@greek@slanted[1]{%
+  \ifcsundef{up#1}{}{%
+    \csletcs{#1}{it#1}%
+    \csletcs{other#1}{up#1}%
   }%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@math@init
+% \end{macro}^^A \tud@math@greek@slanted
+% \end{macro}^^A \tud@math@greek@upright
 % \begin{macro}{\tud@math@greek@init}
 % \changes{v2.04}{2015/03/10}{neu}^^A
 % \begin{macro}{\upDelta}
@@ -2820,7 +3224,7 @@
 \newcommand*\tud@math@greek@declare@lc[1]{%
   \edef\@tempb{%
     \noexpand\DeclareMathSymbol{\csname tud@math@greek@up#1\endcsname}%
-      {\noexpand\mathalpha}{upletters}{\the\@tempcnta}%
+      {\noexpand\mathalpha}{lettersupright}{\the\@tempcnta}%
   }\@tempb%
   \edef\@tempb{%
     \noexpand\DeclareMathSymbol{\csname tud@math@greek@it#1\endcsname}%
@@ -2909,280 +3313,74 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@math@greek@declare@comp
-% \begin{macro}{\tud@cdmath@init}
-% \changes{v2.06}{2018/07/02}{neu}^^A
-% \begin{macro}{\tud@cdmath@declare}
-% \changes{v2.06}{2018/07/02}{neu}^^A
-% \begin{macro}{\mv@tud@nm}
-% \begin{macro}{\mv@tud@bm}
-% \begin{macro}{\mv@tud@dm}
+% \begin{macro}{\tud@math@checkslanted@greeks}
+% \changes{v2.05d}{2016/09/22}{neu}^^A
+% Für die Verwendung der griechischen Glyphen im Mathematikmodus wird versucht, 
+% ein hohes Maß an Kompatibilität für andere Pakete zu gewährleisten. Es wird 
+% versucht zu erkennen, ob Pakete mit einer Option wie \opt{slantedGreek}, 
+% \opt{frenchmath} oder ähnlichem geladen wurde. Hierfür wird nach Definitionen 
+% für \cs{upalpha} als auch \cs{itGamma} gesucht. Existieren die Makros nicht, 
+% wird zumindest auf die aktuelle Definition von \cs{Gamma} geprüft und mit der 
+% standardmäßigen Variant der Glyphe verglichen. Wurde eine passende Definition 
+% gefunden, wird die Option \opt{slantedgreek} voreingestellt.
 %    \begin{macrocode}
-\newcommand*\mv@tud@nm{}
-\newcommand*\mv@tud@bm{}
-\newcommand*\mv@tud@dm{}
+\newcommand*\tud@math@checkslanted@greeks{%
+  \begingroup%
 %    \end{macrocode}
-% Mit \cs{tud@cdmath@declare} werden für den Mathematikmodus die Schriften im 
-% \CD deklariert.
-% \ToDo{mathversion heavy?}[v2.07]
+% Wird keine Änderung durch ein Paket erkannt, werden die Glyphen ab der 
+% \TUDScript-Version~v2.06 kursiv gesetzt. Dies betrifft insbesondere die
+% Majuskeln, welche bei \LaTeX{} normalerweise aufrecht gesetzt werden.
 %    \begin{macrocode}
-\newcommand*\tud@cdmath@declare[2]{%
-  \DeclareMathVersion{tud@nm}%
-  \DeclareMathVersion{tud@bm}%
-%    \end{macrocode}
-% Mit \cs{tud@cdfont@@set} werden die Schriftstärken gemäß den ausgewählten 
-% Schriftoptionen aktiviert (\cs{tud@cdfont@md}, \cs{tud@cdfont@bf}, 
-% \cs{tud@cdfont@ebf}), um diese auch für die Mathematikschriften zu nutzen.
-%    \begin{macrocode}
-  \tud@cdfont@@set%
-  \tud@ttfont@@set%
-  \SetSymbolFont{operators}{tud@nm}{OT1}{#1}{\tud@cdfont@md}{n}%
-  \SetSymbolFont{operators}{tud@bm}{OT1}{#1}{\tud@cdfont@bf}{n}%
-  \SetSymbolFont{letters}{tud@nm}{OML}{#1}{\tud@cdfont@md}{it}%
-  \SetSymbolFont{letters}{tud@bm}{OML}{#1}{\tud@cdfont@bf}{it}%
-%    \end{macrocode}
-% Für die alten Schriften exisiteren keine aufrechten griechischen Minuskeln.
-%    \begin{macrocode}
-  \if@tud@cdoldfont@active%
-    \SetSymbolFont{upletters}{tud@nm}{OML}{#1}{\tud@cdfont@md}{it}%
-    \SetSymbolFont{upletters}{tud@bm}{OML}{#1}{\tud@cdfont@bf}{it}%
-  \else%
-    \SetSymbolFont{upletters}{tud@nm}{OML}{#1}{\tud@cdfont@md}{n}%
-    \SetSymbolFont{upletters}{tud@bm}{OML}{#1}{\tud@cdfont@bf}{n}%
-  \fi%
-  \SetSymbolFont{symbols}{tud@nm}{OMS}{#1}{\tud@cdfont@md}{n}%
-  \SetSymbolFont{symbols}{tud@bm}{OMS}{#1}{\tud@cdfont@bf}{n}%
-  \SetSymbolFont{largesymbols}{tud@nm}{OMX}{#1}{\tud@cdfont@md}{n}%
-  \SetSymbolFont{largesymbols}{tud@bm}{OMX}{#1}{\tud@cdfont@bf}{n}%
-  \SetMathAlphabet{\mathnormal}{tud@nm}{OML}{#1}{\tud@cdfont@md}{it}%
-  \SetMathAlphabet{\mathnormal}{tud@bm}{OML}{#1}{\tud@cdfont@bf}{it}%
-  \SetMathAlphabet{\mathrm}{tud@nm}{OT1}{#1}{\tud@cdfont@md}{n}%
-  \SetMathAlphabet{\mathrm}{tud@bm}{OT1}{#1}{\tud@cdfont@bf}{n}%
-  \SetMathAlphabet{\mathsf}{tud@nm}{OT1}{#1}{\tud@cdfont@md}{n}%
-  \SetMathAlphabet{\mathsf}{tud@bm}{OT1}{#1}{\tud@cdfont@bf}{n}%
-  \SetMathAlphabet{\mathit}{tud@nm}{OT1}{#1}{\tud@cdfont@md}{it}%
-  \SetMathAlphabet{\mathit}{tud@bm}{OT1}{#1}{\tud@cdfont@bf}{it}%
-  \SetMathAlphabet{\mathbf}{tud@nm}{OT1}{#1}{\tud@cdfont@bf}{n}%
-  \SetMathAlphabet{\mathbf}{tud@bm}{OT1}{#1}{\tud@cdfont@ebf}{n}%
-  \SetMathAlphabet{\mathtt}{tud@nm}{OT1}{#2}{\tud@ttfont@md}{n}%
-  \SetMathAlphabet{\mathtt}{tud@bm}{OT1}{#2}{\tud@ttfont@bf}{n}%
-  \IfFileExists{ueus.fd}{%
-    \SetMathAlphabet{\mathcal}{tud@nm}{U}{eus}{m}{n}%
-    \SetMathAlphabet{\mathcal}{tud@bm}{U}{eus}{b}{n}%
-  }{}%
-  \ifundef{\mathfrak}{}{%
-    \IfFileExists{ueuf.fd}{%
-      \SetMathAlphabet{\mathfrak}{tud@nm}{U}{euf}{m}{n}%
-      \SetMathAlphabet{\mathfrak}{tud@bm}{U}{euf}{b}{n}%
-    }{}%
-  }%
-}
-\newcommand*\tud@cdmath@init{%
-  \tud@cdmath@declare{\tud@cdfont@fam@lf}{\tud@ttfont@fam}%
-%    \end{macrocode}
-% Für die alten Schriften sind noch Nacharbeiten notwendig. Im Fließtext werden 
-% für die lateinischen Lettern die \Univers"=Schriften des \CDs verwendet.
-% Darin enthalten sind die auch die griechischen Buchstaben aus dem Paket
-% \pkg{cmbright}. Zusätzlich werden aus dem \pkg{iwona}-Paket die mathematische
-% Symbole verwendet.
-%    \begin{macrocode}
-  \if@tud@cdoldfont@active%
-    \SetSymbolFont{largesymbols}{tud@nm}{OMX}{iwona}{m}{n}%
-    \SetSymbolFont{largesymbols}{tud@bm}{OMX}{iwona}{b}{n}%
-%    \end{macrocode}
-% Das Paket \pkg{cmbright} bringt zusätzlich noch Schriftschnitte für das Paket
-% \pkg{amsfonts} mit. Diese werden gegebenenfalls geladen.
-%    \begin{macrocode}
-    \@ifpackageloaded{amsfonts}{%
-      \DeclareFontFamily{U}{\tud@cdfont@fam@lf a}{}%
-      \DeclareFontShape{U}{\tud@cdfont@fam@lf a}{m}{n}{<->cmbras10}{}%
-      \SetSymbolFont{AMSa}{tud@nm}{U}{\tud@cdfont@fam@lf a}{m}{n}%
-      \SetSymbolFont{AMSa}{tud@bm}{U}{\tud@cdfont@fam@lf a}{m}{n}%
-      \DeclareFontFamily{U}{\tud@cdfont@fam@lf b}{}%
-      \DeclareFontShape{U}{\tud@cdfont@fam@lf b}{m}{n}{<->cmbrbs10}{}%
-      \SetSymbolFont{AMSb}{tud@nm}{U}{\tud@cdfont@fam@lf b}{m}{n}%
-      \SetSymbolFont{AMSb}{tud@bm}{U}{\tud@cdfont@fam@lf b}{m}{n}%
-    }{}%
-%    \end{macrocode}
-% Auch für die Schrift \DIN werden mathematische Glyphen bereitgestellt. Diese
-% wurden aus dem \pkg{iwona}-Paket entnommen. Auch die verwendeten Symbole
-% stammen aus diesem Paket.
-%    \begin{macrocode}
-    \DeclareMathVersion{tud@dm}%
-    \SetSymbolFont{operators}{tud@dm}{OT1}{\tud@cdfont@db}{b}{n}%
-    \SetSymbolFont{letters}{tud@dm}{OML}{\tud@cdfont@db}{b}{sl}%
-    \SetSymbolFont{upletters}{tud@dm}{OML}{\tud@cdfont@db}{b}{sl}%
-    \SetSymbolFont{symbols}{tud@dm}{OMS}{\tud@cdfont@db}{b}{n}%
-    \SetSymbolFont{largesymbols}{tud@dm}{OMX}{iwona}{ebc}{n}%
-    \SetMathAlphabet{\mathnormal}{tud@dm}{OML}{\tud@cdfont@db}{b}{sl}%
-    \SetMathAlphabet{\mathrm}{tud@dm}{OML}{\tud@cdfont@db}{b}{n}%
-    \SetMathAlphabet{\mathsf}{tud@dm}{OML}{\tud@cdfont@db}{b}{n}%
-    \SetMathAlphabet{\mathit}{tud@dm}{OML}{\tud@cdfont@db}{b}{sl}%
-    \SetMathAlphabet{\mathbf}{tud@dm}{OML}{\tud@cdfont@db}{b}{n}%
-    \SetMathAlphabet{\mathtt}{tud@dm}{OT1}{\tud@ttfont@fam}{b}{n}%
-    \IfFileExists{ueus.fd}{%
-      \SetMathAlphabet{\mathcal}{tud@dm}{U}{eus}{b}{n}%
-    }{}%
-    \ifundef{\mathfrak}{}{%
-      \IfFileExists{ueuf.fd}{%
-        \SetMathAlphabet{\mathfrak}{tud@dm}{U}{euf}{b}{n}%
-      }{}%
+    \def\tud@res@c{%
+      \tud@if@v@lower{2.06}{%
+        \TUD@key@preset{slantedgreek}{standard}%
+      }{%
+        \TUD@key@preset{slantedgreek}{true}%
+      }%
     }%
+    \@tud@res@swafalse%
+    \ifcsdef{upalpha}{%
+      \ifx\upalpha\alpha%
+        \@tud@res@swatrue%
+      \fi%
+    }{}%
 %    \end{macrocode}
-% Daran anschließend wird die zuvor definierte Schrift in einer Box verwendet,
-% um das Laden der Schriftdefinitionen am Dokumentbeginn zu forcieren.
+% Existiert \cs{upalpha} und ist mit \cs{alpha} identisch, werden \emph{alle} 
+% griechischen Glyphen aufrecht gesetzt.
 %    \begin{macrocode}
-    \AtBeginDocument{\sbox\z@{\tud@db$ $}}%
-  \fi%
-}
+    \if@tud@res@swa%
+      \def\tud@res@c{\TUD@key@preset{slantedgreek}{false}}%
+    \else%
 %    \end{macrocode}
-% \end{macro}^^A \mv@tud@dm
-% \end{macro}^^A \mv@tud@bm
-% \end{macro}^^A \mv@tud@nm
-% \end{macro}^^A \tud@cdmath@declare
-% \end{macro}^^A \tud@cdmath@init
-% \begin{macro}{\tud@math@set}
-% Mit diesem Befehl werden die Einstellungen für den Mathematiksatz übernommen.
-% Die Option \opt{cdmath} wird ausgewertet, um zwischen dem Standard"~ und
-% neuem Mathematiksatz hin"~ und herschalten zu können. Dabei wird zum einen
-% das Mapping der griechischen Glyphen geändert, zum anderen werden die
-% originalen Mathematikversionen überschrieben respektive wiederhergestellt.
+% Existiert \cs{itGamma} und ist mit \cs{Gamma} oder\dots
 %    \begin{macrocode}
-\newcommand*\tud@math@set{%
+      \ifcsdef{itGamma}{%
+        \ifx\itGamma\Gamma%
+          \@tud@res@swatrue%
+        \fi%
+      }{%
 %    \end{macrocode}
-% Wird das Paket \pkg{fontspec} verwendet, sollte die Option \opt{no-math} 
-% übergeben werden, falls die Mathematikschriften des \CDs zum Einsatz kommen. 
-% Wurde dieser nicht angegeben, wird eine einmalige Warnung erzeugt.
-% \ToDo{%
-%   nicht mv@normal überschreiben, sondern wrapper um \cs{mathversion} nutzen%
-% }[v2.06]
+% \dots\cs{Gamma} entspricht einer möglichen Standarddefnition,\dots
 %    \begin{macrocode}
-  \if@tud@cdmath@active\if@tud@x@fontspec@math@enabled%
-%<*class>
-    \ClassWarningNoLine{\TUD@Class@Name}%
-%</class>
-%<*package>
-    \PackageWarningNoLine{tudscrfonts}%
-%</package>
-    {%
-      It's recommended to load package `fontspec'\MessageBreak%
-      with option `no-math', if you want to use the\MessageBreak%
-      corporate design fonts in math mode%
-    }%
-    \@tud@x@fontspec@math@enabledfalse%
-  \fi\fi%
-  \if@tud@cdmath@active%
-    \tud@cs@store{mv@normal}%
-    \tud@cs@store{mv@bold}%
-    \let\mv@normal\mv@tud@nm%
-    \let\mv@bold\mv@tud@bm%
-    \tud@math@greek@loop\tud@cdmath@greek@shape@set%
-    \tud@math@greek@loop@uc\tud@cdmath@greek@var@set%
-    \ifcase\tud@slantedgreek@num\relax% upright
-      \tud@math@greek@loop\tud@math@greek@upright%
-    \or% slanted
-      \tud@math@greek@loop\tud@math@greek@slanted%
-    \or% standard
-      \tud@math@greek@loop@uc\tud@math@greek@upright%
-      \tud@math@greek@loop@lc\tud@math@greek@slanted%
+        \let\tud@res@a\relax%
+        \let\tud@res@b\relax%
+        \DeclareMathSymbol{\tud@res@a}{\mathalpha}{letters}{0}%
+        \DeclareMathSymbol{\tud@res@b}{\mathord}{letters}{0}%
+        \ifx\Gamma\tud@res@a\relax\@tud@res@swatrue\fi%
+        \ifx\Gamma\tud@res@b\relax\@tud@res@swatrue\fi%
+      }%
+%    \end{macrocode}
+%\dots werden \emph{alle} griechischen Glyphen kursiv gesetzt.
+%    \begin{macrocode}
+      \if@tud@res@swa%
+        \def\tud@res@c{\TUD@key@preset{slantedgreek}{true}}%
+      \fi%
     \fi%
-  \else%
-    \tud@cs@restore{mv@normal}%
-    \tud@cs@restore{mv@bold}%
-    \tud@math@greek@loop\tud@cdmath@greek@shape@reset%
-    \tud@math@greek@loop@uc\tud@cdmath@greek@var@reset%
-  \fi%
-  \mathversion{normal}%
+    \edef\tud@res@c{\endgroup\expandonce\tud@res@c}%
+  \tud@res@c%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@math@set
-% \begin{macro}{\tud@cdmath@greek@shape@set}
-% \changes{v2.04}{2015/03/10}{neu}^^A
-% \begin{macro}{\tud@cdmath@greek@shape@reset}
-% \changes{v2.04}{2015/03/10}{neu}^^A
-% Mit diesen beiden Befehlen kann innerhalb des Dokumentes problemlos zwischen 
-% griechischen Buchstaben für die CD-Schriften und den normalen gewechselt 
-% werden.
-%    \begin{macrocode}
-\newcommand*\tud@cdmath@greek@shape@set[1]{%
-  \tud@cs@store{#1}%
-  \tud@cs@store{up#1}%
-  \tud@cs@store{it#1}%
-  \tud@cs@store{other#1}%
-  \csletcs{up#1}{tud@math@greek@up#1}%
-  \csletcs{it#1}{tud@math@greek@it#1}%
-  \tud@cdmath@greek@comp@set{#1up}{up#1}%
-  \tud@cdmath@greek@comp@set{#1it}{it#1}%
-  \tud@cdmath@greek@comp@set{sl#1}{it#1}%
-  \tud@cdmath@greek@comp@set{#1sl}{it#1}%
-}
-\newcommand*\tud@cdmath@greek@shape@reset[1]{%
-  \tud@cs@restore{#1}%
-  \tud@cs@restore{up#1}%
-  \tud@cs@restore{it#1}%
-  \tud@cs@restore{other#1}%
-  \tud@cdmath@greek@comp@reset{#1up}%
-  \tud@cdmath@greek@comp@reset{#1it}%
-  \tud@cdmath@greek@comp@reset{sl#1}%
-  \tud@cdmath@greek@comp@reset{#1sl}%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@cdmath@greek@shape@reset
-% \end{macro}^^A \tud@cdmath@greek@shape@set
-% \begin{macro}{\tud@cdmath@greek@comp@set}
-% \changes{v2.06}{2018/07/02}{neu}^^A
-% \begin{macro}{\tud@cdmath@greek@comp@reset}
-% \changes{v2.06}{2018/07/02}{neu}^^A
-% Es gibt eine Vielzahl von Paketen, die das Setzen von aufrechten griechischen 
-% Glyphen adressieren. Allerdings gibt es keinen einheitlichen Standard, was 
-% die Nomenklatur der Auswahlbefehle betrifft. Hiermit können Aliasbefehle 
-% überschireben werden, wobei dies nur geschieht, wenn ein Paket diese zuvor
-% auch definert hat.
-%    \begin{macrocode}
-\newcommand*\tud@cdmath@greek@comp@set[2]{%
-  \ifcsdef{#1}{\tud@cs@store{#1}\csletcs{#1}{#2}}{}%
-}
-\newcommand*\tud@cdmath@greek@comp@reset[1]{%
-  \ifcsdef{#1}{\tud@cs@restore{#1}}{}%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@cdmath@greek@comp@reset
-% \end{macro}^^A \tud@cdmath@greek@comp@set
-% \begin{macro}{\tud@math@greek@var@set}
-% \changes{v2.06}{2018/07/02}{neu}^^A
-% \begin{macro}{\tud@math@greek@var@reset}
-% \changes{v2.06}{2018/07/02}{neu}^^A
-% Einige Pakete stellen für griechische Majuskeln die Befehle \cs{var\dots} 
-% bereit, um diese im kursiven Schnitt zu setzen. Sollte eines dieser Pakete 
-% geladen worden sein und ein entsprechender Befehl existieren, dann wird 
-% dieser umdefiniert.
-%    \begin{macrocode}
-\newcommand*\tud@cdmath@greek@var@set[1]{%
-  \tud@cdmath@greek@comp@set{var#1}{it#1}%
-}
-\newcommand*\tud@cdmath@greek@var@reset[1]{%
-  \tud@cdmath@greek@comp@reset{var#1}%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@math@greek@var@reset
-% \end{macro}^^A \tud@math@greek@var@set
-% \begin{macro}{\tud@math@greek@upright}
-% \changes{v2.06}{2018/07/02}{neu}^^A
-% \begin{macro}{\tud@math@greek@slanted}
-% \changes{v2.06}{2018/07/02}{neu}^^A
-% Mit den beiden Befehlen kann die Definition der griechischen Buchstaben 
-% entweder auf aufrecht bzw. kursiv gesetzt werden.
-%    \begin{macrocode}
-\newcommand*\tud@math@greek@upright[1]{%
-  \csletcs{#1}{up#1}%
-  \csletcs{other#1}{it#1}%
-}
-\newcommand*\tud@math@greek@slanted[1]{%
-  \csletcs{#1}{it#1}%
-  \csletcs{other#1}{up#1}%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@math@greek@slanted
-% \end{macro}^^A \tud@math@greek@upright
+% \end{macro}^^A \tud@math@checkslanted@greeks
 % Sämtliche Schrifteinstellungen erfolgen erst am Ende der Präambel, um etwaige
 % Einstellungen irgendwelcher Schriftpakete beachten zu können. Dabei erfolgt 
 % das Setzen der Mathematikschriften durch \cs{AtBeginDocument} innerhalb von 
@@ -3206,24 +3404,7 @@
 %    \end{macrocode}
 % Hier wird auf das Vorhandensein aller benötigten Schriften geprüft.
 %    \begin{macrocode}
-  \if@tud@cdoldfont@active%
-    \tud@cdfont@check[Univers]{%
-      Light,,Bold,Black,%
-      LightOblique,Oblique,BoldOblique,BlackOblique%
-    }{\tud@cdfont@fam}{@tud@cdfont@fam@exist}%
-    \tud@cdfont@check{DIN-Bold}{\tud@cdfont@db}{@tud@cdfont@db@exist}%
-  \else%
-    \tud@cdfont@check[OpenSans]{%
-      Light,Regular,SemiBold,Bold,ExtraBold,%
-      LightItalic,Italic,SemiBoldItalic,BoldItalic,ExtraBoldItalic%
-    }{\tud@cdfont@fam@lf,\tud@cdfont@fam@osf}{@tud@cdfont@fam@exist}%
-  \fi%
-  \@tud@res@swafalse%
-  \IfFileExists{oml\tud@cdfont@fam@lf.fd}{}{\@tud@res@swatrue}%
-  \IfFileExists{oms\tud@cdfont@fam@lf.fd}{}{\@tud@res@swatrue}%
-  \if@tud@res@swa%
-    \tud@locked@bool@preset{@tud@cdmath@active}{false}%
-  \fi%
+  \tud@cdfont@check%
 %    \end{macrocode}
 % Damit \pkg{tudscrfonts} reibungslos mit den nachfolgenden Definitionen
 % funktioniert, wird im Bedarfsfall der Befehl \cs{sectfont} vorgehalten.
@@ -3272,15 +3453,11 @@
 % Mathematikschriften spätestens zum Ende der Präambel initialisiert werden.
 %    \begin{macrocode}
   \if@tud@x@bm@requested%
-    \tud@math@init%
     \UnPreventPackageFromLoading{bm}%
     \RequirePackage{bm}[2017/01/16]%
   \fi%
-%    \end{macrocode}
-% \ToDo{Verzögern notwendig?; nur spezifisches für fontspec ausführen?}[v2.06]
-% \ToDo{Hook definieren, damit sich Mathekram (mathabx) ausführen lässt?}[v2.06]
-%    \begin{macrocode}
-  \AtBeginDocument{\tud@math@init\let\tud@math@init\relax}%
+  \AtBeginDocument{%
+  }%
 }
 %    \end{macrocode}
 % Wurde ein Paket geladen, welches die \pkg{amsfonts}-Schriftfamilie definiert,
