@@ -422,11 +422,11 @@
 }
 \TUD@key{slantedGreek}[true]{\TUDoptions{slantedgreek=#1}}
 \TUD@key{slantedGreeks}[true]{\TUDoptions{slantedgreek=#1}}
-\newif\if@tud@lgrgreek
-\TUD@key{lgrgreek}[true]{\TUD@set@ifkey{lgrgreek}{@tud@lgrgreek}{#1}}
-\TUD@key{lgrgreeks}[true]{\TUDoptions{lgrgreek=#1}}
-\TUD@key{LGRgreek}[true]{\TUDoptions{lgrgreek=#1}}
-\TUD@key{LGRgreeks}[true]{\TUDoptions{lgrgreek=#1}}
+\newif\if@tud@lgrgreeks
+\TUD@key{lgrgreeks}[true]{\TUD@set@ifkey{lgrgreeks}{@tud@lgrgreeks}{#1}}
+\TUD@key{lgrgreek}[true]{\TUDoptions{lgrgreeks=#1}}
+\TUD@key{LGRgreeks}[true]{\TUDoptions{lgrgreeks=#1}}
+\TUD@key{LGRgreek}[true]{\TUDoptions{lgrgreeks=#1}}
 %%% From File: tudscr-area.dtx
 \newif\if@tud@cdgeometry@reset
 \newcommand*\tud@cdgeometry@reset[1]{%
@@ -2455,392 +2455,27 @@
     varepsilon,vartheta,varpi,varrho,varsigma,varphi%
   }\do{\expandafter#1\expandafter{\@tempa}}%
 }
-\newcommand*\mv@tudnormal{}
-\newcommand*\mv@tudbold{}
-\newcommand*\mv@tuddin{}
-\AfterPackage*{mathastext}{%
-  \CheckCommand*\MTversion{\@ifstar\MTversion@s\MTversion@}%
-  \CheckCommand*\MTversion@s[1]{\mathversion{#1}\MTversion@@{#1}}%
-  \newrobustcmd*\tud@mathversion[1]{%
-    \tud@cs@use{mathversion}{#1}%
-    \if@tud@cdmath@active%
-      \ifstr{#1}{normal}{%
-        \MTversion@@{tudnormal}%
-      }{%
-        \ifstr{#1}{bold}{%
-          \MTversion@@{tudbold}%
-        }{}%
-      }%
-    \fi%
-  }%
-  \AtEndPreamble{%
-    \tud@cs@store{mathversion}%
-    \tud@cs@letltx{mathversion}{tud@mathversion}%
-  }%
-}
-\newcommand*\tud@cdmath@init{%
-  \if@tud@cdmath@active%
-    \IfFileExists{iwona.sty}{}{\RequirePackage{iwona}}%
-  \fi%
-  \if@tud@cdoldfont@active\else%
-    \PassOptionsToPackage{%
-      noequal,subdued,defaultalphabets,defaultmathsizes,nohbar,nosmalldelims%
-    }{mathastext}%
-    \RequirePackage{mathastext}[2018/08/22]%
-    \ifundef{\T@LGR}{\DeclareFontEncoding{LGR}{}{}}{}%
-    \tud@if@issymbolfont{tudupgrk}{}{%
-      \DeclareSymbolFont{tudupgrk}{LGR}{cmr}{m}{n}%
-      \SetSymbolFont{tudupgrk}{bold}{LGR}{cmr}{bx}{n}%
-    }%
-    \tud@if@issymbolfont{tuditgrk}{}{%
-      \DeclareSymbolFont{tuditgrk}{LGR}{cmr}{m}{it}%
-      \SetSymbolFont{tuditgrk}{bold}{LGR}{cmr}{bx}{it}%
-    }%
-  \fi%
-  \providecommand*\MTDeclareVersion[6][]{\DeclareMathVersion{##2}}%
-  \providecommand*\MTversion@@[1]{}%
-  \if@tud@cdfont@fam@exist%
-    \tud@cdmath@@init{\tud@cdfont@fam@lf}{\tud@ttfont@fam}%
-  \else%
-    \let\mv@tudnormal\mv@normal%
-    \let\mv@tudbold\mv@bold%
-    \if@tud@cdoldfont@active%
-      \let\mv@tuddin\mv@bold%
-    \fi%
-  \fi%
-  \if@tud@cdoldfont@active%
-    \tud@cnt=\z@\relax%
-    \tud@math@loop@greeks@uc\tud@cdmath@declare@greek@uc%
-    \tud@math@loop@greeks@lc\tud@cdmath@declare@greek@lc%
-  \else%
-    \tud@cdmath@declare@greek@lgr%
-%    \tud@cnt=\z@\relax%
-%    \tud@math@loop@greeks@uc\tud@cdmath@declare@greek@uc%
-%    \tud@math@loop@greeks@lc\tud@cdmath@declare@greek@lc%
-  \fi%
-  \tud@cdmath@greek@init%
-  \tud@cdmath@declare@char{*}{\mathbin}{symbols}{"03}%
-}
-\newcommand*\tud@cdmath@@init[2]{%
-  \tud@cdfont@@set%
-  \tud@ttfont@@set%
-  \if@tud@cdoldfont@active%
-    \DeclareMathVersion{tudnormal}%
-    \DeclareMathVersion{tudbold}%
-    \DeclareMathVersion{tuddin}%
-    \SetSymbolFont{operators}{tudnormal}{OT1}{#1}{\tud@cdfont@md}{n}%
-    \SetSymbolFont{operators}{tudbold}{OT1}{#1}{\tud@cdfont@bf}{n}%
-    \SetSymbolFont{operators}{tuddin}{OT1}{\tud@cdfont@db}{b}{n}%
-    \SetSymbolFont{letters}{tudnormal}{OML}{#1}{\tud@cdfont@md}{sl}%
-    \SetSymbolFont{letters}{tudbold}{OML}{#1}{\tud@cdfont@bf}{sl}%
-    \SetSymbolFont{letters}{tuddin}{OML}{\tud@cdfont@db}{b}{sl}%
-    \SetSymbolFont{symbols}{tudnormal}{OMS}{#1}{\tud@cdfont@md}{n}%
-    \SetSymbolFont{symbols}{tudbold}{OMS}{#1}{\tud@cdfont@bf}{n}%
-    \SetSymbolFont{symbols}{tuddin}{OMS}{\tud@cdfont@db}{b}{n}%
-    \SetSymbolFont{largesymbols}{tudnormal}{OMX}{iwona}{\tud@cdfont@md}{n}%
-    \SetSymbolFont{largesymbols}{tudbold}{OMX}{iwona}{\tud@cdfont@bf}{n}%
-    \SetSymbolFont{largesymbols}{tuddin}{OMX}{iwona}{ebc}{n}%
-    \SetMathAlphabet{\mathnormal}{tudnormal}{OML}{#1}{\tud@cdfont@md}{sl}%
-    \SetMathAlphabet{\mathnormal}{tudbold}{OML}{#1}{\tud@cdfont@bf}{sl}%
-    \SetMathAlphabet{\mathnormal}{tuddin}{OML}{\tud@cdfont@db}{b}{sl}%
-    \tud@if@ismathalphabet{\mathbold}{%
-      \SetMathAlphabet{\mathbold}{tudnormal}{OML}{#1}{\tud@cdfont@bf}{sl}%
-      \SetMathAlphabet{\mathbold}{tudbold}{OML}{#1}{\tud@cdfont@ebf}{sl}%
-      \SetMathAlphabet{\mathbold}{tuddin}{OML}{\tud@cdfont@db}{b}{sl}%
-    }{}%
-  \else%
-    \MTDeclareVersion[it]{tudnormal}{T1}{#1}{\tud@cdfont@md}{n}%
-    \MTDeclareVersion[it]{tudbold}{T1}{#1}{\tud@cdfont@bf}{n}%
-    \SetSymbolFont{operators}{tudnormal}{OT1}{iwona}{\tud@cdfont@md}{n}%
-    \SetSymbolFont{operators}{tudbold}{OT1}{iwona}{\tud@cdfont@bf}{n}%
-    \SetSymbolFont{letters}{tudnormal}{OML}{iwona}{\tud@cdfont@md}{it}%
-    \SetSymbolFont{letters}{tudbold}{OML}{iwona}{\tud@cdfont@bf}{it}%
-    \SetSymbolFont{symbols}{tudnormal}{OMS}{iwona}{\tud@cdfont@md}{n}%
-    \SetSymbolFont{symbols}{tudbold}{OMS}{iwona}{\tud@cdfont@bf}{n}%
-    \SetSymbolFont{largesymbols}{tudnormal}{OMX}{iwona}{\tud@cdfont@md}{n}%
-    \SetSymbolFont{largesymbols}{tudbold}{OMX}{iwona}{\tud@cdfont@bf}{n}%
-%    \tud@if@issymbolfont{lettersupright}{}{%
-%      \DeclareSymbolFont{lettersupright}{OML}{cmr}{m}{it}%
-%    }%
-%    \SetSymbolFont{lettersupright}{tudnormal}{OML}{#1}{\tud@cdfont@md}{n}%
-%    \SetSymbolFont{lettersupright}{tudbold}{OML}{#1}{\tud@cdfont@bf}{n}%
-%    \SetMathAlphabet{\mathnormal}{tudnormal}{OML}{#1}{\tud@cdfont@md}{it}%
-%    \SetMathAlphabet{\mathnormal}{tudbold}{OML}{#1}{\tud@cdfont@bf}{it}%
-%    \tud@if@ismathalphabet{\mathbold}{%
-%      \SetMathAlphabet{\mathbold}{tudnormal}{OML}{#1}{\tud@cdfont@bf}{it}%
-%      \SetMathAlphabet{\mathbold}{tudbold}{OML}{#1}{\tud@cdfont@ebf}{it}%
-%    }{}%
-    \SetSymbolFont{tudupgrk}{tudnormal}{LGR}{#1}{\tud@cdfont@md}{n}%
-    \SetSymbolFont{tuditgrk}{tudnormal}{LGR}{#1}{\tud@cdfont@md}{it}%
-    \SetSymbolFont{tudupgrk}{tudbold}{LGR}{#1}{\tud@cdfont@bf}{n}%
-    \SetSymbolFont{tuditgrk}{tudbold}{LGR}{#1}{\tud@cdfont@bf}{it}%
-  \fi%
-  \SetMathAlphabet{\mathrm}{tudnormal}{OT1}{#1}{\tud@cdfont@md}{n}%
-  \SetMathAlphabet{\mathrm}{tudbold}{OT1}{#1}{\tud@cdfont@bf}{n}%
-  \SetMathAlphabet{\mathsf}{tudnormal}{OT1}{#1}{\tud@cdfont@md}{n}%
-  \SetMathAlphabet{\mathsf}{tudbold}{OT1}{#1}{\tud@cdfont@bf}{n}%
-  \SetMathAlphabet{\mathit}{tudnormal}{OT1}{#1}{\tud@cdfont@md}{it}%
-  \SetMathAlphabet{\mathit}{tudbold}{OT1}{#1}{\tud@cdfont@bf}{it}%
-  \SetMathAlphabet{\mathbf}{tudnormal}{OT1}{#1}{\tud@cdfont@bf}{n}%
-  \SetMathAlphabet{\mathbf}{tudbold}{OT1}{#1}{\tud@cdfont@ebf}{n}%
-  \SetMathAlphabet{\mathtt}{tudnormal}{OT1}{#2}{\tud@ttfont@md}{n}%
-  \SetMathAlphabet{\mathtt}{tudbold}{OT1}{#2}{\tud@ttfont@bf}{n}%
-  \if@tud@cdoldfont@active%
-    \SetMathAlphabet{\mathrm}{tuddin}{OT1}{\tud@cdfont@db}{b}{n}%
-    \SetMathAlphabet{\mathsf}{tuddin}{OT1}{\tud@cdfont@db}{b}{n}%
-    \SetMathAlphabet{\mathit}{tuddin}{OT1}{\tud@cdfont@db}{b}{sl}%
-    \SetMathAlphabet{\mathbf}{tuddin}{OT1}{\tud@cdfont@db}{b}{n}%
-    \SetMathAlphabet{\mathtt}{tuddin}{OT1}{#2}{\tud@ttfont@ebf}{n}%
-  \fi%
-  \IfFileExists{ueus.fd}{%
-    \SetMathAlphabet{\mathcal}{tudnormal}{U}{eus}{m}{n}%
-    \SetMathAlphabet{\mathcal}{tudbold}{U}{eus}{b}{n}%
-    \if@tud@cdoldfont@active%
-      \SetMathAlphabet{\mathcal}{tuddin}{U}{eus}{b}{n}%
-    \fi%
-  }{}%
-  \tud@if@ismathalphabet{\mathfrak}{%
-    \IfFileExists{ueuf.fd}{%
-      \SetMathAlphabet{\mathfrak}{tudnormal}{U}{euf}{m}{n}%
-      \SetMathAlphabet{\mathfrak}{tudbold}{U}{euf}{b}{n}%
-      \if@tud@cdoldfont@active%
-        \SetMathAlphabet{\mathfrak}{tuddin}{U}{euf}{b}{n}%
-      \fi%
-    }{}%
-  }{}%
-  \AtBeginDocument{%
-    \tud@if@issymbolfont{legacymaths}{%
-      \SetSymbolFont{legacymaths}{tudnormal}{OT1}{#1}{\tud@cdfont@md}{n}%
-      \SetSymbolFont{legacymaths}{tudbold}{OT1}{#1}{\tud@cdfont@bf}{n}%
-      \if@tud@cdoldfont@active%
-        \SetSymbolFont{legacymaths}{tuddin}{OT1}{\tud@cdfont@db}{b}{n}%
-      \fi%
-    }{}%
-    \@tud@res@swafalse%
-    \tud@if@issymbolfont{AMSa}{\@tud@res@swatrue}{}%
-    \tud@if@issymbolfont{AMSb}{\@tud@res@swatrue}{}%
-    \if@tud@res@swa%
-      \if@tud@cdoldfont@active%
-        \DeclareFontFamily{U}{\tud@cdfont@fam@lf a}{}%
-        \DeclareFontShape{U}{\tud@cdfont@fam@lf a}{m}{n}{<->cmbras10}{}%
-        \SetSymbolFont{AMSa}{tudnormal}{U}{\tud@cdfont@fam@lf a}{m}{n}%
-        \SetSymbolFont{AMSa}{tudbold}{U}{\tud@cdfont@fam@lf a}{m}{n}%
-        \DeclareFontFamily{U}{\tud@cdfont@fam@lf b}{}%
-        \DeclareFontShape{U}{\tud@cdfont@fam@lf b}{m}{n}{<->cmbrbs10}{}%
-        \SetSymbolFont{AMSb}{tudnormal}{U}{\tud@cdfont@fam@lf b}{m}{n}%
-        \SetSymbolFont{AMSb}{tudbold}{U}{\tud@cdfont@fam@lf b}{m}{n}%
-      \else%
-        \@ifpackageloaded{mdsymbol}{}{%
-          \appto\tud@cdmath@wrn{%
-            \ClassInfoNoLine{\TUD@Class@Name}%
-            {%
-              You may load package `mdsymbol' in order to\MessageBreak%
-              get symbols matching the used math font%
-            }%
-          }%
-        }%
-      \fi%
-    \fi%
-    \if@tud@cdoldfont@active\sbox\z@{\mathversion{tudnormal}$ $\tud@db$ $}\fi%
-  }%
-}
-\newcommand*\tud@cdmath@greek@init{%
-  \tud@math@loop@greeks@all\tud@cdmath@greek@@init%
-  \tud@math@loop@greeks@uc\tud@cdmath@greek@@@init%
-}
-\newcommand*\tud@cdmath@greek@@init[1]{%
-  \tud@cdmath@declare@alias{#1}{it#1}%
-  \tud@cdmath@declare@alias{other#1}{up#1}%
-  \tud@lowerstring\tud@res@b{#1}%
-  \ifcsundef{#1up}{}{%
-    \tud@cdmath@declare@alias{#1up}{up#1}%
-  }%
-  \@for\tud@res@a:={#1sl,sl#1,#1it}\do{%
-    \ifcsundef{\tud@res@a}{}{%
-      \expandafter\tud@cdmath@declare@alias\expandafter{\tud@res@a}{it#1}%
-    }%
-  }%
-  \ifcsundef{#1other}{}{%
-    \tud@cdmath@declare@alias{#1other}{other#1}%
-  }%
-}
-\newcommand*\tud@cdmath@greek@@@init[1]{%
-  \tud@lowerstring\tud@res@a{#1}%
-  \edef\tud@res@a{Up\tud@res@a}%
-  \ifcsundef{\tud@res@a}{}{%
-    \expandafter\tud@cdmath@declare@alias\expandafter{\tud@res@a}{up#1}%
-  }%
-  \ifcsundef{var#1}{}{%
-    \expandafter\tud@cdmath@declare@alias\expandafter{var#1}{it#1}%
-  }%
-}
-\newcommand*\tud@cdmath@declare@greek@uc[1]{%
-  \tud@cdmath@declare@symb{up#1}{\mathalpha}{operators}{\the\tud@cnt}%
-  \tud@cdmath@declare@symb{it#1}{\mathalpha}{letters}{\the\tud@cnt}%
-  \advance\tud@cnt\@ne\relax%
-}
-\newcommand*\tud@cdmath@declare@greek@lc[1]{%
-  \tud@if@issymbolfont{lettersupright}{%
-    \renewcommand*\tud@cdmath@declare@greek@lc[1]{%
-      \tud@cdmath@declare@symb{up##1}{\mathalpha}{lettersupright}{\the\tud@cnt}%
-      \tud@cdmath@declare@symb{it##1}{\mathalpha}{letters}{\the\tud@cnt}%
-      \advance\tud@cnt\@ne\relax%
-    }%
+\newcommand*\tud@math@declare@lgrgreeks[5]{%
+  \ifundef{\T@LGR}{\DeclareFontEncoding{LGR}{}{}}{}%
+  \tud@if@issymbolfont{tudupgrk}{%
+    \SetSymbolFont{tudupgrk}{normal}{LGR}{#1}{#2}{#4}%
   }{%
-    \renewcommand*\tud@cdmath@declare@greek@lc[1]{%
-      \listeadd\tud@cdmath@symb@list{up##1}%
-      \tud@cdmath@declare@symb{it##1}{\mathalpha}{letters}{\the\tud@cnt}%
-      \advance\tud@cnt\@ne\relax%
-    }%
+    \DeclareSymbolFont{tudupgrk}{LGR}{#1}{#2}{#4}%
   }%
-  \tud@cdmath@declare@greek@lc{#1}%
-}
-\newcommand*\tud@cdmath@declare@greek@lgr{%
-  \tud@cdmath@declare@greek@@lgr{Gamma}{71}%
-  \tud@cdmath@declare@greek@@lgr{Delta}{68}%
-  \tud@cdmath@declare@greek@@lgr{Theta}{74}%
-  \tud@cdmath@declare@greek@@lgr{Lambda}{76}%
-  \tud@cdmath@declare@greek@@lgr{Xi}{88}%
-  \tud@cdmath@declare@greek@@lgr{Pi}{80}%
-  \tud@cdmath@declare@greek@@lgr{Sigma}{83}%
-  \tud@cdmath@declare@greek@@lgr{Upsilon}{85}%
-  \tud@cdmath@declare@greek@@lgr{Phi}{70}%
-  \tud@cdmath@declare@greek@@lgr{Psi}{89}%
-  \tud@cdmath@declare@greek@@lgr{Omega}{87}%
-  \tud@cdmath@declare@greek@@lgr{alpha}{97}%
-  \tud@cdmath@declare@greek@@lgr{beta}{98}%
-  \tud@cdmath@declare@greek@@lgr{gamma}{103}%
-  \tud@cdmath@declare@greek@@lgr{delta}{100}%
-  \tud@cdmath@declare@greek@@lgr{epsilon}{101}%
-  \tud@cdmath@declare@greek@@lgr{zeta}{122}%
-  \tud@cdmath@declare@greek@@lgr{eta}{104}%
-  \tud@cdmath@declare@greek@@lgr{theta}{106}%
-  \tud@cdmath@declare@greek@@lgr{iota}{105}%
-  \tud@cdmath@declare@greek@@lgr{kappa}{107}%
-  \tud@cdmath@declare@greek@@lgr{lambda}{108}%
-  \tud@cdmath@declare@greek@@lgr{mu}{109}%
-  \tud@cdmath@declare@greek@@lgr{nu}{110}%
-  \tud@cdmath@declare@greek@@lgr{xi}{120}%
-  \tud@cdmath@declare@greek@@lgr{pi}{112}%
-  \tud@cdmath@declare@greek@@lgr{rho}{114}%
-  \tud@cdmath@declare@greek@@lgr{sigma}{115}%
-  \tud@cdmath@declare@greek@@lgr{tau}{116}%
-  \tud@cdmath@declare@greek@@lgr{upsilon}{117}%
-  \tud@cdmath@declare@greek@@lgr{phi}{102}%
-  \tud@cdmath@declare@greek@@lgr{chi}{113}%
-  \tud@cdmath@declare@greek@@lgr{psi}{121}%
-  \tud@cdmath@declare@greek@@lgr{omega}{119}%
-  \tud@cdmath@declare@greek@@lgr{varepsilon}{101}%
-  \tud@cdmath@declare@greek@@lgr{vartheta}{155}%
-  \tud@cdmath@declare@greek@@lgr{varpi}{119}%
-  \tud@cdmath@declare@greek@@lgr{varrho}{114}%
-  \tud@cdmath@declare@greek@@lgr{varsigma}{99}%
-  \tud@cdmath@declare@greek@@lgr{varphi}{102}%
-}
-\newcommand*\tud@cdmath@declare@greek@@lgr[2]{%
-  \tud@cdmath@declare@symb{up#1}{\mathalpha}{tudupgrk}{#2}%
-  \tud@cdmath@declare@symb{it#1}{\mathalpha}{tuditgrk}{#2}%
-}
-\newcommand*\tud@cdmath@symb@list{}
-\newcommand*\tud@cdmath@declare@symb[4]{%
-  \listeadd\tud@cdmath@symb@list{#1}%
-  \tud@DeclareMathSymbol{#1}{#2}{#3}{#4}%
-}
-\newcommand*\tud@cdmath@char@list{}
-\newcommand*\tud@cdmath@declare@char[4]{%
-  \listeadd\tud@cdmath@char@list{#1}%
-  \tud@DeclareMathSymbol{#1}{#2}{#3}{#4}%
-}
-\newcommand*\tud@DeclareMathSymbol[4]{%
-  \begingroup%
-    \edef\tud@res@a{%
-      \endgroup%
-      \noexpand\DeclareMathSymbol%
-        {\csname tud@cdmath@symbol@#1\endcsname}%
-        {\etex@unexpanded{#2}}{#3}{#4}%
-    }%
-  \tud@res@a%
-}
-\newcommand*\tud@cdmath@declare@alias[2]{%
-  \listeadd\tud@cdmath@symb@list{#1}%
-  \ifcsdef{tud@cdmath@symbol@#2}{%
-    \csletcs{tud@cdmath@symbol@#1}{tud@cdmath@symbol@#2}%
-  }{}%
-}
-\newtoks\tud@cdmath@symbols@toks
-\newcommand*\tud@cdmath@symbols@set{%
-  \expandafter\IfArgIsEmpty\expandafter{\the\tud@cdmath@symbols@toks}{%
-    \forlistloop\tud@cdmath@symbols@set@cmd\tud@cdmath@symb@list%
-    \forlistloop\tud@cdmath@symbols@set@chr\tud@cdmath@char@list%
-    \addto@hook\tud@cdmath@symbols@toks{\tud@cdmath@symbols@toks{}}%
-  }{}%
-}
-\newcommand*\tud@cdmath@symbols@set@cmd[1]{%
-  \ifcsdef{#1}{%
-    \tud@cs@store{#1}%
-    \addto@hook\tud@cdmath@symbols@toks{\tud@cs@restore{#1}}%
+  \SetSymbolFont{tudupgrk}{bold}{LGR}{#1}{#3}{#4}%
+  \tud@if@issymbolfont{tuditgrk}{%
+    \SetSymbolFont{tudupgrk}{normal}{LGR}{#1}{#2}{#5}%
   }{%
-    \addto@hook\tud@cdmath@symbols@toks{\csundef{#1}}%
+    \DeclareSymbolFont{tuditgrk}{LGR}{#1}{#2}{#5}%
   }%
-  \ifcsdef{tud@cdmath@symbol@#1}{%
-    \tud@cs@letltx{#1}{tud@cdmath@symbol@#1}%
-  }{%
-    \csundef{#1}%
-  }%
+  \SetSymbolFont{tuditgrk}{bold}{LGR}{#1}{#3}{#5}%
 }
-\newcommand*\tud@cdmath@symbols@set@chr[1]{%
-  \edef\tud@res@a{\global\mathcode`#1=\the\mathcode`#1\relax}%
-  \eaddto@hook\tud@cdmath@symbols@toks{\tud@res@a}%
-  \begingroup%
-    \edef\tud@res@a{\expandafter\meaning\csname tud@cdmath@symbol@#1\endcsname}%
-    \def\tud@res@b##1"##2\@nil{"##2}%
-    \edef\tud@res@c{\expandafter\tud@res@b\tud@res@a\@nil}%
-    \edef\tud@res@a{%
-      \endgroup%
-      \global\mathcode`#1=\tud@res@c%
-    }%
-  \tud@res@a%
+\newcommand*\tud@math@map@greeks{%
+  \tud@math@loop@greeks@all\tud@math@map@@greeks%
+  \tud@math@loop@greeks@uc\tud@math@map@@@greeks%
+  \tud@math@supplement@greeks%
 }
-\newcommand*\tud@cdmath@symbols@reset{%
-  \the\tud@cdmath@symbols@toks%
-}
-\newcommand*\tud@math@set{%
-  \if@tud@cdmath@active%
-    \tud@cdmath@wrn%
-    \tud@cs@store{mv@normal}%
-    \tud@cs@store{mv@bold}%
-    \let\mv@normal\mv@tudnormal%
-    \let\mv@bold\mv@tudbold%
-    \tud@cdmath@symbols@set%
-    \ifcase\tud@slantedgreek@num\relax% upright
-      \tud@math@loop@greeks@all\tud@math@greek@upright%
-    \or% slanted
-      \tud@math@loop@greeks@all\tud@math@greek@slanted%
-    \or% standard
-      \tud@math@loop@greeks@uc\tud@math@greek@upright%
-      \tud@math@loop@greeks@lc\tud@math@greek@slanted%
-    \fi%
-  \else%
-    \tud@cs@restore{mv@normal}%
-    \tud@cs@restore{mv@bold}%
-    \tud@cdmath@symbols@reset%
-  \fi%
-  \mathversion{normal}%
-}
-\newcommand*\tud@math@greek@upright[1]{%
-  \ifcsundef{up#1}{}{%
-    \csletcs{#1}{up#1}%
-    \csletcs{other#1}{it#1}%
-  }%
-}
-\newcommand*\tud@math@greek@slanted[1]{%
-  \ifcsundef{up#1}{}{%
-    \csletcs{#1}{it#1}%
-    \csletcs{other#1}{up#1}%
-  }%
-}
-% map aliases to tudscr commands
-\newcommand*\tud@math@map@greeks[1]{%
+\newcommand*\tud@math@map@@greeks[1]{%
   \ifcsundef{it#1}{%
     \@for\tud@res@a:={#1sl,sl#1,#1it}\do{%
       \ifcsundef{\tud@res@a}{}{\csedef{it#1}{\csname\tud@res@a\endcsname}}%
@@ -2853,17 +2488,16 @@
     \ifcsundef{#1other}{}{\csedef{other#1}{\csname#1other\endcsname}}%
   }{}%
 }
-\newcommand*\tud@math@map@@greeks[1]{%
+\newcommand*\tud@math@map@@@greeks[1]{%
+  \ifcsundef{it#1}{%
+    \ifcsundef{var#1}{}{\csedef{it#1}{\csname var#1\endcsname}}%
+  }{}%
   \ifcsundef{up#1}{%
     \tud@lowerstring\tud@res@a{#1}%
     \edef\tud@res@a{Up\tud@res@a}%
     \ifcsundef{\tud@res@a}{}{\csedef{up#1}{\csname\tud@res@a\endcsname}}%
   }{}%
-  \ifcsundef{it#1}{%
-    \ifcsundef{var#1}{}{\csedef{it#1}{\csname var#1\endcsname}}%
-  }{}%
 }
-% create defaults, if possible
 \newcommand*\tud@math@supplement@greeks{%
   \begingroup%
     \newcommand*\tud@math@operators@enc{}%
@@ -2887,19 +2521,6 @@
     }%
     \tud@cs@use{mv@normal}%
     \let\tud@res@c\@empty%
-    \ifstr{\tud@math@operators@enc}{\detokenize{OT1}}{%
-      \def\tud@res@a##1{%
-        \ifcsundef{up##1}{%
-          \eappto\tud@res@c{%
-            \noexpand\DeclareMathSymbol{\csname up##1\endcsname}%
-              {\noexpand\mathalpha}{operators}{\the\tud@cnt}%
-          }%
-        }{}%
-        \advance\tud@cnt\@ne\relax%
-      }%
-      \tud@cnt=\z@\relax%
-      \tud@math@loop@greeks@uc\tud@res@a%
-    }{}%
     \ifstr{\tud@math@letters@enc}{\detokenize{OML}}{%
       \def\tud@res@a##1{%
         \ifcsundef{it##1}{%
@@ -2913,14 +2534,31 @@
       \tud@cnt=\z@\relax%
       \tud@math@loop@greeks@all\tud@res@a%
     }{}%
-    \let\tud@res@a\@empty%
-    \if@tud@lgrgreek%
-      \IfFileExists{lgr\tud@math@letters@fam.fd}{%
-        \let\tud@res@a\tud@math@letters@fam%
-      }{%
-        \IfFileExists{lgr\tud@math@operators@fam.fd}{%
-          \let\tud@res@a\tud@math@operators@fam%
+    \ifstr{\tud@math@operators@enc}{\detokenize{OT1}}{%
+      \def\tud@res@a##1{%
+        \ifcsundef{up##1}{%
+          \eappto\tud@res@c{%
+            \noexpand\DeclareMathSymbol{\csname up##1\endcsname}%
+              {\noexpand\mathalpha}{operators}{\the\tud@cnt}%
+          }%
         }{}%
+        \advance\tud@cnt\@ne\relax%
+      }%
+      \tud@cnt=\z@\relax%
+      \tud@math@loop@greeks@uc\tud@res@a%
+    }{}%
+    \let\tud@res@a\@empty%
+    \if@tud@lgrgreeks%
+      \IfFileExists{lgr\tud@cs@use{familydefault}.fd}{%
+        \def\tud@res@a{\tud@cs@use{familydefault}}%
+      }{%
+        \IfFileExists{lgr\tud@math@letters@fam.fd}{%
+          \let\tud@res@a\tud@math@letters@fam%
+        }{%
+          \IfFileExists{lgr\tud@math@operators@fam.fd}{%
+            \let\tud@res@a\tud@math@operators@fam%
+          }{}%
+        }%
       }%
     \fi%
     \edef\tud@res@a{%
@@ -2930,33 +2568,21 @@
     }%
   \tud@res@a%
   \ifx\tud@res@a\@empty\else%
-    \ifundef{\T@LGR}{\DeclareFontEncoding{LGR}{}{}}{}%
-    \tud@if@issymbolfont{tudupgrk}{}{%
-      \DeclareSymbolFont{tudupgrk}{LGR}{cmr}{m}{n}%
-    }%
-    \SetSymbolFont{tudupgrk}{normal}{LGR}%
-      {\tud@res@a}{\tud@cs@use{mddefault}}{\tud@cs@use{updefault}}%
-    \SetSymbolFont{tudupgrk}{bold}{LGR}%
-      {\tud@res@a}{\tud@cs@use{bfdefault}}{\tud@cs@use{updefault}}%
-    \tud@if@issymbolfont{tuditgrk}{}{%
-      \DeclareSymbolFont{tuditgrk}{LGR}{cmr}{m}{it}%
-    }%
-    \SetSymbolFont{tuditgrk}{normal}{LGR}%
-      {\tud@res@a}{\tud@cs@use{mddefault}}{\tud@cs@use{itdefault}}%
-    \SetSymbolFont{tuditgrk}{bold}{LGR}%
-      {\tud@res@a}{\tud@cs@use{bfdefault}}{\tud@cs@use{itdefault}}%
+    \tud@math@declare@lgrgreeks{\tud@res@a}%
+      {\tud@cs@use{mddefault}}{\tud@cs@use{bfdefault}}%
+      {\tud@cs@use{updefault}}{\tud@cs@use{itdefault}}%
     \let\tud@res@c\@empty%
     \def\tud@res@b##1##2{%
-      \ifcsundef{up##1}{%
-        \eappto\tud@res@c{%
-          \noexpand\DeclareMathSymbol{\csname up##1\endcsname}%
-              {\noexpand\mathalpha}{tudupgrk}{##2}%
-        }%
-      }{}%
       \ifcsundef{it##1}{%
         \eappto\tud@res@c{%
           \noexpand\DeclareMathSymbol{\csname it##1\endcsname}%
               {\noexpand\mathalpha}{tuditgrk}{##2}%
+        }%
+      }{}%
+      \ifcsundef{up##1}{%
+        \eappto\tud@res@c{%
+          \noexpand\DeclareMathSymbol{\csname up##1\endcsname}%
+              {\noexpand\mathalpha}{tudupgrk}{##2}%
         }%
       }{}%
     }%
@@ -3034,6 +2660,360 @@
     \edef\tud@res@c{\endgroup\expandonce\tud@res@c}%
   \tud@res@c%
 }
+\newcommand*\mv@tudnormal{}
+\newcommand*\mv@tudbold{}
+\newcommand*\mv@tuddin{}
+\AfterPackage*{mathastext}{%
+  \CheckCommand*\MTversion{\@ifstar\MTversion@s\MTversion@}%
+  \CheckCommand*\MTversion@s[1]{\mathversion{#1}\MTversion@@{#1}}%
+  \newrobustcmd*\tud@mathversion[1]{%
+    \tud@cs@use{mathversion}{#1}%
+    \if@tud@cdmath@active%
+      \ifstr{#1}{normal}{%
+        \MTversion@@{tudnormal}%
+      }{%
+        \ifstr{#1}{bold}{%
+          \MTversion@@{tudbold}%
+        }{}%
+      }%
+    \fi%
+  }%
+  \AtEndPreamble{%
+    \tud@cs@store{mathversion}%
+    \tud@cs@letltx{mathversion}{tud@mathversion}%
+  }%
+}
+\newcommand*\tud@cdmath@init{%
+  \if@tud@cdmath@active%
+    \IfFileExists{iwona.sty}{}{\RequirePackage{iwona}}%
+  \fi%
+  \if@tud@cdoldfont@active\else%
+    \PassOptionsToPackage{%
+      subdued,defaultmathsizes,nosmalldelims,%
+      defaultrm,defaultbf,defaultit,defaultsf,defaulttt,%
+      noequal,nohbar%
+    }{mathastext}%
+    \RequirePackage{mathastext}[2018/08/22]%
+    \tud@math@declare@lgrgreeks{cmr}{m}{bx}{n}{it}%
+  \fi%
+  \providecommand*\MTDeclareVersion[6][]{\DeclareMathVersion{##2}}%
+  \providecommand*\MTversion@@[1]{}%
+  \if@tud@cdfont@fam@exist%
+    \tud@cdmath@@init{\tud@cdfont@fam@lf}{\tud@ttfont@fam}%
+  \else%
+    \let\mv@tudnormal\mv@normal%
+    \let\mv@tudbold\mv@bold%
+    \if@tud@cdoldfont@active%
+      \let\mv@tuddin\mv@bold%
+    \fi%
+  \fi%
+  \if@tud@cdoldfont@active%
+    \tud@cnt=\z@\relax%
+    \tud@math@loop@greeks@uc\tud@cdmath@declare@greek@uc%
+    \tud@math@loop@greeks@lc\tud@cdmath@declare@greek@lc%
+  \else%
+    \tud@cdmath@declare@greek@lgr%
+  \fi%
+  \tud@cdmath@declare@char{*}{\mathbin}{symbols}{"03}%
+  \tud@cdmath@also@greeks%
+}
+\newcommand*\tud@cdmath@@init[2]{%
+  \tud@cdfont@@set%
+  \tud@ttfont@@set%
+  \if@tud@cdoldfont@active%
+    \DeclareMathVersion{tudnormal}%
+    \DeclareMathVersion{tudbold}%
+    \DeclareMathVersion{tuddin}%
+    \SetSymbolFont{operators}{tudnormal}{OT1}{#1}{\tud@cdfont@md}{n}%
+    \SetSymbolFont{operators}{tudbold}{OT1}{#1}{\tud@cdfont@bf}{n}%
+    \SetSymbolFont{operators}{tuddin}{OT1}{\tud@cdfont@db}{b}{n}%
+    \SetSymbolFont{letters}{tudnormal}{OML}{#1}{\tud@cdfont@md}{sl}%
+    \SetSymbolFont{letters}{tudbold}{OML}{#1}{\tud@cdfont@bf}{sl}%
+    \SetSymbolFont{letters}{tuddin}{OML}{\tud@cdfont@db}{b}{sl}%
+    \SetSymbolFont{symbols}{tudnormal}{OMS}{#1}{\tud@cdfont@md}{n}%
+    \SetSymbolFont{symbols}{tudbold}{OMS}{#1}{\tud@cdfont@bf}{n}%
+    \SetSymbolFont{symbols}{tuddin}{OMS}{\tud@cdfont@db}{b}{n}%
+    \SetSymbolFont{largesymbols}{tudnormal}{OMX}{iwona}{\tud@cdfont@md}{n}%
+    \SetSymbolFont{largesymbols}{tudbold}{OMX}{iwona}{\tud@cdfont@bf}{n}%
+    \SetSymbolFont{largesymbols}{tuddin}{OMX}{iwona}{ebc}{n}%
+    \SetMathAlphabet{\mathnormal}{tudnormal}{OML}{#1}{\tud@cdfont@md}{sl}%
+    \SetMathAlphabet{\mathnormal}{tudbold}{OML}{#1}{\tud@cdfont@bf}{sl}%
+    \SetMathAlphabet{\mathnormal}{tuddin}{OML}{\tud@cdfont@db}{b}{sl}%
+    \tud@if@ismathalphabet{\mathbold}{%
+      \SetMathAlphabet{\mathbold}{tudnormal}{OML}{#1}{\tud@cdfont@bf}{sl}%
+      \SetMathAlphabet{\mathbold}{tudbold}{OML}{#1}{\tud@cdfont@ebf}{sl}%
+      \SetMathAlphabet{\mathbold}{tuddin}{OML}{\tud@cdfont@db}{b}{sl}%
+    }{}%
+  \else%
+    \MTDeclareVersion[it]{tudnormal}{T1}{#1}{\tud@cdfont@md}{n}%
+    \MTDeclareVersion[it]{tudbold}{T1}{#1}{\tud@cdfont@bf}{n}%
+    \SetSymbolFont{operators}{tudnormal}{OT1}{iwona}{\tud@cdfont@md}{n}%
+    \SetSymbolFont{operators}{tudbold}{OT1}{iwona}{\tud@cdfont@bf}{n}%
+    \SetSymbolFont{letters}{tudnormal}{OML}{iwona}{\tud@cdfont@md}{it}%
+    \SetSymbolFont{letters}{tudbold}{OML}{iwona}{\tud@cdfont@bf}{it}%
+    \SetSymbolFont{symbols}{tudnormal}{OMS}{iwona}{\tud@cdfont@md}{n}%
+    \SetSymbolFont{symbols}{tudbold}{OMS}{iwona}{\tud@cdfont@bf}{n}%
+    \SetSymbolFont{largesymbols}{tudnormal}{OMX}{iwona}{\tud@cdfont@md}{n}%
+    \SetSymbolFont{largesymbols}{tudbold}{OMX}{iwona}{\tud@cdfont@bf}{n}%
+    \SetSymbolFont{tudupgrk}{tudnormal}{LGR}{#1}{\tud@cdfont@md}{n}%
+    \SetSymbolFont{tuditgrk}{tudnormal}{LGR}{#1}{\tud@cdfont@md}{it}%
+    \SetSymbolFont{tudupgrk}{tudbold}{LGR}{#1}{\tud@cdfont@bf}{n}%
+    \SetSymbolFont{tuditgrk}{tudbold}{LGR}{#1}{\tud@cdfont@bf}{it}%
+    \tud@if@ismathalphabet{\mathbold}{%
+      \SetMathAlphabet{\mathbold}{tudnormal}{T1}{#1}{\tud@cdfont@bf}{it}%
+      \SetMathAlphabet{\mathbold}{tudbold}{T1}{#1}{\tud@cdfont@ebf}{it}%
+    }{}%
+  \fi%
+  \SetMathAlphabet{\mathrm}{tudnormal}{OT1}{#1}{\tud@cdfont@md}{n}%
+  \SetMathAlphabet{\mathrm}{tudbold}{OT1}{#1}{\tud@cdfont@bf}{n}%
+  \IfFileExists{ueus.fd}{%
+    \SetMathAlphabet{\mathcal}{tudnormal}{U}{eus}{m}{n}%
+    \SetMathAlphabet{\mathcal}{tudbold}{U}{eus}{b}{n}%
+    \if@tud@cdoldfont@active%
+      \SetMathAlphabet{\mathcal}{tuddin}{U}{eus}{b}{n}%
+    \fi%
+  }{}%
+  \SetMathAlphabet{\mathbf}{tudnormal}{OT1}{#1}{\tud@cdfont@bf}{n}%
+  \SetMathAlphabet{\mathbf}{tudbold}{OT1}{#1}{\tud@cdfont@ebf}{n}%
+  \SetMathAlphabet{\mathsf}{tudnormal}{OT1}{#1}{\tud@cdfont@md}{n}%
+  \SetMathAlphabet{\mathsf}{tudbold}{OT1}{#1}{\tud@cdfont@bf}{n}%
+  \SetMathAlphabet{\mathit}{tudnormal}{OT1}{#1}{\tud@cdfont@md}{it}%
+  \SetMathAlphabet{\mathit}{tudbold}{OT1}{#1}{\tud@cdfont@bf}{it}%
+  \SetMathAlphabet{\mathtt}{tudnormal}{OT1}{#2}{\tud@ttfont@md}{n}%
+  \SetMathAlphabet{\mathtt}{tudbold}{OT1}{#2}{\tud@ttfont@bf}{n}%
+  \if@tud@cdoldfont@active%
+    \SetMathAlphabet{\mathrm}{tuddin}{OT1}{\tud@cdfont@db}{b}{n}%
+    \SetMathAlphabet{\mathbf}{tuddin}{OT1}{\tud@cdfont@db}{b}{n}%
+    \SetMathAlphabet{\mathsf}{tuddin}{OT1}{\tud@cdfont@db}{b}{n}%
+    \SetMathAlphabet{\mathit}{tuddin}{OT1}{\tud@cdfont@db}{b}{sl}%
+    \SetMathAlphabet{\mathtt}{tuddin}{OT1}{#2}{\tud@ttfont@ebf}{n}%
+  \fi%
+  \tud@if@ismathalphabet{\mathfrak}{%
+    \IfFileExists{ueuf.fd}{%
+      \SetMathAlphabet{\mathfrak}{tudnormal}{U}{euf}{m}{n}%
+      \SetMathAlphabet{\mathfrak}{tudbold}{U}{euf}{b}{n}%
+      \if@tud@cdoldfont@active%
+        \SetMathAlphabet{\mathfrak}{tuddin}{U}{euf}{b}{n}%
+      \fi%
+    }{}%
+  }{}%
+  \AtBeginDocument{%
+    \@tud@res@swafalse%
+    \tud@if@issymbolfont{AMSa}{\@tud@res@swatrue}{}%
+    \tud@if@issymbolfont{AMSb}{\@tud@res@swatrue}{}%
+    \if@tud@res@swa%
+      \if@tud@cdoldfont@active%
+        \DeclareFontFamily{U}{\tud@cdfont@fam@lf a}{}%
+        \DeclareFontShape{U}{\tud@cdfont@fam@lf a}{m}{n}{<->cmbras10}{}%
+        \SetSymbolFont{AMSa}{tudnormal}{U}{\tud@cdfont@fam@lf a}{m}{n}%
+        \SetSymbolFont{AMSa}{tudbold}{U}{\tud@cdfont@fam@lf a}{m}{n}%
+        \DeclareFontFamily{U}{\tud@cdfont@fam@lf b}{}%
+        \DeclareFontShape{U}{\tud@cdfont@fam@lf b}{m}{n}{<->cmbrbs10}{}%
+        \SetSymbolFont{AMSb}{tudnormal}{U}{\tud@cdfont@fam@lf b}{m}{n}%
+        \SetSymbolFont{AMSb}{tudbold}{U}{\tud@cdfont@fam@lf b}{m}{n}%
+      \else%
+        \@ifpackageloaded{mdsymbol}{}{%
+          \appto\tud@cdmath@wrn{%
+            \ClassInfoNoLine{\TUD@Class@Name}%
+            {%
+              You may load package `mdsymbol' in order to\MessageBreak%
+              get symbols matching the used math font%
+            }%
+          }%
+        }%
+      \fi%
+    \fi%
+    \tud@if@issymbolfont{legacymaths}{%
+      \SetSymbolFont{legacymaths}{tudnormal}{OT1}{#1}{\tud@cdfont@md}{n}%
+      \SetSymbolFont{legacymaths}{tudbold}{OT1}{#1}{\tud@cdfont@bf}{n}%
+      \if@tud@cdoldfont@active%
+        \SetSymbolFont{legacymaths}{tuddin}{OT1}{\tud@cdfont@db}{b}{n}%
+      \fi%
+    }{}%
+    \if@tud@cdoldfont@active\sbox\z@{\mathversion{tudnormal}$ $\tud@db$ $}\fi%
+  }%
+}
+\newcommand*\tud@cdmath@symb@list{}
+\newcommand*\tud@cdmath@declare@symb[4]{%
+  \listeadd\tud@cdmath@symb@list{#1}%
+  \tud@DeclareMathSymbol{#1}{#2}{#3}{#4}%
+}
+\newcommand*\tud@cdmath@declare@alias[2]{%
+  \listeadd\tud@cdmath@symb@list{#1}%
+  \ifcsdef{tud@cdmath@symbol@#2}{%
+    \csedef{tud@cdmath@symbol@#1}{\csname tud@cdmath@symbol@#2\endcsname}%
+  }{}%
+}
+\newcommand*\tud@cdmath@char@list{}
+\newcommand*\tud@cdmath@declare@char[4]{%
+  \listeadd\tud@cdmath@char@list{#1}%
+  \tud@DeclareMathSymbol{#1}{#2}{#3}{#4}%
+}
+\newcommand*\tud@DeclareMathSymbol[4]{%
+  \begingroup%
+    \edef\tud@res@a{%
+      \endgroup%
+      \noexpand\DeclareMathSymbol%
+        {\csname tud@cdmath@symbol@#1\endcsname}%
+        {\etex@unexpanded{#2}}{#3}{#4}%
+    }%
+  \tud@res@a%
+}
+\newtoks\tud@cdmath@symbols@toks
+\newcommand*\tud@cdmath@symbols@set{%
+  \expandafter\IfArgIsEmpty\expandafter{\the\tud@cdmath@symbols@toks}{%
+    \forlistloop\tud@cdmath@symbols@set@cmd\tud@cdmath@symb@list%
+    \forlistloop\tud@cdmath@symbols@set@chr\tud@cdmath@char@list%
+    \addto@hook\tud@cdmath@symbols@toks{\tud@cdmath@symbols@toks{}}%
+  }{}%
+}
+\newcommand*\tud@cdmath@symbols@set@cmd[1]{%
+  \ifcsdef{#1}{%
+    \tud@cs@store{#1}%
+    \addto@hook\tud@cdmath@symbols@toks{\tud@cs@restore{#1}}%
+  }{%
+    \addto@hook\tud@cdmath@symbols@toks{\csundef{#1}}%
+  }%
+  \ifcsdef{tud@cdmath@symbol@#1}{%
+    \tud@cs@letltx{#1}{tud@cdmath@symbol@#1}%
+  }{%
+    \csundef{#1}%
+  }%
+}
+\newcommand*\tud@cdmath@symbols@set@chr[1]{%
+  \edef\tud@res@a{\global\mathcode`#1=\the\mathcode`#1\relax}%
+  \eaddto@hook\tud@cdmath@symbols@toks{\tud@res@a}%
+  \begingroup%
+    \edef\tud@res@a{\expandafter\meaning\csname tud@cdmath@symbol@#1\endcsname}%
+    \def\tud@res@b##1"##2\@nil{"##2}%
+    \edef\tud@res@c{\expandafter\tud@res@b\tud@res@a\@nil}%
+    \edef\tud@res@a{%
+      \endgroup%
+      \global\mathcode`#1=\tud@res@c%
+    }%
+  \tud@res@a%
+}
+\newcommand*\tud@cdmath@symbols@reset{\the\tud@cdmath@symbols@toks}
+\newcommand*\tud@cdmath@declare@greek@uc[1]{%
+  \tud@cdmath@declare@symb{it#1}{\mathalpha}{letters}{\the\tud@cnt}%
+  \tud@cdmath@declare@symb{up#1}{\mathalpha}{operators}{\the\tud@cnt}%
+  \advance\tud@cnt\@ne\relax%
+}
+\newcommand*\tud@cdmath@declare@greek@lc[1]{%
+  \tud@cdmath@declare@symb{it#1}{\mathalpha}{letters}{\the\tud@cnt}%
+  \listeadd\tud@cdmath@symb@list{up#1}%
+  \advance\tud@cnt\@ne\relax%
+}
+\newcommand*\tud@cdmath@declare@greek@lgr{%
+  \tud@cdmath@declare@greek@@lgr{Gamma}{71}%
+  \tud@cdmath@declare@greek@@lgr{Delta}{68}%
+  \tud@cdmath@declare@greek@@lgr{Theta}{74}%
+  \tud@cdmath@declare@greek@@lgr{Lambda}{76}%
+  \tud@cdmath@declare@greek@@lgr{Xi}{88}%
+  \tud@cdmath@declare@greek@@lgr{Pi}{80}%
+  \tud@cdmath@declare@greek@@lgr{Sigma}{83}%
+  \tud@cdmath@declare@greek@@lgr{Upsilon}{85}%
+  \tud@cdmath@declare@greek@@lgr{Phi}{70}%
+  \tud@cdmath@declare@greek@@lgr{Psi}{89}%
+  \tud@cdmath@declare@greek@@lgr{Omega}{87}%
+  \tud@cdmath@declare@greek@@lgr{alpha}{97}%
+  \tud@cdmath@declare@greek@@lgr{beta}{98}%
+  \tud@cdmath@declare@greek@@lgr{gamma}{103}%
+  \tud@cdmath@declare@greek@@lgr{delta}{100}%
+  \tud@cdmath@declare@greek@@lgr{epsilon}{101}%
+  \tud@cdmath@declare@greek@@lgr{zeta}{122}%
+  \tud@cdmath@declare@greek@@lgr{eta}{104}%
+  \tud@cdmath@declare@greek@@lgr{theta}{106}%
+  \tud@cdmath@declare@greek@@lgr{iota}{105}%
+  \tud@cdmath@declare@greek@@lgr{kappa}{107}%
+  \tud@cdmath@declare@greek@@lgr{lambda}{108}%
+  \tud@cdmath@declare@greek@@lgr{mu}{109}%
+  \tud@cdmath@declare@greek@@lgr{nu}{110}%
+  \tud@cdmath@declare@greek@@lgr{xi}{120}%
+  \tud@cdmath@declare@greek@@lgr{pi}{112}%
+  \tud@cdmath@declare@greek@@lgr{rho}{114}%
+  \tud@cdmath@declare@greek@@lgr{sigma}{115}%
+  \tud@cdmath@declare@greek@@lgr{tau}{116}%
+  \tud@cdmath@declare@greek@@lgr{upsilon}{117}%
+  \tud@cdmath@declare@greek@@lgr{phi}{102}%
+  \tud@cdmath@declare@greek@@lgr{chi}{113}%
+  \tud@cdmath@declare@greek@@lgr{psi}{121}%
+  \tud@cdmath@declare@greek@@lgr{omega}{119}%
+  \tud@cdmath@declare@greek@@lgr{varepsilon}{101}%
+  \tud@cdmath@declare@greek@@lgr{vartheta}{155}%
+  \tud@cdmath@declare@greek@@lgr{varpi}{119}%
+  \tud@cdmath@declare@greek@@lgr{varrho}{114}%
+  \tud@cdmath@declare@greek@@lgr{varsigma}{99}%
+  \tud@cdmath@declare@greek@@lgr{varphi}{102}%
+}
+\newcommand*\tud@cdmath@declare@greek@@lgr[2]{%
+  \tud@cdmath@declare@symb{up#1}{\mathalpha}{tudupgrk}{#2}%
+  \tud@cdmath@declare@symb{it#1}{\mathalpha}{tuditgrk}{#2}%
+}
+\newcommand*\tud@cdmath@also@greeks{%
+  \tud@math@loop@greeks@all\tud@cdmath@also@@greeks%
+  \tud@math@loop@greeks@uc\tud@cdmath@also@@@greeks%
+}
+\newcommand*\tud@cdmath@also@@greeks[1]{%
+  \tud@cdmath@declare@alias{#1}{it#1}%
+  \tud@cdmath@declare@alias{other#1}{up#1}%
+  \ifcsundef{#1up}{}{%
+    \tud@cdmath@declare@alias{#1up}{up#1}%
+  }%
+  \@for\tud@res@a:={#1sl,sl#1,#1it}\do{%
+    \ifcsundef{\tud@res@a}{}{%
+      \expandafter\tud@cdmath@declare@alias\expandafter{\tud@res@a}{it#1}%
+    }%
+  }%
+  \ifcsundef{#1other}{}{%
+    \tud@cdmath@declare@alias{#1other}{other#1}%
+  }%
+}
+\newcommand*\tud@cdmath@also@@@greeks[1]{%
+  \tud@lowerstring\tud@res@a{#1}%
+  \edef\tud@res@a{Up\tud@res@a}%
+  \ifcsundef{\tud@res@a}{}{%
+    \expandafter\tud@cdmath@declare@alias\expandafter{\tud@res@a}{up#1}%
+  }%
+  \ifcsundef{var#1}{}{%
+    \expandafter\tud@cdmath@declare@alias\expandafter{var#1}{it#1}%
+  }%
+}
+\newcommand*\tud@math@set{%
+  \if@tud@cdmath@active%
+    \tud@cdmath@wrn%
+    \tud@cs@store{mv@normal}%
+    \tud@cs@store{mv@bold}%
+    \let\mv@normal\mv@tudnormal%
+    \let\mv@bold\mv@tudbold%
+    \tud@cdmath@symbols@set%
+    \ifcase\tud@slantedgreek@num\relax% upright
+      \tud@math@loop@greeks@all\tud@math@upright@greeks%
+    \or% slanted
+      \tud@math@loop@greeks@all\tud@math@slanted@greeks%
+    \or% standard
+      \tud@math@loop@greeks@uc\tud@math@upright@greeks%
+      \tud@math@loop@greeks@lc\tud@math@slanted@greeks%
+    \fi%
+  \else%
+    \tud@cs@restore{mv@normal}%
+    \tud@cs@restore{mv@bold}%
+    \tud@cdmath@symbols@reset%
+  \fi%
+  \mathversion{normal}%
+}
+\newcommand*\tud@math@upright@greeks[1]{%
+  \ifcsundef{up#1}{}{%
+    \csletcs{#1}{up#1}%
+    \csletcs{other#1}{it#1}%
+  }%
+}
+\newcommand*\tud@math@slanted@greeks[1]{%
+  \ifcsundef{up#1}{}{%
+    \csletcs{#1}{it#1}%
+    \csletcs{other#1}{up#1}%
+  }%
+}
 \AtEndPreamble{%
   \if@tud@x@mweights@enabled%
     \ifundef{\bfseries@rm}{\edef\bfseries@rm{\bfdefault}}{}%
@@ -3061,9 +3041,7 @@
   \fi%
   \tud@font@set%
   \AtBeginDocument{%
-    \tud@math@loop@greeks@all\tud@math@map@greeks%
-    \tud@math@loop@greeks@uc\tud@math@map@@greeks%
-    \tud@math@supplement@greeks%
+    \tud@math@map@greeks%
     \tud@math@checkslanted@greeks%
     \tud@math@set%
   }%
