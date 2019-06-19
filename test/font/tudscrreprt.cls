@@ -1551,9 +1551,9 @@
 \AfterPackage*{mweights}{\@tud@x@mweights@enabledtrue}
 \newif\if@tud@cdfont@fam@exist
 \newif\if@tud@cdfont@db@exist
-\newcommand*\tud@cdfont@fam{fos}
-\newcommand*\tud@cdfont@fam@lf{fos}
-\newcommand*\tud@cdfont@fam@osf{fosj}
+\newcommand*\tud@cdfont@fam{opensans-TLF}
+\newcommand*\tud@cdfont@fam@lf{opensans-TLF}
+\newcommand*\tud@cdfont@fam@osf{opensans-TOsF}
 \if@tud@cdoldfont@active
   \renewcommand*\tud@cdfont@fam{lun}
   \renewcommand*\tud@cdfont@fam@lf{lun}
@@ -1581,6 +1581,9 @@
   \else%
     \if@tud@cdfont@active%
       \IfFileExists{opensans.sty}{}{\RequirePackage{opensans}}%
+    \fi%
+    \if@tud@cdmath@active%
+      \IfFileExists{iwona.sty}{}{\RequirePackage{iwona}}%
     \fi%
     \tud@cdfont@@check[OpenSans]{%
       Light,Regular,SemiBold,Bold,ExtraBold,%
@@ -1728,6 +1731,7 @@
       \noexpand\defaultfontfeatures[#1]{%
         NFSSFamily=#1,%
         Ligatures=TeX,%
+        Numbers=Monospaced,%
         BoldFont={},%
         ItalicFont={},%
         BoldItalicFont={},%
@@ -2684,9 +2688,6 @@
   }%
 }
 \newcommand*\tud@cdmath@init{%
-  \if@tud@cdmath@active%
-    \IfFileExists{iwona.sty}{}{\RequirePackage{iwona}}%
-  \fi%
   \if@tud@cdoldfont@active\else%
     \PassOptionsToPackage{%
       subdued,defaultmathsizes,nosmalldelims,%
@@ -2753,6 +2754,18 @@
     \SetSymbolFont{letters}{tudbold}{OML}{iwona}{\tud@cdfont@bf}{it}%
     \SetSymbolFont{symbols}{tudnormal}{OMS}{iwona}{\tud@cdfont@md}{n}%
     \SetSymbolFont{symbols}{tudbold}{OMS}{iwona}{\tud@cdfont@bf}{n}%
+    \IfFileExists{omliwona.fd}{%
+      \input{omliwona.fd}%
+      \@for\tud@res@a:={l,m,sb,b,eb}\do{%
+        \csletcs{OML/#1/\tud@res@a/it}{OML/iwona/\tud@res@a/it}%
+      }%
+    }{}%
+    \IfFileExists{omsiwona.fd}{%
+      \input{omsiwona.fd}%
+      \@for\tud@res@a:={l,m,sb,b,eb}\do{%
+        \csletcs{OMS/#1/\tud@res@a/n}{OMS/iwona/\tud@res@a/n}%
+      }%
+    }{}%
     \SetSymbolFont{largesymbols}{tudnormal}{OMX}{iwona}{\tud@cdfont@md}{n}%
     \SetSymbolFont{largesymbols}{tudbold}{OMX}{iwona}{\tud@cdfont@bf}{n}%
     \SetSymbolFont{tudupgrk}{tudnormal}{LGR}{#1}{\tud@cdfont@md}{n}%
@@ -2766,13 +2779,6 @@
   \fi%
   \SetMathAlphabet{\mathrm}{tudnormal}{OT1}{#1}{\tud@cdfont@md}{n}%
   \SetMathAlphabet{\mathrm}{tudbold}{OT1}{#1}{\tud@cdfont@bf}{n}%
-  \IfFileExists{ueus.fd}{%
-    \SetMathAlphabet{\mathcal}{tudnormal}{U}{eus}{m}{n}%
-    \SetMathAlphabet{\mathcal}{tudbold}{U}{eus}{b}{n}%
-    \if@tud@cdoldfont@active%
-      \SetMathAlphabet{\mathcal}{tuddin}{U}{eus}{b}{n}%
-    \fi%
-  }{}%
   \SetMathAlphabet{\mathbf}{tudnormal}{OT1}{#1}{\tud@cdfont@bf}{n}%
   \SetMathAlphabet{\mathbf}{tudbold}{OT1}{#1}{\tud@cdfont@ebf}{n}%
   \SetMathAlphabet{\mathsf}{tudnormal}{OT1}{#1}{\tud@cdfont@md}{n}%
@@ -2788,6 +2794,13 @@
     \SetMathAlphabet{\mathit}{tuddin}{OT1}{\tud@cdfont@db}{b}{sl}%
     \SetMathAlphabet{\mathtt}{tuddin}{OT1}{#2}{\tud@ttfont@ebf}{n}%
   \fi%
+  \IfFileExists{ueus.fd}{%
+    \SetMathAlphabet{\mathcal}{tudnormal}{U}{eus}{m}{n}%
+    \SetMathAlphabet{\mathcal}{tudbold}{U}{eus}{b}{n}%
+    \if@tud@cdoldfont@active%
+      \SetMathAlphabet{\mathcal}{tuddin}{U}{eus}{b}{n}%
+    \fi%
+  }{}%
   \tud@if@ismathalphabet{\mathfrak}{%
     \IfFileExists{ueuf.fd}{%
       \SetMathAlphabet{\mathfrak}{tudnormal}{U}{euf}{m}{n}%
