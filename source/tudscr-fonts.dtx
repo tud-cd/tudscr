@@ -373,15 +373,14 @@
     \tud@cdfont@@@check{OML,OMS}{\tud@cdfont@fam@lf}%
     \tud@cdfont@@@check{OML,OMS}{\tud@cdfont@db}%
   \else%
-    \if@tud@cdfont@active%
-      \IfFileExists{opensans.sty}{}{\RequirePackage{opensans}}%
-    \fi%
 %    \end{macrocode}
-% Das Paket \pkg{iwona} wird genutzt, um fehlende Glyphen und Symbole für die 
-% Mathematikschriften des \CDs zu ergänzen.
+% Die Verion von \pkg{opensans} wird geprüft. Das Paket \pkg{iwona} wird 
+% genutzt, um fehlende Glyphen und Symbole für die Mathematikschriften des \CDs 
+% zu ergänzen.
 %    \begin{macrocode}
-    \if@tud@cdmath@active%
-      \IfFileExists{iwona.sty}{}{\RequirePackage{iwona}}%
+    \if@tud@cdfont@active%
+      \TUD@CheckPackage{opensans}{2019/06/20}%
+      \TUD@CheckPackage{iwona}{2005/10/03}%
     \fi%
     \tud@cdfont@@check[OpenSans]{%
       Light,Regular,SemiBold,Bold,ExtraBold,%
@@ -2685,12 +2684,12 @@
         \ifcsundef{it##1}{%
           \eappto\tud@res@c{%
             \noexpand\DeclareMathSymbol{\csname it##1\endcsname}%
-              {\noexpand\mathalpha}{letters}{\the\tud@cnt}%
+              {\noexpand\mathalpha}{letters}{\the\tud@res@cnt}%
           }%
         }{}%
-        \advance\tud@cnt\@ne\relax%
+        \advance\tud@res@cnt\@ne\relax%
       }%
-      \tud@cnt=\z@\relax%
+      \tud@res@cnt=\z@\relax%
       \tud@math@loop@greeks@all\tud@res@a%
     }{}%
     \ifstr{\tud@math@operators@enc}{\detokenize{OT1}}{%
@@ -2698,12 +2697,12 @@
         \ifcsundef{up##1}{%
           \eappto\tud@res@c{%
             \noexpand\DeclareMathSymbol{\csname up##1\endcsname}%
-              {\noexpand\mathalpha}{operators}{\the\tud@cnt}%
+              {\noexpand\mathalpha}{operators}{\the\tud@res@cnt}%
           }%
         }{}%
-        \advance\tud@cnt\@ne\relax%
+        \advance\tud@res@cnt\@ne\relax%
       }%
-      \tud@cnt=\z@\relax%
+      \tud@res@cnt=\z@\relax%
       \tud@math@loop@greeks@uc\tud@res@a%
     }{}%
 %    \end{macrocode}
@@ -3073,7 +3072,7 @@
 % \ToDo{kann mit \pkg{opensans-math} raus}[v2.??]
 %    \begin{macrocode}
   \if@tud@cdoldfont@active%
-    \tud@cnt=\z@\relax%
+    \tud@res@cnt=\z@\relax%
     \tud@math@loop@greeks@uc\tud@cdmath@declare@greek@uc%
     \tud@math@loop@greeks@lc\tud@cdmath@declare@greek@lc%
   \else%
@@ -3477,9 +3476,9 @@
 % \ToDo{Codierungen \val{LS1/LS2}; siehe \pkg{stix,libertinust1math}}[v2.??]
 %    \begin{macrocode}
 \newcommand*\tud@cdmath@declare@greek@uc[1]{%
-  \tud@cdmath@declare@symb{it#1}{\mathalpha}{letters}{\the\tud@cnt}%
-  \tud@cdmath@declare@symb{up#1}{\mathalpha}{operators}{\the\tud@cnt}%
-  \advance\tud@cnt\@ne\relax%
+  \tud@cdmath@declare@symb{it#1}{\mathalpha}{letters}{\the\tud@res@cnt}%
+  \tud@cdmath@declare@symb{up#1}{\mathalpha}{operators}{\the\tud@res@cnt}%
+  \advance\tud@res@cnt\@ne\relax%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@cdmath@symbol@itOmega
@@ -3570,7 +3569,7 @@
 % normale OML-Kodierung deklariert werden können.
 %    \begin{macrocode}
 \newcommand*\tud@cdmath@declare@greek@lc[1]{%
-  \tud@cdmath@declare@symb{it#1}{\mathalpha}{letters}{\the\tud@cnt}%
+  \tud@cdmath@declare@symb{it#1}{\mathalpha}{letters}{\the\tud@res@cnt}%
 %    \end{macrocode}
 % Für aufrechte griechische Minuskeln gibt es gewöhnlich keine Symbolschrift, 
 % weshalb ein einfacher Eintrag \cs{up\meta{Bezeichner}} in die Liste 
@@ -3580,9 +3579,9 @@
 % \ToDo{falls irgendwann erweiterte OML-Kodierung existiert, dann nutzen}[v2.??]
 %    \begin{macrocode}
 %^^A  \tud@cdmath@declare@symb{it##1}{\mathalpha}{letters}%
-%^^A    {\the\numexpr\tud@cnt+128\relax}%
+%^^A    {\the\numexpr\tud@res@cnt+128\relax}%
   \listeadd\tud@cdmath@symb@list{up#1}%
-  \advance\tud@cnt\@ne\relax%
+  \advance\tud@res@cnt\@ne\relax%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@cdmath@symbol@itvarphi
