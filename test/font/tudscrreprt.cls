@@ -1571,27 +1571,25 @@
 }
 \newcommand*\tud@cdfont@check{%
   \if@tud@cdoldfont@active%
-    \tud@cdfont@@check[Univers]{%
+    \tud@cdfont@@check{Univers}{%
       Light,,Bold,Black,%
       LightOblique,Oblique,BoldOblique,BlackOblique%
     }{\tud@cdfont@fam@lf}{@tud@cdfont@fam@exist}%
-    \tud@cdfont@@check{DIN-Bold}{\tud@cdfont@db}{@tud@cdfont@db@exist}%
-    \tud@cdfont@@@check{OML,OMS}{\tud@cdfont@fam@lf}%
-    \tud@cdfont@@@check{OML,OMS}{\tud@cdfont@db}%
+    \tud@cdfont@@check{DIN}{Bold}{\tud@cdfont@db}{@tud@cdfont@db@exist}%
+    \tud@cdfont@@@check{OT1,OML,OMS}{\tud@cdfont@fam@lf}%
+    \tud@cdfont@@@check{OT1,OML,OMS}{\tud@cdfont@db}%
   \else%
     \if@tud@cdfont@active%
-      \IfFileExists{opensans.sty}{}{\RequirePackage{opensans}}%
+      \TUD@CheckPackage{opensans}{2019/06/20}%
+      \TUD@CheckPackage{iwona}{2005/10/03}%
     \fi%
-    \if@tud@cdmath@active%
-      \IfFileExists{iwona.sty}{}{\RequirePackage{iwona}}%
-    \fi%
-    \tud@cdfont@@check[OpenSans]{%
+    \tud@cdfont@@check{OpenSans}{%
       Light,Regular,SemiBold,Bold,ExtraBold,%
       LightItalic,Italic,SemiBoldItalic,BoldItalic,ExtraBoldItalic%
     }{\tud@cdfont@fam@lf,\tud@cdfont@fam@osf}{@tud@cdfont@fam@exist}%
   \fi%
 }
-\newcommand*\tud@cdfont@@check[4][]{%
+\newcommand*\tud@cdfont@@check[5][-]{%
   \@tud@res@swatrue%
   \def\tud@res@a##1{%
     \@tud@res@swafalse%
@@ -1599,7 +1597,11 @@
   }%
   \if@tud@x@fontspec@enabled%
     \def\tud@res@b##1{\IfFontExistsTF{##1}{}{\tud@res@a{##1}}}%
-    \@for\tud@res@c:={#2}\do{\tud@res@b{#1\tud@res@c}}%
+    \@for\tud@res@c:={#3}\do{%
+      \expandafter\IfArgIsEmpty\expandafter{\tud@res@c}%
+        {\tud@res@b{#2}}%
+        {\tud@res@b{#2#1\tud@res@c}}
+    }%
   \else%
     \def\tud@res@b##1##2{%
       \begingroup%
@@ -1612,19 +1614,20 @@
         }%
       \tud@res@a%
     }%
-    \@for\tud@res@c:={#3}\do{\tud@res@b{\encodingdefault}{\tud@res@c}}%
+    \@for\tud@res@c:={#4}\do{\tud@res@b{\encodingdefault}{\tud@res@c}}%
   \fi%
-  \providebool{#4}%
+  \providebool{#5}%
   \if@tud@res@swa%
-    \booltrue{#4}%
+    \booltrue{#5}%
   \else%
-    \boolfalse{#4}%
+    \boolfalse{#5}%
   \fi%
 }
 \newcommand*\tud@cdfont@@@check[2]{%
+  \@tud@res@swatrue%
   \def\tud@res@a##1##2{%
+    \@tud@res@swafalse%
     \tud@cdfont@missing[##1]{##2}{\tud@cdmath@wrn}%
-    \tud@locked@bool@preset{@tud@cdmath@active}{false}%
   }%
   \def\tud@res@b##1##2{%
     \begingroup%
@@ -1638,6 +1641,21 @@
     \tud@res@a%
   }%
   \@for\tud@res@c:={#1}\do{\tud@res@b{\tud@res@c}{#2}}%
+  \if@tud@res@swa\else%
+    \AtBeginDocument{%
+      \if@tud@cdmath@active%
+        \ClassWarning{\TUD@Class@Name}%
+        {%
+          Some math font encodings are missing.\MessageBreak%
+          The option `cdmath=false' is executed. You should\MessageBreak%
+          either execute the option by yourself or install\MessageBreak%
+          all necessary fonts with a installation script\MessageBreak%
+          listed in the manual
+        }%
+      \fi%
+      \TUDoptions{cdmath=false}%
+    }%
+  \fi%
 }
 \newcommand*\tud@cdfont@missing[3][\encodingdefault]{%
   \begingroup%
@@ -1646,17 +1664,19 @@
       not found for `#1' encoding.\MessageBreak%
     }%
     \if@tud@x@fontspec@enabled%
-      \appto\tud@res@a{%
-        It seems, you haven't installed the required\MessageBreak%
-        OTF-font on your system. You should provide\MessageBreak%
-        the fonts manually to your OS%
-        \if@tud@cdoldfont@active\else%
-        \MessageBreak or install package `opensans'%
-        \fi%
-      }%
+      \ifstr{\encodingdefault}{#1}{%
+        \appto\tud@res@a{%
+          It seems, you haven't installed the required\MessageBreak%
+          OTF-font on your system. You should provide\MessageBreak%
+          the fonts manually to your OS\MessageBreak%
+          \if@tud@cdoldfont@active\else%
+            or install package `opensans'\MessageBreak%
+          \fi%
+        }%
+      }{}%
     \else%
       \if@tud@cdoldfont@active%
-        \def\tud@res@b{T1,OT1}%
+        \def\tud@res@b{T1,OT1,OMS,OML}%
       \else%
         \def\tud@res@b{T1,OT1,T2A,T2B,T2C,X2,LGR}%
       \fi%
@@ -1673,6 +1693,7 @@
           \else%
             install package `opensans'%
           \fi%
+          .\MessageBreak%
         }%
       \else%
         \ifstr{\encodingdefault}{#1}{%
@@ -1731,7 +1752,6 @@
       \noexpand\defaultfontfeatures[#1]{%
         NFSSFamily=#1,%
         Ligatures=TeX,%
-        Numbers=Monospaced,%
         BoldFont={},%
         ItalicFont={},%
         BoldItalicFont={},%
@@ -1861,18 +1881,7 @@
     \fi%
     \tud@cdfont@@set%
   \fi%
-  \@tud@res@swafalse%
-  \if@tud@cdfont@fam@exist\else%
-    \@tud@res@swatrue%
-  \fi%
-  \if@tud@cdoldfont@active%
-    \if@tud@cdoldfont@nodin\else\if@tud@cdfont@db@exist\else%
-      \@tud@res@swatrue%
-    \fi\fi%
-  \fi%
-  \if@tud@res@swa%
-    \tud@cdfont@wrn%
-  \fi%
+  \tud@cdfont@wrn%
 }
 \newcommand*\tud@cdfont@md{m}
 \newcommand*\tud@cdfont@bf{b}
@@ -1953,22 +1962,41 @@
   \if@tud@cdfont@fam@exist%
     \if@tud@x@fontspec@enabled%
       \def\tud@res@a{%
-        UprightFont={OpenSansRegular},%
-        FontFace={l}{n}{OpenSansLight},%
-        FontFace={m}{n}{OpenSansRegular},%
-        FontFace={sb}{n}{OpenSansSemiBold},%
-        FontFace={b}{n}{OpenSansBold},%
-        FontFace={bx}{n}{OpenSansBold},%
-        FontFace={eb}{n}{OpenSansExtraBold},%
-        FontFace={l}{it}{OpenSansLightItalic},%
-        FontFace={m}{it}{OpenSansItalic},%
-        FontFace={sb}{it}{OpenSansSemiBoldItalic},%
-        FontFace={b}{it}{OpenSansBoldItalic},%
-        FontFace={bx}{it}{OpenSansBoldItalic},%
-        FontFace={eb}{it}{OpenSansExtraBoldItalic}%
+        UprightFont={OpenSans-Regular},%
+        FontFace={l}{n}{OpenSans-Light},%
+        FontFace={m}{n}{OpenSans-Regular},%
+        FontFace={sb}{n}{OpenSans-SemiBold},%
+        FontFace={b}{n}{OpenSans-Bold},%
+        FontFace={bx}{n}{OpenSans-Bold},%
+        FontFace={eb}{n}{OpenSans-ExtraBold},%
+        FontFace={l}{it}{OpenSans-LightItalic},%
+        FontFace={m}{it}{OpenSans-Italic},%
+        FontFace={sb}{it}{OpenSans-SemiBoldItalic},%
+        FontFace={b}{it}{OpenSans-BoldItalic},%
+        FontFace={bx}{it}{OpenSans-BoldItalic},%
+        FontFace={eb}{it}{OpenSans-ExtraBoldItalic}%
       }%
       \tud@x@fontspec@init{\tud@cdfont@fam@osf}{Numbers=OldStyle,\tud@res@a}%
       \tud@x@fontspec@init{\tud@cdfont@fam@lf}{\tud@res@a}%
+    \else%
+      \IfFileExists{omliwona.fd}{%
+        \input{omliwona.fd}%
+        \@for\tud@res@a:={l,m,sb,b,eb}\do{%
+          \csletcs{OML/\tud@cdfont@fam@lf/\tud@res@a/it}%
+            {OML/iwona/\tud@res@a/it}%
+          \csletcs{OML/\tud@cdfont@fam@osf/\tud@res@a/it}%
+            {OML/iwona/\tud@res@a/it}%
+        }%
+      }{}%
+      \IfFileExists{omsiwona.fd}{%
+        \input{omsiwona.fd}%
+        \@for\tud@res@a:={l,m,sb,b,eb}\do{%
+          \csletcs{OMS/\tud@cdfont@fam@lf/\tud@res@a/n}%
+            {OMS/iwona/\tud@res@a/n}%
+          \csletcs{OMS/\tud@cdfont@fam@osf/\tud@res@a/n}%
+            {OMS/iwona/\tud@res@a/n}%
+        }%
+      }{}%
     \fi%
     \newrobustcmd*\cdfontln{\usefont{\encodingdefault}{\tud@cdfont@fam}{l}{n}}
     \newrobustcmd*\cdfontrn{\usefont{\encodingdefault}{\tud@cdfont@fam}{m}{n}}
@@ -1981,16 +2009,16 @@
     \newrobustcmd*\cdfontbi{\usefont{\encodingdefault}{\tud@cdfont@fam}{b}{it}}
     \newrobustcmd*\cdfontxi{\usefont{\encodingdefault}{\tud@cdfont@fam}{eb}{it}}
   \else%
-    \tud@cdfont@fallback\cdfontln{OpenSansLight}{md}{up}
-    \tud@cdfont@fallback\cdfontrn{OpenSansRegular}{md}{up}
-    \tud@cdfont@fallback\cdfontsn{OpenSansSemiBold}{md}{up}
-    \tud@cdfont@fallback\cdfontbn{OpenSansBold}{bf}{up}
-    \tud@cdfont@fallback\cdfontxn{OpenSansExtraBold}{bf}{up}
-    \tud@cdfont@fallback\cdfontli{OpenSansLightItalic}{md}{it}
-    \tud@cdfont@fallback\cdfontri{OpenSansItalic}{md}{it}
-    \tud@cdfont@fallback\cdfontsi{OpenSansSemiBoldItalic}{md}{it}
-    \tud@cdfont@fallback\cdfontbi{OpenSansBoldItalic}{bf}{it}
-    \tud@cdfont@fallback\cdfontxi{OpenSansExtraBoldItalic}{bf}{it}
+    \tud@cdfont@fallback\cdfontln{OpenSans-Light}{md}{up}
+    \tud@cdfont@fallback\cdfontrn{OpenSans-Regular}{md}{up}
+    \tud@cdfont@fallback\cdfontsn{OpenSans-SemiBold}{md}{up}
+    \tud@cdfont@fallback\cdfontbn{OpenSans-Bold}{bf}{up}
+    \tud@cdfont@fallback\cdfontxn{OpenSans-ExtraBold}{bf}{up}
+    \tud@cdfont@fallback\cdfontli{OpenSans-LightItalic}{md}{it}
+    \tud@cdfont@fallback\cdfontri{OpenSans-Italic}{md}{it}
+    \tud@cdfont@fallback\cdfontsi{OpenSans-SemiBoldItalic}{md}{it}
+    \tud@cdfont@fallback\cdfontbi{OpenSans-BoldItalic}{bf}{it}
+    \tud@cdfont@fallback\cdfontxi{OpenSans-ExtraBoldItalic}{bf}{it}
   \fi%
   \newcommand*\textcdln{}%
   \newcommand*\textcdrn{}%
@@ -2019,16 +2047,16 @@
       \if@tud@x@fontspec@enabled%
         \def\tud@res@a{%
           UprightFont={Univers},%
-          FontFace={l}{n}{UniversLight},%
+          FontFace={l}{n}{Univers-Light},%
           FontFace={m}{n}{Univers},%
-          FontFace={b}{n}{UniversBold},%
-          FontFace={bx}{n}{UniversBold},%
-          FontFace={eb}{n}{UniversBlack},%
-          FontFace={l}{it}{UniversLightOblique},%
-          FontFace={m}{it}{UniversOblique},%
-          FontFace={b}{it}{UniversBoldOblique},%
-          FontFace={bx}{it}{UniversBoldOblique},%
-          FontFace={eb}{it}{UniversBlackOblique}%
+          FontFace={b}{n}{Univers-Bold},%
+          FontFace={bx}{n}{Univers-Bold},%
+          FontFace={eb}{n}{Univers-Black},%
+          FontFace={l}{it}{Univers-LightOblique},%
+          FontFace={m}{it}{Univers-Oblique},%
+          FontFace={b}{it}{Univers-BoldOblique},%
+          FontFace={bx}{it}{Univers-BoldOblique},%
+          FontFace={eb}{it}{Univers-BlackOblique}%
         }%
         \tud@x@fontspec@init{\tud@cdfont@fam@lf}{\tud@res@a}%
       \fi%
@@ -2041,14 +2069,14 @@
       \newrobustcmd*\univbs{\usefont{\encodingdefault}{\tud@cdfont@fam}{b}{sl}}
       \newrobustcmd*\univxs{\usefont{\encodingdefault}{\tud@cdfont@fam}{eb}{sl}}
     \else%
-      \tud@cdfont@fallback\univln{UniversLight}{md}{up}
+      \tud@cdfont@fallback\univln{Univers-Light}{md}{up}
       \tud@cdfont@fallback\univrn{Univers}{md}{up}
-      \tud@cdfont@fallback\univbn{UniversBold}{bf}{up}
-      \tud@cdfont@fallback\univxn{UniversBlack}{bf}{up}
-      \tud@cdfont@fallback\univls{UniversLightOblique}{md}{sl}
-      \tud@cdfont@fallback\univrs{UniversOblique}{md}{sl}
-      \tud@cdfont@fallback\univbs{UniversBoldOblique}{bf}{sl}
-      \tud@cdfont@fallback\univxs{UniversBlackOblique}{bf}{sl}
+      \tud@cdfont@fallback\univbn{Univers-Bold}{bf}{up}
+      \tud@cdfont@fallback\univxn{Univers-Black}{bf}{up}
+      \tud@cdfont@fallback\univls{Univers-LightOblique}{md}{sl}
+      \tud@cdfont@fallback\univrs{Univers-Oblique}{md}{sl}
+      \tud@cdfont@fallback\univbs{Univers-BoldOblique}{bf}{sl}
+      \tud@cdfont@fallback\univxs{Univers-BlackOblique}{bf}{sl}
     \fi%
     \newcommand*\textuln{}%
     \newcommand*\texturn{}%
@@ -2115,12 +2143,20 @@
       \fi%
       \newrobustcmd*\tud@db{%
         \usefont{\encodingdefault}{\tud@cdfont@db}{b}{n}%
-        \mathversion{tuddin}%
+        \if@tud@cdmath@active\mathversion{tuddin}\fi%
       }%
       \newrobustcmd*\dinbn{\tud@db}%
     \else%
-      \newrobustcmd*\tud@db{\sectfont}%
-      \newrobustcmd*\dinbn{\tud@cdfont@fallback@wrn{DIN-Bold}\tud@db}%
+      \newrobustcmd*\tud@db{\tud@db@wrn\sectfont}%
+      \newcommand*\tud@db@wrn{%
+        \ClassWarning{\TUD@Class@Name}%
+        {%
+          Font `DIN-Bold' is not available and therefore\MessageBreak
+          can not be used for headings%
+        }%
+        \global\let\tud@db@wrn\relax%
+      }%
+      \newrobustcmd*\dinbn{\tud@cdfont@fallback@wrn{DIN-Bold}\sectfont}%
     \fi%
     \newcommand*\textdbn{}%
     \DeclareTextFontCommand\textdbn{\dinbn}%
@@ -2530,12 +2566,12 @@
         \ifcsundef{it##1}{%
           \eappto\tud@res@c{%
             \noexpand\DeclareMathSymbol{\csname it##1\endcsname}%
-              {\noexpand\mathalpha}{letters}{\the\tud@cnt}%
+              {\noexpand\mathalpha}{letters}{\the\tud@res@cnt}%
           }%
         }{}%
-        \advance\tud@cnt\@ne\relax%
+        \advance\tud@res@cnt\@ne\relax%
       }%
-      \tud@cnt=\z@\relax%
+      \tud@res@cnt=\z@\relax%
       \tud@math@loop@greeks@all\tud@res@a%
     }{}%
     \ifstr{\tud@math@operators@enc}{\detokenize{OT1}}{%
@@ -2543,12 +2579,12 @@
         \ifcsundef{up##1}{%
           \eappto\tud@res@c{%
             \noexpand\DeclareMathSymbol{\csname up##1\endcsname}%
-              {\noexpand\mathalpha}{operators}{\the\tud@cnt}%
+              {\noexpand\mathalpha}{operators}{\the\tud@res@cnt}%
           }%
         }{}%
-        \advance\tud@cnt\@ne\relax%
+        \advance\tud@res@cnt\@ne\relax%
       }%
-      \tud@cnt=\z@\relax%
+      \tud@res@cnt=\z@\relax%
       \tud@math@loop@greeks@uc\tud@res@a%
     }{}%
     \let\tud@res@a\@empty%
@@ -2688,19 +2724,28 @@
   }%
 }
 \newcommand*\tud@cdmath@init{%
-  \if@tud@cdoldfont@active\else%
-    \PassOptionsToPackage{%
-      subdued,defaultmathsizes,nosmalldelims,%
-      defaultrm,defaultbf,defaultit,defaultsf,defaulttt,%
-      noequal,nohbar%
-    }{mathastext}%
-    \RequirePackage{mathastext}[2018/08/22]%
-    \tud@math@declare@lgrgreeks{cmr}{m}{bx}{n}{it}%
-  \fi%
-  \providecommand*\MTDeclareVersion[6][]{\DeclareMathVersion{##2}}%
-  \providecommand*\MTversion@@[1]{}%
   \if@tud@cdfont@fam@exist%
+    \if@tud@cdoldfont@active\else%
+      \PassOptionsToPackage{%
+        subdued,defaultmathsizes,nosmalldelims,%
+        defaultrm,defaultbf,defaultit,defaultsf,defaulttt,%
+        noequal,nohbar%
+      }{mathastext}%
+      \RequirePackage{mathastext}[2018/08/22]%
+      \tud@math@declare@lgrgreeks{cmr}{m}{bx}{n}{it}%
+    \fi%
+    \providecommand*\MTDeclareVersion[6][]{\DeclareMathVersion{##2}}%
+    \providecommand*\MTversion@@[1]{}%
     \tud@cdmath@@init{\tud@cdfont@fam@lf}{\tud@ttfont@fam}%
+    \if@tud@cdoldfont@active%
+      \tud@res@cnt=\z@\relax%
+      \tud@math@loop@greeks@uc\tud@cdmath@declare@greek@uc%
+      \tud@math@loop@greeks@lc\tud@cdmath@declare@greek@lc%
+    \else%
+      \tud@cdmath@declare@greek@lgr%
+    \fi%
+    \tud@cdmath@declare@char{*}{\mathbin}{symbols}{"03}%
+    \tud@cdmath@also@greeks%
   \else%
     \let\mv@tudnormal\mv@normal%
     \let\mv@tudbold\mv@bold%
@@ -2708,15 +2753,6 @@
       \let\mv@tuddin\mv@bold%
     \fi%
   \fi%
-  \if@tud@cdoldfont@active%
-    \tud@cnt=\z@\relax%
-    \tud@math@loop@greeks@uc\tud@cdmath@declare@greek@uc%
-    \tud@math@loop@greeks@lc\tud@cdmath@declare@greek@lc%
-  \else%
-    \tud@cdmath@declare@greek@lgr%
-  \fi%
-  \tud@cdmath@declare@char{*}{\mathbin}{symbols}{"03}%
-  \tud@cdmath@also@greeks%
 }
 \newcommand*\tud@cdmath@@init[2]{%
   \tud@cdfont@@set%
@@ -2754,18 +2790,6 @@
     \SetSymbolFont{letters}{tudbold}{OML}{iwona}{\tud@cdfont@bf}{it}%
     \SetSymbolFont{symbols}{tudnormal}{OMS}{iwona}{\tud@cdfont@md}{n}%
     \SetSymbolFont{symbols}{tudbold}{OMS}{iwona}{\tud@cdfont@bf}{n}%
-    \IfFileExists{omliwona.fd}{%
-      \input{omliwona.fd}%
-      \@for\tud@res@a:={l,m,sb,b,eb}\do{%
-        \csletcs{OML/#1/\tud@res@a/it}{OML/iwona/\tud@res@a/it}%
-      }%
-    }{}%
-    \IfFileExists{omsiwona.fd}{%
-      \input{omsiwona.fd}%
-      \@for\tud@res@a:={l,m,sb,b,eb}\do{%
-        \csletcs{OMS/#1/\tud@res@a/n}{OMS/iwona/\tud@res@a/n}%
-      }%
-    }{}%
     \SetSymbolFont{largesymbols}{tudnormal}{OMX}{iwona}{\tud@cdfont@md}{n}%
     \SetSymbolFont{largesymbols}{tudbold}{OMX}{iwona}{\tud@cdfont@bf}{n}%
     \SetSymbolFont{tudupgrk}{tudnormal}{LGR}{#1}{\tud@cdfont@md}{n}%
@@ -2843,7 +2867,14 @@
         \SetSymbolFont{legacymaths}{tuddin}{OT1}{\tud@cdfont@db}{b}{n}%
       \fi%
     }{}%
-    \if@tud@cdoldfont@active\sbox\z@{\mathversion{tudnormal}$ $\tud@db$ $}\fi%
+    \if@tud@cdoldfont@active%
+      \if@tud@cdmath@active%
+        \sbox\z@{%
+          \mathversion{tudnormal}$ $%
+          \mathversion{tuddin}$ $%
+        }%
+      \fi%
+    \fi%
   }%
 }
 \newcommand*\tud@cdmath@symb@list{}
@@ -2908,14 +2939,14 @@
 }
 \newcommand*\tud@cdmath@symbols@reset{\the\tud@cdmath@symbols@toks}
 \newcommand*\tud@cdmath@declare@greek@uc[1]{%
-  \tud@cdmath@declare@symb{it#1}{\mathalpha}{letters}{\the\tud@cnt}%
-  \tud@cdmath@declare@symb{up#1}{\mathalpha}{operators}{\the\tud@cnt}%
-  \advance\tud@cnt\@ne\relax%
+  \tud@cdmath@declare@symb{it#1}{\mathalpha}{letters}{\the\tud@res@cnt}%
+  \tud@cdmath@declare@symb{up#1}{\mathalpha}{operators}{\the\tud@res@cnt}%
+  \advance\tud@res@cnt\@ne\relax%
 }
 \newcommand*\tud@cdmath@declare@greek@lc[1]{%
-  \tud@cdmath@declare@symb{it#1}{\mathalpha}{letters}{\the\tud@cnt}%
+  \tud@cdmath@declare@symb{it#1}{\mathalpha}{letters}{\the\tud@res@cnt}%
   \listeadd\tud@cdmath@symb@list{up#1}%
-  \advance\tud@cnt\@ne\relax%
+  \advance\tud@res@cnt\@ne\relax%
 }
 \newcommand*\tud@cdmath@declare@greek@lgr{%
   \tud@cdmath@declare@greek@@lgr{Gamma}{71}%
@@ -7855,7 +7886,7 @@
     }{}{\tud@patch@wrn{@uclcnotmath}}%
   }%
 \fi
-\TUD@UnwindPackage{textcase}{\providecommand*\NoCaseChange[1]{#1}}
+\TUD@deprecated@cs{NoCaseChange}{@firstofone}
 \endinput
 %%
 %% End of file `tudscrreprt.cls'.

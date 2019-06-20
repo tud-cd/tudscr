@@ -87,7 +87,8 @@
 \newcommand*\tud@res@b{}
 \newcommand*\tud@res@c{}
 \newif\if@tud@res@swa
-\newcount\tud@cnt
+\newcount\tud@res@cnt
+\newread\tud@res@read
 \newtoks\tud@toks@
 \newcommand*\eaddto@hook[2]{%
   \expandafter\addto@hook\expandafter#1\expandafter{#2}%
@@ -502,11 +503,52 @@
   }%
 }
 \newcommand*\TUD@UnwindPackage[2]{\AtEndPreamble{\@ifpackageloaded{#1}{}{#2}}}
+\@onlypreamble\TUD@UnwindPackage
+\newcommand*\TUD@CheckPackage[2]{%
+  \tud@if@packagelater@exists{#1}{#2}{}{%
+      \PackageWarningNoLine{tudscrbase}{%
+        The version `#2' of package `#1'\MessageBreak%
+        is urgently required. An erroneous output\MessageBreak
+        may occur. Please update your distribution%
+      }%
+    \IfFileExists{#1.\@pkgextension}{}{\RequirePackage{#1}[#2]}%
+  }%
+}
+\@onlypreamble\TUD@CheckPackage
+\newcommand*\tud@if@packagelater@exists[2]{%
+  \begingroup%
+    \let\tud@res@a\@empty%
+    \def\tud@res@b[##1]{\def\tud@res@a{##1}}%
+    \def\ProvidesPackage##1{%
+      \@ifnextchar[%]
+        {\tud@res@b}{\tud@res@b[]}%
+    }%
+    \IfFileExists{#1.\@pkgextension}{%
+      \openin\tud@res@read=#1.\@pkgextension%
+      \@tud@res@swatrue%
+      \loop%
+        \read\tud@res@read to\tud@res@c%
+        \@expandtwoargs\in@{\string\ProvidesPackage}%
+          {\expandafter\detokenize\expandafter{\tud@res@c}}%
+        \ifin@%
+          \@tud@res@swafalse%
+          \tud@res@c%
+        \fi%
+      \ifeof\tud@res@read\@tud@res@swafalse\fi%
+      \if@tud@res@swa%
+      \repeat%
+      \closein\tud@res@read%
+    }{}%
+    \edef\tud@res@a{\endgroup\noexpand\@ifl@t@r{\tud@res@a}{#2}}
+  \tud@res@a%
+}
+\@onlypreamble\tud@if@packagelater@exists
 \newcommand*\TUD@RecommendPackage[1]{%
   \kernel@ifnextchar[%]
     {\TUD@@RecommendPackage#1}%
     {\TUD@@RecommendPackage#1[]}%
 }
+\@onlypreamble\TUD@RecommendPackage
 \newcommand*\TUD@@RecommendPackage{}
 \def\TUD@@RecommendPackage#1[#2]{%
   \IfFileExists{#1.sty}{%
@@ -518,6 +560,7 @@
     }%
   }%
 }
+\@onlypreamble\TUD@@RecommendPackage
 \newcommand*\TUD@AfterPackage@set[1]{%
   \newbool{@tud@#1@loaded}%
   \AfterPackage!{#1}{\booltrue{@tud@#1@loaded}}%
