@@ -1600,7 +1600,7 @@
     \@for\tud@res@c:={#3}\do{%
       \expandafter\IfArgIsEmpty\expandafter{\tud@res@c}%
         {\tud@res@b{#2}}%
-        {\tud@res@b{#2#1\tud@res@c}}
+        {\tud@res@b{#2#1\tud@res@c}}%
     }%
   \else%
     \def\tud@res@b##1##2{%
@@ -2869,10 +2869,7 @@
     }{}%
     \if@tud@cdoldfont@active%
       \if@tud@cdmath@active%
-        \sbox\z@{%
-          \mathversion{tudnormal}$ $%
-          \mathversion{tuddin}$ $%
-        }%
+        \sbox\z@{\mathversion{tudnormal}$ $\mathversion{tuddin}$ $}%
       \fi%
     \fi%
   }%
