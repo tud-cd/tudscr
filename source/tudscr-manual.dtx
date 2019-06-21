@@ -1,4 +1,4 @@
-% \CheckSum{4443}
+% \CheckSum{4461}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -4941,6 +4941,16 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@shellescape@wrn
+% \begin{macro}{\tud@latex@ext}
+% \changes{v2.06}{2019/06/21}{neu}^^A
+% Für das verschachtelte Aufrufen von \app{pdflatex} bzw. \app{lualatex}.
+%    \begin{macrocode}
+\newcommand*\tud@latex@ext{}
+\ifpdftex%
+  {\def\tud@latex@ext{pdflatex\space}}%
+  {\def\tud@latex@ext{lualatex\space}}%
+%    \end{macrocode}
+% \end{macro}^^A \tud@latex@ext
 % \begin{macro}{\Tutorial}
 % \changes{v2.02}{2014/08/22}{neu}^^A
 % \changes{v2.02}{2014/10/22}{Reimplementierung}^^A
@@ -4983,12 +4993,12 @@
           \ShellEscape{rm tutorials.sh}%
         \fi%
       }%
-      \@tempb{pdflatex -shell-escape "\@tempa"}%
+      \@tempb{\tud@latex@ext -shell-escape "\@tempa"}%
       \IfFileExists{tutorials/#2.bcf}{\@tempb{biber #2}}{}%
       \@tempb{%
-        pdflatex "\@tempa"^^J%
-        pdflatex -shell-escape "\@tempa"^^J%
-        pdflatex -shell-escape "\@tempa"%
+        \tud@latex@ext "\@tempa"^^J%
+        \tud@latex@ext -shell-escape "\@tempa"^^J%
+        \tud@latex@ext -shell-escape "\@tempa"%
       }%
     }%
   \fi%
@@ -5032,8 +5042,8 @@
   \ifnum\pdf@shellescape=\@ne\relax%
     \filemodCmp{examples/#1.pdf}{examples/#1.tex}{}{%
       \ShellEscape{%
-        pdflatex -output-directory examples examples/#1.tex^^J%
-        pdflatex -output-directory examples examples/#1.tex%
+        \tud@latex@ext -output-directory examples examples/#1.tex^^J%
+        \tud@latex@ext -output-directory examples examples/#1.tex%
       }%
     }%
 %    \end{macrocode}
@@ -5042,8 +5052,8 @@
 %    \begin{macrocode}
     \filemodCmp{examples/#1_print.pdf}{examples/#1_print.tex}{}{%
       \ShellEscape{%
-        pdflatex -output-directory examples examples/#1_print.tex^^J%
-        pdflatex -output-directory examples examples/#1_print.tex%
+        \tud@latex@ext -output-directory examples examples/#1_print.tex^^J%
+        \tud@latex@ext -output-directory examples examples/#1_print.tex%
       }%
     }%
   \fi%
@@ -5594,7 +5604,7 @@
           \edef\@tempb{\etex@unexpanded{\def\StandaloneDate}{\@date}}%
         \fi%
         \edef\@tempa{%
-          pdflatex -jobname=\tud@tut@temp\space%
+          \tud@latex@ext -jobname=\tud@tut@temp\space%
           "\noexpand\unexpanded{\expandonce\@tempb\noexpand\input}%
             {\tud@tut@temp-standalone.tex}"%
         }%
