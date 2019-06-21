@@ -1579,6 +1579,13 @@
     \tud@cdfont@@@check{OT1,OML,OMS}{\tud@cdfont@fam@lf}%
     \tud@cdfont@@@check{OT1,OML,OMS}{\tud@cdfont@db}%
   \else%
+    \@ifpackageloaded{opensans}{%
+      \ClassWarningNoLine{\TUD@Class@Name}%
+      {%
+        You should not load package `opensans'\MessageBreak%
+        manually but just use option `cdfont=true'%
+      }%
+    }{}%
     \if@tud@cdfont@active%
       \TUD@CheckPackage{opensans}{2019/06/20}%
       \TUD@CheckPackage{iwona}{2005/10/03}%
@@ -1648,7 +1655,7 @@
         {%
           Some math font encodings are missing.\MessageBreak%
           The option `cdmath=false' is executed. You should\MessageBreak%
-          either execute the option by yourself or install\MessageBreak%
+          either use this option by yourself or install\MessageBreak%
           all necessary fonts with a installation script\MessageBreak%
           listed in the manual
         }%
@@ -7874,6 +7881,7 @@
   \AfterPackage*{textcase}{%
     \robustify\NoCaseChange%
     \newcommand*\tud@x@textcase@uclcnotmath{%
+      \@nonchangecase\hologo%
       \def\footnote##1##{\toks@{\noexpand\footnote##1}\@footnote}%
       \def\@footnote##1{\NoCaseChange{\the\toks@{##1}}}%
       \def\@mkboth##1##2{\NoCaseChange{\@mkboth{##1}{##2}}}%

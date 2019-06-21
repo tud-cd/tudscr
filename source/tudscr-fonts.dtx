@@ -1,4 +1,4 @@
-% \CheckSum{3000}
+% \CheckSum{3006}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -361,7 +361,6 @@
 % \Univers und \DIN müssen aus lizenrechtlichen Gründen installiert werden. Bei 
 % Nichtvorhandensein der Schriften wird eine Warnung ausgegeben sowie eine
 % Rückfallebene definiert.
-% \ToDo{Warnung, falls Paket \pkg{opensans} manuell geladen wurde}[v2.06]
 %    \begin{macrocode}
 \newcommand*\tud@cdfont@check{%
   \if@tud@cdoldfont@active%
@@ -374,10 +373,22 @@
     \tud@cdfont@@@check{OT1,OML,OMS}{\tud@cdfont@db}%
   \else%
 %    \end{macrocode}
-% Die Verion von \pkg{opensans} wird geprüft. Das Paket \pkg{iwona} wird 
+% Die Version von \pkg{opensans} wird geprüft. Das Paket \pkg{iwona} wird 
 % genutzt, um fehlende Glyphen und Symbole für die Mathematikschriften des \CDs 
 % zu ergänzen.
 %    \begin{macrocode}
+    \@ifpackageloaded{opensans}{%
+%<*class>
+      \ClassWarningNoLine{\TUD@Class@Name}%
+%</class>
+%<*package>
+      \PackageWarningNoLine{tudscrfonts}%
+%</package>
+      {%
+        You should not load package `opensans'\MessageBreak%
+        manually but just use option `cdfont=true'%
+      }%
+    }{}%
     \if@tud@cdfont@active%
       \TUD@CheckPackage{opensans}{2019/06/20}%
       \TUD@CheckPackage{iwona}{2005/10/03}%
@@ -480,11 +491,16 @@
   \if@tud@res@swa\else%
     \AtBeginDocument{%
       \if@tud@cdmath@active%
+%<*class>
         \ClassWarning{\TUD@Class@Name}%
+%</class>
+%<*package>
+        \PackageWarning{tudscrfonts}%
+%</package>
         {%
           Some math font encodings are missing.\MessageBreak%
           The option `cdmath=false' is executed. You should\MessageBreak%
-          either execute the option by yourself or install\MessageBreak%
+          either use this option by yourself or install\MessageBreak%
           all necessary fonts with a installation script\MessageBreak%
           listed in the manual
         }%
@@ -3910,7 +3926,6 @@
 %^^A    \TUDoptions{cdfont=false}%
 %^^A  \fi%
 %^^A%    \end{macrocode}
-% \ToDo{Laden des Paketes \pkg{textcomp} ggf. verzögern, hier ausführen}[v2.06]
 % Die Einstellungen für den Mathematiksatz erfolgen erst zu Dokumentbeginn, um
 % auf Einstellungen von anderen Schriftpaketen reagieren zu können. Da es
 % so gut wie keine freien OpenType-Schriften für den mathmatischen Formelsatz
