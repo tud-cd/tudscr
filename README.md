@@ -2,9 +2,9 @@
  TUD-Script -- Corporate Design of Technische Universität Dresden
 ----------------------------------------------------------------------------
 
- Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2018
+ Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2019
 
- tudscr 2018/xx/xx v2.05n
+ tudscr 2019/06/xx v2.06
 
 ----------------------------------------------------------------------------
 
@@ -20,18 +20,12 @@ Zusammenfassung
 Das TUD-Script-Bundle stellt sowohl Klassen als auch Pakete bereit, um
 LaTeX-Dokumente im Corporate Design der Technischen Universität Dresden zu
 erstellen. Es basiert auf dem KOMA-Script-Bundle, welches zwingend vorhanden
-sein muss. Außerdem sollten die beiden PostScript-Schriftfamilien Univers und
-DIN-Bold installiert werden. Geschieht dies nicht, können die Dokumentklassen
-zwar genutzt werden, die ausgegebenen Dokumente entsprechen in diesem Fall
-jedoch nicht dem ursprünglich erhofftem Stil.
+sein muss. Bei Fragen, Problemen und Anmerkungen sei entweder auf das 
+LaTeX-Forum der Technischen Universität Dresden oder das GitHub-Repository 
+*tudscr* verwiesen:
 
-Mitarbeiter und Studenten der Technischen Universität Dresden können die
-Schriftdateien unter https://tu-dresden.de/service/publizieren/cd/4_latex vom
-Universitätsmarketing  mit dem Hinweis auf die Verwendung von LaTeX anfordern.
-Für die Installation der PostScript-Schriften sei auf den entsprechenden
-Release unter https://github.com/tud-cd/tudscr/releases/tag/fonts und das
-LaTeX-Forum der Technischen Universität Dresden verwiesen:
 http://latex.wcms-file3.tu-dresden.de/phpBB3/
+https://github.com/tud-cd/tudscr/issues
 
 
 Klassen und Pakete
@@ -53,12 +47,22 @@ Das Bundle beinhaltet:
   TUD-Script vereinfacht,
 + das Paket **mathswap** für das Austauschen mathematischer Trennzeichen
   innerhalb von Zahlen (ähnlich zu **ionumbers**),
-+ das Paket **twocolfix** zur Fehlerbefehbung der Position von Überschriften im
-  zweispaltigen Layout und
++ das Paket **twocolfix** zur Fehlerbefehbung der Position von Überschriften
+	im zweispaltigen Layout und
 + eine umfassende Anwenderdokumentation sowie mehrere Tutorials.
 
 Versionen
 ---------
+
+**v2.06** (2019/06/xx)
++ Open Sans als neue Schrift des Corporate Designs
++ Minuskelziffern als Standard auswählbar
++ Unterstützung von Roboto Mono als Schreibmaschinenschrift
++ Unterschriftenfeld auf Titel mit Option `titlesignature` bereitgestellt
++ E-Mail-Adresse auf Titel mit `\emailaddress` nutzbar
++ Befehl `\frontispiece` aus KOMA-Script unterstützt
++ individuelle Untertitel für Teile und Kapitel mit `\setpartsubtitle` und 
+  `\setchaptersubtitle` möglich
 
 **v2.05m** (2017/05/30)
 + Bugfix für Unicode-Engines für die Glyphe `ß`
@@ -154,7 +158,7 @@ Versionen
 + Probleme mit der Klasse **standalone** behoben
 + Laden der Schriften des Corporate Designs im OpenType-Format mit Paket 
   **fontspec** ermöglicht
-+ verbesserte Installationsroutine der PostScript-Schriften
++ verbesserte Installationsroutine der Type1-Schriften
 + Seiten im Stil des Corporate Designs werden mithilfe des Paketes
   **scrlayer-scrpage** erzeugt
 + verschiedene Optionen und Befehle zur individuellen Gestaltung dieser Seiten
@@ -194,17 +198,12 @@ Summary
 The TUD-Script bundle provides both classes and packages in order to
 create LaTeX documents in the corporate design of the Technische Universität
 Dresden. It bases on the KOMA-Script bundle, which must necessarily be present.
-In addition, the PostScript font families Univers and DIN-Bold should be
-installed. Otherwise, the document classes can admittedly be used, but in this
-case, the created documents do not correspond to the originally thought style.
+For questions, problems and comments, please refer to eihter the LaTeX forum 
+of the Dresden University of Technology or the GitHub *tudscr* repository 
 
-Employees and students of the Technische Universität Dresden can request these
-fonts via  https://tu-dresden.de/service/publizieren/cd/4_latex from the
-university marketing university marketing with regard to the use of LaTeX. To
-install the PostScript fonts, please refer to the corresponding release under
-https://github.com/tud-cd/tudscr/releases/tag/fonts and the LaTeX forum of the
-Technische Universität Dresden:
 http://latex.wcms-file3.tu-dresden.de/phpBB3/
+https://github.com/tud-cd/tudscr/issues
+
 
 Classes and Packages
 --------------------
@@ -231,6 +230,16 @@ The bundle offers:
 
 Versions
 --------
+
+**v2.06** (2019/06/xx)
++ Open Sans as new corporate design font
++ text figures selectable as default
++ support of Roboto Mono as typewriter font
++ signature field on title page with option `titlesignature` provided
++ e-mail address on title page with `\emailaddress` available
++ macro `\frontispiece` from KOMA-Script supported
++ customized subtitles for parts and chapters with `\setpartsubtitle` and 
+  `\setchaptersubtitle` possible
 
 **v2.05m** (2017/05/30)
 + bug fix for Unicode engines for glyph`ß`
@@ -325,7 +334,7 @@ Versions
 + fixed bug with class **standalone**
 + loading the corporate design fonts in OpenType format with package 
   **fontspec** is possible
-+ improved installation routine of PostScript fonts
++ improved installation routine of Type1 fonts
 + pages in the style of the corporate design are generated using the package
   **scrlayer-scrpage**
 + various options and commands to customize these pages
