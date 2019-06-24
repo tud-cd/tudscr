@@ -1,4 +1,4 @@
-% \CheckSum{3014}
+% \CheckSum{3028}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-fonts.dtx}[%
-  2019/06/22 v2.06 TUD-Script\space%
+  2019/06/24 v2.06 TUD-Script\space%
 %</driver>
 %<package&identify>\ProvidesPackage{tudscrfonts}[%
 %<*driver|package&identify>
@@ -458,7 +458,6 @@
 %    \end{macrocode}
 % Zuletzt wird der angegebene Schalter gesetzt.
 %    \begin{macrocode}
-  \providebool{#5}%
   \if@tud@res@swa%
     \booltrue{#5}%
   \else%
@@ -1602,7 +1601,7 @@
       \AtBeginDocument{%
         \ifcsundef{textrightarrow}{}{%
           \tud@cs@store{textrightarrow}%
-          \renewcommand*{\textrightarrow}{%
+          \renewrobustcmd*{\textrightarrow}{%
             {\fontfamily{iwona}\selectfont\tud@cs@use{textrightarrow}}%
           }%
         }%
@@ -3133,6 +3132,34 @@
 %    \begin{macrocode}
   \if@tud@cdfont@fam@exist%
     \if@tud@cdoldfont@active\else%
+%    \end{macrocode}
+% Um die Mathematikschriften suaber zu definieren, ist das Laden von bestimmten
+% Paketen durch den Anwender ungünstig. Deshalb wird für diesen Fall eine 
+% Warnung ausgegeben.
+%    \begin{macrocode}
+      \if@tud@cdmath@active%
+        \def\tud@res@a##1{%
+%<*class>
+          \ClassWarningNoLine{\TUD@Class@Name}%
+%</class>
+%<*package>
+          \PackageWarningNoLine{tudscrfonts}%
+%</package>
+          {%
+            You should not load package `##1'\MessageBreak%
+            manually when option `cdmath=true' is active as\MessageBreak%
+            TUD-Script uses package `mathastext' internally\MessageBreak%
+            with a specific set of required options for the\MessageBreak%
+            math font setup%
+          }%
+        }%
+        \@ifpackageloaded{sansmath}{%
+          \tud@res@a{sansmath}%
+        }{}%
+        \@ifpackageloaded{mathastext}{%
+          \tud@res@a{mathastext}%
+        }{}%
+      \fi%
       \PassOptionsToPackage{%
         subdued,defaultmathsizes,nosmalldelims,%
         defaultrm,defaultbf,defaultit,defaultsf,defaulttt,%
