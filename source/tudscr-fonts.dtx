@@ -1,4 +1,4 @@
-% \CheckSum{3050}
+% \CheckSum{3070}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -51,7 +51,7 @@
 %<*driver>
 \ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
 \ProvidesFile{tudscr-fonts.dtx}[%
-  2019/06/25 v2.06 TUD-Script\space%
+  2019/06/28 v2.06 TUD-Script\space%
 %</driver>
 %<package&identify>\ProvidesPackage{tudscrfonts}[%
 %<*driver|package&identify>
@@ -438,18 +438,31 @@
     \def\tud@res@b##1##2{%
       \begingroup%
 %    \end{macrocode}
-% Der zu prüfenden Schriftname wird mit \cs{lowercase} in Minuskeln in 
-% \cs{tud@res@c} expandiert.
+% Der Schalter \cs{if@tud@res@swa} wird \val{false} gesetzt, falls die Schrift 
+% gefunden wurde. Der zu prüfenden Schriftname wird dabei in unterschiedlichen 
+% Varianten getestet, da \cs{IfFileExists} auf unixoiden Betriebssystemen 
+% case-sensitiv ist. 
 %    \begin{macrocode}
+        \@tud@res@swatrue%
         \tud@lowerstring\tud@res@b{##1##2.fd}%
+        \IfFileExists{\tud@res@b}{\@tud@res@swafalse}{}%
+        \if@tud@res@swa%
+          \tud@lowerstring\tud@res@b{##1}%
+          \edef\tud@res@b{\tud@res@b##2.fd}%
+          \IfFileExists{\tud@res@b}{\@tud@res@swafalse}{}%
+        \fi%
+        \if@tud@res@swa%
+          \edef\tud@res@b{##1##2.fd}%
+          \IfFileExists{\tud@res@b}{\@tud@res@swafalse}{}%
+        \fi%
 %    \end{macrocode}
 % Existiert die Schrift nicht, wird die entsprechende Warnung ausgegeben.
 %    \begin{macrocode}
         \edef\tud@res@a{%
           \endgroup%
-          \noexpand\IfFileExists{\tud@res@b}{}{%
+          \if@tud@res@swa%
             \noexpand\tud@res@a{\tud@res@b}%
-          }%
+          \fi%
         }%
       \tud@res@a%
     }%
@@ -3019,9 +3032,9 @@
 \newcommand*\tud@math@checkslanted@greeks{%
   \begingroup%
 %    \end{macrocode}
-% Wird keine Änderung durch ein Paket erkannt, werden die Glyphen ab der 
-% \TUDScript-Version~v2.06 kursiv gesetzt. Dies betrifft insbesondere die
-% Majuskeln, welche bei \LaTeX{} normalerweise aufrecht gesetzt werden.
+% Wird keine Änderung durch Pakete erkannt, werden ab \TUDScript-Version~v2.06 
+% die Glyphen kursiv gesetzt. Dies betrifft insbesondere die Majuskeln, welche
+% bei \LaTeX{} normalerweise aufrecht gesetzt werden.
 %    \begin{macrocode}
     \def\tud@res@c{%
       \tud@if@v@lower{2.06}{%
