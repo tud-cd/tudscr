@@ -4,7 +4,7 @@
 
  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2019
 
- tudscr 2019/06/xx v2.06
+ tudscr 2019/06/28 v2.06
 
 ----------------------------------------------------------------------------
 
@@ -54,7 +54,7 @@ Das Bundle beinhaltet:
 Versionen
 ---------
 
-**v2.06** (2019/06/xx)
+**v2.06** (2019/06/28)
 + Open Sans als neue Schrift des Corporate Designs
 + Minuskelziffern als Standard auswählbar
 + Unterstützung von Roboto Mono als Schreibmaschinenschrift
@@ -231,7 +231,7 @@ The bundle offers:
 Versions
 --------
 
-**v2.06** (2019/06/xx)
+**v2.06** (2019/06/28)
 + Open Sans as new corporate design font
 + text figures selectable as default
 + support of Roboto Mono as typewriter font
