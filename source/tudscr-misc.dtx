@@ -1,10 +1,10 @@
-% \CheckSum{413}
+% \CheckSum{300}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
 % ----------------------------------------------------------------------------
 %
-%  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2017
+%  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2019
 %
 % ----------------------------------------------------------------------------
 %
@@ -48,17 +48,24 @@
 %
 % \iffalse
 %%% From File: tudscr-misc.dtx
-%<*driver>
-\ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
-\ProvidesFile{tudscr-misc.dtx}[%
-  2017/03/29 v2.05l TUD-Script (miscellaneous)%
+%<*dtx>
+% \fi
+%
+\ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
+\ProvidesFile{tudscr-misc.dtx}[2019/06/28 v2.06 TUD-Script\space%
+  (miscellaneous)%
 ]
-\RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
+%
+% \iffalse
 \documentclass[english,ngerman,xindy]{tudscrdoc}
-\usepackage[T1]{fontenc}
-\usepackage{selinput}\SelectInputMappings{adieresis={ä},germandbls={ß}}
+\ifpdftex{
+  \usepackage[T1]{fontenc}
+  \usepackage[ngerman=ngerman-x-latest]{hyphsubst}
+}{
+  \usepackage{fontspec}
+}
 \usepackage{babel}
-\usepackage{tudscrfonts} % only load this package, if the fonts are installed
+\usepackage{tudscrfonts}
 \KOMAoptions{parskip=half-}
 \usepackage{bookmark}
 \usepackage[babel]{microtype}
@@ -75,7 +82,7 @@
   \tableofcontents
   \DocInput{\filename}
 \end{document}
-%</driver>
+%</dtx>
 % \fi
 %
 % \selectlanguage{ngerman}
@@ -89,280 +96,7 @@
 %
 % \StopEventually{\PrintIndex\PrintChanges\PrintToDos}
 %
-% \subsection{Sukkzessives Abarbeiten von Layoutoptionen im Dokument}
-%
-% Werden mit \cs{TUDoptions} nach \cs{begin\{document\}} mehrere Layoutoptionen 
-% gleichzeitig angegeben, muss dafür Sorge getragen werden, dass diese in der 
-% korrekten Reihenfolge abgearbeitet werden. 
-%
-% Das Makro \cs{TUD@SpecialOptionAtDocument} kann innerhalb von \cs{TUD@key} 
-% verwendet werden, um einen im obligatorischen Argument angegebenen Schalter 
-% zu aktivieren. Dabei wird über \cs{tud@atdocument@hook} garantiert, dass der 
-% Befehl \cs{tud@atdocument@process}, welcher für die Abarbeitung der einzelnen 
-% Makros in der richtigen Reihenfolge verantwortlich ist, lediglich einmal über 
-% \cs{AtEndOfFamilyOptions} ausgeführt wird.
-% \ToDo{Evtl. in \file{tudscr-layout.dtx} verschieben?}[v2.06]
-% \ToDo{%
-%   Problem bei \cs{TUDoptions} mit \cs{AtEndOfFamilyOptions} beheben
-% }[v2.06]
-% \ToDo{Überarbeiten: \cs{AtEndOfFamilyOptions*}}[v3.23]
-%
-% \begin{macro}{\TUD@SpecialOptionAtDocument}
-% \changes{v2.05}{2016/06/14}{neu}^^A
-% \begin{macro}{\tud@atdocument@hook}
-% \changes{v2.05}{2016/06/14}{neu}^^A
-%    \begin{macrocode}
-%<*execute&(class&!inherit|package&fonts)>
-\newcommand*\TUD@SpecialOptionAtDocument[1]{}
-%</execute&(class&!inherit|package&fonts)>
-%<*body>
-\newcommand*\tud@atdocument@hook{}
-\let\tud@atdocument@hook\relax
-\AtBeginDocument{%
-  \renewcommand*\TUD@SpecialOptionAtDocument[1]{%
-    \ifx\tud@atdocument@hook\relax%
-      \gdef\tud@atdocument@hook{\global\let\tud@atdocument@hook\relax}%
-      \AtEndOfFamilyOptions{%
-        \tud@atdocument@hook%
-        \tud@atdocument@process%
-      }%
-    \fi%
-    \gappto\tud@atdocument@hook{\global\booltrue{@#1}}%
-  }%
-}
-%</body>
-%    \end{macrocode}
-% \end{macro}^^A \tud@atdocument@hook
-% \end{macro}^^A \TUD@SpecialOptionAtDocument
-%
 % \iffalse
-%<*body>
-% \fi
-%
-% \begin{macro}{\tud@atdocument@process}
-% \changes{v2.05}{2016/06/14}{neu}^^A
-% \begin{macro}{\if@tud@font@set}
-% \changes{v2.05}{2016/06/14}{neu}^^A
-% \begin{macro}{\if@tud@font@math@set}
-% \changes{v2.05}{2016/06/14}{neu}^^A
-% \begin{macro}{\if@tud@font@skip@set}
-% \changes{v2.05}{2016/06/14}{neu}^^A
-% \begin{macro}{\if@tud@x@scr@headings@reset}
-% \changes{v2.05}{2016/06/14}{neu}^^A
-% \begin{macro}{\if@tud@layout@process}
-% \changes{v2.05}{2016/06/14}{neu}^^A
-% \begin{macro}{\if@tud@cdgeometry@process}
-% \changes{v2.05}{2016/06/14}{neu}^^A
-% \begin{macro}{\if@tud@cdgeometry@@process}
-% \changes{v2.05}{2016/06/14}{neu}^^A
-% Das Makro \cs{tud@atdocument@process} wird im Dokument ausgeführt, wenn 
-% mindestens eine Option gesetzt wurde, welche \cs{TUD@SpecialOptionAtDocument} 
-% verwendet. Je nachdem, welche Schalter insgesamt aktiviert wurden, werden die 
-% dazugehörigen Befehle für die Einstellungen von Schriften, Layout und/oder 
-% Satzspiegel in der richtigen Reihenfolge ausgeführt.
-%    \begin{macrocode}
-\newif\if@tud@font@set
-\newif\if@tud@font@math@set
-\newif\if@tud@font@skip@set
-\newif\if@tud@x@scr@headings@reset
-\newif\if@tud@layout@process
-\newif\if@tud@cdgeometry@process
-\newif\if@tud@cdgeometry@@process
-\newcommand*\tud@atdocument@process{%
-  \if@tud@font@set%
-    \tud@font@set%
-    \global\@tud@font@setfalse%
-    \global\@tud@font@math@setfalse%
-    \global\@tud@font@skip@setfalse%
-    \global\@tud@layout@processfalse%
-  \fi%
-  \if@tud@font@math@set%
-    \tud@font@math@set%
-    \global\@tud@font@math@setfalse%
-  \fi%
-  \if@tud@font@skip@set%
-    \tud@font@skip@set%
-    \global\@tud@font@skip@setfalse%
-  \fi%
-%<*class>
-  \if@tud@x@scr@headings@reset%
-    \tud@x@scr@headings@reset%
-    \global\@tud@x@scr@headings@resetfalse%
-    \global\@tud@layout@processfalse%
-  \fi%
-  \if@tud@layout@process%
-    \tud@layout@process%
-    \global\@tud@layout@processfalse%
-  \fi%
-  \if@tud@cdgeometry@process%
-    \tud@cdgeometry@process%
-    \global\@tud@cdgeometry@processfalse%
-    \global\@tud@cdgeometry@@processfalse%
-  \fi%
-  \if@tud@cdgeometry@@process%
-    \tud@cdgeometry@@process%
-    \global\@tud@cdgeometry@@processfalse%
-  \fi%
-%</class>
-}
-%    \end{macrocode}
-% \end{macro}^^A \if@tud@cdgeometry@@process
-% \end{macro}^^A \if@tud@cdgeometry@process
-% \end{macro}^^A \if@tud@layout@process
-% \end{macro}^^A \if@tud@x@scr@headings@reset
-% \end{macro}^^A \if@tud@font@skip@set
-% \end{macro}^^A \if@tud@font@math@set
-% \end{macro}^^A \if@tud@font@set
-% \end{macro}^^A \tud@atdocument@process
-%
-% \iffalse
-%</body>
-%<*class&option>
-% \fi
-%
-% \subsection{Papierformat und Schriftgröße}
-%
-% Insbesondere für Poster aber auch für alle anderen \TUDScript-Klassen wird
-% überprüft, ob nach einer Änderung des Standardpapierformates auch die
-% Schriftgröße durch den Anwender angepasst wurde. Diese wird jedoch nicht auf
-% Plausibilität geprüft, da der Aufwand hierfür relativ hoch wäre. Vielmehr 
-% wird davon ausgegangen, dass die explizite Angabe der Schriftgröße bewusst 
-% und dem Papierformat sowie den verwendeten Textspalten entsprechend erfolgt.
-%
-% Die nachfolgend definierten Optionen und Befehle orientieren sich dabei stark 
-% an internen \KOMAScript-Makros.
-% \ToDo{Evtl. in \file{tudscr-area.dtx} verschieben?}[v2.06]
-% \ToDo{%
-%   Wie mit \opt{layout} von \pkg{geometry} umgehen? Wann Papierformat prüfen?
-%   Vielleicht mit \cs{KOMAoptionOf\{paper\}} prüfen? Oder ganz raus?
-% }[v2.06]
-%
-% \begin{option}{paper}
-% \changes{v2.05}{2015/07/24}{neu}^^A
-% \begin{macro}{\if@tud@x@scr@paper@set}
-% \changes{v2.05}{2015/07/24}{neu}^^A
-% Da die \KOMAScript-Option \opt{paper} eine Menge an Einstellmöglichkeiten 
-% bietet, müssen die relevanten hier abgefangen werden.
-%    \begin{macrocode}
-\newif\if@tud@x@scr@paper@set
-\TUD@key{paper}{%
-  \tud@lowerstring{\@tempa}{#1}%
-%    \end{macrocode}
-% Sowohl ISO/DIN-Formate\dots
-%    \begin{macrocode}
-  \def\@tempb##1##2\@nil{%
-    \@tempswafalse%
-    \if ##1a\@tempswatrue%
-      \else\if ##1b\@tempswatrue%
-        \else\if ##1c\@tempswatrue%
-          \else\if ##1d\@tempswatrue%
-    \fi\fi\fi\fi%
-    \if@tempswa%
-      \ifnumber{##2}{}{\@tempswafalse}%
-    \fi%
-  }%
-  \expandafter\@tempb\@tempa\@nil%
-%    \end{macrocode}
-% \dots als auch frei gewählte Papierformate werden erkannt.
-%    \begin{macrocode}
-  \if@tempswa\else%
-    \def\@tempb##1:##2:##3\@nil{%
-      \edef\@tempc{##1}%
-      \ifx\@tempc\@empty\@tempswafalse\else%
-        \edef\@tempc{##2}%
-        \ifx\@tempc\@empty\@tempswafalse\else\@tempswatrue\fi%
-      \fi%
-    }%
-    \expandafter\@tempb\@tempa::\@nil%
-  \fi%
-%    \end{macrocode}
-% Die Standardpapiergröße spielt allerdings keine Rolle für eine Warnung.
-%    \begin{macrocode}
-  \@tud@x@scr@paper@setfalse%
-  \if@tempswa%
-    \ifstr{\@tempa}{a4}{}{\@tud@x@scr@paper@settrue}%
-    \FamilyKeyStateProcessed%
-  \else%
-    \FamilyKeyStateUnknownValue%
-  \fi%
-}
-%    \end{macrocode}
-% \end{macro}^^A \if@tud@x@scr@paper@set
-% \end{option}^^A paper
-% \begin{option}{fontsize}
-% \changes{v2.05}{2015/07/24}{neu}^^A
-% \begin{macro}{\if@tud@fontsize@set}
-% \changes{v2.05}{2015/07/24}{neu}^^A
-% Bei der Schriftgröße ist das bloße Erkennen und Weiterreichen der Option an 
-% die Klasse ausreichend.
-%    \begin{macrocode}
-\newif\if@tud@fontsize@set
-\TUD@key{fontsize}{%
-  \@tud@fontsize@settrue%
-  \PassOptionsToClass{fontsize=#1}{\TUD@Class@KOMA}%
-  \FamilyKeyStateProcessed%
-}
-%    \end{macrocode}
-% \end{macro}^^A \if@tud@fontsize@set
-% \end{option}^^A fontsize
-% Die Schlüssel sollen lediglich beim Laden der Dokumentklasse die angegebenen 
-% Optionen abfangen. Wurde das Papierformat jedoch nicht die Schriftgröße 
-% geändert, wird nun eine Warnung erzeugt.
-% \ToDo{%
-%   Warnung überarbeiten erst zu Dokumentbeginn prüfen, \opt{layout} beachten!%
-% }[v2.06]
-%    \begin{macrocode}
-\AtEndOfClass{%
-  \RelaxFamilyKey{TUD}{paper}%
-  \RelaxFamilyKey{TUD}{fontsize}%
-  \ifboolexpr{bool {@tud@x@scr@paper@set} or bool {@landscape}}{%
-    \if@tud@fontsize@set\else%
-      \ClassWarningNoLine{\TUD@Class@Name}{%
-        You've set a paper size, which is different from\MessageBreak%
-        default (paper=a4, paper=portrait). Therefore you\MessageBreak%
-        should additionally specify an explicit font size.\MessageBreak%
-        See the manual for further information%
-      }%
-    \fi%
-  }{}%
-}
-%    \end{macrocode}
-%
-% \iffalse
-%</class&option>
-%<*class&execute&!inherit>
-% \fi
-%
-% \begin{macro}{\tud@x@scr@paper}
-% \changes{v2.05}{2015/07/24}{neu}^^A
-% \begin{macro}{\tud@x@scr@@paper}
-% \changes{v2.05}{2015/07/24}{neu}^^A
-% Um die Änderung des Papierformats auch über die \LaTeX-Standardoptionen wie 
-% beispielsweise \opt{a5paper} abfangen zu können, müssen auch die äquivalent 
-% zu \KOMAScript{} ausgewertet werden.
-%    \begin{macrocode}
-\newcommand*\tud@x@scr@paper{%
-  \expandafter\tud@x@scr@@paper\CurrentOption paper\tud@x@scr@@paper%
-}
-\newcommand*\tud@x@scr@@paper{}
-\def\tud@x@scr@@paper #1#2paper#3\tud@x@scr@@paper{%
-  \@tempswafalse%
-  \ifstr{#3}{paper}{\ifnumber{#2}{%
-    \ifstr{#1}{a}{\@tempswatrue}{%
-    \ifstr{#1}{b}{\@tempswatrue}{%
-    \ifstr{#1}{c}{\@tempswatrue}{%
-    \ifstr{#1}{d}{\@tempswatrue}{%
-    }}}}%
-  }{}}{}%
-  \if@tempswa\TUDExecuteOptions{#3=#1#2}\fi%
-  \PassOptionsToClass{\CurrentOption}{\TUD@Class@KOMA}%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@x@scr@@paper
-% \end{macro}^^A \tud@x@scr@paper
-%
-% \iffalse
-%</class&execute&!inherit>
 %<*class&option>
 % \fi
 %
@@ -375,7 +109,9 @@
 % automatisch ein Eintrag für die Sprungmarken erzeugt werden soll.
 %    \begin{macrocode}
 \newif\if@tud@bookmarks
-\TUD@ifkey{tudbookmarks}{@tud@bookmarks}
+\TUD@key{tudbookmarks}[true]{%
+  \TUD@set@ifkey{tudbookmarks}{@tud@bookmarks}{#1}%
+}
 %    \end{macrocode}
 % \end{macro}^^A \if@tud@bookmarks
 % \end{option}^^A tudbookmarks
@@ -433,7 +169,7 @@
 % \changes{v2.05}{2015/08/05}{neu}^^A
 % \begin{macro}{\@maketitle}
 % \changes{v2.05}{2015/08/05}{neu}^^A
-% \begin{macro}{\tud@make@titlehead}
+% \begin{macro}{\tud@maketitle@inpage}
 % \changes{v2.05}{2015/08/05}{neu}^^A
 % Ist die Option \opt{tudbookmarks} aktiviert, werden für Umschlag- und 
 % Titelseite PDF"=Lesezeichen bzw. Outline-Einträge erzeugt.
@@ -441,7 +177,10 @@
 %<*book|report|article>
 \apptocmd{\titlepage}{%
   \tud@x@bookmark@startatroot%
-  \if@tud@cover%
+  \@tud@res@swafalse%
+  \if@tud@coverpage\@tud@res@swatrue\fi%
+  \if@titlepageiscoverpage\@tud@res@swatrue\fi%
+  \if@tud@res@swa%
     \tudbookmark[%
 %<book|report>    0%
 %<article>    1%
@@ -457,13 +196,13 @@
 %    \end{macrocode}
 % Dies geschieht außerdem auch für die Titelköpfe.
 %    \begin{macrocode}
-\pretocmd{\tud@make@titlehead}{%
+\pretocmd{\tud@maketitle@inpage}{%
   \tud@x@bookmark@startatroot%
   \tudbookmark[%
 %<book|report>  0%
 %<article|poster>  1%
   ]{\titlename}{title}%
-}{}{\tud@patch@wrn{tud@make@titlehead}}
+}{}{\tud@patch@wrn{tud@maketitle@inpage}}
 \pretocmd{\@maketitle}{%
   \tud@x@bookmark@startatroot%
   \tudbookmark[%
@@ -472,7 +211,7 @@
   ]{\titlename}{title}%
 }{}{\tud@patch@wrn{@maketitle}}
 %    \end{macrocode}
-% \end{macro}^^A \tud@make@titlehead
+% \end{macro}^^A \tud@maketitle@inpage
 % \end{macro}^^A \@maketitle
 % \end{environment}^^A titlepage
 % \begin{macro}{\tableofcontents}
@@ -490,10 +229,10 @@
   \iftocfeature{toc}{totoc}{}{%
     \if@tud@bookmarks%
       \setuptoc{toc}{totoc}%
-      \tud@cmd@store{addtocontents}%
+      \tud@cs@store{addtocontents}%
       \def\@tempc{%
         \unsettoc{toc}{totoc}%
-        \tud@cmd@restore{addtocontents}%
+        \tud@cs@restore{addtocontents}%
       }%
       \let\addtocontents\@gobbletwo%
     \fi%
@@ -507,22 +246,6 @@
 % \end{macro}^^A \listoffigures
 % \end{macro}^^A \tableofcontents
 %
-% \subsection{Warnung bei der Nutzung des Paketes \pkg{tocloft}}
-%
-% Das Paket \pkg{tocloft} verursacht allerlei Probleme. Wird es geladen, so 
-% erscheint eine entsprechende Warnung.
-%    \begin{macrocode}
-\BeforePackage{tocloft}{%
-  \ClassWarningNoLine{\TUD@Class@Name}{%
-    It is absolutely not recommended to use package\MessageBreak%
-    `tocloft'. Loading the package will certainly lead\MessageBreak%
-    to problems with table of contents and any list of\MessageBreak%
-    floats. You should use the appropriate options of\MessageBreak%
-    the KOMA-Script classes%
-  }%
-}
-%    \end{macrocode}
-%
 % \iffalse
 %</class&body>
 %<*class&option>
@@ -530,92 +253,300 @@
 %
 % \subsection{Fußnoten in Überschriften}
 %
-% \begin{option}{footnotes}
-% \changes{v2.02}{2014/06/27}{neu}^^A
-% \begin{macro}{\if@tud@symbolheadings}
-% \changes{v2.02}{2014/06/27}{neu}^^A
-% Die \KOMAScript-Option \opt{footnotes} wird um den Schlüssel 
-% \val{symbolheadings} erweitert, mit welchem eingestellt werden kann, ob in den
-% Überschriften Symbole für die Fußnoten anstelle von Zahlen verwendet werden
-% sollen.
-% \ToDo{\opt{footnotes}=\val{symbolheadings} komplett überarbeiten}[v2.06]
+% Eigentlich sollte die Option \opt{footnotes}|=|\val{symbolheadings} es 
+% ermöglichen, Fußnoten mit Symbolen in Überschriften zu verwenden. Umgesetzt 
+% werden sollte dies mit dem Paket \pkg{footmisc}. Da dieses aber mit 
+% Inkompatibilitäten zu \pkg{hyperref} und \KOMAScript{} aufwartet, wird darauf 
+% leider verzichtet.
+%^^A% \begin{option}{footnotes}
+%^^A% \changes{v2.02}{2014/06/27}{neu}^^A
+%^^A% \begin{macro}{\if@tud@symbolheadings}
+%^^A% \changes{v2.02}{2014/06/27}{neu}^^A
+%^^A% \begin{macro}{\tud@sec@note}
+%^^A% \changes{v2.02}{2014/06/27}{neu}^^A
+%^^A% \begin{counter}{symbolheadings}
+%^^A% \changes{v2.02}{2014/06/27}{neu}^^A
+%^^A% Die \KOMAScript-Option \opt{footnotes} wird um den Schlüssel 
+%^^A% \val{symbolheadings} erweitert, mit welchem eingestellt werden kann, ob 
+%^^A% in den Überschriften Symbole für die Fußnoten anstelle von Zahlen 
+%^^A% verwendet werden sollen.
+%^^A%    \begin{macrocode}
+%^^A\newif\if@tud@symbolheadings
+%^^A\TUD@key{footnotes}{%
+%^^A  \TUD@set@numkey{footnotes}{@tempa}{%
+%^^A    {nosymbolheadings}{0},{numberheadings}{0},%
+%^^A    {symbolheadings}{1}%
+%^^A  }{#1}%
+%^^A  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+%^^A    \ifcase\@tempa\relax% nosymbolheadings
+%^^A      \@tud@symbolheadingsfalse%
+%^^A    \or% symbolheadings
+%^^A      \@tud@symbolheadingstrue%
+%^^A    \fi%
+%^^A  \fi%
+%^^A}
+%^^A%    \end{macrocode}
+%^^A% Mit \cs{tud@sec@note} wird die Option \opt{footnotes=symbolheadings} 
+%^^A% umgesetzt. Hierfür wird das Paket \pkg{footmisc} benötigt.
+%^^A%    \begin{macrocode}
+%^^A\newcommand*\tud@sec@note[1]{%
+%^^A  \ClassWarning{\TUD@Class@Name}{%
+%^^A    You have to load package `footmisc' with\MessageBreak%
+%^^A    option `stable' in order to use\MessageBreak%
+%^^A    footnotes with symbols in headings%
+%^^A  }%
+%^^A}
+%^^A\AfterPackage{footmisc}{%
+%^^A  \@ifpackagewith{footmisc}{stable}{%
+%^^A    \renewcommand*\tud@sec@note[1]{%
+%^^A      \begingroup%
+%^^A        \if@tud@symbolheadings%
+%^^A          \let\c@footnote\c@symbolheadings%
+%^^A          \def\thefootnote{\fnsymbol{symbolheadings}}%
+%^^A        \fi%
+%^^A        \footnote{#1}%
+%^^A      \endgroup%
+%^^A    }%
+%^^A  }{}%
+%^^A}
+%^^A%    \end{macrocode}
+%^^A% Bei aktivierter Option \opt{footnotes}|=|\val{symbolheadings} wird  
+%^^A% dieser Zähler für die Symboleauswahl von Fußnoten in Überschirften 
+%^^A% inkrementiert.
+%^^A%    \begin{macrocode}
+%^^A\AtEndOfClass{%
+%^^A%<book|report>  \newcounter{symbolheadings}[chapter]
+%^^A%<article|poster>  \newcounter{symbolheadings}
+%^^A}
+%^^A%    \end{macrocode}
+%^^A% \end{counter}^^A symbolheadings
+%^^A% \end{macro}^^A \tud@sec@note
+%^^A% \end{macro}^^A \if@tud@symbolheadings
+%^^A% \end{option}^^A footnotes
+%
+% \subsection{Papierformat und Schriftgröße}
+%
+% Insbesondere für Poster aber auch für alle anderen \TUDScript-Klassen wird
+% überprüft, ob nach einer Änderung des Standardpapierformates auch die
+% Schriftgröße durch den Anwender angepasst wurde. Diese wird jedoch nicht auf
+% Plausibilität geprüft, da der Aufwand hierfür relativ hoch wäre. Vielmehr 
+% wird davon ausgegangen, dass die explizite Angabe der Schriftgröße bewusst 
+% und dem Papierformat sowie den verwendeten Textspalten entsprechend erfolgt.
+%
+% \begin{macro}{\tud@x@scr@checkoptions}
+% \changes{v2.06}{2018/07/31}{neu}^^A
+% \begin{macro}{\tud@x@scr@pt}
+% \changes{v2.06}{2018/07/31}{neu}^^A
+% Das Makro \cs{tud@x@scr@checkoptions} wird mit \cs{DeclareOption*} für alle 
+% Optionen aufgerufen, welche kein Mitglied der Familie~\val{TUD} sind. Damit 
+% kann auf nicht definierte Schlüssel reagiert werden. Anschließend werden diese
+% an die zugrundeliegende \KOMAScript-Klasse weitergereicht.
 %    \begin{macrocode}
-\newif\if@tud@symbolheadings
-\TUD@key{footnotes}{%
-  \TUD@set@numkey{footnotes}{@tempa}{%
-    {nosymbolheadings}{0},{numberheadings}{0},%
-    {symbolheadings}{1}%
-  }{#1}%
-  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \ifcase\@tempa\relax% nosymbolheadings
-      \@tud@symbolheadingsfalse%
-    \or% symbolheadings
-      \@tud@symbolheadingstrue%
+\newcommand*\tud@x@scr@checkoptions{%
+  \expandafter\tud@x@scr@pt\CurrentOption pt\@nil%
+  \PassOptionsToClass{\CurrentOption}{\TUD@Class@KOMA}%
+}
+%    \end{macrocode}
+% Wird die Schriftgröße im veralteten Format \val{\dots pt} übergeben, so wird 
+% der Schalter \cs{if@tud@x@scr@fontsize@set} auf \val{true} gesetzt.
+%    \begin{macrocode}
+\newcommand*\tud@x@scr@pt{}
+\def\tud@x@scr@pt #1pt#2\@nil{%
+  \ifstr{#2}{pt}{\ifnumber{#1}{\@tud@x@scr@fontsize@settrue}{}}{}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@x@scr@pt
+% \end{macro}^^A \tud@x@scr@checkoptions
+%
+% \iffalse
+%</class&option>
+%<*class&body>
+% \fi
+%
+% Wurde das Papierformat jedoch nicht die Schriftgröße geändert, wird eine
+% Warnung erzeugt.
+%    \begin{macrocode}
+\AtBeginDocument{%
+  \if@tud@x@scr@fontsize@set\else%
+    \@tud@res@swafalse%
+    \ifdim\tud@len@layoutwidth<208mm\relax\@tud@res@swatrue\fi%
+    \ifdim\tud@len@layoutwidth>212mm\relax\@tud@res@swatrue\fi%
+    \ifdim\tud@len@layoutheight<295mm\relax\@tud@res@swatrue\fi%
+    \ifdim\tud@len@layoutheight>299mm\relax\@tud@res@swatrue\fi%
+    \if@tud@res@swa%
+      \ClassWarningNoLine{\TUD@Class@Name}{%
+        You've set a layout size, which is different from\MessageBreak%
+        default (paper=a4, paper=portrait). Therefore you\MessageBreak%
+        should additionally specify an explicit font size.\MessageBreak%
+        See the manual for further information%
+      }%
     \fi%
   \fi%
 }
 %    \end{macrocode}
-% \end{macro}^^A \if@tud@symbolheadings
-% \end{option}^^A footnotes
-% \begin{counter}{symbolheadings}
-% \changes{v2.02}{2014/06/27}{neu}^^A
-% Bei aktivierter Option \opt{footnotes}|=|\val{symbolheadings} wird dieser 
-% Zähler für die Symboleauswahl von Fußnoten in Überschirften inkrementiert.
-%    \begin{macrocode}
-\AtEndOfClass{%
-%<book|report>  \newcounter{symbolheadings}[chapter]
-%<article|poster>  \newcounter{symbolheadings}
-}
-%    \end{macrocode}
-% \end{counter}^^A symbolheadings
 %
 % \iffalse
-%</class&option>
+%</class&body>
+%<*class&!inherit|package&fonts>
+%<*option>
+% \fi
+%
+% \subsection{Sukkzessives Abarbeiten von Layoutoptionen im Dokument}
+%
+% Werden mit \cs{TUDoptions} nach \cs{begin\{document\}} mehrere Layoutoptionen 
+% gleichzeitig angegeben, muss dafür Sorge getragen werden, dass diese in der 
+% korrekten Reihenfolge abgearbeitet werden. 
+%
+% Das Makro \cs{TUD@SpecialOptionAtDocument} kann innerhalb von \cs{TUD@key} 
+% verwendet werden, um einen im obligatorischen Argument angegebenen Schalter 
+% zu aktivieren. Dabei wird über \cs{tud@atdocument@hook} garantiert, dass der 
+% Befehl \cs{tud@atdocument@process}, welcher für die Abarbeitung der einzelnen 
+% Makros in der richtigen Reihenfolge verantwortlich ist, lediglich einmal über 
+% \cs{AtEndOfFamilyOptions*} ausgeführt wird.
+%
+% \begin{macro}{\TUD@SpecialOptionAtDocument}
+% \changes{v2.05}{2016/06/14}{neu}^^A
+% \begin{macro}{\tud@atdocument@hook}
+% \changes{v2.05}{2016/06/14}{neu}^^A
+%    \begin{macrocode}
+\newcommand*\tud@atdocument@hook{}
+\let\tud@atdocument@hook\relax
+\newcommand*\TUD@SpecialOptionAtDocument[1]{}
+\AfterEndPreamble{%
+  \renewcommand*\TUD@SpecialOptionAtDocument[1]{%
+    \ifx\tud@atdocument@hook\relax%
+      \gdef\tud@atdocument@hook{\global\let\tud@atdocument@hook\relax}%
+      \AtEndOfFamilyOptions*{%
+        \tud@atdocument@hook%
+        \tud@atdocument@process%
+      }%
+    \fi%
+    \gappto\tud@atdocument@hook{\global\booltrue{@#1}}%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@atdocument@hook
+% \end{macro}^^A \TUD@SpecialOptionAtDocument
+%
+% \iffalse
+%</option>
 %<*body>
 % \fi
 %
-% \begin{macro}{\tud@x@textcase@uclcnotmath}
-% \changes{v2.02}{2014/06/27}{\pkg{textcase}: Ignorieren von Fußnoten im 
-%   Argument des Befehls \cs{MakeTextUppercase}}^^A
-% \changes{v2.03}{2015/01/21}{\pkg{textcase}: Ignorieren des Befehls 
-%   \cs{@mkboth} im Argument des Befehls \cs{MakeTextUppercase}}^^A
-% \begin{macro}{\@uclcnotmath}
-% Damit Fußnoten nicht automatisch in Majuskeln gesetzt werden, wird der
-% interne Befehl \cs{@uclcnotmath} aus dem Paket \pkg{textcase} angepasst.
+% \begin{macro}{\tud@atdocument@process}
+% \changes{v2.05}{2016/06/14}{neu}^^A
+% \begin{macro}{\if@tud@font@set}
+% \changes{v2.05}{2016/06/14}{neu}^^A
+% \begin{macro}{\if@tud@math@set}
+% \changes{v2.05}{2016/06/14}{neu}^^A
+% \begin{macro}{\if@tud@font@skip@set}
+% \changes{v2.05}{2016/06/14}{neu}^^A
+% \begin{macro}{\if@tud@x@scr@headings@reset}
+% \changes{v2.05}{2016/06/14}{neu}^^A
+% \begin{macro}{\if@tud@cd@process}
+% \changes{v2.05}{2016/06/14}{neu}^^A
+% \begin{macro}{\if@tud@cdgeometry@process}
+% \changes{v2.05}{2016/06/14}{neu}^^A
+% Das Makro \cs{tud@atdocument@process} wird im Dokument ausgeführt, wenn 
+% mindestens eine Option gesetzt wurde, welche \cs{TUD@SpecialOptionAtDocument} 
+% verwendet. Je nachdem, welche Schalter insgesamt aktiviert wurden, werden die 
+% dazugehörigen Befehle für die Einstellungen von Schriften, Layout und/oder 
+% Satzspiegel in der richtigen Reihenfolge ausgeführt.
 %    \begin{macrocode}
-\CheckCommand*\@uclcnotmath[4]{%
-  \begingroup
-    #1%
-    \def\({$}\let\)\(%
-    \def\NoCaseChange##1{\noexpand\NoCaseChange{\noexpand##1}}%
-    \@nonchangecase\label
-    \@nonchangecase\ref
-    \@nonchangecase\ensuremath
-    \def\cite##1##{\toks@{\noexpand\cite##1}\@citex}%
-    \def\@citex##1{\NoCaseChange{\the\toks@{##1}}}%
-    \def\reserved@a##1##2{\let#2\reserved@a}%
-    \expandafter\reserved@a\@uclclist\reserved@b{\reserved@b\@gobble}%
-    \protected@edef\reserved@a{%
-      \endgroup
-      \noexpand\@skipmath#3#4$\valign$%
-    }%
-  \reserved@a%
+\newif\if@tud@font@set
+\newif\if@tud@math@set
+\newif\if@tud@font@skip@set
+%<*class>
+\newif\if@tud@x@scr@headings@reset
+\newif\if@tud@cd@process
+\newif\if@tud@cdgeometry@process
+%</class>
+\newcommand*\tud@atdocument@process{%
+  \if@tud@font@set%
+    \tud@font@set%
+    \global\@tud@font@setfalse%
+    \global\@tud@font@skip@setfalse%
+%<class>    \global\@tud@cd@processfalse%
+  \fi%
+  \if@tud@font@skip@set%
+    \tud@font@skip@set%
+    \global\@tud@font@skip@setfalse%
+  \fi%
+  \if@tud@math@set%
+    \tud@math@set%
+    \global\@tud@math@setfalse%
+  \fi%
+%<*class>
+  \if@tud@x@scr@headings@reset%
+    \tud@x@scr@headings@reset%
+    \global\@tud@x@scr@headings@resetfalse%
+    \global\@tud@cd@processfalse%
+  \fi%
+  \if@tud@cd@process%
+    \tud@cd@process%
+    \global\@tud@cd@processfalse%
+  \fi%
+  \if@tud@cdgeometry@process%
+    \tud@cdgeometry@process%
+    \global\@tud@cdgeometry@processfalse%
+  \fi%
+%</class>
 }
-\newcommand*\tud@x@textcase@uclcnotmath{%
-  \def\footnote##1##{\toks@{\noexpand\footnote##1}\@footnote}%
-  \def\@footnote##1{\NoCaseChange{\the\toks@{##1}}}%
-  \def\@mkboth##1##2{\NoCaseChange{\@mkboth{##1}{##2}}}%
-}
-\patchcmd{\@uclcnotmath}{\@nonchangecase\ensuremath}{%
-  \@nonchangecase\ensuremath\tud@x@textcase@uclcnotmath%
-}{}{\tud@patch@wrn{@uclcnotmath}}
 %    \end{macrocode}
-% \end{macro}^^A \@uclcnotmath
-% \end{macro}^^A \tud@x@textcase@uclcnotmath
+% \end{macro}^^A \if@tud@cdgeometry@process
+% \end{macro}^^A \if@tud@cd@process
+% \end{macro}^^A \if@tud@x@scr@headings@reset
+% \end{macro}^^A \if@tud@font@skip@set
+% \end{macro}^^A \if@tud@math@set
+% \end{macro}^^A \if@tud@font@set
+% \end{macro}^^A \tud@atdocument@process
 %
 % \iffalse
 %</body>
+%</class&!inherit|package&fonts>
 %<*execute>
+%<*class&!inherit|package&fonts>
+% \fi
+%
+% \subsection{Versionsabhängige Voreinstellungen}
+%
+% Voreinstellungen von neu eingeführten Optionen, welche die resultierende 
+% Ausgabe entscheidend verändern könnten, werden hier versionsabhängig gesetzt.
+% Hierfür wird der Schlüssel \opt{tudscrver} des Mitglieds \val{.comp} vor 
+% allen anderen Schlüsseln ausgewertet. Danach kann mit \cs{tud@if@v@lower} auf 
+% die gewählte Kompatibilitäsversion getestet werden.
+%    \begin{macrocode}
+\DeclareOption*{}
+\FamilyProcessOptions[.comp]{TUD}\relax
+%    \end{macrocode}
+% Ab der \TUDScript-Version~v2.05 werden einige vertikale Abstände abhängig von 
+% der Schriftgröße definiert. Sollte eine frühere Kompatibilitätseinstellung 
+% angegeben worden sein, wird dieses verhalten deaktiviert.
+%    \begin{macrocode}
+\tud@if@v@lower{2.05}{%
+  \TUD@key@preset{relspacing}{false}%
+}{%
+  \TUD@key@preset{relspacing}{true}%
+}
+%    \end{macrocode}
+% Ab \TUDScript-Version~v2.06 werden die verwendeten Schriften auf \OpenSans 
+% gesetzt, für die Komptibilität zu vorherigen Versionen auf \Univers und \DIN.
+%    \begin{macrocode}
+\tud@if@v@lower{2.06}{%
+%<!(class&poster)>  \TUD@key@preset{cdoldfont}{true}%
+%<class&poster>  \TUD@key@preset{cdoldfont}{ultrabold}%
+  \TUD@key@preset{ttfont}{lmodern}%
+%<class>  \TUD@key@preset{headings}{light}%
+}{%
+%<!(class&poster)>  \TUD@key@preset{cdfont}{true}%
+%<class&poster>  \TUD@key@preset{cdfont}{ultrabold}%
+  \TUD@key@preset{ttfont}{roboto}%
+%<class>  \TUD@key@preset{headings}{heavy}%
+}
+%    \end{macrocode}
+%
+% \iffalse
+%</class&!inherit|package&fonts>
 % \fi
 %
 % \subsection{Durchreichen von Optionen und Standardoptionen}
@@ -624,42 +555,104 @@
 % genutzte \TUDScript-Elternklasse. Für Klassen wird vor dem Durchreichen noch 
 % geprüft, ob ein spezielles Papierformat angegeben wurde.
 %    \begin{macrocode}
-%<class&!inherit>\DeclareOption*{\tud@x@scr@paper}
-%<*class&inherit>
+%<*package>
+%<*fonts>
+\DeclareOption*{\KOMAoptions{\CurrentOption}}
+%</fonts>
+%<*fixfonts>
+\DeclareOption*{\PassOptionsToPackage{\CurrentOption}{tudscrfonts}}
+%</fixfonts>
+%<*comp>
+\DeclareOption*{\TUDoptions{\CurrentOption}}
+%</comp>
+%</package>
+%<*class>
+%<*!inherit>
+\DeclareOption*{\tud@x@scr@checkoptions}
+%</!inherit>
+%<*inherit>
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{\TUD@Class@Parent}}
-%</class&inherit>
-%<package&fonts>\DeclareOption*{\KOMAoptions{\CurrentOption}}
-%<package&comp>\DeclareOption*{\TUDoptions{\CurrentOption}}
+%</inherit>
+%</class>
 %    \end{macrocode}
 % Es werden die Standardoptionen ausgeführt. Für die Klasse \cls{tudscrposter} 
 % werden die Farben aktiviert.
 %    \begin{macrocode}
-%<*class&!inherit>
-\TUDExecuteOptions{%
-%<book|report|article>  cd=true,relspacing=true,tudbookmarks=true%
-%<poster>  cd=bicolor,relspacing=true,tudbookmarks=false,cdfont=ultrabold%
-}
-%</class&!inherit>
 %<*package&tutorial>
 \KOMAoptions{headings=small}
 \TUDoptions{cdfoot=true}
-\TUDExecuteOptions{ToDo=true}
 %</package&tutorial>
+\TUDExecuteOptions{%
+%<*package>
+%<*fixfonts>
+  headings=heavy%
+%</fixfonts>
+%<*tutorial>
+  ToDo=true%
+%</tutorial>
+%</package>
+%<*class&!inherit>
+%<*book|report|article>
+  cd=true,tudbookmarks=true%
+%</book|report|article>
+%<*poster>
+  cd=bicolor,tudbookmarks=false%
+%</poster>
+%</class&!inherit>
+}
 \TUDProcessOptions\relax
 %    \end{macrocode}
 % Die korrespindierende \KOMAScript-Klasse bzw. \TUDScript-Elternklasse wird 
 % geladen.
 %    \begin{macrocode}
 %<*class&!inherit>
-\LoadClass{\TUD@Class@KOMA}[2015/04/23]
+\LoadClass{\TUD@Class@KOMA}[2018/03/30]
 %</class&!inherit>
 %<*class&inherit>
+%<manual>\PassOptionsToClass{ttfont=roboto}{\TUD@Class@Parent}
 \LoadClass{\TUD@Class@Parent}
 %</class&inherit>
 %    \end{macrocode}
 %
 % \iffalse
 %</execute>
+%<*body>
+% \fi
+%
+% \subsection{Anpassungen für das Paket \pkg{textcase}}
+%
+% \begin{macro}{\@uclcnotmath}
+% \begin{macro}{\tud@x@textcase@uclcnotmath}
+% \changes{v2.02}{2014/06/27}{\pkg{textcase}: Ignorieren von Fußnoten im 
+%   Argument des Befehls \cs{MakeTextUppercase}}^^A
+% \changes{v2.03}{2015/01/21}{\pkg{textcase}: Ignorieren des Befehls 
+%   \cs{@mkboth} im Argument des Befehls \cs{MakeTextUppercase}}^^A
+% Damit Fußnoten innerhalb von \cs{MakeTextUppercase} nicht in Majuskeln
+% gesetzt werden, wird der interne Befehl \cs{@uclcnotmath} aus dem Paket
+% \pkg{textcase} angepasst.
+%    \begin{macrocode}
+\if@tud@cdoldfont@active
+  \RequirePackage{textcase}[2004/10/07]
+  \AfterPackage*{textcase}{%
+    \robustify\NoCaseChange%
+    \newcommand*\tud@x@textcase@uclcnotmath{%
+      \@nonchangecase\hologo%
+      \def\footnote##1##{\toks@{\noexpand\footnote##1}\@footnote}%
+      \def\@footnote##1{\NoCaseChange{\the\toks@{##1}}}%
+      \def\@mkboth##1##2{\NoCaseChange{\@mkboth{##1}{##2}}}%
+    }%
+    \patchcmd{\@uclcnotmath}{\@nonchangecase\ensuremath}{%
+      \@nonchangecase\ensuremath\tud@x@textcase@uclcnotmath%
+    }{}{\tud@patch@wrn{@uclcnotmath}}%
+  }%
+\fi
+\TUD@deprecated@cs{NoCaseChange}{@firstofone}
+%    \end{macrocode}
+% \end{macro}^^A \tud@x@textcase@uclcnotmath
+% \end{macro}^^A \@uclcnotmath
+%
+% \iffalse
+%</body>
 % \fi
 %
 % \Finale

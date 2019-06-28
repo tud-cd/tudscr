@@ -1,11 +1,16 @@
-\RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
+\RequirePackage{fix-cm}
 \documentclass[%
   english,ngerman,%
-  cdgeometry=no,DIV=12,automark,%
+  cdgeometry=no,DIV=12,automark%
 ]{tudscrartcl}
+\ifpdftex{
+  \usepackage[T1]{fontenc}
+  \usepackage[ngerman=ngerman-x-latest]{hyphsubst}
+}{
+  \usepackage{fontspec}
+}
+
 \usepackage{tudscrtutorial}
-\usepackage[T1]{fontenc}
-\usepackage{selinput}\SelectInputMappings{adieresis={ä},germandbls={ß}}
 \lstset{%
   inputencoding=utf8,extendedchars=true,
   literate=%
@@ -15,8 +20,8 @@
 }
 \lstset{escapechar=§}
 
-\TUDoptions{cdfont=false}
 \usepackage{lmodern}
+\TUDoptions{cdfont=false}
 \KOMAoptions{headings=normal}
 
 \usepackage{tudscrsupervisor}
@@ -78,7 +83,6 @@
 
 \usepackage{bookmark}
 
-\ActivateWarningFilters[Tutorial]%
 \begin{filecontents}{\jobname.bib}
 @book{talbot2012,
   author    = {Nicola L. C. Talbot},
@@ -151,7 +155,6 @@
   urldate = {2014-12-01}
 }
 \end{filecontents}
-\DeactivateWarningFilters[Tutorial]%
 
 
 \begin{document}
@@ -180,7 +183,7 @@
   Anforderungen an eine wissenschaftliche Arbeit in einem Dokument abzudecken, 
   insbesondere weil es für diese fast von jedem Lehrstuhl mehr oder weniger 
   unterschiedliche Vorgaben zu Formatierung und Layout gibt. Dennoch soll hier 
-  versucht werden, einen Großteil der für gewöhnlich auftretenden Erfordernisse 
+  versucht werden, einen Großteil der für gewöhnlich auftretenden Erfordernisse
   zu bearbeiten.
   
   Dieses Tutorial hat \emph{nicht} die Intention, \hologo{LaTeX}"=Einsteigern 
@@ -192,9 +195,8 @@
   Wünsche dürfen sie mir gegenüber gerne kommunizieren.
   
   Für absolute Neueinsteiger gibt es einige freie Tutorials, welche die ersten 
-  Schritte mit \hologo{LaTeXe} stark erleichtern. Sehr empfehlenswert ist die 
-  ausführliche \hrfn{http://www.fadi-semmo.de/latex/workshop/}{Workshop-Reihe} 
-  von Fadi~Semmo. Außerdem stellt Nicola~L.~C.~Talbot sehr gute Tutorials für 
+  Schritte mit \hologo{LaTeXe} stark erleichtern. Nicola~L.~C.~Talbot stellt 
+  sehr gute Tutorials für 
   \hrfn{http://www.dickimaw-books.com/latex/novices/}{\hologo{LaTeX}-Novizen} 
   \cite{talbot2012} sowie 
   \hrfn{http://www.dickimaw-books.com/latex/thesis/}{Dissertationen} 
@@ -235,16 +237,6 @@ Dokument verwendet werden sollten. Alle weiteren in diesem Tutorial genutzten
 und/oder empfohlenen Pakete werden in den relevanten Abschnitten des Tutorials 
 genauer erläutert. 
 
-Den Anfang macht das Paket \Package{hyphsubst}. Dieses wird für eine wesentlich 
-verbesserte Worttrennung für die deutsche Sprache benötigt und muss bereits 
-\emph{vor} der Klasse geladen werden, damit es problemlos funktioniert. In 
-\autoref{sec:hyphenation} können Sie weitere Informationen zur Verwendung von 
-\Package{hyphsubst} sowie zum Thema \emph{Worttrennung} finden.
-%
-\begin{Preamble}
-\RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
-\end{Preamble}
-%
 Beim Laden der Klasse mit \Macro*{documentclass} können Sie globale Optionen 
 angeben. Diese werden sowohl an die Klasse selbst weitergereicht als auch allen 
 in der Präambel geladenen Pakete zur Verfügung gestellt. Falls das Paket 
@@ -259,26 +251,44 @@ diese nicht nur an das Paket \Package{babel} sondern auch an andere Pakete
 \usepackage{babel}
 \end{Preamble}
 %
-Bei der Verwendung von \Engine{pdfLaTeX} sollte zum einen die Eingabekodierung 
-des erstellten Datei spezifiziert werden. Das Paket \Package{selinput} erkennt 
-automatisch, welche Kodierung der genutzte Editor verwendet. Alternativ lässt 
-sich die Eingabekodierung mit dem Paket \Package{inputenc} auch manuell 
-festgelegen. Zum anderen werden die Schriften in der Ausgabe ebenfalls kodiert. 
-Mit dem Paket \Package{fontenc} lässt sich die verwendete Schriftkodierung für 
-das Dokument spezifizieren, wobei im Normalfall die europäischen Zeichen mit 
-der Option~\Option{T1}(\Package{fontenc}) aktiviert werden sollten. Es wird 
-empfohlen, das Paket \Package{fontenc} \emph{vor} \Package{selinput} respektive 
-\Package{inputenc} zu laden.
+Mit dem Paket \Package{fontenc} lässt sich die Kodierung der für die Ausgabe 
+der verwendeten Schriften im Dokument spezifizieren, wobei die europäische 
+Zeichenkodierung mit der Option~\Option{T1}(\Package{fontenc}) aktiviert wird. 
+Kommt mit \Engine{LuaLaTeX} oder \Engine{XeLaTeX} ein Unicode"=Textsatzsystem 
+zum Einsatz, sollte besser das Paket \Package{fontspec} geladen werden.
+
+Weiterhin kann die Eingabekodierung der kompilierten Datei eingestellt werden. 
+Diese ist standardmäßig \PValue{utf8}. Bei der Verwendung von \Engine{pdfLaTeX} 
+sind auch andere Kodierungen möglich.%
+\footnote{%
+  Sollte die Datei in einer anderen Kodierung gespeichert sein, so kann das 
+  Paket \Package{selinput} genutzt werden, um die Kodierung automatisch zu 
+  erkennen. Alternativ lässt sich die Eingabekodierung auch mit dem Paket 
+  \Package{inputenc} auch manuell festgelegen. In beiden Fällen sollte das 
+  Paket \Package{fontenc} \emph{vorher} geladen worden sein.
+} 
+
+Wurde ein Sprachpaket für die deutsche Sprache geladen (\Package{babel} oder 
+\Package{polyglossia}), so werden für \Engine{LuaLaTeX} und \Engine{XeLaTeX} 
+erweiterte Trennmuster verwendet. Für \Engine{pdfLaTeX} lässt sich eine 
+wesentlich verbesserte Worttrennung für die deutsche Sprache mit dem Paket 
+\Package{hyphsubst} aktivieren. In \autoref{sec:hyphenation} können Sie weitere 
+Informationen zur Verwendung von \Package{hyphsubst} sowie zum Thema 
+\emph{Worttrennung} finden.
 %
 \begin{Preamble}
-\usepackage[T1]{fontenc}
-\usepackage{selinput}\SelectInputMappings{adieresis={ä},germandbls={ß}}
+\ifpdftex{
+  \usepackage[T1]{fontenc}
+  \usepackage[ngerman=ngerman-x-latest]{hyphsubst}
+}{
+  \usepackage{fontspec}
+}
 \end{Preamble}
 %
 Für die \KOMAScript-Klassen wird außerdem das Paket \Package{scrhack} 
 bereitgestellt. Dieses behebt einige Probleme bei der Kompatibilität mit 
 anderen Paketen bezüglich des Erstellens von Verzeichnissen. Deshalb sollte 
-dieses frühzeitig in der Präambel geladen werden. 
+dieses bei Bedarf frühzeitig in der Präambel geladen werden. 
 %
 \begin{Preamble}
 \usepackage{scrhack}
@@ -313,13 +323,13 @@ Gesichtspunkten konstruiert. Dabei ist für dessen Aufteilung maßgeblich die
 angegeben. Diese wird in \autoref{sec:bcor} erläutert.
 
 \subsection{Änderung des Zeilenabstandes (Durchschuss)}
-Auf die Änderung des standardmäßigen Zeilenabstandes sollte aus typografischer 
-Sicht bei der Verwendung einer Standardschrift im Normalfall verzichtet werden. 
-Die Gründe hierfür werden im Handbuch von \TUDScript bei der Vorstellung des 
-Paketes \Package{setspace} erklärt, welches im Zweifelsfall für dieses Anliegen 
-den Befehl \Macro{setstretch}(\Package{setspace}) bereitstellt. Wird ein 
-Dokument in der \Univers-Hausschrift der \TnUD gesetzt, sollte der Wert von 
-\Macro{setstretch}(\Package{setspace}) im Bereich 1.05--1.1 liegen.
+Auf eine Änderung des Zeilenabstandes sollte aus typografischer Sicht bei der 
+Verwendung einer Standardschrift im Normalfall verzichtet werden. Die Gründe 
+hierfür werden im Handbuch von \TUDScript bei der Vorstellung des Paketes 
+\Package{setspace} erklärt, welches für dieses Anliegen den Befehl 
+\Macro{setstretch}[\Parameter{Faktor}](\Package{setspace}) bereitstellt. Wird 
+die \OpenSans-Hausschrift der \TnUD verwendet, sollte der Faktor im Bereich 
+\PValue{1.05}--\PValue{1.1} liegen.
 
 \subsection{Bindekorrektur}
 \label{sec:bcor}%
@@ -1006,14 +1016,14 @@ Ende. Um dieses Manko zu beheben, wird am Schluss jeder \PValue{X}"~Spalte mit
 \PValue{X<\PParameter{\Macro{strut}}} einfach der Befehl \Macro{strut} 
 angehängt, der vertikalen Leerraum ober- und unterhalb der aktuellen Grundlinie 
 einfügt. In \autoref{sec:tables} wird ein Ansatz aufgezeigt, wie dies 
-automatisiert über einen neuen Spaltenstil ausmerzt werden kann. Der Rest des 
+automatisiert über einen neuen Spaltenstil ausgemerzt werden kann. Der Rest des 
 Stils ist identisch zu \PValue{acrotabularx}.
 %
 \CodeHook{\let\newglossarystyle\renewglossarystyle}
 \begin{Preamble*}
 \newglossarystyle{acrotabu}{%
   \renewenvironment{theglossary}{%
-    \begin{tabu}spread 0pt{@{}lX<{\strut}l@{}}%
+    \begin{tabu}{@{}lX<{\strut}l@{}}% 'spread 0pt' defekt in v2.9
   }{%
     \end{tabu}\par\bigskip%
   }%
@@ -1053,31 +1063,31 @@ zumindest das notwendige Glossar erstellt.
 
 Als erstes sollte ein gut nutzbarer Befehl zum Definieren eines neuen Symbols 
 erstellt werden. In Anlehnung an den Befehl für Abkürzungen \Macro*{newacronym} 
-wird er \Macro{newsymbol}|?| genannt. Dieser hat genau ein optionales und vier 
+wird er \Macro{newformulasymbol}|?| genannt. Dieser hat ein optionales und vier 
 obligatorische Argumente, wobei das optionale Argument prinzipiell alle 
 Schlüssel"~Wert"~Paare enthalten kann, die durch das Paket \Package{glossaries} 
 akzeptiert werden. Welche davon letztlich auch Auswirkungen haben, hängt 
-allerdings von der Gestaltung des Stils durch den Anwender ab. Der nachfolgend 
-definierte Befehl hat folgende Gestalt:
+allerdings von der Gestaltung des Stils durch den Anwender ab. Der Befehl hat 
+folgende Definition:
 %
 \begin{quoting}[leftmargin=\parindent]
-\Macro{newsymbol}[%
-  \LParameter\Parameter{Label}\Parameter{Bezeichnung}%
+\Macro{newformulasymbol}[%
+  \LParameter\Parameter{Label}\Parameter{Name}%
   \Parameter{Symbol}\Parameter{Einheit}%
 ]|?|%
 \end{quoting}
 %
 Mit \PName{Label} erfolgt die eindeutige Kennzeichnung des Symbols. Außerdem 
-wird dies für die Sortierung verwendet, was unter Umständen etwas problematisch 
-sein könnte. Eine manuelle Festlegung für den dazugehörigen Schlüssel durch den 
-Anwender über das optionale Argument mit \PValue{sort=}\PName{Bezeichnung} ist 
-eventuell sinnvoll. Nach dem \PName{Label} schließt die \PName{Bezeichnung} für 
-das Formelzeichen an, gefolgt vom \PName{Symbol} sowie der dazugehörige 
-physikalische \PName{Einheit}.
+wird dies standardmäßig für die Sortierung verwendet, was unter Umständen etwas
+problematisch sein könnte. In diesem Fall ist eine manuelle Festlegung für den 
+dazugehörigen Schlüssel durch den Anwender über das optionale Argument mit 
+\PValue{sort=}\PName{Sortierung} eventuell sinnvoll. Nach dem \PName{Label} 
+schließt der \PName{Name} für das Formelzeichen an, gefolgt vom \PName{Symbol} 
+sowie der dazugehörige physikalische \PName{Einheit}.
 %
 \CodeHook{\let\newcommand\renewcommand}
 \begin{Preamble*}
-\newcommand*{\newsymbol}[5][]{%
+\newcommand*{\newformulasymbol}[5][]{%
   \newglossaryentry{#2}{%
     type=symbols,%
     name={#3},%
@@ -1102,12 +1112,12 @@ Fließtext gut genutzt werden kann und ansehnlich ist, wird für diese der Befeh
 \Macro{sfrac}(\Package{xfrac}) aus dem Paket \Package{xfrac} genutzt.
 %
 \begin{Trunk*}
-\newsymbol{l}{Länge}{l}{m}
-\newsymbol{m}{Masse}{m}{kg}
-\newsymbol{a}{Beschleunigung}{a}{\sfrac{m}{s^2}}
-\newsymbol{t}{Zeit}{t}{s}
-\newsymbol{f}{Frequenz}{f}{s^{-1}}
-\newsymbol{F}{Kraft}{F}{m \cdot kg \cdot s^{-2} = \sfrac{J}{m}}
+\newformulasymbol{l}{Länge}{l}{m}
+\newformulasymbol{m}{Masse}{m}{kg}
+\newformulasymbol{a}{Beschleunigung}{a}{\sfrac{m}{s^2}}
+\newformulasymbol{t}{Zeit}{t}{s}
+\newformulasymbol{f}{Frequenz}{f}{s^{-1}}
+\newformulasymbol{F}{Kraft}{F}{m \cdot kg \cdot s^{-2} = \sfrac{J}{m}}
 
 \end{Trunk*}
 %
@@ -1205,7 +1215,7 @@ Hilfe ist.
 \begin{Preamble*}
 \newglossarystyle{symblongtabu}{%
   \renewenvironment{theglossary}{%
-    \begin{longtabu}spread 0pt[l]{ccX<{\strut}l}%
+    \begin{longtabu}[l]{ccX<{\strut}l}% 'spread 0pt' defekt in v2.9
   }{%
     \end{longtabu}%
   }%
@@ -1213,7 +1223,7 @@ Hilfe ist.
   \renewcommand*{\glsgroupskip}{}%
   \renewcommand*{\glossaryheader}{%
     \toprule
-    \bfseries Formelzeichen & \bfseries Einheit &
+    \bfseries Symbol & \bfseries Einheit &
     \bfseries Bezeichnung & \bfseries Seite(n)
     \tabularnewline\midrule\endhead%
     \bottomrule\endfoot%
@@ -1250,13 +1260,13 @@ Das Symbolverzeichnis kann sich nun durchaus sehen lassen.
 \newglossarystyle{symbtabu}{%
   \setglossarystyle{symblongtabu}%
   \renewenvironment{theglossary}{%
-    \begin{tabu}spread 0pt{ccX<{\strut}l}%
+    \begin{tabu}{ccX<{\strut}l}% 'spread 0pt' defekt in v2.9
   }{%
     \bottomrule\end{tabu}%
   }%
   \renewcommand*{\glossaryheader}{%
     \toprule
-    \bfseries Formelzeichen & \bfseries Einheit &
+    \bfseries Symbol & \bfseries Einheit &
     \bfseries Bezeichnung & \bfseries Seite(n)
     \tabularnewline\midrule%
   }%
@@ -1328,7 +1338,7 @@ Ausgabe.
 \newglossarystyle{symbsplitlongtabu}{%
   \newcommand*\symbollevel{-1}%
   \renewenvironment{theglossary}{%
-    \begin{longtabu}spread 0pt[l]{ccX<{\strut}l}%
+    \begin{longtabu}[l]{ccX<{\strut}l}% 'spread 0pt' defekt in v2.9
   }{%
     \end{longtabu}%
   }%
@@ -1336,7 +1346,7 @@ Ausgabe.
   \renewcommand*{\glsgroupskip}{}%
   \newcommand*\symbolhead{%
     \toprule
-    \bfseries Formelzeichen & \bfseries Einheit &
+    \bfseries Symbol & \bfseries Einheit &
     \bfseries Bezeichnung & \bfseries Seite(n)
     \tabularnewline\midrule
   }%
@@ -1407,7 +1417,7 @@ der notwendige Tabellenkopf nach der Überschrift gesetzt, falls es sich um den
 Jetzt könnte man den Glossarstil \PValue{symbsplitlongtabu} bereits verwenden 
 und jedem Formelzeichen bei der Definition mit 
 \begin{quoting}[leftmargin=\parindent]
-\Macro{newsymbol}[%
+\Macro{newformulasymbol}[%
   \POParameter{parent={greekletters/romanletters}}%
   \PParameter{\dots}\PParameter{\dots}\PParameter{\dots}\PParameter{\dots}%
 ]|?|%
@@ -1483,14 +1493,14 @@ das Resultat mit der Liste \Macro*{greeksymbollist} abgeglichen.
 \end{Hint*}
 %
 Mit \Macro*{ifisgreeksymbol} kann jetzt auf die Art des Symbols getestet. Dies 
-wird innerhalb von \Macro{newsymbol}|?| genutzt, um den passenden Elterneintrag 
-auszuwählen. Über das optionale Argument kann jederzeit mit 
+wird innerhalb von \Macro{newformulasymbol}|?| genutzt, um den passenden 
+Elterneintrag auszuwählen. Über das optionale Argument kann jederzeit mit 
 \POParameter{parent={greekletters/romanletters}} der automatische ermittelte 
 Elterneintrag überschrieben werden.
 %
 \begin{Hint}
 \newcommand*\symbollettergroup{}
-\newcommand*{\newsymbol}[5][]{%
+\newcommand*{\newformulasymbol}[5][]{%
   \ifisgreeksymbol{#4}{%
     \renewcommand*{\symbollettergroup}{greekletters}%
   }{%
@@ -2030,12 +2040,12 @@ Gleitumgebung gänzlich zu verzichten.
 
 Hierfür eignet sich beispielsweise die Umgebung \Environment{center}, welche 
 zum einen etwas Abstand vor und nach dem Objekt zum umgebenden Text erzeugt 
-sowie zum anderen die Grafik beziehungsweise Tabelle und die dazugehörige 
-Bezeichnung zusammenhält. \KOMAScript stellt für diesen Anwendungsfall das 
-Makro \Macro{captionof}(\Package{koma-script}) für die Beschriftung zur 
-Verfügung. Werden die Pakete \Package{caption} und \Package{hyperref} geladen, 
-sollte weiterhin \Macro{caption}(\Package{koma-script},\Package{caption}) 
-ergänzt um ein zuvor aufgerufenes  
+und zum anderen die Grafik respektive Tabelle und die dazugehörige Bezeichnung 
+zusammenhält. \KOMAScript{} stellt für diesen Anwendungsfall das Makro 
+\Macro{captionof}(\Package{koma-script}) für die Beschriftung zur Verfügung. 
+Werden die Pakete \Package{caption} und \Package{hyperref} geladen, sollte 
+weiterhin \Macro{caption}(\Package{koma-script},\Package{caption}) ergänzt um 
+ein zuvor aufgerufenes  
 \Macro{captionsetup}[\PParameter{type=figure/table}](\Package{caption})
 genutzt werden. Damit lassen sich Bildunter- sowie Tabellenüberschriften auch 
 ohne die bekannten Gleitumgebungen \Environment{figure} respektive 
@@ -2061,7 +2071,7 @@ bereitstellt. Das Resultat ist identisch zu \autoref{fig:nonfloating-A}.
 \begin{figure}[H]
 \includegraphics{TUD-black}
 \caption{Eine nichtgleitende Grafik in einer \texttt{figure}"=Umgebung}
-\label{fig:...}
+\label{fig:nonfloating-B}
 \end{figure}
 
 \end{Hint}
@@ -2078,7 +2088,7 @@ Quelltextauszuges ist die Dokumentation von \Package{floatrow} zu beachten.
   \caption{%
     Eine nichtgleitende Grafik mit \texttt{\textbackslash floatbox}%
   }%
-  \label{fig:nonfloating-B}%
+  \label{fig:nonfloating-C}%
 }
 \end{Hint}
 \InputCode\noindent
@@ -2099,7 +2109,10 @@ Zum Thema \enquote{Tabellensatz mit \hologo{LaTeX}} sind bereits zahlreiche
 zu diesem Punkt relativ kurz halten. Zwei Regeln sollten beim Satz von Tabellen 
 in jedem Fall beachtet werden:
 %
-\begin{enumerate}[itemindent=0pt,labelwidth=*,labelsep=1em,label=\Roman*.,noitemsep]
+\begin{enumerate}[%
+  itemindent=0pt,noitemsep,%
+  labelwidth=*,labelsep=1em,label=\Roman*.%
+]
 \item keine vertikalen Linien
 \item keine doppelten Linien
 \end{enumerate}
@@ -2623,22 +2636,26 @@ mit einer Mustererkennung ermittelt. Die verwendeten Muster basieren jedoch
 auf der englischen Sprache, weshalb in nicht"~englischsprachigen Texten auch 
 heute noch teilweise falsche Trennstellen gefunden werden.
 
-Zu Beginn wurde bei der Einleitung in \autoref{sec:introduction} auf das Paket 
+In \autoref{sec:introduction} wurde bereits auf das Paket 
 \Package{hyphsubst} hingewiesen, welches dieses Manko~-- aufgrund der nicht 
 mehr so stark gegebenen Restriktionen bezüglich des Speicherbedarfes~-- mit 
-einem Wörterbuch behebt. Dieses Paket muss \emph{vor} dem Laden der 
-Dokumentklasse eingebunden werden. Außerdem wird das Paket \Package{babel} 
-benötigt. Damit auch Wörter mit Umlauten richtig getrennt werden, ist zudem die 
-Verwendung der \PValue{T1}"~Schriftkodierung notwendig. Der Beginn einer 
-Dokumentpräambel könnte folgendermaßen aussehen:
+einem Wörterbuch behebt. Dieses Paket muss für \Engine{pdfLaTeX} vom Anwender 
+eingebunden werden, \Engine{LuaLaTeX} und \Engine{XeLaTeX} verwenden die 
+Trennmuster~-- ein geladenes Sprachpaket wie \Package{polyglossia} oder 
+\Package{babel} vorausgesetzt~-- automatisch. Damit auch Wörter mit Umlauten 
+richtig getrennt werden, ist zudem das Paket \Package{fontenc} mit der 
+\PValue{T1}"~Schriftkodierung respektive \Package{fontspec} notwendig. Der 
+Beginn einer Dokumentpräambel könnte folgendermaßen aussehen:
 %
 \begin{Hint}
-\RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[ngerman,§\PName{Klassenoptionen}§]§\Parameter{Dokumentklasse}§
-\usepackage[T1]{fontenc}
-\usepackage{selinput}\SelectInputMappings{adieresis={ä},germandbls={ß}}
+\ifpdftex{
+  \usepackage[T1]{fontenc}
+  \usepackage[ngerman=ngerman-x-latest]{hyphsubst}
+}{
+  \usepackage{fontspec}
+}
 \usepackage{babel}
-§\dots§
 \end{Hint}
 %
 Die Option \Option{ngerman}(\Package{hyphsubst}) lädt dabei die Trennmuster für 
@@ -2649,8 +2666,8 @@ stattdessen die Option \Option{german}(\Package{hyphsubst}) mit dem Wert
 
 
 \subsection{Einmalige und globale Worttrennungskorrektur}
-Sollte es dennoch passieren, dass ein Wort nicht richtig getrennt wird, kann 
-dies manuell korrigiert werden. Dafür stellt das Paket \Package{babel} mehrere 
+Sollte es dennoch passieren, dass ein Wort nicht korrekt getrennt wird, lässt
+sich dies manuell korrigieren. Dafür stellt das Paket \Package{babel} mehrere 
 Kurzbefehle zur Verfügung. Mit dem Makro \Macro{hyphenation} lassen sich für 
 ein bestimmtes Wort außerdem alle potenziellen Trennstellen angeben. Zum Thema 
 \tudhyperref{sec:tips:hyphenation}{Worttrennungen in deutschsprachigen Texten} 
@@ -2748,56 +2765,6 @@ kann auch das Makro \texttt{\textbackslash acs} genutzt werden.
 \end{Hint*}
 
 
-\subsection{Mathematiksatz}
-Von \hologo{LaTeXe} werden einige Umgebungen für das Setzen mathematischer 
-Formeln und Ausdrücke bereitgestellt, welche meist jedoch nicht \emph{alle} 
-Anforderungen eines Nutzers an den Mathematiksatz erfüllen können. Das Paket
-\Package{amsmath} bietet deshalb eine Reihe weiterführender Umgebungen für das 
-Setzen von einzeiligen und mehrzeiligen sowie ausgerichteter Formeln zur 
-Verfügung. Auf eine Einführung in das Paket wird~-- aufgrund der bereits in 
-großer Zahl vorhandenen Einführungen~-- in diesem Tutorial verzichtet. Außerdem 
-stehen mit \Tutorial{mathtype} und \Tutorial{mathswap} zwei weitere Tutorials 
-zur Verfügung, die sich explizit mit der Thematik eines guten mathematischen 
-Satz beschäftigen.
-
-Das Paket \Package{amsmath} stellt für \hologo{LaTeXe} den De"~facto"~Standard 
-für den mathematischen Satz dar. Allerdings wird es~-- insbesondere aus diesem 
-Grund~-- sehr \enquote{vorsichtig} weiterentwickelt. Für das Setzen neuer 
-Dokumente sollte deshalb das Paket \Package{mathtools} verwendet werden, das
-auf \Package{amsmath} basiert und dieses um zusätzliche Funktionalitäten 
-ergänzt sowie Bugfixes bereithält.
-
-
-\subsection{Einheiten}
-Mit dem Paket \Package{siunitx} lassen sich sowohl physikalische Einheiten als 
-auch Zahlen typografisch korrekt setzen. Sollen die Funktionalitäten in einem 
-deutschsprachigen Dokument problemlos nutzbar sein, so sind die Hinweise zum 
-\tudhyperref{sec:tips:siunitx}{Setzen von Einheiten mit \Package{siunitx}} im 
-\TUDScript-Handbuch zu beachten. Das Paket \Package{units} ist nicht ganz so 
-mächtig wie \Package{siunitx}, kann allerdings als pragmatische Alternative 
-gesehen und genutzt werden.
-
-
-\subsection{Darstellung von mathematischen Brüchen}
-Für ansehnliche und insbesondere im Fließtext gut lesbare mathematische Brüche 
-stellt das Paket \Package{xfrac} den Befehl \Macro{sfrac}(\Package{xfrac}) zur 
-Verfügung.
-%
-\begin{Preamble}
-\usepackage{xfrac}
-
-\end{Preamble}
-
-
-\subsection{Ligaturen}
-Die meisten \hologo{LaTeX}"=Schriftfamilien enthalten Ligaturen, die für einen 
-typografisch sauberen Satz bei zusammengesetzten Wörtern, wie sie gerade im 
-Deutschen relativ häufig vorkommen, aufgetrennt werden müssten. Mit der 
-Anwendung \Application{DeLig}<delig> kann dies automatisiert geschehen. Wird 
-\Engine{LuaLaTeX} als Textsatzsystem genutzt, kann alternativ für dieses 
-Unterfangen das Paket \Package{selnolig} verwendet werden.
-
-
 \subsection{Listen}
 \label{sec:lists}%
 %
@@ -2809,7 +2776,7 @@ häufigste Anliegen bei der Verwendung dieser Umgebungen ist das Reduzieren
 der Abstände zwischen den einzelnen, mit 
 \Macro{item}(\Package{koma-script},\Package{enumitem}) gesetzten Punkten, 
 welche sehr häufig als zu groß empfunden werden. Eine Aufzählung erscheint ohne 
-weitere Anpassungen wie folgt:
+Anpassungen wie folgt:
 %
 \CodePreamble{Aufzählung mit vertikalen Standardabständen}
 \begin{Hint*}
@@ -2849,7 +2816,8 @@ Hier soll dies lediglich für die Umgebung \Environment*{itemize} geschehen:
 %
 Alternativ zur globalen Änderung einer speziellen oder aller Aufzählungslisten 
 kann der Schlüssel \PValue{noitemsep} auch nur gezielt an einzelne Umgebung 
-über das optionale Argument weitergereicht werden.
+über das optionale Argument weitergereicht werden 
+(\Macro*{begin}[\PParameter{itemize}\POParameter{noitemsep}]).
 
 Natürlich erlaubt das Paket noch weitergehende Einstellungen für die Umgebungen 
 \Environment{itemize}(\Package{koma-script},\Package{enumitem}),
@@ -2860,17 +2828,13 @@ eigenen Bedürfnissen angepasst werden. Genaueres hierzu ist der Dokumentation
 des Paketes \Package{enumitem} entnehmen.
 
 
-\subsection{Datumsformatierung}
-Das Paket \Package{isodate} stellt \Macro{printdate}(\Package{isodate}) bereit. 
-Dieser Befehl kann für die Formatierung von Datumsangaben verwendet werden. 
-Wird das Paket mit einer der Dokumentklassen aus dem \TUDScript-Bundle geladen, 
-wird der genannte Befehl automatisch für alle bereitgestellten Datumsfelder 
-verwendet.
-%
-\begin{Preamble}
-\usepackage{isodate}
-
-\end{Preamble}
+\subsection{Ligaturen}
+Die meisten \hologo{LaTeX}"=Schriftfamilien enthalten Ligaturen, die für einen 
+typografisch sauberen Satz bei zusammengesetzten Wörtern, wie sie gerade im 
+Deutschen häufig vorkommen, aufgetrennt werden müssten. Mit der Anwendung 
+\Application{DeLig}<delig> kann dies automatisiert geschehen. Wird 
+\Engine{LuaLaTeX} als Textsatzsystem genutzt, kann alternativ das Paket 
+\Package{selnolig} verwendet werden.
 
 
 \subsection{Auslassungspunkte}
@@ -2884,14 +2848,67 @@ beschrieben, weshalb hier nur kurz darauf eingegangen wird. Es wird das Paket
 \usepackage{ellipsis}
 \end{Preamble}
 %
-Für deutschsprachige Texte sollten außerdem noch 
+Für deutschsprachige Texte sollten außerdem noch folgendes ausgeführt werden:
 %
 \begin{Preamble}
 \let\ellipsispunctuation\relax
 
 \end{Preamble}
+
+
+\subsection{Mathematiksatz}
+Von \hologo{LaTeXe} werden einige Umgebungen für das Setzen mathematischer 
+Formeln und Ausdrücke bereitgestellt, welche meist jedoch nicht \emph{alle} 
+Anforderungen eines Nutzers an den Mathematiksatz erfüllen können. Das Paket
+\Package{amsmath} bietet deshalb eine Reihe weiterführender Umgebungen für das 
+Setzen von einzeiligen und mehrzeiligen sowie ausgerichteter Formeln zur 
+Verfügung. Auf eine Einführung in das Paket wird~-- aufgrund der bereits in 
+großer Zahl vorhandenen Einführungen~-- in diesem Tutorial verzichtet. Außerdem 
+stehen mit \Tutorial{mathtype} und \Tutorial{mathswap} zwei weitere Tutorials 
+zur Verfügung, die sich explizit mit der Thematik eines guten mathematischen 
+Satz beschäftigen.
+
+Das Paket \Package{amsmath} stellt für \hologo{LaTeXe} den De"~facto"~Standard 
+für den mathematischen Satz dar. Allerdings wird es~-- insbesondere aus diesem 
+Grund~-- sehr \enquote{vorsichtig} weiterentwickelt. Für das Setzen neuer 
+Dokumente sollte deshalb das Paket \Package{mathtools} verwendet werden, das
+auf \Package{amsmath} basiert und dieses um zusätzliche Funktionalitäten 
+ergänzt sowie Bugfixes bereithält.
+
+
+\subsection{Darstellung von mathematischen Brüchen}
+Für ansehnliche und insbesondere im Fließtext gut lesbare mathematische Brüche 
+stellt das Paket \Package{xfrac} den Befehl \Macro{sfrac}(\Package{xfrac}) zur 
+Verfügung.
 %
-ausgeführt werden.
+\begin{Preamble}
+\usepackage{xfrac}
+
+\end{Preamble}
+
+
+\subsection{Einheiten}
+Mit dem Paket \Package{siunitx} lassen sich sowohl physikalische Einheiten als 
+auch Zahlen typografisch korrekt setzen. Sollen die Funktionalitäten in einem 
+deutschsprachigen Dokument problemlos nutzbar sein, so sind die Hinweise zum 
+\tudhyperref{sec:tips:siunitx}{Setzen von Einheiten mit \Package{siunitx}} im 
+\TUDScript-Handbuch zu beachten. Das Paket \Package{units} ist nicht ganz so 
+mächtig wie \Package{siunitx}, kann allerdings als pragmatische Alternative 
+gesehen und genutzt werden.
+
+
+\subsection{Datumsformatierung}
+Das Paket \Package{isodate} stellt \Macro{printdate}(\Package{isodate}) bereit. 
+Dieser Befehl kann für die Formatierung von Datumsangaben verwendet werden. 
+Wird das Paket mit einer der Dokumentklassen aus dem \TUDScript-Bundle geladen, 
+wird der genannte Befehl automatisch für alle bereitgestellten Datumsfelder 
+verwendet. Alternativ dazu kann das Paket \Package{datetime2} genutzt werden, 
+dessen Befehl \Macro{DTMDate}(\Package{datetime2}) wird ebenfalls unterstützt.
+%
+\begin{Preamble}
+\usepackage{isodate}
+
+\end{Preamble}
 
 
 
@@ -2916,11 +2933,11 @@ Dokumentschriften innerhalb der erstellten Grafiken ermöglichen. Im Handbuch zu
 \TUDScript wird dies für \tudhyperref{sec:tips:svg}{\Application{Inkscape}} 
 genauer erläutert. Eine andere Variante ist das \enquote{Programmieren} von 
 Grafiken. Die zwei bekanntesten \hologo{LaTeX}"=Pakete sind \Package{tikz}<pgf> 
-und \Package{pstricks}<pstricks-base>. Für diese beiden wird im Folgenden eine 
-Abbildung exemplarisch erstellt, ohne dabei tiefer ins Detail gehen zu wollen. 
-Ebenfalls wird darauf verzichtet, diese im Kopierbeispiel einzubinden. Für 
-beide Pakete gibt es neben der umfangreichen Dokumentation zahlreiche Beispiele 
-und Erläuterungen im Internet.
+und \Package{pstricks}<pstricks-base>. Mit beiden wird folgend eine Abbildung 
+exemplarisch erstellt, ohne dabei ins Detail zu gehen, da es~-- neben den 
+umfangreichen Dokumentationen~-- zahlreiche Beispiele und Erläuterungen im 
+Internet gibt.
+
 
 
 \subsection{Das Paket \Package{tikz}}
@@ -3249,25 +3266,21 @@ function perfect = isperfect(test_value)
   %          28 is a perfect number: 1 + 2 + 4 + 7 + 14 = 28 == 28
   %
   % Arguments:
-  %
   %       test_value        (input)     check to see if this value 
   %                                     is perfect or not
   %       perfect           (output)    if yes, set this to 1
   %                                     if no, set this to 0
-  
+  %
   % this will keep track of the sum of all integer divisors
   tempsum = 0;
-  
   % we check all possible divisors
   for (divisor = 1 : test_value - 1)
     div_result = test_value / divisor;
-    
     if (div_result == floor(div_result)) 
       % this is an integer divisor, so add it to the sum
       tempsum = tempsum + divisor;
     end
   end
-  
   % now, does the sum equal the test_value?
   if (tempsum == test_value) 
     perfect = 1;
@@ -3313,7 +3326,7 @@ dazugehörigen \Forum gestellt werden.
 \addsec{Index}
 Da das Tutorial etwas umfangreicher ist, wird für alle erläuterten Optionen, 
 Umgebungen und Befehle ein Index erstellt. Bei Elementen, die weder \TUDScript 
-noch \KOMAScript zuzuordnen sind, wird das dazugehörige Paket mit angeführt.
+noch \KOMAScript{} zuzuordnen sind, wird das dazugehörige Paket mit angeführt.
 \PrintIndex
 
 \FinishTutorial[%

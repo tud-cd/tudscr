@@ -1,7 +1,10 @@
-\RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
-\documentclass[english,ngerman]{tudscrmanual}
-\usepackage[T1]{fontenc}
-\usepackage{selinput}\SelectInputMappings{adieresis={ä},germandbls={ß}}
+\documentclass[english,ngerman,ttfont=roboto]{tudscrmanual}
+\ifpdftex{
+  \usepackage[T1]{fontenc}
+  \usepackage[ngerman=ngerman-x-latest]{hyphsubst}
+}{
+  \usepackage{fontspec}
+}
 \lstset{%
   inputencoding=utf8,extendedchars=true,
   literate=%
@@ -19,20 +22,21 @@
 %\tracingbundle
 
 \begin{document}
-\newcommand*\cdurl{%
+\newrobustcmd*\cdurl{%
   \begingroup%
     \hypersetup{hidelinks}%
-    \href{https://tu-dresden.de/cd}{https://tu-dresden.de/cd}%
+    \href{https://tu-dresden.de/cd/}{https://tu-dresden.de/cd}%
   \endgroup%
 }
-\faculty{\protect\cdurl}
-\date{30.05.2017}
-\author{Falk Hanisch\thanks{\noexpand\mailto{\tudscrmail}}}
-\subject{\TUDScript \vTUDScript{} basierend auf \KOMAScript}
-\title{%
-  Ein \NoCaseChange{\hologo{LaTeXe}}-Bundle für Dokumente im~neuen \CD der \TnUD
+\faculty{\cdurl}
+\date{28.06.2019}
+\author{%
+  Falk Hanisch%
+  \expandafter\emailaddress\expandafter{\tudscrmail}%
 }
-\addtokomafont{subtitle}{\univbn}
+\publishers{\GitHubRepo'[]}
+\subject{\TUDScript \vTUDScript{} basierend auf \KOMAScript}
+\title{Ein {LaTeX}-Bundle für Dokumente im \TUDCD}
 \ifdef{\tudprintflag}{%
   \subtitle{Benutzerhandbuch\thanks{\href{tudscr}{Online-Version}}}%
 }{%
@@ -45,6 +49,7 @@
   \def\and{, }%
   \let\thanks\@gobble%
   \let\footnote\@gobble%
+  \let\emailaddress\@gobble%
   \hypersetup{%
     pdfauthor = {\@author},%
     pdftitle = {\@title},%
@@ -52,17 +57,10 @@
     pdfkeywords = {LaTeX, \TUDScript, Benutzerhandbuch},%
   }%
 \endgroup%
-\renewcommand*\@pnumwidth{1.9em}
-\renewcommand*\@tocrmarg{2.9em}
 \makeatother
 
 
-
-\ChangedAt*{%
-  v2.00:Generalüberholung und komplette Neuimplementierung von \TUDScript%
-}%
 \maketitle
-
 
 
 \include{tudscr-preface}
@@ -123,38 +121,42 @@
 \include{tudscr-installation}
 \include{tudscr-obsolete}
 \include{tudscr-additional}
-\ToDo[doc]{%
-  Benutzerdefinierte Anpassungen von \TUDScript, Kapitelstile, Farbeinsatz etc.%
-}[v2.06]
 \include{tudscr-index}
 
 
 
 \clearpage
 
+\ToDo[imp,doc]{%
+  Benutzerdefinierte Anpassungen von \TUDScript, Kapitelstile, Farbeinsatz etc.%
+}[v2.07]
 \ToDo[imp]{%
-  \File{.layout}-Dateien direkt in das LyX-Projekt integrieren lassen?%
-}[v2.06]
-\ToDo[imp]{Paket für \Package*{glossaries}-Stile}[v2.06]
+  Spezialseite zur freien Gestaltung mit Hintergrundebene für Bilder und Texte 
+  (CD-Handbuch S. 80 ff.); Seitenstil: \PageStyle*{special.tudheadings}
+}[v2.07]
+\ToDo[doc,imp]{%
+  Rückseite bei Kapitelseiten (auch bei Teilen?) im doppelseitigen Satz per 
+  Option nicht als Vakatseite setzen. Implementierung von farbigen Seiten 
+  davor (\Option*{open=right}) sowie danach (\Option*{open=left}). Setzen von 
+  speziellen Inhalten auf diesen Seiten äquivalent zu \Macro*{setpartpreamble} 
+  bzw. \Macro*{setchapterpreamble}; ggf. temporär umschalten bzw. Warnung bei 
+  Konflikt.
+  \url{http://latex.wcms-file3.tu-dresden.de/phpBB3/viewtopic.php?f=11&t=396}
+}[v2.07]
 
-\ToDo[imp]{\Macro*{DeclareSectionCommand}}[v2.06]
-\ToDo[imp]{Unterstützung für algorithm2e o.ä. (Überschriften?!)}[v2.06]
+\ToDo[imp]{LyX: layout-Dateien in das Projekt integrieren lassen?}[v2.07]
+\ToDo[imp]{\Package*{glossaries}: Paket für Stile aus Tutorial}[v2.07]
 
-\ToDo[rls]{KOMA-Script-Version anpassen (LoadClass) v3.18/v3.23}[v2.06]
-
-\ToDo[imp]{TeXstudio: alle cwl über docstrip, separate .ins-Datei}[v2.06]
-\ToDo[imp]{TeXstudio: tudscrposter.cwl erstellen}[v2.06]
-\ToDo[imp]{TeXstudio: tudscrmanual.cwl/tudscrtutorial.cwl erneuern}[v2.06]
-
+\ToDo[imp]{TeXstudio: cwl-Dateien über docstrip, separate .ins-Datei}[v2.07]
 \ToDo[rls]{TeXstudio: alle *.cwl erneuern, automatisch über *.dtx}
+
+\ToDo[rls]{GitHub auf offene Issues prüfen}
 \ToDo[rls]{\emph{alle} dtx-Dateien der vorherigen Version mit WinMerge sichten}
 \ToDo[rls]{Layout und Umbrüche kontrollieren}
-\ToDo[rls]{%
-  Datum tudscr-version.dtx, tudscr-comp.dtx, Handbuch und README aktualisieren%
-}
+\ToDo[rls]{Datum in tudscr-version.dtx, tudscr-comp.dtx, Handbuch \& README}
 \ToDo[rls]{%
   Release auf GitHub und CTAN, Tag für Homepage und im Forum ändern\\ 
-  \url{http://latex.wcms-file3.tu-dresden.de/phpBB3/viewtopic.php?t=303}%
+  {\small\url{http://latex.wcms-file3.tu-dresden.de/phpBB3/viewtopic.php?t=303}}%
 }
 \ListOfToDo
 \end{document}

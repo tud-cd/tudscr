@@ -1,10 +1,10 @@
-% \CheckSum{2090}
+% \CheckSum{2094}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
 % ----------------------------------------------------------------------------
 %
-%  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2017
+%  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2019
 %
 % ----------------------------------------------------------------------------
 %
@@ -48,18 +48,24 @@
 %
 % \iffalse
 %%% From File: tudscr-doc.dtx
-%<*driver>
-\ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
-\ProvidesFile{tudscr-doc.dtx}[%
-  2017/05/30 v2.05m TUD-Script\space%
+%<*dtx>
+% \fi
+%
+\ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
+\ProvidesFile{tudscr-doc.dtx}[2019/06/28 v2.06 TUD-Script\space%
   (source code documentation based on scrartcl/scrdoc)%
 ]
-\RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
+%
+% \iffalse
 \documentclass[english,ngerman,xindy]{tudscrdoc}
-\usepackage[T1]{fontenc}
-\usepackage{selinput}\SelectInputMappings{adieresis={ä},germandbls={ß}}
+\ifpdftex{
+  \usepackage[T1]{fontenc}
+  \usepackage[ngerman=ngerman-x-latest]{hyphsubst}
+}{
+  \usepackage{fontspec}
+}
 \usepackage{babel}
-\usepackage{tudscrfonts} % only load this package, if the fonts are installed
+\usepackage{tudscrfonts}
 \KOMAoptions{parskip=half-}
 \usepackage{bookmark}
 \usepackage[babel]{microtype}
@@ -76,7 +82,7 @@
   \tableofcontents
   \DocInput{\filename}
 \end{document}
-%</driver>
+%</dtx>
 % \fi
 %
 % \selectlanguage{ngerman}
@@ -89,6 +95,7 @@
 % Mit dieser Klasse erfolgt die Quelltextdokumentation des \TUDScript-Bundles. 
 % Sie lädt standarmäßig die Klasse \cls{ltxdoc}, ersetzt allerdings im Stile 
 % von \cls{scrdoc} im Hintergrund \cls{article} durch \cls{scrartcl}.
+%
 % \StopEventually{\PrintIndex\PrintChanges\PrintToDos}
 %
 % \iffalse
@@ -99,7 +106,7 @@
 % temporär gesichert.
 %    \begin{macrocode}
 \newcommand*\scr@maketitle{}%
-\PassOptionsToClass{toc=left}{scrartcl}%
+\PassOptionsToClass{toc=left,fontsize=10pt}{scrartcl}%
 \AfterClass{scrartcl}{\let\scr@maketitle\@maketitle}%
 %    \end{macrocode}
 % Der folgende Quelltext ist 1:1 aus \cls{scrdoc} kopiert.
@@ -107,28 +114,28 @@
 \newcommand*\sd@saved@LoadClass{}
 \let\sd@saved@LoadClass=\LoadClass
 \renewcommand*\LoadClass[2][]{%
-  \begingroup
+  \begingroup%
     \edef\@tempc{#2}\def\@tempb{article}%
-    \ifx\@tempc\@tempb
-      \let\LoadClass\sd@saved@LoadClass
+    \ifx\@tempc\@tempb%
+      \let\LoadClass\sd@saved@LoadClass%
       \def\@tempc{scrartcl}%
-    \fi
+    \fi%
     \edef\@tempc{%
       \noexpand\endgroup\noexpand\sd@saved@LoadClass[{#1}]{\@tempc}}%
-  \@tempc
+  \@tempc%
 }
 \newcommand*\sd@saved@PassOptionsToClass{}
 \let\sd@saved@PassOptionsToClass=\PassOptionsToClass
 \renewcommand*\PassOptionsToClass[2]{%
-  \begingroup
+  \begingroup%
     \edef\@tempc{#2}\def\@tempb{article}%
-    \ifx\@tempc\@tempb
+    \ifx\@tempc\@tempb%
       \def\@tempc{scrartcl}%
-    \fi
+    \fi%
     \edef\@tempc{%
       \noexpand\endgroup\noexpand\sd@saved@PassOptionsToClass{#1}{%
         \@tempc}}%
-  \@tempc
+  \@tempc%
 }
 \LoadClassWithOptions{ltxdoc}[2015/03/26]
 \setcounter{IndexColumns}{2}
@@ -176,8 +183,8 @@
 %
 % \begin{macro}{\DisableCrossrefsForced}
 % \changes{v2.05i}{2017/03/02}{neu}^^A
-% Für das sichere Deaktivieren von Makroeinträgen im Index nach der Verwendung 
-% von \cs{EnableCrossrefs}. Sollte in einer Gruppe genutzt werden!
+% Deaktivieren von Makroeinträgen im Index nach der Verwendung von
+% \cs{EnableCrossrefs}. Sollte in einer Gruppe genutzt werden!
 %    \begin{macrocode}
 \newcommand*\DisableCrossrefsForced{}
 \let\DisableCrossrefsForced\DisableCrossrefs
@@ -273,7 +280,7 @@
 % einige Patches notwendig sind.
 %    \begin{macrocode}
 \RequirePackage{dox}[2010/12/16]
-\@ifpackagelater{dox}{2017/01/27}{%
+\@ifpackagelater{dox}{2017/12/07}{%
   \ClassWarning{\TUD@Class@Name}{%
     Package `dox' was updated so some patches\MessageBreak%
     are maybe outdated%
@@ -525,9 +532,9 @@
 \CheckCommand*\@doxcreatespecialmainindex[3]{%
   \expandafter\def\csname SpecialMain#1Index\endcsname##1{%
     \@bsphack%
-    \special@index{##1\actualchar{\string\ttfamily\space##1} (#2)
+    \special@index{##1\actualchar{\string\ttfamily\space##1} (#2)%
       \encapchar main}%
-    \special@index{#3:\levelchar##1\actualchar{\string\ttfamily\space##1}
+    \special@index{#3:\levelchar##1\actualchar{\string\ttfamily\space##1}%
       \encapchar main}%
     \@esphack%
   }%
@@ -587,7 +594,7 @@
   \expandafter\def\csname Special#1Index\endcsname##1{%
     \@bsphack%
     \index{##1\actualchar{\protect\ttfamily##1} (#2)\encapchar usage}%
-    \index{#3:\levelchar##1\actualchar{\protect\ttfamily##1}
+    \index{#3:\levelchar##1\actualchar{\protect\ttfamily##1}%
       \encapchar usage}%
     \@esphack%
   }%
@@ -626,24 +633,24 @@
 % vermeiden.
 %    \begin{macrocode}
 \def\@doxcreatemacrolikeprintname#1#2{%
-  \@ifundefined{Print#1Name}{%
+  \ifcsundef{Print#1Name}{%
     \expandafter\def\csname Print#1Name\endcsname##1{%
       \MacroFont\string##1\index@type{#2}\strut\ %
     }%
   }{}%
-  \@ifundefined{PrintDescribe#1}{%
+  \ifcsundef{PrintDescribe#1}{%
     \expandafter\def\csname PrintDescribe#1\endcsname##1{%
       \MacroFont\string##1\index@type{#2}\strut\ %
     }%
   }{}%
 }
 \def\@doxcreateprintname#1#2{%
-  \@ifundefined{Print#1Name}{%
+  \ifcsundef{Print#1Name}{%
     \expandafter\def\csname Print#1Name\endcsname##1{%
       \MacroFont##1\index@type{#2}\strut\ %
     }%
   }{}%
-  \@ifundefined{PrintDescribe#1}{%
+  \ifcsundef{PrintDescribe#1}{%
     \expandafter\def\csname PrintDescribe#1\endcsname##1{%
       \MacroFont##1\index@type{#2}\strut\ %
     }%
@@ -720,7 +727,7 @@
 \tud@reserved[macrolike]{Length}{length}
 \tud@reserved{Counter}{counter}
 \tud@reserved{Color}{TUDcolor}
-\tud@reserved[macrolike]{Locale}{locale}
+\tud@reserved[macrolike]{Localization}{localization}
 \tud@reserved[macrolike]{Field}{field}
 \tud@reserved{Font}{KOMAfont}
 \tud@reserved{Parameter}{parameter}
@@ -753,8 +760,8 @@
 % \changes{v2.05g}{2016/11/02}{neu}^^A
 % Bei der Ausführung einer dieser beiden Befehle bei der Definition von einem 
 % Makro oder einer Umgebung werden diese für evtl. nachfolgende Parameter als 
-% Elterneinträge definiert. Hierfür werden sowohl für den Index als auch die 
-% Änderungsliste die Einträge zur Sortierung in \cs{parameter@parent@indexname} 
+% Elterneinträge definiert. Hierfür werden die Einträge zur Sortierung sowohl 
+% für den Index als auch die Änderungsliste in \cs{parameter@parent@indexname} 
 % und für die Formatierung in \cs{parameter@parent@indexformat} gespeichert.
 %    \begin{macrocode}
 \apptocmd{\@SaveMacroIndexName}{%
@@ -846,7 +853,7 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \SpecialParameterIndex
-% \end{environment}
+% \end{environment}^^A DescribeParameterParent
 %
 % \subsubsection{Erzeugen von Änderungseinträgen}
 %
@@ -1164,10 +1171,10 @@
 % die fraglichen Zeichen ersetzt und in eine weitere Hilfsdatei geschrieben.
 %    \begin{macrocode}
 \ifdefined\tudxdyflag
-  \newcommand*\tud@write@replace{}
-  \newwrite\tud@write@replace
-  \newcommand*\tud@read@replace{}
-  \newread\tud@read@replace
+  \newcommand*\tud@write@replace{}%
+  \newwrite\tud@write@replace%
+  \newcommand*\tud@read@replace{}%
+  \newread\tud@read@replace%
 %    \end{macrocode}
 % Die Makros für die fraglichen Steuerzeichen werden so angepasst, dass die
 % Wahrscheinlichkeit für eine Verwendung dieser Kombination in einem Makro- 
@@ -1175,10 +1182,10 @@
 % Hilfsdateien für Index und Änderungsliste für \app{texindy} angepasst. Dabei 
 % werden diese automatisch erzeugt, falls dies möglich ist.
 %    \begin{macrocode}
-  \def\actualchar{<|1|>}
-  \def\quotechar{<|2|>}
-  \def\levelchar{<|3|>}
-  \begingroup
+  \def\actualchar{<|1|>}%
+  \def\quotechar{<|2|>}%
+  \def\levelchar{<|3|>}%
+  \begingroup%
     \endlinechar=\m@ne\relax%
     \def\tud@reserved#1#2{%
       \IfFileExists{\jobname.#1}{%
@@ -1210,7 +1217,7 @@
         \immediate\closeout\tud@write@replace%
         \ifnum\pdf@shellescape=\@ne\relax%
           \if@tempswa%
-            \immediate\write18{%
+            \ShellEscape{%
               texindy\space%
                 -o \jobname.#2\space%
                 -M \@currname-#2.xdy\space%
@@ -1229,17 +1236,17 @@
     }%
     \tud@reserved{idx}{ind}%
     \tud@reserved{glo}{gls}%
-  \endgroup
+  \endgroup%
 %    \end{macrocode}
 % Sollte \app{texindy} nicht aktiv sein, werden Index und Änderungsliste mit 
 % \app{makeindex} automatisch erzeugt.
 %    \begin{macrocode}
 \else
   \ifnum\pdf@shellescape=\@ne\relax%
-    \immediate\write18{%
+    \ShellEscape{%
       makeindex -s gglo.ist -t \jobname.glg -o \jobname.gls \jobname.glo%
     }%
-    \immediate\write18{%
+    \ShellEscape{%
       makeindex -s gind.ist -t \jobname.ilg -o \jobname.ind \jobname.idx%
     }%
   \fi%
@@ -1261,6 +1268,7 @@
 %
 % \begin{macro}{\PrintToDos}
 % \changes{v2.05}{2016/05/19}{neu}^^A
+% \begin{macro}{\@docinclude}
 % Für ToDo-Notizen wird am Ende eine Liste aller offenen Punkte ausgegeben.
 %    \begin{macrocode}
 \DeclareNewTOC[%
@@ -1274,7 +1282,7 @@
 \newcommand*\PrintToDos{\ifdefined\tudfinalflag\else\listoftodos\fi}
 %    \end{macrocode}
 % Damit die Liste der ToDo-Notizen bei der Erzeugung der gesamten Dokumentation 
-% des Quelltextes einamlig sowie vollständig und nicht nach jeder Quelldatei 
+% des Quelltextes einmalig sowie vollständig und nicht nach jeder Quelldatei 
 % einzeln ausgegeben wird, muss der Befehl \cs{@docinclude} angepasst werden.
 %    \begin{macrocode}
 \patchcmd{\@docinclude}{%
@@ -1299,6 +1307,7 @@
   \let\PrintToDos\@ltxdoc@PrintToDos
 }{}{\tud@patch@wrn{@docinclude}}
 %    \end{macrocode}
+% \end{macro}^^A \@docinclude
 % \end{macro}^^A \PrintToDos
 % \begin{macro}{\ToDo}
 % \changes{v2.02}{2014/07/25}{neu}^^A
@@ -1350,89 +1359,15 @@
 % \end{macro}^^A \@ToDo
 % \end{macro}^^A \ToDo
 %
-% \subsection{Satzspiegel}
+% \subsection{Schriften und Satzspiegel}
 %
-% Um den zur Verfügung stehenden Platz möglichst effektiv zu nutzen, soll der 
-% Satzspiegel dahingehend aufgeteilt werden, dass für die Darstellung jeder
-% Quelltextzeile genau 80~Zeichen zur Verfügung stehen. Dies ist allerdings 
-% abhängig von der geladenen Typewriter-Schrift. Deshalb wird die Berechnung 
-% des Satzspiegels erst zum Ende der Präambel ausgeführt, um auf etwaige Pakete
-% zur Schriftauswahl reagieren zu können.
-%
-% \begin{macro}{\calculatearea}
-% \changes{v2.05g}{2016/11/10}{neu}^^A
-% \begin{length}{\topmargin}
-% \begin{length}{\headheight}
-% \begin{length}{\headsep}
-% \begin{length}{\footskip}
-% \begin{length}{\textheight}
-% \begin{length}{\textwidth}
-% \begin{length}{\columnsep}
-% \begin{length}{\marginparsep}
-% \begin{length}{\marginparwidth}
-% \begin{length}{\oddsidemargin}
-% Hiermit wird die Berechnung des Satzspiegels ausgeführt.
-%    \begin{macrocode}
-\newcommand*\calculatearea{%
-  \setlength\topmargin{-1in}%
-  \setlength\headheight{0pt}%
-  \setlength\headsep{3em}%
-  \setlength\footskip{1.5\headsep}%
-  \setlength\textheight{\dimexpr\paperheight-2.5\headsep-\footskip\relax}%
-  \settowidth\MacroIndent{\rmfamily\scriptsize 0000\ }%
-  \begingroup%
-    \MacroFont\selectfont%
-    \settowidth\@tempdima{\space}%
-    \setlength\@tempdima{80\@tempdima}%
-%^^A    \addtolength\@tempdima{\dimexpr\MacroIndent+.1\p@\relax}%
-    \addtolength\@tempdima{\MacroIndent}%
-    \edef\@tempa{%
-      \endgroup%
-      \noexpand\setlength\noexpand\textwidth{\the\@tempdima}%
-    }%
-  \@tempa%
-  \setlength\columnsep{1em}%
-  \setlength\marginparsep{1em}%
-  \setlength\marginparwidth{%
-    \dimexpr\paperwidth-\textwidth-2\marginparsep\relax%
-  }%
-  \setlength\oddsidemargin{\dimexpr\marginparwidth+\marginparsep-1in\relax}%
-}
-\AtEndPreamble{\calculatearea}
-%    \end{macrocode}
-% \end{length}^^A \oddsidemargin
-% \end{length}^^A \marginparwidth
-% \end{length}^^A \marginparsep
-% \end{length}^^A \columnsep
-% \end{length}^^A \textwidth
-% \end{length}^^A \textheight
-% \end{length}^^A \footskip
-% \end{length}^^A \headsep
-% \end{length}^^A \headheight
-% \end{length}^^A \topmargin
-% \end{macro}^^A \calculatearea
-% \begin{macro}{\saved@calculatearea}
-% \changes{v2.05g}{2016/11/10}{neu}^^A
-% \begin{macro}{\tud@font@set}
-% \begin{macro}{\@pnumwidth}
-% \begin{macro}{\@tocrmarg}
 % \begin{macro}{\MacroFont}
 % \begin{macro}{\AltMacroFont}
-% Etwas komplizierter wird es, wenn das paket \pkg{tudscrfonts} geladen wird. 
-% Die darin ausgewählten Typewriter-Schriften sind zur Quelltextdokumentation 
-% zu schlank. Deshalb wird das Paket \pkg{mweights} genutzt, um die Stärke 
-% etwas zu erhöhen. Damit dies mit dem Paket \pkg{doc} funktioniert, muss der 
-% Befehl \cs{MacroFont} leicht angepasst werden.
-%
-% Da das Paket \pkg{tudscrfonts} das Festlegen der Schriften selbst auf das 
-% Ende der Präambel verzögert, muss sichergestellt werden, dass die Berechnung 
-% des Satzspiegels erst nach der Schriftauswahl erfolgt. Deshalb wird der 
-% Inhalt von \cs{calculatearea} in \cs{saved@calculatearea} gescihert und 
-% anschließend unschädlich gemacht. Danach wird die Satzspiegelberechnung an 
-% das Makro \cs{tud@font@set} angehangen.
+% Wird das Paket \pkg{mweights} geladen, so soll der passende Schriftschnitt 
+% für die ausgewählten TypeWriter-Schriften genutzt werden. Damit dies mit dem 
+% Paket \pkg{doc} funktioniert, muss der Befehl \cs{MacroFont} angepasst werden.
 %    \begin{macrocode}
-\AfterPackage{tudscrfonts}{%
-  \RequirePackage{mweights}[2013/07/21]%
+\AfterPackage{mweights}{%
   \CheckCommand*\MacroFont{%
     \fontencoding\encodingdefault%
     \fontfamily\ttdefault%
@@ -1461,25 +1396,96 @@
     \fontshape\sldefault%
     \small%
   }%
-  \newcommand*\saved@calculatearea{}%
-  \let\saved@calculatearea\calculatearea%
-  \let\calculatearea\relax%
-  \appto\tud@font@set{%
-    \ifcase\tud@cdfont@num\relax\else% true/heavy
-      \def\mdseries@tt{m}%
-      \renewcommand*\@pnumwidth{1.7em}%
-      \renewcommand*\@tocrmarg{2.7em}%
+%    \end{macrocode}
+% Am Ende der Präambel wird dafür gesorgt, dass der Befehl \cs{mdseries@tt} in 
+% jedem Fall definiert ist.
+%    \begin{macrocode}
+  \AtEndPreamble{%
+    \ifundef{\mdseries@tt}{\edef\mdseries@tt{\mddefault}}{}%
+  }%
+}
+%    \end{macrocode}
+% Wird das Paket \pkg{tudscrfonts} genutzt, erscheinen die TypeWriter-Schriften
+% zur Quelltextdokumentation sowohl für Latin~Modern als auch Roboto etwas zu 
+% schlank. 
+%    \begin{macrocode}
+\PassOptionsToPackage{ttfont=lmtt}{tudscrfonts}
+\AfterPackage{tudscrfonts}{%
+  \AtEndPreamble{%
+    \ifnum\tud@ttfont@num>\z@\relax%
+      \edef\mdseries@tt{\tud@ttfont@bf}%
     \fi%
-    \saved@calculatearea%
   }%
 }
 %    \end{macrocode}
 % \end{macro}^^A \AltMacroFont
 % \end{macro}^^A \MacroFont
-% \end{macro}^^A \@tocrmarg
-% \end{macro}^^A \@pnumwidth
-% \end{macro}^^A \tud@font@set
-% \end{macro}^^A \saved@calculatearea
+%
+% Um den zur Verfügung stehenden Platz möglichst effektiv zu nutzen, soll der 
+% Satzspiegel dahingehend aufgeteilt werden, dass für die Darstellung jeder
+% Quelltextzeile genau 80~Zeichen zur Verfügung stehen. Dies ist allerdings 
+% abhängig von der geladenen TypeWriter-Schrift. Deshalb wird die Berechnung 
+% des Satzspiegels erst zum Beginn des Dokumentes ausgeführt, um auf etwaige 
+% Pakete zur Schriftauswahl reagieren zu können.
+%
+% \begin{macro}{\tud@setarea}
+% \changes{v2.05g}{2016/11/10}{neu}^^A
+% \begin{length}{\topmargin}
+% \begin{length}{\headheight}
+% \begin{length}{\headsep}
+% \begin{length}{\footskip}
+% \begin{length}{\textheight}
+% \begin{length}{\textwidth}
+% \begin{length}{\columnsep}
+% \begin{length}{\marginparsep}
+% \begin{length}{\marginparwidth}
+% \begin{length}{\oddsidemargin}
+% Hiermit wird die Berechnung des Satzspiegels ausgeführt.
+%    \begin{macrocode}
+\newcommand*\tud@setarea{%
+  \setlength\topmargin{-1in}%
+  \setlength\headheight{0pt}%
+  \setlength\headsep{3em}%
+  \setlength\footskip{1.5\headsep}%
+  \setlength\textheight{\dimexpr\paperheight-2.5\headsep-\footskip\relax}%
+  \@colht=\textheight%
+  \@colroom=\textheight%
+  \vsize=\textheight%
+  \settowidth\MacroIndent{\rmfamily\scriptsize 0000\ }%
+  \begingroup%
+    \MacroFont\selectfont%
+    \settowidth\@tempdima{\space}%
+    \setlength\@tempdima{80\@tempdima}%
+%^^A    \addtolength\@tempdima{\dimexpr\MacroIndent+.1\p@\relax}%
+    \addtolength\@tempdima{\MacroIndent}%
+    \edef\@tempa{%
+      \endgroup%
+      \noexpand\setlength\noexpand\textwidth{\the\@tempdima}%
+    }%
+  \@tempa%
+  \columnwidth=\textwidth%
+  \hsize=\columnwidth%
+  \linewidth=\hsize%
+  \setlength\columnsep{1em}%
+  \setlength\marginparsep{1em}%
+  \setlength\marginparwidth{%
+    \dimexpr\paperwidth-\textwidth-2\marginparsep\relax%
+  }%
+  \setlength\oddsidemargin{\dimexpr\marginparwidth+\marginparsep-1in\relax}%
+}
+\AtBeginDocument{\tud@setarea}
+%    \end{macrocode}
+% \end{length}^^A \oddsidemargin
+% \end{length}^^A \marginparwidth
+% \end{length}^^A \marginparsep
+% \end{length}^^A \columnsep
+% \end{length}^^A \textwidth
+% \end{length}^^A \textheight
+% \end{length}^^A \footskip
+% \end{length}^^A \headsep
+% \end{length}^^A \headheight
+% \end{length}^^A \topmargin
+% \end{macro}^^A \tud@setarea
 %
 % \subsection{Zusätzliche Markup-Befehle}
 %
@@ -1542,7 +1548,7 @@
 % \begin{macro}{\selectlanguage}
 % \begin{macro}{\glqq}
 % \begin{macro}{\grqq}
-% Etwas kleinkram für \pkg{babel}\dots
+% Etwas Kleinkram für \pkg{babel}\dots
 %    \begin{macrocode}
   \@ifpackageloaded{babel}{}{%
     \ClassWarning{\TUD@Class@Name}{Package `babel' not loaded}%
@@ -1569,16 +1575,16 @@
 %    \begin{macrocode}
   \@ifpackageloaded{tudscrfonts}{}{%
     \RequirePackage{lmodern}[2009/10/30]%
-    \providecommand*\ifdin[2]{#2}%
-    \providecommand*\textuln[1]{\textsf{#1}}%
-    \providecommand*\texturn[1]{\textuln{#1}}%
-    \providecommand*\textubn[1]{\textbf{\textuln{#1}}}%
-    \providecommand*\textuxn[1]{\textubn{#1}}%
-    \providecommand*\textuls[1]{\textsl{\textuln{#1}}}%
-    \providecommand*\texturs[1]{\textuls{#1}}%
-    \providecommand*\textubs[1]{\textbf{\textuls{#1}}}%
-    \providecommand*\textuxs[1]{\textubs{#1}}%
-    \providecommand*\textdbn[1]{\textubn{#1}}%
+    \providecommand*\textcdln[1]{\textsf{#1}}%
+    \providecommand*\textcdrn[1]{\textcdln{#1}}%
+    \providecommand*\textcdsn[1]{\textcdln{#1}}%
+    \providecommand*\textcdbn[1]{\textbf{\textcdln{#1}}}%
+    \providecommand*\textcdxn[1]{\textcdbn{#1}}%
+    \providecommand*\textcdli[1]{\textsl{\textcdln{#1}}}%
+    \providecommand*\textcdri[1]{\textcdli{#1}}%
+    \providecommand*\textcdsi[1]{\textcdli{#1}}%
+    \providecommand*\textcdbi[1]{\textbf{\textcdli{#1}}}%
+    \providecommand*\textcdxi[1]{\textcdbi{#1}}%
   }%
 }
 %    \end{macrocode}

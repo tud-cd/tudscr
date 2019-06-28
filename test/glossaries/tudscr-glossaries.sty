@@ -1,0 +1,164 @@
+\RequirePackage{booktabs,tabu,longtable}
+\PassOptionsToPackage{acronym,symbols}{glossaries}
+
+\AfterPackage*{glossaries}{%
+  \newglossarystyle{acrotabu}{%
+    \renewenvironment{theglossary}{%
+%      \begin{tabu}spread 0pt{@{}lX<{\strut}l@{}}% mit Seitenangabe
+      \begin{tabu}{@{}lX<{\strut}@{}}% ohne Seitenangabe
+    }{%
+      \end{tabu}\par\bigskip%
+    }%
+    \renewcommand*{\glossaryheader}{}%
+    \renewcommand*{\glsgroupheading}[1]{}%
+    \renewcommand*{\glsgroupskip}{}%
+    \renewcommand*{\glossentry}[2]{%
+      \glsentryitem{##1}% Entry number if required
+      \glstarget{##1}{\sffamily\bfseries\glossentryname{##1}} &
+      \glsentrydesc{##1}%
+%      & ##2% mit Seitenangabe
+      \tabularnewline%
+    }
+  }
+  \newcommand*\symbollettergroup{}
+  \newcommand*{\newformulasymbol}[5][]{%
+    \ifisgreeksymbol{#4}{%
+      \renewcommand*{\symbollettergroup}{greekletters}%
+    }{%
+      \renewcommand*{\symbollettergroup}{romanletters}%
+    }%
+    \newglossaryentry{#2}{%
+      type=symbols,%
+      name={#3},%
+      description={\nopostdesc},%
+      symbol={\ensuremath{#4}},%
+      user1={\ensuremath{\mathrm{#5}}},%
+      sort={#2},%
+      parent={\symbollettergroup},%
+      #1%
+    }%
+  }
+  \defglsentryfmt[symbols]{%
+    \ifmmode%
+      \glssymbol{\glslabel}%
+    \else%
+      \glsgenentryfmt~\glsentrysymbol{\glslabel}%
+    \fi%
+  }
+  \providecommand*\greeklettersname{Greek letters}
+  \providecommand*\romanlettersname{Roman letters}
+  \providecaptionname{%
+    american,australian,british,canadian,english,newzealand%
+  }{\greeklettersname}{Greek letters}
+  \providecaptionname{%
+    german,ngerman,austrian,naustrian,swissgerman,nswissgerman%
+  }{\greeklettersname}{Griechische Symbole}
+  \providecaptionname{%
+    american,australian,british,canadian,english,newzealand%
+  }{\romanlettersname}{Roman letters}
+  \providecaptionname{%
+    german,ngerman,austrian,naustrian,swissgerman,nswissgerman%
+  }{\romanlettersname}{Lateinische Symbole}
+  \newglossaryentry{greekletters}{%
+    type=symbols,%
+    name={\greeklettersname},%
+    description={\nopostdesc},%
+    sort={a}%
+  }
+  \newglossaryentry{romanletters}{%
+    type=symbols,%
+    name={\romanlettersname},%
+    description={\nopostdesc},%
+    sort={b}%
+  }
+  
+  \newglossarystyle{symbsplitlongtabu}{%
+    \newcommand*\symbollevel{-1}%
+    \renewenvironment{theglossary}{%
+%      \begin{longtabu}spread 0pt[l]{ccX<{\strut}l}% mit Seitenangabe
+      \begin{longtabu}[l]{ccX<{\strut}}% ohne Seitenangabe
+    }{%
+      \end{longtabu}%
+    }%
+    \renewcommand*{\glsgroupheading}[1]{}%
+    \renewcommand*{\glsgroupskip}{}%
+    \newcommand*\symbolhead{%
+      \toprule
+      \bfseries Formelzeichen & \bfseries Einheit &
+      \bfseries Bezeichnung %& \bfseries Seite(n)
+      \tabularnewline\midrule
+    }%
+    \renewcommand*{\glossaryheader}{%
+      \endfirsthead%
+      \symbolhead\endhead%
+      \bottomrule\endfoot%
+      \gdef\symbollevel{-1}%
+    }%
+    \renewcommand*{\glossentry}[2]{%
+      \ifglshaschildren{##1}{%
+        \ifnum\symbollevel>0\relax%
+          \tabularnewline\bottomrule\tabularnewline[\smallskipamount]%
+        \fi
+        \gdef\symbollevel{0}%
+        \tabularnewline[%
+          \arraystretch\dimexpr-\ht\strutbox-\dp\strutbox\relax%
+        ]%
+%        \multicolumn{4}{@{}l@{}}{\minisec{\glsentryname{##1}}}%mit Seitenangabe
+        \multicolumn{3}{@{}l@{}}{\minisec{\glsentryname{##1}}}%ohne Seitenangabe
+      }{%
+        \GlossariesWarning{%
+          There are no childrens for entry ##1.\MessageBreak
+          Nothing will be printed. Maybe you should\MessageBreak
+          specify ##1 as a child entry.
+        }%
+      }%
+    }%
+    \renewcommand*{\subglossentry}[3]{%
+      \ifnum\symbollevel=0\relax%
+        \tabularnewline[\medskipamount]\symbolhead%
+      \else%
+        \tabularnewline
+      \fi%
+      \gdef\symbollevel{##1}%
+      \glsentryitem{##2}% Entry number if required
+      \glstarget{##2}{\glossentrysymbol{##2}} &
+      \glsentryuseri{##2} &
+      \glossentryname{##2}%
+      %& ##3% mit Seitenangabe
+    }%
+  }
+  }% Ende von AfterPackage
+  \makeatletter
+  \newcommand*\greeksymbollist{}
+  \def\@tempa#1{\ifdefvoid{#1}{}{\listadd\greeksymbollist{#1}}}
+  \forcsvlist{\@tempa}{%
+    \alpha,\beta,\varbeta,\gamma,\delta,\epsilon,\varepsilon,\zeta,%
+    \eta,\theta,\vartheta,\iota,\kappa,\varkappa,\lambda,\mu,\nu,%
+    \xi,\omicron,\pi,\varpi,\rho,\varrho,\sigma,\varsigma,\tau,%
+    \upsilon,\phi,\varphi,\chi,\psi,\omega,%
+    \Alpha,\Beta,\Gamma,\Delta,\Epsilon,\Zeta,\Eta,\Theta,\Iota,%
+    \Kappa,\Lambda,\Mu,\Nu,\Xi,\Omicron,\Pi,\Rho,\Sigma,\Tau,\Upsilon,%
+    \Phi,\Chi,\Psi,\Omega%
+  }
+  \newcommand*\ifisgreeksymbol[1]{%
+    \begingroup%
+      \def\@tempa##1{\let##1\@firstofone}%
+      \forcsvlist{\@tempa}{%
+        \acute,\bar,\breve,\check,\dot,\ddot,\dddot,\ddddot,%
+        \hat,\widehat,\grave,\tilde,\widetilde,\vec,%
+        \Acute,\Bar,\Breve,\Check,\Dot,\Ddot,\Hat,\Grave,\Tilde,\Vec%
+      }%
+      \def\boldsymbol{}%
+      \protected@edef\@tempa{#1}%
+      \def\@tempb##1_##2\relax{\def\@tempa{##1}}%
+      \expandafter\@tempb\@tempa_\relax\relax%
+      \def\@tempb##1^##2\relax{\def\@tempa{##1}}%
+      \expandafter\@tempb\@tempa^\relax\relax%
+      \expandafter\ifinlist\expandafter{\@tempa}{\greeksymbollist}{%
+        \aftergroup\@firstoftwo%
+      }{%
+        \aftergroup\@secondoftwo%
+      }%
+    \endgroup%
+  }
+\makeatother

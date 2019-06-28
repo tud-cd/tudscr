@@ -4,7 +4,7 @@
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
 % ----------------------------------------------------------------------------
 %
-%  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2017
+%  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2019
 %
 % ----------------------------------------------------------------------------
 %
@@ -48,25 +48,35 @@
 %
 % \iffalse
 %%% From File: tudscr-supervisor.dtx
-%<*driver>
-\ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
-\ProvidesFile{tudscr-supervisor.dtx}[%
-  2017/03/29 v2.05l TUD-Script\space%
-%</driver>
+%<*dtx>
+% \fi
+%
+\ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
+\ProvidesFile{tudscr-supervisor.dtx}[2019/06/28 v2.06 TUD-Script\space%
+%
+% \iffalse
+%</dtx>
 %<package>\ProvidesPackage{tudscrsupervisor}[%
-%<*driver|package>
+%<*package>
 %!TUD@Version
+%</package>
 %<package>  package
+%<*dtx|package>
+% \fi
   (commands for supervisors)%
 ]
-%</driver|package>
-%<*driver>
-\RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
+% \iffalse
+%</dtx|package>
+%<*dtx>
 \documentclass[english,ngerman,xindy]{tudscrdoc}
-\usepackage[T1]{fontenc}
-\usepackage{selinput}\SelectInputMappings{adieresis={ä},germandbls={ß}}
+\ifpdftex{
+  \usepackage[T1]{fontenc}
+  \usepackage[ngerman=ngerman-x-latest]{hyphsubst}
+}{
+  \usepackage{fontspec}
+}
 \usepackage{babel}
-\usepackage{tudscrfonts} % only load this package, if the fonts are installed
+\usepackage{tudscrfonts}
 \KOMAoptions{parskip=half-}
 \usepackage{bookmark}
 \usepackage[babel]{microtype}
@@ -83,7 +93,7 @@
   \tableofcontents
   \DocInput{\filename}
 \end{document}
-%</driver>
+%</dtx>
 % \fi
 %
 % \selectlanguage{ngerman}
@@ -201,7 +211,7 @@
 %    \end{macrocode}
 % Der Befehl \cs{tud@split@author@do} wird innerhalb der \TUDScript-Klassen zur
 % formatierten Ausgabe mehrerer Autoren auf der Titelseite verwendet, welche
-% durch\cs{author}\marg{Autor(en)} angegeben und mit \cs{and} getrennt wurden.
+% durch \cs{author}\marg{Autor(en)} angegeben und mit \cs{and} getrennt wurden.
 % Er wird hier auf die Ausgabe der Autoren mit den jeweils zusätzlich gegebenen 
 % Informationen in einer Tabelle angepasst.
 %    \begin{macrocode}
@@ -283,7 +293,7 @@
 % kann die standardmäßige Überschrift überschrieben werden.
 %    \begin{macrocode}
   \cleardoubleoddpage%
-  \def\@headline{}%
+  \let\@headline\@empty%
   \TUD@parameter@family{tudpage}{%
     \TUD@parameter@def{headline}{\def\@headline{##1}}%
     \TUD@parameter@let{heading}{headline}%
@@ -379,7 +389,6 @@
 %    \begin{macrocode}
 \newcommand\taskform[3][]{%
   \begin{task}[#1]%
-    \removelastskip%
     \ifblank{#2}{}{\minisec{\objectivesname}#2}%
     \ifblank{#3}{}{%
       \minisec{\focusname}%
@@ -413,7 +422,7 @@
 % PDF einen Lesezeichen- oder auch Outline-Eintrag gesetzt.
 %    \begin{macrocode}
   \cleardoubleoddpage%
-  \def\@headline{}%
+  \let\@headline\@empty%
   \TUD@parameter@family{tudpage}{%
     \TUD@parameter@def{headline}{\def\@headline{##1}}%
     \TUD@parameter@let{heading}{headline}%
@@ -438,11 +447,11 @@
 %    \begin{macrocode}
   \removelastskip%
   \ifdim\parskip>\z@\vskip\parskip\else\vskip\topsep\fi%
-  \setlength{\@tempskipa}{\smallskipamount}%
+  \setlength\@tempskipa{\smallskipamount}%
   \ifx\@grade\@empty\else%
     \vskip\@tempskipa\noindent%
     \gradetext%
-    \setlength{\@tempskipa}{\bigskipamount}%
+    \setlength\@tempskipa{\bigskipamount}%
   \fi%
   \ifx\@date\@empty\else%
     \vskip\@tempskipa\noindent%
@@ -488,7 +497,6 @@
 %    \begin{macrocode}
 \newcommand\evaluationform[5][]{%
   \begin{evaluation}[#1]%
-    \removelastskip%
     \ifblank{#2}{}{\minisec{\taskname}#2}%
     \ifblank{#3}{}{\minisec{\contentname}#3}%
     \ifblank{#4}{}{\minisec{\assessmentname}#4}%
@@ -569,10 +577,9 @@
 %    \begin{macrocode}
 \newcommand\noticeform[3][]{%
   \begin{notice}[#1]%
-    \removelastskip%
     \ifblank{#2}{}{%
       \ifx\@@title\@empty\else%
-        \minisec{\expandonce{\@@title}}%
+        \minisec{\expandonce{\@@title}}\medskip%
       \fi%
       #2%
     }%

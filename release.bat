@@ -116,29 +116,28 @@ rmdir temp\install /s /q > nul
 rmdir temp\cwl /s /q > nul
 cd release-%version%\temp
 for /f %%f in ('dir /b *.bat') do unix2dos -k %%f
-7za a -tzip tudscr_%version%_full.zip   .\..\..\temp\*
-7za a -tzip tudscr_%version%_update.zip .\..\..\temp\* -xr!logo
+7za a -tzip tudscr_%version%.zip   .\..\..\temp\*
 7za a -tzip tudscr_fonts_install.zip                                                @7za_files_metrics.txt
-call tudscr_fonts_convert.bat
-7za a -tzip tudscr_fonts_converted.zip                                              @7za_files_fonts.txt
+REM call tudscr_fonts_convert.bat
+REM 7za a -tzip tudscr_fonts_converted.zip                                              @7za_files_fonts.txt
 for /f %%f in ('dir /b *.md') do unix2dos -n -k %%f %%~nf.txt
-7za a -tzip .\..\TUD-Script_%version%_Windows_all.zip           -x!*.sh             @7za_files_full.txt @7za_files_postscript.txt
-7za a -tzip .\..\GitHub\TUD-Script_%version%_Windows_full.zip   -x!*.sh             @7za_files_full.txt
-7za a -tzip .\..\GitHub\TUD-Script_%version%_Windows_update.zip -x!*.sh             @7za_files_update.txt
+7za a -tzip .\..\GitHub\TUD-Script_%version%_Windows.zip        -x!*.sh             @7za_files_bundle.txt
 7za a -tzip .\..\GitHub\fonts\TUD-Script_fonts_Windows.zip      -x!*.sh             @7za_files_fonts_install.txt
-7za a -tzip .\..\TUD-Script_fonts_converted_Windows.zip         -x!*.sh             @7za_files_fonts_converted.txt
+REM 7za a -tzip .\..\GitHub\TUD-Script_%version%_Windows_full.zip   -x!*.sh             @7za_files_bundle.txt @7za_files_fonts_install.txt
+REM 7za a -tzip .\..\TUD-Script_%version%_Windows_all.zip           -x!*.sh             @7za_files_bundle.txt @7za_files_fonts_install.txt @7za_files_postscript.txt
+REM 7za a -tzip .\..\TUD-Script_fonts_converted_Windows.zip         -x!*.sh             @7za_files_fonts_converted.txt
 for /f %%f in ('dir /b *.md') do copy %%f %%~nf.txt
-7za a -tzip .\..\TUD-Script_%version%_Unix_all.zip              -x!*.bat -x!7za.exe @7za_files_full.txt @7za_files_postscript.txt
-7za a -tzip .\..\GitHub\TUD-Script_%version%_Unix_full.zip      -x!*.bat -x!7za.exe @7za_files_full.txt
-7za a -tzip .\..\GitHub\TUD-Script_%version%_Unix_update.zip    -x!*.bat -x!7za.exe @7za_files_update.txt
+7za a -tzip .\..\GitHub\TUD-Script_%version%_Unix.zip           -x!*.bat -x!7za.exe @7za_files_bundle.txt
 7za a -tzip .\..\GitHub\fonts\TUD-Script_fonts_Unix.zip         -x!*.bat -x!7za.exe @7za_files_fonts_install.txt
-7za a -tzip .\..\TUD-Script_fonts_converted_Unix.zip            -x!*.bat -x!7za.exe @7za_files_fonts_converted.txt
+REM 7za a -tzip .\..\GitHub\TUD-Script_%version%_Unix_full.zip      -x!*.bat -x!7za.exe @7za_files_bundle.txt @7za_files_fonts_install.txt
+REM 7za a -tzip .\..\TUD-Script_%version%_Unix_all.zip              -x!*.bat -x!7za.exe @7za_files_bundle.txt @7za_files_fonts_install.txt @7za_files_postscript.txt
+REM 7za a -tzip .\..\TUD-Script_fonts_converted_Unix.zip            -x!*.bat -x!7za.exe @7za_files_fonts_converted.txt
 7za a -tzip .\..\GitHub\addon\tudscr4lyx.zip        .\tudscr4lyx\*
 7za a -tzip .\..\GitHub\addon\tudscr4texstudio.zip  .\tudscr4texstudio\*
 cd..
-move  temp\tudscr_%version%_full.zip GitHub\tudscr_%version%.zip
-move  temp\tud_fonts_install.*       GitHub\oldfonts\
-move  temp\tudscr_uninstall.*        GitHub\uninstall\
+move  temp\tudscr_%version%.zip GitHub\tudscr_%version%.zip
+move  temp\tud_fonts_install.*  GitHub\oldfonts\
+move  temp\tudscr_uninstall.*   GitHub\uninstall\
 echo.
 echo =========================================================================
 echo  Release fuer CTAN

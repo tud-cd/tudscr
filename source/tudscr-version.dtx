@@ -1,10 +1,10 @@
-% \CheckSum{133}
+% \CheckSum{147}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
 % ----------------------------------------------------------------------------
 %
-%  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2017
+%  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2019
 %
 % ----------------------------------------------------------------------------
 %
@@ -95,7 +95,7 @@
 \begingroup
   \catcode`\@11\relax
 %<*!(package|class)>
-  \ifx\newcommand\@undefined
+  \ifx\newcommand\undefined
     \gdef\TUD@Version@Check#1{%
       \gdef\TUD@Version{\space\space#1}%
       \gdef\TUDScriptVersion{\space\space#1}%
@@ -110,7 +110,7 @@
       \def\@tempb##1 v##2 ##3\relax##4\relax{\gdef\TUDScriptVersionNumber{##2}}%
       \edef\@tempa{\TUD@Version}%
       \expandafter\@tempb\@tempa\relax? ? \relax\relax%
-      \gdef\TUD@Version@KOMA{3.17}%
+      \gdef\TUD@Version@KOMA{3.25}%
     }
   \else
     \newcommand*\TUD@Version@Check[1]{%
@@ -131,7 +131,7 @@
 %    \end{macrocode}
 % \ToDo{Version eintragen}[Release]
 %    \begin{macrocode}
-  \TUD@Version@Check{2017/05/30 v2.05m TUD-Script}
+  \TUD@Version@Check{2019/06/28 v2.06 TUD-Script}
 \endgroup
 %    \end{macrocode}
 % \end{macro}^^A \TUDScriptVersionNumber
@@ -141,16 +141,21 @@
 % \end{macro}^^A \TUD@Version
 %
 % \iffalse
-%<*driver>
+%<*dtx>
 % \fi
+%
 \ProvidesFile{tudscr-version.dtx}[\TUDScriptVersion\space (versions)]
+%
 % \iffalse
-\RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman,xindy]{tudscrdoc}
-\usepackage[T1]{fontenc}
-\usepackage{selinput}\SelectInputMappings{adieresis={ä},germandbls={ß}}
+\ifpdftex{
+  \usepackage[T1]{fontenc}
+  \usepackage[ngerman=ngerman-x-latest]{hyphsubst}
+}{
+  \usepackage{fontspec}
+}
 \usepackage{babel}
-\usepackage{tudscrfonts} % only load this package, if the fonts are installed
+\usepackage{tudscrfonts}
 \KOMAoptions{parskip=half-}
 \usepackage{bookmark}
 \usepackage[babel]{microtype}
@@ -167,7 +172,7 @@
   \tableofcontents
   \DocInput{\filename}
 \end{document}
-%</driver>
+%</dtx>
 % \fi
 %
 % Als erstes das benötigte \LaTeX-Format.
@@ -239,13 +244,14 @@
 % erstellt.
 %    \begin{macrocode}
 \providecommand*\TUD@Class@Info{%
-  \typeout{+---------------------------------------------------------------}%
+  \typeout{+------------------------------------------------------------------}%
   \typeout{| Corporate Design of Technische Universitaet Dresden}%
-  \typeout{| Class: \TUD@Class@Name}%
-  \typeout{| Version: \TUD@Version}%
-  \typeout{| Author: Falk Hanisch (\tudscrmail)}%
-  \typeout{| Forum: http://latex.wcms-file3.tu-dresden.de/phpBB3/}%
-  \typeout{+---------------------------------------------------------------}%
+  \typeout{| Class:      \TUD@Class@Name}%
+  \typeout{| Version:    \TUD@Version}%
+  \typeout{| Author:     Falk Hanisch (\tudscrmail)}%
+  \typeout{| Repository: https://github.com/tud-cd/tudscr}%
+  \typeout{| Forum:      https://latex.wcms-file3.tu-dresden.de}%
+  \typeout{+------------------------------------------------------------------}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \TUD@Class@Info
@@ -289,7 +295,7 @@
     This package can only be used with a class out of the\MessageBreak%
     tudscr bundle (tudscrbook, tudscrreprt, tudscrartcl, tudscrposter).%
   }%
-  \endinput
+  \endinput%
 \fi
 %    \end{macrocode}
 %
@@ -304,9 +310,19 @@
 %<*package|class>
 \@ifundefined{TUDScript}{%
   \DeclareRobustCommand\TUDScript{%
-    \ifdin{TUD-SCRIPT}{%
-      \textsf{T\kern.05em U\kern.05em D\kern.1em-\kern.1em Script}%
-    }\csname xspace\endcsname%
+    \begingroup%
+      \def\tud@res@b##1{T\kern.05em U\kern.05em D\kern.1em-\kern.1em ##1}%
+%<*!doc>
+      \tud@ifdin{%
+        \edef\tud@res@a{\tud@res@b{SCRIPT}}%
+      }{%
+%</!doc>
+        \edef\tud@res@a{\noexpand\textsf{\tud@res@b{Script}}}%
+%<*!doc>
+      }%
+%</!doc>
+    \expandafter\endgroup\tud@res@a%
+    \csname xspace\endcsname%
   }%
 }{}
 %</package|class>

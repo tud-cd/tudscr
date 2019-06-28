@@ -4,7 +4,7 @@
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
 % ----------------------------------------------------------------------------
 %
-%  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2017
+%  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2019
 %
 % ----------------------------------------------------------------------------
 %
@@ -28,8 +28,8 @@
 %
 % ----------------------------------------------------------------------------
 %
-%<*batchfile>
-\ifx\documentclass\@undefined
+%<*dtx>
+\ifx\documentclass\undefined
 \input docstrip.tex
 \keepsilent
 \askforoverwritefalse
@@ -59,7 +59,7 @@
 \let\endbatchfile\relax
 \fi
 \endbatchfile
-%</batchfile>
+%</dtx>
 %
 % \fi
 %
@@ -80,17 +80,24 @@
 %   Right brace   \}     Tilde         \~}
 %
 % \iffalse
-%<*driver>
-\ifx\ProvidesFile\@undefined\def\ProvidesFile#1[#2]{}\fi
-\ProvidesFile{tudscr-metrics.dtx}[%
-  2017/05/29 v2.05m TUD-Script (font metrics)%
+%<*dtx>
+% \fi
+%
+\ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
+\ProvidesFile{tudscr-metrics.dtx}[2019/06/28 v2.06 TUD-Script\space%
+  (font metrics)%
 ]
-\RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
+%
+% \iffalse
 \documentclass[english,ngerman,xindy]{tudscrdoc}
-\usepackage[T1]{fontenc}
-\usepackage{selinput}\SelectInputMappings{adieresis={ä},germandbls={ß}}
+\ifpdftex{
+  \usepackage[T1]{fontenc}
+  \usepackage[ngerman=ngerman-x-latest]{hyphsubst}
+}{
+  \usepackage{fontspec}
+}
 \usepackage{babel}
-\usepackage{tudscrfonts} % only load this package, if the fonts are installed
+\usepackage{tudscrfonts}
 \KOMAoptions{parskip=half-}
 \usepackage{bookmark}
 \usepackage[babel]{microtype}
@@ -107,7 +114,7 @@
   \tableofcontents
   \DocInput{\filename}
 \end{document}
-%</driver>
+%</dtx>
 % \fi
 %
 % \selectlanguage{ngerman}
@@ -806,10 +813,9 @@
 %
 % \paragraph{OML-Kodierung}
 %
-% Für das Setzen der Akzente im Mathematikmodus wird das Kerning definert. Dazu
-% wurde bei der Initialisierung der beiden Schriftfamilien \file{lun} und 
-% \file{0m6} die Glyphe |tie| mit \cs{skewchar}\cs{font}|=127|
-% gesetzt.
+% Für das Setzen der Akzente im Mathematikmodus wird das Kerning definiert. 
+% Dazu wurde bei der Initialisierung der beiden Schriftfamilien \file{lun} und 
+% \file{0m6} die Glyphe |tie| mit \cs{skewchar}\cs{font}|=127| gesetzt.
 %    \begin{macrocode}
 \inputmtx{unsetgreek}
 \inputmtx{unsetnum}
@@ -1031,7 +1037,10 @@
 }
 \setcommand\vstroke#1{
   \resetint{scaledbar}{\scale{\add{\height{#1}}{\depth{#1}}}{1400}}
-  \movert{\add{\scale{\width{#1}}{500}}{\neg{\half{\scale{\width{bar}}{\int{scaledbar}}}}}}
+  \movert{\add
+    {\scale{\width{#1}}{500}}
+    {\neg{\half{\scale{\width{bar}}{\int{scaledbar}}}}}
+  }
   \glyph{bar}{\int{scaledbar}}
 }
 \resetglyph{blank}

@@ -1,8 +1,7 @@
-\RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 \documentclass[english,ngerman]{tudscrreprt}
-\usepackage{babel}
 \usepackage[T1]{fontenc}
-\usepackage{selinput}\SelectInputMappings{adieresis={ä},germandbls={ß}}
+\ifpdftex{\usepackage[ngerman=ngerman-x-latest]{hyphsubst}}{}
+\usepackage{babel}
 \usepackage{scrhack}
 \usepackage{tudscrsupervisor}
 
@@ -40,7 +39,7 @@
   }
 }
 
-\newcommand*{\newsymbol}[5][]{%
+\newcommand*{\newformulasymbol}[5][]{%
   \newglossaryentry{#2}{%
     type=symbols,%
     name={#3},%
@@ -164,6 +163,9 @@ german,ngerman,austrian,naustrian,swissgerman,nswissgerman%
   }%
 }
 
+\providecommand*\Ggroupname{\greeklettersname}
+\providecommand*\Rgroupname{\romanlettersname}
+% new glossary style for symbols based on longtabu
 \newglossarystyle{symbslongtabu}{%
   \renewenvironment{theglossary}{%
     \begin{longtabu}spread 0pt[l]{ccX<{\strut}l}%
@@ -171,34 +173,33 @@ german,ngerman,austrian,naustrian,swissgerman,nswissgerman%
     \end{longtabu}%
   }%
   \renewcommand*{\glsgroupskip}{
-%    \bottomrule
+    \tabularnewline\bottomrule
   }%
   \renewcommand*{\glsgroupheading}[1]{%
-%    %##1: grouplabel
-%    \tabularnewline\tabularnewline\tabularnewline%
-%    \multicolumn{4}{@{}l@{}}{\minisec{\Large\glsgetgrouptitle{##1}}}%
-%    \tabularnewline%
-%    \tabularnewline%
-%    \toprule%
-%    \bfseries Formelzeichen&%
-%    \bfseries Einheit&%
-%    \bfseries Bezeichnung&%
-%    \bfseries Seite(n)\tabularnewline%
-%    \midrule
+    %##1: grouplabel
+    \tabularnewline\tabularnewline\tabularnewline%
+    \multicolumn{4}{@{}l@{}}{\minisec{\glsgetgrouptitle{##1}}}\tabularnewline%
+    \tabularnewline%
+    \toprule%
+    \bfseries Symbol&%
+    \bfseries Einheit&%
+    \bfseries Beschreibung&%
+    \bfseries Seite(n)\tabularnewline%
+    \midrule
   }%
   \renewcommand*{\glossarypreamble}{%
-%    \tabulinesep=1pt%
-%    \vspace*{-3\baselineskip}%
+    \tabulinesep=1pt%
+    \vspace*{-3\baselineskip}%
   }%
   \renewcommand*{\glossaryheader}{%
-%    \endfirsthead%
-%    \toprule%
-%    \bfseries Formelzeichen&%
-%    \bfseries Einheit&%
-%    \bfseries Bezeichnung&%
-%    \bfseries Seite(n)\tabularnewline%
-%    \midrule\endhead%
-%    \bottomrule\endfoot%
+    \endfirsthead%
+    \toprule%
+    \bfseries Symbol&%
+    \bfseries Einheit&%
+    \bfseries Beschreibung&%
+    \bfseries Seite(n)\tabularnewline%
+    \midrule\endhead%
+    \bottomrule\endfoot%
   }%
   \renewcommand*{\glossentry}[2]{%
     %##1: glslabel, ##2: pages
@@ -209,18 +210,6 @@ german,ngerman,austrian,naustrian,swissgerman,nswissgerman%
   }%
   \renewcommand*{\glossarypostamble}{}%
 }
-
-%\renewcommand*{\newsymbol}[5][]{%
-%  \newglossaryentry{#2}{%
-%    type=symbols,%
-%    name={#3},% name/meaning
-%    description={\nopostdesc},%
-%    symbol={#4},% symbol
-%    user1\ensuremath{\si[per-mode=fraction]{#5}},%
-%    sort={#2},% group-sortname
-%    #1%
-%  }%
-%}
 
 
 }% Ende von AfterPackage
@@ -263,7 +252,7 @@ german,ngerman,austrian,naustrian,swissgerman,nswissgerman%
 \makeatother
 
 %\newcommand*\symbollettergroup{}
-%\renewcommand*{\newsymbol}[5][]{%
+%\renewcommand*{\newformulasymbol}[5][]{%
 %  \ifisgreeksymbol{#4}{%
 %    \renewcommand*{\symbollettergroup}{greekletters}%
 %  }{%
@@ -284,15 +273,17 @@ german,ngerman,austrian,naustrian,swissgerman,nswissgerman%
 
 \begin{document}
 
+%\printsymbols[style=symbsplitlongtabu]
 \printsymbols[style=symbslongtabu]
 
-\newsymbol{alpha}{Test}{\alpha}{nothing}
-\newsymbol[parent=romanletters]{l}{Länge}{l}{m}
-\newsymbol{m}{Masse}{m}{kg}
-\newsymbol{a}{Beschleunigung}{a}{\sfrac{m}{s^2}}
-\newsymbol{t}{Zeit}{t}{s}
-\newsymbol{f}{Frequenz}{f}{s^{-1}}
-\newsymbol{F}{Kraft}{F}{m \cdot kg \cdot s^{-2} = \sfrac{J}{m}}
+
+\newformulasymbol{alpha}{Test}{\alpha}{nothing}
+\newformulasymbol[parent=romanletters]{l}{Länge}{l}{m}
+\newformulasymbol{m}{Masse}{m}{kg}
+\newformulasymbol{a}{Beschleunigung}{a}{\sfrac{m}{s^2}}
+\newformulasymbol{t}{Zeit}{t}{s}
+\newformulasymbol{f}{Frequenz}{f}{s^{-1}}
+\newformulasymbol{F}{Kraft}{F}{m \cdot kg \cdot s^{-2} = \sfrac{J}{m}}
 
 Die Einheiten für die \gls{f} sowie die \gls{F} werden aus den
 SI"=Einheiten der Basisgrößen \gls{l}, \gls{m} und \gls{t} abgeleitet.
@@ -355,17 +346,3 @@ Punktmasse lautet:
   \renewcommand*{\glossarypostamble}{}%
 }
 
-\renewcommand*{\newsymbol}[5][]{%
-  \newglossaryentry{#2}{%
-    type=symbols,%
-    name={#3},% name/meaning
-    description={\nopostdesc},%
-    symbol={#4},% symbol
-    user1\ensuremath{\si[per-mode=fraction]{#5}},%
-    sort={#2},% group-sortname
-    #1%
-  }%
-}
-%
-%\newcommand*{\newgreeksymbol}[5][]{\newsymbol[#1]{g-#2}{#3}{#4}{#5}}
-%\newcommand*{\newlatinsymbol}[5][]{\newsymbol[#1]{r-#2}{#3}{#4}{#5}}
