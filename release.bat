@@ -21,7 +21,7 @@ echo =========================================================================
 echo  Erzeugen der Klassen und der inline-Dokumentation fuer %version%
 echo =========================================================================
 echo.
-call update_classes.bat
+rem call update_classes.bat
 xcopy source temp\ /s
 cd temp
 call clearsource.bat
