@@ -4,7 +4,7 @@
 
  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2019
 
- tudscr 2019/06/28 v2.06
+ tudscr 2019/07/09 v2.06a
 
 ----------------------------------------------------------------------------
 
@@ -48,11 +48,14 @@ Das Bundle beinhaltet:
 + das Paket **mathswap** für das Austauschen mathematischer Trennzeichen
   innerhalb von Zahlen (ähnlich zu **ionumbers**),
 + das Paket **twocolfix** zur Fehlerbefehbung der Position von Überschriften
-	im zweispaltigen Layout und
+  im zweispaltigen Layout und
 + eine umfassende Anwenderdokumentation sowie mehrere Tutorials.
 
 Versionen
 ---------
+
+**v2.06a** (2019/07/09)
++ Bugfix für Paket **mathastext** bezüglich der Eingabekodierung
 
 **v2.06** (2019/06/28)
 + Open Sans als neue Schrift des Corporate Designs
@@ -230,6 +233,9 @@ The bundle offers:
 
 Versions
 --------
+
+**v2.06a** (2019/07/09)
++ bug fix for package **mathastext** regarding input encoding
 
 **v2.06** (2019/06/28)
 + Open Sans as new corporate design font

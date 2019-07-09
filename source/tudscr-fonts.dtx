@@ -1,4 +1,4 @@
-% \CheckSum{3070}
+% \CheckSum{3088}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -52,7 +52,7 @@
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 % \fi
 %
-\ProvidesFile{tudscr-fonts.dtx}[2019/06/28 v2.06 TUD-Script\space%
+\ProvidesFile{tudscr-fonts.dtx}[2019/07/09 v2.06a TUD-Script\space%
 %
 % \iffalse
 %</dtx>
@@ -2337,7 +2337,6 @@
         }%
         \tud@res@c{OT1}{true}%
         \tud@res@c{T1}{true}%
-        \ifcsundef{T@LY1}{}{\tud@res@c{LY1}{true}}%
         \ifcsundef{T@TS1}{}{\tud@res@c{TS1}{false}}%
       \endgroup%
     \fi%
@@ -3097,6 +3096,9 @@
 % \changes{v2.06}{2018/07/02}{neu}^^A
 % \begin{macro}{\tud@cdmath@@init}
 % \changes{v2.06}{2018/07/02}{neu}^^A
+% \changes{v2.06a}{2019/07/09}{Bugfix für \pkg{mathastext} Eingabekodierung}^^A
+% \begin{macro}{\tud@x@mathastext@enc}
+% \changes{v2.06a}{2019/07/09}{neu}^^A
 % \begin{macro}{\mv@tudnormal}
 % \begin{macro}{\mv@tudbold}
 % \begin{macro}{\mv@tuddin}
@@ -3181,9 +3183,8 @@
         }{}%
       \fi%
       \PassOptionsToPackage{%
-        subdued,defaultmathsizes,nosmalldelims,%
-        defaultrm,defaultbf,defaultit,defaultsf,defaulttt,%
-        noequal,nohbar%
+        subdued,defaultmathsizes,nosmalldelims,noequal,%
+        defaultrm,defaultbf,defaultit,defaultsf,defaulttt%
       }{mathastext}%
       \RequirePackage{mathastext}[2018/08/22]%
       \tud@math@declare@lgrgreeks{cmr}{m}{bx}{n}{it}%
@@ -3225,6 +3226,11 @@
     \fi%
   \fi%
 }
+%    \end{macrocode}
+% Mit \cs{tud@cdmath@@init} werden die notwendigen Mathematikversionen und die 
+% dazugehörigen Symbolschriften sowie Alphabete deklariert.
+%    \begin{macrocode}
+\newcommand*\tud@x@mathastext@enc{OT1}
 \newcommand*\tud@cdmath@@init[2]{%
 %    \end{macrocode}
 % Mit \cs{tud@cdfont@@set} werden die Schriftstärken gemäß den ausgewählten 
@@ -3267,13 +3273,24 @@
 %    \end{macrocode}
 % Für \OpenSans wird mangels der Kodierungen \val{OML}, \val{OMS} und \val{OMX} 
 % im Paket \pkg{opensans} zur Deklaration der Mathematikversionen der Befehl 
-% \cs{MTDeclareVersion} aus dem Paket \pkg{mathastext} genutzt. Sämtliche 
-% fehlenden Kodierungen werden notdürftig mit dem Paket \pkg{iwona} definiert. 
-% Zur Definition von griechischen Glyphen wird die LGR-Kodierung der \OpenSans 
-% genutzt.
+% \cs{MTDeclareVersion} aus dem Paket \pkg{mathastext} genutzt. Dabei wird die 
+% Kodierung der Mathematikschriften identisch zur genutzten Eingabekodierung 
+% für den Text gesetzt, da diese in der Version \val{v1.3t} nicht problemfrei 
+% unabhängig davon gewählt werden kann. Sämtliche fehlenden Kodierungen werden
+% notdürftig mit dem Paket \pkg{iwona} definiert. Zur Definition griechischer
+% Glyphen wird die LGR-Kodierung der \OpenSans genutzt.
 %    \begin{macrocode}
-    \MTDeclareVersion[it]{tudnormal}{T1}{#1}{\tud@cdfont@md}{n}%
-    \MTDeclareVersion[it]{tudbold}{T1}{#1}{\tud@cdfont@bf}{n}%
+    \edef\tud@res@b{\encodingdefault}%
+    \@tfor\tud@res@a:={T1}{TU}{EU1}{EU2}\do{%
+      \ifx\tud@res@a\tud@res@b%
+        \let\tud@x@mathastext@enc\tud@res@b%
+        \@break@tfor
+      \fi%
+    }%
+    \MTDeclareVersion[it]{tudnormal}%
+      {\tud@x@mathastext@enc}{#1}{\tud@cdfont@md}{n}%
+    \MTDeclareVersion[it]{tudbold}%
+      {\tud@x@mathastext@enc}{#1}{\tud@cdfont@bf}{n}%
     \SetSymbolFont{operators}{tudnormal}{OT1}{iwona}{\tud@cdfont@md}{n}%
     \SetSymbolFont{operators}{tudbold}{OT1}{iwona}{\tud@cdfont@bf}{n}%
 %    \end{macrocode}
@@ -3299,8 +3316,10 @@
 %^^A    \SetMathAlphabet{\mathnormal}{tudnormal}{U}{#1m}{\tud@cdfont@md}{it}%
 %^^A    \SetMathAlphabet{\mathnormal}{tudbold}{U}{#1m}{\tud@cdfont@bf}{it}%
     \tud@if@ismathalphabet{\mathbold}{%
-      \SetMathAlphabet{\mathbold}{tudnormal}{T1}{#1}{\tud@cdfont@bf}{it}%
-      \SetMathAlphabet{\mathbold}{tudbold}{T1}{#1}{\tud@cdfont@ebf}{it}%
+      \SetMathAlphabet{\mathbold}{tudnormal}%
+        {\tud@x@mathastext@enc}{#1}{\tud@cdfont@bf}{it}%
+      \SetMathAlphabet{\mathbold}{tudbold}%
+        {\tud@x@mathastext@enc}{#1}{\tud@cdfont@ebf}{it}%
 %^^A      \SetMathAlphabet{\mathbold}{tudnormal}{U}{#1m}{\tud@cdfont@bf}{it}%
 %^^A      \SetMathAlphabet{\mathbold}{tudbold}{U}{#1m}{\tud@cdfont@ebf}{it}%
     }{}%
@@ -3409,6 +3428,7 @@
 % \end{macro}^^A \mv@tuddin
 % \end{macro}^^A \mv@tudbold
 % \end{macro}^^A \mv@tudnormal
+% \end{macro}^^A \tud@x@mathastext@enc
 % \end{macro}^^A \tud@cdmath@@init
 % \end{macro}^^A \tud@cdmath@init
 % \begin{macro}{\tud@cdmath@declare@symb}
