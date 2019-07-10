@@ -24,7 +24,8 @@ sein muss. Bei Fragen, Problemen und Anmerkungen sei entweder auf das
 LaTeX-Forum der Technischen Universität Dresden oder das GitHub-Repository 
 *tudscr* verwiesen:
 
-http://latex.wcms-file3.tu-dresden.de/phpBB3/
+https://latex.wcms-file3.tu-dresden.de/phpBB3/
+
 https://github.com/tud-cd/tudscr/issues
 
 
@@ -198,13 +199,14 @@ Versionen
 Summary
 -------
 
-The TUD-Script bundle provides both classes and packages in order to
-create LaTeX documents in the corporate design of the Technische Universität
-Dresden. It bases on the KOMA-Script bundle, which must necessarily be present.
+The TUD-Script bundle provides both classes and packages in order to create 
+LaTeX documents in the corporate design of the Technische Universität Dresden.
+It bases on the KOMA-Script bundle, which must necessarily be present.
 For questions, problems and comments, please refer to eihter the LaTeX forum 
-of the Dresden University of Technology or the GitHub *tudscr* repository 
+of the Dresden University of Technology or the GitHub repository *tudscr*:
 
-http://latex.wcms-file3.tu-dresden.de/phpBB3/
+https://latex.wcms-file3.tu-dresden.de/phpBB3/
+
 https://github.com/tud-cd/tudscr/issues
 
 
