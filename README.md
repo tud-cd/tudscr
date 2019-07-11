@@ -1,5 +1,5 @@
 
- TUD-Script -- Corporate Design of Technische Universität Dresden
+ TUD-Script &ndash; Corporate Design of Technische Universität Dresden
 ----------------------------------------------------------------------------
 
  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2019
@@ -21,12 +21,10 @@ Das TUD-Script-Bundle stellt sowohl Klassen als auch Pakete bereit, um
 LaTeX-Dokumente im Corporate Design der Technischen Universität Dresden zu
 erstellen. Es basiert auf dem KOMA-Script-Bundle, welches zwingend vorhanden
 sein muss. Bei Fragen, Problemen und Anmerkungen sei entweder auf das 
-LaTeX-Forum der Technischen Universität Dresden oder das GitHub-Repository 
-*tudscr* verwiesen:
-
-https://latex.wcms-file3.tu-dresden.de/phpBB3/
-
-https://github.com/tud-cd/tudscr/issues
+[LaTeX-Forum der Technischen Universität Dresden](https://latex.wcms-file3.tu-dresden.de/phpBB3/)
+oder das 
+[GitHub-Repository *tudscr*](https://github.com/tud-cd/tudscr/issues)
+verwiesen:
 
 
 Klassen und Pakete
@@ -202,12 +200,10 @@ Summary
 The TUD-Script bundle provides both classes and packages in order to create 
 LaTeX documents in the corporate design of the Technische Universität Dresden.
 It bases on the KOMA-Script bundle, which must necessarily be present.
-For questions, problems and comments, please refer to eihter the LaTeX forum 
-of the Dresden University of Technology or the GitHub repository *tudscr*:
-
-https://latex.wcms-file3.tu-dresden.de/phpBB3/
-
-https://github.com/tud-cd/tudscr/issues
+For questions, problems and comments, please refer to eihter the 
+[LaTeX forum of the Technische Universität Dresden](https://latex.wcms-file3.tu-dresden.de/phpBB3/)
+or the
+[GitHub repository *tudscr*](https://github.com/tud-cd/tudscr/issues):
 
 
 Classes and Packages
