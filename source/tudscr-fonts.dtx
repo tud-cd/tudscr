@@ -1,4 +1,4 @@
-% \CheckSum{3088}
+% \CheckSum{3082}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -52,7 +52,7 @@
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 % \fi
 %
-\ProvidesFile{tudscr-fonts.dtx}[2019/07/09 v2.06a TUD-Script\space%
+\ProvidesFile{tudscr-fonts.dtx}[2019/07/17 v2.06b TUD-Script\space%
 %
 % \iffalse
 %</dtx>
@@ -361,8 +361,10 @@
 % \changes{v2.04}{2015/03/10}{neu}^^A
 % \begin{macro}{\tud@cdfont@@check}
 % \changes{v2.06}{2018/07/12}{Auswahl der Schriftfamilie angepasst}^^A
+% \changes{v2.06b}{2019/07/17}{Verwendung von \cs{tud@if@fdfileexists}}^^A
 % \begin{macro}{\tud@cdfont@@@check}
 % \changes{v2.06}{2019/06/18}{neu}^^A
+% \changes{v2.06b}{2019/07/17}{Verwendung von \cs{tud@if@fdfileexists}}^^A
 % \begin{macro}{\tud@cdfont@missing}
 % \changes{v2.05l}{2017/03/29}{neu}^^A
 % Mit \cs{tud@cdfont@check} wird geprüft, ob die Schrift \OpenSans respektive 
@@ -443,35 +445,23 @@
 % Fließtext für die aktuelle Kodierung im gleichen Maße geprüft.
 %    \begin{macrocode}
     \def\tud@res@b##1##2{%
-      \begingroup%
 %    \end{macrocode}
 % Der Schalter \cs{if@tud@res@swa} wird \val{false} gesetzt, falls die Schrift 
 % gefunden wurde. Der zu prüfenden Schriftname wird dabei in unterschiedlichen 
 % Varianten getestet, da \cs{IfFileExists} auf unixoiden Betriebssystemen 
 % case-sensitiv ist. 
 %    \begin{macrocode}
-        \@tud@res@swatrue%
-        \tud@lowerstring\tud@res@b{##1##2.fd}%
-        \IfFileExists{\tud@res@b}{\@tud@res@swafalse}{}%
-        \if@tud@res@swa%
-          \tud@lowerstring\tud@res@b{##1}%
-          \edef\tud@res@b{\tud@res@b##2.fd}%
-          \IfFileExists{\tud@res@b}{\@tud@res@swafalse}{}%
-        \fi%
-        \if@tud@res@swa%
-          \edef\tud@res@b{##1##2.fd}%
-          \IfFileExists{\tud@res@b}{\@tud@res@swafalse}{}%
-        \fi%
+      \tud@if@fdfileexists{##1}{##2}{}{%
 %    \end{macrocode}
 % Existiert die Schrift nicht, wird die entsprechende Warnung ausgegeben.
 %    \begin{macrocode}
-        \edef\tud@res@a{%
-          \endgroup%
-          \if@tud@res@swa%
-            \noexpand\tud@res@a{\tud@res@b}%
-          \fi%
-        }%
-      \tud@res@a%
+        \begingroup%
+          \edef\tud@res@a{%
+            \endgroup%
+            \noexpand\tud@res@a{##1##2.fd}%
+          }%
+        \tud@res@a%
+      }%
     }%
     \@for\tud@res@c:={#4}\do{\tud@res@b{\encodingdefault}{\tud@res@c}}%
   \fi%
@@ -496,15 +486,14 @@
     \tud@cdfont@missing[##1]{##2}{\tud@cdmath@wrn}%
   }%
   \def\tud@res@b##1##2{%
-    \begingroup%
-      \tud@lowerstring\tud@res@b{##1##2.fd}%
-      \edef\tud@res@a{%
-        \endgroup%
-        \noexpand\IfFileExists{\tud@res@b}{}{%
-          \noexpand\tud@res@a{##1}{\tud@res@b}%
+    \tud@if@fdfileexists{##1}{##2}{}{%
+      \begingroup%
+        \edef\tud@res@a{%
+          \endgroup%
+          \noexpand\tud@res@a{##1}{##1##2.fd}%
         }%
-      }%
-    \tud@res@a%
+      \tud@res@a%
+    }%
   }%
   \@for\tud@res@c:={#1}\do{\tud@res@b{\tud@res@c}{#2}}%
 %    \end{macrocode}
@@ -2566,7 +2555,7 @@
   }%
   \SetSymbolFont{tudupgrk}{bold}{LGR}{#1}{#3}{#4}%
   \tud@if@issymbolfont{tuditgrk}{%
-    \SetSymbolFont{tudupgrk}{normal}{LGR}{#1}{#2}{#5}%
+    \SetSymbolFont{tuditgrk}{normal}{LGR}{#1}{#2}{#5}%
   }{%
     \DeclareSymbolFont{tuditgrk}{LGR}{#1}{#2}{#5}%
   }%
@@ -2816,13 +2805,13 @@
 %    \begin{macrocode}
     \let\tud@res@a\@empty%
     \if@tud@lgrgreeks%
-      \IfFileExists{lgr\tud@cs@use{familydefault}.fd}{%
+      \tud@if@fdfileexists{LGR}{\tud@cs@use{familydefault}}{%
         \def\tud@res@a{\tud@cs@use{familydefault}}%
       }{%
-        \IfFileExists{lgr\tud@math@letters@fam.fd}{%
+        \tud@if@fdfileexists{LGR}{\tud@math@letters@fam}{%
           \let\tud@res@a\tud@math@letters@fam%
         }{%
-          \IfFileExists{lgr\tud@math@operators@fam.fd}{%
+          \tud@if@fdfileexists{LGR}{\tud@math@operators@fam}{%
             \let\tud@res@a\tud@math@operators@fam%
           }{}%
         }%
@@ -2849,16 +2838,16 @@
       {\tud@cs@use{updefault}}{\tud@cs@use{itdefault}}%
     \let\tud@res@c\@empty%
     \def\tud@res@b##1##2{%
-      \ifcsundef{it##1}{%
-        \eappto\tud@res@c{%
-          \noexpand\DeclareMathSymbol{\csname it##1\endcsname}%
-              {\noexpand\mathalpha}{tuditgrk}{##2}%
-        }%
-      }{}%
       \ifcsundef{up##1}{%
         \eappto\tud@res@c{%
           \noexpand\DeclareMathSymbol{\csname up##1\endcsname}%
               {\noexpand\mathalpha}{tudupgrk}{##2}%
+        }%
+      }{}%
+      \ifcsundef{it##1}{%
+        \eappto\tud@res@c{%
+          \noexpand\DeclareMathSymbol{\csname it##1\endcsname}%
+              {\noexpand\mathalpha}{tuditgrk}{##2}%
         }%
       }{}%
     }%
@@ -3150,15 +3139,39 @@
 % Für die Schriftfamilie \OpenSans existieren leider bisher keine Kodierung für 
 % den Mathematikmodus (\val{OML}, \val{OMS}, \val{OMX}), weshalb hierfür das 
 % Paket \pkg{mathastext} genutzt wird, um trotzdem einen mathematischen Satz zu 
-% ermöglichen.
+% ermöglichen. Dabei wird die Computer~Modern in der \val{LGR}~Kodierung 
+% zwingend benötigt.
 %    \begin{macrocode}
+  \@tud@res@swafalse%
   \if@tud@cdfont@fam@exist%
+    \@tud@res@swatrue%
     \if@tud@cdoldfont@active\else%
+      \tud@if@fdfileexists{LGR}{cmr}{}{%
+        \@tud@res@swafalse%
+        \def\tud@res@a{%
+          \ClassWarningNoLine{\TUD@Class@Name}%
+          {%
+            The packages `cbfonts/cbgreek' and\MessageBreak%
+            `cbfonts-fd' have to be installed for using\MessageBreak%
+            corporate design fonts in math mode. As they\MessageBreak%
+            are not, standard math versions are applied%
+          }%
+        }%
+        \if@tud@cdmath@active%
+          \tud@res@a%
+        \else%
+          \eappto\tud@cdmath@wrn{\expandonce\tud@res@a}%
+        \fi%
+      }%
+    \fi%
+  \fi%
 %    \end{macrocode}
-% Um die Mathematikschriften suaber zu definieren, ist das Laden von bestimmten
+% Um die Mathematikschriften sauber zu definieren, ist das Laden von bestimmten
 % Paketen durch den Anwender ungünstig. Deshalb wird für diesen Fall eine 
 % Warnung ausgegeben.
 %    \begin{macrocode}
+  \if@tud@res@swa%
+    \if@tud@cdoldfont@active\else%
       \if@tud@cdmath@active%
         \def\tud@res@a##1{%
 %<*class>

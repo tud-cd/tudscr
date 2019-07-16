@@ -1,4 +1,4 @@
-% \CheckSum{790}
+% \CheckSum{824}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -52,7 +52,7 @@
 % \fi
 %
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
-\ProvidesFile{tudscr-base.dtx}[2019/06/28 v2.06 TUD-Script\space%
+\ProvidesFile{tudscr-base.dtx}[2019/07/17 v2.06b TUD-Script\space%
 %
 % \iffalse
 %</dtx>
@@ -379,6 +379,53 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@lowerstring
 %
+% \subsubsection{Prüfen auf vorhandene Dateien von Schriftdefinitionen}
+%
+% \begin{macro}{\tud@if@fdfileexists}
+% \changes{v2.06b}{2019/07/17}{neu}^^A
+% Der Befehl wird genutzt, um \file{\dots.fd}~Dateien zu suchen. Dabei muss 
+% beachtet werden, dass \cs{IfFileExists} auf unixoiden Betriebssystemen 
+% case-sensitiv ist.
+%    \begin{macrocode}
+\newcommand*\tud@if@fdfileexists[2]{%
+  \begingroup%
+%    \end{macrocode}
+% Der Schalter \cs{if@tud@res@swa} wird \val{false} gesetzt, falls die Schrift 
+% gefunden wurde. Der zu prüfenden Schriftname wird dabei in unterschiedlichen 
+% Varianten getestet. Zunächst die Standardvariante in Kleinschreibung\dots
+%    \begin{macrocode}
+    \@tud@res@swatrue%
+    \tud@lowerstring\tud@res@a{#1#2.fd}%
+    \IfFileExists{\tud@res@a}{\@tud@res@swafalse}{}%
+%    \end{macrocode}
+% \dots gefolgt von der Variante mit Kleinschreibung der Kodierung und dem 
+% Namen der Schrift wie angegeben\dots
+%    \begin{macrocode}
+    \if@tud@res@swa%
+      \tud@lowerstring\tud@res@a{#1}%
+      \edef\tud@res@a{\tud@res@a#2.fd}%
+      \IfFileExists{\tud@res@a}{\@tud@res@swafalse}{}%
+    \fi%
+%    \end{macrocode}
+% \dots abgeschlossen mit der Variante wie gegeben.
+%    \begin{macrocode}
+    \if@tud@res@swa%
+      \edef\tud@res@a{#1#2.fd}%
+      \IfFileExists{\tud@res@a}{\@tud@res@swafalse}{}%
+    \fi%
+%    \end{macrocode}
+% Wurde die Schriftdatei gefunden, ist \cs{if@tud@res@swa}|=|\cs{iffalse}.
+%    \begin{macrocode}
+    \if@tud@res@swa%
+      \aftergroup\@secondoftwo%
+    \else%
+      \aftergroup\@firstoftwo%
+    \fi%
+  \endgroup%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@if@fdfileexists
+%
 % \subsubsection{Erweiterung von \KOMAScript-Schriftelementen}
 %
 % \begin{macro}{\tud@komafont@set}
@@ -391,6 +438,7 @@
 % einem Schriftelement ein Hilfsmakro \cs{tud@komafont@\meta{Element}} 
 % zugewiesen, welches intern angepasst werden kann. Mit \cs{tud@komafont@set} 
 % werden dem angegebenen Element die gewünschten Schriftattribute zugeteilt.
+% \ToDo{nur für Klassen notwendig!}[v2.06]
 %    \begin{macrocode}
 \newcommand*\tud@komafont@set[2]{%
   \ifcsdef{tud@komafont@#1}{}{\addtokomafont{#1}{\csuse{tud@komafont@#1}}}%
