@@ -1,4 +1,4 @@
-% \CheckSum{790}
+% \CheckSum{824}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -52,7 +52,7 @@
 % \fi
 %
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
-\ProvidesFile{tudscr-base.dtx}[2019/06/28 v2.06 TUD-Script\space%
+\ProvidesFile{tudscr-base.dtx}[2019/07/17 v2.06b TUD-Script\space%
 %
 % \iffalse
 %</dtx>
@@ -379,45 +379,54 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@lowerstring
 %
-% \subsubsection{Erweiterung von \KOMAScript-Schriftelementen}
+% \subsubsection{Test auf vorhandene Dateien von Schriftdefinitionen}
 %
-% \begin{macro}{\tud@komafont@set}
-% \begin{macro}{\tud@komafont@unset}
-% \begin{macro}{\tud@komafont@reset}
-% \changes{v2.02}{2014/08/24}{neu}^^A
-% Es wird die Möglichkeit geschaffen, bestimmten Schriftelementen weitere
-% Eigenschaften mitzugeben. Damit dies optionsabhängig geschehen kann und
-% \cs{addtokomafont} nur einmalig verwendete werden muss, wird im Zweifelsfall
-% einem Schriftelement ein Hilfsmakro \cs{tud@komafont@\meta{Element}} 
-% zugewiesen, welches intern angepasst werden kann. Mit \cs{tud@komafont@set} 
-% werden dem angegebenen Element die gewünschten Schriftattribute zugeteilt.
+% \begin{macro}{\tud@if@fdfileexists}
+% \changes{v2.06b}{2019/07/17}{neu}^^A
+% Der Befehl wird genutzt, um \file{\dots.fd}~Dateien zu suchen. Dabei muss 
+% beachtet werden, dass \cs{IfFileExists} auf unixoiden Betriebssystemen 
+% case-sensitiv ist.
 %    \begin{macrocode}
-\newcommand*\tud@komafont@set[2]{%
-  \ifcsdef{tud@komafont@#1}{}{\addtokomafont{#1}{\csuse{tud@komafont@#1}}}%
-  \csdef{tud@komafont@#1}{#2\nobreak}%
+\newcommand*\tud@if@fdfileexists[2]{%
+  \begingroup%
+%    \end{macrocode}
+% Der Schalter \cs{if@tud@res@swa} wird \val{false} gesetzt, falls die Schrift 
+% gefunden wurde. Der zu prüfenden Schriftname wird dabei in unterschiedlichen 
+% Varianten getestet. Zunächst die Standardvariante in Kleinschreibung\dots
+%    \begin{macrocode}
+    \@tud@res@swatrue%
+    \tud@lowerstring\tud@res@a{#1#2.fd}%
+    \IfFileExists{\tud@res@a}{\@tud@res@swafalse}{}%
+%    \end{macrocode}
+% \dots gefolgt von der Variante mit Kleinschreibung der Kodierung und dem 
+% Namen der Schrift wie angegeben\dots
+%    \begin{macrocode}
+    \if@tud@res@swa%
+      \tud@lowerstring\tud@res@a{#1}%
+      \edef\tud@res@a{\tud@res@a#2.fd}%
+      \IfFileExists{\tud@res@a}{\@tud@res@swafalse}{}%
+    \fi%
+%    \end{macrocode}
+% \dots abgeschlossen mit der Variante wie gegeben.
+%    \begin{macrocode}
+    \if@tud@res@swa%
+      \edef\tud@res@a{#1#2.fd}%
+      \IfFileExists{\tud@res@a}{\@tud@res@swafalse}{}%
+    \fi%
+%    \end{macrocode}
+% Wurde die Schriftdatei gefunden, ist \cs{if@tud@res@swa}|=|\cs{iffalse}.
+%    \begin{macrocode}
+    \if@tud@res@swa%
+      \aftergroup\@secondoftwo%
+    \else%
+      \aftergroup\@firstoftwo%
+    \fi%
+  \endgroup%
 }
 %    \end{macrocode}
-% Mit \cs{tud@komafont@unset} kann das angegebene Element wieder zurückgesetzt
-% werden. Dabei wird das hinzugefügte Makro auf \cs{relax} gesetzt.
-%    \begin{macrocode}
-\newcommand*\tud@komafont@unset[1]{%
-  \ifcsdef{tud@komafont@#1}{}{\addtokomafont{#1}{\csuse{tud@komafont@#1}}}%
-  \csdef{tud@komafont@#1}{\relax}%
-}
-%    \end{macrocode}
-% Werden \KOMAScript-Schriftelemente auf ihre Ausgangsdefinition zurückgesetzt, 
-% so kann diesen mit \cs{tud@komafont@reset} kann das passende Hilfsmakro
-% abermals zugewiesen werden.
-%    \begin{macrocode}
-\newcommand*\tud@komafont@reset[1]{%
-  \ifcsdef{tud@komafont@#1}{\addtokomafont{#1}{\csuse{tud@komafont@#1}}}{}%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@komafont@unset
-% \end{macro}^^A \tud@komafont@reset
-% \end{macro}^^A \tud@komafont@set
+% \end{macro}^^A \tud@if@fdfileexists
 %
-% \subsubsection{Optionsdefinition für \TUDScript}
+% \subsection{Optionsdefinition für \TUDScript}
 %
 % In Anlehnung an \KOMAScript{} werden hier Befehle zur Definition und
 % Ausführung unterschiedlicher Klassenoptionen mithilfe der Funktionen aus
@@ -1069,7 +1078,7 @@
 %    \end{macrocode}
 % \end{macro}^^A \TUD@parameter@error
 %
-% \subsubsection{Ausführung von paketspezifischem Quellcode}
+% \subsection{Ausführung von paketspezifischem Quellcode}
 %
 % Ab und an ist es notwendig, bestimmten Quelltext gezielt in Abhängigkeit vom
 % Ladezustand eines Paketes auszuführen.
@@ -1206,7 +1215,7 @@
 %</package&base>
 % \fi
 %
-% \subsubsection{Bedingt verzögerte Ausführung von \KOMAScript-Optionen}
+% \subsection{Bedingt verzögerte Ausführung von \KOMAScript-Optionen}
 %
 % \begin{macro}{\TUD@KOMAoptions}
 % \changes{v2.05}{2015/07/17}{neu}^^A
@@ -1250,10 +1259,56 @@
 % \end{macro}^^A \TUD@KOMAoptions
 %
 % \iffalse
+%<*class&option>
+% \fi
+%
+% \section{Zusätzliches für die \TUDScript-Klassen}
+%
+% \subsection{Erweiterung von \KOMAScript-Schriftelementen}
+%
+% \begin{macro}{\tud@komafont@set}
+% \begin{macro}{\tud@komafont@unset}
+% \begin{macro}{\tud@komafont@reset}
+% \changes{v2.02}{2014/08/24}{neu}^^A
+% Es wird die Möglichkeit geschaffen, bestimmten Schriftelementen weitere
+% Eigenschaften mitzugeben. Damit dies optionsabhängig geschehen kann und
+% \cs{addtokomafont} nur einmalig verwendete werden muss, wird im Zweifelsfall
+% einem Schriftelement ein Hilfsmakro \cs{tud@komafont@\meta{Element}} 
+% zugewiesen, welches intern angepasst werden kann. Mit \cs{tud@komafont@set} 
+% werden dem angegebenen Element die gewünschten Schriftattribute zugeteilt.
+% \ToDo{nur für Klassen notwendig!}[v2.06]
+%    \begin{macrocode}
+\newcommand*\tud@komafont@set[2]{%
+  \ifcsdef{tud@komafont@#1}{}{\addtokomafont{#1}{\csuse{tud@komafont@#1}}}%
+  \csdef{tud@komafont@#1}{#2\nobreak}%
+}
+%    \end{macrocode}
+% Mit \cs{tud@komafont@unset} kann das angegebene Element wieder zurückgesetzt
+% werden. Dabei wird das hinzugefügte Makro auf \cs{relax} gesetzt.
+%    \begin{macrocode}
+\newcommand*\tud@komafont@unset[1]{%
+  \ifcsdef{tud@komafont@#1}{}{\addtokomafont{#1}{\csuse{tud@komafont@#1}}}%
+  \csdef{tud@komafont@#1}{\relax}%
+}
+%    \end{macrocode}
+% Werden \KOMAScript-Schriftelemente auf ihre Ausgangsdefinition zurückgesetzt, 
+% so kann diesen mit \cs{tud@komafont@reset} kann das passende Hilfsmakro
+% abermals zugewiesen werden.
+%    \begin{macrocode}
+\newcommand*\tud@komafont@reset[1]{%
+  \ifcsdef{tud@komafont@#1}{\addtokomafont{#1}{\csuse{tud@komafont@#1}}}{}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@komafont@unset
+% \end{macro}^^A \tud@komafont@reset
+% \end{macro}^^A \tud@komafont@set
+%
+% \iffalse
+%</class&option>
 %<*class&body>
 % \fi
 %
-% \section{Externe Pakete für die \TUDScript-Klassen}
+% \subsection{Externe Pakete für die \TUDScript-Klassen}
 %
 % \changes{v2.01}{2014/04/24}{Versionsanforderungen bei benötigten Paketen}^^A
 % \changes{v2.02}{2014/07/08}{Warnung bei Verwendung von \pkg{graphics}}^^A
@@ -1263,7 +1318,7 @@
 % Pakete möglichst gering zu halten und nur die wirklich notwendigen zu
 % verwenden.
 %
-% \subsection{Erweiterte Definition von Umgebungen mit dem Paket \pkg{environ}}
+% \subsubsection{Erweiterte Umgebungsdefinition mit dem Paket \pkg{environ}}
 %
 % Die \env{abstract}-Umgebung wird im Vergleich zu den \KOMAScript-Klassen
 % stark erweitert. Für diese sowie für die Umgebungen \env{declarations} und 
@@ -1303,7 +1358,7 @@
 % \end{macro}^^A \tud@x@multicol@check
 % \end{macro}^^A \tud@x@multicol@num
 %
-% \subsection{Pakete für Grafiken und Farben}
+% \subsubsection{Pakete für Grafiken und Farben}
 %
 % Es folgen die Pakete, welche bei Bedarf am Ende der Präambel geladen werden.
 %    \begin{macrocode}

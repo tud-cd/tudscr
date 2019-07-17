@@ -4,7 +4,7 @@
 
  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2019
 
- tudscr 2019/07/09 v2.06a
+ tudscr 2019/07/17 v2.06b
 
 ----------------------------------------------------------------------------
 
@@ -54,6 +54,9 @@ Das Bundle beinhaltet:
 
 Versionen
 ---------
+
+**v2.06b** (2019/07/17)
++ Bugfix für nicht ordnungsgemäßes NFSS (New Font Selection Scheme)
 
 **v2.06a** (2019/07/09)
 + Bugfix für Paket **mathastext** bezüglich der Eingabekodierung
@@ -235,6 +238,9 @@ The bundle offers:
 
 Versions
 --------
+
+**v2.06b** (2019/07/17)
++ bug fix for improper NFSS (New Font Selection Scheme)
 
 **v2.06a** (2019/07/09)
 + bug fix for package **mathastext** regarding input encoding
