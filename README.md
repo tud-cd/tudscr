@@ -4,7 +4,7 @@
 
  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2019
 
- tudscr 2019/07/17 v2.06b
+ tudscr 2019/xx/xx v2.06c
 
 ----------------------------------------------------------------------------
 
@@ -52,6 +52,9 @@ Das Bundle beinhaltet:
 
 Versionen
 ---------
+
+**v2.06c** (2019/xx/xx)
++ Bugfix für Paket **fix-tudscrfonts**
 
 **v2.06b** (2019/07/17)
 + Bugfix für nicht ordnungsgemäßes NFSS (New Font Selection Scheme)
@@ -234,6 +237,9 @@ The bundle offers:
 
 Versions
 --------
+
+**v2.06c** (2019/xx/xx)
++ bug fix for package **fix-tudscrfonts**
 
 **v2.06b** (2019/07/17)
 + bug fix for improper NFSS (New Font Selection Scheme)
