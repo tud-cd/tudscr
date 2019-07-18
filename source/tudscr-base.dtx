@@ -149,11 +149,12 @@
 \RequirePackage{etoolbox}[2011/01/03]
 \RequirePackage{xpatch}[2012/10/02]
 \RequirePackage{letltxmacro}[2016/05/16]
+\RequirePackage{etexcmds}[2011/02/16]
 %    \end{macrocode}
 % Das Paket \pkg{kvsetkeys} erweitert \pkg{keyval} um die Möglichkeit, das
 % Verhalten bei der Angabe eines nicht definierten Schlüssels festzulegen.
+% \ToDo{sollte eigentlich auch mit KOMA-Option \val{@else@} gehen}[v2.07]
 %    \begin{macrocode}
-\RequirePackage{etexcmds}[2011/02/16]
 \RequirePackage{kvsetkeys}[2012/04/25]
 %    \end{macrocode}
 % Mit dem Paket \pkg{trimspaces} können eventuell vorhandene Leerzeichen aus
@@ -427,7 +428,199 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@if@fdfileexists
 %
-% \subsection{Optionsdefinition für \TUDScript}
+% \subsubsection{Sicherung und Wiederherstellung originaler Befehle und Längen}
+%
+% \begin{macro}{\tud@cs@letltx}
+% \changes{v2.06}{2019/06/13}{\cs{LetLtxMacro} zum Sichern originärer Makros}^^A
+% \begin{macro}{\tud@cs@store}
+% \changes{v2.06}{2018/07/15}{%
+%   mit \cs{DeclareRobustCommand} definierte Befehle unterstüzt%
+% }^^A
+% \begin{macro}{\tud@cs@restore}
+% \changes{v2.06}{2018/07/15}{%
+%    stellt originäre Makros auch wieder her, wenn diese mit \cs{undef} 
+%    zwischendurch \emph{undefiniert} gesetzt wurden%
+% }^^A
+% \begin{macro}{\tud@cs@reset}
+% \begin{macro}{\tud@cs@update}
+% \changes{v2.04}{2015/03/03}{neu}^^A
+% \begin{macro}{\tud@cs@use}
+% \begin{macro}{\tud@cs@check}
+% \changes{v2.03}{2015/01/09}{neu}^^A
+% Mit diesen Befehlen wird es möglich, Originalbefehle sichern, nutzen und
+% wiederherstellen zu können. Dies wird benötigt, um zwischen den einzelnen
+% Layouts über Optionseinstellungen zu wechseln und dabei von einem definierten
+% Anfangszustand auszugehen.
+%
+% Der Befehl \cs{tud@cs@letltx} nutzt intern \cs{LetLtxMacro} aus dem Paket 
+% \pkg{letltxmacro}, um auch robust definierte Befehle korrekt zu sichern.
+%    \begin{macrocode}
+\newcommand*\tud@cs@letltx[2]{%
+  \expandafter\expandafter\expandafter\LetLtxMacro%
+  \expandafter\csname #1\expandafter\endcsname\csname #2\endcsname%
+}
+%    \end{macrocode}
+% Mit dem Aufruf \cs{tud@cs@store}\marg{Befehlsname} wird der im Argument 
+% angegebene Befehl in einem neuem Makro \cs{@@tud@\meta{Befehlsname}}
+% gespeichert. Dieser kann danach beliebig angepasst werden. Soll der Befehl zu
+% einem späteren Zeitpunkt auf den Orginalzustand zurücksetzen, kann hierfür
+% jederzeit der Befehl \cs{tud@cs@reset}\marg{Befehlsname} verwendet werden.
+% Durch das Makro \cs{tud@cs@restore}\marg{Befehlsname} wird das mit
+% \cs{tud@cs@store} erstellte Hilfsmakro zusätzlich noch  gelöscht. Der
+% ursprüngliche Befehl kann als solcher mit \cs{tud@cs@use}\marg{Befehlsname}
+% weiterhin genutzt werden. Ein zuvor bereits gesicherter Befehl kann mit 
+% \cs{tud@cs@update}\marg{Befehlsname} auf die momentane Definition 
+% aktualisiert werden.
+%    \begin{macrocode}
+\newrobustcmd*\tud@cs@store[1]{%
+  \tud@cs@check{#1}%
+  \ifcsdef{@@tud@#1}{}{%
+    \tud@cs@letltx{@@tud@#1}{#1}%
+  }%
+}
+\newrobustcmd*\tud@cs@restore[1]{%
+%    \end{macrocode}
+% Sollte ein zuvor gesichertes Makro mit \cs{undef} oder \cs{csundef} 
+% zwischenzeitlich \emph{undefiniert} gesetzt worden sein, wird das originäre 
+% Makro dennoch wiederhergestellt. Hierfür wird es zu \cs{relax} gesetzt, damit
+% die Überprüfung mit \cs{tud@cs@check} keinen Fehler erzeugt.
+%    \begin{macrocode}
+  \ifcsdef{#1}{}{%
+    \ifcsdef{@@tud@#1}{%
+      \cslet{#1}{\relax}%
+    }{}%
+  }%
+%    \end{macrocode}
+% Die eigentliche Wiederherstellung.
+%    \begin{macrocode}
+  \tud@cs@check{#1}%
+  \ifcsdef{@@tud@#1}{%
+    \tud@cs@letltx{#1}{@@tud@#1}%
+    \csundef{@@tud@#1}%
+  }{}%
+}
+\newrobustcmd*\tud@cs@reset[1]{%
+  \tud@cs@check{#1}%
+  \ifcsdef{@@tud@#1}{%
+    \tud@cs@letltx{#1}{@@tud@#1}%
+  }{}%
+}
+\newrobustcmd*\tud@cs@update[1]{%
+  \tud@cs@check{#1}%
+  \ifcsdef{@@tud@#1}{%
+    \tud@cs@letltx{@@tud@#1}{#1}%
+  }{}%
+}
+\newrobustcmd*\tud@cs@use[1]{%
+  \tud@cs@check{#1}%
+  \ifcsdef{@@tud@#1}{%
+    \csuse{@@tud@#1}%
+  }{%
+    \csuse{#1}%
+  }%
+}
+%    \end{macrocode}
+% Dieses Makro dient zum Überprüfen, ob der zu sichernde beziehungsweise 
+% wiederherzustellende Befehl überhaupt definiert ist. Sollte das nicht der 
+% Fall sein, wird ein Fehler ausgegeben.
+%    \begin{macrocode}
+\newrobustcmd*\tud@cs@check[1]{%
+  \ifcsdef{#1}{}{%
+    \PackageError{tudscrbase}{%
+      `\@backslashchar#1' is not defined}{%
+      The command `\@backslashchar#1' was never defined.\MessageBreak%
+      Please contact the TUD-Script maintainer\MessageBreak%
+      via \tudscrmail. A bugfix is urgently required.%
+    }%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@cs@check
+% \end{macro}^^A \tud@cs@use
+% \end{macro}^^A \tud@cs@update
+% \end{macro}^^A \tud@cs@reset
+% \end{macro}^^A \tud@cs@restore
+% \end{macro}^^A \tud@cs@store
+% \end{macro}^^A \tud@cs@letltx
+% \begin{macro}{\tud@skip@store}
+% \changes{v2.04}{2015/03/02}{neu}^^A
+% \changes{v2.05}{2016/07/13}{Verwendung von \cs{tud@skip@check}}^^A
+% \begin{macro}{\tud@skip@restore}
+% \changes{v2.04}{2015/03/02}{neu}^^A
+% \changes{v2.05}{2016/07/13}{Verwendung von \cs{tud@skip@check}}^^A
+% \begin{macro}{\tud@skip@reset}
+% \changes{v2.05}{2016/07/13}{neu}^^A
+% \begin{macro}{\tud@skip@set}
+% \changes{v2.04}{2015/05/05}{neu}^^A
+% \changes{v2.05}{2016/07/13}{Verwendung von \cs{tud@skip@check}}^^A
+% \begin{macro}{\tud@skip@check}
+% \changes{v2.05}{2016/07/13}{neu}^^A
+% Hiermit können~-- äquivalent zum Sichern und Wiederherstellen von Befehlen~-- 
+% Längenregister abgespeichert werden.
+%    \begin{macrocode}
+\newcommand*\tud@skip@store[1]{%
+  \tud@skip@check{#1}{%
+    \ifcsdef{@@tud@skip@#1}{}{%
+      \csedef{@@tud@skip@#1}{\expandafter\the\csname #1\endcsname}%
+    }%
+  }%
+}
+\newcommand*\tud@skip@restore[1]{%
+  \tud@skip@check{#1}{%
+    \ifcsdef{@@tud@skip@#1}{%
+      \csname #1\endcsname=\csname @@tud@skip@#1\endcsname%
+      \csundef{@@tud@skip@#1}%
+    }{}%
+  }%
+}
+\newcommand*\tud@skip@reset[1]{%
+  \tud@skip@check{#1}{%
+    \ifcsdef{@@tud@skip@#1}{%
+      \csname#1\endcsname=\csname @@tud@skip@#1\endcsname%
+    }{}%
+  }%
+}
+\newcommand*\tud@skip@set[2]{%
+  \tud@skip@check{#1}{%
+    \expandafter\setlength\csname #1\endcsname{#2}%
+  }%
+}
+\newcommand*\tud@skip@check[1]{%
+  \begingroup%
+    \@tempswafalse%
+    \expandafter\ifisskip\expandafter{\csname#1\endcsname}{\@tempswatrue}{}%
+    \expandafter\ifisdimen\expandafter{\csname#1\endcsname}{\@tempswatrue}{}%
+    \if@tempswa%
+      \aftergroup\@firstofone%
+    \else%
+      \aftergroup\@gobble%
+    \fi%
+  \endgroup%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@skip@check
+% \end{macro}^^A \tud@skip@set
+% \end{macro}^^A \tud@skip@reset
+% \end{macro}^^A \tud@skip@restore
+% \end{macro}^^A \tud@skip@store
+% \begin{macro}{\tud@patch@wrn}
+% \TUDScript verwendet die Möglichkeiten von \pkg{etoolbox} und \pkg{xpatch}, 
+% um mit den Makros  (\cs{[x]apptocmd}, \cs{[x]pretocmd}, \cs{[x]patchcmd}) 
+% bereits definierte Befehle anzupassen. Falls dies nicht gelingt, wird eine 
+% Warnung ausgegeben, die hier definiert wird.
+%    \begin{macrocode}
+\newcommand*\tud@patch@wrn[1]{%
+  \PackageWarning{tudscrbase}{%
+    It wasn't possible to patch `\@backslashchar#1'\MessageBreak%
+    Please contact the TUD-Script maintainer\MessageBreak%
+    via \tudscrmail. Without a bugfix an\MessageBreak%
+    erroneous output may occur%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@patch@wrn
+%
+% \subsection{Options- und Parameterdefinition für \TUDScript}
 %
 % In Anlehnung an \KOMAScript{} werden hier Befehle zur Definition und
 % Ausführung unterschiedlicher Klassenoptionen mithilfe der Funktionen aus
@@ -665,194 +858,6 @@
 % \end{macro}^^A \tud@locked@bool@set
 % \end{macro}^^A \tud@locked@bool@preset
 % \end{macro}^^A \tud@locked@newbool
-% \begin{macro}{\tud@cs@letltx}
-% \changes{v2.06}{2019/06/13}{\cs{LetLtxMacro} zum Sichern originärer Makros}^^A
-% \begin{macro}{\tud@cs@store}
-% \changes{v2.06}{2018/07/15}{%
-%   mit \cs{DeclareRobustCommand} definierte Befehle unterstüzt%
-% }^^A
-% \begin{macro}{\tud@cs@restore}
-% \changes{v2.06}{2018/07/15}{%
-%    stellt originäre Makros auch wieder her, wenn diese mit \cs{undef} 
-%    zwischendurch \emph{undefiniert} gesetzt wurden%
-% }^^A
-% \begin{macro}{\tud@cs@reset}
-% \begin{macro}{\tud@cs@update}
-% \changes{v2.04}{2015/03/03}{neu}^^A
-% \begin{macro}{\tud@cs@use}
-% \begin{macro}{\tud@cs@check}
-% \changes{v2.03}{2015/01/09}{neu}^^A
-% Mit diesen Befehlen wird es möglich, Originalbefehle sichern, nutzen und
-% wiederherstellen zu können. Dies wird benötigt, um zwischen den einzelnen
-% Layouts über Optionseinstellungen zu wechseln und dabei von einem definierten
-% Anfangszustand auszugehen.
-%
-% Der Befehl \cs{tud@cs@letltx} nutzt intern \cs{LetLtxMacro} aus dem Paket 
-% \pkg{letltxmacro}, um auch robust definierte Befehle korrekt zu sichern.
-%    \begin{macrocode}
-\newcommand*\tud@cs@letltx[2]{%
-  \expandafter\expandafter\expandafter\LetLtxMacro%
-  \expandafter\csname #1\expandafter\endcsname\csname #2\endcsname%
-}
-%    \end{macrocode}
-% Mit dem Aufruf \cs{tud@cs@store}\marg{Befehlsname} wird der im Argument 
-% angegebene Befehl in einem neuem Makro \cs{@@tud@\meta{Befehlsname}}
-% gespeichert. Dieser kann danach beliebig angepasst werden. Soll der Befehl zu
-% einem späteren Zeitpunkt auf den Orginalzustand zurücksetzen, kann hierfür
-% jederzeit der Befehl \cs{tud@cs@reset}\marg{Befehlsname} verwendet werden.
-% Durch das Makro \cs{tud@cs@restore}\marg{Befehlsname} wird das mit
-% \cs{tud@cs@store} erstellte Hilfsmakro zusätzlich noch  gelöscht. Der
-% ursprüngliche Befehl kann als solcher mit \cs{tud@cs@use}\marg{Befehlsname}
-% weiterhin genutzt werden. Ein zuvor bereits gesicherter Befehl kann mit 
-% \cs{tud@cs@update}\marg{Befehlsname} auf die momentane Definition 
-% aktualisiert werden.
-%    \begin{macrocode}
-\newrobustcmd*\tud@cs@store[1]{%
-  \tud@cs@check{#1}%
-  \ifcsdef{@@tud@#1}{}{%
-    \tud@cs@letltx{@@tud@#1}{#1}%
-  }%
-}
-\newrobustcmd*\tud@cs@restore[1]{%
-%    \end{macrocode}
-% Sollte ein zuvor gesichertes Makro mit \cs{undef} oder \cs{csundef} 
-% zwischenzeitlich \emph{undefiniert} gesetzt worden sein, wird das originäre 
-% Makro dennoch wiederhergestellt. Hierfür wird es zu \cs{relax} gesetzt, damit
-% die Überprüfung mit \cs{tud@cs@check} keinen Fehler erzeugt.
-%    \begin{macrocode}
-  \ifcsdef{#1}{}{%
-    \ifcsdef{@@tud@#1}{%
-      \cslet{#1}{\relax}%
-    }{}%
-  }%
-%    \end{macrocode}
-% Die eigentliche Wiederherstellung.
-%    \begin{macrocode}
-  \tud@cs@check{#1}%
-  \ifcsdef{@@tud@#1}{%
-    \tud@cs@letltx{#1}{@@tud@#1}%
-    \csundef{@@tud@#1}%
-  }{}%
-}
-\newrobustcmd*\tud@cs@reset[1]{%
-  \tud@cs@check{#1}%
-  \ifcsdef{@@tud@#1}{%
-    \tud@cs@letltx{#1}{@@tud@#1}%
-  }{}%
-}
-\newrobustcmd*\tud@cs@update[1]{%
-  \tud@cs@check{#1}%
-  \ifcsdef{@@tud@#1}{%
-    \tud@cs@letltx{@@tud@#1}{#1}%
-  }{}%
-}
-\newrobustcmd*\tud@cs@use[1]{%
-  \tud@cs@check{#1}%
-  \ifcsdef{@@tud@#1}{%
-    \csuse{@@tud@#1}%
-  }{%
-    \csuse{#1}%
-  }%
-}
-%    \end{macrocode}
-% Dieses Makro dient zum Überprüfen, ob der zu sichernde beziehungsweise 
-% wiederherzustellende Befehl überhaupt definiert ist. Sollte das nicht der 
-% Fall sein, wird ein Fehler ausgegeben.
-%    \begin{macrocode}
-\newrobustcmd*\tud@cs@check[1]{%
-  \ifcsdef{#1}{}{%
-    \PackageError{tudscrbase}{%
-      `\@backslashchar#1' is not defined}{%
-      The command `\@backslashchar#1' was never defined.\MessageBreak%
-      Please contact the TUD-Script maintainer\MessageBreak%
-      via \tudscrmail. A bugfix is urgently required.%
-    }%
-  }%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@cs@check
-% \end{macro}^^A \tud@cs@use
-% \end{macro}^^A \tud@cs@update
-% \end{macro}^^A \tud@cs@reset
-% \end{macro}^^A \tud@cs@restore
-% \end{macro}^^A \tud@cs@store
-% \end{macro}^^A \tud@cs@letltx
-% \begin{macro}{\tud@skip@store}
-% \changes{v2.04}{2015/03/02}{neu}^^A
-% \changes{v2.05}{2016/07/13}{Verwendung von \cs{tud@skip@check}}^^A
-% \begin{macro}{\tud@skip@restore}
-% \changes{v2.04}{2015/03/02}{neu}^^A
-% \changes{v2.05}{2016/07/13}{Verwendung von \cs{tud@skip@check}}^^A
-% \begin{macro}{\tud@skip@reset}
-% \changes{v2.05}{2016/07/13}{neu}^^A
-% \begin{macro}{\tud@skip@set}
-% \changes{v2.04}{2015/05/05}{neu}^^A
-% \changes{v2.05}{2016/07/13}{Verwendung von \cs{tud@skip@check}}^^A
-% \begin{macro}{\tud@skip@check}
-% \changes{v2.05}{2016/07/13}{neu}^^A
-% Hiermit können~-- äquivalent zum Sichern und Wiederherstellen von Befehlen~-- 
-% Längenregister abgespeichert werden.
-%    \begin{macrocode}
-\newcommand*\tud@skip@store[1]{%
-  \tud@skip@check{#1}{%
-    \ifcsdef{@@tud@skip@#1}{}{%
-      \csedef{@@tud@skip@#1}{\expandafter\the\csname #1\endcsname}%
-    }%
-  }%
-}
-\newcommand*\tud@skip@restore[1]{%
-  \tud@skip@check{#1}{%
-    \ifcsdef{@@tud@skip@#1}{%
-      \csname #1\endcsname=\csname @@tud@skip@#1\endcsname%
-      \csundef{@@tud@skip@#1}%
-    }{}%
-  }%
-}
-\newcommand*\tud@skip@reset[1]{%
-  \tud@skip@check{#1}{%
-    \ifcsdef{@@tud@skip@#1}{%
-      \csname#1\endcsname=\csname @@tud@skip@#1\endcsname%
-    }{}%
-  }%
-}
-\newcommand*\tud@skip@set[2]{%
-  \tud@skip@check{#1}{%
-    \expandafter\setlength\csname #1\endcsname{#2}%
-  }%
-}
-\newcommand*\tud@skip@check[1]{%
-  \begingroup%
-    \@tempswafalse%
-    \expandafter\ifisskip\expandafter{\csname#1\endcsname}{\@tempswatrue}{}%
-    \expandafter\ifisdimen\expandafter{\csname#1\endcsname}{\@tempswatrue}{}%
-    \if@tempswa%
-      \aftergroup\@firstofone%
-    \else%
-      \aftergroup\@gobble%
-    \fi%
-  \endgroup%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@skip@check
-% \end{macro}^^A \tud@skip@set
-% \end{macro}^^A \tud@skip@reset
-% \end{macro}^^A \tud@skip@restore
-% \end{macro}^^A \tud@skip@store
-% \begin{macro}{\tud@patch@wrn}
-% Dieses Makro wird verwendet, wenn mit den Mitteln von \pkg{etoolbox} bereits
-% vorhandene Befehle angepasst werden sollen (\cs{apptocmd}, \cs{pretocmd},
-% \cs{patchcmd}) und dies nicht gelingt.
-%    \begin{macrocode}
-\newcommand*\tud@patch@wrn[1]{%
-  \PackageWarning{tudscrbase}{%
-    It wasn't possible to patch `\@backslashchar#1'\MessageBreak%
-    Please contact the TUD-Script maintainer\MessageBreak%
-    via \tudscrmail. Without a bugfix an\MessageBreak%
-    erroneous output may occur%
-  }%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@patch@wrn
 % \begin{macro}{\TUD@parameter@family}
 % \begin{macro}{\TUD@parameter@@family}
 % \begin{macro}{\TUD@parameter@checkfamily}
@@ -999,7 +1004,8 @@
 % einfache optionale Argumente.
 % \ToDo{%
 %  Eine Katastrophe, dringend überarbeiten; generelle Lösung mit \cs{toks@}?%
-% }[v2.??]%
+%  KOMA-Option \val{@else@} verwenden?
+% }[v2.07]%
 %    \begin{macrocode}
 \newcommand*\TUD@parameter@handler@macro[3][\TUD@parameter@@family]{%
   \TUD@parameter@checkfamily{#1}{TUD@parameter@handler@macro}%
@@ -1277,7 +1283,6 @@
 % einem Schriftelement ein Hilfsmakro \cs{tud@komafont@\meta{Element}} 
 % zugewiesen, welches intern angepasst werden kann. Mit \cs{tud@komafont@set} 
 % werden dem angegebenen Element die gewünschten Schriftattribute zugeteilt.
-% \ToDo{nur für Klassen notwendig!}[v2.06]
 %    \begin{macrocode}
 \newcommand*\tud@komafont@set[2]{%
   \ifcsdef{tud@komafont@#1}{}{\addtokomafont{#1}{\csuse{tud@komafont@#1}}}%
