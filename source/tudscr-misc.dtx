@@ -1,4 +1,4 @@
-% \CheckSum{300}
+% \CheckSum{319}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -52,7 +52,7 @@
 % \fi
 %
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
-\ProvidesFile{tudscr-misc.dtx}[2019/06/28 v2.06 TUD-Script\space%
+\ProvidesFile{tudscr-misc.dtx}[2019/08/02 v2.06c TUD-Script\space%
   (miscellaneous)%
 ]
 %
@@ -391,7 +391,7 @@
 %<*option>
 % \fi
 %
-% \subsection{Sukkzessives Abarbeiten von Layoutoptionen im Dokument}
+% \subsection{Sukkzessives Abarbeiten von Optionen im Dokument}
 %
 % Werden mit \cs{TUDoptions} nach \cs{begin\{document\}} mehrere Layoutoptionen 
 % gleichzeitig angegeben, muss dafür Sorge getragen werden, dass diese in der 
@@ -427,6 +427,44 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@atdocument@hook
 % \end{macro}^^A \TUD@SpecialOptionAtDocument
+% \begin{macro}{\tud@keytoolate@error}
+% \changes{v2.06c}{2019/08/02}{neu}^^A
+% \begin{macro}{\tud@@keytoolate@error}
+% \changes{v2.06c}{2019/08/02}{neu}^^A
+% Das Makro erzeugt eine Fehlermeldung, dass ein Schlüssel zu spät verwendet 
+% wurde. Die Sternversion meldet, dass der Schlüssel allein beim Laden der 
+% Klasse repsektive des Paketes genutzt werden darf. Die normale Version meldet 
+% die zwingende Verwendung in der Präambel.
+%    \begin{macrocode}
+\newcommand*\tud@keytoolate@error{%
+  \kernel@ifstar{\tud@@keytoolate@error{true}}{\tud@@keytoolate@error{false}}%
+}
+\newcommand*\tud@@keytoolate@error[2]{%
+%<*class>
+  \ClassError{\TUD@Class@Name}%
+%</class>
+%<*package&fonts>
+  \PackageError{tudscrfonts}%
+%</package&fonts>
+  {Option `#2' too late}{%
+    Option `#2' can only be set\space%
+    \csname if#1\endcsname%
+      as optional \MessageBreak argument while loading\space%
+%<*class>
+      class `\TUD@Class@Name'%
+%</class>
+%<*package&fonts>
+      package `tudscrfonts'%
+%</package&fonts>
+    \else%
+      in the preamble
+    \fi%
+    \MessageBreak but you have tried to set it up later.%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@@keytoolate@error
+% \end{macro}^^A \tud@keytoolate@error
 %
 % \iffalse
 %</option>
