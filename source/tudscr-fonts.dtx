@@ -1,4 +1,4 @@
-% \CheckSum{3087}
+% \CheckSum{3103}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -52,7 +52,7 @@
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 % \fi
 %
-\ProvidesFile{tudscr-fonts.dtx}[2019/08/02 v2.06c TUD-Script\space%
+\ProvidesFile{tudscr-fonts.dtx}[2019/08/20 v2.06c TUD-Script\space%
 %
 % \iffalse
 %</dtx>
@@ -3110,23 +3110,36 @@
 %    \end{macrocode}
 % Um das Umschalten der Mathematikversion mit \cs{mathversion} auch nutzen zu 
 % können, wenn \pkg{mathastext} für die Schriften des \CDs aktiv ist, wird ein 
-% Wrappermakro benötigt, welches im Bedarfsfall nachträglich \cs{MTversion@@} 
-% aufruft, was normalerweise mit \cs{MTversion*} geschieht.
+% Wrappermakro benötigt, welches im Bedarfsfall\cs{MTversion*} aufruft. Hierfür 
+% wird zunächst auf die gewünschte Mathematikversion, danach der originale 
+% Befehl \cs{mathversion} wiederhergestellt, aufgerufen und anschließend wieder 
+% auf das Wrappermakro \cs{tud@mathversion} zurückgesetzt.
 %    \begin{macrocode}
 \AfterPackage*{mathastext}{%
-  \CheckCommand*\MTversion{\@ifstar\MTversion@s\MTversion@}%
-  \CheckCommand*\MTversion@s[1]{\mathversion{#1}\MTversion@@{#1}}%
   \newrobustcmd*\tud@mathversion[1]{%
-    \tud@cs@use{mathversion}{#1}%
-    \if@tud@cdmath@active%
-      \ifstr{#1}{normal}{%
-        \MTversion@@{tudnormal}%
-      }{%
-        \ifstr{#1}{bold}{%
-          \MTversion@@{tudbold}%
-        }{}%
+    \begingroup%
+      \let\tud@res@a\relax%
+      \if@tud@cdmath@active%
+        \ifstr{#1}{normal}{%
+          \def\tud@res@a{tudnormal}%
+        }{%
+          \ifstr{#1}{bold}{%
+            \def\tud@res@a{tudbold}%
+          }{}%
+        }%
+      \fi%
+      \edef\tud@res@a{%
+        \endgroup%
+        \noexpand\tud@cs@restore{mathversion}%
+        \ifx\tud@res@a\relax%
+          \noexpand\mathversion{#1}%
+        \else%
+          \noexpand\MTversion*{\tud@res@a}%
+        \fi%
+        \noexpand\tud@cs@store{mathversion}%
+        \noexpand\tud@cs@letltx{mathversion}{tud@mathversion}%
       }%
-    \fi%
+    \tud@res@a%
   }%
   \AtEndPreamble{%
     \tud@cs@store{mathversion}%
