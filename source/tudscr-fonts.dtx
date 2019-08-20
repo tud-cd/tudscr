@@ -1,4 +1,4 @@
-% \CheckSum{3083}
+% \CheckSum{3103}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -52,7 +52,7 @@
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 % \fi
 %
-\ProvidesFile{tudscr-fonts.dtx}[2019/07/17 v2.06b TUD-Script\space%
+\ProvidesFile{tudscr-fonts.dtx}[2019/08/20 v2.06c TUD-Script\space%
 %
 % \iffalse
 %</dtx>
@@ -510,7 +510,7 @@
         \PackageWarning{tudscrfonts}%
 %</package>
         {%
-          Some math font encodings are missing.\MessageBreak%
+          Some math font encodings are missing. \MessageBreak%
           The option `cdmath=false' is executed. You should\MessageBreak%
           either use this option by yourself or install\MessageBreak%
           all necessary fonts with a installation script\MessageBreak%
@@ -529,7 +529,7 @@
   \begingroup%
     \def\tud@res@a{%
       `#2' font\MessageBreak%
-      not found for `#1' encoding.\MessageBreak%
+      not found for `#1' encoding. \MessageBreak%
     }%
     \if@tud@x@fontspec@enabled%
       \ifstr{\encodingdefault}{#1}{%
@@ -565,7 +565,7 @@
           \else%
             install package `opensans'%
           \fi%
-          .\MessageBreak%
+          . \MessageBreak%
         }%
       \else%
         \ifstr{\encodingdefault}{#1}{%
@@ -579,7 +579,7 @@
           }%
           \appto\tud@res@a{%
             choose a possible encoding with package\MessageBreak%
-            `fontenc' (\tud@res@b).\MessageBreak%
+            `fontenc' (\tud@res@b). \MessageBreak%
           }%
         }{}%
       \fi%
@@ -700,7 +700,7 @@
 %<*package>
 \@ifpackageloaded{bm}{%
   \PackageWarning{tudscrfonts}{%
-    Package `bm' must be loaded after `tudscrfonts'.\MessageBreak%
+    Package `bm' must be loaded after `tudscrfonts'. \MessageBreak%
     Otherwise the functionality can not be guaranteed%
   }%
 }{%
@@ -1611,7 +1611,10 @@
         \ifcsundef{textrightarrow}{}{%
           \tud@cs@store{textrightarrow}%
           \renewrobustcmd*{\textrightarrow}{%
-            {\fontfamily{iwona}\selectfont\tud@cs@use{textrightarrow}}%
+            \begingroup%
+              \if@tud@cdfont@active\fontfamily{iwona}\selectfont\fi%
+              \tud@cs@use{textrightarrow}%
+            \endgroup%
           }%
         }%
       }%
@@ -3107,23 +3110,36 @@
 %    \end{macrocode}
 % Um das Umschalten der Mathematikversion mit \cs{mathversion} auch nutzen zu 
 % können, wenn \pkg{mathastext} für die Schriften des \CDs aktiv ist, wird ein 
-% Wrappermakro benötigt, welches im Bedarfsfall nachträglich \cs{MTversion@@} 
-% aufruft, was normalerweise mit \cs{MTversion*} geschieht.
+% Wrappermakro benötigt, welches im Bedarfsfall\cs{MTversion*} aufruft. Hierfür 
+% wird zunächst auf die gewünschte Mathematikversion, danach der originale 
+% Befehl \cs{mathversion} wiederhergestellt, aufgerufen und anschließend wieder 
+% auf das Wrappermakro \cs{tud@mathversion} zurückgesetzt.
 %    \begin{macrocode}
 \AfterPackage*{mathastext}{%
-  \CheckCommand*\MTversion{\@ifstar\MTversion@s\MTversion@}%
-  \CheckCommand*\MTversion@s[1]{\mathversion{#1}\MTversion@@{#1}}%
   \newrobustcmd*\tud@mathversion[1]{%
-    \tud@cs@use{mathversion}{#1}%
-    \if@tud@cdmath@active%
-      \ifstr{#1}{normal}{%
-        \MTversion@@{tudnormal}%
-      }{%
-        \ifstr{#1}{bold}{%
-          \MTversion@@{tudbold}%
-        }{}%
+    \begingroup%
+      \let\tud@res@a\relax%
+      \if@tud@cdmath@active%
+        \ifstr{#1}{normal}{%
+          \def\tud@res@a{tudnormal}%
+        }{%
+          \ifstr{#1}{bold}{%
+            \def\tud@res@a{tudbold}%
+          }{}%
+        }%
+      \fi%
+      \edef\tud@res@a{%
+        \endgroup%
+        \noexpand\tud@cs@restore{mathversion}%
+        \ifx\tud@res@a\relax%
+          \noexpand\mathversion{#1}%
+        \else%
+          \noexpand\MTversion*{\tud@res@a}%
+        \fi%
+        \noexpand\tud@cs@store{mathversion}%
+        \noexpand\tud@cs@letltx{mathversion}{tud@mathversion}%
       }%
-    \fi%
+    \tud@res@a%
   }%
   \AtEndPreamble{%
     \tud@cs@store{mathversion}%
@@ -3141,6 +3157,15 @@
 % Paket \pkg{mathastext} genutzt wird, um trotzdem einen mathematischen Satz zu 
 % ermöglichen. Dabei wird die Computer~Modern in der \val{LGR}~Kodierung 
 % zwingend benötigt.
+%
+% Für die LGR-Kodierung werden die Bundles \pkg{cbfonts} und \pkg{cbfonts-fd} 
+% benötigt. Leider lässt sich momentan nur auf letzteres testen. Für ersteres 
+% ließe sich |\font\testfont=grmn1200|\footnote{\file{ltxcheck.tex}} oder
+% \verb+\immediate\openin\pathfont="|kpsewhich grmn1200.tfm"+\ignorespaces%
+% \footnote{\url{https://tex.stackexchange.com/questions/306980/}} oder nutzen.
+% Beide Ansätze sind aber nicht vollends stimmig. Der erste funktioniert nicht, 
+% sobald der Anwender \val{-interaction-mode} selbst definiert und für den 
+% zweiten müssen zumindest eingeschränkte Schreibrechte aktiviert sein.
 %    \begin{macrocode}
   \@tud@res@swafalse%
   \if@tud@cdfont@fam@exist%

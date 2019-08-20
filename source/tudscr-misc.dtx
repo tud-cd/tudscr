@@ -1,4 +1,4 @@
-% \CheckSum{300}
+% \CheckSum{324}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -52,7 +52,7 @@
 % \fi
 %
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
-\ProvidesFile{tudscr-misc.dtx}[2019/06/28 v2.06 TUD-Script\space%
+\ProvidesFile{tudscr-misc.dtx}[2019/08/20 v2.06c TUD-Script\space%
   (miscellaneous)%
 ]
 %
@@ -377,7 +377,7 @@
       \ClassWarningNoLine{\TUD@Class@Name}{%
         You've set a layout size, which is different from\MessageBreak%
         default (paper=a4, paper=portrait). Therefore you\MessageBreak%
-        should additionally specify an explicit font size.\MessageBreak%
+        should additionally specify an explicit font size. \MessageBreak%
         See the manual for further information%
       }%
     \fi%
@@ -391,7 +391,7 @@
 %<*option>
 % \fi
 %
-% \subsection{Sukkzessives Abarbeiten von Layoutoptionen im Dokument}
+% \subsection{Sukkzessives Abarbeiten von Optionen im Dokument}
 %
 % Werden mit \cs{TUDoptions} nach \cs{begin\{document\}} mehrere Layoutoptionen 
 % gleichzeitig angegeben, muss dafür Sorge getragen werden, dass diese in der 
@@ -615,6 +615,61 @@
 %    \end{macrocode}
 %
 % \iffalse
+%<*class&!inherit|package&fonts>
+% \fi
+%
+% \subsection{Optionen ohne späte Wahlmöglichkeit}
+%
+% Einige Optionen können nur zum Zeitpunkt des Ladens einer Klasse oder eines 
+% Paketes respektive in der Präambel gesetzt werden. Diese müssen \emph{nach}
+% \cs{TUDProcessOptions} mit \cs{TUD@key@toolate} redefiniert werden.
+%
+% \begin{macro}{\TUD@key@toolate}
+% \changes{v2.06c}{2019/08/20}{neu}^^A
+% Dieser Befehl definiert eine Fehlermeldung für Schlüssel respektive Optionen, 
+% die zu spät verwendet wurden, wobei er innerhalb der Makros \cs{AtEndOfClass},
+% \cs{AtEndOfClass}, \cs{AtEndPreamble} etc. genutzt werden sollte. Wird dieser 
+% noch im Kontext von Klasse oder Paket (\verb=\@currname.\@currext-h@@k=)
+% verwendet, wird gemeldet, dass der Schlüssel allein beim Laden der Klasse 
+% respektive des Paketes genutzt werden darf. Andernfalls wird die zwingende
+% Verwendung in der Präambel angemerkt.
+%    \begin{macrocode}
+\newcommand*\TUD@key@toolate[1]{%
+  \csedef{tud@key@#1@error}{%
+%<*class>
+    \noexpand\ClassError{\noexpand\TUD@Class@Name}%
+%</class>
+%<*package&fonts>
+    \noexpand\PackageError{tudscrfonts}%
+%</package&fonts>
+    {Option `#1' too late}{%
+      Option `#1' can only be set\space%
+      \ifcsname \@currname.\@currext-h@@k\endcsname%
+        as optional \MessageBreak argument while loading\space%
+%<*class>
+        class `\noexpand\TUD@Class@Name'%
+%</class>
+%<*package&fonts>
+        package `tudscrfonts'%
+%</package&fonts>
+      \else%
+        in the preamble
+      \fi%
+      \MessageBreak but you have tried to set it up later.%
+    }%
+  }%
+  \TUD@key{#1}[]%
+  {%
+    \csuse{tud@key@#1@error}
+    \FamilyKeyStateProcessed%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \TUD@key@toolate
+%
+%
+% \iffalse
+%</class&!inherit|package&fonts>
 %</execute>
 %<*body>
 % \fi
