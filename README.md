@@ -4,7 +4,7 @@
 
  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2019
 
- tudscr 2019/08/20 v2.06c
+ tudscr 2019/08/27 v2.06d
 
 ----------------------------------------------------------------------------
 
@@ -52,6 +52,10 @@ Das Bundle beinhaltet:
 
 Versionen
 ---------
+
+**v2.06d** (2019/08/27)
++ Bugfix für griechische Glyphen im Mathematikmodus beim Einsatz von LuaLaTeX
+  (Ligaturen für angrenzende Glyphen sind entgegen der Definition aktiviert)
 
 **v2.06c** (2019/08/20)
 + Bugfix für Paket **fix-tudscrfonts**
@@ -240,6 +244,10 @@ The bundle offers:
 
 Versions
 --------
+
+**v2.06d** (2019/08/27)
++ bug fix for greek glyphs in math mode when using LuaLaTeX
+ (boundary ligatures are activated contrary to definition)
 
 **v2.06c** (2019/08/20)
 + bug fix for package **fix-tudscrfonts**
