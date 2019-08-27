@@ -1,4 +1,4 @@
-% \CheckSum{3103}
+% \CheckSum{3123}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -52,7 +52,7 @@
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 % \fi
 %
-\ProvidesFile{tudscr-fonts.dtx}[2019/08/20 v2.06c TUD-Script\space%
+\ProvidesFile{tudscr-fonts.dtx}[2019/08/27 v2.06d TUD-Script\space%
 %
 % \iffalse
 %</dtx>
@@ -2841,16 +2841,16 @@
       {\tud@cs@use{updefault}}{\tud@cs@use{itdefault}}%
     \let\tud@res@c\@empty%
     \def\tud@res@b##1##2{%
-      \ifcsundef{up##1}{%
-        \eappto\tud@res@c{%
-          \noexpand\DeclareMathSymbol{\csname up##1\endcsname}%
-              {\noexpand\mathalpha}{tudupgrk}{##2}%
-        }%
-      }{}%
       \ifcsundef{it##1}{%
         \eappto\tud@res@c{%
           \noexpand\DeclareMathSymbol{\csname it##1\endcsname}%
               {\noexpand\mathalpha}{tuditgrk}{##2}%
+        }%
+      }{}%
+      \ifcsundef{up##1}{%
+        \eappto\tud@res@c{%
+          \noexpand\DeclareMathSymbol{\csname up##1\endcsname}%
+              {\noexpand\mathalpha}{tudupgrk}{##2}%
         }%
       }{}%
     }%
@@ -3073,7 +3073,7 @@
         \ifx\Gamma\tud@res@b\relax\@tud@res@swatrue\fi%
       }%
 %    \end{macrocode}
-%\dots werden \emph{alle} griechischen Glyphen kursiv gesetzt.
+% \dots werden \emph{alle} griechischen Glyphen kursiv gesetzt.
 %    \begin{macrocode}
       \if@tud@res@swa%
         \def\tud@res@c{\TUD@key@preset{slantedgreek}{true}}%
@@ -3832,6 +3832,7 @@
 % \changes{v2.06}{2019/06/19}{neu}^^A
 % \begin{macro}{\tud@cdmath@declare@greek@@lgr}
 % \changes{v2.06}{2019/06/19}{neu}^^A
+% \changes{v2.06d}{2019/08/27}{Ligaturen für Lua\LaTeX{} deaktiviert}^^A
 % Die \OpenSans hält die griechischen Glyphen nur in der LGR-Kodierung bereit. 
 % Hiermit werden diese für den mathematischen Satz definiert. Die übergebenen 
 % Argumente an das Makro \cs{tud@cdmath@declare@greek@@lgr} sind Bezeichnung 
@@ -3880,8 +3881,29 @@
   \tud@cdmath@declare@greek@@lgr{varphi}{102}%
 }
 \newcommand*\tud@cdmath@declare@greek@@lgr[2]{%
-  \tud@cdmath@declare@symb{up#1}{\mathalpha}{tudupgrk}{#2}%
   \tud@cdmath@declare@symb{it#1}{\mathalpha}{tuditgrk}{#2}%
+  \tud@cdmath@declare@symb{up#1}{\mathalpha}{tudupgrk}{#2}%
+%    \end{macrocode}
+% Normalerweise sollten Ligaturen für angrenzende Glyphen (boundary ligatures) 
+% im Mathematikmodus deaktiviert werden. Bei Lua\LaTeX{} ist dies jedoch nicht 
+% der Fall, weshalb hier etwas nachgeholfen werden muss, indem nach der Glyphe
+% schlichtweg ein Klammernpaar in der richtigen Kodierung eingefügt wird.
+%    \begin{macrocode}
+  \scr@ifluatex{%
+    \begingroup%
+      \def\tud@res@a{\if@tud@cdmath@active\fontencoding{LGR}\selectfont{}\fi}%
+      \def\tud@res@b##1{%
+        \csxdef{tud@cdmath@symbol@##1}{%
+          {%
+            \mathchar\expandafter\the\csuse{tud@cdmath@symbol@##1}%
+            \expandonce\tud@res@a%
+          }%
+        }%
+      }%
+      \tud@res@b{it#1}%
+      \tud@res@b{up#1}%
+    \endgroup%
+  }{}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@cdmath@declare@greek@@lgr
