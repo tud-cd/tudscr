@@ -1,4 +1,4 @@
-% \CheckSum{4470}
+% \CheckSum{4486}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -52,7 +52,7 @@
 % \fi
 %
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
-\ProvidesFile{tudscr-manual.dtx}[2019/08/20 v2.06c TUD-Script\space%
+\ProvidesFile{tudscr-manual.dtx}[2019/08/27 v2.06e TUD-Script\space%
 %
 % \iffalse
 %</dtx>
@@ -3173,7 +3173,7 @@
     \IfFileExists{\@tempc}{%
       \edef\@tempb{-o \jobname-#4.ind \@tempc}%
     }{%
-      \ClassWarning{tudscrmanual}{File \@tempc\space not found}%
+      \ClassWarningNoLine{tudscrmanual}{File \@tempc\space not found}%
     }%
   }%
 %</class>
@@ -4992,29 +4992,30 @@
       \ifdef{\tudfinalflag}{\appto\@tempa{\def\noexpand\tudfinalflag{}}}{}%
       \ifdef{\tudprintflag}{\appto\@tempa{\def\noexpand\tudprintflag{}}}{}%
       \appto\@tempa{\noexpand\input{#2.tex}}%
-      \def\@tempb##1{%
-        \immediate\openout\tud@write@a=tutorials.sh\relax%
-        \immediate\write\tud@write@a{cd tutorials^^J##1}%
-        \immediate\closeout\tud@write@a%
+      \immediate\openout\tud@write@a=tutorials.sh\relax%
+      \def\@tempb##1{\immediate\write\tud@write@a{##1}}%
+      \@tempb{cd tutorials}%
+      \@tempb{\tud@latex@ext -shell-escape "\@tempa"}%
+      \ifwindows%
+        \@tempb{if exist #2.bcf biber #2}%
+      \else%
+        \@tempb{[ -f #2.bcf ] && biber #2}%
+      \fi%
+      \@tempb{\tud@latex@ext "\@tempa"}%
+      \@tempb{\tud@latex@ext -shell-escape "\@tempa"}%
+      \@tempb{\tud@latex@ext -shell-escape "\@tempa"}%
+      \immediate\closeout\tud@write@a%
 %    \end{macrocode}
 % Hier erfolgt die Unterscheidung der Befehle für die unterschiedlichen OS.
 %    \begin{macrocode}
-        \ifwindows%
-          \ShellEscape{rename tutorials.sh tutorials.bat}%
-          \ShellEscape{tutorials.bat}%
-          \ShellEscape{del tutorials.bat}%
-        \else%
-          \ShellEscape{bash tutorials.sh}%
-          \ShellEscape{rm tutorials.sh}%
-        \fi%
-      }%
-      \@tempb{\tud@latex@ext -shell-escape "\@tempa"}%
-      \IfFileExists{tutorials/#2.bcf}{\@tempb{biber #2}}{}%
-      \@tempb{%
-        \tud@latex@ext "\@tempa"^^J%
-        \tud@latex@ext -shell-escape "\@tempa"^^J%
-        \tud@latex@ext -shell-escape "\@tempa"%
-      }%
+      \ifwindows%
+        \ShellEscape{rename tutorials.sh tutorials.bat}%
+        \ShellEscape{tutorials.bat}%
+        \ShellEscape{del tutorials.bat}%
+      \else%
+        \ShellEscape{bash tutorials.sh}%
+        \ShellEscape{rm tutorials.sh}%
+      \fi%
     }%
   \fi%
 %    \end{macrocode}
@@ -5056,20 +5057,20 @@
 %    \begin{macrocode}
   \ifnum\pdf@shellescape=\@ne\relax%
     \filemodCmp{examples/#1.pdf}{examples/#1.tex}{}{%
-      \ShellEscape{%
-        \tud@latex@ext -output-directory examples examples/#1.tex^^J%
-        \tud@latex@ext -output-directory examples examples/#1.tex%
-      }%
+      \edef\@tempa{\tud@latex@ext -output-directory examples examples/#1.tex}%
+      \ShellEscape{\@tempa}%
+      \ShellEscape{\@tempa}%
     }%
 %    \end{macrocode}
 % Sollte es eine spezielle Version eines beispiels für die Druckausgabe geben, 
 % wird auch dieses kompiliert.
 %    \begin{macrocode}
     \filemodCmp{examples/#1_print.pdf}{examples/#1_print.tex}{}{%
-      \ShellEscape{%
-        \tud@latex@ext -output-directory examples examples/#1_print.tex^^J%
+      \edef\@tempa{%
         \tud@latex@ext -output-directory examples examples/#1_print.tex%
       }%
+      \ShellEscape{\@tempa}%
+      \ShellEscape{\@tempa}%
     }%
   \fi%
 %    \end{macrocode}
@@ -5627,7 +5628,9 @@
           "\noexpand\unexpanded{\expandonce\@tempb\noexpand\input}%
             {\tud@tut@temp-standalone.tex}"%
         }%
-        \ShellEscape{\@tempa^^J\@tempa^^J\@tempa}%
+        \ShellEscape{\@tempa}%
+        \ShellEscape{\@tempa}%
+        \ShellEscape{\@tempa}%
         \ifwindows%
           \def\@tempa{rename}%
         \else%
