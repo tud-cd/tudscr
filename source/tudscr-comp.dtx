@@ -1,4 +1,4 @@
-% \CheckSum{1451}
+% \CheckSum{1459}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -52,7 +52,7 @@
 % \fi
 %
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
-\ProvidesFile{tudscr-comp.dtx}[2019/08/27 v2.06d TUD-Script\space%
+\ProvidesFile{tudscr-comp.dtx}[2019/09/05 v2.06e TUD-Script\space%
 %
 % \iffalse
 %</dtx>
@@ -1538,6 +1538,7 @@
 % \changes{v2.05}{2016/04/17}{neu}^^A
 % \begin{macro}{\tud@comp@centersection}
 % \changes{v2.05}{2016/04/17}{neu}^^A
+% \changes{v2.06e}{2019/09/05}{besserer Test fehlendes optionales Argument}^^A
 % Weiterhin werden Gliederungsebenen definiert, die unabhängig vom restlichen 
 % Layout zentriert gesetzt werden. Eine Mischung von unterschiedlichen Stilen 
 % gleichartiger Ebenen ist aus sicht von Typographie und Layout eher fraglich.
@@ -1562,11 +1563,15 @@
 \newcommand*\tud@comp@centersection[3]{%
   \tud@cs@store{raggedsection}%
   \let\raggedsection\centering%
-  \ifx#2\@nil\relax%
-    \csuse{#1}{#3}%
-  \else%
-    \csuse{#1}[#2]{#3}%
-  \fi%
+  \begingroup%
+    \def\tud@res@a{#2}%
+    \ifx\tud@res@a\@nnil%
+      \aftergroup\@firstoftwo%
+    \else%
+      \aftergroup\@secondoftwo%
+    \fi%
+  \endgroup%
+  {\csuse{#1}{#3}}{\csuse{#1}[#2]{#3}}%
   \tud@cs@restore{raggedsection}%
 }
 %    \end{macrocode}
