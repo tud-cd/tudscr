@@ -1,4 +1,4 @@
-% \CheckSum{3099}
+% \CheckSum{3127}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -52,7 +52,7 @@
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 % \fi
 %
-\ProvidesFile{tudscr-fonts.dtx}[2019/09/09 v2.06e TUD-Script\space%
+\ProvidesFile{tudscr-fonts.dtx}[2019/09/10 v2.06e TUD-Script\space%
 %
 % \iffalse
 %</dtx>
@@ -1469,6 +1469,7 @@
 % \changes{v2.04}{2015/02/17}{neu}^^A
 % \begin{macro}{\tud@font@skip@@set}
 % \changes{v2.04}{2015/03/27}{neu}^^A
+% \changes{v2.06e}{2019/09/10}{\cs{abovedisplayskip} als Bezugsgröße}^^A
 % \begin{macro}{\smallskipamount}
 % \changes{v2.04}{2015/04/24}{Wert abhängig von der Schriftgröße}^^A
 % \begin{macro}{\medskipamount}
@@ -1510,11 +1511,25 @@
 % Hiermit erfolgt das eigentliche Setzen der Abstände.
 %    \begin{macrocode}
 \newcommand*\tud@font@skip@@set{%
-  \smallskipamount=\partopsep%
-  \medskipamount=\partopsep%
-  \multiply\medskipamount by 2%
-  \bigskipamount=\partopsep%
-  \multiply\bigskipamount by 4%
+  \tud@if@v@lower{2.06}{%
+    \bigskipamount=\partopsep%
+    \multiply\bigskipamount by 4%
+  }{%
+    \begingroup%
+      \setlength{\@tempdima}{\abovedisplayskip}
+      \setlength{\@tempdimb}{\dimexpr\@tempdima/3\relax}
+      \edef\tud@res@a{%
+        \endgroup%
+        \noexpand\setlength{\noexpand\bigskipamount}{%
+          \the\@tempdima\@plus\the\@tempdimb\@minus\the\@tempdimb%
+        }%
+      }%
+    \tud@res@a%
+  }%
+  \medskipamount=\bigskipamount%
+  \divide\medskipamount by 2%
+  \smallskipamount=\bigskipamount%
+  \divide\smallskipamount by 4%
   \tud@skip@set{abovecaptionskip}{\dimexpr\bigskipamount*5/6\relax}%
   \tud@skip@set{belowcaptionskip}{\z@}%
   \tud@skip@set{columnsep}{1.1\baselineskip}%
