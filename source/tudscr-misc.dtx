@@ -1,4 +1,4 @@
-% \CheckSum{324}
+% \CheckSum{354}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -52,7 +52,7 @@
 % \fi
 %
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
-\ProvidesFile{tudscr-misc.dtx}[2019/08/29 v2.06e TUD-Script\space%
+\ProvidesFile{tudscr-misc.dtx}[2019/09/12 v2.06e TUD-Script\space%
   (miscellaneous)%
 ]
 %
@@ -385,9 +385,89 @@
 }
 %    \end{macrocode}
 %
+% \subsection{Fixierte Gleitobjekte für Poster}
+%
+% \begin{environment}{figurehere}
+% \changes{v2.05}{2016/04/17}{neu}^^A
+% \begin{environment}{tablehere}
+% \changes{v2.05}{2016/04/17}{neu}^^A
+% \begin{macro}{\tud@here@begin}
+% \changes{v2.06e}{2019/09/10}{neu}^^A
+% \begin{macro}{\tud@here@end}
+% \changes{v2.06e}{2019/09/10}{neu}^^A
+% Für die Klasse \cls{tudscrposter} werden zwei Umgebungen bereitgestellt, mit 
+% denen sich Tabellen und Bilder an einer bestimmten Stelle exakt platzieren
+% lassen. Prinzipiell könnte hierfür auch das Paket \pkg{float} zum Einsatz
+% kommen.
+%    \begin{macrocode}
+%<*poster>
+\newcommand*\tud@here@begin[1]{%
+  \def\@captype{#1}%
+  \vskip\intextsep%
+  \color@vbox%
+    \normalcolor%
+    \vbox\bgroup%
+      \hsize=\columnwidth%
+      \@parboxrestore%
+      \@floatboxreset%
+      \@setnobreak%
+      \ignorespaces%
+}
+\newcommand*\tud@here@end{%
+      \vskip\intextsep%
+      \@minipagefalse%
+      \outer@nobreak
+    \egroup%
+  \color@endbox%
+}
+\newenvironment{figurehere}{\tud@here@begin{figure}}{\tud@here@end}
+\newenvironment{tablehere}{\tud@here@begin{table}}{\tud@here@end}
+%</poster>
+%    \end{macrocode}
+% \end{macro}^^A \tud@here@end
+% \end{macro}^^A \tud@here@begin
+% \end{environment}^^A tablehere
+% \end{environment}^^A figurehere
+%
 % \iffalse
 %</class&body>
-%<*class&!inherit|package&fonts>
+%<*body>
+% \fi
+%
+% \subsection{Anpassungen für das Paket \pkg{textcase}}
+%
+% \begin{macro}{\@uclcnotmath}
+% \begin{macro}{\tud@x@textcase@uclcnotmath}
+% \changes{v2.02}{2014/06/27}{\pkg{textcase}: Ignorieren von Fußnoten im 
+%   Argument des Befehls \cs{MakeTextUppercase}}^^A
+% \changes{v2.03}{2015/01/21}{\pkg{textcase}: Ignorieren des Befehls 
+%   \cs{@mkboth} im Argument des Befehls \cs{MakeTextUppercase}}^^A
+% Damit Fußnoten innerhalb von \cs{MakeTextUppercase} nicht in Majuskeln
+% gesetzt werden, wird der interne Befehl \cs{@uclcnotmath} aus dem Paket
+% \pkg{textcase} angepasst.
+%    \begin{macrocode}
+\if@tud@cdoldfont@active
+  \RequirePackage{textcase}[2004/10/07]%
+  \AfterPackage*{textcase}{%
+    \robustify\NoCaseChange%
+    \newcommand*\tud@x@textcase@uclcnotmath{%
+      \@nonchangecase\hologo%
+      \def\footnote##1##{\toks@{\noexpand\footnote##1}\@footnote}%
+      \def\@footnote##1{\NoCaseChange{\the\toks@{##1}}}%
+      \def\@mkboth##1##2{\NoCaseChange{\@mkboth{##1}{##2}}}%
+    }%
+    \patchcmd{\@uclcnotmath}{\@nonchangecase\ensuremath}{%
+      \@nonchangecase\ensuremath\tud@x@textcase@uclcnotmath%
+    }{}{\tud@patch@wrn{@uclcnotmath}}%
+  }%
+\fi
+\TUD@deprecated@cs{NoCaseChange}{@firstofone}
+%    \end{macrocode}
+% \end{macro}^^A \tud@x@textcase@uclcnotmath
+% \end{macro}^^A \@uclcnotmath
+%
+% \iffalse
+%</body>
 %<*option>
 % \fi
 %
@@ -503,7 +583,6 @@
 %
 % \iffalse
 %</body>
-%</class&!inherit|package&fonts>
 %<*execute>
 %<*class&!inherit|package&fonts>
 % \fi
@@ -517,7 +596,7 @@
 % die gewählte Kompatibilitäsversion getestet werden.
 %    \begin{macrocode}
 \DeclareOption*{}
-\FamilyProcessOptions[.comp]{TUD}\relax
+\TUDProcessOptions[.comp]\relax
 %    \end{macrocode}
 % Ab der \TUDScript-Version~v2.05 werden einige vertikale Abstände abhängig von 
 % der Schriftgröße definiert. Sollte eine frühere Kompatibilitätseinstellung 
@@ -549,6 +628,30 @@
 %</class&!inherit|package&fonts>
 % \fi
 %
+% Es werden die Standardoptionen ausgeführt. Für die Klasse \cls{tudscrposter} 
+% werden die Farben aktiviert.
+%    \begin{macrocode}
+%<*package&tutorial>
+\KOMAoptions{headings=small}
+\TUDoptions{cdfoot=true}
+%</package&tutorial>
+%<*class&!inherit|package&fixfonts>
+\TUDExecuteOptions{%
+%<*package&fixfonts>
+  headings=heavy%
+%</package&fixfonts>
+%<*class&!inherit>
+%<*book|report|article>
+  cd=true,tudbookmarks=true%
+%</book|report|article>
+%<*poster>
+  cd=bicolor,tudbookmarks=false%
+%</poster>
+%</class&!inherit>
+}
+%</class&!inherit|package&fixfonts>
+%    \end{macrocode}
+%
 % \subsection{Durchreichen von Optionen und Standardoptionen}
 %
 % Durchreichen aller Klassenoptionen an die \KOMAScript-Klasse bzw. an die
@@ -575,33 +678,10 @@
 %</inherit>
 %</class>
 %    \end{macrocode}
-% Es werden die Standardoptionen ausgeführt. Für die Klasse \cls{tudscrposter} 
-% werden die Farben aktiviert.
+% Nach der Auswerung der Optionen wird die korrespondierende \KOMAScript-Klasse 
+% bzw. \TUDScript-Elternklasse geladen.
 %    \begin{macrocode}
-%<*package&tutorial>
-\KOMAoptions{headings=small}
-\TUDoptions{cdfoot=true}
-%</package&tutorial>
-%<*class&!inherit|package&fixfonts>
-\TUDExecuteOptions{%
-%<*package&fixfonts>
-  headings=heavy%
-%</package&fixfonts>
-%<*class&!inherit>
-%<*book|report|article>
-  cd=true,tudbookmarks=true%
-%</book|report|article>
-%<*poster>
-  cd=bicolor,tudbookmarks=false%
-%</poster>
-%</class&!inherit>
-}
-%</class&!inherit|package&fixfonts>
 \TUDProcessOptions\relax
-%    \end{macrocode}
-% Die korrespindierende \KOMAScript-Klasse bzw. \TUDScript-Elternklasse wird 
-% geladen.
-%    \begin{macrocode}
 %<*class&!inherit>
 \LoadClass{\TUD@Class@KOMA}[2018/03/30]
 %</class&!inherit>
@@ -668,43 +748,6 @@
 % \iffalse
 %</class&!inherit|package&fonts>
 %</execute>
-%<*body>
-% \fi
-%
-% \subsection{Anpassungen für das Paket \pkg{textcase}}
-%
-% \begin{macro}{\@uclcnotmath}
-% \begin{macro}{\tud@x@textcase@uclcnotmath}
-% \changes{v2.02}{2014/06/27}{\pkg{textcase}: Ignorieren von Fußnoten im 
-%   Argument des Befehls \cs{MakeTextUppercase}}^^A
-% \changes{v2.03}{2015/01/21}{\pkg{textcase}: Ignorieren des Befehls 
-%   \cs{@mkboth} im Argument des Befehls \cs{MakeTextUppercase}}^^A
-% Damit Fußnoten innerhalb von \cs{MakeTextUppercase} nicht in Majuskeln
-% gesetzt werden, wird der interne Befehl \cs{@uclcnotmath} aus dem Paket
-% \pkg{textcase} angepasst.
-%    \begin{macrocode}
-\if@tud@cdoldfont@active
-  \RequirePackage{textcase}[2004/10/07]%
-  \AfterPackage*{textcase}{%
-    \robustify\NoCaseChange%
-    \newcommand*\tud@x@textcase@uclcnotmath{%
-      \@nonchangecase\hologo%
-      \def\footnote##1##{\toks@{\noexpand\footnote##1}\@footnote}%
-      \def\@footnote##1{\NoCaseChange{\the\toks@{##1}}}%
-      \def\@mkboth##1##2{\NoCaseChange{\@mkboth{##1}{##2}}}%
-    }%
-    \patchcmd{\@uclcnotmath}{\@nonchangecase\ensuremath}{%
-      \@nonchangecase\ensuremath\tud@x@textcase@uclcnotmath%
-    }{}{\tud@patch@wrn{@uclcnotmath}}%
-  }%
-\fi
-\TUD@deprecated@cs{NoCaseChange}{@firstofone}
-%    \end{macrocode}
-% \end{macro}^^A \tud@x@textcase@uclcnotmath
-% \end{macro}^^A \@uclcnotmath
-%
-% \iffalse
-%</body>
 % \fi
 %
 % \Finale
