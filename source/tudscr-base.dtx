@@ -1,4 +1,4 @@
-% \CheckSum{819}
+% \CheckSum{842}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -134,11 +134,48 @@
 %</load>
 %    \end{macrocode}
 %
-% \subsection{Notwendige Pakete für \TUDScript}
-%
 % \iffalse
 %<*package&base>
 % \fi
+%
+% \subsection{Notwendige Kompatibilitätseinstellung für \KOMAScript}
+%
+% \begin{macro}{\TUD@Version@KOMA}
+% Das Makro definiert die mindestens notwendige Version von \KOMAScript.
+% \ToDo{Abfangen, falls paket ganz ohne scr@v@... genutzt wird}[v2.06]
+%    \begin{macrocode}
+\def\TUD@Version@KOMA{3.25}%
+\AtBeginDocument{%
+%    \end{macrocode}
+% Ist die mindestens nötige Version (\val{v\csname TUD@Version@KOMA\endcsname})
+% installiert, wird geprüft, ob die Kompatibilitätseinstellung akzeptabel ist.
+%    \begin{macrocode}
+  \ifcsdef{scr@v@\TUD@Version@KOMA}{%
+    \expandafter\ifnum\scr@v@is@lt{3.12}\relax
+      \PackageError{tudscrbase}{%
+        KOMA-Script compatibility level too low%
+      }{%
+        \TUD@Version\space must be used at least with\MessageBreak%
+        `version=3.12' KOMA-Script compatibility option.%
+      }%
+    \fi%
+%    \end{macrocode}
+% Sollte die benötigte Version von \KOMAScript{} nicht vorhanden sein, wird ein 
+% Fehler erzeugt.
+%    \begin{macrocode}
+  }{%
+    \PackageError{tudscrbase}{%
+      KOMA-Script v\TUD@Version@KOMA\space is required%
+    }{%
+      \TUD@Version\space must be used at least with\MessageBreak%
+      KOMA-Script v\TUD@Version@KOMA, but \KOMAScriptVersion\space was found.%
+    }%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \TUD@Version@KOMA
+%
+% \subsection{Notwendige Pakete für \TUDScript}
 %
 % Das Paket \pkg{scrbase} wird zur Optionsdefinition benötigt, \pkg{scrlfile} 
 % für verschiedene Hooks vor sowie nach Klassen und Paketen.
