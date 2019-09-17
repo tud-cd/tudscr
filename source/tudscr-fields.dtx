@@ -1,4 +1,4 @@
-% \CheckSum{875}
+% \CheckSum{909}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -52,7 +52,7 @@
 % \fi
 %
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
-\ProvidesFile{tudscr-fields.dtx}[2019/08/20 v2.06c TUD-Script\space%
+\ProvidesFile{tudscr-fields.dtx}[2019/09/18 v2.06e TUD-Script\space%
   (input fields)%
 ]
 %
@@ -1032,6 +1032,36 @@
 % Einige Felder sind darauf ausgelegt, dass deren kommagetrennte Inhalte 
 % einzeln abgearbeitet und ausgewertet werden können. Die folgenden Makros 
 % übernehmen diese Aufgabe.
+%
+% \begin{macro}{\tud@if@field@unset}
+% \changes{v2.06e}{2019/09/18}{neu}^^A
+% Insbesondere das Autorenfeld (\cs{@author}) benötigt eine Sonderbehandlung, 
+% da dieses nicht leer sondern mit einer Warnung initialisiert ist. Mit diesem
+% Makro kann darauf geprüft werden, ob innerhalb eines Feldes ein Befehl 
+% enthalten ist, welcher mit \cs{@latex@\dots} beginnt, was normalerweise für 
+% generische Fehler oder Warnungen genutzt wird.
+%    \begin{macrocode}
+\newcommand*\tud@if@field@unset[1]{%
+  \begingroup%
+    \edef\tud@res@a{%
+      \def\noexpand\tud@res@a####1\string\@latex@####2\noexpand\@nil{%
+        \noexpand\ifblank{####2}%
+        \etex@unexpanded{\@tud@res@swafalse\@tud@res@swatrue}%
+      }%
+      \noexpand\tud@res@a%
+        \expandafter\strip@prefix\meaning#1%
+        \string\@latex@\noexpand\@nil%
+    }%
+    \tud@res@a%
+    \if@tud@res@swa%
+      \aftergroup\@firstoftwo%
+    \else%
+      \aftergroup\@secondoftwo%
+    \fi%
+  \endgroup%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@if@field@unset
 % \begin{macro}{\tud@multiple@split}
 % \begin{macro}{\tud@multiple@@split}
 % \begin{macro}{\tud@multiple@@@split}
@@ -1054,11 +1084,9 @@
 \newcommand*\tud@multiple@split[1]{%
 %    \end{macrocode}
 % Sollte ein Feld verwendet werden, welches initial eine Fehlermeldung enthält, 
-% so die vorhandene Warnung ausgegeben und danach das Feld als leer definiert.
+% wird die vorhandene Warnung ausgegeben und danach das Feld als leer definiert.
 %    \begin{macrocode}
-  \expandafter\ifpatchable\expandafter{\csname#1\endcsname}{%
-    \@latex@warning@no@line%
-  }{%
+  \expandafter\tud@if@field@unset\expandafter{\csname#1\endcsname}{%
     \csuse{#1}\csgdef{#1}{}%
   }{}%
 %    \end{macrocode}
