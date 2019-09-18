@@ -1,4 +1,4 @@
-% \CheckSum{2035}
+% \CheckSum{2041}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -1929,11 +1929,11 @@
 % \begin{macro}{\tud@footcontent@@do}
 % \changes{v2.04}{2015/04/21}{neu}^^A
 % \changes{v2.05}{2016/04/17}{Stern im Argument erhält aktuellen Inhalt}^^A
-% \begin{macro}{\tud@footcontent@usefont}
+% \begin{macro}{\tud@footcontent@font@use}
 % \changes{v2.06}{2018/08/01}{neu}^^A
-% \begin{macro}{\tud@footcontent@fontsize}
+% \begin{macro}{\tud@footcontent@font@size}
 % \changes{v2.06}{2018/08/01}{neu}^^A
-% \begin{macro}{\tud@footcontent@fontface}
+% \begin{macro}{\tud@footcontent@font@face}
 % \changes{v2.04}{2015/06/01}{neu}^^A
 % \changes{v2.05}{2015/07/21}{Bugfix für die Schriftgröße und den Durchschuss 
 %   bei einer entsprechenden Anpassung der Schriftart \val{tudheadings}}^^A
@@ -1950,10 +1950,10 @@
 %    \end{macrocode}
 % Dieser Befehl wird zur Formatierung der Schrift im Fußbereich definiert.
 %    \begin{macrocode}
-\newcommand*\tud@footcontent@usefont[1]{%
+\newcommand*\tud@footcontent@font@use[1]{%
   \usekomafont{tudheadings}{%
-    \tud@footcontent@fontsize%
-    \tud@footcontent@fontface%
+    \tud@footcontent@font@size%
+    \tud@footcontent@font@face%
     \selectfont%
     #1%
   }%
@@ -1963,8 +1963,8 @@
 % diesen Makros gesichert, weshalb diese vorher alloziert werden. Anschließend
 % erfolgt die Definition des Befehls.
 %    \begin{macrocode}
-\newcommand*\tud@footcontent@fontsize{}
-\newcommand*\tud@footcontent@fontface{}
+\newcommand*\tud@footcontent@font@size{}
+\newcommand*\tud@footcontent@font@face{}
 \newcommand*\tud@footcontent@left{}
 \newcommand*\tud@footcontent@right{}
 \let\tud@footcontent@right\@nnil
@@ -1974,12 +1974,12 @@
 %    \begin{macrocode}
 \newcommand*\footcontent{%
   \kernel@ifstar{%
-    \renewcommand*\tud@footcontent@fontsize{}%
+    \renewcommand*\tud@footcontent@font@size{}%
     \tud@footcontent@do%
   }{%
-    \renewcommand*\tud@footcontent@fontsize{%
-      \setlength\@tempdima{\tud@head@fontsize\p@}%
-      \fontsize{\@tempdima}{1.25\@tempdima}%
+    \renewcommand*\tud@footcontent@font@size{%
+      \setlength\@tempdimb{\tud@head@fontsize\p@}%
+      \fontsize{\@tempdimb}{1.25\@tempdimb}%
     }%
     \tud@footcontent@do%
   }%
@@ -2002,7 +2002,7 @@
 % verwendet, bleibt die bisherige Definition bestehen.
 %    \begin{macrocode}
   \if\detokenize{*#1}\relax\else%
-    \renewcommand*\tud@footcontent@fontface{#1}%
+    \renewcommand*\tud@footcontent@font@face{#1}%
   \fi%
 %    \end{macrocode}
 % Wurde in einem der Argumente für den linken und/oder rechten Inhalt ein Stern 
@@ -2018,9 +2018,9 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@footcontent@right
 % \end{macro}^^A \tud@footcontent@left
-% \end{macro}^^A \tud@footcontent@fontface
-% \end{macro}^^A \tud@footcontent@fontsize
-% \end{macro}^^A \tud@footcontent@usefont
+% \end{macro}^^A \tud@footcontent@font@face
+% \end{macro}^^A \tud@footcontent@font@size
+% \end{macro}^^A \tud@footcontent@font@use
 % \end{macro}^^A \tud@footcontent@@do
 % \end{macro}^^A \tud@footcontent@do
 % \end{KOMAfont}^^A tudheadings
@@ -2155,6 +2155,7 @@
 %
 % \begin{macro}{\tud@footcontent@use}
 % \changes{v2.04}{2015/06/01}{neu}^^A
+% \begin{macro}{\tud@footcontent@@use}
 % Mit \cs{tud@footcontent@use} erfolgt die Ausgabe der mit \cs{footcontent} 
 % definierten Inhalte. Dabei wird darauf geachtet, ob ein \DDC-Logo im Fuß
 % verwendet wird. Die Ausgabe erfolgt jedoch nur, falls tatsächlich etwas 
@@ -2190,31 +2191,9 @@
       \linespread{1}%
       \vss%
       \hbox to #2{%
-        \tud@footcontent@usefont{%
-%    \end{macrocode}
-% Wurde das optionale Argument nach dem obligatorischen nicht genutzt, so wird 
-% der Inhalt über die komplette Breite des Textbereiches ausgegeben.
-%    \begin{macrocode}
-          \ifx\tud@footcontent@right\@nnil%
-            \vtop{%
-              \hsize=\dimexpr#2-\@tempdimc\relax%
-              \strut\ignorespaces\tud@footcontent@left\strut%
-            }%
-%    \end{macrocode}
-% Im zweispaltigen modus werden zwei vertikale Boxen erzeugt, zwischen denen
-% der Abstand \cs{columnsep} eingefügt wird.
-%    \begin{macrocode}
-          \else%
-            \vtop{%
-              \hsize=\dimexpr(#2-\columnsep)/2\relax%
-              \strut\ignorespaces\tud@footcontent@left\strut%
-            }%
-            \hspace{\columnsep}%
-            \vtop{%
-              \hsize=\dimexpr(#2-\columnsep)/2-\@tempdimc\relax%
-              \strut\ignorespaces\tud@footcontent@right\strut%
-            }%
-          \fi%
+        \tud@footcontent@font@use{%
+          \setlength\@tempdima{#2}%
+          \tud@footcontent@@use{\@tempdima}%
           \hss%
         }%
       }%
@@ -2236,7 +2215,34 @@
     \hbox to #2{}%
   \fi%
 }
+\newcommand*\tud@footcontent@@use[1]{%
 %    \end{macrocode}
+% Wurde das optionale Argument nach dem obligatorischen nicht genutzt, so wird 
+% der Inhalt über die komplette Breite des Textbereiches ausgegeben.
+%    \begin{macrocode}
+  \ifx\tud@footcontent@right\@nnil%
+    \vtop{%
+      \hsize=\dimexpr#1-\@tempdimc\relax%
+      \strut\ignorespaces\tud@footcontent@left\strut%
+    }%
+%    \end{macrocode}
+% Im zweispaltigen modus werden zwei vertikale Boxen erzeugt, zwischen denen
+% der Abstand \cs{columnsep} eingefügt wird.
+%    \begin{macrocode}
+  \else%
+    \vtop{%
+      \hsize=\dimexpr(#1-\columnsep)/2\relax%
+      \strut\ignorespaces\tud@footcontent@left\strut%
+    }%
+    \hspace{\columnsep}%
+    \vtop{%
+      \hsize=\dimexpr(#1-\columnsep)/2-\@tempdimc\relax%
+      \strut\ignorespaces\tud@footcontent@right\strut%
+    }%
+  \fi%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@footcontent@@use
 % \end{macro}^^A \tud@footcontent@use
 %
 % \iffalse
