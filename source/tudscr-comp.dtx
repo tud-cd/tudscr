@@ -1,4 +1,4 @@
-% \CheckSum{1370}
+% \CheckSum{1385}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -52,7 +52,7 @@
 % \fi
 %
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
-\ProvidesFile{tudscr-comp.dtx}[2019/09/18 v2.06e TUD-Script\space%
+\ProvidesFile{tudscr-comp.dtx}[2019/09/19 v2.06e TUD-Script\space%
 %
 % \iffalse
 %</dtx>
@@ -1075,7 +1075,7 @@
 }%
 \newcommand*\tud@comp@on@poster@class{\@gobble}
 \@ifclassloaded{tudscrposter}{%
-  \renewcommand*\tud@comp@on@poster@class{\@firstofone}
+  \renewcommand*\tud@comp@on@poster@class{\@firstofone}%
 }{}%
 %    \end{macrocode}
 % \end{macro}^^A \tud@comp@on@poster@class
@@ -1194,7 +1194,7 @@
 %
 % Die folgenden Makros werden für die Hauptklassen definiert.
 %    \begin{macrocode}
-\tud@comp@on@main@class{
+\tud@comp@on@main@class{%
 %    \end{macrocode}
 %
 % \begin{macro}{\submitdate}
@@ -1205,11 +1205,11 @@
 % Es werden weitere Aliasbefehle für die Eingabefelder der \cls{tudbook}-Klasse 
 % definiert.
 %    \begin{macrocode}
-  \newcommand*\submitdate{\date}
-  \newcommand*\submittedon[1]{\gdef\datetext{#1}}
-  \newcommand*\supervisorII[1]{\g@addto@macro\@supervisor{\and\space#1}}
-  \newcommand*\supervisedby[1]{\gdef\supervisorname{#1}}
-  \newcommand*\supervisedIIby[1]{\gdef\supervisorothername{#1}}
+  \newcommand*\submitdate{\date}%
+  \newcommand*\submittedon[1]{\gdef\datetext{#1}}%
+  \newcommand*\supervisorII[1]{\g@addto@macro\@supervisor{\and\space#1}}%
+  \newcommand*\supervisedby[1]{\gdef\supervisorname{#1}}%
+  \newcommand*\supervisedIIby[1]{\gdef\supervisorothername{#1}}%
 %    \end{macrocode}
 % \end{macro}^^A \supervisedIIby
 % \end{macro}^^A \supervisedby
@@ -1225,13 +1225,16 @@
     \thesis{\dissertationname}%
     \let\supervisorname\refereename%
     \let\supervisorothername\refereeothername%
-  }
+  }%
 %    \end{macrocode}
 % \end{macro}^^A \dissertation
+% \begin{macro}{\chapterpage}
 % \begin{macro}{\if@tud@comp@chapterpage}
 % \begin{macro}{\tud@comp@chapterpage@set}
 % \begin{macro}{\tud@comp@chapterpage@unset}
 % \begin{macro}{\tud@comp@chapterpage@wrn}
+% \begin{macro}{\tud@chapter@pre}
+% \begin{macro}{\tud@chapter@app}
 % Die alte \cls{tudbook}-Klasse stellt den Befehl \cs{chapterpage} bereit.
 % Mit diesem ist es möglich, das Verhalten der Kapitelseiten~-- welches durch
 % die Option \opt{chapterpage} gesteuert wird~-- temporär umzuschalten, also
@@ -1246,7 +1249,11 @@
 % ursprünglichen Zustand geschaltet und der globale Schalter
 % \cs{if@tud@comp@chapterpage} zurückgesetzt.
 %    \begin{macrocode}
-  \newif\if@tud@comp@chapterpage
+  \newif\if@tud@comp@chapterpage%
+  \newcommand*\chapterpage{%
+    \global\@tud@comp@chapterpagetrue%
+    \tud@comp@chapterpage@wrn%
+  }%
   \newcommand*\tud@comp@chapterpage@set{%
     \if@tud@comp@chapterpage%
       \if@tud@chapterpage%
@@ -1255,48 +1262,50 @@
         \TUDoptions{chapterpage=true}%
       \fi%
     \fi%
-  }
+  }%
   \newcommand*\tud@comp@chapterpage@unset{%
     \tud@comp@chapterpage@set%
     \global\@tud@comp@chapterpagefalse%
-  }
+  }%
 %    \end{macrocode}
 % Da wie bereits beschrieben das Vorgehen äußerst fragwürdig ist, wird bei der
 % Verwendung von \cs{chapterpage} zumindest einmalig eine Warnung ausgegeben.
 %    \begin{macrocode}
   \newcommand*\tud@comp@chapterpage@wrn{%
     \PackageWarning{tudscrcomp}{%
-      The command \string\chapterpage\space is not\MessageBreak%
+      The command `\string\chapterpage'\space is not\MessageBreak%
       recommended. You should use the same style for\MessageBreak%
       chapters throughout the document%
     }%
     \global\let\tud@comp@chapterpage@wrn\relax%
-  }
+  }%
 %    \end{macrocode}
-% \end{macro}^^A \tud@comp@chapterpage@wrn
-% \end{macro}^^A \tud@comp@chapterpage@unset
-% \end{macro}^^A \tud@comp@chapterpage@set
-% \end{macro}^^A \if@tud@comp@chapterpage
-% \begin{macro}{\chapterpage}
-% \begin{macro}{\tud@chapter@pre}
-% \begin{macro}{\tud@chapter@app}
 % Hier erfolgt die notwendige Anpassungen der internen Gliederungsbefehle.
 %    \begin{macrocode}
   \AtEndPreamble{%
     \if@chapter%
-      \newcommand*\chapterpage{%
-        \global\@tud@comp@chapterpagetrue%
-        \tud@comp@chapterpage@wrn%
-      }
       \pretocmd{\tud@chapter@pre}{\tud@comp@chapterpage@set}%
         {}{\tud@patch@wrn{tud@chapter@pre}}%
       \apptocmd{\tud@chapter@app}{\tud@comp@chapterpage@unset}%
         {}{\tud@patch@wrn{tud@chapter@app}}%
+    \else%
+      \renewcommand*\tud@comp@chapterpage@wrn{%
+        \PackageWarning{tudscrcomp}{%
+          The command `\string\chapterpage'\space is not\MessageBreak%
+          active as the used document class does not provide\MessageBreak%
+          any chapters via `\string\chapter'%
+        }%
+        \global\let\tud@comp@chapterpage@wrn\relax%
+      }%
     \fi%
-  }
+  }%
 %    \end{macrocode}
 % \end{macro}^^A \tud@chapter@app
 % \end{macro}^^A \tud@chapter@pre
+% \end{macro}^^A \tud@comp@chapterpage@wrn
+% \end{macro}^^A \tud@comp@chapterpage@unset
+% \end{macro}^^A \tud@comp@chapterpage@set
+% \end{macro}^^A \if@tud@comp@chapterpage
 % \end{macro}^^A \chapterpage
 % \begin{environment}{theglossary}
 % \begin{macro}{\glossaryname}
@@ -1323,7 +1332,7 @@
       }{\endlist}%
       \newcommand\glossitem[1]{\item[] #1\par}%
     }{}%
-  }
+  }%
 %    \end{macrocode}
 % \end{macro}^^A \glossitem
 % \end{macro}^^A \glossaryname
@@ -1350,7 +1359,7 @@
 % Mit der Option \opt{bluebg} kann der Hintergrund des Posters in \val{HKS41} 
 % gesetzt werden.
 %    \begin{macrocode}
-\tud@comp@on@poster@class{
+\tud@comp@on@poster@class{%
   \TUD@key{bluebg}[true]{%
     \TUD@set@ifkey{bluebg}{@tempswa}{#1}%
     \ifx\FamilyKeyState\FamilyKeyStateProcessed%
@@ -1360,7 +1369,7 @@
         \TUDoptions{backcolor=false}%
       \fi%
     \fi%
-  }
+  }%
 }
 %    \end{macrocode}
 % \end{option}^^A bluebg
@@ -1379,14 +1388,14 @@
 % Möglichkeit zu geben, die Pakete selber ggf. mit Optionen zu laden, erfolgt 
 % die Anforderung der Pakete erst am ende der Präambel.
 %    \begin{macrocode}
-\tud@comp@on@poster@class{
+\tud@comp@on@poster@class{%
   \AtEndPreamble{%
     \RequirePackage{amsmath}[2016/06/28]%
     \RequirePackage{amsfonts}[2013/01/14]%
     \RequirePackage{calc}[2014/10/28]%
     \RequirePackage{textcomp}[2016/06/19]%
     \RequirePackage{tabularx}[2016/02/03]%
-  }
+  }%
 %    \end{macrocode}
 %
 % Die folgenden Makros werden für die Posterklasse definiert.
@@ -1396,11 +1405,11 @@
 % Der Seitenstil \pgs{tudposter} wird als Alias für \pgs{empty.tudheadings} 
 % definiert.
 %    \begin{macrocode}
-  \newcommand*\ps@tudposter{}
-  \let\ps@tudposter\ps@empty
+  \newcommand*\ps@tudposter{}%
+  \let\ps@tudposter\ps@empty%
   \AfterPackage*{scrlayer-scrpage}{%
     \DeclarePageStyleAlias{tudposter}{empty.tudheadings}%
-  }
+  }%
 %    \end{macrocode}
 % \end{layerpagestyle}^^A tudposter
 % \begin{macro}{\telefon}
@@ -1413,18 +1422,18 @@
 % Hier werden alle alten Feldbefehle auf die Pendants von \TUDScript gelegt und 
 % das Makro \cs{tud@split@author@list} um diese Befehle erweitert.
 %    \begin{macrocode}
-  \newrobustcmd*\telefon{\telephone}
+  \newrobustcmd*\telefon{\telephone}%
   \patchcmd{\tud@split@author@list}{telephone}{%
     telephone,telefon%
-  }{}{\tud@patch@wrn{tud@split@author@list}}
-  \newrobustcmd*\fax{\telefax}
+  }{}{\tud@patch@wrn{tud@split@author@list}}%
+  \newrobustcmd*\fax{\telefax}%
   \patchcmd{\tud@split@author@list}{telefax}{%
     telefax,fax%
-  }{}{\tud@patch@wrn{tud@split@author@list}}
-  \newrobustcmd*\email[1]{\emailaddress*{#1}}
+  }{}{\tud@patch@wrn{tud@split@author@list}}%
+  \newrobustcmd*\email[1]{\emailaddress*{#1}}%
   \patchcmd{\tud@split@author@list}{emailaddress}{%
     emailaddress,email%
-  }{}{\tud@patch@wrn{tud@split@author@list}}
+  }{}{\tud@patch@wrn{tud@split@author@list}}%
 %    \end{macrocode}
 % \end{macro}^^A \tud@split@author@list
 % \end{macro}^^A \email
@@ -1435,7 +1444,7 @@
 % Für die Angabe einer Website wird \cs{webpage*} verwendet, um etwaige Makros 
 % zur Formatierung nicht beachten zu müssen.
 %    \begin{macrocode}
-  \newcommand*\homepage[1]{\webpage*{#1}}
+  \newcommand*\homepage[1]{\webpage*{#1}}%
 %    \end{macrocode}
 % \end{macro}^^A \homepage
 % \begin{macro}{\zweitlogofile}
@@ -1455,29 +1464,29 @@
 % Einbindung der Logos verantwortlich sind (\cs{\dots{}logo}), wird allerdings
 % nicht unterstützt.
 %    \begin{macrocode}
-  \newcommand*\zweitlogofile[2][]{\headlogo[#1]{#2}}
+  \newcommand*\zweitlogofile[2][]{\headlogo[#1]{#2}}%
   \newcommand*\zweitlogo[1]{%
     \PackageWarning{tudscrcomp}{%
       It isn't possible to redefine the definition for\MessageBreak%
       including a logo in the header. Please see the\MessageBreak%
       documentation of \string\headlogo%
     }%
-  }
-  \newcommand*\institutslogofile[2][]{\footlogo[#1]{,,,,,,,#2,}}
+  }%
+  \newcommand*\institutslogofile[2][]{\footlogo[#1]{,,,,,,,#2,}}%
   \newcommand*\institutslogo[1]{%
     \PackageWarning{tudscrcomp}{%
       It isn't possible to redefine the definition for\MessageBreak%
       including a logo in the footer. Please see the\MessageBreak%
       documentation of \string\footlogo%
     }%
-  }
+  }%
   \newcommand*\drittlogofile[1]{%
     \PackageWarning{tudscrcomp}{%
       Nothing happened, you should use \string\footlogo\MessageBreak%
       instead. Please see the documentation of \string\footlogo\MessageBreak%
       and option `ddc' or `ddcfoot'%
     }%
-  }
+  }%
   \newcommand*\drittlogo[1]{%
     \PackageWarning{tudscrcomp}{%
       It isn't possible to redefine the definition for\MessageBreak%
@@ -1485,7 +1494,7 @@
       documentation of \string\footlogo\space and option\MessageBreak%
       `ddc' or `ddcfoot'%
     }%
-  }
+  }%
 %    \end{macrocode}
 % \end{macro}^^A \drittlogo
 % \end{macro}^^A \drittlogofile
@@ -1517,34 +1526,34 @@
 % entfernt.
 % \ToDo{Klonen Gliederungsebenen über Makro (Markus fragen?!)}[v2.??]
 %    \begin{macrocode}
-  \newcommand*\topsectionnumdepth{\sectionnumdepth}
-  \newcommand*\scr@topsection@sectionindent{\scr@section@sectionindent}
-  \newcommand*\scr@topsection@beforeskip{\scr@section@beforeskip}
-  \newcommand*\scr@topsection@afterskip{\scr@section@afterskip}
-  \newcommand*\topsectiontocdepth{\sectiontocdepth}
-  \newcommand*\scr@topsection@tocindent{\scr@section@tocindent}
-  \newcommand*\scr@topsection@tocnumwidth{\scr@section@tocnumwidth}
-  \newcommand*\l@topsection{\l@section}
+  \newcommand*\topsectionnumdepth{\sectionnumdepth}%
+  \newcommand*\scr@topsection@sectionindent{\scr@section@sectionindent}%
+  \newcommand*\scr@topsection@beforeskip{\scr@section@beforeskip}%
+  \newcommand*\scr@topsection@afterskip{\scr@section@afterskip}%
+  \newcommand*\topsectiontocdepth{\sectiontocdepth}%
+  \newcommand*\scr@topsection@tocindent{\scr@section@tocindent}%
+  \newcommand*\scr@topsection@tocnumwidth{\scr@section@tocnumwidth}%
+  \newcommand*\l@topsection{\l@section}%
   \DeclareNewSectionCommand[%
     style=section,%
     font={\usekomafont{section}},%
     beforeskip=\z@,%
-  ]{topsection}
-  \let\c@topsection\c@section
-  \newcommand*\topsubsectionnumdepth{\subsectionnumdepth}
-  \newcommand*\scr@topsubsection@sectionindent{\scr@subsection@sectionindent}
-  \newcommand*\scr@topsubsection@beforeskip{\scr@subsection@beforeskip}
-  \newcommand*\scr@topsubsection@afterskip{\scr@subsection@afterskip}
-  \newcommand*\topsubsectiontocdepth{\subsectiontocdepth}
-  \newcommand*\scr@topsubsection@tocindent{\scr@subsection@tocindent}
-  \newcommand*\scr@topsubsection@tocnumwidth{\scr@subsection@tocnumwidth}
-  \newcommand*\l@topsubsection{\l@subsection}
+  ]{topsection}%
+  \let\c@topsection\c@section%
+  \newcommand*\topsubsectionnumdepth{\subsectionnumdepth}%
+  \newcommand*\scr@topsubsection@sectionindent{\scr@subsection@sectionindent}%
+  \newcommand*\scr@topsubsection@beforeskip{\scr@subsection@beforeskip}%
+  \newcommand*\scr@topsubsection@afterskip{\scr@subsection@afterskip}%
+  \newcommand*\topsubsectiontocdepth{\subsectiontocdepth}%
+  \newcommand*\scr@topsubsection@tocindent{\scr@subsection@tocindent}%
+  \newcommand*\scr@topsubsection@tocnumwidth{\scr@subsection@tocnumwidth}%
+  \newcommand*\l@topsubsection{\l@subsection}%
   \DeclareNewSectionCommand[%
     style=section,%
     font={\usekomafont{subsection}},%
     beforeskip=\z@,%
-  ]{topsubsection}
-  \let\c@topsubsection\c@subsection
+  ]{topsubsection}%
+  \let\c@topsubsection\c@subsection%
 %    \end{macrocode}
 % \end{counter}^^A topsubsection
 % \end{macro}^^A \topsubsection
@@ -1567,16 +1576,16 @@
 %    \begin{macrocode}
   \newcommand*\centersection[2][\@nil]{%
     \tud@comp@centersection{section}{#1}{#2}%
-  }
+  }%
   \newcommand*\centersubsection[2][\@nil]{%
     \tud@comp@centersection{subsection}{#1}{#2}%
-  }
+  }%
   \newcommand*\topcentersection[2][\@nil]{%
     \tud@comp@centersection{topsection}{#1}{#2}%
-  }
+  }%
   \newcommand*\topcentersubsection[2][\@nil]{%
     \tud@comp@centersection{topsubsection}{#1}{#2}%
-  }
+  }%
 %    \end{macrocode}
 % Alle Gliederungsbefehle nutzen die passenden Ebenen mit der standardmaßig 
 % Ausrichtung und passen kurzfristig \cs{raggedsection} an. Dabei auch darauf 
@@ -1595,7 +1604,7 @@
     \endgroup%
     {\csuse{#1}{#3}}{\csuse{#1}[#2]{#3}}%
     \tud@cs@restore{raggedsection}%
-  }
+  }%
 %    \end{macrocode}
 % \end{macro}^^A \tud@comp@centersection
 % \end{macro}^^A \topcentersubsection
@@ -1614,15 +1623,15 @@
 % diese an die Einstellungen der zentralen \KOMAScript"=Benutzerschnittstelle 
 % gekoppelt.
 %    \begin{macrocode}
-  \newcommand\sectiontopskip{\scr@section@beforeskip}
-  \newcommand\subsectiontopskip{\scr@subsection@beforeskip}
+  \newcommand\sectiontopskip{\scr@section@beforeskip}%
+  \newcommand\subsectiontopskip{\scr@subsection@beforeskip}%
 %    \end{macrocode}
 % \end{macro}^^A \subsectiontopskip
 % \end{macro}^^A \sectiontopskip
 % \begin{counter}{secnumdepth}
 % Standardmäßig wird die Nummerierung aller Gliederungsebenen deaktiviert.
 %    \begin{macrocode}
-  \setcounter{secnumdepth}{\m@ne}
+  \setcounter{secnumdepth}{\m@ne}%
 %    \end{macrocode}
 % \end{counter}^^A secnumdepth
 % \begin{macro}{\fusszeile}
@@ -1633,7 +1642,7 @@
 % in einem und/oder beiden Argumente von \cs{footcontent} ein Stern \val{*} 
 % verwendet, so bleibt der bisherige Inhalt erhalten.
 %    \begin{macrocode}
-  \newcommand*\fusszeile[2][]{\footcontent[#1]{#2}}
+  \newcommand*\fusszeile[2][]{\footcontent[#1]{#2}}%
   \newcommand*\footcolumn[2]{%
     \ifnumber{#1}{%
       \ifcase#1\relax%
@@ -1644,7 +1653,7 @@
         \footcontent{*}[#2]%
       \fi%
     }{}%
-  }
+  }%
 %    \end{macrocode}
 % \end{macro}^^A \footcolumn
 % \end{macro}^^A \fusszeile
@@ -1659,17 +1668,17 @@
 % Außerdem wird eine Umgebung für farbige Tabellen sowie zwei Umschaltbefehle 
 % für die farbliche Ausprägung der Tabellenzeilen definiert.
 %    \begin{macrocode}
-  \PassOptionsToPackage{table}{xcolor}
-  \newif\if@tud@comp@graytable
-  \newcommand*\blautabelle{\@tud@comp@graytablefalse}
-  \newcommand*\grautabelle{\@tud@comp@graytabletrue}
+  \PassOptionsToPackage{table}{xcolor}%
+  \newif\if@tud@comp@graytable%
+  \newcommand*\blautabelle{\@tud@comp@graytablefalse}%
+  \newcommand*\grautabelle{\@tud@comp@graytabletrue}%
   \newenvironment{farbtabellen}{%
     \if@tud@comp@graytable%
       \rowcolors{1}{HKS92!20}{HKS92!10}%
     \else%
       \rowcolors{1}{HKS41!20}{HKS41!10}%
     \fi%
-  }{}
+  }{}%
 %    \end{macrocode}
 % \end{macro}^^A \grautabelle
 % \end{macro}^^A \blautabelle
@@ -1701,7 +1710,7 @@
         a valid dimension expression.%
       }%
     }%
-  }
+  }%
 %    \end{macrocode}
 % \end{macro}^^A \schnittrand
 %
@@ -1725,8 +1734,8 @@
 % in zwei asymmetrischen Spalten, wohingegen die \TUDScript-Klassen diesen
 % zentriert und symmetrisch zum Satzspiegel platzieren.
 %    \begin{macrocode}
-\tud@comp@on@poster@class{
-  \newif\if@tud@mathposterfoot
+\tud@comp@on@poster@class{%
+  \newif\if@tud@mathposterfoot%
   \TUD@key{tudmathposterfoot}[true]{%
     \TUD@set@ifkey{tudmathposterfoot}{@tud@mathposterfoot}{#1}%
     \ifx\FamilyKeyState\FamilyKeyStateProcessed%
@@ -1744,7 +1753,7 @@
         ]%
       \fi%
     \fi%
-  }
+  }%
 %    \end{macrocode}
 % Die Option \opt{cdfoot} wird um Werte für die Einstellung des Posterfußes
 % erweitert.
@@ -1761,7 +1770,7 @@
         \TUDoptions{tudmathposterfoot=true}%
       \fi%
     \fi%
-  }
+  }%
 }
 %    \end{macrocode}
 % \end{macro}^^A \if@tud@mathposterfoot
@@ -1785,8 +1794,8 @@
 % für ein etwaiges Logo verwendet wird. Dieses Verhalten kann über die Option 
 % \opt{tudmathposterfoot} aktiviert werden und wird hier nachgebildet.
 %    \begin{macrocode}
-\tud@comp@on@poster@class{
-  \newcommand*\tud@comp@mathposterwidth{4.2\tud@len@widemargin}
+\tud@comp@on@poster@class{%
+  \newcommand*\tud@comp@mathposterwidth{4.2\tud@len@widemargin}%
   \patchcmd{\tud@footcontent@use}{%
     \tud@footcontent@@use{\@tempdima}%
   }{%
@@ -1795,7 +1804,7 @@
     \else%
       \tud@footcontent@@use{\@tempdima}%
     \fi%
-  }{}{\tud@patch@wrn{tud@footcontent@use}}
+  }{}{\tud@patch@wrn{tud@footcontent@use}}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@comp@mathposterwidth
@@ -2202,8 +2211,8 @@
 % unerwünscht, weshalb das Laden hiermit unterbunden wird.
 %    \begin{macrocode}
 \newcommand*\tud@x@tudfonts@prevent{%
-  \RequirePackage{amsmath}%
-  \RequirePackage{amsfonts}%
+  \RequirePackage{amsmath}[2016/06/28]%
+  \RequirePackage{amsfonts}[2013/01/14]%
   \newif\if@tudfonts@nodin%
   \let\DeclareTudMathSizes\@gobblefour%
   \let\tud@x@tudfonts@prevent\relax%
