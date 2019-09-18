@@ -1,4 +1,4 @@
-% \CheckSum{3124}
+% \CheckSum{3082}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -52,7 +52,7 @@
 % \fi
 %
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
-\ProvidesFile{tudscr-fonts.dtx}[2019/09/18 v2.06e TUD-Script\space%
+\ProvidesFile{tudscr-fonts.dtx}[2019/09/19 v2.06e TUD-Script\space%
 %
 % \iffalse
 %</dtx>
@@ -106,6 +106,7 @@
 %   den Mathematiksatz verbessert}^^A
 % \changes{v2.04c}{2015/11/29}{Bugfix für \pkg{fontspec} bei fehlenden 
 %   Schriften}^^A
+% \changes{v2.06e}{2019/09/10}{Mathematikschriftstärke passend zu Fließtext}^^A
 %
 % \section{Die Hausschrift der \TnUD}
 %
@@ -153,7 +154,9 @@
 % \pkg{scrextend} benötigt. 
 %    \begin{macrocode}
 \ifcsdef{KOMAClassName}{}{%
-  \RequirePackage{scrextend}[2013/12/19]%
+  \RequirePackage{scrextend}[%
+%!TUD@KOMAVersion
+  ]%
 }
 %    \end{macrocode}
 % Wird das Paket \pkg{tudscrfonts} nach einer der Klassen verwendet, welche die 
@@ -320,10 +323,10 @@
 \newcommand*\tud@cdfont@fam@lf{opensans-TLF}
 \newcommand*\tud@cdfont@fam@osf{opensans-TOsF}
 \if@tud@cdoldfont@active
-  \renewcommand*\tud@cdfont@fam{lun}
-  \renewcommand*\tud@cdfont@fam@lf{lun}
-  \renewcommand*\tud@cdfont@fam@osf{lun}
-  \newcommand*\tud@cdfont@db{0m6}
+  \renewcommand*\tud@cdfont@fam{lun}%
+  \renewcommand*\tud@cdfont@fam@lf{lun}%
+  \renewcommand*\tud@cdfont@fam@osf{lun}%
+  \newcommand*\tud@cdfont@db{0m6}%
 \fi
 %    \end{macrocode}
 % \end{macro}^^A \tud@cdfont@db
@@ -1111,6 +1114,7 @@
 % \end{option}^^A fontsize
 % \begin{option}{relspacing}
 % \changes{v2.05}{2015/12/17}{neu}^^A
+% \changes{v2.06e}{2019/09/10}{stärkerer Einfluss der Schriftgröße}^^A
 % \begin{macro}{\if@tud@relspacing}
 % \changes{v2.05}{2015/12/17}{neu}^^
 % Die Option \opt{relspacing} setzt einige Abstände und Längen in Abhängigkeit 
@@ -1508,8 +1512,8 @@
     \multiply\bigskipamount by 4%
   }{%
     \begingroup%
-      \setlength{\@tempdima}{\abovedisplayskip}
-      \setlength{\@tempdimb}{\dimexpr\@tempdima/3\relax}
+      \setlength{\@tempdima}{\abovedisplayskip}%
+      \setlength{\@tempdimb}{\dimexpr\@tempdima/3\relax}%
       \edef\tud@res@a{%
         \endgroup%
         \noexpand\setlength{\noexpand\bigskipamount}{%
@@ -1653,31 +1657,34 @@
 % definiert. Diese können so im Dokument unabhängig von der Option 
 % \opt{cdfont} genutzt werden.
 %    \begin{macrocode}
-    \newrobustcmd*\cdfontln{\usefont{\encodingdefault}{\tud@cdfont@fam}{l}{n}}
-    \newrobustcmd*\cdfontrn{\usefont{\encodingdefault}{\tud@cdfont@fam}{m}{n}}
-    \newrobustcmd*\cdfontsn{\usefont{\encodingdefault}{\tud@cdfont@fam}{sb}{n}}
-    \newrobustcmd*\cdfontbn{\usefont{\encodingdefault}{\tud@cdfont@fam}{b}{n}}
-    \newrobustcmd*\cdfontxn{\usefont{\encodingdefault}{\tud@cdfont@fam}{eb}{n}}
-    \newrobustcmd*\cdfontli{\usefont{\encodingdefault}{\tud@cdfont@fam}{l}{it}}
-    \newrobustcmd*\cdfontri{\usefont{\encodingdefault}{\tud@cdfont@fam}{m}{it}}
-    \newrobustcmd*\cdfontsi{\usefont{\encodingdefault}{\tud@cdfont@fam}{sb}{it}}
-    \newrobustcmd*\cdfontbi{\usefont{\encodingdefault}{\tud@cdfont@fam}{b}{it}}
-    \newrobustcmd*\cdfontxi{\usefont{\encodingdefault}{\tud@cdfont@fam}{eb}{it}}
+    \def\tud@res@a##1##2##3{%
+      \newrobustcmd*##1{\usefont{\f@encoding}{\tud@cdfont@fam}{##2}{##3}}%
+    }%
+    \tud@res@a\cdfontln{l}{n}%
+    \tud@res@a\cdfontrn{m}{n}%
+    \tud@res@a\cdfontsn{sb}{n}%
+    \tud@res@a\cdfontbn{b}{n}%
+    \tud@res@a\cdfontxn{eb}{n}%
+    \tud@res@a\cdfontli{l}{it}%
+    \tud@res@a\cdfontri{m}{it}%
+    \tud@res@a\cdfontsi{sb}{it}%
+    \tud@res@a\cdfontbi{b}{it}%
+    \tud@res@a\cdfontxi{eb}{it}%
 %    \end{macrocode}
 % Sind die notwendigen Schriften nicht installiert, werden die Schalter für die
 % Rückfallebene so definiert, dass diese eine Warnung ausgeben.
 %    \begin{macrocode}
   \else%
-    \tud@cdfont@fallback\cdfontln{OpenSans-Light}{md}{up}
-    \tud@cdfont@fallback\cdfontrn{OpenSans-Regular}{md}{up}
-    \tud@cdfont@fallback\cdfontsn{OpenSans-SemiBold}{md}{up}
-    \tud@cdfont@fallback\cdfontbn{OpenSans-Bold}{bf}{up}
-    \tud@cdfont@fallback\cdfontxn{OpenSans-ExtraBold}{bf}{up}
-    \tud@cdfont@fallback\cdfontli{OpenSans-LightItalic}{md}{it}
-    \tud@cdfont@fallback\cdfontri{OpenSans-Italic}{md}{it}
-    \tud@cdfont@fallback\cdfontsi{OpenSans-SemiBoldItalic}{md}{it}
-    \tud@cdfont@fallback\cdfontbi{OpenSans-BoldItalic}{bf}{it}
-    \tud@cdfont@fallback\cdfontxi{OpenSans-ExtraBoldItalic}{bf}{it}
+    \tud@cdfont@fallback\cdfontln{OpenSans-Light}{md}{up}%
+    \tud@cdfont@fallback\cdfontrn{OpenSans-Regular}{md}{up}%
+    \tud@cdfont@fallback\cdfontsn{OpenSans-SemiBold}{md}{up}%
+    \tud@cdfont@fallback\cdfontbn{OpenSans-Bold}{bf}{up}%
+    \tud@cdfont@fallback\cdfontxn{OpenSans-ExtraBold}{bf}{up}%
+    \tud@cdfont@fallback\cdfontli{OpenSans-LightItalic}{md}{it}%
+    \tud@cdfont@fallback\cdfontri{OpenSans-Italic}{md}{it}%
+    \tud@cdfont@fallback\cdfontsi{OpenSans-SemiBoldItalic}{md}{it}%
+    \tud@cdfont@fallback\cdfontbi{OpenSans-BoldItalic}{bf}{it}%
+    \tud@cdfont@fallback\cdfontxi{OpenSans-ExtraBoldItalic}{bf}{it}%
   \fi%
 %    \end{macrocode}
 % Außerdem werden für die Schriften noch die entsprechenden Textauswahlbefehle
@@ -1770,27 +1777,30 @@
 %    \end{macrocode}
 % Die Schalter zur expliziten Auswahl für die \Univers-Schriftschnitte.
 %    \begin{macrocode}
-      \newrobustcmd*\univln{\usefont{\encodingdefault}{\tud@cdfont@fam}{l}{n}}
-      \newrobustcmd*\univrn{\usefont{\encodingdefault}{\tud@cdfont@fam}{m}{n}}
-      \newrobustcmd*\univbn{\usefont{\encodingdefault}{\tud@cdfont@fam}{b}{n}}
-      \newrobustcmd*\univxn{\usefont{\encodingdefault}{\tud@cdfont@fam}{eb}{n}}
-      \newrobustcmd*\univls{\usefont{\encodingdefault}{\tud@cdfont@fam}{l}{it}}
-      \newrobustcmd*\univrs{\usefont{\encodingdefault}{\tud@cdfont@fam}{m}{it}}
-      \newrobustcmd*\univbs{\usefont{\encodingdefault}{\tud@cdfont@fam}{b}{it}}
-      \newrobustcmd*\univxs{\usefont{\encodingdefault}{\tud@cdfont@fam}{eb}{it}}
+      \def\tud@res@a##1##2##3{%
+        \newrobustcmd*##1{\usefont{\f@encoding}{\tud@cdfont@fam}{##2}{##3}}%
+      }%
+      \tud@res@a\univln{l}{n}%
+      \tud@res@a\univrn{m}{n}%
+      \tud@res@a\univbn{b}{n}%
+      \tud@res@a\univxn{eb}{n}%
+      \tud@res@a\univls{l}{it}%
+      \tud@res@a\univrs{m}{it}%
+      \tud@res@a\univbs{b}{it}%
+      \tud@res@a\univxs{eb}{it}%
 %    \end{macrocode}
 % Sind die notwendigen Schriften nicht installiert, werden die Schalter für die
 % Rückfallebene so definiert, dass diese eine Warnung ausgeben.
 %    \begin{macrocode}
     \else%
-      \tud@cdfont@fallback\univln{Univers-Light}{md}{up}
-      \tud@cdfont@fallback\univrn{Univers}{md}{up}
-      \tud@cdfont@fallback\univbn{Univers-Bold}{bf}{up}
-      \tud@cdfont@fallback\univxn{Univers-Black}{bf}{up}
-      \tud@cdfont@fallback\univls{Univers-LightOblique}{md}{it}
-      \tud@cdfont@fallback\univrs{Univers-Oblique}{md}{it}
-      \tud@cdfont@fallback\univbs{Univers-BoldOblique}{bf}{it}
-      \tud@cdfont@fallback\univxs{Univers-BlackOblique}{bf}{it}
+      \tud@cdfont@fallback\univln{Univers-Light}{md}{up}%
+      \tud@cdfont@fallback\univrn{Univers}{md}{up}%
+      \tud@cdfont@fallback\univbn{Univers-Bold}{bf}{up}%
+      \tud@cdfont@fallback\univxn{Univers-Black}{bf}{up}%
+      \tud@cdfont@fallback\univls{Univers-LightOblique}{md}{it}%
+      \tud@cdfont@fallback\univrs{Univers-Oblique}{md}{it}%
+      \tud@cdfont@fallback\univbs{Univers-BoldOblique}{bf}{it}%
+      \tud@cdfont@fallback\univxs{Univers-BlackOblique}{bf}{it}%
     \fi%
 %    \end{macrocode}
 % Außerdem werden für die Schriften noch die entsprechenden Textauswahlbefehle
@@ -1869,7 +1879,7 @@
 % Bei der Schriftauswahl wird die entsprechende Mathematikschrift aktiviert.
 %    \begin{macrocode}
       \newrobustcmd*\tud@db{%
-        \usefont{\encodingdefault}{\tud@cdfont@db}{b}{n}%
+        \usefont{\f@encoding}{\tud@cdfont@db}{b}{n}%
         \if@tud@cdmath@active\mathversion{tuddin}\fi%
       }%
       \newrobustcmd*\dinbn{\tud@db}%
