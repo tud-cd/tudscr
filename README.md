@@ -57,6 +57,8 @@ Versionen
 + Schriftstärke im Mathematikmodus wird passend zu den Einstellungen für den 
   Fließtext (`cdfont=light/heavy/normalbold/ultrabold`) gewählt
 + Kombination `cd=true` und `cdfont=false` verwendet Open Sans in Überschriften
++ `relspacing=true` Schriftgröße hat stärkeren Einfluss, unsauberer Übergang zu
+  nicht vordefinierten Zwischengrößen behoben
 + **tudscrposter** Umgebungen `figurehere` und `tablehere`
 
 **v2.06d** (2019/08/27)
