@@ -3,15 +3,19 @@ cd %~dp0
 echo =========================================================================
 echo  Festlegen der Version, welche erstellt werden soll
 echo =========================================================================
-for /f "tokens=1,2,3 delims= " %%a in (
+set version=
+setlocal enabledelayedexpansion
+for /f "tokens=1,2,3* delims= " %%a in (
   'findstr /r \TUD@Version@Check{[0-9][0-9][0-9][0-9]/[0-9][0-9]/[0-9][0-9] source\tudscr-version.dtx'
 ) do (
-  if "%%c" == "TUD-Script}" (
+  set version=%%c
+  if "!version:~0,10!"=="TUD-Script" (
     set version=%%b
   ) else (
     set version=%%b-%%c
   )
 )
+endlocal & set version=%version%
 if exist temp rmdir temp /s /q > nul
 if exist release-%version% rmdir release-%version% /s /q > nul
 echo.
