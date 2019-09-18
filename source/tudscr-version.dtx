@@ -79,41 +79,40 @@
 %    \end{macrocode}
 %
 % \begin{macro}{\TUD@Version}
+% \begin{macro}{\TUDScriptVersion}
+% \begin{macro}{\TUDScriptVersionNumber}
+% \begin{macro}{\TUD@KOMAVersion}
+% \begin{macro}{\TUD@KOMAVersionNumber}
 % \begin{macro}{\TUD@Version@Check}
 % \changes{v2.02}{2014/07/22}{Expandieren der Versionsangabe bei der Verwendung 
 %   von \pkg{docstrip} ermöglicht}^^A
-% \begin{macro}{\TUDScriptVersion}
-% \begin{macro}{\TUDScriptVersionNumber}
 % Das Makro \cs{TUD@Version} gibt an, zu welcher \TUDScript"~Version die 
 % Datei gehört. Die Klassen und Pakete des Bundles verwenden dieses Makro
 % außerdem zur eigenen Versionsangabe. Je nachdem, ob \cs{TUD@Version}
 % bereits definiert ist oder nicht, wird mit \cs{TUD@Version@Check} die
 % Definition überprüft oder eine globale Definition vorgenommen. Da das Ganze
 % auch bei der Erstellung der Dokumentation geschieht, wird \cs{makeatletter}
-% innerhalb einer Gruppe verwendet. In \cs{TUDScriptVersion} wird die 
-% Versioninformation für den Anwender definiert.
+% innerhalb einer Gruppe verwendet. In \cs{TUD@KOMAVersion} wird die mindestens 
+% notwendige Version von \KOMAScript definiert.
 %    \begin{macrocode}
 \begingroup
   \catcode`\@11\relax%
 %<*!(class|package)>
   \ifx\newcommand\undefined
-    \gdef\TUD@Version@Check#1{%
+    \gdef\TUD@Version@Check#1#2{%
       \gdef\TUD@Version{\space\space#1}%
-      \gdef\TUDScriptVersion{\space\space#1}%
+      \gdef\TUD@KOMAVersion{\space\space#2}%
       \aftergroup\endinput%
     }
   \else
 %</!(class|package)>
   \ifx\TUD@Version\@undefined%
-    \newcommand*\TUD@Version@Check[1]{%
+    \newcommand*\TUD@Version@Check[2]{%
       \gdef\TUD@Version{#1}%
-      \gdef\TUDScriptVersion{#1}%
-      \def\@tempb##1 v##2 ##3\relax##4\relax{\gdef\TUDScriptVersionNumber{##2}}%
-      \edef\@tempa{\TUD@Version}%
-      \expandafter\@tempb\@tempa\relax? ? \relax\relax%
+      \gdef\TUD@KOMAVersion{#2}%
     }%
   \else%
-    \newcommand*\TUD@Version@Check[1]{%
+    \newcommand*\TUD@Version@Check[2]{%
       \def\@tempa{#1}%
       \ifx\TUD@Version\@tempa\else%
         \@latex@warning@no@line{%
@@ -128,19 +127,31 @@
 %<*!(class|package)>
   \fi%
 %</!(class|package)>
-  \TUD@Version@Check{2019/09/18 v2.06e TUD-Script}
+  \TUD@Version@Check{2019/09/18 v2.06e TUD-Script}{2018/03/30 v3.25 KOMA-Script}
+  \ifx\TUDScriptVersion\@undefined%
+    \xdef\TUDScriptVersion{\TUD@Version}%
+    \def\@tempa#1 v#2 #3\relax#4\relax#5{\gdef#5{#2}}%
+    \expandafter\@tempa\TUD@Version ? ?\relax\relax{\TUDScriptVersionNumber}%
+    \expandafter\@tempa\TUD@KOMAVersion ? ?\relax\relax{\TUD@KOMAVersionNumber}%
+  \fi%
 \endgroup
 %    \end{macrocode}
+% \end{macro}^^A \TUD@Version@Check
+% \end{macro}^^A \TUD@KOMAVersionNumber
+% \end{macro}^^A \TUD@KOMAVersion
 % \end{macro}^^A \TUDScriptVersionNumber
 % \end{macro}^^A \TUDScriptVersion
-% \end{macro}^^A \TUD@Version@Check
 % \end{macro}^^A \TUD@Version
 %
 % \iffalse
 %</identify>
 %<*dtx>
+% \fi
+%
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
-\ProvidesFile{tudscr-version.dtx}[\TUDScriptVersion\space (versions)]%
+\ProvidesFile{tudscr-version.dtx}[\TUDScriptVersion\space(versions)]%
+%
+% \iffalse
 \documentclass[english,ngerman,xindy]{tudscrdoc}
 \ifpdftex{
   \usepackage[T1]{fontenc}
