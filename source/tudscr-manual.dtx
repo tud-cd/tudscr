@@ -1,4 +1,4 @@
-% \CheckSum{4482}
+% \CheckSum{4457}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -269,10 +269,9 @@
 %    \end{macrocode}
 % Ist der Eintrag bereits erfolgt, wird der verbliebene Teil der Liste 
 % angehangen.
-% \ToDo{\cs{expandafter}\cs{edef}\cs{expandafter} ist quatsch, oder?}[v2.07]
 %    \begin{macrocode}
       \if@tud@list@sorted%
-        \expandafter\edef\expandafter\@tempb\expandafter{\@tempb,\@tempa}%
+        \protected@edef\@tempb{\@tempb,\@tempa}%
       \else%
 %    \end{macrocode}
 % Liegt der Eintrag in alphabetischer Reihenfolge vor dem aktuellen der 
@@ -281,16 +280,8 @@
 % eine Sonderbehandlung erfolgen. Anschließend wird \cs{@tud@list@sortedtrue} 
 % gesetzt.
 %    \begin{macrocode}
-        \expandafter\ifnum\pdf@strcmp{#1}{\@tempa}<\z@\relax%
-          \ifx\@tempb\@empty%
-            \expandafter\edef\expandafter\@tempb\expandafter{%
-              #1,\@tempa%
-            }%
-          \else%
-            \expandafter\edef\expandafter\@tempb\expandafter{%
-              \@tempb,#1,\@tempa%
-            }%
-          \fi%
+        \ifnum\pdf@strcmp{#1}{\@tempa}<\z@\relax%
+          \protected@edef\@tempb{\ifx\@tempb\@empty\else\@tempb,\fi#1,\@tempa}%
           \@tud@list@sortedtrue%
         \else%
 %    \end{macrocode}
@@ -298,11 +289,7 @@
 % Liste, so wird dieser (noch) nicht eingefügt. Der Sonderfall des ersten
 % Elementes wird abgedeckt.
 %    \begin{macrocode}
-          \ifx\@tempb\@empty%
-            \expandafter\edef\expandafter\@tempb\expandafter{\@tempa}%
-          \else%
-            \expandafter\edef\expandafter\@tempb\expandafter{\@tempb,\@tempa}%
-          \fi%
+          \protected@edef\@tempb{\ifx\@tempb\@empty\else\@tempb,\fi\@tempa}%
         \fi%
       \fi%
     }%
@@ -311,7 +298,7 @@
 % dies hier am Ende der Liste.
 %    \begin{macrocode}
     \if@tud@list@sorted\else%
-      \expandafter\edef\expandafter\@tempb\expandafter{\@tempb,#1}%
+      \protected@edef\@tempb{\@tempb,#1}%
     \fi%
 %    \end{macrocode}
 % Die temporäre Liste \cs{@tempb} wird auf \cs{tud@templist} überschrieben.
@@ -529,7 +516,7 @@
 % \changes{v2.05}{2015/10/29}{neu}^^A
 % \begin{macro}{\tud@trace@markup}
 % \changes{v2.05}{2015/10/29}{neu}^^A
-% Mit \cs{tracinglabels} wird die Nachverfolgung aller Aufrufe von
+% Mit \cs{tracingmarkup} wird die Nachverfolgung aller Aufrufe von
 % \cs{Process@@MarkupDeclare} und \cs{Process@@MarkupInline} durch
 % \cs{Process@Markup} inklusive all ihrer Argumente aktiviert. Dies ist für die 
 % Kontrolle des erzeugten Markups sinnvoll.
