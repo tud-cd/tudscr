@@ -1,4 +1,4 @@
-% \CheckSum{1385}
+% \CheckSum{1394}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -1092,7 +1092,7 @@
 % geladenen Klasse generell bereitgestellt werden.
 %
 %    \begin{macrocode}
-\PassOptionsToPackage{oldcolors}{tudscrcolor}
+\PassOptionsToPackage{extended}{tudscrcolor}
 %    \end{macrocode}
 %
 % \iffalse
@@ -1118,17 +1118,21 @@
 % \end{macro}^^A \institut
 % \end{macro}^^A \fachrichtung
 % \end{macro}^^A \einrichtung
+% \begin{macro}{\tudfont}
+% \changes{v2.04}{2015/04/24}{\cls{tudmathposter} wird unterstützt}^^A
 % \begin{macro}{\dinBold}
 % \changes{v2.05}{2015/07/13}{neu}^^A
 % \begin{macro}{\dinfamily}
 % \changes{v2.05}{2015/07/13}{neu}^^A
 % Für die explizite Schriftauswahl gibt es ebenfalls zwei ältere Befehle.
 %    \begin{macrocode}
+\newcommand*\tudfont{\cdfont}
 \newcommand*\dinBold{\dinbn}
 \newcommand*\dinfamily{\dinbn}
 %    \end{macrocode}
 % \end{macro}^^A \dinfamily
 % \end{macro}^^A \dinBold
+% \end{macro}^^A \tudfont
 %
 % \iffalse
 %</body>
@@ -1198,23 +1202,23 @@
 %    \end{macrocode}
 %
 % \begin{macro}{\submitdate}
-% \begin{macro}{\submittedon}
 % \begin{macro}{\supervisorII}
+% \begin{macro}{\submittedon}
 % \begin{macro}{\supervisedby}
 % \begin{macro}{\supervisedIIby}
 % Es werden weitere Aliasbefehle für die Eingabefelder der \cls{tudbook}-Klasse 
 % definiert.
 %    \begin{macrocode}
   \newcommand*\submitdate{\date}%
-  \newcommand*\submittedon[1]{\gdef\datetext{#1}}%
   \newcommand*\supervisorII[1]{\g@addto@macro\@supervisor{\and\space#1}}%
+  \newcommand*\submittedon[1]{\gdef\datetext{#1}}%
   \newcommand*\supervisedby[1]{\gdef\supervisorname{#1}}%
   \newcommand*\supervisedIIby[1]{\gdef\supervisorothername{#1}}%
 %    \end{macrocode}
 % \end{macro}^^A \supervisedIIby
 % \end{macro}^^A \supervisedby
-% \end{macro}^^A \supervisorII
 % \end{macro}^^A \submittedon
+% \end{macro}^^A \supervisorII
 % \end{macro}^^A \submitdate
 % \begin{macro}{\dissertation}
 % Bei der Definition des Typs der Abschlussarbeit mit \cs{dissertation} wird
@@ -1354,6 +1358,49 @@
 % Die hier bereitgestellten Optionen und Befehle werden durch die Klasse 
 % \cls{tudmathposter} bzw. \cls{tudposter} definiert.
 %
+% \begin{option}{tudmathpackages}
+% \changes{v2.06e}{2019/09/19}{neu}^^A
+% Die Klasse \cls{tudmathposter} lädt allerhand Pakete. Dies ist jedoch für den 
+% Anwender alles andere als vorteilhaft, da dadurch unter Umständen Konflikte
+% mit anderen Paketen entstehen oder der Nutzer im Zweifelsfall gar nicht weiß, 
+% dass verwendete Befehle aus bestimmten Paketen entspringen. Dennoch wird aus
+% Kompatibilitätsgründen diese Option bereitgestellt, um die Pakete ggf. Ende
+% der Präambel zu laden.
+%    \begin{macrocode}
+\tud@comp@on@poster@class{%
+  \newif\if@tud@comp@tudmathpackages
+  \TUD@key{tudmathpackages}[true]{%
+    \TUD@set@ifkey{tudmathpackages}{@tud@comp@tudmathpackages}{#1}%
+  }
+  \AtEndPreamble{%
+    \TUD@key@toolate{tudmathpackages}%
+  }
+}
+%    \end{macrocode}
+% \end{option}^^A tudmathpackages
+%
+% \iffalse
+%</option>
+%<*body>
+% \fi
+%
+%    \begin{macrocode}
+\tud@comp@on@poster@class{%
+  \AtEndPreamble{%
+    \if@tud@comp@tudmathpackages%
+      \RequirePackage{calc}[2014/10/28]%
+      \RequirePackage{textcomp}[2016/06/19]%
+      \RequirePackage{tabularx}[2016/02/03]%
+    \fi%
+  }%
+}
+%    \end{macrocode}
+%
+% \iffalse
+%</body>
+%<*option>
+% \fi
+%
 % \begin{option}{bluebg}
 % \changes{v2.05}{2016/04/17}{neu}^^A
 % Mit der Option \opt{bluebg} kann der Hintergrund des Posters in \val{HKS41} 
@@ -1379,26 +1426,10 @@
 %<*body>
 % \fi
 %
-% Die Klasse \cls{tudmathposter} lädt allerhand Pakete. Dies ist jedoch für den 
-% Anwender alles andere als vorteilhaft, da dadurch unter Umständen Konflikte
-% mit anderen Paketen entstehen oder der Nutzer im Zweifelsfall gar nicht weiß, 
-% dass verwendete Befehle aus bestimmten Paketen entspringen. Dennoch werden 
-% aus Kompatibilitätsgründen einige Pakete geladen, um bestehende Dokumente 
-% trotz alledem nach der Portierung kompiliert werden können. Um den Nutzer die 
-% Möglichkeit zu geben, die Pakete selber ggf. mit Optionen zu laden, erfolgt 
-% die Anforderung der Pakete erst am ende der Präambel.
+% Die folgenden Makros werden für die Posterklasse definiert.
 %    \begin{macrocode}
 \tud@comp@on@poster@class{%
-  \AtEndPreamble{%
-    \RequirePackage{amsmath}[2016/06/28]%
-    \RequirePackage{amsfonts}[2013/01/14]%
-    \RequirePackage{calc}[2014/10/28]%
-    \RequirePackage{textcomp}[2016/06/19]%
-    \RequirePackage{tabularx}[2016/02/03]%
-  }%
 %    \end{macrocode}
-%
-% Die folgenden Makros werden für die Posterklasse definiert.
 %
 % \begin{layerpagestyle}{tudposter}
 % \changes{v2.05}{2016/07/26}{neu}^^A
@@ -1634,29 +1665,6 @@
   \setcounter{secnumdepth}{\m@ne}%
 %    \end{macrocode}
 % \end{counter}^^A secnumdepth
-% \begin{macro}{\fusszeile}
-% \changes{v2.05}{2016/04/17}{neu}^^A
-% \begin{macro}{\footcolumn}
-% \changes{v2.05}{2016/04/17}{neu}^^A
-% Mit diesen Befehlen lässt sich der Inhalt des Fußbereiches angepassen. Wird
-% in einem und/oder beiden Argumente von \cs{footcontent} ein Stern \val{*} 
-% verwendet, so bleibt der bisherige Inhalt erhalten.
-%    \begin{macrocode}
-  \newcommand*\fusszeile[2][]{\footcontent[#1]{#2}}%
-  \newcommand*\footcolumn[2]{%
-    \ifnumber{#1}{%
-      \ifcase#1\relax%
-        \footcontent{#2}%
-      \or%
-        \footcontent{#2}[*]%
-      \or%
-        \footcontent{*}[#2]%
-      \fi%
-    }{}%
-  }%
-%    \end{macrocode}
-% \end{macro}^^A \footcolumn
-% \end{macro}^^A \fusszeile
 % \begin{environment}{farbtabellen}
 % \changes{v2.05}{2016/04/17}{neu}^^A
 % \begin{macro}{\if@tud@comp@graytable}
@@ -1782,9 +1790,31 @@
 %<*body>
 % \fi
 %
+% \begin{macro}{\fusszeile}
+% \changes{v2.05}{2016/04/17}{neu}^^A
+% \begin{macro}{\footcolumn}
+% \changes{v2.05}{2016/04/17}{neu}^^A
 % \begin{macro}{\tud@footcontent@use}
 % \begin{macro}{\tud@comp@mathposterwidth}
 % \changes{v2.05}{2016/04/17}{neu}^^A
+% Mit diesen Befehlen lässt sich der Inhalt des Fußbereiches angepassen. Wird
+% in einem und/oder beiden Argumente von \cs{footcontent} ein Stern \val{*} 
+% verwendet, so bleibt der bisherige Inhalt erhalten.
+%    \begin{macrocode}
+\tud@comp@on@poster@class{%
+  \newcommand*\fusszeile[2][]{\footcontent[#1]{#2}}%
+  \newcommand*\footcolumn[2]{%
+    \ifnumber{#1}{%
+      \ifcase#1\relax%
+        \footcontent{#2}%
+      \or%
+        \footcontent{#2}[*]%
+      \or%
+        \footcontent{*}[#2]%
+      \fi%
+    }{}%
+  }%
+%    \end{macrocode}
 % Um die Option \opt{tudmathposterfoot} umzusetzen, muss für die Ausgabe des 
 % Fußbereichs eine Anpassung des Makros \cs{tud@footcontent@use} erfolgen.
 % Normalerweise wird der Fußbereich in zwei gleichbreite Spalten über die
@@ -1794,7 +1824,6 @@
 % für ein etwaiges Logo verwendet wird. Dieses Verhalten kann über die Option 
 % \opt{tudmathposterfoot} aktiviert werden und wird hier nachgebildet.
 %    \begin{macrocode}
-\tud@comp@on@poster@class{%
   \newcommand*\tud@comp@mathposterwidth{4.2\tud@len@widemargin}%
   \patchcmd{\tud@footcontent@use}{%
     \tud@footcontent@@use{\@tempdima}%
@@ -1809,6 +1838,8 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@comp@mathposterwidth
 % \end{macro}^^A \tud@footcontent@use
+% \end{macro}^^A \footcolumn
+% \end{macro}^^A \fusszeile
 %
 % \iffalse
 %</body>
@@ -2211,8 +2242,6 @@
 % unerwünscht, weshalb das Laden hiermit unterbunden wird.
 %    \begin{macrocode}
 \newcommand*\tud@x@tudfonts@prevent{%
-  \RequirePackage{amsmath}[2016/06/28]%
-  \RequirePackage{amsfonts}[2013/01/14]%
   \newif\if@tudfonts@nodin%
   \let\DeclareTudMathSizes\@gobblefour%
   \let\tud@x@tudfonts@prevent\relax%
