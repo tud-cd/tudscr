@@ -1,4 +1,4 @@
-% \CheckSum{4457}
+% \CheckSum{4500}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -443,13 +443,22 @@
 %
 % \begin{macro}{\tracinglabels}
 % \changes{v2.05}{2015/10/29}{neu}^^A
-% \begin{macro}{\tud@trace@lbl@created@add}
-% \changes{v2.05}{2015/10/29}{neu}^^A
-% \begin{macro}{\tud@trace@lbl@missing@add}
-% \changes{v2.05}{2015/10/29}{neu}^^A
+% \changes{v2.06e}{2019/09/19}{optionales Argument unterstützt mehrere Werte}^^A
+% \begin{macro}{\tud@trace@lbl@add}
+% \changes{v2.06e}{2019/09/19}{neu}^^A
+% \begin{macro}{\tud@trace@lbl@wlog}
+% \changes{v2.06e}{2019/09/19}{neu}^^A
 % \begin{macro}{\tud@trace@lbl@created@list}
 % \changes{v2.05}{2015/10/29}{neu}^^A
+% \begin{macro}{\tud@trace@lbl@matched@list}
+% \changes{v2.06e}{2019/09/19}{neu}^^A
 % \begin{macro}{\tud@trace@lbl@missing@list}
+% \changes{v2.05}{2015/10/29}{neu}^^A
+% \begin{macro}{\tud@trace@lbl@created@add}
+% \changes{v2.05}{2015/10/29}{neu}^^A
+% \begin{macro}{\tud@trace@lbl@matched@add}
+% \changes{v2.06e}{2019/09/19}{neu}^^A
+% \begin{macro}{\tud@trace@lbl@missing@add}
 % \changes{v2.05}{2015/10/29}{neu}^^A
 % Mit \cs{tracinglabels} wird die Nachverfolgung aller erstellten Labels in der 
 % Dokumentation aktiviert werden. Die Label werden zum einen direkt im Logfile
@@ -457,60 +466,78 @@
 % Sternversion des Befehls erzeugt keine sortierte Liste. Über das optionale 
 % Argument kann mit verschiedenen Schlüsseln zudem eingestellt werden, ob alle
 % Label (\val{all}) oder nur die erstellten (\val{created}) beziehungsweise die
-% fehlenden (\val{missing}) nachverfolgt werden sollen.
+% fehlenden (\val{missing}) nachverfolgt werden sollen. Labels, die innerhalb 
+% des Index auftreten, werden nicht nachverfolgt, da diese ohnehin im Dokument 
+% erfasst wurden.
 %    \begin{macrocode}
+\newcommand*\tud@trace@lbl@created@list{}
+\newcommand*\tud@trace@lbl@matched@list{}
+\newcommand*\tud@trace@lbl@missing@list{}
 \newcommand*\tud@trace@lbl@created@add[1]{}
+\newcommand*\tud@trace@lbl@matched@add[1]{}
 \newcommand*\tud@trace@lbl@missing@add[1]{}
 \NewDocumentCommand\tracinglabels{!s !O{missing}}{%
-  \newcommand*\tud@trace@lbl@created@list{}%
-  \newcommand*\tud@trace@lbl@missing@list{}%
-  \@tempswafalse%
-  \ifstr{#2}{created}{\@tempswatrue}{}%
-  \ifstr{#2}{all}{\@tempswatrue}{}%
-  \if@tempswa%
-    \renewcommand*\tud@trace@lbl@created@add[1]{%
-      \typeout{%
-        +++++ label created: ##1 on page \thepage%
-      }%
-      \xifinlist{##1}{\tud@trace@lbl@created@list}{}{%
-        \listxadd\tud@trace@lbl@created@list{##1}%
-      }%
+  \let\tud@res@b\@empty%
+  \let\tud@res@c\@empty%
+  \@for\tud@res@a:=#2\do{\listeadd\tud@res@b{\tud@res@a}}%
+  \@for\tud@res@a:={created,matched,missing}\do{%
+    \cslet{tud@trace@lbl@\tud@res@a @add}\@gobble%
+    \ifinlist{all}{\tud@res@b}{%
+      \listeadd\tud@res@c{\tud@res@a}%
+    }{%
+      \xifinlist{\tud@res@a}{\tud@res@b}{%
+        \listeadd\tud@res@c{\tud@res@a}%
+      }{}%
     }%
+  }%
+  \def\tud@trace@lbl@wlog{\relax}%
+  \def\tud@res@a##1{%
+    \csdef{tud@trace@lbl@##1@add}####1{\tud@trace@lbl@add{##1}{####1}}%
     \IfBooleanF{#1}{%
-      \AfterEndDocument{%
-        \typeout{+++++ labels created (sorted) +++++}%
-        \tud@list@sort\tud@trace@lbl@created@list%
-        \forlistloop\typeout{\tud@trace@lbl@created@list}%
+      \appto\tud@trace@lbl@wlog{%
+        \ifcsvoid{tud@trace@lbl@##1@list}{%
+          \wlog{+++++ no labels ##1 +++++}%
+        }{%
+          \wlog{+++++ labels ##1 (sorted) +++++}%
+          \expandafter\tud@list@sort\csname tud@trace@lbl@##1@list\endcsname%
+%    \end{macrocode}
+% Damit der Befehl \cs{wlog} nicht mit jedem Schleifendurchlauf aufgerufen 
+% werden muss, wird ein Hilfsmakro mit dem notwendigen Inhalt bestückt.
+%    \begin{macrocode}
+          \let\tud@res@b\@empty%
+          \def\tud@res@a####1{\appto\tud@res@b{####1^^J}}%
+          \forlistcsloop\tud@res@a{tud@trace@lbl@##1@list}%
+          \wlog{\tud@res@b}%
+        }%
       }%
     }%
-  \fi%
-  \@tempswafalse%
-  \ifstr{#2}{missing}{\@tempswatrue}{}%
-  \ifstr{#2}{all}{\@tempswatrue}{}%
-  \if@tempswa%
-    \renewcommand*\tud@trace@lbl@missing@add[1]{%
-      \typeout{%
-        +++++ label missing: ##1 on page \thepage%
-      }%
-      \xifinlist{##1}{\tud@trace@lbl@missing@list}{}{%
-        \listxadd\tud@trace@lbl@missing@list{##1}%
-      }%
-    }%
-    \IfBooleanF{#1}{%
-      \AfterEndDocument{%
-        \typeout{+++++ labels missing (sorted) +++++}%
-        \tud@list@sort\tud@trace@lbl@missing@list%
-        \forlistloop\typeout{\tud@trace@lbl@missing@list}%
-      }%
-    }%
-  \fi%
+  }%
+  \forlistloop{\tud@res@a}{\tud@res@c}%
 }
 \@onlypreamble\tracinglabels
+\newcommand*\tud@trace@lbl@add[2]{%
+  \if@tud@index\else%
+    \begingroup%
+      \edef\tud@res@a{#2}%
+      \@onelevel@sanitize\tud@res@a%
+      \wlog{+++++ label #1: \tud@res@a\space on page \thepage}%
+      \xifinlistcs{\tud@res@a}{tud@trace@lbl@#1@list}{}{%
+        \listcsxadd{tud@trace@lbl@#1@list}{\tud@res@a}%
+      }%
+    \endgroup%
+  \fi%
+}
+\newcommand*\tud@trace@lbl@wlog{\relax}
+\AfterEndDocument{\tud@trace@lbl@wlog}
 %    \end{macrocode}
-% \end{macro}^^A \tud@trace@lbl@missing@list
-% \end{macro}^^A \tud@trace@lbl@created@list
 % \end{macro}^^A \tud@trace@lbl@missing@add
+% \end{macro}^^A \tud@trace@lbl@matched@add
 % \end{macro}^^A \tud@trace@lbl@created@add
+% \end{macro}^^A \tud@trace@lbl@missing@list
+% \end{macro}^^A \tud@trace@lbl@matched@list
+% \end{macro}^^A \tud@trace@lbl@created@list
+% \end{macro}^^A \tud@trace@lbl@wlog
+% \end{macro}^^A \tud@trace@lbl@add
 % \end{macro}^^A \tracinglabels
 % \begin{macro}{\tracingmarkup}
 % \changes{v2.05}{2015/10/29}{neu}^^A
@@ -524,7 +551,7 @@
 \newcommand*\tud@trace@markup[2]{}
 \newcommand*\tracingmarkup{%
   \renewcommand*\tud@trace@markup[2]{%
-    \typeout{+++++ markup ##1 on page \thepage^^J##2}%
+    \wlog{+++++ markup ##1 on page \thepage^^J##2}%
   }%
 }
 \@onlypreamble\tracingmarkup
@@ -557,8 +584,8 @@
     \endgroup%
   }%
   \AfterEndDocument{%
-    \typeout{+++++ bundle list +++++}%
-    \forlistloop\typeout{\tud@trace@bdl@list}%
+    \wlog{+++++ bundle list +++++}%
+    \forlistloop\wlog{\tud@trace@bdl@list}%
   }%
 }
 \@onlypreamble\tracingbundle
@@ -2809,6 +2836,7 @@
           \ifstr{#6}{url}{\def\@tempa{\href{#5}{\@tempc}}\let\@tempb\relax}{}%
         }%
       }%
+      \tud@trace@lbl@matched@add{#1}%
     }{%
 %</class>
 %    \end{macrocode}
