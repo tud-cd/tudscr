@@ -1,4 +1,4 @@
-% \CheckSum{4493}
+% \CheckSum{4484}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -651,51 +651,6 @@
   \renewcaptionname{ngerman}{\subsectionautorefname}{Abschnitt}%
   \renewcaptionname{ngerman}{\subsubsectionautorefname}{Unterabschnitt}%
 %    \end{macrocode}
-% \begin{macro}{\tudhyperdef}
-% \changes{v2.02}{2014/10/27}{neu}^^A
-% \begin{macro}{\tudhyperref}
-% \changes{v2.02}{2014/10/27}{neu}^^A
-% \begin{macro}{\tud@manualname}
-% \changes{v2.05}{2015/1q/19}{neu}^^A
-% Diese Befehle dienen sowohl zum Definieren von Textankern im Handbuch als 
-% auch  zum Referenzieren auf diese. Bei der Erstellung des Ankers mit 
-% \cs{tudhyperdef} wird zusätzlich auch noch ein Label (\cs{label}) erzeugt.
-% Der Anker wird mit \cs{Hy@raisedlink}~-- wie es auch bei pkg{hyperref}-Labels 
-% geschieht~-- über die Grundlinie gehoben. Die Sternversion sollte nach
-% Überschriften verwendet werden und verschiebt die vertikale Position des
-% Ankers noch weiter nach oben.
-%    \begin{macrocode}
-  \newcommand*\tud@manualname{tudscr}%
-%<*class>
-  \NewDocumentCommand\tudhyperdef{s t' m}{%
-    \@tempswafalse%
-    \IfBooleanT{#1}{\@tempswatrue\setlength\@tempdima{3\baselineskip}}%
-    \IfBooleanT{#2}{\@tempswatrue\setlength\@tempdima{15\baselineskip}}%
-    \if@tempswa%
-      \raisebox{\@tempdima}[0pt][0pt]{\hyperdef{\tud@manualname}{#3}{}}%
-      \par\nobreak\vskip\dimexpr-\parskip-\baselineskip\relax%
-      \@afterindentfalse\@afterheading%
-    \else%
-      \Hy@raisedlink{\hyperdef{\tud@manualname}{#3}{}}\ignorespaces%
-    \fi%
-    \label{#3}%
-    \tud@trace@lbl@created@add{#3}%
-  }%
-  \newcommand*\tudhyperref[2]{\hyperref{}{\tud@manualname}{#1}{#2}}%
-%</class>
-%    \end{macrocode}
-% Aus einem Tutorial erfolgen alle Querverweise mit \cs{tudhyperref} auf das 
-% Anwenderhandbuch \enquote*{tudscr} im übergeordneten Ordner.
-%    \begin{macrocode}
-%<*package>
-  \newcommand*\tudhyperref[2]{%
-    \hyperref{../\tud@manualname.pdf}{\tud@manualname}{#1}{#2}%
-  }%
-%</package>
-%    \end{macrocode}
-% \end{macro}^^A \tud@manualname
-% \end{macro}^^A \tudhyperref
-% \end{macro}^^A \tudhyperdef
 % \begin{macro}{\autorefname}
 % \begin{macro}{\auto@refname}
 % \begin{macro}{\auto@@refname}
@@ -849,6 +804,7 @@
 %    \begin{macrocode}
   \providecommand*\hyperpage[1]{#1}%
   \providecommand*\autoref{??\xspace\kernel@ifstar{\ref}{\ref}}%
+  \providecommand*\autorefname[1][]{??\xspace}%
 %    \end{macrocode}
 % \end{macro}^^A \autoref
 % \end{macro}^^A \hyperpage
@@ -856,6 +812,7 @@
 % \begin{macro}{\hyperref}
 % \begin{macro}{\tud@hyperref@a}
 % \begin{macro}{\tud@hyperref@b}
+% \begin{macro}{\Hy@raisedlink}
 % Mit \cs{hyperdef} wird ein ein Label direkt vor dem Text eingefügt.
 %    \begin{macrocode}
   \providecommand*\hyperdef[3]{\label{#1.#2}#3}%
@@ -868,7 +825,9 @@
   }%
   \newcommand*\tud@hyperref@a[2][]{#2}%
   \newcommand*\tud@hyperref@b[4]{#4}%
+  \providecommand\Hy@raisedlink[1]{#1}%
 %    \end{macrocode}
+% \end{macro}^^A \Hy@raisedlink
 % \end{macro}^^A \tud@hyperref@b
 % \end{macro}^^A \tud@hyperref@a
 % \end{macro}^^A \hyperref
@@ -896,34 +855,76 @@
 % \end{macro}^^A \sectionautorefname
 % \end{macro}^^A \chapterautorefname
 % \end{macro}^^A \partautorefname
-% Anschließend folgen die für Anwenderdokumentation eigens definierten Befehle.
-%    \begin{macrocode}
-%<*class>
-  \ProvideDocumentCommand\tudhyperdef{s t' m}{\label{#3}}%
-%</class>
-  \providecommand*\tudhyperref[2]{#2}%
-  \providecommand*\autorefname[1][]{??\xspace}%
 %
 % \iffalse
 %</!doc>
-%<*doc>
 % \fi
 %
-%    \end{macrocode}
 % Und hier der Teil für die Quelltextdokumentation.
 %    \begin{macrocode}
+%<*doc>
   \providecommand*\hypersourcedef[1]{}%
   \providecommand*\hypersource@def{}%
   \providecommand*\hypersource@ref@codeline[2][]{}%
   \providecommand*\hypersource@ref@page[2][]{}%
-%
-% \iffalse
 %</doc>
-% \fi
-%
-%    \begin{macrocode}
 }
 %    \end{macrocode}
+%
+% \iffalse
+%<*!doc>
+% \fi
+%
+% \begin{macro}{\tudhyperdef}
+% \changes{v2.02}{2014/10/27}{neu}^^A
+% \begin{macro}{\tudhyperref}
+% \changes{v2.02}{2014/10/27}{neu}^^A
+% \begin{macro}{\tud@manualname}
+% \changes{v2.05}{2015/1q/19}{neu}^^A
+% Diese Befehle dienen sowohl zum Definieren von Textankern im Handbuch als 
+% auch  zum Referenzieren auf diese. Bei der Erstellung des Ankers mit 
+% \cs{tudhyperdef} wird zusätzlich auch noch ein Label (\cs{label}) erzeugt.
+% Der Anker wird mit \cs{Hy@raisedlink}~-- wie es auch bei pkg{hyperref}-Labels 
+% geschieht~-- über die Grundlinie gehoben. Die Sternversion sollte nach
+% Überschriften verwendet werden und verschiebt die vertikale Position des
+% Ankers noch weiter nach oben.
+%    \begin{macrocode}
+\newcommand*\tud@manualname{tudscr}%
+%<*class>
+\NewDocumentCommand\tudhyperdef{s t' m}{%
+  \@tempswafalse%
+  \IfBooleanT{#1}{\@tempswatrue\setlength\@tempdima{3\baselineskip}}%
+  \IfBooleanT{#2}{\@tempswatrue\setlength\@tempdima{15\baselineskip}}%
+  \if@tempswa%
+    \raisebox{\@tempdima}[0pt][0pt]{\hyperdef{\tud@manualname}{#3}{}}%
+    \par\nobreak\vskip\dimexpr-\parskip-\baselineskip\relax%
+    \@afterindentfalse\@afterheading%
+  \else%
+    \Hy@raisedlink{\hyperdef{\tud@manualname}{#3}{}}\ignorespaces%
+  \fi%
+  \label{#3}%
+  \tud@trace@lbl@created@add{#3}%
+}%
+\newrobustcmd*\tudhyperref[2]{\hyperref{}{\tud@manualname}{#1}{#2}}%
+%</class>
+%    \end{macrocode}
+% Aus einem Tutorial erfolgen alle Querverweise mit \cs{tudhyperref} auf das 
+% Anwenderhandbuch \enquote*{tudscr} im übergeordneten Ordner.
+%    \begin{macrocode}
+%<*package>
+\newrobustcmd*\tudhyperref[2]{%
+  \hyperref{../\tud@manualname.pdf}{\tud@manualname}{#1}{#2}%
+}%
+%</package>
+%    \end{macrocode}
+% \end{macro}^^A \tud@manualname
+% \end{macro}^^A \tudhyperref
+% \end{macro}^^A \tudhyperdef
+%
+% \iffalse
+%</!doc>
+% \fi
+%
 % \begin{macro}{\hrfn}
 % \changes{v2.02}{2014/08/16}{neu}^^A
 % \changes{v2.04}{2015/02/18}{Schriftgröße mit \cs{scalebox}}^^A
@@ -1006,7 +1007,7 @@
 % \begin{macro}{\if@tud@declare}
 % \begin{macro}{\if@tud@subdeclare}
 % \changes{v2.06e}{2019/09/22}{neu}^^A
-% \begin{macro}{\if@openindex}
+% \begin{macro}{\if@tud@openindex}
 % \begin{macro}{\tud@declare@num}
 % \changes{v2.05}{2015/11/01}{neu}^^A
 % Dies sin ein paar Hilfsmakros zur Steuerung des Markup sowie der Ausgabe von
@@ -1015,14 +1016,14 @@
 % Befehle für das Markup in der Ausgabe als Deklaration oder anderweiteig
 % erfolgt. Zusätzlich kann mit \cs{if@tud@subdeclare} definiert werden, ob 
 % etwaige angehängte Werte an Optionen etc. direkt oder auf einer Unterebene im 
-% Index eingetragen werden sollen. Der Schalter \cs{if@openindex} wird zu 
+% Index eingetragen werden sollen. Der Schalter \cs{if@tud@openindex} wird zu 
 % Beginn einer Deklaration auf \val{true} gesetzt und vor dem Beenden auf
 % \val{false}. Damit wird bestimmt, ob ein öffnender oder ein schließender
 % Indexeintrag erzeugt werden soll.
 %    \begin{macrocode}
 \newif\if@tud@declare
 \newif\if@tud@subdeclare
-\newif\if@openindex
+\newif\if@tud@openindex
 %    \end{macrocode}
 % Das Makro \cs{tud@declare@num} bestimmt innerhalb einer Deklaration, wie 
 % das Markup erfolgen soll. Die möglichen Werte sind bei der Beschreibung von
@@ -1031,7 +1032,7 @@
 \newcommand*\tud@declare@num{0}
 %    \end{macrocode}
 % \end{macro}^^A \tud@declare@num
-% \end{macro}^^A \if@openindex
+% \end{macro}^^A \if@tud@openindex
 % \end{macro}^^A \if@tud@subdeclare
 % \end{macro}^^A \if@tud@declare
 % \begin{environment}{Declaration}
@@ -1210,8 +1211,8 @@
 %    \end{macrocode}
 % Am Ende der Umgebungen wird das übergebenen Hauptargument erneut ausgeführt,
 % was zum Beenden der Indexeinträge für die jeweilige Deklaration führt
-% (\cs{@openindexfalse}, siehe \cs{Process@Index}). Dafür werden die Makros für
-% die Angabe obligatorischer und optionaler Parameter lokal umdefiniert.
+% (\cs{@tud@openindexfalse}, siehe \cs{Process@Index}). Dafür werden die Makros 
+% für die Angabe obligatorischer und optionaler Parameter lokal umdefiniert.
 %    \begin{macrocode}
 \newcommand*\tud@declare@end[2]{%
   \ifx\tud@declaration@list\relax\else%
@@ -1222,7 +1223,7 @@
     }%
   \fi%
   \vskip-\lastskip%
-  \@tud@declaretrue\@openindexfalse#1\@tud@declarefalse%
+  \@tud@declaretrue\@tud@openindexfalse#1\@tud@declarefalse%
   \pagebreak[1]%
 }
 %    \end{macrocode}
@@ -1292,7 +1293,7 @@
 \NewDocumentCommand\tud@declare@special@start{o m m}{%
   \Changed@At@CreateList(#2){#1}%
   \def\tud@declare@num{#3}%
-  \@tud@declaretrue\@openindextrue#2\@tud@declarefalse%
+  \@tud@declaretrue\@tud@openindextrue#2\@tud@declarefalse%
   \def\tud@declare@num{0}%
 }
 \newcommand*\tud@declare@special@end[1]{%
@@ -1302,7 +1303,7 @@
       forget to print this list with \string\printchangedatlist?%
     }%
   \fi%
-  \@tud@declaretrue\@openindexfalse#1\@tud@declarefalse%
+  \@tud@declaretrue\@tud@openindexfalse#1\@tud@declarefalse%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@declare@special@end
@@ -1351,7 +1352,7 @@
 %    \begin{macrocode}
     \global\tud@lastskip=\z@%
     \@afterindentfalse\@afterheading%
-    \@tud@declaretrue\@openindextrue%
+    \@tud@declaretrue\@tud@openindextrue%
 %    \end{macrocode}
 % Die deklarierten Optionen, Umgebungen, Befehle etc. werden umrahmt. Dabei
 % erfolgt die Ausgabe mithilfe einer Box, um die Größe des Deklarationsrahmens
@@ -2200,9 +2201,9 @@
 % dieser \emph{expandiert} wird!
 %    \begin{macrocode}
       \ifxblank{#2}{%
-        \let\tud@reserved\endgroup%
+        \def\tud@reserved{\endgroup}%
       }{%
-        \protected@edef\tud@reserved{\noexpand\endgroup#3}%
+        \protected@edef\tud@reserved{\endgroup#3}%
       }%
     \tud@reserved%
   }%
@@ -2646,7 +2647,7 @@
   \IfValueT{#2}{\addto@hook\tud@toks@{=#2=}}%
   \IfValueT{#3}{\addto@hook\tud@toks@{[#3]}}%
 %    \end{macrocode}
-% Erfolgt gerade eine Deklaration, wird mit dem Schalter \cs{if@openindex} 
+% Erfolgt gerade eine Deklaration, wird mit dem Schalter \cs{if@tud@openindex} 
 % eigentlich unterschieden, ob ein öffnender oder ein schließender Indexeintrag
 % erzeugt werden soll. Dieser wird mit \cs{Process@@Index} erstellt. Um den 
 % schließenden Indexeintrag zu erzeugen, ist die Ausführung des Hauptargumentes 
@@ -2658,7 +2659,7 @@
 %   \begin{macrocode}
 %<*class>
   \if@tud@declare%
-    \if@openindex%
+    \if@tud@openindex%
       \IfValueT{#6}{%
         \ClassWarning{tudscrmanual}{%
           It is not possible to use any cross-reference\MessageBreak%
@@ -3710,7 +3711,7 @@
 %    \begin{macrocode}
 %<*class>
   \if@tud@declare%
-    \if@openindex%
+    \if@tud@openindex%
       \IfValueT{#5}{%
         \ClassWarning{tudscrmanual}{%
           It is not possible to use any indexing format\MessageBreak%
@@ -3719,9 +3720,9 @@
         }%
       }%
 %    \end{macrocode}
-% Jetzt folgt~-- abhängig vom Schalter \cs{if@openindex}~-- der öffnende oder 
-% schließende Indexeintrag der Deklaration. Für den schließenden ist dabei eine
-% Formatierung des Schlüssels nicht notwendig.
+% Jetzt folgt~-- abhängig vom Schalter \cs{if@tud@openindex}~-- der öffnende 
+% oder schließende Indexeintrag der Deklaration. Für den schließenden ist dabei
+% eine Formatierung des Schlüssels nicht notwendig.
 %    \begin{macrocode}
       \index[\tud@lbl@tmp-declare]{%
         \tud@idx@val\tud@idx@key{}@\tud@idx@fmt|(declare%
@@ -4327,9 +4328,7 @@
 % aufgerufen, wodurch in den Makros \cs{tud@idx@key}, \cs{tud@idx@fmt} und
 % \cs{tud@idx@val} die passend formatierten Indexeinträge enthalten sind.
 %    \begin{macrocode}
-      \@tud@changedattrue%
-      #3%
-      \@tud@changedatfalse%
+      \@tud@changedattrue#3\@tud@changedatfalse%
 %    \end{macrocode}
 % Das vierte Argument erstellt in der Änderungsliste einen Untereintrag für den
 % im dritten Argument gegebenen Markup-Befehl. Dies wird für Anmerkungen zu 
