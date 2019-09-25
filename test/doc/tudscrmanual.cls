@@ -436,11 +436,81 @@
 \renewcommand*\fullref[1]{\hyperref[#1]{\autoref*{#1}\space\vpageref{#1}}}
 \AfterPackage*{hyperref}{\RequirePackage[babel]{microtype}[2013/05/23]}
 \TUD@UnwindPackage{hyperref}{\RequirePackage[babel]{microtype}[2013/05/23]}
+\newcommand*\tud@lbl@fmt{%
+  \def~{-}%
+  \let\IeC\@firstofone%
+  \def\"##1{##1e}%
+  \def\ss{ss}%
+  \def\dots{...}%
+  \let\NoCaseChange\@firstofone%
+}
+\newcommand*\ProcessorCreateLabel[1]{%
+  \in@{:}{#1}%
+  \ifin@\else%
+    \ClassError{tudscrmanual}{Wrong formatted label}{%
+      A label has to be used at least with '<bundle>:<markup>'\MessageBreak%
+      but you used \detokenize{#1}.%
+    }%
+  \fi%
+  \SplitArgument{2}{:}{#1}%
+  \expandafter\Processor@CreateLabel\ProcessedArgument%
+}
+\newcommand*\Processor@CreateLabel[3]{%
+% TODO enclose label part in <...>?
+  \begingroup%
+    \Markup@Gobble%
+    \tud@lbl@fmt%
+    \IfValueTF{#3}{%
+      \edef\@tempa{#1:#2:#3}%
+    }{%
+      \tud@attr@get\@tempb{#2}%
+      % TODO bundle prefix sollte implizit gegeben sein
+      \IfValueTF{#1}{%
+        \ifxblank{#1}{% TODO leeres bundle sollte nicht vorkommen
+          \edef\@tempa{\tud@bdl@dflt:\@tempb:#2}%
+        }{%
+          \edef\@tempa{#1:\@tempb:#2}%
+        }%
+      }{%
+        \edef\@tempa{\tud@bdl@curr:\@tempb:#2}%
+      }%
+    }%
+    \edef\@tempc{%
+      \noexpand\endgroup%
+      \def\noexpand\ProcessedArgument{%
+        \expandafter\detokenize\expandafter{\@tempa}%
+      }%
+    }%
+  \@tempc%
+}
+\newcommand*\tud@lbl@tmp{}
+% TODO \relax in #3 > !:...:... für \File etc. bzw. gar kein label?!
+\NewDocumentCommand\tud@lbl@get{s m >{\ProcessorCreateLabel}m d==}{%
+  \edef#2{#3}%
+  \tud@doifPValue[\tud@lbl@fmt]{#4}{\noexpand\eappto\noexpand#2{=#4}}%
+  \IfBooleanF{#1}{\tud@if@lbl@exists{#2}{}{\edef#2{#3}}}%
+}
+\newcommand*\tud@if@lbl@exists[1]{%
+  \begingroup%
+    \protected@edef\tud@res@a{%
+      \endgroup%
+      \noexpand\tud@if@lbl@@exists{#1}%
+    }%
+  \tud@res@a%
+}
+\NewDocumentCommand\tud@if@lbl@@exists{>{\ProcessorCreateLabel}m}{%
+  \ifcsdef{r@#1}{%
+    \expandafter\@firstoftwo%
+  }{%
+    \expandafter\@secondoftwo%
+  }%
+}
 % TODO drittes makro \tud@bdl@unknown -> mappen auf alles, was nicht definiert
 % TODO search for both macros
 \newcommand*\tud@bdl@dflt{\Package{tudscr}}
 \newcommand*\tud@bdl@curr{}
 \let\tud@bdl@curr\tud@bdl@dflt
+% TODO kann vermutlich auch raus
 \newcommand*\tud@if@bdl{%
   \ifx\tud@bdl@curr\tud@bdl@dflt
     \expandafter\@secondoftwo%
@@ -448,23 +518,69 @@
     \expandafter\@firstoftwo%
   \fi%
 }
+\newcommand*\tud@bdl@@seek{}
+\newcommand*\tud@bdl@@@seek{}
+\def\tud@bdl@@seek#1:#2:#3\@nil{%
+  \def\tud@bdl@@@seek##1##2=##3={%
+    \tud@lbl@get##1{##2:#2:#3}%
+  }%
+}%
+\NewDocumentCommand\tud@bdl@seek{m m r== r()}{%
+  \begingroup%
+    \IfValueTF{#4}{%
+      \ifblank{#4}{%
+        \let\tud@res@a\tud@bdl@curr%
+      }{%
+        \def\tud@res@a{#4}%
+      }%
+    }{%
+      \let\tud@res@a\tud@bdl@curr%
+      \tud@lbl@get\tud@lbl@tmp{\tud@bdl@curr:#2}=#3=%
+      \tud@if@lbl@exists{\tud@lbl@tmp}{}{%
+        \expandafter\tud@bdl@@seek\tud@lbl@tmp\@nil%
+        \let\tud@res@b\@empty%
+        \def\tud@res@c##1{%
+          \tud@bdl@@@seek\tud@lbl@tmp{##1}=#3=%
+          \tud@if@lbl@exists{\tud@lbl@tmp}{%
+            \ifx\tud@res@a\tud@bdl@curr%
+              \def\tud@res@a{##1}%
+            \else%
+              \listadd\tud@res@b{##1}%
+            \fi%
+          }{}%
+        }%
+        \forlistloop\tud@res@c{\tud@bdl@list}%
+        \ifx\tud@res@b\@empty\else%
+          \def\tud@res@c##1{\detokenize{##1}\MessageBreak}%
+  %        \ClassWarning{tudscrmanual}{%
+  %          Found following multiple matching bundles for\MessageBreak%
+  %          \detokenize{#2}\IfValueT{#3}{=\detokenize{#3}}:\MessageBreak%
+  %          \expandafter\detokenize\expandafter{\tud@res@a}\MessageBreak%
+  %          \forlistloop\tud@res@c{\tud@res@b}The first match is used%
+  %        }%
+        \fi%
+      }%
+    }%
+    \edef\tud@res@a{%
+      \endgroup%
+      \def\noexpand#1{\expandonce\tud@res@a}%
+    }%
+  \tud@res@a%
+}
 \newcommand*\tud@bdl@list{}
 \newcommand*\tud@bdl@export@list{}
-\newcommand*\tud@bdl@add[1]{%
+\newcommand*\ProcessorProtectedDetokenize[1]{%
+  \protected@edef\ProcessedArgument{#1}%
+  \edef\ProcessedArgument{%
+    \expandafter\detokenize\expandafter{\ProcessedArgument}%
+  }%
+}
+\NewDocumentCommand\tud@bdl@add{>{\ProcessorProtectedDetokenize}m}{%
   \begingroup%
-    \Markup@Gobble%
-    \xifinlist{#1}{\tud@bdl@list}{}{\listxadd\tud@bdl@list{#1}}%
-    \xifinlist{#1}{\tud@bdl@export@list}{}{\listxadd\tud@bdl@export@list{#1}}%
+    \ifinlist{}{\tud@bdl@list}{}{\listadd\tud@bdl@list{#1}}%
+    \ifinlist{#1}{\tud@bdl@export@list}{}{\listgadd\tud@bdl@export@list{#1}}%
   \endgroup%
   \tud@trace@bdl@add{#1}%
-}
-\AtBeginDocument{%
-  \edef\tud@res@a{%
-    \etex@unexpanded{\@tfor\tud@res@b:=}\expandonce\tud@bdl@list\noexpand\do%
-  }%
-  \let\tud@bdl@list\@empty%
-  \tud@res@a{\listxadd\tud@bdl@list{\tud@res@b}}%
-  \tud@bdl@add{\tud@bdl@dflt}%
 }
 \BeforeClosingMainAux{%
   \if@filesw%
@@ -475,6 +591,14 @@
       \string\gdef\string\tud@bdl@list{\expandonce\tud@res@a}%
     }%
   \fi%
+}
+\AtBeginDocument{%
+  \edef\tud@res@a{%
+    \etex@unexpanded{\@tfor\tud@res@b:=}\expandonce\tud@bdl@list\noexpand\do%
+  }%
+  \let\tud@bdl@list\@empty%
+  \tud@res@a{\listxadd\tud@bdl@list{\tud@res@b}}%
+  \tud@bdl@add{\tud@bdl@dflt}%
 }
 \newenvironment{Bundle}[1]{%
   \tud@if@bdl{%
@@ -994,151 +1118,6 @@
 \AfterPackage*{hyperref}{%
   \expandafter\pdfstringdefDisableCommands\expandafter{\Markup@Gobble}%
 }
-\newcommand*\tud@lbl@fmt{%
-  \def~{-}%
-  \let\IeC\@firstofone%
-  \def\"##1{##1e}%
-  \def\ss{ss}%
-  \def\dots{...}%
-  \let\NoCaseChange\@firstofone%
-}
-\newcommand*\ProcessorCreateLabel[1]{%
-  \in@{:}{#1}%
-  \ifin@\else%
-    \ClassError{tudscrmanual}{Wrong formatted label}{%
-      A label has to be used at least with '<bundle>:<markup>'\MessageBreak%
-      but you used \detokenize{#1}.%
-    }%
-  \fi%
-  \SplitArgument{2}{:}{#1}%
-  \expandafter\Processor@CreateLabel\ProcessedArgument%
-}
-\newcommand*\Processor@CreateLabel[3]{%
-% TODO enclose label part in <...>?
-  \begingroup%
-    \Markup@Gobble%
-    \tud@lbl@fmt%
-    \IfValueTF{#3}{%
-      \edef\@tempa{#1:#2:#3}%
-    }{%
-      \tud@attr@get\@tempb{#2}%
-      % TODO bundle prefix sollte implizit gegeben sein
-      \IfValueTF{#1}{%
-        \ifxblank{#1}{% TODO leeres bundle sollte nicht vorkommen
-          \edef\@tempa{\tud@bdl@dflt:\@tempb:#2}%
-        }{%
-          \edef\@tempa{#1:\@tempb:#2}%
-        }%
-      }{%
-        \edef\@tempa{\tud@bdl@curr:\@tempb:#2}%
-      }%
-    }%
-    \edef\@tempc{%
-      \noexpand\endgroup%
-      \def\noexpand\ProcessedArgument{%
-        \expandafter\detokenize\expandafter{\@tempa}%
-      }%
-    }%
-  \@tempc%
-}
-% TODO komplett überarbeiten, die nummer mit Bundle ist bisher nicht sauber
-\newcommand*\tud@lbl@tmp{}
-\NewDocumentCommand\tud@lbl@get{m >{\ProcessorCreateLabel}m d==}{%
-  \tud@lbl@set#1{#2}=#3=%
-%  \typeout{!!! #1}%
-}
-\NewDocumentCommand\tud@lbl@seek{m >{\ProcessorCreateLabel}m r== !o}{%
-  \begingroup%
-    \tud@lbl@@seek\tud@lbl@tmp{#2}=#3=%
-    \if@tud@lbl@found\else%
-      \begingroup%
-        \Markup@Gobble%
-        \let\tud@res@a\@empty%
-        \let\tud@lbl@tmp\relax%
-        \def\tud@res@c##1{%
-          \def\tud@res@b####1:####2:####3\relax{%
-            \def\tud@res@b{%
-              \tud@lbl@@seek\tud@res@b{##1:####2:####3}=#3=%
-            }%
-            \tud@res@b%
-          }%
-          \tud@res@b#2\relax%
-          \if@tud@lbl@found%
-            \ifx\tud@lbl@tmp\relax%
-              \edef\tud@lbl@tmp{\tud@res@b}%
-            \else
-              \xifinlist{\tud@lbl@tmp}{\tud@res@a}{}{%
-                \listeadd\tud@res@a{\tud@lbl@tmp}%
-              }%
-              \listeadd\tud@res@a{\tud@res@b}%
-            \fi%
-          \fi%
-        }%
-        \forlistloop\tud@res@c{\tud@bdl@list}%
-        \ifx\tud@res@a\@empty\else%
-          \IfValueT{#4}{%
-            \def\tud@res@b##1{##1\MessageBreak}%
-%            \ClassWarning{tudscrmanual}{%
-%              Found following multiple matching labels for\MessageBreak%
-%              \detokenize{#4}\IfValueT{#3}{=\detokenize{#3}}:\MessageBreak%
-%              \forlistloop\tud@res@b{\tud@res@a}The first match is used%
-%            }%
-          }%
-        \fi%
-        \edef\tud@res@a{%
-          \endgroup%
-          \ifx\tud@lbl@tmp\relax\else%
-            \def\noexpand\tud@lbl@tmp{\tud@lbl@tmp}%
-          \fi%
-        }%
-      \tud@res@a%
-    \fi%
-    \edef\tud@res@a{%
-      \endgroup%
-      \def\noexpand#1{\tud@lbl@tmp}%
-    }%
-  \tud@res@a%
-%  \tud@if@lbl@exists{#1}{%
-%  \typeout{!!! #1}%
-%  }{%
-%  \typeout{??? #1}%
-%  }%
-}
-\newif\if@tud@lbl@found
-\NewDocumentCommand\tud@lbl@@seek{m m d==}{%
-  \@tud@lbl@foundfalse%
-  \tud@lbl@set#1{#2}=#3=%
-  \tud@if@lbl@exists{#1}{%
-    \@tud@lbl@foundtrue%
-  }{%
-    \IfValueT{#3}{%
-      \tud@if@lbl@exists{#2}{%
-%        \typeout{??? #1\space -- #2}%
-        \def#1{#2}%
-        \@tud@lbl@foundtrue%
-      }{}%
-    }%
-  }%
-}
-\NewDocumentCommand\tud@lbl@set{m m d==}{%
-  \edef#1{#2}%
-  \tud@doifPValue[\tud@lbl@fmt]{#3}{\noexpand\eappto\noexpand#1{=#3}}%
-}
-\newcommand*\tud@if@lbl@exists[1]{%
-  \begingroup%
-    \protected@edef\tud@res@a{%
-      \endgroup%
-      \noexpand\tud@if@lbl@@exists{#1}%
-    }%
-  \tud@res@a%
-}
-\NewDocumentCommand\tud@if@lbl@@exists{>{\ProcessorCreateLabel}m}{%
-  \ifcsdef{r@#1}{%
-    \expandafter\@firstoftwo%
-  }{%
-    \expandafter\@secondoftwo%
-  }%
-}
 \newcommand*\Markup@Suppress{\let\Process@Markup\Markup@@Suppress}
 \NewDocumentCommand\Markup@@Suppress{m d== o d() d<> d''}{}
 \NewDocumentCommand\Process@Markup{m d== o d() d<> d''}{%
@@ -1179,7 +1158,7 @@
 }
 % TODO mehrfache Einträge (aaa,bbb) in #4 verhindern oder einfach zwei labels?
 \NewDocumentCommand\Process@@MarkupDeclare{m r== r[] R(){\tud@bdl@curr}}{%
-  \tud@lbl@get\tud@lbl@tmp{#4:#1}=#2=%
+  \tud@lbl@get*\tud@lbl@tmp{#4:#1}=#2=%
   \ifcase\tud@declare@num\relax%
     \tudhyperdef{\tud@lbl@tmp}%
     \Markup@Output{#1}=#2=[#3]%
@@ -1194,16 +1173,22 @@
 %    \expandafter\@tempa\tud@lbl@tmp\@nil%
   \fi%
 }
-% TODO seek bundle based on labels with processor, großteil aus \tud@lbl@seek
-%      verschieben > nutzbar für \tud@idx@get
 % TODO mehrfache Einträge (aaa,bbb) in #4 ermöglichen (jeweils label etc.)
 \NewDocumentCommand\Process@@MarkupInline{m r== r[] r() d<> d''}{%
   \begingroup%
-    \IfValueTF{#4}{%
-      \tud@lbl@get\tud@lbl@tmp{#4:#1}=#2=%
-    }{%
-      \tud@lbl@seek\tud@lbl@tmp{\tud@bdl@curr:#1}=#2=[#1]%
+    \tud@bdl@seek\tud@res@a{#1}=#2=(#4)%
+    \tud@toks@{\Process@@@MarkupInline{#1}=#2=[#3]}%
+    \eaddto@hook\tud@toks@{\expandafter(\tud@res@a)}%
+    \addto@hook\tud@toks@{<#5>'#6'}%
+    \edef\tud@res@a{%
+      \endgroup%
+      \the\tud@toks@%
     }%
+  \tud@res@a%
+}
+\NewDocumentCommand\Process@@@MarkupInline{m r== r[] r() r<> r''}{%
+  \begingroup%
+    \tud@lbl@get\tud@lbl@tmp{#4:#1}=#2=%
     \def\tud@res@b{\Markup@Output{#1}=#2=[#3]}%
     \let\tud@res@c\tud@res@b%
     \ifdisposition{}{%
@@ -1476,6 +1461,7 @@
 \newcommand*\tud@idx@fmt{}
 \newcommand*\tud@idx@val{}
 \newcommand*\tud@idx@bdl{}
+% TODO use bdl@seek
 \NewDocumentCommand\tud@idx@get{s m m m m r== r[] r() d||}{%
   \begingroup%
     \begingroup%
