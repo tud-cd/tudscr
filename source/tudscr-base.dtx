@@ -1,4 +1,4 @@
-% \CheckSum{843}
+% \CheckSum{858}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -52,7 +52,7 @@
 % \fi
 %
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
-\ProvidesFile{tudscr-base.dtx}[2019/09/19 v2.06e TUD-Script\space%
+\ProvidesFile{tudscr-base.dtx}[2019/09/25 v2.06e TUD-Script\space%
 %
 % \iffalse
 %</dtx>
@@ -264,6 +264,7 @@
 % Hiermit kann ein Argument geprüft werden, ob dieses blank ist (leer oder
 % Leerzeichen). In seiner Syntax ist er identisch zu \cs{ifblank}, allerdings
 % expandiert er im Gegensatz zu diesem das gegebene Argument.
+% \ToDo{funktioniert nicht beständig, adäquat erseten und raus damit!}[v2.06e]
 %    \begin{macrocode}
 \newcommand*\ifxblank{\ifstr{}}
 %    \end{macrocode}
@@ -280,6 +281,7 @@
 % kein logischer Wert, kommt das letzte Argument zum Tragen. Die Syntax lautet:
 % 
 % \cs{ifstrbool}\marg{Argument}\marg{Wahr}\marg{Falsch}\marg{Andernfalls}
+% \ToDo{mit \cs{TUD@set@ifkey} umsetzen}[v2.06e]
 %    \begin{macrocode}
 \newcommand*\ifstrbool[4]{%
   \ifstr{#1}{true}{#2}{%
@@ -343,6 +345,27 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \protected@expandtwoargs
+%
+% \subsubsection{Prüfen auf \cs{@nil} als Argument}
+%
+% \begin{macro}{\tud@if@nil}
+% Für einige optionale Argumente wird \cs{@nil} als Standardwert gesetzt, um 
+% zwischen einem nicht gegebenen und einem leeren Argument differenzieren zu
+% können. Mit diesem Makro kann darauf getestet werden.
+% \ToDo{im Quelltext verwenden!}[v2.06e]
+%    \begin{macrocode}
+\newcommand*\tud@if@nil[1]{%
+  \begingroup%
+    \def\tud@res@a{#1}%
+    \ifx\tud@res@a\@nnil%
+      \aftergroup\@firstoftwo%
+    \else%
+      \aftergroup\@secondoftwo%
+    \fi%
+  \endgroup%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@if@nil
 %
 % \subsubsection{Division für rationale Zahlen}
 %
