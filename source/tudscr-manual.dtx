@@ -52,7 +52,7 @@
 % \fi
 %
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
-\ProvidesFile{tudscr-manual.dtx}[2019/09/23 v2.06e TUD-Script\space%
+\ProvidesFile{tudscr-manual.dtx}[2019/09/26 v2.06e TUD-Script\space%
 %
 % \iffalse
 %</dtx>
@@ -994,6 +994,337 @@
 %</body>
 %<*!doc>
 %<*body>
+% \fi
+%
+% \subsection{Erstellung und Validierung von Labeln}
+%
+% \begin{macro}{\tud@lbl@tmp}
+% \changes{v2.05}{2015/11/03}{neu}^^A
+% \begin{macro}{\tud@lbl@fmt}
+% \changes{v2.05}{2015/11/03}{neu}^^A
+% In \cs{tud@lbl@tmp} werden nachfolgend die durch \cs{tud@lbl@get@curr} oder 
+% \cs{tud@attr@get} erzeugten (Sub-)Label gespeichert. Mit dem Hilfsmakro 
+% \cs{tud@lbl@fmt} wird innerhalb der beiden Befehle \cs{tud@lbl@@create} und 
+% \cs{tud@lbl@get@@curr} dafür gesorgt, dass geschützte Leerzeichen sowie
+% eingabekodierungsabhängige Zeichen korrekt für ein Label umgesetzt werden.
+% Auch durch \cs{NoCaseChange} in Überschriften geschützte Inhalte werden 
+% direkt übernommen.
+%    \begin{macrocode}
+\newcommand*\tud@lbl@tmp{}
+\newcommand*\tud@lbl@fmt{%
+  \def~{-}%
+  \let\IeC\@firstofone%
+  \def\"##1{##1e}%
+  \def\ss{ss}%
+  \def\dots{...}%
+  \let\NoCaseChange\@firstofone%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@lbl@fmt
+% \end{macro}^^A \tud@lbl@tmp
+% \begin{macro}{\tud@lbl@get@curr}
+% \changes{v2.05}{2015/11/03}{neu}^^A
+% \begin{macro}{\tud@lbl@get@@curr}
+% \changes{v2.05}{2015/11/03}{neu}^^A
+% Für den Befehl \cs{tud@lbl@get@curr} wird das zweite obligatorische 
+% Argument (|#3|) für gewöhnlich in der Form
+% |{\Bundle|\marg{Klasse/Paket}|:\Markup|\marg{Element}|}| angegeben. Dieses
+% wird beim Einlesen direkt an die beiden Argumentprozessoren 
+% \cs{SplitArgument}|{2}{:}| gefolgt von \cs{tud@lbl@create} übergeben. Danach
+% enthält das zweite obligatorische Argument ein Label der Form
+% \meta{Bundlepräfix}|:|\meta{Labelpräfix}|:|\meta{Element}. Auch die Angabe
+% eines Makros als zweites obligatorische Argument, welches das Label in der
+% richtigen Formatierung enthält, ist möglich.
+%    \begin{macrocode}
+\NewDocumentCommand\tud@lbl@get@curr{%
+  s m >{\tud@lbl@create}>{\SplitArgument{2}{:}}m d==%
+}{%
+%    \end{macrocode}
+% Mit \cs{tud@lbl@get@@curr} wird das im zweiten obligatorischen Argument 
+% (|#3|) generierte Label in das im ersten obligatorischen Argument |#2|
+% angegebenen Makro gespeichert und ggf. diesem das letzte optionale Argument
+% für einen speziellen Wert zu einem Schlüssel angehangen.
+%    \begin{macrocode}
+  \tud@lbl@get@@curr#2{#3}=#4=%
+%    \end{macrocode}
+% Die Sternversion von \cs{tud@lbl@get@curr} wird für das Definieren von Labeln 
+% bei Deklarationen etc. genutzt. Sollte diese verwendet worden sein, ist die 
+% Generierung beendet.
+%    \begin{macrocode}
+%<*class>
+  \IfBooleanF{#1}{%
+%    \end{macrocode}
+% Andernfalls wird geprüft, ob das erstellte Label überhaupt existiert. Sollte 
+% das nicht der Fall sein, wird ein passendes Label für den gegebenen Schlüssel 
+% ohne speziellen Wert gesucht.
+%    \begin{macrocode}
+    \@tempswafalse%
+    \tud@if@lbl@exists{#2}{%
+      \@tempswatrue%
+    }{%
+      \IfValueT{#4}{%
+        \tud@lbl@get@@curr\tud@reserved{#3}%
+        \tud@if@lbl@exists{\tud@reserved}{%
+          \let#2\tud@reserved%
+          \@tempswatrue%
+        }{}%
+      }%
+    }%
+%    \end{macrocode}
+% Wurde auch danach noch kein passendes Label gefunden, gibt es u.\,U. eine 
+% letzte Möglichkeit, ein passendes Label zu finden. Wird in der Dokumentation 
+% gerade ein Paket oder eine sich von den Hauptklassen unterscheidende Klasse
+% aus dem \TUDScript-Bundle erläutert (Umgebungen \env{Bundle}, \env{Bundle*}), 
+% so wird eventuell auf ein Element aus ebendiesen Hauptklassen referenziert. 
+% In diesem Fall wird \cs{tud@lbl@get@dflt} aufgerufen, um den Bundlepräfix
+% für das Label entsprechend zu setzen.
+%    \begin{macrocode}
+    \if@tempswa\else%
+      \tud@if@bdl{\tud@lbl@get@dflt#2{#3}=#4=}{}%
+    \fi%
+  }%
+%</class>
+}
+%    \end{macrocode}
+% Mit \cs{tud@lbl@get@@curr} wird das generierte Label in Makro gespeichert, 
+% welches beim Aufruf von \cs{tud@lbl@get@curr} angegebenen wurde.
+%    \begin{macrocode}
+\NewDocumentCommand\tud@lbl@get@@curr{m m d==}{%
+  \def#1{#2}%
+%    \end{macrocode}
+% Sollte optional mit \cs{PValue} bzw. \cs{PValueName} ein spezieller Wert für
+% einen Schlüssel übergeben worden sein, wird dieser ggf. angehängt.
+%    \begin{macrocode}
+  \tud@doifPValue[\tud@lbl@fmt]{#3}{\noexpand\appto\noexpand#1{=#3}}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@lbl@get@@curr
+% \end{macro}^^A \tud@lbl@get@curr
+% \begin{macro}{\tud@lbl@get@dflt}
+% \changes{v2.05}{2015/11/04}{neu}^^A
+% \begin{macro}{\tud@lbl@get@@dflt}
+% \changes{v2.05}{2015/11/04}{neu}^^A
+% Diese beiden Makros werden genutzt, um mit \cs{tud@lbl@get@curr} innerhalb 
+% der Umgebungen \env{Bundle} und \env{Bundle*} für den Fall, dass ein 
+% gesuchtes Label für das aktuelle Bundle-Element nicht existiert, nach diesem
+% Element in den existierenden Labels der Hauptklassen zu suchen.
+%
+% Dabei wird das bereits generierte Label durch \cs{tud@lbl@get@dflt} in 
+% seine drei Hauptbestandteile zur Weiterverarbeitung zerlegt.
+%    \begin{macrocode}
+\NewDocumentCommand\tud@lbl@get@dflt{m >{\SplitArgument{2}{:}}m r==}{%
+  \tud@lbl@get@@dflt{#1}#2=#3=%
+}
+%    \end{macrocode}
+% Durch \cs{tud@lbl@get@@dflt} wird als erstes geprüft, ob der Bundlepräfix 
+% bereits dem Standardpräfix für die Hauptklassen entspricht. Nur wenn dies 
+% nicht der Fall ist, wird die Labelgenerierung abermals ausgeführt.
+%    \begin{macrocode}
+\NewDocumentCommand\tud@lbl@get@@dflt{m m m m r==}{%
+  \edef\tud@reserved{\expandafter\detokenize\expandafter{\tud@bdl@dflt}}%
+  \ifstr{\tud@reserved}{#2}{}{%
+%    \end{macrocode}
+% Dabei erfolgt der Aufruf logischerweise mit dem richtigen Bundlepräfix. 
+%    \begin{macrocode}
+    \tud@lbl@get@curr\tud@reserved{\tud@bdl@dflt:#3:#4}=#5=%
+    \tud@if@lbl@exists{\tud@reserved}{\let#1\tud@reserved}{}%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@lbl@get@@dflt
+% \end{macro}^^A \tud@lbl@get@dflt
+% \begin{macro}{\tud@if@lbl@exists}
+% \changes{v2.05}{2015/11/05}{neu}^^A
+% Mit dem Befehl \cs{tud@if@lbl@exists} wird eine Fallunterscheidung bezüglich
+% der Existenz eines Labels in der Form
+% \meta{Bundlepräfix}|:|\meta{Labelpräfix}|:|\meta{Element} durchgeführt. Das
+% zu prüfende Label ist in gleicher Weise wie beim Makro \cs{tud@lbl@get@curr}
+% anzugeben. Je nachdem, ob ein existierendes Label gefunden wird oder nicht,
+% wird das zweite oder das dritte obligatorische Argument ausgeführt.
+%    \begin{macrocode}
+%<*class>
+\NewDocumentCommand\tud@if@lbl@exists{%
+  >{\tud@lbl@create}>{\SplitArgument{2}{:}}m%
+}{%
+  \ifcsdef{r@#1}{%
+    \expandafter\@firstoftwo%
+  }{%
+    \expandafter\@secondoftwo%
+  }%
+}
+%</class>
+%    \end{macrocode}
+% \end{macro}^^A \tud@if@lbl@exists
+% \begin{macro}{\tud@lbl@create}
+% \changes{v2.05}{2015/11/03}{neu}^^A
+% \begin{macro}{\tud@lbl@@create}
+% \changes{v2.05}{2015/11/03}{neu}^^A
+% Das Makro \cs{tud@lbl@@create} ist ein Argumentprozessor, welcher als Eingabe 
+% genau drei Argumente für das Erstellen eines gültigen Labels erwartet. Er
+% wird sowohl von \cs{tud@lbl@get@curr} als auch von \cs{tud@if@lbl@exists}
+% verwendet. Vor der Nutzung von \cs{tud@lbl@create} muss das Argument zuvor
+% bereits mit \cs{SplitArgument}|{2}{:}| aufgerufen worden sein. Diese
+% Eigenheit macht die Definition von \cs{tud@lbl@create} notwendig, um das
+% Ergebnis der zuvor vorgenommenen Argumentaufspaltung verarbeiten zu können,
+% in dem dieses an \cs{tud@lbl@@create} durchgereicht wird. Eine Integration 
+% der Spaltung des Argumentes in \cs{tud@lbl@create} ist aufgrund des 
+% mehrmaligen rekursiven Aufrufs von \cs{tud@lbl@create} nicht möglich.
+%
+% Mit dem Argumentprozessor \cs{tud@lbl@create} wird es ermöglicht, an die 
+% beiden Befehle \cs{tud@lbl@get@curr} und \cs{tud@if@lbl@exists} sowohl ein
+% einzelnes Makro, welches das Label bereits beinhaltet als auch einen
+% Markup-Befehl ggf. mit einem Bundlepräfix zu übergeben. In beiden Fällen
+% wird aus dem übergebenen Argument ein eindeutiges Label in der Form 
+% \meta{Bundlepräfix}|:|\meta{Labelpräfix}|:|\meta{Element} generiert und als
+% resultierendes Argument an das aufrufenden Makro übergeben.
+%    \begin{macrocode}
+\NewDocumentCommand\tud@lbl@create{m}{\tud@lbl@@create#1}
+%    \end{macrocode}
+% Es gibt insgesamt vier verschiedene Varianten der Argumentenübergabe an den
+% Argumentprozessor \cs{tud@lbl@@create}.
+% \begin{description}\let\itshape\slshape
+%    \item[\cs{tud@lbl@@create}]\ignorespaces%
+%    |{\LabelMakro}{-NoValue-}{-NoValue-}|\strut\newline%
+%      Das Label ist bereits in \cs{LabelMakro} enthalten und soll expandiert 
+%      werden. Dabei spielt es keine Rolle, ob die durch |:| getrennten
+%      Bestandteile innerhalb des Labels schon als einfacher String oder in der 
+%      Markupform gegeben sind.
+%    \item[\cs{tud@lbl@@create}]\ignorespaces%
+%    |{-NoValue-}{\Markup|\marg{Element}|}{-NoValue-}|\strut\newline%
+%      Das Label soll für ein Markupelement generiert werden, wobei in jedem
+%      Fall der Inhalt aus \cs{tud@bdl@curr} als Bundlepräfix genutzt wird.
+%    \item[\cs{tud@lbl@@create}]\ignorespaces%
+%    |{\Class/\Package|\marg{\dots}|}|\ignorespaces%
+%    |{\Markup|\marg{Element}|}{-NoValue-}|\strut\newline%
+%      Das Label soll für ein Markupelement generiert werden. 
+%      Dabei wurde explizit ein Paket oder eine Klasse aus dem Bundle angegeben 
+%      oder implizit das Makro \cs{tud@bdl@curr} als Argument verwendet,
+%      welches innerhalb der Umgebungen \env{Bundle} und \env{Bundle*} auf
+%      das/die aktuell beschriebene Paket/Klasse gesetzt wurde.
+%    \item[\cs{tud@lbl@@create}]\ignorespaces%
+%    \marg{Bundlepräfix}\marg{Labelpräfix}\marg{Element}\strut\newline 
+%      Das Label ist bereits vollständig bestimmt und die Argumente werden 
+%      entweder als String oder als Markup übergeben. Auch Mischformen sind 
+%      möglich. In diesem Fall wird es einfach wieder zusammengesetzt. Diese
+%      Variante tritt durch rekursiven Aufruf des Argumentprozessors auf.
+% \end{description}
+%    \begin{macrocode}
+\NewDocumentCommand\tud@lbl@@create{m m m}{%
+  \begingroup%
+%    \end{macrocode}
+% Zu Beginn werden die Markup-Befehle auf ihre expandierbaren Varianten gesetzt 
+% und die zusätzlichen Redefinitionen für die Labelgenerierung aktiviert.
+%    \begin{macrocode}
+    \Markup@Gobble%
+    \tud@lbl@fmt%
+%    \end{macrocode}
+% Sind alle drei Bestandteile bereits vorhanden, wird das Label einfach wieder
+% zusammengesetzt.
+%    \begin{macrocode}
+    \IfValueTF{#3}{%
+      \edef\@tempa{#1:#2:#3}%
+    }{%
+%    \end{macrocode}
+% Hier geschieht die eigentliche Erzeugung der Labels. Dabei wird mit 
+% \cs{tud@attr@get} der für den jeweiligen Markup-Befehl aus dem zweiten
+% obligatorischen Argument spezifische Labelpräfix generiert. Abhängig davon,
+% ob im ersten obligatorischen Argument ein spezieller Bundlepräfix angegeben
+% wurde, wird dieser entweder verwendet oder aber implizit auf den Inhalt aus
+% \cs{tud@bdl@dflt} zurückgegriffen.
+%    \begin{macrocode}
+      \IfValueTF{#2}{%
+        \tud@attr@get\@tempb{#2}%
+        \IfValueTF{#1}{%
+          \ifxblank{#1}{%
+            \edef\@tempa{\tud@bdl@dflt:\@tempb:#2}%
+          }{%
+            \edef\@tempa{#1:\@tempb:#2}%
+          }%
+        }{%
+          \edef\@tempa{\tud@bdl@curr:\@tempb:#2}%
+        }%
+      }{%
+%    \end{macrocode}
+% Wurde lediglich ein Makro angegeben, wird dieses einfach expandiert.
+%    \begin{macrocode}
+        \edef\@tempa{#1}%
+      }%
+    }%
+%    \end{macrocode}
+% Das Ergebnis der Labelgenrierung wurde für alle der behandelten Fälle in 
+% \cs{@tempa} geschrieben. Abschließnd wird \cs{ProcessedArgument} nach der 
+% Gruppe mit dessen Inhalt definiert. Dabei werden bei der Expansion die 
+% catcodes aller Zeichen in Tokens der Klasse \val{other} gewandelt, um diese 
+% später sicher vergleichen zu können.
+%    \begin{macrocode}
+    \edef\@tempc{%
+      \noexpand\endgroup%
+      \def\noexpand\ProcessedArgument{%
+        \expandafter\detokenize\expandafter{\@tempa}%
+      }%
+    }%
+  \@tempc%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@lbl@@create
+% \end{macro}^^A \tud@lbl@create
+%
+% \subsection{Namensraum für unterschiedliche Bundles}
+%
+% Um eventuell identisch benannte Befehle und die dazu passenden Indexeinträge 
+% für unterschiedliche Pakete oder Klassen zu ermöglichen, wird ein Namensraum 
+% für diese eingeführt.
+%
+% \begin{environment}{Bundle}
+% \changes{v2.05}{2015/11/01}{neu}^^A
+% \begin{macro}{\tud@bdl@curr}
+% \changes{v2.05}{2015/08/04}{neu}^^A
+% \begin{macro}{\tud@bdl@dflt}
+% \changes{v2.05}{2015/11/01}{neu}^^A
+% \begin{macro}{\tud@if@bdl}
+% \changes{v2.05}{2015/08/04}{neu}^^A
+% Diese Makros werden für das Definieren eines Bundle-Elements und ggf. das 
+% Prüfen des selbigen benötigt.
+% \ToDo{Suffixe wie Klasse, Paket etc. lokalisieren (locale)}[v2.??]
+%    \begin{macrocode}
+\newcommand*\tud@bdl@dflt{tudscr}
+\newcommand*\tud@bdl@curr{}
+\let\tud@bdl@curr\tud@bdl@dflt
+\newcommand*\tud@if@bdl[2]{\ifstr{\tud@bdl@curr}{\tud@bdl@dflt}{#2}{#1}}
+%    \end{macrocode}
+% Die Umgebung \env{Bundle} kann nicht verschachtelt werden und prüft zuerst 
+% dementsprechend die Verwendung. Anschließend wird lediglich das Makro 
+% \cs{tud@bdl@curr} auf das übergebene Argument gesetzt, um innerhalb der 
+% Umgebung erstellte Label und Indexeinträge zu beeinflussen.
+%    \begin{macrocode}
+\newenvironment{Bundle}[1]{%
+  \tud@if@bdl{%
+%<*class>
+    \ClassError{tudscrmanual}%
+%</class>
+%<*package>
+    \PackageError{tudscrtutorial}%
+%</package>
+      {Nested environment `Bundle'}{%
+      It is not possible to nest this environment, when\MessageBreak%
+      a cross-label was given before.%
+    }%
+  }{%
+%<class>    \tud@trace@bdl@add{#1}%
+    \gdef\tud@bdl@curr{#1}%
+  }%
+  \ignorespaces%
+}{%
+  \global\let\tud@bdl@curr\tud@bdl@dflt%
+  \aftergroup\ignorespaces%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@if@bdl
+% \end{macro}^^A \tud@bdl@dflt
+% \end{macro}^^A \tud@bdl@curr
+% \end{environment}^^A Bundle
+%
+% \iffalse
 %<*class>
 % \fi
 %
@@ -1566,54 +1897,6 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@keyval@error
 % \end{macro}^^A \ProcessorKeyVal
-% \begin{environment}{Bundle}
-% \changes{v2.05}{2015/11/01}{neu}^^A
-% \begin{macro}{\tud@bdl@curr}
-% \changes{v2.05}{2015/08/04}{neu}^^A
-% \begin{macro}{\tud@bdl@dflt}
-% \changes{v2.05}{2015/11/01}{neu}^^A
-% \begin{macro}{\tud@if@bdl}
-% \changes{v2.05}{2015/08/04}{neu}^^A
-% Diese Makros werden für das Definieren eines Bundle-Elements und ggf. das 
-% Prüfen des selbigen benötigt.
-% \ToDo{Suffixe wie Klasse, Paket etc. lokalisieren (locale)}[v2.??]
-%    \begin{macrocode}
-\newcommand*\tud@bdl@dflt{tudscr}
-\newcommand*\tud@bdl@curr{}
-\let\tud@bdl@curr\tud@bdl@dflt
-\newcommand*\tud@if@bdl[2]{\ifstr{\tud@bdl@curr}{\tud@bdl@dflt}{#2}{#1}}
-%    \end{macrocode}
-% Die Umgebung \env{Bundle} kann nicht verschachtelt werden und prüft zuerst 
-% dementsprechend die Verwendung. Anschließend wird lediglich das Makro 
-% \cs{tud@bdl@curr} auf das übergebene Argument gesetzt, um innerhalb der 
-% Umgebung erstellte Label und Indexeinträge zu beeinflussen.
-%    \begin{macrocode}
-\newenvironment{Bundle}[1]{%
-  \tud@if@bdl{%
-%<*class>
-    \ClassError{tudscrmanual}%
-%</class>
-%<*package>
-    \PackageError{tudscrtutorial}%
-%</package>
-      {Nested environment `Bundle'}{%
-      It is not possible to nest this environment, when\MessageBreak%
-      a cross-label was given before.%
-    }%
-  }{%
-%<class>    \tud@trace@bdl@add{#1}%
-    \gdef\tud@bdl@curr{#1}%
-  }%
-  \ignorespaces%
-}{%
-  \global\let\tud@bdl@curr\tud@bdl@dflt%
-  \aftergroup\ignorespaces%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@if@bdl
-% \end{macro}^^A \tud@bdl@dflt
-% \end{macro}^^A \tud@bdl@curr
-% \end{environment}^^A Bundle
 % \begin{macro}{\Application}
 % \changes{v2.02}{2014/10/08}{überarbeitet}^^A
 % \begin{macro}{\@Application}
@@ -2265,279 +2548,6 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \Markup@Gobble
-%
-% \subsubsection{Erstellung und Validierung von Labeln}
-%
-% \begin{macro}{\tud@lbl@tmp}
-% \changes{v2.05}{2015/11/03}{neu}^^A
-% \begin{macro}{\tud@lbl@fmt}
-% \changes{v2.05}{2015/11/03}{neu}^^A
-% In \cs{tud@lbl@tmp} werden nachfolgend die durch \cs{tud@lbl@get@curr} oder 
-% \cs{tud@attr@get} erzeugten (Sub-)Label gespeichert. Mit dem Hilfsmakro 
-% \cs{tud@lbl@fmt} wird innerhalb der beiden Befehle \cs{tud@lbl@@create} und 
-% \cs{tud@lbl@get@@curr} dafür gesorgt, dass geschützte Leerzeichen sowie
-% eingabekodierungsabhängige Zeichen korrekt für ein Label umgesetzt werden.
-% Auch durch \cs{NoCaseChange} in Überschriften geschützte Inhalte werden 
-% direkt übernommen.
-%    \begin{macrocode}
-\newcommand*\tud@lbl@tmp{}
-\newcommand*\tud@lbl@fmt{%
-  \def~{-}%
-  \let\IeC\@firstofone%
-  \def\"##1{##1e}%
-  \def\ss{ss}%
-  \def\dots{...}%
-  \let\NoCaseChange\@firstofone%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@lbl@fmt
-% \end{macro}^^A \tud@lbl@tmp
-% \begin{macro}{\tud@lbl@get@curr}
-% \changes{v2.05}{2015/11/03}{neu}^^A
-% \begin{macro}{\tud@lbl@get@@curr}
-% \changes{v2.05}{2015/11/03}{neu}^^A
-% Für den Befehl \cs{tud@lbl@get@curr} wird das zweite obligatorische 
-% Argument (|#3|) für gewöhnlich in der Form
-% |{\Bundle|\marg{Klasse/Paket}|:\Markup|\marg{Element}|}| angegeben. Dieses
-% wird beim Einlesen direkt an die beiden Argumentprozessoren 
-% \cs{SplitArgument}|{2}{:}| gefolgt von \cs{tud@lbl@create} übergeben. Danach
-% enthält das zweite obligatorische Argument ein Label der Form
-% \meta{Bundlepräfix}|:|\meta{Labelpräfix}|:|\meta{Element}. Auch die Angabe
-% eines Makros als zweites obligatorische Argument, welches das Label in der
-% richtigen Formatierung enthält, ist möglich.
-%    \begin{macrocode}
-\NewDocumentCommand\tud@lbl@get@curr{%
-  s m >{\tud@lbl@create}>{\SplitArgument{2}{:}}m d==%
-}{%
-%    \end{macrocode}
-% Mit \cs{tud@lbl@get@@curr} wird das im zweiten obligatorischen Argument 
-% (|#3|) generierte Label in das im ersten obligatorischen Argument |#2|
-% angegebenen Makro gespeichert und ggf. diesem das letzte optionale Argument
-% für einen speziellen Wert zu einem Schlüssel angehangen.
-%    \begin{macrocode}
-  \tud@lbl@get@@curr#2{#3}=#4=%
-%    \end{macrocode}
-% Die Sternversion von \cs{tud@lbl@get@curr} wird für das Definieren von Labeln 
-% bei Deklarationen etc. genutzt. Sollte diese verwendet worden sein, ist die 
-% Generierung beendet.
-%    \begin{macrocode}
-%<*class>
-  \IfBooleanF{#1}{%
-%    \end{macrocode}
-% Andernfalls wird geprüft, ob das erstellte Label überhaupt existiert. Sollte 
-% das nicht der Fall sein, wird ein passendes Label für den gegebenen Schlüssel 
-% ohne speziellen Wert gesucht.
-%    \begin{macrocode}
-    \@tempswafalse%
-    \tud@if@lbl@exists{#2}{%
-      \@tempswatrue%
-    }{%
-      \IfValueT{#4}{%
-        \tud@lbl@get@@curr\tud@reserved{#3}%
-        \tud@if@lbl@exists{\tud@reserved}{%
-          \let#2\tud@reserved%
-          \@tempswatrue%
-        }{}%
-      }%
-    }%
-%    \end{macrocode}
-% Wurde auch danach noch kein passendes Label gefunden, gibt es u.\,U. eine 
-% letzte Möglichkeit, ein passendes Label zu finden. Wird in der Dokumentation 
-% gerade ein Paket oder eine sich von den Hauptklassen unterscheidende Klasse
-% aus dem \TUDScript-Bundle erläutert (Umgebungen \env{Bundle}, \env{Bundle*}), 
-% so wird eventuell auf ein Element aus ebendiesen Hauptklassen referenziert. 
-% In diesem Fall wird \cs{tud@lbl@get@dflt} aufgerufen, um den Bundlepräfix
-% für das Label entsprechend zu setzen.
-%    \begin{macrocode}
-    \if@tempswa\else%
-      \tud@if@bdl{\tud@lbl@get@dflt#2{#3}=#4=}{}%
-    \fi%
-  }%
-%</class>
-}
-%    \end{macrocode}
-% Mit \cs{tud@lbl@get@@curr} wird das generierte Label in Makro gespeichert, 
-% welches beim Aufruf von \cs{tud@lbl@get@curr} angegebenen wurde.
-%    \begin{macrocode}
-\NewDocumentCommand\tud@lbl@get@@curr{m m d==}{%
-  \def#1{#2}%
-%    \end{macrocode}
-% Sollte optional mit \cs{PValue} bzw. \cs{PValueName} ein spezieller Wert für
-% einen Schlüssel übergeben worden sein, wird dieser ggf. angehängt.
-%    \begin{macrocode}
-  \tud@doifPValue[\tud@lbl@fmt]{#3}{\noexpand\appto\noexpand#1{=#3}}%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@lbl@get@@curr
-% \end{macro}^^A \tud@lbl@get@curr
-% \begin{macro}{\tud@lbl@get@dflt}
-% \changes{v2.05}{2015/11/04}{neu}^^A
-% \begin{macro}{\tud@lbl@get@@dflt}
-% \changes{v2.05}{2015/11/04}{neu}^^A
-% Diese beiden Makros werden genutzt, um mit \cs{tud@lbl@get@curr} innerhalb 
-% der Umgebungen \env{Bundle} und \env{Bundle*} für den Fall, dass ein 
-% gesuchtes Label für das aktuelle Bundle-Element nicht existiert, nach diesem
-% Element in den existierenden Labels der Hauptklassen zu suchen.
-%
-% Dabei wird das bereits generierte Label durch \cs{tud@lbl@get@dflt} in 
-% seine drei Hauptbestandteile zur WEiterverarbeitung zerlegt.
-%    \begin{macrocode}
-\NewDocumentCommand\tud@lbl@get@dflt{m >{\SplitArgument{2}{:}}m r==}{%
-  \tud@lbl@get@@dflt{#1}#2=#3=%
-}
-%    \end{macrocode}
-% Durch \cs{tud@lbl@get@@dflt} wird als erstes geprüft, ob der Bundlepräfix 
-% bereits dem Standardpräfix für die Hauptklassen entspricht. Nur wenn dies 
-% nicht der Fall ist, wird die Labelgenerierung abermals ausgeführt.
-%    \begin{macrocode}
-\NewDocumentCommand\tud@lbl@get@@dflt{m m m m r==}{%
-  \edef\tud@reserved{\expandafter\detokenize\expandafter{\tud@bdl@dflt}}%
-  \ifstr{\tud@reserved}{#2}{}{%
-%    \end{macrocode}
-% Dabei erfolgt der Aufruf logischerweise mit dem richtigen Bundlepräfix. 
-%    \begin{macrocode}
-    \tud@lbl@get@curr\tud@reserved{\tud@bdl@dflt:#3:#4}=#5=%
-    \tud@if@lbl@exists{\tud@reserved}{\let#1\tud@reserved}{}%
-  }%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@lbl@get@@dflt
-% \end{macro}^^A \tud@lbl@get@dflt
-% \begin{macro}{\tud@if@lbl@exists}
-% \changes{v2.05}{2015/11/05}{neu}^^A
-% Mit dem Befehl \cs{tud@if@lbl@exists} wird eine Fallunterscheidung bezüglich
-% der Existenz eines Labels in der Form
-% \meta{Bundlepräfix}|:|\meta{Labelpräfix}|:|\meta{Element} durchgeführt. Das
-% zu prüfende Label ist in gleicher Weise wie beim Makro \cs{tud@lbl@get@curr}
-% anzugeben. Je nachdem, ob ein existierendes Label gefunden wird oder nicht,
-% wird das zweite oder das dritte obligatorische Argument ausgeführt.
-%    \begin{macrocode}
-%<*class>
-\NewDocumentCommand\tud@if@lbl@exists{%
-  >{\tud@lbl@create}>{\SplitArgument{2}{:}}m%
-}{%
-  \ifcsdef{r@#1}{%
-    \expandafter\@firstoftwo%
-  }{%
-    \expandafter\@secondoftwo%
-  }%
-}
-%</class>
-%    \end{macrocode}
-% \end{macro}^^A \tud@if@lbl@exists
-% \begin{macro}{\tud@lbl@create}
-% \changes{v2.05}{2015/11/03}{neu}^^A
-% \begin{macro}{\tud@lbl@@create}
-% \changes{v2.05}{2015/11/03}{neu}^^A
-% Das Makro \cs{tud@lbl@@create} ist ein Argumentprozessor, welcher als Eingabe 
-% genau drei Argumente für das Erstellen eines gültigen Labels erwartet. Er
-% wird sowohl von \cs{tud@lbl@get@curr} als auch von \cs{tud@if@lbl@exists}
-% verwendet. Vor der Nutzung von \cs{tud@lbl@create} muss das Argument zuvor
-% bereits mit \cs{SplitArgument}|{2}{:}| aufgerufen worden sein. Diese
-% Eigenheit macht die Definition von \cs{tud@lbl@create} notwendig, um das
-% Ergebnis der zuvor vorgenommenen Argumentaufspaltung verarbeiten zu können,
-% in dem dieses an \cs{tud@lbl@@create} durchgereicht wird. Eine Integration 
-% der Spaltung des Argumentes in \cs{tud@lbl@create} ist aufgrund des 
-% mehrmaligen rekursiven Aufrufs von \cs{tud@lbl@create} nicht möglich.
-%
-% Mit dem Argumentprozessor \cs{tud@lbl@create} wird es ermöglicht, an die 
-% beiden Befehle \cs{tud@lbl@get@curr} und \cs{tud@if@lbl@exists} sowohl ein
-% einzelnes Makro, welches das Label bereits beinhaltet als auch einen
-% Markup-Befehl ggf. mit einem Bundlepräfix zu übergeben. In beiden Fällen
-% wird aus dem übergebenen Argument ein eindeutiges Label in der Form 
-% \meta{Bundlepräfix}|:|\meta{Labelpräfix}|:|\meta{Element} generiert und als
-% resultierendes Argument an das aufrufenden Makro übergeben.
-%    \begin{macrocode}
-\NewDocumentCommand\tud@lbl@create{m}{\tud@lbl@@create#1}
-%    \end{macrocode}
-% Es gibt insgesamt vier verschiedene Varianten der Argumentenübergabe an den
-% Argumentprozessor \cs{tud@lbl@@create}.
-% \begin{description}\let\itshape\slshape
-%    \item[\cs{tud@lbl@@create}]\ignorespaces%
-%    |{\LabelMakro}{-NoValue-}{-NoValue-}|\strut\newline%
-%      Das Label ist bereits in \cs{LabelMakro} enthalten und soll expandiert 
-%      werden. Dabei spielt es keine Rolle, ob die durch |:| getrennten
-%      Bestandteile innerhalb des Labels schon als einfacher String oder in der 
-%      Markupform gegeben sind.
-%    \item[\cs{tud@lbl@@create}]\ignorespaces%
-%    |{-NoValue-}{\Markup|\marg{Element}|}{-NoValue-}|\strut\newline%
-%      Das Label soll für ein Markupelement generiert werden, wobei in jedem
-%      Fall der Inhalt aus \cs{tud@bdl@curr} als Bundlepräfix genutzt wird.
-%    \item[\cs{tud@lbl@@create}]\ignorespaces%
-%    |{\Class/\Package|\marg{\dots}|}|\ignorespaces%
-%    |{\Markup|\marg{Element}|}{-NoValue-}|\strut\newline%
-%      Das Label soll für ein Markupelement generiert werden. 
-%      Dabei wurde explizit ein Paket oder eine Klasse aus dem Bundle angegeben 
-%      oder implizit das Makro \cs{tud@bdl@curr} als Argument verwendet,
-%      welches innerhalb der Umgebungen \env{Bundle} und \env{Bundle*} auf
-%      das/die aktuell beschriebene Paket/Klasse gesetzt wurde.
-%    \item[\cs{tud@lbl@@create}]\ignorespaces%
-%    \marg{Bundlepräfix}\marg{Labelpräfix}\marg{Element}\strut\newline 
-%      Das Label ist bereits vollständig bestimmt und die Argumente werden 
-%      entweder als String oder als Markup übergeben. Auch Mischformen sind 
-%      möglich. In diesem Fall wird es einfach wieder zusammengesetzt. Diese
-%      Variante tritt durch rekursiven Aufruf des Argumentprozessors auf.
-% \end{description}
-%    \begin{macrocode}
-\NewDocumentCommand\tud@lbl@@create{m m m}{%
-  \begingroup%
-%    \end{macrocode}
-% Zu Beginn werden die Markup-Befehle auf ihre expandierbaren Varianten gesetzt 
-% und die zusätzlichen Redefinitionen für die Labelgenerierung aktiviert.
-%    \begin{macrocode}
-    \Markup@Gobble%
-    \tud@lbl@fmt%
-%    \end{macrocode}
-% Sind alle drei Bestandteile bereits vorhanden, wird das Label einfach wieder
-% zusammengesetzt.
-%    \begin{macrocode}
-    \IfValueTF{#3}{%
-      \edef\@tempa{#1:#2:#3}%
-    }{%
-%    \end{macrocode}
-% Hier geschieht die eigentliche Erzeugung der Labels. Dabei wird mit 
-% \cs{tud@attr@get} der für den jeweiligen Markup-Befehl aus dem zweiten
-% obligatorischen Argument spezifische Labelpräfix generiert. Abhängig davon,
-% ob im ersten obligatorischen Argument ein spezieller Bundlepräfix angegeben
-% wurde, wird dieser entweder verwendet oder aber implizit auf den Inhalt aus
-% \cs{tud@bdl@dflt} zurückgegriffen.
-%    \begin{macrocode}
-      \IfValueTF{#2}{%
-        \tud@attr@get\@tempb{#2}%
-        \IfValueTF{#1}{%
-          \ifxblank{#1}{%
-            \edef\@tempa{\tud@bdl@dflt:\@tempb:#2}%
-          }{%
-            \edef\@tempa{#1:\@tempb:#2}%
-          }%
-        }{%
-          \edef\@tempa{\tud@bdl@curr:\@tempb:#2}%
-        }%
-      }{%
-%    \end{macrocode}
-% Wurde lediglich ein Makro angegeben, wird dieses einfach expandiert.
-%    \begin{macrocode}
-        \edef\@tempa{#1}%
-      }%
-    }%
-%    \end{macrocode}
-% Das Ergebnis der Labelgenrierung wurde für alle der behandelten Fälle in 
-% \cs{@tempa} geschrieben. Abschließnd wird \cs{ProcessedArgument} nach der 
-% Gruppe mit dessen Inhalt definiert. Dabei werden bei der Expansion die 
-% catcodes aller Zeichen in Tokens der Klasse \val{other} gewandelt, um diese 
-% später sicher vergleichen zu können.
-%    \begin{macrocode}
-    \edef\@tempc{%
-      \noexpand\endgroup%
-      \def\noexpand\ProcessedArgument{%
-        \expandafter\detokenize\expandafter{\@tempa}%
-      }%
-    }%
-  \@tempc%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@lbl@@create
-% \end{macro}^^A \tud@lbl@create
 %
 % \subsubsection{Abarbeitung der Markup-Befehle}
 %
