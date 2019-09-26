@@ -1,4 +1,4 @@
-% \CheckSum{135}
+% \CheckSum{143}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -72,11 +72,15 @@
 % \section{Die Version des \texorpdfstring{\TUDScript}{TUD-Script}-Bundles}
 %
 % Für alle Klassen und Paketen, die zum \TUDScript-Bundle auf \KOMAScript-Basis
-% gehören wird als erstes die aktuelle Version sowie \LaTeXe als benötigtes
-% Format festgelgt.
+% gehören wird die Version sowie \LaTeXe als benötigtes Format festgelegt.
+%
+% \StopEventually{\PrintIndex\PrintChanges\PrintToDos}
+%
 %    \begin{macrocode}
 %<class|package>\NeedsTeXFormat{LaTeX2e}
 %    \end{macrocode}
+%
+% \subsection{Definition und Validierung der Version}
 %
 % \begin{macro}{\TUD@Version}
 % \begin{macro}{\TUDScriptVersion}
@@ -119,7 +123,7 @@
           \noexpand\TUD@Version\space is `\TUD@Version',\MessageBreak%
           but `#1' was expected!\MessageBreak%
           You should not use classes, packages or files from\MessageBreak%
-          different TUD-Script-Bundle versions%
+          different TUD-Script bundle versions%
         }%
       \fi%
     }%
@@ -183,18 +187,34 @@
 %<*identify>
 % \fi
 %
+% \subsection{Das \TUDScript-Logo und Kontaktadresse}
+%
+% \begin{macro}{\TUDScript}
+% Der Schriftzug von \TUDScript.
+%    \begin{macrocode}
+\@ifundefined{TUDScript}{%
+  \DeclareRobustCommand\TUDScript{%
+    \textsf{%
+      T\kern.05em U\kern.05em D\kern.1em-\kern.1em Script%
+    }%
+    \ifcsname xspace\endcsname\xspace\fi%
+  }%
+}{}
+%    \end{macrocode}
+% \end{macro}^^A \TUDScript
+%
 % \begin{macro}{\tudscrmail}
 % Die E"~Mail-Adresse für Supportanfragen. 
 %    \begin{macrocode}
-%<*class|package>
 \providecommand*\tudscrmail{hanisch.latex@outlook.com}
-%</class|package>
 %    \end{macrocode}
 % \end{macro}^^A \tudscrmail
 %
 % \iffalse
 %<*class>
 % \fi
+%
+% \subsection{Laden von Klassen und Paketen}
 %
 % \begin{macro}{\TUD@ProvidesClass}
 % \changes{v2.04}{2015/06/13}{neu}^^A
@@ -206,6 +226,8 @@
 % \changes{v2.04}{2015/06/12}{neu}^^A
 % \begin{macro}{\TUD@Class@KOMA}
 % \changes{v2.04}{2015/06/12}{neu}^^A
+% \begin{macro}{\TUDScriptClassName}
+% \begin{macro}{\TUDClassName}
 % Mit diesen Befehlen erfolgt die Versionsangabe der \TUDScript-Klassen beim
 % Laden. Dabei werden hier einmalig die Namen der jeweiligen Klassen definiert. 
 % Hierfür werden die Befehle \cs{TUD@ProvidesClass} für die Hauptklassen und 
@@ -214,31 +236,28 @@
 % Argument entspricht der Basis-Klasse. Das dritte Argument enthält eine kurze 
 % Beschreibung.
 %    \begin{macrocode}
-%<*!inherit>
-\newcommand*\TUD@ProvidesClass[3]{%
+%<!inherit>\newcommand*\TUD@ProvidesClass[3]
+%<inherit>\newcommand*\TUD@ProvidesWrapperClass[3]
+{%
   \ProvidesClass{#1}[%
 %!TUD@Version
     #3 (#2)%
   ]%
-  \newcommand*\TUD@Class@KOMA{#2}%
-  \ifx\TUD@Class@Parent\@undefined%
-    \newcommand*\TUD@Class@Name{#1}%
-    \TUD@Class@Info%
-  \fi%
-}
-%</!inherit>
-%<*inherit>
-\newcommand*\TUD@ProvidesWrapperClass[3]{%
-  \ProvidesClass{#1}[%
-%!TUD@Version
-    #3 (#2)%
-  ]%
-  \newcommand*\TUD@Class@Parent{#2}%
+%<!inherit>  \newcommand*\TUD@Class@KOMA{#2}%
+%<inherit>  \newcommand*\TUD@Class@Parent{#2}%
+%<!inherit>  \ifx\TUD@Class@Parent\@undefined%
   \newcommand*\TUD@Class@Name{#1}%
-  \TUD@Class@Info%
-}
-%</inherit>
 %    \end{macrocode}
+% Die Benutzermakros für den Namen der verwendeten \TUDScript-Klasse.
+%    \begin{macrocode}
+  \newcommand*\TUDScriptClassName{#1}%
+  \providecommand*\TUDClassName{\TUDScriptClassName}%
+  \TUD@Class@Info%
+%<!inherit>  \fi%
+}
+%    \end{macrocode}
+% \end{macro}^^A \TUDClassName
+% \end{macro}^^A \TUDScriptClassName
 % \end{macro}^^A \TUD@Class@KOMA
 % \end{macro}^^A \TUD@Class@Parent
 % \end{macro}^^A \TUD@Class@Name
@@ -270,62 +289,36 @@
 %<doc>\TUD@ProvidesClass{tudscrdoc}{scrartcl}{source code documentation class}
 %<manual>\TUD@ProvidesWrapperClass{tudscrmanual}{tudscrreprt}{manual class}
 %    \end{macrocode}
-% \begin{macro}{\TUDScriptClassName}
-% \begin{macro}{\TUDClassName}
-% Die Benutzermakros für den Namen der verwendeten \TUDScript-Klasse.
-%    \begin{macrocode}
-\edef\TUDScriptClassName{\TUD@Class@Name}
-\providecommand*\TUDClassName{\TUDScriptClassName}
-%    \end{macrocode}
-% \end{macro}^^A \TUDClassName
-% \end{macro}^^A \TUDScriptClassName
 %
 % \iffalse
 %</class>
+%<*package>
+%<*supervisor|comp|tutorial>
 % \fi
 %
-% \section{Das \TUDScript-Logo}
-% \begin{macro}{\TUDScript}
-% Der Schriftzug von \TUDScript.
-%    \begin{macrocode}
-%<*class|package>
-\@ifundefined{TUDScript}{%
-  \DeclareRobustCommand\TUDScript{%
-    \textsf{%
-      T\kern.05em U\kern.05em D\kern.1em-\kern.1em Script%
-    }%
-    \ifcsname xspace\endcsname\xspace\fi%
-  }%
-}{}
-%</class|package>
-%    \end{macrocode}
-% \end{macro}^^A \TUDScript
-%
-% \iffalse
-%</identify>
-%<*package&check>
-% \fi
-%
-% \section{Verwendbarkeit von \TUDScript-Paketen}
-%
+% \begin{macro}{\TUD@Class@Check}
+% \changes{v2.06e}{2019/09/26}{neu}^^A
 % Einige Pakete sind nur mit den \TUDScript-Klassen verwendbar. Diese erzeugen 
-% einen Fehler, wenn sie nicht mit diesen verwendet werden.
+% einen Fehler, wenn sie nicht mit einer dieser verwendet werden.
 %    \begin{macrocode}
-\ifx\TUD@Class@Name\@undefined
-  \PackageError{%
-%<supervisor>    tudscrsupervisor%
-%<comp>    tudscrcomp%
-%<tutorial>    tudscrtutorial%
-  }{Unsupported class found}{%
-    This package can only be used with a class out of the\MessageBreak%
-    tudscr bundle (tudscrbook, tudscrreprt, tudscrartcl, tudscrposter).%
-  }%
-  \expandafter\endinput%
-\fi
+\providecommand*\TUD@Class@Check[1]{%
+  \ifx\TUD@Class@Name\@undefined%
+    \PackageError{#1}{TUD-Script class not loaded}{%
+      This package requires a class of the TUD-Script bundle\MessageBreak%
+      (tudscrbook, tudscrreprt, tudscrartcl, tudscrposter).%
+    }%
+    \DeclareOption*{}%
+    \ProcessOptions\relax%
+    \expandafter\endinput%
+  \fi%
+}%
 %    \end{macrocode}
+% \end{macro}^^A \TUD@Class@Check
 %
 % \iffalse
-%</package&check>
+%</supervisor|comp|tutorial>
+%</package>
+%</identify>
 % \fi
 %
 % \Finale

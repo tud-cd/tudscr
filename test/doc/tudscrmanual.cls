@@ -16,7 +16,7 @@
 %% 
 %% TUD-Script -- Corporate Design of Technische Universitaet Dresden
 %% 
-%%   2019/09/19 v2.06e TUD-Script
+%%   2019/09/26 v2.06e TUD-Script
 %% 
 %% Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2019
 %% 
@@ -51,13 +51,13 @@
           \noexpand\TUD@Version\space is `\TUD@Version',\MessageBreak%
           but `#1' was expected!\MessageBreak%
           You should not use classes, packages or files from\MessageBreak%
-          different TUD-Script-Bundle versions%
+          different TUD-Script bundle versions%
         }%
       \fi%
     }%
   \fi%
   \TUD@Version@Check%
-    {2019/09/19 v2.06e TUD-Script}%
+    {2019/09/26 v2.06e TUD-Script}%
     {2018/03/30 v3.25 KOMA-Script}%
   \ifx\TUDScriptVersion\@undefined%
     \xdef\TUDScriptVersion{\TUD@Version}%
@@ -66,14 +66,25 @@
     \expandafter\@tempa\TUD@KOMAVersion ? ?\relax\relax{\TUD@KOMAVersionNumber}%
   \fi%
 \endgroup
+\@ifundefined{TUDScript}{%
+  \DeclareRobustCommand\TUDScript{%
+    \textsf{%
+      T\kern.05em U\kern.05em D\kern.1em-\kern.1em Script%
+    }%
+    \ifcsname xspace\endcsname\xspace\fi%
+  }%
+}{}
 \providecommand*\tudscrmail{hanisch.latex@outlook.com}
-\newcommand*\TUD@ProvidesWrapperClass[3]{%
+\newcommand*\TUD@ProvidesWrapperClass[3]
+{%
   \ProvidesClass{#1}[%
-  2019/09/19 v2.06e TUD-Script
+  2019/09/26 v2.06e TUD-Script
     #3 (#2)%
   ]%
   \newcommand*\TUD@Class@Parent{#2}%
   \newcommand*\TUD@Class@Name{#1}%
+  \newcommand*\TUDScriptClassName{#1}%
+  \providecommand*\TUDClassName{\TUDScriptClassName}%
   \TUD@Class@Info%
 }
 \providecommand*\TUD@Class@Info{%
@@ -87,20 +98,10 @@
   \typeout{+------------------------------------------------------------------}%
 }
 \TUD@ProvidesWrapperClass{tudscrmanual}{tudscrreprt}{manual class}
-\edef\TUDScriptClassName{\TUD@Class@Name}
-\providecommand*\TUDClassName{\TUDScriptClassName}
-\@ifundefined{TUDScript}{%
-  \DeclareRobustCommand\TUDScript{%
-    \textsf{%
-      T\kern.05em U\kern.05em D\kern.1em-\kern.1em Script%
-    }%
-    \ifcsname xspace\endcsname\xspace\fi%
-  }%
-}{}
 %%% From File: tudscr-manual.dtx
 %%% From File: tudscr-base.dtx
 \RequirePackage{tudscrbase}[%
-  2019/09/19 v2.06e TUD-Script
+  2019/09/26 v2.06e TUD-Script
 ]
 \renewcommand*\TUD@KOMAoptions[1]{\PassOptionsToClass{#1}{\TUD@Class@Parent}}
 \AfterClass{\TUD@Class@Parent}{\let\TUD@KOMAoptions\KOMAoptions}
@@ -182,7 +183,7 @@
 \TUDProcessOptions\relax
 \PassOptionsToClass{ttfont=roboto}{\TUD@Class@Parent}
 \LoadClass{\TUD@Class@Parent}[
-  2019/09/19 v2.06e TUD-Script
+  2019/09/26 v2.06e TUD-Script
 ]
 %%% From File: tudscr-manual.dtx
 \PassOptionsToPackage{log-declarations=false}{xparse}
@@ -2510,7 +2511,7 @@
 \NewDocumentCommand\Forum{!s !t'}{%
   \IfBooleanTF{#1}{\toks@{\href}}{\toks@{\hrfn}}%
   \IfBooleanT{#2}{\toks@{\url}}%
-  \addto@hook\toks@{{http://latex.wcms-file3.tu-dresden.de/phpBB3/}}%
+  \addto@hook\toks@{{http://latex.wcms-file3.tu-dresden.de/}}%
   \IfBooleanF{#2}{\addto@hook\toks@{{TUD-\LaTeX-Forum}}}%
   \the\toks@\xspace%
 }
@@ -2522,18 +2523,17 @@
   }%
   \the\toks@\xspace%
 }
+\newcommand*\tud@github@baseurl{https://github.com/tud-cd}
 \NewDocumentCommand\GitHubRepo{s t' m !O{releases}}{%
   \IfBooleanTF{#1}{\toks@{\href}}{\toks@{\hrfn}}%
   \IfBooleanT{#2}{\toks@{\url}}%
-  \addto@hook\toks@{{https://github.com/tud-cd/#3/#4}}%
+  \addto@hook\toks@{{\tud@github@baseurl/#3/#4}}%
   \IfBooleanF{#2}{%
     \addto@hook\toks@{{\tud@english{GitHub-Repository~\sbnfont{#3}}}}%
   }%
   \the\toks@\xspace%
 }
-\newcommand*\Download[1]{%
-  https://github.com/tud-cd/tudscr/releases/download/#1%
-}
+\newcommand*\Download[1]{\tud@github@baseurl/tudscr/releases/download/#1}
 \newcommand*\notudscrartcl{%
   F\"ur die Klassen \Class{tudscrartcl} sowie \Class{tudscrposter} ist diese %
   Option nicht verf\"ugbar.%
