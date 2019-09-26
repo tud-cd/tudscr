@@ -2546,6 +2546,14 @@
   \addto@hook\toks@{{#2}}%
   \the\toks@\xspace%
 }
+\newrobustcmd*\TUDScriptContactNote{%
+  \footnote{\scriptsize\expandafter\mailto\expandafter{\TUDScriptContact}}%
+}
+\newrobustcmd*\TUDScriptContactTitle{%
+  \ifundef{\emailaddress}{\TUDScriptContactNote}{%
+    \expandafter\emailaddress\expandafter{\TUDScriptContact}%
+  }%
+}
 \newcommand*\CD{\tud@english{Corporate Design}\xspace}
 \newcommand*\CDs{\tud@english{Corporate Designs}\xspace}
 \newcommand*\TUD{Technische Universit\"at Dresden\xspace}
