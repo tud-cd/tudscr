@@ -324,6 +324,7 @@
 \newcommand*\tud@trace@bdl@add[1]{}
 \newcommand*\tud@trace@bdl@list{}
 \newcommand*\tracingbundle{%
+  % TODO use \@onelevel@sanitize
   \renewcommand*\tud@trace@bdl@add[1]{%
     \begingroup%
       \def\Class####1{class:####1}%
@@ -346,22 +347,6 @@
   \renewcaptionname{ngerman}{\sectionautorefname}{Unterkapitel}%
   \renewcaptionname{ngerman}{\subsectionautorefname}{Abschnitt}%
   \renewcaptionname{ngerman}{\subsubsectionautorefname}{Unterabschnitt}%
-  \newcommand*\tud@manualname{tudscr}%
-  \NewDocumentCommand\tudhyperdef{s t' m}{%
-    \@tempswafalse%
-    \IfBooleanT{#1}{\@tempswatrue\setlength\@tempdima{3\baselineskip}}%
-    \IfBooleanT{#2}{\@tempswatrue\setlength\@tempdima{15\baselineskip}}%
-    \if@tempswa%
-      \raisebox{\@tempdima}[0pt][0pt]{\hyperdef{\tud@manualname}{#3}{}}%
-      \par\nobreak\vskip\dimexpr-\parskip-\baselineskip\relax%
-      \@afterindentfalse\@afterheading%
-    \else%
-      \Hy@raisedlink{\hyperdef{\tud@manualname}{#3}{}}\ignorespaces%
-    \fi%
-    \label{#3}%
-    \tud@trace@lbl@created@add{#3}%
-  }%
-  \newcommand*\tudhyperref[2]{\hyperref{}{\tud@manualname}{#1}{#2}}%
   \newcommand*\autorefname[1][current]{%
     \ifstr{#1}{current}{%
       \expandafter\HyPsd@@autorefname\@currentHref\@nil%
@@ -396,12 +381,14 @@
   \providecommand*\nolinkurl[1]{\url{#1}}%
   \providecommand*\hyperpage[1]{#1}%
   \providecommand*\autoref{??\xspace\kernel@ifstar{\ref}{\ref}}%
+  \providecommand*\autorefname[1][]{??\xspace}%
   \providecommand*\hyperdef[3]{\label{#1.#2}#3}%
   \providerobustcmd*\hyperref{%
     \kernel@ifnextchar[{\tud@hyperref@a}{\tud@hyperref@b}%
   }%
   \newcommand*\tud@hyperref@a[2][]{#2}%
   \newcommand*\tud@hyperref@b[4]{#4}%
+  \providecommand\Hy@raisedlink[1]{#1}%
   \tud@localization@german{\partautorefname}{Teil}%
   \tud@localization@german{\chapterautorefname}{Kapitel}%
   \tud@localization@german{\sectionautorefname}{Unterkapitel}%
@@ -412,10 +399,23 @@
   \tud@localization@english{\sectionautorefname}{section}%
   \tud@localization@english{\subsectionautorefname}{subsection}%
   \tud@localization@english{\subsubsectionautorefname}{subsubsection}%
-  \ProvideDocumentCommand\tudhyperdef{s t' m}{\label{#3}}%
-  \providecommand*\tudhyperref[2]{#2}%
-  \providecommand*\autorefname[1][]{??\xspace}%
 }
+\newcommand*\tud@manualname{tudscr}%
+\NewDocumentCommand\tudhyperdef{s t' m}{%
+  \@tempswafalse%
+  \IfBooleanT{#1}{\@tempswatrue\setlength\@tempdima{3\baselineskip}}%
+  \IfBooleanT{#2}{\@tempswatrue\setlength\@tempdima{15\baselineskip}}%
+  \if@tempswa%
+    \raisebox{\@tempdima}[0pt][0pt]{\hyperdef{\tud@manualname}{#3}{}}%
+    \par\nobreak\vskip\dimexpr-\parskip-\baselineskip\relax%
+    \@afterindentfalse\@afterheading%
+  \else%
+    \Hy@raisedlink{\hyperdef{\tud@manualname}{#3}{}}\ignorespaces%
+  \fi%
+  \label{#3}%
+  \tud@trace@lbl@created@add{#3}%
+}%
+\newrobustcmd*\tudhyperref[2]{\hyperref{}{\tud@manualname}{#1}{#2}}%
 \newcommand*\hrfn[2]{%
   \href{#1}{\trim@spaces{#2}}%
   \footnote{%
@@ -448,8 +448,8 @@
   \in@{:}{#1}%
   \ifin@\else%
     \ClassError{tudscrmanual}{Wrong formatted label}{%
-      A label has to be used at least with '<bundle>:<markup>'\MessageBreak%
-      but you used \detokenize{#1}.%
+      A label has to be given at least with '<bundle>:<markup>'\MessageBreak%
+      but \detokenize{#1} was used.%
     }%
   \fi%
   \SplitArgument{2}{:}{#1}%
@@ -464,14 +464,17 @@
       \edef\@tempa{#1:#2:#3}%
     }{%
       \tud@attr@get\@tempb{#2}%
-      % TODO bundle prefix sollte implizit gegeben sein
       \IfValueTF{#1}{%
-        \ifxblank{#1}{% TODO leeres bundle sollte nicht vorkommen
+        \ifxblank{#1}{%
+        % TODO sollte immer gesetzt sein
+        \typeout{*===========================================================}%
           \edef\@tempa{\tud@bdl@dflt:\@tempb:#2}%
         }{%
           \edef\@tempa{#1:\@tempb:#2}%
         }%
       }{%
+        % TODO bundle prefix sollte immer gegeben sein
+        \typeout{!===========================================================}%
         \edef\@tempa{\tud@bdl@curr:\@tempb:#2}%
       }%
     }%
@@ -525,47 +528,97 @@
     \tud@lbl@get##1{##2:#2:#3}%
   }%
 }%
-\NewDocumentCommand\tud@bdl@seek{m m r== r()}{%
+\NewDocumentCommand\tud@bdl@seek{m m r== r() r<> r''}{%
   \begingroup%
+    \let\tud@res@a\@empty%
+    \let\tud@res@b\@empty%
     \IfValueTF{#4}{%
-      \ifblank{#4}{%
-        \let\tud@res@a\tud@bdl@curr%
-      }{%
-        \def\tud@res@a{#4}%
+      \def\tud@res@c{#4}%
+      \@for\tud@res@c:=\tud@res@c\do{%
+        \expandafter\ifblank\expandafter{\tud@res@c}{%
+          \let\tud@res@c\tud@bdl@curr%
+        }{}%
+        \ifx\tud@res@b\@empty%
+          \let\tud@res@b\tud@res@c%
+        \fi%
+        \tud@lbl@get\tud@lbl@tmp{\tud@res@c:#2}=#3=%
+        \tud@if@lbl@exists{\tud@lbl@tmp}{%
+          \expandafter\listadd\expandafter\tud@res@a\expandafter{\tud@res@c}%
+        }{%
+          \expandafter\tud@bdl@trace@lbl\expandafter{\tud@lbl@tmp}<#5>'#6'%
+        }%
       }%
     }{%
-      \let\tud@res@a\tud@bdl@curr%
+      \let\tud@res@b\tud@bdl@curr%
       \tud@lbl@get\tud@lbl@tmp{\tud@bdl@curr:#2}=#3=%
       \tud@if@lbl@exists{\tud@lbl@tmp}{}{%
         \expandafter\tud@bdl@@seek\tud@lbl@tmp\@nil%
-        \let\tud@res@b\@empty%
         \def\tud@res@c##1{%
           \tud@bdl@@@seek\tud@lbl@tmp{##1}=#3=%
           \tud@if@lbl@exists{\tud@lbl@tmp}{%
-            \ifx\tud@res@a\tud@bdl@curr%
-              \def\tud@res@a{##1}%
-            \else%
-              \listadd\tud@res@b{##1}%
-            \fi%
+            \listadd\tud@res@a{##1}%
           }{}%
         }%
         \forlistloop\tud@res@c{\tud@bdl@list}%
-        \ifx\tud@res@b\@empty\else%
-          \def\tud@res@c##1{\detokenize{##1}\MessageBreak}%
-  %        \ClassWarning{tudscrmanual}{%
-  %          Found following multiple matching bundles for\MessageBreak%
-  %          \detokenize{#2}\IfValueT{#3}{=\detokenize{#3}}:\MessageBreak%
-  %          \expandafter\detokenize\expandafter{\tud@res@a}\MessageBreak%
-  %          \forlistloop\tud@res@c{\tud@res@b}The first match is used%
-  %        }%
+        \ifx\tud@res@a\@empty%
+          \tud@bdl@trace@lbl{\tud@bdl@curr:#2}<#5>'#6'%
         \fi%
       }%
     }%
     \edef\tud@res@a{%
       \endgroup%
+      \def\noexpand#1{%
+        \ifx\tud@res@a\@empty%
+          \expandonce\tud@res@b%
+        \else%
+          \expandonce\tud@res@a%
+        \fi%
+      }%
+    }%
+  \tud@res@a%
+}
+\NewDocumentCommand\tud@bdl@trace@lbl{m r<> r''}{%
+  \begingroup%
+    \tud@lbl@get\tud@lbl@tmp{#1}%
+    \tud@get@crossrefnum\tud@res@a<#2>'#3'%
+    \ifnum\tud@res@a=\z@\relax%
+      \tud@trace@lbl@ignored@add{\tud@lbl@tmp}%
+    \else%
+      \tud@trace@lbl@missing@add{\tud@lbl@tmp}%
+    \fi%
+  \endgroup%
+}
+\NewDocumentCommand\tud@bdl@get{m m r== r() r<> r''}{%
+  \begingroup%
+    \tud@bdl@seek\tud@res@c{#2}=#3=(#4)<#5>'#6'%
+    \let\tud@res@a\relax%
+    \let\tud@res@b\@empty%
+    \forlistloop\tud@bdl@@get{\tud@res@c}%
+    \ifx\tud@res@b\@empty\else%
+      \def\tud@res@c##1{\detokenize{##1}\MessageBreak}%
+%      \ClassWarning{tudscrmanual}{%
+%        Found multiple matching bundles for\MessageBreak%
+%        \detokenize{#2}\IfValueT{#3}{=\detokenize{#3}}. \MessageBreak%
+%        These are:\MessageBreak%
+%        \expandafter\detokenize\expandafter{\tud@res@a}\MessageBreak%
+%        \forlistloop\tud@res@c{\tud@res@b}The first match is used%
+%      }%
+    \fi%
+    \edef\tud@res@a{%
+      \endgroup%
       \def\noexpand#1{\expandonce\tud@res@a}%
     }%
   \tud@res@a%
+}
+\newcommand*\tud@bdl@@get[1]{%
+  \ifx\tud@res@a\relax%
+    \def\tud@res@a{#1}%
+  \else%
+    \edef\tud@res@c{\detokenize{#1}}%
+    \xifinlist{\tud@res@c}{\tud@res@b}{}{%
+      \listeadd{\tud@res@b}{\tud@res@c}%
+    }%
+  \fi%
 }
 \newcommand*\tud@bdl@list{}
 \newcommand*\tud@bdl@export@list{}
@@ -575,10 +628,16 @@
     \expandafter\detokenize\expandafter{\ProcessedArgument}%
   }%
 }
-\NewDocumentCommand\tud@bdl@add{>{\ProcessorProtectedDetokenize}m}{%
+\newcommand*\tud@bdl@add[1]{%
   \begingroup%
-    \ifinlist{}{\tud@bdl@list}{}{\listadd\tud@bdl@list{#1}}%
-    \ifinlist{#1}{\tud@bdl@export@list}{}{\listgadd\tud@bdl@export@list{#1}}%
+    \def\tud@res@a{#1}%
+    \@for\tud@res@a:=\tud@res@a\do{%
+      \protected@edef\tud@res@a{\tud@res@a}%
+      \edef\tud@res@a{\expandafter\detokenize\expandafter{\tud@res@a}}%
+      \xifinlist{\tud@res@a}{\tud@bdl@export@list}{}{%
+        \listxadd\tud@bdl@export@list{\tud@res@a}%
+      }%
+    }%
   \endgroup%
   \tud@trace@bdl@add{#1}%
 }
@@ -597,8 +656,8 @@
     \etex@unexpanded{\@tfor\tud@res@b:=}\expandonce\tud@bdl@list\noexpand\do%
   }%
   \let\tud@bdl@list\@empty%
+  \listxadd\tud@bdl@list{\expandonce\tud@bdl@dflt}%
   \tud@res@a{\listxadd\tud@bdl@list{\tud@res@b}}%
-  \tud@bdl@add{\tud@bdl@dflt}%
 }
 \newenvironment{Bundle}[1]{%
   \tud@if@bdl{%
@@ -608,6 +667,12 @@
       a cross-label was given before.%
     }%
   }{%
+    \in@{,}{#1}%
+    \ifin@%
+      \ClassError{tudscrmanual}{Multiple values for environment `Bundle'}{%
+        Multiple elements are prohibited within the argument.%
+      }%
+    \fi%
     \gdef\tud@bdl@curr{#1}%
     \tud@bdl@add{#1}%
   }%
@@ -1120,7 +1185,14 @@
 }
 \newcommand*\Markup@Suppress{\let\Process@Markup\Markup@@Suppress}
 \NewDocumentCommand\Markup@@Suppress{m d== o d() d<> d''}{}
-\NewDocumentCommand\Process@Markup{m d== o d() d<> d''}{%
+\newcommand*\ProcessorBundle[1]{%
+  \ifblank{#1}{%
+    \let\ProcessedArgument\tud@bdl@dflt%
+  }{%
+    \def\ProcessedArgument{#1}%
+  }%
+}
+\NewDocumentCommand\Process@Markup{m d== o >{\ProcessorBundle}d() d<> d''}{%
   \Markup@CheckFormat%
   \if@tud@declare%
     \tud@toks@{\Process@@MarkupDeclare}%
@@ -1156,27 +1228,33 @@
   \the\tud@toks@%
   \Markup@ClearFormat%
 }
-% TODO mehrfache Einträge (aaa,bbb) in #4 verhindern oder einfach zwei labels?
 \NewDocumentCommand\Process@@MarkupDeclare{m r== r[] R(){\tud@bdl@curr}}{%
-  \tud@lbl@get*\tud@lbl@tmp{#4:#1}=#2=%
-  \ifcase\tud@declare@num\relax%
-    \tudhyperdef{\tud@lbl@tmp}%
+  \begingroup%
+    \def\tud@res@c{#4}%
+    \@for\tud@res@c:=\tud@res@c\do{%
+      \expandafter\ifblank\expandafter{\tud@res@c}{%
+        \let\tud@res@c\tud@bdl@curr%
+      }{}%
+      \tud@lbl@get*\tud@lbl@tmp{\tud@res@c:#1}=#2=%
+      \ifcase\tud@declare@num\relax%
+        \tudhyperdef{\tud@lbl@tmp}%
+      \or\or%
+        \tudhyperdef{\tud@lbl@tmp}%
+      \or%
+        \tudhyperdef*{\tud@lbl@tmp}%
+% TODO für tutorials notwendig, darf keine relevanz für manual haben
+%        \def\@tempa##1:##2:##3\@nil{\tudhyperdef*{##3:##2:##3}}%
+%        \expandafter\@tempa\tud@lbl@tmp\@nil%
+      \fi%
+    }%
+  \endgroup%
+  \ifnum\tud@declare@num<\tw@\relax%
     \Markup@Output{#1}=#2=[#3]%
-  \or%
-    \Markup@Output{#1}=#2=[#3]%
-  \or%
-    \tudhyperdef{\tud@lbl@tmp}%
-  \or%
-    \tudhyperdef*{\tud@lbl@tmp}%
-    % TODO ist für tutorials notwendig, darf keine relevanz für manual haben
-%    \def\@tempa##1:##2:##3\@nil{\tudhyperdef*{##3:##2:##3}}%
-%    \expandafter\@tempa\tud@lbl@tmp\@nil%
   \fi%
 }
-% TODO mehrfache Einträge (aaa,bbb) in #4 ermöglichen (jeweils label etc.)
 \NewDocumentCommand\Process@@MarkupInline{m r== r[] r() d<> d''}{%
   \begingroup%
-    \tud@bdl@seek\tud@res@a{#1}=#2=(#4)%
+    \tud@bdl@get\tud@res@a{#1}=#2=(#4)<#5>'#6'%
     \tud@toks@{\Process@@@MarkupInline{#1}=#2=[#3]}%
     \eaddto@hook\tud@toks@{\expandafter(\tud@res@a)}%
     \addto@hook\tud@toks@{<#5>'#6'}%
@@ -1192,36 +1270,32 @@
     \def\tud@res@b{\Markup@Output{#1}=#2=[#3]}%
     \let\tud@res@c\tud@res@b%
     \ifdisposition{}{%
-      \tud@get@crossrefnum\tud@res@a{#6}<#5>%
-      \ifnum\tud@res@a=\z@\relax%
-        \tud@if@lbl@exists{\tud@lbl@tmp}{%
+      \tud@get@crossrefnum\tud@res@a<#5>'#6'%
+      \tud@if@lbl@exists{\tud@lbl@tmp}{%
+        \def\tud@res@c{\tudhyperref{\tud@lbl@tmp}{\tud@res@b}}%
+        \ifcase\tud@res@a\relax\or% auto
+          \appto\tud@res@c{ in \autoref{\tud@lbl@tmp}}%
+        \or% page
+          \appto\tud@res@c{ \vpageref{\tud@lbl@tmp}}%
+        \or% ppage
+          \appto\tud@res@c{ \reftextfaraway{\tud@lbl@tmp}}%
+        \or% full
+          \appto\tud@res@c{ in \fullref{\tud@lbl@tmp}}%
+        \or% url
+          \def\tud@res@c{\href{#5}{\tud@res@b}}%
+%            \tud@trace@lbl@url@add{\tud@lbl@tmp (#5)}%
+        \fi%
+        \ifnum\tud@res@a=\z@\relax%
           \tud@trace@lbl@unused@add{\tud@lbl@tmp}%
-        }{%
-          \tud@trace@lbl@ignored@add{\tud@lbl@tmp}%
-        }%
-      \else%
-        \tud@if@lbl@exists{\tud@lbl@tmp}{%
-          \def\tud@res@c{%
-            \hyperref{}{\tud@manualname}{\tud@lbl@tmp}{\tud@res@b}%
-          }%
-          \ifcase\tud@res@a\relax\or% auto
-            \appto\tud@res@c{ in \autoref{\tud@lbl@tmp}}%
-          \or% page
-            \appto\tud@res@c{ \vpageref{\tud@lbl@tmp}}%
-          \or% ppage
-            \appto\tud@res@c{ \reftextfaraway{\tud@lbl@tmp}}%
-          \or% full
-            \appto\tud@res@c{ in \fullref{\tud@lbl@tmp}}%
-          \or% url
-            \def\tud@res@c{\href{#5}{\tud@res@b}}%
-            \tud@trace@lbl@url@add{\tud@lbl@tmp (#5)}%
-          \fi%
+        \else%
           \tud@trace@lbl@matched@add{\tud@lbl@tmp}%
-        }{%
-          \IfValueT{#5}{%
-            \def\tud@res@c{\href{#5}{\tud@res@b}}%
-            \tud@trace@lbl@url@add{!\tud@lbl@tmp (#5)}%
-          }%
+        \fi%
+      }{%
+        \IfValueT{#5}{%
+          \def\tud@res@c{\href{#5}{\tud@res@b}}%
+%            \tud@trace@lbl@url@add{!\tud@lbl@tmp (#5)}%
+        }%
+        \ifnum\tud@res@a=\z@\relax\else%
           \IfValueT{#6}{%
             \ClassWarning{tudscrmanual}%
             {%
@@ -1230,12 +1304,16 @@
               doesn't exists%
             }%
           }%
-          \tud@trace@lbl@missing@add{\tud@lbl@tmp}%
-        }%
-      \fi%
+        \fi%
+      }%
     }%
-    \tud@res@c%
-  \endgroup%
+%    \tud@res@c%
+%  \endgroup%
+    \protected@edef\tud@res@a{%
+      \endgroup%
+      \tud@res@c%
+    }%
+  \tud@res@a%
 }
 \newif\if@tud@disposition
 \newcommand*\ifdisposition{%
@@ -1247,24 +1325,24 @@
 }
 \pretocmd{\tud@sec@format}%
   {\@tud@dispositiontrue}{}{\tud@patch@wrn{tud@sec@format}}
-\NewDocumentCommand\tud@get@crossrefnum{m m r<>}{%
+\NewDocumentCommand\tud@get@crossrefnum{m r<> r''}{%
   \begingroup%
     \def\tud@res@a{\m@ne}%
-    \IfValueT{#2}{%
+    \IfValueT{#3}{%
       \TUD@set@numkey{}{tud@res@a}{%
         {none}{0},{auto}{1},{page}{2},{ppage}{3},{full}{4},{url}{5}%
-      }{#2}%
+      }{#3}%
       \ifx\FamilyKeyState\FamilyKeyStateProcessed%
         \ifnum\tud@res@a=5\relax%
-          \IfValueF{#3}{\FamilyKeyStateUnknownValue}%
+          \IfValueF{#2}{\FamilyKeyStateUnknownValue}%
         \fi%
       \fi%
       \ifx\FamilyKeyState\FamilyKeyStateProcessed\else%
         \ClassWarning{tudscrmanual}%
         {%
-          The cross-reference shorthand '#2' is unknown. \MessageBreak%
+          The cross-reference shorthand '#3' is unknown. \MessageBreak%
           Only 'auto', 'page', 'ppage' and 'full' as well as\MessageBreak%
-          'none' \IfValueT{#3}{or 'url' }are valid%
+          'none' \IfValueT{#2}{or 'url' }are valid%
         }%
         \def\tud@res@a{\z@}%
       \fi%
@@ -1494,6 +1572,7 @@
     \IfValueTF{#8}{%
       \ifxblank{#8}{}{\def\tud@idx@bdl{#8}}%
     }{%
+      % TODO noch sinnvoll?
       \tud@if@bdl{%
         \tud@if@lbl@exists{\tud@bdl@curr:#5}{%
           \edef\tud@idx@bdl{\expandonce\tud@bdl@curr}%
@@ -1534,7 +1613,7 @@
     \IfBooleanT{#1}{\@tempswatrue}%
     \IfValueT{#9}{%
       \ifstr{#9}{declare}{\@tempswatrue}{}%
-      % TODO sinnvoll? was wenn nicht?
+      % TODO noch sinnvoll?
       \ifstr{#9}{default}{\typeout{??? \the\inputlineno}\@tempswatrue}{}%
     }%
     \if@tempswa%
@@ -1751,6 +1830,7 @@
 \newcommand*\tud@idx@skip{%
   \ifnum\imki@columns>\@ne\relax\vspace{-\multicolsep}\fi%
 }
+% TODO use \@nil
 \newcommand*\print@index[1][]{%
   \pagebreak[3]%
   \@tud@indextrue%
