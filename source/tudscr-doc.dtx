@@ -1,4 +1,4 @@
-% \CheckSum{2094}
+% \CheckSum{2139}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -73,16 +73,8 @@
 }
 \usepackage{babel}
 \usepackage{tudscrfonts}
-\KOMAoptions{parskip=half-}
 \usepackage{bookmark}
 \usepackage[babel]{microtype}
-
-\CodelineIndex
-\RecordChanges
-\GetFileInfo{tudscr-doc.dtx}
-\title{\file{\filename}}
-\author{Falk Hanisch\qquad\expandafter\mailto\expandafter{\tudscrmail}}
-\date{\fileversion\nobreakspace(\filedate)}
 
 \begin{document}
   \maketitle
@@ -181,6 +173,37 @@
 % Die beiden Optionen werden abgearbeitet
 %    \begin{macrocode}
 \ProcessOptions\relax
+%    \end{macrocode}
+%
+% \subsection{Standardwerte für Titelei, Absatzauszeichnung und Index}
+%
+% Folgende Werte sind standardmäßig für den Titel eingestellt, können aber 
+% jederzeit überschrieben werden.
+%    \begin{macrocode}
+\AtEndOfClass{%
+  \title{\file{\filename}}
+  \author{Falk Hanisch\qquad\expandafter\mailto\expandafter{\TUDScriptContact}}
+  \date{\fileversion\nobreakspace(\filedate)}
+  \KOMAoptions{parskip=half-}%
+  \CodelineIndex%
+  \RecordChanges%
+}
+%    \end{macrocode}
+% Wurde in der Präambel \cs{GetFileInfo} nicht aufgerufen, dann erfolgt dies zu 
+% Beginn des Dokumentes.
+%    \begin{macrocode}
+\AtBeginDocument{%
+  \ifx\filename\@undefinded%
+    \GetFileInfo{\jobname.dtx}%
+  \else%
+    \ifx\fileversion\@undefinded%
+      \def\fileversion{???}%
+    \fi%
+    \ifx\filedate\@undefinded%
+      \def\filedate{\today}%
+    \fi%
+  \fi%
+}
 %    \end{macrocode}
 %
 % \subsection{Ignorierte Makros bei der Nutzung von zusätzlichen Indexeinträgen}
@@ -1501,6 +1524,8 @@
 % \begin{macro}{\pkg}
 % \begin{macro}{\opt}
 % \begin{macro}{\val}
+% \begin{macro}{\default}
+% \changes{v2.06e}{2019/09/26}{neu}^^A
 % \begin{macro}{\pgs}
 % \begin{macro}{\env}
 % \begin{macro}{\prm}
@@ -1515,6 +1540,7 @@
 \newrobustcmd*\pkg[1]{\mbox{\textsf{\textbf{#1}}}}
 \newrobustcmd*\opt[1]{\mbox{\texttt{#1}}}
 \newrobustcmd*\val[1]{\mbox{\texttt{#1}}}
+\newrobustcmd*\default[1]{\val{\textit{#1}}}
 \newrobustcmd*\pgs[1]{\mbox{\texttt{#1}}}
 \newrobustcmd*\env[1]{\mbox{\texttt{#1}}}
 \newrobustcmd*\prm[1]{\mbox{\texttt{#1}}}
@@ -1527,6 +1553,7 @@
     \let\pkg\@firstofone%
     \let\opt\@firstofone%
     \let\val\@firstofone%
+    \let\default\@firstofone%
     \let\pgs\@firstofone%
     \let\env\@firstofone%
     \let\prm\@firstofone%
@@ -1539,6 +1566,7 @@
 % \end{macro}^^A \prm
 % \end{macro}^^A \env
 % \end{macro}^^A \pgs
+% \end{macro}^^A \default
 % \end{macro}^^A \val
 % \end{macro}^^A \opt
 % \end{macro}^^A \pkg

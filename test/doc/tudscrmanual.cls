@@ -74,7 +74,7 @@
     \ifcsname xspace\endcsname\xspace\fi%
   }%
 }{}
-\providecommand*\tudscrmail{hanisch.latex@outlook.com}
+\providecommand*\TUDScriptContact{hanisch.latex@outlook.com}
 \newcommand*\TUD@ProvidesWrapperClass[3]
 {%
   \ProvidesClass{#1}[%
@@ -90,9 +90,9 @@
 \providecommand*\TUD@Class@Info{%
   \typeout{+------------------------------------------------------------------}%
   \typeout{| Corporate Design of Technische Universitaet Dresden}%
-  \typeout{| Class:      \TUD@Class@Name}%
-  \typeout{| Version:    \TUD@Version}%
-  \typeout{| Author:     Falk Hanisch (\tudscrmail)}%
+  \typeout{| Class:      \TUDScriptClassName}%
+  \typeout{| Version:    \TUDScriptVersion}%
+  \typeout{| Author:     Falk Hanisch (\TUDScriptContact)}%
   \typeout{| Repository: https://github.com/tud-cd/tudscr}%
   \typeout{| Forum:      https://latex.wcms-file3.tu-dresden.de}%
   \typeout{+------------------------------------------------------------------}%
