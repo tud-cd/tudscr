@@ -254,7 +254,6 @@
   \fi%
   \let\tud@list@sorted\tud@res@a%
 }
-% TODO \tud@templist raus, makros direkt benennen
 \newcommand*\tud@templist{}
 \let\tud@templist\relax
 \newcommand*\tud@trace@lbl@types{}
@@ -315,7 +314,6 @@
 \newcommand*\tud@trace@lbl@wlog{\relax}
 \AfterEndDocument{\tud@trace@lbl@wlog}
 \newcommand*\tud@trace@markup[2]{}
-% TODO check if index or not, create list
 \newcommand*\tracingmarkup{%
   \renewcommand*\tud@trace@markup[2]{%
     \wlog{+++++ markup ##1 on page \thepage^^J##2}%
@@ -325,7 +323,6 @@
 \newcommand*\tud@trace@bdl@add[1]{}
 \newcommand*\tud@trace@bdl@list{}
 \newcommand*\tracingbundle{%
-  % TODO use \@onelevel@sanitize
   \renewcommand*\tud@trace@bdl@add[1]{%
     \begingroup%
       \def\Class####1{class:####1}%
@@ -437,6 +434,7 @@
 \renewcommand*\fullref[1]{\hyperref[#1]{\autoref*{#1}\space\vpageref{#1}}}
 \AfterPackage*{hyperref}{\RequirePackage[babel]{microtype}[2013/05/23]}
 \TUD@UnwindPackage{hyperref}{\RequirePackage[babel]{microtype}[2013/05/23]}
+\newcommand*\tud@lbl@tmp{}
 \newcommand*\tud@lbl@fmt{%
   \def~{-}%
   \let\IeC\@firstofone%
@@ -445,38 +443,71 @@
   \def\dots{...}%
   \let\NoCaseChange\@firstofone%
 }
-\newcommand*\ProcessorCreateLabel[1]{%
-  \in@{:}{#1}%
-  \ifin@\else%
-    \ClassError{tudscrmanual}{Wrong formatted label}{%
-      A label has to be given at least with '<bundle>:<markup>'\MessageBreak%
-      but \detokenize{#1} was used.%
+\NewDocumentCommand\tud@lbl@get@curr{%
+  s m >{\tud@lbl@create}>{\SplitArgument{2}{:}}m d==%
+}{%
+  \tud@lbl@get@@curr#2{#3}=#4=%
+  \IfBooleanF{#1}{%
+    \@tempswafalse%
+    \tud@if@lbl@exists{#2}{%
+      \@tempswatrue%
+    }{%
+      \IfValueT{#4}{%
+        \tud@lbl@get@@curr\tud@reserved{#3}%
+        \tud@if@lbl@exists{\tud@reserved}{%
+          \let#2\tud@reserved%
+          \@tempswatrue%
+        }{}%
+      }%
     }%
-  \fi%
-  \SplitArgument{2}{:}{#1}%
-  \expandafter\Processor@CreateLabel\ProcessedArgument%
+    \if@tempswa\else%
+      \tud@if@bdl{\tud@lbl@get@dflt#2{#3}=#4=}{}%
+    \fi%
+  }%
 }
-\newcommand*\Processor@CreateLabel[3]{%
-% TODO enclose label part in <...>?
+\NewDocumentCommand\tud@lbl@get@@curr{m m d==}{%
+  \def#1{#2}%
+  \tud@doifPValue[\tud@lbl@fmt]{#3}{\noexpand\appto\noexpand#1{=#3}}%
+}
+\NewDocumentCommand\tud@lbl@get@dflt{m >{\SplitArgument{2}{:}}m r==}{%
+  \tud@lbl@get@@dflt{#1}#2=#3=%
+}
+\NewDocumentCommand\tud@lbl@get@@dflt{m m m m r==}{%
+  \edef\tud@reserved{\expandafter\detokenize\expandafter{\tud@bdl@dflt}}%
+  \ifstr{\tud@reserved}{#2}{}{%
+    \tud@lbl@get@curr#1{\tud@bdl@dflt:#3:#4}=#5=%
+  }%
+}
+\NewDocumentCommand\tud@if@lbl@exists{%
+  >{\tud@lbl@create}>{\SplitArgument{2}{:}}m%
+}{%
+  \ifcsdef{r@#1}{%
+    \expandafter\@firstoftwo%
+  }{%
+    \expandafter\@secondoftwo%
+  }%
+}
+\NewDocumentCommand\tud@lbl@create{m}{\tud@lbl@@create#1}
+\NewDocumentCommand\tud@lbl@@create{m m m}{%
   \begingroup%
     \Markup@Gobble%
     \tud@lbl@fmt%
     \IfValueTF{#3}{%
       \edef\@tempa{#1:#2:#3}%
     }{%
-      \tud@attr@get\@tempb{#2}%
-      \IfValueTF{#1}{%
-        \ifxblank{#1}{%
-        % TODO sollte immer gesetzt sein
-        \typeout{*===========================================================}%
-          \edef\@tempa{\tud@bdl@dflt:\@tempb:#2}%
+      \IfValueTF{#2}{%
+        \tud@attr@get\@tempb{#2}%
+        \IfValueTF{#1}{%
+          \ifxblank{#1}{%
+            \edef\@tempa{\tud@bdl@dflt:\@tempb:#2}%
+          }{%
+            \edef\@tempa{#1:\@tempb:#2}%
+          }%
         }{%
-          \edef\@tempa{#1:\@tempb:#2}%
+          \edef\@tempa{\tud@bdl@curr:\@tempb:#2}%
         }%
       }{%
-        % TODO bundle prefix sollte immer gegeben sein
-        \typeout{!===========================================================}%
-        \edef\@tempa{\tud@bdl@curr:\@tempb:#2}%
+        \edef\@tempa{#1}%
       }%
     }%
     \edef\@tempc{%
@@ -487,179 +518,10 @@
     }%
   \@tempc%
 }
-\newcommand*\tud@lbl@tmp{}
-% TODO \relax in #3 > !:...:... für \File etc. bzw. gar kein label?!
-\NewDocumentCommand\tud@lbl@get{s m >{\ProcessorCreateLabel}m d==}{%
-  \edef#2{#3}%
-  \tud@doifPValue[\tud@lbl@fmt]{#4}{\noexpand\eappto\noexpand#2{=#4}}%
-  \IfBooleanF{#1}{\tud@if@lbl@exists{#2}{}{\edef#2{#3}}}%
-}
-\newcommand*\tud@if@lbl@exists[1]{%
-  \begingroup%
-    \protected@edef\tud@res@a{%
-      \endgroup%
-      \noexpand\tud@if@lbl@@exists{#1}%
-    }%
-  \tud@res@a%
-}
-\NewDocumentCommand\tud@if@lbl@@exists{>{\ProcessorCreateLabel}m}{%
-  \ifcsdef{r@#1}{%
-    \expandafter\@firstoftwo%
-  }{%
-    \expandafter\@secondoftwo%
-  }%
-}
-% TODO drittes makro \tud@bdl@unknown -> mappen auf alles, was nicht definiert
-% TODO search for both macros
-\newcommand*\tud@bdl@dflt{\Package{tudscr}}
+\newcommand*\tud@bdl@dflt{tudscr}
 \newcommand*\tud@bdl@curr{}
 \let\tud@bdl@curr\tud@bdl@dflt
-% TODO kann vermutlich auch raus
-\newcommand*\tud@if@bdl{%
-  \ifx\tud@bdl@curr\tud@bdl@dflt
-    \expandafter\@secondoftwo%
-  \else
-    \expandafter\@firstoftwo%
-  \fi%
-}
-\newcommand*\tud@bdl@@seek{}
-\newcommand*\tud@bdl@@@seek{}
-\def\tud@bdl@@seek#1:#2:#3\@nil{%
-  \def\tud@bdl@@@seek##1##2=##3={%
-    \tud@lbl@get##1{##2:#2:#3}%
-  }%
-}%
-\NewDocumentCommand\tud@bdl@seek{m m r== r() r<> r''}{%
-  \begingroup%
-    \let\tud@res@a\@empty%
-    \let\tud@res@b\@empty%
-    \IfValueTF{#4}{%
-      \def\tud@res@c{#4}%
-      \@for\tud@res@c:=\tud@res@c\do{%
-        \expandafter\ifblank\expandafter{\tud@res@c}{%
-          \let\tud@res@c\tud@bdl@curr%
-        }{}%
-        \ifx\tud@res@b\@empty%
-          \let\tud@res@b\tud@res@c%
-        \fi%
-        \tud@lbl@get\tud@lbl@tmp{\tud@res@c:#2}=#3=%
-        \tud@if@lbl@exists{\tud@lbl@tmp}{%
-          \expandafter\listadd\expandafter\tud@res@a\expandafter{\tud@res@c}%
-        }{%
-          \expandafter\tud@bdl@trace@lbl\expandafter{\tud@lbl@tmp}<#5>'#6'%
-        }%
-      }%
-    }{%
-      \let\tud@res@b\tud@bdl@curr%
-      \tud@lbl@get\tud@lbl@tmp{\tud@bdl@curr:#2}=#3=%
-      \tud@if@lbl@exists{\tud@lbl@tmp}{}{%
-        \expandafter\tud@bdl@@seek\tud@lbl@tmp\@nil%
-        \def\tud@res@c##1{%
-          \tud@bdl@@@seek\tud@lbl@tmp{##1}=#3=%
-          \tud@if@lbl@exists{\tud@lbl@tmp}{%
-            \listadd\tud@res@a{##1}%
-          }{}%
-        }%
-        \forlistloop\tud@res@c{\tud@bdl@list}%
-        \ifx\tud@res@a\@empty%
-          \tud@bdl@trace@lbl{\tud@bdl@curr:#2}<#5>'#6'%
-        \fi%
-      }%
-    }%
-    \edef\tud@res@a{%
-      \endgroup%
-      \def\noexpand#1{%
-        \ifx\tud@res@a\@empty%
-          \expandonce\tud@res@b%
-        \else%
-          \expandonce\tud@res@a%
-        \fi%
-      }%
-    }%
-  \tud@res@a%
-}
-\NewDocumentCommand\tud@bdl@trace@lbl{m r<> r''}{%
-  \begingroup%
-    \tud@lbl@get\tud@lbl@tmp{#1}%
-    \tud@get@crossrefnum\tud@res@a<#2>'#3'%
-    \ifnum\tud@res@a=\z@\relax%
-      \tud@trace@lbl@ignored@add{\tud@lbl@tmp}%
-    \else%
-      \tud@trace@lbl@missing@add{\tud@lbl@tmp}%
-    \fi%
-  \endgroup%
-}
-\NewDocumentCommand\tud@bdl@get{m m r== r() r<> r''}{%
-  \begingroup%
-    \tud@bdl@seek\tud@res@c{#2}=#3=(#4)<#5>'#6'%
-    \let\tud@res@a\relax%
-    \let\tud@res@b\@empty%
-    \forlistloop\tud@bdl@@get{\tud@res@c}%
-    \ifx\tud@res@b\@empty\else%
-      \def\tud@res@c##1{\detokenize{##1}\MessageBreak}%
-%      \ClassWarning{tudscrmanual}{%
-%        Found multiple matching bundles for\MessageBreak%
-%        \detokenize{#2}\IfValueT{#3}{=\detokenize{#3}}. \MessageBreak%
-%        These are:\MessageBreak%
-%        \expandafter\detokenize\expandafter{\tud@res@a}\MessageBreak%
-%        \forlistloop\tud@res@c{\tud@res@b}The first match is used%
-%      }%
-    \fi%
-    \edef\tud@res@a{%
-      \endgroup%
-      \def\noexpand#1{\expandonce\tud@res@a}%
-    }%
-  \tud@res@a%
-}
-\newcommand*\tud@bdl@@get[1]{%
-  \ifx\tud@res@a\relax%
-    \def\tud@res@a{#1}%
-  \else%
-    \edef\tud@res@c{\detokenize{#1}}%
-    \xifinlist{\tud@res@c}{\tud@res@b}{}{%
-      \listeadd{\tud@res@b}{\tud@res@c}%
-    }%
-  \fi%
-}
-\newcommand*\tud@bdl@list{}
-\newcommand*\tud@bdl@export@list{}
-\newcommand*\ProcessorProtectedDetokenize[1]{%
-  \protected@edef\ProcessedArgument{#1}%
-  \edef\ProcessedArgument{%
-    \expandafter\detokenize\expandafter{\ProcessedArgument}%
-  }%
-}
-\newcommand*\tud@bdl@add[1]{%
-  \begingroup%
-    \def\tud@res@a{#1}%
-    \@for\tud@res@a:=\tud@res@a\do{%
-      \protected@edef\tud@res@a{\tud@res@a}%
-      \edef\tud@res@a{\expandafter\detokenize\expandafter{\tud@res@a}}%
-      \xifinlist{\tud@res@a}{\tud@bdl@export@list}{}{%
-        \listxadd\tud@bdl@export@list{\tud@res@a}%
-      }%
-    }%
-  \endgroup%
-  \tud@trace@bdl@add{#1}%
-}
-\BeforeClosingMainAux{%
-  \if@filesw%
-    \let\tud@res@a\@empty%
-    \def\tud@res@b#1{\eappto\tud@res@a{{#1}}}%
-    \forlistloop\tud@res@b{\tud@bdl@export@list}%
-    \immediate\write\@mainaux{%
-      \string\gdef\string\tud@bdl@list{\expandonce\tud@res@a}%
-    }%
-  \fi%
-}
-\AtBeginDocument{%
-  \edef\tud@res@a{%
-    \etex@unexpanded{\@tfor\tud@res@b:=}\expandonce\tud@bdl@list\noexpand\do%
-  }%
-  \let\tud@bdl@list\@empty%
-  \listxadd\tud@bdl@list{\expandonce\tud@bdl@dflt}%
-  \tud@res@a{\listxadd\tud@bdl@list{\tud@res@b}}%
-}
+\newcommand*\tud@if@bdl[2]{\ifstr{\tud@bdl@curr}{\tud@bdl@dflt}{#2}{#1}}
 \newenvironment{Bundle}[1]{%
   \tud@if@bdl{%
     \ClassError{tudscrmanual}%
@@ -668,15 +530,8 @@
       a cross-label was given before.%
     }%
   }{%
-    \in@{,}{#1}%
-    \ifin@%
-      \ClassError{tudscrmanual}{Multiple values for environment `Bundle'}{%
-        Multiple elements are prohibited within the argument.%
-      }%
-    \else%
-      \gdef\tud@bdl@curr{#1}%
-      \tud@bdl@add{#1}%
-    \fi%
+    \tud@trace@bdl@add{#1}%
+    \gdef\tud@bdl@curr{#1}%
   }%
   \ignorespaces%
 }{%
@@ -905,33 +760,33 @@
     {There are two optional arguments for a value given!}%
 }
 \NewExpandableDocumentCommand\@Application{s m}{#2}
-\NewDocumentCommand\Application{s m !d<> !d||}{%
+\NewDocumentCommand\Application{s m !d() !d<> !d||}{%
   \Markup@SetFormat{\sbsfont}%
-  \Process@Markup{\Application{#2}}<#3>%
-  \Process@Index{#1}{\Application{#2}}[Anwendungssoftware]|#4|%
+  \Process@Markup{\Application{#2}}(#3)<#4>%
+  \Process@Index{#1}{\Application{#2}}[Anwendungssoftware](#3)|#5|%
 }
 \NewExpandableDocumentCommand\@Distribution{s m}{#2}
-\NewDocumentCommand\Distribution{s m !o !d||}{%
+\NewDocumentCommand\Distribution{s m !o !d() !d||}{%
   \Markup@SetFormat{\sbnfont}%
   \IfValueTF{#3}{%
-    \Process@Markup{\Distribution{#2}}[~#3]%
+    \Process@Markup{\Distribution{#2}}[~#3](#4)%
   }{%
-    \Process@Markup{\Distribution{#2}}%
+    \Process@Markup{\Distribution{#2}}(#4)%
   }%
-  \Process@Index{#1}{\Distribution{#2}}[Distribution]|#4|%
+  \Process@Index{#1}{\Distribution{#2}}[Distribution](#4)|#5|%
 }
 \NewExpandableDocumentCommand\@Engine{s m}{#2}
-\NewDocumentCommand\Engine{s m !d||}{%
+\NewDocumentCommand\Engine{s m !d() !d||}{%
   \Markup@SetFormat{\sbnfont}%
-  \Process@Markup{\Engine{\hologo{#2}}}%
-  \Process@Index{#1}{\Engine{#2}}[Textsatzsystem]|#3|%
+  \Process@Markup{\Engine{\hologo{#2}}}(#3)%
+  \Process@Index{#1}{\Engine{#2}}[Textsatzsystem](#3)|#4|%
 }
 \newrobustcmd*\Path[1]{\mbox{\texttt{#1}}}
 \NewExpandableDocumentCommand\@File{s m}{#2}
-\NewDocumentCommand\File{s m !d||}{%
+\NewDocumentCommand\File{s m !d() !d||}{%
   \Markup@SetFormat{\sbnfont}%
-  \Process@Markup{\File{#2}}%
-  \Process@Index{#1}{\File{#2}}[Datei]|#3|%
+  \Process@Markup{\File{#2}}(#3)%
+  \Process@Index{#1}{\File{#2}}[Datei](#3)|#4|%
 }
 \NewExpandableDocumentCommand\@Class{s m}{#2}
 \NewDocumentCommand\Class{s m !d() !d'' !d||}{%
@@ -1187,21 +1042,29 @@
 }
 \newcommand*\Markup@Suppress{\let\Process@Markup\Markup@@Suppress}
 \NewDocumentCommand\Markup@@Suppress{m d== o d() d<> d''}{}
-\newcommand*\ProcessorBundle[1]{%
-  \ifblank{#1}{%
-    \let\ProcessedArgument\tud@bdl@dflt%
-  }{%
-    \def\ProcessedArgument{#1}%
-  }%
-}
-\NewDocumentCommand\Process@Markup{m d== o >{\ProcessorBundle}d() d<> d''}{%
-  \Markup@CheckFormat%
+\NewDocumentCommand\Process@Markup{m d== o d() d<> d''}{%
   \if@tud@declare%
     \tud@toks@{\Process@@MarkupDeclare}%
+    \IfValueTF{#4}{%
+      \tud@lbl@get@curr*\tud@lbl@tmp{#4:#1}=#2=%
+    }{%
+      \tud@lbl@get@curr*\tud@lbl@tmp{\tud@bdl@curr:#1}=#2=%
+    }%
   \else%
     \tud@toks@{\Process@@MarkupInline}%
+    \tud@lbl@get@curr\tud@lbl@tmp{#4:#1}=#2=%
   \fi%
-  \addto@hook\tud@toks@{{#1}=#2=[#3](#4)}%
+  \eaddto@hook\tud@toks@{\expandafter{\tud@lbl@tmp}}%
+  \begingroup%
+    \Markup@Gobble*%
+    \protected@edef\tud@reserved{%
+      \noexpand\endgroup%
+      \def\noexpand\tud@reserved{#1}%
+    }%
+  \tud@reserved%
+  \eaddto@hook\tud@toks@{\expandafter{\tud@reserved}}%
+  \IfValueT{#2}{\addto@hook\tud@toks@{=#2=}}%
+  \IfValueT{#3}{\addto@hook\tud@toks@{[#3]}}%
   \if@tud@declare%
     \if@tud@openindex%
       \IfValueT{#6}{%
@@ -1225,99 +1088,91 @@
     \tud@trace@markup{output}{\the\tud@toks@}%
   \fi%
   \if@tud@index\else%
-    \IfValueT{#4}{\tud@bdl@add{#4}}%
-  \fi%
-  \the\tud@toks@%
-  \Markup@ClearFormat%
-}
-\NewDocumentCommand\Process@@MarkupDeclare{m r== r[] R(){\tud@bdl@curr}}{%
-  \begingroup%
-    \def\tud@res@c{#4}%
-    \@for\tud@res@c:=\tud@res@c\do{%
-      \expandafter\ifblank\expandafter{\tud@res@c}{%
-        \let\tud@res@c\tud@bdl@curr%
-      }{}%
-      \tud@lbl@get*\tud@lbl@tmp{\tud@res@c:#1}=#2=%
-      \ifcase\tud@declare@num\relax%
-        \tudhyperdef{\tud@lbl@tmp}%
-      \or\or%
-        \tudhyperdef{\tud@lbl@tmp}%
-      \or%
-        \tudhyperdef*{\tud@lbl@tmp}%
-% TODO für tutorials notwendig, darf keine relevanz für manual haben
-%        \def\@tempa##1:##2:##3\@nil{\tudhyperdef*{##3:##2:##3}}%
-%        \expandafter\@tempa\tud@lbl@tmp\@nil%
-      \fi%
-    }%
-  \endgroup%
-  \ifnum\tud@declare@num<\tw@\relax%
-    \Markup@Output{#1}=#2=[#3]%
-  \fi%
-}
-\NewDocumentCommand\Process@@MarkupInline{m r== r[] r() d<> d''}{%
-  \begingroup%
-    \tud@bdl@get\tud@res@a{#1}=#2=(#4)<#5>'#6'%
-    \tud@toks@{\Process@@@MarkupInline{#1}=#2=[#3]}%
-    \eaddto@hook\tud@toks@{\expandafter(\tud@res@a)}%
-    \addto@hook\tud@toks@{<#5>'#6'}%
-    \edef\tud@res@a{%
-      \endgroup%
-      \the\tud@toks@%
-    }%
-  \tud@res@a%
-}
-\NewDocumentCommand\Process@@@MarkupInline{m r== r[] r() r<> r''}{%
-  \begingroup%
-    \tud@lbl@get\tud@lbl@tmp{#4:#1}=#2=%
-    \def\tud@res@b{\Markup@Output{#1}=#2=[#3]}%
-    \let\tud@res@c\tud@res@b%
-    \ifdisposition{}{%
-      \tud@get@crossrefnum\tud@res@a<#5>'#6'%
-      \tud@if@lbl@exists{\tud@lbl@tmp}{%
-        \def\tud@res@c{\tudhyperref{\tud@lbl@tmp}{\tud@res@b}}%
-        \ifcase\tud@res@a\relax% none
-          \let\tud@res@c\tud@res@b%
-        \or% auto
-          \appto\tud@res@c{ in \autoref{\tud@lbl@tmp}}%
-        \or% page
-          \appto\tud@res@c{ \vpageref{\tud@lbl@tmp}}%
-        \or% ppage
-          \appto\tud@res@c{ \reftextfaraway{\tud@lbl@tmp}}%
-        \or% full
-          \appto\tud@res@c{ in \fullref{\tud@lbl@tmp}}%
-        \or% url
-          \def\tud@res@c{\href{#5}{\tud@res@b}}%
-%            \tud@trace@lbl@url@add{\tud@lbl@tmp (#5)}%
-        \fi%
-        \ifnum\tud@res@a=\z@\relax%
-          \tud@trace@lbl@unused@add{\tud@lbl@tmp}%
-        \else%
-          \tud@trace@lbl@matched@add{\tud@lbl@tmp}%
-        \fi%
-      }{%
-        \IfValueT{#5}{%
-          \def\tud@res@c{\href{#5}{\tud@res@b}}%
-%            \tud@trace@lbl@url@add{!\tud@lbl@tmp (#5)}%
-        }%
-        \ifnum\tud@res@a=\z@\relax\else%
-          \IfValueT{#6}{%
-            \ClassWarning{tudscrmanual}%
-            {%
-              A cross-reference could not be created\MessageBreak%
-              as label \tud@lbl@tmp\MessageBreak%
-              doesn't exists%
-            }%
-          }%
-        \fi%
+    \IfValueT{#4}{%
+      \ifxblank{#4}{}{%
+        \tud@trace@bdl@add{#4}%
       }%
     }%
-%    \tud@res@c%
-%  \endgroup%
-    \protected@edef\tud@res@a{%
-      \endgroup%
-      \tud@res@c%
+  \fi%
+  \the\tud@toks@%
+}
+\NewDocumentCommand\Process@@MarkupDeclare{m m d== o}{%
+  \Markup@CheckFormat%
+  \ifcase\tud@declare@num\relax%
+    \tudhyperdef{#1}%
+    \Markup@Output{#2}=#3=[#4]%
+  \or%
+    \Markup@Output{#2}=#3=[#4]%
+  \or%
+    \tudhyperdef{#1}%
+  \or%
+    \tudhyperdef*{#1}%
+    \def\@tempa##1:##2:##3\@nil{\tudhyperdef*{##3:##2:##3}}%
+    \@tempa#1\@nil%
+  \fi%
+  \Markup@ClearFormat%
+}
+\NewDocumentCommand\Process@@MarkupInline{m m d== o d<> d''}{%
+  \Markup@CheckFormat%
+  \begingroup%
+    \def\@tempc{\Markup@Output{#2}=#3=[#4]}%
+    \tud@if@lbl@exists{#1}{%
+      \def\@tempa{\tudhyperref{#1}{\@tempc}}%
+      \let\@tempb\relax%
+      \IfValueT{#6}{%
+        \def\@tempb{%
+          \ClassWarning{tudscrmanual}%
+          {%
+            You've used the unknown cross-reference\MessageBreak%
+            shorthand '#6'. Only 'auto', 'page' and 'full'\MessageBreak%
+            as well as 'none' \IfValueT{#5}{or 'url' }are valid%
+          }%
+        }%
+        \ifstr{#6}{auto}{\def\@tempb{ in \autoref{#1}}}{%
+        \ifstr{#6}{page}{\def\@tempb{ \vpageref{#1}}}{%
+        \ifstr{#6}{ppage}{\def\@tempb{ \reftextfaraway{#1}}}{%
+        \ifstr{#6}{full}{\def\@tempb{ in \fullref{#1}}}{%
+        \ifstr{#6}{none}{%
+          \let\tud@trace@lbl@matched@add\tud@trace@lbl@unused@add%
+          \let\@tempa\@tempc\let\@tempb\relax%#
+        }{%
+        \ifstr{#6}{silent}{%
+          \let\tud@trace@lbl@matched@add\@gobble%
+          \let\@tempa\@tempc\let\@tempb\relax%#
+        }{}%
+        }}}}}%
+        \IfValueT{#5}{%
+          \ifstr{#6}{url}{\def\@tempa{\href{#5}{\@tempc}}\let\@tempb\relax}{}%
+        }%
+      }%
+      \tud@trace@lbl@matched@add{#1}%
+    }{%
+      \let\@tempa\@tempc%
+      \IfValueT{#5}{\def\@tempa{\href{#5}{\@tempc}}}%
+      \let\@tempb\relax%
+      \IfValueT{#6}{%
+        \ifstr{#6}{none}{%
+          \let\tud@trace@lbl@missing@add\tud@trace@lbl@ignored@add%
+          \let\@tempa\@tempc%
+        }{%
+          \def\@tempb{%
+            \ClassWarning{tudscrmanual}%
+            {%
+              Label #1\MessageBreak%
+              is missing, no cross-reference created%
+            }%
+          }%
+        }%
+      }%
+      %\tud@trace@lbl@missing@add{#1}%
+      \def\foo##1=##2\@nil{\def\tud@lbl@tmp{##1}}%
+      \def\tud@lbl@tmp{#1}%
+      \expandafter\foo\tud@lbl@tmp=\@nil%
+      \expandafter\tud@trace@lbl@missing@add\expandafter{\tud@lbl@tmp}%
     }%
-  \tud@res@a%
+    \ifdisposition{\@tempc}{\@tempa\@tempb}%
+  \endgroup%
+  \Markup@ClearFormat%
 }
 \newif\if@tud@disposition
 \newcommand*\ifdisposition{%
@@ -1329,47 +1184,10 @@
 }
 \pretocmd{\tud@sec@format}%
   {\@tud@dispositiontrue}{}{\tud@patch@wrn{tud@sec@format}}
-\NewDocumentCommand\tud@get@crossrefnum{m r<> r''}{%
-  \begingroup%
-    \def\tud@res@a{\m@ne}%
-    \IfValueT{#3}{%
-      \TUD@set@numkey{}{tud@res@a}{%
-        {none}{0},{auto}{1},{page}{2},{ppage}{3},{full}{4},{url}{5}%
-      }{#3}%
-      \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-        \ifnum\tud@res@a=5\relax%
-          \IfValueF{#2}{\FamilyKeyStateUnknownValue}%
-        \fi%
-      \fi%
-      \ifx\FamilyKeyState\FamilyKeyStateProcessed\else%
-        \ClassWarning{tudscrmanual}%
-        {%
-          The cross-reference shorthand '#3' is unknown. \MessageBreak%
-          Only 'auto', 'page', 'ppage' and 'full' as well as\MessageBreak%
-          'none' \IfValueT{#2}{or 'url' }are valid%
-        }%
-        \def\tud@res@a{\z@}%
-      \fi%
-    }%
-    \edef\tud@res@a{%
-      \endgroup%
-      \def\noexpand#1{\tud@res@a}%
-    }%
-  \tud@res@a%
+\NewDocumentCommand\Markup@Output{>{\SplitArgument{1}{!}}m r== r[]}{%
+  \Markup@@Output#1=#2=[#3]%
 }
-\NewDocumentCommand\Markup@Output{m r== r[]}{%
-  \begingroup%
-    \Markup@Gobble*%
-    \protected@edef\tud@res@a{%
-      \endgroup%
-      \noexpand\Markup@@Output{#1}\etex@unexpanded{=#2=[#3]}%
-    }%
-  \tud@res@a%
-}
-\NewDocumentCommand\Markup@@Output{>{\SplitArgument{1}{!}}m r== r[]}{%
-  \Markup@@@Output#1=#2=[#3]%
-}
-\NewDocumentCommand\Markup@@@Output{m m r== r[]}{%
+\NewDocumentCommand\Markup@@Output{m m r== r[]}{%
   \if@tud@declare%
     \tud@toks@{\Markup@Declare}%
   \else%
@@ -1543,7 +1361,6 @@
 \newcommand*\tud@idx@fmt{}
 \newcommand*\tud@idx@val{}
 \newcommand*\tud@idx@bdl{}
-% TODO use bdl@seek
 \NewDocumentCommand\tud@idx@get{s m m m m r== r[] r() d||}{%
   \begingroup%
     \begingroup%
@@ -1571,12 +1388,10 @@
     \def#3{#5}%
     \tud@replace#2{@}{"@}%
     \tud@replace#3{@}{"@}%
-    % TODO noch sinnvoll?
     \let\tud@idx@bdl\tud@bdl@dflt%
     \IfValueTF{#8}{%
-      \ifxblank{#8}{}{\def\tud@idx@bdl{#8}}%
+      \def\tud@idx@bdl{#8}%
     }{%
-      % TODO noch sinnvoll?
       \tud@if@bdl{%
         \tud@if@lbl@exists{\tud@bdl@curr:#5}{%
           \edef\tud@idx@bdl{\expandonce\tud@bdl@curr}%
@@ -1617,8 +1432,7 @@
     \IfBooleanT{#1}{\@tempswatrue}%
     \IfValueT{#9}{%
       \ifstr{#9}{declare}{\@tempswatrue}{}%
-      % TODO noch sinnvoll?
-      \ifstr{#9}{default}{\typeout{??? \the\inputlineno}\@tempswatrue}{}%
+      \ifstr{#9}{default}{\@tempswatrue}{}%
     }%
     \if@tempswa%
       \protected@eappto#2{\expandonce\@tempa}%
@@ -1648,38 +1462,6 @@
     }%
   \tud@reserved%
 }
-\NewDocumentCommand\tud@idx@bdl@get{m m r== d()}{%
-  \begingroup%
-    \def\tud@res@a{#4}%
-    \IfValueF{#4}{%
-      \tud@if@bdl{%
-        % TODO alle Varianten sollten mit \tud@lbl@seek erschlagen werden
-        % TODO wohl eher nicht die Sternversion nutzen
-        \tud@lbl@get\tud@lbl@tmp{\tud@bdl@curr:#2}=#3=%
-        \tud@if@lbl@exists{\tud@lbl@tmp}{%
-          \let\tud@res@a\tud@bdl@curr%
-        }{%
-          \tud@lbl@get\tud@lbl@tmp{\tud@bdl@dflt:#2}=#3=%
-          \tud@if@lbl@exists{\tud@lbl@tmp}{%
-            \let\tud@res@a\tud@bdl@dflt%
-          }{%
-            \Markup@Gobble%
-            \edef\tud@res@b{\tud@bdl@curr}%
-            \ifstrstart{\tud@res@b}{\tud@bdl@dflt}{%
-              \let\tud@res@a\tud@bdl@dflt%
-            }{%
-              \let\tud@res@a\tud@bdl@curr%
-            }%
-          }%
-        }%
-      }{}%
-    }%
-    \edef\tud@res@a{%
-      \endgroup%
-      \def\noexpand#1{\expandonce\tud@res@a}%
-    }%
-  \tud@res@a%
-}
 \newrobustcmd*\cleversee{\tud@cleversee{\seename}}
 \newrobustcmd*\cleverseealso{%
   \ClassWarning{tudscrmanual}%
@@ -1701,8 +1483,6 @@
   \emph{\IfBooleanTF{#1}{\alsoname}{\seename}}\space#2%
 }
 \newcommand*\seeidx[2]{\pageref{idx:#1}}
-% TODO #5 abfangen, wenn -NoValue- und if@tud@bdl
-% TODO mehrfache Einträge in #5 ermöglichen (jeweils separater eintrag)
 \NewDocumentCommand\Process@Index{m m d== o d() d||}{%
   \ifboolexpr{%
     bool {@tud@index} or bool {@tud@obsolete}%
@@ -1717,22 +1497,13 @@
         }%
       }%
     }{%
-      \tud@toks@{\Process@@Index{#2}=#3=[#4]}%
-      \tud@idx@bdl@get\tud@res@a{#2}=#3=(#5)%
-      \eaddto@hook\tud@toks@{\expandafter(\tud@res@a)}%
-      \addto@hook\tud@toks@{|#6|}%
-      \the\tud@toks@%
-%      \Process@@Index{#2}=#3=[#4](#5)|#6|%
+      \Process@@Index{#2}=#3=[#4](#5)|#6|%
     }%
   }%
 }
 \NewDocumentCommand\Process@@Index{m r== r[] r() r||}{%
   \if@tud@declare%
-    \if@tud@subdeclare%
-      \tud@idx@get\tud@idx@key\tud@idx@fmt\tud@idx@val{#1}=#2=[#3](#4)|!|%
-    \else%
-      \tud@idx@get\tud@idx@key\tud@idx@fmt\tud@idx@val{#1}=#2=[#3](#4)|declare|%
-    \fi%
+    \tud@idx@get\tud@idx@key\tud@idx@fmt\tud@idx@val{#1}=#2=[#3](#4)|declare|%
   \else%
     \tud@idx@get\tud@idx@key\tud@idx@fmt\tud@idx@val{#1}=#2=[#3](#4)|#5|%
   \fi%
@@ -1834,7 +1605,6 @@
 \newcommand*\tud@idx@skip{%
   \ifnum\imki@columns>\@ne\relax\vspace{-\multicolsep}\fi%
 }
-% TODO use \@nil
 \newcommand*\print@index[1][]{%
   \pagebreak[3]%
   \@tud@indextrue%
@@ -1861,9 +1631,6 @@
   \tud@idx@get*\tud@idx@key\tud@idx@fmt\tud@idx@val{#1}=#2=[#3](#4)%
 }
 \newlength\changedatskip
-% TODO wie mit (...) umgehen? #3 ist spezialfall, falls nicht innerhalb von []
-% TODO #3 abfangen, wenn -NoValue- und if@tud@bdl
-% TODO mehrfache Einträge in #3 ermöglichen?
 \NewDocumentCommand\ChangedAt{s o d() m !O{\changedatskip}}{%
   \IfValueTF{#2}{%
     \Changed@At@CreateList[#2](#3){#4}%
@@ -2086,6 +1853,7 @@
     \protected@eappto\@tempa{%
       =\IfBooleanTF{#1}{\noexpand\emph}{\@firstofone}{\@tempc}=%
     }%
+    \appto\@tempa{'silent'|!|}%
     \edef\@tempb{%
       \IfBooleanTF{#1}{\noexpand\emph}{\@firstofone}{\noexpand\PValue{\@tempb}}%
     }%
@@ -2095,12 +1863,8 @@
       \IfValueT{#3}{\appto\@tempb{\suffix{S\"aumniswert f\"ur #3}}}%
     }%
     \IfValueT{#4}{\appto\@tempb{\suffix{#4}}}%
-    \edef\tud@reserved{%
-      \noexpand\stditem[%
-        \noexpand\InlineDeclaration*{\expandonce\@tempa}\expandonce\@tempb%
-      ]%
-    }%
-    \tud@reserved%
+    \tud@lbl@get@curr*\tud@lbl@tmp{\tud@bdl@curr:\tud@values}=\@tempc=%
+    \stditem[\tudhyperdef{\tud@lbl@tmp}\@tempa\@tempb]%
   }{%
     \stditem%
   }%
@@ -2127,10 +1891,9 @@
   before=\tud@before@item{packages}%
 }
 \NewDocumentCommand\tud@item@packages{o d<> d()}{%
-  % TODO \tud@bdl@curr sollte für \tud@lbl@seek nicht nötig sein
   \def\@tempa##1{%
     \@tempc%
-    \tud@lbl@get\tud@lbl@tmp{\tud@bdl@curr:\Package{##1}}%
+    \tud@lbl@get@curr*\tud@lbl@tmp{\tud@bdl@curr:\Package{##1}}%
     \tudhyperdef{\tud@lbl@tmp}%
     \begingroup%
       \Package{##1}<#2>'url'|!|%
@@ -2142,7 +1905,7 @@
       \let\@tempc\relax%
       \forcsvlist\@tempa{#1}%
       \IfValueT{#3}{%
-        \tud@lbl@get\tud@lbl@tmp{\tud@bdl@curr:\Package{#3}}%
+        \tud@lbl@get@curr*\tud@lbl@tmp{\tud@bdl@curr:\Package{#3}}%
         \quad(\tudhyperdef{\tud@lbl@tmp}\Package{#3}'none'|!|)%
       }%
     }%
@@ -2514,13 +2277,13 @@
 \NewDocumentCommand\Forum{!s !t'}{%
   \IfBooleanTF{#1}{\toks@{\href}}{\toks@{\hrfn}}%
   \IfBooleanT{#2}{\toks@{\url}}%
-  \addto@hook\toks@{{http://latex.wcms-file3.tu-dresden.de}}%
+  \addto@hook\toks@{{http://latex.wcms-file3.tu-dresden.de/}}%
   \IfBooleanF{#2}{\addto@hook\toks@{{TUD-\LaTeX-Forum}}}%
   \the\toks@\xspace%
 }
 \NewDocumentCommand\CTAN{!s !o !d()}{%
   \IfBooleanTF{#1}{\toks@{\href}}{\toks@{\hrfn}}%
-  \addto@hook\toks@{{http://www.ctan.org\IfValueT{#2}{/#2}}}%
+  \addto@hook\toks@{{http://www.ctan.org/\IfValueT{#2}{#2}}}%
   \addto@hook\toks@{%
     {\tud@english{Comprehensive TeX Archive Network (CTAN\IfValueT{#3}{~#3})}}%
   }%
@@ -2530,13 +2293,12 @@
 \NewDocumentCommand\GitHubRepo{s t' m !O{releases}}{%
   \IfBooleanTF{#1}{\toks@{\href}}{\toks@{\hrfn}}%
   \IfBooleanT{#2}{\toks@{\url}}%
-  \addto@hook\toks@{{\tud@github@baseurl/#3\ifblank{#4}{}{/#4}}}%
+  \addto@hook\toks@{{\tud@github@baseurl/#3/#4}}%
   \IfBooleanF{#2}{%
-    \addto@hook\toks@{{\mbox{\tud@english{GitHub-Repository~\sbnfont{#3}}}}}%
+    \addto@hook\toks@{{\tud@english{GitHub-Repository~\sbnfont{#3}}}}%
   }%
   \the\toks@\xspace%
 }
-% TODO GitHubDownload > map to \GitHubRepo{tudscr}[releases/download/#1]
 \newcommand*\Download[1]{\tud@github@baseurl/tudscr/releases/download/#1}
 \newcommand*\notudscrartcl{%
   F\"ur die Klassen \Class{tudscrartcl} sowie \Class{tudscrposter} ist diese %
