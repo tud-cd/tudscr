@@ -33,6 +33,8 @@ del  clearsource.bat
 cd doc
 call cleardoc.bat
 del  cleardoc.bat
+del  sub-tudscr.tex
+del  test.tex
 cd ..
 if exist test rmdir test/s /q > nul
 mkdir tex\latex\tudscr
