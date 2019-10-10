@@ -300,7 +300,7 @@
 \newcommand*\tud@trace@lbl@add[2]{%
   \if@tud@index\else%
     \begingroup%
-      \edef\tud@res@a{#2}%
+      \protected@edef\tud@res@a{#2}%
       \@onelevel@sanitize\tud@res@a%
       \wlog{+++++ label #1: \tud@res@a\space on page \thepage}%
       \xifinlistcs{\tud@res@a}{tud@trace@lbl@#1@list}{}{%
@@ -434,6 +434,7 @@
 \renewcommand*\fullref[1]{\hyperref[#1]{\autoref*{#1}\space\vpageref{#1}}}
 \AfterPackage*{hyperref}{\RequirePackage[babel]{microtype}[2013/05/23]}
 \TUD@UnwindPackage{hyperref}{\RequirePackage[babel]{microtype}[2013/05/23]}
+% TODO kann das raus?
 \newcommand*\tud@lbl@fmt{%
   \def~{-}%
   \let\IeC\@firstofone%
@@ -487,7 +488,7 @@
 % TODO \relax in #3 > !:...:... für \File etc. bzw. gar kein label?!
 \NewDocumentCommand\tud@lbl@get{s m >{\ProcessorCreateLabel}m d==}{%
   \edef#2{#3}%
-  \tud@doifPValue[\tud@lbl@fmt]{#4}{\noexpand\eappto\noexpand#2{=#4}}%
+  \tud@doifPValue[\tud@lbl@fmt]{#4}{\noexpand\appto\noexpand#2{=#4}}%
   \IfBooleanF{#1}{\tud@if@lbl@exists{#2}{}{\edef#2{#3}}}%
 }
 \newcommand*\tud@if@lbl@exists[1]{%
@@ -597,10 +598,10 @@
           \noexpand\MessageBreak%
         }%
       }%
-      \ClassWarning{tudscrmanual}{%
-        Found multiple matching bundles\MessageBreak%
-        \tud@res@c for \detokenize{#2}\IfValueT{#3}{=\detokenize{#3}}%
-      }%
+%      \ClassWarning{tudscrmanual}{%
+%        Found multiple matching bundles\MessageBreak%
+%        \tud@res@c for \detokenize{#2}\IfValueT{#3}{=\detokenize{#3}}%
+%      }%
       \def\tud@res@b##1,##2\@nil{\def\tud@res@a{##1}}%
       \expandafter\tud@res@b\tud@res@a\@nil%
     \fi%
@@ -1118,6 +1119,7 @@
 \newrobustcmd*\PParameter[1]{\mbox{\texttt{\textbraceleft#1\textbraceright}}}
 \newrobustcmd*\POParameter[1]{\mbox{\texttt{[#1]}}}
 \newrobustcmd*\textOR{\PValue{\,\textbardbl\,}}
+% TODO das ist großer murks, \PValueName muss weg!
 \newcommand*\tud@doifPValue[3][]{%
   \IfValueT{#2}{%
     \begingroup%
@@ -1747,9 +1749,9 @@
           \fi%
         }%
         \if@tempswa%
-          \typeout{!!!!!!!!!!!! #2 (#5)}%
-          \typeout{idx@get: \tud@res@a}%
-          \typeout{bdl@seek: \tud@res@b}%
+%          \typeout{!!!!!!!!!!!! #2 (#5)}%
+%          \typeout{idx@get: \tud@res@a}%
+%          \typeout{bdl@seek: \tud@res@b}%
         \fi%
       \fi%
       \tud@toks@{\Process@@Index{#2}=#3=[#4]}%

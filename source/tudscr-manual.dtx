@@ -1,4 +1,4 @@
-% \CheckSum{4509}
+% \CheckSum{4513}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -59,7 +59,7 @@
 % \fi
 %
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
-\ProvidesFile{tudscr-manual.dtx}[2019/10/02 v2.06e TUD-Script\space%
+\ProvidesFile{tudscr-manual.dtx}[2019/10/10 v2.06e TUD-Script\space%
 %
 % \iffalse
 %</dtx>
@@ -326,25 +326,6 @@
 % Einfluss auf \pkg{glossaries}.
 %    \begin{macrocode}
 \RequirePackage{scrwfile}[2013/08/05]
-%    \end{macrocode}
-% Die Umgebungen \env{Preamble}, \env{Trunk} und \env{Hint} sowie deren
-% Varianten nutzen das Paket \pkg{filecontents}, um ihren Inhalt in eine
-% temporäre Datei zu schreiben und diese direkt mit dem Paket \pkg{listings}
-% darzustellen sowie ggf. den Quelltext auszuführen. Beim Überschreiben einer
-% Datei wird für gewöhnlich eine Warnung erzeugt. Dies wird mit dem Patch 
-% unterbunden.
-%    \begin{macrocode}
-\RequirePackage{filecontents}[2011/10/08]
-\begingroup%
-  \catcode`\*=11%
-  \catcode`\^^M\active%
-  \catcode`\^^L\active\let^^L\relax%
-  \catcode`\^^I\active%
-  \patchcmd{\filec@ntents}{%
-    \@latex@warning@no@line{Overwriting file `\@currdir#1'}%
-  }{}{}{\tud@patch@wrn{filec@tents}}%
-  \global\let\filec@ntents\filec@ntents%
-\endgroup%
 %    \end{macrocode}
 %
 % \iffalse
@@ -5359,11 +5340,35 @@
 % genutzt wird.
 %    \begin{macrocode}
 \newcommand*\tud@tut@pre{%
-  \csuse{filecontents*}{\tud@tut@temp.tex}%
+  \csuse{filecontents*}[force,nosearch]{\tud@tut@temp.tex}%
 }
 \newcommand*\tud@tut@post{%
   \csuse{endfilecontents*}%
 }
+%    \end{macrocode}
+% Die Umgebungen \env{Preamble}, \env{Trunk} und \env{Hint} sowie deren
+% Varianten nutzen die Umgebung \env{filecontents}, um ihren Inhalt in eine
+% temporäre Datei zu schreiben und diese direkt mit dem Paket \pkg{listings}
+% darzustellen sowie ggf. den Quelltext auszuführen. Beim Überschreiben einer
+% Datei wird für gewöhnlich eine Warnung erzeugt. Dies wird mit dem Patch 
+% unterbunden.
+%    \begin{macrocode}
+\begingroup%
+  \catcode`\^^M\active%
+  \catcode`\^^I\active%
+  \patchcmd{\filec@ntents}{%
+    \@latex@warning@no@line{Writing or overwriting file `\@currdir\@curr@file'}%
+  }{%
+    \edef\tud@res@a{%
+      \noexpand\ifstrequal{\@curr@file}{\@currdir\tud@tut@temp.tex}%
+    }%
+    \tud@res@a{}{%
+      \@latex@warning@no@line%
+        {Writing or overwriting file `\@currdir\@curr@file'}%
+    }%
+  }{}{\tud@patch@wrn{filec@tents}}%
+  \global\let\filec@ntents\filec@ntents%
+\endgroup%
 %    \end{macrocode}
 % \end{macro}^^A \tud@tut@post
 % \end{macro}^^A \tud@tut@pre
