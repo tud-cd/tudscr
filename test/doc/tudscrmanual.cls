@@ -16,7 +16,7 @@
 %% 
 %% TUD-Script -- Corporate Design of Technische Universitaet Dresden
 %% 
-%%   2019/09/26 v2.06e TUD-Script
+%%   2019/10/10 v2.06e TUD-Script
 %% 
 %% Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2019
 %% 
@@ -35,7 +35,8 @@
 %% The current maintainer and author of this work is Falk Hanisch.
 %% 
 %%% From File: tudscr-version.dtx
-\NeedsTeXFormat{LaTeX2e}
+\NeedsTeXFormat{LaTeX2e}%
+[2018/04/01]%
 \begingroup
   \catcode`\@11\relax%
   \ifx\TUD@Version\@undefined%
@@ -57,7 +58,7 @@
     }%
   \fi%
   \TUD@Version@Check%
-    {2019/09/26 v2.06e TUD-Script}%
+    {2019/10/10 v2.06e TUD-Script}%
     {2018/03/30 v3.25 KOMA-Script}%
   \ifx\TUDScriptVersion\@undefined%
     \xdef\TUDScriptVersion{\TUD@Version}%
@@ -78,7 +79,7 @@
 \newcommand*\TUD@ProvidesWrapperClass[3]
 {%
   \ProvidesClass{#1}[%
-  2019/09/26 v2.06e TUD-Script
+  2019/10/10 v2.06e TUD-Script
     #3 (#2)%
   ]%
   \newcommand*\TUD@Class@Parent{#2}%
@@ -101,7 +102,7 @@
 %%% From File: tudscr-manual.dtx
 %%% From File: tudscr-base.dtx
 \RequirePackage{tudscrbase}[%
-  2019/09/26 v2.06e TUD-Script
+  2019/10/10 v2.06e TUD-Script
 ]
 \renewcommand*\TUD@KOMAoptions[1]{\PassOptionsToClass{#1}{\TUD@Class@Parent}}
 \AfterClass{\TUD@Class@Parent}{\let\TUD@KOMAoptions\KOMAoptions}
@@ -183,7 +184,7 @@
 \TUDProcessOptions\relax
 \PassOptionsToClass{ttfont=roboto}{\TUD@Class@Parent}
 \LoadClass{\TUD@Class@Parent}[
-  2019/09/26 v2.06e TUD-Script
+  2019/10/10 v2.06e TUD-Script
 ]
 %%% From File: tudscr-manual.dtx
 \PassOptionsToPackage{log-declarations=false}{xparse}
@@ -298,7 +299,7 @@
 }
 \@onlypreamble\tracinglabels
 \newcommand*\tud@trace@lbl@add[2]{%
-  \if@tud@index\else%
+%  \if@tud@index\else%
     \begingroup%
       \protected@edef\tud@res@a{#2}%
       \@onelevel@sanitize\tud@res@a%
@@ -307,7 +308,7 @@
         \listcsxadd{tud@trace@lbl@#1@list}{\tud@res@a}%
       }%
     \endgroup%
-  \fi%
+%  \fi%
 }
 \newcommand*\tud@trace@lbl@wlog{\relax}
 \AfterEndDocument{\tud@trace@lbl@wlog}
@@ -590,6 +591,7 @@
     \tud@bdl@seek\tud@res@a{#2}=#3=(#4)'#5'%
     \protected@expandtwoargs\in@{,}{\tud@res@a}%
     \ifin@%
+      % TODO maybe filter exact matches holding = in label
       \let\tud@res@c\@empty%
       \@for\tud@res@b:={\tud@res@a}\do{%
         \eappto\tud@res@c{%
@@ -935,7 +937,7 @@
 \NewExpandableDocumentCommand\@Class{s m}{#2}
 \NewDocumentCommand\Class{s m !d() !d'' !d||}{%
   \if@tud@changedat%
-    \Process@ChangedAt{\Class{#2}}[Klasse]%
+    \Process@ChangedAt{\Class{#2}}[Klasse](#3)%
   \else%
     \Markup@SetFormat{\sbnfont}%
     \Process@Markup{\Class{#2}}(#3)'#4'%
@@ -945,7 +947,7 @@
 \NewExpandableDocumentCommand\@Package{s m}{#2}
 \NewDocumentCommand\Package{s m !d() !d<> !d'' !d||}{%
   \if@tud@changedat%
-    \Process@ChangedAt{\Package{#2}}[Paket]%
+    \Process@ChangedAt{\Package{#2}}[Paket](#3)%
   \else%
     \Markup@SetFormat{\sbnfont}%
     \IfValueTF{#4}{%
@@ -1190,6 +1192,9 @@
 \newcommand*\ProcessorBundle[1]{%
   \begingroup%
     \def\tud@res@a{#1}%
+    \ifx\tud@res@a\@empty
+      \let\tud@res@a\tud@bdl@dflt%
+    \fi%
     \let\tud@res@b\@empty%
     \let\tud@res@c\@empty%
     \@for\tud@res@a:=\tud@res@a\do{%
@@ -1893,8 +1898,8 @@
   \let\tud@indexprologue\@empty%
 }
 \newif\if@tud@changedat
-% TODO #4 durch alle Markup-Befehle weiterreichen und r()? Liste!
-\NewDocumentCommand\Process@ChangedAt{m d== o d()}{%
+% TODO mehrfache Einträge in #4 ermöglichen?
+\NewDocumentCommand\Process@ChangedAt{m d== o >{\ProcessorBundle}r()}{%
   \tud@idx@get*\tud@idx@key\tud@idx@fmt\tud@idx@val{#1}=#2=[#3](#4)%
 }
 \newlength\changedatskip

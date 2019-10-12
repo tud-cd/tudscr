@@ -1,4 +1,4 @@
-% \CheckSum{4513}
+% \CheckSum{4480}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -59,7 +59,7 @@
 % \fi
 %
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
-\ProvidesFile{tudscr-manual.dtx}[2019/10/10 v2.06e TUD-Script\space%
+\ProvidesFile{tudscr-manual.dtx}[2019/10/12 v2.06e TUD-Script\space%
 %
 % \iffalse
 %</dtx>
@@ -5334,13 +5334,15 @@
 % \changes{v2.02}{2014/08/19}{neu}^^A
 % \begin{macro}{\tud@tut@post}
 % \changes{v2.02}{2014/08/19}{neu}^^A
+% \begin{macro}{\filec@ntents@silent}
+% \changes{v2.06e}{2019/10/10}{neu}^^A
 % Dies sind Hilfsmakros, welche zu Beginn und Ende der Quelltextumgebungen 
 % \env{Preamble}, \env{Trunk} und \env{Hint} für das Sichern der Inhalte in
 % eine Hilfsdatei verantwortlich sind, wofür die \env{filecontents}-Umgebung 
 % genutzt wird.
 %    \begin{macrocode}
 \newcommand*\tud@tut@pre{%
-  \csuse{filecontents*}[force,nosearch]{\tud@tut@temp.tex}%
+  \csuse{filecontents*}[force,silent,nosearch]{\tud@tut@temp.tex}%
 }
 \newcommand*\tud@tut@post{%
   \csuse{endfilecontents*}%
@@ -5350,26 +5352,14 @@
 % Varianten nutzen die Umgebung \env{filecontents}, um ihren Inhalt in eine
 % temporäre Datei zu schreiben und diese direkt mit dem Paket \pkg{listings}
 % darzustellen sowie ggf. den Quelltext auszuführen. Beim Überschreiben einer
-% Datei wird für gewöhnlich eine Warnung erzeugt. Dies wird mit dem Patch 
-% unterbunden.
+% Datei wird für gewöhnlich eine Warnung erzeugt. Dies wird mit dem eigens 
+% definierten Parameter \prm{silent} unterbunden.
 %    \begin{macrocode}
-\begingroup%
-  \catcode`\^^M\active%
-  \catcode`\^^I\active%
-  \patchcmd{\filec@ntents}{%
-    \@latex@warning@no@line{Writing or overwriting file `\@currdir\@curr@file'}%
-  }{%
-    \edef\tud@res@a{%
-      \noexpand\ifstrequal{\@curr@file}{\@currdir\tud@tut@temp.tex}%
-    }%
-    \tud@res@a{}{%
-      \@latex@warning@no@line%
-        {Writing or overwriting file `\@currdir\@curr@file'}%
-    }%
-  }{}{\tud@patch@wrn{filec@tents}}%
-  \global\let\filec@ntents\filec@ntents%
-\endgroup%
+\providecommand*\filec@ntents@silent{%
+  \let\@latex@warning@no@line\@gobble%
+}
 %    \end{macrocode}
+% \end{macro}^^A \filec@ntents@silent
 % \end{macro}^^A \tud@tut@post
 % \end{macro}^^A \tud@tut@pre
 % Die nachfolgenden Umgebungen verwenden die beiden, gerade zuvor eingeführten 
@@ -5582,12 +5572,10 @@
     ##1%
     \begingroup%
       ##2%
-      \setbox\@tempboxa\hbox{\vbox{##1}}%
-      \@tempdima=\ht\@tempboxa%
-      \setbox\@tempboxa\box\voidb@x%
+      \settoheight\@tempdima{\vbox{##1}}%
       \ifdim\@tempdima>\z@\relax%
         \endgraf%
-        \vspace{\medskipamount}%
+        \medskip%
         \noindent\ignorespaces%
       \fi%
     \endgroup%
