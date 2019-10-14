@@ -522,16 +522,18 @@
 }
 \newcommand*\tud@bdl@@seek{}
 \newcommand*\tud@bdl@@@seek{}
-\def\tud@bdl@@seek#1:#2:#3\@nil{%
-  \def\tud@bdl@@@seek##1##2=##3={%
-    \tud@lbl@get##1{##2:#2:#3}%
+\def\tud@bdl@@seek#1:#2:#3\@nil#4\@nil{%
+  \def\tud@bdl@@@seek##1##2{%
+    \tud@lbl@get#4##1{##2:#2:#3}%
   }%
-}%
+}
 \NewDocumentCommand\tud@bdl@seek{s m m r== d() d''}{%
   \begingroup%
     \let\tud@res@a\@empty%
     \let\tud@res@b\@empty%
     \IfValueTF{#5}{%
+      \def\tud@res@c##1,##2\@nil{\def\tud@bdl@curr{##1}}%
+      \tud@res@c#5,\@nil%
       \def\tud@res@c{#5}%
       \@for\tud@res@c:=\tud@res@c\do{%
         \tud@lbl@get\tud@lbl@tmp{\tud@res@c:#3}=#4=%
@@ -543,9 +545,9 @@
         }%
       }%
     }{%
-      \tud@lbl@get\tud@lbl@tmp{\tud@bdl@curr:#3}=#4=%
+      \tud@lbl@get*\tud@lbl@tmp{\tud@bdl@curr:#3}=#4=%
       \tud@if@lbl@exists{\tud@lbl@tmp}{}{%
-        \expandafter\tud@bdl@@seek\tud@lbl@tmp\@nil%
+        \tud@lbl@get\tud@lbl@tmp{\tud@bdl@curr:#3}%
         \def\tud@res@c##1{%
           \tud@bdl@@@seek\tud@lbl@tmp{##1}=#4=%
           \tud@if@lbl@exists{\tud@lbl@tmp}{%
@@ -553,14 +555,21 @@
             \appto\tud@res@b{,##1}%
           }{}%
         }%
+        \expandafter\tud@bdl@@seek\tud@lbl@tmp\@nil*\@nil%
         \forlistloop\tud@res@c{\tud@bdl@list}%
+        \IfValueT{#4}{%
+          \ifx\tud@res@a\@empty%
+            \tud@lbl@get\tud@lbl@tmp{\tud@bdl@curr:#3}%
+            \expandafter\tud@bdl@@seek\tud@lbl@tmp\@nil\@nil%
+            \forlistloop\tud@res@c{\tud@bdl@list}%
+          \fi%
+        }%
         \ifx\tud@res@a\@empty%
           \tud@bdl@trace@lbl{\tud@bdl@curr:#3}'#6'{#1}%
         \fi%
       }%
     }%
     \ifx\tud@res@a\@empty%
-      \listeadd\tud@res@a{\expandonce\tud@bdl@curr}%
       \let\tud@res@b\tud@bdl@curr%
     \else%
       \edef\tud@res@b{%
@@ -600,10 +609,10 @@
           \noexpand\MessageBreak%
         }%
       }%
-%      \ClassWarning{tudscrmanual}{%
-%        Found multiple matching bundles\MessageBreak%
-%        \tud@res@c for \detokenize{#2}\IfValueT{#3}{=\detokenize{#3}}%
-%      }%
+      \ClassWarning{tudscrmanual}{%
+        Found multiple matching bundles\MessageBreak%
+        \tud@res@c for \detokenize{#2}\IfValueT{#3}{=\detokenize{#3}}%
+      }%
       \def\tud@res@b##1,##2\@nil{\def\tud@res@a{##1}}%
       \expandafter\tud@res@b\tud@res@a\@nil%
     \fi%
@@ -1294,6 +1303,18 @@
 \NewDocumentCommand\Process@@@MarkupInline{m r== r[] r() r<> r''}{%
   \begingroup%
     \tud@lbl@get\tud@lbl@tmp{#4:#1}=#2=%
+    \IfValueT{#2}{%
+      \tud@lbl@get*\tud@res@a{#4:#1}=#2=%
+      \ifx\tud@lbl@tmp\tud@res@a\else%
+        \tud@if@lbl@exists{\tud@lbl@tmp}{%
+          \ClassWarning{tudscrmanual}{%
+            A specific value was given but no label was found\MessageBreak%
+            \detokenize{#1=#2}\MessageBreak%
+            for \detokenize{#4}%
+          }%
+        }{}%
+      \fi%
+    }%
     \def\tud@res@b{\Markup@Output{#1}=#2=[#3]}%
     \let\tud@res@c\tud@res@b%
     \ifdisposition{}{%
@@ -1724,6 +1745,7 @@
 \newcommand*\seeidx[2]{\pageref{idx:#1}}
 % TODO #5 abfangen, wenn -NoValue- und if@tud@bdl
 % TODO mehrfache Einträge in #5 ermöglichen (jeweils separater eintrag)
+% TODO \tracingindex
 \NewDocumentCommand\Process@Index{m m d== o d() d||}{%
   \ifboolexpr{%
     bool {@tud@index} or bool {@tud@obsolete}%
