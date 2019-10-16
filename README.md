@@ -188,7 +188,7 @@ Versionen
 + Unterstützung der KOMA-Script-Schriftelemente für Titel und Umschlagseite
 + Befehle und Umgebungen für Zusammenfassung, Selbstständigkeitserklärung und
   Sperrvermerk wurden verbessert
-+ Fussnoten in Überschriften als Symbole  per Option `footnotes`
++ Fussnoten in Überschriften als Symbole per Option `footnotes`
 + einige Befehle wurden für Kompatibilität zu anderen Paketen umbenannt
 + Funktionalität des Paketes **mathswap** im Dokument umschaltbar
 
@@ -329,7 +329,7 @@ Versions
 
 **v2.05** (2016/07/26)
 + class **tudscrposter**
-+ crop marks  with packages **crop** and **geometry** possible
++ crop marks with packages **crop** and **geometry** possible
 + new possible settings for type area
 + font size related skips with option `relspacing`
 + `\course` and `\discipline` available on title
