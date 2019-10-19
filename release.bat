@@ -42,6 +42,21 @@ mkdir source\latex\tudscr
 mkdir doc\latex\tudscr\tutorials
 echo \BaseDirectory{.}> docstrip.cfg
 echo \UseTDS>> docstrip.cfg
+echo %% This file was generated to be used with `tudscr.ins' > git-ver-info.log
+for /f %%f in ('dir /b *.dtx *.tex') do (
+  git log -1 ^
+    --format="\expandafter\gdef\csname %%f-ver\endcsname{%%ad %%h}" ^
+    --date=format:"%%Y/%%m/%%d %%H:%%M:%%S" ^
+    -- ..\source\%%f >> git-ver-info.log
+)
+cd install
+echo %% This file was generated to be used with `tudscr.ins' > git-ver-info.log
+for /f %%f in ('dir /b *.dtx *.tex') do (
+  git log -1 ^
+    --format="\expandafter\gdef\csname %%f-ver\endcsname{%%ad %%h}" ^
+    --date=format:"%%Y/%%m/%%d %%H:%%M:%%S" ^
+    -- ..\..\source\install\%%f >> git-ver-info.log
+)
 tex tudscr.ins
 pdflatex "\def\tudfinalflag{}\input{tudscrsource.tex}"
 pdflatex --shell-escape "\def\tudfinalflag{}\input{tudscrsource.tex}"
