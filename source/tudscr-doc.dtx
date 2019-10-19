@@ -1,4 +1,4 @@
-% \CheckSum{2208}
+% \CheckSum{2234}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -310,6 +310,7 @@
 %    \begin{macrocode}
 \pretocmd{\@docinclude}{\GetFileInfo{#1}\pagestyle{tudscrdoc}}{}{}
 \apptocmd{\@docinclude}{%
+  \let\filename\@undefinded%
   \let\filedate\@undefinded%
   \let\fileversion\@undefinded%
   \let\filerevision\@undefinded%
@@ -319,14 +320,19 @@
   \let\@mkboth\@gobbletwo%
   \let\@oddhead\@empty\let\@evenhead\@empty%
   \def\@oddfoot{%
-    File\ifnum\c@part>\z@\nobreakspace\thepart\fi: {\ttfamily\filename}%
-    \enskip Date: \filedate\nobreakspace\fileversion%
-    \ifx\filerevision\@empty\else%
-      \enskip Revision: \filerevision
-    \fi
+    \ifx\filename\@undefinded? ? ?\else%
+      File\ifnum\c@part>\z@\nobreakspace\thepart\fi:%
+      \nobreakspace\texttt{\filename}%
+      \enskip Date: \ifx\filedate\@undefinded?\else\filedate\fi%
+      \nobreakspace\ifx\fileversion\@undefinded?\else\fileversion\fi%
+      \ifx\filerevision\@undefinded\let\filerevision\@empty\fi%
+      \ifx\filerevision\@empty\else%
+        \enskip Revision: \filerevision%
+      \fi%
+    \fi%
     \hfill\thepage}%
   \def\@evenfoot{\@oddfoot}%
-}%
+}
 \pagestyle{tudscrdoc}%
 \let\ps@titlepage\ps@tudscrdoc%
 %    \end{macrocode}
