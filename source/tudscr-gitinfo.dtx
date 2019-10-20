@@ -1,4 +1,4 @@
-% \CheckSum{262}
+% \CheckSum{388}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -61,10 +61,10 @@
 %
 % Um sich das ganze Aktualisieren von irgendwelchen Versionangaben zu sparen, 
 % werden diese einfach aus dem GitHub-Repository übernommen. Hierfür ist ein 
-% externer Aufruf von \file{git log} notwendig, die notwendigen Informationen 
-% werden dabei in die Datei \file{git-ver-info.log} geschrieben und entweder 
-% während des Durchlaufs mit \app{docstrip} oder aber beim Erzeugen der Doku
-% mithilfe des Paketes \pkg{tudscr-gitinfo} ausgelesen.
+% externer Aufruf von \file{git~log} notwendig, die notwendigen Informationen 
+% werden dabei in die Datei \file{\GitInfoContainer} (\cs{GitInfoContainer}) 
+% geschrieben und entweder während des Durchlaufs mit \app{docstrip} oder aber
+% beim Erzeugen der Doku mithilfe des Paketes \pkg{tudscr-gitinfo} ausgelesen.
 %
 % \StopEventually{\PrintIndex\PrintChanges\PrintToDos}
 %
@@ -84,7 +84,7 @@
 % das Hinzufügen der Versionsinformationen für das Erzeugen der Zieldateien mit 
 % \app{docstrip} definiert.
 %    \begin{macrocode}
-\def\GitInfoContainer{git-ver-info.log}
+\def\GitInfoContainer{tudscr-gitinfo-ver.log}
 %<*!package>
 \begingroup
   \catcode`\@11\relax%
@@ -168,6 +168,8 @@
 % \changes{v2.06e}{2019/10/19}{neu}^^A
 % \begin{macro}{\tud@@GetFileInfo}
 % \changes{v2.06e}{2019/10/19}{neu}^^A
+% \begin{macro}{\tud@git@file@list}
+% \changes{v2.06e}{2019/10/20}{neu}^^A
 % Der Befehl \cs{GetFileInfo} hat das gleiche Ziel wie der gleichnamige Befehl 
 % aus dem Paket \pkg{doc}. Allerdings werden vorliegende Versionsinformationen 
 % aus einem GitHub-Repository bevorzugt geladen. Das Lesen der Informationen, 
@@ -177,6 +179,7 @@
 % gegenüber \file{tex}-Dateien bevorzugt werden.
 %    \begin{macrocode}
 \def\GetFileInfo{\tud@GetFileInfo}
+\newcommand*\tud@git@file@list{}
 \newcommand*\tud@GetFileInfo[1]{%
   \filename@parse{#1}%
   \ifx\filename@ext\relax%
@@ -188,9 +191,11 @@
     \edef\filename{#1}%
   \fi%
 %    \end{macrocode}
-% Wenn zum angegebenen Dateinamen eine entsprechende Versionsinformation aus 
-% dem GitHub-Repository existiert, wird diese verwendet.
+% Mit dem Dateinamen werden über \cs{tud@git@log} Versionsinformation aus einem
+% GitHub-Repository abgerufen und verwendet (falls vorhanden). Der dazugehörige
+% Dateiname wird der Liste \cs{tud@git@file@list} hinzugefügt.
 %    \begin{macrocode}
+  \expandafter\tud@git@log\expandafter{\filename}%
   \ifcsname\filename-ver\endcsname%
     \def\@tempa##1 ##2 ##3\@nil{%
       \def\filedate{##1}%
@@ -200,6 +205,9 @@
     \edef\@tempb{\csname\filename-ver\endcsname}%
     \expandafter\@tempa\@tempb\@nil%
     \let\fileinfo\@empty%
+    \edef\tud@git@file@list{%
+      \ifx\tud@git@file@list\@empty\else\tud@git@file@list,\fi\filename%
+    }%
   \else%
 %    \end{macrocode}
 % Andernfalls wird eine Warnung erzeugt und auf das durch \pkg{doc} definierte 
@@ -251,34 +259,114 @@
 \RequirePackage{scrlfile}
 \AfterPackage*{doc}{\def\GetFileInfo{\tud@GetFileInfo}}
 %    \end{macrocode}
+% \end{macro}^^A \tud@git@file@list
 % \end{macro}^^A \tud@@GetFileInfo
 % \end{macro}^^A \tud@GetFileInfo
 % \end{macro}^^A \GetFileInfo
+% \begin{macro}{\tud@git@log}
+% \changes{v2.06e}{2019/10/20}{neu}^^A
+% \begin{macro}{\tud@git@@log}
+% \changes{v2.06e}{2019/10/20}{neu}^^A
+% Der Befehl \cs{tud@git@log} definiert für die im Argument angegebene Datei 
+% das Makro \cs{\meta{Dateiname}-ver} mit den Versionsinformationen, welche mit 
+% \cs{tud@git@@log} ausgelesen wurden.
+%    \begin{macrocode}
+\RequirePackage{pdftexcmds}
+\RequirePackage{etexcmds}
+\newcommand*\tud@git@log[1]{%
+  \ifnum\pdf@shellescape=\@ne%
+    \begingroup%
+      \endlinechar=\m@ne%
+      \everyeof{\noexpand}%
+      \edef\@tempa{\tud@git@@log{#1}}%
+      \ifx\@tempa\@empty\else%
+        \edef\@tempa{%
+          \etex@unexpanded{\expandafter\gdef\csname #1-ver\endcsname}{\@tempa}%
+        }%
+        \@tempa%
+      \fi%
+    \endgroup%
+  \fi%
+}
+%    \end{macrocode}
+% Der Befehl \cs{tud@git@@log} startet den Aufruf von \file{git~log} mit den 
+% notwendigen Formatierungsoptionen.
+%    \begin{macrocode}
+\begingroup
+\@makeother\|
+\newcommand*\tud@git@@log[1]{}
+\xdef\tud@git@@log#1{%
+  \noexpand\@@input|"git log -1 %
+    --format='\@percentchar ad \@percentchar  h' %
+    --date=format:'\@percentchar Y/\@percentchar m/\@percentchar d %
+      \@percentchar H:\@percentchar M:\@percentchar S' %
+    -- #1" %
+}
+\endgroup
+%    \end{macrocode}
+% \end{macro}^^A \tud@git@@log
+% \end{macro}^^A \tud@git@log
+% Am Dokumentende wird für alle Dateien, für die eine Versionsinformation 
+% gefunden werden konnte und in \cs{tud@git@file@list} gesammelt wurden, diese 
+% in die externe Datei \cs{GitInfoContainer} geschrieben, damit diese auch ohne 
+% den abermaligen Aufruf von \opt{--shell-escape} genutzt werden können.
+%    \begin{macrocode}
+\AtEndDocument{%
+  \ifx\tud@git@file@list\@empty\else%
+    \def\@tempa{%
+      \@percentchar\@percentchar\space%
+      This file was generated with `tudscr-gitinfo.sty'^^J%
+      \@percentchar\@percentchar\space%
+      It is intended to be used for generating either a documentation^^J%
+      \@percentchar\@percentchar\space%
+      with class `tudscrdoc' or installation files with `docstrip'%
+    }%
+    \chardef\reserved@c15 %
+    \ch@ck7\reserved@c\write%
+    \immediate\openout\reserved@c\GitInfoContainer\relax%
+    \immediate\write\reserved@c{\@tempa}%
+    \@for\@tempa:=\tud@git@file@list\do{%
+      \ifx\@tempa\@empty\else%
+        \edef\@tempb{%
+          \etex@unexpanded{\expandafter\gdef\csname}%
+          \@tempa-ver%
+          \noexpand\endcsname%
+          {\csname\@tempa-ver\endcsname}%
+        }%
+        \immediate\write\reserved@c{\etex@unexpanded\expandafter{\@tempb}}%
+      \fi%
+    }%
+    \immediate\closeout\reserved@c%
+  \fi%
+}
+%    \end{macrocode}
 % Am Ende des Paketes werden die Versionsinformationen der aktuellen Datei 
 % ausgelesen und anschließend mit \cs{ProvidesFile} gesetzt, wobei eine Warnung 
 % erzeugt wird, wenn für die Datei schon einmal \cs{ProvidesFile} mit einer 
 % anderen Angabe genutzt wurde. Die zu schreibende Angabe wird hierfür in 
 % \cs{@tempa} expandiert und mit \cs{ ver@\meta{Dateiname}} verglichen.
 %    \begin{macrocode}
-\GetFileInfo{\jobname}
-\edef\@tempa{%
-  \filedate\space\fileversion\space%
-  \ifx\filerevision\@empty\else%
-    \filerevision\ifx\fileinfo\@empty\else\space\fi%
+\AtEndOfPackage{%
+  \GetFileInfo{\jobname}%
+  \edef\@tempa{%
+    \filedate\space\fileversion\space%
+    \ifx\filerevision\@empty\else%
+      \filerevision\ifx\fileinfo\@empty\else\space\fi%
+    \fi%
+    \fileinfo%
+  }%
+  \ifcsname ver@\filename\endcsname%
+    \expandafter\ifx\csname ver@\filename\endcsname\@tempa\else%
+      \PackageWarning{tudscrgitinfo}{%
+        The info for \filename\space is currently\MessageBreak%
+        \csname ver@\filename\endcsname\MessageBreak%
+        and will be overwritten with\MessageBreak%
+        \@tempa%
+      }%
+    \fi%
   \fi%
-  \fileinfo%
+  \ProvidesFile{\filename}[\@tempa]%
 }
-\ifcsname ver@\filename\endcsname%
-  \expandafter\ifx\csname ver@\filename\endcsname\@tempa\else%
-    \PackageWarning{tudscrgitinfo}{%
-      The info for \filename\space is currently\MessageBreak%
-      \csname ver@\filename\endcsname\MessageBreak%
-      and will be overwritten with\MessageBreak%
-      \@tempa%
-    }%
-  \fi%
-\fi
-\ProvidesFile{\filename}[\@tempa]
 %    \end{macrocode}
 %
 % \Finale

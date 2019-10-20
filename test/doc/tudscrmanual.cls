@@ -5,7 +5,6 @@
 %% The original source files were:
 %%
 %% tudscr-version.dtx  (with options: `class,manual,identify,inherit')
-%% tudscr-manual.dtx  (with options: `class,manual')
 %% tudscr-base.dtx  (with options: `class,manual,inherit,load')
 %% tudscr-manual.dtx  (with options: `class,manual,option')
 %% tudscr-misc.dtx  (with options: `class,manual,inherit,execute')
@@ -15,10 +14,11 @@
 %% tudscr-texindy.dtx  (with options: `class,manual')
 %% 
 %% TUD-Script -- Corporate Design of Technische Universitaet Dresden
-%% 
-%%   2019/10/10 v2.06e TUD-Script
+%%               2019/10/20 v2.06e TUD-Script
 %% 
 %% Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2019
+%%               https://github.com/tud-cd/tudscr
+%%               https://latex.wcms-file3.tu-dresden.de
 %% 
 %% This file was generated from file(s) of the TUD-Script bundle.
 %% ----------------------------------------------------------------------------
@@ -26,7 +26,7 @@
 %% This work may be distributed and/or modified under the conditions
 %% of the LaTeX Project Public License, version 1.3c of the license.
 %% The latest version of this license is in
-%%     http://www.latex-project.org/lppl.txt
+%%               https://www.latex-project.org/lppl.txt
 %% and version 1.3c or later is part of all distributions of
 %% LaTeX 2005/12/01 or later and of this work.
 %% 
@@ -34,18 +34,17 @@
 %% 
 %% The current maintainer and author of this work is Falk Hanisch.
 %% 
-%%% From File: tudscr-version.dtx
-\NeedsTeXFormat{LaTeX2e}%
-[2018/04/01]%
+%%%% From File: tudscr-version.dtx 2019/10/19 06:57:36 aaaf2d5
+\NeedsTeXFormat{LaTeX2e}[2019/10/01]
 \begingroup
   \catcode`\@11\relax%
   \ifx\TUD@Version\@undefined%
-    \newcommand*\TUD@Version@Check[2]{%
+    \newcommand*\TUD@@Version[2]{%
       \gdef\TUD@Version{#1}%
       \gdef\TUD@KOMAVersion{#2}%
     }%
   \else%
-    \newcommand*\TUD@Version@Check[2]{%
+    \newcommand*\TUD@@Version[2]{%
       \def\@tempa{#1}%
       \ifx\TUD@Version\@tempa\else%
         \@latex@warning@no@line{%
@@ -57,9 +56,7 @@
       \fi%
     }%
   \fi%
-  \TUD@Version@Check%
-    {2019/10/10 v2.06e TUD-Script}%
-    {2018/03/30 v3.25 KOMA-Script}%
+  \TUD@@Version{2019/10/20 v2.06e TUD-Script}{2018/03/30 v3.25 KOMA-Script}%
   \ifx\TUDScriptVersion\@undefined%
     \xdef\TUDScriptVersion{\TUD@Version}%
     \def\@tempa#1 v#2 #3\relax#4\relax#5{\gdef#5{#2}}%
@@ -79,7 +76,7 @@
 \newcommand*\TUD@ProvidesWrapperClass[3]
 {%
   \ProvidesClass{#1}[%
-  2019/10/10 v2.06e TUD-Script
+  2019/10/20 v2.06e TUD-Script
     #3 (#2)%
   ]%
   \newcommand*\TUD@Class@Parent{#2}%
@@ -99,10 +96,9 @@
   \typeout{+------------------------------------------------------------------}%
 }
 \TUD@ProvidesWrapperClass{tudscrmanual}{tudscrreprt}{manual class}
-%%% From File: tudscr-manual.dtx
 %%% From File: tudscr-base.dtx
 \RequirePackage{tudscrbase}[%
-  2019/10/10 v2.06e TUD-Script
+  2019/10/20 v2.06e TUD-Script
 ]
 \renewcommand*\TUD@KOMAoptions[1]{\PassOptionsToClass{#1}{\TUD@Class@Parent}}
 \AfterClass{\TUD@Class@Parent}{\let\TUD@KOMAoptions\KOMAoptions}
@@ -184,7 +180,7 @@
 \TUDProcessOptions\relax
 \PassOptionsToClass{ttfont=roboto}{\TUD@Class@Parent}
 \LoadClass{\TUD@Class@Parent}[
-  2019/10/10 v2.06e TUD-Script
+  2019/10/20 v2.06e TUD-Script
 ]
 %%% From File: tudscr-manual.dtx
 \PassOptionsToPackage{log-declarations=false}{xparse}

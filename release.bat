@@ -6,7 +6,7 @@ echo =========================================================================
 set version=
 setlocal enabledelayedexpansion
 for /f "tokens=1,2,3* delims= " %%a in (
-  'findstr /r \TUD@Version@Check{[0-9][0-9][0-9][0-9]/[0-9][0-9]/[0-9][0-9] source\tudscr-version.dtx'
+  'findstr /r \TUD@@Version{[0-9][0-9][0-9][0-9]/[0-9][0-9]/[0-9][0-9] source\tudscr-version.dtx'
 ) do (
   set version=%%c
   if "!version:~0,10!"=="TUD-Script" (
@@ -25,11 +25,17 @@ echo =========================================================================
 echo  Erzeugen der Klassen und der inline-Dokumentation fuer %version%
 echo =========================================================================
 echo.
-rem call update_classes.bat
+set sourceinput="\def\tudfinalflag{}\input{tudscrsource.tex}"
+set docinput="\def\tudfinalflag{}\input{tudscr.tex}"
+set docprintinput="\def\tudfinalflag{}\def\tudprintflag{}\input{tudscr.tex}"
+cd source
+call clearsource.bat
+REM tex tudscr.ins
+REM pdflatex --shell-escape %sourceinput%
+cd..
 xcopy source temp\ /s
 cd temp
-call clearsource.bat
-del  clearsource.bat
+del clearsource.bat
 cd doc
 call cleardoc.bat
 del  cleardoc.bat
@@ -42,32 +48,15 @@ mkdir source\latex\tudscr
 mkdir doc\latex\tudscr\tutorials
 echo \BaseDirectory{.}> docstrip.cfg
 echo \UseTDS>> docstrip.cfg
-echo %% This file was generated to be used with `tudscr.ins' > git-ver-info.log
-for /f %%f in ('dir /b *.dtx *.tex') do (
-  git log -1 ^
-    --format="\expandafter\gdef\csname %%f-ver\endcsname{%%ad %%h}" ^
-    --date=format:"%%Y/%%m/%%d %%H:%%M:%%S" ^
-    -- ..\source\%%f >> git-ver-info.log
-)
-cd install
-echo %% This file was generated to be used with `tudscr.ins' > git-ver-info.log
-for /f %%f in ('dir /b *.dtx *.tex') do (
-  git log -1 ^
-    --format="\expandafter\gdef\csname %%f-ver\endcsname{%%ad %%h}" ^
-    --date=format:"%%Y/%%m/%%d %%H:%%M:%%S" ^
-    -- ..\..\source\install\%%f >> git-ver-info.log
-)
-tex tudscr.ins
-pdflatex "\def\tudfinalflag{}\input{tudscrsource.tex}"
-pdflatex --shell-escape "\def\tudfinalflag{}\input{tudscrsource.tex}"
-pdflatex --shell-escape "\def\tudfinalflag{}\input{tudscrsource.tex}"
-pdflatex "\def\tudfinalflag{}\input{tudscrsource.tex}"
+REM tex tudscr.ins
+REM pdflatex %sourceinput%
+REM pdflatex %sourceinput%
+REM pdflatex --shell-escape %sourceinput%
+REM pdflatex %sourceinput%
 move  *.dtx               source\latex\tudscr\
 move  tudscr.ins          source\latex\tudscr\
 move  tudscrsource.tex    source\latex\tudscr\
 xcopy doc                 source\latex\tudscr\doc\ /s
-del source\latex\tudscr\test.tex /s > nul
-rem for /f %%f in ('dir /b ..\*.md') do copy ..\%%f doc\latex\tudscr\%%~nf
 copy ..\*.md doc\latex\tudscr\
 move tudscrsource.pdf doc\latex\tudscr\
 move logo             tex\latex\tudscr\
@@ -78,15 +67,15 @@ echo  Erzeugen des Benutzerhandbuchs
 echo =========================================================================
 echo.
 cd doc
-pdflatex --shell-escape "\def\tudfinalflag{}\input{tudscr.tex}"
-pdflatex "\def\tudfinalflag{}\input{tudscr.tex}"
-pdflatex "\def\tudfinalflag{}\input{tudscr.tex}"
-pdflatex "\def\tudfinalflag{}\input{tudscr.tex}"
-pdflatex --shell-escape "\def\tudfinalflag{}\input{tudscr.tex}"
-pdflatex "\def\tudfinalflag{}\input{tudscr.tex}"
-pdflatex "\def\tudfinalflag{}\def\tudprintflag{}\input{tudscr.tex}"
-copy tudscr.pdf tudscr_print.pdf
-pdflatex "\def\tudfinalflag{}\input{tudscr.tex}"
+REM pdflatex --shell-escape %docinput%
+REM pdflatex %docinput%
+REM pdflatex %docinput%
+REM pdflatex %docinput%
+REM pdflatex --shell-escape %docinput%
+REM pdflatex %docinput%
+REM pdflatex %docprintinput%
+REM copy tudscr.pdf tudscr_print.pdf
+REM pdflatex %docinput%
 del tutorials\*autopp*.* /q > nul
 attrib +h "tutorials\*-standalone-*.pdf"
 attrib +h "tutorials\*-pics.pdf"
@@ -134,7 +123,6 @@ copy temp\doc\latex\tudscr\tudscr.pdf       release-%version%\temp\
 copy temp\doc\latex\tudscr\tudscr_print.pdf release-%version%\temp\
 move temp\install\*.*                       release-%version%\temp\
 rmdir temp\install /s /q > nul
-rmdir temp\cwl /s /q > nul
 cd release-%version%\temp
 for /f %%f in ('dir /b *.bat') do unix2dos -k %%f
 7za a -tzip tudscr_%version%.zip   .\..\..\temp\*
@@ -196,3 +184,4 @@ cd %~dp0
 if exist release-%version%\temp        rmdir release-%version%\temp /s /q > nul
 if exist release-%version%\CTAN\tudscr rmdir release-%version%\CTAN\tudscr /s /q > nul
 if exist temp                          rmdir temp /s /q > nul
+exit /b 0
