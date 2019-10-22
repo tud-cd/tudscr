@@ -184,7 +184,7 @@
 ]
 %%% From File: tudscr-manual.dtx
 \PassOptionsToPackage{log-declarations=false}{xparse}
-\RequirePackage{xparse}[2013/12/31]
+\RequirePackage{xparse}[2019-10-11]
 \RequirePackage{scrhack}[%
   2018/03/30 v3.25 KOMA-Script
 ]
@@ -765,7 +765,8 @@
     }%
   \fi%
 }
-% TODO make \LaTeX[e] available
+% TODO make \LaTeX[e] available bzw. \Package{latex} verwenden
+% TODO nur gültige Markupbefehle \Class und \Package zulassen
 \newenvironment{Bundle}[1]{%
   \tud@if@bdl{%
     \ClassError{tudscrmanual}%
@@ -793,7 +794,6 @@
 % 0 normaler eintrag, 1 ohne label, 2 nur label, 3 verschobenes label
 \newif\if@tud@declare
 \newcount\tud@declare@num
-\newcount\tud@declare@inline@num
 \newif\if@tud@openindex
 \newcommand*\tud@declaration@list{}
 \let\tud@declaration@list\relax
@@ -820,9 +820,9 @@
   }{%
     \listadd\tud@declaration@list{#3}%
     \IfValueTF{#2}{%
-      \Changed@At@CreateList[#2]{#1!#3}%
+      \Changed@At@CreateList{#1!#3}[#2]%
     }{%
-      \Changed@At@CreateList[#3]{#1}%
+      \Changed@At@CreateList{#1}[#3]%
     }%
     \IfValueTF{#6}{%
       \tud@declare@start{#3}[#4][#5](#6)%
@@ -855,7 +855,7 @@
 \let\tud@additional@list\relax
 \newif\if@tud@additional@list
 \NewDocumentCommand\tud@declare@start{o m r[] r[] r()}{%
-  \Changed@At@CreateList[#2]{#1}%
+  \Changed@At@CreateList{#1}[#2]%
   \IfValueTF{#3}{%
     \@tud@preset@listtrue%
     \def\@tempa{Voreinstellung\IfArgIsEmpty{#3}{}{: \PValue{#3}}}%
@@ -893,56 +893,57 @@
   \@tud@declaretrue\@tud@openindexfalse#1\@tud@declarefalse%
   \pagebreak[1]%
 }
-% TODO optionales Argument für \tud@declare@num
-\NewDocumentCommand\InlineDeclaration{s o m}{%
-  \tud@declare@inline@num=\@ne\relax%
-  \IfBooleanT{#1}{\tud@declare@inline@num=\tw@\relax}%
-  \tud@declare@special@start[#2]{#3}{0}%
-  \tud@declare@special@end{#3}%
-  \tud@declare@inline@num=\z@\relax%
+\NewDocumentCommand\InlineDeclaration{s o m O{\IfBooleanTF{#1}{-2}{-1}}}{%
+  \Inline@Declaration{#2}{#3}{#4}%
+}
+\newcommand*\Inline@Declaration[3]{%
+  \tud@declare@special@start[#1]{#2}{#3}%
+  \printchangedatlist%
+  \tud@declare@special@end{#2}{#3}%
 }
 \NewDocumentEnvironment{Declaration*}{o m}{%
-  \tud@declare@special@start[#1]{#2}{2}%
+  \tud@declare@special@start*[#1]{#2}{2}%
 }{%
-  \tud@declare@special@end{#2}%
+  \tud@declare@special@end{#2}{2}%
 }
 \NewDocumentEnvironment{Bundle*}{o m}{%
-  \tud@declare@special@start[#1]{#2}{3}%
+  \tud@declare@special@start*[#1]{#2}{3}%
   \Bundle{#2}%
 }{%
   \endBundle%
-  \tud@declare@special@end{#2}%
+  \tud@declare@special@end{#2}{3}%
 }
-\NewDocumentCommand\tud@declare@special@start{o m m}{%
-  \Changed@At@CreateList(#2){#1}%
-  \tud@declare@num=#3\relax%
-  \@tud@declaretrue\@tud@openindextrue#2\@tud@declarefalse%
+\NewDocumentCommand\tud@declare@special@start{s o m m}{%
+  \tud@declare@num=#4\relax%
+  \@tud@declaretrue%
+  \IfBooleanTF{#1}{%
+    \Changed@At@CreateList{#2}(#3)%
+  }{%
+    \Changed@At@CreateList{#2}[#3]%
+  }%
+  \@tud@openindextrue#3%
+  \@tud@declarefalse%
   \tud@declare@num=\z@\relax%
 }
-\newcommand*\tud@declare@special@end[1]{%
+\newcommand*\tud@declare@special@end[2]{%
   \ifx\tud@changedat@list\relax\else%
     \ClassError{tudscrmanual}{\string\printchangedatlist\space is missing}{%
       \string\tud@changedat@list\space is not empty. Did you\MessageBreak%
       forget to print this list with \string\printchangedatlist?%
     }%
   \fi%
+  \tud@declare@num=#2\relax%
   \@tud@declaretrue\@tud@openindexfalse#1\@tud@declarefalse%
+  \tud@declare@num=\z@\relax%
 }
-\newskip\tud@lastskip
-\pretocmd{\index}{\tud@lastskip=\lastskip}{}{\tud@patch@wrn{index}}
-%\pretocmd{\label}{\tud@lastskip=\lastskip}{}{\tud@patch@wrn{label}}
 \NewDocumentCommand\printdeclarationlist{!s !d()}{%
   \ifx\tud@declaration@list\relax\else%
     \ifhmode%
       \vskip\medskipamount%
     \else%
-      \@tempskipa=\glueexpr\medskipamount-\tud@lastskip\relax%
-      \ifdim\@tempskipa>\z@\relax%
-        \addpenalty{\@beginparpenalty}%
-        \addvspace{\@tempskipa}%
-      \fi%
+      \addpenalty{\@beginparpenalty}%
+      \addvspace{\medskipamount}%
     \fi%
-    \global\tud@lastskip=\z@%
     \@afterindentfalse\@afterheading%
     \@tud@declaretrue\@tud@openindextrue%
     \def\@tempa##1{\ignorespaces##1\tabularnewline}%
@@ -1397,6 +1398,8 @@
 % TODO für tutorials notwendig?, darf keine relevanz für manual haben
 %        \def\@tempa##1:##2:##3\@nil{\tudhyperdef*{##3:##2:##3}}%
 %        \expandafter\@tempa\tud@lbl@tmp\@nil%
+      \else%
+        \tudhyperdef{\tud@lbl@tmp}=#2=%
       \fi%
     }%
   \endgroup%
@@ -1566,7 +1569,7 @@
     \tud@ifdin{\let\tud@res@a\tud@sec@format}{}%
     \begingroup\tud@res@a{\IfValueT{#1}{#1}##1}\endgroup%
   }%
-  \ifnum\tud@declare@inline@num=\z@\relax%
+  \ifnum\tud@declare@num<\z@\relax\else%
     \Markup@@SetFormat[#3](#4)%
   \fi%
 }
@@ -1929,7 +1932,7 @@
 }
 \NewDocumentCommand\Process@@Index{m r== r[] r() r||}{%
   \if@tud@declare%
-    \ifnum\tud@declare@inline@num=\tw@\relax%
+    \ifnum\tud@declare@num<\m@ne\relax%
       \tud@idx@get\tud@idx@key\tud@idx@fmt\tud@idx@val{#1}=#2=[#3](#4)|!|%
     \else%
       \tud@idx@get\tud@idx@key\tud@idx@fmt\tud@idx@val{#1}=#2=[#3](#4)|declare|%
@@ -1948,7 +1951,7 @@
         }%
       }%
       \index[\tud@lbl@tmp-declare]{%
-        \tud@idx@val\tud@idx@key{}@\tud@idx@fmt|(declare%
+        \tud@idx@val\tud@idx@key @\tud@idx@fmt|(declare%
       }%
     \else%
       \index[\tud@lbl@tmp-declare]{\tud@idx@val\tud@idx@key|declare)}%
@@ -1962,7 +1965,7 @@
         \appto\tud@idx@fmt{|#5}%
       }%
     }%
-    \index[\tud@lbl@tmp]{\tud@idx@val\tud@idx@key{}@\tud@idx@fmt}%
+    \index[\tud@lbl@tmp]{\tud@idx@val\tud@idx@key @\tud@idx@fmt}%
   \fi%
 }
 \NewDocumentCommand\CrossIndex{s m o m}{%
@@ -1975,18 +1978,38 @@
   }%
   \forcsvlist{\@tempa{#3}{#4}}{#2}%
 }
+% TODO in tudscr-base
+\newcommand*\tud@extract@box@a{}
+\newcommand*\tud@extract@box@b{}
+\newcommand*\tud@extract@box[2]{%
+  \begingroup
+    \setbox\z@\hbox\bgroup%
+      #1%
+      \renewcommand\tud@extract@box@a{\egroup\endgroup}%
+      \@for\tud@extract@box@b:=\etex@unexpanded{#2}\do{%
+        \eappto\tud@extract@box@a{%
+          \def\expandonce\tud@extract@box@b{%
+            \expandafter\expandonce\tud@extract@box@b%
+          }%
+        }%
+      }%
+  \tud@extract@box@a%
+}
 \NewDocumentCommand\SeeRef{s m m}{%
-  \sbox\z@{%
+  \tud@extract@box{%
     \let\tud@idx@fmt\relax%
     #3%
     \ifx\tud@idx@fmt\relax%
-      \gdef\tud@reserved{#3}%
+      \def\tud@res@a{#3}%
+      \def\tud@res@c{#3}%
     \else%
-      \global\let\tud@reserved\tud@idx@fmt%
+      \edef\tud@res@c{\tud@idx@fmt}%
+      \let\suffix\@gobble%
+      \edef\tud@res@a{\tud@idx@val\tud@idx@key @\tud@idx@fmt}%
     \fi%
-  }%
-  \IfBooleanTF{#1}{\def\tud@idx@fmt{seeunverified}}{\def\tud@idx@fmt{see}}%
-  \index{#2!#3|\tud@idx@fmt{\tud@reserved}}%
+  }{\tud@res@a,\tud@res@c}%
+  \IfBooleanTF{#1}{\def\tud@res@b{seeunverified}}{\def\tud@res@b{see}}%
+  \index{#2!\tud@res@a|\tud@res@b{\tud@res@c}}%
 }
 \newcommand*\PrintIndex{%
   \begingroup%
@@ -2035,13 +2058,13 @@
   \@tud@indextrue%
   \IfValueTF{#2}{%
     \indexprologue{%
-      \tudhyperdef*{idx:\IfValueTF{#1}{#1}{main}}%
+      \tudhyperdef*{idx:\IfValueTF{#1}{#1}{\imki@jobname}}%
       #2%
       \tud@idx@skip%
     }%
   }{%
     \indexprologue[\tud@idx@skip]{%
-      \tudhyperdef*{idx:\IfValueTF{#1}{#1}{main}}%
+      \tudhyperdef*{idx:\IfValueTF{#1}{#1}{\imki@jobname}}%
     }%
   }%
   \IfValueTF{#1}{\printindex[#1]}{\printindex}%
@@ -2057,11 +2080,7 @@
 % TODO #3 abfangen, wenn -NoValue- und if@tud@bdl
 % TODO mehrfache Einträge in #3 ermöglichen?
 \NewDocumentCommand\ChangedAt{s o d() m !O{\changedatskip}}{%
-  \IfValueTF{#2}{%
-    \Changed@At@CreateList[#2](#3){#4}%
-  }{%
-    \Changed@At@CreateList(#3){#4}%
-  }%
+  \Changed@At@CreateList{#4}[#2](#3)%
   \print@changedatlist{#1}{#5}%
 }
 \NewExpandableDocumentCommand\@ChangedAt{s o d() m}{}
@@ -2074,8 +2093,8 @@
 \newcommand*\tud@changedat@list{}
 \let\tud@changedat@list\relax
 \DeclareListParser*{\forssvlist}{;}
-\NewDocumentCommand\Changed@At@CreateList{o d() m}{%
-  \IfValueT{#3}{\forssvlist{\Changed@At@@CreateList[#1](#2)}{#3}}%
+\NewDocumentCommand\Changed@At@CreateList{m o d()}{%
+  \IfValueT{#1}{\forssvlist{\Changed@At@@CreateList[#2](#3)}{#1}}%
 }
 \NewDocumentCommand\Changed@At@@CreateList{r[] r() >{\SplitArgument{1}{:}}m}{%
   \Changed@At@@@CreateList[#1](#2)#3%
@@ -2085,30 +2104,28 @@
 }{%
   \Changed@At@@@@CreateList[#1](#2)#3{#4}%
 }
-\NewDocumentCommand\Changed@At@@@@CreateList{r[] r() m m m}{%
-  \def\@tempa##1{%
-    \sbox\z@{%
+% TODO Reihenfolge der Argumente anpassen?
+\NewDocumentCommand\Changed@At@@@@CreateList{%
+  r[] >{\ProcessorBundle}R(){\tud@bdl@curr} m m m%
+}{%
+  \def\tud@idx@fmt{#2}%
+  \ifx\tud@idx@fmt\tud@bdl@dflt%
+    \let\tud@idx@fmt\@empty%
+  \else%
+    \tud@extract@box{%
       \let\tud@idx@fmt\relax%
-      \@tud@changedattrue%
-      ##1%
-      \@tud@changedatfalse%
-      \ifx\tud@idx@fmt\relax%
-        \gdef\@tempb{##1}%
-      \else%
-        \global\let\@tempb\tud@idx@fmt%
+      \@tud@changedattrue#2\@tud@changedatfalse%
+      \typeout{\meaning\tud@idx@val}%
+      \typeout{\meaning\tud@idx@key}%
+      \typeout{\meaning\tud@idx@fmt}%
+      \ifx\tud@idx@fmt\relax
+        \let\tud@idx@fmt\@empty%
       \fi%
-    }%
-  }%
-  \let\@tempb\@empty%
-  % TODO Wertzuweisung an #2 mit R(){\tud@bdl@curr}?! Prozessor nutzen?
-  \IfValueTF{#2}{%
-    \@tempa{#2}%
-  }{%
-    \tud@if@bdl{\@tempa{\tud@bdl@curr}}{}%
-  }%
+    }{\tud@idx@fmt}%
+  \fi%
   \IfValueTF{#1}{%
     \toks@{#3!Implementierung }%
-    \eaddto@hook\toks@{\@tempb}%
+    \eaddto@hook\toks@{\tud@idx@fmt}%
     \addto@hook\toks@{!#1!}%
     \IfValueT{#4}{\addto@hook\toks@{#4}}%
     \addto@hook\toks@{!}%
@@ -2117,19 +2134,22 @@
     \fi%
   }{%
     \toks@{#3!Allgemein }%
-    \IfValueTF{#2}{%
-      \addto@hook\toks@{!}%
-      \eaddto@hook\toks@{\@tempb:\space}%
-      \IfValueTF{#5}{%
-        \addto@hook\toks@{#5}%
-      }{%
-        \addto@hook\toks@{\emph{neu}}%
-      }%
-    }{%
-      \eaddto@hook\toks@{\@tempb}%
+    \ifx\tud@idx@fmt\@empty%
       \addto@hook\toks@{!}%
       \addto@hook\toks@{#5}%
-    }%
+    \else%
+      \IfValueTF{#5}{%
+        \eaddto@hook\toks@{\tud@idx@fmt}%
+        \addto@hook\toks@{!}%
+        \addto@hook\toks@{#5}%
+      }{%
+        \if@tud@declare%
+          \addto@hook\toks@{!}%
+          \eaddto@hook\toks@{\tud@idx@fmt:\space}%
+          \addto@hook\toks@{\emph{neu}}%
+        \fi%
+      }%
+    \fi%
     \IfValueT{#4}{%
       \ClassError{tudscrmanual}{Using !#4 isn't allowed for a change notice}{%
         At least, it has to be implemented!%
@@ -2220,9 +2240,7 @@
           \expandonce\tud@idx@fmt: Werte angepasst!%
         }%
         \begingroup%
-          \@tud@changedattrue%
-          #4%
-          \@tud@changedatfalse%
+          \@tud@changedattrue#4\@tud@changedatfalse%
           \let\suffix\@gobble%
           \protected@edef\tud@reserved{%
             \noexpand\endgroup%
@@ -2231,6 +2249,7 @@
           }%
         \tud@reserved%
       }%
+      % TODO sollte eigentlich nur passieren, wenn \if@tud@declare
       \ifxblank{#5}{%
         \if@tud@obsolete%
           \appto\tud@idx@fmt{: \emph{entf\"allt}}%
