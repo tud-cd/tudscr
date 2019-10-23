@@ -4,7 +4,7 @@
 
  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2019
 
- tudscr 2019/09/xx v2.06e
+ tudscr 2019/xx/xx v2.06f
 
 ----------------------------------------------------------------------------
 
@@ -53,13 +53,16 @@ Das Bundle beinhaltet:
 Versionen
 ---------
 
-**v2.06e** (2019/09/xx)
+**v2.06f** (2019/xx/xx)
 + Schriftstärke im Mathematikmodus wird passend zu den Einstellungen für den 
   Fließtext (`cdfont=light/heavy/normalbold/ultrabold`) gewählt
 + Kombination `cd=true` und `cdfont=false` verwendet Open Sans in Überschriften
 + `relspacing=true` Schriftgröße hat stärkeren Einfluss, unsauberer Übergang zu
   nicht vordefinierten Zwischengrößen behoben
 + **tudscrposter** Umgebungen `figurehere` und `tablehere`
+
+**v2.06e** (2019/10/23)
++ Bugfix für Paket `scrlfile v3.27`
 
 **v2.06d** (2019/08/27)
 + Bugfix für griechische Glyphen im Mathematikmodus beim Einsatz von LuaLaTeX
@@ -188,7 +191,7 @@ Versionen
 + Unterstützung der KOMA-Script-Schriftelemente für Titel und Umschlagseite
 + Befehle und Umgebungen für Zusammenfassung, Selbstständigkeitserklärung und
   Sperrvermerk wurden verbessert
-+ Fussnoten in Überschriften als Symbole per Option `footnotes`
++ Fußnoten in Überschriften als Symbole per Option `footnotes`
 + einige Befehle wurden für Kompatibilität zu anderen Paketen umbenannt
 + Funktionalität des Paketes **mathswap** im Dokument umschaltbar
 
@@ -253,8 +256,11 @@ The bundle offers:
 Versions
 --------
 
-**v2.06e** (2019/09/xx)
+**v2.06f** (2019/xx/xx)
 + 
+
+**v2.06e** (2019/10/23)
++ bug fix for package `scrlfile v3.27`
 
 **v2.06d** (2019/08/27)
 + bug fix for greek glyphs in math mode when using LuaLaTeX
