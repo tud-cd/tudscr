@@ -1000,19 +1000,23 @@
   \DeclareExpandableDocumentCommand#1{#2}{#3}%
 }
 \newcommand*\ProcessorKeyVal[1]{%
-  \begingroup%
-    \in@{=}{#1}%
-    \ifin@%
-      \def\@tempa##1=##2\@nil{\toks@{{##1}=##2=}}%
-    \else%
-      \def\@tempa##1\@nil{\toks@{{##1}}}%
-    \fi%
-    \@tempa#1\@nil%
-    \protected@edef\tud@reserved{%
-      \noexpand\endgroup%
-      \def\noexpand\ProcessedArgument{\the\toks@}%
-    }%
-  \tud@reserved%
+  \tud@if@nil{#1}{%
+    \def\ProcessedArgument{\@nil}%
+  }{%
+    \begingroup%
+      \in@{=}{#1}%
+      \ifin@%
+        \def\@tempa##1=##2\@nil{\toks@{{##1}=##2=}}%
+      \else%
+        \def\@tempa##1\@nil{\toks@{{##1}}}%
+      \fi%
+      \@tempa#1\@nil%
+      \protected@edef\tud@reserved{%
+        \noexpand\endgroup%
+        \def\noexpand\ProcessedArgument{\the\toks@}%
+      }%
+    \tud@reserved%
+  }
 }
 \newcommand*\tud@keyval@error{%
   \ClassError{tudscrmanual}%
@@ -1076,7 +1080,7 @@
 \NewDocumentCommand\Option{s >{\ProcessorKeyVal}m !d== !d() !d'' !d||}{%
   \Option@Value{#1}#2=#3=(#4)'#5'|#6|%
 }
-\NewDocumentCommand\Option@Value{m m d== d== d() d'' d||}{%
+\NewDocumentCommand\Option@Value{m m r== d== r() r'' r||}{%
   \IfValueT{#4}{\tud@keyval@error}%
   \if@tud@changedat%
     \Process@ChangedAt{\Option{#2}}=#3=[Option](#5)%
@@ -1110,6 +1114,20 @@
     \Process@Index{#1}{\Macro{#2}}(#4)|#6|%
   \fi%
 }
+\NewDocumentCommand\NewMacro{s m !d++ !o !d() !d'' !d||}{%
+  \if@tud@changedat%
+    \Process@ChangedAt{\Macro{#2}}[Befehl](#5)%
+  \else%
+    % TODO \Markup@SetFormat anpassen?
+%    \IfValueTF{#4}{%
+%      \Markup@SetFormat{\ttfamily}[Parameter]%
+%    }{%
+      \Markup@SetFormat[\bsc]{\ttfamily}%
+%    }
+    \Process@Markup{\Macro{#2}}+#3+[#4](#5)'#6'%
+    \Process@Index{#1}{\Macro{#2}}(#5)|#7|%
+  \fi%
+}
 \NewExpandableDocumentCommand\@Length{s m}{#2}
 \NewDocumentCommand\Length{s m !d() !d'' !d||}{%
   \if@tud@changedat%
@@ -1130,12 +1148,14 @@
     \Process@Index{#1}{\Counter{#2}}[Z\"ahler](#3)|#5|%
   \fi%
 }
+% TODO #5 gehört nicht an den Key sondern ans erste Argument
 \NewExpandableDocumentCommand\@Key{s m m}{#2!#3}
 \NewDocumentCommand\Key{s m >{\ProcessorKeyVal}m !d== !d() !d'' !d||}{%
   \Key@Value{#1}{#2}#3=#4=(#5)'#6'|#7|%
 }
 \NewDocumentCommand\Key@Value{m m m d== d== d() d'' d||}{%
   \IfValueT{#5}{\tud@keyval@error}%
+% TODO #6 aus #2 herauslösen > Processor?!
   \if@tud@changedat%
     \Process@ChangedAt{\Key{#2}{#3}}=#4=[Parameter](#6)%
   \else%
@@ -1313,8 +1333,6 @@
 \AfterPackage*{hyperref}{%
   \expandafter\pdfstringdefDisableCommands\expandafter{\Markup@Gobble}%
 }
-\newcommand*\Markup@Suppress{\let\Process@Markup\Markup@@Suppress}
-\NewDocumentCommand\Markup@@Suppress{m d== o d() d<> d''}{}
 \newcommand*\ProcessorBundle[1]{%
   \begingroup%
     \def\tud@res@a{#1}%
@@ -1345,52 +1363,64 @@
     }%
   \tud@res@a%
 }
-\NewDocumentCommand\Process@Markup{m d== o >{\ProcessorBundle}d() d<> d''}{%
+\newcommand*\Markup@Suppress{\let\Process@Markup\Markup@@Suppress}
+\NewDocumentCommand\Markup@@Suppress{m d++ d== o d() d<> d''}{}
+\NewDocumentCommand\Process@Markup{%
+  m >{\ProcessorKeyVal}D++{\@nil} d== o >{\ProcessorBundle}d() d<> d''%
+}{%
+  \Process@@Markup{#1}#2=#3=[#4](#5)<#6>'#7'%
+}
+% TODO weiter geht's
+\NewDocumentCommand\Process@@Markup{m m r== d== r[] r() r<> r''}{%
   \Markup@CheckFormat%
-  \IfValueT{#4}{\tud@trace@bdl@add{#4}}%
-  \if@tud@declare%
-    \tud@toks@{\Process@@MarkupDeclare}%
-  \else%
-    \tud@toks@{\Process@@MarkupInline}%
-  \fi%
-  \addto@hook\tud@toks@{{#1}=#2=[#3](#4)}%
-  \if@tud@index\else%
-    \IfValueT{#5}{%
-      \ifxblank{#5}{}{\addto@hook\tud@toks@{<http://www.ctan.org/pkg/#5>}}%
-    }%
-  \fi%
-  \if@tud@declare%
-    \if@tud@openindex%
-      \IfValueT{#6}{%
-        \ClassWarning{tudscrmanual}{%
-          It is not possible to use any cross-reference\MessageBreak%
-          shorthand like '#6' within the arguments\MessageBreak%
-          of the environment `Declaration'%
-        }%
-      }%
-      \tud@trace@markup{declare}{\the\tud@toks@}%
-    \else%
-      \tud@toks@{\relax}%
-    \fi%
-  \else%
-%    \if@tud@index\else%
-      \IfValueT{#6}{\addto@hook\tud@toks@{'#6'}}%
+  \typeout{!!!!!!!!1 \detokenize{#1 +#2+ =#3= [#5] (#6) <#7> '#8'}}%
+  \detokenize{#1 +#2+ =#3= [#5] (#6) <#7> '#8' --> #4}
+%  \IfValueT{#6}{\tud@trace@bdl@add{#6}}%
+%  \if@tud@declare%
+%    \tud@toks@{\Process@@Markup@Declare}%
+%  \else%
+%    \tud@toks@{\Process@@Markup@Inline}%
+%  \fi%
+%  \addto@hook\tud@toks@{{#1}+#2+=#3=[#4](#5)}%
+%  \if@tud@index\else%
+%    \IfValueT{#6}{%
+%      \ifxblank{#6}{}{\addto@hook\tud@toks@{<http://www.ctan.org/pkg/#6>}}%
+%    }%
+%  \fi%
+%  \if@tud@declare%
+%    \if@tud@openindex%
+%      \IfValueT{#7}{%
+%        \ClassWarning{tudscrmanual}{%
+%          It is not possible to use any cross-reference\MessageBreak%
+%          shorthand like '#7' within the arguments\MessageBreak%
+%          of the environment `Declaration'%
+%        }%
+%      }%
+%      \tud@trace@markup{declare}{\the\tud@toks@}%
+%    \else%
+%      \tud@toks@{\relax}%
 %    \fi%
-    \tud@trace@markup{output}{\the\tud@toks@}%
-  \fi%
-  \the\tud@toks@%
+%  \else%
+%%    \if@tud@index\else%
+%      \IfValueT{#7}{\addto@hook\tud@toks@{'#7'}}%
+%%    \fi%
+%    \tud@trace@markup{output}{\the\tud@toks@}%
+%  \fi%
+%  \the\tud@toks@%
   \Markup@ClearFormat%
 }
-\NewDocumentCommand\Process@@MarkupDeclare{m r== r[] R(){\tud@bdl@curr} d<>}{%
+\NewDocumentCommand\Process@@Markup@Declare{%
+  m r++ r== r[] R(){\tud@bdl@curr} d<>%
+}{%
   \begingroup%
-    \def\tud@res@c{#4}%
+    \def\tud@res@c{#5}%
     \@for\tud@res@c:=\tud@res@c\do{%
       \ifx\tud@res@c\tud@bdl@dflt\else%
         \tud@bdl@add{\tud@res@c}%
       \fi%
-      \tud@lbl@get*\tud@lbl@tmp{\tud@res@c:#1}=#2=%
+      \tud@lbl@get*\tud@lbl@tmp{\tud@res@c:#1}=#3=%
       \ifcase\tud@declare@num\relax%
-        \tudhyperdef{\tud@lbl@tmp}=#2=%
+        \tudhyperdef{\tud@lbl@tmp}=#3=%
       \or\or%
         \tudhyperdef{\tud@lbl@tmp}%
       \or%
@@ -1399,52 +1429,53 @@
 %        \def\@tempa##1:##2:##3\@nil{\tudhyperdef*{##3:##2:##3}}%
 %        \expandafter\@tempa\tud@lbl@tmp\@nil%
       \else%
-        \tudhyperdef{\tud@lbl@tmp}=#2=%
+        \tudhyperdef{\tud@lbl@tmp}=#3=%
       \fi%
     }%
   \endgroup%
   \ifnum\tud@declare@num<\tw@\relax%
-    \Markup@Output{#1}=#2=[#3]<#5>%
+    \Markup@Output{#1}+#2+=#3=[#4]<#6>%
   \fi%
 }
-\NewDocumentCommand\Process@@MarkupInline{m r== r[] r() d<> d''}{%
+\NewDocumentCommand\Process@@Markup@Inline{m r++ r== r[] r() d<> d''}{%
   \begingroup%
-    \tud@toks@{\Process@@@MarkupInline{#1}=#2=[#3]}%
-    \tud@bdl@get\tud@res@a{#1}=#2=(#4)'#6'%
+%    \typeout{!!!!!!!!2 \detokenize{#1=#2=[#3]+#4+}}%
+    \tud@toks@{\Process@@@MarkupInline{#1}+#2+=#3=[#4]}%
+    \tud@bdl@get\tud@res@a{#1}=#3=(#5)'#7'%
     \eaddto@hook\tud@toks@{\expandafter(\tud@res@a)}%
-    \addto@hook\tud@toks@{<#5>'#6'}%
+    \addto@hook\tud@toks@{<#6>'#7'}%
     \edef\tud@res@a{%
       \endgroup%
       \the\tud@toks@%
     }%
   \tud@res@a%
 }
-\NewDocumentCommand\Process@@@MarkupInline{m r== r[] r() r<> r''}{%
+\NewDocumentCommand\Process@@@MarkupInline{m r++ r== r[] r() r<> r''}{%
   \begingroup%
-    \tud@lbl@get\tud@lbl@tmp{#4:#1}=#2=%
-    \def\tud@res@b{\Markup@Output{#1}=#2=[#3]}%
+    \tud@lbl@get\tud@lbl@tmp{#5:#1}=#3=%
+    \def\tud@res@b{\Markup@Output{#1}+#2+=#3=[#4]}%
     \let\tud@res@c\tud@res@b%
     \ifdisposition{}{%
       \tud@get@crossrefnum\tud@res@a'#6'%
       \ifcase\tud@res@a\relax\else%
         \@tud@res@swafalse%
         \begingroup%
-          \tud@lbl@get*\tud@res@a{#4:#1}=#2=%
+          \tud@lbl@get*\tud@res@a{#5:#1}=#3=%
           \ifx\tud@lbl@tmp\tud@res@a\else%
-            \IfValueT{#2}{%
+            \IfValueT{#3}{%
               \tud@if@lbl@exists{\tud@lbl@tmp}{\aftergroup\@tud@res@swatrue}{}%
             }%
           \fi%
 %          \tud@if@lbl@exists{\tud@lbl@tmp}{}{%
-%            \expandafter\ifstrequal\expandafter{\tud@bdl@dflt}{#4}{%
+%            \expandafter\ifstrequal\expandafter{\tud@bdl@dflt}{#5}{%
 %              \aftergroup\@tud@res@swatrue%
 %            }{}%
 %          }%
         \endgroup%
         \if@tud@res@swa%
           \ClassWarning{tudscrmanual}{%
-            A \IfValueTF{#2}{specific}{general} value for \detokenize{#4} with%
-            \MessageBreak #1\IfValueT{#2}{=#2}\MessageBreak%
+            A \IfValueTF{#3}{specific}{general} value for \detokenize{#5} with%
+            \MessageBreak #1\IfValueT{#3}{=#3}\MessageBreak%
             was given, but no label was found%
           }%
         \fi%
@@ -1469,7 +1500,7 @@
         \fi%
       }{%
         \ifcase\tud@res@a\relax\else%
-          \appto\tud@res@c{<#5>}%
+          \appto\tud@res@c{<#6>}%
           \ifnum\tud@res@a>\z@\relax%
             \ClassWarning{tudscrmanual}%
             {%
@@ -1520,17 +1551,19 @@
     }%
   \tud@res@a%
 }
-\NewDocumentCommand\Markup@Output{m r== r[] d<>}{%
+\NewDocumentCommand\Markup@Output{m r++ r== r[] d<>}{%
+  % TODO !!!!!!!!!!!!!!!!!!!! handle #2
   \begingroup%
+%    \typeout{!!!!!!!!3 \detokenize{#1=#2=[#3]+#4+}}%
     \Markup@Gobble*%
     \protected@edef\tud@res@a{%
-      \noexpand\Markup@@Output{#1}\etex@unexpanded{=#2=[#3]}%
+      \noexpand\Markup@@Output{#1}\etex@unexpanded{=#3=[#4]}%
     }%
-    \IfValueT{#4}{%
+    \IfValueT{#5}{%
       \protected@edef\tud@res@a{%
-        \noexpand\href{#4}{\expandonce\tud@res@a}%
+        \noexpand\href{#5}{\expandonce\tud@res@a}%
       }%
-      \tud@trace@lbl@url@add{#4}%
+      \tud@trace@lbl@url@add{#5}%
     }%
     \edef\tud@res@a{%
       \endgroup%
@@ -1538,14 +1571,17 @@
     }%
   \tud@res@a%
 }
+% TODO \SplitArgument raus, sobald \Key neu implementiert
 \NewDocumentCommand\Markup@@Output{>{\SplitArgument{1}{!}}m r== r[]}{%
   \Markup@@@Output#1=#2=[#3]%
 }
 \NewDocumentCommand\Markup@@@Output{m m r== r[]}{%
   \if@tud@declare%
     \tud@toks@{\Markup@Declare}%
+    \typeout{????? \meaning\Markup@Declare}%
   \else%
     \tud@toks@{\Markup@Inline}%
+    \typeout{????? \meaning\Markup@Inline}%
   \fi%
   \IfValueTF{#2}{%
     \def\@tempa{#2}%
@@ -1555,6 +1591,7 @@
   \IfValueT{#3}{\appto\@tempa{=#3}}%
   \IfValueT{#4}{\appto\@tempa{#4}}%
   \eaddto@hook\tud@toks@{\expandafter{\@tempa}}%
+  \typeout{????? \the\tud@toks@}%
   \the\tud@toks@%
 }
 \newcommand*\Markup@Inline[1]{\mbox{\Markup@Format{#1}}}
@@ -1588,6 +1625,7 @@
     \ClassError{tudscrmanual}%
       {\string\Markup@SetFormat\space unused}%
       {It seems you have forgotten to use \string\Markup@SetFormat.}%
+      \let\Markup@Format\@firstofone%
   }{}%
 }
 \ifundef{\tud@x@textcase@uclcnotmath}{}{%
@@ -1723,44 +1761,46 @@
 % TODO use bdl@seek
 % TODO das tut richtig weh, grauenhafter Quelltext!
 % TODO überarbeiten, nachdem \tud@declare@num vereinheitlicht wurde
-\NewDocumentCommand\tud@idx@get{s m m m m r== r[] r() d||}{%
+\NewDocumentCommand\tud@idx@get{s m d== d[] d() d||}{%
   \begingroup%
     \begingroup%
-      \let#4\@empty%
-      \in@{\Key}{#5}%
+      \let\tud@idx@val\@empty%
+      \in@{\Key}{#2}%
+%      \typeout{++++++++++ \detokenize{#2}}%
       \ifin@%
         \Markup@Suppress%
         \let\Key\@firstoftwo%
-        #5%
+        #2%
         \let\@tempa\@empty%
         \IfBooleanT{#1}{\def\@tempa{: Parameter angepasst}}%
-        \def#4{%
-          \expandonce#2\expandonce\@tempa{}@%
-          \expandonce#3\expandonce\@tempa{}!%
+        \def\tud@idx@val{%
+          \expandonce\tud@idx@key\expandonce\@tempa{}@%
+          \expandonce\tud@idx@fmt\expandonce\@tempa{}!%
         }%
       \fi%
       \Markup@Gobble%
       \let\Key\@secondoftwo%
-      \edef\tud@reserved{%
-        \noexpand\endgroup%
-        \def\noexpand#2{#5}%
-        \def\noexpand#4{#4}%
+      \protected@edef\tud@reserved{%
+        \endgroup%
+        \def\noexpand\tud@idx@key{#2}%
+        \def\noexpand\tud@idx@val{\tud@idx@val}%
       }%
+%    \typeout{!!!!! \meaning\tud@reserved}%
     \tud@reserved%
-    \def#3{#5}%
-    \tud@replace#2{@}{"@}%
-    \tud@replace#3{@}{"@}%
+    \def\tud@idx@fmt{#2}%
+    \tud@replace\tud@idx@key{@}{"@}%
+    \tud@replace\tud@idx@fmt{@}{"@}%
     % TODO \tud@if@lbl@exists nutzen, um ggf. 'none' zu setzen
     % TODO noch sinnvoll?
     \let\tud@idx@bdl\tud@bdl@dflt%
-    \IfValueTF{#8}{%
-      \ifxblank{#8}{}{\def\tud@idx@bdl{#8}}%
+    \IfValueTF{#5}{%
+      \ifxblank{#5}{}{\def\tud@idx@bdl{#5}}%
     }{%
       % TODO noch sinnvoll?
       \tud@if@bdl{%
-        \tud@if@lbl@exists{\tud@bdl@curr:#5}{%
+        \tud@if@lbl@exists{\tud@bdl@curr:#2}{%
           \edef\tud@idx@bdl{\expandonce\tud@bdl@curr}%
-          \def\tud@reserved{#5}%
+          \def\tud@reserved{#2}%
           \ifx\tud@reserved\tud@idx@bdl%
             \let\tud@idx@bdl\tud@bdl@dflt%
           \fi%
@@ -1774,14 +1814,14 @@
     \ifx\tud@idx@bdl\tud@bdl@dflt%
       \@tempswafalse%
     \else%
-      \in@{\Key}{#5}\ifin@\@tempswafalse\fi%
+      \in@{\Key}{#2}\ifin@\@tempswafalse\fi%
       \IfBooleanT{#1}{\@tempswafalse}%
       \edef\@tempb{(\expandonce\tud@idx@bdl)}%
     \fi%
     \let\@tempc\@tempb%
-    \IfValueT{#7}{%
-      \appto\@tempa{ #7}%
-      \appto\@tempb{\suffix{#7}}%
+    \IfValueT{#4}{%
+      \appto\@tempa{ #4}%
+      \appto\@tempb{\suffix{#4}}%
     }%
     \if@tempswa%
       \begingroup%
@@ -1795,38 +1835,38 @@
     \fi%
     \@tempswafalse%
     \IfBooleanT{#1}{\@tempswatrue}%
-    \IfValueT{#9}{%
-      \ifstr{#9}{declare}{\@tempswatrue}{}%
+    \IfValueT{#6}{%
+      \ifstr{#6}{declare}{\@tempswatrue}{}%
       % TODO noch sinnvoll?
-      \ifstr{#9}{default}{\typeout{??? \the\inputlineno}\@tempswatrue}{}%
+      \ifstr{#6}{default}{\typeout{??? \the\inputlineno}\@tempswatrue}{}%
     }%
     \if@tempswa%
-      \protected@eappto#2{\expandonce\@tempa}%
+      \protected@eappto\tud@idx@key{\expandonce\@tempa}%
       % TODO \tud@doifPValue raus
-      \tud@doifPValue{#6}{\noexpand\appto\noexpand#2{=#6}}%
-      \protected@eappto#3{\IfValueT{#6}{=#6=}\expandonce\@tempb}%
+      \tud@doifPValue{#3}{\noexpand\appto\noexpand\tud@idx@key{=#3}}%
+      \protected@eappto\tud@idx@fmt{\IfValueT{#3}{=#3=}\expandonce\@tempb}%
     \else%
       % TODO \tud@doifPValue raus
-      \tud@doifPValue{#6}{\noexpand\@tempswatrue}%
+      \tud@doifPValue{#3}{\noexpand\@tempswatrue}%
       \if@tempswa%
-        \eappto#4{%
-          \expandonce#2\expandonce\@tempa{}@%
-          \expandonce#3\expandonce\@tempb{}!%
+        \eappto\tud@idx@val{%
+          \expandonce\tud@idx@key\expandonce\@tempa{}@%
+          \expandonce\tud@idx@fmt\expandonce\@tempb{}!%
         }%
-        \appto#2{=#6}%
-        \appto#3{=#6=}%
-        \protected@eappto#3{\expandonce\@tempc}%
+        \appto\tud@idx@key{=#3}%
+        \appto\tud@idx@fmt{=#3=}%
+        \protected@eappto\tud@idx@fmt{\expandonce\@tempc}%
       \else%
-        \protected@eappto#2{\expandonce\@tempa}%
-        \protected@eappto#3{\expandonce\@tempb}%
+        \protected@eappto\tud@idx@key{\expandonce\@tempa}%
+        \protected@eappto\tud@idx@fmt{\expandonce\@tempb}%
       \fi%
     \fi%
     \let\emph\@firstofone%
     \protected@edef\tud@reserved{%
       \noexpand\endgroup%
-      \def\noexpand#2{#2}%
-      \def\noexpand#3{#3}%
-      \def\noexpand#4{#4}%
+      \def\noexpand\tud@idx@key{\tud@idx@key}%
+      \def\noexpand\tud@idx@fmt{\tud@idx@fmt}%
+      \def\noexpand\tud@idx@val{\tud@idx@val}%
     }%
   \tud@reserved%
 }
@@ -1933,12 +1973,12 @@
 \NewDocumentCommand\Process@@Index{m r== r[] r() r||}{%
   \if@tud@declare%
     \ifnum\tud@declare@num<\m@ne\relax%
-      \tud@idx@get\tud@idx@key\tud@idx@fmt\tud@idx@val{#1}=#2=[#3](#4)|!|%
+      \tud@idx@get{#1}=#2=[#3](#4)|!|%
     \else%
-      \tud@idx@get\tud@idx@key\tud@idx@fmt\tud@idx@val{#1}=#2=[#3](#4)|declare|%
+      \tud@idx@get{#1}=#2=[#3](#4)|declare|%
     \fi%
   \else%
-    \tud@idx@get\tud@idx@key\tud@idx@fmt\tud@idx@val{#1}=#2=[#3](#4)|#5|%
+    \tud@idx@get{#1}=#2=[#3](#4)|#5|%
   \fi%
   \tud@attr@get*\tud@lbl@tmp{#1}%
   \if@tud@declare%
@@ -2073,7 +2113,7 @@
 \newif\if@tud@changedat
 % TODO mehrfache Einträge in #4 ermöglichen?
 \NewDocumentCommand\Process@ChangedAt{m d== o >{\ProcessorBundle}r()}{%
-  \tud@idx@get*\tud@idx@key\tud@idx@fmt\tud@idx@val{#1}=#2=[#3](#4)%
+  \tud@idx@get*{#1}=#2=[#3](#4)%
 }
 \newlength\changedatskip
 % TODO wie mit (...) umgehen? #3 ist spezialfall, falls nicht innerhalb von []
@@ -2115,9 +2155,6 @@
     \tud@extract@box{%
       \let\tud@idx@fmt\relax%
       \@tud@changedattrue#2\@tud@changedatfalse%
-      \typeout{\meaning\tud@idx@val}%
-      \typeout{\meaning\tud@idx@key}%
-      \typeout{\meaning\tud@idx@fmt}%
       \ifx\tud@idx@fmt\relax
         \let\tud@idx@fmt\@empty%
       \fi%
