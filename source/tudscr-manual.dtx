@@ -1,4 +1,4 @@
-% \CheckSum{4470}
+% \CheckSum{4450}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -52,7 +52,7 @@
 % \fi
 %
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
-\ProvidesFile{tudscr-manual.dtx}[2019/08/20 v2.06c TUD-Script\space%
+\ProvidesFile{tudscr-manual.dtx}[2019/10/23 v2.06e TUD-Script\space%
 %
 % \iffalse
 %</dtx>
@@ -337,25 +337,6 @@
 % Einfluss auf \pkg{glossaries}.
 %    \begin{macrocode}
 \RequirePackage{scrwfile}[2013/08/05]
-%    \end{macrocode}
-% Die Umgebungen \env{Preamble}, \env{Trunk} und \env{Hint} sowie deren
-% Varianten nutzen das Paket \pkg{filecontents}, um ihren Inhalt in eine
-% temporäre Datei zu schreiben und diese direkt mit dem Paket \pkg{listings}
-% darzustellen sowie ggf. den Quelltext auszuführen. Beim Überschreiben einer
-% Datei wird für gewöhnlich eine Warnung erzeugt. Dies wird mit dem Patch 
-% unterbunden.
-%    \begin{macrocode}
-\RequirePackage{filecontents}[2011/10/08]
-\begingroup%
-  \catcode`\*=11%
-  \catcode`\^^M\active%
-  \catcode`\^^L\active\let^^L\relax%
-  \catcode`\^^I\active%
-  \patchcmd{\filec@ntents}{%
-    \@latex@warning@no@line{Overwriting file `\@currdir#1'}%
-  }{}{}{\tud@patch@wrn{filec@tents}}%
-  \global\let\filec@ntents\filec@ntents%
-\endgroup%
 %    \end{macrocode}
 %
 % \iffalse
@@ -5294,6 +5275,20 @@
 %    \end{macrocode}
 % \end{macro}^^A \StandaloneDate
 % \end{macro}^^A \StandaloneFile
+% \begin{macro}{\filec@ntents@silent}
+% \changes{v2.06e}{2019/10/10}{neu}^^A
+% Die Umgebungen \env{Preamble}, \env{Trunk} und \env{Hint} sowie deren
+% Varianten nutzen die Umgebung \env{filecontents}, um ihren Inhalt in eine
+% temporäre Datei zu schreiben und diese direkt mit dem Paket \pkg{listings}
+% darzustellen sowie ggf. den Quelltext auszuführen. Beim Überschreiben einer
+% Datei wird für gewöhnlich eine Warnung erzeugt. Dies wird mit dem eigens 
+% definierten Parameter \prm{silent} unterbunden.
+%    \begin{macrocode}
+\providecommand*\filec@ntents@silent{%
+  \let\@latex@warning@no@line\@gobble%
+}
+%    \end{macrocode}
+% \end{macro}^^A \filec@ntents@silent
 % \begin{macro}{\tud@tut@pre}
 % \changes{v2.02}{2014/08/19}{neu}^^A
 % \begin{macro}{\tud@tut@post}
@@ -5304,7 +5299,7 @@
 % genutzt wird.
 %    \begin{macrocode}
 \newcommand*\tud@tut@pre{%
-  \csuse{filecontents*}{\tud@tut@temp.tex}%
+  \csuse{filecontents*}[force,silent,nosearch]{\tud@tut@temp.tex}%
 }
 \newcommand*\tud@tut@post{%
   \csuse{endfilecontents*}%
