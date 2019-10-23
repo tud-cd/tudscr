@@ -1720,28 +1720,39 @@
   }{}{\tud@patch@wrn{theindex}}%
 \fi%
 \NewDocumentCommand\makexdyindex{s o m !o}{%
-  \let\@tempb\@empty%
+  \let\tud@res@c\@empty%
   \IfBooleanT{#1}{%
-    \def\@tempc{\jobname-#4-declare.idx}%
-    \makeindex[name={#4-declare}]%
-    \IfFileExists{\@tempc}{%
-      \edef\@tempb{-o \jobname-#4.ind \@tempc}%
+    \IfValueTF{#4}{%
+      \makeindex[name={#4-declare}]%
+      \edef\tud@res@b{\jobname-#4-declare.idx}%
+      \IfFileExists{\tud@res@b}{%
+        \edef\tud@res@c{-o \jobname-#4.ind \tud@res@b}%
+      }{%
+        \ClassWarningNoLine{tudscrmanual}{File \tud@res@b\space not found}%
+      }%
     }{%
-      \ClassWarningNoLine{tudscrmanual}{File \@tempc\space not found}%
+      \ClassWarningNoLine{tudscrmanual}{%
+        It's not possible to create a special declaration main index%
+      }%
     }%
   }%
-  \protected@edef\@tempa{%
+  \edef\tud@res@b{%
+    -M \@currname-ind.xdy -L german-din%
+    \ifundef{\inputencodingname}{}{ -C \inputencodingname}%
+    \space%
+  }%
+  \protected@edef\tud@res@a{%
     title={#3},%
     columnsep=\noexpand\f@size\noexpand\p@,%
     \IfValueTF{#4}{%
       name={#4},%
-      options={-M \@currname-ind.xdy -L german-din -t \jobname-#4.xlg \@tempb},%
+      options={\tud@res@b -t \jobname-#4.xlg \tud@res@c},%
     }{%
-      options={-M \@currname-ind.xdy -L german-din -t \jobname.xlg},%
+      options={\tud@res@b -t \jobname.xlg},%
     }%
     \IfValueT{#2}{#2}%
   }%
-  \expandafter\makeindex\expandafter[\@tempa]%
+  \expandafter\makeindex\expandafter[\tud@res@a]%
 }
 \makexdyindex{Allgemeiner Index}
 \makexdyindex*{Klassen- und Paketoptionen}[options]
