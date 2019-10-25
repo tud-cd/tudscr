@@ -1,4 +1,4 @@
-% \CheckSum{858}
+% \CheckSum{939}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -135,13 +135,29 @@
 %
 % \subsection{Notwendige Kompatibilitätseinstellung für \KOMAScript}
 %
+% Die installierte Version und die gewählte Kompatibilitätseinstellung von 
+% \KOMAScript{} wird gerpüft.
+%    \begin{macrocode}
+\AtBeginDocument{%
+  \ifcsundef{scr@v@first}{}{%
+%    \end{macrocode}
+% Sollte die benötigte \KOMAScript-Version nicht vorhanden sein, wird ein 
+% Fehler erzeugt.
+%    \begin{macrocode}
+    \ifcsundef{scr@v@\TUD@KOMAVersionNumber}{%
+      \PackageError{tudscrbase}{%
+        KOMA-Script v\TUD@KOMAVersionNumber\space is required%
+      }{%
+        \TUD@Version\space must be used at least with\MessageBreak%
+        \TUD@KOMAVersion, but only\MessageBreak%
+        \KOMAScriptVersion\space was found.%
+      }%
+    }{%
+%    \end{macrocode}
 % Ist die mindestens nötige Version (\csname TUD@KOMAVersion\endcsname) von 
 % \KOMAScript{} installiert, wird geprüft, ob die Kompatibilitätseinstellung
 % akzeptabel ist.
 %    \begin{macrocode}
-\AtBeginDocument{%
-  \ifcsdef{scr@v@first}{%
-    \ifcsdef{scr@v@\TUD@KOMAVersionNumber}{%
       \expandafter\ifnum\scr@v@is@lt{3.12}\relax%
         \PackageError{tudscrbase}{%
           KOMA-Script compatibility level too low%
@@ -150,20 +166,8 @@
           `version=3.12' KOMA-Script compatibility option.%
         }%
       \fi%
-%    \end{macrocode}
-% Sollte die benötigte \KOMAScript-Version nicht vorhanden sein, wird ein 
-% Fehler erzeugt.
-%    \begin{macrocode}
-    }{%
-      \PackageError{tudscrbase}{%
-        KOMA-Script v\TUD@KOMAVersionNumber\space is required%
-      }{%
-        \TUD@Version\space must be used at least with\MessageBreak%
-        \TUD@KOMAVersion, but only\MessageBreak%
-        \KOMAScriptVersion\space was found.%
-      }%
     }%
-  }{}%
+  }%
 }
 %    \end{macrocode}
 %
@@ -414,7 +418,7 @@
   }%
 }
 \AfterPackage*{polyglossia}{%
-  \renewcommand*\iflanguageloaded[1]{\ifcsdef{#1@loaded}}%
+  \renewcommand*\iflanguageloaded[3]{\ifcsundef{#1@loaded}{#3}{#2}}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \iflanguageloaded
@@ -712,24 +716,24 @@
 %    \begin{macrocode}
 \newcommand*\tud@skip@store[1]{%
   \tud@skip@check{#1}{%
-    \ifcsdef{@@tud@skip@#1}{}{%
+    \ifcsundef{@@tud@skip@#1}{%
       \csedef{@@tud@skip@#1}{\expandafter\the\csname #1\endcsname}%
-    }%
+    }{}%
   }%
 }
 \newcommand*\tud@skip@restore[1]{%
   \tud@skip@check{#1}{%
-    \ifcsdef{@@tud@skip@#1}{%
+    \ifcsundef{@@tud@skip@#1}{}{%
       \csname #1\endcsname=\csname @@tud@skip@#1\endcsname%
       \csundef{@@tud@skip@#1}%
-    }{}%
+    }%
   }%
 }
 \newcommand*\tud@skip@reset[1]{%
   \tud@skip@check{#1}{%
-    \ifcsdef{@@tud@skip@#1}{%
+    \ifcsundef{@@tud@skip@#1}{}{%
       \csname#1\endcsname=\csname @@tud@skip@#1\endcsname%
-    }{}%
+    }%
   }%
 }
 \newcommand*\tud@skip@set[2]{%
@@ -949,7 +953,14 @@
   \booltrue{#1@locked}%
 }
 \newcommand*\tud@num@set[2]{%
-  \ifcsdef{#1}{%
+  \ifcsundef{#1}{%
+    \PackageError{tudscrbase}{%
+      `\@backslashchar#1' was never defined%
+    }{%
+      You tried using the numerical expression `\@backslashchar#1'\MessageBreak%
+      but you didn't define it with `\string\tud@locked@newnum'.%
+    }%
+  }{%
     \ifnumber{#2}{%
       \csdef{#1}{#2}%
     }{%
@@ -959,13 +970,6 @@
         You set the numerical expression `\@backslashchar#1'\MessageBreak%
         to value `#2', which isn't numerical.%
       }%
-    }%
-  }{%
-    \PackageError{tudscrbase}{%
-      `\@backslashchar#1' was never defined%
-    }{%
-      You tried using the numerical expression `\@backslashchar#1'\MessageBreak%
-      but you didn't define it with `\string\tud@locked@newnum'.%
     }%
   }%
 }
@@ -1364,18 +1368,17 @@
   \AfterPackage!{#1}{\booltrue{@tud@#1@loaded}}%
 }
 \newcommand*\TUD@AfterPackage@do[2]{%
-  \ifcsdef{if@tud@#1@loaded}{%
+  \ifcsundef{if@tud@#1@loaded}{%
+    \PackageError{tudscrbase}{\string\TUD@AfterPackage@set{#1} missing}{%
+      You have to set \string\TUD@AfterPackage@set{#1} before\MessageBreak%
+      the usage of \string\TUD@AfterPackage@do{#1}{<code>}%
+    }%
+  }{%
     \if@atdocument%
       \ifbool{@tud@#1@loaded}{#2}{}%
     \else%
       \AfterPackage!{#1}{#2}%
     \fi%
-  }{%
-    \PackageError{tudscrbase}{\string\TUD@AfterPackage@set{#1} missing}{%
-      You have to set \string\TUD@AfterPackage@set{#1} before\MessageBreak%
-      the usage of \string\TUD@AfterPackage@do{#1}{<code>} is\MessageBreak%
-      possible.%
-    }%
   }%
 }
 %    \end{macrocode}

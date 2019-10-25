@@ -1,4 +1,4 @@
-% \CheckSum{3082}
+% \CheckSum{3089}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -151,11 +151,11 @@
 % Sollte keine \KOMAScript-Klasse genutzt werden, wird zusätzlich das Paket
 % \pkg{scrextend} benötigt. 
 %    \begin{macrocode}
-\ifcsdef{KOMAClassName}{}{%
+\ifundef{\KOMAClassName}{%
   \RequirePackage{scrextend}[%
 %!TUD@KOMAVersion
   ]%
-}
+}{}
 %    \end{macrocode}
 % Wird das Paket \pkg{tudscrfonts} nach einer der Klassen verwendet, welche die 
 % veralteten Schriftfamilien für \Univers und \DIN definieren, so wird eine 
@@ -1634,7 +1634,7 @@
         }%
       }{}%
       \AtBeginDocument{%
-        \ifcsundef{textrightarrow}{}{%
+        \ifundef{\textrightarrow}{}{%
           \tud@cs@store{textrightarrow}%
           \renewrobustcmd*{\textrightarrow}{%
             \begingroup%
@@ -3067,11 +3067,11 @@
       }%
     }%
     \@tud@res@swafalse%
-    \ifcsdef{upalpha}{%
+    \ifundef{\upalpha}{}{%
       \ifx\upalpha\alpha%
         \@tud@res@swatrue%
       \fi%
-    }{}%
+    }%
 %    \end{macrocode}
 % Existiert \cs{upalpha} und ist mit \cs{alpha} identisch, werden \emph{alle} 
 % griechischen Glyphen aufrecht gesetzt.
@@ -3080,23 +3080,24 @@
       \def\tud@res@c{\TUD@key@preset{slantedgreek}{false}}%
     \else%
 %    \end{macrocode}
-% Existiert \cs{itGamma} und ist mit \cs{Gamma} oder\dots
+% Existiert \cs{itGamma} und ist mit \cs{Gamma} identisch oder\dots
 %    \begin{macrocode}
-      \ifcsdef{itGamma}{%
+      \ifundef{\itGamma}{}{%
         \ifx\itGamma\Gamma%
           \@tud@res@swatrue%
         \fi%
-      }{%
+      }%
 %    \end{macrocode}
 % \dots\cs{Gamma} entspricht einer möglichen Standarddefnition,\dots
 %    \begin{macrocode}
+      \if@tud@res@swa\else%
         \let\tud@res@a\relax%
         \let\tud@res@b\relax%
         \DeclareMathSymbol{\tud@res@a}{\mathalpha}{letters}{0}%
         \DeclareMathSymbol{\tud@res@b}{\mathord}{letters}{0}%
         \ifx\Gamma\tud@res@a\@tud@res@swatrue\fi%
         \ifx\Gamma\tud@res@b\@tud@res@swatrue\fi%
-      }%
+      \fi%
 %    \end{macrocode}
 % \dots werden \emph{alle} griechischen Glyphen kursiv gesetzt.
 %    \begin{macrocode}
@@ -3600,9 +3601,9 @@
 %    \begin{macrocode}
 \newcommand*\tud@cdmath@declare@alias[2]{%
   \listeadd\tud@cdmath@symb@list{#1}%
-  \ifcsdef{tud@cdmath@symbol@#2}{%
+  \ifcsundef{tud@cdmath@symbol@#2}{}{%
     \csedef{tud@cdmath@symbol@#1}{\csname tud@cdmath@symbol@#2\endcsname}%
-  }{}%
+  }%
 }
 \newcommand*\tud@cdmath@char@list{}
 \newcommand*\tud@cdmath@declare@char[4]{%
@@ -3675,20 +3676,20 @@
 % gesichert und später wiederhergestellt. Andernfalls wird er wieder undefinert 
 % gesetzt.
 %    \begin{macrocode}
-  \ifcsdef{#1}{%
+  \ifcsundef{#1}{%
+    \addto@hook\tud@cdmath@symbols@toks{\csundef{#1}}%
+  }{%
     \tud@cs@store{#1}%
     \addto@hook\tud@cdmath@symbols@toks{\tud@cs@restore{#1}}%
-  }{%
-    \addto@hook\tud@cdmath@symbols@toks{\csundef{#1}}%
   }%
 %    \end{macrocode}
 % Nur wenn ein gewünschtes Symbol auch existiert, wird es gesetzt. Damit können 
 % Symbole für \opt{cdmath=true} auch gezielt undefiniert gesetzt werden.
 %    \begin{macrocode}
-  \ifcsdef{tud@cdmath@symbol@#1}{%
-    \tud@cs@letltx{#1}{tud@cdmath@symbol@#1}%
-  }{%
+  \ifcsundef{tud@cdmath@symbol@#1}{%
     \csundef{#1}%
+  }{%
+    \tud@cs@letltx{#1}{tud@cdmath@symbol@#1}%
   }%
 }
 %    \end{macrocode}
