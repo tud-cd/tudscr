@@ -1,4 +1,4 @@
-% \CheckSum{4520}
+% \CheckSum{4505}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -968,7 +968,7 @@
 % Verbesserte Referenzierungen auf Seiten.
 %    \begin{macrocode}
 \RequirePackage{varioref}[2011/10/02]
-\renewcommand*\fullref[1]{\hyperref[#1]{\autoref*{#1}\space\vpageref{#1}}}
+\renewcommand*\fullref[1]{\hyperref[{#1}]{\autoref*{#1}\space\vpageref{#1}}}
 %    \end{macrocode}
 % \end{macro}^^A \fullref
 % Das Paket \pkg{microtype} wird für den optischen Randausgleich verwendet. Es 
@@ -1014,6 +1014,151 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@lbl@fmt
 % \end{macro}^^A \tud@lbl@tmp
+% \begin{macro}{\tud@if@lbl@exists}
+% \changes{v2.05}{2015/11/05}{neu}^^A
+% \begin{macro}{\tud@if@lbl@@exists}
+% Mit dem Befehl \cs{tud@if@lbl@exists} wird eine Fallunterscheidung bezüglich
+% der Existenz eines Labels in der Form
+% \meta{Bundlepräfix}|:|\meta{Labelpräfix}|:|\meta{Element} durchgeführt. Das
+% zu prüfende Label ist in gleicher Weise wie beim Makro \cs{tud@lbl@get@curr}
+% anzugeben. Je nachdem, ob ein existierendes Label gefunden wird oder nicht,
+% wird das zweite oder das dritte obligatorische Argument ausgeführt.
+%    \begin{macrocode}
+%<*class>
+\newcommand*\tud@if@lbl@exists[1]{%
+  \begingroup%
+    \protected@edef\tud@res@a{%
+      \endgroup%
+      \noexpand\tud@if@lbl@@exists{#1}%
+    }%
+  \tud@res@a%
+}
+\NewDocumentCommand\tud@if@lbl@@exists{%
+  >{\tud@lbl@create}>{\SplitArgument{2}{:}}m%
+}{%
+  \ifcsundef{r@#1}{%
+    \expandafter\@secondoftwo%
+  }{%
+    \expandafter\@firstoftwo%
+  }%
+}
+%</class>
+%    \end{macrocode}
+% \end{macro}^^A \tud@if@lbl@@exists
+% \end{macro}^^A \tud@if@lbl@exists
+% \begin{macro}{\tud@lbl@create}
+% \changes{v2.05}{2015/11/03}{neu}^^A
+% \begin{macro}{\tud@lbl@@create}
+% \changes{v2.05}{2015/11/03}{neu}^^A
+% Das Makro \cs{tud@lbl@@create} ist ein Argumentprozessor, welcher als Eingabe 
+% genau drei Argumente für das Erstellen eines gültigen Labels erwartet. Er
+% wird sowohl von \cs{tud@lbl@get@curr} als auch von \cs{tud@if@lbl@exists}
+% verwendet. Vor der Nutzung von \cs{tud@lbl@create} muss das Argument zuvor
+% bereits mit \cs{SplitArgument}|{2}{:}| aufgerufen worden sein. Diese
+% Eigenheit macht die Definition von \cs{tud@lbl@create} notwendig, um das
+% Ergebnis der zuvor vorgenommenen Argumentaufspaltung verarbeiten zu können,
+% in dem dieses an \cs{tud@lbl@@create} durchgereicht wird. Eine Integration 
+% der Spaltung des Argumentes in \cs{tud@lbl@create} ist aufgrund des 
+% mehrmaligen rekursiven Aufrufs von \cs{tud@lbl@create} nicht möglich.
+%
+% Mit dem Argumentprozessor \cs{tud@lbl@create} wird es ermöglicht, an die 
+% beiden Befehle \cs{tud@lbl@get@curr} und \cs{tud@if@lbl@exists} sowohl ein
+% einzelnes Makro, welches das Label bereits beinhaltet als auch einen
+% Markup-Befehl ggf. mit einem Bundlepräfix zu übergeben. In beiden Fällen
+% wird aus dem übergebenen Argument ein eindeutiges Label in der Form 
+% \meta{Bundlepräfix}|:|\meta{Labelpräfix}|:|\meta{Element} generiert und als
+% resultierendes Argument an das aufrufenden Makro übergeben.
+%    \begin{macrocode}
+\NewDocumentCommand\tud@lbl@create{m}{\tud@lbl@@create#1}
+%    \end{macrocode}
+% Es gibt insgesamt vier verschiedene Varianten der Argumentenübergabe an den
+% Argumentprozessor \cs{tud@lbl@@create}.
+% \begin{description}\let\itshape\slshape
+%    \item[\cs{tud@lbl@@create}]\ignorespaces%
+%    |{\LabelMakro}{-NoValue-}{-NoValue-}|\strut\newline%
+%      Das Label ist bereits in \cs{LabelMakro} enthalten und soll expandiert 
+%      werden. Dabei spielt es keine Rolle, ob die durch |:| getrennten
+%      Bestandteile innerhalb des Labels schon als einfacher String oder in der 
+%      Markupform gegeben sind.
+%    \item[\cs{tud@lbl@@create}]\ignorespaces%
+%    |{-NoValue-}{\Markup|\marg{Element}|}{-NoValue-}|\strut\newline%
+%      Das Label soll für ein Markupelement generiert werden, wobei in jedem
+%      Fall der Inhalt aus \cs{tud@bdl@curr} als Bundlepräfix genutzt wird.
+%    \item[\cs{tud@lbl@@create}]\ignorespaces%
+%    |{\Class/\Package|\marg{\dots}|}|\ignorespaces%
+%    |{\Markup|\marg{Element}|}{-NoValue-}|\strut\newline%
+%      Das Label soll für ein Markupelement generiert werden. 
+%      Dabei wurde explizit ein Paket oder eine Klasse aus dem Bundle angegeben 
+%      oder implizit das Makro \cs{tud@bdl@curr} als Argument verwendet,
+%      welches innerhalb der Umgebungen \env{Bundle} und \env{Bundle*} auf
+%      das/die aktuell beschriebene Paket/Klasse gesetzt wurde.
+%    \item[\cs{tud@lbl@@create}]\ignorespaces%
+%    \marg{Bundlepräfix}\marg{Labelpräfix}\marg{Element}\strut\newline 
+%      Das Label ist bereits vollständig bestimmt und die Argumente werden 
+%      entweder als String oder als Markup übergeben. Auch Mischformen sind 
+%      möglich. In diesem Fall wird es einfach wieder zusammengesetzt. Diese
+%      Variante tritt durch rekursiven Aufruf des Argumentprozessors auf.
+% \end{description}
+%    \begin{macrocode}
+\NewDocumentCommand\tud@lbl@@create{m m m}{%
+  \begingroup%
+%    \end{macrocode}
+% Zu Beginn werden die Markup-Befehle auf ihre expandierbaren Varianten gesetzt 
+% und die zusätzlichen Redefinitionen für die Labelgenerierung aktiviert.
+%    \begin{macrocode}
+    \Markup@Gobble%
+    \tud@lbl@fmt%
+%    \end{macrocode}
+% Sind alle drei Bestandteile bereits vorhanden, wird das Label einfach wieder
+% zusammengesetzt.
+%    \begin{macrocode}
+    \IfValueTF{#3}{%
+      \protected@edef\@tempa{#1:#2:#3}%
+    }{%
+%    \end{macrocode}
+% Hier geschieht die eigentliche Erzeugung der Labels. Dabei wird mit 
+% \cs{tud@attr@get} der für den jeweiligen Markup-Befehl aus dem zweiten
+% obligatorischen Argument spezifische Labelpräfix generiert. Abhängig davon,
+% ob im ersten obligatorischen Argument ein spezieller Bundlepräfix angegeben
+% wurde, wird dieser entweder verwendet oder aber implizit auf den Inhalt aus
+% \cs{tud@bdl@dflt} zurückgegriffen.
+%    \begin{macrocode}
+      \IfValueTF{#2}{%
+        \tud@attr@get\@tempb{#2}%
+        \IfValueTF{#1}{%
+          \ifxblank{#1}{%
+            \protected@edef\@tempa{\tud@bdl@dflt:\@tempb:#2}%
+          }{%
+            \protected@edef\@tempa{#1:\@tempb:#2}%
+          }%
+        }{%
+          \protected@edef\@tempa{\tud@bdl@curr:\@tempb:#2}%
+        }%
+      }{%
+%    \end{macrocode}
+% Wurde lediglich ein Makro angegeben, wird dieses einfach expandiert.
+%    \begin{macrocode}
+        \protected@edef\@tempa{#1}%
+      }%
+    }%
+%    \end{macrocode}
+% Das Ergebnis der Labelgenrierung wurde für alle der behandelten Fälle in 
+% \cs{@tempa} geschrieben. Abschließnd wird \cs{ProcessedArgument} nach der 
+% Gruppe mit dessen Inhalt definiert. Dabei werden bei der Expansion die 
+% catcodes aller Zeichen in Tokens der Klasse \val{other} gewandelt, um diese 
+% später sicher vergleichen zu können.
+%    \begin{macrocode}
+    \protected@edef\@tempc{%
+      \noexpand\endgroup%
+      \def\noexpand\ProcessedArgument{%
+        \expandafter\detokenize\expandafter{\@tempa}%
+      }%
+    }%
+  \@tempc%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@lbl@@create
+% \end{macro}^^A \tud@lbl@create
 % \begin{macro}{\tud@lbl@get@curr}
 % \changes{v2.05}{2015/11/03}{neu}^^A
 % \begin{macro}{\tud@lbl@get@@curr}
@@ -1125,141 +1270,6 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@lbl@get@@dflt
 % \end{macro}^^A \tud@lbl@get@dflt
-% \begin{macro}{\tud@if@lbl@exists}
-% \changes{v2.05}{2015/11/05}{neu}^^A
-% Mit dem Befehl \cs{tud@if@lbl@exists} wird eine Fallunterscheidung bezüglich
-% der Existenz eines Labels in der Form
-% \meta{Bundlepräfix}|:|\meta{Labelpräfix}|:|\meta{Element} durchgeführt. Das
-% zu prüfende Label ist in gleicher Weise wie beim Makro \cs{tud@lbl@get@curr}
-% anzugeben. Je nachdem, ob ein existierendes Label gefunden wird oder nicht,
-% wird das zweite oder das dritte obligatorische Argument ausgeführt.
-%    \begin{macrocode}
-%<*class>
-\NewDocumentCommand\tud@if@lbl@exists{%
-  >{\tud@lbl@create}>{\SplitArgument{2}{:}}m%
-}{%
-  \ifcsundef{r@#1}{%
-    \expandafter\@secondoftwo%
-  }{%
-    \expandafter\@firstoftwo%
-  }%
-}
-%</class>
-%    \end{macrocode}
-% \end{macro}^^A \tud@if@lbl@exists
-% \begin{macro}{\tud@lbl@create}
-% \changes{v2.05}{2015/11/03}{neu}^^A
-% \begin{macro}{\tud@lbl@@create}
-% \changes{v2.05}{2015/11/03}{neu}^^A
-% Das Makro \cs{tud@lbl@@create} ist ein Argumentprozessor, welcher als Eingabe 
-% genau drei Argumente für das Erstellen eines gültigen Labels erwartet. Er
-% wird sowohl von \cs{tud@lbl@get@curr} als auch von \cs{tud@if@lbl@exists}
-% verwendet. Vor der Nutzung von \cs{tud@lbl@create} muss das Argument zuvor
-% bereits mit \cs{SplitArgument}|{2}{:}| aufgerufen worden sein. Diese
-% Eigenheit macht die Definition von \cs{tud@lbl@create} notwendig, um das
-% Ergebnis der zuvor vorgenommenen Argumentaufspaltung verarbeiten zu können,
-% in dem dieses an \cs{tud@lbl@@create} durchgereicht wird. Eine Integration 
-% der Spaltung des Argumentes in \cs{tud@lbl@create} ist aufgrund des 
-% mehrmaligen rekursiven Aufrufs von \cs{tud@lbl@create} nicht möglich.
-%
-% Mit dem Argumentprozessor \cs{tud@lbl@create} wird es ermöglicht, an die 
-% beiden Befehle \cs{tud@lbl@get@curr} und \cs{tud@if@lbl@exists} sowohl ein
-% einzelnes Makro, welches das Label bereits beinhaltet als auch einen
-% Markup-Befehl ggf. mit einem Bundlepräfix zu übergeben. In beiden Fällen
-% wird aus dem übergebenen Argument ein eindeutiges Label in der Form 
-% \meta{Bundlepräfix}|:|\meta{Labelpräfix}|:|\meta{Element} generiert und als
-% resultierendes Argument an das aufrufenden Makro übergeben.
-%    \begin{macrocode}
-\NewDocumentCommand\tud@lbl@create{m}{\tud@lbl@@create#1}
-%    \end{macrocode}
-% Es gibt insgesamt vier verschiedene Varianten der Argumentenübergabe an den
-% Argumentprozessor \cs{tud@lbl@@create}.
-% \begin{description}\let\itshape\slshape
-%    \item[\cs{tud@lbl@@create}]\ignorespaces%
-%    |{\LabelMakro}{-NoValue-}{-NoValue-}|\strut\newline%
-%      Das Label ist bereits in \cs{LabelMakro} enthalten und soll expandiert 
-%      werden. Dabei spielt es keine Rolle, ob die durch |:| getrennten
-%      Bestandteile innerhalb des Labels schon als einfacher String oder in der 
-%      Markupform gegeben sind.
-%    \item[\cs{tud@lbl@@create}]\ignorespaces%
-%    |{-NoValue-}{\Markup|\marg{Element}|}{-NoValue-}|\strut\newline%
-%      Das Label soll für ein Markupelement generiert werden, wobei in jedem
-%      Fall der Inhalt aus \cs{tud@bdl@curr} als Bundlepräfix genutzt wird.
-%    \item[\cs{tud@lbl@@create}]\ignorespaces%
-%    |{\Class/\Package|\marg{\dots}|}|\ignorespaces%
-%    |{\Markup|\marg{Element}|}{-NoValue-}|\strut\newline%
-%      Das Label soll für ein Markupelement generiert werden. 
-%      Dabei wurde explizit ein Paket oder eine Klasse aus dem Bundle angegeben 
-%      oder implizit das Makro \cs{tud@bdl@curr} als Argument verwendet,
-%      welches innerhalb der Umgebungen \env{Bundle} und \env{Bundle*} auf
-%      das/die aktuell beschriebene Paket/Klasse gesetzt wurde.
-%    \item[\cs{tud@lbl@@create}]\ignorespaces%
-%    \marg{Bundlepräfix}\marg{Labelpräfix}\marg{Element}\strut\newline 
-%      Das Label ist bereits vollständig bestimmt und die Argumente werden 
-%      entweder als String oder als Markup übergeben. Auch Mischformen sind 
-%      möglich. In diesem Fall wird es einfach wieder zusammengesetzt. Diese
-%      Variante tritt durch rekursiven Aufruf des Argumentprozessors auf.
-% \end{description}
-%    \begin{macrocode}
-\NewDocumentCommand\tud@lbl@@create{m m m}{%
-  \begingroup%
-%    \end{macrocode}
-% Zu Beginn werden die Markup-Befehle auf ihre expandierbaren Varianten gesetzt 
-% und die zusätzlichen Redefinitionen für die Labelgenerierung aktiviert.
-%    \begin{macrocode}
-    \Markup@Gobble%
-    \tud@lbl@fmt%
-%    \end{macrocode}
-% Sind alle drei Bestandteile bereits vorhanden, wird das Label einfach wieder
-% zusammengesetzt.
-%    \begin{macrocode}
-    \IfValueTF{#3}{%
-      \edef\@tempa{#1:#2:#3}%
-    }{%
-%    \end{macrocode}
-% Hier geschieht die eigentliche Erzeugung der Labels. Dabei wird mit 
-% \cs{tud@attr@get} der für den jeweiligen Markup-Befehl aus dem zweiten
-% obligatorischen Argument spezifische Labelpräfix generiert. Abhängig davon,
-% ob im ersten obligatorischen Argument ein spezieller Bundlepräfix angegeben
-% wurde, wird dieser entweder verwendet oder aber implizit auf den Inhalt aus
-% \cs{tud@bdl@dflt} zurückgegriffen.
-%    \begin{macrocode}
-      \IfValueTF{#2}{%
-        \tud@attr@get\@tempb{#2}%
-        \IfValueTF{#1}{%
-          \ifxblank{#1}{%
-            \edef\@tempa{\tud@bdl@dflt:\@tempb:#2}%
-          }{%
-            \edef\@tempa{#1:\@tempb:#2}%
-          }%
-        }{%
-          \edef\@tempa{\tud@bdl@curr:\@tempb:#2}%
-        }%
-      }{%
-%    \end{macrocode}
-% Wurde lediglich ein Makro angegeben, wird dieses einfach expandiert.
-%    \begin{macrocode}
-        \edef\@tempa{#1}%
-      }%
-    }%
-%    \end{macrocode}
-% Das Ergebnis der Labelgenrierung wurde für alle der behandelten Fälle in 
-% \cs{@tempa} geschrieben. Abschließnd wird \cs{ProcessedArgument} nach der 
-% Gruppe mit dessen Inhalt definiert. Dabei werden bei der Expansion die 
-% catcodes aller Zeichen in Tokens der Klasse \val{other} gewandelt, um diese 
-% später sicher vergleichen zu können.
-%    \begin{macrocode}
-    \edef\@tempc{%
-      \noexpand\endgroup%
-      \def\noexpand\ProcessedArgument{%
-        \expandafter\detokenize\expandafter{\@tempa}%
-      }%
-    }%
-  \@tempc%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@lbl@@create
-% \end{macro}^^A \tud@lbl@create
 %
 % \subsection{Namensraum für unterschiedliche Bundles}
 %
@@ -1409,7 +1419,7 @@
 %    \begin{macrocode}
 \NewDocumentEnvironment{Declaration}{o m !o !o !d() !D<>{}}{%
   \listadd\tud@declaration@list{#2}%
-  \tud@declare@start[#1]{#2}[#3][#4]{#5}%
+  \tud@declare@start[{#1}]{#2}[{#3}][{#4}]{#5}%
 }{%
   \tud@declare@end{#2}{\printdeclarationlist}%
 }
@@ -1436,7 +1446,7 @@
       #3%
       \def\tud@declare@num{0}%
     }%
-    \tud@declare@start{#3}[#4][#5]{#6}%
+    \tud@declare@start{#3}[{#4}][{#5}]{#6}%
   }{%
     \listadd\tud@declaration@list{#3}%
 %    \end{macrocode}
@@ -1445,12 +1455,12 @@
 % Untereintrag genutzt.
 %    \begin{macrocode}
     \IfValueTF{#2}{%
-      \Changed@At@CreateList[#2]{#1!#3}%
+      \Changed@At@CreateList[{#2}]{#1!#3}%
     }{%
-      \Changed@At@CreateList[#3]{#1}%
+      \Changed@At@CreateList[{#3}]{#1}%
     }%
     \IfValueTF{#6}{%
-      \tud@declare@start{#3}[#4][#5]{#6}%
+      \tud@declare@start{#3}[{#4}][{#5}]{#6}%
 %    \end{macrocode}
 % Ohne eine zusätzliche Angabe imletzten optionalen Argument wird standardmäßig
 % der Entfall der Deklaration angegeben. Alternativ dazu kann im ersten 
@@ -1458,7 +1468,7 @@
 % neue bzw. aktuell gültige Deklaration als Querverweis angegeben werden.
 %    \begin{macrocode}
     }{%
-      \toks@{\tud@declare@start{#3}[#4][#5]}%
+      \toks@{\tud@declare@start{#3}[{#4}][{#5}]}%
       \def\@tempa{\emph{entf\"allt}}%
       \in@{:}{#1}%
       \ifin@%
@@ -1514,7 +1524,7 @@
 % der Liste \cs{tud@changedat@list} gesichert und später sowohl für die
 % Randnotiz als auch die Änderungsliste verarbeitet.
 %    \begin{macrocode}
-  \Changed@At@CreateList[#2]{#1}%
+  \Changed@At@CreateList[{#2}]{#1}%
 %    \end{macrocode}
 % Hier noch die Listen für Voreinstellungen\dots
 %    \begin{macrocode}
@@ -1572,7 +1582,7 @@
 %    \begin{macrocode}
 \NewDocumentCommand\InlineDeclaration{s o m}{%
   \IfBooleanTF{#1}{\@tud@subdeclaretrue}{\@tud@subdeclarefalse}%
-  \tud@declare@special@start[#2]{#3}{0}%
+  \tud@declare@special@start[{#2}]{#3}{0}%
   \tud@declare@special@end{#3}%
   \@tud@subdeclarefalse%
 }
@@ -1589,7 +1599,7 @@
 % nicht erhöht sondern auf der aktuellen Grundlinie erzeugt wird.
 %    \begin{macrocode}
 \NewDocumentEnvironment{Declaration*}{o m}{%
-  \tud@declare@special@start[#1]{#2}{2}%
+  \tud@declare@special@start[{#1}]{#2}{2}%
 }{%
   \tud@declare@special@end{#2}%
 }
@@ -1609,7 +1619,7 @@
 % dem Schließen der Umgebung \env{Bundle} genutzt. 
 %    \begin{macrocode}
 \NewDocumentEnvironment{Bundle*}{o m}{%
-  \tud@declare@special@start[#1]{#2}{3}%
+  \tud@declare@special@start[{#1}]{#2}{3}%
   \Bundle{#2}%
 }{%
   \endBundle%
@@ -1647,48 +1657,20 @@
 % \end{macro}^^A \tud@declare@special@end
 % \end{macro}^^A \tud@declare@special@start
 % \begin{macro}{\printdeclarationlist}
-% \begin{length}{\tud@lastskip}
-% \changes{v2.05}{2015/11/01}{neu}^^A
-% \begin{macro}{\index}
-% \changes{v2.05}{2015/11/01}{neu}^^A
-% \begin{macro}{\label}
-% \changes{v2.05}{2015/11/01}{neu}^^A
 % Mit dem Befehl \cs{printdeclarationlist} erfolgt die eingentliche Ausgabe 
 % aller Deklarationen. Zweck ist es, mehrere \env{Declaration}-Umgebungen 
 % ineinander verschachteln zu können und eine Ausgabe aller auf einmal zu 
 % erzeugen. Die durch die ggf. nacheinander folgenden Deklarationen wurden in 
 % entsprechenden Listen gesammelt und werden hier jetzt formatiert ausgegben.
-%
-% Da die Verwendung der Befehle \cs{index} und \cs{label} nach Überschriften 
-% dazu führt, dass \cs{addvspace} nicht mehr richtig verendet werden kann, 
-% wird hier etwas gebastelt, damit das trotzdem funktioniert. Dabei wird 
-% einfach bei der verwendung der genannten Befehle der zuvor gesetzte vertikale 
-% Abstand in \cs{tud@lastskip} gesichert.
 %    \begin{macrocode}
-\newskip\tud@lastskip
-\pretocmd{\index}{\tud@lastskip=\lastskip}{}{\tud@patch@wrn{index}}
-\pretocmd{\label}{\tud@lastskip=\lastskip}{}{\tud@patch@wrn{label}}
 \NewDocumentCommand\printdeclarationlist{!s !d()}{%
   \ifx\tud@declaration@list\relax\else%
     \ifhmode%
       \vskip\medskipamount%
     \else%
-%    \end{macrocode}
-% Im vertikalen modus wird dann einfach vom eigentlich gewünschten Abstand der 
-% durch \cs{label} bzw. \cs{index} erzwungene vertikale Freiraum abgezogen. 
-% Sollte dann noch ein positiver Wert bestehen, wird dieser einfach zusätzlich
-% gesetzt.
-%    \begin{macrocode}
-      \@tempskipa=\glueexpr\medskipamount-\tud@lastskip\relax%
-      \ifdim\@tempskipa>\z@\relax%
-        \addpenalty{\@beginparpenalty}%
-        \addvspace{\@tempskipa}%
-      \fi%
+      \addpenalty{\@beginparpenalty}%
+      \addvspace{\medskipamount}%
     \fi%
-%    \end{macrocode}
-% Anschließend wird die Länge auf jeden Fall zurückgesetzt.
-%    \begin{macrocode}
-    \global\tud@lastskip=\z@%
     \@afterindentfalse\@afterheading%
     \@tud@declaretrue\@tud@openindextrue%
 %    \end{macrocode}
@@ -1757,9 +1739,6 @@
   \fi%
 }
 %    \end{macrocode}
-% \end{macro}^^A \label
-% \end{macro}^^A \index
-% \end{length}^^A \tud@lastskip
 % \end{macro}^^A \printdeclarationlist
 % \begin{macro}{\printobsoletelist}
 % \changes{v2.05}{2015/11/01}{neu}^^A
@@ -1856,54 +1835,6 @@
 % entsprechende Formatierung zu gewährleisten, wobei dies nur für die Klasse
 % \cls{tudscrmanual} und nicht für das Paket \pkg{tudscrtutorial} gilt.
 %
-% \begin{macro}{\ProcessorKeyVal}
-% \changes{v2.05}{2015/11/01}{neu}^^A
-% \begin{macro}{\tud@keyval@error}
-% \changes{v2.05}{2015/11/01}{neu}^^A
-% Bei Optionen und Parametern können spezielle Werte einfach im Hauptargument 
-% durch |=| getrennt angegeben werden. Um diese auszuwerten, wird dieser Befehl
-% definiert, welcher als Argumentprozessor verwendet wird.
-%    \begin{macrocode}
-\newcommand*\ProcessorKeyVal[1]{%
-  \begingroup%
-    \in@{=}{#1}%
-%    \end{macrocode}
-% Wird im Argument ein |=| gefunden, so wird alles Darauffolgende als Wert 
-% erkannt und dem eigentlichen Hauptargument bei der Ausgabe angehangen. Das
-% Makro, welches diesen Argumentprozessor verwendet, erhält als Ausgabe also
-% entweder \marg{Schlüssel} oder \marg{Schlüssel}|=|\meta{Wert}|=| falls
-% \cs{ProcessorKeyVal} mit \marg{Schlüssel=Wert} verwendet wurde.
-%    \begin{macrocode}
-    \ifin@%
-      \def\@tempa##1=##2\@nil{\toks@{{##1}=##2=}}%
-    \else%
-      \def\@tempa##1\@nil{\toks@{{##1}}}%
-    \fi%
-    \@tempa#1\@nil%
-    \edef\tud@reserved{%
-      \noexpand\endgroup%
-      \def\noexpand\ProcessedArgument{\the\toks@}%
-    }%
-  \tud@reserved%
-}
-%    \end{macrocode}
-% Es gibt auch noch eine interne Variante für ein optioneles Werte-Argument. 
-% Dabei sollte vermieden werden, dass im Markup das Argument für einen Wert 
-% doppelt angegeben wird. In diesem Fall wird dieser Fehler ausgegeben.
-%    \begin{macrocode}
-\newcommand*\tud@keyval@error{%
-%<*class>
-  \ClassError{tudscrmanual}%
-%</class>
-%<*package>
-  \PackageError{tudscrtutorial}%
-%</package>
-    {Wrong usage of optional argument for value}%
-    {There are two optional arguments for a value given!}%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@keyval@error
-% \end{macro}^^A \ProcessorKeyVal
 % \begin{macro}{\Application}
 % \changes{v2.02}{2014/10/08}{überarbeitet}^^A
 % \begin{macro}{\@Application}
@@ -2104,7 +2035,7 @@
       \tabularnewline\ttfamily\dots%
       \tabularnewline\ttfamily\bsc{}end\textbraceleft#2\textbraceright%
     )%
-    \Process@Markup{\Environment{#2}}[#3](#4)'#5'%
+    \Process@Markup{\Environment{#2}}[{#3}](#4)'#5'%
     \Process@Index{#1}{\Environment{#2}}[Umgebung](#4)|#6|%
 %<*class>
   \fi%
@@ -2131,7 +2062,7 @@
   \else%
 %</class>
     \Markup@SetFormat[\bsc]{\ttfamily}%
-    \Process@Markup{\Macro{#2}}[#3](#4)'#5'%
+    \Process@Markup{\Macro{#2}}[{#3}](#4)'#5'%
     \Process@Index{#1}{\Macro{#2}}(#4)|#6|%
 %<*class>
   \fi%
@@ -2296,7 +2227,7 @@
     \Markup@SetFormat{\ttfamily}[Farbe](%
       \begingroup\ttfamily{#2\IfValueT{#3}{~(#3)}}\endgroup%
     )%
-    \Process@Markup{\Color{#2}}[#3](#4)'#5'%
+    \Process@Markup{\Color{#2}}[{#3}](#4)'#5'%
     \Process@Index{#1}{\Color{#2}}[Farbe](#4)|#6|%
   \fi%
 }
@@ -2307,6 +2238,55 @@
 % \iffalse
 %</class>
 % \fi
+%
+% \begin{macro}{\ProcessorKeyVal}
+% \changes{v2.05}{2015/11/01}{neu}^^A
+% \begin{macro}{\tud@keyval@error}
+% \changes{v2.05}{2015/11/01}{neu}^^A
+% Bei Optionen und Parametern können spezielle Werte einfach im Hauptargument 
+% durch |=| getrennt angegeben werden. Um diese auszuwerten, wird dieser Befehl
+% definiert, welcher als Argumentprozessor verwendet wird.
+%    \begin{macrocode}
+\newcommand*\ProcessorKeyVal[1]{%
+  \begingroup%
+    \in@{=}{#1}%
+%    \end{macrocode}
+% Wird im Argument ein |=| gefunden, so wird alles Darauffolgende als Wert 
+% erkannt und dem eigentlichen Hauptargument bei der Ausgabe angehangen. Das
+% Makro, welches diesen Argumentprozessor verwendet, erhält als Ausgabe also
+% entweder \marg{Schlüssel} oder \marg{Schlüssel}|=|\meta{Wert}|=| falls
+% \cs{ProcessorKeyVal} mit \marg{Schlüssel=Wert} verwendet wurde.
+%    \begin{macrocode}
+    \ifin@%
+      \def\@tempa##1=##2\@nil{\toks@{{##1}=##2=}}%
+    \else%
+      \def\@tempa##1\@nil{\toks@{{##1}}}%
+    \fi%
+    \@tempa#1\@nil%
+    \edef\tud@reserved{%
+      \noexpand\endgroup%
+      \def\noexpand\ProcessedArgument{\the\toks@}%
+    }%
+  \tud@reserved%
+}
+%    \end{macrocode}
+% Es gibt auch noch eine interne Variante für ein optioneles Werte-Argument. 
+% Dabei sollte vermieden werden, dass im Markup das Argument für einen Wert 
+% doppelt angegeben wird. In diesem Fall wird dieser Fehler ausgegeben.
+%    \begin{macrocode}
+\newcommand*\tud@keyval@error{%
+%<*class>
+  \ClassError{tudscrmanual}%
+%</class>
+%<*package>
+  \PackageError{tudscrtutorial}%
+%</package>
+    {Wrong usage of optional argument for value}%
+    {There are two optional arguments for a value given!}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@keyval@error
+% \end{macro}^^A \ProcessorKeyVal
 %
 % \subsubsection{Zuordnung der Markup-Befehle für Label und Index}
 %
@@ -2429,7 +2409,7 @@
   \mbox{\texttt{[}\PName{#1}\textOR\PName{Parameterliste}\texttt{]}}%
 }
 \newrobustcmd*\PParameter[1]{\mbox{\texttt{\textbraceleft#1\textbraceright}}}
-\newrobustcmd*\POParameter[1]{\mbox{\texttt{[#1]}}}
+\newrobustcmd*\POParameter[1]{\mbox{\texttt{[{#1}]}}}
 \newrobustcmd*\textOR{\PValue{\,\textbardbl\,}}
 %    \end{macrocode}
 % \end{macro}^^A \textOR
@@ -2660,7 +2640,7 @@
 % \oarg{Ausgabesuffix}~-- falls diese angegeben wurden.
 %    \begin{macrocode}
   \IfValueT{#2}{\addto@hook\tud@toks@{=#2=}}%
-  \IfValueT{#3}{\addto@hook\tud@toks@{[#3]}}%
+  \IfValueT{#3}{\addto@hook\tud@toks@{[{#3}]}}%
 %    \end{macrocode}
 % Erfolgt gerade eine Deklaration, wird mit dem Schalter \cs{if@tud@openindex} 
 % eigentlich unterschieden, ob ein öffnender oder ein schließender Indexeintrag
@@ -2779,9 +2759,9 @@
   \Markup@CheckFormat%
   \ifcase\tud@declare@num\relax%
     \tudhyperdef{#1}%
-    \Markup@Output{#2}=#3=[#4]%
+    \Markup@Output{#2}=#3=[{#4}]%
   \or%
-    \Markup@Output{#2}=#3=[#4]%
+    \Markup@Output{#2}=#3=[{#4}]%
   \or%
     \tudhyperdef{#1}%
   \or%
@@ -2814,7 +2794,7 @@
 % Variante gesichert.
 %    \begin{macrocode}
   \begingroup%
-    \def\@tempc{\Markup@Output{#2}=#3=[#4]}%
+    \def\@tempc{\Markup@Output{#2}=#3=[{#4}]}%
 %    \end{macrocode}
 % Danach wird eine Fallunterscheidung anhand des im ersten Argument übergebenen 
 % Labels getroffen. Existiert dieses, soll das Element als Hyperlink ausgegeben 
@@ -2954,7 +2934,7 @@
 % \cs{SplitArgument}|{1}{!}| getrennt und dann weiter verarbeitet.
 %    \begin{macrocode}
 \NewDocumentCommand\Markup@Output{>{\SplitArgument{1}{!}}m r== r[]}{%
-  \Markup@@Output#1=#2=[#3]%
+  \Markup@@Output#1=#2=[{#3}]%
 }
 %    \end{macrocode}
 % Anschließend wird entweder \cs{Markup@Declare} oder \cs{Markup@Inline}
@@ -3264,21 +3244,25 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \makexdyindex
-% Nun können mit \cs{makexdyindex} die einzelnen Indexe erstellt werden.
+% Nun können mit \cs{makexdyindex} die einzelnen Indexe erstellt werden. Dies 
+% geschiet jedoch erst zum Ende der Präambel, um die Eingabekodierung auch 
+% wirklich zu erwischen.
 %    \begin{macrocode}
-\makexdyindex{Allgemeiner Index}
-\makexdyindex*{Klassen- und Paketoptionen}[options]
-\makexdyindex*{Befehle und Umgebungen mit zugeh\"origen Parametern}[macros]
+\AtEndPreamble{
+  \makexdyindex{Allgemeiner Index}
+  \makexdyindex*{Klassen- und Paketoptionen}[options]
+  \makexdyindex*{Befehle und Umgebungen mit zugeh\"origen Parametern}[macros]
 %<*class>
-\makexdyindex*{Sprachabh\"angige Bezeichner}[terms]
-\makexdyindex*{Seitenstile, Schriftelemente und Farben}[elements]
+  \makexdyindex*{Sprachabh\"angige Bezeichner}[terms]
+  \makexdyindex*{Seitenstile, Schriftelemente und Farben}[elements]
 %</class>
-\makexdyindex{L\"angen und Z\"ahler}[misc]
-\makexdyindex*{Klassen, Pakete und Dateien}[files]
+  \makexdyindex{L\"angen und Z\"ahler}[misc]
+  \makexdyindex*{Klassen, Pakete und Dateien}[files]
 %<*class>
-\makexdyindex[columns=1]{\"Anderungsliste}[changelog]
+  \makexdyindex[columns=1]{\"Anderungsliste}[changelog]
 %</class>
-\undef\makexdyindex
+  \undef\makexdyindex
+}
 %    \end{macrocode}
 % \begin{macro}{\if@tud@index}
 % \changes{v2.05}{2015/11/05}{neu}^^A
@@ -3702,7 +3686,7 @@
         }%
       }%
     }{%
-      \Process@@Index{#2}=#3=[#4](#5)|#6|%
+      \Process@@Index{#2}=#3=[{#4}](#5)|#6|%
     }%
   }%
 }
@@ -3718,10 +3702,10 @@
 %    \begin{macrocode}
 %<*class>
   \if@tud@declare%
-    \tud@idx@get\tud@idx@key\tud@idx@fmt\tud@idx@val{#1}=#2=[#3](#4)|declare|%
+    \tud@idx@get\tud@idx@key\tud@idx@fmt\tud@idx@val{#1}=#2=[{#3}](#4)|declare|%
   \else%
 %</class>
-    \tud@idx@get\tud@idx@key\tud@idx@fmt\tud@idx@val{#1}=#2=[#3](#4)|#5|%
+    \tud@idx@get\tud@idx@key\tud@idx@fmt\tud@idx@val{#1}=#2=[{#3}](#4)|#5|%
 %<*class>
   \fi%
 %</class>
@@ -3995,7 +3979,7 @@
 %    \end{macrocode}
 % Die Ausgabe des gewünschten Index und des leeren des Prologs.
 %    \begin{macrocode}
-  \ifblank{#1}{\printindex}{\printindex[#1]}%
+  \ifblank{#1}{\printindex}{\printindex[{#1}]}%
   \ifnum\imki@columns>\@ne\relax\vspace{-\multicolsep}\fi%
 %<class>  \let\tud@indexprologue\@empty%
 }
@@ -4051,7 +4035,7 @@
 % \endgroup
 %   \begin{macrocode}
 \NewDocumentCommand\Process@ChangedAt{m d== o d()}{%
-  \tud@idx@get*\tud@idx@key\tud@idx@fmt\tud@idx@val{#1}=#2=[#3](#4)%
+  \tud@idx@get*\tud@idx@key\tud@idx@fmt\tud@idx@val{#1}=#2=[{#3}](#4)%
 }
 %    \end{macrocode}
 % \end{macro}^^A \Process@ChangedAt
@@ -4086,7 +4070,7 @@
 \newlength\changedatskip
 \NewDocumentCommand\ChangedAt{s o d() m !O{\changedatskip}}{%
   \IfValueTF{#2}{%
-    \Changed@At@CreateList[#2](#3){#4}%
+    \Changed@At@CreateList[{#2}](#3){#4}%
   }{%
     \Changed@At@CreateList(#3){#4}%
   }%
@@ -4157,14 +4141,14 @@
 % weiter. 
 %    \begin{macrocode}
 \NewDocumentCommand\Changed@At@CreateList{o d() m}{%
-  \IfValueT{#3}{\forssvlist{\Changed@At@@CreateList[#1](#2)}{#3}}%
+  \IfValueT{#3}{\forssvlist{\Changed@At@@CreateList[{#1}](#2)}{#3}}%
 }
 %    \end{macrocode}
 % Mit \cs{Changed@At@@CreateList} wird lediglich die Versionsnummer von der 
 % eigentlichen Änderungsnotiz getrennt.
 %    \begin{macrocode}
 \NewDocumentCommand\Changed@At@@CreateList{r[] r() >{\SplitArgument{1}{:}}m}{%
-  \Changed@At@@@CreateList[#1](#2)#3%
+  \Changed@At@@@CreateList[{#1}](#2)#3%
 }
 %    \end{macrocode}
 % Zuletzt wird durch \cs{Changed@At@@@CreateList} ein möglicher Untereintrag
@@ -4174,7 +4158,7 @@
 \NewDocumentCommand\Changed@At@@@CreateList{%
   r[] r() >{\SplitArgument{1}{!}}m m%
 }{%
-  \Changed@At@@@@CreateList[#1](#2)#3{#4}%
+  \Changed@At@@@@CreateList[{#1}](#2)#3{#4}%
 }
 %    \end{macrocode}
 % Der Befehl \cs{Changed@At@@@@CreateList} übernimmt nun die Erstellung des 
@@ -4301,16 +4285,112 @@
 % \end{macro}^^A \Changed@At@@CreateList
 % \end{macro}^^A \Changed@At@CreateList
 %
-% \subsubsection{Erzeugen der Änderungseinträge}
+% \subsubsection{Ausgabe der Änderungsliste}
 %
-% Mit den nachfolgenden Makros erfolgt das eigentliche Eintragen der 
-% Änderungseinträge aus der Liste \cs{tud@changedat@list} in den entsprechenden 
-% Index~\val{changelog}. 
+% Ähnlich wie für den Index wird auch für die Änderungsliste bei der Ausgabe 
+% verfahren. 
 %
+% \begin{macro}{\PrintChangelog}
+% \begin{environment}{theindex}
+% Mit \cs{PrintChangelog} erfolgt die Ausgabe der Änderungsliste. Dabei ist zu 
+% beachten, dass die Einträge im Index bis zur vierten Ebene erfolgen.
+%    \begin{macrocode}
+\newcommand*\PrintChangelog{%
+  \begingroup%
+%    \end{macrocode}
+% Die oberste Ebene enthält die Versionsnummer mit dem Präfix |v|. Diese Ebene
+% soll nicht als Indexeintrag selber sondern vielmehr als Überschrift der Ebene
+% \cs{subsection} genutzt werden. Dafür wird zum einen das durch das Paket
+% \pkg{imakeidx} definierte Makro \cs{lettergroup} \emph{unschädlich} gemacht,
+% zum anderen wird der Befehl \cs{item} so umdefiniert, dass dieser alles bis
+% zum nächsten Zeilenumbruch als Argument einliest. Alle darunter liegenden
+% \cs{item}-Befehle werden eine Ebene nach oben gehoben.
+%    \begin{macrocode}
+    \let\lettergroup\@gobble%
+    \apptocmd{\theindex}{%
+      \let\subsubsubitem\subsubitem%
+      \let\subsubitem\subitem%
+      \let\subitem\item%
+      \renewcommand*\item{%
+        \begingroup%
+          \escapechar=`\\%
+          \catcode\endlinechar=\active%
+          \csname\string\item\endcsname%
+      }%
+      \begingroup%
+      \escapechar=`\\%
+      \lccode`\~=\endlinechar%
+      \lowercase{%
+        \expandafter\endgroup%
+        \expandafter\def\csname\string\item\endcsname##1~%
+      }{%
+        \endgroup%
+        \let\@tempb\@firstofone%
+        \if@tud@cdoldfont@active\def\@tempb##1{\NoCaseChange{##1}}\fi%
+        \addsec[{##1}]{\TUDScript \@tempb{##1}}%
+        \tudhyperdef*{idx:changelog:##1}%
+        \def\@tempa{\indexname: \TUDScript \@tempb{##1}}%
+        \@mkboth{\@tempa}{\@tempa}%
+      }%
+    }{}{\tud@patch@wrn{theindex}}%
+%    \end{macrocode}
+% Mit der so angepassten \env{theindex}-Umgebung erfolgt die Ausgabe der 
+% Änderungshistorie.
+%    \begin{macrocode}
+    \clearpage%
+    \def\imki@indexlevel{\addchap}%
+    \print@index[changelog]%
+  \endgroup%
+}
+%    \end{macrocode}
+% \end{environment}^^A theindex
+% \end{macro}^^A \PrintChangelog
+% \begin{macro}{\print@changedatlist}
+% \changes{v2.02}{2014/10/09}{neu}^^A
+% Die Einträge in der Liste der Änderungen \cs{tud@changedat@list} werden mit 
+% dem Makro \cs{Changed@At@CreateList} abgearbeitet, sortiert und erstellt. Das 
+% zweite obligatorische Argument von \cs{@printchangedatlist} steurrt den 
+% vertikalen Versatz der Randnotiz. Wird im ersten Argument das boolesche Flag 
+% zu \cs{BooleanTrue} gesetzt, wird die Randnotiz unterdrückt.
+%    \begin{macrocode}
+\NewDocumentCommand\print@changedatlist{m m}{%
+  \ifx\tud@changedat@list\relax\else%
+    \let\tud@templist\relax%
+    \forlistloop\Changed@At@CreateEntry{\tud@changedat@list}%
+    \global\let\tud@changedat@list\relax%
+%    \end{macrocode}
+% Nach der Verarbeitung der Einräge sind in \cs{tud@templist} alle angegebenen
+% Versionsnummern genau einmal enthalten. Mit \cs{tud@list@sort} werden diese 
+% in die richtige Reihenfolge sortiert und anschließend als Randnotiz in einer
+% Tabelle ausgegeben, falls nicht die Sternversion verwendet wurde.
+%    \begin{macrocode}
+    \IfBooleanF{#1}{%
+      \tud@list@sort\tud@templist%
+      \strut%
+      \marginnote{%
+        \def\@tempa####1{%
+          \ignorespaces%
+          \tudhyperref{idx:changelog:####1}{####1}%
+          \tabularnewline%
+        }%
+        \begin{tabular}{|l|}%
+          \hline%
+          \forlistloop\@tempa{\tud@templist}%
+          \hline%
+        \end{tabular}%
+      }[{#2}]%
+      \ignorespaces%
+    }%
+  \fi%
+}
+%    \end{macrocode}
+% \end{macro}^^A \print@changedatlist
 % \begin{macro}{\Changed@At@CreateEntry}
 % \changes{v2.02}{2014/09/02}{neu}^^A
 % \begin{macro}{\Changed@At@@CreateEntry}
 % \changes{v2.02}{2014/09/02}{neu}^^A
+% Mit diesen Makros erfolgt das eigentliche Eintragen der Änderungen aus der 
+% Liste \cs{tud@changedat@list} in den entsprechenden Index~\val{changelog}. 
 % Der Befehl \cs{Changed@At@CreateEntry} wird durch \cs{@printchangedatlist} 
 % aufgerufen und teilt die gegebene Liste am Delimiter Ausrufezeichen |!| in
 % fünf Argumente auf und reicht sie an \cs{Changed@At@@CreateEntry} weiter.
@@ -4429,107 +4509,6 @@
 % \end{macro}^^A \Changed@At@@CreateEntry
 % \end{macro}^^A \Changed@At@CreateEntry
 %
-% \subsubsection{Ausgabe der Änderungsliste}
-%
-% Ähnlich wie für den Index wird auch für die Änderungsliste bei der Ausgabe 
-% verfahren. 
-%
-% \begin{macro}{\PrintChangelog}
-% \begin{environment}{theindex}
-% Mit \cs{PrintChangelog} erfolgt die Ausgabe der Änderungsliste. Dabei ist zu 
-% beachten, dass die Einträge im Index bis zur vierten Ebene erfolgen.
-%    \begin{macrocode}
-\newcommand*\PrintChangelog{%
-  \begingroup%
-%    \end{macrocode}
-% Die oberste Ebene enthält die Versionsnummer mit dem Präfix |v|. Diese Ebene
-% soll nicht als Indexeintrag selber sondern vielmehr als Überschrift der Ebene
-% \cs{subsection} genutzt werden. Dafür wird zum einen das durch das Paket
-% \pkg{imakeidx} definierte Makro \cs{lettergroup} \emph{unschädlich} gemacht,
-% zum anderen wird der Befehl \cs{item} so umdefiniert, dass dieser alles bis
-% zum nächsten Zeilenumbruch als Argument einliest. Alle darunter liegenden
-% \cs{item}-Befehle werden eine Ebene nach oben gehoben.
-%    \begin{macrocode}
-    \let\lettergroup\@gobble%
-    \apptocmd{\theindex}{%
-      \let\subsubsubitem\subsubitem%
-      \let\subsubitem\subitem%
-      \let\subitem\item%
-      \renewcommand*\item{%
-        \begingroup%
-          \escapechar=`\\%
-          \catcode\endlinechar=\active%
-          \csname\string\item\endcsname%
-      }%
-      \begingroup%
-      \escapechar=`\\%
-      \lccode`\~=\endlinechar%
-      \lowercase{%
-        \expandafter\endgroup%
-        \expandafter\def\csname\string\item\endcsname##1~%
-      }{%
-        \endgroup%
-        \let\@tempb\@firstofone%
-        \if@tud@cdoldfont@active\def\@tempb##1{\NoCaseChange{##1}}\fi%
-        \addsec[##1]{\TUDScript \@tempb{##1}}%
-        \tudhyperdef*{idx:changelog:##1}%
-        \def\@tempa{\indexname: \TUDScript \@tempb{##1}}%
-        \@mkboth{\@tempa}{\@tempa}%
-      }%
-    }{}{\tud@patch@wrn{theindex}}%
-%    \end{macrocode}
-% Mit der so angepassten \env{theindex}-Umgebung erfolgt die Ausgabe der 
-% Änderungshistorie.
-%    \begin{macrocode}
-    \clearpage%
-    \def\imki@indexlevel{\addchap}%
-    \print@index[changelog]%
-  \endgroup%
-}
-%    \end{macrocode}
-% \end{environment}^^A theindex
-% \end{macro}^^A \PrintChangelog
-% \begin{macro}{\print@changedatlist}
-% \changes{v2.02}{2014/10/09}{neu}^^A
-% Die Einträge in der Liste der Änderungen \cs{tud@changedat@list} werden mit 
-% dem Makro \cs{Changed@At@CreateList} abgearbeitet, sortiert und erstellt. Das 
-% zweite obligatorische Argument von \cs{@printchangedatlist} steurrt den 
-% vertikalen Versatz der Randnotiz. Wird im ersten Argument das boolesche Flag 
-% zu \cs{BooleanTrue} gesetzt, wird die Randnotiz unterdrückt.
-%    \begin{macrocode}
-\NewDocumentCommand\print@changedatlist{m m}{%
-  \ifx\tud@changedat@list\relax\else%
-    \let\tud@templist\relax%
-    \forlistloop\Changed@At@CreateEntry{\tud@changedat@list}%
-    \global\let\tud@changedat@list\relax%
-%    \end{macrocode}
-% Nach der Verarbeitung der Einräge sind in \cs{tud@templist} alle angegebenen
-% Versionsnummern genau einmal enthalten. Mit \cs{tud@list@sort} werden diese 
-% in die richtige Reihenfolge sortiert und anschließend als Randnotiz in einer
-% Tabelle ausgegeben, falls nicht die Sternversion verwendet wurde.
-%    \begin{macrocode}
-    \IfBooleanF{#1}{%
-      \tud@list@sort\tud@templist%
-      \strut%
-      \marginnote{%
-        \def\@tempa####1{%
-          \ignorespaces%
-          \tudhyperref{idx:changelog:####1}{####1}%
-          \tabularnewline%
-        }%
-        \begin{tabular}{|l|}%
-          \hline%
-          \forlistloop\@tempa{\tud@templist}%
-          \hline%
-        \end{tabular}%
-      }[#2]%
-      \ignorespaces%
-    }%
-  \fi%
-}
-%    \end{macrocode}
-% \end{macro}^^A \print@changedatlist
-%
 % \subsection{Erweiterte Listen für Erläuterungen im Handbuch}
 %
 % Es folgen einige Umgebungen, mit welchen bestimmte Aspekte oder Pakete im
@@ -4586,7 +4565,7 @@
 \newcommand*\tud@values{}
 \NewDocumentEnvironment{values}{m !o}{%
   \def\tud@values{#1}%
-  \IfValueTF{#2}{\@values[#2]}{\@values}%
+  \IfValueTF{#2}{\@values[{#2}]}{\@values}%
 }{%
   \end@values%
 }
@@ -4696,10 +4675,10 @@
 % durch den Befehl \cs{item@bool} gesetzt.
 %    \begin{macrocode}
 \NewDocumentCommand\itemtrue{!s !o !o !d()}{%
-  \item@bool{#1}{true/on/yes}[#2][#3](#4)%
+  \item@bool{#1}{true/on/yes}[{#2}][{#3}](#4)%
 }
 \NewDocumentCommand\itemfalse{!s !o !o !d()}{%
-  \item@bool{#1}{false/off/no}[#2][#3](#4)%
+  \item@bool{#1}{false/off/no}[{#2}][{#3}](#4)%
 }
 %    \end{macrocode}
 % Der Befehl \cs{item@bool} setzt je nach angegebenen Argumenten über ein
@@ -4714,7 +4693,7 @@
 %    \begin{macrocode}
   \protected@edef\@tempa{#2\IfValueT{#3}{/#3}}%
   \eaddto@hook\toks@{\expandafter[\@tempa]}%
-  \IfValueT{#4}{\addto@hook\toks@{[#4]}}%
+  \IfValueT{#4}{\addto@hook\toks@{[{#4}]}}%
   \IfValueT{#5}{\addto@hook\toks@{(#5)}}%
   \the\toks@%
 }
@@ -6054,7 +6033,7 @@
 % Andernfalls erscheint im Rand die Anmerkung \emph{ToDo}.
 %    \begin{macrocode}
           \renewcommand*\marginpar[2][]{%
-            \marginnote[##1]{##2}[\dimexpr-\ht\z@+1.6ex+1.75pt\relax]%
+            \marginnote[{##1}]{##2}[\dimexpr-\ht\z@+1.6ex+1.75pt\relax]%
           }%
           \toks@\expandafter{\tud@res@a noline,nolist}%
           \settowidth\marginparwidth{\tud@res@c}%
@@ -6309,7 +6288,7 @@
   \marginnote{%
     \setlength\fboxsep{0.25em}%
     \fbox{Achtung!}%
-  }[#1]%
+  }[{#1}]%
   \emph{\trim@spaces{#2}}%
 }
 \NewDocumentCommand\Forum{!s !t'}{%
