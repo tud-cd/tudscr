@@ -1,4 +1,4 @@
-% \CheckSum{4505}
+% \CheckSum{4510}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -3197,6 +3197,8 @@
 % \end{environment}^^A theindex
 % \begin{macro}{\makexdyindex}
 % \changes{v2.05}{2015/11/01}{neu}^^A
+% \begin{macro}{\tud@xdy@default}
+% \changes{v2.05}{2019/10/30}{neu}^^A
 % Um die einzelnen Indexe erstellen zu können, wird das Makro \cs{makexdyindex} 
 % definiert. Die Sternversion dieses Befehle erstellt dabei neben dem normalen
 % Spezialindex einen weiteren, welcher explizit für Deklarationen genutzt wird.
@@ -3205,15 +3207,20 @@
 % danach wird die Datei mit den normalen Einträgen verarbeitet. Siehe hierzu 
 % auch \cs{Process@@Index}.
 %    \begin{macrocode}
-\NewDocumentCommand\makexdyindex{s o m !o}{%
+\newcommand*\tud@xdy@default{}
+\edef\tud@xdy@default{%
+  -M \@currname-ind.xdy -L german-din%
+  \etex@unexpanded{\ifundef{\inputencodingname}{}{ -C \inputencodingname}}%
+}%
+\NewDocumentCommand\makexdyindex{s D(){\tud@xdy@default} o m !o}{%
   \let\tud@res@c\@empty%
 %<*class>
   \IfBooleanT{#1}{%
-    \IfValueTF{#4}{%
-      \makeindex[name={#4-declare}]%
-      \edef\tud@res@b{\jobname-#4-declare.idx}%
+    \IfValueTF{#5}{%
+      \makeindex[name={#5-declare}]%
+      \edef\tud@res@b{\jobname-#5-declare.idx}%
       \IfFileExists{\tud@res@b}{%
-        \edef\tud@res@c{-o \jobname-#4.ind \tud@res@b}%
+        \edef\tud@res@c{-o \jobname-#5.ind \tud@res@b}%
       }{%
         \ClassWarningNoLine{tudscrmanual}{File \tud@res@b\space not found}%
       }%
@@ -3224,44 +3231,41 @@
     }%
   }%
 %</class>
-  \edef\tud@res@b{%
-    -M \@currname-ind.xdy -L german-din%
-    \ifundef{\inputencodingname}{}{ -C \inputencodingname}%
-    \space%
-  }%
   \protected@edef\tud@res@a{%
-    title={#3},%
+    title={#4},%
     columnsep=\noexpand\f@size\noexpand\p@,%
-    \IfValueTF{#4}{%
-      name={#4},%
-      options={\tud@res@b -t \jobname-#4.xlg \tud@res@c},%
+    \IfValueTF{#5}{%
+      name={#5},%
+      options={#2\space-t \jobname-#5.xlg \tud@res@c},%
     }{%
-      options={\tud@res@b -t \jobname.xlg},%
+      options={#2\space-t \jobname.xlg},%
     }%
-    \IfValueT{#2}{#2}%
+    \IfValueT{#3}{#3}%
   }%
   \expandafter\makeindex\expandafter[\tud@res@a]%
 }
 %    \end{macrocode}
+% \end{macro}^^A \tud@xdy@default
 % \end{macro}^^A \makexdyindex
 % Nun können mit \cs{makexdyindex} die einzelnen Indexe erstellt werden. Dies 
 % geschiet jedoch erst zum Ende der Präambel, um die Eingabekodierung auch 
 % wirklich zu erwischen.
 %    \begin{macrocode}
-\AtEndPreamble{
-  \makexdyindex{Allgemeiner Index}
-  \makexdyindex*{Klassen- und Paketoptionen}[options]
-  \makexdyindex*{Befehle und Umgebungen mit zugeh\"origen Parametern}[macros]
+\AtEndPreamble{%
+  \makexdyindex{Allgemeiner Index}%
+  \makexdyindex*{Klassen- und Paketoptionen}[options]%
+  \makexdyindex*{Befehle und Umgebungen mit zugeh\"origen Parametern}[macros]%
 %<*class>
-  \makexdyindex*{Sprachabh\"angige Bezeichner}[terms]
-  \makexdyindex*{Seitenstile, Schriftelemente und Farben}[elements]
+  \makexdyindex*{Sprachabh\"angige Bezeichner}[terms]%
+  \makexdyindex*{Seitenstile, Schriftelemente und Farben}[elements]%
 %</class>
-  \makexdyindex{L\"angen und Z\"ahler}[misc]
-  \makexdyindex*{Klassen, Pakete und Dateien}[files]
+  \makexdyindex{L\"angen und Z\"ahler}[misc]%
+  \makexdyindex*{Klassen, Pakete und Dateien}[files]%
 %<*class>
-  \makexdyindex[columns=1]{\"Anderungsliste}[changelog]
+  \makexdyindex[columns=1]{\"Anderungsliste}[changelog]%
 %</class>
-  \undef\makexdyindex
+  \undef\makexdyindex%
+  \undef\tud@xdy@default%
 }
 %    \end{macrocode}
 % \begin{macro}{\if@tud@index}
