@@ -1,4 +1,4 @@
-% \CheckSum{4495}
+% \CheckSum{4520}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -129,7 +129,7 @@
 %    \begin{macrocode}
 %<*!doc>
 \PassOptionsToPackage{log-declarations=false}{xparse}
-\RequirePackage{xparse}[2013/12/31]
+\RequirePackage{xparse}[2019/10/11]
 %</!doc>
 %    \end{macrocode}
 % Bugfixes für unterschiedliche Pakete.
@@ -513,7 +513,7 @@
 \newcommand*\tud@trace@lbl@add[2]{%
   \if@tud@index\else%
     \begingroup%
-      \edef\tud@res@a{#2}%
+      \protected@edef\tud@res@a{#2}%
       \@onelevel@sanitize\tud@res@a%
       \wlog{+++++ label #1: \tud@res@a\space on page \thepage}%
       \xifinlistcs{\tud@res@a}{tud@trace@lbl@#1@list}{}{%
@@ -856,6 +856,8 @@
 %
 % \begin{macro}{\tudhyperdef}
 % \changes{v2.02}{2014/10/27}{neu}^^A
+% \begin{macro}{\tud@hyperdef}
+% \changes{v2.06f}{2019/10/29}{neu}^^A
 % \begin{macro}{\tudhyperref}
 % \changes{v2.02}{2014/10/27}{neu}^^A
 % \begin{macro}{\tud@manualname}
@@ -870,20 +872,30 @@
 %    \begin{macrocode}
 \newcommand*\tud@manualname{tudscr}%
 %<*class>
-\NewDocumentCommand\tudhyperdef{s t' m}{%
-  \@tempswafalse%
-  \IfBooleanT{#1}{\@tempswatrue\setlength\@tempdima{3\baselineskip}}%
-  \IfBooleanT{#2}{\@tempswatrue\setlength\@tempdima{15\baselineskip}}%
-  \if@tempswa%
-    \raisebox{\@tempdima}[0pt][0pt]{\hyperdef{\tud@manualname}{#3}{}}%
-    \par\nobreak\vskip\dimexpr-\parskip-\baselineskip\relax%
-    \@afterindentfalse\@afterheading%
-  \else%
-    \Hy@raisedlink{\hyperdef{\tud@manualname}{#3}{}}\ignorespaces%
-  \fi%
-  \label{#3}%
-  \tud@trace@lbl@created@add{#3}%
-}%
+\NewDocumentCommand\tudhyperdef{s t' m d==}{%
+  \begingroup%
+    \@tempswafalse%
+    \IfBooleanT{#1}{\@tempswatrue\setlength\@tempdima{3\baselineskip}}%
+    \IfBooleanT{#2}{\@tempswatrue\setlength\@tempdima{15\baselineskip}}%
+    \if@tempswa%
+      \raisebox{\@tempdima}[0pt][0pt]{\tud@hyperdef{#3}}%
+      \par\nobreak\vskip\dimexpr-\parskip-\baselineskip\relax%
+      \@afterindentfalse\@afterheading%
+    \else%
+      \Hy@raisedlink{\tud@hyperdef{#3}}\ignorespaces%
+    \fi%
+    \label{#3}%
+    \tud@trace@lbl@created@add{#3}%
+  \endgroup%
+}
+\newcommand*\tud@hyperdef[1]{%
+  \begingroup%
+    \edef\tud@res@a{%
+      \endgroup%
+      \noexpand\hyperdef{\tud@manualname}{#1}{}%
+    }%
+  \tud@res@a%
+}
 \newrobustcmd*\tudhyperref[2]{\hyperref{}{\tud@manualname}{#1}{#2}}%
 %</class>
 %    \end{macrocode}
@@ -898,6 +910,7 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@manualname
 % \end{macro}^^A \tudhyperref
+% \end{macro}^^A \tud@hyperdef
 % \end{macro}^^A \tudhyperdef
 %
 % \iffalse
@@ -1289,8 +1302,23 @@
       a cross-label was given before.%
     }%
   }{%
-%<class>    \tud@trace@bdl@add{#1}%
-    \gdef\tud@bdl@curr{#1}%
+    \in@{,}{#1}%
+    \ifin@%
+%<*class>
+      \ClassError{tudscrmanual}%
+%</class>
+%<*package>
+     \PackageError{tudscrtutorial}%
+%</package>
+      {Multiple values for environment `Bundle'}{%
+        Multiple elements are prohibited within the argument.%
+      }%
+    \else%
+      \gdef\tud@bdl@curr{#1}%
+%<*class>
+      \tud@trace@bdl@add{#1}%
+%</class>
+    \fi%
   }%
   \ignorespaces%
 }{%
@@ -1379,7 +1407,7 @@
 % Deklaration erfolgt mit dem Befehl \cs{printdeclarationlist} bezieungsweise 
 % \cs{printobsoletelist}. 
 %    \begin{macrocode}
-\NewDocumentEnvironment{Declaration}{o m !o !o !d()}{%
+\NewDocumentEnvironment{Declaration}{o m !o !o !d() !D<>{}}{%
   \listadd\tud@declaration@list{#2}%
   \tud@declare@start[#1]{#2}[#3][#4]{#5}%
 }{%
@@ -1925,12 +1953,6 @@
 %    \end{macrocode}
 % \end{macro}^^A \@Engine
 % \end{macro}^^A \Engine
-% \begin{macro}{\Path}
-% Pfade werden ohne zusätzliches Markup ausgegeben.
-%    \begin{macrocode}
-\newrobustcmd*\Path[1]{\mbox{\texttt{#1}}}
-%    \end{macrocode}
-% \end{macro}^^A \Path
 % \begin{macro}{\File}
 % \changes{v2.02}{2014/10/08}{überarbeitet}^^A
 % \begin{macro}{\@File}
@@ -2370,6 +2392,7 @@
 % \ToDo{%
 %   neues Makro \cs{PLength} mit \cs{PName\{Längenwert\}}
 % }[v2.??]%
+% \begin{macro}{\Path}
 % \begin{macro}{\PValue}
 % \begin{macro}{\PName}
 % \begin{macro}{\PValueName}
@@ -2387,8 +2410,10 @@
 % \changes{v2.03}{2015/01/25}{neu}^^A
 % \begin{macro}{\textOR}
 % Diese Befehle dienen zum Auszeichnen von obligatorischen und optionalen 
-% Parametern und Befehlen oder bestimmten Wertzuweisungen.
+% Parametern und Befehlen oder bestimmten Wertzuweisungen. Pfade werden ohne
+% zusätzliches Markup ausgegeben.
 %    \begin{macrocode}
+\newrobustcmd*\Path[1]{\mbox{\texttt{#1}}}
 \newrobustcmd*\PValue[1]{\mbox{\texttt{#1}}}
 \newrobustcmd*\PName[1]{\PValue{\textsl{<#1>}}}
 \newrobustcmd*\PValueName[1]{\PName{#1}}
@@ -2420,6 +2445,7 @@
 % \end{macro}^^A \PValueName
 % \end{macro}^^A \PName
 % \end{macro}^^A \PValue
+% \end{macro}^^A \Path
 % \begin{macro}{\tud@doifPValue}
 % \changes{v2.05}{2015/11/14}{neu}^^A
 % Der Befehl wird von den Makros \cs{tud@lbl@get@curr} und \cs{tud@idx@get}
@@ -3200,30 +3226,41 @@
 % auch \cs{Process@@Index}.
 %    \begin{macrocode}
 \NewDocumentCommand\makexdyindex{s o m !o}{%
-  \let\@tempb\@empty%
+  \let\tud@res@c\@empty%
 %<*class>
   \IfBooleanT{#1}{%
-    \def\@tempc{\jobname-#4-declare.idx}%
-    \makeindex[name={#4-declare}]%
-    \IfFileExists{\@tempc}{%
-      \edef\@tempb{-o \jobname-#4.ind \@tempc}%
+    \IfValueTF{#4}{%
+      \makeindex[name={#4-declare}]%
+      \edef\tud@res@b{\jobname-#4-declare.idx}%
+      \IfFileExists{\tud@res@b}{%
+        \edef\tud@res@c{-o \jobname-#4.ind \tud@res@b}%
+      }{%
+        \ClassWarningNoLine{tudscrmanual}{File \tud@res@b\space not found}%
+      }%
     }{%
-      \ClassWarningNoLine{tudscrmanual}{File \@tempc\space not found}%
+      \ClassWarningNoLine{tudscrmanual}{%
+        It's not possible to create a special declaration main index%
+      }%
     }%
   }%
 %</class>
-  \protected@edef\@tempa{%
+  \edef\tud@res@b{%
+    -M \@currname-ind.xdy -L german-din%
+    \ifundef{\inputencodingname}{}{ -C \inputencodingname}%
+    \space%
+  }%
+  \protected@edef\tud@res@a{%
     title={#3},%
     columnsep=\noexpand\f@size\noexpand\p@,%
     \IfValueTF{#4}{%
       name={#4},%
-      options={-M \@currname-ind.xdy -L german-din -t \jobname-#4.xlg \@tempb},%
+      options={\tud@res@b -t \jobname-#4.xlg \tud@res@c},%
     }{%
-      options={-M \@currname-ind.xdy -L german-din -t \jobname.xlg},%
+      options={\tud@res@b -t \jobname.xlg},%
     }%
     \IfValueT{#2}{#2}%
   }%
-  \expandafter\makeindex\expandafter[\@tempa]%
+  \expandafter\makeindex\expandafter[\tud@res@a]%
 }
 %    \end{macrocode}
 % \end{macro}^^A \makexdyindex
