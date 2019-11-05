@@ -1,4 +1,4 @@
-% \CheckSum{3089}
+% \CheckSum{3084}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -607,121 +607,12 @@
 % \end{macro}^^A \tud@cdfont@@check
 % \end{macro}^^A \tud@cdfont@check
 %
-% \subsection{Kompatibilität der Schriften}
-% \subsubsection{Majuskel-ß für Unicode-Prozessoren}
-%
-% Es wird für die Majuskelvariante der Glyphe \enquote*{ß} eine Rückfallebene
-% (Substitution mit \enquote*{SS}) definiert, da diese für Unicode-Engines 
-% standardmäßig nicht bereitgestellt wird. Um diese zu erkennen, wird auf die 
-% gleiche Methodik wie im Paket \pkg{newunicodechar} zurückgegriffen.
-%    \begin{macrocode}
-\begingroup
-\catcode`\^=7
-\catcode30=12
-\catcode`\!=12
-\edef\tud@reserved{\@gobble^^^^0021}
-\expandafter\endgroup
-%    \end{macrocode}
-% Wurde eine Unicode-Engine erkannt (|^^^^0021| wird als ein Token gelesen), 
-% dann werden die Kodierungen für kleines und großes \enquote*{ß} dahingehend 
-% angepasst, dass diese \enquote*{ss} bzw. \enquote*{SS} verwenden, wenn die 
-% entsprechende Glyphe nicht vorhanden ist.
-%    \begin{macrocode}
-\ifx\tud@reserved\@empty
-  \RequirePackage{newunicodechar}[2012/11/12]%
-  \uccode"00DF="1E9E%
-  \lccode"1E9E="00DF%
-  \newunicodechar{^^^^00df}{\iffontchar\font"00DF \symbol{"00DF}\else ss\fi}%
-  \newunicodechar{^^^^1e9e}{\iffontchar\font"1E9E \symbol{"1E9E}\else SS\fi}%
-\fi
-%    \end{macrocode}
-%
-% \subsubsection{Ausrichtung von Überschriften und das Paket \pkg{ragged2e}}
-%
-% \begin{macro}{\tud@raggedright}
-% \begin{macro}{\tud@RaggedRight}
-% Die Überschriften sollen laut \CD linksbündig und ohne Silbentrennung gesetzt
-% werden. Normalerweise ist das dies beim linksbündigen Satz bei \LaTeX{} der
-% Fall. Allerdings ist es mit dem Paket \pkg{ragged2e} möglich, das Verhalten
-% für den Flattersatz zu ändern und die Silbentrennung zu aktivieren. Mit der
-% Option \opt{newcommands} werden dabei die originalen Befehle überschrieben,
-% vorher jedoch in \cs{LaTeX\dots} gesichert. Diese Makros dienen dazu, die
-% Überschriften in jedem Fall~-- auch bei der Verwendung von \pkg{ragged2e} mit
-% der Option \opt{newcommands}~-- ohne Trennungen zu setzen.
-%    \begin{macrocode}
-\newcommand*\tud@raggedright{\raggedright}
-\newcommand*\tud@RaggedRight{\raggedright}
-\AfterPackage*{ragged2e}{%
-  \ifundef{\LaTeXraggedright}{}{%
-    \renewcommand*\tud@raggedright{\LaTeXraggedright}%
-  }%
-  \renewcommand*\tud@RaggedRight{\RaggedRight}%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@RaggedRight
-% \end{macro}^^A \tud@raggedright
-%
-% \subsubsection{Anpassungen für das Paket \pkg{siunitx}}
-%
-% \begin{macro}{\lseries}
-% \begin{macro}{\if@tud@x@siunitx@enabled}
-% \changes{v2.05m}{2017/05/29}{neu}
-% Das Paket \pkg{siunitx} nutzt den Befehl \cs{lseries} für den Fall, dass für
-% den Fließtext eine Schrift die Serie \val{l} verwendet. Dem wird hier 
-% Rechnung getragen. Außerdem muss bei der Auswahl der Schriften evtl. auf das 
-% Paket reagiert werden, weil es sich bei der Definition der Schriften für den 
-% Mathematikmodus auf \cs{familydefault} bzw. \cs{rmfamily} verlässt.
-%    \begin{macrocode}
-\newif\if@tud@x@siunitx@enabled
-\AfterPackage*{siunitx}{%
-  \@tud@x@siunitx@enabledtrue%
-  \providecommand*\lseries{\fontseries{l}\selectfont}%
-}
-%    \end{macrocode}
-% \end{macro}^^A \if@tud@x@siunitx@enabled
-% \end{macro}^^A \lseries
-%
-% \subsubsection{Anpassungen für die Klasse \cls{beamer}}
-%
-% Die \cls{beamer}-Klasse lädt standardmäßig serifenlose Mathematikschriften. 
-% Dies soll verhindert werden, damit die Auswahl über die Option \opt{cdmath} 
-% erfolgen kann.
-%    \begin{macrocode}
-%<*package>
-\AfterClass*{beamer}{\usefonttheme[onlymath]{serif}}
-%</package>
-%    \end{macrocode}
-%
-% \subsubsection{Mathematikschriften in Verbindung mit dem Paket \pkg{bm}}
-%
-% \begin{macro}{\if@tud@x@bm@requested}
-% Das Paket \pkg{bm} stellt den Befehl \cs{bm} für fette und kursive Symbole im 
-% Mathematiksatz bereit. Damit dies funktioniert, muss das Laden des Paketes 
-% auf das Ende der Präambel verzögert werden, um zuvor alle Einstellungen für 
-% die mathematischen Symbole vornehmen zu können.
-%    \begin{macrocode}
-\newif\if@tud@x@bm@requested
-%<*package>
-\@ifpackageloaded{bm}{%
-  \PackageWarning{tudscrfonts}{%
-    Package `bm' must be loaded after `tudscrfonts'. \MessageBreak%
-    Otherwise the functionality can not be guaranteed%
-  }%
-}{%
-%</package>
-\PreventPackageFromLoading[\@tud@x@bm@requestedtrue]{bm}
-%<*package>
-}
-%</package>
-%    \end{macrocode}
-% \end{macro}^^A \if@tud@x@bm@requested
-%
 % \iffalse
 %</body>
 %<*option>
 % \fi
 %
-% \subsection{Schriftauswahl und -optionen}
+% \subsection{Optionen und Befehle zur Schriftauswahl}
 %
 % Hier werden die Optionen und Befehle zur Schriftauswahl definiert.
 %
@@ -2370,9 +2261,9 @@
 %
 % \subsubsection{Schriften für den Mathematiksatz}
 %
-% Für den mathematischen Satz werden ergänzend zur \OpenSans die Symbole aus 
-% dem Paket \pkg{mdsymbol} genutzt. Diese werden bereits bei der Erstellung der 
-% Type1-Schriften eingefügt.
+% Da es so gut wie keine freien OpenType-Schriften für den mathmatischen
+% Formelsatz gibt, werden \emph{immer} Type1-Schriften verwendet, falls diese
+% installiert sind.
 %
 % Die veralteten Schriften des \CDs \Univers und \DIN besitzen keine Glyphen für
 % den Mathematiksatz. Daher musste~-- insbesondere für griechische Symbole~-- 
@@ -4111,119 +4002,12 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@math@slanted@greeks
 % \end{macro}^^A \tud@math@upright@greeks
-% Sämtliche Schrifteinstellungen erfolgen erst am Ende der Präambel, um etwaige
-% Einstellungen irgendwelcher Schriftpakete beachten zu können. Dabei erfolgt 
-% das Setzen der Mathematikschriften durch \cs{AtBeginDocument} innerhalb von 
-% \cs{AtEndPreamble} am Ende \emph{aller} \cs{AtBeginDocument}.
-%    \begin{macrocode}
-\AtEndPreamble{%
-%    \end{macrocode}
-% Falls das Paket \pkg{mweights} geladen wurde, werden im Bedarfsfall die vom
-% Paket erwarteten Makros für die Schriftstärken der einzelnen Schriftfamilien 
-% definiert. Beim Aufruf von \cs{tud@font@set} werden diese anschließend 
-% gesichert.
-%    \begin{macrocode}
-  \if@tud@x@mweights@enabled%
-    \ifundef{\bfseries@rm}{\edef\bfseries@rm{\bfdefault}}{}%
-    \ifundef{\mdseries@rm}{\edef\mdseries@rm{\mddefault}}{}%
-    \ifundef{\bfseries@sf}{\edef\bfseries@sf{\bfdefault}}{}%
-    \ifundef{\mdseries@sf}{\edef\mdseries@sf{\mddefault}}{}%
-    \ifundef{\bfseries@tt}{\edef\bfseries@tt{\bfdefault}}{}%
-    \ifundef{\mdseries@tt}{\edef\mdseries@tt{\mddefault}}{}%
-  \fi%
-%    \end{macrocode}
-% Hier wird auf das Vorhandensein aller benötigten Schriften geprüft.
-%    \begin{macrocode}
-  \tud@cdfont@check%
-%    \end{macrocode}
-% Damit \pkg{tudscrfonts} reibungslos mit den nachfolgenden Definitionen
-% funktioniert, wird im Bedarfsfall der Befehl \cs{sectfont} vorgehalten.
-%    \begin{macrocode}
-%<package>  \ifdef{\sectfont}{}{\let\sectfont\relax}%
-%    \end{macrocode}
-% Nachdem auf die Schriften geprüft wurde, werden noch die Schriftschalter und 
-% die dazugehörigen Befehle definiert. Auch die mathematischen Schriften werden
-% initialisiert.
-%    \begin{macrocode}
-  \tud@cdfont@init%
-  \tud@ttfont@init%
-  \tud@cdmath@init%
-%    \end{macrocode}
-% Die Einstellungen für den Mathematiksatz erfolgen erst zu Dokumentbeginn, um
-% auf Einstellungen von anderen Schriftpaketen reagieren zu können. Da es
-% so gut wie keine freien OpenType-Schriften für den mathmatischen Formelsatz
-% gibt, werden \emph{immer} die Type1-Schriften verwendet, falls diese
-% installiert sind. Wurde jedoch das Paket \pkg{bm} angefordert, so müssen die
-% Mathematikschriften spätestens zum Ende der Präambel initialisiert werden.
-%    \begin{macrocode}
-  \if@tud@x@bm@requested%
-    \UnPreventPackageFromLoading{bm}%
-    \if@tud@cdmath@active%
-      \tud@cs@store{mv@normal}%
-      \tud@cs@store{mv@bold}%
-      \tud@cdfont@@set%
-      \tud@ttfont@@set%
-      \tud@cdmath@set%
-    \fi%
-    \RequirePackage{bm}[2017/01/16]%
-    \tud@cs@restore{mv@normal}%
-    \tud@cs@restore{mv@bold}%
-    \tud@cdmath@@init%
-  \fi%
-%    \end{macrocode}
-% Wurde das Paket \pkg{siunitx} geladen, so werden die Schrifteinstellungen
-% mit \opt{cdfont}|=|\val{false} deaktiviert und zu Beginn des Dokumentes 
-% auf die aktuelle Einstellung gesetzt.
-%    \begin{macrocode}
-  \if@tud@x@siunitx@enabled%
-    \if@tud@cdfont@active%
-      \if@tud@cdfont@heavy%
-        \def\tud@reserved{\TUDoptions{cdfont=heavy}}%
-      \else%
-        \def\tud@reserved{\TUDoptions{cdfont=true}}%
-      \fi%
-    \else%
-      \def\tud@reserved{\TUDoptions{cdfont=false}}%
-    \fi%
-    \expandafter\AfterEndPreamble\expandafter{\tud@reserved}%
-    \TUDoptions{cdfont=false}%
-  \fi%
-%    \end{macrocode}
-% Damit die Schrift im Dokument später noch umgestellt werden kann, werden
-% sämtliche Einstellungen erst am Ende der Präambel gesichert. Deshalb wird
-% der dafür verantwortliche Befehl \cs{tud@font@set} hier zum ersten Mal
-% verwendet. Damit ist es möglich, die Schriften eventuell geladener Pakete wie
-% \pkg{lmodern} oder \pkg{libertine} vorher zu sichern und später wieder zu
-% aktivieren. 
-%    \begin{macrocode}
-  \tud@font@set%
-  \AtBeginDocument{%
-%    \end{macrocode}
-% Bereitstellung der Auswahlbefehle für griechische Glyphen in der Nomenklatur 
-% von \TUDScript (\cs{up\meta{Bezeichner}}, \cs{it\meta{Bezeichner}}).
-%    \begin{macrocode}
-    \tud@math@map@greeks%
-%    \end{macrocode}
-% Für die griechischen Glyphen wird mit \cs{tud@math@checkslanted@greeks} 
-% geprüft, ob diese durch ein Paket explizit auf kursive Majuskeln oder eine 
-% vollständig aufrechte Variante gesetzt wurden. Ist dies der Fall, wird der
-% Standardwert für die Option \opt{slantedgreek} entsprechend angepasst.
-%    \begin{macrocode}
-    \tud@math@checkslanted@greeks%
-%    \end{macrocode}
-% Nachdem alle Vorbereitungen getroffen wurden, werden die Schriften für den 
-% mathematischen Satz nun endlich gesetzt.
-%    \begin{macrocode}
-    \tud@math@set%
-  }%
-}
-%    \end{macrocode}
 %
 % \iffalse
 %<*class>
 % \fi
 %
-% \subsubsection{Schriften für die speziellen Seitenstile}
+% \subsubsection{Schriften für die Seitenstile der \TUDScript-Klassen}
 %
 % \begin{macro}{\tud@head@font@set}
 % \changes{v2.02}{2014/07/08}{Unterstützung für \opt{cdhead} hinzugefügt}^^A
@@ -4359,6 +4143,223 @@
 %
 % \iffalse
 %</class>
+% \fi
+%
+% \subsection{Schriftauswahl}
+%
+% Die eigentliche Schriftauswahl erfolgt~-- abhängig von den zuvor gesetzten 
+% Einstellungen~-- erst am Ende der Präambel, um etwaige Voreinstellungen
+% anderer Schriftpakete beachten zu können. Dabei erfolgt die Auswahl der
+% Schriften für den Mathematiksatz durch \cs{AtBeginDocument} innerhalb von 
+% \cs{AtEndPreamble} am Ende \emph{möglichst aller} \cs{AtBeginDocument}.
+%    \begin{macrocode}
+\AtEndPreamble{%
+%    \end{macrocode}
+% Falls das Paket \pkg{mweights} geladen wurde, werden im Bedarfsfall die vom
+% Paket erwarteten Makros für die Schriftstärken der einzelnen Schriftfamilien 
+% definiert. Beim Aufruf von \cs{tud@font@set} werden diese anschließend 
+% gesichert.
+%    \begin{macrocode}
+  \if@tud@x@mweights@enabled%
+    \ifundef{\bfseries@rm}{\edef\bfseries@rm{\bfdefault}}{}%
+    \ifundef{\mdseries@rm}{\edef\mdseries@rm{\mddefault}}{}%
+    \ifundef{\bfseries@sf}{\edef\bfseries@sf{\bfdefault}}{}%
+    \ifundef{\mdseries@sf}{\edef\mdseries@sf{\mddefault}}{}%
+    \ifundef{\bfseries@tt}{\edef\bfseries@tt{\bfdefault}}{}%
+    \ifundef{\mdseries@tt}{\edef\mdseries@tt{\mddefault}}{}%
+  \fi%
+%    \end{macrocode}
+% Hier wird auf das Vorhandensein aller benötigten Schriften geprüft.
+%    \begin{macrocode}
+  \tud@cdfont@check%
+%    \end{macrocode}
+% Nachdem auf die Schriften geprüft wurde, werden noch die Schriftschalter und 
+% die dazugehörigen Befehle definiert. Auch die mathematischen Schriften werden
+% initialisiert.
+%    \begin{macrocode}
+  \tud@cdfont@init%
+  \tud@ttfont@init%
+  \tud@cdmath@init%
+%    \end{macrocode}
+% Die Einstellungen für den Mathematiksatz erfolgen erst zu Dokumentbeginn, um
+% auf Einstellungen von anderen Schriftpaketen reagieren zu können. Da es
+% so gut wie keine freien OpenType-Schriften für den mathmatischen Formelsatz
+% gibt, werden \emph{immer} die Type1-Schriften verwendet, falls diese
+% installiert sind. Wurde jedoch das Paket \pkg{bm} angefordert, so müssen die
+% Mathematikschriften spätestens zum Ende der Präambel initialisiert werden.
+%    \begin{macrocode}
+  \if@tud@x@bm@requested%
+    \UnPreventPackageFromLoading{bm}%
+    \if@tud@cdmath@active%
+      \tud@cs@store{mv@normal}%
+      \tud@cs@store{mv@bold}%
+      \tud@cdfont@@set%
+      \tud@ttfont@@set%
+      \tud@cdmath@set%
+    \fi%
+    \RequirePackage{bm}[2017/01/16]%
+    \tud@cs@restore{mv@normal}%
+    \tud@cs@restore{mv@bold}%
+    \tud@cdmath@@init%
+  \fi%
+%    \end{macrocode}
+% Wurde das Paket \pkg{siunitx} geladen, so werden die Schrifteinstellungen
+% mit \opt{cdfont}|=|\val{false} deaktiviert und zu Beginn des Dokumentes 
+% auf die aktuelle Einstellung gesetzt.
+%    \begin{macrocode}
+  \if@tud@x@siunitx@enabled%
+    \if@tud@cdfont@active%
+      \if@tud@cdfont@heavy%
+        \def\tud@reserved{\TUDoptions{cdfont=heavy}}%
+      \else%
+        \def\tud@reserved{\TUDoptions{cdfont=true}}%
+      \fi%
+    \else%
+      \def\tud@reserved{\TUDoptions{cdfont=false}}%
+    \fi%
+    \expandafter\AfterEndPreamble\expandafter{\tud@reserved}%
+    \TUDoptions{cdfont=false}%
+  \fi%
+%    \end{macrocode}
+% Damit die Schrift im Dokument später noch umgestellt werden kann, werden
+% sämtliche Einstellungen erst am Ende der Präambel gesichert. Deshalb wird
+% der dafür verantwortliche Befehl \cs{tud@font@set} hier zum ersten Mal
+% verwendet. Damit ist es möglich, die Schriften eventuell geladener Pakete wie
+% \pkg{lmodern} oder \pkg{libertine} vorher zu sichern und später wieder zu
+% aktivieren. 
+%    \begin{macrocode}
+  \tud@font@set%
+  \AtBeginDocument{%
+%    \end{macrocode}
+% Bereitstellung der Auswahlbefehle für griechische Glyphen in der Nomenklatur 
+% von \TUDScript (\cs{up\meta{Bezeichner}}, \cs{it\meta{Bezeichner}}).
+%    \begin{macrocode}
+    \tud@math@map@greeks%
+%    \end{macrocode}
+% Für die griechischen Glyphen wird mit \cs{tud@math@checkslanted@greeks} 
+% geprüft, ob diese durch ein Paket explizit auf kursive Majuskeln oder eine 
+% vollständig aufrechte Variante gesetzt wurden. Ist dies der Fall, wird der
+% Standardwert für die Option \opt{slantedgreek} entsprechend angepasst.
+%    \begin{macrocode}
+    \tud@math@checkslanted@greeks%
+%    \end{macrocode}
+% Nachdem alle Vorbereitungen getroffen wurden, werden die Schriften für den 
+% mathematischen Satz nun endlich gesetzt.
+%    \begin{macrocode}
+    \tud@math@set%
+  }%
+}
+%    \end{macrocode}
+%
+% \subsection{Kompatibilität der Schriften}
+% \subsubsection{Majuskel-ß für Unicode-Prozessoren}
+%
+% Es wird für die Majuskelvariante der Glyphe \enquote*{ß} eine Rückfallebene
+% (Substitution mit \enquote*{SS}) definiert, da diese für Unicode-Engines 
+% standardmäßig nicht bereitgestellt wird. Um diese zu erkennen, wird auf die 
+% gleiche Methodik wie im Paket \pkg{newunicodechar} zurückgegriffen.
+%    \begin{macrocode}
+\begingroup
+\catcode`\^=7
+\catcode30=12
+\catcode`\!=12
+\edef\tud@reserved{\@gobble^^^^0021}
+\expandafter\endgroup
+%    \end{macrocode}
+% Wurde eine Unicode-Engine erkannt (|^^^^0021| wird als ein Token gelesen), 
+% dann werden die Kodierungen für kleines und großes \enquote*{ß} dahingehend 
+% angepasst, dass diese \enquote*{ss} bzw. \enquote*{SS} verwenden, wenn die 
+% entsprechende Glyphe nicht vorhanden ist.
+%    \begin{macrocode}
+\ifx\tud@reserved\@empty
+  \RequirePackage{newunicodechar}[2012/11/12]%
+  \uccode"00DF="1E9E%
+  \lccode"1E9E="00DF%
+  \newunicodechar{^^^^00df}{\iffontchar\font"00DF \symbol{"00DF}\else ss\fi}%
+  \newunicodechar{^^^^1e9e}{\iffontchar\font"1E9E \symbol{"1E9E}\else SS\fi}%
+\fi
+%    \end{macrocode}
+%
+% \subsubsection{Ausrichtung von Überschriften und das Paket \pkg{ragged2e}}
+%
+% \begin{macro}{\tud@raggedright}
+% \begin{macro}{\tud@RaggedRight}
+% Die Überschriften sollen laut \CD linksbündig und ohne Silbentrennung gesetzt
+% werden. Normalerweise ist das dies beim linksbündigen Satz bei \LaTeX{} der
+% Fall. Allerdings ist es mit dem Paket \pkg{ragged2e} möglich, das Verhalten
+% für den Flattersatz zu ändern und die Silbentrennung zu aktivieren. Mit der
+% Option \opt{newcommands} werden dabei die originalen Befehle überschrieben,
+% vorher jedoch in \cs{LaTeX\dots} gesichert. Diese Makros dienen dazu, die
+% Überschriften in jedem Fall~-- auch bei der Verwendung von \pkg{ragged2e} mit
+% der Option \opt{newcommands}~-- ohne Trennungen zu setzen.
+%    \begin{macrocode}
+\newcommand*\tud@raggedright{\raggedright}
+\newcommand*\tud@RaggedRight{\raggedright}
+\AfterPackage*{ragged2e}{%
+  \ifundef{\LaTeXraggedright}{}{%
+    \renewcommand*\tud@raggedright{\LaTeXraggedright}%
+  }%
+  \renewcommand*\tud@RaggedRight{\RaggedRight}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@RaggedRight
+% \end{macro}^^A \tud@raggedright
+%
+% \subsubsection{Anpassungen für das Paket \pkg{siunitx}}
+%
+% \begin{macro}{\lseries}
+% \begin{macro}{\if@tud@x@siunitx@enabled}
+% \changes{v2.05m}{2017/05/29}{neu}
+% Das Paket \pkg{siunitx} nutzt den Befehl \cs{lseries} für den Fall, dass für
+% den Fließtext eine Schrift die Serie \val{l} verwendet. Dem wird hier 
+% Rechnung getragen. Außerdem muss bei der Auswahl der Schriften evtl. auf das 
+% Paket reagiert werden, weil es sich bei der Definition der Schriften für den 
+% Mathematikmodus auf \cs{familydefault} bzw. \cs{rmfamily} verlässt.
+%    \begin{macrocode}
+\newif\if@tud@x@siunitx@enabled
+\AfterPackage*{siunitx}{%
+  \@tud@x@siunitx@enabledtrue%
+  \providecommand*\lseries{\fontseries{l}\selectfont}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \if@tud@x@siunitx@enabled
+% \end{macro}^^A \lseries
+%
+% \subsubsection{Mathematikschriften in Verbindung mit dem Paket \pkg{bm}}
+%
+% \begin{macro}{\if@tud@x@bm@requested}
+% Das Paket \pkg{bm} stellt den Befehl \cs{bm} für fette und kursive Symbole im 
+% Mathematiksatz bereit. Damit dies funktioniert, muss das Laden des Paketes 
+% auf das Ende der Präambel verzögert werden, um zuvor alle Einstellungen für 
+% die mathematischen Symbole vornehmen zu können.
+%    \begin{macrocode}
+\newif\if@tud@x@bm@requested
+%<*package>
+\@ifpackageloaded{bm}{%
+  \PackageWarning{tudscrfonts}{%
+    Package `bm' must be loaded after `tudscrfonts'. \MessageBreak%
+    Otherwise the functionality can not be guaranteed%
+  }%
+}{%
+%</package>
+\PreventPackageFromLoading[\@tud@x@bm@requestedtrue]{bm}
+%<*package>
+}
+%</package>
+%    \end{macrocode}
+% \end{macro}^^A \if@tud@x@bm@requested
+% \subsubsection{Anpassungen für die Klasse \cls{beamer}}
+%
+% Die \cls{beamer}-Klasse lädt standardmäßig serifenlose Mathematikschriften. 
+% Dies soll verhindert werden, damit die Auswahl über die Option \opt{cdmath} 
+% erfolgen kann.
+%    \begin{macrocode}
+%<*package>
+\AfterClass*{beamer}{\usefonttheme[onlymath]{serif}}
+%</package>
+%    \end{macrocode}
+%
+% \iffalse
 %</body>
 % \fi
 %
