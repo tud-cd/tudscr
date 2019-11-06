@@ -1,4 +1,4 @@
-% \CheckSum{3119}
+% \CheckSum{3125}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -1181,11 +1181,13 @@
 %    \begin{macrocode}
 \newcommand*\tud@font@set{%
 %    \end{macrocode}
-% Ist die Verwendung der Schriften des \CDs gewünscht, werden die Schnitte der 
-% Standardschriften vorher vorher gesichert, um diese später vollständig 
-% wiederherstellen zu können.
+% Ist die Verwendung der Schriften des \CDs gewünscht, obwohl diese nicht
+% installiert sind, werden die entsprechenden Warnungen ausgegeben. Danach 
+% werden die Schnitte der Standardschriften gesichert, um diese später
+% vollständig wiederherstellen zu können.
 %    \begin{macrocode}
   \if@tud@cdfont@active%
+    \tud@cdfont@wrn%
     \tud@cs@store{rmdefault}%
     \tud@cs@store{sfdefault}%
     \tud@cs@store{ttdefault}%
@@ -1214,16 +1216,6 @@
       \tud@cs@store{sffamily}%
       \tud@cs@store{ttfamily}%
     \fi%
-%    \end{macrocode}
-% Zunächst werden die Standardwerte für die Schriftfamilien gesetzt.
-%    \begin{macrocode}
-    \renewcommand*\rmdefault{\sfdefault}%
-    \renewcommand*\updefault{n}%
-    \renewcommand*\itdefault{it}%
-    \renewcommand*\sldefault{sl}%
-    \renewcommand*\familydefault{\sfdefault}%
-    \renewcommand*\seriesdefault{\mddefault}%
-    \renewcommand*\shapedefault{\updefault}%
 %    \end{macrocode}
 % Danach erfolgt die Definition der Schriften des \CDs. 
 %    \begin{macrocode}
@@ -1315,13 +1307,22 @@
 % Hiermit erfolgt die eigentliche Auswahl der Schriftfamilien für das \CD.
 %    \begin{macrocode}
 \newcommand*\tud@cdfont@set{%
+%    \end{macrocode}
+% Die Standardwerte für die Schriftfamilien werden gesetzt.
+%    \begin{macrocode}
+  \renewcommand*\rmdefault{\sfdefault}%
+  \renewcommand*\updefault{n}%
+  \renewcommand*\itdefault{it}%
+  \renewcommand*\sldefault{sl}%
+  \renewcommand*\familydefault{\sfdefault}%
+  \renewcommand*\seriesdefault{\mddefault}%
+  \renewcommand*\shapedefault{\updefault}%
   \if@tud@cdfont@fam@exist%
     \if@tud@cdfont@lining%
       \let\tud@cdfont@fam\tud@cdfont@fam@lf%
     \else%
       \let\tud@cdfont@fam\tud@cdfont@fam@osf%
     \fi%
-    \tud@cdfont@@set%
 %    \end{macrocode}
 % Das Aktivieren der Schriften erfolgt entweder mit dem Paket \pkg{fontspec}
 % oder\dots
@@ -1334,12 +1335,8 @@
     \else%
       \renewcommand*\sfdefault{\tud@cdfont@fam}%
     \fi%
+    \tud@cdfont@@set%
   \fi%
-%    \end{macrocode}
-% Sollte versucht werden, die Schriften zu aktivieren, obwohl diese nicht
-% installiert sind, werden die entsprechenden Warnungen ausgegeben.
-%    \begin{macrocode}
-  \tud@cdfont@wrn%
 }
 \newcommand*\tud@cdfont@md{m}
 \newcommand*\tud@cdfont@bf{b}
@@ -2126,27 +2123,33 @@
     }%
     \TUDoptions{ttfont=lmodern}%
   \fi\fi%
-  \tud@ttfont@@set%
+  \ifcase\tud@ttfont@num\relax%
+    \let\tud@ttfont@fam\ttdefault%
+  \or% roboto
+    \let\tud@ttfont@fam\tud@ttfont@rb%
+  \else% lmodern
+    \let\tud@ttfont@fam\tud@ttfont@lm%
+  \fi%
   \ifcase\tud@ttfont@num\relax\else% !false
     \if@tud@x@fontspec@enabled%
 %    \end{macrocode}
 % Das Setzen der TypeWriter-Schriften aus dem Paket \pkg{lmodern} erfolgt nur,
 % wenn diese nicht standardmäßig durch \pkg{fontspec} aktiviert ist.
 %    \begin{macrocode}
-      \ifx\ttdefault\tud@ttfont@fam\else%
+      \ifx\tud@ttfont@fam\ttdefault\else%
         \tud@x@fontspec@set{tt}{\tud@ttfont@fam}%
       \fi%
     \else%
       \renewcommand*\ttdefault{\tud@ttfont@fam}%
     \fi%
   \fi%
+  \tud@ttfont@@set%
 }
 \newcommand*\tud@ttfont@md{}
 \newcommand*\tud@ttfont@bf{}
 \newcommand*\tud@ttfont@ebf{}
 \newcommand*\tud@ttfont@@set{%
   \ifcase\tud@ttfont@num\relax%
-    \let\tud@ttfont@fam\ttdefault%
     \ifundef{\mdseries@tt}{%
       \edef\tud@ttfont@md{\tud@cs@use{mddefault}}%
     }{%
@@ -2159,12 +2162,10 @@
     }%
     \edef\tud@ttfont@ebf{\tud@ttfont@bf}%
   \or% roboto
-    \let\tud@ttfont@fam\tud@ttfont@rb%
     \renewcommand*\tud@ttfont@md{\tud@cdfont@md}%
     \renewcommand*\tud@ttfont@bf{\tud@cdfont@bf}%
     \renewcommand*\tud@ttfont@ebf{\tud@cdfont@ebf}%
   \else% lmodern
-    \let\tud@ttfont@fam\tud@ttfont@lm%
     \if@tud@cdfont@heavy%
       \renewcommand*\tud@ttfont@md{m}%
       \renewcommand*\tud@ttfont@bf{b}%
