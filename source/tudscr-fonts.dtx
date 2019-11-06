@@ -1,4 +1,4 @@
-% \CheckSum{3080}
+% \CheckSum{3096}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -302,10 +302,6 @@
 % Dokumente mit den Schriften \Univers und \DIN nutzen zu können, werden die 
 % entsprechenden Befehle ebenfalls vorgehalten.
 %
-% \begin{macro}{\if@tud@cdfont@fam@exist}
-% \changes{v2.06}{2018/07/12}{neu}^^A
-% \begin{macro}{\if@tud@cdfont@db@exist}
-% \changes{v2.06}{2018/07/12}{neu}^^A
 % \begin{macro}{\tud@cdfont@fam}
 % \changes{v2.06}{2018/07/12}{neu}^^A
 % \begin{macro}{\tud@cdfont@fam@lf}
@@ -315,8 +311,6 @@
 % \begin{macro}{\tud@cdfont@db}
 % Zu Beginn werden Schalter und Hilfsmakros sowohl für den Fließtext\dots
 %    \begin{macrocode}
-\newif\if@tud@cdfont@fam@exist
-\newif\if@tud@cdfont@db@exist
 \newcommand*\tud@cdfont@fam{opensans-TLF}
 \newcommand*\tud@cdfont@fam@lf{opensans-TLF}
 \newcommand*\tud@cdfont@fam@osf{opensans-TOsF}
@@ -331,8 +325,6 @@
 % \end{macro}^^A \tud@cdfont@fam@osf
 % \end{macro}^^A \tud@cdfont@fam@lf
 % \end{macro}^^A \tud@cdfont@fam
-% \end{macro}^^A \if@tud@cdfont@db@exist
-% \end{macro}^^A \if@tud@cdfont@fam@exist
 % \begin{macro}{\tud@ttfont@fam}
 % \changes{v2.06}{2018/07/12}{neu}^^A
 % \begin{macro}{\tud@ttfont@rb}
@@ -371,6 +363,16 @@
 % \changes{v2.06b}{2019/07/17}{Verwendung von \cs{tud@if@fdfileexists}}^^A
 % \begin{macro}{\tud@cdfont@missing}
 % \changes{v2.05l}{2017/03/29}{neu}^^A
+% \begin{macro}{\if@tud@cdfont@fam@exist}
+% \changes{v2.06}{2018/07/12}{neu}^^A
+% \begin{macro}{\if@tud@cdfont@db@exist}
+% \changes{v2.06}{2018/07/12}{neu}^^A
+% \begin{macro}{\if@tud@cdmath@fam@exist}
+% \changes{v2.06f}{2019/11/06}{neu}^^A
+% \begin{macro}{\if@tud@cdmath@db@exist}
+% \changes{v2.06f}{2019/11/06}{neu}^^A
+% \begin{macro}{\tud@x@mathastext@enc}
+% \changes{v2.06a}{2019/07/09}{neu}^^A
 % Mit \cs{tud@cdfont@check} wird geprüft, ob die Schrift \OpenSans respektive 
 % die veralteten Schriften \Univers und \DIN im OTF-Format respektive im 
 % Type1-Format vorhanden sind. Die Schriftschnitte der \OpenSans werden für 
@@ -379,6 +381,11 @@
 % Nichtvorhandensein der Schriften wird eine Warnung ausgegeben sowie eine
 % Rückfallebene definiert.
 %    \begin{macrocode}
+\newif\if@tud@cdfont@fam@exist
+\newif\if@tud@cdfont@db@exist
+\newif\if@tud@cdmath@fam@exist
+\newif\if@tud@cdmath@db@exist
+\newcommand*\tud@x@mathastext@enc{OT1}
 \newcommand*\tud@cdfont@check{%
   \if@tud@cdoldfont@active%
     \tud@cdfont@@check{Univers}{%
@@ -386,8 +393,8 @@
       LightOblique,Oblique,BoldOblique,BlackOblique%
     }{\tud@cdfont@fam@lf}{@tud@cdfont@fam@exist}%
     \tud@cdfont@@check{DIN}{Bold}{\tud@cdfont@db}{@tud@cdfont@db@exist}%
-    \tud@cdfont@@@check{OT1,OML,OMS}{\tud@cdfont@fam@lf}%
-    \tud@cdfont@@@check{OT1,OML,OMS}{\tud@cdfont@db}%
+    \tud@cdfont@@@check{OT1,OML,OMS}{\tud@cdfont@fam@lf}{@tud@cdmath@fam@exist}%
+    \tud@cdfont@@@check{OT1,OML,OMS}{\tud@cdfont@db}{@tud@cdmath@db@exist}%
   \else%
 %    \end{macrocode}
 % Die Version von \pkg{opensans} wird geprüft. Das Paket \pkg{iwona} wird 
@@ -414,6 +421,29 @@
       Light,Regular,SemiBold,Bold,ExtraBold,%
       LightItalic,Italic,SemiBoldItalic,BoldItalic,ExtraBoldItalic%
     }{\tud@cdfont@fam@lf,\tud@cdfont@fam@osf}{@tud@cdfont@fam@exist}%
+%    \end{macrocode}
+% Für \OpenSans wird mangels der Kodierungen \val{OML}, \val{OMS} und \val{OMX} 
+% im Paket \pkg{opensans} zur Deklaration der Mathematikversionen der Befehl 
+% \cs{MTDeclareVersion} aus dem Paket \pkg{mathastext} genutzt. Dabei wird die 
+% Kodierung der Mathematikschriften identisch zur genutzten Eingabekodierung 
+% für den Text gesetzt, da diese in der Version \val{v1.3t} nicht problemfrei 
+% unabhängig davon gewählt werden kann.
+%    \begin{macrocode}
+    \@expandtwoargs\in@{,\encodingdefault,}{,OT1,T1,TU,EU1,EU2,}%
+    \ifin@%
+      \let\tud@x@mathastext@enc\encodingdefault%
+%    \end{macrocode}
+% Der Test auf das Vorhandensein der \OpenSans wird nur durchgeführt, wenn es 
+% sich nicht um eine Unicode"=Eingabekodierung handelt.
+%    \begin{macrocode}
+      \@expandtwoargs\in@{,\tud@x@mathastext@enc,}{,TU,EU1,EU2,}%
+      \ifin@%
+        \@tud@cdmath@fam@existtrue%
+      \else%
+        \tud@cdfont@@@check{\tud@x@mathastext@enc}%
+          {\tud@cdfont@fam@lf}{@tud@cdmath@fam@exist}%
+      \fi%
+    \fi%
   \fi%
 }
 %    \end{macrocode}
@@ -481,9 +511,10 @@
 %    \end{macrocode}
 % Hiermit wird auf Type1-Schriften in den notwendigen Kodierungen für den
 % Mathematiksatz geprüft. Warnungen für fehlende Schriften werden dem Hook
-% \cs{tud@cdmath@wrn} hinzugefügt.
+% \cs{tud@cdmath@wrn} hinzugefügt und der im dritten Argument gegebene Schalter 
+% wird entsprechend gesetzt.
 %    \begin{macrocode}
-\newcommand*\tud@cdfont@@@check[2]{%
+\newcommand*\tud@cdfont@@@check[3]{%
   \@tud@res@swatrue%
   \def\tud@res@a##1##2{%
     \@tud@res@swafalse%
@@ -501,24 +532,32 @@
   }%
   \@for\tud@res@c:={#1}\do{\tud@res@b{\tud@res@c}{#2}}%
 %    \end{macrocode}
-% Wurde mindestens eine notwendige nicht gefunden, wird \opt{cdmath=false} 
-% gesetzt. War diese zuvor aktiv, wird eine Warnung dazu ausgegeben.
+% Wurde mindestens eine notwendige Type1-Schrift nicht gefunden, wird die 
+% Option \opt{cdmath=false} gesetzt. War diese zuvor aktiv, wird eine Warnung
+% dazu ausgegeben.
 %    \begin{macrocode}
-  \if@tud@res@swa\else%
+  \if@tud@res@swa%
+    \booltrue{#3}%
+  \else%
+    \boolfalse{#3}%
     \AtBeginDocument{%
       \if@tud@cdmath@active%
 %<*class>
-        \ClassWarning{\TUD@Class@Name}%
+        \ClassWarningNoLine{\TUD@Class@Name}%
 %</class>
 %<*package>
-        \PackageWarning{tudscrfonts}%
+        \PackageWarningNoLine{tudscrfonts}%
 %</package>
         {%
           Some math font encodings are missing. \MessageBreak%
           The option `cdmath=false' is executed. You should\MessageBreak%
           either use this option by yourself or install\MessageBreak%
-          all necessary fonts with a installation script\MessageBreak%
-          listed in the manual%
+          \if@tud@cdoldfont@active%
+            all necessary fonts with a installation script\MessageBreak%
+            listed in the manual%
+          \else%
+            package `opensans'%
+          \fi%
         }%
       \fi%
       \TUDoptions{cdmath=false}%
@@ -591,10 +630,10 @@
     \appto\tud@res@a{A fallback layout is used}%
     \edef\tud@res@c{%
 %<*class>
-      \etex@unexpanded{\ClassWarning{\TUD@Class@Name}}%
+      \etex@unexpanded{\ClassWarningNoLine{\TUD@Class@Name}}%
 %</class>
 %<*package>
-      \etex@unexpanded{\PackageWarning{tudscrfonts}}%
+      \etex@unexpanded{\PackageWarningNoLine{tudscrfonts}}%
 %</package>
         {\tud@res@a}%
     }%
@@ -602,6 +641,11 @@
   \endgroup%
 }
 %    \end{macrocode}
+% \end{macro}^^A \tud@x@mathastext@enc
+% \end{macro}^^A \if@tud@cdmath@db@exist
+% \end{macro}^^A \if@tud@cdmath@fam@exist
+% \end{macro}^^A \if@tud@cdfont@db@exist
+% \end{macro}^^A \if@tud@cdfont@fam@exist
 % \end{macro}^^A \tud@cdfont@missing
 % \end{macro}^^A \tud@cdfont@@@check
 % \end{macro}^^A \tud@cdfont@@check
@@ -1097,7 +1141,7 @@
     }%
     \edef\tud@res@a{%
       \endgroup%
-      \noexpand\DeclareRobustCommand%
+      \noexpand\renewrobustcmd*%
           \expandafter\noexpand\csname #1family\endcsname{%
         \expandafter\noexpand\csname tud@x@fontspec@fam@#2\endcsname%
       }%
@@ -3013,8 +3057,6 @@
 % \changes{v2.06f}{2019/09/10}{neu}^^A
 % \begin{macro}{\tud@cdmath@bold@name}
 % \changes{v2.06f}{2019/09/10}{neu}^^A
-% \begin{macro}{\tud@x@mathastext@enc}
-% \changes{v2.06a}{2019/07/09}{neu}^^A
 % \begin{macro}{\tud@mathversion}
 % \changes{v2.06}{2019/06/17}{neu}^^A
 % \begin{macro}{\MTDeclareVersion}
@@ -3041,7 +3083,7 @@
 % zweiten müssen zumindest eingeschränkte Schreibrechte aktiviert sein.
 %    \begin{macrocode}
   \@tud@res@swafalse%
-  \if@tud@cdfont@fam@exist%
+  \if@tud@cdmath@fam@exist%
     \@tud@res@swatrue%
     \if@tud@cdoldfont@active\else%
       \tud@if@fdfileexists{LGR}{cmr}{}{%
@@ -3135,7 +3177,15 @@
 %    \begin{macrocode}
   \else%
     \let\tud@cdmath@set\relax%
-    \if@tud@cdoldfont@active%
+  \fi%
+%    \end{macrocode}
+% Für die Schrift \DIN existiert lediglich eine Mathematikversion, das Vorgehen 
+% ist ähnlich zur \Univers.
+%    \begin{macrocode}
+  \if@tud@cdoldfont@active%
+    \if@tud@cdmath@db@exist%
+      \tud@cdmath@db@init{\tud@cdfont@db}%
+    \else%
       \let\mv@tuddin\mv@bold%
     \fi%
   \fi%
@@ -3195,12 +3245,6 @@
     \tud@res@a{true}{false}%
     \tud@res@a{true}{true}%
   \tud@res@b%
-%    \end{macrocode}
-% Für die Schrift \DIN existiert lediglich eine Mathematikversion.
-%    \begin{macrocode}
-  \if@tud@cdoldfont@active%
-    \tud@cdmath@@@@init{\tud@cdfont@db}%
-  \fi%
 }
 %    \end{macrocode}
 % Mit \cs{tud@cdmath@@@init} werden die notwendigen Mathematikversionen und die 
@@ -3219,7 +3263,6 @@
 %   \item[|\#9|] der fette Schreibmaschinenschnitt
 % \end{description}
 %    \begin{macrocode}
-\newcommand*\tud@x@mathastext@enc{OT1}
 \newcommand*\tud@cdmath@@@init[9]{%
 %    \end{macrocode}
 % Die Deklaration der Mathematikversionen für die alten Schriften. Die 
@@ -3244,22 +3287,11 @@
     }{}%
   \else%
 %    \end{macrocode}
-% Für \OpenSans wird mangels der Kodierungen \val{OML}, \val{OMS} und \val{OMX} 
-% im Paket \pkg{opensans} zur Deklaration der Mathematikversionen der Befehl 
-% \cs{MTDeclareVersion} aus dem Paket \pkg{mathastext} genutzt. Dabei wird die 
-% Kodierung der Mathematikschriften identisch zur genutzten Eingabekodierung 
-% für den Text gesetzt, da diese in der Version \val{v1.3t} nicht problemfrei 
-% unabhängig davon gewählt werden kann. Sämtliche fehlenden Kodierungen werden
-% notdürftig mit dem Paket \pkg{iwona} definiert. Zur Definition griechischer
-% Glyphen wird die LGR-Kodierung der \OpenSans genutzt.
+% Für \OpenSans werden für die fehlenden Kodierungen \val{OML}, \val{OMS} und 
+% \val{OMX} die entsprechenden Symbolschriften eher notdürftig mit dem Paket 
+% \pkg{iwona} definiert. Zur Definition der griechischen Glyphen wird die
+% LGR-Kodierung der \OpenSans genutzt.
 %    \begin{macrocode}
-    \edef\tud@res@b{\encodingdefault}%
-    \@tfor\tud@res@a:={T1}{TU}{EU1}{EU2}\do{%
-      \ifx\tud@res@a\tud@res@b%
-        \let\tud@x@mathastext@enc\tud@res@b%
-        \@break@tfor%
-      \fi%
-    }%
     \MTDeclareVersion[it]{#1}{\tud@x@mathastext@enc}{#3}{#4}{n}%
     \MTDeclareVersion[it]{#2}{\tud@x@mathastext@enc}{#3}{#5}{n}%
     \SetSymbolFont{operators}{#1}{OT1}{iwona}{#4}{n}%
@@ -3376,43 +3408,45 @@
 % Auch für die Schrift \DIN werden mathematische Glyphen bereitgestellt. Diese 
 % wurden schon bei der Installation aus dem \pkg{iwona}-Paket entnommen. 
 %    \begin{macrocode}
-\newcommand*\tud@cdmath@@@@init[1]{%
-  \DeclareMathVersion{tuddin}%
-  \SetSymbolFont{operators}{tuddin}{OT1}{#1}{b}{n}%
-  \SetSymbolFont{letters}{tuddin}{OML}{#1}{b}{it}%
-  \SetSymbolFont{symbols}{tuddin}{OMS}{#1}{b}{n}%
-  \SetSymbolFont{largesymbols}{tuddin}{OMX}{iwona}{ebc}{n}%
-  \AtBeginDocument{%
-    \tud@if@issymbolfont{legacymaths}{%
-      \SetSymbolFont{legacymaths}{tuddin}{OT1}{#1}{b}{n}%
+\if@tud@cdoldfont@active
+  \newcommand*\tud@cdmath@db@init[1]{%
+    \DeclareMathVersion{tuddin}%
+    \SetSymbolFont{operators}{tuddin}{OT1}{#1}{b}{n}%
+    \SetSymbolFont{letters}{tuddin}{OML}{#1}{b}{it}%
+    \SetSymbolFont{symbols}{tuddin}{OMS}{#1}{b}{n}%
+    \SetSymbolFont{largesymbols}{tuddin}{OMX}{iwona}{ebc}{n}%
+    \AtBeginDocument{%
+      \tud@if@issymbolfont{legacymaths}{%
+        \SetSymbolFont{legacymaths}{tuddin}{OT1}{#1}{b}{n}%
+      }{}%
+    }%
+    \SetMathAlphabet{\mathnormal}{tuddin}{OML}{#1}{b}{it}%
+    \tud@if@ismathalphabet{\mathbold}{%
+      \SetMathAlphabet{\mathbold}{tuddin}{OML}{#1}{b}{it}%
     }{}%
-  }%
-  \SetMathAlphabet{\mathnormal}{tuddin}{OML}{#1}{b}{it}%
-  \tud@if@ismathalphabet{\mathbold}{%
-    \SetMathAlphabet{\mathbold}{tuddin}{OML}{#1}{b}{it}%
-  }{}%
-  \SetMathAlphabet{\mathrm}{tuddin}{OT1}{#1}{b}{n}%
-  \SetMathAlphabet{\mathbf}{tuddin}{OT1}{#1}{b}{n}%
-  \SetMathAlphabet{\mathsf}{tuddin}{OT1}{#1}{b}{n}%
-  \SetMathAlphabet{\mathit}{tuddin}{OT1}{#1}{b}{it}%
-  \IfFileExists{ueus.fd}{%
-    \SetMathAlphabet{\mathcal}{tuddin}{U}{eus}{b}{n}%
-  }{}%
-  \tud@if@ismathalphabet{\mathfrak}{%
-    \IfFileExists{ueuf.fd}{%
-      \SetMathAlphabet{\mathfrak}{tuddin}{U}{euf}{b}{n}%
+    \SetMathAlphabet{\mathrm}{tuddin}{OT1}{#1}{b}{n}%
+    \SetMathAlphabet{\mathbf}{tuddin}{OT1}{#1}{b}{n}%
+    \SetMathAlphabet{\mathsf}{tuddin}{OT1}{#1}{b}{n}%
+    \SetMathAlphabet{\mathit}{tuddin}{OT1}{#1}{b}{it}%
+    \IfFileExists{ueus.fd}{%
+      \SetMathAlphabet{\mathcal}{tuddin}{U}{eus}{b}{n}%
     }{}%
-  }{}%
+    \tud@if@ismathalphabet{\mathfrak}{%
+      \IfFileExists{ueuf.fd}{%
+        \SetMathAlphabet{\mathfrak}{tuddin}{U}{euf}{b}{n}%
+      }{}%
+    }{}%
 %    \end{macrocode}
 % Daran anschließend wird die zuvor definierte Schrift in einer Box verwendet,
 % um das Laden der Schriftdefinitionen am Dokumentbeginn zu forcieren.
 %    \begin{macrocode}
-  \AtBeginDocument{%
-    \if@tud@cdmath@active%
-      \sbox\z@{\mathversion{normal}$ $\mathversion{tuddin}$ $}%
-    \fi%
+    \AtBeginDocument{%
+      \if@tud@cdmath@active%
+        \sbox\z@{\mathversion{normal}$ $\mathversion{tuddin}$ $}%
+      \fi%
+    }%
   }%
-}
+\fi
 %    \end{macrocode}
 % Um das Umschalten der Mathematikversion mit \cs{mathversion} auch nutzen zu 
 % können, wenn \pkg{mathastext} für die Schriften des \CDs aktiv ist, wird ein 
@@ -3455,11 +3489,10 @@
 %    \end{macrocode}
 % \end{macro}^^A \MTDeclareVersion
 % \end{macro}^^A \tud@mathversion
-% \end{macro}^^A \tud@x@mathastext@enc
 % \end{macro}^^A \tud@cdmath@bold@name
 % \end{macro}^^A \tud@cdmath@normal@name
 % \end{macro}^^A \tud@cdmath@set
-% \end{macro}^^A \tud@cdmath@@@@init
+% \end{macro}^^A \tud@cdmath@db@init
 % \end{macro}^^A \tud@cdmath@@@init
 % \end{macro}^^A \tud@cdmath@@init
 % \end{macro}^^A \tud@cdmath@init
