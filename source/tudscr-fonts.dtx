@@ -1,4 +1,4 @@
-% \CheckSum{3125}
+% \CheckSum{3130}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -1179,7 +1179,7 @@
 % des \CDs aktiviert. Dabei werden die Pakete \pkg{fontspec} und \pkg{mweights} 
 % beachtet. 
 %    \begin{macrocode}
-\newcommand*\tud@font@set{%
+\newcommand*\tud@font@set[1][\tud@cdfont@wrn]{%
 %    \end{macrocode}
 % Ist die Verwendung der Schriften des \CDs gewünscht, obwohl diese nicht
 % installiert sind, werden die entsprechenden Warnungen ausgegeben. Danach 
@@ -1187,7 +1187,7 @@
 % vollständig wiederherstellen zu können.
 %    \begin{macrocode}
   \if@tud@cdfont@active%
-    \tud@cdfont@wrn%
+    #1%
     \tud@cs@store{rmdefault}%
     \tud@cs@store{sfdefault}%
     \tud@cs@store{ttdefault}%
@@ -3239,11 +3239,11 @@
     \if@tud@cdfont@active\else%
       \preto\tud@res@b{%
         \@tud@cdfont@activetrue%
-        \tud@font@set%
+        \tud@font@set[]%
       }%
       \appto\tud@res@b{%
         \@tud@cdfont@activefalse%
-        \tud@font@set%
+        \tud@font@set[]%
       }%
     \fi%
     \preto\tud@res@b{\endgroup}%
@@ -4002,14 +4002,14 @@
 % das Mapping der griechischen Glyphen geändert, zum anderen werden die
 % originalen Mathematikversionen überschrieben respektive wiederhergestellt.
 %    \begin{macrocode}
-\newcommand*\tud@math@set{%
+\newcommand*\tud@math@set[1][\tud@cdmath@wrn]{%
 %    \end{macrocode}
 % Beim Aktivieren der Mathematikschriften im \CD werden einmalig alle Warnungen 
 % ausgegeben, falls bei der Initialisierung Probleme aufgetreten sind und 
 % dementsprechend der Hook \cs{tud@cdmath@wrn} gefüllt wurde.
 %    \begin{macrocode}
   \if@tud@cdmath@active%
-    \tud@cdmath@wrn%
+    #1%
     \tud@cs@store{mv@normal}%
     \tud@cs@store{mv@bold}%
     \tud@cdmath@set%
@@ -4237,29 +4237,6 @@
 %    \begin{macrocode}
   \tud@cdfont@init%
   \tud@ttfont@init%
-  \tud@cdmath@init%
-%    \end{macrocode}
-% Die Einstellungen für den Mathematiksatz erfolgen erst zu Dokumentbeginn, um
-% auf Einstellungen von anderen Schriftpaketen reagieren zu können. Da es
-% so gut wie keine freien OpenType-Schriften für den mathmatischen Formelsatz
-% gibt, werden \emph{immer} die Type1-Schriften verwendet, falls diese
-% installiert sind. Wurde jedoch das Paket \pkg{bm} angefordert, so müssen die
-% Mathematikschriften spätestens zum Ende der Präambel initialisiert werden.
-%    \begin{macrocode}
-  \if@tud@x@bm@requested%
-    \UnPreventPackageFromLoading{bm}%
-    \if@tud@cdmath@active%
-      \tud@cs@store{mv@normal}%
-      \tud@cs@store{mv@bold}%
-      \tud@cdfont@@set%
-      \tud@ttfont@@set%
-      \tud@cdmath@set%
-    \fi%
-    \RequirePackage{bm}[2017/01/16]%
-    \tud@cs@restore{mv@normal}%
-    \tud@cs@restore{mv@bold}%
-    \tud@cdmath@@init%
-  \fi%
 %    \end{macrocode}
 % Damit die Schrift im Dokument später noch umgestellt werden kann, werden
 % sämtliche Einstellungen erst am Ende der Präambel gesichert. Deshalb wird
@@ -4269,6 +4246,14 @@
 % aktivieren. 
 %    \begin{macrocode}
   \tud@font@set%
+%    \end{macrocode}
+% Die Definitionen für den Mathematiksatz erfolgen erst zu Dokumentbeginn, um
+% auf Einstellungen von anderen Schriftpaketen reagieren zu können. Wurde
+% jedoch das Paket \pkg{bm} angefordert, so müssen die Mathematikschriften
+% bereits zum Ende der Präambel über \cs{tud@x@bm@delayed} initialisiert werden.
+%    \begin{macrocode}
+  \tud@cdmath@init%
+  \tud@x@bm@delayed%
   \AtBeginDocument{%
 %    \end{macrocode}
 % Bereitstellung der Auswahlbefehle für griechische Glyphen in der Nomenklatur 
@@ -4360,7 +4345,7 @@
 % revidiert und direkt nach den durch \pkg{siunitx} zu Beginn des Dokumentes 
 % erfolgten Einstellungen durch \cs{tud@x@siunitx@reset} wiederhergestellt. 
 % Dieser etwas merkwürdige Workaround geht auf die gemeldeten Probleme bei 
-% \hrfn{https://github.com/tud-cd/tudscr/issues/22}{GitHub} und im  
+% \hrfn{https://github.com/tud-cd/tudscr/issues/22}{GitHub} sowie im 
 % \hrfn{https://latex.wcms-file3.tu-dresden.de/phpBB3/viewtopic.php?t=503}%
 % {Forum} zurück.
 %    \begin{macrocode}
@@ -4374,8 +4359,8 @@
       \else%
         \renewcommand*\tud@x@siunitx@reset{\TUDoptions{cdfont=true}}%
       \fi%
-      \appto\tud@x@siunitx@reset{\tud@font@set}%
-      \TUDoptions{cdfont=false}\tud@font@set%
+      \appto\tud@x@siunitx@reset{\tud@font@set[]}%
+      \TUDoptions{cdfont=false}\tud@font@set[]%
     \fi%
   }%
   \AtBeginDocument{\tud@x@siunitx@reset}%
@@ -4386,11 +4371,14 @@
 %
 % \subsubsection{Mathematikschriften in Verbindung mit dem Paket \pkg{bm}}
 %
+% \begin{macro}{\tud@x@bm@delayed}
 % \begin{macro}{\if@tud@x@bm@requested}
 % Das Paket \pkg{bm} stellt den Befehl \cs{bm} für fette und kursive Symbole im 
 % Mathematiksatz bereit. Damit dies funktioniert, muss das Laden des Paketes 
 % auf das Ende der Präambel verzögert werden, um zuvor alle Einstellungen für 
-% die mathematischen Symbole vornehmen zu können.
+% die mathematischen Symbole vornehmen zu können. Dieser Workaround geht auf
+% \hrfn{https://latex.wcms-file3.tu-dresden.de/phpBB3/viewtopic.php?t=448}
+% {eine Meldung im Forum} zurück.
 %    \begin{macrocode}
 \newif\if@tud@x@bm@requested
 %<*package>
@@ -4406,7 +4394,35 @@
 }
 %</package>
 %    \end{macrocode}
+% Wird das Paket verzögert geladen, so werden die Mathematikschriften des \CDs 
+% aktiviert (falls zuvor angefordert), damit die durch das Paket \pkg{bm} 
+% vollzogenen Einstellungen für diese auch wirksam werden. Anschließend wird
+% der Ausgangszustand wiederhergestellt, um den späteren und erstmaligen Aufruf 
+% von \cs{tud@math@set} vollständig abarbeiten zu können.
+%    \begin{macrocode}
+\newcommand*\tud@x@bm@delayed{%
+  \if@tud@x@bm@requested%
+    \UnPreventPackageFromLoading{bm}%
+    \if@tud@cdmath@active%
+      \tud@cs@store{mv@normal}%
+      \tud@cs@store{mv@bold}%
+      \tud@cdmath@set%
+    \fi%
+    \RequirePackage{bm}[2017/01/16]%
+    \tud@cs@restore{mv@normal}%
+    \tud@cs@restore{mv@bold}%
+  \fi%
+  \let\tud@x@bm@delayed\relax%
+}
+%    \end{macrocode}
+% Für die \OpenSans kommt das Paket \pkg{mathastext} zum Einsatz. In diesem 
+% Fall muss das Paket \pkg{bm} bereits zuvor geladen werden.
+%    \begin{macrocode}
+\BeforePackage{mathastext}{\tud@x@bm@delayed}
+%    \end{macrocode}
 % \end{macro}^^A \if@tud@x@bm@requested
+% \end{macro}^^A \tud@x@bm@delayed
+%
 % \subsubsection{Anpassungen für die Klasse \cls{beamer}}
 %
 % Die \cls{beamer}-Klasse lädt standardmäßig serifenlose Mathematikschriften. 
