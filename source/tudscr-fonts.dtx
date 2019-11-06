@@ -1,4 +1,4 @@
-% \CheckSum{3096}
+% \CheckSum{3119}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -3171,12 +3171,6 @@
 % Auswahlvariationen~-- deklariert.
 %    \begin{macrocode}
     \tud@cdmath@also@greeks%
-%    \end{macrocode}
-% Sollten die notwendigen Schriftfamilien nicht gefunden worden sein, werden 
-% keine separaten Mathematikversionen definiert.
-%    \begin{macrocode}
-  \else%
-    \let\tud@cdmath@set\relax%
   \fi%
 %    \end{macrocode}
 % Für die Schrift \DIN existiert lediglich eine Mathematikversion, das Vorgehen 
@@ -3190,18 +3184,7 @@
     \fi%
   \fi%
 }
-%    \end{macrocode}
-% Mit \cs{tud@cdmath@set} erfolgt bei Bedarf die Auswahl der aktuell benötigten 
-% Mathematikversion, wobei für die Zuweisung \cs{tud@cdmath@normal@name} und 
-% \cs{tud@cdmath@bold@name} in \cs{mv@normal} sowie \cs{mv@bold} expandiert 
-% werden. Die Namen für die Versionen setzen sich dabei aus den Päfixen 
-% \val{tudnormal@} und \val{tudbold@} sowie der Verkettung des regulären und
-% des fetten Schriftschnitts zusammen.
-%    \begin{macrocode}
-\newcommand*\tud@cdmath@set{%
-  \letcs\mv@normal{mv@\tud@cdmath@normal@name}%
-  \letcs\mv@bold{mv@\tud@cdmath@bold@name}%
-}
+\newcommand*\tud@cdmath@set{}
 \newcommand*\tud@cdmath@normal@name{tudnormal@\tud@cdfont@md\tud@cdfont@bf}%
 \newcommand*\tud@cdmath@bold@name{tudbold@\tud@cdfont@md\tud@cdfont@bf}%
 %    \end{macrocode}
@@ -3211,7 +3194,7 @@
 % Einstellungen der Schriftschnitte die dazu passenden Mathematikversionen 
 % deklariert. Dabei werden die insgesamt vier möglichen Kombinationen für die 
 % beiden Schalter \cs{if@tud@cdfont@heavy} (\opt{cdfont=light/heavy}) und 
-% \cs{if@tud@cdfont@ultrabold} (\opt{cdfont=normalbold/ultrabold}) kombiniert 
+% \cs{if@tud@cdfont@ultrabold} (\opt{cdfont=normalbold/ultrabold}) gesetzt 
 % und dafür die passenden Mathematikversionen definiert.\footnote{Eigentlich 
 % müssten auch noch alle Kombinationen für die Schreibmaschinenschriften 
 % beachtet werden. Dies ist dann aber wohl eher nicht notwendig, zumal für 
@@ -3220,7 +3203,7 @@
 %    \begin{macrocode}
 \newcommand*\tud@cdmath@@init{%
   \begingroup%
-    \def\tud@res@b{\endgroup}%
+    \let\tud@res@b\@empty%
     \def\tud@res@a##1##2{%
       \setbool{@tud@cdfont@heavy}{##1}%
       \setbool{@tud@cdfont@ultrabold}{##2}%
@@ -3244,7 +3227,45 @@
     \tud@res@a{false}{true}%
     \tud@res@a{true}{false}%
     \tud@res@a{true}{true}%
+%    \end{macrocode}
+% Für den zugegbener Maßen etwas  unwahrscheinlichen Fall, dass die Kombination 
+% aus \opt{cdfont=false} und \opt{cdmath=true} genutzt wird, werden für die 
+% Initialisierung die Schriften des \CDs kurzzeitig aktiviert. Damit wird dem 
+% Umstand Sorge getragen, dass das Paket \pkg{mathastext} bei der Definition 
+% der Mathematikversionen teilweise auf Makros wie \cs{bfdefault} zurückgreift 
+% und diese dementsprechend gesetzt sein sollten.
+%    \begin{macrocode}
+    \if@tud@cdfont@active\else%
+      \preto\tud@res@b{%
+        \@tud@cdfont@activetrue%
+        \tud@font@set%
+      }%
+      \appto\tud@res@b{%
+        \@tud@cdfont@activefalse%
+        \tud@font@set%
+      }%
+    \fi%
+    \preto\tud@res@b{\endgroup}%
   \tud@res@b%
+%    \end{macrocode}
+% Mit \cs{tud@cdmath@set} erfolgt bei Bedarf die Auswahl der aktuell benötigten 
+% Mathematikversion, wobei für die Zuweisung \cs{tud@cdmath@normal@name} und 
+% \cs{tud@cdmath@bold@name} in \cs{mv@normal} sowie \cs{mv@bold} expandiert 
+% werden. Die Namen für die Versionen setzen sich dabei aus den Päfixen 
+% \val{tudnormal@} und \val{tudbold@} sowie der Verkettung des regulären und
+% des fetten Schriftschnitts zusammen, welche zum Zeitpunkt des Aufrufs aktiv 
+% sind (Option \opt{cdfont}) und durch \cs{tud@cdfont@@set} gesetzt werden.
+%    \begin{macrocode}
+  \renewcommand*\tud@cdmath@set{%
+    \begingroup%
+      \tud@cdfont@@set%
+      \edef\tud@res@a{%
+        \endgroup%
+        \etex@unexpanded{\letcs\mv@normal}{mv@\tud@cdmath@normal@name}%
+        \etex@unexpanded{\letcs\mv@bold}{mv@\tud@cdmath@bold@name}%
+      }%
+    \tud@res@a%
+  }%
 }
 %    \end{macrocode}
 % Mit \cs{tud@cdmath@@@init} werden die notwendigen Mathematikversionen und die 
@@ -4009,7 +4030,10 @@
     \tud@cs@restore{mv@bold}%
     \tud@cdmath@symbols@reset%
   \fi%
-  \mathversion{normal}%
+%    \end{macrocode}
+% Zuletzt wird die aktuell gewählte Mathematikversion erneut aufgerufen.
+%    \begin{macrocode}
+  \expandafter\mathversion\expandafter{\math@version}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@math@set
