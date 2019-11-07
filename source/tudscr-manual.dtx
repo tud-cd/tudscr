@@ -1,4 +1,4 @@
-% \CheckSum{4510}
+% \CheckSum{4512}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -858,6 +858,8 @@
 % \changes{v2.02}{2014/10/27}{neu}^^A
 % \begin{macro}{\tud@hyperdef}
 % \changes{v2.06f}{2019/10/29}{neu}^^A
+% \begin{macro}{\tud@hyperdef@skip}
+% \changes{v2.06f}{2019/11/07}{neu}^^A
 % \begin{macro}{\tudhyperref}
 % \changes{v2.02}{2014/10/27}{neu}^^A
 % \begin{macro}{\tud@manualname}
@@ -872,20 +874,17 @@
 %    \begin{macrocode}
 \newcommand*\tud@manualname{tudscr}%
 %<*class>
-\NewDocumentCommand\tudhyperdef{s t' m d==}{%
+\NewDocumentCommand\tudhyperdef{s m d==}{%
   \begingroup%
-    \@tempswafalse%
-    \IfBooleanT{#1}{\@tempswatrue\setlength\@tempdima{3\baselineskip}}%
-    \IfBooleanT{#2}{\@tempswatrue\setlength\@tempdima{15\baselineskip}}%
-    \if@tempswa%
-      \raisebox{\@tempdima}[0pt][0pt]{\tud@hyperdef{#3}}%
+    \IfBooleanTF{#1}{%
+      \raisebox{\tud@hyperdef@skip}[0pt][0pt]{\tud@hyperdef{#2}}%
       \par\nobreak\vskip\dimexpr-\parskip-\baselineskip\relax%
       \@afterindentfalse\@afterheading%
-    \else%
-      \Hy@raisedlink{\tud@hyperdef{#3}}\ignorespaces%
-    \fi%
-    \label{#3}%
-    \tud@trace@lbl@created@add{#3}%
+    }{%
+      \Hy@raisedlink{\tud@hyperdef{#2}}\ignorespaces%
+    }%
+    \label{#2}%
+    \tud@trace@lbl@created@add{#2}%
   \endgroup%
 }
 \newcommand*\tud@hyperdef[1]{%
@@ -896,6 +895,17 @@
     }%
   \tud@res@a%
 }
+%    \end{macrocode}
+% Der zusätzliche Sprung nach oben für den Anker wird innerhalb der Teil"~ und 
+% Kapitelpräambeln für die Sternversion erhöht.
+%    \begin{macrocode}
+\newcommand*\tud@hyperdef@skip{3\baselineskip}
+\patchcmd{\set@@@@preamble}{%
+  \let\phantomsection\relax%
+}{%
+  \let\phantomsection\relax%
+  \renewcommand*\tud@hyperdef@skip{15\baselineskip}%
+}{}{\tud@patch@wrn{set@@@@preamble}}
 \newrobustcmd*\tudhyperref[2]{\hyperref{}{\tud@manualname}{#1}{#2}}%
 %</class>
 %    \end{macrocode}
@@ -910,6 +920,7 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@manualname
 % \end{macro}^^A \tudhyperref
+% \end{macro}^^A \tud@hyperdef@skip
 % \end{macro}^^A \tud@hyperdef
 % \end{macro}^^A \tudhyperdef
 %
@@ -961,6 +972,7 @@
 %
 % \iffalse
 %</body|class&doc>
+%<*!doc>
 %<*body>
 % \fi
 %
@@ -981,12 +993,6 @@
 %    \begin{macrocode}
 \TUD@UnwindPackage{hyperref}{\RequirePackage[babel]{microtype}[2013/05/23]}
 %    \end{macrocode}
-%
-% \iffalse
-%</body>
-%<*!doc>
-%<*body>
-% \fi
 %
 % \subsection{Erstellung und Validierung von Labeln}
 %
@@ -6113,6 +6119,7 @@
 %    \end{macrocode}
 %
 % \iffalse
+%<*!doc>
 %<*body>
 % \fi
 %
@@ -6195,6 +6202,7 @@
 % \iffalse
 %</class>
 %</body>
+%</!doc>
 %<*body|class&doc>
 % \fi
 %
@@ -6273,44 +6281,23 @@
 %
 % \subsubsection{Zusätzliche Markup-Befehle}
 %
-% \begin{macro}{\Attention}
-% \changes{v2.02}{2014/08/16}{neu}^^A
-% \begin{macro}{\Forum}
-% \begin{macro}{\CTAN}
-% \changes{v2.05}{2015/11/22}{neu}^^A
 % \begin{macro}{\GitHubRepo}
 % \changes{v2.02}{2014/08/16}{neu}^^A
 % \begin{macro}{\Download}
 % \changes{v2.05g}{2016/11/08}{neu}^^A
-% \begin{macro}{\notudscrartcl}
+% \begin{macro}{\Forum}
+% \begin{macro}{\CTAN}
+% \changes{v2.05}{2015/11/22}{neu}^^A
+% \begin{macro}{\Attention}
+% \changes{v2.02}{2014/08/16}{neu}^^A
 % \begin{macro}{\scrguide}
 % \changes{v2.02}{2014/09/04}{neu}^^A
 % \changes{v2.05}{2015/07/23}{Hyperlinktext über optionales Argument}^^A
+% \begin{macro}{\notudscrartcl}
 % Für die Anwenderdokumentation werden weitere Auszeichnungsbefehle definiert.
 %    \begin{macrocode}
-\newcommand*\Attention[2][\z@]{%
-  \marginnote{%
-    \setlength\fboxsep{0.25em}%
-    \fbox{Achtung!}%
-  }[{#1}]%
-  \emph{\trim@spaces{#2}}%
-}
-\NewDocumentCommand\Forum{!s !t'}{%
-  \IfBooleanTF{#1}{\toks@{\href}}{\toks@{\hrfn}}%
-  \IfBooleanT{#2}{\toks@{\url}}%
-  \addto@hook\toks@{{http://latex.wcms-file3.tu-dresden.de/phpBB3/}}%
-  \IfBooleanF{#2}{\addto@hook\toks@{{TUD-\LaTeX-Forum}}}%
-  \the\toks@\xspace%
-}
-\NewDocumentCommand\CTAN{!s !o !d()}{%
-  \IfBooleanTF{#1}{\toks@{\href}}{\toks@{\hrfn}}%
-  \addto@hook\toks@{{http://www.ctan.org/\IfValueT{#2}{#2}}}%
-  \addto@hook\toks@{%
-    {\tud@english{Comprehensive TeX Archive Network (CTAN\IfValueT{#3}{~#3})}}%
-  }%
-  \the\toks@\xspace%
-}
 %<*class>
+%<*!doc>
 \NewDocumentCommand\GitHubRepo{s t' m !O{releases}}{%
   \IfBooleanTF{#1}{\toks@{\href}}{\toks@{\hrfn}}%
   \IfBooleanT{#2}{\toks@{\url}}%
@@ -6323,11 +6310,43 @@
 \newcommand*\Download[1]{%
   https://github.com/tud-cd/tudscr/releases/download/#1%
 }
-\newcommand*\notudscrartcl{%
-  F\"ur die Klassen \Class{tudscrartcl} sowie \Class{tudscrposter} ist diese %
-  Option nicht verf\"ugbar.%
-}
+%</!doc>
+%<*doc>
+%    \end{macrocode}
+% \ToDo{Befehl für tudscrdoc, setzen der base url}[v2.06f]
+%    \begin{macrocode}
+%</doc>
 %</class>
+%<*!doc>
+\NewDocumentCommand\Forum{!s !t'}{%
+  \IfBooleanTF{#1}{\toks@{\href}}{\toks@{\hrfn}}%
+  \IfBooleanT{#2}{\toks@{\url}}%
+  \addto@hook\toks@{{http://latex.wcms-file3.tu-dresden.de/phpBB3/}}%
+  \IfBooleanF{#2}{\addto@hook\toks@{{TUD-\LaTeX-Forum}}}%
+  \the\toks@\xspace%
+}
+%</!doc>
+%<*doc>
+%    \end{macrocode}
+% \ToDo{Befehl für tudscrdoc}[v2.06f]
+%    \begin{macrocode}
+%</doc>
+%<*!doc>
+\NewDocumentCommand\CTAN{!s !o !d()}{%
+  \IfBooleanTF{#1}{\toks@{\href}}{\toks@{\hrfn}}%
+  \addto@hook\toks@{{http://www.ctan.org/\IfValueT{#2}{#2}}}%
+  \addto@hook\toks@{%
+    {\tud@english{Comprehensive TeX Archive Network (CTAN\IfValueT{#3}{~#3})}}%
+  }%
+  \the\toks@\xspace%
+}
+\newcommand*\Attention[2][\z@]{%
+  \marginnote{%
+    \setlength\fboxsep{0.25em}%
+    \fbox{Achtung!}%
+  }[{#1}]%
+  \emph{\trim@spaces{#2}}%
+}
 \NewDocumentCommand\scrguide{!s !O{\KOMAScript-Handbuch}}{%
   \IfBooleanTF{#1}{\toks@{\href}}{\toks@{\hrfn}}%
   \addto@hook\toks@{%
@@ -6336,19 +6355,27 @@
   \addto@hook\toks@{{#2}}%
   \the\toks@\xspace%
 }
+%<*class>
+\newcommand*\notudscrartcl{%
+  F\"ur die Klassen \Class{tudscrartcl} sowie \Class{tudscrposter} ist diese %
+  Option nicht verf\"ugbar.%
+}
+%</class>
+%</!doc>
 %    \end{macrocode}
-% \end{macro}^^A \scrguide
 % \end{macro}^^A \notudscrartcl
-% \end{macro}^^A \Download
-% \end{macro}^^A \GitHubRepo
+% \end{macro}^^A \scrguide
+% \end{macro}^^A \Attention
 % \end{macro}^^A \CTAN
 % \end{macro}^^A \Forum
-% \end{macro}^^A \Attention
+% \end{macro}^^A \Download
+% \end{macro}^^A \GitHubRepo
 % \begin{macro}{\TUDScriptContactNote}
 % \changes{v2.06f}{2019/09/26}{neu}^^A
 % \begin{macro}{\TUDScriptContactTitle}
 % \changes{v2.06f}{2019/09/26}{neu}^^A
 %    \begin{macrocode}
+%<*!doc>
 \newrobustcmd*\TUDScriptContactNote{%
   \footnote{\scriptsize\expandafter\mailto\expandafter{\TUDScriptContact}}%
 }
@@ -6363,6 +6390,7 @@
     \let\TUDScriptContactTitle\relax%
   }%
 }
+%</!doc>
 %    \end{macrocode}
 % \end{macro}^^A \TUDScriptContactTitle
 % \end{macro}^^A \TUDScriptContactNote
@@ -6446,6 +6474,7 @@
 %
 % \iffalse
 %</body|class&doc>
+%<*!doc>
 %<*body>
 % \fi
 %
@@ -6473,6 +6502,7 @@
 %
 % \iffalse
 %</body>
+%</!doc>
 % \fi
 %
 % \Finale
