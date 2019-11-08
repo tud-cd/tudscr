@@ -1,4 +1,4 @@
-% \CheckSum{4613}
+% \CheckSum{4698}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -694,6 +694,15 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@auxlist@remove
 % \end{macro}^^A \tud@auxlist@add
+% \begin{macro}{\tud@auxlist@ifin}
+% \changes{v2.06f}{2019/11/08}{neu}^^A
+% \begin{macro}{\tud@auxlist@forloop}
+% \changes{v2.06f}{2019/11/08}{neu}^^A
+\newcommand*\tud@auxlist@ifin[2]{\xifinlistcs{#1}{#2@auxlist}}
+\newcommand*\tud@auxlist@forloop[2]{\forlistcsloop#1{#2@auxlist}}
+%    \end{macrocode}
+% \end{macro}^^A \tud@auxlist@remove
+% \end{macro}^^A \tud@auxlist@add
 %
 % \iffalse
 %</class>
@@ -972,6 +981,7 @@
 %    \begin{macrocode}
 \newcommand*\tud@manualname{tudscr}%
 %<*class>
+\tud@auxlist@register{tud@label@alias}%
 \NewDocumentCommand\tudhyperdef{s m d==}{%
   \begingroup%
     \IfBooleanTF{#1}{%
@@ -983,6 +993,61 @@
     }%
     \label{#2}%
     \tud@trace@lbl@created@add{#2}%
+%    \end{macrocode}
+% Nach der Definition des eigentlichen Labels werden noch mögliche Aliaslabel 
+% definiert. Das aktuell erstellte Label ist definitiv kein Alias und wird 
+% dementsprechend aus der Liste zu erstellender Aliaslabel entfernt. Danach 
+% wird das Basislabel aus dem aktuellen in \cs{tud@res@a} extrahiert. In 
+% \cs{tud@res@b} werden alle nachfolgend erstellten Aliaswerte gesichert, um 
+% diese ganz zum Schluss noch zu validieren.
+%    \begin{macrocode}
+    \tud@auxlist@remove{tud@label@alias}{#2}%
+    \edef\tud@res@a{#2}%
+    \def\tud@res@c##1=##2\@nil{\def\tud@res@a{##1}}%
+    \expandafter\tud@res@c\tud@res@a==\@nil%
+    \let\tud@res@b\@empty%
+%    \end{macrocode}
+% Für die während der Deklaration in \cs{tud@alias@values} abgelegten Werte 
+% werden Aliaslabel erzeugt.
+%    \begin{macrocode}
+    \expandafter\tud@if@nil\expandafter{\tud@alias@values}{}{%
+      \@for\tud@res@c:=\tud@alias@values\do{%
+        \trim@spaces@in\tud@res@c%
+        \ifx\tud@res@c\@empty\else%
+          \listeadd\tud@res@b{\tud@res@c}%
+          \tudhyper@alias@values{\tud@res@a=\tud@res@c}%
+        \fi%
+      }%
+    }%
+%    \end{macrocode}
+% Dies gilt auch für die Deklaration als boolscher Schalter.
+%    \begin{macrocode}
+    \IfValueT{#3}{%
+      \listadd\tud@res@b{#3}%
+      \ifstrequal{\PBoolean}{#3}{%
+        \tudhyper@alias@values{\tud@res@a=true}%
+        \tudhyper@alias@values{\tud@res@a=false}%
+      }{}%
+    }%
+%    \end{macrocode}
+% Zum Schluss wird noch geprüft, ob ein boolscher Werte auch in der gewünschten 
+% Notation angegeben wurden.
+%    \begin{macrocode}
+    \def\tud@res@c##1{%
+      \ifstrbool{##1}{\@tud@res@swatrue}{\@tud@res@swatrue}{\@tud@res@swafalse}%
+      \if@tud@res@swa%
+        \ifboolexpr{%
+          (test {\ifstrequal{##1}{true}} or test {\ifstrequal{##1}{false}})%
+        }{\@tud@res@swafalse}{\@tud@res@swatrue}%
+        \if@tud@res@swa%
+          \ClassWarning{tudscrmanual}{%
+            Boolean values should only be referred with\MessageBreak%
+            'true/false' but '##1' was used%
+          }%
+        \fi%
+      \fi%
+    }%
+    \expandafter\forlistloop\expandafter\tud@res@c\expandafter{\tud@res@b}%
   \endgroup%
 }
 \newcommand*\tud@hyperdef[1]{%
@@ -1004,6 +1069,22 @@
   \let\phantomsection\relax%
   \renewcommand*\tud@hyperdef@skip{15\baselineskip}%
 }{}{\tud@patch@wrn{set@@@@preamble}}
+%    \end{macrocode}
+% Nicht verwirren lassen! Das Aliaslabel wird zunäöchst der Exportliste 
+% hinzugefügt. Anschließend wird geprüft, ob es in der importierten Liste 
+% enthalten ist.
+%    \begin{macrocode}
+\newcommand*\tudhyper@alias@values[1]{%
+  \tud@auxlist@add{tud@label@alias}{#1}%
+  \tud@auxlist@ifin{#1}{tud@label@alias}{%
+    \Hy@raisedlink{\tud@hyperdef{#1}}\ignorespaces%
+    \label{#1}%
+    \tud@trace@lbl@created@add{#1\space(alias)}%
+  }{}%
+}
+%    \end{macrocode}
+% Und schließlich der Befehl zum Referenzieren auf die definierten Anker.
+%    \begin{macrocode}
 \newrobustcmd*\tudhyperref[2]{\hyperref{}{\tud@manualname}{#1}{#2}}%
 %</class>
 %    \end{macrocode}
@@ -1521,8 +1602,11 @@
 % Deklaration erfolgt mit dem Befehl \cs{printdeclarationlist} bezieungsweise 
 % \cs{printobsoletelist}. 
 %    \begin{macrocode}
-\NewDocumentEnvironment{Declaration}{o m !o !o !d() !D<>{}}{%
-  \listadd\tud@declaration@list{#2}%
+\NewDocumentEnvironment{Declaration}{o m !o !o !d() !D<>{\noexpand\@nil}}{%
+  \listeadd\tud@declaration@list{%
+    \def\noexpand\tud@alias@values{#6}%
+    \etex@unexpanded{#2}%
+  }%
   \tud@declare@start[{#1}]{#2}[{#3}][{#4}]{#5}%
 }{%
   \tud@declare@end{#2}{\printdeclarationlist}%
