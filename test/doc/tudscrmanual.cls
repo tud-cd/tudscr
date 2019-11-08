@@ -451,6 +451,8 @@
   \tud@localization@english{\subsubsectionautorefname}{subsubsection}%
 }
 \newcommand*\tud@manualname{tudscr}%
+% TODO \detokenize\expandafter notwendig? wahrscheinlich wegen UTF8?
+\tud@auxlist@register{tud@label@alias}%[\detokenize\expandafter]%
 \NewDocumentCommand\tudhyperdef{s m d==}{%
   \begingroup%
     \IfBooleanTF{#1}{%
@@ -463,57 +465,46 @@
     \label{#2}%
     \tud@trace@lbl@created@add{#2}%
     \tud@auxlist@remove{tud@label@alias}{#2}%
-    \def\tud@res@b##1=##2=##3\@nil{%
-      \def\tud@res@a{##1}%
-      \ifstrbool{##2}{\@tud@res@swatrue}{\@tud@res@swatrue}{\@tud@res@swafalse}%
+    \edef\tud@res@a{#2}%
+    \def\tud@res@c##1=##2\@nil{\def\tud@res@a{##1}}%
+    \expandafter\tud@res@c\tud@res@a==\@nil%
+    \let\tud@res@b\@empty%
+    \expandafter\tud@if@nil\expandafter{\tud@alias@values}{}{%
+      \@for\tud@res@c:=\tud@alias@values\do{%
+        \trim@spaces@in\tud@res@c%
+        \ifx\tud@res@c\@empty\else%
+          \listeadd\tud@res@b{\tud@res@c}%
+          \tudhyper@alias@values{\tud@res@a=\tud@res@c}%
+        \fi%
+      }%
+    }%
+    \IfValueT{#3}{%
+      \listadd\tud@res@b{#3}%
+      \ifstrequal{\PBoolean}{#3}{%
+        \tudhyper@alias@values{\tud@res@a=true}%
+        \tudhyper@alias@values{\tud@res@a=false}%
+      }{}%
+%      \in@{\PName}{#3}%
+%      \ifin@%
+%        \tudhyper@alias@values{\tud@res@a}%
+%      \fi%
+    }%
+    \def\tud@res@c##1{%
+      \ifstrbool{##1}{\@tud@res@swatrue}{\@tud@res@swatrue}{\@tud@res@swafalse}%
       \if@tud@res@swa%
         \ifboolexpr{%
-          (test {\ifstrequal{##2}{true}} or test {\ifstrequal{##2}{false}})%
+          (test {\ifstrequal{##1}{true}} or test {\ifstrequal{##1}{false}})%
         }{\@tud@res@swafalse}{\@tud@res@swatrue}%
         \if@tud@res@swa%
           \ClassWarning{tudscrmanual}{%
             Boolean values should only be referred with\MessageBreak%
-            'true/false' but '##2' was used%
+            'true/false' but '##1' was used%
           }%
         \fi%
       \fi%
     }%
-    \edef\tud@res@a{\noexpand\tud@res@b#2==\noexpand\@nil}%
-    \tud@res@a%
-    \ifstrequal{\PBoolean}{#3}{%
-      \tudhyper@alias@values{\tud@res@a}{true,false}%
-    }{}%
-    \in@{\PName}{#3}%
-    \ifin@%
-      \tudhyper@alias@values{\tud@res@a}{}%
-    \fi%
-    \expandafter\tud@if@nil\expandafter{\tud@alias@values}{}{%
-      \tudhyper@alias@values{\tud@res@a}{\tud@alias@values}%
-    }%
+    \expandafter\forlistloop\expandafter\tud@res@c\expandafter{\tud@res@b}%
   \endgroup%
-}
-% TODO \detokenize\expandafter notwendig? wahrscheinlich wegen UTF8?
-\tud@auxlist@register{tud@label@alias}%[\detokenize\expandafter]%
-\newcommand*\tudhyper@alias@values[2]{%
-  \edef\tud@res@b{#2}%
-  \ifx\tud@res@b\@empty%
-    \tudhyper@alias@@values{#1}%
-  \else%
-    \@for\tud@res@b:=\tud@res@b\do{%
-      \edef\tud@res@b{#1=\tud@res@b}%
-      \tudhyper@alias@@values{\tud@res@b}%
-    }%
-  \fi%
-}
-\newcommand*\tudhyper@alias@@values[1]{%
-  \tud@auxlist@add{tud@label@alias}{#1}%
-  \edef\tud@res@b{\detokenize\expandafter{#1}}%
-%  \tud@auxlist@ifin{\tud@res@b}{tud@label@alias}{%
-  \tud@auxlist@ifin{#1}{tud@label@alias}{%
-    \Hy@raisedlink{\tud@hyperdef{#1}}%
-    \label{#1}%
-    \tud@trace@lbl@created@add{#1\space(alias)}%
-  }{}%
 }
 \newcommand*\tud@hyperdef[1]{%
   \begingroup%
@@ -530,6 +521,17 @@
   \let\phantomsection\relax%
   \renewcommand*\tud@hyperdef@skip{15\baselineskip}%
 }{}{\tud@patch@wrn{set@@@@preamble}}
+\newcommand*\tudhyper@alias@values[1]{%
+  \tud@auxlist@add{tud@label@alias}{#1}%
+% TODO \detokenize\expandafter notwendig? wahrscheinlich wegen UTF8?
+%  \edef\tud@res@b{\detokenize\expandafter{#1}}%
+%  \tud@auxlist@ifin{\tud@res@b}{tud@label@alias}{%
+  \tud@auxlist@ifin{#1}{tud@label@alias}{%
+    \Hy@raisedlink{\tud@hyperdef{#1}}\ignorespaces%
+    \label{#1}%
+    \tud@trace@lbl@created@add{#1\space(alias)}%
+  }{}%
+}
 \newrobustcmd*\tudhyperref[2]{\hyperref{}{\tud@manualname}{#1}{#2}}%
 \newcommand*\hrfn[2]{%
   \href{#1}{\trim@spaces{#2}}%
@@ -552,7 +554,7 @@
 \AfterPackage*{hyperref}{\RequirePackage[babel]{microtype}[2013/05/23]}
 \TUD@UnwindPackage{hyperref}{\RequirePackage[babel]{microtype}[2013/05/23]}
 \newcommand*\tud@lbl@tmp{}
-% TODO kann das raus?
+% TODO das kann raus!
 \newcommand*\tud@lbl@fmt{%
   \def~{-}%
 %  \let\IeC\@firstofone%
@@ -579,7 +581,8 @@
 \newcommand*\ProcessorCreateLabel[1]{%
   \in@{:}{#1}%
   \ifin@\else%
-    \ClassError{tudscrmanual}{Wrong formatted label}{%
+    \ClassError{tudscrmanual}%
+    {Wrong formatted label}{%
       A label has to be given at least with '<bundle>:<markup>'\MessageBreak%
       but \detokenize{#1} was used.%
     }%
@@ -590,7 +593,6 @@
 \newcommand*\Processor@CreateLabel[3]{%
   \begingroup%
     \Markup@Gobble%
-    \tud@lbl@fmt%
     \IfValueTF{#3}{%
       \protected@edef\@tempa{#1:#2:#3}%
     }{%
@@ -663,7 +665,7 @@
     \fi%
   \endgroup%
 }
-% TODO make \LaTeX[e] available bzw. \Package{latex} verwenden
+% TODO make \LaTeX[e] available bzw. \Bundle{latex} verwenden
 % TODO nur gültige Markupbefehle \Class, \Package, \Bundle zulassen
 % TODO rename to Separation
 \newenvironment{Bundle}[1]{%
@@ -847,7 +849,7 @@
     }{%
       \toks@{\tud@declare@start{#3}[{#4}][{#5}]}%
       \def\@tempa{\emph{entf\"allt}}%
-      % TODO \in@ kann raus, oder?
+      % TODO \in@ kann raus, oder? der Split mit \@tempb sollte reichen
       \in@{:}{#1}%
       \ifin@%
         \def\@tempb##1:##2\@nil{%
@@ -913,16 +915,16 @@
   \@tud@declaretrue\@tud@openindexfalse#1\@tud@declarefalse%
   \pagebreak[1]%
 }
-\NewDocumentCommand\InlineDeclaration{s o m O{\IfBooleanTF{#1}{-2}{-1}}}{%
-  \Inline@Declaration{#2}{#3}{#4}%
+\NewDocumentCommand\InlineDeclaration{s o m}{%
+  \Inline@Declaration[{#2}]{#3}[\IfBooleanTF{#1}{-2}{-1}]%
 }
-\newcommand*\Inline@Declaration[3]{%
+\NewDocumentCommand\Inline@Declaration{o m O{-1}}{%
   \tud@declare@special@start[{#1}]{#2}{#3}%
   \printchangedatlist%
   \tud@declare@special@end{#2}{#3}%
 }
 \NewDocumentEnvironment{Declaration*}{o m}{%
-  \tud@declare@special@start*[{#1}]{#2}{2}%
+  \tud@declare@special@start[{#1}]{#2}{2}%
 }{%
   \tud@declare@special@end{#2}{2}%
 }
@@ -933,7 +935,7 @@
   \endBundle%
   \tud@declare@special@end{#2}{3}%
 }
-\NewDocumentCommand\tud@declare@special@start{s o m m}{%
+\NewDocumentCommand\tud@declare@special@start{s r[] m m}{%
   \tud@declare@num=#4\relax%
   \@tud@declaretrue%
   \IfBooleanTF{#1}{%
@@ -1356,9 +1358,7 @@
   \Process@Index{#1}{\File{#2}}|#4|%
 }
 \Markup@Simple@Format\File(\textsbn){Datei}
-\NewDocumentCommand\Path{>{\ProcessorUnderscore}m}{%
-  \mbox{\texttt{#1}}%
-}
+\NewDocumentCommand\Path{>{\ProcessorUnderscore}m}{\mbox{\texttt{#1}}}
 \NewDocumentCommand\tud@attr@get{s m m}{%
   \begingroup%
     \def\@tempa##1##2##3{%
@@ -1454,32 +1454,24 @@
     \let\PValue\@firstofone%
     \let\PName\@firstofone%
     \let\PValueName\@firstofone%
-%    \let\PSet\relax%
-%    \let\PBoolean\relax%
     \let\PSet\@empty%
     \let\PBoolean\@empty%
     \let\PSetName\@gobble%
     \let\Parameter\@firstofone%
     \let\OParameter\@firstofone%
-%    \let\LParameter\relax%
     \let\LParameter\@empty%
     \let\OLParameter\@firstofone%
     \let\PParameter\@firstofone%
     \let\POParameter\@firstofone%
-%    \let\textOR\relax%
     \let\textOR\@empty%
     \let\hologo\@firstofone%
     \let\hologoRobust\@firstofone%
     \def\_{-}%
+%    \def~{-}%
     \protected\def~{~}%
+    \def\dots{...}%
     \let\emph\@firstofone%
-    % TODO rein?!
-%      \def~{-}%
-%    %  \let\IeC\@firstofone%
-%    %  \def\"##1{##1e}%
-%    %  \def\ss{ss}%
-%      \def\dots{...}%
-%      \let\NoCaseChange\@firstofone%
+    \let\NoCaseChange\@firstofone%
   }%
 }
 \AfterPackage*{hyperref}{%
@@ -1590,7 +1582,7 @@
 % TODO für tutorials notwendig?, darf keine relevanz für manual haben
 %        \def\@tempa##1:##2:##3\@nil{\tudhyperdef*{##3:##2:##3}}%
 %        \expandafter\@tempa\tud@lbl@tmp\@nil%
-      \else%
+      \else% <0
         \tudhyperdef{\tud@lbl@tmp}=#3=%
       \fi%
     }%
@@ -1917,13 +1909,8 @@
 %    \typeout{!!!!! \meaning\tud@reserved}%
     \tud@reserved%
     \def\tud@idx@fmt{#2}%
-    \begingroup%
-      \edef\tud@res@a{%
-        \endgroup%
-        \etex@unexpanded{\tud@replace\tud@idx@key}{\detokenize{@}}{"@}%
-        \etex@unexpanded{\tud@replace\tud@idx@fmt}{\detokenize{@}}{"@}%
-      }%
-    \tud@res@a%
+    \tud@@replace\tud@idx@key{@}{"@}%
+    \tud@@replace\tud@idx@fmt{@}{"@}%
     % TODO \tud@if@lbl@exists nutzen, um ggf. 'none' zu setzen
     % TODO noch sinnvoll?
     \let\tud@idx@bdl\tud@bdl@dflt%
@@ -2171,13 +2158,8 @@
       }%
     }%
     \expandafter\tud@res@b\tud@res@a()()\@nil%
-    \begingroup%
-      \edef\tud@res@a{%
-        \endgroup%
-        \etex@unexpanded{\tud@replace\tud@res@a}{\detokenize{@}}{"@}%
-        \etex@unexpanded{\tud@replace\tud@res@c}{\detokenize{@}}{"@}%
-      }%
-    \tud@res@a%
+    \tud@@replace\tud@res@a{@}{"@}%
+    \tud@@replace\tud@res@c{@}{"@}%
     \edef\tud@res@a{%
       \endgroup%
       \def\noexpand#1{%
@@ -2355,7 +2337,7 @@
       }%
   \tud@extract@box@a%
 }
-% TODO überprüfen
+% TODO überprüfen und Makronamen anpassen
 \NewDocumentCommand\SeeRef{s m m}{%
   \tud@extract@box{%
     \let\tud@idx@fmt\relax%
@@ -2554,7 +2536,7 @@
     \tud@print@index[changelog]%
   \endgroup%
 }
-\NewDocumentCommand\print@changedatlist{m m}{%
+\newcommand*\print@changedatlist[2]{%
   \ifx\tud@changedat@list\relax\else%
     \begingroup%
       \let\tud@res@a\@empty%
@@ -3079,34 +3061,14 @@
     }%
   \tud@res@a%
 }
-%\renewcommand*\tud@replace[3]{%
-%  \begingroup%
-%    \toks@{\def\@tempa##1}%
-%    \eaddto@hook\toks@{\detokenize\expandafter{#2}}%
-%    \addto@hook\toks@{##2\@nil{\@tempb{##1}{##2}}}%
-%    \the\toks@%
-%    \def\@tempb##1##2{%
-%      \IfArgIsEmpty{##2}{%
-%        \appto#1{##1}%
-%        \let\@tempc\relax%
-%      }{%
-%        \appto#1{##1#3}%
-%        \def\@tempc{\@tempa##2\@nil}%
-%      }%
-%      \@tempc%
-%    }%
-%    \toks@{\@tempa}%
-%    \edef\@tempc{\expandafter\detokenize\expandafter{#1}}%
-%    \eaddto@hook\toks@{\@tempc}%
-%    \eaddto@hook\toks@{\detokenize{#2}\@nil}%
-%    \def#1{}%
-%    \the\toks@%
-%    \edef\tud@reserved{%
-%      \noexpand\endgroup%
-%      \def\noexpand#1{#1}%
-%    }%
-%  \tud@reserved%
-%}
+\newcommand*\tud@@replace[3]{%
+  \begingroup%
+    \edef\tud@res@a{%
+      \endgroup%
+      \etex@unexpanded{\tud@replace#1}{\detokenize{#2}}{\detokenize{#3}}%
+    }%
+  \tud@res@a%
+}
 \newcommand*\tud@remove@trailing@slashes[2][\@nil]{%
   \begingroup%
     \tud@if@nil{#1}{%

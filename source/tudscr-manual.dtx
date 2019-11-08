@@ -1,4 +1,4 @@
-% \CheckSum{4730}
+% \CheckSum{4733}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -2077,20 +2077,6 @@
 %    \end{macrocode}
 % \end{macro}^^A \@Engine
 % \end{macro}^^A \Engine
-% \begin{macro}{\File}
-% \changes{v2.02}{2014/10/08}{überarbeitet}^^A
-% \begin{macro}{\@File}
-% Die Auszeichnung und der Indexeintrag einer Datei.
-%    \begin{macrocode}
-\NewExpandableDocumentCommand\@File{s m}{#2}
-\NewDocumentCommand\File{s m !d() !d||}{%
-  \Markup@SetFormat{\sbnfont}%
-  \Process@Markup{\File{#2}}(#3)%
-  \Process@Index{#1}{\File{#2}}[Datei](#3)|#4|%
-}
-%    \end{macrocode}
-% \end{macro}^^A \@File
-% \end{macro}^^A \File
 % \begin{macro}{\Class}
 % \changes{v2.02}{2014/10/08}{überarbeitet}^^A
 % \begin{macro}{\@Class}
@@ -2432,6 +2418,40 @@
 %</class>
 % \fi
 %
+% \begin{macro}{\ProcessorUnderscore}
+% \changes{v2.06f}{2019/11/08}{neu}^^A
+% Mit diesem Argumentprozessor werden Unterstriche in Datei- und Pfadangaben 
+% unschädlich gemacht.
+%    \begin{macrocode}
+\newcommand*\ProcessorUnderscore[1]{%
+  \begingroup%
+    \def\tud@res@a{#1}%
+    \tud@replace\tud@res@a{_}{\_}%
+    \edef\tud@res@a{%
+      \endgroup%
+      \def\noexpand\ProcessedArgument{\expandonce\tud@res@a}%
+    }%
+  \tud@res@a%
+}
+%    \end{macrocode}
+% \end{macro}^^A \ProcessorUnderscore
+% \begin{macro}{\File}
+% \changes{v2.02}{2014/10/08}{überarbeitet}^^A
+% \begin{macro}{\@File}
+% Die Auszeichnung und der Indexeintrag einer Datei.
+%    \begin{macrocode}
+\NewExpandableDocumentCommand\@File{s m}{#2}
+\NewDocumentCommand\File{s >{\ProcessorUnderscore}m !d() !d||}{%
+  \Markup@SetFormat{\sbnfont}%
+  \Process@Markup{\File{#2}}(#3)%
+  \Process@Index{#1}{\File{#2}}[Datei](#3)|#4|%
+}
+%    \end{macrocode}
+% \end{macro}^^A \@File
+% \end{macro}^^A \File
+% \begin{macro}{\Path}
+\NewDocumentCommand\Path{>{\ProcessorUnderscore}m}{\mbox{\texttt{#1}}}
+% \end{macro}^^A \Path
 % \begin{macro}{\ProcessorKeyVal}
 % \changes{v2.05}{2015/11/01}{neu}^^A
 % \begin{macro}{\tud@keyval@error}
@@ -2559,7 +2579,6 @@
 %   überarbeiten; \cs{PValueName} umbenennen^^A
 % }[v2.06f]
 % \ToDo{neues Makro \cs{PSetLength} mit \cs{PName\{Längenwert\}}}[v2.??]
-% \begin{macro}{\Path}
 % \begin{macro}{\PValue}
 % \begin{macro}{\PName}
 % \begin{macro}{\PValueName}
@@ -2580,7 +2599,6 @@
 % Parametern und Befehlen oder bestimmten Wertzuweisungen. Pfade werden ohne
 % zusätzliches Markup ausgegeben.
 %    \begin{macrocode}
-\newrobustcmd*\Path[1]{\mbox{\texttt{#1}}}
 \newrobustcmd*\PValue[1]{\mbox{\texttt{#1}}}
 \newrobustcmd*\PName[1]{\PValue{\textsl{<#1>}}}
 \newrobustcmd*\PValueName[1]{\PName{#1}}
@@ -2612,7 +2630,6 @@
 % \end{macro}^^A \PValueName
 % \end{macro}^^A \PName
 % \end{macro}^^A \PValue
-% \end{macro}^^A \Path
 % \begin{macro}{\tud@doifPValue}
 % \changes{v2.05}{2015/11/14}{neu}^^A
 % Der Befehl wird von den Makros \cs{tud@lbl@get} und \cs{tud@idx@get} genutzt,
@@ -3607,8 +3624,8 @@
 % mit |"| maskiert.
 %    \begin{macrocode}
     \def#3{#5}%
-    \tud@replace#2{@}{"@}%
-    \tud@replace#3{@}{"@}%
+    \tud@@replace#2{@}{"@}%
+    \tud@@replace#3{@}{"@}%
 %    \end{macrocode}
 % In \cs{@idxbundle} wird ggf. das Paket oder die Klasse gespeichert, für die 
 % der aktuelle Eintrag erzeugt werden soll. Eine explizite Angabe wird in jedem 
@@ -6399,67 +6416,57 @@
 %
 % \begin{macro}{\tud@replace}
 % \changes{v2.05}{2015/11/01}{neu}^^A
+% \changes{v2.06f}{2019/11/08}{neu}^^A
+% \begin{macro}{\tud@@replace}
+% \changes{v2.06f}{2019/11/08}{neu}^^A
 % Mit diesem Befehl kann in einem gegebenen Makro ein bestimmtes Zeichen durch 
-% ein anderes ersetzt werden. Dies wird verwendet, um für Indexbefehle oder 
-% Labels die möglicherweise enthaltenen |@|"~Zeichen zu ersetzen.
+% ein anderes ersetzt werden. Dies wird verwendet, um für Indexbefehle die 
+% möglicherweise enthaltenen |@|"~Zeichen oder in Datei- und Pfadangaben 
+% Unterstriche zu ersetzen.
 %    \begin{macrocode}
 \newcommand*\tud@replace[3]{%
   \begingroup%
 %    \end{macrocode}
-% Zunächst wird \cs{@tempa} als ein durch \cs{@nil} abgegrenztes Makro mit 
-% zwei Argumenten definiert, wobei diese durch das im zweiten Argument gegebene 
-% \meta{Zeichen} voneinander abgegrenzt werden. Mit diese beiden Argumente wird
-% das Makro \cs{@tempb} aufgerufen. 
+% Zunächst wird der Inhalt des ersten Argumentes expandiert. Anschließend 
+% wird \cs{tud@res@b} als ein durch \cs{@nil} abgegrenztes Makro mit zwei
+% Argumenten definiert, wobei diese durch das im zweiten Argument gegebene 
+% \meta{Zeichen} voneinander abgegrenzt werden. Dieses Makro wird nun so lange 
+% rekursiv mit dem zweiten Teil aufgerufen, bis dieses leer is. Dabei wird der 
+% erste, durch das angegebene zu ersetzende Zeichen Teil sukzessive an 
+% \cs{tud@res@c} angehängt und um das im dritten Argument angegebene 
+% Ersatzzeichen vervollständigt.
 %    \begin{macrocode}
-    \toks@{\def\@tempa##1}%
-    \eaddto@hook\toks@{\detokenize{#2}}%
-    \addto@hook\toks@{##2\@nil{\@tempb{##1}{##2}}}%
-%    \end{macrocode}
-% Der Inhalt von \cs{toks@} ist
-% \cs{def}\cs{@tempa\#1\meta{Zeichen}\#2}\cs{@nil\{\cs{@tempb\{\#1\}\{\#2\}}\}}
-% und definiert \cs{@tempa}.
-%    \begin{macrocode}
-    \the\toks@%
-%    \end{macrocode}
-% Nun wird \cs{@tempb} definiert. Dieses Makro fügt dem Zielmakro das erste
-% Argumente gefolgt von \meta{Ersatzzeichen} hinzu. Mit dem zweiten Argument
-% wird anschließend \cs{@tempa\#\#2}\cs{@nil} so lange rekursiv aufgerufen, bis
-% es wirklich leer ist, wodurch das zweite Argument \meta{Zeichen} sukzessive 
-% durch das dritte Argument \meta{Ersatzzeichen} ersetzt wird.
-%    \begin{macrocode}
-    \def\@tempb##1##2{%
+    \protected@edef\tud@res@a{#1}%
+    \let\tud@res@c\@empty%
+    \def\tud@res@b##1#2##2\@nil{%
       \IfArgIsEmpty{##2}{%
-        \appto#1{##1}%
-        \let\@tempc\relax%
+        \appto\tud@res@c{##1}%
       }{%
-        \appto#1{##1#3}%
-        \def\@tempc{\@tempa##2\@nil}%
+        \appto\tud@res@c{##1#3}%
+        \tud@res@b##2\@nil%
       }%
-      \@tempc%
     }%
-%    \end{macrocode}
-% Nachdem die beiden notwendigen Makros definiert wurden, erfolgt jetzt die 
-% eigentliche Ersetzung. Dafür wird der Inhalt des Zielmakros als Argument für 
-% \cs{@tempa} verwendet. Diesem wird das zu ersetzende Zeichen gefolgt von
-% \cs{@nil} hinzugefügt, um das Argument abschließend zu begrenzen.
-%    \begin{macrocode}
-    \toks@{\@tempa}%
-    \edef\@tempc{\expandafter\detokenize\expandafter{#1}}%
-    \eaddto@hook\toks@{\@tempc}%
-    \eaddto@hook\toks@{\detokenize{#2}\@nil}%
-%    \end{macrocode}
-% Der Inhalt von \cs{toks@} hat die Form \cs{@tempa\#1\meta{Zeichen}}\cs{@nil},
-% wobei der Inhalt von \meta{\#1} expandiert wird.
-%    \begin{macrocode}
-    \def#1{}%
-    \the\toks@%
-    \edef\tud@reserved{%
-      \noexpand\endgroup%
-      \def\noexpand#1{#1}%
+    \expandafter\tud@res@b\tud@res@a#2\@nil%
+    \edef\tud@res@a{%
+      \endgroup%
+      \def\noexpand#1{\expandonce{\tud@res@c}}%
     }%
-  \tud@reserved%
+  \tud@res@a%
 }
 %    \end{macrocode}
+% Diese Variante sorgt dafür, dass die zu ersetzenden Zeichen alle als Strings 
+% behandelt werden.
+%    \begin{macrocode}
+\newcommand*\tud@@replace[3]{%
+  \begingroup%
+    \edef\tud@res@a{%
+      \endgroup%
+      \etex@unexpanded{\tud@replace#1}{\detokenize{#2}}{\detokenize{#3}}%
+    }%
+  \tud@res@a%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@@replace
 % \end{macro}^^A \tud@replace
 %
 % \iffalse
