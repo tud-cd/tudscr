@@ -1,4 +1,4 @@
-% \CheckSum{4716}
+% \CheckSum{4723}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -1536,35 +1536,26 @@
 % Verfügung gestellt werden.
 %
 % \begin{macro}{\if@tud@declare}
-% \begin{macro}{\if@tud@subdeclare}
-% \changes{v2.06f}{2019/09/22}{neu}^^A
-% \begin{macro}{\if@tud@openindex}
 % \begin{macro}{\tud@declare@num}
 % \changes{v2.05}{2015/11/01}{neu}^^A
+% \begin{macro}{\if@tud@openindex}
 % Dies sin ein paar Hilfsmakros zur Steuerung des Markup sowie der Ausgabe von
 % Deklarationen, Index und Änderungsliste, welche bei den nächsten Befehlen und 
 % Umgebungen genutzt werden. Mit \cs{if@tud@declare} wird festgelegt, ob die
-% Befehle für das Markup in der Ausgabe als Deklaration oder anderweiteig
-% erfolgt. Zusätzlich kann mit \cs{if@tud@subdeclare} definiert werden, ob 
-% etwaige angehängte Werte an Optionen etc. direkt oder auf einer Unterebene im 
-% Index eingetragen werden sollen. Der Schalter \cs{if@tud@openindex} wird zu 
-% Beginn einer Deklaration auf \val{true} gesetzt und vor dem Beenden auf
-% \val{false}. Damit wird bestimmt, ob ein öffnender oder ein schließender
+% Befehle für das Markup in der Ausgabe als Deklaration oder anderweitig
+% erfolgt. Zusätzlich wird mit \cs{tud@declare@num} definiert, wie genau das 
+% Markup sich darstellen soll. Die möglichen Werte sind bei der Beschreibung
+% von \cs{Process@@MarkupDeclare} zu finden. Der Schalter \cs{if@tud@openindex} 
+% wird zu Beginn einer Deklaration auf \val{true} gesetzt und vor dem Beenden
+% auf \val{false}. Damit wird bestimmt, ob ein öffnender oder ein schließender
 % Indexeintrag erzeugt werden soll.
 %    \begin{macrocode}
 \newif\if@tud@declare
-\newif\if@tud@subdeclare
+\newcount\tud@declare@num
 \newif\if@tud@openindex
 %    \end{macrocode}
-% Das Makro \cs{tud@declare@num} bestimmt innerhalb einer Deklaration, wie 
-% das Markup erfolgen soll. Die möglichen Werte sind bei der Beschreibung von
-% \cs{Process@@MarkupDeclare} zu finden.
-%    \begin{macrocode}
-\newcommand*\tud@declare@num{0}
-%    \end{macrocode}
-% \end{macro}^^A \tud@declare@num
 % \end{macro}^^A \if@tud@openindex
-% \end{macro}^^A \if@tud@subdeclare
+% \end{macro}^^A \tud@declare@num
 % \end{macro}^^A \if@tud@declare
 % \begin{environment}{Declaration}
 % \begin{environment}{Obsolete}
@@ -1608,7 +1599,7 @@
     \def\noexpand\tud@alias@values{#6}%
     \etex@unexpanded{#2}%
   }%
-  \tud@declare@start[{#1}]{#2}[{#3}][{#4}]{#5}%
+  \tud@declare@start[{#1}]{#2}[{#3}][{#4}](#5)%
 }{%
   \tud@declare@end{#2}{\printdeclarationlist}%
 }
@@ -1631,11 +1622,11 @@
 % keine Änderungsnotiz erzeugt.
 %    \begin{macrocode}
     \listadd\tud@declaration@list{%
-      \def\tud@declare@num{1}%
+      \tud@declare@num=\@ne\relax%
       #3%
-      \def\tud@declare@num{0}%
+      \tud@declare@num=\z@\relax%
     }%
-    \tud@declare@start{#3}[{#4}][{#5}]{#6}%
+    \tud@declare@start{#3}[{#4}][{#5}](#6)%
   }{%
     \listadd\tud@declaration@list{#3}%
 %    \end{macrocode}
@@ -1644,12 +1635,12 @@
 % Untereintrag genutzt.
 %    \begin{macrocode}
     \IfValueTF{#2}{%
-      \Changed@At@CreateList[{#2}]{#1!#3}%
+      \Changed@At@CreateList{#1!#3}[{#2}]%
     }{%
-      \Changed@At@CreateList[{#3}]{#1}%
+      \Changed@At@CreateList{#1}[{#3}]%
     }%
     \IfValueTF{#6}{%
-      \tud@declare@start{#3}[{#4}][{#5}]{#6}%
+      \tud@declare@start{#3}[{#4}][{#5}](#6)%
 %    \end{macrocode}
 % Ohne eine zusätzliche Angabe imletzten optionalen Argument wird standardmäßig
 % der Entfall der Deklaration angegeben. Alternativ dazu kann im ersten 
@@ -1668,15 +1659,13 @@
         }%
         \@tempb#1\@nil%
       \fi%
-      \eaddto@hook\toks@{\expandafter{\@tempa}}%
+      \eaddto@hook\toks@{\expandafter(\@tempa)}%
       \the\toks@%
     }%
   }%
   \@tud@obsoletefalse%
 }{%
-  \@tud@obsoletetrue%
-  \tud@declare@end{#3}{\printobsoletelist}%
-  \@tud@obsoletefalse%
+  \tud@declare@end{\@tud@obsoletetrue#3\@tud@obsoletefalse}{\printobsoletelist}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \if@tud@obsolete
@@ -1708,13 +1697,13 @@
 % Dies sind die Makros für die eigentliche Abarbeitung der Deklarationsbefehle 
 % zu Beginn und Ende der Umgebungen \env{Declaration} und \env{Obsolete}.
 %    \begin{macrocode}
-\NewDocumentCommand\tud@declare@start{o m r[] r[] m}{%
+\NewDocumentCommand\tud@declare@start{o m r[] r[] r()}{%
 %    \end{macrocode}
 % Die optional angegebenen Änderungen werden mit \cs{Changed@At@CreateList} in 
 % der Liste \cs{tud@changedat@list} gesichert und später sowohl für die
 % Randnotiz als auch die Änderungsliste verarbeitet.
 %    \begin{macrocode}
-  \Changed@At@CreateList[{#2}]{#1}%
+  \Changed@At@CreateList{#1}[{#2}]%
 %    \end{macrocode}
 % Hier noch die Listen für Voreinstellungen\dots
 %    \begin{macrocode}
@@ -1769,14 +1758,25 @@
 % \end{macro}^^A \tud@declare@start
 % \begin{macro}{\InlineDeclaration}
 % \changes{v2.06f}{2019/09/22}{neu}^^A
+% \begin{macro}{\Inline@Declaration}
+% \changes{v2.06f}{2019/09/22}{neu}^^A
+% Mit dem Befehl \cs{InlineDeclaration} kann eine Deklaration auch im Fließtext 
+% erfolgen, ohne das hierfür die tabellarische Darstellung gewählt wird. 
+% Vielmehr erscheint der Markup-Befehl in seiner gewöhnlichen Fließtextform, 
+% allerdings werden zusätzlich ein Anker und ein Deklarationsindexeintrag 
+% erstellt. Die Sternform erzeugt hierbei einen untergeordneten Indexeintrag. 
+% Das optionale Argument kann für Änderungsnotizen genutzt werden.
 %    \begin{macrocode}
 \NewDocumentCommand\InlineDeclaration{s o m}{%
-  \IfBooleanTF{#1}{\@tud@subdeclaretrue}{\@tud@subdeclarefalse}%
-  \tud@declare@special@start[{#2}]{#3}{0}%
-  \tud@declare@special@end{#3}%
-  \@tud@subdeclarefalse%
+  \Inline@Declaration[{#2}]{#3}[\IfBooleanTF{#1}{-2}{-1}]%
+}
+\NewDocumentCommand\Inline@Declaration{o m O{-1}}{%
+  \tud@declare@special@start[{#1}]{#2}{#3}%
+  \printchangedatlist%
+  \tud@declare@special@end{#2}{#3}%
 }
 %    \end{macrocode}
+% \end{macro}^^A \Inline@Declaration
 % \end{macro}^^A \InlineDeclaration
 % \begin{environment}{Declaration*}
 % \changes{v2.02}{2014/10/09}{neu}^^A
@@ -1791,7 +1791,7 @@
 \NewDocumentEnvironment{Declaration*}{o m}{%
   \tud@declare@special@start[{#1}]{#2}{2}%
 }{%
-  \tud@declare@special@end{#2}%
+  \tud@declare@special@end{#2}{2}%
 }
 %    \end{macrocode}
 % \end{environment}^^A Declaration*
@@ -1809,11 +1809,11 @@
 % dem Schließen der Umgebung \env{Bundle} genutzt. 
 %    \begin{macrocode}
 \NewDocumentEnvironment{Bundle*}{o m}{%
-  \tud@declare@special@start[{#1}]{#2}{3}%
+  \tud@declare@special@start*[{#1}]{#2}{3}%
   \Bundle{#2}%
 }{%
   \endBundle%
-  \tud@declare@special@end{#2}%
+  \tud@declare@special@end{#2}{3}%
 }
 %    \end{macrocode}
 % \end{environment}^^A Bundle*
@@ -1821,27 +1821,37 @@
 % \changes{v2.05}{2015/11/01}{neu}^^A
 % \begin{macro}{\tud@declare@special@end}
 % \changes{v2.05}{2015/11/01}{neu}^^A
-% Die beiden dienen zur vereinfachten Deklaration. Es wird keine Ausgabe 
-% sondern lediglich Hyperlink, Indexeintrag und Änderungsnotiz erzeugt. Das 
-% optionale Argument dient einem Änderungseintrag, das erste obligaotrische 
-% gilt der eigentlichen Deklaration, das zweite zur Einstellung des Makros 
-% \cs{tud@declare@num}, mit welchem das Verhalten für das Erzeugen der Labels 
-% gesteuert wird.
+% Die beiden Befehle dienen zur vereinfachten Deklaration. Sollte eine Ausgabe 
+% erfolgen, so erfolgt diese im Fließtext und nicht tabelarisch. In jedem Fall 
+% werden Hyperlink, Indexeintrag und Änderungsnotiz erzeugt. Das optionale
+% Argument dient einem Änderungseintrag, das erste obligaotrische gilt der
+% eigentlichen Deklaration, das zweite zur Anpassung von \cs{tud@declare@num}, 
+% mit welchem das Verhalten für das Erzeugen von Ausgabe und Label gesteuert 
+% wird. Die Sternvariante wird von der Umgebung \env{Bundle*} genutzt, um 
+% Einträge in der Änderungsliste in den allgemeinen Teil zu schreiben.
 %    \begin{macrocode}
-\NewDocumentCommand\tud@declare@special@start{o m m}{%
-  \Changed@At@CreateList(#2){#1}%
-  \def\tud@declare@num{#3}%
-  \@tud@declaretrue\@tud@openindextrue#2\@tud@declarefalse%
-  \def\tud@declare@num{0}%
+\NewDocumentCommand\tud@declare@special@start{s r[] m m}{%
+  \tud@declare@num=#4\relax%
+  \@tud@declaretrue%
+  \IfBooleanTF{#1}{%
+    \Changed@At@CreateList{#2}(#3)%
+  }{%
+    \Changed@At@CreateList{#2}[{#3}]%
+  }%
+  \@tud@openindextrue#3%
+  \@tud@declarefalse%
+  \tud@declare@num=\z@\relax%
 }
-\newcommand*\tud@declare@special@end[1]{%
+\newcommand*\tud@declare@special@end[2]{%
   \ifx\tud@changedat@list\relax\else%
     \ClassError{tudscrmanual}{\string\printchangedatlist\space is missing}{%
       \string\tud@changedat@list\space is not empty. Did you\MessageBreak%
       forget to print this list with \string\printchangedatlist?%
     }%
   \fi%
+  \tud@declare@num=#2\relax%
   \@tud@declaretrue\@tud@openindexfalse#1\@tud@declarefalse%
+  \tud@declare@num=\z@\relax%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@declare@special@end
@@ -2907,6 +2917,7 @@
 % Mit \cs{Process@@MarkupDeclare} wird die formatierte Ausgabe der Deklaration 
 % realisiert. Wie diese genau gestaltet ist, wird durch \cs{tud@declare@num}
 % bestimmt. Folgende Werte sind möglich:
+% \ToDo{\val{-1/-2} dokumentieren}[v2.06f]
 % \begin{description}
 % \item[\val{0}:] Ausgabe von Markup, Erzeugen eines Labels
 % \item[\val{1}:] Ausgabe von Markup, kein Label
@@ -3098,8 +3109,9 @@
     \expandafter\@secondoftwo%
   \fi%
 }
-\pretocmd{\tud@sec@format}%
-  {\@tud@dispositiontrue}{}{\tud@patch@wrn{tud@sec@format}}
+\pretocmd{\tud@sec@format}{%
+  \@tud@dispositiontrue%
+}{}{\tud@patch@wrn{tud@sec@format}}
 %    \end{macrocode}
 % \end{macro}^^A \tud@sec@format
 % \end{macro}^^A \if@tud@disposition
@@ -4256,11 +4268,7 @@
 %    \begin{macrocode}
 \newlength\changedatskip
 \NewDocumentCommand\ChangedAt{s o d() m !O{\changedatskip}}{%
-  \IfValueTF{#2}{%
-    \Changed@At@CreateList[{#2}](#3){#4}%
-  }{%
-    \Changed@At@CreateList(#3){#4}%
-  }%
+  \Changed@At@CreateList{#4}[{#2}](#3)%
 %    \end{macrocode}
 % Nach dem Erstellen der Liste wird diese abgearbeitet und ggf. die Randnotiz 
 % ausgegeben.
@@ -4314,7 +4322,7 @@
 % welche alle notwendigen Angaben für das Erzeugen der Änderungshistorie in 
 % Form eines Indexes mit \cs{Changed@At@CreateEntry} enthält.
 %
-% Der Befehl \cs{Changed@At@CreateList} kann vor dem obligatorischen Argument 
+% Der Befehl \cs{Changed@At@CreateList} kann nach dem obligatorischen Argument 
 % mit einem ordinären optionalen Argument verwendet werden, in welchem ein 
 % Makro, eine Umgebung, eine Option etc. angegeben wird. Ist dies der Fall, so 
 % wird der Eintrag in die Änderungsliste für dieses Element generiert, sonst 
@@ -4323,12 +4331,11 @@
 % \env{Declaration*} bzw. \env{Bundle*} eine Änderungsnotiz erstellt wird, um 
 % diese für das jeweilige \TUDScript-Bundle-Element in den entsprechenden
 % Abschnitt der Änderungsliste einzutragen. Das Hauptargument verarbeitet
-% schließlich eine semikolongetrennte Liste und reicht jeden Bestandteil 
-% zusammen mit den beiden optionalen Argumenten an \cs{Changed@At@@CreateList} 
-% weiter. 
+% eine semikolongetrennte Liste und reicht jeden Bestandteil zusammen mit den
+% beiden optionalen Argumenten an \cs{Changed@At@@CreateList} weiter. 
 %    \begin{macrocode}
-\NewDocumentCommand\Changed@At@CreateList{o d() m}{%
-  \IfValueT{#3}{\forssvlist{\Changed@At@@CreateList[{#1}](#2)}{#3}}%
+\NewDocumentCommand\Changed@At@CreateList{m o d()}{%
+  \IfValueT{#1}{\forssvlist{\Changed@At@@CreateList[{#2}](#3)}{#1}}%
 }
 %    \end{macrocode}
 % Mit \cs{Changed@At@@CreateList} wird lediglich die Versionsnummer von der 
@@ -4383,9 +4390,7 @@
   \def\@tempa##1{%
     \sbox\z@{%
       \let\tud@idx@fmt\relax%
-      \@tud@changedattrue%
-      ##1%
-      \@tud@changedatfalse%
+      \@tud@changedattrue##1\@tud@changedatfalse%
       \ifx\tud@idx@fmt\relax%
         \gdef\@tempb{##1}%
       \else%
@@ -4643,9 +4648,7 @@
 % Inhalt von \cs{tud@idx@val} zu schützen, erfolgt das ganze in einer Gruppe.
 %    \begin{macrocode}
         \begingroup%
-          \@tud@changedattrue%
-          #4%
-          \@tud@changedatfalse%
+          \@tud@changedattrue#4\@tud@changedatfalse%
           \let\suffix\@gobble%
           \protected@edef\tud@reserved{%
             \noexpand\endgroup%
