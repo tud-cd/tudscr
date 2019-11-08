@@ -1,4 +1,4 @@
-% \CheckSum{4512}
+% \CheckSum{4613}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -596,6 +596,104 @@
 % \end{macro}^^A \tud@trace@bdl@list
 % \end{macro}^^A \tud@trace@bfundle
 % \end{macro}^^A \tracingbundle
+%
+% \subsection{Hilfslisten}
+%
+% Mit den nachfolgenden Makros werden Hilfslisten definiert, die am Ende des 
+% Dokumentes in die aux"~Datei geschrieben werden, um dieses beim nachfolgenden 
+% Durchlauf wieder einlesen und verarbeiten zu können.
+% \begin{macro}{\tud@auxlist@register}
+% \changes{v2.06f}{2019/11/08}{neu}^^A
+% Hiermit wird eine Hilfsliste initialisiert und die Befehle ausgeführt, um 
+% diese für die aux"~Datei zu lesen und zu schreiben. Das erste optionale 
+% Argument dient dazu, vor dem eigentlichen Einlesen der Liste diese mit einem 
+% Element zu initialisieren. Das obligatorische Argument enthält den Namen der 
+% Liste. Das nachfolgende optionale Argument wird beim Importieren auf jedes 
+% Listenelement angewendet, bevor es zur Liste hinzugefügt wird.
+%
+% Dabei werden drei Makros verwendet. Der Befehl \cs{\meta{listname}@auxlist} 
+% enthält die importierte Liste. In \cs{\meta{listname}@auxlist@positive} 
+% werden alle potentiellen Einträge in einer Positivliste vorgehalten, die 
+% exportiert werden sollen. Da im Verlauf des Dokumentes allerdings bestimmte
+% Elemente wieder entfernt werden könnten, wird die Negativliste für diese 
+% genutzt. Dieses Konstrukt dient dazu, dass beim Kompilieren des Dokumentes 
+% möglicherweise Elemente auftreten, die gar nicht exportiert werden sollen, 
+% obwohl diese später der Positivliste hinzugefügt werden könnten.
+%    \begin{macrocode}
+\NewDocumentCommand\tud@auxlist@register{o m !O{\@firstofone}}{%
+  \expandafter\newcommand\expandafter*\csname#2@auxlist\endcsname{}%
+  \expandafter\newcommand\expandafter*\csname#2@auxlist@positive\endcsname{}%
+  \expandafter\newcommand\expandafter*\csname#2@auxlist@negative\endcsname{}%
+  \BeforeClosingMainAux{%
+    \forlistcsloop{\listcsremove{#2@auxlist@positive}}{#2@auxlist@negative}%
+    \tud@auxlist@export{#2@auxlist}%
+  }%
+  \AtBeginDocument{\tud@auxlist@import{#1}{#2@auxlist}{#3}}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@auxlist@register
+% \begin{macro}{\tud@auxlist@export}
+% \changes{v2.06f}{2019/11/08}{neu}^^A
+% \begin{macro}{\tud@auxlist@import}
+% \changes{v2.06f}{2019/11/08}{neu}^^A
+%    \begin{macrocode}
+% Beim Schreiben in die aux"~Datei wird die \pkg{etoolbox}"~Liste in eine 
+% Token-Liste umgewandelt.
+\newcommand*\tud@auxlist@export[1]{%
+  \if@filesw%
+    \let\tud@res@a\@empty%
+    \def\tud@res@b##1{\eappto\tud@res@a{{##1}}}%
+    \forlistcsloop\tud@res@b{#1@positive}%
+    \immediate\write\@mainaux{%
+      \string\gdef\expandafter\string\csname #1\endcsname%
+        {\expandonce\tud@res@a}%
+    }%
+  \fi%
+}
+%    \end{macrocode}
+% Beim Lesen wird die Token-Liste zurück in eine \pkg{etoolbox}"~Liste 
+% gewandelt.
+%    \begin{macrocode}
+\newcommand*\tud@auxlist@import[3]{%
+  \begingroup%
+    \edef\tud@res@a{%
+      \etex@unexpanded{\@tfor\tud@res@b:=}%
+      \expandafter\expandonce\csname #2\endcsname%
+    }%
+    \global\cslet{#2}\@empty%
+    \IfValueT{#1}{\listcsxadd{#2}{#1}}%
+    \tud@res@a\do{\listcsxadd{#2}{#3{\tud@res@b}}}%
+  \endgroup%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@auxlist@import
+% \end{macro}^^A \tud@auxlist@export
+% \begin{macro}{\tud@auxlist@add}
+% \changes{v2.06f}{2019/11/08}{neu}^^A
+% \begin{macro}{\tud@auxlist@remove}
+% \changes{v2.06f}{2019/11/08}{neu}^^A
+%    \begin{macrocode}
+\newcommand*\tud@auxlist@add[2]{%
+  \begingroup%
+    \protected@edef\tud@res@a{#2}%
+    \edef\tud@res@a{\detokenize\expandafter{\tud@res@a}}%
+    \xifinlistcs{\tud@res@a}{#1@auxlist@positive}{}{%
+      \listcsxadd{#1@auxlist@positive}{\tud@res@a}%
+    }%
+  \endgroup%
+}
+\newcommand*\tud@auxlist@remove[2]{%
+  \begingroup%
+    \protected@edef\tud@res@a{#2}%
+    \edef\tud@res@a{\detokenize\expandafter{\tud@res@a}}%
+    \xifinlistcs{\tud@res@a}{#1@auxlist@negative}{}{%
+      \listcsxadd{#1@auxlist@negative}{\tud@res@a}%
+    }%
+  \endgroup%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@auxlist@remove
+% \end{macro}^^A \tud@auxlist@add
 %
 % \iffalse
 %</class>
