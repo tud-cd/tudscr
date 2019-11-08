@@ -1,4 +1,4 @@
-% \CheckSum{4698}
+% \CheckSum{4716}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -332,8 +332,8 @@
 %<*option>
 % \fi
 %
-% \subsection{%
-%   Optionen für die Ausgabe von \cls{tudscrmanual} und \pkg{tudscrtutorial}%
+% \subsection{^^A
+%   Optionen für die Ausgabe von \cls{tudscrmanual} und \pkg{tudscrtutorial}^^A
 % }
 %
 % \begin{option}{final}
@@ -698,6 +698,7 @@
 % \changes{v2.06f}{2019/11/08}{neu}^^A
 % \begin{macro}{\tud@auxlist@forloop}
 % \changes{v2.06f}{2019/11/08}{neu}^^A
+%    \begin{macrocode}
 \newcommand*\tud@auxlist@ifin[2]{\xifinlistcs{#1}{#2@auxlist}}
 \newcommand*\tud@auxlist@forloop[2]{\forlistcsloop#1{#2@auxlist}}
 %    \end{macrocode}
@@ -1179,10 +1180,10 @@
 % \changes{v2.05}{2015/11/03}{neu}^^A
 % \begin{macro}{\tud@lbl@fmt}
 % \changes{v2.05}{2015/11/03}{neu}^^A
-% In \cs{tud@lbl@tmp} werden nachfolgend die durch \cs{tud@lbl@get@curr} oder 
+% In \cs{tud@lbl@tmp} werden nachfolgend die durch \cs{tud@lbl@get} oder 
 % \cs{tud@attr@get} erzeugten (Sub-)Label gespeichert. Mit dem Hilfsmakro 
-% \cs{tud@lbl@fmt} wird innerhalb der beiden Befehle \cs{tud@lbl@@create} und 
-% \cs{tud@lbl@get@@curr} dafür gesorgt, dass geschützte Leerzeichen sowie
+% \cs{tud@lbl@fmt} wird innerhalb der beiden Befehle \cs{Processor@CreateLabel} 
+% und \cs{tud@lbl@get@@curr} dafür gesorgt, dass geschützte Leerzeichen sowie
 % eingabekodierungsabhängige Zeichen korrekt für ein Label umgesetzt werden.
 % Auch durch \cs{NoCaseChange} in Überschriften geschützte Inhalte werden 
 % direkt übernommen.
@@ -1205,7 +1206,7 @@
 % Mit dem Befehl \cs{tud@if@lbl@exists} wird eine Fallunterscheidung bezüglich
 % der Existenz eines Labels in der Form
 % \meta{Bundlepräfix}|:|\meta{Labelpräfix}|:|\meta{Element} durchgeführt. Das
-% zu prüfende Label ist in gleicher Weise wie beim Makro \cs{tud@lbl@get@curr}
+% zu prüfende Label ist in gleicher Weise wie beim Makro \cs{tud@lbl@get}
 % anzugeben. Je nachdem, ob ein existierendes Label gefunden wird oder nicht,
 % wird das zweite oder das dritte obligatorische Argument ausgeführt.
 %    \begin{macrocode}
@@ -1218,9 +1219,7 @@
     }%
   \tud@res@a%
 }
-\NewDocumentCommand\tud@if@lbl@@exists{%
-  >{\tud@lbl@create}>{\SplitArgument{2}{:}}m%
-}{%
+\NewDocumentCommand\tud@if@lbl@@exists{>{\ProcessorCreateLabel}m}{%
   \ifcsundef{r@#1}{%
     \expandafter\@secondoftwo%
   }{%
@@ -1231,53 +1230,40 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@if@lbl@@exists
 % \end{macro}^^A \tud@if@lbl@exists
-% \begin{macro}{\tud@lbl@create}
+% \begin{macro}{\ProcessorCreateLabel}
 % \changes{v2.05}{2015/11/03}{neu}^^A
-% \begin{macro}{\tud@lbl@@create}
+% \begin{macro}{\Processor@CreateLabel}
 % \changes{v2.05}{2015/11/03}{neu}^^A
-% Das Makro \cs{tud@lbl@@create} ist ein Argumentprozessor, welcher als Eingabe 
-% genau drei Argumente für das Erstellen eines gültigen Labels erwartet. Er
-% wird sowohl von \cs{tud@lbl@get@curr} als auch von \cs{tud@if@lbl@exists}
-% verwendet. Vor der Nutzung von \cs{tud@lbl@create} muss das Argument zuvor
-% bereits mit \cs{SplitArgument}|{2}{:}| aufgerufen worden sein. Diese
-% Eigenheit macht die Definition von \cs{tud@lbl@create} notwendig, um das
-% Ergebnis der zuvor vorgenommenen Argumentaufspaltung verarbeiten zu können,
-% in dem dieses an \cs{tud@lbl@@create} durchgereicht wird. Eine Integration 
-% der Spaltung des Argumentes in \cs{tud@lbl@create} ist aufgrund des 
-% mehrmaligen rekursiven Aufrufs von \cs{tud@lbl@create} nicht möglich.
-%
-% Mit dem Argumentprozessor \cs{tud@lbl@create} wird es ermöglicht, an die 
-% beiden Befehle \cs{tud@lbl@get@curr} und \cs{tud@if@lbl@exists} sowohl ein
-% einzelnes Makro, welches das Label bereits beinhaltet als auch einen
-% Markup-Befehl ggf. mit einem Bundlepräfix zu übergeben. In beiden Fällen
-% wird aus dem übergebenen Argument ein eindeutiges Label in der Form 
+% Mit dem Argumentprozessor \cs{ProcessorCreateLabel} wird es ermöglicht, an 
+% die Befehle \cs{tud@lbl@get} und \cs{tud@if@lbl@exists} sowohl ein einzelnes
+% Makro, welches das Label bereits beinhaltet als auch einen Markup-Befehl ggf.
+% mit einem Bundlepräfix zu übergeben. In beiden Fällen wird aus dem Argument
+% ein eindeutiges Label in der Form 
 % \meta{Bundlepräfix}|:|\meta{Labelpräfix}|:|\meta{Element} generiert und als
 % resultierendes Argument an das aufrufenden Makro übergeben.
-%    \begin{macrocode}
-\NewDocumentCommand\tud@lbl@create{m}{\tud@lbl@@create#1}
-%    \end{macrocode}
-% Es gibt insgesamt vier verschiedene Varianten der Argumentenübergabe an den
-% Argumentprozessor \cs{tud@lbl@@create}.
+%
+% Es gibt insgesamt vier verschiedene Varianten der Übergabe eines Argumentes 
+% an den Argumentprozessor \cs{ProcessorCreateLabel}.
 % \begin{description}\let\itshape\slshape
-%    \item[\cs{tud@lbl@@create}]\ignorespaces%
-%    |{\LabelMakro}{-NoValue-}{-NoValue-}|\strut\newline%
+%    \item[\cs{ProcessorCreateLabel}]
+%    |{\LabelMakro}{-NoValue-}{-NoValue-}|\strut\newline^^A
 %      Das Label ist bereits in \cs{LabelMakro} enthalten und soll expandiert 
 %      werden. Dabei spielt es keine Rolle, ob die durch |:| getrennten
 %      Bestandteile innerhalb des Labels schon als einfacher String oder in der 
 %      Markupform gegeben sind.
-%    \item[\cs{tud@lbl@@create}]\ignorespaces%
-%    |{-NoValue-}{\Markup|\marg{Element}|}{-NoValue-}|\strut\newline%
+%    \item[\cs{ProcessorCreateLabel}]
+%    |{-NoValue-}{\Markup|\marg{Element}|}{-NoValue-}|\strut\newline^^A
 %      Das Label soll für ein Markupelement generiert werden, wobei in jedem
 %      Fall der Inhalt aus \cs{tud@bdl@curr} als Bundlepräfix genutzt wird.
-%    \item[\cs{tud@lbl@@create}]\ignorespaces%
-%    |{\Class/\Package|\marg{\dots}|}|\ignorespaces%
-%    |{\Markup|\marg{Element}|}{-NoValue-}|\strut\newline%
+%    \item[\cs{ProcessorCreateLabel}]
+%    |{\Class/\Package|\marg{\dots}|}|^^A
+%    |{\Markup|\marg{Element}|}{-NoValue-}|\strut\newline^^A
 %      Das Label soll für ein Markupelement generiert werden. 
 %      Dabei wurde explizit ein Paket oder eine Klasse aus dem Bundle angegeben 
 %      oder implizit das Makro \cs{tud@bdl@curr} als Argument verwendet,
 %      welches innerhalb der Umgebungen \env{Bundle} und \env{Bundle*} auf
 %      das/die aktuell beschriebene Paket/Klasse gesetzt wurde.
-%    \item[\cs{tud@lbl@@create}]\ignorespaces%
+%    \item[\cs{ProcessorCreateLabel}]
 %    \marg{Bundlepräfix}\marg{Labelpräfix}\marg{Element}\strut\newline 
 %      Das Label ist bereits vollständig bestimmt und die Argumente werden 
 %      entweder als String oder als Markup übergeben. Auch Mischformen sind 
@@ -1285,7 +1271,24 @@
 %      Variante tritt durch rekursiven Aufruf des Argumentprozessors auf.
 % \end{description}
 %    \begin{macrocode}
-\NewDocumentCommand\tud@lbl@@create{m m m}{%
+\newcommand*\ProcessorCreateLabel[1]{%
+  \in@{:}{#1}%
+  \ifin@\else%
+%<*class>
+    \ClassError{tudscrmanual}%
+%</class>
+%<*package>
+    \PackageError{tudscrtutorial}%
+%</package>
+    {Wrong formatted label}{%
+      A label has to be given at least with '<bundle>:<markup>'\MessageBreak%
+      but \detokenize{#1} was used.%
+    }%
+  \fi%
+  \SplitArgument{2}{:}{#1}%
+  \expandafter\Processor@CreateLabel\ProcessedArgument%
+}
+\newcommand*\Processor@CreateLabel[3]{%
   \begingroup%
 %    \end{macrocode}
 % Zu Beginn werden die Markup-Befehle auf ihre expandierbaren Varianten gesetzt 
@@ -1342,25 +1345,20 @@
   \@tempc%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@lbl@@create
-% \end{macro}^^A \tud@lbl@create
-% \begin{macro}{\tud@lbl@get@curr}
+% \end{macro}^^A \Processor@CreateLabel
+% \end{macro}^^A \ProcessorCreateLabel
+% \begin{macro}{\tud@lbl@get}
 % \changes{v2.05}{2015/11/03}{neu}^^A
 % \begin{macro}{\tud@lbl@get@@curr}
 % \changes{v2.05}{2015/11/03}{neu}^^A
-% Für den Befehl \cs{tud@lbl@get@curr} wird das zweite obligatorische 
-% Argument (|#3|) für gewöhnlich in der Form
-% |{\Bundle|\marg{Klasse/Paket}|:\Markup|\marg{Element}|}| angegeben. Dieses
-% wird beim Einlesen direkt an die beiden Argumentprozessoren 
-% \cs{SplitArgument}|{2}{:}| gefolgt von \cs{tud@lbl@create} übergeben. Danach
-% enthält das zweite obligatorische Argument ein Label der Form
-% \meta{Bundlepräfix}|:|\meta{Labelpräfix}|:|\meta{Element}. Auch die Angabe
-% eines Makros als zweites obligatorische Argument, welches das Label in der
-% richtigen Formatierung enthält, ist möglich.
+% Für \cs{tud@lbl@get} wird das zweite obligatorische Argument für gewöhnlich
+% in der Form |{\Bundle|\marg{Klasse/Paket}|:\Markup|\marg{Element}|}| gegeben.
+% Beim Einlesen wird es mit dem Argumentprozessor \cs{ProcessorCreateLabel} in
+% die Form \meta{Bundlepräfix}|:|\meta{Labelpräfix}|:|\meta{Element} gewandelt. 
+% Auch die Angabe eines Makros als zweites obligatorische Argument, welches das
+% Label in der richtigen Formatierung enthält, ist möglich.
 %    \begin{macrocode}
-\NewDocumentCommand\tud@lbl@get@curr{%
-  s m >{\tud@lbl@create}>{\SplitArgument{2}{:}}m d==%
-}{%
+\NewDocumentCommand\tud@lbl@get{s m >{\ProcessorCreateLabel}m d==}{%
 %    \end{macrocode}
 % Mit \cs{tud@lbl@get@@curr} wird das im zweiten obligatorischen Argument 
 % (|#3|) generierte Label in das im ersten obligatorischen Argument |#2|
@@ -1369,8 +1367,8 @@
 %    \begin{macrocode}
   \tud@lbl@get@@curr#2{#3}=#4=%
 %    \end{macrocode}
-% Die Sternversion von \cs{tud@lbl@get@curr} wird für das Definieren von Labeln 
-% bei Deklarationen etc. genutzt. Sollte diese verwendet worden sein, ist die 
+% Die Sternversion von \cs{tud@lbl@get} wird für das Definieren von Labeln bei
+% Deklarationen etc. genutzt. Sollte diese verwendet worden sein, ist die 
 % Generierung beendet.
 %    \begin{macrocode}
 %<*class>
@@ -1409,7 +1407,7 @@
 }
 %    \end{macrocode}
 % Mit \cs{tud@lbl@get@@curr} wird das generierte Label in Makro gespeichert, 
-% welches beim Aufruf von \cs{tud@lbl@get@curr} angegebenen wurde.
+% welches beim Aufruf von \cs{tud@lbl@get} angegebenen wurde.
 %    \begin{macrocode}
 \NewDocumentCommand\tud@lbl@get@@curr{m m d==}{%
   \def#1{#2}%
@@ -1421,15 +1419,15 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@lbl@get@@curr
-% \end{macro}^^A \tud@lbl@get@curr
+% \end{macro}^^A \tud@lbl@get
 % \begin{macro}{\tud@lbl@get@dflt}
 % \changes{v2.05}{2015/11/04}{neu}^^A
 % \begin{macro}{\tud@lbl@get@@dflt}
 % \changes{v2.05}{2015/11/04}{neu}^^A
-% Diese beiden Makros werden genutzt, um mit \cs{tud@lbl@get@curr} innerhalb 
-% der Umgebungen \env{Bundle} und \env{Bundle*} für den Fall, dass ein 
-% gesuchtes Label für das aktuelle Bundle-Element nicht existiert, nach diesem
-% Element in den existierenden Labels der Hauptklassen zu suchen.
+% Diese beiden Makros werden genutzt, um mit \cs{tud@lbl@get} innerhalb der
+% Umgebungen \env{Bundle} und \env{Bundle*} für den Fall, dass ein gesuchtes
+% Label für das aktuelle Bundle-Element nicht existiert, nach diesem Element in
+% den existierenden Labels der Hauptklassen zu suchen.
 %
 % Dabei wird das bereits generierte Label durch \cs{tud@lbl@get@dflt} in 
 % seine drei Hauptbestandteile zur Weiterverarbeitung zerlegt.
@@ -1448,7 +1446,7 @@
 %    \end{macrocode}
 % Dabei erfolgt der Aufruf logischerweise mit dem richtigen Bundlepräfix. 
 %    \begin{macrocode}
-    \tud@lbl@get@curr\tud@reserved{\tud@bdl@dflt:#3:#4}=#5=%
+    \tud@lbl@get\tud@reserved{\tud@bdl@dflt:#3:#4}=#5=%
     \tud@if@lbl@exists{\tud@reserved}{\let#1\tud@reserved}{}%
   }%
 }
@@ -1571,6 +1569,8 @@
 % \begin{environment}{Declaration}
 % \begin{environment}{Obsolete}
 % \changes{v2.05}{2015/11/01}{neu}^^A
+% \begin{macro}{\tud@alias@values}
+% \changes{v2.06f}{2019/11/08}{neu}^^A
 % \begin{macro}{\tud@declaration@list}
 % \begin{macro}{\if@tud@obsolete}
 % \changes{v2.05}{2015/11/01}{neu}^^A
@@ -1602,6 +1602,7 @@
 % Deklaration erfolgt mit dem Befehl \cs{printdeclarationlist} bezieungsweise 
 % \cs{printobsoletelist}. 
 %    \begin{macrocode}
+\newcommand*\tud@alias@values{\@nil}
 \NewDocumentEnvironment{Declaration}{o m !o !o !d() !D<>{\noexpand\@nil}}{%
   \listeadd\tud@declaration@list{%
     \def\noexpand\tud@alias@values{#6}%
@@ -1680,6 +1681,7 @@
 %    \end{macrocode}
 % \end{macro}^^A \if@tud@obsolete
 % \end{macro}^^A \tud@declaration@list
+% \end{macro}^^A \tud@alias@values
 % \end{environment}^^A Obsolete
 % \end{environment}^^A Declaration
 % \begin{macro}{\tud@preset@list}
@@ -2167,12 +2169,12 @@
 % direkt mit |=|\meta{Wert}|=| angehangen werden. Um die gleichzeitige 
 % Verwendung beider Varianten zu unterdrücken, wird in diesem Fall ein Fehler 
 % erzeugt.
-% \ToDo{%
+% \ToDo{^^A
 %   Eigentlich sollte der Wert hier formatiert werden. Wünschenswert wäre die 
 %   Angabe von \val{Option=Wert} und \val{Option=<Spezialwert>}, damit das 
 %   Gezerre mit der Spezialbehandlung von \cs{PSet} etc. wegfallen könnte,
-%   siehe \cs{tud@declare@start}
-% }[v2.??]%
+%   siehe \cs{tud@declare@start}^^A
+% }[v2.??]
 %    \begin{macrocode}
 \NewDocumentCommand\Option@Value{m m d== d== d() d'' d||}{%
   \IfValueT{#4}{\tud@keyval@error}%
@@ -2212,11 +2214,11 @@
 % Nur hier kommt das optionale Argument von \cs{Markup@SetFormat} nach dem
 % Hauptargument zum Tragen. Die resultierende Ausgabe hat die Gesatlt:
 %
-% \begin{tabular}{l}%
+% \begin{tabular}{l}
 %   \cs{begin}\marg{Umgebung}\tabularnewline
 %   \dots\tabularnewline
 %   \cs{end}\marg{Umgebung}\tabularnewline
-% \end{tabular}%
+% \end{tabular}
 %    \begin{macrocode}
     \Markup@SetFormat{\ttfamily}(%
       \ttfamily\bsc{}begin\textbraceleft#2\textbraceright\IfValueT{#3}{#3}%
@@ -2320,12 +2322,12 @@
 % Parameter gültig ist. Das zweite Argument ist der Parameter selbst. Die 
 % optionale Zuweisung eines Wertes kann äquivalent zu \cs{Option} mit dem
 % Trennzeichen~|=| im Hauptargument erfolgen.
-% \ToDo{%
+% \ToDo{^^A
 %   Eigentlich sollte der Wert hier formatiert werden. Die Angabe von
 %   \val{Parameter=Wert} und \val{Parameter=<Spezialwert>} wäre gut, damit
 %   das Gezerre mit der Spezialbehandlung von \cs{PSet} etc. wegfallen könnte,
-%   siehe \cs{tud@declare@start}
-% }[v2.??]%
+%   siehe \cs{tud@declare@start}^^A
+% }[v2.??]
 %    \begin{macrocode}
 \NewExpandableDocumentCommand\@Key{s m m}{#2!#3}
 \NewDocumentCommand\Key{s m >{\ProcessorKeyVal}m !d== !d() !d'' !d||}{%
@@ -2543,23 +2545,17 @@
 %
 % \subsubsection{Markup von Variablen, Parametern etc.}
 %
-% \ToDo{%
-%   Verwendung der Befehle überprüfen, evtl. umbennenen. Wozu \cs{PValueName}?%
+% \ToDo{^^A
+%   Verwendung der Befehle überprüfen, evtl. umbennenen. Wozu \cs{PValueName}?
 %   Evtl. sollte \cs{PValue} innerhalb von \cs{PName} lokal geändert werden?
 %   Was passiert, wenn auch \cs{PName} von \cs{tud@doifPValue} akzeptiert?
-%   Zeile 542--546 in tudscr-hints, 294 in tudscr-packages
-% }[v2.??]%
-% \ToDo{%
+%   Zeile 542--546 in tudscr-hints, 294 in tudscr-packages^^A
+% }[v2.06f]
+% \ToDo{^^A
 %   nach '=\cs{P(Value)?Name}' in *.tex suchen und ggf. 
-%   überarbeiten; \cs{PValueName} umbenennen%
-% }[v2.??]%
-% \ToDo{%
-%   bei der Deklaration evtl. ein Hilfsmakro erstellen und den
-%   Default-Eintrag hinterlegen, um ggf. darauf zu prüfen%
-% }[v2.??]%
-% \ToDo{%
-%   neues Makro \cs{PLength} mit \cs{PName\{Längenwert\}}
-% }[v2.??]%
+%   überarbeiten; \cs{PValueName} umbenennen^^A
+% }[v2.06f]
+% \ToDo{neues Makro \cs{PSetLength} mit \cs{PName\{Längenwert\}}}[v2.??]
 % \begin{macro}{\Path}
 % \begin{macro}{\PValue}
 % \begin{macro}{\PName}
@@ -2616,11 +2612,10 @@
 % \end{macro}^^A \Path
 % \begin{macro}{\tud@doifPValue}
 % \changes{v2.05}{2015/11/14}{neu}^^A
-% Der Befehl wird von den Makros \cs{tud@lbl@get@curr} und \cs{tud@idx@get}
-% genutzt, um bedingten Quelltext auszuführen, falls im ersten obligatorischen 
-% Argument entweder Parameter entweder direkt oder aber mit einem der beiden 
-% Parameter-Markup-Befehle \cs{PValue} oder \cs{PValueName} angegeben wurde. 
-% Alle anderen Auszeichnungsbefehle für Parameter sollen ingnoriert werden.
+% Der Befehl wird von den Makros \cs{tud@lbl@get} und \cs{tud@idx@get} genutzt,
+% um bedingten Quelltext auszuführen, falls im ersten obligatorischen Argument
+% entweder Parameter direkt oder aber mit einem der Parameter-Markup-Befehle
+% \cs{PValue} oder \cs{PValueName} angegeben wurde.
 %    \begin{macrocode}
 \newcommand*\tud@doifPValue[3][]{%
   \IfValueT{#2}{%
@@ -2763,9 +2758,9 @@
 % |'|\meta{Referenzvariante}|'| der automatisch erzeugte Querverweis in
 % verschiedenen Varianten formatiert werden. Der vollständige Funktionsaufruf:
 % \newline\begingroup\scriptsize
-%   \cs{Process@Markup}\marg{Element}|=|\meta{Wert}|=|\ignorespaces%
-%   \oarg{Ausgabesuffix}\parg{Bundleelement}\ignorespaces%
-%   |<|\meta{CTAN-Paket}|>||'|\meta{Referenzvariante}|'|\ignorespaces%
+%   \cs{Process@Markup}\marg{Element}|=|\meta{Wert}|=|^^A
+%   \oarg{Ausgabesuffix}\parg{Bundleelement}^^A
+%   |<|\meta{CTAN-Paket}|>||'|\meta{Referenzvariante}|'|^^A
 % \endgroup
 %
 % In eingen Fällen ist es beim Aufruf eines Markup-Befehls nicht erwünscht, 
@@ -2788,24 +2783,24 @@
 % das Zusammensetzen der notwendigen Übergabewerte erleichtert wird. 
 %
 % Die Fallunterscheidung betrifft des Weiteren die Erzeugung des Labels. Für 
-% eine Deklaration wird die Sternversion von \cs{tud@lbl@get@curr} verwendet, 
-% welche ein Label aus den gegebenen Argumenten zusammensetzt. Ist keine
-% Deklaration aktiv, versucht \cs{tud@lbl@get@curr} ein gültiges, schon 
-% vorhandenes Label zu  verwenden. Das generierte Label wird anschließend als 
-% erstes Argument für das weiterverabeitende Makro genutzt.
+% eine Deklaration wird die Sternversion von \cs{tud@lbl@get} verwendet, welche
+% ein Label aus den gegebenen Argumenten zusammensetzt. Ist keine Deklaration
+% aktiv, versucht \cs{tud@lbl@get} ein gültiges, schon vorhandenes Label zu 
+% verwenden. Das generierte Label wird anschließend als erstes Argument für das
+% weiterverabeitende Makro genutzt.
 %    \begin{macrocode}
 %<*class>
   \if@tud@declare%
     \tud@toks@{\Process@@MarkupDeclare}%
     \IfValueTF{#4}{%
-      \tud@lbl@get@curr*\tud@lbl@tmp{#4:#1}=#2=%
+      \tud@lbl@get*\tud@lbl@tmp{#4:#1}=#2=%
     }{%
-      \tud@lbl@get@curr*\tud@lbl@tmp{\tud@bdl@curr:#1}=#2=%
+      \tud@lbl@get*\tud@lbl@tmp{\tud@bdl@curr:#1}=#2=%
     }%
   \else%
 %</class>
     \tud@toks@{\Process@@MarkupInline}%
-    \tud@lbl@get@curr\tud@lbl@tmp{#4:#1}=#2=%
+    \tud@lbl@get\tud@lbl@tmp{#4:#1}=#2=%
 %<*class>
   \fi%
 %</class>
@@ -2969,10 +2964,10 @@
 % des Befehls \cs{Process@@MarkupDeclare} und werden bis auf das Label ebenso an
 % \cs{Markup@Output} übergeben, nachdem mit dem Befehl \cs{Markup@CheckFormat} 
 % auf eine existierende Markup-Definition geprüft wurde.
-% \ToDo{%
+% \ToDo{^^A
 %   Hyperlinks auf erläuterte Element innerhalb der Umgenung \env{Declaration}
-%   unterbinden? Könnte \cs{tud@declaration@list} genutzt werden?%
-% }[v2.07]%
+%   unterbinden? Könnte \cs{tud@declaration@list} genutzt werden?^^A
+% }[v2.07]
 %    \begin{macrocode}
 \NewDocumentCommand\Process@@MarkupInline{m m d== o d() d<> d''}{%
   \Markup@CheckFormat%
@@ -3528,9 +3523,9 @@
 % Deklarationen zur Unterdrückung von Untereinträgen verwendet.
 % Der vollständige Funktionsaufruf lautet:
 % \newline\begingroup\scriptsize
-%   \cs{tud@idx@get}\cs{tud@idx@key}\cs{tud@idx@fmt}\ignorespaces%
-%   \cs{tud@idx@val}\marg{Elem.}|=|\meta{Wert}|=|\oarg{Anm.}\ignorespaces%
-%   \parg{Bundleelem.}\verb=|=\meta{Indexmark.}\verb=|=\ignorespaces%
+%   \cs{tud@idx@get}\cs{tud@idx@key}\cs{tud@idx@fmt}^^A
+%   \cs{tud@idx@val}\marg{Elem.}|=|\meta{Wert}|=|\oarg{Anm.}^^A
+%   \parg{Bundleelem.}\verb=|=\meta{Indexmark.}\verb=|=^^A
 % \endgroup
 %    \begin{macrocode}
 \newcommand*\tud@idx@key{}
@@ -3853,9 +3848,9 @@
 % Nomenklatur identisch zu den bisherigen Erläuterungen, der vollständige 
 % Funktionsaufruf lautet:
 % \newline\begingroup\scriptsize
-%   \cs{Process@Index}\marg{Stern?}\marg{Element}\ignorespaces%
-%   |=|\meta{Wert}|=|\oarg{Anmerkung}\parg{Bundleelement}\ignorespaces%
-%   \verb=|=\meta{Indexmarkup}\verb=|=\ignorespaces%
+%   \cs{Process@Index}\marg{Stern?}\marg{Element}^^A
+%   |=|\meta{Wert}|=|\oarg{Anmerkung}\parg{Bundleelement}^^A
+%   \verb=|=\meta{Indexmarkup}\verb=|=^^A
 % \endgroup
 %    \begin{macrocode}
 \NewDocumentCommand\Process@Index{m m d== o d() d||}{%
@@ -4222,8 +4217,8 @@
 % Aufruf des Makros erfolgt dabei in gewohnter Form mit einem obligatorischen 
 % gefolgt von drei optionalen Argumenten:
 % \newline\begingroup\scriptsize
-%   \cs{Process@ChangedAt}\marg{Element}|=|\meta{Wert}|=|\ignorespaces%
-%   \oarg{Ausgabesuffix}\parg{Bundleelement}\ignorespaces%
+%   \cs{Process@ChangedAt}\marg{Element}|=|\meta{Wert}|=|^^A
+%   \oarg{Ausgabesuffix}\parg{Bundleelement}^^A
 % \endgroup
 %   \begin{macrocode}
 \NewDocumentCommand\Process@ChangedAt{m d== o d()}{%
@@ -4367,13 +4362,13 @@
 % Der im Folgenden erzeugte Eintrag für die Liste \cs{tud@changedat@list} wird
 % in zwei unterschiedlichen Varianten generiert. In der Form 
 % \newline\begingroup\scriptsize
-%   \meta{Versionsnummer}|!Allgemein!|\meta{Änderungsnotiz}\ignorespaces%
+%   \meta{Versionsnummer}|!Allgemein!|\meta{Änderungsnotiz}^^A
 % \endgroup\newline
-%  werden allgemeine Änderungsnotizen erstellt, für Einträge bezüglich der
+% werden allgemeine Änderungsnotizen erstellt, für Einträge bezüglich der
 % Implementierung wird die folgende Form genutzt:
 % \newline\begingroup\scriptsize
-%   \meta{Versionsnummer}|!Implementierung!|\meta{Markup-Befehl}\ignorespaces%
-%   |!|\meta{Untereintrag}|!|\meta{Änderungsnotiz}\ignorespaces%
+%   \meta{Versionsnummer}|!Implementierung!|\meta{Markup-Befehl}^^A
+%   |!|\meta{Untereintrag}|!|\meta{Änderungsnotiz}^^A
 % \endgroup
 %    \begin{macrocode}
 \NewDocumentCommand\Changed@At@@@@CreateList{r[] r() m m m}{%
@@ -4411,8 +4406,8 @@
 % Argumentes entschieden. Ist es vorhanden, handelt es sich um einen Eintrag 
 % für den Implementierungsteil, welcher in \cs{tud@changedat@list} in der Form 
 % \newline\begingroup\scriptsize
-%   \meta{Versionsnummer}|!Implementierung!|\meta{Markup-Befehl}\ignorespaces%
-%   |!|\meta{Untereintrag}|!|\meta{Änderungsnotiz}\ignorespaces%
+%   \meta{Versionsnummer}|!Implementierung!|\meta{Markup-Befehl}^^A
+%   |!|\meta{Untereintrag}|!|\meta{Änderungsnotiz}^^A
 % \endgroup\newline
 % gespeichert wird, wobei der Untereintrag auch leer bleiben kann.
 %    \begin{macrocode}
@@ -4439,7 +4434,7 @@
 %    \end{macrocode}
 % Handelt es sich um einen allgemeinen Änderungseintrag, wird dieser in der Form
 % \newline\begingroup\scriptsize
-%   \meta{Versionsnummer}|!Allgemein!|\meta{Änderungsnotiz}\ignorespaces%
+%   \meta{Versionsnummer}|!Allgemein!|\meta{Änderungsnotiz}^^A
 % \endgroup\newline
 % in der Liste \cs{tud@changedat@list} gespeichert. Für den allgemeinen Teil 
 % wird mit der Angabe eines \TUDScript-Bundle-Elements etwas anders verfahren.
@@ -4601,12 +4596,12 @@
 % gesetzt werden soll. Die in \cs{tud@changedat@list} gespeicherten Einträge 
 % haben die Form 
 % \newline\begingroup\scriptsize
-%   \meta{Versionsnummer}|!Allgemein!|\meta{Änderungsnotiz}\ignorespaces%
+%   \meta{Versionsnummer}|!Allgemein!|\meta{Änderungsnotiz}^^A
 % \endgroup\newline
 % oder 
 % \newline\begingroup\scriptsize
-%   \meta{Versionsnummer}|!Implementierung!|\meta{Markup-Befehl}\ignorespaces%
-%   |!|\meta{Untereintrag}|!|\meta{Änderungsnotiz}\ignorespaces%
+%   \meta{Versionsnummer}|!Implementierung!|\meta{Markup-Befehl}^^A
+%   |!|\meta{Untereintrag}|!|\meta{Änderungsnotiz}^^A
 % \endgroup
 %    \begin{macrocode}
 \newcommand*\Changed@At@@CreateEntry[5]{%
@@ -4845,7 +4840,7 @@
 % und der erste im optionalen Argument angegebene Wert werden verwendet, um ein
 % Label zu erstellen.
 %    \begin{macrocode}
-    \tud@lbl@get@curr*\tud@lbl@tmp{\tud@bdl@curr:\tud@values}=\@tempc=%
+    \tud@lbl@get*\tud@lbl@tmp{\tud@bdl@curr:\tud@values}=\@tempc=%
 %    \end{macrocode}
 % Abschließend erfolgt wird die Ausgabe des generierten Eintrags mit dem 
 % originalen Makro \cs{stditem}.
@@ -4925,7 +4920,7 @@
 %    \begin{macrocode}
   \def\@tempa##1{%
     \@tempc%
-    \tud@lbl@get@curr*\tud@lbl@tmp{\tud@bdl@curr:\Package{##1}}%
+    \tud@lbl@get*\tud@lbl@tmp{\tud@bdl@curr:\Package{##1}}%
     \tudhyperdef{\tud@lbl@tmp}%
     \begingroup%
       \Package{##1}<#2>'url'|!|%
@@ -4942,7 +4937,7 @@
 % CTAN verzichtet.
 %    \begin{macrocode}
       \IfValueT{#3}{%
-        \tud@lbl@get@curr*\tud@lbl@tmp{\tud@bdl@curr:\Package{#3}}%
+        \tud@lbl@get*\tud@lbl@tmp{\tud@bdl@curr:\Package{#3}}%
         \quad(\tudhyperdef{\tud@lbl@tmp}\Package{#3}'none'|!|)%
       }%
     }%
