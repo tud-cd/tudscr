@@ -1,4 +1,4 @@
-% \CheckSum{4723}
+% \CheckSum{4730}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -302,13 +302,6 @@
 % \end{macro}^^A \tud@list@sorted
 % \end{macro}^^A \tud@list@@sort
 % \end{macro}^^A \tud@list@sort
-% \begin{macro}{\tud@templist}
-% \changes{v2.02}{2014/07/25}{neu}^^A
-%    \begin{macrocode}
-\newcommand*\tud@templist{}
-\let\tud@templist\relax
-%    \end{macrocode}
-% \end{macro}^^A \tud@templist
 %
 % \iffalse
 %</class>
@@ -4541,38 +4534,59 @@
 % \changes{v2.02}{2014/10/09}{neu}^^A
 % Die Einträge in der Liste der Änderungen \cs{tud@changedat@list} werden mit 
 % dem Makro \cs{Changed@At@CreateList} abgearbeitet, sortiert und erstellt. Das 
-% zweite obligatorische Argument von \cs{@printchangedatlist} steurrt den 
+% zweite obligatorische Argument von \cs{@printchangedatlist} steuert den 
 % vertikalen Versatz der Randnotiz. Wird im ersten Argument das boolesche Flag 
 % zu \cs{BooleanTrue} gesetzt, wird die Randnotiz unterdrückt.
 %    \begin{macrocode}
-\NewDocumentCommand\print@changedatlist{m m}{%
+\newcommand*\print@changedatlist[2]{%
   \ifx\tud@changedat@list\relax\else%
-    \let\tud@templist\relax%
-    \forlistloop\Changed@At@CreateEntry{\tud@changedat@list}%
-    \global\let\tud@changedat@list\relax%
+    \begingroup%
 %    \end{macrocode}
-% Nach der Verarbeitung der Einräge sind in \cs{tud@templist} alle angegebenen
+% In \cs{tud@res@a} wird eine Liste aller angegebenen Versionsnummern 
+% gespeichert, die nach dem Setzen der Änderungseinträge sortiert als Randnotiz 
+% ausgegeben wird. Um diese zu erhalten, wird diese von jedem Eintrag aus 
+% \cs{tud@changedat@list} mit \cs{tud@res@b} respektive \cs{tud@res@c}
+% extrahiert.
+%    \begin{macrocode}
+      \let\tud@res@a\@empty%
+      \def\tud@res@b##1!##2\@nil{%
+        \ifinlist{##1}{\tud@res@a}{}{\listadd\tud@res@a{##1}}%
+        \Changed@At@CreateEntry{##1!##2}%
+      }%
+      \def\tud@res@c##1{\tud@res@b##1\@nil}%
+      \forlistloop\tud@res@c{\tud@changedat@list}%
+      \global\let\tud@changedat@list\relax%
+%    \end{macrocode}
+% Nach der Verarbeitung der Einräge sind in \cs{tud@res@a} alle angegebenen
 % Versionsnummern genau einmal enthalten. Mit \cs{tud@list@sort} werden diese 
 % in die richtige Reihenfolge sortiert und anschließend als Randnotiz in einer
-% Tabelle ausgegeben, falls nicht die Sternversion verwendet wurde.
+% Tabelle ausgegeben, falls nicht die Sternversion verwendet wurde. Hierfür 
+% wird für jede Versionsnummer ein Tabellenzeileneintrag generiert, der einen 
+% Link auf den entsprechenden Abschnitt in der Änderungsliste enthält. Daran 
+% anschließend wird die eigentliche Tabelle in der Randnotiz ausgegeben.
 %    \begin{macrocode}
-    \IfBooleanF{#1}{%
-      \tud@list@sort\tud@templist%
-      \strut%
-      \marginnote{%
-        \def\@tempa####1{%
-          \ignorespaces%
-          \tudhyperref{idx:changelog:####1}{####1}%
-          \tabularnewline%
+      \IfBooleanF{#1}{%
+        \tud@list@sort\tud@res@a%
+        \let\tud@res@b\@empty%
+        \def\tud@res@c##1{%
+          \appto\tud@res@b{%
+            \ignorespaces%
+            \tudhyperref{idx:changelog:##1}{##1}%
+            \tabularnewline%
+          }%
         }%
-        \begin{tabular}{|l|}%
-          \hline%
-          \forlistloop\@tempa{\tud@templist}%
-          \hline%
-        \end{tabular}%
-      }[{#2}]%
-      \ignorespaces%
-    }%
+        \forlistloop\tud@res@c{\tud@res@a}%
+        \strut%
+        \marginnote{%
+          \begin{tabular}{|l|}%
+            \hline%
+            \tud@res@b%
+            \hline%
+          \end{tabular}%
+        }[{#2}]%
+        \aftergroup\ignorespaces%
+      }%
+    \endgroup%
   \fi%
 }
 %    \end{macrocode}
@@ -4689,11 +4703,6 @@
       \index[changelog]{#1!#2!#3}%
     }%
   }%
-%    \end{macrocode}
-% Außerdem wird der Liste \cs{tud@templist} die aktuelle Version einmalig 
-% hinzugefügt, um alle Versionsangaben in einer Randnotiz ausgeben zu können.
-%    \begin{macrocode}
-  \ifinlist{#1}{\tud@templist}{}{\listadd\tud@templist{#1}}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \Changed@At@@CreateEntry
@@ -5010,26 +5019,26 @@
 % angegeben werden, welches die gewünschte Breite der Tabelle angibt.
 %    \begin{macrocode}
 \NewDocumentCommand\TermTable{s m O{\linewidth}}{%
-  \let\tud@templist\relax%
-  \forcsvlist{\listadd\tud@templist}{#2}%
   \ifhmode\par\fi%
   \vskip\medskipamount%
   \@afterindentfalse\@afterheading%
-  \IfBooleanTF{#1}{%
-    \setlength\@tempdima{#3}%
-    \setlength\@tempdimc{-.7\baselineskip}%
-    \begin{tabularx}{\@tempdima}{lXX}\Term@Table\end{tabularx}%
-  }{%
-    \setlength\@tempdimc{\z@}%
-    \begin{tabular}{lll}\Term@Table\end{tabular}%
-  }%
+  \begingroup%
+    \IfBooleanTF{#1}{%
+      \setlength\@tempdima{#3}%
+      \setlength\@tempdimc{-.7\baselineskip}%
+      \begin{tabularx}{\@tempdima}{lXX}\Term@Table{#2}\end{tabularx}%
+    }{%
+      \setlength\@tempdimc{\z@}%
+      \begin{tabular}{lll}\Term@Table{#2}\end{tabular}%
+    }%
+  \endgroup%
   \par\addvspace{\medskipamount}%
 }
-\newcommand*\Term@Table{%
+\newcommand*\Term@Table[1]{%
   \toprule%
   \textbf{Bezeichner} & \textbf{Deutsch} & \textbf{Englisch}\tabularnewline%
   \midrule%
-  \forlistloop\Term@@Table{\tud@templist}%
+  \forcsvlist\Term@@Table{#1}%
   \bottomrule%
 }
 \newcommand*\Term@@Table[1]{%
@@ -5125,7 +5134,7 @@
 %    \begin{macrocode}
 \RequirePackage{listings}[2014/03/04]
 \lstdefinestyle{tudscr}{%
-  basicstyle=\ttfamily\ifdef{\setstretch}{\setstretch{1}}{},%
+  basicstyle=\ttfamily\ifundef{\setstretch}{}{\setstretch{1}},%
   keywordstyle=,%
   columns=fullflexible,keepspaces,%
   aboveskip=\smallskipamount,%
