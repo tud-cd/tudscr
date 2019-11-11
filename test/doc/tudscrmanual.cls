@@ -484,6 +484,7 @@
         \tudhyper@alias@values{\tud@res@a=true}%
         \tudhyper@alias@values{\tud@res@a=false}%
       }{}%
+      % TODO typeout --> welche Optionen sind ggf. betroffen? eher wieder rein!
 %      \in@{\PName}{#3}%
 %      \ifin@%
 %        \tudhyper@alias@values{\tud@res@a}%
@@ -590,6 +591,7 @@
   \SplitArgument{2}{:}{#1}%
   \expandafter\Processor@CreateLabel\ProcessedArgument%
 }
+% TODO \@temp... > tud@res@...
 \newcommand*\Processor@CreateLabel[3]{%
   \begingroup%
     \Markup@Gobble%
@@ -1132,10 +1134,6 @@
       }{}{\noexpand\tud@patch@wrn{#1}}%
     }%
   \tud@res@b%
-}
-\providecommand*\NewExpandableDocumentCommand[3]{%
-  \NewDocumentCommand#1{#2}{}%
-  \DeclareExpandableDocumentCommand#1{#2}{#3}%
 }
 \newcommand*\ProcessorValue[2]{%
   \begingroup%
@@ -2636,7 +2634,6 @@
   font=\normalfont,parsep=\parskip,listparindent=\parindent,%
   before=\tud@before@item{values}%
 }
-\DeclareListParser*{\forslashlist}{/}
 \NewDocumentCommand\tud@item@values{s r[] o d()}{%
   \begingroup%
     \in@{/}{#2}%
@@ -3069,13 +3066,83 @@
     }%
   \tud@res@a%
 }
-\newcommand*\tud@remove@trailing@slashes[2][\@nil]{%
+\NewDocumentCommand\GitHubRepo{s o D(){\tud@github@url@base} d<>}{%
   \begingroup%
-    \tud@if@nil{#1}{%
-      \edef\tud@res@a{\trim@spaces{#2}}%
+    \tud@github@url@normalize\tud@res@b{#3}%
+    \IfValueTF{#2}{%
+      \def\tud@res@c{#2}%
     }{%
-      \edef\tud@res@a{\trim@spaces{#1}}%
+      \expandafter\filename@parse\expandafter{\tud@res@b}%
+      \protected@edef\tud@res@c{%
+        \mbox{\tud@english{GitHub-Repository~\textsbn{\filename@base}}}%
+      }%
     }%
+    \IfValueT{#4}{%
+      \edef\tud@res@a{\trim@spaces{#4}}%
+      \tud@remove@trailing@slashes{\tud@res@a}%
+      \ifnumber{\tud@res@a}{%
+        \eappto{\tud@res@b}{/issues/\tud@res@a}%
+      }{%
+        \eappto{\tud@res@b}{/\tud@res@a}%
+      }%
+    }%
+    \IfBooleanTF{#1}{\let\tud@res@a\href}{\let\tud@res@a\hrfn}%
+    \tud@res@a{https://github.com/\tud@res@b}{\tud@res@c}%
+  \endgroup%
+  \xspace%
+}
+\NewDocumentCommand\GitHubDownload{s D(){\tud@github@url@base} d<> m}{%
+  \begingroup%
+    \tud@github@url@normalize\tud@res@b{#2}%
+    \IfValueTF{#3}{%
+      \appto\tud@res@b{/releases/download/#3/#4}%
+    }{%
+      \appto\tud@res@b{/releases/latest/download/#4}%
+    }%
+    \IfBooleanTF{#1}{\let\tud@res@a\href}{\let\tud@res@a\hrfn}%
+    \tud@res@a{https://github.com/\tud@res@b}{\File*{#4}}%
+  \endgroup%
+  \xspace%
+}
+\newcommand*\GitHubBase[1]{%
+  \tud@github@url@normalize\tud@github@url@base{#1}%
+}
+\newcommand*\tud@github@url@base{}
+\let\tud@github@url@base\relax
+\newcommand*\tud@github@url@normalize[2]{%
+  \begingroup%
+    \def\tud@res@a{#2}%
+    \def\tud@res@b{\tud@github@url@base}%
+    \ifx\tud@res@a\tud@res@b%
+      \ifx\tud@github@url@base\relax%
+        \ClassError{tudscrmanual}%
+        {GitHub base was never set}{%
+          You have to use \string\GitHubBase\space in order to \MessageBreak%
+          define the base url for your GitHub repository.%
+        }%
+        \def\tud@res@a{???}%
+      \fi%
+    \else%
+      \edef\tud@res@a{\trim@spaces{#2}}%
+      \def\tud@res@b##1github.com/##2github.com/##3\@nil{%
+        \IfArgIsEmpty{##2}{%
+          \def\tud@res@a{##1}%
+        }{%
+          \def\tud@res@a{##2}%
+        }%
+      }%
+      \expandafter\tud@res@b\tud@res@a github.com/github.com/\@nil%
+      \tud@remove@trailing@slashes{\tud@res@a}%
+    \fi%
+    \edef\tud@res@b{%
+      \endgroup%
+      \def\noexpand#1{\tud@res@a}%
+    }%
+  \tud@res@b%
+}
+\newcommand*\tud@remove@trailing@slashes[1]{%
+  \begingroup%
+    \edef\tud@res@a{\trim@spaces{#1}}%
     \ifstrstart{\tud@res@a}{/}{%
       \edef\tud@res@a{\expandafter\@gobble\tud@res@a}%
     }{}%
@@ -3095,73 +3162,9 @@
     \expandafter\tud@res@b\tud@res@a//\@nil%
     \edef\tud@res@b{%
       \endgroup%
-      \def\noexpand#2{\tud@res@c}%
+      \def\noexpand#1{\tud@res@c}%
     }%
   \tud@res@b%
-}
-% TODO Makro \GitHubUrl plus makro zum normalisieren
-\newcommand*\tud@github@baseurl{\TUDScriptRepository}
-\newcommand*\tud@github@url@normalize[2][\@nil]{%
-  \begingroup%
-    \tud@if@nil{#1}{%
-      \edef\tud@res@a{\trim@spaces{#2}}%
-    }{%
-      \edef\tud@res@a{\trim@spaces{#1}}%
-    }%
-    \def\tud@res@b##1github.com/##2github.com/##3\@nil{%
-      \IfArgIsEmpty{##2}{%
-        \def\tud@res@a{##1}%
-      }{%
-        \def\tud@res@a{##2}%
-      }%
-    }%
-    \expandafter\tud@res@b\tud@res@a github.com/github.com/\@nil%
-    \tud@remove@trailing@slashes{\tud@res@a}%
-    \edef\tud@res@b{%
-      \endgroup%
-      \def\noexpand#2{\tud@res@a}%
-    }%
-  \tud@res@b%
-}
-\NewDocumentCommand\GitHubRepo{s o D(){\tud@github@baseurl} d<>}{%
-  \begingroup%
-    \tud@github@url@normalize[{#3}]\tud@res@a%
-    \expandafter\filename@parse\expandafter{\tud@res@a}%
-    \edef\tud@res@b{\filename@area\filename@base}%
-    \edef\tud@res@c{\filename@base}%
-    \IfValueT{#4}{%
-      \edef\tud@res@a{\trim@spaces{#4}}%
-      \tud@remove@trailing@slashes{\tud@res@a}%
-      \ifnumber{\tud@res@a}{%
-        \eappto{\tud@res@b}{/issues/\tud@res@a}%
-      }{%
-        \eappto{\tud@res@b}{/\tud@res@a}%
-      }%
-    }%
-    \IfValueTF{#2}{%
-      \def\tud@res@c{#2}%
-    }{%
-      \protected@edef\tud@res@c{%
-        \mbox{\tud@english{GitHub-Repository~\textsbn{\tud@res@c}}}%
-      }%
-    }%
-    \IfBooleanTF{#1}{\let\tud@res@a\href}{\let\tud@res@a\hrfn}%
-    \tud@res@a{https://github.com/\tud@res@b}{\tud@res@c}%
-  \endgroup%
-  \xspace%
-}
-\NewDocumentCommand\GitHubDownload{s D(){\tud@github@baseurl} d<> m}{%
-  \begingroup%
-    \tud@github@url@normalize[{#2}]{\tud@res@b}%
-    \IfValueTF{#3}{%
-      \appto\tud@res@b{/releases/download/#3/#4}%
-    }{%
-      \appto\tud@res@b{/releases/latest/download/#4}%
-    }%
-    \IfBooleanTF{#1}{\let\tud@res@a\href}{\let\tud@res@a\hrfn}%
-    \tud@res@a{https://github.com/\tud@res@b}{\File*{#4}}%
-  \endgroup%
-  \xspace%
 }
 \newcommand*\TUDForum{\mbox{TUD-\hologo{LaTeX}-Forum}}
 \NewDocumentCommand\Forum{!s !O{\TUDForum} !d<>}{%

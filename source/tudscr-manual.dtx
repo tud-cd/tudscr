@@ -1,4 +1,4 @@
-% \CheckSum{4739}
+% \CheckSum{4974}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -1228,40 +1228,29 @@
 % \begin{macro}{\Processor@CreateLabel}
 % \changes{v2.05}{2015/11/03}{neu}^^A
 % Mit dem Argumentprozessor \cs{ProcessorCreateLabel} wird es ermöglicht, an 
-% die Befehle \cs{tud@lbl@get} und \cs{tud@if@lbl@exists} sowohl ein einzelnes
-% Makro, welches das Label bereits beinhaltet als auch einen Markup-Befehl ggf.
-% mit einem Bundlepräfix zu übergeben. In beiden Fällen wird aus dem Argument
-% ein eindeutiges Label in der Form 
-% \meta{Bundlepräfix}|:|\meta{Labelpräfix}|:|\meta{Element} generiert und als
-% resultierendes Argument an das aufrufenden Makro übergeben.
+% die Befehle \cs{tud@lbl@get} und \cs{tud@if@lbl@exists} sowohl ein bereits 
+% formatiertes Label als auch einen Markup-Befehl mit einem Bundlepräfix zu
+% übergeben. In beiden Fällen wird aus dem Argument ein eindeutiges Label in
+% der Form \meta{Bundlepräfix}|:|\meta{Labelpräfix}|:|\meta{Element} generiert
+% und als resultierendes Argument an das aufrufenden Makro übergeben.
 %
-% Es gibt insgesamt vier verschiedene Varianten der Übergabe eines Argumentes 
-% an den Argumentprozessor \cs{ProcessorCreateLabel}.
+% Es gibt zwei verschiedene Varianten der Übergabe eines Argumentes an den
+% Argumentprozessor \cs{ProcessorCreateLabel}.
 % \begin{description}\let\itshape\slshape
-%    \item[\cs{ProcessorCreateLabel}]
-%    |{\LabelMakro}{-NoValue-}{-NoValue-}|\strut\newline^^A
-%      Das Label ist bereits in \cs{LabelMakro} enthalten und soll expandiert 
-%      werden. Dabei spielt es keine Rolle, ob die durch |:| getrennten
-%      Bestandteile innerhalb des Labels schon als einfacher String oder in der 
-%      Markupform gegeben sind.
-%    \item[\cs{ProcessorCreateLabel}]
-%    |{-NoValue-}{\Markup|\marg{Element}|}{-NoValue-}|\strut\newline^^A
-%      Das Label soll für ein Markupelement generiert werden, wobei in jedem
-%      Fall der Inhalt aus \cs{tud@bdl@curr} als Bundlepräfix genutzt wird.
-%    \item[\cs{ProcessorCreateLabel}]
-%    |{\Class/\Package|\marg{\dots}|}|^^A
-%    |{\Markup|\marg{Element}|}{-NoValue-}|\strut\newline^^A
-%      Das Label soll für ein Markupelement generiert werden. 
-%      Dabei wurde explizit ein Paket oder eine Klasse aus dem Bundle angegeben 
-%      oder implizit das Makro \cs{tud@bdl@curr} als Argument verwendet,
-%      welches innerhalb der Umgebungen \env{Bundle} und \env{Bundle*} auf
-%      das/die aktuell beschriebene Paket/Klasse gesetzt wurde.
-%    \item[\cs{ProcessorCreateLabel}]
-%    \marg{Bundlepräfix}\marg{Labelpräfix}\marg{Element}\strut\newline 
-%      Das Label ist bereits vollständig bestimmt und die Argumente werden 
-%      entweder als String oder als Markup übergeben. Auch Mischformen sind 
-%      möglich. In diesem Fall wird es einfach wieder zusammengesetzt. Diese
-%      Variante tritt durch rekursiven Aufruf des Argumentprozessors auf.
+%   \item[\cs{ProcessorCreateLabel}]
+%   |{\Class/\Package/\Bundle|\marg{\dots}|}|^^A
+%   |{\Markup|\marg{Element}|}{-NoValue-}|\strut\newline^^A
+%     Das Label soll für ein Markupelement generiert werden. 
+%     Dabei wurde explizit ein Paket, eine Klasse oder ein Bundle angegeben 
+%     oder implizit das Makro \cs{tud@bdl@curr} als Argument verwendet,
+%     welches innerhalb der Umgebungen \env{Bundle} und \env{Bundle*} auf
+%     das/die aktuell beschriebene Paket/Klasse gesetzt wurde.
+%   \item[\cs{ProcessorCreateLabel}]
+%   \marg{Bundlepräfix}\marg{Labelpräfix}\marg{Element}\strut\newline^^A
+%     Das Label ist bereits vollständig bestimmt und die Argumente werden 
+%     entweder als String oder als Markup übergeben. Auch Mischformen sind 
+%     möglich. In diesem Fall wird es einfach wieder zusammengesetzt. Diese
+%     Variante tritt auch durch rekursiven Aufruf des Argumentprozessors auf.
 % \end{description}
 %    \begin{macrocode}
 \newcommand*\ProcessorCreateLabel[1]{%
@@ -1984,20 +1973,6 @@
 \newrobustcmd*\suffix[1]{\begingroup~\scriptsize(#1)\endgroup}
 %    \end{macrocode}
 % \end{macro}^^A \suffix
-% \begin{macro}{\NewExpandableDocumentCommand}
-% \changes{v2.02}{2014/11/04}{neu}^^A
-% \changes{v2.05i}{2017/03/12}{wird mittlerweile von \pkg{xparse} definiert}^^A
-% Für Labels, Index- und Änderungs- sowie PDF-Outline-Einträge etc. müssen ganz
-% bestimmte Markup-Befehle durch eine expandierbare Version ersetzt werden. Um 
-% dies möglichst einfach zu gestalten, wird \cs{NewExpandableDocumentCommand} 
-% definiert.
-%    \begin{macrocode}
-\providecommand*\NewExpandableDocumentCommand[3]{%
-  \NewDocumentCommand#1{#2}{}%
-  \DeclareExpandableDocumentCommand#1{#2}{#3}%
-}
-%    \end{macrocode}
-% \end{macro}^^A \NewExpandableDocumentCommand
 %
 % \subsubsection{Definition der Markup-Befehle}
 %
@@ -2027,6 +2002,10 @@
 % Für die Änderungsliste wird der Befehl \cs{Process@ChangedAt} genutzt, um die 
 % entsprechende Formatierung zu gewährleisten, wobei dies nur für die Klasse
 % \cls{tudscrmanual} und nicht für das Paket \pkg{tudscrtutorial} gilt.
+%
+% Für Labels, Index- und Änderungs- sowie PDF-Outline-Einträge etc. müssen die
+% Markup-Befehle durch eine expandierbare Version ersetzt werden, welche hier
+% mit \cs{NewExpandableDocumentCommand} definiert werden.
 %
 % \begin{macro}{\Application}
 % \changes{v2.02}{2014/10/08}{überarbeitet}^^A
@@ -2158,11 +2137,11 @@
 % direkt mit |=|\meta{Wert}|=| angehangen werden. Um die gleichzeitige 
 % Verwendung beider Varianten zu unterdrücken, wird in diesem Fall ein Fehler 
 % erzeugt.
-% \ToDo{^^A
+% \ToDo{
 %   Eigentlich sollte der Wert hier formatiert werden. Wünschenswert wäre die 
 %   Angabe von \val{Option=Wert} und \val{Option=<Spezialwert>}, damit das 
 %   Gezerre mit der Spezialbehandlung von \cs{PSet} etc. wegfallen könnte,
-%   siehe \cs{tud@declare@start}^^A
+%   siehe \cs{tud@declare@start}
 % }[v2.??]
 %    \begin{macrocode}
 \NewDocumentCommand\Option@Value{m m d== d== d() d'' d||}{%
@@ -2311,11 +2290,11 @@
 % Parameter gültig ist. Das zweite Argument ist der Parameter selbst. Die 
 % optionale Zuweisung eines Wertes kann äquivalent zu \cs{Option} mit dem
 % Trennzeichen~|=| im Hauptargument erfolgen.
-% \ToDo{^^A
+% \ToDo{
 %   Eigentlich sollte der Wert hier formatiert werden. Die Angabe von
 %   \val{Parameter=Wert} und \val{Parameter=<Spezialwert>} wäre gut, damit
 %   das Gezerre mit der Spezialbehandlung von \cs{PSet} etc. wegfallen könnte,
-%   siehe \cs{tud@declare@start}^^A
+%   siehe \cs{tud@declare@start}
 % }[v2.??]
 %    \begin{macrocode}
 \NewExpandableDocumentCommand\@Key{s m m}{#2!#3}
@@ -2568,15 +2547,15 @@
 %
 % \subsubsection{Markup von Variablen, Parametern etc.}
 %
-% \ToDo{^^A
+% \ToDo{
 %   Verwendung der Befehle überprüfen, evtl. umbennenen. Wozu \cs{PValueName}?
 %   Evtl. sollte \cs{PValue} innerhalb von \cs{PName} lokal geändert werden?
 %   Was passiert, wenn auch \cs{PName} von \cs{tud@doifPValue} akzeptiert?
-%   Zeile 542--546 in tudscr-hints, 294 in tudscr-packages^^A
+%   Zeile 542--546 in tudscr-hints, 294 in tudscr-packages
 % }[v2.06f]
-% \ToDo{^^A
+% \ToDo{
 %   nach '=\cs{P(Value)?Name}' in *.tex suchen und ggf. 
-%   überarbeiten; \cs{PValueName} umbenennen^^A
+%   überarbeiten; \cs{PValueName} umbenennen
 % }[v2.06f]
 % \ToDo{neues Makro \cs{PSetLength} mit \cs{PName\{Längenwert\}}}[v2.??]
 % \begin{macro}{\PValue}
@@ -2777,11 +2756,12 @@
 % die automatisch generierten Links auf CTAN anzupassen. Zuletzt kann mit 
 % |'|\meta{Referenzvariante}|'| der automatisch erzeugte Querverweis in
 % verschiedenen Varianten formatiert werden. Der vollständige Funktionsaufruf:
-% \newline\begingroup\scriptsize
+% \newline\begingroup\scriptsize^^A
 %   \cs{Process@Markup}\marg{Element}|=|\meta{Wert}|=|^^A
 %   \oarg{Ausgabesuffix}\parg{Bundleelement}^^A
 %   |<|\meta{CTAN-Paket}|>||'|\meta{Referenzvariante}|'|^^A
 % \endgroup
+% \ToDo{vorherige doc überarbeiten oder raus}[v2.06f]
 %
 % In eingen Fällen ist es beim Aufruf eines Markup-Befehls nicht erwünscht, 
 % dass dieser auch tatsächlich ausgegeben wird. Für diesen Fall wird gleich zu
@@ -2929,10 +2909,10 @@
 % bestimmt. Folgende Werte sind möglich:
 % \ToDo{\val{-1/-2} dokumentieren}[v2.06f]
 % \begin{description}
-% \item[\val{0}:] Ausgabe von Markup, Erzeugen eines Labels
-% \item[\val{1}:] Ausgabe von Markup, kein Label
-% \item[\val{2}:] keine Ausgabe, aber Erzeugen eines Labels
-% \item[\val{3}:] keine Ausgabe, Erzeugen eines nach oben verschobenen Labels
+%   \item[\val{0}:] Ausgabe von Markup, Erzeugen eines Labels
+%   \item[\val{1}:] Ausgabe von Markup, kein Label
+%   \item[\val{2}:] keine Ausgabe, aber Erzeugen eines Labels
+%   \item[\val{3}:] keine Ausgabe, Erzeugen eines nach oben verschobenen Labels
 % \end{description}
 % Normalerweise kommt die erste Variante zum Einsatz. Die zweite Variante wird 
 % genutzt, wenn mit mit der Umgebung \env{Obsolete} zwar eine Ausgabe aber kein 
@@ -2985,9 +2965,9 @@
 % des Befehls \cs{Process@@MarkupDeclare} und werden bis auf das Label ebenso an
 % \cs{Markup@Output} übergeben, nachdem mit dem Befehl \cs{Markup@CheckFormat} 
 % auf eine existierende Markup-Definition geprüft wurde.
-% \ToDo{^^A
+% \ToDo{
 %   Hyperlinks auf erläuterte Element innerhalb der Umgenung \env{Declaration}
-%   unterbinden? Könnte \cs{tud@declaration@list} genutzt werden?^^A
+%   unterbinden? Könnte \cs{tud@declaration@list} genutzt werden?
 % }[v2.07]
 %    \begin{macrocode}
 \NewDocumentCommand\Process@@MarkupInline{m m d== o d() d<> d''}{%
@@ -3544,11 +3524,12 @@
 % gespeichert wird. Das Argument \verb=|=\meta{Indexmarkup}\verb=|= wird bei
 % Deklarationen zur Unterdrückung von Untereinträgen verwendet.
 % Der vollständige Funktionsaufruf lautet:
-% \newline\begingroup\scriptsize
+% \newline\begingroup\scriptsize^^A
 %   \cs{tud@idx@get}\cs{tud@idx@key}\cs{tud@idx@fmt}^^A
 %   \cs{tud@idx@val}\marg{Elem.}|=|\meta{Wert}|=|\oarg{Anm.}^^A
 %   \parg{Bundleelem.}\verb=|=\meta{Indexmark.}\verb=|=^^A
 % \endgroup
+% \ToDo{vorherige doc überarbeiten oder raus}[v2.06f]
 %    \begin{macrocode}
 \newcommand*\tud@idx@key{}
 \newcommand*\tud@idx@fmt{}
@@ -3869,11 +3850,12 @@
 % Die auf die zwei obligatorischen Argumente folgenden optionalen sind in der
 % Nomenklatur identisch zu den bisherigen Erläuterungen, der vollständige 
 % Funktionsaufruf lautet:
-% \newline\begingroup\scriptsize
+% \newline\begingroup\scriptsize^^A
 %   \cs{Process@Index}\marg{Stern?}\marg{Element}^^A
 %   |=|\meta{Wert}|=|\oarg{Anmerkung}\parg{Bundleelement}^^A
 %   \verb=|=\meta{Indexmarkup}\verb=|=^^A
 % \endgroup
+% \ToDo{vorherige doc überarbeiten oder raus}[v2.06f]
 %    \begin{macrocode}
 \NewDocumentCommand\Process@Index{m m d== o d() d||}{%
   \ifboolexpr{%
@@ -4238,10 +4220,11 @@
 % der Erstellung der Änderungseinträge mit \cs{Changed@At@CreateEntry}. Der
 % Aufruf des Makros erfolgt dabei in gewohnter Form mit einem obligatorischen 
 % gefolgt von drei optionalen Argumenten:
-% \newline\begingroup\scriptsize
+% \newline\begingroup\scriptsize^^A
 %   \cs{Process@ChangedAt}\marg{Element}|=|\meta{Wert}|=|^^A
 %   \oarg{Ausgabesuffix}\parg{Bundleelement}^^A
 % \endgroup
+% \ToDo{vorherige doc überarbeiten oder raus}[v2.06f]
 %   \begin{macrocode}
 \NewDocumentCommand\Process@ChangedAt{m d== o d()}{%
   \tud@idx@get*\tud@idx@key\tud@idx@fmt\tud@idx@val{#1}=#2=[{#3}](#4)%
@@ -4377,16 +4360,14 @@
 % zur Implementierung getrennt werden. 
 %
 % Der im Folgenden erzeugte Eintrag für die Liste \cs{tud@changedat@list} wird
-% in zwei unterschiedlichen Varianten generiert. In der Form 
-% \newline\begingroup\scriptsize
-%   \meta{Versionsnummer}|!Allgemein!|\meta{Änderungsnotiz}^^A
-% \endgroup\newline
-% werden allgemeine Änderungsnotizen erstellt, für Einträge bezüglich der
-% Implementierung wird die folgende Form genutzt:
-% \newline\begingroup\scriptsize
-%   \meta{Versionsnummer}|!Implementierung!|\meta{Markup-Befehl}^^A
-%   |!|\meta{Untereintrag}|!|\meta{Änderungsnotiz}^^A
-% \endgroup
+% in zwei unterschiedlichen Varianten generiert:
+% \begin{description}
+%   \item[\meta{Versionsnummer}|!Allgemein!|\meta{Änderungsnotiz}]\strut\newline
+%     allgemeine Änderungsnotiz
+%   \item[\meta{Versionsnummer}|!Implementierung!|\meta{Markup}^^A
+%   |!|\meta{Untereintrag}|!|\meta{Änderungsnotiz}]\strut\newline
+%     Änderungsnotiz für Implementierung eines Befehls, Option etc.
+% \end{description}
 %    \begin{macrocode}
 \NewDocumentCommand\Changed@At@@@@CreateList{r[] r() m m m}{%
 %    \end{macrocode}
@@ -4420,11 +4401,12 @@
 % den zur Implementierung erscheinen soll. Dies wird an der Existenz des ersten
 % Argumentes entschieden. Ist es vorhanden, handelt es sich um einen Eintrag 
 % für den Implementierungsteil, welcher in \cs{tud@changedat@list} in der Form 
-% \newline\begingroup\scriptsize
+% \newline\begingroup^^A
 %   \meta{Versionsnummer}|!Implementierung!|\meta{Markup-Befehl}^^A
 %   |!|\meta{Untereintrag}|!|\meta{Änderungsnotiz}^^A
-% \endgroup\newline
+% \endgroup\newline^^A
 % gespeichert wird, wobei der Untereintrag auch leer bleiben kann.
+% \ToDo{vorherige doc überarbeiten oder raus}[v2.06f]
 %    \begin{macrocode}
   \IfValueTF{#1}{%
     \toks@{#3!Implementierung }%
@@ -4448,10 +4430,11 @@
   }{%
 %    \end{macrocode}
 % Handelt es sich um einen allgemeinen Änderungseintrag, wird dieser in der Form
-% \newline\begingroup\scriptsize
+% \newline\begingroup^^A
 %   \meta{Versionsnummer}|!Allgemein!|\meta{Änderungsnotiz}^^A
-% \endgroup\newline
+% \endgroup\newline^^A
 % in der Liste \cs{tud@changedat@list} gespeichert. Für den allgemeinen Teil 
+% \ToDo{vorherige doc überarbeiten oder raus}[v2.06f]
 % wird mit der Angabe eines \TUDScript-Bundle-Elements etwas anders verfahren.
 % Wurde dieses~-- wenn auch nur indirekt über eine der beiden Spezialumgebungen
 % \env{Declaration*} bzw. \env{Bundle*}~-- angegeben, so wird der Eintrag in
@@ -4631,14 +4614,15 @@
 % oder eben nicht. Der zweite Fall tritt auf, wenn lediglich eine Randnotiz
 % gesetzt werden soll. Die in \cs{tud@changedat@list} gespeicherten Einträge 
 % haben die Form 
-% \newline\begingroup\scriptsize
+% \newline\begingroup^^A
 %   \meta{Versionsnummer}|!Allgemein!|\meta{Änderungsnotiz}^^A
-% \endgroup\newline
+% \endgroup\newline^^A
 % oder 
-% \newline\begingroup\scriptsize
+% \newline\begingroup^^A
 %   \meta{Versionsnummer}|!Implementierung!|\meta{Markup-Befehl}^^A
 %   |!|\meta{Untereintrag}|!|\meta{Änderungsnotiz}^^A
 % \endgroup
+% \ToDo{vorherige doc überarbeiten oder raus}[v2.06f]
 %    \begin{macrocode}
 \newcommand*\Changed@At@@CreateEntry[5]{%
   \IfValueT{#3}{%
@@ -6468,9 +6452,220 @@
 %
 % \begin{macro}{\GitHubRepo}
 % \changes{v2.02}{2014/08/16}{neu}^^A
-% \begin{macro}{\Download}
+% \begin{macro}{\GitHubDownload}
 % \changes{v2.05g}{2016/11/08}{neu}^^A
+% Auszeichnungsbefehle für Verweise auf ein GitHub-Repository. Die Ausgabe für 
+% den Befehl kann mit dem optionalen Argument bestimmt werden. Wird dieses 
+% Argument nicht gegeben, wird der letzte Teil der in runden Klammern gegebenen 
+% Repository-URL als Grundlage für die Ausgabe genutzt. Das letzte optionale 
+% Argument in Guillemets kann entweder als Link auf ein Issue (numerisch) oder 
+% aber zum anhängen eines URL-Pfades genutzt werden.
+%    \begin{macrocode}
+%<*!doc>
+\NewDocumentCommand\GitHubRepo{s o D(){\tud@github@url@base} d<>}{%
+  \begingroup%
+    \tud@github@url@normalize\tud@res@b{#3}%
+    \IfValueTF{#2}{%
+      \def\tud@res@c{#2}%
+    }{%
+      \expandafter\filename@parse\expandafter{\tud@res@b}%
+      \protected@edef\tud@res@c{%
+        \mbox{\tud@english{GitHub-Repository~\textsbn{\filename@base}}}%
+      }%
+    }%
+    \IfValueT{#4}{%
+      \edef\tud@res@a{\trim@spaces{#4}}%
+      \tud@remove@trailing@slashes{\tud@res@a}%
+      \ifnumber{\tud@res@a}{%
+        \eappto{\tud@res@b}{/issues/\tud@res@a}%
+      }{%
+        \eappto{\tud@res@b}{/\tud@res@a}%
+      }%
+    }%
+    \IfBooleanTF{#1}{\let\tud@res@a\href}{\let\tud@res@a\hrfn}%
+    \tud@res@a{https://github.com/\tud@res@b}{\tud@res@c}%
+  \endgroup%
+  \xspace%
+}
+\NewDocumentCommand\GitHubDownload{s D(){\tud@github@url@base} d<> m}{%
+  \begingroup%
+    \tud@github@url@normalize\tud@res@b{#2}%
+    \IfValueTF{#3}{%
+      \appto\tud@res@b{/releases/download/#3/#4}%
+    }{%
+      \appto\tud@res@b{/releases/latest/download/#4}%
+    }%
+    \IfBooleanTF{#1}{\let\tud@res@a\href}{\let\tud@res@a\hrfn}%
+    \tud@res@a{https://github.com/\tud@res@b}{\File*{#4}}%
+  \endgroup%
+  \xspace%
+}
+%</!doc>
+%<*doc>
+\newcommand*\@GitHubRepo{}
+\newcommand*\@@GitHubRepo{}
+\newcommand*\@@@GitHubRepo{}
+\newcommand*\GitHubRepo{%
+  \kernel@ifnextchar[{\@GitHubRepo}{\@GitHubRepo[\@nil]}%
+}
+\def\@GitHubRepo[#1]{%
+  \kernel@ifnextchar(%
+    {\@@GitHubRepo{#1}}%
+    {\@@GitHubRepo{#1}(\tud@github@url@base)}%
+}
+\def\@@GitHubRepo#1(#2){%
+  \kernel@ifnextchar<{\@@@GitHubRepo{#1}{#2}}{\@@@GitHubRepo{#1}{#2}<\@nil>}%
+}
+\def\@@@GitHubRepo#1#2<#3>{%
+  \begingroup%
+    \tud@github@url@normalize\tud@res@b{#2}%
+    \tud@if@nil{#1}{%
+      \expandafter\filename@parse\expandafter{\tud@res@b}%
+      \protected@edef\tud@res@c{%
+        \mbox{\tud@english{GitHub-Repository~\textbf{\textsf{\filename@base}}}}%
+      }%
+    }{%
+      \def\tud@res@c{#1}%
+    }%
+    \tud@if@nil{#3}{}{%
+      \edef\tud@res@a{\trim@spaces{#3}}%
+      \tud@remove@trailing@slashes{\tud@res@a}%
+      \ifnumber{\tud@res@a}{%
+        \eappto{\tud@res@b}{/issues/\tud@res@a}%
+      }{%
+        \eappto{\tud@res@b}{/\tud@res@a}%
+      }%
+    }%
+    \hrfn{https://github.com/\tud@res@b}{\tud@res@c}%
+  \endgroup%
+  \xspace%
+}
+%</doc>
+%    \end{macrocode}
+% \end{macro}^^A \GitHubDownload
+% \end{macro}^^A \GitHubRepo
+% \begin{macro}{\GitHubBase}
+% \changes{v2.06f}{2019/11/11}{neu}^^A
+% \begin{macro}{\tud@github@url@base}
+% \changes{v2.06f}{2019/11/11}{neu}^^A
+% \begin{macro}{\tud@github@url@normalize}
+% \changes{v2.06f}{2019/11/11}{neu}^^A
+% \begin{macro}{\tud@remove@trailing@slashes}
+% \changes{v2.06f}{2019/11/11}{neu}^^A
+%    \begin{macrocode}
+\newcommand*\GitHubBase[1]{%
+  \tud@github@url@normalize\tud@github@url@base{#1}%
+}
+\newcommand*\tud@github@url@base{}
+\let\tud@github@url@base\relax
+\newcommand*\tud@github@url@normalize[2]{%
+  \begingroup%
+    \def\tud@res@a{#2}%
+    \def\tud@res@b{\tud@github@url@base}%
+    \ifx\tud@res@a\tud@res@b%
+      \ifx\tud@github@url@base\relax%
+%<*class>
+%<!doc>        \ClassError{tudscrmanual}%
+%<doc>        \ClassError{tudscrdoc}%
+%</class>
+%<*package>
+        \PackageError{tudscrtutorial}%
+%</package>
+        {GitHub base was never set}{%
+          You have to use \string\GitHubBase\space in order to \MessageBreak%
+          define the base url for your GitHub repository.%
+        }%
+        \def\tud@res@a{???}%
+      \fi%
+    \else%
+      \edef\tud@res@a{\trim@spaces{#2}}%
+      \def\tud@res@b##1github.com/##2github.com/##3\@nil{%
+        \IfArgIsEmpty{##2}{%
+          \def\tud@res@a{##1}%
+        }{%
+          \def\tud@res@a{##2}%
+        }%
+      }%
+      \expandafter\tud@res@b\tud@res@a github.com/github.com/\@nil%
+      \tud@remove@trailing@slashes{\tud@res@a}%
+    \fi%
+    \edef\tud@res@b{%
+      \endgroup%
+      \def\noexpand#1{\tud@res@a}%
+    }%
+  \tud@res@b%
+}
+\newcommand*\tud@remove@trailing@slashes[1]{%
+  \begingroup%
+    \edef\tud@res@a{\trim@spaces{#1}}%
+    \ifstrstart{\tud@res@a}{/}{%
+      \edef\tud@res@a{\expandafter\@gobble\tud@res@a}%
+    }{}%
+    \let\tud@res@c\@empty%
+    \def\tud@res@b##1/##2/\@nil{%
+      \IfArgIsEmpty{##2}{%
+        \appto\tud@res@c{##1}%
+      }{%
+        \ifstr{##2}{/}{%
+          \appto\tud@res@c{##1}%
+        }{%
+          \appto\tud@res@c{##1/}%
+          \tud@res@b##2/\@nil%
+        }%
+      }%
+    }%
+    \expandafter\tud@res@b\tud@res@a//\@nil%
+    \edef\tud@res@b{%
+      \endgroup%
+      \def\noexpand#1{\tud@res@c}%
+    }%
+  \tud@res@b%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@remove@trailing@slashes
+% \end{macro}^^A \tud@github@url@normalize
+% \end{macro}^^A \tud@github@url@base
+% \end{macro}^^A \GitHubBase
 % \begin{macro}{\Forum}
+% \begin{macro}{\@Forum}
+% \begin{macro}{\@@Forum}
+% \begin{macro}{\TUDForum}
+% Der Befehl für die Ausgabe eines Links zum \TUDForum. Das optionale Argument 
+% in Guillemets kann genutzt werden, um auf einen spezifisches Beitrag zu 
+% verlinken.
+%    \begin{macrocode}
+%<*!doc>
+\newcommand*\TUDForum{\mbox{TUD-\hologo{LaTeX}-Forum}}
+\NewDocumentCommand\Forum{!s !O{\TUDForum} !d<>}{%
+  \begingroup%
+    \IfBooleanTF{#1}{\let\tud@res@a\href}{\let\tud@res@a\hrfn}%
+    \tud@res@a{\TUDScriptForum\IfValueT{#3}{viewtopic.php?t=#3}}{#2}%
+  \endgroup%
+  \xspace%
+}
+%</!doc>
+%<*doc>
+\newcommand*\TUDForum{\mbox{TUD-\LaTeX-Forum}}
+\newcommand*\@Forum{}
+\newcommand*\@@Forum{}
+\newcommand*\Forum{%
+  \kernel@ifnextchar[{\@Forum}{\@Forum[\TUDForum]}%
+}
+\def\@Forum[#1]{\kernel@ifnextchar<{\@@Forum{#1}}{\@@Forum{#1}<\@nil>}}
+\def\@@Forum#1<#2>{%
+  \begingroup%
+    \let\tud@res@a\@empty
+    \tud@if@nil{#2}{}{\def\tud@res@a{viewtopic.php?t=#2}}%
+    \hrfn{\TUDScriptForum\tud@res@a}{#1}%
+  \endgroup%
+  \xspace%
+}
+%</doc>
+%    \end{macrocode}
+% \end{macro}^^A \TUDForum
+% \end{macro}^^A \@@Forum
+% \end{macro}^^A \@Forum
+% \end{macro}^^A \Forum
 % \begin{macro}{\CTAN}
 % \changes{v2.05}{2015/11/22}{neu}^^A
 % \begin{macro}{\Attention}
@@ -6481,49 +6676,15 @@
 % \begin{macro}{\notudscrartcl}
 % Für die Anwenderdokumentation werden weitere Auszeichnungsbefehle definiert.
 %    \begin{macrocode}
-%<*class>
 %<*!doc>
-\NewDocumentCommand\GitHubRepo{s t' m !O{releases}}{%
-  \IfBooleanTF{#1}{\toks@{\href}}{\toks@{\hrfn}}%
-  \IfBooleanT{#2}{\toks@{\url}}%
-  \addto@hook\toks@{{https://github.com/tud-cd/#3/#4}}%
-  \IfBooleanF{#2}{%
-    \addto@hook\toks@{{\tud@english{GitHub-Repository~\sbnfont{#3}}}}%
-  }%
-  \the\toks@\xspace%
-}
-\newcommand*\Download[1]{%
-  https://github.com/tud-cd/tudscr/releases/download/#1%
-}
-%</!doc>
-%<*doc>
-%    \end{macrocode}
-% \ToDo{Befehl für tudscrdoc, setzen der base url}[v2.06f]
-%    \begin{macrocode}
-%</doc>
-%</class>
-%<*!doc>
-\NewDocumentCommand\Forum{!s !t'}{%
-  \IfBooleanTF{#1}{\toks@{\href}}{\toks@{\hrfn}}%
-  \IfBooleanT{#2}{\toks@{\url}}%
-  \addto@hook\toks@{{http://latex.wcms-file3.tu-dresden.de/phpBB3/}}%
-  \IfBooleanF{#2}{\addto@hook\toks@{{TUD-\LaTeX-Forum}}}%
-  \the\toks@\xspace%
-}
-%</!doc>
-%<*doc>
-%    \end{macrocode}
-% \ToDo{Befehl für tudscrdoc}[v2.06f]
-%    \begin{macrocode}
-%</doc>
-%<*!doc>
-\NewDocumentCommand\CTAN{!s !o !d()}{%
-  \IfBooleanTF{#1}{\toks@{\href}}{\toks@{\hrfn}}%
-  \addto@hook\toks@{{http://www.ctan.org/\IfValueT{#2}{#2}}}%
-  \addto@hook\toks@{%
-    {\tud@english{Comprehensive TeX Archive Network (CTAN\IfValueT{#3}{~#3})}}%
-  }%
-  \the\toks@\xspace%
+\NewDocumentCommand\CTAN{!s !o}{%
+  \begingroup%
+    \IfBooleanTF{#1}{\let\tud@res@a\href}{\let\tud@res@a\hrfn}%
+    \tud@res@a{http://www.ctan.org\IfValueT{#2}{/#2}}{%
+      \tud@english{Comprehensive TeX Archive Network (CTAN)}%
+    }%
+  \endgroup%
+  \xspace%
 }
 \newcommand*\Attention[2][\z@]{%
   \marginnote{%
@@ -6533,12 +6694,13 @@
   \emph{\trim@spaces{#2}}%
 }
 \NewDocumentCommand\scrguide{!s !O{\KOMAScript-Handbuch}}{%
-  \IfBooleanTF{#1}{\toks@{\href}}{\toks@{\hrfn}}%
-  \addto@hook\toks@{%
-    {http://mirrors.ctan.org/macros/latex/contrib/koma-script/doc/scrguide.pdf}%
-  }%
-  \addto@hook\toks@{{#2}}%
-  \the\toks@\xspace%
+  \begingroup%
+    \IfBooleanTF{#1}{\let\tud@res@a\href}{\let\tud@res@a\hrfn}%
+    \tud@res@a{%
+      http://mirrors.ctan.org/macros/latex/contrib/koma-script/doc/scrguide.pdf%
+    }{#2}%
+  \endgroup%
+  \xspace%
 }
 %<*class>
 \newcommand*\notudscrartcl{%
@@ -6552,9 +6714,6 @@
 % \end{macro}^^A \scrguide
 % \end{macro}^^A \Attention
 % \end{macro}^^A \CTAN
-% \end{macro}^^A \Forum
-% \end{macro}^^A \Download
-% \end{macro}^^A \GitHubRepo
 % \begin{macro}{\TUDScriptContactNote}
 % \changes{v2.06f}{2019/09/26}{neu}^^A
 % \begin{macro}{\TUDScriptContactTitle}
