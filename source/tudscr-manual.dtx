@@ -1,4 +1,4 @@
-% \CheckSum{4733}
+% \CheckSum{4739}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -4796,7 +4796,6 @@
 % \end{environment}^^A @values
 % \end{environment}^^A values
 % \begin{macro}{\tud@item@values}
-% \begin{macro}{\forslashlist}
 % Das Makro \cs{tud@item@values} ersetzt in der Umgebung \env{values} die 
 % originale Definiton von \cs{item}. Die Sternversion kann dabei verwendet 
 % werden, um die Einstellung für den Säumniswert hervorzuheben. Im ersten 
@@ -4809,78 +4808,74 @@
 % optionale Argument in runden Klammern fügt zum Schluss einen ergänzenden 
 % Eintrag hinzu.
 %    \begin{macrocode}
-\DeclareListParser*{\forslashlist}{/}
-\NewDocumentCommand\tud@item@values{s o o d()}{%
+\NewDocumentCommand\tud@item@values{s r[] o d()}{%
+  \begingroup%
 %    \end{macrocode}
-% Alle Auszeichnungen kommen nur zum Tragen, wenn ein optionales Argument für 
-% die Werte angegeben wurde.
+% Die ggf. durch Schrägstrich getrennte Liste im optionalen Argument wird 
+% abgearbeitet. Der erste Eintrag wird für den Indexeintrag benötigt und in
+% \cs{tud@res@b} gesichert, alle weiteren Einträge werden in \cs{tud@res@c}
+% gespeichert und lediglich im Fließtext aufgelistet.
 %    \begin{macrocode}
-  \IfValueTF{#2}{%
+    \in@{/}{#2}%
+    \ifin@%
+      \def\tud@res@a##1/##2\@nil{%
+        \def\tud@res@b{##1}%
+        \def\tud@res@c{\PValue{/##2}}%
+      }%
+      \tud@res@a#2\@nil%
+    \else%
+      \def\tud@res@b{#2}%
+      \let\tud@res@c\@empty%
+    \fi%
 %    \end{macrocode}
-% Die durch Schrägstrich getrennte Liste im optionalen Argument wird mit 
-% \cs{forslashlist} durchlaufen. Der erste Eintrag wird für den Indexeintrag 
-% benötigt und in \cs{@tempc} gesichert, alle weiteren Einträge werden in 
-% \cs{@tempb} gespeichert und lediglich im Fließtext aufgelistet.
+% Jetzt beginnt die Formatierung der Ausgabe. Wurde die Sternversion genutzt, 
+% so werden die extrahierten Werte als Säumniswert mit \cs{emph} hervorgehoben.
+% Danach wird die zu beschreibende Option in \cs{tud@res@a} expandiert. Danach 
+% wird der erste Wert angehangen. Zuletzt wird mit \cs{InlineDeclaration*} 
+% dafür Sorge getragen, dass auf den erzeugten Eintrag selbst kein Hyperlink
+% erzeugt wird und dieser im passenden Index als fettmarkierter Eintrag
+% erscheint.
 %    \begin{macrocode}
-    \let\@tempc\@empty%
-    \def\tud@reserved##1{%
-      \if@tempswa%
-        \appto\@tempb{/##1}%
-      \else%
-        \@tempswatrue%
-        \let\@tempb\@empty%
-        \def\@tempc{##1}%
+    \IfBooleanT{#1}{%
+      \protected@edef\tud@res@b{\noexpand\emph{\tud@res@b}}%
+      \ifx\tud@res@c\@empty\else%
+        \protected@edef\tud@res@c{\noexpand\emph{\tud@res@c}}%
       \fi%
     }%
-    \@tempswafalse%
-    \forslashlist\tud@reserved{#2}%
-%    \end{macrocode}
-% Jetzt beginnt die Formatierung der Ausgabe. Zuerst wird die zu beschreibende 
-% Option in \cs{@tempa} expandiert. Danach wird der erste Wert angehangen, 
-% wobei dieser für die Sternversion als Säumniswert mit \cs{emph} hervorgehoben 
-% wird. Zuletzt wird dafür Sorge getragen, dass auf den anschließend erzeugten 
-% Eintrag selbst kein Hyperlink erzeugt wird und dieser im passenden Index als 
-% fettmarkierter Eintrag erscheint.
-%    \begin{macrocode}
-    \edef\@tempa{\expandonce\tud@values}%
-    \protected@eappto\@tempa{%
-      =\IfBooleanTF{#1}{\noexpand\emph}{\@firstofone}{\@tempc}=%
-    }%
-    \appto\@tempa{'none'|!|}%
-%    \end{macrocode}
-% Danach werden alle weiteren möglichen Werte angegeben, wobei auch diese im 
-% Zweifelsfall mit \cs{emph} hervorzuheben sind.
-%    \begin{macrocode}
-    \edef\@tempb{%
-      \IfBooleanTF{#1}{\noexpand\emph}{\@firstofone}{\noexpand\PValue{\@tempb}}%
-    }%
+    \protected@edef\tud@res@a{\tud@values}%
+    \eappto\tud@res@a{=\expandonce\tud@res@b=}%
 %    \end{macrocode}
 % Zuletzt erfolgt die Auszeichnung, ob es sich bei den gelisteten Werten um 
-% Säumniswerte handelt, gefolgt vom optionael Suffix.
+% Säumniswerte handelt, gefolgt vom optionalen Suffix.
 %    \begin{macrocode}
+    \let\tud@res@b\@empty%
     \IfBooleanTF{#1}{%
-      \appto\@tempb{\suffix{S\"aumniswert}}%
+      \appto\tud@res@b{\suffix{S\"aumniswert}}%
     }{%
-      \IfValueT{#3}{\appto\@tempb{\suffix{S\"aumniswert f\"ur #3}}}%
+      \IfValueT{#3}{\appto\tud@res@b{\suffix{S\"aumniswert f\"ur #3}}}%
     }%
-    \IfValueT{#4}{\appto\@tempb{\suffix{#4}}}%
+    \IfValueT{#4}{\appto\tud@res@b{\suffix{#4}}}%
 %    \end{macrocode}
-% Die in \cs{tud@values} gespeicherte, zu beschreibende Option bzw. Makro etc. 
-% und der erste im optionalen Argument angegebene Wert werden verwendet, um ein
-% Label zu erstellen.
+% Die in \cs{tud@res@a} gespeicherte, zu beschreibende Option und der erste im 
+% optionalen Argument angegebene Wert werden verwendet, um ein diese zu 
+% deklarieren. Die restlichen Werte sowie mögliche Suffixe werden für die 
+% Ausgabe angehängt.
 %    \begin{macrocode}
-    \tud@lbl@get*\tud@lbl@tmp{\tud@bdl@curr:\tud@values}=\@tempc=%
+    \edef\tud@res@a{%
+      \noexpand\InlineDeclaration*{\expandonce\tud@res@a}%
+      \expandonce\tud@res@c\expandonce\tud@res@b%
+    }%
 %    \end{macrocode}
-% Abschließend erfolgt wird die Ausgabe des generierten Eintrags mit dem 
-% originalen Makro \cs{stditem}.
+% Abschließend erfolgt die Ausgabe des generierten Eintrags mit dem originalen
+% Makro \cs{stditem}.
 %    \begin{macrocode}
-    \stditem[\tudhyperdef{\tud@lbl@tmp}\@tempa\@tempb]%
-  }{%
-    \stditem%
-  }%
+    \edef\tud@res@a{%
+      \endgroup%
+      \noexpand\stditem[{\expandonce\tud@res@a}]%
+    }%
+  \tud@res@a%  
 }
 %    \end{macrocode}
-% \end{macro}^^A \forslashlist
 % \end{macro}^^A \tud@item@values
 % \begin{macro}{\itemtrue}
 % \begin{macro}{\itemfalse}
@@ -4923,7 +4918,6 @@
 % \begin{environment}{packages}
 % \begin{macro}{\tud@item@packages}
 % \changes{v2.02}{2014/10/09}{optionales Argument für CTAN-Link}^^A
-% \changes{v2.04}{2015/03/12}{optionales Argument für weitere Pakete}^^A
 % Ähnlich wie für die Auflistung von Werten eines Schlüssels wird auch mit der 
 % Charakterisierung von Paketen verfahren. Diese werden in der Auflistung 
 % speziell gekennzeichnet.
@@ -4939,38 +4933,33 @@
 % Textanker definiert, auf die im Zweifelsfall in der Dokumentation verlinkt 
 % wird.
 %    \begin{macrocode}
-\NewDocumentCommand\tud@item@packages{o d<> d()}{%
+\NewDocumentCommand\tud@item@packages{r[] d<>}{%
 %    \end{macrocode}
 % Die kommagetrennte Liste im optionalen Argument wird verwendet, um jedes
-% einzelnen Paket aufzulisten und einen dazugehörigen Textanker zu erzeugen. 
+% einzelne Paket zu deklarieren und einen dazugehörigen Textanker zu erzeugen. 
 % Das optionale Argument in Guillemets kann genutzt werden, um \emph{alle} 
 % gelisteten Pakete auf den gleichen CTAN-Link zielen zu lassen. Dies ist 
 % beispielsweise für mehrere Pakete aus dem gleichen Bundle sinnvoll.
 %    \begin{macrocode}
-  \def\@tempa##1{%
-    \@tempc%
-    \tud@lbl@get*\tud@lbl@tmp{\tud@bdl@curr:\Package{##1}}%
-    \tudhyperdef{\tud@lbl@tmp}%
-    \begingroup%
-      \Package{##1}<#2>'url'|!|%
-    \endgroup%
-    \def\@tempc{, }%
-  }%
-  \stditem[{%
-    \IfValueT{#1}{%
-      \let\@tempc\relax%
-      \forcsvlist\@tempa{#1}%
-%    \end{macrocode}
-% Wird im dritten optionalen Argument in runden Klammern ein Paket angegeben,
-% so wird ebenfalls ein Textanker erzeugt, allerdings auf einen Hyperlink zu
-% CTAN verzichtet.
-%    \begin{macrocode}
-      \IfValueT{#3}{%
-        \tud@lbl@get*\tud@lbl@tmp{\tud@bdl@curr:\Package{#3}}%
-        \quad(\tudhyperdef{\tud@lbl@tmp}\Package{#3}'none'|!|)%
+  \begingroup%
+    \let\tud@res@a\@empty%
+    \def\tud@res@b##1{%
+      \eappto\tud@res@a{%
+        ,\noexpand\InlineDeclaration{\noexpand\Package{##1}\IfValueT{#2}{<#2>}}%
       }%
     }%
-  }]%
+    \forcsvlist\tud@res@b{#1}%
+%    \end{macrocode}
+% Die Deklarationen werden durchgeführt und ausgegeben. Dabei muss das führende 
+% Komma zuvor ignoriert werden.
+%    \begin{macrocode}
+    \edef\tud@res@a{%
+      \endgroup%
+      \noexpand\stditem[{%
+        \expandafter\expandafter\expandafter\@gobble\expandonce\tud@res@a%
+      }]%
+    }%
+  \tud@res@a%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@item@packages
