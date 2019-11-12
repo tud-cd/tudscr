@@ -1,4 +1,4 @@
-% \CheckSum{4986}
+% \CheckSum{5034}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -5956,17 +5956,12 @@
 %    \end{macrocode}
 % \end{macro}^^A \IncludeStandalone
 %
-% \iffalse
-%</package>
-% \fi
-%
 % \subsection{Automatische Erstellung von \pkg{pstricks}-Grafiken}
 %
 % Falls innerhalb eines Tutorials das Paket \pkg{pstricks} verwendet wird, muss
 % dafür Sorge getragen werden, dass die automatische Kompilierung reibungslos
 % mit \pkg{auto-pst-pdf} funktioniert.
 %    \begin{macrocode}
-%<*package>
 \AfterPackage*{pstricks}{%
   \ifnum\pdf@shellescape=\@ne\relax%
     \filemodCmp{\jobname-pics.pdf}{\jobname.tex}{%
@@ -5985,8 +5980,52 @@
     \@tempa%
   \fi%
 }
-%</package>
 %    \end{macrocode}
+% Die Kombination von \pkg{pst-pdf} und \pkg{imakeidx} verträgt sich nicht, da
+% das Paket \pkg{pst-pdf} im \val{extraction mode} das optionale Argument von 
+% \cs{makeindex} nicht beachtet und der Befehl \cs{printindex} ebenfalls Fehler
+% verursacht.
+%    \begin{macrocode}
+\AfterPackage*{pst-pdf}{%
+  \ifcase\ppf@TeX@mode\relax
+    \renewcommand*\makeindex[1][]{}%
+    \renewcommand*\printindex[1][]{}%
+  \fi
+%    \end{macrocode}
+% Weiterhin tritt mit dem \LaTeXe"~Kernel \val{2019/10/01} das Problem auf, 
+% dass alle sämtliche und nicht nur \pkg{pstricks}-Grafiken extrahiert werden. 
+% Das Problem wurde bereits unter \GitHubRepo(rolfn/pst-pdf)<1> gemledet, aber 
+% noch nicht behoben.
+%    \begin{macrocode}
+  \@ifpackagelater{pst-pdf}{2017/06/23}{%
+    \PackageWarning{tudscrtutorial}^%
+    {%
+      Package `pst-pdf' was updated so patching\MessageBreak%
+      \string\ppf@is@pdfTeX@graphic is not required anymore%
+    }%
+  }{%
+    \ifundef{\ppf@is@pdfTeX@graphic}{}{%
+      \renewcommand*\ppf@is@pdfTeX@graphic[5]{%
+        \@ppf@pdftex@graphicfalse%
+        \begingroup
+          \edef\pdfTeXext{\detokenize\expandafter{#2}}%<----added
+          \def\Gin@setfile##1##2##3{%
+            \edef\@tempb{\detokenize\expandafter{##2}}%
+            \@for\@tempa:=\pdfTeXext\do{%
+              \ifx\@tempa\@tempb\global\@ppf@pdftex@graphictrue\fi}}%
+          \edef\Gin@extensions{#2,#3}%
+          \pr@outerfalse\ppf@Ginclude@graphics{#1}%
+        \endgroup%
+        \if@ppf@pdftex@graphic#4\else#5\fi%
+      }%
+    }%
+  }%
+}
+%    \end{macrocode}
+%
+% \iffalse
+%</package>
+% \fi
 %
 % \subsection{ToDo-Liste}
 %
