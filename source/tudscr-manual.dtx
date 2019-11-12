@@ -1,4 +1,4 @@
-% \CheckSum{4954}
+% \CheckSum{4986}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -599,8 +599,9 @@
 % diese für die aux"~Datei zu lesen und zu schreiben. Das erste optionale 
 % Argument dient dazu, vor dem eigentlichen Einlesen der Liste diese mit einem 
 % Element zu initialisieren. Das obligatorische Argument enthält den Namen der 
-% Liste. Das nachfolgende optionale Argument wird beim Importieren auf jedes 
-% Listenelement angewendet, bevor es zur Liste hinzugefügt wird.
+% Liste. Das nachfolgende optionale Argument wird bei der Verabeitung auf jedes 
+% Listenelement angewendet, bevor es zur Liste hinzugefügt oder mit dieser 
+% verglichen wird.
 %
 % Dabei werden drei Makros verwendet. Der Befehl \cs{\meta{listname}@auxlist} 
 % enthält die importierte Liste. In \cs{\meta{listname}@auxlist@positive} 
@@ -615,11 +616,12 @@
   \expandafter\newcommand\expandafter*\csname#2@auxlist\endcsname{}%
   \expandafter\newcommand\expandafter*\csname#2@auxlist@positive\endcsname{}%
   \expandafter\newcommand\expandafter*\csname#2@auxlist@negative\endcsname{}%
+  \expandafter\newcommand\expandafter*\csname#2@auxlist@handler\endcsname{#3}%
   \BeforeClosingMainAux{%
     \forlistcsloop{\listcsremove{#2@auxlist@positive}}{#2@auxlist@negative}%
-    \tud@auxlist@export{#2@auxlist}%
+    \tud@auxlist@export{#2}%
   }%
-  \AtBeginDocument{\tud@auxlist@import{#1}{#2@auxlist}{#3}}%
+  \AtBeginDocument{\tud@auxlist@import{#1}{#2}}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@auxlist@register
@@ -634,9 +636,9 @@
   \if@filesw%
     \let\tud@res@a\@empty%
     \def\tud@res@b##1{\eappto\tud@res@a{{##1}}}%
-    \forlistcsloop\tud@res@b{#1@positive}%
+    \forlistcsloop\tud@res@b{#1@auxlist@positive}%
     \immediate\write\@mainaux{%
-      \string\gdef\expandafter\string\csname #1\endcsname%
+      \string\gdef\expandafter\string\csname #1@auxlist\endcsname%
         {\expandonce\tud@res@a}%
     }%
   \fi%
@@ -645,15 +647,22 @@
 % Beim Lesen wird die Token-Liste zurück in eine \pkg{etoolbox}"~Liste 
 % gewandelt.
 %    \begin{macrocode}
-\newcommand*\tud@auxlist@import[3]{%
+\newcommand*\tud@auxlist@import[2]{%
   \begingroup%
     \edef\tud@res@a{%
-      \etex@unexpanded{\@tfor\tud@res@b:=}%
-      \expandafter\expandonce\csname #2\endcsname%
+      \etex@unexpanded{\@tfor\tud@res@c:=}%
+      \expandafter\expandonce\csname #2@auxlist\endcsname%
     }%
-    \global\cslet{#2}\@empty%
-    \IfValueT{#1}{\listcsxadd{#2}{#1}}%
-    \tud@res@a\do{\listcsxadd{#2}{#3{\tud@res@b}}}%
+    \letcs\tud@res@b{#2@auxlist@handler}%
+    \global\cslet{#2@auxlist}\@empty%
+    \IfValueT{#1}{%
+      \edef\tud@res@c{\tud@res@b{#1}}%
+      \listcsxadd{#2@auxlist}{\expandonce\tud@res@c}%
+    }%
+    \tud@res@a\do{%
+      \edef\tud@res@c{\tud@res@b{\tud@res@c}}%
+      \listcsxadd{#2@auxlist}{\expandonce\tud@res@c}%
+    }%
   \endgroup%
 }
 %    \end{macrocode}
@@ -690,7 +699,16 @@
 % \begin{macro}{\tud@auxlist@forloop}
 % \changes{v2.06f}{2019/11/08}{neu}^^A
 %    \begin{macrocode}
-\newcommand*\tud@auxlist@ifin[2]{\xifinlistcs{#1}{#2@auxlist}}
+\newcommand*\tud@auxlist@ifin[2]{%
+  \begingroup%
+    \protected@edef\tud@res@a{#1}%
+    \letcs\tud@res@b{#2@auxlist@handler}%
+    \edef\tud@res@a{%
+      \endgroup%
+      \noexpand\ifinlistcs{\tud@res@b{\tud@res@a}}{#2@auxlist}%
+    }%
+  \tud@res@a%
+}
 \newcommand*\tud@auxlist@forloop[2]{\forlistcsloop#1{#2@auxlist}}
 %    \end{macrocode}
 % \end{macro}^^A \tud@auxlist@remove
@@ -973,7 +991,12 @@
 %    \begin{macrocode}
 \newcommand*\tud@manualname{tudscr}%
 %<*class>
-\tud@auxlist@register{tud@label@alias}%
+%    \end{macrocode}
+% Die Verwendung von \cs{detokenize} ist notwendig, damit mögliche Unterschiede 
+% bei den catcodes von Labeln ignoriert und nur die Strings selbst verglichen
+% werden.
+%    \begin{macrocode}
+\tud@auxlist@register{tud@label@alias}[\detokenize\expandafter]%
 \NewDocumentCommand\tudhyperdef{s m d==}{%
   \begingroup%
     \IfBooleanTF{#1}{%
@@ -4152,13 +4175,21 @@
 %</class>
 %    \end{macrocode}
 % Fur das Paket \pkg{tudscrtutorial} erfolgt eine einfache Ausgabe der Indexe.
-% Hier wird der Prolog im Zweifel nur für Makrodefinitionen genutzt.
+% Hier wird das zweite optionale Argument im Zweifel nur für Makrodefinitionen
+% genutzt.
 %    \begin{macrocode}
-%<package>  \indexprologue[\tud@idx@skip]{\IfValueT{#2}{#2}}%
+%<*package>
+  \indexprologue[\tud@idx@skip]{}%
+  \begingroup%
+  \IfValueT{#2}{#2}%
+%</package>
 %    \end{macrocode}
 % Die Ausgabe des gewünschten Index.
 %    \begin{macrocode}
   \IfValueTF{#1}{\printindex[{#1}]}{\printindex}%
+%<*package>
+  \endgroup%
+%</package>
   \ifnum\imki@columns>\@ne\relax\vspace{-\multicolsep}\fi%
 }
 %    \end{macrocode}
@@ -5455,15 +5486,15 @@
   \addsec{Copy\nobreakspace\&\nobreakspace{}Paste}%
   \thispagestyle{empty}%
   \pagestyle{empty}%
-  Zum Ende des Dokumentes wird das vorgestellte Tutorial als \"ubersetzbarer %
-  Quelltext ausgegeben, um dieses via Copy~\&~Paste verwenden und alle Punkte %
-  nachvollziehen zu k\"onnen. Bitte beachten Sie, dass~-- abh\"angig vom %
-  genutzten PDF-Betrachter~-- beim Kopieren die dargestellten Einz\"uge und %
-  Abs\"atze m\"oglicherweise verloren gehen k\"onnen. Dies kann insbesondere %
-  aufgrund fehlender Leerzeilen zu einem unvorteilhaften Ausgabeergebnis %
-  f\"uhren. Alternativ finden Sie den folgenden \hologo{LaTeX}-Quelltext auch %
-  im Pfad \Path{\PName{texmf}/source/latex/tudscr/doc/examples/} als Datei %
-  \File{\jobname-example.tex}. \par #1%
+  Der zuvor beschriebene Quelltext wird folgend ausgegeben, um diesen via %
+  Copy~\&~Paste nutzen und nachvollziehen zu k\"onnen. Bitte beachten Sie, %
+  dass~-- abh\"angig vom verwendeten PDF-Betrachter~-- beim Kopieren die hier %
+  dargestellten Einz\"uge und Abs\"atze m\"oglicherweise verloren gehen %
+  k\"onnen. Dies kann insbesondere aufgrund fehlender Leerzeilen zu einem %
+  falschen Ausgabeergebnis f\"uhren. Alternativ finden Sie den folgenden %
+  \hologo{LaTeX}-Quelltext auch im Pfad %
+  \Path{\PName{texmf}/source/latex/tudscr/doc/examples/} %
+  als Datei \File{\jobname-example.tex}. \par #1%
   \begin{quoting}[rightmargin=0pt]%
   \lstinputlisting[style=tudscr]{\jobname-example.tex}%
   \end{quoting}%
