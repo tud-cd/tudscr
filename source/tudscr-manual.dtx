@@ -1,4 +1,4 @@
-% \CheckSum{4974}
+% \CheckSum{4954}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -452,9 +452,7 @@
 % Sternversion des Befehls erzeugt keine sortierte Liste. Über das optionale 
 % Argument kann mit verschiedenen Schlüsseln zudem eingestellt werden, ob alle
 % Label (\val{all}) oder nur die erstellten (\val{created}) beziehungsweise die
-% fehlenden (\val{missing}) nachverfolgt werden sollen. Labels, die innerhalb 
-% des Index auftreten, werden nicht nachverfolgt, da diese ohnehin im Dokument 
-% erfasst wurden.
+% fehlenden (\val{missing}) nachverfolgt werden sollen.
 %    \begin{macrocode}
 \newcommand*\tud@trace@lbl@types{}
 \listadd\tud@trace@lbl@types{created}%
@@ -1939,7 +1937,7 @@
   \print@changedatlist{#1}{#2}%
 }
 %    \end{macrocode}
-% \end{macro}^^A \printchangedatlista
+% \end{macro}^^A \printchangedatlist
 %
 % \iffalse
 %</class>
@@ -1953,6 +1951,26 @@
 %
 % Als erstes werden für Klasse und Paket einige Hilfmakros definiert.
 %
+% \begin{macro}{\if@tud@index}
+% \changes{v2.05}{2015/11/05}{neu}^^A
+% \begin{macro}{\if@tud@changelog}
+% \changes{v2.06f}{2019/11/12}{neu}^^A
+% Der Schalter \cs{if@tud@index} wird zwei unterschiedliche Aufgaben verwendet. 
+% Zum einen wird er bei der Ausgabe von Verzeichnissen auf \val{true} gesetzt,
+% um das Setzen von Indexeinträgen durch Markup-Befehle in den Verzeichnissen
+% selbst zu unterbinden. Weiterhin verhindert der aktivierte Schalter bei der
+% Ausführung von \cs{Process@Markup} das Erstellen von erweiterten 
+% Querverweisen sowie das Setzen von CTAN-Links bei Paketen (\cs{Package}), was 
+% weder in Verzeichnissen noch im Index oder der Änderungsliste erwünscht ist,
+% weshalb sowohl von \cs{PrintIndex} als auch \cs{PrintChangelog} ebenfalls
+% \cs{@tud@indextrue} gesetzt wird.
+%    \begin{macrocode}
+\newif\if@tud@index
+\addtoeachtocfile{\protect\@tud@indextrue}
+%<class>\newif\if@tud@changelog
+%    \end{macrocode}
+% \end{macro}^^A \if@tud@changelog
+% \end{macro}^^A \if@tud@index
 % \begin{macro}{\bsc}
 % \changes{v2.02}{2014/07/22}{\cs{newrobustcmd} aus \pkg{etoolbox} anstatt
 %   \cs{DeclareRobustCommand}}^^A
@@ -3451,21 +3469,6 @@
   \undef\tud@xdy@default%
 }
 %    \end{macrocode}
-% \begin{macro}{\if@tud@index}
-% \changes{v2.05}{2015/11/05}{neu}^^A
-% Dieser Schalter wird zwei unterschiedliche Aufgaben verwendet. Zum einen wird 
-% er bei der Ausgabe von Verzeichnissen auf \val{true} gesetzt, um das Setzen 
-% von Indexeinträgen durch Markup-Befehle in den Verzeichnissen selbst zu 
-% unterbinden. Weiterhin verhindert der aktivierte Schalter bei der Ausführung 
-% von \cs{Process@Markup} das Erstellen von erweiterten Querverweisen sowie das 
-% Setzen von CTAN-Links bei Paketen (\cs{Package}), was weder in Verzeichnissen 
-% noch im Index erwünscht ist, weshalb vom Makro \cs{@printindex} ebenfalls
-% \cs{@tud@indextrue} gesetzt wird.
-%    \begin{macrocode}
-\newif\if@tud@index
-\addtoeachtocfile{\protect\@tud@indextrue}
-%    \end{macrocode}
-% \end{macro}^^A \if@tud@index
 %
 % \subsubsection{Formatierung von Indexeinträgen}
 %
@@ -4031,93 +4034,83 @@
 % Dies sind alle Befehle, die zur Ausgabe der erzeugten Indexe benötigt werden.
 % \begin{macro}{\PrintIndex}
 % \changes{v2.02}{2014/08/20}{neu}^^A
-% \begin{macro}{\tud@indexprologue}
-% \changes{v2.02}{2014/08/20}{neu}^^A
 % Mit \cs{PrintIndex} erfolgt die Ausgabe aller erstellten Indexe. Dabei wird 
-% für bestimmte Spezialindexe das Makro \cs{tud@indexprologue} neu gesetzt, um 
-% für diese vor der eigentlichen Ausgabe einige Anmerkungen machen zu können.
-% Mit \cs{tud@indexprologue} kann der einleitende Teil für einen Index gesetzt
-% werden.
+% für bestimmte Spezialindexe \cs{indexprologue} aus dem Paket \pkg{imakeidx} 
+% genutzt, um für diese vor der eigentlichen Ausgabe einige Anmerkungen machen
+% zu können.
 %    \begin{macrocode}
-%<*class>
-\newcommand*\tud@indexprologue{}
-%</class>
 \newcommand*\PrintIndex{%
   \begingroup%
+    \@tud@indextrue%
     \providecommand*\lettergroup[1]{%
       \par\textbf{\textsf{##1}}\par%
       \nopagebreak%
     }%
+    \tud@print@index%
+    (%
 %<*class>
-    \renewcommand\tud@indexprologue{%
       Die im Folgenden aufgelisteten Schlagworte sollen f\"ur den Umgang mit %
-      \hologo{LaTeX} im Allgemeinen sowie dem \TUDScript-Bundle im Speziellen %
+      \hologo{LaTeXe} im Allgemeinen sowie dem \TUDScript-Bundle im Speziellen %
       sowohl Antworten bei generellen Fragen liefern als auch L\"osungen f\"ur %
       typische Probleme bereitstellen. Falls ein gesuchter Begriff hier nicht %
       zu finden ist oder trotz vorhandener Hinweise kein zufriedenstellendes %
       Ergebnis erzielt werden kann, sollte das \Forum* erster Anlaufpunkt %
       sein, um weitere Hilfe bei der Nutzung von \TUDScript zu erhalten.%
-    }%
 %</class>
 %<*package>
-    \begingroup%
-    \let\lettergroup\@gobble%
-    \let\indexspace\relax%
+      \let\lettergroup\@gobble%
+      \let\indexspace\relax%
 %</package>
-    \print@index%
-%<*package>
-    \endgroup%
-%</package>
+    )%
 %<*class>
     \clearpage%
-    \renewcommand\tud@indexprologue{%
+%</class>
+    \tud@print@index[options]%
+%<*class>
+    (%
       Dies ist der Index aller im Handbuch erl\"auterten sowie erw\"ahnten %
       Optionen, wobei bei den meisten auch Untereintr\"age mit Seitenangaben %
       f\"ur spezielle Wertzuweisungen existieren.%
-    }%
+    )%
 %</class>
-    \print@index[options]%
+    \tud@print@index[macros]%
 %<*class>
-    \renewcommand\tud@indexprologue{%
+    (%
       Dies ist eine Auflistung aller zuvor erl\"auterten sowie erw\"ahnten %
       Befehle und Umgebungen. Bei einigen sind zus\"atzliche Untereintr\"age %
       f\"ur Schl\"ussel-Wert-Parameter zu finden, die im optionalen Argument %
       der jeweiligen Anweisung verwendet werden k\"onnen. Gegebenenfalls sind %
       f\"ur explizite Wertzuweisungen an diese Parameter Seitenverweise zu % 
       finden.%
-    }%
+    )%
 %</class>
-    \print@index[macros]%
 %<*class>
-    \renewcommand\tud@indexprologue{%
+    \tud@print@index[terms]%
+    (%
       Dies sind die von \TUDScript definierten, sprachabh\"angigen Bezeichner. %
       Informationen zur Verwendung sowie den Anpassungsm\"oglichkeiten sind in %
       \autoref{sec:localization} zu finden.%
-    }%
-    \print@index[terms]%
-    \print@index[elements]%
+    )%
+    \tud@print@index[elements]%
 %</class>
+    \tud@print@index[misc]%
 %<*package>
-    \begingroup%
-    \let\lettergroup\@gobble%
-    \let\indexspace\relax%
+    (%
+      \let\lettergroup\@gobble%
+      \let\indexspace\relax%
+    )%
 %</package>
-    \print@index[misc]%
-%<*package>
-    \endgroup%
-%</package>
-    \print@index[files]%
+    \tud@print@index[files]%
   \endgroup%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@indexprologue
 % \end{macro}^^A \PrintIndex
-% \begin{macro}{\print@index}
+% \begin{macro}{\tud@print@index}
 % \changes{v2.02}{2014/07/25}{neu}^^A
 % \begin{macro}{\tud@idx@skip}
 % \changes{v2.02}{2014/09/02}{neu}^^A
-% Mit \cs{@printindex} erfolgt die Ausgabe der einzelnen Indexe. Dabei wird in 
-% der Klasse \cls{tudscrmanual} zuvor für jeden Index ein referenzierbares
+% Mit \cs{tud@print@index} erfolgt die Ausgabe der einzelnen Indexe. Dabei wird
+% in der Klasse \cls{tudscrmanual} zuvor für jeden Index ein referenzierbares
 % Label erstellt und ggf. der Prolog gesetzt.
 %
 % Aufgrund der Verwendung der \env{multicols}-Umgebung durch das Paket
@@ -4127,54 +4120,50 @@
 \newcommand*\tud@idx@skip{%
   \ifnum\imki@columns>\@ne\relax\vspace{-\multicolsep}\fi%
 }
-\newcommand*\print@index[1][]{%
+\NewDocumentCommand\tud@print@index{o +d()}{%
 %    \end{macrocode}
 % Falls ein Seitenumbruch notwendig ist, sollte dieser vor dem Index und nicht 
 % unmittelbar nach dem Beginn erfolgen.
 %    \begin{macrocode}
   \pagebreak[3]%
-  \@tud@indextrue%
 %<*class>
 %    \end{macrocode}
 % Das zu erstellende Label wird in \cs{tud@reserved} gespeichert. Dabei wird 
 % die Sternversion von \cs{tudhyperdef} genutzt, um das Label auf die Höhe der 
 % Überschrift zu setzen.
 %    \begin{macrocode}
-  \ifblank{#1}{%
-    \def\tud@reserved{\tudhyperdef*{idx:main}}%
-  }{%
-    \def\tud@reserved{\tudhyperdef*{idx:#1}}%
-  }%
-%    \end{macrocode}
-% Ohne Prolog wird der fehlerhafte vertikale Abstand behoben. 
-%    \begin{macrocode}
-  \ifx\tud@indexprologue\@empty%
-    \indexprologue[\tud@idx@skip]{\tud@reserved}%
+  \IfValueTF{#2}{%
 %    \end{macrocode}
 % Mit Prolog wird der fehlerhafte vertikale Abstand nach diesem korrigiert.
 %    \begin{macrocode}
-  \else%
     \indexprologue{%
-      \tud@reserved%
-      \tud@indexprologue%
+      \tudhyperdef*{idx:\IfValueTF{#1}{#1}{\imki@jobname}}%
+      #2%
       \tud@idx@skip%
     }%
-  \fi%
+  }{%
+%    \end{macrocode}
+% Ohne Prolog wird der fehlerhafte vertikale Abstand behoben. 
+%    \begin{macrocode}
+    \indexprologue[\tud@idx@skip]{%
+      \tudhyperdef*{idx:\IfValueTF{#1}{#1}{\imki@jobname}}%
+    }%
+  }%
 %</class>
 %    \end{macrocode}
 % Fur das Paket \pkg{tudscrtutorial} erfolgt eine einfache Ausgabe der Indexe.
+% Hier wird der Prolog im Zweifel nur für Makrodefinitionen genutzt.
 %    \begin{macrocode}
-%<package>  \indexprologue[\tud@idx@skip]{}%
+%<package>  \indexprologue[\tud@idx@skip]{\IfValueT{#2}{#2}}%
 %    \end{macrocode}
-% Die Ausgabe des gewünschten Index und des leeren des Prologs.
+% Die Ausgabe des gewünschten Index.
 %    \begin{macrocode}
-  \ifblank{#1}{\printindex}{\printindex[{#1}]}%
+  \IfValueTF{#1}{\printindex[{#1}]}{\printindex}%
   \ifnum\imki@columns>\@ne\relax\vspace{-\multicolsep}\fi%
-%<class>  \let\tud@indexprologue\@empty%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@idx@skip
-% \end{macro}^^A \print@index
+% \end{macro}^^A \tud@print@index
 %
 % \iffalse
 %<*class>
@@ -4480,6 +4469,8 @@
 %    \begin{macrocode}
 \newcommand*\PrintChangelog{%
   \begingroup%
+    \@tud@indextrue%
+    \@tud@changelogtrue%
 %    \end{macrocode}
 % Die oberste Ebene enthält die Versionsnummer mit dem Präfix |v|. Diese Ebene
 % soll nicht als Indexeintrag selber sondern vielmehr als Überschrift der Ebene
@@ -4522,7 +4513,7 @@
 %    \begin{macrocode}
     \clearpage%
     \def\imki@indexlevel{\addchap}%
-    \print@index[changelog]%
+    \tud@print@index[changelog]%
   \endgroup%
 }
 %    \end{macrocode}

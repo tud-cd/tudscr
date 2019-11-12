@@ -34,7 +34,7 @@
 %% 
 %% The current maintainer and author of this work is Falk Hanisch.
 %% 
-%%%% From File: tudscr-version.dtx 2019/10/23 15:20:47 cb055ee
+%%%% From File: tudscr-version.dtx 2019/11/08 00:00:00 5a8858a
 \NeedsTeXFormat{LaTeX2e}[2019/10/01]
 \begingroup
   \catcode`\@11\relax%
@@ -99,13 +99,13 @@
   \typeout{+------------------------------------------------------------------}%
 }
 \TUD@ProvidesWrapperClass{tudscrmanual}{tudscrreprt}{manual class}
-%%%% From File: tudscr-base.dtx 2019/10/25 03:52:05 452a9f7
+%%%% From File: tudscr-base.dtx 2019/11/12 00:38:34 b317afd
 \RequirePackage{tudscrbase}[%
   2019/10/24 v2.06f TUD-Script
 ]
 \renewcommand*\TUD@KOMAoptions[1]{\PassOptionsToClass{#1}{\TUD@Class@Parent}}
 \AfterClass{\TUD@Class@Parent}{\let\TUD@KOMAoptions\KOMAoptions}
-%%%% From File: tudscr-manual.dtx 2019/10/25 03:52:05 452a9f7
+%%%% From File: tudscr-manual.dtx 2019/11/12 02:03:02 aedfdd7
 \TUD@key{final}[true]{%
   \TUD@set@ifkey{final}{@tempswa}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
@@ -178,14 +178,14 @@
   \fi%
 }
 \TUDExecuteOptions{ToDo=true}
-%%%% From File: tudscr-misc.dtx 2019/10/23 15:20:47 cb055ee
+%%%% From File: tudscr-misc.dtx 2019/10/29 22:57:10 87f6482
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{\TUD@Class@Parent}}
 \TUDProcessOptions\relax
 \PassOptionsToClass{ttfont=roboto}{\TUD@Class@Parent}
 \LoadClass{\TUD@Class@Parent}[
   2019/10/24 v2.06f TUD-Script
 ]
-%%%% From File: tudscr-manual.dtx 2019/10/25 03:52:05 452a9f7
+%%%% From File: tudscr-manual.dtx 2019/11/12 02:03:02 aedfdd7
 \PassOptionsToPackage{log-declarations=false}{xparse}
 \RequirePackage{xparse}[2019/10/11]
 \RequirePackage{scrhack}[%
@@ -1020,8 +1020,8 @@
   \print@changedatlist{#1}{#2}%
 }
 \newif\if@tud@index
-\newif\if@tud@changelog
 \addtoeachtocfile{\protect\@tud@indextrue}
+\newif\if@tud@changelog
 \newrobustcmd*\bsc{\@backslashchar}
 \newrobustcmd*\suffix[1]{\begingroup~\scriptsize(#1)\endgroup}
 \newcommand*\Markup@Split[3]{%
@@ -2359,7 +2359,8 @@
       \par\textbf{\textsf{##1}}\par%
       \nopagebreak%
     }%
-    \tud@print@index(%
+    \tud@print@index%
+    (%
       Die im Folgenden aufgelisteten Schlagworte sollen f\"ur den Umgang mit %
       \hologo{LaTeXe} im Allgemeinen sowie dem \TUDScript-Bundle im Speziellen %
       sowohl Antworten bei generellen Fragen liefern als auch L\"osungen f\"ur %
@@ -2369,12 +2370,14 @@
       sein, um weitere Hilfe bei der Nutzung von \TUDScript zu erhalten.%
     )%
     \clearpage%
-    \tud@print@index[options](%
+    \tud@print@index[options]%
+    (%
       Dies ist der Index aller im Handbuch erl\"auterten sowie erw\"ahnten %
       Optionen, wobei bei den meisten auch Untereintr\"age mit Seitenangaben %
       f\"ur spezielle Wertzuweisungen existieren.%
     )%
-    \tud@print@index[macros](%
+    \tud@print@index[macros]%
+    (%
       Dies ist eine Auflistung aller zuvor erl\"auterten sowie erw\"ahnten %
       Befehle und Umgebungen. Bei einigen sind zus\"atzliche Untereintr\"age %
       f\"ur Schl\"ussel-Wert-Parameter zu finden, die im optionalen Argument %
@@ -2382,7 +2385,8 @@
       f\"ur explizite Wertzuweisungen an diese Parameter Seitenverweise zu %
       finden.%
     )%
-    \tud@print@index[terms](%
+    \tud@print@index[terms]%
+    (%
       Dies sind die von \TUDScript definierten, sprachabh\"angigen Bezeichner. %
       Informationen zur Verwendung sowie den Anpassungsm\"oglichkeiten sind in %
       \autoref{sec:localization} zu finden.%
@@ -2500,8 +2504,8 @@
 }
 \newcommand*\PrintChangelog{%
   \begingroup%
-    \@tud@changelogtrue%
     \@tud@indextrue%
+    \@tud@changelogtrue%
     \let\lettergroup\@gobble%
     \apptocmd{\theindex}{%
       \let\subsubsubitem\subsubitem%
@@ -3249,7 +3253,7 @@
 \newcommand*\textsbs{}
 \newrobustcmd*\sbsfont{\sffamily\bfseries\slshape}
 \DeclareTextFontCommand\textsbs{\sbsfont}
-%%%% From File: tudscr-fields.dtx 2019/10/25 03:52:05 452a9f7
+%%%% From File: tudscr-fields.dtx 2019/11/12 00:38:34 b317afd
 \newcommand*\@chairman{}
 \newcommand*\chairman[1]{\gdef\@chairman{#1}}
 \newcommand*\@grade{}
