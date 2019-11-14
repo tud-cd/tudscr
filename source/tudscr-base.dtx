@@ -1,4 +1,4 @@
-% \CheckSum{939}
+% \CheckSum{995}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -885,16 +885,22 @@
 % möglich.
 %    \begin{macrocode}
 \newcommand*\TUD@set@ifkey[3]{%
-  \tud@lowerstring\tud@res@a{#3}%
-  \edef\tud@res@b{%
-    \etex@unexpanded{\FamilySetBool{TUD}{#1}{#2}}{\tud@res@a}%
-  }\tud@res@b%
+  \begingroup%
+    \tud@lowerstring\tud@res@a{#3}%
+    \edef\tud@res@a{%
+      \endgroup%
+      \etex@unexpanded{\FamilySetBool{TUD}{#1}{#2}}{\tud@res@a}%
+    }
+  \tud@res@a%
 }
 \newcommand*\TUD@set@numkey[4]{%
-  \tud@lowerstring\tud@res@a{#4}%
-  \edef\tud@res@b{%
-    \etex@unexpanded{\FamilySetNumerical{TUD}{#1}{#2}{#3}}{\tud@res@a}%
-  }\tud@res@b%
+  \begingroup%
+    \tud@lowerstring\tud@res@a{#4}%
+    \edef\tud@res@a{%
+      \endgroup%
+      \etex@unexpanded{\FamilySetNumerical{TUD}{#1}{#2}{#3}}{\tud@res@a}%
+    }%
+  \tud@res@a%
 }
 %    \end{macrocode}
 % Um Dopplungen im Code zu vermeiden, werden für die numerische Schlüssel die 
@@ -904,14 +910,57 @@
   {false}{0},{off}{0},{no}{0},{true}{1},{on}{1},{yes}{1}%
 }
 %    \end{macrocode}
-% Mit \cs{TUD@set@dimenkey} wird der übergebene Längenwert im spezifiezierten 
-% Makro gespeichert.
+% Mit \cs{TUD@set@dimenkey} wird der übergebene Längenwert im spezifizierten 
+% Makro gespeichert. Wurde ein Argument übergeben, dass in einen String
+% expandiert, ist etwas Aufwand notwendig, da \cs{FamilySetLength} einen Fehler
+% wirft, wenn eine Längenangabe mit falscher Einheit übergeben wird. Deshalb
+% wird das Argument zuvor mit \cs{ifdimen} geprüft. Dieser Befehl wiederum kann
+% nicht mit Primitiven wie Längen etc. genutzt werden. 
 %    \begin{macrocode}
 \newcommand*\TUD@set@dimenkey[3]{%
-  \tud@lowerstring\tud@res@a{#3}%
-  \edef\tud@res@b{%
-    \etex@unexpanded{\FamilySetUseLengthMacro{TUD}{#1}{#2}}{\tud@res@a}%
-  }\tud@res@b%
+  \begingroup%
+    \tud@lowerstring\tud@res@a{#3}%
+%    \end{macrocode}
+% Zunächst wird der potenzielle String für die Manipulationen temporär in 
+% \cs{tud@res@b} gesichert und gegebenenfalls das Vorzeichen entfernt.
+%    \begin{macrocode}
+    \let\tud@res@b\tud@res@a%
+    \@tud@res@swafalse%
+    \expandafter\if\expandafter\@car\tud@res@b\relax\@nil+\@tud@res@swatrue\fi%
+    \expandafter\if\expandafter\@car\tud@res@b\relax\@nil-\@tud@res@swatrue\fi%
+    \if@tud@res@swa%
+      \edef\tud@res@b{\expandafter\@gobble\tud@res@b}%
+    \fi%
+%    \end{macrocode}
+% Danach wird geprüft, ob der String mit einer Ziffer beginnt. In diesem Fall 
+% wird mit \cs{ifdimen} geprüft, ob die Angabe tatsächlich eine Länge ist. 
+% Gegebenenfalls wird für Werte ohne Dimensionsangabe einfach \val{pt} als 
+% intendierte angenommen. Sollte es sich bei dem Argument nicht um einen String 
+% sondern um eine Primitive oder ein geschütztes Makro handeln, wird der 
+% \val{false}-Zweig von \cs{ifisinteger} ausgeführt.
+%    \begin{macrocode}
+    \@tud@res@swatrue%
+    \protected@edef\tud@res@b{\expandafter\@car\tud@res@b\relax\@nil}%
+    \ifisinteger{\tud@res@b}{%
+      \ifdimen{\tud@res@a}{}{%
+        \ifdimen{\tud@res@a pt}{%
+          \appto\tud@res@a{pt}%
+          \PackageWarning{tudscrbase}{%
+            No unit given! It is assumed, that you meant\MessageBreak%
+            `#1=#3pt'%
+          }%
+        }{%
+          \@tud@res@swafalse%
+        }%
+      }%
+    }{}%
+    \edef\tud@res@a{%
+      \endgroup%
+      \if@tud@res@swa%
+        \etex@unexpanded{\FamilySetUseLengthMacro{TUD}{#1}{#2}}{\tud@res@a}%
+      \fi%
+    }%
+  \tud@res@a%
 }
 %    \end{macrocode}
 % Dieser Befehl wird lediglich pro forma definiert. An diesen kann eine Liste 
