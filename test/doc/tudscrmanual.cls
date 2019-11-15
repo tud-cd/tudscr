@@ -99,13 +99,13 @@
   \typeout{+------------------------------------------------------------------}%
 }
 \TUD@ProvidesWrapperClass{tudscrmanual}{tudscrreprt}{manual class}
-%%%% From File: tudscr-base.dtx 2019/11/12 00:38:34 b317afd
+%%%% From File: tudscr-base.dtx 2019/11/15 03:28:28 f4c331b
 \RequirePackage{tudscrbase}[%
   2019/10/24 v2.06f TUD-Script
 ]
 \renewcommand*\TUD@KOMAoptions[1]{\PassOptionsToClass{#1}{\TUD@Class@Parent}}
 \AfterClass{\TUD@Class@Parent}{\let\TUD@KOMAoptions\KOMAoptions}
-%%%% From File: tudscr-manual.dtx 2019/11/12 02:03:02 aedfdd7
+%%%% From File: tudscr-manual.dtx 2019/11/15 03:28:28 f4c331b
 \TUD@key{final}[true]{%
   \TUD@set@ifkey{final}{@tempswa}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
@@ -185,7 +185,7 @@
 \LoadClass{\TUD@Class@Parent}[
   2019/10/24 v2.06f TUD-Script
 ]
-%%%% From File: tudscr-manual.dtx 2019/11/12 02:03:02 aedfdd7
+%%%% From File: tudscr-manual.dtx 2019/11/15 03:28:28 f4c331b
 \PassOptionsToPackage{log-declarations=false}{xparse}
 \RequirePackage{xparse}[2019/10/11]
 \RequirePackage{scrhack}[%
@@ -343,32 +343,40 @@
   \expandafter\newcommand\expandafter*\csname#2@auxlist\endcsname{}%
   \expandafter\newcommand\expandafter*\csname#2@auxlist@positive\endcsname{}%
   \expandafter\newcommand\expandafter*\csname#2@auxlist@negative\endcsname{}%
+  \expandafter\newcommand\expandafter*\csname#2@auxlist@handler\endcsname{#3}%
   \BeforeClosingMainAux{%
     \forlistcsloop{\listcsremove{#2@auxlist@positive}}{#2@auxlist@negative}%
-    \tud@auxlist@export{#2@auxlist}%
+    \tud@auxlist@export{#2}%
   }%
-  \AtBeginDocument{\tud@auxlist@import{#1}{#2@auxlist}{#3}}%
+  \AtBeginDocument{\tud@auxlist@import{#1}{#2}}%
 }
 \newcommand*\tud@auxlist@export[1]{%
   \if@filesw%
     \let\tud@res@a\@empty%
     \def\tud@res@b##1{\eappto\tud@res@a{{##1}}}%
-    \forlistcsloop\tud@res@b{#1@positive}%
+    \forlistcsloop\tud@res@b{#1@auxlist@positive}%
     \immediate\write\@mainaux{%
-      \string\gdef\expandafter\string\csname #1\endcsname%
+      \string\gdef\expandafter\string\csname #1@auxlist\endcsname%
         {\expandonce\tud@res@a}%
     }%
   \fi%
 }
-\newcommand*\tud@auxlist@import[3]{%
+\newcommand*\tud@auxlist@import[2]{%
   \begingroup%
     \edef\tud@res@a{%
-      \etex@unexpanded{\@tfor\tud@res@b:=}%
-      \expandafter\expandonce\csname #2\endcsname%
+      \etex@unexpanded{\@tfor\tud@res@c:=}%
+      \expandafter\expandonce\csname #2@auxlist\endcsname%
     }%
-    \global\cslet{#2}\@empty%
-    \IfValueT{#1}{\listcsxadd{#2}{#1}}%
-    \tud@res@a\do{\listcsxadd{#2}{#3{\tud@res@b}}}%
+    \letcs\tud@res@b{#2@auxlist@handler}%
+    \global\cslet{#2@auxlist}\@empty%
+    \IfValueT{#1}{%
+      \edef\tud@res@c{\tud@res@b{#1}}%
+      \listcsxadd{#2@auxlist}{\expandonce\tud@res@c}%
+    }%
+    \tud@res@a\do{%
+      \edef\tud@res@c{\tud@res@b{\tud@res@c}}%
+      \listcsxadd{#2@auxlist}{\expandonce\tud@res@c}%
+    }%
   \endgroup%
 }
 \newcommand*\tud@auxlist@add[2]{%
@@ -389,7 +397,16 @@
     }%
   \endgroup%
 }
-\newcommand*\tud@auxlist@ifin[2]{\xifinlistcs{#1}{#2@auxlist}}
+\newcommand*\tud@auxlist@ifin[2]{%
+  \begingroup%
+    \protected@edef\tud@res@a{#1}%
+    \letcs\tud@res@b{#2@auxlist@handler}%
+    \edef\tud@res@a{%
+      \endgroup%
+      \noexpand\ifinlistcs{\tud@res@b{\tud@res@a}}{#2@auxlist}%
+    }%
+  \tud@res@a%
+}
 \newcommand*\tud@auxlist@forloop[2]{\forlistcsloop#1{#2@auxlist}}
 \PassOptionsToPackage{hyperindex=false,colorlinks,linkcolor=blue}{hyperref}
 \PassOptionsToPackage{open,openlevel=0}{bookmark}
@@ -451,8 +468,7 @@
   \tud@localization@english{\subsubsectionautorefname}{subsubsection}%
 }
 \newcommand*\tud@manualname{tudscr}%
-% TODO \detokenize\expandafter notwendig? wahrscheinlich wegen UTF8?
-\tud@auxlist@register{tud@label@alias}%[\detokenize\expandafter]%
+\tud@auxlist@register{tud@label@alias}[\detokenize\expandafter]%
 \NewDocumentCommand\tudhyperdef{s m d==}{%
   \begingroup%
     \IfBooleanTF{#1}{%
@@ -524,9 +540,6 @@
 }{}{\tud@patch@wrn{set@@@@preamble}}
 \newcommand*\tudhyper@alias@values[1]{%
   \tud@auxlist@add{tud@label@alias}{#1}%
-% TODO \detokenize\expandafter notwendig? wahrscheinlich wegen UTF8?
-%  \edef\tud@res@b{\detokenize\expandafter{#1}}%
-%  \tud@auxlist@ifin{\tud@res@b}{tud@label@alias}{%
   \tud@auxlist@ifin{#1}{tud@label@alias}{%
     \Hy@raisedlink{\tud@hyperdef{#1}}\ignorespaces%
     \label{#1}%
@@ -658,16 +671,18 @@
     \expandafter\@firstoftwo%
   \fi%
 }
-\tud@auxlist@register[\expandonce\tud@bdl@dflt]{tud@bdl}%
+\tud@auxlist@register[\tud@bdl@dflt]{tud@bdl}%
 \newcommand*\tud@bdl@add[1]{%
   \begingroup%
     \protected@edef\tud@res@a{#1}%
     \ifx\tud@res@a\tud@bdl@dflt\else%
-      \tud@auxlist@add{tud@bdl}{#1}%
+      \tud@auxlist@add{tud@bdl}{\tud@res@a}%
     \fi%
   \endgroup%
 }
-% TODO make \LaTeX[e] available bzw. \Bundle{latex} verwenden
+% TODO make \LaTeX[e] available bzw. \Bundle{latex} verwenden (auch treatise)
+% --> Bundle-Argument pflicht bzw. warnung, wenn nicht? oder dflt lassen und
+% direkten link ins handbuch setzen?
 % TODO nur gültige Markupbefehle \Class, \Package, \Bundle zulassen
 % TODO rename to Separation
 \newenvironment{Bundle}[1]{%
@@ -1478,9 +1493,10 @@
 \newcommand*\ProcessorBundle[1]{%
   \begingroup%
     \def\tud@res@a{#1}%
-    \ifx\tud@res@a\@empty%
+    \trim@spaces@in\tud@res@a%
+    \expandafter\ifblank\expandafter{\tud@res@a}{%
       \let\tud@res@a\tud@bdl@dflt%
-    \fi%
+    }{}%
     \let\tud@res@b\@empty%
     \let\tud@res@c\@empty%
     \@for\tud@res@a:=\tud@res@a\do{%
@@ -1615,22 +1631,24 @@
           \tud@lbl@get*\tud@res@a{#5:#1}+#2+=#3=%
           \ifx\tud@lbl@tmp\tud@res@a\else%
             \IfValueT{#3}{%
-              \tud@if@lbl@exists{\tud@lbl@tmp}{\aftergroup\@tud@res@swatrue}{}%
+              \tud@if@lbl@exists{\tud@lbl@tmp}{\@tud@res@swatrue}{}%
             }%
           \fi%
 %          \tud@if@lbl@exists{\tud@lbl@tmp}{}{%
 %            \expandafter\ifstrequal\expandafter{\tud@bdl@dflt}{#5}{%
-%              \aftergroup\@tud@res@swatrue%
+%              \@tud@res@swatrue%
 %            }{}%
 %          }%
+          \if@tud@res@swa%
+            \ClassWarning{tudscrmanual}{%
+              A \IfValueTF{#3}{specific}{general} value for \detokenize{#5} 
+              with%
+              \MessageBreak #1\IfValueT{#3}{=#3}\MessageBreak%
+              was given, but label \tud@res@a\MessageBreak%
+              was not found%
+            }%
+          \fi%
         \endgroup%
-        \if@tud@res@swa%
-          \ClassWarning{tudscrmanual}{%
-            A \IfValueTF{#3}{specific}{general} value for \detokenize{#5} with%
-            \MessageBreak #1\IfValueT{#3}{=#3}\MessageBreak%
-            was given, but no label was found%
-          }%
-        \fi%
       \fi%
       \tud@if@lbl@exists{\tud@lbl@tmp}{%
         \def\tud@res@c{\tudhyperref{\tud@lbl@tmp}{\tud@res@b}}%
@@ -3253,7 +3271,7 @@
 \newcommand*\textsbs{}
 \newrobustcmd*\sbsfont{\sffamily\bfseries\slshape}
 \DeclareTextFontCommand\textsbs{\sbsfont}
-%%%% From File: tudscr-fields.dtx 2019/11/12 00:38:34 b317afd
+%%%% From File: tudscr-fields.dtx 2019/11/15 03:28:28 f4c331b
 \newcommand*\@chairman{}
 \newcommand*\chairman[1]{\gdef\@chairman{#1}}
 \newcommand*\@grade{}
