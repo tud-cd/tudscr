@@ -1,4 +1,4 @@
-% \CheckSum{5034}
+% \CheckSum{4987}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -5198,7 +5198,7 @@
 % \begin{macro}{\tud@shellescape@wrn}
 % \changes{v2.02}{2014/10/14}{neu}^^A
 % Dieses Makro wird verwendet, wenn eine gesuchte Datei nicht gefunden wurde, 
-% weil das Dokument noch nicht mit dem Schalter \file{-{}-shell-escape} 
+% weil das Dokument noch nicht mit dem Parameter \file{-{}-shell-escape} 
 % kompiliert wurde.
 %    \begin{macrocode}
 \newcommand*\tud@shellescape@wrn[1]{%
@@ -5336,7 +5336,7 @@
 %    \end{macrocode}
 % Ist die gesuchte Datei vorhanden, wird diese auch eingebunden. Andernfalls 
 % wird eine Warnung mit dem Hinweis auf die notwendige Verwendung von 
-% \app{pdflatex} mit dem Schalter \file{-{}-shell-escape} erzeugt.
+% \app{pdflatex} mit dem Parameter \file{-{}-shell-escape} erzeugt.
 %    \begin{macrocode}
   \def\@tempa{examples/#1.pdf}%
   \ifdef{\tudprintflag}{%
@@ -5539,20 +5539,6 @@
 % \end{macro}^^A \CodeHook
 % \end{macro}^^A \Code@Preamble
 % \end{macro}^^A \CodePreamble
-% \begin{macro}{\StandaloneFile}
-% \changes{v2.02}{2014/08/19}{neu}^^A
-% \begin{macro}{\StandaloneDate}
-% \changes{v2.05}{2015/11/18}{neu}^^A
-% Die Umgebungen \env{Trunk!} und \env{Hint!} erzeugen nach der Ausgabe des
-% Quelltextes mit dem Makro \cs{tud@tut@pdf} eine PDF-Datei, welche mit
-% \cs{IncludeStandalone} in das Tutorial eingebunden werden kann.
-%    \begin{macrocode}
-\newcommand*\StandaloneFile{}
-\let\StandaloneFile\relax
-\newcommand*\StandaloneDate{}
-%    \end{macrocode}
-% \end{macro}^^A \StandaloneDate
-% \end{macro}^^A \StandaloneFile
 % \begin{macro}{\filec@ntents@silent}
 % \changes{v2.06e}{2019/10/10}{neu}^^A
 % Die Umgebungen \env{Preamble}, \env{Trunk} und \env{Hint} sowie deren
@@ -5687,15 +5673,14 @@
   }%
   \aftergroup\@tempa%
 }
-\newenvironment{Trunk!}[1]{%
-  \gdef\StandaloneFile{#1}%
+\NewDocumentEnvironment{Trunk!}{m}{%
   \tud@tut@pre%
 }{%
   \tud@tut@post%
   \tud@tut@append{trunk}%
   \gdef\@tempa{%
     \tud@tut@lst%
-    \tud@tut@pdf%
+    \tud@tut@pdf{#1}%
     \global\let\Code@Preamble\relax%
   }%
   \aftergroup\@tempa%
@@ -5747,14 +5732,13 @@
   }%
   \aftergroup\@tempa%
 }
-\newenvironment{Hint!}[1]{%
-  \gdef\StandaloneFile{#1}%
+\NewDocumentEnvironment{Hint!}{m}{%
   \tud@tut@pre%
 }{%
   \tud@tut@post%
   \gdef\@tempa{%
     \tud@tut@lst%
-    \tud@tut@pdf%
+    \tud@tut@pdf{#1}%
     \global\let\Code@Preamble\relax%
   }%
   \aftergroup\@tempa%
@@ -5840,12 +5824,12 @@
 % Die Umgebungen \env{Trunk!} und \env{Hint!} verwenden nach der Ausgabe des
 % Quelltextes diesen abermals, um daraus eine PDF-Datei zu erzeugen. Dafür wird
 % eine temporäre \LaTeX-Datei mithilfe einer \env{filecontents}-Umgebung 
-% erzeugt. Diese bindet die mit \env{Trunk!} erzeugte Datei ein und wird
-% anschließend via \cs{ShellEscape} kompiliert. Dabei sollte man sich nicht von 
-% der doppelten Verwendung von \cs{jobname} verwirren lassen. Der Dateiname der
-% temporär erzeugten \LaTeX-Datei ist abhängig vom gesetzten Tutorial. Beim
-% Aufruf dieser wird über die Optionen von \app{pdflatex} der verwendete
-% \cs{jobname} angepasst (siehe \cs{tud@tut@pdf}).
+% erzeugt. Diese bindet die mit \env{Trunk!} respektive \env{Hint!} erzeugte 
+% Datei ein und wird anschließend via \cs{ShellEscape} kompiliert. Dabei sollte
+% man sich nicht von der doppelten Verwendung von \cs{jobname} verwirren 
+% lassen. Der Dateiname der temporär erzeugten \LaTeX-Datei ist abhängig vom
+% gesetzten Tutorial. Beim Aufruf von \app{pdflatex} wird \cs{jobname} über den
+% entsprechenden Kommandozeilenparameter angepasst (siehe \cs{tud@tut@pdf}).
 %    \begin{macrocode}
 \IfFileExists{\tud@tut@temp-standalone.tex}{\@tempswafalse}{\@tempswatrue}
 \if@tempswa
@@ -5863,67 +5847,61 @@
 \usepackage{enumitem}
 \setlist{noitemsep}
 \begin{document}
-\ifdefvoid{\StandaloneDate}{}{\date{\StandaloneDate}}%
 \input{\jobname.tex}%
 \end{document}
 \end{filecontents*}
 \fi
 %    \end{macrocode}
-% Der Quelltext aus den Umgebungen \env{Trunk!} und \env{Hint!} wird~-- wie bei
-% allen anderen \env{Trunk}-Derivaten~-- in \file{\string\tud@tut@temp.tex}
-% gesichert. Beim Aufruf von \app{pdflatex} wird durch die Nutzung der Option
-% \file{-jobname=\string\tud@tut@temp} die Definition von \cs{jobname} in der
+% Der Quelltext der Umgebungen \env{Trunk!} und \env{Hint!} wird~-- wie bei
+% allen anderen \env{Trunk}"~ und \env{Hint!}"~Derivaten~-- in der Datei
+% \file{\string\tud@tut@temp.tex} gesichert. Diese wird für das Procederre 
+% in \file{\string\jobname-standalone-\#1.tex} umbenannt. Anschließend wird 
+% beim Aufruf von \app{pdflatex} durch die Nutzung des Kommandozeilenparameters
+% \file{-jobname=\string\jobname-standalone-\#1} der Befehl \cs{jobname} in der 
 % aufgerufenen Datei \file{\string\tud@tut@temp-standalone.tex} überschrieben
-% und der Inhalt von \file{\string\tud@tut@temp.tex} wie gewünscht eingebunden
-% und kompiliert. Damit die so erstellte PDF-Datei mit \cs{IncludeStandalone}
-% im weiteren Verlauf in das Tutorial eingebunden werden kann, wird diese 
-% außerdem noch in \file{\string\jobname-standalone-\string\StandaloneFile.pdf} 
-% umbenannt. Das Makro \cs{StandaloneDate} wird auf das Datum der Master-Datei
-% gesetzt, damit das voreingestellte Datum der erzeugten Datei angepasst werden
-% kann.
+% und der Inhalt von \file{\string\jobname-standalone-\#1.tex} wie gewünscht
+% eingebunden und kompiliert. Die so erstellte PDF"~Datei kann anschließend mit 
+% \cs{IncludeStandalone} in das Tutorial eingebunden werden.
 %    \begin{macrocode}
-\newcommand*\tud@tut@pdf{%
+\newcommand*\tud@tut@pdf[1]{%
   \ifnum\pdf@shellescape=\@ne\relax%
-    \filemodCmp{\jobname-standalone-\StandaloneFile.pdf}{\jobname.tex}{}{%
+    \filemodCmp{\jobname-standalone-#1.pdf}{\jobname.tex}{}{%
       \begingroup%
-        \let\printdate\@firstofone%
-        \edef\@tempa{\expandonce\@date}%
-        \def\@tempb{\today}%
-        \ifx\@tempa\@tempb%
-          \let\@tempb\@empty%
-        \else%
-          \edef\@tempb{\etex@unexpanded{\def\StandaloneDate}{\@date}}%
-        \fi%
+        \ShellEscape{%
+          \ifwindows%
+            copy%
+          \else%
+            cp%
+          \fi%
+          \space"\tud@tut@temp.tex"\space"\jobname-standalone-#1.tex"%
+        }%
         \edef\@tempa{%
-          \tud@latex@ext -jobname=\tud@tut@temp\space%
-          "\noexpand\unexpanded{\expandonce\@tempb\noexpand\input}%
-            {\tud@tut@temp-standalone.tex}"%
+          \tud@latex@ext -jobname="\jobname-standalone-#1"\space%
+          "\unexpanded{\noexpand\input}{\tud@tut@temp-standalone.tex}"%
         }%
         \ShellEscape{\@tempa}%
         \ShellEscape{\@tempa}%
         \ShellEscape{\@tempa}%
-        \ifwindows%
-          \def\@tempa{rename}%
-        \else%
-          \def\@tempa{mv}%
-        \fi%
         \ShellEscape{%
-          \@tempa\space\tud@tut@temp.pdf\space%
-          \jobname-standalone-\StandaloneFile.pdf%
+          \ifwindows%
+            del%
+          \else%
+            rm%
+          \fi%
+          \space"\jobname-standalone-#1.tex"%
         }%
       \endgroup%
     }%
   \fi%
-  \global\let\StandaloneFile\relax%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@tut@pdf
 % \begin{macro}{\IncludeStandalone}
 % \changes{v2.02}{2014/09/10}{neu}^^A
-% Der Befehl \cs{IncludeStandalone} bindet die durch \env{Trunk!} generierten
-% PDF-Dateien ein. Das angehängte optionale Argument dient zur Angabe der
-% einzubindenden Seiten der PDF-Datei, wobei diese automatisch auf die passende
-% Breite skaliert werden.
+% Der Befehl \cs{IncludeStandalone} bindet die mit den Umgebungen \env{Trunk!} 
+% und \env{Hint!} generierten PDF"~Dateien ein. Das angehängte optionale 
+% Argument dient zur Angabe der einzubindenden Seiten der PDF-Datei, wobei
+% diese automatisch auf die passende Breite skaliert werden.
 %    \begin{macrocode}
 \NewDocumentCommand\IncludeStandalone{o m !O{1}}{%
   \IfFileExists{\jobname-standalone-#2.pdf}{%
