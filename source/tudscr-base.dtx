@@ -1,4 +1,4 @@
-% \CheckSum{995}
+% \CheckSum{998}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -917,9 +917,9 @@
 % wird das Argument zuvor mit \cs{ifdimen} geprüft. Dieser Befehl wiederum kann
 % nicht mit Primitiven wie Längen etc. genutzt werden. 
 %    \begin{macrocode}
-\newcommand*\TUD@set@dimenkey[3]{%
+\newcommand*\TUD@set@dimenkey[4][pt]{%
   \begingroup%
-    \tud@lowerstring\tud@res@a{#3}%
+    \tud@lowerstring\tud@res@a{#4}%
 %    \end{macrocode}
 % Zunächst wird der potenzielle String für die Manipulationen temporär in 
 % \cs{tud@res@b} gesichert und gegebenenfalls das Vorzeichen entfernt.
@@ -934,20 +934,21 @@
 %    \end{macrocode}
 % Danach wird geprüft, ob der String mit einer Ziffer beginnt. In diesem Fall 
 % wird mit \cs{ifdimen} geprüft, ob die Angabe tatsächlich eine Länge ist. 
-% Gegebenenfalls wird für Werte ohne Dimensionsangabe einfach \val{pt} als 
-% intendierte angenommen. Sollte es sich bei dem Argument nicht um einen String 
-% sondern um eine Primitive oder ein geschütztes Makro handeln, wird der 
-% \val{false}-Zweig von \cs{ifisinteger} ausgeführt.
+% Gegebenenfalls wird für Werte ohne Dimensionsangabe einfach \val{pt} oder ein 
+% gegebenes optionales Argument als intendierte angenommen. Sollte es sich bei
+% dem Argument nicht um einen String sondern um eine Primitive oder ein
+% geschütztes Makro handeln, wird der \val{false}-Zweig von \cs{ifisinteger}
+% ausgeführt.
 %    \begin{macrocode}
     \@tud@res@swatrue%
     \protected@edef\tud@res@b{\expandafter\@car\tud@res@b\relax\@nil}%
     \ifisinteger{\tud@res@b}{%
       \ifdimen{\tud@res@a}{}{%
-        \ifdimen{\tud@res@a pt}{%
-          \appto\tud@res@a{pt}%
+        \ifdimen{\tud@res@a#1}{%
+          \appto\tud@res@a{#1}%
           \PackageWarning{tudscrbase}{%
             No unit given! It is assumed, that you meant\MessageBreak%
-            `#1=#3pt'%
+            `#2=#4#1'%
           }%
         }{%
           \@tud@res@swafalse%
@@ -957,7 +958,9 @@
     \edef\tud@res@a{%
       \endgroup%
       \if@tud@res@swa%
-        \etex@unexpanded{\FamilySetUseLengthMacro{TUD}{#1}{#2}}{\tud@res@a}%
+        \etex@unexpanded{\FamilySetUseLengthMacro{TUD}{#2}{#3}}{\tud@res@a}%
+      \else%
+        \noexpand\FamilyKeyStateUnknownValue%
       \fi%
     }%
   \tud@res@a%
