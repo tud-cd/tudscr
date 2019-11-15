@@ -2356,15 +2356,16 @@
 % TODO überprüfen und Makronamen anpassen
 \NewDocumentCommand\SeeRef{s m m}{%
   \tud@extract@box{%
+%    \protected\def~{~}%
     \let\tud@idx@fmt\relax%
     #3%
     \ifx\tud@idx@fmt\relax%
       \def\tud@res@a{#3}%
       \def\tud@res@c{#3}%
     \else%
-      \edef\tud@res@c{\tud@idx@fmt}%
+      \protected@edef\tud@res@c{\tud@idx@fmt}%
       \let\suffix\@gobble%
-      \edef\tud@res@a{\tud@idx@val\tud@idx@key @\tud@idx@fmt}%
+      \protected@edef\tud@res@a{\tud@idx@val\tud@idx@key @\tud@idx@fmt}%
     \fi%
   }{\tud@res@a,\tud@res@c}%
   \IfBooleanTF{#1}{\def\tud@res@b{seeunverified}}{\def\tud@res@b{see}}%
