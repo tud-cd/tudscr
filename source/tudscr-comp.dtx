@@ -1,4 +1,4 @@
-% \CheckSum{1397}
+% \CheckSum{1418}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -1695,34 +1695,6 @@
 % \end{macro}^^A \blautabelle
 % \end{macro}^^A \if@tud@comp@graytable
 % \end{environment}^^A farbtabellen
-% \begin{macro}{\schnittrand}
-% \changes{v2.05}{2016/04/17}{neu}^^A
-% Zu guter Letzt geht es an das Makro \cs{schnittrand}. Zur Intension dieses 
-% Befehls gab es im \GitHubRepo(tud-cd/tud-cd)<6> bereits eine angeregte
-% Diskussion.
-% \ToDo{Für \cls{tudscrposter} übernehmen?}[v2.07]
-%    \begin{macrocode}
-  \ifundef{\schnittrand}{}{%
-    \ifisdimension{\schnittrand}{%
-      \edef\@tempa{%
-        paperwidth=\the\dimexpr\paperwidth+\schnittrand*2\relax,%
-        paperheight=\the\dimexpr\paperheight+\schnittrand*2\relax,%
-        layout=\the\paperwidth:\the\paperheight,%
-        layoutoffset=\the\dimexpr\schnittrand\relax,%
-        showcrop%
-      }%
-      \expandafter\geometry\expandafter{\@tempa}%
-    }{%
-      \PackageErrorNoLine{tudscrcomp}{%
-        Wrong definition for `\string\schnittrand'%
-      }{%
-        The definition of `\string\schnittrand' does not expand to\MessageBreak%
-        a valid dimension expression.%
-      }%
-    }%
-  }%
-%    \end{macrocode}
-% \end{macro}^^A \schnittrand
 %
 % Das waren die Makros für die Posterklassen.
 %    \begin{macrocode}
@@ -1733,6 +1705,56 @@
 %</body>
 %<*option>
 % \fi
+%
+% \begin{option}{schnittrand}
+% \begin{macro}{\schnittrand}
+% \changes{v2.05}{2016/04/17}{neu}^^A
+% Nun geht es an das Makro \cs{schnittrand}. Zur Intension dieses Befehls gab
+% es im \GitHubRepo(tud-cd/tud-cd)<6> bereits eine angeregte Diskussion.
+% \ToDo{Für \cls{tudscrposter} übernehmen?}[v2.07]
+%    \begin{macrocode}
+\tud@comp@on@poster@class{%
+  \TUD@key{schnittrand}[5mm]{%
+    \TUD@set@dimenkey[mm]{schnittrand}{\@tempa}{#1}%
+    \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+      \edef\@tempa{%
+        paperwidth=\the\dimexpr\paperwidth+\@tempa*2\relax,%
+        paperheight=\the\dimexpr\paperheight+\@tempa*2\relax,%
+        layout=\the\paperwidth:\the\paperheight,%
+        layoutoffset=\the\dimexpr\@tempa\relax,%
+        showcrop%
+      }%
+      \expandafter\geometry\expandafter{\@tempa}%
+    \fi%
+%    \end{macrocode}
+% Da die Option auf das Seitenlayout direkt zugreift und mehrmalige Aufrufe 
+% sich beeinflussen würden, werden diese unterbunden.
+%    \begin{macrocode}
+    \TUD@key{schnittrand}[5mm]{%
+      \PackageWarning{tudscrcomp}{%
+        It is not possible to use option `schnittrand'\MessageBreak%
+        multiple times, the given setting `schnittrand=##1'\MessageBreak%
+        is ignored%
+      }%
+    }%
+  }%
+  \ifundef{\schnittrand}{}{%
+    \protected@edef\@tempa{%
+      \noexpand\TUDExecuteOptions{schnittrand=\schnittrand}%
+    }\@tempa%
+    \ifx\FamilyKeyState\FamilyKeyStateProcessed\else%
+      \PackageErrorNoLine{tudscrcomp}{%
+        Wrong definition for `\string\schnittrand'%
+      }{%
+        The definition of `\string\schnittrand' does not expand\MessageBreak%
+        to a valid dimension expression.%
+      }%
+    \fi%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \schnittrand
+% \end{option}^^A schnittrand
 %
 % \begin{option}{tudmathfoot}
 % \changes{v2.05}{2016/04/17}{neu}^^A

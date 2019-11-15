@@ -1,4 +1,4 @@
-% \CheckSum{3130}
+% \CheckSum{3142}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -821,14 +821,11 @@
 % dass es sich bei diesem um die gewünschte Schriftgröße handelt.
 %    \begin{macrocode}
   \else%
-    \tud@lowerstring\tud@res@a{#1}%
-    \ifdimen{\tud@res@a}{%
-      \ifdim\tud@res@a>\z@\relax%
-        \TUDoptions{fontsize=#1}%
-        \tud@cdfont@activate%
-        \FamilyKeyStateProcessed%
-      \fi%
-    }{}%
+    \TUD@set@dimenkey{cdfont}{\@tempa}{#1}%
+    \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+      \TUDoptions{fontsize=#1}%
+      \tud@cdfont@activate%
+    \fi%
   \fi%
 }
 \newcommand*\tud@cdfont@activate{%
@@ -992,6 +989,7 @@
 \TUD@key{fontsize}{%
   \TUD@set@dimenkey{fontsize}{\@tempa}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \ifdim\@tempa>\z@\relax%
 %    \end{macrocode}
 % Für das Paket wird geprüft, ob die gerade abgearbeitete Option global als
 % Klassenoption angegeben wurde. Für den Fall, dass dies nicht so ist~-- die 
@@ -999,22 +997,41 @@
 % dem Hinweis auf das vorgeschlagene Vorgehen ausgegeben.
 %    \begin{macrocode}
 %<*package>
-    \@expandtwoargs\in@{,\CurrentOption,}{,\@globaloptionslist,}%
-    \ifin@\else%
-      \edef\tud@res@a{%
-        \noexpand\PackageWarning{tudscrfonts}%
-        {%
-          The key `\CurrentOption' should only be\MessageBreak%
-          used as class option%
+      \@expandtwoargs\in@{,\CurrentOption,}{,\@globaloptionslist,}%
+      \ifin@\else%
+        \edef\tud@res@a{%
+          \noexpand\PackageWarning{tudscrfonts}%
+          {%
+            The key `\CurrentOption' should only be\MessageBreak%
+            used as class option%
+          }%
         }%
-      }%
-      \expandafter\AtEndOfPackage\expandafter{\tud@res@a}%
-    \fi%
+        \expandafter\AtEndOfPackage\expandafter{\tud@res@a}%
+      \fi%
 %</package>
 %<*class>
-    \@tud@x@scr@fontsize@settrue%
+      \@tud@x@scr@fontsize@settrue%
 %</class>
-    \TUD@KOMAoptions{fontsize=#1}%
+      \TUD@KOMAoptions{fontsize=#1}%
+    \else%
+      \FamilyKeyStateUnknownValue%
+    \fi%
+  \fi%
+%    \end{macrocode}
+% Für ungültige Werte wird eine Warnung ausgegeben.
+%    \begin{macrocode}
+  \ifx\FamilyKeyState\FamilyKeyStateUnknownValue%
+%<*class>
+    \ClassWarningNoLine{\TUD@Class@Name}%
+%</class>
+%<*package>
+    \PackageWarningNoLine{tudscrfonts}%
+%</package>
+    {%
+      The value for option `fontsize' has to be a\MessageBreak%
+      positve dimension but `#1' was given%
+    }%
+    \FamilyKeyStateProcessed%
   \fi%
 }
 %<*class>
