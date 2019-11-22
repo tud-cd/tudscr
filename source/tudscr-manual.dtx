@@ -1,4 +1,4 @@
-% \CheckSum{5006}
+% \CheckSum{5179}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -415,12 +415,12 @@
 % \begin{macro}{\tracinglabels}
 % \changes{v2.05}{2015/10/29}{neu}^^A
 % \changes{v2.06f}{2019/09/19}{optionales Argument unterstützt mehrere Werte}^^A
+% \begin{macro}{\tud@trace@lbl@types}
+% \changes{v2.06f}{2019/09/22}{neu}^^A
 % \begin{macro}{\tud@trace@lbl@add}
 % \changes{v2.06f}{2019/09/19}{neu}^^A
 % \begin{macro}{\tud@trace@lbl@wlog}
 % \changes{v2.06f}{2019/09/19}{neu}^^A
-% \begin{macro}{\tud@trace@lbl@types}
-% \changes{v2.06f}{2019/09/22}{neu}^^A
 % \begin{macro}{\tud@trace@lbl@created@list}
 % \changes{v2.05}{2015/10/29}{neu}^^A
 % \begin{macro}{\tud@trace@lbl@matched@list}
@@ -432,18 +432,6 @@
 % \begin{macro}{\tud@trace@lbl@missing@list}
 % \changes{v2.05}{2015/10/29}{neu}^^A
 % \begin{macro}{\tud@trace@lbl@url@list}
-% \changes{v2.06f}{2019/09/19}{neu}^^A
-% \begin{macro}{\tud@trace@lbl@created@add}
-% \changes{v2.05}{2015/10/29}{neu}^^A
-% \begin{macro}{\tud@trace@lbl@matched@add}
-% \changes{v2.06f}{2019/09/19}{neu}^^A
-% \begin{macro}{\tud@trace@lbl@unused@add}
-% \changes{v2.06f}{2019/09/19}{neu}^^A
-% \begin{macro}{\tud@trace@lbl@ignored@add}
-% \changes{v2.06f}{2019/09/19}{neu}^^A
-% \begin{macro}{\tud@trace@lbl@missing@add}
-% \changes{v2.05}{2015/10/29}{neu}^^A
-% \begin{macro}{\tud@trace@lbl@url@add}
 % \changes{v2.06f}{2019/09/19}{neu}^^A
 % Mit \cs{tracinglabels} wird die Nachverfolgung aller erstellten Labels in der 
 % Dokumentation aktiviert werden. Die Label werden zum einen direkt im Logfile
@@ -462,10 +450,14 @@
 \listadd\tud@trace@lbl@types{url}%
 \def\tud@res@a#1{%
   \expandafter\newcommand\csname tud@trace@lbl@#1@list\endcsname{}%
-  \expandafter\newcommand\csname tud@trace@lbl@#1@add\endcsname[1]{}%
+  \expandafter\let\csname tud@trace@lbl@#1@list\endcsname\relax%
 }
 \forlistloop{\tud@res@a}{\tud@trace@lbl@types}%
 \NewDocumentCommand\tracinglabels{!s !O{missing}}{%
+  \def\tud@res@a##1{%
+    \expandafter\let\csname tud@trace@lbl@##1@list\endcsname\relax%
+  }%
+  \forlistloop{\tud@res@a}{\tud@trace@lbl@types}%
   \let\tud@res@b\@empty%
   \let\tud@res@c\@empty%
   \@for\tud@res@a:=#2\do{\listeadd\tud@res@b{\tud@res@a}}%
@@ -476,7 +468,7 @@
     \forlistloop{\tud@res@a}{\tud@trace@lbl@types}%
   }%
   \def\tud@res@a##1{%
-    \csdef{tud@trace@lbl@##1@add}####1{\tud@trace@lbl@add{##1}{####1}}%
+    \expandafter\let\csname tud@trace@lbl@##1@list\endcsname\@empty%
     \IfBooleanF{#1}{%
       \appto\tud@trace@lbl@wlog{%
         \ifcsvoid{tud@trace@lbl@##1@list}{%
@@ -503,11 +495,19 @@
 \newcommand*\tud@trace@lbl@add[2]{%
   \if@tud@index\else%
     \begingroup%
-      \protected@edef\tud@res@a{#2}%
-      \@onelevel@sanitize\tud@res@a%
-      \wlog{+++++ label #1: \tud@res@a\space on page \thepage}%
-      \xifinlistcs{\tud@res@a}{tud@trace@lbl@#1@list}{}{%
-        \listcsxadd{tud@trace@lbl@#1@list}{\tud@res@a}%
+      \ifcsundef{tud@trace@lbl@#1@list}{%
+        \ifinlist{#1}{\tud@trace@lbl@types}{}{%
+          \ClassError{tudscrmanual}{Undefined label type `#1'}{%
+            The given tracing type was never defined.%
+          }%
+        }%
+      }{%
+        \protected@edef\tud@res@a{#2}%
+        \@onelevel@sanitize\tud@res@a%
+        \wlog{+++++ label #1: \tud@res@a\space on page \thepage\on@line}%
+        \xifinlistcs{\tud@res@a}{tud@trace@lbl@#1@list}{}{%
+          \listcsxadd{tud@trace@lbl@#1@list}{\tud@res@a}%
+        }%
       }%
     \endgroup%
   \fi%
@@ -515,40 +515,100 @@
 \newcommand*\tud@trace@lbl@wlog{\relax}
 \AfterEndDocument{\tud@trace@lbl@wlog}
 %    \end{macrocode}
-% \end{macro}^^A \tud@trace@lbl@url@add
-% \end{macro}^^A \tud@trace@lbl@missing@add
-% \end{macro}^^A \tud@trace@lbl@ignored@add
-% \end{macro}^^A \tud@trace@lbl@unused@add
-% \end{macro}^^A \tud@trace@lbl@matched@add
-% \end{macro}^^A \tud@trace@lbl@created@add
 % \end{macro}^^A \tud@trace@lbl@url@list
 % \end{macro}^^A \tud@trace@lbl@missing@list
 % \end{macro}^^A \tud@trace@lbl@ignored@list
 % \end{macro}^^A \tud@trace@lbl@unused@list
 % \end{macro}^^A \tud@trace@lbl@matched@list
 % \end{macro}^^A \tud@trace@lbl@created@list
-% \end{macro}^^A \tud@trace@lbl@types
 % \end{macro}^^A \tud@trace@lbl@wlog
 % \end{macro}^^A \tud@trace@lbl@add
+% \end{macro}^^A \tud@trace@lbl@types
 % \end{macro}^^A \tracinglabels
 % \begin{macro}{\tracingmarkup}
 % \changes{v2.05}{2015/10/29}{neu}^^A
-% \begin{macro}{\tud@trace@markup}
-% \changes{v2.05}{2015/10/29}{neu}^^A
+% \begin{macro}{\tud@trace@markup@types}
+% \changes{v2.06f}{2019/11/22}{neu}^^A
+% \begin{macro}{\tud@trace@markup@add}
+% \changes{v2.06f}{2019/11/22}{neu}^^A
+% \begin{macro}{\tud@trace@markup@wlog}
+% \changes{v2.06f}{2019/11/22}{neu}^^A
+% \begin{macro}{\tud@trace@markup@declare@list}
+% \changes{v2.06f}{2019/11/22}{neu}^^A
+% \begin{macro}{\tud@trace@markup@output@list}
+% \changes{v2.06f}{2019/11/22}{neu}^^A
 % Mit \cs{tracingmarkup} wird die Nachverfolgung aller Aufrufe von
 % \cs{Process@@MarkupDeclare} und \cs{Process@@MarkupInline} durch
-% \cs{Process@Markup} inklusive all ihrer Argumente aktiviert. Dies ist für die 
-% Kontrolle des erzeugten Markups sinnvoll.
+% \cs{Process@Markup} inklusive all ihrer Argumente aktiviert. Dies wird 
+% gegebenenfalls zur Kontrolle des erzeugten Markups genutzt.
 %    \begin{macrocode}
-\newcommand*\tud@trace@markup[2]{}
-\newcommand*\tracingmarkup{%
-  \renewcommand*\tud@trace@markup[2]{%
-    \wlog{+++++ markup ##1 on page \thepage^^J##2}%
+\newcommand*\tud@trace@markup@types{}
+\listadd\tud@trace@markup@types{declare}%
+\listadd\tud@trace@markup@types{output}%
+\def\tud@res@a#1{%
+  \expandafter\newcommand\csname tud@trace@markup@#1@list\endcsname{}%
+  \expandafter\let\csname tud@trace@markup@#1@list\endcsname\relax%
+}
+\forlistloop{\tud@res@a}{\tud@trace@markup@types}%
+\NewDocumentCommand\tracingmarkup{!s !O{all}}{%
+  \def\tud@res@a##1{%
+    \expandafter\let\csname tud@trace@markup@##1@list\endcsname\relax%
   }%
+  \forlistloop{\tud@res@a}{\tud@trace@markup@types}%
+  \let\tud@res@b\@empty%
+  \let\tud@res@c\@empty%
+  \@for\tud@res@a:=#2\do{\listeadd\tud@res@b{\tud@res@a}}%
+  \ifinlist{all}{\tud@res@b}{%
+    \let\tud@res@c\tud@trace@markup@types%
+  }{%
+    \def\tud@res@a##1{\xifinlist{##1}{\tud@res@b}{\listeadd\tud@res@c{##1}}{}}%
+    \forlistloop{\tud@res@a}{\tud@trace@markup@types}%
+  }%
+  \def\tud@res@a##1{%
+    \expandafter\let\csname tud@trace@markup@##1@list\endcsname\@empty%
+    \IfBooleanF{#1}{%
+      \appto\tud@trace@markup@wlog{%
+        \wlog{+++++ markup ##1 (sorted) +++++}%
+        \expandafter\tud@list@sort\csname tud@trace@markup@##1@list\endcsname%
+        \let\tud@res@b\@empty%
+        \def\tud@res@a####1{\appto\tud@res@b{####1^^J}}%
+        \forlistcsloop\tud@res@a{tud@trace@markup@##1@list}%
+        \wlog{\tud@res@b}%
+      }%
+    }%
+  }%
+  \def\tud@trace@markup@wlog{\relax}%
+  \forlistloop{\tud@res@a}{\tud@res@c}%
 }
 \@onlypreamble\tracingmarkup
+\newcommand*\tud@trace@markup@add[2]{%
+  \if@tud@index\else%
+    \begingroup%
+      \ifcsundef{tud@trace@markup@#1@list}{%
+        \ifinlist{#1}{\tud@trace@markup@types}{}{%
+          \ClassError{tudscrmanual}{Undefined markup type `#1'}{%
+            The given tracing type was never defined.%
+          }%
+        }%
+      }{%
+        \protected@edef\tud@res@a{#2}%
+        \@onelevel@sanitize\tud@res@a%
+        \wlog{+++++ markup #1 on page \thepage\on@line^^J\tud@res@a}%
+        \xifinlistcs{\tud@res@a}{tud@trace@markup@#1@list}{}{%
+          \listcsxadd{tud@trace@markup@#1@list}{\tud@res@a}%
+        }%
+      }%
+    \endgroup%
+  \fi%
+}
+\newcommand*\tud@trace@markup@wlog{\relax}
+\AfterEndDocument{\tud@trace@markup@wlog}
 %    \end{macrocode}
-% \end{macro}^^A \tud@trace@markup
+% \end{macro}^^A \tud@trace@markup@output@list
+% \end{macro}^^A \tud@trace@markup@declare@list
+% \end{macro}^^A \tud@trace@markup@wlog
+% \end{macro}^^A \tud@trace@markup@add
+% \end{macro}^^A \tud@trace@markup@types
 % \end{macro}^^A \tracingmarkup
 % \begin{macro}{\tracingbundle}
 % \changes{v2.05}{2015/10/29}{neu}^^A
@@ -996,7 +1056,7 @@
 % werden.
 %    \begin{macrocode}
 \tud@auxlist@register{tud@label@alias}[\detokenize\expandafter]%
-\NewDocumentCommand\tudhyperdef{s m d==}{%
+\NewDocumentCommand\tudhyperdef{s m !d==}{%
   \begingroup%
     \IfBooleanTF{#1}{%
       \raisebox{\tud@hyperdef@skip}[0pt][0pt]{\tud@hyperdef{#2}}%
@@ -1006,7 +1066,7 @@
       \Hy@raisedlink{\tud@hyperdef{#2}}\ignorespaces%
     }%
     \label{#2}%
-    \tud@trace@lbl@created@add{#2}%
+    \tud@trace@lbl@add{created}{#2}%
 %    \end{macrocode}
 % Nach der Definition des eigentlichen Labels werden noch mögliche Aliaslabel 
 % definiert. Das aktuell erstellte Label ist definitiv kein Alias und wird 
@@ -1093,7 +1153,7 @@
   \tud@auxlist@ifin{#1}{tud@label@alias}{%
     \Hy@raisedlink{\tud@hyperdef{#1}}\ignorespaces%
     \label{#1}%
-    \tud@trace@lbl@created@add{#1\space(alias)}%
+    \tud@trace@lbl@add{created}{#1\space(alias)}%
   }{}%
 }
 %    \end{macrocode}
@@ -1232,7 +1292,7 @@
     }%
   \tud@res@a%
 }
-\NewDocumentCommand\tud@if@lbl@@exists{>{\ProcessorCreateLabel}m}{%
+\NewDocumentCommand\tud@if@lbl@@exists{>{\Processor@CreateLabel}m}{%
   \ifcsundef{r@#1}{%
     \expandafter\@secondoftwo%
   }{%
@@ -1243,11 +1303,11 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@if@lbl@@exists
 % \end{macro}^^A \tud@if@lbl@exists
-% \begin{macro}{\ProcessorCreateLabel}
-% \changes{v2.05}{2015/11/03}{neu}^^A
 % \begin{macro}{\Processor@CreateLabel}
 % \changes{v2.05}{2015/11/03}{neu}^^A
-% Mit dem Argumentprozessor \cs{ProcessorCreateLabel} wird es ermöglicht, an 
+% \begin{macro}{\Processor@@CreateLabel}
+% \changes{v2.05}{2015/11/03}{neu}^^A
+% Mit dem Argumentprozessor \cs{Processor@CreateLabel} wird es ermöglicht, an 
 % die Befehle \cs{tud@lbl@get} und \cs{tud@if@lbl@exists} sowohl ein bereits 
 % formatiertes Label als auch einen Markup-Befehl mit einem Bundlepräfix zu
 % übergeben. In beiden Fällen wird aus dem Argument ein eindeutiges Label in
@@ -1255,16 +1315,16 @@
 % und als resultierendes Argument an das aufrufenden Makro übergeben.
 %
 % Es gibt zwei verschiedene Varianten der Übergabe eines Argumentes an den
-% Argumentprozessor \cs{ProcessorCreateLabel}.
+% Argumentprozessor \cs{Processor@CreateLabel}.
 % \begin{description}\let\itshape\slshape
-%   \item[\cs{ProcessorCreateLabel}]
+%   \item[\cs{Processor@CreateLabel}]
 %   |{\Class/\Package/\Bundle|\marg{\dots}|:\Markup|\marg{Element}|}|\newline^^A
 %     Das Label soll für ein Markupelement generiert werden. 
 %     Dabei wurde explizit ein Paket, eine Klasse oder ein Bundle angegeben 
 %     oder implizit das Makro \cs{tud@bdl@curr} als Argument verwendet,
 %     welches innerhalb der Umgebungen \env{Bundle} und \env{Bundle*} auf
 %     das/die aktuell beschriebene Paket/Klasse gesetzt wurde.
-%   \item[\cs{ProcessorCreateLabel}]
+%   \item[\cs{Processor@CreateLabel}]
 %   |{|\meta{Bundlepräfix}|:|\meta{Labelpräfix}|:|\meta{Element}|}|\newline^^A
 %     Das Label ist bereits vollständig bestimmt und die Argumente werden 
 %     entweder als String oder als Markup übergeben. Auch Mischformen sind 
@@ -1272,7 +1332,7 @@
 %     Variante tritt auch durch rekursiven Aufruf des Argumentprozessors auf.
 % \end{description}
 %    \begin{macrocode}
-\newcommand*\ProcessorCreateLabel[1]{%
+\newcommand*\Processor@CreateLabel[1]{%
 %^^A  \in@{:}{#1}%
 %^^A  \ifin@\else%
 %^^A%<*class>
@@ -1287,15 +1347,15 @@
 %^^A    }%
 %^^A  \fi%
   \SplitArgument{2}{:}{#1}%
-  \expandafter\Processor@CreateLabel\ProcessedArgument%
+  \expandafter\Processor@@CreateLabel\ProcessedArgument%
 }
-\newcommand*\Processor@CreateLabel[3]{%
+\newcommand*\Processor@@CreateLabel[3]{%
   \begingroup%
 %    \end{macrocode}
 % Zu Beginn werden die Markup-Befehle auf ihre expandierbaren Varianten gesetzt 
 % und die zusätzlichen Redefinitionen für die Labelgenerierung aktiviert.
 %    \begin{macrocode}
-    \Markup@Gobble%
+    \Markup@Expandable%
     \tud@lbl@fmt%
 %    \end{macrocode}
 % Sind alle drei Bestandteile bereits vorhanden, wird das Label einfach wieder
@@ -1346,18 +1406,18 @@
   \@tempc%
 }
 %    \end{macrocode}
+% \end{macro}^^A \Processor@@CreateLabel
 % \end{macro}^^A \Processor@CreateLabel
-% \end{macro}^^A \ProcessorCreateLabel
 % \begin{macro}{\tud@lbl@get}
 % \changes{v2.05}{2015/11/03}{neu}^^A
 % \begin{macro}{\tud@lbl@get@@curr}
 % \changes{v2.05}{2015/11/03}{neu}^^A
 % Für \cs{tud@lbl@get} wird das zweite obligatorische Argument für gewöhnlich
 % in der Form |\Bundle|\marg{Klasse/Paket}|:\Markup|\marg{Element} gegeben und
-% mit dem Argumentprozessor \cs{ProcessorCreateLabel} in die Form
+% mit dem Argumentprozessor \cs{Processor@CreateLabel} in die Form
 % \meta{Bundlepräfix}|:|\meta{Labelpräfix}|:|\meta{Element} gewandelt.
 %    \begin{macrocode}
-\NewDocumentCommand\tud@lbl@get{s m >{\ProcessorCreateLabel}m d==}{%
+\NewDocumentCommand\tud@lbl@get{s m >{\Processor@CreateLabel}m d==}{%
 %    \end{macrocode}
 % Mit \cs{tud@lbl@get@@curr} wird das im zweiten obligatorischen Argument 
 % (|#3|) generierte Label in das im ersten obligatorischen Argument |#2|
@@ -1769,7 +1829,7 @@
 \NewDocumentCommand\InlineDeclaration{s o m}{%
   \Inline@Declaration[{#2}]{#3}[\IfBooleanTF{#1}{-2}{-1}]%
 }
-\NewDocumentCommand\Inline@Declaration{o m O{-1}}{%
+\NewDocumentCommand\Inline@Declaration{o m !O{-1}}{%
   \tud@declare@special@start[{#1}]{#2}{#3}%
   \printchangedatlist%
   \tud@declare@special@end{#2}{#3}%
@@ -2158,7 +2218,7 @@
 % \changes{v2.02}{2014/11/02}{neu}^^A
 % Im Gegensatz zu den vorherigen Befehlen, kann im Hauptargument ein spezieller 
 % Wert für eine Option optional durch ein |=| getrennt angegeben werden. Durch
-% den Argumentprozessor \cs{ProcessorKeyVal} wird dieses vom eigentlichen
+% den Argumentprozessor \cs{Processor@KeyVal} wird dieses vom eigentlichen
 % Schlüssel getrennt. Dabei wird der gegebene Schlüssel immer in der Form
 % \marg{Schlüssel} ausgegeben. Sollte ein optionaler Wert gegeben worden sein, 
 % wird dieser in der Form |=|\meta{Wert}|=| einfach angehängt und als optionales
@@ -2167,7 +2227,7 @@
 % verwiesen werden.
 %    \begin{macrocode}
 \NewExpandableDocumentCommand\@Option{s m}{#2}
-\NewDocumentCommand\Option{s >{\ProcessorKeyVal}m !d== !d() !d'' !d||}{%
+\NewDocumentCommand\Option{s >{\Processor@KeyVal}m !d== !d() !d'' !d||}{%
   \Option@Value{#1}#2=#3=(#4)'#5'|#6|%
 }
 %    \end{macrocode}
@@ -2336,7 +2396,7 @@
 % }[v2.??]
 %    \begin{macrocode}
 \NewExpandableDocumentCommand\@Key{s m m}{#2!#3}
-\NewDocumentCommand\Key{s m >{\ProcessorKeyVal}m !d== !d() !d'' !d||}{%
+\NewDocumentCommand\Key{s m >{\Processor@KeyVal}m !d== !d() !d'' !d||}{%
   \Key@Value{#1}{#2}#3=#4=(#5)'#6'|#7|%
 }
 \NewDocumentCommand\Key@Value{m m m d== d== d() d'' d||}{%
@@ -2435,12 +2495,12 @@
 %</class>
 % \fi
 %
-% \begin{macro}{\ProcessorUnderscore}
+% \begin{macro}{\Processor@Underscore}
 % \changes{v2.06f}{2019/11/08}{neu}^^A
 % Mit diesem Argumentprozessor werden Unterstriche in Datei- und Pfadangaben 
 % unschädlich gemacht.
 %    \begin{macrocode}
-\newcommand*\ProcessorUnderscore[1]{%
+\newcommand*\Processor@Underscore[1]{%
   \begingroup%
     \def\tud@res@a{#1}%
     \tud@replace\tud@res@a{_}{\_}%
@@ -2451,14 +2511,14 @@
   \tud@res@a%
 }
 %    \end{macrocode}
-% \end{macro}^^A \ProcessorUnderscore
+% \end{macro}^^A \Processor@Underscore
 % \begin{macro}{\File}
 % \changes{v2.02}{2014/10/08}{überarbeitet}^^A
 % \begin{macro}{\@File}
 % Die Auszeichnung und der Indexeintrag einer Datei.
 %    \begin{macrocode}
 \NewExpandableDocumentCommand\@File{s m}{#2}
-\NewDocumentCommand\File{s >{\ProcessorUnderscore}m !d() !d||}{%
+\NewDocumentCommand\File{s >{\Processor@Underscore}m !d() !d||}{%
   \Markup@SetFormat{\sbnfont}%
   \Process@Markup{\File{#2}}(#3)%
   \Process@Index{#1}{\File{#2}}[Datei](#3)|#4|%
@@ -2467,9 +2527,9 @@
 % \end{macro}^^A \@File
 % \end{macro}^^A \File
 % \begin{macro}{\Path}
-\NewDocumentCommand\Path{>{\ProcessorUnderscore}m}{\mbox{\texttt{#1}}}
+\NewDocumentCommand\Path{>{\Processor@Underscore}m}{\mbox{\texttt{#1}}}
 % \end{macro}^^A \Path
-% \begin{macro}{\ProcessorKeyVal}
+% \begin{macro}{\Processor@KeyVal}
 % \changes{v2.05}{2015/11/01}{neu}^^A
 % \begin{macro}{\tud@keyval@error}
 % \changes{v2.05}{2015/11/01}{neu}^^A
@@ -2477,7 +2537,7 @@
 % durch |=| getrennt angegeben werden. Um diese auszuwerten, wird dieser Befehl
 % definiert, welcher als Argumentprozessor verwendet wird.
 %    \begin{macrocode}
-\newcommand*\ProcessorKeyVal[1]{%
+\newcommand*\Processor@KeyVal[1]{%
   \begingroup%
     \in@{=}{#1}%
 %    \end{macrocode}
@@ -2485,7 +2545,7 @@
 % erkannt und dem eigentlichen Hauptargument bei der Ausgabe angehangen. Das
 % Makro, welches diesen Argumentprozessor verwendet, erhält als Ausgabe also
 % entweder \marg{Schlüssel} oder \marg{Schlüssel}|=|\meta{Wert}|=| falls
-% \cs{ProcessorKeyVal} mit \marg{Schlüssel=Wert} verwendet wurde.
+% \cs{Processor@KeyVal} mit \marg{Schlüssel=Wert} verwendet wurde.
 %    \begin{macrocode}
     \ifin@%
       \def\@tempa##1=##2\@nil{\toks@{{##1}=##2=}}%
@@ -2516,7 +2576,7 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@keyval@error
-% \end{macro}^^A \ProcessorKeyVal
+% \end{macro}^^A \Processor@KeyVal
 %
 % \subsubsection{Zuordnung der Markup-Befehle für Label und Index}
 %
@@ -2597,13 +2657,9 @@
 % }[v2.06f]
 % \ToDo{neues Makro \cs{PSetLength} mit \cs{PName\{Längenwert\}}}[v2.??]
 % \begin{macro}{\PValue}
-% \begin{macro}{\PName}
-% \begin{macro}{\PValueName}
+% \begin{macro}{\PValueDefault}
 % \changes{v2.05}{2015/11/01}{neu}^^A
-% \begin{macro}{\PSet}
-% \begin{macro}{\PBoolean}
-% \begin{macro}{\PBName}
-% \changes{v2.02}{2014/11/12}{neu}^^A
+% \begin{macro}{\PName}
 % \begin{macro}{\Parameter}
 % \begin{macro}{\OParameter}
 % \begin{macro}{\LParameter}
@@ -2612,28 +2668,38 @@
 % \begin{macro}{\POParameter}
 % \changes{v2.03}{2015/01/25}{neu}^^A
 % \begin{macro}{\textOR}
+% \begin{macro}{\PMisc}
+% \begin{macro}{\PSet}
+% \begin{macro}{\PBoolean}
+% \begin{macro}{\PLength}
 % Diese Befehle dienen zum Auszeichnen von obligatorischen und optionalen 
 % Parametern und Befehlen oder bestimmten Wertzuweisungen. Pfade werden ohne
 % zusätzliches Markup ausgegeben.
 %    \begin{macrocode}
 \newrobustcmd*\PValue[1]{\mbox{\texttt{#1}}}
-\newrobustcmd*\PName[1]{\PValue{\textsl{<#1>}}}
+\newrobustcmd*\PValueDefault[1]{\mbox{\texttt{\textsl{#1}}}}
+\newrobustcmd*\PName[1]{\mbox{\texttt{\textsl{<#1>}}}}
 \newrobustcmd*\PValueName[1]{\PName{#1}}
-\newrobustcmd*\PSet{\PName{Einstellung}}
-\newrobustcmd*\PBoolean{\PName{Ein-Aus-Wert}}
-\newrobustcmd*\PBName[1]{\PBoolean\textOR\PName{#1}}
 \newrobustcmd*\Parameter[1]{%
   \mbox{\texttt{\textbraceleft}\PName{#1}\texttt{\textbraceright}}%
 }
+\newrobustcmd*\PParameter[1]{\mbox{\texttt{\textbraceleft#1\textbraceright}}}
 \newrobustcmd*\OParameter[1]{\mbox{\texttt{[}\PName{#1}\texttt{]}}}
+\newrobustcmd*\POParameter[1]{\mbox{\texttt{[{#1}]}}}
 \newrobustcmd*\LParameter{\mbox{\texttt{[}\PName{Parameterliste}\texttt{]}}}
 \newrobustcmd*\OLParameter[1]{%
   \mbox{\texttt{[}\PName{#1}\textOR\PName{Parameterliste}\texttt{]}}%
 }
-\newrobustcmd*\PParameter[1]{\mbox{\texttt{\textbraceleft#1\textbraceright}}}
-\newrobustcmd*\POParameter[1]{\mbox{\texttt{[{#1}]}}}
 \newrobustcmd*\textOR{\PValue{\,\textbardbl\,}}
+\newrobustcmd*\PMisc[1]{\PName{#1}}
+\newrobustcmd*\PSet{\PMisc{Einstellung}}
+\newrobustcmd*\PBoolean{\PMisc{Ein-Aus-Wert}}
+\newrobustcmd*\PLength{\PMisc{L\"angenwert}}
 %    \end{macrocode}
+% \end{macro}^^A \PLength
+% \end{macro}^^A \PBoolean
+% \end{macro}^^A \PSet
+% \end{macro}^^A \PMisc
 % \end{macro}^^A \textOR
 % \end{macro}^^A \POParameter
 % \end{macro}^^A \PParameter
@@ -2641,11 +2707,8 @@
 % \end{macro}^^A \LParameter
 % \end{macro}^^A \OParameter
 % \end{macro}^^A \Parameter
-% \end{macro}^^A \PBName
-% \end{macro}^^A \PBoolean
-% \end{macro}^^A \PSet
-% \end{macro}^^A \PValueName
 % \end{macro}^^A \PName
+% \end{macro}^^A \PValueDefault
 % \end{macro}^^A \PValue
 % \begin{macro}{\tud@doifPValue}
 % \changes{v2.05}{2015/11/14}{neu}^^A
@@ -2665,18 +2728,20 @@
 % speziellen Werten bei Schlüsseln zu erhalten.
 %    \begin{macrocode}
       \let\PValue\@firstofone%
+      \let\PValueDefault\@firstofone%
       \let\PName\@gobble%
       \let\PValueName\@firstofone%
-      \let\PSet\@empty%
-      \let\PBoolean\@empty%
-      \let\PBName\@gobble%
       \let\Parameter\@gobble%
       \let\OParameter\@gobble%
       \let\LParameter\@empty%
       \let\OLParameter\@gobble%
       \let\PParameter\@gobble%
       \let\POParameter\@gobble%
-      \let\textOR\relax%
+      \let\textOR\@empty%
+      \let\PMisc\@gobble%
+      \let\PSet\@empty%
+      \let\PBoolean\@empty%
+      \let\PLength\@empty%
       \let\emph\@firstofone%
 %    \end{macrocode}
 % Im optionalen Argument können weitere Angaben gemacht werden, um zum Beispiel 
@@ -2698,14 +2763,16 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@doifPValue
-% \begin{macro}{\Markup@Gobble}
+% \begin{macro}{\Markup@Expandable}
 % \changes{v2.05}{2015/11/01}{neu}^^A
+% \begin{macro}{\Parameter@Expandable}
+% \changes{v2.06f}{2019/11/22}{neu}^^A
 % Dieser Befehl definiert alle Markup-Befehle in der Form um, dass diese nur 
 % noch das eigentliche Hauptargument unformatiert durchreichen. Dies wird für 
 % die Erstellung von Label und Indexeinträgen benötigt. Die Sternversion führt 
 % dies auch noch für die Auszeichnung von Parametern etc. durch.
 %    \begin{macrocode}
-\NewDocumentCommand\Markup@Gobble{s}{%
+\NewDocumentCommand\Markup@Expandable{s}{%
   \let\Application\@Application%
   \let\Distribution\@Distribution%
   \let\Engine\@Engine%
@@ -2725,34 +2792,42 @@
   \let\Color\@Color%
 %</class>
   \IfBooleanF{#1}{%
-    \let\PValue\@firstofone%
-    \let\PName\@firstofone%
-    \let\PValueName\@firstofone%
-    \let\PSet\relax%
-    \let\PBoolean\relax%
-    \let\PBName\@firstofone%
-    \let\Parameter\@firstofone%
-    \let\OParameter\@firstofone%
-    \let\LParameter\relax%
-    \let\OLParameter\@firstofone%
-    \let\PParameter\@firstofone%
-    \let\POParameter\@firstofone%
-    \let\textOR\relax%
+    \Parameter@Expandable%
     \let\hologoRobust\@firstofone%
     \def\_{-}%
     \protected\def~{~}%
   }%
 }
 %    \end{macrocode}
-% Mit dem zuvor definierten Makro \cs{Markup@Gobble} wird gleich dafür Sorge 
-% getragen, dass die Auszeichnungsbefehle für PDF-Outline-Einträge korrekt 
-% funktionieren.
+% Hiermit werden die Befehle für Parameter expandierbar.
+%    \begin{macrocode}
+\newcommand*\Parameter@Expandable{%
+  \let\PValue\@firstofone%
+  \let\PValueDefault\@firstofone%
+  \let\PName\@firstofone%
+  \let\PValueName\@firstofone%
+  \let\Parameter\@firstofone%
+  \let\OParameter\@firstofone%
+  \let\LParameter\@empty%
+  \let\OLParameter\@firstofone%
+  \let\PParameter\@firstofone%
+  \let\POParameter\@firstofone%
+  \let\textOR\@empty%
+  \let\PMisc\@gobble%
+  \let\PSet\@empty%
+  \let\PBoolean\@empty%
+  \let\PLength\@empty%
+}
+% Mit dem zuvor definierten Makro \cs{Markup@Expandable} wird gleich dafür
+% Sorge getragen, dass die Auszeichnungsbefehle für PDF-Outline-Einträge
+% korrekt funktionieren.
 %    \begin{macrocode}
 \AfterPackage*{hyperref}{%
-  \expandafter\pdfstringdefDisableCommands\expandafter{\Markup@Gobble}%
+  \expandafter\pdfstringdefDisableCommands\expandafter{\Markup@Expandable}%
 }
 %    \end{macrocode}
-% \end{macro}^^A \Markup@Gobble
+% \end{macro}^^A \Parameter@Expandable
+% \end{macro}^^A \Markup@Expandable
 %
 % \subsubsection{Abarbeitung der Markup-Befehle}
 %
@@ -2849,7 +2924,7 @@
 % Weiterverarbeitung genutzt.
 %    \begin{macrocode}
   \begingroup%
-    \Markup@Gobble*%
+    \Markup@Expandable*%
     \protected@edef\tud@reserved{%
       \noexpand\endgroup%
       \def\noexpand\tud@reserved{#1}%
@@ -3059,7 +3134,7 @@
           \ifstr{#7}{url}{\def\@tempa{\href{#6}{\@tempc}}\let\@tempb\relax}{}%
         }%
       }%
-      \tud@trace@lbl@matched@add{#1}%
+      \tud@trace@lbl@add{matched}{#1}%
     }{%
 %</class>
 %    \end{macrocode}
@@ -3104,7 +3179,7 @@
 % es den passenden Debug-Befehl.
 %    \begin{macrocode}
 %<*class>
-      \tud@trace@lbl@missing@add{#1}%
+      \tud@trace@lbl@add{missing}{#1}%
     }%
 %</class>
 %    \end{macrocode}
@@ -3613,7 +3688,7 @@
 % expandiert, der ggf. erzeugte Haupteintrag in das vierte. Für \cs{Key} ist
 % hier nur noch das zweite Argument relevant.
 %    \begin{macrocode}
-      \Markup@Gobble%
+      \Markup@Expandable%
 %<class>      \let\Key\@secondoftwo%
       \edef\tud@reserved{%
         \noexpand\endgroup%
@@ -3708,7 +3783,7 @@
 %    \begin{macrocode}
     \if@tempswa%
       \begingroup%
-        \Markup@Gobble%
+        \Markup@Expandable%
         \edef\tud@reserved{%
           \noexpand\endgroup%
           \noexpand\appto\noexpand\@tempa{ \tud@idx@bdl}%
@@ -4142,7 +4217,7 @@
 \newcommand*\tud@idx@vskip{%
   \ifnum\imki@columns>\@ne\relax\vspace{-\multicolsep}\fi%
 }
-\NewDocumentCommand\tud@print@index{o +d()}{%
+\NewDocumentCommand\tud@print@index{!o !+d()}{%
 %    \end{macrocode}
 % Falls ein Seitenumbruch notwendig ist, sollte dieser vor dem Index und nicht 
 % unmittelbar nach dem Beginn erfolgen.
@@ -4344,7 +4419,7 @@
 % eine semikolongetrennte Liste und reicht jeden Bestandteil zusammen mit den
 % beiden optionalen Argumenten an \cs{Changed@At@@CreateList} weiter. 
 %    \begin{macrocode}
-\NewDocumentCommand\Changed@At@CreateList{m o d()}{%
+\NewDocumentCommand\Changed@At@CreateList{m !o !d()}{%
   \IfValueT{#1}{\forssvlist{\Changed@At@@CreateList[{#2}](#3)}{#1}}%
 }
 %    \end{macrocode}
@@ -4811,7 +4886,9 @@
 % optionale Argument in runden Klammern fügt zum Schluss einen ergänzenden 
 % Eintrag hinzu.
 %    \begin{macrocode}
-\NewDocumentCommand\tud@item@values{s r[] o d()}{%
+\NewDocumentCommand\tud@item@values{%
+  s D(){\IfBooleanTF{#1}{\PValueDefault}{\PValue}} r[] !o !d()%
+}{%
   \begingroup%
 %    \end{macrocode}
 % Die ggf. durch Schrägstrich getrennte Liste im optionalen Argument wird 
@@ -4819,15 +4896,15 @@
 % \cs{tud@res@b} gesichert, alle weiteren Einträge werden in \cs{tud@res@c}
 % gespeichert und lediglich im Fließtext aufgelistet.
 %    \begin{macrocode}
-    \in@{/}{#2}%
+    \in@{/}{#3}%
     \ifin@%
       \def\tud@res@a##1/##2\@nil{%
         \def\tud@res@b{##1}%
         \def\tud@res@c{\PValue{/##2}}%
       }%
-      \tud@res@a#2\@nil%
+      \tud@res@a#3\@nil%
     \else%
-      \def\tud@res@b{#2}%
+      \def\tud@res@b{#3}%
       \let\tud@res@c\@empty%
     \fi%
 %    \end{macrocode}
@@ -4855,9 +4932,9 @@
     \IfBooleanTF{#1}{%
       \appto\tud@res@b{\suffix{S\"aumniswert}}%
     }{%
-      \IfValueT{#3}{\appto\tud@res@b{\suffix{S\"aumniswert f\"ur #3}}}%
+      \IfValueT{#4}{\appto\tud@res@b{\suffix{S\"aumniswert f\"ur #4}}}%
     }%
-    \IfValueT{#4}{\appto\tud@res@b{\suffix{#4}}}%
+    \IfValueT{#5}{\appto\tud@res@b{\suffix{#5}}}%
 %    \end{macrocode}
 % Die in \cs{tud@res@a} gespeicherte, zu beschreibende Option und der erste im 
 % optionalen Argument angegebene Wert werden verwendet, um ein diese zu 
@@ -4936,19 +5013,25 @@
 % Textanker definiert, auf die im Zweifelsfall in der Dokumentation verlinkt 
 % wird.
 %    \begin{macrocode}
-\NewDocumentCommand\tud@item@packages{r[] d<>}{%
+\NewDocumentCommand\tud@item@packages{r[] !d() !d<>}{%
 %    \end{macrocode}
 % Die kommagetrennte Liste im optionalen Argument wird verwendet, um jedes
 % einzelne Paket zu deklarieren und einen dazugehörigen Textanker zu erzeugen. 
-% Das optionale Argument in Guillemets kann genutzt werden, um \emph{alle} 
-% gelisteten Pakete auf den gleichen CTAN-Link zielen zu lassen. Dies ist 
-% beispielsweise für mehrere Pakete aus dem gleichen Bundle sinnvoll.
+% Die runden Klammern können genutzt werden, um das Bundle (Label, Index etc.)
+% für das Paket zu definieren. Das optionale Argument in Guillemets kann
+% genutzt werden, um \emph{alle} gelisteten Pakete auf den gleichen CTAN-Link
+% zielen zu lassen. Dies ist beispielsweise für mehrere Pakete aus dem gleichen
+% Bundle sinnvoll.
 %    \begin{macrocode}
   \begingroup%
     \let\tud@res@a\@empty%
     \def\tud@res@b##1{%
       \eappto\tud@res@a{%
-        ,\noexpand\InlineDeclaration{\noexpand\Package{##1}\IfValueT{#2}{<#2>}}%
+        ,\noexpand\InlineDeclaration{%
+          \noexpand\Package{##1}%
+          \IfValueT{#2}{\unexpanded{(#2)}}%
+          \IfValueT{#3}{<#3>}%
+        }%
       }%
     }%
     \forcsvlist\tud@res@b{#1}%
@@ -5027,7 +5110,7 @@
 % dafür die \env{tabularx}-Umgebung. Für diese kann ein zweites Argument
 % angegeben werden, welches die gewünschte Breite der Tabelle angibt.
 %    \begin{macrocode}
-\NewDocumentCommand\TermTable{s m O{\linewidth}}{%
+\NewDocumentCommand\TermTable{s m !O{\linewidth}}{%
   \ifhmode\par\fi%
   \vskip\medskipamount%
   \@afterindentfalse\@afterheading%
@@ -6480,9 +6563,15 @@
 %    \begin{macrocode}
 \newcommand*\tud@@replace[3]{%
   \begingroup%
+    \protected@edef\tud@res@a{#1}%
+    \edef\tud@res@a{\detokenize\expandafter{\tud@res@a}}%
+    \edef\tud@res@b{%
+      \unexpanded{\tud@replace\tud@res@a}{\detokenize{#2}}{\detokenize{#3}}%
+    }%
+    \tud@res@b%
     \edef\tud@res@a{%
       \endgroup%
-      \unexpanded{\tud@replace#1}{\detokenize{#2}}{\detokenize{#3}}%
+      \def\noexpand#1{\tud@res@a}%
     }%
   \tud@res@a%
 }
