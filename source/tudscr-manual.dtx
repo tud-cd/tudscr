@@ -1,4 +1,4 @@
-% \CheckSum{5001}
+% \CheckSum{5006}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -310,13 +310,12 @@
 %
 % \subsection{Zusätzliche Pakete für das Paket \pkg{tudscrtutorial}}
 %
-% Mit dem Paket \pkg{scrwfile} lassen sich Probleme mit zu wenig verfügbaren 
+% Mit dem Paket \pkg{morewrites} lassen sich Probleme mit zu wenig verfügbaren 
 % Streams für das Schreiben externer Datein beheben. Hintergrund ist die
 % Verwendung des Paketes \pkg{glossaries} in einem der Tutorials, welches eine
-% Vielzahl solcher Streams benötigt. Das Paket \pkg{morewrites} hat keinen 
-% Einfluss auf \pkg{glossaries}.
+% Vielzahl solcher Streams benötigt.
 %    \begin{macrocode}
-\RequirePackage{scrwfile}[2013/08/05]
+\RequirePackage{morewrites}[2018/12/29]
 %    \end{macrocode}
 %
 % \iffalse
@@ -1274,19 +1273,19 @@
 % \end{description}
 %    \begin{macrocode}
 \newcommand*\ProcessorCreateLabel[1]{%
-  \in@{:}{#1}%
-  \ifin@\else%
-%<*class>
-    \ClassError{tudscrmanual}%
-%</class>
-%<*package>
-    \PackageError{tudscrtutorial}%
-%</package>
-    {Wrong formatted label}{%
-      A label has to be given at least with '<bundle>:<markup>'\MessageBreak%
-      but \detokenize{#1} was used.%
-    }%
-  \fi%
+%^^A  \in@{:}{#1}%
+%^^A  \ifin@\else%
+%^^A%<*class>
+%^^A    \ClassError{tudscrmanual}%
+%^^A%</class>
+%^^A%<*package>
+%^^A    \PackageError{tudscrtutorial}%
+%^^A%</package>
+%^^A    {Wrong formatted label}{%
+%^^A      A label must be given at least with '<bundle>:<markup>'\MessageBreak%
+%^^A      but \detokenize{#1} was used.%
+%^^A    }%
+%^^A  \fi%
   \SplitArgument{2}{:}{#1}%
   \expandafter\Processor@CreateLabel\ProcessedArgument%
 }
@@ -4130,7 +4129,7 @@
 % \end{macro}^^A \PrintIndex
 % \begin{macro}{\tud@print@index}
 % \changes{v2.02}{2014/07/25}{neu}^^A
-% \begin{macro}{\tud@idx@skip}
+% \begin{macro}{\tud@idx@vskip}
 % \changes{v2.02}{2014/09/02}{neu}^^A
 % Mit \cs{tud@print@index} erfolgt die Ausgabe der einzelnen Indexe. Dabei wird
 % in der Klasse \cls{tudscrmanual} zuvor für jeden Index ein referenzierbares
@@ -4138,9 +4137,9 @@
 %
 % Aufgrund der Verwendung der \env{multicols}-Umgebung durch das Paket
 % \pkg{imakeidx} werden normalerweise ohne einen Prolog zu große vertikale
-% Abstände gesetzt. Dies wird mit \cs{tud@idx@skip} behoben.
+% Abstände gesetzt. Dies wird mit \cs{tud@idx@vskip} behoben.
 %    \begin{macrocode}
-\newcommand*\tud@idx@skip{%
+\newcommand*\tud@idx@vskip{%
   \ifnum\imki@columns>\@ne\relax\vspace{-\multicolsep}\fi%
 }
 \NewDocumentCommand\tud@print@index{o +d()}{%
@@ -4162,13 +4161,13 @@
     \indexprologue{%
       \tudhyperdef*{idx:\IfValueTF{#1}{#1}{\imki@jobname}}%
       #2%
-      \tud@idx@skip%
+      \tud@idx@vskip%
     }%
   }{%
 %    \end{macrocode}
 % Ohne Prolog wird der fehlerhafte vertikale Abstand behoben. 
 %    \begin{macrocode}
-    \indexprologue[\tud@idx@skip]{%
+    \indexprologue[\tud@idx@vskip]{%
       \tudhyperdef*{idx:\IfValueTF{#1}{#1}{\imki@jobname}}%
     }%
   }%
@@ -4179,7 +4178,7 @@
 % genutzt.
 %    \begin{macrocode}
 %<*package>
-  \indexprologue[\tud@idx@skip]{}%
+  \indexprologue[\tud@idx@vskip]{}%
   \begingroup%
   \IfValueT{#2}{#2}%
 %</package>
@@ -4193,7 +4192,7 @@
   \ifnum\imki@columns>\@ne\relax\vspace{-\multicolsep}\fi%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@idx@skip
+% \end{macro}^^A \tud@idx@vskip
 % \end{macro}^^A \tud@print@index
 %
 % \iffalse
@@ -5260,6 +5259,18 @@
         \@tempb{if exist #2.bcf biber #2}%
       \else%
         \@tempb{[ -f #2.bcf ] && biber #2}%
+      \fi%
+      \@tempb{\tud@latex@ext "\@tempa"}%
+      \@tempb{\tud@latex@ext -shell-escape "\@tempa"}%
+      \ifwindows%
+        \@tempb{if exist #2.ist makeglossaries #2}%
+      \else%
+        \@tempb{[ -f #2.ist ] && makeglossaries #2}%
+      \fi%
+      \ifwindows%
+        \@tempb{if exist #2.xdy makeglossaries #2}%
+      \else%
+        \@tempb{[ -f #2.xdy ] && makeglossaries #2}%
       \fi%
       \@tempb{\tud@latex@ext "\@tempa"}%
       \@tempb{\tud@latex@ext -shell-escape "\@tempa"}%
@@ -6537,6 +6548,9 @@
   \endgroup%
   \xspace%
 }
+\newcommand*\Download[1]{%
+  https://github.com/tud-cd/tudscr/releases/download/#1%
+}
 %</!doc>
 %<*doc>
 \newcommand*\@GitHubRepo{}
@@ -6595,45 +6609,33 @@
 }
 \newcommand*\tud@github@url@base{}
 \let\tud@github@url@base\relax
-\AtBeginDocument{%
-  \ifx\tud@github@url@base\relax%
-%<class&!doc>        \ClassWarningNoLine{tudscrmanual}%
-%<class&doc>        \ClassWarningNoLine{tudscrdoc}%
-%<package>        \PackageWarningNoLine{tudscrtutorial}%
-    {%
-      No GitHub repository was set with `\string\GitHubBase' so\MessageBreak%
-      \TUDScriptRepository\space is used%
-    }%
-    \GitHubBase{\TUDScriptRepository}%
-  \fi%
-}
 \newcommand*\tud@github@url@normalize[2]{%
   \begingroup%
     \def\tud@res@a{#2}%
     \def\tud@res@b{\tud@github@url@base}%
     \ifx\tud@res@a\tud@res@b%
       \ifx\tud@github@url@base\relax%
-%<class&!doc>        \ClassError{tudscrmanual}%
-%<class&doc>        \ClassError{tudscrdoc}%
-%<package>        \PackageError{tudscrtutorial}%
-        {GitHub base was never set}{%
-          You have to use \string\GitHubBase\space in order to \MessageBreak%
-          define the base url for your GitHub repository.%
+%<class&!doc>        \ClassWarning{tudscrmanual}%
+%<class&doc>        \ClassWarning{tudscrdoc}%
+%<package>        \PackageWarning{tudscrtutorial}%
+        {%
+          No GitHub repository was set with `\string\GitHubBase'\MessageBreak%
+          so \TUDScriptRepository\space is used%
         }%
-        \def\tud@res@a{???}%
+        \edef\tud@res@a{\TUDScriptRepository}%
       \fi%
     \else%
       \edef\tud@res@a{\trim@spaces{#2}}%
-      \def\tud@res@b##1github.com/##2github.com/##3\@nil{%
-        \IfArgIsEmpty{##2}{%
-          \def\tud@res@a{##1}%
-        }{%
-          \def\tud@res@a{##2}%
-        }%
-      }%
-      \expandafter\tud@res@b\tud@res@a github.com/github.com/\@nil%
-      \tud@remove@trailing@slashes{\tud@res@a}%
     \fi%
+    \def\tud@res@b##1github.com/##2github.com/##3\@nil{%
+      \IfArgIsEmpty{##2}{%
+        \def\tud@res@a{##1}%
+      }{%
+        \def\tud@res@a{##2}%
+      }%
+    }%
+    \expandafter\tud@res@b\tud@res@a github.com/github.com/\@nil%
+    \tud@remove@trailing@slashes{\tud@res@a}%
     \edef\tud@res@b{%
       \endgroup%
       \def\noexpand#1{\tud@res@a}%
