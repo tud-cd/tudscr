@@ -1,4 +1,4 @@
-% \CheckSum{1418}
+% \CheckSum{1427}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -127,7 +127,7 @@
 % \changes{v2.03}{2015/02/05}{neu}^^A
 % \begin{macro}{\TUD@deprecated@@cs}
 % \changes{v2.06}{2018/08/07}{neu}^^A
-% \begin{macro}{\TUD@deprecated@lengthcs}
+% \begin{macro}{\TUD@deprecated@skip}
 % \changes{v2.05}{2016/06/20}{neu}^^A
 % Um alte Optionen und Befehle dem Anwender bei der Verwendung kenntlich zu 
 % machen, werden entsprechende Warnungen definiert. Für Optionen wird dabei
@@ -199,21 +199,26 @@
   }{}%
 }
 %<*class>
-\newcommand*\TUD@deprecated@lengthcs[2][]{%
-  \ifdim\csuse{#2}<\maxdimen\relax%
-    \ClassWarning{\TUD@Class@Name}{%
-      Using the length `\@backslashchar#2' is deprecated. \MessageBreak%
-      You should use option `#2' instead%
-    }%
-    \csxdef{tud@dim@#2}{\the\csuse{#2}}%
-    \expandafter\setlength\csname #2\endcsname{\maxdimen}%
-    \global\csuse{#2}=\csuse{#2}%
-    #1%
+\newcommand*\TUD@deprecated@skip[1]{%
+  \ifdim\csuse{#1}<\maxdimen\relax%
+    \begingroup%
+      \tud@skip@to@string\tud@res@a{\csuse{#1}}%
+      \ClassWarning{\TUD@Class@Name}{%
+        Setting length `\@backslashchar#1' is deprecated. \MessageBreak%
+        The option `#1=\tud@res@a'\MessageBreak%
+        is used instead%
+      }%
+      \expandafter\global\expandafter\setlength\csname #1\endcsname{\maxdimen}%
+      \edef\tud@res@a{%
+        \endgroup%
+        \unexpanded{\TUDoption{#1}}{\tud@res@a}%
+      }%
+    \tud@res@a%
   \fi%
 }
 %</class>
 %    \end{macrocode}
-% \end{macro}^^A \TUD@deprecated@lengthcs
+% \end{macro}^^A \TUD@deprecated@skip
 % \end{macro}^^A \TUD@deprecated@@cs
 % \end{macro}^^A \TUD@deprecated@cs
 % \end{macro}^^A \TUD@deprecated@key
@@ -785,8 +790,9 @@
 % Um die Höhe von Logos im Fußbereich der \pgs{tudheadings}-Seitenstile 
 % einheitlich festzulegen, gab es bis einschließlich der Version~v2.04 die 
 % Länge \cs{footlogoheight} anstelle der Option \opt{footlogoheight}. Sollte 
-% der Anwender diese anpassen, wird \cs{tud@dim@footlogoheight} auf diesen Wert 
-% gesetzt und eine Warnung erzeugt.
+% der Anwender die Länge anpassen, wird dies mit \cs{TUD@deprecated@skip} an 
+% der entsprechenden Stelle geprüft und die korrespondierende Option auf 
+% diesen Wert gesetzt, wobei eine Warnung erzeugt wird.
 %    \begin{macrocode}
 \newlength\footlogoheight
 \setlength\footlogoheight{\maxdimen}
@@ -799,7 +805,8 @@
 % Mit diesen Längen konnte der Anwender vor der Version~v2.05 die Überschriften 
 % von Titel, Teilen und Kapiteln vertikal verschieben. Diese Funktionalität 
 % wird seitdem mit den Optionen \opt{headingsvskip} und \opt{pageheadingsvskip} 
-% abgedeckt.
+% abgedeckt. Auch hier wird eine Warnung erzeugt, falls der Anwender diesen 
+% Wert ändern sollte.
 %    \begin{macrocode}
 %<*book|report|article>
 \newlength\pageheadingsvskip
@@ -1744,7 +1751,7 @@
       \noexpand\TUDExecuteOptions{cropmargin=\schnittrand}%
     }\@tempa%
     \ifx\FamilyKeyState\FamilyKeyStateProcessed\else%
-      \PackageErrorNoLine{tudscrcomp}{%
+      \PackageError{tudscrcomp}{%
         Wrong definition for `\string\schnittrand'%
       }{%
         The definition of `\string\schnittrand' does not expand\MessageBreak%

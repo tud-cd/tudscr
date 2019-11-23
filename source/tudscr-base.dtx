@@ -1,4 +1,4 @@
-% \CheckSum{1349}
+% \CheckSum{1396}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -521,12 +521,12 @@
 %
 % \subsubsection{Erzwungene Kleinschreibung von Strings}
 %
+% \begin{macro}{\tud@lowerstring}
 % Dieses Makro expandiert das zweite Argument, setzt es in Kleinbuchstaben und
 % speichert das Ergebnis in den im ersten Argument angegebenen Befehl. Dies 
 % wird zum Beispiel benötigt, um bestimmte Werte bei bei Schlüssel-Wert-Paaren,
 % Schlüsselwörter in einigen Feldern oder auch Einheiten bei Längenangaben
 % sicher erkennen zu können.
-% \begin{macro}{\tud@lowerstring}
 %    \begin{macrocode}
 \newcommand*\tud@lowerstring[2]{%
   \protected@edef#1{%
@@ -538,12 +538,12 @@
 %
 % \subsubsection{Entfernen aller Leerzeichen in Strings}
 %
+% \begin{macro}{\tud@remove@spaces@within}
 % Hiermit können in einem gegebenen String \emph{alle} Leerzeichen enthaltenen 
-% entfernt werden. Dies wird verwendet, um für \cs{TUD@set@lengthkey} sowie 
+% entfernt werden. Dies wird verwendet, um für \cs{TUD@set@skipkey} sowie 
 % \cs{TUD@set@dimenkey} eine Warnung auszugeben, falls das übergebene Argument 
 % fehlerhaft formatiert ist, wobei Unterschiede bei Leerzeichen ignoriert 
 % werden sollen.
-% \begin{macro}{\tud@remove@spaces@within}
 %    \begin{macrocode}
 \newcommand*\tud@remove@spaces@within[1]{%
   \begingroup%
@@ -789,6 +789,38 @@
 % \end{macro}^^A \tud@skip@reset
 % \end{macro}^^A \tud@skip@restore
 % \end{macro}^^A \tud@skip@store
+% \begin{macro}{\tud@skip@to@string}
+% \changes{v2.06f}{2019/11/23}{neu}^^A
+% Die direkte Verwendung von \cs{the} auf ein \cs{skip}-Register hat zur Folge, 
+% dass die Einheit \val{pt} mit die Charactercodes \val{12} zurückgegeben 
+% werden, was bei der Weiterverarbeitung unter Umständen Probleme bereitet. 
+% Dieses Makro löst das Problem.
+%    \begin{macrocode}
+\newcommand*\tud@skip@to@string[2]{%
+  \begingroup%
+    \edef\tud@res@a{\strip@pt\dimexpr#2\relax pt}%
+    \edef\tud@res@b{\strip@pt\dimexpr\gluestretch#2\relax}%
+    \ifdim\tud@res@b\p@=\z@\relax\else%
+      \eappto\tud@res@a{%
+        \space\@plus\space\tud@res@b%
+        \ifcase\gluestretchorder#2pt\or fil\or fill\or filll\fi%
+      }%
+    \fi%
+    \edef\tud@res@b{\strip@pt\dimexpr\glueshrink#2\relax}%
+    \ifdim\tud@res@b\p@=\z@\relax\else%
+      \eappto\tud@res@a{%
+        \space\@minus\space\tud@res@b%
+        \ifcase\glueshrinkorder#2pt\or fil\or fill\or filll\fi%
+      }%
+    \fi%
+    \edef\tud@res@a{%
+      \endgroup%
+      \unexpanded{\def#1}{\tud@res@a}%
+    }%
+  \tud@res@a%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@skip@to@string
 % \begin{macro}{\tud@patch@wrn}
 % \TUDScript verwendet die Möglichkeiten von \pkg{etoolbox} und \pkg{xpatch}, 
 % um mit den Makros  (\cs{[x]apptocmd}, \cs{[x]pretocmd}, \cs{[x]patchcmd}) 
@@ -942,16 +974,16 @@
 % \end{macro}^^A \TUD@set@numkey
 % \end{macro}^^A \TUD@bool@numkey
 % \end{macro}^^A \TUD@set@ifkey
-% \begin{macro}{\TUD@set@lengthkey}
+% \begin{macro}{\TUD@set@skipkey}
 % \changes{v2.06}{2018/08/01}{forcierte Kleinschreibung Schlüsselwerte}^^A
 % \changes{v2.06f}{2019/11/21}{überarbeitet, Trennung in Skip und Dimension}^^A
-% \begin{macro}{\tud@normalize@lengthkey}
+% \begin{macro}{\tud@normalize@skipkey}
 % \changes{v2.06f}{2019/11/21}{neu}^^A
-% \begin{macro}{\tud@normalize@@lengthkey}
+% \begin{macro}{\tud@normalize@@skipkey}
 % \changes{v2.06f}{2019/11/21}{neu}^^A
-% \begin{macro}{\tud@validate@lengthkey}
+% \begin{macro}{\tud@validate@skipkey}
 % \changes{v2.06f}{2019/11/21}{neu}^^A
-% Mit \cs{TUD@set@lengthkey} und \cs{TUD@set@dimenkey} wird der übergebene Wert
+% Mit \cs{TUD@set@skipkey} und \cs{TUD@set@dimenkey} wird der übergebene Wert
 % entweder als Skip (Länge mit Kleister) oder Dimension (Länge ohne Kleister)
 % im spezifizierten Makro gespeichert, wobei auf eine gültige Eingabe geprüft 
 % wird.
@@ -962,54 +994,38 @@
 % optionale Argument gibt die gewünschte Längeneinheit an, falls diese im 
 % Argument nicht spezifiert wurde.
 %    \begin{macrocode}
-\newcommand*\TUD@set@lengthkey[4][pt]{%
+\newcommand*\TUD@set@skipkey[4][pt]{%
   \begingroup%
     \tud@lowerstring\tud@res@a{#4}%
 %    \end{macrocode}
-% Zunächst wird das erste Zeichen des potenziellen String extrahiert. Sollte es 
-% sich dabei nicht um einen leeren oder einen Integer-Wert handeln, wird das 
-% zweite Zeichen des String überprüft, um ggf. ein Vorzeichen zu ignorieren. 
+% Es wird geprüft, ob das Argument zu einem String expandiert. Ist dies der
+% Fall, wird die vermeintliche Längenangabe mit \cs{tud@normalize@skipkey} 
+% normalisiert, wobei das Resultat in das Makro im ersten Argument des Befehls
+% zurückgeschrieben wird. Sollte das Normalisieren nicht gelingen, wird ein
+% leerer Wert zurückgegeben. 
 %    \begin{macrocode}
-    \protected@edef\tud@res@b{\expandafter\@car\tud@res@a\relax\@nil}%
-    \ifisinteger{\tud@res@b}{}{%
-      \ifx\tud@res@b\@empty\else%
+    \edef\tud@res@b{\detokenize\expandafter{\tud@res@a}}%
+    \edef\tud@res@c{\detokenize\expandafter{\@backslashchar}}%
+    \@expandtwoargs\in@{\tud@res@c}{\tud@res@b}%
+    \ifin@%
 %    \end{macrocode}
-% War das übergebene Argument eine \TeX"~Primitive, so resultiert der folgende 
-% Aufruf in der Definition \verb=\protected@edef\tud@res@b{\relax}=\dots
+% Unter Umständen könnten auch noch Zähler und numerische Ausdrücke beachtet 
+% werden, allerdings halte ich dies für nicht sehr sinnvoll.
 %    \begin{macrocode}
-        \protected@edef\tud@res@b{%
-          \expandafter\expandafter\expandafter\@car%
-            \expandafter\@gobble\tud@res@a\relax\relax\@nil%
-          }%
-      \fi%
-    }%
-%    \end{macrocode}
-% \dots die folgend dahingehend geprüft wird, ob es dabei um \cs{skip} oder 
-% \cs{dimen} handelt. Ist auch dies nicht der Fall, ist dies schlichtweg ein 
-% unverträgliches Argument.
-%    \begin{macrocode}
-    \def\tud@res@c{\relax}%
-    \ifx\tud@res@b\tud@res@c%
-      \@tud@res@swatrue%
-      \ifisskip{\tud@res@a}{\@tud@res@swafalse}{}%
-      \ifisdimen{\tud@res@a}{\@tud@res@swafalse}{}%
-      \if@tud@res@swa%
-        \let\tud@res@a\@empty%
-      \fi%
-%    \end{macrocode}
-% Sollte auch das zweite Zeichen des Argumentes keine Ziffer sein, wird vor das 
-% gegebene Argument einfach ein \val{0} gesetzt und danach die vermeintliche 
-% Längenangabe mit \cs{tud@normalize@lengthkey} normalisiert, wobei das 
-% Resultat in das Makro im ersten Argument des Befehls zurückgeschrieben wird.
-% Sollte das Normalisieren nicht gelingen, wird ein leerer Wert zurückgegeben. 
-%    \begin{macrocode}
+%<*donotuse>
+      \ifiscount{\tud@res@a}{%
+        \protected@edef\tud@res@a{\numexpr\tud@res@a\relax}%
+      }{}%
+      \ifisnumexpr{\tud@res@a}{%
+        \protected@edef\tud@res@a{\dimexpr\tud@res@a #1\relax}%
+      }{}%
+%</donotuse>
     \else%
-      \ifisinteger{\tud@res@b}{}{\preto\tud@res@a{0}}%
-      \tud@normalize@lengthkey\tud@res@a{#1}%
+      \tud@normalize@skipkey\tud@res@a{#1}%
     \fi%
 %    \end{macrocode}
 % Konnte eine Längenangabe interpretiert werden, wird für ein falsch 
-% formatiertes Argument mit \cs{tud@validate@lengthkey} ggf. eine Warnung
+% formatiertes Argument mit \cs{tud@validate@skipkey} ggf. eine Warnung
 % ausgegeben und anschließend der gültige Wert gesetzt.
 %    \begin{macrocode}
     \protected@edef\tud@res@a{%
@@ -1017,20 +1033,20 @@
       \ifx\tud@res@a\@empty%
         \noexpand\FamilyKeyStateUnknownValue%
       \else%
-        \unexpanded{\tud@validate@lengthkey{#2}}{\tud@res@a}{#4}%
+        \unexpanded{\tud@validate@skipkey{#2}}{\tud@res@a}{#4}%
         \unexpanded{\FamilySetUseLengthMacro{TUD}{#2}{#3}}{\tud@res@a}%
       \fi%
     }%
   \tud@res@a%
 }
 %    \end{macrocode}
-% Das Makro \cs{tud@normalize@lengthkey} erhält im ersten Argument den zu
+% Das Makro \cs{tud@normalize@skipkey} erhält im ersten Argument den zu
 % interpretierenden String und im zweiten die ggf. zu setzende Einheit. Dieser
 % String wird in den Basiswert und möglichen Kleister aufgetrennt, wobei
 % hierbei auch eine vertauschte und eigentlich fehlerhafte Angabe von Kleister
 % in der Form \verb=... minus ... plus ...= verarbeitet wird.
 %    \begin{macrocode}
-\newcommand*\tud@normalize@lengthkey[2]{%
+\newcommand*\tud@normalize@skipkey[2]{%
   \begingroup%
     \edef\tud@res@c{#1}%
     \def\tud@res@a##1plus##2plus##3\@nil{%
@@ -1061,7 +1077,7 @@
     }%
     \expandafter\tud@res@b\tud@res@a%
 %    \end{macrocode}
-% Jeder der drei Token wird nun mit \cs{tud@normalize@@lengthkey} geprüft, ob 
+% Jeder der drei Token wird nun mit \cs{tud@normalize@@skipkey} geprüft, ob 
 % es sich tatsächlich um eine Dimensionsangabe oder zumindest einen Zahlenwert 
 % handelt. Für letzteren Fall wird die übergebene Einheit angehangen. Kann ein
 % Token nicht als Dimensionsangabe interpretiert werden~-- das übergebene Makro 
@@ -1073,7 +1089,7 @@
     \let\tud@res@c\@empty%
     \@tud@res@swatrue%
     \tud@res@b\do{%
-      \tud@normalize@@lengthkey\tud@res@a{\tud@res@b}{#2}%
+      \tud@normalize@@skipkey\tud@res@a{\tud@res@b}{#2}%
       \ifx\tud@res@a\relax%
         \@tud@res@swafalse%
         \@break@tfor%
@@ -1113,7 +1129,7 @@
 % die Vorzeichen beachtet werden, welches erst in \cs{tud@res@b} gesichert und 
 % anschließend von \cs{tud@res@a} entfernt wird.
 %    \begin{macrocode}
-\newcommand*\tud@normalize@@lengthkey[3]{%
+\newcommand*\tud@normalize@@skipkey[3]{%
   \begingroup%
     \edef\tud@res@a{#2}%
     \@tud@res@swafalse%
@@ -1190,7 +1206,7 @@
 % mit dem angegbenen Argument verglichen und eine Warnung erzeugt, falls die 
 % Formatierung des Argumentes es notwendig machte, dieses zu interpretieren.
 %    \begin{macrocode}
-\newcommand*\tud@validate@lengthkey[3]{%
+\newcommand*\tud@validate@skipkey[3]{%
   \begingroup%
 %    \end{macrocode}
 % Unterschiede bei Leerzeichen sollen keine Warnung erzeugen.
@@ -1206,20 +1222,20 @@
     \fi%
   \endgroup{%
     \PackageWarning{tudscrbase}{%
-      The given value `#3'\MessageBreak%
+      The length `#3'\MessageBreak%
       seems to be wrong formatted. Assuming, you meant\MessageBreak%
       `#1=#2'%
     }%
   }%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@validate@lengthkey
-% \end{macro}^^A \tud@normalize@@lengthkey
-% \end{macro}^^A \tud@normalize@lengthkey
-% \end{macro}^^A \TUD@set@lengthkey
+% \end{macro}^^A \tud@validate@skipkey
+% \end{macro}^^A \tud@normalize@@skipkey
+% \end{macro}^^A \tud@normalize@skipkey
+% \end{macro}^^A \TUD@set@skipkey
 % \begin{macro}{\TUD@set@dimenkey}
 % \changes{v2.05}{2016/06/15}{neu}^^A
-% Zur Angabe von Dimensionen wird auf \cs{TUD@set@lengthkey} zurückgegriffen 
+% Zur Angabe von Dimensionen wird auf \cs{TUD@set@skipkey} zurückgegriffen 
 % und anschließend geprüft, ob das Argument für \cs{dimen} genutzt werden kann.
 %    \begin{macrocode}
 \newcommand*\TUD@set@dimenkey[4][pt]{%
@@ -1228,8 +1244,8 @@
 %    \end{macrocode}
 % Die Warnung wird temporär deaktiviert und ggf. später ausgegeben.
 %    \begin{macrocode}
-      \renewcommand*\tud@validate@lengthkey[3]{}%
-      \TUD@set@lengthkey[{#1}]{#2}{\tud@res@a}{#4}%
+      \renewcommand*\tud@validate@skipkey[3]{}%
+      \TUD@set@skipkey[{#1}]{#2}{\tud@res@a}{#4}%
       \edef\tud@res@a{%
         \endgroup%
         \ifx\FamilyKeyState\FamilyKeyStateProcessed%
@@ -1240,7 +1256,7 @@
       }%
     \tud@res@a%
 %    \end{macrocode}
-% Das Ergebnis der Wertzuweisung an \cs{TUD@set@lengthkey} wird im Makro
+% Das Ergebnis der Wertzuweisung an \cs{TUD@set@skipkey} wird im Makro
 % \cs{tud@res@a} gespeichert. Möglicher Kleister wird entfernt.
 %    \begin{macrocode}
     \def\tud@res@b##1plus##2\@nil{\def\tud@res@a{##1}}%
@@ -1269,7 +1285,7 @@
       \ifx\tud@res@a\@empty%
         \noexpand\FamilyKeyStateUnknownValue%
       \else%
-        \unexpanded{\tud@validate@lengthkey{#2}}{\tud@res@a}{#4}%
+        \unexpanded{\tud@validate@skipkey{#2}}{\tud@res@a}{#4}%
         \unexpanded{\FamilySetUseLengthMacro{TUD}{#2}{#3}}{\tud@res@a}%
       \fi%
     }%
@@ -1605,6 +1621,7 @@
 \newcommand*\TUD@parameter@error[2]{%
   \PackageError{tudscrbase}{Unsupported value for parameter `#1'}{%
     `#1' can only be used with values:\MessageBreak#2%
+    \MessageBreak Please choose a valid one.%
   }%
 }
 %    \end{macrocode}
@@ -1728,7 +1745,7 @@
   \ifcsundef{if@tud@#1@loaded}{%
     \PackageError{tudscrbase}{\string\TUD@AfterPackage@set{#1} missing}{%
       You have to set \string\TUD@AfterPackage@set{#1} before\MessageBreak%
-      the usage of \string\TUD@AfterPackage@do{#1}{<code>}%
+      the usage of \string\TUD@AfterPackage@do{#1}{<code>}.%
     }%
   }{%
     \if@atdocument%
