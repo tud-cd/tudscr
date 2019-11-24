@@ -1,4 +1,4 @@
-% \CheckSum{1427}
+% \CheckSum{1426}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -1382,9 +1382,7 @@
   \TUD@key{loadpackages}[true]{%
     \TUD@set@ifkey{loadpackages}{@tud@comp@loadpackages}{#1}%
   }
-  \AtEndPreamble{%
-    \TUD@key@toolate{loadpackages}%
-  }
+  \AtEndPreamble{\TUD@key@toolate{loadpackages}}%
 }
 %    \end{macrocode}
 % \end{option}^^A loadpackages
@@ -1714,6 +1712,9 @@
 % \fi
 %
 % \begin{option}{cropmargin}
+% \changes{v2.06f}{2019/11/24}{neu}^^A
+% \begin{macro}{\tud@cropmargin@set}
+% \changes{v2.06f}{2019/11/24}{neu}^^A
 % \begin{macro}{\schnittrand}
 % \changes{v2.05}{2016/04/17}{neu}^^A
 % Nun geht es an das Makro \cs{schnittrand}. Zur Intension dieses Befehls gab
@@ -1722,46 +1723,51 @@
 % \ToDo{In area-process übernehmen?}[v2.06f]
 %    \begin{macrocode}
 \tud@comp@on@poster@class{%
+  \newcommand*\tud@cropmargin@set{}%
+  \preto\tud@cdgeometry@@init{\tud@cropmargin@set}%
   \TUD@key{cropmargin}[5mm]{%
     \TUD@set@dimenkey[mm]{cropmargin}{\@tempa}{#1}%
     \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-      \edef\@tempa{%
-        paperwidth=\the\dimexpr\paperwidth+\@tempa*2\relax,%
-        paperheight=\the\dimexpr\paperheight+\@tempa*2\relax,%
-        layout=\the\paperwidth:\the\paperheight,%
-        layoutoffset=\the\dimexpr\@tempa\relax,%
-        showcrop%
+      \edef\tud@cropmargin@set{%
+        \noexpand\geometry{%
+          papersize={%
+            \the\dimexpr\paperwidth+\@tempa*2\relax,%
+            \the\dimexpr\paperheight+\@tempa*2\relax%
+          },%
+          layoutsize={\the\paperwidth,\the\paperheight},%
+          layoutoffset=\the\dimexpr\@tempa\relax,%
+          showcrop%
+        }%
       }%
-      \expandafter\geometry\expandafter{\@tempa}%
     \fi%
-%    \end{macrocode}
-% Da die Option auf das Seitenlayout direkt zugreift und mehrmalige Aufrufe 
-% sich beeinflussen würden, werden diese unterbunden.
-%    \begin{macrocode}
-    \TUD@key{cropmargin}[5mm]{%
-      \PackageWarning{tudscrcomp}{%
-        It is not possible to use option `cropmargin'\MessageBreak%
-        multiple times, the given setting `cropmargin=##1'\MessageBreak%
-        is ignored%
-      }%
-    }%
   }%
-  \ifundef{\schnittrand}{}{%
-    \protected@edef\@tempa{%
-      \noexpand\TUDExecuteOptions{cropmargin=\schnittrand}%
-    }\@tempa%
-    \ifx\FamilyKeyState\FamilyKeyStateProcessed\else%
-      \PackageError{tudscrcomp}{%
-        Wrong definition for `\string\schnittrand'%
-      }{%
-        The definition of `\string\schnittrand' does not expand\MessageBreak%
-        to a valid dimension expression.%
-      }%
-    \fi%
+%    \end{macrocode}
+% Da die Option direkt auf das Seitenlayout zugreift und mehrmalige Aufrufe 
+% sich beeinflussen würden, werden diese zum Ende der Präambel unterbunden.
+%    \begin{macrocode}
+  \AtEndPreamble{\TUD@key@toolate{cropmargin}}%
+%    \end{macrocode}
+% Nachdem die passende Option definiert wurde, wird noch \cs{schnittrand} 
+% ausgewertet und verarbeitet. Dies geschieht zum spätestmöglichen Zeitpunkt, 
+% damit dieser Befehl irgendwo innerhalb der Präambel definiert werden kann.
+%    \begin{macrocode}
+  \preto\tud@cdgeometry@init{%
+    \ifundef{\schnittrand}{}{%
+      \TUDoptions{cropmargin=\schnittrand}%
+      \ifx\FamilyKeyState\FamilyKeyStateProcessed\else%
+        \PackageError{tudscrcomp}{%
+          Wrong definition for `\string\schnittrand'%
+        }{%
+          The definition of `\string\schnittrand' does not expand\MessageBreak%
+          to a valid dimension expression.%
+        }%
+      \fi%
+    }%
   }%
 }
 %    \end{macrocode}
 % \end{macro}^^A \schnittrand
+% \end{macro}^^A \tud@cropmargin@set
 % \end{option}^^A cropmargin
 %
 % \begin{option}{tudmathfoot}
