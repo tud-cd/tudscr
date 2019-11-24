@@ -1,4 +1,4 @@
-% \CheckSum{1396}
+% \CheckSum{1383}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -372,7 +372,7 @@
 % interpretierbar, wird das zweite Argument ausgeführt. Kann der String als 
 % \enquote{falsch} angesehen werden, dementsprechen das dritte. Ist der String 
 % kein logischer Wert, kommt das letzte Argument zum Tragen. Die Syntax lautet:
-% 
+%
 % \cs{ifstrbool}\marg{Argument}\marg{Wahr}\marg{Falsch}\marg{Andernfalls}
 % \ToDo{mit \cs{TUD@set@ifkey} umsetzen}[v2.06f]
 %    \begin{macrocode}
@@ -1240,55 +1240,59 @@
 %    \begin{macrocode}
 \newcommand*\TUD@set@dimenkey[4][pt]{%
   \begingroup%
-    \begingroup%
+    \TUD@set@skipkey[{#1}]{#2}{\tud@res@a}{#4}%
+    \ifx\FamilyKeyState\FamilyKeyStateProcessed%
 %    \end{macrocode}
-% Die Warnung wird temporär deaktiviert und ggf. später ausgegeben.
+% Das Ergebnis der Wertzuweisung an \cs{TUD@set@skipkey} wurde im Makro
+% \cs{tud@res@a} gespeichert. Handelt es sich beim Argument um ein
+% \cs{skip}"~Register oder eine \cs{glueexpr}, kann nicht sichergestellt 
+% werden, dass diesem später doch noch Kleister hinzugefügt wird, weshalb diese
+% nicht akzeptiert werden.
 %    \begin{macrocode}
-      \renewcommand*\tud@validate@skipkey[3]{}%
-      \TUD@set@skipkey[{#1}]{#2}{\tud@res@a}{#4}%
-      \edef\tud@res@a{%
-        \endgroup%
-        \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-          \unexpanded{\def\tud@res@a}{\expandonce\tud@res@a}%
-        \else%
-          \unexpanded{\let\tud@res@a\@empty}%
-        \fi%
+      \@tud@res@swafalse%
+      \ifisskip{\tud@res@a}{%
+        \protected@edef\tud@res@a{\dimexpr\tud@res@a\relax}%
+        \def\tud@res@b{a \string\skip\space register}%
+        \@tud@res@swatrue%
+      }{%
+        \ifisglueexpr{\tud@res@a}{%
+          \protected@edef\tud@res@a{\dimexpr\tud@res@a\relax}%
+          \def\tud@res@b{a glue expression}%
+          \@tud@res@swatrue%
+        }{%
+%    \end{macrocode}
+% Ebenso wird direkt angegebener Kleister entfernt.
+%    \begin{macrocode}
+          \ifisglue{\tud@res@a}{%
+            \ifisdimension{\tud@res@a}{}{%
+              \setlength\@tempdima{\glueexpr\tud@res@a\relax}%
+              \tud@skip@to@string\tud@res@a{\@tempdima}%
+              \def\tud@res@b{something containing glue}%
+              \@tud@res@swatrue%
+            }%
+          }{}%
+        }%
       }%
-    \tud@res@a%
 %    \end{macrocode}
-% Das Ergebnis der Wertzuweisung an \cs{TUD@set@skipkey} wird im Makro
-% \cs{tud@res@a} gespeichert. Möglicher Kleister wird entfernt.
+% Sollte einer der zuvor beschriebenen Fälle aufgetreten sein, wird eine 
+% Warnung ausgegeben.
 %    \begin{macrocode}
-    \def\tud@res@b##1plus##2\@nil{\def\tud@res@a{##1}}%
-    \expandafter\tud@res@b\tud@res@a plus\@nil%
-    \def\tud@res@b##1minus##2\@nil{\def\tud@res@a{##1}}%
-    \expandafter\tud@res@b\tud@res@a minus\@nil%
-    \@tud@res@swatrue%
-    \ifisdimension{\tud@res@a}{\@tud@res@swafalse}{}%
-    \ifisdimen{\tud@res@a}{\@tud@res@swafalse}{}%
-%    \end{macrocode}
-% Handelt es sich beim Argument jedoch um ein \cs{skip}"~Register, kann nicht
-% sichergestellt werden, dass diesem später doch noch Kleister hinzugefügt
-% wird, weshalb diese nicht akzeptiert werden.
-%    \begin{macrocode}
-    \ifisskip{\tud@res@a}{%
-      \PackageWarning{tudscrbase}{%
-        Using `#2=\string\skip' is not possible. You should\MessageBreak%
-        consider a \string\dimen\space register instead%
-      }%
-    }{}%
-    \if@tud@res@swa%
-      \let\tud@res@a\@empty%
-    \fi%
-    \protected@edef\tud@res@a{%
-      \endgroup%
-      \ifx\tud@res@a\@empty%
-        \noexpand\FamilyKeyStateUnknownValue%
-      \else%
-        \unexpanded{\tud@validate@skipkey{#2}}{\tud@res@a}{#4}%
-        \unexpanded{\FamilySetUseLengthMacro{TUD}{#2}{#3}}{\tud@res@a}%
+      \if@tud@res@swa%
+        \PackageWarning{tudscrbase}{%
+          Using option `#2' with\MessageBreak%
+          \tud@res@b\space(#4)\MessageBreak%
+          is not possible. You should consider to use an\MessageBreak%
+          expression for a dimen instead. Setting\MessageBreak%
+          `#2=\tud@res@a'%
+        }%
       \fi%
-    }%
+      \protected@edef\tud@res@a{%
+        \endgroup%
+        \unexpanded{\FamilySetUseLengthMacro{TUD}{#2}{#3}}{\tud@res@a}%
+      }%
+    \else%
+      \def\tud@res@a{\endgroup}%
+    \fi%
   \tud@res@a%
 }
 %    \end{macrocode}
