@@ -1,4 +1,4 @@
-% \CheckSum{2244}
+% \CheckSum{2232}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -179,6 +179,7 @@
 % \pkg{geometry} genutzt. Dabei werden entweder die gewünschten Maße der
 % Seitenränder direkt gewählt oder aber die mit \pkg{typearea} berechneten Maße
 % an \pkg{geometry} durchgereicht.
+% \ToDo{tud@len@... > tud@dim@ und tud@glue@}
 %
 % \begin{length}{\tud@len@widemargin}
 % \begin{length}{\tud@len@slimmargin}
@@ -683,10 +684,7 @@
 % Negative Werte sind nicht möglich, diese werden automatisch korrigiert.
 %    \begin{macrocode}
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \ifdim\dimexpr\tud@bleedmargin@dim\relax<\z@\relax%
-      \def\@tempa-##1\@nil{\def\tud@bleedmargin@dim{##1}}%
-      \@tempa#1\@nil%
-    \fi%
+    \tud@positive@skipkey{\tud@bleedmargin@dim}%
   \fi%
 }
 %    \end{macrocode}
@@ -1318,9 +1316,7 @@
 % die zuvor gemachten Einstellungen zurückgesetzt.
 %    \begin{macrocode}
       \Gm@initnewgm%
-      \edef\@tempa{%
-        paperwidth=\the\paperwidth,paperheight=\the\paperheight,#1%
-      }%
+      \edef\@tempa{papersize={\the\paperwidth,\the\paperheight},#1}%
       \def\@tempc{\tud@cs@use{geometry}}%
       \expandafter\@tempc\expandafter{\@tempa,driver=none}%
     \fi%
@@ -1882,7 +1878,7 @@
     \tud@cdgeometry@reset{custom}%
     \begingroup%
       \epreto\tud@x@geometry@init{%
-        paperwidth=\the\paperwidth,paperheight=\the\paperheight,%
+        papersize={\the\paperwidth,\the\paperheight},%
         \tud@cdgeometry@layout,%
         \tud@cdgeometry@mpincl,%
         \if@reversemargin%

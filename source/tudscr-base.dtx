@@ -1,4 +1,4 @@
-% \CheckSum{1383}
+% \CheckSum{1400}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -1233,6 +1233,21 @@
 % \end{macro}^^A \tud@normalize@@skipkey
 % \end{macro}^^A \tud@normalize@skipkey
 % \end{macro}^^A \TUD@set@skipkey
+% \begin{macro}{\tud@positive@skipkey}
+% \changes{v2.06f}{2019/11/24}{neu}^^A
+% Um Schlüssel für Längen definieren zu können, die zwingend positiv sind, kann 
+% dieses Makro genutzt werden. Übergeben werden muss ein Makro, welches einen 
+% Längenausdruck enthält.
+%    \begin{macrocode}
+\newcommand*\tud@positive@skipkey[1]{%
+  \protected@edef#1{%
+    \noexpand\glueexpr%
+    \noexpand\ifdim\noexpand\glueexpr\expandonce#1\relax<\z@-\noexpand\fi%
+    \expandonce#1\relax%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@positive@skipkey
 % \begin{macro}{\TUD@set@dimenkey}
 % \changes{v2.05}{2016/06/15}{neu}^^A
 % Zur Angabe von Dimensionen wird auf \cs{TUD@set@skipkey} zurückgegriffen 
@@ -1281,8 +1296,8 @@
         \PackageWarning{tudscrbase}{%
           Using option `#2' with\MessageBreak%
           \tud@res@b\space(#4)\MessageBreak%
-          is not possible. You should consider to use an\MessageBreak%
-          expression for a dimen instead. Setting\MessageBreak%
+          is not recommended. You should consider to use\MessageBreak%
+          an expression for a dimen instead. Setting\MessageBreak%
           `#2=\tud@res@a'%
         }%
       \fi%
@@ -1291,7 +1306,7 @@
         \unexpanded{\FamilySetUseLengthMacro{TUD}{#2}{#3}}{\tud@res@a}%
       }%
     \else%
-      \def\tud@res@a{\endgroup}%
+      \def\tud@res@a{\endgroup\FamilyKeyStateUnknownValue}%
     \fi%
   \tud@res@a%
 }
@@ -1458,7 +1473,7 @@
   \expandafter\define@key\expandafter{#1}%
 }
 %    \end{macrocode}
-% Mit \cs{TUD@parameter@let}\marg{Name}\marg{Name} kann äquivalent zur
+% Mit \cs{TUD@parameter@let}\marg{Name}\marg{Name} kann entsprechend zur
 % \mbox{\TeX"~Primitive \cs{let}} die Definition der Verarbeitung eines
 % Parameters auf einen weiteren übertragen werden.
 %    \begin{macrocode}
