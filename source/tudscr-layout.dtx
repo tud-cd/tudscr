@@ -1,4 +1,4 @@
-% \CheckSum{1232}
+% \CheckSum{1241}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -577,11 +577,11 @@
 %<*book|report|article>
 \newcommand*\tud@pageheadingsvskip@dim{0pt}
 \TUD@key{pageheadingsvskip}{%
-  \TUD@set@dimenkey{pageheadingsvskip}{\tud@pageheadingsvskip@dim}{#1}%
+  \TUD@set@dimkey{pageheadingsvskip}{\tud@pageheadingsvskip@dim}{#1}%
 }
 \newcommand*\tud@headingsvskip@dim{0pt}
 \TUD@key{headingsvskip}{%
-  \TUD@set@dimenkey{headingsvskip}{\tud@headingsvskip@dim}{#1}%
+  \TUD@set@dimkey{headingsvskip}{\tud@headingsvskip@dim}{#1}%
 }
 %</book|report|article>
 %    \end{macrocode}
@@ -673,27 +673,49 @@
 % \changes{v2.05}{2015/11/24}{neu}^^A
 % \begin{macro}{\tud@x@scr@headings@current}
 % \changes{v2.05}{2015/11/24}{neu}^^A
-% \begin{macro}{\tud@sec@fontsize}
+% \begin{macro}{\tud@sec@fontsizecmd}
 % \changes{v2.05}{2015/11/24}{neu}^^A
-% \begin{macro}{\tud@thesis@fontsize}
+% \begin{macro}{\tud@sec@baseline@dim}
+% \changes{v2.06f}{2019/11/24}{neu}^^A
+% \begin{macro}{\tud@sec@@baselineskip}
+% \changes{v2.06f}{2019/11/24}{neu}^^A
+% \begin{macro}{\tud@subtitle@fontsizecmd}
 % \changes{v2.05}{2015/11/24}{neu}^^A
 % Als erstes werden die Optionen verarbeitet, welche einen Einfluss auf die 
 % Formatierung respektive die Schriftgröße der Überschriften haben. Wird die
 % Option \opt{headings} verwendet, werden mit \cs{tud@x@scr@headings@set} die
-% Schriftgrößen sowohl für die Überschriften (\cs{tud@sec@fontsize}) als auch 
-% die Titelseite (\cs{tud@thesis@fontsize}) gesetzt. Dafür wird die gewählte 
-% Größe\footnote{\opt{headings}|=|\val{standardclasses/big/normal/small}} im
-% Hilfsmakro \cs{tud@x@scr@headings@current} gesichert.
+% Schriftgrößen sowohl für die Überschriften (\cs{tud@sec@fontsizecmd}) als 
+% auch die Titelseite (\cs{tud@subtitle@fontsizecmd}) gesetzt. Die gewählte 
+% Größe\footnote{\opt{headings}|=|\val{standardclasses/big/normal/small}} wird 
+% dafür im Hilfsmakro \cs{tud@x@scr@headings@current} gesichert. Die Größe des 
+% Grundzeilenabstandes in Überschriften wird in \cs{tud@sec@baseline@dim} 
+% abgelegt, dieser ist für die Abstände innerhalb von Überschriften notwendig. 
 %    \begin{macrocode}
 \newcommand*\tud@x@scr@headings@current{}
-\newcommand*\tud@sec@fontsize{}
-\newcommand*\tud@thesis@fontsize{}
+\newcommand*\tud@sec@fontsizecmd{\Huge}
+\newcommand*\tud@sec@@baselineskip{%
+  \begingroup
+    \tud@sec@fontsizecmd%
+    \edef\tud@res@a{%
+      \endgroup%
+      \unexpanded{\def\tud@sec@baseline@dim}{%
+        \the\dimexpr\glueexpr\f@baselineskip\relax\relax%
+      }%
+    }%
+  \tud@res@a
+}
+\newcommand*\tud@sec@baseline@dim{}
+\tud@sec@@baselineskip
+\newcommand*\tud@prefix@fontsizecmd{\huge}
+\newcommand*\tud@subtitle@fontsizecmd{\LARGE}
 \newcommand*\tud@x@scr@headings@set[1][]{%
-  \def\@tempa##1##2##3{%
+  \def\@tempa##1##2##3##4{%
     \ifstr{##1}{\tud@x@scr@headings@current}{}{%
       \renewcommand*\tud@x@scr@headings@current{##1}%
-      \renewcommand*\tud@sec@fontsize{##2}%
-      \renewcommand*\tud@thesis@fontsize{##3}%
+      \renewcommand*\tud@sec@fontsizecmd{##2}%
+      \tud@sec@@baselineskip%
+      \renewcommand*\tud@prefix@fontsizecmd{##3}%
+      \renewcommand*\tud@subtitle@fontsizecmd{##4}%
       #1%
     }%
   }%
@@ -706,24 +728,10 @@
   \KOMAoptionOf[\def\@tempb]{\KOMAClassFileName}{headings}%
   \@for\@tempc:=\@tempb\do{%
     \ifstr{standardclasses}{\@tempc}{\@tempa{standardclasses}{\Huge}{\LARGE}}{%
-    \ifstr{big}{\@tempc}{\@tempa{big}{\Huge}{\LARGE}}{%
-    \ifstr{normal}{\@tempc}{\@tempa{normal}{\huge}{\Large}}{%
-    \ifstr{small}{\@tempc}{\@tempa{small}{\LARGE}{\large}}{}}}}%
+    \ifstr{big}{\@tempc}{\@tempa{big}{\Huge}{\huge}{\LARGE}}{%
+    \ifstr{normal}{\@tempc}{\@tempa{normal}{\huge}{\LARGE}{\Large}}{%
+    \ifstr{small}{\@tempc}{\@tempa{small}{\LARGE}{\Large}{\large}}{}}}}%
   }%
-%    \end{macrocode}
-% Der Abstand nach Teil- und Kapitelüberschriften wird ebenso in Abhängigkeit 
-% der gewählten Einstellung für \opt{headings} definiert.
-%    \begin{macrocode}
-  \begingroup%
-    \tud@sec@fontsize%
-    \setlength\@tempdima{\baselineskip}%
-    \@tempskipa=%
-      \glueexpr.8\@tempdima\@plus.05\@tempdima\@minus.1\@tempdima\relax\relax%
-    \edef\tud@res@a{%
-      \endgroup%
-      \def\noexpand\tud@cd@afterskip{\the\@tempskipa}%
-    }%
-  \tud@res@a%
 }
 %    \end{macrocode}
 % Damit die Einstellungen für die Größe wirksam werden, wird das Makro einmalig
@@ -731,8 +739,10 @@
 %    \begin{macrocode}
 \AtEndPreamble{\tud@x@scr@headings@set}
 %    \end{macrocode}
-% \end{macro}^^A \tud@thesis@fontsize
-% \end{macro}^^A \tud@sec@fontsize
+% \end{macro}^^A \tud@subtitle@fontsizecmd
+% \end{macro}^^A \tud@sec@@baselineskip
+% \end{macro}^^A \tud@sec@baseline@dim
+% \end{macro}^^A \tud@sec@fontsizecmd
 % \end{macro}^^A \tud@x@scr@headings@current
 % \end{macro}^^A \tud@x@scr@headings@set
 % \begin{macro}{\tud@x@scr@headings@reset}
@@ -984,11 +994,11 @@
       \usekomafont{disposition}%
       \raggedtitle%
       \tud@sec@fontface%
-      \tud@sec@fontsize%
+      \tud@sec@fontsizecmd%
       \tud@color{\tud@title@fontcolor}%
     }%
     \tud@komafont@set{subtitle}{%
-      \tud@thesis@fontsize%
+      \tud@subtitle@fontsizecmd%
       \fontseries{\tud@cdfont@bf}\selectfont%
     }%
     \tud@komafont@set{subject}{%
@@ -1034,17 +1044,17 @@
   \else% !false
     \tud@cs@store{scr@part@beforeskip}%
 %<*book|report>
-    \renewcommand*\scr@part@beforeskip{\tud@cd@beforeskip}%
+    \renewcommand*\scr@part@beforeskip{\tud@cd@beforevskip@dim}%
 %</book|report>
 %<*article|poster>
-    \renewcommand*\scr@part@beforeskip{\tud@cd@afterskip+\baselineskip}%
+    \renewcommand*\scr@part@beforeskip{\tud@cd@aftervskip@glue+\baselineskip}%
 %</article|poster>
 %<*book|report>
     \tud@cs@store{scr@part@innerskip}%
-    \renewcommand*\scr@part@innerskip{\tud@cd@innerskip}%
+    \renewcommand*\scr@part@innerskip{\tud@cd@innervskip@dim}%
 %</book|report>
     \tud@cs@store{scr@part@afterskip}%
-    \renewcommand*\scr@part@afterskip{\tud@cd@afterskip}%
+    \renewcommand*\scr@part@afterskip{\tud@cd@aftervskip@glue}%
     \tud@cs@store{partheadstartvskip}%
     \let\partheadstartvskip\tud@partheadstartvskip%
 %<*book|report>
@@ -1067,6 +1077,7 @@
     }%
     \tud@komafont@set{partnumber}{%
       \tud@sec@fontface%
+      \tud@prefix@fontsizecmd%
       \tud@color{\tud@part@fontcolor}%
     }%
     \tud@cs@store{raggedpart}%
@@ -1097,11 +1108,11 @@
 %    \begin{macrocode}
   \else% !false
     \tud@cs@store{scr@chapter@beforeskip}%
-    \renewcommand*\scr@chapter@beforeskip{\tud@cd@beforeskip}%
+    \renewcommand*\scr@chapter@beforeskip{\tud@cd@beforevskip@dim}%
     \tud@cs@store{scr@chapter@innerskip}%
-    \renewcommand*\scr@chapter@innerskip{\tud@cd@innerskip}%
+    \renewcommand*\scr@chapter@innerskip{\tud@cd@innervskip@dim}%
     \tud@cs@store{scr@chapter@afterskip}%
-    \renewcommand*\scr@chapter@afterskip{\tud@cd@afterskip}%
+    \renewcommand*\scr@chapter@afterskip{\tud@cd@aftervskip@glue}%
     \tud@cs@store{chapterheadstartvskip}%
     \let\chapterheadstartvskip\tud@chapterheadstartvskip%
     \tud@cs@store{chapterlineswithprefixformat}%
@@ -1114,7 +1125,7 @@
     \renewcommand*\tud@chapter@after@hook{\tud@chapter@app}%
     \tud@komafont@set{chapter}{%
       \tud@sec@fontface%
-      \tud@sec@fontsize%
+      \tud@sec@fontsizecmd%
       \tud@color{\tud@chapter@fontcolor}%
     }%
     \tud@komafont@set{chapterprefix}{\usesizeofkomafont{partnumber}}%
@@ -1240,11 +1251,11 @@
 % \changes{v2.06}{2018/08/01}{neu}^^A
 % \begin{macro}{\tud@cd@vphantom}
 % \changes{v2.06}{2018/08/01}{neu}^^A
-% \begin{macro}{\tud@cd@beforeskip}
+% \begin{macro}{\tud@cd@beforevskip@dim}
 % \changes{v2.06}{2018/08/01}{neu}^^A
-% \begin{macro}{\tud@cd@innerskip}
+% \begin{macro}{\tud@cd@innervskip@dim}
 % \changes{v2.06}{2018/08/01}{neu}^^A
-% \begin{macro}{\tud@cd@afterskip}
+% \begin{macro}{\tud@cd@aftervskip@glue}
 % \changes{v2.06}{2018/08/01}{neu}^^A
 % Im \TUDCD werden sowohl Titel als auch Teil- und Kapitelüberschriften auf der 
 % gleichen Grundlinienhöhe gesetzt. Hierfür sind Anpassungen der entsprechenden
@@ -1253,26 +1264,32 @@
 % \cs{chapterheadstartvskip} gesetzt. Um das Layout des \CDs umzusetzen, werden 
 % diese beiden Makros als Haken genutzt.
 %
-% Das Makro \cs{tud@cd@beforeskip} enthält den Abstand vor einer Überschrift, 
+% Das Makro \cs{tud@cd@beforevskip@dim} ist der Abstand vor einer Überschrift, 
 % welcher über \cs{tud@cd@headstartvskip} gesetzt wird. Der Abstand zwischen 
 % der Nummerierung eines Teils und der eigentlichen Bezeichnung wird mit
-% \cs{tud@cd@innerskip} definiert und durch \KOMAScript{} eingefügt. Gleiches 
-% gilt für eine separate Kapitelnummernzeile (\opt{chapterprefix}) und dem 
-% eigentlichen Kapiteltitel. Durch \cs{tud@cd@afterskip} wird der Abstand
-% zwischen Titel und Fließtext respektive der unteren Prääambel definiert. 
-% Dieser Abstand ist abhängig von der gewählten Einstellung für \opt{headings}.
+% \cs{tud@cd@innervskip@dim} definiert und durch \KOMAScript{} eingefügt.
+% Gleiches gilt für eine separate Kapitelnummernzeile (\opt{chapterprefix}) und
+% dem eigentlichen Kapiteltitel. Durch \cs{tud@cd@aftervskip@glue} wird der
+% Abstand zwischen Titel und Fließtext respektive der unteren Prääambel
+% definiert. Dieser Abstand ist abhängig von der gewählten Einstellung für die 
+% Option \opt{headings}.
+% \ToDo{skip > @dim}[v2.06]
 %    \begin{macrocode}
-\newcommand*\tud@cd@beforeskip{%
-  \dimexpr-\tud@len@areavskip-\tud@len@areaheadvskip\relax%
+\newcommand*\tud@cd@beforevskip@dim{%
+  \dimexpr-\tud@dim@areavskip-\tud@dim@areaheadvskip\relax%
 }
-\newcommand*\tud@cd@innerskip{.25\baselineskip}%
-\newcommand*\tud@cd@afterskip{%
-  .75\baselineskip\@plus.05\baselineskip\@minus.1\baselineskip%
+\newcommand*\tud@cd@innervskip@dim{\dimexpr(\tud@sec@baseline@dim)/5\relax}%
+\newcommand*\tud@cd@aftervskip@glue{%
+  \glueexpr%
+    \dimexpr(\tud@sec@baseline@dim)*4/5\relax%
+    \@plus\dimexpr(\tud@sec@baseline@dim)/20\relax%
+    \@minus\dimexpr(\tud@sec@baseline@dim)/10\relax%
+  \relax%
 }
 \newcommand*\tud@cd@headstartvskip{%
-  \@tempskipa=\glueexpr\tud@cd@beforeskip\relax\relax%
-  \ifdim\@tempskipa<\z@\@tempskipa-\@tempskipa\fi%
-  \null\vskip-\baselineskip\vskip\@tempskipa%
+  \tud@setdim\@tempdima{\tud@cd@beforevskip@dim}%
+  \tud@length@setabsolute\@tempdima%
+  \null\vskip\dimexpr\@tempdima-1\baselineskip\relax%
 }
 %    \end{macrocode}
 % Sollte keine Präfixzeile für Teile oder Kapitel verwendet werden, muss für 
@@ -1282,14 +1299,13 @@
 \newcommand*\tud@cd@vphantom{%
   \begingroup%
     \usekomafont{partnumber}{\nobreak\tud@sec@strut}%
-    \setlength\@tempskipa{\tud@cd@innerskip}%
-    \par\nobreak\vskip\@tempskipa%
+    \par\nobreak\vskip\tud@cd@innervskip@dim%
   \endgroup%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@cd@afterskip
-% \end{macro}^^A \tud@cd@innerskip
-% \end{macro}^^A \tud@cd@beforeskip
+% \end{macro}^^A \tud@cd@aftervskip@glue
+% \end{macro}^^A \tud@cd@innervskip@dim
+% \end{macro}^^A \tud@cd@beforevskip@dim
 % \end{macro}^^A \tud@cd@vphantom
 % \end{macro}^^A \tud@cd@headstartvskip
 %
@@ -1321,8 +1337,8 @@
 % Zunächst wird der unterschiedliche Abstand bei Teil- und Kapitelpräambeln 
 % ausgeglichen.
 %    \begin{macrocode}
-  \@tempskipa=\glueexpr\tud@cd@afterskip\relax%
-  \ifdim\@tempskipa<\z@\@tempskipa-\@tempskipa\fi%
+  \tud@setglue\@tempskipa{\tud@cd@aftervskip@glue}%
+  \tud@length@setabsolute\@tempskipa%
   \vskip\@tempskipa%
 %    \end{macrocode}
 % Anschließend folgen die Anpassungen für die Teilpräambel.
@@ -1331,7 +1347,7 @@
     \renewcommand*\tud@abstract@level@num{1}%
   \fi%
   \KOMAoptions{titlepage=false}%
-  \null\vskip-\baselineskip%
+  \null\vskip-1\baselineskip%
   \addtokomafont{disposition}{\tud@color{\tud@part@fontcolor}}%
   \addtokomafont{dictum}{\tud@color{\tud@part@fontcolor}}%
   \let\tud@preamble@fontcolor\tud@part@fontcolor%
@@ -1350,7 +1366,7 @@
     \renewcommand*\tud@abstract@level@num{1}%
   \fi%
   \KOMAoptions{titlepage=false}%
-  \null\vskip-\baselineskip%
+  \null\vskip-1\baselineskip%
 %    \end{macrocode}
 % Die Farb- und Schrifteinstellungen sind nur für reine Kapitelseiten notwendig.
 %    \begin{macrocode}
@@ -1420,7 +1436,7 @@
 % Die Schriftelement für die Untertitel von Teilen.
 %    \begin{macrocode}
 \newkomafont{partsubtitle}{%
-  \tud@thesis@fontsize%
+  \tud@subtitle@fontsizecmd%
   \fontseries{\tud@cdfont@bf}\selectfont%
   \tud@color{\tud@part@fontcolor}%
 }
@@ -1445,7 +1461,7 @@
 % Die Schriftelement für die Untertitel von Kapiteln.
 %    \begin{macrocode}
 \newkomafont{chaptersubtitle}{%
-  \tud@thesis@fontsize%
+  \tud@subtitle@fontsizecmd%
   \fontseries{\tud@cdfont@bf}\selectfont%
   \tud@color{\tud@chapter@fontcolor}%
 }
@@ -1510,7 +1526,7 @@
   \fi%
   \tud@cd@specialpage@set{part}%
   \tud@cd@headstartvskip%
-  \TUD@deprecated@skip{pageheadingsvskip}%
+  \TUD@deprecated@length{\pageheadingsvskip}%
   \vspace*{\tud@pageheadingsvskip@dim}%
 }
 %</book|report>
@@ -1610,10 +1626,10 @@
   \fi%
   \tud@cd@headstartvskip%
   \if@tud@chapterpage%
-    \TUD@deprecated@skip{pageheadingsvskip}%
+    \TUD@deprecated@length{\pageheadingsvskip}%
     \vspace*{\tud@pageheadingsvskip@dim}%
   \else%
-    \TUD@deprecated@skip{headingsvskip}%
+    \TUD@deprecated@length{\headingsvskip}%
     \vspace*{\tud@headingsvskip@dim}%
   \fi%
 }

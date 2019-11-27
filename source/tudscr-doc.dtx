@@ -1,4 +1,4 @@
-% \CheckSum{2231}
+% \CheckSum{2219}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -496,7 +496,7 @@
 % \end{macro}^^A \doxitem
 % \begin{macro}{\@doxcreatedescribes}
 % \changes{v2.05i}{2017/03/09}{neu}^^A
-% \begin{length}{\marginnotevskip}
+% \begin{length}{\tud@dim@marginnotevskip}
 % \changes{v2.05i}{2017/03/09}{neu}^^A
 % \begin{macro}{\marginpar}
 % Hiermit werden Befehle der Form \cs{DescribeOption\meta{Typ}s} erzeugt, mit 
@@ -504,10 +504,10 @@
 % Randnotizen via \cs{marginnote} mit den passenden vertikalen Abständen 
 % erstellt.
 %    \begin{macrocode}
-\newlength\marginnotevskip
+\tud@newdim\tud@dim@marginnotevskip
 \newcommand*\@doxcreatedescribes[1]{%
   \expandafter\def\csname Describe#1s\endcsname##1{%
-    \setlength\marginnotevskip{\z@}%
+    \tud@setdim\tud@dim@marginnotevskip{\z@}%
     \def\@tempc{##1}%
     \@for\@tempa:=\@tempc\do{%
       \expandafter\ifblank\expandafter{\@tempa}{}{%
@@ -515,10 +515,10 @@
           \expandonce{\csname Describe#1\endcsname}{\expandonce{\@tempa}}%
         }%
         \@tempb%
-        \addtolength\marginnotevskip{\baselineskip}%
+        \tud@addtodim\tud@dim@marginnotevskip{1\baselineskip}%
       }%
     }%
-    \setlength\marginnotevskip{\z@}%
+    \tud@setdim\tud@dim@marginnotevskip{\z@}%
     \ignorespaces%
   }%
 }
@@ -526,15 +526,15 @@
 \AfterPackage*{marginnote}{%
   \renewcommand*\marginpar[2][]{%
     \IfArgIsEmpty{#1}{%
-      \marginnote{#2}[\marginnotevskip]%
+      \marginnote{#2}[\tud@dim@marginnotevskip]%
     }{%
-      \marginnote[{#1}]{#2}[\marginnotevskip]%
+      \marginnote[{#1}]{#2}[\tud@dim@marginnotevskip]%
     }%
   }%
 }
 %    \end{macrocode}
 % \end{macro}^^A \marginpar
-% \end{length}^^A \marginnotevskip
+% \end{length}^^A \tud@dim@marginnotevskip
 % \end{macro}^^A \@doxcreatedescribes
 % \begin{macro}{\index@type}
 % \changes{v2.05g}{2016/11/10}{neu}^^A
@@ -1410,7 +1410,7 @@
           \dimexpr-\fboxsep-\fboxrule\relax%
         ]%
       }%
-      \fbox{\parbox{\dimexpr\textwidth-2\fboxsep\relax}{#1\strut}}%
+      \fbox{\parbox{\dimexpr\textwidth-\fboxsep*2\relax}{#1\strut}}%
       \endgraf%
 %    \end{macrocode}
 % Werden mit \cs{DocInclude} mehrere Dateien in das Dokument eingefügt, so 
@@ -1512,11 +1512,11 @@
 % Hiermit wird die Berechnung des Satzspiegels ausgeführt.
 %    \begin{macrocode}
 \newcommand*\tud@setarea{%
-  \setlength\topmargin{-1in}%
-  \setlength\headheight{0pt}%
-  \setlength\headsep{3em}%
-  \setlength\footskip{\headsep}%
-  \setlength\textheight{\dimexpr\paperheight-2.5\headsep-1.5\footskip\relax}%
+  \tud@setdim\topmargin{-1in}%
+  \tud@setdim\headheight{0pt}%
+  \tud@setdim\headsep{3em}%
+  \tud@setdim\footskip{\headsep}%
+  \tud@setdim\textheight{\paperheight-\headsep*5/2-\footskip*3/2}%
   \@colht=\textheight%
   \@colroom=\textheight%
   \vsize=\textheight%
@@ -1524,23 +1524,20 @@
   \begingroup%
     \MacroFont\selectfont%
     \settowidth\@tempdima{\space}%
-    \setlength\@tempdima{80\@tempdima}%
-%^^A    \addtolength\@tempdima{\dimexpr\MacroIndent+.1\p@\relax}%
-    \addtolength\@tempdima{\MacroIndent}%
+    \tud@setdim\@tempdima{\@tempdima*80}%
+    \tud@addtodim\@tempdima{\MacroIndent}%
     \edef\@tempa{%
       \endgroup%
-      \noexpand\setlength\noexpand\textwidth{\the\@tempdima}%
+      \noexpand\tud@setdim\noexpand\textwidth{\the\@tempdima}%
     }%
   \@tempa%
   \columnwidth=\textwidth%
   \hsize=\columnwidth%
   \linewidth=\hsize%
-  \setlength\columnsep{1em}%
-  \setlength\marginparsep{1em}%
-  \setlength\marginparwidth{%
-    \dimexpr\paperwidth-\textwidth-2\marginparsep\relax%
-  }%
-  \setlength\oddsidemargin{\dimexpr\marginparwidth+\marginparsep-1in\relax}%
+  \tud@setdim\columnsep{1em}%
+  \tud@setdim\marginparsep{1em}%
+  \tud@setdim\marginparwidth{\paperwidth-\textwidth-\marginparsep*2}%
+  \tud@setdim\oddsidemargin{\marginparwidth+\marginparsep-1in}%
 }
 \AtBeginDocument{\tud@setarea}
 %    \end{macrocode}

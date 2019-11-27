@@ -1,4 +1,4 @@
-% \CheckSum{2019}
+% \CheckSum{2057}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -145,6 +145,15 @@
 % \pkg{typearea} genutzt wird. Dafür wird das Logo im Kopf so wie im \CD
 % vorgesehen mit dem Logo der \TnUD in den Rand und dem Schriftzug bündig zum
 % Textblock gesetzt. 
+% 
+% \Attention{%
+%   Um Längenangaben aus Makros sicher auf Dimensionsausdrücke zu reduzieren,
+%   müssen diese in \cs{dimexpr}\cs{glueexpr}\val{...}\cs{relax}\cs{relax}
+%   eingehüllt werden. Das Paket \pkg{scrlayer} verwendet allerdings lediglich 
+%  \cs{dimexpr}, weshalb hier noch zusätzlich \cs{glueexpr} genutzt wird. Siehe 
+%  hierzu auch \GitHubRepo(latex3/latex2e)<227>.
+% }
+%
 % \begin{layer}{tudheadings.head.content}
 % \changes{v2.04}{2015/05/31}{neu}^^A
 % Dies sind das links aus dem Satzspiegel verschobene Logo der \TnUD und das 
@@ -153,10 +162,10 @@
 %    \begin{macrocode}
   \DeclareNewLayer[%
     background,headsep,%
-    addhoffset=\dimexpr\tud@len@logox-\tud@len@widemargin\relax,%
-    addwidth=\dimexpr-\tud@len@logox+\tud@len@widemargin\relax,%
-    voffset=\tud@len@logoy,%
-    addvoffset=\tud@len@layoutvoffset,%
+    addhoffset=\glueexpr\tud@dim@logox-\tud@dim@widemargin\relax,%
+    addwidth=\glueexpr-\tud@dim@logox+\tud@dim@widemargin\relax,%
+    voffset=\glueexpr\tud@dim@logoy\relax,%
+    addvoffset=\glueexpr\tud@dim@layoutvoffset\relax,%
     contents={%
 %    \end{macrocode}
 % Vor der Ausgabe der Logoboxen werden diese im Bedarfsfall neu gesetzt.
@@ -178,10 +187,10 @@
 %    \begin{macrocode}
   \DeclareNewLayer[%
     background,%
-    width=\dimexpr\tud@len@layoutwidth+\tud@bleedmargin@dim*2\relax,%
-    addhoffset=\dimexpr\tud@len@layouthoffset-\tud@bleedmargin@dim\relax,%
-    height=\dimexpr\tud@len@topmargin+\tud@bleedmargin@dim\relax,%
-    addvoffset=\dimexpr\tud@len@layoutvoffset-\tud@bleedmargin@dim\relax,%
+    width=\glueexpr\tud@dim@layoutwidth+(\tud@bleedmargin@dim)*2\relax,%
+    addhoffset=\glueexpr\tud@dim@layouthoffset-\tud@bleedmargin@dim\relax,%
+    height=\glueexpr\tud@dim@topmargin+\tud@bleedmargin@dim\relax,%
+    addvoffset=\glueexpr\tud@dim@layoutvoffset-\tud@bleedmargin@dim\relax,%
     contents={%
       \ifnum\tud@head@bar@num>\tw@\relax% cdhead=color
         \color{HKS41}%
@@ -191,16 +200,16 @@
   ]{tudheadings.head.back}%
   \DeclareNewLayer[%
     background,%
-    width=\dimexpr\tud@len@layoutwidth+\tud@bleedmargin@dim*2\relax,%
-    addhoffset=\dimexpr\tud@len@layouthoffset-\tud@bleedmargin@dim\relax,%
-    height=\tud@len@barheight,%
-    voffset=\tud@len@topmargin,%
-    addvoffset=\tud@len@layoutvoffset,%
+    width=\glueexpr\tud@dim@layoutwidth+(\tud@bleedmargin@dim)*2\relax,%
+    addhoffset=\glueexpr\tud@dim@layouthoffset-\tud@bleedmargin@dim\relax,%
+    height=\glueexpr\tud@dim@barheight\relax,%
+    voffset=\glueexpr\tud@dim@topmargin\relax,%
+    addvoffset=\glueexpr\tud@dim@layoutvoffset\relax,%
     contents={%
       \ifnum\tud@head@bar@num>\@ne\relax% cdhead=barcolor/color
         \color{HKS41!60}%
-        \setlength\@tempdima{\dimexpr\ht\strutbox-\tud@len@barheight\relax}%
-        \ifdim\@tempdima<\z@\relax\setlength\@tempdima{\z@}\fi%
+        \tud@setdim\@tempdima{\ht\strutbox-\tud@dim@barheight}%
+        \ifdim\@tempdima<\z@\relax\tud@setdim\@tempdima{\z@}\fi%
         \raisebox{\@tempdima}{\rule{\layerwidth}{\layerheight}}%
       \fi%
     },%
@@ -214,8 +223,8 @@
 %    \begin{macrocode}
   \DeclareNewLayer[%
     background,headsep,%
-    voffset=\dimexpr\tud@len@topmargin+\tud@len@line\relax,%
-    addvoffset=\tud@len@layoutvoffset,%
+    voffset=\glueexpr\tud@dim@topmargin+\tud@dim@line\relax,%
+    addvoffset=\glueexpr\tud@dim@layoutvoffset\relax,%
     contents={%
       \tud@head@font@set%
       \tud@head@text@set%
@@ -240,8 +249,8 @@
 %    \begin{macrocode}
   \DeclareNewLayer[%
     background,headsep,%
-    voffset=\dimexpr\tud@len@topmargin-.5\tud@len@line\relax,%
-    addvoffset=\tud@len@layoutvoffset,%
+    voffset=\glueexpr\tud@dim@topmargin-\tud@dim@line/2\relax,%
+    addvoffset=\glueexpr\tud@dim@layoutvoffset\relax,%
     contents={%
       \ifnum\tud@head@bar@num<\tw@\relax% cdhead=nocolor/litecolor
         \if@tud@head@widebar\else\tud@head@rule{\layerwidth}\fi%
@@ -250,9 +259,9 @@
   ]{tudheadings.head.upline}%
   \DeclareNewLayer[%
     background,headsep,%
-    voffset=\dimexpr\tud@len@topmargin+\tud@len@barheight%
-      -.5\tud@len@line\relax,%
-    addvoffset=\tud@len@layoutvoffset,%
+    voffset=\glueexpr\tud@dim@topmargin+\tud@dim@barheight%
+      -\tud@dim@line/2\relax,%
+    addvoffset=\glueexpr\tud@dim@layoutvoffset\relax,%
     contents={%
       \ifnum\tud@head@bar@num<\tw@\relax% cdhead=nocolor/litecolor
         \if@tud@head@widebar\else\tud@head@rule{\layerwidth}\fi%
@@ -261,10 +270,10 @@
   ]{tudheadings.head.lowline}%
   \DeclareNewLayer[%
     background,%
-    width=\dimexpr\tud@len@layoutwidth+\tud@bleedmargin@dim*2\relax,%
-    addhoffset=\dimexpr\tud@len@layouthoffset-\tud@bleedmargin@dim\relax,%
-    voffset=\dimexpr\tud@len@topmargin-.5\tud@len@line\relax,%
-    addvoffset=\tud@len@layoutvoffset,%
+    width=\glueexpr\tud@dim@layoutwidth+(\tud@bleedmargin@dim)*2\relax,%
+    addhoffset=\glueexpr\tud@dim@layouthoffset-\tud@bleedmargin@dim\relax,%
+    voffset=\glueexpr\tud@dim@topmargin-\tud@dim@line/2\relax,%
+    addvoffset=\glueexpr\tud@dim@layoutvoffset\relax,%
     contents={%
       \ifnum\tud@head@bar@num<\tw@\relax% cdhead=nocolor/litecolor
         \if@tud@head@widebar\tud@head@rule{\layerwidth}\fi%
@@ -273,11 +282,11 @@
   ]{tudheadings.head.uplinewide}%
   \DeclareNewLayer[%
     background,%
-    width=\dimexpr\tud@len@layoutwidth+\tud@bleedmargin@dim*2\relax,%
-    addhoffset=\dimexpr\tud@len@layouthoffset-\tud@bleedmargin@dim\relax,%
-    voffset=\dimexpr\tud@len@topmargin+\tud@len@barheight%
-      -.5\tud@len@line\relax,%
-    addvoffset=\tud@len@layoutvoffset,%
+    width=\glueexpr\tud@dim@layoutwidth+(\tud@bleedmargin@dim)*2\relax,%
+    addhoffset=\glueexpr\tud@dim@layouthoffset-\tud@bleedmargin@dim\relax,%
+    voffset=\glueexpr\tud@dim@topmargin+\tud@dim@barheight%
+      -\tud@dim@line/2\relax,%
+    addvoffset=\glueexpr\tud@dim@layoutvoffset\relax,%
     contents={%
       \ifnum\tud@head@bar@num<\tw@\relax% cdhead=nocolor/litecolor
         \if@tud@head@widebar\tud@head@rule{\layerwidth}\fi%
@@ -295,8 +304,8 @@
 %    \begin{macrocode}
   \DeclareNewLayer[%
     foreground,headsep,%
-    addvoffset=.5\tud@len@headsep,%
-    height=\baselineskip,%
+    addvoffset=\glueexpr\tud@dim@headsep/2\relax,%
+    height=\glueexpr1\baselineskip\relax,%
     contents={\if@tud@head@date\hfill\tud@date@print\fi},%
   ]{tudheadings.head.date}%
 %    \end{macrocode}
@@ -319,11 +328,11 @@
 %    \begin{macrocode}
   \DeclareNewLayer[%
     background,foot,%
-    width=\dimexpr\tud@len@layoutwidth+\tud@bleedmargin@dim*2\relax,%
-    hoffset=\dimexpr\tud@len@layouthoffset-\tud@bleedmargin@dim\relax,%
-    height=\dimexpr\tud@len@layoutheight-\layeryoffset%
-      +\tud@len@layoutvoffset+\tud@bleedmargin@dim\relax,%
-    addvoffset=-\dp\strutbox,%
+    width=\glueexpr\tud@dim@layoutwidth+(\tud@bleedmargin@dim)*2\relax,%
+    hoffset=\glueexpr\tud@dim@layouthoffset-\tud@bleedmargin@dim\relax,%
+    height=\glueexpr\tud@dim@layoutheight-\layeryoffset%
+      +\tud@dim@layoutvoffset+\tud@bleedmargin@dim\relax,%
+    addvoffset=\glueexpr-\dp\strutbox\relax,%
     contents={%
       \if@tud@foot@colored%
         \let\@tempc\relax%
@@ -352,7 +361,7 @@
 %    \begin{macrocode}
   \tud@if@v@lower{2.03}{%
     \ModifyLayer[%
-      addvoffset=-\tud@len@ddcdiff+\ht\strutbox,%
+      addvoffset=\glueexpr-\tud@dim@ddcdiff+\ht\strutbox\relax,%
       contents={%
         \if@tud@foot@colored%
           \let\@tempc\relax%
@@ -372,7 +381,7 @@
               \vbox to \layerheight{%
                 \vfil\@tempc%
                 \rule{\layerwidth}{%
-                  \dimexpr\layerheight-\tud@len@ddcdiff+\ht\strutbox\relax%
+                  \dimexpr\layerheight-\tud@dim@ddcdiff+\ht\strutbox\relax%
                 }%
               }%
             \else% \tud@ddc@foot@num!=false
@@ -391,8 +400,8 @@
 %    \begin{macrocode}
   \DeclareNewLayer[%
     background,foot,%
-    height=\dimexpr\tud@len@layoutheight-\layeryoffset%
-      +\tud@len@layoutvoffset\relax,%
+    height=\glueexpr\tud@dim@layoutheight-\layeryoffset%
+      +\tud@dim@layoutvoffset\relax,%
     contents={%
 %    \end{macrocode}
 % Falls die Höhe der Logos im Fuß nicht durch den Anwender festgelegt wurden, 
@@ -400,8 +409,8 @@
 % Layers nicht vollständig genutzt, um bei einem farbigen Fußbereich einen 
 % gewissen Abstand vom Inhalt zur Kante zu erhalten.
 %    \begin{macrocode}
-      \TUD@deprecated@skip{footlogoheight}%
-      \setlength\@tempdima{\dimexpr\layerheight-\dp\strutbox\relax}%
+      \TUD@deprecated@length{\footlogoheight}%
+      \tud@setdim\@tempdima{\layerheight-\dp\strutbox}%
 %    \end{macrocode}
 % Im Bedarfsfall werden die Boxen vor der Ausgabe durch die einzelnen 
 % \cs{\dots{}@use}-Befehle neu gesetzt. Danach erfolgt die Ausgabe, wobei die 
@@ -418,14 +427,14 @@
 %    \begin{macrocode}
   \tud@if@v@lower{2.03}{%
     \ModifyLayer[%
-      addvoffset=-\tud@len@ddcdiff+\ht\strutbox,%
+      addvoffset=\glueexpr-\tud@dim@ddcdiff+\ht\strutbox\relax,%
       contents={%
-        \TUD@deprecated@skip{footlogoheight}%
-        \setlength\@tempdima{\dimexpr\layerheight-\dp\strutbox\relax}%
+        \TUD@deprecated@length{\footlogoheight}%
+        \tud@setdim\@tempdima{\layerheight-\dp\strutbox}%
         \tud@ddc@check%
         \ifcase\@tempb\relax% \tud@ddc@foot@num=false
-          \addtolength\@tempdima{\dimexpr\ht\strutbox-\tud@len@ddcdiff\relax}%
-          \vskip\dimexpr\tud@len@ddcdiff-\ht\strutbox-\baselineskip\relax%
+          \tud@addtodim\@tempdima{\ht\strutbox-\tud@dim@ddcdiff}%
+          \vskip\dimexpr\tud@dim@ddcdiff-\ht\strutbox-1\baselineskip\relax%
         \fi%
         \tud@footlogo@cmd@use{\@tempdima}{\layerwidth}%
         \tud@footlogo@ddc@use{\@tempdima}{\layerwidth}%
@@ -558,10 +567,10 @@
   \DeclareNewLayer[%
     background,%
     area=%
-      {\dimexpr\tud@len@layouthoffset-\tud@bleedmargin@dim\relax}%
-      {\dimexpr\tud@len@layoutvoffset-\tud@bleedmargin@dim\relax}%
-      {\dimexpr\tud@len@layoutwidth+\tud@bleedmargin@dim*2\relax}%
-      {\dimexpr\tud@len@layoutheight+\tud@bleedmargin@dim*2\relax}%
+      {\glueexpr\tud@dim@layouthoffset-\tud@bleedmargin@dim\relax}%
+      {\glueexpr\tud@dim@layoutvoffset-\tud@bleedmargin@dim\relax}%
+      {\glueexpr\tud@dim@layoutwidth+(\tud@bleedmargin@dim)*2\relax}%
+      {\glueexpr\tud@dim@layoutheight+(\tud@bleedmargin@dim)*2\relax}%
     ,%
     contents={%
       \ifdefvoid{\tud@pagecolor}{}{%
@@ -836,8 +845,8 @@
 % des Querbalkens gesetzt, die Schriftfarbe des Fußes wird global geändert, 
 % damit Seitenzahl und Kolumnentitel gegebenenfalls angepasst werden.
 %    \begin{macrocode}
-  \let\tud@len@line\tud@len@thinline%
-  \ifstr{\tud@head@fontcolor}{white}{\let\tud@len@line\tud@len@heavyline}{}%
+  \let\tud@dim@line\tud@dim@thinline%
+  \ifstr{\tud@head@fontcolor}{white}{\let\tud@dim@line\tud@dim@heavyline}{}%
   \global\let\tud@foot@fontcolor\tud@foot@fontcolor%
 }
 %    \end{macrocode}
@@ -971,7 +980,7 @@
 % Die Farbe des Textes der ersten Zeile entspricht immer der des Kopfes.
 %    \begin{macrocode}
   \def\@tempb{\tud@color{\tud@head@fontcolor}}%
-  \def\@tempc{\depth+\tud@len@heavyline}%
+  \def\@tempc{\depth+\tud@dim@heavyline}%
 %    \end{macrocode}
 % Das Makro \cs{@tempa} wird zur Ababreitung der Liste \cs{tud@head@text@list} 
 % definiert.
@@ -1012,7 +1021,7 @@
 % lassen, wird dies hier temporär unterdrückt.
 %    \begin{macrocode}
     \let\@raggedtwoe@everyselectfont\relax%
-    \setlength\spaceskip{\z@}%
+    \tud@setdim\spaceskip{\z@}%
     \selectfont%
     \offinterlineskip%
     \forlistloop\@tempa{\tud@head@text@list}%
@@ -1028,9 +1037,11 @@
 % Befehl zur Ausgabe der ersten und evtl. zweiten Textzeile im TUD-Kopf
 %    \begin{macrocode}
 \newcommand*\tud@head@text@write[2][\z@]{%
-  \raisebox{\dimexpr(\tud@len@barheight+2\tud@len@line-\totalheight)/2\relax}[%
-    \dimexpr\tud@len@barheight-\depth\relax%
-  ][\dimexpr#1\relax]{#2\vphantom{gjpqy\"A\"O\"U}}%
+  \raisebox{%
+    \dimexpr(\tud@dim@barheight+\tud@dim@line*2-\totalheight)/2\relax%
+  }[%
+    \dimexpr\tud@dim@barheight-\depth\relax%
+  ][\dimexpr\glueexpr#1\relax\relax]{#2\vphantom{gjpqy\"A\"O\"U}}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@head@text@write
@@ -1039,11 +1050,11 @@
 % Der Querbalken des Kopfes läuft je nach Parameterwahl \cs{tud@head@bar@num}
 % entweder nur über den Textbereich oder aber über die gesamte Seitenbreite.
 % Der Befehl erzeugt eine horizontale Linie mit der übergebenen Breite und 
-% über \cs{tud@len@line} definierter Dicke.
+% über \cs{tud@dim@line} definierter Dicke.
 %    \begin{macrocode}
 \newcommand*\tud@head@rule[1]{%
   \tud@color{\tud@head@fontcolor}%
-  \rule[\ht\strutbox]{#1}{\tud@len@line}%
+  \rule[\ht\strutbox]{#1}{\tud@dim@line}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@head@rule
@@ -1088,7 +1099,7 @@
 \newcommand*\tud@vlayerbox[3]{%
   \begingroup%
     \setbox\z@\vbox{#2}%
-    \setlength\@tempdima{\dimexpr\ht\z@+\dp\z@-#1\relax}%
+    \tud@setdim\@tempdima{\ht\z@+\dp\z@-#1}%
     \ifdim\@tempdima>\z@\relax%
       \ClassWarning{\TUD@Class@Name}{%
         #3\MessageBreak%
@@ -1231,7 +1242,7 @@
 % \changes{v2.04}{2015/05/31}{neu}^^A
 % \begin{macro}{\if@tud@mainlogo@wrn}
 % \changes{v2.04}{2015/05/31}{neu}^^A
-% \begin{length}{\tud@len@mainlogoheight}
+% \begin{length}{\tud@dim@mainlogoheight}
 % \changes{v2.04}{2015/05/31}{neu}^^A
 % \begin{macro}{\tud@mainlogo@wrn}
 % \changes{v2.02}{2014/06/23}{Umbenennen von \cs{tud@head@logo@wrn}}^^A
@@ -1241,17 +1252,17 @@
 % Satzspiegels beim Ausführen der einzelnen Seitenstil-Layer. Dafür wird der
 % Schalter \cs{if@tud@mainlogo@set} im Hook \cs{tud@AfterChangingArea} gesetzt.
 %    \begin{macrocode}
-\newlength\tud@len@mainlogoheight
+\tud@newdim\tud@dim@mainlogoheight
 \newcommand*\tud@mainlogo@wrn[1]{}
 \newif\if@tud@mainlogo@set
 \newcommand*\tud@mainlogo@set{%
   \if@tud@mainlogo@set%
-    \def\@tempa{\includegraphics[keepaspectratio,width=\tud@len@logowidth]}%
+    \def\@tempa{\includegraphics[keepaspectratio,width=\tud@dim@logowidth]}%
     \tud@savelayerbox{main@black}{\@tempa{TUD-black}}%
     \tud@savelayerbox{main@HKS41}{\@tempa{TUD-blue}}%
     \tud@savelayerbox{main@white}{\@tempa{TUD-white}}%
-    \settoheight\tud@len@mainlogoheight{\tud@uselayerbox{main@black}}%
-    \global\tud@len@mainlogoheight=\tud@len@mainlogoheight%
+    \settoheight\tud@dim@mainlogoheight{\tud@uselayerbox{main@black}}%
+    \global\tud@dim@mainlogoheight=\tud@dim@mainlogoheight%
 %    \end{macrocode}
 % Es soll sichergestellt werden, dass das bei der Verwendung von \pkg{typearea}
 % über den Satzspiegel in den Seitenrand hinausragende TUD-Logo nicht außerhalb
@@ -1285,7 +1296,7 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@mainlogo@wrn
-% \end{length}^^A \tud@len@mainlogoheight
+% \end{length}^^A \tud@dim@mainlogoheight
 % \end{macro}^^A \if@tud@mainlogo@set
 % \end{macro}^^A \tud@mainlogo@set
 % \begin{macro}{\tud@mainlogo@use}
@@ -1295,7 +1306,7 @@
 %    \begin{macrocode}
 \newcommand*\tud@mainlogo@use{%
   \tud@mainlogo@wrn{%
-    \dimexpr\oddsidemargin+1in+\tud@len@logox-\tud@len@widemargin\relax%
+    \dimexpr\oddsidemargin+1in+\tud@dim@logox-\tud@dim@widemargin\relax%
   }%
   \tud@uselayerbox{main@\tud@head@logocolor}%
 }
@@ -1382,7 +1393,7 @@
 %    \begin{macrocode}
 \newcommand*\tud@headlogo@set{%
   \def\@tempa{%
-    \includegraphics[keepaspectratio,totalheight=\tud@len@mainlogoheight]%
+    \includegraphics[keepaspectratio,totalheight=\tud@dim@mainlogoheight]%
   }%
   \tud@savelayerbox{head@black}{\@tempa{DDC-24}}%
   \tud@savelayerbox{head@HKS41}{\@tempa{DDC-27}}%
@@ -1401,7 +1412,7 @@
     \def\@tempc##1##2{%
       \tud@savelayerbox{head@option}{%
         \includegraphics[%
-          keepaspectratio,totalheight=\tud@len@mainlogoheight,##2%
+          keepaspectratio,totalheight=\tud@dim@mainlogoheight,##2%
         ]{##1}%
       }%
     }%
@@ -1442,7 +1453,7 @@
 % werden diese in einer Box vertikal zentriert.
 %    \begin{macrocode}
 \newcommand*\tud@headlogo@use{%
-  \tud@vlayerbox{\tud@len@mainlogoheight}{%
+  \tud@vlayerbox{\tud@dim@mainlogoheight}{%
     \vss%
     \hbox{%
       \tud@ddc@check%
@@ -1554,7 +1565,7 @@
 % Außerdem kann mit der Option \opt{extrabottommargin} gesetzt werden.
 %    \begin{macrocode}
   \else%
-    \TUD@set@dimenkey{cdfoot}{\@tempa}{#1}%
+    \TUD@set@dimkey{cdfoot}{\@tempa}{#1}%
     \ifx\FamilyKeyState\FamilyKeyStateProcessed%
       \TUDoptions{extrabottommargin=#1}%
     \fi%
@@ -1636,9 +1647,9 @@
 \newcommand*\tud@footlogoheight@dim{}
 \let\tud@footlogoheight@dim\relax
 \TUD@key{footlogoheight}{%
-  \TUD@set@dimenkey{footlogoheight}{\tud@footlogoheight@dim}{#1}%
+  \TUD@set@dimkey{footlogoheight}{\tud@footlogoheight@dim}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \tud@positive@skipkey{\tud@footlogoheight@dim}%
+    \tud@length@setabsolute{\tud@footlogoheight@dim}%
     \global\@tud@footlogo@option@settrue%
   \fi%
 }
@@ -1652,9 +1663,9 @@
 \AtEndOfClass{%
   \ifdefvoid{\tud@footlogoheight@dim}{%
     \tud@if@v@lower{2.03}{%
-      \def\tud@footlogoheight@dim{.6\tud@len@topmargin}%
+      \def\tud@footlogoheight@dim{\dimexpr\tud@dim@topmargin*3/5\relax}%
     }{%
-      \def\tud@footlogoheight@dim{\tud@len@mainlogoheight}%
+      \def\tud@footlogoheight@dim{\tud@dim@mainlogoheight}%
     }%
   }{}%
 }
@@ -1701,7 +1712,9 @@
 %    \begin{macrocode}
 \newcommand*\tud@footlogo@ddc@set[2]{%
   \tud@savelayerbox{foot@#1}{%
-    \includegraphics[keepaspectratio,totalheight=\tud@footlogoheight@dim]{#2}%
+    \includegraphics[%
+      keepaspectratio,totalheight=\dimexpr\tud@footlogoheight@dim\relax%
+    ]{#2}%
   }%
 }
 %    \end{macrocode}
@@ -1876,7 +1889,7 @@
 % In jedem Fall werden die Grundeinstellungen als erstes ausgeführt.
 %    \begin{macrocode}
     \preto\tud@footlogo@fileoptions{%
-      keepaspectratio,totalheight=\tud@footlogoheight@dim,%
+      keepaspectratio,totalheight=\dimexpr\tud@footlogoheight@dim\relax,%
     }%
 %    \end{macrocode}
 % Wurden tatsächlich inidviduelle Parameter übergeben, so werden diese als 
@@ -1977,8 +1990,8 @@
     \tud@footcontent@do%
   }{%
     \renewcommand*\tud@footcontent@font@size{%
-      \setlength\@tempdimb{\tud@head@fontsize\p@}%
-      \fontsize{\@tempdimb}{1.25\@tempdimb}%
+      \tud@setdim\@tempdimb{\tud@head@fontsize\p@}%
+      \fontsize{\@tempdimb}{\dimexpr\@tempdimb*5/4\relax}%
     }%
     \tud@footcontent@do%
   }%
@@ -2176,10 +2189,10 @@
   \if@tempswa%
     \tud@ddc@check%
     \ifcase\@tempb\relax%
-      \setlength\@tempdimc{\z@}%
+      \tud@setdim\@tempdimc{\z@}%
     \else%
       \settowidth\@tempdimc{\tud@uselayerbox{foot@black}}%
-      \addtolength\@tempdimc{\columnsep}%
+      \tud@addtodim\@tempdimc{\columnsep}%
     \fi%
 %    \end{macrocode}
 % Äquivalent zu den Logos wird auch der durch den Anwender frei definierbare 
@@ -2191,7 +2204,7 @@
       \vss%
       \hbox to #2{%
         \tud@footcontent@font@use{%
-          \setlength\@tempdima{#2}%
+          \tud@setdim\@tempdima{#2}%
           \tud@footcontent@@use{\@tempdima}%
           \hss%
         }%
@@ -2221,7 +2234,7 @@
 %    \begin{macrocode}
   \ifx\tud@footcontent@right\@nnil%
     \vtop{%
-      \hsize=\dimexpr#1-\@tempdimc\relax%
+      \hsize=\dimexpr\glueexpr#1-\@tempdimc\relax\relax%
       \strut\ignorespaces\tud@footcontent@left\strut%
     }%
 %    \end{macrocode}
@@ -2230,12 +2243,12 @@
 %    \begin{macrocode}
   \else%
     \vtop{%
-      \hsize=\dimexpr(#1-\columnsep)/2\relax%
+      \hsize=\dimexpr\glueexpr(#1-\columnsep)/2\relax\relax%
       \strut\ignorespaces\tud@footcontent@left\strut%
     }%
     \hspace{\columnsep}%
     \vtop{%
-      \hsize=\dimexpr(#1-\columnsep)/2-\@tempdimc\relax%
+      \hsize=\dimexpr\glueexpr(#1-\columnsep)/2-\@tempdimc\relax\relax%
       \strut\ignorespaces\tud@footcontent@right\strut%
     }%
   \fi%

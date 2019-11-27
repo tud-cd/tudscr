@@ -1,4 +1,4 @@
-% \CheckSum{3142}
+% \CheckSum{3149}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -821,7 +821,7 @@
 % dass es sich bei diesem um die gewünschte Schriftgröße handelt.
 %    \begin{macrocode}
   \else%
-    \TUD@set@dimenkey{cdfont}{\@tempa}{#1}%
+    \TUD@set@dimkey{cdfont}{\@tempa}{#1}%
     \ifx\FamilyKeyState\FamilyKeyStateProcessed%
       \TUDoptions{fontsize=#1}%
       \tud@cdfont@activate%
@@ -987,7 +987,7 @@
 \newif\if@tud@x@scr@fontsize@set
 %</class>
 \TUD@key{fontsize}{%
-  \TUD@set@dimenkey{fontsize}{\@tempa}{#1}%
+  \TUD@set@dimkey{fontsize}{\@tempa}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifdim\@tempa>\z@\relax%
 %    \end{macrocode}
@@ -1055,7 +1055,7 @@
       The key `fontsize=#1' should only be\MessageBreak%
       used as class option%
     }%
-    \TUD@SpecialOptionAtDocument{tud@font@skip@set}%
+    \TUD@SpecialOptionAtDocument{tud@relspacing@set}%
     \FamilyKeyStateProcessed%
   }%
 }
@@ -1070,7 +1070,7 @@
 % Die Option \opt{relspacing} setzt einige Abstände und Längen in Abhängigkeit 
 % der aktuellen Grundschriftgröße, wenn sie aktiviert wurde. Die verwendete 
 % Grundschriftgröße kann mit der \KOMAScript-Option \opt{fontsize} eingestellt
-% werden. Die Definiton der Längen wird durch das Makro \cs{tud@font@skip@set} 
+% werden. Die Definiton der Längen wird durch das Makro \cs{tud@relspacing@set} 
 % vorgenommen.
 %    \begin{macrocode}
 \newif\if@tud@relspacing
@@ -1086,7 +1086,7 @@
     \or% true
       \@tud@relspacingtrue%
     \fi%
-    \TUD@SpecialOptionAtDocument{tud@font@skip@set}%
+    \TUD@SpecialOptionAtDocument{tud@relspacing@set}%
   \fi%
 }
 %    \end{macrocode}
@@ -1291,7 +1291,7 @@
 % definiert. Danach wird gewählte Standardschrift aktiviert und für die Klassen 
 % das Layout erneuert.
 %    \begin{macrocode}
-  \tud@font@skip@set%
+  \tud@relspacing@set%
   \normalfont\selectfont%
 %<*class>
   \tud@cd@process%
@@ -1408,9 +1408,9 @@
 % \end{macro}^^A \tud@cdfont@md
 % \end{macro}^^A \tud@cdfont@@set
 % \end{macro}^^A \tud@cdfont@set
-% \begin{macro}{\tud@font@skip@set}
+% \begin{macro}{\tud@relspacing@set}
 % \changes{v2.04}{2015/02/17}{neu}^^A
-% \begin{macro}{\tud@font@skip@@set}
+% \begin{macro}{\tud@relspacing@@set}
 % \changes{v2.04}{2015/03/27}{neu}^^A
 % \changes{v2.06f}{2019/09/10}{\cs{abovedisplayskip} als Referenz}^^A
 % \begin{macro}{\smallskipamount}
@@ -1428,42 +1428,42 @@
 % Abstände angepasst, die bei den \KOMAScript-Klassen nicht abhängig von dieser
 % sind.
 %    \begin{macrocode}
-\newcommand*\tud@font@skip@set{%
+\newcommand*\tud@relspacing@set{%
 %    \end{macrocode}
 % Es werden die Standardeinstellungen abhängig von \opt{cdfont} entweder 
 % wiederhergestellt oder gesichert und neu definiert.
 %    \begin{macrocode}
   \if@tud@relspacing%
-    \tud@skip@store{smallskipamount}%
-    \tud@skip@store{medskipamount}%
-    \tud@skip@store{bigskipamount}%
-    \tud@skip@store{abovecaptionskip}%
-    \tud@skip@store{belowcaptionskip}%
-    \tud@skip@store{columnsep}%
-    \tud@font@skip@@set%
+    \tud@cslength@store{smallskipamount}%
+    \tud@cslength@store{medskipamount}%
+    \tud@cslength@store{bigskipamount}%
+    \tud@cslength@store{abovecaptionskip}%
+    \tud@cslength@store{belowcaptionskip}%
+    \tud@cslength@store{columnsep}%
+    \tud@relspacing@@set%
   \else%
-    \tud@skip@restore{smallskipamount}%
-    \tud@skip@restore{medskipamount}%
-    \tud@skip@restore{bigskipamount}%
-    \tud@skip@restore{abovecaptionskip}%
-    \tud@skip@restore{belowcaptionskip}%
-    \tud@skip@restore{columnsep}%
+    \tud@cslength@restore{smallskipamount}%
+    \tud@cslength@restore{medskipamount}%
+    \tud@cslength@restore{bigskipamount}%
+    \tud@cslength@restore{abovecaptionskip}%
+    \tud@cslength@restore{belowcaptionskip}%
+    \tud@cslength@restore{columnsep}%
   \fi%
 }
 %    \end{macrocode}
 % Hiermit erfolgt das eigentliche Setzen der Abstände.
 %    \begin{macrocode}
-\newcommand*\tud@font@skip@@set{%
+\newcommand*\tud@relspacing@@set{%
   \tud@if@v@lower{2.06}{%
     \bigskipamount=\partopsep%
     \multiply\bigskipamount by 4%
   }{%
     \begingroup%
-      \setlength{\@tempdima}{\abovedisplayskip}%
-      \setlength{\@tempdimb}{\dimexpr\@tempdima/3\relax}%
+      \tud@setdim\@tempdima{\dimexpr\abovedisplayskip\relax}%
+      \tud@setdim\@tempdimb{\@tempdima/3}%
       \edef\tud@res@a{%
         \endgroup%
-        \noexpand\setlength{\noexpand\bigskipamount}{%
+        \noexpand\tud@setglue\noexpand\bigskipamount{%
           \the\@tempdima\@plus\the\@tempdimb\@minus\the\@tempdimb%
         }%
       }%
@@ -1473,9 +1473,13 @@
   \divide\medskipamount by 2%
   \smallskipamount=\bigskipamount%
   \divide\smallskipamount by 4%
-  \tud@skip@set{abovecaptionskip}{\dimexpr\bigskipamount*5/6\relax}%
-  \tud@skip@set{belowcaptionskip}{\z@}%
-  \tud@skip@set{columnsep}{1.1\baselineskip}%
+  \tud@if@lengthregister{\abovecaptionskip}{%
+    \tud@setdim\abovecaptionskip{\dimexpr\bigskipamount\relax*5/6}%
+  }{}%
+  \tud@if@lengthregister{\belowcaptionskip}{%
+    \tud@setdim\belowcaptionskip{\z@}%
+  }{}%
+  \tud@setdim\columnsep{1\baselineskip*11/10}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \columnsep
@@ -1484,8 +1488,8 @@
 % \end{macro}^^A \bigskipamount
 % \end{macro}^^A \medskipamount
 % \end{macro}^^A \smallskipamount
-% \end{macro}^^A \tud@font@skip@@set
-% \end{macro}^^A \tud@font@skip@set
+% \end{macro}^^A \tud@relspacing@@set
+% \end{macro}^^A \tud@relspacing@set
 % \begin{macro}{\tud@cdfont@init}
 % \changes{v2.04}{2015/03/10}{neu}^^A
 % \begin{macro}{\cdfontln}

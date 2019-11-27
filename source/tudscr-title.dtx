@@ -1,4 +1,4 @@
-% \CheckSum{1379}
+% \CheckSum{1389}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -200,7 +200,7 @@
 %<*book|report|article>
 \newkomafont{thesis}{%
   \usekomafont{title}%
-  \tud@thesis@fontsize%
+  \tud@subtitle@fontsizecmd%
 }
 %</book|report|article>
 \newkomafont{titlepage}{%
@@ -487,7 +487,7 @@
 % Höhe steht wie die Überschriften auf Teil- und Kapitelseiten.
 %    \begin{macrocode}
     \tud@cd@headstartvskip%
-    \TUD@deprecated@skip{pageheadingsvskip}%
+    \TUD@deprecated@length{\pageheadingsvskip}%
     \vspace*{\tud@pageheadingsvskip@dim}%
     \tud@cd@vphantom%
     \setparsizes{\z@}{\z@}{\z@\@plus1fil}\par@updaterelative%
@@ -514,7 +514,7 @@
         {\usekomafont{partnumber}{\nobreak\tud@sec@strut}}%
         {\usekomafont{subtitle}{\tud@title@format{\@subtitle}\par}}%
       \fi%
-      \vskip 2\bigskipamount%
+      \vskip\glueexpr\bigskipamount*2\relax%
 %    \end{macrocode}
 % Ausgabe eines Autors oder mehrerer Autoren ggf. mit Zusatzinformationen.
 %    \begin{macrocode}
@@ -611,7 +611,7 @@
 %    \begin{macrocode}
         \if@tud@titlesignature%
           \let\tud@split@@author@do\tud@split@author@signature%
-          \vskip\tud@len@signatureskip\noindent%
+          \vskip\tud@glue@signaturevskip\noindent%
           \tud@ifin@and{\@@author}{}{\hfill}%
           \tud@multiple@split{@@author}%
         \fi%
@@ -803,7 +803,7 @@
   \global\@topnum=\z@%
   \tud@cd@headstartvskip%
 %<*book|report|article>
-  \TUD@deprecated@skip{headingsvskip}%
+  \TUD@deprecated@length{\headingsvskip}%
   \vspace*{\tud@headingsvskip@dim}%
   \tud@cd@vphantom%
 %</book|report|article>
@@ -841,7 +841,7 @@
 % Ausgabe eines Autors oder mehrerer Autoren ggf. mit Zusatzinformationen.
 %    \begin{macrocode}
 %<*book|report|article>
-    \vskip 2\bigskipamount%
+    \vskip\glueexpr\bigskipamount*2\relax%
     \let\tud@split@author@do\tud@split@author@title%
     \tud@multiple@split{@author}\par%
 %    \end{macrocode}
@@ -871,11 +871,13 @@
 %    \end{macrocode}
 % Am Ende wird noch etwas vertikaler Abstand eingefügt.
 %    \begin{macrocode}
-    \vskip 2\bigskipamount%
+    \vskip\glueexpr\bigskipamount*2\relax%
 %</book|report|article>
     \ifnum\col@number>\@ne\relax%
       \ifdefvoid{\multicolsep}{}{%
-        \ifisskip{\multicolsep}{\vspace{-\multicolsep}}{}%
+        \ifdeflength{\multicolsep}{\vspace{-\multicolsep}}{%
+          \ifdefdimen{\multicolsep}{\vspace{-\multicolsep}}{}%
+        }%
       }%
     \fi%
 %    \end{macrocode}
@@ -924,10 +926,10 @@
 % Der ermittelte Offset muss~-- warum auch immer~-- um \val{1pt} vergrößert
 % werden. Zusätzlich wird ein mittlerer Abstand zwischen Kopf und Titel gesetzt.
 %    \begin{macrocode}
-  \setlength\@tempdima{\dimexpr\ht\z@+\dp\z@\relax}%
+  \tud@setdim\@tempdima{\ht\z@+\dp\z@}%
   \ifdim\@tempdima>\z@\relax%
 %<*book|report|article>
-    \vskip\dimexpr-\@tempdima-\p@-\medskipamount\relax%
+    \vskip\glueexpr-\@tempdima-\p@-\medskipamount\relax%
 %</book|report|article>
     \usebox\z@\par\medskip%
   \fi%
@@ -1117,9 +1119,9 @@
 % Autors zentriert ausgegeben.
 %    \begin{macrocode}
   \vbox{%
-    \hsize=.3\textwidth%
+    \hsize=\dimexpr\textwidth*3/10\relax%
     \centering%
-    \rule{.3\textwidth}{.05pt}\newline%
+    \rule{\dimexpr\textwidth*3/10\relax}{.05pt}\newline%
     \ignorespaces#1\strut\unskip%
   }%
 %    \end{macrocode}
@@ -1197,7 +1199,7 @@
 % werden.
 %    \begin{macrocode}
     \global\setbox\tud@title@box\vbox{%
-      \vspace*{.9\baselineskip}#1\bigskip%
+      \vspace*{\dimexpr1\baselineskip*9/10\relax}#1\bigskip%
     }%
   \endgroup%
 %    \end{macrocode}
@@ -1205,11 +1207,11 @@
 % Vor der Version~v2.03 gab es für das \DDC-Logo einen abweichenden Satzspiegel 
 % der ggf. beachtet werden muss.
 %    \begin{macrocode}
-  \setlength\@tempdima{\textheight}%
+  \tud@setdim\@tempdima{\textheight}%
   \tud@if@v@lower{2.03}{%
     \tud@ddc@check%
     \ifcase\@tempb\relax\else% \tud@ddc@foot@num!=false
-      \setlength\@tempdima{\dimexpr\textheight-\tud@len@ddcdiff\relax}%
+      \tud@setdim\@tempdima{\textheight-\tud@dim@ddcdiff}%
       \@tempswatrue%
     \fi%
   }{}%
@@ -1223,7 +1225,7 @@
       \splitmaxdepth\maxdepth%
       \vsplit\tud@title@box to \@tempdima%
       \clearpage%
-      \setlength\@tempdima{\textheight}%
+      \tud@setdim\@tempdima{\textheight}%
       \tud@if@v@lower{2.03}{\@tempswafalse}{}%
     }%
 %    \end{macrocode}
@@ -1250,7 +1252,7 @@
         You are using a two-column title along with\MessageBreak%
         the DDC-logo. Unfortunately in this case, the\MessageBreak%
         type area has to be adjusted manually. Please\MessageBreak%
-        use `\string\enlargethispage{-\the\tud@len@ddcdiff}'\MessageBreak%
+        use `\string\enlargethispage{-\the\tud@dim@ddcdiff}'\MessageBreak%
         in both columns after the title%
       }%
     \fi%
@@ -1371,23 +1373,22 @@
 %    \begin{macrocode}
       \if@tud@coverpage%
         \def\coverpagetopmargin{%
-          \dimexpr\tud@len@topmargin+\tud@len@barheight%
-            +\tud@len@headsep\relax%
+          \dimexpr\tud@dim@topmargin+\tud@dim@barheight+\tud@dim@headsep\relax%
         }%
       \else%
         \tud@if@v@lower{2.03}{%
-          \def\coverpagetopmargin{.5\tud@len@both}%
+          \def\coverpagetopmargin{\dimexpr(\tud@dim@bothmargin)/2\relax}%
         }{%
-          \def\coverpagetopmargin{\tud@len@slimmargin}%
+          \def\coverpagetopmargin{\tud@dim@slimmargin}%
         }%
       \fi%
       \tud@if@v@lower{2.03}{%
-        \def\coverpagebottommargin{.5\tud@len@both}%
+        \def\coverpagebottommargin{\dimexpr(\tud@dim@bothmargin)/2\relax}%
       }{%
-        \def\coverpagebottommargin{\tud@len@widemargin}%
+        \def\coverpagebottommargin{\tud@dim@widemargin}%
       }%
-      \def\coverpageleftmargin{\tud@len@widemargin}%
-      \def\coverpagerightmargin{\tud@len@slimmargin}%
+      \def\coverpageleftmargin{\dimexpr\tud@dim@widemargin}%
+      \def\coverpagerightmargin{\dimexpr\tud@dim@slimmargin}%
     \fi%
     \if@tud@coverpage%
 %    \end{macrocode}
@@ -1409,7 +1410,7 @@
 %    \begin{macrocode}
       \begingroup%
         \tud@cover@setmargins%
-        \tud@len@areavskip=\z@%
+        \tud@dim@areavskip=\z@%
 %    \end{macrocode}
 % Die Ausgabe des Covers und ggf. das Wiederherstellen des Satzspiegels.
 %    \begin{macrocode}
@@ -1485,16 +1486,16 @@
 %    \begin{macrocode}
 \renewcommand*{\coverpagetopmargin}{%
   \if@tud@coverpage%
-    \dimexpr\tud@len@topmargin+\tud@len@barheight+\tud@len@headsep\relax%
+    \dimexpr\tud@dim@topmargin+\tud@dim@barheight+\tud@dim@headsep\relax%
   \else%
     \dimexpr\topmargin+1in\relax%
   \fi%
 }
 \renewcommand*{\coverpagebottommargin}{%
   \if@tud@coverpage%
-    \dimexpr\tud@len@widemargin\relax%
+    \tud@dim@widemargin%
   \else%
-    2\dimexpr\coverpagetopmargin\relax%
+    \dimexpr(\coverpagetopmargin)*2\relax%
   \fi%
 }
 %    \end{macrocode}
@@ -1518,26 +1519,22 @@
 % Standardmäßig ist \cs{coverbottommargin} abhängig von \cs{covertopmargin}, 
 % weshalb dieses Makro als erstes expandiert wird.
 %    \begin{macrocode}
-    \setlength\@tempdima{%
-      \dimexpr\coverpagebottommargin-\tud@len@layoutvoffset%
-      +\paperheight-\tud@len@layoutheight\relax%
+    \tud@setdim\@tempdima{%
+      \coverpagebottommargin-\tud@dim@layoutvoffset%
+        +\paperheight-\tud@dim@layoutheight%
     }%
     \edef\coverpagebottommargin{\the\@tempdima}%
-    \setlength\@tempdima{%
-      \dimexpr\coverpagetopmargin+\tud@len@layoutvoffset\relax%
-    }%
+    \tud@setdim\@tempdima{\coverpagetopmargin+\tud@dim@layoutvoffset}%
     \edef\coverpagetopmargin{\the\@tempdima}%
 %    \end{macrocode}
 % Selbiges gilt für \cs{coverrightmargin} und \cs{coverleftmargin}.
 %    \begin{macrocode}
-    \setlength\@tempdima{%
-      \dimexpr\coverpagerightmargin-\tud@len@layouthoffset%
-      +\paperwidth-\tud@len@layoutwidth\relax%
+    \tud@setdim\@tempdima{%
+      \coverpagerightmargin-\tud@dim@layouthoffset%
+        +\paperwidth-\tud@dim@layoutwidth%
     }%
     \edef\coverpagerightmargin{\the\@tempdima}%
-    \setlength\@tempdima{%
-      \dimexpr\coverpageleftmargin+\tud@len@layouthoffset\relax%
-    }%
+    \tud@setdim\@tempdima{\coverpageleftmargin+\tud@dim@layouthoffset}%
     \edef\coverpageleftmargin{\the\@tempdima}%
 %    \end{macrocode}
 % Abschließend werden die gewünschten Längen nach der lokalen Gruppe definiert.
@@ -1562,7 +1559,7 @@
     -\coverpagebottommargin\relax%
   \headheight=0pt%
   \headsep=0pt%
-  \footskip=\baselineskip%
+  \footskip=1\baselineskip%
   \@colht=\textheight%
   \@colroom=\textheight%
   \vsize=\textheight%

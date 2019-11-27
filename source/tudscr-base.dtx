@@ -1,4 +1,4 @@
-% \CheckSum{1400}
+% \CheckSum{1521}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -272,7 +272,7 @@
 %    \end{macrocode}
 % Das Paket \pkg{kvsetkeys} erweitert \pkg{keyval} um die Möglichkeit, das
 % Verhalten bei der Angabe eines nicht definierten Schlüssels festzulegen.
-% \ToDo{sollte eigentlich auch mit KOMA-Option \val{@else@} gehen}[v3.27]
+% \ToDo{sollte auch mit KOMA-Option \val{@else@} gehen, besser raus}[v3.27]
 %    \begin{macrocode}
 \RequirePackage{kvsetkeys}[2012/04/25]
 %    \end{macrocode}
@@ -338,6 +338,147 @@
 %    \end{macrocode}
 % \end{macro}^^A \eaddto@hook
 % \end{macro}^^A \tud@toks@
+%
+% \subsubsection{Saubere Definiton von Längen-Registern}
+%
+% \begin{macro}{\tud@newglue}
+% \changes{v2.06f}{2019/11/24}{neu}^^A
+% \begin{macro}{\tud@newdim}
+% \changes{v2.06f}{2019/11/24}{neu}^^A
+% \begin{macro}{\tud@setglue}
+% \changes{v2.06f}{2019/11/24}{neu}^^A
+% \begin{macro}{\tud@setdim}
+% \changes{v2.06f}{2019/11/24}{neu}^^A
+% \begin{macro}{\tud@addtoglue}
+% \changes{v2.06f}{2019/11/24}{neu}^^A
+% \begin{macro}{\tud@addtodim}
+% \changes{v2.06f}{2019/11/24}{neu}^^A
+% Der \LaTeXe"~Kernel stellt lediglich \cs{newlength} zur Verfügung, um bereits 
+% bestehende Makros nicht zu überschreiben. Soll jedoch ein \cs{dimen}-Register 
+% definiert werden, gibt es keinen entsprechenden Befehl. Auch die Zuweisung 
+% von Längenwerte kann mit \cs{setlength} nicht sauber erfolgen, da nicht 
+% geprüft wird, ob die Zuweisung an ein \cs{skip}"~ oder \cs{dimen}-Register 
+% erfolgt. Deshalb werden hier für diese Aufgabe interne Befehle definiert.
+% Siehe dazu auch \GitHubRepo(latex3/latex2e)<227>.
+%    \begin{macrocode}
+\newcommand*\tud@newglue[1]{\@ifdefinable#1{\newskip#1}}
+\newcommand*\tud@newdim[1]{\@ifdefinable#1{\newdimen#1}}
+\newrobustcmd*\tud@setglue[2]{%
+  \ifdefdimen{#1}{%
+    \PackageWarning{tudscrbase}{%
+      You tried to assign dimen \string#1\MessageBreak%
+      so \string\tud@setdim\space is used%
+    }%
+    \tud@setdim{#1}{#2}%
+  }{%
+    \setlength#1{\glueexpr#2\relax}%
+  }%
+}
+\newrobustcmd*\tud@setdim[2]{%
+  \begingroup%
+    \@tud@res@swafalse%
+    \setlength\@tempskipa{\glueexpr#2\relax}%
+    \ifdim\gluestretch\@tempskipa=\z@\relax\else%
+      \@tud@res@swatrue%
+    \fi%
+    \ifdim\glueshrink\glueexpr\@tempskipa\relax=\z@\relax\else%
+      \@tud@res@swatrue%
+    \fi%
+    \if@tud@res@swa%
+      \PackageWarning{tudscrbase}{%
+        You tried to use \string\tud@setdim\string#1\MessageBreak%
+        with glue \detokenize{#2} (\the\@tempskipa)\MessageBreak%
+        but only the base value is used%
+      }%
+    \fi%
+  \endgroup%
+  \setlength#1{\dimexpr\glueexpr#2\relax\relax}%
+}
+\newrobustcmd*\tud@addtoglue[2]{%
+  \tud@setglue#1{\glueexpr#1+#2\relax}%
+}
+\newrobustcmd*\tud@addtodim[2]{%
+  \tud@setdim#1{\glueexpr#1+#2\relax}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@addtodim
+% \end{macro}^^A \tud@addtoglue
+% \end{macro}^^A \tud@setdim
+% \end{macro}^^A \tud@setglue
+% \end{macro}^^A \tud@newdim
+% \end{macro}^^A \tud@newglue
+% \begin{macro}{\tud@if@lengthregister}
+% \changes{v2.06f}{2019/11/26}{neu}^^A
+% Prüft, ob der übergebene Befehl ein \cs{skip}"~ oder \cs{dimen}-Register ist.
+%    \begin{macrocode}
+\newcommand*\tud@if@lengthregister[1]{%
+  \begingroup%
+    \@tud@res@swafalse%
+    \ifdeflength{#1}{\@tud@res@swatrue}{}%
+    \ifdefdimen{#1}{\@tud@res@swatrue}{}%
+    \if@tud@res@swa%
+      \aftergroup\@firstoftwo%
+    \else%
+      \aftergroup\@secondoftwo%
+    \fi%
+  \endgroup%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@if@lengthregister
+% \begin{macro}{\tud@length@setabsolute}
+% \changes{v2.06f}{2019/11/24}{neu}^^A
+% Um Schlüssel für Längen definieren zu können, die zwingend positiv sind, kann 
+% dieses Makro genutzt werden. Übergeben werden muss entweder eine Länge oder 
+% ein Makro, welches einen Längenausdruck enthält.
+%    \begin{macrocode}
+\newcommand*\tud@length@setabsolute[1]{%
+  \tud@if@lengthregister{#1}{%
+    \ifdim#1<\z@%
+      \setlength#1{-\glueexpr#1\relax}%
+    \fi%
+  }{%
+    \protected@edef#1{%
+      \noexpand\ifdim\noexpand\glueexpr\expandonce#1\relax<\z@-\noexpand\fi%
+      \noexpand\glueexpr\expandonce#1\relax%
+    }%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@length@setabsolute
+% \begin{macro}{\tud@length@to@string}
+% \changes{v2.06f}{2019/11/23}{neu}^^A
+% Die direkte Verwendung von \cs{the} auf ein \cs{skip}-Register hat zur Folge, 
+% dass die Einheit \val{pt} mit die Charactercodes \val{12} zurückgegeben 
+% werden, was bei der Weiterverarbeitung unter Umständen Probleme bereitet. 
+% Dieses Makro löst das Problem.
+%    \begin{macrocode}
+\newcommand*\tud@length@to@string[2]{%
+  \begingroup%
+    \def\tud@res@c{\glueexpr#2\relax}%
+    \edef\tud@res@a{\strip@pt\dimexpr\tud@res@c\relax pt}%
+    \edef\tud@res@b{\strip@pt\dimexpr\gluestretch\tud@res@c\relax}%
+    \ifdim\tud@res@b\p@=\z@\relax\else%
+      \eappto\tud@res@a{%
+        \space\@plus\space\tud@res@b%
+        \ifcase\gluestretchorder\tud@res@c pt\or fil\or fill\or filll\fi%
+      }%
+    \fi%
+    \edef\tud@res@b{\strip@pt\dimexpr\glueshrink\tud@res@c\relax}%
+    \ifdim\tud@res@b\p@=\z@\relax\else%
+      \eappto\tud@res@a{%
+        \space\@minus\space\tud@res@b%
+        \ifcase\glueshrinkorder\tud@res@c pt\or fil\or fill\or filll\fi%
+      }%
+    \fi%
+    \edef\tud@res@a{%
+      \endgroup%
+      \unexpanded{\def#1}{\tud@res@a}%
+    }%
+  \tud@res@a%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@length@to@string
+%
 %
 % \subsubsection{Robuster Test auf leeres Argument}
 %
@@ -487,29 +628,29 @@
 %    \begin{macrocode}
     \ifdim\@tempdima>\@tempdimb\relax%
       \@whiledim\@tempdimb>1pt\relax\do{%
-        \setlength\@tempdima{.1\@tempdima}%
-        \setlength\@tempdimb{.1\@tempdimb}%
+        \setlength\@tempdima{\dimexpr\@tempdima/10\relax}%
+        \setlength\@tempdimb{\dimexpr\@tempdimb/10\relax}%
       }%
       \setlength\@tempdimc{\@tempdima}%
     \else%
       \@whiledim\@tempdima>1pt\relax\do{%
-        \setlength\@tempdima{.1\@tempdima}%
-        \setlength\@tempdimb{.1\@tempdimb}%
+        \setlength\@tempdima{\dimexpr\@tempdima/10\relax}%
+        \setlength\@tempdimb{\dimexpr\@tempdimb/10\relax}%
       }%
       \setlength\@tempdimc{\@tempdimb}%
     \fi%
     \@tempcnta=1\relax%
-    \@whiledim\dimexpr\@tempcnta\@tempdimc\relax<.01\maxdimen\do{%
+    \@whiledim%
+      \dimexpr\@tempcnta\@tempdimc\relax<\dimexpr\maxdimen/100\relax%
+    \do{%
       \multiply\@tempcnta by 10\relax%
     }%
 %    \end{macrocode}
 % Mit dem im temporären Zählerregister \cs{@tempcnta} gespeicherten Faktor 
 % wird der Dividend erweitert und der berechnete Quotient wieder gekürzt.
 %    \begin{macrocode}
-    \setlength\@tempdimc{%
-      \dimexpr(\@tempcnta\@tempdima / \@tempdimb * \p@)\relax%
-    }%
-    \setlength\@tempdimc{\dimexpr \@tempdimc/\@tempcnta\relax}%
+    \setlength\@tempdimc{\dimexpr(\@tempcnta\@tempdima/\@tempdimb*\p@)\relax}%
+    \setlength\@tempdimc{\dimexpr\@tempdimc/\@tempcnta\relax}%
 %    \end{macrocode}
 % Das Ergebnis wird in das angegebene Makro expandiert.
 %    \begin{macrocode}
@@ -540,8 +681,8 @@
 %
 % \begin{macro}{\tud@remove@spaces@within}
 % Hiermit können in einem gegebenen String \emph{alle} Leerzeichen enthaltenen 
-% entfernt werden. Dies wird verwendet, um für \cs{TUD@set@skipkey} sowie 
-% \cs{TUD@set@dimenkey} eine Warnung auszugeben, falls das übergebene Argument 
+% entfernt werden. Dies wird verwendet, um für \cs{TUD@set@gluekey} sowie 
+% \cs{TUD@set@dimkey} eine Warnung auszugeben, falls das übergebene Argument 
 % fehlerhaft formatiert ist, wobei Unterschiede bei Leerzeichen ignoriert 
 % werden sollen.
 %    \begin{macrocode}
@@ -655,9 +796,10 @@
 % aktualisiert werden.
 %    \begin{macrocode}
 \newrobustcmd*\tud@cs@store[1]{%
-  \tud@cs@check{#1}%
-  \ifcsdef{@@tud@#1}{}{%
-    \tud@cs@letltx{@@tud@#1}{#1}%
+  \tud@cs@check{#1}{%
+    \ifcsdef{@@tud@#1}{}{%
+      \tud@cs@letltx{@@tud@#1}{#1}%
+    }%
   }%
 }
 \newrobustcmd*\tud@cs@restore[1]{%
@@ -675,30 +817,34 @@
 %    \end{macrocode}
 % Die eigentliche Wiederherstellung.
 %    \begin{macrocode}
-  \tud@cs@check{#1}%
-  \ifcsdef{@@tud@#1}{%
-    \tud@cs@letltx{#1}{@@tud@#1}%
-    \csundef{@@tud@#1}%
-  }{}%
+  \tud@cs@check{#1}{%
+    \ifcsdef{@@tud@#1}{%
+      \tud@cs@letltx{#1}{@@tud@#1}%
+      \csundef{@@tud@#1}%
+    }{}%
+  }%
 }
 \newrobustcmd*\tud@cs@reset[1]{%
-  \tud@cs@check{#1}%
-  \ifcsdef{@@tud@#1}{%
-    \tud@cs@letltx{#1}{@@tud@#1}%
-  }{}%
+  \tud@cs@check{#1}{%
+    \ifcsdef{@@tud@#1}{%
+      \tud@cs@letltx{#1}{@@tud@#1}%
+    }{}%
+  }%
 }
 \newrobustcmd*\tud@cs@update[1]{%
-  \tud@cs@check{#1}%
-  \ifcsdef{@@tud@#1}{%
-    \tud@cs@letltx{@@tud@#1}{#1}%
-  }{}%
+  \tud@cs@check{#1}{%
+    \ifcsdef{@@tud@#1}{%
+      \tud@cs@letltx{@@tud@#1}{#1}%
+    }{}%
+  }%
 }
 \newrobustcmd*\tud@cs@use[1]{%
-  \tud@cs@check{#1}%
-  \ifcsdef{@@tud@#1}{%
-    \csuse{@@tud@#1}%
-  }{%
-    \csuse{#1}%
+  \tud@cs@check{#1}{%
+    \ifcsdef{@@tud@#1}{%
+      \csuse{@@tud@#1}%
+    }{%
+      \csuse{#1}%
+    }%
   }%
 }
 %    \end{macrocode}
@@ -707,14 +853,24 @@
 % Fall sein, wird ein Fehler ausgegeben.
 %    \begin{macrocode}
 \newrobustcmd*\tud@cs@check[1]{%
-  \ifcsdef{#1}{}{%
-    \PackageError{tudscrbase}{%
-      `\@backslashchar#1' is not defined}{%
-      The command `\@backslashchar#1' was never defined. \MessageBreak%
-      Please contact the TUD-Script maintainer\MessageBreak%
-      via \TUDScriptContact. A bugfix is urgently required.%
-    }%
-  }%
+  \begingroup%
+    \ifcsdef{#1}{\@tud@res@swatrue}{\@tud@res@swafalse}%
+    \if@tud@res@swa%
+      \ifcscounter{#1}{\@tud@res@swafalse}{}%
+      \ifcslength{#1}{\@tud@res@swafalse}{}%
+      \ifcsdimen{#1}{\@tud@res@swafalse}{}%
+    \fi%
+    \if@tud@res@swa%
+      \aftergroup\@firstofone%
+    \else%
+      \PackageError{tudscrbase}{`\@backslashchar#1' is not a macro}{%
+        The macro `\@backslashchar#1' was never defined. \MessageBreak%
+        Please contact the TUD-Script maintainer\MessageBreak%
+        via \TUDScriptContact. A bugfix is urgently required.%
+      }%
+      \aftergroup\@gobble%
+    \fi%
+  \endgroup%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@cs@check
@@ -724,103 +880,64 @@
 % \end{macro}^^A \tud@cs@restore
 % \end{macro}^^A \tud@cs@store
 % \end{macro}^^A \tud@cs@letltx
-% \begin{macro}{\tud@skip@store}
+% \begin{macro}{\tud@cslength@store}
 % \changes{v2.04}{2015/03/02}{neu}^^A
-% \changes{v2.05}{2016/07/13}{Verwendung von \cs{tud@skip@check}}^^A
-% \begin{macro}{\tud@skip@restore}
+% \changes{v2.05}{2016/07/13}{Verwendung von \cs{tud@cslength@check}}^^A
+% \begin{macro}{\tud@cslength@restore}
 % \changes{v2.04}{2015/03/02}{neu}^^A
-% \changes{v2.05}{2016/07/13}{Verwendung von \cs{tud@skip@check}}^^A
-% \begin{macro}{\tud@skip@reset}
+% \changes{v2.05}{2016/07/13}{Verwendung von \cs{tud@cslength@check}}^^A
+% \begin{macro}{\tud@cslength@reset}
 % \changes{v2.05}{2016/07/13}{neu}^^A
-% \begin{macro}{\tud@skip@set}
-% \changes{v2.04}{2015/05/05}{neu}^^A
-% \changes{v2.05}{2016/07/13}{Verwendung von \cs{tud@skip@check}}^^A
-% \begin{macro}{\tud@skip@check}
+% \begin{macro}{\tud@cslength@check}
 % \changes{v2.05}{2016/07/13}{neu}^^A
 % Hiermit können~-- äquivalent zum Sichern und Wiederherstellen von Befehlen~-- 
 % Längenregister abgespeichert werden.
 %    \begin{macrocode}
-\newcommand*\tud@skip@store[1]{%
-  \tud@skip@check{#1}{%
-    \ifcsundef{@@tud@skip@#1}{%
-      \csedef{@@tud@skip@#1}{\expandafter\the\csname #1\endcsname}%
+\newcommand*\tud@cslength@store[1]{%
+  \tud@cslength@check{#1}{%
+    \ifcsundef{@@tud@length@#1}{%
+      \csedef{@@tud@length@#1}{\expandafter\the\csname #1\endcsname}%
     }{}%
   }%
 }
-\newcommand*\tud@skip@restore[1]{%
-  \tud@skip@check{#1}{%
-    \ifcsundef{@@tud@skip@#1}{}{%
+\newcommand*\tud@cslength@restore[1]{%
+  \tud@cslength@check{#1}{%
+    \ifcsundef{@@tud@length@#1}{}{%
       \expandafter\setlength\csname #1\endcsname{%
-        \csname @@tud@skip@#1\endcsname%
+        \csname @@tud@length@#1\endcsname%
       }%
-      \csundef{@@tud@skip@#1}%
+      \csundef{@@tud@length@#1}%
     }%
   }%
 }
-\newcommand*\tud@skip@reset[1]{%
-  \tud@skip@check{#1}{%
-    \ifcsundef{@@tud@skip@#1}{}{%
+\newcommand*\tud@cslength@reset[1]{%
+  \tud@cslength@check{#1}{%
+    \ifcsundef{@@tud@length@#1}{}{%
       \expandafter\setlength\csname #1\endcsname{%
-        \csname @@tud@skip@#1\endcsname%
+        \csname @@tud@length@#1\endcsname%
       }%
     }%
   }%
 }
-\newcommand*\tud@skip@set[2]{%
-  \tud@skip@check{#1}{%
-    \expandafter\setlength\csname #1\endcsname{#2}%
-  }%
-}
-\newcommand*\tud@skip@check[1]{%
+\newcommand*\tud@cslength@check[1]{%
   \begingroup%
-    \@tempswafalse%
-    \expandafter\ifisskip\expandafter{\csname#1\endcsname}{\@tempswatrue}{}%
-    \expandafter\ifisdimen\expandafter{\csname#1\endcsname}{\@tempswatrue}{}%
-    \if@tempswa%
+    \expandafter\tud@if@lengthregister\expandafter{\csname#1\endcsname}{%
       \aftergroup\@firstofone%
-    \else%
+    }{%
+      \PackageError{tudscrbase}{`\@backslashchar#1' is not a length}{%
+        The length `\@backslashchar#1' was never defined. \MessageBreak%
+        Please contact the TUD-Script maintainer\MessageBreak%
+        via \TUDScriptContact. A bugfix is urgently required.%
+      }%
       \aftergroup\@gobble%
-    \fi%
+    }%
   \endgroup%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@skip@check
-% \end{macro}^^A \tud@skip@set
-% \end{macro}^^A \tud@skip@reset
-% \end{macro}^^A \tud@skip@restore
-% \end{macro}^^A \tud@skip@store
-% \begin{macro}{\tud@skip@to@string}
-% \changes{v2.06f}{2019/11/23}{neu}^^A
-% Die direkte Verwendung von \cs{the} auf ein \cs{skip}-Register hat zur Folge, 
-% dass die Einheit \val{pt} mit die Charactercodes \val{12} zurückgegeben 
-% werden, was bei der Weiterverarbeitung unter Umständen Probleme bereitet. 
-% Dieses Makro löst das Problem.
-%    \begin{macrocode}
-\newcommand*\tud@skip@to@string[2]{%
-  \begingroup%
-    \edef\tud@res@a{\strip@pt\dimexpr#2\relax pt}%
-    \edef\tud@res@b{\strip@pt\dimexpr\gluestretch#2\relax}%
-    \ifdim\tud@res@b\p@=\z@\relax\else%
-      \eappto\tud@res@a{%
-        \space\@plus\space\tud@res@b%
-        \ifcase\gluestretchorder#2pt\or fil\or fill\or filll\fi%
-      }%
-    \fi%
-    \edef\tud@res@b{\strip@pt\dimexpr\glueshrink#2\relax}%
-    \ifdim\tud@res@b\p@=\z@\relax\else%
-      \eappto\tud@res@a{%
-        \space\@minus\space\tud@res@b%
-        \ifcase\glueshrinkorder#2pt\or fil\or fill\or filll\fi%
-      }%
-    \fi%
-    \edef\tud@res@a{%
-      \endgroup%
-      \unexpanded{\def#1}{\tud@res@a}%
-    }%
-  \tud@res@a%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@skip@to@string
+% \end{macro}^^A \tud@cslength@check
+% \end{macro}^^A \tud@cslength@reset
+% \end{macro}^^A \tud@cslength@restore
+% \end{macro}^^A \tud@cslength@store
 % \begin{macro}{\tud@patch@wrn}
 % \TUDScript verwendet die Möglichkeiten von \pkg{etoolbox} und \pkg{xpatch}, 
 % um mit den Makros  (\cs{[x]apptocmd}, \cs{[x]pretocmd}, \cs{[x]patchcmd}) 
@@ -974,16 +1091,16 @@
 % \end{macro}^^A \TUD@set@numkey
 % \end{macro}^^A \TUD@bool@numkey
 % \end{macro}^^A \TUD@set@ifkey
-% \begin{macro}{\TUD@set@skipkey}
+% \begin{macro}{\TUD@set@gluekey}
 % \changes{v2.06}{2018/08/01}{forcierte Kleinschreibung Schlüsselwerte}^^A
 % \changes{v2.06f}{2019/11/21}{überarbeitet, Trennung in Skip und Dimension}^^A
-% \begin{macro}{\tud@normalize@skipkey}
+% \begin{macro}{\tud@normalize@gluekey}
 % \changes{v2.06f}{2019/11/21}{neu}^^A
-% \begin{macro}{\tud@normalize@@skipkey}
+% \begin{macro}{\tud@normalize@@gluekey}
 % \changes{v2.06f}{2019/11/21}{neu}^^A
-% \begin{macro}{\tud@validate@skipkey}
+% \begin{macro}{\tud@validate@gluekey}
 % \changes{v2.06f}{2019/11/21}{neu}^^A
-% Mit \cs{TUD@set@skipkey} und \cs{TUD@set@dimenkey} wird der übergebene Wert
+% Mit \cs{TUD@set@gluekey} und \cs{TUD@set@dimkey} wird der übergebene Wert
 % entweder als Skip (Länge mit Kleister) oder Dimension (Länge ohne Kleister)
 % im spezifizierten Makro gespeichert, wobei auf eine gültige Eingabe geprüft 
 % wird.
@@ -994,12 +1111,12 @@
 % optionale Argument gibt die gewünschte Längeneinheit an, falls diese im 
 % Argument nicht spezifiert wurde.
 %    \begin{macrocode}
-\newcommand*\TUD@set@skipkey[4][pt]{%
+\newcommand*\TUD@set@gluekey[4][pt]{%
   \begingroup%
     \tud@lowerstring\tud@res@a{#4}%
 %    \end{macrocode}
 % Es wird geprüft, ob das Argument zu einem String expandiert. Ist dies der
-% Fall, wird die vermeintliche Längenangabe mit \cs{tud@normalize@skipkey} 
+% Fall, wird die vermeintliche Längenangabe mit \cs{tud@normalize@gluekey} 
 % normalisiert, wobei das Resultat in das Makro im ersten Argument des Befehls
 % zurückgeschrieben wird. Sollte das Normalisieren nicht gelingen, wird ein
 % leerer Wert zurückgegeben. 
@@ -1021,11 +1138,11 @@
       }{}%
 %</donotuse>
     \else%
-      \tud@normalize@skipkey\tud@res@a{#1}%
+      \tud@normalize@gluekey\tud@res@a{#1}%
     \fi%
 %    \end{macrocode}
 % Konnte eine Längenangabe interpretiert werden, wird für ein falsch 
-% formatiertes Argument mit \cs{tud@validate@skipkey} ggf. eine Warnung
+% formatiertes Argument mit \cs{tud@validate@gluekey} ggf. eine Warnung
 % ausgegeben und anschließend der gültige Wert gesetzt.
 %    \begin{macrocode}
     \protected@edef\tud@res@a{%
@@ -1033,20 +1150,20 @@
       \ifx\tud@res@a\@empty%
         \noexpand\FamilyKeyStateUnknownValue%
       \else%
-        \unexpanded{\tud@validate@skipkey{#2}}{\tud@res@a}{#4}%
+        \unexpanded{\tud@validate@gluekey{#2}}{\tud@res@a}{#4}%
         \unexpanded{\FamilySetUseLengthMacro{TUD}{#2}{#3}}{\tud@res@a}%
       \fi%
     }%
   \tud@res@a%
 }
 %    \end{macrocode}
-% Das Makro \cs{tud@normalize@skipkey} erhält im ersten Argument den zu
+% Das Makro \cs{tud@normalize@gluekey} erhält im ersten Argument den zu
 % interpretierenden String und im zweiten die ggf. zu setzende Einheit. Dieser
 % String wird in den Basiswert und möglichen Kleister aufgetrennt, wobei
 % hierbei auch eine vertauschte und eigentlich fehlerhafte Angabe von Kleister
 % in der Form \verb=... minus ... plus ...= verarbeitet wird.
 %    \begin{macrocode}
-\newcommand*\tud@normalize@skipkey[2]{%
+\newcommand*\tud@normalize@gluekey[2]{%
   \begingroup%
     \edef\tud@res@c{#1}%
     \def\tud@res@a##1plus##2plus##3\@nil{%
@@ -1077,7 +1194,7 @@
     }%
     \expandafter\tud@res@b\tud@res@a%
 %    \end{macrocode}
-% Jeder der drei Token wird nun mit \cs{tud@normalize@@skipkey} geprüft, ob 
+% Jeder der drei Token wird nun mit \cs{tud@normalize@@gluekey} geprüft, ob 
 % es sich tatsächlich um eine Dimensionsangabe oder zumindest einen Zahlenwert 
 % handelt. Für letzteren Fall wird die übergebene Einheit angehangen. Kann ein
 % Token nicht als Dimensionsangabe interpretiert werden~-- das übergebene Makro 
@@ -1089,7 +1206,7 @@
     \let\tud@res@c\@empty%
     \@tud@res@swatrue%
     \tud@res@b\do{%
-      \tud@normalize@@skipkey\tud@res@a{\tud@res@b}{#2}%
+      \tud@normalize@@gluekey\tud@res@a{\tud@res@b}{#2}%
       \ifx\tud@res@a\relax%
         \@tud@res@swafalse%
         \@break@tfor%
@@ -1129,7 +1246,7 @@
 % die Vorzeichen beachtet werden, welches erst in \cs{tud@res@b} gesichert und 
 % anschließend von \cs{tud@res@a} entfernt wird.
 %    \begin{macrocode}
-\newcommand*\tud@normalize@@skipkey[3]{%
+\newcommand*\tud@normalize@@gluekey[3]{%
   \begingroup%
     \edef\tud@res@a{#2}%
     \@tud@res@swafalse%
@@ -1162,10 +1279,10 @@
 % Wertangaben ohne Betrag werden ignoriert.
 %    \begin{macrocode}
     \if@tud@res@swa%
-      \ifdim\dimexpr0\tud@res@a\relax=\z@%
+      \ifisdimension{\tud@res@a}{}{%
         \let\tud@res@a\@empty%
         \let\tud@res@b\@empty%
-      \fi%
+      }%
     \else%
 %    \end{macrocode}
 % Sollte keine gültige Dimension angegeben worden sein, wird nun geprüft, ob es 
@@ -1206,7 +1323,7 @@
 % mit dem angegbenen Argument verglichen und eine Warnung erzeugt, falls die 
 % Formatierung des Argumentes es notwendig machte, dieses zu interpretieren.
 %    \begin{macrocode}
-\newcommand*\tud@validate@skipkey[3]{%
+\newcommand*\tud@validate@gluekey[3]{%
   \begingroup%
 %    \end{macrocode}
 % Unterschiede bei Leerzeichen sollen keine Warnung erzeugen.
@@ -1229,36 +1346,21 @@
   }%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@validate@skipkey
-% \end{macro}^^A \tud@normalize@@skipkey
-% \end{macro}^^A \tud@normalize@skipkey
-% \end{macro}^^A \TUD@set@skipkey
-% \begin{macro}{\tud@positive@skipkey}
-% \changes{v2.06f}{2019/11/24}{neu}^^A
-% Um Schlüssel für Längen definieren zu können, die zwingend positiv sind, kann 
-% dieses Makro genutzt werden. Übergeben werden muss ein Makro, welches einen 
-% Längenausdruck enthält.
-%    \begin{macrocode}
-\newcommand*\tud@positive@skipkey[1]{%
-  \protected@edef#1{%
-    \noexpand\glueexpr%
-    \noexpand\ifdim\noexpand\glueexpr\expandonce#1\relax<\z@-\noexpand\fi%
-    \expandonce#1\relax%
-  }%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@positive@skipkey
-% \begin{macro}{\TUD@set@dimenkey}
+% \end{macro}^^A \tud@validate@gluekey
+% \end{macro}^^A \tud@normalize@@gluekey
+% \end{macro}^^A \tud@normalize@gluekey
+% \end{macro}^^A \TUD@set@gluekey
+% \begin{macro}{\TUD@set@dimkey}
 % \changes{v2.05}{2016/06/15}{neu}^^A
-% Zur Angabe von Dimensionen wird auf \cs{TUD@set@skipkey} zurückgegriffen 
+% Zur Angabe von Dimensionen wird auf \cs{TUD@set@gluekey} zurückgegriffen 
 % und anschließend geprüft, ob das Argument für \cs{dimen} genutzt werden kann.
 %    \begin{macrocode}
-\newcommand*\TUD@set@dimenkey[4][pt]{%
+\newcommand*\TUD@set@dimkey[4][pt]{%
   \begingroup%
-    \TUD@set@skipkey[{#1}]{#2}{\tud@res@a}{#4}%
+    \TUD@set@gluekey[{#1}]{#2}{\tud@res@a}{#4}%
     \ifx\FamilyKeyState\FamilyKeyStateProcessed%
 %    \end{macrocode}
-% Das Ergebnis der Wertzuweisung an \cs{TUD@set@skipkey} wurde im Makro
+% Das Ergebnis der Wertzuweisung an \cs{TUD@set@gluekey} wurde im Makro
 % \cs{tud@res@a} gespeichert. Handelt es sich beim Argument um ein
 % \cs{skip}"~Register oder eine \cs{glueexpr}, kann nicht sichergestellt 
 % werden, dass diesem später doch noch Kleister hinzugefügt wird, weshalb diese
@@ -1276,12 +1378,15 @@
           \@tud@res@swatrue%
         }{%
 %    \end{macrocode}
-% Ebenso wird direkt angegebener Kleister entfernt.
+% Ebenso wird direkt angegebener Kleister entfernt. Nicht über das Konstrukt 
+% mit \cs{@tempdima} und \cs{glueexpr} wundern. Ohne das Paket \pkg{calc} ist 
+% die Zuweisung von Kleister als String an ein \cs{dimen}-Register nicht ohne 
+% weiteres möglich. Die Verwendung \cs{glueexpr} dient quasi als Umschlag.
 %    \begin{macrocode}
           \ifisglue{\tud@res@a}{%
             \ifisdimension{\tud@res@a}{}{%
-              \setlength\@tempdima{\glueexpr\tud@res@a\relax}%
-              \tud@skip@to@string\tud@res@a{\@tempdima}%
+              \setlength\@tempdima{\dimexpr\glueexpr\tud@res@a\relax\relax}%
+              \tud@length@to@string\tud@res@a{\@tempdima}%
               \def\tud@res@b{something containing glue}%
               \@tud@res@swatrue%
             }%
@@ -1311,7 +1416,7 @@
   \tud@res@a%
 }
 %    \end{macrocode}
-% \end{macro}^^A \TUD@set@dimenkey
+% \end{macro}^^A \TUD@set@dimkey
 % \begin{macro}{\TUD@unknown@keyval}
 % Dieser Befehl wird lediglich pro forma definiert. An diesen kann eine Liste 
 % möglicher Wertzuweisungen übergeben werden, welche durch \KOMAScript{} 

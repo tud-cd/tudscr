@@ -1,4 +1,4 @@
-% \CheckSum{5238}
+% \CheckSum{5207}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -1034,7 +1034,7 @@
 % \changes{v2.02}{2014/10/27}{neu}^^A
 % \begin{macro}{\tud@hyperdef}
 % \changes{v2.06f}{2019/10/29}{neu}^^A
-% \begin{macro}{\tud@hyperdef@skip}
+% \begin{macro}{\tud@hyperdefvskip@dim}
 % \changes{v2.06f}{2019/11/07}{neu}^^A
 % \begin{macro}{\tudhyperref}
 % \changes{v2.02}{2014/10/27}{neu}^^A
@@ -1059,8 +1059,8 @@
 \NewDocumentCommand\tudhyperdef{s m !d==}{%
   \begingroup%
     \IfBooleanTF{#1}{%
-      \raisebox{\tud@hyperdef@skip}[0pt][0pt]{\tud@hyperdef{#2}}%
-      \par\nobreak\vskip\dimexpr-\parskip-\baselineskip\relax%
+      \raisebox{\tud@hyperdefvskip@dim}[0pt][0pt]{\tud@hyperdef{#2}}%
+      \par\nobreak\vskip\glueexpr-\parskip-\baselineskip\relax%
       \@afterindentfalse\@afterheading%
     }{%
       \Hy@raisedlink{\tud@hyperdef{#2}}\ignorespaces%
@@ -1136,15 +1136,15 @@
 % Der zusätzliche Sprung nach oben für den Anker wird innerhalb der Teil"~ und 
 % Kapitelpräambeln für die Sternversion erhöht.
 %    \begin{macrocode}
-\newcommand*\tud@hyperdef@skip{3\baselineskip}
+\newcommand*\tud@hyperdefvskip@dim{\dimexpr1\baselineskip*3\relax}
 \patchcmd{\set@@@@preamble}{%
   \let\phantomsection\relax%
 }{%
   \let\phantomsection\relax%
-  \renewcommand*\tud@hyperdef@skip{15\baselineskip}%
+  \renewcommand*\tud@hyperdefvskip@dim{\dimexpr1\baselineskip*15\relax}%
 }{}{\tud@patch@wrn{set@@@@preamble}}
 %    \end{macrocode}
-% Nicht verwirren lassen! Das Aliaslabel wird zunäöchst der Exportliste 
+% Nicht verwirren lassen! Das Aliaslabel wird zunächst der Exportliste 
 % hinzugefügt. Anschließend wird geprüft, ob es in der importierten Liste 
 % enthalten ist.
 %    \begin{macrocode}
@@ -1173,7 +1173,7 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@manualname
 % \end{macro}^^A \tudhyperref
-% \end{macro}^^A \tud@hyperdef@skip
+% \end{macro}^^A \tud@hyperdefvskip@dim
 % \end{macro}^^A \tud@hyperdef
 % \end{macro}^^A \tudhyperdef
 %
@@ -1941,7 +1941,7 @@
 % platzierten Link dieser in \cs{HyperRaiseLinkDefault} gesichert werden.
 %    \begin{macrocode}
     \def\@tempa##1{\ignorespaces##1\tabularnewline}%
-    \edef\HyperRaiseLinkDefault{\the\baselineskip}%
+    \edef\HyperRaiseLinkDefault{\the\dimexpr1\baselineskip\relax}%
     \sbox\z@{%
       \begin{tabular}{|l|}%
         \hline%
@@ -1985,7 +1985,7 @@
 % den Höhenversatz zwischen Randnotiz und Deklarationsrahmen auszugleichen.
 %    \begin{macrocode}
     \print@changedatlist{#1}{%
-      \dimexpr.5\ht\strutbox+.5\dp\strutbox-.5\ht0-.5\dp0\relax%
+      \dimexpr\ht\strutbox/2+\dp\strutbox/2-\ht0/2-\dp0/2\relax%
     }%
 %    \end{macrocode}
 % Zum Schluss wird das optionale Argument (in runden Klammern) neben der
@@ -3516,7 +3516,11 @@
       \let\item\@idxitem%
       \renewcommand*\subitem{\@idxitem\hspace*{1em}}%
       \renewcommand*\subsubitem{\@idxitem \hspace*{2em}}%
-      \renewcommand*\indexspace{\par\vskip1em\@plus1ex\@minus.5ex\relax}%
+      \ifundef{\indexspace}{%
+        \let\indexspace\relax%
+      }{%
+        \renewcommand*\indexspace{\par\vskip1em\@plus1ex\@minus.5ex\relax}%
+      }%
     }%
   }%
 %    \end{macrocode}
@@ -4374,7 +4378,7 @@
 % \changes{v2.06}{2018/09/03}{optionale Angabe des Bundles}^^A
 % \begin{macro}{\@ChangedAt}
 % \changes{v2.06}{2019/06/24}{neu}^^A
-% \begin{length}{\changedatskip}
+% \begin{length}{\tud@dim@changedatvskip}
 % \changes{v2.04}{2015/06/08}{neu}^^A
 % Der Befehl \cs{ChangedAt} kann im Fließtext für das Erstellen einer freien 
 % Änderungsnotiz genutzt werden. Das obligatorische Argument sollt wie kurz 
@@ -4395,8 +4399,8 @@
 % ein vertikaler Versatz dieser angegeben werden. Die Sternversion des Befehls 
 % unterdrückt die Ausgabe der Randnotiz. 
 %    \begin{macrocode}
-\newlength\changedatskip
-\NewDocumentCommand\ChangedAt{s o d() m !O{\changedatskip}}{%
+\tud@newdim\tud@dim@changedatvskip
+\NewDocumentCommand\ChangedAt{s o d() m !O{\tud@dim@changedatvskip}}{%
   \Changed@At@CreateList{#4}[{#2}](#3)%
 %    \end{macrocode}
 % Nach dem Erstellen der Liste wird diese abgearbeitet und ggf. die Randnotiz 
@@ -4415,7 +4419,7 @@
 }
 \BeforeStartingTOC{\let\ChangedAt\@ChangedAt}
 %    \end{macrocode}
-% \end{length}^^A \changedatskip
+% \end{length}^^A \tud@dim@changedatvskip
 % \end{macro}^^A \@ChangedAt
 % \end{macro}^^A \ChangedAt
 %
@@ -4877,9 +4881,9 @@
     \letcs\item{tud@item@#1}%
 %    \end{macrocode}
 % Damit die Änderungsnotizen in der passenden vertikalen Position erscheinen, 
-% wird die Länge \cs{changedatskip} entsprechend angepasst.
+% wird die Länge \cs{tud@dim@changedatvskip} entsprechend angepasst.
 %    \begin{macrocode}
-    \setlength\changedatskip{-\baselineskip}%
+    \tud@setdim\tud@dim@changedatvskip{-1\baselineskip}%
   }{}%
 }
 %    \end{macrocode}
@@ -5103,8 +5107,6 @@
 % \begin{macro}{\tabularm@box}
 % \begin{macro}{\tabularm@num}
 % \begin{length}{\tabularm@wd}
-% \begin{length}{\tempdim}
-% \changes{v2.02}{2014/08/16}{neu}^^A
 % Die Umgebung \env{tabularm} ist eine Erweiterung der \env{tabular}-Umgebung.
 % In dieser wird die Breite der zu setzenden Tabelle mit Hilfe der Box 
 % \cs{tabularm@box} in \cs{tabularm@wd} gespeichert. Anschließend kann mit dem
@@ -5112,16 +5114,15 @@
 % werden. Dabei ist das zu übergebende Argument die Anzahl der zu erzeugenden, 
 % linksbündigen Spalten.
 %    \begin{macrocode}
-\newlength\tempdim
 \newsavebox\tabularm@box
-\newlength\tabularm@wd
+\tud@newdim\tabularm@wd
 \newcommand*\tabularm@num{1}
 \NewEnviron{tabularm}[1]{%
   \begin{lrbox}{\tabularm@box}%
     \let\allcolumnpar\@gobble%
     \begin{tabular}{*{#1}l}\BODY\end{tabular}%
   \end{lrbox}%
-  \setlength\tabularm@wd{\wd\tabularm@box}%
+  \tud@setdim\tabularm@wd{\wd\tabularm@box}%
   \def\tabularm@num{#1}%
   \let\allcolumnpar\tabularm@allcolumnpar%
   \begin{tabular}{*{#1}l}\BODY\end{tabular}%
@@ -5130,7 +5131,6 @@
   \multicolumn{\tabularm@num}{@{}p{\tabularm@wd}@{}}{#1}%
 }
 %    \end{macrocode}
-% \end{length}^^A \tempdim
 % \end{length}^^A \tabularm@wd
 % \end{macro}^^A \tabularm@box
 % \end{macro}^^A \tabularm@num
@@ -5160,27 +5160,28 @@
   \@afterindentfalse\@afterheading%
   \begingroup%
     \IfBooleanTF{#1}{%
-      \setlength\@tempdima{#3}%
-      \setlength\@tempdimc{-.7\baselineskip}%
-      \begin{tabularx}{\@tempdima}{lXX}\Term@Table{#2}\end{tabularx}%
+      \begin{tabularx}{\dimexpr\glueexpr#3\relax\relax}{lXX}%
+        \Term@Table{#2}{-\ht\strutbox}%
+      \end{tabularx}%
     }{%
-      \setlength\@tempdimc{\z@}%
-      \begin{tabular}{lll}\Term@Table{#2}\end{tabular}%
+      \begin{tabular}{lll}%
+        \Term@Table{#2}{\z@}%
+      \end{tabular}%
     }%
   \endgroup%
   \par\addvspace{\medskipamount}%
 }
-\newcommand*\Term@Table[1]{%
+\newcommand*\Term@Table[2]{%
   \toprule%
   \textbf{Bezeichner} & \textbf{Deutsch} & \textbf{Englisch}\tabularnewline%
   \midrule%
-  \forcsvlist\Term@@Table{#1}%
+  \forcsvlist\Term@@Table{#1}{#2}%
   \bottomrule%
 }
-\newcommand*\Term@@Table[1]{%
+\newcommand*\Term@@Table[2]{%
   \Term{#1}'none' & %
   \ifstr{\csuse{#1}}{}{\PName{leer}}{\csuse{#1}} & %
-  \selectlanguage{english}\vspace*{\@tempdimc}%
+  \selectlanguage{english}\vspace*{#2}%
   \ifstr{\csuse{#1}}{}{\PName{empty}}{\csuse{#1}}\tabularnewline%
 }
 %    \end{macrocode}
@@ -5666,7 +5667,8 @@
 \let\Code@Preamble\relax
 \newcommand\CodePreamble[1]{%
   \long\gdef\Code@Preamble{%
-    \hskip.5\leftmargin\textit{Die resultierende Ausgabe:}\space#1%
+    \hskip\glueexpr\leftmargin/2\relax%
+    \textit{Die resultierende Ausgabe:}\space#1%
   }%
 }
 \newcommand*\Code@Hook{}
@@ -5932,8 +5934,8 @@
 % Text vorangestellt werden kann.
 %    \begin{macrocode}
   \@tempa{\Code@Preamble}{}%
-  \setlength\@tempdimc{\leftskip}%
-  \setlength\leftskip{\leftmargin}%
+  \tud@setdim\@tempdimc{\leftskip}%
+  \tud@setdim\leftskip{\leftmargin}%
 %    \end{macrocode}
 % Durch die zweimalige Verwendung von \file{\string\tud@tut@temp.tex}~-- einmal 
 % direkt und einmal innerhalb einer Box~-- können darin verwendete Befehle wie
@@ -5943,7 +5945,7 @@
 %    \begin{macrocode}
   \@tempa{\input{\tud@tut@temp.tex}}{\Code@Hook}%
   \global\let\Code@Hook\relax%
-  \setlength\leftskip{\@tempdimc}%
+  \tud@setdim\leftskip{\@tempdimc}%
   \noindent\ignorespaces%
 }
 %    \end{macrocode}
@@ -5971,7 +5973,7 @@
 %    \begin{macrocode}
 \IfFileExists{\tud@tut@temp-standalone.tex}{\@tempswafalse}{\@tempswatrue}
 \if@tempswa
-\begin{filecontents*}{\tud@tut@temp-standalone.tex}
+\begin{filecontents*}[force,silent,nosearch]{\tud@tut@temp-standalone.tex}
 \documentclass[english,ngerman]{tudscrreprt}
 \ifpdftex{
   \usepackage[T1]{fontenc}
@@ -6046,11 +6048,11 @@
     \@tempcnta\z@%
     \@for\@tempa:=#3\do{\advance\@tempcnta\@ne}%
     \ifnum\@tempcnta>\z@\relax%
-      \setlength\@tempdima{\textwidth}%
+      \tud@setdim\@tempdima{\textwidth}%
       \divide\@tempdima\@tempcnta%
       \advance\@tempcnta\m@ne%
       \multiply\@tempcnta 2%
-      \addtolength\@tempdima{-\@tempcnta\tabcolsep}%
+      \tud@addtodim\@tempdima{-\@tempcnta\tabcolsep}%
       \@for\@tempa:=#3\do{%
         \advance\@tempcnta\m@ne%
         \edef\@tempb{%
@@ -6107,35 +6109,6 @@
     \renewcommand*\makeindex[1][]{}%
     \renewcommand*\printindex[1][]{}%
   \fi
-%    \end{macrocode}
-% Weiterhin tritt mit dem \LaTeXe"~Kernel \val{2019/10/01} das Problem auf, 
-% dass alle sämtliche und nicht nur \pkg{pstricks}-Grafiken extrahiert werden. 
-% Das Problem wurde bereits unter \GitHubRepo(rolfn/pst-pdf)<1> gemledet, aber 
-% noch nicht behoben.
-%    \begin{macrocode}
-  \@ifpackagelater{pst-pdf}{2017/06/23}{%
-    \PackageWarning{tudscrtutorial}^%
-    {%
-      Package `pst-pdf' was updated so patching\MessageBreak%
-      \string\ppf@is@pdfTeX@graphic is not required anymore%
-    }%
-  }{%
-    \ifundef{\ppf@is@pdfTeX@graphic}{}{%
-      \renewcommand*\ppf@is@pdfTeX@graphic[5]{%
-        \@ppf@pdftex@graphicfalse%
-        \begingroup
-          \edef\pdfTeXext{\detokenize\expandafter{#2}}%<----added
-          \def\Gin@setfile##1##2##3{%
-            \edef\@tempb{\detokenize\expandafter{##2}}%
-            \@for\@tempa:=\pdfTeXext\do{%
-              \ifx\@tempa\@tempb\global\@ppf@pdftex@graphictrue\fi}}%
-          \edef\Gin@extensions{#2,#3}%
-          \pr@outerfalse\ppf@Ginclude@graphics{#1}%
-        \endgroup%
-        \if@ppf@pdftex@graphic#4\else#5\fi%
-      }%
-    }%
-  }%
 }
 %    \end{macrocode}
 %
@@ -6160,7 +6133,7 @@
 \RequirePackage{todonotes}[2012/07/25]
 \AtEndPreamble{%
   \ifdim\marginparwidth<2cm\relax%
-    \setlength\marginparwidth{2cm}%
+    \tud@setdim\marginparwidth{2cm}%
   \fi%
 }
 %    \end{macrocode}
@@ -6401,7 +6374,7 @@
           }%
           \toks@\expandafter{\tud@res@a noline,nolist}%
           \settowidth\marginparwidth{\tud@res@c}%
-          \addtolength\marginparwidth{\dimexpr1.6ex+1pt\relax}%
+          \tud@addtodim\marginparwidth{\dimexpr1.6ex+1pt\relax}%
           \expandafter\todo\expandafter[\the\toks@]{\tud@res@c\strut}%
           \aftergroup\par\aftergroup\noindent%
 %    \end{macrocode}
@@ -6848,8 +6821,6 @@
 % \end{macro}^^A \Forum
 % \begin{macro}{\CTAN}
 % \changes{v2.05}{2015/11/22}{neu}^^A
-% \begin{macro}{\Attention}
-% \changes{v2.02}{2014/08/16}{neu}^^A
 % \begin{macro}{\scrguide}
 % \changes{v2.02}{2014/09/04}{neu}^^A
 % \changes{v2.05}{2015/07/23}{Hyperlinktext über optionales Argument}^^A
@@ -6865,13 +6836,6 @@
     }%
   \endgroup%
   \xspace%
-}
-\newcommand*\Attention[2][\z@]{%
-  \marginnote{%
-    \setlength\fboxsep{0.25em}%
-    \fbox{Achtung!}%
-  }[{#1}]%
-  \emph{\trim@spaces{#2}}%
 }
 \NewDocumentCommand\scrguide{!s !O{\KOMAScript-Handbuch}}{%
   \begingroup%
@@ -6892,8 +6856,20 @@
 %    \end{macrocode}
 % \end{macro}^^A \notudscrartcl
 % \end{macro}^^A \scrguide
-% \end{macro}^^A \Attention
 % \end{macro}^^A \CTAN
+% \begin{macro}{\Attention}
+% \changes{v2.02}{2014/08/16}{neu}^^A
+% Falls irgendetwas besonders hervorgehoben werden sollte.
+%    \begin{macrocode}
+\newcommand*\Attention[2][\z@]{%
+  \marginnote{%
+    \tud@setdim\fboxsep{0.25em}%
+    \fbox{Achtung!}%
+  }[{#1}]%
+  \emph{\trim@spaces{#2}}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \Attention
 % \begin{macro}{\TUDScriptContactNote}
 % \changes{v2.06f}{2019/09/26}{neu}^^A
 % \begin{macro}{\TUDScriptContactTitle}
