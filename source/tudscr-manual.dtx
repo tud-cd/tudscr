@@ -1,4 +1,4 @@
-% \CheckSum{5207}
+% \CheckSum{5263}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -1937,8 +1937,10 @@
 % erfolgt die Ausgabe mithilfe einer Box, um die Größe des Deklarationsrahmens
 % zu speichern und die Änderungsmarkierung am Seitenrand auf die richtige Höhe
 % zu platzieren. Da innerhalb von Tabellen der Wert von \cs{baselineskip} auf
-% \makeatletter\the\z@\makeatother~gesetzt wird, muss für einen richtig
-% platzierten Link dieser in \cs{HyperRaiseLinkDefault} gesichert werden.
+% \val{0pt}~gesetzt wird, muss für einen richtig platzierten Link dieser in 
+% \cs{HyperRaiseLinkDefault} gesichert werden. Die Größe der Tabelle wird 
+% später noch benötigt, deshalb wird diese in einer Box gesetzt.
+% \ToDo{Größe der Box direkt annschließend in tud@res@... sichern}[v2.06]
 %    \begin{macrocode}
     \def\@tempa##1{\ignorespaces##1\tabularnewline}%
     \edef\HyperRaiseLinkDefault{\the\dimexpr1\baselineskip\relax}%
@@ -1985,7 +1987,7 @@
 % den Höhenversatz zwischen Randnotiz und Deklarationsrahmen auszugleichen.
 %    \begin{macrocode}
     \print@changedatlist{#1}{%
-      \dimexpr\ht\strutbox/2+\dp\strutbox/2-\ht0/2-\dp0/2\relax%
+      \dimexpr(\ht\strutbox+\dp\strutbox-\ht0-\dp0)/2\relax%
     }%
 %    \end{macrocode}
 % Zum Schluss wird das optionale Argument (in runden Klammern) neben der
@@ -2962,7 +2964,7 @@
 % Für ein eventuell notwendiges Debugging, wird \cs{Process@@MarkupDeclare} mit
 % seinen Argumenten ggf. in das Log-File geschrieben.
 %    \begin{macrocode}
-      \tud@trace@markup{declare}{\the\tud@toks@}%
+      \tud@trace@markup@add{declare}{\the\tud@toks@}%
     \else%
       \tud@toks@{\relax}%
     \fi%
@@ -2988,7 +2990,7 @@
 %    \end{macrocode}
 % Auch hier wird ggf. ein Debug-Eintrag ins Log-File geschrieben. 
 %    \begin{macrocode}
-    \tud@trace@markup{output}{\the\tud@toks@}%
+    \tud@trace@markup@add{output}{\the\tud@toks@}%
   \fi%
 %    \end{macrocode}
 % Ganz zum Schluss wird noch für beide Fälle geprüft, ob \parg{Bundleelement} 
@@ -3065,6 +3067,9 @@
     \tudhyperdef*{#1}%
     \def\@tempa##1:##2:##3\@nil{\tudhyperdef*{##3:##2:##3}}%
     \@tempa#1\@nil%
+  \else%
+    \tudhyperdef{#1}%
+    \Markup@Output{#2}=#3=[{#4}]%
   \fi%
   \Markup@ClearFormat%
 }
@@ -3411,11 +3416,11 @@
 % \app{texindy} verwendet. Diese können sowohl mit dem Paket als auch mit der 
 % Klasse erzeugt werden.
 %
-% \begin{macro}{\makexdyindex}
+% \begin{macro}{\tud@xdy@make}
 % \changes{v2.05}{2015/11/01}{neu}^^A
 % \begin{macro}{\tud@xdy@settings}
 % \changes{v2.05}{2019/10/30}{neu}^^A
-% Um die einzelnen Indexe erstellen zu können, wird das Makro \cs{makexdyindex} 
+% Um die einzelnen Indexe erstellen zu können, wird das Makro \cs{tud@xdy@make} 
 % definiert. Die Sternversion dieses Befehle erstellt dabei neben dem normalen
 % Spezialindex einen weiteren, welcher explizit für Deklarationen genutzt wird.
 % Dieser wird anschließen als erstes an \app{texindy} weitergereicht, um die
@@ -3425,41 +3430,28 @@
 %    \begin{macrocode}
 \newcommand*\tud@xdy@settings{}
 \edef\tud@xdy@settings{-M \@currname-ind.xdy -L german-din}
-\NewDocumentCommand\makexdyindex{s o m !o}{%
-  \let\tud@res@c\@empty%
+\NewDocumentCommand\tud@xdy@make{s o m !O{\jobname}}{%
+%    \end{macrocode}
+% Mit \app{texindy} gibt es Probleme bei der Bildung von Seitenzahlenbereichen
+% (siehe auch \file{tudscr-texindy.dtx}). Dies wird umgangen, indem als 
+% Deklaration markierte Indexeinträge in einen separaten Index geschrieben und 
+% am Ende von \app{texindy} zwei Indexe für jede Kategorie prozessiert werden.
+%    \begin{macrocode}
 %<*class>
-  \IfBooleanT{#1}{%
-    \IfValueTF{#4}{%
-      \makeindex[name={#4-declare}]%
-      \edef\tud@res@b{\jobname-#4-declare.idx}%
-      \IfFileExists{\tud@res@b}{%
-        \edef\tud@res@c{-o \jobname-#4.ind \tud@res@b}%
-      }{%
-        \ClassWarningNoLine{tudscrmanual}{File \tud@res@b\space not found}%
-      }%
-    }{%
-      \ClassWarningNoLine{tudscrmanual}{%
-        It's not possible to create a special declaration main index%
-      }%
-    }%
-  }%
+  \IfBooleanT{#1}{\makeindex[name={#4-declare}]}%
 %</class>
   \protected@edef\tud@res@a{%
     title={#3},%
     columnsep=\noexpand\f@size\noexpand\p@,%
-    \IfValueTF{#4}{%
-      name={#4},%
-      options={\tud@xdy@settings\space-t \jobname-#4.xlg \tud@res@c},%
-    }{%
-      options={\tud@xdy@settings\space-t \jobname.xlg},%
-    }%
+    name={#4},%
+    options={\tud@xdy@settings\space-t \jobname-#4.xlg},%
     \IfValueT{#2}{#2}%
   }%
   \expandafter\makeindex\expandafter[\tud@res@a]%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@xdy@settings
-% \end{macro}^^A \makexdyindex
+% \end{macro}^^A \tud@xdy@make
 %
 % Damit \pkg{imakeidx} nicht bei jedem Aufruf mit \file{-{}-shell-escape} die 
 % Indexe neu erstellt, wird mit \cs{pdf@filemdfivesum} geprüft, ob sich die
@@ -3467,13 +3459,13 @@
 % Prüfsumme in aux"~Datei geschrieben, wobei diese dort nur geändert wird, wenn
 % das Flag \file{-{}-shell-escape} aktiv ist, da nur dann auch wirklich der 
 % nachgelagerte Prozess mit \pkg{imakeidx} auseführt wird.
-% \begin{macro}{\tud@idx@compare}
+% \begin{macro}{\tud@idx@mdfive}
 % \changes{v2.06f}{2019/11/22}{neu}^^A
 % Das Makro für die Prüfsumme, welches in die aux"~Datei geschrieben wird.
 %    \begin{macrocode}
-\newcommand*\tud@idx@compare{}%
+\newcommand*\tud@idx@mdfive{}%
 %    \end{macrocode}
-% \end{macro}^^A \tud@idx@compare
+% \end{macro}^^A \tud@idx@mdfive
 % Hier erfolgt das vergleichen der letzten mit der aktuellen Prüfsumme. Ist 
 % diese identisch, kann der nachgelagerte Prozess von \pkg{imakeidx} 
 % deaktiviert werden.
@@ -3482,7 +3474,7 @@
   \ifundef{\pdf@filemdfivesum}{}{%
     \PassOptionsToPackage{quiet}{imakeidx}%
     \edef\tud@res@a{\pdf@filemdfivesum{\jobname.idx}}%
-    \ifnum\pdf@strcmp{\tud@res@a}{\tud@idx@compare}=\z@\relax%
+    \ifnum\pdf@strcmp{\tud@res@a}{\tud@idx@mdfive}=\z@\relax%
       \PassOptionsToPackage{noautomatic}{imakeidx}%
     \else%
       \ifnum\pdf@shellescape=\@ne\relax\else%
@@ -3490,10 +3482,10 @@
           The index file `\jobname.idx' has changed. Run again\MessageBreak%
           with --shell-escape flag enabled%
         }%
-        \let\tud@res@a\tud@idx@compare%
+        \let\tud@res@a\tud@idx@mdfive%
       \fi%
     \fi%
-    \immediate\write\@mainaux{\string\gdef\string\tud@idx@compare{\tud@res@a}}%
+    \immediate\write\@mainaux{\string\gdef\string\tud@idx@mdfive{\tud@res@a}}%
   }%
 %    \end{macrocode}
 % Nun erfolgt das eigentliche Laden des Paketes.
@@ -3590,28 +3582,79 @@
   \fi%
 %    \end{macrocode}
 % \end{environment}^^A theindex
+% \begin{macro}{\imki@build}
+% Wie zuvor bereits geschildert, gibt es aufgrund einer Eingenheit~-- oder auch 
+% eines Bugs~-- von \app{texindy} den Ansatz, den Index für Deklarationen vom
+% normalen Index für die unterschiedlichen Indextypen abzuspalten, um Bereiche  
+% von Seitenzahlen vernünftig bilden zu können. Damit beiden erzeugten Indexe 
+% von \app{texindy} verarbeitet werden können, muss die entsprechende Option
+% gesetzt werden. Leider stellt das Paket \pkg{imakeidx} dafür keine geeigneten 
+% Mittel zur Verfügung, da sich erst beim Aufruf von \app{texindy} entscheiden 
+% lässt, welche Dateien zu prozessieren sind. Die entsprechnden Optionen sind 
+% bei \pkg{imakeidx} bereits zum Zeitpunkt des Aufrufs von \cs{makeindex} 
+% anzugeben. Deshalb wird später das Makro \cs{imki@options} innerhalb von 
+% \cs{imki@set@\meta{name}} angepasst.
+%    \begin{macrocode}
+%<*class>
+  \CheckCommand*\imki@build[1]{%
+    \toks@{}%
+    \imki@dokey\imki@title
+    \imki@dokey\imki@program
+    \imki@dokey\imki@options
+    \imki@dokey\imki@columns
+    \imki@dokey\imki@columnsep
+    \ifKV@imki@noautomatic
+      \addto@hook\toks@{\KV@imki@noautomatictrue}%
+    \else
+      \addto@hook\toks@{\KV@imki@noautomaticfalse}%
+    \fi
+    \ifKV@imki@intoc
+      \addto@hook\toks@{\KV@imki@intoctrue}%
+    \else
+      \addto@hook\toks@{\KV@imki@intocfalse}%
+    \fi
+    \ifKV@imki@columnseprule
+      \addto@hook\toks@{\KV@imki@columnsepruletrue}%
+    \else
+      \addto@hook\toks@{\KV@imki@columnseprulefalse}%
+    \fi
+    \expandafter\edef\csname imki@set@#1\endcsname{\the\toks@}%
+  }%
+%</class>
+%    \end{macrocode}
+% \end{macro}^^A \imki@build
 % Die Eingabekodierung wird an \app{texindy} weitergereicht.
 %    \begin{macrocode}
   \ifundef{\inputencodingname}{}{%
     \eappto\tud@xdy@settings{\space-C\space\inputencodingname}%
   }%
 %    \end{macrocode}
-% Nun können mit \cs{makexdyindex} die einzelnen Indexe erstellt werden.
+% Nun können mit \cs{tud@xdy@make} die einzelnen Indexe erstellt werden.
 %    \begin{macrocode}
-  \makexdyindex{Allgemeiner Index}%
-  \makexdyindex*{Klassen- und Paketoptionen}[options]%
-  \makexdyindex*{Befehle und Umgebungen mit zugeh\"origen Parametern}[macros]%
+  \tud@xdy@make{Allgemeiner Index}%
+  \tud@xdy@make*{Klassen- und Paketoptionen}[options]%
+  \tud@xdy@make*{Befehle und Umgebungen mit zugeh\"origen Parametern}[macros]%
 %<*class>
-  \makexdyindex*{Sprachabh\"angige Bezeichner}[terms]%
-  \makexdyindex*{Seitenstile, Schriftelemente und Farben}[elements]%
+  \tud@xdy@make*{Sprachabh\"angige Bezeichner}[terms]%
+  \tud@xdy@make*{Seitenstile, Schriftelemente und Farben}[elements]%
 %</class>
-  \makexdyindex{L\"angen und Z\"ahler}[misc]%
-  \makexdyindex*{Klassen, Pakete und Dateien}[files]%
+  \tud@xdy@make{L\"angen und Z\"ahler}[misc]%
+  \tud@xdy@make*{Klassen, Pakete und Dateien}[files]%
 %<*class>
-  \makexdyindex[columns=1]{\"Anderungsliste}[changelog]%
+  \tud@xdy@make[columns=1]{\"Anderungsliste}[changelog]%
 %</class>
-  \undef\makexdyindex%
-  \undef\tud@xdy@settings%
+%    \end{macrocode}
+% Das Paket \pkg{imakeidx} prüft nach dem durch \cs{printindex} initiierten 
+% Aufruf von \app{splitindex} nicht, ob \file{\cs{jobname}-\meta{name}.dtx} 
+% auch tatsächlich exisitiert, was am Ende zu einem fehlerhaften Aufruf von
+% \app{texindy} führt. Um dies zu umgehen, wird durch \cs{tud@print@index}
+% geprüft, ob die gewünschte Datei auch vorhanden ist, bevor \cs{printindex} 
+% ausgeführt wird. Dafür muss \app{splitindex} aber zuvor aufgerufen worden 
+% sein, was hier erfolgt.
+%    \begin{macrocode}
+  \ifnum\pdf@shellescape=\@ne\relax%
+    \ShellEscape{splitindex -m \string"\string" \jobname.idx}%
+  \fi%
 }
 %    \end{macrocode}
 %
@@ -3723,8 +3766,8 @@
         \let\@tempa\@empty%
         \IfBooleanT{#1}{\def\@tempa{: Parameter angepasst}}%
         \def#4{%
-          \expandonce#2\expandonce\@tempa{}@%
-          \expandonce#3\expandonce\@tempa{}!%
+          \expandonce#2\expandonce\@tempa @%
+          \expandonce#3\expandonce\@tempa!%
         }%
       \fi%
 %</class>
@@ -3851,7 +3894,10 @@
     \@tempswafalse%
     \IfBooleanT{#1}{\@tempswatrue}%
     \IfValueT{#9}{%
-      \ifstr{#9}{declare}{\@tempswatrue}{}%
+      \ifstr{#9}{declare}{%
+        \@tempswatrue%
+        \tud@doifPValue{#6}{\noexpand\@tempswafalse}%
+      }{}%
       \ifstr{#9}{default}{\@tempswatrue}{}%
     }%
 %    \end{macrocode}
@@ -3873,8 +3919,8 @@
 %    \begin{macrocode}
       \if@tempswa%
         \eappto#4{%
-          \expandonce#2\expandonce\@tempa{}@%
-          \expandonce#3\expandonce\@tempb{}!%
+          \expandonce#2\expandonce\@tempa @%
+          \expandonce#3\expandonce\@tempb!%
         }%
         \appto#2{=#6}%
         \appto#3{=#6=}%
@@ -4075,7 +4121,9 @@
         \tud@idx@val\tud@idx@key @\tud@idx@fmt|(declare%
       }%
     \else%
-      \index[\tud@lbl@tmp-declare]{\tud@idx@val\tud@idx@key|declare)}%
+      \index[\tud@lbl@tmp-declare]{%
+        \tud@idx@val\tud@idx@key @\tud@idx@fmt|declare)%
+      }%
     \fi%
 %    \end{macrocode}
 % Für Markup-Befehle außerhalb von Deklarationsumgebungen wird ein einfacher 
@@ -4232,9 +4280,9 @@
 %<*class>
     \tud@print@index[terms]%
     (%
-      Dies sind die von \TUDScript definierten, sprachabh\"angigen Bezeichner. %
-      Informationen zur Verwendung sowie den Anpassungsm\"oglichkeiten sind in %
-      \autoref{sec:localization} zu finden.%
+      Dies sind die von \TUDScript definierten beziehungsweise erw\"ahnten, %
+      sprachabh\"angigen Bezeichner. Informationen zur Verwendung sowie den %
+      Anpassungsm\"oglichkeiten sind in \autoref{sec:localization} zu finden.%
     )%
     \tud@print@index[elements]%
 %</class>
@@ -4260,40 +4308,71 @@
 %
 % Aufgrund der Verwendung der \env{multicols}-Umgebung durch das Paket
 % \pkg{imakeidx} werden normalerweise ohne einen Prolog zu große vertikale
-% Abstände gesetzt. Dies wird mit \cs{tud@idx@vskip} behoben.
+% Abstände nach der Überschrift und am Ende des Index gesetzt. Dies wird mit
+% \cs{tud@idx@vskip} behoben.
 %    \begin{macrocode}
 \newcommand*\tud@idx@vskip{%
   \ifnum\imki@columns>\@ne\relax\vspace{-\multicolsep}\fi%
 }
-\NewDocumentCommand\tud@print@index{!o !+d()}{%
+\NewDocumentCommand\tud@print@index{!O{\jobname} !+d()}{%
+%    \end{macrocode}
+% Falls ein zusätzlicher Deklarationsindex erstellt wurde, müssen die Optionen 
+% beim Aufruf von \app{texindy} angepasst werden. Da auf das Vorhandensein der 
+% entsprechenden Datei erst hier geprüft werden kann, ist dies nicht über das 
+% Interface von \pkg{imakeidx} möglich. Für dieses Unterfangen wird der Befehl
+% \cs{imki@set@\meta{name}} genutzt, welcher die individuellen Einstellungen 
+% des jeweiligen Index beinhaltet. Dieser wird in einer Gruppe aufgerufen, 
+% anschließend werden dem darin definierten Befehl \cs{imki@options} die 
+% benötigten Flags für \app{texindy} für die Ausgabe- und Indexdatei angehangen 
+% und an das Ende von \cs{imki@set@\meta{name}} zurückgeschrieben. So wird der 
+% Aufruf \file{texindy \cs{imki@options} \cs{jobname}-\meta{name}.idx} zu
+% \begin{quote}\raggedright^^A
+% \file{texindy \cs{imki@options} -o \jobname-\meta{name}.ind}\newline
+% \null\qquad\file{\jobname-\meta{name}-declare.idx \jobname-\meta{name}.idx}
+% \end{quote}
+% gepatcht. Damit werden beide Dateien von \app{texindy} verarbeitet, wobei die 
+% Einträge in \file{\jobname-\meta{name}-declare.idx} priorisiert werden.
+%    \begin{macrocode}
+  \IfFileExists{\jobname-#1-declare.idx}{%
+    \begingroup%
+      \csuse{imki@set@#1}%
+      \protected@edef\tud@res@a{%
+        \endgroup%
+        \noexpand\csappto{imki@set@#1}{%
+          \unexpanded{\def\imki@options}{%
+            \imki@options\space-o \jobname-#1.ind\space 
+            \jobname-#1-declare.idx\space%
+          }%
+        }%
+      }%
+    \tud@res@a%
+%    \end{macrocode}
+% Jetzt muss noch dafür Sorge getragen werden, dass die zweite Datei auch 
+% vorhanden ist, da sonst der Aufruf von \app{texindy} ebenfalls fehlerhaft 
+% endet.
+%    \begin{macrocode}
+    \IfFileExists{\jobname-#1.idx}{}{%
+      \immediate\openout\tud@write@a=\jobname-#1.idx\relax%
+      \immediate\closeout\tud@write@a%
+    }%
+  }{}%
 %    \end{macrocode}
 % Falls ein Seitenumbruch notwendig ist, sollte dieser vor dem Index und nicht 
 % unmittelbar nach dem Beginn erfolgen.
 %    \begin{macrocode}
-  \pagebreak[3]%
+  \IfFileExists{\jobname-#1.idx}{%
+    \pagebreak[3]%
 %<*class>
 %    \end{macrocode}
-% Das zu erstellende Label wird in \cs{tud@reserved} gespeichert. Dabei wird 
-% die Sternversion von \cs{tudhyperdef} genutzt, um das Label auf die Höhe der 
-% Überschrift zu setzen.
+% Das zu erstellende Label wird mit der Sternversion von \cs{tudhyperdef}
+% gesetzt, um dieses auf die Höhe der Überschrift zu setzen. Mit Prolog wird
+% der fehlerhafte vertikale Abstand nach diesem korrigiert, andernfalls sofort.
 %    \begin{macrocode}
-  \IfValueTF{#2}{%
-%    \end{macrocode}
-% Mit Prolog wird der fehlerhafte vertikale Abstand nach diesem korrigiert.
-%    \begin{macrocode}
-    \indexprologue{%
-      \tudhyperdef*{idx:\IfValueTF{#1}{#1}{\imki@jobname}}%
-      #2%
-      \tud@idx@vskip%
+    \IfValueTF{#2}{%
+      \indexprologue{\tudhyperdef*{idx:#1}#2\tud@idx@vskip}%
+    }{%
+      \indexprologue[\tud@idx@vskip]{\tudhyperdef*{idx:#1}}%
     }%
-  }{%
-%    \end{macrocode}
-% Ohne Prolog wird der fehlerhafte vertikale Abstand behoben. 
-%    \begin{macrocode}
-    \indexprologue[\tud@idx@vskip]{%
-      \tudhyperdef*{idx:\IfValueTF{#1}{#1}{\imki@jobname}}%
-    }%
-  }%
 %</class>
 %    \end{macrocode}
 % Fur das Paket \pkg{tudscrtutorial} erfolgt eine einfache Ausgabe der Indexe.
@@ -4301,18 +4380,25 @@
 % genutzt.
 %    \begin{macrocode}
 %<*package>
-  \indexprologue[\tud@idx@vskip]{}%
-  \begingroup%
-  \IfValueT{#2}{#2}%
+    \indexprologue[\tud@idx@vskip]{}%
+    \begingroup%
+    \IfValueT{#2}{#2}%
 %</package>
 %    \end{macrocode}
 % Die Ausgabe des gewünschten Index.
 %    \begin{macrocode}
-  \IfValueTF{#1}{\printindex[{#1}]}{\printindex}%
+    \printindex[{#1}]%
 %<*package>
-  \endgroup%
+    \endgroup%
 %</package>
-  \ifnum\imki@columns>\@ne\relax\vspace{-\multicolsep}\fi%
+    \tud@idx@vskip%
+  }{%
+    \ClassWarning{tudscrmanual}%
+    {%
+      No index entries found, index file\MessageBreak%
+      `\jobname-#1.idx' does not exist%
+    }%
+  }%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@idx@vskip
@@ -4964,12 +5050,10 @@
 % erzeugt wird und dieser im passenden Index als fettmarkierter Eintrag
 % erscheint.
 %    \begin{macrocode}
-    \IfBooleanT{#1}{%
-      \protected@edef\tud@res@b{\noexpand\emph{\tud@res@b}}%
-      \ifx\tud@res@c\@empty\else%
-        \protected@edef\tud@res@c{\noexpand\emph{\tud@res@c}}%
-      \fi%
-    }%
+    \protected@edef\tud@res@b{#2{\tud@res@b}}%
+    \ifx\tud@res@c\@empty\else%
+      \protected@edef\tud@res@c{#2{\tud@res@c}}%
+    \fi%
     \protected@edef\tud@res@a{\tud@values}%
     \eappto\tud@res@a{=\expandonce\tud@res@b=}%
 %    \end{macrocode}
@@ -6387,7 +6471,7 @@
           \ifx\tud@todo@type@use\@empty\else%
             \begingroup%
               \let\tud@res@c\@empty%
-              \renewcommand*{\do}[1]{%
+              \renewcommand*\do[1]{%
                 \appto\tud@res@c{,##1}%
               }%
               \dolistloop{\tud@todo@type@use}%
