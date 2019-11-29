@@ -537,10 +537,10 @@ die Präambel ein und erstellt anschließend über den PostScript-Pfad
 \Path{latex\,>\,dvips\,>\,ps2pdf} eine PDF"~Datei, welche lediglich alle in den 
 vorhandenen \Environment{pspicture}(\Package{pstricks})"~Umgebungen erstellten 
 Grafiken enthält. Das Paket \Package{iftex} stellt zur Unterscheidung, ob das 
-aktuell erzeugte Dokument in einer PDF"~ oder einer DVI"~Datei ausgegeben wird, 
-das Makro \Macro{ifpdf}(\Package{iftex}) bereit. Dies wird genutzt, um abhängig 
-vom Ausgabeformat unterschiedliche Quelltexte auszuführen und somit die 
-nachfolgend beschriebenen Probleme zu beheben.
+aktuell kompilierte Dokument in einer PDF"~ oder einer DVI"~Datei ausgegeben 
+wird, das Makro \Macro{ifpdf}(\Package{iftex}) bereit. Dieser Befehl wird 
+nachfolgend genutzt, um abhängig vom Ausgabeformat unterschiedliche Quelltexte 
+auszuführen.
 %
 \begin{quoting}
 \begin{Code}
@@ -551,18 +551,18 @@ nachfolgend beschriebenen Probleme zu beheben.
 \minisec{Die gleichzeitige Verwendung von \Package{floatrow}}
 Das Paket \Package{floatrow} stellt Befehle bereit, mit denen die Beschriftung 
 von Gleitobjekten sehr bequem gesetzt werden können. Diese Setzen ihren Inhalt 
-erst in einer Box, um deren Breite zu ermitteln und diese anschließend 
-auszugeben. In Kombination mit \Package{auto-pst-pdf} führt das zu einer 
-doppelten Erstellung der gewünschten Abbildung. Um dies zu vermeiden, müssen 
-die durch \Package{floatrow} bereitgestellten Befehle \enquote{unschädlich} 
-gemacht werden. Die fraglichen Befehlen akzeptieren allerdings bis zu drei 
-optionale Argumente \emph{vor} den beiden obligatorischen, was für die 
-Benutzerschnittstelle für die (Re"~)Definition durch \hologo{LaTeX} 
-normalerweise nicht vorgesehen ist. Deshalb wird das Paket \Package{xparse} 
-geladen, mit welchem dies möglich wird. Genaueres dazu ist der dazugehörigen 
-Paketdokumentation zu entnehmen. Mit folgendem Quelltextauszug lassen sich die 
-Befehle des Paketes \Package{floatrow} zusammen mit der 
-\Environment{pspicture}(\Package{pstricks})"~Umgebung wie gewohnt verwenden.
+vor der eigentlichen Ausgabe erst in einer Box, um deren Breite zu ermitteln. 
+In Kombination mit \Package{auto-pst-pdf} führt das zu einer doppelten 
+Erstellung der gewünschten Abbildung. Um dies zu vermeiden, müssen die durch 
+\Package{floatrow} bereitgestellten Makros \enquote{unschädlich} gemacht 
+werden. Die fraglichen Befehle akzeptieren allerdings bis zu drei optionale 
+Argumente \emph{vor} den beiden obligatorischen, was bei \hologo{LaTeX} für die 
+(Re"~)Definition von Befehlen normalerweise nicht vorgesehen ist. Deshalb wird 
+das Paket \Package{xparse} geladen, mit welchem dies möglich wird. Genaueres 
+dazu ist der dazugehörigen Paketdokumentation zu entnehmen. Mit folgendem 
+Quelltextauszug lassen sich die Befehle des Paketes \Package{floatrow} zusammen 
+mit der \Environment{pspicture}(\Package{pstricks})"~Umgebung wie gewohnt 
+verwenden.
 %
 \begin{quoting}
 \begin{Code}
@@ -709,7 +709,7 @@ Befehl \Macro{geometry} bereit, in dessen Argument mit
 festgelegt werden kann. Wird zusätzlich noch der Parameter 
 \Key{\Macro{geometry}}{layout=\PName{Zielformat}}|default| angegeben, so wird 
 damit das gewünschte Zielformat definiert. Dabei sollte mit 
-\Key{\Macro{geometry}}{layoutoffset=\PName{Längenwert}}|default| dieser Bereich 
+\Key{\Macro{geometry}}{layoutoffset=\PLength}|default| dieser Bereich 
 gegebenenfalls etwas eingerückt werden. Die Angabe von 
 \Key{\Macro{geometry}}{showcrop=\PBoolean}|default| generiert außerdem noch 
 visuelle Schnittmarken.
@@ -734,7 +734,7 @@ visuelle Schnittmarken.
 Für genauere Erläuterungen sowie weitere Einstellmöglichkeiten sei auf die 
 Dokumentation von \Package{crop} beziehungsweise \Package{geometry} verwiesen.
 Mit der \TUDScript-Option \Option{bleedmargin}(\Class{tudscrposter}) können
-zusätzlich ie farbigen Bereiche der \PageStyle{tudheadings}"~Seitenstile 
+zusätzlich die farbigen Bereiche der \PageStyle{tudheadings}"~Seitenstile 
 erweitert werden, um ein \enquote{Zuschneiden in die Farbe} zu ermöglichen.
 
 
@@ -930,14 +930,15 @@ schreibende Pakete, kann es zur der Fehlermeldung
 \end{Code}
 \end{quoting}
 %
-kommen. Abhilfe schafft hier das Paket \Package{scrwfile}, welches einige 
-Änderungen am \hologo{LaTeXe}"~Kernel vornimmt, um die Anzahl der benötigten 
-Hilfsdateien für das Schreiben aller Verzeichnisse zu reduzieren. Es muss 
-einfach in der Präambel eingebunden werden. Sollten mit diesem Paket 
-unerwarteter Weise Probleme auftreten, ist dessen Anleitung im \scrguide zu 
-finden. Eine weitere Möglichkeit, das beschriebene Problem der geringen Menge 
-an Ausgabe-Streams zu umgehen, stellt das Paket \Package{morewrites} dar. 
-Allerdings ist dessen Verwendung nicht in allen Fällen von Erfolg gekrönt.
+kommen. Abhilfe schafft das Paket \Package{morewrites}, welches die Ausgabe der 
+Streams in eine Hilfsdatei umleitet. Es sollte möglichst frühzeitig innerhalb 
+der Präambel geladen werden. Die Verwendung des Paketes is in seltenen Fällen 
+nicht von Erfolg gekrönt. Für diesen Fall lässt sich alternativ das Paket 
+\Package{scrwfile}(\Package{koma-script}) nutzen, welches einige Änderungen am 
+\hologo{LaTeXe}"~Kernel vornimmt, um die Anzahl der benötigten Hilfsdateien für 
+das Schreiben aller Verzeichnisse zu reduzieren. Auch dieses sollte gleich zu 
+Beginn der Präambel eingebunden werden. Sollten mit diesem Paket unerwarteter 
+Weise Probleme auftreten, ist dessen Anleitung im \scrguide zu finden. 
 
 
 
