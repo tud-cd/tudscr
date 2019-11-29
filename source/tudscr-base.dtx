@@ -1,4 +1,4 @@
-% \CheckSum{1521}
+% \CheckSum{1541}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -187,7 +187,7 @@
 %    \begin{macrocode}
 \@ifpackageloaded{scrlfile}{%
   \@ifpackagelater{scrlfile}{2019/10/13}{}{%
-    \renewcommand*{\scr@load@hook}[2]{%
+    \renewcommand*\scr@load@hook[2]{%
       \edef\scr@hookname{#1}%
       \def\scr@cmd@hook{before}%
       \ifx\scr@hookname\scr@cmd@hook
@@ -205,7 +205,7 @@
         \fi
       \let\scr@hookname\@undefined
     }%
-    \renewcommand*{\@@AfterClass}[2]{%
+    \renewcommand*\@@AfterClass[2]{%
       \@ifundefined{#2.\@clsextension-l@ading}{%
         \@sAfterClass
       }{%
@@ -213,7 +213,7 @@
       }%
       {#2}%
     }%
-    \renewcommand*{\@@@AfterClass}[2]{%
+    \renewcommand*\@@@AfterClass[2]{%
       \@ifundefined{#2.\@clsextension-l@ading}{%
         \@ifclassloaded{#2}{%
           \@sAfterClass
@@ -225,7 +225,7 @@
       }%
       {#2}%
     }%
-    \renewcommand*{\@@AfterPackage}[2]{%
+    \renewcommand*\@@AfterPackage[2]{%
       \@ifundefined{#2.\@pkgextension-l@ading}{%
         \@sAfterPackage
       }{%
@@ -233,7 +233,7 @@
       }%
       {#2}%
     }%
-    \renewcommand*{\@@@AfterPackage}[2]{%
+    \renewcommand*\@@@AfterPackage[2]{%
       \@ifundefined{#2.\@pkgextension-l@ading}{%
         \@ifpackageloaded{#2}{%
           \@sAfterPackage
@@ -245,7 +245,7 @@
       }%
       {#2}%
     }%
-    \renewcommand*{\AfterAtEndOfPackage}[1]{%
+    \renewcommand*\AfterAtEndOfPackage[1]{%
       \@ifpackageloaded{#1}{%
         \@ifundefined{#1.\@pkgextension-l@ading}{%
           \@gobbletwo
@@ -257,7 +257,7 @@
       }%
       {#1}%
     }%
-    \newcommand*{\@AfterAtEndOfPackage}[1]{%
+    \newcommand*\@AfterAtEndOfPackage[1]{%
       \scr@set@load@hook{lateafter}{#1.\@pkgextension}%
     }%
   }%
@@ -284,6 +284,34 @@
 %    \end{macrocode}
 %
 % \subsection{Grundlegende Befehle für \TUDScript}
+%
+% \subsubsection{Sichere Definition von \TeX-Primitiven}
+%
+% Mit \LaTeX{} lassen sich einige Primitiven definieren, ohne zu Prüfen, ob 
+% ggf. bereits eine Definition vorhanden ist. Dies wird hiermit umgangen.
+% \begin{macro}{\tud@newif}
+% \changes{v2.06f}{2019/09/29}{neu}^^A
+% \begin{macro}{\tud@newcount}
+% \changes{v2.06f}{2019/09/29}{neu}^^A
+% \begin{macro}{\tud@newtoks}
+% \changes{v2.06f}{2019/09/29}{neu}^^A
+% \begin{macro}{\tud@newread}
+% \changes{v2.06f}{2019/09/29}{neu}^^A
+% \begin{macro}{\tud@newwrite}
+% \changes{v2.06f}{2019/09/29}{neu}^^A
+%    \begin{macrocode}
+\newcommand*\tud@newif[1]{\@ifdefinable#1{\newif#1}}
+\newcommand*\tud@newcount[1]{\@ifdefinable#1{\newcount#1}}
+\newcommand*\tud@newtoks[1]{\@ifdefinable#1{\newtoks#1}}
+\newcommand*\tud@newread[1]{\@ifdefinable#1{\newread#1}}
+\newcommand*\tud@newwrite[1]{\@ifdefinable#1{\newwrite#1}}
+%    \end{macrocode}
+% \end{macro}^^A \tud@newwrite
+% \end{macro}^^A \tud@newread
+% \end{macro}^^A \tud@newtoks
+% \end{macro}^^A \tud@newcount
+% \end{macro}^^A \tud@newif
+%
 % \subsubsection{Temporäre Makros zur internen Verwendung durch \TUDScript}
 %
 % Hier werden Makros definiert, die allein für die interne temporäre Nutzung 
@@ -291,6 +319,7 @@
 % \ToDo{Sämtliche \cs{@temp\dots}-Makros auf \cs{tud@res@\dots} ändern}[v2.??]
 % \ToDo{\cs{tud@reserved} in \cs{tud@res@?}, Achtung bei Dopplungen!}[v2.??]
 % \ToDo{Schlüssel sollten weiterhin \cs{@temp\dots}-Makros verwenden}[v2.??]
+% \ToDo{Makros mit \val{@num} in count ändern}[v2.??]
 % \begin{macro}{\tud@reserved}
 % \changes{v2.05}{2015/10/27}{neu}^^A
 % \begin{macro}{\tud@res@a}
@@ -311,9 +340,9 @@
 \newcommand*\tud@res@a{}
 \newcommand*\tud@res@b{}
 \newcommand*\tud@res@c{}
-\newif\if@tud@res@swa
-\newcount\tud@res@cnt
-\newread\tud@res@read
+\tud@newif\if@tud@res@swa
+\tud@newcount\tud@res@cnt
+\tud@newread\tud@res@read
 %    \end{macrocode}
 % \end{macro}^^A \tud@res@read
 % \end{macro}^^A \tud@res@cnt
@@ -331,7 +360,7 @@
 % zu \cs{addto@hook}~-- ein Makro zum Anfügen des expandierten Arguments an ein 
 % token-Register bereitgestellt.
 %    \begin{macrocode}
-\newtoks\tud@toks@
+\tud@newtoks\tud@toks@
 \newcommand*\eaddto@hook[2]{%
   \expandafter\addto@hook\expandafter#1\expandafter{#2}%
 }
@@ -339,7 +368,7 @@
 % \end{macro}^^A \eaddto@hook
 % \end{macro}^^A \tud@toks@
 %
-% \subsubsection{Saubere Definiton von Längen-Registern}
+% \subsubsection{Definiton von Längen-Registern}
 %
 % \begin{macro}{\tud@newglue}
 % \changes{v2.06f}{2019/11/24}{neu}^^A

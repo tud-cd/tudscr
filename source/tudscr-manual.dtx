@@ -1,4 +1,4 @@
-% \CheckSum{5263}
+% \CheckSum{5275}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -224,7 +224,7 @@
 % Der Befehl \cs{tud@list@sort} erwartet eine \pkg{etoolbox}-Liste und sortiert 
 % diese mit dem Makro \cs{sort@list} in alphabetischer Reihenfolge.
 %    \begin{macrocode}
-\newif\if@tud@list@sorted
+\tud@newif\if@tud@list@sorted
 \newcommand*\tud@list@sorted{}
 \newcommand*\tud@list@sort[1]{%
   \ifdefvoid{#1}{%
@@ -1609,9 +1609,9 @@
 % auf \val{false}. Damit wird bestimmt, ob ein öffnender oder ein schließender
 % Indexeintrag erzeugt werden soll.
 %    \begin{macrocode}
-\newif\if@tud@declare
-\newcount\tud@declare@num
-\newif\if@tud@openindex
+\tud@newif\if@tud@declare
+\tud@newcount\tud@declare@num
+\tud@newif\if@tud@openindex
 %    \end{macrocode}
 % \end{macro}^^A \if@tud@openindex
 % \end{macro}^^A \tud@declare@num
@@ -1672,7 +1672,7 @@
 % für Umgebungen und Befehle gedacht, bei denen lediglich ein oder mehrere 
 % Parameter geändert wurden bzw. entfallen.
 %    \begin{macrocode}
-\newif\if@tud@obsolete
+\tud@newif\if@tud@obsolete
 \NewDocumentEnvironment{Obsolete}{m o m !o !o !d()}{%
   \@tud@obsoletetrue%
   \ifxblank{#1}{%
@@ -1740,10 +1740,10 @@
 %    \begin{macrocode}
 \newcommand*\tud@preset@list{}
 \let\tud@preset@list\relax
-\newif\if@tud@preset@list
+\tud@newif\if@tud@preset@list
 \newcommand*\tud@additional@list{}
 \let\tud@additional@list\relax
-\newif\if@tud@additional@list
+\tud@newif\if@tud@additional@list
 %    \end{macrocode}
 % \end{macro}^^A \if@tud@additional@list
 % \end{macro}^^A \tud@additional@list
@@ -2049,9 +2049,9 @@
 % weshalb sowohl von \cs{PrintIndex} als auch \cs{PrintChangelog} ebenfalls
 % \cs{@tud@indextrue} gesetzt wird.
 %    \begin{macrocode}
-\newif\if@tud@index
+\tud@newif\if@tud@index
 \addtoeachtocfile{\protect\@tud@indextrue}
-%<class>\newif\if@tud@changelog
+%<class>\tud@newif\if@tud@changelog
 %    \end{macrocode}
 % \end{macro}^^A \if@tud@changelog
 % \end{macro}^^A \if@tud@index
@@ -3209,7 +3209,7 @@
 % und der dazugehörige auswertende Befehl \cs{ifdisposition} definiert. Das
 % Setzen des Schalters wird in \cs{tud@sec@format} gepatcht.
 %    \begin{macrocode}
-\newif\if@tud@disposition
+\tud@newif\if@tud@disposition
 \newcommand*\ifdisposition{%
   \if@tud@disposition%
     \expandafter\@firstoftwo%
@@ -3474,6 +3474,22 @@
   \ifundef{\pdf@filemdfivesum}{}{%
     \PassOptionsToPackage{quiet}{imakeidx}%
     \edef\tud@res@a{\pdf@filemdfivesum{\jobname.idx}}%
+%    \end{macrocode}
+% Das Paket \pkg{imakeidx} prüft nach dem durch \cs{printindex} initiierten 
+% Aufruf von \app{splitindex} nicht, ob \file{\cs{jobname}-\meta{name}.dtx} 
+% auch tatsächlich exisitiert, was am Ende zu einem fehlerhaften Aufruf von
+% \app{texindy} führt. Um dies zu umgehen, wird durch \cs{tud@print@index}
+% geprüft, ob die gewünschte Datei auch vorhanden ist, bevor \cs{printindex} 
+% ausgeführt wird. Dafür muss \app{splitindex} aber zuvor aufgerufen worden 
+% sein, was hier erfolgt.
+%    \begin{macrocode}
+    \ifnum\pdf@shellescape=\@ne\relax%
+      \ifx\tud@idx@mdfive\@empty%
+        \ifx\tud@res@a\@empty\else%
+          \ShellEscape{splitindex -m \string"\string" \jobname.idx}%
+        \fi%
+      \fi%
+    \fi%
     \ifnum\pdf@strcmp{\tud@res@a}{\tud@idx@mdfive}=\z@\relax%
       \PassOptionsToPackage{noautomatic}{imakeidx}%
     \else%
@@ -3643,18 +3659,6 @@
 %<*class>
   \tud@xdy@make[columns=1]{\"Anderungsliste}[changelog]%
 %</class>
-%    \end{macrocode}
-% Das Paket \pkg{imakeidx} prüft nach dem durch \cs{printindex} initiierten 
-% Aufruf von \app{splitindex} nicht, ob \file{\cs{jobname}-\meta{name}.dtx} 
-% auch tatsächlich exisitiert, was am Ende zu einem fehlerhaften Aufruf von
-% \app{texindy} führt. Um dies zu umgehen, wird durch \cs{tud@print@index}
-% geprüft, ob die gewünschte Datei auch vorhanden ist, bevor \cs{printindex} 
-% ausgeführt wird. Dafür muss \app{splitindex} aber zuvor aufgerufen worden 
-% sein, was hier erfolgt.
-%    \begin{macrocode}
-  \ifnum\pdf@shellescape=\@ne\relax%
-    \ShellEscape{splitindex -m \string"\string" \jobname.idx}%
-  \fi%
 }
 %    \end{macrocode}
 %
@@ -4388,6 +4392,9 @@
 % Die Ausgabe des gewünschten Index.
 %    \begin{macrocode}
     \printindex[{#1}]%
+    \IfFileExists{\jobname-#1.ind}{}{%
+      \immediate\write\@mainaux{\string\gdef\string\tud@idx@mdfive{}}%
+    }%
 %<*package>
     \endgroup%
 %</package>
@@ -4438,7 +4445,7 @@
 % \cs{Process@ChangedAt} auszuführen, mit welchem die Formatierung der Einträge 
 % der Änderungsliste erfolgt.
 %   \begin{macrocode}
-\newif\if@tud@changedat
+\tud@newif\if@tud@changedat
 %    \end{macrocode}
 % Die Formatierung der Änderungseinträge erfolgt~-- wie auch für den Index~-- 
 % mit dem Makro \cs{tud@idx@get}, wobei die Sternversion für die Identifikation
@@ -5330,17 +5337,14 @@
 % genutzt. Für dieses wird eine eigene Stildatei verwendet, welche zur Laufzeit 
 % erzeugt wofür zuerst ein Ausgabestream reserviert wird.
 %    \begin{macrocode}
-\newcommand*\tud@write@a{}
-\newwrite\tud@write@a
+\tud@newwrite\tud@write@a
 %    \end{macrocode}
 % Für die Tutorials werden später zusätzlich noch ein weiterer Ausgabe- sowie 
 % ein Eingabestream benötigt, die hier gleich mit initialisiert werden.
 %    \begin{macrocode}
 %<*package>
-\newcommand*\tud@write@b{}
-\newwrite\tud@write@b
-\newcommand*\tud@read{}
-\newread\tud@read
+\tud@newwrite\tud@write@b
+\tud@newread\tud@read
 %</package>
 %    \end{macrocode}
 % \end{macro}^^A \tud@read
@@ -6239,7 +6243,7 @@
 % Diese Option ist verantwortlich für den Schalter \cs{if@tud@todo}. Über 
 % diesen wird gesteuert, ob ToDo-Notizen ausgegeben werden sollen.
 %    \begin{macrocode}
-\newif\if@tud@todo
+\tud@newif\if@tud@todo
 \newcommand*\tud@todo@type@pos{}
 \let\tud@todo@type@pos\relax
 \newcommand*\tud@todo@type@neg{}

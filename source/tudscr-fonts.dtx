@@ -221,7 +221,7 @@
 % Mathematikschriften überlassen wurde. In diesem Fall wird eine entsprechende 
 % Warnung an \cs{tud@cdmath@wrn} angehängt.
 %    \begin{macrocode}
-\newif\if@tud@x@fontspec@enabled
+\tud@newif\if@tud@x@fontspec@enabled
 \PassOptionsToPackage{no-math}{fontspec}
 \AfterPackage*{fontspec}{%
   \@ifpackagelater{fontspec}{2017/01/24}{%
@@ -289,7 +289,7 @@
 % für beispielsweise die TypeWriter-Schriften nutzen zu können.
 %    \begin{macrocode}
 \TUD@RecommendPackage{mweights}[2017/03/30]%
-\newif\if@tud@x@mweights@enabled
+\tud@newif\if@tud@x@mweights@enabled
 \AfterPackage*{mweights}{\@tud@x@mweights@enabledtrue}
 %    \end{macrocode}
 % \end{macro}^^A \if@tud@x@mweights@enabled
@@ -345,7 +345,7 @@
 % Die TypeWriter-Schrift aus \pkg{roboto-mono} kann nur genutzt werden, wenn
 % diese tatsächlich auch vorhanden ist.
 %    \begin{macrocode}
-\newif\if@tud@ttfont@rb@exist
+\tud@newif\if@tud@ttfont@rb@exist
 \IfFileExists{roboto-mono.sty}{%
   \@tud@ttfont@rb@existtrue%
 }{%
@@ -381,10 +381,10 @@
 % Nichtvorhandensein der Schriften wird eine Warnung ausgegeben sowie eine
 % Rückfallebene definiert.
 %    \begin{macrocode}
-\newif\if@tud@cdfont@fam@exist
-\newif\if@tud@cdfont@db@exist
-\newif\if@tud@cdmath@fam@exist
-\newif\if@tud@cdmath@db@exist
+\tud@newif\if@tud@cdfont@fam@exist
+\tud@newif\if@tud@cdfont@db@exist
+\tud@newif\if@tud@cdmath@fam@exist
+\tud@newif\if@tud@cdmath@db@exist
 \newcommand*\tud@x@mathastext@enc{OT1}
 \newcommand*\tud@cdfont@check{%
   \if@tud@cdoldfont@active%
@@ -689,10 +689,10 @@
 %   das macht alles um einiges einfacher, siehe \opt{cdoldfont}, \opt{cdmath}
 % }[v2.07]
 %    \begin{macrocode}
-\newif\if@tud@cdfont@active
-\newif\if@tud@cdfont@heavy
-\newif\if@tud@cdfont@ultrabold
-\newif\if@tud@cdfont@lining
+\tud@newif\if@tud@cdfont@active
+\tud@newif\if@tud@cdfont@heavy
+\tud@newif\if@tud@cdfont@ultrabold
+\tud@newif\if@tud@cdfont@lining
 \@tud@cdfont@liningtrue
 \TUD@key{cdfont}[true]{%
   \TUD@set@numkey{cdfont}{@tempa}{%
@@ -873,8 +873,8 @@
 % Schriftauswahl für die \TUDScript-Klassen oder das Paket \pkg{tudscrfonts} 
 % entsprechend angepasst.
 %    \begin{macrocode}
-\newif\if@tud@cdoldfont@active
-\newif\if@tud@cdoldfont@nodin
+\tud@newif\if@tud@cdoldfont@active
+\tud@newif\if@tud@cdoldfont@nodin
 \TUD@key{cdoldfont}[true]{%
   \TUD@set@numkey{cdoldfont}{@tempa}{%
     \TUD@bool@numkey,%
@@ -984,12 +984,14 @@
 % \KOMAScript{} weiterreicht.
 %    \begin{macrocode}
 %<*class>
-\newif\if@tud@x@scr@fontsize@set
+\tud@newif\if@tud@x@scr@fontsize@set
 %</class>
 \TUD@key{fontsize}{%
   \TUD@set@dimkey{fontsize}{\@tempa}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \ifdim\@tempa>\z@\relax%
+    \ifdim\@tempa<\p@\relax%
+      \FamilyKeyStateUnknownValue%
+    \else%
 %    \end{macrocode}
 % Für das Paket wird geprüft, ob die gerade abgearbeitete Option global als
 % Klassenoption angegeben wurde. Für den Fall, dass dies nicht so ist~-- die 
@@ -1013,8 +1015,6 @@
       \@tud@x@scr@fontsize@settrue%
 %</class>
       \TUD@KOMAoptions{fontsize=#1}%
-    \else%
-      \FamilyKeyStateUnknownValue%
     \fi%
   \fi%
 %    \end{macrocode}
@@ -1028,8 +1028,8 @@
     \PackageWarningNoLine{tudscrfonts}%
 %</package>
     {%
-      The value for option `fontsize' has to be a\MessageBreak%
-      positve dimension but `#1' was given%
+      The value for option `fontsize' must be a dimension\MessageBreak%
+      and at least 1pt but `#1' was given%
     }%
     \FamilyKeyStateProcessed%
   \fi%
@@ -1073,7 +1073,7 @@
 % werden. Die Definiton der Längen wird durch das Makro \cs{tud@relspacing@set} 
 % vorgenommen.
 %    \begin{macrocode}
-\newif\if@tud@relspacing
+\tud@newif\if@tud@relspacing
 \TUD@key{relspacing}[true]{%
   \TUD@set@numkey{relspacing}{@tempa}{%
     \TUD@bool@numkey,%
@@ -1589,7 +1589,7 @@
       \AtBeginDocument{%
         \ifundef{\textrightarrow}{}{%
           \tud@cs@store{textrightarrow}%
-          \renewrobustcmd*{\textrightarrow}{%
+          \renewrobustcmd*\textrightarrow{%
             \begingroup%
               \if@tud@cdfont@active\fontfamily{iwona}\selectfont\fi%
               \tud@cs@use{textrightarrow}%
@@ -2431,7 +2431,7 @@
 % Mit dieser Option lässt sich die Nutzung von griechischen Glyphen der aus der 
 % LGR-Kodierung der aktuellen Schriftfamilie für den Mathematiksatz aktivieren.
 %    \begin{macrocode}
-\newif\if@tud@lgrgreeks
+\tud@newif\if@tud@lgrgreeks
 \TUD@key{lgrgreeks}[true]{\TUD@set@ifkey{lgrgreeks}{@tud@lgrgreeks}{#1}}
 \TUD@key{lgrgreek}[true]{\TUDoptions{lgrgreeks=#1}}
 \TUD@key{LGRgreeks}[true]{\TUDoptions{lgrgreeks=#1}}
@@ -3615,7 +3615,7 @@
 % \cs{tud@cdmath@declare@symb} sowie \cs{tud@cdmath@declare@char} deklariert 
 % wurden, und den normalen gewechselt werden. 
 %    \begin{macrocode}
-\newtoks\tud@cdmath@symbols@toks
+\tud@newtoks\tud@cdmath@symbols@toks
 \newcommand*\tud@cdmath@symbols@set{%
 %    \end{macrocode}
 % Die Sicherung der alten Definitionen erfolgt nur einmalig. Die Liste der 
@@ -4398,7 +4398,7 @@
 % die mathematischen Symbole vornehmen zu können. Dieser Workaround geht auf
 % eine Meldung im \Forum<448> zurück.
 %    \begin{macrocode}
-\newif\if@tud@x@bm@requested
+\tud@newif\if@tud@x@bm@requested
 %<*package>
 \@ifpackageloaded{bm}{%
   \PackageWarning{tudscrfonts}{%
