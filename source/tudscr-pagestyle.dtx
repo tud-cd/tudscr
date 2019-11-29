@@ -1,4 +1,4 @@
-% \CheckSum{2057}
+% \CheckSum{2063}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -1103,7 +1103,8 @@
     \ifdim\@tempdima>\z@\relax%
       \ClassWarning{\TUD@Class@Name}{%
         #3\MessageBreak%
-        The maximum height is exceeded by \the\@tempdima\MessageBreak%
+        The maximum height is exceeded by\MessageBreak%
+        \the\@tempdima%
       }%
     \fi%
   \endgroup%
@@ -1111,6 +1112,262 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@vlayerbox
+%
+% \iffalse
+%</class&body>
+% \fi
+%
+% \subsection{Optionen für das \DDC-Logo}
+%
+% \begin{macro}{\tud@comp@clearpage}
+% \changes{v2.04}{2015/05/31}{neu}^^A
+% \begin{macro}{\tud@comp@resetpagestyle}
+% \changes{v2.04}{2015/05/31}{neu}^^A
+% \begin{macro}{\if@tud@ddc@internal}
+% \changes{v2.02}{2014/07/08}{neu}^^A
+% Bis zur Version~v2.02 wurden unterschiedliche Satzsiegel für den Seitenfuß 
+% mit und ohne \DDC-Logo verwendet. Damit dieser im Zweifelsfall umgestellt 
+% werden kann, wurde vor dem Ausführen der entsprechenden Optionen ein 
+% Seitenumbruch erzwungen und nach dem Verarbeiten der Optionen der aktuelle 
+% Seitenstil erneut aufgerufen. Die beiden folgenden Makros werden für dieses 
+% Unterfangen definiert, jedoch bei der Abarbeitung der Optionen nur noch im 
+% Kompatibilitätmodus ausgeführt. Der Schalter \cs{if@tud@ddc@internal} wird 
+% intern von den Optionen \opt{ddc}, \opt{ddchead} und \opt{ddcfoot} verwendet,
+% um rekursive Aufrufe der Optionen zu verhindern.
+%    \begin{macrocode}
+%<*class&option>
+\tud@newif\if@tud@ddc@internal
+\newcommand*\tud@comp@clearpage{}%
+\newcommand*\tud@comp@resetpagestyle{}%
+%</class&option>
+%<*class&body>
+\tud@if@v@lower{2.04}{%
+  \renewcommand*\tud@comp@clearpage{%
+    \if@tud@ddc@internal\else%
+      \tud@if@tudheadings{\currentpagestyle}{\clearpage}{}%
+    \fi%
+  }%
+  \renewcommand*\tud@comp@resetpagestyle{%
+    \if@tud@ddc@internal\else%
+      \tud@if@tudheadings{\currentpagestyle}{%
+        \expandafter\pagestyle\expandafter{\currentpagestyle}%
+      }{}%
+    \fi%
+  }%
+}{}%
+%</class&body>
+%    \end{macrocode}
+% \end{macro}^^A \if@tud@ddc@internal
+% \end{macro}^^A \tud@comp@clearpage
+% \end{macro}^^A \tud@comp@resetpagestyle
+%
+% \iffalse
+%<*class&option>
+% \fi
+%
+% \begin{option}{ddc}
+% \changes{v2.02}{2014/06/23}{automatische Logowahl}^^A
+% \begin{option}{ddchead}
+% \changes{v2.02}{2014/06/23}{Logo von \DDC entweder in Kopf oder Fuß}^^A
+% \begin{option}{ddcfoot}
+% \changes{v2.02}{2014/06/23}{Logo von \DDC entweder in Kopf oder Fuß}^^A
+% Diese Optionen dienen zur Auswahl des \DDC-Logos auf Seiten mit dem Stil 
+% \pgs{tudheadings}. Die Option \opt{ddchead} setzt das Logo dabei immer in den
+% Kopf, wobei ein mit \cs{headlogo} definiertes Zweitlogo gegebenenfalls 
+% überschrieben wird. Die Option \opt{ddcfoot} setzt das Logo immer in den Fuß. 
+% Mit der Option \opt{ddc} wird das Logo nur in den Kopf gesetzt, wenn kein 
+% Zweitlogo angegeben ist. Ist dies jedoch der Fall, wird das Logo stattdessen 
+% im Fuß ausgegeben.
+% \begin{macro}{\tud@ddc@switch}
+% \changes{v2.02}{2014/06/23}{neu}^^A
+% Das Makro definiert die gültigen Werte für die \DDC-Optionen \opt{ddc}, 
+% \opt{ddchead} sowie \opt{ddcfoot}.
+%    \begin{macrocode}
+\newcommand*\tud@ddc@switch{}
+\edef\tud@ddc@switch{%
+  \TUD@bool@numkey,%
+  {color}{2},{colour}{2},{cdcolor}{2},{cdcolour}{2},%
+  {colorblack}{3},{colourblack}{3},{cdcolorblack}{3},{cdcolourblack}{3},%
+  {gray}{4},{grey}{4},{hks92}{4},{cdgray}{4},{cdgrey}{4},%
+  {black}{5},{cdblack}{5},%
+  {blue}{6},{hks41}{6},{cdblue}{6},{cddarkblue}{6},%
+  {white}{7},{cdwhite}{7}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@ddc@switch
+% \begin{macro}{\tud@ddc@auto@num}
+% \changes{v2.02}{2014/06/23}{neu}^^A
+% \begin{macro}{\if@tud@ddc@auto}
+% \changes{v2.02}{2014/06/23}{neu}^^A
+% \begin{macro}{\if@tud@headlogo@option@set}
+% \changes{v2.04}{2015/05/31}{neu}^^A
+% \begin{macro}{\if@tud@footlogo@option@set}
+% \changes{v2.04}{2015/06/01}{neu}^^A
+% Die Option \opt{ddc}.
+%    \begin{macrocode}
+\tud@newif\if@tud@headlogo@option@set
+\tud@newif\if@tud@footlogo@option@set
+\tud@newif\if@tud@ddc@auto
+\newcommand*\tud@ddc@auto@num{0}
+\TUD@key{ddc}[true]{%
+%    \end{macrocode}
+% Im Kompatibiltätsmodus wird ein Seitenumbruch erzwungen. Anschließend wird 
+% die Option abgearbeitet.
+%    \begin{macrocode}
+  \tud@comp@clearpage%
+  \TUD@set@numkey{ddc}{tud@ddc@auto@num}{\tud@ddc@switch}{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+%    \end{macrocode}
+% Wurde die Option \opt{ddc} intern durch \opt{ddchead} oder \opt{ddcfoot} 
+% aufgerufen, wird die automatische Auswahl des \DDC-Logos deaktiviert.
+%    \begin{macrocode}
+    \if@tud@ddc@internal%
+      \@tud@ddc@autofalse%
+    \else%
+%    \end{macrocode}
+% Andernfalls wird die automatische Auswahl aktiviert und die beiden Optionen
+% \opt{ddchead} sowie \opt{ddcfoot} intern zurückgesetzt.
+%    \begin{macrocode}
+      \@tud@ddc@autotrue%
+      \@tud@ddc@internaltrue%
+      \TUDoptions{ddchead=false}%
+      \TUDoptions{ddcfoot=false}%
+      \@tud@ddc@internalfalse%
+    \fi%
+%    \end{macrocode}
+% Sowohl die \DDC-Logos als auch ein mögliches Zweilogo (\cs{headlogo}) werden
+% in den entsprechenden Layern durch Boxen ausgegeben. Die beiden Schalter 
+% führen zum Erneuern der dazugehörigen Logoboxen. Siehe die Beschreibung der 
+% Makros \cs{tud@headlogo@option@set} sowie \cs{tud@footlogo@option@set}.
+%    \begin{macrocode}
+    \global\@tud@headlogo@option@settrue%
+    \global\@tud@footlogo@option@settrue%
+  \fi%
+%    \end{macrocode}
+% Abschließend wird im Kompatibilitätsmodus der aktuelle Seitenstil aufgerufen,
+% um bei einem geänderten Fuß den notwendigen Satzspiegel zu laden.
+%    \begin{macrocode}
+  \tud@comp@resetpagestyle%
+}
+%    \end{macrocode}
+% \end{macro}^^A \if@tud@footlogo@option@set
+% \end{macro}^^A \if@tud@headlogo@option@set
+% \end{macro}^^A \if@tud@ddc@auto
+% \end{macro}^^A \tud@ddc@auto@num
+% \begin{macro}{\tud@ddc@head@num}
+% \changes{v2.03}{2015/01/22}{Seitenstilauswahl bei Deaktivierung verbessert}^^A
+% Die Option \opt{ddchead} dient zum zwingenden Setzen des \DDC-Logos im Kopf 
+% der Seiten im Stil von \pgs{tudheadings}.
+%    \begin{macrocode}
+\newcommand*\tud@ddc@head@num{0}
+\TUD@key{ddchead}[true]{%
+%    \end{macrocode}
+% Der Seitenumbruch im Kompatibilitätsmodus.
+%    \begin{macrocode}
+  \tud@comp@clearpage%
+  \TUD@set@numkey{ddchead}{tud@ddc@head@num}{\tud@ddc@switch}{#1}%
+%    \end{macrocode}
+% Beim internen Aufruf soll lediglich der Wert des Schlüssels geändert werden. 
+% Wurde die Option durch den Anwender genutzt, werden die korrespondierenden 
+% Optionen zurückgesetzt. Der Aufruf der Option \opt{ddc} führt zum erneuten 
+% setzen der Logoboxen.
+%    \begin{macrocode}
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \if@tud@ddc@internal\else%
+      \@tud@ddc@internaltrue%
+      \TUDoptions{ddcfoot=false}%
+      \TUDoptions{ddc=false}%
+      \@tud@ddc@internalfalse%
+    \fi%
+  \fi%
+%    \end{macrocode}
+% Das Setzen des Seitenstils im Kompatibilitätsmodus.
+%    \begin{macrocode}
+  \tud@comp@resetpagestyle%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@ddc@head@num
+% \begin{macro}{\tud@ddc@foot@num}
+% \changes{v2.03}{2015/01/22}{Seitenstilauswahl bei Deaktivierung verbessert}^^A
+% Die Option \opt{ddcfoot} dient zum zwingenden Setzen des \DDC-Logos im Fuß 
+% der Seiten im Stil von \pgs{tudheadings}. Das Vorgehen beim Umschalten des
+% Schlüssels ist äquivalent zur Option \opt{ddchead}
+%    \begin{macrocode}
+\newcommand*\tud@ddc@foot@num{0}
+\TUD@key{ddcfoot}[true]{%
+%    \end{macrocode}
+% Der Seitenumbruch im Kompatibilitätsmodus.
+%    \begin{macrocode}
+  \tud@comp@clearpage%
+  \TUD@set@numkey{ddcfoot}{tud@ddc@foot@num}{\tud@ddc@switch}{#1}%
+%    \end{macrocode}
+% Beim internen Aufruf soll lediglich der Wert des Schlüssels geändert werden. 
+% Wurde die Option durch den Anwender genutzt, werden die korrespondierenden 
+% Optionen zurückgesetzt. Der Aufruf der Option \opt{ddc} führt zum erneuten 
+% setzen der Logoboxen.
+%    \begin{macrocode}
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \if@tud@ddc@internal\else%
+      \@tud@ddc@internaltrue%
+      \TUDoptions{ddchead=false}%
+      \TUDoptions{ddc=false}%
+      \@tud@ddc@internalfalse%
+    \fi%
+  \fi%
+%    \end{macrocode}
+% Das Setzen des Seitenstils im Kompatibilitätsmodus.
+%    \begin{macrocode}
+  \tud@comp@resetpagestyle%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@ddc@foot@num
+% \end{option}^^A ddcfoot
+% \end{option}^^A ddchead
+% \end{option}^^A ddc
+%
+% \iffalse
+%</class&option>
+%<*class&body>
+% \fi
+%
+% \begin{macro}{\tud@ddc@check}
+% \changes{v2.02}{2014/06/23}{neu}^^A
+% Dieses Hilfsmakro wird aufgerufen, wenn geprüft wird, welche Einstellungen
+% für Kopf und Fuß des Seitenstiles \pgs{tudheadings} zum Tragen kommen sollen.
+% Über den Schalter \cs{if@tud@ddc@auto} wird festgelegt, ob die Auswahl des
+% \DDC-Logos automatisch erfolgen soll~-- Option \opt{ddc} wurde verwendet.
+% Ist dies der Fall, wird das Logo standardmäßig im Kopf gesetzt. Ist jedoch
+% durch den Befehl \cs{headlogo} ein Zweitlogo angegeben worde, wird dieses in
+% der Fußzeile ausgegeben. Die Verwendung einer der Optionen \opt{ddchead} bzw. 
+% \opt{ddcfoot} forciert die Ausgabe des \DDC-Logos an der gewünschten Stelle.
+% Die jeweils gültige Auswahl für Kopf bzw. Fuß wird in den Makros \cs{@tempa} 
+% bzw. \cs{@tempb} geschrieben und kann anschließend ausgewertet werden.
+%    \begin{macrocode}
+\newcommand*\tud@ddc@check{%
+  \let\@tempa\tud@ddc@head@num%
+  \let\@tempb\tud@ddc@foot@num%
+  \if@tud@ddc@auto%
+    \ifdefvoid{\tud@headlogo@filename}{%
+      \let\@tempa\tud@ddc@auto@num%
+      \let\@tempb\z@%
+    }{%
+      \let\@tempa\z@%
+      \let\@tempb\tud@ddc@auto@num%
+    }%
+  \fi%
+%    \end{macrocode}
+% Für die Satzspiegelvergrößerung wird beim Vorhandensein eines oder mehrerer 
+% Logos im Fuß die Variable \cs{@tempb} auf einen negativen Wert gesetzt, um 
+% auch ohne die Ausgabe eines \DDC-Logos den Fußbereich zu vergrößern.
+%    \begin{macrocode}
+  \tud@if@v@lower{2.03}{%
+    \ifnum\@tempb=\z@\relax%
+      \ifdefvoid{\tud@footlogo@filenames}{}{\let\@tempb\m@ne}%
+    \fi%
+  }{}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@ddc@check
 %
 % \iffalse
 %</class&body>
@@ -1289,7 +1546,7 @@
 % den Boxen in der richtigen Größe neu zu setzen.
 %    \begin{macrocode}
     \tud@headlogo@set%
-    \@tud@footlogo@option@settrue%
+    \global\@tud@footlogo@option@settrue%
     \tud@footlogo@option@set%
     \global\@tud@mainlogo@setfalse%
   \fi%
@@ -1637,15 +1894,15 @@
 % \changes{v2.05}{2016/06/16}{neu}^^A
 % \begin{macro}{\tud@footlogoheight@dim}
 % \changes{v2.04}{2015/06/01}{neu}^^A
+% \begin{macro}{\tud@footlogoheight@set}
 % Für den Anwender besteht mit der Option \opt{footlogoheight} die Möglichkeit, 
 % die Höhe aller Logos im Fußbereich~-- also eventuell das \DDC-Logo sowie
 % vom Anwender mit dem Befehl \cs{footlogo} angegebene Logos~-- zentral
 % festzulegen. Dabei wird der gewünschte Wert in \cs{tud@footlogoheight@dim} 
-% abgelegt. 
+% abgelegt. Ist dieser \val{0pt}, wird die Höhe des Loogs der \TnUD genutzt.
 %    \begin{macrocode}
 %<*option>
-\newcommand*\tud@footlogoheight@dim{}
-\let\tud@footlogoheight@dim\relax
+\newcommand*\tud@footlogoheight@dim{0pt}
 \TUD@key{footlogoheight}{%
   \TUD@set@dimkey{footlogoheight}{\tud@footlogoheight@dim}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
@@ -1657,20 +1914,21 @@
 %    \end{macrocode}
 % Da sich mit der Version~v2.03 die Standardhöhe des \DDC-Logos im Fußbereich 
 % geändert hat, wird dieser Wert abhängig von der Einstellung für die Option 
-% \opt{tudscrver} nach der Abarbeitung der Optionen am Ende der Klasse gesetzt.
+% \opt{tudscrver} gesetzt.
 %    \begin{macrocode}
 %<*body>
-\AtEndOfClass{%
-  \ifdefvoid{\tud@footlogoheight@dim}{%
+\newcommand*\tud@footlogoheight@set{%
+  \ifdim\dimexpr\tud@footlogoheight@dim\relax=\z@\relax%
     \tud@if@v@lower{2.03}{%
       \def\tud@footlogoheight@dim{\dimexpr\tud@dim@topmargin*3/5\relax}%
     }{%
       \def\tud@footlogoheight@dim{\tud@dim@mainlogoheight}%
     }%
-  }{}%
+  \fi%
 }
 %</body>
 %    \end{macrocode}
+% \end{macro}^^A \tud@footlogoheight@set
 % \end{macro}^^A \tud@footlogoheight@dim
 % \end{option}^^A footlogoheight
 %
@@ -1742,6 +2000,7 @@
       \tud@footlogo@ddc@set{option}{DDC-28}%
     \fi%
     \global\@tud@footlogo@option@setfalse%
+    \global\@tud@footlogo@cmd@settrue%
   \fi%
 }
 %    \end{macrocode}
@@ -1770,11 +2029,10 @@
         \vss\vss%
       }{%
         You should reduce `footlogoheight', because it is\MessageBreak%
-        too high (\the\dimexpr\tud@footlogoheight@dim\relax).%
+        too high (\the\dimexpr\tud@footlogoheight@dim\relax). %
         \ifnum\tud@cdgeometry@num>\@ne% true/symmetric/twoside
-          \MessageBreak%
-          Alternatively you can enlarge the bottom margin\MessageBreak%
-          by using option `extrabottommargin'.%
+          Alternatively you can enlarge\MessageBreak%
+          the bottom margin with option `extrabottommargin'. %
         \fi%
       }%
     }%
@@ -1922,6 +2180,7 @@
 % den Fuß innerhalb der Ebene \val{tudheadings.foot.content} auszugeben.
 %    \begin{macrocode}
 \newcommand*\tud@footlogo@cmd@use[2]{%
+  \tud@footlogoheight@set%
   \tud@footlogo@option@set%
   \tud@footlogo@cmd@set{#1}{#2}%
   \setbox\z@\hbox{\tud@uselayerbox{foot@cmd}}%
@@ -2256,262 +2515,6 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@footcontent@@use
 % \end{macro}^^A \tud@footcontent@use
-%
-% \iffalse
-%</class&body>
-% \fi
-%
-% \subsection{Optionen für das \DDC-Logo}
-%
-% \begin{macro}{\tud@comp@clearpage}
-% \changes{v2.04}{2015/05/31}{neu}^^A
-% \begin{macro}{\tud@comp@resetpagestyle}
-% \changes{v2.04}{2015/05/31}{neu}^^A
-% \begin{macro}{\if@tud@ddc@internal}
-% \changes{v2.02}{2014/07/08}{neu}^^A
-% Bis zur Version~v2.02 wurden unterschiedliche Satzsiegel für den Seitenfuß 
-% mit und ohne \DDC-Logo verwendet. Damit dieser im Zweifelsfall umgestellt 
-% werden kann, wurde vor dem Ausführen der entsprechenden Optionen ein 
-% Seitenumbruch erzwungen und nach dem Verarbeiten der Optionen der aktuelle 
-% Seitenstil erneut aufgerufen. Die beiden folgenden Makros werden für dieses 
-% Unterfangen definiert, jedoch bei der Abarbeitung der Optionen nur noch im 
-% Kompatibilitätmodus ausgeführt. Der Schalter \cs{if@tud@ddc@internal} wird 
-% intern von den Optionen \opt{ddc}, \opt{ddchead} und \opt{ddcfoot} verwendet,
-% um rekursive Aufrufe der Optionen zu verhindern.
-%    \begin{macrocode}
-%<*class&option>
-\tud@newif\if@tud@ddc@internal
-\newcommand*\tud@comp@clearpage{}%
-\newcommand*\tud@comp@resetpagestyle{}%
-%</class&option>
-%<*class&body>
-\tud@if@v@lower{2.04}{%
-  \renewcommand*\tud@comp@clearpage{%
-    \if@tud@ddc@internal\else%
-      \tud@if@tudheadings{\currentpagestyle}{\clearpage}{}%
-    \fi%
-  }%
-  \renewcommand*\tud@comp@resetpagestyle{%
-    \if@tud@ddc@internal\else%
-      \tud@if@tudheadings{\currentpagestyle}{%
-        \expandafter\pagestyle\expandafter{\currentpagestyle}%
-      }{}%
-    \fi%
-  }%
-}{}%
-%</class&body>
-%    \end{macrocode}
-% \end{macro}^^A \if@tud@ddc@internal
-% \end{macro}^^A \tud@comp@clearpage
-% \end{macro}^^A \tud@comp@resetpagestyle
-%
-% \iffalse
-%<*class&option>
-% \fi
-%
-% \begin{option}{ddc}
-% \changes{v2.02}{2014/06/23}{automatische Logowahl}^^A
-% \begin{option}{ddchead}
-% \changes{v2.02}{2014/06/23}{Logo von \DDC entweder in Kopf oder Fuß}^^A
-% \begin{option}{ddcfoot}
-% \changes{v2.02}{2014/06/23}{Logo von \DDC entweder in Kopf oder Fuß}^^A
-% Diese Optionen dienen zur Auswahl des \DDC-Logos auf Seiten mit dem Stil 
-% \pgs{tudheadings}. Die Option \opt{ddchead} setzt das Logo dabei immer in den
-% Kopf, wobei ein mit \cs{headlogo} definiertes Zweitlogo gegebenenfalls 
-% überschrieben wird. Die Option \opt{ddcfoot} setzt das Logo immer in den Fuß. 
-% Mit der Option \opt{ddc} wird das Logo nur in den Kopf gesetzt, wenn kein 
-% Zweitlogo angegeben ist. Ist dies jedoch der Fall, wird das Logo stattdessen 
-% im Fuß ausgegeben.
-% \begin{macro}{\tud@ddc@switch}
-% \changes{v2.02}{2014/06/23}{neu}^^A
-% Das Makro definiert die gültigen Werte für die \DDC-Optionen \opt{ddc}, 
-% \opt{ddchead} sowie \opt{ddcfoot}.
-%    \begin{macrocode}
-\newcommand*\tud@ddc@switch{}
-\edef\tud@ddc@switch{%
-  \TUD@bool@numkey,%
-  {color}{2},{colour}{2},{cdcolor}{2},{cdcolour}{2},%
-  {colorblack}{3},{colourblack}{3},{cdcolorblack}{3},{cdcolourblack}{3},%
-  {gray}{4},{grey}{4},{hks92}{4},{cdgray}{4},{cdgrey}{4},%
-  {black}{5},{cdblack}{5},%
-  {blue}{6},{hks41}{6},{cdblue}{6},{cddarkblue}{6},%
-  {white}{7},{cdwhite}{7}%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@ddc@switch
-% \begin{macro}{\tud@ddc@auto@num}
-% \changes{v2.02}{2014/06/23}{neu}^^A
-% \begin{macro}{\if@tud@ddc@auto}
-% \changes{v2.02}{2014/06/23}{neu}^^A
-% \begin{macro}{\if@tud@headlogo@option@set}
-% \changes{v2.04}{2015/05/31}{neu}^^A
-% \begin{macro}{\if@tud@footlogo@option@set}
-% \changes{v2.04}{2015/06/01}{neu}^^A
-% Die Option \opt{ddc}.
-%    \begin{macrocode}
-\tud@newif\if@tud@headlogo@option@set
-\tud@newif\if@tud@footlogo@option@set
-\tud@newif\if@tud@ddc@auto
-\newcommand*\tud@ddc@auto@num{0}
-\TUD@key{ddc}[true]{%
-%    \end{macrocode}
-% Im Kompatibiltätsmodus wird ein Seitenumbruch erzwungen. Anschließend wird 
-% die Option abgearbeitet.
-%    \begin{macrocode}
-  \tud@comp@clearpage%
-  \TUD@set@numkey{ddc}{tud@ddc@auto@num}{\tud@ddc@switch}{#1}%
-  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-%    \end{macrocode}
-% Wurde die Option \opt{ddc} intern durch \opt{ddchead} oder \opt{ddcfoot} 
-% aufgerufen, wird die automatische Auswahl des \DDC-Logos deaktiviert.
-%    \begin{macrocode}
-    \if@tud@ddc@internal%
-      \@tud@ddc@autofalse%
-    \else%
-%    \end{macrocode}
-% Andernfalls wird die automatische Auswahl aktiviert und die beiden Optionen
-% \opt{ddchead} sowie \opt{ddcfoot} intern zurückgesetzt.
-%    \begin{macrocode}
-      \@tud@ddc@autotrue%
-      \@tud@ddc@internaltrue%
-      \TUDoptions{ddchead=false}%
-      \TUDoptions{ddcfoot=false}%
-      \@tud@ddc@internalfalse%
-    \fi%
-%    \end{macrocode}
-% Sowohl die \DDC-Logos als auch ein mögliches Zweilogo (\cs{headlogo}) werden
-% in den entsprechenden Layern durch Boxen ausgegeben. Die beiden Schalter 
-% führen zum Erneuern der dazugehörigen Logoboxen. Siehe die Beschreibung der 
-% Makros \cs{tud@headlogo@option@set} sowie \cs{tud@footlogo@option@set}.
-%    \begin{macrocode}
-    \global\@tud@headlogo@option@settrue%
-    \global\@tud@footlogo@option@settrue%
-  \fi%
-%    \end{macrocode}
-% Abschließend wird im Kompatibilitätsmodus der aktuelle Seitenstil aufgerufen,
-% um bei einem geänderten Fuß den notwendigen Satzspiegel zu laden.
-%    \begin{macrocode}
-  \tud@comp@resetpagestyle%
-}
-%    \end{macrocode}
-% \end{macro}^^A \if@tud@footlogo@option@set
-% \end{macro}^^A \if@tud@headlogo@option@set
-% \end{macro}^^A \if@tud@ddc@auto
-% \end{macro}^^A \tud@ddc@auto@num
-% \begin{macro}{\tud@ddc@head@num}
-% \changes{v2.03}{2015/01/22}{Seitenstilauswahl bei Deaktivierung verbessert}^^A
-% Die Option \opt{ddchead} dient zum zwingenden Setzen des \DDC-Logos im Kopf 
-% der Seiten im Stil von \pgs{tudheadings}.
-%    \begin{macrocode}
-\newcommand*\tud@ddc@head@num{0}
-\TUD@key{ddchead}[true]{%
-%    \end{macrocode}
-% Der Seitenumbruch im Kompatibilitätsmodus.
-%    \begin{macrocode}
-  \tud@comp@clearpage%
-  \TUD@set@numkey{ddchead}{tud@ddc@head@num}{\tud@ddc@switch}{#1}%
-%    \end{macrocode}
-% Beim internen Aufruf soll lediglich der Wert des Schlüssels geändert werden. 
-% Wurde die Option durch den Anwender genutzt, werden die korrespondierenden 
-% Optionen zurückgesetzt. Der Aufruf der Option \opt{ddc} führt zum erneuten 
-% setzen der Logoboxen.
-%    \begin{macrocode}
-  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \if@tud@ddc@internal\else%
-      \@tud@ddc@internaltrue%
-      \TUDoptions{ddcfoot=false}%
-      \TUDoptions{ddc=false}%
-      \@tud@ddc@internalfalse%
-    \fi%
-  \fi%
-%    \end{macrocode}
-% Das Setzen des Seitenstils im Kompatibilitätsmodus.
-%    \begin{macrocode}
-  \tud@comp@resetpagestyle%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@ddc@head@num
-% \begin{macro}{\tud@ddc@foot@num}
-% \changes{v2.03}{2015/01/22}{Seitenstilauswahl bei Deaktivierung verbessert}^^A
-% Die Option \opt{ddcfoot} dient zum zwingenden Setzen des \DDC-Logos im Fuß 
-% der Seiten im Stil von \pgs{tudheadings}. Das Vorgehen beim Umschalten des
-% Schlüssels ist äquivalent zur Option \opt{ddchead}
-%    \begin{macrocode}
-\newcommand*\tud@ddc@foot@num{0}
-\TUD@key{ddcfoot}[true]{%
-%    \end{macrocode}
-% Der Seitenumbruch im Kompatibilitätsmodus.
-%    \begin{macrocode}
-  \tud@comp@clearpage%
-  \TUD@set@numkey{ddcfoot}{tud@ddc@foot@num}{\tud@ddc@switch}{#1}%
-%    \end{macrocode}
-% Beim internen Aufruf soll lediglich der Wert des Schlüssels geändert werden. 
-% Wurde die Option durch den Anwender genutzt, werden die korrespondierenden 
-% Optionen zurückgesetzt. Der Aufruf der Option \opt{ddc} führt zum erneuten 
-% setzen der Logoboxen.
-%    \begin{macrocode}
-  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \if@tud@ddc@internal\else%
-      \@tud@ddc@internaltrue%
-      \TUDoptions{ddchead=false}%
-      \TUDoptions{ddc=false}%
-      \@tud@ddc@internalfalse%
-    \fi%
-  \fi%
-%    \end{macrocode}
-% Das Setzen des Seitenstils im Kompatibilitätsmodus.
-%    \begin{macrocode}
-  \tud@comp@resetpagestyle%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@ddc@foot@num
-% \end{option}^^A ddcfoot
-% \end{option}^^A ddchead
-% \end{option}^^A ddc
-%
-% \iffalse
-%</class&option>
-%<*class&body>
-% \fi
-%
-% \begin{macro}{\tud@ddc@check}
-% \changes{v2.02}{2014/06/23}{neu}^^A
-% Dieses Hilfsmakro wird aufgerufen, wenn geprüft wird, welche Einstellungen
-% für Kopf und Fuß des Seitenstiles \pgs{tudheadings} zum Tragen kommen sollen.
-% Über den Schalter \cs{if@tud@ddc@auto} wird festgelegt, ob die Auswahl des
-% \DDC-Logos automatisch erfolgen soll~-- Option \opt{ddc} wurde verwendet.
-% Ist dies der Fall, wird das Logo standardmäßig im Kopf gesetzt. Ist jedoch
-% durch den Befehl \cs{headlogo} ein Zweitlogo angegeben worde, wird dieses in
-% der Fußzeile ausgegeben. Die Verwendung einer der Optionen \opt{ddchead} bzw. 
-% \opt{ddcfoot} forciert die Ausgabe des \DDC-Logos an der gewünschten Stelle.
-% Die jeweils gültige Auswahl für Kopf bzw. Fuß wird in den Makros \cs{@tempa} 
-% bzw. \cs{@tempb} geschrieben und kann anschließend ausgewertet werden.
-%    \begin{macrocode}
-\newcommand*\tud@ddc@check{%
-  \let\@tempa\tud@ddc@head@num%
-  \let\@tempb\tud@ddc@foot@num%
-  \if@tud@ddc@auto%
-    \ifdefvoid{\tud@headlogo@filename}{%
-      \let\@tempa\tud@ddc@auto@num%
-      \let\@tempb\z@%
-    }{%
-      \let\@tempa\z@%
-      \let\@tempb\tud@ddc@auto@num%
-    }%
-  \fi%
-%    \end{macrocode}
-% Für die Satzspiegelvergrößerung wird beim Vorhandensein eines oder mehrerer 
-% Logos im Fuß die Variable \cs{@tempb} auf einen negativen Wert gesetzt, um 
-% auch ohne die Ausgabe eines \DDC-Logos den Fußbereich zu vergrößern.
-%    \begin{macrocode}
-  \tud@if@v@lower{2.03}{%
-    \ifnum\@tempb=\z@\relax%
-      \ifdefvoid{\tud@footlogo@filenames}{}{\let\@tempb\m@ne}%
-    \fi%
-  }{}%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@ddc@check
 %
 % \subsection{Umgebungsparameter für die neuen Seitenstile}
 %
