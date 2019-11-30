@@ -674,35 +674,34 @@
   \SplitArgument{2}{:}{#1}%
   \expandafter\Processor@@CreateLabel\ProcessedArgument%
 }
-% TODO \@temp... > tud@res@...
 \newcommand*\Processor@@CreateLabel[3]{%
   \begingroup%
     \Markup@Expandable%
     \IfValueTF{#3}{%
-      \protected@edef\@tempa{#1:#2:#3}%
+      \protected@edef\tud@res@a{#1:#2:#3}%
     }{%
-      \tud@attr@get\@tempb{#2}%
+      \tud@attr@get\tud@res@b{#2}%
       \IfValueTF{#1}{%
         \ifxblank{#1}{%
         % TODO sollte immer gesetzt sein
         \typeout{*======================================== #1:#2:#3}%
-          \protected@edef\@tempa{\tud@bdl@dflt:\@tempb:#2}%
+          \protected@edef\tud@res@a{\tud@bdl@dflt:\tud@res@b:#2}%
         }{%
-          \protected@edef\@tempa{#1:\@tempb:#2}%
+          \protected@edef\tud@res@a{#1:\tud@res@b:#2}%
         }%
       }{%
         % TODO bundle prefix sollte immer gegeben sein
         \typeout{!======================================== #1:#2:#3}%
-        \protected@edef\@tempa{\tud@bdl@curr:\@tempb:#2}%
+        \protected@edef\tud@res@a{\tud@bdl@curr:\tud@res@b:#2}%
       }%
     }%
-    \protected@edef\@tempc{%
+    \protected@edef\tud@res@c{%
       \noexpand\endgroup%
       \def\noexpand\ProcessedArgument{%
-        \expandafter\detokenize\expandafter{\@tempa}%
+        \expandafter\detokenize\expandafter{\tud@res@a}%
       }%
     }%
-  \@tempc%
+  \tud@res@c%
 }
 % TODO \relax in #3 > !:...:... für \File etc. bzw. gar kein label?!
 \NewDocumentCommand\tud@lbl@get{s m >{\Processor@CreateLabel}m !d++ !d==}{%
@@ -913,7 +912,6 @@
   \tud@declare@end{#2}{\printdeclarationlist}%
 }
 \tud@newif\if@tud@obsolete
-% TODO \@temp... > tud@res@...
 \NewDocumentEnvironment{Obsolete}{m o m !o !o !d()}{%
   \@tud@obsoletetrue%
   \ifxblank{#1}{%
@@ -934,18 +932,18 @@
       \tud@declare@start{#3}[{#4}][{#5}](#6)%
     }{%
       \toks@{\tud@declare@start{#3}[{#4}][{#5}]}%
-      \def\@tempa{\emph{entf\"allt}}%
-      % TODO \in@ kann raus, oder? der Split mit \@tempb sollte reichen
+      \def\tud@res@a{\emph{entf\"allt}}%
+      % TODO \in@ kann raus, oder? der Split mit \tud@res@b sollte reichen
       \in@{:}{#1}%
       \ifin@%
-        \def\@tempb##1:##2\@nil{%
+        \def\tud@res@b##1:##2\@nil{%
           \IfArgIsEmpty{##2}{}{%
-            \def\@tempa{\seeref{##2'page'}}%
+            \def\tud@res@a{\seeref{##2'page'}}%
           }%
         }%
-        \@tempb#1\@nil%
+        \tud@res@b#1\@nil%
       \fi%
-      \eaddto@hook\toks@{\expandafter(\@tempa)}%
+      \eaddto@hook\toks@{\expandafter(\tud@res@a)}%
       \the\toks@%
     }%
   }%
@@ -959,20 +957,19 @@
 \newcommand*\tud@additional@list{}
 \let\tud@additional@list\relax
 \tud@newif\if@tud@additional@list
-% TODO \@temp... > tud@res@...
 \NewDocumentCommand\tud@declare@start{o m r[] r[] r()}{%
   \Changed@At@CreateList{#1}[{#2}]%
   \IfValueTF{#3}{%
     \@tud@preset@listtrue%
-    \def\@tempa{%
+    \def\tud@res@a{%
       Voreinstellung\IfArgIsEmpty{#3}{}{: \Parameter@Enclose\PValueDefault{#3}}%
     }%
     % TODO geht das auch mit \@nil?
     \IfValueT{#4}{%
-      \def\@tempb[##1:##2]{##1: \Parameter@Enclose\PValueDefault{##2}}%
-      \eappto\@tempa{ | \expandonce{\@tempb[#4]}}%
+      \def\tud@res@b[##1:##2]{##1: \Parameter@Enclose\PValueDefault{##2}}%
+      \eappto\tud@res@a{ | \expandonce{\tud@res@b[#4]}}%
     }%
-    \listeadd\tud@preset@list{\expandonce\@tempa}%
+    \listeadd\tud@preset@list{\expandonce\tud@res@a}%
   }{%
     \listadd\tud@preset@list{\relax}%
   }%
@@ -1047,7 +1044,6 @@
   \@tud@declaretrue\@tud@openindexfalse#1\@tud@declarefalse%
   \tud@declare@num=\z@\relax%
 }
-% TODO \@temp... > tud@res@...
 \NewDocumentCommand\printdeclarationlist{!s !d()}{%
   \ifx\tud@declaration@list\relax\else%
     \ifhmode%
@@ -1058,28 +1054,28 @@
     \fi%
     \@afterindentfalse\@afterheading%
     \@tud@declaretrue\@tud@openindextrue%
-    \def\@tempa##1{\ignorespaces##1\tabularnewline}%
+    \def\tud@res@a##1{\ignorespaces##1\tabularnewline}%
     \edef\HyperRaiseLinkDefault{\the\dimexpr1\baselineskip\relax}%
     \sbox\z@{%
       \begin{tabular}{|l|}%
         \hline%
-        \forlistloop\@tempa{\tud@declaration@list}%
+        \forlistloop\tud@res@a{\tud@declaration@list}%
         \hline%
       \end{tabular}%
     }\usebox\z@%
     \@tud@declarefalse%
     \ifboolexpr{bool {@tud@preset@list} or bool {@tud@additional@list}}{%
-      \def\@tempa##1{\small\ignorespaces##1\tabularnewline}%
+      \def\tud@res@a##1{\small\ignorespaces##1\tabularnewline}%
       \hskip1.2em%
       \if@tud@preset@list%
         \begin{tabular}{@{}l@{}}%
-          \forlistloop\@tempa{\tud@preset@list}%
+          \forlistloop\tud@res@a{\tud@preset@list}%
         \end{tabular}%
         \hspace{\tabcolsep}%
       \fi%
       \if@tud@additional@list%
         \begin{tabular}{@{}l@{}}%
-          \forlistloop\@tempa{\tud@additional@list}%
+          \forlistloop\tud@res@a{\tud@additional@list}%
         \end{tabular}%
       \fi%
     }{}%
@@ -1492,33 +1488,32 @@
 }
 \Markup@Simple@Format\File(\textsbn){Datei}
 \NewDocumentCommand\Path{>{\Processor@Underscore}m}{\mbox{\texttt{#1}}}
-% TODO \@temp... > tud@res@...
 \NewDocumentCommand\tud@attr@get{s m m}{%
   \begingroup%
-    \def\@tempa##1##2##3{%
+    \def\tud@res@a##1##2##3{%
       \def##1####1{%
-        \edef\@tempb{\IfBooleanTF{#1}{##2}{##3}}%
+        \edef\tud@res@b{\IfBooleanTF{#1}{##2}{##3}}%
       }%
     }%
-    \@tempa\Application{\jobname}{app}%
-    \@tempa\Distribution{\jobname}{dst}%
-    \@tempa\Engine{\jobname}{eng}%
-    \@tempa\File{files}{fle}%
-    \@tempa\Class{files}{cls}%
-    \@tempa\Package{files}{pkg}%
-    \@tempa\Option{options}{opt}%
-    \@tempa\Environment{macros}{env}%
-    \@tempa\Macro{macros}{cmd}%
-    \@tempa\Length{misc}{len}%
-    \@tempa\Counter{misc}{cnt}%
-    \@tempa\Term{terms}{term}%
-    \@tempa\PageStyle{elements}{pgs}%
-    \@tempa\Font{elements}{font}%
-    \@tempa\Color{elements}{clr}%
+    \tud@res@a\Application{\jobname}{app}%
+    \tud@res@a\Distribution{\jobname}{dst}%
+    \tud@res@a\Engine{\jobname}{eng}%
+    \tud@res@a\File{files}{fle}%
+    \tud@res@a\Class{files}{cls}%
+    \tud@res@a\Package{files}{pkg}%
+    \tud@res@a\Option{options}{opt}%
+    \tud@res@a\Environment{macros}{env}%
+    \tud@res@a\Macro{macros}{cmd}%
+    \tud@res@a\Length{misc}{len}%
+    \tud@res@a\Counter{misc}{cnt}%
+    \tud@res@a\Term{terms}{term}%
+    \tud@res@a\PageStyle{elements}{pgs}%
+    \tud@res@a\Font{elements}{font}%
+    \tud@res@a\Color{elements}{clr}%
     #3%
     \edef\tud@reserved{%
       \noexpand\endgroup%
-      \def\noexpand#2{\@tempb}%
+      \def\noexpand#2{\tud@res@b}%
     }%
   \tud@reserved%
 }
@@ -1735,8 +1730,8 @@
       \or%
         \tudhyperdef*{\tud@lbl@tmp}%
 % TODO für tutorials notwendig?, darf keine relevanz für manual haben
-%        \def\@tempa##1:##2:##3\@nil{\tudhyperdef*{##3:##2:##3}}%
-%        \expandafter\@tempa\tud@lbl@tmp\@nil%
+%        \def\tud@res@a##1:##2:##3\@nil{\tudhyperdef*{##3:##2:##3}}%
+%        \expandafter\tud@res@a\tud@lbl@tmp\@nil%
       \else% <0
         \tudhyperdef{\tud@lbl@tmp}=#3=%
       \fi%
@@ -2225,14 +2220,13 @@
   \tud@cleversee{\alsoname}%
 }
 \newcommand*\tud@cleversee{}
-% TODO \@temp... > tud@res@...
 \def\tud@cleversee#1#2#3\relax{%
   \IfArgIsEmpty{#3}{%
     \emph{#1}\space#2%
   }{%
     \begingroup%
-      \def\@tempa, ##1\@nil{##1,\space\emph{\alsoname}\space#2}%
-      \@tempa#3\@nil%
+      \def\tud@res@a, ##1\@nil{##1,\space\emph{\alsoname}\space#2}%
+      \tud@res@a#3\@nil%
     \endgroup%
   }%
 }
@@ -2510,16 +2504,15 @@
     \index[\tud@lbl@tmp]{\tud@idx@val\tud@idx@key @\tud@idx@fmt}%
   \fi%
 }
-% TODO \@temp... > tud@res@...
 \NewDocumentCommand\CrossIndex{s m o m}{%
-  \def\@tempa##1##2##3{%
+  \def\tud@res@a##1##2##3{%
     \index{%
       \IfBooleanTF{#1}{##3@##3}{##3!"|@}%
       \,\textrightarrow\,%
       \tudhyperref{idx:##2}{\IfValueTF{##1}{##1}{Index der ##3}}|seeidx{##2}%
     }%
   }%
-  \forcsvlist{\@tempa{#3}{#4}}{#2}%
+  \forcsvlist{\tud@res@a{#3}{#4}}{#2}%
 }
 % TODO wieder raus
 \newcommand*\tud@extract@box@a{}
@@ -2729,7 +2722,6 @@
   }%
   \listeadd\tud@changedat@list{\the\toks@}%
 }
-% TODO \@temp... > tud@res@...
 \newcommand*\PrintChangelog{%
   \begingroup%
     \@tud@indextrue%
@@ -2753,12 +2745,12 @@
         \expandafter\def\csname\string\item\endcsname##1~%
       }{%
         \endgroup%
-        \let\@tempb\@firstofone%
-        \if@tud@cdoldfont@active\def\@tempb##1{\NoCaseChange{##1}}\fi%
-        \addsec[{##1}]{\TUDScript \@tempb{##1}}%
+        \let\tud@res@b\@firstofone%
+        \if@tud@cdoldfont@active\def\tud@res@b##1{\NoCaseChange{##1}}\fi%
+        \addsec[{##1}]{\TUDScript \tud@res@b{##1}}%
         \tudhyperdef*{idx:changelog:##1}%
-        \def\@tempa{\indexname: \TUDScript \@tempb{##1}}%
-        \@mkboth{\@tempa}{\@tempa}%
+        \def\tud@res@a{\indexname: \TUDScript \tud@res@b{##1}}%
+        \@mkboth{\tud@res@a}{\tud@res@a}%
       }%
     }{}{\tud@patch@wrn{theindex}}%
     \clearpage%
@@ -2910,12 +2902,11 @@
 \NewDocumentCommand\itemfalse{!s !o !o !d()}{%
   \item@bool{#1}{false/off/no}[{#2}][{#3}](#4)%
 }
-% TODO \@temp... > tud@res@...
 \NewDocumentCommand\item@bool{m m r[] r[] r()}{%
   \toks@{\item}%
   \IfBooleanT{#1}{\addto@hook\toks@{*}}%
-  \protected@edef\@tempa{#2\IfValueT{#3}{/#3}}%
-  \eaddto@hook\toks@{\expandafter[\@tempa]}%
+  \protected@edef\tud@res@a{#2\IfValueT{#3}{/#3}}%
+  \eaddto@hook\toks@{\expandafter[\tud@res@a]}%
   \IfValueT{#4}{\addto@hook\toks@{[{#4}]}}%
   \IfValueT{#5}{\addto@hook\toks@{(#5)}}%
   \the\toks@%
@@ -3036,38 +3027,37 @@
 \newrobustcmd*\hypertut[2]{%
   \hyperref{tutorials/#1.pdf}{#1}{tutorials:#1}{\File*{#1.pdf}#2}%
 }
-% TODO \@temp... > tud@res@...
 \NewDocumentCommand\Tutorial{s m !d||}{%
   \ifnum\pdf@shellescape=\@ne\relax%
     \filemodCmp{tutorials/#2.pdf}{tutorials/#2.tex}{}{%
-      \let\@tempa\@empty%
-      \ifdef{\tudfinalflag}{\appto\@tempa{\def\noexpand\tudfinalflag{}}}{}%
-      \ifdef{\tudprintflag}{\appto\@tempa{\def\noexpand\tudprintflag{}}}{}%
-      \appto\@tempa{\noexpand\input{#2.tex}}%
+      \let\tud@res@a\@empty%
+      \ifdef{\tudfinalflag}{\appto\tud@res@a{\def\noexpand\tudfinalflag{}}}{}%
+      \ifdef{\tudprintflag}{\appto\tud@res@a{\def\noexpand\tudprintflag{}}}{}%
+      \appto\tud@res@a{\noexpand\input{#2.tex}}%
       \immediate\openout\tud@write@a=tutorials.sh\relax%
-      \def\@tempb##1{\immediate\write\tud@write@a{##1}}%
-      \@tempb{cd tutorials}%
-      \@tempb{\tud@latex@ext -shell-escape "\@tempa"}%
+      \def\tud@res@b##1{\immediate\write\tud@write@a{##1}}%
+      \tud@res@b{cd tutorials}%
+      \tud@res@b{\tud@latex@ext -shell-escape "\tud@res@a"}%
       \ifwindows%
-        \@tempb{if exist #2.bcf biber #2}%
+        \tud@res@b{if exist #2.bcf biber #2}%
       \else%
-        \@tempb{[ -f #2.bcf ] && biber #2}%
+        \tud@res@b{[ -f #2.bcf ] && biber #2}%
       \fi%
-      \@tempb{\tud@latex@ext "\@tempa"}%
-      \@tempb{\tud@latex@ext -shell-escape "\@tempa"}%
+      \tud@res@b{\tud@latex@ext "\tud@res@a"}%
+      \tud@res@b{\tud@latex@ext -shell-escape "\tud@res@a"}%
       \ifwindows%
-        \@tempb{if exist #2.ist makeglossaries #2}%
+        \tud@res@b{if exist #2.ist makeglossaries #2}%
       \else%
-        \@tempb{[ -f #2.ist ] && makeglossaries #2}%
+        \tud@res@b{[ -f #2.ist ] && makeglossaries #2}%
       \fi%
       \ifwindows%
-        \@tempb{if exist #2.xdy makeglossaries #2}%
+        \tud@res@b{if exist #2.xdy makeglossaries #2}%
       \else%
-        \@tempb{[ -f #2.xdy ] && makeglossaries #2}%
+        \tud@res@b{[ -f #2.xdy ] && makeglossaries #2}%
       \fi%
-      \@tempb{\tud@latex@ext "\@tempa"}%
-      \@tempb{\tud@latex@ext -shell-escape "\@tempa"}%
-      \@tempb{\tud@latex@ext -shell-escape "\@tempa"}%
+      \tud@res@b{\tud@latex@ext "\tud@res@a"}%
+      \tud@res@b{\tud@latex@ext -shell-escape "\tud@res@a"}%
+      \tud@res@b{\tud@latex@ext -shell-escape "\tud@res@a"}%
       \immediate\closeout\tud@write@a%
       \ifwindows%
         \ShellEscape{rename tutorials.sh tutorials.bat}%
@@ -3089,37 +3079,40 @@
     \index[files]{\hypertut{#2}{\suffix{Tutorial}}\IfValueT{#3}{|#3}}%
   }%
 }
-% TODO \@temp... > tud@res@...
 \newcommand*\IncludeExample[1]{%
   \lstinputlisting[style=tudscr]{examples/#1}%
   \ifnum\pdf@shellescape=\@ne\relax%
     \filemodCmp{examples/#1.pdf}{examples/#1.tex}{}{%
-      \edef\@tempa{\tud@latex@ext -output-directory examples examples/#1.tex}%
-      \ShellEscape{\@tempa}%
-      \ShellEscape{\@tempa}%
+      \edef\tud@res@a{%
+        \tud@latex@ext -output-directory examples examples/#1.tex%
+      }%
+      \ShellEscape{\tud@res@a}%
+      \ShellEscape{\tud@res@a}%
     }%
     \filemodCmp{examples/#1_print.pdf}{examples/#1_print.tex}{}{%
-      \edef\@tempa{%
+      \edef\tud@res@a{%
         \tud@latex@ext -output-directory examples examples/#1_print.tex%
       }%
-      \ShellEscape{\@tempa}%
-      \ShellEscape{\@tempa}%
+      \ShellEscape{\tud@res@a}%
+      \ShellEscape{\tud@res@a}%
     }%
   \fi%
-  \def\@tempa{examples/#1.pdf}%
+  \def\tud@res@a{examples/#1.pdf}%
   \ifdef{\tudprintflag}{%
-    \IfFileExists{examples/#1_print.pdf}{\def\@tempa{examples/#1_print.pdf}}{}%
+    \IfFileExists{examples/#1_print.pdf}{%
+      \def\tud@res@a{examples/#1_print.pdf}%
+    }{}%
   }{}%
-  \IfFileExists{\@tempa}{%
-    \edef\@tempa{%
+  \IfFileExists{\tud@res@a}{%
+    \edef\tud@res@a{%
       \noexpand\includepdf[%
         pages=-,noautoscale,frame,keepaspectratio,pagecommand={},%
         height=\noexpand\textheight,width=\noexpand\textwidth,offset=5mm 0mm%
-      ]{\@tempa}%
+      ]{\tud@res@a}%
     }%
-    \@tempa%
+    \tud@res@a%
   }{%
-    \tud@shellescape@wrn{\@tempa}%
+    \tud@shellescape@wrn{\tud@res@a}%
   }%
 }
 \PassOptionsToPackage{obeyFinal}{todonotes}
