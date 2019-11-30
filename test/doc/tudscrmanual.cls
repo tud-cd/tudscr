@@ -840,7 +840,6 @@
         }%
       }%
     }{%
-      % TODO debug ausgabe für bdl, die gefunden wurden --> setzen im dokument
       \tud@lbl@get*\tud@lbl@tmp{\tud@bdl@curr:#2}+#3+=#4=%
       \tud@if@lbl@exists{\tud@lbl@tmp}{}{%
         \def\tud@res@c##1{%
@@ -884,7 +883,7 @@
   \tud@res@a%
 }
 \NewDocumentCommand\tud@bdl@trace@lbl{m r''}{%
-% TODO rein?
+% TODO check if index or not
 %  \if@tud@index\else%
     \begingroup%
       \tud@lbl@get\tud@lbl@tmp{#1}%
@@ -1004,6 +1003,7 @@
   \@tud@declaretrue\@tud@openindexfalse#1\@tud@declarefalse%
   \pagebreak[1]%
 }
+% TODO Sternvariante eigentlich nicht notwendig
 \NewDocumentCommand\InlineDeclaration{s o m}{%
   \Inline@Declaration[{#2}]{#3}[\IfBooleanTF{#1}{-2}{-1}]%
 }
@@ -1226,7 +1226,7 @@
 \newcommand*\Processor@Value[2]{%
   \begingroup%
     \def\tud@res@a##1=##2=##3\@nil{%
-      \tud@toks@{{##1}}%
+      \tud@toks@{+##1+}%
       \IfArgIsEmpty{##2}{%
         \def\tud@res@b{#1}%
       }{%
@@ -1240,25 +1240,11 @@
     }%
     \tud@res@a#2==\@nil%
     \expandafter\IfValueT\expandafter{\tud@res@b}{%
-% TODO DOC in PValue hüllen, wenn kein Markup
+% DOC in PValue hüllen, wenn kein Markup
       \protected@edef\tud@res@a{%
         \unexpanded{\Parameter@Enclose[\def\tud@res@b]{\PValue}}{\tud@res@b}%
       }%
       \tud@res@a%
-%% TODO Makro \tud@if@parameter? eher \Parameter@Enclose
-%      \begingroup%
-%        \protected@edef\tud@res@a{\tud@res@b}%
-%        \Parameter@Expandable%
-%        \protected@edef\tud@res@c{\tud@res@b}%
-%        \edef\tud@res@a{%
-%          \endgroup%
-%          \ifx\tud@res@a\tud@res@c%
-%            \unexpanded{\def\tud@res@b}{%
-%              \noexpand\PValue{\expandonce\tud@res@b}%
-%            }%
-%          \fi%
-%        }%
-%      \tud@res@a%
       \tud@trace@markup@add{temp}{\expandonce\tud@res@b}%
     }%
     \eaddto@hook\tud@toks@{\expandafter=\tud@res@b=}%
@@ -1282,7 +1268,7 @@
   \addto@hook\tud@toks@{{#1}|#5|}%
   \the\tud@toks@%
   \Process@Index{#1}{\Distribution{#2}}|#5|%
-  % TODO SeeRef raus, \IfBooleanT{#1}{\index{Distribution}}
+  % TODO SeeRef raus, \IfBooleanF{#1}{\index{Distribution}}
 }
 \Markup@Simple@Format\Distribution(\textsbn){Distribution}
 \NewExpandableDocumentCommand\@Engine{s m}{#2}
@@ -1322,7 +1308,7 @@
 \NewDocumentCommand\Option{s >{\Processor@Value{#3}}m !d== !d() !d'' !d||}{%
   \Option@Value{#1}#2(#4)'#5'|#6|%
 }
-\NewDocumentCommand\Option@Value{m m r== r() r'' r||}{%
+\NewDocumentCommand\Option@Value{m r++ r== r() r'' r||}{%
   \if@tud@changedat%
     \Process@ChangedAt{\Option{#2}}=#3=(#4)%
   \else%
@@ -1332,12 +1318,29 @@
 }
 \Markup@Simple@Format\Option{Option}[c]
 \NewExpandableDocumentCommand\@Environment{s m}{#2}
-\NewDocumentCommand\Environment{s m !d++ !o !d() !d'' !d||}{%
+\NewDocumentCommand\Environment{%
+  s m !>{\Processor@Value{#4}}d++ !d== !o !d() !d'' !d||
+}{%
+  \tud@toks@{\Environment@Parameter{#1}{#2}}%
+  \IfValueTF{#3}{%
+    \addto@hook\tud@toks@{#3}%
+  }{%
+    \IfValueT{#4}{%
+      \ClassWarning{tudscrmanual}{%
+        The given value `#4' is ignored as\MessageBreak%
+        no `+<parameter>+' was specified%
+      }%
+    }%
+  }%
+  \addto@hook\tud@toks@{[#5](#6)'#7'|#8|}%
+  \the\tud@toks@%
+}
+\NewDocumentCommand\Environment@Parameter{m m d++ d== r[] r() r'' r||}{%
   \if@tud@changedat%
-    \Process@ChangedAt{\Environment{#2}}(#5)%
+    \Process@ChangedAt{\Environment{#2}}(#6)%
   \else%
-    \Process@Markup{\Environment{#2}}+#3+[{#4}](#5)'#6'{#1}|#7|%
-    \Process@Index{#1}{\Environment{#2}}+#3+(#4)|#7|%
+    \Process@Markup{\Environment{#2}}+#3+=#4=[{#5}](#6)'#7'{#1}|#8|%
+    \Process@Index{#1}{\Environment{#2}}+#3+=#4=(#6)|#8|%
   \fi%
 }
 \Markup@Declare@Format\Environment{%
@@ -1347,12 +1350,29 @@
 }
 \Markup@Simple@Format\Environment{Umgebung}
 \NewExpandableDocumentCommand\@Macro{s m}{#2}
-\NewDocumentCommand\Macro{s m !d++ !o !d() !d'' !d||}{%
+\NewDocumentCommand\Macro{%
+  s m !>{\Processor@Value{#4}}d++ !d== !o !d() !d'' !d||%
+}{%
+  \tud@toks@{\Macro@Parameter{#1}{#2}}%
+  \IfValueTF{#3}{%
+    \addto@hook\tud@toks@{#3}%
+  }{%
+    \IfValueT{#4}{%
+      \ClassWarning{tudscrmanual}{%
+        The given value `#4' is ignored as\MessageBreak%
+        no `+<parameter>+' was specified%
+      }%
+    }%
+  }%
+  \addto@hook\tud@toks@{[#5](#6)'#7'|#8|}%
+  \the\tud@toks@%
+}
+\NewDocumentCommand\Macro@Parameter{m m d++ d== r[] r() r'' r||}{%
   \if@tud@changedat%
-    \Process@ChangedAt{\Macro{#2}}(#5)%
+    \Process@ChangedAt{\Macro{#2}}(#6)%
   \else%
-    \Process@Markup{\Macro{#2}}+#3+[{#4}](#5)'#6'{#1}|#7|%
-    \Process@Index{#1}{\Macro{#2}}+#3+(#5)|#7|%
+    \Process@Markup{\Macro{#2}}+#3+=#4=[{#5}](#6)'#7'{#1}|#8|%
+    \Process@Index{#1}{\Macro{#2}}+#3+=#4=(#6)|#8|%
   \fi%
 }
 \Markup@Simple@Format*\Macro{Befehl}[c]
@@ -1387,11 +1407,6 @@
 \NewDocumentCommand\Key{s m m !d== !d() !d'' !d||}{%
 %  \ClassWarning{tudscrmanual}{Set new markup!}%
   \begingroup%
-%    \IfValueT{#4}{%
-%      \ClassError{tudscrmanual}%
-%        {Wrong usage of optional argument for value}%
-%        {There are two optional arguments for a value given!}%
-%    }%
     \begingroup%
       \Markup@Get@Name\tud@res@b{#2}%
       \Markup@Expandable%
@@ -1527,13 +1542,13 @@
   \mbox{\texttt{[}\PName{#1}\textOR\PName{Parameterliste}\texttt{]}}%
 }
 \newrobustcmd*\textOR{\PValue{\,\textbardbl\,}}
-\newrobustcmd*\PMisc[1]{\PName{#1}}
+\newrobustcmd*\PSet[1]{\PName{#1}}
 % TODO \newcommand?!
-\newrobustcmd*\PSet{\PMisc{Einstellung}}
+\newrobustcmd*\PMisc{\PSet{Einstellung}}
 % TODO \newcommand?!
-\newrobustcmd*\PBoolean{\PMisc{Ein-Aus-Wert}}
+\newrobustcmd*\PBoolean{\PSet{Ein-Aus-Wert}}
 % TODO \newcommand?!
-\newrobustcmd*\PLength{\PMisc{L\"ange}}
+\newrobustcmd*\PLength{\PSet{L\"ange}}
 % TODO das ist großer murks, \PValueName muss weg!
 \newcommand*\tud@doifPValue[3][]{%
   \IfValueT{#2}{%
@@ -1550,8 +1565,8 @@
       \let\PParameter\@gobble%
       \let\POParameter\@gobble%
       \let\textOR\@empty%
-      \let\PMisc\@gobble%
-      \let\PSet\@empty%
+      \let\PSet\@gobble%
+      \let\PMisc\@empty%
       \let\PBoolean\@empty%
       \let\PLength\@empty%
       \let\emph\@firstofone%
@@ -1607,8 +1622,8 @@
   \let\PParameter\@firstofone%
   \let\POParameter\@firstofone%
   \let\textOR\@empty%
-  \let\PMisc\@gobble%
-  \let\PSet\@empty%
+  \let\PSet\@gobble%
+  \let\PMisc\@empty%
   \let\PBoolean\@empty%
   \let\PLength\@empty%
 }
@@ -1666,32 +1681,17 @@
 \newcommand*\Markup@Suppress{\let\Process@Markup\Markup@@Suppress}
 \NewDocumentCommand\Markup@@Suppress{m d++ d== o d() d<> d''}{}
 \NewDocumentCommand\Process@Markup{%
-  m >{\Processor@Value{#3}}d++ d== o >{\Processor@Bundle}d() d<> d'' m r||%
+  m d++ d== o >{\Processor@Bundle}d() d<> d'' m r||%
 }{%
-  \begingroup%
-    \tud@toks@{\Process@@Markup{#1}}%
-    \IfValueTF{#2}{%
-      \addto@hook\tud@toks@{#2}%
-    }{%
-      \addto@hook\tud@toks@{{#2}=#3=}%
-    }%
-    \addto@hook\tud@toks@{[{#4}](#5)<#6>'#7'{#8}|#9|}%
-    \edef\tud@res@a{%
-      \endgroup%
-      \the\tud@toks@%
-    }%
-  \tud@res@a%
-}
-\NewDocumentCommand\Process@@Markup{m m r== r[] r() r<> r'' m r||}{%  
-  \Process@@@Markup{#1}{#2}=#3=[{#4}](#5)<#6>'#7'%
+  \Process@@Markup{#1}{#2}=#3=[{#4}](#5)<#6>'#7'%
   \Process@New@Index{#1}{#2}=#3=[{#4}](#5)<#6>'#7'{#8}|#9|%
 }
-\NewDocumentCommand\Process@@@Markup{m m r== r[] r() r<> r''}{%
+\NewDocumentCommand\Process@@Markup{m m r== r[] r() r<> r''}{%
   \IfValueT{#6}{\tud@trace@bdl@add{#6}}%
   \if@tud@declare%
-    \tud@toks@{\Process@@@Markup@Declare}%
+    \tud@toks@{\Process@@Markup@Declare}%
   \else%
-    \tud@toks@{\Process@@@Markup@Inline}%
+    \tud@toks@{\Process@@Markup@Inline}%
   \fi%
   \addto@hook\tud@toks@{{#1}+#2+=#3=[{#4}](#5)}%
   \if@tud@index\else%
@@ -1718,7 +1718,7 @@
   \fi%
   \the\tud@toks@%
 }
-\NewDocumentCommand\Process@@@Markup@Declare{%
+\NewDocumentCommand\Process@@Markup@Declare{%
   m r++ r== r[] R(){\tud@bdl@curr} !d<>%
 }{%
   \begingroup%
@@ -1746,9 +1746,9 @@
     \Markup@Output{#1}+#2+=#3=[{#4}]<#6>%
   \fi%
 }
-\NewDocumentCommand\Process@@@Markup@Inline{m r++ r== r[] r() !d<> !d''}{%
+\NewDocumentCommand\Process@@Markup@Inline{m r++ r== r[] r() !d<> !d''}{%
   \begingroup%
-    \tud@toks@{\Process@@@Markup@@Inline{#1}+#2+=#3=[{#4}]}%
+    \tud@toks@{\Process@@Markup@@Inline{#1}+#2+=#3=[{#4}]}%
     \tud@bdl@get\tud@res@a{#1}+#2+=#3=(#5)'#7'%
     \eaddto@hook\tud@toks@{\expandafter(\tud@res@a)}%
     \addto@hook\tud@toks@{<#6>'#7'}%
@@ -1758,7 +1758,7 @@
     }%
   \tud@res@a%
 }
-\NewDocumentCommand\Process@@@Markup@@Inline{m r++ r== r[] r() r<> r''}{%
+\NewDocumentCommand\Process@@Markup@@Inline{m r++ r== r[] r() r<> r''}{%
   \begingroup%
     \tud@lbl@get\tud@lbl@tmp{#5:#1}+#2+=#3=%
     \def\tud@res@b{\Markup@Output{#1}+#2+=#3=[{#4}]}%
@@ -2073,7 +2073,7 @@
 \newcommand*\tud@idx@fmt{}
 \newcommand*\tud@idx@val{}
 \newcommand*\tud@idx@bdl{}
-% TODO !!!!!!!!!!!! das tut richtig weh, grauenhafter Quelltext! use bdl@seek?
+% TODO RAUS! !!!!!!!!!!!! das tut richtig weh, grauenhafter Quelltext!
 \NewDocumentCommand\tud@idx@get{s m d== d() d||}{%
   \begingroup%
     \begingroup%
@@ -2101,13 +2101,10 @@
     \def\tud@idx@fmt{#2}%
     \tud@@replace\tud@idx@key{@}{"@}%
     \tud@@replace\tud@idx@fmt{@}{"@}%
-    % TODO \tud@if@lbl@exists nutzen, um ggf. 'none' zu setzen
-    % TODO noch sinnvoll?
     \let\tud@idx@bdl\tud@bdl@dflt%
     \IfValueTF{#4}{%
       \ifxblank{#4}{}{\def\tud@idx@bdl{#4}}%
     }{%
-      % TODO noch sinnvoll?
       \tud@if@bdl{%
         \tud@if@lbl@exists{\tud@bdl@curr:#2}{%
           \edef\tud@idx@bdl{\expandonce\tud@bdl@curr}%
@@ -2130,7 +2127,6 @@
       \edef\@tempb{(\expandonce\tud@idx@bdl)}%
     \fi%
     \let\@tempc\@tempb%
-    % TODO über \Markup@Get@Name suffix suchen und an \@tempa hängen?!
     \begingroup%
       \Markup@Get@Name\tud@res@a{#2}%
       \IfBooleanTF{#1}{%
@@ -2160,18 +2156,14 @@
     \@tempswafalse%
     \IfBooleanT{#1}{\@tempswatrue}%
     \IfValueT{#5}{%
-      % TODO noch sinnvoll?
-      \typeout{??? \the\inputlineno}
       \ifstr{#5}{declare}{\@tempswatrue}{}%
       \ifstr{#5}{default}{\@tempswatrue}{}%
     }%
     \if@tempswa%
       \protected@eappto\tud@idx@key{\expandonce\@tempa}%
-      % TODO \tud@doifPValue raus
       \tud@doifPValue{#3}{\noexpand\appto\noexpand\tud@idx@key{=#3}}%
       \protected@eappto\tud@idx@fmt{\IfValueT{#3}{=#3=}\expandonce\@tempb}%
     \else%
-      % TODO \tud@doifPValue raus
       \tud@doifPValue{#3}{\noexpand\@tempswatrue}%
       \if@tempswa%
         \eappto\tud@idx@val{%
@@ -2201,8 +2193,6 @@
     \def\tud@res@a{#5}%
     \IfValueF{#5}{%
       \tud@if@bdl{%
-        % TODO alle Varianten sollten mit \tud@lbl@seek erschlagen werden
-        % TODO wohl eher nicht die Sternversion nutzen
         \tud@lbl@get\tud@lbl@tmp{\tud@bdl@curr:#2}+#3+=#4=%
         \tud@if@lbl@exists{\tud@lbl@tmp}{%
           \let\tud@res@a\tud@bdl@curr%
@@ -2321,6 +2311,8 @@
     \fi%
   \else%
     \IfValueT{#5}{%
+      % TODO noch sinnvoll?
+      \typeout{??? \thepage\on@line}%
       % TODO |declare| und |default| durch InlineDeclartion ersetzen
       % TODO nur noch |!| und |?| zulassen
       \ifstr{#5}{declare}{%
@@ -2356,7 +2348,7 @@
       \protected@edef\tud@res@c{%
         \endgroup%
         \unexpanded{\def\tud@res@a}{%
-          #3\ifx\tud@res@b\@empty\else=\unexpanded{#5}\fi%
+          #3\ifx\tud@res@b\@empty\else=\tud@res@b\fi%
           \IfBooleanF{#1}{#6\if@tud@res@swa\suffix{#7}\fi}%
         }%
       }%
@@ -2390,10 +2382,11 @@
     \IfValueT{#4}{%
       \begingroup%
         \Parameter@Expandable%
-        % TODO \PSet with newcommand, \PMisc setzt \aftergroup\@tud@res@swatrue%
+        % TODO \PMisc with newcommand, \PSet setzt \aftergroup\@tud@res@swatrue%
         \protected@edef\tud@res@a{#4}%
         \ifx\tud@res@a\@empty%
           \aftergroup\@tud@res@swatrue%
+        \else%
         \fi%
       \endgroup%
     }%
@@ -2402,7 +2395,6 @@
     \tud@toks@{\tud@idx@format@entry\tud@idx@entry@a{#2}{#2}}%
     \IfValueF{#3}{\if@tud@res@swa\addto@hook\tud@toks@{=#4=}\fi}%
     \eaddto@hook\tud@toks@{\expandafter[\tud@res@c](#5)}%
-%    \typeout{+++++++ \the\tud@toks@}
     \the\tud@toks@%
     \IfValueT{#3}{%
       \Markup@Get@Name\tud@res@c{\Key@Value}%
@@ -2435,8 +2427,7 @@
     }%
   \tud@res@a%
 }
-% TODO #5 abfangen, wenn -NoValue- und if@tud@bdl
-% TODO mehrfache Einträge in #5 ermöglichen (jeweils separater eintrag)
+% TODO Raus!
 \NewDocumentCommand\Process@Index{m m !d++ !d== !d() !d||}{%
   \ifboolexpr{%
     bool {@tud@index} or bool {@tud@obsolete}%
@@ -2457,11 +2448,8 @@
       }{%
         \tud@bdl@seek\tud@res@b{#2}+#3+=#4=%
       }%
-      % TODO komplett raus? >{\Processor@Bundle}d()
       \tud@idx@bdl@get\tud@res@a{#2}+#3+=#4=(#5)%
-      % TODO hier gehts weiter
       \ifx\tud@res@a\tud@res@b\else%
-        % TODO \@temp... > tud@res@...
         \@tempswatrue%
         \expandafter\IfValueF\expandafter{\tud@res@a}{%
           \ifx\tud@res@b\tud@bdl@dflt%
@@ -2655,7 +2643,7 @@
   }%
 }
 \tud@newif\if@tud@changedat
-% TODO mehrfache Einträge in #4 ermöglichen?
+% TODO mehrfache Einträge in #3 ermöglichen?
 \NewDocumentCommand\Process@ChangedAt{m d== >{\Processor@Bundle}r()}{%
   \tud@idx@get*{#1}=#2=(#3)%
 }
@@ -2897,8 +2885,7 @@
     \ifx\tud@res@c\@empty\else%
       \protected@edef\tud@res@c{#2{\tud@res@c}}%
     \fi%
-    % TODO hier wahrscheinlich neue Variante von \InlineDeclaration nutzen
-    \protected@edef\tud@res@a{\tud@values}%
+      \protected@edef\tud@res@a{\tud@values}%
     \eappto\tud@res@a{=\expandonce\tud@res@b=}%
     \let\tud@res@b\@empty%
     \IfBooleanTF{#1}{%
