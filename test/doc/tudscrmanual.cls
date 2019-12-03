@@ -923,6 +923,7 @@
     \tud@declare@start{#3}[{#4}][{#5}](#6)%
   }{%
     \listadd\tud@declaration@list{#3}%
+    % TODO überprüfen
     \IfValueTF{#2}{%
       \Changed@At@CreateList{#1!#3}[{#2}]%
     }{%
@@ -1219,31 +1220,75 @@
     }%
   \tud@res@b%
 }
-\newcommand*\Processor@Value[2]{%
+\NewDocumentCommand\Processor@Value{m m m}{%
   \begingroup%
-    \def\tud@res@a##1=##2=##3\@nil{%
-      \tud@toks@{+##1+}%
+    \def\tud@res@b##1=##2=##3\@nil{%
+      \def\tud@res@a{##1}%
       \IfArgIsEmpty{##2}{%
-        \def\tud@res@b{#1}%
+        \def\tud@res@c{#2}%
       }{%
-        \def\tud@res@b{##2}%
-        \IfValueT{#1}{%
+        \def\tud@res@c{##2}%
+        \IfValueT{#2}{%
           \ClassError{tudscrmanual}%
             {Two optional arguments for a value given!}%
-            {You did specify `##2' as well as `#1' as a value.}%
+            {You did specify `##2' as well as `#2' as a value.}%
         }%
       }%
     }%
-    \tud@res@a#2==\@nil%
-    \expandafter\IfValueT\expandafter{\tud@res@b}{%
-% DOC in PValue hüllen, wenn kein Markup
-      \protected@edef\tud@res@a{%
-        \unexpanded{\Parameter@Enclose[\def\tud@res@b]{\PValue}}{\tud@res@b}%
+    \tud@res@b#3==\@nil%
+    \tud@if@nil{#1}{}{%
+      \def\tud@res@b##1+##2+##3\@nil{%
+        \def\tud@res@a{##1}%
+        \IfArgIsEmpty{##2}{%
+          \def\tud@res@b{#1}%
+        }{%
+          \def\tud@res@b{##2}%
+          \IfValueT{#1}{%
+            \ClassError{tudscrmanual}%
+              {Two optional arguments for a parameter given!}%
+              {You did specify `##2' as well as `#1' as a parameter.}%
+          }%
+        }%
       }%
-      \tud@res@a%
-      \tud@trace@markup@add{temp}{\expandonce\tud@res@b}%
+      \expandafter\tud@res@b\tud@res@a++\@nil%
+      \protected@expandtwoargs\in@{=}{\tud@res@b}%
+      \ifin@%
+        \expandafter\IfValueTF\expandafter{\tud@res@c}{%
+          \ClassError{tudscrmanual}%
+            {Two optional arguments for a value given!}%
+            {You did specify `\tud@res@c' as well as `\tud@res@b' as a value.}%
+        }{%
+          \def\tud@res@c##1=##2\@nil{%
+            \def\tud@res@b{##1}%
+            \def\tud@res@c{##2}%
+          }%
+          \expandafter\tud@res@c\tud@res@b\@nil%
+        }%
+      \fi%
     }%
-    \eaddto@hook\tud@toks@{\expandafter=\tud@res@b=}%
+    \tud@toks@{}%
+    \eaddto@hook\tud@toks@{\expandafter{\tud@res@a}}%
+    \tud@if@nil{#1}{%
+      \let\tud@res@b\@empty%
+    }{%
+      \eaddto@hook\tud@toks@{\expandafter+\tud@res@b+}%
+    }%
+    \expandafter\IfValueT\expandafter{\tud@res@c}{%
+      \expandafter\IfValueTF\expandafter{\tud@res@b}{%
+        % DOC in PValue hüllen, wenn kein Markup
+        \protected@edef\tud@res@a{%
+          \unexpanded{\Parameter@Enclose[\def\tud@res@c]{\PValue}}{\tud@res@c}%
+        }%
+        \tud@res@a%
+      }{%
+        \ClassWarning{tudscrmanual}{%
+          The given value `\tud@res@c' is ignored as\MessageBreak%
+          no `+<parameter>+' was specified%
+        }%
+        \let\tud@res@c\tud@res@b%
+      }%
+    }%
+    \eaddto@hook\tud@toks@{\expandafter=\tud@res@c=}%
     \protected@edef\tud@res@a{%
       \endgroup%
       \def\noexpand\ProcessedArgument{\the\tud@toks@}%
@@ -1254,7 +1299,6 @@
 \NewExpandableDocumentCommand\@Application{s m}{#2}
 \NewDocumentCommand\Application{s m !d() !d<> !d||}{%
   \Process@Markup{\Application{#2}}<#4>{#1}|#5|%
-  \Process@Index{#1}{\Application{#2}}|#5|%
 }
 \Markup@Simple@Format\Application(\textsbs){Anwendungssoftware}
 \NewExpandableDocumentCommand\@Distribution{s m}{#2}
@@ -1263,81 +1307,49 @@
   \IfValueT{#3}{\addto@hook\tud@toks@{[~#3]}}%
   \addto@hook\tud@toks@{{#1}|#5|}%
   \the\tud@toks@%
-  \Process@Index{#1}{\Distribution{#2}}|#5|%
   % TODO SeeRef raus, \IfBooleanF{#1}{\index{Distribution}}
 }
 \Markup@Simple@Format\Distribution(\textsbn){Distribution}
 \NewExpandableDocumentCommand\@Engine{s m}{#2}
 \NewDocumentCommand\Engine{s m !d() !d||}{%
   \Process@Markup{\Engine{#2}}{#1}|#4|%
-  \Process@Index{#1}{\Engine{#2}}|#4|%
 }
 \Markup@Simple@Format\Engine(\sbnfont\hologoRobust){Textsatzsystem}
 \NewExpandableDocumentCommand\@Class{s m}{#2}
 \NewDocumentCommand\Class{s m !d() !d'' !d||}{%
-  \if@tud@changedat%
-    \Process@ChangedAt{\Class{#2}}(#3)%
-  \else%
-    \Process@Markup{\Class{#2}}(#3)'#4'{#1}|#5|%
-    \Process@Index{#1}{\Class{#2}}(#3)|#5|%
-  \fi%
+  \Process@Markup{\Class{#2}}(#3)'#4'{#1}|#5|%
 }
 \Markup@Simple@Format\Class(\textsbn){Klasse}
 \NewExpandableDocumentCommand\@Package{s m}{#2}
 \NewDocumentCommand\Package{s m !d() !d<> !d'' !d||}{%
-  \if@tud@changedat%
-    \Process@ChangedAt{\Package{#2}}(#3)%
-  \else%
-    \tud@toks@{\Process@Markup{\Package{#2}}(#3)}%
-    \IfValueTF{#4}{%
-      \addto@hook\tud@toks@{<#4>}%
-    }{%
-      \addto@hook\tud@toks@{<#2>}%
-    }%
-    \addto@hook\tud@toks@{'#5'{#1}|#6|}%
-    \the\tud@toks@%
-    \Process@Index{#1}{\Package{#2}}(#3)|#6|%
-  \fi%
+  \tud@toks@{\Process@Markup{\Package{#2}}(#3)}%
+  \IfValueTF{#4}{%
+    \addto@hook\tud@toks@{<#4>}%
+  }{%
+    \addto@hook\tud@toks@{<#2>}%
+  }%
+  \addto@hook\tud@toks@{'#5'{#1}|#6|}%
+  \the\tud@toks@%
 }
 \Markup@Simple@Format\Package(\textsbn){Paket}
 \NewExpandableDocumentCommand\@Option{s m}{#2}
-\NewDocumentCommand\Option{s >{\Processor@Value{#3}}m !d== !d() !d'' !d||}{%
+\NewDocumentCommand\Option{%
+  s >{\Processor@Value{\@nil}{#3}}m !d== !d() !d'' !d||%
+}{%
   \Option@Value{#1}#2(#4)'#5'|#6|%
 }
-\NewDocumentCommand\Option@Value{m r++ r== r() r'' r||}{%
-  \if@tud@changedat%
-    \Process@ChangedAt{\Option{#2}}=#3=(#4)%
-  \else%
-    \Process@Markup{\Option{#2}}=#3=(#4)'#5'{#1}|#6|%
-    \Process@Index{#1}{\Option{#2}}=#3=(#4)|#6|%
-  \fi%
+\NewDocumentCommand\Option@Value{m m r== r() r'' r||}{%
+  \Process@Markup{\Option{#2}}=#3=(#4)'#5'{#1}|#6|%
 }
 \Markup@Simple@Format\Option{Option}[c]
 \NewExpandableDocumentCommand\@Environment{s m}{#2}
 \NewDocumentCommand\Environment{%
-  s m !>{\Processor@Value{#4}}d++ !d== !o !d() !d'' !d||
+  s >{\Processor@Value{#3}{#4}}m !d++ !d== !o !d() !d'' !d||
 }{%
-  \tud@toks@{\Environment@Parameter{#1}{#2}}%
-  \IfValueTF{#3}{%
-    \addto@hook\tud@toks@{#3}%
-  }{%
-    \IfValueT{#4}{%
-      \ClassWarning{tudscrmanual}{%
-        The given value `#4' is ignored as\MessageBreak%
-        no `+<parameter>+' was specified%
-      }%
-    }%
-  }%
-  \addto@hook\tud@toks@{[#5](#6)'#7'|#8|}%
-  \the\tud@toks@%
+  \Environment@Parameter{#1}#2[#5](#6)'#7'|#8|%
 }
-\NewDocumentCommand\Environment@Parameter{m m d++ d== r[] r() r'' r||}{%
-  \if@tud@changedat%
-    \Process@ChangedAt{\Environment{#2}}(#6)%
-  \else%
-    \Process@Markup{\Environment{#2}}+#3+=#4=[{#5}](#6)'#7'{#1}|#8|%
-    \Process@Index{#1}{\Environment{#2}}+#3+=#4=(#6)|#8|%
-  \fi%
+\NewDocumentCommand\Environment@Parameter{m m r++ r== r[] r() r'' r||}{%
+  \Process@Markup{\Environment{#2}}+#3+=#4=[{#5}](#6)'#7'{#1}|#8|%
 }
 \Markup@Declare@Format\Environment{%
   \texttt{\bsc{}begin\textbraceleft#1\textbraceright\IfValueT{#3}{#3}}%
@@ -1347,29 +1359,12 @@
 \Markup@Simple@Format\Environment{Umgebung}
 \NewExpandableDocumentCommand\@Macro{s m}{#2}
 \NewDocumentCommand\Macro{%
-  s m !>{\Processor@Value{#4}}d++ !d== !o !d() !d'' !d||%
+  s >{\Processor@Value{#3}{#4}}m !d++ !d== !o !d() !d'' !d||%
 }{%
-  \tud@toks@{\Macro@Parameter{#1}{#2}}%
-  \IfValueTF{#3}{%
-    \addto@hook\tud@toks@{#3}%
-  }{%
-    \IfValueT{#4}{%
-      \ClassWarning{tudscrmanual}{%
-        The given value `#4' is ignored as\MessageBreak%
-        no `+<parameter>+' was specified%
-      }%
-    }%
-  }%
-  \addto@hook\tud@toks@{[#5](#6)'#7'|#8|}%
-  \the\tud@toks@%
+  \Macro@Parameter{#1}#2[#5](#6)'#7'|#8|%
 }
 \NewDocumentCommand\Macro@Parameter{m m d++ d== r[] r() r'' r||}{%
-  \if@tud@changedat%
-    \Process@ChangedAt{\Macro{#2}}(#6)%
-  \else%
-    \Process@Markup{\Macro{#2}}+#3+=#4=[{#5}](#6)'#7'{#1}|#8|%
-    \Process@Index{#1}{\Macro{#2}}+#3+=#4=(#6)|#8|%
-  \fi%
+  \Process@Markup{\Macro{#2}}+#3+=#4=[{#5}](#6)'#7'{#1}|#8|%
 }
 \Markup@Simple@Format*\Macro{Befehl}[c]
 \NewExpandableDocumentCommand\@Key@Value{s m}{#2}
@@ -1379,23 +1374,13 @@
 %      Markup@Declare@@Key@Value patchen?
 \NewExpandableDocumentCommand\@Length{s m}{#2}
 \NewDocumentCommand\Length{s m !d() !d'' !d||}{%
-  \if@tud@changedat%
-    \Process@ChangedAt{\Length{#2}}(#3)%
-  \else%
-    \Process@Markup{\Length{#2}}(#3)'#4'{#1}|#5|%
-    \Process@Index{#1}{\Length{#2}}(#3)|#5|%
-  \fi%
+  \Process@Markup{\Length{#2}}(#3)'#4'{#1}|#5|%
 }
 % TODO ndic?
 \Markup@Simple@Format*\Length{L\"ange}[dic]
 \NewExpandableDocumentCommand\@Counter{s m}{#2}
 \NewDocumentCommand\Counter{s m !d() !d'' !d||}{%
-  \if@tud@changedat%
-    \Process@ChangedAt{\Counter{#2}}(#3)%
-  \else%
-    \Process@Markup{\Counter{#2}}(#3)'#4'{#1}|#5|%
-    \Process@Index{#1}{\Counter{#2}}(#3)|#5|%
-  \fi%
+  \Process@Markup{\Counter{#2}}(#3)'#4'{#1}|#5|%
 }
 % TODO ndic?
 \Markup@Simple@Format\Counter{Z\"ahler}[dic]
@@ -1429,45 +1414,25 @@
 }
 \NewExpandableDocumentCommand\@Term{s m}{#2}
 \NewDocumentCommand\Term{s m !d() !d'' !d||}{%
-  \if@tud@changedat%
-    \Process@ChangedAt{\Term{#2}}(#3)%
-  \else%
-    \Process@Markup{\Term{#2}}(#3)'#4'{#1}|#5|%
-    \Process@Index{#1}{\Term{#2}}(#3)|#5|%
-  \fi%
+  \Process@Markup{\Term{#2}}(#3)'#4'{#1}|#5|%
 }
 % TODO ndic?
 \Markup@Simple@Format*\Term{Bezeichner}[dc]
 \NewExpandableDocumentCommand\@PageStyle{s m}{#2}
 \NewDocumentCommand\PageStyle{s m !d() !d'' !d||}{%
-  \if@tud@changedat%
-    \Process@ChangedAt{\PageStyle{#2}}(#3)%
-  \else%
-    \Process@Markup{\PageStyle{#2}}(#3)'#4'{#1}|#5|%
-    \Process@Index{#1}{\PageStyle{#2}}(#3)|#5|%
-  \fi%
+  \Process@Markup{\PageStyle{#2}}(#3)'#4'{#1}|#5|%
 }
 % TODO ndic?
 \Markup@Simple@Format\PageStyle{Seitenstil}[dic]
 \NewExpandableDocumentCommand\@Font{s m}{#2}
 \NewDocumentCommand\Font{s m !d() !d'' !d||}{%
-  \if@tud@changedat%
-    \Process@ChangedAt{\Font{#2}}(#3)%
-  \else%
-    \Process@Markup{\Font{#2}}(#3)'#4'{#1}|#5|%
-    \Process@Index{#1}{\Font{#2}}(#3)|#5|%
-  \fi%
+  \Process@Markup{\Font{#2}}(#3)'#4'{#1}|#5|%
 }
 % TODO ndic?
 \Markup@Simple@Format\Font{Schriftelement}[dic]
 \NewExpandableDocumentCommand\@Color{s m}{#2}
 \NewDocumentCommand\Color{s m !o !D(){\Package{tudscrcolor}} !d'' !d||}{%
-  \if@tud@changedat%
-    \Process@ChangedAt{\Color{#2}}(#4)%
-  \else%
-    \Process@Markup{\Color{#2}}[{#3}](#4)'#5'{#1}|#6|%
-    \Process@Index{#1}{\Color{#2}}(#4)|#6|%
-  \fi%
+  \Process@Markup{\Color{#2}}[{#3}](#4)'#5'{#1}|#6|%
 }
 \Markup@Declare@Format\Color{\texttt{#1\IfValueT{#3}{\,(#3)}}}
 \Markup@Simple@Format\Color{Farbe}[dic]
@@ -1484,7 +1449,6 @@
 \NewExpandableDocumentCommand\@File{s m}{#2}
 \NewDocumentCommand\File{s >{\Processor@Underscore}m !d() !d||}{%
   \Process@Markup{\File{#2}}{#1}|#4|%
-  \Process@Index{#1}{\File{#2}}|#4|%
 }
 \Markup@Simple@Format\File(\textsbn){Datei}
 \NewDocumentCommand\Path{>{\Processor@Underscore}m}{\mbox{\texttt{#1}}}
@@ -1678,11 +1642,15 @@
 \NewDocumentCommand\Process@Markup{%
   m d++ d== o >{\Processor@Bundle}d() d<> d'' m r||%
 }{%
-  \Process@@Markup{#1}{#2}=#3=[{#4}](#5)<#6>'#7'%
-  \Process@New@Index{#1}{#2}=#3=[{#4}](#5)<#6>'#7'{#8}|#9|%
+  \if@tud@changedat%
+    \Process@ChangedAt{#1}+#2+=#3=(#5)%
+  \else%
+    \Process@@Markup{#1}+#2+=#3=[{#4}](#5)<#6>'#7'%
+    \Process@Index{#1}+#2+=#3=(#5){#8}|#9|%
+  \fi%
 }
-\NewDocumentCommand\Process@@Markup{m m r== r[] r() r<> r''}{%
-  \IfValueT{#6}{\tud@trace@bdl@add{#6}}%
+\NewDocumentCommand\Process@@Markup{m r++ r== r[] r() r<> r''}{%
+  \IfValueT{#5}{\tud@trace@bdl@add{#5}}%
   \if@tud@declare%
     \tud@toks@{\Process@@Markup@Declare}%
   \else%
@@ -2182,37 +2150,6 @@
     }%
   \tud@reserved%
 }
-% TODO RAUS!
-\NewDocumentCommand\tud@idx@bdl@get{m m r++ r== d()}{%
-  \begingroup%
-    \def\tud@res@a{#5}%
-    \IfValueF{#5}{%
-      \tud@if@bdl{%
-        \tud@lbl@get\tud@lbl@tmp{\tud@bdl@curr:#2}+#3+=#4=%
-        \tud@if@lbl@exists{\tud@lbl@tmp}{%
-          \let\tud@res@a\tud@bdl@curr%
-        }{%
-          \tud@lbl@get\tud@lbl@tmp{\tud@bdl@dflt:#2}+#3+=#4=%
-          \tud@if@lbl@exists{\tud@lbl@tmp}{%
-            \let\tud@res@a\tud@bdl@dflt%
-          }{%
-            \Markup@Expandable%
-            \edef\tud@res@b{\tud@bdl@curr}%
-            \ifstrstart{\tud@res@b}{\tud@bdl@dflt}{%
-              \let\tud@res@a\tud@bdl@dflt%
-            }{%
-              \let\tud@res@a\tud@bdl@curr%
-            }%
-          }%
-        }%
-      }{}%
-    }%
-    \edef\tud@res@a{%
-      \endgroup%
-      \def\noexpand#1{\expandonce\tud@res@a}%
-    }%
-  \tud@res@a%
-}
 \newrobustcmd*\cleversee{\tud@cleversee{\seename}}
 \newrobustcmd*\cleverseealso{%
   \ClassWarning{tudscrmanual}%
@@ -2234,46 +2171,46 @@
   \emph{\IfBooleanTF{#1}{\alsoname}{\seename}}\space#2%
 }
 \newcommand*\seeidx[2]{\pageref{idx:#1}}
-\NewDocumentCommand\Process@New@Index{m m r== r[] r() r<> r'' m r||}{%
+\NewDocumentCommand\Process@Index{m r++ r== r() m r||}{%
   \ifboolexpr{%
     bool {@tud@index} or bool {@tud@obsolete}%
   }{}{%
     \if@tud@declare%
       \if@tud@openindex%
-        \IfBooleanT{#8}{%
+        \IfBooleanT{#5}{%
           \Markup@Get@Name\tud@res@a{#1}%
           \ClassWarning{tudscrmanual}{%
             Using \@backslashchar\tud@res@a* (starred version)\MessageBreak%
             within a declaration is inept%
           }%
         }%
-        \IfValueT{#9}{%
+        \IfValueT{#6}{%
           \ClassWarning{tudscrmanual}{%
             It is not possible to use any indexing format\MessageBreak%
-            like |#9| within a declaration%
+            like |#6| within a declaration%
           }%
         }%
       \fi%
     \fi%
-    \IfBooleanTF{#8}{%
-      \IfValueT{#9}{%
+    \IfBooleanTF{#5}{%
+      \IfValueT{#6}{%
         \Markup@Get@Name\tud@res@a{#1}%
         \ClassWarning{tudscrmanual}{%
           Using \@backslashchar\tud@res@a* (starred version)\MessageBreak%
           means, no index entry is created. The optional\MessageBreak%
-          argument |#9| is ignored%
+          argument |#6| is ignored%
         }%
       }%
     }{%
       \begingroup%
-        \IfValueTF{#5}{%
-          \def\tud@res@a{#5}%
+        \IfValueTF{#4}{%
+          \def\tud@res@a{#4}%
         }{%
           \tud@bdl@seek\tud@res@a{#1}+#2+=#3=%
         }%
         \@for\tud@res@a:=\tud@res@a\do{%
-          \tud@toks@{\Process@New@@Index{#1}+#2+=#3=}%
-          \eaddto@hook\tud@toks@{\expandafter(\tud@res@a)|#9|}%
+          \tud@toks@{\Process@@Index{#1}+#2+=#3=}%
+          \eaddto@hook\tud@toks@{\expandafter(\tud@res@a)|#6|}%
           \the\tud@toks@%
         }%
       \endgroup%
@@ -2281,19 +2218,9 @@
   }%
 }
 \newcommand*\tud@idx@entry{}
-\NewDocumentCommand\Process@New@@Index{m r++ r== r() r||}{%
+\NewDocumentCommand\Process@@Index{m r++ r== r() r||}{%
   % TODO pass macro \tud@idx@entry as argument
   \tud@idx@New@get{#1}+#2+=#3=(#4)%
-%  \par\meaning\tud@idx@val?
-%  \if@tud@declare%
-%    \ifnum\tud@declare@num<\m@ne\relax%
-%      \tud@idx@New@get{#1}=#2=(#3)|!|%
-%    \else%
-%      \tud@idx@New@get{#1}=#2=(#3)|declare|%
-%    \fi%
-%  \else%
-%    \tud@idx@New@get{#1}=#2=(#3)|#4|%
-%  \fi%
   \tud@attr@get*\tud@lbl@tmp{#1}%
   \let\tud@res@b\@empty%
   \if@tud@declare%
@@ -2317,6 +2244,7 @@
       }%
     }%
   \fi%
+  % TODO \tud@idx@entry verwenden
   \index[\tud@lbl@tmp]{\tud@idx@entry@a\tud@res@b}%
 }
 % #1 subentry?
@@ -2363,7 +2291,7 @@
     }%
   \tud@res@c%
 }
-% TODO alles in temporäres Makro \tud@res@a
+% TODO alles in Makro \tud@res@a bzw an \tud@idx@entry (#1) anhängen!
 \newcommand*\tud@idx@entry@a{}
 \newcommand*\tud@idx@entry@b{}
 \newcommand*\tud@idx@entry@c{}
@@ -2420,89 +2348,6 @@
       \def\noexpand\tud@idx@entry@a{\tud@idx@entry@a}%
     }%
   \tud@res@a%
-}
-% TODO Raus!
-\NewDocumentCommand\Process@Index{m m !d++ !d== !d() !d||}{%
-  \ifboolexpr{%
-    bool {@tud@index} or bool {@tud@obsolete}%
-  }{}{%
-    \IfBooleanTF{#1}{%
-      \IfValueT{#6}{%
-        \ClassWarning{tudscrmanual}%
-        {%
-          Using the starred version of\MessageBreak%
-          #2\MessageBreak%
-          means, no index entry is created. The optional\MessageBreak%
-          argument |#6| is ignored%
-        }%
-      }%
-    }{%
-      \IfValueTF{#5}{%
-        \def\tud@res@b{#5}%
-      }{%
-        \tud@bdl@seek\tud@res@b{#2}+#3+=#4=%
-      }%
-      \tud@idx@bdl@get\tud@res@a{#2}+#3+=#4=(#5)%
-      \ifx\tud@res@a\tud@res@b\else%
-        \@tempswatrue%
-        \expandafter\IfValueF\expandafter{\tud@res@a}{%
-          \ifx\tud@res@b\tud@bdl@dflt%
-            \@tempswafalse%
-          \fi%
-        }%
-        \if@tempswa%
-%          \typeout{!!!!!!!!!!!! #2 (#5)}%
-%          \typeout{idx@get: \tud@res@a}%
-%          \typeout{bdl@seek: \tud@res@b}%
-        \fi%
-      \fi%
-      \tud@toks@{\Process@@Index{#2}=#4=}%
-%      \eaddto@hook\tud@toks@{\expandafter(\tud@res@a)}%
-      \eaddto@hook\tud@toks@{\expandafter(\tud@res@b)}%
-      \addto@hook\tud@toks@{|#6|}%
-%      \the\tud@toks@%
-    }%
-  }%
-}
-\NewDocumentCommand\Process@@Index{m r== r() r||}{%
-  \if@tud@declare%
-    \ifnum\tud@declare@num<\m@ne\relax%
-      \tud@idx@get{#1}=#2=(#3)|!|%
-    \else%
-      \tud@idx@get{#1}=#2=(#3)|declare|%
-    \fi%
-  \else%
-    \tud@idx@get{#1}=#2=(#3)|#4|%
-  \fi%
-  \tud@attr@get*\tud@lbl@tmp{#1}%
-  \if@tud@declare%
-    \if@tud@openindex%
-      \IfValueT{#4}{%
-        \ClassWarning{tudscrmanual}{%
-          It is not possible to use any indexing format\MessageBreak%
-          like |#4| within the arguments of the\MessageBreak%
-          environments `Declaration' or `Declaration*'%
-        }%
-      }%
-      \index[\tud@lbl@tmp-declare]{%
-        \tud@idx@val\tud@idx@key @\tud@idx@fmt|(declare%
-      }%
-    \else%
-      \index[\tud@lbl@tmp-declare]{%
-        \tud@idx@val\tud@idx@key @\tud@idx@fmt|declare)%
-      }%
-    \fi%
-  \else%
-    \IfValueT{#4}{%
-      \ifstr{#4}{declare}{%
-        \appto\tud@lbl@tmp{-declare}%
-        \appto\tud@idx@fmt{|declare}%
-      }{%
-        \appto\tud@idx@fmt{|#4}%
-      }%
-    }%
-    \index[\tud@lbl@tmp]{\tud@idx@val\tud@idx@key @\tud@idx@fmt}%
-  \fi%
 }
 \NewDocumentCommand\CrossIndex{s m o m}{%
   \def\tud@res@a##1##2##3{%
@@ -2636,9 +2481,22 @@
   }%
 }
 \tud@newif\if@tud@changedat
-% TODO mehrfache Einträge in #3 ermöglichen?
-\NewDocumentCommand\Process@ChangedAt{m d== >{\Processor@Bundle}r()}{%
-  \tud@idx@get*{#1}=#2=(#3)%
+% TODO mehrfache Einträge in #4 ermöglichen?
+\NewDocumentCommand\Process@ChangedAt{m r++ r== r()}{%
+%      \begingroup%
+%        \IfValueTF{#4}{%
+%          \def\tud@res@a{#4}%
+%        }{%
+%          \tud@bdl@seek\tud@res@a{#1}+#2+=#3=%
+%        }%
+%        \@for\tud@res@a:=\tud@res@a\do{%
+%          \tud@toks@{\Process@@ChangedAt{#1}+#2+=#3=}%
+%          \eaddto@hook\tud@toks@{\expandafter(\tud@res@a)}%
+%          \the\tud@toks@%
+%          \tud@idx@New@get{#1}+#2+=#3=(#4)%
+%        }%
+%      \endgroup%
+  \tud@idx@get*{#1}=#3=(#4)%
 }
 \tud@newdim\tud@dim@changedatvskip
 % TODO wie mit (...) umgehen? #3 ist spezialfall, falls nicht innerhalb von []
@@ -2659,7 +2517,35 @@
 \let\tud@changedat@list\relax
 \DeclareListParser*{\forssvlist}{;}
 \NewDocumentCommand\Changed@At@CreateList{m !o !d()}{%
-  \IfValueT{#1}{\forssvlist{\Changed@At@@CreateList[{#2}](#3)}{#1}}%
+  \IfValueT{#1}{%
+    \typeout{+++++++++++++++++++++++++++++}%
+    \forssvlist{\Changed@At@@CreateList[{#2}](#3)}{#1}%
+    \typeout{/////////////////////////////}%
+    \forssvlist{\Changed@At@New@CreateList[{#2}](#3)}{#1}%
+    \typeout{-----------------------------}%
+  }%
+}
+\NewDocumentCommand\Changed@At@New@CreateList{%
+  r[] r() m%
+}{%
+  \begingroup%
+    \def\tud@res@a##1:##2:##3\@nil{%
+      \def\tud@res@b{##1}%
+      \def\tud@res@c{##2}%
+    }%
+    \tud@res@a#3::\@nil%
+    \def\tud@res@a##1!##2!##3\@nil{%
+      \def\tud@res@a{##1}%
+      \def\tud@res@b{##2}%
+    }%
+    \expandafter\tud@res@a\tud@res@b!!\@nil%
+    \typeout{\meaning\tud@res@a}% ???
+    \typeout{\meaning\tud@res@b}% ???
+    \typeout{\meaning\tud@res@c}% ???
+  \endgroup%
+    \typeout{\detokenize{#1}}% Base-Option
+    \typeout{\detokenize{#2}}% Bundle
+    \typeout{\detokenize{#3}}% ???
 }
 \NewDocumentCommand\Changed@At@@CreateList{r[] r() >{\SplitArgument{1}{:}}m}{%
   \Changed@At@@@CreateList[{#1}](#2)#3%
@@ -2720,6 +2606,7 @@
       }%
     }%
   }%
+  \typeout{\the\toks@}%
   \listeadd\tud@changedat@list{\the\toks@}%
 }
 \newcommand*\PrintChangelog{%
