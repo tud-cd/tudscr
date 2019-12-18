@@ -1,4 +1,4 @@
-% \CheckSum{3149}
+% \CheckSum{3166}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -119,16 +119,31 @@
 %</package&identify>
 %    \end{macrocode}
 %
-%
 % \StopEventually{\PrintIndex\PrintChanges\PrintToDos}
 %
 % \iffalse
 %<*option>
+% \fi
+%
+% Der Category Code für Anführungsstriche wird auf nicht-aktiv gesetzt für den 
+% Fall das ein Paket dies gerne anders hätte.
+%
+%    \begin{macrocode}
+\newcommand*\tud@catcodes@restore{}
+\edef\tud@catcodes@restore{%
+  \catcode`\noexpand\"\the\catcode`\"\relax%
+}%
+\@makeother\"%
+%<class>\AtEndOfClass{\tud@catcodes@restore}
+%<package>\AtEndOfPackage{\tud@catcodes@restore}
+%    \end{macrocode}
+%
+% \iffalse
 %<*class>
 % \fi
 %
 % \subsection{^^A
-%   Verwendung durch die \TUDScript-Klassen und das Paket \pkg{tudscrfonts}^^A
+%   Nutzung durch die \TUDScript-Klassen und das Paket \pkg{tudscrfonts}^^A
 % }
 %
 % Die Schriften des \TUDCDs werden standardmäßig durch die \TUDScript-Klassen 
@@ -315,10 +330,10 @@
 \newcommand*\tud@cdfont@fam@lf{opensans-TLF}
 \newcommand*\tud@cdfont@fam@osf{opensans-TOsF}
 \if@tud@cdoldfont@active
-  \renewcommand*\tud@cdfont@fam{lun}%
-  \renewcommand*\tud@cdfont@fam@lf{lun}%
-  \renewcommand*\tud@cdfont@fam@osf{lun}%
-  \newcommand*\tud@cdfont@db{0m6}%
+  \renewcommand*\tud@cdfont@fam{lun}
+  \renewcommand*\tud@cdfont@fam@lf{lun}
+  \renewcommand*\tud@cdfont@fam@osf{lun}
+  \newcommand*\tud@cdfont@db{0m6}
 \fi
 %    \end{macrocode}
 % \end{macro}^^A \tud@cdfont@db
@@ -4224,79 +4239,6 @@
 %</class>
 % \fi
 %
-% \subsection{Schriftauswahl}
-%
-% Die eigentliche Schriftauswahl erfolgt~-- abhängig von den zuvor gesetzten 
-% Einstellungen~-- erst am Ende der Präambel, um etwaige Voreinstellungen
-% anderer Schriftpakete beachten zu können. Dabei erfolgt die Auswahl der
-% Schriften für den Mathematiksatz durch \cs{AtBeginDocument} innerhalb von 
-% \cs{AtEndPreamble} am Ende \emph{möglichst aller} \cs{AtBeginDocument}.
-%    \begin{macrocode}
-\AtEndPreamble{%
-%    \end{macrocode}
-% Falls das Paket \pkg{mweights} geladen wurde, werden im Bedarfsfall die vom
-% Paket erwarteten Makros für die Schriftstärken der einzelnen Schriftfamilien 
-% definiert. Beim Aufruf von \cs{tud@font@set} werden diese anschließend 
-% gesichert.
-%    \begin{macrocode}
-  \if@tud@x@mweights@enabled%
-    \ifundef{\bfseries@rm}{\edef\bfseries@rm{\bfdefault}}{}%
-    \ifundef{\mdseries@rm}{\edef\mdseries@rm{\mddefault}}{}%
-    \ifundef{\bfseries@sf}{\edef\bfseries@sf{\bfdefault}}{}%
-    \ifundef{\mdseries@sf}{\edef\mdseries@sf{\mddefault}}{}%
-    \ifundef{\bfseries@tt}{\edef\bfseries@tt{\bfdefault}}{}%
-    \ifundef{\mdseries@tt}{\edef\mdseries@tt{\mddefault}}{}%
-  \fi%
-%    \end{macrocode}
-% Hier wird auf das Vorhandensein aller benötigten Schriften geprüft.
-%    \begin{macrocode}
-  \tud@cdfont@check%
-%    \end{macrocode}
-% Nachdem auf die Schriften geprüft wurde, werden noch die Schriftschalter und 
-% die dazugehörigen Befehle definiert. Auch die mathematischen Schriften werden
-% initialisiert.
-%    \begin{macrocode}
-  \tud@cdfont@init%
-  \tud@ttfont@init%
-%    \end{macrocode}
-% Damit die Schrift im Dokument später noch umgestellt werden kann, werden
-% sämtliche Einstellungen erst am Ende der Präambel gesichert. Deshalb wird
-% der dafür verantwortliche Befehl \cs{tud@font@set} hier zum ersten Mal
-% verwendet. Damit ist es möglich, die Schriften eventuell geladener Pakete wie
-% \pkg{lmodern} oder \pkg{libertine} vorher zu sichern und später wieder zu
-% aktivieren. 
-%    \begin{macrocode}
-  \tud@font@set%
-%    \end{macrocode}
-% Die Definitionen für den Mathematiksatz erfolgen erst zu Dokumentbeginn, um
-% auf Einstellungen von anderen Schriftpaketen reagieren zu können. Wurde
-% jedoch das Paket \pkg{bm} angefordert, so müssen die Mathematikschriften
-% bereits zum Ende der Präambel über \cs{tud@x@bm@delayed} initialisiert werden.
-%    \begin{macrocode}
-  \tud@cdmath@init%
-  \tud@x@bm@delayed%
-  \AtBeginDocument{%
-%    \end{macrocode}
-% Bereitstellung der Auswahlbefehle für griechische Glyphen in der Nomenklatur 
-% von \TUDScript (\cs{up\meta{Bezeichner}}, \cs{it\meta{Bezeichner}}).
-%    \begin{macrocode}
-    \tud@math@map@greeks%
-%    \end{macrocode}
-% Für die griechischen Glyphen wird mit \cs{tud@math@checkslanted@greeks} 
-% geprüft, ob diese durch ein Paket explizit auf kursive Majuskeln oder eine 
-% vollständig aufrechte Variante gesetzt wurden. Ist dies der Fall, wird der
-% Standardwert für die Option \opt{slantedgreek} entsprechend angepasst.
-%    \begin{macrocode}
-    \tud@math@checkslanted@greeks%
-%    \end{macrocode}
-% Nachdem alle Vorbereitungen getroffen wurden, werden die Schriften für den 
-% mathematischen Satz nun endlich gesetzt.
-%    \begin{macrocode}
-    \tud@math@set%
-  }%
-}
-%    \end{macrocode}
-%
 % \subsection{Kompatibilität der Schriften}
 % \subsubsection{Majuskel-ß für Unicode-Prozessoren}
 %
@@ -4318,11 +4260,11 @@
 % entsprechende Glyphe nicht vorhanden ist.
 %    \begin{macrocode}
 \ifx\tud@reserved\@empty
-  \RequirePackage{newunicodechar}[2012/11/12]%
-  \uccode"00DF="1E9E%
-  \lccode"1E9E="00DF%
-  \newunicodechar{^^^^00df}{\iffontchar\font"00DF \symbol{"00DF}\else ss\fi}%
-  \newunicodechar{^^^^1e9e}{\iffontchar\font"1E9E \symbol{"1E9E}\else SS\fi}%
+  \RequirePackage{newunicodechar}[2012/11/12]
+  \uccode"00DF="1E9E
+  \lccode"1E9E="00DF
+  \newunicodechar{^^^^00df}{\iffontchar\font"00DF \symbol{"00DF}\else ss\fi}
+  \newunicodechar{^^^^1e9e}{\iffontchar\font"1E9E \symbol{"1E9E}\else SS\fi}
 \fi
 %    \end{macrocode}
 %
@@ -4450,6 +4392,79 @@
 %<*package>
 \AfterClass*{beamer}{\usefonttheme[onlymath]{serif}}
 %</package>
+%    \end{macrocode}
+%
+% \subsection{Schriftauswahl}
+%
+% Die eigentliche Schriftauswahl erfolgt~-- abhängig von den zuvor gesetzten 
+% Einstellungen~-- erst am Ende der Präambel, um etwaige Voreinstellungen
+% anderer Schriftpakete beachten zu können. Dabei erfolgt die Auswahl der
+% Schriften für den Mathematiksatz durch \cs{AtBeginDocument} innerhalb von 
+% \cs{AtEndPreamble} am Ende \emph{möglichst aller} \cs{AtBeginDocument}.
+%    \begin{macrocode}
+\AtEndPreamble{%
+%    \end{macrocode}
+% Falls das Paket \pkg{mweights} geladen wurde, werden im Bedarfsfall die vom
+% Paket erwarteten Makros für die Schriftstärken der einzelnen Schriftfamilien 
+% definiert. Beim Aufruf von \cs{tud@font@set} werden diese anschließend 
+% gesichert.
+%    \begin{macrocode}
+  \if@tud@x@mweights@enabled%
+    \ifundef{\bfseries@rm}{\edef\bfseries@rm{\bfdefault}}{}%
+    \ifundef{\mdseries@rm}{\edef\mdseries@rm{\mddefault}}{}%
+    \ifundef{\bfseries@sf}{\edef\bfseries@sf{\bfdefault}}{}%
+    \ifundef{\mdseries@sf}{\edef\mdseries@sf{\mddefault}}{}%
+    \ifundef{\bfseries@tt}{\edef\bfseries@tt{\bfdefault}}{}%
+    \ifundef{\mdseries@tt}{\edef\mdseries@tt{\mddefault}}{}%
+  \fi%
+%    \end{macrocode}
+% Hier wird auf das Vorhandensein aller benötigten Schriften geprüft.
+%    \begin{macrocode}
+  \tud@cdfont@check%
+%    \end{macrocode}
+% Nachdem auf die Schriften geprüft wurde, werden noch die Schriftschalter und 
+% die dazugehörigen Befehle definiert. Auch die mathematischen Schriften werden
+% initialisiert.
+%    \begin{macrocode}
+  \tud@cdfont@init%
+  \tud@ttfont@init%
+%    \end{macrocode}
+% Damit die Schrift im Dokument später noch umgestellt werden kann, werden
+% sämtliche Einstellungen erst am Ende der Präambel gesichert. Deshalb wird
+% der dafür verantwortliche Befehl \cs{tud@font@set} hier zum ersten Mal
+% verwendet. Damit ist es möglich, die Schriften eventuell geladener Pakete wie
+% \pkg{lmodern} oder \pkg{libertine} vorher zu sichern und später wieder zu
+% aktivieren. 
+%    \begin{macrocode}
+  \tud@font@set%
+%    \end{macrocode}
+% Die Definitionen für den Mathematiksatz erfolgen erst zu Dokumentbeginn, um
+% auf Einstellungen von anderen Schriftpaketen reagieren zu können. Wurde
+% jedoch das Paket \pkg{bm} angefordert, so müssen die Mathematikschriften
+% bereits zum Ende der Präambel über \cs{tud@x@bm@delayed} initialisiert werden.
+%    \begin{macrocode}
+  \tud@cdmath@init%
+  \tud@x@bm@delayed%
+  \AtBeginDocument{%
+%    \end{macrocode}
+% Bereitstellung der Auswahlbefehle für griechische Glyphen in der Nomenklatur 
+% von \TUDScript (\cs{up\meta{Bezeichner}}, \cs{it\meta{Bezeichner}}).
+%    \begin{macrocode}
+    \tud@math@map@greeks%
+%    \end{macrocode}
+% Für die griechischen Glyphen wird mit \cs{tud@math@checkslanted@greeks} 
+% geprüft, ob diese durch ein Paket explizit auf kursive Majuskeln oder eine 
+% vollständig aufrechte Variante gesetzt wurden. Ist dies der Fall, wird der
+% Standardwert für die Option \opt{slantedgreek} entsprechend angepasst.
+%    \begin{macrocode}
+    \tud@math@checkslanted@greeks%
+%    \end{macrocode}
+% Nachdem alle Vorbereitungen getroffen wurden, werden die Schriften für den 
+% mathematischen Satz nun endlich gesetzt.
+%    \begin{macrocode}
+    \tud@math@set%
+  }%
+}
 %    \end{macrocode}
 %
 % \iffalse
