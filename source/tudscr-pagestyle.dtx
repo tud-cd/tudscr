@@ -1,4 +1,4 @@
-% \CheckSum{2063}
+% \CheckSum{2071}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -92,7 +92,7 @@
 %
 % \section{Der Seitenstil des \CDs}
 %
-% Es wird der Seitenstil des \CD der \TnUD mit Logo und dem charakteristischen 
+% Es wird der Seitenstil des \TUDCD mit Logo und dem charakteristischen 
 % Querbalken im Kopfbereich definiert. Hierfür kommt das \KOMAScript-Paket 
 % \pkg{scrlayer-scrpage} zum Einsatz.
 % \ToDo{Abhängigkeiten Satzspiegel<>Seitenstil beseitigen}[v2.07]
@@ -139,12 +139,11 @@
 % \changes{v2.02}{2014/06/23}{neu}^^A
 % \begin{layerpagestyle}{empty.tudheadings}
 % \changes{v2.02}{2014/06/23}{neu}^^A
-% Es wird ein neuer Seitenstil kreiert, der das \CD der \TnUD mit der
-% prägenden Kopfzeile umsetzt. Dabei soll dieser Kopf auch verwendbar sein,
-% wenn nicht die vom \CD vorgeschriebenen Seitenränder sondern das Paket
-% \pkg{typearea} genutzt wird. Dafür wird das Logo im Kopf so wie im \CD
-% vorgesehen mit dem Logo der \TnUD in den Rand und dem Schriftzug bündig zum
-% Textblock gesetzt. 
+% Es wird ein neuer Seitenstil kreiert, der das \TUDCD mit der prägenden
+% Kopfzeile umsetzt. Dabei soll dieser Kopf auch verwendbar sein, wenn nicht
+% die vom \CD vorgeschriebenen Seitenränder sondern das Paket \pkg{typearea}
+% genutzt wird. Dafür wird das Logo im Kopf so wie im \CD vorgesehen mit dem
+% Logo der \TnUD in den Rand und dem Schriftzug bündig zum Textblock gesetzt. 
 % 
 % \Attention{%
 %   Um Längenangaben aus Makros sicher auf Dimensionsausdrücke zu reduzieren,
@@ -474,7 +473,7 @@
 % entsprechenden \pgs{scrheadings}-Ebenen verwendet. 
 %    \begin{macrocode}
   \DeclareNewPageStyleByLayers[%
-    onselect=\tud@ps@onselect,onbackground=\tud@ps@onbackground%
+    onbackground=\tud@ps@onbackground%
   ]{tudheadings}{%
     tudheadings.head.back,%
     tudheadings.head.content,%
@@ -505,7 +504,7 @@
 % Fußzeilenebenen des Seitenstils \pgs{plain.scrheadings} hinzugefügt.
 %    \begin{macrocode}
   \DeclareNewPageStyleByLayers[%
-    onselect=\tud@ps@onselect,onbackground=\tud@ps@onbackground%
+    onbackground=\tud@ps@onbackground%
   ]{plain.tudheadings}{%
     tudheadings.head.back,%
     tudheadings.head.content,%
@@ -535,7 +534,7 @@
 % lediglich aus dem Kopf besteht und einen lerren Seitenfuß hat.
 %    \begin{macrocode}
   \DeclareNewPageStyleByLayers[%
-    onselect=\tud@ps@onselect,onbackground=\tud@ps@onbackground%
+    onbackground=\tud@ps@onbackground%
   ]{empty.tudheadings}{%
     tudheadings.head.back,%
     tudheadings.head.content,%
@@ -586,6 +585,39 @@
 % \end{layerpagestyle}^^A empty.tudheadings
 % \end{layerpagestyle}^^A plain.tudheadings
 % \end{layerpagestyle}^^A tudheadings
+% Normalerweise werden durch \pkg{scrlayer-scrpage} bei der Umschaltung auf 
+% einen mit dem Befehl \cs{newpairofpagestyles}\marg{Seitenstil} definierten 
+% Seitenstil, die Seitenstile \pgs{headings} und \pgs{plain} als Aliase für 
+% \pgs{\meta{Seitenstil}} und \pgs{plain.\meta{Seitenstil}} festgelegt. 
+% Allerdings definiert dieser Befehl zusätzliche Ebenen für Kopf- und Fußzeile, 
+% weshalb auf die Verwendung verzichtet wird. Das automatische Umschalten soll 
+% dennoch ermöglicht werden, weshalb hierfür der Haken \val{onselect} verwendet 
+% wird, der für jeden Seitenstil bei der Initialisierung aufgerufen wird.
+%    \begin{macrocode}
+  \AddToLayerPageStyleOptions{@everystyle@}{%
+    onselect={%
+      \tud@if@tudheadings{\currentpagestyle}{%
+        \DeclarePageStyleAlias{plain}{plain.tudheadings}%
+        \DeclarePageStyleAlias{headings}{tudheadings}%
+        \def\sls@currentheadings{tudheadings}%
+        \def\sls@currentplain{plain.tudheadings}%
+%    \end{macrocode}
+% Im Seitenfuß wird für die Seitenzahl und ggf. die Kolumnentitel die passende 
+% Schrift verwendet.
+%    \begin{macrocode}
+        \tud@komafont@set{pagenumber}{\usekomafont{tudheadings}}%
+        \tud@komafont@set{pagefoot}{\usekomafont{tudheadings}}%
+      }{%
+%    \end{macrocode}
+% Handelt es sich nicht um einen \pgs{tudheadings} Seitenstil, werden die 
+% Schriften für Seitenzahl und Kolumnentitel zurückgesetzt.
+%    \begin{macrocode}
+        \tud@komafont@unset{pagenumber}%
+        \tud@komafont@unset{pagefoot}%
+      }%
+    }%
+  }%
+%    \end{macrocode}
 % Damit ist die Deklaration der Seitenstile mit \pkg{scrlayer-scrpage} beendet.
 %    \begin{macrocode}
 }
@@ -708,27 +740,6 @@
 % \end{macro}^^A \ps@empty.tudheadings
 % \end{macro}^^A \ps@plain.tudheadings
 % \end{macro}^^A \ps@tudheadings
-% \begin{macro}{\tud@ps@onselect}
-% \changes{v2.03}{2015/01/09}{neu}^^A
-% Der Befehl wird bei der Initialisierung der Seitenstile aufgerufen.
-%    \begin{macrocode}
-\newcommand*\tud@ps@onselect{%
-%    \end{macrocode}
-% Normalerweise werden durch \pkg{scrlayer-scrpage} bei der Umschaltung auf 
-% einen mit dem Befehl \cs{newpairofpagestyles}\marg{Seitenstil} definierten 
-% Seitenstil, die Seitenstile \pgs{headings} und \pgs{plain} als Aliase für 
-% \pgs{\meta{Seitenstil}} und \pgs{plain.\meta{Seitenstil}} festgelegt. 
-% Allerdings definiert dieser Befehl zusätzliche Ebenen für Kopf- und Fußzeile, 
-% weshalb auf die Verwendung verzichtet wird. Das automatische Umschalten soll 
-% dennoch ermöglicht werden.
-%    \begin{macrocode}
-  \DeclarePageStyleAlias{plain}{plain.tudheadings}%
-  \DeclarePageStyleAlias{headings}{tudheadings}%
-  \def\sls@currentheadings{tudheadings}%
-  \def\sls@currentplain{plain.tudheadings}%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@ps@onselect
 %
 % \subsubsection{Gestaltungsvarianten für Kopf- und Fußzeile}
 %
@@ -1551,6 +1562,10 @@
     \global\@tud@mainlogo@setfalse%
   \fi%
 }
+\AtBeginDocument{%
+  \@tud@mainlogo@settrue%
+  \tud@mainlogo@set%
+}
 %    \end{macrocode}
 % \end{macro}^^A \tud@mainlogo@wrn
 % \end{length}^^A \tud@dim@mainlogoheight
@@ -1981,6 +1996,7 @@
 % gesetzt wurde, bei der Ausgabe des dazugehörigen Layers.
 %    \begin{macrocode}
 \newcommand*\tud@footlogo@option@set{%
+  \tud@footlogoheight@set%
   \if@tud@footlogo@option@set%
     \tud@footlogo@ddc@set{black}{DDC-22}%
     \tud@footlogo@ddc@set{HKS41}{DDC-25}%
@@ -2031,8 +2047,9 @@
         You should reduce `footlogoheight', because it is\MessageBreak%
         too high (\the\dimexpr\tud@footlogoheight@dim\relax). %
         \ifnum\tud@cdgeometry@num>\@ne% true/symmetric/twoside
-          Alternatively you can enlarge\MessageBreak%
-          the bottom margin with option `extrabottommargin'. %
+          Alternatively you could use\MessageBreak%
+          option `extrabottommargin=<length>'\MessageBreak%
+          in order to enlarge the bottom margin. %
         \fi%
       }%
     }%
@@ -2180,7 +2197,6 @@
 % den Fuß innerhalb der Ebene \val{tudheadings.foot.content} auszugeben.
 %    \begin{macrocode}
 \newcommand*\tud@footlogo@cmd@use[2]{%
-  \tud@footlogoheight@set%
   \tud@footlogo@option@set%
   \tud@footlogo@cmd@set{#1}{#2}%
   \setbox\z@\hbox{\tud@uselayerbox{foot@cmd}}%
