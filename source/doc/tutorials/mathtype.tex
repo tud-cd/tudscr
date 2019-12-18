@@ -21,7 +21,7 @@
 
 \begin{document}
 \title{Ein Beitrag zum mathematischen Satz mit \hologo{LaTeX}}
-\author{Falk Hanisch\TUDScriptContactNote}
+\author{Falk Hanisch\TUDScriptContactTitle}
 \date{07.11.2016}
 
 \makeatletter
@@ -152,8 +152,8 @@ Definition möglich:%
 %
 Ein gewünschter Nebeneffekt der vorhergehenden Definition ist, dass dieser 
 Befehl aufgrund der Verwendung von \Macro{ensuremath}[\PParameter{\dots}] nun 
-auch im Fließtext verwenden werden kann. Beispielsweise lässt sich im Textteil 
-das induzierten Moment einer Verbrennungskraftmaschine~\M{VM_{ind}} angeben
+auch im Fließtext verwenden werden kann, wie hier für das induzierte Moment 
+einer Verbrennungskraftmaschine~\M{VM_{ind}} 
 (\Macro{M}[\PParameter{VM\_\PParameter{ind}}]).
 
 Für noch mehr Bequemlichkeit bei der Nutzung kann eine Lösung gefunden werden, 
@@ -168,10 +168,12 @@ optionalen Argument genutzt werden kann.
 \CodeHook{\let\newcommand\renewcommand}
 \begin{Trunk*}
 \makeatletter
-\renewcommand*{\M}[1]{\@ifnextchar[{\o@M{#1}}{\n@M{#1}}}
-\newcommand*{\n@M}{}
+\renewcommand*{\M}[1]{%
+  \kernel@ifnextchar[%]
+    {\o@M{#1}}{\n@M{#1}}%
+}
+\newcommand*{\n@M}[1]{\ensuremath{M\ind{#1}}}
 \newcommand*{\o@M}{}
-\def\n@M#1{\ensuremath{M\ind{#1}}}
 \def\o@M#1[#2]{\ensuremath{M\ind{#1_{#2}}}}
 \makeatother
 
@@ -195,10 +197,9 @@ Somit vereinfacht sich das zu Beginn vorgestellte Beispiel recht deutlich:
 Das Definieren von \Macro{M}[\Parameter{Index}\OParameter{Indexindex}] mit 
 angehängtem optionalen Argument ist ehrlich gesagt nur ein wenig Spielerei und 
 soll zeigen, wie dies prinzipiell mit \hologo{LaTeX} umgesetzt werden kann. 
-Das Paket \Package{xparse} könnte alternativ zum hier vorgestellten Vorgehen 
-für die Befehlsdeklaration des optionalen \textbf{nach} dem obligatorischen 
-Argument genutzt werden. Damit würde die Befehlsdeklaration für \Macro{M} 
-folgendermaßen lauten:
+Mit dem Paket \Package{xparse} könnte alternativ für die Befehlsdeklaration des 
+optionalen \textbf{nach} dem obligatorischen Argument folgendermaßen genutzt 
+werden:
 \begin{Hint}
 \NewDocumentCommand \M { m o } {%
   \ensuremath{M\ind{#1\IfValueT{#2}{_{#2}}}}%
