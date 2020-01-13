@@ -186,7 +186,7 @@
   2019/10/24 v2.06f TUD-Script
 ]
 %%%% From File: tudscr-manual.dtx 2019/11/29 01:36:52 c9a9b7b
-\PassOptionsToPackage{log-declarations=false}{xparse}
+%\PassOptionsToPackage{log-declarations=true}{xparse}
 \RequirePackage{xparse}[2019/10/11]
 \RequirePackage{scrhack}[%
   2018/03/30 v3.25 KOMA-Script
@@ -688,8 +688,8 @@
       \protected@edef\tud@res@a{#1:\tud@res@b:#2}%
     }%
     \protected@edef\tud@res@c{%
-      \noexpand\endgroup%
-      \def\noexpand\ProcessedArgument{%
+      \endgroup%
+      \unexpanded{\def\ProcessedArgument}{%
         \expandafter\detokenize\expandafter{\tud@res@a#4}%
       }%
     }%
@@ -720,216 +720,200 @@
 }
 % TODO alle \toks@ > \tud@toks@ ?
 \newif\if@tud@declare
-\newcount\tud@declare@num
 \newif\if@tud@openindex
+\newcount\tud@declare@num
+\newcommand*\tud@declare@open[2]{%
+  \tud@declare@num=#1\relax%
+  \@tud@declaretrue\@tud@openindextrue#2\@tud@declarefalse%
+  \tud@declare@num=\z@\relax%
+}
+\newcommand*\tud@declare@close[2]{%
+  \tud@declare@num=#1\relax%
+  \@tud@declaretrue\@tud@openindexfalse#2\@tud@declarefalse%
+  \tud@declare@num=\z@\relax%
+}
 \newcommand*\tud@declaration@list{}
-\let\tud@declaration@list\relax
-\newcommand*\tud@declaration@@list{}
-\let\tud@declaration@@list\relax
-\newcommand*\tud@declaration@add[3]{%
-  \listadd\tud@declaration@list{#1#2#3}%
-  \listadd\tud@declaration@@list{#2}%
-}
 \newcommand*\tud@alias@values{\@nil}
+% TODO andere Delimiter: d() D<> --> D'' d()
 \NewDocumentEnvironment{Declaration}{o m !o !o !d() !D<>{\noexpand\@nil}}{%
-  \begingroup%
-    \tud@toks@{\tud@declaration@add}%
-    \edef\tud@res@a{{\gdef\noexpand\tud@alias@values{#6}}}%
-    \eaddto@hook\tud@toks@{\tud@res@a}%
-    \addto@hook\tud@toks@{{#2}}%
-    \addto@hook\tud@toks@{{\gdef\tud@alias@values{\@nil}}}%
-    \edef\tud@res@a{\endgroup\the\tud@toks@}%
-  \tud@res@a%
-  \tud@declare@start[{#1}]{#2}[{#3}][{#4}](#5)%
-}{%
-  \tud@declare@end{#2}%
-}
-\newcommand*\tud@preset@list{}
-\let\tud@preset@list\relax
-\tud@newif\if@tud@preset@list
-\newcommand*\tud@additional@list{}
-\let\tud@additional@list\relax
-\tud@newif\if@tud@additional@list
-\NewDocumentCommand\tud@declare@start{o m r[] r[] r()}{%
-  \@tud@declaretrue%
+  % TODO was passiert hier? besser an \tud@declare@start durchreichen?
   \Changed@At@CreateList{#1}[{#2}]:\emph{neu}:{\BooleanFalse}%
-  \@tud@declarefalse%
-  \IfValueTF{#3}{%
-    \@tud@preset@listtrue%
-    \def\tud@res@a{%
-      Voreinstellung\IfArgIsEmpty{#3}{}{: \Parameter@Enclose\PValueDefault{#3}}%
-    }%
-    % TODO geht das auch mit \def\tud@res@b##1:##2\@nil?
+  \edef\tud@res@a{\def\noexpand\tud@alias@values{#6}}%
+  \tud@toks@{\tud@declare@start!0!}%
+  \eaddto@hook\tud@toks@{\expandafter!\tud@res@a!}%
+  \addto@hook\tud@toks@{{#2}[{#3}][{#4}](#5)}%
+  \the\tud@toks@%
+}{%
+  \tud@declare@end!0!{#2}%
+}
+% TODO D!!{} raus
+\NewDocumentCommand\tud@declare@start{r!! D!!{} m r[] r[] r()}{%
+  \begingroup%
+    \let\tud@res@a\@empty%
     \IfValueT{#4}{%
-      \def\tud@res@b[##1:##2]{##1: \Parameter@Enclose\PValueDefault{##2}}%
-      \eappto\tud@res@a{ | \expandonce{\tud@res@b[#4]}}%
+      \edef\tud@res@a{%
+        Voreinstellung%
+        \IfArgIsEmpty{#4}{}{%
+          \unexpanded{:\space\Parameter@Enclose\PValueDefault{#4}}%
+        }%
+      }%
+      \IfValueT{#5}{%
+        \def\tud@res@c##1:##2:##3\@nil{%
+          \IfArgIsEmpty{##2}{%
+            \ClassError{tudscrmanual}{Wrong format of \detokenize{`[#5]'}}{%
+              The format `[condition:preset]' has to be given.%
+            }%
+          }{%
+            \appto\tud@res@a{%
+               \,\textbar\,##1: \Parameter@Enclose\PValueDefault{##2}%
+             }%
+          }%
+        }%
+        \tud@res@c#5::\@nil%
+      }%
     }%
-    \listeadd\tud@preset@list{\expandonce\tud@res@a}%
-  }{%
-    \listadd\tud@preset@list{\relax}%
-  }%
-  % TODO \in@ ist murks, zählen \tabularnewline in DeclareFormat{Environment}
-  \IfValueTF{#5}{%
-    \@tud@additional@listtrue%
-    \listadd\tud@additional@list{(#5)}%
-    \in@{\Environment}{#2}%
-    \ifin@\listadd\tud@additional@list{\tabularnewline}\fi%
-  }{%
-    \listadd\tud@additional@list{\relax}%
-    \in@{\Environment}{#2}%
-    \ifin@%
-      \listadd\tud@additional@list{\relax}%
-      \listadd\tud@additional@list{\relax}%
-    \fi%
-  }%
+    \IfValueTF{#6}{%
+      \def\tud@res@b{(#6)}%
+    }{%
+      \let\tud@res@b\@empty%
+    }%
+    \tud@toks@{{#1}{#2}{#3}}%
+    \eaddto@hook\tud@toks@{\expandafter{\tud@res@a}}%
+    \eaddto@hook\tud@toks@{\expandafter{\tud@res@b}}%
+    \edef\tud@res@c{%
+      \endgroup%
+      \unexpanded{\listadd\tud@declaration@list}{\the\tud@toks@}%
+    }%
+  \tud@res@c%
+  \let\printdeclarationlist\tud@print@declarationlist%
 }
-\newcommand*\tud@declare@end[1]{%
-  \ifx\tud@declaration@list\relax\else%
-    \ClassError{tudscrmanual}{\string\printdeclarationlist\space is missing}{%
-      \string\tud@declaration@list\space is not empty. Did you\MessageBreak%
-      forget to print this list with\MessageBreak%
-      \string\printdeclarationlist?%
-    }%
-  \fi%
+\NewDocumentCommand\tud@declare@end{r!! m}{%
+  \tud@declaration@check%
+  \gundef\printdeclarationlist%
   \vskip-\lastskip%
-  \@tud@declaretrue\@tud@openindexfalse#1\@tud@declarefalse%
-  \pagebreak[1]%
+  \tud@declare@close{#1}{#2}%
+  \pagebreak[1]\par%
 }
-\tud@newif\if@tud@obsolete
+\newcommand*\printdeclarationlist{}
+\AtBeginDocument{\undef\printdeclarationlist}
+\newcommand*\tud@declaration@check{%
+  \ifundef\printdeclarationlist{}{%
+    \ClassError{tudscrmanual}{\string\printdeclarationlist\space is missing}{%
+      The command \string\printdeclarationlist\space must\MessageBreak%
+      be used for declarations.%
+    }%
+    \global\let\tud@declaration@list\@empty%
+  }%
+}
+\NewDocumentCommand\tud@print@declarationlist{!d()}{%
+  \gundef\printdeclarationlist%
+  \ifhmode%
+    \vskip\medskipamount%
+  \else%
+    \addpenalty{\@beginparpenalty}%
+    \addvspace{\medskipamount}%
+  \fi%
+  \@afterindentfalse\@afterheading%
+  \begingroup%
+    \def\tud@res@b##1##2##3##4##5{%
+      \tud@declare@open{##1}{\ignorespaces##2##3}&%
+      \ifblank{##4}{}{\hskip2\tabcolsep\small\ignorespaces##4}&%
+      \ifblank{##5}{}{\hskip2\tabcolsep\small\ignorespaces##5}%
+    }%
+    \def\tud@res@a##1{%
+      \tud@res@b##1%
+      \tabularnewline%
+    }%
+    \edef\HyperRaiseLinkDefault{\the\dimexpr1\baselineskip\relax}%
+    \sbox\z@{%
+      \begin{tabular}[b]{|l|@{}l@{}l@{}}%
+        \cline{1-1}\noalign{\vskip\arrayrulewidth}%
+        \forlistloop\tud@res@a{\tud@declaration@list}%
+        \cline{1-1}\noalign{\vskip\arrayrulewidth}%
+      \end{tabular}%
+    }%
+    \let\tud@res@c\@empty%
+    \def\tud@res@b##1##2##3##4##5{\listadd\tud@res@c{##3}}%
+    \def\tud@res@a##1{\tud@res@b##1}%
+    \forlistloop\tud@res@a{\tud@declaration@list}%
+    \edef\tud@res@b{\the\dimexpr\ht\strutbox-\ht\z@\relax}%
+    \usebox\z@%
+    \IfValueT{#1}{%
+      \begin{minipage}[b][\ht\z@][c]{\the\dimexpr\textwidth-\wd\z@}%
+      #1%
+      \end{minipage}%
+    }%
+    \edef\tud@res@a{%
+      \endgroup%
+      \noexpand\tud@print@@changedatlist{\tud@res@b}%
+      \unexpanded{\def\tud@declaration@list}{\expandonce\tud@res@c}%
+    }%
+  \tud@res@a%
+  \par\nobreak%
+  \@afterindentfalse\@afterheading%
+% TODO rein?
+%  \strut%
+}
+% TODO d()d'' -> d''d()
 \NewDocumentEnvironment{Obsolete}{m m !o !o !d() !d''}{%
-  \tud@declaration@add{\global\@tud@obsoletetrue}%
-    {#2}{\global\@tud@obsoletefalse}%
-  % TODO überprüfen, was passiert hier?
-  \@tud@declaretrue\@tud@obsoletetrue%
+  % TODO was passiert hier? besser an \tud@declare@start durchreichen?
   \Changed@At@CreateList{#1}[{#2}]:\emph{entf\"allt}:{\BooleanTrue}%
-  \@tud@obsoletefalse\@tud@declarefalse%
-  \IfValueTF{#5}{%
-    \def\tud@res@a{#5}%
-  }{%
-    \def\tud@res@a{entf\"allt}%
-  }%
-  \IfValueT{#6}{%
-    \appto\tud@res@a{, \seeref{\@tud@indextrue#6'page'}}%
-  }%
-  \toks@{\tud@declare@start{#2}[{#3}][{#4}]}%
+  \def\tud@res@a{entf\"allt}%
+  \IfValueT{#5}{\def\tud@res@a{#5}}%
+  \IfValueT{#6}{\appto\tud@res@a{, \seeref{\@tud@indextrue#6'page'}}}%
+  % TODO !!!!!!!!!!!!!!!!!!!! neuer Wert für declare@num anstatt \@tud@indextrue
+  \toks@{\tud@declare@start!1!!\@tud@indextrue!{#2}[{#3}][{#4}]}%
   \eaddto@hook\toks@{\expandafter(\tud@res@a)}%
   \the\toks@%
 }{%
-  \tud@declare@end{%
-    \tud@declare@num=\@ne\relax%
-    #2%
-    \tud@declare@num=\z@\relax%  
-  }%
+  \tud@declare@end!1!{#2}%
 }
 \NewDocumentEnvironment{Declaration'}{m !o !o !d()}{%
-  \tud@declaration@add{\global\tud@declare@num=\@ne\relax}%
-    {#1}{\global\tud@declare@num=\z@\relax}%
-  \tud@declare@start{#1}[{#2}][{#3}](#4)%
+  \tud@declare@start!1!{#1}[{#2}][{#3}](#4)%
 }{%
-  \tud@declare@end{%
-    \tud@declare@num=\@ne\relax%
-    #1%
-    \tud@declare@num=\z@\relax%
-  }%
+  \tud@declare@end!1!{#1}%
 }
 \NewDocumentEnvironment{Declaration*}{m}{%
-  \tud@declare@special@start{#1}{2}%
+  \tud@declare@special@start!2!{#1}%
 }{%
-  \tud@declare@special@end{#1}{2}%
+  \tud@declare@special@end!2!{#1}%
 }
-\NewDocumentCommand\InlineDeclaration{o m !o}{%
-  \Inline@Declaration[{#1}]{#2}{-1}[{#3}]%
-}
-\NewDocumentCommand\Inline@Declaration{o m m !o}{%
-  \tud@declare@special@start[{#1}]{#2}{#3}%
-  \print@changedatlist%
-  \tud@declare@special@end{#2}{-1}%
-  \IfValueT{#4}{#4}\xspace%
+% TODO Argument -1 notwendig?
+\NewDocumentCommand\InlineDeclaration{D!!{-1} m !d()}{%
+  \tud@declare@special@start!#1!{#2}%
+  \tud@print@changedatlist%
+  \tud@declare@special@end!#1!{#2}%
+  % TODO xspace nur, falls Ausgabe!
+  \IfValueT{#3}{#3}\xspace%
 }
 % TODO rename Bundle* to EntityDeclaration and Bundle to Separation
 \NewDocumentEnvironment{Bundle*}{o m}{%
-  \tud@declare@special@start*[{#1}]{#2}{3}%
-  \print@changedatlist%
+  \tud@declare@special@start*!3!{#2}[{#1}]%
+  \tud@print@changedatlist%
   \begin{Bundle}{#2}%
 }{%
   \end{Bundle}%
-  \tud@declare@special@end{#2}{3}%
+  \tud@declare@special@end!3!{#2}%
 }
-\NewDocumentCommand\tud@declare@special@start{s o m m}{%
-  \tud@declare@num=#4\relax%
-  \@tud@declaretrue%
+\NewDocumentCommand\tud@declare@special@start{s r!! m !o}{%
   % TODO sonderbehandlung * notwendig? optionales argument :xxx:?
+  % direkt erzeugen und durch diesen Befehl
   \IfBooleanTF{#1}{%
-    \Changed@At@CreateList{#2}(#3){\BooleanFalse}%
+    \Changed@At@CreateList{#4}(#3){\BooleanFalse}%
   }{%
-    \Changed@At@CreateList{#2}[{#3}]{\BooleanFalse}%
+    \Changed@At@CreateList{#4}[{#3}]{\BooleanFalse}%
   }%
-  \@tud@openindextrue#3%
-  \@tud@declarefalse%
-  \tud@declare@num=\z@\relax%
+  \tud@declare@open{#2}{#3}%
   \ignorespaces%
 }
-\newcommand*\tud@declare@special@end[2]{%
+\NewDocumentCommand\tud@declare@special@end{r!! m}{%
   \ifx\tud@changedat@entry@list\@empty\else%
-%    \ClassError{tudscrmanual}{Unprocessed change notes}{%
-%      \string\tud@changedat@entry@list\space is not empty%
-%    }%
-  \fi%
-  \tud@declare@num=#2\relax%
-  \@tud@declaretrue\@tud@openindexfalse#1\@tud@declarefalse%
-  \tud@declare@num=\z@\relax%
-  \ignorespaces%
-}
-\NewDocumentCommand\printdeclarationlist{!d()}{%
-  \ifx\tud@declaration@list\relax\else%
-    \ifhmode%
-      \vskip\medskipamount%
-    \else%
-      \addpenalty{\@beginparpenalty}%
-      \addvspace{\medskipamount}%
-    \fi%
-    \@afterindentfalse\@afterheading%
-    \@tud@declaretrue\@tud@openindextrue%
-    \def\tud@res@a##1{\ignorespaces##1\tabularnewline}%
-    \edef\HyperRaiseLinkDefault{\the\dimexpr1\baselineskip\relax}%
-    \sbox\z@{%
-      \begin{tabular}{|l|}%
-        \hline%
-        \forlistloop\tud@res@a{\tud@declaration@list}%
-        \hline%
-      \end{tabular}%
-    }\usebox\z@%
-    \@tud@declarefalse%
-    \ifboolexpr{bool {@tud@preset@list} or bool {@tud@additional@list}}{%
-      \def\tud@res@a##1{\small\ignorespaces##1\tabularnewline}%
-      \hskip1.2em%
-      \if@tud@preset@list%
-        \begin{tabular}{@{}l@{}}%
-          \forlistloop\tud@res@a{\tud@preset@list}%
-        \end{tabular}%
-        \hspace{\tabcolsep}%
-      \fi%
-      \if@tud@additional@list%
-        \begin{tabular}{@{}l@{}}%
-          \forlistloop\tud@res@a{\tud@additional@list}%
-        \end{tabular}%
-      \fi%
-    }{}%
-    \global\let\tud@declaration@list\relax%
-    \global\let\tud@preset@list\relax%
-    \global\let\tud@additional@list\relax%
-    \global\@tud@preset@listfalse%
-    \global\@tud@additional@listfalse%
-    \print@@changedatlist{%
-      \dimexpr(\ht\strutbox+\dp\strutbox-\ht0-\dp0)/2\relax%
+    \ClassError{tudscrmanual}{Unprocessed change notes}{%
+      \string\tud@changedat@entry@list\space is not empty%
     }%
-    \IfValueT{#1}{#1}%
-    \par\nobreak%
-    \vskip\medskipamount%
-    \@afterindentfalse\@afterheading%
   \fi%
-% TODO rein?
-%  \strut%
+  \tud@declare@close{#1}{#2}%
+  \ignorespaces%
 }
 % TODO drittes makro \tud@bdl@unknown -> mappen auf alles, was nicht definiert?
 % TODO search for both macros
@@ -973,24 +957,35 @@
 }
 \NewDocumentCommand\tud@bdl@get{m m r++ r== d() d''}{%
   \begingroup%
-    \tud@bdl@seek\tud@res@a{#2}+#3+=#4=(#5)'#6'%
+    \tud@bdl@seek\tud@res@a\tud@res@b{#2}+#3+=#4=(#5)'#6'%
     \protected@expandtwoargs\in@{,}{\tud@res@a}%
     \ifin@%
-      \let\tud@res@c\@empty%
-      \@for\tud@res@b:={\tud@res@a}\do{%
-        \eappto\tud@res@c{%
-          \noexpand\@spaces%
-          \expandafter\detokenize\expandafter{\tud@res@b}%
-          \noexpand\MessageBreak%
+      \begingroup%
+        \let\tud@res@c\@empty%
+        \@for\tud@res@b:={\tud@res@a}\do{%
+          \eappto\tud@res@c{%
+            \noexpand\@spaces%
+            \expandafter\detokenize\expandafter{\tud@res@b}%
+            \noexpand\MessageBreak%
+          }%
         }%
-      }%
-      \protected@edef\tud@res@b{#2\IfValueT{#3}{+#3+}\IfValueT{#4}{=#4=}}%
-      \ClassWarning{tudscrmanual}{%
-        Found multiple matching bundles\MessageBreak%
-        \tud@res@c for \detokenize\expandafter{\tud@res@b}%
-      }%
-      \def\tud@res@b##1,##2\@nil{\def\tud@res@a{##1}}%
-      \expandafter\tud@res@b\tud@res@a\@nil%
+        \protected@edef\tud@res@b{#2\IfValueT{#3}{+#3+}\IfValueT{#4}{=#4=}}%
+        \ClassWarning{tudscrmanual}{%
+          Found multiple matching bundles\MessageBreak%
+          \tud@res@c for \detokenize\expandafter{\tud@res@b}%
+        }%
+      \endgroup%
+    \fi%
+    \ifx\tud@res@a\@empty%
+      \ifx\tud@res@b\@empty%
+        \let\tud@res@a\tud@bdl@curr%
+      \else%
+        \let\tud@res@a\tud@res@b%
+      \fi%
+    \else
+      \ifx\tud@res@b\@empty\else%
+        \eappto\tud@res@a{,\expandonce\tud@res@b}%
+      \fi
     \fi%
     \edef\tud@res@a{%
       \endgroup%
@@ -1015,63 +1010,65 @@
     \tud@lbl@get#4##1{##2:#2:#3}%
   }%
 }
-\NewDocumentCommand\tud@bdl@seek{m m r++ r== !d() !d''}{%
+\NewDocumentCommand\tud@bdl@seek{m m m r++ r== !d() !d''}{%
   \begingroup%
     \let\tud@res@a\@empty%
     \let\tud@res@b\@empty%
-    \IfValueTF{#5}{%
-      \def\tud@res@c##1,##2\@nil{\def\tud@bdl@curr{##1}}%
-      \tud@res@c#5,\@nil%
-      \def\tud@res@c{#5}%
+    \IfValueTF{#6}{%
+      \def\tud@res@c{#6}%
       \@for\tud@res@c:=\tud@res@c\do{%
-        \tud@lbl@get\tud@lbl@tmp{\tud@res@c:#2}+#3+=#4=%
+        \tud@lbl@get\tud@lbl@tmp{\tud@res@c:#3}+#4+=#5=%
         \tud@if@lbl@exists{\tud@lbl@tmp}{%
-          \expandafter\listadd\expandafter\tud@res@a\expandafter{\tud@res@c}%
-          \eappto\tud@res@b{,\expandonce\tud@res@c}%
+          \eappto\tud@res@a{,\expandonce\tud@res@c}%
         }{%
-          \expandafter\tud@bdl@trace@lbl\expandafter{\tud@lbl@tmp}'#6'%
+          \eappto\tud@res@b{,\expandonce\tud@res@c}%
+          \expandafter\tud@bdl@trace@lbl\expandafter{\tud@lbl@tmp}'#7'%
         }%
       }%
     }{%
-      \tud@lbl@get*\tud@lbl@tmp{\tud@bdl@curr:#2}+#3+=#4=%
+      \tud@lbl@get*\tud@lbl@tmp{\tud@bdl@curr:#3}+#4+=#5=%
       \tud@if@lbl@exists{\tud@lbl@tmp}{}{%
         \def\tud@res@c##1{%
-          \tud@bdl@@@seek\tud@lbl@tmp{##1}=#4=%
+          \tud@bdl@@@seek\tud@lbl@tmp{##1}=#5=%
           \tud@if@lbl@exists{\tud@lbl@tmp}{%
-            \listadd\tud@res@a{##1}%
-            \appto\tud@res@b{,##1}%
+            \appto\tud@res@a{,##1}%
           }{}%
         }%
         % DOC Basislabel ohne Wert
-        \tud@lbl@get\tud@lbl@tmp{\tud@bdl@curr:#2}+#3+%
+        \tud@lbl@get\tud@lbl@tmp{\tud@bdl@curr:#3}+#4+%
         % DOC exakte Treffer mit ggf. gegebenen Wert
         \expandafter\tud@bdl@@seek\tud@lbl@tmp\@nil*\@nil%
         \tud@auxlist@forloop\tud@res@c{tud@bdl}%
-        \IfValueT{#4}{%
+        \IfValueT{#5}{%
           \ifx\tud@res@a\@empty%
             % DOC Basislabel ohne Wert
-            \tud@lbl@get\tud@lbl@tmp{\tud@bdl@curr:#2}+#3+%
+            \tud@lbl@get\tud@lbl@tmp{\tud@bdl@curr:#3}+#4+%
             % DOC suche Treffer ohne gegebenen Wert (kein Stern)
             \expandafter\tud@bdl@@seek\tud@lbl@tmp\@nil\@nil%
             \tud@auxlist@forloop\tud@res@c{tud@bdl}%
           \fi%
         }%
         \ifx\tud@res@a\@empty%
-          \tud@lbl@get\tud@lbl@tmp{\tud@bdl@curr:#2}+#3+%
-          \expandafter\tud@bdl@trace@lbl\expandafter{\tud@lbl@tmp}'#6'%
+          \tud@lbl@get\tud@lbl@tmp{\tud@bdl@curr:#3}+#4+%
+          \expandafter\tud@bdl@trace@lbl\expandafter{\tud@lbl@tmp}'#7'%
+          \edef\tud@res@b{,\expandonce\tud@bdl@curr}%
         \fi%
       }%
     }%
-    \ifx\tud@res@a\@empty%
-      \let\tud@res@b\tud@bdl@curr%
-    \else%
+    \ifx\tud@res@a\@empty\else%
+      \edef\tud@res@a{%
+        \expandafter\expandafter\expandafter\@gobble\expandonce\tud@res@a%
+      }%
+    \fi%
+    \ifx\tud@res@b\@empty\else%
       \edef\tud@res@b{%
         \expandafter\expandafter\expandafter\@gobble\expandonce\tud@res@b%
       }%
     \fi%
     \edef\tud@res@a{%
       \endgroup%
-      \def\noexpand#1{\expandonce\tud@res@b}%
+      \def\noexpand#1{\expandonce\tud@res@a}%
+      \def\noexpand#2{\expandonce\tud@res@b}%
     }%
   \tud@res@a%
 }
@@ -1087,6 +1084,7 @@
   \endgroup%
 }
 \tud@newif\if@tud@index
+% TODO \addtoeachtocfile vs BeforeStartingTOC
 \addtoeachtocfile{\protect\@tud@indextrue}
 \tud@newif\if@tud@changelog
 \newrobustcmd*\bsc{\@backslashchar}
@@ -1109,7 +1107,30 @@
     \expandafter\expandafter\expandafter\@gobble\expandafter\string#1%
   }%
 }
-\newcommand*\Markup@Get@Arguments[2]{\Markup@Split#1{\@secondoftwo}{#2}}
+\newcommand*\Markup@Get@Arguments[2]{%
+  \Markup@Split#1{\@secondoftwo}{#2}%
+  \expandafter\if\expandafter\@car#1\relax\@nil*\else%%
+    \begingroup%
+      \edef\tud@res@c{\expandonce#1}%
+      \def\tud@res@a##1{%
+        \kernel@ifnextchar\bgroup%
+          {\@tud@res@swafalse\tud@res@b}%
+          {\@tud@res@swatrue\tud@res@b}%
+        ##1\@nil%
+      }%
+      \def\tud@res@b##1\@nil{%
+        \if@tud@res@swa%
+          \def\tud@res@c{{##1}}%
+        \fi%
+      }%
+      \expandafter\tud@res@a\expandafter{\tud@res@c}%
+      \edef\tud@res@c{%
+        \endgroup%
+        \unexpanded{\def#1}{\expandonce\tud@res@c}%
+      }%
+    \tud@res@c%
+  \fi%
+}
 \NewDocumentCommand\Markup@Simple@Format{s m D(){\texttt} m !O{ic}}{%
   \Markup@Get@Name\tud@res@c{#2}%
   \ifcsundef{Markup@Inline@@\tud@res@c}{%
@@ -1301,9 +1322,9 @@
   \IfValueT{#4}{\addto@hook\tud@toks@{[~#4]}}%
   \addto@hook\tud@toks@{{#1}}%
   \IfValueTF{#6}{%
-    \addto@hook\tud@toks@{|#6/Distribution|}%
+    \addto@hook\tud@toks@{|<Distribution>#6|}%
   }{%
-    \addto@hook\tud@toks@{|/Distribution|}%
+    \addto@hook\tud@toks@{|<Distribution>|}%
   }%
   \the\tud@toks@%
 }
@@ -1343,22 +1364,24 @@
 \NewDocumentCommand\Environment{%
   s >{\Processor@Value{#3}{#4}}m !d++ !d== !o !d() !d'' !d||%
 }{%
-  \Environment@Parameter{#1}#2[#5](#6)'#7'|#8|%
+  \Environment@Parameter{#1}#2[{#5}](#6)'#7'|#8|%
 }
 \NewDocumentCommand\Environment@Parameter{m m r++ r== r[] r() r'' r||}{%
   \Process@Markup{\Environment{#2}}+#3+=#4=[{#5}](#6)'#7'{#1}|#8|%
 }
 \Markup@Declare@Format\Environment{%
+  \begin{tabular}[t]{@{}l@{}}
   \texttt{\bsc{}begin\textbraceleft#1\textbraceright\IfValueT{#3}{#3}}%
-  \tabularnewline\texttt{\dots}%
+  \tabularnewline\texttt{\quad\raisebox{-.3\dp\@arstrutbox}[0pt][0pt]{\vdots}}%
   \tabularnewline\texttt{\bsc{}end\textbraceleft#1\textbraceright}%
+  \end{tabular}
 }
 \Markup@Simple@Format\Environment{Umgebung}
 \NewExpandableDocumentCommand\@Macro{s m}{#2}
 \NewDocumentCommand\Macro{%
   s >{\Processor@Value{#3}{#4}}m !d++ !d== !o !d() !d'' !d||%
 }{%
-  \Macro@Parameter{#1}#2[#5](#6)'#7'|#8|%
+  \Macro@Parameter{#1}#2[{#5}](#6)'#7'|#8|%
 }
 \NewDocumentCommand\Macro@Parameter{m m d++ d== r[] r() r'' r||}{%
   \Process@Markup{\Macro{#2}}+#3+=#4=[{#5}](#6)'#7'{#1}|#8|%
@@ -1448,7 +1471,7 @@
 \newcommand*\Processor@Underscore[1]{%
   \begingroup%
     \def\tud@res@a{#1}%
-    \tud@replace\tud@res@a{_}{\_}%
+    \tud@replace@in\tud@res@a{_}{\_}%
     \edef\tud@res@a{%
       \endgroup%
       \def\noexpand\ProcessedArgument{\expandonce\tud@res@a}%
@@ -1486,11 +1509,11 @@
     \tud@res@a\Color{elements}{clr}%
     \tud@res@a\File{files}{fle}%
     #3%
-    \edef\tud@reserved{%
-      \noexpand\endgroup%
-      \def\noexpand#2{\tud@res@b}%
+    \edef\tud@res@a{%
+      \endgroup%
+      \unexpanded{\def#2}{\tud@res@b}%
     }%
-  \tud@reserved%
+  \tud@res@a%
 }
 \newrobustcmd*\CD{\tud@english{Corporate Design}\xspace}
 \newrobustcmd*\CDs{\tud@english{Corporate Designs}\xspace}
@@ -1643,53 +1666,78 @@
     }%
   \tud@res@a%
 }
-\tud@newif\if@tud@changedat
 \NewDocumentCommand\Process@Markup{%
   m d++ d== o >{\Processor@Bundle}d() d<> d'' m r||%
 }{%
-  \if@tud@changedat%
-    \Process@ChangedAt{#1}+#2+=#3=[{#4}](#5)%
-  \else%
-    \Process@Output{#1}+#2+=#3=[{#4}](#5)<#6>'#7'%
-    \ifboolexpr{%
-      bool {@tud@index} or bool {@tud@obsolete} or 
-      ( bool {@tud@declare} and test {\ifnumcomp{\tud@declare@num}{=}{1}} )%
-    }{}{%
-      \Process@Index{#1}+#2+=#3=(#5){#8}|#9|%
+  \begingroup%
+    \tud@toks@{\Process@@Markup{#1}+#2+=#3=[{#4}]}%
+    \if@tud@declare%
+      \IfValueTF{#5}{\def\tud@res@a{#5}}{\let\tud@res@a\tud@bdl@curr}%
+    \else%
+      \tud@bdl@get\tud@res@a{#1}+#2+=#3=(#5)'#7'%
+    \fi%
+    \eaddto@hook\tud@toks@{\expandafter(\tud@res@a)}%
+    \addto@hook\tud@toks@{<#6>'#7'{#8}|#9|}%
+    \expandafter\tud@trace@bdl@add\expandafter{\tud@res@a}%
+    \edef\tud@res@a{%
+      \endgroup%
+      \the\tud@toks@%
     }%
-  \fi%
+  \tud@res@a%
 }
-\GetDocumentCommandArgSpec\Process@Markup%
-\expandafter\NewDocumentCommand\expandafter\Process@Get@Markup\expandafter{%
+\NewDocumentCommand\Process@@Markup{%
+  m d++ d== o r() d<> d'' m r||%
+}{%
+  \Process@Output{#1}+#2+=#3=[{#4}](#5)<#6>'#7'%
+  \ifboolexpr{%
+    (bool {@tud@declare} and test {\ifnumcomp{\tud@declare@num}{=}{1}})%
+      or bool {@tud@index} 
+  }{}{%
+    \Process@Index{#1}+#2+=#3=[{#4}](#5){#8}|#9|%
+  }%
+}
+\GetDocumentCommandArgSpec\Process@@Markup%
+\expandafter\NewDocumentCommand\expandafter\Process@Get@@Markup\expandafter{%
   \ArgumentSpecification%
 }{%
   \tud@toks@{{#1}}%
-  \IfValueT{#2}{\addto@hook\tud@toks@{+#2+}}%
-  \addto@hook\tud@toks@{=#3=}%
+  \tud@res@b{#2}{\addto@hook\tud@toks@{+#2+}}%
+  \tud@res@b{#3}{\addto@hook\tud@toks@{=#3=}}%
+  \tud@res@b{#4}{\addto@hook\tud@toks@{[{#4}]}}%
+  \tud@res@b{#5}{\addto@hook\tud@toks@{(#5)}}%
 }
-\newcommand*\Markup@Replace@Value[3][\@firstofone]{%
+\NewDocumentCommand\Process@Get@Markup{s m m}{%
   \begingroup%
-    \let\Process@Markup\Process@Get@Markup%
-    #2%
-    \edef\tud@res@a{\the\tud@toks@}%
-    \def\tud@res@b##1=##2=\@nil{%
-      \def\tud@res@a{##1=#3=}%
+    \let\Process@@Markup\Process@Get@@Markup%
+    \IfBooleanTF{#1}{%
+      \let\tud@res@b\IfValueT%
+    }{%
+      \let\tud@res@b\@secondoftwo%
     }%
-    \expandafter\tud@res@b\tud@res@a\@nil%
+    #3%
     \edef\tud@res@a{%
       \endgroup%
-      \unexpanded{#1}{\expandonce\tud@res@a}%
+      \unexpanded{\def#2}{\the\tud@toks@}%
     }%
   \tud@res@a%
 }
 \NewDocumentCommand\Process@Output{m r++ r== r[] r() r<> r''}{%
-  \IfValueT{#5}{\tud@trace@bdl@add{#5}}%
   \if@tud@declare%
     \tud@toks@{\Process@Output@Declare}%
   \else%
     \tud@toks@{\Process@Output@Inline}%
   \fi%
-  \addto@hook\tud@toks@{{#1}+#2+=#3=[{#4}](#5)}%
+  \addto@hook\tud@toks@{{#1}+#2+=#3=[{#4}]}%
+  \if@tud@declare%
+    \addto@hook\tud@toks@{(#5)}%
+  \else%
+    \begingroup%
+      \def\tud@res@a##1,##2\@nil{%
+        \endgroup%
+        \addto@hook\tud@toks@{(##1)}%
+      }%
+    \tud@res@a#5,\@nil%
+  \fi%
   \if@tud@index\else%
     \IfValueT{#6}{%
       \ifxblank{#6}{}{\addto@hook\tud@toks@{<http://www.ctan.org/pkg/#6>}}%
@@ -1714,15 +1762,18 @@
   \fi%
   \the\tud@toks@%
 }
+% DOC 0: Ausgabe, Label, Index
+% DOC 1: Ausgabe, Label, kein Index
+% DOC 1: Ausgabe, kein Label, kein Index
+% DOC 2: keine Ausgabe, Label, Index
+% DOC 3: keine Ausgabe, raised Label, Index
 \NewDocumentCommand\Process@Output@Declare{%
-  m r++ r== r[] R(){\tud@bdl@curr} !d<>%
+  m r++ r== r[] r() !d<>%
 }{%
   \begingroup%
     \def\tud@res@c{#5}%
     \@for\tud@res@c:=\tud@res@c\do{%
-      \ifx\tud@res@c\tud@bdl@dflt\else%
-        \tud@bdl@add{\tud@res@c}%
-      \fi%
+      \tud@bdl@add{\tud@res@c}%
       \tud@lbl@get*\tud@lbl@tmp{\tud@res@c:#1}+#2+=#3=%
       \ifcase\tud@declare@num\relax%
         \tudhyperdef{\tud@lbl@tmp}=#3=%
@@ -1743,18 +1794,6 @@
   \fi%
 }
 \NewDocumentCommand\Process@Output@Inline{m r++ r== r[] r() !d<> !d''}{%
-  \begingroup%
-    \tud@toks@{\Process@Output@@Inline{#1}+#2+=#3=[{#4}]}%
-    \tud@bdl@get\tud@res@a{#1}+#2+=#3=(#5)'#7'%
-    \eaddto@hook\tud@toks@{\expandafter(\tud@res@a)}%
-    \addto@hook\tud@toks@{<#6>'#7'}%
-    \edef\tud@res@a{%
-      \endgroup%
-      \the\tud@toks@%
-    }%
-  \tud@res@a%
-}
-\NewDocumentCommand\Process@Output@@Inline{m r++ r== r[] r() r<> r''}{%
   \begingroup%
     \tud@lbl@get\tud@lbl@tmp{#5:#1}+#2+=#3=%
     \def\tud@res@b{\Markup@Output{#1}+#2+=#3=[{#4}]}%
@@ -1778,7 +1817,7 @@
           \if@tud@res@swa%
             \ClassWarning{tudscrmanual}{%
               A \IfValueTF{#3}{specific}{general} value for \detokenize{#5}%
-              \MessageBreak with `#1\IfValueT{#2}{+#2+}\IfValueT{#3}{=#3=}'%
+              \MessageBreak `#1\IfValueT{#2}{+#2+}\IfValueT{#3}{=#3=}'%
               \MessageBreak was given, but there exists no label%
               \MessageBreak `\tud@res@a'%
             }%
@@ -2054,7 +2093,9 @@
     \fi
     \expandafter\edef\csname imki@set@#1\endcsname{\the\toks@}%
   }%
-  \ifundef{\inputencodingname}{}{%
+  \ifundef{\inputencodingname}{%
+    \eappto\tud@xdy@settings{\space-C\space utf8}%
+  }{%
     \eappto\tud@xdy@settings{\space-C\space\inputencodingname}%
   }%
   \tud@xdy@make{Allgemeiner Index}%
@@ -2103,56 +2144,88 @@
   \emph{\IfBooleanTF{#1}{\alsoname}{\seename}}\space\begingroup#2\endgroup%
 }
 \newcommand*\seeidx[2]{\pageref{idx:#1}}
-\NewDocumentCommand\Process@Index{m r++ r== r() m r||}{%
+\newcommand*\Processor@IndexFormat[1]{%
+  \begingroup%
+    \def\tud@res@a##1<##2>##3<##4>##5<>##6\@nil{%
+      \IfArgIsEmpty{##1}{%
+        \IfArgIsEmpty{##3}{%
+          \def\tud@res@b{##5}%
+        }{%
+          \def\tud@res@b{##3}%
+        }%
+      }{%
+        \def\tud@res@b{##1}%
+      }%
+      \def\tud@res@c{##2}%
+      \IfArgIsEmpty{##4}{}{%
+        \preto\tud@res@c{##4!}%
+      }%
+    }%
+    \tud@res@a#1<><><>\@nil%
+    \protected@edef\tud@res@a{%
+      \endgroup%
+      \unexpanded{\def\ProcessedArgument}{%
+        \ifx\tud@res@c\@empty\else<\expandonce\tud@res@c>\fi%
+        \ifx\tud@res@b\@empty\else|\expandonce\tud@res@b|\fi%
+      }%
+    }%
+  \tud@res@a%
+}
+\NewDocumentCommand\Process@Index{m r++ r== r[] r() m r||}{%
   \if@tud@declare%
     \if@tud@openindex%
-      \IfBooleanT{#5}{%
+      \IfBooleanT{#6}{%
         \Markup@Get@Name\tud@res@a{#1}%
         \ClassWarning{tudscrmanual}{%
           Using \@backslashchar\tud@res@a* (starred version)\MessageBreak%
           within a declaration is inept%
         }%
       }%
-      \IfValueT{#6}{%
-        \ClassWarning{tudscrmanual}{%
-          It is not possible to use any indexing format\MessageBreak%
-          like |#6| within a declaration%
-        }%
-      }%
     \fi%
   \fi%
-  \IfBooleanTF{#5}{%
-    \IfValueT{#6}{%
+  \IfBooleanTF{#6}{%
+    \IfValueT{#7}{%
       \Markup@Get@Name\tud@res@a{#1}%
       \ClassWarning{tudscrmanual}{%
         Using \@backslashchar\tud@res@a* (starred version)\MessageBreak%
         means, no index entry is created. The optional\MessageBreak%
-        argument |#6| is ignored%
+        indexing format |#7| is ignored%
       }%
     }%
   }{%
     \begingroup%
-      \IfValueTF{#4}{%
-        \def\tud@res@a{#4}%
-      }{%
-        \tud@bdl@seek\tud@res@a{#1}+#2+=#3=%
-      }%
+      \def\tud@res@a{#5}%
       \@for\tud@res@a:=\tud@res@a\do{%
-        \tud@toks@{\Process@@Index{#1}+#2+=#3=}%
-        \eaddto@hook\tud@toks@{\expandafter(\tud@res@a)|#6|}%
+        \tud@toks@{\Process@@Index{#1}+#2+=#3=[{#4}]}%
+        \eaddto@hook\tud@toks@{\expandafter(\tud@res@a)}%
+        \addto@hook\tud@toks@{|#7|}%
         \the\tud@toks@%
       }%
     \endgroup%
   }%
 }
-\newcommand*\tud@idx@entry{}
-\NewDocumentCommand\Process@@Index{m r++ r== r() r||}{%
-  \tud@idx@get{#1}+#2+=#3=(#4)%
+\NewDocumentCommand\Process@@Index{%
+  m r++ r== r[] r() >{\Processor@IndexFormat}r||
+}{%
+  \tud@toks@{\Process@@@Index{#1}+#2+=#3=[{#4}](#5)}%
+  \IfValueT{#6}{\addto@hook\tud@toks@{#6}}%
+  \the\tud@toks@%
+}
+\NewDocumentCommand\Process@@@Index{%
+  m r++ r== r[] r() d<> d||%
+}{%
+  \tud@idx@get{#1}+#2+=#3=[{#4}](#5)<#6>%
   \tud@attr@get*\tud@lbl@tmp{#1}%
   \let\tud@res@a\@empty%
   \let\tud@res@b\@empty%
   \if@tud@declare%
-  % TODO check
+    \IfValueT{#7}{%
+      \ClassWarning{tudscrmanual}{%
+        It is not possible to use any indexing format\MessageBreak%
+        |#7| within a declaration%
+      }%
+    }%
+  % TODO check, falls das klappt, separate declare-Indexe notwendig?
 %  ;;(define-attributes (("declare" "!") ("important" "?")("default")))
 %  ;;(markup-attribute-group-list :sep ", ")
 %  ;;(merge-to "default" "declare")
@@ -2164,17 +2237,8 @@
       \def\tud@res@a{declare)}%
     \fi%
   \else%
-    \IfValueT{#5}{%
-      \def\tud@res@c##1/##2/##3\@nil{%
-        \ifx\tud@res@a\@empty%
-          \def\tud@res@a{##1}%
-        \fi%
-        \IfArgIsEmpty{##2}{}{\appto\tud@res@b{##2!}}%
-        \IfArgIsEmpty{##3}{}{%
-          \tud@res@c/##3\@nil%
-        }%
-      }%
-      \tud@res@c#5//\@nil%
+    \IfValueT{#7}{%
+      \def\tud@res@a{#7}%
       % TODO noch sinnvoll?
       \ifx\tud@res@a\@empty\else%
         \typeout{??? \thepage\on@line}%
@@ -2189,7 +2253,7 @@
   % TODO split \tud@idx@entry und jeden Eintrag auch verwenden?
   % falls ja, nur wenn \@tud@declarefalse?
   \index[\tud@lbl@tmp]{%
-    \tud@res@b\tud@idx@entry\ifx\tud@res@a\@empty\else|\tud@res@a\fi%
+    \tud@idx@entry\ifx\tud@res@a\@empty\else|\tud@res@a\fi%
   }%
 }
 % #1 subentry?
@@ -2248,8 +2312,8 @@
       \IfBooleanF{#1}{#6\if@tud@res@swa\suffix{#7}\fi}%
       \IfValueT{#9}{:\space#9}%
     }%
-    \tud@@replace\tud@res@a{@}{"@}%
-    \tud@@replace\tud@res@b{@}{"@}%
+    \tud@replace@@in\tud@res@a{@}{"@}%
+    \tud@replace@@in\tud@res@b{@}{"@}%
     \edef\tud@res@c{%
       \endgroup%
       \def\noexpand#2{\expandonce\tud@res@a @\expandonce\tud@res@b}%
@@ -2304,19 +2368,90 @@
     }%
   \tud@res@c%
 }
+\newcommand*\Processor@IndexSuperEntry[3]{%
+  \begingroup%
+    \let\tud@res@a\@empty%
+    \def\tud@res@c##1!##2\@nil{%
+      \begingroup%
+        \protected@edef\tud@res@a{##1}%
+        \begingroup%
+          \Markup@Expandable%
+          \protected@edef\tud@res@b{%
+            \endgroup%
+            \unexpanded{\def\tud@res@b}{\tud@res@a}%
+          }%
+        \tud@res@b%
+        \ifx\tud@res@a\tud@res@b%
+          \def\tud@idx@entry{##1}%
+        \else%
+          \Process@Get@Markup\tud@res@a{##1}%
+          \def\tud@res@b####1(####2)\@nil{%
+            \IfValueF{####2}{\def\tud@res@a{####1(#1)}}%
+          }%
+          \expandafter\tud@res@b\tud@res@a\@nil%
+          % TODO besser! Überabreiten, nachdem \Processor@SpecialValue raus 
+          % TODO "neu" und "Werte angepasst" als erster Spezialeintrag!
+          \IfValueT{#2}{%
+            \appto\tud@res@a{:Werte angepasst:}%
+          }%
+          \expandafter\tud@idx@get\tud@res@a%
+        \fi%
+        \edef\tud@res@a{%
+          \endgroup%
+          \unexpanded{\appto\tud@res@a}{\expandonce\tud@idx@entry!}%
+        }%
+      \tud@res@a%
+      \IfArgIsEmpty{##2}{}{\tud@res@c##2\@nil}%
+    }%
+    \tud@res@c#3!\@nil%
+    \edef\tud@res@a{%
+      \endgroup%
+      \unexpanded{\def\ProcessedArgument}{\expandonce\tud@res@a}%
+    }%
+  \tud@res@a%
+}
+% TODO \Processor@SpecialValue raus
+% TODO Argumente tauschen, sodass d:: als erstes changelog argument
+\newcommand*\tud@idx@entry{}
 \NewDocumentCommand\tud@idx@get{%
-  m r++ >{\Processor@SpecialValue{#5}}r== r() d== D(){\tud@bdl@dflt} d::%
+  m r++ >{\Processor@SpecialValue{#7}}r== o r() 
+  >{\Processor@IndexSuperEntry{#5}{#9}}d<> 
+  d== D(){\tud@bdl@dflt} d::%
 }{%
   \tud@toks@{\tud@idx@@get{#1}+#2+}%
   \IfValueTF{#3}{%
     \addto@hook\tud@toks@{#3}%
   }{%
-    \IfValueT{#5}{\addto@hook\tud@toks@{=#5=}}%
+    \IfValueTF{#7}{%
+      \addto@hook\tud@toks@{=#7=}%
+    }{%
+      \addto@hook\tud@toks@{=#3=}%
+    }%
   }%
-  \addto@hook\tud@toks@{(#4)(#6):#7:}%
-  \IfValueTF{#7}{\addto@hook\tud@toks@{c}}{\addto@hook\tud@toks@{i}}%
+  \addto@hook\tud@toks@{(#5)(#8):#9:}%
+  \IfValueTF{#9}{\addto@hook\tud@toks@{{c}}}{\addto@hook\tud@toks@{{i}}}%
   \the\tud@toks@%
+  \IfValueT{#6}{%
+    \begingroup%
+      \def\tud@res@a##1!##2\@nil{%
+        \IfArgIsEmpty{##2}{%
+          \def\tud@res@a{##1}%
+        }{%
+          \tud@res@a##2\@nil%
+        }%
+      }%
+      \expandafter\tud@res@a\tud@idx@entry!\@nil%
+      \edef\tud@res@a{%
+        \endgroup%
+        \unexpanded{\def\tud@idx@entry}{#6\expandonce\tud@res@a}%
+      }%
+    \tud@res@a%
+  }%
+  \IfValueT{#7}{%
+    \typeout{+++++++++++ \detokenize{#7} \meaning\tud@idx@entry}%
+  }%
 }
+% TODO #5 und #6 auflösen?
 \NewDocumentCommand\tud@idx@@get{m r++ d!! d== r() r() r:: m}{%
   \begingroup%
     \IfValueTF{#7}{\def\tud@res@b{#7}}{\let\tud@res@b\@empty}%
@@ -2486,30 +2621,25 @@
     }%
   }%
 }
-\newcommand*\tud@changedat@process@list{}
-\NewDocumentCommand\Process@ChangedAt{m r++ r== r[] r()}{%
+\NewDocumentCommand\Process@ChangedAt{m r++ r== r[] r() m}{%
   \begingroup%
-    \IfValueTF{#5}{%
-      \def\tud@res@a{#5}%
-    }{%
-      \tud@bdl@get\tud@res@a{#1}+#2+=#3=%
-    }%
+    \let\tud@res@b\@empty%
+    \def\tud@res@a{#5}%
     \@for\tud@res@a:=\tud@res@a\do{%
       % TODO pass #4, für oberste ebene in Änderungsliste
       \tud@toks@{{#1}+#2+=#3=}%
       \eaddto@hook\tud@toks@{\expandafter(\tud@res@a)}%
-      \listeadd\tud@changedat@process@list{\the\tud@toks@}%
+      \listeadd\tud@res@b{\the\tud@toks@}%
     }%
     \edef\tud@res@a{%
       \endgroup%
-      \def\noexpand\tud@changedat@process@list{%
-        \expandonce\tud@changedat@process@list%
-      }%
+      \unexpanded{\def#6}{\expandonce\tud@res@b}%
     }%
   \tud@res@a%
 }
 \newcommand*\tud@changedat@entry@list{}
 \newcommand*\tud@changedat@version@list{}
+% TODO o -> d<>? ist doch Haupteintrag (Implementierung), oder?
 \NewDocumentCommand\ChangedAt{s o d() m}{%
   \ifx\tud@changedat@entry@list\@empty\else%
     \ClassError{tudscrmanual}{Unprocessed change notes}{%
@@ -2519,14 +2649,14 @@
   \let\tud@changedat@entry@list\@empty%
   \let\tud@changedat@version@list\@empty%
   \Changed@At@CreateList{#4}[{#2}](#3){#1}%
-  \print@changedatlist%
+  \tud@print@changedatlist%
 }
 % TODO raus, wenn umgebung Values umgesetzt
 \tud@newdim\tud@dim@changedatvskip
-\newcommand*\print@changedatlist{%
-  \print@@changedatlist{\tud@dim@changedatvskip}%
+\newcommand*\tud@print@changedatlist{%
+  \tud@print@@changedatlist{\tud@dim@changedatvskip}%
 }
-\newcommand\print@@changedatlist[1]{%
+\newcommand\tud@print@@changedatlist[1]{%
   \begingroup%
     \ifx\tud@changedat@version@list\@empty\else%
       \tud@list@sort\tud@changedat@version@list%
@@ -2541,12 +2671,12 @@
       \forlistloop\tud@res@c{\tud@changedat@version@list}%
       \strut%
       \marginnote{%
-        \begin{tabular}{|l|}%
+        \begin{tabular}[b]{|l|}%
           \hline%
           \tud@res@b%
           \hline%
         \end{tabular}%
-      }[{#1}]%
+      }[{\dimexpr\glueexpr#1\relax\relax}]%
     \fi%
     \ifx\tud@changedat@entry@list\@empty\else%
       \forlistloop\@firstofone{\tud@changedat@entry@list}%
@@ -2562,29 +2692,30 @@
     \let\ChangedAt\@ChangedAt%
   }%
 }
+% TODO \addtoeachtocfile vs BeforeStartingToc
 \BeforeStartingTOC{\let\ChangedAt\@ChangedAt}
 \DeclareListParser*{\forssvlist}{;}
-% TODO spezialfall \@tud@declaretrue notwendig?
+% TODO argument order
 \NewDocumentCommand\Changed@At@CreateList{%
-  m o >{\Processor@Bundle}D(){\tud@bdl@curr} d:: m%
+  m >{\Processor@IndexFormat}o >{\Processor@Bundle}D(){\tud@bdl@curr} d:: m%
 }{%
   \IfValueT{#1}{%
     \def\tud@res@a{#3}%
     \@for\tud@res@a:=\tud@res@a\do{%
-      \tud@toks@{\Changed@At@@CreateList[{#2}]}%
+      \tud@toks@{\Changed@At@@CreateList}%
+      \IfValueT{#2}{\addto@hook\tud@toks@{#2}}%
       \eaddto@hook\tud@toks@{\expandafter(\tud@res@a):#4:{#5}}%
       \forssvlist{\the\tud@toks@}{#1}%
     }%
   }%
 }
-\NewDocumentCommand\Changed@At@@CreateList{r[] r() r:: m m}{%
+\NewDocumentCommand\Changed@At@@CreateList{d<> d|| r() r:: m m}{%
   \begingroup%
-    % TODO internes Argument für Untereinträge
     \def\tud@res@a##1:##2:##3\@nil{%
       \def\tud@res@b{##1}%
       \def\tud@res@c{##2}%
     }%
-    \tud@res@a#5::\@nil%
+    \tud@res@a#6::\@nil%
     \begingroup%
       \def\tud@res@a##1!##2!##3\@nil{%
         \def\tud@res@a{##1}%
@@ -2595,7 +2726,10 @@
         \def\tud@res@a{\endgroup}%
       \else%
         % TODO Warnung!
-          \Markup@Expandable
+          \Markup@Expandable%
+          \robustify\PName%
+          \robustify\PValue%
+          \robustify\PValueName%
           \def\tud@res@c##1=##2\@nil{%
             \protected@edef\tud@res@a{%
               \endgroup%
@@ -2612,20 +2746,10 @@
       \def\tud@res@b{##2}%
     }%
     \expandafter\tud@res@a\tud@res@b==\@nil%
-    \ifx\tud@res@c\@empty%
-      % TODO als optionales Argument :test: direkt für \Changed@At@CreateList
-%      \if@tud@declare%
-%        \if@tud@obsolete%
-%          \def\tud@res@c{\emph{entf\"allt}}%
-%        \else%
-%          \def\tud@res@c{\emph{neu}}%
-%        \fi%
-%      \fi%
-    \fi%
     \tud@toks@{\Changed@At@CreateEntry}%
     \eaddto@hook\tud@toks@{\expandafter{\tud@res@a}}%
-    \IfValueTF{#1}{%
-      \addto@hook\tud@toks@{[{#1}]}%
+    \IfValueTF{#2}{%
+      \addto@hook\tud@toks@{<#1>[{#2}]}%
       \ifx\tud@res@b\@empty\else%
         \protected@edef\tud@res@b{%
           \unexpanded{\Parameter@Enclose[\def\tud@res@b]{\PValue}}{\tud@res@b}%
@@ -2634,22 +2758,22 @@
         \eaddto@hook\tud@toks@{\expandafter=\tud@res@b=}%
       \fi%
     }{%
-    % TODO optionales Argument von \ChangedAt weglassen, Markup direkt mit ! 
+      % TODO optionales Argument von \ChangedAt weglassen, direkt mit ! Markup ?
 %      \ifx\tud@res@b\@empty\else%
 %        \ifx\tud@res@c\@empty%
 %         \typeout{!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!}%
 %        \fi%
 %      \fi%
     }%
-    \addto@hook\tud@toks@{(#2)}%
+    \addto@hook\tud@toks@{(#3)}%
     \trim@spaces@in\tud@res@c%
     \ifx\tud@res@c\@empty%
-      \IfValueT{#3}{\addto@hook\tud@toks@{:#3:}}%
+      \IfValueT{#4}{\addto@hook\tud@toks@{:#4:}}%
     \else%
       \eaddto@hook\tud@toks@{\expandafter:\tud@res@c:}%
     \fi%
     \listeadd\tud@changedat@entry@list{\the\tud@toks@}%
-    \IfBooleanF{#4}{%
+    \IfBooleanF{#5}{%
       \xifinlist{\tud@res@a}{\tud@changedat@version@list}{}{%
         \listeadd\tud@changedat@version@list{\tud@res@a}%
       }%
@@ -2705,132 +2829,56 @@
     \tud@print@index[changelog]%
   \endgroup%
 }
-\NewDocumentCommand\Changed@At@CreateEntry{m o d== r() !d::}{%
+\NewDocumentCommand\Changed@At@CreateEntry{m d<> o d== r() !d::}{%
   \begingroup%
-    \IfValueT{#5}{%
-      \protected@edef\tud@res@a{#4}%
+    \IfValueT{#6}{%
+      \protected@edef\tud@res@a{#5}%
       \ifx\tud@res@a\tud@bdl@dflt%
         \let\tud@res@a\@empty%
       \else%
-        \def\tud@res@a{\space#4}%
+        \def\tud@res@a{\space#5}%
       \fi%
-      \IfValueTF{#2}{%
-        \let\tud@changedat@process@list\@empty%
-        \@tud@changedattrue#2\@tud@changedatfalse%
+      \IfValueTF{#3}{%
+        \@tud@declaretrue%
+        \Process@Get@Markup\tud@res@b{#3}%
+        \@tud@declarefalse%
+        \expandafter\Process@ChangedAt\tud@res@b{\tud@res@c}%
         \def\tud@res@b##1{%
-          \tud@idx@get##1=#3=(#4):#5:%
+          \tud@idx@get##1<#2>=#4=(#5):#6:%
           \index[changelog]{#1!Implementierung\tud@res@a!\tud@idx@entry}%
         }%
-        \forlistloop\tud@res@b{\tud@changedat@process@list}%
+        \forlistloop\tud@res@b{\tud@res@c}%
       }{%
-        \index[changelog]{#1!Allgemein\tud@res@a!#5}%
+        % TODO non-markup@markup
+        \index[changelog]{#1!Allgemein\tud@res@a!#6}%
       }%
     }%
   \endgroup%
 }
 \RequirePackage{enumitem}[2011/09/28]
 \setlist{before*={\endgraf\tud@RaggedRight},partopsep=0pt,noitemsep}
-\newcommand*\stditem{}
-\newcommand*\tud@before@item[1]{%
-  \ifdefvoid{\stditem}{%
-    \let\stditem\item%
-    \letcs\item{tud@item@#1}%
-    % TODO Änderungsnotiz direkt über Makro \item setzen
-    \tud@setdim\tud@dim@changedatvskip{-1\baselineskip}%
-  }{}%
-}
-\newcommand*\tud@values{}
-% TODO erstes Argument mit Liste (ddc,ddchead,ddcfoot)
-% TODO Hauptargument der aktuellen Deklarationen in Liste
-\NewDocumentEnvironment{values}{m !o}{%
-  \def\tud@values{#1}%
-  \IfValueTF{#2}{\@values[{#2}]}{\@values}%
-}{%
-  \end@values%
-}
-\newlist{@values}{description}{1}
-\setlist[@values]{%
-  topsep=\smallskipamount,labelwidth=\linewidth,labelsep=0pt,%
-  font=\normalfont,parsep=\parskip,listparindent=\parindent,%
-  before=\tud@before@item{values}%
-}
-\NewDocumentCommand\tud@item@values{s r[] !o !d()}{%
-  \begingroup%
-    \in@{/}{#2}%
-    \ifin@%
-      \def\tud@res@a##1/##2\@nil{%
-        \def\tud@res@b{##1}%
-        \def\tud@res@c{/##2}%
-      }%
-      \tud@res@a#2\@nil%
-    \else%
-      \def\tud@res@b{#2}%
-      \let\tud@res@c\@empty%
-    \fi%
-    \IfBooleanTF{#1}{\def\tud@res@a{\PValueDefault}}{\def\tud@res@a{\PValue}}%
-    \protected@edef\tud@res@a{%
-      \unexpanded{\Parameter@Enclose[\def\tud@res@b]}%
-        {\expandonce\tud@res@a}{\tud@res@b}%
-      \ifx\tud@res@c\@empty\else%
-        \unexpanded{\Parameter@Enclose[\def\tud@res@c]}%
-          {\expandonce\tud@res@a}{\tud@res@c}%
-      \fi%
-    }%
-    \tud@res@a%
-    \protected@edef\tud@res@a{\tud@values}%
-    \eappto\tud@res@a{=\expandonce\tud@res@b=}%
-    \let\tud@res@b\@empty%
-    \IfBooleanTF{#1}{%
-      \appto\tud@res@b{\suffix{S\"aumniswert}}%
-    }{%
-      \IfValueT{#3}{\appto\tud@res@b{\suffix{S\"aumniswert f\"ur #3}}}%
-    }%
-    \IfValueT{#4}{\appto\tud@res@b{\suffix{#4}}}%
-    \edef\tud@res@a{%
-      % TODO doch Sternversion, für Links ohne Output?!
-      \noexpand\InlineDeclaration{\expandonce\tud@res@a}%
-      \expandonce\tud@res@c\expandonce\tud@res@b%
-    }%
-    \edef\tud@res@a{%
-      \endgroup%
-      \noexpand\stditem[{\expandonce\tud@res@a}]%
-    }%
-  \tud@res@a%
-}
-\NewDocumentCommand\itemtrue{!s !o !o !d()}{%
-  \item@bool{#1}{true/on/yes}[{#2}][{#3}](#4)%
-}
-\NewDocumentCommand\itemfalse{!s !o !o !d()}{%
-  \item@bool{#1}{false/off/no}[{#2}][{#3}](#4)%
-}
-\NewDocumentCommand\item@bool{m m r[] r[] r()}{%
-  \toks@{\item}%
-  \IfBooleanT{#1}{\addto@hook\toks@{*}}%
-  \protected@edef\tud@res@a{#2\IfValueT{#3}{/#3}}%
-  \eaddto@hook\toks@{\expandafter[\tud@res@a]}%
-  \IfValueT{#4}{\addto@hook\toks@{[{#4}]}}%
-  \IfValueT{#5}{\addto@hook\toks@{(#5)}}%
-  \the\toks@%
-}
-%
-%
-%
 \newcommand*\itemval{}
-\undef\itemval%
 \newcommand*\itemvaltrue{}
-\undef\itemvaltrue%
 \newcommand*\itemvalfalse{}
-\undef\itemvalfalse%
+\newcommand*\tud@item@raw{}
+\AtBeginDocument{%
+  \undef\itemval%
+  \undef\itemvaltrue%
+  \undef\itemvalfalse%
+}
 \newcommand*\tud@item@val@init[1]{%
+  \tud@declaration@check%
   \let\itemval\tud@item@val%
   \let\itemvaltrue\tud@item@val@true%
   \let\itemvalfalse\tud@item@val@false%
+  \let\tud@item@raw\item%
+  \undef\item%
 }
 % TODO erstes Argument mit Liste (ddc,ddchead,ddcfoot)
 % TODO Hauptargument der aktuellen Deklarationen in Liste
 \newcommand*\tud@list@create[4][]{%
-  \newlist{#2}{#3}{#4}
-  \setlist[#2]{%
+  \newlist{#2}{#3}{#4}%
+  \setlist[{#2}]{%
     topsep=\smallskipamount,labelwidth=\linewidth,labelsep=0pt,%
     font=\normalfont,parsep=\parskip,listparindent=\parindent,#1%
   }%
@@ -2838,17 +2886,17 @@
 \tud@list@create[%
   before=\tud@item@val@init%
 ]{DeclarationValues}{description}{1}
-\NewDocumentCommand\tud@item@val{s d'' o r== !d()}{%
+\NewDocumentCommand\tud@item@val{s r== !d'' !d() !o}{%
   \begingroup%
-    \in@{/}{#4}%
+    \in@{/}{#2}%
     \ifin@%
       \def\tud@res@c##1/##2\@nil{%
         \def\tud@res@a{##1}%
         \def\tud@res@b{/##2}%
       }%
-      \tud@res@c#4\@nil%
+      \tud@res@c#2\@nil%
     \else%
-      \def\tud@res@a{#4}%
+      \def\tud@res@a{#2}%
       \let\tud@res@b\@empty%
     \fi%
     \IfBooleanTF{#1}{\def\tud@res@c{\PValueDefault}}{\def\tud@res@c{\PValue}}%
@@ -2864,57 +2912,93 @@
     \IfBooleanTF{#1}{%
       \appto\tud@res@b{\suffix{S\"aumniswert}}%
     }{%
-      \IfValueT{#2}{\appto\tud@res@b{\suffix{S\"aumniswert f\"ur #2}}}%
+      \IfValueT{#3}{\appto\tud@res@b{\suffix{S\"aumniswert f\"ur #3}}}%
     }%
-    \IfValueT{#5}{\appto\tud@res@b{\suffix{#5}}}%
+    \IfValueT{#4}{\appto\tud@res@b{\suffix{#4}}}%
     \def\tud@res@c##1##2##3{%
-      \Markup@Replace@Value[\def\tud@res@b]{##3}{##1}%
-      \ifx\tud@res@a\@empty%
-        \edef\tud@res@a{%
-          \noexpand\InlineDeclaration{\expandonce\tud@res@b}[{##2}]%
+      \begingroup%
+        \Markup@Replace@Value\tud@res@b{##3}{##1}%
+        \tud@toks@{\InlineDeclaration}%
+        \ifx\tud@res@a\@empty%
+          \edef\tud@res@c{{\expandonce\tud@res@b|<##3>|}\unexpanded{(##2)}}%
+        \else%
+          \edef\tud@res@c{!2!{\expandonce\tud@res@b|<##3>|}}%
+        \fi%
+        \eaddto@hook\tud@toks@{\tud@res@c}%
+        \edef\tud@res@a{\the\tud@toks@}%
+        \tud@toks@{\Changed@At@CreateList{#5}}%
+        \def\tud@res@c{<##3>}%
+        \eappto\tud@res@c{\expandonce\tud@res@b}%
+        \eaddto@hook\tud@toks@{\expandafter[\tud@res@c]}%
+        \addto@hook\tud@toks@{:\emph{neu}:{\BooleanFalse}}%
+        \edef\tud@res@b{\the\tud@toks@}%
+        \edef\tud@res@c{%
+          \endgroup%
+          \unexpanded{\appto\tud@res@a}{\expandonce\tud@res@a}%
+          \unexpanded{\appto\tud@res@b}{\expandonce\tud@res@b}%
         }%
-      \else%
-        \eappto\tud@res@a{%
-          \noexpand\Inline@Declaration{\expandonce\tud@res@b}{2}%
-        }%
-      \fi%
+      \tud@res@c%
     }%
     \edef\tud@res@a{%
-      \unexpanded{\let\tud@res@a\@empty}%
+      \unexpanded{\let\tud@res@a\@empty\let\tud@res@b\@empty}%
       \noexpand\forlistloop{%
         \noexpand\tud@res@c{\expandonce\tud@res@a}{\expandonce\tud@res@b}%
-      }{\expandonce\tud@declaration@@list}%
+      }{\noexpand\tud@declaration@list}%
     }%
     \tud@res@a%
     \edef\tud@res@a{%
       \endgroup%
-      \noexpand\item[{\expandonce\tud@res@a}]%
+      \noexpand\tud@item@raw[\expandonce\tud@res@a]%
+      \IfValueT{#5}{%
+        \expandonce\tud@res@b%
+        \noexpand\tud@print@@changedatlist{-1\baselineskip}%
+      }%
     }%
   \tud@res@a%
-  % TODO !!!!!!!!!!! Änderungsnotiz --> Einträge sammlen und einmalig setzen
-%      \IfValueT{#3}{%
-%        \ChangedAt{#3}%
-%      }%
 }
-\NewDocumentCommand\tud@item@val@true{!s !d'' !o !d== !d()}{%
-  \tud@item@val@bool{#1}'#2'[{#3}]{true/on/yes}=#4=(#5)%
+\NewDocumentCommand\tud@item@val@true{!s !d== !d'' !d() !o}{%
+  \tud@item@val@bool{#1}{true/on/yes}=#2='#3'(#4)[{#5}]%
 }
-\NewDocumentCommand\tud@item@val@false{!s !d'' !o !d== !d()}{%
-  \tud@item@val@bool{#1}'#2'[{#3}]{false/off/no}=#4=(#5)%
+\NewDocumentCommand\tud@item@val@false{!s !d== !d'' !d() !o}{%
+  \tud@item@val@bool{#1}{false/off/no}=#2='#3'(#4)[{#5}]%
 }
-\NewDocumentCommand\tud@item@val@bool{m r'' r[] m r== r()}{%
+\NewDocumentCommand\tud@item@val@bool{m m r== r'' r() r[]}{%
   \toks@{\tud@item@val}%
   \IfBooleanT{#1}{\addto@hook\toks@{*}}%
-  \addto@hook\toks@{'#2'[{#3}]}%
-  \protected@edef\tud@res@a{#4\IfValueT{#5}{/#5}}%
+  \protected@edef\tud@res@a{#2\IfValueT{#3}{/#3}}%
   \eaddto@hook\toks@{\expandafter=\tud@res@a=}%
-  \addto@hook\toks@{(#6)}%
+  \addto@hook\toks@{'#4'}%
+  \addto@hook\toks@{(#5)[{#6}]}%
   \the\toks@%
+}
+\newcommand*\Markup@Replace@Value[3]{%
+  \begingroup%
+    \Process@Get@Markup*\tud@res@a{#2}%
+    \def\tud@res@b##1=##2=##3\@nil{%
+      \def\tud@res@a{##1=#3=##3}%
+    }%
+    \expandafter\tud@res@b\tud@res@a\@nil%
+    \edef\tud@res@a{%
+      \endgroup%
+      \unexpanded{\def#1}{\expandonce\tud@res@a}%
+    }%
+  \tud@res@a%
 }
 %
 %
 %
 % TODO rename to DeclarationPackages
+% TODO Variante, um \InlineDeclaration nicht direkt verwenden zu müssen
+% siehe tudscr-packages: selnolig, morewrites, scrwfile
+\newcommand*\stditem{}
+\newcommand*\tud@before@item[1]{%
+  \ifdefvoid{\stditem}{%
+    \let\stditem\item%
+    \letcs\item{tud@item@#1}%
+    % TODO Änderungsnotiz direkt über Makro \item setzen
+    \tud@setdim\tud@dim@changedatvskip{-1\baselineskip}%
+  }{}%
+}
 \newlist{packages}{description}{2}
 \setlist[packages]{%
   topsep=\smallskipamount,labelwidth=\linewidth,labelsep=0pt,%
@@ -2945,15 +3029,15 @@
 \newsavebox\tabularm@box
 \tud@newdim\tabularm@wd
 \newcommand*\tabularm@num{1}
-\NewEnviron{tabularm}[1]{%
+\NewEnviron{tabularm}[2][c]{%
   \begin{lrbox}{\tabularm@box}%
     \let\allcolumnpar\@gobble%
-    \begin{tabular}{*{#1}l}\BODY\end{tabular}%
+    \begin{tabular}[{#1}]{*{#2}l}\BODY\end{tabular}%
   \end{lrbox}%
   \tud@setdim\tabularm@wd{\wd\tabularm@box}%
-  \def\tabularm@num{#1}%
+  \def\tabularm@num{#2}%
   \let\allcolumnpar\tabularm@allcolumnpar%
-  \begin{tabular}{*{#1}l}\BODY\end{tabular}%
+  \begin{tabular}[{#1}]{*{#2}l}\BODY\end{tabular}%
 }
 \newcommand*\tabularm@allcolumnpar[1]{%
   \multicolumn{\tabularm@num}{@{}p{\tabularm@wd}@{}}{#1}%
@@ -2974,7 +3058,8 @@
       \end{tabular}%
     }%
   \endgroup%
-  \par\addvspace{\medskipamount}%
+  % TODO Ja oder nein?
+%  \par\addvspace{\medskipamount}%
 }
 \newcommand*\Term@Table[2]{%
   \toprule%
@@ -3286,7 +3371,7 @@
   \RequirePackage{ellipsis}[2004/9/28]%
   \let\ellipsispunctuation\relax%
 }
-\newcommand*\tud@replace[3]{%
+\newcommand*\tud@replace@in[3]{%
   \begingroup%
     \protected@edef\tud@res@a{#1}%
     \let\tud@res@c\@empty%
@@ -3305,12 +3390,12 @@
     }%
   \tud@res@a%
 }
-\newcommand*\tud@@replace[3]{%
+\newcommand*\tud@replace@@in[3]{%
   \begingroup%
     \protected@edef\tud@res@a{#1}%
     \edef\tud@res@a{\detokenize\expandafter{\tud@res@a}}%
     \edef\tud@res@b{%
-      \unexpanded{\tud@replace\tud@res@a}{\detokenize{#2}}{\detokenize{#3}}%
+      \unexpanded{\tud@replace@in\tud@res@a}{\detokenize{#2}}{\detokenize{#3}}%
     }%
     \tud@res@b%
     \edef\tud@res@a{%
