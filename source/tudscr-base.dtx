@@ -1,4 +1,4 @@
-% \CheckSum{1541}
+% \CheckSum{1459}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -173,95 +173,13 @@
 %
 % \subsection{Notwendige Pakete für \TUDScript}
 %
+% \changes{v2.06f}{2020/01/14}{Anpassungen für \pkg{scrbase} \val{v3.28}}^^A
 % Das Paket \pkg{scrbase} wird zur Optionsdefinition benötigt, \pkg{scrlfile} 
 % für verschiedene Hooks vor sowie nach Klassen und Paketen.
 %    \begin{macrocode}
 \RequirePackage{scrbase}[%
 %!TUD@KOMAVersion
 ]
-%    \end{macrocode}
-% \changes{v2.06e}{2019/10/23}{Bugfix für \pkg{scrlfile} \val{v3.27}}^^A
-% Das Paket \pkg{scrlfile} in der \KOMAScript-Version \val{v3.27} enthält einen 
-% Bug, der erst mit \val{v3.27a} gefixt wird.
-% \ToDo{Bugfix für \pkg{scrlfile} raus, v3.27a notwendig}[v3.27a]
-%    \begin{macrocode}
-\@ifpackageloaded{scrlfile}{%
-  \@ifpackagelater{scrlfile}{2019/10/13}{}{%
-    \renewcommand*\scr@load@hook[2]{%
-      \edef\scr@hookname{#1}%
-      \def\scr@cmd@hook{before}%
-      \ifx\scr@hookname\scr@cmd@hook
-        \expandafter\def\csname #2-l@ading\endcsname{#2}%
-      \fi
-      \let\scr@cmd@hook\@undefined
-      \@ifundefined{#2-@#1}{}{%
-        \@nameuse{#2-@#1}%
-        \expandafter\let\csname #2-@#1\endcsname\relax
-      }%
-      \edef\scr@hookname{#1}%
-      \def\scr@cmp@hook{after}%
-        \ifx\scr@hookname\scr@cmp@hook
-          \expandafter\let\csname #2-l@ading\endcsname\@undefined
-        \fi
-      \let\scr@hookname\@undefined
-    }%
-    \renewcommand*\@@AfterClass[2]{%
-      \@ifundefined{#2.\@clsextension-l@ading}{%
-        \@sAfterClass
-      }{%
-        \@AfterClass
-      }%
-      {#2}%
-    }%
-    \renewcommand*\@@@AfterClass[2]{%
-      \@ifundefined{#2.\@clsextension-l@ading}{%
-        \@ifclassloaded{#2}{%
-          \@sAfterClass
-        }{%
-          \AfterAtEndOfClass
-        }%
-      }{%
-        \AfterAtEndOfClass
-      }%
-      {#2}%
-    }%
-    \renewcommand*\@@AfterPackage[2]{%
-      \@ifundefined{#2.\@pkgextension-l@ading}{%
-        \@sAfterPackage
-      }{%
-        \@AfterPackage
-      }%
-      {#2}%
-    }%
-    \renewcommand*\@@@AfterPackage[2]{%
-      \@ifundefined{#2.\@pkgextension-l@ading}{%
-        \@ifpackageloaded{#2}{%
-          \@sAfterPackage
-        }{%
-          \@AfterAtEndOfPackage
-        }%
-      }{%
-        \@AfterAtEndOfPackage
-      }%
-      {#2}%
-    }%
-    \renewcommand*\AfterAtEndOfPackage[1]{%
-      \@ifpackageloaded{#1}{%
-        \@ifundefined{#1.\@pkgextension-l@ading}{%
-          \@gobbletwo
-        }{%
-          \@AfterAtEndOfPackage
-        }%
-      }{%
-        \@AfterAtEndOfPackage
-      }%
-      {#1}%
-    }%
-    \newcommand*\@AfterAtEndOfPackage[1]{%
-      \scr@set@load@hook{lateafter}{#1.\@pkgextension}%
-    }%
-  }%
-}{}
 %    \end{macrocode}
 % Die folgenden Pakete werden für die Manipulation bereits definierter
 % Makros sowie zur erweiterten Auswertung boolescher Ausdrücke benötigt.
@@ -529,7 +447,7 @@
 %^^A  \endgroup%
 %^^A}
 %    \begin{macrocode}
-\newcommand*\ifxblank{\ifstr{}}
+\newcommand*\ifxblank{\Ifstr{}}
 %    \end{macrocode}
 % \end{macro}^^A \ifxblank
 %
@@ -544,15 +462,15 @@
 % kein logischer Wert, kommt das letzte Argument zum Tragen. Die Syntax lautet:
 %
 % \cs{ifstrbool}\marg{Argument}\marg{Wahr}\marg{Falsch}\marg{Andernfalls}
-% \ToDo{mit \cs{TUD@set@ifkey} umsetzen}[v2.07]
+% \ToDo{> \cs{tud@if@bool@else} und mit \cs{TUD@set@ifkey} umsetzen}[v2.07]
 %    \begin{macrocode}
 \newcommand*\ifstrbool[4]{%
-  \ifstr{#1}{true}{#2}{%
-    \ifstr{#1}{on}{#2}{%
-      \ifstr{#1}{yes}{#2}{%
-        \ifstr{#1}{false}{#3}{%
-          \ifstr{#1}{no}{#3}{%
-            \ifstr{#1}{off}{#3}{%
+  \Ifstr{#1}{true}{#2}{%
+    \Ifstr{#1}{on}{#2}{%
+      \Ifstr{#1}{yes}{#2}{%
+        \Ifstr{#1}{false}{#3}{%
+          \Ifstr{#1}{no}{#3}{%
+            \Ifstr{#1}{off}{#3}{%
               #4%
             }%
           }%
@@ -1159,10 +1077,10 @@
 % werden, allerdings halte ich dies für nicht sehr sinnvoll.
 %    \begin{macrocode}
 %<*donotuse>
-      \ifiscount{\tud@res@a}{%
+      \Ifiscount{\tud@res@a}{%
         \protected@edef\tud@res@a{\numexpr\tud@res@a\relax}%
       }{}%
-      \ifisnumexpr{\tud@res@a}{%
+      \Ifisnumexpr{\tud@res@a}{%
         \protected@edef\tud@res@a{\dimexpr\tud@res@a #1\relax}%
       }{}%
 %</donotuse>
@@ -1254,7 +1172,7 @@
     \if@tud@res@swa%
       \def\tud@res@b##1##2##3{%
         \IfArgIsEmpty{##1}{\def\tud@res@b{0#2}}{\def\tud@res@b{##1}}%
-        \ifdimen{\tud@res@b}{%
+        \Ifdimen{\tud@res@b}{%
           \edef\tud@res@a{%
             \tud@res@b%
             \IfArgIsEmpty{##2}{}{\space\@plus\space##2}%
@@ -1288,17 +1206,17 @@
       \let\tud@res@b\@empty%
     \fi%
 %    \end{macrocode}
-% Danach wird mit \cs{ifdimen} geprüft, ob die Angabe tatsächlich eine Länge
-% ist. Hier kommt zum Tragen, das \cs{ifdimen} auch wahr ist, wenn lediglich 
-% eine gültige Einheit ohne Maßzahl (\cs{ifdimen}\verb={pt}=) angegeben wird.
+% Danach wird mit \cs{Ifdimen} geprüft, ob die Angabe tatsächlich eine Länge
+% ist. Hier kommt zum Tragen, das \cs{Ifdimen} auch wahr ist, wenn lediglich 
+% eine gültige Einheit ohne Maßzahl (\cs{Ifdimen}\verb={pt}=) angegeben wird.
 % Für Werte ohne Dimensionsangabe wird gegebenenfalls einfach das optionale
 % Argument als intendierte angenommen. Sollte es sich bei dem Argument nicht um
 % einen String sondern um eine \TeX"~Primitive oder ein geschütztes Makro
 % handeln, wird kein \val{true}-Zweig durchlaufen.
 %    \begin{macrocode}
     \@tud@res@swatrue%
-    \ifdimen{\tud@res@a}{}{%
-      \ifdimen{\tud@res@a#3}{%
+    \Ifdimen{\tud@res@a}{}{%
+      \Ifdimen{\tud@res@a#3}{%
         \appto\tud@res@a{#3}%
       }{%
         \@tud@res@swafalse%
@@ -1308,7 +1226,7 @@
 % Wertangaben ohne Betrag werden ignoriert.
 %    \begin{macrocode}
     \if@tud@res@swa%
-      \ifisdimension{\tud@res@a}{}{%
+      \Ifisdimension{\tud@res@a}{}{%
         \let\tud@res@a\@empty%
         \let\tud@res@b\@empty%
       }%
@@ -1322,12 +1240,12 @@
 %    \begin{macrocode}
       \def\tud@res@c##1fil##2fil##3\@nil{%
         \IfArgIsEmpty{##1}{\def\tud@res@a{1}}{\def\tud@res@a{##1}}%
-        \ifdimen{\tud@res@a pt}{\@tud@res@swatrue}{\@tud@res@swafalse}%
+        \Ifdimen{\tud@res@a pt}{\@tud@res@swatrue}{\@tud@res@swafalse}%
         \if@tud@res@swa%
           \appto\tud@res@a{fil##2}%
-          \ifstr{##2}{}{}{%
-            \ifstr{##2}{l}{}{%
-              \ifstr{##2}{ll}{}{\@tud@res@swafalse}%
+          \Ifstr{##2}{}{}{%
+            \Ifstr{##2}{l}{}{%
+              \Ifstr{##2}{ll}{}{\@tud@res@swafalse}%
             }%
           }%
         \fi%
@@ -1396,12 +1314,12 @@
 % nicht akzeptiert werden.
 %    \begin{macrocode}
       \@tud@res@swafalse%
-      \ifisskip{\tud@res@a}{%
+      \Ifisskip{\tud@res@a}{%
         \protected@edef\tud@res@a{\dimexpr\tud@res@a\relax}%
         \def\tud@res@b{a \string\skip\space register}%
         \@tud@res@swatrue%
       }{%
-        \ifisglueexpr{\tud@res@a}{%
+        \Ifisglueexpr{\tud@res@a}{%
           \protected@edef\tud@res@a{\dimexpr\tud@res@a\relax}%
           \def\tud@res@b{a glue expression}%
           \@tud@res@swatrue%
@@ -1412,8 +1330,8 @@
 % die Zuweisung von Kleister als String an ein \cs{dimen}-Register nicht ohne 
 % weiteres möglich. Die Verwendung \cs{glueexpr} dient quasi als Umschlag.
 %    \begin{macrocode}
-          \ifisglue{\tud@res@a}{%
-            \ifisdimension{\tud@res@a}{}{%
+          \Ifisglue{\tud@res@a}{%
+            \Ifisdimension{\tud@res@a}{}{%
               \setlength\@tempdima{\dimexpr\glueexpr\tud@res@a\relax\relax}%
               \tud@length@to@string\tud@res@a{\@tempdima}%
               \def\tud@res@b{something containing glue}%
@@ -1487,7 +1405,7 @@
       but you didn't define it with `\string\tud@locked@newnum'.%
     }%
   }{%
-    \ifnumber{#2}{%
+    \Ifnumber{#2}{%
       \csdef{#1}{#2}%
     }{%
       \PackageError{tudscrbase}{%
@@ -1704,7 +1622,7 @@
 \newcommand*\TUD@parameter@handler@macro[3][\TUD@parameter@@family]{%
   \TUD@parameter@checkfamily{#1}{TUD@parameter@handler@macro}%
   \expandafter\kv@set@family@handler\expandafter{#1}{%
-    \ifstr{\kv@key}{\TUD@parameter@nokey}{#3}{#2}%
+    \Ifstr{\kv@key}{\TUD@parameter@nokey}{#3}{#2}%
   }%
 }
 %    \end{macrocode}
@@ -1742,8 +1660,8 @@
     \def\@tempa{\def\tud@reserved{#2=\kv@value}}%
   }%
   \appto\@tempa{%
-    \ifstr{\kv@value}{twocolumn}{\def\kv@value{2}}{}%
-    \ifnumber{\kv@value}{\def\tud@reserved{columns=\kv@value}}{}%
+    \Ifstr{\kv@value}{twocolumn}{\def\kv@value{2}}{}%
+    \Ifnumber{\kv@value}{\def\tud@reserved{columns=\kv@value}}{}%
     \iflanguageloaded{\kv@value}{\def\tud@reserved{language=\kv@value}}{}%
     \ifx\tud@reserved\relax%
       \PackageError{tudscrbase}{%

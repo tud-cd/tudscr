@@ -1,3 +1,4 @@
+
 %%
 %% This is file `tudscrmanual.cls',
 %% generated with the docstrip utility.
@@ -14,7 +15,7 @@
 %% tudscr-texindy.dtx  (with options: `class,manual')
 %% 
 %% TUD-Script -- Corporate Design of Technische Universitaet Dresden
-%%               2019/10/24 v2.06f TUD-Script
+%%               2020/01/15 v2.07 TUD-Script
 %% 
 %% Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2019
 %%               https://github.com/tud-cd/tudscr
@@ -34,7 +35,7 @@
 %% 
 %% The current maintainer and author of this work is Falk Hanisch.
 %% 
-%%%% From File: tudscr-version.dtx 2019/11/08 00:00:00 5a8858a
+%%%% From File: tudscr-version.dtx 2020/01/14 01:35:36 9fb7125
 \NeedsTeXFormat{LaTeX2e}[2019/10/01]
 \begingroup
   \catcode`\@11\relax%
@@ -56,7 +57,7 @@
       \fi%
     }%
   \fi%
-  \TUD@@Version{2019/10/24 v2.06f TUD-Script}{2018/03/30 v3.25 KOMA-Script}%
+  \TUD@@Version{2020/01/15 v2.07 TUD-Script}{2019/12/23 v3.28 KOMA-Script}%
   \ifx\TUDScriptVersion\@undefined%
     \xdef\TUDScriptVersion{\TUD@Version}%
     \def\@tempa#1 v#2 #3\relax#4\relax#5{\gdef#5{#2}}%
@@ -79,7 +80,7 @@
 \newcommand*\TUD@ProvidesWrapperClass[3]
 {%
   \ProvidesClass{#1}[%
-  2019/10/24 v2.06f TUD-Script
+  2020/01/15 v2.07 TUD-Script
     #3 (#2)%
   ]%
   \newcommand*\TUD@Class@Parent{#2}%
@@ -99,13 +100,13 @@
   \typeout{+------------------------------------------------------------------}%
 }
 \TUD@ProvidesWrapperClass{tudscrmanual}{tudscrreprt}{manual class}
-%%%% From File: tudscr-base.dtx 2019/11/29 01:36:52 c9a9b7b
+%%%% From File: tudscr-base.dtx 2020/01/14 17:13:34 e5e3ff2
 \RequirePackage{tudscrbase}[%
-  2019/10/24 v2.06f TUD-Script
+  2020/01/15 v2.07 TUD-Script
 ]
 \renewcommand*\TUD@KOMAoptions[1]{\PassOptionsToClass{#1}{\TUD@Class@Parent}}
 \AfterClass{\TUD@Class@Parent}{\let\TUD@KOMAoptions\KOMAoptions}
-%%%% From File: tudscr-manual.dtx 2019/11/29 01:36:52 c9a9b7b
+%%%% From File: tudscr-manual.dtx 2020/01/14 17:13:34 e5e3ff2
 \TUD@key{final}[true]{%
   \TUD@set@ifkey{final}{@tempswa}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
@@ -159,7 +160,7 @@
     \let\tud@todo@type@neg\relax%
   \else%
     \def\@tempa not##1##2##3##4\@nil{%
-      \ifstr{##1##2##3}{not}{%
+      \Ifstr{##1##2##3}{not}{%
         \IfArgIsEmpty{##4}{}{%
           \listeadd\tud@todo@type@neg{##4}%
           \@tud@todotrue%
@@ -178,18 +179,17 @@
   \fi%
 }
 \TUDExecuteOptions{ToDo=true}
-%%%% From File: tudscr-misc.dtx 2019/11/29 01:36:52 c9a9b7b
+%%%% From File: tudscr-misc.dtx 2020/01/14 17:13:34 e5e3ff2
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{\TUD@Class@Parent}}
 \TUDProcessOptions\relax
 \PassOptionsToClass{ttfont=roboto}{\TUD@Class@Parent}
-\LoadClass{\TUD@Class@Parent}[
-  2019/10/24 v2.06f TUD-Script
+\LoadClass{\TUD@Class@Parent}[%
+  2020/01/15 v2.07 TUD-Script
 ]
-%%%% From File: tudscr-manual.dtx 2019/11/29 01:36:52 c9a9b7b
-%\PassOptionsToPackage{log-declarations=true}{xparse}
+%%%% From File: tudscr-manual.dtx 2020/01/14 17:13:34 e5e3ff2
 \RequirePackage{xparse}[2019/10/11]
 \RequirePackage{scrhack}[%
-  2018/03/30 v3.25 KOMA-Script
+  2019/12/23 v3.28 KOMA-Script
 ]
 \RequirePackage{babel}[2014/03/24]
 \PassOptionsToPackage{quiet}{marginnote}
@@ -255,12 +255,12 @@
   \let\tud@list@sorted\tud@res@a%
 }
 \newcommand*\tud@trace@lbl@types{}
-\listadd\tud@trace@lbl@types{created}%
-\listadd\tud@trace@lbl@types{matched}%
-\listadd\tud@trace@lbl@types{unused}%
-\listadd\tud@trace@lbl@types{ignored}%
-\listadd\tud@trace@lbl@types{missing}%
-\listadd\tud@trace@lbl@types{url}%
+\listadd\tud@trace@lbl@types{created}
+\listadd\tud@trace@lbl@types{matched}
+\listadd\tud@trace@lbl@types{unused}
+\listadd\tud@trace@lbl@types{ignored}
+\listadd\tud@trace@lbl@types{missing}
+\listadd\tud@trace@lbl@types{url}
 \def\tud@res@a#1{%
   \expandafter\newcommand\csname tud@trace@lbl@#1@list\endcsname{}%
   \expandafter\let\csname tud@trace@lbl@#1@list\endcsname\relax%
@@ -322,9 +322,9 @@
 \newcommand*\tud@trace@lbl@wlog{\relax}
 \AfterEndDocument{\tud@trace@lbl@wlog}
 \newcommand*\tud@trace@markup@types{}
-\listadd\tud@trace@markup@types{declare}%
-\listadd\tud@trace@markup@types{output}%
-\listadd\tud@trace@markup@types{temp}%
+\listadd\tud@trace@markup@types{declare}
+\listadd\tud@trace@markup@types{output}
+\listadd\tud@trace@markup@types{temp}
 \def\tud@res@a#1{%
   \expandafter\newcommand\csname tud@trace@markup@#1@list\endcsname{}%
   \expandafter\let\csname tud@trace@markup@#1@list\endcsname\relax%
@@ -477,7 +477,7 @@
   \renewcaptionname{ngerman}{\subsectionautorefname}{Abschnitt}%
   \renewcaptionname{ngerman}{\subsubsectionautorefname}{Unterabschnitt}%
   \newcommand*\autorefname[1][current]{%
-    \ifstr{#1}{current}{%
+    \Ifstr{#1}{current}{%
       \expandafter\HyPsd@@autorefname\@currentHref\@nil%
     }{%
       \auto@refname\HyPsd@@autorefname{#1}%
@@ -2245,7 +2245,7 @@
       \fi%
       % TODO |declare| und |default| durch InlineDeclartion ersetzen
       % TODO nur noch |!| und |?| zulassen
-      \ifstr{\tud@res@a}{declare}{%
+      \Ifstr{\tud@res@a}{declare}{%
         \appto\tud@lbl@tmp{-declare}%
       }{}%
     }%
@@ -2984,9 +2984,6 @@
     }%
   \tud@res@a%
 }
-%
-%
-%
 % TODO rename to DeclarationPackages
 % TODO Variante, um \InlineDeclaration nicht direkt verwenden zu müssen
 % siehe tudscr-packages: selnolig, morewrites, scrwfile
@@ -3070,9 +3067,9 @@
 }
 \newcommand*\Term@@Table[2]{%
   \Term{#2}'none' & %
-  \ifstr{\csuse{#2}}{}{\PName{leer}}{\csuse{#2}} & %
+  \Ifstr{\csuse{#2}}{}{\PName{leer}}{\csuse{#2}} & %
   \selectlanguage{english}\vspace*{#1}%
-  \ifstr{\csuse{#2}}{}{\PName{empty}}{\csuse{#2}}\tabularnewline%
+  \Ifstr{\csuse{#2}}{}{\PName{empty}}{\csuse{#2}}\tabularnewline%
 }
 \newenvironment{Example}{\csuse{Example*}}{%
   \csuse{endExample*}%
@@ -3109,10 +3106,14 @@
     activated shell escape option%
   }%
 }
-\newcommand*\tud@latex@ext{}
-\ifpdftex%
-  {\def\tud@latex@ext{pdflatex\space}}%
-  {\def\tud@latex@ext{lualatex\space}}%
+\newcommand*\tud@latex@ext{pdflatex\space}
+\iftutex
+  \ifxetex
+    \renewcommand*\tud@latex@ext{xelatex\space}
+  \else
+    \renewcommand*\tud@latex@ext{lualatex\space}
+  \fi
+\fi
 \newrobustcmd*\hypertut[2]{%
   \hyperref{tutorials/#1.pdf}{#1}{tutorials:#1}{\File*{#1.pdf}#2}%
 }
@@ -3269,7 +3270,7 @@
                 \tud@v@get\tud@res@a{#4}%
                 \def\tud@res@c##1.##2##3##4\@nil{##1##2##3}%
                 \edef\tud@res@b{\expandafter\tud@res@c\tud@res@a.000\@nil}%
-                \ifnumber{\tud@res@b}{%
+                \Ifnumber{\tud@res@b}{%
                   \edef\tud@res@c{%
                     \expandafter\tud@res@c\TUDScriptVersionNumber.000\@nil%
                   }%
@@ -3418,7 +3419,7 @@
     \IfValueT{#4}{%
       \edef\tud@res@a{\trim@spaces{#4}}%
       \tud@remove@trailing@slashes{\tud@res@a}%
-      \ifnumber{\tud@res@a}{%
+      \Ifnumber{\tud@res@a}{%
         \eappto{\tud@res@b}{/issues/\tud@res@a}%
       }{%
         \eappto{\tud@res@b}{/\tud@res@a}%
@@ -3482,7 +3483,7 @@
 \newcommand*\tud@remove@trailing@slashes[1]{%
   \begingroup%
     \edef\tud@res@a{\trim@spaces{#1}}%
-    \ifstrstart{\tud@res@a}{/}{%
+    \Ifstrstart{\tud@res@a}{/}{%
       \edef\tud@res@a{\expandafter\@gobble\tud@res@a}%
     }{}%
     \let\tud@res@c\@empty%
@@ -3490,7 +3491,7 @@
       \IfArgIsEmpty{##2}{%
         \appto\tud@res@c{##1}%
       }{%
-        \ifstr{##2}{/}{%
+        \Ifstr{##2}{/}{%
           \appto\tud@res@c{##1}%
         }{%
           \appto\tud@res@c{##1/}%
@@ -3653,7 +3654,7 @@
 % use markup-indexentry :open and :close
 \newcommand*\tud@xdy@create[2][theindex]{%
   \IfFileExists{\@currname-#2.xdy}{}{%
-  \ifstr{#1}{theglossary}{\@tud@xdy@glotrue}{\@tud@xdy@glofalse}%
+  \Ifstr{#1}{theglossary}{\@tud@xdy@glotrue}{\@tud@xdy@glofalse}%
   \openout\tud@write@xdy=\@currname-#2.xdy\relax%
   \write\tud@write@xdy{(require "texindy.xdy")}%
   \write\tud@write@xdy{%
