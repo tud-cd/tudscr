@@ -4,7 +4,7 @@
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
 % ----------------------------------------------------------------------------
 %
-%  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2019
+%  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2020
 %
 % ----------------------------------------------------------------------------
 %
@@ -65,12 +65,12 @@
 %<*dtx>
 \RequirePackage{tudscr-gitinfo}
 \documentclass[english,ngerman,xindy]{tudscrdoc}
-\ifpdftex{
+\iftutex
+  \usepackage{fontspec}
+\else
   \usepackage[T1]{fontenc}
   \usepackage[ngerman=ngerman-x-latest]{hyphsubst}
-}{
-  \usepackage{fontspec}
-}
+\fi
 \usepackage{babel}
 \usepackage{tudscrfonts}
 \usepackage{bookmark}
@@ -5433,10 +5433,14 @@
 % \changes{v2.06}{2019/06/21}{neu}^^A
 % Für das verschachtelte Aufrufen von \app{pdflatex} bzw. \app{lualatex}.
 %    \begin{macrocode}
-\newcommand*\tud@latex@ext{}
-\ifpdftex%
-  {\def\tud@latex@ext{pdflatex\space}}%
-  {\def\tud@latex@ext{lualatex\space}}%
+\newcommand*\tud@latex@ext{pdflatex\space}
+\iftutex
+  \ifxetex
+    \renewcommand*\tud@latex@ext{xelatex\space}
+  \else
+    \renewcommand*\tud@latex@ext{lualatex\space}
+  \fi
+\fi
 %    \end{macrocode}
 % \end{macro}^^A \tud@latex@ext
 % \begin{macro}{\Tutorial}
@@ -6070,12 +6074,12 @@
 \if@tempswa
 \begin{filecontents*}[force,silent,nosearch]{\tud@tut@temp-standalone.tex}
 \documentclass[english,ngerman]{tudscrreprt}
-\ifpdftex{
+\iftutex
+  \usepackage{fontspec}
+\else
   \usepackage[T1]{fontenc}
   \usepackage[ngerman=ngerman-x-latest]{hyphsubst}
-}{
-  \usepackage{fontspec}
-}
+\fi
 \usepackage{babel}
 \usepackage{tudscrsupervisor}
 \usepackage{isodate}
