@@ -2,9 +2,9 @@
  TUD-Script &ndash; Corporate Design of Technische Universität Dresden
 ----------------------------------------------------------------------------
 
- Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2019
+ Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2020
 
- tudscr 2019/10/23 v2.06e
+ tudscr 2020/01/14 v2.06f
 
 ----------------------------------------------------------------------------
 
@@ -52,6 +52,9 @@ Das Bundle beinhaltet:
 
 Versionen
 ---------
+
+**v2.06f** (2020/01/14)
++ Anpassungen für Paket `scrbase v3.28`
 
 **v2.06e** (2019/10/23)
 + Bugfix für Paket `scrlfile v3.27`
@@ -247,6 +250,9 @@ The bundle offers:
 
 Versions
 --------
+
+**v2.06f** (2020/01/14)
++ adaptions for package `scrbase v3.28`
 
 **v2.06e** (2019/10/23)
 + bug fix for package `scrlfile v3.27`

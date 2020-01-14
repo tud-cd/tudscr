@@ -1,10 +1,10 @@
-% \CheckSum{903}
+% \CheckSum{843}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
 % ----------------------------------------------------------------------------
 %
-%  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2019
+%  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2020
 %
 % ----------------------------------------------------------------------------
 %
@@ -52,7 +52,7 @@
 % \fi
 %
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
-\ProvidesFile{tudscr-base.dtx}[2019/10/23 v2.06e TUD-Script\space%
+\ProvidesFile{tudscr-base.dtx}[2020/01/14 v2.06f TUD-Script\space%
 %
 % \iffalse
 %</dtx>
@@ -69,12 +69,12 @@
 %</dtx|package&base>
 %<*dtx>
 \documentclass[english,ngerman,xindy]{tudscrdoc}
-\ifpdftex{
+\iftutex
+  \usepackage{fontspec}
+\else
   \usepackage[T1]{fontenc}
   \usepackage[ngerman=ngerman-x-latest]{hyphsubst}
-}{
-  \usepackage{fontspec}
-}
+\fi
 \usepackage{babel}
 \usepackage{tudscrfonts}
 \KOMAoptions{parskip=half-}
@@ -140,91 +140,17 @@
 %
 % Das Paket \pkg{scrbase} wird zur Optionsdefinition benötigt, \pkg{scrlfile} 
 % für verschiedene Hooks vor sowie nach Klassen und Paketen.
+% \ToDo{Provisorium entfernen}[v2.07]
 %    \begin{macrocode}
-\RequirePackage{scrbase}[2018/03/30]
-%    \end{macrocode}
-% \changes{v2.06e}{2019/10/23}{Bugfix für \pkg{scrlfile} \val{v3.27}}^^A
-% Das Paket \pkg{scrlfile} in der \KOMAScript-Version \val{v3.27} enthält einen 
-% Bug, der erst mit \val{v3.27a} gefixt wird.
-% \ToDo{Bugfix für \pkg{scrlfile} raus, v3.27a notwendig}[v3.27a]
-%    \begin{macrocode}
-\@ifpackageloaded{scrlfile}{%
-  \@ifpackagelater{scrlfile}{2019/10/13}{}{%
-    \renewcommand*{\scr@load@hook}[2]{%
-      \edef\scr@hookname{#1}%
-      \def\scr@cmd@hook{before}%
-      \ifx\scr@hookname\scr@cmd@hook
-        \expandafter\def\csname #2-l@ading\endcsname{#2}%
-      \fi
-      \let\scr@cmd@hook\@undefined
-      \@ifundefined{#2-@#1}{}{%
-        \@nameuse{#2-@#1}%
-        \expandafter\let\csname #2-@#1\endcsname\relax
-      }%
-      \edef\scr@hookname{#1}%
-      \def\scr@cmp@hook{after}%
-        \ifx\scr@hookname\scr@cmp@hook
-          \expandafter\let\csname #2-l@ading\endcsname\@undefined
-        \fi
-      \let\scr@hookname\@undefined
-    }%
-    \renewcommand*{\@@AfterClass}[2]{%
-      \@ifundefined{#2.\@clsextension-l@ading}{%
-        \@sAfterClass
-      }{%
-        \@AfterClass
-      }%
-      {#2}%
-    }%
-    \renewcommand*{\@@@AfterClass}[2]{%
-      \@ifundefined{#2.\@clsextension-l@ading}{%
-        \@ifclassloaded{#2}{%
-          \@sAfterClass
-        }{%
-          \AfterAtEndOfClass
-        }%
-      }{%
-        \AfterAtEndOfClass
-      }%
-      {#2}%
-    }%
-    \renewcommand*{\@@AfterPackage}[2]{%
-      \@ifundefined{#2.\@pkgextension-l@ading}{%
-        \@sAfterPackage
-      }{%
-        \@AfterPackage
-      }%
-      {#2}%
-    }%
-    \renewcommand*{\@@@AfterPackage}[2]{%
-      \@ifundefined{#2.\@pkgextension-l@ading}{%
-        \@ifpackageloaded{#2}{%
-          \@sAfterPackage
-        }{%
-          \@AfterAtEndOfPackage
-        }%
-      }{%
-        \@AfterAtEndOfPackage
-      }%
-      {#2}%
-    }%
-    \renewcommand*{\AfterAtEndOfPackage}[1]{%
-      \@ifpackageloaded{#1}{%
-        \@ifundefined{#1.\@pkgextension-l@ading}{%
-          \@gobbletwo
-        }{%
-          \@AfterAtEndOfPackage
-        }%
-      }{%
-        \@AfterAtEndOfPackage
-      }%
-      {#1}%
-    }%
-    \newcommand*{\@AfterAtEndOfPackage}[1]{%
-      \scr@set@load@hook{lateafter}{#1.\@pkgextension}%
-    }%
-  }%
-}{}
+\providecommand*{\ifstr}{\Ifstr}
+\providecommand*{\ifstrstart}{\Ifstrstart}
+\providecommand*{\ifisskip}{\Ifisskip}
+\providecommand*{\ifdimen}{\Ifdimen}
+\providecommand*{\ifisdimen}{\Ifisdimen}
+\providecommand*{\ifisdimension}{\Ifisdimension}
+\providecommand*{\ifnumber}{\Ifnumber}
+\RequirePackage{scrbase}[2019/12/23]
+\RequirePackage{iftex}[2019/11/07]
 %    \end{macrocode}
 % Die folgenden Pakete werden für die Manipulation bereits definierter
 % Makros sowie zur erweiterten Auswertung boolescher Ausdrücke benötigt.
