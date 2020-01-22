@@ -1,4 +1,4 @@
-% \CheckSum{3167}
+% \CheckSum{3237}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -1252,6 +1252,7 @@
 % Danach erfolgt die Definition der Schriften des \CDs. 
 %    \begin{macrocode}
     \tud@cdfont@set%
+    \tud@cdfont@symbols@set%
     \tud@ttfont@set%
     \if@tud@x@mweights@enabled%
       \edef\bfseries@rm{\tud@cdfont@bf}%
@@ -1292,6 +1293,7 @@
       \tud@cs@restore{sffamily}%
       \tud@cs@restore{ttfamily}%
     \fi%
+    \tud@cdfont@symbols@reset%
   \fi%
   \if@tud@x@mweights@enabled%
     \edef\rmdef@ult{\rmdefault}%
@@ -1423,6 +1425,115 @@
 % \end{macro}^^A \tud@cdfont@md
 % \end{macro}^^A \tud@cdfont@@set
 % \end{macro}^^A \tud@cdfont@set
+% \begin{macro}{\tud@cdfont@declare@symb}
+% \changes{v2.07}{2020/01/22}{neu}^^A
+% \begin{macro}{\tud@cdfont@symb@list}
+% \changes{v2.07}{2020/01/22}{neu}^^A
+% \begin{macro}{\tud@DeclareTextSymbol}
+% \changes{v2.07}{2020/01/22}{neu}^^A
+% Mit \cs{tud@cdfont@declare@symb} können Glyhen respektive einzelne Zeichen 
+% definiert werden, welche über das Makro \cs{tud@cdfont@symbols@set} nur zum 
+% Einsatz kommen, wenn \opt{cdfont=true} aktiviert wurde. Damit können gezielt 
+% Symbole in verschiedenen Kodierungen aus unterscihedlichen Schriftfamilien 
+% definiert werden.
+%    \begin{macrocode}
+\newcommand*\tud@cdfont@symb@list{}
+\newcommand*\tud@cdfont@declare@symb[4]{%
+  \listeadd\tud@cdfont@symb@list{#1}%
+  \tud@DeclareTextSymbol{#1}{#2}{#3}{#4}%
+}
+%    \end{macrocode}
+% Die an \cs{tud@cdfont@declare@symb} übergebene Bezeichner für Auswahlbefehle
+% erhalten \cs{tud@cdfont@symbol@...} als Präfix.
+%    \begin{macrocode}
+\newcommand*\tud@DeclareTextSymbol[4]{%
+  \begingroup%
+    \edef\tud@res@a{%
+      \endgroup%
+      \noexpand\DeclareTextCommand%
+        {\csname tud@cdfont@symbol@#1\endcsname}{#2}%
+        {\unexpanded{{\fontfamily{#3}\selectfont\char#4}}}%
+      \noexpand\DeclareTextCommandDefault%
+        {\csname tud@cdfont@symbol@#1\endcsname}%
+        {\noexpand\UseTextSymbol{#2}{\csname tud@cdfont@symbol@#1\endcsname}}%
+    }%
+  \tud@res@a%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@DeclareTextSymbol
+% \end{macro}^^A \tud@cdfont@symb@list
+% \end{macro}^^A \tud@cdfont@declare@symb
+% \begin{macro}{\tud@cdfont@symbols@set}
+% \changes{v2.07}{2020/01/22}{neu}^^A
+% \begin{macro}{\tud@cdfont@symbols@toks}
+% \changes{v2.07}{2020/01/22}{neu}^^A
+% \begin{macro}{\tud@cdfont@symbols@set@cmd}
+% \changes{v2.07}{2020/01/22}{neu}^^A
+% \begin{macro}{\tud@cdfont@symbols@reset}
+% \changes{v2.07}{2020/01/22}{neu}^^A
+% Mit diesen Befehlen wird im zwischen Symbolen für die Schriften des \CDs, 
+% welche mit \cs{tud@cdfont@declare@symb} deklariert wurden, und den normalen 
+% gewechselt werden. 
+%    \begin{macrocode}
+\tud@newtoks\tud@cdfont@symbols@toks
+\newcommand*\tud@cdfont@symbols@set{%
+%    \end{macrocode}
+% Die Sicherung der alten Definitionen erfolgt nur einmalig. Die Liste der 
+% Symbole wird durchlaufen und die erfolgten Definitionen werden umgesetzt.
+%    \begin{macrocode}
+  \expandafter\IfArgIsEmpty\expandafter{\the\tud@cdfont@symbols@toks}{%
+    \forlistloop\tud@cdfont@symbols@set@cmd\tud@cdfont@symb@list%
+%    \end{macrocode}
+% Wird das Tokenregister abgerufen, soll es anschließend auch wieder geleert 
+% werden.
+%    \begin{macrocode}
+    \addto@hook\tud@cdfont@symbols@toks{\tud@cdfont@symbols@toks{}}%
+  }{}%
+}
+%    \end{macrocode}
+% Das Vorgehen zur Wiederherstellung im Token \cs{tud@cdfont@symbols@toks}
+% definiert.
+%    \begin{macrocode}
+\newcommand*\tud@cdfont@symbols@set@cmd[1]{%
+  \tud@cs@store{#1}%
+  \addto@hook\tud@cdfont@symbols@toks{\tud@cs@restore{#1}}%
+  \tud@cs@letltx{#1}{tud@cdfont@symbol@#1}%
+}
+%    \end{macrocode}
+% Für das Zurücksetzen muss lediglich das Tokenregister aufgerufen werden.
+%    \begin{macrocode}
+\newcommand*\tud@cdfont@symbols@reset{\the\tud@cdfont@symbols@toks}
+%    \end{macrocode}
+% \end{macro}^^A \tud@cdfont@symbols@reset
+% \end{macro}^^A \tud@cdfont@symbols@set@cmd
+% \end{macro}^^A \tud@cdfont@symbols@toks
+% \end{macro}^^A \tud@cdfont@symbols@set
+% \begin{macro}{\tud@cdfont@declare@textsymb}
+% \changes{v2.07}{2020/01/22}{neu}^^A
+% \begin{macro}{\tud@cdmath@symbol@textleftarrow}
+% \begin{macro}{\tud@cdmath@symbol@textrightarrow}
+% \begin{macro}{\tud@cdmath@symbol@textuparrow}
+% \begin{macro}{\tud@cdmath@symbol@textdownarrow}
+% \begin{macro}{\tud@cdmath@symbol@textlangle}
+% \begin{macro}{\tud@cdmath@symbol@textrangle}
+% Die Definition der Textsymbole für die \val{TS1}-Kodierung.
+%    \begin{macrocode}
+\newcommand*\tud@cdfont@declare@textsymb{%
+  \tud@cdfont@declare@symb{textleftarrow}{TS1}{iwona}{24}%
+  \tud@cdfont@declare@symb{textrightarrow}{TS1}{iwona}{25}%
+  \tud@cdfont@declare@symb{textuparrow}{TS1}{iwona}{94}%
+  \tud@cdfont@declare@symb{textdownarrow}{TS1}{iwona}{95}%
+  \tud@cdfont@declare@symb{textlangle}{TS1}{iwona}{60}%
+  \tud@cdfont@declare@symb{textrangle}{TS1}{iwona}{62}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@cdmath@symbol@textrangle
+% \end{macro}^^A \tud@cdmath@symbol@textlangle
+% \end{macro}^^A \tud@cdmath@symbol@textdownarrow
+% \end{macro}^^A \tud@cdmath@symbol@textuparrow
+% \end{macro}^^A \tud@cdmath@symbol@textrightarrow
+% \end{macro}^^A \tud@cdmath@symbol@textleftarrow
+% \end{macro}^^A \tud@cdfont@declare@textsymb
 % \begin{macro}{\tud@relspacing@set}
 % \changes{v2.04}{2015/02/17}{neu}^^A
 % \begin{macro}{\tud@relspacing@@set}
@@ -1601,17 +1712,10 @@
             {OMS/iwona/\tud@res@a/n}%
         }%
       }{}%
-      \AtBeginDocument{%
-        \ifundef{\textrightarrow}{}{%
-          \tud@cs@store{textrightarrow}%
-          \renewrobustcmd*\textrightarrow{%
-            \begingroup%
-              \if@tud@cdfont@active\fontfamily{iwona}\selectfont\fi%
-              \tud@cs@use{textrightarrow}%
-            \endgroup%
-          }%
-        }%
-      }%
+%    \end{macrocode}
+% Nun folgen noch einzeln definierte Symbole.
+%    \begin{macrocode}
+      \tud@cdfont@declare@textsymb%
     \fi%
 %    \end{macrocode}
 % Es werden mehrere Schalter zur expliziten Auswahl für die Schriftschnitte
@@ -2226,6 +2330,8 @@
 % \end{macro}^^A \tud@ttfont@set
 % \begin{macro}{\tud@ttfont@init}
 % \changes{v2.06}{2018/07/12}{neu}^^A
+% \changes{v2.07}{2020/01/22}{Anpassungen für \val{TS1}-Kodierung; wird immer 
+%   definiert und \cs{DeclareEncodingSubset} wird verwendet}^^A
 % \begin{macro}{\tud@ttfont@rb@scale}
 % \changes{v2.06}{2018/08/30}{neu}^^A
 % Mit \cs{tud@ttfont@init} erfolgt die Defintion der TypeWriter-Schriften.
@@ -2326,8 +2432,29 @@
         }%
         \tud@res@c{OT1}{true}%
         \tud@res@c{T1}{true}%
-        \ifcsundef{T@TS1}{}{\tud@res@c{TS1}{false}}%
-      \endgroup%
+%    \end{macrocode}
+% Mit \LaTeXe~2020/02/02 wird die \val{TS1}-Kodierung immer definiert und 
+% gleichzeitg ein Kompatibilitätslevel für verschiedene Schriftfamilien 
+% eingeführt. Da hier eine Schriftfamilie für die skalierte \texttt{RobotoMono} 
+% definiert wird, wird der Kompatibilitätslevel dementsprechend übernommen.
+%    \begin{macrocode}
+        \tud@res@c{TS1}{false}%
+        \def\tud@res@a{\endgroup}%
+        \def\tud@res@b{TS1:RobotoMono-TLF}%
+        \ifcsundef{\tud@res@b}{%
+%<*class>
+          \ClassWarningNoLine{\TUD@Class@Name}%
+%</class>
+%<*package>
+          \PackageWarningNoLine{tudscrfonts}%
+%</package>
+            {`\tud@res@b' encoding subset undefinied}%
+        }{%
+          \eappto\tud@res@a{%
+            \noexpand\DeclareEncodingSubset{TS1}{tudtt}{\csuse{\tud@res@b}}%
+          }%
+        }%
+      \tud@res@a%
     \fi%
   \fi%
 }
@@ -3594,8 +3721,8 @@
 }
 %    \end{macrocode}
 % Die an \cs{tud@cdmath@declare@symb} und \cs{tud@cdmath@declare@char} 
-% übergebene Bezeichner für Auswahlbefehle erhalten \cs{tud@cdmath@symbol@} als
-% Präfix, wodurch sich die Definitionen für die einzelnen Mathematikversionen 
+% übergebene Bezeichner für Auswahlbefehle erhalten \cs{tud@cdmath@symbol@...} 
+% als Präfix, wodurch sich die Definitionen für einzelne Mathematikversionen 
 % beliebig tauschen lassen.
 %    \begin{macrocode}
 \newcommand*\tud@DeclareMathSymbol[4]{%
@@ -3625,7 +3752,7 @@
 % \changes{v2.06}{2019/06/19}{neu}^^A
 % \begin{macro}{\tud@cdmath@symbols@reset}
 % \changes{v2.04}{2015/03/10}{neu}^^A
-% Mit diesen beiden Befehlen kann innerhalb des Dokumentes problemlos zwischen 
+% Durch diese Befehle kann innerhalb des Dokumentes problemlos zwischen 
 % mathematischen Symbolen und Zeichen für die Schriften des \CDs, welche mit 
 % \cs{tud@cdmath@declare@symb} sowie \cs{tud@cdmath@declare@char} deklariert 
 % wurden, und den normalen gewechselt werden. 
@@ -3737,7 +3864,7 @@
 % ist, wird eine interne Version definiert und im Bedarfsfall der dazugehörige 
 % \LaTeX-Befehl mit dieser überschrieben. Hierfür sind die beiden Befehle 
 % \cs{tud@cdmath@symbols@set} und \cs{tud@cdmath@symbols@reset} verantwortlich.
-% \ToDo{Codierungen \val{LS1/LS2}; siehe \pkg{stix,libertinust1math}}[v2.??]
+% \ToDo{Kodierungen \val{LS1/LS2}; siehe \pkg{stix,libertinust1math}}[v2.??]
 %    \begin{macrocode}
 \newcommand*\tud@cdmath@declare@greek@uc[1]{%
   \tud@cdmath@declare@symb{it#1}{\mathalpha}{letters}{\the\tud@res@cnt}%
