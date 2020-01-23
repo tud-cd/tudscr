@@ -67,10 +67,10 @@ Versionen
 
 
 **v2.06f** (2020/01/14)
-+ Anpassungen für Paket **scrbase** `v3.28`
++ Anpassungen für Paket **scrbase** v3.28
 
 **v2.06e** (2019/10/23)
-+ Bugfix für Paket **scrlfile** `v3.27`
++ Bugfix für Paket **scrlfile** v3.27
 
 **v2.06d** (2019/08/27)
 + Bugfix für griechische Glyphen im Mathematikmodus beim Einsatz von LuaLaTeX
@@ -268,10 +268,10 @@ Versions
 + ...
 
 **v2.06f** (2020/01/14)
-+ adaptions for package **scrbase** `v3.28`
++ adaptions for package **scrbase** v3.28
 
 **v2.06e** (2019/10/23)
-+ bug fix for package **scrlfile** `v3.27`
++ bug fix for package **scrlfile** v3.27
 
 **v2.06d** (2019/08/27)
 + bug fix for greek glyphs in math mode when using LuaLaTeX
