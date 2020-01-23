@@ -1,4 +1,4 @@
-% \CheckSum{3237}
+% \CheckSum{3244}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -1444,7 +1444,13 @@
 }
 %    \end{macrocode}
 % Die an \cs{tud@cdfont@declare@symb} übergebene Bezeichner für Auswahlbefehle
-% erhalten \cs{tud@cdfont@symbol@...} als Präfix.
+% erhalten \cs{tud@cdfont@symbol@...} als Präfix. Da hiermit der ursprüngliche 
+% Befehlsname verändert wird, würde dieser Befehlsname auch verwendet werden, 
+% wenn dieser in einem fragilen Kontext genutzt wird (siehe \cs{@changed@cmd}).
+% Deshalb wird im Anschluss der neue Befehl selbst robust definiert, damit 
+% eine spätere Expansion nach der Zuweisung mit \cs{tud@cs@letltx} nicht in 
+% \cs{tud@cdfont@symbol@\meta{symbol}} resultiert sondern in jedem Fall 
+% \cs{\meta{symbol}} erhalen bleibt.
 %    \begin{macrocode}
 \newcommand*\tud@DeclareTextSymbol[4]{%
   \begingroup%
@@ -1458,6 +1464,7 @@
         {\noexpand\UseTextSymbol{#2}{\csname tud@cdfont@symbol@#1\endcsname}}%
     }%
   \tud@res@a%
+  \expandafter\robustify\csname tud@cdfont@symbol@#1\endcsname%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@DeclareTextSymbol
@@ -3665,6 +3672,7 @@
         \noexpand\tud@cs@letltx{mathversion}{tud@mathversion}%
       }%
     \tud@res@a%
+    \ifcsundef{mv@#1}{}{\edef\math@version{#1}}%
   }%
   \AtEndPreamble{%
     \tud@cs@store{mathversion}%
