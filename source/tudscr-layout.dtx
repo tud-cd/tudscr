@@ -1,4 +1,4 @@
-% \CheckSum{1241}
+% \CheckSum{1245}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -791,6 +791,8 @@
 % \begin{macro}{\tud@sec@uppercase}
 % \begin{macro}{\tud@sec@strut}
 % \changes{v2.06}{2018/07/24}{neu}^^A
+% \begin{macro}{\if@tud@disposition}
+% \changes{v2.06}{2018/08/02}{neu}^^A
 % Mit \cs{tud@sec@fontface} wird die Schriftart für Überschriften im 
 % Layout des \CDs definiert.
 %    \begin{macrocode}
@@ -806,7 +808,7 @@
         \edef\bfseries@tt{\tud@ttfont@ebf}%
       \fi%
       \let\bfdefault\tud@cdfont@ebf%
-      \fontseries{\tud@cdfont@ebf}%
+      \fontseriesforce{\tud@cdfont@ebf}%
     \fi%
   \else%
     \fontfamily{\tud@cdfont@fam}%
@@ -815,7 +817,7 @@
     \else%
       \let\bfdefault\tud@cdfont@bf%
     \fi%
-    \fontseries{\bfdefault}%
+    \fontseriesforce{\bfdefault}%
   \fi%
   \selectfont%
 }
@@ -834,18 +836,22 @@
   }%
 \fi
 %    \end{macrocode}
-% Der Befehl \cs{tud@sec@format} dient zur Formatierung von Überschriften.
-% Dabei wird dieser mit der von \KOMAScript{} bereitgestellten Schnittstelle für
-% Teile\footnote{\cs{partlineswithprefixformat}}, 
-% Kapitel\footnote{\cs{chapterlineswithprefixformat}, \cs{chapterlinesformat}} 
-% und 
+% Mit \cs{tud@sec@format} erfolgt die Formatierung von Überschriften, wobei die
+% \KOMAScript-Schnittstelle für Teile\footnote{\cs{partlineswithprefixformat}}, 
+% Kapitel\footnote{\cs{chapterlineswithprefixformat}, \cs{chapterlinesformat}}, 
 % Abschnitte\footnote{\cs{sectionlinesformat}, \cs{sectioncatchphraseformat}} 
-% verwendet. Dadurch wird eine Anpassung der Gliederungsbefehle~-- wie es
-% einschließlich Version~v2.05 für die erzwungene Großschreibung umgesetzt 
-% wurde~-- vermieden. Für die \OpenSans führt das Makro \cs{tud@sec@format}
-% lediglich \cs{tud@sec@strut} aus.
+% sowie zusätzlich einfache Layoutelemente verwendet werden. Dadurch wird eine 
+% Anpassung der Gliederungsbefehle~-- wie es einschließlich Version~v2.05 für
+% die erzwungene Großschreibung umgesetzt wurde~-- vermieden. Für die \OpenSans
+% führt das Makro \cs{tud@sec@format} lediglich \cs{tud@sec@strut} aus.
+%
+% Für Markup oder andere Inhalte, die lediglich im Fließtext jedoch nicht in 
+% Überschriften ausgegeben werden, wird der Schalter \cs{if@tud@disposition} 
+% definiert. Das Setzen des Schalters wird in \cs{tud@sec@format} vorgenommen.
 %    \begin{macrocode}
+\tud@newif\if@tud@disposition
 \newcommand*\tud@sec@format[2][]{%
+  \@tud@dispositiontrue%
   \IfArgIsEmpty{#1}{%
     \tud@sec@strut%
   }{%
@@ -871,6 +877,7 @@
     \renewcommand*\tud@sec@uppercase{\MakeTextUppercase}%
   }%
   \renewcommand*\tud@sec@format[2][]{%
+    \@tud@dispositiontrue%
     \@tud@res@swafalse%
     \IfArgIsEmpty{#1}{%
       \tud@sec@strut%
@@ -909,6 +916,7 @@
 }
 %<package&fixfonts>}
 %    \end{macrocode}
+% \end{macro}^^A \if@tud@disposition
 % \end{macro}^^A \tud@sec@strut
 % \end{macro}^^A \tud@sec@uppercase
 % \end{macro}^^A \tud@sec@format
@@ -998,7 +1006,7 @@
     }%
     \tud@komafont@set{subtitle}{%
       \tud@subtitle@fontsizecmd%
-      \fontseries{\tud@cdfont@bf}\selectfont%
+      \fontseriesforce{\tud@cdfont@bf}\selectfont%
     }%
     \tud@komafont@set{subject}{%
       \sffamily%
@@ -1436,7 +1444,7 @@
 %    \begin{macrocode}
 \newkomafont{partsubtitle}{%
   \tud@subtitle@fontsizecmd%
-  \fontseries{\tud@cdfont@bf}\selectfont%
+  \fontseriesforce{\tud@cdfont@bf}\selectfont%
   \tud@color{\tud@part@fontcolor}%
 }
 \aliaskomafont{parttitle}{partsubtitle}
@@ -1461,7 +1469,7 @@
 %    \begin{macrocode}
 \newkomafont{chaptersubtitle}{%
   \tud@subtitle@fontsizecmd%
-  \fontseries{\tud@cdfont@bf}\selectfont%
+  \fontseriesforce{\tud@cdfont@bf}\selectfont%
   \tud@color{\tud@chapter@fontcolor}%
 }
 %</book|report>
