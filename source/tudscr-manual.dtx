@@ -1,4 +1,4 @@
-% \CheckSum{5289}
+% \CheckSum{5298}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -1275,7 +1275,7 @@
 % \begin{macro}{\tud@if@lbl@@exists}
 % Mit dem Befehl \cs{tud@if@lbl@exists} wird eine Fallunterscheidung bezüglich
 % der Existenz eines Labels in der Form
-% \meta{Bundlepräfix}|:|\meta{Labelpräfix}|:|\meta{Element} durchgeführt. Das
+% \meta{Entitätpräfix}|:|\meta{Labelpräfix}|:|\meta{Element} durchgeführt. Das
 % zu prüfende Label ist in gleicher Weise wie beim Makro \cs{tud@lbl@get}
 % anzugeben. Je nachdem, ob ein existierendes Label gefunden wird oder nicht,
 % wird das zweite oder das dritte obligatorische Argument ausgeführt.
@@ -1306,9 +1306,9 @@
 % \changes{v2.05}{2015/11/03}{neu}^^A
 % Mit dem Argumentprozessor \cs{Processor@CreateLabel} wird es ermöglicht, an 
 % die Befehle \cs{tud@lbl@get} und \cs{tud@if@lbl@exists} sowohl ein bereits 
-% formatiertes Label als auch einen Markup-Befehl mit einem Bundlepräfix zu
+% formatiertes Label als auch einen Markup-Befehl mit einem Entitätpräfix zu
 % übergeben. In beiden Fällen wird aus dem Argument ein eindeutiges Label in
-% der Form \meta{Bundlepräfix}|:|\meta{Labelpräfix}|:|\meta{Element} generiert
+% der Form \meta{Entitätpräfix}|:|\meta{Labelpräfix}|:|\meta{Element} generiert
 % und als resultierendes Argument an das aufrufenden Makro übergeben.
 %
 % Es gibt zwei verschiedene Varianten der Übergabe eines Argumentes an den
@@ -1318,11 +1318,11 @@
 %   |{\Class/\Package/\Bundle|\marg{\dots}|:\Markup|\marg{Element}|}|\newline^^A
 %     Das Label soll für ein Markupelement generiert werden. 
 %     Dabei wurde explizit ein Paket, eine Klasse oder ein Bundle angegeben 
-%     oder implizit das Makro \cs{tud@bdl@curr} als Argument verwendet,
-%     welches innerhalb der Umgebungen \env{Bundle} und \env{Bundle*} auf
-%     das/die aktuell beschriebene Paket/Klasse gesetzt wurde.
+%     respektive implizit das Makro \cs{tud@bdl@curr} als Argument verwendet,
+%     welches innerhalb der Umgebungen \env{Entity} und \env{EntityDeclaration}
+%     auf die aktuell beschriebene Entität gesetzt wurde.
 %   \item[\cs{Processor@CreateLabel}]
-%   |{|\meta{Bundlepräfix}|:|\meta{Labelpräfix}|:|\meta{Element}|}|\newline^^A
+%   |{|\meta{Entitätpräfix}|:|\meta{Labelpräfix}|:|\meta{Element}|}|\newline^^A
 %     Das Label ist bereits vollständig bestimmt und die Argumente werden 
 %     entweder als String oder als Markup übergeben. Auch Mischformen sind 
 %     möglich. In diesem Fall wird es einfach wieder zusammengesetzt. Diese
@@ -1365,7 +1365,7 @@
 % Hier geschieht die eigentliche Erzeugung der Labels. Dabei wird mit 
 % \cs{tud@attr@get} der für den jeweiligen Markup-Befehl aus dem zweiten
 % obligatorischen Argument spezifische Labelpräfix generiert. Abhängig davon,
-% ob im ersten obligatorischen Argument ein spezieller Bundlepräfix angegeben
+% ob im ersten obligatorischen Argument ein spezieller Entitätpräfix angegeben
 % wurde, wird dieser entweder verwendet oder aber implizit auf den Inhalt aus
 % \cs{tud@bdl@dflt} zurückgegriffen.
 %    \begin{macrocode}
@@ -1410,9 +1410,9 @@
 % \begin{macro}{\tud@lbl@get@@curr}
 % \changes{v2.05}{2015/11/03}{neu}^^A
 % Für \cs{tud@lbl@get} wird das zweite obligatorische Argument für gewöhnlich
-% in der Form |\Bundle|\marg{Klasse/Paket}|:\Markup|\marg{Element} gegeben und
-% mit dem Argumentprozessor \cs{Processor@CreateLabel} in die Form
-% \meta{Bundlepräfix}|:|\meta{Labelpräfix}|:|\meta{Element} gewandelt.
+% in der Form |\Class/\Package/\Bundle|\marg{\dots}|:\Markup|\marg{Element}
+% gegeben und mit dem Argumentprozessor \cs{Processor@CreateLabel} in die Form
+% \meta{Entitätpräfix}|:|\meta{Labelpräfix}|:|\meta{Element} gewandelt.
 %    \begin{macrocode}
 \NewDocumentCommand\tud@lbl@get{s m >{\Processor@CreateLabel}m d==}{%
 %    \end{macrocode}
@@ -1449,11 +1449,12 @@
 %    \end{macrocode}
 % Wurde auch danach noch kein passendes Label gefunden, gibt es u.\,U. eine 
 % letzte Möglichkeit, ein passendes Label zu finden. Wird in der Dokumentation 
-% gerade ein Paket oder eine sich von den Hauptklassen unterscheidende Klasse
-% aus dem \TUDScript-Bundle erläutert (Umgebungen \env{Bundle}, \env{Bundle*}), 
-% so wird eventuell auf ein Element aus ebendiesen Hauptklassen referenziert. 
-% In diesem Fall wird \cs{tud@lbl@get@dflt} aufgerufen, um den Bundlepräfix
-% für das Label entsprechend zu setzen.
+% gerade ein/e Bundle, Paket oder Klasse respektive eine sich von den 
+% Hauptklassen unterscheidende Klasse oder ein Paket aus dem \TUDScript-Bundle
+% erläutert (Umgebungen \env{Entity}, \env{EntityDeclaration}), so wird
+% eventuell auf ein Element aus ebendiesen Hauptklassen referenziert. In diesem
+% Fall wird \cs{tud@lbl@get@dflt} aufgerufen, um den Entitätpräfix für das 
+% Label entsprechend zu setzen.
 %    \begin{macrocode}
     \if@tempswa\else%
       \tud@if@bdl{\tud@lbl@get@dflt#2{#3}=#4=}{}%
@@ -1481,9 +1482,9 @@
 % \begin{macro}{\tud@lbl@get@@dflt}
 % \changes{v2.05}{2015/11/04}{neu}^^A
 % Diese beiden Makros werden genutzt, um mit \cs{tud@lbl@get} innerhalb der
-% Umgebungen \env{Bundle} und \env{Bundle*} für den Fall, dass ein gesuchtes
-% Label für das aktuelle Bundle-Element nicht existiert, nach diesem Element in
-% den existierenden Labels der Hauptklassen zu suchen.
+% Umgebungen \env{Entity} und \env{EntityDeclaration} für den Fall, dass ein
+% gesuchtes Label für die aktuelle Entität nicht existiert, nach diesem
+% Element in den existierenden Labels der Hauptklassen zu suchen.
 %
 % Dabei wird das bereits generierte Label durch \cs{tud@lbl@get@dflt} in 
 % seine drei Hauptbestandteile zur Weiterverarbeitung zerlegt.
@@ -1492,7 +1493,7 @@
   \tud@lbl@get@@dflt{#1}#2=#3=%
 }
 %    \end{macrocode}
-% Durch \cs{tud@lbl@get@@dflt} wird als erstes geprüft, ob der Bundlepräfix 
+% Durch \cs{tud@lbl@get@@dflt} wird als erstes geprüft, ob der Entitätpräfix 
 % bereits dem Standardpräfix für die Hauptklassen entspricht. Nur wenn dies 
 % nicht der Fall ist, wird die Labelgenerierung abermals ausgeführt.
 %    \begin{macrocode}
@@ -1500,7 +1501,7 @@
   \edef\tud@reserved{\expandafter\detokenize\expandafter{\tud@bdl@dflt}}%
   \Ifstr{\tud@reserved}{#2}{}{%
 %    \end{macrocode}
-% Dabei erfolgt der Aufruf logischerweise mit dem richtigen Bundlepräfix. 
+% Dabei erfolgt der Aufruf logischerweise mit dem richtigen Entitätpräfix. 
 %    \begin{macrocode}
     \tud@lbl@get\tud@reserved{\tud@bdl@dflt:#3:#4}=#5=%
     \tud@if@lbl@exists{\tud@reserved}{\let#1\tud@reserved}{}%
@@ -1510,13 +1511,13 @@
 % \end{macro}^^A \tud@lbl@get@@dflt
 % \end{macro}^^A \tud@lbl@get@dflt
 %
-% \subsection{Namensraum für unterschiedliche Bundles}
+% \subsection{Namensraum für unterschiedliche Entitäten}
 %
 % Um eventuell identisch benannte Befehle und die dazu passenden Indexeinträge 
-% für unterschiedliche Pakete oder Klassen zu ermöglichen, wird ein Namensraum 
-% für diese eingeführt.
+% für unterschiedliche Bundle, Pakete oder Klassen zu ermöglichen, wird ein
+% Namensraum für diese eingeführt.
 %
-% \begin{environment}{Bundle}
+% \begin{environment}{Entity}
 % \changes{v2.05}{2015/11/01}{neu}^^A
 % \begin{macro}{\tud@bdl@curr}
 % \changes{v2.05}{2015/08/04}{neu}^^A
@@ -1524,7 +1525,7 @@
 % \changes{v2.05}{2015/11/01}{neu}^^A
 % \begin{macro}{\tud@if@bdl}
 % \changes{v2.05}{2015/08/04}{neu}^^A
-% Diese Makros werden für das Definieren eines Bundle-Elements und ggf. das 
+% Diese Makros werden für das Definieren eines Entitätelements und ggf. das 
 % Prüfen des selbigen benötigt.
 % \ToDo{Suffixe wie Klasse, Paket etc. lokalisieren (locale)}[v2.??]
 %    \begin{macrocode}
@@ -1533,12 +1534,12 @@
 \let\tud@bdl@curr\tud@bdl@dflt
 \newcommand*\tud@if@bdl[2]{\Ifstr{\tud@bdl@curr}{\tud@bdl@dflt}{#2}{#1}}
 %    \end{macrocode}
-% Die Umgebung \env{Bundle} kann nicht verschachtelt werden und prüft zuerst 
+% Die Umgebung \env{Entity} kann nicht verschachtelt werden und prüft zuerst 
 % dementsprechend die Verwendung. Anschließend wird lediglich das Makro 
 % \cs{tud@bdl@curr} auf das übergebene Argument gesetzt, um innerhalb der 
 % Umgebung erstellte Label und Indexeinträge zu beeinflussen.
 %    \begin{macrocode}
-\newenvironment{Bundle}[1]{%
+\newenvironment{Entity}[1]{%
   \tud@if@bdl{%
 %<*class>
     \ClassError{tudscrmanual}%
@@ -1546,7 +1547,7 @@
 %<*package>
     \PackageError{tudscrtutorial}%
 %</package>
-      {Nested environment `Bundle'}{%
+      {Nested environment `Entity'}{%
       It is not possible to nest this environment, when\MessageBreak%
       a cross-label was given before.%
     }%
@@ -1559,7 +1560,7 @@
 %<*package>
      \PackageError{tudscrtutorial}%
 %</package>
-      {Multiple values for environment `Bundle'}{%
+      {Multiple values for environment `Entity'}{%
         Multiple elements are prohibited within the argument.%
       }%
     \else%
@@ -1578,7 +1579,7 @@
 % \end{macro}^^A \tud@if@bdl
 % \end{macro}^^A \tud@bdl@dflt
 % \end{macro}^^A \tud@bdl@curr
-% \end{environment}^^A Bundle
+% \end{environment}^^A Entity
 %
 % \iffalse
 %<*class>
@@ -1586,10 +1587,10 @@
 %
 % \subsection{Deklarationsumgebungen für die Klasse \cls{tudscrmanual}}
 %
-% Die Umgebungen beiden \env{Declaration} und \env{Declaration*} sowie 
-% \env{Obsolete} und \env{Bundle} werden für die Beschreibung von Optionen,
-% Umgebungen, Befehlen etc. verwendet, welche von \TUDScript dem Anwender zur 
-% Verfügung gestellt werden.
+% Die Umgebungen \env{Declaration} und \env{Declaration*} sowie \env{Obsolete}
+% und \env{Entity} werden für die Beschreibung von Optionen, Umgebungen,
+% Befehlen etc. verwendet, welche von \TUDScript oder einer anderen Entität dem
+% Anwender zur Verfügung gestellt werden.
 %
 % \begin{macro}{\if@tud@declare}
 % \begin{macro}{\tud@declare@num}
@@ -1851,28 +1852,29 @@
 }
 %    \end{macrocode}
 % \end{environment}^^A Declaration*
-% \begin{environment}{Bundle*}
+% \begin{environment}{EntityDeclaration}
 % \changes{v2.05}{2015/11/01}{neu}^^A
-% Die Umgebung \env{Bundle*} wird verwendet, wenn ein zusätzliches Paket oder 
-% eine weitere Klasse in Ergänzung zu den Hauptklassen dokumentiert wird. 
-% Hierfür wird die Umgebung \env{Bundle} erst geöffnet, nachdem mit dem Makro
-% \cs{tud@declare@special@start} das obligatorische Argument~-- sprich die 
-% Klasse oder das Paket~-- deklariert wird. Die Umgebung \env{Bundle*} sollte 
-% dabei direkt nach einer Gliederungsüberschrift genutzt werden, in welcher das 
-% zu deklarierende Element (Klasse, Paket etc.) genannt wird, da der Anker des 
-% erzeugten Labels weiter nach oben auf die Höhe der Überschirft verschoben
-% wird. Zum Abschluss der Deklaration wird \cs{tud@declare@special@end} nach
-% dem Schließen der Umgebung \env{Bundle} genutzt. 
+% Die Umgebung \env{EntityDeclaration} wird verwendet, wenn ein zusätzliches 
+% Paket oder eine weitere Klasse in Ergänzung zu den Hauptklassen dokumentiert
+% wird. Hierfür wird die Umgebung \env{Entity} erst geöffnet, nachdem mit dem
+% Makro \cs{tud@declare@special@start} das obligatorische Argument~-- sprich
+% die Klasse oder das Paket~-- deklariert wird. Die hier definierte Umgebung 
+% \env{EntityDeclaration} sollte dabei direkt nach einer Gliederungsüberschrift
+% genutzt werden, in welcher das zu deklarierende Element (Klasse, Paket etc.)
+% genannt wird, da der Anker des erzeugten Labels weiter nach oben auf die Höhe
+% der Überschirft verschoben wird. Zum Abschluss der Deklaration wird 
+%\cs{tud@declare@special@end} nach dem Schließen der Umgebung \env{Entity} 
+% genutzt. 
 %    \begin{macrocode}
-\NewDocumentEnvironment{Bundle*}{o m}{%
+\NewDocumentEnvironment{EntityDeclaration}{o m}{%
   \tud@declare@special@start*[{#1}]{#2}{3}%
-  \Bundle{#2}%
+  \Entity{#2}%
 }{%
-  \endBundle%
+  \endEntity%
   \tud@declare@special@end{#2}{3}%
 }
 %    \end{macrocode}
-% \end{environment}^^A Bundle*
+% \end{environment}^^A EntityDeclaration
 % \begin{macro}{\tud@declare@special@start}
 % \changes{v2.05}{2015/11/01}{neu}^^A
 % \begin{macro}{\tud@declare@special@end}
@@ -1883,8 +1885,9 @@
 % Argument dient einem Änderungseintrag, das erste obligaotrische gilt der
 % eigentlichen Deklaration, das zweite zur Anpassung von \cs{tud@declare@num}, 
 % mit welchem das Verhalten für das Erzeugen von Ausgabe und Label gesteuert 
-% wird. Die Sternvariante wird von der Umgebung \env{Bundle*} genutzt, um 
-% Einträge in der Änderungsliste in den allgemeinen Teil zu schreiben.
+% wird. Die Sternvariante wird von der Umgebung \env{EntityDeclaration} 
+% genutzt, um Einträge in der Änderungsliste in den allgemeinen Teil zu
+% schreiben.
 %    \begin{macrocode}
 \NewDocumentCommand\tud@declare@special@start{s r[] m m}{%
   \tud@declare@num=#4\relax%
@@ -2011,8 +2014,8 @@
 % \end{macro}^^A \printobsoletelist
 % \begin{macro}{\printchangedatlist}
 % \changes{v2.05}{2015/11/01}{neu}^^A
-% Damit werden Änderungsnotizen der Umgebungen \env{Declaration*}, \env{Bundle} 
-% und \env{Bundle*} ausgegeben.
+% Damit werden Änderungsnotizen ausgegeben, die zu Beginn einer der Umgebungen 
+% \env{Declaration*} und \env{EntityDeclaration} angegeben wurden.
 %    \begin{macrocode}
 \NewDocumentCommand\printchangedatlist{!s !O{\z@}}{%
   \print@changedatlist{#1}{#2}%
@@ -2088,7 +2091,7 @@
 % |'|\meta{Referenzvariante}|'| um einen textuellen Querverweis ergänzt werden
 % kann. Mit \verb=|=\meta{Indexmarkup}\verb=|= kann die Erscheinung im Index
 % angepasst werden. Bei einigen Befehlen kann zusätzlich zuvor im Markup mit
-% dem optionalen Argument \parg{Bundleelement} die Zuweisung auf ein bestimmtes
+% dem optionalen Argument \parg{Entität} die Zuweisung auf ein bestimmtes
 % Paket oder eine Klasse aus dem \TUDScript-Bundle erfolgen.
 %
 % Die eigentliche Behandlung erfolgt mit dem Befehl \cs{Process@Markup}, 
@@ -2153,6 +2156,30 @@
 %    \end{macrocode}
 % \end{macro}^^A \@Engine
 % \end{macro}^^A \Engine
+% \begin{macro}{\Bundle}
+% \begin{macro}{\@Bundle}
+% Die Auszeichnung und der Indexeintrag einer Klasse. Das optionale Argument 
+% zwischen Apostrophen kann für die Formatierung eines Querverweises im Text
+% genutzt werden, das optionale Argument zwischen senkrechten Strichen dient
+% der Formatierung des Indexeintrages.
+%    \begin{macrocode}
+\NewExpandableDocumentCommand\@Bundle{s m}{#2}
+\NewDocumentCommand\Bundle{s m !d() !d'' !d||}{%
+%<*class>
+  \if@tud@changedat%
+    \Process@ChangedAt{\Bundle{#2}}[Bundle]%
+  \else%
+%</class>
+    \Markup@SetFormat{\sbnfont}%
+    \Process@Markup{\Bundle{#2}}(#3)'#4'%
+    \Process@Index{#1}{\Bundle{#2}}[Bundle](#3)|#5|%
+%<*class>
+  \fi%
+%</class>
+}
+%    \end{macrocode}
+% \end{macro}^^A \@Bundle
+% \end{macro}^^A \Bundle
 % \begin{macro}{\Class}
 % \changes{v2.02}{2014/10/08}{überarbeitet}^^A
 % \begin{macro}{\@Class}
@@ -2604,6 +2631,7 @@
     \@tempa\Distribution{\jobname}{dst}%
     \@tempa\Engine{\jobname}{eng}%
     \@tempa\File{files}{fle}%
+    \@tempa\Bundle{files}{bdl}%
     \@tempa\Class{files}{cls}%
     \@tempa\Package{files}{pkg}%
     \@tempa\Option{options}{opt}%
@@ -2776,6 +2804,7 @@
   \let\Distribution\@Distribution%
   \let\Engine\@Engine%
   \let\File\@File%
+  \let\Bundle\@Bundle%
   \let\Class\@Class%
   \let\Package\@Package%
   \let\Option\@Option%
@@ -2870,7 +2899,7 @@
 % verschiedenen Varianten formatiert werden. Der vollständige Funktionsaufruf:
 % \newline\begingroup\scriptsize^^A
 %   \cs{Process@Markup}\marg{Element}|=|\meta{Wert}|=|^^A
-%   \oarg{Ausgabesuffix}\parg{Bundleelement}^^A
+%   \oarg{Ausgabesuffix}\parg{Entität}^^A
 %   |<|\meta{CTAN-Paket}|>||'|\meta{Referenzvariante}|'|^^A
 % \endgroup
 % \ToDo{vorherige doc überarbeiten oder raus}[v2.07]
@@ -2990,13 +3019,13 @@
     \tud@trace@markup@add{output}{\the\tud@toks@}%
   \fi%
 %    \end{macrocode}
-% Ganz zum Schluss wird noch für beide Fälle geprüft, ob \parg{Bundleelement} 
-% angegeben wurde. Ist dies der Fall, wird zum einen das \meta{Bundleelement}
+% Ganz zum Schluss wird noch für beide Fälle geprüft, ob \parg{Entität} 
+% angegeben wurde. Ist dies der Fall, wird zum einen die \meta{Entität}
 % zur Überprüfung ggf. in das Log-File geschrieben, zum anderen wird geprüft, 
 % ob für das \meta{Element} überhaupt ein Link definiert wurde, der verwendet
 % werden soll. Ist dies nicht der Fall, wird eine Warnung ausgegeben. Dies ist 
 % möglich, da durch die automatische Labelgenerierung normalerweise alle nicht 
-% existierenden Labels mit \meta{Bundlepräfix} auf \cs{tud@bdl@dftl} verweisen
+% existierenden Labels mit \meta{Entitätpräfix} auf \cs{tud@bdl@dftl} verweisen
 % müssten. Für die wenigen Fälle, in denen gezielt auf einen Querverweis 
 % verzichtet werden soll, kann ein leeres Argument \parg{} angegeben werden.
 %    \begin{macrocode}
@@ -3035,10 +3064,10 @@
 % Die dritte Version kommt bei Erklärungen mit der Umgebung \env{Declaration*}
 % zum Einsatz, welche im Fließtext verwendet wird und kein Markup, wohl aber
 % eine Label für das beschriebene Element erzeugt werden soll. Für die vierte
-% Variante, welche die Umgebung \env{Bundle*} betrifft, gilt dies im Prinzip
-% gleichermaßen. Allerdings wird diese Umgebung zu Beginn der Deklarationen
-% eines Bundleelements direkt nach einer Überschrift verwendet. Hier soll der 
-% erzeugte Link direkt auf der Höhe der Überschrift platziert werden.
+% Variante, welche die Umgebung \env{EntityDeclaration} betrifft, gilt dies im 
+% Prinzip gleichermaßen. Allerdings wird diese Umgebung zu Beginn der
+% Deklarationen einer Entität direkt nach einer Überschrift verwendet. Hier 
+% soll der erzeugte Link direkt auf der Höhe der Überschrift platziert werden.
 %
 % Das erste Argument enthält das zu definierende Label, gefolgt vom Element, 
 % welches ausgezeichnet werden soll. Die tatsächliche Ausgabe erfolgt mit dem 
@@ -3188,7 +3217,11 @@
 % Ganz zum Schluss erfolgt die Ausgabe als Hyperlink mit optional erweitertem 
 % Querverweis nicht, wenn gerade eine Überschrift gesetzt wird.
 %    \begin{macrocode}
-    \ifdisposition{\@tempc}{\@tempa\@tempb}%
+    \if@tud@disposition%
+      \@tempc%
+    \else%
+      \@tempa\@tempb%
+    \fi%
 %    \end{macrocode}
 % Zum Schluss wird die Formatierung mit \cs{Markup@ClearFormat} zurückgesetzt.
 %    \begin{macrocode}
@@ -3197,30 +3230,6 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \Process@@MarkupInline
-% \begin{macro}{\ifdisposition}
-% \changes{v2.06}{2018/08/02}{neu}^^A
-% \begin{macro}{\if@tud@disposition}
-% \begin{macro}{\tud@sec@format}
-% Für Markup oder andere Inhalte, die lediglich im Fließtext jedoch nicht in 
-% Überschriften ausgegeben werden, wird der Schalter \cs{if@tud@disposition} 
-% und der dazugehörige auswertende Befehl \cs{ifdisposition} definiert. Das
-% Setzen des Schalters wird in \cs{tud@sec@format} gepatcht.
-%    \begin{macrocode}
-\tud@newif\if@tud@disposition
-\newcommand*\ifdisposition{%
-  \if@tud@disposition%
-    \expandafter\@firstoftwo%
-  \else%
-    \expandafter\@secondoftwo%
-  \fi%
-}
-\pretocmd{\tud@sec@format}{%
-  \@tud@dispositiontrue%
-}{}{\tud@patch@wrn{tud@sec@format}}
-%    \end{macrocode}
-% \end{macro}^^A \tud@sec@format
-% \end{macro}^^A \if@tud@disposition
-% \end{macro}^^A \tud@if@disposition
 % \begin{macro}{\Markup@Output}
 % \changes{v2.05}{2015/11/05}{neu}^^A
 % \begin{macro}{\Markup@@Output}
@@ -3383,6 +3392,7 @@
     \tud@nonchangecase\Distribution%
     \tud@nonchangecase\Engine%
     \tud@nonchangecase\File%
+    \tud@nonchangecase\Bundle%
     \tud@nonchangecase\Class%
     \tud@nonchangecase\Package%
     \tud@nonchangecase\Option%
@@ -3710,14 +3720,14 @@
 % hinzu. Soll der Indexeintrag für ein spezifisches Paket oder eine Klasse aus
 % dem \TUDScript-Bundle erstellt werden, wird das optionale Argument in runden 
 % Klammern \parg{\string\Class\marg{Klasse}/\string\Package\marg{Paket}} für 
-% einen Verweis auf das \parg{Bundleelement} verwendet, der in \cs{@idxbundle} 
+% einen Verweis auf das \parg{Entität} verwendet, der in \cs{@idxbundle} 
 % gespeichert wird. Das Argument \verb=|=\meta{Indexmarkup}\verb=|= wird bei
 % Deklarationen zur Unterdrückung von Untereinträgen verwendet.
 % Der vollständige Funktionsaufruf lautet:
 % \newline\begingroup\scriptsize^^A
 %   \cs{tud@idx@get}\cs{tud@idx@key}\cs{tud@idx@fmt}^^A
 %   \cs{tud@idx@val}\marg{Elem.}|=|\meta{Wert}|=|\oarg{Anm.}^^A
-%   \parg{Bundleelem.}\verb=|=\meta{Indexmark.}\verb=|=^^A
+%   \parg{Entität}\verb=|=\meta{Indexmark.}\verb=|=^^A
 % \endgroup
 % \ToDo{vorherige doc überarbeiten oder raus}[v2.07]
 %    \begin{macrocode}
@@ -4045,7 +4055,7 @@
 % Funktionsaufruf lautet:
 % \newline\begingroup\scriptsize^^A
 %   \cs{Process@Index}\marg{Stern?}\marg{Element}^^A
-%   |=|\meta{Wert}|=|\oarg{Anmerkung}\parg{Bundleelement}^^A
+%   |=|\meta{Wert}|=|\oarg{Anmerkung}\parg{Entität}^^A
 %   \verb=|=\meta{Indexmarkup}\verb=|=^^A
 % \endgroup
 % \ToDo{vorherige doc überarbeiten oder raus}[v2.07]
@@ -4452,7 +4462,7 @@
 % gefolgt von drei optionalen Argumenten:
 % \newline\begingroup\scriptsize^^A
 %   \cs{Process@ChangedAt}\marg{Element}|=|\meta{Wert}|=|^^A
-%   \oarg{Ausgabesuffix}\parg{Bundleelement}^^A
+%   \oarg{Ausgabesuffix}\parg{Entität}^^A
 % \endgroup
 % \ToDo{vorherige doc überarbeiten oder raus}[v2.07]
 %   \begin{macrocode}
@@ -4465,7 +4475,7 @@
 % \begin{macro}{\ChangedAt}
 % \changes{v2.02}{2014/07/25}{erweitert}^^A
 % \changes{v2.02}{2014/10/15}{Sternversion neu (keine Randnotiz)}^^A
-% \changes{v2.06}{2018/09/03}{optionale Angabe des Bundles}^^A
+% \changes{v2.06}{2018/09/03}{optionale Angabe der Entität}^^A
 % \begin{macro}{\@ChangedAt}
 % \changes{v2.06}{2019/06/24}{neu}^^A
 % \begin{length}{\tud@dim@changedatvskip}
@@ -4551,11 +4561,12 @@
 % wird der Eintrag in die Änderungsliste für dieses Element generiert, sonst 
 % wird eine allgemeiner Eintrag erzeugt. Das optionale Argument in runden 
 % Klammern wird lediglich verwendet, wenn für eine der beiden Spezialumgebungen 
-% \env{Declaration*} bzw. \env{Bundle*} eine Änderungsnotiz erstellt wird, um 
-% diese für das jeweilige \TUDScript-Bundle-Element in den entsprechenden
-% Abschnitt der Änderungsliste einzutragen. Das Hauptargument verarbeitet
-% eine semikolongetrennte Liste und reicht jeden Bestandteil zusammen mit den
-% beiden optionalen Argumenten an \cs{Changed@At@@CreateList} weiter. 
+% \env{Declaration*} bzw. \env{EntityDeclaration} eine Änderungsnotiz erstellt
+% wird, um diese für das jeweilige \TUDScript-Bundle-Element in den
+% entsprechenden Abschnitt der Änderungsliste einzutragen. Das Hauptargument
+% verarbeitet eine semikolongetrennte Liste und reicht jeden Bestandteil
+% zusammen mit den beiden optionalen Argumenten an \cs{Changed@At@@CreateList}
+% weiter. 
 %    \begin{macrocode}
 \NewDocumentCommand\Changed@At@CreateList{m !o !d()}{%
   \IfValueT{#1}{\forssvlist{\Changed@At@@CreateList[{#2}](#3)}{#1}}%
@@ -4605,8 +4616,8 @@
 % erfolgt entweder anhand des explizit angegebenen optionalen Argumentes in
 % runden Klammern oder aber implizit über den gegenwärtigen Inhalt des Makros
 % \cs{tud@bdl@curr}. Dafür wird das Makro \cs{@tempa} so definiert, dass es
-% das angegebene Argument in einer Box ausführt und das gesuchte Bundle-Element
-% in \cs{@tempb} gespeichert ist.
+% das angegebene Argument in einer Box ausführt und die gesuchte Entität in
+% \cs{@tempb} gespeichert ist.
 %    \begin{macrocode}
   \def\@tempa##1{%
     \sbox\z@{%
@@ -4626,9 +4637,9 @@
     \tud@if@bdl{\@tempa{\tud@bdl@curr}}{}%
   }%
 %    \end{macrocode}
-% Nachdem klar ist, für welches Bundle-Element ggf. der Änderungslisteneintrag 
-% erzeugt werden soll, wird nun bestimmt, ob dieser im allgemeinen Teil oder in 
-% den zur Implementierung erscheinen soll. Dies wird an der Existenz des ersten
+% Nachdem klar ist, für welche Entität ggf. der Änderungslisteneintrag erzeugt
+% werden soll, wird nun bestimmt, ob dieser im allgemeinen Teil oder in den 
+% zur Implementierung erscheinen soll. Dies wird an der Existenz des ersten
 % Argumentes entschieden. Ist es vorhanden, handelt es sich um einen Eintrag 
 % für den Implementierungsteil, welcher in \cs{tud@changedat@list} in der Form 
 % \newline\begingroup^^A
@@ -4667,10 +4678,10 @@
 % \ToDo{vorherige doc überarbeiten oder raus}[v2.07]
 % wird mit der Angabe eines \TUDScript-Bundle-Elements etwas anders verfahren.
 % Wurde dieses~-- wenn auch nur indirekt über eine der beiden Spezialumgebungen
-% \env{Declaration*} bzw. \env{Bundle*}~-- angegeben, so wird der Eintrag in
-% den allgemeinen Hauptteil als Untereintrag erzeugt. Erfolgte die Verwendung
-% jedoch innerhalb einer \TUDScript-Bundle-Deklaration, so erscheint der
-% Eintrag im allgemeinen Teil für das explizite Bundle-Element.
+% \env{Declaration*} bzw. \env{EntityDeclaration}~-- angegeben, so wird der 
+% Eintrag in den allgemeinen Hauptteil als Untereintrag erzeugt. Erfolgte die
+% Verwendung jedoch innerhalb einer \TUDScript-Bundle-Deklaration, so erscheint
+% der Eintrag im allgemeinen Teil für die explizite engegebene Entität.
 %    \begin{macrocode}
     \toks@{#3!Allgemein }%
     \IfValueTF{#2}{%
