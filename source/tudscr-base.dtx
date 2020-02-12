@@ -1,4 +1,4 @@
-% \CheckSum{1460}
+% \CheckSum{1480}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -429,31 +429,46 @@
 % \end{macro}^^A \tud@length@to@string
 %
 %
-% \subsubsection{Robuster Test auf leeres Argument}
+% \subsubsection{Strings}
+% \minisec{Expandierte Tests}
 %
-% \begin{macro}{\ifxblank}
-% Hiermit kann ein Argument geprüft werden, ob dieses blank ist (leer oder
-% Leerzeichen). In seiner Syntax ist er identisch zu \cs{ifblank}, allerdings
-% expandiert er im Gegensatz zu diesem das gegebene Argument.
-% \ToDo{funktioniert nicht beständig, adäquat ersetzen und raus damit!}[v2.07]
-%^^A\newcommand*\svg@ifstrblank[1]{%
-%^^A  \begingroup%
-%^^A    \edef\svg@tempa{%
-%^^A      \noexpand\IfArgIsEmpty{\expandafter\@gobble#1\relax}%
-%^^A    }%
-%^^A    \svg@tempa{%
-%^^A      \aftergroup\@firstoftwo%
-%^^A    }{%
-%^^A      \aftergroup\@secondoftwo%
-%^^A    }%
-%^^A  \endgroup%
-%^^A}
+% \begin{macro}{\tud@if@strequal}
+% \changes{v2.07}{2020/02/07}{neu}^^A
+% \begin{macro}{\tud@if@strempty}
+% \changes{v2.07}{2020/02/07}{neu}^^A
+% \begin{macro}{\tud@if@strblank}
+% \changes{v2.07}{2020/02/07}{neu}^^A
+% Hiermit wird geprüft, ob ein String gleich, leer oder blank (Leerzeichen)
+% ist. In ihrer Syntax sind die Befehle identisch zu \cs{ifstrequal},
+% \cs{ifstrempty} und \cs{ifblank}, allerdings werden er im Gegensatz zu diesen 
+% die gegebene Argumente expandiert.
+% \ToDo{\cs{ifxblank} raus}[v2.07]
+% \ToDo{ifblank, ifstrequal/ifstrempty/Ifstr suchen und ersetzen}[v2.07]
 %    \begin{macrocode}
-\newcommand*\ifxblank{\Ifstr{}}
+\newcommand*\ifxblank{\tud@if@strblank}
+\newcommand*\tud@if@strequal[2]{%
+  \begingroup%
+    \protected@edef\tud@res@a{%
+      \endgroup%
+      \noexpand\ifstrequal{#1}{#2}%
+    }%
+  \tud@res@a%
+}
+\newcommand*\tud@if@strempty{\tud@if@strequal{}}
+\newcommand*\tud@if@strblank[1]{%
+  \begingroup%
+    \protected@edef\tud@res@a{%
+      \endgroup%
+      \noexpand\ifblank{#1}%
+    }%
+  \tud@res@a%
+}
 %    \end{macrocode}
-% \end{macro}^^A \ifxblank
+% \end{macro}^^A \tud@if@strblank
+% \end{macro}^^A \tud@if@strempty
+% \end{macro}^^A \tud@if@strequal
 %
-% \subsubsection{Test auf booleschen Ausdruck in Form eines Strings}
+% \minisec{Test auf booleschen Ausdruck in Form eines Strings}
 %
 % \begin{macro}{\ifstrbool}
 % \changes{v2.03}{2015/01/09}{neu}^^A
@@ -464,6 +479,7 @@
 % kein logischer Wert, kommt das letzte Argument zum Tragen. Die Syntax lautet:
 %
 % \cs{ifstrbool}\marg{Argument}\marg{Wahr}\marg{Falsch}\marg{Andernfalls}
+% \ToDo{nur als internen Befehl definieren \cs{tud@if@...}}[v2.07]
 % \ToDo{> \cs{tud@if@bool@else} und mit \cs{TUD@set@ifkey} umsetzen}[v2.07]
 %    \begin{macrocode}
 \newcommand*\ifstrbool[4]{%
@@ -484,11 +500,64 @@
 %    \end{macrocode}
 % \end{macro}^^A \ifstrbool
 %
+% \minisec{Erzwungene Kleinschreibung von Strings}
+%
+% \begin{macro}{\tud@lowerstring}
+% Dieses Makro expandiert das zweite Argument, setzt es in Minuskeln und
+% speichert das Ergebnis in den im ersten Argument angegebenen Befehl. Dies 
+% wird zum Beispiel benötigt, um bestimmte Werte bei bei Schlüssel-Wert-Paaren,
+% Schlüsselwörter in einigen Feldern oder auch Einheiten bei Längenangaben
+% sicher erkennen zu können.
+% \ToDo{in \cs{tud@strlowercase} umbenennen, optionales Arg wie svg?}[v2.07]
+%    \begin{macrocode}
+\newcommand*\tud@lowerstring[2]{%
+  \protected@edef#1{%
+    \lowercase{\def\noexpand#1{#2}}%
+  }#1%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@lowerstring
+%
+% \minisec{Entfernen aller Leerzeichen in Strings}
+%
+% \begin{macro}{\tud@remove@spaces@within}
+% Hiermit können in einem gegebenen String \emph{alle} Leerzeichen enthaltenen 
+% entfernt werden. Dies wird verwendet, um für \cs{TUD@set@gluekey} sowie 
+% \cs{TUD@set@dimkey} eine Warnung auszugeben, falls das übergebene Argument 
+% fehlerhaft formatiert ist, wobei Unterschiede bei Leerzeichen ignoriert 
+% werden sollen.
+%\ToDo{%
+%  \protecting{\texttt{\detokenize{\expandafter\zap@space\tud@res@a \@empty}}}%
+% }[v2.07]
+%    \begin{macrocode}
+\newcommand*\tud@remove@spaces@within[1]{%
+  \begingroup%
+    \protected@edef\tud@res@a{#1}%
+    \def\tud@res@b##1 ##2\@nil{%
+      \appto\tud@res@c{##1}%
+      \IfArgIsEmpty{##2}{}{\tud@res@b##2\@nil}%
+    }%
+    \edef\tud@res@c{%
+      \unexpanded{\let\tud@res@c\@empty}%
+      \noexpand\tud@res@b\expandonce\tud@res@a\space\noexpand\@nil%
+    }%
+    \tud@res@c%
+    \protected@edef\tud@res@a{%
+      \endgroup%
+      \unexpanded{\def#1}{\tud@res@c}%
+    }%
+  \tud@res@a%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@remove@spaces@within
+%
 % \subsubsection{Test auf eine verwendbare Sprache}
 %
 % \begin{macro}{\iflanguageloaded}
 % \changes{v2.05}{2015/11/23}{neu}^^A
 % Hiermit kann getestet werden, ob das Argument als Sprache nutzbar ist.
+% \ToDo{ist der Befehl so noch sinnvoll?}[v2.07]
+% \ToDo{nur als internen Befehl definieren \cs{tud@if@...}}[v2.07]
 %    \begin{macrocode}
 \newcommand*\iflanguageloaded[1]{%
   \PackageWarning{tudscrbase}{%
@@ -608,53 +677,6 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@divide
-%
-% \subsubsection{Erzwungene Kleinschreibung von Strings}
-%
-% \begin{macro}{\tud@lowerstring}
-% Dieses Makro expandiert das zweite Argument, setzt es in Minuskeln und
-% speichert das Ergebnis in den im ersten Argument angegebenen Befehl. Dies 
-% wird zum Beispiel benötigt, um bestimmte Werte bei bei Schlüssel-Wert-Paaren,
-% Schlüsselwörter in einigen Feldern oder auch Einheiten bei Längenangaben
-% sicher erkennen zu können.
-%    \begin{macrocode}
-\newcommand*\tud@lowerstring[2]{%
-  \protected@edef#1{%
-    \lowercase{\noexpand\def\noexpand#1{#2}}%
-  }#1%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@lowerstring
-%
-% \subsubsection{Entfernen aller Leerzeichen in Strings}
-%
-% \begin{macro}{\tud@remove@spaces@within}
-% Hiermit können in einem gegebenen String \emph{alle} Leerzeichen enthaltenen 
-% entfernt werden. Dies wird verwendet, um für \cs{TUD@set@gluekey} sowie 
-% \cs{TUD@set@dimkey} eine Warnung auszugeben, falls das übergebene Argument 
-% fehlerhaft formatiert ist, wobei Unterschiede bei Leerzeichen ignoriert 
-% werden sollen.
-%    \begin{macrocode}
-\newcommand*\tud@remove@spaces@within[1]{%
-  \begingroup%
-    \protected@edef\tud@res@a{#1}%
-    \def\tud@res@b##1 ##2\@nil{%
-      \appto\tud@res@c{##1}%
-      \IfArgIsEmpty{##2}{}{\tud@res@b##2\@nil}%
-    }%
-    \edef\tud@res@c{%
-      \unexpanded{\let\tud@res@c\@empty}%
-      \noexpand\tud@res@b\expandonce\tud@res@a\space\noexpand\@nil%
-    }%
-    \tud@res@c%
-    \protected@edef\tud@res@a{%
-      \endgroup%
-      \unexpanded{\def#1}{\tud@res@c}%
-    }%
-  \tud@res@a%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@remove@spaces@within
 %
 % \subsubsection{Test auf vorhandene Dateien von Schriftdefinitionen}
 %
