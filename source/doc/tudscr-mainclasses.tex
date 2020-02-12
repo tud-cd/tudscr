@@ -112,6 +112,7 @@ Mathematiksatz in \autoref{sec:tut} zu finden.
 
 
 \minisec{Die Schriftformate Type1 und OpenType}
+%
 \index{Type1-Schriften}%
 \index{OpenType-Schriften}%
 \ChangedAt{v2.02:OpenType-Schriften mit Paket \Package{fontspec} verwendbar}
@@ -308,6 +309,7 @@ ist nicht notwendig.
 
 
 \minisec{Auszeichnungen im Text}
+%
 \index{Schriftstärke}%
 \index{Schriftauszeichnung}%
 %
@@ -542,6 +544,7 @@ angegebenen Letter gesetzt.
 
 
 \minisec{Zusätzliche Hinweise zum Mathematiksatz}
+%
 Unter Umständen werden zusätzliche Symbole für den Mathematiksatz benötigt. 
 Sehr oft kommt hierfür das Paket \Package{amssymb}'CTAN:amsfonts' zum Einsatz. 
 Dieses stellt zahlreiche zusätzliche für die \hologo{LaTeX}"=Standardschriften 
@@ -578,7 +581,8 @@ Layout, wie es beispielsweise mit dem Paket \Package{multicol} erzeugt werden
 kann, in Relation zur Schriftgröße sinnvoll festgelegt.
 
 Die verwendete Schriftgröße kann durch den Anwender über die \KOMAScript-Option 
-\Option{fontsize=\PLength}(\Bundle{koma-script}) festgelegt werden.
+\InlineDeclaration{\Option{fontsize=\PLength}(\Bundle{koma-script})} festgelegt 
+werden.
 \Attention{%
   Dabei ist zu beachten, dass diese immer als Klassenoption angegeben werden 
   sollte.%
@@ -613,31 +617,52 @@ Textspalten im mehrspaltigen Layout anpassen.
 \index{Layout|(}%
 \subsection{Der Satzspiegel}
 \index{Satzspiegel|(}%
+\subsubsection{Grundlegende Einstellungen für den Satzspiegel}
 %
+\begin{Entity}{\Package{typearea}}
+\begin{Declaration}{\Option{DIV=\PMisc}}[default]
+\begin{Declaration}{\Option{paper=\PMisc}}[A4]
+\begin{Declaration}{\Option{twoside=\PMisc}}[false][\Class{tudscrbook}:true]
+\printdeclarationlist%
+\index{Satzspiegel}%
+\index{Papierformat}%
+%
+Die Einstellung des Satzspiegels erfolgt durch \KOMAScript normalerweise mit 
+dem Paket \Package{typearea}(\Bundle{koma-script}), wobei insbesondere die 
+Klassenoption \Option{DIV=\PMisc}(\Package{typearea}) maßgeblichen Einfluss auf 
+diesen hat. Mit \Option{paper=\PMisc} lässt sich das Papierformat und dessen 
+Orientierung festlegen. Der doppelseitige Satz kann mit \Option{twoside=\PMisc} 
+(de-)aktiviert werden. Ist dieser aktiv, sind weiterhin die Hinweise in 
+\autoref{sec:vacat} von Relevanz. Detaillierte Anwendungshinweise für die 
+genannten Optionen sind im \scrguide zu finden.
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Entity}
+
+\subsubsection{Der Satzspiegel im \TUDCD}
 \begin{Declaration}[v2.03]{\Option{cdgeometry=\PMisc}}%
   [true,restricted][\Option{cd=false}:false]%
 \printdeclarationlist%
 \index{Layout!Seitenstile}%
 \index{Satzspiegel!doppelseitig}%
 %
-Diese Option ist für die Aufteilung beziehungsweise die Berechnung des 
-Satzspiegels verantwortlich. Das Maß der Seitenränder ist im \CD fest 
-vorgegeben und wird standardmäßig von den \TUDScript-Klassen eingehalten. 
-Allerdings lassen sich die Seitenränder anpassen, um beispielsweise einen 
-vernünftigen doppelseitigen Satz zu ermöglichen.%
+Diese Option ist für die Wahl des Satzspiegels verantwortlich. Das Maß der 
+Seitenränder ist im \CD fest vorgegeben und wird standardmäßig von den 
+\TUDScript-Klassen eingehalten. Allerdings lassen sich die Seitenränder 
+anpassen, um beispielsweise einen vernünftigen doppelseitigen Satz zu 
+ermöglichen.%
 \footnote{Hierbei sollte der innere Rand schmaler als der äußere sein}
-Des Weiteren besteht die Möglichkeit, auf das Standardverhalten von 
-\KOMAScript{} zurückzufallen und die Satzspiegelberechnung durch das Paket 
-\Package{typearea} vornehmen zu lassen. Hier hat insbesondere die Klassenoption 
-\Option{DIV=\PMisc}(\Package{typearea})|declare| maßgeblichen Einfluss auf den 
-Satzspiegel. Mehr dazu ist im \scrguide[Handbuch von \KOMAScript] zu finden.
-Zusätzlich lässt sich mit \Option{cdgeometry=custom} der Satzspiegel durch den 
-Anwender (fast) beliebig festlegen.
+Deshalb besteht die Möglichkeit, entweder auf das Standardverhalten von 
+\KOMAScript{} zurückzufallen und den Satzspiegel durch das Paket 
+\Package{typearea} zu berechnen oder aber diesen (fast) beliebig manuell 
+festzulegen.
 %
 \begin{DeclarationValues}
 \itemvalfalse
   Die Satzspiegelberechnung erfolgt via \Package{typearea}, die Vorgaben des 
-  \CDs bezüglich der Seitenränder werden ignoriert.
+  \CDs bezüglich der Seitenränder werden ignoriert. \Attention{Nur in diesem 
+  Fall wirkt die Option \Option{DIV}(\Package{typearea}).}
 \itemvaltrue*=asymmetric/cd=
   Die Seitenränder werden im asymmetrischen Stil des \CDs fest definiert und 
   auch für den doppelseitigen Satz
@@ -703,19 +728,22 @@ weitestgehend manuell einzustellen.
 \end{DeclarationValues}
 \end{Declaration}
 
-\minisec{Bindekorrektur}
+
+
+
+\subsubsection{Bindekorrektur}
 \index{Satzspiegel!Bindekorrektur|!}%
 %
 Im Zusammenhang mit den Seitenrändern oder besser dem Satzspiegel ist die durch 
 das Paket \Package{typearea} zur Verfügung gesellte \KOMAScript-Option 
-\Option{BCOR=\PLength}(\Package{typearea})|declare| zu erwähnen. Mit dieser 
-kann bei der Satzspiegelberechnung ein Heftrand respektive eine Bindekorrektur 
-berücksichtigt werden. Durch die \TUDScript-Klassen wird der mit dieser Option 
-angegebene Wert auch an das Paket \Package{geometry} weitergereicht, sodass der 
-Benutzer unabhängig von der Satzspiegelgestaltung (\Option{cdgeometry}) die 
-Option \Option{BCOR}(\Package{typearea}) nutzen kann. So lässt sich eine 
-Bindekorrektur von beispielsweise \unit[5]{mm} mit der \emph{Klassenoption} 
-\Option*{BCOR=5mm}(\Package{typearea}) festlegen.
+\InlineDeclaration{\Option{BCOR=\PLength}(\Package{typearea})} zu erwähnen. Mit 
+dieser kann bei der Satzspiegelberechnung ein Heftrand respektive eine 
+Bindekorrektur berücksichtigt werden. Durch die \TUDScript-Klassen wird der mit 
+dieser Option angegebene Wert auch an das Paket \Package{geometry} 
+weitergereicht, sodass der Benutzer unabhängig von der Satzspiegelgestaltung 
+(\Option{cdgeometry}) die Option \Option{BCOR}(\Package{typearea}) nutzen kann. 
+So lässt sich eine Bindekorrektur von beispielsweise \unit[5]{mm} mit der 
+\emph{Klassenoption} \Option*{BCOR=5mm}(\Package{typearea}) festlegen.
 
 Eine Anpassung der Bindekorrektur hat natürlich \emph{immer} eine Änderung der 
 verfügbaren Breite des Textbereichs zur Folge hat und führt somit zwingend zu 
@@ -735,7 +763,7 @@ respektive \Option*{BCOR=6mm}(\Package{typearea}) bei diesem Beispiel zu wählen
 \index{Satzspiegel|)}%
 \end{Example}
 
-\minisec{Kopf- und Fußzeile im Zusammenspiel mit dem Satzspiegel}
+\subsubsection{Kopf- und Fußzeile im Zusammenspiel mit dem Satzspiegel}
 \index{Layout!Kopfzeile|?}%
 \index{Layout!Fußzeile|?}%
 %
@@ -749,10 +777,10 @@ Kopf- und Fußzeile bei der Satzspiegelkonstruktion entweder dem Rand oder dem
 Textkörper zugeschlagen werden sollten. Dies sollte bei der Erstellung eigener 
 Kopf- und Fußzeilen beachtet werden. Die Einstellung dafür erfolgt mit den 
 beiden \KOMAScript-Optionen 
-\Option{headinclude=\PBoolean}(\Package{typearea})|declare| sowie 
-\Option{footinclude=\PBoolean}(\Package{typearea})|declare|.
-Diese können~-- unabhängig von der Einstellung zur Satzspiegelgestaltung durch 
-die Option \Option{cdgeometry}~-- verwendet werden.
+\InlineDeclaration{\Option{headinclude=\PBoolean}(\Package{typearea})} sowie 
+\InlineDeclaration{\Option{footinclude=\PBoolean}(\Package{typearea})}. Diese 
+können~-- unabhängig von der Einstellung zur Satzspiegelgestaltung durch die 
+Option \Option{cdgeometry}~-- verwendet werden.
 
 \begin{Declaration}[v2.03]{\Option{extrabottommargin=\PLength}}[0pt]%
 \printdeclarationlist%
@@ -765,8 +793,7 @@ im Fußbereich entweder mit \Macro{footlogo} Drittlogos verwendet werden und
 diese über das optionale Argument oder via \Option{footlogoheight} über die 
 Standardhöhe hinaus vergrößert wurden oder mit \Macro{footcontent} ein 
 übergroßer Inhalt angegeben wurde, kann dieser unter Umständen etwas zu klein 
-sein. Alternativ kann auch die Option \Option{cdfoot} mit einem Längenwert 
-verwendet werden.
+sein. 
 \end{Declaration}
 
 
@@ -841,7 +868,8 @@ Im Layout des \CDs wird auch bei \Option{cdfont=false} die Hausschrift in
 Die Option \Option{headings=\PMisc} wird bereits von \KOMAScript{} definiert 
 und dient unter anderem zum Festlegen der Größe von Überschriften. Diese wird 
 von \TUDScript erweitert, um im Layout des \CDs die Schriftstärke der 
-Überschriften anpassen zu können.
+Überschriften anpassen zu können. Die Einstellungen gelten für die 
+Gliederungsebenen bis einschließlich \Macro*{subsubsection}.
 %
 \begin{DeclarationValues}
 \itemval=light/normalbold=
@@ -849,9 +877,6 @@ von \TUDScript erweitert, um im Layout des \CDs die Schriftstärke der
 \itemval=heavy/ultrabold=
   Für Überschriften wird die extra"~fette Schriftstärke verwendet.
 \end{DeclarationValues}
-%
-Die Einstellungen gelten für die Gliederungsebenen bis einschließlich 
-\Macro*{subsubsection}.
 \end{Declaration}
 
 
@@ -884,13 +909,7 @@ abhängig von der Option \Option{cdfont=\PMisc} ist. Sowohl für Titel- als auch
 Umschlagseite kann diese über das optionale Argument von \Macro{maketitle} 
 respektive \Macro{makecover} geändert werden.
 
-\begin{Declaration}[%
-  v2.03!\Option{cdtitle=bicolor}:%
-    Farbeinsatz nur im Kopf mit farbig abgesetztem Querbalken;
-  v2.03!\Option{cdtitle=fullcolor}:%
-    voller Farbeinsatz mit farbig abgesetztem Querbalken;
-  v2.04!\Option{cdtitle=barcolor}:nur farbig abgesetzter Querbalken;%
-]{\Option{cdtitle=\PMisc}}[\Option{cd=\PMisc}]<\cdalias>
+\begin{Declaration}{\Option{cdtitle=\PMisc}}[\Option{cd=\PMisc}]<\cdalias>
 \printdeclarationlist%
 \index{Titel|?}%
 %
@@ -916,19 +935,13 @@ und dem im \CD umgeschaltet werden. Die neue Titelseite unterstützt alle durch
   Danksagung.
 }
 Zusätzlich werden viele neue Felder definiert, welche vor allem für eine 
-wissenschaftliche Arbeit von Relevanz sind. Genaueres dazu 
-ist in \autoref{sec:title} nachzulesen. Unabhängig von der gewählten Variante 
-der Titelseite wird diese immer mit \Macro{maketitle} erzeugt.
+wissenschaftliche Arbeit von Relevanz sind. Genaueres dazu ist in 
+\autoref{sec:title} nachzulesen. Der Titel selbst wird~-- unabhängig von der 
+gewählten Variante~-- immer mit \Macro{maketitle} erzeugt.
 \end{Declaration}
 
-\begin{Declaration}[%
-  v2.02;%
-  v2.03!\Option{cdcover=bicolor}:%
-    Farbeinsatz nur im Kopf mit farbig abgesetztem Querbalken;
-  v2.03!\Option{cdcover=fullcolor}:%
-    voller Farbeinsatz mit farbig abgesetztem Querbalken;
-  v2.04!\Option{cdcover=barcolor}:nur farbig abgesetzter Querbalken;%
-]{\Option{cdcover=\PMisc}}[true][\Option{cd=false}:false]<\cdalias>
+\begin{Declaration}[v2.02]{\Option{cdcover=\PMisc}}%
+  [true][\Option{cd=false}:false]<\cdalias>
 \printdeclarationlist%
 \index{Umschlagseite|?}%
 %
@@ -943,13 +956,7 @@ die Umschlagseite dem originalen \KOMAScript-Titel. Die Verwendung des Befehls
 \autoref{sec:title} erläutert.
 \end{Declaration}
 
-\begin{Declaration}[%
-  v2.03!\Option{cdpart=bicolor}:%
-    Farbeinsatz nur im Kopf mit farbig abgesetztem Querbalken;
-  v2.03!\Option{cdpart=fullcolor}:%
-    voller Farbeinsatz mit farbig abgesetztem Querbalken;
-  v2.04!\Option{cdpart=barcolor}:nur farbig abgesetzter Querbalken;%
-]{\Option{cdpart=\PMisc}}[\Option{cd=\PMisc}]<\cdalias>
+\begin{Declaration}{\Option{cdpart=\PMisc}}[\Option{cd=\PMisc}]<\cdalias>
 \printdeclarationlist%
 \index{Layout!Teileseiten|?}%
 %
@@ -962,13 +969,7 @@ Hinweise zur Teileseite im
 \CD zu finden.
 \end{Declaration}
 
-\begin{Declaration}[%
-  v2.03!\Option{cdchapter=bicolor}:%
-    Farbeinsatz nur im Kopf mit farbig abgesetztem Querbalken;
-  v2.03!\Option{cdchapter=fullcolor}:%
-    voller Farbeinsatz mit farbig abgesetztem Querbalken;
-  v2.04!\Option{cdchapter=barcolor}:nur farbig abgesetzter Querbalken;%
-]{\Option{cdchapter=\PMisc}}[\Option{cd=\PMisc}]<\cdalias>
+\begin{Declaration}{\Option{cdchapter=\PMisc}}[\Option{cd=\PMisc}]<\cdalias>
 \printdeclarationlist%
 \index{Layout!Kapitelseiten|?}%
 %
@@ -1033,7 +1034,6 @@ dementsprechend tiefer.
 \index{Layout!Überschriften|)}%
 \end{Declaration}
 \end{Declaration}
-
 
 
 \subsection{Seiten im Stil des \CDs}
@@ -1248,9 +1248,9 @@ Ausprägung aktiviert werden, was auch für dieses Anwenderhandbuch geschehen is
 \end{DeclarationValues}
 %
 Wird beim Laden der Klasse respektive des Paketes \Package{scrlayer-scrpage} 
-die Option \Option{manualmark}(\Package{scrlayer-scrpage})|declare| nicht 
-explizit angegeben, so werden mit \Option{cdfoot=true} über die 
-\KOMAScript-Option \Option{automark}(\Package{scrlayer-scrpage})|declare| auch 
+die Option \InlineDeclaration{\Option{manualmark}(\Package{scrlayer-scrpage})} 
+nicht explizit angegeben, so werden mit \Option{cdfoot=true} über die 
+Option \InlineDeclaration{\Option{automark}(\Package{scrlayer-scrpage})} auch 
 gleichzeitig die automatischen Kolumnentitel aktiviert, welche als Marken die 
 Titel der Gliederungsebenen verwendet. Genaueres dazu und der Möglichkeit, die 
 Kolumnentitel manuell festzulegen, ist dem \scrguide zu entnehmen.
@@ -1408,7 +1408,7 @@ Spalte erhalten. Beispielsweise kann die linke Fußbereichsspalte mit
 \Macro{footcontent}[\Parameter{Inhalt}\POParameter{*}] angepasst werden ohne 
 dabei den Inhalt der rechten Spalte zu verändern oder es ließe sich lediglich 
 die verwendete Schrift des Fußbereichs bei gleichbleibendem Inhalt mit 
-\Macro{footcontent}[\OParameter{Anweisungen}\PParameter{*}\POParameter{*}]%
+\Macro{footcontent}[\OParameter{Anweisungen}\PParameter{*}\POParameter{*}]
 anpassen.
 
 Im Fußbereich wird das Schriftelement \Font{tudheadings} verwendet. Dabei wird 
@@ -1529,20 +1529,18 @@ manuell ändern:
 \index{Layout!Fußzeile}%
 \index{Layout!Seitenstile}%
 %
-Die \Environment{tudpage}"~Umgebung hat ihren Ursprung in einer frühen Version 
-von \TUDScript, als die \PageStyle{tudheadings}"=Seitenstile noch nicht 
-verfügbar waren. Diese sollten mittlerweile bevorzugt gegenüber der hier 
-beschriebenen Umgebung verwendet werden. Die \Environment{tudpage}"~Umgebung 
-kann über verschiedene Parameter als optionales Argument angepasst werden. Wird 
-das Paket \Package{babel} genutzt, kann die innerhalb der Umgebung angewandte 
-Sprache mit \Key{\Environment{tudpage}}{language=\PSet{Sprache}} geändert 
-werden, was zur Anpassung der sprachspezifischen Trennungsmuster und Bezeichner 
-führt. Wurde das Paket \Package{multicol} geladen, wird mit dem Parameter 
-\Key{\Environment{tudpage}}{columns=\PSet{Anzahl}} der Inhalt der Umgebung 
-mit gegebenen Anzahl mehrspaltig gesetzt. Der Seitenstil, welcher durch die 
-\Environment{tudpage}"~Umgebung verwendet wird, kann mit dem Parameter 
+Sind die Einstellungsmöglichkeiten der \PageStyle{tudheadings}"=Seitenstile 
+nicht ausreichend, kann die \Environment{tudpage}"~Umgebung genutzt werden, 
+wobei sich diese über die verschiedenen Parameter im optionalen Argument 
+anpassen lässt. Mit dem Paket \Package{babel} kann die innerhalb der Umgebung 
+angewandte Sprache mit \Key{\Environment{tudpage}}{language=\PSet{Sprache}} 
+geändert werden, was zur Anpassung der sprachspezifischen Trennungsmuster und 
+Bezeichner führt. Wurde das Paket \Package{multicol} geladen, wird mit dem 
+Parameter \Key{\Environment{tudpage}}{columns=\PSet{Anzahl}} der Inhalt der 
+gegebenen Anzahl entsprechend mehrspaltig gesetzt. Der gewünschte  
+\PageStyle{tudheadings}"=Seitenstil kann mit dem Parameter 
 \Key{\Environment{tudpage}}{pagestyle=\PSet{Seitenstil}} angepasst werden, 
-wobei \PValue{headings}, \PValue{plain} und \PValue{empty} gültige Werte sind. 
+wobei \PValue{headings}, \PValue{plain} und \PValue{empty} gültig sind. 
 
 Die weiteren Parameter entsprechen in ihrem Verhalten den gleichnamigen 
 Klassenoptionen oder Befehlen, wirken sich jedoch nur innerhalb der 
@@ -1573,8 +1571,7 @@ Wertzuweisungen ist auf den angegebenen Seiten dokumentiert.
 }
 %
 Für das Erstellen eines Titels mit dem Befehl \Macro{maketitle} wird mit der 
-\KOMAScript-Option 
-\Option{titlepage=\PBoolean}(\Bundle{koma-script})|declare| festgelegt, ob 
+\KOMAScript-Option \Option{titlepage}(\Bundle{koma-script}) festgelegt, ob 
 dieser in Gestalt einer ganzen Titelseite oder nur als Titelkopf erscheinen 
 soll. Für den Titel im \TUDCD werden alle Felder unterstützt, welche bereits 
 durch \KOMAScript{} definiert sind. Darüber hinaus werden für die 
@@ -1594,7 +1591,7 @@ wird~-- im Vergleich zum Titel~-- lediglich einer reduzierte Anzahl an Feldern
 auf dieser ausgegeben.
 
 \begin{Declaration}[%
-  v2.01:Bugfix für Schriftstärke auf Titelseite;%
+  v2.01:Bugfix für Schriftstärke auf Titelseite für verschiedene Elemente;%
   v2.02:Unterstützung der Schriftelemente \Font*{titlehead}, 
     \Font*{subject}, \Font*{title}, \Font*{subtitle}, \Font*{author}, 
     \Font*{date}, \Font*{publishers}, \Font*{dedication}, 
@@ -1683,9 +1680,9 @@ eines \DDC-Logos auf den Titel beschränkt bleiben.
 \index{Satzspiegel!zweispaltig}%
 %
 Im zweispaltigen Satz 
-(Klassenoption~\Option{twocolumn}(\Package{typearea})|declare|) wird mit 
-\Macro{maketitle} die Titelseite selbst immer einspaltig gesetzt. Direkt nach 
-dem Titel folgt normalerweise der zweispaltige Fließtext. Mit dem Befehl 
+(Klassenoption~\InlineDeclaration{\Option{twocolumn}(\Package{typearea})}) wird 
+mit \Macro{maketitle} die Titelseite selbst immer einspaltig gesetzt. Direkt 
+nach dem Titel folgt normalerweise der zweispaltige Fließtext. Mit dem Befehl 
 \Macro{maketitleonecolumn} kann nach dem Titel zusätzlich weiterer Inhalt~-- 
 zum Beispiel eine Zusammenfassung respektive eine Kurzfassung~-- einspaltig 
 gesetzt werden.
@@ -1795,18 +1792,22 @@ einzig auf die Umschlagseite aus.
 \end{Declaration}
 \end{Declaration}
 
+\begin{Entity}{\Bundle{koma-script}}
+\begin{Declaration}{\Option{titlepage=\PMisc}}[true][\Class{tudscrartcl}:false]%
 \begin{Declaration}{\Macro{title}[\Parameter{Titel}]}
-\begin{Declaration}[%
-  v2.01:Bugfix für Schriftstärke bei Verwendung des Untertitels%
-]{\Macro{subtitle}[\Parameter{Untertitel}]}
+\begin{Declaration}{\Macro{subtitle}[\Parameter{Untertitel}]}
 \printdeclarationlist%
 \index{Titel!Felder|(}%
 %
 Die Befehle \Macro{title} und \Macro{subtitle} sind selbsterklärend. Anzumerken 
-ist, dass die Schriftstärke des Titels von der Option \Option{headings} abhängt
-und der Untertitel immer im fetten Schnitt erscheint. 
+ist, dass die Schriftstärke des Titels von der Option \Option{headings}() 
+abhängt und der Untertitel immer im fetten Schnitt erscheint. Die Gestalt des 
+Titels (alleinstehende Titelseite oder Titelkopf) wird mit der Option 
+\Option{titlepage} gesetzt und ist im \scrguide dokumentiert.
 \end{Declaration}
 \end{Declaration}
+\end{Declaration}
+\end{Entity}
 
 \begin{Declaration}[v2.02]{\Font{titlepage}}
 \begin{Declaration}[v2.02]{\Font{thesis}}
@@ -2332,7 +2333,7 @@ Mit \Macro*{renewcommand*}[%
 lässt sich übrigens~-- unabhängig von der Option \Option{chapterpage}~-- der 
 Seitenstil von Kapiteln anpassen. Bei der Verwendung von Kapitelseiten mit 
 \Option{chapterpage=true} ist außerdem das Aktivieren der \KOMAScript-Option 
-\Option{chapterprefix=\PBoolean}(\Bundle{koma-script})|declare| 
+\InlineDeclaration{\Option{chapterprefix=\PBoolean}(\Bundle{koma-script})} 
 empfehlenswert. Damit werden die Kapitelüberschriften mit einer Vorsatzzeile 
 gesetzt. Wird ein nummeriertes Kapitel erzeugt, so wird zunächst in einer Zeile 
 \enquote{Kapitel} gefolgt von der aktuellen Kapitelnummer ausgegeben, in der 
@@ -2362,13 +2363,15 @@ werden kann.
 
 
 \subsection{Vakatseiten}
+\tudhyperdef*{sec:vacat}%
 \index{Vakatseiten|(}%
 %
 Automatisch erzeugte Vakatseiten~-- auch absichtliche Leerseiten genannt~-- 
-sind in Abhängigkeit der 
-\KOMAScript-Optionen \Option{twoside=\PMisc}(\Package{typearea})|declare| 
-und \Option{open=\PMisc}(\Bundle{koma-script})|declare| am Beginn von Teilen 
-und Kapiteln in Dokumenten zu finden.%
+können nur im doppelseitigem Satz (\Option{twoside=true}(\Package{typearea})) 
+vor dem Beginn eines Teils oder Kapitels abhängig von der \KOMAScript-Option 
+\InlineDeclaration{\Option{open=\PMisc}(\Bundle{koma-script})} auftreten. Wird 
+ein neuer Teil oder ein neues Kapitel immer auf einer rechten Seite erzeugt 
+(\Option{open=right}(\Bundle{koma-script})),%
 \footnote{%
   Voreinstellungen
   \Class{tudscrbook}: 
@@ -2378,9 +2381,10 @@ und Kapiteln in Dokumenten zu finden.%
   \Option{open=any}(\Bundle{koma-script}), 
   \Option{twoside=false}(\Package{typearea})%
 }
-Für die Vakatseiten kann der Seitenstil mit der \KOMAScript-Option 
-\Option{cleardoublepage=\PMisc}(\Bundle{koma-script})|declare| eingestellt 
-werden.
+so wird gegebenenfalls~-- der zuvor gesetzte Inhalt endete auf einer rechten 
+Seite~-- eine Vakatseite erzeugt. Für diese kann mit der \KOMAScript-Option 
+\InlineDeclaration{\Option{cleardoublepage=\PMisc}(\Bundle{koma-script})} der 
+Seitenstil eingestellt werden.
 
 \begin{Declaration}[%
   v2.06:Einstellung für farbige Rückseiten%
@@ -2392,16 +2396,16 @@ werden.
 \index{Layout!Rückseiten}%
 \index{Satzspiegel!doppelseitig}%
 %
-Diese Option wirkt sich lediglich bei aktiviertem doppelseitigem Satz und 
-ausschließlich rechts eröffnenden Seiten für Teile beziehungsweise Kapitel
-aus.%
+Diese Option wirkt sich lediglich im gerade zuvor beschriebenen Fall des 
+doppelseitigen Satzes und ausschließlich rechts eröffnenden Seiten für Teile 
+beziehungsweise Kapitel aus.%
 \footnote{%
   \KOMAScript-Option \Option{twoside=true}(\Package{typearea}) und 
   \Option{open=right}(\Bundle{koma-script})%
 }
-In diesem Fall kann der Stil der darauffolgenden, linken Seite~-- sprich der 
-Rückseite~-- beeinflusst werden. Das Normalverhalten sieht vor, dass nach einem 
-Teil die nachfolgende Rückseite unabhängig von der Einstellung für 
+Unter diesen Umständen kann der Stil der darauffolgenden, linken Seite~-- 
+sprich der Rückseite~-- beeinflusst werden. Das Normalverhalten sieht vor, dass 
+nach einem Teil die nachfolgende Rückseite unabhängig von der Einstellung für 
 \Option{cleardoublepage}(\Bundle{koma-script}) immer als vollständig leere 
 Seite ohne Kopf- oder Fußzeilen gesetzt wird.
 
@@ -2466,9 +2470,7 @@ Abschnitts \emph{Textauszeichnungen} zu finden.
 }
 \begin{quoting}[rightmargin=0pt]
 \begin{Code}[escapechar=§]
-\AtBeginDocument{%
-  \addtokomafont§\Parameter{Schriftelement}\Parameter{Einstellungen}§%
-}
+\AtBeginDocument{\addtokomafont§\Parameter{Schriftelement}\Parameter{Einstellungen}§}
 \end{Code}
 \end{quoting}
 
@@ -2515,7 +2517,6 @@ automatisch ein. Detaillierte Informationen sind in der Dokumentation von
 Neben den Befehlen für die Anpassung des Layouts an das \TUDCD stellen die 
 \TUDScript-Klassen weitere Befehle und Umgebungen zur Verfügung, um die 
 Anwendung insbesondere für wissenschaftliche Arbeiten zu erleichtern.
-
 
 
 \subsection{Zusammenfassung/Kurzfassung}
@@ -2751,6 +2752,7 @@ Wird die \Environment{abstract}"~Umgebung innerhalb des Argumentes der Befehle
 \end{Declaration}
 
 \minisec{Umbenennung der \abstractname}
+%
 Mit dem \KOMAScript-Befehl \Macro{renewcaptionname}(\Bundle{koma-script})
 kann der Bezeichner~-- sprich der Wortlaut~-- der für die 
 \Environment{abstract}"~Umgebung verwendeten Überschrift verändert werden. Mehr 
@@ -3568,11 +3570,8 @@ Nutzung von \Option{tudscrver} nur als Klassenoption möglich ist.
   innerhalb des Dokumentes auftreten. Dies ist die Standardeinstellung.
 \end{DeclarationValues}
 \end{Declaration}
-\end{Declaration*}
-\end{Declaration*}
-\end{Declaration*}
 
-\ToDo[doc]{Wieder rein, falls vernünftig implementiert}[v2.07]
+\ToDo[doc]{Wieder rein, falls vernünftig implementiert}[v2.08]
 %\subsection{Fußnoten in Überschriften}
 %\index{Layout!Überschriften}%
 %\index{Fußnoten}%
@@ -3611,3 +3610,7 @@ Nutzung von \Option{tudscrver} nur als Klassenoption möglich ist.
 %\end{DeclarationValues}
 %\end{Declaration}
 %\end{Declaration}
+
+\end{Declaration*}
+\end{Declaration*}
+\end{Declaration*}

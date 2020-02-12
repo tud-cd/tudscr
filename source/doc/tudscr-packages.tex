@@ -4,25 +4,17 @@
 \index{Kompatibilität|?}%
 \section{Notwendige und ergänzende Pakete für \TUDScript}
 \tudhyperdef*{sec:packages:needed}%
-Diese Pakete werden von den \TUDScript-Klassen zwingend benötigt und 
-eingebunden. Möchten Sie eines der im Folgenden aufgezählten Pakete selber 
-mit bestimmten Optionen nutzen, so sollten diese bereits \emph{vor} dem Laden 
-der Dokumentklasse an das Paket weitergereicht werden, falls bei der folgenden
-Beschreibung des Paketes nichts anderweitiges angegeben wird.
-%
-\begin{Example}
-Das Weiterreichen von Optionen an Pakete muss folgendermaßen erfolgen:
-\begin{Code}[escapechar=§]
-\PassOptionsToPackage§\Parameter{Paketoptionen}\Parameter{Paket}§
-\documentclass§\OParameter{Klassenoptionen}\PParameter{tudscr\dots}§
-\end{Code}
-\end{Example}
+Die im Folgenden aufgezählten Pakete werden von den \TUDScript-Klassen zwingend 
+benötigt und spätestens zum Ende der Präambel geladen. Möchten Sie eines der 
+Pakete selber nutzen, können Sie dieses auch wie gewohnt mit
+\Macro{usepackage}[\OParameter{Paketoptionen}\Parameter{Paket}] einbinden. 
+Alternativ ist es auch möglich, einfach die gewünschten Optionen bereits 
+\emph{vor} dem Laden der Dokumentklasse an das entsprechende Paket 
+weiterzureichen, falls bei der folgenden Beschreibung des Paketes nichts 
+anderweitiges angegeben wird. Dies wird in \autoref{sec:tips:options} genauer 
+beschrieben.
 %
 \ToDo{koma-script nicht als Paket, Links beachten!}[v2.06]
-\begin{EntityDeclaration}{\Bundle{koma-script}}
-\begin{Declaration*}{\Class{scrbook}}
-\begin{Declaration*}{\Class{scrreprt}}
-\begin{Declaration*}{\Class{scrartcl}}
 \begin{packages}
 \item[%
   typearea,scrbase,scrlayer-scrpage,scrletter,scrextend%
@@ -31,7 +23,11 @@ Das Weiterreichen von Optionen an Pakete muss folgendermaßen erfolgen:
     v2.02:Paket \Package{scrlayer-scrpage}(\Bundle{koma-script}) ist für 
     \TUDScript unabdingbar%
   }%
-  De zentrale Grundlage für \TUDScript sind die Klassen \Class{scrbook}, 
+  \begin{EntityDeclaration*}{\Bundle{koma-script}}
+  \begin{Declaration*}{\Class{scrbook}}
+  \begin{Declaration*}{\Class{scrreprt}}
+  \begin{Declaration*}{\Class{scrartcl}}
+  Die zentrale Grundlage für \TUDScript sind die Klassen \Class{scrbook}, 
   \Class{scrreprt} und \Class{scrartcl} aus dem \KOMAScript-Bundle. Weiterhin 
   wird das Paket \Package{scrbase} genutzt, was das Definieren von Optionen 
   oder Schlüsseln im Stil von \KOMAScript erlaubt, die auch noch nach dem Laden 
@@ -41,12 +37,10 @@ Das Weiterreichen von Optionen an Pakete muss folgendermaßen erfolgen:
   des Paketes \Package{scrlayer-scrpage} bereitgestellt. Wenn es nicht durch 
   den Anwender~-- mit beliebigen Optionen~-- geladen wird, erfolgt dies am Ende 
   der Präambel automatisch durch \TUDScript.
-\end{packages}
-\end{Declaration*}
-\end{Declaration*}
-\end{Declaration*}
-\end{EntityDeclaration}
-\begin{packages}
+  \end{Declaration*}
+  \end{Declaration*}
+  \end{Declaration*}
+  \end{EntityDeclaration*}
 \item[opensans,iwona]
   \index{Schriftart|!}%
   \ChangedAt{%
@@ -173,6 +167,7 @@ von \Engine{pdfLaTeX} das Paket \Package{hyphsubst} unbedingt zu verwenden.
   \footnote{englisch: font expansion}
   im Dokument. Es funktioniert nicht mit der klassischen \Engine*{TeX}"~Engine, 
   wohl jedoch mit \Engine*{pdfTeX} oder \Engine*{LuaTeX} sowie \Engine*{XeTeX}.
+  \ToDo{Hinweis zu Optionen (final, spacing, kerning, tracking?)}
 \item[babel,polyglossia]
   \index{Sprachunterstützung}%
   \index{Bezeichner}%
@@ -260,7 +255,7 @@ die Makrotypografie adressieren.
   \OpenSans~-- ist dies schwieriger und ein erweiterter Abstand der Zeilen kann 
   hierbei hilfreich sein. Jedoch sollte nicht nach dem Motto 
   \enquote{viel hilft viel} verfahren werden. Für dieses Dokument wurde 
-  \Macro{setstretch}[\PParameter{1.1}](\Package{setspace}) für den 
+  \Macro{setstretch}[\PParameter{\baselinestretch}](\Package{setspace}) für den 
   Zeilenabstand gewählt. Weitere Tipps sind in \autoref{sec:tips:headings} und 
   \autoref{sec:tips:headline} zu finden.
 \item[multicol]
@@ -298,10 +293,10 @@ die Makrotypografie adressieren.
   \Environment{quote}(\Bundle{koma-script}) und 
   \Environment{quotation}(\Bundle{koma-script})~-- für Zitate und ähnliches 
   an. Allerdings werden durch beide Umgebungen die \KOMAScript-Option 
-  \Option{parskip=\PMisc}(\Bundle{koma-script})|declare| ignoriert. Mit der 
-  Umgebung \Environment{quoting}(\Package{quoting}) aus dem gleichnamigen Paket 
-  lässt sich dieses Problem umgehen. Wird das Paket geladen, wird diese 
-  innerhalb der \Environment{abstract}"~Umgebung verwendet.
+  \Option{parskip=\PMisc}(\Bundle{koma-script}) ignoriert. Mit der Umgebung 
+  \Environment{quoting}(\Package{quoting}) aus dem gleichnamigen Paket lässt 
+  sich dieses Problem umgehen. Wird das Paket geladen, wird diese innerhalb der 
+  \Environment{abstract}"~Umgebung verwendet.
 \item[csquotes]
   \index{Zitate}%
   Das Paket stellt unter anderem den Befehl 
@@ -604,8 +599,9 @@ finden.
 %\end{document}
 \begin{packages}
 \item[caption]
-  Mit der Option \Option{captions=\PMisc}(\Bundle{koma-script})|declare| 
-  bieten die \KOMAScript-Klassen bereits einige Möglichkeiten zum Formatieren 
+  Die \KOMAScript-Klassen bieten bereits mit der Option 
+  \InlineDeclaration{\Option{captions=\PMisc}(\Bundle{koma-script})}
+  einige Möglichkeiten zum Formatieren 
   der Beschriftungen für Gleitobjekte. Dieses Paket ist daher meist nur in 
   gewissen Ausnahmefällen für spezielle Anweisungen notwendig, allerdings auch 
   bei der Verwendung unbedenklich.
@@ -639,7 +635,7 @@ finden.
 \item[placeins]
   Mit diesem Paket kann die Ausgabe von Gleitobjekten vor Kapiteln und wahlweise
   Unterkapiteln erzwungen werden.
-\item[flafter]<>
+\item[flafter](\Bundle{latex-base})<latex-base>
   Dieses Paket erlaubt die frühestmögliche Platzierung von Gleitobjekten im 
   ausgegeben Dokument erst an der Stelle ihres Auftretens im Quelltext. Diese 
   werden dementsprechend nie vor ihrer Definition am Anfang der Seite 

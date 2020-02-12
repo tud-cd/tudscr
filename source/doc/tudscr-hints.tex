@@ -324,9 +324,11 @@ vor der ersten und nach der letzten entfernt werden.
 \section{Unterdrückung des Einzuges eines Absatzes}
 \index{Absatzauszeichnung}%
 %
-Werden zur Absatzauszeichnung im Dokument~-- wie es aus typografischer Sicht 
-zumeist sinnvoll ist~-- Einzüge und keine vertikalen Abstände verwendet
-(\KOMAScript-Option \Option*{parskip=false}(\Bundle{koma-script})), kann es 
+Die Absatzauszeichnung wird durch die \KOMAScript-Option
+\InlineDeclaration{\Option{parskip=\PMisc}(\Bundle{koma-script})} festgelegt. 
+Werden für diese~-- wie es aus typografischer Sicht zumeist sinnvoll ist~-- 
+Einzüge (\Option{parskip=false}(\Bundle{koma-script})) und keine vertikalen 
+Abstände verwendet (\Option{parskip=half/true}(\Bundle{koma-script})), kann es 
 vorkommen, dass ein ganz bestimmter Absatz~-- beispielsweise der nach einer 
 zuvor genutzten Umgebung folgende~-- ungewollt eingerückt ist. Dies kann sehr 
 einfach manuell behoben werden, indem direkt zu Beginn des Absatzes das Makro 
@@ -507,25 +509,36 @@ verwendet werden.
 
 
 \section{Fehlermeldung beim Laden eines Paketes mit Optionen}
+\tudhyperdef*{sec:tips:options}
 \ChangedAt{v2.05:\TaT Fehler beim Laden eines Paketes mit Optionen}
 %
 Es kann unter Umständen passieren, dass beim Laden eines Paketes mit bestimmten 
-Optionen via \Macro*{usepackage}[\OParameter{Paketoptionen}\Parameter{Paket}] 
-folgender Fehler ausgegeben wird:
+Optionen via \InlineDeclaration{%
+  \Macro{usepackage}[\OParameter{Paketoptionen}\Parameter{Paket}]%
+  (\Bundle{latex-base})%
+} folgender Fehler ausgegeben wird:
 %
 \begin{quoting}
 \begin{Code}[escapechar=§]
-! LaTeX Error: Option clash for package <§\dots§>.
+! LaTeX Error: Option clash for package <...>.
 \end{Code}
 \end{quoting}
 %
-Mit großer Sicherheit wird das angeforderte Paket bereits durch die verwendete 
+Wahrscheinlich wird das angeforderte Paket bereits durch die verwendete 
 Dokumentklasse oder ein anderes Paket geladen. Normalerweise genügt es, die 
-gewünschten Optionen durch 
-\Macro{PassOptionsToPackage}[\Parameter{Paketoptionen}\Parameter{Paket}] 
-bereits vor dem Laden der Dokumentklasse mit \Macro*{documentclass} an das 
-betreffende Paket weiterzureichen.
-
+gewünschten Optionen mit
+\begin{Entity}{\Bundle{latex-base}}
+\begin{quoting}
+\InlineDeclaration{%
+  \Macro{PassOptionsToPackage}[\Parameter{Paketoptionen}\Parameter{Paket}]%
+}\newline%
+\Macro*{documentclass}[\OParameter{Klassenoptionen}\Parameter{Klasse}]%
+\end{quoting}
+\end{Entity}
+bereits vor dem Laden der Dokumentklasse an das betreffende Paket 
+weiterzureichen.
+%
+%
 
 
 \section{Probleme bei der Verwendung von \Package{auto-pst-pdf}}
@@ -536,11 +549,10 @@ Bei der Verwendung von \Engine{pdfLaTeX} liest das Paket \Package{auto-pst-pdf}
 die Präambel ein und erstellt anschließend über den PostScript-Pfad 
 \Path{latex\,>\,dvips\,>\,ps2pdf} eine PDF"~Datei, welche lediglich alle in den 
 vorhandenen \Environment{pspicture}(\Package{pstricks})"~Umgebungen erstellten 
-Grafiken enthält. Das Paket \Package{iftex} stellt zur Unterscheidung, ob das 
-aktuell kompilierte Dokument in einer PDF"~ oder einer DVI"~Datei ausgegeben 
-wird, das Makro \Macro{ifpdf}(\Package{iftex}) bereit. Dieser Befehl wird 
-nachfolgend genutzt, um abhängig vom Ausgabeformat unterschiedliche Quelltexte 
-auszuführen.
+Grafiken enthält. Mit dem Befehl \Macro{ifpdf}(\Package{iftex}) aus dem Paket 
+\Package{iftex} lässt sich unterscheiden, ob die Ausgabe in eine PDF"~ oder 
+DVI"~Datei erfolgt. Folgend wird abhängig vom Ausgabeformat unterschiedlicher 
+Quelltext ausgeführt.
 %
 \begin{quoting}
 \begin{Code}
@@ -549,6 +561,7 @@ auszuführen.
 \end{quoting}
 
 \minisec{Die gleichzeitige Verwendung von \Package{floatrow}}
+%
 Das Paket \Package{floatrow} stellt Befehle bereit, mit denen die Beschriftung 
 von Gleitobjekten sehr bequem gesetzt werden können. Diese Setzen ihren Inhalt 
 vor der eigentlichen Ausgabe erst in einer Box, um deren Breite zu ermitteln. 
@@ -577,6 +590,7 @@ verwenden.
 \end{quoting}
 
 \minisec{Die parallele Nutzung von \Package{tikz} und \Package{todonotes}}
+%
 Mit dem Paket \Package{tikz}~-- und auch allen anderen Paketen die 
 selbiges nutzen wie beispielsweise \Package{todonotes}~-- gibt es in Verbindung 
 mit \Package{auto-pst-pdf} ebenfalls Probleme. Lösen lässt sich dieses Dilemma, 
@@ -639,7 +653,7 @@ werden. Das folgende Minimalbeispiel zeigt, wie dies mit \KOMAScript-Mitteln
 über die Optionen \Option*{paper=landscape}(\Package{typearea}) und 
 \Option*{paper=A3}(\Package{typearea}) geändert werden kann.
 \begin{Code}
-\documentclass[paper=a4,pagesize]{tudscrreprt}
+\documentclass[paper=A4,pagesize]{tudscrreprt}
 \usepackage[T1]{fontenc}
 \usepackage[ngerman]{babel}
 \usepackage{blindtext}
@@ -686,7 +700,7 @@ Papierbogens angegeben.
 \begin{Code}[escapechar=§]
 \RequirePackage{fix-cm}
 \documentclass[%
-  paper=a1,
+  paper=A1,
   fontsize=36pt
 ]{tudscrposter}
 \usepackage[T1]{fontenc}
@@ -718,7 +732,7 @@ Schnittmarken.
 \begin{Code}[escapechar=§]
 \RequirePackage{fix-cm}
 \documentclass[%
-  paper=a1,
+  paper=A1,
   fontsize=36pt
 ]{tudscrposter}
 \usepackage[T1]{fontenc}
@@ -769,7 +783,7 @@ zu finden.
 \tudhyperdef*{sec:tips:floats}%
 \index{Gleitobjekte!Platzierung|?}%
 %
-Mit den beiden Paketen \Package{flafter}<> sowie \Package{placeins} gibt es die 
+Mit den beiden Paketen \Package{flafter} sowie \Package{placeins} gibt es die 
 Möglichkeit, den für \hologo{LaTeX} zur Verfügung stehenden Raum für die 
 Platzierung von Gleitobjekten einzuschränken. Darüber hinaus kann diese auch 
 durch die im Folgenden aufgezählten Befehle beeinflusst werden. Die Makros 
@@ -880,7 +894,7 @@ relativ großen und kleinen Schriftgrößen kann dabei eine Warnung in der Gesta
 %
 \begin{quoting}[rightmargin=0pt]
 \begin{Code}[escapechar=§]
-LaTeX Font Warning: Font shape `§\dots§' in size <xx> not available
+LaTeX Font Warning: Font shape `...' in size <xx> not available
 \end{Code}
 \end{quoting}
 %
