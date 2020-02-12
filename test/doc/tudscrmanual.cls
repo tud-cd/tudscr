@@ -313,7 +313,7 @@
     }{%
       \protected@edef\tud@res@a{#2}%
       \@onelevel@sanitize\tud@res@a%
-      \wlog{+++++ label #1: \tud@res@a\space on page \thepage\on@line}%
+      \wlog{+++++ label #1: \tud@res@a\on@line}%
       \xifinlistcs{\tud@res@a}{tud@trace@lbl@#1@list}{}{%
         \listcsxadd{tud@trace@lbl@#1@list}{\tud@res@a}%
       }%
@@ -639,6 +639,8 @@
 }
 \newcommand*\Processor@CreateLabel[2]{%
   \begingroup%
+    \def\_{_}%
+    \def\dots{...}%
     \protected@edef\tud@res@a{#1}%
     \Markup@Name@Get\tud@res@b{#2}%
     \tud@lowerstring\tud@res@b{\tud@res@b}%
@@ -721,10 +723,10 @@
 }
 \newcommand*\tud@declaration@list{}
 \newcommand*\tud@alias@values{\@nil}
-% TODO andere Delimiter: d() D<> --> D'' d()
+% TODO andere Delimiter: d() D<> --> D'' d()?
 \NewDocumentEnvironment{Declaration}{o m !o !o !d() !D<>{}}{%
   % TODO was passiert hier? besser an \tud@declare@start durchreichen?
-  \Changed@At@CreateList{#1}[{#2}]:\emph{neu}:{\BooleanFalse}%
+  \Changed@At@CreateList{#1}[{#2}]:\emph{neu}:{\BooleanTrue}%
   \edef\tud@res@a{\def\noexpand\tud@alias@values{#6}}%
   \tud@toks@{\tud@declare@start!0!}%
   \eaddto@hook\tud@toks@{\expandafter!\tud@res@a!}%
@@ -846,7 +848,7 @@
 % TODO d()d'' -> d''d()
 \NewDocumentEnvironment{Obsolete}{m m !o !o !d() !d''}{%
   % TODO was passiert hier? besser an \tud@declare@start durchreichen?
-  \Changed@At@CreateList{#1}[{#2}]:\emph{entf\"allt}:{\BooleanTrue}%
+  \Changed@At@CreateList{#1}[{#2}]:\emph{entf\"allt}:{\BooleanFalse}%
   \def\tud@res@a{entf\"allt}%
   \IfValueT{#5}{\def\tud@res@a{#5}}%
   \IfValueT{#6}{\appto\tud@res@a{, \seeref{\@tud@indextrue#6'page'}}}%
@@ -872,13 +874,36 @@
 % TODO ohne openindex, einfach |declare (über declare@num <0)?
 % TODO sollte \Markup@Inline@Format verwenden, evtl spezielle declare-Variante 
 % TODO im Dokument alias setzen falls Wert gegeben, interne Variante ohne alias
-\NewDocumentCommand\InlineDeclaration{s D!!{-1} m !d()}{%
+\NewDocumentCommand\InlineDeclaration{s d!! m !d()}{%
+  \IfValueT{#2}{\ClassWarning{tudscrmanual}{warning text inline}}%
+  \IfValueT{#4}{\ClassWarning{tudscrmanual}{warning text append}}%
   %TODO Sternvarinate als raisedlink
-  \tud@declare@special@start!#2!{#3}%
-  \tud@print@changedatlist%
-  \tud@declare@special@end!#2!{#3}%
-  \IfValueTF{#4}{#4}{\null}%
+  \Inline@Declaration!-1!{#3}(#4)%
 }
+\NewDocumentCommand\Inline@Declaration{r!! m !o !d()}{%
+  %TODO Sternvarinate als raisedlink
+  \tud@declare@special@start!#1!{#2}%
+  \tud@print@changedatlist%
+  \tud@declare@special@end!#1!{#2}%
+  \IfValueTF{#4}{%
+%    \ClassWarning{tudscrmanual}{warning text append}%
+    #4%
+  }{%
+    \IfValueTF{#3}{#3}{\null}%
+  }%
+}
+%\NewDocumentCommand\InlineDeclaration{s D!!{-1} m !o !d()}{%
+%  \IfValueT{#2}{\ClassWarning{tudscrmanual}{warning text inline}}%
+%  \IfValueT{#5}{\ClassWarning{tudscrmanual}{warning text append}}%
+%  %TODO Sternvarinate als raisedlink
+%  \Inline@Declaration!-1!{#3}[{#4}]%
+%}
+%\NewDocumentCommand\Inline@Declaration{r!! m !o}{%
+%  \tud@declare@special@start!#1!{#2}%
+%  \tud@print@changedatlist%
+%  \tud@declare@special@end!#1!{#2}%
+%  \IfValueTF{#3}{#3}{\null}%
+%}
 \NewDocumentEnvironment{EntityDeclaration*}{o m}{%
   \tud@declare@special@start*!2!{#2}[{#1}]%
   \tud@print@changedatlist%
@@ -900,9 +925,9 @@
   % TODO sonderbehandlung * notwendig? optionales argument :xxx:?
   % direkt erzeugen und durch diesen Befehl
   \IfBooleanTF{#1}{%
-    \Changed@At@CreateList{#4}(#3){\BooleanFalse}%
+    \Changed@At@CreateList{#4}(#3){\BooleanTrue}%
   }{%
-    \Changed@At@CreateList{#4}[{#3}]{\BooleanFalse}%
+    \Changed@At@CreateList{#4}[{#3}]{\BooleanTrue}%
   }%
   \tud@declare@open{#2}{#3}%
   \ignorespaces%
@@ -1665,12 +1690,12 @@
     \let\suffix\@suffix%
     \let\hologo\@firstofone%
     \let\hologoRobust\@firstofone%
+    % TODO raus?
     \def\_{-}%
 %    \def~{-}%
     \protected\def~{~}%
     \def\dots{...}%
     \let\NoCaseChange\@firstofone%
-    % TODO raus?
     \let\emph\@firstofone%
   }%
 }
@@ -1699,6 +1724,7 @@
       \endgroup%
       \unexpanded{#1}%
       \ifx\tud@res@a\tud@res@b%
+        % TODO if empty?
         \unexpanded{{#2{#3}}}%
       \else%
         \unexpanded{{#3}}%
@@ -1748,6 +1774,7 @@
   m d++ d== o >{\Processor@Entity}d() d'' m r|| d<>%
 }{%
   \begingroup%
+    \IfValueT{#9}{\typeout{???/ \detokenize{#9}\on@line}}%
     \tud@toks@{\Process@@Markup{#1}+#2+=#3=[{#4}]}%
     % TODO in Deklarationen auf oberster ebene nur Spezialwerte in #3 möglich 
     \if@tud@declare%
@@ -1888,7 +1915,6 @@
     \expandafter\@firstoftwo%
   }%
 }
-% TODO rename to idx@get oder @aux?
 \newcommand*\tud@idx@read[2]{%
   \begingroup%
     \protected@edef\tud@res@a{%
@@ -2457,7 +2483,7 @@
         \def\tud@res@b{#3}%
         % TODO noch sinnvoll?
         \ifx\tud@res@b\@empty\else%
-          \typeout{??? \thepage\on@line}%
+          \typeout{??? \detokenize{#3} \thepage\on@line}%
         \fi%
         % TODO |declare| und |default| durch InlineDeclartion ersetzen
         % TODO nur noch |!| und |?| zulassen
@@ -2769,7 +2795,7 @@
 \newcommand*\tud@changedat@entry@list{}
 \newcommand*\tud@changedat@version@list{}
 % TODO o -> d<>? ist doch Haupteintrag (Implementierung), oder?
-\NewDocumentCommand\ChangedAt{s o d() m}{%
+\NewDocumentCommand\ChangedAt{>{\ReverseBoolean}s o d() m}{%
   \ifx\tud@changedat@entry@list\@empty\else%
     \ClassError{tudscrmanual}{Unprocessed change notes}{%
       \string\tud@changedat@entry@list\space is not empty%
@@ -2822,71 +2848,36 @@
 % TODO \addtoeachtocfile vs BeforeStartingToc
 \BeforeStartingTOC{\let\ChangedAt\@ChangedAt}
 \DeclareListParser*{\forssvlist}{;}
-% TODO raus!
-\newcommand*\Processor@IndexFormat[1]{%
-  \begingroup%
-    \def\tud@res@a##1<##2>##3<##4>##5<>##6\@nil{%
-      \IfArgIsEmpty{##1}{%
-        \IfArgIsEmpty{##3}{%
-          \def\tud@res@b{##5}%
-        }{%
-          \def\tud@res@b{##3}%
-        }%
-      }{%
-        \def\tud@res@b{##1}%
-      }%
-      \def\tud@res@c{##2}%
-      \IfArgIsEmpty{##4}{}{%
-        \preto\tud@res@c{##4!}%
-      }%
-    }%
-    \tud@res@a#1<><><>\@nil%
-    \protected@edef\tud@res@a{%
-      \endgroup%
-      \def\noexpand\ProcessedArgument{%
-        \ifx\tud@res@b\@empty\else|\expandonce\tud@res@b|\fi%
-        \ifx\tud@res@c\@empty\else<\expandonce\tud@res@c>\fi%
-      }%
-    }%
-  \tud@res@a%
-}
 % TODO argument order
 \NewDocumentCommand\Changed@At@CreateList{%
-  m >{\Processor@IndexFormat}o >{\Processor@Entity}D(){\tud@ety@curr} d:: m%
+  m o D(){\tud@ety@curr} d:: m%
 }{%
-  \IfValueT{#1}{%
-    \def\tud@res@a{#3}%
-    \@for\tud@res@a:=\tud@res@a\do{%
-      \tud@toks@{\Changed@At@@CreateList}%
-      \IfValueT{#2}{\addto@hook\tud@toks@{#2}}%
-      \eaddto@hook\tud@toks@{\expandafter(\tud@res@a):#4:{#5}}%
-      \forssvlist{\the\tud@toks@}{#1}%
-    }%
+  \IfValueT{#1}{\Changed@At@@CreateList{#1}[{#2}](#3):#4:{#5}}%
+}
+\NewDocumentCommand\Changed@At@@CreateList{%
+  m o >{\Processor@Entity}r() r:: m%
+}{%
+  \def\tud@res@a{#3}%
+  \@for\tud@res@a:=\tud@res@a\do{%
+    \tud@toks@{\Changed@At@@@CreateList[{#2}]}%
+    \eaddto@hook\tud@toks@{\expandafter(\tud@res@a):#4:{#5}}%
+    \forssvlist{\the\tud@toks@}{#1}%
   }%
 }
-\NewDocumentCommand\Changed@At@@CreateList{d|| d<> r() r:: m m}{%
+% TODO #2 raus
+\NewDocumentCommand\Changed@At@@@CreateList{o d<> r() r:: m m}{%
   \begingroup%
     \def\tud@res@a##1:##2:##3\@nil{%
       \def\tud@res@a{##1}%
       \def\tud@res@b{##2}%
-      % TODO ##3 anhängen, wenn nicht ':' oder '::'
+      % TODO ##3 anhängen, wenn nicht ':' oder '::'? defaultwerte!
     }%
     \tud@res@a#6::\@nil%
-    % TODO \Changed@At@CreateEntry nur aufrufen, falls :#4: oder default
+    % TODO \Changed@At@CreateEntry nur in liste, falls :#4: oder default
     % TODO default-Wert mit <new> oder <obsolete> setzen?
     \tud@toks@{\Changed@At@CreateEntry}%
     \eaddto@hook\tud@toks@{\expandafter{\tud@res@a}}%
-    \IfValueTF{#1}{%
-      % TODO <#2> sollte weg!
-      \addto@hook\tud@toks@{<#2>[{#1}]}%
-    }{%
-      % TODO optionales Argument von \ChangedAt weglassen, direkt mit ! Markup ?
-      \ifx\tud@res@b\@empty%
-          \ClassWarning{tudscrmanual}{warning text}%
-%         \typeout{!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!}%
-      \fi%
-    }%
-    \addto@hook\tud@toks@{(#3)}%
+    \addto@hook\tud@toks@{[{#1}](#3)}%
     \trim@spaces@in\tud@res@b%
     \ifx\tud@res@b\@empty%
       \IfValueT{#4}{\addto@hook\tud@toks@{:#4:}}%
@@ -2894,7 +2885,7 @@
       \eaddto@hook\tud@toks@{\expandafter:\tud@res@b:}%
     \fi%
     \listeadd\tud@changedat@entry@list{\the\tud@toks@}%
-    \IfBooleanF{#5}{%
+    \IfBooleanT{#5}{%
       \xifinlist{\tud@res@a}{\tud@changedat@version@list}{}{%
         \listeadd\tud@changedat@version@list{\tud@res@a}%
       }%
@@ -2953,6 +2944,7 @@
 % TODO kann \tud@idx@entry raus?
 \newcommand*\tud@idx@entry{}
 % TODO \tud@replace@@in #6 {@}{"@}{!}{"!}{|}{"|}%
+% TODO #2 raus
 \NewDocumentCommand\Changed@At@CreateEntry{m d<> o d== r() !d::}{%
 % TODO RAUS!!!!!!!!!!!!!!!!!!
 % TODO auf verwendete Argumente prüfen
@@ -3131,22 +3123,22 @@
     \IfValueT{#4}{\appto\tud@res@b{\suffix{#4}}}%
     \def\tud@res@c##1##2##3{%
       \begingroup%
+%        \tud@item@raw\detokenize{##2}%
         % TODO ClassError, wenn ungültiger Eintrag in Parameterliste?
         \Markup@Replace@Value\tud@res@b{##3}{##1}%
-        \tud@toks@{\InlineDeclaration}%
+        \tud@toks@{\Inline@Declaration}%
         % TODO <##3> ist nicht schön, besser als Arg. für \Inline@Declaration?
         \ifx\tud@res@a\@empty%
-          \edef\tud@res@c{{\expandonce\tud@res@b<##3>}\unexpanded{(##2)}}%
+          \edef\tud@res@c{!-1!{\expandonce\tud@res@b<##3>}\unexpanded{(##2)}}%
         \else%
           \edef\tud@res@c{!2!{\expandonce\tud@res@b<##3>}}%
         \fi%
         \eaddto@hook\tud@toks@{\tud@res@c}%
         \edef\tud@res@a{\the\tud@toks@}%
+        % TODO \Changed@At@CreateList innerhalb von \Inline@Declaration
         \tud@toks@{\Changed@At@CreateList{#5}}%
-        \def\tud@res@c{<##3>}%
-        \eappto\tud@res@c{\expandonce\tud@res@b}%
-        \eaddto@hook\tud@toks@{\expandafter[\tud@res@c]}%
-        \addto@hook\tud@toks@{:\emph{neu}:{\BooleanFalse}}%
+        \eaddto@hook\tud@toks@{\expandafter[\tud@res@b]}%
+        \addto@hook\tud@toks@{:\emph{neu}:{\BooleanTrue}}%
         \edef\tud@res@b{\the\tud@toks@}%
         \edef\tud@res@c{%
           \endgroup%
@@ -3172,6 +3164,8 @@
     }%
   \tud@res@a%
 }
+\newcommand*\tud@item@val@loop@declaration@list[3]{%
+}
 \NewDocumentCommand\tud@item@val@true{!s !d== !d'' !d() !o}{%
   \tud@item@val@bool{#1}{true/on/yes}=#2='#3'(#4)[{#5}]%
 }
@@ -3188,17 +3182,6 @@
   \the\tud@toks@%
 }
 \newcommand*\Markup@Replace@Value[3]{%
-%  \begingroup%
-%    \Markup@Get*\tud@res@a{#2}%
-%    \def\tud@res@b##1=##2=##3\@nil{%
-%      \def\tud@res@a{##1=#3=##3}%
-%    }%
-%    \expandafter\tud@res@b\tud@res@a\@nil%
-%    \edef\tud@res@a{%
-%      \endgroup%
-%      \unexpanded{\def#1}{\expandonce\tud@res@a}%
-%    }%
-%  \tud@res@a%
   \begingroup%
     \def\tud@res@b##1=##2\@nil{\def\tud@res@b{##1=#3}}%
     \def\tud@res@a##1##2##3\@nil{%
@@ -3233,6 +3216,7 @@
 }
 % TODO ist #2 immer \Bundle? sollte es default für #3 setzen?
 % TODO zusammenspiel von #2 und #3, #3 default {}?
+% TODO #3 !d''
 \NewDocumentCommand\tud@item@packages{r[] !d() !d<>}{%
   \begingroup%
     \let\tud@res@a\@empty%
@@ -3607,7 +3591,8 @@
 }
 \newcommand*\tud@replace@in[3]{%
   \begingroup%
-    \protected@edef\tud@res@a{#1}%
+    \edef\tud@res@a{\expandonce{#1}}%
+%    \protected@edef\tud@res@a{#1}%
     \let\tud@res@c\@empty%
     \def\tud@res@b##1#2##2\@nil{%
       \IfArgIsEmpty{##2}{%
@@ -3620,7 +3605,7 @@
     \expandafter\tud@res@b\tud@res@a#2\@nil%
     \edef\tud@res@a{%
       \endgroup%
-      \unexpanded{\def#1}{\expandonce{\tud@res@c}}%
+      \unexpanded{\def#1}{\expandonce\tud@res@c}%
     }%
   \tud@res@a%
 }
