@@ -312,7 +312,20 @@
     }{%
       \protected@edef\tud@res@a{#4}%
       \@onelevel@sanitize\tud@res@a%
-      \edef\tud@res@b{\IfValueT{#3}{\space<#3>}\IfValueT{#2}{\space(#2)}}%
+      \IfValueTF{#3}{%
+        \protected@edef\tud@res@b{#3}%
+        \protected@expandtwoargs\in@{=}{\tud@res@b}%
+        \ifin@%
+          \def\tud@res@c##1=##2\@nil{\def\tud@res@b{##2}}%
+          \expandafter\tud@res@c\tud@res@b\@nil%
+        \fi%
+      }{%
+        \let\tud@res@b\@empty%
+      }%
+      \protected@edef\tud@res@b{%
+        \ifx\tud@res@b\@empty\else\space<\tud@res@b>\fi%
+        \IfValueT{#2}{\space(#2)}%
+      }%
       \wlog{+++++ label #1\tud@res@b\on@line\space+++++^^J\tud@res@a}%
       \xifinlistcs{\tud@res@a\tud@res@b}{tud@trace@lbl@#1@list}{}{%
         \listcsxadd{tud@trace@lbl@#1@list}{\tud@res@a\tud@res@b}%
@@ -451,12 +464,35 @@
   \tud@res@a%
 }
 \newcommand*\tud@auxlist@forloop[2]{\forlistcsloop#1{#2@auxlist}}
+\PassOptionsToPackage{open,openlevel=0}{bookmark}
+\AfterPackage*{bookmark}{%
+  \def\Hy@writebookmark#1#2#3#4#5{%
+    \ifnum#4>\BKM@depth\relax\else%
+      \def\BKM@type{#5}%
+      \ifx\BKM@type\Hy@bookmarkstype%
+        \begingroup%
+          \ifBKM@numbered%
+            \let\numberline\Hy@numberline%
+            \let\booknumberline\Hy@numberline%
+            \let\partnumberline\Hy@numberline%
+            \let\chapternumberline\Hy@numberline%
+          \else%
+            \let\numberline\@gobble%
+            \let\booknumberline\@gobble%
+            \let\partnumberline\@gobble%
+            \let\chapternumberline\@gobble%
+          \fi%
+          \bookmark[level=#4,dest={\HyperDestNameFilter{#3}}]{#2}%
+        \endgroup%
+      \fi%
+    \fi%
+  }%
+}
 \PassOptionsToPackage{%
-%  destlabel=true,
-  pdfview=FitH,hyperindex=false,%
+  destlabel=true,%pdfview=FitH,%
+  hyperindex=false,%
   colorlinks,linkcolor=blue,citecolor=violet%
 }{hyperref}
-\PassOptionsToPackage{open,openlevel=0}{bookmark}
 \AfterPackage*{hyperref}{%
   \renewcaptionname{ngerman}{\sectionautorefname}{Unterkapitel}%
   \renewcaptionname{ngerman}{\subsectionautorefname}{Abschnitt}%
@@ -489,16 +525,8 @@
     defined. At least the package `url' is loaded%
   }%
   \providecommand*\hypersetup[1]{}%
-  \providecommand*\href[3][]{#3}%
-  \providecommand*\phantomsection{}%
-  \providecommand*\texorpdfstring[2]{#1}%
-  \RequirePackage{url}[2013/09/16]%
-  \providecommand*\url[1]{\detokenize{#1}}%
-  \providecommand*\nolinkurl[1]{\url{#1}}%
   \providecommand*\hyperpage[1]{#1}%
-  \providecommand*\autoref{??\xspace\kernel@ifstar{\ref}{\ref}}%
-  \providecommand*\autorefname[1][]{??\xspace}%
-  \providecommand*\hyperdef[4][]{\label{#2.#3}#4}%
+  \providerobustcmd*\href[3][]{#3}%
   \providerobustcmd*\hyperref{%
     \kernel@ifnextchar[%]
       {\tud@x@hyperref@a}%
@@ -506,7 +534,16 @@
   }%
   \newcommand*\tud@x@hyperref@a[2][]{#2}%
   \newcommand*\tud@x@hyperref@b[4]{#4}%
-  \providecommand\Hy@raisedlink[1]{#1}%
+  \providecommand*\hypertarget[2]{\label{#1}#2}%
+  \providecommand*\hyperlink[2]{\hyperref[{#1}]{#2}}%
+  \providecommand*\Hy@raisedlink[1]{#1}%
+  \providecommand*\phantomsection{}%
+  \providecommand*\texorpdfstring[2]{#1}%
+  \providerobustcmd*\autoref{??\xspace\kernel@ifstar{\ref}{\ref}}%
+  \providerobustcmd*\autorefname[1][]{??\xspace}%
+  \RequirePackage{url}[2013/09/16]%
+  \providerobustcmd*\url[1]{\detokenize{#1}}%
+  \providerobustcmd*\nolinkurl[1]{\url{#1}}%
   \tud@localization@german{\partautorefname}{Teil}%
   \tud@localization@german{\chapterautorefname}{Kapitel}%
   \tud@localization@german{\sectionautorefname}{Unterkapitel}%
@@ -517,55 +554,6 @@
   \tud@localization@english{\sectionautorefname}{section}%
   \tud@localization@english{\subsectionautorefname}{subsection}%
   \tud@localization@english{\subsubsectionautorefname}{subsubsection}%
-}
-\newcommand*\tud@hypervskip@dim{\dimexpr1\baselineskip*3\relax}
-\patchcmd{\set@@@@preamble}{%
-  \let\phantomsection\relax%
-}{%
-  \let\phantomsection\relax%
-  \renewcommand*\tud@hypervskip@dim{\dimexpr1\baselineskip*15\relax}%
-}{}{\tud@patch@wrn{set@@@@preamble}}
-\newcommand*\tud@hyper@category{tudscr}%
-% TODO für treatise.tex überarbeiten
-% \href[pdfnewwindow]{./test.pdf#sec:general}{text}
-\newrobustcmd*\tudhyperref[2]{\hyperref{}{\tud@hyper@category}{#1}{#2}}%
-\NewDocumentCommand\tudhyperdef{s m}{\tud@@hyperdef{#1}{#2}}
-\NewDocumentCommand\tud@hyperdef{s d<> m}{\tud@@hyperdef{#1}<#2>{#3}}
-\NewDocumentCommand\tud@@hyperdef{m d<> m}{%
-  \begingroup%
-    \protected@edef\tud@res@a{%
-      \endgroup%
-      \noexpand\tud@@@hyperdef{#1}<#2>{#3}%
-    }%
-  \tud@res@a%
-}
-\NewDocumentCommand\tud@@@hyperdef{m r<> m}{%
-  \begingroup%
-    \edef\tud@res@a{\noexpand\hyperdef{\tud@hyper@category}{#3}{}}%
-        % TODO warum ist raised notwendig?
-        % \hyperdef{bar}{foo}{\subsection{General introduction}}\label{bar}
-        % https://tex.stackexchange.com/questions/83795/
-        % \hypersetup{destlabel=true}?
-    \IfBooleanTF{#1}{%
-%      \ClassWarning{tudscrmanual}{remove}%
-      \raisebox{\tud@hypervskip@dim}[0pt][0pt]{\tud@res@a}%
-      \par\nobreak\vskip\glueexpr-\parskip-\baselineskip\relax%
-      % TODO warum? geht auch \noindent?
-      \@afterindentfalse\@afterheading%
-    }{%
-      \Hy@raisedlink{\tud@res@a}\ignorespaces%
-    }%
-    \label{#3}%
-    \IfValueTF{#2}{%
-      \tud@trace@lbl@add{created}<#2>{#3}%
-    }{%
-      \IfBooleanTF{#1}{%
-        \tud@trace@lbl@add{created}(raised){#3}%
-      }{%
-        \tud@trace@lbl@add{created}{#3}%
-      }%
-    }%
-  \endgroup%
 }
 \newcommand*\hrfn[2]{\href{#1}{\trim@spaces{#2}}\footnote{\url{#1}}}
 \newrobustcmd*\mailto[1]{\mbox{\href{mailto:#1}{\nolinkurl{#1}}}}%
@@ -664,6 +652,67 @@
     }%
   \tud@res@c%
 }
+% TODO raus?
+\newcommand*\tud@lbl@@get[2]{%
+  \begingroup%
+    \Markup@Get\tud@res@a{#2}%
+    \expandafter\tud@lbl@get\expandafter\tud@lbl@tmp\tud@res@a%
+    \edef\tud@res@a{%
+      \endgroup%
+      \unexpanded{\def#1}{\expandonce\tud@lbl@tmp}%
+    }%
+  \tud@res@a%
+}
+\tud@auxlist@register{tud@lbl@dest}[\detokenize\expandafter]%
+\NewDocumentCommand\tudmarkuplabel{o m}{%
+  \begingroup%
+    \Markup@Get\tud@res@a{#2}%
+    \expandafter\tud@lbl@get\expandafter\tud@lbl@tmp\tud@res@a%
+    \def\tud@res@b##1=##2=##3\@nil{%
+      \def\tud@res@b{##2}%
+    }%
+    \expandafter\tud@res@b\tud@res@a\@nil%
+    \edef\tud@res@a{%
+      \endgroup%
+      \noexpand\Process@Declare@Label*{\expandonce\tud@lbl@tmp}=\tud@res@b=%
+      \IfValueT{#1}{%
+        \noexpand\HyperDestRename{#1}{\expandonce\tud@lbl@tmp}%
+        \noexpand\label{#1}%
+      }%
+    }%
+  \tud@res@a%
+}
+% TODO \tudhyperref > \tudmanualref für treatise.tex überarbeiten
+% \href[pdfnewwindow]{./test.pdf#sec:general}{text}
+\newrobustcmd*\tud@hyperlink[2]{%
+  \begingroup%
+    \protected@edef\tud@res@a{%
+      \endgroup%
+      \noexpand\hyperlink{#1}%
+    }%
+  \tud@res@a{#2}%
+}
+\NewDocumentCommand\tud@hypertarget{d<> m}{%
+  \begingroup%
+    \protected@edef\tud@res@a{%
+      \endgroup%
+      \noexpand\tud@@hypertarget<#1>{#2}%
+    }%
+  \tud@res@a%
+}
+\NewDocumentCommand\tud@@hypertarget{r<> m}{%
+  \begingroup%
+    \tud@auxlist@ifin{#2}{tud@lbl@dest}{%
+      \IfValueT{#1}{\HyperDestRename{#2}{#1}}%
+    }{%
+      \Hy@raisedlink{\hypertarget{#2}{}}\ignorespaces%
+      \let\HyperDestRename\@gobbletwo%
+    }%
+    \label{#2}%
+    \tud@trace@lbl@add{created}<#1>{#2}%
+  \endgroup%
+}
+\tud@auxlist@register{tud@lbl@alias}[\detokenize\expandafter]%
 \newcommand*\tud@lbl@alias@values{}
 \NewDocumentCommand\tud@declare@open{m d<> m}{%
   \tud@declare@process{#1}%
@@ -770,19 +819,8 @@
       It is not possible to nest several `Entity' environments%
     }%
   \fi%
-  % TODO changelog und index (Entity* zum Unterdrücken des Index)
-  % TODO öffnenden und schließenden Eintrag erzeugen? tud@special@index?
-  % TODO für index Modus definieren, der nur Index aber keine Ausgabe erzeugt
-%  \Markup@Get\tud@res@a{#1}%
-%  \expandafter\tud@lbl@get\expandafter\tud@lbl@tmp\tud@res@a%
-%  \tud@toks@{\tud@idx@get\tud@ety@entry}%
-%  \eaddto@hook\tud@toks@{\tud@res@a}%
-%  \eaddto@hook\tud@toks@{\expandafter'\tud@lbl@tmp'}%
-%  \the\tud@toks@%
-%  \expandafter\New@Process@Index@Write\expandafter{\tud@ety@entry}{#1}|(|%
   \ignorespaces%
 }{%
-%  \expandafter\New@Process@Index@Write\expandafter{\tud@ety@entry}{#1}|)|%
   \global\let\tud@ety@curr\tud@ety@dflt%
   \aftergroup\ignorespaces%
 }
@@ -908,13 +946,16 @@
 \NewDocumentCommand\tud@ety@trace@lbl{m r'' m}{%
   \begingroup%
     \tud@get@crossrefnum\tud@res@a'#2'%
+    \let\tud@res@b\@empty%
     \let\tud@res@c\@empty%
     \ifnum\tud@res@a<\z@\relax%
-      \ifbool{#3}{%
-        \def\tud@res@b{unused}%
-      }{%
-        \def\tud@res@b{ignored}%
-      }%
+      \ifnum\tud@res@a=\m@ne\relax%
+        \ifbool{#3}{%
+          \def\tud@res@b{unused}%
+        }{%
+          \def\tud@res@b{ignored}%
+        }%
+      \fi%
     \else%
       \ifbool{#3}{%
         \def\tud@res@b{matched}%
@@ -929,7 +970,9 @@
     \fi%
     \protected@edef\tud@res@a{%
       \endgroup%
-      \noexpand\tud@trace@lbl@add{\tud@res@b}\tud@res@c{#1}%
+      \ifx\tud@res@b\@empty\else%
+        \noexpand\tud@trace@lbl@add{\tud@res@b}\tud@res@c{#1}%
+      \fi%
     }%
   \tud@res@a%
 }
@@ -1135,15 +1178,6 @@
 }{%
   \end{Entity}%
   \tud@declare@special@end!2!{#2}%
-}
-% TODO sollte raus
-\NewDocumentEnvironment{Entity'}{o m}{%
-  \tud@declare@special@start*!4!{#2}[{#1}]%
-  \tud@print@changedatlist%
-  \begin{Entity}{#2}%
-}{%
-  \end{Entity}%
-  \tud@declare@special@end!4!{#2}%
 }
 \NewDocumentCommand\tud@declare@special@start{s r!! m !o !d<>}{%
   % TODO sonderbehandlung * notwendig? optionales argument :xxx:?
@@ -1392,7 +1426,7 @@
 %  \NewDocumentCommand#1{s m #2 >{Processor@Index{##1}}!D||{}}{%
 %    \Process@Markup{Application}{##2}#3|##6|%
 %  }%
-%  \Markup@Simple@Format{Application}(\textsbs){Anwendungssoftware}
+%  \Markup@Simple@Format{Application}(\textsbi){Anwendungssoftware}
 %  \NewExpandableDocumentCommand\@Application{s m}{#2}% notwendig?
 %}
 %\Set@Markup@Command\Application{%
@@ -1440,8 +1474,8 @@
 }{%
   \Process@Markup{\Application{#2}}(#4)'#5'{#1}|#6|%
 }
-\Markup@Simple@Format\Application(\textsbs){Anwendungssoftware}
-\NewDocumentCommand\ApplicationRaw{m d() d'' d|| >{\ReverseBoolean}m}{%
+\Markup@Simple@Format\Application(\textsbi){Anwendungssoftware}
+\NewDocumentCommand\ApplicationRaw{m d() D''{\@nil} d|| >{\ReverseBoolean}m}{%
   \Process@Markup{\Application{#1}}(#2)'#3'{#5}|#4|%
 }
 \NewExpandableDocumentCommand\@ApplicationRaw{m d() d'' d|| m}{#1}
@@ -1486,7 +1520,7 @@
 }
 \Markup@Simple@Format\Class(\textsbn){Klasse}
 % TODO wieder raus, wenn zentrale Markupschnittstelle
-\NewDocumentCommand\ClassRaw{m d() d'' d|| >{\ReverseBoolean}m}{%
+\NewDocumentCommand\ClassRaw{m d() D''{\@nil} d|| >{\ReverseBoolean}m}{%
   \Process@Markup{\Class{#1}}(#2)'#3'{#5}|#4|%
 }
 \NewExpandableDocumentCommand\@ClassRaw{m d() d'' d|| m}{#1}
@@ -1505,7 +1539,7 @@
 }
 \Markup@Simple@Format\Package(\textsbn){Paket}
 % TODO wieder raus, wenn zentrale Markupschnittstelle
-\NewDocumentCommand\PackageRaw{m d() d'' d|| >{\ReverseBoolean}m}{%
+\NewDocumentCommand\PackageRaw{m d() D''{\@nil} d|| >{\ReverseBoolean}m}{%
   \Process@Markup{\Package{#1}}(#2)'#3'{#5}|#4|%
 }
 \NewExpandableDocumentCommand\@PackageRaw{m d() d'' d|| m}{#1}
@@ -1548,7 +1582,7 @@
 \Markup@Simple@Format*\Macro{Befehl}[c]
 \NewExpandableDocumentCommand\@Key@Value{s m}{#2}
 \NewDocumentCommand\Key@Value{s m}{#2}%
-\Markup@Simple@Format\Key@Value(\textttsl){Parameter}[c]
+\Markup@Simple@Format\Key@Value(\textttit){Parameter}[c]
 % TODO \Markup@Declare@Format\Key@Value mit Einzug?
 %\pretocmd\Markup@Declare@@Key@Value{bbb}{}{}
 \NewExpandableDocumentCommand\@Length{s m}{#2}
@@ -1700,7 +1734,6 @@
   \def\Univers{Univers\space}%
   \def\DIN{DIN Bold\space}%
 }
-\newrobustcmd*\textttsl[1]{\texttt{\textsl{#1}}}
 % TODO Makro zur Def. von Parameter (Spezial: \PSet \PMisc \PBoolean \PLength)
 % TODO \SMisc etc. für Spezialwerte?
 %\newcommand*\tud@param@list{}
@@ -1716,7 +1749,7 @@
 %    {#3}{#5}%
 %}
 \NewDocumentCommand\PValue{s m}{%
-  \mbox{\IfBooleanTF{#1}{\textttsl}{\texttt}{#2}}%
+  \mbox{\IfBooleanTF{#1}{\textttit}{\texttt}{#2}}%
 }
 \NewExpandableDocumentCommand\@PValue{s m}{#2}
 \newrobustcmd*\PName[1]{\mbox{\texttt{<#1>}}}
@@ -2074,23 +2107,23 @@
   \fi%
   \the\tud@toks@%
 }
-\tud@auxlist@register{tud@label@alias}[\detokenize\expandafter]%
-\NewDocumentCommand\Process@Declare@Label{m r==}{%
+\NewDocumentCommand\Process@Declare@Label{s m d==}{%
   \begingroup%
-    \let\tud@res@a\relax%
+    \protected@edef\tud@res@a{#2}%
+    \tud@auxlist@remove{tud@lbl@alias}{#2}%
     \let\tud@res@c\@empty%
-    \IfValueT{#2}{%
-      \tud@if@param@special{#2}{%
+    \IfValueT{#3}{%
+      \tud@if@param@special{#3}{%
         \listadd\tud@res@c{*}%
-        \ifstrequal{\PBoolean}{#2}{%
+        \tud@if@strequal{\PBoolean}{#3}{%
           \listadd\tud@res@c{true}%
           \listadd\tud@res@c{false}%
         }{}%
       }{}%
 % TODO typeout --> welche Optionen sind ggf. betroffen? eher wieder rein?
-%      \in@{\PName}{#2}%
+%      \in@{\PName}{#3}%
 %      \ifin@%
-%        \tudhyper@alias@values{\tud@res@a}{#2}%
+%        \tudhyper@alias@values{\tud@res@a}{#3}%
 %      \fi%
     }%
     \expandafter\IfValueT\expandafter{\tud@lbl@alias@values}{%
@@ -2114,33 +2147,54 @@
       \fi%
     }%
 % TODO für tutorials notwendig?, darf keine relevanz für manual haben
-%        \def\tud@res@a##1:##2:##3\@nil{\tudhyperdef*{##3:##2:##3}}%
+%        \def\tud@res@a##1:##2:##3\@nil{\tud@hypertarget{##3:##2:##3}}%
 %        \expandafter\tud@res@a\tud@lbl@tmp\@nil%
-    \let\@currentlabelname\@empty%
-    \tud@hyperdef{#1}%
-    \tud@auxlist@remove{tud@label@alias}{#1}%
     \ifx\tud@res@c\@empty\else%
-      \def\tud@res@a##1=##2=##3\@nil{%
-        \def\tud@res@a{##1}%
-        \def\tud@res@b{##2}%
-      }%
-      \expandafter\tud@res@a#1==\@nil%
-      \def\do##1{%
-        \tud@if@strequal{##1}{*}{%
-          \tud@hyperalias{\tud@res@a}{\tud@res@b}%
-        }{%
-          \tud@hyperalias{\tud@res@a=##1}{\tud@res@b}%
+      \begingroup%
+        \def\tud@res@b##1=##2\@nil{\def\tud@res@a{##1}}%
+        \expandafter\tud@res@b\tud@res@a=\@nil%
+        \def\do##1{%
+          \edef\tud@res@b{\expandonce\tud@res@a}%
+          \tud@if@strequal{##1}{*}{}{\appto\tud@res@b{=##1}}%
+          \tud@auxlist@add{tud@lbl@alias}{\tud@res@b}%
+          \tud@auxlist@ifin{\tud@res@b}{tud@lbl@alias}{%
+            \listeadd\tud@res@c{\detokenize\expandafter{\tud@res@b}}%
+          }{}%
         }%
-      }%
-      \dolistloop{\tud@res@c}%
+        \edef\tud@res@c{%
+          \unexpanded{\let\tud@res@c\@empty}%
+          \noexpand\dolistloop{\expandonce\tud@res@c}%
+        }%
+        \tud@res@c%
+        \edef\tud@res@c{%
+          \endgroup%
+          \unexpanded{\def\tud@res@c}{\expandonce\tud@res@c}%
+        }%
+      \tud@res@c%
     \fi%
+    \listeadd\tud@res@c{\expandonce\tud@res@a}%
+    \IfBooleanTF{#1}{%
+      \def\do##1{%
+        \tud@auxlist@add{tud@lbl@dest}{##1}%
+      }%
+      \dolistloop\tud@res@c%
+    }{%
+      \let\tud@res@b\tud@res@c%
+      \def\do##1{%
+        \tud@auxlist@ifin{##1}{tud@lbl@dest}{%
+          \listremove\tud@res@c{##1}%
+        }{}%
+      }%
+      \dolistloop\tud@res@b%
+      \let\@currentlabelname\@empty%
+    }%
+    \expandafter\ifinlist\expandafter{\tud@res@a}\tud@res@c{%
+      \expandafter\listremove\expandafter\tud@res@c\expandafter{\tud@res@a}%
+      \tud@hypertarget{\tud@res@a}%
+    }{}%
+    \def\do##1{\tud@hypertarget<\tud@res@a>{##1}}%
+    \dolistloop\tud@res@c%
   \endgroup%
-}
-\newcommand*\tud@hyperalias[2]{%
-  \tud@auxlist@add{tud@label@alias}{#1}%
-  \tud@auxlist@ifin{#1}{tud@label@alias}{%
-    \tud@hyperdef<#2>{#1}%
-  }{}%
 }
 \NewDocumentCommand\Process@Output@Declare{m r// r== r[] r()}{%
   \ifnum\tud@declare@mode=\@ne\relax%
@@ -2174,17 +2228,15 @@
     \let\tud@res@a\@firstofone%
     \ifnum\tud@res@c<\z@\relax\else%
       \tud@if@lbl@exists{\tud@lbl@tmp}{%
-        \edef\tud@lbl@tmp{\tud@lbl@tmp}%
-        \def\tud@res@a##1{\tudhyperref{\tud@lbl@tmp}{##1}\tud@res@b}%
         \let\tud@res@b\empty% simple/link
         \ifcase\tud@res@c\relax\or% auto
-          \def\tud@res@b{ in \autoref{\tud@lbl@tmp}}%
+          \def\tud@res@b{ in \noexpand\autoref{\tud@lbl@tmp}}%
         \or% page
-          \def\tud@res@b{ \vpageref{\tud@lbl@tmp}}%
+          \def\tud@res@b{ \noexpand\vpageref{\tud@lbl@tmp}}%
         \or% ppage
-          \def\tud@res@b{ \reftextfaraway{\tud@lbl@tmp}}%
+          \def\tud@res@b{ \noexpand\reftextfaraway{\tud@lbl@tmp}}%
         \or% full
-          \def\tud@res@b{ in \fullref{\tud@lbl@tmp}}%
+          \def\tud@res@b{ in \noexpand\fullref{\tud@lbl@tmp}}%
         \else% link
           \ClassWarning{tudscrmanual}{%
             As label `\tud@lbl@tmp' exists, the\MessageBreak%
@@ -2192,6 +2244,9 @@
             is ignored%
           }%
         \fi%
+        \protected@edef\tud@res@a##1{%
+          \noexpand\tud@hyperlink{\tud@lbl@tmp}{##1}\tud@res@b%
+        }%
       }{%
         \ifnum\tud@res@c=\z@\relax%
           \def\tud@res@b##1##2\@nil{%
@@ -2287,29 +2342,33 @@
 \NewDocumentCommand\tud@get@crossrefnum{m r''}{%
   \begingroup%
     \IfValueTF{#2}{%
-      \def\tud@res@a##1:##2\@nil{%
-        \IfArgIsEmpty{##2}{%
-          \def\tud@res@a{#2}%
-        }{%
-          \def\tud@res@a{##1:}%
+      \tud@if@nil{#2}{%
+        \def\tud@res@a{-2}%
+      }{%
+        \def\tud@res@a##1:##2\@nil{%
+          \IfArgIsEmpty{##2}{%
+            \def\tud@res@a{#2}%
+          }{%
+            \def\tud@res@a{##1:}%
+          }%
         }%
+        \tud@res@a#2:\@nil%
+        \TUD@set@numkey{}{tud@res@a}{%
+          {auto}{0},{ref}{1},{page}{2},{ppage}{3},{full}{4},%
+          {ctan:}{5},{url:}{6},{none}{-1}%
+        }{\tud@res@a}%
+        \ifx\FamilyKeyState\FamilyKeyStateProcessed\else%
+          \ClassWarning{tudscrmanual}%
+          {%
+            The cross-reference '#2'\MessageBreak%
+            is unknown. Only shorthands 'ref', 'page',\MessageBreak%
+            'ppage' and 'full' as well as 'auto' and\MessageBreak%
+            'none' are valid. Additionally, 'URL:<url>\MessageBreak%
+            or 'CTAN:<pkg>' can be used%
+          }%
+          \def\tud@res@a{-1}%
+        \fi%
       }%
-      \tud@res@a#2:\@nil%
-      \TUD@set@numkey{}{tud@res@a}{%
-        {auto}{0},{ref}{1},{page}{2},{ppage}{3},{full}{4},%
-        {ctan:}{5},{url:}{6},{none}{-1}%
-      }{\tud@res@a}%
-      \ifx\FamilyKeyState\FamilyKeyStateProcessed\else%
-        \ClassWarning{tudscrmanual}%
-        {%
-          The cross-reference '#2'\MessageBreak%
-          is unknown. Only shorthands 'ref', 'page',\MessageBreak%
-          'ppage' and 'full' as well as 'auto' and\MessageBreak%
-          'none' are valid. Additionally, 'URL:<url>\MessageBreak%
-          or 'CTAN:<pkg>' can be used%
-        }%
-        \def\tud@res@a{-1}%
-      \fi%
     }{%
       \def\tud@res@a{0}%
     }%
@@ -2711,8 +2770,7 @@
         % TODO Argument <> verallgemeinern? direkt das label durchreichen?
 %        \typeout{???* \detokenize{#9}\on@line}%
 %        \typeout{???* \tud@lbl@tmp\space vs. #8}%
-        \Markup@Get\tud@res@a{#9}%
-        \expandafter\tud@lbl@get\expandafter\tud@lbl@tmp\tud@res@a%
+        \tud@lbl@@get\tud@lbl@tmp{#9}%
         \tud@res@c{\tud@lbl@tmp}{%
           \tud@idx@read\tud@res@a{\tud@lbl@tmp}%
           \appto\tud@res@a{!}%
@@ -2792,7 +2850,7 @@
       \tud@res@b##3!\@nil
       \index{%
         ##3!"|@\,\textrightarrow\,%
-        \tudhyperref{idx:##2}{%
+        \hyperref[{idx:##2}]{%
           \IfValueTF{##1}{##1}{Index der \tud@res@b}%
         }|seeidx{##2}%
       }%
@@ -2816,6 +2874,29 @@
       \par\textbf{\textsf{##1}}\par%
       \nopagebreak%
     }%
+    \setchapterpreamble{%
+      \begin{abstract}
+        \noindent%
+        Die Formatierung der Eintr\"age in allen aufgef\"uhrten Indexen ist 
+        folgenderma\ss{}en aufzufassen: \textbf{Zahlen in fetter Schrift} 
+        verweisen auf die \textbf{Erkl\"arung} zu einem Stichwort, wobei in der
+        digitalen Fassung dieses Handbuchs dieser Eintrag selbst ein Hyperlink
+        zu seiner Erl\"auterung ist. Seitenzahlen in normaler Schriftst\"arke
+        hingegen deuten auf zus\"atzliche Informationen, wobei diese f\"ur
+        \textit{kursiv hervorgehobene Zahlen} als besonders \textit{wichtig} 
+        erachtet werden.\par 
+        Bei Eintr\"agen von \hyperref[idx:options]{Klassen- und Paketoptionen},
+        \hyperref[idx:macros]{Umgebungen und Befehlen} sowie 
+        \hyperref[idx:elements]{Seitenstilen, Schriftelementen und Farben} 
+        respektive \hyperref[idx:misc]{L\"angen und Z\"ahlern}, zu denen keine 
+        direkte \textbf{Erkl\"arung} existiert~-- und diese dementsprechend 
+        auch nicht als Hyperlink dargestellt sind~-- handelt es sich um 
+        zus\"atzliche Hinweise f\"ur Elemente, die nicht durch \TUDScript 
+        sondern von anderen Klassen oder Paketen zur Verf\"ugung gestellt 
+        werden, welche im Suffix des entsprechenden Eintrages angegeben sind. 
+      \end{abstract}
+    }%
+    \addchap{\indexname}
     \tud@print@index%
     (%
       Die im Folgenden aufgelisteten Schlagworte sollen f\"ur den Umgang mit %
@@ -2878,9 +2959,9 @@
   \IfFileExists{\jobname-#1.idx}{%
     \pagebreak[3]%
     \IfValueTF{#2}{%
-      \indexprologue{\tudhyperdef*{idx:#1}#2\tud@idx@vskip}%
+      \indexprologue{\label{idx:#1}#2\tud@idx@vskip}%
     }{%
-      \indexprologue[\tud@idx@vskip]{\tudhyperdef*{idx:#1}}%
+      \indexprologue[\tud@idx@vskip]{\label{idx:#1}}%
     }%
     \printindex[{#1}]%
     % TODO in \tud@xdy@make erledigen
@@ -2941,7 +3022,7 @@
       \def\tud@res@c##1{%
         \appto\tud@res@b{%
           \ignorespaces%
-          \tudhyperref{idx:changelog:##1}{##1}%
+          \hyperref[{idx:changelog:##1}]{##1}%
           \tabularnewline%
         }%
       }%
@@ -3070,7 +3151,7 @@
         \let\tud@res@b\@firstofone%
         \if@tud@cdoldfont@active\def\tud@res@b##1{\NoCaseChange{##1}}\fi%
         \addsec[{##1}]{\TUDScript \tud@res@b{##1}}%
-        \tudhyperdef*{idx:changelog:##1}%
+        \label{idx:changelog:##1}%
         \def\tud@res@a{\indexname: \TUDScript \tud@res@b{##1}}%
         \@mkboth{\tud@res@a}{\tud@res@a}%
       }%
@@ -3484,7 +3565,8 @@
     \renewcommand*\tud@latex@ext{lualatex\space}
   \fi
 \fi
-\newrobustcmd*\hypertut[2]{%
+% TODO \href[pdfnewwindow]{tutorials/#1.pdf#???}{\File*{#1.pdf}#2}
+\newrobustcmd*\HyperTutorial[2]{%
   \hyperref{tutorials/#1.pdf}{#1}{tutorials:#1}{\File*{#1.pdf}#2}%
 }
 \NewDocumentCommand\Tutorial{s m !d||}{%
@@ -3530,14 +3612,14 @@
     }%
   \fi%
   \IfFileExists{tutorials/#2.pdf}{%
-    \hypertut{#2}{}%
+    \HyperTutorial{#2}{}%
   }{%
     \File*{#2.pdf}%
     \tud@shellescape@wrn{tutorials/#2.pdf}%
   }%
   % TODO Suffix (Datei) im Index ignorieren
   \IfBooleanF{#1}{%
-    \index[files]{\hypertut{#2}{\suffix{Tutorial}}\IfValueT{#3}{|#3}}%
+    \index[files]{\HyperTutorial{#2}{\suffix{Tutorial}}\IfValueT{#3}{|#3}}%
   }%
 }
 \newcommand*\IncludeExample[1]{%
@@ -3853,7 +3935,8 @@
 }
 \newcommand*\tud@remove@trailing@slashes[1]{%
   \begingroup%
-    \edef\tud@res@a{\trim@spaces{#1}}%
+    \protected@edef\tud@res@a{#1}%
+    \trim@spaces@in\tud@res@a%
     \Ifstrstart{\tud@res@a}{/}{%
       \edef\tud@res@a{\expandafter\@gobble\tud@res@a}%
     }{}%
@@ -3941,9 +4024,12 @@
 \newcommand*\textsbn{}
 \newrobustcmd*\sbnfont{\sffamily\bfseries\upshape}
 \DeclareTextFontCommand\textsbn{\sbnfont}
-\newcommand*\textsbs{}
-\newrobustcmd*\sbsfont{\sffamily\bfseries\slshape}
-\DeclareTextFontCommand\textsbs{\sbsfont}
+\newcommand*\textsbi{}
+\newrobustcmd*\sbsfont{\sffamily\bfseries\itshape}
+\DeclareTextFontCommand\textsbi{\sbsfont}
+\newcommand*\textttit{}
+\newrobustcmd*\ttitfont{\ttfamily\itshape}
+\DeclareTextFontCommand\textttit{\ttitfont}
 %%%% From File: tudscr-fields.dtx 2019/11/29 01:36:52 c9a9b7b
 \newcommand*\@chairman{}
 \newcommand*\chairman[1]{\gdef\@chairman{#1}}
@@ -4070,12 +4156,12 @@
     )^^J%
     (markup-locref%
     \space:attr "important"%
-    \space:open "\string\textsl{\string\hyperpage{"%
+    \space:open "\string\textit{\string\hyperpage{"%
     \space:close "}}"%
     )^^J%
     (markup-locref%
     \space:attr "?"\@spaces\@spaces%
-    \space:open "\string\textsl{\string\hyperpage{"%
+    \space:open "\string\textit{\string\hyperpage{"%
     \space:close "}}"%
     )^^J%
     (markup-locref%
