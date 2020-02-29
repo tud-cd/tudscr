@@ -254,6 +254,8 @@
   \fi%
   \let\tud@list@sorted\tud@res@a%
 }
+\newcommand*\tud@trace@lbl@wlog{\relax}
+\AfterReadingMainAux{\tud@trace@lbl@wlog}
 \newcommand*\tud@trace@lbl@types{}
 \listadd\tud@trace@lbl@types{created}
 \listadd\tud@trace@lbl@types{matched}
@@ -263,12 +265,12 @@
 \listadd\tud@trace@lbl@types{url}
 \def\tud@res@a#1{%
   \expandafter\newcommand\csname tud@trace@lbl@#1@list\endcsname{}%
-  \expandafter\let\csname tud@trace@lbl@#1@list\endcsname\relax%
+  \cslet{tud@trace@lbl@#1@list}\relax%
 }
 \forlistloop{\tud@res@a}{\tud@trace@lbl@types}%
 \NewDocumentCommand\tracinglabels{!s !O{missing}}{%
   \def\tud@res@a##1{%
-    \expandafter\let\csname tud@trace@lbl@##1@list\endcsname\relax%
+    \cslet{tud@trace@lbl@##1@list}\relax%
   }%
   \forlistloop{\tud@res@a}{\tud@trace@lbl@types}%
   \let\tud@res@b\@empty%
@@ -281,7 +283,7 @@
     \forlistloop{\tud@res@a}{\tud@trace@lbl@types}%
   }%
   \def\tud@res@a##1{%
-    \expandafter\let\csname tud@trace@lbl@##1@list\endcsname\@empty%
+    \cslet{tud@trace@lbl@##1@list}\@empty%
     \IfBooleanF{#1}{%
       \appto\tud@trace@lbl@wlog{%
         \ifcsvoid{tud@trace@lbl@##1@list}{%
@@ -333,20 +335,20 @@
     }%
   \endgroup%
 }
-\newcommand*\tud@trace@lbl@wlog{\relax}
-\AfterEndDocument{\tud@trace@lbl@wlog}
+\newcommand*\tud@trace@markup@wlog{\relax}
+\AfterReadingMainAux{\tud@trace@markup@wlog}
 \newcommand*\tud@trace@markup@types{}
 \listadd\tud@trace@markup@types{declare}
 \listadd\tud@trace@markup@types{output}
 \listadd\tud@trace@markup@types{temp}
 \def\tud@res@a#1{%
   \expandafter\newcommand\csname tud@trace@markup@#1@list\endcsname{}%
-  \expandafter\let\csname tud@trace@markup@#1@list\endcsname\relax%
+  \cslet{tud@trace@markup@#1@list}\relax%
 }
 \forlistloop{\tud@res@a}{\tud@trace@markup@types}%
 \NewDocumentCommand\tracingmarkup{!s !O{all}}{%
   \def\tud@res@a##1{%
-    \expandafter\let\csname tud@trace@markup@##1@list\endcsname\relax%
+    \cslet{tud@trace@markup@##1@list}\relax%
   }%
   \forlistloop{\tud@res@a}{\tud@trace@markup@types}%
   \let\tud@res@b\@empty%
@@ -359,7 +361,7 @@
     \forlistloop{\tud@res@a}{\tud@trace@markup@types}%
   }%
   \def\tud@res@a##1{%
-    \expandafter\let\csname tud@trace@markup@##1@list\endcsname\@empty%
+    \cslet{tud@trace@markup@##1@list}\@empty%
     \IfBooleanF{#1}{%
       \appto\tud@trace@markup@wlog{%
         \wlog{+++++ markup ##1 (sorted) +++++}%
@@ -393,8 +395,6 @@
     }%
   \endgroup%
 }
-\newcommand*\tud@trace@markup@wlog{\relax}
-\AfterEndDocument{\tud@trace@markup@wlog}
 \NewDocumentCommand\tud@auxlist@register{o m !O{\@firstofone}}{%
   \expandafter\newcommand\expandafter*\csname#2@auxlist\endcsname{}%
   \expandafter\newcommand\expandafter*\csname#2@auxlist@positive\endcsname{}%
@@ -419,10 +419,7 @@
 }
 \newcommand*\tud@auxlist@import[2]{%
   \begingroup%
-    \edef\tud@res@a{%
-      \unexpanded{\@tfor\tud@res@c:=}%
-      \expandafter\expandonce\csname #2@auxlist\endcsname%
-    }%
+    \edef\tud@res@a{\unexpanded{\@tfor\tud@res@c:=}\csexpandonce{#2@auxlist}}%
     \letcs\tud@res@b{#2@auxlist@handler}%
     \global\cslet{#2@auxlist}\@empty%
     \IfValueT{#1}{%
@@ -506,12 +503,12 @@
     \unskip\xspace%
   }%
   \newcommand*\auto@refname[2]{%
-    \ifcsname r@#2\endcsname%
+    \ifcsundef{r@#2}{%
+      ??%
+    }{%
       \expandafter\expandafter\expandafter\auto@@refname%
           \csname r@#2\endcsname{}{}{}{}\@nil#1\@nil%
-    \else%
-      ??%
-    \fi%
+    }%
   }%
   \newcommand*\auto@@refname{}%
   \def\auto@@refname#1#2#3#4#5\@nil#6\@nil{#6#4.\@nil}%
@@ -558,6 +555,7 @@
 \newcommand*\hrfn[2]{\href{#1}{\trim@spaces{#2}}\footnote{\url{#1}}}
 \newrobustcmd*\mailto[1]{\mbox{\href{mailto:#1}{\nolinkurl{#1}}}}%
 \AfterPackage*{hyperref}{%
+  % TODO was soll das?
   \patchcmd{\pdfstringdef}{\csname HyPsd@babel@}{%
     \let\bbl@info\@gobble\csname HyPsd@babel@%
   }{}{\tud@patch@wrn{pdfstringdef}}%
@@ -1366,8 +1364,8 @@
           \def\tud@res@b{##2}%
           \IfValueT{#1}{%
             \ClassError{tudscrmanual}%
-              {Two optional arguments for a parameter given!}%
-              {You did specify `##2' as well as `#1' as a parameter.}%
+              {Two optional arguments for a key given!}%
+              {You did specify `##2' as well as `#1' as a key.}%
           }%
         }%
       }%
@@ -1403,7 +1401,7 @@
       }{%
         \ClassWarning{tudscrmanual}{%
           The given value `\tud@res@c' is ignored as\MessageBreak%
-          no `/<parameter>/' was specified%
+          no `/<key>/' was specified%
         }%
         \let\tud@res@c\tud@res@b%
       }%
@@ -1735,29 +1733,51 @@
   \def\DIN{DIN Bold\space}%
 }
 % TODO Makro zur Def. von Parameter (Spezial: \PSet \PMisc \PBoolean \PLength)
-% TODO \SMisc etc. für Spezialwerte?
-%\newcommand*\tud@param@list{}
+\newcommand*\tud@param@list{}
 %\newcommand*\tud@param@@list{}
-%\NewDocumentCommand\Set@Parameter@Command{%
-%  s m m m m
-%}{%
-%  \listeadd\tud@param@list{#2}%
-%  \IfBooleanT{#1}{\listeadd\tud@param@@list{#2}}%
-%  \edef\tud@res@a{\expandafter\@gobble\string#2}%
-%  \NewDocumentCommand#2{#3}{#4}%
-%  \expandafter\NewExpandableDocumentCommand\csname\tud@res@a @exp\endcsname%
-%    {#3}{#5}%
-%}
-\NewDocumentCommand\PValue{s m}{%
-  \mbox{\IfBooleanTF{#1}{\textttit}{\texttt}{#2}}%
+\NewDocumentCommand\NewParameterCommand{s m m m m}{%
+  \edef\tud@res@a{\expandafter\@gobble\string#2}%
+  \listeadd\tud@param@list{\tud@res@a}%
+%  \IfBooleanT{#1}{\listeadd\tud@param@@list{\tud@res@a}}%
+  \edef\tud@res@b{\expandafter\noexpand\csname @\tud@res@a\endcsname}%
+  \expandafter\NewExpandableDocumentCommand\tud@res@b{#3}{#5}%
+  \NewDocumentCommand#2{#3}{#4}%
 }
-\NewExpandableDocumentCommand\@PValue{s m}{#2}
-\newrobustcmd*\PName[1]{\mbox{\texttt{<#1>}}}
-\newrobustcmd*\PSet[1]{\PName{#1}}
-% TODO Wert statt Einstellung? oder beide Varianten?
-\newrobustcmd*\PMisc{\PSet{Einstellung}}
-\newrobustcmd*\PBoolean{\PSet{Ein-Aus-Wert}}
-\newrobustcmd*\PLength{\PSet{L\"ange}}
+\newcommand*\Parameter@Expandable{%
+  % TODO wo ist das notwendig (log!)? besser auf neue expandierbare?
+  \begingroup%
+    \def\tud@res@a{\endgroup}%
+    \def\tud@res@b##1{\appto\tud@res@a{\csletcs{##1}{@##1}}}%
+    \forlistloop\tud@res@b{\tud@param@list}%
+  \tud@res@a%
+}
+\NewDocumentCommand\P@Braces{s m}{%
+  \mbox{%
+    \texttt{\IfBooleanTF{#1}{\lbrack}{\textbraceleft}}%
+    #2%
+    \texttt{\IfBooleanTF{#1}{\rbrack}{\textbraceright}}%
+  }%
+}
+\NewParameterCommand\PValue{s m}{%
+ \mbox{\IfBooleanTF{#1}{\textttit}{\texttt}{#2}}%
+}{#2}
+\NewParameterCommand\PName{s m}{%
+  \mbox{\IfBooleanTF{#1}{\textttit}{\texttt}{<#2>}}%
+}{#2}
+\NewParameterCommand\MPName{m}{\P@Braces{\PName{#1}}}{#1}
+\NewParameterCommand\MPValue{m}{\P@Braces{\PValue{#1}}}{#1}
+\NewParameterCommand\OPName{m}{\P@Braces*{\PName{#1}}}{#1}
+\NewParameterCommand\OPValue{m}{\P@Braces*{\PValue{#1}}}{#1}
+\NewParameterCommand\PList{}{\OPName{Parameterliste}}{}
+\NewParameterCommand\POList{m}{%
+  \P@Braces*{\PName{#1}\texttt{\,\textbardbl\,}\PName{Parameterliste}}%
+}{#1}
+% TODO \PSet > \PSpecial oder \SPset, \SPmisc, ...
+\NewParameterCommand*\PSet{m}{\PName{#1}}{}
+% TODO Varianten mit "Wert" und "Einstellung" (\SPmisc, \SPset)
+\NewParameterCommand*\PMisc{}{\PSet{Einstellung}}{}
+\NewParameterCommand*\PBoolean{}{\PSet{Ein-Aus-Wert}}{}
+\NewParameterCommand*\PLength{}{\PSet{L\"ange}}{}
 % TODO \tud@if@param@special aus expandierbaren Versionen ableiten
 \newcommand*\tud@if@param@special[1]{%
   \begingroup%
@@ -1775,19 +1795,23 @@
     \fi%
   \endgroup%
 }
-% TODO Befehlsnamen überarbeiten, Befehle verschachteln bzw. übergeordneten B.
-\newrobustcmd*\Parameter[1]{%
-  \mbox{\texttt{\textbraceleft}\PName{#1}\texttt{\textbraceright}}%
+\newcommand*\Parameter@Enclose[3][\@firstofone]{%
+  \begingroup%
+    \protected@edef\tud@res@a{#3}%
+    \Parameter@Expandable%
+    \protected@edef\tud@res@b{\tud@res@a}%
+    \edef\tud@res@a{%
+      \endgroup%
+      \unexpanded{#1}%
+      \ifx\tud@res@a\tud@res@b%
+        % TODO if empty?
+        \unexpanded{{#2{#3}}}%
+      \else%
+        \unexpanded{{#3}}%
+      \fi%
+    }%
+  \tud@res@a%
 }
-\newrobustcmd*\PParameter[1]{\mbox{\texttt{\textbraceleft#1\textbraceright}}}
-\newrobustcmd*\OParameter[1]{\mbox{\texttt{[}\PName{#1}\texttt{]}}}
-\newrobustcmd*\POParameter[1]{\mbox{\texttt{[{#1}]}}}
-\newrobustcmd*\LParameter{\mbox{\texttt{[}\PName{Parameterliste}\texttt{]}}}
-% TODO \egroup\PValue{\,\textbardbl\,}\bgroup
-\newrobustcmd*\OLParameter[1]{%
-  \mbox{\texttt{[}\PName{#1}\textOR\PName{Parameterliste}\texttt{]}}%
-}
-\newrobustcmd*\textOR{\PValue{\,\textbardbl\,}}
 \NewDocumentCommand\Markup@Expandable{s}{%
   \let\Application\@Application%
   \let\Engine\@Engine%
@@ -1820,39 +1844,6 @@
     \let\NoCaseChange\@firstofone%
     \let\emph\@firstofone%
   }%
-}
-\newcommand*\Parameter@Expandable{%
-  \let\PValue\@PValue%
-  \let\PName\@firstofone%
-  % TODO wo ist das notwendig (log!)? besser auf neue expandierbare?
-  \let\PSet\@gobble%
-  \let\PMisc\@empty%
-  \let\PBoolean\@empty%
-  \let\PLength\@empty%
-  \let\Parameter\@firstofone%
-  \let\OParameter\@firstofone%
-  \let\LParameter\@empty%
-  \let\OLParameter\@firstofone%
-  \let\PParameter\@firstofone%
-  \let\POParameter\@firstofone%
-  \let\textOR\@empty%
-}
-\newcommand*\Parameter@Enclose[3][\@firstofone]{%
-  \begingroup%
-    \protected@edef\tud@res@a{#3}%
-    \Parameter@Expandable%
-    \protected@edef\tud@res@b{\tud@res@a}%
-    \edef\tud@res@a{%
-      \endgroup%
-      \unexpanded{#1}%
-      \ifx\tud@res@a\tud@res@b%
-        % TODO if empty?
-        \unexpanded{{#2{#3}}}%
-      \else%
-        \unexpanded{{#3}}%
-      \fi%
-    }%
-  \tud@res@a%
 }
 \AfterPackage*{hyperref}{%
 %  \expandafter\pdfstringdefDisableCommands\expandafter{\Markup@Expandable}%
