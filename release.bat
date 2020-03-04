@@ -67,9 +67,8 @@ echo  Erzeugen des Benutzerhandbuchs
 echo =========================================================================
 echo.
 cd doc
+REM pdflatex %docinput%
 REM pdflatex --shell-escape %docinput%
-REM pdflatex %docinput%
-REM pdflatex %docinput%
 REM pdflatex %docinput%
 REM pdflatex --shell-escape %docinput%
 REM pdflatex %docinput%
