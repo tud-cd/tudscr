@@ -308,14 +308,16 @@
 % Die Auswahl des Seitenstils wird im Vergleich zur Klasse \cls{ltxdoc}
 % verbessert und an das Paket \pkg{tudscr-gitinfo} angepasst.
 %    \begin{macrocode}
-\pretocmd{\@docinclude}{\GetFileInfo{#1}\pagestyle{tudscrdoc}}{}{}
-\apptocmd{\@docinclude}{%
+\pretocmd\@docinclude{%
+  \GetFileInfo{#1}\pagestyle{tudscrdoc}%
+}{}{\tud@patch@wrn{@docinclude}}
+\apptocmd\@docinclude{%
   \let\filename\@undefinded%
   \let\filedate\@undefinded%
   \let\fileversion\@undefinded%
   \let\filerevision\@undefinded%
   \let\fileinfo\@undefinded%
-}{}{}
+}{}{\tud@patch@wrn{@docinclude}}
 \def\ps@tudscrdoc{%
   \let\@mkboth\@gobbletwo%
   \let\@oddhead\@empty\let\@evenhead\@empty%
@@ -759,14 +761,14 @@
   \edef\saved@indexname{\expandafter\@gobble#1}%
 }
 \CheckCommand*\@SaveEnvIndexName[1]{\let\saved@indexname#1}
-\apptocmd{\@SaveMacroIndexName}{%
+\apptocmd\@SaveMacroIndexName{%
   \let\saved@indextype\@empty%
 }{}{\tud@patch@wrn{@SaveMacroIndexName}}
 \CheckCommand*\SpecialMainMacroIndex[1]{%
   \SpecialMainIndex{#1}\nobreak%
   \DoNotIndex{#1}%
 }
-\apptocmd{\SpecialMainMacroIndex}{%
+\apptocmd\SpecialMainMacroIndex{%
   \let\parameter@parent@changes\relax%
   \hypersourcedef{\filesep\number\c@CodelineNo}%
 }{}{\tud@patch@wrn{SpecialMainMacroIndex}}
@@ -833,13 +835,13 @@
 % für den Index als auch die Änderungsliste in \cs{parameter@parent@indexname} 
 % und für die Formatierung in \cs{parameter@parent@indexformat} gespeichert.
 %    \begin{macrocode}
-\apptocmd{\@SaveMacroIndexName}{%
+\apptocmd\@SaveMacroIndexName{%
   \edef\parameter@parent@indexname{\expandafter\@gobble#1}%
   \edef\parameter@parent@indexformat{%
     \string\verb\quotechar*\verbatimchar#1\verbatimchar%
   }%
 }{}{\tud@patch@wrn{@SaveMacroIndexName}}
-\apptocmd{\@SaveEnvIndexName}{%
+\apptocmd\@SaveEnvIndexName{%
   \protected@edef\parameter@parent@indexname{#1\space\saved@indextype}%
   \protected@edef\parameter@parent@indexformat{%
     \string\verb\quotechar*\verbatimchar#1\verbatimchar%
@@ -1357,7 +1359,7 @@
 % des Quelltextes einmalig sowie vollständig und nicht nach jeder Quelldatei 
 % einzeln ausgegeben wird, muss der Befehl \cs{@docinclude} angepasst werden.
 %    \begin{macrocode}
-\patchcmd{\@docinclude}{%
+\patchcmd\@docinclude{%
   \let\@ltxdoc@PrintIndex\PrintIndex
   \let\PrintIndex\relax
   \let\@ltxdoc@PrintChanges\PrintChanges
@@ -1370,7 +1372,7 @@
   \let\@ltxdoc@PrintToDos\PrintToDos%
   \let\PrintToDos\relax%
 }{}{\tud@patch@wrn{@docinclude}}
-\patchcmd{\@docinclude}{%
+\patchcmd\@docinclude{%
   \let\PrintIndex\@ltxdoc@PrintIndex
   \let\PrintChanges\@ltxdoc@PrintChanges
 }{%
