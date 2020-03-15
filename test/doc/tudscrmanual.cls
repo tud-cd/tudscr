@@ -301,12 +301,12 @@
   \let\glossary\@gobble%
   \tud@addtocontents@hook%
 }{}{\tud@patch@wrn{addtocontents}}%
-\newcommand*\tud@toc@special[1]{%
+\newcommand*\tud@headings@special[1]{%
   \appto\tud@addtocontents@hook{#1}%
   \AfterPackage*{hyperref}{\pdfstringdefDisableCommands{#1}}%
   \AfterPackage*{nameref}{\GetTitleStringDisableCommands{#1}}%
 }
-\tud@toc@special{\RenewExpandableDocumentCommand\index{o m}{}}
+\tud@headings@special{\RenewExpandableDocumentCommand\index{o m}{}}
 \AfterPackage*{nameref}{%
   \providecommand\GetTitleStringProtectedExpand[1]{%
     \def\GetTitleStringResult{#1}%
@@ -325,7 +325,7 @@
     \GetTitleStringProtectedExpand%
   }{}{\tud@patch@wrn{NR@gettitle}}%
 }
-\@onlypreamble\tud@toc@special
+\@onlypreamble\tud@headings@special
 \AfterPackage*{nameref}{\preto\label@hook{\GetTitleStringSetup{expand=true}}}
 \tud@newif\if@tud@list@sorted
 \newcommand*\tud@list@sorted{}
@@ -802,7 +802,7 @@
   \tud@res@a%
 }
 \ProvideExpandableDocumentCommand\@tudmarkuplabel{o m}{}
-\tud@toc@special{\let\tudmarkuplabel\@tudmarkuplabel}
+\tud@headings@special{\let\tudmarkuplabel\@tudmarkuplabel}
 % TODO \tudhyperref > \tudmanualref für treatise.tex überarbeiten
 % \href[pdfnewwindow]{./test.pdf#sec:general}{text}
 \newrobustcmd*\tud@hyperlink[2]{%
@@ -1256,7 +1256,7 @@
   \@killglue%
   \tud@declaration@check%
   \tud@declare@close{#1}{#2}%
-  \par\pagebreak[1]%
+  \par%
 }
 \newcommand*\printdeclarationlist{}
 \AtBeginDocument{\undef\printdeclarationlist}
@@ -1272,9 +1272,7 @@
 }
 \NewDocumentCommand\tud@print@declarationlist{!o !d()}{%
   \gundef\printdeclarationlist%
-  % TODO 5/4, wenn addvspace bug behoben github.com/latex3/latex2e/issues/307
-  % TODO alle label und index befehle nach gliederungen ins argument selbiger
-  \tud@setglue\@tempskipa{\medskipamount*4/4}%
+  \tud@setglue\@tempskipa{\medskipamount}%
   \ifhmode%
     \vskip\@tempskipa%
   \else%
@@ -1323,8 +1321,7 @@
     }%
   \tud@res@a%
   \par\nobreak%
-  % TODO wenn addvspace bug behoben
-  % \vskip\glueexpr\smallskipamount/2\relax%
+  \vskip\glueexpr\smallskipamount/2\relax%
   \@afterindentfalse\@afterheading%
 }
 \NewDocumentEnvironment{Declaration*}{o m}{%
@@ -2263,7 +2260,7 @@
       Index entry for label `#1' was already defined%
     }%
   }%
-  \csxdef{tud@idx@@#1}{\detokenize{#2}}%
+  \csgdef{tud@idx@@#1}{#2}%
 }
 \AtEndDocument{\let\tud@idx@declare\@gobbletwo}
 \newcommand*\tud@if@idx@exists[1]{%
@@ -3251,7 +3248,7 @@
   \let\tud@chg@entry@list\@empty%
   \let\tud@chg@version@list\@empty%
   \Changed@At@CreateList{#4}[{#2}](#3){#1}%
-  \tud@print@changedatlist%
+  \strut\tud@print@changedatlist%
 }
 % TODO raus, wenn DeclarationPackages umgesetzt; default=\z@
 \tud@newdim\tud@dim@changedatvskip
@@ -3263,13 +3260,12 @@
       \def\tud@res@c##1{%
         \appto\tud@res@b{%
           \ignorespaces%
-          \normalfont%
+          \normalfont\normalsize%
           \hyperref[{idx:changelog:##1}]{##1}%
           \tabularnewline%
         }%
       }%
       \forlistloop\tud@res@c{\tud@chg@version@list}%
-      \strut%
       \marginnote{%
         \begin{tabular}[b]{|l|}%
           \hline%
@@ -3288,7 +3284,7 @@
   \ignorespaces%
 }
 \NewExpandableDocumentCommand\@ChangedAt{s o d() m}{}
-\tud@toc@special{\let\ChangedAt\@ChangedAt}
+\tud@headings@special{\let\ChangedAt\@ChangedAt}
 \DeclareListParser*{\forscsvlist}{;}
 % TODO argument order
 % TODO Bundle aus Markup extrahieren, falls vorhanden?
@@ -3441,17 +3437,18 @@
           }%
         }%
         \tud@res@c##1\@nil%
-        \edef\tud@res@c{\SplitArgument{2}{!}{\tud@idx@entry}}%
+        \edef\tud@res@c{\noexpand\SplitArgument{2}{!}{\tud@idx@entry}}%
         \tud@res@c%
-        \edef\tud@res@c####1####2####3{%
-          \unexpanded{\Changed@At@@CreateEntry\tud@idx@entry}{####1}%
+        \def\tud@res@c####1####2####3{%
+          \def\tud@res@c{\Changed@At@@CreateEntry\tud@idx@entry{####1}}%
           \if@tud@res@swa%
-            {####2}{####3}%
+            \appto\tud@res@c{{####2}{####3}}%
           \else%
-            {####3}{####2}%
+            \appto\tud@res@c{{####3}{####2}}%
           \fi%
         }%
-        \expandafter\tud@res@c\ProcessedArgument(#3):#4:%
+        \expandafter\tud@res@c\ProcessedArgument%
+        \tud@res@c(#3):#4:%
         \index[changelog]{%
           #1!Implementierung\tud@res@a!\tud@idx@entry%
         }%
@@ -3582,6 +3579,7 @@
   }%
 }
 % TODO DeclarationValues mit optionalem Argument statt \tud@declaration@list
+% TODO noindent nach Umgebung
 \tud@list@create[%
   before=\tud@item@val@init%
 ]{DeclarationValues}{description}{1}
@@ -3919,116 +3917,114 @@
     \tud@setdim\marginparwidth{2cm}%
   \fi%
 }
-\AfterPackage*{todonotes}{%
-  \newcommand*\@ToDo[2][]{%
-    \expandafter\todo\expandafter[\expandafter{#1}]{\trim@spaces{#2}\strut}%
-  }%
-  \NewDocumentCommand\ToDo{s O{default} m !o}{%
-    \ifnum\tud@todo@num>\z@\relax%
-      \global\let\tud@currentHref\@currentHref%
+\newcommand*\@ToDo[2][]{%
+  \expandafter\todo\expandafter[\expandafter{#1}]{\trim@spaces{#2}\strut}%
+}%
+\NewDocumentCommand\ToDo{s O{default} m !o}{%
+  \ifnum\tud@todo@num>\z@\relax%
+    \global\let\tud@currentHref\@currentHref%
+    \begingroup%
       \begingroup%
-        \begingroup%
-          \let\tud@res@a\tud@todo@type@use%
-          \let\tud@res@b\@empty%
-          \TUDoptions{ToDo={only={#2}}}%
-          \def\tud@res@c##1{%
-            \ifinlist{##1}{\tud@res@a}{\listadd\tud@res@b{##1}}{}%
-          }%
-          \forlistloop\tud@res@c\tud@todo@type@use%
-          \edef\tud@res@c{%
-            \endgroup%
-            \unexpanded{\def\tud@todo@type@use}{\expandonce\tud@res@b}%
-          }%
-        \tud@res@c%
-        \ifx\tud@todo@type@use\@empty\else%
-          \edef\tud@res@a{\TUDScriptVersionNumber}%
-          \ifinlist{rls}{\tud@todo@type@use}{%
-            \def\tud@res@c{HKS44}%
-            \IfValueT{#4}{%
-              \ClassWarning{tudscrmanual}{%
-                ToDo type `rls' is fixed to current version%
-              }%
+        \let\tud@res@a\tud@todo@type@use%
+        \let\tud@res@b\@empty%
+        \TUDoptions{ToDo={only={#2}}}%
+        \def\tud@res@c##1{%
+          \ifinlist{##1}{\tud@res@a}{\listadd\tud@res@b{##1}}{}%
+        }%
+        \forlistloop\tud@res@c\tud@todo@type@use%
+        \edef\tud@res@c{%
+          \endgroup%
+          \unexpanded{\def\tud@todo@type@use}{\expandonce\tud@res@b}%
+        }%
+      \tud@res@c%
+      \ifx\tud@todo@type@use\@empty\else%
+        \edef\tud@res@a{\TUDScriptVersionNumber}%
+        \ifinlist{rls}{\tud@todo@type@use}{%
+          \def\tud@res@c{HKS44}%
+          \IfValueT{#4}{%
+            \ClassWarning{tudscrmanual}{%
+              ToDo type `rls' is fixed to current version%
             }%
+          }%
+        }{%
+          \ifinlist{imp}{\tud@todo@type@use}{%
+            \def\tud@res@c{HKS57}%
           }{%
-            \ifinlist{imp}{\tud@todo@type@use}{%
-              \def\tud@res@c{HKS57}%
+            \ifinlist{doc}{\tud@todo@type@use}{%
+              \def\tud@res@c{HKS33}%
             }{%
-              \ifinlist{doc}{\tud@todo@type@use}{%
-                \def\tud@res@c{HKS33}%
-              }{%
-                \def\tud@res@c{HKS92}%
-              }%
+              \def\tud@res@c{HKS92}%
             }%
-            \IfValueT{#4}{\protected@edef\tud@res@a{#4}}%
           }%
-          \begingroup%
-            \tud@v@to@number*\tud@res@b{\tud@res@a}%
-            \ifx\tud@res@b\relax%
-              \def\tud@res@c{50}%
+          \IfValueT{#4}{\protected@edef\tud@res@a{#4}}%
+        }%
+        \begingroup%
+          \tud@v@to@number*\tud@res@b{\tud@res@a}%
+          \ifx\tud@res@b\relax%
+            \def\tud@res@c{50}%
+          \else%
+            \tud@v@to@number\tud@res@c{\TUDScriptVersionNumber}%
+            \ifnum\tud@res@b<\tud@res@c\relax%
+              \def\tud@res@b{0}%
             \else%
-              \tud@v@to@number\tud@res@c{\TUDScriptVersionNumber}%
-              \ifnum\tud@res@b<\tud@res@c\relax%
-                \def\tud@res@b{0}%
+              \ifnum\tud@res@b>\tud@res@c\relax%
+                \def\tud@res@b{2}%
               \else%
-                \ifnum\tud@res@b>\tud@res@c\relax%
-                  \def\tud@res@b{2}%
-                \else%
-                  \def\tud@res@b{1}%
-                \fi%
+                \def\tud@res@b{1}%
               \fi%
             \fi%
-            \edef\tud@res@c{%
-              \endgroup%
-              \unexpanded{\def\tud@res@a}{\tud@res@a}%
-              \unexpanded{\edef\tud@res@b}{%
-                \ifcase\tud@res@b%
-                  color=\noexpand\tud@res@c!100,%
-                  bordercolor=HKS07!80,%
-                  textcolor=white%
-                \or%
-                  color=\noexpand\tud@res@c!50%
-                \else%
-                  color=\noexpand\tud@res@c!20%
-                \fi%
-              }%
-              \unexpanded{\tikzset{notestyleraw/.append style={align=center}}}%
-              \ifcase\tud@res@b\relax%
-                \unexpanded{%
-                  \tikzset{notestyleraw/.append style={%
-                    line width = 1pt,
-                    text width = \@todonotes@textwidth - 1.6ex - 2pt,
-                    inner sep  = 0.8ex
-                  }}%
-                }%
+          \fi%
+          \edef\tud@res@c{%
+            \endgroup%
+            \unexpanded{\def\tud@res@a}{\tud@res@a}%
+            \unexpanded{\edef\tud@res@b}{%
+              \ifcase\tud@res@b%
+                color=\noexpand\tud@res@c!100,%
+                bordercolor=HKS07!80,%
+                textcolor=white%
+              \or%
+                color=\noexpand\tud@res@c!50%
+              \else%
+                color=\noexpand\tud@res@c!20%
               \fi%
             }%
-          \tud@res@c%
-          \ifnum\tud@todo@num=\tw@\relax%
-            \let\@todonotes@drawInlineNote\relax
-          \else%
-            \ifhmode\strut\par\fi%
-            \let\par\relax%
-            \vskip\glueexpr\smallskipamount/2\relax%
-            \noindent%
-          \fi%
-          \edef\tud@res@c{\tud@res@b,inline\IfBooleanT{#1}{,nolist}}%
-          \sbox\z@{\@ToDo[{\tud@res@c}]{#3}}\usebox\z@%
-          \renewcommand*\marginpar[2][]{%
-            \marginnote[{##1}]{##2}[\dimexpr\ht\strutbox-\ht\z@-\dp\z@\relax]%
+            \unexpanded{\tikzset{notestyleraw/.append style={align=center}}}%
+            \ifcase\tud@res@b\relax%
+              \unexpanded{%
+                \tikzset{notestyleraw/.append style={%
+                  line width = 1pt,
+                  text width = \@todonotes@textwidth - 1.6ex - 2pt,
+                  inner sep  = 0.8ex
+                }}%
+              }%
+            \fi%
           }%
-          \edef\tud@res@c{\tud@res@b,noline,nolist}%
-          \@ToDo[{\tud@res@c}]{\tud@res@a}%
-          \ifnum\tud@todo@num=\tw@\relax\else%
-            \aftergroup\par\aftergroup\noindent%
-          \fi%
+        \tud@res@c%
+        \ifnum\tud@todo@num=\tw@\relax%
+          \let\@todonotes@drawInlineNote\relax
+        \else%
+          \ifhmode\strut\par\fi%
+          \let\par\relax%
+          \vskip\glueexpr\smallskipamount/2\relax%
+          \noindent%
         \fi%
-      \endgroup%
-      \global\let\@currentHref\tud@currentHref%
-    \fi%
-    \ignorespaces%
-  }%
-  \newcommand*\ListOfToDo{\ifnum\tud@todo@num>\z@\relax\clearpage\listoftodos\fi}%
+        \edef\tud@res@c{\tud@res@b,inline\IfBooleanT{#1}{,nolist}}%
+        \sbox\z@{\@ToDo[{\tud@res@c}]{#3}}\usebox\z@%
+        \renewcommand*\marginpar[2][]{%
+          \marginnote[{##1}]{##2}[\dimexpr\ht\strutbox-\ht\z@-\dp\z@\relax]%
+        }%
+        \edef\tud@res@c{\tud@res@b,noline,nolist}%
+        \@ToDo[{\tud@res@c}]{\tud@res@a}%
+        \ifnum\tud@todo@num=\tw@\relax\else%
+          \aftergroup\par\aftergroup\noindent%
+        \fi%
+      \fi%
+    \endgroup%
+    \global\let\@currentHref\tud@currentHref%
+  \fi%
+  \ignorespaces%
 }
+\newcommand*\ListOfToDo{\ifnum\tud@todo@num>\z@\relax\clearpage\listoftodos\fi}
 \NewDocumentCommand\tud@v@to@number{s m m}{%
   \begingroup%
     \edef\tud@res@a{%

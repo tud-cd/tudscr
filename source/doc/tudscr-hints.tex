@@ -373,7 +373,6 @@ Zurücksetzen des Fußnotenzählers durch neue Kapitel deaktiviert, womit sich
   \index{Inhaltsverzeichnis}%
 }
 \ChangedAt{v2.02:\TaT{Warnung beim Erzeugen des Inhaltsverzeichnisses}}%
-\ChangedAt{v2.02:\TaT{Hinweis auf Rand bei mehrzeiligen Einträgen ergänzt}}%
 Wird mit \Macro{tableofcontents}(\Bundle{koma-script}) das Inhaltsverzeichnis 
 für ein Dokument mit einer dreistelligen Seitenanzahl erstellt, so erscheinen 
 unter Umständen viele Warnungen mit der Meldung:
@@ -387,6 +386,7 @@ overfull \hbox
 Die Seitenzahlen im Verzeichnis werden in einer Box mit einer festen Breite 
 von~\PValue{1.55em} gesetzt, welche im Makro \Macro*{@pnumwidth} hinterlegt ist 
 und im Zweifel vergrößert werden sollte. Dabei ist auch der rechte Rand für 
+\ChangedAt{v2.05}%
 mehrzeilige Einträge im Verzeichnis \Macro*{@tocrmarg} zu vergrößern, welcher 
 mit~\PValue{2.55em} voreingestellt ist. Die Werte sollten nur minimal geändert 
 werden:
@@ -777,56 +777,30 @@ erweitert werden, um ein \enquote{Zuschneiden in die Farbe} zu ermöglichen.
 
 
 
-\section{Vermeiden des Skalierens einer PDF-Datei beim Druck}
-%
-\ChangedAt{v2.04:\TaT{Vermeiden des Skalierens einer PDF"~Datei beim Druck}}%
-Beim Erzeugen eines Druckauftrages einer PDF"~Datei kann es unter Umständen 
-dazu führen, dass diese durch den verwendeten PDF"~Betrachter unnötigerweise 
-vorher skaliert wird und dabei die Seitenränder vergrößert werden. Um dieses 
-Verhalten für Dokumente, die mit \Engine{pdfLaTeX} erzeugt werden, zu 
-unterdrücken, gibt es zwei Möglichkeiten:
-%
-\begin{enumerate}
-\item Wenn im Dokument ohnehin das Paket \Package{hyperref} verwendet wird, 
-  ist der simple Aufruf von 
-  \Macro{hypersetup}[\MPValue{pdfprintscaling=None}](\Package{hyperref})
-  ausreichend.
-\item Der Low"~Level"~Befehl
-  \Macro*{pdfcatalog}[\MPValue{/ViewerPreferences<{}</PrintScaling/None>{}>}]
-  besitzt das gleiche Verhalten und lässt sich auch ohne \Package{hyperref} 
-  nutzen.
-\end{enumerate}
-%
-Weitere Informationen sind unter \url{http://www.komascript.de/node/1897} 
-zu finden.
-
-
-
 \section{%
   Platzierung von Gleitobjekten%
   \label{sec:tips:floats}%
   \index{Gleitobjekte!Platzierung|?}%
+  \index{Satzspiegel!zweispaltig}%
 }
-\ToDo[doc]{\Macro*{floatsep}, \Macro*{intextsep}, \Macro*{textfloatsep} (dbl)}%
-\ToDo[doc]{Hinweis auf \Option*{twocolumn}}%
 Mit den beiden Paketen \Package{flafter} sowie \Package{placeins} gibt es die 
 Möglichkeit, den für \hologo{LaTeX} zur Verfügung stehenden Raum für die 
 Platzierung von Gleitobjekten einzuschränken. Darüber hinaus kann diese auch 
-durch die im Folgenden aufgezählten Befehle beeinflusst werden. Die Makros 
-lassen sich mit \Macro*{renewcommand*}[\MPName{Makro}\MPName{Wert}] sehr 
-einfach ändern.
+durch die im Folgenden aufgezählten Befehle beeinflusst werden, wobei zwischen 
+einspaltigem und zweispaltigen Layout (\Option{twocolumn}(\Package{typearea})) 
+unterschieden wird. Die nachfolgend erläuterten Makros lassen sich sehr 
+einfach mit \Macro*{renewcommand*}[\MPName{Makro}\MPName{Wert}] ändern. 
 
 \begin{Declaration}{\Macro*{floatpagefraction}}[0\floatpagefraction]
 \begin{Declaration}{\Macro*{dblfloatpagefraction}}[0\dblfloatpagefraction]
 \printdeclarationlist%
 %
-Der Wert gibt die relative Größe eines Gleitobjektes bezogen auf die 
-eingestellte Texthöhe (\Length*{textheight}) an, die mindestens erreicht sein 
-muss, damit für dieses gegebenenfalls vor dem Beginn eines neuen Kapitels eine 
-separate Seite erzeugt wird. Dabei wird einspaltiges 
-(\Macro*{floatpagefraction}) und zweispaltiges (\Macro*{dblfloatpagefraction}) 
-Layout unterschieden. Der Wert für beide Befehle sollte im Bereich 
-von~\PValue{0.5}\dots\PValue{0.8} liegen.
+Der Wert gibt die relative Größe eines Gleitobjektes bezogen auf die Texthöhe 
+(\Length*{textheight}) an, die mindestens erreicht sein muss, damit für dieses 
+gegebenenfalls vor dem Beginn eines neuen Kapitels eine separate Seite erzeugt 
+wird. Dabei wird einspaltiges (\Macro*{floatpagefraction}) und zweispaltiges 
+(\Macro*{dblfloatpagefraction}) Layout unterschieden. Der Wert für beide 
+Befehle sollte im Bereich von~\PValue{0.5\dots0.8} liegen.
 \end{Declaration}
 \end{Declaration}
 
@@ -834,10 +808,10 @@ von~\PValue{0.5}\dots\PValue{0.8} liegen.
 \begin{Declaration}{\Macro*{dbltopfraction}}[0\dbltopfraction]
 \printdeclarationlist%
 %
-Diese Werte geben den maximalen Seitenanteil für Gleitobjekte, die am oberen 
-Seitenrand platziert werden, für einspaltiges und zweispaltiges Layout an. Er 
-sollte im Bereich von \PValue{0.5}\dots\PValue{0.8} liegen und größer als 
-\Macro*{floatpagefraction} beziehungsweise \Macro*{dblfloatpagefraction} sein.
+Diese Werte geben den maximalen Seitenanteil für Gleitobjekte an, die am oberen 
+Seitenrand platziert werden. Er sollte größer als \Macro*{floatpagefraction} 
+respektive \Macro*{dblfloatpagefraction} (zweispaltiges Layout) sein und im 
+Bereich von \PValue{0.5\dots0.8} liegen. 
 \end{Declaration}
 \end{Declaration}
 
@@ -851,9 +825,29 @@ platziert werden. Er sollte zwischen~\PValue{0.2} und~\PValue{0.5} betragen.
 \begin{Declaration}{\Macro*{textfraction}}[0\textfraction]
 \printdeclarationlist%
 %
-Dies ist der Mindestanteil an Fließtext, der auf einer Seite mit Gleitobjekten 
-vorhanden sein muss, wenn diese nicht auf einer separaten Seite ausgegeben 
-werden. Er sollte in einem Bereich von~\PValue{0.1}\dots\PValue{0.3} liegen.
+Dies ist der notwendige Mindestanteil an Fließtext auf einer Seite mit 
+Gleitobjekten, damit diese nicht auf einer separaten Seite ausgegeben werden. 
+Er sollte im Bereich von~\PValue{0.1}\dots\PValue{0.3} liegen.
+\end{Declaration}
+
+\begin{Declaration}{\Length*{textfloatsep}}[\the\textfloatsep]
+\begin{Declaration}{\Length*{dbltextfloatsep}}[\the\dbltextfloatsep]
+\begin{Declaration}{\Length*{intextsep}}[\the\intextsep]
+\begin{Declaration}{\Length*{floatsep}}[\the\floatsep]
+\begin{Declaration}{\Length*{dblfloatsep}}[\the\dblfloatsep]
+\printdeclarationlist%
+%
+Die Längen \Length*{textfloatsep} und \Length*{dbltextfloatsep} (zweispaltig) 
+werden zwischen Fließtext und dem ersten Gleitobjekt am Ende beziehungsweise 
+dem letzten am Anfang einer Seite eingefügt. Die Länge \Length*{intextsep} 
+bestimmt den Abstand oberhalb und unterhalb von Gleitobjekten, wenn die Ausgabe 
+innerhalb des Fließtextes forciert wird. Mehrere Gleitobjekte nacheinander 
+werden mit \Length*{textfloatsep} respektive \Length*{dbltextfloatsep} 
+(zweispaltig) voneinander separiert.
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
+\end{Declaration}
 \end{Declaration}
 
 \begin{Declaration}{\Counter*{totalnumber}}[\arabic{totalnumber}]
@@ -908,44 +902,6 @@ Unterfangen Folgendes nutzen:
 
 
 
-\section{%
-  Warnung bei der Schriftgrößenwahl%
-  \label{sec:tips:fontsize}%
-}
-\ChangedAt{v2.04:\TaT{Warnung bei der Schriftgrößenwahl}}%
-Die im Dokument verwendete Schriftgröße kann bei den \KOMAScript-Klassen sehr 
-einfach über die Option~\Option{fontsize}(\Bundle{koma-script}) eingestellt 
-werden, wobei diese immer als Klassenoption angegeben werden sollte. Bei 
-relativ großen und kleinen Schriftgrößen kann dabei eine Warnung in der Gestalt 
-%
-\begin{quoting}[rightmargin=0pt]
-\begin{Code}[escapechar=§]
-LaTeX Font Warning: Font shape `...' in size <xx> not available
-\end{Code}
-\end{quoting}
-%
-auftreten. Dies daran, dass zum Zeitpunkt des Ladens einer Klasse immer nach 
-den Standardschriften der Computer~Modern gesucht wird, unabhängig davon, ob im 
-Nachhinein ein anderes Schriftpaket geladen wird. Diese sind de"~facto nicht 
-in alle Größen skalierbar. Um die Warnungen zu beseitigen, sollte das Paket 
-\Package{fix-cm} mit \Macro*{RequirePackage} \emph{vor} der Dokumentklasse 
-geladen werden:
-%
-\begin{quoting}[rightmargin=0pt]
-\begin{Code}[escapechar=§]
-\RequirePackage{fix-cm}
-\documentclass§\OPName{Klassenoptionen}\MPName{Klasse}§
-\usepackage[T1]{fontenc}
-§\dots§
-\begin{document}
-§\dots§
-\end{document}
-\end{Code}
-\end{quoting}
-%
-Damit werden die Warnungen behoben.
-
-
 
 \section{%
   Fehlermeldung: ! No room for a new \textbackslash write%
@@ -960,7 +916,7 @@ hilfreiche Pakete~-- wie beispielsweise \Package{hyperref}, \Package{biblatex},
 \Package{glossaries}, \Package{todonotes} oder auch \Package{filecontents}~-- 
 benötigen eigene Hilfsdateien und öffnen für das Erstellen dieser einen 
 Ausgabe-Stream oder mehr. Lädt der Anwender mehrere, in eine Hilfsdatei 
-schreibende Pakete, kann es zur der Fehlermeldung
+schreibende Pakete, kann es zur folgender Fehlermeldung kommen:
 %
 \begin{quoting}
 \begin{Code}
@@ -968,12 +924,82 @@ schreibende Pakete, kann es zur der Fehlermeldung
 \end{Code}
 \end{quoting}
 %
-kommen. Abhilfe schafft das Paket \Package{morewrites}, welches die Ausgabe der 
-Streams in eine Hilfsdatei umleitet. Es sollte möglichst frühzeitig innerhalb 
-der Präambel geladen werden. Die Verwendung des Paketes is in seltenen Fällen 
-nicht von Erfolg gekrönt. Für diesen Fall lässt sich alternativ das Paket 
-\Package{scrwfile}(\Bundle{koma-script}) nutzen, welches einige Änderungen am 
-\hologo{LaTeXe}"~Kernel vornimmt, um die Anzahl der benötigten Hilfsdateien für 
-das Schreiben aller Verzeichnisse zu reduzieren. Auch dieses sollte gleich zu 
-Beginn der Präambel eingebunden werden. Sollten mit diesem Paket unerwarteter 
-Weise Probleme auftreten, ist dessen Anleitung im \scrguide zu finden. 
+Abhilfe schafft das Paket \Package{morewrites}, welches die Ausgabe der Streams 
+in eine Hilfsdatei umleitet. Es sollte möglichst frühzeitig innerhalb der 
+Präambel geladen werden. Nur sehr selten ist die Verwendung des Paketes nicht 
+von Erfolg gekrönt. 
+
+Für diesen Fall lässt sich das Paket \Package{scrwfile}(\Bundle{koma-script}) 
+als Alternative nutzen, welches einige Änderungen am \hologo{LaTeXe}"~Kernel 
+vornimmt. Das Ziel dieses Paketes ist es, zumindest die Anzahl der benötigten 
+Hilfsdateien für das Schreiben \emph{aller Verzeichnisse} zu reduzieren und 
+somit nur einen einzigen Stream hierfür zu verwenden. Auch dieses sollte gleich 
+zu Beginn der Präambel eingebunden werden. Der Entwicklungsstand des Paketes 
+ist als experimentell eingestuft, auch wenn es meiner Erfahrung nach fehlerfrei 
+arbeitet. Sollten dennoch Probleme auftreten, ist die Anleitung des Paketes im 
+\scrguide zu finden. 
+
+
+
+\section{%
+  Warnung bei der Schriftgrößenwahl%
+  \label{sec:tips:fontsize}%
+}
+\ChangedAt{v2.04:\TaT{Warnung bei der Schriftgrößenwahl}}%
+Die im Dokument verwendete Schriftgröße lässt sich bei den \KOMAScript-Klassen 
+einfach über die Option~\Option{fontsize}(\Bundle{koma-script}) einstellen, 
+wobei diese \emph{immer} als Klassenoption anzugeben ist. Werden mit der Option 
+relativ großen oder kleinen Schriftgrößen angegeben, kann dabei die folgende 
+Warnung auftreten:
+%
+\begin{quoting}[rightmargin=0pt]
+\begin{Code}[escapechar=§]
+LaTeX Font Warning: Font shape `...' in size <xx> not available
+\end{Code}
+\end{quoting}
+%
+Dies liegt darin begründet, dass zum Zeitpunkt des Ladens einer Klasse zunächst 
+immer nach den Standardschriften der Computer~Modern gesucht wird, unabhängig 
+davon, ob im Nachhinein ein anderes Schriftpaket Anwendung findet. Die 
+ursprünglichen Schriften der Computer~Modern sind de"~facto nicht auf alle 
+Größen skalierbar. Um die genannten Warnungen zu beseitigen, sollte \emph{vor} 
+der Dokumentklasse das Paket \Package{fix-cm} geladen werden:
+%
+\begin{quoting}[rightmargin=0pt]
+\begin{Code}[escapechar=§]
+\RequirePackage{fix-cm}
+\documentclass§\OPName{Klassenoptionen}\MPName{Klasse}§
+\usepackage[T1]{fontenc}
+§\dots§
+\begin{document}
+§\dots§
+\end{document}
+\end{Code}
+\end{quoting}
+
+
+
+\section{Vermeiden des Skalierens einer PDF-Datei beim Druck}
+%
+\ChangedAt{v2.04:\TaT{Vermeiden des Skalierens einer PDF"~Datei beim Druck}}%
+Beim Erzeugen eines Druckauftrages einer PDF"~Datei kann es unter Umständen 
+dazu führen, dass diese durch den verwendeten PDF"~Betrachter unnötigerweise 
+vorher skaliert wird und dabei die Seitenränder vergrößert werden. Um dieses 
+Verhalten für Dokumente, die mit \Engine{pdfLaTeX} erzeugt werden, zu 
+unterdrücken, gibt es zwei Möglichkeiten:
+%
+\begin{enumerate}
+\item Wenn im Dokument ohnehin das Paket \Package{hyperref} verwendet wird, 
+  ist der simple Aufruf von 
+  \Macro{hypersetup}[\MPValue{pdfprintscaling=None}](\Package{hyperref})
+  ausreichend.
+\item Der Low"~Level"~Befehl
+  \Macro*{pdfcatalog}[\MPValue{/ViewerPreferences<{}</PrintScaling/None>{}>}]
+  besitzt das gleiche Verhalten und lässt sich auch ohne \Package{hyperref} 
+  nutzen.
+\end{enumerate}
+%
+Weitere Informationen sind unter \url{http://www.komascript.de/node/1897} 
+zu finden.
+
+
