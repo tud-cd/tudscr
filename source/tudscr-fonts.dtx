@@ -1,4 +1,4 @@
-% \CheckSum{3124}
+% \CheckSum{3183}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -52,7 +52,7 @@
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
 % \fi
 %
-\ProvidesFile{tudscr-fonts.dtx}[2020/01/14 v2.06f TUD-Script\space%
+\ProvidesFile{tudscr-fonts.dtx}[2020/06/18 v2.06g TUD-Script\space%
 %
 % \iffalse
 %</dtx>
@@ -1283,6 +1283,7 @@
 % Danach erfolgt die Definition der Schriften des \CDs. 
 %    \begin{macrocode}
     \tud@cdfont@set%
+    \tud@cdfont@symbols@set%
     \tud@ttfont@set%
     \if@tud@x@mweights@enabled%
       \edef\bfseries@rm{\tud@cdfont@bf}%
@@ -1323,6 +1324,7 @@
       \tud@cs@restore{sffamily}%
       \tud@cs@restore{ttfamily}%
     \fi%
+    \tud@cdfont@symbols@reset%
   \fi%
   \if@tud@x@mweights@enabled%
     \edef\rmdef@ult{\rmdefault}%
@@ -1449,6 +1451,122 @@
 % \end{macro}^^A \tud@cdfont@md
 % \end{macro}^^A \tud@cdfont@@set
 % \end{macro}^^A \tud@cdfont@set
+% \begin{macro}{\tud@cdfont@declare@symb}
+% \changes{v2.07}{2020/01/22}{neu}^^A
+% \begin{macro}{\tud@cdfont@symb@list}
+% \changes{v2.07}{2020/01/22}{neu}^^A
+% \begin{macro}{\tud@DeclareTextSymbol}
+% \changes{v2.07}{2020/01/22}{neu}^^A
+% Mit \cs{tud@cdfont@declare@symb} können Glyhen respektive einzelne Zeichen 
+% definiert werden, welche über das Makro \cs{tud@cdfont@symbols@set} nur zum 
+% Einsatz kommen, wenn \opt{cdfont=true} aktiviert wurde. Damit können gezielt 
+% Symbole in verschiedenen Kodierungen aus unterscihedlichen Schriftfamilien 
+% definiert werden.
+%    \begin{macrocode}
+\newcommand*\tud@cdfont@symb@list{}
+\newcommand*\tud@cdfont@declare@symb[4]{%
+  \listeadd\tud@cdfont@symb@list{#1}%
+  \tud@DeclareTextSymbol{#1}{#2}{#3}{#4}%
+}
+%    \end{macrocode}
+% Die an \cs{tud@cdfont@declare@symb} übergebenen Bezeichner für Auswahlbefehle
+% erhalten \cs{tud@cdfont@symbol@\dots} als Präfix. Da so der ursprüngliche 
+% Befehlsname verändert wird, würde dieser Befehlsname auch verwendet werden, 
+% wenn dieser in einem fragilen Kontext genutzt wird (siehe \cs{@changed@cmd}).
+% Deshalb wird im Anschluss der neue Befehl selbst robust definiert, damit 
+% eine spätere Expansion nach der Zuweisung mit \cs{tud@cs@letltx} nicht in 
+% \cs{tud@cdfont@symbol@\meta{symbol}} resultiert sondern in jedem Fall 
+% \cs{\meta{symbol}} erhalen bleibt.
+%    \begin{macrocode}
+\newcommand*\tud@DeclareTextSymbol[4]{%
+  \begingroup%
+    \edef\tud@res@a{%
+      \endgroup%
+      \noexpand\DeclareTextCommand%
+        {\csname tud@cdfont@symbol@#1\endcsname}{#2}%
+        {\unexpanded{{\fontfamily{#3}\selectfont\char#4}}}%
+      \noexpand\DeclareTextCommandDefault%
+        {\csname tud@cdfont@symbol@#1\endcsname}%
+        {\noexpand\UseTextSymbol{#2}{\csname tud@cdfont@symbol@#1\endcsname}}%
+    }%
+  \tud@res@a%
+  \expandafter\robustify\csname tud@cdfont@symbol@#1\endcsname%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@DeclareTextSymbol
+% \end{macro}^^A \tud@cdfont@symb@list
+% \end{macro}^^A \tud@cdfont@declare@symb
+% \begin{macro}{\tud@cdfont@symbols@set}
+% \changes{v2.07}{2020/01/22}{neu}^^A
+% \begin{macro}{\tud@cdfont@symbols@toks}
+% \changes{v2.07}{2020/01/22}{neu}^^A
+% \begin{macro}{\tud@cdfont@symbols@set@cmd}
+% \changes{v2.07}{2020/01/22}{neu}^^A
+% \begin{macro}{\tud@cdfont@symbols@reset}
+% \changes{v2.07}{2020/01/22}{neu}^^A
+% Mit diesen Befehlen wird im zwischen Symbolen für die Schriften des \CDs, 
+% welche mit \cs{tud@cdfont@declare@symb} deklariert wurden, und den normalen 
+% gewechselt werden. 
+%    \begin{macrocode}
+\newtoks\tud@cdfont@symbols@toks
+\newcommand*\tud@cdfont@symbols@set{%
+%    \end{macrocode}
+% Die Sicherung der alten Definitionen erfolgt nur einmalig. Die Liste der 
+% Symbole wird durchlaufen und die erfolgten Definitionen werden umgesetzt.
+%    \begin{macrocode}
+  \expandafter\IfArgIsEmpty\expandafter{\the\tud@cdfont@symbols@toks}{%
+    \forlistloop\tud@cdfont@symbols@set@cmd\tud@cdfont@symb@list%
+%    \end{macrocode}
+% Wird das Tokenregister abgerufen, soll es anschließend auch wieder geleert 
+% werden.
+%    \begin{macrocode}
+    \addto@hook\tud@cdfont@symbols@toks{\tud@cdfont@symbols@toks{}}%
+  }{}%
+}
+%    \end{macrocode}
+% Das Vorgehen zur Wiederherstellung im Token \cs{tud@cdfont@symbols@toks}
+% definiert.
+%    \begin{macrocode}
+\newcommand*\tud@cdfont@symbols@set@cmd[1]{%
+  \tud@cs@store{#1}%
+  \addto@hook\tud@cdfont@symbols@toks{\tud@cs@restore{#1}}%
+  \tud@cs@letltx{#1}{tud@cdfont@symbol@#1}%
+}
+%    \end{macrocode}
+% Für das Zurücksetzen muss lediglich das Tokenregister aufgerufen werden.
+%    \begin{macrocode}
+\newcommand*\tud@cdfont@symbols@reset{\the\tud@cdfont@symbols@toks}
+%    \end{macrocode}
+% \end{macro}^^A \tud@cdfont@symbols@reset
+% \end{macro}^^A \tud@cdfont@symbols@set@cmd
+% \end{macro}^^A \tud@cdfont@symbols@toks
+% \end{macro}^^A \tud@cdfont@symbols@set
+% \begin{macro}{\tud@cdfont@declare@textsymb}
+% \changes{v2.07}{2020/01/22}{neu}^^A
+% \begin{macro}{\tud@cdmath@symbol@textleftarrow}
+% \begin{macro}{\tud@cdmath@symbol@textrightarrow}
+% \begin{macro}{\tud@cdmath@symbol@textuparrow}
+% \begin{macro}{\tud@cdmath@symbol@textdownarrow}
+% \begin{macro}{\tud@cdmath@symbol@textlangle}
+% \begin{macro}{\tud@cdmath@symbol@textrangle}
+% Die Definition der Textsymbole für die \val{TS1}-Kodierung.
+%    \begin{macrocode}
+\newcommand*\tud@cdfont@declare@textsymb{%
+  \tud@cdfont@declare@symb{textleftarrow}{TS1}{iwona}{24}%
+  \tud@cdfont@declare@symb{textrightarrow}{TS1}{iwona}{25}%
+  \tud@cdfont@declare@symb{textuparrow}{TS1}{iwona}{94}%
+  \tud@cdfont@declare@symb{textdownarrow}{TS1}{iwona}{95}%
+  \tud@cdfont@declare@symb{textlangle}{TS1}{iwona}{60}%
+  \tud@cdfont@declare@symb{textrangle}{TS1}{iwona}{62}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@cdmath@symbol@textrangle
+% \end{macro}^^A \tud@cdmath@symbol@textlangle
+% \end{macro}^^A \tud@cdmath@symbol@textdownarrow
+% \end{macro}^^A \tud@cdmath@symbol@textuparrow
+% \end{macro}^^A \tud@cdmath@symbol@textrightarrow
+% \end{macro}^^A \tud@cdmath@symbol@textleftarrow
+% \end{macro}^^A \tud@cdfont@declare@textsymb
 % \begin{macro}{\tud@font@skip@set}
 % \changes{v2.04}{2015/02/17}{neu}^^A
 % \begin{macro}{\tud@font@skip@@set}
@@ -1607,17 +1725,10 @@
             {OMS/iwona/\tud@res@a/n}%
         }%
       }{}%
-      \AtBeginDocument{%
-        \ifcsundef{textrightarrow}{}{%
-          \tud@cs@store{textrightarrow}%
-          \renewrobustcmd*{\textrightarrow}{%
-            \begingroup%
-              \if@tud@cdfont@active\fontfamily{iwona}\selectfont\fi%
-              \tud@cs@use{textrightarrow}%
-            \endgroup%
-          }%
-        }%
-      }%
+%    \end{macrocode}
+% Nun folgen noch einzeln definierte Symbole.
+%    \begin{macrocode}
+      \tud@cdfont@declare@textsymb%
     \fi%
 %    \end{macrocode}
 % Es werden mehrere Schalter zur expliziten Auswahl für die Schriftschnitte
