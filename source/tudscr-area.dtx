@@ -1,4 +1,4 @@
-% \CheckSum{2189}
+% \CheckSum{2249}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -290,6 +290,12 @@
 % \changes{v2.05}{2015/11/29}{neu}^^A
 % \begin{macro}{\tud@cdgeometry@assignlayout}
 % \changes{v2.06}{2018/08/13}{neu}^^A
+% \begin{macro}{\tud@cdgeometry@resetlayout}
+% \changes{v2.06g}{2020/06/18}{neu, Bugfix für Änderung des Papierformates}^^A
+% \begin{macro}{\tud@cdgeometry@papersize@store}
+% \changes{v2.06g}{2020/06/18}{neu}^^A
+% \begin{macro}{\tud@cdgeometry@papersize@last}
+% \changes{v2.06g}{2020/06/18}{neu}^^A
 % \begin{length}{\tud@dim@layoutwidth}
 % \changes{v2.05}{2016/04/03}{neu}^^A
 % \begin{length}{\tud@dim@layoutheight}
@@ -316,18 +322,6 @@
 \tud@newdim\tud@dim@layoutheight
 \tud@newdim\tud@dim@layouthoffset
 \tud@newdim\tud@dim@layoutvoffset
-%    \end{macrocode}
-% Mit \cs{tud@cdgeometry@assignlayout} wird die Layoutgröße, welche ggf. mit 
-% dem Paket \pkg{geometry} angegeben wurde, entsprechend gesetzt.
-%    \begin{macrocode}
-\newcommand*\tud@cdgeometry@assignlayout{%
-  \ifdim\tud@dim@layoutwidth<\p@\relax%
-    \tud@setdim\tud@dim@layoutwidth{\paperwidth}%
-  \fi%
-  \ifdim\tud@dim@layoutheight<\p@\relax%
-    \tud@setdim\tud@dim@layoutheight{\paperheight}%
-  \fi%
-}
 \newcommand*\tud@cdgeometry@set{%
   \tud@cdgeometry@assignlayout%
   \tud@if@v@lower{2.05}{%
@@ -523,12 +517,57 @@
     \tud@setdim\tud@dim@headsep{.707107\tud@dim@headsep}%
     \tud@setdim\tud@dim@footsep{.707107\tud@dim@footsep}%
   \fi%
+  \tud@cdgeometry@papersize@store%
+}
+%    \end{macrocode}
+% Mit \cs{tud@cdgeometry@assignlayout} wird die Layoutgröße, welche ggf. mit 
+% dem Paket \pkg{geometry} angegeben wurde, entsprechend gesetzt.
+%    \begin{macrocode}
+\newcommand*\tud@cdgeometry@assignlayout{%
+  \ifdim\tud@dim@layoutwidth<\p@\relax%
+    \tud@setdim\tud@dim@layoutwidth{\paperwidth}%
+  \fi%
+  \ifdim\tud@dim@layoutheight<\p@\relax%
+    \tud@setdim\tud@dim@layoutheight{\paperheight}%
+  \fi%
+}
+%    \end{macrocode}
+% Das Verarbeiten des Parameters \prm{layout} von \pkg{geometry} ist etwas 
+% komplizierter. Normalerweise werden dessen Einstellungen bei einer einfachen
+% Änderung des Satzspiegels beibehalten. Bei einer Änderung des Papierformates 
+% sind die damit gemachten Einstellungen nur bedingt weiterhin nutzbar. Die
+% Offset-Werte bleiben in diesem Fall erhalten, das Layoutformat allerdings 
+% wird zurückgesetzt. Das aktuelle Papierformat wird nach der Prüfung auf eine 
+% Änderung in \cs{tud@cdgeometry@papersize@last} gesichert.
+%    \begin{macrocode}
+\newcommand*\tud@cdgeometry@papersize@last{}
+\newcommand*\tud@cdgeometry@papersize@store{%
+  \edef\tud@cdgeometry@papersize@last{\the\paperheight:\the\paperwidth}%
+}
+\newcommand*\tud@cdgeometry@resetlayout{%
+  \begingroup%
+    \edef\tud@res@a{\the\paperheight:\the\paperwidth}%
+    \def\tud@res@b{%
+      \endgroup%
+      \tud@cdgeometry@papersize@store%
+    }%
+    \ifx\tud@res@a\tud@cdgeometry@papersize@last\else%
+      \appto\tud@res@b{%
+        \tud@setdim\tud@dim@layoutwidth{\z@}%
+        \tud@setdim\tud@dim@layoutheight{\z@}%
+        \tud@x@geometry@fixmargins%
+      }%
+    \fi%
+  \tud@res@b%
 }
 %    \end{macrocode}
 % \end{length}^^A \tud@dim@layoutvoffset
 % \end{length}^^A \tud@dim@layouthoffset
 % \end{length}^^A \tud@dim@layoutheight
 % \end{length}^^A \tud@dim@layoutwidth
+% \end{macro}^^A \tud@cdgeometry@papersize@last
+% \end{macro}^^A \tud@cdgeometry@papersize@store
+% \end{macro}^^A \tud@cdgeometry@resetlayout
 % \end{macro}^^A \tud@cdgeometry@assignlayout
 % \end{macro}^^A \if@tud@cdgeometry@adjust
 % \end{macro}^^A \tud@cdgeometry@set
@@ -627,11 +666,11 @@
 % erfolgte, wird auf das Laden verzichtet (\cs{if@tud@cdgeometry@reset}).
 %    \begin{macrocode}
     \if@atdocument%
-      \if@tud@cdgeometry@reset\else%
+      \if@tud@cdgeometry@reset\else% false
         \ifcase\tud@cdgeometry@num\relax%
           \tud@loadgeometry{current@typearea}%
           \@tud@x@geometry@fixmarginstrue%
-        \or%
+        \or% custom
           \tud@loadgeometry{current@custom}%
           \@tud@x@geometry@fixmarginstrue%
         \fi%
@@ -907,6 +946,7 @@
 % der einzelnen Seitenstile umzusetzen. Dabei werden auch etwaige Optionen von
 % \KOMAScript{} beachtet. Hierfür werden die originalen Befehle \cs{geometry}
 % und \cs{newgeometry} angepasst, weshalb diese vorher gesichert werden.
+% \ToDo{erweiterte Möglichkeiten von \cs{newgeometry} dokumentieren}[v2.07]
 %    \begin{macrocode}
   \tud@newif\if@tud@x@geometry@enabled%
   \@tud@x@geometry@enabledtrue%
@@ -949,7 +989,11 @@
     \if@tud@x@geometry@enabled%
       \if@atdocument%
         \@tud@x@geometry@fixmarginstrue%
-        \tud@cdgeometry@reset{custom}%
+        \ifcase\tud@cdgeometry@num\relax% false
+          \tud@cdgeometry@reset{typearea}%
+        \or% custom
+          \tud@cdgeometry@reset{custom}%
+        \fi%
         \tud@cdgeometry@process%
       \fi%
     \fi%
@@ -981,6 +1025,7 @@
 % \end{macro}^^A \geometry
 % \begin{macro}{\tud@x@geometry@user}
 % \changes{v2.05}{2016/03/06}{neu}^^A
+% \changes{v2.06g}{2020/06/18}{Bugfix für Änderung des Papierformates}^^A
 % \begin{parameter}{paper}
 % \begin{parameter}{papername}
 % \begin{parameter}{paperwidth}
@@ -1017,9 +1062,15 @@
     \let\tud@x@geometry@layout\@empty%
     \let\tud@x@geometry@parameter\@empty%
     \TUD@parameter@set{geometry}{#1}%
+%    \end{macrocode}
+% Bei einer Änderung des Papierformates wird das Layoutformat zurückgesetzt.
+%    \begin{macrocode}
+    \tud@x@geometry@area@set{paper}%
+    \tud@cdgeometry@resetlayout%
     \ifx\tud@x@geometry@layout\@empty\else%
       \begingroup%
         \tud@x@geometry@area@set{layout}%
+        \tud@cdgeometry@assignlayout%
         \edef\tud@res@a{%
           \endgroup%
             \unexpanded{\tud@setdim\tud@dim@layoutwidth}{\the\paperwidth}%
@@ -1027,17 +1078,36 @@
         }%
       \tud@res@a%
     \fi%
-    \tud@x@geometry@area@set{paper}%
     \Ifstr{#2}{newgeometry}{%
       \eappto\Gm@restore@org{%
         \noexpand\paperwidth=\the\paperwidth\relax%
         \noexpand\paperheight=\the\paperheight\relax%
       }%
-      \tud@x@geometry@getlayout{\tud@res@a}%
-      \epreto\tud@x@geometry@parameter{\tud@res@a,}%
-      \def\tud@res@a{\tud@cs@use{newgeometry}}%
-      \expandafter\tud@res@a\expandafter{\tud@x@geometry@parameter}%
-      \edef\tud@x@geometry@init{\tud@x@geometry@parameter}%
+%    \end{macrocode}
+% Wird der Befehl verwendet, wenn eigentlich \pkg{typearea} aktiv ist, so 
+% werden lediglich die Einstellungen zu \prm{paper} und \prm{layout} beachtet. 
+% Dies wird über die gepatchte Version von \cs{typearea} realisert. Siehe dazu 
+% \cs{tud@x@typearea@before} und \cs{tud@x@typearea@after} für Details.
+%    \begin{macrocode}
+      \ifcase\tud@cdgeometry@num\relax%
+        \typearea[current]{current}%
+        \ifx\tud@x@geometry@parameter\@empty\else%
+          \ClassWarning{\TUD@Class@Name}{%
+            It isn't possible to use \string\newgeometry with any\MessageBreak%
+            key except `paper' or `layout' when package `typearea'\MessageBreak%
+            is used with`cdgeometry=typearea'%
+          }%
+        \fi%
+%    \end{macrocode}
+% Die Abarbeitung der gegebenen Parameter wird mit \cs{tud@cdgeometry@process}
+% innerhalb von \cs{Gm@changelayout} realisiert. Letzteres Makro wird wiederum 
+% von der originalen Definition von \cs{newgeometry} aufgerufen.
+%    \begin{macrocode}
+      \else%
+        \def\tud@res@a{\tud@cs@use{newgeometry}}%
+        \expandafter\tud@res@a\expandafter{\tud@x@geometry@parameter}%
+        \edef\tud@x@geometry@init{\tud@x@geometry@parameter}%
+      \fi%
     }{%
       \eappto\tud@x@geometry@init{\tud@x@geometry@parameter}%
     }%
@@ -1047,7 +1117,7 @@
 % sowie \val{layout} des Paketes \pkg{geometry} auf die passenden Optionen von 
 % \KOMAScript{} abbilden zu können und insbesondere Schnittmarken für alle 
 % Seitenstile bereitzustellen.
-% \ToDo{
+% \ToDo{%
 %   Leider ist aus der dem Versuch, eine halbwegs einheitliche Schnittstelle 
 %   zwischen den Paketen \pkg{typearea} und \pkg{geometry} zu schaffen, ein
 %   ziemlich unübersichtliches Konstrukt geworden, weshalb das Ganze in einer
@@ -1095,8 +1165,12 @@
       }%
       \@tempa#1,,\@nil%
     }%
-    \TUD@parameter@def{layoutwidth}{\tud@setdim\tud@dim@layoutwidth{#1}}%
-    \TUD@parameter@def{layoutheight}{\tud@setdim\tud@dim@layoutheight{#1}}%
+    \TUD@parameter@def{layoutwidth}{%
+      \tud@x@geometry@area@def{layout}{#1:\tud@dim@layoutheight}%
+    }%
+    \TUD@parameter@def{layoutheight}{%
+      \tud@x@geometry@area@def{layout}{\tud@dim@layoutwidth:#1}%
+    }%
     \TUD@parameter@def{layoutoffset}{%
       \def\@tempa##1,##2,##3\@nil{%
         \IfArgIsEmpty{##2}{%
@@ -1196,25 +1270,27 @@
     \fi%
   }%
 %    \end{macrocode}
-% Der Befehl \cs{tud@x@geometry@area@set} bewerkstelligt die Abarbeitung der 
-% zuvor gesammelten Schlüssel.
+% Der Befehl \cs{tud@x@geometry@area@set} bewerkstelligt die sequentielle 
+% Abarbeitung der zuvor gesammelten Schlüssel.
 %    \begin{macrocode}
   \newcommand*\tud@x@geometry@area@set[1]{%
     \letcs{\@tempa}{tud@x@geometry@#1}%
     \ifdefvoid{\@tempa}{}{%
       \def\@tempb##1:##2:##3\@nil{%
-        \begingroup%
-          \IfArgIsEmpty{##2}{%
-            \def\@tempb{\KOMAoption{paper}{##1}}%
-          }{%
-            \if@landscape%
-              \def\@tempb{\KOMAoption{paper}{##2:##1}}%
-            \else%
-              \def\@tempb{\KOMAoption{paper}{##1:##2}}%
-            \fi%
-          }%
-          \edef\@tempb{\endgroup\expandonce\@tempb}%
-        \@tempb%
+        \IfArgIsEmpty{##2}{%
+          \KOMAoption{paper}{##1}%
+        }{%
+%    \end{macrocode}
+% \KOMAScript{} stellt sich ziemlich clever an und setzt das Papierformat in 
+% dieser Notation immer korrekt im Quer- oder Hochformat, unabhängig von der 
+% Reihenfolge der angegebenen Längen. Für den Parameter \prm{layout} ist dies 
+% jedoch unerwünscht, weshalb der verantwortliche Befehl deaktiviert wird.
+% \emph{Dies geschieht hier direkt und nicht in einer Gruppe,} weil der Aufruf 
+% von \cs{tud@x@geometry@area@set}|{layout}| lokal erfolgt.
+%    \begin{macrocode}
+          \ifstr{#1}{layout}{\let\scr@setpaperorientation\relax}{}%
+          \KOMAoption{paper}{##1:##2}%
+        }%
       }%
       \def\@tempc##1{\@tempb##1::\@nil}%
       \expandafter\forcsvlist\expandafter\@tempc\expandafter{\@tempa}%
@@ -1252,12 +1328,12 @@
     \ifGm@pass%
       \let#1\@empty%
     \else%
-      \tud@cdgeometry@assignlayout%
       \begingroup%
 %    \end{macrocode}
 % Das Setzen des Layouts erfolgt nur, wenn die dazugehörigen Längen \emph{nicht}
 % denen des Papierbogens entsprechen.
 %    \begin{macrocode}
+        \tud@cdgeometry@assignlayout%
         \@tud@res@swafalse%
         \ifdim\tud@dim@layoutwidth=\paperwidth\relax\else\@tud@res@swatrue\fi%
         \ifdim\tud@dim@layoutheight=\paperheight\relax\else\@tud@res@swatrue\fi%
@@ -2057,6 +2133,7 @@
 % \begin{macro}{\typearea}
 % \begin{macro}{\areaset}
 % \begin{macro}{\storereareas}
+% \changes{v2.06g}{2020/06/18}{Sichern der Längen für \prm{layout}}^^A
 % \begin{macro}{\tud@x@typearea@before}
 % \changes{v2.06}{2018/08/13}{neu}^^A
 % \begin{macro}{\tud@x@typearea@after}
@@ -2070,6 +2147,7 @@
 % der Präambel werden in \cs{tud@x@typearea@init} gesichert.
 %    \begin{macrocode}
 \newcommand*\tud@x@typearea@before{%
+  \tud@cdgeometry@resetlayout%
   \tud@cslength@store{paperheight}%
   \tud@cslength@store{paperwidth}%
   \begingroup%
@@ -2124,9 +2202,14 @@
   \begingroup%
     \tud@x@geometry@fixmargins%
     \tud@cs@use{storeareas}{#1}%
+    \def\tud@res@b##1{\unexpanded{\tud@setdim##1}{\the##1}}%
     \edef\tud@res@a{%
       \endgroup%
       \unexpanded{\def#1}{%
+        \tud@res@b{\tud@dim@layoutwidth}%
+        \tud@res@b{\tud@dim@layoutheight}%
+        \tud@res@b{\tud@dim@layouthoffset}%
+        \tud@res@b{\tud@dim@layoutvoffset}%
         \expandonce#1%
         \def\noexpand\tud@cdgeometry@num{\tud@cdgeometry@num}%
       }%

@@ -65,6 +65,8 @@ Versionen
 + Verwendung der Symbole `\textleftarrow`, `\textrightarrow`, `\textuparrow`,
   `\textdownarrow` sowie `\textlangle` und `\textrangle` aus Paket **iwona**
 
+**v2.06g** (2020/06/18)
++ Bugfix für Änderung des Satzspiegels im Dokument
 
 **v2.06f** (2020/01/14)
 + Anpassungen für Paket **scrbase** v3.28
@@ -266,6 +268,9 @@ Versions
 
 **v2.07** (2020/xx/xx)
 + ...
+
+**v2.06g** (2020/06/18)
++ bug fix when changing type area within document
 
 **v2.06f** (2020/01/14)
 + adaptions for package **scrbase** v3.28
