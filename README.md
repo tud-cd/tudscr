@@ -4,7 +4,7 @@
 
  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2020
 
- tudscr 2020/01/14 v2.06f
+ tudscr 2020/06/18 v2.06g
 
 ----------------------------------------------------------------------------
 
@@ -52,6 +52,9 @@ Das Bundle beinhaltet:
 
 Versionen
 ---------
+
+**v2.06g** (2020/06/18)
++ Bugfix für Änderung des Satzspiegels im Dokument
 
 **v2.06f** (2020/01/14)
 + Anpassungen für Paket `scrbase v3.28`
@@ -250,6 +253,9 @@ The bundle offers:
 
 Versions
 --------
+
+**v2.06g** (2020/06/18)
++ bug fix when changing type area within document
 
 **v2.06f** (2020/01/14)
 + adaptions for package `scrbase v3.28`
