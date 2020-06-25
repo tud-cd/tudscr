@@ -186,7 +186,7 @@
 %
 % \subsection{Grundlegende Befehle für \TUDScript}
 %
-% \subsubsection{Sichere Definition von \TeX-Primitiven}
+% \subsubsection{Erweiterte Definition von \TeX-Primitiven}
 %
 % Mit \LaTeX{} lassen sich einige Primitiven definieren, ohne zu Prüfen, ob 
 % ggf. bereits eine Definition vorhanden ist. Dies wird hiermit umgangen.
@@ -212,6 +212,16 @@
 % \end{macro}^^A \tud@newtoks
 % \end{macro}^^A \tud@newcount
 % \end{macro}^^A \tud@newif
+% \begin{macro}{\tud@absnum}
+% \changes{v2.07}{2020/04/24}{neu}^^A
+% Mit diesem Befehl wird der Betrag eines numerischen Werte zurückgelifert.
+%    \begin{macrocode}
+\newcommand*\tud@absnum{}
+\def\tud@absnum#1\relax{%
+  \numexpr\ifnum\numexpr#1\relax<\z@-\fi\numexpr#1\relax\relax%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@absnum
 %
 % \subsubsection{Temporäre Makros zur internen Verwendung durch \TUDScript}
 %
@@ -229,25 +239,25 @@
 % \changes{v2.06}{2018/07/12}{neu}^^A
 % \begin{macro}{\tud@res@c}
 % \changes{v2.06}{2018/07/12}{neu}^^A
+% \begin{macro}{\tud@res@d}
+% \changes{v2.06}{2018/07/12}{neu}^^A
 % \begin{macro}{\if@tud@res@swa}
 % \changes{v2.06}{2018/07/12}{neu}^^A
 % \begin{macro}{\tud@res@cnt}
 % \changes{v2.06}{2019/06/13}{neu}^^A
-% \begin{macro}{\tud@res@read}
-% \changes{v2.06}{2019/06/21}{neu}^^A
 % Makros zur temporären Verwendung.
 %    \begin{macrocode}
 \newcommand*\tud@reserved{}
 \newcommand*\tud@res@a{}
 \newcommand*\tud@res@b{}
 \newcommand*\tud@res@c{}
+\newcommand*\tud@res@d{}
 \tud@newif\if@tud@res@swa
 \tud@newcount\tud@res@cnt
-\tud@newread\tud@res@read
 %    \end{macrocode}
-% \end{macro}^^A \tud@res@read
 % \end{macro}^^A \tud@res@cnt
 % \end{macro}^^A \if@tud@res@swa
+% \end{macro}^^A \tud@res@d
 % \end{macro}^^A \tud@res@c
 % \end{macro}^^A \tud@res@b
 % \end{macro}^^A \tud@res@a
@@ -337,6 +347,13 @@
 % \end{macro}^^A \tud@setglue
 % \end{macro}^^A \tud@newdim
 % \end{macro}^^A \tud@newglue
+% \begin{macro}{\tud@res@glue}
+% \changes{v2.06}{2019/06/21}{neu}^^A
+% Und gleich noch eine temporäre Länge mit dazu.
+%    \begin{macrocode}
+\tud@newglue\tud@res@glue
+%    \end{macrocode}
+% \end{macro}^^A \tud@res@glue
 % \begin{macro}{\tud@if@lengthregister}
 % \changes{v2.07}{2019/11/26}{neu}^^A
 % Prüft, ob der übergebene Befehl ein \cs{skip}"~ oder \cs{dimen}-Register ist.
@@ -1002,18 +1019,14 @@
 % \end{macro}^^A \TUD@key@@define
 % \end{macro}^^A \TUD@key@define
 % \end{macro}^^A \TUD@key
+%
+% Die folgenden Befehle dienen zum Verarbeiten der Optionen, wobei prinzipiell 
+% auch eine freie Definition mit anschließender Abarbeitung ohne diese möglich 
+% ist.
+%
 % \begin{macro}{\TUD@set@ifkey}
 % \changes{v2.06}{2018/08/01}{forcierte Kleinschreibung Schlüsselwerte}^^A
-% \begin{macro}{\TUD@set@numkey}
-% \changes{v2.02}{2014/11/05}{neu}^^A
-% \changes{v2.06}{2018/08/01}{forcierte Kleinschreibung Schlüsselwerte}^^A
-% \begin{macro}{\TUD@bool@numkey}
-% \changes{v2.03}{2015/01/09}{neu}^^A
-% Dies sind die Befehle zum Setzen der Optionen. Diese können entweder als
-% Schalter (\cs{TUD@set@ifkey}) oder aber mit mehreren möglichen Werten
-% (\cs{TUD@set@numkey}) definiert werden. Prinzipiell ist auch eine freie
-% Definition mit anschließender Abarbeitung ohne die zuvor genannten Befehle
-% möglich.
+% Hiermit wird der Option ein einfacher Schalterwert zugewiesen.
 %    \begin{macrocode}
 \newcommand*\TUD@set@ifkey[3]{%
   \begingroup%
@@ -1024,6 +1037,15 @@
     }%
   \tud@res@a%
 }
+%    \end{macrocode}
+% \end{macro}^^A \TUD@set@ifkey
+% \begin{macro}{\TUD@set@numkey}
+% \changes{v2.02}{2014/11/05}{neu}^^A
+% \changes{v2.06}{2018/08/01}{forcierte Kleinschreibung Schlüsselwerte}^^A
+% \begin{macro}{\TUD@bool@numkey}
+% \changes{v2.03}{2015/01/09}{neu}^^A
+% Hiermit werden für eine Option mehrere mögliche Werte definiert. 
+%    \begin{macrocode}
 \newcommand*\TUD@set@numkey[4]{%
   \begingroup%
     \tud@lowerstring\tud@res@a{#4}%
@@ -1043,7 +1065,6 @@
 %    \end{macrocode}
 % \end{macro}^^A \TUD@set@numkey
 % \end{macro}^^A \TUD@bool@numkey
-% \end{macro}^^A \TUD@set@ifkey
 % \begin{macro}{\TUD@set@gluekey}
 % \changes{v2.06}{2018/08/01}{forcierte Kleinschreibung Schlüsselwerte}^^A
 % \changes{v2.07}{2019/11/21}{überarbeitet, Trennung in Skip und Dimension}^^A
@@ -1732,6 +1753,7 @@
 % zu laden. Ist das Paket gar nicht installiert, wird durch den Aufruf von 
 % \cs{RequirePackage} ein Fehler erzeugt respektive MiKTeX zur automatischen 
 % Nachinstallation animiert.
+% \ToDo{.aux schreiben, wenn existent und so ggf. nur einmalig ausführen}[v2.07]
 %    \begin{macrocode}
 \newcommand*\TUD@CheckPackage[2]{%
   \tud@if@packagelater@exists{#1}{#2}{}{%
@@ -1760,20 +1782,20 @@
         {\tud@res@b[]}%
     }%
     \IfFileExists{#1.sty}{%
-      \openin\tud@res@read=#1.sty%
+      \openin\@inputcheck=#1.sty%
       \@tud@res@swatrue%
       \loop%
-        \read\tud@res@read to\tud@res@c%
+        \read\@inputcheck to\tud@res@c%
         \@expandtwoargs\in@{\string\ProvidesPackage}%
           {\expandafter\detokenize\expandafter{\tud@res@c}}%
         \ifin@%
           \@tud@res@swafalse%
           \tud@res@c%
         \fi%
-        \ifeof\tud@res@read\@tud@res@swafalse\fi%
+        \ifeof\@inputcheck\@tud@res@swafalse\fi%
         \if@tud@res@swa%
       \repeat%
-      \closein\tud@res@read%
+      \closein\@inputcheck%
     }{}%
     \edef\tud@res@a{\endgroup\noexpand\@ifl@t@r{\tud@res@a}{#2}}%
   \tud@res@a%
@@ -1784,18 +1806,19 @@
 % \end{macro}^^A \TUD@CheckPackage
 % \begin{macro}{\TUD@RecommendPackage}
 % \changes{v2.06}{2018/07/12}{neu}^^A
+% \begin{macro}{\TUD@Recommend@Package}
 % Bestimmte Pakete sind für die Funktionalität von \TUDScript empfohlen, aber 
 % nicht zwingend erforderlich. Sind diese nicht vorhanden, wird eine Warnung 
 % ausgegeben.
 %    \begin{macrocode}
 \newcommand*\TUD@RecommendPackage[1]{%
   \kernel@ifnextchar[%]
-    {\TUD@@RecommendPackage#1}%
-    {\TUD@@RecommendPackage#1[]}%
+    {\TUD@Recommend@Package#1}%
+    {\TUD@Recommend@Package#1[]}%
 }
 \@onlypreamble\TUD@RecommendPackage
-\newcommand*\TUD@@RecommendPackage{}
-\def\TUD@@RecommendPackage#1[#2]{%
+\newcommand*\TUD@Recommend@Package{}
+\def\TUD@Recommend@Package#1[#2]{%
   \IfFileExists{#1.sty}{%
     \RequirePackage{#1}[{#2}]%
   }{%
@@ -1805,8 +1828,9 @@
     }%
   }%
 }
-\@onlypreamble\TUD@@RecommendPackage
+\@onlypreamble\TUD@Recommend@Package
 %    \end{macrocode}
+% \end{macro}^^A \TUD@Recommend@Package
 % \end{macro}^^A \TUD@RecommendPackage
 % \begin{macro}{\TUD@AfterPackage@set}
 % \changes{v2.04}{2015/03/09}{neu}^^A
