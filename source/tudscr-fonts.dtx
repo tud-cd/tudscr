@@ -1623,6 +1623,10 @@
 % \end{macro}^^A \tud@relspacing@set
 % \begin{macro}{\tud@cdfont@init}
 % \changes{v2.04}{2015/03/10}{neu}^^A
+% \begin{macro}{\tud@cdfont@@init}
+% \changes{v2.07}{2020/05/12}{neu}^^A
+% \begin{macro}{\tud@cdfont@@@init}
+% \changes{v2.07}{2020/05/12}{neu}^^A
 % \begin{macro}{\cdfontln}
 % \changes{v2.06}{2018/06/29}{neu}^^A
 % \begin{macro}{\cdfontrn}
@@ -1664,10 +1668,16 @@
 % \begin{macro}{\textcdxs}
 % \changes{v2.06}{2018/06/29}{neu}^^A
 % Das Makro \cs{tud@cdfont@init} wird für die Defintion aller Befehle zur
-% Auswahl der Schriften des \CDs verwendet.
+% Auswahl der Schriften des \CDs verwendet. Dabei erfolgt die Definition der 
+% Schriften selbst mit \cs{tud@cdfont@@init} und das Festlegen der Befehle zur 
+% expliziten Schriftauswahl mit \cs{tud@cdfont@@@init}.
 % \ToDo{Condensed Schriften mit neuer Open Sans?}[v2.07]
 %    \begin{macrocode}
 \newcommand*\tud@cdfont@init{%
+  \tud@cdfont@@init%
+  \tud@cdfont@@@init%
+}
+\newcommand*\tud@cdfont@@init{%
 %    \end{macrocode}
 % Zur Nutztung der OTF"~Schriften werden mit \cs{tud@x@fontspec@init} alle 
 % benötigten Schriftfamilien mit ihren einzelnen Schriftschnitten definiert.
@@ -1761,10 +1771,12 @@
     \tud@cdfont@fallback\cdfontbi{OpenSans-BoldItalic}{bf}{it}%
     \tud@cdfont@fallback\cdfontxi{OpenSans-ExtraBoldItalic}{bf}{it}%
   \fi%
+}
 %    \end{macrocode}
 % Außerdem werden für die Schriften noch die entsprechenden Textauswahlbefehle
 % bereitgestellt.
 %    \begin{macrocode}
+\newcommand*\tud@cdfont@@@init{%
   \newcommand*\textcdln{}%
   \newcommand*\textcdrn{}%
   \newcommand*\textcdsn{}%
@@ -1807,6 +1819,8 @@
 % \end{macro}^^A \cdfontsn
 % \end{macro}^^A \cdfontrn
 % \end{macro}^^A \cdfontln
+% \end{macro}^^A \tud@cdfont@@@init
+% \end{macro}^^A \tud@cdfont@@init
 % \end{macro}^^A \tud@cdfont@init
 % \begin{macro}{\univln}
 % \begin{macro}{\univrn}
@@ -1831,7 +1845,7 @@
 % Die Definition der Befehle der veralteten Schriften des \CDs.
 %    \begin{macrocode}
 \if@tud@cdoldfont@active
-  \renewcommand*\tud@cdfont@init{%
+  \renewcommand*\tud@cdfont@@init{%
     \if@tud@cdfont@fam@exist%
       \if@tud@x@fontspec@enabled%
         \def\tud@res@a{%
@@ -1910,26 +1924,6 @@
     \newrobustcmd*\cdfontsi{\univrs}%
     \newrobustcmd*\cdfontbi{\univbs}%
     \newrobustcmd*\cdfontxi{\univxs}%
-    \newcommand*\textcdln{}%
-    \newcommand*\textcdrn{}%
-    \newcommand*\textcdsn{}%
-    \newcommand*\textcdbn{}%
-    \newcommand*\textcdxn{}%
-    \newcommand*\textcdli{}%
-    \newcommand*\textcdri{}%
-    \newcommand*\textcdsi{}%
-    \newcommand*\textcdbi{}%
-    \newcommand*\textcdxi{}%
-    \DeclareTextFontCommand\textcdln{\cdfontln}%
-    \DeclareTextFontCommand\textcdrn{\cdfontrn}%
-    \DeclareTextFontCommand\textcdsn{\cdfontsn}%
-    \DeclareTextFontCommand\textcdbn{\cdfontbn}%
-    \DeclareTextFontCommand\textcdxn{\cdfontxn}%
-    \DeclareTextFontCommand\textcdli{\cdfontli}%
-    \DeclareTextFontCommand\textcdri{\cdfontri}%
-    \DeclareTextFontCommand\textcdsi{\cdfontsi}%
-    \DeclareTextFontCommand\textcdbi{\cdfontbi}%
-    \DeclareTextFontCommand\textcdxi{\cdfontxi}%
 %    \end{macrocode}
 % Anschließend wird für \DIN äquivalent verfahren.
 %    \begin{macrocode}
@@ -3155,8 +3149,8 @@
 % \opt{frenchmath} oder ähnlichem geladen wurde. Hierfür wird nach Definitionen 
 % für \cs{upalpha} als auch \cs{itGamma} gesucht. Existieren die Makros nicht, 
 % wird zumindest auf die aktuelle Definition von \cs{Gamma} geprüft und mit der 
-% standardmäßigen Variante der Letter verglichen. Wurde eine passende Definition 
-% gefunden, wird die Option \opt{slantedgreek} voreingestellt.
+% standardmäßigen Variante der Letter verglichen. Wurde eine passende
+% Definition gefunden, wird die Option \opt{slantedgreek} voreingestellt.
 %    \begin{macrocode}
 \newcommand*\tud@math@checkslanted@greeks{%
   \begingroup%
