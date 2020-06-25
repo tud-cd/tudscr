@@ -909,6 +909,8 @@
 % \subsubsection{Erzeugen von Änderungseinträgen}
 %
 % \begin{macro}{\changes@}
+% \changes{v2.05}{2020/04/25}{Prüfen falscher Datumsangaben}^^A
+% \begin{macro}{\changes@@}
 % Bei der Erstellung der Änderungsliste fehlt bei Makros in der aktuellen 
 % Version von \pkg{doc} ein Leerzeichen. Das Problem ist bereits gemeldet. 
 %    \begin{macrocode}
@@ -938,8 +940,16 @@
 % Erscheinens der einzelnen Einträge wird das angegebene Datum zur Sortierung 
 % genutzt.
 %    \begin{macrocode}
+\renewcommand*\changes@[3]{%
+  \ifnum\@parse@version@1993/01/01\@nil<\expandafter\@parse@version@#2//00\@nil%
+    \expandafter\@gobble%
+  \else%
+    \expandafter\@firstofone%
+  \fi{\ClassWarning{\TUD@Class@Name}{The given date `#2' seems to be invalid}}%
+  \changes@@{#1}{#2}{#3}%
+}
 \ifdefined\tudxdyflag%
-  \renewcommand*\changes@[3]{%
+  \newcommand*\changes@@[3]{%
 %    \end{macrocode}
 % Einträge sollen nur erzeugt werden, wenn diese vollständig sind.
 %    \begin{macrocode}
@@ -1019,7 +1029,7 @@
 % Für \app{makeindex} wird der Befehl insebsondere für das Listen der Parameter 
 % angepasst.
 %    \begin{macrocode}
-  \renewcommand*\changes@[3]{%
+  \newcommand*\changes@@[3]{%
     \protected@edef\@tempa{%
       \noexpand\glossary{%
         #1\levelchar%
@@ -1056,6 +1066,7 @@
   }%
 \fi%
 %    \end{macrocode}
+% \end{macro}^^A \changes@@
 % \end{macro}^^A \changes@
 % \begin{macro}{\@wrglossary}
 % Für die Ausgabe der Änderungsliste soll nicht einfach nur die Seitenzahl 
