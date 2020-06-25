@@ -18,7 +18,7 @@
 %% TUD-Script -- Corporate Design of Technische Universitaet Dresden
 %%               2020/01/22 v2.07 TUD-Script
 %% 
-%% Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2019
+%% Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2020
 %%               https://github.com/tud-cd/tudscr
 %%               https://latex.wcms-file3.tu-dresden.de/phpBB3/
 %% 

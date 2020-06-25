@@ -1,5 +1,6 @@
-% \CheckSum{382}
+% \CheckSum{390}
 % \iffalse meta-comment
+% tudscr-gitinfo.dtx
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
 % ----------------------------------------------------------------------------
@@ -61,8 +62,8 @@
 %
 % Um sich das ganze Aktualisieren von irgendwelchen Versionangaben zu sparen, 
 % werden diese einfach aus dem GitHub-Repository übernommen. Hierfür ist ein 
-% externer Aufruf von \file{git~log} notwendig, die notwendigen Informationen 
-% werden dabei in die Datei \file{\GitInfoContainer} (\cs{GitInfoContainer}) 
+% externer Aufruf von \file{git~log} notwendig, die Informationen werden dabei
+% in die Datei \file{\GitContainerFile} (\cs{GitContainerFile}) 
 % geschrieben und entweder während des Durchlaufs mit \app{docstrip} oder aber
 % beim Erzeugen der Doku mithilfe des Paketes \pkg{tudscr-gitinfo} ausgelesen.
 %
@@ -70,13 +71,13 @@
 %
 % \subsection{GitHub-Versionsinformationen für \app{docstrip}}
 %
-% \begin{macro}{\GitInfoContainer}
+% \begin{macro}{\GitFileInfo}
+% \changes{v2.07}{2019/10/19}{neu}^^A
+% \begin{macro}{\GitContainerFile}
 % \changes{v2.07}{2019/10/19}{neu}^^A
 % \begin{macro}{\InputGitContainer}
 % \changes{v2.07}{2019/10/19}{neu}^^A
-% \begin{macro}{\GitFileInfo}
-% \changes{v2.07}{2019/10/19}{neu}^^A
-% In \cs{GitInfoContainer} wird der Name der Datei gespeichert, welche die 
+% In \cs{GitContainerFile} wird der Name der Datei gespeichert, welche die 
 % Versionsinformationen für alle Quelldateien enthält. Diese definiert für alle 
 % relevanten Dateien Makros in der Form
 % \cs{\meta{Dateiname}-ver\{\meta{Datum} \meta{Zeit} \meta{Hash}\}}. Diese 
@@ -84,18 +85,18 @@
 % das Hinzufügen der Versionsinformationen für das Erzeugen der Zieldateien mit 
 % \app{docstrip} definiert.
 %    \begin{macrocode}
-\def\GitInfoContainer{tudscr-gitinfo-ver.aux}
+\def\GitContainerFile{tudscr-gitinfo-ver.aux}
 %<*!package>
 \begingroup
   \catcode`\@11\relax%
   \ifx\documentclass\undefined%
     \ifx\@@input\undefined\global\let\@@input\input\fi%
     \newread\@inputcheck%
-    \immediate\openin\@inputcheck=\GitInfoContainer\relax%
+    \immediate\openin\@inputcheck=\GitContainerFile\relax%
     \ifeof\@inputcheck%
       \global\let\InputGitContainer\relax%
     \else%
-      \gdef\InputGitContainer{\@@input\GitInfoContainer\relax}%
+      \gdef\InputGitContainer{\@@input\GitContainerFile\relax}%
     \fi%
     \closein\@inputcheck%
     \gdef\GitFileInfo#1{%
@@ -112,9 +113,9 @@
 \let\InputGitContainer\undefined
 %</!package>
 %    \end{macrocode}
-% \end{macro}^^A \GitFileInfo
 % \end{macro}^^A \InputGitContainer
-% \end{macro}^^A \GitInfoContainer
+% \end{macro}^^A \GitContainerFile
+% \end{macro}^^A \GitFileInfo
 %
 % \iffalse
 %<*ins>
@@ -132,6 +133,7 @@
 %
 % \iffalse
 %<*dtx>
+\ProvidesFile{tudscr-gitinfo.dtx}[2020/06/25]
 \RequirePackage{tudscr-gitinfo}
 \documentclass[english,ngerman,xindy]{tudscrdoc}
 \iftutex
@@ -157,20 +159,23 @@
 %
 % Gleich zu Beginn werden die Versionsinformationen geladen, wenn dies nicht 
 % schon passiert ist und diese vorhanden sind.
-% \ToDo{mit gitattributes filter das datum beim commit eintragen}[v2.07]
 %^^A https://www.juandebravo.com/2017/12/02/git-filter-smudge-and-clean/
 %^^A https://git-scm.com/book/en/v2/Customizing-Git-Git-Attributes#filters_b
 %^^A file:///C:/Program%20Files/Git/mingw64/share/doc/git-doc/gitattributes.html
 %    \begin{macrocode}
-\ifcsname ver@\GitInfoContainer\endcsname\else
-  \InputIfFileExists{\GitInfoContainer}{}{}%
+\ProvidesPackage{tudscr-gitinfo}[%
+%!TUD@Version
+  package (obtaining git version)%
+]
+\ifcsname ver@\GitContainerFile\endcsname\else
+  \InputIfFileExists{\GitContainerFile}{}{}%
 \fi
 %    \end{macrocode}
 % \begin{macro}{\GetFileInfo}
 % \changes{v2.07}{2019/10/19}{neu}^^A
 % \begin{macro}{\tud@GetFileInfo}
 % \changes{v2.07}{2019/10/19}{neu}^^A
-% \begin{macro}{\tud@@GetFileInfo}
+% \begin{macro}{\tud@Get@FileInfo}
 % \changes{v2.07}{2019/10/19}{neu}^^A
 % \begin{macro}{\tud@git@file@list}
 % \changes{v2.07}{2019/10/20}{neu}^^A
@@ -215,11 +220,11 @@
 % Andernfalls wird eine Warnung erzeugt und auf das durch \pkg{doc} definierte 
 % Verhalten von \cs{GetFileInfo} zurückgeschaltet.
 %    \begin{macrocode}
-    \PackageWarning{tudscr-gitinfo}{No git info found for \filename}%
-    \expandafter\tud@@GetFileInfo\expandafter{\filename}%
+    \PackageWarningNoLine{tudscr-gitinfo}{No git info found for \filename}%
+    \expandafter\tud@Get@FileInfo\expandafter{\filename}%
   \fi%
 }
-\newcommand*\tud@@GetFileInfo[1]{%
+\newcommand*\tud@Get@FileInfo[1]{%
   \ifx\filedate\@undefinded%
     \edef\filedate{?}%
   \fi%
@@ -262,7 +267,7 @@
 \AfterPackage*{doc}{\def\GetFileInfo{\tud@GetFileInfo}}
 %    \end{macrocode}
 % \end{macro}^^A \tud@git@file@list
-% \end{macro}^^A \tud@@GetFileInfo
+% \end{macro}^^A \tud@Get@FileInfo
 % \end{macro}^^A \tud@GetFileInfo
 % \end{macro}^^A \GetFileInfo
 % \begin{macro}{\tud@git@log}
@@ -309,35 +314,37 @@
 % \end{macro}^^A \tud@git@log
 % Am Dokumentende wird für alle Dateien, für die eine Versionsinformation 
 % gefunden werden konnte und in \cs{tud@git@file@list} gesammelt wurden, diese 
-% in die externe Datei \cs{GitInfoContainer} geschrieben, damit diese auch ohne 
-% den abermaligen Aufruf mit dem Parameter \file{-{}-shell-escape} genutzt
+% in die externe Datei \cs{GitContainerFile} geschrieben, damit diese auch 
+% ohne den abermaligen Aufruf mit dem Parameter \file{-{}-shell-escape} genutzt
 % werden können.
 %    \begin{macrocode}
 \AtEndDocument{%
-  \ifx\tud@git@file@list\@empty\else%
-    \edef\tud@git@file@list{\expandafter\@gobble\tud@git@file@list}%
-    \def\@tempa{%
-      \@percentchar\@percentchar\space%
-      This file was generated with `tudscr-gitinfo.sty'^^J%
-      \@percentchar\@percentchar\space%
-      It is intended to be used for generating either a documentation^^J%
-      \@percentchar\@percentchar\space%
-      with class `tudscrdoc' or installation files with `docstrip'%
-    }%
-    \chardef\reserved@c15 %
-    \ch@ck7\reserved@c\write%
-    \immediate\openout\reserved@c\GitInfoContainer\relax%
-    \immediate\write\reserved@c{\@tempa}%
-    \@for\@tempa:=\tud@git@file@list\do{%
-      \edef\@tempb{%
-        \unexpanded{\expandafter\gdef\csname}%
-        \@tempa-ver%
-        \noexpand\endcsname%
-        {\csname\@tempa-ver\endcsname}%
+  \ifnum\pdf@shellescape=\@ne%
+    \ifx\tud@git@file@list\@empty\else%
+      \edef\tud@git@file@list{\expandafter\@gobble\tud@git@file@list}%
+      \def\@tempa{%
+        \@percentchar\@percentchar\space%
+        This file was generated with `tudscr-gitinfo.sty'^^J%
+        \@percentchar\@percentchar\space%
+        It is intended to be used for generating either a documentation^^J%
+        \@percentchar\@percentchar\space%
+        with class `tudscrdoc' or installation files with `docstrip'%
       }%
-      \immediate\write\reserved@c{\unexpanded\expandafter{\@tempb}}%
-    }%
-    \immediate\closeout\reserved@c%
+      \chardef\reserved@c15 %
+      \ch@ck7\reserved@c\write%
+      \immediate\openout\reserved@c\GitContainerFile\relax%
+      \immediate\write\reserved@c{\@tempa}%
+      \@for\@tempa:=\tud@git@file@list\do{%
+        \edef\@tempb{%
+          \unexpanded{\expandafter\gdef\csname}%
+          \@tempa-ver%
+          \noexpand\endcsname%
+          {\csname\@tempa-ver\endcsname}%
+        }%
+        \immediate\write\reserved@c{\unexpanded\expandafter{\@tempb}}%
+      }%
+      \immediate\closeout\reserved@c%
+    \fi%
   \fi%
 }
 %    \end{macrocode}
@@ -357,12 +364,14 @@
     \fileinfo%
   }%
   \ifcsname ver@\filename\endcsname%
-    \expandafter\ifx\csname ver@\filename\endcsname\@tempa\else%
-      \PackageWarning{tudscr-gitinfo}{%
-        The info for \filename\space is currently\MessageBreak%
+    \edef\@tempb{\csname ver@\filename\endcsname}%
+    \ifx\@tempb\filedate\else%
+      \PackageWarningNoLine{tudscr-gitinfo}{%
+        The obtained info for \filename\space is\MessageBreak%
+        \@tempa\MessageBreak%
+        so the current info\MessageBreak%
         \csname ver@\filename\endcsname\MessageBreak%
-        and will be overwritten with\MessageBreak%
-        \@tempa%
+        is overwritten%
       }%
     \fi%
   \fi%

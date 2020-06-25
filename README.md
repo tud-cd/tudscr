@@ -4,7 +4,7 @@
 
  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2020
 
- tudscr 2020/xx/xx v2.07
+ **tudscr 2020/xx/xx v2.07**
 
  The current release is shiped via CTAN: https://www.ctan.org/pkg/tudscr
  
@@ -15,6 +15,7 @@
  English text below.
 
 ----------------------------------------------------------------------------
+
 
 Zusammenfassung
 ---------------
@@ -51,6 +52,7 @@ Das Bundle beinhaltet:
 + das Paket **twocolfix** zur Fehlerbefehbung der Position von Überschriften
   im zweispaltigen Layout und
 + eine umfassende Anwenderdokumentation sowie mehrere Tutorials.
+
 
 Versionen
 ---------
@@ -231,6 +233,7 @@ Versionen
 
 -------------------------------------------------------------------------------
 
+
 Summary
 -------
 
@@ -265,6 +268,7 @@ The bundle offers:
 + the package **twocolfix** for fixing the positioning bug of headings in
   twocolumn layout and
 + an comprehensive user documentation as well as several tutorials.
+
 
 Versions
 --------
