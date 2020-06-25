@@ -65,6 +65,9 @@ Versionen
 + Verwendung der Symbole `\textleftarrow`, `\textrightarrow`, `\textuparrow`,
   `\textdownarrow` sowie `\textlangle` und `\textrangle` aus Paket **iwona**
 
+**v2.06h** (2020/06/25)
++ Bugfix für Paket **polyglossia** #52
+
 **v2.06g** (2020/06/18)
 + Bugfix für Änderung des Satzspiegels im Dokument
 
@@ -268,6 +271,9 @@ Versions
 
 **v2.07** (2020/xx/xx)
 + ...
+
+**v2.06h** (2020/06/25)
++ bug fix for package **polyglossia** #52
 
 **v2.06g** (2020/06/18)
 + bug fix when changing type area within document
