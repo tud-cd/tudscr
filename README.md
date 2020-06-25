@@ -4,7 +4,7 @@
 
  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2020
 
- tudscr 2020/06/18 v2.06g
+ tudscr 2020/06/25 v2.06h
 
 ----------------------------------------------------------------------------
 
@@ -52,6 +52,9 @@ Das Bundle beinhaltet:
 
 Versionen
 ---------
+
+**v2.06h** (2020/06/25)
++ Bugfix für Paket **polyglossia** #52
 
 **v2.06g** (2020/06/18)
 + Bugfix für Änderung des Satzspiegels im Dokument
@@ -253,6 +256,9 @@ The bundle offers:
 
 Versions
 --------
+
+**v2.06h** (2020/06/25)
++ bug fix for package **polyglossia** #52
 
 **v2.06g** (2020/06/18)
 + bug fix when changing type area within document
