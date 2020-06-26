@@ -175,9 +175,9 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@english
 % Das Paket \pkg{shellesc} ermöglicht mit dem Befehl \cs{ShellEscape} die 
-% Verwendung von Systembefehlen auf der Kommandozeile unabhängig von der 
-% genutzten Engine. Sollte \app{lualatex} als Dokumentprozessor eingesetzt
-% werden, sind dennoch die \app{pdflatex}-Primitiven \cs{pdf(@)strcmp} und
+% Verwendung von Systembefehlen auf der Kommandozeile unabhängig vom genutzten
+% Format. Sollte \app{lualatex} als Dokumentprozessor eingesetzt werden, sind 
+% dennoch die beiden \app{pdflatex}-Primitiven \cs{pdf(@)strcmp} und 
 % \cs{pdf(@)shellescape} nötig, wofür das Paket \pkg{pdftexcmds} geladen wird.
 %    \begin{macrocode}
 \RequirePackage{shellesc}[2016/06/07]
@@ -1656,7 +1656,7 @@
 % \cs{printobsoletelist}. 
 %    \begin{macrocode}
 \newcommand*\tud@alias@values{\@nil}
-\NewDocumentEnvironment{Declaration}{o m !o !o !d() !D<>{\noexpand\@nil}}{%
+\NewDocumentEnvironment{Declaration}{o m o o d() D<>{\noexpand\@nil}}{%
   \listeadd\tud@declaration@list{%
     \def\noexpand\tud@alias@values{#6}%
     \unexpanded{#2}%
@@ -1676,7 +1676,7 @@
 % Parameter geändert wurden bzw. entfallen.
 %    \begin{macrocode}
 \tud@newif\if@tud@obsolete
-\NewDocumentEnvironment{Obsolete}{m o m !o !o !d()}{%
+\NewDocumentEnvironment{Obsolete}{m o m o o d()}{%
   \@tud@obsoletetrue%
   \ifxblank{#1}{%
 %    \end{macrocode}
@@ -1840,23 +1840,23 @@
 %    \end{macrocode}
 % \end{macro}^^A \Inline@Declaration
 % \end{macro}^^A \InlineDeclaration
-% \begin{environment}{Declaration*}
+% \begin{environment}{DeclareEntity*}
 % \changes{v2.02}{2014/10/09}{neu}^^A
 % \changes{v2.05}{2015/08/04}{Indexaufteilung/-markup für Klassen und Pakete}^^A
-% Die Sternversion der Umgebung \env{Declaration*} ist für die vereinfachte 
+% Die Sternversion der Umgebung \env{DeclareEntity*} ist für die vereinfachte 
 % Deklaration von Klassen, Paketen etc. gedacht, bei denen keine Ausgabe 
 % sondern lediglich Hyperlink, Indexeintrag und Änderungsnotiz erzeugt werden 
 % sollen. Hierbei werden die beiden Befehle \cs{tud@declare@special@start} und 
 % \cs{tud@declare@special@end} genutzt, wobei der Anker des erzeugten Labels
 % nicht erhöht sondern auf der aktuellen Grundlinie erzeugt wird.
 %    \begin{macrocode}
-\NewDocumentEnvironment{Declaration*}{o m}{%
+\NewDocumentEnvironment{DeclareEntity*}{o m}{%
   \tud@declare@special@start[{#1}]{#2}{2}%
 }{%
   \tud@declare@special@end{#2}{2}%
 }
 %    \end{macrocode}
-% \end{environment}^^A Declaration*
+% \end{environment}^^A DeclareEntity*
 % \begin{environment}{DeclareEntity}
 % \changes{v2.05}{2015/11/01}{neu}^^A
 % Die Umgebung \env{DeclareEntity} wird verwendet, wenn ein zusätzliches 
@@ -2022,7 +2022,7 @@
 % \begin{macro}{\printchangedatlist}
 % \changes{v2.05}{2015/11/01}{neu}^^A
 % Damit werden Änderungsnotizen ausgegeben, die zu Beginn einer der Umgebungen 
-% \env{Declaration*} und \env{DeclareEntity} angegeben wurden.
+% \env{DeclareEntity*} und \env{DeclareEntity} angegeben wurden.
 %    \begin{macrocode}
 \NewDocumentCommand\printchangedatlist{!s !O{\z@}}{%
   \print@changedatlist{#1}{#2}%
@@ -2164,21 +2164,21 @@
 %    \end{macrocode}
 % \end{macro}^^A \@Distribution
 % \end{macro}^^A \Distribution
-% \begin{macro}{\Engine}
+% \begin{macro}{\Format}
 % \changes{v2.05}{2015/11/04}{neu}^^A
-% \begin{macro}{\@Engine}
+% \begin{macro}{\@Format}
 % \changes{v2.05}{2015/11/04}{neu}^^A
 % Die Auszeichnung und der Indexeintrag für ein bestimmtes Textsatzsystem.
 %    \begin{macrocode}
-\NewExpandableDocumentCommand\@Engine{s m}{#2}
-\NewDocumentCommand\Engine{s m !d() !d||}{%
+\NewExpandableDocumentCommand\@Format{s m}{#2}
+\NewDocumentCommand\Format{s m !d() !d||}{%
   \Markup@SetFormat{\sbnfont}%
-  \Process@Markup{\Engine{\hologo{#2}}}(#3)%
-  \Process@Index{#1}{\Engine{#2}}[Textsatzsystem](#3)|#4|%
+  \Process@Markup{\Format{\hologo{#2}}}(#3)%
+  \Process@Index{#1}{\Format{#2}}[Textsatzsystem](#3)|#4|%
 }
 %    \end{macrocode}
-% \end{macro}^^A \@Engine
-% \end{macro}^^A \Engine
+% \end{macro}^^A \@Format
+% \end{macro}^^A \Format
 % \begin{macro}{\Bundle}
 % \begin{macro}{\@Bundle}
 % Die Auszeichnung und der Indexeintrag einer Klasse. Das optionale Argument 
@@ -2652,7 +2652,7 @@
     }%
     \@tempa\Application{\jobname}{app}%
     \@tempa\Distribution{\jobname}{dst}%
-    \@tempa\Engine{\jobname}{eng}%
+    \@tempa\Format{\jobname}{eng}%
     \@tempa\File{files}{fle}%
     \@tempa\Bundle{files}{bdl}%
     \@tempa\Class{files}{cls}%
@@ -2825,7 +2825,7 @@
 \NewDocumentCommand\Markup@Expandable{s}{%
   \let\Application\@Application%
   \let\Distribution\@Distribution%
-  \let\Engine\@Engine%
+  \let\Format\@Format%
   \let\File\@File%
   \let\Bundle\@Bundle%
   \let\Class\@Class%
@@ -2895,7 +2895,7 @@
 %
 % \begin{macro}{\Process@Markup}
 % \changes{v2.02}{2014/10/08}{Markup für Index und Fließtext getrennt}^^A
-% \changes{v2.02}{2014/10/09}{Anpassung für Umgebung \env{Declaration*}}^^A
+% \changes{v2.02}{2014/10/09}{Anpassung für Umgebung \env{DeclareEntity*}}^^A
 % \changes{v2.05}{2015/11/05}{Neuimplementierung}^^A
 % \begin{macro}{\Markup@Suppress}
 % \changes{v2.05}{2015/11/05}{neu}^^A
@@ -3084,7 +3084,7 @@
 % veralteter Werte oder Parameter diese im Kontext ihrer Option oder Umgebung
 % bzw. ihres Befehls anzugeben.
 %
-% Die dritte Version kommt bei Erklärungen mit der Umgebung \env{Declaration*}
+% Die dritte Version kommt bei Erklärungen mit der Umgebung \env{DeclareEntity*}
 % zum Einsatz, welche im Fließtext verwendet wird und kein Markup, wohl aber
 % eine Label für das beschriebene Element erzeugt werden soll. Für die vierte
 % Variante, welche die Umgebung \env{DeclareEntity} betrifft, gilt dies im 
@@ -3414,7 +3414,7 @@
   \apptocmd\tud@x@textcase@uclcnotmath{%
     \tud@nonchangecase\Application%
     \tud@nonchangecase\Distribution%
-    \tud@nonchangecase\Engine%
+    \tud@nonchangecase\Format%
     \tud@nonchangecase\File%
     \tud@nonchangecase\Bundle%
     \tud@nonchangecase\Class%
@@ -4144,7 +4144,7 @@
         \ClassWarning{tudscrmanual}{%
           It is not possible to use any indexing format\MessageBreak%
           like |#5| within the arguments of the\MessageBreak%
-          environments `Declaration' or `Declaration*'%
+          environments `Declaration' or `DeclareEntity*'%
         }%
       }%
 %    \end{macrocode}
@@ -4585,7 +4585,7 @@
 % wird der Eintrag in die Änderungsliste für dieses Element generiert, sonst 
 % wird eine allgemeiner Eintrag erzeugt. Das optionale Argument in runden 
 % Klammern wird lediglich verwendet, wenn für eine der beiden Spezialumgebungen 
-% \env{Declaration*} bzw. \env{DeclareEntity} eine Änderungsnotiz erstellt
+% \env{DeclareEntity*} bzw. \env{DeclareEntity} eine Änderungsnotiz erstellt
 % wird, um diese für das jeweilige \TUDScript-Bundle-Element in den
 % entsprechenden Abschnitt der Änderungsliste einzutragen. Das Hauptargument
 % verarbeitet eine semikolongetrennte Liste und reicht jeden Bestandteil
@@ -4702,7 +4702,7 @@
 % \ToDo{vorherige doc überarbeiten oder raus}[v2.07]
 % wird mit der Angabe eines \TUDScript-Bundle-Elements etwas anders verfahren.
 % Wurde dieses~-- wenn auch nur indirekt über eine der beiden Spezialumgebungen
-% \env{Declaration*} bzw. \env{DeclareEntity}~-- angegeben, so wird der 
+% \env{DeclareEntity*} bzw. \env{DeclareEntity}~-- angegeben, so wird der 
 % Eintrag in den allgemeinen Hauptteil als Untereintrag erzeugt. Erfolgte die
 % Verwendung jedoch innerhalb einer \TUDScript-Bundle-Deklaration, so erscheint
 % der Eintrag im allgemeinen Teil für die explizite engegebene Entität.
@@ -7056,8 +7056,19 @@
 %<*body|class&doc>
 % \fi
 %
-% \begin{macro}{\CD}
-% \begin{macro}{\CDs}
+% \begin{macro}{\KOMAScript}
+% \begin{macro}{\TUDScript}
+% Für die robuste Verwendung im Text.
+%    \begin{macrocode}
+\kernel@make@fragile\KOMAScript
+\edef\KOMAScript{\noexpand\mbox{\expandonce\KOMAScript}\noexpand\xspace}
+\robustify\KOMAScript
+\robustify\TUDScript
+%    \end{macrocode}
+% \end{macro}^^A \DDC
+% \end{macro}^^A \TUDCDs
+% \begin{macro}{\TUDScript}
+% \begin{macro}{\KOMAScript}
 % \begin{macro}{\TUD}
 % \begin{macro}{\TnUD}
 % \begin{macro}{\TUDCD}
