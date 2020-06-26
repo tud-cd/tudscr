@@ -41,7 +41,7 @@
 \endbatchfile
 %</ins>
 %<*dtx>
-\ProvidesFile{tudscr-manual.dtx}[2020/06/25]
+\ProvidesFile{tudscr-manual.dtx}[2020/06/26]
 \RequirePackage{tudscr-gitinfo}
 \documentclass[english,ngerman,xindy]{tudscrdoc}
 \iftutex
@@ -750,6 +750,26 @@
 %
 % \iffalse
 %</class>
+% \fi
+%
+% \subsection{Spezielles für Inhaltsverzeichnis und Fußzeile}
+%
+% \ToDo{Das muss dokumentiert werden!}[v2.07]
+%    \begin{macrocode}
+\NewExpandableDocumentCommand\@gobbleopt@one{o m}{}
+\patchcmd\@outputpage{%
+  \let\index\@gobble\let\glossary\@gobble%
+}{%
+  \let\index\@gobbleopt@one\let\glossary\@gobbleopt@one%
+}{}{\tud@patch@wrn{@outputpage}}
+\patchcmd\addtocontents{%
+  \let\index\@gobble\let\glossary\@gobble%
+}{%
+  \let\index\@gobbleopt@one\let\glossary\@gobbleopt@one%
+}{}{\tud@patch@wrn{addtocontents}}%
+%    \end{macrocode}
+%
+% \iffalse
 %</body>
 %</!doc>
 %<*body|class&doc>
@@ -1136,7 +1156,9 @@
 %    \end{macrocode}
 % Und schließlich der Befehl zum Referenzieren auf die definierten Anker.
 %    \begin{macrocode}
+\AfterPackage*{hyperref}{\robustify\hyperref}
 \newrobustcmd*\tudhyperref[2]{\hyperref{}{\tud@manualname}{#1}{#2}}%
+\NewDocumentCommand\tudmarkuplabel{o m}{\IfValueT{#1}{\label{#1}}}
 %</class>
 %    \end{macrocode}
 % Aus einem Tutorial erfolgen alle Querverweise mit \cs{tudhyperref} auf das 
@@ -1302,7 +1324,7 @@
 %     Das Label soll für ein Markupelement generiert werden. 
 %     Dabei wurde explizit ein Paket, eine Klasse oder ein Bundle angegeben 
 %     respektive implizit das Makro \cs{tud@bdl@curr} als Argument verwendet,
-%     welches innerhalb der Umgebungen \env{Entity} und \env{EntityDeclaration}
+%     welches innerhalb der Umgebungen \env{Entity} und \env{Entity*}
 %     auf die aktuell beschriebene Entität gesetzt wurde.
 %   \item[\cs{Processor@CreateLabel}]
 %   |{|\meta{Entitätpräfix}|:|\meta{Labelpräfix}|:|\meta{Element}|}|\newline^^A
@@ -1434,7 +1456,7 @@
 % letzte Möglichkeit, ein passendes Label zu finden. Wird in der Dokumentation 
 % gerade ein/e Bundle, Paket oder Klasse respektive eine sich von den 
 % Hauptklassen unterscheidende Klasse oder ein Paket aus dem \TUDScript-Bundle
-% erläutert (Umgebungen \env{Entity}, \env{EntityDeclaration}), so wird
+% erläutert (Umgebungen \env{Entity}, \env{Entity*}), so wird
 % eventuell auf ein Element aus ebendiesen Hauptklassen referenziert. In diesem
 % Fall wird \cs{tud@lbl@get@dflt} aufgerufen, um den Entitätpräfix für das 
 % Label entsprechend zu setzen.
@@ -1465,7 +1487,7 @@
 % \begin{macro}{\tud@lbl@get@@dflt}
 % \changes{v2.05}{2015/11/04}{neu}^^A
 % Diese beiden Makros werden genutzt, um mit \cs{tud@lbl@get} innerhalb der
-% Umgebungen \env{Entity} und \env{EntityDeclaration} für den Fall, dass ein
+% Umgebungen \env{Entity} und \env{Entity*} für den Fall, dass ein
 % gesuchtes Label für die aktuelle Entität nicht existiert, nach diesem
 % Element in den existierenden Labels der Hauptklassen zu suchen.
 %
@@ -1835,29 +1857,30 @@
 }
 %    \end{macrocode}
 % \end{environment}^^A Declaration*
-% \begin{environment}{EntityDeclaration}
+% \begin{environment}{Entity*}
 % \changes{v2.05}{2015/11/01}{neu}^^A
-% Die Umgebung \env{EntityDeclaration} wird verwendet, wenn ein zusätzliches 
+% Die Umgebung \env{Entity*} wird verwendet, wenn ein zusätzliches 
 % Paket oder eine weitere Klasse in Ergänzung zu den Hauptklassen dokumentiert
 % wird. Hierfür wird die Umgebung \env{Entity} erst geöffnet, nachdem mit dem
 % Makro \cs{tud@declare@special@start} das obligatorische Argument~-- sprich
 % die Klasse oder das Paket~-- deklariert wird. Die hier definierte Umgebung 
-% \env{EntityDeclaration} sollte dabei direkt nach einer Gliederungsüberschrift
+% \env{Entity*} sollte dabei direkt nach einer Gliederungsüberschrift
 % genutzt werden, in welcher das zu deklarierende Element (Klasse, Paket etc.)
 % genannt wird, da der Anker des erzeugten Labels weiter nach oben auf die Höhe
 % der Überschirft verschoben wird. Zum Abschluss der Deklaration wird 
 %\cs{tud@declare@special@end} nach dem Schließen der Umgebung \env{Entity} 
 % genutzt. 
 %    \begin{macrocode}
-\NewDocumentEnvironment{EntityDeclaration}{o m}{%
+\NewDocumentEnvironment{Entity*}{o m}{%
   \tud@declare@special@start*[{#1}]{#2}{3}%
-  \Entity{#2}%
+  \printchangedatlist*%
+  \begin{Entity}{#2}%
 }{%
-  \endEntity%
+  \end{Entity}%
   \tud@declare@special@end{#2}{3}%
 }
 %    \end{macrocode}
-% \end{environment}^^A EntityDeclaration
+% \end{environment}^^A Entity*
 % \begin{macro}{\tud@declare@special@start}
 % \changes{v2.05}{2015/11/01}{neu}^^A
 % \begin{macro}{\tud@declare@special@end}
@@ -1868,7 +1891,7 @@
 % Argument dient einem Änderungseintrag, das erste obligaotrische gilt der
 % eigentlichen Deklaration, das zweite zur Anpassung von \cs{tud@declare@num}, 
 % mit welchem das Verhalten für das Erzeugen von Ausgabe und Label gesteuert 
-% wird. Die Sternvariante wird von der Umgebung \env{EntityDeclaration} 
+% wird. Die Sternvariante wird von der Umgebung \env{Entity*} 
 % genutzt, um Einträge in der Änderungsliste in den allgemeinen Teil zu
 % schreiben.
 %    \begin{macrocode}
@@ -1905,7 +1928,7 @@
 % erzeugen. Die durch die ggf. nacheinander folgenden Deklarationen wurden in 
 % entsprechenden Listen gesammelt und werden hier jetzt formatiert ausgegben.
 %    \begin{macrocode}
-\NewDocumentCommand\printdeclarationlist{!s !d()}{%
+\NewDocumentCommand\printdeclarationlist{!s !o !d()}{%
   \ifx\tud@declaration@list\relax\else%
     \ifhmode%
       \vskip\medskipamount%
@@ -1933,6 +1956,7 @@
         \forlistloop\@tempa{\tud@declaration@list}%
         \hline%
       \end{tabular}%
+      \IfValueT{#2}{\zap@space#2 \@empty}%
     }\usebox\z@%
     \@tud@declarefalse%
 %    \end{macrocode}
@@ -1976,7 +2000,7 @@
 % Zum Schluss wird das optionale Argument (in runden Klammern) neben der
 % Deklarationsbox ausgegeben.
 %    \begin{macrocode}
-    \IfValueT{#2}{#2}%
+    \IfValueT{#3}{#3}%
     \par\nobreak%
     \vskip\medskipamount%
     \@afterindentfalse\@afterheading%
@@ -1998,7 +2022,7 @@
 % \begin{macro}{\printchangedatlist}
 % \changes{v2.05}{2015/11/01}{neu}^^A
 % Damit werden Änderungsnotizen ausgegeben, die zu Beginn einer der Umgebungen 
-% \env{Declaration*} und \env{EntityDeclaration} angegeben wurden.
+% \env{Declaration*} und \env{Entity*} angegeben wurden.
 %    \begin{macrocode}
 \NewDocumentCommand\printchangedatlist{!s !O{\z@}}{%
   \print@changedatlist{#1}{#2}%
@@ -2090,6 +2114,22 @@
 % ersetzt werden, welche hier mit \cs{NewExpandableDocumentCommand} ebenfalls 
 % definiert werden.
 %
+% \ToDo{Das ist bloß temporär und muss raus!}[v2.07]
+%    \begin{macrocode}
+\newcommand*\ApplicationRaw[2]{\Application{#1}}
+\newcommand*\ClassRaw[2]{\Class{#1}}
+\newcommand*\PackageRaw[2]{\Package{#1}}
+\newcommand*\@ApplicationRaw[2]{#1}
+\newcommand*\@ClassRaw[2]{#1}
+\newcommand*\@PackageRaw[2]{#1}
+\AfterPackage*{hyperref}{%
+  \pdfstringdefDisableCommands{%
+    \let\ApplicationRaw\@ApplicationRaw%
+    \let\ClassRaw\@ClassRaw%
+    \let\PackageRaw\@PackageRaw%
+  }%
+}
+%    \end{macrocode}
 % \begin{macro}{\Application}
 % \changes{v2.02}{2014/10/08}{überarbeitet}^^A
 % \begin{macro}{\@Application}
@@ -2670,12 +2710,12 @@
 % \begin{macro}{\PValueDefault}
 % \changes{v2.05}{2015/11/01}{neu}^^A
 % \begin{macro}{\PName}
-% \begin{macro}{\Parameter}
-% \begin{macro}{\OParameter}
-% \begin{macro}{\LParameter}
-% \begin{macro}{\OLParameter}
-% \begin{macro}{\PParameter}
-% \begin{macro}{\POParameter}
+% \begin{macro}{\MPName}
+% \begin{macro}{\OPName}
+% \begin{macro}{\OList}
+% \begin{macro}{\OPList}
+% \begin{macro}{\MPValue}
+% \begin{macro}{\OPValue}
 % \changes{v2.03}{2015/01/25}{neu}^^A
 % \begin{macro}{\textOR}
 % \begin{macro}{\PSet}
@@ -2690,14 +2730,14 @@
 \newrobustcmd*\PValueDefault[1]{\mbox{\texttt{\textsl{#1}}}}
 \newrobustcmd*\PName[1]{\mbox{\texttt{\textsl{<#1>}}}}
 \newrobustcmd*\PValueName[1]{\PName{#1}}
-\newrobustcmd*\Parameter[1]{%
+\newrobustcmd*\MPName[1]{%
   \mbox{\texttt{\textbraceleft}\PName{#1}\texttt{\textbraceright}}%
 }
-\newrobustcmd*\PParameter[1]{\mbox{\texttt{\textbraceleft#1\textbraceright}}}
-\newrobustcmd*\OParameter[1]{\mbox{\texttt{[}\PName{#1}\texttt{]}}}
-\newrobustcmd*\POParameter[1]{\mbox{\texttt{[{#1}]}}}
-\newrobustcmd*\LParameter{\mbox{\texttt{[}\PName{Parameterliste}\texttt{]}}}
-\newrobustcmd*\OLParameter[1]{%
+\newrobustcmd*\MPValue[1]{\mbox{\texttt{\textbraceleft#1\textbraceright}}}
+\newrobustcmd*\OPName[1]{\mbox{\texttt{[}\PName{#1}\texttt{]}}}
+\newrobustcmd*\OPValue[1]{\mbox{\texttt{[{#1}]}}}
+\newrobustcmd*\OList{\mbox{\texttt{[}\PName{Parameterliste}\texttt{]}}}
+\newrobustcmd*\OPList[1]{%
   \mbox{\texttt{[}\PName{#1}\textOR\PName{Parameterliste}\texttt{]}}%
 }
 \newrobustcmd*\textOR{\PValue{\,\textbardbl\,}}
@@ -2711,12 +2751,12 @@
 % \end{macro}^^A \PMisc
 % \end{macro}^^A \PSet
 % \end{macro}^^A \textOR
-% \end{macro}^^A \POParameter
-% \end{macro}^^A \PParameter
-% \end{macro}^^A \OLParameter
-% \end{macro}^^A \LParameter
-% \end{macro}^^A \OParameter
-% \end{macro}^^A \Parameter
+% \end{macro}^^A \OPValue
+% \end{macro}^^A \MPValue
+% \end{macro}^^A \OPList
+% \end{macro}^^A \OList
+% \end{macro}^^A \OPName
+% \end{macro}^^A \MPName
 % \end{macro}^^A \PName
 % \end{macro}^^A \PValueDefault
 % \end{macro}^^A \PValue
@@ -2741,12 +2781,12 @@
       \let\PValueDefault\@firstofone%
       \let\PName\@gobble%
       \let\PValueName\@firstofone%
-      \let\Parameter\@gobble%
-      \let\OParameter\@gobble%
-      \let\LParameter\@empty%
-      \let\OLParameter\@gobble%
-      \let\PParameter\@gobble%
-      \let\POParameter\@gobble%
+      \let\MPName\@gobble%
+      \let\OPName\@gobble%
+      \let\OList\@empty%
+      \let\OPList\@gobble%
+      \let\MPValue\@gobble%
+      \let\OPValue\@gobble%
       \let\textOR\@empty%
       \let\PSet\@gobble%
       \let\PMisc\@empty%
@@ -2817,12 +2857,12 @@
   \let\PValueDefault\@firstofone%
   \let\PName\@firstofone%
   \let\PValueName\@firstofone%
-  \let\Parameter\@firstofone%
-  \let\OParameter\@firstofone%
-  \let\LParameter\@empty%
-  \let\OLParameter\@firstofone%
-  \let\PParameter\@firstofone%
-  \let\POParameter\@firstofone%
+  \let\MPName\@firstofone%
+  \let\OPName\@firstofone%
+  \let\OList\@empty%
+  \let\OPList\@firstofone%
+  \let\MPValue\@firstofone%
+  \let\OPValue\@firstofone%
   \let\textOR\@empty%
   \let\PSet\@gobble%
   \let\PMisc\@empty%
@@ -3047,7 +3087,7 @@
 % Die dritte Version kommt bei Erklärungen mit der Umgebung \env{Declaration*}
 % zum Einsatz, welche im Fließtext verwendet wird und kein Markup, wohl aber
 % eine Label für das beschriebene Element erzeugt werden soll. Für die vierte
-% Variante, welche die Umgebung \env{EntityDeclaration} betrifft, gilt dies im 
+% Variante, welche die Umgebung \env{Entity*} betrifft, gilt dies im 
 % Prinzip gleichermaßen. Allerdings wird diese Umgebung zu Beginn der
 % Deklarationen einer Entität direkt nach einer Überschrift verwendet. Hier 
 % soll der erzeugte Link direkt auf der Höhe der Überschrift platziert werden.
@@ -3140,10 +3180,11 @@
           }%
         }%
         \Ifstr{#7}{auto}{\def\@tempb{ in \autoref{#1}}}{%
+        \Ifstr{#7}{ref}{\def\@tempb{ in \autoref{#1}}}{
         \Ifstr{#7}{page}{\def\@tempb{ \vpageref{#1}}}{%
         \Ifstr{#7}{ppage}{\def\@tempb{ \reftextfaraway{#1}}}{%
         \Ifstr{#7}{full}{\def\@tempb{ in \fullref{#1}}}{%
-        \Ifstr{#7}{none}{\let\@tempa\@tempc\let\@tempb\relax}{}}}}}%
+        \Ifstr{#7}{none}{\let\@tempa\@tempc\let\@tempb\relax}{}}}}}}%
         \IfValueT{#6}{%
           \Ifstr{#7}{url}{\def\@tempa{\href{#6}{\@tempc}}\let\@tempb\relax}{}%
         }%
@@ -4544,7 +4585,7 @@
 % wird der Eintrag in die Änderungsliste für dieses Element generiert, sonst 
 % wird eine allgemeiner Eintrag erzeugt. Das optionale Argument in runden 
 % Klammern wird lediglich verwendet, wenn für eine der beiden Spezialumgebungen 
-% \env{Declaration*} bzw. \env{EntityDeclaration} eine Änderungsnotiz erstellt
+% \env{Declaration*} bzw. \env{Entity*} eine Änderungsnotiz erstellt
 % wird, um diese für das jeweilige \TUDScript-Bundle-Element in den
 % entsprechenden Abschnitt der Änderungsliste einzutragen. Das Hauptargument
 % verarbeitet eine semikolongetrennte Liste und reicht jeden Bestandteil
@@ -4661,7 +4702,7 @@
 % \ToDo{vorherige doc überarbeiten oder raus}[v2.07]
 % wird mit der Angabe eines \TUDScript-Bundle-Elements etwas anders verfahren.
 % Wurde dieses~-- wenn auch nur indirekt über eine der beiden Spezialumgebungen
-% \env{Declaration*} bzw. \env{EntityDeclaration}~-- angegeben, so wird der 
+% \env{Declaration*} bzw. \env{Entity*}~-- angegeben, so wird der 
 % Eintrag in den allgemeinen Hauptteil als Untereintrag erzeugt. Erfolgte die
 % Verwendung jedoch innerhalb einer \TUDScript-Bundle-Deklaration, so erscheint
 % der Eintrag im allgemeinen Teil für die explizite engegebene Entität.
@@ -5236,13 +5277,13 @@
 % dafür die \env{tabularx}-Umgebung. Für diese kann ein zweites Argument
 % angegeben werden, welches die gewünschte Breite der Tabelle angibt.
 %    \begin{macrocode}
-\NewDocumentCommand\TermTable{s m !O{\linewidth}}{%
+\NewDocumentCommand\TermTable{o m}{%
   \ifhmode\par\fi%
   \vskip\medskipamount%
   \@afterindentfalse\@afterheading%
   \begingroup%
-    \IfBooleanTF{#1}{%
-      \begin{tabularx}{\dimexpr\glueexpr#3\relax\relax}{lXX}%
+    \IfValueTF{#1}{%
+      \begin{tabularx}{\dimexpr\glueexpr#1\relax\relax}{lXX}%
         \Term@Table{-\ht\strutbox}{#2}%
       \end{tabularx}%
     }{%
