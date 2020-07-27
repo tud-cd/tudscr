@@ -4,7 +4,7 @@
 
  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2020
 
- tudscr 2020/06/25 v2.06h
+ tudscr 2020/07/27 v2.06i
 
 ----------------------------------------------------------------------------
 
@@ -52,6 +52,9 @@ Das Bundle beinhaltet:
 
 Versionen
 ---------
+
+**v2.06i** (2020/07/27)
++ Bugfix für duplizierte Outline-Einträg in Umgebung `abstract`
 
 **v2.06h** (2020/06/25)
 + Bugfix für Paket **polyglossia** #52
@@ -256,6 +259,9 @@ The bundle offers:
 
 Versions
 --------
+
+**v2.06i** (2020/07/27)
++ bug fix for duplicated outline entries in environment `abstract`
 
 **v2.06h** (2020/06/25)
 + bug fix for package **polyglossia** #52
