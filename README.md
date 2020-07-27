@@ -6,13 +6,11 @@
 
  **tudscr 2020/xx/xx v2.07**
 
- The current release is shiped via CTAN: https://www.ctan.org/pkg/tudscr
- 
 ----------------------------------------------------------------------------
 
  This material is subject to the LaTeX Project Public License version 1.3c
  or later. See http://www.latex-project.org/lppl.txt for details.
- English text below.
+ English text below
 
 ----------------------------------------------------------------------------
 
@@ -66,6 +64,9 @@ Versionen
 + **tudscrposter** Umgebungen `figurehere` und `tablehere`
 + Verwendung der Symbole `\textleftarrow`, `\textrightarrow`, `\textuparrow`,
   `\textdownarrow` sowie `\textlangle` und `\textrangle` aus Paket **iwona**
+
+**v2.06i** (2020/07/27)
++ Bugfix für duplizierte Outline-Einträg in Umgebung `abstract`
 
 **v2.06h** (2020/06/25)
 + Bugfix für Paket **polyglossia** #52
@@ -275,6 +276,9 @@ Versions
 
 **v2.07** (2020/xx/xx)
 + ...
+
+**v2.06i** (2020/07/27)
++ bug fix for duplicated outline entries in environment `abstract`
 
 **v2.06h** (2020/06/25)
 + bug fix for package **polyglossia** #52
