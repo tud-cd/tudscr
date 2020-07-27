@@ -30,8 +30,8 @@ set docinput="\def\tudfinalflag{}\input{tudscr.tex}"
 set docprintinput="\def\tudfinalflag{}\def\tudprintflag{}\input{tudscr.tex}"
 cd source
 call clearsource.bat
-REM tex tudscr.ins
-REM pdflatex --shell-escape %sourceinput%
+tex tudscr.ins
+pdflatex --shell-escape %sourceinput%
 cd..
 xcopy source temp\ /s
 cd temp
@@ -48,11 +48,11 @@ mkdir source\latex\tudscr
 mkdir doc\latex\tudscr\tutorials
 echo \BaseDirectory{.}> docstrip.cfg
 echo \UseTDS>> docstrip.cfg
-REM tex tudscr.ins
-REM pdflatex %sourceinput%
-REM pdflatex %sourceinput%
-REM pdflatex --shell-escape %sourceinput%
-REM pdflatex %sourceinput%
+tex tudscr.ins
+pdflatex %sourceinput%
+pdflatex %sourceinput%
+pdflatex --shell-escape %sourceinput%
+pdflatex %sourceinput%
 move  *.dtx               source\latex\tudscr\
 move  tudscr.ins          source\latex\tudscr\
 move  tudscrsource.tex    source\latex\tudscr\
@@ -67,14 +67,14 @@ echo  Erzeugen des Benutzerhandbuchs
 echo =========================================================================
 echo.
 cd doc
-REM pdflatex %docinput%
-REM pdflatex --shell-escape %docinput%
-REM pdflatex %docinput%
-REM pdflatex --shell-escape %docinput%
-REM pdflatex %docinput%
-REM pdflatex %docprintinput%
-REM copy tudscr.pdf tudscr_print.pdf
-REM pdflatex %docinput%
+pdflatex %docinput%
+pdflatex --shell-escape %docinput%
+pdflatex %docinput%
+pdflatex --shell-escape %docinput%
+pdflatex %docinput%
+pdflatex %docprintinput%
+copy tudscr.pdf tudscr_print.pdf
+pdflatex %docinput%
 del tutorials\*autopp*.* /q > nul
 attrib +h "tutorials\*-standalone-*.pdf"
 attrib +h "tutorials\*-pics.pdf"
