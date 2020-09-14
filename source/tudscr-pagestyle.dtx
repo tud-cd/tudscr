@@ -644,10 +644,13 @@
 % bereits durch den Anwender ausgewählt werden können, wird \cs{pagestyle} 
 % temporär zurechtgebogen. Die Definition des Makros wird gesichert und direkt 
 % vor dem Laden des Paketes wiederhergestellt. Damit werden die Seitenstile
-% erst aktiviert, nachdem diese auch tatsächlich erstellt wurden.
+% erst aktiviert, nachdem diese auch tatsächlich erstellt wurden. Alle zuvor 
+% angeforderten Seitenstile werden erst nach dem Paket propagiert.
 %    \begin{macrocode}
 \tud@cs@store{pagestyle}
-\renewcommand*\pagestyle[1]{\AfterPackage!{scrlayer-scrpage}{\pagestyle{#1}}}
+\renewcommand*\pagestyle[1]{%
+  \AfterAtEndOfPackage*{scrlayer-scrpage}{\pagestyle{#1}}%
+}
 \BeforePackage{scrlayer-scrpage}{%
   \tud@cs@restore{pagestyle}%
   \undef\tud@pagestyle%
@@ -661,7 +664,7 @@
 % Einstellungen abgeschlossen sein müssen, um die Satzspiegel zu definieren.
 % \ToDo{Abhängigkeiten Satzspiegel<>Seitenstil beseitigen}[v2.07]
 %    \begin{macrocode}
-\AfterPackage!{scrlayer-scrpage}{\AtEndPreamble{\tud@cdgeometry@init}}
+\AfterAtEndOfPackage*{scrlayer-scrpage}{\AtEndPreamble{\tud@cdgeometry@init}}
 %    \end{macrocode}
 % \begin{macro}{\ps@tudheadings}
 % \begin{macro}{\ps@plain.tudheadings}
