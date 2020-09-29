@@ -4,7 +4,7 @@
 
  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2020
 
- tudscr 2020/07/27 v2.06i
+ tudscr 2020/09/29 v2.06j
 
 ----------------------------------------------------------------------------
 
@@ -52,6 +52,9 @@ Das Bundle beinhaltet:
 
 Versionen
 ---------
+
+**v2.06j** (2020/09/29)
++ Anpassungen an neue Version von `scrlfile v3.32` für LaTeX-Kernel `2020/10/01`
 
 **v2.06i** (2020/07/27)
 + Bugfix für duplizierte Outline-Einträg in Umgebung `abstract`
@@ -259,6 +262,9 @@ The bundle offers:
 
 Versions
 --------
+
+**v2.06j** (2020/09/29)
++ adjustments to new version of `scrlfile v3.32` for LaTeX kernel `2020/10/01`
 
 **v2.06i** (2020/07/27)
 + bug fix for duplicated outline entries in environment `abstract`
