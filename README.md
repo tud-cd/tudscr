@@ -7,7 +7,7 @@
  **tudscr 2020/xx/xx v2.07**
 
  The current release is shiped via CTAN: https://www.ctan.org/pkg/tudscr
- 
+
 ----------------------------------------------------------------------------
 
  This material is subject to the LaTeX Project Public License version 1.3c
