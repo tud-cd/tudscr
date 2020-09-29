@@ -75,6 +75,7 @@ pdflatex %docinput%
 pdflatex %docprintinput%
 copy tudscr.pdf tudscr_print.pdf
 pdflatex %docinput%
+pause
 del tutorials\*autopp*.* /q > nul
 attrib +h "tutorials\*-standalone-*.pdf"
 attrib +h "tutorials\*-pics.pdf"
@@ -84,6 +85,7 @@ move tutorials\*-example.tex ..\source\latex\tudscr\doc\examples\
 del *.* /q > nul
 rmdir examples /s /q > nul
 rmdir tutorials /s /q > nul
+pause
 echo.
 echo =========================================================================
 echo  Erzeugen der Installationdateien
