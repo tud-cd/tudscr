@@ -65,6 +65,9 @@ Versionen
 + Verwendung der Symbole `\textleftarrow`, `\textrightarrow`, `\textuparrow`,
   `\textdownarrow` sowie `\textlangle` und `\textrangle` aus Paket **iwona**
 
+**v2.06j** (2020/09/29)
++ Anpassungen an neue Version von `scrlfile v3.32` für LaTeX-Kernel `2020/10/01`
+
 **v2.06i** (2020/07/27)
 + Bugfix für duplizierte Outline-Einträg in Umgebung `abstract`
 
@@ -276,6 +279,9 @@ Versions
 
 **v2.07** (2020/xx/xx)
 + ...
+
+**v2.06j** (2020/09/29)
++ adjustments to new version of **scrlfile** v3.32 for LaTeX kernel `2020/10/01`
 
 **v2.06i** (2020/07/27)
 + bug fix for duplicated outline entries in environment `abstract`
