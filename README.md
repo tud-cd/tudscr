@@ -4,7 +4,7 @@
 
  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2020
 
- tudscr 2020/09/29 v2.06j
+ tudscr 2020/11/10 v2.06k
 
 ----------------------------------------------------------------------------
 
@@ -52,6 +52,9 @@ Das Bundle beinhaltet:
 
 Versionen
 ---------
+
+**v2.06k** (2020/11/10)
++ Fix für doppelte Leerzeichen in `\confirmation` etc.
 
 **v2.06j** (2020/09/29)
 + Anpassungen an neue Version von `scrlfile v3.32` für LaTeX-Kernel `2020/10/01`
@@ -262,6 +265,9 @@ The bundle offers:
 
 Versions
 --------
+
+**v2.06k** (2020/11/10)
++ bug fix for multiple spaces in `\confirmation` etc.
 
 **v2.06j** (2020/09/29)
 + adjustments to new version of `scrlfile v3.32` for LaTeX kernel `2020/10/01`

@@ -64,10 +64,10 @@ pdflatex "\def\tudfinalflag{}\input{tudscr.tex}"
 pdflatex --shell-escape "\def\tudfinalflag{}\input{tudscr.tex}"
 pdflatex "\def\tudfinalflag{}\input{tudscr.tex}"
 pdflatex "\def\tudfinalflag{}\def\tudprintflag{}\input{tudscr.tex}"
-pause
 copy tudscr.pdf tudscr_print.pdf
 pdflatex "\def\tudfinalflag{}\input{tudscr.tex}"
 del tutorials\*autopp*.* /q > nul
+pause
 attrib +h "tutorials\*-standalone-*.pdf"
 attrib +h "tutorials\*-pics.pdf"
 move tudscr*.pdf             latex\tudscr\
@@ -76,7 +76,6 @@ move tutorials\*-example.tex ..\source\latex\tudscr\doc\examples\
 del *.* /q > nul
 rmdir examples /s /q > nul
 rmdir tutorials /s /q > nul
-pause
 echo.
 echo =========================================================================
 echo  Erzeugen der Installationdateien
