@@ -6,13 +6,16 @@
 
  tudscr 2020/11/10 v2.06k
 
+ The current release is shiped via CTAN: https://www.ctan.org/pkg/tudscr
+
 ----------------------------------------------------------------------------
 
  This material is subject to the LaTeX Project Public License version 1.3c
  or later. See http://www.latex-project.org/lppl.txt for details.
- English text below
+ English text below.
 
 ----------------------------------------------------------------------------
+
 
 Zusammenfassung
 ---------------
@@ -50,6 +53,7 @@ Das Bundle beinhaltet:
   im zweispaltigen Layout und
 + eine umfassende Anwenderdokumentation sowie mehrere Tutorials.
 
+
 Versionen
 ---------
 
@@ -57,7 +61,7 @@ Versionen
 + Fix für doppelte Leerzeichen in `\confirmation` etc.
 
 **v2.06j** (2020/09/29)
-+ Anpassungen an neue Version von `scrlfile v3.32` für LaTeX-Kernel `2020/10/01`
++ Anpassungen an neue Version von **scrlfile** v3.32 für LaTeX-Kernel 2020/10/01
 
 **v2.06i** (2020/07/27)
 + Bugfix für duplizierte Outline-Einträg in Umgebung `abstract`
@@ -69,11 +73,11 @@ Versionen
 + Bugfix für Änderung des Satzspiegels im Dokument
 
 **v2.06f** (2020/01/14)
-+ Anpassungen für Paket `scrbase v3.28`
++ Anpassungen für Paket **scrbase** v3.28
 
 **v2.06e** (2019/10/23)
-+ Bugfix für Paket `scrlfile v3.27`
-  
++ Bugfix für Paket **scrlfile** v3.27
+
 **v2.06d** (2019/08/27)
 + Bugfix für griechische Glyphen im Mathematikmodus beim Einsatz von LuaLaTeX
   (Ligaturen für angrenzende Glyphen sind entgegen der Definition aktiviert)
@@ -201,7 +205,7 @@ Versionen
 + Unterstützung der KOMA-Script-Schriftelemente für Titel und Umschlagseite
 + Befehle und Umgebungen für Zusammenfassung, Selbstständigkeitserklärung und
   Sperrvermerk wurden verbessert
-+ Fussnoten in Überschriften als Symbole  per Option `footnotes`
++ Fußnoten in Überschriften als Symbole per Option `footnotes`
 + einige Befehle wurden für Kompatibilität zu anderen Paketen umbenannt
 + Funktionalität des Paketes **mathswap** im Dokument umschaltbar
 
@@ -227,6 +231,7 @@ Versionen
 + erste Version des TUD-Script-Bundles
 
 -------------------------------------------------------------------------------
+
 
 Summary
 -------
@@ -263,6 +268,7 @@ The bundle offers:
   twocolumn layout and
 + an comprehensive user documentation as well as several tutorials.
 
+
 Versions
 --------
 
@@ -270,7 +276,7 @@ Versions
 + bug fix for multiple spaces in `\confirmation` etc.
 
 **v2.06j** (2020/09/29)
-+ adjustments to new version of `scrlfile v3.32` for LaTeX kernel `2020/10/01`
++ adjustments to new version of **scrlfile** v3.32 for LaTeX kernel 2020/10/01
 
 **v2.06i** (2020/07/27)
 + bug fix for duplicated outline entries in environment `abstract`
@@ -282,10 +288,10 @@ Versions
 + bug fix when changing type area within document
 
 **v2.06f** (2020/01/14)
-+ adaptions for package `scrbase v3.28`
++ adaptions for package **scrbase** v3.28
 
 **v2.06e** (2019/10/23)
-+ bug fix for package `scrlfile v3.27`
++ bug fix for package **scrlfile** v3.27
 
 **v2.06d** (2019/08/27)
 + bug fix for greek glyphs in math mode when using LuaLaTeX
@@ -360,7 +366,7 @@ Versions
 
 **v2.05** (2016/07/26)
 + class **tudscrposter**
-+ crop marks  with packages **crop** and **geometry** possible
++ crop marks with packages **crop** and **geometry** possible
 + new possible settings for type area
 + font size related skips with option `relspacing`
 + `\course` and `\discipline` available on title
