@@ -87,7 +87,7 @@ Versionen
 
 **v2.06e** (2019/10/23)
 + Bugfix für Paket **scrlfile** v3.27
-  
+
 **v2.06d** (2019/08/27)
 + Bugfix für griechische Glyphen im Mathematikmodus beim Einsatz von LuaLaTeX
   (Ligaturen für angrenzende Glyphen sind entgegen der Definition aktiviert)
@@ -379,7 +379,7 @@ Versions
 
 **v2.05** (2016/07/26)
 + class **tudscrposter**
-+ crop marks  with packages **crop** and **geometry** possible
++ crop marks with packages **crop** and **geometry** possible
 + new possible settings for type area
 + font size related skips with option `relspacing`
 + `\course` and `\discipline` available on title

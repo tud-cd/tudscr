@@ -35,7 +35,7 @@ pdflatex --shell-escape %sourceinput%
 cd..
 xcopy source temp\ /s
 cd temp
-del  clearsource.bat
+del clearsource.bat
 cd doc
 call cleardoc.bat
 del  cleardoc.bat
