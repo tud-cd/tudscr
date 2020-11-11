@@ -67,6 +67,9 @@ Versionen
 + Verwendung der Symbole `\textleftarrow`, `\textrightarrow`, `\textuparrow`,
   `\textdownarrow` sowie `\textlangle` und `\textrangle` aus Paket **iwona**
 
+**v2.06k** (2020/11/10)
++ Fix für doppelte Leerzeichen in `\confirmation` etc.
+
 **v2.06j** (2020/09/29)
 + Anpassungen an neue Version von **scrlfile** v3.32 für LaTeX-Kernel 2020/10/01
 
@@ -281,6 +284,9 @@ Versions
 
 **v2.07** (2020/xx/xx)
 + ...
+
+**v2.06k** (2020/11/10)
++ bug fix for multiple spaces in `\confirmation` etc.
 
 **v2.06j** (2020/09/29)
 + adjustments to new version of **scrlfile** v3.32 for LaTeX kernel 2020/10/01

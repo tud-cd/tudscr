@@ -75,8 +75,8 @@ pdflatex %docinput%
 pdflatex %docprintinput%
 copy tudscr.pdf tudscr_print.pdf
 pdflatex %docinput%
-pause
 del tutorials\*autopp*.* /q > nul
+pause
 attrib +h "tutorials\*-standalone-*.pdf"
 attrib +h "tutorials\*-pics.pdf"
 move tudscr*.pdf             latex\tudscr\
