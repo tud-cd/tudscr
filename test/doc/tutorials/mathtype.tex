@@ -1,0 +1,214 @@
+\documentclass[english,ngerman,cdfont=false]{tudscrartcl}
+\iftutex
+  \usepackage{fontspec}
+\else
+  \usepackage[T1]{fontenc}
+  \input glyphtounicode.tex
+  \pdfgentounicode=1
+  \usepackage[ngerman=ngerman-x-latest]{hyphsubst}
+\fi
+
+\usepackage{tudscrtutorial}
+\lstset{%
+  inputencoding=utf8,extendedchars=true,
+  literate=%
+    {ä}{{\"a}}1 {ö}{{\"o}}1 {ü}{{\"u}}1
+    {Ä}{{\"A}}1 {Ö}{{\"O}}1 {Ü}{{\"U}}1
+    {ß}{{\ss}}1 {~}{{\textasciitilde}}1
+    {»}{{\guillemetright}}1 {«}{{\guillemetleft}}1
+}
+
+\usepackage{mathtools}
+\usepackage{bookmark}
+
+\begin{document}
+\title{Ein Beitrag zum mathematischen Satz mit \hologo{LaTeX}}
+\author{Falk Hanisch\TUDScriptContactTitle}
+\date{07.11.2016}
+
+\makeatletter
+\begingroup%
+  \def\and{, }%
+  \let\thanks\@gobble%
+  \let\footnote\@gobble%
+  \hypersetup{%
+    pdfauthor = {\@author},%
+    pdftitle = {\@title},%
+    pdfsubject = {Mathematiksatz mit \hologo{LaTeX}},%
+    pdfkeywords = {LaTeX, \TUDScript, Tutorial, Mathematiksatz},%
+  }%
+\endgroup%
+\markright{\@title}
+\makeatother
+
+\StartTutorial[%
+  Im mathematischen Satz sollten lediglich Formelzeichen für physikalische 
+  Größen und Variablen sowie Funktions- und Operatorzeichen mit frei wählbarer 
+  Bedeutung kursiv geschrieben werden. Dagegen werden Einheiten und ihre 
+  Vorsätze, Zahlen, Funktions- und Operatorzeichen mit feststehender Bedeutung 
+  sowie chemische Elemente und Verbindungen ebenso wie Indizes, welche ein 
+  Formelzeichen näher beschreiben, aufrecht gesetzt. Dieses Tutorial zeigt, wie 
+  mit einfachen Mitteln die Auszeichnung von Indizes bei Formelzeichen 
+  typografisch korrekt erfolgen kann.
+]
+Bevor das eigentliche Tutorial beginnt, werden sowohl eine Dokumentklasse als 
+auch die für jedes \hologo{LaTeX}"~Dokument meiner Meinung nach sinnvollen 
+Pakete geladen.
+%
+\begin{Preamble}
+\documentclass[ngerman]{tudscrartcl}% andere Klassen sind möglich
+\usepackage{iftex}
+\iftutex
+  \usepackage{fontspec}
+\else
+  \usepackage[T1]{fontenc}
+  \usepackage[ngerman=ngerman-x-latest]{hyphsubst}
+\fi
+\usepackage{babel}
+\usepackage{microtype}
+
+\end{Preamble}
+%
+Zusätzlich wird das Paket \Package{amsmath} geladen, welches unter anderem die 
+in diesem Tutorial verwendeten Mathematikumgebungen \Environment{equation}, 
+\Environment{gathered} und \Environment{aligned} zur Verfügung stellt.
+%
+\begin{Preamble}
+\usepackage{amsmath}
+\end{Preamble}
+%
+Zunächst wird ein Beispiel gegeben, das für die folgenden Ausführungen als 
+Grundlage dient. 
+%
+\CodePreamble{}%
+\begin{Trunk*}
+\begin{equation*}
+\begin{gathered}
+M_{EM} = \frac{M_{Rad}}{i_g \cdot i_A} - M_{VM} \\
+\textrm{für }
+\begin{aligned}
+0\leq M_{VM}\leq M_{VMmax} \\ 
+M_{EMmin}\leq M_{EM}\leq M_{EMmax}
+\end{aligned}
+\end{gathered}
+\end{equation*}
+
+\end{Trunk*}
+%
+Ein guter Mathematiksatz ist in \hologo{LaTeX} durchaus Sisyphusarbeit. Wenn 
+mikrotypografisch alles richtig gemacht werden soll, gibt es einiges zu 
+beachten. Generell gilt, dass Variablen kursiv oder geneigt, Bezeichnungen und 
+Konstanten aufrecht gesetzt werden. Um beschreibende Indizes formal richtig zu 
+setzen, ist ohne weitere Maßnahmen die exzessive Nutzung der Befehle 
+\Macro{mathrm}[\MPValue{\dots}] und \Macro{mathit}[\MPValue{\dots}] 
+respektive \Macro{mathnormal}[\MPValue{\dots}] wohl oder übel notwendig. 
+Aus dem vorhergehenden Beispiel wird mit ziemlich viel Anpassungsarbeit:
+%
+\CodePreamble{}%
+\begin{Trunk*}
+\begin{equation*}
+\begin{gathered}
+M_\mathrm{EM} = \frac{M_\mathrm{Rad}}{i_g \cdot i_A} - M_\mathrm{VM} \\
+\textrm{für }
+\begin{aligned}
+0\leq M_\mathrm{VM}\leq M_\mathrm{VM_{max}} \\ 
+M_\mathrm{EM_{min}}\leq M_\mathrm{EM}\leq M_\mathrm{EM_{max}}
+\end{aligned}
+\end{gathered}
+\end{equation*}
+
+\end{Trunk*}
+%
+Augenscheinlich ist dabei sehr viel Handarbeit notwendig. Allerdings lässt sich 
+dies relativ gut vereinfachen. Zu diesem Zwecke wird für das Setzen von Indizes 
+bei Formelzeichen der Befehl \Macro{ind}[\MPValue{\dots}] definiert. Danach 
+können~-- wenn dies für nötig und sinnvoll erachtet wird~-- noch zusätzliche 
+Befehle für häufig verwendete Ausdrücke definiert werden. Als Beispiel wird das 
+schon eben genutzte Drehmoment \ensuremath{M} verwendet. Hierfür wäre folgende 
+Definition möglich:%
+\footnote{%
+  Dabei sorgt \Macro*{kern.03em} für das Einfügen eins kleinen Abstandes 
+  zwischen kursiver Variable und dem aufrechten Index. Abhängig von der 
+  verwendeten Schriftart sollte dieser Abstand leicht angepasst werden. 
+}
+%
+\CodeHook{\let\newcommand\renewcommand}
+\begin{Trunk*}
+\newcommand*{\ind}[1]{\ensuremath{\kern.03em_\mathrm{#1}}}
+\newcommand*{\M}[1]{\ensuremath{M\ind{#1}}}
+
+\end{Trunk*}
+\CodePreamble{}
+\begin{Trunk*}
+\begin{equation*}
+\begin{gathered}
+\M{EM} = \frac{\M{Rad}}{i_g \cdot i_A} - \M{VM} \\
+\textrm{für }
+\begin{aligned}
+0\leq \M{VM}\leq \M{VM_{max}} \\ 
+\M{EM_{min}}\leq \M{EM}\leq \M{EM_{max}}
+\end{aligned}
+\end{gathered}
+\end{equation*}
+
+\end{Trunk*}
+%
+Ein gewünschter Nebeneffekt der vorhergehenden Definition ist, dass dieser 
+Befehl aufgrund der Verwendung von \Macro{ensuremath}[\MPValue{\dots}] nun 
+auch im Fließtext verwenden werden kann, wie hier für das induzierte Moment 
+einer Verbrennungskraftmaschine~\M{VM_{ind}} 
+(\Macro{M}[\MPValue{VM\_\MPValue{ind}}]).
+
+Für noch mehr Bequemlichkeit bei der Nutzung kann eine Lösung gefunden werden, 
+mit welcher~-- im Gegensatz zur Standardbefehlsdefinition in \hologo{LaTeX}~-- 
+\textbf{nach} dem obligatorischen noch ein optionales Argument für einen 
+zusätzlichen Subindex angegeben werden kann, um damit der natürlichen 
+Schreibweise zu entsprechen. Es wird der Befehl \Macro{M} so definiert, das 
+dieser entweder mit \Macro{M}[\MPName{Index}] oder in der Variante 
+\Macro{M}[\MPName{Index}\OPName{Indexindex}] mit nachgelagertem 
+optionalen Argument genutzt werden kann.
+%
+\CodeHook{\let\newcommand\renewcommand}
+\begin{Trunk*}
+\makeatletter
+\renewcommand*{\M}[1]{%
+  \kernel@ifnextchar[%]
+    {\o@M{#1}}{\n@M{#1}}%
+}
+\newcommand*{\n@M}[1]{\ensuremath{M\ind{#1}}}
+\newcommand*{\o@M}{}
+\def\o@M#1[#2]{\ensuremath{M\ind{#1_{#2}}}}
+\makeatother
+
+\end{Trunk*}
+%
+Somit vereinfacht sich das zu Beginn vorgestellte Beispiel recht deutlich:
+%
+\begin{Trunk*}
+\begin{equation*}
+\begin{gathered}
+\M{EM} = \frac{\M{Rad}}{i_g \cdot i_A} - \M{VM} \\
+\textrm{für }
+\begin{aligned}
+0\leq \M{VM}\leq \M{VM}[max] \\ 
+\M{EM}[min]\leq \M{EM}\leq \M{EM}[max]
+\end{aligned}
+\end{gathered}
+\end{equation*}
+\end{Trunk*}
+%
+Das Definieren von \Macro{M}[\MPName{Index}\OPName{Indexindex}] mit 
+angehängtem optionalen Argument ist ehrlich gesagt nur ein wenig Spielerei und 
+soll zeigen, wie dies prinzipiell mit \hologo{LaTeX} umgesetzt werden kann. 
+Mit dem Paket \Package{xparse} könnte alternativ für die Befehlsdeklaration des 
+optionalen \textbf{nach} dem obligatorischen Argument folgendermaßen genutzt 
+werden:
+\begin{Hint}
+\NewDocumentCommand \M { m o } {%
+  \ensuremath{M\ind{#1\IfValueT{#2}{_{#2}}}}%
+}
+\end{Hint}
+%
+\FinishTutorial
+\ListOfToDo
+\end{document}

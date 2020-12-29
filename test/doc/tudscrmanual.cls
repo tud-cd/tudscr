@@ -59,7 +59,7 @@
       \fi%
     }%
   \fi%
-  \TUD@@Version{2020/06/25 v2.07 TUD-Script}{2019/12/23 v3.28 KOMA-Script}%
+  \TUD@@Version{2020/09/30 v2.07 TUD-Script}{2019/12/23 v3.28 KOMA-Script}%
   \ifx\TUDScriptVersion\@undefined%
     \xdef\TUDScriptVersion{\TUD@Version}%
     \def\@tempa#1 v#2 #3\relax#4\relax#5{\gdef#5{#2}}%
@@ -506,7 +506,6 @@
 \newcommand*\tud@trace@markup@types{}
 \listadd\tud@trace@markup@types{declare}
 \listadd\tud@trace@markup@types{output}
-\listadd\tud@trace@markup@types{temp}
 \def\tud@res@a#1{%
   \expandafter\newcommand\csname tud@trace@markup@#1@list\endcsname{}%
   \cslet{tud@trace@markup@#1@list}\relax%
@@ -2118,7 +2117,9 @@
           }{%
             \csgdef{\tud@res@c}{#1}%
           }%
-          \IfValueT{#2}{\DeclareSpecialLink{\tud@res@a}<#2>}%
+          \IfValueT{#2}{%
+            \expandafter\DeclareSpecialLink\expandafter{\tud@res@a}<#2>%
+          }%
         \else%
           \ClassWarning{tudscrmanual}{%
             Level `\detokenize{#1} (#3)'\MessageBreak%
