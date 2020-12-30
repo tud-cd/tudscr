@@ -607,7 +607,6 @@
     }%
   \tud@res@a%
 }
-% TODO configure imakeidx right here
 \NewExpandableDocumentCommand\@gobbleopt@one{o m}{}
 \patchcmd\@outputpage{%
   \let\index\@gobble\let\glossary\@gobble%
@@ -707,7 +706,7 @@
   \newcommand*\tud@x@hyperref@a[2][]{#2}%
   \newcommand*\tud@x@hyperref@b[4]{#4}%
   \providecommand*\hypertarget[2]{\label{#1}#2}%
-  % TODO replace all \hyperref[]{} with \hyperlink{}{}
+  % PENDING replace all \hyperref[]{} with \hyperlink{}{}
   \providecommand*\hyperlink[2]{\hyperref[{#1}]{#2}}%
   \providecommand*\Hy@raisedlink[1]{#1}%
   \providecommand*\phantomsection{}%
@@ -728,7 +727,7 @@
   \tud@localization@english{\subsectionautorefname}{subsection}%
   \tud@localization@english{\subsubsectionautorefname}{subsubsection}%
 }
-% TODO wo sind urls als fußnoten überhaupt sinnvoll?
+% PENDING wo sind urls als fußnoten überhaupt sinnvoll?
 \newcommand*\hrfn[2]{\href{#1}{\trim@spaces{#2}}\footnote{\url{#1}}}
 \newrobustcmd*\mailto[1]{\mbox{\href{mailto:#1}{\nolinkurl{#1}}}}%
 \newrobustcmd*\bsc{\kern-.05em\@backslashchar\kern-.05em}
@@ -740,6 +739,172 @@
 \PassOptionsToPackage{babel}{microtype}
 \AfterPackage*{hyperref}{\RequirePackage{microtype}[2013/05/23]}
 \TUD@UnwindPackage{hyperref}{\RequirePackage{microtype}[2013/05/23]}
+\newcommand*\tud@xdy@settings{}
+% TODO locale-Einstellung in Abhängigkeit der Hauptsprache! 
+\edef\tud@xdy@settings{texindy -M \@currname-ind.xdy -L german-din}
+\NewDocumentCommand\tud@xdy@make{s o m !O{\jobname}}{%
+  \protected@edef\tud@res@a{%
+    title={#3},%
+    columnsep=\noexpand\f@size\noexpand\p@,%
+    name={#4},%
+    options={\tud@xdy@settings\space-t \jobname-#4.xlg},%
+    \IfValueT{#2}{#2}%
+  }%
+  \expandafter\makeindex\expandafter[\tud@res@a]%
+  % TODO NewCrossIndex
+%  \expandafter\newcommand\expandafter*\csname tud@idx@cross@#4\endcsname{}%
+}
+%  \tud@xdy@make{Allgemeiner Index}%
+%  \tud@xdy@make*{Klassen- und Paketoptionen}[options]%
+%  \tud@xdy@make*{Befehle und Umgebungen mit zugeh\"origen Parametern}[macros]%
+%  \tud@xdy@make*{Sprachabh\"angige Bezeichner}[terms]%
+%  \tud@xdy@make*{Seitenstile, Schriftelemente und Farben}[elements]%
+%  \tud@xdy@make*{L\"angen und Z\"ahler}[misc]%
+%  \tud@xdy@make*{Klassen, Pakete und Dateien}[files]%
+%  \tud@xdy@make[columns=1]{\"Anderungsliste}[changelog]%
+\let\index\@gobbleopt@one%
+\let\makeindex\@empty
+\@onlypreamble\makeindex
+\newcommand*\tud@idx@mdf{}
+\newcommand*\tud@idx@label{}
+\if@filesw
+  \newwrite\@indexfile%
+  \immediate\openout\@indexfile=\jobname.idx%
+  \typeout{Writing index file \jobname.idx}%
+  \def\index{%
+    \@bsphack%
+    \@ifnextchar[%]
+      {\@index}%
+      {\@index[\jobname]}%
+  }%
+  \def\@index[#1]#2{%
+    % URGENT mit Liste aus tud@makeindex abgleichen
+%    \@ifundefined{#1@idxfile}{%
+%      \ClassWarning{tudscrmanual}{Undefined index file `#1'}%
+%    }{%
+      \begingroup%
+        \@sanitize%
+        \protected@write\@indexfile{}{\string\indexentry[#1]{#2}{\thepage}}%
+      \endgroup%
+%    }%
+    \@esphack%
+  }%
+  \BeforeClosingMainAux{%
+    \immediate\closeout\@indexfile%
+    \@tud@res@swafalse%
+    \ifundef{\pdf@filemdfivesum}{%
+      \@tud@res@swatrue%
+      \let\tud@idx@mdf\@empty%
+    }{%
+      \edef\tud@res@a{\pdf@filemdfivesum{\jobname.idx}}%
+      \ifnum\pdf@strcmp{\tud@res@a}{\tud@idx@mdf}=\z@\else%
+        \@tud@res@swatrue%
+      \fi%
+    }%
+    \if@tud@res@swa%
+      \ifnum\pdf@shellescape=\@ne\relax%
+        \ifundef{\inputencodingname}{%
+          \appto\tud@xdy@settings{ -C utf8}%
+        }{%
+          \eappto\tud@xdy@settings{ -C \inputencodingname}%
+        }%
+        \ShellEscape{splitindex -m \string"\tud@xdy@settings" \jobname.idx}%
+      \else%
+        \let\tud@res@a\tud@idx@mdf%
+        \ClassWarningNoLine{tudscrmanual}{%
+          The index file `\jobname.idx' has changed. Run again\MessageBreak%
+          with --shell-escape flag enabled%
+        }%
+      \fi%
+    \fi%
+    \immediate\write\@mainaux{\string\gdef\string\tud@idx@mdf{\tud@res@a}}%
+  }%
+\fi%
+\AtBeginDocument{%
+%  \PassOptionsToPackage{xindy,splitindex}{imakeidx}%
+%  \RequirePackage{imakeidx}[2016/10/15]%
+%  \indexsetup{%
+%    level=\addsec,%
+%    noclearpage,firstpagestyle=headings,headers={\indexname}{\indexname},%
+%    othercode={%
+%      \def\lettergroup##1{\minisec{##1}}%
+%      \DeclareDocumentCommand\tud@idxitem{s m}{%
+%        \par%
+%        \hspace*{\dimexpr\numexpr##2\relax em\relax}%
+%        \hangindent=\dimexpr\numexpr##2+3\relax em\relax%
+%        \IfBooleanT{##1}{\penalty\@lowpenalty}%
+%      }%
+%      \def\item{\tud@idxitem{0}}%
+%      \def\subitem{\tud@idxitem*{1}}%
+%      \def\subsubitem{\tud@idxitem*{2}}%
+%      \def\subsubsubitem{\tud@idxitem*{3}}%
+%%      \ifundef{\indexspace}{%
+%%        \let\indexspace\relax%
+%%      }{%
+%        \renewcommand*\indexspace{\par\vskip1em\@plus2ex\@minus1ex\relax}%
+%%      }%
+%    }%
+%  }%
+%  \ifimki@original\else%
+%    \CheckCommand\theindex{%
+%      \imki@maybeaddtotoc
+%      \imki@indexlevel{\indexname}\imki@indexheaders
+%      \thispagestyle{\imki@firstpagestyle}%
+%      \ifnum\imki@columns>\@ne
+%        \columnsep \imki@columnsep
+%        \ifx\imki@idxprologue\relax
+%          \begin{multicols}{\imki@columns}
+%        \else
+%          \begin{multicols}{\imki@columns}[\imki@idxprologue]
+%        \fi
+%      \else
+%        \imki@idxprologue
+%      \fi
+%      \global\let\imki@idxprologue\relax
+%      \parindent\z@
+%      \parskip\z@ \@plus .3\p@\relax
+%      \columnseprule \ifKV@imki@columnseprule.4\p@\else\z@\fi
+%      \raggedright
+%      \let\item\@idxitem
+%      \imki@othercode%
+%    }%
+%    \patchcmd\theindex{%
+%      \imki@indexlevel{\indexname}\imki@indexheaders%
+%    }{%
+%      \imki@indexheaders%
+%    }{}{\tud@patch@wrn{theindex}}%
+%    \patchcmd\theindex{%
+%      \ifnum\imki@columns>\@ne
+%        \columnsep \imki@columnsep
+%        \ifx\imki@idxprologue\relax
+%          \begin{multicols}{\imki@columns}
+%        \else
+%          \begin{multicols}{\imki@columns}[\imki@idxprologue]
+%        \fi
+%      \else
+%        \imki@idxprologue
+%      \fi
+%    }{%
+%      \edef\tud@res@a{%
+%        \noexpand\imki@indexlevel{%
+%          \noexpand\indexname%
+%          \ifx\tud@idx@label\@empty\else%
+%            \noexpand\label{\tud@idx@label}%
+%          \fi%
+%          % TODO NewCrossIndex
+%%          \expandonce\tud@idx@cross%
+%        }\ifx\imki@idxprologue\relax\else\noexpand\imki@idxprologue\fi%
+%      }%
+%      \ifnum\imki@columns>\@ne\relax%
+%        \columnsep \imki@columnsep%
+%          \begin{multicols}{\imki@columns}[\tud@res@a]%
+%      \else%
+%        \tud@res@a%
+%      \fi%
+%      \global\let\tud@idx@label\@empty%
+%    }{}{\tud@patch@wrn{theindex}}%
+%  \fi%
+}
 \newcommand*\tud@markup@list{}
 \NewDocumentCommand\Markup@Format@Set{m m O{} r() d<> m r|| m}{%
   \expandafter\newcommand\csname Markup@Format@@Level@@#1\endcsname{}%
@@ -1030,9 +1195,9 @@
       \def\tud@res@b{\AP@MarkupKey}%
     \fi%
     \eappto\tud@res@c{%
-      % TODO !o!d()!d''!d|| raus, nachdem tudscrmanual.sty umgesetzt
-      % {s d|| d'' d() >{\expandonce\tud@res@b{\tud@res@d}}m !o!d()!d''!d||}%
       \unexpanded{\NewDocumentCommand#2}{%
+%       PENDING !o!d()!d''!d|| raus, nachdem tudscrmanual.sty umgesetzt
+%        s d|| d'' d() >{\expandonce\tud@res@b{\tud@res@d}}m !o!d()!d''!d||
         s d|| d'' d() >{\expandonce\tud@res@b{\tud@res@d}}m%
       }{%
         \unexpanded{\Process@Markup[##1]}{\tud@res@d}\unexpanded{##5|##2|'##3'}%
@@ -1049,7 +1214,7 @@
         \else%
           \unexpanded{(##4)}%
         \fi%
-%      % TODO raus, nachdem tudscrmanual.sty umgesetzt
+%       PENDING raus, nachdem tudscrmanual.sty umgesetzt
 %      \unexpanded{%
 %        \IfValueT{##6}{\ClassWarning{tudscrmanual}{change markup for `##6'}}%
 %        \IfValueT{##7}{\ClassWarning{tudscrmanual}{change markup for `##7'}}%
@@ -2560,7 +2725,7 @@
         \unexpanded{\def\tud@res@b}{\expandonce\tud@res@b}%
       }%
     \tud@res@a%
-% TODO für tutorials notwendig?, darf keine relevanz für manual haben
+% PENDING für tutorials notwendig?, darf keine relevanz für manual haben
 %        \def\tud@res@a##1:##2:##3\@nil{\tud@hypertarget{##3:##2:##3}}%
 %        \expandafter\tud@res@a\tud@lbl@tmp\@nil%
     \tud@auxlist@remove{tud@lbl@alias}{\tud@res@a}%
@@ -3211,166 +3376,6 @@
   \forlistloop\tud@res@a{\tud@markup@list}%
   \appto\tud@x@textcase@uclcnotmath{\tud@nocasechange\hologo}%
 }
-\newcommand*\tud@xdy@settings{}
-\edef\tud@xdy@settings{-M \@currname-ind.xdy -L german-din}
-\NewDocumentCommand\tud@xdy@make{s o m !O{\jobname}}{%
-  \protected@edef\tud@res@a{%
-    title={#3},%
-    columnsep=\noexpand\f@size\noexpand\p@,%
-    name={#4},%
-    options={\tud@xdy@settings\space-t \jobname-#4.xlg},%
-    \IfValueT{#2}{#2}%
-  }%
-  \expandafter\makeindex\expandafter[\tud@res@a]%
-  % TODO NewCrossIndex
-%  \expandafter\newcommand\expandafter*\csname tud@idx@cross@#4\endcsname{}%
-}
-\newcommand*\tud@idx@mdfive{}
-\newcommand*\tud@idx@label{}
-\AtBeginDocument{%
-  \ifundef{\pdf@filemdfivesum}{}{%
-    \PassOptionsToPackage{quiet}{imakeidx}%
-    \edef\tud@res@a{\pdf@filemdfivesum{\jobname.idx}}%
-    % TODO splitindex mit \tud@xdy@make aufrufen
-    \ifnum\pdf@shellescape=\@ne\relax%
-      \ifx\tud@idx@mdfive\@empty%
-        \ifx\tud@res@a\@empty\else%
-          \ShellEscape{splitindex -m \string"\string" \jobname.idx}%
-        \fi%
-      \fi%
-    \fi%
-    % TODO noautomatic erst bei printindex setzen, imakeidx direkt laden
-    \ifnum\pdf@strcmp{\tud@res@a}{\tud@idx@mdfive}=\z@\relax%
-      \PassOptionsToPackage{noautomatic}{imakeidx}%
-    \else%
-      \ifnum\pdf@shellescape=\@ne\relax\else%
-        \let\tud@res@a\tud@idx@mdfive%
-      \fi%
-    \fi%
-    \immediate\write\@mainaux{\string\gdef\string\tud@idx@mdfive{\tud@res@a}}%
-  }%
-  \PassOptionsToPackage{xindy,splitindex}{imakeidx}%
-  \RequirePackage{imakeidx}[2013/07/11]%
-  \indexsetup{%
-    level=\addsec,%
-    noclearpage,firstpagestyle=headings,headers={\indexname}{\indexname},%
-    othercode={%
-      \def\lettergroup##1{\minisec{##1}}%
-      \DeclareDocumentCommand\tud@idxitem{s m}{%
-        \par%
-        \hspace*{\dimexpr\numexpr##2\relax em\relax}%
-        \hangindent=\dimexpr\numexpr##2+3\relax em\relax%
-        \IfBooleanT{##1}{\penalty\@lowpenalty}%
-      }%
-      \def\item{\tud@idxitem{0}}%
-      \def\subitem{\tud@idxitem*{1}}%
-      \def\subsubitem{\tud@idxitem*{2}}%
-      \def\subsubsubitem{\tud@idxitem*{3}}%
-%      \ifundef{\indexspace}{%
-%        \let\indexspace\relax%
-%      }{%
-        \renewcommand*\indexspace{\par\vskip1em\@plus2ex\@minus1ex\relax}%
-%      }%
-    }%
-  }%
-  \ifimki@original\else%
-    \CheckCommand\theindex{%
-      \imki@maybeaddtotoc
-      \imki@indexlevel{\indexname}\imki@indexheaders
-      \thispagestyle{\imki@firstpagestyle}%
-      \ifnum\imki@columns>\@ne
-        \columnsep \imki@columnsep
-        \ifx\imki@idxprologue\relax
-          \begin{multicols}{\imki@columns}
-        \else
-          \begin{multicols}{\imki@columns}[\imki@idxprologue]
-        \fi
-      \else
-        \imki@idxprologue
-      \fi
-      \global\let\imki@idxprologue\relax
-      \parindent\z@
-      \parskip\z@ \@plus .3\p@\relax
-      \columnseprule \ifKV@imki@columnseprule.4\p@\else\z@\fi
-      \raggedright
-      \let\item\@idxitem
-      \imki@othercode%
-    }%
-    \patchcmd\theindex{%
-      \imki@indexlevel{\indexname}\imki@indexheaders%
-    }{%
-      \imki@indexheaders%
-    }{}{\tud@patch@wrn{theindex}}%
-    \patchcmd\theindex{%
-      \ifnum\imki@columns>\@ne
-        \columnsep \imki@columnsep
-        \ifx\imki@idxprologue\relax
-          \begin{multicols}{\imki@columns}
-        \else
-          \begin{multicols}{\imki@columns}[\imki@idxprologue]
-        \fi
-      \else
-        \imki@idxprologue
-      \fi
-    }{%
-      \edef\tud@res@a{%
-        \noexpand\imki@indexlevel{%
-          \noexpand\indexname%
-          \ifx\tud@idx@label\@empty\else%
-            \noexpand\label{\tud@idx@label}%
-          \fi%
-          % TODO NewCrossIndex
-%          \expandonce\tud@idx@cross%
-        }\ifx\imki@idxprologue\relax\else\noexpand\imki@idxprologue\fi%
-      }%
-      \ifnum\imki@columns>\@ne\relax%
-        \columnsep \imki@columnsep%
-          \begin{multicols}{\imki@columns}[\tud@res@a]%
-      \else%
-        \tud@res@a%
-      \fi%
-      \global\let\tud@idx@label\@empty%
-    }{}{\tud@patch@wrn{theindex}}%
-  \fi%
-  \CheckCommand*\imki@build[1]{%
-    \toks@{}%
-    \imki@dokey\imki@title
-    \imki@dokey\imki@program
-    \imki@dokey\imki@options
-    \imki@dokey\imki@columns
-    \imki@dokey\imki@columnsep
-    \ifKV@imki@noautomatic
-      \addto@hook\toks@{\KV@imki@noautomatictrue}%
-    \else
-      \addto@hook\toks@{\KV@imki@noautomaticfalse}%
-    \fi
-    \ifKV@imki@intoc
-      \addto@hook\toks@{\KV@imki@intoctrue}%
-    \else
-      \addto@hook\toks@{\KV@imki@intocfalse}%
-    \fi
-    \ifKV@imki@columnseprule
-      \addto@hook\toks@{\KV@imki@columnsepruletrue}%
-    \else
-      \addto@hook\toks@{\KV@imki@columnseprulefalse}%
-    \fi
-    \expandafter\edef\csname imki@set@#1\endcsname{\the\toks@}%
-  }%
-  % TODO \inputencodingname erst bei printindex verwenden
-  \ifundef{\inputencodingname}{%
-    \eappto\tud@xdy@settings{\space-C\space utf8}%
-  }{%
-    \eappto\tud@xdy@settings{\space-C\space\inputencodingname}%
-  }%
-  \tud@xdy@make{Allgemeiner Index}%
-  \tud@xdy@make*{Klassen- und Paketoptionen}[options]%
-  \tud@xdy@make*{Befehle und Umgebungen mit zugeh\"origen Parametern}[macros]%
-  \tud@xdy@make*{Sprachabh\"angige Bezeichner}[terms]%
-  \tud@xdy@make*{Seitenstile, Schriftelemente und Farben}[elements]%
-  \tud@xdy@make*{L\"angen und Z\"ahler}[misc]%
-  \tud@xdy@make*{Klassen, Pakete und Dateien}[files]%
-  \tud@xdy@make[columns=1]{\"Anderungsliste}[changelog]%
-}
 \newrobustcmd*\cleversee{\tud@cleversee{\seename}}
 \newrobustcmd*\cleverseealso{%
   \ClassWarning{tudscrmanual}%
@@ -3723,15 +3728,17 @@
     \forcsvlist{\tud@res@a}{#1}%
   \endgroup%
 }
-\AfterReadingMainAux{%
-  \immediate\closeout\@indexfile%
-  \ifnum\pdf@strcmp{\pdf@filemdfivesum{\jobname.idx}}{\tud@idx@mdfive}=\z@\else%
-    \ClassWarningNoLine{tudscrmanual}{%
-      The index file `\jobname.idx' has changed. Run again\MessageBreak%
-      with --shell-escape flag enabled%
-    }%
-  \fi%
-}
+%\AfterReadingMainAux{%
+%  \if@filesw%
+%    \immediate\closeout\@indexfile%
+%    \ifnum\pdf@strcmp{\pdf@filemdfivesum{\jobname.idx}}{\tud@idx@mdf}=\z@\else%
+%      \ClassWarningNoLine{tudscrmanual}{%
+%        The index file `\jobname.idx' has changed. Run again\MessageBreak%
+%        with --shell-escape flag enabled%
+%      }%
+%    \fi%
+%  \fi%
+%}
 \newcommand*\PrintIndex{%
   \begingroup%
     \tud@index@mode@num=\m@ne%
@@ -3812,7 +3819,7 @@
         No processed index file found,\MessageBreak%
         `\jobname-#1.ind' does not exist%
       }%
-      \immediate\write\@mainaux{\string\gdef\string\tud@idx@mdfive{}}%
+%      \immediate\write\@mainaux{\string\gdef\string\tud@idx@mdf{}}%
     }%
     \tud@idx@vskip%
   }{%
