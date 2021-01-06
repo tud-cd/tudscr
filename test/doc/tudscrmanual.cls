@@ -19,7 +19,7 @@
 %% TUD-Script -- Corporate Design of Technische Universitaet Dresden
 %%               2020/06/25 v2.07 TUD-Script
 %% 
-%% Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2020
+%% Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2021
 %%               https://github.com/tud-cd/tudscr
 %%               https://latex.wcms-file3.tu-dresden.de/phpBB3/
 %% 
@@ -191,16 +191,16 @@
   \fi%
   \let\tud@list@sorted\tud@res@a%
 }
-\newcommand*\tud@set@add[2]{%
+\newcommand*\tud@unique@add[2]{%
   \ifinlist{#2}{#1}{}{\listadd#1{#2}}%
 }
-\newcommand*\tud@set@eadd[2]{%
+\newcommand*\tud@unique@eadd[2]{%
   \xifinlist{#2}{#1}{}{\listeadd#1{#2}}%
 }
-\newcommand*\tud@set@xadd[2]{%
+\newcommand*\tud@unique@xadd[2]{%
   \xifinlist{#2}{#1}{}{\listxadd#1{#2}}%
 }
-\newcommand*\tud@set@csxadd[2]{%
+\newcommand*\tud@unique@csxadd[2]{%
   \xifinlistcs{#2}{#1}{}{\listcsxadd{#1}{#2}}%
 }
 \providerobustcmd{\listeremove}[2]{%
@@ -319,7 +319,7 @@
       \def\tud@res@b{\listeremove\tud@todo@type@use}%
     }{%
       \let\tud@todo@type@use\@empty%
-      \def\tud@res@b{\tud@set@eadd\tud@todo@type@use}%
+      \def\tud@res@b{\tud@unique@eadd\tud@todo@type@use}%
     }%
     \let\tud@res@c\@empty%
     \@for\tud@res@a:=\tud@res@a\do{%
@@ -485,7 +485,7 @@
           }%
         \fi%
         \@onelevel@sanitize\tud@res@c%
-        \tud@set@csxadd{tud@trace@lbl@#1@list}{\tud@res@c}%
+        \tud@unique@csxadd{tud@trace@lbl@#1@list}{\tud@res@c}%
       \endgroup%
       \protected@eappto\tud@res@a{%
         ^^J\@spaces##1%
@@ -545,7 +545,7 @@
       \protected@edef\tud@res@a{#2}%
       \@onelevel@sanitize\tud@res@a%
       \wlog{+++++ markup #1\on@line\space+++++^^J\@spaces\tud@res@a}%
-      \tud@set@csxadd{tud@trace@markup@#1@list}{\tud@res@a}%
+      \tud@unique@csxadd{tud@trace@markup@#1@list}{\tud@res@a}%
     }%
   \endgroup%
 }
@@ -587,14 +587,14 @@
   \begingroup%
     \protected@edef\tud@res@a{#2}%
     \edef\tud@res@a{\detokenize\expandafter{\tud@res@a}}%
-    \tud@set@csxadd{#1@auxlist@positive}{\tud@res@a}%
+    \tud@unique@csxadd{#1@auxlist@positive}{\tud@res@a}%
   \endgroup%
 }
 \newcommand*\tud@auxlist@remove[2]{%
   \begingroup%
     \protected@edef\tud@res@a{#2}%
     \edef\tud@res@a{\detokenize\expandafter{\tud@res@a}}%
-    \tud@set@csxadd{#1@auxlist@negative}{\tud@res@a}%
+    \tud@unique@csxadd{#1@auxlist@negative}{\tud@res@a}%
   \endgroup%
 }
 \newcommand*\tud@auxlist@ifin[2]{%
@@ -741,32 +741,135 @@
 \TUD@UnwindPackage{hyperref}{\RequirePackage{microtype}[2013/05/23]}
 \newcommand*\tud@xdy@settings{}
 % TODO locale-Einstellung in Abhängigkeit der Hauptsprache! 
-\edef\tud@xdy@settings{texindy -M \@currname-ind.xdy -L german-din}
-\NewDocumentCommand\tud@xdy@make{s o m !O{\jobname}}{%
-  \protected@edef\tud@res@a{%
-    title={#3},%
-    columnsep=\noexpand\f@size\noexpand\p@,%
-    name={#4},%
-    options={\tud@xdy@settings\space-t \jobname-#4.xlg},%
-    \IfValueT{#2}{#2}%
-  }%
-  \expandafter\makeindex\expandafter[\tud@res@a]%
+\edef\tud@xdy@settings{texindy -M \@currname-index.xdy -L german-din}
+\newcommand*\tud@index@name{\jobname}
+\newcommand*\tud@index@title{\indexname}
+\newcommand*\tud@index@toc{\tud@index@title}
+\newcommand*\tud@index@cols{2}
+\newcommand*\tud@idx@list{}
+\NewDocumentCommand\tud@index@make{O{\jobname} D(){2} m}{%
+  \begingroup%
+    \def\tud@res@a##1{%
+      \addto@hook@expandafter\tud@toks@{%
+        \expandafter\def\expandafter##1\expandafter{##1}%
+      }%
+    }%
+    \edef\tud@index@name{#1}%
+    \edef\tud@index@cols{#2}%
+    \def\tud@index@title{#3}%
+    \tud@toks@{}%
+    \tud@res@a\tud@index@name%
+    \tud@res@a\tud@index@cols%
+    \tud@res@a\tud@index@title%
+    \edef\tud@res@a{%
+      \endgroup%
+      \noexpand\tud@unique@add\noexpand\tud@idx@list{\tud@index@name}%
+      \noexpand\csdef{tud@index@set@@#1}{\the\tud@toks@}%
+    }%
+  \tud@res@a%
   % TODO NewCrossIndex
 %  \expandafter\newcommand\expandafter*\csname tud@idx@cross@#4\endcsname{}%
 }
-%  \tud@xdy@make{Allgemeiner Index}%
-%  \tud@xdy@make*{Klassen- und Paketoptionen}[options]%
-%  \tud@xdy@make*{Befehle und Umgebungen mit zugeh\"origen Parametern}[macros]%
-%  \tud@xdy@make*{Sprachabh\"angige Bezeichner}[terms]%
-%  \tud@xdy@make*{Seitenstile, Schriftelemente und Farben}[elements]%
-%  \tud@xdy@make*{L\"angen und Z\"ahler}[misc]%
-%  \tud@xdy@make*{Klassen, Pakete und Dateien}[files]%
-%  \tud@xdy@make[columns=1]{\"Anderungsliste}[changelog]%
+\tud@index@make{Allgemeines}
+\tud@index@make[options]{Klassen- und Paketoptionen}
+\tud@index@make[macros]{Befehle und Umgebungen mit zugeh\"origen Parametern}
+\tud@index@make[terms]{Sprachabh\"angige Bezeichner}
+\tud@index@make[elements]{Seitenstile, Schriftelemente und Farben}
+\tud@index@make[misc]{L\"angen und Z\"ahler}
+\tud@index@make[files]{Klassen, Pakete und Dateien}
+\newcommand*\tud@chg@list{}
+\NewDocumentCommand\tud@changes@make{m}{%
+  \tud@unique@add\tud@chg@list{#1}%
+  \tud@unique@add\tud@idx@list{changes-#1}%
+}
+\tud@changes@make{v2.00}
+\tud@changes@make{v2.01}
+\tud@changes@make{v2.02}
+\tud@changes@make{v2.03}
+\tud@changes@make{v2.04}
+\tud@changes@make{v2.05}
+\tud@changes@make{v2.06}
+\tud@changes@make{v2.07}
 \let\index\@gobbleopt@one%
 \let\makeindex\@empty
 \@onlypreamble\makeindex
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\RequirePackage{multicol}
+\newcommand*\tud@index@prologue{}%
+\newcommand*\tud@idx@vskip{%
+%  \ifnum\tud@index@cols>\@ne\relax\vspace{-\multicolsep}\fi%
+}
+\DeclareDocumentCommand\tud@idx@item{m}{%
+  \par%
+  \hspace*{\dimexpr\numexpr#1\relax em\relax}%
+  \hangindent=\dimexpr\numexpr#1+3\relax em\relax%
+  \ifnum#1>\z@\relax\penalty\@lowpenalty\relax\fi%
+}%
+\newcommand*\tud@index@hook{}
+%\RenewDocumentEnvironment{theindex}{+b}{
+\renewenvironment{theindex}{%
+  \def\lettergroup##1{\minisec{##1}}%
+  \def\item{\tud@idx@item{0}}%
+  \def\subitem{\tud@idx@item{1}}%
+  \def\subsubitem{\tud@idx@item{2}}%
+  \def\subsubsubitem{\tud@idx@item{3}}%
+  \def\indexspace{\par\vskip2ex\@plus2ex\@minus1ex\relax}%
+  \tud@index@hook%
+  \edef\tud@res@a{%
+%    \ifnum\tud@index@cols>\@ne\relax%
+      \noexpand\addsec[\noexpand\tud@index@toc]{%
+        \noexpand\tud@index@title%
+        \noexpand\label{idx:\tud@index@name}%
+        % TODO NewCrossIndex
+  %          \expandonce\tud@idx@cross%
+      }%
+      \noexpand\markdouble{\noexpand\indexname: \noexpand\tud@index@title}%
+      \ifx\tud@index@prologue\relax\else%
+        \unexpanded{\tud@index@prologue\par\tud@idx@vskip}%
+      \fi%
+%    \else%
+%      % URGENT mit Änderungsliste für jede version ersetzen
+%      \noexpand\addchap{%
+%        \noexpand\tud@index@title%
+%        \noexpand\label{idx:\tud@index@name}%
+%      }%
+%    \fi%
+  }%
+  \ifnum\tud@index@cols>\@ne\relax%
+    \setlength\columnsep{\f@size\p@}%
+    \setlength\columnseprule{\z@}%
+    \begin{multicols}{\tud@index@cols}[\tud@res@a]%
+%    #1%
+%    \end{multicols}%
+  \else%
+    \tud@res@a
+    %#1%
+  \fi%
+  \setparsizes{\z@}{\z@\@plus.1\baselineskip}{\z@\@plus1fil}%
+  \par@updaterelative%
+  \tud@raggedright%
+}{%
+  \ifnum\tud@index@cols>\@ne\end{multicols}\fi%
+}
+\NewDocumentCommand\tud@index@print{!O{\jobname} !+d()}{%
+  \IfFileExists{\jobname-#1.ind}{%
+    \pagebreak[3]%
+    % TODO NewCrossIndex
+%    \letcs\tud@idx@cross{tud@idx@cross@#1}%
+    \let\tud@index@prologue\relax%
+    \IfValueT{#2}{\def\tud@index@prologue{#2}}%
+    \csuse{tud@index@set@@#1}%
+    \@input@{\jobname-#1.ind}
+    \tud@idx@vskip%
+  }{%
+    \ClassWarning{tudscrmanual}%
+    {%
+      No processed index file found,\MessageBreak%
+      `\jobname-#1.ind' does not exist%
+    }%
+  }%
+}
 \newcommand*\tud@idx@mdf{}
-\newcommand*\tud@idx@label{}
 \if@filesw
   \newwrite\@indexfile%
   \immediate\openout\@indexfile=\jobname.idx%
@@ -779,14 +882,10 @@
   }%
   \def\@index[#1]#2{%
     % URGENT mit Liste aus tud@makeindex abgleichen
-%    \@ifundefined{#1@idxfile}{%
-%      \ClassWarning{tudscrmanual}{Undefined index file `#1'}%
-%    }{%
-      \begingroup%
-        \@sanitize%
-        \protected@write\@indexfile{}{\string\indexentry[#1]{#2}{\thepage}}%
-      \endgroup%
-%    }%
+    \xifinlist{#1}{\tud@idx@list}{}{%
+      \ClassWarning{tudscrmanual}{Undefined index `#1'}%
+    }%
+    \protected@write\@indexfile{\@sanitize}{\string\indexentry[#1]{#2}{\thepage}}%
     \@esphack%
   }%
   \BeforeClosingMainAux{%
@@ -819,92 +918,8 @@
     \fi%
     \immediate\write\@mainaux{\string\gdef\string\tud@idx@mdf{\tud@res@a}}%
   }%
-\fi%
-\AtBeginDocument{%
-%  \PassOptionsToPackage{xindy,splitindex}{imakeidx}%
-%  \RequirePackage{imakeidx}[2016/10/15]%
-%  \indexsetup{%
-%    level=\addsec,%
-%    noclearpage,firstpagestyle=headings,headers={\indexname}{\indexname},%
-%    othercode={%
-%      \def\lettergroup##1{\minisec{##1}}%
-%      \DeclareDocumentCommand\tud@idxitem{s m}{%
-%        \par%
-%        \hspace*{\dimexpr\numexpr##2\relax em\relax}%
-%        \hangindent=\dimexpr\numexpr##2+3\relax em\relax%
-%        \IfBooleanT{##1}{\penalty\@lowpenalty}%
-%      }%
-%      \def\item{\tud@idxitem{0}}%
-%      \def\subitem{\tud@idxitem*{1}}%
-%      \def\subsubitem{\tud@idxitem*{2}}%
-%      \def\subsubsubitem{\tud@idxitem*{3}}%
-%%      \ifundef{\indexspace}{%
-%%        \let\indexspace\relax%
-%%      }{%
-%        \renewcommand*\indexspace{\par\vskip1em\@plus2ex\@minus1ex\relax}%
-%%      }%
-%    }%
-%  }%
-%  \ifimki@original\else%
-%    \CheckCommand\theindex{%
-%      \imki@maybeaddtotoc
-%      \imki@indexlevel{\indexname}\imki@indexheaders
-%      \thispagestyle{\imki@firstpagestyle}%
-%      \ifnum\imki@columns>\@ne
-%        \columnsep \imki@columnsep
-%        \ifx\imki@idxprologue\relax
-%          \begin{multicols}{\imki@columns}
-%        \else
-%          \begin{multicols}{\imki@columns}[\imki@idxprologue]
-%        \fi
-%      \else
-%        \imki@idxprologue
-%      \fi
-%      \global\let\imki@idxprologue\relax
-%      \parindent\z@
-%      \parskip\z@ \@plus .3\p@\relax
-%      \columnseprule \ifKV@imki@columnseprule.4\p@\else\z@\fi
-%      \raggedright
-%      \let\item\@idxitem
-%      \imki@othercode%
-%    }%
-%    \patchcmd\theindex{%
-%      \imki@indexlevel{\indexname}\imki@indexheaders%
-%    }{%
-%      \imki@indexheaders%
-%    }{}{\tud@patch@wrn{theindex}}%
-%    \patchcmd\theindex{%
-%      \ifnum\imki@columns>\@ne
-%        \columnsep \imki@columnsep
-%        \ifx\imki@idxprologue\relax
-%          \begin{multicols}{\imki@columns}
-%        \else
-%          \begin{multicols}{\imki@columns}[\imki@idxprologue]
-%        \fi
-%      \else
-%        \imki@idxprologue
-%      \fi
-%    }{%
-%      \edef\tud@res@a{%
-%        \noexpand\imki@indexlevel{%
-%          \noexpand\indexname%
-%          \ifx\tud@idx@label\@empty\else%
-%            \noexpand\label{\tud@idx@label}%
-%          \fi%
-%          % TODO NewCrossIndex
-%%          \expandonce\tud@idx@cross%
-%        }\ifx\imki@idxprologue\relax\else\noexpand\imki@idxprologue\fi%
-%      }%
-%      \ifnum\imki@columns>\@ne\relax%
-%        \columnsep \imki@columnsep%
-%          \begin{multicols}{\imki@columns}[\tud@res@a]%
-%      \else%
-%        \tud@res@a%
-%      \fi%
-%      \global\let\tud@idx@label\@empty%
-%    }{}{\tud@patch@wrn{theindex}}%
-%  \fi%
-}
+\fi
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newcommand*\tud@markup@list{}
 \NewDocumentCommand\Markup@Format@Set{m m O{} r() d<> m r|| m}{%
   \expandafter\newcommand\csname Markup@Format@@Level@@#1\endcsname{}%
@@ -924,8 +939,8 @@
     \csdef{Markup@Format@@SpecialLink@@#1}{#5}%
   }%
   \expandafter\newcommand\csname Markup@Format@@Index@@#1\endcsname{}%
-  % TODO indexprefix
   \csdef{Markup@Format@@Index@@#1}{#6}%
+  % TODO indexprefix
   \Markup@Suffix@Format@Set{#1}{#7}{\suffix{#8}}%
 }
 \@onlypreamble\Markup@Format@Set
@@ -1485,7 +1500,7 @@
       \else%
         \edef\tud@res@a{%
           \unexpanded{%
-            \def\tud@res@a##1##2{\tud@set@eadd##1{\detokenize{##2}}}%
+            \def\tud@res@a##1##2{\tud@unique@eadd##1{\detokenize{##2}}}%
             \let\tud@res@b\@empty%
             \let\tud@res@c\@empty%
           }%
@@ -2716,7 +2731,7 @@
           \tud@res@a%
           \tud@auxlist@add{tud@lbl@alias}{\tud@res@a}%
           \tud@auxlist@ifin{\tud@res@a}{tud@lbl@alias}{%
-            \tud@set@eadd\tud@res@b{\expandonce\tud@res@a}%
+            \tud@unique@eadd\tud@res@b{\expandonce\tud@res@a}%
           }{}%
         \fi%
       }%
@@ -2932,8 +2947,8 @@
     }%
     \edef\tud@lbl@tmp{sec:obsolete:\tud@changes@version}%
     \edef\tud@res@b{%
-      \noexpand\index[changelog]{%
-        \tud@changes@version!Allgemein@Allgemein:\space%
+      \noexpand\index[changes-\tud@changes@version]{%
+        Allgemein@Allgemein:\space%
         \noexpand\hyperref[\tud@lbl@tmp]{%
           \unexpanded{\"Anderungen gegen\"uber der vorhergehenden Version}%
         }%
@@ -3637,10 +3652,10 @@
   %  ;;(merge-to "default" "declare")
   %  ;;(merge-to "default" "important")
     \protected@edef\tud@res@a{#1}%
-    \def\tud@res@c{declare}%
+    \def\tud@res@b{declare}%
     \@tud@res@swatrue%
     \ifcase\tud@absnum\tud@declare@mode@num\relax\relax%
-      \IfValueTF{#3}{\def\tud@res@c{#3}}{\let\tud@res@c\@empty}%
+      \IfValueTF{#3}{\def\tud@res@b{#3}}{\let\tud@res@b\@empty}%
     \or%
       \ifnum\tud@declare@mode@num<\z@\relax%
         \tud@index@mode@num=\thr@@%
@@ -3656,14 +3671,15 @@
     \fi%
     \if@tud@res@swa%
       \ifcase\tud@index@mode@num\relax\or\or%
-        \preto\tud@res@c{(}%
+        \preto\tud@res@b{(}%
       \or%
-        \appto\tud@res@c{)}%
+        \appto\tud@res@b{)}%
       \fi%
     % TODO split an "!" und jeden Eintrag auch verwenden?
     %      falls ja, nur wenn \tud@declare@mode@num>\z@?
-      \letcs\tud@res@b{Markup@Format@@Index@@#2}%
-      \index[\tud@res@b]{\tud@res@a\ifx\tud@res@c\@empty\else|\tud@res@c\fi}%
+      \index[\csuse{Markup@Format@@Index@@#2}]{%
+        \tud@res@a\ifx\tud@res@b\@empty\else|\tud@res@b\fi%
+      }%
     \fi%
   \endgroup%
 }
@@ -3704,7 +3720,7 @@
 }
 % TODO NewCrossIndex: Schließen des Ausgabestreams durch imakeidx verhindern!
 % TODO danach mit |see kombinieren, um Refernezen zu bündeln
-%      \SeeIndex[Änderungsliste:changelog]{Änderungen}{Changelog,Version}
+%      \SeeIndex[Änderungsliste:changes]{Änderungen}{Changelog,Version}
 %      #2 erhält Eintrag auf Index #1; #3|see#2; Sternversion für seeunverified?
 \NewDocumentCommand\CrossIndex{m o m}{%
   \begingroup%
@@ -3728,19 +3744,9 @@
     \forcsvlist{\tud@res@a}{#1}%
   \endgroup%
 }
-%\AfterReadingMainAux{%
-%  \if@filesw%
-%    \immediate\closeout\@indexfile%
-%    \ifnum\pdf@strcmp{\pdf@filemdfivesum{\jobname.idx}}{\tud@idx@mdf}=\z@\else%
-%      \ClassWarningNoLine{tudscrmanual}{%
-%        The index file `\jobname.idx' has changed. Run again\MessageBreak%
-%        with --shell-escape flag enabled%
-%      }%
-%    \fi%
-%  \fi%
-%}
 \newcommand*\PrintIndex{%
   \begingroup%
+    \cleardoublepage%
     \tud@index@mode@num=\m@ne%
     \setchapterpreamble{%
       \begin{abstract}%
@@ -3764,8 +3770,8 @@
         kein Hyperlink verf\"ugbar.%
       \end{abstract}%
     }%
-    \addchap{\indexname}%
-    \tud@print@index%
+    \addchap{\indexname\label{idx:index}}%
+    \tud@index@print%
     (%
       Die im Folgenden aufgelisteten Schlagworte sollen f\"ur den Umgang mit %
       \hologo{LaTeXe} im Allgemeinen sowie dem \TUDScript-Bundle im Speziellen %
@@ -3776,13 +3782,13 @@
       sein, um weitere Hilfe zu erhalten.%
     )%
     \clearpage%
-    \tud@print@index[options]%
+    \tud@index@print[options]%
     (%
       Dies ist der Index aller im Handbuch erl\"auterten sowie erw\"ahnten %
       Optionen, wobei bei den meisten auch Untereintr\"age mit Seitenangaben %
       f\"ur spezielle Wertzuweisungen existieren.%
     )%
-    \tud@print@index[macros]%
+    \tud@index@print[macros]%
     (%
       Dies ist eine Auflistung aller zuvor erl\"auterten sowie erw\"ahnten %
       Befehle und Umgebungen. Bei einigen sind zus\"atzliche Untereintr\"age %
@@ -3790,45 +3796,16 @@
       der jeweiligen Anweisung verwendet werden k\"onnen. Gegebenenfalls sind %
       auch explizite Wertzuweisungen an diese Parameter angegeben.%
     )%
-    \tud@print@index[terms]%
+    \tud@index@print[terms]%
     (%
       Dies sind die von \TUDScript definierten respektive erw\"ahnten, %
       sprachabh\"angigen Bezeichner. Informationen zu Nutzung und %
       Anpassungsm\"oglichkeiten sind in \autoref{sec:localization} zu finden.%
     )%
-    \tud@print@index[elements]%
-    \tud@print@index[misc]%
-    \tud@print@index[files]%
+    \tud@index@print[elements]%
+    \tud@index@print[misc]%
+    \tud@index@print[files]%
   \endgroup%
-}
-\newcommand*\tud@idx@vskip{%
-  \ifnum\imki@columns>\@ne\relax\vspace{-\multicolsep}\fi%
-}
-\NewDocumentCommand\tud@print@index{!O{\jobname} !+d()}{%
-  \IfFileExists{\jobname-#1.idx}{%
-    \pagebreak[3]%
-    \def\tud@idx@label{idx:#1}%
-    % TODO NewCrossIndex
-%    \letcs\tud@idx@cross{tud@idx@cross@#1}%
-    \IfValueT{#2}{\indexprologue{#2\tud@idx@vskip}}%
-    \printindex[{#1}]%
-    % TODO in \tud@xdy@make erledigen
-    \IfFileExists{\jobname-#1.ind}{}{%
-      \ClassWarning{tudscrmanual}%
-      {%
-        No processed index file found,\MessageBreak%
-        `\jobname-#1.ind' does not exist%
-      }%
-%      \immediate\write\@mainaux{\string\gdef\string\tud@idx@mdf{}}%
-    }%
-    \tud@idx@vskip%
-  }{%
-    \ClassWarning{tudscrmanual}%
-    {%
-      No index entries found, index file\MessageBreak%
-      `\jobname-#1.idx' does not exist%
-    }%
-  }%
 }
 % TODO d<> in Ordnung oder besser einfach o?
 \NewDocumentCommand\ChangedAt{s d<> m}{%
@@ -3878,7 +3855,7 @@
         \appto\tud@res@b{%
           \ignorespaces%
           \normalfont\normalsize%
-          \hyperref[{idx:changelog:##1}]{##1}%
+          \hyperref[{idx:changes-##1}]{##1}%
           \tabularnewline%
         }%
       }%
@@ -3951,45 +3928,28 @@
       \listxadd\tud@chg@entry@list{\the\tud@toks@}%
     \fi%
     \IfBooleanF{#4}{%
-      \tud@set@xadd\tud@chg@version@list{\tud@res@a}%
+      \tud@unique@xadd\tud@chg@version@list{\tud@res@a}%
     }%
   \endgroup%
 }
-\newcommand*\PrintChangelog{%
+\newcommand*\PrintChanges{%
   \begingroup%
+    \cleardoublepage%
     \tud@index@mode@num=-2%
-    \apptocmd\theindex{%
-      % TODO neuer Stil tudscrmanual-gls.xdy oder tudscrmanual-clg.xdy
-      % oder tudscrmanual-changelog.xdy [und tudscrmanual-index.xdy]
-      % tudscrdoc beachten
-      % ebenen neu arangieren; abstände zwischen items; entity oberste ebene?
+    \def\indexname{\"Anderungsliste}%
+    \addchap{\indexname\label{idx:changes}}%
+    \appto\tud@index@hook{%
+      \def\tud@index@cols{\@ne}%
       \let\lettergroup\@gobble%
-      \let\subsubsubsubitem\subsubsubitem%
-      \let\subsubsubitem\subsubitem%
-      \let\subsubitem\subitem%
-      \let\subitem\item%
-      \renewcommand*\item{%
-        \begingroup%
-          \escapechar=`\\%
-          \catcode\endlinechar=\active%
-          \csname\string\item\endcsname%
-      }%
-      \begingroup%
-      \escapechar=`\\%
-      \lccode`\~=\endlinechar%
-      \lowercase{%
-        \expandafter\endgroup%
-        \expandafter\def\csname\string\item\endcsname##1~%
-      }{%
-        \endgroup%
-        \addsec[{##1}]{\TUDScript##1\label{idx:changelog:##1}}%
-        \def\tud@res@a{\indexname:\space\TUDScript##1}%
-        \@mkboth{\tud@res@a}{\tud@res@a}%
-      }%
-    }{}{\tud@patch@wrn{theindex}}%
-    \clearpage%
-    \def\imki@indexlevel{\addchap}%
-    \tud@print@index[changelog]%
+      \let\indexspace\relax%
+    }%
+    \def\do##1{%
+      \def\tud@index@title{\TUDScript##1}%
+      \def\tud@index@toc{##1}%
+      \def\tud@index@name{changes-##1}%
+      \tud@index@print[\tud@index@name]%
+    }%
+    \dolistloop{\tud@chg@list}%
   \endgroup%
 }
 % TODO #3<->#4
@@ -4031,7 +3991,7 @@
       }%
       \expandafter\tud@res@c\ProcessedArgument%
       \the\tud@toks@%
-      \index[changelog]{#3!Implementierung\tud@res@a!\tud@res@c}%
+       \index[changes-#3]{Implementierung\tud@res@a!\tud@res@c}%
     }{%
       \tud@if@strequal{#4}{!new!}{%
         \def\tud@res@b{neuer Bestandteil von \TUDScript}%
@@ -4065,7 +4025,7 @@
         \fi%
       }%
       \edef\tud@res@b{\detokenize\expandafter{\tud@res@b}}%
-      \index[changelog]{#3!Allgemein\tud@res@a!\tud@res@b}%
+       \index[changes-#3]{Allgemein\tud@res@a!\tud@res@b}%
     }%
   \endgroup%
 }
@@ -4665,7 +4625,9 @@
   \fi%
   \ignorespaces%
 }
-\newcommand*\ListOfToDo{\ifnum\tud@todo@num>\z@\relax\clearpage\listoftodos\fi}
+\newcommand*\ListOfToDo{%
+  \ifnum\tud@todo@num>\z@\relax\cleardoublepage\listoftodos\fi%
+}
 \newcommand*\tud@v@validate[1]{%
   \begingroup%
     \protected@edef\tud@res@a{#1}%
@@ -5050,13 +5012,8 @@
 %%%% From File: tudscr-texindy.dtx 2019/11/29 01:36:52 c9a9b7b
 \begingroup
 \tud@newwrite\tud@write@xdy
-\tud@newif\if@tud@xdy@glo
-% TODO create \@currname-gls.xdy für Änderungsliste
-% use markup-indexentry :open and :close
-\newcommand*\tud@xdy@create[2][theindex]{%
-  \IfFileExists{\@currname-#2.xdy}{}{%
-  \Ifstr{#1}{theglossary}{\@tud@xdy@glotrue}{\@tud@xdy@glofalse}%
-  \openout\tud@write@xdy=\@currname-#2.xdy\relax%
+\IfFileExists{\@currname-index.xdy}{}{%
+  \openout\tud@write@xdy=\@currname-index.xdy\relax%
   \write\tud@write@xdy{(require "texindy.xdy")}%
   \write\tud@write@xdy{%
     (define-location-class^^J%
@@ -5163,9 +5120,7 @@
     )%
   }%
   \closeout\tud@write@xdy%
-  }%
 }
-\tud@xdy@create{ind}
 \endgroup
 \endinput
 %%
