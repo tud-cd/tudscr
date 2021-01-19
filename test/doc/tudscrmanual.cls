@@ -789,8 +789,7 @@
 \tud@index@make[files]{Klassen, Pakete und Dateien}
 \newcommand*\tud@changes@list{}
 \NewDocumentCommand\tud@changes@make{m}{%
-  \tud@unique@add\tud@changes@list{#1}%
-  \tud@unique@add\tud@index@list{changes-#1}%
+  \tud@unique@add\tud@changes@list{changes-#1}%
 }
 \tud@changes@make{v2.00}
 \tud@changes@make{v2.01}
@@ -800,7 +799,7 @@
 \tud@changes@make{v2.05}
 \tud@changes@make{v2.06}
 \tud@changes@make{v2.07}
-\let\index\@gobbleopt@one%
+\let\index\@gobbleopt@one
 \let\makeindex\@empty
 \@onlypreamble\makeindex
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -815,7 +814,7 @@
   \vskip\glueexpr1#1\@plus1#1\@minus.5#1\relax%
 }
 \newcommand*\tud@index@hook{}
-\RenewDocumentEnvironment{theindex}{+b}{
+\RenewDocumentEnvironment{theindex}{+b}{%
   \def\lettergroup##1{\minisec{##1}}%
   \def\item{\tud@index@item{0}}%
   \def\subitem{\tud@index@item{1}}%
@@ -861,7 +860,7 @@
       \let\tud@index@prologue\relax%
     }%
     \csuse{tud@index@set@@#1}%
-    \@input@{\jobname-#1.ind}
+    \@input@{\jobname-#1.ind}%
   }{%
     \ClassWarning{tudscrmanual}%
     {%
@@ -883,7 +882,9 @@
   }%
   \def\@index[#1]#2{%
     \xifinlist{#1}{\tud@index@list}{}{%
-      \ClassWarning{tudscrmanual}{Index `#1' was never defined}%
+      \xifinlist{#1}{\tud@changes@list}{}{%
+        \ClassWarning{tudscrmanual}{Index `#1' was never defined}%
+      }%
     }%
     \protected@write\@indexfile{\@sanitize}{%
       \string\indexentry[#1]{#2}{\thepage}%
@@ -924,7 +925,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newcommand*\tud@markup@list{}
 % r'' : dlicn -> declare, inline, index, changelog, normal text
-\NewDocumentCommand\Markup@Format@Set{m r() O{} r|| r'' m}{%
+\NewDocumentCommand\Markup@Format@Set{m r() O{} d|| r'' m}{%
   \tud@toks@{{#1}{{#2{#3##1\IfValueT{##2}{=##2}}}\IfValueT{##3}{##3}}}%
   \ifcsundef{Markup@Format@@Inline@@#1}{%
     \expandafter\Markup@Inline@Format@Set\the\tud@toks@%
@@ -935,8 +936,10 @@
   \ifcsundef{Markup@Format@@InlineDeclare@@#1}{%
     \expandafter\Markup@InlineDeclare@Format@Set\the\tud@toks@%
   }{}%
-  \expandafter\newcommand\csname Markup@Format@@Index@@#1\endcsname{}%
-  \csdef{Markup@Format@@Index@@#1}{#4}%
+  \IfValueT{#4}{%
+    \expandafter\newcommand\csname Markup@Format@@Index@@#1\endcsname{}%
+    \csdef{Markup@Format@@Index@@#1}{#4}%
+  }%
   % TODO indexprefix
   \Markup@Suffix@Format@Set{#1}{#5}{\suffix{#6}}%
 }
@@ -1091,16 +1094,40 @@
     }%
   \tud@res@d%
 }
-% TODO idx=true>\jobname, idx=false>kein index, idx=...>\tud@markup@idxname
-% TODO idx=true!Distribution
-\newcommand*\tud@markup@idxname{\jobname}
+\newcommand*\tud@markup@idx{\jobname}
 \TUD@key[.markup]{idx}[true]{%
-%  \TUD@set@ifkey{idx}{@tud@markup@idxname}{#1}%
-%  \ifx\FamilyKeyState\FamilyKeyStateProcessed\else%
-    % TODO validate idxname
-    \def\tud@markup@idxname{#1}%
-    \FamilyKeyStateProcessed%
-%  \fi%
+  \begingroup%
+    \def\tud@res@b{\endgroup}%
+    \def\tud@res@a##1:##2:##3\@nil{%
+      \undef\tud@markup@idx%
+      \TUD@set@ifkey{idx}{@tempswa}{##1}%
+      \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+        \if@tempswa%
+          \def\tud@markup@idx{\jobname}%
+        \fi%
+      \else%
+        \xifinlist{##1}{\tud@index@list}{%
+          \FamilyKeyStateProcessed%
+          \def\tud@markup@idx{##1}%
+        }{%
+          \ClassError{tudscrmanual}{Unknown index `##1'}{%
+            Index `##1' was never defined with \string\tud@index@make!%
+          }%
+        }%
+      \fi%
+      \protected@eappto\tud@res@b{%
+        \ifundef\tud@markup@idx{%
+          \unexpanded{\undef\tud@markup@idx}%
+        }{%
+          \unexpanded{\def\tud@markup@idx}{%
+            \expandonce\tud@markup@idx\IfArgIsEmpty{##2}{}{\unexpanded{:##2}}%
+          }%
+        }%
+        \expandonce\FamilyKeyState%
+      }%
+    }%
+    \tud@res@a#1::\@nil%
+  \tud@res@b%
 }
 \tud@newcount\tud@markup@type@num
 \TUD@key[.markup]{type}{%
@@ -1128,7 +1155,9 @@
     \addto@hook@expandafter\tud@toks@{\expandafter{\tud@res@d}}%
     \addto@hook\tud@toks@{(#4)}%
     \IfBooleanT{#1}{\addto@hook\tud@toks@{[\bsc]}}%
-    \addto@hook@expandafter\tud@toks@{\expandafter|\tud@markup@idxname|}%
+    \ifundef\tud@markup@idx{}{%
+      \addto@hook@expandafter\tud@toks@{\expandafter|\tud@markup@idx|}%
+    }%
     \addto@hook\tud@toks@{'#5'{#6}}%
     \eappto\tud@res@c{\the\tud@toks@}%
     \def\tud@res@b##1##2{%
@@ -1286,7 +1315,7 @@
       \tud@if@strblank{#2}{\@tud@res@swatrue}{}%
     }%
     \if@tud@res@swa%
-      \aftergroup\@firstoftwo
+      \aftergroup\@firstoftwo%
     \else%
       \IfBooleanF{#1}{%
         \protected@edef\tud@res@a{#2}%
@@ -1354,7 +1383,7 @@
           The given entity `\detokenize\expandafter{\tud@res@a}'\MessageBreak%
           can not be used here, %
           \ifx\tud@res@b\@empty%
-            no entities are valid.
+            no entities are valid.%
           \else%
             valid entities are:\MessageBreak%
             \tud@res@b%
@@ -1380,20 +1409,40 @@
     \fi%
   \endgroup%
 }
+\NewDocumentCommand\Process@Invalid@Argument{s m}{%
+  \ClassWarning{tudscrmanual}{%
+    Using \IfBooleanTF{#1}{starred markup}{declaration} with #2 is not possible%
+  }%
+}
 \NewDocumentCommand\Process@Markup{o m m d// d== o r|| r'' r()}{%
   \begingroup%
+    \@tud@res@swafalse%
+    \IfBooleanTF{#1}{%
+      \ifnum\tud@declare@mode@num=\z@\relax%
+        \@tud@res@swatrue%
+      \else%
+        \Process@Invalid@Argument*{a declaration}%
+      \fi%
+      \IfValueT{#7}{\Process@Invalid@Argument*{|#7|}}%
+      \IfValueT{#8}{\Process@Invalid@Argument*{'#8'}}%
+      \IfValueT{#9}{\Process@Invalid@Argument*{(#9)}}%
+    }{%
+      \ifnum\tud@declare@mode@num>\z@\relax%
+        \IfValueT{#7}{\IfArgIsEmpty{#7}{}{\Process@Invalid@Argument{|#7|}}}%
+        \IfValueT{#8}{\Process@Invalid@Argument{'#8'}}%
+      \fi%
+    }%
     \tud@idx@robustify%
     % PENDING ||''() überarbeiten/vereinheitlichen? wie default/NOOP?    
     \tud@toks@{\Process@@Markup[#1]{#2}{#3}/#4/=#5=[{#6}]}%
-    \IfBooleanTF{#1}{%
-      % TODO |\@nil| und (\@nil)?
-      % TODO ist \tud@ety@gnrl sinnvoll? \@nil? doch lieber suchen?
-      \addto@hook\tud@toks@{||'\@nil'(\tud@ety@gnrl)}%
-    }{%
+    \if@tud@res@swa%
+      % TODO |\@nil|
+      \addto@hook\tud@toks@{||'\@nil'(\@nil)}%
+    \else%
       \addto@hook\tud@toks@{|#7|'#8'}%
       \Entity@Get\tud@res@a(#9){#2}{#3}%
       \addto@hook@expandafter\tud@toks@{\expandafter(\tud@res@a)}%
-    }%
+    \fi%
     \edef\tud@res@a{%
       \endgroup%
       \the\tud@toks@%
@@ -1576,30 +1625,6 @@
       \noexpand\Process@Output{\if@tud@markup@output\expandonce\tud@res@a\fi}%
     }%
   \tud@res@a%
-% PENDING Warnungen prüfen und verteilen
-  \IfBooleanT{#1}{%
-    \ifnum\tud@declare@mode@num>\z@\relax%
-      \ClassWarning{tudscrmanual}{%
-        Using starred markup within a declaration is inept%
-      }%
-    \fi%
-  }%
-%  \IfBooleanTF{#7}{%
-%    \IfValueT{#8}{%
-%      \ClassWarning{tudscrmanual}{%
-%        Using `\detokenize\expandafter{\@backslashchar#2*}'\MessageBreak%
-%        means, no index entry is created. The optional\MessageBreak%
-%        indexing format |#8| means nothing%
-%      }%
-%    }%
-%  }
-%      \IfValueT{#7}{%
-%        \ClassWarning{tudscrmanual}{%
-%          It is not possible to use any indexing format\MessageBreak%
-%          |#7| within a declaration%
-%        }%
-%      }%
-%
 }
 % TODO \Process@@@Markup auflösen in \Process@[@]Index [und \Process@Declare?]
 \NewDocumentCommand\Process@@@Markup{m m d// d== o r|| r'' r() r<>}{%
@@ -1615,7 +1640,7 @@
     }%
   \fi%
 }
-% TODO rename to Process@Output@...
+% TODO rename to Process@Output@..., r|| raus?
 \NewDocumentCommand\Markup@Output@Get{m m m r// r== r[] r|| r'' r()}{%
   \begingroup%
     \tud@refnum@get\tud@res@a'#8'%
@@ -1898,44 +1923,43 @@
   \tud@res@a%
 }
 \BeforeStartingTOC{\let\Process@Markup\Process@Simple@Markup}
-\NewDocumentCommand\Markup@@Replace{}{}
-% TODO \tud@toks@ anstelle von \ProcessedArgument
-\NewDocumentCommand\Markup@@@Replace{m m m m}{%
-  \tud@if@nil{#3}{%
-    \def\ProcessedArgument{\@nil}%
-  }{%
-    \def\ProcessedArgument{#4}%
-    \IfValueT{#3}{%
-      \IfBooleanTF{#1}{%
-        \IfValueF{#4}{\def\ProcessedArgument{#3}}%
-      }{%
-        \def\ProcessedArgument{#3}%
+\NewDocumentCommand\Markup@@Replace{m m m m}{%
+  \begingroup%
+    \tud@if@nil{#3}{%
+      \def\tud@res@a{\@nil}%
+    }{%
+      \def\tud@res@a{#4}%
+      \IfValueT{#3}{%
+        \IfBooleanTF{#1}{%
+          \IfValueF{#4}{\def\tud@res@a{#3}}%
+        }{%
+          \def\tud@res@a{#3}%
+        }%
       }%
     }%
-  }%
-  \edef\ProcessedArgument{%
-    \@firstoftwo#2\expandonce\ProcessedArgument\@secondoftwo#2%
-  }%
+    \edef\tud@res@a{%
+      \endgroup%
+      \unexpanded{\addto@hook\tud@toks@}{%
+        \@firstoftwo#2\expandonce\tud@res@a\@secondoftwo#2%
+      }%
+    }%
+  \tud@res@a%
 }
 \NewDocumentCommand\Markup@Replace{s m d== d|| d'' m}{%
   \begingroup%
-    % URGENT was passiert hier, warum die redefinition?
+    \protected@edef\tud@res@a{#6}%
     \GetDocumentCommandArgSpec\Process@Markup% o m m d// d== o r|| r'' r()
-    \expandafter\RenewDocumentCommand\expandafter\Markup@@Replace\expandafter{%
+    \expandafter\DeclareDocumentCommand\expandafter\tud@res@b\expandafter{%
       \ArgumentSpecification%
     }{%
-      % TODO \tud@res@a anstelle von \tud@toks@
       \tud@toks@{[{##1}]{##2}{##3}/##4/}%
-      \Markup@@@Replace{#1}{==}{#3}{##5}%
-      \addto@hook@expandafter\tud@toks@{\ProcessedArgument}%
+      \Markup@@Replace{#1}{==}{#3}{##5}%
       \addto@hook\tud@toks@{[{##6}]}%
-      \Markup@@@Replace{#1}{||}{#4}{##7}%
-      \addto@hook@expandafter\tud@toks@{\ProcessedArgument}%
-      \Markup@@@Replace{#1}{''}{#5}{##8}%
-      \addto@hook@expandafter\tud@toks@{\ProcessedArgument}%
+      \Markup@@Replace{#1}{||}{#4}{##7}%
+      \Markup@@Replace{#1}{''}{#5}{##8}%
       \addto@hook\tud@toks@{(##9)}%
     }%
-    \expandafter\Markup@@Replace#6%
+    \expandafter\tud@res@b\tud@res@a%
     \edef\tud@res@a{%
       \endgroup%
       \unexpanded{\def#2}{\the\tud@toks@}%
@@ -2028,7 +2052,7 @@
       \endgroup%
       \unexpanded{\def#2}{\expandonce\tud@res@a}%
     }%
-  \tud@res@a
+  \tud@res@a%
 }
 \NewDocumentCommand\Markup@Split@@Get{m m}{%
   \begingroup%
@@ -2057,16 +2081,41 @@
 }
 \@onlypreamble\tud@ety@declare
 \RequirePackage{hologo}[2012/04/26]
-\NewDocumentCommand\Path{>{\AP@Underscore}m}{\mbox{\texttt{#1}}}
-\NewMarkupCommand\Application[lvl=0](\textsbi){Anwendungssoftware}
-% TODO wie mit IndexPrefix umgehen?
-\NewMarkupCommand\Distribution[lvl=0](\textsbn){Distribution}
+\newrobustcmd*\DistributionGeneral{%
+  \hologo{LaTeX}\penalty\@M-\hskip\z@skip Distribution\xspace%
+}
+\NewMarkupCommand\Distribution[%
+%  lvl=0,idx=true:Distribution%
+  lvl=0,idx=true:{LaTeX-Distribution}@{\DistributionGeneral}%
+](\textsbn){Distribution}
+\index{Distribution|seeunverified{\DistributionGeneral}}%
+\NewDocumentCommand\DistributionGeneral@IndexEntry{m}{%
+  \ifnum\tud@index@mode@num<\@ne\relax\else%
+    \IfArgIsEmpty{#1}{}{%
+      \index{{LaTeX-Distribution}@\DistributionGeneral\IfValueT{#1}{|#1}}%
+    }%
+  \fi%
+}
+\NewDocumentCommand\TeXLive{!t' !d|| !d''}{%
+  \Distribution|#2|'#3'{\hologo{TeX}~Live\IfBooleanT{#1}{~Portable}}%
+  \DistributionGeneral@IndexEntry{#2}\xspace%
+}
+\index{{TeX Live}@{\TeXLive}|seeunverified{\DistributionGeneral}}%
+\NewDocumentCommand\MacTeX{!t' !d|| !d''}{%
+  \Distribution|#2|'#3'{Mac\hologo{TeX}\IfBooleanT{#1}{~Portable}}%
+  \DistributionGeneral@IndexEntry{#2}\xspace%
+}
+\index{{MacTeX}@{\MacTeX}|seeunverified{\DistributionGeneral}}%
+\NewDocumentCommand\MiKTeX{!t' !d|| !d''}{%
+  \Distribution|#2|'#3'{\hologo{MiKTeX}\IfBooleanT{#1}{~Portable}}%
+  \DistributionGeneral@IndexEntry{#2}\xspace%
+}
+\index{{MiKTeX}@{\MiKTeX}|seeunverified{\DistributionGeneral}}%
 \NewMarkupCommand\Format[lvl=1](\sbnfont\hologo){Textsatzsystem}
-% TODO direkten Indexeintrag unterbinden
-\NewMarkupCommand\Bundle[lvl=1](\textsbn){Bundle}
-% TODO \idxsuffix unterdrücken?
+\NewMarkupCommand\Bundle[lvl=1,idx=false](\textsbn){Bundle}
+% TODO \idxsuffix auf Bundle unterdrücken?
 \NewMarkupCommand\Class[lvl=2,idx=files](\textsbn){Klasse}
-% TODO \idxsuffix unterdrücke
+% TODO \idxsuffix auf Bundle unterdrücken?
 \NewMarkupCommand\Package[lvl=2,idx=files](\textsbn){Paket}
 \NewMarkupCommand\Option[idx=options,type=value]'c'{Option}
 \Markup@Declare@Format@Set{Environment}{%
@@ -2099,8 +2148,10 @@
 \NewMarkupCommand\PageStyle[idx=elements]'dic'{Seitenstil}
 \NewMarkupCommand\Font[idx=elements]'dic'{Schriftelement}
 \NewMarkupCommand\Color[idx=elements]'dic'{Farbe}
+\NewMarkupCommand\Application[lvl=0](\textsbi){Anwendungssoftware}
 \NewMarkupCommand\Tutorial[lvl=-2>0..1,idx=files](\textsbn){Tutorial}
 \NewMarkupCommand\File[lvl=-2>0..1,idx=files](\texttt)'c'{Datei}
+\NewDocumentCommand\Path{>{\AP@Underscore}m}{\mbox{\texttt{#1}}}
 % TODO auf \tud@ety@gnrl verzichten, einfach leer lassen?
 \newcommand*\tud@ety@gnrl{+general+}
 % TODO change to \Class{tudscr[-class|main]} oder ganz raus?
@@ -2199,7 +2250,7 @@
             }%
           }{}%
           \csxdef{\tud@res@a}{#2}%
-        \endgroup
+        \endgroup%
       }{%
         \ClassWarning{tudscrmanual}{%
           The given special link `#2' \MessageBreak%
@@ -2786,6 +2837,7 @@
 \TUD@key[.declare]{label}[true]{%
   \TUD@set@ifkey{label}{@tud@declare@label}{#1}%
 }
+% URGENT doppelte verwendung von \tud@index@mode@num auflösen
 \tud@newcount\tud@index@mode@num
 \tud@index@mode@num=\@ne%
 \TUD@key[.declare]{index}[true]{%
@@ -2829,12 +2881,6 @@
 }{%
   \tud@declare@end{#1}[index=false]%
 }
-% TODO Declaration': index=false, track=true/false?
-%\NewDocumentEnvironment{Declaration'}{m d() d<>}{%
-%  \tud@declare@start{#1}[track,index=false](#2)<#3>{see}%
-%}{%
-%  \tud@declare@end{#1}[index=false]%
-%}
 % TODO alle Änderungen zur vorherigen Version in separaten Teil der Liste?
 %      nach Implementierung, wie benennen?
 %      unterscheiden zwischen neu/geändert und entfernt?!
@@ -3263,23 +3309,6 @@
   \tud@declare@close{#1}[{#2}]%
   \ignorespaces%
 }
-% TODO überall interne Reihenfolge von () '' || in || '' () ändern
-% TODO validate #6; nur |!|, |?|, |.| und || gültig
-% TODO validate #7?
-%%      \unexpanded{%
-%%        \IfBooleanT{##1}{%
-%%          \IfValueT{##2}{%
-%%            \ClassWarning{tudscrmanual}{%
-%%              It's not possible to use both star and |##2|!%
-%%            }%
-%%          }%
-%%          \IfValueT{##3}{%
-%%            \ClassWarning{tudscrmanual}{%
-%%              It's not possible to use both star and '##3'!%
-%%            }%
-%%          }%
-%%        }%
-%%      }%
 \AfterPackage*{textcase}{%
   \newcommand*\tud@no@casechange[1]{\NoCaseChange{\the\toks@{#1}}}%
   \newcommand*\tud@nocasechange[1]{%
@@ -3360,6 +3389,7 @@
 \newcommand*\tud@lbl@parent{}
 \let\tud@lbl@parent\relax%
 % TODO |#3| \AP@Index für Auswertung > \tud@index@mode@num auswerten
+%       nur |!|, |?|, |.| und || gültig
 %      |type:suffix| für Änderung des Indexsuffix
 % TODO <#4> ist das jemals -NoValue-?
 \NewDocumentCommand\Process@Index{m r== r|| r<> m}{%
@@ -3370,8 +3400,10 @@
     \tud@if@strblank{#3}{\@tud@res@swafalse}{}%
     % TODO ENDE überarbeiten
     \if@tud@res@swa%
+      % TODO \tud@idx@get und \tud@idx@declare sollte immer erfolgen, auch wenn
+      % kein Index geschrieben wird!
       \tud@idx@get\tud@res@a<#4>{#5}%
-      \tud@idx@write{\tud@res@a}{#1}|#3|%
+      \tud@idx@write{#1}{\tud@res@a}|#3|%
       \ifnum\tud@declare@mode@num>\z@\relax%
         \def\tud@res@b##1{%
           \protected@write\@auxout{}{\string\tud@idx@declare{##1}{\tud@res@a}}%
@@ -3408,8 +3440,9 @@
     }%
   \tud@res@a%
 }
-\NewDocumentCommand\tud@idx@@get{o m m d// d== o d|| d'' r()}{%
 % TODO #6 bei Deklaration für index verwenden? suffix parameter nicht in index?
+% TODO #7 und #8 notwendig?
+\NewDocumentCommand\tud@idx@@get{o m m d// d== o d|| d'' r()}{%
 %\IfValueT{#6}{\typeout{?????????????????????? #6}}%
   \def\tud@res@c##1##2##3{%
     \tud@if@idx@exists{##1}{##2}{%
@@ -3449,9 +3482,6 @@
         \eappto\tud@idx@tmp{\expandonce\tud@res@b!}%
       }%
     }%
-    % URGENT übler Hack, muss in NewMarkupCommand -> \hologo{LaTeX}-Distribution
-    \tud@if@strequal{Distribution}{#2}{\preto\tud@idx@tmp{Distribution!}}{}%
-    % URGENT ENDE Hack
   \fi%
   \tud@toks@{\tud@idx@@@get}%
   \ifx\tud@idx@tmp\@empty%
@@ -3537,7 +3567,7 @@
   %  ;;(markup-attribute-group-list :sep ", ")
   %  ;;(merge-to "default" "declare")
   %  ;;(merge-to "default" "important")
-    \protected@edef\tud@res@a{#1}%
+    \protected@edef\tud@res@a{#2}%
     \def\tud@res@b{declare}%
     \@tud@res@swatrue%
     \ifcase\tud@absnum\tud@declare@mode@num\relax\relax%
@@ -3561,16 +3591,32 @@
       \or%
         \appto\tud@res@b{)}%
       \fi%
+      \ifcsdef{Markup@Format@@Index@@#1}{%
+        \edef\tud@res@c{%
+          \expandafter\expandafter\expandafter\noexpand%
+          \csname Markup@Format@@Index@@#1\endcsname%
+        }%
+        \def\tud@res@d##1:##2:##3\@nil{%
+          \def\tud@res@c{##1}%
+          \IfArgIsEmpty{##2}{}{\preto\tud@res@a{##2!}}%
+        }%
+        \expandafter\tud@res@d\tud@res@c::\@nil%
     % TODO split an "!" und jeden Eintrag auch verwenden?
     %      falls ja, nur wenn \tud@declare@mode@num>\z@?
-      \index[\csuse{Markup@Format@@Index@@#2}]{%
-        \tud@res@a\ifx\tud@res@b\@empty\else|\tud@res@b\fi%
+        \index[\tud@res@c]{\tud@res@a\ifx\tud@res@b\@empty\else|\tud@res@b\fi}%
+      }{%
+        \IfValueT{#3}{%
+          \edef\tud@res@a{\detokenize\expandafter{\@backslashchar#2}}%
+          \ClassWarning{tudscrmanual}{%
+            Markup command `\tud@res@a' was defined\MessageBreak%
+            without an index, |#3| is useless%
+          }%
+        }%
       }%
     \fi%
   \endgroup%
 }
-% TODO NewCrossIndex: Schließen des Ausgabestreams durch imakeidx verhindern!
-% TODO danach mit |see kombinieren, um Refernezen zu bündeln
+% TODO NewCrossIndex: mit |see kombinieren, um Refernezen zu bündeln
 %      \SeeIndex[Änderungsliste:changes]{Änderungen}{Changelog,Version}
 %      #2 erhält Eintrag auf Index #1; #3|see#2; Sternversion für seeunverified?
 \NewDocumentCommand\CrossIndex{m o m}{%
@@ -3605,7 +3651,7 @@
         Die Formatierung der Eintr\"age in allen aufgef\"uhrten Indexen ist %
         folgenderma\ss{}en aufzufassen: \textbf{Zahlen in fetter Schrift} %
         verweisen auf die \textbf{Erkl\"arung} zu einem Stichwort, wobei in %
-        der digitalen Fassung dieses Handbuchs dieser Eintrag selbst ein % 
+        der digitalen Fassung dieses Handbuchs dieser Eintrag selbst ein %
         Hyperlink zu seiner Erl\"auterung ist. Seitenzahlen in normaler %
         Schriftst\"arke hingegen deuten auf zus\"atzliche Informationen, %
         wobei diese f\"ur \textit{kursiv hervorgehobene Zahlen} als besonders %
@@ -3614,10 +3660,10 @@
         \hyperref[idx:macros]{Umgebungen und Befehlen} sowie %
         \hyperref[idx:elements]{Seitenstilen, Schriftelementen und Farben} %
         respektive \hyperref[idx:misc]{L\"angen und Z\"ahlern}, die nicht %
-        durch \TUDScript sondern von anderen Klassen oder Paketen zur % 
-        Verf\"ugung gestellt werden, sind diese im Suffix des entsprechenden % 
-        Eintrages angegeben. Exisitiert f\"ur einen solchen Eintrag % 
-        \emph{keine} direkte \textbf{Erl\"auterung} ist dementsprechend auch % 
+        durch \TUDScript sondern von anderen Klassen oder Paketen zur %
+        Verf\"ugung gestellt werden, sind diese im Suffix des entsprechenden %
+        Eintrages angegeben. Exisitiert f\"ur einen solchen Eintrag %
+        \emph{keine} direkte \textbf{Erl\"auterung} ist dementsprechend auch %
         kein Hyperlink verf\"ugbar.%
       \end{abstract}%
     }%
@@ -3815,9 +3861,17 @@
       \let\indexspace\relax%
     }%
     \def\do##1{%
-      \def\tud@index@title{\TUDScript##1}%
-      \def\tud@index@toc{##1}%
-      \def\tud@index@name{changes-##1}%
+      \begingroup%
+        \def\tud@res@b{\endgroup}%
+        \def\tud@res@a changes-####1\@nil{%
+          \appto\tud@res@b{%
+            \def\tud@index@title{\TUDScript####1}%
+            \def\tud@index@toc{####1}%
+          }%
+        }%
+        \tud@res@a##1\@nil%
+      \tud@res@b%
+      \def\tud@index@name{##1}%
       \tud@index@print[\tud@index@name]%
     }%
     \dolistloop{\tud@changes@list}%
@@ -4210,7 +4264,6 @@
   \tud@res@a%
   \strut\ignorespaces%
 }
-
 \NewDocumentEnvironment{tabularm}{O{c} m o +b}{%
   \sbox\z@{\tabular[{#1}]{*{#2}l}#4\endtabular}%
   \begin{tabular}{c}%
@@ -4223,7 +4276,7 @@
   \ifhmode\par\fi%
   \vskip\smallskipamount%
   \@afterindentfalse\@afterheading%
-  \begingroup
+  \begingroup%
     \let\tud@res@a\@empty%
     \def\tud@res@b##1##2##3\@nil{%
       \tud@if@strequal{Term}{##1}{\appto\tud@res@a{##2,}}{}%
@@ -4754,7 +4807,7 @@
     }%
     \IfBooleanTF{#2}{\let\tud@res@a\href}{\let\tud@res@a\hrfn}%
     \IfBooleanTF{#1}{%
-      \def\tud@res@c{\File*{#5}}
+      \def\tud@res@c{\File*{#5}}%
     }{%
       \def\tud@res@c{\InlineDeclaration{\File{#5}}}%
     }%
