@@ -1,5 +1,5 @@
 % PENDING squash feature/newmarkup, reset develop
-% TODO Verwendung aller \tud@if@nil prüfen
+% PENDING Verwendung aller \tud@if@nil prüfen
 \newcommand*\tud@typeout[1]{\typeout{dbg(\the\inputlineno): #1}}
 %\let\tud@typeout\@gobble
 %%
@@ -469,16 +469,15 @@
       \fi%
     }%
     \def\do##1{%
-      \ifnum\tud@res@d=\@ne\relax% missing
+      \ifnum\tud@res@d=\@ne\relax% missing with link
         \tud@trace@lbl@add{url}<#2>{##1}%
       \fi%
       \begingroup%
         \ifnum\tud@res@d=\z@\relax% url
-          % TODO relevant, ob das Label existiert? wohl eher speciallink
           \tud@if@lbl@exists{##1}{%
-            \protected@edef\tud@res@c{\tud@res@c\space<-\space##1}%
+            \appto\tud@res@c{\space<-\space##1}%
           }{%
-            \protected@edef\tud@res@c{\tud@res@c\space??\space##1}%
+            \appto\tud@res@c{\space??\space##1}%
           }%
         \else%
           \protected@edef\tud@res@c{%
@@ -489,8 +488,7 @@
         \tud@unique@csxadd{tud@trace@lbl@#1@list}{\tud@res@c}%
       \endgroup%
       \protected@eappto\tud@res@a{%
-        ^^J\@spaces##1%
-        \ifx\tud@res@c\@empty\else^^J\@spaces\tud@res@c\fi%
+        ^^J\@spaces##1\ifx\tud@res@c\@empty\else^^J\@spaces\tud@res@c\fi%
       }%
     }%
     \let\tud@res@a\@empty%
@@ -940,7 +938,6 @@
     \expandafter\newcommand\csname Markup@Format@@Index@@#1\endcsname{}%
     \csdef{Markup@Format@@Index@@#1}{#4}%
   }%
-  % TODO indexprefix
   \Markup@Suffix@Format@Set{#1}{#5}{\suffix{#6}}%
 }
 \@onlypreamble\Markup@Format@Set
@@ -1029,13 +1026,6 @@
   \endgroup%
 }
 \NewExpandableDocumentCommand\@nosuffix{m}{#1}
-% TODO Verwendung prüfen und ggf durch \nosuffix ersetzen?!
-\newrobustcmd*\MarkupSuffixInline[1]{%
-  \begingroup%
-    \renewcommand*\Markup@Suffix@Select[1]{\Markup@Suffix@@Select{n}{##1}}%
-    #1%
-  \endgroup%
-}
 \newcommand*\tud@markup@lvl{}
 \let\tud@markup@lvl\relax
 \TUD@key[.markup]{lvl}{%
@@ -1432,8 +1422,7 @@
         \IfValueT{#8}{\Process@Invalid@Argument{'#8'}}%
       \fi%
     }%
-    \tud@idx@robustify%
-    % PENDING ||''() überarbeiten/vereinheitlichen? wie default/NOOP?    
+    \tud@idx@robustify% 
     \tud@toks@{\Process@@Markup[#1]{#2}{#3}/#4/=#5=[{#6}]}%
     \if@tud@res@swa%
       % TODO |\@nil|
@@ -1822,12 +1811,13 @@
         \def\tud@res@a{-2}%
       }{%
         \TUD@set@numkey{}{tud@res@a}{%
-          {none}{-1},{simple}{0},{plain}{0},{basic}{0},%
+          {}{-1},{none}{-1},{simple}{0},{plain}{0},{basic}{0},%
           {auto}{2},{ref}{2},{autoref}{2},{auto*}{3},{ref*}{3},{autoref*}{3},%
           {full}{4},{fullref}{4},{full*}{5},{fullref*}{5},%
           {page}{6},{pageref}{6},{vpage}{6},{vpageref}{6},%
           {far}{7},{faraway}{7},{realpage}{7},%
         }{#3}%
+        \meaning\tud@res@a
         % TODO Spezialfälle hier raus, wird über \DeclareMarkupLink geklärt
         % TODO momentan nicht ausgewertet, wenn kein speciallink \File'GH:x'{y}
         \ifx\FamilyKeyState\FamilyKeyStateProcessed\else%
@@ -3255,14 +3245,13 @@
 }
 % TODO alias setzen falls Spezialwert gegeben (parskip), intern ohne alias
 % TODO Nutzen eines vorhandenen/gegebenen Links \File'CTAN:l2tabu'{l2tabu.pdf}
-\NewDocumentCommand\InlineDeclaration{s d== m}{%
+\NewDocumentCommand\InlineDeclaration{s m}{%
   \IfBooleanT{#1}{%
     \ClassWarning{tudscrmanual}{%
       There is no starred variant for \string\InlineDeclaration%
     }%
   }%
-  \IfValueT{#2}{\ClassWarning{tudscrmanual}{remove me}}%
-  \Inline@Declaration=#2={#3}%
+  \Inline@Declaration{#2}%
 }
 \NewDocumentCommand\Inline@Declaration{s o d== m}{%
   \tud@declare@special@start[{#2}]{#4}=#3=[inline\IfBooleanT{#1}{,output=false}]%
@@ -3401,7 +3390,7 @@
     % TODO ENDE überarbeiten
     \if@tud@res@swa%
       % TODO \tud@idx@get und \tud@idx@declare sollte immer erfolgen, auch wenn
-      % kein Index geschrieben wird!
+      % kein Index geschrieben wird! (außer |\@nil|)
       \tud@idx@get\tud@res@a<#4>{#5}%
       \tud@idx@write{#1}{\tud@res@a}|#3|%
       \ifnum\tud@declare@mode@num>\z@\relax%
@@ -3493,7 +3482,7 @@
     \IfValueT{#5}{%
       \tud@if@param@special{#5}{}{%
         \def\tud@res@c##1@##2\@nil{%
-          \def\tud@res@b{{##1}@{\MarkupSuffixInline{##2}}}%
+          \def\tud@res@b{{##1}@{\nosuffix{##2}}}%
         }%
         \expandafter\tud@res@c\tud@res@b\@nil%
       }%
@@ -3944,14 +3933,14 @@
         \ifin@%
           \expandafter\def\expandafter\tud@res@c%
             \expandafter##\expandafter1\string @##2\@nil{%
-            \def\tud@res@b{{##1}@{\MarkupSuffixInline{##2}}}%
+            \def\tud@res@b{{##1}@{\nosuffix{##2}}}%
           }%
           \expandafter\tud@res@c\tud@res@b\@nil%
         \else%
           \protected@expandtwoargs\in@{@}{\tud@res@b}%
           \ifin@%
             \def\tud@res@c##1@##2\@nil{%
-              \def\tud@res@b{{##1}@{\MarkupSuffixInline{##2}}}%
+              \def\tud@res@b{{##1}@{\nosuffix{##2}}}%
             }%
             \expandafter\tud@res@c\tud@res@b\@nil%
           \else%
@@ -3960,7 +3949,7 @@
               \protected@edef\tud@res@c{%
                 \endgroup%
                 \unexpanded{\def\tud@res@b}{%
-                  {\tud@res@b}@{\MarkupSuffixInline{\expandonce\tud@res@b}}%
+                  {\tud@res@b}@{\noexpand\nosuffix{\expandonce\tud@res@b}}%
                 }%
               }%
             \tud@res@c%
@@ -4668,9 +4657,10 @@
 \PassOptionsToPackage{vskip=\smallskipamount}{quoting}
 \RequirePackage{quoting}[2014/01/28]
 \RequirePackage{isodate}[2010/01/03]
-\PreventPackageFromLoading{everysel}
-\newcommand*{\EverySelectfont}[1]{\AddToHook{selectfont}{#1}}
-\newcommand*{\AtNextSelectfont}[1]{\AddToHookNext{selectfont}{#1}}
+% URGENT raus, sobald da!
+\disable@package@load{everysel}{%
+  \newcommand*\EverySelectfont[1]{\AddToHook{selectfont}{##1}}%
+}
 \RequirePackage{ragged2e}[2009/05/21]
 \@removefromreset{footnote}{chapter}
 \renewcommand*\raggedfootnote{\tud@RaggedRight}%
