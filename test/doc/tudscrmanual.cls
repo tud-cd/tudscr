@@ -1429,7 +1429,7 @@
       \addto@hook\tud@toks@{||'\@nil'(\@nil)}%
     \else%
       \addto@hook\tud@toks@{|#7|'#8'}%
-      \Entity@Get\tud@res@a(#9){#2}{#3}%
+      \Entity@Seek\tud@res@a(#9){#2}{#3}%
       \addto@hook@expandafter\tud@toks@{\expandafter(\tud@res@a)}%
     \fi%
     \edef\tud@res@a{%
@@ -1438,7 +1438,7 @@
     }%
   \tud@res@a%
 }
-\NewDocumentCommand\Entity@Get{s m d() m m}{%
+\NewDocumentCommand\Entity@Seek{s m d() m m}{%
   \begingroup%
     \Parameter@Expandable%
     \Misc@Expandable%
@@ -1556,6 +1556,11 @@
       \fi%
       \IfBooleanF{#1}{\def\tud@ety@valid{\tud@ety@gnrl}}%
     \fi%
+\protected@expandtwoargs\in@{,}{\tud@ety@valid}%
+\ifin@%
+\tud@typeout{\detokenize{#1 -- #3 -- #4 -- #5}}%
+\tud@typeout{\detokenize\expandafter{\tud@ety@valid}}%
+\fi%
     \edef\tud@res@a{%
       \endgroup%
       \unexpanded{\def#2}{\expandonce\tud@ety@valid}%
@@ -1577,7 +1582,10 @@
       \IfArgIsEmpty{##2}{}{%
         \ifnum\tud@declare@mode@num=\z@\relax%
           % TODO wirklich ##2 abschneiden?
-          \tud@if@strequal{\tud@ety@crnt}{##1}{\let\tud@res@a\tud@ety@crnt}{}%
+          \tud@if@strequal{\tud@ety@crnt}{##1}{%
+            \tud@typeout{??????????? \detokenize{##1--##2}}%
+            \let\tud@res@a\tud@ety@crnt%
+          }{}%
         \else%
           \ifnum\tud@declare@mode@num>\z@\relax%
             \if@tud@declare@label%
@@ -1617,7 +1625,7 @@
 }
 % TODO \Process@@@Markup auflösen in \Process@[@]Index [und \Process@Declare?]
 \NewDocumentCommand\Process@@@Markup{m m d// d== o r|| r'' r() r<>}{%
-  \Process@Index{#1}=#4=|#6|<#9>{{#1}{#2}/#3/=#4=[{#5}]|#6|'#7'(#8)}%
+  \Process@@Index{#1}=#4=|#6|<#9>{{#1}{#2}/#3/=#4=[{#5}]|#6|'#7'(#8)}%
   \ifnum\tud@declare@mode@num>\z@\relax%
     \if@tud@declare@label%
       \tud@lbl@declare=#4=<#9>%
@@ -1755,7 +1763,8 @@
         \let\tud@res@c\relax%
         \ifnum\tud@res@a<\tw@\relax%
           \def\tud@res@b{\@firstofone}%
-          \Entity@Link@Get\tud@res@c{\tud@lbl@tmp}{#2}{#3}%
+          % TODO tiefe suche oder nur Label?
+          \Entity@Link@Seek\tud@res@c{\tud@lbl@tmp}{#2}{#3}%
           \ifx\tud@res@c\relax\else%
             \tud@special@href@get\tud@res@b{\tud@res@c}{\tud@lbl@tmp}%
           \fi%
@@ -1817,7 +1826,6 @@
           {page}{6},{pageref}{6},{vpage}{6},{vpageref}{6},%
           {far}{7},{faraway}{7},{realpage}{7},%
         }{#3}%
-        \meaning\tud@res@a
         % TODO Spezialfälle hier raus, wird über \DeclareMarkupLink geklärt
         % TODO momentan nicht ausgewertet, wenn kein speciallink \File'GH:x'{y}
         \ifx\FamilyKeyState\FamilyKeyStateProcessed\else%
@@ -2078,7 +2086,6 @@
 %  lvl=0,idx=true:Distribution%
   lvl=0,idx=true:{LaTeX-Distribution}@{\DistributionGeneral}%
 ](\textsbn){Distribution}
-\index{Distribution|seeunverified{\DistributionGeneral}}%
 \NewDocumentCommand\DistributionGeneral@IndexEntry{m}{%
   \ifnum\tud@index@mode@num<\@ne\relax\else%
     \IfArgIsEmpty{#1}{}{%
@@ -2090,17 +2097,14 @@
   \Distribution|#2|'#3'{\hologo{TeX}~Live\IfBooleanT{#1}{~Portable}}%
   \DistributionGeneral@IndexEntry{#2}\xspace%
 }
-\index{{TeX Live}@{\TeXLive}|seeunverified{\DistributionGeneral}}%
 \NewDocumentCommand\MacTeX{!t' !d|| !d''}{%
   \Distribution|#2|'#3'{Mac\hologo{TeX}\IfBooleanT{#1}{~Portable}}%
   \DistributionGeneral@IndexEntry{#2}\xspace%
 }
-\index{{MacTeX}@{\MacTeX}|seeunverified{\DistributionGeneral}}%
 \NewDocumentCommand\MiKTeX{!t' !d|| !d''}{%
   \Distribution|#2|'#3'{\hologo{MiKTeX}\IfBooleanT{#1}{~Portable}}%
   \DistributionGeneral@IndexEntry{#2}\xspace%
 }
-\index{{MiKTeX}@{\MiKTeX}|seeunverified{\DistributionGeneral}}%
 \NewMarkupCommand\Format[lvl=1](\sbnfont\hologo){Textsatzsystem}
 \NewMarkupCommand\Bundle[lvl=1,idx=false](\textsbn){Bundle}
 % TODO \idxsuffix auf Bundle unterdrücken?
@@ -2251,14 +2255,19 @@
   \endgroup%
 }
 \@onlypreamble\DefaultEntityLink
-\NewDocumentCommand\Entity@Link@Get{m m m m}{%
+\NewDocumentCommand\Entity@Link@Get{m m}{%
+  \tud@truncate@value#1{#2}%
+  \letcs#1{Entity@Link@@#1}%
+  \ifundef{#1}{\let#1\relax}{}%
+}%
+\NewDocumentCommand\Entity@Link@Seek{m m m m}{%
   \begingroup%
-    \tud@truncate@value\tud@res@a{#2}%
-    \letcs\tud@res@a{Entity@Link@@\tud@res@a}%
-    \ifundef{\tud@res@a}{%
-      \Entity@Get*\tud@res@b{#3}{#4}%
+    \Entity@Link@Get\tud@res@a{#2}%
+    \ifx\tud@res@a\relax%
+      \Entity@Seek*\tud@res@b{#3}{#4}%
       \ifx\tud@res@b\@empty\else%
         \Entity@Level@Get\tud@res@d{#3}%
+%        \meaning\tud@res@b -- \meaning\tud@res@d\par
         \ifnum\tud@res@d<\thr@@\relax%
           \protected@expandtwoargs\in@{,}{\tud@res@b}%
           \ifin@%
@@ -2269,19 +2278,21 @@
               found for `\tud@res@c', link not available%
             }%
           \else%
+            \tud@typeout{///// #2: #3 -- #4}%
             \tud@lbl@get\tud@lbl@tmp{\tud@res@b}%
             \Markup@Split@Get\tud@res@c{\tud@res@b}%
             \edef\tud@res@a{%
-              \unexpanded{\Entity@Link@Get\tud@res@a}%
+              \unexpanded{\Entity@Link@Seek\tud@res@a}%
                 {\tud@lbl@tmp}\expandonce\tud@res@c%
             }%
+            \tud@typeout{\meaning\tud@res@a}%
             \tud@res@a%
           \fi%
         \else%
           % TODO lvl >=3: reference auf (gemeinsames) label, sonst hyperlink?!
         \fi%
       \fi%
-    }{}%
+    \fi%
     \edef\tud@res@a{%
       \endgroup%
       \ifundef{\tud@res@a}{%
@@ -2327,7 +2338,7 @@
 }
 % TODO den ganzen Kram noch einmal prüfen
 % TODO \tud@specialurl@get und \tud@special@href@get zusammenfassen
-% TODO in \Entity@Link@Get integrieren
+% TODO in \Entity@Link@Seek integrieren
 \newcommand*\tud@special@href@get[3]{%
   \begingroup%
     \tud@specialurl@get\tud@res@a\tud@res@b{#2}%
@@ -2586,7 +2597,7 @@
           \tud@trace@lbl@add{matched}<\tud@res@a>{\tud@lbl@tmp}%
         }{%
           \def\tud@res@b##1##2##3\@nil{%
-            \Entity@Link@Get\tud@res@b{\tud@lbl@tmp}{##1}{##2}%
+            \Entity@Link@Get\tud@res@b{\tud@lbl@tmp}%
           }%
           \tud@res@b#3\@nil%
           \ifx\tud@res@b\relax%
@@ -3377,11 +3388,12 @@
 }
 \newcommand*\tud@lbl@parent{}
 \let\tud@lbl@parent\relax%
-% TODO |#3| \AP@Index für Auswertung > \tud@index@mode@num auswerten
+% TODO |#3| \AP@Index für Auswertung 
+%   > \tud@index@mode@num für default auswerten (Changes)
 %       nur |!|, |?|, |.| und || gültig
 %      |type:suffix| für Änderung des Indexsuffix
 % TODO <#4> ist das jemals -NoValue-?
-\NewDocumentCommand\Process@Index{m r== r|| r<> m}{%
+\NewDocumentCommand\Process@@Index{m r== r|| r<> m}{%
   % TODO überarbeiten, index |.| für normalen Eintrag
   \begingroup%
     \@tud@res@swatrue%
@@ -3870,6 +3882,8 @@
 % TODO Trennung von Allgemein und Implementierung notwendig/sinnvoll?
 % TODO nach Paketen trennen, diese als Teilüberschrift?!
 % TODO Implementierung > Funktionalität erweitert/ergänzt & veraltet/entfernt
+% TODO (Bundle) für Eintrag auswerten 
+%   \begin{Declaration}{\Macro(*){caption}}[v2.07;v2.06:stuff]
 \NewDocumentCommand\Changed@At@CreateEntry{r() r<> m r::}{%
   \begingroup%
     \tud@idx@robustify%
@@ -4131,7 +4145,7 @@
         \ifx\tud@res@c\@empty\else%
           \Markup@Outer@Get\tud@res@c{\tud@res@c}%
           \edef\tud@res@c{%
-            % TODO Process@Index einfach hier mit \tud@lbl@parent aufrufen?
+            % TODO Process@@Index einfach hier mit \tud@lbl@parent aufrufen?
             %      und Markup@Replace||
             \unexpanded{\def\tud@lbl@parent}{\tud@lbl@tmp}%
             \noexpand\Inline@Declaration\ifx\tud@res@a\@empty\else*\fi%
@@ -4196,8 +4210,9 @@
       \tud@lbl@get\tud@lbl@tmp{##1{##2}}%
       \Markup@Split@Get*\tud@res@c{##1{##2}}%
       \edef\tud@res@c{%
-        \unexpanded{\Entity@Link@Get\tud@res@c}{\tud@lbl@tmp}%{#2}{#3}%
-          \expandonce\tud@res@c%
+        % TODO tiefe suche oder nur Label?
+        \unexpanded{\Entity@Link@Seek\tud@res@c}{\tud@lbl@tmp}%{#2}{#3}%
+        \expandonce\tud@res@c%
       }%
       \tud@res@c%
       \ifx\tud@res@c\relax%
