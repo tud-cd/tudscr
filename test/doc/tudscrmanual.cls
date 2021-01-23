@@ -1311,6 +1311,9 @@
     \forlistloop\tud@res@b{\tud@markup@list}%
   \tud@res@a%
 }
+\newcommand*\tud@markup@detokenize[2]{%
+  \detokenize\expandafter{\@backslashchar#1{#2}}%
+}
 \NewDocumentCommand\tud@if@markup{s m}{%
   \begingroup%
     \@tud@res@swafalse%
@@ -1374,18 +1377,14 @@
           \tud@res@d{%
             \eappto\tud@res@b{%
               \ifx\tud@res@b\@empty\else,\space\fi%
-              \detokenize\expandafter{\@backslashchar##1}%
+              \tud@markup@detokenize{##1}{...}%
             }%
           }{}%
         }%
         \forlistloop\tud@res@c{\tud@markup@list}%
-        \edef\tud@res@a{%
-          \@backslashchar\expandafter\@firstoftwo\tud@res@a%
-          {\expandafter\@secondoftwo\tud@res@a}%
-        }%
         \ClassError{tudscrmanual}{Invalid entity found}{%
-          The given entity `\detokenize\expandafter{\tud@res@a}'\MessageBreak%
-          can not be used here, %
+          The given entity `\expandafter\tud@markup@detokenize\tud@res@a'%
+          \MessageBreak can not be used here, %
           \ifx\tud@res@b\@empty%
             no entities are valid.%
           \else%
@@ -1460,83 +1459,38 @@
 \NewDocumentCommand\Process@@Markup{o m m r// r== r[] r|| r'' r()}{%
   \begingroup%
     \tud@idx@robustify%
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % URGENT \tud@refnum@get\tud@res@cnt'#8' hier aufrufen und in der Schleife
-    % verarbeiten, wahrscheinlich nach declare@mode unterscheiden zwischen
-    % \tud@lbl@@get und \tud@lbl@@get* (Kernfunktionalität wohl hier ausführen)
-    % alles in \tud@toks@ packen und nach der Schleife ausführen?!
-    % 1. refnum
-    % 2. vor Schleife gemeinsames Label
-    %    a) declare@mode > 0 & declare --> label deklarieren (internal@list?)
-    %    b) declare@mode 0 --> swatrue und sichern respektive ignore
-%    \ifnum\tud@declare@mode@num=\z@\relax%
-%      \Process@@@Markup@Inline
-%    \else%
-%      \Process@@@Markup@Declare
-%    \fi%
-    % in Schleife
-    % 3. lbl@get -> Process@Index%
-    % 4. a) declare@mode > 0 Label und Entity deklarieren
-    %    b) declare@mode = 0 & swafalse
-    %       --> lbl@get* und jedes bundle in liste, falls min eins exisitent
-    % nach Schleife
-    % 5. a) declare@mode = 0 --> link generieren, falls nur ein label
-    %    b) declare@mode > 0 --> firstofone
-    % 6. Wrapper{\Markup@Output@@@Get\tud@res@a{#2}{#3}/#4/=#5=[{#6}]}
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % TODO ist das so sinnvoll? mit \Markup@Output@Get verwursten
-    % TODO check auf multiple labels hier oder in \Markup@Output@Get?!
-    % TODO multiple labels ggf. vorher auf gemeinsames checken!
-%    \def\tud@res@b##1,##2\@nil{%
-%          \ifnum\tud@declare@mode@num>\z@\relax%
-%            \if@tud@declare@label%
-%              \tud@lbl@@get\tud@lbl@tmp{{#2}{#3}/#4/=#5=(#9)}%
-%              \tud@lbl@declare=#5=<\tud@lbl@tmp>%
-%            \fi%
-%          \fi%
-%        \fi%
-%      }%
-%    }%
-%    \tud@res@b#9,\@nil%
     \def\tud@res@a{#9}%
     \let\tud@res@b\@empty%
     \def\tud@res@c##1##2{\listeadd\tud@res@b{\unexpanded{(##1)}<##2>}}%
-    \@tud@res@swatrue%
     \ifnum\tud@declare@mode@num>\m@ne\relax%
       \protected@expandtwoargs\in@{,}{#9}%
       \ifin@%
         \tud@lbl@@get\tud@lbl@tmp{{#2}{#3}/#4/=#5=(#9)}%
-        \ifnum\tud@declare@mode@num=\z@\relax%
-          \tud@if@lbl@exists{\tud@lbl@tmp}{\@tud@res@swafalse}{%
-            \tud@truncate@value\tud@res@d{\tud@lbl@tmp}%
-            \tud@if@lbl@exists{\tud@res@d}{\@tud@res@swafalse}{}%
-          }%
-          \if@tud@res@swa\else%
-            \tud@res@c{#9}{\tud@lbl@tmp}%
-          \fi%
-        \else%
-          \tud@res@c{#9}{\tud@lbl@tmp}%
-        \fi%
+        \tud@res@c{#9}{\tud@lbl@tmp}%
       \fi%
     \fi%
     \@for\tud@res@d:=\tud@res@a\do{%
       \tud@lbl@@get\tud@lbl@tmp{{#2}{#3}/#4/=#5=(\tud@res@d)}%
       \Process@Index[{#1}]{#2}{#3}/#4/=#5=[{#6}](\tud@res@d)<\tud@lbl@tmp>|#7|%
-      \if@tud@res@swa%
-        \expandafter\tud@res@c\expandafter{\tud@res@d}{\tud@lbl@tmp}%
-      \fi%
+      \expandafter\tud@res@c\expandafter{\tud@res@d}{\tud@lbl@tmp}%
     }%
     \ifnum\tud@declare@mode@num>\m@ne\relax%
+      \def\tud@res@a{\@firstofone}%
       \ifnum\tud@declare@mode@num=\z@\relax%
-        \Markup@Output@Get\tud@res@a{#2}{#3}/#4/=#5=[{#6}]|#7|'#8'(#9)%
-        \def\tud@res@b{output}%
+        \IfBooleanF{#1}{%
+          \if@tud@sec\else%
+            \Markup@Output@Wrapper\tud@res@a{#2}{#3}'#8'{\tud@res@b}%
+          \fi%
+        }%
+        \def\tud@res@c{output}%
       \else%
+        % TODO \Markup@Output@Wrapper@... fur Link bei InlineDeclaration
         \Process@@@Markup@Declare{#2}{#3}/#4/=#5=[{#6}]|#7|'#8'{\tud@res@b}%
-        % TODO \Markup@Output@Wrapper@Get fur inlineDeclaration
-        \Markup@Output@@@Get\tud@res@a{#2}{#3}/#4/=#5=[{#6}]%
-        \def\tud@res@b{declare}%
+        \def\tud@res@c{declare}%
       \fi%
-      \tud@trace@markup@add{\tud@res@b}{\expandonce\tud@res@a}%
+      \Markup@Output@Get\tud@res@b{#2}{#3}/#4/=#5=[{#6}]%
+      \eappto\tud@res@a{{\expandonce\tud@res@b}}%
+      \tud@trace@markup@add{\tud@res@c}{\expandonce\tud@res@a}%
     \else%
       \let\tud@res@a\@empty%
     \fi%
@@ -1548,8 +1502,8 @@
 }
 \NewDocumentCommand\Process@@@Markup@Declare{m m r// r== r[] r|| r'' m}{%
   \begingroup%
-    \protected@edef\tud@res@a{#8}%
-    \def\tud@res@b##1{\tud@res@d##1\@nil}%
+    \protected@edef\tud@res@a{\noexpand\dolistloop{\expandonce#8}}%
+    \def\do##1{\tud@res@d##1\@nil}%
     \def\tud@res@d(##1)<##2>\@nil{%
       \if@tud@declare@label%
         \tud@lbl@declare=#4=<##2>%
@@ -1558,217 +1512,208 @@
       \ifin@%
         % TODO label in \tud@declaration@internal@list?
       \else%
-        % TODO check raus?
-        \tud@if@strequal{\tud@ety@gnrl}{##1}{}{%
         \Entity@Declare{#1}{#2}{##1}%
-        }%
         \listgadd\tud@declaration@internal@list{%
           {{#1}{#2}/#3/=#4=[{#5}]|#6|'#7'(##1)}%
           {##2}%
         }%
       \fi%
     }%
-    \forlistloop\tud@res@b{\tud@res@a}%
+    \tud@res@a%
   \endgroup%
-}%
-% TODO rename to Process@Output@..., r|| raus?
-% URGENT '#8' hier mit AP auswerten, #1+\if@tud@sec statt \@nil beachten!
-% TODO \suffix{Bundle} wenn nicht ety@crn!!!
-\NewDocumentCommand\Markup@Output@Get{m m m r// r== r[] r|| r'' r()}{%
-  \begingroup%
-    \tud@refnum@get\tud@res@a'#8'%
-    % TODO label nicht verwenden, wenn in declaration@list;
-    %      in diesem Fall schon in \Process@@Markup 'none' setzen?
-    %      zu beachten ist, dass bspw. 'full' trotzdem funktionieren sollte
-    %      unterdrücken der labels quasi nur bei refnum=0
-    \ifnum\tud@res@a<\z@\relax%
-      \ifnum\tud@res@a=\m@ne\relax%
-        \def\tud@res@b{#9}%
-        \@for\tud@res@b:=\tud@res@b\do{%
-          \tud@lbl@@get\tud@lbl@tmp{{#2}{#3}/#4/=#5=(\tud@res@b)}%
-          \tud@trace@lbl@add{ignored}{\tud@lbl@tmp}%
-        }%
-      \fi%
-      \def\tud@res@b{\@firstofone}%
-      % URGENT split in Markup@Output@Wrapper@Label/Markup@Output@Wrapper@Link
-    \else%
-      \def\tud@res@d##1,##2\@nil{%
-        \tud@lbl@@get*\tud@lbl@tmp{{#2}{#3}/#4/=#5=(##1)}%
-        \let\tud@res@b\@empty%
-        \IfArgIsEmpty{##2}{}{%
-          \def\tud@res@b{##2}%
-          \ifcase\tud@res@a\relax%
-            % TODO ist es sinnvoll, hier auf crnt zu prüfen?
-            \tud@if@strequal{\tud@ety@crnt}{##1}{%
-              \tud@if@lbl@exists{\tud@lbl@tmp}{\let\tud@res@b\@empty}{}%
-            }{}%
-          \fi%
-        }%
-        \ifx\tud@res@b\@empty\else%
-          \begingroup%
-            \let\tud@res@c\@empty%
-            \preto\tud@res@b{##1,}%
-            \@for\tud@res@b:=\tud@res@b\do{%
-              \tud@lbl@@get*\tud@lbl@tmp{{#2}{#3}/#4/=#5=(\tud@res@b)}%
-              \tud@if@lbl@exists{\tud@lbl@tmp}{%
-                \eappto\tud@res@c{%
-                  \noexpand\@spaces%
-                  \detokenize\expandafter{\tud@res@b}%
-                  \noexpand\MessageBreak%
-                }%
-              }{}%
-            }%
-            % URGENT mehrere Labels checken
-%                      \ClassWarning{tudscrmanual}{%
-%                        Found multiple matching entities\MessageBreak%
-%                        \tud@res@c for \detokenize\expandafter{\tud@res@b}%
-%                      }
-            \ifx\tud@res@c\@empty\else%
-              \ClassWarning{tudscrmanual}{%
-                A specific entity is needed\MessageBreak%
-                \tud@res@c%
-                for `\detokenize\expandafter{\@backslashchar#2{#3}}'%
-              }%
-            \fi%
-          \endgroup%
-        \fi%
-      }%
-      \tud@res@d#9,\@nil%
-      % TODO separates Makros
-      \tud@if@lbl@exists{\tud@lbl@tmp}{%
-        \let\tud@res@b\@empty%
-        \let\tud@res@c\@gobble% simple/link
-        \ifcase\tud@res@a\relax\or% link
-          % TODO raus
-          \def\tud@res@b{%
-            \ClassWarning{tudscrmanual}{%
-              As label `\tud@lbl@tmp' exists, the\MessageBreak%
-              given link '#8'\MessageBreak%
-              is ignored%
-            }%
-          }%
-        \or% autoref
-          \def\tud@res@c{ in \noexpand\autoref}%
-        \or% autoref*
-          \def\tud@res@c{ aus \noexpand\autoref}%
-        \or% fullref
-          \def\tud@res@c{ in \noexpand\fullref}%
-        \or% fullref*
-          \def\tud@res@c{ aus \noexpand\fullref}%
-        \or% page
-          \def\tud@res@c{ \noexpand\vpageref}%
-        \or% far
-          \def\tud@res@c{ \noexpand\reftextfaraway}%
-        \fi%
-        \protected@edef\tud@res@b{%
-          \expandonce\tud@res@b%
-          \noexpand\tud@hyperlink[\tud@res@c{\tud@lbl@tmp}]{\tud@lbl@tmp}%
-        }%
-      }{%
-        % TODO \Markup@Output@Wrapper@Get, für Link bei InlineDeclaration 
-        \edef\tud@res@b{%
-          \noexpand\ClassWarning{tudscrmanual}{%
-            A cross-reference was not created as label\noexpand\MessageBreak%
-            \tud@lbl@tmp\noexpand\MessageBreak%
-            does not exist%
-          }%
-          \noexpand\@firstofone%
-        }%
-        \let\tud@res@c\relax%
-        \ifnum\tud@res@a<\tw@\relax%
-          \def\tud@res@b{\@firstofone}%
-          % TODO tiefe suche oder nur Label?
-          \Entity@Link@Seek\tud@res@c{\tud@lbl@tmp}{#2}{#3}%
-          \ifx\tud@res@c\relax\else%
-            \tud@special@href@get\tud@res@b{\tud@res@c}{\tud@lbl@tmp}%
-          \fi%
-        \fi%
-      }%
-    \fi%
-    \tud@typeout{xxx: \meaning\tud@res@b}%
-    \Markup@Output@@@Get\tud@res@d{#2}{#3}/#4/=#5=[{#6}]%
-    \eappto\tud@res@b{{\expandonce\tud@res@d}}%
-    \edef\tud@res@a{%
-      \endgroup%
-      \unexpanded{\def#1}{\expandonce\tud@res@b}%
-    }%
-  \tud@res@a%
-%    TODO Warnungen auch ausgeben, wenn Sternversion mit  
-%         label default genutzt wird (\Macro*{blinddocument})
-%    \ifcase\tud@res@a\relax\else%
-%      \begingroup%
-%        \@tud@res@swafalse%
-%        \tud@if@lbl@exists{\tud@lbl@tmp}{%
-%          \IfValueT{#5}{%
-%            \tud@lbl@@get\tud@res@a{{#2}/#4/=#5=(#9)}%
-%            \ifx\tud@lbl@tmp\tud@res@a\else%
-%              \let\tud@lbl@tmp\tud@res@a%
-%              \@tud@res@swatrue
-%            \fi%
-%          }%
-%        }{%
-%        % TODO rein!
-%        %  \expandafter\ifstrequal\expandafter{\tud@ety@dflt}{#9}{%
-%        %    \@tud@res@swatrue%
-%        %  }{}%
-%        }%
-%        \if@tud@res@swa%
-%          \ClassWarning{tudscrmanual}{%
-%            A \IfValueTF{#5}{specific}{general} value for \detokenize{#9}%
-%            \MessageBreak `#2\IfValueT{#4}{/#4/}\IfValueT{#5}{=#5=}'%
-%            \MessageBreak was given, but there exists no label%
-%            \MessageBreak `\tud@lbl@tmp'%
-%          }%
-%        \fi%
-%      \endgroup%
-%    \fi%
 }
 % TODO numerischen Wert mit AP@... erzeugen, in neuem \Process@@@Markup
-\NewDocumentCommand\tud@refnum@get{s m r''}{%
+\newcommand*\tud@reference@num[2]{%
   \begingroup%
-    \IfValueTF{#3}{%
-      \tud@if@nil{#3}{%
-        \def\tud@res@a{-2}%
+    \TUD@set@numkey{}{tud@res@a}{%
+      {}{-1},{none}{-1},{simple}{0},{plain}{0},{basic}{0},%
+      {auto}{2},{ref}{2},{autoref}{2},{auto*}{3},{ref*}{3},{autoref*}{3},%
+      {full}{4},{fullref}{4},{full*}{5},{fullref*}{5},%
+      {page}{6},{pageref}{6},{vpage}{6},{vpageref}{6},%
+      {far}{7},{faraway}{7},{realpage}{7},%
+    }{#2}%
+    % TODO Spezialfälle hier raus, wird über \DeclareMarkupLink geklärt
+    % TODO momentan nicht ausgewertet, wenn kein speciallink \File'GH:x'{y}
+    \ifx\FamilyKeyState\FamilyKeyStateProcessed\else%
+      \tud@if@specialurl{#2}{%
+      % TODO '*' gültig falls defaulturl? bei inlinedeklarationen standard?
+      % TODO direkt für alles, was nicht \Bundle{tudscr}?
+        \def\tud@res@a{1}%
       }{%
-        \TUD@set@numkey{}{tud@res@a}{%
-          {}{-1},{none}{-1},{simple}{0},{plain}{0},{basic}{0},%
-          {auto}{2},{ref}{2},{autoref}{2},{auto*}{3},{ref*}{3},{autoref*}{3},%
-          {full}{4},{fullref}{4},{full*}{5},{fullref*}{5},%
-          {page}{6},{pageref}{6},{vpage}{6},{vpageref}{6},%
-          {far}{7},{faraway}{7},{realpage}{7},%
-        }{#3}%
-        % TODO Spezialfälle hier raus, wird über \DeclareMarkupLink geklärt
-        % TODO momentan nicht ausgewertet, wenn kein speciallink \File'GH:x'{y}
-        \ifx\FamilyKeyState\FamilyKeyStateProcessed\else%
-          \tud@if@specialurl{#3}{%
-          % TODO '*' gültig falls defaulturl? bei inlinedeklarationen standard?
-          % TODO direkt für alles, was nicht \Bundle{tudscr}?
-            \def\tud@res@a{1}%
-          }{%
-            \IfBooleanF{#1}{%
-              \ClassWarning{tudscrmanual}{%
-                The cross-reference '#3'\MessageBreak%
-                is unknown. Only '[auto]ref' or 'full[ref]' and\MessageBreak%
-                '[v]page[ref]' as well as 'plain' or 'none' are\MessageBreak%
-                valid. Additionally, 'CTAN:<pkg>' or 'GH:<repo>'\MessageBreak%
-                and 'URL:<url>' can be used%
-              }%
-            }%
-            \def\tud@res@a{-1}%
-          }%
-          \FamilyKeyStateProcessed%
-        \fi%
+        \ClassWarning{tudscrmanual}{%
+          The cross-reference '#2'\MessageBreak%
+          is unknown. Only '[auto]ref' or 'full[ref]' and\MessageBreak%
+          '[v]page[ref]' as well as 'plain' or 'none' are\MessageBreak%
+          valid. Additionally, 'CTAN:<pkg>' or 'GH:<repo>'\MessageBreak%
+          and 'URL:<url>' can be used%
+        }%
+        \def\tud@res@a{-1}%
       }%
-    }{%
-      \def\tud@res@a{0}%
-    }%
+      \FamilyKeyStateProcessed%
+    \fi%
     \edef\tud@res@a{%
       \endgroup%
-      \unexpanded{\def#2}{\tud@res@a}%
+      \unexpanded{#1=}\tud@res@a\relax%
     }%
   \tud@res@a%
 }
-\NewDocumentCommand\Markup@Output@@@Get{m m >{\AP@Underscore}m r// r== r[]}{%
+% TODO \suffix{Bundle} wenn nicht ety@crn!!!
+\NewDocumentCommand\Markup@Output@Wrapper{m m m r'' m}{%
+  \begingroup%
+    \let\tud@output@wrapper\relax%
+    \IfValueTF{#4}{%
+      \tud@reference@num\tud@res@cnt{#4}%
+      \ifnum\tud@res@cnt=\m@ne\relax%
+        \def\tud@output@wrapper{\@firstofone}%
+      \fi%
+    }{%
+      \tud@res@cnt=\z@%
+    }%
+    \protected@edef\tud@res@c{\noexpand\dolistloop{\expandonce#5}}%
+    \let\tud@lbl@found\@empty%
+    \let\tud@res@a\@empty%
+    \let\tud@res@b\@empty%
+    \def\do##1{\tud@res@d##1\@nil}%
+    \def\tud@res@d(##1)<##2>\@nil{%
+      \ifnum\tud@res@cnt=\m@ne\relax%
+        \tud@trace@lbl@add{ignored}{##2}%
+      \else%
+        \edef\tud@lbl@tmp{##2}%
+        \tud@if@lbl@exists{\tud@lbl@tmp}{%
+          \tud@trace@lbl@add{matched}{\tud@lbl@tmp}%
+        }{%
+          \tud@truncate@value\tud@lbl@tmp{\tud@lbl@tmp}%
+          \tud@if@lbl@exists{\tud@lbl@tmp}{%
+            \tud@trace@lbl@add{matched}<##2>{\tud@lbl@tmp}%
+          }{%
+            \let\tud@lbl@tmp\relax%
+          }%
+        }%
+        % DOC erster Eintrag, ggf. kombiniertes Label!
+        \ifx\tud@lbl@found\@empty%
+          \let\tud@lbl@found\tud@lbl@tmp%
+          % DOC \tud@res@a enthält bundle und label für hyperlink
+          \def\tud@res@a{{##2}{##1}}%
+        \else%
+          \ifx\tud@lbl@tmp\relax\else%
+            \protected@eappto\tud@res@b{\ifx\tud@res@b\@empty\else,\fi##1}%
+          \fi%
+        \fi%
+      \fi%
+    }%
+    \tud@res@c%
+    \ifx\tud@lbl@found\relax%
+      \ifx\tud@res@b\@empty\else%
+        \def\tud@output@wrapper{\@firstofone}%
+        \let\tud@res@c\@empty%
+        \@for\tud@res@b:=\tud@res@b\do{%
+          \eappto\tud@res@c{%
+            \unexpanded{\MessageBreak\@spaces}%
+            \detokenize\expandafter{\tud@res@b}%%
+          }%
+        }%
+        \ClassWarning{tudscrmanual}{%
+          A specific entity (single or valid combination) is\MessageBreak% 
+          needed for `\tud@markup@detokenize{#2}{#3}'%
+          \tud@res@c%
+        }%
+      \fi%
+    \fi%
+    \ifx\tud@output@wrapper\relax%
+      \protected@edef\tud@res@c{%
+        \ifx\tud@lbl@found\relax%
+          \unexpanded{\Markup@Output@Wrapper@Link\tud@output@wrapper}%
+            {\the\tud@res@cnt}\expandonce\tud@res@a'#4'{#2}{#3}%
+        \else%
+          \unexpanded{\Markup@Output@Wrapper@Label\tud@output@wrapper}%
+            {\the\tud@res@cnt}{\tud@lbl@found}'#4'%
+        \fi%
+      }%
+      \tud@res@c%
+    \fi%
+    \edef\tud@output@wrapper{%
+      \endgroup%
+      \unexpanded{\def#1}{%
+        \ifx\tud@output@wrapper\relax%
+          \noexpand\@firstofone%
+        \else%
+          \expandonce\tud@output@wrapper%
+        \fi%
+      }%
+    }%
+  \tud@output@wrapper%
+}
+\NewDocumentCommand\Markup@Output@Wrapper@Label{m m m r''}{%
+  \begingroup%
+% TODO label nicht verwenden, wenn in declaration@list;
+%      in diesem Fall schon in \Process@@Markup 'none' setzen?
+%      zu beachten ist, dass bspw. 'full' trotzdem funktionieren sollte
+%      unterdrücken der labels quasi nur bei refnum=0
+    \let\tud@res@a\relax% simple/link
+    \ifcase#2\relax\or% link
+      \ClassWarning{tudscrmanual}{%
+        As label `#3'\MessageBreak%
+        exists, link '#4' is ignored%
+      }%
+    \or% autoref
+      \def\tud@res@a{in \autoref}%
+    \or% autoref*
+      \def\tud@res@a{aus \autoref}%
+    \or% fullref
+      \def\tud@res@a{in \fullref}%
+    \or% fullref*
+      \def\tud@res@a{aus \fullref}%
+    \or% page
+      \def\tud@res@a{\vpageref}%
+    \or% far
+      \def\tud@res@a{\reftextfaraway}%
+    \fi%
+    \edef\tud@res@a{%
+      \endgroup%
+      \unexpanded{\def#1}{\noexpand\tud@hyperlink%
+        \ifx\tud@res@a\relax\else[{\space\expandonce\tud@res@a{#3}}]\fi{#3}%
+      }%
+    }%
+  \tud@res@a%
+}
+\NewDocumentCommand\Markup@Output@Wrapper@Link{m m m m r'' m m}{%
+  \begingroup
+    \def\tud@res@a{\@firstofone}%
+    \ifnum#2<\tw@\relax%
+      % TODO Bundle #4 durchreichen für tiefe Suche
+      \Entity@Link@Seek\tud@res@c{#3}{#6}{#7}%
+      \IfValueT{#5}{%
+        \ifx\tud@res@c\relax%
+          \def\tud@res@c{#5}%
+        \else%
+          \ClassWarning{tudscrmanual}{%
+            The special link '#5' was not used as\MessageBreak%
+            a default one '\tud@res@c'%
+            \MessageBreak exists%
+          }%
+        \fi%
+      }%
+      \ifx\tud@res@c\relax\else%
+        \tud@special@href@get\tud@res@a{\tud@res@c}{#3}%
+      \fi%
+    \else%
+      \ClassWarning{tudscrmanual}{%
+        A cross-reference was not created as label\MessageBreak%
+        `#3' does not exist%
+      }%
+    \fi%
+    \ifx\tud@res@c\relax%
+      \tud@trace@lbl@add{missing}{#3}%
+    \else%
+      \tud@trace@lbl@add{missing}<\tud@res@c>{#3}%
+    \fi%
+    \edef\tud@res@a{%
+      \endgroup%
+      \unexpanded{\def#1}{\expandonce\tud@res@a}%
+    }%
+  \tud@res@a%
+}
+\NewDocumentCommand\Markup@Output@Get{m m >{\AP@Underscore}m r// r== r[]}{%
   \begingroup%
     \IfValueTF{#4}{%
       % TODO Ist das hier richtig aufgehoben oder sollten das die 
@@ -1796,7 +1741,7 @@
         \expandafter\noexpand\csname\tud@res@b\endcsname%
           {\tud@res@c}\unexpanded{=#5=[{#6}]}%
       }%
-    }
+    }%
     \edef\tud@res@a{%
       \endgroup%
       \unexpanded{\def#1}{\expandonce\tud@res@a}%
@@ -1831,7 +1776,7 @@
 }{%
   \begingroup%
     \tud@declare@mode@num=\z@%
-    \Markup@Output@@@Get\tud@res@a{#2}{#3}/#4/=#5=[{#6}]%
+    \Markup@Output@Get\tud@res@a{#2}{#3}/#4/=#5=[{#6}]%
     \edef\tud@res@a{%
       \endgroup%
       \expandonce\tud@res@a%
@@ -1950,13 +1895,10 @@
 }
 \newcommand*\Markup@Main@Ignore[4]{%
   \IfValueT{#1}{%
-    \begingroup%
-      \edef\tud@res@a{\detokenize\expandafter{\@backslashchar#3{#4}}}%
-      \edef\tud@res@b{\@firstoftwo#2\unexpanded{#1}\@secondoftwo#2}%
-      \ClassWarning{tudscrmanual}{%
-        Argument \tud@res@b\space of \tud@res@a\space is ignored%
-      }%
-    \endgroup%
+    \ClassWarning{tudscrmanual}{%
+      \tud@markup@detokenize{#3}{#4} ignoring argument\MessageBreak%
+      \@firstoftwo#2#1\@secondoftwo#2%
+    }%
   }%
 }
 \NewDocumentCommand\Markup@Split@Get{s m m}{%
@@ -1984,16 +1926,17 @@
 }
 \tud@auxlist@register*{tud@ety@declare}
 \newrobustcmd*\Entity@Declare[3]{%
-  \tud@auxlist@add{tud@ety@declare}{\noexpand\tud@ety@declare{#1}{#2}{#3}}%
+  % TODO check raus?
+  \tud@if@strequal{\tud@ety@gnrl}{#3}{}{%
+    \tud@auxlist@add{tud@ety@declare}{\noexpand\tud@ety@declare{#1}{#2}{#3}}%
+  }%
 }
 \newrobustcmd*\tud@ety@declare[3]{%
-  \begingroup%
-    \ifcsundef{Entity@Declared@@#1@#2}{%
-      \csgdef{Entity@Declared@@#1@#2}{#3}%
-    }{%
-      \csgappto{Entity@Declared@@#1@#2}{,#3}%
-    }%
-  \endgroup%
+  \ifcsundef{Entity@Declared@@#1@#2}{%
+    \csgdef{Entity@Declared@@#1@#2}{#3}%
+  }{%
+    \csgappto{Entity@Declared@@#1@#2}{,#3}%
+  }%
 }
 \@onlypreamble\tud@ety@declare
 \RequirePackage{hologo}[2012/04/26]
@@ -2145,40 +2088,46 @@
   \the\tud@toks@%
 }
 \@onlypreamble\DefaultEntity
-% TODO Sternform für unterdrückte Warnungen
 \NewDocumentCommand\Entity@Seek{s m d() m m}{%
   \begingroup%
     \Parameter@Expandable%
     \Misc@Expandable%
-    \edef\tud@ety@objective{\detokenize\expandafter{\@backslashchar#4{#5}}}%
     \letcs\tud@res@b{Entity@Declared@@#4@#5}%
     \letcs\tud@res@c{Entity@Default@@#4@#5}%
     \let\tud@res@a\tud@ety@crnt%
     % DOC Schalter, ob #3 nicht leer gesetzt
     \@tud@res@swafalse%
     \IfValueT{#3}{%
-      \protected@edef\tud@res@a{#3}%
+      \let\tud@res@a\@empty%
+      \protected@edef\tud@res@d{#3}%
+      \@for\tud@res@d:=\tud@res@d\do{%
+        \trim@spaces@in\tud@res@d%
+        \ifx\tud@res@d\@empty\else%
+          \tud@if@strequal{!}{\tud@res@d}{%
+            \let\tud@res@d\tud@ety@crnt%
+          }{%
+            \tud@if@strequal{*}{\tud@res@d}{%
+              \ifundef\tud@res@c{%
+                \let\tud@res@d\@empty%
+                \ClassWarning{tudscrmanual}{%
+                  There is no default entity for\MessageBreak%
+                  `\tud@markup@detokenize{#4}{#5}'%
+                }%
+              }{%
+                \let\tud@res@d\tud@res@c%
+              }%
+            }{}%
+          }%
+          \eappto\tud@res@a{%
+            \ifx\tud@res@a\@empty\else,\fi\expandonce\tud@res@d%
+          }%
+        \fi%
+      }%
       \ifx\tud@res@a\@empty%
         \ClassWarning{tudscrmanual}{Setting an empty entity is not possible}%
         \let\tud@res@a\tud@ety@crnt%
       \else%
         \@tud@res@swatrue%
-        \tud@if@strequal{!}{\tud@res@a}{%
-          \let\tud@res@a\tud@ety@crnt%
-        }{%
-          \tud@if@strequal{*}{\tud@res@a}{%
-            \ifundef\tud@res@c{%
-              \@tud@res@swafalse%
-              \let\tud@res@a\tud@ety@crnt%
-              \ClassWarning{tudscrmanual}{%
-                There is no default entity for\MessageBreak%
-                `\tud@ety@objective'%
-              }%
-            }{%
-              \let\tud@res@a\tud@res@c%
-            }%
-          }{}%
-        }%
       \fi%
     }%
     \let\tud@ety@found\@empty%
@@ -2201,7 +2150,7 @@
             \if@tud@res@swa%
               \ClassWarning{tudscrmanual}{%
                 The entity `\detokenize\expandafter{\tud@res@d}'\MessageBreak%
-                for `\tud@ety@objective' was never set%
+                for `\tud@markup@detokenize{#4}{#5}' was never set%
               }%
               \eappto\tud@ety@fallback{%
                 \ifx\tud@ety@fallback\@empty\else,\fi\expandonce\tud@res@d%
@@ -2219,17 +2168,25 @@
         \else%
           \ifx\tud@ety@found\tud@res@c\else%
             \if@tud@res@swa\else%
-              % DOC INLINE
-              \ifnum\tud@absnum\tud@declare@mode@num\relax=\tw@\relax%
-                \let\tud@ety@found\tud@res@c%
-              \fi%
+              % DOC bereits deklariert?
+              \protected@expandtwoargs\in@%
+                  {,\detokenize\expandafter{\tud@res@c},}%
+                  {,\detokenize\expandafter{\tud@res@b},}%
+              \ifin@\else%
+              % URGENT rein oder raus?
+%              % DOC INLINE
+%              \ifnum\tud@absnum\tud@declare@mode@num\relax=\tw@\relax%
+%                \let\tud@ety@found\tud@res@c%
+%              \fi%
               \ifnum\tud@declare@mode@num>\z@\relax%
+%                \typeout{--------------- #1-#2-#3-#4-#5}%
                 \ClassWarning{tudscrmanual}{%
-                  The entity for `\tud@ety@objective'\MessageBreak%
+                  The entity for `\tud@markup@detokenize{#4}{#5}'\MessageBreak%
                   should be given explicitly or by value:\MessageBreak%
                   (*) for \tud@res@c\MessageBreak%
                   (!) for \tud@ety@crnt%
                 }%
+              \fi%
               \fi%
             \fi%
           \fi%
@@ -2265,7 +2222,7 @@
           \ifnum\tud@res@a>\@ne\relax%
             \ClassWarning{tudscrmanual}{%
               No entity could be found for\MessageBreak%
-              `\tud@ety@objective'%
+              `\tud@markup@detokenize{#4}{#5}'%
             }%
           \fi%
         }%
@@ -2274,14 +2231,14 @@
       \ifx\tud@ety@valid\@empty%
         \ClassWarning{tudscrmanual}{%
           No entity could be validated for\MessageBreak%
-          `\tud@ety@objective', so using given\MessageBreak%
+          `\tud@markup@detokenize{#4}{#5}', so using given\MessageBreak%
           `\expandonce\tud@ety@fallback' instead%
         }%
         \let\tud@ety@valid\tud@ety@fallback%
       \else%
         \ClassWarning{tudscrmanual}{%
           Valid entity `\expandonce\tud@ety@valid'\MessageBreak%
-          found for `\tud@ety@objective', dropping\MessageBreak%
+          found for `\tud@markup@detokenize{#4}{#5}', dropping\MessageBreak%
           `\expandonce\tud@ety@fallback'%
         }%
       \fi%
@@ -2351,11 +2308,9 @@
         \ifnum\tud@res@d<\thr@@\relax%
           \protected@expandtwoargs\in@{,}{\tud@res@b}%
           \ifin@%
-            % TODO Warnung in eigentständiges Makro für mehrmalige Verwendung
-            \edef\tud@res@c{\detokenize\expandafter{\@backslashchar#3{#4}}}%
             \ClassWarning{tudscrmanual}{%
               Multiple entities (\tud@res@b)\MessageBreak%
-              found for `\tud@res@c', link not available%
+              found for `\tud@markup@detokenize{#3}{#4}', link not available%
             }%
           \else%
             \tud@typeout{///// #2: #3 -- #4}%
@@ -2383,7 +2338,7 @@
     }%
   \tud@res@a%
 }
-% TODO das geht auch einfacher!
+% URGENT !!! das geht auch einfacher!
 \newcommand*\tud@specialurl@get[3]{%
   \begingroup%
     \protected@edef\tud@res@b{#3}%
@@ -2421,6 +2376,7 @@
 % TODO in \Entity@Link@Seek integrieren
 \newcommand*\tud@special@href@get[3]{%
   \begingroup%
+    % URGENT #2 wird überschrieben, wenn \tud@res@b
     \tud@specialurl@get\tud@res@a\tud@res@b{#2}%
     \ifcase\tud@res@a\relax% CTAN
       \tud@url@normalize@ctan\tud@res@b{pkg/\tud@res@b}%
@@ -2664,35 +2620,12 @@
     }%
   \tud@res@a%
 }
-\NewDocumentCommand\tud@lbl@@get{s m m}{%
+\NewDocumentCommand\tud@lbl@@get{m m}{%
   \begingroup%
-    \tud@lbl@@@get#3%
-    \IfBooleanT{#1}{%
-      \tud@if@lbl@exists{\tud@lbl@tmp}{%
-        \tud@trace@lbl@add{matched}{\tud@lbl@tmp}%
-      }{%
-        \let\tud@res@a\tud@lbl@tmp%
-        \tud@truncate@value\tud@lbl@tmp{\tud@lbl@tmp}%
-        \tud@if@lbl@exists{\tud@lbl@tmp}{%
-          \tud@trace@lbl@add{matched}<\tud@res@a>{\tud@lbl@tmp}%
-        }{%
-          % PENDING vorhandenen Link vorher einsammeln?
-          % PENDING oder \tud@trace@lbl@add{missing} später nutzen?
-          \def\tud@res@b##1##2##3\@nil{%
-            \Entity@Link@Seek\tud@res@b{\tud@lbl@tmp}{##1}{##2}%
-          }%
-          \tud@res@b#3\@nil%
-          \ifx\tud@res@b\relax%
-            \tud@trace@lbl@add{missing}{\tud@res@a}%
-          \else%
-            \tud@trace@lbl@add{missing}<\tud@res@b>{\tud@res@a}%
-          \fi%
-        }%
-      }%
-    }%
+    \tud@lbl@@@get#2%%
     \edef\tud@res@a{%
       \endgroup%
-      \unexpanded{\def#2}{\detokenize\expandafter{\tud@lbl@tmp}}%
+      \unexpanded{\def#1}{\detokenize\expandafter{\tud@lbl@tmp}}%
     }%
   \tud@res@a%
 }
@@ -2889,6 +2822,7 @@
         }%
       \tud@res@b{##1}%
     }%
+    % TODO (beide) Schleifen notwendig?
     \dolistloop{#3}%
     \dolistloop{#2}%
     \tud@trace@lbl@add{created}{\tud@res@a}%
@@ -3476,8 +3410,8 @@
 }
 \newcommand*\tud@lbl@parent{}
 \let\tud@lbl@parent\relax%
-% TODO |#9| \AP@Index für Auswertung 
-%   > \tud@index@mode@num für default auswerten (Changes)
+% TODO |#9| \AP@Index für Auswertung
+%   > \tud@index@mode@num für default (NoValue) auswerten (Changes)
 %       nur |!|, |?|, |.| und || gültig
 \NewDocumentCommand\Process@Index{o m m r// r== r[] r() r<> r||}{%
   \begingroup%
@@ -3702,10 +3636,9 @@
         \index[\tud@res@c]{\tud@res@a\ifx\tud@res@b\@empty\else|\tud@res@b\fi}%
       }{%
         \IfValueT{#3}{%
-          \edef\tud@res@a{\detokenize\expandafter{\@backslashchar#2}}%
           \ClassWarning{tudscrmanual}{%
-            Markup command `\tud@res@a' was defined\MessageBreak%
-            without an index, |#3| is useless%
+            Markup command `\tud@markup@detokenize{#2}{...}' was\MessageBreak%
+            defined without index, |#3| is useless%
           }%
         }%
       }%
@@ -4575,7 +4508,7 @@
         \def\tud@res@c##1{%
           \ifinlist{##1}{\tud@res@a}{\listadd\tud@res@b{##1}}{}%
         }%
-        \forlistloop\tud@res@c\tud@todo@type@use%
+        \forlistloop\tud@res@c{\tud@todo@type@use}%
         \edef\tud@res@c{%
           \endgroup%
           \unexpanded{\def\tud@todo@type@use}{\expandonce\tud@res@b}%
@@ -4765,7 +4698,7 @@
 \PassOptionsToPackage{vskip=\smallskipamount}{quoting}
 \RequirePackage{quoting}[2014/01/28]
 \RequirePackage{isodate}[2010/01/03]
-% URGENT raus, sobald v2.1 da!
+% PENDING raus, sobald v2.2 bzw. neues ragged2e da!
 \disable@package@load{everysel}{%
   \newcommand*\EverySelectfont[1]{\AddToHook{selectfont}{##1}}%
 }
