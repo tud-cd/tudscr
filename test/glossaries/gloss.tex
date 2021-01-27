@@ -1,0 +1,250 @@
+\documentclass[english,ngerman]{tudscrreprt}
+\usepackage{iftex}
+\iftutex
+  \usepackage{fontspec}
+\else
+  \usepackage[T1]{fontenc}
+  \usepackage[ngerman=ngerman-x-latest]{hyphsubst}
+\fi
+\usepackage{babel}
+\usepackage{xltabular}
+\usepackage{booktabs}
+\usepackage{siunitx}
+
+\AfterPackage*{hyperref}{%
+\usepackage[%
+%  acronym,% Abkürzungen
+  symbols,% Formelzeichen
+  nomain,% kein Glossar
+  nogroupskip,%
+  toc,%
+  section=chapter,%
+  nostyles,%
+  translate=babel,%
+% mit Tex Live einfach verwendbar
+  xindy={language=german-din},
+]{glossaries}
+\makeglossaries
+}% Ende von AfterPackage
+
+\makeatletter
+\newcommand*\glssort@roman{%
+  a,A,b,B,c,C,d,D,e,E,f,F,g,G,h,H,i,I,j,J,k,K,l,L,m,M,
+  n,N,o,O,p,P,q,Q,r,R,s,S,t,T,u,U,v,V,w,W,x,X,y,Y,z,Z%
+}
+\newcommand*\glssort@greek{%
+  \alpha,\Alpha,\beta,\varbeta,\Beta,\gamma,\Gamma,\delta,\Delta,%
+  \epsilon,\varepsilon,\Epsilon,\zeta,\Zeta,\eta,\Eta,\theta,\vartheta,\Theta,%
+  \iota,\Iota,\kappa,\varkappa,\Kappa,\lambda,\Lambda,\mu,\Mu,\nu,\Nu,\xi,\Xi,%
+  \omicron,\Omicron,\pi,\varpi,\Pi,\rho,\varrho,\Rho,\sigma,\varsigma,\Sigma,%
+  \tau,\Tau,\upsilon,\Upsilon,\phi,\varphi,\Phi,\chi,\Chi,\psi,\Psi,%
+  \omega,\varomega,\Omega%
+}
+\newcommand*\diff[1]{\upDelta#1}
+\newcommand*\glssort@accent{%
+  \diff,\acute,\bar,\breve,\check,\dot,\ddot,\dddot,\ddddot,%
+  \hat,\widehat,\grave,\tilde,\widetilde,\vec,\mathring,%
+  \Acute,\Bar,\Breve,\Check,\Dot,\Ddot,\Hat,\Grave,\Tilde,\Vec%
+}
+\newcommand*\glssort@index[2]{%
+  \begingroup%
+    \glssort@sanitize\@tempa{#2}%
+    % erster Token für Vergleich
+    \def\@tempc##1##2\@nil{\def\@tempb{##1}}%
+    \expandafter\@tempc\@tempa\@nil%
+    \@tempswafalse%
+    \@tempcnta=0%
+    % Schleife für Token-Vergleich aus Listen \glssort@roman und \glssort@greek
+    \def\do##1{%
+      \if@tempswa\else%
+        \def\@tempc{##1}%
+        \ifx\@tempb\@tempc\@tempswatrue\fi%
+        \if@tempswa\else\advance\@tempcnta\@ne\fi%
+      \fi%
+    }%
+    \edef\@tempc{\expandonce\glssort@roman,\expandonce\glssort@greek}%
+    \expandafter\docsvlist\expandafter{\@tempc}%
+    \edef\@tempa{%
+      \endgroup%
+      \unexpanded{\def#1}{%
+        \ifnum\@tempcnta<100 0\fi\ifnum\@tempcnta<10 0\fi\the\@tempcnta%
+        \space\detokenize\expandafter{\@tempa}%
+      }%
+    }%
+  \@tempa%
+  \typeout{+++++ generated sort index: #1}%
+}
+\AfterPackage*{glossaries}{%
+  \newcommand*\symbollettergroup{}
+  \newcommand*\newformulasymbol[5][]{%
+    \ifisgreeksymbol{#4}{%
+      \renewcommand*{\symbollettergroup}{greekletters}%
+    }{%
+      \renewcommand*{\symbollettergroup}{romanletters}%
+    }%
+    \begingroup%
+      \def\@tempa{%
+        type=symbols,%
+        parent={\symbollettergroup},%
+        name={#3},%
+        description={\nopostdesc},%
+        symbol={\ensuremath{#4}},%
+        user1={\si{#5}},%
+        #1%
+      }%
+      \glssort@index\@tempb{#4}%
+      \epreto\@tempa{sort={\@tempb},}%
+      \edef\@tempb{%
+        \endgroup%
+        \unexpanded{\newglossaryentry{#2}}{\expandonce\@tempa}%
+      }%
+    \@tempb%
+  }%
+  \defglsentryfmt[symbols]{%
+    \ifmmode%
+      \glssymbol{\glslabel}%
+    \else%
+      \glsgenentryfmt~\glsentrysymbol{\glslabel}%
+    \fi%
+  }
+  \providecommand*\greeklettersname{Greek letters}
+  \providecommand*\romanlettersname{Roman letters}
+  \newglossaryentry{greekletters}{%
+    type=symbols,%
+    name={\greeklettersname},%
+    description={\nopostdesc},%
+    sort={a}%
+  }
+  \newglossaryentry{romanletters}{%
+    type=symbols,%
+    name={\romanlettersname},%
+    description={\nopostdesc},%
+    sort={b}%
+  }
+  \newglossarystyle{symbxltab}{%
+    \newcommand*\symbollevel{-1}%
+    \renewenvironment{theglossary}{%
+      \xltabular[l]{\linewidth}{ccXl}%
+    }{%
+      \endxltabular%
+    }%
+    \renewcommand*{\glsgroupheading}[1]{}%
+    \renewcommand*{\glsgroupskip}{}%
+    \newcommand*\symbolhead{%
+      \toprule
+      \bfseries Formelzeichen & \bfseries Einheit &
+      \bfseries Bezeichnung %& \bfseries Seite(n)
+      \tabularnewline\midrule
+    }%
+    \renewcommand*{\glossaryheader}{%
+      \endfirsthead%
+      \symbolhead\endhead%
+      \bottomrule\endfoot%
+      \gdef\symbollevel{-1}%
+    }%
+    \renewcommand*{\glossentry}[2]{%
+      \ifglshaschildren{##1}{%
+        \ifnum\symbollevel>0\relax%
+          \tabularnewline\bottomrule\tabularnewline[\smallskipamount]%
+        \fi
+        \gdef\symbollevel{0}%
+        \tabularnewline[%
+          \arraystretch\dimexpr-\ht\strutbox-\dp\strutbox\relax%
+        ]%
+%        \multicolumn{4}{@{}l@{}}{\minisec{\glsentryname{##1}}}%mit Seitenangabe
+        \multicolumn{3}{@{}l@{}}{\minisec{\glsentryname{##1}}}%ohne Seitenangabe
+      }{%
+        \GlossariesWarning{%
+          There are no childrens for entry ##1.\MessageBreak
+          Nothing will be printed. Maybe you should\MessageBreak
+          specify ##1 as a child entry.
+        }%
+      }%
+    }%
+    \renewcommand*{\subglossentry}[3]{%
+      \ifnum\symbollevel=0\relax%
+        \tabularnewline[\medskipamount]\symbolhead%
+      \else%
+        \tabularnewline
+      \fi%
+      \gdef\symbollevel{##1}%
+      \glsentryitem{##2}% Entry number if required
+      \glstarget{##2}{\glossentrysymbol{##2}} &
+      \glsentryuseri{##2} &
+      \glossentryname{##2}%
+      %& ##3% mit Seitenangabe
+    }%
+  }
+}% Ende von AfterPackage
+\newcommand*\glssort@sanitize[2]{%
+  \begingroup%
+    \@tempcnta=0%
+    \def\do##1{%
+      \advance\@tempcnta\@ne%
+      % für accents wird an Argument Suffix für sort-Key angehängt
+      \edef##1####1{####1|\ifnum\@tempcnta<10 0\fi\the\@tempcnta}%
+    }%
+    \expandafter\docsvlist\expandafter{\glssort@accent}%
+    \let\boldsymbol\relax%
+    \let\mathrm\@firstofone%
+    \protected@edef\@tempa{\endgroup\unexpanded{\def#1}{#2}}%
+  \@tempa%
+}
+\newcommand*\ifisgreeksymbol[1]{%
+  \begingroup%
+    \glssort@sanitize\@tempa{#1}%
+    \def\@tempb##1##2\@nil{\def\@tempa{##1}}%
+    \expandafter\@tempb\@tempa\@nil%
+    \edef\@tempb{%
+      \noexpand\in@{,\expandonce\@tempa,}{,\expandonce\glssort@greek,}%
+    }%
+    \@tempb%
+    \ifin@
+      \aftergroup\@firstoftwo%
+    \else%
+      \aftergroup\@secondoftwo%
+    \fi%
+  \endgroup%
+}
+\makeatother
+\usepackage[colorlinks]{hyperref}
+
+\AtBeginDocument{
+\newformulasymbol{Pteq}{äquivalente Referenzleistung bezogen auf $r$}
+  {\tilde{P}_{\mathrm{t},r}}{\W}
+\newcommand*\Pteq[1][r]{\glslink{Pteq}{\ensuremath{\tilde{P}_{\mathrm{t},#1}}}}
+\newformulasymbol{aavg}{mittlere Beschleunigung}{\bar{a}}{\m\per\square\s}
+\newformulasymbol{A}{Stirnfläche}{A}{\square\metre}
+\newformulasymbol{U}{Spannung}{U}{\V}
+\newformulasymbol{dU}{Spannungshub}{\diff{U}}{\V}
+\newformulasymbol{eta}{Wirkungsgrad}{\eta}{1}
+\newformulasymbol{thetac}{Temperatur}{\vartheta_\mathrm{c}}{\celsius}
+\newformulasymbol{Func}{Funktionalität}{\Xi}{1}
+\newformulasymbol{fxi}{funktionale Dauer}{\xi}{\hour}
+}
+
+\begin{document}
+Und im Text:
+Ein Beispiel sind \Pteq, \Pteq[0.5] \Pteq[1] und \Pteq[99].
+
+Also habe ich folgende Fälle für die Formelzeichen
+
+\gls{aavg}
+
+\gls{A}
+
+\gls{U}
+
+\gls{dU}
+
+\gls{eta}
+
+\gls{thetac}
+
+\gls{Func}
+
+\gls{fxi}
+
+\printsymbols[style=symbxltab]
+
+\end{document}
