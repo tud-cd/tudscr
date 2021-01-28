@@ -475,6 +475,7 @@
     }%
     \def\do##1{%
       \ifnum\tud@res@d=\@ne\relax% missing with link
+        % TODO tracing der urls prüfen
         \tud@trace@lbl@add{url}<#2>{##1}%
       \fi%
       \begingroup%
@@ -500,6 +501,7 @@
     \let\tud@res@a\@empty%
     \tud@res@cnt=\z@\relax%
     \ifnum\tud@res@cnt>\@ne\relax%
+      % TODO schleife auflösen
       \typeout{!!!!!!!!!!!!!!!!!!!!!!! LOOP wird genutzt!}
     \fi%
     \dolistloop{#3}%
@@ -1428,7 +1430,7 @@
     \tud@idx@robustify%
     \def\tud@res@a{#9}%
     \let\tud@res@b\@empty%
-    \def\tud@res@c##1##2{\listeadd\tud@res@b{\unexpanded{(##1)}<##2>}}%
+    \def\tud@res@c##1##2{\listeadd\tud@res@b{<##2>\unexpanded{(##1)}}}%
     \ifnum\tud@declare@mode@num>\m@ne\relax%
       \protected@expandtwoargs\in@{,}{#9}%
       \ifin@%
@@ -1456,12 +1458,20 @@
         \Process@@@Markup@Declare{#2}{#3}/#4/=#5=[{#6}]|#7|'#8'{\tud@res@b}%
         % URGENT \Markup@Output@Wrapper@InlineDeclaration fur Link
         \ifnum\tud@declare@mode@num=\tw@\relax%
-          % TODO LinkSeek via \tud@res@b, Warnung falls für mehrere Entities
-          % TODO 'none' unterdrückt!
-          % einzelnen verwenden, keiner vorhanden -> überschreibbar!
-%          {#9}{#2}{#3}
-%          \tud@if@specialurl{#5}{\def\tud@res@c{#5}}{}%
-%                  \tud@specialurl@resolve\tud@res@a{\tud@res@c}{#3}%
+%
+%      \let\tud@res@b\@empty%
+%      \ifcase#2\relax\or% simple
+%        \Entity@Link@Seek\tud@res@b<#4>(#5){#6}{#7}%
+%      \or% link
+%        \Entity@Link@Seek\tud@res@b'#3'<#4>(#5){#6}{#7}%
+%      \else%
+%        \ClassWarning{tudscrmanual}{%
+%          A cross-reference was not created as label\MessageBreak%
+%          `#4' does not exist%
+%        }%
+%      \fi%
+%      \tud@specialurl@wrapper\tud@res@a{\tud@res@b}{#4}%
+%
         \fi%
         \def\tud@res@c{declare}%
       \fi%
@@ -1481,18 +1491,18 @@
   \begingroup%
     \protected@edef\tud@res@a{\noexpand\dolistloop{\expandonce#8}}%
     \def\do##1{\tud@res@d##1\@nil}%
-    \def\tud@res@d(##1)<##2>\@nil{%
+    \def\tud@res@d<##1>(##2)\@nil{%
       \if@tud@declare@label%
-        \tud@lbl@declare=#4=<##2>%
+        \tud@lbl@declare=#4=<##1>%
       \fi%
-      \protected@expandtwoargs\in@{,}{##1}%
+      \protected@expandtwoargs\in@{,}{##2}%
       \ifin@%
         % TODO label in \tud@declaration@internal@list?
       \else%
-        \Entity@Declare{#1}{#2}{##1}%
+        \Entity@Declare{#1}{#2}{##2}%
         \listgadd\tud@declaration@internal@list{%
-          {{#1}{#2}/#3/=#4=[{#5}]|#6|'#7'(##1)}%
-          {##2}%
+          {{#1}{#2}/#3/=#4=[{#5}]|#6|'#7'(##2)}%
+          {##1}%
         }%
       \fi%
     }%
@@ -1502,26 +1512,28 @@
 \newcommand*\tud@reference@num[2]{%
   \begingroup%
     \TUD@set@numkey{}{tud@res@a}{%
-      {}{-1},{none}{-1},{simple}{0},{plain}{0},{basic}{0},%
-      {auto}{2},{ref}{2},{autoref}{2},{auto*}{3},{ref*}{3},{autoref*}{3},%
-      {full}{4},{fullref}{4},{full*}{5},{fullref*}{5},%
-      {page}{6},{pageref}{6},{vpage}{6},{vpageref}{6},%
-      {far}{7},{faraway}{7},{realpage}{7},%
+      \TUD@bool@numkey,{}{0},{none}{0},{simple}{1},{plain}{1},{basic}{1},%
+      % URGENT default definitiv suchen! {*}{2},
+      {auto}{3},{ref}{3},{autoref}{3},{auto*}{4},{ref*}{4},{autoref*}{4},%
+      {full}{5},{fullref}{5},{full*}{6},{fullref*}{6},%
+      {page}{7},{pageref}{7},{vpage}{7},{vpageref}{7},%
     }{#2}%
     \ifx\FamilyKeyState\FamilyKeyStateProcessed\else%
-      \tud@if@specialurl{#2}{%
-      % TODO '*' für defaulturl? bei inlinedeklarationen standard?
-        \def\tud@res@a{1}%
-      }{%
-        \ClassWarning{tudscrmanual}{%
-          The cross-reference '#2'\MessageBreak%
-          is unknown. Only '[auto]ref' or 'full[ref]' and\MessageBreak%
-          '[v]page[ref]' as well as 'plain' or 'none' are\MessageBreak%
-          valid. Besides, 'CTAN[info]:<pkg>' or 'GH:<repo>'\MessageBreak%
-          and 'URL:<url>' can be used%
-        }%
-        \def\tud@res@a{-1}%
+      \tud@specialurl@validate{#2}{%
+      % URGENT '*' für defaulturl? bei inlinedeklarationen standard?
+        \def\tud@res@a{2}%
+        \FamilyKeyStateProcessed%
       }%
+    \fi%
+    \ifx\FamilyKeyState\FamilyKeyStateProcessed\else%
+      \ClassWarning{tudscrmanual}{%
+        The cross-reference '#2'\MessageBreak%
+        is unknown. Only '[auto]ref' or 'full[ref]' and\MessageBreak%
+        '[v]page[ref]' as well as '' or booleans are\MessageBreak%
+        valid. Besides, 'CTAN[info]:<pkg>' or 'GH:<repo>'\MessageBreak%
+        and 'URL:<url>' can be used%
+      }%
+      \def\tud@res@a{0}%
       \FamilyKeyStateProcessed%
     \fi%
     \edef\tud@res@a{%
@@ -1536,22 +1548,22 @@
     \let\tud@output@wrapper\relax%
     \IfValueTF{#4}{%
       \tud@reference@num\tud@res@cnt{#4}%
-      \ifnum\tud@res@cnt=\m@ne\relax%
+      \ifnum\tud@res@cnt=\z@\relax%
         \def\tud@output@wrapper{\@firstofone}%
       \fi%
     }{%
-      \tud@res@cnt=\z@%
+      \tud@res@cnt=\@ne%
     }%
     \protected@edef\tud@res@c{\noexpand\dolistloop{\expandonce#5}}%
     \let\tud@lbl@found\relax%
     \let\tud@res@a\@empty%
     \let\tud@res@b\@empty%
     \def\do##1{\tud@res@d##1\@nil}%
-    \def\tud@res@d(##1)<##2>\@nil{%
-      \ifnum\tud@res@cnt=\m@ne\relax%
-        \tud@trace@lbl@add{ignored}{##2}%
+    \def\tud@res@d<##1>(##2)\@nil{%
+      \ifnum\tud@res@cnt=\z@\relax%
+        \tud@trace@lbl@add{ignored}{##1}%
       \else%
-        \edef\tud@lbl@tmp{##2}%
+        \edef\tud@lbl@tmp{##1}%
         \tud@if@lbl@exists{\tud@lbl@tmp}{}{%
           \tud@truncate@value\tud@lbl@tmp{\tud@lbl@tmp}%
           \tud@if@lbl@exists{\tud@lbl@tmp}{}{%
@@ -1562,11 +1574,11 @@
         \ifx\tud@lbl@found\relax%
           \let\tud@lbl@found\tud@lbl@tmp%
           % DOC \tud@res@a enthält bundle und label für hyperlink
-          % URGENT in <##2>(##1)?
-          \def\tud@res@a{{##2}{##1}}%
+          \def\tud@res@a{<##1>(##2)}%
         \else%
           \ifx\tud@lbl@tmp\@empty\else%
-            \protected@eappto\tud@res@b{\ifx\tud@res@b\@empty\else,\fi##1}%
+            \tud@trace@lbl@add{ignored}{\tud@lbl@tmp}%
+            \appto\tud@res@b{\MessageBreak\@spaces{##2}}%
           \fi%
         \fi%
       \fi%
@@ -1575,139 +1587,95 @@
     \ifx\tud@lbl@found\@empty%
       \ifx\tud@res@b\@empty\else%
         \def\tud@output@wrapper{\@firstofone}%
-        \let\tud@res@c\@empty%
-        \@for\tud@res@b:=\tud@res@b\do{%
-          \eappto\tud@res@c{%
-            \unexpanded{\MessageBreak\@spaces}%
-            \detokenize\expandafter{\tud@res@b}%%
-          }%
-        }%
         \ClassWarning{tudscrmanual}{%
           A specific entity (single or valid combination) is\MessageBreak% 
           needed for `\tud@markup@detokenize{#2}{#3}'%
-          \tud@res@c%
+          \tud@res@b%
         }%
       \fi%
     \fi%
     \ifx\tud@output@wrapper\relax%
-      \begingroup%
-      \def\tud@res@c##1##2{\def\tud@res@a{<##1>(##2)}}%
-      \expandafter\tud@res@c\tud@res@a%
       \edef\tud@res@c{%
-        \noexpand\Markup@Output@@Wrapper<\tud@lbl@found>{\the\tud@res@cnt}'#4'%
-          \expandonce\tud@res@a{#2}{#3}%
+        \noexpand\Markup@Output@@Wrapper<\tud@lbl@found>{\the\tud@res@cnt}%
+          \ifnum\tud@res@cnt>\@ne'#4'\fi%
+          \expandonce\tud@res@a%
+          \unexpanded{{#2}{#3}}%
       }%
       \tud@res@c%
-      \endgroup
-      \ifx\tud@lbl@found\@empty%
-        \protected@edef\tud@res@c{%
-        % TODO \Entity@Link@Seek hier vorher aufrufen
-          \unexpanded{\Markup@Output@Wrapper@Link\tud@output@wrapper}%
-            {\the\tud@res@cnt}\expandonce\tud@res@a'#4'{#2}{#3}%
-        }%
-        \tud@res@c%
-      \else%
-        \edef\tud@lbl@tmp{\expandafter\@firstoftwo\tud@res@a}%
-        \ifx\tud@lbl@found\tud@lbl@tmp%
-          \tud@trace@lbl@add{matched}{\tud@lbl@found}%
-        \else%
-          \tud@trace@lbl@add{matched}<\tud@lbl@tmp>{\tud@lbl@found}%
-        \fi%
-        \tud@truncate@value\tud@lbl@tmp{\tud@lbl@tmp}%
-        \xifinlist{\tud@lbl@tmp}{\tud@declaration@label@list}{%
-          \def\tud@output@wrapper{\@firstofone}%
-        }{%
-% URGENT label nicht verwenden, wenn in declaration@label@list;
-%      in diesem Fall schon in \Process@@Markup 'none' setzen?
-%      zu beachten ist, dass bspw. 'full' trotzdem funktionieren sollte
-%      unterdrücken der labels quasi nur bei refnum=0
-          \protected@edef\tud@res@c{%
-            \unexpanded{\Markup@Output@Wrapper@Label\tud@output@wrapper}%
-              {\the\tud@res@cnt}{\tud@lbl@found}'#4'%
-          }%
-          \tud@res@c%
-        }%
-      \fi%
-    \fi%
-    \edef\tud@output@wrapper{%
-      \endgroup%
-      \unexpanded{\def#1}{%
-        \ifx\tud@output@wrapper\relax%
-          \noexpand\@firstofone%
-        \else%
-          \expandonce\tud@output@wrapper%
-        \fi%
-      }%
-    }%
-  \tud@output@wrapper%
-}
-% DOC found cnt ref input ety markup value
-\NewDocumentCommand\Markup@Output@@Wrapper{r<> m r'' r<> d() m m}{%
-  \typeout{=========================================}%
-  \typeout{\detokenize{<#1>{#2}'#3'<#4>(#5){#6}{#7}}}%
-}
-\NewDocumentCommand\Markup@Output@Wrapper@Label{m m m r''}{%
-  \begingroup%
-    \let\tud@res@a\relax% simple/link
-    \ifcase#2\relax\or% link
-      \ClassWarning{tudscrmanual}{%
-        As label `#3'\MessageBreak%
-        exists, link '#4' is ignored%
-      }%
-    \or% autoref
-      \def\tud@res@a{in \autoref}%
-    \or% autoref*
-      \def\tud@res@a{aus \autoref}%
-    \or% fullref
-      \def\tud@res@a{in \fullref}%
-    \or% fullref*
-      \def\tud@res@a{aus \fullref}%
-    \or% page
-      \def\tud@res@a{\vpageref}%
-    \or% far
-      \def\tud@res@a{\reftextfaraway}%
     \fi%
     \edef\tud@res@a{%
       \endgroup%
-      \unexpanded{\def#1}{\noexpand\tud@hyperlink%
-        \ifx\tud@res@a\relax\else[{\space\expandonce\tud@res@a{#3}}]\fi{#3}%
+      \unexpanded{\def#1}{%
+%        \ifx\tud@output@wrapper\relax%
+%          \noexpand\@firstofone%
+%        \else%
+          \expandonce\tud@output@wrapper%
+%        \fi%
       }%
     }%
   \tud@res@a%
 }
-\NewDocumentCommand\Markup@Output@Wrapper@Link{m m m m r'' m m}{%
-  \begingroup
-    \def\tud@res@a{\@firstofone}%
-    \ifnum#2<\tw@\relax%
-      \Entity@Link@Seek\tud@res@c<#3>(#4){#6}{#7}%
-      \IfValueT{#5}{%
-        \ifx\tud@res@c\relax%
-          \tud@if@specialurl{#5}{\def\tud@res@c{#5}}{}%
-        \else%
-          \ClassWarning{tudscrmanual}{%
-            The special link '#5' was not used as\MessageBreak%
-            a default one '\tud@res@c'%
-            \MessageBreak exists%
-          }%
-        \fi%
-      }%
-      \ifx\tud@res@c\relax\else%
-        \tud@specialurl@resolve\tud@res@a{\tud@res@c}{#3}%
+% DOC found cnt ref input ety markup value
+\NewDocumentCommand\Markup@Output@@Wrapper{r<> m d'' r<> d() m m}{%
+%  \typeout{=========================================}%
+%  \typeout{\detokenize{<#1>{#2}'#3'<#4>(#5){#6}{#7}}}%
+  \begingroup%
+    \edef\tud@lbl@found{#1}%
+    \ifx\tud@lbl@found\@empty%
+      \let\tud@res@a\@empty%
+      % URGENT not multiple?
+      \ifnum\tud@res@cnt>\tw@\relax%
+        \ClassWarning{tudscrmanual}{%
+          A cross-reference was not created as label\MessageBreak%
+          `#4' does not exist%
+        }%
+      \else%
+        \Entity@Link@Seek\tud@res@a'#3'<#4>(#5){#6}{#7}%
+      \fi%
+      \tud@specialurl@wrapper\tud@output@wrapper{\tud@res@a}{#4}%
+      \ifx\tud@res@a\@empty%
+        \tud@trace@lbl@add{missing}{#4}%
+      \else%
+        \tud@trace@lbl@add{missing}<\tud@res@a>{#4}%
       \fi%
     \else%
-      \ClassWarning{tudscrmanual}{%
-        A cross-reference was not created as label\MessageBreak%
-        `#3' does not exist%
+      % URGENT implementieren
+      %        \tud@truncate@value\tud@lbl@tmp{\tud@lbl@tmp}%
+      %        \xifinlist{\tud@lbl@tmp}{\tud@declaration@label@list}{%
+      %          \def\tud@output@wrapper{\@firstofone}%
+      %        }{%
+      \let\tud@res@a\@empty% simple/link
+      \ifcase#2\relax\or\or% link
+        \ClassWarning{tudscrmanual}{%
+          As label `#4'\MessageBreak%
+          exists, link '#3' is ignored%
+        }%
+      \or% autoref
+        \def\tud@res@a{in \autoref}%
+      \or% autoref*
+        \def\tud@res@a{aus \autoref}%
+      \or% fullref
+        \def\tud@res@a{in \fullref}%
+      \or% fullref*
+        \def\tud@res@a{aus \fullref}%
+      \or% page
+        \def\tud@res@a{\vpageref}%
+      \fi%
+      \edef\tud@output@wrapper{%
+        \noexpand\tud@hyperlink%
+        \ifx\tud@res@a\@empty\else%
+          [{\space\expandonce\tud@res@a{\tud@lbl@found}}]%
+        \fi{\tud@lbl@found}%
       }%
-    \fi%
-    \ifx\tud@res@c\relax%
-      \tud@trace@lbl@add{missing}{#3}%
-    \else%
-      \tud@trace@lbl@add{missing}<\tud@res@c>{#3}%
+      \tud@if@strequal{#4}{\tud@lbl@found}{%
+        \tud@trace@lbl@add{matched}{\tud@lbl@found}%
+      }{%
+        \tud@trace@lbl@add{matched}<#4>{\tud@lbl@found}%
+      }%
     \fi%
     \edef\tud@res@a{%
       \endgroup%
-      \unexpanded{\def#1}{\expandonce\tud@res@a}%
+      \unexpanded{\def\tud@output@wrapper}{\expandonce\tud@output@wrapper}%
     }%
   \tud@res@a%
 }
@@ -1965,9 +1933,7 @@
 }
 \NewMarkupCommand\Format[lvl=1](\sbnfont\hologo){Textsatzsystem}
 \NewMarkupCommand\Bundle[lvl=1,idx=false](\textsbn){Bundle}
-% TODO \idxsuffix auf Bundle unterdrücken?
 \NewMarkupCommand\Class[lvl=2,idx=files](\textsbn){Klasse}
-% TODO \idxsuffix auf Bundle unterdrücken?
 \NewMarkupCommand\Package[lvl=2,idx=files](\textsbn){Paket}
 \NewMarkupCommand\Option[idx=options,type=value]'c'{Option}
 \Markup@Declare@Format@Set{Environment}{%
@@ -2242,7 +2208,7 @@
 \NewDocumentCommand\DefaultEntityLink{m d() r''}{%
   \begingroup%
     \tud@if@markup{#1}{%
-      \tud@if@specialurl{#3}{%
+      \tud@specialurl@validate{#3}{%
         \begingroup%
           \Markup@Split@Get\tud@res@a{#1}%
           \protected@edef\tud@res@b{\IfValueTF{#2}{#2}{}}%
@@ -2271,11 +2237,6 @@
           }{}%
           \csxdef{\tud@res@a}{#3}%
         \endgroup%
-      }{%
-        \ClassWarning{tudscrmanual}{%
-          Special link `#3' invalid, permitted are:\MessageBreak%
-          CTAN[info]:... GH:... URL:...
-        }%
       }%
     }{}%
   \endgroup%
@@ -2351,70 +2312,77 @@
     }%
   \tud@res@a%
 }
-\NewDocumentCommand\Entity@Link@Seek{m d<> d() m m}{%
+\NewDocumentCommand\Entity@Link@Seek{m d'' d<> d() m m}{%
   \begingroup%
-    \IfValueTF{#2}{%
-      \protected@edef\tud@lbl@tmp{#2}%
+    \IfValueTF{#3}{%
+      \protected@edef\tud@lbl@tmp{#3}%
     }{%
-      \Entity@Get*\tud@res@a{#4}{#5}%
-      \tud@lbl@@get\tud@lbl@tmp{{#4}{#5}(\tud@res@a)}%
+      \Entity@Get*\tud@res@a{#5}{#6}%
+      \tud@lbl@@get\tud@lbl@tmp{{#5}{#6}(\tud@res@a)}%
     }%
     \Entity@Link@Get\tud@res@a{\tud@lbl@tmp}%
-    \ifx\tud@res@a\relax%
-      % TODO Level-Check raus?
-      \Entity@Level@Get\tud@res@d{#4}%
+    \ifx\tud@res@a\@empty%
+      % URGENT Level-Check raus, wenn '*'
+      \Entity@Level@Get\tud@res@d{#5}%
       \ifnum\tud@res@d<\thr@@\relax%
-        \Entity@Seek(#3){#4}{#5}{%
+        \Entity@Seek(#4){#5}{#6}{%
           \tud@lbl@get\tud@lbl@tmp{\tud@ety@encountered}%
           \Entity@Link@Get\tud@res@a{\tud@lbl@tmp}%
-          \ifx\tud@res@a\relax\else%
+          \ifx\tud@res@a\@empty\else%
             \@tud@ety@seekfalse%
           \fi%
         }%
       \fi%
     \fi%
+    \IfValueT{#2}{%
+      \ifx\tud@res@a\@empty%
+        \tud@specialurl@validate{#2}{\def\tud@res@a{#2}}%
+      \else%
+        \ClassWarning{tudscrmanual}{%
+          The special link '#2' was not used as\MessageBreak%
+          a default one '\tud@res@a'\MessageBreak exists%
+        }%
+      \fi%
+    }%
     \edef\tud@res@a{%
       \endgroup%
-      \ifx\tud@res@a\relax%
-        \unexpanded{\let#1\relax}%
-      \else%
-        \unexpanded{\def#1}{\tud@res@a}%
-      \fi%
+      \unexpanded{\def#1}{\tud@res@a}%
     }%
   \tud@res@a%
 }
 \NewDocumentCommand\Entity@Link@Get{m m}{%
   \tud@truncate@value#1{#2}%
   \letcs#1{Entity@Link@@#1}%
-  \ifundef{#1}{\let#1\relax}{}%
+  \ifundef{#1}{\let#1\@empty}{}%
 }
-\newcommand*\tud@specialurl@resolve[3]{%
+\newcommand*\tud@specialurl@wrapper[3]{%
   \begingroup%
     \protected@edef\tud@res@a{#2}%
-    \expandafter\tud@specialurl@@resolve\expandafter\tud@res@b\tud@res@a::\@nil%
-    \ifnum\tud@res@b<\z@\relax%
-      \let\tud@res@c\@empty%
-    \else%
-      \def\tud@res@d##1:##2\@nil{\def\tud@res@c{##2}}%
-      \expandafter\tud@res@d\tud@res@a\@nil%
-      \ifx\tud@res@c\@empty\else%
-        \ifcase\tud@res@b\relax% CTAN
-          \tud@url@normalize@ctan\tud@res@c{pkg/\tud@res@c}%
-        \or% CTANinfo
-          \tud@url@normalize@ctan\tud@res@c{tex-archive/info/\tud@res@c}%
-        \or% GH
-          \tud@url@normalize@github\tud@res@c{\tud@res@c}%
+    \let\tud@res@c\@empty%
+    \ifx\tud@res@a\@empty\else%
+      \expandafter\tud@specialurl@resolve\expandafter\tud@res@b\tud@res@a::\@nil%
+      \ifnum\tud@res@b<\z@\relax\else%
+        \def\tud@res@d##1:##2\@nil{\def\tud@res@c{##2}}%
+        \expandafter\tud@res@d\tud@res@a\@nil%
+        \ifx\tud@res@c\@empty\else%
+          \ifcase\tud@res@b\relax% CTAN
+            \tud@url@normalize@ctan\tud@res@c{pkg/\tud@res@c}%
+          \or% CTANinfo
+            \tud@url@normalize@ctan\tud@res@c{tex-archive/info/\tud@res@c}%
+          \or% GH
+            \tud@url@normalize@github\tud@res@c{\tud@res@c}%
+          \fi%
         \fi%
       \fi%
-    \fi%
-    \ifx\tud@res@c\@empty%
-      \ClassWarning{tudscrmanual}{%
-        The given special link `#2' \MessageBreak%
-        could not be resovled%
-      }%
-    \else%
-      % PENDING wirklich #3 notwendig?
-      \tud@trace@lbl@add{url}<\tud@res@a>{#3}%
+      \ifx\tud@res@c\@empty%
+        \ClassWarning{tudscrmanual}{%
+          The given special link `#2' \MessageBreak%
+          could not be resovled%
+        }%
+      \else%
+        % TODO tracing der urls prüfen; #3 wirklich notwendig?
+        \tud@trace@lbl@add{url}<\tud@res@a>{#3}%
+      \fi%
     \fi%
     \edef\tud@res@a{%
       \endgroup%
@@ -2428,8 +2396,8 @@
     }%
   \tud@res@a%
 }
-\newcommand*\tud@specialurl@@resolve{}
-\def\tud@specialurl@@resolve#1#2:#3:#4\@nil{%
+\newcommand*\tud@specialurl@resolve{}
+\def\tud@specialurl@resolve#1#2:#3:#4\@nil{%
   \begingroup%
     \FamilyKeyStateUnknownValue%
     \IfArgIsEmpty{#3}{}{%
@@ -2448,16 +2416,20 @@
     }%
   \tud@res@a%
 }
-\newcommand*\tud@if@specialurl[1]{%
+\newcommand*\tud@specialurl@validate[1]{%
   \begingroup%
     \protected@edef\tud@res@a{%
-      \unexpanded{\tud@specialurl@@resolve\tud@res@a}#1::\noexpand\@nil%
+      \unexpanded{\tud@specialurl@resolve\tud@res@a}#1::\noexpand\@nil%
     }%
     \tud@res@a%
     \ifnum\tud@res@a<\z@\relax%
-      \aftergroup\@secondoftwo%
+      \ClassWarning{tudscrmanual}{%
+        Special link `#1' invalid, permitted are:\MessageBreak%
+        CTAN[info]:... GH:... URL:...
+      }%
+      \aftergroup\@gobble%
     \else%
-      \aftergroup\@firstoftwo%
+      \aftergroup\@firstofone%
     \fi%
   \endgroup%
 }
@@ -3598,7 +3570,7 @@
     \Markup@Suffix@@Select[\protected@edef\tud@res@b]{}{#3}%
     \begingroup%
       \Markup@Expandable%
-      \protected@edef\tud@res@d{%
+      \protected@edef\tud@res@c{%
         \endgroup%
         \unexpanded{\def\tud@idx@key}{%
           \IfValueTF{#5}{#5}{#4}%
@@ -3609,24 +3581,33 @@
           \fi%
         }%
       }%
-    \tud@res@d%
+    \tud@res@c%
     \def\tud@res@b{{#3}{#4}/#5/=#6=}%
     \if@tud@res@swa%
       \IfValueT{#7}{\appto\tud@res@b{[#7]}}%
     \fi%
-    \appto\tud@res@b{|\@nil|'\@nil'}%
-    \ifx\tud@res@a\@empty%
-      \def\tud@res@c{\@nil}%
-    \else%
-      \let\tud@res@c\tud@res@a%
-    \fi%
-    \eappto\tud@res@b{(\expandonce\tud@res@c)}%
+    \eappto\tud@res@b{%
+      \unexpanded{|\@nil|'\@nil'}%
+      (\ifx\tud@res@a\@empty\noexpand\@nil\else\expandonce\tud@res@a\fi)%
+    }%
     \Markup@Outer@Get\tud@idx@fmt{\tud@res@b}%
     \if@tud@res@swa%
-      \ifx\tud@res@a\@empty\else%
-        \ifx\tud@res@a\tud@ety@dflt\else%
-          \eappto\tud@idx@fmt{\noexpand\idxsuffix{\expandonce\tud@res@a}}%
+      \ifx\tud@res@a\@empty%
+        \@tud@res@swafalse%
+      \else%
+        \ifx\tud@res@a\tud@ety@dflt%
+          \@tud@res@swafalse%
+        \else%
+          \Entity@Level@Get\tud@res@c{#3}%
+          \ifnum\tud@res@c>\tw@\relax%
+            \@tud@res@swatrue%
+          \else%
+            \@tud@res@swafalse
+          \fi%
         \fi%
+      \fi%
+      \if@tud@res@swa%
+        \eappto\tud@idx@fmt{\noexpand\idxsuffix{\expandonce\tud@res@a}}%
       \fi%
     \fi%
     \tud@replace@@in\tud@idx@key{@}{"@}%
@@ -4291,13 +4272,13 @@
           \expandonce\tud@res@c%
       }%
       \tud@res@c%
-      \ifx\tud@res@c\relax%
+      \ifx\tud@res@c\@empty%
         \ClassWarning{tudscrmanual}{%
           There is no default markup link for `\detokenize{#1}'%
         }%
         \def\tud@res@c{CTAN:##2}%
       \fi%
-      \tud@specialurl@resolve\tud@res@c{\tud@res@c}{\tud@lbl@tmp}%
+      \tud@specialurl@wrapper\tud@res@c{\tud@res@c}{\tud@lbl@tmp}%
       \eappto\tud@res@a{%
         \ifx\tud@res@a\@empty\else,\space\fi%
         \expandonce\tud@res@c{%
