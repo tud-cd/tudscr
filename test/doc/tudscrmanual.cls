@@ -458,15 +458,18 @@
     \let\tud@res@c\@empty%
     \let\tud@res@d\m@ne%
     \IfValueT{#2}{%
-      \TUD@set@numkey{}{tud@res@d}{{url}{0},{missing}{1},{matched}{2}}{#1}%
+      \TUD@set@numkey{}{tud@res@d}{%
+        {url}{0},{matched}{1},{created}{2},{missing}{2},
+      }{#1}%
       \ifx\FamilyKeyState\FamilyKeyStateProcessed%
         \ifcase\tud@res@d\relax%
           \def\tud@res@c{#2}%
         \or%
-          \def\tud@res@c{->\space#2}%
-        \or%
           \def\tud@res@b{\space(substituted)}%
           \def\tud@res@c{<-\space#2}%
+        \or%
+          \tud@trace@lbl@add{url}<#2>{#3}%
+          \def\tud@res@c{->\space#2}%
         \fi%
       \else%
         \ClassWarning{tudscrmanual}{No specific label log `#1' defined}%
@@ -474,10 +477,6 @@
       \fi%
     }%
     \def\do##1{%
-      \ifnum\tud@res@d=\@ne\relax% missing with link
-        % TODO tracing der urls prüfen
-        \tud@trace@lbl@add{url}<#2>{##1}%
-      \fi%
       \begingroup%
         \ifnum\tud@res@d=\z@\relax% url
           \tud@if@lbl@exists{##1}{%
@@ -496,14 +495,8 @@
       \protected@eappto\tud@res@a{%
         ^^J\@spaces##1\ifx\tud@res@c\@empty\else^^J\@spaces\tud@res@c\fi%
       }%
-      \advance\tud@res@cnt\@ne\relax%
     }%
     \let\tud@res@a\@empty%
-    \tud@res@cnt=\z@\relax%
-    \ifnum\tud@res@cnt>\@ne\relax%
-      % TODO schleife auflösen
-      \typeout{!!!!!!!!!!!!!!!!!!!!!!! LOOP wird genutzt!}
-    \fi%
     \dolistloop{#3}%
     \ifnum\tud@res@d=\z@\relax\else% !url
       \ifx\tud@res@a\@empty\else%
@@ -1455,9 +1448,12 @@
       \Process@Index[{#1}]{#2}{#3}/#4/=#5=[{#6}](\tud@res@d)<\tud@lbl@tmp>|#7|%
       \expandafter\tud@res@c\expandafter{\tud@res@d}{\tud@lbl@tmp}%
     }%
-    \ifnum\tud@declare@mode@num>\m@ne\relax%
+    \let\tud@res@a\@empty%
+    \ifnum\tud@declare@mode@num>\m@ne\relax
       \def\tud@res@a{\@firstofone}%
+      \let\tud@res@c\@empty%
       \ifnum\tud@declare@mode@num=\z@\relax%
+        \def\tud@res@d{output}%
         \IfBooleanF{#1}{%
           \if@tud@sec%
             \IfValueT{#8}{\Process@Invalid@Arg{a heading}{'#8'}}%
@@ -1465,51 +1461,39 @@
             \Markup@Inline@Wrapper\tud@res@a{#2}{#3}'#8'{\tud@res@b}%
           \fi%
         }%
-        \def\tud@res@c{output}%
       \else%
-        \Process@@@Markup@Declare{#2}{#3}/#4/=#5=[{#6}]|#7|'#8'{\tud@res@b}%
+        \def\tud@res@d{declare}%
         % TODO rein, sobald idx@get \Markup* versteht und || nicht mehr nötig
 %        \IfValueT{#7}{\Process@Invalid@Arg{a declaration}{|#7|}}%
         \ifnum\tud@declare@mode@num=\@ne\relax%
 %          \IfValueT{#8}{\Process@Invalid@Arg{a declaration environment}{'#8'}}%
         \else%
-          \begingroup%
-        % URGENT \Markup@InlineDeclare@Wrapper fur Link
-        % URGENT !!!!!!!!!!! standardmäßig '*' für defaulturl? Level beachten?
-          \let\tud@res@c\relax%
-          \IfValueTF{#8}{%
-            \tud@reference@num\tud@res@cnt{#8}%
-          }{%
+          \if@tud@markup@output%
             \tud@res@cnt=\@ne%
-          }%
-          \ifcase\tud@res@cnt\relax\or%
-            \def\tud@res@c{'*'}%
-          \or%
-            \def\tud@res@c{'#8'}%
-          \else%
-            \Process@Invalid@Arg{an inline declaration}{'#8'}%
+            \IfValueT{#8}{\tud@reference@num\tud@res@cnt{#8}}%
+            \ifnum\tud@res@cnt>\z@\relax%
+              \ifnum\tud@res@cnt>\tw@\relax%
+                \Process@Invalid@Arg{an inline declaration}{'#8'}%
+              \else%
+                \Entity@Link@Seek\tud@res@c'#8'{#2}{#3}%
+                % URGENT !!!!!!!!!!!! values für abstract & delcaration
+%                \ifx\tud@res@c\@empty%
+%                  \typeout{====== \detokenize{{#2}{#3}/#4/=#5='#8'}}%
+%                \fi%
+                \tud@specialurl@wrapper\tud@res@a{\tud@res@c}%
+              \fi%
+            \fi%
           \fi%
-          \ifx\tud@res@c\relax%
-%            \typeout{///////// \meaning\tud@res@a}%
-          \else%
-            \edef\tud@res@c{%
-              \unexpanded{\Entity@Link@Seek\tud@res@b}%
-                \tud@res@c\unexpanded{{#2}{#3}}%
-            }%
-            \tud@res@c%
-            \tud@specialurl@wrapper\tud@res@a{\tud@res@b}{}%
-            \typeout{========= \meaning\tud@res@a}%
-            \typeout{\detokenize{{#2}{#3}/#4/=#5=[{#6}]}}%
-          \fi%
-          \endgroup%
         \fi%
-        \def\tud@res@c{declare}%
+        \edef\tud@res@c{%
+          \noexpand\Process@@@Markup@Declare{\expandonce\tud@res@b}%
+          \ifx\tud@res@c\@empty\else'\tud@res@c'\fi%
+        }%
+        \tud@res@c{#2}{#3}/#4/=#5=[{#6}]|#7|'#8'%
       \fi%
       \Markup@Output@Get\tud@res@b{#2}{#3}/#4/=#5=[{#6}]%
       \eappto\tud@res@a{{\expandonce\tud@res@b}}%
-      \tud@trace@markup@add{\tud@res@c}{\expandonce\tud@res@a}%
-    \else%
-      \let\tud@res@a\@empty%
+      \tud@trace@markup@add{\tud@res@d}{\expandonce\tud@res@a}%
     \fi%
     \edef\tud@res@a{%
       \endgroup%
@@ -1517,26 +1501,25 @@
     }%
   \tud@res@a%
 }
-\NewDocumentCommand\Process@@@Markup@Declare{m m r// r== r[] r|| r'' m}{%
+\NewDocumentCommand\Process@@@Markup@Declare{m d'' m m r// r== r[] r|| r''}{%
   \begingroup%
-    \protected@edef\tud@res@a{\noexpand\dolistloop{\expandonce#8}}%
     \def\do##1{\tud@res@d##1\@nil}%
     \def\tud@res@d<##1>(##2)\@nil{%
       \if@tud@declare@label%
-        \tud@lbl@declare=#4=<##1>%
+        \tud@lbl@declare'#2'=#6={##1}%
       \fi%
       \protected@expandtwoargs\in@{,}{##2}%
       \ifin@%
         % TODO label in \tud@declare@result@list?
       \else%
-        \Entity@Declare{#1}{#2}{##2}%
+        \Entity@Declare{#3}{#4}{##2}%
         \listgadd\tud@declare@result@list{%
-          {{#1}{#2}/#3/=#4=[{#5}]|#6|'#7'(##2)}%
+          {{#3}{#4}/#5/=#6=[{#7}]|#8|'#9'(##2)}%
           {##1}%
         }%
       \fi%
     }%
-    \tud@res@a%
+    \dolistloop{#1}%
   \endgroup%
 }
 \newcommand*\tud@reference@num[2]{%
@@ -1574,13 +1557,12 @@
 \NewDocumentCommand\Markup@Inline@Wrapper{m m m r'' m}{%
   \begingroup%
     \let\tud@output@wrapper\relax%
-    \IfValueTF{#4}{%
+    \tud@res@cnt=\@ne%
+    \IfValueT{#4}{%
       \tud@reference@num\tud@res@cnt{#4}%
       \ifnum\tud@res@cnt=\z@\relax%
         \def\tud@output@wrapper{\@firstofone}%
       \fi%
-    }{%
-      \tud@res@cnt=\@ne%
     }%
     \protected@edef\tud@res@c{\noexpand\dolistloop{\expandonce#5}}%
     \let\tud@lbl@found\relax%
@@ -1657,7 +1639,7 @@
       \else%
         \Entity@Link@Seek\tud@res@a'#3'<#4>(#5){#6}{#7}%
       \fi%
-      \tud@specialurl@wrapper\tud@output@wrapper{\tud@res@a}{#4}%
+      \tud@specialurl@wrapper\tud@output@wrapper{\tud@res@a}%
       \ifx\tud@res@a\@empty%
         \tud@trace@lbl@add{missing}{#4}%
       \else%
@@ -2459,7 +2441,7 @@
   \letcs#1{Entity@Link@@#1}%
   \ifundef{#1}{\let#1\@empty}{}%
 }
-\newcommand*\tud@specialurl@wrapper[3]{%
+\newcommand*\tud@specialurl@wrapper[2]{%
   \begingroup%
     \protected@edef\tud@res@a{#2}%
     \let\tud@res@c\@empty%
@@ -2481,12 +2463,7 @@
       \ifx\tud@res@c\@empty%
         \ClassWarning{tudscrmanual}{%
           The given special link `#2' \MessageBreak%
-          could not be resovled%
-        }%
-      \else%
-        % TODO tracing der urls prüfen; #3 wirklich notwendig?
-        \tud@if@strblank{#3}{}{%
-          \tud@trace@lbl@add{url}<\tud@res@a>{#3}%
+          could not be resolved%
         }%
       \fi%
     \fi%
@@ -2508,7 +2485,6 @@
     \FamilyKeyStateUnknownValue%
     \IfArgIsEmpty{#3}{}{%
       \TUD@set@numkey{}{tud@res@a}{%
-        % TODO ctaninfo für https://www.ctan.org/tex-archive/info/
         {ctan}{0},{ctaninfo}{1},{gh}{2},{url}{3}%
       }{#2}%
     }%
@@ -2802,12 +2778,12 @@
 \tud@auxlist@register(\detokenize\expandafter){tud@lbl@alias}
 \newcommand*\tud@lbl@alias@values{}
 \newcommand*\tud@lbl@alias@nospecial{!.!:}
-\NewDocumentCommand\tud@lbl@declare{s d== r<>}{%
+\NewDocumentCommand\tud@lbl@declare{s d'' d== m}{%
   \begingroup%
-    \protected@edef\tud@res@a{#3}%
+    \protected@edef\tud@res@a{#4}%
     \tud@truncate@value\tud@res@c{\tud@res@a}%
-    \IfValueTF{#2}{%
-      \protected@edef\tud@res@b{#2}%
+    \IfValueTF{#3}{%
+      \protected@edef\tud@res@b{#3}%
       \tud@if@strequal{\PBoolean}{\tud@res@b}{%
         \preto\tud@lbl@alias@values{true,false,}%
       }{}%
@@ -2859,7 +2835,7 @@
 %        \def\tud@res@a##1:##2:##3\@nil{\tud@hypertarget{##3:##2:##3}}%
 %        \expandafter\tud@res@a\tud@lbl@tmp\@nil%
     \tud@auxlist@remove{tud@lbl@alias}{\tud@res@a}%
-    \tud@hypertarget{#1}<\tud@res@b>{\tud@res@a}%
+    \tud@hypertarget{#1}'#2'<\tud@res@b>{\tud@res@a}%
   \endgroup%
 }
 \tud@auxlist@register(\detokenize\expandafter){tud@lbl@dest}
@@ -2883,7 +2859,7 @@
               \noexpand\HyperDestRename{\tud@lbl@tmp}{\tud@res@b}%
             }%
           \fi%
-          \eappto\tud@res@a{\noexpand\tud@lbl@declare*<\tud@lbl@tmp>}%
+          \eappto\tud@res@a{\noexpand\tud@lbl@declare*{\tud@lbl@tmp}}%
         \fi%
       }%
       \IfValueT{#1}{%
@@ -2914,15 +2890,15 @@
     }%
   \tud@res@a{#3}{#1}%
 }
-\NewDocumentCommand\tud@hypertarget{m d<> m}{%
+\NewDocumentCommand\tud@hypertarget{m d'' d<> m}{%
   \begingroup%
     \protected@edef\tud@res@a{%
       \endgroup%
-      \noexpand\tud@hyper@target{#1}<#2>{#3}%
+      \noexpand\tud@hyper@target{#1}'#2'<#3>{#4}%
     }%
   \tud@res@a%
 }
-\NewDocumentCommand\tud@hyper@target{m r<> m}{%
+\NewDocumentCommand\tud@hyper@target{m r'' r<> m}{%
   \begingroup%
     \let\tud@res@a\@empty%
     \def\tud@res@b##1{%
@@ -2941,7 +2917,7 @@
         \@tud@res@swatrue%
         \IfBooleanTF{#1}{%
           \tud@auxlist@add{tud@lbl@dest}{##1}%
-          \HyperDestRename{##1}{#3}%
+          \HyperDestRename{##1}{#4}%
         }{%
           \tud@auxlist@ifin{##1}{tud@lbl@dest}{%
             \@tud@res@swafalse%
@@ -2953,10 +2929,9 @@
         }%
       \tud@res@b{##1}%
     }%
-    % TODO (beide) Schleifen notwendig?
+    \do{#4}%
     \dolistloop{#3}%
-    \dolistloop{#2}%
-    \tud@trace@lbl@add{created}{\tud@res@a}%
+    \tud@trace@lbl@add{created}<#2>{\tud@res@a}%
   \endgroup%
 }
 \tud@newif\if@tud@markup@output\@tud@markup@outputtrue
@@ -4472,27 +4447,8 @@
   \begingroup%
     \let\tud@res@a\@empty%
     \def\tud@res@b##1##2{%
-% TODO raus, sobald InlineDeclaration links erzeugt, sind zwingend notwendig!
-      \tud@lbl@get\tud@lbl@tmp{##1{##2}}%
-      \Markup@Split@Get*\tud@res@c{##1{##2}}%
-      \edef\tud@res@c{%
-        \unexpanded{\Entity@Link@Seek\tud@res@c}<\tud@lbl@tmp>%
-          \expandonce\tud@res@c%
-      }%
-      \tud@res@c%
-      \ifx\tud@res@c\@empty%
-        \ClassWarning{tudscrmanual}{%
-          There is no default markup link for `\detokenize{#1}'%
-        }%
-        \def\tud@res@c{CTAN:##2}%
-      \fi%
-      \tud@specialurl@wrapper\tud@res@c{\tud@res@c}{\tud@lbl@tmp}%
-      \eappto\tud@res@a{%
-        \ifx\tud@res@a\@empty\else,\space\fi%
-        \expandonce\tud@res@c{%
-          \noexpand\Inline@Declaration{##1{##2}}%
-        }%
-      }%
+      \ifx\tud@res@a\@empty\else\appto\tud@res@a{,\space}\fi%
+      \appto\tud@res@a{\Inline@Declaration{##1'*'{##2}}}%
     }%
     \forcsvlist{\tud@res@b{\Package}}{#1}%
     \IfValueT{#2}{%
@@ -5030,23 +4986,23 @@
   \fi%
 }
 % TODO check arguments...
-\NewDocumentCommand\GitHubRepo{!t' !o !d() !d<>}{%
+\NewDocumentCommand\GitHubRepo{!o !d() !d<>}{%
   \begingroup%
-    \IfValueTF{#3}{%
-      \tud@url@normalize@github\tud@res@b{#3}%
+    \IfValueTF{#2}{%
+      \tud@url@normalize@github\tud@res@b{#2}%
     }{%
       \let\tud@res@b\tud@github@url@base%
     }%
-    \IfValueTF{#2}{%
-      \def\tud@res@c{#2}%
+    \IfValueTF{#1}{%
+      \def\tud@res@c{#1}%
     }{%
       \expandafter\filename@parse\expandafter{\tud@res@b}%
       \protected@edef\tud@res@c{%
-        \mbox{\tud@english{GitHub-Repository\nbs\textsbn{\filename@base}}}%
+        \tud@english{GitHub-Repository\nbs\textsbn{\filename@base}}%
       }%
     }%
-    \IfValueT{#4}{%
-      \edef\tud@res@a{\trim@spaces{#4}}%
+    \IfValueT{#3}{%
+      \edef\tud@res@a{\trim@spaces{#3}}%
       \tud@remove@enfold@char\tud@res@a{/}%
       \Ifnumber{\tud@res@a}{%
         \eappto{\tud@res@b}{/issues/\tud@res@a}%
@@ -5054,63 +5010,58 @@
         \eappto{\tud@res@b}{/\tud@res@a}%
       }%
     }%
-    \IfBooleanTF{#1}{\let\tud@res@a\hrfn}{\let\tud@res@a\href}%
-    \tud@res@a{\tud@res@b}{\tud@res@c}%
+    \href{\tud@res@b}{\mbox{\tud@res@c}}%
   \endgroup%
   \xspace%
 }
-\NewDocumentCommand\GitHubDownload{s t' d() d<> m}{%
+\NewDocumentCommand\GitHubDownload{s d() d<> m}{%
   \begingroup%
-    \IfValueTF{#3}{%
-      \tud@url@normalize@github\tud@res@b{#3}%
+    \IfValueTF{#2}{%
+      \tud@url@normalize@github\tud@res@b{#2}%
     }{%
       \let\tud@res@b\tud@github@url@base%
     }%
-    \IfValueTF{#4}{%
-      \appto\tud@res@b{/releases/download/#4/#5}%
+    \IfValueTF{#3}{%
+      \appto\tud@res@b{/releases/download/#3/#4}%
     }{%
-      \appto\tud@res@b{/releases/latest/download/#5}%
+      \appto\tud@res@b{/releases/latest/download/#4}%
     }%
-    \IfBooleanTF{#2}{\let\tud@res@a\hrfn}{\let\tud@res@a\href}%
     \IfBooleanTF{#1}{%
-      \def\tud@res@c{\File*{#5}}%
+      \def\tud@res@c{\File*{#4}}%
     }{%
-      \def\tud@res@c{\InlineDeclaration{\File''{#5}}}%
+      \def\tud@res@c{\InlineDeclaration{\File''{#4}}}%
     }%
-    \tud@res@a{\tud@res@b}{\tud@res@c}%
+    \href{\tud@res@b}{\tud@res@c}%
   \endgroup%
   \xspace%
 }
 \newcommand*\TUDForum{%
   \mbox{T\kern.05em U\kern.05em D-\hologo{LaTeX}-Forum}\xspace%
 }
-\NewDocumentCommand\Forum{!t' !O{\TUDForum} !d<>}{%
+\NewDocumentCommand\Forum{!O{\TUDForum} !d<>}{%
   \begingroup%
-    \IfBooleanTF{#1}{\let\tud@res@a\hrfn}{\let\tud@res@a\href}%
-    \tud@res@a{\TUDScriptForum\IfValueT{#3}{viewtopic.php?t=#3}}{#2}%
+    \href{\TUDScriptForum\IfValueT{#2}{viewtopic.php?t=#2}}{#1}%
   \endgroup%
   \xspace%
 }
-\NewDocumentCommand\CTAN{!t' !o !d<>}{%
+\NewDocumentCommand\CTAN{!o !d<>}{%
   \begingroup%
-    \IfBooleanTF{#1}{\let\tud@res@a\hrfn}{\let\tud@res@a\href}%
-    \tud@url@normalize@ctan\tud@res@b{\IfValueT{#3}{#3}}%
-    \IfValueTF{#2}{%
-      \def\tud@res@c{#2}%
+    \tud@url@normalize@ctan\tud@res@b{\IfValueT{#2}{#2}}%
+    \IfValueTF{#1}{%
+      \def\tud@res@c{#1}%
     }{%
       \def\tud@res@c{\tud@english{Comprehensive TeX Archive Network (CTAN)}}%
     }%
-    \tud@res@a{\tud@res@b}{\mbox{\tud@res@c}}%
+    \href{\tud@res@b}{\mbox{\tud@res@c}}%
   \endgroup%
   \xspace%
 }
 % TODO use CTAN@pkg or something from \Bundle?
 % TODO nur Link und keine Fußnote im Normalfall?
-\NewDocumentCommand\scrguide{!t' !O{\KOMAScript-Handbuch}}{%
-  \begingroup%
-    \IfBooleanTF{#1}{\let\tud@res@a\hrfn}{\let\tud@res@a\href}%
+\NewDocumentCommand\scrguide{!O{\KOMAScript-Handbuch}}{%
+  \begingroup%%
     \tud@url@normalize@ctan\tud@res@b{pkg/koma-script}%
-    \tud@res@a{\tud@res@b}{#2}%
+    \href{\tud@res@b}{#1}%
   \endgroup%
   \xspace%
 }

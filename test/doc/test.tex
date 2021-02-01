@@ -42,35 +42,100 @@
 %  }
 %}
 
+\DefaultEntity{\Bundle{letltxmacro}}'CTAN:foo'{\Package{letltxmacro}}
+
 \begin{document}
 
-\makeatletter
+\GitHubDownload*{tudscr_\vTUDScript.zip}
 
+\GitHubDownload{atudscr_\vTUDScript.zip}
 
-%\meaning\tud@markup@list
+\end{document}
 %
-%\edef\tud@res@d{\csuse{Entity@Level@@Option}}%
-%
-%\meaning\tud@res@d
-%
-%\csmeaning{Entity@Level@@Option}
-%
-%\edef\foo{\expandafter\expandafter\expandafter\@firstoftwo%
-%\csuse{Entity@Level@@Option}}
-%
-%\meaning\foo
-
-%\Entity@Level@@Validate
 \noindent
-Alternativ kann für die \TUDScript-Klassen auf das Paket \Package{geometry}
-zurückgegriffen werden, das mit den Befehlen \Macro{geometry|\MList} sowie 
-\Macro{newgeometry|\MList} eine Schnittstelle zur Festlegung des Seitenlayouts 
-bereitstellt. Im Argument lässt sich mit \PValue{paper=\PSet{Papierformat}}
-das Papierformat festgelegen. Ein kleineres Zielformat, welches für den 
-Satzspiegel genutzt wird, kann zusätzlich mit \PValue{layout=\PSet{Zielformat}} 
-angegeben werden, wobei dieser Bereich mit \PValue{layoutoffset=\PLength} 
-gegebenenfalls etwas eingerückt wird. Mit \PValue{showcrop=\PBoolean} werden 
-außerdem noch visuelle Schnittmarken generiert.
+\begin{quoting}
+\renewcommand*\href[2]{\url{#1}~(#2)}%
+\GitHubRepo<issues>\newline\Forum%
+\end{quoting}
+
+\begin{DeclarePackages}
+\itempkg{scrbase,scrlayer-scrpage,typearea,scrletter,scrextend}<%
+    \Bundle{koma-script},\Class*{koma-class},%
+    \Class{scrbook},\Class{scrreprt},\Class{scrartcl}%
+  >%
+  Die zentrale Grundlage für \TUDScript bilden~-- zusammenfassend in diesem 
+  Dokument gegebenenfalls als \Class||{koma-class} bezeichnet~-- die drei 
+  Hauptklassen \Class{scrbook}, \Class{scrreprt} sowie \Class{scrartcl} aus dem 
+  \scrguide[\KOMAScript-Bundle]. Das Paket \Package{scrbase} erlaubt die 
+  Definition von Optionen oder Schlüsseln, die sich auch noch nach dem Laden 
+  einer Klasse oder eines Paketes aus dem \TUDScript-Bundle mit den Befehlen 
+  \Macro{TUDoption} und \Macro{TUDoptions} ändern lassen. Weiterhin werden die 
+  \PageStyle{tudheadings}"=Seitenstile der \TUDScript-Klassen mithilfe des 
+  Paketes \Package{scrlayer-scrpage} bereitgestellt. Wenn dieses nicht~-- mit 
+  beliebigen Optionen~-- durch den Anwender geladen wird, erfolgt dies 
+  automatisch am Ende der Präambel. Für die Festlegung des Satzspiegels wird
+  das Paket \Package{typearea} genutzt.
+\itempkg{opensans,mathastext,iwona}[v2.06]
+  \index{Schriftart|!}%
+  Das Paket \Package{opensans} stellt die Schriftfamilie \OpenSans sowohl für 
+  den Fließtext als auch den mathematischen Satz zur Verfügung. Es enthält alle 
+  nötigen Schriftschnitte sowohl im Type1- als auch im OpenType-Format. Da die 
+  Schriftfamilie in der aktuellen Version keine mathematischen Glyphen 
+  bereitstellt, werden die Pakete \Package{mathastext} und \Package{iwona} 
+  zusätzlich genutzt, um zumindest einen halbwegs erträglichen mathematischen 
+  Satz mit \OpenSans zu ermöglichen.
+%  Werden dabei zusätzliche Symbole benötigt, wird empfohlen, auf das Paket 
+%  \Package{amssymb} zu verzichten und anstelle dessen \Package{mdsymbol} zu 
+%  laden.
+  \ToDo{roboto-mono, hinweis zu mdsymbol raus}[v2.07]
+  \ToDo{mweights raus, Text in Hinweise verschieben?!}[v2.07]
+%\itempkg{mweights}
+%  \index{Schriftstärke}%
+%  In \hologo{LaTeX} existieren die Schriftfamilien für Serifenschriften 
+%  (\Macro{rmfamily}), serifenlose Schriften (\Macro{sffamily}) sowie die 
+%  Schreibmaschinenschriften (\Macro{ttfamily}). Deren Schriftstärke wird für 
+%  gewöhnlich mit den Befehlen \Macro{mddefault} und \Macro{bfdefault} 
+%  einheitlich festgelegt. Bei der Verwendung unterschiedlicher Schriftpakete 
+%  kann es unter Umständen zu Problemen bei den Schriftstärken kommen. Diese 
+%  Paket erlaubt die individuelle Definition der Schriftstärke für jede der 
+%  drei Schriftfamilien.
+\itempkg{geometry}
+  \index{Satzspiegel}%
+  Das Paket wird zum Festlegen der Seitenränder respektive des Satzspiegels 
+  verwendet.
+  \Attention{%
+    Ein Weiterreichen zusätzlicher Optionen an das Paket wird dringlich nicht 
+    empfohlen.
+  }%
+\itempkg{graphicx}
+  \index{Grafiken}%
+  Zum Einbinden des Logos der \TnUD im Kopf sowie aller weitere Abbildungen und 
+  Logos wird \Macro{includegraphics} genutzt.
+\itempkg{xcolor}
+  \index{Farben}%
+  Damit werden die Farben des \CDs zur Verwendung im Dokument definiert. 
+  Genaueres ist bei der Beschreibung von \Package'ref'{tudscrcolor} zu finden. 
+\itempkg{iftex,etoolbox,xpatch,letltxmacro}
+  Diese Pakete stellen viele Funktionen zum Testen und zur Ablaufkontrolle 
+  bereit. Weiterhin wird das Manipulieren vorhandener Makros ermöglicht.
+  \ToDo{kvsetkeys, environ, nicht mehr verwenden, Doku raus!}[v2.07]
+  \ToDo{text von environ to xparse?}[v2.07]
+%\itempkg{kvsetkeys}
+%  Das von \Package{scrbase} geladene Paket \Package{keyval} macht das 
+%  Definieren von Klassen- und Paketoptionen sowie Parametern nach dem 
+%  Schlüssel"=Wert"=Prinzip möglich. Mit diesem Paket kann das Verhalten für 
+%  unbekannte Schlüssel festgelegt werden.
+%\itempkg{environ}
+%  \index{Befehlsdeklaration}%
+%  Es wird eine verbesserte Deklaration von Umgebungen ermöglicht, bei der auch 
+%  beim Abschluss der Umgebung auf die übergebenen Parameter zugegriffen werden 
+%  kann. 
+\itempkg{trimspaces}
+  Bei mehreren Eingabefeldern für den Anwender werden die Argumente mithilfe 
+  dieses Paketes um eventuell angegebene, unnötige Leerzeichen befreit.
+\end{DeclarePackages}
+
+\end{document}
 
 \begin{Entity}{\Bundle{tudscr}}
 
