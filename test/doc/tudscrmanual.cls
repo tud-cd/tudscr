@@ -626,6 +626,7 @@
   \let\index\@gobble\let\glossary\@gobble%
 }{%
   \let\index\@gobbleopt@one\let\glossary\@gobbleopt@one%
+  \let\Process@Markup\Process@Simple@Markup%
 }{}{\tud@patch@wrn{@outputpage}}
 \newcommand*\tud@addtocontents@hook{}
 \let\tud@addtocontents@hook\relax
@@ -1458,7 +1459,7 @@
         }%
       \else%
         \def\tud@res@d{declare}%
-        % TODO rein, sobald idx@get \Markup* versteht und || nicht mehr nötig
+        % URGENT rein, sobald idx@get \Markup* versteht und || nicht mehr nötig
 %        \IfValueT{#7}{\Process@Invalid@Arg{a declaration}{|#7|}}%
         \ifnum\tud@declare@mode@num=\@ne\relax%
 %          \IfValueT{#8}{\Process@Invalid@Arg{a declaration environment}{'#8'}}%
@@ -1723,7 +1724,14 @@
     }{%
       \let\Process@@Markup\Markup@Inner@@Get%
     }%
-    #3%
+    \tud@if@markup*{#3}{%
+      #3%
+    }{%
+      \ClassError{tudscrmanual}{Internal error}{%
+        `\detokenize{#3}' is no markup command!%
+      }%
+      \Bundle{unknown}%
+    }%
     \edef\tud@res@a{%
       \endgroup%
       \unexpanded{\def#2}{\the\tud@toks@}%
@@ -2835,11 +2843,13 @@
       \def\tud@res@a{\endgroup}%
       \let\tud@res@b\@empty%
       \def\tud@res@c{#2}%
-      \@tud@res@swatrue%
+      \IfValueT{#1}{%
+        \eappto\tud@res@a{\noexpand\label{#1}}%
+        \edef\tud@res@b{#1}%
+      }%
       \@for\tud@res@c:=\tud@res@c\do{%
         \trim@spaces@in\tud@res@c%
-        \ifx\tud@res@c\@empty\else%
-          % TODO sicherstellen, dass markup simple, lvl beachten?!
+        \tud@if@markup{\tud@res@c}{%
           \tud@lbl@get\tud@lbl@tmp{\tud@res@c}%
           \ifx\tud@res@b\@empty%
             \edef\tud@res@b{\tud@lbl@tmp}%
@@ -2849,15 +2859,7 @@
             }%
           \fi%
           \eappto\tud@res@a{\noexpand\tud@lbl@declare*{\tud@lbl@tmp}}%
-        \fi%
-      }%
-      \IfValueT{#1}{%
-        \eappto\tud@res@a{%
-          \ifx\tud@res@b\@empty\else%
-            \noexpand\HyperDestRename{#1}{\tud@res@b}%
-          \fi%
-          \noexpand\label{#1}%
-        }%
+        }{}%
       }%
     \tud@res@a%
   \else%
