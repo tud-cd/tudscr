@@ -435,8 +435,7 @@
   \forlistloop{\tud@res@a}{\tud@res@c}%
 }
 \@onlypreamble\tracinglabels
-% PENDING d<> in o
-\NewDocumentCommand\tud@trace@lbl@add{m d<> m}{%
+\NewDocumentCommand\tud@trace@lbl@add{m o m}{%
   \ifcsundef{tud@trace@lbl@#1@list}{%
     \xifinlist{#1}{\tud@trace@lbl@types}{}{%
       \ClassError{tudscrmanual}{Undefined label type `#1'}{%
@@ -447,12 +446,12 @@
     \begingroup%
       \protected@edef\tud@res@a{%
         \endgroup%
-        \noexpand\tud@trace@lbl@@add{#1}<#2>{#3}%
+        \noexpand\tud@trace@lbl@@add{#1}{#2}{#3}%
       }%
     \tud@res@a%
   }%
 }
-\NewDocumentCommand\tud@trace@lbl@@add{m r<> m}{%
+\NewDocumentCommand\tud@trace@lbl@@add{m m m}{%
   \begingroup%
     \let\tud@res@b\@empty%
     \let\tud@res@c\@empty%
@@ -468,7 +467,7 @@
           \def\tud@res@b{\space(substituted)}%
           \def\tud@res@c{<-\space#2}%
         \or%
-          \tud@trace@lbl@add{url}<#2>{#3}%
+          \tud@trace@lbl@add{url}[{#2}]{#3}%
           \def\tud@res@c{->\space#2}%
         \fi%
       \else%
@@ -698,7 +697,6 @@
   \newcommand*\tud@x@hyperref@a[2][]{#2}%
   \newcommand*\tud@x@hyperref@b[4]{#4}%
   \providecommand*\hypertarget[2]{\label{#1}#2}%
-  % PENDING replace all \hyperref[]{} with \hyperlink{}{}
   \providecommand*\hyperlink[2]{\hyperref[{#1}]{#2}}%
   \providecommand*\Hy@raisedlink[1]{#1}%
   \providecommand*\phantomsection{}%
@@ -726,7 +724,7 @@
 \DeclareListParser*{\forssvlist}{;}
 \PassOptionsToPackage{nospace}{varioref}
 \RequirePackage{varioref}[2019/11/05]
-\renewrobustcmd*\fullref[1]{\hyperlink{#1}{\autoref*{#1}\space\vpageref{#1}}}
+\renewrobustcmd*\fullref[1]{\hyperref[{#1}]{\autoref*{#1}\space\vpageref{#1}}}
 \PassOptionsToPackage{babel}{microtype}
 \AfterPackage*{hyperref}{\RequirePackage{microtype}[2013/05/23]}
 \TUD@UnwindPackage{hyperref}{\RequirePackage{microtype}[2013/05/23]}
@@ -905,9 +903,9 @@
 \fi
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newcommand*\tud@markup@list{}
-% r'' : dlicn -> declare, inline, index, changelog, normal text
+% DOC r'' : dlicn -> declare, inline, index, changelog, normal text
 \NewDocumentCommand\Markup@Format@Set{m r() O{} d|| r'' m}{%
-  \tud@toks@{{#1}{{#2{#3##1\IfValueT{##2}{=##2}}}\IfValueT{##3}{##3}}}%
+  \tud@toks@{{#1}{{#2{#3##1}\IfValueT{##2}{\PValue{=}##2}}\IfValueT{##3}{##3}}}%
   \ifcsundef{Markup@Format@@Inline@@#1}{%
     \expandafter\Markup@Inline@Format@Set\the\tud@toks@%
   }{}%
@@ -1416,9 +1414,6 @@
       \addto@hook\tud@toks@{|#7|'#8'}%
     }%
     \tud@res@b\tud@res@a(#9){#2}{#3}%
-%    \ifx\tud@res@a\@empty%
-%      \def\tud@res@a{\tud@ety@gnrl}%
-%    \fi%
     \addto@hook@expandafter\tud@toks@{\expandafter(\tud@res@a)}%
     \edef\tud@res@a{%
       \endgroup%
@@ -1476,10 +1471,6 @@
                 \Process@Invalid@Arg{an inline declaration}{'#8'}%
               \else%
                 \Entity@Link@Seek\tud@res@c'#8'{#2}{#3}%
-                % URGENT !!!!!!!!!!!! values für abstract & delcaration
-%                \ifx\tud@res@c\@empty%
-%                  \typeout{====== \detokenize{{#2}{#3}/#4/=#5='#8'}}%
-%                \fi%
                 \tud@specialurl@wrapper\tud@res@a{\tud@res@c}%
               \fi%
             \fi%
@@ -1643,14 +1634,9 @@
       \ifx\tud@res@a\@empty%
         \tud@trace@lbl@add{missing}{#4}%
       \else%
-        \tud@trace@lbl@add{missing}<\tud@res@a>{#4}%
+        \tud@trace@lbl@add{missing}[{\tud@res@a}]{#4}%
       \fi%
     \else%
-      % URGENT implementieren
-      %        \tud@truncate@value\tud@lbl@tmp{\tud@lbl@tmp}%
-      %        \xifinlist{\tud@lbl@tmp}{\tud@declaration@label@list}{%
-      %          \def\tud@output@wrapper{\@firstofone}%
-      %        }{%
       \let\tud@res@a\@empty% simple/link
       \ifcase#2\relax\or\or% link
         \ClassWarning{tudscrmanual}{%
@@ -1668,16 +1654,24 @@
       \or% page
         \def\tud@res@a{\vpageref}%
       \fi%
+      % DOC nur Hyperlinks auf Element, die nicht gerade deklariert werden
+      \tud@truncate@value\tud@lbl@tmp{\tud@lbl@found}%
+      \xifinlist{\tud@lbl@tmp}{\tud@declaration@label@list}{%
+        \def\tud@res@b{\@swaptwoargs}%
+      }{%
+        \edef\tud@res@b{\noexpand\tud@hyperlink{\tud@lbl@found}}%
+      }%
       \edef\tud@output@wrapper{%
-        \noexpand\tud@hyperlink%
-        \ifx\tud@res@a\@empty\else%
-          [{\space\expandonce\tud@res@a{\tud@lbl@found}}]%
-        \fi{\tud@lbl@found}%
+        \expandonce\tud@res@b{%
+          \ifx\tud@res@a\@empty\else%
+            \space\expandonce\tud@res@a{\tud@lbl@found}%
+          \fi%
+        }%
       }%
       \tud@if@strequal{#4}{\tud@lbl@found}{%
         \tud@trace@lbl@add{matched}{\tud@lbl@found}%
       }{%
-        \tud@trace@lbl@add{matched}<#4>{\tud@lbl@found}%
+        \tud@trace@lbl@add{matched}[{#4}]{\tud@lbl@found}%
       }%
     \fi%
     \edef\tud@res@a{%
@@ -1722,7 +1716,6 @@
   \tud@res@a%
 }
 % TODO check if markup \tud@if@markup
-% TODO prüfen, wo das in verbindung mit lbl läuft
 \NewDocumentCommand\Markup@Inner@Get{s m m}{%
   \begingroup%
     \IfBooleanTF{#1}{%
@@ -2044,7 +2037,6 @@
 \NewMarkupCommand\Tutorial[lvl=-2>0..1,idx=files](\textsbn){Tutorial}
 \NewMarkupCommand\File[lvl=-2>0..1,idx=files](\texttt)'c'{Datei}
 \NewDocumentCommand\Path{>{\AP@Underscore}m}{\mbox{\texttt{#1}}}
-% TODO auf \tud@ety@gnrl verzichten, einfach leer lassen?
 \newcommand*\tud@ety@gnrl{+general+}
 % TODO change to \Class{tudscr[-class|main]} oder ganz raus?
 \newcommand*\tud@ety@dflt{\Bundle{tudscr}}
@@ -2248,12 +2240,14 @@
     \ifx\tud@ety@fallback\@empty%
       \ifx\tud@ety@valid\@empty%
         \IfBooleanF{#1}{%
-          \Entity@Level@Get\tud@res@a{#4}%
-          \ifnum\tud@res@a>\@ne\relax%
-            \ClassWarning{tudscrmanual}{%
-              No entity could be found for\MessageBreak%
-              `\tud@markup@detokenize{#4}{#5}'%
-            }%
+          \ifnum\tud@declare@mode@num>\m@ne\relax%
+            \Entity@Level@Get\tud@res@a{#4}%
+            \ifnum\tud@res@a>\@ne\relax%
+              \ClassWarning{tudscrmanual}{%
+                No entity could be found for\MessageBreak%
+                `\tud@markup@detokenize{#4}{#5}'%
+              }%
+            \fi%
           \fi%
         }%
         \def\tud@ety@valid{\tud@ety@gnrl}%
@@ -2293,9 +2287,6 @@
             \expandonce\tud@res@a%
           }%
           \tud@res@b%
-%          \ifx\tud@res@b\@empty%
-%            \def\tud@res@b{\tud@ety@gnrl}%
-%          \fi%
           \edef\tud@res@b{%
             \unexpanded{\tud@lbl@@get\tud@lbl@tmp}{%
               \expandonce\tud@res@a(\expandonce\tud@res@b)%
@@ -2635,7 +2626,6 @@
 \NewParameterCommand\OPName{m}{\P@Braces*{\PName{#1}}}{\@PName{#1}}
 \NewParameterCommand\OPValue{m}{\P@Braces*{\PValue{#1}}}{\@PValue{#1}}
 \NewParameterCommand\OList{}{\OPName{Parameterliste}}{\@PName{Parameterliste}}
-% TODO raus? oder einfach nicht mehr dokumentieren?
 \NewParameterCommand\OPList{m}{%
   \P@Braces*{%
     \PName{#1}%
@@ -2738,7 +2728,6 @@
 }
 \NewDocumentCommand\tud@lbl@@@get{o m m d// d== o d|| d'' r()}{%
   \begingroup%
-    % TODO \tud@ety@gnrl > \Bundle{+general+}?!
     \protected@edef\tud@res@a{#9}%
     \ifx\tud@res@a\tud@ety@gnrl\else%
       \let\tud@res@b\@empty%
@@ -2880,59 +2869,63 @@
 }
 \NewExpandableDocumentCommand\@tudmarkuplabel{o m}{}
 \tud@headings@special{\let\tudmarkuplabel\@tudmarkuplabel}
-% TODO \tudhyperref > \tudmanualref für treatise.tex überarbeiten
+% PENDING \tudhyperref > \tudmanualref für treatise.tex überarbeiten
 % \href[pdfnewwindow]{./test.pdf#sec:general}{text}
-\newrobustcmd*\tud@hyperlink[3][]{%
+\newrobustcmd*\tud@hyperlink[3]{%
   \begingroup%
     \protected@edef\tud@res@a{%
       \endgroup%
-      \noexpand\hyperlink{#2}%
+      \noexpand\hyperlink{#1}%
     }%
-  \tud@res@a{#3}{#1}%
+  \tud@res@a{#3}{#2}%
 }
 \NewDocumentCommand\tud@hypertarget{m d'' d<> m}{%
   \begingroup%
     \protected@edef\tud@res@a{%
       \endgroup%
-      \noexpand\tud@hyper@target{#1}'#2'<#3>{#4}%
+      \noexpand\tud@@hypertarget{#1}'#2'<#3>{#4}%
     }%
   \tud@res@a%
 }
-\NewDocumentCommand\tud@hyper@target{m r'' r<> m}{%
+\NewDocumentCommand\tud@@hypertarget{m r'' r<> m}{%
   \begingroup%
     \let\tud@res@a\@empty%
-    \def\tud@res@b##1{%
-      \protected@edef\tud@res@c{%
-        \if@tud@res@swa%
-          \unexpanded{\label{##1}}%
-        \fi%
-        \endgroup%
-        \if@tud@res@swa%
-          \unexpanded{\listadd\tud@res@a{##1}}%
-        \fi%
-      }\tud@res@c%
+    \tud@@@hypertarget\tud@res@a{#1}{#4}{#4}%
+    \IfValueT{#3}{%
+      \forlistloop{\tud@@@hypertarget\tud@res@a{#1}{#4}}{#3}%
     }%
-    \def\do##1{%
-      \begingroup%
-        \@tud@res@swatrue%
-        \IfBooleanTF{#1}{%
-          \tud@auxlist@add{tud@lbl@dest}{##1}%
-          \HyperDestRename{##1}{#4}%
-        }{%
-          \tud@auxlist@ifin{##1}{tud@lbl@dest}{%
-            \@tud@res@swafalse%
-          }{%
-            \Hy@raisedlink{\hypertarget{##1}{}}\ignorespaces%
-            \let\HyperDestRename\@gobbletwo%
-            \let\@currentlabelname\@empty%
-          }%
-        }%
-      \tud@res@b{##1}%
-    }%
-    \do{#4}%
-    \dolistloop{#3}%
-    \tud@trace@lbl@add{created}<#2>{\tud@res@a}%
+    \tud@trace@lbl@add{created}[{#2}]{\tud@res@a}%
   \endgroup%
+}
+\NewDocumentCommand\tud@@@hypertarget{m m m m}{%
+  \begingroup%
+    \@tud@res@swatrue%
+    \IfBooleanTF{#2}{%
+      \tud@auxlist@add{tud@lbl@dest}{#4}%
+      \ifx\HyperDestRename\@gobbletwo%
+        \Hy@raisedlink{\hypertarget{#4}{}}%
+      \else%
+        \HyperDestRename{#4}{#3}%
+      \fi%
+    }{%
+      \tud@auxlist@ifin{#4}{tud@lbl@dest}{%
+        \@tud@res@swafalse%
+      }{%
+        \Hy@raisedlink{\hypertarget{#4}{}}%
+        \let\HyperDestRename\@gobbletwo%
+        \let\@currentlabelname\@empty%
+      }%
+    }%
+    \protected@edef\tud@res@a{%
+      \if@tud@res@swa%
+        \unexpanded{\label{#4}}%
+      \fi%
+      \endgroup%
+      \if@tud@res@swa%
+        \unexpanded{\listadd#1{#4}}%
+      \fi%
+    }%
+  \tud@res@a%
 }
 \tud@newif\if@tud@markup@output\@tud@markup@outputtrue
 \TUD@key[.declare]{output}[true]{%
@@ -2966,7 +2959,26 @@
     \tud@declare@mode@num=\@ne%
   \fi%
 }
-\NewDocumentCommand\tud@declare@process{s m}{%
+\NewDocumentCommand\tud@declare@open{m D=={} r[]}{%
+  \let\tud@declare@result@list\@empty%
+  \begingroup%
+    \tud@@declare{#3}%
+    \protected@edef\tud@lbl@alias@values{#2}%
+    #1%
+    \if@tud@declare@track%
+      \aftergroup\@tud@declare@tracktrue%
+    \else%
+      \aftergroup\@tud@declare@trackfalse%
+    \fi%
+  \endgroup%
+}
+\NewDocumentCommand\tud@declare@close{m r[]}{%
+  \begingroup%
+    \tud@@declare*{#2}%
+    #1%
+  \endgroup%
+}
+\NewDocumentCommand\tud@@declare{s m}{%
   \TUDExecuteOptions[.declare]{output,label,index,track=false,inline=false}%
   \begingroup%
     \edef\tud@res@a{%
@@ -3265,26 +3277,7 @@
   \tud@declare@close{#1}[{#2}]%
   \par%
 }
-\NewDocumentCommand\tud@declare@open{m D=={} r[]}{%
-  \let\tud@declare@result@list\@empty%
-  \begingroup%
-    \tud@declare@process{#3}%
-    \protected@edef\tud@lbl@alias@values{#2}%
-    #1%
-    \if@tud@declare@track%
-      \aftergroup\@tud@declare@tracktrue%
-    \else%
-      \aftergroup\@tud@declare@trackfalse%
-    \fi%
-  \endgroup%
-}
-\NewDocumentCommand\tud@declare@close{m r[]}{%
-  \begingroup%
-    \tud@declare@process*{#2}%
-    #1%
-  \endgroup%
-}
-\newcommand*\tud@declaration@list{}
+\newcommand*\tud@declaration@inner@list{}
 \newcommand*\tud@declaration@label@list{}
 \newcommand*\printdeclarationlist{}
 \AtBeginDocument{\undef\printdeclarationlist}
@@ -3295,7 +3288,7 @@
       be used right after the last declaration environment.%
     }%
     \gundef\printdeclarationlist%
-    \global\let\tud@declaration@list\@empty%
+    \global\let\tud@declaration@inner@list\@empty%
   }%
 }
 \newcommand\Process@@Output{}%
@@ -3313,10 +3306,7 @@
     % DOC interne Teil der Tabelle
     \let\tud@res@a\@empty%
     % DOC alles, was nach \printdeclarationlist definiert werden muss
-    \def\tud@res@b{%
-      \let\tud@declaration@list\@empty%
-      \let\tud@declaration@label@list\@empty%
-    }%
+    \let\tud@res@b\@empty%
     \def\do##1{\tud@declare@process@eval\tud@res@a\tud@res@b\@nil##1\@nil}%
     \dolistloop{\tud@declare@process@list}%
     \sbox\z@{%
@@ -3387,7 +3377,7 @@
     \eappto#1{%
       \unexpanded{\listadd\tud@declaration@label@list}{\tud@lbl@tmp}%
     }%
-    \appto#1{\listadd\tud@declaration@list{#3}}%
+    \appto#1{\listadd\tud@declaration@inner@list{#3}}%
   \fi%
 }
 % DOC split von {v2.02}{!new!}{\BooleanFalse}{internal}{lbl}
@@ -3396,7 +3386,6 @@
   \appto#1{\Changed@At@ProcessList{#2}<{#5}{#6}>:#3:{#4}}%
 }
 % TODO alias setzen falls Spezialwert gegeben (parskip), intern ohne alias
-% TODO Nutzen eines vorhandenen/gegebenen Links \File'CTAN:l2tabu'{l2tabu.pdf}
 \NewDocumentCommand\InlineDeclaration{s m}{%
   \IfBooleanT{#1}{%
     \ClassWarning{tudscrmanual}{%
@@ -3406,8 +3395,11 @@
   \Inline@Declaration{#2}%
 }
 \NewDocumentCommand\Inline@Declaration{s o d== m}{%
-  \tud@declare@special@start[{#2}]{#4}=#3=[inline\IfBooleanT{#1}{,output=false}]%
-  \tud@declare@special@end{#4}[inline]%
+  \begingroup%
+    \tud@declare@special@start[{#2}]{#4}=#3=%
+      [inline\IfBooleanT{#1}{,output=false}]%
+    \tud@declare@special@end{#4}[inline]%
+  \endgroup%
   \null%
 }
 \NewDocumentEnvironment{DeclareEntity}{m o}{%
@@ -3444,6 +3436,8 @@
     }%
     \tud@print@changedatlist%
   }%
+  \tud@lbl@get\tud@lbl@tmp{#3}%
+  \listeadd\tud@declaration@label@list{\tud@lbl@tmp}%
   \ignorespaces%
 }
 \NewDocumentCommand\tud@declare@special@end{m r[]}{%
@@ -3529,7 +3523,7 @@
 }
 \newcommand*\tud@lbl@parent{}
 \let\tud@lbl@parent\relax%
-% TODO |#9| \AP@Index für Auswertung
+% URGENT !!!! |#9| \AP@Index für Auswertung
 %   > \tud@index@mode@num für default (NoValue) auswerten (Changes)
 %       nur |!|, |?|, |.| und || gültig
 %   > \tud@lbl@parent über || akzeptieren, falls Deklaration
@@ -3542,7 +3536,7 @@
   \tud@res@a%
 }
 \NewDocumentCommand\Process@@Index{m m r// r== r[] r|| r() r<>}{%
-  % TODO überarbeiten, index |.| für normalen Eintrag
+  % URGENT !!!! überarbeiten, index |.| für normalen Eintrag
   \begingroup%
     \@tud@res@swatrue%
     \ifnum\tud@index@mode@num<\@ne\relax\@tud@res@swafalse\fi%
@@ -3875,6 +3869,7 @@
         \trim@spaces@in\tud@res@a%
         \ifx\tud@res@a\@empty\else%
           \Markup@Inner@Get\tud@res@b{\tud@res@a}%
+          % TODO ??? \tud@lbl@@get\tud@lbl@tmp{\tud@res@b}%
           \tud@lbl@get\tud@lbl@tmp{\tud@res@a}%
           \edef\tud@res@a{{\expandonce\tud@res@b}{\tud@lbl@tmp}}%
           \expandafter\tud@res@d\expandafter{\tud@res@a}%
@@ -4068,16 +4063,7 @@
     \fi%
     \IfValueTF{#2}{%
       \def\tud@res@c##1##2\@nil{%
-        % TODO If@Markup@KeyTF{##1}{\@tud@res@swatrue}{\@tud@res@swafalse}
-        \def\tud@res@c####1/####2/####3\@nil{%
-          \IfValueTF{####2}{%
-            \@tud@res@swatrue%
-          }{%
-            \@tud@res@swafalse%
-          }%
-        }%
-        \tud@res@c##1\@nil%
-        % TODO ENDE If@Markup@KeyTF
+        \If@Markup@Key@TF{##1}{\@tud@res@swatrue}{\@tud@res@swafalse}%
         \tud@idx@get\tud@res@c<##2>{##1}%
       }%
       \tud@res@c#2\@nil%
@@ -4212,6 +4198,7 @@
   \newlist{#2}{#3}{#4}%
   \setlist[{#2}]{%
     topsep=\smallskipamount,%
+    % TODO Einzug des Labels 
     font=\normalfont,labelwidth=\linewidth,labelsep=0pt,%labelindent=.75em,%
     parsep=\parskip,listparindent=\parindent,%
     #1%
@@ -4221,9 +4208,9 @@
   \newcommand*\itemval{}%
   \undef\itemval%
 }
-\newcommand*\tud@item@@val[1]{%
+\newcommand*\tud@item@@val{%
   \tud@declare@check%
-  \ifx\tud@declaration@list\@empty%
+  \ifx\tud@declaration@inner@list\@empty%
     \ClassError{tudscrmanual}{Wrong usage of `DeclareValues'}{%
       The environment `DeclareValues' can only be used\MessageBreak%
       within declarations.%
@@ -4232,7 +4219,6 @@
   \let\itemval\tud@item@val%
 }
 % TODO noindent nach Umgebung?
-% TODO Einzug des Labels 
 \newcommand*\tud@val@main{}
 \newcommand*\tud@val@addon{}
 \newcommand*\tud@val@alias{}
@@ -4246,7 +4232,7 @@
         % DOC \tud@res@b zum Abgleich des optionalen Argumentes
         \forcsvlist{\tud@val@compare\tud@res@a\tud@res@b{##1}}{#1}%
       }%
-      \dolistloop{\tud@declaration@list}%
+      \dolistloop{\tud@declaration@inner@list}%
       \def\do##1{%
         \xifinlist{\detokenize{##1}}{\tud@res@b}{}{%
           \ClassWarning{tudscrmanual}{%
@@ -4264,7 +4250,7 @@
           }{}%
         }%
       }%
-      \dolistloop{\tud@declaration@list}%
+      \dolistloop{\tud@declaration@inner@list}%
     }%
     \ifx\tud@res@a\@empty%
       \let\tud@res@c\@empty%
@@ -4275,7 +4261,7 @@
           \detokenize\expandafter{\tud@res@d}\noexpand\MessageBreak%
         }%
       }%
-      \dolistloop{\tud@declaration@list}%
+      \dolistloop{\tud@declaration@inner@list}%
       \ClassError{tudscrmanual}{No markup with special value declared}{%
         None of the given declarations:\MessageBreak%
         \tud@res@c\IfValueT{#1}{was matched or }holds a special value.%
@@ -4325,6 +4311,7 @@
   \tud@res@c%
 }
 \tud@list@create[before=\tud@item@@val]{Declare@Values}{description}{1}
+% >{\AP@PresetParser}
 \NewDocumentCommand\tud@item@val{s r== d() >{\AP@MarkupRef{see}}d<> o}{%
   \begingroup%
     \tud@val@format\tud@val@main\tud@val@addon\tud@val@alias{#1}{#2}%
@@ -4436,8 +4423,10 @@
   \newcommand*\itempkg{}%
   \undef\itempkg%
 }
+\newcommand*\tud@pkg@label@list{}
 \newcommand*\tud@item@@pkg[1]{%
   \let\itempkg\tud@item@pkg%
+  \let\tud@pkg@label@list\tud@declaration@label@list%
 }
 % TODO noindent nach Umgebung?
 \tud@list@create[before=\tud@item@@pkg]{DeclarePackages}{description}{2}
@@ -4446,17 +4435,12 @@
 \NewDocumentCommand\tud@item@pkg{m !d() !d<> !o}{%
   \begingroup%
     \let\tud@res@a\@empty%
-    \def\tud@res@b##1##2{%
-      \ifx\tud@res@a\@empty\else\appto\tud@res@a{,\space}\fi%
-      \appto\tud@res@a{\Inline@Declaration{##1'*'{##2}}}%
-    }%
-    \forcsvlist{\tud@res@b{\Package}}{#1}%
+    \forcsvlist{\tud@pkg@declare\tud@res@a{\Package'*'}}{#1}%
     \IfValueT{#2}{%
-      \forcsvlist{\expandafter\tud@res@b\@firstofone}{#2}%
+      \forcsvlist{\tud@pkg@@declare\tud@res@a}{#2}%
     }%
     \IfValueT{#3}{%
-      \def\tud@res@b##1{\appto\tud@res@a{\Inline@Declaration*{##1}}}%
-      \forcsvlist{\tud@res@b}{#3}%
+      \forcsvlist{\tud@pkg@@declare*\tud@res@a}{#3}%
     }%
     \IfValueTF{#4}{%
       \let\tud@res@d\@empty%
@@ -4485,9 +4469,23 @@
       \endgroup%
       \noexpand\item[\expandonce\tud@res@a]%
       \expandonce\tud@res@d%
+      \unexpanded{\def\tud@declaration@label@list}{%
+        \expandonce\tud@pkg@label@list%
+      }%
     }%
   \tud@res@a%
   \strut\ignorespaces%
+}
+\newcommand\tud@pkg@declare[3]{\tud@pkg@@declare#1{#2{#3}}}
+\NewDocumentCommand\tud@pkg@@declare{s m m}{%
+  \tud@lbl@get\tud@lbl@tmp{#3}%
+  \listeadd\tud@pkg@label@list{\tud@lbl@tmp}%
+  \eappto#2{%
+  % URGENT !!!!!!!!!!!!!!!!!!!!!
+%    \IfBooleanF{#1}{\ifx#2\@empty\else\unexpanded{\,/\,}\fi}%
+    \IfBooleanF{#1}{\ifx#2\@empty\else,\space\fi}%
+    \noexpand\Inline@Declaration\IfBooleanT{#1}{*}\unexpanded{{#3}}%
+  }%
 }
 \NewDocumentEnvironment{tabularm}{O{c} m o +b}{%
   \sbox\z@{\tabular[{#1}]{*{#2}l}#4\endtabular}%
@@ -4504,7 +4502,7 @@
   \begingroup%
     \let\tud@res@a\@empty%
     \def\do##1{\Term@Table\tud@res@a\@nil##1\@nil}%
-    \dolistloop{\tud@declaration@list}%
+    \dolistloop{\tud@declaration@inner@list}%
     \ifx\tud@res@a\@empty%
       \ClassWarning{tudscrmanual}{No declaration for Terms found}%
     \else%
@@ -4985,7 +4983,6 @@
     \GitHubBase{\TUDScriptRepository}%
   \fi%
 }
-% TODO check arguments...
 \NewDocumentCommand\GitHubRepo{!o !d() !d<>}{%
   \begingroup%
     \IfValueTF{#2}{%
@@ -5056,12 +5053,11 @@
   \endgroup%
   \xspace%
 }
-% TODO use CTAN@pkg or something from \Bundle?
-% TODO nur Link und keine Fußnote im Normalfall?
 \NewDocumentCommand\scrguide{!O{\KOMAScript-Handbuch}}{%
-  \begingroup%%
-    \tud@url@normalize@ctan\tud@res@b{pkg/koma-script}%
-    \href{\tud@res@b}{#1}%
+  \begingroup%
+    \Entity@Link@Seek\tud@res@a{Bundle}{koma-script}%
+    \tud@specialurl@wrapper\tud@res@a{\tud@res@a}%
+    \tud@res@a{#1}%
   \endgroup%
   \xspace%
 }
