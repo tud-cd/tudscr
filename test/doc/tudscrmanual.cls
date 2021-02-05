@@ -2993,16 +2993,18 @@
 % TODO alle Änderungen zur vorherigen Version in unteren Teil der Liste?
 %      --> unterscheiden zwischen neu/geändert und entfernt
 \newcommand*\tud@changes@version{}
-\let\tud@changes@version\relax
+\AtBeginDocument{\undef\tud@changes@version}
 \NewDocumentEnvironment{Changes}{m o}{%
-  \ifx\tud@changes@version\relax\else%
+  \ifundef{\tud@changes@version}{%
+    \def\tud@changes@version{#1}%
+    \tud@v@validate{\tud@changes@version}%
+  }{%
     \ClassError{tudscrmanual}{Nested environment `Changes'}{%
       The environment `Changes' must not be nested!%
     }%
-  \fi%
-  \def\tud@changes@version{#1}%
-  \tud@v@validate{\tud@changes@version}%
-  \ifx\tud@changes@version\relax\else%
+    \undef\tud@changes@version%
+  }%
+  \ifundef{\tud@changes@version}{}{%
     \begingroup%
       \edef\tud@res@a{%
         \unexpanded{\"Anderungen f\"ur \TUDScript}\tud@changes@version%
@@ -3034,7 +3036,7 @@
         }%
       }%
     \tud@res@d%
-  \fi%
+  }%
 % TODO defaultwert für index ändern
 }{}
 \NewDocumentEnvironment{Obsolete}{m d() D<>{}}{%
@@ -3507,12 +3509,8 @@
     }%
   \tud@res@a%
 }
-\newcommand*\tud@lbl@parent{}
-\let\tud@lbl@parent\relax%
 % URGENT !!!!
-%   > \tud@lbl@parent über || akzeptieren, falls Deklaration
 %   > \tud@index@mode@num für default (NoValue) auswerten (Changes)
-%       nur |!|, |?|, |.| und || gültig
 %   > || default für Obsolete, ansonsten |.|; nach || suchen
 \NewDocumentCommand\Process@Index{o m m r// r== r[] r|| r() r<>}{%
   \begingroup%
@@ -3611,11 +3609,11 @@
         \global\cslet{tud@idx@lbl@@##1}\tud@res@a%
       }%
       \tud@res@b{#8}%
-      \ifundef{\tud@lbl@parent}{%
-        \tud@if@param@special{#4}{%
-          \tud@truncate@value\tud@res@c{#8}%
-          \expandafter\tud@res@b\expandafter{\tud@res@c}%
-        }{}%
+      \tud@if@param@special{#4}{%
+        \tud@truncate@value\tud@lbl@tmp{#8}%
+        \xifinlist{\tud@lbl@tmp}{\tud@declaration@label@list}{}{%
+          \expandafter\tud@res@b\expandafter{\tud@lbl@tmp}%
+        }%
       }{}%
     \fi%
   \endgroup%
@@ -3654,16 +3652,13 @@
       ##3%
     }%
   }%
-  % TODO \tud@lbl@parent aus declaration@list? als Argument?
-  \ifundef{\tud@lbl@parent}{}{%
-    \typeout{////////}%
-    \typeout{\tud@lbl@parent}%
-    \typeout{\detokenize{[#1]{#2}{#3}/#4/=#5=[#6]|#7|'#8'(#9)}}%
-    \tud@if@idx@exists{\tud@lbl@parent}{%
-      \tud@idx@read\tud@idx@tmp{\tud@lbl@parent}%
+  \tud@lbl@@get\tud@lbl@tmp{{#2}{#3}/#4/(#9)}%
+  \xifinlist{\tud@lbl@tmp}{\tud@declaration@label@list}{%
+    \tud@if@idx@exists{\tud@lbl@tmp}{%
+      \tud@idx@read\tud@idx@tmp{\tud@lbl@tmp}%
       \appto\tud@idx@tmp{!}%
     }{}%
-  }%
+  }{}%
   \ifx\tud@idx@tmp\@empty%
     \IfValueT{#4}{%
       \tud@lbl@@get\tud@lbl@tmp{{#2}{#3}(#9)}%
@@ -4283,9 +4278,9 @@
         }%
       }%
       \dolistloop{\tud@declaration@inner@list}%
-      \ClassError{tudscrmanual}{No markup with special value declared}{%
+      \ClassWarning{tudscrmanual}{%
         None of the given declarations:\MessageBreak%
-        \tud@res@c\IfValueT{#1}{was matched or }holds a special value.%
+        \tud@res@c\IfValueT{#1}{was matched or }holds a special value%
       }%
     \fi%
     \edef\tud@res@a{%
@@ -4363,8 +4358,6 @@
         \edef\tud@res@c{%
           \endgroup%
           \unexpanded{\appto\tud@res@a}{%
-            % TODO \tud@lbl@tmp via |...| durchreichen, \tud@lbl@parent raus!
-            \unexpanded{\def\tud@lbl@parent}{\tud@lbl@tmp}%
             \noexpand\Inline@Declaration\ifx\tud@res@a\@empty\else*\fi%
               \unexpanded{[{#5}]}%
               =\expandonce\tud@val@alias=%
@@ -4379,7 +4372,9 @@
       \endgroup%
       \noexpand\item[{%
         \unexpanded{\let\tud@print@changedatlist\relax}%
-        \expandonce\tud@res@a\expandonce\tud@val@addon%
+        \ifx\tud@res@a\@empty\else%
+          \expandonce\tud@res@a\expandonce\tud@val@addon%
+        \fi%
       }]%
     }%
   \tud@res@a%
