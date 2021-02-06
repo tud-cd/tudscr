@@ -949,13 +949,22 @@
   \csdef{Markup@Format@@Suffix@@#1}{{#2}{#3}}%
 }
 \@onlypreamble\Markup@Suffix@Format@Set
+% DOC Markup Index: 1 default=true 0 default=false -1 no -2/-3 index/changelog
+\tud@newcount\tud@index@mode@num
+\tud@index@mode@num=\@ne\relax%
+\newenvironment{NoIndexDefault}{%
+  \tud@index@mode@num=\z@\relax%
+  \ignorespaces%
+}{%
+  \aftergroup\ignorespaces%
+}
 \newcommand*\Markup@Suffix@Select[1]{%
   \begingroup%
-    \tud@index@mode@num=\numexpr-\tud@index@mode@num-1\relax%
+    \tud@index@mode@num=\numexpr\tud@index@mode@num+3\relax%
     \ifcase\tud@index@mode@num\relax%
-      \def\tud@res@a{i}%
-    \or%
       \def\tud@res@a{c}%
+    \or%
+      \def\tud@res@a{i}%
     \else%
       \def\tud@res@a{n}%
     \fi%
@@ -1744,28 +1753,6 @@
 }{%
   \tud@toks@{[{#1}]{#2}{#3}/#4/=#5=[{#6}]|#7|'#8'(#9)}%
 }
-\NewDocumentCommand\Markup@@Replace{m m m m}{%
-  \begingroup%
-    \tud@if@nil{#3}{%
-      \def\tud@res@a{\@nil}%
-    }{%
-      \def\tud@res@a{#4}%
-      \IfValueT{#3}{%
-        \IfBooleanTF{#1}{%
-          \IfValueF{#4}{\def\tud@res@a{#3}}%
-        }{%
-          \def\tud@res@a{#3}%
-        }%
-      }%
-    }%
-    \edef\tud@res@a{%
-      \endgroup%
-      \unexpanded{\addto@hook\tud@toks@}{%
-        \@firstoftwo#2\expandonce\tud@res@a\@secondoftwo#2%
-      }%
-    }%
-  \tud@res@a%
-}
 % DOC Sternversion ersetzt nur -No-Value-
 \NewDocumentCommand\Markup@Replace{s m d== d|| d'' m}{%
   \begingroup%
@@ -1785,6 +1772,28 @@
     \edef\tud@res@a{%
       \endgroup%
       \unexpanded{\def#2}{\the\tud@toks@}%
+    }%
+  \tud@res@a%
+}
+\NewDocumentCommand\Markup@@Replace{m m m m}{%
+  \begingroup%
+    \tud@if@nil{#3}{%
+      \def\tud@res@a{\@nil}%
+    }{%
+      \def\tud@res@a{#4}%
+      \IfValueT{#3}{%
+        \IfBooleanTF{#1}{%
+          \IfValueF{#4}{\def\tud@res@a{#3}}%
+        }{%
+          \def\tud@res@a{#3}%
+        }%
+      }%
+    }%
+    \edef\tud@res@a{%
+      \endgroup%
+      \unexpanded{\addto@hook\tud@toks@}{%
+        \@firstoftwo#2\expandonce\tud@res@a\@secondoftwo#2%
+      }%
     }%
   \tud@res@a%
 }
@@ -1973,13 +1982,16 @@
 \NewMarkupCommand\Distribution[%
   lvl=0,idx=true:{LaTeX-Distribution}@{\DistributionGeneral}%
 ](\textsbn){Distribution}
-% TODO \AP@Index?!
 \NewDocumentCommand\DistributionGeneral@IndexEntry{m}{%
-  \ifnum\tud@index@mode@num>\z@\relax%
-    \IfArgIsEmpty{#1}{}{%
-      \index{{LaTeX-Distribution}@\DistributionGeneral\IfValueT{#1}{|#1}}%
-    }%
-  \fi%
+  \begingroup%
+    \tud@idx@markup@get\tud@res@a{#1}%
+    \ifx\tud@res@a\relax\else%
+      \ifx\tud@res@a\@empty\else%
+        \preto\tud@res@a{|}%
+      \fi%
+      \index{{LaTeX-Distribution}@\DistributionGeneral\tud@res@a}%
+    \fi%
+  \endgroup%
 }
 \NewDocumentCommand\TeXLive{!t' !d|| !d''}{%
   \Distribution|#2|'#3'{\hologo{TeX}~Live\IfBooleanT{#1}{~Portable}}%
@@ -2928,15 +2940,12 @@
 \TUD@key[.declare]{label}[true]{%
   \TUD@set@ifkey{label}{@tud@declare@label}{#1}%
 }
-% URGENT doppelte verwendung von \tud@index@mode@num auflösen
-\tud@newcount\tud@index@mode@num
-\tud@index@mode@num=\@ne%
 \TUD@key[.declare]{index}[true]{%
   \TUD@set@ifkey{index}{@tempswa}{#1}%
   \if@tempswa%
-    \tud@index@mode@num=\@ne%
+    \tud@index@mode@num=\@ne\relax%
   \else%
-    \tud@index@mode@num=\z@%
+    \tud@index@mode@num=\m@ne\relax%
   \fi%
 }
 \tud@newcount\tud@declare@mode@num
@@ -2992,26 +3001,26 @@
 }
 % TODO alle Änderungen zur vorherigen Version in unteren Teil der Liste?
 %      --> unterscheiden zwischen neu/geändert und entfernt
-\newcommand*\tud@changes@version{}
-\AtBeginDocument{\undef\tud@changes@version}
-\NewDocumentEnvironment{Changes}{m o}{%
-  \ifundef{\tud@changes@version}{%
-    \def\tud@changes@version{#1}%
-    \tud@v@validate{\tud@changes@version}%
+\newcommand*\tud@cessations@version{}
+\AtBeginDocument{\undef\tud@cessations@version}
+\NewDocumentEnvironment{Cessations}{m o}{%
+  \ifundef{\tud@cessations@version}{%
+    \def\tud@cessations@version{#1}%
+    \tud@v@validate{\tud@cessations@version}%
   }{%
-    \ClassError{tudscrmanual}{Nested environment `Changes'}{%
-      The environment `Changes' must not be nested!%
+    \ClassError{tudscrmanual}{Nested environment `Cessations'}{%
+      The environment `Cessations' must not be nested!%
     }%
-    \undef\tud@changes@version%
+    \undef\tud@cessations@version%
   }%
-  \ifundef{\tud@changes@version}{}{%
+  \ifundef{\tud@cessations@version}{}{%
     \begingroup%
       \edef\tud@res@a{%
-        \unexpanded{\"Anderungen f\"ur \TUDScript}\tud@changes@version%
+        \unexpanded{\"Anderungen f\"ur \TUDScript}\tud@cessations@version%
       }%
-      \edef\tud@lbl@tmp{sec:obsolete:\tud@changes@version}%
+      \edef\tud@lbl@tmp{sec:cessations:\tud@cessations@version}%
       \edef\tud@res@b{%
-        \noexpand\index[changes-\tud@changes@version]{%
+        \noexpand\index[changes-\tud@cessations@version]{%
           ""@Allgemein:\space\noexpand\hyperref[\tud@lbl@tmp]{%
             \unexpanded{\"Anderungen gegen\"uber der vorhergehenden Version}%
           }%
@@ -3020,7 +3029,7 @@
       \let\tud@res@c\@empty%
       \IfValueT{#2}{%
         \def\tud@res@d##1{%
-          \eappto\tud@res@c{\tud@changes@version:}%
+          \eappto\tud@res@c{\tud@cessations@version:}%
           \appto\tud@res@c{##1;}%
         }%
         \forssvlist{\tud@res@d}{#2}%
@@ -3037,23 +3046,24 @@
       }%
     \tud@res@d%
   }%
-% TODO defaultwert für index ändern
 }{}
-\NewDocumentEnvironment{Obsolete}{m d() D<>{}}{%
-  \ifx\tud@changes@version\relax%
-    \ClassError{tudscrmanual}{Missing environment `Changes'}{%
-      The environment `Obsolete' must be used\MessageBreak%
-      within environment `Changes'!%
+\NewDocumentEnvironment{Cessation}{m d() D<>{}}{%
+  \ifx\tud@cessations@version\relax%
+    \ClassError{tudscrmanual}{Missing environment `Cessations'}{%
+      The environment `Cessation' must be used\MessageBreak%
+      within environment `Cessations'!%
     }%
-    \edef\tud@changes@version{\vTUDScript}%
+    \edef\tud@cessations@version{\vTUDScript}%
   \fi%
   \begingroup%
-    \tud@ref@get\tud@res@a{obsolete}{#3}{|\@nil|'\@nil'}%
+    \tud@ref@get\tud@res@a{discontinued}{#3}{|\@nil|'\@nil'}%
     \edef\tud@res@a{%
       \endgroup%
-      \noexpand\tud@declare@start*[\tud@changes@version:\expandonce\tud@res@a]%
+      \noexpand\tud@declare@start*[%
+        {\tud@cessations@version:\expandonce\tud@res@a}%
+      ]%
     }%
-  \tud@res@a{#1}[track,index=false](#2)<#3>{obsolete}%
+  \tud@res@a{#1}[track,index=false](#2)<#3>{discontinued}%
 }{%
   \tud@declare@end{#1}[index=false]%
 }
@@ -3118,7 +3128,7 @@
       \TUD@set@numkey{}{tud@res@c}{%
         {see}{0},{seealso}{1},%
         {equal}{2},{gobble}{3},%
-        {not}{4},{obsolete}{5}%
+        {not}{4},{discontinued}{5}%
       }{\tud@res@b}%
       \ifx\FamilyKeyState\FamilyKeyStateProcessed%
         \ifcase\tud@res@c\relax% see
@@ -3136,7 +3146,7 @@
         \or% not
           \def\tud@res@b{nicht definiert}%
           \def\tud@res@c##1{ f\"ur ##1}%
-        \or% obsolete
+        \or% discontinued
           \def\tud@res@b{entf\"allt}%
           \def\tud@res@c##1{, \seeplain{##1}}%
         \fi%
@@ -3246,7 +3256,7 @@
     \IfValueTF{#2}{%
       % TODO ist das noch notwendig?
       \IfBooleanTF{#1}{%
-        \addto@hook\tud@toks@{{#2}{!obsolete!}{\BooleanTrue}}%
+        \addto@hook\tud@toks@{{#2}{!discontinued!}{\BooleanTrue}}%
       }{%
         \addto@hook\tud@toks@{{#2}{!new!}{\BooleanFalse}}%
       }%
@@ -3281,7 +3291,7 @@
   }%
 }
 \newcommand\Process@@Output{}%
-\NewDocumentCommand\tud@print@declarationlist{!o !d()}{%
+\NewDocumentCommand\tud@print@declarationlist{!o !+d()}{%
   \gundef\printdeclarationlist%
   \tud@setglue\tud@res@glue{\medskipamount*3/2}%
   \ifhmode%
@@ -3509,12 +3519,9 @@
     }%
   \tud@res@a%
 }
-% URGENT !!!!
-%   > \tud@index@mode@num für default (NoValue) auswerten (Changes)
-%   > || default für Obsolete, ansonsten |.|; nach || suchen
 \NewDocumentCommand\Process@Index{o m m r// r== r[] r|| r() r<>}{%
   \begingroup%
-    \ifnum\tud@index@mode@num>\z@\relax
+    \ifnum\tud@index@mode@num>\m@ne\relax
       \IfBooleanTF{#1}{\@tud@res@swafalse}{%
         \ifcsdef{Markup@Format@@Index@@#2}{%
           \@tud@res@swatrue%
@@ -3565,30 +3572,36 @@
 }
 \newcommand*\tud@idx@markup@get[2]{%
   \begingroup%
-    \let\tud@res@b\@empty%
-    \IfValueT{#2}{%
-      \TUD@set@numkey{}{tud@res@a}{%
-        \TUD@bool@numkey,{}{0},{.}{1},{default}{1},%
-        {?}{2},{important}{2},{!}{3},{declare}{3},%
-      }{#2}%
-      \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-        \ifcase\tud@res@a\relax%
-          \let\tud@res@b\relax%
-        \or% default
-          \let\tud@res@b\@empty%
-        \or% important
-          \def\tud@res@b{?}%
-        \or% declare
-          \def\tud@res@b{!}%
+    \ifnum\tud@index@mode@num>\z@\relax%
+      \let\tud@res@b\@empty%
+    \else%
+      \let\tud@res@b\relax%
+    \fi%
+    \ifnum\tud@index@mode@num>\m@ne\relax%
+      \IfValueT{#2}{%
+        \TUD@set@numkey{}{tud@res@a}{%
+          \TUD@bool@numkey,{}{0},{.}{1},{default}{1},%
+          {?}{2},{important}{2},{!}{3},{declare}{3},%
+        }{#2}%
+        \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+          \ifcase\tud@res@a\relax%
+            \let\tud@res@b\relax%
+          \or% default
+            \let\tud@res@b\@empty%
+          \or% important
+            \def\tud@res@b{?}%
+          \or% declare
+            \def\tud@res@b{!}%
+          \fi%
+        \else%
+          \ClassWarning{tudscrmanual}{%
+            The index specification |#2| is\MessageBreak%
+            unknown. Only |.| or |?| and |!| as well as || or\MessageBreak%
+            booleans are valid%
+          }%
         \fi%
-      \else%
-        \ClassWarning{tudscrmanual}{%
-          The index specification |#2| is\MessageBreak%
-          unknown. Only |.| or |?| and |!| as well as || or\MessageBreak%
-          booleans are valid%
-        }%
-      \fi%
-    }%
+      }%
+    \fi%
     \edef\tud@res@a{%
       \endgroup%
       \ifx\tud@res@b\relax%
@@ -3645,7 +3658,6 @@
 %\IfValueT{#6}{\typeout{?????????????????????? #6}}%
   \def\tud@res@c##1##2##3{%
     \tud@if@idx@exists{##1}{##2}{%
-      % TODO die Warnung direkt in \tud@if@idx@exists?
       \ClassWarning{tudscrmanual}{%
         Index entry for\MessageBreak`##1'\MessageBreak is not defined%
       }%
@@ -3788,6 +3800,8 @@
 % TODO NewCrossIndex: mit |see kombinieren, um Referenzen zu bündeln
 %      \SeeIndex[Änderungsliste:changes]{Änderungen}{Changelog,Version}
 %      #2 erhält Eintrag auf Index #1; #3|see#2; Sternversion für seeunverified?
+% \SeeIndex[macros]{Befehle}{Makros,Parameter}
+% \SeeIndex[Änderungsliste:changelog]{Änderungen}{Changelog,Version}
 \NewDocumentCommand\CrossIndex{m o m}{%
   \begingroup%
     \def\tud@res@c##1!##2\@nil{%
@@ -3813,7 +3827,7 @@
 \newcommand*\PrintIndex{%
   \begingroup%
     \cleardoublepage%
-    \tud@index@mode@num=\m@ne%
+    \tud@index@mode@num=-2\relax%
     \setchapterpreamble{%
       \begin{abstract}%
         \noindent%
@@ -4017,7 +4031,7 @@
 \newcommand*\PrintChanges{%
   \begingroup%
     \cleardoublepage%
-    \tud@index@mode@num=-2%
+    \tud@index@mode@num=-3\relax%
     \def\indexname{\"Anderungsliste}%
     \addchap{\indexname\label{idx:changes}}%
     \appto\tud@index@hook{%
@@ -4135,13 +4149,13 @@
 % TODO an geändertes \Changed@At@CreateEntry anpassen
 \NewDocumentCommand\Changed@At@@CreateEntry{m r() r:: m m m}{%
   \begingroup%
-    % TODO als einfacher Schalter, wenn Obsolete Processorergebnis durchreicht
+    % TODO als einfacher Schalter, wenn Cessation Processorergebnis durchreicht
     \tud@if@strequal{!new!}{#3}{%
       \let\tud@res@b\@empty%
       \def\tud@res@c{\emph{neu}}%
     }{%
       % TODO kann eigentlich raus
-      \tud@if@strequal{!obsolete!}{#3}{%
+      \tud@if@strequal{!discontinued!}{#3}{%
         \let\tud@res@b\@empty%
         \def\tud@res@c{\emph{entf\"allt}}%
       }{%
