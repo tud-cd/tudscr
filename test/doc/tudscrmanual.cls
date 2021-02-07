@@ -773,8 +773,6 @@
       \noexpand\csdef{tud@index@set@@#1}{\the\tud@toks@}%
     }%
   \tud@res@a%
-  % TODO NewCrossIndex
-%  \expandafter\newcommand\expandafter*\csname tud@idx@cross@#1\endcsname{}%
 }
 \tud@index@make{Allgemeines}
 \tud@index@make[options]{Klassen- und Paketoptionen}
@@ -819,11 +817,7 @@
   \def\indexspace{\tud@index@vskip[\bigskipamount]}%
   \tud@index@hook%
   \def\tud@res@a{%
-    \addsec[\tud@index@toc]{\tud@index@title\label{idx:\tud@index@name}%
-      % TODO NewCrossIndex
-  %          \expandonce?
-  %           \tud@idx@cross%
-    }%
+    \addsec[\tud@index@toc]{\tud@index@title\label{idx:\tud@index@name}}%
     \markdouble{\indexname: \tud@index@title}%
     \tud@index@prologue%
   }%
@@ -848,8 +842,6 @@
 \NewDocumentCommand\tud@index@print{!O{\jobname} !+d()}{%
   \IfFileExists{\jobname-#1.ind}{%
     \pagebreak[3]%
-    % TODO NewCrossIndex
-%    \letcs\tud@idx@cross{tud@idx@cross@#1}%
     \IfValueTF{#2}{%
       \def\tud@index@prologue{#2\par}%
     }{%
@@ -3558,16 +3550,16 @@
       \ifcase\tud@absnum\tud@declare@mode@num\relax\relax% inline
         \tud@idx@markup@get\tud@res@a{#7}%
       \or% declaration
-        \ifnum\tud@declare@mode@num<\z@\relax%
-          \def\tud@res@a{!)}%
+        \ifnum\tud@declare@mode@num>\z@\relax%
+          \def\tud@res@a{!(}%
         \else%
-          \def\tud@res@a{(!}%
+          \def\tud@res@a{!)}%
         \fi%
       \or% inline declaration
-        \ifnum\tud@declare@mode@num<\z@\relax%
-          \let\tud@res@a\relax%
-        \else%
+        \ifnum\tud@declare@mode@num>\z@\relax%
           \def\tud@res@a{!}%
+        \else%
+          \let\tud@res@a\relax%
         \fi%
       \fi%
       \ifx\tud@res@a\relax%
@@ -3813,31 +3805,38 @@
     \index[\tud@res@c]{\tud@res@a\IfValueT{#2}{|#2}}%
   \endgroup%
 }
-% TODO NewCrossIndex: mit |see kombinieren, um Referenzen zu bündeln
-%      \SeeIndex[Änderungsliste:changes]{Änderungen}{Changelog,Version}
-%      #2 erhält Eintrag auf Index #1; #3|see#2; Sternversion für seeunverified?
-% \SeeIndex[macros]{Befehle}{Makros,Parameter}
-% \SeeIndex[Änderungsliste:changelog]{Änderungen}{Changelog,Version}
-\NewDocumentCommand\CrossIndex{m o m}{%
+\NewDocumentCommand\CrossIndex{m o m m}{%
   \begingroup%
-    \def\tud@res@c##1!##2\@nil{%
-      \IfArgIsEmpty{##2}{%
-        \def\tud@res@b{Index der ##1}%
+    \def\do##1{%
+      \IfValueTF{#2}{%
+        \def\tud@res@b{\trim@spaces{#2}}%
       }{%
-        \tud@res@c##2\@nil%
+        \Cross@Index\tud@res@b##1!\@nil%
       }%
+      \index{%
+        \trim@spaces{##1}!"%
+          |@\,\textrightarrow\,\hyperref[{idx:#1}]{\tud@res@b}|seeidx{#1}%
+      }%
+      \SeeIndex{##1}{#4}%
     }%
-    \def\tud@res@d##1##2{%
-%      \csgappto{tud@idx@cross@#3}{%
-%        \index{##2}%
-        \index{##2!"|@\,\textrightarrow\,\hyperref[{idx:#3}]{##1}|seeidx{#3}}%
-%      }%
+    \docsvlist{#3}%
+  \endgroup%
+}
+\newcommand*\Cross@Index{}
+\def\Cross@Index#1#2!#3\@nil{%
+  \IfArgIsEmpty{#3}{%
+    \def#1{Index der #2}%
+  }{%
+    \Cross@Index#1#3\@nil%
+  }%
+}
+\NewDocumentCommand\SeeIndex{s m m}{%
+  \begingroup%
+    \def\do##1{%
+      \index{\trim@spaces{##1}%
+        |see\IfBooleanT{#1}{unverified}{\trim@spaces{#2}}}%
     }%
-    \def\tud@res@a##1{%
-      \IfValueTF{#2}{\def\tud@res@b{#2}}{\tud@res@c##1!\@nil}%
-      \expandafter\tud@res@d\expandafter{\tud@res@b}{##1}%
-    }%
-    \forcsvlist{\tud@res@a}{#1}%
+    \docsvlist{#3}%
   \endgroup%
 }
 \newcommand*\PrintIndex{%
@@ -4264,7 +4263,6 @@
   \fi%
   \let\itemval\tud@item@val%
 }
-% TODO noindent nach Umgebung?
 \newcommand*\tud@val@main{}
 \newcommand*\tud@val@addon{}
 \newcommand*\tud@val@alias{}
