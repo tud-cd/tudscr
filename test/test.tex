@@ -1,16 +1,108 @@
-\documentclass[ngerman,cdfont=light]{tudscrartcl}
-\usepackage{iftex}
-\iftutex
-  \usepackage{fontspec}
-\else
-  \usepackage[T1]{fontenc}
+%\RequirePackage[2019/10/01]{latexrelease}
+\documentclass{article}
+\usepackage[T1]{fontenc}
+\usepackage{etoolbox}
+%\usepackage{noindentafter}
+%
+\NewDocumentEnvironment{Bla}{}{}{}
+\newenvironment{Foo}{}{}
 
-\fi
-\begin{document}
+
+
+%\providecommand\IfFormatAtLeastTF{\@ifl@t@r\fmtversion}
+%\IfFormatAtLeastTF{2020/10/01}{%
+%}{%
+%\IfFormatAtLeastTF{2019/10/01}{}{}
+%}
 
 \makeatletter
 
-\meaning\footnote
+\newcommand*\@NoIndentAfter{%
+  \kernel@ifnextchar\par{%
+    \par%
+    \def\par{%
+      \everypar{\setbox\z@\lastbox\everypar{}}%
+      \@restorepar%
+    }%
+  }{}%
+}
+\newcommand*\@NoIndentAfterEnv{}%
+\def\@NoIndentAfterEnv#1\ignorespaces\fi{#1\ignorespaces\fi\@NoIndentAfter}%
+\newrobustcmd*\NoIndentAfterThis{\@NoIndentAfter\par}
+\newcommand*\NoIndentAfterEnv[1]{%
+  \AfterEndEnvironment{#1}{\@NoIndentAfterEnv}%
+}%
+
+\makeatother
+\NoIndentAfterEnv{Bla}
+\NoIndentAfterEnv{Foo}
+%\NoIndentAfterEnv{quote}
+%\NoIndentAfterEnv{quotation}
+\begin{document}
+
+\meaning\end
+
+\csmeaning{end }
+
+\meaning\AddToHook
+
+%\ShowCommand\AfterEndEnvironment
+
+
+
+\long\def\testnoindent#1{%
+\noindent
+/////////////////////////////////
+
+#1%
+===== without par =====
+
+\smallskip
+\noindent
+/////////////////////////////////
+
+#1%
+
+=====    with par =====
+
+\bigskip
+}
+
+\testnoindent{%
+\begin{Bla}%
+BlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBla%
+\end{Bla}%
+}
+
+\testnoindent{%
+\begin{Foo}
+FooFooFooFooFooFooFooFooFooFooFoo
+\end{Foo}
+}
+
+\testnoindent{%
+\begin{quote}
+QuoteQuoteQuoteQuoteQuoteQuote
+\end{quote}
+}
+
+\testnoindent{%
+\begin{quotation}
+QuotationQuotationQuotation
+\end{quotation}
+}
+
+
+%Text und noch etwas \NoIndentAfterThis mehr Text
+
+%\bigskip
+%
+%\ttfamily
+%\meaning\end
+%
+%\bigskip
+%
+%\csmeaning{end }
 
 \end{document}
 

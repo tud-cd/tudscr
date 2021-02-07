@@ -379,6 +379,22 @@
 }
 \RequirePackage{shellesc}[2016/06/07]
 \RequirePackage{pdftexcmds}[2016/05/21]
+\newcommand*\NoIndentAfterEnvironment[1]{%
+  \AfterEndEnvironment{#1}{\@NoIndentAfterEnvironment}%
+}
+\newcommand*\@NoIndentAfterEnvironment{}
+\def\@NoIndentAfterEnvironment#1\ignorespaces\fi{%
+  #1\ignorespaces\fi\@@NoIndentAfterEnvironment%
+}
+\newcommand*\@@NoIndentAfterEnvironment{%
+  \kernel@ifnextchar\par{%
+    \par%
+    \def\par{%
+      \everypar{\setbox\z@\lastbox\everypar{}}%
+      \@restorepar%
+    }%
+  }{}%
+}
 \newcommand*\tud@trace@lbl@wlog{\relax}
 \AfterEndDocument{\tud@trace@lbl@wlog}
 \newcommand*\tud@trace@lbl@types{}
@@ -4253,6 +4269,7 @@
 \newcommand*\tud@val@addon{}
 \newcommand*\tud@val@alias{}
 \newcommand*\tud@val@declaration@list{}
+\NoIndentAfterEnvironment{DeclareValues}
 \NewDocumentEnvironment{DeclareValues}{o +b}{%
   \begingroup%
     \let\tud@res@a\@empty%
@@ -4458,7 +4475,7 @@
   \let\itempkg\tud@item@pkg%
   \let\tud@pkg@label@list\tud@declaration@label@list%
 }
-% TODO noindent nach Umgebung?
+\NoIndentAfterEnvironment{DeclarePackages}
 \tud@list@create[before=\tud@item@@pkg]{DeclarePackages}{description}{2}
 % TODO argumente überprüfen bzw. komplett überarbeiten; m als letztes?!
 \NewDocumentCommand\tud@item@pkg{m !d() !d<> !o}{%
@@ -4560,17 +4577,6 @@
   \strut\selectlanguage{english}%
   \Ifstr{\csuse{#1}}{}{\PName{empty}}{\csuse{#1}}\tabularnewline%
 }
-% TODO noindent nach umgebung?
-\newenvironment{Example}{\csuse{Example*}}{%
-  \csuse{endExample*}%
-  \addvspace{-\topsep}%
-}
-\newenvironment{Example*}{%
-  \labeling{{\usekomafont{disposition}{Beispiel:\nbs}}}%
-  \item[{\usekomafont{disposition}{Beispiel:\nbs}}]%
-}{%
-  \endlabeling%
-}
 \tud@newwrite\tud@write@a
 \RequirePackage{listings}[2014/03/04]
 \lstdefinestyle{tudscr}{%
@@ -4582,11 +4588,30 @@
   language=[LaTeX]TeX,%
   texcl,%
 }
-% TODO noindent nach Umgebung?
+\NoIndentAfterEnvironment{Code}
 \lstnewenvironment{Code}[1][]{\lstset{style=tudscr,#1}}{}
 \newcommand*\tud@currentHref{}
 \BeforeBeginEnvironment{Code}{\global\let\tud@currentHref\@currentHref}
 \AfterEndEnvironment{Code}{\global\let\@currentHref\tud@currentHref}
+\newcommand*\tud@let@token{}
+\def\tud@let@token{\@nil}
+\AddToHookNext{env/Code/after}{\futurelet\tud@let@token\relax}%
+\NoIndentAfterEnvironment{Example}
+\newenvironment{Example}{%
+  \labeling{{\usekomafont{disposition}{Beispiel:\nbs}}}%
+  \item[{\usekomafont{disposition}{Beispiel:\nbs}}]%
+  \def\tud@let@token{\@nil}%
+}{%
+  \begingroup%
+    \edef\tud@res@a{%
+      \endgroup%
+      \noexpand\endlabeling%
+      \ifx\tud@let@token\@nnil\else%
+        \unexpanded{\addvspace{-\smallskipamount}}%
+      \fi%
+    }%
+  \tud@res@a%
+}
 % TODO shell-Kram raus, Tutorials und Examples über Skript/make erstellen
 \RequirePackage{filemod}[2011/09/19]
 \RequirePackage{ifplatform}[2010/10/22]
