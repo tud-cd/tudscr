@@ -3007,11 +3007,11 @@
 }{%
   \tud@declare@end{#1}[index=false]%
 }
-% TODO alle Änderungen zur vorherigen Version in unteren Teil der Liste?
+% URGENT alle Änderungen zur vorherigen Version in unteren Teil der Liste?
 %      --> unterscheiden zwischen neu/geändert und entfernt
 \newcommand*\tud@cessations@version{}
 \AtBeginDocument{\undef\tud@cessations@version}
-\NewDocumentEnvironment{Cessations}{m o}{%
+\NewDocumentEnvironment{Cessations}{m !o}{%
   \ifundef{\tud@cessations@version}{%
     \def\tud@cessations@version{#1}%
     \tud@v@validate{\tud@cessations@version}%
@@ -3024,13 +3024,13 @@
   \ifundef{\tud@cessations@version}{}{%
     \begingroup%
       \edef\tud@res@a{%
-        \unexpanded{\"Anderungen f\"ur \TUDScript}\tud@cessations@version%
+        \unexpanded{Anpassungen f\"ur \TUDScript}\tud@cessations@version%
       }%
       \edef\tud@lbl@tmp{sec:cessations:\tud@cessations@version}%
       \edef\tud@res@b{%
         \noexpand\index[changes-\tud@cessations@version]{%
           ""@Allgemein:\space\noexpand\hyperref[\tud@lbl@tmp]{%
-            \unexpanded{\"Anderungen gegen\"uber der vorhergehenden Version}%
+            \unexpanded{Anpassungen gegen\"uber der vorhergehenden Version}%
           }%
         }%
       }%
@@ -3045,7 +3045,7 @@
       }%
       \edef\tud@res@d{%
         \endgroup%
-        \noexpand\subsection[\expandonce\tud@res@a]{%
+        \noexpand\addsec[\expandonce\tud@res@a]{%
           \expandonce\tud@res@a%
           \noexpand\label{\tud@lbl@tmp}%
           \expandonce\tud@res@b%
@@ -3408,14 +3408,14 @@
   \endgroup%
   \null%
 }
-\NewDocumentEnvironment{DeclareEntity}{m o}{%
+\NewDocumentEnvironment{DeclareEntity}{m !o}{%
   \tud@declare@special@start*[{#2}]{#1}[output=false]%
   \begin{Entity}{#1}%
 }{%
   \end{Entity}%
   \tud@declare@special@end{#1}[]%
 }
-\NewDocumentEnvironment{DeclareEntity*}{m o}{%
+\NewDocumentEnvironment{DeclareEntity*}{m !o}{%
   \tud@declare@special@start[{#2}]{#1}[output=false]%
 }{%
   \tud@declare@special@end{#1}[]%
@@ -4268,7 +4268,7 @@
 \newcommand*\tud@val@alias{}
 \newcommand*\tud@val@declaration@list{}
 \NoIndentAfterEnvironment{DeclareValues}
-\NewDocumentEnvironment{DeclareValues}{o +b}{%
+\NewDocumentEnvironment{DeclareValues}{!o +b}{%
   \begingroup%
     \let\tud@res@a\@empty%
     \IfValueTF{#1}{%
@@ -4475,7 +4475,6 @@
 }
 \NoIndentAfterEnvironment{DeclarePackages}
 \tud@list@create[before=\tud@item@@pkg]{DeclarePackages}{description}{2}
-% TODO argumente überprüfen bzw. komplett überarbeiten; m als letztes?!
 \NewDocumentCommand\tud@item@pkg{m !d() !d<> !o}{%
   \begingroup%
     \let\tud@res@a\@empty%
@@ -4529,7 +4528,7 @@
     \noexpand\Inline@Declaration\IfBooleanT{#1}{*}\unexpanded{{#3}}%
   }%
 }
-\NewDocumentEnvironment{tabularm}{O{c} m o +b}{%
+\NewDocumentEnvironment{tabularm}{O{c} m !o +b}{%
   \sbox\z@{\tabular[{#1}]{*{#2}l}#4\endtabular}%
   \begin{tabular}{c}%
     \usebox\z@%
@@ -4610,7 +4609,7 @@
     }%
   \tud@res@a%
 }
-% TODO shell-Kram raus, Tutorials und Examples über Skript/make erstellen
+% PENDING shell-Kram raus, Tutorials und Examples über Skript/make erstellen
 \RequirePackage{filemod}[2011/09/19]
 \RequirePackage{ifplatform}[2010/10/22]
 \newcommand*\tud@shellescape@wrn[1]{%
@@ -4703,7 +4702,6 @@
       \def\tud@res@a{examples/#1_print.pdf}%
     }{}%
   }{}%
-  % TODO Eintrag in Index (suffix Beispiel)?
   \IfFileExists{\tud@res@a}{%
     \edef\tud@res@a{%
       \noexpand\includepdf[%
@@ -5231,7 +5229,7 @@
 \tud@localization@english{\noticename}{Notice}
 %%%% From File: tudscr-texindy.dtx 2019/11/29 01:36:52 c9a9b7b
 \begingroup
-% TODO check
+% URGENT check
 %  ;;(define-attributes (("declare" "!") ("important" "?")("default")))
 %  ;;(markup-attribute-group-list :sep ", ")
 %  ;;(merge-to "default" "declare")
