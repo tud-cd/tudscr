@@ -130,6 +130,8 @@
   \ifdef{\tudfinalflag}{%
     \TUDoptions{ToDo=false}%
     \TUD@key{ToDo}{\FamilyKeyStateProcessed}%
+    \TUDoptions{indexnote=false}%
+    \TUD@key{indexnote}{\FamilyKeyStateProcessed}%
   }{%
     \KOMAoptions{overfullrule}%
   }%
@@ -346,6 +348,18 @@
   \tud@res@a%
 }
 \TUDExecuteOptions{ToDo=true}
+\tud@newif\if@tud@index@note
+\TUD@key{indexnote}[true]{%
+  \TUD@set@ifkey{indexnote}{@tud@index@note}{#1}%
+}
+\AtEndPreamble{%
+  \TUD@key@toolate{indexnote}%
+  \if@tud@index@note%
+    \AtBeginDocument{\setlength\marginparpush{\z@}}%
+  \else%
+    \let\tud@index@note@write\@gobbletwo%
+  \fi%
+}
 %%%% From File: tudscr-misc.dtx 2020/01/14 17:13:34 e5e3ff2
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{\TUD@Class@Parent}}
 \TUDProcessOptions\relax
@@ -357,11 +371,11 @@
 \RequirePackage{scrhack}[%
   2019/12/23 v3.28 KOMA-Script
 ]
-\RequirePackage{babel}[2014/03/24]
+\RequirePackage{babel}[2021/01/26]
 \PassOptionsToPackage{quiet}{marginnote}
-\RequirePackage{marginnote}[2012/03/29]
+\RequirePackage{marginnote}[2018/08/09]
 \reversemarginpar
-\RequirePackage{xspace}[2009/10/20]
+\RequirePackage{xspace}[2014/10/28]
 \xspaceaddexceptions{"=}
 \@ifpackagelater{geometry}{2020/01/03}{%
   \ClassWarning{tudscrmanual}{%
@@ -377,8 +391,8 @@
     \renewcommand*\tud@english[1]{\foreignlanguage{english}{#1}}%
   }{}%
 }
-\RequirePackage{shellesc}[2016/06/07]
-\RequirePackage{pdftexcmds}[2016/05/21]
+\RequirePackage{shellesc}[2019/11/08]
+\RequirePackage{pdftexcmds}[2020/06/27]
 \newcommand*\NoIndentAfterEnvironment[1]{%
   \AfterEndEnvironment{#1}{\@NoIndentAfterEnvironment}%
 }
@@ -670,6 +684,7 @@
 \PassOptionsToPackage{%
   destlabel=true,%pdfview=FitH,%
   hyperindex=false,%
+  % TODO Farben für Links nach CD
   colorlinks,linkcolor=blue,citecolor=violet%
 }{hyperref}
 \AfterPackage*{hyperref}{%
@@ -740,14 +755,16 @@
 \newrobustcmd*\nbs{\nobreakspace{}}
 \DeclareListParser*{\forssvlist}{;}
 \PassOptionsToPackage{nospace}{varioref}
-\RequirePackage{varioref}[2019/11/05]
+\RequirePackage{varioref}[2020/08/11]
 \renewrobustcmd*\fullref[1]{\hyperref[{#1}]{\autoref*{#1}\space\vpageref{#1}}}
 \PassOptionsToPackage{babel}{microtype}
-\AfterPackage*{hyperref}{\RequirePackage{microtype}[2013/05/23]}
-\TUD@UnwindPackage{hyperref}{\RequirePackage{microtype}[2013/05/23]}
+\AfterPackage*{hyperref}{\RequirePackage{microtype}[2020/12/07]}
+\TUD@UnwindPackage{hyperref}{\RequirePackage{microtype}[2020/12/07]}
 \newcommand*\tud@xdy@settings{}
 % PENDING locale-Einstellung in Abhängigkeit der Hauptsprache! 
 \edef\tud@xdy@settings{texindy -M \@currname-index.xdy -L german-din}
+\newcommand*\tud@xdy@log{}
+\edef\tud@xdy@log{\jobname.xlg}
 \newcommand*\tud@index@name{\jobname}
 \newcommand*\tud@index@title{\indexname}
 \newcommand*\tud@index@toc{\tud@index@title}
@@ -797,9 +814,11 @@
 \let\makeindex\@empty
 \@onlypreamble\makeindex
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\RequirePackage{multicol}
+\RequirePackage{multicol}[2019/12/09]
 \newcommand*\tud@index@prologue{}%
+\newcommand*\tud@index@level{0}
 \newcommand*\tud@index@item[2][\relax]{%
+  \def\tud@index@level{#2}%
   \par\penalty\numexpr#2*50-50\relax#1%
   \hspace*{\dimexpr\numexpr#2\relax em\relax}%
   \hangindent=\dimexpr\numexpr2*#2+3\relax em/2\relax%
@@ -857,9 +876,54 @@
     }%
   }%
 }
+\newcommand*\tud@index@note@entries{}
+\let\tud@index@note@entries\relax
+\newlength\tud@index@note@vskip
+\newcommand*\tud@index@note@format[1]{%
+  \hfill\llap{%
+    \colorbox{HKS41!60}{%
+      \normalfont\normalsize%
+      \tiny\textcdsi{\textcolor{HKS07}{#1}}%
+    }%
+  }%
+}
+\newcommand*\tud@index@note@write[2]{%
+  \begingroup%
+    \tud@if@strequal{#1}{\jobname}{%
+      \ifundef{\printdeclarationlist}{%
+        \@tud@res@swafalse%
+        \ifnum\@floatpenalty<\z@\relax\@tud@res@swatrue\fi%
+        \ifinner\@tud@res@swatrue\fi%
+        \if@tud@res@swa%
+          \addtolength\tud@index@note@vskip{\baselineskip}%
+          \marginnote{\tud@index@note@format{#2}}[\the\tud@index@note@vskip]%
+        \else%
+          \marginpar{\tud@index@note@format{#2}}%
+          \tud@index@note@vskip=\z@%
+        \fi%
+      }{%
+        \ifx\tud@index@note@entries\relax%
+          \tud@index@note@vskip=\z@%
+          \gdef\tud@index@note@entries{%
+            \global\let\tud@index@note@entries\relax%
+            \global\tud@index@note@vskip=\z@%
+          }%
+        \fi%
+        \appto\tud@index@note@entries{%
+          \marginnote{\tud@index@note@format{#2}}%
+        }%
+        \addtolength\tud@index@note@vskip{\baselineskip}%
+        \xappto\tud@index@note@entries{[\the\tud@index@note@vskip]}%
+      }%
+      \global\tud@index@note@vskip=\tud@index@note@vskip%
+    }{}%
+  \endgroup%
+}
+\tud@newread\tud@read
+\tud@newwrite\tud@write@a
 \newcommand*\tud@index@mdfive{}
 \if@filesw
-  \newwrite\@indexfile%
+  \tud@newwrite\@indexfile%
   \immediate\openout\@indexfile=\jobname.idx%
   \typeout{Writing index file \jobname.idx}%
   \def\index{%
@@ -877,6 +941,7 @@
     \protected@write\@indexfile{\@sanitize}{%
       \string\indexentry[#1]{#2}{\thepage}%
     }%
+    \tud@index@note@write{#1}{#2}%
     \@esphack%
   }%
   \BeforeClosingMainAux{%
@@ -892,20 +957,41 @@
       \fi%
     }%
     \if@tud@res@swa%
-      \ifnum\pdf@shellescape=\@ne\relax%
-        \ifundef{\inputencodingname}{%
-          \appto\tud@xdy@settings{ -C utf8}%
-        }{%
-          \eappto\tud@xdy@settings{ -C \inputencodingname}%
-        }%
-        \ShellEscape{splitindex -m \string"\tud@xdy@settings" \jobname.idx}%
+      \ifundef{\inputencodingname}{%
+        \appto\tud@xdy@settings{ -C utf8}%
+      }{%
+        \eappto\tud@xdy@settings{ -C \inputencodingname}%
+      }%
+      \edef\tud@res@b{%
+        \string|\string"splitindex\space-m\space%
+          '\tud@xdy@settings\space2>\string&1'\space%
+          \jobname.idx\string"\space%
+      }%
+      \immediate\openout\tud@write@a\tud@xdy@log\relax%
+\ifnum\pdf@shellescape=\@ne\relax%
+      \typeout{========== calling splitindex ==========}%
+      \typeout{\tud@res@b}%
+      \expandafter\tud@readtostream\expandafter{\tud@res@b}{\tud@write@a}%
+\fi%
+      \immediate\closeout\tud@write@a%
+      \ifnum0\pdf@filesize{\tud@xdy@log}>0\relax%
+        \expandafter\@gobble%
       \else%
+        \expandafter\@firstofone%
+      \fi{%
         \let\tud@res@a\tud@index@mdfive%
-        \ClassWarningNoLine{tudscrmanual}{%
-          The index file `\jobname.idx' has changed. Run again\MessageBreak%
-          with --shell-escape flag enabled%
-        }%
-      \fi%
+        \ifnum\pdf@shellescape=\@ne\relax%
+          \ClassWarningNoLine{tudscrmanual}{%
+            \tud@res@b\MessageBreak%
+            was called but there is no result%
+          }%
+        \else%
+          \ClassWarningNoLine{tudscrmanual}{%
+            The index file `\jobname.idx' has changed. Run again\MessageBreak%
+            with --shell-escape flag enabled%
+          }%
+        \fi%
+      }%
     \fi%
     \immediate\write\@mainaux{\string\gdef\string\tud@index@mdfive{\tud@res@a}}%
   }%
@@ -1983,7 +2069,7 @@
   }%
 }
 \@onlypreamble\tud@ety@declare
-\RequirePackage{hologo}[2012/04/26]
+\RequirePackage{hologo}[2019/12/05]
 \newrobustcmd*\DistributionGeneral{%
   \hologo{LaTeX}\penalty\@M-\hskip\z@skip Distribution\xspace%
 }
@@ -3045,7 +3131,8 @@
       }%
       \edef\tud@res@d{%
         \endgroup%
-        \noexpand\addsec[\expandonce\tud@res@a]{%
+        \noexpand\subsection[nonumber=true]%[tocentry=\expandonce\tud@res@a]
+        {%
           \expandonce\tud@res@a%
           \noexpand\label{\tud@lbl@tmp}%
           \expandonce\tud@res@b%
@@ -3300,7 +3387,6 @@
 }
 \newcommand\Process@@Output{}%
 \NewDocumentCommand\tud@print@declarationlist{!o !+d()}{%
-  \gundef\printdeclarationlist%
   \tud@setglue\tud@res@glue{\medskipamount*3/2}%
   \ifhmode%
     \vskip\tud@res@glue%
@@ -3335,10 +3421,12 @@
         \end{minipage}%
       }%
     }%
+    \gundef\printdeclarationlist%
     \edef\tud@res@c{%
       \endgroup%
       \expandonce\tud@res@b%
       \noexpand\tud@print@changedatlist[-\arrayrulewidth]%
+      \begingroup\expandonce\tud@index@note@entries\endgroup%
     }%
   \tud@res@c%
   \par\nobreak%
@@ -3469,6 +3557,8 @@
     {You should use `|see' instead of `|seealso'}%
   \tud@cleversee{\alsoname}%
 }
+% TODO direkter link auf Indexeintrag möglich?
+% > \indexentry[\jobname] müsste target erzeugen und cleversee dieses nutzen
 \newcommand*\tud@cleversee{}
 \def\tud@cleversee#1#2\relax{%
   \begingroup%
@@ -3588,8 +3678,7 @@
     \ifnum\tud@index@mode@num>\m@ne\relax%
       \IfValueT{#2}{%
         \TUD@set@numkey{}{tud@res@a}{%
-          \TUD@bool@numkey,{}{0},{.}{1},{default}{1},%
-          {?}{2},{important}{2},{!}{3},{declare}{3},%
+          \TUD@bool@numkey,{}{0},{.}{1},{?}{2},{!}{3}%
         }{#2}%
         \ifx\FamilyKeyState\FamilyKeyStateProcessed%
           \ifcase\tud@res@a\relax%
@@ -3813,6 +3902,8 @@
       }{%
         \Cross@Index\tud@res@b##1!\@nil%
       }%
+      % TODO cleversee und index@level nutzen?
+      % kein subitem, wenn nichts anderes gegeben...
       \index{%
         \trim@spaces{##1}!"%
           |@\,\textrightarrow\,\hyperref[{idx:#1}]{\tud@res@b}|seeidx{#1}%
@@ -3832,6 +3923,7 @@
 }
 \NewDocumentCommand\SeeIndex{s m m}{%
   \begingroup%
+    \let\tud@index@note@write\@gobbletwo%
     \def\do##1{%
       \index{\trim@spaces{##1}%
         |see\IfBooleanT{#1}{unverified}{\trim@spaces{#2}}}%
@@ -4234,7 +4326,7 @@
   \tud@res@c%
 }
 % TODO den ganzen allgemeinen Kram weiter nach oben
-\RequirePackage{enumitem}[2011/09/28]
+\RequirePackage{enumitem}[2019/06/20]
 \setlist{%
   before*={\endgraf\tud@RaggedRight},%
   partopsep=0pt,noitemsep%
@@ -4535,7 +4627,7 @@
     \IfValueT{#3}{\tabularnewline\parbox[b]{\the\wd\z@}{\vskip1.5ex#3}}%
   \end{tabular}%
 }{}
-\RequirePackage{tabularx}[1999/01/07]
+\RequirePackage{tabularx}[2020/01/15]
 \NewDocumentCommand\TermTable{!o}{%
   \ifhmode\par\fi%
   \vskip\smallskipamount%
@@ -4574,8 +4666,7 @@
   \strut\selectlanguage{english}%
   \Ifstr{\csuse{#1}}{}{\PName{empty}}{\csuse{#1}}\tabularnewline%
 }
-\tud@newwrite\tud@write@a
-\RequirePackage{listings}[2014/03/04]
+\RequirePackage{listings}[2020/03/24]
 \lstdefinestyle{tudscr}{%
   basicstyle=\ttfamily\ifundef{\setstretch}{}{\setstretch{1}},%
   keywordstyle=,%
@@ -4611,7 +4702,7 @@
 }
 % PENDING shell-Kram raus, Tutorials und Examples über Skript/make erstellen
 \RequirePackage{filemod}[2011/09/19]
-\RequirePackage{ifplatform}[2010/10/22]
+\RequirePackage{ifplatform}[2017/10/13]
 \newcommand*\tud@shellescape@wrn[1]{%
   \ClassWarning{tudscrmanual}%
   {%
@@ -4629,6 +4720,29 @@
   \fi
 \fi
 \appto\tud@latex@ext{-synctex=1\space}
+\newcommand*\tud@readtostream[2]{%
+  \begingroup%
+    \endlinechar=\m@ne\relax%
+%    \@makeother\|%
+    \everyeof{\noexpand}%
+    \let\tud@res@d\@empty%
+    \openin\tud@read=#1%
+    \@tempswafalse%
+    \loop\unless\ifeof\tud@read%
+      \readline\tud@read to\tud@res@d%
+      \ifx\tud@res@d\@empty%
+        \ifeof\tud@read\@tempswafalse\fi%
+      \else%
+        \@tempswatrue%
+      \fi%
+      \if@tempswa%
+        \immediate\write#2{\expandonce\tud@res@d}%
+      \fi%
+      \ifx\tud@res@d\@empty\@tempswafalse\fi%
+    \repeat%
+    \closein\tud@read%
+  \endgroup%
+}
 \NewDocumentCommand\HyperTutorial{m}{%
   \ifnum\pdf@shellescape=\@ne\relax%
     \filemodCmp{tutorials/#1.pdf}{tutorials/#1.tex}{}{%
@@ -4720,7 +4834,7 @@
 }{%
   \PassOptionsToPackage{colorinlistoftodos}{todonotes}%
 }
-\RequirePackage{todonotes}[2012/07/25]
+\RequirePackage{todonotes}[2018/11/22]
 \AtEndPreamble{%
   \ifdim\marginparwidth<2cm\relax%
     \tud@setdim\marginparwidth{2cm}%
@@ -4930,21 +5044,17 @@
   \tud@res@c%
 }
 % TODO viel weiter nach oben, alle prüfen, ob in Klasse oder Dokument!
-\RequirePackage{csquotes}[2011/10/22]
+\RequirePackage{csquotes}[2021-01-04]
 \RequirePackage{setspace}[2011/12/19]
 \setstretch{1.1}
 \PassOptionsToPackage{vskip=\smallskipamount}{quoting}
 \RequirePackage{quoting}[2014/01/28]
 \RequirePackage{isodate}[2010/01/03]
-% PENDING raus, sobald v2.2 bzw. neues ragged2e da!
-\disable@package@load{everysel}{%
-  \newcommand*\EverySelectfont[1]{\AddToHook{selectfont}{##1}}%
-}
-\RequirePackage{ragged2e}[2009/05/21]
+\RequirePackage{ragged2e}[2021/02/05]
 \@removefromreset{footnote}{chapter}
 \renewcommand*\raggedfootnote{\tud@RaggedRight}%
-\RequirePackage{booktabs}[2005/04/14]
-\RequirePackage{caption}[2015/09/17]
+\RequirePackage{booktabs}[2020/01/12]
+\RequirePackage{caption}[2020/10/26]
 \RequirePackage{floatrow}[2008/08/02]
 \DeclareCaptionSubType[alph]{figure}
 \DeclareCaptionSubType[alph]{table}
@@ -4953,11 +5063,11 @@
 \captionsetup[subfloat]{labelformat=brace,list=off}
 \KOMAoption{captions}{tableheading,figuresignature}
 \floatsetup[table]{style=plaintop}
-\RequirePackage{tikz}[2013/12/13]
-\RequirePackage{pdfpages}[2013/08/25]
+\RequirePackage{tikz}[2020/12/27]
+\RequirePackage{pdfpages}[2021/02/05]
 \RequirePackage{units}[1998/08/04]
 \AtEndPreamble{%
-  \RequirePackage{ellipsis}[2020/5/22]%
+  \RequirePackage{ellipsis}[2020/05/22]%
   \let\ellipsispunctuation\relax%
 }
 \newcommand*\tud@replace@in[3]{%
@@ -5076,6 +5186,7 @@
       \def\tud@res@c{\File*{#4}}%
     }{%
       \def\tud@res@c{\InlineDeclaration{\File''{#4}}}%
+      \index{Dateien}%
     }%
     \href{\tud@res@b}{\tud@res@c}%
   \endgroup%
@@ -5229,26 +5340,20 @@
 \tud@localization@english{\noticename}{Notice}
 %%%% From File: tudscr-texindy.dtx 2019/11/29 01:36:52 c9a9b7b
 \begingroup
-% URGENT check
-%  ;;(define-attributes (("declare" "!") ("important" "?")("default")))
-%  ;;(markup-attribute-group-list :sep ", ")
-%  ;;(merge-to "default" "declare")
-%  ;;(merge-to "default" "important")
-\tud@newwrite\tud@write@xdy
 \IfFileExists{\@currname-index.xdy}{}{%
-  \openout\tud@write@xdy=\@currname-index.xdy\relax%
-  \write\tud@write@xdy{(require "texindy.xdy")}%
-  \write\tud@write@xdy{%
+  \openout\tud@write@a=\@currname-index.xdy\relax%
+  \write\tud@write@a{(require "texindy.xdy")}%
+  \write\tud@write@a{%
     (define-location-class^^J%
     \space\space"arabic-page-numbers" ("arabic-numbers")%
     \space:min-range-length 1^^J%
     )^^J%
     (markup-range :sep "--")%
   }%
-  \write\tud@write@xdy{%
+  \write\tud@write@a{%
     (merge-rule "\@backslashchar[(.*)\@backslashchar]" "" :eregexp)%
   }%
-  \write\tud@write@xdy{%
+  \write\tud@write@a{%
     (markup-indexentry%
     \space:open "~n\@spaces\@spaces\string\subsubsubitem\space"%
     \space:depth 3%
@@ -5258,28 +5363,20 @@
     \space:depth 4%
     )%
   }%
-  \write\tud@write@xdy{%
+  \write\tud@write@a{%
     (markup-locclass-list%
     \space:open "\string\,\string\dotfill{}\space"%
     \space:close "\string\relax"%
     \space:sep ",\space"%
     )%
   }%
-  \write\tud@write@xdy{%
-    (define-attributes (("declare" "!" "important" "?" "default")))^^J%
-    (markup-locref%
-    \space:attr "declare"\space\space%
-    \space:open "\string\textbf{\string\hyperpage{"%
-    \space:close "}}"%
-    )^^J%
+  % DOC Ignorieren/Überschreiben der default-Einträge für Attribut
+  \write\tud@write@a{%
+    (define-attributes (("!" "default") ("?" "default") ("default")))^^J%
+    (markup-attribute-group-list :sep ", ")^^J%
     (markup-locref%
     \space:attr "!"\@spaces\@spaces%
     \space:open "\string\textbf{\string\hyperpage{"%
-    \space:close "}}"%
-    )^^J%
-    (markup-locref%
-    \space:attr "important"%
-    \space:open "\string\textit{\string\hyperpage{"%
     \space:close "}}"%
     )^^J%
     (markup-locref%
@@ -5293,7 +5390,7 @@
     \space:close "}"%
     )%
   }%
-  \write\tud@write@xdy{%
+  \write\tud@write@a{%
     (define-crossref-class "seeunverified" :unverified)^^J%
     (markup-crossref-list :class "seeunverified"^^J%
     \space\space%
@@ -5302,7 +5399,7 @@
     :sep "; "^^J%
     )%
   }%
-  \write\tud@write@xdy{%
+  \write\tud@write@a{%
     (markup-crossref-list :class "see"^^J%
     \space\space%
     :open "\string\cleversee\space"\@spaces\space%
@@ -5316,7 +5413,7 @@
     :sep "; "^^J%
     )%
   }%
-  \write\tud@write@xdy{%
+  \write\tud@write@a{%
     (define-crossref-class "seeidx" :unverified)^^J%
     (markup-crossref-list :class "seeidx"^^J%
     \space\space%
@@ -5325,7 +5422,7 @@
     :sep "; "^^J%
     )%
   }%
-  \write\tud@write@xdy{%
+  \write\tud@write@a{%
     (markup-crossref-layer-list :class "see"%
     \@spaces\space:sep "\string\,\string\textbar\string\,"%
     )^^J%
@@ -5333,7 +5430,7 @@
     \space:sep "\string\,\string\textbar\string\,"%
     )%
   }%
-  \write\tud@write@xdy{%
+  \write\tud@write@a{%
     (define-location-class-order^^J%
     \space\space(^^J%
     \@spaces"see" "seealso" "seeidx" "seeunverified"^^J%
@@ -5342,7 +5439,7 @@
     \space\space)^^J%
     )%
   }%
-  \closeout\tud@write@xdy%
+  \closeout\tud@write@a%
 }
 \endgroup
 \endinput
