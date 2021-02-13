@@ -751,6 +751,7 @@
 }
 \newcommand*\hrfn[2]{\href{#1}{\trim@spaces{#2}}\footnote{\url{#1}}}
 \newrobustcmd*\mailto[1]{\mbox{\href{mailto:#1}{\nolinkurl{#1}}}}%
+\newrobustcmd*\txb{{\raise.05em\hbox{\kern.05em\textbar\kern.05em}}}
 \newrobustcmd*\bsc{\kern-.05em\@backslashchar\kern-.05em}
 \newrobustcmd*\nbs{\nobreakspace{}}
 \DeclareListParser*{\forssvlist}{;}
@@ -767,10 +768,11 @@
 \edef\tud@xdy@log{\jobname.xlg}
 \newcommand*\tud@index@name{\jobname}
 \newcommand*\tud@index@title{\indexname}
+\newcommand*\tud@index@ref{\tud@index@title}
 \newcommand*\tud@index@toc{\tud@index@title}
 \newcommand*\tud@index@cols{2}
 \newcommand*\tud@index@list{}
-\NewDocumentCommand\tud@index@make{O{\jobname} D(){2} m}{%
+\NewDocumentCommand\tud@index@make{O{\jobname} d() m}{%
   \begingroup%
     \def\tud@res@a##1{%
       \addto@hook@expandafter\tud@toks@{%
@@ -778,11 +780,15 @@
       }%
     }%
     \edef\tud@index@name{#1}%
-    \edef\tud@index@cols{#2}%
+    \IfValueTF{#2}{%
+      \def\tud@index@ref{#2}%
+    }{%
+      \def\tud@index@ref{Index der #3}%
+    }%
     \def\tud@index@title{#3}%
     \tud@toks@{}%
     \tud@res@a\tud@index@name%
-    \tud@res@a\tud@index@cols%
+    \tud@res@a\tud@index@ref%
     \tud@res@a\tud@index@title%
     \edef\tud@res@a{%
       \endgroup%
@@ -791,10 +797,11 @@
     }%
   \tud@res@a%
 }
-\tud@index@make{Allgemeines}
+\tud@index@make(Allgemeiner Index){Allgemeines}
 \tud@index@make[options]{Klassen- und Paketoptionen}
-\tud@index@make[macros]{Befehle und Umgebungen mit zugeh\"origen Parametern}
-\tud@index@make[terms]{Sprachabh\"angige Bezeichner}
+\tud@index@make[macros](Index der Befehle und Umgebungen)%
+  {Befehle und Umgebungen mit zugeh\"origen Parametern}
+\tud@index@make[terms](Index der Bezeichner){Sprachabh\"angige Bezeichner}
 \tud@index@make[elements]{Seitenstile, Schriftelemente und Farben}
 \tud@index@make[misc]{L\"angen und Z\"ahler}
 \tud@index@make[files]{Klassen, Pakete und Dateien}
@@ -816,9 +823,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \RequirePackage{multicol}[2019/12/09]
 \newcommand*\tud@index@prologue{}%
-\newcommand*\tud@index@level{0}
 \newcommand*\tud@index@item[2][\relax]{%
-  \def\tud@index@level{#2}%
   \par\penalty\numexpr#2*50-50\relax#1%
   \hspace*{\dimexpr\numexpr#2\relax em\relax}%
   \hangindent=\dimexpr\numexpr2*#2+3\relax em/2\relax%
@@ -836,8 +841,11 @@
   \def\indexspace{\tud@index@vskip[\bigskipamount]}%
   \tud@index@hook%
   \def\tud@res@a{%
-    \addsec[\tud@index@toc]{\tud@index@title\label{idx:\tud@index@name}}%
-    \markdouble{\indexname: \tud@index@title}%
+    \addsec[%
+      reference=\tud@index@ref,%
+      tocentry=\tud@index@toc%
+    ]{\tud@index@title\label{idx:\tud@index@name}}%
+    \markdouble{\tud@index@ref}%
     \tud@index@prologue%
   }%
   \ifnum\tud@index@cols>\@ne\relax%
@@ -2731,7 +2739,7 @@
 \NewParameterCommand\OPList{m}{%
   \P@Braces*{%
     \PName{#1}%
-    \texttt{\kern.05em\textbar\kern-.3em\textbar\kern.05em}%
+    \texttt{\txb\kern-.5em\txb}%
     \PName{Parameterliste}%
   }%
 }{\@PName{Parameterliste}}
@@ -3282,7 +3290,7 @@
                 \unexpanded{\PValue@Enfold*'}{\expandonce\tud@res@c}%
               }%
             }%
-            \preto\tud@res@b{\,\textbar\,####1:\space}%
+            \preto\tud@res@b{\txb####1:\space}%
           }%
           \tud@res@b##2\@nil%
         \else%
@@ -3894,39 +3902,35 @@
     \index[\tud@res@c]{\tud@res@a\IfValueT{#2}{|#2}}%
   \endgroup%
 }
-\NewDocumentCommand\CrossIndex{m o m m}{%
+\NewDocumentCommand\CrossIndex{m o m}{%
   \begingroup%
     \def\do##1{%
       \IfValueTF{#2}{%
-        \def\tud@res@b{\trim@spaces{#2}}%
+        \def\tud@res@b{#2}%
+        \tud@replace@in\tud@res@b{*}{##1}%
+        \edef\tud@res@b{\noexpand\hyperref[{idx:#1}]{\tud@res@b}}%
       }{%
-        \Cross@Index\tud@res@b##1!\@nil%
+        \def\tud@res@b{\nameref{idx:#1}}%
       }%
-      % TODO cleversee und index@level nutzen?
-      % kein subitem, wenn nichts anderes gegeben...
       \index{%
-        \trim@spaces{##1}!"%
-          |@\,\textrightarrow\,\hyperref[{idx:#1}]{\tud@res@b}|seeidx{#1}%
+        \trim@spaces{##1}!"|idx:#1@%
+          \textrightarrow\kern.1em\trim@spaces{\tud@res@b}|seeidx{#1}%
       }%
-      \SeeIndex{##1}{#4}%
     }%
     \docsvlist{#3}%
   \endgroup%
 }
-\newcommand*\Cross@Index{}
-\def\Cross@Index#1#2!#3\@nil{%
-  \IfArgIsEmpty{#3}{%
-    \def#1{Index der #2}%
-  }{%
-    \Cross@Index#1#3\@nil%
-  }%
-}
-\NewDocumentCommand\SeeIndex{s m m}{%
+\NewDocumentCommand\SeeIndex{s m m}{
   \begingroup%
     \let\tud@index@note@write\@gobbletwo%
     \def\do##1{%
-      \index{\trim@spaces{##1}%
-        |see\IfBooleanT{#1}{unverified}{\trim@spaces{#2}}}%
+      \begingroup%
+        \def\do####1{%
+          \index{\trim@spaces{####1}%
+            |see\IfBooleanT{#1}{unverified}{\trim@spaces{##1}}}%
+        }%
+        \docsvlist{#2}%
+      \endgroup%
     }%
     \docsvlist{#3}%
   \endgroup%
@@ -3946,13 +3950,10 @@
         Schriftst\"arke hingegen deuten auf zus\"atzliche Informationen, %
         wobei diese f\"ur \textit{kursiv hervorgehobene Zahlen} als besonders %
         \textit{wichtig} erachtet werden.\par %
-        Eintr\"age von \hyperref[idx:options]{Klassen- und Paketoptionen}, %
-        \hyperref[idx:macros]{Umgebungen und Befehlen} sowie %
-        \hyperref[idx:elements]{Seitenstilen, Schriftelementen und Farben} %
-        respektive \hyperref[idx:misc]{L\"angen und Z\"ahlern}, die nicht %
-        durch \TUDScript sondern von anderen Klassen oder Paketen zur %
-        Verf\"ugung gestellt werden, sind diese im Suffix des entsprechenden %
-        Eintrages angegeben. Exisitiert f\"ur einen solchen Eintrag %
+        In den themenspezifischen Indexen wird f\"ur alle Eintr\"age, welche %
+        nicht durch \TUDScript sondern von anderen Klassen oder Paketen zur %
+        Verf\"ugung gestellt werden, dies im Suffix des entsprechenden %
+        Eintrages angegeben. Existiert f\"ur einen solchen Eintrag %
         \emph{keine} direkte \textbf{Erl\"auterung} ist dementsprechend auch %
         kein Hyperlink verf\"ugbar.%
       \end{abstract}%
@@ -4157,6 +4158,7 @@
           \appto\tud@res@b{%
             \def\tud@index@title{\TUDScript####1}%
             \def\tud@index@toc{####1}%
+            \def\tud@index@ref{\indexname\space f\"ur \TUDScript####1}%
           }%
         }%
         \tud@res@a##1\@nil%
@@ -4616,7 +4618,7 @@
   \tud@lbl@get\tud@lbl@tmp{#3}%
   \listeadd\tud@pkg@label@list{\tud@lbl@tmp}%
   \eappto#2{%
-    \IfBooleanF{#1}{\ifx#2\@empty\else\unexpanded{\,/\,}\fi}%
+    \IfBooleanF{#1}{\ifx#2\@empty\else\unexpanded{\kern.1em/\kern.1em}\fi}%
     \noexpand\Inline@Declaration\IfBooleanT{#1}{*}\unexpanded{{#3}}%
   }%
 }
@@ -5365,7 +5367,7 @@
   }%
   \write\tud@write@a{%
     (markup-locclass-list%
-    \space:open "\string\,\string\dotfill{}\space"%
+    \space:open "\string\dotfill{}"%
     \space:close "\string\relax"%
     \space:sep ",\space"%
     )%
@@ -5424,10 +5426,10 @@
   }%
   \write\tud@write@a{%
     (markup-crossref-layer-list :class "see"%
-    \@spaces\space:sep "\string\,\string\textbar\string\,"%
+    \@spaces\space:sep "\string\txb{}"%
     )^^J%
     (markup-crossref-layer-list :class "seealso"%
-    \space:sep "\string\,\string\textbar\string\,"%
+    \space:sep "\string\txb{}"%
     )%
   }%
   \write\tud@write@a{%
