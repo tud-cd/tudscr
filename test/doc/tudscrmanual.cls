@@ -153,6 +153,7 @@
   cd=color,%
 }{\TUD@Class@Parent}
 \PassOptionsToPackage{automark}{scrlayer-scrpage}
+% PENDING in tudscr-misc.dtx mit manual als guard?
 \tud@newif\if@tud@list@sorted
 \newcommand*\tud@list@sorted{}
 \newcommand*\tud@list@sort[1]{%
@@ -235,6 +236,39 @@
     \edef\tud@res@a{%
       \endgroup%
       \unexpanded{\def#1}{\expandonce\tud@res@a}%
+    }%
+  \tud@res@a%
+}
+\newcommand*\tud@replace@in[3]{%
+  \begingroup%
+    \edef\tud@res@a{\expandonce{#1}}%
+    \let\tud@res@c\@empty%
+    \def\tud@res@b##1#2##2\@nil{%
+      \IfArgIsEmpty{##2}{%
+        \appto\tud@res@c{##1}%
+      }{%
+        \appto\tud@res@c{##1#3}%
+        \tud@res@b##2\@nil%
+      }%
+    }%
+    \expandafter\tud@res@b\tud@res@a#2\@nil%
+    \edef\tud@res@a{%
+      \endgroup%
+      \unexpanded{\def#1}{\expandonce\tud@res@c}%
+    }%
+  \tud@res@a%
+}
+\newcommand*\tud@replace@@in[3]{%
+  \begingroup%
+    \protected@edef\tud@res@a{#1}%
+    \edef\tud@res@a{\detokenize\expandafter{\tud@res@a}}%
+    \edef\tud@res@b{%
+      \unexpanded{\tud@replace@in\tud@res@a}{\detokenize{#2}}{\detokenize{#3}}%
+    }%
+    \tud@res@b%
+    \edef\tud@res@a{%
+      \endgroup%
+      \unexpanded{\def#1}{\tud@res@a}%
     }%
   \tud@res@a%
 }
@@ -382,7 +416,62 @@
     Package `geometry' was updated so some patches\MessageBreak%
     are maybe outdated%
   }%
-}{}%
+}{}
+\RequirePackage{shellesc}[2019/11/08]
+\RequirePackage{pdftexcmds}[2020/06/27]
+\RequirePackage{hologo}[2019/12/05]
+\RequirePackage{csquotes}[2021-01-04]
+\RequirePackage{setspace}[2011/12/19]
+\setstretch{1.1}
+\PassOptionsToPackage{vskip=\smallskipamount}{quoting}
+\RequirePackage{quoting}[2014/01/28]
+\RequirePackage{isodate}[2010/01/03]
+\RequirePackage{ragged2e}[2021/02/05]
+\@removefromreset{footnote}{chapter}
+\renewcommand*\raggedfootnote{\tud@RaggedRight}%
+\RequirePackage{booktabs}[2020/01/12]
+\RequirePackage{caption}[2020/10/26]
+\RequirePackage{floatrow}[2008/08/02]
+\DeclareCaptionSubType[alph]{figure}
+\DeclareCaptionSubType[alph]{table}
+\captionsetup{font=sf,labelfont=bf,labelsep=space}
+\captionsetup{singlelinecheck=off,format=hang,justification=raggedright}
+\captionsetup[subfloat]{labelformat=brace,list=off}
+\KOMAoption{captions}{tableheading,figuresignature}
+\floatsetup[table]{style=plaintop}
+\RequirePackage{tikz}[2020/12/27]
+\RequirePackage{pdfpages}[2021/02/05]
+\RequirePackage{units}[1998/08/04]
+\AtEndPreamble{%
+  \RequirePackage{ellipsis}[2020/05/22]%
+  \let\ellipsispunctuation\relax%
+}
+\NewDocumentCommand\tud@url@normalize{m O{https://} m m}{%
+  \begingroup%
+    \edef\tud@res@a{\trim@spaces{#4}}%
+    \def\tud@res@b##1#3/##2#3/##3\@nil{%
+      \IfArgIsEmpty{##2}{%
+        \def\tud@res@a{##1}%
+      }{%
+        \def\tud@res@a{##2}%
+      }%
+    }%
+    \expandafter\tud@res@b\tud@res@a #3/#3/\@nil%
+    \tud@remove@enfold@char\tud@res@a{/}%
+    \edef\tud@res@b{%
+      \endgroup%
+      \unexpanded{\def#1}{#2#3/\tud@res@a}%
+    }%
+  \tud@res@b%
+}
+\newcommand*\tud@github@url@base{}
+\let\tud@github@url@base\relax
+\newcommand*\tud@url@normalize@github[2]{%
+  \tud@url@normalize#1{github.com}{#2}%
+}
+\newcommand*\tud@url@normalize@ctan[2]{%
+  \tud@url@normalize#1{ctan.org}{#2}%
+}
 \newcommand*\vTUDScript{v\TUDScriptVersionNumber}
 \newcommand*\vKOMAScript{v\TUD@KOMAVersionNumber}
 \newcommand*\tud@english[1]{#1}
@@ -391,8 +480,6 @@
     \renewcommand*\tud@english[1]{\foreignlanguage{english}{#1}}%
   }{}%
 }
-\RequirePackage{shellesc}[2019/11/08]
-\RequirePackage{pdftexcmds}[2020/06/27]
 \newcommand*\NoIndentAfterEnvironment[1]{%
   \AfterEndEnvironment{#1}{\@NoIndentAfterEnvironment}%
 }
@@ -684,8 +771,11 @@
 \PassOptionsToPackage{%
   destlabel=true,%pdfview=FitH,%
   hyperindex=false,%
-  % TODO Farben für Links nach CD
-  colorlinks,linkcolor=blue,citecolor=violet%
+  colorlinks,%
+  linkcolor=HKS44,%
+  urlcolor=HKS33,%
+  citecolor=HKS57,%
+  filecolor=HKS65,%
 }{hyperref}
 \AfterPackage*{hyperref}{%
   \renewcaptionname{ngerman}{\sectionautorefname}{Unterkapitel}%
@@ -821,7 +911,6 @@
 \let\index\@gobbleopt@one
 \let\makeindex\@empty
 \@onlypreamble\makeindex
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \RequirePackage{multicol}[2019/12/09]
 \newcommand*\tud@index@prologue{}%
 \newcommand*\tud@index@item[2][\relax]{%
@@ -1005,7 +1094,6 @@
     \immediate\write\@mainaux{\string\gdef\string\tud@index@mdfive{\tud@res@a}}%
   }%
 \fi
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newcommand*\tud@markup@list{}
 % DOC r'' : dlicn -> declare, inline, index, changelog, normal text
 \NewDocumentCommand\Markup@Format@Set{m r() O{} d|| r'' m}{%
@@ -2078,7 +2166,6 @@
   }%
 }
 \@onlypreamble\tud@ety@declare
-\RequirePackage{hologo}[2019/12/05]
 \newrobustcmd*\DistributionGeneral{%
   \hologo{LaTeX}\penalty\@M-\hskip\z@skip Distribution\xspace%
 }
@@ -2149,7 +2236,6 @@
 \NewMarkupCommand\File[lvl=-2>0..1,idx=files](\texttt)'c'{Datei}
 \NewDocumentCommand\Path{>{\AP@Underscore}m}{\mbox{\texttt{#1}}}
 \newcommand*\tud@ety@gnrl{+general+}
-% TODO change to \Class{tudscr[-class|main]} oder ganz raus?
 \newcommand*\tud@ety@dflt{\Bundle{tudscr}}
 \newcommand*\tud@ety@crnt{}
 \NewDocumentCommand\DefaultEntity{m d'' m}{%
@@ -3563,7 +3649,7 @@
     {You should use `|see' instead of `|seealso'}%
   \tud@cleversee{\alsoname}%
 }
-% TODO direkter link auf Indexeintrag möglich?
+% URGENT direkter link auf Indexeintrag möglich?
 % > \indexentry[\jobname] müsste target erzeugen und cleversee dieses nutzen
 \newcommand*\tud@cleversee{}
 \def\tud@cleversee#1#2\relax{%
@@ -3755,8 +3841,8 @@
     }%
   \tud@res@a%
 }
-% TODO #6 bei Deklaration für index verwenden? suffix parameter nicht in index?
-% TODO #7 und #8 notwendig?
+% TODO #6 bei Deklaration für index verwenden? 
+% TODO suffix parameter nicht in index?
 \NewDocumentCommand\tud@idx@@get{o m m d// d== o d|| d'' r()}{%
 %\IfValueT{#6}{\typeout{?????????????????????? #6}}%
   \def\tud@res@c##1##2##3{%
@@ -5045,92 +5131,6 @@
       \fi%
     }%
   \tud@res@c%
-}
-% TODO viel weiter nach oben, alle prüfen, ob in Klasse oder Dokument!
-\RequirePackage{csquotes}[2021-01-04]
-\RequirePackage{setspace}[2011/12/19]
-\setstretch{1.1}
-\PassOptionsToPackage{vskip=\smallskipamount}{quoting}
-\RequirePackage{quoting}[2014/01/28]
-\RequirePackage{isodate}[2010/01/03]
-\RequirePackage{ragged2e}[2021/02/05]
-\@removefromreset{footnote}{chapter}
-\renewcommand*\raggedfootnote{\tud@RaggedRight}%
-\RequirePackage{booktabs}[2020/01/12]
-\RequirePackage{caption}[2020/10/26]
-\RequirePackage{floatrow}[2008/08/02]
-\DeclareCaptionSubType[alph]{figure}
-\DeclareCaptionSubType[alph]{table}
-\captionsetup{font=sf,labelfont=bf,labelsep=space}
-\captionsetup{singlelinecheck=off,format=hang,justification=raggedright}
-\captionsetup[subfloat]{labelformat=brace,list=off}
-\KOMAoption{captions}{tableheading,figuresignature}
-\floatsetup[table]{style=plaintop}
-\RequirePackage{tikz}[2020/12/27]
-\RequirePackage{pdfpages}[2021/02/05]
-\RequirePackage{units}[1998/08/04]
-\AtEndPreamble{%
-  \RequirePackage{ellipsis}[2020/05/22]%
-  \let\ellipsispunctuation\relax%
-}
-\newcommand*\tud@replace@in[3]{%
-  \begingroup%
-    \edef\tud@res@a{\expandonce{#1}}%
-    \let\tud@res@c\@empty%
-    \def\tud@res@b##1#2##2\@nil{%
-      \IfArgIsEmpty{##2}{%
-        \appto\tud@res@c{##1}%
-      }{%
-        \appto\tud@res@c{##1#3}%
-        \tud@res@b##2\@nil%
-      }%
-    }%
-    \expandafter\tud@res@b\tud@res@a#2\@nil%
-    \edef\tud@res@a{%
-      \endgroup%
-      \unexpanded{\def#1}{\expandonce\tud@res@c}%
-    }%
-  \tud@res@a%
-}
-\newcommand*\tud@replace@@in[3]{%
-  \begingroup%
-    \protected@edef\tud@res@a{#1}%
-    \edef\tud@res@a{\detokenize\expandafter{\tud@res@a}}%
-    \edef\tud@res@b{%
-      \unexpanded{\tud@replace@in\tud@res@a}{\detokenize{#2}}{\detokenize{#3}}%
-    }%
-    \tud@res@b%
-    \edef\tud@res@a{%
-      \endgroup%
-      \unexpanded{\def#1}{\tud@res@a}%
-    }%
-  \tud@res@a%
-}
-\NewDocumentCommand\tud@url@normalize{m O{https://} m m}{%
-  \begingroup%
-    \edef\tud@res@a{\trim@spaces{#4}}%
-    \def\tud@res@b##1#3/##2#3/##3\@nil{%
-      \IfArgIsEmpty{##2}{%
-        \def\tud@res@a{##1}%
-      }{%
-        \def\tud@res@a{##2}%
-      }%
-    }%
-    \expandafter\tud@res@b\tud@res@a #3/#3/\@nil%
-    \tud@remove@enfold@char\tud@res@a{/}%
-    \edef\tud@res@b{%
-      \endgroup%
-      \unexpanded{\def#1}{#2#3/\tud@res@a}%
-    }%
-  \tud@res@b%
-}
-\newcommand*\tud@github@url@base{}
-\let\tud@github@url@base\relax
-\newcommand*\tud@url@normalize@github[2]{%
-  \tud@url@normalize#1{github.com}{#2}%
-}
-\newcommand*\tud@url@normalize@ctan[2]{%
-  \tud@url@normalize#1{ctan.org}{#2}%
 }
 \newcommand*\GitHubBase[1]{%
   \tud@url@normalize@github\tud@github@url@base{#1}%
