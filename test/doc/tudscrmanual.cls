@@ -215,7 +215,7 @@
 \newcommand*\tud@remove@enfold@char[2]{%
   \begingroup%
     \expandafter\def\expandafter\tud@res@b\expandafter{#1}%
-    \trim@spaces@in{\tud@res@b}%
+    \trim@spaces@in\tud@res@b%
     \expandafter\in@\expandafter#2\expandafter{\tud@res@b}%
     \ifin@%
       \let\tud@res@a\@empty%
@@ -839,6 +839,14 @@
   \tud@localization@english{\subsectionautorefname}{subsection}%
   \tud@localization@english{\subsubsectionautorefname}{subsubsection}%
 }
+\newcommand*\hypertargetraised[1]{%
+  \begingroup%
+    \edef\tud@res@a{%
+      \endgroup%
+      \noexpand\Hy@raisedlink{\noexpand\hypertarget{#1}{}}%
+    }%
+  \tud@res@a%
+}
 \newcommand*\hrfn[2]{\href{#1}{\trim@spaces{#2}}\footnote{\url{#1}}}
 \newrobustcmd*\mailto[1]{\mbox{\href{mailto:#1}{\nolinkurl{#1}}}}%
 \newrobustcmd*\txb{{\raise.05em\hbox{\kern.05em\textbar\kern.05em}}}
@@ -987,7 +995,7 @@
 }
 \newcommand*\tud@index@note@write[2]{%
   \begingroup%
-    \tud@if@strequal{#1}{\jobname}{%
+    \tud@if@strequal{\jobname}{#1}{%
       \ifundef\printdeclarationlist{%
         \@tud@res@swafalse%
         \ifnum\@floatpenalty<\z@\relax\@tud@res@swatrue\fi%
@@ -1024,24 +1032,6 @@
   \tud@newwrite\@indexfile%
   \immediate\openout\@indexfile=\jobname.idx%
   \typeout{Writing index file \jobname.idx}%
-  \def\index{%
-    \@bsphack%
-    \@ifnextchar[%]
-      {\@index}%
-      {\@index[\jobname]}%
-  }%
-  \def\@index[#1]#2{%
-    \xifinlist{#1}{\tud@index@list}{}{%
-      \xifinlist{#1}{\tud@changes@list}{}{%
-        \ClassWarning{tudscrmanual}{Index `#1' was never defined}%
-      }%
-    }%
-    \protected@write\@indexfile{\@sanitize}{%
-      \string\indexentry[#1]{#2}{\thepage}%
-    }%
-    \tud@index@note@write{#1}{#2}%
-    \@esphack%
-  }%
   \BeforeClosingMainAux{%
     \immediate\closeout\@indexfile%
     \@tud@res@swafalse%
@@ -1094,6 +1084,159 @@
     \immediate\write\@mainaux{\string\gdef\string\tud@index@mdfive{\tud@res@a}}%
   }%
 \fi
+\newcommand*\tud@idx@join[3]{%
+  \edef#1{\detokenize{#2}\detokenize{@}\detokenize{#3}}%
+}
+\newcommand*\tud@idx@split[2]{%
+  \begingroup%
+    \edef\tud@idx@split{#2}%
+    \expandafter\tud@idx@@split\tud@idx@split\@nil%
+    \edef\tud@idx@split{%
+      \endgroup%
+      \unexpanded{\def#1}{\tud@idx@split}%
+    }%
+  \tud@idx@split%
+}
+\newcommand*\tud@idx@@split{}
+\expandafter\def\expandafter\tud@idx@@split%
+    \expandafter#\expandafter1\detokenize{@}#2\@nil{%
+  \def\tud@idx@split{{#1}{#2}}%
+}
+\undef\@wrindex
+\newcommand*\@wrindex[2][\jobname]{%
+  \protected@write\@indexfile{\@sanitize}{%
+    \string\indexentry[#1]{#2}{\thepage}%
+  }%
+}
+\def\index{%
+  \@bsphack\begingroup%
+  \@sanitize%
+  \@ifnextchar[%]
+    {\@index}%
+    {\@index[\jobname]}%
+}
+\def\@index[#1]#2{%
+  \xifinlist{#1}{\tud@index@list}{}{%
+    \xifinlist{#1}{\tud@changes@list}{}{%
+      \ClassWarning{tudscrmanual}{Index `#1' was never defined}%
+    }%
+  }%
+  \tud@if@strequal{\jobname}{#1}{%
+    \tud@idx@parse{#1}{#2}%
+  }{%
+    \@wrindex[{#1}]{#2}%
+  }%
+  \tud@index@note@write{#1}{#2}%
+  \endgroup\@esphack%
+}
+\newcommand*\tud@idx@parse[2]{%
+  \in@{|}{#2}%
+  \ifin@%
+    \tud@idx@@parse#2\@nil{#1}%
+  \else%
+    \tud@idx@@parse#2|\@nil{#1}%
+  \fi%
+}
+\newcommand*\tud@idx@@parse{}
+\def\tud@idx@@parse#1|#2\@nil#3{%
+  \tud@idx@@@parse{#1}{#2}{#3}%
+}
+\newcommand*\tud@idx@@@parse[3]{%
+  \begingroup%
+    \let\tud@res@a\@empty%
+    \let\tud@res@b\@empty%
+    \expandafter\tud@idx@@@@parse\detokenize{#1}!\@nil%
+    \edef\tud@res@a{%
+      \endgroup%
+      \noexpand\@wrindex[{#3}]{%
+        \tud@res@a\IfArgIsEmpty{#2}{}{\unexpanded{|#2}}%
+      }%
+    }%
+  \tud@res@a%
+}
+\newcommand*\tud@idx@@@@parse{}
+\def\tud@idx@@@@parse#1!#2\@nil{%
+  \@expandtwoargs\in@{\detokenize{@}}{\detokenize{#1}}%
+  \ifin@%
+    \tud@idx@split\tud@res@c{#1}%
+    \expandafter\tud@idx@@@@@parse\tud@res@c%
+  \else%
+    \tud@idx@@@@@parse{#1}{#1}%
+  \fi%
+  \IfArgIsEmpty{#2}{}{%
+    \appto\tud@res@a{!}%
+    \appto\tud@res@b{"!}%
+    \tud@idx@@@@parse#2\@nil%
+  }%
+}
+\newcommand*\tud@idx@@@@@parse[2]{%
+  \appto\tud@res@b{#1}%
+  \eappto\tud@res@a{%
+    \unexpanded{#1}\detokenize{@}%
+    \unexpanded{\string\hypertargetraised}{indexentry:\expandonce\tud@res@b}%
+    \unexpanded{#2}%
+  }%
+}
+\newrobustcmd*\seesep{\txb}%
+\newrobustcmd*\cleversee{\tud@cleversee{\seename}}
+\newrobustcmd*\cleverseealso{%
+  \ClassWarning{tudscrmanual}%
+    {You should use `|see' instead of `|seealso'}%
+  \tud@cleversee{\alsoname}%
+}
+\newcommand*\tud@cleversee{}
+\def\tud@cleversee#1#2\relax{%
+  \begingroup%
+    \let\cleversee\@empty%
+    \let\cleverseealso\@empty%
+    \let\tud@res@a\@empty%
+    \def\tud@res@b{#2}%
+    \def\tud@res@c##1\\##2\@nil{%
+      \appto\tud@res@a{##1}%
+      \def\tud@res@b{##2}%
+      \trim@spaces@in\tud@res@b%
+      \in@{\\}{##2}%
+    }%
+    \in@true%
+    \@whilesw\ifin@\fi{%
+      \expandafter\tud@res@c\tud@res@b\@nil%
+    }%
+    \ifx\tud@res@b\@empty%
+      \mbox{\emph{#1}}%
+    \else%
+      \def\tud@res@c##1 ##2\@nil{%
+        ##2##1\space\mbox{\emph{\alsoname}}%
+      }%
+      \expandafter\tud@res@c\tud@res@b\@nil%
+    \fi%
+    \let\tud@res@b\nbs
+    \def\do##1{%
+      \def\tud@res@c{##1}%
+      \trim@spaces@in\tud@res@c%
+      \tud@res@b%
+      \begingroup%
+        \tud@if@markup*{##1}{%
+          \Markup@Split@Get*\tud@res@d{##1}%
+          \Markup@Suffix@@Select[\protected@edef\tud@res@d]{}{%
+            \expandafter\@firstoftwo\tud@res@d%
+          }%
+        }{%
+          \let\tud@res@d\@empty%
+        }%
+        \Markup@Expandable%
+        \let\DistributionGeneral\@DistributionGeneral%
+        \def\seesep{!}%
+        \protected@edef\tud@res@d{%
+          \endgroup%
+          \noexpand\hyperlink{indexentry:\tud@res@c\tud@res@d}%
+        }%
+      \tud@res@d{\tud@res@c}%
+      \def\tud@res@b{;\space}%
+    }%
+    \expandafter\dossvlist\expandafter{\tud@res@a}%
+  \endgroup%
+}
+\newcommand*\seeidx[2]{\pageref{idx:#1}}
 \newcommand*\tud@markup@list{}
 % DOC r'' : dlicn -> declare, inline, index, changelog, normal text
 \NewDocumentCommand\Markup@Format@Set{m r() O{} d|| r'' m}{%
@@ -1211,7 +1354,7 @@
 \newcommand*\tud@markup@lvl{}
 \let\tud@markup@lvl\relax
 \TUD@key[.markup]{lvl}{%
-  % DOC lvl=3>1..2 eigenes Level > Entitäten nutzbar mit Level von..bis
+% DOC lvl=3>1..2 eigenes Level > Entitäten nutzbar mit Level von..bis
   \begingroup%
     \def\tud@res@d##1>##2>##3\@nil{%
       \Ifisinteger{##1}{%
@@ -1627,7 +1770,10 @@
     \tud@idx@robustify%
     \def\tud@res@a{#9}%
     \let\tud@res@b\@empty%
-    \def\tud@res@c##1##2{\listeadd\tud@res@b{<##2>\unexpanded{(##1)}}}%
+    \def\tud@res@c##1##2{%
+      \protected@edef\tud@lbl@tmp{##2}%
+      \listeadd\tud@res@b{<\expandonce\tud@lbl@tmp>\unexpanded{(##1)}}%
+    }%
     \ifnum\tud@declare@mode@num>\m@ne\relax%
       \protected@expandtwoargs\in@{,}{#9}%
       \ifin@%
@@ -1760,7 +1906,7 @@
       \ifnum\tud@res@cnt=\z@\relax%
         \tud@trace@lbl@add{ignored}{##1}%
       \else%
-        \edef\tud@lbl@tmp{##1}%
+        \protected@edef\tud@lbl@tmp{##1}%
         \tud@if@lbl@exists{\tud@lbl@tmp}{}{%
           \tud@truncate@value\tud@lbl@tmp{\tud@lbl@tmp}%
           \tud@if@lbl@exists{\tud@lbl@tmp}{}{%
@@ -1793,7 +1939,8 @@
     \fi%
     \ifx\tud@output@wrapper\relax%
       \edef\tud@res@c{%
-        \noexpand\Markup@Inline@@Wrapper<\tud@lbl@found>{\the\tud@res@cnt}%
+        \noexpand\Markup@Inline@@Wrapper<\expandonce\tud@lbl@found>%
+          {\the\tud@res@cnt}%
           \ifnum\tud@res@cnt>\@ne'#4'\fi%
           \expandonce\tud@res@a%
           \unexpanded{{#2}{#3}}%
@@ -1809,7 +1956,7 @@
 % DOC found cnt ref input ety markup value
 \NewDocumentCommand\Markup@Inline@@Wrapper{r<> m d'' r<> d() m m}{%
   \begingroup%
-    \edef\tud@lbl@found{#1}%
+    \def\tud@lbl@found{#1}%
     \ifx\tud@lbl@found\@empty%
       \let\tud@res@a\@empty%
       \ifnum\tud@res@cnt>\tw@\relax%
@@ -1858,7 +2005,7 @@
           \fi%
         }%
       }%
-      \tud@if@strequal{#4}{\tud@lbl@found}{%
+      \tud@if@strequal{\tud@lbl@found}{#4}{%
         \tud@trace@lbl@add{matched}{\tud@lbl@found}%
       }{%
         \tud@trace@lbl@add{matched}[{#4}]{\tud@lbl@found}%
@@ -2100,7 +2247,7 @@
     \IfValueTF{#1}{%
       \IfValueTF{#2}{%
         \def\do##1{%
-          \tud@if@strequal{\trim@spaces{##1}}{#1}{%
+          \tud@if@strequal{#1}{\trim@spaces{##1}}{%
             \@tud@res@swatrue%
             \listbreak%
           }{}%
@@ -2166,12 +2313,11 @@
   }%
 }
 \@onlypreamble\tud@ety@declare
-\newrobustcmd*\DistributionGeneral{%
-  \hologo{LaTeX}\penalty\@M-\hskip\z@skip Distribution\xspace%
+\NewDocumentCommand\DistributionGeneral{!d||}{%
+  \hologo{LaTeX}\penalty\@M-\hskip\z@skip Distribution%
+  \DistributionGeneral@IndexEntry{#1}\xspace%
 }
-\NewMarkupCommand\Distribution[%
-  lvl=0,idx=true:{LaTeX-Distribution}@{\DistributionGeneral}%
-](\textsbn){Distribution}
+\newcommand*\@DistributionGeneral{LaTeX-Distribution}%
 \NewDocumentCommand\DistributionGeneral@IndexEntry{m}{%
   \begingroup%
     \tud@idx@markup@get\tud@res@a{#1}%
@@ -2179,10 +2325,17 @@
       \ifx\tud@res@a\@empty\else%
         \preto\tud@res@a{|}%
       \fi%
-      \index{{LaTeX-Distribution}@\DistributionGeneral\tud@res@a}%
+      \epreto\tud@res@a{\DistributionGeneral@@IndexEntry}%
+      \expandafter\index\expandafter{\tud@res@a}%
     \fi%
   \endgroup%
 }
+\newcommand*\DistributionGeneral@@IndexEntry{}
+\expandafter\tud@idx@join\expandafter\DistributionGeneral@@IndexEntry%
+    \expandafter{\@DistributionGeneral}{{\DistributionGeneral}}%
+\NewMarkupCommand\Distribution[%
+  lvl=0,idx=true:\DistributionGeneral@@IndexEntry%
+](\textsbn){Distribution}
 \NewDocumentCommand\TeXLive{!t' !d|| !d''}{%
   \Distribution|#2|'#3'{\hologo{TeX}~Live\IfBooleanT{#1}{~Portable}}%
   \DistributionGeneral@IndexEntry{#2}\xspace%
@@ -2837,6 +2990,7 @@
 % TODO Varianten mit "Wert" und "Einstellung"? (\SPmisc, \SPset)
 \NewParameterCommand*\PSet{m}{\PName{#1}}{<3:#1>}
 % TODO \tud@if@param@special aus expandierbaren Versionen ableiten
+% TODO -NoValue- --> weder noch?
 \newcommand*\tud@if@param@special[1]{%
   \begingroup%
     \protected@edef\tud@res@b{#1}%
@@ -2917,9 +3071,9 @@
 \NewDocumentCommand\tud@lbl@@get{m m}{%
   \begingroup%
     \tud@lbl@@@get#2%%
-    \edef\tud@res@a{%
+    \protected@edef\tud@res@a{%
       \endgroup%
-      \unexpanded{\def#1}{\detokenize\expandafter{\tud@lbl@tmp}}%
+      \unexpanded{\def#1}{\tud@lbl@tmp}%
     }%
   \tud@res@a%
 }
@@ -3063,7 +3217,7 @@
 % \href[pdfnewwindow]{./test.pdf#sec:general}{text}
 \newrobustcmd*\tud@hyperlink[3]{%
   \begingroup%
-    \protected@edef\tud@res@a{%
+    \edef\tud@res@a{%
       \endgroup%
       \noexpand\hyperlink{#1}%
     }%
@@ -3093,7 +3247,7 @@
     \IfBooleanTF{#2}{%
       \tud@auxlist@add{tud@lbl@dest}{#4}%
       \ifx\HyperDestRename\@gobbletwo%
-        \Hy@raisedlink{\hypertarget{#4}{}}%
+        \hypertargetraised{#4}%
       \else%
         \HyperDestRename{#4}{#3}%
       \fi%
@@ -3101,18 +3255,18 @@
       \tud@auxlist@ifin{#4}{tud@lbl@dest}{%
         \@tud@res@swafalse%
       }{%
-        \Hy@raisedlink{\hypertarget{#4}{}}%
+        \hypertargetraised{#4}%
         \let\HyperDestRename\@gobbletwo%
         \let\@currentlabelname\@empty%
       }%
     }%
     \protected@edef\tud@res@a{%
       \if@tud@res@swa%
-        \unexpanded{\label{#4}}%
+        \noexpand\label{#4}%
       \fi%
       \endgroup%
       \if@tud@res@swa%
-        \unexpanded{\listadd#1{#4}}%
+        \unexpanded{\listadd#1}{#4}%
       \fi%
     }%
   \tud@res@a%
@@ -3207,7 +3361,7 @@
       }%
       \edef\tud@lbl@tmp{sec:cessations:\tud@cessations@version}%
       \edef\tud@res@b{%
-        \noexpand\index[changes-\tud@cessations@version]{%
+        \noexpand\index[{changes-\tud@cessations@version}]{%
           ""@Allgemein:\space\noexpand\hyperref[\tud@lbl@tmp]{%
             \unexpanded{Anpassungen gegen\"uber der vorhergehenden Version}%
           }%
@@ -3643,49 +3797,13 @@
   \forlistloop\tud@res@a{\tud@markup@list}%
   \appto\tud@x@textcase@uclcnotmath{\tud@nocasechange\hologo}%
 }
-\newrobustcmd*\cleversee{\tud@cleversee{\seename}}
-\newrobustcmd*\cleverseealso{%
-  \ClassWarning{tudscrmanual}%
-    {You should use `|see' instead of `|seealso'}%
-  \tud@cleversee{\alsoname}%
-}
-% URGENT direkter link auf Indexeintrag möglich?
-% > \indexentry[\jobname] müsste target erzeugen und cleversee dieses nutzen
-\newcommand*\tud@cleversee{}
-\def\tud@cleversee#1#2\relax{%
-  \begingroup%
-    \let\cleversee\@empty%
-    \let\cleverseealso\@empty%
-    \let\tud@res@a\@empty%
-    \def\tud@res@b{#2}%
-    \def\tud@res@c##1\\##2\@nil{%
-      \eappto\tud@res@a{##1}%
-      \def\tud@res@b{##2}%
-      \trim@spaces@in\tud@res@b%
-      \in@{\\}{##2}%
-    }%
-    \in@true%
-    \@whilesw\ifin@\fi{%
-      \expandafter\tud@res@c\tud@res@b\@nil%
-    }%
-    \ifx\tud@res@b\@empty%
-      \mbox{\emph{#1}}\nbs\tud@res@a%
-    \else%
-      \def\tud@res@c##1 ##2\@nil{%
-        ##2##1\space\mbox{\emph{\alsoname}}\nbs\tud@res@a%
-      }%
-      \expandafter\tud@res@c\tud@res@b\@nil%
-    \fi%
-  \endgroup%
-}
-\newcommand*\seeidx[2]{\pageref{idx:#1}}
 \newrobustcmd*\tud@idx@declare[2]{%
   \ifcsundef{tud@idx@lbl@@#1}{}{%
     \ClassWarningNoLine{tudscrmanual}{%
       Index entry for\MessageBreak`#1'\MessageBreak was already defined%
     }%
   }%
-  \csgdef{tud@idx@lbl@@#1}{#2}%
+  \csxdef{tud@idx@lbl@@#1}{\detokenize{#2}}%
 }
 \@onlypreamble\tud@idx@declare
 \AtEndDocument{\let\tud@idx@declare\@gobbletwo}
@@ -3892,10 +4010,15 @@
   \ifx\tud@idx@tmp\@empty\else%
     \IfValueT{#5}{%
       \tud@if@param@special{#5}{}{%
-        \def\tud@res@c##1@##2\@nil{%
-          \def\tud@res@b{{##1}@{\nosuffix{##2}}}%
-        }%
-        \expandafter\tud@res@c\tud@res@b\@nil%
+        \begingroup%
+          \tud@idx@split\tud@res@c{\tud@res@b}%
+          \edef\tud@res@d{%
+            \endgroup%
+            \unexpanded{\tud@idx@join\tud@res@b}%
+              {\expandafter\@firstoftwo\tud@res@c}%
+              {\noexpand\nosuffix{\expandafter\@secondoftwo\tud@res@c}}%
+          }%
+        \tud@res@d%
       }%
     }%
   \fi%
@@ -3965,7 +4088,7 @@
     \tud@replace@@in\tud@idx@fmt{|}{"|}%
     \edef\tud@res@c{%
       \endgroup%
-      \unexpanded{\def#2}{{\expandonce\tud@idx@key}@{\expandonce\tud@idx@fmt}}%
+      \unexpanded{\tud@idx@join#2}{\tud@idx@key}{\tud@idx@fmt}%
     }%
   \tud@res@c%
 }
@@ -3977,14 +4100,19 @@
       \csname Markup@Format@@Index@@#1\endcsname%
     }%
     \def\tud@res@d##1:##2:##3\@nil{%
-      \def\tud@res@c{##1}%
+      \def\tud@res@b{##1}%
       \IfArgIsEmpty{##2}{}{\preto\tud@res@a{##2!}}%
     }%
     \expandafter\tud@res@d\tud@res@c::\@nil%
   % TODO split an "!" und jeden Eintrag auch verwenden?
   %      falls ja, nur wenn \tud@declare@mode@num>\z@?
-    \index[\tud@res@c]{\tud@res@a\IfValueT{#2}{|#2}}%
-  \endgroup%
+    \edef\tud@res@a{%
+      \endgroup%
+      \noexpand\index[{\tud@res@b}]{%
+        \expandonce\tud@res@a\IfValueT{#2}{\unexpanded{|#2}}%
+      }%
+    }%
+  \tud@res@a%
 }
 \NewDocumentCommand\CrossIndex{m o m}{%
   \begingroup%
@@ -3996,9 +4124,12 @@
       }{%
         \def\tud@res@b{\nameref{idx:#1}}%
       }%
-      \index{%
-        \trim@spaces{##1}!""idx:#1@%
-          \textrightarrow\kern.1em\trim@spaces{\tud@res@b}|seeidx{#1}%
+      \protected@edef\tud@res@c{##1}%
+      \trim@spaces@in\tud@res@c%
+      \trim@spaces@in\tud@res@b%
+      % DOC direkts schreiben um indextarget zu umgehen
+      \@wrindex{%
+        \tud@res@c!""idx:#1@\textrightarrow\kern.1em\tud@res@b|seeidx{#1}%
       }%
     }%
     \docsvlist{#3}%
@@ -4010,8 +4141,17 @@
     \def\do##1{%
       \begingroup%
         \def\do####1{%
-          \index{\trim@spaces{####1}%
-            |see\IfBooleanT{#1}{unverified}{\trim@spaces{##1}}}%
+          \protected@edef\tud@res@a{####1}%
+          \trim@spaces@in\tud@res@a%
+          \protected@edef\tud@res@b{##1}%
+          \trim@spaces@in\tud@res@b%
+          \edef\tud@res@c{%
+            \noexpand\index{%
+              \expandonce\tud@res@a%
+              |see\IfBooleanT{#1}{unverified}{\expandonce\tud@res@b}%
+            }%
+          }%
+          \tud@res@c%
         }%
         \docsvlist{#2}%
       \endgroup%
@@ -4199,7 +4339,7 @@
       \fi%
     }%
     \ifx\tud@res@b\@empty\else%
-      \index[changes-#5]{\tud@res@a!\tud@res@b}%
+      \index[{changes-#5}]{\tud@res@a!\tud@res@b}%
     \fi%
   \endgroup%
 }
@@ -4277,28 +4417,16 @@
     \ifx\tud@res@a\@empty\else\preto\tud@res@a{!}\fi%
     \ifx\tud@res@b\@empty\def\tud@res@b{"|}\else\preto\tud@res@b{: }\fi%
     \ifx\tud@res@c\@empty\else\preto\tud@res@c{: }\fi%
-    \protected@edef\tud@res@b{%
-      \unexpanded{\tud@res@c#2\@nil}{\tud@res@b}{\tud@res@c}%
-    }%
-    \def\tud@res@c##1@##2\@nil##3##4{%
-      \def\tud@res@c{##2##4}%
-      \begingroup%
-        \Markup@Expandable%
-        \protected@edef\tud@res@b{%
-          \endgroup%
-          \unexpanded{\def\tud@res@b}{##1##3}%
-        }%
-      \tud@res@b%
-    }%
-    \tud@res@b%
-    \protected@edef\tud@res@d{%
-      \unexpanded{\tud@replace@@in\tud@res@b}{\noexpand\idxsuffix{#5}}{}%
-      \unexpanded{\tud@replace@@in\tud@res@c}{\noexpand\idxsuffix{#5}}{}%
-    }%
-    \tud@res@d%
+    \tud@idx@split\tud@res@d{#2}%
+    \protected@edef\tud@res@c{\expandafter\@secondoftwo\tud@res@d\tud@res@c}%
+    \tud@replace@@in\tud@res@c{\idxsuffix{#5}}{}%
+    \Markup@Expandable%
+    \protected@edef\tud@res@b{\expandafter\@firstoftwo\tud@res@d\tud@res@b}%
+    \tud@replace@@in\tud@res@b{\idxsuffix{#5}}{}%
     \edef\tud@res@c{%
       \endgroup%
-      \unexpanded{\def#1}{{\tud@res@b}@{\tud@res@c}\expandonce\tud@res@a}%
+      \unexpanded{\tud@idx@join#1}{\tud@res@b}{\tud@res@c}%
+      \unexpanded{\appto#1}{\tud@res@a}%
     }%
   \tud@res@c%
 }
@@ -4309,7 +4437,7 @@
       \def\tud@res@c##1:##2\@nil{%
         \def\tud@res@a{##1}%
         \def\tud@res@b{##2}%
-        \trim@spaces@in{\tud@res@b}%
+        \trim@spaces@in\tud@res@b%
       }%
       \tud@res@c#3\@nil%
     \else%
@@ -4352,9 +4480,8 @@
     \Markup@Expandable%
     \protected@edef\tud@res@a{%
       \endgroup%
-      \unexpanded{\def#1}{%
-        {\tud@res@b}@{\noexpand\nosuffix{\expandonce\tud@res@b}}%
-      }%
+      \unexpanded{\tud@idx@join#1}%
+        {\tud@res@b}{\noexpand\nosuffix{\expandonce\tud@res@b}}%
     }%
   \tud@res@a%
 }
@@ -4364,7 +4491,7 @@
       \tud@chg@entry@validate\tud@res@a\tud@res@b{##1}{%
         \tud@unique@xadd\tud@chg@version@list{\tud@res@a}%
         \tud@chg@general@get\tud@res@b{\tud@res@b}%
-        \index[changes-\tud@res@a]{#2@\hyperref[#3]{#2}!\tud@res@b}%
+        \index[{changes-\tud@res@a}]{#2@\hyperref[#3]{#2}!\tud@res@b}%
       }%
     }%
     \dossvlist{#4}%
@@ -5047,7 +5174,7 @@
 \newcommand*\tud@v@validate[1]{%
   \begingroup%
     \protected@edef\tud@res@a{#1}%
-    \trim@spaces@in{\tud@res@a}%
+    \trim@spaces@in\tud@res@a%
     \tud@v@to@number*\tud@res@b{\tud@res@a}%
     \edef\tud@res@a{%
       \endgroup%
@@ -5369,8 +5496,8 @@
   \write\tud@write@a{%
     (markup-locclass-list%
     \space:open "\string\dotfill{}"%
-    \space:close "\string\relax"%
     \space:sep ",\space"%
+    \space:close "\string\relax"%
     )%
   }%
   % DOC Ignorieren/Überschreiben der default-Einträge für Attribut
@@ -5398,22 +5525,22 @@
     (markup-crossref-list :class "seeunverified"^^J%
     \space\space%
     :open "\string\cleversee\space"\@spaces\space%
-    :close "\@backslashchar\@backslashchar"\space%
-    :sep "; "^^J%
+    :sep "; "\space%
+    :close "\@backslashchar\@backslashchar"^^J%
     )%
   }%
   \write\tud@write@a{%
     (markup-crossref-list :class "see"^^J%
     \space\space%
     :open "\string\cleversee\space"\@spaces\space%
-    :close "\@backslashchar\@backslashchar"\space%
-    :sep "; "^^J%
+    :sep "; "\space%
+    :close "\@backslashchar\@backslashchar"^^J%
     )^^J%
     (markup-crossref-list :class "seealso"^^J%
     \space\space%
     :open "\string\cleverseealso\space"\space%
-    :close "\@backslashchar\@backslashchar"\space%
-    :sep "; "^^J%
+    :sep "; "\space%
+    :close "\@backslashchar\@backslashchar"^^J%
     )%
   }%
   \write\tud@write@a{%
@@ -5421,16 +5548,16 @@
     (markup-crossref-list :class "seeidx"^^J%
     \space\space%
     :open "\string\seeidx{"\@spaces\@spaces%
-    :close "}{}"\space%
-    :sep "; "^^J%
+    :sep "; "\space%
+    :close "}{}"^^J%
     )%
   }%
   \write\tud@write@a{%
     (markup-crossref-layer-list :class "see"%
-    \@spaces\space:sep "\string\txb{}"%
+    \@spaces\space:sep "\string\seesep\space"%
     )^^J%
     (markup-crossref-layer-list :class "seealso"%
-    \space:sep "\string\txb{}"%
+    \space:sep "\string\seesep\space"%
     )%
   }%
   \write\tud@write@a{%
