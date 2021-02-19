@@ -26,148 +26,60 @@
 %\tracingmarkup%[all]
 \usepackage{blindtext}
 
+%\usepackage{showframe}
+
 \begin{document}
-
-%\begin{Entity}{\Bundle{tudscr}}
-%\begin{Declaration}
-%  {\Option{cd=\PMisc}}
-%  (true)
-%\printdeclarationlist
-%Mit dieser Option wird festgelegt, ob und wie das \TUDCD im gesamten Dokument 
-%verwendet wird. Sie hat Einfluss auf die Ausprägung von Titel"~, Teil"~, und 
-%Kapitelseiten sowie die Überschriften der weiteren Gliederungsebenen. 
-%Im Layout des \CDs wird auch bei \Option{cdfont=false} die Hausschrift in 
-%Überschriften verwendet.
-%\begin{DeclareValues}
-%\itemval=barcolor=[v2.04:Layoutseiten verwenden für \PageStyle{tudheadings} 
-%    solitären, farbig abgesetzten Querbalken]
-%  Zusätzlich zur vorherigen Einstellung wird außerdem der Querbalken farbig 
-%  abgesetzt.
-%\end{DeclareValues}
-%\index{Layout!Kopfzeile|)}%
-%\end{Declaration}
-%\end{Entity}
-
-%\TeXLive
-
-\DistributionGeneral
-
-%\CrossIndex{terms}{Bezeichner,Sprachunterstützung}
-%\SeeIndex{Sprachunterstützung}{Bezeichner}
-%\SeeIndex{Lokalisierung}{Bezeichner,Sprachunterstützung}
-%\SeeIndex{Silbentrennung,Sprachunterstützung,Trennungsmuster}{Worttrennung}
-
-
-%\CrossIndex{elements}[Index der *]{Farben,Schriftelemente,Seitenstile}
+\subsubsection{Der Satzspiegel im \TUDCD}
 %
-%\SeeIndex{Cover}{Umschlagseite}
-
-%\begin{Declaration}
-%  {\Macro{TUDScript}}
-%  [v2.04]
-%\printdeclarationlist
-%%
-%Diese Anweisung setzt das Logo respektive die Wortmarke \enquote{\TUDScript{}} 
-%in serifenloser Schrift und mit leichter Sperrung des in Versalien gesetzten 
-%Teils. Dieser Befehl wird von allen Klassen und Paketen des \TUDScript-Bundles 
-%definiert.
-%\end{Declaration}
-
-%\index{bla}
-%
-%\index{blubb}
-%
-%\index{foo|see{bla}}
-%\index{foo|see{blubb}}
-%
-%\index{markup@markup (real)}
-%
-%\index{refmarkup|see{markup}}
-%
-%
-%\index{refmarkup}
-%
-%\index{weird@stuff!really@shit!or@what|!}
-
-
-%\TeXLive
-
-%
-%\DistributionGeneral
-
-\section{Stub%
-\label{idx:changes}%
-\label{idx:macros}%
-\label{idx:terms}%
-\label{idx:files}%
-\label{idx:elements}%
-\label{idx:misc}%
-\label{idx:options}%
-}
-
-\Application{Foo}
-
-\index{bla|see{\Application{Foo}}}
-
-
-%\DistributionGeneral aaa
-%
-%{\DistributionGeneral} bbb
-%
-%{\DistributionGeneral}ccc
-
-
-
-%\begin{Declaration}
-%  {\Macro(!){date|\OPList{Suffix}\MPName{Datum}}}
-%  [v2.05:Angabe von Parametern für Prä- und Suffix bei Datumsausgabe möglich;]
-%\begin{Declaration}
-%  {\Macro(!){date/before=\PSet{Präfix}}}
-%  [v2.05]
-%\printdeclarationlist%
-%Mit dem Befehl \Macro{date} lässt sich das Datum angegeben. 
-%\ChangedAt{v2.05}%
-%\end{Declaration}
-%\end{Declaration}
-%
-%
-%Über das optionale Argument können Parameter \Macro{date/before=\PSet{Präfix}} 
-
-
-%\SeeIndex{Abstand}{Längen}
-%\index{Längen}
-%
-%%\def\"a{ae}
-%
-%%\hypertarget{Blä}{Blä}
-%%\hypertarget{Bla}{Bla}
-%%und was kommt \hyperlink{Blä}{jetzt}?
-%%und was kommt \hyperlink{Bla}{jetzt}?
-%
-\makeatletter
-%
-%\edef\foo{%
-%  \noexpand\hypertarget{Blä}%
-%}
-%\meaning\foo
-%
-%\foo{Blä}
-%
-%
-%\protected@edef\foo{%
-%  \noexpand\hyperlink{Blä}%
-%}
-%\meaning\foo
-%
-%\foo{Blä ref}
-%
-%
-%\let\hyperpage\@firstofone
-\tud@index@mode@num=-2\relax%
-%%\csuse{tud@index@set@@tudscr}%
-%%\@input@{tudscr-tudscr.ind}%
-\tud@index@print
-%
-\makeatother
+\begin{Declaration}
+  {\Option{cdgeometry=\PMisc}}
+  (true,restricted|\Option{cd=false}:false)
+  [v2.03]
+\printdeclarationlist[%
+  \index{Satzspiegel!doppelseitig}%
+]
+Diese Option ist für die Wahl des Satzspiegels verantwortlich. Das Maß der 
+Seitenränder ist im \CD fest vorgegeben und wird standardmäßig von den 
+\TUDScript-Klassen eingehalten. Allerdings lassen sich die Seitenränder 
+anpassen, um beispielsweise einen vernünftigen doppelseitigen Satz zu 
+ermöglichen.%
+\footnote{Hierbei sollte der innere Rand schmaler als der äußere sein}
+Deshalb besteht die Möglichkeit, entweder auf das Standardverhalten von 
+\KOMAScript zurückzufallen und den Satzspiegel durch das Paket 
+\Package{typearea} zu berechnen oder aber diesen (fast) beliebig manuell 
+festzulegen.
+\begin{DeclareValues}
+\NewDocumentCommand\marginformat{s m m m m}{%
+  \unskip\hfill%
+  \IfBooleanTF{#1}{innen}{links}:\,#2\,mm,\,%
+  \IfBooleanTF{#1}{außen}{rechts}:\,#3\,mm,\,%
+  oben:\,#4\,mm\,,unten:\,#5\,mm%
+}%
+\itemval=false=
+  Die Satzspiegelberechnung erfolgt via \Package{typearea}, die Vorgaben des 
+  \CDs bezüglich der Seitenränder werden ignoriert.
+  \Attention{Nur in diesem Fall wirkt die Option \Option{DIV}.}
+\itemval*=true,asymmetric,cd=<\marginformat{30}{20}{20}{30}>%
+  Die Seitenränder werden im asymmetrischen Stil des \CDs fest definiert und 
+  auch für den doppelseitigen Satz (Klassenoption \Option{twoside=true}) 
+  genutzt.%
+\itemval=symmetric,centred,centered=<\marginformat{25}{25}{20}{30}>%
+  Der Satzspiegel wird im einseitigen sowie doppelseitigen Satz auf der Seite 
+  zentriert.%
+\itemval=twoside,balanced=<\marginformat*{20}{30}{20}{30}>%
+  Diese Einstellung aktiviert den doppelseitigen Satz (\Option{twoside=true}) 
+  und ändert den Satzspiegel derart, dass die Ränder der inneren Seiten 
+  schmaler sind als die der äußeren.
+  \Attention{%
+    Der so erzeugte Satzspiegel ist jedoch unvorteilhaft, da das Logo der \TnUD 
+    sehr nah am inneren Seitenrand des Dokumentes gesetzt wird und folglich auf 
+    rechten respektive ungeraden Seiten sehr weit an den Blattrand rückt.
+  }
+  Dieses Problem kann~-- bei \Class{tudscrbook} sowie \Class{tudscrreprt}~-- 
+  prinzipiell gelöst werden, indem Titel, Teile und Kapitel über das Aktivieren 
+  der \KOMAScript-Option \Option{open=left} immer auf einer linken Seite 
+  beginnen, was allerdings aus typografischer Sicht eher unüblich ist.
+\end{DeclareValues}
+\end{Declaration}
 
 \end{document}
