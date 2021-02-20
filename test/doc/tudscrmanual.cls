@@ -434,6 +434,7 @@
 \RequirePackage{shellesc}[2019/11/08]
 \RequirePackage{pdftexcmds}[2020/06/27]
 \RequirePackage{hologo}[2019/12/05]
+%\pretocmd\hologo{\typeout{===== #1}}{}{\tud@patch@wrn{hologo}}
 \RequirePackage{csquotes}[2021-01-04]
 \RequirePackage{setspace}[2011/12/19]
 \setstretch{1.1}
@@ -1586,22 +1587,24 @@
 \tud@headings@special{\let\tudmarkuplabel\@tudmarkuplabel}
 % DOC r'' : dlicn -> declare, inline, index, changelog, normal text
 \newcommand*\tud@markup@list{}
-\NewDocumentCommand\Markup@Format@Set{m r() O{} d|| r'' m}{%
+\NewDocumentCommand\Markup@Format@Set{m r() O{} D<>{} d|| r'' m}{%
   \tud@toks@{{#1}{{#2{#3##1}\IfValueT{##2}{\PValue{=}##2}}\IfValueT{##3}{##3}}}%
   \ifcsundef{Markup@Format@@Inline@@#1}{%
     \expandafter\Markup@Inline@Format@Set\the\tud@toks@%
   }{}%
-  \ifcsundef{Markup@Format@@Declare@@#1}{%
-    \expandafter\Markup@Declare@Format@Set\the\tud@toks@%
-  }{}%
   \ifcsundef{Markup@Format@@InlineDeclare@@#1}{%
     \expandafter\Markup@InlineDeclare@Format@Set\the\tud@toks@%
   }{}%
-  \IfValueT{#4}{%
+  \ifcsundef{Markup@Format@@Declare@@#1}{%
+    \def\@tempa{[{#4}]}%
+    \expandafter\expandafter\expandafter\Markup@Declare@Format@Set%
+      \expandafter\@tempa\the\tud@toks@%
+  }{}%
+  \IfValueT{#5}{%
     \expandafter\newcommand\csname Markup@Format@@Index@@#1\endcsname{}%
-    \csdef{Markup@Format@@Index@@#1}{#4}%
+    \csdef{Markup@Format@@Index@@#1}{#5}%
   }%
-  \Markup@Suffix@Format@Set{#1}{#5}{\suffix{#6}}%
+  \Markup@Suffix@Format@Set{#1}{#6}{\suffix{#7}}%
 }
 \@onlypreamble\Markup@Format@Set
 \newcommand*\Markup@Inline@Format@Set[2]{%
@@ -1611,13 +1614,6 @@
   }%
 }
 \@onlypreamble\Markup@Inline@Format@Set
-\newcommand*\Markup@Declare@Format@Set[2]{%
-  \expandafter\newcommand\csname Markup@Format@@Declare@@#1\endcsname{}%
-  \csdef{Markup@Format@@Declare@@#1}##1=##2=[##3]{%
-    \mbox{#2\Markup@Suffix@@Select{d}{#1}}%
-  }%
-}
-\@onlypreamble\Markup@Declare@Format@Set
 \newcommand*\Markup@InlineDeclare@Format@Set[2]{%
   \expandafter\newcommand\csname Markup@Format@@InlineDeclare@@#1\endcsname{}%
   \csdef{Markup@Format@@InlineDeclare@@#1}##1=##2=[##3]{%
@@ -1625,6 +1621,13 @@
   }%
 }
 \@onlypreamble\Markup@InlineDeclare@Format@Set
+\newcommand*\Markup@Declare@Format@Set[3][]{%
+  \expandafter\newcommand\csname Markup@Format@@Declare@@#2\endcsname{}%
+  \csdef{Markup@Format@@Declare@@#2}##1=##2=[##3]{%
+    \mbox{#1#3\Markup@Suffix@@Select{d}{#2}}%
+  }%
+}
+\@onlypreamble\Markup@Declare@Format@Set
 \newcommand*\Markup@Suffix@Format@Set[3]{%
   \expandafter\newcommand\csname Markup@Format@@Suffix@@#1\endcsname{}%
   \csdef{Markup@Format@@Suffix@@#1}{{#2}{#3}}%
@@ -1689,7 +1692,8 @@
     \nbs#3\IfBooleanTF{#2}{\textlangle#4\textrangle}{(#4)}%
   \endgroup%
 }
-\NewExpandableDocumentCommand\@suffix{s t' o m}{\space#4}%
+\NewExpandableDocumentCommand\@suffix{s t' o m}{#4}%
+%\NewExpandableDocumentCommand\@suffix{s t' o m}{\space#4}%
 \NewExpandableDocumentCommand\@@suffix{s t' o m}{}%
 \newrobustcmd*\idxsuffix{\suffix*'}
 \NewDocumentCommand\nosuffix{m}{%
@@ -1797,7 +1801,7 @@
     {default}{0},{value}{1},{param}{2}%
   }{#1}%
 }
-\NewDocumentCommand\NewMarkupCommand{s m O{} D(){\texttt} D''{ic} m}{%
+\NewDocumentCommand\NewMarkupCommand{s m O{} D(){\texttt} D<>{} D''{ic} m}{%
   \begingroup%
     \TUDExecuteOptions[.markup]{#3}%
     \ifx\tud@markup@lvl\relax%
@@ -1814,10 +1818,11 @@
     \addto@hook@expandafter\tud@toks@{\expandafter{\tud@res@d}}%
     \addto@hook\tud@toks@{(#4)}%
     \IfBooleanT{#1}{\addto@hook\tud@toks@{[\bsc]}}%
+    \addto@hook\tud@toks@{<#5>}%
     \ifundef\tud@markup@idx{}{%
       \addto@hook@expandafter\tud@toks@{\expandafter|\tud@markup@idx|}%
     }%
-    \addto@hook\tud@toks@{'#5'{#6}}%
+    \addto@hook\tud@toks@{'#6'{#7}}%
     \eappto\tud@res@c{\the\tud@toks@}%
     \def\tud@res@b##1##2{%
       \eappto\tud@res@c{%
@@ -1934,7 +1939,26 @@
         \trim@spaces@in\tud@res@d%
         \edef\ProcessedArgument{{\expandonce\tud@res@d}}%
         \tud@if@strblank{##2}{%
-          \appto\ProcessedArgument{[{\Markup@Suffix@@Select{}{#1}}]}%
+          \in@{/}{##1}%
+          \ifin@%
+            \def\tud@res@b####1/####2\@nil{%
+              \begingroup%
+                \let\suffix\@suffix%
+                \Markup@Suffix@@Select[\edef\tud@res@c]{}{KeyVal@Parameter}%
+                \trim@spaces@in\tud@res@c%
+                \eappto\tud@res@c{: \csname #1\endcsname*{####1}}%
+                \edef\tud@res@c{%
+                  \endgroup%
+                  \unexpanded{\appto\ProcessedArgument}{%
+                    [{\noexpand\suffix{\expandonce\tud@res@c}}]%
+                  }%
+                }%
+              \tud@res@c%
+            }%
+            \tud@res@b##1\@nil%
+          \else%
+            \appto\ProcessedArgument{[{\Markup@Suffix@@Select{}{#1}}]}%
+          \fi%
         }{%
           \appto\ProcessedArgument{[{##2}]}%
         }%
@@ -2191,7 +2215,7 @@
       \fi%
       \protected@expandtwoargs\in@{,}{##2}%
       \ifin@%
-        % TODO label in \tud@declare@result@list?
+        % URGENT label in \tud@declare@result@list?
       \else%
         \Entity@Declare{#3}{#4}{##2}%
         \listgadd\tud@declare@result@list{%
@@ -2369,7 +2393,7 @@
 \NewDocumentCommand\Markup@Output@Get{m m >{\AP@Underscore}m r// r== r[]}{%
   \begingroup%
     \IfValueTF{#4}{%
-      \def\tud@res@a{Key@Value}%
+      \def\tud@res@a{KeyVal@Parameter}%
       \def\tud@res@c{#4}%
     }{%
       \def\tud@res@a{#2}%
@@ -2441,18 +2465,18 @@
   \tud@toks@{[{#1}]{#2}{#3}/#4/=#5=[{#6}]|#7|'#8'(#9)}%
 }
 % DOC Sternversion ersetzt nur -No-Value-
-\NewDocumentCommand\Markup@Replace{s m d== d|| d'' m}{%
+\NewDocumentCommand\Markup@Replace{s m d== o d|| d'' m}{%
   \begingroup%
-    \protected@edef\tud@res@a{#6}%
+    \protected@edef\tud@res@a{#7}%
     \GetDocumentCommandArgSpec\Process@Markup% o m m d// d== o r|| r'' r()
     \expandafter\DeclareDocumentCommand\expandafter\tud@res@b\expandafter{%
       \ArgumentSpecification%
     }{%
       \tud@toks@{[{##1}]{##2}{##3}/##4/}%
       \Markup@@Replace{#1}{==}{#3}{##5}%
-      \addto@hook\tud@toks@{[{##6}]}%
-      \Markup@@Replace{#1}{||}{#4}{##7}%
-      \Markup@@Replace{#1}{''}{#5}{##8}%
+      \Markup@@Replace{#1}{[]}{#4}{##6}%
+      \Markup@@Replace{#1}{||}{#5}{##7}%
+      \Markup@@Replace{#1}{''}{#6}{##8}%
       \addto@hook\tud@toks@{(##9)}%
     }%
     \expandafter\tud@res@b\tud@res@a%
@@ -2666,9 +2690,14 @@
   \endgroup%
 }
 \@onlypreamble\tud@ety@declare
-\NewDocumentCommand\DistributionGeneral{!d||}{%
-  \hologo{LaTeX}\nobreak-\hskip\z@skip Distribution%
-  \DistributionGeneral@IndexEntry{#1}\xspace%
+\ifundef\textnonbreakinghyphen{%
+  \DeclareTextCommandDefault\textnonbreakinghyphen{\mbox{-}}%
+}{%
+  \ClassWarning{tudscrmanual}{\string\textnonbreakinghyphen now exists}%
+}
+\NewDocumentCommand\DistributionGeneral{!s !d||}{%
+  \hologo{LaTeX}\textnonbreakinghyphen Distribution\IfBooleanT{#1}{en}%
+  \DistributionGeneral@IndexEntry{#2}\xspace%
 }
 \newcommand*\@DistributionGeneral{LaTeX-Distribution}%
 \NewDocumentCommand\DistributionGeneral@IndexEntry{m}{%
@@ -2706,13 +2735,6 @@
 \NewMarkupCommand\Class[lvl=2,idx=files](\textsbn){Klasse}
 \NewMarkupCommand\Package[lvl=2,idx=files](\textsbn){Paket}
 \NewMarkupCommand\Option[idx=options,type=value]'c'{Option}
-\Markup@Declare@Format@Set{Environment}{%
-  \begin{tabular}[t]{@{}l@{}}%
-  \texttt{\bsc{}begin\textbraceleft#1\textbraceright\IfValueT{#3}{#3}}%
-  \tabularnewline\texttt{\quad\raisebox{-.3\dp\@arstrutbox}[0pt][0pt]{\vdots}}%
-  \tabularnewline\texttt{\bsc{}end\textbraceleft#1\textbraceright}%
-  \end{tabular}%
-}
 \Markup@InlineDeclare@Format@Set{Environment}{%
   \texttt{%
     \bsc{}begin\textbraceleft#1\textbraceright\IfValueT{#3}{#3}%
@@ -2720,17 +2742,18 @@
     \bsc{}end\textbraceleft#1\textbraceright%
   }%
 }
+\Markup@Declare@Format@Set{Environment}{%
+  \begin{tabular}[t]{@{}l@{}}%
+  \texttt{\bsc{}begin\textbraceleft#1\textbraceright\IfValueT{#3}{#3}}%
+  \tabularnewline\texttt{\quad\raisebox{-.3\dp\@arstrutbox}[0pt][0pt]{\vdots}}%
+  \tabularnewline\texttt{\bsc{}end\textbraceleft#1\textbraceright}%
+  \end{tabular}%
+}
 \NewMarkupCommand\Environment[idx=macros,type=param]{Umgebung}
 \NewMarkupCommand*\Macro[idx=macros,type=param]'c'{Befehl}
-% TODO undef \Key@Value damit nicht direkt verwendbar?
-% TODO umbenennen in @Parameter
-% TODO wie idx, ety, lvl setzen?
-% TODO |ic| raus, evtl |l|?
-\NewMarkupCommand\Key@Value[idx=macros](\textttit){Parameter}
-% TODO \Markup@Declare@Format\Key@Value mit Einzug?
-%\pretocmd\Markup@Format@@Declare@@Key@Value{%
-%  \quad%
-%}{}{}
+% TODO undef \KeyVal@Parameter damit nicht direkt verwendbar?
+% URGENT wie idx, ety, lvl setzen?
+\NewMarkupCommand\KeyVal@Parameter[idx=macros](\textttit)<\quad>''{Parameter}
 \NewMarkupCommand*\Term[idx=terms]'dc'{Bezeichner}
 \NewMarkupCommand*\Length[idx=misc]'dic'{L\"ange}
 \NewMarkupCommand\Counter[idx=misc]'dic'{Z\"ahler}
@@ -3379,7 +3402,8 @@
 }
 % TODO noch notwendig?
 \newcommand*\Misc@Expandable{%
-  \let\suffix\@suffix%
+%  \let\suffix\@suffix%
+  \def\suffix{\space\@suffix}%
   \let\nosuffix\@nosuffix%
   \let\seeplain\@seeplain%
   \let\hologo\@firstofone%
@@ -4104,10 +4128,7 @@
     }%
   \tud@res@a%
 }
-% TODO #6 bei Deklaration für index verwenden? 
-% TODO suffix parameter nicht in index?
 \NewDocumentCommand\tud@idx@@get{o m m d// d== o d|| d'' r()}{%
-%\IfValueT{#6}{\typeout{?????????????????????? #6}}%
   \def\tud@res@c##1##2##3{%
     \tud@if@idx@exists{##1}{##2}{%
       \ClassWarning{tudscrmanual}{%
@@ -4155,6 +4176,7 @@
   \ifx\tud@idx@tmp\@empty\else%
     \IfValueT{#5}{%
       \tud@if@param@special{#5}{}{%
+        % URGENT suffix parameter generell nicht in index?
         \begingroup%
           \tud@idx@split\tud@res@c{\tud@res@b}%
           \edef\tud@res@d{%
@@ -4167,6 +4189,8 @@
       }%
     }%
   \fi%
+  % URGENT #6 bei Deklaration für index verwenden? 
+  %\IfValueT{#6}{\typeout{?????????????????????? #6}}%
   \eappto\tud@idx@tmp{\expandonce\tud@res@b}%
 }
 \newcommand*\tud@idx@key{}
@@ -4823,14 +4847,15 @@
 \NewDocumentCommand\tud@item@val{s r== d() d<> o}{%
   \begingroup%
     \tud@val@format\tud@val@main\tud@val@addon\tud@val@alias{#1}{#2}%
+    \let\tud@res@d\@empty%
     \IfValueTF{#3}{%
-      \appto\tud@val@addon{\suffix{S\"aumniswert f\"ur #3}}%
+      \appto\tud@res@d{\suffix{S\"aumniswert f\"ur #3}}%
     }{%
-      \IfBooleanT{#1}{\appto\tud@val@addon{\suffix{S\"aumniswert}}}%
+      \IfBooleanT{#1}{\appto\tud@res@d{\suffix{S\"aumniswert}}}%
     }%
     \IfValueT{#4}{%
       \tud@ref@get\tud@res@a{see}{#4}{||'page'}%
-      \eappto\tud@val@addon{%
+      \eappto\tud@res@d{%
         {\unexpanded{\hfill\suffixsize}\expandonce\tud@res@a}%
       }%
     }%
@@ -4847,7 +4872,11 @@
         \fi%
         \edef\tud@res@b{%
           % DOC '' für Inline@Declaration ohne Link
-          \unexpanded{\Markup@Replace\tud@res@b}=\expandonce\tud@val@main=''%
+          \unexpanded{\Markup@Replace\tud@res@b}=\expandonce\tud@val@main=%
+          \ifx\tud@val@addon\@empty\else%
+            [{\expandonce\tud@val@addon}]%
+          \fi%
+          ''% URGENT '' notwendig?
         }%
         \tud@res@b{##1}%
         \Markup@Outer@Get\tud@res@b{\tud@res@b}%
@@ -4870,7 +4899,7 @@
       \noexpand\item[{%
         \unexpanded{\let\tud@print@changedatlist\relax}%
         \ifx\tud@res@a\@empty\else%
-          \expandonce\tud@res@a\expandonce\tud@val@addon%
+          \expandonce\tud@res@a\expandonce\tud@res@d%
         \fi%
       }]%
     }%

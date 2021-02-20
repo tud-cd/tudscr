@@ -1,3 +1,22 @@
+%\documentclass{tudscrartcl}
+%\usepackage[T1]{fontenc}
+%\usepackage{hologo}
+%\begin{document}
+%
+%\hologo{LaTeX}
+%
+%\textbf{\hologo{LaTeX}}
+%
+%\textit{\hologo{LaTeX}}
+%
+%\textsf{\hologo{LaTeX}}
+%
+%\textsl{\hologo{LaTeX}}
+%
+%\meaning\hologo
+%
+%
+%\end{document}
 \PassOptionsToPackage{check=none}{widows-and-orphans}%
 \documentclass[english,ngerman,ToDo=inline,final,indexnote=false]{tudscrmanual}
 \GitHubBase{\TUDScriptRepository}
@@ -26,60 +45,147 @@
 %\tracingmarkup%[all]
 \usepackage{blindtext}
 
-%\usepackage{showframe}
-
+\usepackage{lmodern}
 \begin{document}
-\subsubsection{Der Satzspiegel im \TUDCD}
-%
+
+%\TUDoptions{cdfont=false}
+
+\makeatletter
+\newlength\tud@logo@w
+\setlength\tud@logo@w{0.9em}
+% PENDING raus?
+\newlength\tud@logo@h
+\setlength\tud@logo@h{1ex}
+\newcommand*\tud@logo@ic[1]{\ifdim\the\fontdimen\@ne\font>\z@\relax#1\fi}
+\newrobustcmd*\sanslogo[1]{%
+  \ifcsundef{tud@logo@#1}{%
+    \csname#1\endcsname%
+    \enskip\hologo{#1}%
+    \ClassWarning{tudscrmanual}{warning text}%
+  }{%
+    \mbox{\csuse{tud@logo@#1}}%
+    \enskip\hologo{#1}%
+  }%
+}
+\newcommand*\tud@logo@scale[2]{%
+  \begingroup%
+    \setbox\z@\hbox{#1}%
+    \vbox to\ht\z@{%
+      \setbox\@ne\hbox{%
+        \check@mathfonts%
+        \fontsize\sf@size\z@%
+        \math@fontsfalse\selectfont%
+        #2%
+      }%
+      \hbox{%
+        \copy\@ne\relax%
+        \kern-.995\wd\@ne%
+        \copy\@ne\relax%
+      }%
+      \vss%
+    }%
+  \endgroup%
+}
+\newcommand*\tud@logo@La{%
+  L%
+  \kern-.36\tud@logo@w\tud@logo@ic{\kern.1\tud@logo@w}%
+  \tud@logo@scale{T}{A}%
+}
+\newcommand*\tud@logo@Xe{%
+  X\kern-.05\tud@logo@w\tud@logo@ic{\kern-.015\tud@logo@w}%
+ \lower.5\tud@logo@h\hbox{\rotatebox[origin=c]{180}{E}}%
+}
+\newcommand*\tud@logo@TeX{%
+  T%
+  \kern-.23\tud@logo@w\tud@logo@ic{\kern-.05\tud@logo@w}%
+  \lower.5\tud@logo@h\hbox{E}%
+  \kern-.075\tud@logo@w\tud@logo@ic{\kern.1\tud@logo@w}%
+  X\@%
+}
+\newcommand*\tud@logo@LaTeX{%
+  \tud@logo@La\kern-.15\tud@logo@w\tud@logo@TeX%
+}
+
+\newcommand*\tud@logo@LaTeXe{%
+  \tud@logo@LaTeX\kern.1\tud@logo@w%
+  \hbox{%
+    \m@th%
+    \if b\expandafter\@car\f@series x\@nil\csname boldmath\endcsname\fi%
+    2$_{\textstyle\varepsilon}$%
+  }\@%
+}
+\expandafter\newcommand\expandafter*\csname tud@logo@LaTeX3\endcsname{%
+  \tud@logo@LaTeX\kern.1\tud@logo@w3\@%
+}
+\newcommand*\tud@logo@pdfLaTeX{%
+  \tud@logo@scale{x}{PDF}\tud@logo@LaTeX%
+}
+\newcommand*\tud@logo@LuaLaTeX{%
+  L\tud@logo@scale{x}{UA}\tud@logo@LaTeX%
+}
+\newcommand*\tud@logo@XeLaTeX{%
+  \tud@logo@Xe%
+  \kern-.15\tud@logo@w\tud@logo@ic{\kern.015\tud@logo@w}%
+  \tud@logo@LaTeX%
+}
+\newcommand*\tud@logo@BibTeX{%
+  B\tud@logo@scale{x}{IB}\kern-.1\tud@logo@w\tud@logo@TeX%
+}
+\newcommand*\tud@logo@MiKTeX{MiK\kern.05\tud@logo@w\tud@logo@TeX}
+\newcommand*\tud@logo@LyX{%
+  L\kern-.12\tud@logo@w\tud@logo@ic{\kern-.03\tud@logo@w}%
+  \lower.5\tud@logo@h\hbox{Y}%
+  \kern-.12\tud@logo@w\tud@logo@ic{\kern.07\tud@logo@w}%
+  X\@%
+}
+
+\def\do#1{%
+\clearpage
+\par\noindent\sanslogo{#1}
+\par\noindent\textsf{\sanslogo{#1}}
+\par\noindent\textit{\sanslogo{#1}}
+\par\noindent\textsl{\sanslogo{#1}}
+\par\noindent\textbf{\sanslogo{#1}}
+\par\noindent\textbf{\textsl{\sanslogo{#1}}}
+}
+
+\docsvlist{%
+LyX,
+MiKTeX,
+BibTeX,
+XeLaTeX,
+LuaLaTeX,
+pdfLaTeX,
+LaTeX3,
+LaTeXe,
+LaTeX,
+TeX,
+}
+
+\end{document}
+
 \begin{Declaration}
-  {\Option{cdgeometry=\PMisc}}
-  (true,restricted|\Option{cd=false}:false)
-  [v2.03]
-\printdeclarationlist[%
-  \index{Satzspiegel!doppelseitig}%
-]
-Diese Option ist für die Wahl des Satzspiegels verantwortlich. Das Maß der 
-Seitenränder ist im \CD fest vorgegeben und wird standardmäßig von den 
-\TUDScript-Klassen eingehalten. Allerdings lassen sich die Seitenränder 
-anpassen, um beispielsweise einen vernünftigen doppelseitigen Satz zu 
-ermöglichen.%
-\footnote{Hierbei sollte der innere Rand schmaler als der äußere sein}
-Deshalb besteht die Möglichkeit, entweder auf das Standardverhalten von 
-\KOMAScript zurückzufallen und den Satzspiegel durch das Paket 
-\Package{typearea} zu berechnen oder aber diesen (fast) beliebig manuell 
-festzulegen.
-\begin{DeclareValues}
-\NewDocumentCommand\marginformat{s m m m m}{%
-  \unskip\hfill%
-  \IfBooleanTF{#1}{innen}{links}:\,#2\,mm,\,%
-  \IfBooleanTF{#1}{außen}{rechts}:\,#3\,mm,\,%
-  oben:\,#4\,mm\,,unten:\,#5\,mm%
-}%
+  {\Environment{abstract|\OPList{Sprache}}}
+\begin{Declaration}
+  {\Environment{abstract/markboth=\PMisc}}
+\printdeclarationlist
+Zur Festlegung der Kolumnentitel existieren für 
+\Environment{abstract/markboth} 
+folgende Einstellungen:%
+\begin{DeclareValues}[\Environment{abstract/markboth}]
 \itemval=false=
-  Die Satzspiegelberechnung erfolgt via \Package{typearea}, die Vorgaben des 
-  \CDs bezüglich der Seitenränder werden ignoriert.
-  \Attention{Nur in diesem Fall wirkt die Option \Option{DIV}.}
-\itemval*=true,asymmetric,cd=<\marginformat{30}{20}{20}{30}>%
-  Die Seitenränder werden im asymmetrischen Stil des \CDs fest definiert und 
-  auch für den doppelseitigen Satz (Klassenoption \Option{twoside=true}) 
-  genutzt.%
-\itemval=symmetric,centred,centered=<\marginformat{25}{25}{20}{30}>%
-  Der Satzspiegel wird im einseitigen sowie doppelseitigen Satz auf der Seite 
-  zentriert.%
-\itemval=twoside,balanced=<\marginformat*{20}{30}{20}{30}>%
-  Diese Einstellung aktiviert den doppelseitigen Satz (\Option{twoside=true}) 
-  und ändert den Satzspiegel derart, dass die Ränder der inneren Seiten 
-  schmaler sind als die der äußeren.
-  \Attention{%
-    Der so erzeugte Satzspiegel ist jedoch unvorteilhaft, da das Logo der \TnUD 
-    sehr nah am inneren Seitenrand des Dokumentes gesetzt wird und folglich auf 
-    rechten respektive ungeraden Seiten sehr weit an den Blattrand rückt.
-  }
-  Dieses Problem kann~-- bei \Class{tudscrbook} sowie \Class{tudscrreprt}~-- 
-  prinzipiell gelöst werden, indem Titel, Teile und Kapitel über das Aktivieren 
-  der \KOMAScript-Option \Option{open=left} immer auf einer linken Seite 
-  beginnen, was allerdings aus typografischer Sicht eher unüblich ist.
+  Die aktuellen Kolumnentitel~-- je nach gewählter Option für das Paket 
+  \Package{scrlayer-scrpage} automatische (\Option{automark}) oder manuelle 
+  (\Option{manualmark})~-- werden verwendet.
+\itemval*=true=
+  Die Kolumnentitel für linke und rechte Seiten werden auf \Term{abstractname} 
+  gesetzt.
+\itemval=\PName{Kolumnentitel}=
+  Die Kolumnentitel werden manuell festgelegt. So lassen sich die Kolumnen 
+  beispielsweise mit \Environment{abstract/markboth=\MPValue{}} auch 
+  vollständig löschen. 
 \end{DeclareValues}
+\end{Declaration}
 \end{Declaration}
 
 \end{document}
