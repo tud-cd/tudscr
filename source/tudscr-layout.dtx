@@ -775,9 +775,9 @@
 %   Fließtextschriften möglich}^^A
 % \begin{macro}{\tud@sec@@fontface}
 % \begin{macro}{\tud@sec@format}
+% \begin{macro}{\tud@sec@@format}
+% \begin{macro}{\tud@sec@@@format}
 % \begin{macro}{\tud@sec@uppercase}
-% \begin{macro}{\tud@sec@strut}
-% \changes{v2.06}{2018/07/24}{neu}^^A
 % \begin{macro}{\if@tud@sec}
 % \changes{v2.06}{2018/08/02}{neu}^^A
 % Mit \cs{tud@sec@fontface} wird die Schriftart für Überschriften im 
@@ -832,83 +832,69 @@
 % Abschnitte\footnote{\cs{sectionlinesformat}, \cs{sectioncatchphraseformat}} 
 % sowie zusätzlich einfache Layoutelemente verwendet werden. Dadurch wird eine 
 % Anpassung der Gliederungsbefehle~-- wie es einschließlich Version~v2.05 für
-% die erzwungene Großschreibung umgesetzt wurde~-- vermieden. Für die \OpenSans
-% führt das Makro \cs{tud@sec@format} lediglich \cs{tud@sec@strut} aus.
+% die erzwungene Großschreibung umgesetzt wurde~-- vermieden.
+%
+% Um für Teile und Kapitel ein einheitliches Erscheinungsbild zu erhalten, wird
+% für diese zum einen \cs{strut}~-- in der Schriftgröße des Kontexts oder aber 
+% für das im  optionalen Argument gegebene Schriftelement~-- und zum anderen
+% ausreichend vertikaler Leerraum für Umlaute eingefügt. Letzteres erfolgt auch 
+% für Abschnitte (Sternversion). Dies liegt darin begründet, dass auf einer 
+% neuen Seite die erste Grundlinie höher liegt, als für Umlautmajuskeln in der 
+% Schrift für \cs{section} etc. notwendig ist. Deshalb wird die Grundlinie
+% \enquote{notfallmäßig} mit \cs{vphantom} so weit nach unten verschoben, wie 
+% für die höchste Letter benötigt wird, unabhängig vom tatsächlichen Inhalt.
 %
 % Für Markup oder andere Inhalte, die lediglich im Fließtext jedoch nicht in 
 % Überschriften ausgegeben werden, wird der Schalter \cs{if@tud@sec} definiert.
 % Das Setzen des Schalters wird in \cs{tud@sec@format} vorgenommen.
 %    \begin{macrocode}
 \tud@newif\if@tud@sec
-\newcommand*\tud@sec@format[2][]{%
+\newrobustcmd*\tud@sec@format{%
   \@tud@sectrue%
-  \IfArgIsEmpty{#1}{%
-    \tud@sec@strut%
-  }{%
-    \begingroup%
-      \usefontofkomafont{#1}%
-      \tud@sec@strut%
-    \endgroup%
-  }%
-  #2%
+  \kernel@ifstar{\tud@sec@@format{}}{\tud@sec@@format{\strut}}%
+}
+\newcommand*\tud@sec@@format[1]{%
+  \kernel@ifnextchar[%]
+    {\tud@sec@@@format{#1}}%
+    {\tud@sec@@@format{#1}[]}%
+}
+\newcommand*\tud@sec@@@format{}
+\def\tud@sec@@@format#1[#2]{%
+  \begingroup%
+    \IfArgIsEmpty{#2}{}{\usefontofkomafont{#2}}%
+    \nobreak#1\nobreak\vphantom{\textsuperscript{\tud@font@phantomglyphs}}%
+  \endgroup%
+  \@firstofone%
 }
 %    \end{macrocode}
 % Für die alten Schriften hat der Befehl eine erweiterte Funktionalität, wenn 
 % die Schriftfamilie \DIN aktiv ist, welche für Überschriften einzusetzen ist.
 % Das \CD verlangt dabei, dass zwingend Majuskeln zu verwenden sind. Hierfür 
 % wird der Befehl \cs{MakeTextUppercase} aus dem Paket \pkg{textcase} genutzt, 
-% der den internen \LaTeX"~Befehl \cs{MakeUppercase} verbessert. Das optionale 
-% Argument kann genutzt werden, falls nicht die aktuelle Schrift sondern ein 
-% durch \KOMAScript{} definiertes Schriftelement ausgewertet werden soll.
+% der den internen \LaTeX"~Befehl \cs{MakeUppercase} verbessert.
 %    \begin{macrocode}
 \if@tud@cdoldfont@active
   \newcommand*\tud@sec@uppercase{\MakeUppercase}%
   \AfterPackage*{textcase}{%
     \renewcommand*\tud@sec@uppercase{\MakeTextUppercase}%
   }%
-  \renewcommand*\tud@sec@format[2][]{%
-    \@tud@sectrue%
-    \@tud@res@swafalse%
-    \IfArgIsEmpty{#1}{%
-      \tud@sec@strut%
-      \tud@ifdin{\@tud@res@swatrue}{}%
-    }{%
-      \begingroup%
-        \usefontofkomafont{#1}%
-        \tud@sec@strut%
-        \tud@ifdin{\aftergroup\@tud@res@swatrue}{}%
-      \endgroup%
-    }%
-    \if@tud@res@swa%
-      \tud@sec@uppercase{#2}%
-    \else%
-      #2%
-    \fi%
+  \def\tud@sec@@@format#1[#2]{%
+    \begingroup%
+      \IfArgIsEmpty{#2}{}{\usefontofkomafont{#2}}%
+      \nobreak#1\nobreak\vphantom{\textsuperscript{\tud@font@phantomglyphs}}%
+      \tud@ifdin{\aftergroup\tud@sec@uppercase}{\aftergroup\@firstofone}%
+    \endgroup%
   }%
 \fi
 %    \end{macrocode}
-% Für Abschnitte etc. liegt auf einer neuen Seite dier erste Grundlinie höher,
-% als für Majuskeln in der größeren Schrift für \cs{section} etc. benötigt 
-% wird. Deshalb wird die Grundlinie \enquote{notfallmäßig} so weit nach unten
-% verschoben, wie für die höchste Letter benötigt wird. Mit dem Befehl 
-% \cs{tud@sec@strut} wird für alle Überschriften dafür gesorgt, dass immer der 
-% gleiche Freiraum bereitgehalten wird, unabhängig vom Inhalt der spezifischen 
-% Überschrift. Hierfür wird \cs{strutbox} aus dem \LaTeXe"~Kernel~-- nachdem 
-% \cs{strut} zuvor bereits einmal ausgeführt wird, um die Standardgröße der Box 
-% zu verwenden~-- temporär umdefiniert.
+% Ende von \cs{AfterPackage} für \pkg{fix-tudscrfonts}.
 %    \begin{macrocode}
-\newrobustcmd*\tud@sec@strut{%
-%<*class>
-  \begingroup%
-    \strut\setbox\strutbox\hbox{\vphantom{\textsuperscript{\"A\"O\"U}}}\strut%
-  \endgroup%
-%</class>
-}
 %<package&fixfonts>}
 %    \end{macrocode}
 % \end{macro}^^A \if@tud@sec
-% \end{macro}^^A \tud@sec@strut
 % \end{macro}^^A \tud@sec@uppercase
+% \end{macro}^^A \tud@sec@@@format
+% \end{macro}^^A \tud@sec@@format
 % \end{macro}^^A \tud@sec@format
 % \end{macro}^^A \tud@sec@@fontface
 % \end{macro}^^A \tud@sec@fontface
@@ -1172,7 +1158,7 @@
     \renewcommand*\raggedsection{\tud@raggedright}%
     \tud@cs@store{minisec}%
     \renewcommand\minisec[1]{%
-      \tud@cs@use{minisec}{\tud@sec@format{##1}}%
+      \tud@cs@use{minisec}{\tud@sec@format*{##1}}%
     }%
     \tud@komafont@set{minisec}{%
       \tud@sec@fontface%
@@ -1294,8 +1280,7 @@
 %    \begin{macrocode}
 \newcommand*\tud@cd@vphantom{%
   \begingroup%
-    \usekomafont{partnumber}{\nobreak\tud@sec@strut}%
-    \par\nobreak\vskip\tud@cd@innervskip@dim%
+    \usekomafont{partnumber}{\tud@sec@format{\vskip\tud@cd@innervskip@dim}}%
   \endgroup%
 }
 %    \end{macrocode}
@@ -1580,8 +1565,8 @@
       }%
     \fi%
     \tud@cd@vphantom%
-    \tud@sec@format[{#1}]{%
-      \usekomafont{#1}{\nobreak\interlinepenalty \@M\@@title\strut\@@par}%
+    \usekomafont{#1}{%
+      \tud@sec@format{\nobreak\interlinepenalty\@M\@@title\strut\@@par}%
     }%
     \setpartsubtitle{%
       \setkomafont{part}{}%
@@ -1826,14 +1811,10 @@
 % Die Formatierungsbefehle für die Überschriften von Abschnitten etc.
 %    \begin{macrocode}
 \newcommand*\tud@sectionlinesformat[4]{%
-  \@hangfrom{\hskip #2#3}{\tud@sec@format[{#1}]{#4}}%
+  \@hangfrom{\hskip #2#3}{\tud@sec@format*[{#1}]{#4}}%
 }
-%    \end{macrocode}
-% Für Überschriften mit Einzug wird \cs{tud@sec@strut} wirkungslos definiert.
-%    \begin{macrocode}
 \newcommand*\tud@sectioncatchphraseformat[4]{%
-  \let\tud@sec@strut\relax%
-  \hskip #2#3\tud@sec@format[{#1}]{#4}%
+  \hskip #2#3\tud@sec@format*[{#1}]{#4}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@sectioncatchphraseformat
