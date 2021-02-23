@@ -2690,13 +2690,8 @@
   \endgroup%
 }
 \@onlypreamble\tud@ety@declare
-\ifundef\textnonbreakinghyphen{%
-  \DeclareTextCommandDefault\textnonbreakinghyphen{\mbox{-}}%
-}{%
-  \ClassWarning{tudscrmanual}{\string\textnonbreakinghyphen now exists}%
-}
 \NewDocumentCommand\DistributionGeneral{!s !d||}{%
-  \hologo{LaTeX}\textnonbreakinghyphen Distribution\IfBooleanT{#1}{en}%
+  \hologo{LaTeX}\mbox{-}Distribution\IfBooleanT{#1}{en}%
   \DistributionGeneral@IndexEntry{#2}\xspace%
 }
 \newcommand*\@DistributionGeneral{LaTeX-Distribution}%
@@ -5472,6 +5467,92 @@
 \newcommand*\textttit{}
 \newrobustcmd*\ttitfont{\ttfamily\itshape}
 \DeclareTextFontCommand\textttit{\ttitfont}
+\newlength\tud@logo@w
+\setlength\tud@logo@w{0.9em}
+\newlength\tud@logo@h
+\setlength\tud@logo@h{1ex}
+\newcommand*\tud@logo@ic[1]{\ifdim\the\fontdimen\@ne\font>\z@\relax#1\fi}
+\newcommand*\tud@logo@backup{}
+\let\tud@logo@backup\hologo%
+\newrobustcmd*\sanslogo[1]{%
+  \ifcsundef{tud@logo@#1}{%
+    \tud@logo@backup{#1}%
+    \ClassWarning{tudscrmanual}{logo #1 missing}%
+  }{%
+    \mbox{\csuse{tud@logo@#1}}%
+  }%
+}
+% URGENT ersetzen!
+%\def\hologo#1{%
+%%  \ClassWarning{tudscrmanual}{change me!}%
+%  \sanslogo{#1}%
+%}
+\newcommand*\tud@logo@scale[2]{%
+  \begingroup%
+    \setbox\z@\hbox{#1}%
+    \vbox to\ht\z@{%
+      \hbox{%
+        \check@mathfonts%
+        \fontsize\sf@size\z@%
+        \math@fontsfalse\selectfont%
+        #2%
+      }%
+      \vss%
+    }%
+  \endgroup%
+}
+\newcommand*\tud@logo@La{%
+  L%
+  \kern-.36\tud@logo@w\tud@logo@ic{\kern.1\tud@logo@w}%
+  \tud@logo@scale{T}{A}%
+}
+\newcommand*\tud@logo@Xe{%
+  X\kern-.05\tud@logo@w\tud@logo@ic{\kern-.015\tud@logo@w}%
+ \lower.5\tud@logo@h\hbox{\rotatebox[origin=c]{180}{E}}%
+}
+\newcommand*\tud@logo@TeX{%
+  T%
+  \kern-.23\tud@logo@w\tud@logo@ic{\kern-.05\tud@logo@w}%
+  \lower.5\tud@logo@h\hbox{E}%
+  \kern-.075\tud@logo@w\tud@logo@ic{\kern.1\tud@logo@w}%
+  X\@%
+}
+\newcommand*\tud@logo@LaTeX{%
+  \tud@logo@La\kern-.15\tud@logo@w\tud@logo@TeX%
+}
+
+\newcommand*\tud@logo@LaTeXe{%
+  \tud@logo@LaTeX\kern.1\tud@logo@w%
+  \hbox{%
+    \m@th%
+    \if b\expandafter\@car\f@series x\@nil\csname boldmath\endcsname\fi%
+    2$_{\textstyle\varepsilon}$%
+  }\@%
+}
+\expandafter\newcommand\expandafter*\csname tud@logo@LaTeX3\endcsname{%
+  \tud@logo@LaTeX\kern.1\tud@logo@w3\@%
+}
+\newcommand*\tud@logo@pdfLaTeX{%
+  \tud@logo@scale{x}{PDF}\tud@logo@LaTeX%
+}
+\newcommand*\tud@logo@LuaLaTeX{%
+  L\tud@logo@scale{x}{UA}\tud@logo@LaTeX%
+}
+\newcommand*\tud@logo@XeLaTeX{%
+  \tud@logo@Xe%
+  \kern-.15\tud@logo@w\tud@logo@ic{\kern.015\tud@logo@w}%
+  \tud@logo@LaTeX%
+}
+\newcommand*\tud@logo@BibTeX{%
+  B\tud@logo@scale{x}{IB}\kern-.1\tud@logo@w\tud@logo@TeX%
+}
+\newcommand*\tud@logo@MiKTeX{MiK\kern.05\tud@logo@w\tud@logo@TeX}
+\newcommand*\tud@logo@LyX{%
+  L\kern-.12\tud@logo@w\tud@logo@ic{\kern-.03\tud@logo@w}%
+  \lower.5\tud@logo@h\hbox{Y}%
+  \kern-.12\tud@logo@w\tud@logo@ic{\kern.07\tud@logo@w}%
+  X\@%
+}
 %%%% From File: tudscr-fields.dtx 2019/11/29 01:36:52 c9a9b7b
 \newcommand*\@chairman{}
 \newcommand*\chairman[1]{\gdef\@chairman{#1}}
