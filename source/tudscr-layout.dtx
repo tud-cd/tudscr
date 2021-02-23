@@ -4,7 +4,7 @@
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
 % ----------------------------------------------------------------------------
 %
-%  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2020
+%  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2021
 %
 % ----------------------------------------------------------------------------
 %
@@ -41,7 +41,7 @@
 \endbatchfile
 %</ins>
 %<*dtx>
-\ProvidesFile{tudscr-layout.dtx}[2020/11/11]
+\ProvidesFile{tudscr-layout.dtx}[2021/02/23]
 \RequirePackage{tudscr-gitinfo}
 \documentclass[english,ngerman,xindy]{tudscrdoc}
 \iftutex
@@ -419,8 +419,8 @@
 %    \begin{macrocode}
 \newcommand*\tud@cleardoublespecialpage[2][]{%
   \begingroup%
-    \addtokomafont{pagenumber}{\usekomafont{tudheadings}}%
-    \addtokomafont{pagefoot}{\usekomafont{tudheadings}}%
+    \addtokomafont{pagenumber}{\usefontofkomafont{tudheadings}}%
+    \addtokomafont{pagefoot}{\usefontofkomafont{tudheadings}}%
     #2%
     \ifboolexpr{bool {@twoside} and bool {@openright}}{%
       \if@tud@clearcolor%
@@ -775,9 +775,10 @@
 %   Fließtextschriften möglich}^^A
 % \begin{macro}{\tud@sec@@fontface}
 % \begin{macro}{\tud@sec@format}
+% \changes{v2.07}{2021/02/23}{Sternversion für Leerraum ohne \cs{strut}}^^A
+% \begin{macro}{\tud@sec@@format}
+% \begin{macro}{\tud@sec@@@format}
 % \begin{macro}{\tud@sec@uppercase}
-% \begin{macro}{\tud@sec@strut}
-% \changes{v2.06}{2018/07/24}{neu}^^A
 % \begin{macro}{\if@tud@sec}
 % \changes{v2.06}{2018/08/02}{neu}^^A
 % Mit \cs{tud@sec@fontface} wird die Schriftart für Überschriften im 
@@ -832,83 +833,69 @@
 % Abschnitte\footnote{\cs{sectionlinesformat}, \cs{sectioncatchphraseformat}} 
 % sowie zusätzlich einfache Layoutelemente verwendet werden. Dadurch wird eine 
 % Anpassung der Gliederungsbefehle~-- wie es einschließlich Version~v2.05 für
-% die erzwungene Großschreibung umgesetzt wurde~-- vermieden. Für die \OpenSans
-% führt das Makro \cs{tud@sec@format} lediglich \cs{tud@sec@strut} aus.
+% die erzwungene Großschreibung umgesetzt wurde~-- vermieden.
+%
+% Um für Teile und Kapitel ein einheitliches Erscheinungsbild zu erhalten, wird
+% für diese zum einen \cs{strut}~-- in der Schriftgröße des Kontexts oder aber 
+% für das im  optionalen Argument gegebene Schriftelement~-- und zum anderen
+% ausreichend vertikaler Leerraum für Umlaute eingefügt. Letzteres erfolgt auch 
+% für Abschnitte (Sternversion). Dies liegt darin begründet, dass auf einer 
+% neuen Seite die erste Grundlinie höher liegt, als für Umlautmajuskeln in der 
+% Schrift für \cs{section} etc. notwendig ist. Deshalb wird die Grundlinie
+% \enquote{notfallmäßig} mit \cs{vphantom} so weit nach unten verschoben, wie 
+% für die höchste Letter benötigt wird, unabhängig vom tatsächlichen Inhalt.
 %
 % Für Markup oder andere Inhalte, die lediglich im Fließtext jedoch nicht in 
 % Überschriften ausgegeben werden, wird der Schalter \cs{if@tud@sec} definiert.
 % Das Setzen des Schalters wird in \cs{tud@sec@format} vorgenommen.
 %    \begin{macrocode}
 \tud@newif\if@tud@sec
-\newcommand*\tud@sec@format[2][]{%
+\newrobustcmd*\tud@sec@format{%
   \@tud@sectrue%
-  \IfArgIsEmpty{#1}{%
-    \tud@sec@strut%
-  }{%
-    \begingroup%
-      \usefontofkomafont{#1}%
-      \tud@sec@strut%
-    \endgroup%
-  }%
-  #2%
+  \kernel@ifstar{\tud@sec@@format{}}{\tud@sec@@format{\strut}}%
+}
+\newcommand*\tud@sec@@format[1]{%
+  \kernel@ifnextchar[%]
+    {\tud@sec@@@format{#1}}%
+    {\tud@sec@@@format{#1}[]}%
+}
+\newcommand*\tud@sec@@@format{}
+\def\tud@sec@@@format#1[#2]{%
+  \begingroup%
+    \IfArgIsEmpty{#2}{}{\usefontofkomafont{#2}}%
+    \nobreak#1\nobreak\vphantom{\textsuperscript{\tud@font@phantomglyphs}}%
+  \endgroup%
+  \@firstofone%
 }
 %    \end{macrocode}
 % Für die alten Schriften hat der Befehl eine erweiterte Funktionalität, wenn 
 % die Schriftfamilie \DIN aktiv ist, welche für Überschriften einzusetzen ist.
 % Das \CD verlangt dabei, dass zwingend Majuskeln zu verwenden sind. Hierfür 
 % wird der Befehl \cs{MakeTextUppercase} aus dem Paket \pkg{textcase} genutzt, 
-% der den internen \LaTeX"~Befehl \cs{MakeUppercase} verbessert. Das optionale 
-% Argument kann genutzt werden, falls nicht die aktuelle Schrift sondern ein 
-% durch \KOMAScript{} definiertes Schriftelement ausgewertet werden soll.
+% der den internen \LaTeX"~Befehl \cs{MakeUppercase} verbessert.
 %    \begin{macrocode}
 \if@tud@cdoldfont@active
   \newcommand*\tud@sec@uppercase{\MakeUppercase}%
   \AfterPackage*{textcase}{%
     \renewcommand*\tud@sec@uppercase{\MakeTextUppercase}%
   }%
-  \renewcommand*\tud@sec@format[2][]{%
-    \@tud@sectrue%
-    \@tud@res@swafalse%
-    \IfArgIsEmpty{#1}{%
-      \tud@sec@strut%
-      \tud@ifdin{\@tud@res@swatrue}{}%
-    }{%
-      \begingroup%
-        \usefontofkomafont{#1}%
-        \tud@sec@strut%
-        \tud@ifdin{\aftergroup\@tud@res@swatrue}{}%
-      \endgroup%
-    }%
-    \if@tud@res@swa%
-      \tud@sec@uppercase{#2}%
-    \else%
-      #2%
-    \fi%
+  \def\tud@sec@@@format#1[#2]{%
+    \begingroup%
+      \IfArgIsEmpty{#2}{}{\usefontofkomafont{#2}}%
+      \nobreak#1\nobreak\vphantom{\textsuperscript{\tud@font@phantomglyphs}}%
+      \tud@ifdin{\aftergroup\tud@sec@uppercase}{\aftergroup\@firstofone}%
+    \endgroup%
   }%
 \fi
 %    \end{macrocode}
-% Für Abschnitte etc. liegt auf einer neuen Seite dier erste Grundlinie höher,
-% als für Majuskeln in der größeren Schrift für \cs{section} etc. benötigt 
-% wird. Deshalb wird die Grundlinie \enquote{notfallmäßig} so weit nach unten
-% verschoben, wie für die höchste Letter benötigt wird. Mit dem Befehl 
-% \cs{tud@sec@strut} wird für alle Überschriften dafür gesorgt, dass immer der 
-% gleiche Freiraum bereitgehalten wird, unabhängig vom Inhalt der spezifischen 
-% Überschrift. Hierfür wird \cs{strutbox} aus dem \LaTeXe"~Kernel~-- nachdem 
-% \cs{strut} zuvor bereits einmal ausgeführt wird, um die Standardgröße der Box 
-% zu verwenden~-- temporär umdefiniert.
+% Ende von \cs{AfterPackage} für \pkg{fix-tudscrfonts}.
 %    \begin{macrocode}
-\newrobustcmd*\tud@sec@strut{%
-%<*class>
-  \begingroup%
-    \strut\setbox\strutbox\hbox{\vphantom{\textsuperscript{\"A\"O\"U}}}\strut%
-  \endgroup%
-%</class>
-}
 %<package&fixfonts>}
 %    \end{macrocode}
 % \end{macro}^^A \if@tud@sec
-% \end{macro}^^A \tud@sec@strut
 % \end{macro}^^A \tud@sec@uppercase
+% \end{macro}^^A \tud@sec@@@format
+% \end{macro}^^A \tud@sec@@format
 % \end{macro}^^A \tud@sec@format
 % \end{macro}^^A \tud@sec@@fontface
 % \end{macro}^^A \tud@sec@fontface
@@ -919,6 +906,21 @@
 %<*class&body>
 % \fi
 %
+% \begin{macro}{\tud@part@hook}
+% \changes{v2.07}{2021/02/23}{neu}^^A
+% \KOMAScript{} ignoriert für Teile standardmäßig alle Einstellungen für die 
+% Option \opt{parskip}. Da diese jedoch für Kapitel Beachtung finden und mit 
+% \TUDScript das Erscheinungsbild~-- insbesondere die vertikale Platzierung von 
+% Überschriften~-- für diese beiden Elemente einheitlich sein soll, wird über 
+% diesen Haken dafür gesorgt, dass \opt{parskip} auch für Teile genutzt wird.
+%    \begin{macrocode}
+%<*book|report>
+\newcommand*\tud@part@hook{}
+\let\tud@part@hook\relax
+\AddtoDoHook{heading/begingroup/part}{\tud@part@hook}
+%</book|report>
+%    \end{macrocode}
+% \end{macro}^^A \tud@part@hook
 % \begin{macro}{\tud@title@fontcolor}
 % \begin{macro}{\tud@part@fontcolor}
 % \begin{macro}{\tud@chapter@fontcolor}
@@ -954,7 +956,7 @@
 % dass die Optionen auch im Dokument geändert und wiederhergestellt werden
 % können.
 % \ToDo{\cs{...pagecolor} und {\cs{...fontcolor} (part/chapter/title)}}[v2.07]
-% \ToDo{Schriftfarbauswahl in \cs{tud@cd@process}}[v2.07]
+% \ToDo{Farbauswahl in \cs{tud@cd@process} bzw. \KOMAScript{} do-hooks}[v2.07]
 % \ToDo{Überschriften paragraph und subparagraph in Open Sans}[v2.07]
 %    \begin{macrocode}
 \newcommand*\tud@cd@process{%
@@ -987,9 +989,9 @@
 %<*poster>
     \renewcommand*\titlepagestyle{empty.tudheadings}%
 %</poster>
-    \tud@komafont@set{titlehead}{\usekomafont{titlepage}}%
+    \tud@komafont@set{titlehead}{\usefontofkomafont{titlepage}}%
     \tud@komafont@set{title}{%
-      \usekomafont{disposition}%
+      \usefontofkomafont{disposition}%
       \raggedtitle%
       \tud@sec@fontface%
       \tud@sec@fontsizecmd%
@@ -1005,15 +1007,16 @@
       \tud@color{\tud@title@fontcolor}%
     }%
 %<*book|report|article>
-    \tud@komafont@set{author}{\usekomafont{subject}}%
-    \tud@komafont@set{publishers}{\usekomafont{author}}%
-    \tud@komafont@set{date}{\usekomafont{titlepage}}%
+    \tud@komafont@set{author}{\usefontofkomafont{subject}}%
+    \tud@komafont@set{publishers}{\usefontofkomafont{author}}%
+    \tud@komafont@set{date}{\usefontofkomafont{titlepage}}%
 %</book|report|article>
   \fi%
 %    \end{macrocode}
 % Das gleiche für die Teileseiten.
 %    \begin{macrocode}
   \ifcase\tud@cd@part@num\relax% false
+    \tud@cs@restore{partlineswithprefixformat}%
     \tud@cs@restore{scr@part@beforeskip}%
 %<*book|report>
     \tud@cs@restore{scr@part@innerskip}%
@@ -1024,8 +1027,8 @@
     \tud@cs@restore{partheadendvskip}%
     \tud@cs@restore{partheademptypage}%
     \tud@cs@restore{partpagestyle}%
+    \let\tud@part@hook\relax%
 %</book|report>
-    \tud@cs@restore{partlineswithprefixformat}%
     \tud@komafont@unset{part}%
     \tud@komafont@unset{partnumber}%
     \tud@cs@restore{raggedpart}%
@@ -1040,6 +1043,8 @@
 % weiter unten im Quelltext zu finden.
 %    \begin{macrocode}
   \else% !false
+    \tud@cs@store{partlineswithprefixformat}%
+    \let\partlineswithprefixformat\tud@partlineswithprefixformat%
     \tud@cs@store{scr@part@beforeskip}%
 %<*book|report>
     \renewcommand*\scr@part@beforeskip{\tud@cd@beforevskip@dim}%
@@ -1062,13 +1067,18 @@
     \let\partheademptypage\tud@partheademptypage%
     \tud@cs@store{partpagestyle}%
     \renewcommand*\partpagestyle{plain.tudheadings}%
-%</book|report>
-    \tud@cs@store{partlineswithprefixformat}%
-    \let\partlineswithprefixformat\tud@partlineswithprefixformat%
+%    \end{macrocode}
+% Mit \verb=\setparsizes{\z@}{\z@}{\z@\@plus 1fil}\par@updaterelative= werden
+% normalerweise direkt nach dem Haken \verb=heading/begingroup/part= durch 
+% \KOMAScript{} die Einstellungen für die Option \opt{parskip} deaktiviert. Ist 
+% das Layout des \CDs aktiv, wird dies unterbunden.
+%    \begin{macrocode}
+    \def\tud@part@hook{\let\setparsizes\@gobblefour}%
 %    \end{macrocode}
 % Es wird die Schriftfarbe, "~größe und "~art angepasst, je nachdem ob der
 % Titel des Dokumentes auf den Teileseiten auftauchen soll oder eben nicht.
 %    \begin{macrocode}
+%</book|report>
     \tud@komafont@set{part}{%
       \tud@sec@fontface%
       \tud@color{\tud@part@fontcolor}%
@@ -1088,12 +1098,12 @@
 %    \begin{macrocode}
 %<*book|report>
   \ifcase\tud@cd@chapter@num\relax% false
+    \tud@cs@restore{chapterlineswithprefixformat}%
+    \tud@cs@restore{chapterlinesformat}%
     \tud@cs@restore{scr@chapter@beforeskip}%
     \tud@cs@restore{scr@chapter@innerskip}%
     \tud@cs@restore{scr@chapter@afterskip}%
     \tud@cs@restore{chapterheadstartvskip}%
-    \tud@cs@restore{chapterlineswithprefixformat}%
-    \tud@cs@restore{chapterlinesformat}%
     \tud@cs@restore{tud@chapter@before@hook}%
     \tud@cs@restore{tud@chapter@after@hook}%
     \tud@komafont@unset{chapter}%
@@ -1105,6 +1115,10 @@
 % angepassten Befehle abermals über \cs{let}.
 %    \begin{macrocode}
   \else% !false
+    \tud@cs@store{chapterlineswithprefixformat}%
+    \let\chapterlineswithprefixformat\tud@chapterlineswithprefixformat%
+    \tud@cs@store{chapterlinesformat}%
+    \let\chapterlinesformat\tud@chapterlinesformat%
     \tud@cs@store{scr@chapter@beforeskip}%
     \renewcommand*\scr@chapter@beforeskip{\tud@cd@beforevskip@dim}%
     \tud@cs@store{scr@chapter@innerskip}%
@@ -1113,10 +1127,6 @@
     \renewcommand*\scr@chapter@afterskip{\tud@cd@aftervskip@glue}%
     \tud@cs@store{chapterheadstartvskip}%
     \let\chapterheadstartvskip\tud@chapterheadstartvskip%
-    \tud@cs@store{chapterlineswithprefixformat}%
-    \let\chapterlineswithprefixformat\tud@chapterlineswithprefixformat%
-    \tud@cs@store{chapterlinesformat}%
-    \let\chapterlinesformat\tud@chapterlinesformat%
     \tud@cs@store{tud@chapter@before@hook}%
     \renewcommand*\tud@chapter@before@hook{\tud@chapter@pre}%
     \tud@cs@store{tud@chapter@after@hook}%
@@ -1173,7 +1183,7 @@
     \renewcommand*\raggedsection{\tud@raggedright}%
     \tud@cs@store{minisec}%
     \renewcommand\minisec[1]{%
-      \tud@cs@use{minisec}{\tud@sec@format{##1}}%
+      \tud@cs@use{minisec}{\tud@sec@format*{##1}}%
     }%
     \tud@komafont@set{minisec}{%
       \tud@sec@fontface%
@@ -1247,6 +1257,7 @@
 % \end{macro}^^A \tud@cd@specialpage@set
 % \begin{macro}{\tud@cd@headstartvskip}
 % \changes{v2.06}{2018/08/01}{neu}^^A
+% \changes{v2.07}{2021/02/23}{Bugfix für vertikale Unterschiede}^^A
 % \begin{macro}{\tud@cd@vphantom}
 % \changes{v2.06}{2018/08/01}{neu}^^A
 % \begin{macro}{\tud@cd@beforevskip@dim}
@@ -1283,10 +1294,19 @@
     \@minus\dimexpr(\tud@sec@baseline@dim)/10\relax%
   \relax%
 }
+%    \end{macrocode}
+% Dieses Konstrukt ist mehr oder weniger durch ausprobieren entstanden, da für 
+% die unterschiedlichen Einstellungsmöglichkeiten der Option \opt{headings} je 
+% nach gewählter Größe der Überschriften leichte Verschiebungen und Sprünge für 
+% die unterschiedlichen Varianten\footnote{Prefix, Untertitel, Absatzabstände} 
+% aufgetreten sind.
+%    \begin{macrocode}
 \newcommand*\tud@cd@headstartvskip{%
   \tud@setdim\@tempdima{\tud@cd@beforevskip@dim}%
   \tud@length@setabsolute\@tempdima%
-  \null\vskip\dimexpr\@tempdima-1\baselineskip\relax%
+  \vskip\dimexpr%
+    \@tempdima+\tud@sec@baseline@dim*2/5-\f@baselineskip-\parskip%
+  \relax%
 }
 %    \end{macrocode}
 % Sollte keine Präfixzeile für Teile oder Kapitel verwendet werden, muss für 
@@ -1295,8 +1315,7 @@
 %    \begin{macrocode}
 \newcommand*\tud@cd@vphantom{%
   \begingroup%
-    \usekomafont{partnumber}{\nobreak\tud@sec@strut}%
-    \par\nobreak\vskip\tud@cd@innervskip@dim%
+    \usekomafont{partnumber}{\tud@sec@format{\vskip\tud@cd@innervskip@dim}}%
   \endgroup%
 }
 %    \end{macrocode}
@@ -1313,6 +1332,41 @@
 % \subsection{Positionierung und Formatierung von Überschriften}
 % \subsubsection{Präambeln für Teile und Kapitel}
 %
+% \begin{macro}{\scr@startpart}
+% Für die Präambel von Teilen muss ebenfalls etwas gebastelt werden, um das 
+% Erscheinungsbild an das von Teilen anzupassen, falls das Layout des \CDs 
+% aktiv ist.
+%    \begin{macrocode}
+\patchcmd\scr@startpart{%
+  \partheadstartvskip
+  \vbox to\z@{\vss\use@preamble{#1@o}\strut\par}%
+  \vskip-\baselineskip\nobreak
+}{%
+  \ifcase\tud@cd@part@num\relax% false
+    \partheadstartvskip%
+    \vbox to\z@{\vss\use@preamble{#1@o}\strut\par}%
+    \vskip-\baselineskip\nobreak%
+  \else%
+%    \end{macrocode}
+% Im Gegensatz zur ursprünglichen Definition wird die Präambel vor der 
+% vertikalen Formatierung des Teils ausgegeben und an die Kapitelpräambel 
+% angeglichen.
+%    \begin{macrocode}
+    {%
+      \setbox\z@\vbox{%
+        \vskip\dimexpr%
+          \tud@cd@innervskip@dim-\tud@sec@baseline@dim-\baselineskip%
+        \relax%
+        \use@preamble{#1@o}\strut\par%
+      }%
+      \vbox to \z@{\box\z@\vss}%
+      \vskip\dimexpr\parskip-\baselineskip\relax%
+    }%
+    \partheadstartvskip%
+  \fi%
+}{}{\tud@patch@wrn{scr@startpart}}
+%    \end{macrocode}
+% \end{macro}^^A \scr@startpart
 % \begin{macro}{\tud@preamble@fontcolor}
 % \changes{v2.06}{2018/08/08}{neu}^^A
 % Der Befehl wird innerhalb von \cs{set@@@@preamble} genutzt, um die notwendige 
@@ -1473,7 +1527,10 @@
 %    \begin{macrocode}
 \newcommand*\tud@sec@subtitle[1]{%
   \ifcsvoid{tud@#1@subtitle}{}{%
-    {\usekomafont{#1subtitle}{\tud@sec@format{\csuse{tud@#1@subtitle}}}}\par%
+    {\usekomafont{#1subtitle}{%
+      \vskip-\parskip%
+      \tud@sec@format{\csuse{tud@#1@subtitle}}%
+    }}\par%
     \global\cslet{tud@#1@subtitle}{\@empty}%
   }%
 }
@@ -1492,6 +1549,7 @@
 %
 % Für die \cls{tudscrartcl}-Klasse wird der vertikale Standardabstand
 % beibehalten und lediglich die Farbanpassung hinzugefügt.
+% \ToDo{in \cs{AddtoDoHook} migrieren}[v2.07]
 %    \begin{macrocode}
 %<*article|poster>
 \newcommand*\tud@partheadstartvskip{}
@@ -1568,11 +1626,13 @@
 % \changes{v2.06}{2018/08/01}{neu}^^A
 % \begin{macro}{\tud@partformat}
 % \changes{v2.06}{2018/08/01}{neu}^^A
+% \changes{v2.07}{2021/02/23}{Bugfix für Option \opt{parttitle}}^^A
 % Die Formatierungsbefehle für die Überschriften von Teilen.
 %    \begin{macrocode}
 \newcommand*\tud@partformat{}%
 \newcommand*\tud@partlineswithprefixformat[3]{%
 %<*book|report>
+  \vskip-2\parskip%
   \if@tud@parttitle%
     \ifx\@@title\@empty%
       \ClassWarning{\TUD@Class@Name}{%
@@ -1581,13 +1641,18 @@
       }%
     \fi%
     \tud@cd@vphantom%
-    \tud@sec@format[{#1}]{%
-      \usekomafont{#1}{\nobreak\interlinepenalty \@M\@@title\strut\@@par}%
+    \usekomafont{#1}{%
+      \tud@sec@format{\nobreak\interlinepenalty\@M\@@title\strut\@@par}%
     }%
-    \setpartsubtitle{%
-      \setkomafont{part}{}%
-      \tud@sec@format[partnumber]{\IfUseNumber{\partformat\enskip}{}#3}%
+%    \end{macrocode}
+% Hier wird etwas hemdsärmlich der eigentliche Titel aus \verb=#3= extrahiert.
+%    \begin{macrocode}
+    \def\tud@partformat##1\nobreak\interlinepenalty\@M##2\strut\@@par##3\@nil{%
+      \def\tud@partformat{\IfUseNumber{\partformat\enskip}{}##2}%
     }%
+    \expandafter\expandafter\expandafter\tud@partformat%
+      \expandafter\@firstofone\@gobbletwo#3\@nil%
+    \expandafter\setpartsubtitle\expandafter{\tud@partformat}%
   \else%
 %</book|report>
     \edef\tud@partformat{\noexpand\tud@sec@format{\expandonce\partformat}}%
@@ -1615,6 +1680,7 @@
 % \CD angepasst. Mit der Option \opt{headingsvskip} kann diese vertikal durch
 % den Benutzer verschoben werden. Außerdem werden die benötigten Farben für die
 % jeweils gewählte Option ausgewählt.
+% \ToDo{in \cs{AddtoDoHook} migrieren}[v2.07]
 %    \begin{macrocode}
 \newcommand*\tud@chapterheadstartvskip{%
   \renewcommand*\tud@chapter@fontcolor{}%
@@ -1642,9 +1708,7 @@
 %    \begin{macrocode}
 \newcommand*\tud@chapterformat{}%
 \newcommand*\tud@chapterlineswithprefixformat[3]{%
-  \edef\tud@chapterformat{%
-    \noexpand\tud@sec@format{\expandonce\chapterformat}%
-  }%
+  \edef\tud@chapterformat{\noexpand\tud@sec@format{\expandonce\chapterformat}}%
   \let\chapterformat\tud@chapterformat%
   \IfUseNumber{}{\tud@cd@vphantom}%
   #2\tud@sec@format[{#1}]{#3}%
@@ -1669,6 +1733,7 @@
 % der Kapitel durch die beiden Haken \cs{tud@chapter@before@hook} sowie
 % \cs{tud@chapter@after@hook}, den Start und das Ende der Gliederungsbefehle
 % für Kapitel definieren.
+% \ToDo{in \cs{AddtoDoHook} migrieren}[v2.07]
 %    \begin{macrocode}
 \newcommand*\tud@chapter@pre{%
   \if@tud@chapterpage%
@@ -1782,6 +1847,7 @@
 % Die beiden Haken \cs{tud@chapter@before@hook} und \cs{tud@chapter@after@hook}
 % werden den \KOMAScript-Befehlen hinzugefügt, welche den Start und das Ende 
 % der Gliederungsbefehle für Kapitel definieren.
+% \ToDo{in \cs{AddtoDoHook} migrieren}[v2.07]
 %    \begin{macrocode}
 \newcommand*\tud@chapter@before@hook{}
 \newcommand*\tud@chapter@after@hook{}
@@ -1827,14 +1893,10 @@
 % Die Formatierungsbefehle für die Überschriften von Abschnitten etc.
 %    \begin{macrocode}
 \newcommand*\tud@sectionlinesformat[4]{%
-  \@hangfrom{\hskip #2#3}{\tud@sec@format[{#1}]{#4}}%
+  \@hangfrom{\hskip #2#3}{\tud@sec@format*[{#1}]{#4}}%
 }
-%    \end{macrocode}
-% Für Überschriften mit Einzug wird \cs{tud@sec@strut} wirkungslos definiert.
-%    \begin{macrocode}
 \newcommand*\tud@sectioncatchphraseformat[4]{%
-  \let\tud@sec@strut\relax%
-  \hskip #2#3\tud@sec@format[{#1}]{#4}%
+  \hskip #2#3\tud@sec@format*[{#1}]{#4}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@sectioncatchphraseformat

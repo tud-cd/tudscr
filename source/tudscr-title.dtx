@@ -4,7 +4,7 @@
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
 % ----------------------------------------------------------------------------
 %
-%  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2020
+%  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2021
 %
 % ----------------------------------------------------------------------------
 %
@@ -41,7 +41,7 @@
 \endbatchfile
 %</ins>
 %<*dtx>
-\ProvidesFile{tudscr-title.dtx}[2020/12/28]
+\ProvidesFile{tudscr-title.dtx}[2021/02/23]
 \RequirePackage{tudscr-gitinfo}
 \documentclass[english,ngerman,xindy]{tudscrdoc}
 \iftutex
@@ -178,7 +178,7 @@
 %    \begin{macrocode}
 %<*book|report|article>
 \newkomafont{thesis}{%
-  \usekomafont{title}%
+  \usefontofkomafont{title}%
   \tud@subtitle@fontsizecmd%
 }
 %</book|report|article>
@@ -470,6 +470,7 @@
 % Das ganze Layout wird vertikal so verschoben, dass der Titel auf der gleichen
 % Höhe steht wie die Überschriften auf Teil- und Kapitelseiten.
 %    \begin{macrocode}
+    \vspace*{-\baselineskip}%
     \tud@cd@headstartvskip%
     \TUD@deprecated@length{\pageheadingsvskip}%
     \vspace*{\tud@pageheadingsvskip@dim}%
@@ -495,8 +496,7 @@
 % allerdings etwas kleiner.
 %    \begin{macrocode}
       \ifx\@subtitle\@empty\else%
-        {\usekomafont{partnumber}{\nobreak\tud@sec@strut}}%
-        {\usekomafont{subtitle}{\tud@title@format{\@subtitle}\par}}%
+        {\usekomafont{subtitle}{\tud@title@format[partnumber]{\@subtitle}\par}}%
       \fi%
       \vskip\glueexpr\bigskipamount*2\relax%
 %    \end{macrocode}
@@ -786,6 +786,7 @@
 %    \begin{macrocode}
 \newcommand*\tud@maketitle@@inpage{%
   \global\@topnum=\z@%
+  \vspace*{-\baselineskip}%
   \tud@cd@headstartvskip%
 %<*book|report|article>
   \TUD@deprecated@length{\headingsvskip}%
@@ -818,8 +819,7 @@
 %    \begin{macrocode}
     {\usekomafont{title}{\tud@title@format{\@title}\par}}%
     \ifx\@subtitle\@empty\else%
-      \vskip 1ex\@plus.5ex\@minus.5ex%
-      {\usekomafont{subtitle}{\tud@title@format{\@subtitle}\par}}%
+      {\usekomafont{subtitle}{\tud@title@format[partnumber]{\@subtitle}\par}}%
     \fi%
     \vskip 2ex\@plus1ex\@minus1ex%
 %    \end{macrocode}
@@ -891,9 +891,9 @@
 \newcommand*\tud@maketitle@head{%
   \setbox\z@\vbox{%
     \ifx\@titlehead\@empty\else%
-      {\usekomafont{titlehead}{%
+      {\usefontofkomafont{titlehead}{%
         \begin{minipage}[t]{\textwidth}%
-          \@titlehead\tud@sec@strut%
+          \@titlehead\strut\par%
         \end{minipage}%
       }}%
     \fi%
@@ -902,9 +902,7 @@
 %</book|report|article>
     \ifx\@subject\@empty\else%
       \par\medskip%
-      {\usekomafont{subject}{%
-        \@subject\tud@sec@strut%
-      }}%
+      {\usekomafont{subject}{\tud@sec@format[partnumber]{\@subject}}}%
     \fi%
   }%
 %    \end{macrocode}
@@ -930,10 +928,10 @@
 % der Titelseite soll sichergestellt werden, dass der Inhalt selbst nicht in
 % Majuskeln gesetzt wird.
 %    \begin{macrocode}
-\newcommand*\tud@title@format[1]{%
+\newcommand*\tud@title@format[2][]{%
   \begingroup%
     \let\\\newline%
-    \tud@sec@format{#1}%
+    \tud@sec@format[{#1}]{#2}%
   \endgroup%
 }
 %    \end{macrocode}
