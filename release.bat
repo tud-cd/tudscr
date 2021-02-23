@@ -30,7 +30,7 @@ set docinput="\def\tudfinalflag{}\input{tudscr.tex}"
 set docprintinput="\def\tudfinalflag{}\def\tudprintflag{}\input{tudscr.tex}"
 cd source
 call clearsource.bat
-tex tudscr.ins
+pdftex tudscr.ins
 pdflatex --shell-escape %sourceinput%
 cd..
 xcopy source temp\ /s
@@ -48,7 +48,7 @@ mkdir source\latex\tudscr
 mkdir doc\latex\tudscr\tutorials
 echo \BaseDirectory{.}> docstrip.cfg
 echo \UseTDS>> docstrip.cfg
-tex tudscr.ins
+pdftex tudscr.ins
 pdflatex %sourceinput%
 pdflatex %sourceinput%
 pdflatex --shell-escape %sourceinput%
@@ -92,9 +92,9 @@ echo  Erzeugen der Installationdateien
 echo =========================================================================
 echo.
 cd ..\install
-tex tudscr-metrics.dtx
+pdftex tudscr-metrics.dtx
 copy  ..\source\latex\tudscr\tudscr-version.dtx ..\.
-tex tudscr-scripts.dtx
+pdftex tudscr-scripts.dtx
 rename *.bxt *.bat
 setlocal enabledelayedexpansion
 set "pattern=_V_"
