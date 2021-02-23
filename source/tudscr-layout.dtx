@@ -1625,6 +1625,7 @@
 % \changes{v2.06}{2018/08/01}{neu}^^A
 % \begin{macro}{\tud@partformat}
 % \changes{v2.06}{2018/08/01}{neu}^^A
+% \changes{v2.07}{2021/02/23}{Bugfix für Option \opt{parttitle}}^^A
 % Die Formatierungsbefehle für die Überschriften von Teilen.
 %    \begin{macrocode}
 \newcommand*\tud@partformat{}%
@@ -1642,10 +1643,15 @@
     \usekomafont{#1}{%
       \tud@sec@format{\nobreak\interlinepenalty\@M\@@title\strut\@@par}%
     }%
-    \setpartsubtitle{%
-      \setkomafont{part}{}%
-      \tud@sec@format[partnumber]{\IfUseNumber{\partformat\enskip}{}#3}%
+%    \end{macrocode}
+% Hier wird etwas hemdsärmlich der eigentliche Titel aus \verb=#3= extrahiert.
+%    \begin{macrocode}
+    \def\tud@partformat##1\nobreak\interlinepenalty\@M##2\strut\@@par##3\@nil{%
+      \def\tud@partformat{\IfUseNumber{\partformat\enskip}{}##2}%
     }%
+    \expandafter\expandafter\expandafter\tud@partformat%
+      \expandafter\@firstofone\@gobbletwo#3\@nil%
+    \expandafter\setpartsubtitle\expandafter{\tud@partformat}%
   \else%
 %</book|report>
     \edef\tud@partformat{\noexpand\tud@sec@format{\expandonce\partformat}}%
