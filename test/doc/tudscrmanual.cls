@@ -2212,7 +2212,7 @@
       \fi%
       \protected@expandtwoargs\in@{,}{##2}%
       \ifin@%
-        % URGENT label in \tud@declare@result@list?
+        \listgadd\tud@declare@result@list{{}{##1}}%
       \else%
         \Entity@Declare{#3}{#4}{##2}%
         \listgadd\tud@declare@result@list{%
@@ -3767,7 +3767,7 @@
   \let\printdeclarationlist\tud@print@declarationlist%
 }
 \NewDocumentCommand\tud@declare@end{m r[]}{%
-  \@killglue%
+  \ifvmode\else\@killglue\fi%
   \tud@declare@check%
   \tud@declare@close{#1}[{#2}]%
   \par%
@@ -3880,7 +3880,9 @@
 }
 % DOC split von #3 \tud@declare@process@eval und \tud@declare@result@list
 \NewDocumentCommand\tud@chg@appto{m o d:: m m m}{%
-  \appto#1{\Changed@At@Process[{#2}]<{#5}{#6}>:#3:{#4}}%
+  \IfArgIsEmpty{#5}{}{%
+    \appto#1{\Changed@At@Process[{#2}]<{#5}{#6}>:#3:{#4}}%
+  }%
 }
 \NewDocumentCommand\InlineDeclaration{s m}{%
   \IfBooleanT{#1}{%
@@ -4748,6 +4750,7 @@
 \NewDocumentEnvironment{DeclareValues}{!o +b}{%
   \begingroup%
     \let\tud@res@a\@empty%
+    \@tud@res@swatrue%
     \IfValueTF{#1}{%
       \let\tud@res@b\@empty%
       \def\do##1{%
@@ -4765,16 +4768,34 @@
       }%
       \docsvlist{#1}%
     }{%
-      \def\do##1{%
-        \If@Markup@Key@TF{##1}{}{%
-          \If@Markup@Value@TF[\PMisc,\PBoolean]{##1}{%
-            \listadd\tud@res@a{##1}%
+      \RenewDocumentCommand\tud@res@c{s m}{%
+        \begingroup%
+          \If@Markup@Key@TF{##2}{%
+            \IfBooleanTF{##1}{\@tud@res@swatrue}{\@tud@res@swafalse}%
+          }{%
+            \IfBooleanTF{##1}{\@tud@res@swafalse}{\@tud@res@swatrue}%
+          }%
+          \if@tud@res@swa%
+            \aftergroup\@firstofone%
+          \else%
+            \aftergroup\@gobble%
+          \fi%
+        \endgroup{%
+          \If@Markup@Value@TF[\PMisc,\PBoolean]{##2}{%
+            \IfBooleanT{##1}{\ifx\tud@res@a\@empty\else\@tud@res@swafalse\fi}%
+            \listadd\tud@res@a{##2}%
           }{}%
         }%
       }%
-      \dolistloop{\tud@declaration@inner@list}%
+      \forlistloop{\tud@res@c}{\tud@declaration@inner@list}%
+      \ifx\tud@res@a\@empty%
+        \forlistloop{\tud@res@c*}{\tud@declaration@inner@list}%
+      \fi%
     }%
     \ifx\tud@res@a\@empty%
+      \@tud@res@swafalse%
+    \fi%
+    \if@tud@res@swa\else%
       \let\tud@res@c\@empty%
       \def\do##1{%
         \def\tud@res@d{##1}%
@@ -4783,11 +4804,25 @@
           \detokenize\expandafter{\tud@res@d}\noexpand\MessageBreak%
         }%
       }%
-      \dolistloop{\tud@declaration@inner@list}%
-      \ClassWarning{tudscrmanual}{%
-        None of the given declarations:\MessageBreak%
-        \tud@res@c\IfValueT{#1}{was matched or }holds a special value%
-      }%
+      \ifx\tud@res@a\@empty%
+        \let\tud@res@a\tud@declaration@inner@list%
+        \@tud@res@swafalse%
+      \else%
+        \@tud@res@swatrue%
+      \fi%
+      \dolistloop{\tud@res@a}%
+      \if@tud@res@swa%
+        \ClassWarning{tudscrmanual}{%
+          Multiple matching declarations, specify one of\MessageBreak%
+           \tud@res@c with the optional argument of `DeclareValues'%
+        }%
+      \else%
+        \ClassWarning{tudscrmanual}{%
+          None of the given declarations:\MessageBreak%
+          \tud@res@c\IfValueT{#1}{was matched or }holds a special value%
+        }%
+      \fi%
+      \let\tud@res@a\@empty%
     \fi%
     \edef\tud@res@a{%
       \endgroup%
@@ -4862,10 +4897,8 @@
         \edef\tud@res@b{%
           % DOC '' für Inline@Declaration ohne Link
           \unexpanded{\Markup@Replace\tud@res@b}=\expandonce\tud@val@main=%
-          \ifx\tud@val@addon\@empty\else%
-            [{\expandonce\tud@val@addon}]%
-          \fi%
-          ''% URGENT '' notwendig?
+            \ifx\tud@val@addon\@empty\else[{\expandonce\tud@val@addon}]\fi%
+            ''%
         }%
         \tud@res@b{##1}%
         \Markup@Outer@Get\tud@res@b{\tud@res@b}%
@@ -4887,7 +4920,9 @@
       \endgroup%
       \noexpand\item[{%
         \unexpanded{\let\tud@print@changedatlist\relax}%
-        \ifx\tud@res@a\@empty\else%
+        \ifx\tud@res@a\@empty%
+          \PValue{???=#2}%
+        \else%
           \expandonce\tud@res@a\expandonce\tud@res@d%
         \fi%
       }]%
