@@ -433,8 +433,6 @@
 }{}
 \RequirePackage{shellesc}[2019/11/08]
 \RequirePackage{pdftexcmds}[2020/06/27]
-\RequirePackage{hologo}[2019/12/05]
-%\pretocmd\hologo{\typeout{===== #1}}{}{\tud@patch@wrn{hologo}}
 \RequirePackage{csquotes}[2021-01-04]
 \RequirePackage{setspace}[2011/12/19]
 \setstretch{1.1}
@@ -844,7 +842,7 @@
       \fi%
     \fi%
     % TODO separates Makro?
-    \let\hologo\@firstofone%
+    \let\sflogo\@firstofone%
     \def~{\space}%
     \def\dots{...}%
     \def\_{_}%
@@ -1693,7 +1691,6 @@
   \endgroup%
 }
 \NewExpandableDocumentCommand\@suffix{s t' o m}{#4}%
-%\NewExpandableDocumentCommand\@suffix{s t' o m}{\space#4}%
 \NewExpandableDocumentCommand\@@suffix{s t' o m}{}%
 \newrobustcmd*\idxsuffix{\suffix*'}
 \NewDocumentCommand\nosuffix{m}{%
@@ -2691,7 +2688,7 @@
 }
 \@onlypreamble\tud@ety@declare
 \NewDocumentCommand\DistributionGeneral{!s !d||}{%
-  \hologo{LaTeX}\mbox{-}Distribution\IfBooleanT{#1}{en}%
+  \sflogo{LaTeX}\mbox{-}Distribution\IfBooleanT{#1}{en}%
   \DistributionGeneral@IndexEntry{#2}\xspace%
 }
 \newcommand*\@DistributionGeneral{LaTeX-Distribution}%
@@ -2714,18 +2711,18 @@
   lvl=0,idx=true:\DistributionGeneral@@IndexEntry%
 ](\textsbn){Distribution}
 \NewDocumentCommand\TeXLive{!t' !d|| !d''}{%
-  \Distribution|#2|'#3'{\hologo{TeX}~Live\IfBooleanT{#1}{~Portable}}%
+  \Distribution|#2|'#3'{\sflogo{TeXLive}\IfBooleanT{#1}{~Portable}}%
   \DistributionGeneral@IndexEntry{#2}\xspace%
 }
 \NewDocumentCommand\MacTeX{!t' !d|| !d''}{%
-  \Distribution|#2|'#3'{Mac\hologo{TeX}\IfBooleanT{#1}{~Portable}}%
+  \Distribution|#2|'#3'{\sflogo{MacTeX}\IfBooleanT{#1}{~Portable}}%
   \DistributionGeneral@IndexEntry{#2}\xspace%
 }
 \NewDocumentCommand\MiKTeX{!t' !d|| !d''}{%
-  \Distribution|#2|'#3'{\hologo{MiKTeX}\IfBooleanT{#1}{~Portable}}%
+  \Distribution|#2|'#3'{\sflogo{MiKTeX}\IfBooleanT{#1}{~Portable}}%
   \DistributionGeneral@IndexEntry{#2}\xspace%
 }
-\NewMarkupCommand\Format[lvl=1](\sbnfont\hologo){Textsatzsystem}
+\NewMarkupCommand\Format[lvl=1](\sbnfont\sflogo){Textsatzsystem}
 \NewMarkupCommand\Bundle[lvl=1,idx=false](\textsbn){Bundle}
 \NewMarkupCommand\Class[lvl=2,idx=files](\textsbn){Klasse}
 \NewMarkupCommand\Package[lvl=2,idx=files](\textsbn){Paket}
@@ -3397,12 +3394,10 @@
 }
 % TODO noch notwendig?
 \newcommand*\Misc@Expandable{%
-%  \let\suffix\@suffix%
   \def\suffix{\space\@suffix}%
   \let\nosuffix\@nosuffix%
   \let\seeplain\@seeplain%
-  \let\hologo\@firstofone%
-  \let\hologoRobust\@firstofone%
+  \let\sflogo\@firstofone%
   \let\emph\@firstofone%
   \let\texttt\@firstofone%
   \let\NoCaseChange\@firstofone%
@@ -3420,7 +3415,6 @@
   \robustify{\dots}%
   \robustify\texttt%
   \robustify\emph%
-  \robustify\hologo%
   \ifdef\hyperref{\robustify\hyperref}{}%
 }
 % PENDING --> Tutorial: Entity pflicht bzw. warnung, wenn nicht?
@@ -3959,7 +3953,7 @@
     }%
   }%
   \forlistloop\tud@res@a{\tud@markup@list}%
-  \appto\tud@x@textcase@uclcnotmath{\tud@nocasechange\hologo}%
+  \appto\tud@x@textcase@uclcnotmath{\tud@nocasechange\sflogo}%
 }
 \newrobustcmd*\tud@idx@declare[2]{%
   \ifcsundef{tud@idx@lbl@@#1}{}{%
@@ -4350,7 +4344,7 @@
     \tud@index@print%
     (%
       Die im Folgenden aufgelisteten Schlagworte sollen f\"ur den Umgang mit %
-      \hologo{LaTeXe} im Allgemeinen sowie dem \TUDScript-Bundle im Speziellen %
+      \sflogo{LaTeXe} im Allgemeinen sowie dem \TUDScript-Bundle im Speziellen %
       sowohl Antworten bei generellen Fragen liefern als auch L\"osungen f\"ur %
       typische Probleme bereitstellen. Falls ein gesuchter Begriff hier nicht %
       zu finden ist oder trotz vorhandener Hinweise kein zufriedenstellendes %
@@ -5403,7 +5397,7 @@
   \xspace%
 }
 \newcommand*\TUDForum{%
-  \mbox{T\kern.05em U\kern.05em D-\hologo{LaTeX}-Forum}\xspace%
+  \mbox{T\kern.05em U\kern.05em D-\sflogo{LaTeX}-Forum}\xspace%
 }
 \NewDocumentCommand\Forum{!O{\TUDForum} !d<>}{%
   \begingroup%
@@ -5467,27 +5461,24 @@
 \newcommand*\textttit{}
 \newrobustcmd*\ttitfont{\ttfamily\itshape}
 \DeclareTextFontCommand\textttit{\ttitfont}
-\newlength\tud@logo@w
-\setlength\tud@logo@w{0.9em}
-\newlength\tud@logo@h
-\setlength\tud@logo@h{1ex}
-\newcommand*\tud@logo@ic[1]{\ifdim\the\fontdimen\@ne\font>\z@\relax#1\fi}
-\newcommand*\tud@logo@backup{}
-\let\tud@logo@backup\hologo%
-\newrobustcmd*\sanslogo[1]{%
-  \ifcsundef{tud@logo@#1}{%
-    \tud@logo@backup{#1}%
-    \ClassWarning{tudscrmanual}{logo #1 missing}%
-  }{%
-    \mbox{\csuse{tud@logo@#1}}%
+\newlength\tud@sflogo@@xdim
+\setlength\tud@sflogo@@xdim{0.9em}
+\newlength\tud@sflogo@@ydim
+\setlength\tud@sflogo@@ydim{1ex}
+\newcommand*\tud@sflogo@@xkern[2][]{%
+  \kern#2\tud@sflogo@@xdim%
+  \IfArgIsEmpty{#1}{}{%
+    \ifdim\the\fontdimen\@ne\font>\z@\relax\kern#1\tud@sflogo@@xdim\fi%
   }%
 }
-% URGENT ersetzen!
-%\def\hologo#1{%
-%%  \ClassWarning{tudscrmanual}{change me!}%
-%  \sanslogo{#1}%
-%}
-\newcommand*\tud@logo@scale[2]{%
+\newrobustcmd*\sflogo[1]{%
+  \ifcsundef{tud@sflogo@#1}{%
+    \ClassWarning{tudscrmanual}{logo #1 missing}%
+  }{%
+    \mbox{\csuse{tud@sflogo@#1}}%
+  }%
+}
+\newcommand*\tud@sflogo@@scale[2]{%
   \begingroup%
     \setbox\z@\hbox{#1}%
     \vbox to\ht\z@{%
@@ -5501,56 +5492,49 @@
     }%
   \endgroup%
 }
-\newcommand*\tud@logo@La{%
-  L%
-  \kern-.36\tud@logo@w\tud@logo@ic{\kern.1\tud@logo@w}%
-  \tud@logo@scale{T}{A}%
-}
-\newcommand*\tud@logo@Xe{%
-  X\kern-.05\tud@logo@w\tud@logo@ic{\kern-.015\tud@logo@w}%
- \lower.5\tud@logo@h\hbox{\rotatebox[origin=c]{180}{E}}%
-}
-\newcommand*\tud@logo@TeX{%
-  T%
-  \kern-.23\tud@logo@w\tud@logo@ic{\kern-.05\tud@logo@w}%
-  \lower.5\tud@logo@h\hbox{E}%
-  \kern-.075\tud@logo@w\tud@logo@ic{\kern.1\tud@logo@w}%
+\newcommand*\tud@sflogo@TeX{%
+  T\tud@sflogo@@xkern[-.05]{-.23}%
+  \lower.5\tud@sflogo@@ydim\hbox{E}%
+  \tud@sflogo@@xkern[.1]{-.075}%
   X\@%
 }
-\newcommand*\tud@logo@LaTeX{%
-  \tud@logo@La\kern-.15\tud@logo@w\tud@logo@TeX%
+\newcommand*\tud@sflogo@LaTeX{%
+  L\tud@sflogo@@xkern[.1]{-.36}\tud@sflogo@@scale{T}{A}%
+  \tud@sflogo@@xkern{-.15}\sflogo{TeX}%
 }
-
-\newcommand*\tud@logo@LaTeXe{%
-  \tud@logo@LaTeX\kern.1\tud@logo@w%
+\newcommand*\tud@sflogo@LaTeXe{%
+  \sflogo{LaTeX}\tud@sflogo@@xkern{.1}%
   \hbox{%
     \m@th%
     \if b\expandafter\@car\f@series x\@nil\csname boldmath\endcsname\fi%
     2$_{\textstyle\varepsilon}$%
   }\@%
 }
-\expandafter\newcommand\expandafter*\csname tud@logo@LaTeX3\endcsname{%
-  \tud@logo@LaTeX\kern.1\tud@logo@w3\@%
+\expandafter\newcommand\expandafter*\csname tud@sflogo@LaTeX3\endcsname{%
+  \sflogo{LaTeX}\tud@sflogo@@xkern{.1}3\@%
 }
-\newcommand*\tud@logo@pdfLaTeX{%
-  \tud@logo@scale{x}{PDF}\tud@logo@LaTeX%
+\newcommand*\tud@sflogo@pdfLaTeX{pdf\sflogo{LaTeX}}
+\newcommand*\tud@sflogo@LuaLaTeX{Lua\sflogo{LaTeX}}
+\newcommand*\tud@sflogo@XeLaTeX{%
+  X\tud@sflogo@@xkern[-.015]{-.05}%
+  \lower.5\tud@sflogo@@ydim\hbox{\rotatebox[origin=c]{180}{E}}%
+  \tud@sflogo@@xkern[.015]{-.15}%
+  \sflogo{LaTeX}%
 }
-\newcommand*\tud@logo@LuaLaTeX{%
-  L\tud@logo@scale{x}{UA}\tud@logo@LaTeX%
+\newcommand*\tud@sflogo@BibTeX{%
+  B\tud@sflogo@@scale{x}{IB}\tud@sflogo@@xkern{-.1}\sflogo{TeX}%
 }
-\newcommand*\tud@logo@XeLaTeX{%
-  \tud@logo@Xe%
-  \kern-.15\tud@logo@w\tud@logo@ic{\kern.015\tud@logo@w}%
-  \tud@logo@LaTeX%
+\newcommand*\tud@sflogo@TeXLive{%
+  \sflogo{TeX}\tud@sflogo@@xkern[-.1]{.25}Live\@%
 }
-\newcommand*\tud@logo@BibTeX{%
-  B\tud@logo@scale{x}{IB}\kern-.1\tud@logo@w\tud@logo@TeX%
+\newcommand*\tud@sflogo@MacTeX{%
+  Mac\tud@sflogo@@xkern{-.05}\sflogo{TeX}\@%
 }
-\newcommand*\tud@logo@MiKTeX{MiK\kern.05\tud@logo@w\tud@logo@TeX}
-\newcommand*\tud@logo@LyX{%
-  L\kern-.12\tud@logo@w\tud@logo@ic{\kern-.03\tud@logo@w}%
-  \lower.5\tud@logo@h\hbox{Y}%
-  \kern-.12\tud@logo@w\tud@logo@ic{\kern.07\tud@logo@w}%
+\newcommand*\tud@sflogo@MiKTeX{MiK\tud@sflogo@@xkern{.05}\sflogo{TeX}}
+\newcommand*\tud@sflogo@LyX{%
+  L\tud@sflogo@@xkern[-.03]{-.12}%
+  \lower.5\tud@sflogo@@ydim\hbox{Y}%
+  \tud@sflogo@@xkern[.07]{-.12}%
   X\@%
 }
 %%%% From File: tudscr-fields.dtx 2019/11/29 01:36:52 c9a9b7b
