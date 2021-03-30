@@ -2,9 +2,9 @@
  TUD-Script &ndash; Corporate Design of Technische Universität Dresden
 ----------------------------------------------------------------------------
 
- Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2020
+ Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2021
 
- **tudscr 2020/xx/xx v2.07**
+ **tudscr 2021/xx/xx v2.07**
 
  The current release is shiped via CTAN: https://www.ctan.org/pkg/tudscr
 
@@ -57,7 +57,7 @@ Das Bundle beinhaltet:
 Versionen
 ---------
 
-**v2.07** (2020/xx/xx)
+**v2.07** (2021/xx/xx)
 + Schriftstärke im Mathematikmodus wird passend zu den Einstellungen für den 
   Fließtext (`cdfont=light/heavy/normalbold/ultrabold`) gewählt
 + Kombination `cd=true` und `cdfont=false` verwendet Open Sans in Überschriften
@@ -66,6 +66,10 @@ Versionen
 + **tudscrposter** Umgebungen `figurehere` und `tablehere`
 + Verwendung der Symbole `\textleftarrow`, `\textrightarrow`, `\textuparrow`,
   `\textdownarrow` sowie `\textlangle` und `\textrangle` aus Paket **iwona**
+
+**v2.06l** (2021/03/30)
++ Fix für Festlegung des Seitenstils in der Präambel
++ Fix für das Durchreichen von Optionen mit LaTeX 2021/05/01
 
 **v2.06k** (2020/11/10)
 + Fix für doppelte Leerzeichen in `\confirmation` etc.
@@ -282,9 +286,13 @@ The bundle offers:
 Versions
 --------
 
-**v2.07** (2020/xx/xx)
+**v2.07** (2021/xx/xx)
 + ...
 
+**v2.06l** (2021/03/30)
++ bug fix for defining the page style in the preamble
++ bug fix for passing options with LaTeX 2021/05/01
+  
 **v2.06k** (2020/11/10)
 + bug fix for multiple spaces in `\confirmation` etc.
 
