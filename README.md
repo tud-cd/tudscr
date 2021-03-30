@@ -2,15 +2,17 @@
  TUD-Script &ndash; Corporate Design of Technische Universität Dresden
 ----------------------------------------------------------------------------
 
- Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2020
+ Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2021
 
  **tudscr 2020/xx/xx v2.07**
+
+ The current release is shiped via CTAN: https://www.ctan.org/pkg/tudscr
 
 ----------------------------------------------------------------------------
 
  This material is subject to the LaTeX Project Public License version 1.3c
  or later. See http://www.latex-project.org/lppl.txt for details.
- English text below
+ English text below.
 
 ----------------------------------------------------------------------------
 
@@ -65,11 +67,15 @@ Versionen
 + Verwendung der Symbole `\textleftarrow`, `\textrightarrow`, `\textuparrow`,
   `\textdownarrow` sowie `\textlangle` und `\textrangle` aus Paket **iwona**
 
+**v2.06l** (2021/03/30)
++ Fix für Festlegung des Seitenstils in der Präambel
++ Fix für das Durchreichen von Optionen mit LaTeX 2021/05/01
+
 **v2.06k** (2020/11/10)
 + Fix für doppelte Leerzeichen in `\confirmation` etc.
 
 **v2.06j** (2020/09/29)
-+ Anpassungen an neue Version von `scrlfile v3.32` für LaTeX-Kernel `2020/10/01`
++ Anpassungen an neue Version von **scrlfile** v3.32 für LaTeX-Kernel 2020/10/01
 
 **v2.06i** (2020/07/27)
 + Bugfix für duplizierte Outline-Einträg in Umgebung `abstract`
@@ -283,11 +289,15 @@ Versions
 **v2.07** (2020/xx/xx)
 + ...
 
+**v2.06l** (2021/03/30)
++ bug fix for defining the page style in the preamble
++ bug fix for passing options with LaTeX 2021/05/01
+  
 **v2.06k** (2020/11/10)
 + bug fix for multiple spaces in `\confirmation` etc.
 
 **v2.06j** (2020/09/29)
-+ adjustments to new version of **scrlfile** v3.32 for LaTeX kernel `2020/10/01`
++ adjustments to new version of **scrlfile** v3.32 for LaTeX kernel 2020/10/01
 
 **v2.06i** (2020/07/27)
 + bug fix for duplicated outline entries in environment `abstract`
