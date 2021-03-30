@@ -2,7 +2,7 @@
  TUD-Script &ndash; Corporate Design of Technische Universität Dresden
 ----------------------------------------------------------------------------
 
- Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2020
+ Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2021
 
 ----------------------------------------------------------------------------
 
