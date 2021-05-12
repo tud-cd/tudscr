@@ -60,7 +60,7 @@
       \fi%
     }%
   \fi%
-  \TUD@@Version{2020/09/30 v2.07 TUD-Script}{2019/12/23 v3.28 KOMA-Script}%
+  \TUD@@Version{2021/03/31 v2.07 TUD-Script}{2021/03/17 v3.33 KOMA-Script}%
   \ifx\TUDScriptVersion\@undefined%
     \xdef\TUDScriptVersion{\TUD@Version}%
     \def\@tempa#1 v#2 #3\relax#4\relax#5{\gdef#5{#2}}%
@@ -395,11 +395,13 @@
   \fi%
 }
 %%%% From File: tudscr-misc.dtx 2020/01/14 17:13:34 e5e3ff2
-\DeclareOption*{\PassOptionsToClass{\CurrentOption}{\TUD@Class@Parent}}
+\DeclareOption*{\expandafter\PassOptionsToClass\expandafter{\CurrentOption}%
+  {\TUD@Class@Parent}%
+}
 \TUDProcessOptions\relax
 \PassOptionsToClass{ttfont=roboto}{\TUD@Class@Parent}
 \LoadClass{\TUD@Class@Parent}[%
-  2020/06/25 v2.07 TUD-Script
+  2021/03/31 v2.07 TUD-Script
 ]
 %%%% From File: tudscr-manual.dtx 2020/01/14 17:13:34 e5e3ff2
 \newcommand*\vTUDScript{v\TUDScriptVersionNumber}
@@ -4162,7 +4164,7 @@
   \ifx\tud@idx@tmp\@empty%
     \addto@hook\tud@toks@{*}%
   \fi%
-  \addto@hook\tud@toks@{\tud@res@b{#2}{#3}/#4/=#5=(#9)}%
+  \addto@hook\tud@toks@{\tud@res@b{#2}{#3}/#4/=#5=[#6](#9)}%
   \the\tud@toks@%
   \ifx\tud@idx@tmp\@empty\else%
     \IfValueT{#5}{%
@@ -4180,9 +4182,15 @@
       }%
     }%
   \fi%
-  % URGENT #6 bei Deklaration für index verwenden? 
-  %\IfValueT{#6}{\typeout{?????????????????????? #6}}%
   \eappto\tud@idx@tmp{\expandonce\tud@res@b}%
+  % URGENT #6 bei Deklaration für index verwenden? 
+%  \ifnum\tud@declare@mode@num>\z@\relax%
+%%  \IfValueTF{#5}{\typeout{????? 5: \detokenize{#5}}}{%
+%    \IfValueF{#5}{\IfValueT{#6}{\typeout{????? 6: \detokenize{#6}}}}%
+%%  }%
+%  \typeout{===== \meaning\tud@res@b}%
+%  \typeout{===== \meaning\tud@idx@tmp}%
+%  \fi%
 }
 \newcommand*\tud@idx@key{}
 \newcommand*\tud@idx@fmt{}
@@ -4214,7 +4222,12 @@
     \tud@res@c%
     \def\tud@res@b{{#3}{#4}/#5/=#6=}%
     \if@tud@res@swa%
-      \IfValueT{#7}{\appto\tud@res@b{[#7]}}%
+      \ifnum\tud@declare@mode@num>\z@\relax%
+        \IfValueT{#7}{%
+          \typeout{????? 7: \detokenize{#7}}%
+          \appto\tud@res@b{[#7]}%
+        }%
+      \fi%
     \fi%
     \eappto\tud@res@b{%
       \unexpanded{|\@nil|'\@nil'}%
