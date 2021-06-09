@@ -1735,11 +1735,16 @@
 % Ladezustand eines Paketes auszuführen.
 % \begin{macro}{\TUD@UnwindPackage}
 % \changes{v2.05}{2015/10/28}{neu}^^A
+% \changes{v2.07}{2021/06/09}{Sternversion}^^A
 % Dieser Befehl dient zur Ausführung von Quelltext, falls ein Paket bis zum 
 % Ende der Dokumentpräambel nicht geladen wurde. Im ersten obligatorischen
-% Argument wird das Paket angegeben, im zweiten der Quellcode.
+% Argument wird das Paket angegeben, im zweiten der Quellcode. Die Sternversion 
+% führt den Quellcode auch nach dem Laden des Paketes aus.
 %    \begin{macrocode}
-\newcommand*\TUD@UnwindPackage[2]{\AtEndPreamble{\@ifpackageloaded{#1}{}{#2}}}
+\NewDocumentCommand\TUD@UnwindPackage{s m m}{%
+  \IfBooleanT{#1}{\AfterPackage*{#2}{#3}}%
+  \AtEndPreamble{\@ifpackageloaded{#2}{}{#3}}%
+}
 \@onlypreamble\TUD@UnwindPackage
 %    \end{macrocode}
 % \end{macro}^^A \TUD@UnwindPackage

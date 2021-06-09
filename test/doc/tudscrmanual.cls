@@ -10,6 +10,7 @@
 %%
 %% tudscr-version.dtx  (with options: `class,manual,identify,inherit')
 %% tudscr-base.dtx  (with options: `class,manual,inherit,load')
+%% tudscr-misc.dtx  (with options: `class,manual,util,list,string')
 %% tudscr-manual.dtx  (with options: `class,manual,option')
 %% tudscr-misc.dtx  (with options: `class,manual,inherit,execute')
 %% tudscr-manual.dtx  (with options: `class,manual,body')
@@ -18,7 +19,7 @@
 %% tudscr-texindy.dtx  (with options: `class,manual')
 %% 
 %% TUD-Script -- Corporate Design of Technische Universitaet Dresden
-%%               2020/06/25 v2.07 TUD-Script
+%%               2021/06/10 v2.07 TUD-Script
 %% 
 %% Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2021
 %%               https://github.com/tud-cd/tudscr
@@ -38,8 +39,8 @@
 %% 
 %% The current maintainer and author of this work is Falk Hanisch.
 %% 
-%%%% From File: tudscr-version.dtx 2020/01/14 01:35:36 9fb7125
-\NeedsTeXFormat{LaTeX2e}[2019/10/01]
+%%%% From File: tudscr-version.dtx 2021/03/31 01:29:04 83e7294
+\NeedsTeXFormat{LaTeX2e}[2021-06-01]
 \begingroup
   \catcode`\@11\relax%
   \ifx\TUD@Version\@undefined%
@@ -60,7 +61,7 @@
       \fi%
     }%
   \fi%
-  \TUD@@Version{2021/03/31 v2.07 TUD-Script}{2021/03/17 v3.33 KOMA-Script}%
+  \TUD@@Version{2021/06/10 v2.07 TUD-Script}{2021/03/17 v3.33 KOMA-Script}%
   \ifx\TUDScriptVersion\@undefined%
     \xdef\TUDScriptVersion{\TUD@Version}%
     \def\@tempa#1 v#2 #3\relax#4\relax#5{\gdef#5{#2}}%
@@ -83,7 +84,7 @@
 \newcommand*\TUD@ProvidesWrapperClass[3]
 {%
   \ProvidesClass{#1}[%
-  2020/06/25 v2.07 TUD-Script
+  2021/06/10 v2.07 TUD-Script
     #3 (#2)%
   ]%
   \newcommand*\TUD@Class@Parent{#2}%
@@ -103,57 +104,88 @@
   \typeout{+------------------------------------------------------------------}%
 }
 \TUD@ProvidesWrapperClass{tudscrmanual}{tudscrreprt}{manual class}
-%%%% From File: tudscr-base.dtx 2020/01/14 17:13:34 e5e3ff2
+%%%% From File: tudscr-base.dtx 2021/01/18 15:24:43 7ad44a9
 \RequirePackage{tudscrbase}[%
-  2020/06/25 v2.07 TUD-Script
+  2021/06/10 v2.07 TUD-Script
 ]
 \renewcommand*\TUD@KOMAoptions[1]{\PassOptionsToClass{#1}{\TUD@Class@Parent}}
 \AfterClass{\TUD@Class@Parent}{\let\TUD@KOMAoptions\KOMAoptions}
-%%%% From File: tudscr-manual.dtx 2020/01/14 17:13:34 e5e3ff2
-\TUD@key{final}[true]{%
-  \TUD@set@ifkey{final}{@tempswa}{#1}%
-  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \if@tempswa%
-      \let\tudfinalflag\relax%
-    \fi%
-  \fi%
-}
-\TUD@key{print}[true]{%
-  \TUD@set@ifkey{print}{@tempswa}{#1}%
-  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \if@tempswa%
-      \let\tudprintflag\relax%
-    \fi%
-  \fi%
-}
-\AtEndPreamble{%
-  \ifdef{\tudfinalflag}{%
-    \TUDoptions{ToDo=false}%
-    \TUD@key{ToDo}{\FamilyKeyStateProcessed}%
-    \TUDoptions{indexnote=false}%
-    \TUD@key{indexnote}{\FamilyKeyStateProcessed}%
-  }{%
-    \KOMAoptions{overfullrule}%
+%%%% From File: tudscr-misc.dtx 2021/03/31 01:55:38 5cfe807
+\NewDocumentCommand\tud@auxlist@register{s D(){\@firstofone} m}{%
+  \expandafter\newcommand\expandafter*\csname#3@auxlist\endcsname{}%
+  \expandafter\newcommand\expandafter*\csname#3@auxlist@positive\endcsname{}%
+  \expandafter\newcommand\expandafter*\csname#3@auxlist@negative\endcsname{}%
+  \expandafter\newcommand\expandafter*\csname#3@auxlist@handler\endcsname{#2}%
+  \BeforeClosingMainAux{%
+    \forlistcsloop{\listcsremove{#3@auxlist@positive}}{#3@auxlist@negative}%
+    \tud@auxlist@export{#3}%
   }%
-  \ifdef{\tudprintflag}{%
-    \ifnum\tud@cd@num>\z@\relax%
-      \TUDoptions{cd=true}%
-    \fi%
-    \TUD@key{cd}{\FamilyKeyStateProcessed}%
-    \ifundef\hypersetup{}{\hypersetup{hidelinks}}%
-  }{}%
+  \AtBeginDocument{\tud@auxlist@import{#3}{#1}}%
 }
-\PassOptionsToClass{%
-  cdfoot=true,%
-  chapterpage=true,%
-  chapterprefix=true,%
-  headings=optiontoheadandtoc,%
-  captions=tableheading,%
-  numbers=noenddot,%
-  cd=color,%
-}{\TUD@Class@Parent}
-\PassOptionsToPackage{automark}{scrlayer-scrpage}
-% PENDING in tudscr-misc.dtx mit manual als guard?
+\newcommand*\tud@auxlist@export[1]{%
+  \if@filesw%
+    \let\tud@res@a\@empty%
+    \def\tud@res@b##1{\eappto\tud@res@a{\@percentchar^^J\@spaces{##1}}}%
+    \forlistcsloop\tud@res@b{#1@auxlist@positive}%
+    \immediate\write\@mainaux{%
+      \string\gdef\expandafter\string\csname #1@auxlist\endcsname%
+        {\expandonce\tud@res@a\@percentchar^^J}%
+    }%
+  \fi%
+}
+\newcommand*\tud@auxlist@import[2]{%
+  \begingroup%
+    \edef\tud@res@a{\unexpanded{\@tfor\tud@res@c:=}\csexpandonce{#1@auxlist}}%
+    \letcs\tud@res@b{#1@auxlist@handler}%
+    \global\cslet{#1@auxlist}\@empty%
+    \tud@res@a\do{%
+      \edef\tud@res@c{\tud@res@b{\tud@res@c}}%
+      \listcsxadd{#1@auxlist}{\expandonce\tud@res@c}%
+    }%
+  \endgroup%
+  \IfBooleanT{#2}{\forlistcsloop{\@firstofone}{#1@auxlist}}%
+}
+\newcommand*\tud@auxlist@add[2]{%
+  \begingroup%
+    \protected@edef\tud@res@a{#2}%
+    \edef\tud@res@a{\detokenize\expandafter{\tud@res@a}}%
+    \tud@unique@csxadd{#1@auxlist@positive}{\tud@res@a}%
+  \endgroup%
+}
+\newcommand*\tud@auxlist@remove[2]{%
+  \begingroup%
+    \protected@edef\tud@res@a{#2}%
+    \edef\tud@res@a{\detokenize\expandafter{\tud@res@a}}%
+    \tud@unique@csxadd{#1@auxlist@negative}{\tud@res@a}%
+  \endgroup%
+}
+\newcommand*\tud@auxlist@ifin[2]{%
+  \begingroup%
+    \protected@edef\tud@res@a{#1}%
+    \letcs\tud@res@b{#2@auxlist@handler}%
+    \edef\tud@res@a{%
+      \endgroup%
+      \noexpand\ifinlistcs{\tud@res@b{\tud@res@a}}{#2@auxlist}%
+    }%
+  \tud@res@a%
+}
+\newcommand*\tud@unique@add[2]{%
+  \ifinlist{#2}{#1}{}{\listadd#1{#2}}%
+}
+\newcommand*\tud@unique@eadd[2]{%
+  \xifinlist{#2}{#1}{}{\listeadd#1{#2}}%
+}
+\newcommand*\tud@unique@xadd[2]{%
+  \xifinlist{#2}{#1}{}{\listxadd#1{#2}}%
+}
+\newcommand*\tud@unique@csxadd[2]{%
+  \xifinlistcs{#2}{#1}{}{\listcsxadd{#1}{#2}}%
+}
+\providerobustcmd*\listeremove[2]{%
+  \begingroup%
+    \edef\etb@tempa{\endgroup\unexpanded{\listremove#1}{#2}}%
+  \etb@tempa%
+}
 \tud@newif\if@tud@list@sorted
 \newcommand*\tud@list@sorted{}
 \newcommand*\tud@list@sort[1]{%
@@ -195,26 +227,9 @@
     \fi%
   \fi%
 }
-\newcommand*\tud@unique@add[2]{%
-  \ifinlist{#2}{#1}{}{\listadd#1{#2}}%
-}
-\newcommand*\tud@unique@eadd[2]{%
-  \xifinlist{#2}{#1}{}{\listeadd#1{#2}}%
-}
-\newcommand*\tud@unique@xadd[2]{%
-  \xifinlist{#2}{#1}{}{\listxadd#1{#2}}%
-}
-\newcommand*\tud@unique@csxadd[2]{%
-  \xifinlistcs{#2}{#1}{}{\listcsxadd{#1}{#2}}%
-}
-\providerobustcmd{\listeremove}[2]{%
-  \begingroup%
-    \edef\etb@tempa{\endgroup\unexpanded{\listremove#1}{#2}}%
-  \etb@tempa%
-}
 \newcommand*\tud@remove@enfold@char[2]{%
   \begingroup%
-    \expandafter\def\expandafter\tud@res@b\expandafter{#1}%
+    \edef\tud@res@b{\expandonce{#1}}%
     \trim@spaces@in\tud@res@b%
     \expandafter\in@\expandafter#2\expandafter{\tud@res@b}%
     \ifin@%
@@ -272,15 +287,60 @@
     }%
   \tud@res@a%
 }
+%%%% From File: tudscr-manual.dtx 2020/11/11 22:13:36 968380d
+\TUD@key{final}[true]{%
+  \TUD@set@ifkey{final}{@tempswa}{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \if@tempswa%
+      \let\tudfinalflag\relax%
+    \fi%
+  \fi%
+}
+\TUD@key{print}[true]{%
+  \TUD@set@ifkey{print}{@tempswa}{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \if@tempswa%
+      \let\tudprintflag\relax%
+    \fi%
+  \fi%
+}
+\AtEndPreamble{%
+  \ifdef{\tudfinalflag}{%
+    \TUDoptions{ToDo=false}%
+    \TUD@key{ToDo}{\FamilyKeyStateProcessed}%
+    \TUDoptions{indexnote=false}%
+    \TUD@key{indexnote}{\FamilyKeyStateProcessed}%
+  }{%
+    \KOMAoptions{overfullrule}%
+  }%
+  \ifdef{\tudprintflag}{%
+    \ifnum\tud@cd@num>\z@\relax%
+      \TUDoptions{cd=true}%
+    \fi%
+    \TUD@key{cd}{\FamilyKeyStateProcessed}%
+    \ifundef\hypersetup{}{\hypersetup{hidelinks}}%
+  }{}%
+}
+\PassOptionsToClass{%
+  cdfoot=true,%
+  chapterpage=true,%
+  chapterprefix=true,%
+  headings=optiontoheadandtoc,%
+  captions=tableheading,%
+  numbers=noenddot,%
+  cd=color,%
+}{\TUD@Class@Parent}
+\PassOptionsToPackage{automark}{scrlayer-scrpage}
 \tud@newcount\tud@todo@num
-\newcommand*\tud@todo@type@use{}%
+\newcommand*\tud@todo@type@use{}
 \newcommand*\tud@todo@type@default{}
 \forcsvlist{\listadd\tud@todo@type@default}{rls,imp,doc,default}
 \TUD@key{ToDo}[true]{%
-  \TUD@set@numkey{ToDo}{tud@todo@num}{%
+  \TUD@set@numkey{ToDo}{@tempa}{%
     \TUD@bool@numkey,{inline}{1},{noinline}{2}%
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \tud@todo@num=\@tempa\relax%
     \let\tud@todo@type@use\tud@todo@type@default%
   \else%
     \begingroup%
@@ -394,28 +454,23 @@
     \let\tud@index@note@write\@gobbletwo%
   \fi%
 }
-%%%% From File: tudscr-misc.dtx 2020/01/14 17:13:34 e5e3ff2
-\DeclareOption*{\expandafter\PassOptionsToClass\expandafter{\CurrentOption}%
+%%%% From File: tudscr-misc.dtx 2021/03/31 01:55:38 5cfe807
+\DeclareOption*{%
+  \expandafter\PassOptionsToClass\expandafter{\CurrentOption}%
   {\TUD@Class@Parent}%
 }
 \TUDProcessOptions\relax
 \PassOptionsToClass{ttfont=roboto}{\TUD@Class@Parent}
 \LoadClass{\TUD@Class@Parent}[%
-  2021/03/31 v2.07 TUD-Script
+  2021/06/10 v2.07 TUD-Script
 ]
-%%%% From File: tudscr-manual.dtx 2020/01/14 17:13:34 e5e3ff2
+%%%% From File: tudscr-manual.dtx 2020/11/11 22:13:36 968380d
 \newcommand*\vTUDScript{v\TUDScriptVersionNumber}
 \newcommand*\vKOMAScript{v\TUD@KOMAVersionNumber}
-% PENDING SurrogatePackage (in tudscr-base.dtx) statt \TUD@UnwindPackage
-\NewDocumentCommand\SurrogatePackage{s m m}{%
-  \IfBooleanT{#1}{\AfterPackage*{#2}{#3}}%
-  \AtEndPreamble{\@ifpackageloaded{#2}{}{#3}}%
-}
-\@onlypreamble\SurrogatePackage
 \RequirePackage{scrhack}[%
-  2019/12/23 v3.28 KOMA-Script
+  2021/03/17 v3.33 KOMA-Script
 ]
-\RequirePackage{babel}[2021/01/26]
+\RequirePackage{babel}[2021-06-02]
 \newcommand*\tud@english[1]{#1}
 \AtBeginDocument{%
   \iflanguageloaded{english}{%
@@ -435,7 +490,7 @@
 }{}
 \RequirePackage{shellesc}[2019/11/08]
 \RequirePackage{pdftexcmds}[2020/06/27]
-\RequirePackage{csquotes}[2021-01-04]
+\RequirePackage{csquotes}[2021/02/22]
 \RequirePackage{setspace}[2011/12/19]
 \setstretch{1.1}
 \PassOptionsToPackage{vskip=\smallskipamount}{quoting}
@@ -469,8 +524,8 @@
 \captionsetup[subfloat]{labelformat=brace,list=off}
 \KOMAoption{captions}{tableheading,figuresignature}
 \floatsetup[table]{style=plaintop}
-\RequirePackage{tikz}[2020/12/27]
-\RequirePackage{pdfpages}[2021/02/05]
+\RequirePackage{tikz}[2021/05/15]
+\RequirePackage{pdfpages}[2021/03/06]
 \RequirePackage{units}[1998/08/04]
 \AtEndPreamble{%
   \RequirePackage{ellipsis}[2020/05/22]%
@@ -492,7 +547,7 @@
 }{%
   \PassOptionsToPackage{colorinlistoftodos}{todonotes}%
 }
-\RequirePackage{todonotes}[2018/11/22]
+\RequirePackage{todonotes}[2021/06/04]
 \AtEndPreamble{%
   \ifdim\marginparwidth<2cm\relax%
     \tud@setdim\marginparwidth{2cm}%
@@ -506,7 +561,7 @@
   }{}{\tud@patch@wrn{NR@gettitle}}%
 }
 \PassOptionsToPackage{babel}{microtype}
-\SurrogatePackage*{hyperref}{\RequirePackage{microtype}[2020/12/07]}
+\TUD@UnwindPackage*{hyperref}{\RequirePackage{microtype}[2021/03/14]}
 \PassOptionsToPackage{open,openlevel=0}{bookmark}
 \PassOptionsToPackage{%
   destlabel=true,%pdfview=FitH,%
@@ -541,7 +596,7 @@
   \def\auto@@refname#1#2#3#4#5\@nil#6\@nil{#6#4.\@nil}%
   \providecommand*\Url[1]{\detokenize{#1}\endgroup}%
 }
-\SurrogatePackage{hyperref}{%
+\TUD@UnwindPackage{hyperref}{%
   \ClassWarningNoLine{tudscrmanual}%
   {%
     It is strongly recommended to load package `hyperref'. \MessageBreak%
@@ -741,64 +796,6 @@
       \fi%
     }%
   \tud@res@c%
-}
-\NewDocumentCommand\tud@auxlist@register{s D(){\@firstofone} m}{%
-  \expandafter\newcommand\expandafter*\csname#3@auxlist\endcsname{}%
-  \expandafter\newcommand\expandafter*\csname#3@auxlist@positive\endcsname{}%
-  \expandafter\newcommand\expandafter*\csname#3@auxlist@negative\endcsname{}%
-  \expandafter\newcommand\expandafter*\csname#3@auxlist@handler\endcsname{#2}%
-  \BeforeClosingMainAux{%
-    \forlistcsloop{\listcsremove{#3@auxlist@positive}}{#3@auxlist@negative}%
-  }%
-  \BeforeClosingMainAux{\tud@auxlist@export{#3}}%
-  \AtBeginDocument{\tud@auxlist@import{#3}{#1}}%
-}
-\newcommand*\tud@auxlist@export[1]{%
-  \if@filesw%
-    \let\tud@res@a\@empty%
-    \def\tud@res@b##1{\eappto\tud@res@a{\@percentchar^^J\@spaces{##1}}}%
-    \forlistcsloop\tud@res@b{#1@auxlist@positive}%
-    \immediate\write\@mainaux{%
-      \string\gdef\expandafter\string\csname #1@auxlist\endcsname%
-        {\expandonce\tud@res@a\@percentchar^^J}%
-    }%
-  \fi%
-}
-\newcommand*\tud@auxlist@import[2]{%
-  \begingroup%
-    \edef\tud@res@a{\unexpanded{\@tfor\tud@res@c:=}\csexpandonce{#1@auxlist}}%
-    \letcs\tud@res@b{#1@auxlist@handler}%
-    \global\cslet{#1@auxlist}\@empty%
-    \tud@res@a\do{%
-      \edef\tud@res@c{\tud@res@b{\tud@res@c}}%
-      \listcsxadd{#1@auxlist}{\expandonce\tud@res@c}%
-    }%
-  \endgroup%
-  \IfBooleanT{#2}{\forlistcsloop{\@firstofone}{#1@auxlist}}%
-}
-\newcommand*\tud@auxlist@add[2]{%
-  \begingroup%
-    \protected@edef\tud@res@a{#2}%
-    \edef\tud@res@a{\detokenize\expandafter{\tud@res@a}}%
-    \tud@unique@csxadd{#1@auxlist@positive}{\tud@res@a}%
-  \endgroup%
-}
-\newcommand*\tud@auxlist@remove[2]{%
-  \begingroup%
-    \protected@edef\tud@res@a{#2}%
-    \edef\tud@res@a{\detokenize\expandafter{\tud@res@a}}%
-    \tud@unique@csxadd{#1@auxlist@negative}{\tud@res@a}%
-  \endgroup%
-}
-\newcommand*\tud@auxlist@ifin[2]{%
-  \begingroup%
-    \protected@edef\tud@res@a{#1}%
-    \letcs\tud@res@b{#2@auxlist@handler}%
-    \edef\tud@res@a{%
-      \endgroup%
-      \noexpand\ifinlistcs{\tud@res@b{\tud@res@a}}{#2@auxlist}%
-    }%
-  \tud@res@a%
 }
 \newcommand*\tud@lbl@tmp{}
 \NewDocumentCommand\tud@lbl@get{m m}{%
@@ -1796,9 +1793,12 @@
 }
 \tud@newcount\tud@markup@type@num
 \TUD@key[.markup]{type}{%
-  \TUD@set@numkey{type}{tud@markup@type@num}{%
+  \TUD@set@numkey{type}{@tempa}{%
     {default}{0},{value}{1},{param}{2}%
   }{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \tud@markup@type@num=\@tempa\relax%
+  \fi%
 }
 \NewDocumentCommand\NewMarkupCommand{s m O{} D(){\texttt} D<>{} D''{ic} m}{%
   \begingroup%
@@ -5282,7 +5282,7 @@
 \newcommand*\@ToDo[2][]{%
   \expandafter\todo\expandafter[\expandafter{#1}]{\trim@spaces{#2}\strut}%
 }
-\SurrogatePackage{todonotes}{%
+\TUD@UnwindPackage{todonotes}{%
   \RenewDocumentCommand\ToDo{s o m !o}{}%
   \newcommand*\ListOfToDo{}%
 }

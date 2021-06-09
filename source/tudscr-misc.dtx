@@ -486,9 +486,365 @@
 %
 % \iffalse
 %</body>
+%<*util&list>
+% \fi
+%
+% \subsection{Verarbeitung von Listen}
+% \subsubsection{Externe Hilfslisten}
+%
+% \begin{macro}{\tud@auxlist@register}
+% \changes{v2.07}{2019/11/08}{neu}^^A
+% Hiermit wird eine Hilfsliste initialisiert und die Befehle ausgeführt, um 
+% diese am Ende des Dokumentes in die aux"~Datei schreiben und im nachfolgenden 
+% Durchlauf wieder einlesen und verarbeiten zu können.
+%
+% Das obligatorische Argument enthält den Namen der Liste. Das vorherige 
+% optionale Argument wird bei der Verarbeitung auf jedes Listenelement 
+% angewendet, bevor es zur Liste hinzugefügt oder mit dieser verglichen wird.
+% Die Sternversion führt nach dem Einlesen der Liste die enthaltenen Elemente 
+% einzeln aus.
+%
+% Dabei werden drei Makros verwendet. Der Befehl \cs{\meta{listname}@auxlist} 
+% enthält die importierte Liste. In \cs{\meta{listname}@auxlist@positive} 
+% werden alle potentiellen Einträge in einer Positivliste vorgehalten, die 
+% exportiert werden sollen. Da im Verlauf des Dokumentes allerdings bestimmte
+% Elemente wieder entfernt werden könnten, wird die Negativliste für diese 
+% genutzt. Dieses Konstrukt dient dazu, dass beim Kompilieren des Dokumentes 
+% möglicherweise Elemente auftreten, die gar nicht exportiert werden sollen, 
+% obwohl diese später der Positivliste hinzugefügt werden könnten.
+%    \begin{macrocode}
+\NewDocumentCommand\tud@auxlist@register{s D(){\@firstofone} m}{%
+  \expandafter\newcommand\expandafter*\csname#3@auxlist\endcsname{}%
+  \expandafter\newcommand\expandafter*\csname#3@auxlist@positive\endcsname{}%
+  \expandafter\newcommand\expandafter*\csname#3@auxlist@negative\endcsname{}%
+  \expandafter\newcommand\expandafter*\csname#3@auxlist@handler\endcsname{#2}%
+  \BeforeClosingMainAux{%
+    \forlistcsloop{\listcsremove{#3@auxlist@positive}}{#3@auxlist@negative}%
+    \tud@auxlist@export{#3}%
+  }%
+  \AtBeginDocument{\tud@auxlist@import{#3}{#1}}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@auxlist@register
+% \begin{macro}{\tud@auxlist@export}
+% \changes{v2.07}{2019/11/08}{neu}^^A
+% \begin{macro}{\tud@auxlist@import}
+% \changes{v2.07}{2019/11/08}{neu}^^A
+%    \begin{macrocode}
+% Beim Schreiben in die aux"~Datei wird die \pkg{etoolbox}"~Liste in eine 
+% Token-Liste umgewandelt.
+\newcommand*\tud@auxlist@export[1]{%
+  \if@filesw%
+    \let\tud@res@a\@empty%
+    \def\tud@res@b##1{\eappto\tud@res@a{\@percentchar^^J\@spaces{##1}}}%
+    \forlistcsloop\tud@res@b{#1@auxlist@positive}%
+    \immediate\write\@mainaux{%
+      \string\gdef\expandafter\string\csname #1@auxlist\endcsname%
+        {\expandonce\tud@res@a\@percentchar^^J}%
+    }%
+  \fi%
+}
+%    \end{macrocode}
+% Beim Lesen wird die Token-Liste zurück in eine \pkg{etoolbox}"~Liste 
+% gewandelt.
+%    \begin{macrocode}
+\newcommand*\tud@auxlist@import[2]{%
+  \begingroup%
+    \edef\tud@res@a{\unexpanded{\@tfor\tud@res@c:=}\csexpandonce{#1@auxlist}}%
+    \letcs\tud@res@b{#1@auxlist@handler}%
+    \global\cslet{#1@auxlist}\@empty%
+    \tud@res@a\do{%
+      \edef\tud@res@c{\tud@res@b{\tud@res@c}}%
+      \listcsxadd{#1@auxlist}{\expandonce\tud@res@c}%
+    }%
+  \endgroup%
+  \IfBooleanT{#2}{\forlistcsloop{\@firstofone}{#1@auxlist}}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@auxlist@import
+% \end{macro}^^A \tud@auxlist@export
+%
+% \begin{macro}{\tud@auxlist@add}
+% \changes{v2.07}{2019/11/08}{neu}^^A
+% \begin{macro}{\tud@auxlist@remove}
+% \changes{v2.07}{2019/11/08}{neu}^^A
+% \begin{macro}{\tud@auxlist@ifin}
+% \changes{v2.07}{2019/11/08}{neu}^^A
+%    \begin{macrocode}
+\newcommand*\tud@auxlist@add[2]{%
+  \begingroup%
+    \protected@edef\tud@res@a{#2}%
+    \edef\tud@res@a{\detokenize\expandafter{\tud@res@a}}%
+    \tud@unique@csxadd{#1@auxlist@positive}{\tud@res@a}%
+  \endgroup%
+}
+\newcommand*\tud@auxlist@remove[2]{%
+  \begingroup%
+    \protected@edef\tud@res@a{#2}%
+    \edef\tud@res@a{\detokenize\expandafter{\tud@res@a}}%
+    \tud@unique@csxadd{#1@auxlist@negative}{\tud@res@a}%
+  \endgroup%
+}
+\newcommand*\tud@auxlist@ifin[2]{%
+  \begingroup%
+    \protected@edef\tud@res@a{#1}%
+    \letcs\tud@res@b{#2@auxlist@handler}%
+    \edef\tud@res@a{%
+      \endgroup%
+      \noexpand\ifinlistcs{\tud@res@b{\tud@res@a}}{#2@auxlist}%
+    }%
+  \tud@res@a%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@auxlist@ifin
+% \end{macro}^^A \tud@auxlist@remove
+% \end{macro}^^A \tud@auxlist@add
+% \begin{macro}{\tud@unique@add}
+% \changes{v2.07}{2021/06/08}{neu}^^A
+% \begin{macro}{\tud@unique@eadd}
+% \changes{v2.07}{2021/06/08}{neu}^^A
+% \begin{macro}{\tud@unique@xadd}
+% \changes{v2.07}{2021/06/08}{neu}^^A
+% \begin{macro}{\tud@unique@csxadd}
+% \changes{v2.07}{2021/06/08}{neu}^^A
+% \begin{macro}{\listeremove}
+% \changes{v2.07}{2021/06/08}{neu}^^A
+% Ein wenig syntaktischer Zucker für Listen ohne Duplikate.
+%    \begin{macrocode}
+\newcommand*\tud@unique@add[2]{%
+  \ifinlist{#2}{#1}{}{\listadd#1{#2}}%
+}
+\newcommand*\tud@unique@eadd[2]{%
+  \xifinlist{#2}{#1}{}{\listeadd#1{#2}}%
+}
+\newcommand*\tud@unique@xadd[2]{%
+  \xifinlist{#2}{#1}{}{\listxadd#1{#2}}%
+}
+\newcommand*\tud@unique@csxadd[2]{%
+  \xifinlistcs{#2}{#1}{}{\listcsxadd{#1}{#2}}%
+}
+\providerobustcmd*\listeremove[2]{%
+  \begingroup%
+    \edef\etb@tempa{\endgroup\unexpanded{\listremove#1}{#2}}%
+  \etb@tempa%
+}
+%    \end{macrocode}
+% \end{macro}^^A \listeremove
+% \end{macro}^^A \tud@unique@csxadd
+% \end{macro}^^A \tud@unique@xadd
+% \end{macro}^^A \tud@unique@eadd
+% \end{macro}^^A \tud@unique@add
+%
+% \subsubsection{Sortieren von Listen}
+%
+% \begin{macro}{\tud@list@sort}
+% \changes{v2.02}{2014/07/25}{neu}^^A
+% \changes{v2.07}{2019/09/20}{Hilfskonstrukt kommaseparierte Liste entfernt}^^A
+% \begin{macro}{\tud@list@@sort}
+% \changes{v2.02}{2014/07/25}{neu}^^A
+% \begin{macro}{\tud@list@@@sort}
+% \changes{v2.07}{2019/09/20}{neu}^^A
+% \begin{macro}{\tud@list@sorted}
+% \changes{v2.02}{2014/07/25}{neu}^^A
+% \begin{macro}{\if@tud@list@sorted}
+% \changes{v2.02}{2014/07/25}{neu}^^A
+% Der Befehl \cs{tud@list@sort} erwartet eine \pkg{etoolbox}-Liste und sortiert 
+% diese mit dem Makro \cs{sort@list} in alphabetischer Reihenfolge.
+%    \begin{macrocode}
+\tud@newif\if@tud@list@sorted
+\newcommand*\tud@list@sorted{}
+\newcommand*\tud@list@sort[1]{%
+  \ifdefvoid{#1}{%
+    \ClassWarning{tudscrmanual}{%
+      The given list \string#1\space\MessageBreak%
+      is empty, nothing to sort here%
+    }%
+  }{%
+    \begingroup%
+      \let\tud@list@sorted\@empty%
+      \forlistloop\tud@list@@sort{#1}%
+      \edef\tud@res@c{%
+        \endgroup%
+        \unexpanded{\def#1}{\expandonce\tud@list@sorted}%
+      }%
+    \tud@res@c%
+  }%
+}
+%    \end{macrocode}
+% Hier erfolgt die eigentliche Sortierung der Liste.
+%    \begin{macrocode}
+\newcommand*\tud@list@@sort[1]{%
+%    \end{macrocode}
+% Die Einräge werden mit \cs{pdfstrcmp} an der richtigen Stelle eingefügt.
+% Dabei wird die temporäre Liste \cs{tud@list@sorted} durchlaufen und
+% \cs{tud@res@a} als Hilfsmakro verwendet, in welches die aktuelle Liste
+% innerhalb der \cs{@forlistloop}-Schleife stückweise expandiert wird. Wenn das
+% aktuelle Element an der dafür passenden Stelle eingesetzt wurde, wird
+% \cs{if@tud@list@sorted} gesetzt und der restliche Teil von 
+% \cs{tud@list@sorted} an \cs{tud@res@a} angehängt.
+%    \begin{macrocode}
+  \@tud@list@sortedfalse%
+  \let\tud@res@a\@empty%
+  \forlistloop{\tud@list@@@sort\tud@res@a{#1}}{\tud@list@sorted}%
+%    \end{macrocode}
+% Wurde der Eintrag nach dem Durchlaufen der Liste nicht eingefügt, so erfolgt 
+% dies hier am Ende der Liste.
+%    \begin{macrocode}
+  \if@tud@list@sorted\else%
+    \listadd\tud@res@a{#1}%
+  \fi%
+%    \end{macrocode}
+% Die temporäre Liste \cs{tud@res@a} wird in \cs{tud@list@sorted} geschrieben.
+%    \begin{macrocode}
+  \let\tud@list@sorted\tud@res@a%
+}
+%    \end{macrocode}
+% Das Makro für die eigentliche Sortierung.
+%    \begin{macrocode}
+\newcommand*\tud@list@@@sort[3]{%
+%    \end{macrocode}
+% Ist der Eintrag bereits erfolgt, wird der verbliebene Teil der Liste 
+% angehangen.
+%    \begin{macrocode}
+  \if@tud@list@sorted%
+    \listadd#1{#3}%
+  \else%
+%    \end{macrocode}
+% Liegt der Eintrag in alphabetischer Reihenfolge vor dem aktuellen der 
+% durchlaufenenen Liste, so wird dieser davor eingefügt. Anschließend wird 
+% \cs{@tud@list@sortedtrue} gesetzt.
+%    \begin{macrocode}
+    \ifnum\pdf@strcmp{#2}{#3}<\z@\relax%
+      \listadd#1{#2}%
+      \listadd#1{#3}%
+      \@tud@list@sortedtrue%
+    \else%
+%    \end{macrocode}
+% Ist Eintrag in alphabetischer Reihenfolge nach dem aktuellen der geprüften 
+% Liste, so wird dieser (noch) nicht eingefügt. 
+%    \begin{macrocode}
+      \listadd#1{#3}%
+    \fi%
+  \fi%
+}
+%    \end{macrocode}
+% \end{macro}^^A \if@tud@list@sorted
+% \end{macro}^^A \tud@list@sorted
+% \end{macro}^^A \tud@list@@@sort
+% \end{macro}^^A \tud@list@@sort
+% \end{macro}^^A \tud@list@sort
+%
+% \iffalse
+%</util&list>
+%<*util&string>
+% \fi
+%
+%
+%
+% \subsection{Stringmanipulation}
+%
+% \begin{macro}{\tud@remove@enfold@char}
+% \changes{v2.07}{2019/11/08}{neu}^^A
+% Entfernt aus der einfachen Expansion des ersten Argumentes am Anfang und Ende 
+% das im zweiten Argument angegebene Zeichen.
+%    \begin{macrocode}
+\newcommand*\tud@remove@enfold@char[2]{%
+  \begingroup%
+    \edef\tud@res@b{\expandonce{#1}}%
+    \trim@spaces@in\tud@res@b%
+    \expandafter\in@\expandafter#2\expandafter{\tud@res@b}%
+    \ifin@%
+      \let\tud@res@a\@empty%
+      \def\tud@res@c##1#2##2\@nil{%
+        \IfArgIsEmpty{##1}{}{%
+          \ifx\tud@res@a\@empty%
+            \def\tud@res@a{##1}%
+          \else%
+            \appto\tud@res@a{#2##1}%
+          \fi%
+        }%
+        \IfArgIsEmpty{##2}{}{\tud@res@c##2\@nil}%
+      }%
+      \expandafter\tud@res@c\tud@res@b#2\@nil%
+    \else%
+      \let\tud@res@a\tud@res@b%
+    \fi%
+    \edef\tud@res@a{%
+      \endgroup%
+      \unexpanded{\def#1}{\expandonce\tud@res@a}%
+    }%
+  \tud@res@a%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@remove@enfold@char
+%
+% \begin{macro}{\tud@replace@in}
+% \changes{v2.05}{2015/11/01}{neu}^^A
+% \changes{v2.07}{2019/11/08}{neu}^^A
+% \begin{macro}{\tud@replace@@in}
+% \changes{v2.07}{2019/11/08}{neu}^^A
+% Mit diesem Befehl kann in einem gegebenen Makro ein bestimmtes Zeichen durch 
+% ein anderes ersetzt werden. Dies wird verwendet, um für Indexbefehle die 
+% möglicherweise enthaltenen |@|"~Zeichen oder in Datei- und Pfadangaben 
+% Unterstriche zu ersetzen.
+%    \begin{macrocode}
+\newcommand*\tud@replace@in[3]{%
+  \begingroup%
+%    \end{macrocode}
+% Zunächst wird der Inhalt des ersten Argumentes expandiert. Anschließend 
+% wird \cs{tud@res@b} als ein durch \cs{@nil} abgegrenztes Makro mit zwei
+% Argumenten definiert, wobei diese durch das im zweiten Argument gegebene 
+% \meta{Zeichen} voneinander abgegrenzt werden. Dieses Makro wird nun so lange 
+% rekursiv mit dem zweiten Teil aufgerufen, bis dieses leer is. Dabei wird der 
+% erste, durch das angegebene zu ersetzende Zeichen Teil sukzessive an 
+% \cs{tud@res@c} angehängt und um das im dritten Argument angegebene 
+% Ersatzzeichen vervollständigt.
+%    \begin{macrocode}
+    \edef\tud@res@a{\expandonce{#1}}%
+    \let\tud@res@c\@empty%
+    \def\tud@res@b##1#2##2\@nil{%
+      \IfArgIsEmpty{##2}{%
+        \appto\tud@res@c{##1}%
+      }{%
+        \appto\tud@res@c{##1#3}%
+        \tud@res@b##2\@nil%
+      }%
+    }%
+    \expandafter\tud@res@b\tud@res@a#2\@nil%
+    \edef\tud@res@a{%
+      \endgroup%
+      \unexpanded{\def#1}{\expandonce\tud@res@c}%
+    }%
+  \tud@res@a%
+}
+%    \end{macrocode}
+% Diese Variante sorgt dafür, dass die zu ersetzenden Zeichen alle als Strings 
+% behandelt werden.
+%    \begin{macrocode}
+\newcommand*\tud@replace@@in[3]{%
+  \begingroup%
+    \protected@edef\tud@res@a{#1}%
+    \edef\tud@res@a{\detokenize\expandafter{\tud@res@a}}%
+    \edef\tud@res@b{%
+      \unexpanded{\tud@replace@in\tud@res@a}{\detokenize{#2}}{\detokenize{#3}}%
+    }%
+    \tud@res@b%
+    \edef\tud@res@a{%
+      \endgroup%
+      \unexpanded{\def#1}{\tud@res@a}%
+    }%
+  \tud@res@a%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@replace@@in
+% \end{macro}^^A \tud@replace@in
+%
+% \iffalse
+%</util&string>
 %<*option>
 % \fi
 %
+% \section{Verarbeitung von Optionen}
 % \subsection{Sukkzessives Abarbeiten von Optionen im Dokument}
 %
 % Werden mit \cs{TUDoptions} nach \cs{begin\{document\}} mehrere Layoutoptionen 
@@ -681,7 +1037,10 @@
 \DeclareOption*{\expandafter\TUD@KOMAoptions\expandafter{\CurrentOption}}
 %</fonts>
 %<*fixfonts>
-\DeclareOption*{\expandafter\PassOptionsToPackage\expandafter{\CurrentOption}{tudscrfonts}}
+\DeclareOption*{%
+  \expandafter\PassOptionsToPackage\expandafter{\CurrentOption}%
+  {tudscrfonts}%
+}
 %</fixfonts>
 %<*comp>
 \DeclareOption*{\expandafter\TUDoptions\expandafter{\CurrentOption}}
@@ -692,7 +1051,10 @@
 \DeclareOption*{\tud@x@scr@checkoptions}
 %</!inherit>
 %<*inherit>
-\DeclareOption*{\expandafter\PassOptionsToClass\expandafter{\CurrentOption}{\TUD@Class@Parent}}
+\DeclareOption*{%
+  \expandafter\PassOptionsToClass\expandafter{\CurrentOption}%
+  {\TUD@Class@Parent}%
+}
 %</inherit>
 %</class>
 %    \end{macrocode}
