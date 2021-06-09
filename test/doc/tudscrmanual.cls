@@ -4224,7 +4224,7 @@
     \if@tud@res@swa%
       \ifnum\tud@declare@mode@num>\z@\relax%
         \IfValueT{#7}{%
-          \typeout{????? 7: \detokenize{#7}}%
+%          \typeout{????? 7: \detokenize{#7}}%
           \appto\tud@res@b{[#7]}%
         }%
       \fi%
