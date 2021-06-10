@@ -156,7 +156,7 @@
 % \changes{v2.07}{2019/10/19}{neu}^^A
 % \begin{macro}{\tud@GetFileInfo}
 % \changes{v2.07}{2019/10/19}{neu}^^A
-% \begin{macro}{\tud@Get@FileInfo}
+% \begin{macro}{\tud@@GetFileInfo}
 % \changes{v2.07}{2019/10/19}{neu}^^A
 % \begin{macro}{\tud@git@file@list}
 % \changes{v2.07}{2019/10/20}{neu}^^A
@@ -189,7 +189,7 @@
   \ifcsname\filename-ver\endcsname%
     \def\@tempa##1 ##2 ##3\@nil{%
       \def\filedate{##1}%
-      \def\fileversion{##2}%
+      \let\fileversion\@empty%
       \def\filerevision{##3}%
     }%
     \edef\@tempb{\csname\filename-ver\endcsname}%
@@ -202,22 +202,14 @@
 % Verhalten von \cs{GetFileInfo} zurückgeschaltet.
 %    \begin{macrocode}
     \PackageWarningNoLine{tudscr-gitinfo}{No git info found for \filename}%
-    \expandafter\tud@Get@FileInfo\expandafter{\filename}%
+    \expandafter\tud@@GetFileInfo\expandafter{\filename}%
   \fi%
 }
-\newcommand*\tud@Get@FileInfo[1]{%
-  \ifx\filedate\@undefinded%
-    \edef\filedate{?}%
-  \fi%
-  \ifx\fileversion\@undefinded%
-    \def\fileversion{?}%
-  \fi%
-  \ifx\filerevision\@undefinded%
-    \let\filerevision\@empty%
-  \fi%
-  \ifx\fileinfo\@undefinded%
-    \let\fileinfo\@empty%
-  \fi%
+\newcommand*\tud@@GetFileInfo[1]{%
+  \@ifundefined{filedate}{\def\filedate{?}}{}%
+  \@ifundefined{fileversion}{\def\fileversion{?}}{}%
+  \@ifundefined{filerevision}{\let\filerevision\@empty}{}%
+  \@ifundefined{fileinfo}{\let\fileinfo\@empty}{}%
 %    \end{macrocode}
 % Verbesserte Variante, um nicht \cs{relax?} in die Felder zu schreiben.
 %    \begin{macrocode}
@@ -250,7 +242,7 @@
 \AfterPackage*{doc}{\def\GetFileInfo{\tud@GetFileInfo}}
 %    \end{macrocode}
 % \end{macro}^^A \tud@git@file@list
-% \end{macro}^^A \tud@Get@FileInfo
+% \end{macro}^^A \tud@@GetFileInfo
 % \end{macro}^^A \tud@GetFileInfo
 % \end{macro}^^A \GetFileInfo
 % \begin{macro}{\tud@git@log}

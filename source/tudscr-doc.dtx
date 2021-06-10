@@ -161,12 +161,15 @@
 %    \begin{macrocode}
 \newcommand*\FormatRevision[1]{\texttt{#1}}
 \AtEndOfClass{%
-  \title{\file{\filename}}%
-  \author{Falk Hanisch\qquad\expandafter\mailto\expandafter{\TUDScriptContact}}%
-  \date{%
-    \filedate\nobreakspace\fileversion%
-    \ifx\filerevision\@empty\else\nobreakspace\FormatRevision{\filerevision}\fi%
-  }%
+  \@ifpackageloaded{tudscr-gitinfo}{%
+    \GetFileInfo{\jobname}%
+    \title{\file{\filename}}%
+    \date{%
+      \filedate%
+      \ifdefvoid\fileversion{}{\nobreakspace\fileversion}%
+      \ifdefvoid\filerevision{}{\nobreakspace\FormatRevision{\filerevision}}%
+    }%
+  }{}%
   \KOMAoptions{parskip=half-}%
   \CodelineIndex%
   \RecordChanges%
@@ -176,15 +179,19 @@
 % Beginn des Dokumentes.
 %    \begin{macrocode}
 \AtBeginDocument{%
-  \ifx\filename\@undefinded%
+  \ifundef\filename{%
     \IfFileExists{\jobname.dtx}{%
       \edef\filename{\jobname.dtx}%
     }{%
       \edef\filename{\jobname.tex}%
     }%
+    \undef\filedate%
+    \undef\fileversion%
+    \undef\filerevision%
+    \undef\fileinfo%
     \expandafter\GetFileInfo\expandafter{\filename}%
-  \fi%
-  \ifx\filerevision\@undefinded\let\filerevision\@empty\fi%
+  }{}%
+  \ifundef\filerevision{\let\filerevision\@empty}{}%
 }
 %    \end{macrocode}
 %
@@ -292,28 +299,18 @@
 \pretocmd\@docinclude{%
   \GetFileInfo{#1}\pagestyle{tudscrdoc}%
 }{}{\tud@patch@wrn{@docinclude}}
-\apptocmd\@docinclude{%
-  \let\filename\@undefinded%
-  \let\filedate\@undefinded%
-  \let\fileversion\@undefinded%
-  \let\filerevision\@undefinded%
-  \let\fileinfo\@undefinded%
-}{}{\tud@patch@wrn{@docinclude}}
 \def\ps@tudscrdoc{%
   \let\@mkboth\@gobbletwo%
-  \let\@oddhead\@empty\let\@evenhead\@empty%
+  \let\@oddhead\@empty%
+  \let\@evenhead\@empty%
   \def\@oddfoot{%
-    \ifx\filename\@undefinded? ? ?\else%
-      File\ifnum\c@part>\z@\nobreakspace\thepart\fi:%
-      \nobreakspace\texttt{\filename}%
-      \enskip Version: \ifx\filedate\@undefinded?\else\filedate\fi%
-      \nobreakspace\ifx\fileversion\@undefinded?\else\fileversion\fi%
-      \ifx\filerevision\@undefinded\let\filerevision\@empty\fi%
-      \ifx\filerevision\@empty\else%
-        \enskip\FormatRevision{\filerevision}%
-      \fi%
-    \fi%
-    \hfill\thepage}%
+    File\ifnum\c@part>\z@\nobreakspace\thepart\fi:%
+    \nobreakspace\texttt{\ifdefvoid\filename{?}{\filename}}%
+    \enskip Version:\nobreakspace\ifdefvoid\filedate{?}{\filedate}%
+    \ifdefvoid\fileversion{}{\nobreakspace\fileversion}%
+    \ifdefvoid\filerevision{}{\enskip\FormatRevision{\filerevision}}%
+    \hfill\thepage%
+  }%
   \def\@evenfoot{\@oddfoot}%
 }
 \pagestyle{tudscrdoc}%
@@ -1349,7 +1346,6 @@
 % Für ToDo-Notizen wird am Ende eine Liste aller offenen Punkte ausgegeben.
 %    \begin{macrocode}
 \DeclareNewTOC[%
-  type=todo,%
   listname={\tud@todo@name},%
   name=ToDo,%
   tocentryindent=\z@,%
