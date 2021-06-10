@@ -86,127 +86,21 @@ gutes Tutorial.
 
 
 \section{%
-  Worttrennungen in deutschsprachigen Texten%
-  \label{sec:tips:hyphenation}%
-  \index{Worttrennung|!}%
-  \index{Trennungsmuster}%
+  URL-Umbrüche im Literaturverzeichnis mit \Package{biblatex}%
+  \index{Literaturverzeichnis}%
 }
 %
-\Hint{v2.02}{Worttrennung}%
-Die möglichen Trennstellen von Wörtern werden von \sflogo{LaTeX} mithilfe 
-eines Algorithmus berechnet. Dieser ist jedoch in seiner ursprünglichen Form 
-für die englische Sprache konzipiert worden. Für deutschsprachige Texte wird 
-die Worttrennung~-- insbesondere bei zusammengeschriebenen Wörtern~-- mit dem 
-Paket \Package{hyphsubst} entscheidend verbessert, welches ein um vielerlei 
-Trennungsmuster ergänztes Wörterbuch aus dem Paket \Package{dehyph-exptl} 
-nutzt. Weiterhin muss eines der beiden Sprachpakete \Package{babel} oder
-\Package{polyglossia} geladen werden. 
-
-Für \Format{pdfLaTeX} ist zusätzlich das Paket \Package{fontenc} beispielsweise 
-mit der \PValue{T1}~Schriftkodierung erforderlich, damit auch Wörter mit 
-Umlauten richtig getrennt werden. Bei der Verwendung von \Format{LuaLaTeX} 
-oder \Format{XeLaTeX} werden~-- in Verbindung mit einem der zwei genannten 
-Sprachpakete~-- die besseren Trennungsmuster automatisch aktiviert. Der Beginn 
-einer Dokumentpräambel könnte folgendermaßen aussehen:
-%
-\begin{quoting}[rightmargin=0pt]
-\begin{Code}[escapechar=§]
-\documentclass[ngerman,§\PName{Klassenoptionen}§]§\MPName{Dokumentklasse}§
-\usepackage{iftex}
-\iftutex
-  \usepackage{fontspec}
-\else
-  \usepackage[T1]{fontenc}
-  \usepackage[ngerman=ngerman-x-latest]{hyphsubst}
-\fi
-\usepackage{babel}
-\end{Code}
-\end{quoting}
-%
-Eine Anmerkung noch zur Trennung von Wörtern mit Bindestrichen. Normalerweise 
-sind die beiden von \sflogo{LaTeX} verwendeten Zeichen für Bindestrich und 
-Trennstrich identisch. Leider wird der Trennungsalgorithmus von \sflogo{LaTeX} 
-bei Wörtern, welche bereits einen Bindestrich enthalten, außer Kraft gesetzt. 
-In der Folge werden~-- in der deutschen Sprache durchaus öfter anzutreffende~-- 
-Wortungetüme wie die \enquote{Donaudampfschifffahrts-Gesellschafterversammlung} 
-normalerweise nur direkt nach dem angegebenen Bindestrich getrennt. 
-
-Allerdings gibt es die Möglichkeit, das genutzte Zeichen für den Trennstrich 
-zu ändern. Dafür ist das Laden der \PValue{T1}"~Schriftkodierung mit dem Paket 
-\Package{fontenc} zwingend erforderlich. Wenn von der verwendeten Schrift 
-nichts anderes eingestellt ist, liegen sowohl Binde- als auch Trennstrich auf 
-Position~\PValue{45} der Zeichentabelle. In der \PValue{T1}"~Schriftkodierung 
-befindet sich auf der Position~\PValue{127} glücklicherweise für gewöhnlich das 
-gleiche Zeichen noch einmal. Dies ist jedoch von der verwendeten Schrift 
-abhängig. Wird der Ausdruck \Macro*{defaulthyphenchar|\PValue{=127}} vor dem 
-Laden des Paketes \Package{fontenc} verwendet, kann dieses Zeichen für den 
-Trennstrich genutzt werden. 
-
-Sollte trotz aller Maßnahmen dennoch einmal ein bestimmtes Wort falsch getrennt 
-werden, so kann die Worttrennung dieses Wortes manuell und global geändert 
-werden. Dies wird mit \Macro{hyphenation|\MPValue{Sil-ben-tren-nung}} gemacht. 
-Es ist zu beachten, dass dies für alle Flexionsformen des Wortes erfolgen 
-sollte. Für eine lokale/temporäre Worttrennung kann mit Befehlen aus dem Paket 
-\Package{babel} gearbeitet werden. Diese sind: 
-
-\vskip\medskipamount\noindent
-\begingroup
-\newcommand*\listhyphens[2]{#1&\PValue{#2}\tabularnewline}%
-\begin{tabular}{@{}ll}
-  \textbf{Beschreibung}&\textbf{Befehl}\tabularnewline
-  \listhyphens{ausschließliche Trennstellen}{\textbackslash-}
-  \listhyphens{zusätzliche Trennstellen}{"'-} 
-  \listhyphens{Umbruch ohne Trennstrich}{"'"'}
-  \listhyphens{Bindestrich ohne Umbruch}{"'\textasciitilde} 
-  \listhyphens{Bindestrich, der weitere Trennstellen erlaubt}{"'=}
-\end{tabular}
-\endgroup
-
-
-
-\section{%
-  Lokale Änderungen von Befehlen und Einstellungen%
-  \label{sec:tips:local}%
-  \index{Befehle}%
-  \index{Umgebungen}%
-  \index{Befehlsdeklaration!Geltungsbereich}%
-}
-%
-\Hint{v2.02}{Lokale Änderungen}%
-Ein zentraler Bestandteil von \sflogo{LaTeX} ist die Verwendung von Gruppen 
-oder Gruppierungen. Innerhalb dieser bleiben alle vorgenommenen Änderungen an 
-Befehlen, Umgebungen oder Einstellungen lokal. Dies kann sehr nützlich sein, 
-wenn beispielsweise das Verhalten eines bestimmten Makros einmalig oder 
-innerhalb von selbst definierten Befehlen oder Umgebungen geändert werden, im 
-Normalfall jedoch die ursprüngliche Funktionalität behalten soll.
-%
-\begin{Example}
-\index{Schriftauszeichnung}%
-Der Befehl \Macro{emph} wird von \sflogo{LaTeX} für Hervorhebungen im Text 
-bereitgestellt und führt normalerweise zu einer kursiven oder~-- falls kein 
-Schriftschnitt mit echten Kursiven vorhanden ist~-- kursivierten oder auch 
-geneigten Auszeichnung. Soll diese zwischenzeitlich mit fetter Schrift 
-erfolgen, kann \Macro{emph} innerhalb einer Gruppierung umdefiniert werden. 
-Wird diese beendet, verhält sich der Befehl wie gewohnt.
-\begin{Code}
-In diesem Text wird genau ein \emph{Wort} hervorgehoben.
-\begingroup
-  \renewcommand*{\emph}[1]{\textbf{#1}}%
-  In diesem Text wird genau ein \emph{Wort} hervorgehoben.
-\endgroup
-In diesem Text wird genau ein \emph{Wort} hervorgehoben.
-\end{Code}
-In diesem Text wird genau ein \emph{Wort} hervorgehoben.
-\begingroup
-  \renewcommand*{\emph}[1]{\textbf{#1}}%
-  In diesem Text wird genau ein \emph{Wort} hervorgehoben.
-\endgroup
-In diesem Text wird genau ein \emph{Wort} hervorgehoben.
-\end{Example}
-%
-Eine Gruppierung kann entweder mit \Macro*{begingroup} und \Macro*{endgroup} 
-oder einfach mit einem geschweiften Klammerpaar \MPValue{\dots} definiert 
-werden.
+\Hint{v2.02}{URL-Umbrüche im Literaturverzeichnis}%
+Wird das Paket \Package{biblatex} verwendet, kann es unter Umständen dazu 
+kommen, das eine URL nicht vernünftig umbrochen wird. Ist dies der Fall, 
+können die Zähler \Counter{biburlnumpenalty}, \Counter{biburlucpenalty} und 
+\Counter{biburllcpenalty} erhöht werden. Das Manipulieren eines Zählers kann 
+mit \Macro*{setcounter|\MPName{Zähler}} oder lokal mit 
+\Macro||{defcounter|\MPName{Zähler}} aus dem Paket \Package{etoolbox} erfolgen. 
+Die möglichen Werte liegen zwischen 0~und~10\,000, wobei es bei höheren 
+Zählerwerten zu mehr URL"~Umbrüchen an Ziffern~(\Counter{biburlnumpenalty}), 
+Majuskeln~(\Counter{biburlucpenalty}) und Minuskeln~(\Counter{biburllcpenalty}) 
+kommt. Genaueres in der Dokumentation zu \Package{biblatex}.
 
 
 
@@ -238,21 +132,36 @@ Bezeichnungen von Gliederungsebenen können folgendermaßen verändert werden.
 
 
 \section{%
-  URL-Umbrüche im Literaturverzeichnis mit \Package{biblatex}%
-  \index{Literaturverzeichnis}%
+  Warnung beim Erzeugen des Inhaltsverzeichnisses%
+  \index{Inhaltsverzeichnis}%
 }
 %
-\Hint{v2.02}{URL-Umbrüche im Literaturverzeichnis}%
-Wird das Paket \Package{biblatex} verwendet, kann es unter Umständen dazu 
-kommen, das eine URL nicht vernünftig umbrochen wird. Ist dies der Fall, 
-können die Zähler \Counter{biburlnumpenalty}, \Counter{biburlucpenalty} und 
-\Counter{biburllcpenalty} erhöht werden. Das Manipulieren eines Zählers kann 
-mit \Macro*{setcounter|\MPName{Zähler}} oder lokal mit 
-\Macro||{defcounter|\MPName{Zähler}} aus dem Paket \Package{etoolbox} erfolgen. 
-Die möglichen Werte liegen zwischen 0~und~10\,000, wobei es bei höheren 
-Zählerwerten zu mehr URL"~Umbrüchen an Ziffern~(\Counter{biburlnumpenalty}), 
-Majuskeln~(\Counter{biburlucpenalty}) und Minuskeln~(\Counter{biburllcpenalty}) 
-kommt. Genaueres in der Dokumentation zu \Package{biblatex}.
+\Hint{v2.02}{Warnung beim Erzeugen des Inhaltsverzeichnisses}%
+Wird mit \Macro{tableofcontents} das Inhaltsverzeichnis für ein Dokument mit 
+einer dreistelligen Seitenanzahl erstellt, so erscheinen unter Umständen viele 
+Warnungen mit der Meldung:
+%
+\begin{quoting}
+\begin{Code}
+overfull \hbox
+\end{Code}
+\end{quoting}
+%
+Die Seitenzahlen im Verzeichnis werden in einer Box mit einer festen Breite 
+von~\PValue{1.55em} gesetzt, welche im Makro \Macro||{@pnumwidth} hinterlegt 
+ist und im Zweifel vergrößert werden sollte. Dabei ist auch der rechte Rand für 
+\Hint{v2.05}{Warnung beim Erzeugen des Inhaltsverzeichnisses}%
+mehrzeilige Einträge im Verzeichnis \Macro||{@tocrmarg} zu vergrößern, welcher 
+mit~\PValue{2.55em} voreingestellt ist. Die Werte sollten nur minimal geändert 
+werden:
+%
+\begin{quoting}
+\begin{Code}
+\makeatletter
+\renewcommand*{\@pnumwidth}{1.9em}\renewcommand*{\@tocrmarg}{2.9em}
+\makeatother
+\end{Code}
+\end{quoting}
 
 
 
@@ -278,31 +187,18 @@ ersetzen.
 
 
 \section{%
-  Warnung wegen zu geringer Höhe der Kopf-/Fußzeile%
-  \label{sec:tips:headline}%
-  \index{Zeilenabstand}%
-  \index{Layout!Kopfzeile}%
-  \index{Layout!Fußzeile}%
+  Unterbinden des Zurücksetzens von Fußnoten%
+  \label{sec:tips:counter}%
+  \index{Fußnoten}%
+  \index{Zähler}%
 }
 %
-Wird das Paket \Package{setspace} verwendet, kann es passieren, dass nach der 
-Änderung des Zeilenabstandes \emph{innerhalb} des Dokumentes eine oder beide 
-der folgenden Warnungen erscheinen:
-%
-\begin{quoting}
-\begin{Code}
-scrlayer-scrpage Warning: \headheight to low.
-scrlayer-scrpage Warning: \footheight to low.
-\end{Code}
-\end{quoting}
-%
-Dies liegt an dem durch den vergrößerten Zeilenabstand erhöhten Bedarf für die
-Kopf- und Fußzeile, die Höhen können in diesem Fall direkt mit der Verwendung 
-von \Macro{recalctypearea} angepasst werden. Allerdings ändert das den 
-Satzspiegel im Dokument, was eine andere und durchaus berechtigte Warnung von 
-\Package{typearea} zur Folge hat. Falls die Änderung des Zeilendurchschuss 
-wirklich nötig ist, sollte dies in der Präambel des Dokumentes einmalig 
-passieren. Dann entfallen auch die Warnungen.
+Einige \sflogo{LaTeX}"~Zähler werden bei der Inkrementierung eines überlagerten 
+Zählers zurückgesetzt. Diese Abhängigkeit wird durch \Macro{counterwithin} 
+definiert, mit \Macro{counterwithout} kann diese gelöst werden. Durch 
+\Macro{counterwithout|*\MPValue{footnote}\MPValue{chapter}} lässt sich ein 
+Zurücksetzen des Fußnotenzählers für neue Kapitel deaktivieren, um fortlaufende 
+Fußnoten zu realisieren.
 
 
 
@@ -365,56 +261,6 @@ eingerückt ist. Dies kann sehr einfach manuell behoben werden, indem zu Beginn
 des Absatzes das Makro \Macro{noindent} verwendet wird. Soll das Einrücken von 
 Absätzen nach bestimmten Umgebungen oder Befehlen automatisiert unterbunden 
 werden, ist das Paket \Package{noindentafter} zu empfehlen.
-
-
-
-\section{%
-  Unterbinden des Zurücksetzens von Fußnoten%
-  \label{sec:tips:counter}%
-  \index{Fußnoten}%
-  \index{Zähler}%
-}
-%
-Einige \sflogo{LaTeX}"~Zähler werden bei der Inkrementierung eines überlagerten 
-Zählers zurückgesetzt. Diese Abhängigkeit wird durch \Macro{counterwithin} 
-definiert, mit \Macro{counterwithout} kann diese gelöst werden. Durch 
-\Macro{counterwithout|*\MPValue{footnote}\MPValue{chapter}} lässt sich ein 
-Zurücksetzen des Fußnotenzählers für neue Kapitel deaktivieren, um fortlaufende 
-Fußnoten zu realisieren.
-
-
-
-\section{%
-  Warnung beim Erzeugen des Inhaltsverzeichnisses%
-  \index{Inhaltsverzeichnis}%
-}
-%
-\Hint{v2.02}{Warnung beim Erzeugen des Inhaltsverzeichnisses}%
-Wird mit \Macro{tableofcontents} das Inhaltsverzeichnis für ein Dokument mit 
-einer dreistelligen Seitenanzahl erstellt, so erscheinen unter Umständen viele 
-Warnungen mit der Meldung:
-%
-\begin{quoting}
-\begin{Code}
-overfull \hbox
-\end{Code}
-\end{quoting}
-%
-Die Seitenzahlen im Verzeichnis werden in einer Box mit einer festen Breite 
-von~\PValue{1.55em} gesetzt, welche im Makro \Macro||{@pnumwidth} hinterlegt 
-ist und im Zweifel vergrößert werden sollte. Dabei ist auch der rechte Rand für 
-\Hint{v2.05}{Warnung beim Erzeugen des Inhaltsverzeichnisses}%
-mehrzeilige Einträge im Verzeichnis \Macro||{@tocrmarg} zu vergrößern, welcher 
-mit~\PValue{2.55em} voreingestellt ist. Die Werte sollten nur minimal geändert 
-werden:
-%
-\begin{quoting}
-\begin{Code}
-\makeatletter
-\renewcommand*{\@pnumwidth}{1.9em}\renewcommand*{\@tocrmarg}{2.9em}
-\makeatother
-\end{Code}
-\end{quoting}
 
 
 
@@ -506,6 +352,100 @@ wörtlichen Zitaten häufig verwendet werden.
 
 
 \section{%
+  Finden von unbekannten \sflogo{LaTeX}-Symbolen%
+  \index{Symbole}%
+}
+%
+Für \sflogo{LaTeX} stehen jede Menge Symbole zur Verfügung, die allerdings 
+nicht immer einfach zu finden sind. Abhilfe schafft hier die Zusammenfassung 
+\InlineDeclaration{\File'CTANinfo:symbols/comprehensive'{symbols-a4.pdf}}, in 
+welcher viele Symbole aus mehreren Paketen aufgeführt werden. Alternativ lässt 
+sich auf \hrfn{http://detexify.kirelabs.org/classify.html}{Detexify} ein 
+gesuchtes Symbol einfach zeichnen, die Webseite liefert eine Liste ähnlicher 
+Symbole vieler Pakete zurück.
+
+
+
+\section{%
+  Worttrennungen in deutschsprachigen Texten%
+  \label{sec:tips:hyphenation}%
+  \index{Worttrennung|!}%
+  \index{Trennungsmuster}%
+}
+%
+\Hint{v2.02}{Worttrennung}%
+Die möglichen Trennstellen von Wörtern werden von \sflogo{LaTeX} mithilfe 
+eines Algorithmus berechnet. Dieser ist jedoch in seiner ursprünglichen Form 
+für die englische Sprache konzipiert worden. Für deutschsprachige Texte wird 
+die Worttrennung~-- insbesondere bei zusammengeschriebenen Wörtern~-- mit dem 
+Paket \Package{hyphsubst} entscheidend verbessert, welches ein um vielerlei 
+Trennungsmuster ergänztes Wörterbuch aus dem Paket \Package{dehyph-exptl} 
+nutzt. Weiterhin muss eines der beiden Sprachpakete \Package{babel} oder
+\Package{polyglossia} geladen werden. 
+
+Für \Format{pdfLaTeX} ist zusätzlich das Paket \Package{fontenc} beispielsweise 
+mit der \PValue{T1}~Schriftkodierung erforderlich, damit auch Wörter mit 
+Umlauten richtig getrennt werden. Bei der Verwendung von \Format{LuaLaTeX} 
+oder \Format{XeLaTeX} werden~-- in Verbindung mit einem der zwei genannten 
+Sprachpakete~-- die besseren Trennungsmuster automatisch aktiviert. Der Beginn 
+einer Dokumentpräambel könnte folgendermaßen aussehen:
+%
+\begin{quoting}[rightmargin=0pt]
+\begin{Code}[escapechar=§]
+\documentclass[ngerman,§\PName{Klassenoptionen}§]§\MPName{Dokumentklasse}§
+\usepackage{iftex}
+\iftutex
+  \usepackage{fontspec}
+\else
+  \usepackage[T1]{fontenc}
+  \usepackage[ngerman=ngerman-x-latest]{hyphsubst}
+\fi
+\usepackage{babel}
+\end{Code}
+\end{quoting}
+%
+Eine Anmerkung noch zur Trennung von Wörtern mit Bindestrichen. Normalerweise 
+sind die beiden von \sflogo{LaTeX} verwendeten Zeichen für Bindestrich und 
+Trennstrich identisch. Leider wird der Trennungsalgorithmus von \sflogo{LaTeX} 
+bei Wörtern, welche bereits einen Bindestrich enthalten, außer Kraft gesetzt. 
+In der Folge werden~-- in der deutschen Sprache durchaus öfter anzutreffende~-- 
+Wortungetüme wie die \enquote{Donaudampfschifffahrts-Gesellschafterversammlung} 
+normalerweise nur direkt nach dem angegebenen Bindestrich getrennt. 
+
+Allerdings gibt es die Möglichkeit, das genutzte Zeichen für den Trennstrich 
+zu ändern. Dafür ist das Laden der \PValue{T1}"~Schriftkodierung mit dem Paket 
+\Package{fontenc} zwingend erforderlich. Wenn von der verwendeten Schrift 
+nichts anderes eingestellt ist, liegen sowohl Binde- als auch Trennstrich auf 
+Position~\PValue{45} der Zeichentabelle. In der \PValue{T1}"~Schriftkodierung 
+befindet sich auf der Position~\PValue{127} glücklicherweise für gewöhnlich das 
+gleiche Zeichen noch einmal. Dies ist jedoch von der verwendeten Schrift 
+abhängig. Wird der Ausdruck \Macro*{defaulthyphenchar|\PValue{=127}} vor dem 
+Laden des Paketes \Package{fontenc} verwendet, kann dieses Zeichen für den 
+Trennstrich genutzt werden. 
+
+Sollte trotz aller Maßnahmen dennoch einmal ein bestimmtes Wort falsch getrennt 
+werden, so kann die Worttrennung dieses Wortes manuell und global geändert 
+werden. Dies wird mit \Macro{hyphenation|\MPValue{Sil-ben-tren-nung}} gemacht. 
+Es ist zu beachten, dass dies für alle Flexionsformen des Wortes erfolgen 
+sollte. Für eine lokale/temporäre Worttrennung kann mit Befehlen aus dem Paket 
+\Package{babel} gearbeitet werden. Diese sind: 
+
+\vskip\medskipamount\noindent
+\begingroup
+\newcommand*\listhyphens[2]{#1&\PValue{#2}\tabularnewline}%
+\begin{tabular}{@{}ll}
+  \textbf{Beschreibung}&\textbf{Befehl}\tabularnewline
+  \listhyphens{ausschließliche Trennstellen}{\textbackslash-}
+  \listhyphens{zusätzliche Trennstellen}{"'-} 
+  \listhyphens{Umbruch ohne Trennstrich}{"'"'}
+  \listhyphens{Bindestrich ohne Umbruch}{"'\textasciitilde} 
+  \listhyphens{Bindestrich, der weitere Trennstellen erlaubt}{"'=}
+\end{tabular}
+\endgroup
+
+
+
+\section{%
   Lokalisierung für das Setzen von Einheiten mit \Package{siunitx}%
   \label{sec:tips:siunitx}%
   \index{Einheiten}%
@@ -535,17 +475,42 @@ verwendet werden.
 
 
 \section{%
-  Finden von unbekannten \sflogo{LaTeX}-Symbolen%
-  \index{Symbole}%
+  Warnung bei der Schriftgrößenwahl%
+  \label{sec:tips:fontsize}%
+  \index{Schriftart}%
+  \index{Schriftgröße}%
 }
 %
-Für \sflogo{LaTeX} stehen jede Menge Symbole zur Verfügung, die allerdings 
-nicht immer einfach zu finden sind. Abhilfe schafft hier die Zusammenfassung 
-\InlineDeclaration{\File'CTANinfo:symbols/comprehensive'{symbols-a4.pdf}}, in 
-welcher viele Symbole aus mehreren Paketen aufgeführt werden. Alternativ lässt 
-sich auf \hrfn{http://detexify.kirelabs.org/classify.html}{Detexify} ein 
-gesuchtes Symbol einfach zeichnen, die Webseite liefert eine Liste ähnlicher 
-Symbole vieler Pakete zurück.
+\Hint{v2.04}{Warnung bei der Schriftgrößenwahl}%
+Die im Dokument verwendete Schriftgröße lässt sich bei den \KOMAScript-Klassen 
+einfach über die Option~\Option{fontsize} einstellen, wobei diese \emph{immer} 
+als Klassenoption anzugeben ist. Werden mit der Option relativ großen oder 
+kleinen Schriftgrößen angegeben, kann dabei die folgende Warnung auftreten:
+%
+\begin{quoting}[rightmargin=0pt]
+\begin{Code}[escapechar=§]
+LaTeX Font Warning: Font shape `...' in size <xx> not available
+\end{Code}
+\end{quoting}
+%
+Dies liegt darin begründet, dass zum Zeitpunkt des Ladens einer Klasse zunächst 
+immer nach den Standardschriften der Computer~Modern gesucht wird, unabhängig 
+davon, ob im Nachhinein ein anderes Schriftpaket Anwendung findet. Die 
+ursprünglichen Schriften der Computer~Modern sind de"~facto nicht auf alle 
+Größen skalierbar. Um die genannten Warnungen zu beseitigen, sollte \emph{vor} 
+der Dokumentklasse das Paket \Package{fix-cm} geladen werden:
+%
+\begin{quoting}[rightmargin=0pt]
+\begin{Code}[escapechar=§]
+\RequirePackage{fix-cm}
+\documentclass§\OPName{Klassenoptionen}\MPName{Klasse}§
+\usepackage[T1]{fontenc}
+§\dots§
+\begin{document}
+§\dots§
+\end{document}
+\end{Code}
+\end{quoting}
 
 
 
@@ -580,217 +545,87 @@ weiterzureichen.
 
 
 \section{%
-  Probleme bei der Verwendung von \Package{auto-pst-pdf}%
-  \label{sec:tips:auto-pst-pdf}%
-  \index{Gleitobjekte}%
-  \index{Grafiken}%
+  Fehlermeldung: ! No room for a new \textbackslash write%
+  \label{sec:tips:write}%
 }
 %
-\Hint{v2.02}{Hinweise zum Paket \Package{auto-pst-pdf}}%
-Bei der Verwendung von \Format{pdfLaTeX} liest das Paket \Package{auto-pst-pdf} 
-die Präambel ein und erstellt anschließend über den PostScript-Pfad 
-\Path{latex\,>\,dvips\,>\,ps2pdf} eine PDF"~Datei, welche lediglich alle in den 
-vorhandenen \Environment{pspicture}"~Umgebungen erstellten Grafiken enthält. 
-Mit dem Befehl \Macro{ifpdf} aus dem Paket \Package{iftex} lässt sich 
-unterscheiden, ob die Ausgabe in eine PDF"~ oder DVI"~Datei erfolgt. Folgend 
-wird abhängig vom Ausgabeformat unterschiedlicher Quelltext ausgeführt.
+\Hint{v2.02}{Fehler beim Schreiben von Hilfsdateien}%
+Für das Erstellen und Schreiben externer Hilfsdateien steht \sflogo{LaTeX} nur 
+eine begrenzte Anzahl sogenannter Ausgabe-Streams zur Verfügung. Allein für 
+jedes zu erstellende Verzeichnis reserviert \sflogo{LaTeX} selbst jeweils einen 
+neuen Stream. Auch einige bereits in diesem Handbuch vorgestellte, hilfreiche 
+Pakete~-- \Package{hyperref}, \Package{biblatex}, \Package{glossaries} oder 
+auch \Package{todonotes}~-- sowie die Umgebung \Environment{filecontents}
+benötigen eigene Hilfsdateien und öffnen für das Erstellen dieser mindestens 
+jeweils einen Ausgabe-Stream. Lädt der Anwender mehrere, in eine Hilfsdatei 
+schreibende Pakete, kann es zur folgender Fehlermeldung kommen:
 %
 \begin{quoting}
 \begin{Code}
-\usepackage{iftex}
+! No room for a new \write .
 \end{Code}
 \end{quoting}
+%
+Abhilfe schafft das Paket \Package{morewrites}, welches die Ausgabe der Streams 
+in eine Hilfsdatei umleitet. Es sollte möglichst frühzeitig innerhalb der 
+Präambel geladen werden. Nur sehr selten ist die Verwendung des Paketes nicht 
+von Erfolg gekrönt. 
 
-\minisec{Die gleichzeitige Verwendung von \Package{floatrow}}
-%
-Das Paket \Package{floatrow} stellt Befehle bereit, mit denen die Beschriftung 
-von Gleitobjekten sehr bequem gesetzt werden können. Diese Setzen ihren Inhalt 
-vor der eigentlichen Ausgabe erst in einer Box, um deren Breite zu ermitteln. 
-In Kombination mit \Package{auto-pst-pdf} führt das zu einer doppelten 
-Erstellung der gewünschten Grafik. Um dies zu vermeiden, müssen die durch 
-\Package{floatrow} bereitgestellten Makros \enquote{unschädlich} gemacht 
-werden. Die fraglichen Befehle akzeptieren allerdings bis zu drei optionale 
-Argumente \emph{vor} den beiden obligatorischen, was bei \sflogo{LaTeX} für die 
-(Re"~)Definition von Befehlen normalerweise nicht vorgesehen ist. Deshalb wird 
-das Paket \Package{xparse} geladen, mit welchem dies möglich wird. Genaueres 
-dazu ist der dazugehörigen Paketdokumentation zu entnehmen. Mit folgendem 
-Quelltextauszug lassen sich die Befehle des Paketes \Package{floatrow} zusammen 
-mit der \Environment{pspicture}"~Umgebung wie gewohnt verwenden.
-\ToDo{xparse im Kernel!}[v2.07]
-%
-\begin{quoting}
-\begin{Code}
-\usepackage{floatrow}
-\usepackage{xparse}
-\ifpdf\else
-  \RenewDocumentCommand{\fcapside}{ooo+m+m}{#4#5}
-  \RenewDocumentCommand{\ttabbox}{ooo+m+m}{#4#5}
-  \RenewDocumentCommand{\ffigbox}{ooo+m+m}{#4#5}
-\fi
-\end{Code}
-\end{quoting}
-
-\minisec{Die parallele Nutzung von \Package{tikz} und \Package{todonotes}}
-%
-Mit dem Paket \Package{tikz}~-- und auch allen anderen Paketen die 
-selbiges nutzen wie beispielsweise \Package{todonotes}~-- gibt es in Verbindung 
-mit \Package{auto-pst-pdf} ebenfalls Probleme. Lösen lässt sich dieses Dilemma, 
-indem die fraglichen Pakete lediglich geladen werden, wenn \Format{pdfLaTeX} 
-aktiv ist.
-%
-\begin{quoting}[rightmargin=0pt]
-\begin{Code}
-\ifpdf
-  \usepackage{tikz}%\dots gegebenenfalls weitere auf tikz basierende Pakete
-\fi
-\end{Code}
-\end{quoting}
+Für diesen Fall lässt sich das Paket \Package{scrwfile} als Alternative nutzen, 
+welches einige Änderungen am \sflogo{LaTeXe}"~Kernel vornimmt. Das Ziel dieses 
+Paketes ist es, zumindest die Anzahl der benötigten Hilfsdateien für das 
+Schreiben \emph{aller Verzeichnisse} zu reduzieren und somit nur einen einzigen 
+Stream hierfür zu verwenden. Auch dieses sollte gleich zu Beginn der Präambel 
+eingebunden werden. Der Entwicklungsstand des Paketes ist als experimentell 
+eingestuft, auch wenn es meiner Erfahrung nach fehlerfrei arbeitet. Sollten 
+dennoch Probleme auftreten, ist die Anleitung des Paketes im \scrguide zu 
+finden. 
 
 
 
 \section{%
-  Automatisiertes Einbinden von \Application{Inkscape}-Grafiken%
-  \tudmarkuplabel[sec:tips:svg]{\Macro{includesvg}}%
-  \index{Grafiken}%
+  Lokale Änderungen von Befehlen und Einstellungen%
+  \label{sec:tips:local}%
+  \index{Befehle}%
+  \index{Umgebungen}%
+  \index{Befehlsdeklaration!Geltungsbereich}%
 }
 %
-\Hint{v2.04}{Einbinden von \Application{Inkscape}-Grafiken}%
-Das Einbinden von \Application{Inkscape}"=Grafiken in \sflogo{LaTeX}"=Dokumente
-ist Dank der entsprechenden Exportfunktion prinzipiell möglich. Allerdings muss 
-hierfür relativ viel manueller Aufwand betrieben werden, die notwendigen 
-Schritte sind im \CTAN<pkg/svg-inkscape> dokumentiert. Ein daraus abgeleiteter 
-und verbesserter Ansatz wird durch das Paket \Package{svg} bereitgestellt. Mit 
-diesem Paket ist ein \textbf{automatisierter} Export und anschließendes 
-Einbinden von \Application{Inkscape}"=Grafiken in das Dokument bei der Nutzung 
-eines \Format*{LaTeX}"~Formats möglich. Für diesen Zweck wird der Befehl
-\InlineDeclaration{\Macro'*'{includesvg|\OPName{Parameter}\MPName{SVG-Datei}}} 
-als zentrale Benutzerschnittstelle durch das Paket definiert.
-
-Dabei erfolgt der externe Aufruf von \Application{Inkscape} über Kommandozeile 
-respektive Terminal mit \Path{inkscape.exe}. Damit dieser auch tatsächlich 
-erfolgen kann, ist die Ausführung einer \Format*{LaTeX}"~Engine mit dem 
-Parameter \Path{-{}-shell-escape} zwingend notwendig. Außerdem muss der 
-Pfad zur Datei \Path{inkscape.exe} dem System bekannt sein.%
-\footnote{%
-  Der Pfad zu \Path{inkscape.exe} in der Umgebungsvariable \Path{PATH} des 
-  Betriebssystems enthalten sein.%
-}
-Für weiterführende Informationen sei auf die Dokumentation des Pakets 
-\Package{svg} verwiesen.
-
-
-
-\section{%
-  Änderung des Papierformates%
-  \index{Papierformat}%
-}
-%
-Es kann vorkommen, dass innerhalb eines Dokumentes kurzzeitig das Papierformat 
-geändert werden soll, um beispielsweise eine Konstruktionsskizze in der 
-digitalen PDF"~Datei einzubinden. Dabei ist es mit der \KOMAScript-Option 
-\Option{paper=\PMisc} sowohl möglich, lediglich die Ausrichtung in ein 
-Querformat zu ändern, als auch die Größe des Papierformates selber.
+\Hint{v2.02}{Lokale Änderungen}%
+Ein zentraler Bestandteil von \sflogo{LaTeX} ist die Verwendung von Gruppen 
+oder Gruppierungen. Innerhalb dieser bleiben alle vorgenommenen Änderungen an 
+Befehlen, Umgebungen oder Einstellungen lokal. Dies kann sehr nützlich sein, 
+wenn beispielsweise das Verhalten eines bestimmten Makros einmalig oder 
+innerhalb von selbst definierten Befehlen oder Umgebungen geändert werden, im 
+Normalfall jedoch die ursprüngliche Funktionalität behalten soll.
 %
 \begin{Example}
-Ein Dokument im A4"~Format soll zwischenzeitlich auf ein A3"~Querformat 
-geändert werden. Das folgende Minimalbeispiel zeigt, wie sich dies mit den 
-Möglichkeiten von \KOMAScript über die Optionen \Option{paper=landscape} und 
-\Option{paper=A3} umsetzen lässt.
+\index{Schriftauszeichnung}%
+Der Befehl \Macro{emph} wird von \sflogo{LaTeX} für Hervorhebungen im Text 
+bereitgestellt und führt normalerweise zu einer kursiven oder~-- falls kein 
+Schriftschnitt mit echten Kursiven vorhanden ist~-- kursivierten oder auch 
+geneigten Auszeichnung. Soll diese zwischenzeitlich mit fetter Schrift 
+erfolgen, kann \Macro{emph} innerhalb einer Gruppierung umdefiniert werden. 
+Wird diese beendet, verhält sich der Befehl wie gewohnt.
 \begin{Code}
-\documentclass[paper=A4,pagesize]{tudscrreprt}
-\usepackage[T1]{fontenc}
-\usepackage[ngerman]{babel}
-\usepackage{blindtext}
-
-\begin{document}
-\chapter{Überschrift Eins}
-\Blindtext
-
-\cleardoublepage
-\storeareas\PotraitArea% speichert den aktuellen Satzspiegel
-\KOMAoptions{paper=A3,paper=landscape,DIV=current}
-\chapter{Überschrift Zwei}
-\Blindtext
-
-\cleardoublepage
-\PotraitArea% lädt den gespeicherten Satzspiegel
-\chapter{Überschrift Drei}
-\Blindtext
-\end{document}
+In diesem Text wird genau ein \emph{Wort} hervorgehoben.
+\begingroup
+  \renewcommand*{\emph}[1]{\textbf{#1}}%
+  In diesem Text wird genau ein \emph{Wort} hervorgehoben.
+\endgroup
+In diesem Text wird genau ein \emph{Wort} hervorgehoben.
 \end{Code}
+In diesem Text wird genau ein \emph{Wort} hervorgehoben.
+\begingroup
+  \renewcommand*{\emph}[1]{\textbf{#1}}%
+  In diesem Text wird genau ein \emph{Wort} hervorgehoben.
+\endgroup
+In diesem Text wird genau ein \emph{Wort} hervorgehoben.
 \end{Example}
-
-
-
-\section{%
-  Beschnittzugabe und Schnittmarken%
-  \label{sec:tips:crop}%
-  \index{Beschnittzugabe|!}%
-  \index{Schnittmarken|!}%
-  \index{Papierformat}%
-}
 %
-\Hint{v2.05}{Beschnittzugabe und Schnittmarken}%
-Beim Plotten von Postern oder anderen farbigen Druckerzeugnissen besteht 
-oftmals das Problem, dass ein randloses Drucken nur schwer realisierbar ist. 
-Deshalb wird zu oftmals damit beholfen, dass der Druck des fertigen Dokumentes 
-auf einem größeren Papierbogen erfolgt und anschließend auf das gewünschte 
-Zielformat zugeschnitten wird, womit das Problem des nicht bedruckbaren Randes 
-entfällt. Dies kann über zwei verschiedene Wege realisiert werden.
-
-Der einfachste Weg ist die Verwendung des Paketes \Package{crop}. Mit diesem 
-kann das Dokument ganz normal im gewünschten Zielformat erstellt werden. Vor 
-dem Druck wird dieses Paket geladen und einfach das gewünschte Format des 
-Papierbogens angegeben. 
-%
-\begin{quoting}[rightmargin=0pt]
-\begin{Code}[escapechar=§]
-\RequirePackage{fix-cm}
-\documentclass[%
-  paper=A1,
-  fontsize=36pt
-]{tudscrposter}
-\usepackage[T1]{fontenc}
-§\dots§
-\usepackage{graphicx}
-\usepackage[b1,center,cam]{crop}
-\begin{document}
-§\dots§
-\end{document}
-\end{Code}
-\end{quoting}
-%
-Alternativ kann für die \TUDScript-Klassen auf das Paket \Package{geometry}
-zurückgegriffen werden, das mit den Befehlen \Macro{geometry|\MList} sowie 
-\Macro{newgeometry|\MList} eine Schnittstelle zur Festlegung des Seitenlayouts 
-bereitstellt. Im Argument lässt sich mit \PValue{paper=\PSet{Papierformat}}
-das Papierformat festgelegen. Ein kleineres Zielformat, welches für den 
-Satzspiegel genutzt wird, kann zusätzlich mit \PValue{layout=\PSet{Zielformat}} 
-angegeben werden, wobei dieser Bereich mit \PValue{layoutoffset=\PLength} 
-gegebenenfalls etwas eingerückt wird. Mit \PValue{showcrop=\PBoolean} werden 
-außerdem noch visuelle Schnittmarken generiert.
-%
-\begin{quoting}[rightmargin=0pt]
-\begin{Code}[escapechar=§]
-\RequirePackage{fix-cm}
-\documentclass[%
-  paper=A1,
-  fontsize=36pt
-]{tudscrposter}
-\usepackage[T1]{fontenc}
-§\dots§
-\geometry{paper=b1,layout=a1,layoutoffset=1in,showcrop}
-\begin{document}
-§\dots§
-\end{document}
-\end{Code}
-\end{quoting}
-%
-Für genauere Erläuterungen sowie weitere Einstellmöglichkeiten sei auf die 
-Dokumentationen der Pakete \Package{crop} respektive \Package{geometry} 
-verwiesen. Mit der \TUDScript-Option \Option{bleedmargin} können zusätzlich die 
-farbigen Bereiche der \PageStyle{tudheadings}"~Seitenstile erweitert werden, um 
-ein \enquote{Zuschneiden in die Farbe} zu ermöglichen.
+Eine Gruppierung kann entweder mit \Macro*{begingroup} und \Macro*{endgroup} 
+oder einfach mit einem geschweiften Klammerpaar \MPValue{\dots} definiert 
+werden.
 
 
 
@@ -934,11 +769,11 @@ können mit \Macro*{setcounter|\MPName{Zähler}\MPName{Wert}} geändert werden.
 ]
 Sind vor Beginn eines Kapitels noch Gleitobjekte verblieben, so werden diese 
 von \sflogo{LaTeX} normalerweise auf einer separaten Seite vertikal zentriert 
-ausgegeben. Dabei bestimmen diese Längen den Abstand vor dem ersten Gleitobjekt 
-zum oberen Seitenrand (\Length||{@fptop}, \Length||{@dblfptop}), zwischen den 
-einzelnen Objekten (\Length||{@fpsep}, \Length||{@dblfpsep}) sowie zum unteren 
-Seitenrand (\Length||{@fpbot}, \Length||{@dblfpbot}). Soll dies nicht 
-geschehen, können die Längen durch den Anwender geändert werden.
+ausgegeben. Dabei steuern die genannten Längen den Abstand vor dem ersten 
+Gleitobjekt zum oberen Seitenrand (\Length||{@fptop}, \Length||{@dblfptop}), 
+zwischen den einzelnen Objekten (\Length||{@fpsep}, \Length||{@dblfpsep}) sowie 
+zum unteren Seitenrand (\Length||{@fpbot}, \Length||{@dblfpbot}). Diese können 
+nach Bedarf angepasst werden.
 \end{Declaration}
 \end{Declaration}
 \end{Declaration}
@@ -947,9 +782,9 @@ geschehen, können die Längen durch den Anwender geändert werden.
 \end{Declaration}
 %
 \begin{Example}
-Alle Gleitobjekte auf einer dafür speziell gesetzten Seite sollen direkt zu 
-Beginn dieser ausgegeben werden. In der Dokumentpräambel lässt sich für dieses 
-Unterfangen Folgendes nutzen:
+Alle Gleitobjekte auf einer für diese separat erzeugten Seite sollen ohne 
+vertikalen Leeraum oberhalb ausgegeben werden. In der Dokumentpräambel wird 
+definiert:
 \begin{Code}
 \makeatletter
 \setlength{\@fptop}{0pt}
@@ -962,90 +797,146 @@ Unterfangen Folgendes nutzen:
 
 
 
-\section{Hurenkinder und Schusterjungen}
-\Hint{v2.07}{...}%
-Alleinstehende Zeilen am Seitenende oder "~anfang... Das Paket...
-\ToDo{\Package*{widows-and-orphans}: widowpenalty, clubpenalty, brokenpenalty, 
-displaywidowpenalty}[v2.07]
-
-
-
 \section{%
-  Fehlermeldung: ! No room for a new \textbackslash write%
-  \label{sec:tips:write}%
+  Änderung des Papierformates%
+  \index{Papierformat}%
 }
 %
-\Hint{v2.02}{Fehler beim Schreiben von Hilfsdateien}%
-Für das Erstellen und Schreiben externer Hilfsdateien steht \sflogo{LaTeX} nur 
-eine begrenzte Anzahl sogenannter Ausgabe-Streams zur Verfügung. Allein für 
-jedes zu erstellende Verzeichnis reserviert \sflogo{LaTeX} selbst jeweils einen 
-neuen Stream. Auch einige bereits in diesem Handbuch vorgestellte, hilfreiche 
-Pakete~-- \Package{hyperref}, \Package{biblatex}, \Package{glossaries} oder 
-auch \Package{todonotes}~-- sowie die Umgebung \Environment{filecontents}
-benötigen eigene Hilfsdateien und öffnen für das Erstellen dieser mindestens 
-jeweils einen Ausgabe-Stream. Lädt der Anwender mehrere, in eine Hilfsdatei 
-schreibende Pakete, kann es zur folgender Fehlermeldung kommen:
+Es kann vorkommen, dass innerhalb eines Dokumentes kurzzeitig das Papierformat 
+geändert werden soll, um beispielsweise eine Konstruktionsskizze in der 
+digitalen PDF"~Datei einzubinden. Dabei ist es mit der \KOMAScript-Option 
+\Option{paper=\PMisc} sowohl möglich, lediglich die Ausrichtung in ein 
+Querformat zu ändern, als auch die Größe des Papierformates selber.
 %
-\begin{quoting}
+\begin{Example}
+Ein Dokument im A4"~Format soll zwischenzeitlich auf ein A3"~Querformat 
+geändert werden. Das folgende Minimalbeispiel zeigt, wie sich dies mit den 
+Möglichkeiten von \KOMAScript über die Optionen \Option{paper=landscape} und 
+\Option{paper=A3} umsetzen lässt.
 \begin{Code}
-! No room for a new \write .
-\end{Code}
-\end{quoting}
-%
-Abhilfe schafft das Paket \Package{morewrites}, welches die Ausgabe der Streams 
-in eine Hilfsdatei umleitet. Es sollte möglichst frühzeitig innerhalb der 
-Präambel geladen werden. Nur sehr selten ist die Verwendung des Paketes nicht 
-von Erfolg gekrönt. 
+\documentclass[paper=A4,pagesize]{tudscrreprt}
+\usepackage[T1]{fontenc}
+\usepackage[ngerman]{babel}
+\usepackage{blindtext}
 
-Für diesen Fall lässt sich das Paket \Package{scrwfile} als Alternative nutzen, 
-welches einige Änderungen am \sflogo{LaTeXe}"~Kernel vornimmt. Das Ziel dieses 
-Paketes ist es, zumindest die Anzahl der benötigten Hilfsdateien für das 
-Schreiben \emph{aller Verzeichnisse} zu reduzieren und somit nur einen einzigen 
-Stream hierfür zu verwenden. Auch dieses sollte gleich zu Beginn der Präambel 
-eingebunden werden. Der Entwicklungsstand des Paketes ist als experimentell 
-eingestuft, auch wenn es meiner Erfahrung nach fehlerfrei arbeitet. Sollten 
-dennoch Probleme auftreten, ist die Anleitung des Paketes im \scrguide zu 
-finden. 
+\begin{document}
+\chapter{Überschrift Eins}
+\Blindtext
+
+\cleardoublepage
+\storeareas\PotraitArea% speichert den aktuellen Satzspiegel
+\KOMAoptions{paper=A3,paper=landscape,DIV=current}
+\chapter{Überschrift Zwei}
+\Blindtext
+
+\cleardoublepage
+\PotraitArea% lädt den gespeicherten Satzspiegel
+\chapter{Überschrift Drei}
+\Blindtext
+\end{document}
+\end{Code}
+\end{Example}
 
 
 
 \section{%
-  Warnung bei der Schriftgrößenwahl%
-  \label{sec:tips:fontsize}%
-  \index{Schriftart}%
-  \index{Schriftgröße}%
+  Beschnittzugabe und Schnittmarken%
+  \label{sec:tips:crop}%
+  \index{Beschnittzugabe|!}%
+  \index{Schnittmarken|!}%
+  \index{Papierformat}%
 }
 %
-\Hint{v2.04}{Warnung bei der Schriftgrößenwahl}%
-Die im Dokument verwendete Schriftgröße lässt sich bei den \KOMAScript-Klassen 
-einfach über die Option~\Option{fontsize} einstellen, wobei diese \emph{immer} 
-als Klassenoption anzugeben ist. Werden mit der Option relativ großen oder 
-kleinen Schriftgrößen angegeben, kann dabei die folgende Warnung auftreten:
-%
-\begin{quoting}[rightmargin=0pt]
-\begin{Code}[escapechar=§]
-LaTeX Font Warning: Font shape `...' in size <xx> not available
-\end{Code}
-\end{quoting}
-%
-Dies liegt darin begründet, dass zum Zeitpunkt des Ladens einer Klasse zunächst 
-immer nach den Standardschriften der Computer~Modern gesucht wird, unabhängig 
-davon, ob im Nachhinein ein anderes Schriftpaket Anwendung findet. Die 
-ursprünglichen Schriften der Computer~Modern sind de"~facto nicht auf alle 
-Größen skalierbar. Um die genannten Warnungen zu beseitigen, sollte \emph{vor} 
-der Dokumentklasse das Paket \Package{fix-cm} geladen werden:
+\Hint{v2.05}{Beschnittzugabe und Schnittmarken}%
+Beim Plotten von Postern oder anderen farbigen Druckerzeugnissen besteht 
+oftmals das Problem, dass ein randloses Drucken nur schwer realisierbar ist. 
+Deshalb wird zu oftmals damit beholfen, dass der Druck des fertigen Dokumentes 
+auf einem größeren Papierbogen erfolgt und anschließend auf das gewünschte 
+Zielformat zugeschnitten wird, womit das Problem des nicht bedruckbaren Randes 
+entfällt. Dies kann über zwei verschiedene Wege realisiert werden.
+
+Der einfachste Weg ist die Verwendung des Paketes \Package{crop}. Mit diesem 
+kann das Dokument ganz normal im gewünschten Zielformat erstellt werden. Vor 
+dem Druck wird dieses Paket geladen und einfach das gewünschte Format des 
+Papierbogens angegeben. 
 %
 \begin{quoting}[rightmargin=0pt]
 \begin{Code}[escapechar=§]
 \RequirePackage{fix-cm}
-\documentclass§\OPName{Klassenoptionen}\MPName{Klasse}§
+\documentclass[%
+  paper=A1,
+  fontsize=36pt
+]{tudscrposter}
 \usepackage[T1]{fontenc}
 §\dots§
+\usepackage{graphicx}
+\usepackage[b1,center,cam]{crop}
 \begin{document}
 §\dots§
 \end{document}
 \end{Code}
 \end{quoting}
+%
+Alternativ kann für die \TUDScript-Klassen auf das Paket \Package{geometry}
+zurückgegriffen werden, das mit den Befehlen \Macro{geometry|\MList} sowie 
+\Macro{newgeometry|\MList} eine Schnittstelle zur Festlegung des Seitenlayouts 
+bereitstellt. Im Argument lässt sich mit \PValue{paper=\PSet{Papierformat}}
+das Papierformat festgelegen. Ein kleineres Zielformat, welches für den 
+Satzspiegel genutzt wird, kann zusätzlich mit \PValue{layout=\PSet{Zielformat}} 
+angegeben werden, wobei dieser Bereich mit \PValue{layoutoffset=\PLength} 
+gegebenenfalls etwas eingerückt wird. Mit \PValue{showcrop=\PBoolean} werden 
+außerdem noch visuelle Schnittmarken generiert.
+%
+\begin{quoting}[rightmargin=0pt]
+\begin{Code}[escapechar=§]
+\RequirePackage{fix-cm}
+\documentclass[%
+  paper=A1,
+  fontsize=36pt
+]{tudscrposter}
+\usepackage[T1]{fontenc}
+§\dots§
+\geometry{paper=b1,layout=a1,layoutoffset=1in,showcrop}
+\begin{document}
+§\dots§
+\end{document}
+\end{Code}
+\end{quoting}
+%
+Für genauere Erläuterungen sowie weitere Einstellmöglichkeiten sei auf die 
+Dokumentationen der Pakete \Package{crop} respektive \Package{geometry} 
+verwiesen. Mit der \TUDScript-Option \Option{bleedmargin} können zusätzlich die 
+farbigen Bereiche der \PageStyle{tudheadings}"~Seitenstile erweitert werden, um 
+ein \enquote{Zuschneiden in die Farbe} zu ermöglichen.
+
+
+
+\section{%
+  Warnung wegen zu geringer Höhe der Kopf-/Fußzeile%
+  \label{sec:tips:headline}%
+  \index{Zeilenabstand}%
+  \index{Layout!Kopfzeile}%
+  \index{Layout!Fußzeile}%
+}
+%
+Wird das Paket \Package{setspace} verwendet, kann es passieren, dass nach der 
+Änderung des Zeilenabstandes \emph{innerhalb} des Dokumentes eine oder beide 
+der folgenden Warnungen erscheinen:
+%
+\begin{quoting}
+\begin{Code}
+scrlayer-scrpage Warning: \headheight to low.
+scrlayer-scrpage Warning: \footheight to low.
+\end{Code}
+\end{quoting}
+%
+Dies liegt an dem durch den vergrößerten Zeilenabstand erhöhten Bedarf für die
+Kopf- und Fußzeile, die Höhen können in diesem Fall direkt mit der Verwendung 
+von \Macro{recalctypearea} angepasst werden. Allerdings ändert das den 
+Satzspiegel im Dokument, was eine andere und durchaus berechtigte Warnung von 
+\Package{typearea} zur Folge hat. Falls die Änderung des Zeilendurchschuss 
+wirklich nötig ist, sollte dies in der Präambel des Dokumentes einmalig 
+passieren. Dann entfallen auch die Warnungen.
 
 
 
@@ -1072,3 +963,110 @@ Weitere Informationen sind unter \mbox{\url{http://www.komascript.de/node/1897}}
 zu finden.
 
 
+
+\section{%
+  Automatisiertes Einbinden von \Application{Inkscape}-Grafiken%
+  \tudmarkuplabel[sec:tips:svg]{\Macro{includesvg}}%
+  \index{Grafiken}%
+}
+%
+\Hint{v2.04}{Einbinden von \Application{Inkscape}-Grafiken}%
+Das Einbinden von \Application{Inkscape}"=Grafiken in \sflogo{LaTeX}"=Dokumente
+ist Dank der entsprechenden Exportfunktion prinzipiell möglich. Allerdings muss 
+hierfür relativ viel manueller Aufwand betrieben werden, die notwendigen 
+Schritte sind im \CTAN<pkg/svg-inkscape> dokumentiert. Ein daraus abgeleiteter 
+und verbesserter Ansatz wird durch das Paket \Package{svg} bereitgestellt. Mit 
+diesem Paket ist ein \textbf{automatisierter} Export und anschließendes 
+Einbinden von \Application{Inkscape}"=Grafiken in das Dokument bei der Nutzung 
+eines \Format*{LaTeX}"~Formats möglich. Für diesen Zweck wird der Befehl
+\InlineDeclaration{\Macro'*'{includesvg|\OPName{Parameter}\MPName{SVG-Datei}}} 
+als zentrale Benutzerschnittstelle durch das Paket definiert.
+
+Dabei erfolgt der externe Aufruf von \Application{Inkscape} über Kommandozeile 
+respektive Terminal mit \Path{inkscape.exe}. Damit dieser auch tatsächlich 
+erfolgen kann, ist die Ausführung einer \Format*{LaTeX}"~Engine mit dem 
+Parameter \Path{-{}-shell-escape} zwingend notwendig. Außerdem muss der 
+Pfad zur Datei \Path{inkscape.exe} dem System bekannt sein.%
+\footnote{%
+  Der Pfad zu \Path{inkscape.exe} in der Umgebungsvariable \Path{PATH} des 
+  Betriebssystems enthalten sein.%
+}
+Für weiterführende Informationen sei auf die Dokumentation des Pakets 
+\Package{svg} verwiesen.
+
+
+
+\section{%
+  Probleme bei der Verwendung von \Package{auto-pst-pdf}%
+  \label{sec:tips:auto-pst-pdf}%
+  \index{Gleitobjekte}%
+  \index{Grafiken}%
+}
+%
+\Hint{v2.02}{Hinweise zum Paket \Package{auto-pst-pdf}}%
+Bei der Verwendung von \Format{pdfLaTeX} liest das Paket \Package{auto-pst-pdf} 
+die Präambel ein und erstellt anschließend über den PostScript-Pfad 
+\Path{latex\,>\,dvips\,>\,ps2pdf} eine PDF"~Datei, welche lediglich alle in den 
+vorhandenen \Environment{pspicture}"~Umgebungen erstellten Grafiken enthält. 
+Mit dem Befehl \Macro{ifpdf} aus dem Paket \Package{iftex} lässt sich 
+unterscheiden, ob die Ausgabe in eine PDF"~ oder DVI"~Datei erfolgt. Folgend 
+wird abhängig vom Ausgabeformat unterschiedlicher Quelltext ausgeführt.
+%
+\begin{quoting}
+\begin{Code}
+\usepackage{iftex}
+\end{Code}
+\end{quoting}
+
+\minisec{Die gleichzeitige Verwendung von \Package{floatrow}}
+%
+Das Paket \Package{floatrow} stellt Befehle bereit, mit denen die Beschriftung 
+von Gleitobjekten sehr bequem gesetzt werden können. Diese Setzen ihren Inhalt 
+vor der eigentlichen Ausgabe erst in einer Box, um deren Breite zu ermitteln. 
+In Kombination mit \Package{auto-pst-pdf} führt das zu einer doppelten 
+Erstellung der gewünschten Grafik. Um dies zu vermeiden, müssen die durch 
+\Package{floatrow} bereitgestellten Makros \enquote{unschädlich} gemacht 
+werden. Die fraglichen Befehle akzeptieren allerdings bis zu drei optionale 
+Argumente \emph{vor} den beiden obligatorischen, was bei \sflogo{LaTeX} für die 
+(Re"~)Definition von Befehlen normalerweise nicht vorgesehen ist. Deshalb wird 
+das Paket \Package{xparse} geladen, mit welchem dies möglich wird. Genaueres 
+dazu ist der dazugehörigen Paketdokumentation zu entnehmen. Mit folgendem 
+Quelltextauszug lassen sich die Befehle des Paketes \Package{floatrow} zusammen 
+mit der \Environment{pspicture}"~Umgebung wie gewohnt verwenden.
+\ToDo{xparse im Kernel!}[v2.07]
+%
+\begin{quoting}
+\begin{Code}
+\usepackage{floatrow}
+\usepackage{xparse}
+\ifpdf\else
+  \RenewDocumentCommand{\fcapside}{ooo+m+m}{#4#5}
+  \RenewDocumentCommand{\ttabbox}{ooo+m+m}{#4#5}
+  \RenewDocumentCommand{\ffigbox}{ooo+m+m}{#4#5}
+\fi
+\end{Code}
+\end{quoting}
+
+\minisec{Die parallele Nutzung von \Package{tikz} und \Package{todonotes}}
+%
+Mit dem Paket \Package{tikz}~-- und auch allen anderen Paketen die 
+selbiges nutzen wie beispielsweise \Package{todonotes}~-- gibt es in Verbindung 
+mit \Package{auto-pst-pdf} ebenfalls Probleme. Lösen lässt sich dieses Dilemma, 
+indem die fraglichen Pakete lediglich geladen werden, wenn \Format{pdfLaTeX} 
+aktiv ist.
+%
+\begin{quoting}[rightmargin=0pt]
+\begin{Code}
+\ifpdf
+  \usepackage{tikz}%\dots gegebenenfalls weitere auf tikz basierende Pakete
+\fi
+\end{Code}
+\end{quoting}
+
+
+
+%\section{Hurenkinder und Schusterjungen}
+%\Hint{v2.07}{...}%
+%Alleinstehende Zeilen am Seitenende oder "~anfang... Das Paket...
+\ToDo{\Package*{widows-and-orphans}: widowpenalty, clubpenalty, brokenpenalty, 
+displaywidowpenalty}[v2.07]

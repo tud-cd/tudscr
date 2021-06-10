@@ -553,13 +553,6 @@
     \tud@setdim\marginparwidth{2cm}%
   \fi%
 }
-\AfterPackage*{nameref}{%
-  \patchcmd\NR@gettitle{%
-    \GetTitleString%
-  }{%
-    \GetTitleStringExpand%
-  }{}{\tud@patch@wrn{NR@gettitle}}%
-}
 \PassOptionsToPackage{babel}{microtype}
 \TUD@UnwindPackage*{hyperref}{\RequirePackage{microtype}[2021/03/14]}
 \PassOptionsToPackage{open,openlevel=0}{bookmark}
@@ -633,6 +626,13 @@
   \tud@localization@english{\sectionautorefname}{section}%
   \tud@localization@english{\subsectionautorefname}{subsection}%
   \tud@localization@english{\subsubsectionautorefname}{subsubsection}%
+}
+\AfterPackage*{nameref}{%
+  \patchcmd\NR@gettitle{%
+    \GetTitleString%
+  }{%
+    \GetTitleStringExpand%
+  }{}{\tud@patch@wrn{NR@gettitle}}%
 }
 \PassOptionsToPackage{nospace}{varioref}
 \RequirePackage{varioref}[2020/08/11]
@@ -1205,19 +1205,19 @@
     \long\def\tud@res@b##1{\tud@res@a##1}%
   \fi%
   \tud@res@b{%
-    \setparsizes{\z@}{\z@\@plus.05\baselineskip}{\z@\@plus1fil}%
+    \setparsizes{\z@}{\z@\@plus.1\baselineskip}{\z@\@plus1fil}%
     \par@updaterelative%
     \tud@raggedright%
     #1%
   }%
 }{}
 \NewDocumentCommand\tud@index@print{!O{\jobname} !+d()}{%
+  \pagebreak[3]%
   \IfFileExists{\jobname-#1.ind}{%
-    \pagebreak[3]%
     \IfValueTF{#2}{%
-      \def\tud@index@prologue{#2\par}%
+      \def\tud@index@prologue{\nopagebreak#2\par}%
     }{%
-      \let\tud@index@prologue\relax%
+      \let\tud@index@prologue\nopagebreak%
     }%
     \csuse{tud@index@set@@#1}%
     \@input@{\jobname-#1.ind}%
@@ -4164,7 +4164,7 @@
   \ifx\tud@idx@tmp\@empty%
     \addto@hook\tud@toks@{*}%
   \fi%
-  \addto@hook\tud@toks@{\tud@res@b{#2}{#3}/#4/=#5=[#6](#9)}%
+  \addto@hook\tud@toks@{\tud@res@b{#2}{#3}/#4/=#5=(#9)}%
   \the\tud@toks@%
   \ifx\tud@idx@tmp\@empty\else%
     \IfValueT{#5}{%
@@ -4183,25 +4183,27 @@
     }%
   \fi%
   \eappto\tud@idx@tmp{\expandonce\tud@res@b}%
-  % URGENT #6 bei Deklaration für index verwenden? 
-%  \ifnum\tud@declare@mode@num>\z@\relax%
-%%  \IfValueTF{#5}{\typeout{????? 5: \detokenize{#5}}}{%
-%    \IfValueF{#5}{\IfValueT{#6}{\typeout{????? 6: \detokenize{#6}}}}%
-%%  }%
-%  \typeout{===== \meaning\tud@res@b}%
-%  \typeout{===== \meaning\tud@idx@tmp}%
-%  \fi%
 }
 \newcommand*\tud@idx@key{}
 \newcommand*\tud@idx@fmt{}
-\NewDocumentCommand\tud@idx@@@get{s m m m d// d== o r()}{%
+\newcommand*\AP@TruncateStar[1]{%
+  \begingroup%
+    \def\tud@res@a##1*##2\@nil{\def\tud@res@a{##1}}%
+    \tud@res@a#1*\@nil%
+    \edef\tud@res@a{%
+      \endgroup%
+      \def\noexpand\ProcessedArgument{\expandonce\tud@res@a}%
+    }%
+  \tud@res@a%
+}
+\NewDocumentCommand\tud@idx@@@get{s m m >{\AP@TruncateStar}m d// d== r()}{%
   \begingroup%
     \@tud@res@swatrue%
     \IfBooleanF{#1}{%
       \IfValueT{#5}{\@tud@res@swafalse}%
       \IfValueT{#6}{\@tud@res@swafalse}%
     }%
-    \protected@edef\tud@res@a{#8}%
+    \protected@edef\tud@res@a{#7}%
     \ifx\tud@res@a\tud@ety@gnrl%
       \let\tud@res@a\@empty%
     \fi%
@@ -4221,14 +4223,6 @@
       }%
     \tud@res@c%
     \def\tud@res@b{{#3}{#4}/#5/=#6=}%
-    \if@tud@res@swa%
-      \ifnum\tud@declare@mode@num>\z@\relax%
-        \IfValueT{#7}{%
-%          \typeout{????? 7: \detokenize{#7}}%
-          \appto\tud@res@b{[#7]}%
-        }%
-      \fi%
-    \fi%
     \eappto\tud@res@b{%
       \unexpanded{|\@nil|'\@nil'}%
       (\ifx\tud@res@a\@empty\noexpand\@nil\else\expandonce\tud@res@a\fi)%
@@ -4705,7 +4699,8 @@
       }%
       \def\tud@index@cols{\@ne}%
       \let\lettergroup\@gobble%
-      \let\indexspace\relax%
+%      \let\indexspace\relax%
+      \def\indexspace{\tud@index@vskip}%
     }%
     \def\do##1{%
       \begingroup%
