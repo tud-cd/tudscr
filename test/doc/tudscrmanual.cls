@@ -454,7 +454,7 @@
     \let\tud@index@note@write\@gobbletwo%
   \fi%
 }
-%%%% From File: tudscr-misc.dtx 2021/03/31 01:55:38 5cfe807
+%%%% From File: tudscr-misc.dtx 2021/06/10 01:08:07 fb873a0
 \DeclareOption*{%
   \expandafter\PassOptionsToClass\expandafter{\CurrentOption}%
   {\TUD@Class@Parent}%
@@ -470,35 +470,43 @@
 \RequirePackage{scrhack}[%
   2021/03/17 v3.33 KOMA-Script
 ]
-\RequirePackage{babel}[2021-06-02]
-\newcommand*\tud@english[1]{#1}
-\AtBeginDocument{%
-  \iflanguageloaded{english}{%
-    \renewcommand*\tud@english[1]{\foreignlanguage{english}{#1}}%
-  }{}%
-}
-\PassOptionsToPackage{quiet}{marginnote}
-\RequirePackage{marginnote}[2018/08/09]
-\reversemarginpar
-\RequirePackage{xspace}[2014/10/28]
-\xspaceaddexceptions{"=}
 \@ifpackagelater{geometry}{2020/01/03}{%
   \ClassWarning{tudscrmanual}{%
     Package `geometry' was updated so some patches\MessageBreak%
     are maybe outdated%
   }%
 }{}
+\RequirePackage{babel}[2021-06-02]
+\RequirePackage{csquotes}[2021/02/22]
+\newcommand*\tud@english[1]{#1}
+\AtBeginDocument{%
+  \iflanguageloaded{english}{%
+    \renewcommand*\tud@english[1]{\foreignlanguage{english}{#1}}%
+  }{}%
+}
 \RequirePackage{shellesc}[2019/11/08]
 \RequirePackage{pdftexcmds}[2020/06/27]
-\RequirePackage{csquotes}[2021/02/22]
+\RequirePackage{multicol}[2019/12/09]
 \RequirePackage{setspace}[2011/12/19]
 \setstretch{1.1}
+\PassOptionsToPackage{babel}{microtype}
+\TUD@UnwindPackage*{hyperref}{\RequirePackage{microtype}[2021/03/14]}
 \PassOptionsToPackage{vskip=\smallskipamount}{quoting}
 \RequirePackage{quoting}[2014/01/28]
 \RequirePackage{isodate}[2010/01/03]
 \RequirePackage{ragged2e}[2021/02/05]
 \@removefromreset{footnote}{chapter}
 \renewcommand*\raggedfootnote{\tud@RaggedRight}%
+\RequirePackage{units}[1998/08/04]
+\AtEndPreamble{%
+  \RequirePackage{ellipsis}[2020/05/22]%
+  \let\ellipsispunctuation\relax%
+}
+\RequirePackage{xspace}[2014/10/28]
+\xspaceaddexceptions{"=}
+\PassOptionsToPackage{quiet}{marginnote}
+\RequirePackage{marginnote}[2018/08/09]
+\reversemarginpar
 \RequirePackage{tabularx}[2020/01/15]
 \RequirePackage{booktabs}[2020/01/12]
 \RequirePackage{enumitem}[2019/06/20]
@@ -515,6 +523,8 @@
     #1%
   }%
 }
+\RequirePackage{tikz}[2021/05/15]
+\RequirePackage{pdfpages}[2021/03/06]
 \RequirePackage{caption}[2020/10/26]
 \RequirePackage{floatrow}[2008/08/02]
 \DeclareCaptionSubType[alph]{figure}
@@ -524,13 +534,6 @@
 \captionsetup[subfloat]{labelformat=brace,list=off}
 \KOMAoption{captions}{tableheading,figuresignature}
 \floatsetup[table]{style=plaintop}
-\RequirePackage{tikz}[2021/05/15]
-\RequirePackage{pdfpages}[2021/03/06]
-\RequirePackage{units}[1998/08/04]
-\AtEndPreamble{%
-  \RequirePackage{ellipsis}[2020/05/22]%
-  \let\ellipsispunctuation\relax%
-}
 \RequirePackage{listings}[2020/03/24]
 \lstdefinestyle{tudscr}{%
   basicstyle=\ttfamily\ifundef\setstretch{}{\setstretch{1}},%
@@ -553,17 +556,25 @@
     \tud@setdim\marginparwidth{2cm}%
   \fi%
 }
-\PassOptionsToPackage{babel}{microtype}
-\TUD@UnwindPackage*{hyperref}{\RequirePackage{microtype}[2021/03/14]}
+\PassOptionsToPackage{nospace}{varioref}
+\RequirePackage{varioref}[2020/08/11]
+\renewrobustcmd*\fullref[1]{\hyperref[{#1}]{\autoref*{#1}\space\vpageref{#1}}}
+%\AfterPackage*{nameref}{%
+%  \patchcmd\NR@gettitle{%
+%    \GetTitleString%
+%  }{%
+%    \GetTitleStringExpand%
+%  }{}{\tud@patch@wrn{NR@gettitle}}%
+%}
 \PassOptionsToPackage{open,openlevel=0}{bookmark}
 \PassOptionsToPackage{%
-  destlabel=true,%pdfview=FitH,%
   hyperindex=false,%
   colorlinks,%
   linkcolor=HKS44,%
   urlcolor=HKS33,%
   citecolor=HKS57,%
   filecolor=HKS65,%
+  destlabel=true,%pdfview=FitH,%
 }{hyperref}
 \AfterPackage*{hyperref}{%
   \renewcaptionname{ngerman}{\sectionautorefname}{Unterkapitel}%
@@ -587,7 +598,6 @@
   }%
   \newcommand*\auto@@refname{}%
   \def\auto@@refname#1#2#3#4#5\@nil#6\@nil{#6#4.\@nil}%
-  \providecommand*\Url[1]{\detokenize{#1}\endgroup}%
 }
 \TUD@UnwindPackage{hyperref}{%
   \ClassWarningNoLine{tudscrmanual}%
@@ -597,8 +607,12 @@
     defined. At least the package `url' is loaded%
   }%
   \providecommand*\hypersetup[1]{}%
-  \providecommand*\hyperpage[1]{#1}%
   \providerobustcmd*\href[3][]{#3}%
+  \providecommand*\phantomsection{}%
+  \providecommand*\texorpdfstring[2]{#1}%
+  \RequirePackage{url}[2013/09/16]%
+  \providerobustcmd*\url[1]{\detokenize{#1}}%
+  \providerobustcmd*\nolinkurl[1]{\url{#1}}% 
   \providerobustcmd*\hyperref{%
     \kernel@ifnextchar[%]
       {\tud@x@hyperref@a}%
@@ -609,13 +623,9 @@
   \providecommand*\hypertarget[2]{\label{#1}#2}%
   \providecommand*\hyperlink[2]{\hyperref[{#1}]{#2}}%
   \providecommand*\Hy@raisedlink[1]{#1}%
-  \providecommand*\phantomsection{}%
-  \providecommand*\texorpdfstring[2]{#1}%
+  \providecommand*\hyperpage[1]{#1}%
   \providerobustcmd*\autoref{??\xspace\kernel@ifstar{\ref}{\ref}}%
   \providerobustcmd*\autorefname[1][]{??\xspace}%
-  \RequirePackage{url}[2013/09/16]%
-  \providerobustcmd*\url[1]{\detokenize{#1}}%
-  \providerobustcmd*\nolinkurl[1]{\url{#1}}%
   \tud@localization@german{\partautorefname}{Teil}%
   \tud@localization@german{\chapterautorefname}{Kapitel}%
   \tud@localization@german{\sectionautorefname}{Unterkapitel}%
@@ -627,17 +637,6 @@
   \tud@localization@english{\subsectionautorefname}{subsection}%
   \tud@localization@english{\subsubsectionautorefname}{subsubsection}%
 }
-\AfterPackage*{nameref}{%
-  \patchcmd\NR@gettitle{%
-    \GetTitleString%
-  }{%
-    \GetTitleStringExpand%
-  }{}{\tud@patch@wrn{NR@gettitle}}%
-}
-\PassOptionsToPackage{nospace}{varioref}
-\RequirePackage{varioref}[2020/08/11]
-\renewrobustcmd*\fullref[1]{\hyperref[{#1}]{\autoref*{#1}\space\vpageref{#1}}}
-\RequirePackage{multicol}[2019/12/09]
 \newcommand*\tud@xdy@settings{}
 % PENDING locale-Einstellung in Abhängigkeit der Hauptsprache! 
 \edef\tud@xdy@settings{texindy -M \@currname-index.xdy -L german-din}

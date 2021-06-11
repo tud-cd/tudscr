@@ -98,11 +98,11 @@
 %
 % \subsection{Notwendige Pakete und Befehle}
 %
+% \ToDo{den Teil für tudscrdoc in tudscr-doc.dtx}[v2.07]
+% \ToDo{guards überarbeiten, korrelierenden Quelltext zusammenhalten}[v2.07]
 % Basis für die Handbuchklasse \cls{tudscrmanual} ist \cls{tudscrreprt}. 
 % Zusätzlich wird das Paket \pkg{tudscrtutorial} erstellt, um an das Handbuch
-% angelehnte Tutorials in einem Unterordner zu erstellen. Sowohl für die Klasse
-% als auch das Paket werden einige Pakete geladen, um Einstellungen vorzunehmen 
-% und nützliche Befehle zu definieren.
+% angelehnte Tutorials in einem Unterordner zu erstellen.
 %
 % \begin{macro}{\vTUDScript}
 % \begin{macro}{\vKOMAScript}
@@ -121,11 +121,29 @@
 %!TUD@KOMAVersion
 ]
 %    \end{macrocode}
+% Für das Paket \pkg{geometry} erfolgen durch \TUDScript vielerlei Anpassungen. 
+% Um bei einer signifikanten Änderung des Paketes passend reagieren zu können, 
+% wird auf das aktuelle Paketdatum geprüft und für neue Versionen eine Warnung
+% erzeugt.
+% \ToDo{\cs{IfPackageAtLeastTF}; ggf. direkt in die Klassen}[v2.07]
+% \ToDo{Kann raus, sobald \pkg{geometry} nicht mehr notwendig}[v2.08]
+%    \begin{macrocode}
+%<*class&!doc>
+\@ifpackagelater{geometry}{2020/01/03}{%
+  \ClassWarning{tudscrmanual}{%
+    Package `geometry' was updated so some patches\MessageBreak%
+    are maybe outdated%
+  }%
+}{}
+%</class&!doc>
+%    \end{macrocode}
 % Die Sprachunterstützung für Klasse und Paket.
+% \ToDo{in tudscr.tex?}[v2.07]
 %    \begin{macrocode}
 %<*!doc>
 \RequirePackage{babel}[2021-06-02]
 %</!doc>
+\RequirePackage{csquotes}[2021/02/22]
 %    \end{macrocode}
 % \begin{macro}{\tud@english}
 % Hiermit wird der Argumentsinhalt mit englischen Trennungsmustern gesetzt,
@@ -139,36 +157,6 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@english
-% Das Paket \pkg{marginnote} stellt nicht fließenden Randnotizen bereit, welche 
-% für die Kennzeichnung von Änderungen, Hinweise oder ToDo-Notizen verwendet 
-% werden. Die Randnotizen werden auf dem linken~-- weil größeren~-- Seitenrand
-% gesetzt.
-%    \begin{macrocode}
-\PassOptionsToPackage{quiet}{marginnote}
-\RequirePackage{marginnote}[2018/08/09]
-%<!doc>\reversemarginpar
-%    \end{macrocode}
-% Das Paket für intelligente Leerzeichen am Ende von Makros mit \cs{xspace}.
-%    \begin{macrocode}
-\RequirePackage{xspace}[2014/10/28]
-\xspaceaddexceptions{"=}
-%    \end{macrocode}
-% Für das Paket \pkg{geometry} erfolgen durch \TUDScript vielerlei Anpassungen. 
-% Um bei einer signifikanten Änderung des Paketes passend reagieren zu können, 
-% wird auf das aktuelle Paketdatum geprüft und für neue Versionen eine Warnung
-% erzeugt.
-% \ToDo{\cs{IfPackageAtLeastTF}}[v2.07]
-% \ToDo{Kann raus, sobald \pkg{geometry} nicht mehr notwendig}[v2.08]
-%    \begin{macrocode}
-%<*class&!doc>
-\@ifpackagelater{geometry}{2020/01/03}{%
-  \ClassWarning{tudscrmanual}{%
-    Package `geometry' was updated so some patches\MessageBreak%
-    are maybe outdated%
-  }%
-}{}
-%</class&!doc>
-%    \end{macrocode}
 % Das Paket \pkg{shellesc} ermöglicht mit dem Befehl \cs{ShellEscape} die 
 % Verwendung von Systembefehlen auf der Kommandozeile unabhängig vom genutzten
 % Format. Sollte \app{lualatex} als Dokumentprozessor eingesetzt werden, sind 
@@ -178,16 +166,32 @@
 \RequirePackage{shellesc}[2019/11/08]
 \RequirePackage{pdftexcmds}[2020/06/27]
 %    \end{macrocode}
-% Sprachabhängiges Setzen von Anführungszeichen.
+%
+%
+%
+% \subsubsection{Makro- und Microtypografie}
+%
+% \iffalse
+%<*!doc>
+% \fi
+%
+% Für den zweispaltigen Satz im Index.
 %    \begin{macrocode}
-\RequirePackage{csquotes}[2021/02/22]
+\RequirePackage{multicol}[2019/12/09]
 %    \end{macrocode}
 % Vergrößerung des Durchschusses.
 %    \begin{macrocode}
 \RequirePackage{setspace}[2011/12/19]
 \setstretch{1.1}
 %    \end{macrocode}
-% Verbesserte Zitate.
+% Das Paket \pkg{microtype} wird für den optischen Randausgleich verwendet. Es 
+% sollte erst nach \pkg{hyperref} geladen werden. Wurde \pkg{hyperref} nicht
+% geladen, dann soll auf \pkg{microtype} trotzdem nicht verzichtet werden.
+%    \begin{macrocode}
+\PassOptionsToPackage{babel}{microtype}
+\TUD@UnwindPackage*{hyperref}{\RequirePackage{microtype}[2021/03/14]}
+%    \end{macrocode}
+% Zitate mit Beachtung der Absatzeinstellungen.
 %    \begin{macrocode}
 \PassOptionsToPackage{vskip=\smallskipamount}{quoting}
 \RequirePackage{quoting}[2014/01/28]
@@ -209,6 +213,43 @@
 %    \begin{macrocode}
 \renewcommand*\raggedfootnote{\tud@RaggedRight}%
 %    \end{macrocode}
+% Typographisch saubere Einheiten.
+%    \begin{macrocode}
+\RequirePackage{units}[1998/08/04]
+%    \end{macrocode}
+% Das Paket \pkg{ellipsis} sorgt für korrekte Auslassungpunkte.
+%    \begin{macrocode}
+\AtEndPreamble{%
+  \RequirePackage{ellipsis}[2020/05/22]%
+  \let\ellipsispunctuation\relax%
+}
+%    \end{macrocode}
+%
+% \iffalse
+%</!doc>
+% \fi
+%
+% Das Paket für intelligente Leerzeichen am Ende von Makros mit \cs{xspace}.
+%    \begin{macrocode}
+\RequirePackage{xspace}[2014/10/28]
+\xspaceaddexceptions{"=}
+%    \end{macrocode}
+% Das Paket \pkg{marginnote} stellt nicht fließenden Randnotizen bereit, welche 
+% für die Kennzeichnung von Änderungen, Hinweise oder ToDo-Notizen verwendet 
+% werden. Die Randnotizen werden auf dem linken~-- weil größeren~-- Seitenrand
+% gesetzt.
+%    \begin{macrocode}
+\PassOptionsToPackage{quiet}{marginnote}
+\RequirePackage{marginnote}[2018/08/09]
+%<!doc>\reversemarginpar
+%    \end{macrocode}
+%
+% \iffalse
+%<*!doc>
+% \fi
+%
+% \subsubsection{Tabellen und Listen}
+%
 % Mit Hilfe von \pkg{tabularx} können Tabellen bestimmter Breite und
 % automatisch berechneten Spaltenbreiten gesetzt werden.
 %    \begin{macrocode}
@@ -229,7 +270,38 @@
   partopsep=0pt,noitemsep%
 }
 %    \end{macrocode}
-% Die Formatierung von Gleitobjekten.
+% \begin{macro}{\tud@list@create}
+% \changes{v2.07}{2021/06/09}{neu}^^A
+% Dieses Makro dient dem Erstellen zusätzlicher Listenumgebungen mit 
+% vordefinierten Einstellungen.
+%    \begin{macrocode}
+\newcommand*\tud@list@create[4][]{%
+  \newlist{#2}{#3}{#4}%
+  \setlist[{#2}]{%
+    font=\normalfont,%
+    labelindent=.75em,labelwidth=\dimexpr\linewidth-.75em\relax,labelsep=0pt,%
+    topsep=\smallskipamount,parsep=\parskip,listparindent=\parindent,%
+    #1%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@list@create
+%
+%
+%
+% \subsubsection{Grafiken \& Co.}
+%
+%    \begin{macrocode}
+\RequirePackage{tikz}[2021/05/15]
+%    \end{macrocode}
+% Einbinden von ganzseitigen PDF"~Dokumenten als Beispiel im Handbuch.
+%    \begin{macrocode}
+\RequirePackage{pdfpages}[2021/03/06]
+%    \end{macrocode}%
+%
+%
+% \subsubsection{Formatierung von Gleitobjekten}
+%
 %    \begin{macrocode}
 \RequirePackage{caption}[2020/10/26]
 \RequirePackage{floatrow}[2008/08/02]
@@ -241,25 +313,11 @@
 \KOMAoption{captions}{tableheading,figuresignature}
 \floatsetup[table]{style=plaintop}
 %    \end{macrocode}
-% Erstellen von Grafiken.
-%    \begin{macrocode}
-\RequirePackage{tikz}[2021/05/15]
-%    \end{macrocode}
-% Einbinden von ganzseitigen PDF"~Dokumenten als Beispiel im Handbuch.
-%    \begin{macrocode}
-\RequirePackage{pdfpages}[2021/03/06]
-%    \end{macrocode}
-% Typographisch saubere Einheiten.
-%    \begin{macrocode}
-\RequirePackage{units}[1998/08/04]
-%    \end{macrocode}
-% Das Paket \pkg{ellipsis} sorgt für korrekte Auslassungpunkte.
-%    \begin{macrocode}
-\AtEndPreamble{%
-  \RequirePackage{ellipsis}[2020/05/22]%
-  \let\ellipsispunctuation\relax%
-}
-%    \end{macrocode}
+%
+%
+%
+% \subsubsection{Quelltexte}
+%
 % Sowohl im Handbuch als auch in den Tutorials werden Quelltextauszüge für das 
 % bessere Verständnis des Anwenders angegeben. Um diese darzustellen wird das 
 % Paket \pkg{listings} verwendet.
@@ -275,6 +333,11 @@
   texcl,%
 }
 %    \end{macrocode}
+%
+%
+%
+% \subsubsection{Änderungsnotizen}
+%
 % Für Klasse und Paket besteht die Möglichkeit, Änderungsnotizen zu nutzen, 
 % wofür das Paket \pkg{todonotes} geladen wird.
 %    \begin{macrocode}
@@ -294,46 +357,319 @@
   \fi%
 }
 %    \end{macrocode}
-% Das Paket \pkg{microtype} wird für den optischen Randausgleich verwendet. Es 
-% sollte erst nach \pkg{hyperref} geladen werden. Wurde \pkg{hyperref} nicht
-% geladen, dann soll auf \pkg{microtype} trotzdem nicht verzichtet werden.
-%    \begin{macrocode}
-\PassOptionsToPackage{babel}{microtype}
-\TUD@UnwindPackage*{hyperref}{\RequirePackage{microtype}[2021/03/14]}
-%    \end{macrocode}
+%
+%
+% \subsubsection{Querverweise etc.}
+%
 % Verbesserte Referenzierungen auf Seiten.
 %    \begin{macrocode}
 \PassOptionsToPackage{nospace}{varioref}
 \RequirePackage{varioref}[2020/08/11]
 %    \end{macrocode}
+% \begin{macro}{\fullref}
+% Ein Makro zur vollständigen Referenzierungen inklusive der relevanten Seite.
+%    \begin{macrocode}
+\renewrobustcmd*\fullref[1]{\hyperref[{#1}]{\autoref*{#1}\space\vpageref{#1}}}
+%    \end{macrocode}
+% \end{macro}^^A \fullref
+% 
+%    \begin{macrocode}
+\AfterPackage*{nameref}{%
+  \patchcmd\NR@gettitle{%
+    \GetTitleString%
+  }{%
+    \GetTitleStringExpand%
+  }{}{\tud@patch@wrn{NR@gettitle}}%
+}
+%    \end{macrocode}
 %
 % \iffalse
-%</body|class&doc>
-%<*!doc>
-%<*body>
-%<*package>
+%</!doc>
 % \fi
 %
-% \subsection{Zusätzliche Pakete für das Paket \pkg{tudscrtutorial}}
+% Das Paket \pkg{hyperref} wird für alle möglichen Links und Querverweise 
+% geladen, \pkg{bookmark} verbessert das Erstellen der Outline-Einträge.
+%    \begin{macrocode}
+\PassOptionsToPackage{open,openlevel=0}{bookmark}
+\PassOptionsToPackage{%
+  hyperindex=false,%
+  colorlinks,%
+%<doc>  linkcolor=blue,%
+%<*!doc>
+  linkcolor=HKS44,%
+  urlcolor=HKS33,%
+  citecolor=HKS57,%
+  filecolor=HKS65,%
+  destlabel=true,%pdfview=FitH,%
+%</!doc>
+}{hyperref}
+%    \end{macrocode}
+% Es folgen einige Befehle, die an das Paket \pkg{hyperref} gekoppelt sind. 
+% Sobald das Paket geladen wurde, werden die Makros mit der jeweiligen
+% Funktionalität definiert. 
+%    \begin{macrocode}
+\AfterPackage*{hyperref}{%
+%    \end{macrocode}
+% Zuerst die Einstellungen für \cls{tudscrmanual} und \pkg{tudscrtutorial}.
+%
+% \iffalse
+%<*!doc>
+% \fi
+%
+% Die Bezeichner für die Abschnittsebenen werden umbenannt.
+%    \begin{macrocode}
+  \renewcaptionname{ngerman}{\sectionautorefname}{Unterkapitel}%
+  \renewcaptionname{ngerman}{\subsectionautorefname}{Abschnitt}%
+  \renewcaptionname{ngerman}{\subsubsectionautorefname}{Unterabschnitt}%
+%    \end{macrocode}
+% \begin{macro}{\autorefname}
+% \begin{macro}{\auto@refname}
+% \begin{macro}{\auto@@refname}
+% Der Befehl \cs{autorefname} dient dazu, den Verweistyp beziehungsweise den 
+% Bezeichner des aktuellen~-- oder optional eines speziellen~-- Labels ohne die 
+% dazugehörige Nummerierung zu erhalten. Das zugrunde liegende Funktionsprinzip 
+% wurde bei \hrfn{http://tex.stackexchange.com/q/33776}{LaTeX Stack Exchange} 
+% vorgestellt und hier übernommen.
+%    \begin{macrocode}
+  \newcommand*\autorefname[1][current]{%
+    \Ifstr{#1}{current}{%
+      \expandafter\HyPsd@@autorefname\@currentHref\@nil%
+    }{%
+      \auto@refname\HyPsd@@autorefname{#1}%
+    }%
+    \unskip\xspace%
+  }%
+  \newcommand*\auto@refname[2]{%
+    \ifcsundef{r@#2}{%
+      ??%
+    }{%
+      \expandafter\expandafter\expandafter\auto@@refname%
+          \csname r@#2\endcsname{}{}{}{}\@nil#1\@nil%
+    }%
+  }%
+  \newcommand*\auto@@refname{}%
+  \def\auto@@refname#1#2#3#4#5\@nil#6\@nil{#6#4.\@nil}%
+%    \end{macrocode}
+% \end{macro}^^A \auto@@refname
+% \end{macro}^^A \auto@refname
+% \end{macro}^^A \autorefname
+%
+% \iffalse
+%</!doc>
+%<*doc>
+% \fi
+%
+% Nun die Einstellungen für \cls{tudscrdoc}.
+% \begin{macro}{\hypersourcedef}
+% \changes{v2.05}{2016/04/26}{neu}^^A
+% \begin{macro}{\hypersource@def}
+% \changes{v2.05}{2016/04/26}{neu}^^A
+% \begin{macro}{\hypersource@ref@codeline}
+% \changes{v2.05}{2016/04/26}{neu}^^A
+% \begin{macro}{\hypersource@ref@page}
+% \changes{v2.05}{2016/04/26}{neu}^^A
+% Diese Makros werden verwendet, um im Index respektive in der Änderungsliste 
+% mithilfe von \pkg{hyperref} Hyperlinks auf Codezeilen respektive Seiten im 
+% Dokument zu setzen. 
+%
+% Mit \cs{hypersourcedef} wird ein Textanker gesetzt, falls dieser noch nicht 
+% definiert wurde, was durch \cs{hypersource@def} abgesichert wird. Als 
+% Argument wird hierfür die aktuelle Codezeile verwendet.
+%    \begin{macrocode}
+  \newcommand*\hypersource@def{}%
+  \newcommand*\hypersourcedef[1]{%
+    \Ifstr{#1}{\hypersource@def}{}{%
+      \Hy@raisedlink{\hyperdef{}{source:#1}{}}%
+      \xdef\hypersource@def{#1}%
+    }%
+  }%
+%    \end{macrocode}
+% Mit \cs{hypersource@ref@\dots} wird auf Anker im Dokument verlinkt. Dies 
+% erfolgt indirekt über die Attribute \val{main} bzw. \val{usage}, welche bei
+% der Definitionen von Befehlen etc. im Index genutzt werden. Hierfür werden
+% die dazugehörigen Makros umdefiniert.
+%    \begin{macrocode}
+  \newcommand*\hypersource@ref@codeline[2][\@firstofone]{%
+    \begingroup%
+      \def\@tempa##1{\hyperref{}{}{source:##1}{#1{##1}}}%
+      \forcsvlist\@tempa{#2}%
+    \endgroup%
+  }%
+  \newcommand*\hypersource@ref@page[2][\@firstofone]{%
+    \begingroup%
+      \def\@tempa##1{\hyperlink{page.##1}{#1{##1}}}%
+      \forcsvlist\@tempa{#2}%
+    \endgroup%
+  }%
+  \renewcommand*\main[1]{%
+    \ifcodeline@index%
+      \hypersource@ref@codeline[\underline]{#1}%
+    \else%
+      \hypersource@ref@page[\underline]{#1}%
+    \fi%
+  }%
+  \renewcommand*\usage[1]{\hypersource@ref@page[\textit]{#1}}%
+%    \end{macrocode}
+% \end{macro}^^A \hypersource@ref@page
+% \end{macro}^^A \hypersource@ref@codeline
+% \end{macro}^^A \hypersource@def
+% \end{macro}^^A \hypersourcedef
+%
+% \iffalse
+%</doc>
+% \fi
+%
+% Das war's. Damit sind die Ausführungen für das Paket \pkg{hyperref} beendet.
+%    \begin{macrocode}
+}
+%    \end{macrocode}
+% Sollte das Paket \pkg{hyperref} nicht geladen werden, wird eine Rückfallebene 
+% definiert, wodurch die Klasse dennoch verwendet werden kann.
+%    \begin{macrocode}
+\TUD@UnwindPackage{hyperref}{%
+%    \end{macrocode}
+% Zunächst die direkt innerhalb der Dokumentation verwendeten Befehle nebst 
+% dazugehöriger Warnung.
+%    \begin{macrocode}
+%<*!doc>
+%<*class>
+  \ClassWarningNoLine{tudscrmanual}%
+%</class>
+%<*package>
+  \PackageWarningNoLine{tudscrtutorial}%
+%</package>
+  {%
+    It is strongly recommended to load package `hyperref'. \MessageBreak%
+    Nevertheless, essential commands are rudimentarily\MessageBreak%
+    defined. At least the package `url' is loaded%
+  }%
+%</!doc>
+%    \end{macrocode}
+% \begin{macro}{\hypersetup}
+% \begin{macro}{\href}
+% \begin{macro}{\phantomsection}
+% \begin{macro}{\texorpdfstring}
+% \begin{macro}{\url}
+% \begin{macro}{\nolinkurl}
+% Einige vom Paket \pkg{hyperref} definierten Befehle werden vorgehalten.
+%    \begin{macrocode}
+  \providecommand*\hypersetup[1]{}%
+  \providerobustcmd*\href[3][]{#3}%
+  \providecommand*\phantomsection{}%
+  \providecommand*\texorpdfstring[2]{#1}%
+  \RequirePackage{url}[2013/09/16]%
+  \providerobustcmd*\url[1]{\detokenize{#1}}%
+  \providerobustcmd*\nolinkurl[1]{\url{#1}}%
+%    \end{macrocode}
+% \end{macro}^^A \nolinkurl
+% \end{macro}^^A \url
+% \end{macro}^^A \texorpdfstring
+% \end{macro}^^A \phantomsection
+% \end{macro}^^A \href
+% \end{macro}^^A \hypersetup
+%
+% \iffalse
+%<*!doc>
+% \fi
+%
+% \begin{macro}{\hyperref}
+% \begin{macro}{\tud@x@hyperref@a}
+% \begin{macro}{\tud@x@hyperref@b}
+% \begin{macro}{\hypertarget}
+% \begin{macro}{\hyperlink}
+% \begin{macro}{\Hy@raisedlink}
+% Der Befehl \cs{hyperref} existiert in zwei Varianten. Entweder mit einem 
+% optionalen und einem obligatorischen Argument oder mit vier Argumenten.
+%    \begin{macrocode}
+  \providerobustcmd*\hyperref{%
+    \kernel@ifnextchar[%]
+      {\tud@x@hyperref@a}%
+      {\tud@x@hyperref@b}%
+  }%
+  \newcommand*\tud@x@hyperref@a[2][]{#2}%
+  \newcommand*\tud@x@hyperref@b[4]{#4}%
+  \providecommand*\hypertarget[2]{\label{#1}#2}%
+  \providecommand*\hyperlink[2]{\hyperref[{#1}]{#2}}%
+  \providecommand*\Hy@raisedlink[1]{#1}%
+%    \end{macrocode}
+% \end{macro}^^A \Hy@raisedlink
+% \end{macro}^^A \hyperlink
+% \end{macro}^^A \hypertarget
+% \end{macro}^^A \tud@x@hyperref@b
+% \end{macro}^^A \tud@x@hyperref@a
+% \end{macro}^^A \hyperref
+% \begin{macro}{\hyperpage}
+% \begin{macro}{\autoref}
+% Der Befehl \cs{autoref} wird auch in der Sternversion genutzt.
+%    \begin{macrocode}
+  \providecommand*\hyperpage[1]{#1}%
+  \providerobustcmd*\autoref{??\xspace\kernel@ifstar{\ref}{\ref}}%
+  \providerobustcmd*\autorefname[1][]{??\xspace}%
+%    \end{macrocode}
+% \end{macro}^^A \autoref
+% \end{macro}^^A \hyperpage
+% \begin{macro}{\partautorefname}
+% \begin{macro}{\chapterautorefname}
+% \begin{macro}{\sectionautorefname}
+% \begin{macro}{\subsectionautorefname}
+% \begin{macro}{\subsubsectionautorefname}
+% Die notwendigen, lokalen Bezeichner der Gliederungsebenen.
+%    \begin{macrocode}
+  \tud@localization@german{\partautorefname}{Teil}%
+  \tud@localization@german{\chapterautorefname}{Kapitel}%
+  \tud@localization@german{\sectionautorefname}{Unterkapitel}%
+  \tud@localization@german{\subsectionautorefname}{Abschnitt}%
+  \tud@localization@german{\subsubsectionautorefname}{Unterabschnitt}%
+  \tud@localization@english{\partautorefname}{Part}%
+  \tud@localization@english{\chapterautorefname}{chapter}%
+  \tud@localization@english{\sectionautorefname}{section}%
+  \tud@localization@english{\subsectionautorefname}{subsection}%
+  \tud@localization@english{\subsubsectionautorefname}{subsubsection}%
+%    \end{macrocode}
+% \end{macro}^^A \subsubsectionautorefname
+% \end{macro}^^A \subsectionautorefname
+% \end{macro}^^A \sectionautorefname
+% \end{macro}^^A \chapterautorefname
+% \end{macro}^^A \partautorefname
+%
+% \iffalse
+%</!doc>
+% \fi
+%
+% Und hier der Teil für die Quelltextdokumentation.
+%    \begin{macrocode}
+%<*doc>
+  \providecommand*\hypersourcedef[1]{}%
+  \providecommand*\hypersource@def{}%
+  \providecommand*\hypersource@ref@codeline[2][]{}%
+  \providecommand*\hypersource@ref@page[2][]{}%
+%</doc>
+}
+%    \end{macrocode}
+%
+%
+%
+% \subsubsection{Hilfsdateien}
 %
 % Mit dem Paket \pkg{morewrites} lassen sich Probleme mit zu wenig verfügbaren 
 % Streams für das Schreiben externer Datein beheben. Hintergrund ist die
 % Verwendung des Paketes \pkg{glossaries} in einem der Tutorials, welches eine
 % Vielzahl solcher Streams benötigt.
+% \ToDo{noch notwendig?}[v2.07]
 %    \begin{macrocode}
+%<*body&package>
 \RequirePackage{morewrites}[2018/12/29]
+%</body&package>
 %    \end{macrocode}
 %
 % \iffalse
-%</package>
-%</body>
+%</body|class&doc>
+%<*!doc>
 %<*option>
 % \fi
 %
 %
-% \subsection{^^A
-%   Optionen für die Ausgabe von \cls{tudscrmanual} und \pkg{tudscrtutorial}^^A
-% }
+% \subsection{Optionen für die Ausgabe}
 %
 % \begin{option}{final}
 % \begin{option}{print}
@@ -681,252 +1017,6 @@
 %
 % \subsection{Anpassungen für das Paket \pkg{hyperref} und Querverweise}
 %
-% Das Paket \pkg{hyperref} wird für alle möglichen Links und Querverweise 
-% geladen, \pkg{bookmark} verbessert das Erstellen der Outline-Einträge.
-%    \begin{macrocode}
-\PassOptionsToPackage{hyperindex=false,colorlinks,linkcolor=blue}{hyperref}
-\PassOptionsToPackage{open,openlevel=0}{bookmark}
-%    \end{macrocode}
-% Es folgen einige Befehle, die an das Paket \pkg{hyperref} gekoppelt sind. 
-% Sobald das Paket geladen wurde, werden die Makros mit der jeweiligen
-% Funktionalität definiert. 
-%    \begin{macrocode}
-\AfterPackage*{hyperref}{%
-%    \end{macrocode}
-% Zuerst die Einstellungen für \cls{tudscrmanual} und \pkg{tudscrtutorial}.
-%
-% \iffalse
-%<*!doc>
-% \fi
-%
-% Die Bezeichner für die Abschnittsebenen werden umbenannt.
-%    \begin{macrocode}
-  \renewcaptionname{ngerman}{\sectionautorefname}{Unterkapitel}%
-  \renewcaptionname{ngerman}{\subsectionautorefname}{Abschnitt}%
-  \renewcaptionname{ngerman}{\subsubsectionautorefname}{Unterabschnitt}%
-%    \end{macrocode}
-% \begin{macro}{\autorefname}
-% \begin{macro}{\auto@refname}
-% \begin{macro}{\auto@@refname}
-% Der Befehl \cs{autorefname} dient dazu, den Verweistyp beziehungsweise den 
-% Bezeichner des aktuellen~-- oder optional eines speziellen~-- Labels ohne die 
-% dazugehörige Nummerierung zu erhalten. Das zugrunde liegende Funktionsprinzip 
-% wurde bei \hrfn{http://tex.stackexchange.com/q/33776}{LaTeX Stack Exchange} 
-% vorgestellt und hier übernommen.
-%    \begin{macrocode}
-  \newcommand*\autorefname[1][current]{%
-    \Ifstr{#1}{current}{%
-      \expandafter\HyPsd@@autorefname\@currentHref\@nil%
-    }{%
-      \auto@refname\HyPsd@@autorefname{#1}%
-    }%
-    \unskip\xspace%
-  }%
-  \newcommand*\auto@refname[2]{%
-    \expandafter\ifx\csname r@#2\endcsname\relax%
-      ??%
-    \else%
-      \expandafter\expandafter\expandafter\auto@@refname%
-          \csname r@#2\endcsname{}{}{}{}\@nil#1\@nil%
-    \fi%
-  }%
-  \newcommand*\auto@@refname{}%
-  \def\auto@@refname#1#2#3#4#5\@nil#6\@nil{#6#4.\@nil}%
-%    \end{macrocode}
-% \end{macro}^^A \auto@@refname
-% \end{macro}^^A \auto@refname
-% \end{macro}^^A \autorefname
-% Nun die Einstellungen für \cls{tudscrdoc}.
-%
-% \iffalse
-%</!doc>
-%<*doc>
-% \fi
-%
-% \begin{macro}{\hypersourcedef}
-% \changes{v2.05}{2016/04/26}{neu}^^A
-% \begin{macro}{\hypersource@def}
-% \changes{v2.05}{2016/04/26}{neu}^^A
-% \begin{macro}{\hypersource@ref@codeline}
-% \changes{v2.05}{2016/04/26}{neu}^^A
-% \begin{macro}{\hypersource@ref@page}
-% \changes{v2.05}{2016/04/26}{neu}^^A
-% Diese Makros werden verwendet, um im Index respektive in der Änderungsliste 
-% mithilfe von \pkg{hyperref} Hyperlinks auf Codezeilen respektive Seiten im 
-% Dokument zu setzen. 
-%
-% Mit \cs{hypersourcedef} wird ein Textanker gesetzt, falls dieser noch nicht 
-% definiert wurde, was durch \cs{hypersource@def} abgesichert wird. Als 
-% Argument wird hierfür die aktuelle Codezeile verwendet.
-%    \begin{macrocode}
-  \newcommand*\hypersource@def{}%
-  \newcommand*\hypersourcedef[1]{%
-    \Ifstr{#1}{\hypersource@def}{}{%
-      \Hy@raisedlink{\hyperdef{}{source:#1}{}}%
-      \xdef\hypersource@def{#1}%
-    }%
-  }%
-%    \end{macrocode}
-% Mit \cs{hypersource@ref@\dots} wird auf Anker im Dokument verlinkt. Dies 
-% erfolgt indirekt über die Attribute \val{main} bzw. \val{usage}, welche bei
-% der Definitionen von Befehlen etc. im Index genutzt werden. Hierfür werden
-% die dazugehörigen Makros umdefiniert.
-%    \begin{macrocode}
-  \newcommand*\hypersource@ref@codeline[2][\@firstofone]{%
-    \begingroup%
-      \def\@tempa##1{\hyperref{}{}{source:##1}{#1{##1}}}%
-      \forcsvlist\@tempa{#2}%
-    \endgroup%
-  }%
-  \newcommand*\hypersource@ref@page[2][\@firstofone]{%
-    \begingroup%
-      \def\@tempa##1{\hyperlink{page.##1}{#1{##1}}}%
-      \forcsvlist\@tempa{#2}%
-    \endgroup%
-  }%
-  \renewcommand*\main[1]{%
-    \ifcodeline@index%
-      \hypersource@ref@codeline[\underline]{#1}%
-    \else%
-      \hypersource@ref@page[\underline]{#1}%
-    \fi%
-  }%
-  \renewcommand*\usage[1]{\hypersource@ref@page[\textit]{#1}}%
-%    \end{macrocode}
-% \end{macro}^^A \hypersource@ref@page
-% \end{macro}^^A \hypersource@ref@codeline
-% \end{macro}^^A \hypersource@def
-% \end{macro}^^A \hypersourcedef
-%
-% \iffalse
-%</doc>
-% \fi
-%
-% Das war's. Damit sind die Ausführungen für das Paket \pkg{hyperref} beendet.
-%    \begin{macrocode}
-}
-%    \end{macrocode}
-% Sollte das Paket \pkg{hyperref} nicht geladen werden, wird eine Rückfallebene 
-% definiert, wodurch die Klasse dennoch verwendet werden kann.
-%    \begin{macrocode}
-\TUD@UnwindPackage{hyperref}{%
-%    \end{macrocode}
-% Zunächst die direkt innerhalb der Dokumentation verwendeten Befehle nebst 
-% dazugehöriger Warnung.
-%    \begin{macrocode}
-%<*!doc>
-%<*class>
-  \ClassWarningNoLine{tudscrmanual}%
-%</class>
-%<*package>
-  \PackageWarningNoLine{tudscrtutorial}%
-%</package>
-  {%
-    It is strongly recommended to load package `hyperref'. \MessageBreak%
-    Nevertheless, essential commands are rudimentarily\MessageBreak%
-    defined. At least the package `url' is loaded%
-  }%
-%</!doc>
-%    \end{macrocode}
-% \begin{macro}{\hypersetup}
-% \begin{macro}{\href}
-% \begin{macro}{\phantomsection}
-% \begin{macro}{\texorpdfstring}
-% \begin{macro}{\nolinkurl}
-% Einige vom Paket \pkg{hyperref} definierten Befehle werden vorgehalten.
-%    \begin{macrocode}
-  \providecommand*\hypersetup[1]{}%
-  \providecommand*\href[3][]{#3}%
-  \providecommand*\phantomsection{}%
-  \providecommand*\texorpdfstring[2]{#1}%
-  \RequirePackage{url}[2013/09/16]%
-  \providecommand*\nolinkurl[1]{\url{#1}}%
-%    \end{macrocode}
-% \end{macro}^^A \nolinkurl
-% \end{macro}^^A \texorpdfstring
-% \end{macro}^^A \phantomsection
-% \end{macro}^^A \href
-% \end{macro}^^A \hypersetup
-%
-% \iffalse
-%<*!doc>
-% \fi
-%
-% \begin{macro}{\hyperpage}
-% \begin{macro}{\autoref}
-% Der Befehl \cs{autoref} wird auch in der Sternversion genutzt.
-%    \begin{macrocode}
-  \providecommand*\hyperpage[1]{#1}%
-  \providecommand*\autoref{??\xspace\kernel@ifstar{\ref}{\ref}}%
-  \providecommand*\autorefname[1][]{??\xspace}%
-%    \end{macrocode}
-% \end{macro}^^A \autoref
-% \end{macro}^^A \hyperpage
-% \begin{macro}{\hyperdef}
-% \begin{macro}{\hyperref}
-% \begin{macro}{\tud@hyperref@a}
-% \begin{macro}{\tud@hyperref@b}
-% \begin{macro}{\Hy@raisedlink}
-% Mit \cs{hyperdef} wird ein ein Label direkt vor dem Text eingefügt.
-%    \begin{macrocode}
-  \providecommand*\hyperdef[3]{\label{#1.#2}#3}%
-%    \end{macrocode}
-% Der Befehl \cs{hyperref} existiert in zwei Varianten. Entweder mit einem 
-% optionalen und einem obligatorischen Argument oder mit vier Argumenten.
-%    \begin{macrocode}
-  \providerobustcmd*\hyperref{%
-    \kernel@ifnextchar[%]
-      {\tud@hyperref@a}%
-      {\tud@hyperref@b}%
-  }%
-  \newcommand*\tud@hyperref@a[2][]{#2}%
-  \newcommand*\tud@hyperref@b[4]{#4}%
-  \providecommand\Hy@raisedlink[1]{#1}%
-%    \end{macrocode}
-% \end{macro}^^A \Hy@raisedlink
-% \end{macro}^^A \tud@hyperref@b
-% \end{macro}^^A \tud@hyperref@a
-% \end{macro}^^A \hyperref
-% \end{macro}^^A \hyperdef
-% \begin{macro}{\partautorefname}
-% \begin{macro}{\chapterautorefname}
-% \begin{macro}{\sectionautorefname}
-% \begin{macro}{\subsectionautorefname}
-% \begin{macro}{\subsubsectionautorefname}
-% Die notwendigen, lokalen Bezeichner der Gliederungsebenen.
-%    \begin{macrocode}
-  \tud@localization@german{\partautorefname}{Teil}%
-  \tud@localization@german{\chapterautorefname}{Kapitel}%
-  \tud@localization@german{\sectionautorefname}{Unterkapitel}%
-  \tud@localization@german{\subsectionautorefname}{Abschnitt}%
-  \tud@localization@german{\subsubsectionautorefname}{Unterabschnitt}%
-  \tud@localization@english{\partautorefname}{Part}%
-  \tud@localization@english{\chapterautorefname}{chapter}%
-  \tud@localization@english{\sectionautorefname}{section}%
-  \tud@localization@english{\subsectionautorefname}{subsection}%
-  \tud@localization@english{\subsubsectionautorefname}{subsubsection}%
-%    \end{macrocode}
-% \end{macro}^^A \subsubsectionautorefname
-% \end{macro}^^A \subsectionautorefname
-% \end{macro}^^A \sectionautorefname
-% \end{macro}^^A \chapterautorefname
-% \end{macro}^^A \partautorefname
-%
-% \iffalse
-%</!doc>
-% \fi
-%
-% Und hier der Teil für die Quelltextdokumentation.
-%    \begin{macrocode}
-%<*doc>
-  \providecommand*\hypersourcedef[1]{}%
-  \providecommand*\hypersource@def{}%
-  \providecommand*\hypersource@ref@codeline[2][]{}%
-  \providecommand*\hypersource@ref@page[2][]{}%
-%</doc>
-}
-%    \end{macrocode}
-%
 % \iffalse
 %<*!doc>
 % \fi
@@ -1134,13 +1224,6 @@
 %<*!doc>
 %<*body>
 % \fi
-%
-% \begin{macro}{\fullref}
-% Ein Makro zur vollständigen Referenzierungen inklusive der relevanten Seite.
-%    \begin{macrocode}
-\renewcommand*\fullref[1]{\hyperref[{#1}]{\autoref*{#1}\space\vpageref{#1}}}
-%    \end{macrocode}
-% \end{macro}^^A \fullref
 %
 % \subsection{Erstellung und Validierung von Labeln}
 %
