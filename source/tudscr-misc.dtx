@@ -108,6 +108,7 @@
 % \StopEventually{\PrintIndex\PrintChanges\PrintToDos}
 %
 % \iffalse
+%<*!(manual|doc)>
 %<*class&option>
 % \fi
 %
@@ -486,361 +487,6 @@
 %
 % \iffalse
 %</body>
-%<*util&list>
-% \fi
-%
-% \subsection{Verarbeitung von Listen}
-% \subsubsection{Externe Hilfslisten}
-%
-% \begin{macro}{\tud@auxlist@register}
-% \changes{v2.07}{2019/11/08}{neu}^^A
-% Hiermit wird eine Hilfsliste initialisiert und die Befehle ausgeführt, um 
-% diese am Ende des Dokumentes in die aux"~Datei schreiben und im nachfolgenden 
-% Durchlauf wieder einlesen und verarbeiten zu können.
-%
-% Das obligatorische Argument enthält den Namen der Liste. Das vorherige 
-% optionale Argument wird bei der Verarbeitung auf jedes Listenelement 
-% angewendet, bevor es zur Liste hinzugefügt oder mit dieser verglichen wird.
-% Die Sternversion führt nach dem Einlesen der Liste die enthaltenen Elemente 
-% einzeln aus.
-%
-% Dabei werden drei Makros verwendet. Der Befehl \cs{\meta{listname}@auxlist} 
-% enthält die importierte Liste. In \cs{\meta{listname}@auxlist@positive} 
-% werden alle potentiellen Einträge in einer Positivliste vorgehalten, die 
-% exportiert werden sollen. Da im Verlauf des Dokumentes allerdings bestimmte
-% Elemente wieder entfernt werden könnten, wird die Negativliste für diese 
-% genutzt. Dieses Konstrukt dient dazu, dass beim Kompilieren des Dokumentes 
-% möglicherweise Elemente auftreten, die gar nicht exportiert werden sollen, 
-% obwohl diese später der Positivliste hinzugefügt werden könnten.
-%    \begin{macrocode}
-\NewDocumentCommand\tud@auxlist@register{s D(){\@firstofone} m}{%
-  \expandafter\newcommand\expandafter*\csname#3@auxlist\endcsname{}%
-  \expandafter\newcommand\expandafter*\csname#3@auxlist@positive\endcsname{}%
-  \expandafter\newcommand\expandafter*\csname#3@auxlist@negative\endcsname{}%
-  \expandafter\newcommand\expandafter*\csname#3@auxlist@handler\endcsname{#2}%
-  \BeforeClosingMainAux{%
-    \forlistcsloop{\listcsremove{#3@auxlist@positive}}{#3@auxlist@negative}%
-    \tud@auxlist@export{#3}%
-  }%
-  \AtBeginDocument{\tud@auxlist@import{#3}{#1}}%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@auxlist@register
-% \begin{macro}{\tud@auxlist@export}
-% \changes{v2.07}{2019/11/08}{neu}^^A
-% \begin{macro}{\tud@auxlist@import}
-% \changes{v2.07}{2019/11/08}{neu}^^A
-%    \begin{macrocode}
-% Beim Schreiben in die aux"~Datei wird die \pkg{etoolbox}"~Liste in eine 
-% Token-Liste umgewandelt.
-\newcommand*\tud@auxlist@export[1]{%
-  \if@filesw%
-    \let\tud@res@a\@empty%
-    \def\tud@res@b##1{\eappto\tud@res@a{\@percentchar^^J\@spaces{##1}}}%
-    \forlistcsloop\tud@res@b{#1@auxlist@positive}%
-    \immediate\write\@mainaux{%
-      \string\gdef\expandafter\string\csname #1@auxlist\endcsname%
-        {\expandonce\tud@res@a\@percentchar^^J}%
-    }%
-  \fi%
-}
-%    \end{macrocode}
-% Beim Lesen wird die Token-Liste zurück in eine \pkg{etoolbox}"~Liste 
-% gewandelt.
-%    \begin{macrocode}
-\newcommand*\tud@auxlist@import[2]{%
-  \begingroup%
-    \edef\tud@res@a{\unexpanded{\@tfor\tud@res@c:=}\csexpandonce{#1@auxlist}}%
-    \letcs\tud@res@b{#1@auxlist@handler}%
-    \global\cslet{#1@auxlist}\@empty%
-    \tud@res@a\do{%
-      \edef\tud@res@c{\tud@res@b{\tud@res@c}}%
-      \listcsxadd{#1@auxlist}{\expandonce\tud@res@c}%
-    }%
-  \endgroup%
-  \IfBooleanT{#2}{\forlistcsloop{\@firstofone}{#1@auxlist}}%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@auxlist@import
-% \end{macro}^^A \tud@auxlist@export
-%
-% \begin{macro}{\tud@auxlist@add}
-% \changes{v2.07}{2019/11/08}{neu}^^A
-% \begin{macro}{\tud@auxlist@remove}
-% \changes{v2.07}{2019/11/08}{neu}^^A
-% \begin{macro}{\tud@auxlist@ifin}
-% \changes{v2.07}{2019/11/08}{neu}^^A
-%    \begin{macrocode}
-\newcommand*\tud@auxlist@add[2]{%
-  \begingroup%
-    \protected@edef\tud@res@a{#2}%
-    \edef\tud@res@a{\detokenize\expandafter{\tud@res@a}}%
-    \tud@unique@csxadd{#1@auxlist@positive}{\tud@res@a}%
-  \endgroup%
-}
-\newcommand*\tud@auxlist@remove[2]{%
-  \begingroup%
-    \protected@edef\tud@res@a{#2}%
-    \edef\tud@res@a{\detokenize\expandafter{\tud@res@a}}%
-    \tud@unique@csxadd{#1@auxlist@negative}{\tud@res@a}%
-  \endgroup%
-}
-\newcommand*\tud@auxlist@ifin[2]{%
-  \begingroup%
-    \protected@edef\tud@res@a{#1}%
-    \letcs\tud@res@b{#2@auxlist@handler}%
-    \edef\tud@res@a{%
-      \endgroup%
-      \noexpand\ifinlistcs{\tud@res@b{\tud@res@a}}{#2@auxlist}%
-    }%
-  \tud@res@a%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@auxlist@ifin
-% \end{macro}^^A \tud@auxlist@remove
-% \end{macro}^^A \tud@auxlist@add
-% \begin{macro}{\tud@unique@add}
-% \changes{v2.07}{2021/06/08}{neu}^^A
-% \begin{macro}{\tud@unique@eadd}
-% \changes{v2.07}{2021/06/08}{neu}^^A
-% \begin{macro}{\tud@unique@xadd}
-% \changes{v2.07}{2021/06/08}{neu}^^A
-% \begin{macro}{\tud@unique@csxadd}
-% \changes{v2.07}{2021/06/08}{neu}^^A
-% \begin{macro}{\listeremove}
-% \changes{v2.07}{2021/06/08}{neu}^^A
-% Ein wenig syntaktischer Zucker für Listen ohne Duplikate.
-%    \begin{macrocode}
-\newcommand*\tud@unique@add[2]{%
-  \ifinlist{#2}{#1}{}{\listadd#1{#2}}%
-}
-\newcommand*\tud@unique@eadd[2]{%
-  \xifinlist{#2}{#1}{}{\listeadd#1{#2}}%
-}
-\newcommand*\tud@unique@xadd[2]{%
-  \xifinlist{#2}{#1}{}{\listxadd#1{#2}}%
-}
-\newcommand*\tud@unique@csxadd[2]{%
-  \xifinlistcs{#2}{#1}{}{\listcsxadd{#1}{#2}}%
-}
-\providerobustcmd*\listeremove[2]{%
-  \begingroup%
-    \edef\etb@tempa{\endgroup\unexpanded{\listremove#1}{#2}}%
-  \etb@tempa%
-}
-%    \end{macrocode}
-% \end{macro}^^A \listeremove
-% \end{macro}^^A \tud@unique@csxadd
-% \end{macro}^^A \tud@unique@xadd
-% \end{macro}^^A \tud@unique@eadd
-% \end{macro}^^A \tud@unique@add
-%
-% \subsubsection{Sortieren von Listen}
-%
-% \begin{macro}{\tud@list@sort}
-% \changes{v2.02}{2014/07/25}{neu}^^A
-% \changes{v2.07}{2019/09/20}{Hilfskonstrukt kommaseparierte Liste entfernt}^^A
-% \begin{macro}{\tud@list@@sort}
-% \changes{v2.02}{2014/07/25}{neu}^^A
-% \begin{macro}{\tud@list@@@sort}
-% \changes{v2.07}{2019/09/20}{neu}^^A
-% \begin{macro}{\tud@list@sorted}
-% \changes{v2.02}{2014/07/25}{neu}^^A
-% \begin{macro}{\if@tud@list@sorted}
-% \changes{v2.02}{2014/07/25}{neu}^^A
-% Der Befehl \cs{tud@list@sort} erwartet eine \pkg{etoolbox}-Liste und sortiert 
-% diese mit dem Makro \cs{sort@list} in alphabetischer Reihenfolge.
-%    \begin{macrocode}
-\tud@newif\if@tud@list@sorted
-\newcommand*\tud@list@sorted{}
-\newcommand*\tud@list@sort[1]{%
-  \ifdefvoid{#1}{%
-    \ClassWarning{tudscrmanual}{%
-      The given list \string#1\space\MessageBreak%
-      is empty, nothing to sort here%
-    }%
-  }{%
-    \begingroup%
-      \let\tud@list@sorted\@empty%
-      \forlistloop\tud@list@@sort{#1}%
-      \edef\tud@res@c{%
-        \endgroup%
-        \unexpanded{\def#1}{\expandonce\tud@list@sorted}%
-      }%
-    \tud@res@c%
-  }%
-}
-%    \end{macrocode}
-% Hier erfolgt die eigentliche Sortierung der Liste.
-%    \begin{macrocode}
-\newcommand*\tud@list@@sort[1]{%
-%    \end{macrocode}
-% Die Einräge werden mit \cs{pdfstrcmp} an der richtigen Stelle eingefügt.
-% Dabei wird die temporäre Liste \cs{tud@list@sorted} durchlaufen und
-% \cs{tud@res@a} als Hilfsmakro verwendet, in welches die aktuelle Liste
-% innerhalb der \cs{@forlistloop}-Schleife stückweise expandiert wird. Wenn das
-% aktuelle Element an der dafür passenden Stelle eingesetzt wurde, wird
-% \cs{if@tud@list@sorted} gesetzt und der restliche Teil von 
-% \cs{tud@list@sorted} an \cs{tud@res@a} angehängt.
-%    \begin{macrocode}
-  \@tud@list@sortedfalse%
-  \let\tud@res@a\@empty%
-  \forlistloop{\tud@list@@@sort\tud@res@a{#1}}{\tud@list@sorted}%
-%    \end{macrocode}
-% Wurde der Eintrag nach dem Durchlaufen der Liste nicht eingefügt, so erfolgt 
-% dies hier am Ende der Liste.
-%    \begin{macrocode}
-  \if@tud@list@sorted\else%
-    \listadd\tud@res@a{#1}%
-  \fi%
-%    \end{macrocode}
-% Die temporäre Liste \cs{tud@res@a} wird in \cs{tud@list@sorted} geschrieben.
-%    \begin{macrocode}
-  \let\tud@list@sorted\tud@res@a%
-}
-%    \end{macrocode}
-% Das Makro für die eigentliche Sortierung.
-%    \begin{macrocode}
-\newcommand*\tud@list@@@sort[3]{%
-%    \end{macrocode}
-% Ist der Eintrag bereits erfolgt, wird der verbliebene Teil der Liste 
-% angehangen.
-%    \begin{macrocode}
-  \if@tud@list@sorted%
-    \listadd#1{#3}%
-  \else%
-%    \end{macrocode}
-% Liegt der Eintrag in alphabetischer Reihenfolge vor dem aktuellen der 
-% durchlaufenenen Liste, so wird dieser davor eingefügt. Anschließend wird 
-% \cs{@tud@list@sortedtrue} gesetzt.
-%    \begin{macrocode}
-    \ifnum\pdf@strcmp{#2}{#3}<\z@\relax%
-      \listadd#1{#2}%
-      \listadd#1{#3}%
-      \@tud@list@sortedtrue%
-    \else%
-%    \end{macrocode}
-% Ist Eintrag in alphabetischer Reihenfolge nach dem aktuellen der geprüften 
-% Liste, so wird dieser (noch) nicht eingefügt. 
-%    \begin{macrocode}
-      \listadd#1{#3}%
-    \fi%
-  \fi%
-}
-%    \end{macrocode}
-% \end{macro}^^A \if@tud@list@sorted
-% \end{macro}^^A \tud@list@sorted
-% \end{macro}^^A \tud@list@@@sort
-% \end{macro}^^A \tud@list@@sort
-% \end{macro}^^A \tud@list@sort
-%
-% \iffalse
-%</util&list>
-%<*util&string>
-% \fi
-%
-%
-%
-% \subsection{Stringmanipulation}
-%
-% \begin{macro}{\tud@remove@enfold@char}
-% \changes{v2.07}{2019/11/08}{neu}^^A
-% Entfernt aus der einfachen Expansion des ersten Argumentes am Anfang und Ende 
-% das im zweiten Argument angegebene Zeichen.
-%    \begin{macrocode}
-\newcommand*\tud@remove@enfold@char[2]{%
-  \begingroup%
-    \edef\tud@res@b{\expandonce{#1}}%
-    \trim@spaces@in\tud@res@b%
-    \expandafter\in@\expandafter#2\expandafter{\tud@res@b}%
-    \ifin@%
-      \let\tud@res@a\@empty%
-      \def\tud@res@c##1#2##2\@nil{%
-        \IfArgIsEmpty{##1}{}{%
-          \ifx\tud@res@a\@empty%
-            \def\tud@res@a{##1}%
-          \else%
-            \appto\tud@res@a{#2##1}%
-          \fi%
-        }%
-        \IfArgIsEmpty{##2}{}{\tud@res@c##2\@nil}%
-      }%
-      \expandafter\tud@res@c\tud@res@b#2\@nil%
-    \else%
-      \let\tud@res@a\tud@res@b%
-    \fi%
-    \edef\tud@res@a{%
-      \endgroup%
-      \unexpanded{\def#1}{\expandonce\tud@res@a}%
-    }%
-  \tud@res@a%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@remove@enfold@char
-%
-% \begin{macro}{\tud@replace@in}
-% \changes{v2.05}{2015/11/01}{neu}^^A
-% \changes{v2.07}{2019/11/08}{neu}^^A
-% \begin{macro}{\tud@replace@@in}
-% \changes{v2.07}{2019/11/08}{neu}^^A
-% Mit diesem Befehl kann in einem gegebenen Makro ein bestimmtes Zeichen durch 
-% ein anderes ersetzt werden. Dies wird verwendet, um für Indexbefehle die 
-% möglicherweise enthaltenen |@|"~Zeichen oder in Datei- und Pfadangaben 
-% Unterstriche zu ersetzen.
-%    \begin{macrocode}
-\newcommand*\tud@replace@in[3]{%
-  \begingroup%
-%    \end{macrocode}
-% Zunächst wird der Inhalt des ersten Argumentes expandiert. Anschließend 
-% wird \cs{tud@res@b} als ein durch \cs{@nil} abgegrenztes Makro mit zwei
-% Argumenten definiert, wobei diese durch das im zweiten Argument gegebene 
-% \meta{Zeichen} voneinander abgegrenzt werden. Dieses Makro wird nun so lange 
-% rekursiv mit dem zweiten Teil aufgerufen, bis dieses leer is. Dabei wird der 
-% erste, durch das angegebene zu ersetzende Zeichen Teil sukzessive an 
-% \cs{tud@res@c} angehängt und um das im dritten Argument angegebene 
-% Ersatzzeichen vervollständigt.
-%    \begin{macrocode}
-    \edef\tud@res@a{\expandonce{#1}}%
-    \let\tud@res@c\@empty%
-    \def\tud@res@b##1#2##2\@nil{%
-      \IfArgIsEmpty{##2}{%
-        \appto\tud@res@c{##1}%
-      }{%
-        \appto\tud@res@c{##1#3}%
-        \tud@res@b##2\@nil%
-      }%
-    }%
-    \expandafter\tud@res@b\tud@res@a#2\@nil%
-    \edef\tud@res@a{%
-      \endgroup%
-      \unexpanded{\def#1}{\expandonce\tud@res@c}%
-    }%
-  \tud@res@a%
-}
-%    \end{macrocode}
-% Diese Variante sorgt dafür, dass die zu ersetzenden Zeichen alle als Strings 
-% behandelt werden.
-%    \begin{macrocode}
-\newcommand*\tud@replace@@in[3]{%
-  \begingroup%
-    \protected@edef\tud@res@a{#1}%
-    \edef\tud@res@a{\detokenize\expandafter{\tud@res@a}}%
-    \edef\tud@res@b{%
-      \unexpanded{\tud@replace@in\tud@res@a}{\detokenize{#2}}{\detokenize{#3}}%
-    }%
-    \tud@res@b%
-    \edef\tud@res@a{%
-      \endgroup%
-      \unexpanded{\def#1}{\tud@res@a}%
-    }%
-  \tud@res@a%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@replace@@in
-% \end{macro}^^A \tud@replace@in
-%
-% \iffalse
-%</util&string>
 %<*option>
 % \fi
 %
@@ -957,6 +603,7 @@
 %
 % \iffalse
 %</body>
+%</!(manual|doc)>
 %<*execute>
 %<*class&!inherit|package&fonts>
 % \fi
@@ -1129,10 +776,859 @@
 %    \end{macrocode}
 % \end{macro}^^A \TUD@key@toolate
 %
-%
 % \iffalse
 %</class&!inherit|package&fonts>
 %</execute>
+%<*manual|doc>
+% \fi
+%
+%
+%
+% \section{Zusätzliche für die Benutzer- und Quelltextdokumentation}
+%
+% Hier tauchen Hilfsmittel auf, die für die Dokumentation verwendet werden.
+%
+% \iffalse
+%<*manual&option>
+% \fi
+%
+% \subsection{Verarbeitung von Listen}
+% \subsubsection{Externe Hilfslisten}
+%
+% \begin{macro}{\tud@auxlist@register}
+% \changes{v2.07}{2019/11/08}{neu}^^A
+% Hiermit wird eine Hilfsliste initialisiert und die Befehle ausgeführt, um 
+% diese am Ende des Dokumentes in die aux"~Datei schreiben und im nachfolgenden 
+% Durchlauf wieder einlesen und verarbeiten zu können.
+%
+% Das obligatorische Argument enthält den Namen der Liste. Das vorherige 
+% optionale Argument wird bei der Verarbeitung auf jedes Listenelement 
+% angewendet, bevor es zur Liste hinzugefügt oder mit dieser verglichen wird.
+% Die Sternversion führt nach dem Einlesen der Liste die enthaltenen Elemente 
+% einzeln aus.
+%
+% Dabei werden drei Makros verwendet. Der Befehl \cs{\meta{listname}@auxlist} 
+% enthält die importierte Liste. In \cs{\meta{listname}@auxlist@positive} 
+% werden alle potentiellen Einträge in einer Positivliste vorgehalten, die 
+% exportiert werden sollen. Da im Verlauf des Dokumentes allerdings bestimmte
+% Elemente wieder entfernt werden könnten, wird die Negativliste für diese 
+% genutzt. Dieses Konstrukt dient dazu, dass beim Kompilieren des Dokumentes 
+% möglicherweise Elemente auftreten, die gar nicht exportiert werden sollen, 
+% obwohl diese später der Positivliste hinzugefügt werden könnten.
+%    \begin{macrocode}
+\NewDocumentCommand\tud@auxlist@register{s D(){\@firstofone} m}{%
+  \expandafter\newcommand\expandafter*\csname#3@auxlist\endcsname{}%
+  \expandafter\newcommand\expandafter*\csname#3@auxlist@positive\endcsname{}%
+  \expandafter\newcommand\expandafter*\csname#3@auxlist@negative\endcsname{}%
+  \expandafter\newcommand\expandafter*\csname#3@auxlist@handler\endcsname{#2}%
+  \BeforeClosingMainAux{%
+    \forlistcsloop{\listcsremove{#3@auxlist@positive}}{#3@auxlist@negative}%
+    \tud@auxlist@export{#3}%
+  }%
+  \AtBeginDocument{\tud@auxlist@import{#3}{#1}}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@auxlist@register
+% \begin{macro}{\tud@auxlist@export}
+% \changes{v2.07}{2019/11/08}{neu}^^A
+% \begin{macro}{\tud@auxlist@import}
+% \changes{v2.07}{2019/11/08}{neu}^^A
+% Beim Schreiben in die aux"~Datei wird die \pkg{etoolbox}"~Liste in eine 
+% Token-Liste umgewandelt.
+%    \begin{macrocode}
+\newcommand*\tud@auxlist@export[1]{%
+  \if@filesw%
+    \let\tud@res@a\@empty%
+    \def\tud@res@b##1{\eappto\tud@res@a{\@percentchar^^J\@spaces{##1}}}%
+    \forlistcsloop\tud@res@b{#1@auxlist@positive}%
+    \immediate\write\@mainaux{%
+      \string\gdef\expandafter\string\csname #1@auxlist\endcsname%
+        {\expandonce\tud@res@a\@percentchar^^J}%
+    }%
+  \fi%
+}
+%    \end{macrocode}
+% Beim Lesen wird die Token-Liste zurück in eine \pkg{etoolbox}"~Liste 
+% gewandelt.
+%    \begin{macrocode}
+\newcommand*\tud@auxlist@import[2]{%
+  \begingroup%
+    \edef\tud@res@a{\unexpanded{\@tfor\tud@res@c:=}\csexpandonce{#1@auxlist}}%
+    \letcs\tud@res@b{#1@auxlist@handler}%
+    \global\cslet{#1@auxlist}\@empty%
+    \tud@res@a\do{%
+      \edef\tud@res@c{\tud@res@b{\tud@res@c}}%
+      \listcsxadd{#1@auxlist}{\expandonce\tud@res@c}%
+    }%
+  \endgroup%
+  \IfBooleanT{#2}{\forlistcsloop{\@firstofone}{#1@auxlist}}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@auxlist@import
+% \end{macro}^^A \tud@auxlist@export
+%
+% \begin{macro}{\tud@auxlist@add}
+% \changes{v2.07}{2019/11/08}{neu}^^A
+% \begin{macro}{\tud@auxlist@remove}
+% \changes{v2.07}{2019/11/08}{neu}^^A
+% \begin{macro}{\tud@auxlist@ifin}
+% \changes{v2.07}{2019/11/08}{neu}^^A
+% Befehle für das Hinzufügen, Entfernen und Prüfen von Elementen in den Listen.
+%    \begin{macrocode}
+\newcommand*\tud@auxlist@add[2]{%
+  \begingroup%
+    \protected@edef\tud@res@a{#2}%
+    \edef\tud@res@a{\detokenize\expandafter{\tud@res@a}}%
+    \tud@unique@csxadd{#1@auxlist@positive}{\tud@res@a}%
+  \endgroup%
+}
+\newcommand*\tud@auxlist@remove[2]{%
+  \begingroup%
+    \protected@edef\tud@res@a{#2}%
+    \edef\tud@res@a{\detokenize\expandafter{\tud@res@a}}%
+    \tud@unique@csxadd{#1@auxlist@negative}{\tud@res@a}%
+  \endgroup%
+}
+\newcommand*\tud@auxlist@ifin[2]{%
+  \begingroup%
+    \protected@edef\tud@res@a{#1}%
+    \letcs\tud@res@b{#2@auxlist@handler}%
+    \edef\tud@res@a{%
+      \endgroup%
+      \noexpand\ifinlistcs{\tud@res@b{\tud@res@a}}{#2@auxlist}%
+    }%
+  \tud@res@a%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@auxlist@ifin
+% \end{macro}^^A \tud@auxlist@remove
+% \end{macro}^^A \tud@auxlist@add
+% \begin{macro}{\tud@unique@add}
+% \changes{v2.07}{2021/06/08}{neu}^^A
+% \begin{macro}{\tud@unique@eadd}
+% \changes{v2.07}{2021/06/08}{neu}^^A
+% \begin{macro}{\tud@unique@xadd}
+% \changes{v2.07}{2021/06/08}{neu}^^A
+% \begin{macro}{\tud@unique@csxadd}
+% \changes{v2.07}{2021/06/08}{neu}^^A
+% \begin{macro}{\listeremove}
+% \changes{v2.07}{2021/06/08}{neu}^^A
+% Ein wenig syntaktischer Zucker für Listen ohne Duplikate.
+%    \begin{macrocode}
+\newcommand*\tud@unique@add[2]{%
+  \ifinlist{#2}{#1}{}{\listadd#1{#2}}%
+}
+\newcommand*\tud@unique@eadd[2]{%
+  \xifinlist{#2}{#1}{}{\listeadd#1{#2}}%
+}
+\newcommand*\tud@unique@xadd[2]{%
+  \xifinlist{#2}{#1}{}{\listxadd#1{#2}}%
+}
+\newcommand*\tud@unique@csxadd[2]{%
+  \xifinlistcs{#2}{#1}{}{\listcsxadd{#1}{#2}}%
+}
+\providerobustcmd*\listeremove[2]{%
+  \begingroup%
+    \edef\etb@tempa{\endgroup\unexpanded{\listremove#1}{#2}}%
+  \etb@tempa%
+}
+%    \end{macrocode}
+% \end{macro}^^A \listeremove
+% \end{macro}^^A \tud@unique@csxadd
+% \end{macro}^^A \tud@unique@xadd
+% \end{macro}^^A \tud@unique@eadd
+% \end{macro}^^A \tud@unique@add
+%
+% \subsubsection{Sortieren von Listen}
+%
+% \begin{macro}{\tud@list@sort}
+% \changes{v2.02}{2014/07/25}{neu}^^A
+% \changes{v2.07}{2019/09/20}{Hilfskonstrukt kommaseparierte Liste entfernt}^^A
+% \begin{macro}{\tud@list@@sort}
+% \changes{v2.02}{2014/07/25}{neu}^^A
+% \begin{macro}{\tud@list@@@sort}
+% \changes{v2.07}{2019/09/20}{neu}^^A
+% \begin{macro}{\tud@list@sorted}
+% \changes{v2.02}{2014/07/25}{neu}^^A
+% \begin{macro}{\if@tud@list@sorted}
+% \changes{v2.02}{2014/07/25}{neu}^^A
+% Der Befehl \cs{tud@list@sort} erwartet eine \pkg{etoolbox}-Liste und sortiert 
+% diese mit dem Makro \cs{sort@list} in alphabetischer Reihenfolge.
+%    \begin{macrocode}
+\tud@newif\if@tud@list@sorted
+\newcommand*\tud@list@sorted{}
+\newcommand*\tud@list@sort[1]{%
+  \ifdefvoid{#1}{%
+    \ClassWarning{\TUD@Class@Name}{%
+      The given list \string#1\space\MessageBreak%
+      is empty, nothing to sort here%
+    }%
+  }{%
+    \begingroup%
+      \let\tud@list@sorted\@empty%
+      \forlistloop\tud@list@@sort{#1}%
+      \edef\tud@res@c{%
+        \endgroup%
+        \unexpanded{\def#1}{\expandonce\tud@list@sorted}%
+      }%
+    \tud@res@c%
+  }%
+}
+%    \end{macrocode}
+% Hier erfolgt die eigentliche Sortierung der Liste.
+%    \begin{macrocode}
+\newcommand*\tud@list@@sort[1]{%
+%    \end{macrocode}
+% Die Einräge werden mit \cs{pdfstrcmp} an der richtigen Stelle eingefügt.
+% Dabei wird die temporäre Liste \cs{tud@list@sorted} durchlaufen und
+% \cs{tud@res@a} als Hilfsmakro verwendet, in welches die aktuelle Liste
+% innerhalb der \cs{@forlistloop}-Schleife stückweise expandiert wird. Wenn das
+% aktuelle Element an der dafür passenden Stelle eingesetzt wurde, wird
+% \cs{if@tud@list@sorted} gesetzt und der restliche Teil von 
+% \cs{tud@list@sorted} an \cs{tud@res@a} angehängt.
+%    \begin{macrocode}
+  \@tud@list@sortedfalse%
+  \let\tud@res@a\@empty%
+  \forlistloop{\tud@list@@@sort\tud@res@a{#1}}{\tud@list@sorted}%
+%    \end{macrocode}
+% Wurde der Eintrag nach dem Durchlaufen der Liste nicht eingefügt, so erfolgt 
+% dies hier am Ende der Liste.
+%    \begin{macrocode}
+  \if@tud@list@sorted\else%
+    \listadd\tud@res@a{#1}%
+  \fi%
+%    \end{macrocode}
+% Die temporäre Liste \cs{tud@res@a} wird in \cs{tud@list@sorted} geschrieben.
+%    \begin{macrocode}
+  \let\tud@list@sorted\tud@res@a%
+}
+%    \end{macrocode}
+% Das Makro für die eigentliche Sortierung.
+%    \begin{macrocode}
+\newcommand*\tud@list@@@sort[3]{%
+%    \end{macrocode}
+% Ist der Eintrag bereits erfolgt, wird der verbliebene Teil der Liste 
+% angehangen.
+%    \begin{macrocode}
+  \if@tud@list@sorted%
+    \listadd#1{#3}%
+  \else%
+%    \end{macrocode}
+% Liegt der Eintrag in alphabetischer Reihenfolge vor dem aktuellen der 
+% durchlaufenenen Liste, so wird dieser davor eingefügt. Anschließend wird 
+% \cs{@tud@list@sortedtrue} gesetzt.
+%    \begin{macrocode}
+    \ifnum\pdf@strcmp{#2}{#3}<\z@\relax%
+      \listadd#1{#2}%
+      \listadd#1{#3}%
+      \@tud@list@sortedtrue%
+    \else%
+%    \end{macrocode}
+% Ist Eintrag in alphabetischer Reihenfolge nach dem aktuellen der geprüften 
+% Liste, so wird dieser (noch) nicht eingefügt. 
+%    \begin{macrocode}
+      \listadd#1{#3}%
+    \fi%
+  \fi%
+}
+%    \end{macrocode}
+% \end{macro}^^A \if@tud@list@sorted
+% \end{macro}^^A \tud@list@sorted
+% \end{macro}^^A \tud@list@@@sort
+% \end{macro}^^A \tud@list@@sort
+% \end{macro}^^A \tud@list@sort
+%
+% \iffalse
+%</manual&option>
+%<*option>
+% \fi
+%
+%
+%
+%
+% \subsection{Stringmanipulation}
+%
+% \begin{macro}{\tud@remove@enfold@char}
+% \changes{v2.07}{2019/11/08}{neu}^^A
+% Entfernt aus der einfachen Expansion des ersten Argumentes am Anfang und Ende 
+% das im zweiten Argument angegebene Zeichen.
+% \ToDo{mit tudscr-base zusammenführen (hier oder dort)}[v2.07]
+%    \begin{macrocode}
+\newcommand*\tud@remove@enfold@char[2]{%
+  \begingroup%
+    \edef\tud@res@b{\expandonce{#1}}%
+    \trim@spaces@in\tud@res@b%
+    \expandafter\in@\expandafter#2\expandafter{\tud@res@b}%
+    \ifin@%
+      \let\tud@res@a\@empty%
+      \def\tud@res@c##1#2##2\@nil{%
+        \IfArgIsEmpty{##1}{}{%
+          \ifx\tud@res@a\@empty%
+            \def\tud@res@a{##1}%
+          \else%
+            \appto\tud@res@a{#2##1}%
+          \fi%
+        }%
+        \IfArgIsEmpty{##2}{}{\tud@res@c##2\@nil}%
+      }%
+      \expandafter\tud@res@c\tud@res@b#2\@nil%
+    \else%
+      \let\tud@res@a\tud@res@b%
+    \fi%
+    \edef\tud@res@a{%
+      \endgroup%
+      \unexpanded{\def#1}{\expandonce\tud@res@a}%
+    }%
+  \tud@res@a%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@remove@enfold@char
+%
+% \begin{macro}{\tud@replace@in}
+% \changes{v2.05}{2015/11/01}{neu}^^A
+% \changes{v2.07}{2019/11/08}{neu}^^A
+% \begin{macro}{\tud@replace@@in}
+% \changes{v2.07}{2019/11/08}{neu}^^A
+% Mit diesem Befehl kann in einem gegebenen Makro ein bestimmtes Zeichen durch 
+% ein anderes ersetzt werden. Dies wird verwendet, um für Indexbefehle die 
+% möglicherweise enthaltenen |@|"~Zeichen oder in Datei- und Pfadangaben 
+% Unterstriche zu ersetzen.
+%    \begin{macrocode}
+\newcommand*\tud@replace@in[3]{%
+  \begingroup%
+%    \end{macrocode}
+% Zunächst wird der Inhalt des ersten Argumentes expandiert. Anschließend 
+% wird \cs{tud@res@b} als ein durch \cs{@nil} abgegrenztes Makro mit zwei
+% Argumenten definiert, wobei diese durch das im zweiten Argument gegebene 
+% \meta{Zeichen} voneinander abgegrenzt werden. Dieses Makro wird nun so lange 
+% rekursiv mit dem zweiten Teil aufgerufen, bis dieses leer is. Dabei wird der 
+% erste, durch das angegebene zu ersetzende Zeichen Teil sukzessive an 
+% \cs{tud@res@c} angehängt und um das im dritten Argument angegebene 
+% Ersatzzeichen vervollständigt.
+%    \begin{macrocode}
+    \edef\tud@res@a{\expandonce{#1}}%
+    \let\tud@res@c\@empty%
+    \def\tud@res@b##1#2##2\@nil{%
+      \IfArgIsEmpty{##2}{%
+        \appto\tud@res@c{##1}%
+      }{%
+        \appto\tud@res@c{##1#3}%
+        \tud@res@b##2\@nil%
+      }%
+    }%
+    \expandafter\tud@res@b\tud@res@a#2\@nil%
+    \edef\tud@res@a{%
+      \endgroup%
+      \unexpanded{\def#1}{\expandonce\tud@res@c}%
+    }%
+  \tud@res@a%
+}
+%    \end{macrocode}
+% Diese Variante sorgt dafür, dass die zu ersetzenden Zeichen alle als Strings 
+% behandelt werden.
+%    \begin{macrocode}
+\newcommand*\tud@replace@@in[3]{%
+  \begingroup%
+    \protected@edef\tud@res@a{#1}%
+    \edef\tud@res@a{\detokenize\expandafter{\tud@res@a}}%
+    \edef\tud@res@b{%
+      \unexpanded{\tud@replace@in\tud@res@a}{\detokenize{#2}}{\detokenize{#3}}%
+    }%
+    \tud@res@b%
+    \edef\tud@res@a{%
+      \endgroup%
+      \unexpanded{\def#1}{\tud@res@a}%
+    }%
+  \tud@res@a%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@replace@@in
+% \end{macro}^^A \tud@replace@in
+%
+% \iffalse
+%</option>
+%<*body>
+% \fi
+%
+%
+%
+% \subsection{Zusätzliche Markup-Befehle}
+% \subsubsection{Textauszeichnung}
+%
+% \begin{macro}{\@pnumwidth}
+% \begin{macro}{\@tocrmarg}
+% Etwas mehr Platz im Inhaltsverzeichnis für die Seitenzahlen.
+%    \begin{macrocode}
+\renewcommand*\@pnumwidth{2.1em}%
+\renewcommand*\@tocrmarg{3.1em}%
+%    \end{macrocode}
+% \end{macro}^^A \@tocrmarg
+% \end{macro}^^A \@pnumwidth
+%
+% \begin{macro}{\textsbn}
+% \changes{v2.02}{2014/08/16}{neu}^^A
+% \begin{macro}{\sbnfont}
+% \changes{v2.02}{2014/08/16}{neu}^^A
+% \begin{macro}{\textsbi}
+% \changes{v2.02}{2014/08/16}{neu}^^A
+% \begin{macro}{\sbifont}
+% \changes{v2.02}{2014/08/16}{neu}^^A
+% \begin{macro}{\textttit}
+% \changes{v2.07}{2021/06/11}{neu}^^A
+% \begin{macro}{\ttitfont}
+% \changes{v2.07}{2021/06/11}{neu}^^A
+% Kombinierte Auszeichnungsbefehle für Text.
+%    \begin{macrocode}
+\newcommand*\textsbn{}
+\newrobustcmd*\sbnfont{\sffamily\bfseries\upshape}
+\DeclareTextFontCommand\textsbn{\sbnfont}
+\newcommand*\textsbi{}
+\newrobustcmd*\sbifont{\sffamily\bfseries\itshape}
+\DeclareTextFontCommand\textsbi{\sbifont}
+\newcommand*\textttit{}
+\newrobustcmd*\ttitfont{\ttfamily\itshape}
+\DeclareTextFontCommand\textttit{\ttitfont}
+%    \end{macrocode}
+% \end{macro}^^A \ttitfont
+% \end{macro}^^A \textttit
+% \end{macro}^^A \sbifont
+% \end{macro}^^A \textsbi
+% \end{macro}^^A \sbnfont
+% \end{macro}^^A \textsbn
+%
+% \begin{macro}{\Logo}
+% \changes{v2.07}{2021/06/11}{neu}^^A
+% Dieser Befehl wird ein richtiges Kerning beim Setzen verschiedener Logos mit 
+% \OpenSans definiert. Die Verwendung von \pkg{hologo} liefert für diese keine 
+% befriedigenden Resultate.
+% \ToDo{Teile von hologo implementieren, falls cdfont=false}[v2.07]
+%    \begin{macrocode}
+\newrobustcmd*\Logo[1]{%
+  \ifcsundef{tud@logo@#1}{%
+    \ClassError{\TUD@Class@Name}{logo `#1' missing}{%
+      The necessary macro `\@backslashchar tud@logo@#1'\MessageBreak%
+      was never defined.%
+    }%
+  }{%
+    \mbox{\csuse{tud@logo@#1}}%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \Logo
+%
+% \begin{macro}{\tud@logo@@kern}
+% \begin{macro}{\tud@logo@@shift}
+% \begin{macro}{\tud@logo@@topscript}
+% Diese Befehle dienen dazu, nachfolgend spezielle Logos zu definieren, welche 
+% Kerning, vertikales Verschieben oder Skalieren einzelner Lettern ermöglichen.
+% Die Implemetierung ist stark am Paket \pkg{hologo} orientiert.
+%
+% Mit \cs{tud@logo@@kern} wird Kerning eingefügt, wobei im obligatorischen 
+% Argument ein prozentualer Faktor für den Basiswert \val{1em} angegeben wird. 
+% Mit dem optionalen Argument kann ggf. zusätzliches Kerning für den kursiven 
+% Schriftschnitt definiert werden.
+%    \begin{macrocode}
+\newcommand*\tud@logo@@kern[2][0]{%
+  \kern\dimexpr1em*%
+    \numexpr\ifdim\the\fontdimen\@ne\font>\z@#1+\fi#2\relax%
+  /100\relax%
+}
+%    \end{macrocode}
+% Dieser Befehl verschiebt den im zweiten Argument angegebenen Inhalt vertikal 
+% um Basiswert \val{1ex} mutlipliziert mit dem prozentualer Faktor im ersten 
+% Argument.
+%    \begin{macrocode}
+\newcommand*\tud@logo@@shift[2]{%
+  \lower\dimexpr1ex*#1/100\relax\hbox{#2}%
+}
+%    \end{macrocode}
+% Der im zweiten Argument gegebene Inhalt wird mit \cs{scriptsize} auf der Höhe
+% des im ersten Argumentes angegebenen Inhaltes ausgegeben.
+%    \begin{macrocode}
+\newcommand*\tud@logo@@topscript[2]{%
+  \begingroup%
+    \setbox\z@\hbox{#1}%
+    \vbox to\ht\z@{%
+      \hbox{%
+        \check@mathfonts%
+        \fontsize\sf@size\z@%
+        \math@fontsfalse\selectfont%
+        #2%
+      }%
+      \vss%
+    }%
+  \endgroup%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@logo@@topscript
+% \end{macro}^^A \tud@logo@@shift
+% \end{macro}^^A \tud@logo@@kern
+%
+% \begin{macro}{\tud@logo@TeX}
+% \begin{macro}{\tud@logo@LaTeX}
+% \begin{macro}{\tud@logo@LaTeXe}
+% \begin{macro}{\tud@logo@LaTeX3}
+% \begin{macro}{\tud@logo@pdfLaTeX}
+% \begin{macro}{\tud@logo@LuaLaTeX}
+% \begin{macro}{\tud@logo@XeLaTeX}
+% \begin{macro}{\tud@logo@BibTeX}
+% \begin{macro}{\tud@logo@TeXLive}
+% \begin{macro}{\tud@logo@MacTeX}
+% \begin{macro}{\tud@logo@MiKTeX}
+% \begin{macro}{\tud@logo@LyX}
+% Hier werden die Logos definiert, welche sich mit \cs{Logo}\marg{name} 
+% ausgeben lassen. Gültige Werte für \meta{name} entsprechen dem letzten Teil 
+% des Befehlsnamens (\cs{tud@logo@\meta{name}}).
+%    \begin{macrocode}
+\newcommand*\tud@logo@TeX{%
+  T\tud@logo@@kern[-4]{-21}%
+  \tud@logo@@shift{40}{E}%
+  \tud@logo@@kern[7]{-6}%
+  X\@%
+}
+\newcommand*\tud@logo@LaTeX{%
+  L\tud@logo@@kern[9]{-32}\tud@logo@@topscript{T}{A}%
+  \tud@logo@@kern[1]{-13}\Logo{TeX}%
+}
+\newcommand*\tud@logo@LaTeXe{%
+  \Logo{LaTeX}\tud@logo@@kern[-2]{8}%
+  \hbox{%
+    \m@th%
+    \if b\expandafter\@car\f@series x\@nil\csname boldmath\endcsname\fi%
+    2$_{\textstyle\varepsilon}$%
+  }\@%
+}
+\expandafter\newcommand\expandafter*\csname tud@logo@LaTeX3\endcsname{%
+  \Logo{LaTeX}\tud@logo@@kern[-2]{8}3\@%
+}
+\newcommand*\tud@logo@pdfLaTeX{pdf\tud@logo@@kern{3}\Logo{LaTeX}}
+\newcommand*\tud@logo@LuaLaTeX{Lua\tud@logo@@kern{-1}\Logo{LaTeX}}
+\newcommand*\tud@logo@XeLaTeX{%
+  X\tud@logo@@kern[-1]{-5}%
+  \tud@logo@@shift{40}{\rotatebox[origin=c]{180}{E}}%
+  \tud@logo@@kern[1]{-13}%
+  \Logo{LaTeX}%
+}
+\newcommand*\tud@logo@BibTeX{%
+  B\tud@logo@@topscript{x}{IB}\tud@logo@@kern{-10}\Logo{TeX}%
+}
+\newcommand*\tud@logo@TeXLive{%
+  \Logo{TeX}\tud@logo@@kern[-5]{20}Live\@%
+}
+\newcommand*\tud@logo@MacTeX{%
+  Mac\tud@logo@@kern{-3}\Logo{TeX}\@%
+}
+\newcommand*\tud@logo@MiKTeX{MiK\tud@logo@@kern{6}\Logo{TeX}}
+\newcommand*\tud@logo@LyX{%
+  L\tud@logo@@kern[-3]{-11}%
+  \tud@logo@@shift{40}{Y}%
+  \tud@logo@@kern[7]{-11}%
+  X\@%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@logo@LyX
+% \end{macro}^^A \tud@logo@MiKTeX
+% \end{macro}^^A \tud@logo@MacTeX
+% \end{macro}^^A \tud@logo@TeXLive
+% \end{macro}^^A \tud@logo@BibTeX
+% \end{macro}^^A \tud@logo@XeLaTeX
+% \end{macro}^^A \tud@logo@LuaLaTeX
+% \end{macro}^^A \tud@logo@pdfLaTeX
+% \end{macro}^^A \tud@logo@LaTeX3
+% \end{macro}^^A \tud@logo@LaTeXe
+% \end{macro}^^A \tud@logo@LaTeX
+% \end{macro}^^A \tud@logo@TeX
+%
+%
+%
+% \subsubsection{Logisches Markup}
+% \begin{macro}{\tud@english}
+% Hiermit wird der Argumentsinhalt mit englischen Trennungsmustern gesetzt,
+% falls die Sprache geladen wurde.
+%    \begin{macrocode}
+\newcommand*\tud@english[1]{#1}
+\AtBeginDocument{%
+  \iflanguageloaded{english}{%
+    \renewcommand*\tud@english[1]{\foreignlanguage{english}{#1}}%
+  }{}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@english
+%
+% \begin{macro}{\tud@url@normalize}
+% \changes{v2.07}{2019/11/11}{neu}^^A
+%    \begin{macrocode}
+\NewDocumentCommand\tud@url@normalize{m O{https://} m m}{%
+  \begingroup%
+    \edef\tud@res@a{\trim@spaces{#4}}%
+    \def\tud@res@b##1#3/##2#3/##3\@nil{%
+      \IfArgIsEmpty{##2}{%
+        \def\tud@res@a{##1}%
+      }{%
+        \def\tud@res@a{##2}%
+      }%
+    }%
+    \expandafter\tud@res@b\tud@res@a #3/#3/\@nil%
+    \tud@remove@enfold@char\tud@res@a{/}%
+    \edef\tud@res@b{%
+      \endgroup%
+      \unexpanded{\def#1}{#2#3/\tud@res@a}%
+    }%
+  \tud@res@b%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@url@normalize
+% \begin{macro}{\GitHubBase}
+% \changes{v2.07}{2019/11/11}{neu}^^A
+% \begin{macro}{\tud@github@url@base}
+% \changes{v2.07}{2019/11/11}{neu}^^A
+% \begin{macro}{\tud@url@normalize@github}
+% \changes{v2.07}{2019/11/11}{neu}^^A
+%    \begin{macrocode}
+\newcommand*\tud@url@normalize@github[2]{%
+  \tud@url@normalize#1{github.com}{#2}%
+}
+\newcommand*\tud@github@url@base{}
+\let\tud@github@url@base\relax
+\newcommand*\GitHubBase[1]{%
+  \tud@url@normalize@github\tud@github@url@base{#1}%
+}
+\AtBeginDocument{%
+  \ifx\tud@github@url@base\relax%
+    \ClassWarning{\TUD@Class@Name}%
+    {%
+      No GitHub repository was set with `\string\GitHubBase'\MessageBreak%
+      so \TUDScriptRepository\space is used%
+    }%
+    \GitHubBase{\TUDScriptRepository}%
+  \fi%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@url@normalize@github
+% \end{macro}^^A \tud@github@url@base
+% \end{macro}^^A \GitHubBase
+%
+% \begin{macro}{\GitHubRepo}
+% \changes{v2.02}{2014/08/16}{neu}^^A
+% Auszeichnungsbefehle für Verweise auf ein GitHub-Repository. Die Ausgabe für 
+% den Befehl kann mit dem optionalen Argument bestimmt werden. Wird dieses 
+% Argument nicht gegeben, wird der letzte Teil der in runden Klammern gegebenen 
+% Repository-URL als Grundlage für die Ausgabe genutzt. Das letzte optionale 
+% Argument in Guillemets kann entweder als Link auf ein Issue (numerisch) oder 
+% aber zum anhängen eines URL-Pfades genutzt werden.
+%    \begin{macrocode}
+\NewDocumentCommand\GitHubRepo{!o !d() !d<>}{%
+  \begingroup%
+    \IfValueTF{#2}{%
+      \tud@url@normalize@github\tud@res@b{#2}%
+    }{%
+      \let\tud@res@b\tud@github@url@base%
+    }%
+    \IfValueTF{#1}{%
+      \def\tud@res@c{#1}%
+    }{%
+      \expandafter\filename@parse\expandafter{\tud@res@b}%
+      \protected@edef\tud@res@c{%
+        \tud@english{GitHub-Repository\nobreakspace\textsbn{\filename@base}}%
+      }%
+    }%
+    \IfValueT{#3}{%
+      \edef\tud@res@a{\trim@spaces{#3}}%
+      \tud@remove@enfold@char\tud@res@a{/}%
+      \Ifnumber{\tud@res@a}{%
+        \eappto{\tud@res@b}{/issues/\tud@res@a}%
+      }{%
+        \eappto{\tud@res@b}{/\tud@res@a}%
+      }%
+    }%
+    \href{\tud@res@b}{\mbox{\tud@res@c}}%
+  \endgroup%
+  \xspace%
+}
+%    \end{macrocode}
+% \end{macro}^^A \GitHubRepo
+%
+% \begin{macro}{\GitHubDownload}
+% \changes{v2.05g}{2016/11/08}{neu}^^A
+% Der Befehl für die Angabe von direkten Downloadlinks.
+%    \begin{macrocode}
+%<*manual>
+\NewDocumentCommand\GitHubDownload{s d() d<> m}{%
+  \begingroup%
+    \IfValueTF{#2}{%
+      \tud@url@normalize@github\tud@res@b{#2}%
+    }{%
+      \let\tud@res@b\tud@github@url@base%
+    }%
+    \IfValueTF{#3}{%
+      \appto\tud@res@b{/releases/download/#3/#4}%
+    }{%
+      \appto\tud@res@b{/releases/latest/download/#4}%
+    }%
+    \IfBooleanTF{#1}{%
+      \def\tud@res@c{\File*{#4}}%
+    }{%
+      \def\tud@res@c{\InlineDeclaration{\File''{#4}}}%
+      \index{Dateien}%
+    }%
+    \href{\tud@res@b}{\mbox{\tud@res@c}}%
+  \endgroup%
+  \xspace%
+}
+%</manual>
+%    \end{macrocode}
+% \end{macro}^^A \GitHubDownload
+%
+% \begin{macro}{\CTAN}
+% \changes{v2.05}{2015/11/22}{neu}^^A
+% \begin{macro}{\tud@url@normalize@ctan}
+% \changes{v2.07}{2019/11/11}{neu}^^A
+% Das Markup für einen Link auf \CTAN.
+%    \begin{macrocode}
+\newcommand*\tud@url@normalize@ctan[2]{%
+  \tud@url@normalize#1{ctan.org}{#2}%
+}
+\NewDocumentCommand\CTAN{!o !d<>}{%
+  \begingroup%
+    \tud@url@normalize@ctan\tud@res@b{\IfValueT{#2}{#2}}%
+    \IfValueTF{#1}{%
+      \def\tud@res@c{#1}%
+    }{%
+      \def\tud@res@c{\tud@english{Comprehensive TeX Archive Network (CTAN)}}%
+    }%
+    \href{\tud@res@b}{\mbox{\tud@res@c}}%
+  \endgroup%
+  \xspace%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@url@normalize@ctan
+% \end{macro}^^A \CTAN
+%
+% \begin{macro}{\TUDForum}
+% \begin{macro}{\Forum}
+% Der Befehl für die Ausgabe eines Links zum \TUDForum. Das optionale Argument 
+% in Guillemets kann genutzt werden, um auf einen spezifisches Beitrag zu 
+% verlinken.
+%    \begin{macrocode}
+\newcommand*\TUDForum{%
+  \mbox{T\kern.05em U\kern.05em D-\Logo{LaTeX}-Forum}\xspace%
+}
+\NewDocumentCommand\Forum{!O{\TUDForum} !d<>}{%
+  \begingroup%
+    \href{\TUDScriptForum\IfValueT{#2}{viewtopic.php?t=#2}}{\mbox{#1}}%
+  \endgroup%
+  \xspace%
+}
+%    \end{macrocode}
+% \end{macro}^^A \Forum
+% \end{macro}^^A \TUDForum
+%
+% \begin{macro}{\Attention}
+% \changes{v2.02}{2014/08/16}{neu}^^A
+% Falls irgendetwas besonders hervorgehoben werden sollte.
+%    \begin{macrocode}
+\newcommand*\Attention[2][\z@]{%
+  \marginnote{%
+    \tud@setdim\fboxsep{0.25em}%
+    \fbox{Achtung!}%
+  }[{#1}]%
+  \emph{\trim@spaces{#2}}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \Attention
+% \begin{macro}{\TUDScriptContactTitle}
+% \changes{v2.07}{2019/09/26}{neu}^^A
+%    \begin{macrocode}
+\newrobustcmd*\TUDScriptContactTitle{%
+  \ifundef\emailaddress{%
+    \footnote{\scriptsize\expandafter\mailto\expandafter{\TUDScriptContact}}%
+  }{%
+    \expandafter\emailaddress\expandafter{\TUDScriptContact}%
+  }%
+}
+\AfterPackage*{hyperref}{%
+  \pdfstringdefDisableCommands{\let\TUDScriptContactTitle\relax}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \TUDScriptContactTitle
+%
+% \begin{macro}{\KOMAScript}
+% \begin{macro}{\TUDScript}
+% Für die robuste Verwendung im Text.
+%    \begin{macrocode}
+\kernel@make@fragile\KOMAScript
+\edef\KOMAScript{\noexpand\mbox{\expandonce\KOMAScript}\noexpand\xspace}
+\robustify\KOMAScript
+\robustify\TUDScript
+%    \end{macrocode}
+% \end{macro}^^A \TUDScript
+% \end{macro}^^A \KOMAScript
+%
+% \begin{macro}{\CD}
+% \begin{macro}{\CDs}
+% \begin{macro}{\TUD}
+% \begin{macro}{\TnUD}
+% \begin{macro}{\TUDCD}
+% \changes{v2.05}{2015/11/01}{neu}^^A
+% \begin{macro}{\TUDCDs}
+% \changes{v2.05}{2015/11/01}{neu}^^A
+% \begin{macro}{\DDC}
+% Diese Befehle stellen regelmäßig in der Quelltextdokumentatuion und im 
+% Handbuch genutzte Textbausteine bereit. Dazu wird der Befehl \cs{xspace} aus 
+% dem \pkg{xspace}-Paket genutzt.
+%    \begin{macrocode}
+\newrobustcmd*\CD{\tud@english{Corporate Design}\xspace}
+\newrobustcmd*\CDs{\tud@english{Corporate Designs}\xspace}
+\newrobustcmd*\TUD{Technische Universit\"at Dresden\xspace}
+\newrobustcmd*\TnUD{Technischen Universit\"at Dresden\xspace}
+\newcommand*\TUDCD{\CD der \TnUD}
+\newcommand*\TUDCDs{\CDs der \TnUD}
+\newrobustcmd*\DDC{%
+  \mbox{%
+    D\kern.05em R\kern.05em E\kern.05em S\kern.05em %
+    D\kern.05em E\kern.05em N\kern.1em-\kern.1em concept%
+  }\xspace%
+}
+\AfterPackage*{hyperref}{%
+  \pdfstringdefDisableCommands{%
+    \def\DDC{DRESDEN-concept{}}%
+    \def\TUDScript{TUD-Script{}}%
+    \def\KOMAScript{KOMA-Script{}}%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \DDC
+% \end{macro}^^A \TUDCDs
+% \end{macro}^^A \TUDCD
+% \end{macro}^^A \TnUD
+% \end{macro}^^A \TUD
+% \end{macro}^^A \CDs
+% \end{macro}^^A \CD
+%
+% \begin{macro}{\OpenSans}
+% \changes{v2.06}{2018/07/02}{neu}^^A
+% \begin{macro}{\Univers}
+% \begin{macro}{\DIN}
+% Für die Nennung der Schriften spezielle Markos bereitgestellt.
+%    \begin{macrocode}
+\newrobustcmd*\OpenSans{\textcdbn{Open\nobreakspace{}Sans}\xspace}
+\newrobustcmd*\Univers{\textcdbi{Univers}\xspace}
+\newrobustcmd*\DIN{\textcdbi{DIN\nobreakspace{}Bold}\xspace}
+\AfterPackage*{hyperref}{%
+  \pdfstringdefDisableCommands{%
+    \def\OpenSans{Open Sans{}}%
+    \def\Univers{Univers{}}%
+    \def\DIN{DIN Bold{}}%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \DIN
+% \end{macro}^^A \Univers
+% \end{macro}^^A \OpenSans
+%
+% \iffalse
+%</body>
+%</manual|doc>
 % \fi
 %
 % \Finale

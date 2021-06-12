@@ -145,18 +145,6 @@
 %</!doc>
 \RequirePackage{csquotes}[2021/02/22]
 %    \end{macrocode}
-% \begin{macro}{\tud@english}
-% Hiermit wird der Argumentsinhalt mit englischen Trennungsmustern gesetzt,
-% falls die Sprache geladen wurde.
-%    \begin{macrocode}
-\newcommand*\tud@english[1]{#1}
-\AtBeginDocument{%
-  \iflanguageloaded{english}{%
-    \renewcommand*\tud@english[1]{\foreignlanguage{english}{#1}}%
-  }{}%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@english
 % Das Paket \pkg{shellesc} ermöglicht mit dem Befehl \cs{ShellEscape} die 
 % Verwendung von Systembefehlen auf der Kommandozeile unabhängig vom genutzten
 % Format. Sollte \app{lualatex} als Dokumentprozessor eingesetzt werden, sind 
@@ -372,7 +360,11 @@
 \renewrobustcmd*\fullref[1]{\hyperref[{#1}]{\autoref*{#1}\space\vpageref{#1}}}
 %    \end{macrocode}
 % \end{macro}^^A \fullref
-% 
+% Um ungewünschten vertikalen Leerraum vor und nach Überschriften zu vermeiden, 
+% werden die Befehle \cs{label} und \cs{index} innerhalb des obligatorischen 
+% Argumentes von Gliederungsbefehlen genutzt (\GitHubRepo(latex3/latex2e)<307>).
+% Damit diese nicht im durch \cs{newlabel} erzeugten Label auftauchen, muss 
+% durch \pkg{nameref} explizit \cs{GetTitleStringExpand} verwendet werden.
 %    \begin{macrocode}
 \AfterPackage*{nameref}{%
   \patchcmd\NR@gettitle{%
@@ -2113,7 +2105,7 @@
 %    \begin{macrocode}
 \NewExpandableDocumentCommand\@Application{s m}{#2}
 \NewDocumentCommand\Application{s m !d() !d<> !d||}{%
-  \Markup@SetFormat{\sbsfont}%
+  \Markup@SetFormat{\sbifont}%
   \Process@Markup{\Application{#2}}(#3)<#4>%
   \Process@Index{#1}{\Application{#2}}[Anwendungssoftware](#3)|#5|%
 }
@@ -4282,7 +4274,7 @@
       sowohl Antworten bei generellen Fragen liefern als auch L\"osungen f\"ur %
       typische Probleme bereitstellen. Falls ein gesuchter Begriff hier nicht %
       zu finden ist oder trotz vorhandener Hinweise kein zufriedenstellendes %
-      Ergebnis erzielt werden kann, sollte das \Forum' erster Anlaufpunkt %
+      Ergebnis erzielt werden kann, sollte das \Forum erster Anlaufpunkt %
       sein, um weitere Hilfe bei der Nutzung von \TUDScript zu erhalten.%
 %</class>
 %<*package>
@@ -5610,7 +5602,7 @@
 %
 % \begin{macro}{\tud@tut@temp}
 % \changes{v2.05}{2016/05/01}{neu}^^A
-% \begin{macro}{\tud@tut@readtostream}
+% \begin{macro}{\tud@tut@inputtostream}
 % \changes{v2.02}{2014/12/16}{neu}^^A
 % \begin{macro}{\tud@tut@append}
 % \changes{v2.02}{2014/08/19}{neu}^^A
@@ -5621,13 +5613,13 @@
 % können, werden zwei Eingabe- sowie ein Ausgabestream benötigt, welche bereits 
 % zuvor initialisiert wurden.
 %
-% Mit \cs{tud@tut@readtostream} wird der Inhalt der Datei im ersten Argument 
+% Mit \cs{tud@tut@inputtostream} wird der Inhalt der Datei im ersten Argument 
 % in den Ausgabestream des zweiten Argumentes geschrieben. Dies wird durch 
-% \cs{tud@tut@append} genutzt.
+% \ToDo{inputtostream überhaupt notwendig?}
 %    \begin{macrocode}
 \newcommand*\tud@tut@temp{}
 \edef\tud@tut@temp{\@currname-temp}
-\newcommand*\tud@tut@readtostream[2]{%
+\newcommand*\tud@tut@inputtostream[2]{%
   \begingroup%
     \endlinechar=\m@ne\relax%
     \openin\tud@read=#1%
@@ -5675,18 +5667,18 @@
 %    \begin{macrocode}
 \newcommand*\tud@tut@append[1]{%
   \Ifstr{#1}{preamble}{%
-    \tud@tut@readtostream{\tud@tut@temp.tex}{\tud@write@a}%
+    \tud@tut@inputtostream{\tud@tut@temp.tex}{\tud@write@a}%
   }{%
     \Ifstr{#1}{trunk}{%
-      \tud@tut@readtostream{\tud@tut@temp.tex}{\tud@write@b}%
+      \tud@tut@inputtostream{\tud@tut@temp.tex}{\tud@write@b}%
     }{%
-      \tud@tut@readtostream{\tud@tut@temp.tex}{#1}%
+      \tud@tut@inputtostream{\tud@tut@temp.tex}{#1}%
     }%
   }%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@tut@append
-% \end{macro}^^A \tud@tut@readtostream
+% \end{macro}^^A \tud@tut@inputtostream
 % \end{macro}^^A \tud@tut@temp
 % \begin{macro}{\StartTutorial}
 % \changes{v2.02}{2014/08/21}{neu}^^A
@@ -5725,8 +5717,8 @@
   \immediate\closeout\tud@write@b%
   \immediate\closeout\tud@write@a%
   \immediate\openout\tud@write@a\jobname-example.tex\relax%
-  \tud@tut@readtostream{\tud@tut@temp-preamble.tex}{\tud@write@a}%
-  \tud@tut@readtostream{\tud@tut@temp-trunk.tex}{\tud@write@a}%
+  \tud@tut@inputtostream{\tud@tut@temp-preamble.tex}{\tud@write@a}%
+  \tud@tut@inputtostream{\tud@tut@temp-trunk.tex}{\tud@write@a}%
   \immediate\closeout\tud@write@a%
   \clearpage%
   \addsec{Copy\nobreakspace\&\nobreakspace{}Paste}%
@@ -6582,464 +6574,6 @@
 % \end{macro}^^A \ListOfToDo
 % \end{macro}^^A \tud@todo@type@use
 % \end{macro}^^A \ToDo
-%
-% \iffalse
-%</body>
-%</!doc>
-%<*body>
-% \fi
-%
-%
-%
-%
-% \subsection{Zusätzliche Markup-Befehle}
-%
-% Einige zusätzliche Auszecihnungsbefehle.
-% \ToDo{tudscrdoc kann problemlos NewDocumentCommand verwenden}[v2.07]
-%
-% \begin{macro}{\GitHubRepo}
-% \changes{v2.02}{2014/08/16}{neu}^^A
-% \begin{macro}{\@GitHubRepo}
-% \begin{macro}{\@@GitHubRepo}
-% \begin{macro}{\@@@GitHubRepo}
-% \begin{macro}{\@@@@GitHubRepo}
-% Auszeichnungsbefehle für Verweise auf ein GitHub-Repository. Die Ausgabe für 
-% den Befehl kann mit dem optionalen Argument bestimmt werden. Wird dieses 
-% Argument nicht gegeben, wird der letzte Teil der in runden Klammern gegebenen 
-% Repository-URL als Grundlage für die Ausgabe genutzt. Das letzte optionale 
-% Argument in Guillemets kann entweder als Link auf ein Issue (numerisch) oder 
-% aber zum anhängen eines URL-Pfades genutzt werden.
-%    \begin{macrocode}
-%<*!doc>
-\NewDocumentCommand\GitHubRepo{!t' !o !D(){\tud@github@url@base} !d<>}{%
-  \begingroup%
-    \tud@github@url@normalize\tud@res@b{#3}%
-    \IfValueTF{#2}{%
-      \def\tud@res@c{#2}%
-    }{%
-      \expandafter\filename@parse\expandafter{\tud@res@b}%
-      \protected@edef\tud@res@c{%
-        \mbox{\tud@english{GitHub-Repository~\textsbn{\filename@base}}}%
-      }%
-    }%
-    \IfValueT{#4}{%
-      \edef\tud@res@a{\trim@spaces{#4}}%
-      \tud@remove@trailing@slashes{\tud@res@a}%
-      \Ifnumber{\tud@res@a}{%
-        \eappto{\tud@res@b}{/issues/\tud@res@a}%
-      }{%
-        \eappto{\tud@res@b}{/\tud@res@a}%
-      }%
-    }%
-    \IfBooleanTF{#1}{\let\tud@res@a\href}{\let\tud@res@a\hrfn}%
-    \tud@res@a{https://github.com/\tud@res@b}{\tud@res@c}%
-  \endgroup%
-  \xspace%
-}
-%</!doc>
-%<*doc>
-\newcommand*\GitHubRepo{%
-  \kernel@ifnextchar'%
-    {\@GitHubRepo{\href}}%
-    {\@GitHubRepo{\hrfn}{}}%
-}
-\newcommand*\@GitHubRepo[2]{%
-  \kernel@ifnextchar[%]
-    {\@@GitHubRepo{#1}}%
-    {\@@GitHubRepo{#1}[\@nil]}%
-}
-\newcommand*\@@GitHubRepo{}
-\def\@@GitHubRepo#1[#2]{%
-  \kernel@ifnextchar(%)
-    {\@@@GitHubRepo{#1}{#2}}%
-    {\@@@GitHubRepo{#1}{#2}(\tud@github@url@base)}%
-}
-\newcommand*\@@@GitHubRepo{}
-\def\@@@GitHubRepo#1#2(#3){%
-  \kernel@ifnextchar<%>
-    {\@@@@GitHubRepo{#1}{#2}{#3}}%
-    {\@@@@GitHubRepo{#1}{#2}{#3}<\@nil>}%
-}
-\newcommand*\@@@@GitHubRepo{}
-\def\@@@@GitHubRepo#1#2#3<#4>{%
-  \begingroup%
-    \tud@github@url@normalize\tud@res@b{#3}%
-    \tud@if@nil{#2}{%
-      \expandafter\filename@parse\expandafter{\tud@res@b}%
-      \protected@edef\tud@res@c{%
-        \mbox{\tud@english{GitHub-Repository~\textbf{\textsf{\filename@base}}}}%
-      }%
-    }{%
-      \def\tud@res@c{#2}%
-    }%
-    \tud@if@nil{#4}{}{%
-      \edef\tud@res@a{\trim@spaces{#4}}%
-      \tud@remove@trailing@slashes{\tud@res@a}%
-      \Ifnumber{\tud@res@a}{%
-        \eappto{\tud@res@b}{/issues/\tud@res@a}%
-      }{%
-        \eappto{\tud@res@b}{/\tud@res@a}%
-      }%
-    }%
-    #1{https://github.com/\tud@res@b}{\tud@res@c}%
-  \endgroup%
-  \xspace%
-}
-%</doc>
-%    \end{macrocode}
-% \end{macro}^^A \@@@@GitHubRepo
-% \end{macro}^^A \@@@GitHubRepo
-% \end{macro}^^A \@@GitHubRepo
-% \end{macro}^^A \@GitHubRepo
-% \end{macro}^^A \GitHubRepo
-% \begin{macro}{\GitHubDownload}
-% \changes{v2.05g}{2016/11/08}{neu}^^A
-% Der Befehl für die Angabe von direkten Downloadlinks.
-%    \begin{macrocode}
-%<*!doc>
-\NewDocumentCommand\GitHubDownload{s t' D(){\tud@github@url@base} d<> m}{%
-  \begingroup%
-    \tud@github@url@normalize\tud@res@b{#3}%
-    \IfValueTF{#4}{%
-      \appto\tud@res@b{/releases/download/#4/#5}%
-    }{%
-      \appto\tud@res@b{/releases/latest/download/#5}%
-    }%
-    \IfBooleanTF{#2}{\let\tud@res@a\href}{\let\tud@res@a\hrfn}%
-    \IfBooleanTF{#1}{\def\tud@res@c{\File*}}{\def\tud@res@c{\File}}%
-    \tud@res@a{https://github.com/\tud@res@b}{\tud@res@c{#5}}%
-  \endgroup%
-  \xspace%
-}
-%</!doc>
-%    \end{macrocode}
-% \end{macro}^^A \GitHubDownload
-% \begin{macro}{\GitHubBase}
-% \changes{v2.07}{2019/11/11}{neu}^^A
-% \begin{macro}{\tud@github@url@base}
-% \changes{v2.07}{2019/11/11}{neu}^^A
-% \begin{macro}{\tud@github@url@normalize}
-% \changes{v2.07}{2019/11/11}{neu}^^A
-% \begin{macro}{\tud@remove@trailing@slashes}
-% \changes{v2.07}{2019/11/11}{neu}^^A
-%    \begin{macrocode}
-\newcommand*\GitHubBase[1]{%
-  \tud@github@url@normalize\tud@github@url@base{#1}%
-}
-\newcommand*\tud@github@url@base{}
-\let\tud@github@url@base\relax
-\newcommand*\tud@github@url@normalize[2]{%
-  \begingroup%
-    \def\tud@res@a{#2}%
-    \def\tud@res@b{\tud@github@url@base}%
-    \ifx\tud@res@a\tud@res@b%
-      \ifx\tud@github@url@base\relax%
-%<class&!doc>        \ClassWarning{tudscrmanual}%
-%<class&doc>        \ClassWarning{tudscrdoc}%
-%<package>        \PackageWarning{tudscrtutorial}%
-        {%
-          No GitHub repository was set with `\string\GitHubBase'\MessageBreak%
-          so \TUDScriptRepository\space is used%
-        }%
-        \edef\tud@res@a{\TUDScriptRepository}%
-      \fi%
-    \else%
-      \edef\tud@res@a{\trim@spaces{#2}}%
-    \fi%
-    \def\tud@res@b##1github.com/##2github.com/##3\@nil{%
-      \IfArgIsEmpty{##2}{%
-        \def\tud@res@a{##1}%
-      }{%
-        \def\tud@res@a{##2}%
-      }%
-    }%
-    \expandafter\tud@res@b\tud@res@a github.com/github.com/\@nil%
-    \tud@remove@trailing@slashes{\tud@res@a}%
-    \edef\tud@res@b{%
-      \endgroup%
-      \def\noexpand#1{\tud@res@a}%
-    }%
-  \tud@res@b%
-}
-\newcommand*\tud@remove@trailing@slashes[1]{%
-  \begingroup%
-    \edef\tud@res@a{\trim@spaces{#1}}%
-    \Ifstrstart{\tud@res@a}{/}{%
-      \edef\tud@res@a{\expandafter\@gobble\tud@res@a}%
-    }{}%
-    \let\tud@res@c\@empty%
-    \def\tud@res@b##1/##2/\@nil{%
-      \IfArgIsEmpty{##2}{%
-        \appto\tud@res@c{##1}%
-      }{%
-        \Ifstr{##2}{/}{%
-          \appto\tud@res@c{##1}%
-        }{%
-          \appto\tud@res@c{##1/}%
-          \tud@res@b##2/\@nil%
-        }%
-      }%
-    }%
-    \expandafter\tud@res@b\tud@res@a//\@nil%
-    \edef\tud@res@b{%
-      \endgroup%
-      \def\noexpand#1{\tud@res@c}%
-    }%
-  \tud@res@b%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@remove@trailing@slashes
-% \end{macro}^^A \tud@github@url@normalize
-% \end{macro}^^A \tud@github@url@base
-% \end{macro}^^A \GitHubBase
-% \begin{macro}{\TUDForum}
-% \begin{macro}{\Forum}
-% \begin{macro}{\@Forum}
-% \begin{macro}{\@@Forum}
-% \begin{macro}{\@@@Forum}
-% Der Befehl für die Ausgabe eines Links zum \TUDForum. Das optionale Argument 
-% in Guillemets kann genutzt werden, um auf einen spezifisches Beitrag zu 
-% verlinken.
-%    \begin{macrocode}
-%<*!doc>
-\newcommand*\TUDForum{\mbox{TUD-\hologo{LaTeX}-Forum}}
-\NewDocumentCommand\Forum{!t' !O{\TUDForum} !d<>}{%
-  \begingroup%
-    \IfBooleanTF{#1}{\let\tud@res@a\href}{\let\tud@res@a\hrfn}%
-    \tud@res@a{\TUDScriptForum\IfValueT{#3}{viewtopic.php?t=#3}}{#2}%
-  \endgroup%
-  \xspace%
-}
-%</!doc>
-%<*doc>
-\newcommand*\TUDForum{\mbox{TUD-\LaTeX-Forum}}
-\newcommand*\Forum{%
-  \kernel@ifnextchar'%
-    {\@Forum{\href}}%
-    {\@Forum{\hrfn}{}}%
-}
-\newcommand*\@Forum[2]{%
-  \kernel@ifnextchar[%]
-    {\@@Forum{#1}}%
-    {\@@Forum{#1}[\TUDForum]}%
-}
-\newcommand*\@@Forum{}
-\def\@@Forum#1[#2]{%
-  \kernel@ifnextchar<%>
-    {\@@@Forum{#1}{#2}}%
-    {\@@@Forum{#1}{#2}<\@nil>}%
-}
-\def\@@@Forum#1#2<#3>{%
-  \begingroup%
-    \let\tud@res@a\@empty%
-    \tud@if@nil{#3}{}{\def\tud@res@a{viewtopic.php?t=#3}}%
-    #1{\TUDScriptForum\tud@res@a}{#2}%
-  \endgroup%
-  \xspace%
-}
-%</doc>
-%    \end{macrocode}
-% \end{macro}^^A \@@@Forum
-% \end{macro}^^A \@@Forum
-% \end{macro}^^A \@Forum
-% \end{macro}^^A \Forum
-% \end{macro}^^A \TUDForum
-% \begin{macro}{\CTAN}
-% \changes{v2.05}{2015/11/22}{neu}^^A
-% \begin{macro}{\scrguide}
-% \changes{v2.02}{2014/09/04}{neu}^^A
-% \changes{v2.05}{2015/07/23}{Hyperlinktext über optionales Argument}^^A
-% \begin{macro}{\notudscrartcl}
-% Für die Anwenderdokumentation werden weitere Auszeichnungsbefehle definiert.
-%    \begin{macrocode}
-%<*!doc>
-\NewDocumentCommand\CTAN{!t' !o}{%
-  \begingroup%
-    \IfBooleanTF{#1}{\let\tud@res@a\href}{\let\tud@res@a\hrfn}%
-    \tud@res@a{http://www.ctan.org\IfValueT{#2}{/#2}}{%
-      \tud@english{Comprehensive TeX Archive Network (CTAN)}%
-    }%
-  \endgroup%
-  \xspace%
-}
-\NewDocumentCommand\scrguide{!t' !O{\KOMAScript-Handbuch}}{%
-  \begingroup%
-    \IfBooleanTF{#1}{\let\tud@res@a\href}{\let\tud@res@a\hrfn}%
-    \tud@res@a{%
-      http://mirrors.ctan.org/macros/latex/contrib/koma-script/doc/scrguide.pdf%
-    }{#2}%
-  \endgroup%
-  \xspace%
-}
-%<*class>
-\newcommand*\notudscrartcl{%
-  F\"ur die Klassen \Class{tudscrartcl} sowie \Class{tudscrposter} ist diese %
-  Option nicht verf\"ugbar.%
-}
-%</class>
-%</!doc>
-%    \end{macrocode}
-% \end{macro}^^A \notudscrartcl
-% \end{macro}^^A \scrguide
-% \end{macro}^^A \CTAN
-% \begin{macro}{\Attention}
-% \changes{v2.02}{2014/08/16}{neu}^^A
-% Falls irgendetwas besonders hervorgehoben werden sollte.
-%    \begin{macrocode}
-\newcommand*\Attention[2][\z@]{%
-  \marginnote{%
-    \tud@setdim\fboxsep{0.25em}%
-    \fbox{Achtung!}%
-  }[{#1}]%
-  \emph{\trim@spaces{#2}}%
-}
-%    \end{macrocode}
-% \end{macro}^^A \Attention
-% \begin{macro}{\TUDScriptContactNote}
-% \changes{v2.07}{2019/09/26}{neu}^^A
-% \begin{macro}{\TUDScriptContactTitle}
-% \changes{v2.07}{2019/09/26}{neu}^^A
-%    \begin{macrocode}
-%<*!doc>
-\newrobustcmd*\TUDScriptContactNote{%
-  \footnote{\scriptsize\expandafter\mailto\expandafter{\TUDScriptContact}}%
-}
-\newrobustcmd*\TUDScriptContactTitle{%
-  \ifundef{\emailaddress}{\TUDScriptContactNote}{%
-    \expandafter\emailaddress\expandafter{\TUDScriptContact}%
-  }%
-}
-\AfterPackage*{hyperref}{%
-  \pdfstringdefDisableCommands{%
-    \let\TUDScriptContactNote\relax%
-    \let\TUDScriptContactTitle\relax%
-  }%
-}
-%</!doc>
-%    \end{macrocode}
-% \end{macro}^^A \TUDScriptContactTitle
-% \end{macro}^^A \TUDScriptContactNote
-%
-% \iffalse
-%</body>
-%<*body|class&doc>
-% \fi
-%
-% \begin{macro}{\KOMAScript}
-% \begin{macro}{\TUDScript}
-% Für die robuste Verwendung im Text.
-%    \begin{macrocode}
-\kernel@make@fragile\KOMAScript
-\edef\KOMAScript{\noexpand\mbox{\expandonce\KOMAScript}\noexpand\xspace}
-\robustify\KOMAScript
-\robustify\TUDScript
-%    \end{macrocode}
-% \end{macro}^^A \DDC
-% \end{macro}^^A \TUDCDs
-% \begin{macro}{\TUDScript}
-% \begin{macro}{\KOMAScript}
-% \begin{macro}{\TUD}
-% \begin{macro}{\TnUD}
-% \begin{macro}{\TUDCD}
-% \changes{v2.05}{2015/11/01}{neu}^^A
-% \begin{macro}{\TUDCDs}
-% \changes{v2.05}{2015/11/01}{neu}^^A
-% \begin{macro}{\DDC}
-% Diese Befehle stellen regelmäßig in der Quelltextdokumentatuion und im 
-% Handbuch genutzte Textbausteine bereit. Dazu wird der Befehl \cs{xspace} aus 
-% dem \pkg{xspace}-Paket genutzt.
-%    \begin{macrocode}
-\newcommand*\CD{\tud@english{Corporate Design}\xspace}
-\newcommand*\CDs{\tud@english{Corporate Designs}\xspace}
-\newcommand*\TUD{Technische Universit\"at Dresden\xspace}
-\newcommand*\TnUD{Technischen Universit\"at Dresden\xspace}
-\newcommand*\TUDCD{\CD der \TnUD}
-\newcommand*\TUDCDs{\CDs der \TnUD}
-\newrobustcmd*\DDC{%
-  \mbox{%
-    D\kern.05em R\kern.05em E\kern.05em S\kern.05em %
-    D\kern.05em E\kern.05em N\kern.1em-\kern.1em concept%
-  }\xspace%
-}
-\AfterPackage*{hyperref}{%
-  \pdfstringdefDisableCommands{%
-    \def\DDC{DRESDEN-concept{}}%
-    \def\TUDScript{TUD-Script{}}%
-    \def\KOMAScript{KOMA-Script{}}%
-  }%
-}
-%    \end{macrocode}
-% \end{macro}^^A \DDC
-% \end{macro}^^A \TUDCDs
-% \end{macro}^^A \TUDCD
-% \end{macro}^^A \TnUD
-% \end{macro}^^A \TUD
-% \end{macro}^^A \CDs
-% \end{macro}^^A \CD
-% \begin{macro}{\OpenSans}
-% \changes{v2.06}{2018/07/02}{neu}^^A
-% \begin{macro}{\Univers}
-% \begin{macro}{\DIN}
-% Für die Nennung der Schriften spezielle Markos bereitgestellt.
-%    \begin{macrocode}
-%^^A%<*!doc>
-\newrobustcmd*\OpenSans{\textcdbn{Open~Sans}\xspace}
-\newrobustcmd*\Univers{\textcdbi{Univers}\xspace}
-\newrobustcmd*\DIN{\textcdbi{DIN~Bold}\xspace}
-%^^A%</!doc>
-%^^A%<*doc>
-%^^A\newcommand*\OpenSans{\textcdbn{Open~Sans}\xspace}
-%^^A\newcommand*\Univers{\textcdbi{Univers}\xspace}
-%^^A\newcommand*\DIN{\textcdbi{DIN~Bold}\xspace}
-%^^A%</doc>
-\AfterPackage*{hyperref}{%
-  \pdfstringdefDisableCommands{%
-    \def\OpenSans{Open Sans{}}%
-    \def\Univers{Univers{}}%
-    \def\DIN{DIN Bold{}}%
-  }%
-}
-%    \end{macrocode}
-% \end{macro}^^A \DIN
-% \end{macro}^^A \Univers
-% \end{macro}^^A \OpenSans
-% \begin{macro}{\@pnumwidth}
-% \begin{macro}{\@tocrmarg}
-% Für das Inhaltsverzeichnis werden die beiden Längen angepasst.
-%    \begin{macrocode}
-\renewcommand*\@pnumwidth{2.1em}%
-\renewcommand*\@tocrmarg{3.1em}%
-%    \end{macrocode}
-% \end{macro}^^A \@tocrmarg
-% \end{macro}^^A \@pnumwidth
-%
-% \iffalse
-%</body|class&doc>
-%<*!doc>
-%<*body>
-% \fi
-%
-% \begin{macro}{\textsbn}
-% \changes{v2.02}{2014/08/16}{neu}^^A
-% \begin{macro}{\sbnfont}
-% \changes{v2.02}{2014/08/16}{neu}^^A
-% \begin{macro}{\textsbs}
-% \changes{v2.02}{2014/08/16}{neu}^^A
-% \begin{macro}{\sbsfont}
-% \changes{v2.02}{2014/08/16}{neu}^^A
-% Für die Anwenderdokumentation werden weitere Auszeichnungsbefehle definiert.
-%    \begin{macrocode}
-\newcommand*\textsbn{}
-\newrobustcmd*\sbnfont{\sffamily\bfseries\upshape}
-\DeclareTextFontCommand\textsbn{\sbnfont}
-\newcommand*\textsbs{}
-\newrobustcmd*\sbsfont{\sffamily\bfseries\slshape}
-\DeclareTextFontCommand\textsbs{\sbsfont}
-%    \end{macrocode}
-% \end{macro}^^A \sbsfont
-% \end{macro}^^A \textsbs
-% \end{macro}^^A \sbnfont
-% \end{macro}^^A \textsbn
 %
 % \iffalse
 %</body>

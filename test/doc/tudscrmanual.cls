@@ -10,7 +10,6 @@
 %%
 %% tudscr-version.dtx  (with options: `class,manual,identify,inherit')
 %% tudscr-base.dtx  (with options: `class,manual,inherit,load')
-%% tudscr-misc.dtx  (with options: `class,manual,util,list,string')
 %% tudscr-manual.dtx  (with options: `class,manual,option')
 %% tudscr-misc.dtx  (with options: `class,manual,inherit,execute')
 %% tudscr-manual.dtx  (with options: `class,manual,body')
@@ -110,184 +109,7 @@
 ]
 \renewcommand*\TUD@KOMAoptions[1]{\PassOptionsToClass{#1}{\TUD@Class@Parent}}
 \AfterClass{\TUD@Class@Parent}{\let\TUD@KOMAoptions\KOMAoptions}
-%%%% From File: tudscr-misc.dtx 2021/03/31 01:55:38 5cfe807
-\NewDocumentCommand\tud@auxlist@register{s D(){\@firstofone} m}{%
-  \expandafter\newcommand\expandafter*\csname#3@auxlist\endcsname{}%
-  \expandafter\newcommand\expandafter*\csname#3@auxlist@positive\endcsname{}%
-  \expandafter\newcommand\expandafter*\csname#3@auxlist@negative\endcsname{}%
-  \expandafter\newcommand\expandafter*\csname#3@auxlist@handler\endcsname{#2}%
-  \BeforeClosingMainAux{%
-    \forlistcsloop{\listcsremove{#3@auxlist@positive}}{#3@auxlist@negative}%
-    \tud@auxlist@export{#3}%
-  }%
-  \AtBeginDocument{\tud@auxlist@import{#3}{#1}}%
-}
-\newcommand*\tud@auxlist@export[1]{%
-  \if@filesw%
-    \let\tud@res@a\@empty%
-    \def\tud@res@b##1{\eappto\tud@res@a{\@percentchar^^J\@spaces{##1}}}%
-    \forlistcsloop\tud@res@b{#1@auxlist@positive}%
-    \immediate\write\@mainaux{%
-      \string\gdef\expandafter\string\csname #1@auxlist\endcsname%
-        {\expandonce\tud@res@a\@percentchar^^J}%
-    }%
-  \fi%
-}
-\newcommand*\tud@auxlist@import[2]{%
-  \begingroup%
-    \edef\tud@res@a{\unexpanded{\@tfor\tud@res@c:=}\csexpandonce{#1@auxlist}}%
-    \letcs\tud@res@b{#1@auxlist@handler}%
-    \global\cslet{#1@auxlist}\@empty%
-    \tud@res@a\do{%
-      \edef\tud@res@c{\tud@res@b{\tud@res@c}}%
-      \listcsxadd{#1@auxlist}{\expandonce\tud@res@c}%
-    }%
-  \endgroup%
-  \IfBooleanT{#2}{\forlistcsloop{\@firstofone}{#1@auxlist}}%
-}
-\newcommand*\tud@auxlist@add[2]{%
-  \begingroup%
-    \protected@edef\tud@res@a{#2}%
-    \edef\tud@res@a{\detokenize\expandafter{\tud@res@a}}%
-    \tud@unique@csxadd{#1@auxlist@positive}{\tud@res@a}%
-  \endgroup%
-}
-\newcommand*\tud@auxlist@remove[2]{%
-  \begingroup%
-    \protected@edef\tud@res@a{#2}%
-    \edef\tud@res@a{\detokenize\expandafter{\tud@res@a}}%
-    \tud@unique@csxadd{#1@auxlist@negative}{\tud@res@a}%
-  \endgroup%
-}
-\newcommand*\tud@auxlist@ifin[2]{%
-  \begingroup%
-    \protected@edef\tud@res@a{#1}%
-    \letcs\tud@res@b{#2@auxlist@handler}%
-    \edef\tud@res@a{%
-      \endgroup%
-      \noexpand\ifinlistcs{\tud@res@b{\tud@res@a}}{#2@auxlist}%
-    }%
-  \tud@res@a%
-}
-\newcommand*\tud@unique@add[2]{%
-  \ifinlist{#2}{#1}{}{\listadd#1{#2}}%
-}
-\newcommand*\tud@unique@eadd[2]{%
-  \xifinlist{#2}{#1}{}{\listeadd#1{#2}}%
-}
-\newcommand*\tud@unique@xadd[2]{%
-  \xifinlist{#2}{#1}{}{\listxadd#1{#2}}%
-}
-\newcommand*\tud@unique@csxadd[2]{%
-  \xifinlistcs{#2}{#1}{}{\listcsxadd{#1}{#2}}%
-}
-\providerobustcmd*\listeremove[2]{%
-  \begingroup%
-    \edef\etb@tempa{\endgroup\unexpanded{\listremove#1}{#2}}%
-  \etb@tempa%
-}
-\tud@newif\if@tud@list@sorted
-\newcommand*\tud@list@sorted{}
-\newcommand*\tud@list@sort[1]{%
-  \ifdefvoid{#1}{%
-    \ClassWarning{tudscrmanual}{%
-      The given list \string#1\space\MessageBreak%
-      is empty, nothing to sort here%
-    }%
-  }{%
-    \begingroup%
-      \let\tud@list@sorted\@empty%
-      \forlistloop\tud@list@@sort{#1}%
-      \edef\tud@res@c{%
-        \endgroup%
-        \unexpanded{\def#1}{\expandonce\tud@list@sorted}%
-      }%
-    \tud@res@c%
-  }%
-}
-\newcommand*\tud@list@@sort[1]{%
-  \@tud@list@sortedfalse%
-  \let\tud@res@a\@empty%
-  \forlistloop{\tud@list@@@sort\tud@res@a{#1}}{\tud@list@sorted}%
-  \if@tud@list@sorted\else%
-    \listadd\tud@res@a{#1}%
-  \fi%
-  \let\tud@list@sorted\tud@res@a%
-}
-\newcommand*\tud@list@@@sort[3]{%
-  \if@tud@list@sorted%
-    \listadd#1{#3}%
-  \else%
-    \ifnum\pdf@strcmp{#2}{#3}<\z@\relax%
-      \listadd#1{#2}%
-      \listadd#1{#3}%
-      \@tud@list@sortedtrue%
-    \else%
-      \listadd#1{#3}%
-    \fi%
-  \fi%
-}
-\newcommand*\tud@remove@enfold@char[2]{%
-  \begingroup%
-    \edef\tud@res@b{\expandonce{#1}}%
-    \trim@spaces@in\tud@res@b%
-    \expandafter\in@\expandafter#2\expandafter{\tud@res@b}%
-    \ifin@%
-      \let\tud@res@a\@empty%
-      \def\tud@res@c##1#2##2\@nil{%
-        \IfArgIsEmpty{##1}{}{%
-          \ifx\tud@res@a\@empty%
-            \def\tud@res@a{##1}%
-          \else%
-            \appto\tud@res@a{#2##1}%
-          \fi%
-        }%
-        \IfArgIsEmpty{##2}{}{\tud@res@c##2\@nil}%
-      }%
-      \expandafter\tud@res@c\tud@res@b#2\@nil%
-    \else%
-      \let\tud@res@a\tud@res@b%
-    \fi%
-    \edef\tud@res@a{%
-      \endgroup%
-      \unexpanded{\def#1}{\expandonce\tud@res@a}%
-    }%
-  \tud@res@a%
-}
-\newcommand*\tud@replace@in[3]{%
-  \begingroup%
-    \edef\tud@res@a{\expandonce{#1}}%
-    \let\tud@res@c\@empty%
-    \def\tud@res@b##1#2##2\@nil{%
-      \IfArgIsEmpty{##2}{%
-        \appto\tud@res@c{##1}%
-      }{%
-        \appto\tud@res@c{##1#3}%
-        \tud@res@b##2\@nil%
-      }%
-    }%
-    \expandafter\tud@res@b\tud@res@a#2\@nil%
-    \edef\tud@res@a{%
-      \endgroup%
-      \unexpanded{\def#1}{\expandonce\tud@res@c}%
-    }%
-  \tud@res@a%
-}
-\newcommand*\tud@replace@@in[3]{%
-  \begingroup%
-    \protected@edef\tud@res@a{#1}%
-    \edef\tud@res@a{\detokenize\expandafter{\tud@res@a}}%
-    \edef\tud@res@b{%
-      \unexpanded{\tud@replace@in\tud@res@a}{\detokenize{#2}}{\detokenize{#3}}%
-    }%
-    \tud@res@b%
-    \edef\tud@res@a{%
-      \endgroup%
-      \unexpanded{\def#1}{\tud@res@a}%
-    }%
-  \tud@res@a%
-}
-%%%% From File: tudscr-manual.dtx 2020/11/11 22:13:36 968380d
+%%%% From File: tudscr-manual.dtx 2020/01/14 17:13:34 e5e3ff2
 \TUD@key{final}[true]{%
   \TUD@set@ifkey{final}{@tempswa}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
@@ -455,6 +277,183 @@
   \fi%
 }
 %%%% From File: tudscr-misc.dtx 2021/06/10 01:08:07 fb873a0
+\NewDocumentCommand\tud@auxlist@register{s D(){\@firstofone} m}{%
+  \expandafter\newcommand\expandafter*\csname#3@auxlist\endcsname{}%
+  \expandafter\newcommand\expandafter*\csname#3@auxlist@positive\endcsname{}%
+  \expandafter\newcommand\expandafter*\csname#3@auxlist@negative\endcsname{}%
+  \expandafter\newcommand\expandafter*\csname#3@auxlist@handler\endcsname{#2}%
+  \BeforeClosingMainAux{%
+    \forlistcsloop{\listcsremove{#3@auxlist@positive}}{#3@auxlist@negative}%
+    \tud@auxlist@export{#3}%
+  }%
+  \AtBeginDocument{\tud@auxlist@import{#3}{#1}}%
+}
+\newcommand*\tud@auxlist@export[1]{%
+  \if@filesw%
+    \let\tud@res@a\@empty%
+    \def\tud@res@b##1{\eappto\tud@res@a{\@percentchar^^J\@spaces{##1}}}%
+    \forlistcsloop\tud@res@b{#1@auxlist@positive}%
+    \immediate\write\@mainaux{%
+      \string\gdef\expandafter\string\csname #1@auxlist\endcsname%
+        {\expandonce\tud@res@a\@percentchar^^J}%
+    }%
+  \fi%
+}
+\newcommand*\tud@auxlist@import[2]{%
+  \begingroup%
+    \edef\tud@res@a{\unexpanded{\@tfor\tud@res@c:=}\csexpandonce{#1@auxlist}}%
+    \letcs\tud@res@b{#1@auxlist@handler}%
+    \global\cslet{#1@auxlist}\@empty%
+    \tud@res@a\do{%
+      \edef\tud@res@c{\tud@res@b{\tud@res@c}}%
+      \listcsxadd{#1@auxlist}{\expandonce\tud@res@c}%
+    }%
+  \endgroup%
+  \IfBooleanT{#2}{\forlistcsloop{\@firstofone}{#1@auxlist}}%
+}
+\newcommand*\tud@auxlist@add[2]{%
+  \begingroup%
+    \protected@edef\tud@res@a{#2}%
+    \edef\tud@res@a{\detokenize\expandafter{\tud@res@a}}%
+    \tud@unique@csxadd{#1@auxlist@positive}{\tud@res@a}%
+  \endgroup%
+}
+\newcommand*\tud@auxlist@remove[2]{%
+  \begingroup%
+    \protected@edef\tud@res@a{#2}%
+    \edef\tud@res@a{\detokenize\expandafter{\tud@res@a}}%
+    \tud@unique@csxadd{#1@auxlist@negative}{\tud@res@a}%
+  \endgroup%
+}
+\newcommand*\tud@auxlist@ifin[2]{%
+  \begingroup%
+    \protected@edef\tud@res@a{#1}%
+    \letcs\tud@res@b{#2@auxlist@handler}%
+    \edef\tud@res@a{%
+      \endgroup%
+      \noexpand\ifinlistcs{\tud@res@b{\tud@res@a}}{#2@auxlist}%
+    }%
+  \tud@res@a%
+}
+\newcommand*\tud@unique@add[2]{%
+  \ifinlist{#2}{#1}{}{\listadd#1{#2}}%
+}
+\newcommand*\tud@unique@eadd[2]{%
+  \xifinlist{#2}{#1}{}{\listeadd#1{#2}}%
+}
+\newcommand*\tud@unique@xadd[2]{%
+  \xifinlist{#2}{#1}{}{\listxadd#1{#2}}%
+}
+\newcommand*\tud@unique@csxadd[2]{%
+  \xifinlistcs{#2}{#1}{}{\listcsxadd{#1}{#2}}%
+}
+\providerobustcmd*\listeremove[2]{%
+  \begingroup%
+    \edef\etb@tempa{\endgroup\unexpanded{\listremove#1}{#2}}%
+  \etb@tempa%
+}
+\tud@newif\if@tud@list@sorted
+\newcommand*\tud@list@sorted{}
+\newcommand*\tud@list@sort[1]{%
+  \ifdefvoid{#1}{%
+    \ClassWarning{\TUD@Class@Name}{%
+      The given list \string#1\space\MessageBreak%
+      is empty, nothing to sort here%
+    }%
+  }{%
+    \begingroup%
+      \let\tud@list@sorted\@empty%
+      \forlistloop\tud@list@@sort{#1}%
+      \edef\tud@res@c{%
+        \endgroup%
+        \unexpanded{\def#1}{\expandonce\tud@list@sorted}%
+      }%
+    \tud@res@c%
+  }%
+}
+\newcommand*\tud@list@@sort[1]{%
+  \@tud@list@sortedfalse%
+  \let\tud@res@a\@empty%
+  \forlistloop{\tud@list@@@sort\tud@res@a{#1}}{\tud@list@sorted}%
+  \if@tud@list@sorted\else%
+    \listadd\tud@res@a{#1}%
+  \fi%
+  \let\tud@list@sorted\tud@res@a%
+}
+\newcommand*\tud@list@@@sort[3]{%
+  \if@tud@list@sorted%
+    \listadd#1{#3}%
+  \else%
+    \ifnum\pdf@strcmp{#2}{#3}<\z@\relax%
+      \listadd#1{#2}%
+      \listadd#1{#3}%
+      \@tud@list@sortedtrue%
+    \else%
+      \listadd#1{#3}%
+    \fi%
+  \fi%
+}
+\newcommand*\tud@remove@enfold@char[2]{%
+  \begingroup%
+    \edef\tud@res@b{\expandonce{#1}}%
+    \trim@spaces@in\tud@res@b%
+    \expandafter\in@\expandafter#2\expandafter{\tud@res@b}%
+    \ifin@%
+      \let\tud@res@a\@empty%
+      \def\tud@res@c##1#2##2\@nil{%
+        \IfArgIsEmpty{##1}{}{%
+          \ifx\tud@res@a\@empty%
+            \def\tud@res@a{##1}%
+          \else%
+            \appto\tud@res@a{#2##1}%
+          \fi%
+        }%
+        \IfArgIsEmpty{##2}{}{\tud@res@c##2\@nil}%
+      }%
+      \expandafter\tud@res@c\tud@res@b#2\@nil%
+    \else%
+      \let\tud@res@a\tud@res@b%
+    \fi%
+    \edef\tud@res@a{%
+      \endgroup%
+      \unexpanded{\def#1}{\expandonce\tud@res@a}%
+    }%
+  \tud@res@a%
+}
+\newcommand*\tud@replace@in[3]{%
+  \begingroup%
+    \edef\tud@res@a{\expandonce{#1}}%
+    \let\tud@res@c\@empty%
+    \def\tud@res@b##1#2##2\@nil{%
+      \IfArgIsEmpty{##2}{%
+        \appto\tud@res@c{##1}%
+      }{%
+        \appto\tud@res@c{##1#3}%
+        \tud@res@b##2\@nil%
+      }%
+    }%
+    \expandafter\tud@res@b\tud@res@a#2\@nil%
+    \edef\tud@res@a{%
+      \endgroup%
+      \unexpanded{\def#1}{\expandonce\tud@res@c}%
+    }%
+  \tud@res@a%
+}
+\newcommand*\tud@replace@@in[3]{%
+  \begingroup%
+    \protected@edef\tud@res@a{#1}%
+    \edef\tud@res@a{\detokenize\expandafter{\tud@res@a}}%
+    \edef\tud@res@b{%
+      \unexpanded{\tud@replace@in\tud@res@a}{\detokenize{#2}}{\detokenize{#3}}%
+    }%
+    \tud@res@b%
+    \edef\tud@res@a{%
+      \endgroup%
+      \unexpanded{\def#1}{\tud@res@a}%
+    }%
+  \tud@res@a%
+}
+%%%% From File: tudscr-misc.dtx 2021/06/10 01:08:07 fb873a0
 \DeclareOption*{%
   \expandafter\PassOptionsToClass\expandafter{\CurrentOption}%
   {\TUD@Class@Parent}%
@@ -478,12 +477,6 @@
 }{}
 \RequirePackage{babel}[2021-06-02]
 \RequirePackage{csquotes}[2021/02/22]
-\newcommand*\tud@english[1]{#1}
-\AtBeginDocument{%
-  \iflanguageloaded{english}{%
-    \renewcommand*\tud@english[1]{\foreignlanguage{english}{#1}}%
-  }{}%
-}
 \RequirePackage{shellesc}[2019/11/08]
 \RequirePackage{pdftexcmds}[2020/06/27]
 \RequirePackage{multicol}[2019/12/09]
@@ -559,13 +552,13 @@
 \PassOptionsToPackage{nospace}{varioref}
 \RequirePackage{varioref}[2020/08/11]
 \renewrobustcmd*\fullref[1]{\hyperref[{#1}]{\autoref*{#1}\space\vpageref{#1}}}
-%\AfterPackage*{nameref}{%
-%  \patchcmd\NR@gettitle{%
-%    \GetTitleString%
-%  }{%
-%    \GetTitleStringExpand%
-%  }{}{\tud@patch@wrn{NR@gettitle}}%
-%}
+\AfterPackage*{nameref}{%
+  \patchcmd\NR@gettitle{%
+    \GetTitleString%
+  }{%
+    \GetTitleStringExpand%
+  }{}{\tud@patch@wrn{NR@gettitle}}%
+}
 \PassOptionsToPackage{open,openlevel=0}{bookmark}
 \PassOptionsToPackage{%
   hyperindex=false,%
@@ -612,7 +605,7 @@
   \providecommand*\texorpdfstring[2]{#1}%
   \RequirePackage{url}[2013/09/16]%
   \providerobustcmd*\url[1]{\detokenize{#1}}%
-  \providerobustcmd*\nolinkurl[1]{\url{#1}}% 
+  \providerobustcmd*\nolinkurl[1]{\url{#1}}%
   \providerobustcmd*\hyperref{%
     \kernel@ifnextchar[%]
       {\tud@x@hyperref@a}%
@@ -706,7 +699,6 @@
 \newrobustcmd*\mailto[1]{\mbox{\href{mailto:#1}{\nolinkurl{#1}}}}%
 \newrobustcmd*\txb{{\raise.05em\hbox{\kern.05em\textbar\kern.05em}}}
 \newrobustcmd*\bsc{\kern-.05em\@backslashchar\kern-.05em}
-\newrobustcmd*\nbs{\nobreakspace{}}
 \DeclareListParser{\dossvlist}{;}
 \DeclareListParser*{\forssvlist}{;}
 \newcommand*\tud@v@validate[1]{%
@@ -840,7 +832,7 @@
       \fi%
     \fi%
     % TODO separates Makro?
-    \let\sflogo\@firstofone%
+    \let\Logo\@firstofone%
     \def~{\space}%
     \def\dots{...}%
     \def\_{_}%
@@ -1127,45 +1119,73 @@
     }%
   \tud@res@a{#3}{#2}%
 }
-\NewDocumentCommand\tud@url@normalize{m O{https://} m m}{%
-  \begingroup%
-    \edef\tud@res@a{\trim@spaces{#4}}%
-    \def\tud@res@b##1#3/##2#3/##3\@nil{%
-      \IfArgIsEmpty{##2}{%
-        \def\tud@res@a{##1}%
-      }{%
-        \def\tud@res@a{##2}%
-      }%
+\newcommand*\tud@index@mdfive{}
+\if@filesw
+  \tud@newwrite\@indexfile%
+  \immediate\openout\@indexfile=\jobname.idx%
+  \typeout{Writing index file \jobname.idx}%
+  \BeforeClosingMainAux{%
+    \immediate\closeout\@indexfile%
+    \@tud@res@swafalse%
+    \ifundef\pdf@filemdfivesum{%
+      \@tud@res@swatrue%
+      \let\tud@index@mdfive\@empty%
+      \let\tud@res@a\@empty%
+    }{%
+      \edef\tud@res@a{\pdf@filemdfivesum{\jobname.idx}}%
+      \ifnum\pdf@strcmp{\tud@res@a}{\tud@index@mdfive}=\z@\else%
+        \@tud@res@swatrue%
+      \fi%
     }%
-    \expandafter\tud@res@b\tud@res@a #3/#3/\@nil%
-    \tud@remove@enfold@char\tud@res@a{/}%
-    \edef\tud@res@b{%
-      \endgroup%
-      \unexpanded{\def#1}{#2#3/\tud@res@a}%
-    }%
-  \tud@res@b%
-}
-\newcommand*\tud@github@url@base{}
-\let\tud@github@url@base\relax
-\newcommand*\GitHubBase[1]{%
-  \tud@url@normalize@github\tud@github@url@base{#1}%
-}
-\AtBeginDocument{%
-  \ifx\tud@github@url@base\relax%
-    \ClassWarning{tudscrmanual}%
-    {%
-      No GitHub repository was set with `\string\GitHubBase'\MessageBreak%
-      so \TUDScriptRepository\space is used%
-    }%
-    \GitHubBase{\TUDScriptRepository}%
-  \fi%
-}
-\newcommand*\tud@url@normalize@github[2]{%
-  \tud@url@normalize#1{github.com}{#2}%
-}
-\newcommand*\tud@url@normalize@ctan[2]{%
-  \tud@url@normalize#1{ctan.org}{#2}%
-}
+    \if@tud@res@swa%
+      \ifnum\pdf@shellescape=\@ne\relax%
+        \ifundef\inputencodingname{%
+          \appto\tud@xdy@settings{ -C utf8}%
+        }{%
+          \eappto\tud@xdy@settings{ -C \inputencodingname}%
+        }%
+        \edef\tud@res@c{\pdf@filemdfivesum{\tud@xdy@log}}%
+        \edef\tud@res@b{%
+          splitindex%
+            \space-m\space'\tud@xdy@settings\space2>\string&1'%
+            \space\jobname.idx%
+        }%
+        \begingroup%
+          \everyeof{\noexpand}%
+          \endlinechar=\m@ne%
+          \ClassInfo{tudscrmanual}{calling splitindex:}%
+          \ClassInfo{tudscrmanual}{\tud@res@b}%
+          \edef\tud@res@b{%
+            \noexpand\@@input\string|%
+              \string"\tud@res@b\space>\tud@xdy@log\string"\space%
+          }%
+          \tud@res@b%
+        \endgroup%
+        % DOC wnn erfolgreich, sollte das log-file sich geändert haben
+        \ifnum\pdf@strcmp{\tud@res@c}{\pdf@filemdfivesum{\tud@xdy@log}}=\z@%
+          \ClassWarningNoLine{tudscrmanual}%
+          {%
+            \tud@res@b\MessageBreak%
+            was called but there is no result%
+          }%
+          \@tud@res@swafalse%
+        \fi%
+      \else%
+        \ClassWarningNoLine{tudscrmanual}%
+        {%
+          The index file `\jobname.idx' has changed. Run again\MessageBreak%
+          with --shell-escape flag enabled%
+        }%
+        \@tud@res@swafalse%
+      \fi%
+      \if@tud@res@swa\else%
+        \let\tud@res@a\tud@index@mdfive%
+      \fi%
+    \fi%
+    % DOC muss in jedem Fall geschrieben werden
+    \immediate\write\@mainaux{\string\gdef\string\tud@index@mdfive{\tud@res@a}}%
+  }%
+\fi
 \newcommand*\tud@index@prologue{}%
 \newcommand*\tud@index@item[2][\relax]{%
   \par\penalty\numexpr#2*50-50\relax#1%
@@ -1226,6 +1246,7 @@
       No processed index file found,\MessageBreak%
       `\jobname-#1.ind' does not exist%
     }%
+    \global\let\tud@index@mdfive\@empty%
   }%
 }
 \newcommand*\tud@index@note@entries{}
@@ -1271,65 +1292,6 @@
     }{}%
   \endgroup%
 }
-\tud@newread\tud@read
-\tud@newwrite\tud@write@a
-\newcommand*\tud@index@mdfive{}
-\if@filesw
-  \tud@newwrite\@indexfile%
-  \immediate\openout\@indexfile=\jobname.idx%
-  \typeout{Writing index file \jobname.idx}%
-  \BeforeClosingMainAux{%
-    \immediate\closeout\@indexfile%
-    \@tud@res@swafalse%
-    \ifundef\pdf@filemdfivesum{%
-      \@tud@res@swatrue%
-      \let\tud@index@mdfive\@empty%
-    }{%
-      \edef\tud@res@a{\pdf@filemdfivesum{\jobname.idx}}%
-      \ifnum\pdf@strcmp{\tud@res@a}{\tud@index@mdfive}=\z@\else%
-        \@tud@res@swatrue%
-      \fi%
-    }%
-    \if@tud@res@swa%
-      \ifundef\inputencodingname{%
-        \appto\tud@xdy@settings{ -C utf8}%
-      }{%
-        \eappto\tud@xdy@settings{ -C \inputencodingname}%
-      }%
-      \edef\tud@res@b{%
-        \string|\string"splitindex\space-m\space%
-          '\tud@xdy@settings\space2>\string&1'\space%
-          \jobname.idx\string"\space%
-      }%
-      \immediate\openout\tud@write@a\tud@xdy@log\relax%
-\ifnum\pdf@shellescape=\@ne\relax%
-      \ClassInfo{tudscrmanual}{calling splitindex:}%
-      \ClassInfo{tudscrmanual}{\tud@res@b}%
-      \expandafter\tud@readtostream\expandafter{\tud@res@b}{\tud@write@a}%
-\fi%
-      \immediate\closeout\tud@write@a%
-      \ifnum0\pdf@filesize{\tud@xdy@log}>0\relax%
-        \expandafter\@gobble%
-      \else%
-        \expandafter\@firstofone%
-      \fi{%
-        \let\tud@res@a\tud@index@mdfive%
-        \ifnum\pdf@shellescape=\@ne\relax%
-          \ClassWarningNoLine{tudscrmanual}{%
-            \tud@res@b\MessageBreak%
-            was called but there is no result%
-          }%
-        \else%
-          \ClassWarningNoLine{tudscrmanual}{%
-            The index file `\jobname.idx' has changed. Run again\MessageBreak%
-            with --shell-escape flag enabled%
-          }%
-        \fi%
-      }%
-    \fi%
-    \immediate\write\@mainaux{\string\gdef\string\tud@index@mdfive{\tud@res@a}}%
-  }%
-\fi
 \newcommand*\tud@idx@join[3]{%
   \edef#1{\detokenize{#2}\detokenize{@}\detokenize{#3}}%
 }
@@ -1471,7 +1433,7 @@
       }%
       \expandafter\tud@res@c\tud@res@b\@nil%
     \fi%
-    \let\tud@res@b\nbs
+    \def\tud@res@b{\nobreakspace{}}%
     \def\do##1{%
       \def\tud@res@c{##1}%
       \trim@spaces@in\tud@res@c%
@@ -1669,6 +1631,7 @@
     }%
   \tud@res@c%
 }
+% DOC größer als \tiny, kleiner als \scriptsize
 \newcommand*\suffixsize{\scriptsize}
 \AtBeginDocument{%
   \begingroup%
@@ -1685,7 +1648,7 @@
 \NewDocumentCommand\suffix{s t' O{\suffixsize} m}{%
   \begingroup%
     \IfBooleanT{#1}{\let\Markup@Suffix@Select\@gobble}%
-    \nbs#3\IfBooleanTF{#2}{\textlangle#4\textrangle}{(#4)}%
+    \nobreakspace#3\IfBooleanTF{#2}{\textlangle#4\textrangle}{(#4)}%
   \endgroup%
 }
 \NewExpandableDocumentCommand\@suffix{s t' o m}{#4}%
@@ -2689,7 +2652,7 @@
 }
 \@onlypreamble\tud@ety@declare
 \NewDocumentCommand\DistributionGeneral{!s !d||}{%
-  \sflogo{LaTeX}\mbox{-}Distribution\IfBooleanT{#1}{en}%
+  \Logo{LaTeX}\mbox{-}Distribution\IfBooleanT{#1}{en}%
   \DistributionGeneral@IndexEntry{#2}\xspace%
 }
 \newcommand*\@DistributionGeneral{LaTeX-Distribution}%
@@ -2712,18 +2675,18 @@
   lvl=0,idx=true:\DistributionGeneral@@IndexEntry%
 ](\textsbn){Distribution}
 \NewDocumentCommand\TeXLive{!t' !d|| !d''}{%
-  \Distribution|#2|'#3'{\sflogo{TeXLive}\IfBooleanT{#1}{~Portable}}%
+  \Distribution|#2|'#3'{\Logo{TeXLive}\IfBooleanT{#1}{~Portable}}%
   \DistributionGeneral@IndexEntry{#2}\xspace%
 }
 \NewDocumentCommand\MacTeX{!t' !d|| !d''}{%
-  \Distribution|#2|'#3'{\sflogo{MacTeX}\IfBooleanT{#1}{~Portable}}%
+  \Distribution|#2|'#3'{\Logo{MacTeX}\IfBooleanT{#1}{~Portable}}%
   \DistributionGeneral@IndexEntry{#2}\xspace%
 }
 \NewDocumentCommand\MiKTeX{!t' !d|| !d''}{%
-  \Distribution|#2|'#3'{\sflogo{MiKTeX}\IfBooleanT{#1}{~Portable}}%
+  \Distribution|#2|'#3'{\Logo{MiKTeX}\IfBooleanT{#1}{~Portable}}%
   \DistributionGeneral@IndexEntry{#2}\xspace%
 }
-\NewMarkupCommand\Format[lvl=1](\sbnfont\sflogo){Textsatzsystem}
+\NewMarkupCommand\Format[lvl=1](\sbnfont\Logo){Textsatzsystem}
 \NewMarkupCommand\Bundle[lvl=1,idx=false](\textsbn){Bundle}
 \NewMarkupCommand\Class[lvl=2,idx=files](\textsbn){Klasse}
 \NewMarkupCommand\Package[lvl=2,idx=files](\textsbn){Paket}
@@ -3235,28 +3198,14 @@
   \endgroup%
 }
 \AtEndOfClass{\InputIfFileExists{tudscrmanual.cfg}{}{}}
-% DOC größer als \tiny, kleiner als \scriptsize
-\kernel@make@fragile\KOMAScript
-\edef\KOMAScript{%
-  \noexpand\mbox{\expandonce\KOMAScript}\noexpand\xspace%
+\NewDocumentCommand\scrguide{!O{\KOMAScript-Handbuch}}{%
+  \begingroup%
+    \Entity@Link@Seek\tud@res@a{Bundle}{koma-script}%
+    \tud@specialurl@wrapper\tud@res@a{\tud@res@a}%
+    \tud@res@a{#1}%
+  \endgroup%
+  \xspace%
 }
-\robustify\KOMAScript
-\robustify\TUDScript
-\newrobustcmd*\CD{\tud@english{Corporate Design}\xspace}
-\newrobustcmd*\CDs{\tud@english{Corporate Designs}\xspace}
-\newrobustcmd*\TUD{Technische Universit\"at Dresden\xspace}
-\newrobustcmd*\TnUD{Technischen Universit\"at Dresden\xspace}
-\newcommand*\TUDCD{\CD der \TnUD}
-\newcommand*\TUDCDs{\CDs der \TnUD}
-\newrobustcmd*\DDC{%
-  \mbox{%
-    D\kern.05em R\kern.05em E\kern.05em S\kern.05em %
-    D\kern.05em E\kern.05em N\kern.1em-\kern.1em concept%
-  }\xspace%
-}
-\newrobustcmd*\OpenSans{\textcdbn{Open\nbs{}Sans}\xspace}
-\newrobustcmd*\Univers{\textcdbi{Univers}\xspace}
-\newrobustcmd*\DIN{\textcdbi{DIN\nbs{}Bold}\xspace}
 % TODO noch notwendig?
 \newcommand*\Markup@@Expandable{%
   \def\KOMAScript{KOMA-Script\space}%
@@ -3398,7 +3347,7 @@
   \def\suffix{\space\@suffix}%
   \let\nosuffix\@nosuffix%
   \let\seeplain\@seeplain%
-  \let\sflogo\@firstofone%
+  \let\Logo\@firstofone%
   \let\emph\@firstofone%
   \let\texttt\@firstofone%
   \let\NoCaseChange\@firstofone%
@@ -3562,7 +3511,7 @@
   \tud@declare@end{#1}[index=false]%
 }
 \NewDocumentCommand\seeplain{s m}{%
-  \mbox{\emph{\IfBooleanTF{#1}{\alsoname}{\seename}}}\nbs#2%
+  \mbox{\emph{\IfBooleanTF{#1}{\alsoname}{\seename}}}\nobreakspace#2%
 }
 \NewExpandableDocumentCommand\@seeplain{s m}{%
   \IfBooleanTF{#1}{\alsoname}{\seename}\space#2%
@@ -3956,7 +3905,7 @@
     }%
   }%
   \forlistloop\tud@res@a{\tud@markup@list}%
-  \appto\tud@x@textcase@uclcnotmath{\tud@nocasechange\sflogo}%
+  \appto\tud@x@textcase@uclcnotmath{\tud@nocasechange\Logo}%
 }
 \newrobustcmd*\tud@idx@declare[2]{%
   \ifcsundef{tud@idx@lbl@@#1}{}{%
@@ -4352,7 +4301,7 @@
     \tud@index@print%
     (%
       Die im Folgenden aufgelisteten Schlagworte sollen f\"ur den Umgang mit %
-      \sflogo{LaTeXe} im Allgemeinen sowie dem \TUDScript-Bundle im Speziellen %
+      \Logo{LaTeXe} im Allgemeinen sowie dem \TUDScript-Bundle im Speziellen %
       sowohl Antworten bei generellen Fragen liefern als auch L\"osungen f\"ur %
       typische Probleme bereitstellen. Falls ein gesuchter Begriff hier nicht %
       zu finden ist oder trotz vorhandener Hinweise kein zufriedenstellendes %
@@ -4698,7 +4647,6 @@
       }%
       \def\tud@index@cols{\@ne}%
       \let\lettergroup\@gobble%
-%      \let\indexspace\relax%
       \def\indexspace{\tud@index@vskip}%
     }%
     \def\do##1{%
@@ -5111,8 +5059,8 @@
 \AddToHookNext{env/Code/after}{\futurelet\tud@let@token\relax}%
 \NoIndentAfterEnvironment{Example}
 \newenvironment{Example}{%
-  \labeling{{\usekomafont{disposition}{Beispiel:\nbs}}}%
-  \item[{\usekomafont{disposition}{Beispiel:\nbs}}]%
+  \labeling{{\usekomafont{disposition}{Beispiel:\nobreakspace}}}%
+  \item[{\usekomafont{disposition}{Beispiel:\nobreakspace}}]%
   \def\tud@let@token{\@nil}%
 }{%
   \begingroup%
@@ -5145,29 +5093,7 @@
   \fi
 \fi
 \appto\tud@latex@ext{-synctex=1\space}
-\newcommand*\tud@readtostream[2]{%
-  \begingroup%
-    \endlinechar=\m@ne\relax%
-%    \@makeother\|%
-    \everyeof{\noexpand}%
-    \let\tud@res@d\@empty%
-    \openin\tud@read=#1%
-    \@tempswafalse%
-    \loop\unless\ifeof\tud@read%
-      \readline\tud@read to\tud@res@d%
-      \ifx\tud@res@d\@empty%
-        \ifeof\tud@read\@tempswafalse\fi%
-      \else%
-        \@tempswatrue%
-      \fi%
-      \if@tempswa%
-        \immediate\write#2{\expandonce\tud@res@d}%
-      \fi%
-      \ifx\tud@res@d\@empty\@tempswafalse\fi%
-    \repeat%
-    \closein\tud@read%
-  \endgroup%
-}
+\tud@newwrite\tud@write@a
 \NewDocumentCommand\HyperTutorial{m}{%
   \ifnum\pdf@shellescape=\@ne\relax%
     \filemodCmp{tutorials/#1.pdf}{tutorials/#1.tex}{}{%
@@ -5388,197 +5314,6 @@
 \newcommand*\ListOfToDo{%
   \ifnum\tud@todo@num>\z@\relax\cleardoublepage\listoftodos\fi%
 }
-\NewDocumentCommand\GitHubRepo{!o !d() !d<>}{%
-  \begingroup%
-    \IfValueTF{#2}{%
-      \tud@url@normalize@github\tud@res@b{#2}%
-    }{%
-      \let\tud@res@b\tud@github@url@base%
-    }%
-    \IfValueTF{#1}{%
-      \def\tud@res@c{#1}%
-    }{%
-      \expandafter\filename@parse\expandafter{\tud@res@b}%
-      \protected@edef\tud@res@c{%
-        \tud@english{GitHub-Repository\nbs\textsbn{\filename@base}}%
-      }%
-    }%
-    \IfValueT{#3}{%
-      \edef\tud@res@a{\trim@spaces{#3}}%
-      \tud@remove@enfold@char\tud@res@a{/}%
-      \Ifnumber{\tud@res@a}{%
-        \eappto{\tud@res@b}{/issues/\tud@res@a}%
-      }{%
-        \eappto{\tud@res@b}{/\tud@res@a}%
-      }%
-    }%
-    \href{\tud@res@b}{\mbox{\tud@res@c}}%
-  \endgroup%
-  \xspace%
-}
-\NewDocumentCommand\GitHubDownload{s d() d<> m}{%
-  \begingroup%
-    \IfValueTF{#2}{%
-      \tud@url@normalize@github\tud@res@b{#2}%
-    }{%
-      \let\tud@res@b\tud@github@url@base%
-    }%
-    \IfValueTF{#3}{%
-      \appto\tud@res@b{/releases/download/#3/#4}%
-    }{%
-      \appto\tud@res@b{/releases/latest/download/#4}%
-    }%
-    \IfBooleanTF{#1}{%
-      \def\tud@res@c{\File*{#4}}%
-    }{%
-      \def\tud@res@c{\InlineDeclaration{\File''{#4}}}%
-      \index{Dateien}%
-    }%
-    \href{\tud@res@b}{\tud@res@c}%
-  \endgroup%
-  \xspace%
-}
-\newcommand*\TUDForum{%
-  \mbox{T\kern.05em U\kern.05em D-\sflogo{LaTeX}-Forum}\xspace%
-}
-\NewDocumentCommand\Forum{!O{\TUDForum} !d<>}{%
-  \begingroup%
-    \href{\TUDScriptForum\IfValueT{#2}{viewtopic.php?t=#2}}{#1}%
-  \endgroup%
-  \xspace%
-}
-\NewDocumentCommand\CTAN{!o !d<>}{%
-  \begingroup%
-    \tud@url@normalize@ctan\tud@res@b{\IfValueT{#2}{#2}}%
-    \IfValueTF{#1}{%
-      \def\tud@res@c{#1}%
-    }{%
-      \def\tud@res@c{\tud@english{Comprehensive TeX Archive Network (CTAN)}}%
-    }%
-    \href{\tud@res@b}{\mbox{\tud@res@c}}%
-  \endgroup%
-  \xspace%
-}
-\NewDocumentCommand\scrguide{!O{\KOMAScript-Handbuch}}{%
-  \begingroup%
-    \Entity@Link@Seek\tud@res@a{Bundle}{koma-script}%
-    \tud@specialurl@wrapper\tud@res@a{\tud@res@a}%
-    \tud@res@a{#1}%
-  \endgroup%
-  \xspace%
-}
-\newcommand*\notudscrartcl{%
-  F\"ur die Klassen \Class{tudscrartcl} sowie \Class{tudscrposter} ist diese %
-  Option nicht verf\"ugbar.%
-}
-\newcommand*\Attention[2][\z@]{%
-  \marginnote{%
-    \tud@setdim\fboxsep{0.25em}%
-    \fbox{Achtung!}%
-  }[{#1}]%
-  \emph{\trim@spaces{#2}}%
-}
-\newrobustcmd*\TUDScriptContactNote{%
-  \footnote{\scriptsize\expandafter\mailto\expandafter{\TUDScriptContact}}%
-}
-\newrobustcmd*\TUDScriptContactTitle{%
-  \ifundef\emailaddress{\TUDScriptContactNote}{%
-    \expandafter\emailaddress\expandafter{\TUDScriptContact}%
-  }%
-}
-\AfterPackage*{hyperref}{%
-  \pdfstringdefDisableCommands{%
-    \let\TUDScriptContactNote\relax%
-    \let\TUDScriptContactTitle\relax%
-  }%
-}
-\renewcommand*\@pnumwidth{1.9em}%
-\renewcommand*\@tocrmarg{2.9em}%
-\newcommand*\textsbn{}
-\newrobustcmd*\sbnfont{\sffamily\bfseries\upshape}
-\DeclareTextFontCommand\textsbn{\sbnfont}
-\newcommand*\textsbi{}
-\newrobustcmd*\sbsfont{\sffamily\bfseries\itshape}
-\DeclareTextFontCommand\textsbi{\sbsfont}
-\newcommand*\textttit{}
-\newrobustcmd*\ttitfont{\ttfamily\itshape}
-\DeclareTextFontCommand\textttit{\ttitfont}
-\newlength\tud@sflogo@@xdim
-\setlength\tud@sflogo@@xdim{0.9em}
-\newlength\tud@sflogo@@ydim
-\setlength\tud@sflogo@@ydim{1ex}
-\newcommand*\tud@sflogo@@xkern[2][]{%
-  \kern#2\tud@sflogo@@xdim%
-  \IfArgIsEmpty{#1}{}{%
-    \ifdim\the\fontdimen\@ne\font>\z@\relax\kern#1\tud@sflogo@@xdim\fi%
-  }%
-}
-\newrobustcmd*\sflogo[1]{%
-  \ifcsundef{tud@sflogo@#1}{%
-    \ClassWarning{tudscrmanual}{logo #1 missing}%
-  }{%
-    \mbox{\csuse{tud@sflogo@#1}}%
-  }%
-}
-\newcommand*\tud@sflogo@@scale[2]{%
-  \begingroup%
-    \setbox\z@\hbox{#1}%
-    \vbox to\ht\z@{%
-      \hbox{%
-        \check@mathfonts%
-        \fontsize\sf@size\z@%
-        \math@fontsfalse\selectfont%
-        #2%
-      }%
-      \vss%
-    }%
-  \endgroup%
-}
-\newcommand*\tud@sflogo@TeX{%
-  T\tud@sflogo@@xkern[-.05]{-.23}%
-  \lower.5\tud@sflogo@@ydim\hbox{E}%
-  \tud@sflogo@@xkern[.1]{-.075}%
-  X\@%
-}
-\newcommand*\tud@sflogo@LaTeX{%
-  L\tud@sflogo@@xkern[.1]{-.36}\tud@sflogo@@scale{T}{A}%
-  \tud@sflogo@@xkern{-.15}\sflogo{TeX}%
-}
-\newcommand*\tud@sflogo@LaTeXe{%
-  \sflogo{LaTeX}\tud@sflogo@@xkern{.1}%
-  \hbox{%
-    \m@th%
-    \if b\expandafter\@car\f@series x\@nil\csname boldmath\endcsname\fi%
-    2$_{\textstyle\varepsilon}$%
-  }\@%
-}
-\expandafter\newcommand\expandafter*\csname tud@sflogo@LaTeX3\endcsname{%
-  \sflogo{LaTeX}\tud@sflogo@@xkern{.1}3\@%
-}
-\newcommand*\tud@sflogo@pdfLaTeX{pdf\sflogo{LaTeX}}
-\newcommand*\tud@sflogo@LuaLaTeX{Lua\sflogo{LaTeX}}
-\newcommand*\tud@sflogo@XeLaTeX{%
-  X\tud@sflogo@@xkern[-.015]{-.05}%
-  \lower.5\tud@sflogo@@ydim\hbox{\rotatebox[origin=c]{180}{E}}%
-  \tud@sflogo@@xkern[.015]{-.15}%
-  \sflogo{LaTeX}%
-}
-\newcommand*\tud@sflogo@BibTeX{%
-  B\tud@sflogo@@scale{x}{IB}\tud@sflogo@@xkern{-.1}\sflogo{TeX}%
-}
-\newcommand*\tud@sflogo@TeXLive{%
-  \sflogo{TeX}\tud@sflogo@@xkern[-.1]{.25}Live\@%
-}
-\newcommand*\tud@sflogo@MacTeX{%
-  Mac\tud@sflogo@@xkern{-.05}\sflogo{TeX}\@%
-}
-\newcommand*\tud@sflogo@MiKTeX{MiK\tud@sflogo@@xkern{.05}\sflogo{TeX}}
-\newcommand*\tud@sflogo@LyX{%
-  L\tud@sflogo@@xkern[-.03]{-.12}%
-  \lower.5\tud@sflogo@@ydim\hbox{Y}%
-  \tud@sflogo@@xkern[.07]{-.12}%
-  X\@%
-}
 %%%% From File: tudscr-fields.dtx 2019/11/29 01:36:52 c9a9b7b
 \newcommand*\@chairman{}
 \newcommand*\chairman[1]{\gdef\@chairman{#1}}
@@ -5653,7 +5388,248 @@
   The thesis is evaluated with a grade of \textbf{\@grade}.%
 }
 \tud@localization@english{\noticename}{Notice}
-%%%% From File: tudscr-texindy.dtx 2019/11/29 01:36:52 c9a9b7b
+%%%% From File: tudscr-misc.dtx 2021/06/10 01:08:07 fb873a0
+\renewcommand*\@pnumwidth{2.1em}%
+\renewcommand*\@tocrmarg{3.1em}%
+\newcommand*\textsbn{}
+\newrobustcmd*\sbnfont{\sffamily\bfseries\upshape}
+\DeclareTextFontCommand\textsbn{\sbnfont}
+\newcommand*\textsbi{}
+\newrobustcmd*\sbifont{\sffamily\bfseries\itshape}
+\DeclareTextFontCommand\textsbi{\sbifont}
+\newcommand*\textttit{}
+\newrobustcmd*\ttitfont{\ttfamily\itshape}
+\DeclareTextFontCommand\textttit{\ttitfont}
+\newrobustcmd*\Logo[1]{%
+  \ifcsundef{tud@logo@#1}{%
+    \ClassError{\TUD@Class@Name}{logo `#1' missing}{%
+      The necessary macro `\@backslashchar tud@logo@#1'\MessageBreak%
+      was never defined.%
+    }%
+  }{%
+    \mbox{\csuse{tud@logo@#1}}%
+  }%
+}
+\newcommand*\tud@logo@@kern[2][0]{%
+  \kern\dimexpr1em*%
+    \numexpr\ifdim\the\fontdimen\@ne\font>\z@#1+\fi#2\relax%
+  /100\relax%
+}
+\newcommand*\tud@logo@@shift[2]{%
+  \lower\dimexpr1ex*#1/100\relax\hbox{#2}%
+}
+\newcommand*\tud@logo@@topscript[2]{%
+  \begingroup%
+    \setbox\z@\hbox{#1}%
+    \vbox to\ht\z@{%
+      \hbox{%
+        \check@mathfonts%
+        \fontsize\sf@size\z@%
+        \math@fontsfalse\selectfont%
+        #2%
+      }%
+      \vss%
+    }%
+  \endgroup%
+}
+\newcommand*\tud@logo@TeX{%
+  T\tud@logo@@kern[-4]{-21}%
+  \tud@logo@@shift{40}{E}%
+  \tud@logo@@kern[7]{-6}%
+  X\@%
+}
+\newcommand*\tud@logo@LaTeX{%
+  L\tud@logo@@kern[9]{-32}\tud@logo@@topscript{T}{A}%
+  \tud@logo@@kern[1]{-13}\Logo{TeX}%
+}
+\newcommand*\tud@logo@LaTeXe{%
+  \Logo{LaTeX}\tud@logo@@kern[-2]{8}%
+  \hbox{%
+    \m@th%
+    \if b\expandafter\@car\f@series x\@nil\csname boldmath\endcsname\fi%
+    2$_{\textstyle\varepsilon}$%
+  }\@%
+}
+\expandafter\newcommand\expandafter*\csname tud@logo@LaTeX3\endcsname{%
+  \Logo{LaTeX}\tud@logo@@kern[-2]{8}3\@%
+}
+\newcommand*\tud@logo@pdfLaTeX{pdf\tud@logo@@kern{3}\Logo{LaTeX}}
+\newcommand*\tud@logo@LuaLaTeX{Lua\tud@logo@@kern{-1}\Logo{LaTeX}}
+\newcommand*\tud@logo@XeLaTeX{%
+  X\tud@logo@@kern[-1]{-5}%
+  \tud@logo@@shift{40}{\rotatebox[origin=c]{180}{E}}%
+  \tud@logo@@kern[1]{-13}%
+  \Logo{LaTeX}%
+}
+\newcommand*\tud@logo@BibTeX{%
+  B\tud@logo@@topscript{x}{IB}\tud@logo@@kern{-10}\Logo{TeX}%
+}
+\newcommand*\tud@logo@TeXLive{%
+  \Logo{TeX}\tud@logo@@kern[-5]{20}Live\@%
+}
+\newcommand*\tud@logo@MacTeX{%
+  Mac\tud@logo@@kern{-3}\Logo{TeX}\@%
+}
+\newcommand*\tud@logo@MiKTeX{MiK\tud@logo@@kern{6}\Logo{TeX}}
+\newcommand*\tud@logo@LyX{%
+  L\tud@logo@@kern[-3]{-11}%
+  \tud@logo@@shift{40}{Y}%
+  \tud@logo@@kern[7]{-11}%
+  X\@%
+}
+\newcommand*\tud@english[1]{#1}
+\AtBeginDocument{%
+  \iflanguageloaded{english}{%
+    \renewcommand*\tud@english[1]{\foreignlanguage{english}{#1}}%
+  }{}%
+}
+\NewDocumentCommand\tud@url@normalize{m O{https://} m m}{%
+  \begingroup%
+    \edef\tud@res@a{\trim@spaces{#4}}%
+    \def\tud@res@b##1#3/##2#3/##3\@nil{%
+      \IfArgIsEmpty{##2}{%
+        \def\tud@res@a{##1}%
+      }{%
+        \def\tud@res@a{##2}%
+      }%
+    }%
+    \expandafter\tud@res@b\tud@res@a #3/#3/\@nil%
+    \tud@remove@enfold@char\tud@res@a{/}%
+    \edef\tud@res@b{%
+      \endgroup%
+      \unexpanded{\def#1}{#2#3/\tud@res@a}%
+    }%
+  \tud@res@b%
+}
+\newcommand*\tud@url@normalize@github[2]{%
+  \tud@url@normalize#1{github.com}{#2}%
+}
+\newcommand*\tud@github@url@base{}
+\let\tud@github@url@base\relax
+\newcommand*\GitHubBase[1]{%
+  \tud@url@normalize@github\tud@github@url@base{#1}%
+}
+\AtBeginDocument{%
+  \ifx\tud@github@url@base\relax%
+    \ClassWarning{\TUD@Class@Name}%
+    {%
+      No GitHub repository was set with `\string\GitHubBase'\MessageBreak%
+      so \TUDScriptRepository\space is used%
+    }%
+    \GitHubBase{\TUDScriptRepository}%
+  \fi%
+}
+\NewDocumentCommand\GitHubRepo{!o !d() !d<>}{%
+  \begingroup%
+    \IfValueTF{#2}{%
+      \tud@url@normalize@github\tud@res@b{#2}%
+    }{%
+      \let\tud@res@b\tud@github@url@base%
+    }%
+    \IfValueTF{#1}{%
+      \def\tud@res@c{#1}%
+    }{%
+      \expandafter\filename@parse\expandafter{\tud@res@b}%
+      \protected@edef\tud@res@c{%
+        \tud@english{GitHub-Repository\nobreakspace\textsbn{\filename@base}}%
+      }%
+    }%
+    \IfValueT{#3}{%
+      \edef\tud@res@a{\trim@spaces{#3}}%
+      \tud@remove@enfold@char\tud@res@a{/}%
+      \Ifnumber{\tud@res@a}{%
+        \eappto{\tud@res@b}{/issues/\tud@res@a}%
+      }{%
+        \eappto{\tud@res@b}{/\tud@res@a}%
+      }%
+    }%
+    \href{\tud@res@b}{\mbox{\tud@res@c}}%
+  \endgroup%
+  \xspace%
+}
+\NewDocumentCommand\GitHubDownload{s d() d<> m}{%
+  \begingroup%
+    \IfValueTF{#2}{%
+      \tud@url@normalize@github\tud@res@b{#2}%
+    }{%
+      \let\tud@res@b\tud@github@url@base%
+    }%
+    \IfValueTF{#3}{%
+      \appto\tud@res@b{/releases/download/#3/#4}%
+    }{%
+      \appto\tud@res@b{/releases/latest/download/#4}%
+    }%
+    \IfBooleanTF{#1}{%
+      \def\tud@res@c{\File*{#4}}%
+    }{%
+      \def\tud@res@c{\InlineDeclaration{\File''{#4}}}%
+      \index{Dateien}%
+    }%
+    \href{\tud@res@b}{\mbox{\tud@res@c}}%
+  \endgroup%
+  \xspace%
+}
+\newcommand*\tud@url@normalize@ctan[2]{%
+  \tud@url@normalize#1{ctan.org}{#2}%
+}
+\NewDocumentCommand\CTAN{!o !d<>}{%
+  \begingroup%
+    \tud@url@normalize@ctan\tud@res@b{\IfValueT{#2}{#2}}%
+    \IfValueTF{#1}{%
+      \def\tud@res@c{#1}%
+    }{%
+      \def\tud@res@c{\tud@english{Comprehensive TeX Archive Network (CTAN)}}%
+    }%
+    \href{\tud@res@b}{\mbox{\tud@res@c}}%
+  \endgroup%
+  \xspace%
+}
+\newcommand*\TUDForum{%
+  \mbox{T\kern.05em U\kern.05em D-\Logo{LaTeX}-Forum}\xspace%
+}
+\NewDocumentCommand\Forum{!O{\TUDForum} !d<>}{%
+  \begingroup%
+    \href{\TUDScriptForum\IfValueT{#2}{viewtopic.php?t=#2}}{\mbox{#1}}%
+  \endgroup%
+  \xspace%
+}
+\newcommand*\Attention[2][\z@]{%
+  \marginnote{%
+    \tud@setdim\fboxsep{0.25em}%
+    \fbox{Achtung!}%
+  }[{#1}]%
+  \emph{\trim@spaces{#2}}%
+}
+\newrobustcmd*\TUDScriptContactTitle{%
+  \ifundef\emailaddress{%
+    \footnote{\scriptsize\expandafter\mailto\expandafter{\TUDScriptContact}}%
+  }{%
+    \expandafter\emailaddress\expandafter{\TUDScriptContact}%
+  }%
+}
+\AfterPackage*{hyperref}{%
+  \pdfstringdefDisableCommands{\let\TUDScriptContactTitle\relax}%
+}
+\kernel@make@fragile\KOMAScript
+\edef\KOMAScript{\noexpand\mbox{\expandonce\KOMAScript}\noexpand\xspace}
+\robustify\KOMAScript
+\robustify\TUDScript
+\newrobustcmd*\CD{\tud@english{Corporate Design}\xspace}
+\newrobustcmd*\CDs{\tud@english{Corporate Designs}\xspace}
+\newrobustcmd*\TUD{Technische Universit\"at Dresden\xspace}
+\newrobustcmd*\TnUD{Technischen Universit\"at Dresden\xspace}
+\newcommand*\TUDCD{\CD der \TnUD}
+\newcommand*\TUDCDs{\CDs der \TnUD}
+\newrobustcmd*\DDC{%
+  \mbox{%
+    D\kern.05em R\kern.05em E\kern.05em S\kern.05em %
+    D\kern.05em E\kern.05em N\kern.1em-\kern.1em concept%
+  }\xspace%
+}
+\newrobustcmd*\OpenSans{\textcdbn{Open\nobreakspace{}Sans}\xspace}
+\newrobustcmd*\Univers{\textcdbi{Univers}\xspace}
+\newrobustcmd*\DIN{\textcdbi{DIN\nobreakspace{}Bold}\xspace}
+%%%% From File: tudscr-texindy.dtx 2020/08/26 15:38:56 580f3aa
 \begingroup
 \IfFileExists{\@currname-index.xdy}{}{%
   \openout\tud@write@a=\@currname-index.xdy\relax%
@@ -5672,10 +5648,10 @@
     (markup-indexentry%
     \space:open "~n\@spaces\@spaces\string\subsubsubitem\space"%
     \space:depth 3%
-    )^^J%
-    (markup-indexentry%
-    \space:open "~n\@spaces\@spaces\space\space\string\subsubsubsubitem\space"%
-    \space:depth 4%
+%    )^^J%
+%    (markup-indexentry%
+%    \space:open "~n\@spaces\@spaces\space\space\string\subsubsubsubitem\space"%
+%    \space:depth 4%
     )%
   }%
   \write\tud@write@a{%
