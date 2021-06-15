@@ -140,7 +140,7 @@
       \TUDoptions{cd=true}%
     \fi%
     \TUD@key{cd}{\FamilyKeyStateProcessed}%
-    \ifundef\hypersetup{}{\hypersetup{hidelinks}}%
+    \ifundef{\hypersetup}{}{\hypersetup{hidelinks}}%
   }{}%
 }
 \PassOptionsToClass{%
@@ -277,6 +277,36 @@
   \fi%
 }
 %%%% From File: tudscr-misc.dtx 2021/06/10 01:08:07 fb873a0
+\RequirePackage{scrhack}[%
+  2021/03/17 v3.33 KOMA-Script
+]
+\RequirePackage{xspace}[2014/10/28]
+\xspaceaddexceptions{"=}
+\PassOptionsToPackage{quiet}{marginnote}
+\RequirePackage{marginnote}[2018/08/09]
+\reversemarginpar
+\RequirePackage{shellesc}[2019/11/08]
+\RequirePackage{pdftexcmds}[2020/06/27]
+\newcommand*\hrfn[2]{\href{#1}{\trim@spaces{#2}}\footnote{\url{#1}}}
+\newrobustcmd*\mailto[1]{\mbox{\href{mailto:#1}{\nolinkurl{#1}}}}%
+\TUD@UnwindPackage{hyperref}{%
+  \RequirePackage{url}[2013/09/16]%
+  \providerobustcmd*\url[1]{\texttt{\detokenize{#1}}}%
+  \providerobustcmd*\nolinkurl[1]{\url{#1}}%
+  \providerobustcmd*\href[3][]{#3}%
+}
+\AfterPackage*{babel}{\RequirePackage{csquotes}}
+\TUD@UnwindPackage{babel}{%
+  \ClassWarningNoLine{\TUD@Class@Name}{Package `babel' not loaded}%
+  \providecommand*\glqq{\quotedblbase}%
+  \providecommand*\grqq{\textquotedblleft}%
+  \providecommand*\seename{siehe}%
+  \providecommand*\alsoname{siehe\nobreakspace auch}%
+}
+\TUD@UnwindPackage{csquotes}{%
+  \ClassWarningNoLine{\TUD@Class@Name}{Package `csquotes' not loaded}%
+  \providecommand\enquote[1]{\emph{#1}}%
+}
 \NewDocumentCommand\tud@auxlist@register{s D(){\@firstofone} m}{%
   \expandafter\newcommand\expandafter*\csname#3@auxlist\endcsname{}%
   \expandafter\newcommand\expandafter*\csname#3@auxlist@positive\endcsname{}%
@@ -464,21 +494,6 @@
   2021/06/10 v2.07 TUD-Script
 ]
 %%%% From File: tudscr-manual.dtx 2020/11/11 22:13:36 968380d
-\newcommand*\vTUDScript{v\TUDScriptVersionNumber}
-\newcommand*\vKOMAScript{v\TUD@KOMAVersionNumber}
-\RequirePackage{scrhack}[%
-  2021/03/17 v3.33 KOMA-Script
-]
-\@ifpackagelater{geometry}{2020/01/03}{%
-  \ClassWarning{tudscrmanual}{%
-    Package `geometry' was updated so some patches\MessageBreak%
-    are maybe outdated%
-  }%
-}{}
-\RequirePackage{babel}[2021-06-02]
-\RequirePackage{csquotes}[2021/02/22]
-\RequirePackage{shellesc}[2019/11/08]
-\RequirePackage{pdftexcmds}[2020/06/27]
 \RequirePackage{multicol}[2019/12/09]
 \RequirePackage{setspace}[2011/12/19]
 \setstretch{1.1}
@@ -495,11 +510,6 @@
   \RequirePackage{ellipsis}[2020/05/22]%
   \let\ellipsispunctuation\relax%
 }
-\RequirePackage{xspace}[2014/10/28]
-\xspaceaddexceptions{"=}
-\PassOptionsToPackage{quiet}{marginnote}
-\RequirePackage{marginnote}[2018/08/09]
-\reversemarginpar
 \RequirePackage{tabularx}[2020/01/15]
 \RequirePackage{booktabs}[2020/01/12]
 \RequirePackage{enumitem}[2019/06/20]
@@ -529,7 +539,7 @@
 \floatsetup[table]{style=plaintop}
 \RequirePackage{listings}[2020/03/24]
 \lstdefinestyle{tudscr}{%
-  basicstyle=\ttfamily\ifundef\setstretch{}{\setstretch{1}},%
+  basicstyle=\ttfamily\ifundef{\setstretch}{}{\setstretch{1}},%
   keywordstyle=,%
   columns=fullflexible,keepspaces,%
   aboveskip=\smallskipamount,%
@@ -552,6 +562,7 @@
 \PassOptionsToPackage{nospace}{varioref}
 \RequirePackage{varioref}[2020/08/11]
 \renewrobustcmd*\fullref[1]{\hyperref[{#1}]{\autoref*{#1}\space\vpageref{#1}}}
+\RequirePackage{nameref}[2021/04/02]
 \AfterPackage*{nameref}{%
   \patchcmd\NR@gettitle{%
     \GetTitleString%
@@ -570,9 +581,6 @@
   destlabel=true,%pdfview=FitH,%
 }{hyperref}
 \AfterPackage*{hyperref}{%
-  \renewcaptionname{ngerman}{\sectionautorefname}{Unterkapitel}%
-  \renewcaptionname{ngerman}{\subsectionautorefname}{Abschnitt}%
-  \renewcaptionname{ngerman}{\subsubsectionautorefname}{Unterabschnitt}%
   \newcommand*\autorefname[1][current]{%
     \Ifstr{#1}{current}{%
       \expandafter\HyPsd@@autorefname\@currentHref\@nil%
@@ -591,21 +599,22 @@
   }%
   \newcommand*\auto@@refname{}%
   \def\auto@@refname#1#2#3#4#5\@nil#6\@nil{#6#4.\@nil}%
+  \renewcaptionname{ngerman}{\sectionautorefname}{Unterkapitel}%
+  \renewcaptionname{ngerman}{\subsectionautorefname}{Abschnitt}%
+  \renewcaptionname{ngerman}{\subsubsectionautorefname}{Unterabschnitt}%
 }
 \TUD@UnwindPackage{hyperref}{%
   \ClassWarningNoLine{tudscrmanual}%
   {%
-    It is strongly recommended to load package `hyperref'. \MessageBreak%
-    Nevertheless, essential commands are rudimentarily\MessageBreak%
-    defined. At least the package `url' is loaded%
+    Loading the package `hyperref' is strongly\MessageBreak%
+    recommended. At the very least, some essential\MessageBreak%
+    commands are defined as stubs%
   }%
   \providecommand*\hypersetup[1]{}%
-  \providerobustcmd*\href[3][]{#3}%
-  \providecommand*\phantomsection{}%
-  \providecommand*\texorpdfstring[2]{#1}%
-  \RequirePackage{url}[2013/09/16]%
-  \providerobustcmd*\url[1]{\detokenize{#1}}%
-  \providerobustcmd*\nolinkurl[1]{\url{#1}}%
+  \providecommand*\bookmarksetup[1]{}%
+  \providecommand*\pdfbookmark[3][]{}%
+  \providecommand*\currentpdfbookmark[2]{}%
+  \providecommand*\HyperDestRename[2]{}%
   \providerobustcmd*\hyperref{%
     \kernel@ifnextchar[%]
       {\tud@x@hyperref@a}%
@@ -613,8 +622,8 @@
   }%
   \newcommand*\tud@x@hyperref@a[2][]{#2}%
   \newcommand*\tud@x@hyperref@b[4]{#4}%
-  \providecommand*\hypertarget[2]{\label{#1}#2}%
-  \providecommand*\hyperlink[2]{\hyperref[{#1}]{#2}}%
+  \providecommand*\hypertarget[2]{#2}%
+  \providecommand*\hyperlink[2]{#2}%
   \providecommand*\Hy@raisedlink[1]{#1}%
   \providecommand*\hyperpage[1]{#1}%
   \providerobustcmd*\autoref{??\xspace\kernel@ifstar{\ref}{\ref}}%
@@ -632,7 +641,7 @@
 }
 \newcommand*\tud@xdy@settings{}
 % PENDING locale-Einstellung in Abhängigkeit der Hauptsprache! 
-\edef\tud@xdy@settings{texindy -M \@currname-index.xdy -L german-din}
+\edef\tud@xdy@settings{texindy -M \@currname-ind.xdy -L german-din}
 \newcommand*\tud@xdy@log{}
 \edef\tud@xdy@log{\jobname.xlg}
 \newcommand*\tud@index@name{\jobname}
@@ -695,8 +704,6 @@
   \AfterPackage*{nameref}{\GetTitleStringDisableCommands{#1}}%
 }
 \@onlypreamble\tud@headings@special
-\newcommand*\hrfn[2]{\href{#1}{\trim@spaces{#2}}\footnote{\url{#1}}}
-\newrobustcmd*\mailto[1]{\mbox{\href{mailto:#1}{\nolinkurl{#1}}}}%
 \newrobustcmd*\txb{{\raise.05em\hbox{\kern.05em\textbar\kern.05em}}}
 \newrobustcmd*\bsc{\kern-.05em\@backslashchar\kern-.05em}
 \DeclareListParser{\dossvlist}{;}
@@ -834,6 +841,7 @@
     % TODO separates Makro?
     \let\Logo\@firstofone%
     \def~{\space}%
+    \def\nobreakspace{\space}%
     \def\dots{...}%
     \def\_{_}%
     \Parameter@Expandable%
@@ -1161,7 +1169,7 @@
           }%
           \tud@res@b%
         \endgroup%
-        % DOC wnn erfolgreich, sollte das log-file sich geändert haben
+        % DOC wenn erfolgreich, sollte das log-file sich geändert haben
         \ifnum\pdf@strcmp{\tud@res@c}{\pdf@filemdfivesum{\tud@xdy@log}}=\z@%
           \ClassWarningNoLine{tudscrmanual}%
           {%
@@ -1433,7 +1441,7 @@
       }%
       \expandafter\tud@res@c\tud@res@b\@nil%
     \fi%
-    \def\tud@res@b{\nobreakspace{}}%
+    \def\tud@res@b{\nobreakspace}%
     \def\do##1{%
       \def\tud@res@c{##1}%
       \trim@spaces@in\tud@res@c%
@@ -2078,7 +2086,7 @@
 }
 \NewDocumentCommand\Process@Markup{o m m d// d== o r|| r'' r()}{%
   \begingroup%
-    \tud@idx@robustify% 
+    \tud@idx@robustify%
     \tud@toks@{\Process@@Markup[#1]{#2}{#3}/#4/=#5=[{#6}]|#7|'#8'}%
     \def\tud@res@b{\Entity@Get}%
     \IfBooleanT{#1}{%
@@ -2675,15 +2683,15 @@
   lvl=0,idx=true:\DistributionGeneral@@IndexEntry%
 ](\textsbn){Distribution}
 \NewDocumentCommand\TeXLive{!t' !d|| !d''}{%
-  \Distribution|#2|'#3'{\Logo{TeXLive}\IfBooleanT{#1}{~Portable}}%
+  \Distribution|#2|'#3'{\Logo{TeXLive}\IfBooleanT{#1}{\nobreakspace Portable}}%
   \DistributionGeneral@IndexEntry{#2}\xspace%
 }
 \NewDocumentCommand\MacTeX{!t' !d|| !d''}{%
-  \Distribution|#2|'#3'{\Logo{MacTeX}\IfBooleanT{#1}{~Portable}}%
+  \Distribution|#2|'#3'{\Logo{MacTeX}\IfBooleanT{#1}{\nobreakspace Portable}}%
   \DistributionGeneral@IndexEntry{#2}\xspace%
 }
 \NewDocumentCommand\MiKTeX{!t' !d|| !d''}{%
-  \Distribution|#2|'#3'{\Logo{MiKTeX}\IfBooleanT{#1}{~Portable}}%
+  \Distribution|#2|'#3'{\Logo{MiKTeX}\IfBooleanT{#1}{\nobreakspace Portable}}%
   \DistributionGeneral@IndexEntry{#2}\xspace%
 }
 \NewMarkupCommand\Format[lvl=1](\sbnfont\Logo){Textsatzsystem}
@@ -3351,9 +3359,10 @@
   \let\emph\@firstofone%
   \let\texttt\@firstofone%
   \let\NoCaseChange\@firstofone%
-  \def\_{_}%
   \def~{\space}%
+  \def\nobreakspace{\space}%
   \def\dots{...}%
+  \def\_{_}%
 }
 \AfterPackage*{hyperref}{%
   \expandafter\pdfstringdefDisableCommands\expandafter{\Markup@Expandable}%
@@ -3361,8 +3370,9 @@
 % TODO robustify markup?! \_ \dots ...
 % TODO geht das nach csname? oder doch mit token-register arbeiten?
 \newcommand*\tud@idx@robustify{%
-  \robustify{\_}%
+  \robustify\nobreakspace%
   \robustify{\dots}%
+  \robustify{\_}%
   \robustify\texttt%
   \robustify\emph%
   \ifdef\hyperref{\robustify\hyperref}{}%
@@ -5511,7 +5521,7 @@
 }
 \AtBeginDocument{%
   \ifx\tud@github@url@base\relax%
-    \ClassWarning{\TUD@Class@Name}%
+    \ClassWarningNoLine{\TUD@Class@Name}%
     {%
       No GitHub repository was set with `\string\GitHubBase'\MessageBreak%
       so \TUDScriptRepository\space is used%
@@ -5543,9 +5553,11 @@
         \eappto{\tud@res@b}{/\tud@res@a}%
       }%
     }%
-    \href{\tud@res@b}{\mbox{\tud@res@c}}%
-  \endgroup%
-  \xspace%
+    \protected@edef\tud@res@a{%
+      \endgroup%
+      \noexpand\href{\tud@res@b}{\noexpand\mbox{\tud@res@c}}%
+    }%
+  \tud@res@a\xspace%
 }
 \NewDocumentCommand\GitHubDownload{s d() d<> m}{%
   \begingroup%
@@ -5565,9 +5577,11 @@
       \def\tud@res@c{\InlineDeclaration{\File''{#4}}}%
       \index{Dateien}%
     }%
-    \href{\tud@res@b}{\mbox{\tud@res@c}}%
-  \endgroup%
-  \xspace%
+    \protected@edef\tud@res@a{%
+      \endgroup%
+      \noexpand\href{\tud@res@b}{\noexpand\mbox{\tud@res@c}}%
+    }%
+  \tud@res@a\xspace%
 }
 \newcommand*\tud@url@normalize@ctan[2]{%
   \tud@url@normalize#1{ctan.org}{#2}%
@@ -5580,18 +5594,24 @@
     }{%
       \def\tud@res@c{\tud@english{Comprehensive TeX Archive Network (CTAN)}}%
     }%
-    \href{\tud@res@b}{\mbox{\tud@res@c}}%
-  \endgroup%
-  \xspace%
+    \protected@edef\tud@res@a{%
+      \endgroup%
+      \noexpand\href{\tud@res@b}{\noexpand\mbox{\tud@res@c}}%
+    }%
+  \tud@res@a\xspace%
 }
 \newcommand*\TUDForum{%
   \mbox{T\kern.05em U\kern.05em D-\Logo{LaTeX}-Forum}\xspace%
 }
 \NewDocumentCommand\Forum{!O{\TUDForum} !d<>}{%
   \begingroup%
-    \href{\TUDScriptForum\IfValueT{#2}{viewtopic.php?t=#2}}{\mbox{#1}}%
-  \endgroup%
-  \xspace%
+    \protected@edef\tud@res@a{%
+      \endgroup%
+      \noexpand\href%
+        {\TUDScriptForum\IfValueT{#2}{viewtopic.php?t=#2}}%
+        {\noexpand\mbox{#1}}%
+    }%
+  \tud@res@a\xspace%
 }
 \newcommand*\Attention[2][\z@]{%
   \marginnote{%
@@ -5601,7 +5621,7 @@
   \emph{\trim@spaces{#2}}%
 }
 \newrobustcmd*\TUDScriptContactTitle{%
-  \ifundef\emailaddress{%
+  \ifundef{\emailaddress}{%
     \footnote{\scriptsize\expandafter\mailto\expandafter{\TUDScriptContact}}%
   }{%
     \expandafter\emailaddress\expandafter{\TUDScriptContact}%
@@ -5614,6 +5634,14 @@
 \edef\KOMAScript{\noexpand\mbox{\expandonce\KOMAScript}\noexpand\xspace}
 \robustify\KOMAScript
 \robustify\TUDScript
+\AfterPackage*{hyperref}{%
+  \pdfstringdefDisableCommands{%
+    \def\KOMAScript{KOMA-Script{}}%
+    \def\TUDScript{TUD-Script{}}%
+  }%
+}
+\newcommand*\vTUDScript{v\TUDScriptVersionNumber}
+\newcommand*\vKOMAScript{v\TUD@KOMAVersionNumber}
 \newrobustcmd*\CD{\tud@english{Corporate Design}\xspace}
 \newrobustcmd*\CDs{\tud@english{Corporate Designs}\xspace}
 \newrobustcmd*\TUD{Technische Universit\"at Dresden\xspace}
@@ -5626,43 +5654,60 @@
     D\kern.05em E\kern.05em N\kern.1em-\kern.1em concept%
   }\xspace%
 }
-\newrobustcmd*\OpenSans{\textcdbn{Open\nobreakspace{}Sans}\xspace}
+\AfterPackage*{hyperref}{%
+  \pdfstringdefDisableCommands{%
+    \def\CD{Corporate Design{}}%
+    \def\CDs{Corporate Designs{}}%
+    \def\TUD{Technische Universit\"at Dresden{}}%
+    \def\TnUD{Technischen Universit\"at Dresden{}}%
+    \def\DDC{DRESDEN-concept{}}%
+  }%
+}
+\newrobustcmd*\OpenSans{\textcdbn{Open\nobreakspace Sans}\xspace}
 \newrobustcmd*\Univers{\textcdbi{Univers}\xspace}
-\newrobustcmd*\DIN{\textcdbi{DIN\nobreakspace{}Bold}\xspace}
-%%%% From File: tudscr-texindy.dtx 2020/08/26 15:38:56 580f3aa
-\begingroup
-\IfFileExists{\@currname-index.xdy}{}{%
-  \openout\tud@write@a=\@currname-index.xdy\relax%
-  \write\tud@write@a{(require "texindy.xdy")}%
-  \write\tud@write@a{%
+\newrobustcmd*\DIN{\textcdbi{DIN\nobreakspace Bold}\xspace}
+\AfterPackage*{hyperref}{%
+  \pdfstringdefDisableCommands{%
+    \def\OpenSans{Open Sans{}}%
+    \def\Univers{Univers{}}%
+    \def\DIN{DIN Bold{}}%
+  }%
+}
+%%%% From File: tudscr-texindy.dtx 2021/06/12 02:44:58 6b1aad4
+\tud@newwrite\tud@xdy@write
+\NewDocumentCommand\tud@xdy@create{s}{%
+  \begingroup%
+    \edef\tud@res@a{\@currname-\IfBooleanTF{#1}{gls}{ind}.xdy}%
+    \def\tud@res@b{\endgroup}%
+    \expandafter\IfFileExists\expandafter{\tud@res@a}{}{%
+      \eappto\tud@res@b{\noexpand\tud@xdy@@create{#1}{\tud@res@a}}%
+    }%
+  \tud@res@b%
+}
+\NewDocumentCommand\tud@xdy@@create{m m}{%
+  \openout\tud@xdy@write=#2\relax%
+  \write\tud@xdy@write{(require "texindy.xdy")}%
+  \write\tud@xdy@write{%
     (define-location-class^^J%
     \space\space"arabic-page-numbers" ("arabic-numbers")%
     \space:min-range-length 1^^J%
     )^^J%
     (markup-range :sep "--")%
   }%
-  \write\tud@write@a{%
+  \write\tud@xdy@write{%
     (merge-rule "\@backslashchar[(.*)\@backslashchar]" "" :eregexp)%
   }%
-  \write\tud@write@a{%
-    (markup-indexentry%
-    \space:open "~n\@spaces\@spaces\string\subsubsubitem\space"%
-    \space:depth 3%
-%    )^^J%
-%    (markup-indexentry%
-%    \space:open "~n\@spaces\@spaces\space\space\string\subsubsubsubitem\space"%
-%    \space:depth 4%
-    )%
+  \write\tud@xdy@write{%
+    (markup-indexentry :open "~n\string\subsubsubitem\space" :depth 3)%
   }%
-  \write\tud@write@a{%
+  \write\tud@xdy@write{%
     (markup-locclass-list%
     \space:open "\string\dotfill{}"%
-    \space:sep ",\space"%
+    \space:sep ", "%
     \space:close "\string\relax"%
     )%
   }%
-  % DOC Ignorieren/Überschreiben der default-Einträge für Attribut
-  \write\tud@write@a{%
+  \write\tud@xdy@write{%
     (define-attributes (("!" "default") ("?" "default") ("default")))^^J%
     (markup-attribute-group-list :sep ", ")^^J%
     (markup-locref%
@@ -5681,16 +5726,7 @@
     \space:close "}"%
     )%
   }%
-  \write\tud@write@a{%
-    (define-crossref-class "seeunverified" :unverified)^^J%
-    (markup-crossref-list :class "seeunverified"^^J%
-    \space\space%
-    :open "\string\cleversee\space"\@spaces\space%
-    :sep "; "\space%
-    :close "\@backslashchar\@backslashchar"^^J%
-    )%
-  }%
-  \write\tud@write@a{%
+  \write\tud@xdy@write{%
     (markup-crossref-list :class "see"^^J%
     \space\space%
     :open "\string\cleversee\space"\@spaces\space%
@@ -5704,7 +5740,16 @@
     :close "\@backslashchar\@backslashchar"^^J%
     )%
   }%
-  \write\tud@write@a{%
+  \write\tud@xdy@write{%
+    (define-crossref-class "seeunverified" :unverified)^^J%
+    (markup-crossref-list :class "seeunverified"^^J%
+    \space\space%
+    :open "\string\cleversee\space"\@spaces\space%
+    :sep "; "\space%
+    :close "\@backslashchar\@backslashchar"^^J%
+    )%
+  }%
+  \write\tud@xdy@write{%
     (define-crossref-class "seeidx" :unverified)^^J%
     (markup-crossref-list :class "seeidx"^^J%
     \space\space%
@@ -5713,7 +5758,7 @@
     :close "}{}"^^J%
     )%
   }%
-  \write\tud@write@a{%
+  \write\tud@xdy@write{%
     (markup-crossref-layer-list :class "see"%
     \@spaces\space:sep "\string\seesep\space"%
     )^^J%
@@ -5721,7 +5766,7 @@
     \space:sep "\string\seesep\space"%
     )%
   }%
-  \write\tud@write@a{%
+  \write\tud@xdy@write{%
     (define-location-class-order^^J%
     \space\space(^^J%
     \@spaces"see" "seealso" "seeidx" "seeunverified"^^J%
@@ -5730,9 +5775,9 @@
     \space\space)^^J%
     )%
   }%
-  \closeout\tud@write@a%
+  \closeout\tud@xdy@write%
 }
-\endgroup
+\tud@xdy@create
 \endinput
 %%
 %% End of file `tudscrmanual.cls'.

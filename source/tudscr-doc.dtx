@@ -120,6 +120,84 @@
 \setcounter{StandardModuleDepth}{2}
 %    \end{macrocode}
 %
+% \subsection{Hyperlinks auf den Quelltext}
+%
+% Es folgen einige Befehle, die an das Paket \pkg{hyperref} gekoppelt sind. 
+% Sobald das Paket geladen wurde, werden die Makros mit der jeweiligen
+% Funktionalität definiert.
+%    \begin{macrocode}
+\PassOptionsToPackage{open,openlevel=0}{bookmark}
+\PassOptionsToPackage{%
+  hyperindex=false,%
+  colorlinks,%
+  linkcolor=blue,%
+}{hyperref}
+%    \end{macrocode}
+%
+% \begin{macro}{\main}
+% \begin{macro}{\usage}
+% Diese Makros werden verwendet, um im Index respektive in der Änderungsliste 
+% mithilfe von \pkg{hyperref} Hyperlinks auf Codezeilen respektive Seiten im 
+% Dokument zu setzen. 
+%    \begin{macrocode}
+\AfterPackage*{hyperref}{%
+  \renewcommand*\main[1]{%
+    \ifcodeline@index%
+      \hypersource@ref@codeline[\underline]{#1}%
+    \else%
+      \hypersource@ref@page[\underline]{#1}%
+    \fi%
+  }%
+  \renewcommand*\usage[1]{\hypersource@ref@page[\textit]{#1}}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \usage
+% \end{macro}^^A \main
+%
+% \begin{macro}{\hypersourcedef}
+% \changes{v2.05}{2016/04/26}{neu}^^A
+% \begin{macro}{\hypersource@def}
+% \changes{v2.05}{2016/04/26}{neu}^^A
+% \begin{macro}{\hypersource@ref@codeline}
+% \changes{v2.05}{2016/04/26}{neu}^^A
+% \begin{macro}{\hypersource@ref@page}
+% \changes{v2.05}{2016/04/26}{neu}^^A
+% Mit \cs{hypersourcedef} wird ein Textanker gesetzt, falls dieser noch nicht 
+% definiert wurde, was durch \cs{hypersource@def} abgesichert wird. Als 
+% Argument wird hierfür die aktuelle Codezeile verwendet.
+%    \begin{macrocode}
+\newcommand*\hypersource@def{}%
+\newcommand*\hypersourcedef[1]{%
+  \Ifstr{#1}{\hypersource@def}{}{%
+    \Hy@raisedlink{\hyperdef{}{source:#1}{}}%
+    \xdef\hypersource@def{#1}%
+  }%
+}
+\TUD@UnwindPackage{hyperref}{\renewcommand*\hypersourcedef[1]{}}
+%    \end{macrocode}
+% Mit \cs{hypersource@ref@\dots} wird auf Anker im Dokument verlinkt. Dies 
+% erfolgt indirekt über die Attribute \val{main} bzw. \val{usage}, welche bei
+% der Definitionen von Befehlen etc. im Index genutzt werden. Hierfür werden
+% die dazugehörigen Makros umdefiniert.
+%    \begin{macrocode}
+\newcommand*\hypersource@ref@codeline[2][\@firstofone]{%
+  \begingroup%
+    \def\@tempa##1{\hyperref{}{}{source:##1}{#1{##1}}}%
+    \forcsvlist\@tempa{#2}%
+  \endgroup%
+}%
+\newcommand*\hypersource@ref@page[2][\@firstofone]{%
+  \begingroup%
+    \def\@tempa##1{\hyperlink{page.##1}{#1{##1}}}%
+    \forcsvlist\@tempa{#2}%
+  \endgroup%
+}%
+%    \end{macrocode}
+% \end{macro}^^A \hypersource@ref@page
+% \end{macro}^^A \hypersource@ref@codeline
+% \end{macro}^^A \hypersource@def
+% \end{macro}^^A \hypersourcedef
+%
 % \subsection{Klassenoptionen}
 %
 % \begin{option}{final}
@@ -179,7 +257,7 @@
 % Beginn des Dokumentes.
 %    \begin{macrocode}
 \AtBeginDocument{%
-  \ifundef\filename{%
+  \ifundef{\filename}{%
     \IfFileExists{\jobname.dtx}{%
       \edef\filename{\jobname.dtx}%
     }{%
@@ -191,7 +269,7 @@
     \undef\fileinfo%
     \expandafter\GetFileInfo\expandafter{\filename}%
   }{}%
-  \ifundef\filerevision{\let\filerevision\@empty}{}%
+  \ifundef{\filerevision}{\let\filerevision\@empty}{}%
 }
 %    \end{macrocode}
 %
@@ -1217,9 +1295,9 @@
 %
 % \subsubsection{Erzeugen von Index und Änderungsliste}
 %
-% \begin{macro}{\tud@write@replace}
+% \begin{macro}{\tud@xdy@write}
 % \changes{v2.05}{2016/04/21}{neu}^^A
-% \begin{macro}{\tud@read@replace}
+% \begin{macro}{\tud@xdy@read}
 % \changes{v2.05}{2016/04/21}{neu}^^A
 % \begin{macro}{\tud@line@replace}
 % \changes{v2.05}{2016/04/21}{neu}^^A
@@ -1238,8 +1316,8 @@
 % die fraglichen Zeichen ersetzt und in eine weitere Hilfsdatei geschrieben.
 %    \begin{macrocode}
 \ifdefined\tudxdyflag
-  \tud@newwrite\tud@write@replace%
-  \tud@newread\tud@read@replace%
+  \tud@newwrite\tud@xdy@write%
+  \tud@newread\tud@xdy@read%
 %    \end{macrocode}
 % Die Makros für die fraglichen Steuerzeichen werden so angepasst, dass die
 % Wahrscheinlichkeit für eine Verwendung dieser Kombination in einem Makro- 
@@ -1254,11 +1332,11 @@
     \endlinechar=\m@ne\relax%
     \def\tud@reserved#1#2{%
       \IfFileExists{\jobname.#1}{%
-        \immediate\openin\tud@read@replace=\jobname.#1\relax%
-        \immediate\openout\tud@write@replace=\jobname-xdy.#1\relax%
+        \immediate\openin\tud@xdy@read=\jobname.#1\relax%
+        \immediate\openout\tud@xdy@write=\jobname-xdy.#1\relax%
         \@tempswafalse%
-        \loop\unless\ifeof\tud@read@replace%
-          \readline\tud@read@replace to\tud@line@replace%
+        \loop\unless\ifeof\tud@xdy@read%
+          \readline\tud@xdy@read to\tud@line@replace%
           \tud@replace@@in\tud@line@replace{"}{""}%
           \tud@replace@@in\tud@line@replace{!}{"!}%
           \tud@replace@@in\tud@line@replace{:}{":}%
@@ -1271,15 +1349,15 @@
           \expandafter\tud@replace@@in\expandafter\tud@line@replace%
             \expandafter{\levelchar}{!}%
           \tud@replace@@in\tud@line@replace{" @}{}%
-          \ifeof\tud@read@replace\else%
-            \immediate\write\tud@write@replace{%
+          \ifeof\tud@xdy@read\else%
+            \immediate\write\tud@xdy@write{%
               \unexpanded\expandafter{\tud@line@replace}%
             }%
             \@tempswatrue%
           \fi%
         \repeat%
-        \immediate\closein\tud@read@replace%
-        \immediate\closeout\tud@write@replace%
+        \immediate\closein\tud@xdy@read%
+        \immediate\closeout\tud@xdy@write%
         \ifnum\pdf@shellescape=\@ne\relax%
           \if@tempswa%
             \ShellEscape{%
@@ -1298,8 +1376,8 @@
 % Falls nichts geschrieben wurde, wird eine leere Ausgabedatei erzeugt.
 %    \begin{macrocode}
           \else%
-            \immediate\openout\tud@write@replace=\jobname.#2\relax%
-            \immediate\closeout\tud@write@replace%
+            \immediate\openout\tud@xdy@write=\jobname.#2\relax%
+            \immediate\closeout\tud@xdy@write%
           \fi%
         \fi%
       }{}%
@@ -1330,8 +1408,8 @@
 % \end{macro}^^A \quotechar
 % \end{macro}^^A \actualchar
 % \end{macro}^^A \tud@line@replace
-% \end{macro}^^A \tud@read@replace
-% \end{macro}^^A \tud@write@replace
+% \end{macro}^^A \tud@xdy@read
+% \end{macro}^^A \tud@xdy@write
 % Jetzt werden noch die Einleitungen für Index und Änderungsliste angepasst.
 %    \begin{macrocode}
 \IndexPrologue{\addsec{\indexname}\tud@index@text}
@@ -1557,6 +1635,25 @@
 % \end{length}^^A \topmargin
 % \end{macro}^^A \tud@setarea
 %
+% Sollte das Paket \pkg{tudscrfonts} nicht geladen worden sein, so wird das
+% Paket \pkg{lmodern} geladen und die fehlenden Befehle zur Schriftauswahl
+% rudimentär definiert.
+%    \begin{macrocode}
+\TUD@UnwindPackage{tudscrfonts}{%
+  \RequirePackage{lmodern}[2009/10/30]%
+  \providecommand*\textcdln[1]{\textsf{#1}}%
+  \providecommand*\textcdrn[1]{\textcdln{#1}}%
+  \providecommand*\textcdsn[1]{\textcdln{#1}}%
+  \providecommand*\textcdbn[1]{\textbf{\textcdln{#1}}}%
+  \providecommand*\textcdxn[1]{\textcdbn{#1}}%
+  \providecommand*\textcdli[1]{\textsl{\textcdln{#1}}}%
+  \providecommand*\textcdri[1]{\textcdli{#1}}%
+  \providecommand*\textcdsi[1]{\textcdli{#1}}%
+  \providecommand*\textcdbi[1]{\textbf{\textcdli{#1}}}%
+  \providecommand*\textcdxi[1]{\textcdbi{#1}}%
+}
+%    \end{macrocode}
+%
 % \subsection{Zusätzliche Markup-Befehle}
 %
 % \begin{macro}{\app}
@@ -1617,57 +1714,6 @@
 % \end{macro}^^A \cls
 % \end{macro}^^A \bdl
 % \end{macro}^^A \app
-%
-% \subsection{Rückfalloptionen bei fehlenden Paketen}
-%
-% Zum Schluss erfolgen einige Anpassungen mit \cs{AtEndPreamble}, um abhängig 
-% vom Ladezustand einiger Pakete reagieren zu können.
-%    \begin{macrocode}
-\AtEndPreamble{%
-%    \end{macrocode}
-% \begin{macro}{\selectlanguage}
-% \begin{macro}{\glqq}
-% \begin{macro}{\grqq}
-% Etwas Kleinkram für \pkg{babel}\dots
-%    \begin{macrocode}
-  \@ifpackageloaded{babel}{}{%
-    \ClassWarning{\TUD@Class@Name}{Package `babel' not loaded}%
-    \providecommand*\selectlanguage[1]{}%
-    \providecommand*\glqq{}%
-    \providecommand*\grqq{}%
-  }%
-%    \end{macrocode}
-% \end{macro}^^A \grqq
-% \end{macro}^^A \glqq
-% \end{macro}^^A \selectlanguage
-% \begin{macro}{\enquote}
-% \dots und \pkg{csquotes}.
-%    \begin{macrocode}
-  \@ifpackageloaded{csquotes}{}{%
-    \ClassWarning{\TUD@Class@Name}{Package `csquotes' not loaded}%
-    \providecommand\enquote[1]{\emph{#1}}%
-  }%
-%    \end{macrocode}
-% \end{macro}^^A \enquote
-% Sollte das Paket \pkg{tudscrfonts} nicht geladen worden sein, so wird das
-% Paket \pkg{lmodern} geladen und die fehlenden Befehle zur Schriftauswahl
-% rudimentär definiert.
-%    \begin{macrocode}
-  \@ifpackageloaded{tudscrfonts}{}{%
-    \RequirePackage{lmodern}[2009/10/30]%
-    \providecommand*\textcdln[1]{\textsf{#1}}%
-    \providecommand*\textcdrn[1]{\textcdln{#1}}%
-    \providecommand*\textcdsn[1]{\textcdln{#1}}%
-    \providecommand*\textcdbn[1]{\textbf{\textcdln{#1}}}%
-    \providecommand*\textcdxn[1]{\textcdbn{#1}}%
-    \providecommand*\textcdli[1]{\textsl{\textcdln{#1}}}%
-    \providecommand*\textcdri[1]{\textcdli{#1}}%
-    \providecommand*\textcdsi[1]{\textcdli{#1}}%
-    \providecommand*\textcdbi[1]{\textbf{\textcdli{#1}}}%
-    \providecommand*\textcdxi[1]{\textcdbi{#1}}%
-  }%
-}
-%    \end{macrocode}
 %
 % \iffalse
 %</class&body>
