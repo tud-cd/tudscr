@@ -95,6 +95,30 @@
 % \fi
 %
 % \subsection{Notwendige Pakete und Befehle}
+%
+% Mit dem Paket \pkg{morewrites} lassen sich Probleme mit zu wenig verfügbaren 
+% Streams für das Schreiben externer Datein beheben. Hintergrund ist die
+% Verwendung des Paketes \pkg{glossaries} in einem der Tutorials, welches eine
+% Vielzahl solcher Streams benötigt.
+% \ToDo{noch notwendig?}[v2.07]
+%    \begin{macrocode}
+%<*body&package>
+\RequirePackage{morewrites}[2018/12/29]
+%</body&package>
+%    \end{macrocode}
+%
+% \begin{macro}{\dossvlist}
+% \changes{v2.05}{2015/11/17}{neu}^^A
+% \begin{macro}{\forssvlist}
+% \changes{v2.05}{2015/11/17}{neu}^^A
+% Makros für das Verarbeiten von semikolongetrennten Listen.
+%    \begin{macrocode}
+\DeclareListParser{\dossvlist}{;}
+\DeclareListParser*{\forssvlist}{;}
+%    \end{macrocode}
+% \end{macro}^^A \forssvlist
+% \end{macro}^^A \dossvlist
+%
 % \subsubsection{Makro- und Microtypografie}
 % Für den zweispaltigen Satz im Index.
 %    \begin{macrocode}
@@ -133,6 +157,10 @@
 % \dots und im Flattersatz ausgegeben.
 %    \begin{macrocode}
 \renewcommand*\raggedfootnote{\tud@RaggedRight}%
+%    \end{macrocode}
+% Unterdrücken von Absatzeinzügen nach bestimmten Umgebungen.
+%    \begin{macrocode}
+\RequirePackage{noindentafter}[2021/05/14]
 %    \end{macrocode}
 % Typographisch saubere Einheiten.
 %    \begin{macrocode}
@@ -276,9 +304,20 @@
   destlabel=true,%pdfview=FitH,%
 }{hyperref}
 %    \end{macrocode}
+%
 % Es folgen einige Befehle, die an das Paket \pkg{hyperref} gekoppelt sind. 
 % Sobald das Paket geladen wurde, werden die Makros mit der jeweiligen
-% Funktionalität definiert. 
+% Funktionalität definiert.
+% \begin{macro}{\tud@currentHref}
+% Einige Befehle und Umgebungen von Drittpaketen ändern bei deren Aufruf die 
+% Definition von \cs{currentHref}, was bei Querverweisen gegebenenfalls zu 
+% falschen Einträgen führt. Hierfür wird \cs{tud@currentHref} definiert, um die 
+% jeweils aktuelle Definition von \cs{currentHref} zu sichern und nach den 
+% fraglichen Befehlen und Umgebungen zurückzusetzen.
+%    \begin{macrocode}
+\newcommand*\tud@currentHref{}
+%    \end{macrocode}
+% \end{macro}^^A \tud@currentHref
 %    \begin{macrocode}
 \AfterPackage*{hyperref}{%
 %    \end{macrocode}
@@ -426,18 +465,117 @@
 %
 %
 %
-% \subsubsection{Hilfsdateien}
+% \subsubsection{Verarbeitung von Versionsangaben}
 %
-% Mit dem Paket \pkg{morewrites} lassen sich Probleme mit zu wenig verfügbaren 
-% Streams für das Schreiben externer Datein beheben. Hintergrund ist die
-% Verwendung des Paketes \pkg{glossaries} in einem der Tutorials, welches eine
-% Vielzahl solcher Streams benötigt.
-% \ToDo{noch notwendig?}[v2.07]
+% Mit diesen Befehlen können Versionsangaben zu \TUDScript verarbeitet und 
+% validiert werden.
+%
+% \begin{macro}{\tud@v@to@number}
+% \changes{v2.07}{2021/06/16}{neu}^^A
+% Hiermit wird eine Versionsangabe im gebräuchlichen \Logo{LaTeX}"~Format 
+% (\verb=[v]?\d.\d\d[a-z]?\s.*=) aus dem zweiten obligatorischen Argument 
+% eingelesen und in einen Integer-Wert gewandelt. Dieser wird in das Makro 
+% im ersten obligatorischen Argument zurückgeschrieben, welches anschließend 
+% für Vergleiche verwendet werden kann. Die Sternversion schreibt die
+% normalisierte Versionsangabe in das Makro im zweiten Argument zurück.
 %    \begin{macrocode}
-%<*body&package>
-\RequirePackage{morewrites}[2018/12/29]
-%</body&package>
+\NewDocumentCommand\tud@v@to@number{s m m}{%
+  \begingroup%
+    \edef\tud@res@a{%
+      \unexpanded{\tud@v@get\tud@res@a}{#3}%
+    }%
+    \tud@res@a%
+    \def\tud@res@c##1 ##2~##3\@nil{%
+      \IfArgIsEmpty{##2}{%
+        \let\tud@res@b\@empty%
+      }{%
+        \def\tud@res@a{##1}%
+        \def\tud@res@b{\space##2}%
+      }%
+    }%
+    \expandafter\tud@res@c\tud@res@a~ ~\@nil%
+    \protected@expandtwoargs\in@{.}{\tud@res@a}%
+    \ifin@%
+      \def\tud@res@c##1.##2##3##4\@nil{%
+        \let\tud@res@a\relax%
+        \Ifnumber{##1}{%
+          \Ifnumber{##2}{%
+            \Ifnumber{##3}{%
+              \edef\tud@res@a{##1.##2##3##4}%
+            }{%
+              \edef\tud@res@a{##1.\two@digits{##2}##3##4}%
+            }%
+          }{}%
+        }{}%
+      }%
+      \expandafter\tud@res@c\tud@res@a\@empty\@nil%
+      \ifx\tud@res@a\relax\else%
+        \def\tud@res@c##1.##2##3##4##5\@nil{%
+          \tud@if@strblank{##5}{%
+            \edef\tud@res@a{v##1.##2##3##4\tud@res@b}%
+            \edef\tud@res@b{##1.##2##3##4}%
+          }{%
+            \let\tud@res@a\relax%
+          }%
+        }%
+        \expandafter\tud@res@c\tud@res@a\@empty\@nil%
+      \fi%
+    \else%
+      \let\tud@res@a\relax%
+    \fi%
+    \ifx\tud@res@a\relax%
+      \ClassWarning{tudscrmanual}{Wrong formatted version number}%
+    \else%
+      \def\tud@res@c##1.##2##3##4\@nil{%
+        ##1##2##3%
+        \IfArgIsEmpty{##4}{000}{\ifnum\number`##4<100 0\fi\number`##4}%
+      }%
+      \edef\tud@res@b{\expandafter\tud@res@c\tud@res@b\@nil}%
+    \fi%
+    \edef\tud@res@c{%
+      \endgroup%
+      \ifx\tud@res@a\relax%
+        \unexpanded{\let#2\relax}%
+      \else%
+        \unexpanded{\def#2}{\tud@res@b}%
+        \IfBooleanT{#1}{\unexpanded{\def#3}{\tud@res@a}}%
+      \fi%
+    }%
+  \tud@res@c%
+}
 %    \end{macrocode}
+% \end{macro}^^A \tud@v@to@number
+%
+% \begin{macro}{\tud@v@validate}
+% \changes{v2.07}{2021/06/16}{neu}^^A
+% Normalisiert die Versionsangabe im übergebenen Makro und erzeugt einen 
+% Fehler, falls diese nicht ausgewertet werden kann.
+%    \begin{macrocode}
+\newcommand*\tud@v@validate[1]{%
+  \begingroup%
+    \protected@edef\tud@res@a{#1}%
+    \trim@spaces@in\tud@res@a%
+    \tud@v@to@number*\tud@res@b{\tud@res@a}%
+    \edef\tud@res@a{%
+      \endgroup%
+      \ifx\tud@res@b\relax%
+        \unexpanded{%
+          \ClassError{tudscrmanual}{Invalid version number}{%
+            The given version number `#1' is invalid as it\MessageBreak%
+            should be `[v][0-9]+.[0-9]+[a-z]*' (regex).%
+          }%
+          \let#1\relax%
+        }%
+      \else%
+        \unexpanded{\def#1}{\tud@res@a}%
+      \fi%
+    }%
+  \tud@res@a%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@v@validate
+%
+%
 %
 % \iffalse
 %</body>
@@ -530,7 +668,7 @@
 % \subsection{Debug-Traces für die Klasse \cls{tudscrmanual}}
 %
 % Ab und an ist es beim Erstellen des Handbuchs recht sinnvoll, verschiedene 
-% Dinge direkt im Logfile zu überprüfen. Hierfür werden folgend einige Befehle 
+% Dinge direkt im Log-File zu überprüfen. Hierfür werden folgend einige Befehle 
 % zur Ablaufkontrolle definiert.
 %
 % \begin{macro}{\tracinglabels}
@@ -538,15 +676,15 @@
 % \changes{v2.07}{2019/09/19}{optionales Argument unterstützt mehrere Werte}^^A
 % \begin{macro}{\tud@trace@lbl@types}
 % \changes{v2.07}{2019/09/22}{neu}^^A
+% \begin{macro}{\tud@trace@lbl@wlog}
+% \changes{v2.07}{2019/09/19}{neu}^^A
 % \begin{macro}{\tud@trace@lbl@add}
 % \changes{v2.07}{2019/09/19}{neu}^^A
-% \begin{macro}{\tud@trace@lbl@wlog}
+% \begin{macro}{\tud@trace@lbl@@add}
 % \changes{v2.07}{2019/09/19}{neu}^^A
 % \begin{macro}{\tud@trace@lbl@created@list}
 % \changes{v2.05}{2015/10/29}{neu}^^A
 % \begin{macro}{\tud@trace@lbl@matched@list}
-% \changes{v2.07}{2019/09/19}{neu}^^A
-% \begin{macro}{\tud@trace@lbl@unused@list}
 % \changes{v2.07}{2019/09/19}{neu}^^A
 % \begin{macro}{\tud@trace@lbl@ignored@list}
 % \changes{v2.07}{2019/09/19}{neu}^^A
@@ -555,93 +693,167 @@
 % \begin{macro}{\tud@trace@lbl@url@list}
 % \changes{v2.07}{2019/09/19}{neu}^^A
 % Mit \cs{tracinglabels} wird die Nachverfolgung aller erstellten Labels in der 
-% Dokumentation aktiviert werden. Die Label werden zum einen direkt im Logfile
+% Dokumentation aktiviert werden. Die Label werden zum einen direkt im Log-File
 % ausgegeben und am Ende des selbigen in einer sortierten Liste ausgegeben. Die 
 % Sternversion des Befehls erzeugt keine sortierte Liste. Über das optionale 
 % Argument kann mit verschiedenen Schlüsseln zudem eingestellt werden, ob alle
 % Label (\val{all}) oder nur die erstellten (\val{created}) beziehungsweise die
 % fehlenden (\val{missing}) nachverfolgt werden sollen.
 %    \begin{macrocode}
+\newcommand*\tud@trace@lbl@wlog{\relax}
+\AfterEndDocument{\tud@trace@lbl@wlog}
 \newcommand*\tud@trace@lbl@types{}
 \listadd\tud@trace@lbl@types{created}
 \listadd\tud@trace@lbl@types{matched}
-\listadd\tud@trace@lbl@types{unused}
 \listadd\tud@trace@lbl@types{ignored}
 \listadd\tud@trace@lbl@types{missing}
 \listadd\tud@trace@lbl@types{url}
 \def\tud@res@a#1{%
   \expandafter\newcommand\csname tud@trace@lbl@#1@list\endcsname{}%
-  \expandafter\let\csname tud@trace@lbl@#1@list\endcsname\relax%
+  \cslet{tud@trace@lbl@#1@list}\relax%
 }
-\forlistloop{\tud@res@a}{\tud@trace@lbl@types}%
-\NewDocumentCommand\tracinglabels{!s !O{missing}}{%
-  \def\tud@res@a##1{%
-    \expandafter\let\csname tud@trace@lbl@##1@list\endcsname\relax%
-  }%
+\forlistloop{\tud@res@a}{\tud@trace@lbl@types}
+\NewDocumentCommand\tracinglabels{!s !D<>{} !O{missing}}{%
+  \def\tud@res@a##1{\cslet{tud@trace@lbl@##1@list}\relax}%
   \forlistloop{\tud@res@a}{\tud@trace@lbl@types}%
   \let\tud@res@b\@empty%
-  \let\tud@res@c\@empty%
-  \@for\tud@res@a:=#2\do{\listeadd\tud@res@b{\tud@res@a}}%
-  \ifinlist{all}{\tud@res@b}{%
-    \let\tud@res@c\tud@trace@lbl@types%
-  }{%
-    \def\tud@res@a##1{\xifinlist{##1}{\tud@res@b}{\listeadd\tud@res@c{##1}}{}}%
+  \in@{,all,}{,#3,}%
+  \ifin@%
+    \let\tud@res@b\tud@trace@lbl@types%
+  \else%
+    \def\tud@res@a##1{%
+      \in@{,##1,}{,#3,}%
+      \ifin@%
+        \listadd\tud@res@b{##1}%
+      \fi%
+    }%
     \forlistloop{\tud@res@a}{\tud@trace@lbl@types}%
-  }%
+  \fi%
+  \def\tud@trace@lbl@wlog{\relax}%
   \def\tud@res@a##1{%
-    \expandafter\let\csname tud@trace@lbl@##1@list\endcsname\@empty%
+    \cslet{tud@trace@lbl@##1@list}\@empty%
     \IfBooleanF{#1}{%
-      \appto\tud@trace@lbl@wlog{%
-        \ifcsvoid{tud@trace@lbl@##1@list}{%
-          \wlog{+++++ no labels ##1 +++++}%
-        }{%
-          \wlog{+++++ labels ##1 (sorted) +++++}%
-          \expandafter\tud@list@sort\csname tud@trace@lbl@##1@list\endcsname%
+      \in@{,##1,}{,#2,}%
+      \ifin@\else%
+        \appto\tud@trace@lbl@wlog{%
+          \ifcsvoid{tud@trace@lbl@##1@list}{%
+            \wlog{+++++ no labels ##1 +++++}%
+          }{%
+            \wlog{+++++ labels ##1 (sorted) +++++}%
+            \expandafter\tud@list@sort\csname tud@trace@lbl@##1@list\endcsname%
 %    \end{macrocode}
 % Damit der Befehl \cs{wlog} nicht mit jedem Schleifendurchlauf aufgerufen 
 % werden muss, wird ein Hilfsmakro mit dem notwendigen Inhalt bestückt.
 %    \begin{macrocode}
-          \let\tud@res@b\@empty%
-          \def\tud@res@a####1{\appto\tud@res@b{####1^^J}}%
-          \forlistcsloop\tud@res@a{tud@trace@lbl@##1@list}%
-          \wlog{\tud@res@b}%
+            \let\tud@res@c\@empty%
+            \def\tud@res@a####1{\appto\tud@res@c{####1^^J}}%
+            \forlistcsloop\tud@res@a{tud@trace@lbl@##1@list}%
+            \@onelevel@sanitize\tud@res@c%
+            \wlog{\tud@res@c}%
+          }%
         }%
-      }%
+      \fi%
     }%
   }%
-  \def\tud@trace@lbl@wlog{\relax}%
-  \forlistloop{\tud@res@a}{\tud@res@c}%
+  \forlistloop{\tud@res@a}{\tud@res@b}%
 }
 \@onlypreamble\tracinglabels
-\newcommand*\tud@trace@lbl@add[2]{%
-  \begingroup%
-    \ifcsundef{tud@trace@lbl@#1@list}{%
-      \ifinlist{#1}{\tud@trace@lbl@types}{}{%
-        \ClassError{\TUD@Class@Name}{Undefined label type `#1'}{%
-          The given tracing type was never defined.%
-        }%
-      }%
-    }{%
-      \protected@edef\tud@res@a{#2}%
-      \@onelevel@sanitize\tud@res@a%
-      \wlog{+++++ label #1: \tud@res@a\space on page \thepage\on@line}%
-      \xifinlistcs{\tud@res@a}{tud@trace@lbl@#1@list}{}{%
-        \listcsxadd{tud@trace@lbl@#1@list}{\tud@res@a}%
+%    \end{macrocode}
+% Hiermit werden Labels aus der Liste im zweiten obligatorischen Argument der 
+% Typliste im ersten obligatorischen Argument hinzugefügt. Das optionale 
+% Argument dient als zusätzliche Angabe im Log-File.
+%    \begin{macrocode}
+\NewDocumentCommand\tud@trace@lbl@add{m o m}{%
+  \ifcsundef{tud@trace@lbl@#1@list}{%
+    \xifinlist{#1}{\tud@trace@lbl@types}{}{%
+      \ClassError{tudscrmanual}{Undefined label type `#1'}{%
+        The given tracing type was never defined.%
       }%
     }%
+  }{%
+    \begingroup%
+      \protected@edef\tud@res@a{%
+        \endgroup%
+        \noexpand\tud@trace@lbl@@add{#1}{#2}{#3}%
+      }%
+    \tud@res@a%
+  }%
+}
+\newcommand*\tud@trace@lbl@@add[3]{%
+  \begingroup%
+    \let\tud@res@b\@empty%
+    \let\tud@res@c\@empty%
+    \let\tud@res@d\m@ne%
+%    \end{macrocode}
+% Das optionale Argument dient für zusätzliche Angaben im Log-File für die 
+% unterschiedlichen Typlisten, welche in \cs{tud@res@b} und \cs{tud@res@c}
+% abgelegt werden.
+%    \begin{macrocode}
+    \IfValueT{#2}{%
+      \TUD@set@numkey{}{tud@res@d}{%
+        {url}{0},{matched}{1},{created}{2},{missing}{2},
+      }{#1}%
+      \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+        \ifcase\tud@res@d\relax%
+          \def\tud@res@c{#2}%
+        \or%
+          \def\tud@res@b{\space(substituted)}%
+          \def\tud@res@c{<-\space#2}%
+        \or%
+          \tud@trace@lbl@add{url}[{#2}]{#3}%
+          \def\tud@res@c{->\space#2}%
+        \fi%
+      \else%
+        \ClassWarning{tudscrmanual}{No specific label log `#1' defined}%
+        \FamilyKeyStateProcessed%
+      \fi%
+    }%
+%    \end{macrocode}
+% Die Labels werden in einer Liste übergeben, welche hier verarbeitet wird.
+%    \begin{macrocode}
+    \let\tud@res@a\@empty%
+    \def\do##1{%
+      \begingroup%
+        \ifnum\tud@res@d=\z@\relax% url
+          \tud@if@lbl@exists{##1}{%
+            \eappto\tud@res@c{\space<-\space##1}%
+          }{%
+            \eappto\tud@res@c{\space??\space##1}%
+          }%
+        \else%
+          \protected@edef\tud@res@c{%
+            ##1\ifx\tud@res@c\@empty\else\space\tud@res@c\fi%
+          }%
+        \fi%
+        \@onelevel@sanitize\tud@res@c%
+        \tud@unique@csxadd{tud@trace@lbl@#1@list}{\tud@res@c}%
+      \endgroup%
+%    \end{macrocode}
+% In \cs{tud@res@a} werden alle Einträge für das Log-File gesammelt.
+%    \begin{macrocode}
+      \protected@eappto\tud@res@a{%
+        ^^J\@spaces##1\ifx\tud@res@c\@empty\else^^J\@spaces\tud@res@c\fi%
+      }%
+    }%
+    \dolistloop{#3}%
+    \ifnum\tud@res@d=\z@\relax\else% !url
+      \ifx\tud@res@a\@empty\else%
+        \epreto\tud@res@a{+++++ label #1\tud@res@b\on@line\space+++++}%
+        \@onelevel@sanitize\tud@res@a%
+        \wlog{\tud@res@a}%
+      \fi%
+    \fi%
   \endgroup%
 }
-\newcommand*\tud@trace@lbl@wlog{\relax}
-\AfterEndDocument{\tud@trace@lbl@wlog}
 %    \end{macrocode}
 % \end{macro}^^A \tud@trace@lbl@url@list
 % \end{macro}^^A \tud@trace@lbl@missing@list
 % \end{macro}^^A \tud@trace@lbl@ignored@list
-% \end{macro}^^A \tud@trace@lbl@unused@list
 % \end{macro}^^A \tud@trace@lbl@matched@list
 % \end{macro}^^A \tud@trace@lbl@created@list
-% \end{macro}^^A \tud@trace@lbl@wlog
+% \end{macro}^^A \tud@trace@lbl@@add
 % \end{macro}^^A \tud@trace@lbl@add
+% \end{macro}^^A \tud@trace@lbl@wlog
 % \end{macro}^^A \tud@trace@lbl@types
 % \end{macro}^^A \tracinglabels
 % \begin{macro}{\tracingmarkup}
@@ -649,8 +861,6 @@
 % \begin{macro}{\tud@trace@markup@types}
 % \changes{v2.07}{2019/11/22}{neu}^^A
 % \begin{macro}{\tud@trace@markup@add}
-% \changes{v2.07}{2019/11/22}{neu}^^A
-% \begin{macro}{\tud@trace@markup@wlog}
 % \changes{v2.07}{2019/11/22}{neu}^^A
 % \begin{macro}{\tud@trace@markup@declare@list}
 % \changes{v2.07}{2019/11/22}{neu}^^A
@@ -666,44 +876,35 @@
 \listadd\tud@trace@markup@types{output}
 \def\tud@res@a#1{%
   \expandafter\newcommand\csname tud@trace@markup@#1@list\endcsname{}%
-  \expandafter\let\csname tud@trace@markup@#1@list\endcsname\relax%
+  \cslet{tud@trace@markup@#1@list}\relax%
 }
-\forlistloop{\tud@res@a}{\tud@trace@markup@types}%
-\NewDocumentCommand\tracingmarkup{!s !O{all}}{%
-  \def\tud@res@a##1{%
-    \expandafter\let\csname tud@trace@markup@##1@list\endcsname\relax%
-  }%
+\forlistloop{\tud@res@a}{\tud@trace@markup@types}
+\NewDocumentCommand\tracingmarkup{!O{declare}}{%
+  \def\tud@res@a##1{\cslet{tud@trace@markup@##1@list}\relax}%
   \forlistloop{\tud@res@a}{\tud@trace@markup@types}%
   \let\tud@res@b\@empty%
   \let\tud@res@c\@empty%
-  \@for\tud@res@a:=#2\do{\listeadd\tud@res@b{\tud@res@a}}%
+  \protected@edef\tud@res@a{#1}%
+  \@for\tud@res@a:=\tud@res@a\do{%
+    \trim@spaces@in\tud@res@a%
+    \ifx\tud@res@a\@empty\else%
+      \listeadd\tud@res@b{\tud@res@a}%
+    \fi%
+  }%
   \ifinlist{all}{\tud@res@b}{%
     \let\tud@res@c\tud@trace@markup@types%
   }{%
     \def\tud@res@a##1{\xifinlist{##1}{\tud@res@b}{\listeadd\tud@res@c{##1}}{}}%
     \forlistloop{\tud@res@a}{\tud@trace@markup@types}%
   }%
-  \def\tud@res@a##1{%
-    \expandafter\let\csname tud@trace@markup@##1@list\endcsname\@empty%
-    \IfBooleanF{#1}{%
-      \appto\tud@trace@markup@wlog{%
-        \wlog{+++++ markup ##1 (sorted) +++++}%
-        \expandafter\tud@list@sort\csname tud@trace@markup@##1@list\endcsname%
-        \let\tud@res@b\@empty%
-        \def\tud@res@a####1{\appto\tud@res@b{####1^^J}}%
-        \forlistcsloop\tud@res@a{tud@trace@markup@##1@list}%
-        \wlog{\tud@res@b}%
-      }%
-    }%
-  }%
-  \def\tud@trace@markup@wlog{\relax}%
+  \def\tud@res@a##1{\cslet{tud@trace@markup@##1@list}\@empty}%
   \forlistloop{\tud@res@a}{\tud@res@c}%
 }
 \@onlypreamble\tracingmarkup
 \newcommand*\tud@trace@markup@add[2]{%
   \begingroup%
     \ifcsundef{tud@trace@markup@#1@list}{%
-      \ifinlist{#1}{\tud@trace@markup@types}{}{%
+      \xifinlist{#1}{\tud@trace@markup@types}{}{%
         \ClassError{tudscrmanual}{Undefined markup type `#1'}{%
           The given tracing type was never defined.%
         }%
@@ -711,58 +912,17 @@
     }{%
       \protected@edef\tud@res@a{#2}%
       \@onelevel@sanitize\tud@res@a%
-      \wlog{+++++ markup #1 on page \thepage\on@line^^J\tud@res@a}%
-      \xifinlistcs{\tud@res@a}{tud@trace@markup@#1@list}{}{%
-        \listcsxadd{tud@trace@markup@#1@list}{\tud@res@a}%
-      }%
+      \wlog{+++++ markup #1\on@line\space+++++^^J\@spaces\tud@res@a}%
+      \tud@unique@csxadd{tud@trace@markup@#1@list}{\tud@res@a}%
     }%
   \endgroup%
 }
-\newcommand*\tud@trace@markup@wlog{\relax}
-\AfterEndDocument{\tud@trace@markup@wlog}
 %    \end{macrocode}
 % \end{macro}^^A \tud@trace@markup@output@list
 % \end{macro}^^A \tud@trace@markup@declare@list
-% \end{macro}^^A \tud@trace@markup@wlog
 % \end{macro}^^A \tud@trace@markup@add
 % \end{macro}^^A \tud@trace@markup@types
 % \end{macro}^^A \tracingmarkup
-% \begin{macro}{\tracingbundle}
-% \changes{v2.05}{2015/10/29}{neu}^^A
-% \begin{macro}{\tud@trace@bdl@add}
-% \changes{v2.05}{2015/10/29}{neu}^^A
-% \begin{macro}{\tud@trace@bdl@list}
-% \changes{v2.05}{2015/10/29}{neu}^^A
-% Wird \cs{tracingbundle} in der Präambel verwendet, werden alle direkt oder 
-% indirekt durch \cs{Process@Markup} im Handbuch erzeugten Querverweise auf
-% Klassen oder Pakete aus dem \TUDScript-Bundle nachverfolgt und am Ende des
-% Logfiles ausgegeben. Damit kann im Zweifel übeprüft werden, ob eventuell eine
-% falsche Referenz genutzt wurde, wodurch u.\,U. Querverweise oder Einträge in
-% Index und Änderungsliste fehlerhaft werden oder erst gar nicht erscheinen.
-%    \begin{macrocode}
-\newcommand*\tud@trace@bdl@add[1]{}
-\newcommand*\tud@trace@bdl@list{}
-\newcommand*\tracingbundle{%
-  \renewcommand*\tud@trace@bdl@add[1]{%
-    \begingroup%
-      \def\Class####1{class:####1}%
-      \def\Package####1{package:####1}%
-      \xifinlist{##1}{\tud@trace@bdl@list}{}{%
-        \listxadd\tud@trace@bdl@list{##1}%
-      }%
-    \endgroup%
-  }%
-  \AfterEndDocument{%
-    \wlog{+++++ bundle list +++++}%
-    \tud@list@sort\tud@trace@bdl@list%
-    \forlistloop\wlog{\tud@trace@bdl@list}%
-  }%
-}
-\@onlypreamble\tracingbundle
-%    \end{macrocode}
-% \end{macro}^^A \tud@trace@bdl@list
-% \end{macro}^^A \tud@trace@bfundle
-% \end{macro}^^A \tracingbundle
 %
 % \iffalse
 %</class>
@@ -1257,9 +1417,6 @@
       }%
     \else%
       \gdef\tud@bdl@curr{#1}%
-%<*class>
-      \tud@trace@bdl@add{#1}%
-%</class>
     \fi%
   }%
   \ignorespaces%
@@ -2740,7 +2897,7 @@
 % verzichtet werden soll, kann ein leeres Argument \parg{} angegeben werden.
 %    \begin{macrocode}
   \if@tud@index\else%
-    \IfValueT{#4}{\tud@trace@bdl@add{#4}}%
+%^^A    \IfValueT{#4}{\tud@trace@bdl@add{#4}}%
   \fi%
 %    \end{macrocode}
 % Nun erfolgt mit \cs{Process@@MarkupDeclare} bzw. \cs{Process@@MarkupInline} 
@@ -4267,25 +4424,14 @@
 % in den Umgebungen für Deklarationen begründet, welche verschachtelt werden
 % können, jedoch einmalig mit \cs{printdeclarationlist} abgearbeitet werden.
 %
-% \begin{macro}{\tud@changedat@list}
-% \changes{v2.02}{2014/07/25}{neu}^^A
-% \begin{macro}{\forssvlist}
-% \changes{v2.05}{2015/11/17}{neu}^^A
-% Hier werden die Liste \cs{tud@changedat@list} sowie das Makro \cs{forssvlist} 
-% für die Aufspaltung der semikolongetrennten Änderungsnotizen definiert.
-%    \begin{macrocode}
-\newcommand*\tud@changedat@list{}
-\let\tud@changedat@list\relax
-\DeclareListParser*{\forssvlist}{;}
-%    \end{macrocode}
-% \end{macro}^^A \forssvlist
-% \end{macro}^^A \tud@changedat@list
 % \begin{macro}{\Changed@At@CreateList}
 % \changes{v2.02}{2014/09/02}{neu}^^A
 % \begin{macro}{\Changed@At@@CreateList}
 % \changes{v2.02}{2014/10/09}{neu}^^A
 % \begin{macro}{\Changed@At@@@CreateList}
 % \begin{macro}{\Changed@At@@@@CreateList}
+% \begin{macro}{\tud@changedat@list}
+% \changes{v2.02}{2014/07/25}{neu}^^A
 % Mit diesen Befehlen wird eine Liste im Format von \pkg{etoolbox} erzeugt, 
 % welche alle notwendigen Angaben für das Erzeugen der Änderungshistorie in 
 % Form eines Indexes mit \cs{Changed@At@CreateEntry} enthält.
@@ -4303,6 +4449,8 @@
 % zusammen mit den beiden optionalen Argumenten an \cs{Changed@At@@CreateList}
 % weiter. 
 %    \begin{macrocode}
+\newcommand*\tud@changedat@list{}
+\let\tud@changedat@list\relax
 \NewDocumentCommand\Changed@At@CreateList{m !o !d()}{%
   \IfValueT{#1}{\forssvlist{\Changed@At@@CreateList[{#2}](#3)}{#1}}%
 }
@@ -4441,6 +4589,7 @@
   \listeadd\tud@changedat@list{\the\toks@}%
 }
 %    \end{macrocode}
+% \end{macro}^^A \tud@changedat@list
 % \end{macro}^^A \Changed@At@@@@CreateList
 % \end{macro}^^A \Changed@At@@@CreateList
 % \end{macro}^^A \Changed@At@@CreateList
@@ -4929,38 +5078,20 @@
 % \subsubsection{Tabelle mit automatisch berechneter Mehrspaltenzellenbreite}
 %
 % \begin{environment}{tabularm}
-% \begin{macro}{\tabularm@allcolumnpar}
-% \begin{macro}{\tabularm@box}
-% \begin{macro}{\tabularm@num}
-% \begin{length}{\tabularm@wd}
 % Die Umgebung \env{tabularm} ist eine Erweiterung der \env{tabular}-Umgebung.
-% In dieser wird die Breite der zu setzenden Tabelle mit Hilfe der Box 
-% \cs{tabularm@box} in \cs{tabularm@wd} gespeichert. Anschließend kann mit dem
-% Befehl \cs{allcolumnpar} eine Zeile über alle Spalten der Tabelle ausgegeben 
-% werden. Dabei ist das zu übergebende Argument die Anzahl der zu erzeugenden, 
-% linksbündigen Spalten.
+% Im obligatorischen Argument wird die gewünschte Anzahl der linksbündigen 
+% Spalten angegeben. Sollte danach das optionale Argument verwendet werden, 
+% wird dessen Inhalt in einer alle Spalten übergreifenden Zeile unterhalb der 
+% eigentlichen Tabelle ausgegeben.
 %    \begin{macrocode}
-\newsavebox\tabularm@box
-\tud@newdim\tabularm@wd
-\newcommand*\tabularm@num{1}
-\NewEnviron{tabularm}[1]{%
-  \begin{lrbox}{\tabularm@box}%
-    \let\allcolumnpar\@gobble%
-    \begin{tabular}{*{#1}l}\BODY\end{tabular}%
-  \end{lrbox}%
-  \tud@setdim\tabularm@wd{\wd\tabularm@box}%
-  \def\tabularm@num{#1}%
-  \let\allcolumnpar\tabularm@allcolumnpar%
-  \begin{tabular}{*{#1}l}\BODY\end{tabular}%
-}
-\newcommand*\tabularm@allcolumnpar[1]{%
-  \multicolumn{\tabularm@num}{@{}p{\tabularm@wd}@{}}{#1}%
-}
+\NewDocumentEnvironment{tabularm}{O{c} m !o +b}{%
+  \sbox\z@{\tabular[{#1}]{*{#2}l}#4\endtabular}%
+  \begin{tabular}{c}%
+    \usebox\z@%
+    \IfValueT{#3}{\tabularnewline\parbox[b]{\the\wd\z@}{\vskip1.5ex#3}}%
+  \end{tabular}%
+}{}
 %    \end{macrocode}
-% \end{length}^^A \tabularm@wd
-% \end{macro}^^A \tabularm@box
-% \end{macro}^^A \tabularm@num
-% \end{macro}^^A \tabularm@allcolumnpar
 % \end{environment}^^A tabularm
 %
 % \subsubsection{Tabelle für mehrsprachigen Bezeichner}
@@ -4968,130 +5099,74 @@
 % \begin{macro}{\TermTable}
 % \begin{macro}{\Term@Table}
 % \begin{macro}{\Term@@Table}
+% \begin{macro}{\Term@@@Table}
 % Für sprachabhängige Bezeichner wird zusätzlich der Befehl \cs{TermTable} 
-% definiert, dem eine kommaseparierte Liste übergeben werden kann. Anhand 
-% dieser Liste werden die enthalten Begriffe für die Sprachen Deutsch und
-% English in einer Tabelle ausgegeben. Die Sternversion dieses Befehls nutzt
-% dafür die \env{tabularx}-Umgebung. Für diese kann ein zweites Argument
-% angegeben werden, welches die gewünschte Breite der Tabelle angibt.
+% definiert. Dieser kann innerhalb von \env{Declaration} verwendet werden, um 
+% alle mit \cs{Term} definierten Bezeichner für die Sprachen Deutsch und
+% English in einer Tabelle auszugeben. Wird im optionalen Argument eine Länge 
+% angegeben, wird diese für die Breite einer \env{tabularx}-Umgebung genutzt.
 %    \begin{macrocode}
-\NewDocumentCommand\TermTable{o m}{%
+\NewDocumentCommand\TermTable{!o}{%
   \ifhmode\par\fi%
-  \vskip\medskipamount%
+  \vskip\smallskipamount%
   \@afterindentfalse\@afterheading%
   \begingroup%
-    \IfValueTF{#1}{%
-      \begin{tabularx}{\dimexpr\glueexpr#1\relax\relax}{lXX}%
-        \Term@Table{-\ht\strutbox}{#2}%
-      \end{tabularx}%
-    }{%
-      \begin{tabular}{lll}%
-        \Term@Table{\z@}{#2}%
-      \end{tabular}%
-    }%
+%    \end{macrocode}
+% Mit \cs{Term@Table} wird \cs{tud@declaration@inner@list} nach Einträgen von 
+% \cs{Term} durchsucht und die deklarierten Werte in einer kommaseparierten
+% Liste gespeichert.
+%    \begin{macrocode}
+    \let\tud@res@a\@empty%
+    \def\do##1{\Term@Table\tud@res@a\@nil##1\@nil}%
+    \dolistloop{\tud@declaration@inner@list}%
+    \ifx\tud@res@a\@empty%
+      \ClassWarning{tudscrmanual}{No declaration for Terms found}%
+    \else%
+%    \end{macrocode}
+% Die extrahierten Werte werden für die Ausgabe der Tabelle verwendet.
+%    \begin{macrocode}
+      \IfValueTF{#1}{%
+        \begin{tabularx}{\dimexpr\glueexpr#1\relax\relax}[b]{lXX}%
+          \expandafter\Term@@Table\expandafter{\tud@res@a}%
+        \end{tabularx}%
+      }{%
+        \begin{tabular}[b]{lll}%
+          \expandafter\Term@@Table\expandafter{\tud@res@a}%
+        \end{tabular}%
+      }%
+    \fi%
   \endgroup%
-  \par\addvspace{\medskipamount}%
 }
-\newcommand*\Term@Table[2]{%
+\newcommand*\Term@Table{}
+\def\Term@Table#1\@nil#2#3#4\@nil{\tud@if@strequal{Term}{#2}{\appto#1{#3,}}{}}%
+%    \end{macrocode}
+% Das Setzen der eigentlichen Tabelle.
+%    \begin{macrocode}
+\newcommand*\Term@@Table[1]{%
   \toprule%
   \textbf{Bezeichner} & \textbf{Deutsch} & \textbf{Englisch}\tabularnewline%
   \midrule%
-  \forcsvlist{\Term@@Table{#1}}{#2}%
+  \forcsvlist{\Term@@@Table}{#1}%
   \bottomrule%
 }
-\newcommand*\Term@@Table[2]{%
-  \Term{#2}'none' & %
-  \Ifstr{\csuse{#2}}{}{\PName{leer}}{\csuse{#2}} & %
-  \selectlanguage{english}\vspace*{#1}%
-  \Ifstr{\csuse{#2}}{}{\PName{empty}}{\csuse{#2}}\tabularnewline%
+\newcommand*\Term@@@Table[1]{%
+  \Term*{#1} & %
+  \Ifstr{\csuse{#1}}{}{\PName{leer}}{\csuse{#1}} & %
+  \strut\selectlanguage{english}%
+  \Ifstr{\csuse{#1}}{}{\PName{empty}}{\csuse{#1}}\tabularnewline%
 }
 %    \end{macrocode}
+% \end{macro}^^A \Term@@@Table
 % \end{macro}^^A \Term@@Table
 % \end{macro}^^A \Term@Table
 % \end{macro}^^A \TermTable
-%
-% \subsubsection{Umgebung für die Angabe eines Beispiels}
-%
-% \begin{environment}{Example}
-% \begin{environment}{Example*}
-% Diese Umgebung wird für die exemplarische Erläuterung von bestimmten Aspekten 
-% im Handbuch verwendet. Wenn dafür ein Quelltextauszug nötig ist, kann 
-% innerhalb dieser die \env{Code}-Umgebung genutzt werden. Die Sternversion 
-% unterdrückt dabei das Zurücksetzen des eigentlich entfernten vertikalen 
-% Abstandes.
-%    \begin{macrocode}
-\newenvironment{Example}{\csuse{Example*}}{%
-  \csuse{endExample*}%
-  \addvspace{-\topsep}%
-}
-\newenvironment{Example*}{%
-  \labeling{{\usekomafont{disposition}{Beispiel:\nobreakspace}}}%
-  \item[{\usekomafont{disposition}{Beispiel:\nobreakspace}}]%
-}{%
-  \endlabeling%
-}
-%    \end{macrocode}
-% \end{environment}^^A Example*
-% \end{environment}^^A Example
-%
-% \iffalse
-%</class>
-% \fi
-%
-% \subsection{Lesen und Schreiben von Hilfsdateien}
-%
-% Für den Anwender werden im \TUDScript-Bundle einige Tutorials mit Hinweisen 
-% zur Nutzung von \LaTeX{} bereitgestellt. Innerhalb dieser werden Auszüge von
-% Quelltexten verwendet und erläutert. Zum einen soll die Möglichkeit 
-% geschaffen werden, diese gesammelt am Ende eines Tutorials für ein
-% Copy"~\&"~Paste"~Beispiel zu verwenden. Andererseits soll auch das sofortige
-% Ausführen des beschriebenen Quelltextauszuges direkt im Tutorial möglich
-% sein.
-%
-% Dafür werden im Folgenden die Umgebungen \env{Preamble}, \env{Trunk} und
-% \env{Hint} sowie daraus abgeleitet Varianten definiert, womit sich die Angabe
-% und Erläuterung der Quelltexte im Tutorial logisch strukturieren lässt und
-% dennoch die notwendige Ordnung dieser für das Copy"~\&"~Paste"~Beispiel
-% aufrechterhalten werden kann. Hierfür zeichnen die beiden Umgebungen
-% \env{Preamble} und \env{Trunk} und deren Derivate verantwortlich. Die
-% Umgebung \env{Hint} steht für zusätzliche Erläuterungen bereit, welche jedoch
-% nicht in das Copy"~\&"~Paste"~Beispiel übernommen werden.
-%
-% \begin{macro}{\tud@write@a}
-% \changes{v2.02}{2014/10/22}{neu}^^A
-% \begin{macro}{\tud@write@b}
-% \changes{v2.02}{2014/11/02}{neu}^^A
-% \begin{macro}{\tud@read}
-% \changes{v2.02}{2014/08/19}{neu}^^A
-% Für die Erstellung der Indexe wird zum Sortieren das Programm \app{texindy} 
-% genutzt. Für dieses wird eine eigene Stildatei verwendet, welche zur Laufzeit 
-% erzeugt wofür zuerst ein Ausgabestream reserviert wird.
-%    \begin{macrocode}
-\tud@newwrite\tud@write@a
-%    \end{macrocode}
-% Für die Tutorials werden später zusätzlich noch ein weiterer Ausgabe- sowie 
-% ein Eingabestream benötigt, die hier gleich mit initialisiert werden.
-%    \begin{macrocode}
-%<*package>
-\tud@newwrite\tud@write@b
-\tud@newread\tud@read
-%</package>
-%    \end{macrocode}
-% \end{macro}^^A \tud@read
-% \end{macro}^^A \tud@write@b
-% \end{macro}^^A \tud@write@a
 %
 % \subsection{Einbinden von Quelltextauszügen}
 %
 % Hier werden allerlei Befehle und Umgebungen für die Formatierung, Ausgabe und 
 % Ausführung von Quelltextauszügen mit dem Paket \pkg{listings} definiert.
 %
-% \iffalse
-%<*class>
-% \fi
-%
 % \begin{environment}{Code}
-% \begin{macro}{\tud@currentHref}
 % Folgend werden Befehle und Umgebungen für die Darstellung von Quelltexten im 
 % Handbuch definiert. Mit dieser Umgebung können kurze Quelltextbeispiele 
 % ausgegeben werden. Sicherlich sinnvoll ist, die \env{Code}-Umgebung innerhalb
@@ -5099,17 +5174,50 @@
 % abzuheben.
 %    \begin{macrocode}
 \lstnewenvironment{Code}[1][]{\lstset{style=tudscr,#1}}{}
+\NoIndentAfterEnv{Code}
 %    \end{macrocode}
 % Innerhalb der Umgebung \env{Code} wird \cs{@currentHref} unerwünschter Weise
 % geändert. Um dies zu vermeiden, wird dieser Befehl gesichert und anschließend
 % zurückgesetzt.
 %    \begin{macrocode}
-\newcommand*\tud@currentHref{}
 \BeforeBeginEnvironment{Code}{\global\let\tud@currentHref\@currentHref}
 \AfterEndEnvironment{Code}{\global\let\@currentHref\tud@currentHref}
 %    \end{macrocode}
-% \end{macro}^^A \tud@currentHref
 % \end{environment}^^A Code
+%
+% \subsubsection{Umgebung für die Angabe eines Beispiels}
+%
+% \begin{environment}{Example}
+% \begin{macro}{\if@tud@code@used}
+% \changes{v2.07}{2021/06/16}{neu}^^A
+% Diese Umgebung wird für die exemplarische Erläuterung von bestimmten Aspekten 
+% im Handbuch verwendet. Wenn dafür ein Quelltextauszug nötig ist, kann 
+% innerhalb dieser die \env{Code}-Umgebung genutzt werden. Sollte direkt nach 
+% diesem auch die \env{Example}-Umgebung enden, wird etwas zu viel vertikaler 
+% Abstand eingefügt, weshalb für diesen Fall (\cs{if@tud@code@used}) dieser am 
+% Ende der Umgebung entfernt wird.
+%    \begin{macrocode}
+\tud@newif\if@tud@code@used
+\newenvironment{Example}{%
+  \labeling{{\usekomafont{disposition}{Beispiel:\nobreakspace}}}%
+  \item[{\usekomafont{disposition}{Beispiel:\nobreakspace}}]%
+  \@tud@code@usedfalse%
+  \AddToHookNext{env/Code/after}{\@tud@code@usedtrue}%
+}{%
+  \begingroup%
+    \edef\tud@res@a{%
+      \endgroup%
+      \noexpand\endlabeling%
+      \if@tud@code@used%
+        \noexpand\addvspace{\the\glueexpr-\parskip\relax}%
+      \fi%
+    }%
+  \tud@res@a%
+}
+\NoIndentAfterEnv{Example}
+%    \end{macrocode}
+% \end{macro}^^A \if@tud@code@used
+% \end{environment}^^A Example
 %
 % \iffalse
 %</class>
@@ -5117,6 +5225,7 @@
 %
 % \subsection{Kompilieren von externen Dateien und Querverweise auf diese}
 %
+% \ToDo{shell-Kram raus, Tutorials/Examples über \app{make} erstellen}[v2.07]
 % Das Paket \pkg{filemod} wird genutzt, um externer Dateien nur zu kompilieren,
 % wenn dies aufgrund einer Änderung auch notwendig ist.
 %    \begin{macrocode}
@@ -5160,78 +5269,139 @@
     \renewcommand*\tud@latex@ext{lualatex\space}
   \fi
 \fi
+\appto\tud@latex@ext{-synctex=1\space}
 %    \end{macrocode}
 % \end{macro}^^A \tud@latex@ext
-% \begin{macro}{\Tutorial}
-% \changes{v2.02}{2014/08/22}{neu}^^A
-% \changes{v2.02}{2014/10/22}{Reimplementierung}^^A
-% \begin{macro}{\@Tutorial}
-% \begin{macro}{\hypertut}
-% \changes{v2.02}{2014/09/02}{neu}^^A
-% Die gegebenenfalls notwendige Kompilierung und die Referenzierung eines 
-% Tutorials aus dem Handbuch erfolgt mit \cs{Tutorial}. Außerdem erfolgt mit
-% \cs{hypertut} ein verlinkter Eintrag in den Index.
-% \ToDo{umbenennen in tud@hypertut}[v2.07]
+% \begin{macro}{\IncludeExample}
+% \changes{v2.02}{2014/07/25}{Skalierung der eingefügten Seiten}^^A
+% Mit diesem Befehl wird eine \LaTeX-Datei ggf. übersetzt und anschließend als
+% PDF"~Datei wieder eingebunden. Zuvor wird der dazugehörige Quelltext mittels
+% \cs{lstinputlisting} im Dokument ausgegeben. Dieser Befehl wird lediglich für 
+% die Klasse \cls{tudscrmanual} benötigt.
 %    \begin{macrocode}
 %<*class>
-\newrobustcmd*\hypertut[2]{%
-  \hyperref{tutorials/#1.pdf}{#1}{tutorials:#1}{\File*{#1.pdf}#2}%
-}
-\NewDocumentCommand\Tutorial{s m !d||}{%
-  \if@tud@index\else\@Tutorial{#2}\fi%
+\newcommand*\IncludeExample[2][1]{%
+  \begingroup%
+    \lstinputlisting[style=tudscr]{examples/#2}%
 %    \end{macrocode}
-% Hyperlink und Indexeintrag.
-% \ToDo{verwenden von SuppressMarkupSuffix im Index}[v2.07]
-%^^A \index[files]{#2.pdf Tutorial@\Tutorial{#2}{\suffix{Tutorial}}}%
+% Die Beispiele werden nur erneut kompiliert, wenn sich diese geändert haben 
+% oder noch gar kein entsprechendes PDF"~Dokument existiert.
 %    \begin{macrocode}
-  \IfFileExists{tutorials/#2.pdf}{%
-    \hypertut{#2}{}%
-  }{%
-    \File*{#2.pdf}%
-    \tud@shellescape@wrn{tutorials/#2.pdf}%
-  }%
-  \IfBooleanF{#1}{%
-    \index[files]{\hypertut{#2}{\suffix{Tutorial}}\IfValueT{#3}{|#3}}%
-  }%
-}
+    \ifnum\pdf@shellescape=\@ne\relax%
+      \filemodCmp{examples/#2.pdf}{examples/#2.tex}{}{%
+        \edef\tud@res@a{%
+          \tud@latex@ext -output-directory examples examples/#2.tex%
+        }%
+        \ShellEscape{\tud@res@a}%
+        \ShellEscape{\tud@res@a}%
+      }%
 %    \end{macrocode}
-% Um mit den verschachtelten Aufrufen von \app{pdflatex} umgehen zu können,
-% wird das ganze Prozedere in ein Skript ausgelagert. Somit können die Aufrufe
-% von \app{pdflatex} für die Tutorials aus dem entsprechenden Ordner und mit
-% den notwendigen Optionen erfolgen.
+% Sollte es eine spezielle Version eines beispiels für die Druckausgabe geben, 
+% wird auch dieses kompiliert.
 %    \begin{macrocode}
-\newcommand*\@Tutorial[1]{%
+      \filemodCmp{examples/#2_print.pdf}{examples/#2_print.tex}{}{%
+        \edef\tud@res@a{%
+          \tud@latex@ext -output-directory examples examples/#2_print.tex%
+        }%
+        \ShellEscape{\tud@res@a}%
+        \ShellEscape{\tud@res@a}%
+      }%
+    \fi%
+%    \end{macrocode}
+% Ist die gesuchte Datei vorhanden, wird diese auch eingebunden, wobei 
+% gegebenenfalls die Druckversion verwendet wird, falls vorhanden.
+%    \begin{macrocode}
+    \def\tud@res@a{examples/#2.pdf}%
+    \ifdef{\tudprintflag}{%
+      \IfFileExists{examples/#2_print.pdf}{%
+        \def\tud@res@a{examples/#2_print.pdf}%
+      }{}%
+    }{}%
+    \IfFileExists{\tud@res@a}{%
+      \edef\tud@res@a{%
+        \noexpand\includepdf[%
+          pages=-,noautoscale,frame,keepaspectratio,pagecommand={},%
+          height=\noexpand\textheight,width=\noexpand\textwidth,offset=5mm 0mm%
+        ]{\tud@res@a}%
+      }%
+      \tud@res@a%
+    }{%
+%    \end{macrocode}
+% Andernfalls wird eine Warnung mit dem Hinweis auf die notwendige Verwendung
+% von \app{pdflatex} mit dem Parameter \file{-{}-shell-escape} erzeugt und ein 
+% Platzhalter für das fehlende Dokument eingefügt, wbeo das optionale Argument 
+% die Anzahl der erwarteten Seiten angibt.
+%    \begin{macrocode}
+      \begingroup%
+        \tud@shellescape@wrn{\tud@res@a}%
+        \tud@res@cnt=#1\relax%
+        \@whilenum\tud@res@cnt>\z@\relax\do{%
+          \advance\tud@res@cnt\m@ne%
+          \clearpage%
+          \fboxsep=-\arrayrulewidth%
+          \noindent\fbox{\vbox to\textheight{%
+            \vss\vss%
+            \hbox to\textwidth{\hss\texttt{\tud@res@a}\hss}%
+            \vskip\smallskipamount%
+            \hbox to\textwidth{%
+              \hss\texttt{\the\numexpr#1-\tud@res@cnt\relax/#1}\hss%
+            }%
+            \vss\vss\vss%
+          }}%
+        }%
+      \endgroup%
+      \clearpage%
+    }%
+  \endgroup%
+}
+%</class>
+%    \end{macrocode}
+% \end{macro}^^A \IncludeExample
+% \begin{macro}{\HyperTutorial}
+% \changes{v2.02}{2014/08/22}{neu}^^A
+% \changes{v2.02}{2014/10/22}{Reimplementierung}^^A
+% \begin{macro}{\tud@bash@write}
+% Die gegebenenfalls notwendige Kompilierung und die Referenzierung eines 
+% Tutorials aus dem Handbuch erfolgt mit \cs{Tutorial}. Um mit verschachtelten
+% Aufrufen von \app{pdflatex} umgehen zu können, wird das ganze Prozedere in
+% ein Skript ausgelagert. Somit können die Aufrufe von \app{pdflatex} für die
+% Tutorials aus dem entsprechenden Ordner und mit den notwendigen Optionen
+% erfolgen.
+%    \begin{macrocode}
+%<*class>
+\tud@newwrite\tud@bash@write
+\newcommand*\HyperTutorial[1]{%
   \ifnum\pdf@shellescape=\@ne\relax%
     \filemodCmp{tutorials/#1.pdf}{tutorials/#1.tex}{}{%
-      \let\@tempa\@empty%
-      \ifdef{\tudfinalflag}{\appto\@tempa{\def\noexpand\tudfinalflag{}}}{}%
-      \ifdef{\tudprintflag}{\appto\@tempa{\def\noexpand\tudprintflag{}}}{}%
-      \appto\@tempa{\noexpand\input{#1.tex}}%
-      \immediate\openout\tud@write@a=tutorials.sh\relax%
-      \def\@tempb##1{\immediate\write\tud@write@a{##1}}%
-      \@tempb{cd tutorials}%
-      \@tempb{\tud@latex@ext -shell-escape "\@tempa"}%
+      \let\tud@res@a\@empty%
+      \ifdef{\tudfinalflag}{\appto\tud@res@a{\def\noexpand\tudfinalflag{}}}{}%
+      \ifdef{\tudprintflag}{\appto\tud@res@a{\def\noexpand\tudprintflag{}}}{}%
+      \appto\tud@res@a{\noexpand\input{#1.tex}}%
+      \immediate\openout\tud@bash@write=tutorials.sh\relax%
+      \def\tud@res@b##1{\immediate\write\tud@bash@write{##1}}%
+      \tud@res@b{cd tutorials}%
+      \tud@res@b{\tud@latex@ext -shell-escape "\tud@res@a"}%
       \ifwindows%
-        \@tempb{if exist #1.bcf biber #1}%
+        \tud@res@b{if exist #1.bcf biber #1}%
       \else%
-        \@tempb{[ -f #1.bcf ] && biber #1}%
+        \tud@res@b{[ -f #1.bcf ] && biber #1}%
       \fi%
-      \@tempb{\tud@latex@ext "\@tempa"}%
-      \@tempb{\tud@latex@ext -shell-escape "\@tempa"}%
+      \tud@res@b{\tud@latex@ext "\tud@res@a"}%
+      \tud@res@b{\tud@latex@ext -shell-escape "\tud@res@a"}%
       \ifwindows%
-        \@tempb{if exist #1.ist makeglossaries #1}%
+        \tud@res@b{if exist #1.ist makeglossaries #1}%
       \else%
-        \@tempb{[ -f #1.ist ] && makeglossaries #1}%
+        \tud@res@b{[ -f #1.ist ] && makeglossaries #1}%
       \fi%
       \ifwindows%
-        \@tempb{if exist #1.xdy makeglossaries #1}%
+        \tud@res@b{if exist #1.xdy makeglossaries #1}%
       \else%
-        \@tempb{[ -f #1.xdy ] && makeglossaries #1}%
+        \tud@res@b{[ -f #1.xdy ] && makeglossaries #1}%
       \fi%
-      \@tempb{\tud@latex@ext "\@tempa"}%
-      \@tempb{\tud@latex@ext -shell-escape "\@tempa"}%
-      \@tempb{\tud@latex@ext -shell-escape "\@tempa"}%
-      \immediate\closeout\tud@write@a%
+      \tud@res@b{\tud@latex@ext "\tud@res@a"}%
+      \tud@res@b{\tud@latex@ext -shell-escape "\tud@res@a"}%
+      \tud@res@b{\tud@latex@ext -shell-escape "\tud@res@a"}%
+      \immediate\closeout\tud@bash@write%
 %    \end{macrocode}
 % Hier erfolgt die Unterscheidung der Befehle für die unterschiedlichen OS.
 %    \begin{macrocode}
@@ -5245,6 +5415,17 @@
       \fi%
     }%
   \fi%
+%    \end{macrocode}
+% Hyperlink und verlinkter Indexeintrag.
+% \ToDo{verwenden von SuppressMarkupSuffix im Index}[v2.07]
+%^^A \index[files]{#2.pdf Tutorial@\Tutorial{#2}{\suffix{Tutorial}}}%
+%    \begin{macrocode}
+  \IfFileExists{tutorials/#1.pdf}{%
+    \href[pdfnewwindow]{tutorials/#1.pdf}{\InlineDeclaration{\Tutorial''{#1}}}%
+  }{%
+    \tud@shellescape@wrn{tutorials/#1.pdf}%
+    \Tutorial{#1}%
+  }%
 }
 %</class>
 %    \end{macrocode}
@@ -5252,72 +5433,48 @@
 % \ToDo{use \cs{File} or \cs{File*}?}[v2.07]
 %    \begin{macrocode}
 %<*package>
-\newcommand*\Tutorial[1]{\href{#1.pdf}{\textsbn{#1.pdf}}}
+\newcommand*\HyperTutorial[1]{\href{#1.pdf}{\textsbn{#1.pdf}}}
 %</package>
 %    \end{macrocode}
-% \end{macro}^^A \hypertut
-% \end{macro}^^A \@Tutorial
-% \end{macro}^^A \Tutorial
-% \begin{macro}{\IncludeExample}
-% \changes{v2.02}{2014/07/25}{Skalierung der eingefügten Seiten}^^A
-% Mit diesem Befehl wird eine \LaTeX-Datei ggf. übersetzt und anschließend als
-% PDF"~Datei wieder eingebunden. Zuvor wird der dazugehörige Quelltext mittels
-% \cs{lstinputlisting} im Dokument ausgegeben. Dieser Befehl wird lediglich für 
-% die Klasse \cls{tudscrmanual} benötigt.
-%    \begin{macrocode}
-%<*class>
-\newcommand*\IncludeExample[1]{%
-  \lstinputlisting[style=tudscr]{examples/#1}%
-%    \end{macrocode}
-% Die Beispiele werden nur erneut kompiliert, wenn sich diese geändert haben 
-% oder noch gar kein entsprechendes PDF"~Dokument existiert.
-%    \begin{macrocode}
-  \ifnum\pdf@shellescape=\@ne\relax%
-    \filemodCmp{examples/#1.pdf}{examples/#1.tex}{}{%
-      \edef\@tempa{\tud@latex@ext -output-directory examples examples/#1.tex}%
-      \ShellEscape{\@tempa}%
-      \ShellEscape{\@tempa}%
-    }%
-%    \end{macrocode}
-% Sollte es eine spezielle Version eines beispiels für die Druckausgabe geben, 
-% wird auch dieses kompiliert.
-%    \begin{macrocode}
-    \filemodCmp{examples/#1_print.pdf}{examples/#1_print.tex}{}{%
-      \edef\@tempa{%
-        \tud@latex@ext -output-directory examples examples/#1_print.tex%
-      }%
-      \ShellEscape{\@tempa}%
-      \ShellEscape{\@tempa}%
-    }%
-  \fi%
-%    \end{macrocode}
-% Ist die gesuchte Datei vorhanden, wird diese auch eingebunden. Andernfalls 
-% wird eine Warnung mit dem Hinweis auf die notwendige Verwendung von 
-% \app{pdflatex} mit dem Parameter \file{-{}-shell-escape} erzeugt.
-%    \begin{macrocode}
-  \def\@tempa{examples/#1.pdf}%
-  \ifdef{\tudprintflag}{%
-    \IfFileExists{examples/#1_print.pdf}{\def\@tempa{examples/#1_print.pdf}}{}%
-  }{}%
-  \IfFileExists{\@tempa}{%
-    \edef\@tempa{%
-      \noexpand\includepdf[%
-        pages=-,noautoscale,frame,keepaspectratio,pagecommand={},%
-        height=\noexpand\textheight,width=\noexpand\textwidth,offset=5mm 0mm%
-      ]{\@tempa}%
-    }%
-    \@tempa%
-  }{%
-    \tud@shellescape@wrn{\@tempa}%
-  }%
-}
-%</class>
-%    \end{macrocode}
-% \end{macro}^^A \IncludeExample
+% \end{macro}^^A \tud@bash@write
+% \end{macro}^^A \HyperTutorial
 %
 % \iffalse
 %<*package>
 % \fi
+%
+% Für den Anwender werden im \TUDScript-Bundle einige Tutorials mit Hinweisen 
+% zur Nutzung von \LaTeX{} bereitgestellt. Innerhalb dieser werden Auszüge von
+% Quelltexten verwendet und erläutert. Zum einen soll die Möglichkeit 
+% geschaffen werden, diese gesammelt am Ende eines Tutorials für ein
+% Copy"~\&"~Paste"~Beispiel zu verwenden. Andererseits soll auch das sofortige
+% Ausführen des beschriebenen Quelltextauszuges direkt im Tutorial möglich
+% sein.
+%
+% Dafür werden im Folgenden die Umgebungen \env{Preamble}, \env{Trunk} und
+% \env{Hint} sowie daraus abgeleitet Varianten definiert, womit sich die Angabe
+% und Erläuterung der Quelltexte im Tutorial logisch strukturieren lässt und
+% dennoch die notwendige Ordnung dieser für das Copy"~\&"~Paste"~Beispiel
+% aufrechterhalten werden kann. Hierfür zeichnen die beiden Umgebungen
+% \env{Preamble} und \env{Trunk} und deren Derivate verantwortlich. Die
+% Umgebung \env{Hint} steht für zusätzliche Erläuterungen bereit, welche jedoch
+% nicht in das Copy"~\&"~Paste"~Beispiel übernommen werden.
+%
+% \begin{macro}{\tud@write@a}
+% \changes{v2.02}{2014/10/22}{neu}^^A
+% \begin{macro}{\tud@write@b}
+% \changes{v2.02}{2014/11/02}{neu}^^A
+% \begin{macro}{\tud@read}
+% \changes{v2.02}{2014/08/19}{neu}^^A
+% Die notwendigen Ein- und Ausgabestreams.
+%    \begin{macrocode}
+\tud@newwrite\tud@write@a
+\tud@newwrite\tud@write@b
+\tud@newread\tud@read
+%    \end{macrocode}
+% \end{macro}^^A \tud@read
+% \end{macro}^^A \tud@write@b
+% \end{macro}^^A \tud@write@a
 %
 % \begin{macro}{\tud@tut@temp}
 % \changes{v2.05}{2016/05/01}{neu}^^A
@@ -6149,10 +6306,8 @@
       \ifx\tud@todo@type@use\@empty\else%
 %    \end{macrocode}
 % Wenn mindestens ein aktiver Kategorisierungstyp gefunden wurde, werden in 
-% temporären Makros die Einstellungen für die 
-% farbige Ausprägung 
-% von Randnotiz (\cs{tud@res@a}) und der Textbox im Fließtex(\cs{tud@res@b}) 
-% sowie das Label der Randnotiz (\cs{tud@res@c}) gespeichert.
+% temporären Makros die Versionsangabe (\cs{tud@res@a}) sowie die Einstellungen 
+% zur farbige Ausprägung der ToDo-Notiz (\cs{tud@res@b}) gespeichert.
 %    \begin{macrocode}
         \edef\tud@res@a{\TUDScriptVersionNumber}%
 %    \end{macrocode}
@@ -6162,11 +6317,12 @@
 % behandelt.
 %    \begin{macrocode}
         \ifinlist{rls}{\tud@todo@type@use}{%
-          \def\tud@res@c{HKS44}%
           \IfValueT{#4}{%
-            \ClassWarning{tudscrmanual}{`rls' is fixed to current version}%
+            \ClassWarning{tudscrmanual}{`rls' implies current version}%
           }%
+          \def\tud@res@c{HKS44}%
         }{%
+          \IfValueT{#4}{\protected@edef\tud@res@a{#4}}%
           \ifinlist{imp}{\tud@todo@type@use}{%
             \def\tud@res@c{HKS57}%
           }{%
@@ -6176,50 +6332,76 @@
               \def\tud@res@c{HKS92}%
             }%
           }%
-%    \end{macrocode}
-% Das angestellte optionale Argument erzeugt zusätzlich eine Notiz am Rand, in
-% welcher vorzugsweise die angedachte Version eingetragen werden kann. Sollte 
-% dieser angegeben sein, wird auf eine gültige Versionsnummer geprüft. Dabei 
-% wird ein möglicherweise vorangestelltes |v| entfernt.
-%    \begin{macrocode}
-          \def\tud@res@c{ToDo}%
-          \IfValueT{#4}{%
-            \begingroup%
-%    \end{macrocode}
-% Die angegebene Versionsnummer wird geprüft, ob bereits zu einer vergangenen 
-% Version gehört. In diesem Fall wird die ToDo-Notiz entsprechend als dringlich 
-% gekennzeichnet. Entspricht die angegebene Versionsnummer einer späteren 
-% Version, so wird ToDo-Notiz ebenfalls für diese gekennzeichnet.
-%    \begin{macrocode}
-              \tud@v@get\tud@res@a{#4}%
-              \def\tud@res@c##1.##2##3##4\@nil{##1##2##3}%
-              \edef\tud@res@b{\expandafter\tud@res@c\tud@res@a.000\@nil}%
-              \Ifnumber{\tud@res@b}{%
-                \edef\tud@res@c{%
-                  \expandafter\tud@res@c\TUDScriptVersionNumber.000\@nil%
-                }%
-                \ifnum\tud@res@b>\tud@res@c\relax%
-                  \def\tud@res@b{color=HKS92!30,}%
-                \else%
-                  \ifnum\tud@res@b<\tud@res@c\relax%
-                    \def\tud@res@b{color=HKS07!50,}%
-                  \else%
-                    \def\tud@res@b{color=HKS41!30,}%
-                  \fi%
-                \fi%
-                \def\tud@res@c{v\tud@res@a}%
-              }{%
-                \let\tud@res@b\@empty%
-                \def\tud@res@c{#4}%
-              }%
-              \edef\tud@res@c{%
-                \endgroup%
-                \def\noexpand\tud@res@b{\tud@res@b}%
-                \def\noexpand\tud@res@c{\tud@res@c}%
-              }%
-            \tud@res@c%
-          }%
         }%
+%    \end{macrocode}
+% Das optionale Argument erzeugt zusätzlich eine Notiz am Rand, in welcher
+% vorzugsweise die angedachte Version eingetragen werden kann. Sollte 
+% dieses angegeben sein, wird auf eine gültige Versionsnummer geprüft.
+%    \begin{macrocode}
+        \begingroup%
+          \tud@v@to@number*\tud@res@b{\tud@res@a}%
+%    \end{macrocode}
+% Die Ausprägung der ToDo-Notiz wird in Abhängigkeit von der gefundenen 
+% Versionsnummer im Vergleich zur gerade aktuellen Version gestaltet.
+%    \begin{macrocode}
+          \ifx\tud@res@b\relax%
+            \tud@res@cnt=1%
+          \else%
+            \tud@v@to@number\tud@res@c{\TUDScriptVersionNumber}%
+            \ifnum\tud@res@b<\tud@res@c\relax%
+              \tud@res@cnt=0%
+            \else%
+              \ifnum\tud@res@b>\tud@res@c\relax%
+                \tud@res@cnt=3%
+              \else%
+                \tud@res@cnt=2%
+              \fi%
+            \fi%
+          \fi%
+%    \end{macrocode}
+% Die~-- gegebenfalls korrigerte~-- Randnotiz (\cs{tud@res@a}) sowie die 
+% farbliche Ausprägung (\cs{tud@res@b}) werden expandiert. Die zu verwendende 
+% Farbe selbst ist nach der Gruppe weiterhin in \cs{tud@res@c} abgelegt.
+%    \begin{macrocode}
+          \edef\tud@res@c{%
+            \endgroup%
+            \unexpanded{\def\tud@res@a}{\tud@res@a}%
+            \unexpanded{\edef\tud@res@b}{%
+              \ifcase\tud@res@cnt% < current version
+                color=\noexpand\tud@res@c,%
+                bordercolor=HKS07!80,%
+                textcolor=white,%
+                inlinewidth=\linewidth - 2pt%
+              \or% no version
+                color=\noexpand\tud@res@c!15,%
+                bordercolor=HKS07!50%
+              \or% = current version
+                color=\noexpand\tud@res@c!60,%
+                bordercolor=\noexpand\tud@res@c%
+              \or% > current version
+                color=\noexpand\tud@res@c!30,%
+                bordercolor=\noexpand\tud@res@c%
+              \else% undefined state
+                color=HKS07!80,%
+                textcolor=\noexpand\tud@res@c%
+              \fi%
+            }%
+%    \end{macrocode}
+% Die Inhalte werden zentriert gesetzt. Für überfällige ToDo-Notizen wird 
+% zusätzlich die Linienstärke erhöht.
+%    \begin{macrocode}
+            \unexpanded{\tikzset{notestyleraw/.append style={align=center}}}%
+            \ifcase\tud@res@cnt\relax%
+              \unexpanded{%
+                \tikzset{notestyleraw/.append style={%
+                  line width = 2pt,%
+                  text width = \@todonotes@textwidth - 1.6ex - 2pt,%
+                  inner sep  = 0.8ex%
+                }}%
+              }%
+            \fi%
+          }%
+        \tud@res@c%
 %    \end{macrocode}
 % Vor der Ausgabe wird ggf. ein kleiner vertikaler Abstand eingefügt.
 %    \begin{macrocode}

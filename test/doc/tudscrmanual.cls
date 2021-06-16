@@ -1,5 +1,3 @@
-% PENDING squash feature/newmarkup, reset develop
-% PENDING Verwendung aller \tud@if@nil prüfen
 \newcommand*\tud@typeout[1]{\typeout{dbg(\the\inputlineno): #1}}
 %\let\tud@typeout\@gobble
 %%
@@ -506,6 +504,8 @@
   2021/06/10 v2.07 TUD-Script
 ]
 %%%% From File: tudscr-manual.dtx 2020/11/11 22:13:36 968380d
+\DeclareListParser{\dossvlist}{;}
+\DeclareListParser*{\forssvlist}{;}
 \RequirePackage{multicol}[2019/12/09]
 \RequirePackage{setspace}[2011/12/19]
 \setstretch{1.1}
@@ -517,6 +517,7 @@
 \RequirePackage{ragged2e}[2021/02/05]
 \@removefromreset{footnote}{chapter}
 \renewcommand*\raggedfootnote{\tud@RaggedRight}%
+\RequirePackage{noindentafter}[2021/05/14]
 \RequirePackage{units}[1998/08/04]
 \AtEndPreamble{%
   \RequirePackage{ellipsis}[2020/05/22]%
@@ -580,6 +581,7 @@
   filecolor=HKS65,%
   destlabel=true,%pdfview=FitH,%
 }{hyperref}
+\newcommand*\tud@currentHref{}
 \AfterPackage*{hyperref}{%
   \newcommand*\autorefname[1][current]{%
     \Ifstr{#1}{current}{%
@@ -706,29 +708,6 @@
 \@onlypreamble\tud@headings@special
 \newrobustcmd*\txb{{\raise.05em\hbox{\kern.05em\textbar\kern.05em}}}
 \newrobustcmd*\bsc{\kern-.05em\@backslashchar\kern-.05em}
-\DeclareListParser{\dossvlist}{;}
-\DeclareListParser*{\forssvlist}{;}
-\newcommand*\tud@v@validate[1]{%
-  \begingroup%
-    \protected@edef\tud@res@a{#1}%
-    \trim@spaces@in\tud@res@a%
-    \tud@v@to@number*\tud@res@b{\tud@res@a}%
-    \edef\tud@res@a{%
-      \endgroup%
-      \ifx\tud@res@b\relax%
-        \unexpanded{%
-          \ClassError{tudscrmanual}{Invalid version number}{%
-            The given version number `#1' is invalid as it\MessageBreak%
-            should be `[v][0-9]+.[0-9]+[a-z]*' (regex).%
-          }%
-          \let#1\relax%
-        }%
-      \else%
-        \unexpanded{\def#1}{\tud@res@a}%
-      \fi%
-    }%
-  \tud@res@a%
-}
 \NewDocumentCommand\tud@v@to@number{s m m}{%
   \begingroup%
     \edef\tud@res@a{%
@@ -788,12 +767,31 @@
         \unexpanded{\let#2\relax}%
       \else%
         \unexpanded{\def#2}{\tud@res@b}%
-        \IfBooleanT{#1}{%
-          \unexpanded{\def#3}{\tud@res@a}%
-        }%
+        \IfBooleanT{#1}{\unexpanded{\def#3}{\tud@res@a}}%
       \fi%
     }%
   \tud@res@c%
+}
+\newcommand*\tud@v@validate[1]{%
+  \begingroup%
+    \protected@edef\tud@res@a{#1}%
+    \trim@spaces@in\tud@res@a%
+    \tud@v@to@number*\tud@res@b{\tud@res@a}%
+    \edef\tud@res@a{%
+      \endgroup%
+      \ifx\tud@res@b\relax%
+        \unexpanded{%
+          \ClassError{tudscrmanual}{Invalid version number}{%
+            The given version number `#1' is invalid as it\MessageBreak%
+            should be `[v][0-9]+.[0-9]+[a-z]*' (regex).%
+          }%
+          \let#1\relax%
+        }%
+      \else%
+        \unexpanded{\def#1}{\tud@res@a}%
+      \fi%
+    }%
+  \tud@res@a%
 }
 \newcommand*\tud@lbl@tmp{}
 \NewDocumentCommand\tud@lbl@get{m m}{%
@@ -950,19 +948,17 @@
 }
 \forlistloop{\tud@res@a}{\tud@trace@lbl@types}
 \NewDocumentCommand\tracinglabels{!s !D<>{} !O{missing}}{%
-  \def\tud@res@a##1{%
-    \cslet{tud@trace@lbl@##1@list}\relax%
-  }%
+  \def\tud@res@a##1{\cslet{tud@trace@lbl@##1@list}\relax}%
   \forlistloop{\tud@res@a}{\tud@trace@lbl@types}%
-  \let\tud@res@c\@empty%
+  \let\tud@res@b\@empty%
   \in@{,all,}{,#3,}%
   \ifin@%
-    \let\tud@res@c\tud@trace@lbl@types%
+    \let\tud@res@b\tud@trace@lbl@types%
   \else%
     \def\tud@res@a##1{%
       \in@{,##1,}{,#3,}%
       \ifin@%
-        \listadd\tud@res@c{##1}%
+        \listadd\tud@res@b{##1}%
       \fi%
     }%
     \forlistloop{\tud@res@a}{\tud@trace@lbl@types}%
@@ -979,17 +975,17 @@
           }{%
             \wlog{+++++ labels ##1 (sorted) +++++}%
             \expandafter\tud@list@sort\csname tud@trace@lbl@##1@list\endcsname%
-            \let\tud@res@b\@empty%
-            \def\tud@res@a####1{\appto\tud@res@b{####1^^J}}%
+            \let\tud@res@c\@empty%
+            \def\tud@res@a####1{\appto\tud@res@c{####1^^J}}%
             \forlistcsloop\tud@res@a{tud@trace@lbl@##1@list}%
-            \@onelevel@sanitize\tud@res@b%
-            \wlog{\tud@res@b}%
+            \@onelevel@sanitize\tud@res@c%
+            \wlog{\tud@res@c}%
           }%
         }%
       \fi%
     }%
   }%
-  \forlistloop{\tud@res@a}{\tud@res@c}%
+  \forlistloop{\tud@res@a}{\tud@res@b}%
 }
 \@onlypreamble\tracinglabels
 \NewDocumentCommand\tud@trace@lbl@add{m o m}{%
@@ -1008,7 +1004,7 @@
     \tud@res@a%
   }%
 }
-\NewDocumentCommand\tud@trace@lbl@@add{m m m}{%
+\newcommand*\tud@trace@lbl@@add[3]{%
   \begingroup%
     \let\tud@res@b\@empty%
     \let\tud@res@c\@empty%
@@ -1032,6 +1028,7 @@
         \FamilyKeyStateProcessed%
       \fi%
     }%
+    \let\tud@res@a\@empty%
     \def\do##1{%
       \begingroup%
         \ifnum\tud@res@d=\z@\relax% url
@@ -1052,7 +1049,6 @@
         ^^J\@spaces##1\ifx\tud@res@c\@empty\else^^J\@spaces\tud@res@c\fi%
       }%
     }%
-    \let\tud@res@a\@empty%
     \dolistloop{#3}%
     \ifnum\tud@res@d=\z@\relax\else% !url
       \ifx\tud@res@a\@empty\else%
@@ -1479,9 +1475,7 @@
 }
 \forlistloop{\tud@res@a}{\tud@trace@markup@types}
 \NewDocumentCommand\tracingmarkup{!O{declare}}{%
-  \def\tud@res@a##1{%
-    \cslet{tud@trace@markup@##1@list}\relax%
-  }%
+  \def\tud@res@a##1{\cslet{tud@trace@markup@##1@list}\relax}%
   \forlistloop{\tud@res@a}{\tud@trace@markup@types}%
   \let\tud@res@b\@empty%
   \let\tud@res@c\@empty%
@@ -4678,22 +4672,6 @@
     \dolistloop{\tud@changes@list}%
   \endgroup%
 }
-\newcommand*\NoIndentAfterEnvironment[1]{%
-  \AfterEndEnvironment{#1}{\@NoIndentAfterEnvironment}%
-}
-\newcommand*\@NoIndentAfterEnvironment{}
-\def\@NoIndentAfterEnvironment#1\ignorespaces\fi{%
-  #1\ignorespaces\fi\@@NoIndentAfterEnvironment%
-}
-\newcommand*\@@NoIndentAfterEnvironment{%
-  \kernel@ifnextchar\par{%
-    \par%
-    \def\par{%
-      \everypar{\setbox\z@\lastbox\everypar{}}%
-      \@restorepar%
-    }%
-  }{}%
-}
 \AtBeginDocument{%
   \newcommand*\itemval{}%
   \undef\itemval%
@@ -4712,7 +4690,6 @@
 \newcommand*\tud@val@addon{}
 \newcommand*\tud@val@alias{}
 \newcommand*\tud@val@declaration@list{}
-\NoIndentAfterEnvironment{DeclareValues}
 \NewDocumentEnvironment{DeclareValues}{!o +b}{%
   \begingroup%
     \let\tud@res@a\@empty%
@@ -4797,6 +4774,7 @@
   \tud@res@a%
   \begin{Declare@Values}#2\end{Declare@Values}%
 }{}
+\NoIndentAfterEnv{DeclareValues}
 \NewDocumentCommand\tud@val@compare{m m m m}{%
   \begingroup%
     \@tud@res@swafalse%
@@ -4960,8 +4938,8 @@
   \let\itempkg\tud@item@pkg%
   \let\tud@pkg@label@list\tud@declaration@label@list%
 }
-\NoIndentAfterEnvironment{DeclarePackages}
 \tud@list@create[before=\tud@item@@pkg]{DeclarePackages}{description}{2}
+\NoIndentAfterEnv{DeclarePackages}
 \NewDocumentCommand\tud@item@pkg{m !d() !d<> !o}{%
   \begingroup%
     \let\tud@res@a\@empty%
@@ -5060,31 +5038,28 @@
   \strut\selectlanguage{english}%
   \Ifstr{\csuse{#1}}{}{\PName{empty}}{\csuse{#1}}\tabularnewline%
 }
-\NoIndentAfterEnvironment{Code}
 \lstnewenvironment{Code}[1][]{\lstset{style=tudscr,#1}}{}
-\newcommand*\tud@currentHref{}
+\NoIndentAfterEnv{Code}
 \BeforeBeginEnvironment{Code}{\global\let\tud@currentHref\@currentHref}
 \AfterEndEnvironment{Code}{\global\let\@currentHref\tud@currentHref}
-\newcommand*\tud@let@token{}
-\def\tud@let@token{\@nil}
-\AddToHookNext{env/Code/after}{\futurelet\tud@let@token\relax}%
-\NoIndentAfterEnvironment{Example}
+\tud@newif\if@tud@code@used
 \newenvironment{Example}{%
   \labeling{{\usekomafont{disposition}{Beispiel:\nobreakspace}}}%
   \item[{\usekomafont{disposition}{Beispiel:\nobreakspace}}]%
-  \def\tud@let@token{\@nil}%
+  \@tud@code@usedfalse%
+  \AddToHookNext{env/Code/after}{\@tud@code@usedtrue}%
 }{%
   \begingroup%
     \edef\tud@res@a{%
       \endgroup%
       \noexpand\endlabeling%
-      \ifx\tud@let@token\@nnil\else%
-        \unexpanded{\addvspace{-\smallskipamount}}%
+      \if@tud@code@used%
+        \noexpand\addvspace{\the\glueexpr-\parskip\relax}%
       \fi%
     }%
   \tud@res@a%
 }
-% PENDING shell-Kram raus, Tutorials und Examples über Skript/make erstellen
+\NoIndentAfterEnv{Example}
 \RequirePackage{filemod}[2011/09/19]
 \RequirePackage{ifplatform}[2017/10/13]
 \newcommand*\tud@shellescape@wrn[1]{%
@@ -5104,56 +5079,6 @@
   \fi
 \fi
 \appto\tud@latex@ext{-synctex=1\space}
-\tud@newwrite\tud@write@a
-\NewDocumentCommand\HyperTutorial{m}{%
-  \ifnum\pdf@shellescape=\@ne\relax%
-    \filemodCmp{tutorials/#1.pdf}{tutorials/#1.tex}{}{%
-      \let\tud@res@a\@empty%
-      \ifdef{\tudfinalflag}{\appto\tud@res@a{\def\noexpand\tudfinalflag{}}}{}%
-      \ifdef{\tudprintflag}{\appto\tud@res@a{\def\noexpand\tudprintflag{}}}{}%
-      \appto\tud@res@a{\noexpand\input{#1.tex}}%
-      \immediate\openout\tud@write@a=tutorials.sh\relax%
-      \def\tud@res@b##1{\immediate\write\tud@write@a{##1}}%
-      \tud@res@b{cd tutorials}%
-      \tud@res@b{\tud@latex@ext -shell-escape "\tud@res@a"}%
-      \ifwindows%
-        \tud@res@b{if exist #1.bcf biber #1}%
-      \else%
-        \tud@res@b{[ -f #1.bcf ] && biber #1}%
-      \fi%
-      \tud@res@b{\tud@latex@ext "\tud@res@a"}%
-      \tud@res@b{\tud@latex@ext -shell-escape "\tud@res@a"}%
-      \ifwindows%
-        \tud@res@b{if exist #1.ist makeglossaries #1}%
-      \else%
-        \tud@res@b{[ -f #1.ist ] && makeglossaries #1}%
-      \fi%
-      \ifwindows%
-        \tud@res@b{if exist #1.xdy makeglossaries #1}%
-      \else%
-        \tud@res@b{[ -f #1.xdy ] && makeglossaries #1}%
-      \fi%
-      \tud@res@b{\tud@latex@ext "\tud@res@a"}%
-      \tud@res@b{\tud@latex@ext -shell-escape "\tud@res@a"}%
-      \tud@res@b{\tud@latex@ext -shell-escape "\tud@res@a"}%
-      \immediate\closeout\tud@write@a%
-      \ifwindows%
-        \ShellEscape{rename tutorials.sh tutorials.bat}%
-        \ShellEscape{tutorials.bat}%
-        \ShellEscape{del tutorials.bat}%
-      \else%
-        \ShellEscape{bash tutorials.sh}%
-        \ShellEscape{rm tutorials.sh}%
-      \fi%
-    }%
-  \fi%
-  \IfFileExists{tutorials/#1.pdf}{%
-    \href[pdfnewwindow]{tutorials/#1.pdf}{\InlineDeclaration{\Tutorial''{#1}}}%
-  }{%
-    \tud@shellescape@wrn{tutorials/#1.pdf}%
-    \Tutorial{#1}%
-  }%
-}
 \newcommand*\IncludeExample[2][1]{%
   \begingroup%
     \lstinputlisting[style=tudscr]{examples/#2}%
@@ -5193,7 +5118,7 @@
         \tud@res@cnt=#1\relax%
         \@whilenum\tud@res@cnt>\z@\relax\do{%
           \advance\tud@res@cnt\m@ne%
-          \clearpage
+          \clearpage%
           \fboxsep=-\arrayrulewidth%
           \noindent\fbox{\vbox to\textheight{%
             \vss\vss%
@@ -5209,6 +5134,56 @@
       \clearpage%
     }%
   \endgroup%
+}
+\tud@newwrite\tud@bash@write
+\newcommand*\HyperTutorial[1]{%
+  \ifnum\pdf@shellescape=\@ne\relax%
+    \filemodCmp{tutorials/#1.pdf}{tutorials/#1.tex}{}{%
+      \let\tud@res@a\@empty%
+      \ifdef{\tudfinalflag}{\appto\tud@res@a{\def\noexpand\tudfinalflag{}}}{}%
+      \ifdef{\tudprintflag}{\appto\tud@res@a{\def\noexpand\tudprintflag{}}}{}%
+      \appto\tud@res@a{\noexpand\input{#1.tex}}%
+      \immediate\openout\tud@bash@write=tutorials.sh\relax%
+      \def\tud@res@b##1{\immediate\write\tud@bash@write{##1}}%
+      \tud@res@b{cd tutorials}%
+      \tud@res@b{\tud@latex@ext -shell-escape "\tud@res@a"}%
+      \ifwindows%
+        \tud@res@b{if exist #1.bcf biber #1}%
+      \else%
+        \tud@res@b{[ -f #1.bcf ] && biber #1}%
+      \fi%
+      \tud@res@b{\tud@latex@ext "\tud@res@a"}%
+      \tud@res@b{\tud@latex@ext -shell-escape "\tud@res@a"}%
+      \ifwindows%
+        \tud@res@b{if exist #1.ist makeglossaries #1}%
+      \else%
+        \tud@res@b{[ -f #1.ist ] && makeglossaries #1}%
+      \fi%
+      \ifwindows%
+        \tud@res@b{if exist #1.xdy makeglossaries #1}%
+      \else%
+        \tud@res@b{[ -f #1.xdy ] && makeglossaries #1}%
+      \fi%
+      \tud@res@b{\tud@latex@ext "\tud@res@a"}%
+      \tud@res@b{\tud@latex@ext -shell-escape "\tud@res@a"}%
+      \tud@res@b{\tud@latex@ext -shell-escape "\tud@res@a"}%
+      \immediate\closeout\tud@bash@write%
+      \ifwindows%
+        \ShellEscape{rename tutorials.sh tutorials.bat}%
+        \ShellEscape{tutorials.bat}%
+        \ShellEscape{del tutorials.bat}%
+      \else%
+        \ShellEscape{bash tutorials.sh}%
+        \ShellEscape{rm tutorials.sh}%
+      \fi%
+    }%
+  \fi%
+  \IfFileExists{tutorials/#1.pdf}{%
+    \href[pdfnewwindow]{tutorials/#1.pdf}{\InlineDeclaration{\Tutorial''{#1}}}%
+  }{%
+    \tud@shellescape@wrn{tutorials/#1.pdf}%
+    \Tutorial{#1}%
+  }%
 }
 \TUD@UnwindPackage{todonotes}{%
   \RenewDocumentCommand\ToDo{s o m !o}{}%
@@ -5235,11 +5210,12 @@
       \ifx\tud@todo@type@use\@empty\else%
         \edef\tud@res@a{\TUDScriptVersionNumber}%
         \ifinlist{rls}{\tud@todo@type@use}{%
-          \def\tud@res@c{HKS44}%
           \IfValueT{#4}{%
-            \ClassWarning{tudscrmanual}{`rls' is fixed to current version}%
+            \ClassWarning{tudscrmanual}{`rls' implies current version}%
           }%
+          \def\tud@res@c{HKS44}%
         }{%
+          \IfValueT{#4}{\protected@edef\tud@res@a{#4}}%
           \ifinlist{imp}{\tud@todo@type@use}{%
             \def\tud@res@c{HKS57}%
           }{%
@@ -5249,21 +5225,20 @@
               \def\tud@res@c{HKS92}%
             }%
           }%
-          \IfValueT{#4}{\protected@edef\tud@res@a{#4}}%
         }%
         \begingroup%
           \tud@v@to@number*\tud@res@b{\tud@res@a}%
           \ifx\tud@res@b\relax%
-            \def\tud@res@c{50}%
+            \tud@res@cnt=1%
           \else%
             \tud@v@to@number\tud@res@c{\TUDScriptVersionNumber}%
             \ifnum\tud@res@b<\tud@res@c\relax%
-              \def\tud@res@b{0}%
+              \tud@res@cnt=0%
             \else%
               \ifnum\tud@res@b>\tud@res@c\relax%
-                \def\tud@res@b{2}%
+                \tud@res@cnt=3%
               \else%
-                \def\tud@res@b{1}%
+                \tud@res@cnt=2%
               \fi%
             \fi%
           \fi%
@@ -5271,21 +5246,30 @@
             \endgroup%
             \unexpanded{\def\tud@res@a}{\tud@res@a}%
             \unexpanded{\edef\tud@res@b}{%
-              \ifcase\tud@res@b%
-                color=\noexpand\tud@res@c!100,%
+              \ifcase\tud@res@cnt% < current version
+                color=\noexpand\tud@res@c,%
                 bordercolor=HKS07!80,%
-                textcolor=white%
-              \or%
-                color=\noexpand\tud@res@c!50%
-              \else%
-                color=\noexpand\tud@res@c!20%
+                textcolor=white,%
+                inlinewidth=\linewidth - 2pt%
+              \or% no version
+                color=\noexpand\tud@res@c!15,%
+                bordercolor=HKS07!50%
+              \or% = current version
+                color=\noexpand\tud@res@c!60,%
+                bordercolor=\noexpand\tud@res@c%
+              \or% > current version
+                color=\noexpand\tud@res@c!30,%
+                bordercolor=\noexpand\tud@res@c%
+              \else% undefined state
+                color=HKS07!80,%
+                textcolor=\noexpand\tud@res@c%
               \fi%
             }%
             \unexpanded{\tikzset{notestyleraw/.append style={align=center}}}%
-            \ifcase\tud@res@b\relax%
+            \ifcase\tud@res@cnt\relax%
               \unexpanded{%
                 \tikzset{notestyleraw/.append style={%
-                  line width = 1pt,%
+                  line width = 2pt,%
                   text width = \@todonotes@textwidth - 1.6ex - 2pt,%
                   inner sep  = 0.8ex%
                 }}%
