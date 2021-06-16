@@ -55,6 +55,7 @@
 \usepackage{bookmark}
 \usepackage[babel]{microtype}
 
+\GitHubBase{\TUDScriptRepository}
 \begin{document}
   \maketitle
   \tableofcontents
@@ -70,7 +71,7 @@
 % \changes{v2.02}{2014/11/18}{\pkg{tudscrtutorial}: Index für Tutorials}^^A
 % \changes{v2.05}{2015/08/04}{Geteilte Deklarationen für Klasse und Paket}^^A
 %
-% \section{Handbuch und Leitfäden zu \TUDScript}
+% \section{Anwenderdokumentation und Leitfäden zu \TUDScript}
 %
 % Es werden die Klasse \cls{tudscrmanual} (auf Basis von \cls{tudscrreprt}) für 
 % die Anwenderdokumentation sowie das Paket \pkg{tudscrtutorial} für das Setzen
@@ -88,8 +89,6 @@
 \TUD@Class@Check{tudscrtutorial}
 %</package&identify>
 %    \end{macrocode}
-%
-% \StopEventually{\PrintIndex\PrintChanges\PrintToDos}
 %
 % \iffalse
 %<*body>
@@ -234,31 +233,6 @@
   texcl,%
 }
 %    \end{macrocode}
-%
-%
-%
-% \subsubsection{Änderungsnotizen}
-%
-% Für Klasse und Paket besteht die Möglichkeit, Änderungsnotizen zu nutzen, 
-% wofür das Paket \pkg{todonotes} geladen wird.
-%    \begin{macrocode}
-\PassOptionsToPackage{obeyFinal}{todonotes}
-%    \end{macrocode}
-% Für den Druck wird die farbige Ausgabe der ToDo-Notizen deaktiviert.
-%    \begin{macrocode}
-\ifdef{\tudprintflag}{%
-  \PassOptionsToPackage{color=white}{todonotes}%
-}{%
-  \PassOptionsToPackage{colorinlistoftodos}{todonotes}%
-}
-\RequirePackage{todonotes}[2021/06/04]
-\AtEndPreamble{%
-  \ifdim\marginparwidth<2cm\relax%
-    \tud@setdim\marginparwidth{2cm}%
-  \fi%
-}
-%    \end{macrocode}
-%
 %
 % \subsubsection{Querverweise etc.}
 %
@@ -643,7 +617,7 @@
   \begingroup%
     \ifcsundef{tud@trace@lbl@#1@list}{%
       \ifinlist{#1}{\tud@trace@lbl@types}{}{%
-        \ClassError{tudscrmanual}{Undefined label type `#1'}{%
+        \ClassError{\TUD@Class@Name}{Undefined label type `#1'}{%
           The given tracing type was never defined.%
         }%
       }%
@@ -5955,7 +5929,25 @@
 %
 % \subsection{ToDo-Liste}
 %
-% Für die Ausgabe der ToDo-Notizen wird das Paket \pkg{todonotes} genutzt.
+% Für Klasse und Paket besteht die Möglichkeit, ToDo-Notizen zu nutzen, wofür
+% das Paket \pkg{todonotes} geladen wird.
+%    \begin{macrocode}
+\PassOptionsToPackage{obeyFinal}{todonotes}
+%    \end{macrocode}
+% Für den Druck wird die farbige Ausgabe der ToDo-Notizen deaktiviert.
+%    \begin{macrocode}
+\ifdef{\tudprintflag}{%
+  \PassOptionsToPackage{color=white}{todonotes}%
+}{%
+  \PassOptionsToPackage{colorinlistoftodos}{todonotes}%
+}
+\RequirePackage{todonotes}[2021/06/04]
+\AtEndPreamble{%
+  \ifdim\marginparwidth<2cm\relax%
+    \tud@setdim\marginparwidth{2cm}%
+  \fi%
+}
+%    \end{macrocode}
 %
 % \begin{option}{ToDo}
 % \changes{v2.02}{2014/07/10}{neu}^^A
@@ -5963,7 +5955,7 @@
 % \begin{macro}{\tud@todo@num}
 % \changes{v2.07}{2021/06/09}{neu}^^A
 % \begin{macro}{\tud@todo@type@use}
-% \changes{v2.07}{2021/06/09}{neu}^^A
+% \changes{v2.06}{2018/08/02}{neu}^^A
 % \begin{macro}{\tud@todo@type@default}
 % \changes{v2.07}{2021/06/09}{neu}^^A
 % \begin{macro}{\tud@todo@type@set}
@@ -6108,8 +6100,8 @@
 % \changes{v2.03}{2015/01/25}{Ausgabe auf bestimmten Typ beschränkbar}^^A
 % \changes{v2.05}{2015/11/02}{Farbkodierung durch optionale Versionsnummer}^^A
 % \changes{v2.06}{2018/08/02}{farbige Ausgabe abhängig von Versionsnummer}^^A
-% \begin{macro}{\tud@todo@type@use}
-% \changes{v2.06}{2018/08/02}{neu}^^A
+% \begin{macro}{\@ToDo}
+% \changes{v2.07}{2021/06/09}{neu}^^A
 % \begin{macro}{\ListOfToDo}
 % \changes{v2.02}{2014/07/10}{neu}^^A
 % Mit dem Befehl \cs{ToDo}\oarg{Option}\marg{ToDo-Notiz}\oarg{Versionsnummer}
@@ -6117,213 +6109,176 @@
 % erstellt werden. Das erste optionale Argument kann die Kategorisierungstypen
 % \val{doc}, \val{imp} und \val{rls} beinhalten, welche für eine spezifische
 % farbliche Kodierung sorgen, um die Aufgaben zu kategorisieren.
+%
+% Sollte das Paket \pkg{todonotes} nicht geladen werden, erfolgt ein Definition 
+% der beiden notwendigen Befehle als Dummy.
 %    \begin{macrocode}
-\AfterPackage*{todonotes}{%
-  \newcommand*\tud@todo@type@use{}%
+\TUD@UnwindPackage{todonotes}{%
+  \RenewDocumentCommand\ToDo{s o m !o}{}%
+  \renewcommand*\ListOfToDo{}%
+}
 %    \end{macrocode}
 % Nun folgt die Definition des eigentlichen Befehls. Dabei wird zu Beginn
 % \cs{@currentHref} gesichert und am Ende wiederhergestellt.
+% \ToDo{\texttt{s o D()\{default\} m}; auch für \cls{tudscrdoc}}[v2.07]
 %    \begin{macrocode}
-  \NewDocumentCommand\ToDo{s o m !o}{%
-    \ifbool{@tud@todo}{%
-      \global\let\tud@currentHref\@currentHref%
+\NewDocumentCommand\ToDo{s O{default} m !o}{%
+  \ifnum\tud@todo@num>\z@\relax%
+    \global\let\tud@currentHref\@currentHref%
+    \begingroup%
+%    \end{macrocode}
+% Die Ausgabe erfolgt entweder für die per Option in \cs{tud@todo@type@use} 
+% festgelegten Eintragstypen oder speziell für die im optionalen Argument 
+% angegebenen. Hierfür wird \opt{ToDo=\{only=\meta{\dots}\}} für das optionale
+% Argument lokal ausgeführt und anschließend mit der zuvor gesicherten globalen
+% Liste eine Schnittmenge gebildet.
+%    \begin{macrocode}
       \begingroup%
+        \let\tud@res@a\tud@todo@type@use%
+        \let\tud@res@b\@empty%
+        \def\tud@res@c##1{%
+          \ifinlist{##1}{\tud@res@a}{\listadd\tud@res@b{##1}}{}%
+        }%
+        \TUDoptions{ToDo={only={#2}}}%
+        \forlistloop\tud@res@c{\tud@todo@type@use}%
+        \edef\tud@res@c{%
+          \endgroup%
+          \unexpanded{\def\tud@todo@type@use}{\expandonce\tud@res@b}%
+        }%
+      \tud@res@c%
+      \ifx\tud@todo@type@use\@empty\else%
 %    \end{macrocode}
-% In \cs{tud@todo@type@use} werden alle im optionalen Argument angegeben Werte 
-% gesischer, welche entweder über die Liste \cs{tud@todo@type@pos} explizit 
-% angefordert oder nicht über die Liste \cs{tud@todo@type@neg} ausgeschlossen 
-% wurden.
-%    \begin{macrocode}
-        \let\tud@todo@type@use\@empty%
-%    \end{macrocode}
-% Das optionale Argument enthält die gewüscnhten Kategorisierungstypen.
-%    \begin{macrocode}
-        \IfValueTF{#2}{%
-          \IfArgIsEmpty{#2}{}{%
-%    \end{macrocode}
-% Die Ausgabe erfolgt entweder für alle ToDo-Notizen oder nur für die per 
-% Option festgelegten Typen. Dabei wird in einer Schleife geprüft, ob der in 
-% der aktuellen Notiz angegebene Kategorisierungstyp entweder in der Positv- 
-% oder aber in der Negativ-Liste enthalten ist.
-%    \begin{macrocode}
-            \let\tud@todo@type@use\relax%
-            \ifx\tud@todo@type@pos\relax%
-              \def\tud@res@a##1{%
-                \ifinlist{##1}{\tud@todo@type@use}{}{%
-                  \ifinlist{##1}{\tud@todo@type@neg}{}{%
-                    \listadd\tud@todo@type@use{##1}%
-                  }%
-                }%
-              }%
-            \else%
-              \def\tud@res@a##1{%
-                \ifinlist{##1}{\tud@todo@type@use}{}{%
-                  \ifinlist{##1}{\tud@todo@type@pos}{%
-                    \listadd\tud@todo@type@use{##1}%
-                  }{}%
-                }%
-              }%
-            \fi%
-            \forcsvlist\tud@res@a{#2}%
-          }%
-        }{}%
-%    \end{macrocode}
-% Nur wenn mindestens ein aktiver Kategorisierungstyp gefunden wurde oder aber
-% gar keine Angabe gemacht wurde, erfolgt die Ausgabe.
-%    \begin{macrocode}
-        \ifx\tud@todo@type@use\relax\else%
-%    \end{macrocode}
-% In den temporären Makros werden die Einstellungen für die farbige Ausprägung 
+% Wenn mindestens ein aktiver Kategorisierungstyp gefunden wurde, werden in 
+% temporären Makros die Einstellungen für die 
+% farbige Ausprägung 
 % von Randnotiz (\cs{tud@res@a}) und der Textbox im Fließtex(\cs{tud@res@b}) 
 % sowie das Label der Randnotiz (\cs{tud@res@c}) gespeichert.
 %    \begin{macrocode}
-          \let\tud@res@a\@empty%
-          \let\tud@res@b\@empty%
-          \let\tud@res@c\@empty%
+        \edef\tud@res@a{\TUDScriptVersionNumber}%
 %    \end{macrocode}
 % Der Kategorisierungstyp für Releases \val{rls} ist quasi vorkonfiguriert. 
 % Sind weitere Kategorisierungstypen angegeben, werden diese ignoriert. Der Typ 
 % für Implemtierung \val{imp} wird vorangig zur Dokumentation \val{doc} 
 % behandelt.
 %    \begin{macrocode}
-          \ifinlist{rls}{\tud@todo@type@use}{%
-            \def\tud@res@a{color=HKS44!30,}%
-            \def\tud@res@b{color=HKS44!30,}%
-            \edef\tud@res@c{v\TUDScriptVersionNumber}%
+        \ifinlist{rls}{\tud@todo@type@use}{%
+          \def\tud@res@c{HKS44}%
+          \IfValueT{#4}{%
+            \ClassWarning{tudscrmanual}{`rls' is fixed to current version}%
+          }%
+        }{%
+          \ifinlist{imp}{\tud@todo@type@use}{%
+            \def\tud@res@c{HKS57}%
           }{%
-            \ifinlist{imp}{\tud@todo@type@use}{%
-              \def\tud@res@a{color=HKS57!50,}%
+            \ifinlist{doc}{\tud@todo@type@use}{%
+              \def\tud@res@c{HKS33}%
             }{%
-              \ifinlist{doc}{\tud@todo@type@use}{%
-                \def\tud@res@a{color=HKS41!30,}%
-              }{}%
+              \def\tud@res@c{HKS92}%
             }%
+          }%
 %    \end{macrocode}
 % Das angestellte optionale Argument erzeugt zusätzlich eine Notiz am Rand, in
 % welcher vorzugsweise die angedachte Version eingetragen werden kann. Sollte 
 % dieser angegeben sein, wird auf eine gültige Versionsnummer geprüft. Dabei 
 % wird ein möglicherweise vorangestelltes |v| entfernt.
 %    \begin{macrocode}
-            \def\tud@res@c{ToDo}%
-            \IfValueT{#4}{%
-              \begingroup%
+          \def\tud@res@c{ToDo}%
+          \IfValueT{#4}{%
+            \begingroup%
 %    \end{macrocode}
 % Die angegebene Versionsnummer wird geprüft, ob bereits zu einer vergangenen 
 % Version gehört. In diesem Fall wird die ToDo-Notiz entsprechend als dringlich 
 % gekennzeichnet. Entspricht die angegebene Versionsnummer einer späteren 
 % Version, so wird ToDo-Notiz ebenfalls für diese gekennzeichnet.
 %    \begin{macrocode}
-                \tud@v@get\tud@res@a{#4}%
-                \def\tud@res@c##1.##2##3##4\@nil{##1##2##3}%
-                \edef\tud@res@b{\expandafter\tud@res@c\tud@res@a.000\@nil}%
-                \Ifnumber{\tud@res@b}{%
-                  \edef\tud@res@c{%
-                    \expandafter\tud@res@c\TUDScriptVersionNumber.000\@nil%
-                  }%
-                  \ifnum\tud@res@b>\tud@res@c\relax%
-                    \def\tud@res@b{color=HKS92!30,}%
-                  \else%
-                    \ifnum\tud@res@b<\tud@res@c\relax%
-                      \def\tud@res@b{color=HKS07!50,}%
-                    \else%
-                      \def\tud@res@b{color=HKS41!30,}%
-                    \fi%
-                  \fi%
-                  \def\tud@res@c{v\tud@res@a}%
-                }{%
-                  \let\tud@res@b\@empty%
-                  \def\tud@res@c{#4}%
-                }%
+              \tud@v@get\tud@res@a{#4}%
+              \def\tud@res@c##1.##2##3##4\@nil{##1##2##3}%
+              \edef\tud@res@b{\expandafter\tud@res@c\tud@res@a.000\@nil}%
+              \Ifnumber{\tud@res@b}{%
                 \edef\tud@res@c{%
-                  \endgroup%
-                  \def\noexpand\tud@res@b{\tud@res@b}%
-                  \def\noexpand\tud@res@c{\tud@res@c}%
+                  \expandafter\tud@res@c\TUDScriptVersionNumber.000\@nil%
                 }%
-              \tud@res@c%
-            }%
+                \ifnum\tud@res@b>\tud@res@c\relax%
+                  \def\tud@res@b{color=HKS92!30,}%
+                \else%
+                  \ifnum\tud@res@b<\tud@res@c\relax%
+                    \def\tud@res@b{color=HKS07!50,}%
+                  \else%
+                    \def\tud@res@b{color=HKS41!30,}%
+                  \fi%
+                \fi%
+                \def\tud@res@c{v\tud@res@a}%
+              }{%
+                \let\tud@res@b\@empty%
+                \def\tud@res@c{#4}%
+              }%
+              \edef\tud@res@c{%
+                \endgroup%
+                \def\noexpand\tud@res@b{\tud@res@b}%
+                \def\noexpand\tud@res@c{\tud@res@c}%
+              }%
+            \tud@res@c%
           }%
+        }%
 %    \end{macrocode}
-% Vor der Ausgabe wird ein kleiner vertikaler Abstand eingefügt.
+% Vor der Ausgabe wird ggf. ein kleiner vertikaler Abstand eingefügt.
 %    \begin{macrocode}
-          \ifhmode\par\fi%
+        \ifnum\tud@todo@num=\tw@\relax%
+          \let\@todonotes@drawInlineNote\relax%
+        \else%
+          \ifhmode\strut\par\fi%
           \let\par\relax%
-          \vskip\medskipamount%
+          \vskip\glueexpr\smallskipamount/2\relax%
           \noindent%
+        \fi%
 %    \end{macrocode}
 % Dann erfolgt die Ausgabe der eigentlichen ToDo-Notiz im Textbereich. Die 
 % Sternversion von \cs{ToDo} unterdrückt dabei die Aufnahme in die ToDo-Liste.
 %    \begin{macrocode}
-          \toks@\expandafter{\tud@res@b inline}%
-          \IfBooleanT{#1}{\addto@hook\toks@{,nolist}}%
-          \sbox\z@{%
-            \expandafter\todo\expandafter[\the\toks@]{\trim@spaces{#3}\strut}%
-          }\usebox\z@%
+        \edef\tud@res@c{\tud@res@b,inline\IfBooleanT{#1}{,nolist}}%
+        \sbox\z@{\@ToDo{\tud@res@c}{#3}}\usebox\z@%
 %    \end{macrocode}
 % Es folgt die dazugehörige Randnotiz. Damit diese nicht verrutscht, wird
 % \cs{marginnote} anstelle von \cs{marginpar} verwendet. Wurde das angestellte
 % optionale Argument verwendet, wird dieses für die Randnotiz genutzt.
 % Andernfalls erscheint im Rand die Anmerkung \emph{ToDo}.
 %    \begin{macrocode}
-          \renewcommand*\marginpar[2][]{%
-            \marginnote[{##1}]{##2}[\dimexpr-\ht\z@+1.6ex+1.75pt\relax]%
-          }%
-          \toks@\expandafter{\tud@res@a noline,nolist}%
-          \settowidth\marginparwidth{\tud@res@c}%
-          \tud@addtodim\marginparwidth{\dimexpr1.6ex+1pt\relax}%
-          \expandafter\todo\expandafter[\the\toks@]{\tud@res@c\strut}%
+        \renewcommand*\marginpar[2][]{%
+          \marginnote[{##1}]{##2}[\dimexpr\ht\strutbox-\ht\z@-\dp\z@\relax]%
+        }%
+        \edef\tud@res@c{\tud@res@b,noline,nolist}%
+        \@ToDo{\tud@res@c}{\tud@res@a}%
+        \ifnum\tud@todo@num=\tw@\relax\else%
           \aftergroup\par\aftergroup\noindent%
-%    \end{macrocode}
-% Wurden im ersten optionalen Argument unbekannte Werte gefunden, werden diese 
-% mit einer Warnung gemeldet.
-%    \begin{macrocode}
-          \listremove{\tud@todo@type@use}{rls}%
-          \listremove{\tud@todo@type@use}{imp}%
-          \listremove{\tud@todo@type@use}{doc}%
-          \ifx\tud@todo@type@use\@empty\else%
-            \begingroup%
-              \let\tud@res@c\@empty%
-              \renewcommand*\do[1]{%
-                \appto\tud@res@c{,##1}%
-              }%
-              \dolistloop{\tud@todo@type@use}%
-              \edef\tud@res@c{%
-                \endgroup%
-                \edef\noexpand\tud@res@c{\expandafter\@gobble\tud@res@c}%
-              }%
-            \tud@res@c%
-            \ClassWarning{tudscrmanual}{%
-              Unknown key(s) `\string\ToDo[\tud@res@c]'%
-            }%
-          \fi%
         \fi%
-      \endgroup%
-      \global\let\@currentHref\tud@currentHref%
-    }{}%
-    \ignorespaces%
-  }%
+      \fi%
+    \endgroup%
+    \global\let\@currentHref\tud@currentHref%
+  \fi%
+  \ignorespaces%
+}
+%    \end{macrocode}
+% Hilfmakro zur Ausführung des Befehle \cs{todo} aus dem Paket \pkg{todonotes}.
+%    \begin{macrocode}
+\newcommand*\@ToDo[2]{%
+  \expandafter\todo\expandafter[\expandafter{#1}]{\trim@spaces{#2}\strut}%
+}
 %    \end{macrocode}
 % Zum Schluss wird der Befehl \cs{ListOfToDo} definiert, der die Liste der noch 
 % zu erledigenden Punkte ausgibt.
 %    \begin{macrocode}
-  \newcommand*\ListOfToDo{\if@tud@todo\clearpage\listoftodos\fi}%
-}
-%    \end{macrocode}
-% Sollte das Paket \pkg{todonotes} nicht geladen werden, erfolgt ein Definition 
-% der beiden notwendigen Befehle als Dummy.
-%    \begin{macrocode}
-\TUD@UnwindPackage{todonotes}{%
-  \NewDocumentCommand\ToDo{s o m !o}{}%
-  \newcommand*\ListOfToDo{}%
+\newcommand*\ListOfToDo{%
+  \ifnum\tud@todo@num>\z@\relax\cleardoublepage\listoftodos\fi%
 }
 %    \end{macrocode}
 % \end{macro}^^A \ListOfToDo
-% \end{macro}^^A \tud@todo@type@use
+% \end{macro}^^A \@ToDo
 % \end{macro}^^A \ToDo
 %
 % \iffalse
 %</body>
 % \fi
 %
-% \Finale
+% \Finale\PrintIndex\PrintChanges\PrintToDos
 %
 \endinput

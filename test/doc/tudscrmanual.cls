@@ -153,6 +153,18 @@
   cd=color,%
 }{\TUD@Class@Parent}
 \PassOptionsToPackage{automark}{scrlayer-scrpage}
+\PassOptionsToPackage{obeyFinal}{todonotes}
+\ifdef{\tudprintflag}{%
+  \PassOptionsToPackage{color=white}{todonotes}%
+}{%
+  \PassOptionsToPackage{colorinlistoftodos}{todonotes}%
+}
+\RequirePackage{todonotes}[2021/06/04]
+\AtEndPreamble{%
+  \ifdim\marginparwidth<2cm\relax%
+    \tud@setdim\marginparwidth{2cm}%
+  \fi%
+}
 \tud@newcount\tud@todo@num
 \newcommand*\tud@todo@type@use{}
 \newcommand*\tud@todo@type@default{}
@@ -547,18 +559,6 @@
   language=[LaTeX]TeX,%
   texcl,%
 }
-\PassOptionsToPackage{obeyFinal}{todonotes}
-\ifdef{\tudprintflag}{%
-  \PassOptionsToPackage{color=white}{todonotes}%
-}{%
-  \PassOptionsToPackage{colorinlistoftodos}{todonotes}%
-}
-\RequirePackage{todonotes}[2021/06/04]
-\AtEndPreamble{%
-  \ifdim\marginparwidth<2cm\relax%
-    \tud@setdim\marginparwidth{2cm}%
-  \fi%
-}
 \PassOptionsToPackage{nospace}{varioref}
 \RequirePackage{varioref}[2020/08/11]
 \renewrobustcmd*\fullref[1]{\hyperref[{#1}]{\autoref*{#1}\space\vpageref{#1}}}
@@ -719,7 +719,7 @@
         \unexpanded{%
           \ClassError{tudscrmanual}{Invalid version number}{%
             The given version number `#1' is invalid as it\MessageBreak%
-            should be `[v][0-9]+.[0-9]+[a-z]*'%
+            should be `[v][0-9]+.[0-9]+[a-z]*' (regex).%
           }%
           \let#1\relax%
         }%
@@ -1169,7 +1169,7 @@
           }%
           \tud@res@b%
         \endgroup%
-        % DOC wenn erfolgreich, sollte das log-file sich geändert haben
+        % DOC wenn erfolgreich, hat sich das log geändert (temporäre Module)
         \ifnum\pdf@strcmp{\tud@res@c}{\pdf@filemdfivesum{\tud@xdy@log}}=\z@%
           \ClassWarningNoLine{tudscrmanual}%
           {%
@@ -1186,6 +1186,7 @@
         }%
         \@tud@res@swafalse%
       \fi%
+      % DOC Zurücksetzen auf bisherige Prüfsumme
       \if@tud@res@swa\else%
         \let\tud@res@a\tud@index@mdfive%
       \fi%
@@ -2377,7 +2378,7 @@
     \fi%
     \ifcsundef{\tud@res@b}{%
       \ClassError{tudscrmanual}{Internal error}{%
-        `\@backslashchar\tud@res@b' was never defined%
+        `\@backslashchar\tud@res@b' was never defined.%
       }%
       \let\tud@res@a\@empty%
     }{%
@@ -3142,11 +3143,11 @@
         \expandafter\tud@res@d\tud@res@a\@nil%
         \ifx\tud@res@c\@empty\else%
           \ifcase\tud@res@b\relax% CTAN
-            \tud@url@normalize@ctan\tud@res@c{pkg/\tud@res@c}%
+            \tud@ctan@url@normalize\tud@res@c{pkg/\tud@res@c}%
           \or% CTANinfo
-            \tud@url@normalize@ctan\tud@res@c{tex-archive/info/\tud@res@c}%
+            \tud@ctan@url@normalize\tud@res@c{tex-archive/info/\tud@res@c}%
           \or% GH
-            \tud@url@normalize@github\tud@res@c{\tud@res@c}%
+            \tud@github@url@normalize\tud@res@c{\tud@res@c}%
           \fi%
         \fi%
       \fi%
@@ -3738,7 +3739,7 @@
 \AtBeginDocument{\undef\printdeclarationlist}
 \newcommand*\tud@declare@check{%
   \ifundef\printdeclarationlist{}{%
-    \ClassError{tudscrmanual}{\string\printdeclarationlist\space is missing}{%
+    \ClassError{tudscrmanual}{\string\printdeclarationlist\space missing}{%
       The command \string\printdeclarationlist\space must\MessageBreak%
       be used right after the last declaration environment.%
     }%
@@ -5209,12 +5210,9 @@
     }%
   \endgroup%
 }
-\newcommand*\@ToDo[2][]{%
-  \expandafter\todo\expandafter[\expandafter{#1}]{\trim@spaces{#2}\strut}%
-}
 \TUD@UnwindPackage{todonotes}{%
   \RenewDocumentCommand\ToDo{s o m !o}{}%
-  \newcommand*\ListOfToDo{}%
+  \renewcommand*\ListOfToDo{}%
 }
 % TODO > s o[#4] d()[#2] m; in tudscrdoc übernehmen
 \NewDocumentCommand\ToDo{s O{default} m !o}{%
@@ -5224,10 +5222,10 @@
       \begingroup%
         \let\tud@res@a\tud@todo@type@use%
         \let\tud@res@b\@empty%
-        \TUDoptions{ToDo={only={#2}}}%
         \def\tud@res@c##1{%
           \ifinlist{##1}{\tud@res@a}{\listadd\tud@res@b{##1}}{}%
         }%
+        \TUDoptions{ToDo={only={#2}}}%
         \forlistloop\tud@res@c{\tud@todo@type@use}%
         \edef\tud@res@c{%
           \endgroup%
@@ -5239,9 +5237,7 @@
         \ifinlist{rls}{\tud@todo@type@use}{%
           \def\tud@res@c{HKS44}%
           \IfValueT{#4}{%
-            \ClassWarning{tudscrmanual}{%
-              ToDo type `rls' is fixed to current version%
-            }%
+            \ClassWarning{tudscrmanual}{`rls' is fixed to current version}%
           }%
         }{%
           \ifinlist{imp}{\tud@todo@type@use}{%
@@ -5306,12 +5302,12 @@
           \noindent%
         \fi%
         \edef\tud@res@c{\tud@res@b,inline\IfBooleanT{#1}{,nolist}}%
-        \sbox\z@{\@ToDo[{\tud@res@c}]{#3}}\usebox\z@%
+        \sbox\z@{\@ToDo{\tud@res@c}{#3}}\usebox\z@%
         \renewcommand*\marginpar[2][]{%
           \marginnote[{##1}]{##2}[\dimexpr\ht\strutbox-\ht\z@-\dp\z@\relax]%
         }%
         \edef\tud@res@c{\tud@res@b,noline,nolist}%
-        \@ToDo[{\tud@res@c}]{\tud@res@a}%
+        \@ToDo{\tud@res@c}{\tud@res@a}%
         \ifnum\tud@todo@num=\tw@\relax\else%
           \aftergroup\par\aftergroup\noindent%
         \fi%
@@ -5320,6 +5316,9 @@
     \global\let\@currentHref\tud@currentHref%
   \fi%
   \ignorespaces%
+}
+\newcommand*\@ToDo[2]{%
+  \expandafter\todo\expandafter[\expandafter{#1}]{\trim@spaces{#2}\strut}%
 }
 \newcommand*\ListOfToDo{%
   \ifnum\tud@todo@num>\z@\relax\cleardoublepage\listoftodos\fi%
@@ -5511,84 +5510,88 @@
     }%
   \tud@res@b%
 }
-\newcommand*\tud@url@normalize@github[2]{%
+\newcommand*\tud@github@url@normalize[2]{%
   \tud@url@normalize#1{github.com}{#2}%
 }
 \newcommand*\tud@github@url@base{}
 \let\tud@github@url@base\relax
 \newcommand*\GitHubBase[1]{%
-  \tud@url@normalize@github\tud@github@url@base{#1}%
+  \tud@github@url@normalize\tud@github@url@base{#1}%
 }
-\AtBeginDocument{%
-  \ifx\tud@github@url@base\relax%
-    \ClassWarningNoLine{\TUD@Class@Name}%
-    {%
-      No GitHub repository was set with `\string\GitHubBase'\MessageBreak%
-      so \TUDScriptRepository\space is used%
-    }%
-    \GitHubBase{\TUDScriptRepository}%
-  \fi%
+\newcommand*\tud@github@url@error{%
+  \ClassError{\TUD@Class@Name}{GitHub repository missing}{%
+    No default GitHub repository was set with\MessageBreak%
+    `\detokenize{\GitHubBase{<url>}}'. You should either\MessageBreak%
+    set a default one or pass it as argument.%
+  }%
 }
 \NewDocumentCommand\GitHubRepo{!o !d() !d<>}{%
   \begingroup%
-    \IfValueTF{#2}{%
-      \tud@url@normalize@github\tud@res@b{#2}%
-    }{%
-      \let\tud@res@b\tud@github@url@base%
-    }%
-    \IfValueTF{#1}{%
-      \def\tud@res@c{#1}%
-    }{%
-      \expandafter\filename@parse\expandafter{\tud@res@b}%
-      \protected@edef\tud@res@c{%
-        \tud@english{GitHub-Repository\nobreakspace\textsbn{\filename@base}}%
+    \IfValueT{#2}{\tud@github@url@normalize\tud@github@url@base{#2}}%
+    \ifx\tud@github@url@base\relax%
+      \def\tud@res@a{%
+        \endgroup%
+        \tud@github@url@error%
       }%
-    }%
-    \IfValueT{#3}{%
-      \edef\tud@res@a{\trim@spaces{#3}}%
-      \tud@remove@enfold@char\tud@res@a{/}%
-      \Ifnumber{\tud@res@a}{%
-        \eappto{\tud@res@b}{/issues/\tud@res@a}%
+    \else%
+      \IfValueTF{#1}{%
+        \def\tud@res@c{#1}%
       }{%
-        \eappto{\tud@res@b}{/\tud@res@a}%
+        \expandafter\filename@parse\expandafter{\tud@github@url@base}%
+        \protected@edef\tud@res@c{%
+          \tud@english{GitHub-Repository\nobreakspace\textsbn{\filename@base}}%
+        }%
       }%
-    }%
-    \protected@edef\tud@res@a{%
-      \endgroup%
-      \noexpand\href{\tud@res@b}{\noexpand\mbox{\tud@res@c}}%
-    }%
+      \IfValueT{#3}{%
+        \edef\tud@res@b{\trim@spaces{#3}}%
+        \tud@remove@enfold@char\tud@res@b{/}%
+        \Ifnumber{\tud@res@b}{%
+          \IfValueF{#1}{\eappto\tud@res@c{\#\tud@res@b}}%
+          \eappto{\tud@github@url@base}{/issues/\tud@res@b}%
+        }{%
+          \eappto{\tud@github@url@base}{/\tud@res@b}%
+        }%
+      }%
+      \protected@edef\tud@res@a{%
+        \endgroup%
+        \noexpand\href{\tud@github@url@base}{\noexpand\mbox{\tud@res@c}}%
+      }%
+    \fi%
   \tud@res@a\xspace%
 }
 \NewDocumentCommand\GitHubDownload{s d() d<> m}{%
   \begingroup%
-    \IfValueTF{#2}{%
-      \tud@url@normalize@github\tud@res@b{#2}%
-    }{%
-      \let\tud@res@b\tud@github@url@base%
-    }%
-    \IfValueTF{#3}{%
-      \appto\tud@res@b{/releases/download/#3/#4}%
-    }{%
-      \appto\tud@res@b{/releases/latest/download/#4}%
-    }%
-    \IfBooleanTF{#1}{%
-      \def\tud@res@c{\File*{#4}}%
-    }{%
-      \def\tud@res@c{\InlineDeclaration{\File''{#4}}}%
-      \index{Dateien}%
-    }%
-    \protected@edef\tud@res@a{%
-      \endgroup%
-      \noexpand\href{\tud@res@b}{\noexpand\mbox{\tud@res@c}}%
-    }%
+    \IfValueT{#2}{\tud@github@url@normalize\tud@github@url@base{#2}}%
+    \ifx\tud@github@url@base\relax%
+      \def\tud@res@a{%
+        \endgroup%
+        \tud@github@url@error%
+      }%
+    \else%
+      \IfValueTF{#3}{%
+        \appto\tud@github@url@base{/releases/download/#3/#4}%
+      }{%
+        \appto\tud@github@url@base{/releases/latest/download/#4}%
+      }%
+      \IfBooleanTF{#1}{%
+        \def\tud@res@c{\File*{#4}}%
+      }{%
+        \def\tud@res@c{\InlineDeclaration{\File''{#4}}}%
+        \index{Dateien}%
+      }%
+      \protected@edef\tud@res@a{%
+        \endgroup%
+        \noexpand\href{\tud@github@url@base}{\noexpand\mbox{\tud@res@c}}%
+      }%
+    \fi%
   \tud@res@a\xspace%
 }
-\newcommand*\tud@url@normalize@ctan[2]{%
+\newcommand*\tud@ctan@url@normalize[2]{%
   \tud@url@normalize#1{ctan.org}{#2}%
 }
 \NewDocumentCommand\CTAN{!o !d<>}{%
   \begingroup%
-    \tud@url@normalize@ctan\tud@res@b{\IfValueT{#2}{#2}}%
+    \tud@ctan@url@normalize\tud@res@b{\IfValueT{#2}{#2}}%
     \IfValueTF{#1}{%
       \def\tud@res@c{#1}%
     }{%
