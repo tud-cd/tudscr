@@ -3436,7 +3436,7 @@
 % \changes{v2.07}{2021/06/16}{neu}^^A
 % \begin{macro}{\tud@val@declaration@list}
 % \changes{v2.07}{2021/06/16}{neu}^^A
-% \begin{macro}{\tud@val@compare}
+% \begin{macro}{\tud@val@match}
 % \changes{v2.07}{2021/06/16}{neu}^^A
 % Die Umgebung \env{DeclareValues} dient zur Beschreibung gültiger Werte für 
 % aktuelle Deklarationen von Optionen aber auch Befehls- und Optionsparametern.
@@ -3455,116 +3455,161 @@
 \newcommand*\tud@val@alias{}
 \newcommand*\tud@val@declaration@list{}
 \NewDocumentEnvironment{DeclareValues}{!o +b}{%
+  \tud@declare@check%
+  \ifx\tud@declaration@inner@list\@empty%
+    \ClassError{tudscrmanual}{Wrong usage of `DeclareValues'}{%
+      The environment `DeclareValues' can only be used\MessageBreak%
+      within declarations.%
+    }%
+  \fi%
   \begingroup%
 %    \end{macrocode}
-% In \cs{tud@res@a} werden gültige Markup-Befehle als Liste gespeichert.
+% In \cs{tud@res@a} werden alle passenden Deklarationen als Liste gespeichert. 
+% Dabei sind nur solche gültig, die \cs{PMisc} oder \cs{PBoolean} verwenden. 
+% Diese werden zunächst temporär in \cs{tud@val@declaration@list} gesichert.
+% Der Schalter \cs{if@tud@res@swa} wird zu \val{false} gesetzt, falls keine 
+% gültigen Treffer erzielt werden konnten.
 %    \begin{macrocode}
-    \let\tud@res@a\@empty%
     \@tud@res@swatrue%
-    \IfValueTF{#1}{%
+    \let\tud@res@a\@empty%
+    \let\tud@val@declaration@list\@empty%
+    \def\do##1{%
+      \If@Markup@Value@TF[\PMisc,\PBoolean]{##1}{%
+%    \end{macrocode}
+% Ohne optionales Argument wird bei mehreren Treffern eine Warnung ausgegeben.
+%    \begin{macrocode}
+        \IfValueF{#1}{%
+          \ifx\tud@val@declaration@list\@empty\else\@tud@res@swafalse\fi%
+        }%
+        \listadd\tud@val@declaration@list{##1}%
+      }{}%
+    }%
+    \dolistloop{\tud@declaration@inner@list}%
 %    \end{macrocode}
 % Die im optionalen Argument angegebenen Markup-Befehle werden überprüft, ob 
 % diese aktuell auch tatsächlich deklariert werden. In \cs{tud@res@a} werden 
 % gültige Einträge aus \cs{tud@declaration@inner@list} abgelegt, \cs{tud@res@b}
-% enthält die korrelierenden Markup-Befehle, welche lediglich benötigt werden, 
-% um ungültige Angaben zu melden.
+% enthält die nicht zuzuordnende Markup-Befehle, welche lediglich benötigt 
+% werden, um ungültige Angaben zu melden.
 %    \begin{macrocode}
+    \IfValueTF{#1}{%
       \let\tud@res@b\@empty%
-      \def\do##1{\forcsvlist{\tud@val@compare\tud@res@a\tud@res@b{##1}}{#1}}%
-      \dolistloop{\tud@declaration@inner@list}%
       \def\do##1{%
-        \xifinlist{\detokenize{##1}}{\tud@res@b}{}{%
-          \ClassWarning{tudscrmanual}{%
-            Argument `\detokenize{##1}' did not match\MessageBreak%
-            any current declaration%
-          }%
-        }%
+%    \end{macrocode}
+% Der aktuelle Markup-Befehl wird \cs{tud@res@b} hinzugefügt und bei einem 
+% Treffer durch \cs{tud@val@match} wieder entfernt.
+%    \begin{macrocode}
+        \listeadd\tud@res@b{\detokenize{##1}}%
+        \forlistloop%
+          {\tud@val@match\tud@res@a{\tud@res@b}{##1}}%
+          {\tud@val@declaration@list}%
       }%
       \docsvlist{#1}%
-    }{%
 %    \end{macrocode}
-% Ohne optionales Argument 
+% Alle in \cs{tud@res@b} abgelegten Markup-Befehle aus dem optionalen Argument 
+% konnten nicht zugeordnet werden.
 %    \begin{macrocode}
-      \RenewDocumentCommand\tud@res@c{s m}{%
-        \begingroup%
-          \If@Markup@Key@TF{##2}{%
-            \IfBooleanTF{##1}{\@tud@res@swatrue}{\@tud@res@swafalse}%
-          }{%
-            \IfBooleanTF{##1}{\@tud@res@swafalse}{\@tud@res@swatrue}%
-          }%
-          \if@tud@res@swa%
-            \aftergroup\@firstofone%
-          \else%
-            \aftergroup\@gobble%
-          \fi%
-        \endgroup{%
-          \If@Markup@Value@TF[\PMisc,\PBoolean]{##2}{%
-            \IfBooleanT{##1}{\ifx\tud@res@a\@empty\else\@tud@res@swafalse\fi}%
-            \listadd\tud@res@a{##2}%
-          }{}%
+      \def\do##1{%
+        \ClassWarning{tudscrmanual}{%
+          Argument `\detokenize{##1}' did not match\MessageBreak%
+          any current declaration%
         }%
       }%
-      \forlistloop{\tud@res@c}{\tud@declaration@inner@list}%
-      \ifx\tud@res@a\@empty%
-        \forlistloop{\tud@res@c*}{\tud@declaration@inner@list}%
-      \fi%
+      \dolistloop{\tud@res@b}%
+    }{%
+%    \end{macrocode}
+% Ohne optionales Argument werden alle potentiellen Einträge verwendet.
+%    \begin{macrocode}
+      \let\tud@res@a\tud@val@declaration@list%
     }%
-}
+%    \end{macrocode}
+% Eine leere Liste ist in jedem Fall nicht akzeptabel. Ohne gültige Treffer 
+% wird eine Warnung über gar keine oder zu viele, nicht spezifizerte Kandidaten
+% ausgegeben.
+%    \begin{macrocode}
+    \ifx\tud@res@a\@empty%
+      \@tud@res@swafalse%
+    \fi%
+    \if@tud@res@swa\else%
+      \let\tud@res@c\@empty%
+      \def\do##1{%
+        \def\tud@res@d{##1}%
+        \Markup@Outer@Get\tud@res@d{\tud@res@d}%
+        \eappto\tud@res@c{%
+          \detokenize\expandafter{\tud@res@d}\noexpand\MessageBreak%
+        }%
+      }%
+      \ifx\tud@res@a\@empty%
+        \let\tud@res@a\tud@declaration@inner@list%
+        \@tud@res@swafalse%
+      \else%
+        \@tud@res@swatrue%
+      \fi%
+      \dolistloop{\tud@res@a}%
+      \if@tud@res@swa%
+        \ClassWarning{tudscrmanual}{%
+          Multiple matching declarations, one or more of\MessageBreak%
+           \tud@res@c should be specified with the\MessageBreak%
+           optional argument of `DeclareValues'%
+        }%
+      \else%
+        \ClassWarning{tudscrmanual}{%
+          None of the given declarations:\MessageBreak%
+          \tud@res@c\IfValueT{#1}{was matched or }holds a special value%
+        }%
+      \fi%
+      \let\tud@res@a\@empty%
+    \fi%
+%    \end{macrocode}
+% Am Ende der Initialisierung enthält \cs{tud@val@declaration@list} alle 
+% Einträge aus \cs{tud@declaration@inner@list}, die für die nachfolgende 
+% Deklaration der Werte verwendet werden.
+%    \begin{macrocode}
+    \edef\tud@res@a{%
+      \endgroup%
+      \unexpanded{\def\tud@val@declaration@list}{\expandonce\tud@res@a}%
+    }%
+  \tud@res@a%
+  \begin{Declare@Values}#2\end{Declare@Values}%
+}{}
 \NoIndentAfterEnv{DeclareValues}
 %    \end{macrocode}
-% Hiermit wird geprüft, ob der im dritten Argument übergebene einzelne Eintrag 
-% aus \cs{tud@declaration@inner@list} mit dem im vierten Argument explizit 
-% angegebenen Markupbefehl korreliert.
+% Hiermit wird geprüft, ob der explizit angegebenen Markupbefehl im dritten 
+% Argument mit dem einzelnen Eintrag aus \cs{tud@declaration@inner@list} im
+% vierten Argument korreliert.
 %    \begin{macrocode}
-\newcommand*\tud@val@compare[4]{%
+\newcommand*\tud@val@match[4]{%
 %    \end{macrocode}
 % Der Vergleich selbst erfolgt auf Basis der zugehörigen Labels.
 %    \begin{macrocode}
   \begingroup%
     \@tud@res@swafalse%
-    \tud@lbl@@get\tud@res@a{#3}%
-    \tud@lbl@get\tud@res@b{#4}%
+    \tud@lbl@get\tud@res@a{#3}%
+    \tud@lbl@@get\tud@res@b{#4}%
     \ifx\tud@res@a\tud@res@b%
       \@tud@res@swatrue%
     \else%
-      \tud@truncate@value\tud@res@a{\tud@res@a}%
       \tud@truncate@value\tud@res@b{\tud@res@b}%
       \ifx\tud@res@a\tud@res@b%
         \@tud@res@swatrue%
       \fi%
     \fi%
 %    \end{macrocode}
-% Bei einem Treffer wird geprüft, ob ein Spezialparameter für die Deklaration 
-% verwendet wurde. Nur diesen können explizite Werte zugewiesen werden.
-%    \begin{macrocode}
-    \if@tud@res@swa%
-      \If@Markup@Value@TF[\PMisc,\PBoolean]{#3}{}{%
-        \@tud@res@swafalse%
-        \def\tud@res@c{#3}%
-        \Markup@Outer@Get\tud@res@c{\tud@res@c}%
-        \ClassWarning{tudscrmanual}{%
-          Argument `\detokenize{#4}' matched\MessageBreak%
-          `\detokenize\expandafter{\tud@res@c}'\MessageBreak%
-          which can't be used%
-        }%
-      }%
-    \fi%
-%    \end{macrocode}
-% Korrelieren die Angaben aus dem dritten und vierten Argument wird der Eintrag 
-% aus \cs{tud@declaration@inner@list} sowie das Markup in die Listen aus dem 
-% ersten und zweiten Argument geschrieben.
+% Korrelieren die Angaben wird der Eintrag aus \cs{tud@declaration@inner@list} 
+% in die Liste im ersten Argument geschrieben und der Markup-Befehl aus der 
+% Liste des zweiten Arguments entfernt.
 %    \begin{macrocode}
     \edef\tud@res@c{%
       \endgroup%
       \if@tud@res@swa%
-        \unexpanded{\listadd#1{#3}}%
-        \unexpanded{\listeadd#2{\detokenize{#4}}}%
+        \unexpanded{\listadd#1{#4}}%
+        \unexpanded{\listeremove#2{\detokenize{#3}}}%
       \fi%
     }%
   \tud@res@c%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@val@compare
+% \end{macro}^^A \tud@val@match
 % \end{macro}^^A \tud@val@declaration@list
 % \end{macro}^^A \tud@val@alias
 % \end{macro}^^A \tud@val@addon
@@ -3590,13 +3635,6 @@
 % Der Befehl \cs{itemval} ist nur innerhalb von \env{Declare@Values} gültig.
 %    \begin{macrocode}
 \newcommand*\tud@item@@val{%
-  \tud@declare@check%
-  \ifx\tud@declaration@inner@list\@empty%
-    \ClassError{tudscrmanual}{Wrong usage of `DeclareValues'}{%
-      The environment `DeclareValues' can only be used\MessageBreak%
-      within declarations.%
-    }%
-  \fi%
   \let\itemval\tud@item@val%
 }
 \tud@list@create[before=\tud@item@@val]{Declare@Values}{description}{1}
@@ -3645,15 +3683,43 @@
       }%
     }%
 %    \end{macrocode}
-% Die in \cs{tud@res@a} gespeicherte, zu beschreibende Option und der erste im 
-% optionalen Argument angegebene Wert werden verwendet, um ein diese zu 
-% deklarieren. Die restlichen Werte sowie mögliche Suffixe werden für die 
-% Ausgabe angehängt.
+% Die in \cs{tud@val@declaration@list} gespeicherten Basis-Deklarationen werden 
+% genutzt, um die spezifischen Werte zu deklarieren. Dabei wird lediglich der 
+% erste Eintrag inlusive der möglichen Werte ausgegeben. Alle nachfolgenden 
+% Einträge aus der Liste werden ohne Ausgabe deklariert (Label, Index).
 %    \begin{macrocode}
-    \edef\tud@res@a{%
-      \noexpand\InlineDeclaration*{\expandonce\tud@res@a}%
-      \expandonce\tud@res@c\expandonce\tud@res@b%
+    \let\tud@res@a\@empty%
+    \def\do##1{%
+      \begingroup%
+%    \end{macrocode}
+% Der in der Basis-Deklaration gegebene Wert wird durch den spezifischen mit 
+% \cs{Markup@Replace} ersetzt.
+%    \begin{macrocode}
+        \edef\tud@res@b{%
+          \unexpanded{\Markup@Replace\tud@res@b}%
+            =\expandonce\tud@val@main=%
+            \ifx\tud@val@addon\@empty\else[{\expandonce\tud@val@addon}]\fi%
+        }%
+        \tud@res@b{##1}%
+        \Markup@Outer@Get\tud@res@b{\tud@res@b}%
+        \edef\tud@res@c{%
+          \endgroup%
+%    \end{macrocode}
+% In \cs{tud@res@a} werden alle Werte-Deklarationen abgelegt, wobei auch 
+% Änderungseinträge sowie mögliche Alias-Label beachtet werden. Sobald ein 
+% Eintrag exisitiert, werden alle folgenden Deklarationen mit der Sternversion 
+% von \cs{Inline@Declaration} zur Unterdrückung der Ausgabe.
+%    \begin{macrocode}
+          \unexpanded{\appto\tud@res@a}{%
+            \noexpand\Inline@Declaration\ifx\tud@res@a\@empty\else*\fi'%
+              \unexpanded{[{#5}]}%
+              =\expandonce\tud@val@alias=%
+              {\expandonce\tud@res@b}%
+          }%
+        }%
+      \tud@res@c%
     }%
+    \dolistloop{\tud@val@declaration@list}%
 %    \end{macrocode}
 % Abschließend erfolgt die Ausgabe des generierten Eintrags mit \cs{item}. 
 % Aufgrund der ggf. mehrmaligen Verwendung von \cs{Inline@Declaration} im 
@@ -3669,7 +3735,7 @@
         \ifx\tud@res@a\@empty%
           \PValue{???=#2}%
         \else%
-          \expandonce\tud@res@a%
+          \expandonce\tud@res@a\expandonce\tud@res@d%
         \fi%
       }]%
     }%
@@ -3739,37 +3805,32 @@
       \dolistloop{\tud@val@declaration@list}%
     \fi%
 %    \end{macrocode}
-% Die ggf. durch Schrägstrich getrennte Liste im optionalen Argument wird 
-% abgearbeitet. Der erste Eintrag wird für den Indexeintrag benötigt und in
-% \cs{tud@res@b} gesichert, alle weiteren Einträge werden in \cs{tud@res@c}
-% gespeichert und lediglich im Fließtext aufgelistet.
+% Die kommaseparierte Liste \cs{tud@res@d} möglicher Werte wird verarbeitet und 
+% die Werte werden formatiert, wobei die Sternversion von \cs{itemval} für die 
+% Formatierung als Säumniswert genutzt wird. Der erste Wert wird insbesondere 
+% für den Indexeintrag benötigt und in \cs{tud@res@a} gesichert, alle weiteren
+% Einträge werden in \cs{tud@res@b} gespeichert und lediglich bei der Ausgabe
+% aufgelistet. In \cs{tud@res@c} werden die weiteren Einträge unformatiert 
+% abgelegt.
 %    \begin{macrocode}
-    \in@{/}{#3}%
-    \ifin@%
-      \def\tud@res@a##1/##2\@nil{%
-        \def\tud@res@b{##1}%
-        \def\tud@res@c{\PValue{/##2}}%
+    \let\tud@res@a\@empty%
+    \let\tud@res@b\@empty%
+    \let\tud@res@c\@empty%
+    \def\do##1{%
+      \def\tud@res@d{##1}%
+      \IfBooleanTF{#4}{%
+        \PValue@Enfold*{\tud@res@d}%
+      }{%
+        \PValue@Enfold{\tud@res@d}%
       }%
-      \tud@res@a#3\@nil%
-    \else%
-      \def\tud@res@b{#3}%
-      \let\tud@res@c\@empty%
-    \fi%
-%    \end{macrocode}
-% Jetzt beginnt die Formatierung der Ausgabe. Wurde die Sternversion genutzt, 
-% so werden die extrahierten Werte als Säumniswert mit \cs{emph} hervorgehoben.
-% Danach wird die zu beschreibende Option in \cs{tud@res@a} expandiert. Danach 
-% wird der erste Wert angehangen. Zuletzt wird mit \cs{InlineDeclaration*} 
-% dafür Sorge getragen, dass auf den erzeugten Eintrag selbst kein Hyperlink
-% erzeugt wird und dieser im passenden Index als fettmarkierter Eintrag
-% erscheint.
-%    \begin{macrocode}
-    \protected@edef\tud@res@b{#2{\tud@res@b}}%
-    \ifx\tud@res@c\@empty\else%
-      \protected@edef\tud@res@c{#2{\tud@res@c}}%
-    \fi%
-    \protected@edef\tud@res@a{\tud@values}%
-    \eappto\tud@res@a{=\expandonce\tud@res@b=}%
+      \ifx\tud@res@a\@empty%
+        \let\tud@res@a\tud@res@d%
+      \else%
+        \eappto\tud@res@b{\PValue{/}\expandonce\tud@res@d}%
+        \eappto\tud@res@c{\ifx\tud@res@c\@empty\else,\fi\expandonce\tud@res@d}%
+      \fi%
+    }%
+    \expandafter\docsvlist\expandafter{\tud@res@d}%
     \edef\tud@res@a{%
       \endgroup%
       \unexpanded{\def#1}{\expandonce\tud@res@a}%

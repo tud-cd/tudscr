@@ -4041,18 +4041,16 @@
         {\unexpanded{\hfill\suffixsize}\expandonce\tud@res@a}%
       }%
     }%
+    \let\tud@res@a\@empty%
     \def\do##1{%
       \begingroup%
         \edef\tud@res@b{%
-          % DOC '' für Inline@Declaration ohne Link
           \unexpanded{\Markup@Replace\tud@res@b}%
             =\expandonce\tud@val@main=%
             \ifx\tud@val@addon\@empty\else[{\expandonce\tud@val@addon}]\fi%
-            ''%
         }%
         \tud@res@b{##1}%
         \Markup@Outer@Get\tud@res@b{\tud@res@b}%
-        \tud@lbl@@get\tud@lbl@tmp{##1}%
         \edef\tud@res@c{%
           \endgroup%
           \unexpanded{\appto\tud@res@a}{%
@@ -4062,10 +4060,8 @@
               {\expandonce\tud@res@b}%
           }%
         }%
-        \typeout{===== \meaning\tud@res@c}%
       \tud@res@c%
     }%
-    \let\tud@res@a\@empty%
     \dolistloop{\tud@val@declaration@list}%
     \edef\tud@res@a{%
       \endgroup%
@@ -4083,7 +4079,6 @@
 }
 \newcommand*\tud@val@format[5]{%
   \begingroup%
-    % DOC normalize and format input values
     \protected@edef\tud@res@a{#5}%
     \let\tud@res@b\@empty%
     \let\tud@res@c\@empty%
