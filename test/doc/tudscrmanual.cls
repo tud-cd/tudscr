@@ -4150,7 +4150,7 @@
 }
 \newcommand*\tud@index@note@entries{}
 \let\tud@index@note@entries\relax
-\newlength\tud@index@note@vskip
+\tud@newdim\tud@index@note@vskip
 \newcommand*\tud@index@note@format[1]{%
   \hfill\llap{%
     \colorbox{HKS41!60}{%
@@ -4159,6 +4159,7 @@
     }%
   }%
 }
+% TODO überprüfen, was genau läuft hier?
 \newcommand*\tud@index@note@write[2]{%
   \begingroup%
     \tud@if@strequal{\jobname}{#1}{%
@@ -4167,15 +4168,15 @@
         \ifnum\@floatpenalty<\z@\relax\@tud@res@swatrue\fi%
         \ifinner\@tud@res@swatrue\fi%
         \if@tud@res@swa%
-          \addtolength\tud@index@note@vskip{\baselineskip}%
+          \tud@addtodim\tud@index@note@vskip{1\baselineskip}%
           \marginnote{\tud@index@note@format{#2}}[\the\tud@index@note@vskip]%
         \else%
           \marginpar{\tud@index@note@format{#2}}%
-          \tud@index@note@vskip=\z@%
+          \tud@setdim\tud@index@note@vskip{\z@}%
         \fi%
       }{%
         \ifx\tud@index@note@entries\relax%
-          \tud@index@note@vskip=\z@%
+          \tud@setdim\tud@index@note@vskip{\z@}%
           \gdef\tud@index@note@entries{%
             \global\let\tud@index@note@entries\relax%
             \global\tud@index@note@vskip=\z@%
@@ -4184,7 +4185,7 @@
         \appto\tud@index@note@entries{%
           \marginnote{\tud@index@note@format{#2}}%
         }%
-        \addtolength\tud@index@note@vskip{\baselineskip}%
+        \tud@addtodim\tud@index@note@vskip{1\baselineskip}%
         \xappto\tud@index@note@entries{[\the\tud@index@note@vskip]}%
       }%
       \global\tud@index@note@vskip=\tud@index@note@vskip%
