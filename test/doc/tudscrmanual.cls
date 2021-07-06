@@ -58,7 +58,7 @@
       \fi%
     }%
   \fi%
-  \TUD@@Version{2021/06/10 v2.07 TUD-Script}{2021/03/17 v3.33 KOMA-Script}%
+  \TUD@@Version{2021/07/07 v2.07 TUD-Script}{2021/06/25 v3.34 KOMA-Script}%
   \ifx\TUDScriptVersion\@undefined%
     \xdef\TUDScriptVersion{\TUD@Version}%
     \def\@tempa#1 v#2 #3\relax#4\relax#5{\gdef#5{#2}}%
@@ -81,7 +81,7 @@
 \newcommand*\TUD@ProvidesWrapperClass[3]
 {%
   \ProvidesClass{#1}[%
-  2021/06/10 v2.07 TUD-Script
+  2021/07/07 v2.07 TUD-Script
     #3 (#2)%
   ]%
   \newcommand*\TUD@Class@Parent{#2}%
@@ -103,13 +103,13 @@
 \TUD@ProvidesWrapperClass{tudscrmanual}{tudscrreprt}{manual class}
 %%%% From File: tudscr-base.dtx 2021/01/18 15:24:43 7ad44a9
 \RequirePackage{tudscrbase}[%
-  2021/06/10 v2.07 TUD-Script
+  2021/07/07 v2.07 TUD-Script
 ]
 \renewcommand*\TUD@KOMAoptions[1]{\PassOptionsToClass{#1}{\TUD@Class@Parent}}
 \AfterClass{\TUD@Class@Parent}{\let\TUD@KOMAoptions\KOMAoptions}
 %%%% From File: tudscr-misc.dtx 2021/06/10 01:08:07 fb873a0
 \RequirePackage{scrhack}[%
-  2021/03/17 v3.33 KOMA-Script
+  2021/06/25 v3.34 KOMA-Script
 ]
 \RequirePackage{xspace}[2014/10/28]
 \xspaceaddexceptions{"=}
@@ -1024,12 +1024,14 @@
 }{}{\tud@patch@wrn{@outputpage}}
 \newcommand*\tud@addtocontents@hook{}
 \let\tud@addtocontents@hook\relax
-\newcommand*\tud@headings@special[1]{%
-  \appto\tud@addtocontents@hook{#1}%
-  \AfterPackage*{hyperref}{\pdfstringdefDisableCommands{#1}}%
-  \AfterPackage*{nameref}{\GetTitleStringDisableCommands{#1}}%
+\NewDocumentCommand\tud@addtocontents@special{s m}{%
+  \appto\tud@addtocontents@hook{#2}%
+  \IfBooleanT{#1}{%
+    \AfterPackage*{hyperref}{\pdfstringdefDisableCommands{#2}}%
+    \AfterPackage*{nameref}{\GetTitleStringDisableCommands{#2}}%
+  }%
 }
-\@onlypreamble\tud@headings@special
+\@onlypreamble\tud@addtocontents@special
 \patchcmd\addtocontents{%
   \let\index\@gobble\let\glossary\@gobble%
 }{%
@@ -2066,7 +2068,7 @@
   \fi%
 }
 \NewExpandableDocumentCommand\@tudmarkuplabel{o m}{}
-\tud@headings@special{\let\tudmarkuplabel\@tudmarkuplabel}
+\tud@addtocontents@special*{\let\tudmarkuplabel\@tudmarkuplabel}
 \tud@newif\if@tud@markup@output\@tud@markup@outputtrue
 \TUD@key[.declare]{output}[true]{%
   \TUD@set@ifkey{output}{@tud@markup@output}{#1}%
@@ -4217,7 +4219,7 @@
   }%
 }
 \NewExpandableDocumentCommand\@gobbleopt@one{o m}{}
-\tud@headings@special{\let\index\@gobbleopt@one}
+\tud@addtocontents@special*{\let\index\@gobbleopt@one}
 \def\index{%
   \@bsphack\begingroup%
   \@sanitize%
@@ -4869,7 +4871,7 @@
 \expandafter\NewExpandableDocumentCommand\expandafter\@ChangedAt\expandafter{%
   \ArgumentSpecification%
 }{}%
-\tud@headings@special{\let\ChangedAt\@ChangedAt}
+\tud@addtocontents@special*{\let\ChangedAt\@ChangedAt}
 \newcommand*\tud@chg@entry@list{}
 \newcommand*\tud@chg@version@list{}
 \newcommand*\tud@print@changedatlist[1][\z@]{%

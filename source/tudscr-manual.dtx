@@ -256,19 +256,22 @@
 % \end{macro}^^A \tud@outputpage@hook
 % \begin{macro}{\tud@addtocontents@hook}
 % \changes{v2.07}{2021/06/15}{neu}^^A
-% \begin{macro}{\tud@headings@special}
+% \begin{macro}{\tud@addtocontents@special}
 % \changes{v2.07}{2021/06/15}{neu}^^A
 % \begin{macro}{\addtocontents}
-% Die Patches für die Inhaltsverzeichnis und Outline-Einträge.
+% Die Patches für die Inhaltsverzeichnis und Outline-Einträge. Letztere werden 
+% nur geändert, falls die Sternversion genutzt wurde.
 %    \begin{macrocode}
 \newcommand*\tud@addtocontents@hook{}
 \let\tud@addtocontents@hook\relax
-\newcommand*\tud@headings@special[1]{%
-  \appto\tud@addtocontents@hook{#1}%
-  \AfterPackage*{hyperref}{\pdfstringdefDisableCommands{#1}}%
-  \AfterPackage*{nameref}{\GetTitleStringDisableCommands{#1}}%
+\NewDocumentCommand\tud@addtocontents@special{s m}{%
+  \appto\tud@addtocontents@hook{#2}%
+  \IfBooleanT{#1}{%
+    \AfterPackage*{hyperref}{\pdfstringdefDisableCommands{#2}}%
+    \AfterPackage*{nameref}{\GetTitleStringDisableCommands{#2}}%
+  }%
 }
-\@onlypreamble\tud@headings@special
+\@onlypreamble\tud@addtocontents@special
 \patchcmd\addtocontents{%
   \let\index\@gobble\let\glossary\@gobble%
 }{%
@@ -277,7 +280,7 @@
 }{}{\tud@patch@wrn{addtocontents}}
 %    \end{macrocode}
 % \end{macro}^^A \addtocontents
-% \end{macro}^^A \tud@headings@special
+% \end{macro}^^A \tud@addtocontents@special
 % \end{macro}^^A \tud@addtocontents@hook
 %
 %
@@ -760,6 +763,13 @@
 % Ankers noch weiter nach oben.
 %    \begin{macrocode}
 \newcommand*\tud@manualname{tudscr}%
+\newcommand*\tud@hyperdefvskip@dim{\dimexpr1\baselineskip*3\relax}
+\patchcmd\set@@@@preamble{%
+  \let\phantomsection\relax%
+}{%
+  \let\phantomsection\relax%
+  \renewcommand*\tud@hyperdefvskip@dim{\dimexpr1\baselineskip*15\relax}%
+}{}{\tud@patch@wrn{set@@@@preamble}}
 %<*class>
 %    \end{macrocode}
 % Die Verwendung von \cs{detokenize} ist notwendig, damit mögliche Unterschiede 
@@ -3067,20 +3077,6 @@
     \tud@trace@markup@add{output}{\the\tud@toks@}%
   \fi%
 %    \end{macrocode}
-% Ganz zum Schluss wird noch für beide Fälle geprüft, ob \parg{Entität} 
-% angegeben wurde. Ist dies der Fall, wird zum einen die \meta{Entität}
-% zur Überprüfung ggf. in das Log-File geschrieben, zum anderen wird geprüft, 
-% ob für das \meta{Element} überhaupt ein Link definiert wurde, der verwendet
-% werden soll. Ist dies nicht der Fall, wird eine Warnung ausgegeben. Dies ist 
-% möglich, da durch die automatische Labelgenerierung normalerweise alle nicht 
-% existierenden Labels mit \meta{Entitätpräfix} auf \cs{tud@bdl@dftl} verweisen
-% müssten. Für die wenigen Fälle, in denen gezielt auf einen Querverweis 
-% verzichtet werden soll, kann ein leeres Argument \parg{} angegeben werden.
-%    \begin{macrocode}
-  \if@tud@index\else%
-%^^A    \IfValueT{#4}{\tud@trace@bdl@add{#4}}%
-  \fi%
-%    \end{macrocode}
 % Nun erfolgt mit \cs{Process@@MarkupDeclare} bzw. \cs{Process@@MarkupInline} 
 % die Ausführung der eigentlichen Auszeichnung.
 %    \begin{macrocode}
@@ -4140,8 +4136,8 @@
 % \changes{v2.07}{2021/06/15}{neu}^^A
 %    \begin{macrocode}
 \NewExpandableDocumentCommand\@gobbleopt@one{o m}{}
-\tud@headings@special{\let\index\@gobbleopt@one}
 \tud@outputpage@special{\let\index\@gobbleopt@one}
+\tud@addtocontents@special*{\let\index\@gobbleopt@one}
 %    \end{macrocode}
 % \end{macro}^^A \@gobbleopt@one
 %
