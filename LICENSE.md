@@ -13,6 +13,10 @@
  or later and of this work. This work has the LPPL maintenance status
  "author-maintained". The current maintainer and author of this work
  is Falk Hanisch.
+ 
+ However, only members of the  Technische Universität Dresden are permitted 
+ to publish documents in the corporate design, in particular with the use 
+ of an official logo.
 
 ----------------------------------------------------------------------------
 
@@ -23,5 +27,9 @@
  oder später und dieses Werks. Dieses Werk hat den LPPL-Verwaltungs-Status
  "author-maintained", wird somit allein durch den Autor verwaltet. Der
  aktuelle Verwalter und Autor dieses Werkes ist Falk Hanisch.
+ 
+ Jedoch ist es lediglich Angehörigen der Technischen Universität Dresden 
+ gestattet, Dokumente im Corporate Design insbesondere mit der Verwendung 
+ eines offiziellen Logos zu veröffentlichen.
 
 ----------------------------------------------------------------------------

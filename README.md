@@ -4,15 +4,16 @@
 
  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2021
 
- tudscr 2021/03/30 v2.06l
-
- The current release is shiped via CTAN: https://www.ctan.org/pkg/tudscr
-
-----------------------------------------------------------------------------
+ tudscr 2021/07/06 v2.06m
 
  This material is subject to the LaTeX Project Public License version 1.3c
  or later. See http://www.latex-project.org/lppl.txt for details.
- English text below.
+
+----------------------------------------------------------------------------
+
+The current release is shiped via CTAN: https://www.ctan.org/pkg/tudscr
+
+**English text below**
 
 ----------------------------------------------------------------------------
 
@@ -56,6 +57,9 @@ Das Bundle beinhaltet:
 
 Versionen
 ---------
+
+**v2.06m** (2021/07/06)
++ Fix eines internen Fehlers mit LuaLaTeX
 
 **v2.06l** (2021/03/30)
 + Fix für Festlegung des Seitenstils in der Präambel
@@ -275,6 +279,9 @@ The bundle offers:
 
 Versions
 --------
+
+**v2.06m** (2021/07/06)
++ bug fix for an internal error with LuaLaTeX
 
 **v2.06l** (2021/03/30)
 + bug fix for defining the page style in the preamble
