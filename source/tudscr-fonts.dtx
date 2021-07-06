@@ -2649,16 +2649,16 @@
   \tud@math@loop@greeks@lc{#1}%
 }
 \newcommand*\tud@math@loop@greeks@uc[1]{%
-  \@for\@tempa:={%
+  \forcsvlist#1{%
     Gamma,Delta,Theta,Lambda,Xi,Pi,Sigma,Upsilon,Phi,Psi,Omega%
-  }\do{\expandafter#1\expandafter{\@tempa}}%
+  }%
 }
 \newcommand*\tud@math@loop@greeks@lc[1]{%
-  \@for\@tempa:={%
+  \forcsvlist#1{%
     alpha,beta,gamma,delta,epsilon,zeta,eta,theta,iota,kappa,lambda,%
     mu,nu,xi,pi,rho,sigma,tau,upsilon,phi,chi,psi,omega,%
     varepsilon,vartheta,varpi,varrho,varsigma,varphi%
-  }\do{\expandafter#1\expandafter{\@tempa}}%
+  }%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@math@loop@greeks@lc
@@ -2837,15 +2837,11 @@
 \newcommand*\tud@math@map@@greeks[1]{%
   \ifcsundef{it#1}{%
     \@for\tud@res@a:={#1sl,sl#1,#1it}\do{%
-      \ifcsundef{\tud@res@a}{}{\csedef{it#1}{\csname\tud@res@a\endcsname}}%
+      \ifcsundef{\tud@res@a}{}{\csletcs{it#1}{\tud@res@a}}%
     }%
   }{}%
-  \ifcsundef{up#1}{%
-    \ifcsundef{#1up}{}{\csedef{up#1}{\csname#1up\endcsname}}%
-  }{}%
-  \ifcsundef{other#1}{%
-    \ifcsundef{#1other}{}{\csedef{other#1}{\csname#1other\endcsname}}%
-  }{}%
+  \ifcsundef{up#1}{\ifcsundef{#1up}{}{\csletcs{up#1}{#1up}}}{}%
+  \ifcsundef{other#1}{\ifcsundef{#1other}{}{\csletcs{other#1}{#1other}}}{}%
 }
 %    \end{macrocode}
 % Einige Pakete stellen für griechische Majuskeln die Befehle \cs{var\dots} 
@@ -2854,13 +2850,11 @@
 % ebenfalls ausgewertet und ggf. auf die \TUDScript-Nomenklatur abgebildet.
 %    \begin{macrocode}
 \newcommand*\tud@math@map@@@greeks[1]{%
-  \ifcsundef{it#1}{%
-    \ifcsundef{var#1}{}{\csedef{it#1}{\csname var#1\endcsname}}%
-  }{}%
+  \ifcsundef{it#1}{\ifcsundef{var#1}{}{\csletcs{it#1}{var#1}}}{}%
   \ifcsundef{up#1}{%
     \tud@lowerstring\tud@res@a{#1}%
     \edef\tud@res@a{Up\tud@res@a}%
-    \ifcsundef{\tud@res@a}{}{\csedef{up#1}{\csname\tud@res@a\endcsname}}%
+    \ifcsundef{\tud@res@a}{}{\csletcs{up#1}{\tud@res@a}}%
   }{}%
 }
 %    \end{macrocode}
@@ -3696,6 +3690,7 @@
 % \changes{v2.06}{2019/06/19}{neu}^^A
 % \begin{macro}{\tud@cdmath@declare@alias}
 % \changes{v2.06}{2019/06/19}{neu}^^A
+% \changes{v2.06m}{2021/07/06}{\cs{csedef} durch \cs{csletcs} ersetzt}^^A
 % \begin{macro}{\tud@cdmath@symb@list}
 % \changes{v2.06}{2019/06/19}{neu}^^A
 % \begin{macro}{\tud@cdmath@declare@char}
@@ -3722,7 +3717,7 @@
 \newcommand*\tud@cdmath@declare@alias[2]{%
   \listeadd\tud@cdmath@symb@list{#1}%
   \ifcsundef{tud@cdmath@symbol@#2}{}{%
-    \csedef{tud@cdmath@symbol@#1}{\csname tud@cdmath@symbol@#2\endcsname}%
+    \csletcs{tud@cdmath@symbol@#1}{tud@cdmath@symbol@#2}%
   }%
 }
 \newcommand*\tud@cdmath@char@list{}

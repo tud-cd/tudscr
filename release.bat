@@ -28,13 +28,9 @@ echo.
 set sourceinput="\def\tudfinalflag{}\input{tudscrsource.tex}"
 set docinput="\def\tudfinalflag{}\input{tudscr.tex}"
 set docprintinput="\def\tudfinalflag{}\def\tudprintflag{}\input{tudscr.tex}"
-cd source
-call clearsource.bat
-REM tex tudscr.ins
-REM pdflatex --shell-escape %sourceinput%
-cd..
 xcopy source temp\ /s
 cd temp
+call clearsource.bat
 del clearsource.bat
 cd doc
 call cleardoc.bat
@@ -43,56 +39,65 @@ del  sub-tudscr.tex
 del  test.tex
 cd ..
 if exist test rmdir test/s /q > nul
+echo.
+echo =========================================================================
+echo  Kopieren der Quelldateien
+echo =========================================================================
+echo.
 mkdir tex\latex\tudscr
-mkdir source\latex\tudscr
-mkdir doc\latex\tudscr\tutorials
 echo \BaseDirectory{.}> docstrip.cfg
 echo \UseTDS>> docstrip.cfg
-REM tex tudscr.ins
-REM pdflatex %sourceinput%
-REM pdflatex %sourceinput%
-REM pdflatex --shell-escape %sourceinput%
-REM pdflatex %sourceinput%
-move  *.dtx               source\latex\tudscr\
-move  tudscr.ins          source\latex\tudscr\
-move  tudscrsource.tex    source\latex\tudscr\
-xcopy doc                 source\latex\tudscr\doc\ /s
-copy ..\*.md doc\latex\tudscr\
+pdftex tudscr.ins
+xcopy /s logo                 tex\latex\tudscr\logo\
+xcopy /s doc                  .
+copy     tex\latex\tudscr\*.* .
+copy     tex\latex\tudscr\*.* examples
+copy     tex\latex\tudscr\*.* tutorials
+mkdir source\latex\tudscr
+move     doc                  source\latex\tudscr\doc
+copy     *.dtx                source\latex\tudscr\
+copy     tudscr.ins           source\latex\tudscr\
+copy     tudscrsource.tex     source\latex\tudscr\
+mkdir doc\latex\tudscr\tutorials
+copy     ..\*.md              doc\latex\tudscr\
+echo.
+echo =========================================================================
+echo  Erzeugen der Quelltextdokumentation
+echo =========================================================================
+echo.
+pdflatex --shell-escape %sourceinput%
+pdflatex %sourceinput%
+pdflatex %sourceinput%
+pdflatex --shell-escape %sourceinput%
+pdflatex %sourceinput%
 move tudscrsource.pdf doc\latex\tudscr\
-move logo             tex\latex\tudscr\
-del *.* /q > nul
 echo.
 echo =========================================================================
 echo  Erzeugen des Benutzerhandbuchs
 echo =========================================================================
 echo.
-cd doc
-REM pdflatex %docinput%
-REM pdflatex --shell-escape %docinput%
-REM pdflatex %docinput%
-REM pdflatex --shell-escape %docinput%
-REM pdflatex %docinput%
-REM pdflatex %docprintinput%
-REM copy tudscr.pdf tudscr_print.pdf
-REM pdflatex %docinput%
+pdflatex %docinput%
+pdflatex --shell-escape %docinput%
+pdflatex %docinput%
+pdflatex --shell-escape %docinput%
+pdflatex %docinput%
+pdflatex %docprintinput%
+copy tudscr.pdf tudscr_print.pdf
+pdflatex %docinput%
 del tutorials\*autopp*.* /q > nul
 attrib +h "tutorials\*-standalone-*.pdf"
 attrib +h "tutorials\*-pics.pdf"
-move tudscr*.pdf             latex\tudscr\
-move tutorials\*.pdf         latex\tudscr\tutorials\
-move tutorials\*-example.tex ..\source\latex\tudscr\doc\examples\
-del *.* /q > nul
-rmdir examples /s /q > nul
-rmdir tutorials /s /q > nul
+move tudscr*.pdf             doc\latex\tudscr\
+move tutorials\*.pdf         doc\latex\tudscr\tutorials\
+move tutorials\*-example.tex source\latex\tudscr\doc\examples\
 echo.
 echo =========================================================================
 echo  Erzeugen der Installationdateien
 echo =========================================================================
 echo.
-cd ..\install
-tex tudscr-metrics.dtx
-copy  ..\source\latex\tudscr\tudscr-version.dtx ..\.
-tex tudscr-scripts.dtx
+cd install
+pdftex tudscr-metrics.dtx
+pdftex tudscr-scripts.dtx
 rename *.bxt *.bat
 setlocal enabledelayedexpansion
 set "pattern=_V_"
@@ -102,7 +107,6 @@ for %%a in (*.*) do (
   rename "%%a" "!file:%pattern%=%replace%!"
 )
 endlocal
-del ..\tudscr-version.dtx
 echo.
 echo =========================================================================
 echo  Release fuer GitHub
