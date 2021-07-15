@@ -4,10 +4,11 @@
 
  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2021
 
- tudscr 2021/07/06 v2.06m
+ tudscr 2021/07/15 v2.06n
 
  This material is subject to the LaTeX Project Public License version 1.3c
- or later. See http://www.latex-project.org/lppl.txt for details.
+ or later.<br>
+ See http://www.latex-project.org/lppl.txt for details.
 
 ----------------------------------------------------------------------------
 
@@ -57,6 +58,9 @@ Das Bundle beinhaltet:
 
 Versionen
 ---------
+
+**v2.06n** (2021/07/15)
++ Fix für **siunitx**
 
 **v2.06m** (2021/07/06)
 + Fix eines internen Fehlers mit LuaLaTeX
@@ -279,6 +283,9 @@ The bundle offers:
 
 Versions
 --------
+
+**v2.06n** (2021/07/15)
++ bug fix for **siunitx**
 
 **v2.06m** (2021/07/06)
 + bug fix for an internal error with LuaLaTeX
