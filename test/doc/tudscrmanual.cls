@@ -58,7 +58,7 @@
       \fi%
     }%
   \fi%
-  \TUD@@Version{2021/07/07 v2.07 TUD-Script}{2021/06/25 v3.34 KOMA-Script}%
+  \TUD@@Version{2021/07/16 v2.07 TUD-Script}{2021/06/25 v3.34 KOMA-Script}%
   \ifx\TUDScriptVersion\@undefined%
     \xdef\TUDScriptVersion{\TUD@Version}%
     \def\@tempa#1 v#2 #3\relax#4\relax#5{\gdef#5{#2}}%
@@ -81,7 +81,7 @@
 \newcommand*\TUD@ProvidesWrapperClass[3]
 {%
   \ProvidesClass{#1}[%
-  2021/07/07 v2.07 TUD-Script
+  2021/07/16 v2.07 TUD-Script
     #3 (#2)%
   ]%
   \newcommand*\TUD@Class@Parent{#2}%
@@ -103,7 +103,7 @@
 \TUD@ProvidesWrapperClass{tudscrmanual}{tudscrreprt}{manual class}
 %%%% From File: tudscr-base.dtx 2021/01/18 15:24:43 7ad44a9
 \RequirePackage{tudscrbase}[%
-  2021/07/07 v2.07 TUD-Script
+  2021/07/16 v2.07 TUD-Script
 ]
 \renewcommand*\TUD@KOMAoptions[1]{\PassOptionsToClass{#1}{\TUD@Class@Parent}}
 \AfterClass{\TUD@Class@Parent}{\let\TUD@KOMAoptions\KOMAoptions}
@@ -636,7 +636,7 @@
 }
 \TUDProcessOptions\relax
 \LoadClass{\TUD@Class@Parent}[%
-  2021/06/10 v2.07 TUD-Script
+  2021/07/16 v2.07 TUD-Script
 ]
 %%%% From File: tudscr-misc.dtx 2021/06/10 01:08:07 fb873a0
 \renewcommand*\@pnumwidth{2.1em}%
@@ -658,6 +658,23 @@
     }%
   }{%
     \mbox{\csuse{tud@logo@#1}}%
+  }%
+}
+\newcommand*\tud@if@cdfont@activated{}
+\let\tud@if@cdfont@activated\@secondoftwo
+\AtBeginDocument{%
+  \ifdefined\if@tud@cdfont@active
+    \expandafter\@firstofone%
+  \else%
+    \expandafter\@gobble%
+  \fi{%
+    \renewcommand*\tud@if@cdfont@activated{%
+      \if@tud@cdfont@active%
+        \expandafter\@firstoftwo%
+      \else%
+        \expandafter\@secondoftwo%
+      \fi%
+    }%
   }%
 }
 \newcommand*\tud@logo@@kern[2][0]{%
@@ -682,18 +699,53 @@
     }%
   \endgroup%
 }
+\RequirePackage{l3draw}
+\ExplSyntaxOn
+\newcommand*\tud@logo@@reflect[1]{%
+  \begingroup%
+  \rlap{%
+    \draw_begin:
+    \hcoffin_set:Nn \l_tmpa_coffin{ #1 }
+    \draw_transform_xslant:n{ \the\dimexpr\fontdimen\@ne\font*2\relax }
+    \draw_transform_xscale:n{ -1 }
+    \draw_coffin_use:Nnn \l_tmpa_coffin { hc } { vc }
+    \draw_end:
+  }%
+  \hphantom{#1}%
+  \endgroup%
+}
+\ExplSyntaxOff
 \newcommand*\tud@logo@TeX{%
-  T\tud@logo@@kern[-4]{-21}%
-  \tud@logo@@shift{40}{E}%
-  \tud@logo@@kern[7]{-6}%
+  T%
+  \tud@if@cdfont@activated{%
+    \tud@logo@@kern[-4]{-21}%
+    \tud@logo@@shift{40}{E}%
+    \tud@logo@@kern[7]{-6}%
+  }{%
+    \tud@logo@@kern[-7]{-19}%
+    \tud@logo@@shift{48}{E}%
+    \tud@logo@@kern[1]{-13}%
+  }%
   X\@%
 }
 \newcommand*\tud@logo@LaTeX{%
-  L\tud@logo@@kern[9]{-32}\tud@logo@@topscript{T}{A}%
-  \tud@logo@@kern[1]{-13}\Logo{TeX}%
+  L%
+  \tud@if@cdfont@activated{%
+    \tud@logo@@kern[9]{-32}\tud@logo@@topscript{T}{A}%
+    \tud@logo@@kern[1]{-13}%
+  }{%
+    \tud@logo@@kern[3]{-35}\tud@logo@@topscript{T}{A}%
+    \tud@logo@@kern[-7]{-17}%
+  }%
+  \Logo{TeX}%
 }
 \newcommand*\tud@logo@LaTeXe{%
-  \Logo{LaTeX}\tud@logo@@kern[-2]{8}%
+  \Logo{LaTeX}%
+  \tud@if@cdfont@activated{%
+    \tud@logo@@kern[-2]{8}%
+  }{%
+    \tud@logo@@kern[-2]{10}%
+  }%
   \hbox{%
     \m@th%
     \if b\expandafter\@car\f@series x\@nil\csname boldmath\endcsname\fi%
@@ -701,30 +753,78 @@
   }\@%
 }
 \expandafter\newcommand\expandafter*\csname tud@logo@LaTeX3\endcsname{%
-  \Logo{LaTeX}\tud@logo@@kern[-2]{8}3\@%
+  \Logo{LaTeX}%
+  \tud@if@cdfont@activated{%
+    \tud@logo@@kern[-2]{8}%
+  }{%
+    \tud@logo@@kern[-2]{10}%
+  }%
+  3\@%
 }
-\newcommand*\tud@logo@pdfLaTeX{pdf\tud@logo@@kern{3}\Logo{LaTeX}}
-\newcommand*\tud@logo@LuaLaTeX{Lua\tud@logo@@kern{-1}\Logo{LaTeX}}
+\newcommand*\tud@logo@pdfLaTeX{%
+  pdf%
+  \tud@if@cdfont@activated{%
+    \tud@logo@@kern{3}%
+  }{%
+    \tud@logo@@kern[-8]{7}%
+  }%
+  \Logo{LaTeX}%
+}
+\newcommand*\tud@logo@LuaLaTeX{%
+  Lua%
+  \tud@if@cdfont@activated{%
+    \tud@logo@@kern{-2}%
+  }{%
+    \tud@logo@@kern[-3]{3}%
+  }%
+  \Logo{LaTeX}%
+}
 \newcommand*\tud@logo@XeLaTeX{%
-  X\tud@logo@@kern[-1]{-5}%
-  \tud@logo@@shift{40}{\rotatebox[origin=c]{180}{E}}%
-  \tud@logo@@kern[1]{-13}%
+  X%
+  \tud@if@cdfont@activated{%
+    \tud@logo@@kern[-15]{-5}%
+    \tud@logo@@shift{40}{\tud@logo@@reflect{E}}%
+    \tud@logo@@kern[15]{-12}%
+  }{%
+    \tud@logo@@kern[-9]{-10}%
+    \tud@logo@@shift{48}{\tud@logo@@reflect{E}}%
+    \tud@logo@@kern{-8}%
+  }%
   \Logo{LaTeX}%
 }
 \newcommand*\tud@logo@BibTeX{%
-  B\tud@logo@@topscript{x}{IB}\tud@logo@@kern{-10}\Logo{TeX}%
+  B%
+  \tud@if@cdfont@activated{%
+    \tud@logo@@kern{-5}%
+    \tud@logo@@shift{7}{\tud@logo@@topscript{x}{I\tud@logo@@kern{-5}B}}%
+    \tud@logo@@kern{-10}%
+  }{%
+    \tud@logo@@kern{-5}%
+    \tud@logo@@shift{-10}{\tud@logo@@topscript{x}{I\tud@logo@@kern[-6]{-3}B}}%
+    \tud@logo@@kern[-5]{-7}%
+  }%
+  \Logo{TeX}%
 }
 \newcommand*\tud@logo@TeXLive{%
-  \Logo{TeX}\tud@logo@@kern[-5]{20}Live\@%
+  \Logo{TeX}\tud@logo@@kern[-5]{\tud@if@cdfont@activated{20}{15}}Live\@%
 }
 \newcommand*\tud@logo@MacTeX{%
   Mac\tud@logo@@kern{-3}\Logo{TeX}\@%
 }
-\newcommand*\tud@logo@MiKTeX{MiK\tud@logo@@kern{6}\Logo{TeX}}
+\newcommand*\tud@logo@MiKTeX{%
+  MiK\tud@logo@@kern{\tud@if@cdfont@activated{6}{-2}}\Logo{TeX}%
+}
 \newcommand*\tud@logo@LyX{%
-  L\tud@logo@@kern[-3]{-11}%
-  \tud@logo@@shift{40}{Y}%
-  \tud@logo@@kern[7]{-11}%
+  L%
+  \tud@if@cdfont@activated{%
+    \tud@logo@@kern[-3]{-11}%
+    \tud@logo@@shift{40}{Y}%
+    \tud@logo@@kern[7]{-11}%
+  }{%
+    \tud@logo@@kern[-9]{-9}%
+    \tud@logo@@shift{40}{Y}%
+    \tud@logo@@kern[1]{-11}%
+  }%
   X\@%
 }
 \newcommand*\tud@english[1]{#1}
