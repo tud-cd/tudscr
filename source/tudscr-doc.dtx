@@ -1,4 +1,4 @@
-% \CheckSum{2094}
+% \CheckSum{2331}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -265,188 +265,30 @@
 %
 % \subsection{Definition und Erscheinungsbild von Deklarationselementen}
 %
-% Mit dem Paket~\pkg{dox} können weitere Deklarationselemente erstellt werden.
-% Dieses lädt außerdem das Paket~\pkg{doc}, welches die Grundfunktionalitäten
-% für die Erstellung von \file{.dtx}-Dateien bereitstellt. In der momentanen
-% Version unterstützt das Paket~\pkg{dox} die aktuellen Anpassungen an die
-% Erstellung von Änderungsnotizen durch \pkg{doc} nicht, weshalb im Folgenden
-% einige Patches notwendig sind.
-%    \begin{macrocode}
-\RequirePackage{dox}[2010/12/16]
-\@ifpackagelater{dox}{2017/12/07}{%
-  \ClassWarning{\TUD@Class@Name}{%
-    Package `dox' was updated so some patches\MessageBreak%
-    are maybe outdated%
-  }%
-}{}%
-%    \end{macrocode}
-% \begin{macro}{\m@cro@}
-% Nach dem Laden des Paketes werden die Definitionen einiger Makros überprüft.
-%    \begin{macrocode}
-\CheckCommand\m@cro@[2]{%
-  \endgroup \topsep\MacroTopsep \trivlist
-  \edef\saved@macroname{\string#2}%
-  #1
-    \let\saved@indexname\saved@macroname
-  \else
-    \edef\saved@indexname{\expandafter\@gobble\string#2}%
-  \fi
-  \def\makelabel##1{\llap{##1}}%
-  \if@inlabel
-    \let\@tempa\@empty \count@\macro@cnt
-    \loop \ifnum\count@>\z@
-      \edef\@tempa{\@tempa\hbox{\strut}}\advance\count@\m@ne \repeat
-    \edef\makelabel##1{\llap{\vtop to\baselineskip
-                               {\@tempa\hbox{##1}\vss}}}%
-    \advance \macro@cnt \@ne
-  \else  \macro@cnt\@ne  \fi
-  \edef\@tempa{\noexpand\item[%
-     #1%
-       \noexpand\PrintMacroName
-     \else
-       \noexpand\PrintEnvName
-     \fi
-     {\string#2}]}%
-  \@tempa
-  \global\advance\c@CodelineNo\@ne
-   #1%
-      \SpecialMainIndex{#2}\nobreak
-      \DoNotIndex{#2}%
-   \else
-      \SpecialMainEnvIndex{#2}\nobreak
-   \fi
-  \global\advance\c@CodelineNo\m@ne
-  \ignorespaces
-}
-%    \end{macrocode}
-% \end{macro}^^A \m@cro@
+% Das Paket~\pkg{doc} stellt die Funktionalitäten zur Quelltextdokumentation 
+% innerhalb von \file{.dtx}-Dateien bereit. Mit \pkg{doc}~|v3.0| ist es 
+% zusätzlich möglich, mit \cs{NewDocElement} weitere Deklarationselemente zu 
+% erstellen. Allerdings wird für die Anpassung des Erscheinungsbildes der
+% Indexeinträge keine Schnittstelle bereitgestellt, weshalb im Folgenden einige
+% Patches notwendig sind.
 %
-% \subsubsection{Erweiterte Einträge für Index und Änderungsliste}
+% \subsubsection{Randnotizen und multiple Erläuterungen}
 %
-% \begin{macro}{\doxitem}
-% Mit dem Befehl \cs{doxitem} werden beliebige Deklarationselemente erstellt. 
-% das Makro wird für das Hinzufügen des Eintragstyps für Index, Änderungsliste 
-% und Randnotiz angepasst.
-%    \begin{macrocode}
-\CheckCommand\doxitem[4][]{%
-  \@nameuse{dox@macrolike\dox@macrolikedefault}%
-  \def\dox@idxtype{#3}%
-  \setkeys{dox}{#1}
-  \@ifundefined{Print#2Name}{%
-    \ifdox@macrolike
-      \expandafter\def\csname Print#2Name\endcsname##1{%
-        \strut\MacroFont\string ##1\ }
-    \else
-      \expandafter\def\csname Print#2Name\endcsname##1{%
-        \strut\MacroFont ##1\ }
-    \fi}{}
-  \ifdox@macrolike
-    \def\@doxexpr{\@doxcreatespecialmainmacrolikeindex{#2}}%
-  \else
-    \def\@doxexpr{\@doxcreatespecialmainindex{#2}}%
-  \fi
-  \expandafter\@doxexpr\expandafter{\dox@idxtype}{#4}%
-  \@ifundefined{PrintDescribe#2}{%
-    \ifdox@macrolike
-      \expandafter\def\csname PrintDescribe#2\endcsname##1{%
-        \strut\MacroFont\string ##1\ }
-    \else
-      \expandafter\def\csname PrintDescribe#2\endcsname##1{%
-        \strut\MacroFont ##1\ }
-    \fi}{}
-  \ifdox@macrolike
-    \def\@doxexpr{\@doxcreatespecialmacrolikeindex{#2}}%
-  \else
-    \def\@doxexpr{\@doxcreatespecialindex{#2}}%
-  \fi
-  \expandafter\@doxexpr\expandafter{\dox@idxtype}{#4}%
-  \@doxcreatedescribe{#2}
-  \@doxcreateenv{#2}{#3}
-  \ifdox@macrolike
-    \expandafter\let\csname @Save#2IndexName\endcsname%
-      \@doxsavemacrolikeindexname%
-  \else
-    \expandafter\let\csname @Save#2IndexName\endcsname\@doxsaveindexname%
-  \fi
-}
-%    \end{macrocode}
-% Das Makro wird dahingehend angepasst, dass alle für die Ausgabe erzeugten 
-% Befehle der Form  \cs{Print\meta{Typ}Name} und \cs{PrintDescribe\meta{Typ}}
-% um den Eintragstyp ergänzt werden, erstellt durch \cs{doxcreateprintname} 
-% bzw. \cs{doxcreatemacrolikeprintname}. Zusätzlich werden für die Klasse
-% \cls{tudscrdoc} Befehle in der Form \cs{@Save\meta{Typ}IndexName} mit den 
-% neuen Makros \cs{doxcreateindexname} bzw. \cs{doxcreatemacrolikeindexname} 
-% erstellt. Mit diesen wird beim Aufruf einer Deklarationsumgebung der aktuelle
-% Name und Eintragstyp des jeweiligen Deklarationselementes gesichert, um diese
-% Informationen in der Änderungsliste nutzen zu können. Außerdem werden mit dem 
-% Makro \cs{@doxcreatedescribes} Befehle erzeugt, mit denen eine Liste von zu 
-% beschreibenden Elementen via \cs{DescribeOption\meta{Typ}s} erzeugt werden 
-% kann. Dies dient insbesondere zum Erzeugen der Randnotizen mit \cs{marginnote}
-% aus dem glecihnamigen Paket.
-%    \begin{macrocode}
-\renewcommand*\doxitem[4][]{%
-  \@nameuse{dox@macrolike\dox@macrolikedefault}%
-  \def\dox@idxtype{#3}%
-  \setkeys{dox}{#1}%
-  \ifdox@macrolike%
-    \def\@doxexpr{\@doxcreatespecialmainmacrolikeindex{#2}}%
-  \else%
-    \def\@doxexpr{\@doxcreatespecialmainindex{#2}}%
-  \fi%
-  \expandafter\@doxexpr\expandafter{\dox@idxtype}{#4}%
-  \ifdox@macrolike%
-    \def\@doxexpr{\@doxcreatespecialmacrolikeindex{#2}}%
-  \else%
-    \def\@doxexpr{\@doxcreatespecialindex{#2}}%
-  \fi%
-  \expandafter\@doxexpr\expandafter{\dox@idxtype}{#4}%
-  \ifdox@macrolike%
-    \def\@doxexpr{\@doxcreatemacrolikeprintname{#2}}%
-  \else%
-    \def\@doxexpr{\@doxcreateprintname{#2}}%
-  \fi%
-  \expandafter\@doxexpr\expandafter{\dox@idxtype}%
-  \ifdox@macrolike%
-    \def\@doxexpr{\@doxcreatemacrolikeindexname{#2}}%
-  \else%
-    \def\@doxexpr{\@doxcreateindexname{#2}}%
-  \fi%
-  \expandafter\@doxexpr\expandafter{\dox@idxtype}%
-  \@doxcreatedescribe{#2}%
-  \@doxcreatedescribes{#2}%
-  \@doxcreateenv{#2}{#3}%
-}
-%    \end{macrocode}
-% \end{macro}^^A \doxitem
-% \begin{macro}{\@doxcreatedescribes}
-% \changes{v2.05i}{2017/03/09}{neu}^^A
+% Das Paket~\pkg{doc} stellt mit |\Describe|\meta{Typ} Befehle für die 
+% Erläuterung einzelner Deklarationselemente bereit. Sollen gleich mehrere 
+% Elemente in einem Abschnitt erläutert werden, fehlt jedoch die entsprechende
+% Schnittstelle, weshalb zusätzlich die Befehle |\Describe|\meta{Typ}|s| 
+% darauf aufbauend definiert werden.
+%
 % \begin{length}{\marginnotevskip}
 % \changes{v2.05i}{2017/03/09}{neu}^^A
 % \begin{macro}{\marginpar}
-% Hiermit werden Befehle der Form \cs{DescribeOption\meta{Typ}s} erzeugt, mit 
-% welchen mehrere Eintragstypen erzeugt werden können. Gleichzeitig werden die 
-% Randnotizen via \cs{marginnote} mit den passenden vertikalen Abständen 
-% erstellt.
+% Da die Befehle |\Describe|\meta{Typ} zur Erzeugung einer Randnotiz für 
+% jeden Eintrag \cs{marginpar} verwenden, müssen diese mit einem vertikalen 
+% Versatz gesetzt werden, falls gleich mehrere auf einmal zu erzeugen sind. 
+% Hierfür wird das Paket~\pkg{marginnote} genutzt.
 %    \begin{macrocode}
 \newlength\marginnotevskip
-\newcommand*\@doxcreatedescribes[1]{%
-  \expandafter\def\csname Describe#1s\endcsname##1{%
-    \setlength\marginnotevskip{\z@}%
-    \def\@tempc{##1}%
-    \@for\@tempa:=\@tempc\do{%
-      \expandafter\ifblank\expandafter{\@tempa}{}{%
-        \edef\@tempb{%
-          \expandonce{\csname Describe#1\endcsname}{\expandonce{\@tempa}}%
-        }%
-        \@tempb%
-        \addtolength\marginnotevskip{\baselineskip}%
-      }%
-    }%
-    \setlength\marginnotevskip{\z@}%
-    \ignorespaces%
-  }%
-}
-\@doxcreatedescribes{Macro}
 \AfterPackage*{marginnote}{%
   \renewcommand*\marginpar[2][]{%
     \IfArgIsEmpty{#1}{%
@@ -459,407 +301,621 @@
 %    \end{macrocode}
 % \end{macro}^^A \marginpar
 % \end{length}^^A \marginnotevskip
-% \end{macro}^^A \@doxcreatedescribes
-% \begin{macro}{\index@type}
-% \changes{v2.05g}{2016/11/10}{neu}^^A
-% Dieses Makro dient zur Formatierung des Typen der Deklarationselemente in 
-% Index und Änderungsliste.
+% \begin{macro}{\doc@createdescribes}
+% \changes{v2.05i}{2017/03/09}{neu}^^A
+% Die Definition für |\Describe|\meta{Typ}|s|. Die so erzeugten Befehle passen
+% für jeden neuen Eintrag die Länge \cs{marginnotevskip} selbstständig an. Für
+% jeden angegebenen Eintrag |\Describe|\meta{Typ}|s|\oarg{...}\marg{Element(e)}
+% wird an |\Describe|\meta{Typ}\oarg{...}\marg{Element} das optionale Argument 
+% durchgereicht. Erzeugt werden Befehle via \cs{@NewDocElement}.
 %    \begin{macrocode}
-\newrobustcmd*\index@type[1]{%
+\newcommand*\doc@createdescribes[1]{%
+  \expandafter\newcommand\expandafter*\csname Describe#1s\endcsname[2][]{%
+    \setlength\marginnotevskip{\z@}%
+    \def\@tempc{##2}%
+    \@for\@tempa:=\@tempc\do{%
+      \trim@spaces@in\@tempa%
+      \ifx\@tempa\@empty\else%
+        \def\@tempb{\@nameuse{Describe#1}[{##1}]}%
+        \expandafter\@tempb\expandafter{\@tempa}%
+        \addtolength\marginnotevskip{\baselineskip}%
+      \fi%
+    }%
+    \setlength\marginnotevskip{\z@}%
+    \ignorespaces%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \doc@createdescribes
+% \begin{macro}{\tud@idx@typemarkup}
+% \changes{v2.05g}{2016/11/10}{neu}^^A
+% \changes{v2.06o}{2022/07/20}{Anpassungen für \pkg{doc}}^^A
+% Dieses Makro dient zur Formatierung des Typen der Deklarationselemente in 
+% Index, Änderungsliste und Randnotizen.
+%    \begin{macrocode}
+\NewDocumentCommand{\tud@idx@typemarkup}{r()}{%
   \begingroup%
   \normalfont\scriptsize\space(#1)%
   \endgroup%
 }
 %    \end{macrocode}
-% \end{macro}^^A \index@type
-% \begin{macro}{\@doxcreatespecialmainmacrolikeindex}
-% \begin{macro}{\@doxcreatespecialmainindex}
-% \begin{macro}{\@doxcreatespecialmacrolikeindex}
-% \begin{macro}{\@doxcreatespecialindex}
+% \end{macro}^^A \tud@idx@typemarkup
+% \begin{macro}{\@NewDocElement}
+% \changes{v2.06o}{2022/07/20}{neu}^^A
+% Erzeugen von |\Describe|\meta{Typ}|s|\oarg{...}\marg{Element(e)}.
+%    \begin{macrocode}
+\apptocmd\@NewDocElement{%
+  \doc@createdescribes{#2}%
+}{}{\tud@patch@wrn{@NewDocElement}}
+%    \end{macrocode}
+% Hiermit wird die Formatierung des Elementtyps bei Deklarationen angepasst.
+% Zu beachten ist, das zusätzlich zur ursprünglichen Definition \cs{strut} zum 
+% Schluss (nochmals) ausgeführt wird. Somit lassen sich potenzielle Probleme 
+% mit dem Paket \pkg{microtype} vermeiden.
+%    \begin{macrocode}
+\patchcmd\@NewDocElement{%
+  \@temptokena\expandafter{%
+    \expandafter\textnormal\expandafter{%
+      \expandafter\space\expandafter(\doc@printtype)%
+    }%
+  }%
+}{%
+  \@temptokena\expandafter{%
+    \expandafter\textnormal\expandafter{%
+      \expandafter\tud@idx@typemarkup\expandafter(\doc@printtype)\strut%
+    }%
+  }%
+}{}{\tud@patch@wrn{@NewDocElement}}
+%    \end{macrocode}
+% \end{macro}^^A \@NewDocElement
+%
+% \subsubsection{Erweiterte Einträge für Index und Änderungsliste}
+%
+% \begin{macro}{\tud@idx@sortkey}
+% \changes{v2.05g}{2016/11/02}{neu}^^A
+% \begin{macro}{\tud@idx@format}
+% \changes{v2.05g}{2016/11/02}{neu}^^A
+% \begin{macro}{\tud@idx@element}
+% \changes{v2.05g}{2016/11/02}{neu}^^A
+% \begin{macro}{\tud@idx@parent}
+% \changes{v2.05g}{2016/11/02}{neu}^^A
+% \changes{v2.06o}{2022/07/20}{Anpassungen für \pkg{doc}}^^A
+% Mit diesen Befehlen kann beim Erzeugen von Einträgen für die Änderungsliste 
+% auf die zuvor bereits erzeugten Indexeinträge zurückggegriffen werden. Ein 
+% zuvor erzeugter Elterneintrag wird mit Sortierschlüssel und der eigentlichen
+% Formatierung in zwei Token in \cs{tud@idx@parent} expandiert, um später
+% darauf zurückgreifen zu können~-- dies ist insbesondere für Parameter nötig.
+%    \begin{macrocode}
+\newcommand*\tud@idx@sortkey{}
+\let\tud@idx@sortkey\relax
+\newcommand*\tud@idx@format{}
+\let\tud@idx@format\relax
+\newcommand*\tud@idx@element{}
+\let\tud@idx@element\relax
+\newcommand*\tud@idx@parent{}
+\let\tud@idx@parent\relax
+%    \end{macrocode}
+% \end{macro}^^A \tud@idx@parent
+% \end{macro}^^A \tud@idx@element
+% \end{macro}^^A \tud@idx@format
+% \end{macro}^^A \tud@idx@sortkey
+% \begin{macro}{\doc@createspecialindexes}
+% \changes{v2.06o}{2022/07/20}{neu}^^A
+% \begin{macro}{\doc@createspecialmacrolikeindexes}
+% \changes{v2.06o}{2022/07/20}{neu}^^A
 % Für den Index muss bei diesen Makros eine Anpassung erfolgen, damit die
 % Sortierung auch bei der Verwendung von \app{texindy} richtig erfolgt und 
 % keine Einträge, welche es trotz gleicher Bezeichnung für unterschiedliche
-% Deklarationselemente (beispielsweise Umgebung \env{abstract} und Option
-% \opt{abstract}) gibt, unterschlagen werden. Außerdem wird hier die Definition
-% der Quelltextanker eingehangen und die Elterneinträge für Parameteränderungen 
-% zurückgesetzt.
+% Deklarationselemente (beispielsweise gleichnamige Umgebungen und Optionen) 
+% gibt, unterschlagen werden. Deshalb wird den erzeugten Sortierschlüsseln die 
+% Ausgabe des Deklarationstyps aus |#2| respektive |\@temptokena| hinzugefügt. 
+% Außerdem wird der Markupbefehl \cs{tud@idx@typemarkup} für diese eingehangen.
+%
+% Weiterhin werden das Deklarationselement in \cs{tud@idx@element} sowie der 
+% Sortierschlüssel in \cs{tud@idx@sortkey} und der formatierte Indexeintrag in
+% \cs{tud@idx@format} gesichert, um diese sowohl in der Änderungsliste als auch
+% für eigens definierte Elterneinträge (\cs{tud@idx@parent}) nutzen zu können.
 %    \begin{macrocode}
-\CheckCommand*\@doxcreatespecialmainmacrolikeindex[3]{%
-  \expandafter\def\csname SpecialMain#1Index\endcsname##1{%
-    \@SpecialIndexHelper@##1\@nil
-    \@bsphack%
-    \special@index{\@gtempa\actualchar
-      \string\verb\quotechar*\verbatimchar\bslash\@gtempa\verbatimchar
-      \space(#2)\encapchar main}%
-    \special@index{#3:\levelchar\@gtempa\actualchar%
-      \string\verb\quotechar*\verbatimchar\bslash\@gtempa\verbatimchar
-      \encapchar main}%
-    \@esphack%
+\CheckCommand*\doc@createspecialindexes[3]{%
+  \@temptokena{\space (#2)}%
+  \@temptokenb{#3:}%
+  \@nameedef{SpecialMain#1Index}##1{%
+    \noexpand\@bsphack
+    \ifdoc@toplevel
+      \noexpand\special@index{%
+        ##1\noexpand\actualchar{\string\ttfamily\space##1}%
+        \ifx\@nil#2\@nil\else\the\@temptokena\fi
+        \noexpand\encapchar main%
+      }%
+    \fi
+    \ifx\@nil#3\@nil\else
+      \noexpand\special@index{%
+        \the\@temptokenb\noexpand\levelchar
+        ##1\noexpand\actualchar{\string\ttfamily\space##1}%
+        \noexpand\encapchar main%
+      }%
+    \fi
+    \noexpand\@esphack%
+  }%
+  \@nameedef{Special#1Index}##1{%
+    \noexpand\@bsphack
+    \ifdoc@toplevel
+      \noexpand\doc@providetarget
+      \noexpand\index{%
+        ##1\noexpand\actualchar{\string\ttfamily\space##1}%
+        \ifx\@nil#2\@nil\else\the\@temptokena\fi
+        \noexpand\doc@handleencap{usage}%
+      }%
+    \fi
+    \ifx\@nil#3\@nil\else
+      \noexpand\index{%
+        \the\@temptokenb\noexpand\levelchar
+        ##1\noexpand\actualchar{\string\ttfamily\space##1}%
+        \noexpand\doc@handleencap{usage}%
+      }%
+    \fi
+    \noexpand\@esphack%
+  }%
+}
+\renewcommand*\doc@createspecialindexes[3]{%
+  \@temptokena{\space (#2)}%
+  \@temptokenb{#3:}%
+  \@nameedef{SpecialMain#1Index}##1{%
+    \noexpand\@bsphack
+    \ifdoc@toplevel
+      \noexpand\special@index{%
+        % PATCH: add `\the\@temptokena' to sorting argument
+        ##1\ifx\@nil#2\@nil\else\the\@temptokena\fi
+        \noexpand\actualchar{\string\ttfamily\space##1}%
+        % PATCH: add `\tud@idx@typemarkup' for markup
+        \ifx\@nil#2\@nil\else\noexpand\tud@idx@typemarkup\the\@temptokena\fi
+        \noexpand\encapchar main%
+      }%
+    \fi
+    \ifx\@nil#3\@nil\else
+      \noexpand\special@index{%
+        \the\@temptokenb\noexpand\levelchar
+        % PATCH: add `\the\@temptokena' to sorting argument
+        ##1\ifx\@nil#2\@nil\else\the\@temptokena\fi
+        \noexpand\actualchar{\string\ttfamily\space##1}%
+        \noexpand\encapchar main%
+      }%
+    \fi
+    \noexpand\@esphack%
+%    \end{macrocode}
+% Bei allen Varianten der Indexeinträge werden diese nach dem Erstellen
+% gesichert, um diese in der richtigen Formatierung als Elterneinträge
+% für Parameter im Index sowie für die Änderungsliste nutzen zu können.
+%    \begin{macrocode}
+    % PATCH: assign used sort key and formatted entry to dedicated macros
+    \gdef\noexpand\tud@idx@sortkey{##1\ifx\@nil#2\@nil\else\the\@temptokena\fi}%
+    \gdef\noexpand\tud@idx@format{%
+      {\string\ttfamily\space##1}%
+      \ifx\@nil#2\@nil\else\noexpand\tud@idx@typemarkup\the\@temptokena\fi
+    }%
+    % PATCH: reset settings for nested index and changelog entries
+    \gdef\noexpand\tud@idx@element{#1}%
+    \global\let\noexpand\tud@idx@parent\relax%
+  }%
+  \@nameedef{Special#1Index}##1{%
+    \noexpand\@bsphack
+    \ifdoc@toplevel
+      \noexpand\doc@providetarget
+      \noexpand\index{%
+        % PATCH: add `\the\@temptokena' to sorting argument
+        ##1\ifx\@nil#2\@nil\else\the\@temptokena\fi
+        \noexpand\actualchar{\string\ttfamily\space##1}%
+        % PATCH: add `\tud@idx@typemarkup' for markup
+        \ifx\@nil#2\@nil\else\noexpand\tud@idx@typemarkup\the\@temptokena\fi
+        \noexpand\doc@handleencap{usage}%
+      }%
+    \fi
+    \ifx\@nil#3\@nil\else
+      \noexpand\index{%
+        \the\@temptokenb\noexpand\levelchar
+        % PATCH: add `\the\@temptokena' to sorting argument
+        ##1\ifx\@nil#2\@nil\else\the\@temptokena\fi
+        \noexpand\actualchar{\string\ttfamily\space##1}%
+        \noexpand\doc@handleencap{usage}%
+      }%
+    \fi
+    \noexpand\@esphack%
+    % PATCH: assign used sort key and formatted entry to dedicated macros
+    \gdef\noexpand\tud@idx@sortkey{##1\ifx\@nil#2\@nil\else\the\@temptokena\fi}%
+    \gdef\noexpand\tud@idx@format{%
+      {\string\ttfamily\space##1}%
+      \ifx\@nil#2\@nil\else\noexpand\tud@idx@typemarkup\the\@temptokena\fi
+    }%
+    % PATCH: reset settings for nested index and changelog entries
+    \gdef\noexpand\tud@idx@element{#1}%
+    \global\let\noexpand\tud@idx@parent\relax%
+  }%
+}
+\CheckCommand*\doc@createspecialmacrolikeindexes[3]{%
+  \@temptokena{\space (#2)}%
+  \@temptokenb{#3:}%
+  \@nameedef{Code#1Index}##1##2{%
+    \noexpand\@SpecialIndexHelper@##2\noexpand\@nil
+    \noexpand\@bsphack
+    \noexpand\ifdoc@noindex\noexpand\else
+      \ifdoc@toplevel
+        \noexpand\special@index{%
+          \noexpand\@gtempa\noexpand\actualchar
+          \string\verb% % to fool emacs highlighting
+          \noexpand\quotechar*\noexpand\verbatimchar
+          \noexpand\bslash\noexpand\@gtempa\noexpand\verbatimchar
+          \ifx\@nil#2\@nil\else \the\@temptokena \fi
+          \noexpand\encapchar ##1%
+        }%
+      \fi
+      \ifx\@nil#3\@nil\else
+        \noexpand\special@index{%
+          \the\@temptokenb\noexpand\levelchar
+          \noexpand\@gtempa\noexpand\actualchar
+          \string\verb% % to fool emacs highlighting
+          \noexpand\quotechar*\noexpand\verbatimchar
+          \noexpand\bslash\noexpand\@gtempa\noexpand\verbatimchar
+          \noexpand\encapchar ##1%
+        }%
+      \fi
+    \noexpand\fi
+    \noexpand\@esphack%
+  }%
+  \@nameedef{SpecialMain#1Index}##1{%
+    \expandafter\noexpand\csname Code#1Index\endcsname{main}{##1}%
+  }%
+  \@nameedef{Special#1Index}##1{%
+    \noexpand\@SpecialIndexHelper@##1\noexpand\@nil
+    \noexpand\@bsphack
+    \noexpand\ifdoc@noindex\noexpand\else
+      \ifdoc@toplevel
+        \noexpand\doc@providetarget
+        \noexpand\index{%
+          \noexpand\@gtempa\noexpand\actualchar
+          \string\verb% % to fool emacs highlighting
+          \noexpand\quotechar*\noexpand\verbatimchar
+          \noexpand\bslash\noexpand\@gtempa\noexpand\verbatimchar
+          \ifx\@nil#2\@nil\else \the\@temptokena \fi
+          \noexpand\doc@handleencap{usage}%
+        }%
+      \fi
+      \ifx\@nil#3\@nil\else
+        \noexpand\index{%
+          \the\@temptokenb\noexpand\levelchar
+          \noexpand\@gtempa\noexpand\actualchar
+          \string\verb% % to fool emacs highlighting
+          \noexpand\quotechar*\noexpand\verbatimchar
+          \noexpand\bslash\noexpand\@gtempa\noexpand\verbatimchar
+          \noexpand\doc@handleencap{usage}%
+        }%
+      \fi
+    \noexpand\fi
+    \noexpand\@esphack%
+  }%
+}
+\renewcommand*\doc@createspecialmacrolikeindexes[3]{%
+  \@temptokena{\space (#2)}%
+  \@temptokenb{#3:}%
+  \@nameedef{Code#1Index}##1##2{%
+    \noexpand\@SpecialIndexHelper@##2\noexpand\@nil
+    \noexpand\@bsphack
+    \noexpand\ifdoc@noindex\noexpand\else
+      \ifdoc@toplevel
+        \noexpand\special@index{%
+          % PATCH: add `\the\@temptokena' to sorting argument
+          \noexpand\@gtempa\ifx\@nil#2\@nil\else\the\@temptokena\fi
+          \noexpand\actualchar
+          \string\verb% % to fool emacs highlighting
+          \noexpand\quotechar*\noexpand\verbatimchar
+          \noexpand\bslash\noexpand\@gtempa\noexpand\verbatimchar
+          % PATCH: add `\tud@idx@typemarkup' for markup
+          \ifx\@nil#2\@nil\else\noexpand\tud@idx@typemarkup\the\@temptokena\fi
+          \noexpand\encapchar ##1%
+        }%
+      \fi
+      \ifx\@nil#3\@nil\else
+        \noexpand\special@index{%
+          \the\@temptokenb\noexpand\levelchar
+          % PATCH: add `\the\@temptokena' to sorting argument
+          \noexpand\@gtempa\ifx\@nil#2\@nil\else\the\@temptokena\fi
+          \noexpand\actualchar
+          \string\verb% % to fool emacs highlighting
+          \noexpand\quotechar*\noexpand\verbatimchar
+          \noexpand\bslash\noexpand\@gtempa\noexpand\verbatimchar
+          \noexpand\encapchar ##1%
+        }%
+      \fi
+    \noexpand\fi
+    \noexpand\@esphack%
+  }%
+%    \end{macrocode}
+% Für das Sichern der Indexeinträge muss ein bisschen mit der Expansion der 
+% Makros gezaubert werden. Der in \cs{@gtempa} relevante Teil für den Index
+% ist erst nach der Expansion (via \cs{doc@expr}) verfügbar, muss aber in einer
+% zweiten Expansion aus eben diesem Makro expandiert werden. Wiederum muss der 
+% Teil aus |\ifx\@nil#2\@nil\else\the\@temptokena\fi| hier direkt expandiert 
+% werden und wird danach vor weiterer Expansion geschützt!
+%    \begin{macrocode}
+  \@nameedef{SpecialMain#1Index}##1{%
+    \expandafter\noexpand\csname Code#1Index\endcsname{main}{##1}%
+    % PATCH: assign used sort key and formatted entry to dedicated macros
+    \xdef\noexpand\tud@idx@sortkey{% 
+      \noexpand\expandonce\noexpand\@gtempa%
+      \ifx\@nil#2\@nil\else\noexpand\unexpanded{\the\@temptokena}\fi%
+    }%
+    \xdef\noexpand\tud@idx@format{%
+      \unexpanded{\noexpand\string\noexpand\verb}%
+      \unexpanded{\noexpand\quotechar*\noexpand\verbatimchar}%
+      \unexpanded{\noexpand\bslash}\noexpand\expandonce\noexpand\@gtempa%
+      \unexpanded{\noexpand\verbatimchar}%
+      \ifx\@nil#2\@nil\else
+        \noexpand\unexpanded{\noexpand\tud@idx@typemarkup\the\@temptokena}%
+      \fi
+    }%
+    % PATCH: reset settings for nested index and changelog entries
+    \gdef\noexpand\tud@idx@element{#1}%
+    \global\let\noexpand\tud@idx@parent\relax
+  }%
+  \@nameedef{Special#1Index}##1{%
+    \noexpand\@SpecialIndexHelper@##1\noexpand\@nil
+    \noexpand\@bsphack
+    \noexpand\ifdoc@noindex\noexpand\else
+      \ifdoc@toplevel
+        \noexpand\doc@providetarget
+        \noexpand\index{%
+          % PATCH: add `\the\@temptokena' to sorting argument
+          \noexpand\@gtempa\ifx\@nil#2\@nil\else\the\@temptokena\fi
+          \noexpand\actualchar
+          \string\verb% % to fool emacs highlighting
+          \noexpand\quotechar*\noexpand\verbatimchar
+          \noexpand\bslash\noexpand\@gtempa\noexpand\verbatimchar
+          % PATCH: add `\tud@idx@typemarkup' for markup
+          \ifx\@nil#2\@nil\else\noexpand\tud@idx@typemarkup\the\@temptokena\fi
+          \noexpand\doc@handleencap{usage}%
+        }%
+      \fi
+      \ifx\@nil#3\@nil\else
+        \noexpand\index{%
+          \the\@temptokenb\noexpand\levelchar
+          % PATCH: add `\the\@temptokena' to sorting argument
+          \noexpand\@gtempa\ifx\@nil#2\@nil\else\the\@temptokena\fi
+          \noexpand\actualchar
+          \string\verb% % to fool emacs highlighting
+          \noexpand\quotechar*\noexpand\verbatimchar
+          \noexpand\bslash\noexpand\@gtempa\noexpand\verbatimchar
+          \noexpand\doc@handleencap{usage}%
+        }%
+      \fi
+    \noexpand\fi
+    \noexpand\@esphack%
+%    \end{macrocode}
+% Zur Sicherung der Indexeinträge das selbe Spiel für die Expansion wie zuvor.
+%    \begin{macrocode}
+    % PATCH: assign used sort key and formatted entry to dedicated macros
+    \xdef\noexpand\tud@idx@sortkey{% 
+      \noexpand\expandonce\noexpand\@gtempa%
+      \ifx\@nil#2\@nil\else\noexpand\unexpanded{\the\@temptokena}\fi%
+    }%
+    \xdef\noexpand\tud@idx@format{%
+      \unexpanded{\noexpand\string\noexpand\verb}%
+      \unexpanded{\noexpand\quotechar*\noexpand\verbatimchar}%
+      \unexpanded{\noexpand\bslash}\noexpand\expandonce\noexpand\@gtempa%
+      \unexpanded{\noexpand\verbatimchar}%
+      \ifx\@nil#2\@nil\else
+        \noexpand\unexpanded{\noexpand\tud@idx@typemarkup\the\@temptokena}%
+      \fi
+    }%
+    % PATCH: reset settings for nested index and changelog entries
+    \gdef\noexpand\tud@idx@element{#1}%
+    \global\let\noexpand\tud@idx@parent\relax
   }%
 }
 %    \end{macrocode}
-% Um den Typ der Deklarationselemente in den Index einzutragen, wird der Typ
-% geschützt expandiert, um beispielsweise Umlaute problemlos nutzen zu können.
-%    \begin{macrocode}
-\renewcommand*\@doxcreatespecialmainmacrolikeindex[3]{%
-  \expandafter\def\csname SpecialMain#1Index\endcsname##1{%
-    \@SpecialIndexHelper@##1\@nil%
-    \@bsphack%
-    \protected@edef\tud@reserved{#2}%
-    \special@index{%
-      \@gtempa\space\expandonce\tud@reserved\actualchar%
-      \string\verb\quotechar*\verbatimchar\bslash\@gtempa\verbatimchar%
-      \index@type{\expandonce\tud@reserved}\encapchar main%
-    }%
-    \protected@edef\tud@reserved{#3}%
-    \special@index{%
-      \expandonce\tud@reserved:\levelchar\@gtempa\actualchar%
-      \string\verb\quotechar*\verbatimchar\bslash\@gtempa\verbatimchar%
-      \encapchar main%
-    }%
-    \@esphack%
-    \let\parameter@parent@changes\relax%
-    \hypersourcedef{\filesep\number\c@CodelineNo}%
-  }%
-}
-\CheckCommand*\@doxcreatespecialmainindex[3]{%
-  \expandafter\def\csname SpecialMain#1Index\endcsname##1{%
-    \@bsphack%
-    \special@index{##1\actualchar{\string\ttfamily\space##1} (#2)%
-      \encapchar main}%
-    \special@index{#3:\levelchar##1\actualchar{\string\ttfamily\space##1}%
-      \encapchar main}%
-    \@esphack%
-  }%
-}
-\renewcommand*\@doxcreatespecialmainindex[3]{%
-  \expandafter\def\csname SpecialMain#1Index\endcsname##1{%
-    \@bsphack%
-    \protected@edef\tud@reserved{#2}%
-    \special@index{%
-      ##1\space\expandonce\tud@reserved\actualchar%
-      {\string\ttfamily\space##1}\index@type{\expandonce\tud@reserved}%
-      \encapchar main%
-    }%
-    \protected@edef\tud@reserved{#3}%
-    \special@index{%
-      \expandonce\tud@reserved:\levelchar##1\actualchar%
-      {\string\ttfamily\space##1}\encapchar main%
-    }%
-    \@esphack%
-    \let\parameter@parent@changes\relax%
-    \hypersourcedef{\filesep\number\c@CodelineNo}%
-  }%
-}
-\CheckCommand*\@doxcreatespecialmacrolikeindex[3]{%
-  \expandafter\def\csname Special#1Index\endcsname##1{%
-    \@SpecialIndexHelper@##1\@nil
-    \@bsphack%
-    \index{\@gtempa\actualchar
-      \string\verb\quotechar*\verbatimchar\bslash\@gtempa\verbatimchar
-      \space(#2)\encapchar usage}%
-    \index{#3:\levelchar\@gtempa\actualchar
-      \string\verb\quotechar*\verbatimchar\bslash\@gtempa\verbatimchar
-      \encapchar usage}%
-    \@esphack%
-  }%
-}
-\renewcommand*\@doxcreatespecialmacrolikeindex[3]{%
-  \expandafter\def\csname Special#1Index\endcsname##1{%
-    \@SpecialIndexHelper@##1\@nil%
-    \@bsphack%
-    \protected@edef\tud@reserved{#2}%
-    \index{%
-      \@gtempa\space\expandonce\tud@reserved\actualchar%
-      \string\verb\quotechar*\verbatimchar\bslash\@gtempa\verbatimchar%
-      \index@type{\expandonce\tud@reserved}\encapchar usage%
-    }%
-    \protected@edef\tud@reserved{#3}%
-    \index{%
-      \expandonce\tud@reserved:\levelchar\@gtempa\actualchar%
-      \string\verb\quotechar*\verbatimchar\bslash\@gtempa\verbatimchar%
-      \encapchar usage%
-    }%
-    \@esphack%
-  }%
-}
-\CheckCommand*\@doxcreatespecialindex[3]{%
-  \expandafter\def\csname Special#1Index\endcsname##1{%
-    \@bsphack%
-    \index{##1\actualchar{\protect\ttfamily##1} (#2)\encapchar usage}%
-    \index{#3:\levelchar##1\actualchar{\protect\ttfamily##1}%
-      \encapchar usage}%
-    \@esphack%
-  }%
-}
-\renewcommand*\@doxcreatespecialindex[3]{%
-  \expandafter\def\csname Special#1Index\endcsname##1{%
-    \@bsphack%
-    \protected@edef\tud@reserved{#2}%
-    \index{%
-      ##1\space\expandonce\tud@reserved\actualchar%
-      {\protect\ttfamily##1}\index@type{\expandonce\tud@reserved}%
-      \encapchar usage%
-    }%
-    \protected@edef\tud@reserved{#3}%
-    \index{%
-      \expandonce\tud@reserved:\levelchar##1\actualchar%
-      {\protect\ttfamily##1}\encapchar usage%
-    }%
-    \@esphack%
-  }%
-}
-%    \end{macrocode}
-% \end{macro}^^A \@doxcreatespecialindex
-% \end{macro}^^A \@doxcreatespecialmacrolikeindex
-% \end{macro}^^A \@doxcreatespecialmainindex
-% \end{macro}^^A \@doxcreatespecialmainmacrolikeindex
-% \begin{macro}{\@doxcreatemacrolikeprintname}
-% \begin{macro}{\@doxcreateprintname}
-% \begin{macro}{\@doxcreatemacrolikeindexname}
-% \begin{macro}{\@doxcreateindexname}
-% \begin{macro}{\saved@indextype}
-% Hiermit werden die Makros zur Ausgabe als Randnotiz definiert. Mit diesen
-% wird dem eigentlichen Eintrag der Eintragstyp angehängt. Zu beachten ist, das 
-% entgegen der ursprünglichen Definition \cs{strut} erst zum Schluss ausgeführt 
-% wird. Somit lassen sich potenzielle Probleme mit dem Paket \pkg{microtype} 
-% vermeiden.
-%    \begin{macrocode}
-\def\@doxcreatemacrolikeprintname#1#2{%
-  \ifcsundef{Print#1Name}{%
-    \expandafter\def\csname Print#1Name\endcsname##1{%
-      \MacroFont\string##1\index@type{#2}\strut\ %
-    }%
-  }{}%
-  \ifcsundef{PrintDescribe#1}{%
-    \expandafter\def\csname PrintDescribe#1\endcsname##1{%
-      \MacroFont\string##1\index@type{#2}\strut\ %
-    }%
-  }{}%
-}
-\def\@doxcreateprintname#1#2{%
-  \ifcsundef{Print#1Name}{%
-    \expandafter\def\csname Print#1Name\endcsname##1{%
-      \MacroFont##1\index@type{#2}\strut\ %
-    }%
-  }{}%
-  \ifcsundef{PrintDescribe#1}{%
-    \expandafter\def\csname PrintDescribe#1\endcsname##1{%
-      \MacroFont##1\index@type{#2}\strut\ %
-    }%
-  }{}%
-}
-%    \end{macrocode}
-% Ziel ist es, in den 
-% Makros \cs{saved@indexname} und \cs{saved@indextype} den Namen und den Typ 
-% des aktuellen Deklarationselementes zu speichern.
-%    \begin{macrocode}
-\newcommand*\saved@indextype{}
-\def\@doxcreatemacrolikeindexname#1#2{%
-  \expandafter\def\csname @Save#1IndexName\endcsname##1{%
-    \edef\saved@indexname{\expandafter\@gobble##1}%
-    \protected@edef\saved@indextype{#2}%
-  }%
-}
-\def\@doxcreateindexname#1#2{%
-  \expandafter\def\csname @Save#1IndexName\endcsname##1{%
-    \let\saved@indexname##1%
-    \protected@edef\saved@indextype{#2}%
-  }%
-}
-%    \end{macrocode}
-% \end{macro}^^A \saved@indextype
-% \end{macro}^^A \@doxcreateindexname
-% \end{macro}^^A \@doxcreatemacrolikeindexname
-% \end{macro}^^A \@doxcreateprintname
-% \end{macro}^^A \@doxcreatemacrolikeprintname
-% \begin{macro}{\@SaveMacroIndexName}
-% \begin{macro}{\@SaveEnvIndexName}
-% \begin{macro}{\SpecialMainMacroIndex}
-% Da für Makros die notwendigen Befehle für die Anpassungen der Änderungsliste
-% nicht über \cs{doxitem} kreiert werden, erfolgt dies hier direkt.
-%    \begin{macrocode}
-\CheckCommand*\@SaveMacroIndexName[1]{%
-  \edef\saved@indexname{\expandafter\@gobble#1}%
-}
-\CheckCommand*\@SaveEnvIndexName[1]{\let\saved@indexname#1}
-\apptocmd{\@SaveMacroIndexName}{%
-  \let\saved@indextype\@empty%
-}{}{\tud@patch@wrn{@SaveMacroIndexName}}
-\CheckCommand*\SpecialMainMacroIndex[1]{%
-  \SpecialMainIndex{#1}\nobreak%
-  \DoNotIndex{#1}%
-}
-\apptocmd{\SpecialMainMacroIndex}{%
-  \let\parameter@parent@changes\relax%
-  \hypersourcedef{\filesep\number\c@CodelineNo}%
-}{}{\tud@patch@wrn{SpecialMainMacroIndex}}
-%    \end{macrocode}
-% \end{macro}^^A \SpecialMainMacroIndex
-% \end{macro}^^A \@SaveEnvIndexName
-% \end{macro}^^A \@SaveMacroIndexName
+% \end{macro}^^A \doc@createspecialmacrolikeindexes
+% \end{macro}^^A \doc@createspecialindexes
 %
 % \subsubsection{Erstellen aller Deklarationselemente}
 %
 % Nachdem nun die Anpassungen für die Änderungsliste erfolgt sind, können nun 
-% die für die Dokumentatiton notwendigen Umgebungen mit \cs{docitem} erstellt
-% werden. Dabei kommen die Lokalisierungsvariablen \cs{tud@\dots{}@name} zum 
-% Tragen.
+% die für die Dokumentatiton notwendigen Umgebungen mit \cs{NewDocElement} 
+% erstellt werden, wobei die Lokalisierungsvariablen |\tud@|\meta{\dots}|@name| 
+% zum Tragen kommen.
 %    \begin{macrocode}
-\renewcommand*\tud@reserved[3][]{%
-  \doxitem[#1,idxtype=\csname tud@#3@name\endcsname]{#2}{#3}{%
-    \csname tud@#3s@name\endcsname%
-  }%
+\def\tud@res@a#1{%
+  \kernel@ifnextchar[%]
+  {\tud@res@b{#1}}{\tud@res@b{#1}[]}%
 }
-\undef\PrintEnvName
-\undef\PrintDescribeEnv
-\tud@reserved{Env}{environment}
-\tud@reserved{Option}{option}
-\tud@reserved{LayerPageStyle}{layerpagestyle}
-\tud@reserved{Layer}{layer}
-\tud@reserved[macrolike]{Length}{length}
-\tud@reserved{Counter}{counter}
-\tud@reserved{Color}{TUDcolor}
-\tud@reserved[macrolike]{Localization}{localization}
-\tud@reserved[macrolike]{Field}{field}
-\tud@reserved{Font}{KOMAfont}
-\tud@reserved{Parameter}{parameter}
+\def\tud@res@b#1[#2]#3#4{%
+  #1[{%
+    idxgroup=\csname tud@#4s@name\endcsname,%
+    idxtype=\csname tud@#4@name\endcsname,%
+    printtype=\csname tud@#4@name\endcsname,%
+    #2%
+  }]{#3}{#4}%
+}
+\tud@res@a\RenewDocElement[macrolike,idxgroup,idxtype,printtype]{Macro}{macro}
+\tud@res@a\RenewDocElement{Env}{environment}
+\tud@res@a\NewDocElement{Option}{option}
+\tud@res@a\NewDocElement{LayerPageStyle}{layerpagestyle}
+\tud@res@a\NewDocElement{Layer}{layer}
+\tud@res@a\NewDocElement[macrolike]{Length}{length}
+\tud@res@a\NewDocElement{Counter}{counter}
+\tud@res@a\NewDocElement{Color}{TUDcolor}
+\tud@res@a\NewDocElement[macrolike]{Localization}{localization}
+\tud@res@a\NewDocElement[macrolike]{Field}{field}
+\tud@res@a\NewDocElement{Font}{KOMAfont}
+\tud@res@a\NewDocElement{Parameter}{parameter}
 %    \end{macrocode}
 %
 % \subsubsection{Besonderheiten des Deklarationselementes \emph{Parameter}}
 %
-% \begin{macro}{\parameter@parent@changes}
-% \changes{v2.05g}{2016/11/02}{neu}^^A
-% \begin{macro}{\parameter@parent@indexname}
-% \changes{v2.05g}{2016/11/02}{neu}^^A
-% \begin{macro}{\parameter@parent@indexformat}
-% \changes{v2.05g}{2016/11/02}{neu}^^A
-% Um für Parameter sowohl im Index als auch in der Änderungsliste eine weitere 
-% Ebene zu definieren, werden diese Befehle eigens definiert. 
+% \begin{macro}{\DescribeMacroParameters}
+% \changes{v2.06o}{2022/07/20}{neu}^^A
+% \begin{macro}{\DescribeEnvParameters}
+% \changes{v2.06o}{2022/07/20}{neu}^^A
+% \begin{macro}{\Describe@Parameters}
+% \changes{v2.06o}{2022/07/20}{neu}^^A
+% Hiermit können Parameter für Befehle und Umgebungen beschrieben werden. Mit 
+% |\Describe|\meta{Typ}|Parameters|\oarg{...}\marg{Element(e)}\marg{Parameter}
+% erfolgt der Aufruf, wobei das optionale Argument an \cs{DescribeParameter} 
+% durchgereicht wird.
 %    \begin{macrocode}
-\newcommand*\parameter@parent@changes{}
-\let\parameter@parent@changes\relax
-\newcommand*\parameter@parent@indexname{}
-\let\parameter@parent@indexname\relax
-\newcommand*\parameter@parent@indexformat{}
-\let\parameter@parent@indexformat\relax
-%    \end{macrocode}
-% \end{macro}^^A \parameter@parent@indexformat
-% \end{macro}^^A \parameter@parent@indexname
-% \end{macro}^^A \parameter@parent@changes
-% \begin{macro}{\@SaveMacroIndexName}
-% \changes{v2.05g}{2016/11/02}{neu}^^A
-% \begin{macro}{\@SaveEnvIndexName}
-% \changes{v2.05g}{2016/11/02}{neu}^^A
-% Bei der Ausführung einer dieser beiden Befehle bei der Definition von einem 
-% Makro oder einer Umgebung werden diese für evtl. nachfolgende Parameter als 
-% Elterneinträge definiert. Hierfür werden die Einträge zur Sortierung sowohl 
-% für den Index als auch die Änderungsliste in \cs{parameter@parent@indexname} 
-% und für die Formatierung in \cs{parameter@parent@indexformat} gespeichert.
-%    \begin{macrocode}
-\apptocmd{\@SaveMacroIndexName}{%
-  \edef\parameter@parent@indexname{\expandafter\@gobble#1}%
-  \edef\parameter@parent@indexformat{%
-    \string\verb\quotechar*\verbatimchar#1\verbatimchar%
-  }%
-}{}{\tud@patch@wrn{@SaveMacroIndexName}}
-\apptocmd{\@SaveEnvIndexName}{%
-  \protected@edef\parameter@parent@indexname{#1\space\saved@indextype}%
-  \protected@edef\parameter@parent@indexformat{%
-    \string\verb\quotechar*\verbatimchar#1\verbatimchar%
-    \index@type{\saved@indextype}%
-  }%
-}{}{\tud@patch@wrn{@SaveEnvIndexName}}
-%    \end{macrocode}
-% \end{macro}^^A \@SaveEnvIndexName
-% \end{macro}^^A \@SaveMacroIndexName
-% \begin{macro}{\SpecialMainParameterIndex}
-% \changes{v2.05g}{2016/11/02}{neu}^^A
-% Hier wird nun die Gestalt der Einträge für Parameter als Haupteintrag 
-% festgelegt.
-%    \begin{macrocode}
-\renewcommand*\SpecialMainParameterIndex[1]{%
-  \ifx\parameter@parent@indexname\relax%
-    \ClassError{\TUD@Class@Name}{No previous macro or environment}{%
-      Since parameters can only be used for macros or\MessageBreak%
-      environments, you have to use `parameter' within\MessageBreak%
-      `macro' or `environment'.%
-    }%
-  \fi%
-  \protected@edef\parameter@parent@changes{%
-    \parameter@parent@indexname\actualchar%
-    \parameter@parent@indexformat:\levelchar%
-  }%
-  \@bsphack%
-  \special@index{%
-    \parameter@parent@indexname\actualchar%
-    \parameter@parent@indexformat\levelchar%
-    #1\space\tud@parameter@name\actualchar%
-    {\string\ttfamily\space#1}\index@type{\tud@parameter@name}%
-    \encapchar main%
-  }%
-  \special@index{%
-    \tud@parameters@name:\levelchar%
-    #1\space\parameter@parent@indexname%
-    \actualchar{\string\ttfamily\space#1}%
-    \noexpand\,--\noexpand\,\parameter@parent@indexformat%
-    \encapchar main%
-  }%
-  \@esphack%
-  \hypersourcedef{\filesep\number\c@CodelineNo}%
+\newcommand*\DescribeMacroParameters{}
+\def\DescribeMacroParameters{%
+  \kernel@ifnextchar[%]
+  {\Describe@Parameters{Macro}}{\Describe@Parameters{Macro}[]}%
+}
+\newcommand*\DescribeEnvParameters{}
+\def\DescribeEnvParameters{%
+  \kernel@ifnextchar[%]
+  {\Describe@Parameters{Env}}{\Describe@Parameters{Env}[]}%
 }
 %    \end{macrocode}
-% \end{macro}^^A \SpecialMainParameterIndex
-% \begin{environment}{DescribeParameterParent}
-% \changes{v2.05i}{2017/02/20}{neu}^^A
+% Für eine möglichst einfache Schnittstelle wird ein bisschen getrickst. Das 
+% optionale Argument wird zunächst dahingehend ausgewertet, ob Indexeinträge
+% überhaupt erzeugt werden sollen. In diesem Fall wird die Ausgabe unterdrückt, 
+% um diese bei der Angabe mehrerer \marg{Element(e)} nicht mehrfach zu erhalten.
+%    \begin{macrocode}
+\newcommand*\Describe@Parameters{}
+\def\Describe@Parameters#1[#2]#3#4{%
+  \begingroup%
+    \csname keys_set:nn\endcsname{doc}{#2}%
+    \ifdoc@noindex%
+      \aftergroup\@gobble%
+    \else%
+      \aftergroup\@firstofone%
+    \fi%
+  \endgroup{%
+    \def\@tempc{#3}%
+    \@for\@tempa:=\@tempc\do{%
+      \trim@spaces@in\@tempa%
+      \ifx\@tempa\@empty\else%
+        \begingroup%
+%    \end{macrocode}
+% Durch den Aufruf von |\Describe|\meta{Typ} wird der Elterneintrag erzeugt. 
+% Dieser muss durch \pkg{doc} zwar erstellt, jedoch nicht in den Index 
+% eingetragen werden, weshalb \prm{noindex} nicht möglich ist und stattdessen
+% \cs{index} hier das Argument verschluckt.
+%    \begin{macrocode}
+          \let\index\@gobble%
+          \def\@tempb{\@nameuse{Describe#1}[noprint]}%
+          \expandafter\@tempb\expandafter{\@tempa}%
+          \xdef\tud@idx@parent{%
+            {\expandonce\tud@idx@sortkey}{\expandonce\tud@idx@format}%
+          }%
+        \endgroup%
+        \DescribeParameters[{#2,noprint}]{#4}%
+      \fi%
+    }%
+  }%
+%    \end{macrocode}
+% Nach dem Erstellen der Indexeinträge erfolgt die \emph{einmalige} Ausgabe 
+% aller genannten Parameter.
+%    \begin{macrocode}
+  \begingroup%
+    \csname keys_set:nn\endcsname{doc}{#2}%
+    \ifdoc@noprint%
+      \aftergroup\@gobble%
+    \else%
+      \aftergroup\@firstofone%
+    \fi%
+  \endgroup{%
+    \DescribeParameters[{#2,noindex}]{#4}%
+  }%
+  \global\let\tud@idx@parent\relax%
+}
+%    \end{macrocode}
+% \end{macro}^^A \Describe@Parameters
+% \end{macro}^^A \DescribeEnvParameters
+% \end{macro}^^A \DescribeMacroParameters
+% \begin{macro}{\SpecialMainParameterIndex}
+% \changes{v2.05g}{2016/11/02}{neu}^^A
+% \changes{v2.06o}{2022/07/20}{Anpassungen für \pkg{doc}}^^A
 % \begin{macro}{\SpecialParameterIndex}
 % \changes{v2.05i}{2017/02/20}{neu}^^A
-% Selbiges für die Verwendung durch \cs{Describe\dots}
+% \changes{v2.06o}{2022/07/20}{Anpassungen für \pkg{doc}}^^A
+% Die Gestalt der Parameter als Haupteinträge wird hier definiert.
 %    \begin{macrocode}
-\newenvironment{DescribeParameterParent}[2]{%
-  \@nameuse{@Save#1IndexName}{\string#2}%
-}{}
-\renewcommand*\SpecialParameterIndex[1]{%
-  \ifx\parameter@parent@indexname\relax%
-    \ClassError{\TUD@Class@Name}{No previous macro or environment}{%
-      Since parameters can only be used for macros or\MessageBreak%
-      environments, you have to use macro\MessageBreak%
-      `\string\DescribeParameter' only within the environment\MessageBreak%
-      `DescribeParameterParent'.%
-    }%
+\renewcommand*\SpecialMainParameterIndex[1]{%
+  \ifx\tud@idx@parent\relax%
+    \@expandtwoargs\in@{\tud@idx@element}{Macro,Env}%
+    \ifin@%
+      \xdef\tud@idx@parent{%
+        {\expandonce\tud@idx@sortkey}{\expandonce\tud@idx@format}%
+      }%
+    \else%
+      \ClassError{\TUD@Class@Name}{No previous macro or environment}{%
+        Since parameters can only be used for macros or\MessageBreak%
+        environments, you have to use `parameter' within\MessageBreak%
+        `macro' or `environment'.%
+      }%
+    \fi%
   \fi%
-  \@bsphack%
-  \index{%
-    \parameter@parent@indexname\actualchar%
-    \parameter@parent@indexformat\levelchar%
-    #1\space\tud@parameter@name\actualchar%
-    {\protect\ttfamily#1}\index@type{\tud@parameter@name}%
-    \encapchar usage%
-  }%
-  \index{%
-    \tud@parameters@name:\levelchar#1\space\parameter@parent@indexname%
-    \actualchar{\protect\ttfamily#1}%
-    \noexpand\,--\noexpand\,\parameter@parent@indexformat%
-    \encapchar usage%
-  }%
-  \@esphack%
+  \ifx\tud@idx@parent\relax\else%
+    \gdef\tud@idx@sortkey{#1\space(\tud@parameter@name)}%
+    \gdef\tud@idx@format{%
+      {\string\ttfamily\space#1}%
+      \tud@idx@typemarkup\space(\tud@parameter@name)%
+    }%
+    \@bsphack%
+    \special@index{%
+      \expandafter\@firstoftwo\tud@idx@parent\actualchar%
+      \expandafter\@secondoftwo\tud@idx@parent\levelchar%
+      \tud@idx@sortkey\actualchar\tud@idx@format%
+      \encapchar main%
+    }%
+    \@esphack%
+  \fi%
+}
+%    \end{macrocode}
+% Hier wird die Gestalt der Indexeinträge für Parameter festgelegt, wenn diese 
+% durch \cs{Describe@Parameters} erzeugt werden.
+%    \begin{macrocode}
+\renewcommand*\SpecialParameterIndex[1]{%
+  \ifx\tud@idx@parent\relax%
+    \ClassError{\TUD@Class@Name}{No macro or environment given}{%
+      Since parameters can only be used for macros or\MessageBreak%
+      environments, you have to use an appropriate command like\MessageBreak%
+      `\string\DescribeMacroParameters' or `\string\DescribeEnvParameters'.%
+    }%
+  \else%
+    \gdef\tud@idx@sortkey{#1\space(\tud@parameter@name)}%
+    \gdef\tud@idx@format{%
+      {\string\ttfamily\space#1}%
+      \tud@idx@typemarkup\space(\tud@parameter@name)%
+    }%
+    \@bsphack%
+    \index{%
+      \expandafter\@firstoftwo\tud@idx@parent\actualchar%
+      \expandafter\@secondoftwo\tud@idx@parent\levelchar%
+      \tud@idx@sortkey\actualchar\tud@idx@format%
+      \encapchar usage%
+    }%
+    \@esphack%
+  \fi%
 }
 %    \end{macrocode}
 % \end{macro}^^A \SpecialParameterIndex
-% \end{environment}^^A DescribeParameterParent
+% \end{macro}^^A \SpecialMainParameterIndex
 %
 % \subsubsection{Erzeugen von Änderungseinträgen}
 %
 % \begin{macro}{\changes@}
-% Bei der Erstellung der Änderungsliste fehlt bei Makros in der aktuellen 
-% Version von \pkg{doc} ein Leerzeichen. Das Problem ist bereits gemeldet. 
+% \changes{v2.06o}{2022/07/20}{Anpassungen für \pkg{doc}}^^A
+% \changes{v2.06o}{2022/07/25}{Prüfen falscher Datumsangaben}^^A
+% \begin{macro}{\changes@@}
+% Vor den Änderungen wird geprüft, ob sich an der Definition aus dem Paket 
+% \pkg{doc} etwas geändert hat. Der Befehl \cs{changehistoryname} wird vom 
+% Paket \pkg{hypdoc} verwendet.
 %    \begin{macrocode}
 \CheckCommand*\changes@[3]{%
   \protected@edef\@tempa{%
     \noexpand\glossary{%
-      #1\levelchar
+      #1%
+      \ifdoc@reportchangedates\space -- #2\fi
+      \levelchar
       \ifx\saved@macroname\@empty
-        \space
+        \quotechar!%
         \actualchar
         \generalname
       \else
@@ -877,127 +933,80 @@
 %    \end{macrocode}
 % Bei der Erzeugung der Änderungseinträge wird zwischen der Verwendung von 
 % \app{makeindex} und \app{texindy} unterschieden. Für die Reihenfolge des 
-% Erscheinens der einzelnen Einträge wird das angegebene Datum zur Sortierung 
-% genutzt.
+% Erscheinens der einzelnen Einträge wird das in |#2| angegebene Datum zur 
+% Sortierung genutzt.
 %    \begin{macrocode}
-\ifdefined\tudxdyflag%
-  \renewcommand*\changes@[3]{%
+\renewcommand*\changes@[3]{%
+  \ifnum\@parse@version@1993/01/01\@nil<\expandafter\@parse@version@#2//00\@nil%
+    \expandafter\@gobble%
+  \else%
+    \expandafter\@firstofone%
+  \fi{\ClassWarning{\TUD@Class@Name}{The given date `#2' seems to be invalid}}%
+  \changes@@{#1}{#2}{#3}%
+}
+\ifdefined\tudxdyflag
+  \newcommand*\changes@@[3]{%
+    \protected@edef\@tempa{%
+      \noexpand\glossary{%
+        #1\ifdoc@reportchangedates\space -- #2\fi
+        \levelchar
 %    \end{macrocode}
-% Einträge sollen nur erzeugt werden, wenn diese vollständig sind.
+% Das an die vorderster Stelle sortierte Zeichen ist |~| bei \app{texindy}.
 %    \begin{macrocode}
-    \@tempswatrue%
-    \ifblank{#1}{\@tempswafalse}{}%
-    \ifblank{#3}{\@tempswafalse}{}%
-    \if@tempswa%
+        \ifx\saved@macroname\@empty
+          \string~\actualchar\tud@general@name%
 %    \end{macrocode}
-% Es wird dabei unterschieden, ob der Änderungseintrag einem Parameter gilt. 
-% Ist dies nicht der Fall, so wird der Eintrag mehr oder weniger standardmäßig 
-% erzeugt.
+% Gilt der Änderungseintrag einem Parameter wird eine zusätzliche Ebene vor dem
+% eigentlichen Eintrag des Parameters erzeugt und der in \cs{tud@idx@parent}
+% zuvor gesicherte Elterneintrag~-- Befehl oder Umgebung~-- eingefügt. Weil
+% ohnehin eine Stildatei für \app{texindy} erzeugt wird, ist das Erzeugen 
+% zusätzlicher Ebenen in der Änderungsliste einfach machbar. Prinzipiell wäre
+% das mit einer entsprechenden Stildatei auch für \app{makeindex} machbar.
 %    \begin{macrocode}
-      \ifx\parameter@parent@changes\relax%
-        \protected@edef\@tempb{%
-          \saved@indexname%
-          \ifx\saved@indextype\@empty\else%
-            \space\saved@indextype%
-          \fi%
-          \actualchar%
-          \string\verb\quotechar*%
-          \verbatimchar\saved@macroname%
-          \verbatimchar%
-          \ifx\saved@indextype\@empty\else%
-            \index@type{\saved@indextype}%
-          \fi%
-          :\levelchar%
-        }%
-%    \end{macrocode}
-% Andernfalls wird eine zusätzliche Ebene vor dem eigentlichen Eintrag des
-% Parameters erzeugt und der zuvor in \cs{parameter@parent@changes} gesicherte 
-% Elterneintrag~-- Befehl oder Umgebung~-- dafür eingefügt.
-%    \begin{macrocode}
-      \else%
-        \protected@edef\@tempb{%
-          \parameter@parent@changes%
-          \saved@indexname%
-          \ifx\saved@indextype\@empty\else%
-            \space\saved@indextype%
-          \fi%
-          \actualchar%
-%    \end{macrocode}
-% Der so erzeugte Änderungseintrag soll durch \app{texindy} bei der Erzeugung 
-% der Änderungsliste noch speziell sortiert werden. Daher wird nicht \cs{verb} 
-% sondern lediglich \cs{ttfamily} verwendet.
-%    \begin{macrocode}
-          {\noexpand\ttfamily\saved@macroname}%
-          \ifx\saved@indextype\@empty\else%
-            \index@type{\saved@indextype}%
-          \fi%
-          :\levelchar%
-        }%
-      \fi%
-      \protected@edef\@tempa{%
-        \noexpand\glossary{%
-          #1\levelchar%
-          \ifx\saved@macroname\@empty%
-            \tud@general@name%
-          \else%
-            \tud@implementation@name%
-          \fi%
-          \levelchar%
-          \ifx\saved@macroname\@empty\else%
-            \@tempb%
-          \fi%
-          #2 #3%
-          \actualchar%
-          #3% (#2)%
-        }%
+        \else
+          \ifx\tud@idx@parent\relax\else
+            \expandafter\@firstoftwo\tud@idx@parent\actualchar
+            \expandafter\@secondoftwo\tud@idx@parent:\levelchar
+          \fi
+          \tud@idx@sortkey\actualchar\tud@idx@format%
+        \fi
+        :\levelchar
+        #2\space\protecting{#3}\actualchar\protecting{#3}%
       }%
-    \else%
-      \let\@tempa\relax%
-    \fi%
+    }%
     \@tempa\endgroup\@esphack%
   }%
-\else%
+\else
 %    \end{macrocode}
-% Für \app{makeindex} wird der Befehl insebsondere für das Listen der Parameter 
+% Für \app{makeindex} wird der Befehl insbesondere für das Listen der Parameter 
 % angepasst.
 %    \begin{macrocode}
   \renewcommand*\changes@[3]{%
     \protected@edef\@tempa{%
       \noexpand\glossary{%
-        #1\levelchar%
-        \ifx\saved@macroname\@empty%
-          \quotechar!%
-          \actualchar%
-          \tud@general@name%
-          :\levelchar%
-        \else%
-          \ifx\parameter@parent@changes\relax\else%
-            \parameter@parent@changes zzz\space%
-          \fi%
-          \saved@indexname%
-          \ifx\saved@indextype\@empty\else%
-            \space\saved@indextype%
-          \fi%
-          \actualchar%
-          \string\verb\quotechar*%
-          \verbatimchar\saved@macroname%
-          \verbatimchar%
-          \ifx\saved@indextype\@empty\else%
-            \index@type{\saved@indextype}%
-          \fi%
-          \ifx\parameter@parent@changes\relax%
-            :\levelchar%
-          \else%
-            :\space%
-          \fi%
-        \fi%
-        #3%
+        #1\ifdoc@reportchangedates\space -- #2\fi
+        \levelchar
+        \ifx\saved@macroname\@empty
+          \quotechar!\actualchar\tud@general@name%
+        \else
+          \ifx\tud@idx@parent\relax\else
+            \expandafter\@firstoftwo\tud@idx@parent\space--\space%
+          \fi
+          \tud@idx@sortkey\actualchar
+          \ifx\tud@idx@parent\relax\else
+            \expandafter\@secondoftwo\tud@idx@parent\noexpand\,--\noexpand\,%
+          \fi
+          \tud@idx@format%
+        \fi
+        :\levelchar
+        #2\space\protecting{#3}\actualchar\protecting{#3}%
       }%
     }%
     \@tempa\endgroup\@esphack%
   }%
-\fi%
+\fi
 %    \end{macrocode}
+% \end{macro}^^A \changes@@
 % \end{macro}^^A \changes@
 % \begin{macro}{\@wrglossary}
 % Für die Ausgabe der Änderungsliste soll nicht einfach nur die Seitenzahl 
@@ -1187,11 +1196,30 @@
         \@tempswafalse%
         \loop\unless\ifeof\tud@read@replace%
           \readline\tud@read@replace to\tud@line@replace%
+%    \end{macrocode}
+% Um potenzielle Dopplungen zu vermeiden, wird \cs{quotechar} vor Zeichen 
+% entfernt, die ohnehin gegebenenfalls manuell behandelt werden müsen.
+%    \begin{macrocode}
+          \expandafter\tud@replace\expandafter\tud@line@replace%
+            \expandafter{\quotechar"}{"}%
+          \expandafter\tud@replace\expandafter\tud@line@replace%
+            \expandafter{\quotechar!}{!}%
+          \expandafter\tud@replace\expandafter\tud@line@replace%
+            \expandafter{\quotechar:}{:}%
+          \expandafter\tud@replace\expandafter\tud@line@replace%
+            \expandafter{\quotechar @}{@}%
+%    \end{macrocode}
+% Jetzt die manuellen Anpassungen für Zeichen, die eigentlich zur Steuerung
+% der Indexeinträge genutzt werden.
+%    \begin{macrocode}
           \tud@replace\tud@line@replace{"}{""}%
           \tud@replace\tud@line@replace{!}{"!}%
           \tud@replace\tud@line@replace{:}{":}%
           \tud@replace\tud@line@replace{@}{"@}%
           \tud@replace\tud@line@replace{\"@}{"\@backslashchar"@}%
+%    \end{macrocode}
+% Abschließend erfolgt das Einsetzen der Steuerzeichen.
+%    \begin{macrocode}
           \expandafter\tud@replace\expandafter\tud@line@replace%
             \expandafter{\actualchar}{@}%
           \expandafter\tud@replace\expandafter\tud@line@replace%
@@ -1346,6 +1374,7 @@
       \fi%
       \addxcontentsline{tdo}{todo}{\tud@reserved\@tempa:\space#1}%
     \endgroup%
+    \ignorespaces%
   \fi%
 }
 %    \end{macrocode}
@@ -1430,17 +1459,19 @@
 % \begin{length}{\textheight}
 % \begin{length}{\textwidth}
 % \begin{length}{\columnsep}
+% \begin{length}{\labelsep}
 % \begin{length}{\marginparsep}
 % \begin{length}{\marginparwidth}
 % \begin{length}{\oddsidemargin}
-% Hiermit wird die Berechnung des Satzspiegels ausgeführt.
+% Hiermit wird der Satzspiegel berechnet, wobei \length{labelsep} als Maß für
+% die Seitenränder sowie den Abstand von Randnotizen und Textkörper dient.
 %    \begin{macrocode}
 \newcommand*\tud@setarea{%
   \setlength\topmargin{-1in}%
   \setlength\headheight{0pt}%
   \setlength\headsep{3em}%
-  \setlength\footskip{1.5\headsep}%
-  \setlength\textheight{\dimexpr\paperheight-2.5\headsep-\footskip\relax}%
+  \setlength\footskip{\headsep}%
+  \setlength\textheight{\dimexpr\paperheight-\headsep*5/2-\footskip*3/2\relax}%
   \@colht=\textheight%
   \@colroom=\textheight%
   \vsize=\textheight%
@@ -1449,7 +1480,6 @@
     \MacroFont\selectfont%
     \settowidth\@tempdima{\space}%
     \setlength\@tempdima{80\@tempdima}%
-%^^A    \addtolength\@tempdima{\dimexpr\MacroIndent+.1\p@\relax}%
     \addtolength\@tempdima{\MacroIndent}%
     \edef\@tempa{%
       \endgroup%
@@ -1460,17 +1490,19 @@
   \hsize=\columnwidth%
   \linewidth=\hsize%
   \setlength\columnsep{1em}%
-  \setlength\marginparsep{1em}%
+  \setlength\labelsep{1em}%
+  \setlength\marginparsep{\labelsep}%
+  \setlength\oddsidemargin{\dimexpr\paperwidth-\textwidth-\labelsep-1in\relax}%
   \setlength\marginparwidth{%
-    \dimexpr\paperwidth-\textwidth-2\marginparsep\relax%
+    \dimexpr\oddsidemargin+1in-\labelsep-\marginparsep\relax%
   }%
-  \setlength\oddsidemargin{\dimexpr\marginparwidth+\marginparsep-1in\relax}%
 }
 \AtBeginDocument{\tud@setarea}
 %    \end{macrocode}
 % \end{length}^^A \oddsidemargin
 % \end{length}^^A \marginparwidth
 % \end{length}^^A \marginparsep
+% \end{length}^^A \labelsep
 % \end{length}^^A \columnsep
 % \end{length}^^A \textwidth
 % \end{length}^^A \textheight
