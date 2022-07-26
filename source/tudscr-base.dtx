@@ -45,7 +45,6 @@
 \fi
 \usepackage{babel}
 \usepackage{tudscrfonts}
-\usepackage{bookmark}
 \usepackage[babel]{microtype}
 
 \GitHubBase{\TUDScriptRepository}
@@ -60,6 +59,8 @@
 % \selectlanguage{ngerman}
 %
 % \changes{v2.02}{2014/06/23}{Paket \pkg{titlepage} nicht weiter unterstützt}^^A
+%
+%
 %
 % \section{Das Paket \pkg{tudscrbase} -- Basisdefinitionen für \TUDScript}
 %
@@ -77,7 +78,7 @@
 %    \end{macrocode}
 %
 % \ToDo{
-%   Schnittstelle äquivalent zu \cs{KOMA@kav@\dots}? Dann hierfür 
+%   Schnittstelle äquivalent zu \cs{KOMA@kav@...}? Dann hierfür 
 %   \pkg{etoolbox}-Listen und \cs{listadd} sowie \cs{listremove} nutzen
 % }[v2.??]
 % \ToDo{
@@ -115,8 +116,9 @@
 \AtBeginDocument{%
   \ifcsundef{scr@v@first}{}{%
 %    \end{macrocode}
-% Sollte die benötigte \KOMAScript-Version nicht vorhanden sein, wird ein 
-% Fehler erzeugt.
+% Es wird gerpüft, ob die mindestens benötigte \KOMAScript-Version
+% (\cs{TUD@Version@KOMA}: \csuse{TUD@Version@KOMA}) verfügbar ist. Sollte dies
+% nicht der Fall sein, wird ein Fehler erzeugt.
 %    \begin{macrocode}
     \ifcsundef{scr@v@\TUD@KOMAVersionNumber}{%
       \PackageError{tudscrbase}{%
@@ -166,7 +168,7 @@
 %    \end{macrocode}
 % Das Paket \pkg{kvsetkeys} erweitert \pkg{keyval} um die Möglichkeit, das
 % Verhalten bei der Angabe eines nicht definierten Schlüssels festzulegen.
-% \ToDo{sollte auch mit KOMA-Option \val{@else@} gehen, besser raus}[v3.27]
+% \ToDo{sollte auch mit KOMA-Option \val{@else@} gehen, besser raus}[v2.07]
 %    \begin{macrocode}
 \RequirePackage{kvsetkeys}[2012/04/25]
 %    \end{macrocode}
@@ -175,6 +177,15 @@
 % oder bei der expliziten Auswahl einer Schrift des \CD sgenutzt.
 %    \begin{macrocode}
 \RequirePackage{trimspaces}[2009/09/17]
+%    \end{macrocode}
+% Für \pkg{hyperref} werden \cs{TUDScript} und \cs{KOMAScript} deaktiviert.
+%    \begin{macrocode}
+\AfterPackage*{hyperref}{%
+  \pdfstringdefDisableCommands{%
+    \def\TUDScript{TUD-Script}%
+    \def\KOMAScript{KOMA-Script}%
+  }%
+}
 %    \end{macrocode}
 %
 % \subsection{Grundlegende Befehle für \TUDScript}
@@ -220,9 +231,9 @@
 %
 % Hier werden Makros definiert, die allein für die interne temporäre Nutzung 
 % gedacht sind.
-% \ToDo{Sämtliche \cs{@temp\dots}-Makros auf \cs{tud@res@\dots} ändern}[v2.??]
-% \ToDo{\cs{tud@reserved} in \cs{tud@res@?}, Achtung bei Dopplungen!}[v2.??]
-% \ToDo{Schlüssel sollten weiterhin \cs{@temp\dots}-Makros verwenden}[v2.??]
+% \ToDo{sämtliche \cs{@temp...}-Makros auf \cs{tud@res@...} ändern}[v2.??]
+% \ToDo{\cs{tud@reserved} in \cs{tud@res@...}, Achtung bei Dopplungen!}[v2.??]
+% \ToDo{Schlüssel sollten weiterhin \cs{@temp...}-Makros verwenden}[v2.??]
 % \ToDo{Makros mit \val{@num} in count ändern}[v2.??]
 % \begin{macro}{\tud@reserved}
 % \changes{v2.05}{2015/10/27}{neu}^^A
@@ -271,6 +282,23 @@
 %    \end{macrocode}
 % \end{macro}^^A \addto@hook@expandafter
 % \end{macro}^^A \tud@toks@
+%
+% \subsubsection{Verzweigung für Präambel und Dokument}
+%
+% \begin{macro}{\tud@if@preamble}
+% \changes{v2.05o}{2022/07/25}{als Ersatz für \cs{if@atdocument}}^^A
+% Mit \KOMAScript~v3.37 wurde das Aktivieren des Schalters \cs{if@atdocument} 
+% aufgrund des stark veränderten und damit leider nur bedingt deterministischen 
+% \hrfn{https://sourceforge.net/p/koma-script/tickets/23/}{Hook-Managements} 
+% des Kernels auf |begindocument/before| verschoben. Dieser Befehl wird als
+% Gegenstück definiert und führt in Abhängigkeit von |begindocument/after| 
+% Quelltext verzweigt aus.
+%    \begin{macrocode}
+\newcommand*\tud@if@preamble{}
+\let\tud@if@preamble\@firstoftwo
+\AfterEndPreamble{\let\tud@if@preamble\@secondoftwo}
+%    \end{macrocode}
+% \end{macro}^^A \tud@if@preamble
 %
 % \subsubsection{Definiton von Längen-Registern}
 %
@@ -746,7 +774,7 @@
 }
 %    \end{macrocode}
 % Mit dem Aufruf \cs{tud@cs@store}\marg{Befehlsname} wird der im Argument 
-% angegebene Befehl in einem neuem Makro \cs{@@tud@\meta{Befehlsname}}
+% angegebene Befehl in einem neuem Makro |\@@tud@|\meta{Befehlsname}
 % gespeichert. Dieser kann danach beliebig angepasst werden. Soll der Befehl zu
 % einem späteren Zeitpunkt auf den Orginalzustand zurücksetzen, kann hierfür
 % jederzeit der Befehl \cs{tud@cs@reset}\marg{Befehlsname} verwendet werden.
@@ -960,7 +988,7 @@
 % aber in bestimmten Fällen eine Option in Abhängigkeit von einer anderen
 % unterschiedliche Standardwerte annehmen soll, wird dafür eine Möglichkeit
 % geschaffen. Hierfür wird für jede Option ein korrelierende Schalter 
-% \cs{if@tud@key@\meta{Schlüssel}@set} definiert. Dieser wird auf \val{true} 
+% |\if@tud@key@|\meta{Schlüssel}|@set| definiert. Dieser wird auf \val{true} 
 % gesetzt, sobald der Schlüssel explizit gesetzt wurde, womit ein Standardwert 
 % einer Klassenoption überschrieben werden kann. Das Setzen der Standardwerte 
 % erfolgt intern mit dem Befehl \cs{TUD@key@preset}.
@@ -968,7 +996,7 @@
 \newcommand*\TUD@key[2][.\@currname.\@currext]{%
 %    \end{macrocode}
 % Basierend auf dem Namen des Schalters wird die notwendige, boolesche Variable
-% erzeugt (\cs{if@tud@key@\meta{Schlüssel}@set}), welche im Falle des direkten
+% erzeugt (|\if@tud@key@|\meta{Schlüssel}|@set|), welche im Falle des direkten
 % Aufrufs des Schlüssels, ein Überschreiben mit einem Standardwert verhindert.
 %    \begin{macrocode}
   \providebool{@tud@key@#2@set}%
@@ -996,7 +1024,7 @@
   }%
 }
 %    \end{macrocode}
-% Es kann intern über \cs{if@tud@key@\meta{Schlüssel}@set} geprüft werden, ob
+% Es kann intern über |\if@tud@key@|\meta{Schlüssel}|@set| geprüft werden, ob
 % einem Schlüssel ein explizites Wert zugewiesen wurde. Sollte dies nicht der
 % Fall sein, kann dieser hiermit intern beliebig angepasst werden. Da es durch 
 % das Setzen der Option mit \cs{TUDoption} zu einer Sperrung kommt, muss diese
@@ -1505,7 +1533,7 @@
 % \ToDo{
 %   Eine Katastrophe, dringend überarbeiten; generelle Lösung mit \cs{toks@}? 
 %   KOMA-Option \val{@else@} verwenden?
-% }[v3.27]
+% }[v2.07]
 %    \begin{macrocode}
 \newcommand*\TUD@parameter@@family{}
 \newcommand*\TUD@parameter@family[2]{%
@@ -1639,7 +1667,7 @@
 % \ToDo{
 %   Eine Katastrophe, dringend überarbeiten; generelle Lösung mit \cs{toks@}? 
 %   KOMA-Option \val{@else@} verwenden?
-% }[v3.27]
+% }[v2.07]
 %    \begin{macrocode}
 \newcommand*\TUD@parameter@handler@macro[3][\TUD@parameter@@family]{%
   \TUD@parameter@checkfamily{#1}{TUD@parameter@handler@macro}%
@@ -1769,7 +1797,7 @@
 %    \end{macrocode}
 % Hiermit wird geprüft, ob ein installiertes Paket in einer bestimmten Version
 % vorhanden ist, ohne dieses zu laden. Hierfür wird die Datei zeilenweise 
-% gelesen, bis der Eintrag \cs{ProvidesPackage\marg{Paketname}\oarg{Version}} 
+% gelesen, bis der Eintrag \cs{ProvidesPackage}\marg{Paketname}\oarg{Version} 
 % gefunden wird.
 % \ToDo{kann \cs{@ifl@t@r} ersetzt werden?}[v2.07]
 % \ToDo{Name in \cs{IfPackageExistsAtLeastTF} ändern}[v2.07]
@@ -1851,14 +1879,14 @@
   \ifcsundef{if@tud@#1@loaded}{%
     \PackageError{tudscrbase}{\string\TUD@AfterPackage@set{#1} missing}{%
       You have to set \string\TUD@AfterPackage@set{#1} before\MessageBreak%
-      the usage of \string\TUD@AfterPackage@do{#1}{<code>}.%
+      using \string\TUD@AfterPackage@do{#1}{<code>}.%
     }%
   }{%
-    \if@atdocument%
-      \ifbool{@tud@#1@loaded}{#2}{}%
-    \else%
+    \tud@if@preamble{%
       \AfterAtEndOfPackage*{#1}{#2}%
-    \fi%
+    }{%
+      \ifbool{@tud@#1@loaded}{#2}{}%
+    }%
   }%
 }
 %    \end{macrocode}
@@ -1885,7 +1913,7 @@
   \renewcommand*\TUD@KOMAoptions[1]{%
     \PackageWarning{tudscrbase}{%
       You should load package `scrextend' right after\MessageBreak%
-      the documentclass. The following option is gobbled\MessageBreak%
+      the documentclass. The following option is gobbled:\MessageBreak%
       \string\KOMAoptions{`#1'}%
     }%
   }%
@@ -1928,7 +1956,7 @@
 % Es wird die Möglichkeit geschaffen, bestimmten Schriftelementen weitere
 % Eigenschaften mitzugeben. Damit dies optionsabhängig geschehen kann und
 % \cs{addtokomafont} nur einmalig verwendete werden muss, wird im Zweifelsfall
-% einem Schriftelement ein Hilfsmakro \cs{tud@komafont@\meta{Element}} 
+% einem Schriftelement ein Hilfsmakro |\tud@komafont@|\meta{Element} 
 % zugewiesen, welches intern angepasst werden kann. Mit \cs{tud@komafont@set} 
 % werden dem angegebenen Element die gewünschten Schriftattribute zugeteilt.
 %    \begin{macrocode}
@@ -2047,6 +2075,6 @@
 %</class&body>
 % \fi
 %
-% \Finale\PrintIndex\PrintChanges\PrintToDos
+% \PrintBackMatter
 %
 \endinput

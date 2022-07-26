@@ -45,7 +45,6 @@
 \fi
 \usepackage{babel}
 \usepackage{tudscrfonts}
-\usepackage{bookmark}
 \usepackage[babel]{microtype}
 
 \GitHubBase{\TUDScriptRepository}
@@ -63,6 +62,8 @@
 % \changes{v2.05}{2015/07/06}{Layout für Poster}^^A
 % \changes{v2.07}{2019/09/09}{\opt{cdfont=false} und \opt{cd=true} setzt
 %   Überschriften im \CD}^^A
+%
+%
 %
 % \section{Das Layout des \CDs}
 %
@@ -119,7 +120,7 @@
 % im \pgs{tudheadings}-Stil ist schwarz und wird für die farbigen Layouts auf
 % dunkelblau gesetzt. Abhängig von der gewählten Option~-- der nummerische Wert
 % ist über \cs{tud@cd@switch} festgelegt~-- werden die sog. Layoutschlüssel
-% (\cs{tud@cd@\meta{Typ}@num}) auf einen Wert gesetzt (0\dots 6), welcher
+% (|\tud@cd@|\meta{Typ}|@num|) auf einen Wert gesetzt (0\dots 6), welcher
 % später ausgewertet werden kann. Der Schalter für Kapitel wird lediglich für
 % die Klassen \cls{tudscrbook} und \cls{tudscrreprt} definiert und genutzt.
 % Damit werden alle Komponenten mit einer zentralen Option festgelegt, können
@@ -174,13 +175,13 @@
 % festgelegt. Dies kann vom Benutzer mit dem Setzen der Option \opt{cdgeometry}
 % überschrieben werden.
 %    \begin{macrocode}
-    \if@atdocument\else%
+    \tud@if@preamble{%
       \ifcase\tud@cd@num\relax% false
         \tud@locked@num@preset{tud@cdgeometry@num}{0}%
       \else% !false
         \tud@locked@num@preset{tud@cdgeometry@num}{2}%
       \fi%
-    \fi%
+    }{}%
   \fi%
 }
 %    \end{macrocode}
@@ -312,7 +313,7 @@
 % \begin{option}{cleardoublespecialpage}
 % \changes{v2.02}{2014/07/08}{Werte für Seitenstil aus den \TUDScript- bzw.
 %   \KOMAScript-Klassen möglich}^^A
-% \changes{v2.03}{2015/01/09}{Prüfung des Seitenstils mit \cs{AfterPreamble}
+% \changes{v2.03}{2015/01/09}{Prüfung des Seitenstils mit \cs{AfterEndPreamble}
 %   auf Beginn des Dokumentes verzögert}^^A
 % \changes{v2.06}{2018/08/21}{Farbeinstellungen integriert}^^A
 % \begin{macro}{\tud@cleardoublepage}
@@ -376,10 +377,10 @@
 % Beim Laden der Klasse selbst sind die speziellen Seitenstile der \KOMAScript-
 % bzw. \TUDScript-Klassen noch nicht definiert. Diese sollen als Werte jedoch
 % trotzdem erlaubt sein. Deshalb wird für diesen Fall das Überprüfen mit
-% \cs{AfterPreamble} auf den Beginn des Dokumentes verzögert.
+% \cs{AfterEndPreamble} auf den Beginn des Dokumentes verzögert.
 %    \begin{macrocode}
   \else%
-    \AfterPreamble{%
+    \AfterEndPreamble{%
       \ifcsundef{ps@#1}{%
         \ClassError{\TUD@Class@Name}{`#1' is no valid pagestyle}{%
           You tried to use `#1' as a pagestyle for option\MessageBreak%
@@ -476,6 +477,7 @@
 % \begin{option}{backgroundcolor}
 % \begin{option}{bgcolor}
 % \begin{macro}{\normalcolor}
+% \changes{v2.06o}{2022/07/25}{Überprüfen der robusten Definition}^^A
 % Mit dieser Option kann die standardmäßige Hintergrundfarbe für Poster gesetzt 
 % werden.
 %    \begin{macrocode}
@@ -500,20 +502,33 @@
 % Wird die Option innerhalb des Dokumentes verwendet, wird mit einer Box erst 
 % die gewählte Farbe verifiziert und anschließend auf die am Dokumentbeginn 
 % definierte Textfarbe umgestellt.
+% \ToDo{angucken, was soll das genau?}[v2.07]
 %    \begin{macrocode}
-  \if@atdocument%
+  \tud@if@preamble{}{%
     \ifdefvoid{\tud@pagecolor}{}{\sbox\z@{\color{\tud@pagecolor}}}%
     \normalcolor%
-  \fi%
+  }%
 }
 \TUD@key{backgroundcolor}[true]{\TUDoptions{backcolor=#1}}
 \TUD@key{bgcolor}[true]{\TUDoptions{backcolor=#1}}
 %    \end{macrocode}
 % Für das Aktivieren der Farbe \val{HKS41} wird \cs{normalcolor} erweitert, um 
-% hier in jedem Fall als Schriftfarbe \emph{weiß} zu verwenden.
+% hier in jedem Fall als Schriftfarbe \emph{weiß} zu verwenden. Zur Überprüfung
+% der Definition von \cs{normalcolor} ist zu beachten, dass dieser Befehl seit 
+% |2020/02/02| robust ist.
 %    \begin{macrocode}
 \AfterPackage{xcolor}{%
-  \CheckCommand*\normalcolor{\let\current@color\default@color\set@color}%
+  \begingroup
+    \def\tud@res@a{\let\current@color\default@color\set@color}%
+    \edef\tud@res@b{
+      \endgroup
+      \unexpanded{\CheckCommand*\normalcolor}{\expandonce\tud@res@a}
+    }
+    \ifx\tud@res@a\normalcolor\let\tud@res@b\endgroup\else
+      \robustify\tud@res@a%
+      \ifx\tud@res@a\normalcolor\let\tud@res@b\endgroup\fi
+    \fi
+  \tud@res@b
   \apptocmd\normalcolor{%
     \Ifstr{\tud@pagecolor}{HKS41}{\color{white}}{}%
   }{}{\tud@patch@wrn{normalcolor}}%
@@ -613,7 +628,7 @@
 % Die \KOMAScript-Option \opt{headings} setzt für alle Überschriften die 
 % Formatierung zurück. Um die Einstellungen für das \CD aktiv zu halten, werden 
 % nach der Ausführung der Option durch \cs{tud@x@scr@headings@reset} die mit 
-% \cs{tud@komafont@set} definierten Makros \cs{tud@komafont@\meta{Element}}
+% \cs{tud@komafont@set} definierten Makros |\tud@komafont@|\meta{Element}
 % erneut an die entsprechenden Schriftelemente angehängt. Bei der Verwendung 
 % der \KOMAScript-Option \opt{headings}|=|\val{standardclasses} werden außerdem 
 % noch die Optionen \opt{open} und \opt{chapterprefix} ausgeführt, weshalb auch
@@ -716,7 +731,7 @@
 % Damit die Einstellungen für die Größe wirksam werden, wird das Makro einmalig
 % zu Beginn des Dokumentes ausgeführt.
 %    \begin{macrocode}
-\AtEndPreamble{\tud@x@scr@headings@set}
+\AfterEndPreamble{\tud@x@scr@headings@set}
 %    \end{macrocode}
 % \end{macro}^^A \tud@subtitle@fontsizecmd
 % \end{macro}^^A \tud@sec@@baselineskip
@@ -1899,6 +1914,6 @@
 %</class&body>
 % \fi
 %
-% \Finale\PrintIndex\PrintChanges\PrintToDos
+% \PrintBackMatter
 %
 \endinput

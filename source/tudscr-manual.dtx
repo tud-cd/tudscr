@@ -45,7 +45,6 @@
 \fi
 \usepackage{babel}
 \usepackage{tudscrfonts}
-\usepackage{bookmark}
 \usepackage[babel]{microtype}
 
 \GitHubBase{\TUDScriptRepository}
@@ -63,6 +62,8 @@
 %   der Kompilierung}^^A
 % \changes{v2.02}{2014/11/18}{\pkg{tudscrtutorial}: Index für Tutorials}^^A
 % \changes{v2.05}{2015/08/04}{Geteilte Deklarationen für Klasse und Paket}^^A
+%
+%
 %
 % \section{Anwenderdokumentation und Leitfäden zu \TUDScript}
 %
@@ -535,16 +536,19 @@
 % geladen, \pkg{bookmark} verbessert das Erstellen der Outline-Einträge.
 %    \begin{macrocode}
 %<*option>
-\PassOptionsToPackage{open,openlevel=0}{bookmark}
-\PassOptionsToPackage{%
-  hyperindex=false,%
-  colorlinks,%
-  linkcolor=HKS44,%
-  urlcolor=HKS33,%
-  citecolor=HKS57,%
-  filecolor=HKS65,%
-  destlabel=true,%pdfview=FitH,%
-}{hyperref}
+\PassOptionsToPackage{hyperindex=false}{hyperref}
+\AfterPackage*{bookmark}{\bookmarksetup{open,openlevel=1}}
+\AfterAtEndOfPackage*{hyperref}{%
+  \@ifpackageloaded{bookmark}{}{\RequirePackage{bookmark}}%
+  \hypersetup{%
+    colorlinks,%
+    linkcolor=HKS44,%
+    urlcolor=HKS33,%
+    citecolor=HKS57,%
+    filecolor=HKS65,%
+    destlabel=true,%pdfview=FitH,%
+  }
+}
 %</option>
 %    \end{macrocode}
 % Verbesserte Referenzierungen auf Seiten.
@@ -654,22 +658,25 @@
   }%
 %    \end{macrocode}
 % \begin{macro}{\hypersetup}
-% \begin{macro}{\bookmarksetup}
 % \begin{macro}{\pdfbookmark}
 % \begin{macro}{\currentpdfbookmark}
+% \begin{macro}{\subpdfbookmark}
+% \begin{macro}{\belowpdfbookmark}
 % \begin{macro}{\HyperDestRename}
 % Einige vom Paket \pkg{hyperref} definierten Befehle werden vorgehalten.
 %    \begin{macrocode}
   \providecommand*\hypersetup[1]{}%
-  \providecommand*\bookmarksetup[1]{}%
   \providecommand*\pdfbookmark[3][]{}%
   \providecommand*\currentpdfbookmark[2]{}%
+  \providecommand*\subpdfbookmark[2]{}%
+  \providecommand*\belowpdfbookmark[2]{}%
   \providecommand*\HyperDestRename[2]{}%
 %    \end{macrocode}
 % \end{macro}^^A \HyperDestRename
+% \end{macro}^^A \belowpdfbookmark
+% \end{macro}^^A \subpdfbookmark
 % \end{macro}^^A \currentpdfbookmark
 % \end{macro}^^A \pdfbookmark
-% \end{macro}^^A \bookmarksetup
 % \end{macro}^^A \hypersetup
 %
 % \begin{macro}{\hyperref}
@@ -2733,7 +2740,7 @@
 %   nach '=\cs{P(Value)?Name}' in *.tex suchen und ggf. 
 %   überarbeiten; \cs{PValueName} umbenennen
 % }[v2.07]
-% \ToDo{neues Makro \cs{PSetLength} mit \cs{PName\{Längenwert\}}}[v2.??]
+% \ToDo{neues Makro \cs{PSetLength} mit \cs{PName}\marg{Längenwert}}[v2.??]
 % \begin{macro}{\PValue}
 % \begin{macro}{\PValueDefault}
 % \changes{v2.05}{2015/11/01}{neu}^^A
@@ -4042,7 +4049,7 @@
 % lässt, welche Dateien zu prozessieren sind. Die entsprechnden Optionen sind 
 % bei \pkg{imakeidx} bereits zum Zeitpunkt des Aufrufs von \cs{makeindex} 
 % anzugeben. Deshalb wird später das Makro \cs{imki@options} innerhalb von 
-% \cs{imki@set@\meta{name}} angepasst.
+% |\imki@set@|\meta{name} angepasst.
 %    \begin{macrocode}
 %<*class>
   \CheckCommand*\imki@build[1]{%
@@ -4797,11 +4804,11 @@
 % beim Aufruf von \app{texindy} angepasst werden. Da auf das Vorhandensein der 
 % entsprechenden Datei erst hier geprüft werden kann, ist dies nicht über das 
 % Interface von \pkg{imakeidx} möglich. Für dieses Unterfangen wird der Befehl
-% \cs{imki@set@\meta{name}} genutzt, welcher die individuellen Einstellungen 
+% |\imki@set@|\meta{name} genutzt, welcher die individuellen Einstellungen 
 % des jeweiligen Index beinhaltet. Dieser wird in einer Gruppe aufgerufen, 
 % anschließend werden dem darin definierten Befehl \cs{imki@options} die 
 % benötigten Flags für \app{texindy} für die Ausgabe- und Indexdatei angehangen 
-% und an das Ende von \cs{imki@set@\meta{name}} zurückgeschrieben. So wird der 
+% und an das Ende von |\imki@set@|\meta{name} zurückgeschrieben. So wird der 
 % Aufruf \file{texindy \cs{imki@options} \cs{jobname}-\meta{name}.idx} zu
 % \begin{quote}\raggedright^^A
 % \file{texindy \cs{imki@options} -o \jobname-\meta{name}.ind}\newline
@@ -6832,6 +6839,6 @@
 % \fi
 %
 %
-% \Finale\PrintIndex\PrintChanges\PrintToDos
+% \PrintBackMatter
 %
 \endinput

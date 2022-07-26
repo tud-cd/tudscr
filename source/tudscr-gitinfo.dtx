@@ -49,6 +49,7 @@
 % in die Datei \file{\GitContainerFile} (\cs{GitContainerFile}) 
 % geschrieben und entweder während des Durchlaufs mit \app{docstrip} oder aber
 % beim Erzeugen der Doku mithilfe des Paketes \pkg{tudscr-gitinfo} ausgelesen.
+%
 % \subsection{GitHub-Versionsinformationen für \app{docstrip}}
 %
 % \begin{macro}{\GitFileInfo}
@@ -60,7 +61,7 @@
 % In \cs{GitContainerFile} wird der Name der Datei gespeichert, welche die 
 % Versionsinformationen für alle Quelldateien enthält. Diese definiert für alle 
 % relevanten Dateien Makros in der Form
-% \cs{\meta{Dateiname}-ver\{\meta{Datum} \meta{Zeit} \meta{Hash}\}}. Diese 
+% |\|\meta{Dateiname}|-ver{|\meta{Datum}| |\meta{Zeit}| |\meta{Hash}|}|. Diese 
 % Datei wird eingebunden, falls vorhanden sowie der Befehl \cs{GitFileInfo} für 
 % das Hinzufügen der Versionsinformationen für das Erzeugen der Zieldateien mit 
 % \app{docstrip} definiert.
@@ -81,10 +82,10 @@
     \closein\@inputcheck%
     \gdef\GitFileInfo#1{%
       \MetaPrefix\MetaPrefix\space From File:\space#1\space%
-      \ifcsname#1-ver\endcsname%
-        \csname#1-ver\endcsname%
-      \else%
+      \expandafter\ifx\csname#1-ver\endcsname\relax%
         (no git version info was found)%
+      \else%
+        \csname#1-ver\endcsname%
       \fi%
     }%
     \aftergroup\InputGitContainer%
@@ -119,7 +120,6 @@
 \fi
 \usepackage{babel}
 \usepackage{tudscrfonts}
-\usepackage{bookmark}
 \usepackage[babel]{microtype}
 
 \GitHubBase{\TUDScriptRepository}
@@ -249,7 +249,7 @@
 % \begin{macro}{\tud@git@@log}
 % \changes{v2.07}{2019/10/20}{neu}^^A
 % Der Befehl \cs{tud@git@log} definiert für die im Argument angegebene Datei 
-% das Makro \cs{\meta{Dateiname}-ver} mit den Versionsinformationen, welche mit 
+% das Makro |\|\meta{Dateiname}|-ver| mit den Versionsinformationen, welche mit 
 % \cs{tud@git@@log} ausgelesen wurden. 
 %    \begin{macrocode}
 \RequirePackage{pdftexcmds}
@@ -326,7 +326,7 @@
 % ausgelesen und anschließend mit \cs{ProvidesFile} gesetzt, wobei eine Warnung 
 % erzeugt wird, wenn für die Datei schon einmal \cs{ProvidesFile} mit einer 
 % anderen Angabe genutzt wurde. Die zu schreibende Angabe wird hierfür in 
-% \cs{@tempa} expandiert und mit \cs{ ver@\meta{Dateiname}} verglichen.
+% \cs{@tempa} expandiert und mit |\ ver@|\meta{Dateiname} verglichen.
 %    \begin{macrocode}
 \AtEndOfPackage{%
   \GetFileInfo{\jobname}%
@@ -353,6 +353,6 @@
 }
 %    \end{macrocode}
 %
-% \Finale\PrintIndex\PrintChanges\PrintToDos
+% \PrintBackMatter
 %
 \endinput

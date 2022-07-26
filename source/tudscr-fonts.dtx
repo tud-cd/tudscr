@@ -45,7 +45,6 @@
 \fi
 \usepackage{babel}
 \usepackage{tudscrfonts}
-\usepackage{bookmark}
 \usepackage[babel]{microtype}
 
 \GitHubBase{\TUDScriptRepository}
@@ -68,6 +67,8 @@
 % \changes{v2.04c}{2015/11/29}{Bugfix für \pkg{fontspec} bei fehlenden 
 %   Schriften}^^A
 % \changes{v2.07}{2019/09/10}{Mathematikschriftstärke passend zu Fließtext}^^A
+%
+%
 %
 % \section{Die Hausschrift der \TnUD}
 %
@@ -152,9 +153,9 @@
 \@for\@tempa:={%
   tudbook,tudbeamer,tudfax,tudform,tudhaus,tudletter,tudposter,tudmathposter%
 }\do{%
-  \if@tempswa\else%
+  \if@tempswa\else
     \@ifclassloaded{\@tempa}{\@tempswatrue\let\@tempb\@tempa}{}%
-  \fi%
+  \fi
 }%
 \if@tempswa%
   \@ifpackageloaded{fix-tudscrfonts}{}{%
@@ -1421,13 +1422,13 @@
 }
 %    \end{macrocode}
 % Die an \cs{tud@cdfont@declare@symb} übergebenen Letter für Auswahlbefehle
-% erhalten \cs{tud@cdfont@symbol@\dots} als Präfix. Da so der ursprüngliche 
+% erhalten |\tud@cdfont@symbol@...| als Präfix. Da so der ursprüngliche
 % Befehlsname verändert wird, würde dieser Befehlsname auch verwendet werden, 
 % wenn dieser in einem fragilen Kontext genutzt wird (siehe \cs{@changed@cmd}).
 % Deshalb wird im Anschluss der neue Befehl selbst robust definiert, damit 
 % eine spätere Expansion nach der Zuweisung mit \cs{tud@cs@letltx} nicht in 
-% \cs{tud@cdfont@symbol@\meta{symbol}} resultiert sondern in jedem Fall 
-% \cs{\meta{symbol}} erhalen bleibt.
+% |\tud@cdfont@symbol@|\meta{Letter} resultiert sondern in jedem Fall 
+% |\|\meta{Letter} erhalten bleibt.
 %    \begin{macrocode}
 \newcommand*\tud@DeclareTextSymbol[4]{%
   \begingroup%
@@ -2691,7 +2692,7 @@
 % die Nomenklatur der Auswahlbefehle betrifft. Mit diesem Makro wird nach den 
 % am häufigsten auftretenden Varianten für die Auswahl für aufrechte und 
 % kursive Lettern gesucht, um diese auf die von \TUDScript genutzte Nomenklatur 
-% (\cs{up\meta{Letter}}, \cs{it\meta{Letter}}, \cs{other\meta{Letter}})
+% (|\up|\meta{Letter}, |\it|\meta{Letter}, |\other|\meta{Letter})
 % abzubilden, damit diese unabhängig von der Einstellung für \opt{cdmath}
 % genutzt werden kann und somit neben den normalen Makros zusätzliche Befehle 
 % für das explizite Auswählen aufrechter und kursiver Lettern bereitstehen.
@@ -2711,9 +2712,9 @@
   \ifcsundef{other#1}{\ifcsundef{#1other}{}{\csletcs{other#1}{#1other}}}{}%
 }
 %    \end{macrocode}
-% Einige Pakete stellen für griechische Majuskeln die Befehle \cs{var\dots} 
+% Einige Pakete stellen für griechische Majuskeln Befehle |\var|\meta{Letter}
 % bereit, um diese im kursiven Schnitt zu setzen. Weiterhin existiert für 
-% aufrechte Majuskeln auch noch die Form \cs{Up\meta{Letter}}. Diese werden 
+% aufrechte Majuskeln auch noch die Form |\Up|\meta{Letter}. Diese werden 
 % ebenfalls ausgewertet und ggf. auf die \TUDScript-Nomenklatur abgebildet.
 %    \begin{macrocode}
 \newcommand*\tud@math@map@@@greeks[1]{%
@@ -2923,13 +2924,9 @@
 %    \end{macrocode}
 % Existiert \cs{itGamma} und ist mit \cs{Gamma} identisch oder\dots
 %    \begin{macrocode}
-      \ifundef{\itGamma}{}{%
-        \ifx\itGamma\Gamma%
-          \@tud@res@swatrue%
-        \fi%
-      }%
+      \ifundef{\itGamma}{}{\ifx\itGamma\Gamma\@tud@res@swatrue\fi}%
 %    \end{macrocode}
-% \dots\cs{Gamma} entspricht einer möglichen Standarddefnition,\dots
+% \dots\cs{Gamma} entspricht einer kursiven Standarddefnition, \dots
 %    \begin{macrocode}
       \if@tud@res@swa\else%
         \let\tud@res@a\relax%
@@ -3297,7 +3294,7 @@
     }{}%
   }{}%
 %    \end{macrocode}
-% Das Paket \pkg{cmbright} stelt zusätzlich noch Schriftschnitte für die 
+% Das Paket \pkg{cmbright} stellt zusätzlich noch Schriftschnitte für die 
 % Symbolschriften \val{AMSa} und \val{AMSb} bereit, welche gegebenenfalls für 
 % die alten Schriften geladen werden.
 %    \begin{macrocode}
@@ -3474,8 +3471,8 @@
 }
 %    \end{macrocode}
 % Die an \cs{tud@cdmath@declare@symb} und \cs{tud@cdmath@declare@char} 
-% übergebenen Letter für Auswahlbefehle nutzen \cs{tud@cdmath@symbol@\dots} 
-% als Präfix, wodurch sich die Definitionen für einzelne Mathematikversionen 
+% übergebenen Letter für Auswahlbefehle nutzen |\tud@cdfont@symbol@...| als
+% Präfix, wodurch sich die Definitionen für einzelne Mathematikversionen 
 % beliebig tauschen lassen.
 %    \begin{macrocode}
 \newcommand*\tud@DeclareMathSymbol[4]{%
@@ -3564,7 +3561,7 @@
   \addto@hook@expandafter\tud@cdmath@symbols@toks{\tud@res@a}%
 %    \end{macrocode}
 % Für das Überschreiben des \cs{mathcode} des gewünschen \meta{Zeichen} wird 
-% dieser aus der Bedeutung von \cs{tud@cdmath@symbols@\meta{Zeichen}} mit
+% dieser aus der Bedeutung von |\tud@cdmath@symbols@|\meta{Zeichen} mit
 % \cs{meaning} herausgelöst.
 %    \begin{macrocode}
   \begingroup%
@@ -3620,9 +3617,9 @@
   \tud@cdmath@declare@symb{it#1}{\mathalpha}{letters}{\the\tud@res@cnt}%
 %    \end{macrocode}
 % Für aufrechte griechische Minuskeln gibt es gewöhnlich keine Symbolschrift, 
-% weshalb der Eintrag \cs{up\meta{Letter}} in \cs{tud@cdmath@symb@list} gesetzt 
-% wird, was mit einem fehlenden \cs{tud@cdmath@symbol@\meta{Letter}} zu einem 
-% undefinierten \cs{up\meta{Letter}} bei \opt{cdmath=true} führt.
+% weshalb der Eintrag |\up|\meta{Letter} in \cs{tud@cdmath@symb@list} gesetzt 
+% wird, was mit einem fehlenden |\tud@cdmath@symbol@|\meta{Letter} zu einem 
+% undefinierten |\up|\meta{Letter} bei \opt{cdmath=true} führt.
 % \ToDo{falls irgendwann erweiterte OML-Kodierung existiert, dann nutzen}[v2.??]
 %    \begin{macrocode}
 %^^A  \tud@cdmath@declare@symb{it##1}{\mathalpha}{letters}%
@@ -3842,7 +3839,7 @@
 % \begin{macro}{\tud@head@font@@bold}
 % \changes{v2.05}{2016/04/17}{neu}^^A
 % \begin{macro}{\tud@font@phantomglyphs}
-% \changes{v2.07}{2021/02/23}{neu}^^A
+% \changes{v2.06o}{2022/07/25}{neu}^^A
 % Die Schrift der Kopfzeile wird entweder in den Schriften des \CDs oder aber 
 % in den serifenlosen Standardschriften gesetzt, wobei für beide Varianten
 % sowohl eine fettgedruckte als auch eine normale Version benötigt wird. Die
@@ -4009,9 +4006,9 @@
 % Fall. Allerdings ist es mit dem Paket \pkg{ragged2e} möglich, das Verhalten
 % für den Flattersatz zu ändern und die Silbentrennung zu aktivieren. Mit der
 % Option \opt{newcommands} werden dabei die originalen Befehle überschrieben,
-% vorher jedoch in \cs{LaTeX\dots} gesichert. Diese Makros dienen dazu, die
-% Überschriften in jedem Fall~-- auch bei der Verwendung von \pkg{ragged2e} mit
-% der Option \opt{newcommands}~-- ohne Trennungen zu setzen.
+% vorher jedoch beispielsweise in \cs{LaTeXraggedright} gesichert. Diese Makros 
+% dienen dazu, die Überschriften in jedem Fall~-- auch bei der Verwendung von
+% \pkg{ragged2e} mit der Option \opt{newcommands}~-- ohne Trennungen zu setzen.
 %    \begin{macrocode}
 \newcommand*\tud@raggedright{\raggedright}
 \newcommand*\tud@RaggedRight{\raggedright}
@@ -4180,7 +4177,7 @@
   \tud@x@bm@delayed%
 %    \end{macrocode}
 % Bereitstellung der Auswahlbefehle für griechische Lettern in der Nomenklatur 
-% von \TUDScript (\cs{up\meta{Bezeichner}}, \cs{it\meta{Bezeichner}}).
+% von \TUDScript (|\up|\meta{Letter}, |\it|\meta{Letter}).
 %    \begin{macrocode}
   \tud@math@map@greeks%
 %    \end{macrocode}
@@ -4205,6 +4202,6 @@
 %</body>
 % \fi
 %
-% \Finale\PrintIndex\PrintChanges\PrintToDos
+% \PrintBackMatter
 %
 \endinput
