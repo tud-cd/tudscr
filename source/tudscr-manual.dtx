@@ -1,4 +1,4 @@
-% \CheckSum{4457}
+% \CheckSum{4399}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -45,7 +45,7 @@
 % \fi
 %
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
-\ProvidesFile{tudscr-manual.dtx}[2019/10/23 v2.06e TUD-Script\space%
+\ProvidesFile{tudscr-manual.dtx}[2022/07/24 v2.06o TUD-Script\space%
 %
 % \iffalse
 %</dtx>
@@ -564,14 +564,16 @@
 % Das Paket \pkg{hyperref} wird für alle möglichen Links und Querverweise 
 % geladen, \pkg{bookmark} verbessert das Erstellen der Outline-Einträge.
 %    \begin{macrocode}
-\PassOptionsToPackage{hyperindex=false,colorlinks,linkcolor=blue}{hyperref}
-\PassOptionsToPackage{open,openlevel=0}{bookmark}
+\PassOptionsToPackage{hyperindex=false}{hyperref}
+\AfterPackage*{bookmark}{\bookmarksetup{open,openlevel=1}}
 %    \end{macrocode}
 % Es folgen einige Befehle, die an das Paket \pkg{hyperref} gekoppelt sind. 
 % Sobald das Paket geladen wurde, werden die Makros mit der jeweiligen
 % Funktionalität definiert. 
 %    \begin{macrocode}
-\AfterPackage*{hyperref}{%
+\AfterAtEndOfPackage*{hyperref}{%
+  \@ifpackageloaded{bookmark}{}{\RequirePackage{bookmark}}%
+  \hypersetup{colorlinks,linkcolor=blue}%
 %    \end{macrocode}
 % Zuerst die Einstellungen für \cls{tudscrmanual} und \pkg{tudscrtutorial}.
 %
@@ -590,7 +592,7 @@
 % \begin{macro}{\tudhyperref}
 % \changes{v2.02}{2014/10/27}{neu}^^A
 % \begin{macro}{\tud@manualname}
-% \changes{v2.05}{2015/1q/19}{neu}^^A
+% \changes{v2.05}{2015/11/19}{neu}^^A
 % Diese Befehle dienen sowohl zum Definieren von Textankern im Handbuch als 
 % auch  zum Referenzieren auf diese. Bei der Erstellung des Ankers mit 
 % \cs{tudhyperdef} wird zusätzlich auch noch ein Label (\cs{label}) erzeugt.
@@ -665,66 +667,6 @@
 %
 % \iffalse
 %</!doc>
-%<*doc>
-% \fi
-%
-% \begin{macro}{\hypersourcedef}
-% \changes{v2.05}{2016/04/26}{neu}^^A
-% \begin{macro}{\hypersource@def}
-% \changes{v2.05}{2016/04/26}{neu}^^A
-% \begin{macro}{\hypersource@ref@codeline}
-% \changes{v2.05}{2016/04/26}{neu}^^A
-% \begin{macro}{\hypersource@ref@page}
-% \changes{v2.05}{2016/04/26}{neu}^^A
-% Diese Makros werden verwendet, um im Index respektive in der Änderungsliste 
-% mithilfe von \pkg{hyperref} Hyperlinks auf Codezeilen respektive Seiten im 
-% Dokument zu setzen. 
-%
-% Mit \cs{hypersourcedef} wird ein Textanker gesetzt, falls dieser noch nicht 
-% definiert wurde, was durch \cs{hypersource@def} abgesichert wird. Als 
-% Argument wird hierfür die aktuelle Codezeile verwendet.
-%    \begin{macrocode}
-  \newcommand*\hypersource@def{}
-  \newcommand*\hypersourcedef[1]{%
-    \ifstr{#1}{\hypersource@def}{}{%
-      \Hy@raisedlink{\hyperdef{}{source:#1}{}}%
-      \xdef\hypersource@def{#1}%
-    }%
-  }%
-%    \end{macrocode}
-% Mit \cs{hypersource@ref@\dots} wird auf Anker im Dokument verlinkt. Dies 
-% erfolgt indirekt über die Attribute \val{main} bzw. \val{usage}, welche bei
-% der Definitionen von Befehlen etc. im Index genutzt werden. Hierfür werden
-% die dazugehörigen Makros umdefiniert.
-%    \begin{macrocode}
-  \newcommand*\hypersource@ref@codeline[2][\@firstofone]{%
-    \begingroup%
-      \def\@tempa##1{\hyperref{}{}{source:##1}{#1{##1}}}%
-      \forcsvlist\@tempa{#2}%
-    \endgroup%
-  }%
-  \newcommand*\hypersource@ref@page[2][\@firstofone]{%
-    \begingroup%
-      \def\@tempa##1{\hyperlink{page.##1}{#1{##1}}}%
-      \forcsvlist\@tempa{#2}%
-    \endgroup%
-  }%
-  \renewcommand*\main[1]{%
-    \ifcodeline@index%
-      \hypersource@ref@codeline[\underline]{#1}%
-    \else%
-      \hypersource@ref@page[\underline]{#1}%
-    \fi%
-  }%
-  \renewcommand*\usage[1]{\hypersource@ref@page[\textit]{#1}}%
-%    \end{macrocode}
-% \end{macro}^^A \hypersource@ref@page
-% \end{macro}^^A \hypersource@ref@codeline
-% \end{macro}^^A \hypersource@def
-% \end{macro}^^A \hypersourcedef
-%
-% \iffalse
-%</doc>
 % \fi
 %
 % Das war's. Damit sind die Ausführungen für das Paket \pkg{hyperref} beendet.
@@ -756,6 +698,10 @@
 % \begin{macro}{\hypersetup}
 % \begin{macro}{\href}
 % \begin{macro}{\phantomsection}
+% \begin{macro}{\pdfbookmark}
+% \begin{macro}{\currentpdfbookmark}
+% \begin{macro}{\subpdfbookmark}
+% \begin{macro}{\belowpdfbookmark}
 % \begin{macro}{\texorpdfstring}
 % \begin{macro}{\nolinkurl}
 % Einige vom Paket \pkg{hyperref} definierten Befehle werden vorgehalten.
@@ -763,12 +709,20 @@
   \providecommand*\hypersetup[1]{}%
   \providecommand*\href[3][]{#3}%
   \providecommand*\phantomsection{}%
+  \providecommand*\pdfbookmark[3][]{}%
+  \providecommand*\currentpdfbookmark[2]{}%
+  \providecommand*\subpdfbookmark[2]{}%
+  \providecommand*\belowpdfbookmark[2]{}%
   \providecommand*\texorpdfstring[2]{#1}%
   \RequirePackage{url}[2013/09/16]%
   \providecommand*\nolinkurl[1]{\url{#1}}%
 %    \end{macrocode}
 % \end{macro}^^A \nolinkurl
 % \end{macro}^^A \texorpdfstring
+% \end{macro}^^A \belowpdfbookmark
+% \end{macro}^^A \subpdfbookmark
+% \end{macro}^^A \currentpdfbookmark
+% \end{macro}^^A \pdfbookmark
 % \end{macro}^^A \phantomsection
 % \end{macro}^^A \href
 % \end{macro}^^A \hypersetup
@@ -840,19 +794,6 @@
 %
 % \iffalse
 %</!doc>
-%<*doc>
-% \fi
-%
-%    \end{macrocode}
-% Und hier der Teil für die Quelltextdokumentation.
-%    \begin{macrocode}
-  \providecommand*\hypersourcedef[1]{}
-  \providecommand*\hypersource@def{}
-  \providecommand*\hypersource@ref@codeline[2][]{}
-  \providecommand*\hypersource@ref@page[2][]{}
-%
-% \iffalse
-%</doc>
 % \fi
 %
 %    \begin{macrocode}
@@ -886,19 +827,6 @@
 \newrobustcmd*\mailto[1]{\mbox{\href{mailto:#1}{\nolinkurl{#1}}}}%
 %    \end{macrocode}
 % \end{macro}^^A \mailto
-% Wenn \pkg{hyperref} geladen wird, erzeugt das Paket \pkg{babel} innerhalb von 
-% \cs{pdfstringdef} ziemlich viele und absolut unnötige Infos in der Form
-% \texttt{Package babel Info: Redefining ngerman shorthand}. Dieser Patch dient
-% zum Unterdrücken dieser Infos.
-% \begin{macro}{\pdfstringdef}
-%    \begin{macrocode}
-\AfterPackage*{hyperref}{%
-  \patchcmd{\pdfstringdef}{\csname HyPsd@babel@}{%
-    \let\bbl@info\@gobble\csname HyPsd@babel@%
-  }{}{\tud@patch@wrn{pdfstringdef}}%
-}
-%    \end{macrocode}
-% \end{macro}^^A \pdfstringdef
 %
 % \iffalse
 %</body|class&doc>
@@ -912,16 +840,6 @@
 \renewcommand*\fullref[1]{\hyperref[#1]{\autoref*{#1} \vpageref{#1}}}
 %    \end{macrocode}
 % \end{macro}^^A \fullref
-% Das Paket \pkg{microtype} wird für den optischen Randausgleich verwendet. Es 
-% sollte erst nach \pkg{hyperref} geladen werden.
-%    \begin{macrocode}
-\AfterPackage*{hyperref}{\RequirePackage[babel]{microtype}[2013/05/23]}
-%    \end{macrocode}
-% Wurde \pkg{hyperref} nicht geladen, dann soll auf \pkg{microtype} trotzdem 
-% nicht verzichtet werden.
-%    \begin{macrocode}
-\TUD@UnwindPackage{hyperref}{\RequirePackage[babel]{microtype}[2013/05/23]}
-%    \end{macrocode}
 %
 % \iffalse
 %</body>
@@ -6299,11 +6217,7 @@
   }\xspace%
 }
 \AfterPackage*{hyperref}{%
-  \pdfstringdefDisableCommands{%
-    \def\DDC{DRESDEN-concept}%
-    \def\TUDScript{TUD-Script}%
-    \def\KOMAScript{KOMA-Script}%
-  }%
+  \pdfstringdefDisableCommands{\def\DDC{DRESDEN-concept}}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \DDC

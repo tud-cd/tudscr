@@ -1,4 +1,4 @@
-% \CheckSum{491}
+% \CheckSum{438}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -45,7 +45,7 @@
 % \fi
 %
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
-\ProvidesFile{tudscr-texindy.dtx}[2019/06/28 v2.06 TUD-Script\space%
+\ProvidesFile{tudscr-texindy.dtx}[2022/07/24 v2.06o TUD-Script\space%
   (texindy style files)%
 ]
 %
@@ -80,12 +80,12 @@
 %
 % \selectlanguage{ngerman}
 %
-% \section{Stildateien für \texorpdfstring{\app{texindy}}{texindy}}
+% \section{Stildateien für \app{texindy}}
 %
 % Für die Dokumentationsklassen und -pakete wird zur Sortierung \app{texindy} 
 % verwendet. Da das Programm die die Dateien nicht in einem |TEXPATH| nach den
 % Stildateien sucht, werden diese zur Laufzeit im Arbeitsverzeichnis erstellt.
-% Nachfolgend werden die zu erstellenden \app{texindy}-Stildateien beschrieben.
+% Nachfolgend werden die erstellten \app{texindy}-Stildateien beschrieben.
 %
 % \StopEventually{\PrintIndex\PrintChanges\PrintToDos}
 %
@@ -95,67 +95,64 @@
 % Stildatei benötigt. Damit dieses beim Erzeugen der Datei nicht als solches
 % interpretiert wird, ist dafür ein separates Makro notwendig.
 %    \begin{macrocode}
-%<*doc>
-\catcode`\#=12
+\edef\tud@res@a{\catcode`\noexpand\#=\the\catcode`\#\relax}%
+\@makeother\#
 \newcommand*\@hashchar{#}
-\catcode`\#=6
-%</doc>
+\tud@res@a
 %    \end{macrocode}
 % \end{macro}^^A \@hashchar
-%
-% \subsection{Defintion der verwendeten Umgebung}
-%
 % \begin{macro}{\tud@xdy@create}
 % \changes{v2.05}{2016/04/24}{neu}^^A
-% \begin{macro}{\tud@write@xdy}
+% \begin{macro}{\tud@xdy@@create}
+% \begin{macro}{\tud@xdy@write}
 % \changes{v2.05}{2016/04/24}{neu}^^A
-% \begin{macro}{\if@tud@xdy@glo}
-% \changes{v2.05}{2016/04/25}{neu}^^A
 % Dies sind die Hilfsmakros für die Erzeugung der nötigen Dateien. Mit dem
 % \cs{tud@xdy@create} wird angegeben, ob die Stildatei für einen Index oder ein 
 % Glossar erzeugt wird, was prinzipiell nur für die Klasse \cls{tudscrdoc} 
-% notwendig ist. 
+% notwendig ist.
 %    \begin{macrocode}
-\begingroup
-%<doc>\ifdef{\tudxdyflag}{%
-\newcommand*\tud@write@xdy{}
-\newwrite\tud@write@xdy
-\newif\if@tud@xdy@glo
-\newcommand*\tud@xdy@create[2][theindex]{%
-  \IfFileExists{\@currname-#2.xdy}{}{%
-  \ifstr{#1}{theglossary}{\@tud@xdy@glotrue}{\@tud@xdy@glofalse}%
-  \openout\tud@write@xdy=\@currname-#2.xdy\relax%
+%<doc>\ifdefined\tudxdyflag
+%<!doc>\newcommand*\tud@xdy@write{}
+%<!doc>\newwrite\tud@xdy@write
+\NewDocumentCommand\tud@xdy@create{s}{%
+  \begingroup%
+    \edef\tud@res@a{\@currname-\IfBooleanTF{#1}{gls}{ind}.xdy}%
+    \expandafter\IfFileExists\expandafter{\tud@res@a}{}{%
+      \IfBooleanTF{#1}{\@tud@res@swatrue}{\@tud@res@swafalse}%
+      \edef\tud@res@b{the\if@tud@res@swa glossary\else index\fi}%
+      \edef\tud@res@a{\noexpand\tud@xdy@@create{\tud@res@b}{\tud@res@a}}%
+      \tud@res@a%
+    }%
+  \endgroup%
+}
+\newcommand*\tud@xdy@@create[2]{%
+  \immediate\openout\tud@xdy@write=#2\relax%
 %    \end{macrocode}
-% Als erstes wird Standard-\LaTeXe-Modul geladen.
+% Als erstes wird das \LaTeX-Standardmodul geladen.
 %    \begin{macrocode}
-  \write\tud@write@xdy{(require "texindy.xdy")}%
+  \immediate\write\tud@xdy@write{(require "texindy.xdy")}%
 %    \end{macrocode}
 %
-% \subsection{Befehle zur Gruppierung der Indexeinträge}
-%
+% Für die Klasse \cls{tudscrdoc} werden in den Stildateien die verwendeten 
+% Umgebung definiert, welche für die prozessierten Indexdateien zu nutzen sind.
 %    \begin{macrocode}
+  \immediate\write\tud@xdy@write{%
 %<*doc>
-  \write\tud@write@xdy{%
     (markup-index^^J%
-    \space\space:open^^J%
+    \@spaces:open^^J%
     "\string\begin{#1}^^J%
-    \space\space%
-    \string\providecommand*\string\lettergroupDefault[1]{\@percentchar^^J%
-    \@spaces\string\par%
-    \string\centerline{\string\textbf{\string\textsf{Symbole}}}%
-    \string\par\@percentchar^^J%
-    \@spaces\string\nopagebreak\@percentchar^^J%
-    \space\space}\@percentchar^^J%
-    \space\space%
-    \string\providecommand*\string\lettergroup[1]{\@percentchar^^J%
-    \@spaces\string\par%
-    \string\centerline{\string\textbf{\string\textsf{\@hashchar1}}}%
-    \string\par\@percentchar^^J%
-    \@spaces\string\nopagebreak\@percentchar^^J%
-    \space\space}\@percentchar^^J%
     \space\space\string\makeatletter\@percentchar^^J%
-    \space\space\string\scan@allowedfalse\@percentchar%
-  }%
+    \space\space\string\providecommand*\string\lettergroupDefault[1]%
+        {\string\lettergroup{\string\tud@symbols@name}}\@percentchar^^J%
+    \space\space\string\providecommand*\string\lettergroup[1]{\@percentchar^^J%
+    \@spaces\string\belowpdfbookmark%
+        {\@hashchar1}{#1/\@hashchar1}\@percentchar^^J%
+    \@spaces\string\par\string\centerline%
+        {\string\normalsize\string\textbf{\string\textsf{\@hashchar1}}}%
+        \@percentchar^^J%
+    \@spaces\string\par\string\smallskip\string\nopagebreak\@percentchar^^J%
+    \space\space}\@percentchar^^J%
+    \space\space\string\scan@allowedfalse\@percentchar^^J%
 %    \end{macrocode}
 % Für die Änderungsliste erfolgt die Gruppierung anhand der Versionsnummer. Da 
 % diese auf der ersten Ebene angegeben ist (\cs{item}) muss das Ganze mit einem 
@@ -163,114 +160,91 @@
 % Außerdem werden mit \cs{tud@lst@def} die benötigten Befehle zur selektiven 
 % Anzeige der Änderungseinträge erstellt.
 %    \begin{macrocode}
-  \if@tud@xdy@glo%
-  \write\tud@write@xdy{%
+\if@tud@res@swa
     \space\space\string\newcommand*\string\@lettergroup{}\@percentchar^^J%
-    \space\space%
-    \string\def\string\@lettergroup\@hashchar1\string\relax%
-    {\string\lettergroup{\@hashchar1}}\@percentchar^^J%
-    \space\space\string\tud@lst@def\@percentchar%
-  }%
-  \fi%
+    \space\space\string\def\string\@lettergroup\@hashchar1\string\relax%
+        {\string\lettergroup{\@hashchar1}}\@percentchar^^J%
+    \space\space\string\tud@lst@def\@percentchar^^J%
+\fi
 %    \end{macrocode}
 % Der Abschluss der Umgebungsdefinition.
 %    \begin{macrocode}
-  \if@tud@xdy@glo%
-  \write\tud@write@xdy{%
-    "^^J%
-    \space\space:close "\string~n\string~n\string\end{#1}\string~n"^^J%
-    \space\space:hierdepth 4^^J%
-    )%
-  }%
-  \else%
-  \write\tud@write@xdy{%
-    "^^J%
-    \space\space:close "\string~n\string~n\string\end{#1}\string~n"^^J%
-    \space\space:hierdepth 3^^J%
-    )%
-  }%
-  \fi%
+    "^^J% Ende des Umgebungsbeginns
+    \@spaces:close "\string~n\string~n\string\end{#1}\string~n"^^J%
+    \@spaces:hierdepth 3^^J%
+    )^^J%
+%    \end{macrocode}
+% Für die Sortierung des Indexes sollen einzelne Zeichen beachtet werden.
+% Hierfür wird |xy-ignore-special| durch |xy-resolve-special| ersetzt.
+%    \begin{macrocode}
+    (define-sort-rule-orientations (forward backward forward forward))^^J%
+    (use-rule-set :run 0^^J%
+    \@spaces:rule-set ("xy-alphabetize" "xy-resolve-special")^^J%
+    )^^J%
+    (use-rule-set :run 1^^J%
+    \@spaces:rule-set ("xy-resolve-diacritics" "xy-resolve-special")^^J%
+    )^^J%
+    (use-rule-set :run 2^^J%
+    \@spaces:rule-set ("xy-resolve-case" "xy-resolve-special")^^J%
+    )^^J%
+%    \end{macrocode}
+% Die Seitenzahlenbereiche für die Quelltextdokumentation bestehen aus drei 
+% Teilen, um das Verlinken auf Codezeilen zu ermöglichen~--
+% \meta{Target}|:|\meta{Dateischlüssel}|-|\meta{Codezeile}|:|\meta{Seitenzahl}
+%    \begin{macrocode}
+    (define-alphabet "AlphaExtended"^^J%
+    \@spaces(^^J%
+    \@spaces\@spaces"A" "B" "C" "D" "E" "F" "G" "H" "I" "J" "K" "L" "M"^^J%
+    \@spaces\@spaces"N" "O" "P" "Q" "R" "S" "T" "U" "V" "W" "X" "Y" "Z"^^J%
+    \@spaces\@spaces"a" "b" "c" "d" "e" "f" "g" "h" "i" "j" "k" "l" "m"^^J%
+    \@spaces\@spaces"n" "o" "p" "q" "r" "s" "t" "u" "v" "w" "x" "y" "z"^^J%
+    \@spaces\@spaces"?"^^J%
+    \@spaces)^^J%
+    )^^J%
+    (define-location-class "hypdoc"^^J%
+    \@spaces(^^J%
+    \@spaces\@spaces"arabic-numbers" :sep ":"^^J%
+    \@spaces\@spaces"AlphaExtended" \space:sep "-" "arabic-numbers" :sep ":"^^J%
+    \@spaces\@spaces"arabic-numbers"^^J%
+    \@spaces)^^J%
+    \@spaces:min-range-length 2^^J%
+    )^^J%
 %</doc>
 %    \end{macrocode}
-%
-% \subsection{Defintion und Markup der Seitenzahlen}
-%
 % Leider lässt sich für Seitenzahlbereiche via |:attr| (noch) kein Markup für 
 % angehängte \enquote*{f.} sowie \enquote*{ff.} einstellen. Diese würden deshalb
 % bei kursiven oder fetten Seitenzahlen trotzdem in normaler Schrift erscheinen,
 % weshalb auf die Auszeichnung folgender Seiten verzichtet wird.
 %    \begin{macrocode}
-%^^A  \write\tud@write@xdy{(require "ff-ranges.xdy")}%
+%^^A  (require "ff-ranges.xdy")^^J%
 %    \end{macrocode}
 % Bereiche mit mehr als zwei Seitenzahlen werden zusammengefasst, wobei als
-% Trennzeichen ein Halbgeviertstrich verwendet wird. Für \cls{tudscrdoc} werden 
-% die Seitenzahlen beim Einbinden der einzelnen \file{.dtx}-Dateien mit einem
-% alphanumerischen Präfix versehen, wofür eine eigene |location-class| erstellt
-% wird.
+% Trennzeichen ein Halbgeviertstrich verwendet wird.
 %    \begin{macrocode}
-  \write\tud@write@xdy{%
-    (define-location-class^^J%
-    \space\space"arabic-page-numbers" ("arabic-numbers")%
-    \space:min-range-length 1^^J%
+    (define-location-class "arabic-page-numbers"^^J%
+    \@spaces("arabic-numbers")^^J%
+    \@spaces:min-range-length 2^^J%
     )^^J%
 %<*doc>
-    (define-alphabet "AlphaExtended"^^J%
-    \space(^^J%
-    \space\space"A" "B" "C" "D" "E" "F" "G" "H" "I" "J" "K" "L" "M"^^J%
-    \space\space"N" "O" "P" "Q" "R" "S" "T" "U" "V" "W" "X" "Y" "Z"^^J%
-    \space\space"a" "b" "c" "d" "e" "f" "g" "h" "i" "j" "k" "l" "m"^^J%
-    \space\space"n" "o" "p" "q" "r" "s" "t" "u" "v" "w" "x" "y" "z"^^J%
-    \space\space"?"^^J%
-    \space)^^J%
-    )^^J%
-    (define-location-class^^J%
-    \space\space"codeline" ("AlphaExtended" :sep "-" "arabic-numbers")%
-    \space:min-range-length 2^^J%
-    )^^J%
-    (define-location-class-order ("arabic-page-numbers" "codeline"))^^J%
+    (define-location-class-order ("hypdoc" "arabic-page-numbers"))^^J%
 %</doc>
-    (markup-range :sep "--")%
-  }%
+    (markup-range :sep "--")^^J%
 %    \end{macrocode}
-%
-% \subsection{Ignorieren von bestimmten Anteilen bei der Sortierung}
-%
 % Alle Argumente in eckigen Klammern werden ignoriert. Dies wird bei einigen
 % Indexbefehlen genutzt, um die nicht beachteten RegExp-Regeln auszugleichen, 
-% siehe den nächsten Absatz. In der Klasse \cls{tudscrdoc} werden außerdem ein 
-% oder mehrere vorangestellte |@|"~Zeichen ignoriert.
+% siehe den nächsten Absatz. In der Klasse \cls{tudscrdoc} werden außerdem im 
+% Befehlsnamen enthaltene |@|"~Zeichen für die Sortierung gesondert behandelt.
 %    \begin{macrocode}
-  \write\tud@write@xdy{%
-    (merge-rule "\@backslashchar[(.*)\@backslashchar]" "" :eregexp)%
 %<*doc>
-    ^^J%
-    (merge-rule%
-    \space"\string^(@+)([\string^@~n]*)"%
-    \space"\string\2\string~e\string\1"%
-    \space:eregexp :again%
+    (merge-rule :again^^J%
+    \@spaces"(.*)@(.*)"^^J%
+    \@spaces"\string\1\string\2\space\string~e"^^J%
     )^^J%
-    (merge-rule%
-    \space"(.*)(@@@@)([\string^@~n]*)"%
-    \space"\string\1@@@\string\3\string~e"%
-    \space:again :eregexp%
-    )^^J%
-    (merge-rule%
-    \space"(.*)(@@@)([\string^@~n]*)"%
-    \space"\string\1@@\string\3\string~e"%
-    \space:again :eregexp%
-    )^^J%
-    (merge-rule%
-    \space"(.*)(@@)([\string^@~n]*)"%
-    \space"\string\1@\string\3\string~e"%
-    \space:eregexp :again%
-    )^^J%
-    (merge-rule%
-    \space"(.*?)(@)([\string^@~n]*)"%
-    \space"\string\1\string~b\string\3"%
-    \space:eregexp :again%
-    )%
 %</doc>
-  }%
+    (merge-rule :eregexp^^J%
+    \@spaces"\string\[(.*)\string\]"^^J%
+    \@spaces""^^J%
+    )^^J%
 %    \end{macrocode}
 % Innerhalb ausgewählter Auszeichnungs- und Textbefehle sollten die Befehle
 % selbst, nicht jedoch die Argumente verworfen werden. Leider lässt sich dies 
@@ -279,36 +253,30 @@
 % genutzt werden.
 %    \begin{macrocode}
 %<*!doc>
-%^^A  \write\tud@write@xdy{%
 %^^A    (merge-rule "\\hologo\{(.*)\}" "/1" :eregexp)^^J%
 %^^A    (merge-rule "\\texttt\{(.*)\}" "/1" :eregexp)^^J%
 %^^A    (merge-rule "\\textsbn\{(.*)\}" "/1" :eregexp)^^J%
 %^^A    (merge-rule "\\textsbs\{(.*)\}" "/1" :eregexp)^^J%
-%^^A  }%
 %</!doc>
 %    \end{macrocode}
-%
-% \subsection{Markup der einzelnen Einträge}
-%
 % Für die Änderungsliste im Handbuch werden Untereinträge bis zur vierten Ebene
 % unterstützt.
 %    \begin{macrocode}
-%<*!doc&class>
-  \write\tud@write@xdy{%
-    (markup-indexentry :open "~n \string\subsubsubitem " :depth 3)%
-  }%
-%</!doc&class>
+%<*!doc>
+    (markup-indexentry :depth 3^^J%
+    \@spaces:open\space\space"\string~n\string\subsubsubitem\space"^^J%
+    )^^J%
+%</!doc>
 %    \end{macrocode}
 % Für die Änderungsliste von \cls{tudscrdoc} erfolgt die Gruppierung anhand der
 % angegebenen Versionsnummer. Das bedeutet, das das Markup für die eigentliche 
 % |letter-group| unterdrückt und die erste Ebene dafür verwendet wird. 
 %    \begin{macrocode}
 %<*doc>
-  \if@tud@xdy@glo%
-  \write\tud@write@xdy{%
-    (markup-letter-group%
-    \space:open-head "\string~n\space\space\string\@gobble{"%
-    \space:close-head "}"%
+\if@tud@res@swa
+    (markup-letter-group^^J%
+    \@spaces:open-head\space\space"\string~n\space\space\string\@gobble{"^^J%
+    \@spaces:close-head "}"^^J%
     )^^J%
 %    \end{macrocode}
 % Leider gibt es für die Eintragsebenen keine Schlüssel |open-head| und
@@ -316,36 +284,32 @@
 % Zwischen Einträgen der ersten Ebene soll äquivalent zu |letter-group| etwas
 % Abstand eingefügt werden.
 %    \begin{macrocode}
-    (markup-indexentry-list%
-    \space:sep "\string~n\string~n\space\space\string\indexspace\string~n"%
-    \space:depth 0%
+    (markup-indexentry-list :depth 0^^J%
+    \@spaces:sep\space\space\space%
+        "\string~n\string~n\space\space\string\indexspace\string~n"^^J%
     )^^J%
 %    \end{macrocode}
 % Da jeder Eintrag in der Änderungsliste aus mindestens drei Ebenen besteht, 
 % wird vor der ersten Ebene der Beginn des Markupbefehls gesetzt\dots
 %    \begin{macrocode}
-    (markup-indexentry\@spaces\space\space%
-    :open "\string~n\space\space\string\@lettergroup\space"\space:depth 0%
+    (markup-indexentry \@spaces\space:depth 0^^J%
+    \@spaces:open\space\space%
+        "\string~n\space\space\string\@lettergroup\space"^^J%
     )^^J%
 %    \end{macrocode}
-% \dots und vor Beginn der zweiten Ebene mit \cs{relax} terminiert.
+% \dots und vor Beginn der zweiten Ebene mit \cs{relax} terminiert. Diese 
+% wird mit \cs{item} ausgezeichnet.
 %    \begin{macrocode}
-    (markup-indexentry-list :open "\string\relax" :depth 1)^^J%
-%    \end{macrocode}
-% Anschließend werden die zweite sowie die dritte Ebene mit \cs{item} und
-% \cs{subitem} ausgezeichnet.
-%    \begin{macrocode}
-    (markup-indexentry\@spaces\space\space%
-    :open "\string~n\space\space\string\item\space" :depth 1%
+    (markup-indexentry-list :depth 1^^J%
+    \@spaces:open\space\space"\string\relax"^^J%
     )^^J%
-    (markup-indexentry-list :open "\string\efill" :depth 2)^^J%
-    (markup-indexentry\@spaces\space\space%
-    :open "\string~n\@spaces\string\subitem\space" :depth 2%
+    (markup-indexentry \@spaces\space:depth 1^^J%
+    \@spaces:open\space\space"\string~n\space\space\string\item\space"^^J%
     )^^J%
 %    \end{macrocode}
-% Im Implemetierungsteil soll eine einzelne Änderungsnotiz für einen Eintrag
-% direkt danach ausgegeben werden. Exisitieren für diesen jedoch mehrere
-% Anmerkungen, so sollen diese in der nächsten Ebene ausgegeben werden. Da die
+% Eine einzelne, nachfolgende Änderungsnotiz für den aktuellen Eintrag soll 
+% direkt ausgegeben werden. Sind jedoch mehrere nachgelagerte Anmerkungen 
+% vorhanden, so sollen diese in der nächsten Ebene ausgegeben werden. Da die
 % Anzahl aller Anmerkungen zu einem einzelnen Eintrag zu Beginn noch unbekannt
 % ist, werden alle dazugehörigen Änderungsnotizen zunächst mit \cs{tud@lst@add}
 % in der~-- zuvor mit dem Makro \cs{tud@lst@init} initialisierten~-- Liste
@@ -354,42 +318,32 @@
 % werden entsprechend die Makros \cs{tud@lst@@init}, \cs{tud@lst@@values} und
 % \cs{tud@lst@@add} sowie \cs{tud@lst@@process} verwendet.
 %    \begin{macrocode}
-    (markup-indexentry-list^^J%
-    \space\space:open\space\space"\string\tud@lst@init"^^J%
-    \space\space:close "\string~n \@spaces\space\string\tud@lst@process"^^J%
-    \space\space:depth 3^^J%
+    (markup-indexentry-list :depth 2^^J%
+    \@spaces:open\space\space"\string\tud@lst@init"^^J%
+    \@spaces:close "\string~n \@spaces\space\string\tud@lst@process"^^J%
     )^^J%
-    (markup-indexentry^^J%
-    \space\space:open%
-    \space\space"\string~n\@spaces\space\space\string\tud@lst@add{"^^J%
-    \space\space:close "}"^^J%
-    \space\space:depth 3^^J%
+    (markup-indexentry \@spaces\space:depth 2^^J%
+    \@spaces:open%
+        \space\space"\string~n\@spaces\space\space\string\tud@lst@add{"^^J%
+    \@spaces:close "}"^^J%
     )^^J%
-    (markup-indexentry-list^^J%
-    \space\space:close "\string~n\@spaces\@spaces\string\tud@lst@@process{"^^J%
-    \space\space:open\space\space"}\string\tud@lst@@init"^^J%
-    \space\space:depth 4^^J%
+    (markup-indexentry-list :depth 3^^J%
+    \@spaces:close "\string~n\@spaces\@spaces\string\tud@lst@@process{"^^J%
+    \@spaces:open\space\space"}\string\tud@lst@@init"^^J%
     )^^J%
-    (markup-indexentry^^J%
-    \space\space:open%
-    \space\space"\string~n\@spaces\@spaces\string\tud@lst@@add{"^^J%
-    \space\space:close "}"^^J%
-    \space\space:depth 4^^J%
-    )%
-  }%
+    (markup-indexentry \@spaces\space:depth 3^^J%
+    \@spaces:open%
+        \space\space"\string~n\@spaces\@spaces\string\tud@lst@@add{"^^J%
+    \@spaces:close "}"^^J%
+    )^^J%
 %    \end{macrocode}
 % Für den Index aller Eintragstypen ist nur auf zu leere \cs{hbox} zu achten.
 %    \begin{macrocode}
-  \else%
-  \write\tud@write@xdy{%
-    (markup-indexentry-list :open "\string\efil" :depth 1)%
-  }%
-  \fi%
+\else
+    (markup-indexentry-list :open "\string\efil" :depth 1)^^J%
+\fi
 %</doc>
 %    \end{macrocode}
-%
-% \subsection{Markup des Füllbereichs zwischen Eintrag und Seitenzahlen}
-%
 % Punkte zwischen Eintrag und Seitenzahl. Das schließende \cs{relax} wird für 
 % die smarte Definition des Befehls \cs{cleversee} benötigt, welcher nach den 
 % beiden obligatorischen Argument die nachfolgenden Seitenzahlen sucht und 
@@ -397,200 +351,147 @@
 % der Änderungsliste der Hyperlink für die Seitenzahl respektive die Codezeile 
 % direkt erzeugt.
 %    \begin{macrocode}
-  \write\tud@write@xdy{%
-    (markup-locclass-list%
-%<!doc>    \space:open "\string\,\string\dotfill\string\,"%
-%<doc>    \space:open "\string\pfill\space"%
-    \space:close "\string\relax"%
-    \space:sep ",\space"%
-    )%
-  }%
+    (markup-locclass-list^^J%
+%<!doc>    \@spaces:open\space\space"\string\,\string\dotfill\string\,"^^J%
+%<doc>    \@spaces:open\space\space"\string\pfill\space"^^J%
+    \@spaces:close "\string\relax"^^J%
+    \@spaces:sep\space\space\space",\space"^^J%
+    )^^J%
 %    \end{macrocode}
+% Es werden für Handbuch und Tutorials die Attribute \emph{!} für deklarierende 
+% sowie \emph{?} für wichtige Einträge zusätzlich zu \emph{default} definiert.
 %
-% \subsection{Attribute für Einträge}
-%
-% Es werden für Handbuch und Tutorials die Attribute \emph{declare} mit der
-% Abkürzung~\emph{!} sowie \emph{important} mit der Abkürzung~\emph{?} und
-% \emph{default} definiert, welche hierarchisch gleichgestellt sind.
-%
-% \iffalse
+% Einträge werden hierarchisch unterschieden. Standardeinträge \val{default}
+% werden ggf. von deklarierenden oder wichtigen Einträgen überschrieben bzw. 
+% nicht separat gelistet.
+%    \begin{macrocode}
 %<*!doc>
-% \fi
-%
-%    \begin{macrocode}
-  \write\tud@write@xdy{%
-    (define-attributes (("declare" "!" "important" "?" "default")))^^J%
-%    \end{macrocode}
-% Eine Alternative wäre, diese in der Hierarchie zu unterscheiden, allerdings
-% war eine Bildung von zufriedenstellenden Seitenbereichen dabei nicht möglich
-% und wurde deshalb verworfen.
-%    \begin{macrocode}
-%^^A    (markup-attribute-group-list :sep ", ")^^J%
-%^^A    (define-attributes (("declare" "!") ("important" "?")("default")))^^J%
-%    \end{macrocode}
-% Einträge, die als wichtig oder als Deklaration festgelegt wurden, könnten
-% auch für normale Indexeinträge zur Bereichsbildung verwendet werden. 
-% Allerdings führt dies auch zur Erzeugung redundanter Einträge, falls es sich 
-% bei den Sondereinträgen bereits um einen Seitenbereich handelt.
-%    \begin{macrocode}
-%^^A    (merge-to "declare" "default")^^J%
-%^^A    (merge-to "!" "default")^^J%
-%^^A    (merge-to "important" "default")^^J%
-%^^A    (merge-to "?" "default")^^J%
+    (define-attributes (("!" "default") ("?" "default") ("default")))^^J%
+    (markup-attribute-group-list :sep ", ")^^J%
 %    \end{macrocode}
 % Hier erfolgt die Definition der Auszeichnugen der Attribute. Deklarationen 
 % werden fett gedruckt, wichtige Einträge erscheinen kursiv. Außerdem wird ein
 % entsprechnder Link auf die Seite eingefügt.
 %    \begin{macrocode}
-    (markup-locref%
-    \space:attr "declare"\space\space%
-    \space:open "\string\textbf{\string\hyperpage{"%
-    \space:close "}}"%
+    (markup-locref :attr "!"^^J%
+    \@spaces:open\space\space"\string\textbf{\string\hyperpage{"^^J%
+    \@spaces:close "}}"^^J%
     )^^J%
-    (markup-locref%
-    \space:attr "!"\@spaces\@spaces%
-    \space:open "\string\textbf{\string\hyperpage{"%
-    \space:close "}}"%
+    (markup-locref :attr "?"^^J%
+    \@spaces:open\space\space"\string\textit{\string\hyperpage{"^^J%
+    \@spaces:close "}}"^^J%
     )^^J%
-    (markup-locref%
-    \space:attr "important"%
-    \space:open "\string\textsl{\string\hyperpage{"%
-    \space:close "}}"%
+    (markup-locref :attr "default"^^J%
+    \@spaces:open\space\space"\string\hyperpage{"^^J%
+    \@spaces:close "}" ^^J%
     )^^J%
-    (markup-locref%
-    \space:attr "?"\@spaces\@spaces%
-    \space:open "\string\textsl{\string\hyperpage{"%
-    \space:close "}}"%
-    )^^J%
-    (markup-locref%
-    \space:attr "default"\space\space%
-    \space:open "\string\hyperpage{"\@spaces\@spaces%
-    \space:close "}"%
-    )%
-  }%
-%    \end{macrocode}
-%
-% \iffalse
 %</!doc>
-%<*doc>
-% \fi
-%
-% Für \cls{tudscrdoc} erfolgen die Auszeichnungen für den Index im Stile von
-% \pkg{doc} mit den Attribute \emph{main} und \emph{usage}, wobei hier eine 
-% Hierarchie verwendet wird. Es werden Einträge mit dem Attribut \emph{usage} 
-% vor \emph{main} und \emph{default} aufgeführt.
-%    \begin{macrocode}
-  \write\tud@write@xdy{%
-    (markup-attribute-group-list :sep ", ")^^J%
-    (define-attributes (("usage") ("main") ("default")))^^J%
-    (markup-locref :attr "usage"%
-    \space:open "\string\usage{"\space:close "}"%
-    )^^J%
-    (markup-locref :attr "main"%
-    \space\space:open "\string\main{"\space\space:close "}"%
-    )%
-  }%
 %    \end{macrocode}
-%
-% \iffalse
+% Für \cls{tudscrdoc} erfolgen die Auszeichnungen für den Index im Stile von
+% \pkg{doc} vorallem mit den Attributen \emph{usage} für Erläuterung sowie
+% \emph{main} für Codedefinitionen und \emph{code} für Verweise auf die 
+% Verwendung im Quellcode. Zusätzlich wird \emph{change} definiert, um auch
+% Änderungseinträge separat zu erfassen. Diese Attribute dienen \app{texindy}
+% lediglich für die Kategorisierung der Einträge, die Formatierung dieser für
+% die Ausgabe erfolgt mit \cs{tud@xdy@mapping}\marg{Attribut}\marg{Referenz}.
+%    \begin{macrocode}
+%<*doc>
+    (markup-attribute-group-list :sep ", ")^^J%
+    (define-attributes (("usage") ("main") ("code") ("change") ("default")))^^J%
+    (markup-locref :attr "change"^^J%
+    \@spaces:open"\string\tud@xdy@mapping{change}{"^^J
+    \@spaces:close "}"^^J%
+    )^^J%
+    (markup-locref :attr "code"^^J%
+    \@spaces:open "\string\tud@xdy@mapping{code}{"^^J%
+    \@spaces:close "}"^^J%
+    )^^J%
+    (markup-locref :attr "usage"^^J%
+    \@spaces:open "\string\tud@xdy@mapping{usage}{"^^J%
+    \@spaces:close "}"^^J%
+    )^^J%
+    (markup-locref :attr "main"^^J%
+    \@spaces:open "\string\tud@xdy@mapping{main}{"^^J%
+    \@spaces:close "}"^^J%
+    )^^J%
 %</doc>
-%<*!doc>
-% \fi
-%
-% \subsection{Querverweise im Index}
-%
-% Im Handbuch prüfen, mit \verb=|see=\marg{Eintrag} erzeugte Querverweise im 
+%    \end{macrocode}
+% Im Handbuch prüfen, mit \verb+|see+\marg{Eintrag} erzeugte Querverweise im 
 % Index, ob außerdem noch Seitenzahlangaben existent sind.
 %    \begin{macrocode}
-  \write\tud@write@xdy{%
+%<*!doc>
     (markup-crossref-list :class "see"^^J%
-    \space\space:open "\string\cleversee{" \@spaces:sep "; " :close "}"^^J%
+    \@spaces:open\space\space"\string\cleversee\space"^^J%
+    \@spaces:sep\space\space\space"; "^^J%
+    \@spaces:close "\@backslashchar\@backslashchar"^^J%
     )^^J%
     (markup-crossref-list :class "seealso"^^J%
-    \space\space:open "\string\cleverseealso{" :sep "; " :close "}"^^J%
-    )%
-  }%
+    \@spaces:open\space\space"\string\cleverseealso\space"^^J%
+    \@spaces:sep\space\space\space"; "^^J%
+    \@spaces:close "\@backslashchar\@backslashchar"^^J%
+    )^^J%
 %    \end{macrocode}
-%
-% \iffalse
-%<*class>
-% \fi
-%
 % Um Querverweise ohne Prüfung des Zieleintrags erzeugen zu können, wird der 
 % passende Typ |seeunverified| definiert.
 %    \begin{macrocode}
-  \write\tud@write@xdy{%
+%<*class>
     (define-crossref-class "seeunverified" :unverified)^^J%
     (markup-crossref-list :class "seeunverified"^^J%
-    \space\space:open "\string\cleversee{" \@spaces:sep "; " :close "}"^^J%
-    )%
-  }%
+    \@spaces:open\space\space"\string\cleversee\space"^^J%
+    \@spaces:sep\space\space\space"; "^^J%
+    \@spaces:close "\@backslashchar\@backslashchar"^^J%
+    )^^J%
 %    \end{macrocode}
 % Dieser Querverweistyp wird speziell im allgemeinen Index verwendet, um auf 
 % einen Spezialindex zu verweisen. Dabei dient |:unverified| zum Unterdrücken
 % von Warnungen durch \app{texindy} aufgrund eines fehlenden Ziels für den
 % Querverweis.
 %    \begin{macrocode}
-  \write\tud@write@xdy{%
     (define-crossref-class "seeidx" :unverified)^^J%
     (markup-crossref-list :class "seeidx"^^J%
-    \space\space:open "\string\seeidx{"\@spaces\@spaces:sep "; "%
-    \space:close "}{}"^^J%
-    )%
-  }%
-%    \end{macrocode}
-% Damit die Makros \cs{cleversee} und \cs{cleverseealso} sowie \cs{seeidx} auf
-% nachfolgende Seitenzahlen suchen können, müssen diese vor selbigen im Index
-% aufgerufen werden.
-%    \begin{macrocode}
-  \write\tud@write@xdy{%
-    (define-location-class-order^^J%
-    \space\space(^^J%
-    \@spaces"see" "seealso" "seeidx" "seeunverified"^^J%
-    \@spaces"roman-page-numbers" "arabic-page-numbers" "alpha-page-numbers"^^J%
-    \@spaces"Roman-page-numbers" "Alpha-page-numbers"^^J%
-    \space\space)^^J%
-    )%
-  }%
-%    \end{macrocode}
-%
-% \iffalse
+    \@spaces:open\space\space"\string\seeidx{"^^J%
+    \@spaces:sep\space\space\space"; "^^J%
+    \@spaces:close "}{}"^^J%
+    )^^J%
 %</class>
-% \fi
-%
-% Werden mit \verb=|see=\marg{Eintrag!Untereintrag} gezielte Querverweise auf
+%    \end{macrocode}
+% Werden mit \verb+|see+\marg{Eintrag!Untereintrag} gezielte Querverweise auf
 % Untereinträge im Index erstellt, so werden diese nicht standardmäßig mit 
 % einem Komma sondern mit \enquote*{\,\textbar\,} getrennt.
 %    \begin{macrocode}
-  \write\tud@write@xdy{%
     (markup-crossref-layer-list :class "see"%
     \@spaces\space:sep "\string\,\string\textbar\string\,"%
     )^^J%
     (markup-crossref-layer-list :class "seealso"%
     \space:sep "\string\,\string\textbar\string\,"%
-    )%
-  }%
+    )^^J%
 %    \end{macrocode}
-%
-% \iffalse
+% Damit die Makros \cs{cleversee} und \cs{cleverseealso} sowie \cs{seeidx} auf
+% nachfolgende Seitenzahlen suchen können, müssen diese vor selbigen im Index
+% aufgerufen werden.
+%    \begin{macrocode}
+    (define-location-class-order^^J%
+    \@spaces(^^J%
+%<class>    \@spaces"see" "seealso" "seeidx" "seeunverified"^^J%
+%<!class>    \@spaces"see" "seealso"^^J%
+    \@spaces"roman-page-numbers" "arabic-page-numbers" "alpha-page-numbers"^^J%
+    \@spaces"Roman-page-numbers" "Alpha-page-numbers"^^J%
+    \@spaces)^^J%
+    )^^J%
 %</!doc>
-% \fi
-%
-% \subsection{Erzeugen der Stildateien}
-%
+%    \end{macrocode}
 % Damit ist die \app{texindy}-Stildatei fertig und kann mit \cs{tud@xdy@create} 
 % erstellt werden.
 %    \begin{macrocode}
-  \closeout\tud@write@xdy%
   }%
+  \immediate\closeout\tud@xdy@write%
 }
-\tud@xdy@create{ind}
-%<doc>\tud@xdy@create[theglossary]{gls}
-%<doc>}{}
-\endgroup
+\tud@xdy@create
+%<doc>\tud@xdy@create*
+%<doc>\fi
 %    \end{macrocode}
-% \end{macro}^^A \if@tud@xdy@glo
-% \end{macro}^^A \tud@write@xdy
+% \end{macro}^^A \tud@xdy@write
+% \end{macro}^^A \tud@xdy@@create
 % \end{macro}^^A \tud@xdy@create
 %
 % \Finale
