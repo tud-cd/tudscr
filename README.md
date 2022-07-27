@@ -7,7 +7,8 @@
  **tudscr 2020/xx/xx v2.07**
 
  This material is subject to the LaTeX Project Public License version 1.3c
- or later. See http://www.latex-project.org/lppl.txt for details.
+ or later.<br>
+ See http://www.latex-project.org/lppl.txt for details.
 
 ----------------------------------------------------------------------------
 
@@ -67,6 +68,9 @@ Versionen
 + **tudscrposter** Umgebungen `figurehere` und `tablehere`
 + Verwendung der Symbole `\textleftarrow`, `\textrightarrow`, `\textuparrow`,
   `\textdownarrow` sowie `\textlangle` und `\textrangle` aus Paket **iwona**
+
+**v2.06n** (2021/07/15)
++ Fix für **siunitx**
 
 **v2.06m** (2021/07/06)
 + Fix eines internen Fehlers mit LuaLaTeX
@@ -292,6 +296,9 @@ Versions
 
 **v2.07** (2020/xx/xx)
 + ...
+
+**v2.06n** (2021/07/15)
++ bug fix for **siunitx**
 
 **v2.06m** (2021/07/06)
 + bug fix for an internal error with LuaLaTeX
