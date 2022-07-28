@@ -1,4 +1,4 @@
-% \CheckSum{2307}
+% \CheckSum{2299}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -45,7 +45,7 @@
 % \fi%
 %
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
-\ProvidesFile{tudscr-area.dtx}[2020/06/18 v2.06g TUD-Script\space%
+\ProvidesFile{tudscr-area.dtx}[2022/07/25 v2.06o TUD-Script\space%
   (type or page area)%
 ]
 %
@@ -661,7 +661,7 @@
 % definierte Satzspiegel geladen werden. Falls jedoch eine Neuberechnung 
 % erfolgte, wird auf das Laden verzichtet (\cs{if@tud@cdgeometry@reset}).
 %    \begin{macrocode}
-    \if@atdocument%
+    \tud@if@preamble{}{%
       \if@tud@cdgeometry@reset\else% false
         \ifcase\tud@cdgeometry@num\relax%
           \tud@loadgeometry{current@typearea}%
@@ -672,7 +672,7 @@
         \fi%
         \TUD@SpecialOptionAtDocument{tud@cdgeometry@process}%
       \fi%
-    \fi%
+    }%
   \fi%
 }
 %    \end{macrocode}
@@ -967,7 +967,7 @@
 %    \begin{macrocode}
   \renewcommand*\restoregeometry[1][custom]{%
     \tud@cdgeometry@reset{#1}%
-    \if@atdocument%
+    \tud@if@preamble{}{%
       \ifcase\tud@cdgeometry@num\relax% false
         \tud@loadgeometry{init@typearea}%
         \@tud@x@geometry@fixmarginstrue%
@@ -976,7 +976,7 @@
         \@tud@x@geometry@fixmarginstrue%
       \fi%
       \tud@cdgeometry@process%
-    \fi%
+    }%
   }%
 %    \end{macrocode}
 % Sollte im Dokument durch den Anwender der Satzspiegel manuell geändert 
@@ -986,7 +986,7 @@
 %    \begin{macrocode}
   \apptocmd{\Gm@changelayout}{%
     \if@tud@x@geometry@enabled%
-      \if@atdocument%
+      \tud@if@preamble{}{%
         \@tud@x@geometry@fixmarginstrue%
         \ifcase\tud@cdgeometry@num\relax% false
           \tud@cdgeometry@reset{typearea}%
@@ -994,7 +994,7 @@
           \tud@cdgeometry@reset{custom}%
         \fi%
         \tud@cdgeometry@process%
-      \fi%
+      }%
     \fi%
   }{}{\tud@patch@wrn{Gm@changelayout}}%
 %    \end{macrocode}
@@ -1367,12 +1367,23 @@
 %    \begin{macrocode}
   \newcommand*\tud@x@geometry@set[1]{%
     \@tud@x@geometry@enabledfalse%
+    \tud@if@preamble{%
+%    \end{macrocode}
+% In der Präambel werden mit \cs{Gm@initnewgm} vor jedem Satzspiegel die zuvor
+% gemachten Einstellungen zurückgesetzt.
+%    \begin{macrocode}
+      \Gm@initnewgm%
+      \edef\@tempa{%
+        paperwidth=\the\paperwidth,paperheight=\the\paperheight,#1%
+      }%
+      \def\@tempc{\tud@cs@use{geometry}}%
+      \expandafter\@tempc\expandafter{\@tempa,driver=none}%
+    }{%
 %    \end{macrocode}
 % Um etwaige Änderungen am Papierformat innerhalb des Dokumentes beachten zu 
 % können, werden die aktuellen Maße für das Papierformat an \cs{Gm@restore@org} 
 % angehangen.
 %    \begin{macrocode}
-    \if@atdocument%
       \edef\@tempa{#1}%
       \tud@cs@store{Gm@restore@org}%
       \eappto\Gm@restore@org{%
@@ -1382,18 +1393,7 @@
       \def\@tempc{\tud@cs@use{newgeometry}}%
       \expandafter\@tempc\expandafter{\@tempa}%
       \tud@cs@restore{Gm@restore@org}%
-    \else%
-%    \end{macrocode}
-% Zu Beginn des Dokumentes werden mit \cs{Gm@initnewgm} vor jedem Satzspiegel
-% die zuvor gemachten Einstellungen zurückgesetzt.
-%    \begin{macrocode}
-      \Gm@initnewgm%
-      \edef\@tempa{%
-        paperwidth=\the\paperwidth,paperheight=\the\paperheight,#1%
-      }%
-      \def\@tempc{\tud@cs@use{geometry}}%
-      \expandafter\@tempc\expandafter{\@tempa,driver=none}%
-    \fi%
+    }%
     \@tud@x@geometry@enabledtrue%
   }%
 %    \end{macrocode}
@@ -1880,11 +1880,11 @@
 % Falls die (abermalige) Erstellung der Satzspiegel im Dokument erfolgt, sollte 
 % anschließend auch der richtige Satzspiegel wieder ausgewählt werden.
 %    \begin{macrocode}
-    \if@atdocument%
+    \tud@if@preamble{}{%
       \ifstr{\tud@currentgeometry}{stdarea}{}{%
         \expandafter\tud@loadgeometry\expandafter{\tud@currentgeometry}%
       }%
-    \fi%
+    }%
   }%
 %    \end{macrocode}
 % \end{macro}^^A \tud@cdgeometry@ddcmargin
@@ -1929,11 +1929,12 @@
 % \end{macro}^^A \tud@cdgeometry@hincl
 % \begin{macro}{\tud@cdgeometry@@init}
 % \changes{v2.04}{2015/03/10}{neu}^^A
-% Damit alle Satzspiegeleinstellungen korrekt vorgenommen und auch alle
-% Klassenoptionen korrekt verarbeitet werden, wird die Berechnung erstmalig mit
-% \cs{AtEndPreamble} am Ende der Präambel ausgeführt. Dabei werden sowohl der
-% benutzerdefinierte Satzspiegel als auch die durch \pkg{typearea} berechneten
-% Einstellungen gesichert.
+% Damit alle Satzspiegeleinstellungen vollständig vorgenommen und auch alle
+% Klassenoptionen korrekt verarbeitet werden, wird die Berechnung erstmalig 
+% mit \cs{AtEndPreamble}|{|\cs{tud@cdgeometry@init}|}| ausgeführt, nachdem der 
+% Ladezustandes des Paketes \pkg{scrlayer-scrpage} geprüft wurde. Dabei werden 
+% sowohl der benutzerdefinierte Satzspiegel als auch die durch \pkg{typearea}
+% berechneten Einstellungen gesichert.
 %    \begin{macrocode}
   \newcommand*\tud@cdgeometry@@init{%
     \csuse{@ta@usegeometryfalse}%
@@ -2179,12 +2180,12 @@
 \newcommand*\tud@x@typearea@after{%
   \tud@skip@restore{paperheight}%
   \tud@skip@restore{paperwidth}%
-  \if@atdocument%
+  \tud@if@preamble{%
+    \TUD@key@preset{cdgeometry}{false}%
+  }{%
     \tud@cdgeometry@reset{typearea}%
     \tud@cdgeometry@process%
-  \else%
-    \TUD@key@preset{cdgeometry}{false}%
-  \fi%
+  }%
 }
 \newcommand*\tud@x@typearea@init{\recalctypearea}%
 %    \end{macrocode}

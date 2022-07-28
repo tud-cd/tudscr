@@ -1,4 +1,4 @@
-% \CheckSum{1215}
+% \CheckSum{1239}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -45,7 +45,7 @@
 % \fi
 %
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
-\ProvidesFile{tudscr-layout.dtx}[2019/07/19 v2.06c TUD-Script\space%
+\ProvidesFile{tudscr-layout.dtx}[2022/07/25 v2.06o TUD-Script\space%
   (layout)%
 ]
 %
@@ -195,13 +195,13 @@
 % festgelegt. Dies kann vom Benutzer mit dem Setzen der Option \opt{cdgeometry}
 % überschrieben werden.
 %    \begin{macrocode}
-    \if@atdocument\else%
+    \tud@if@preamble{%
       \ifcase\tud@cd@num\relax% false
         \tud@locked@num@preset{tud@cdgeometry@num}{0}%
       \else% !false
         \tud@locked@num@preset{tud@cdgeometry@num}{2}%
       \fi%
-    \fi%
+    }{}%
   \fi%
 }
 %    \end{macrocode}
@@ -333,7 +333,7 @@
 % \begin{option}{cleardoublespecialpage}
 % \changes{v2.02}{2014/07/08}{Werte für Seitenstil aus den \TUDScript- bzw.
 %   \KOMAScript-Klassen möglich}^^A
-% \changes{v2.03}{2015/01/09}{Prüfung des Seitenstils mit \cs{AfterPreamble}
+% \changes{v2.03}{2015/01/09}{Prüfung des Seitenstils mit \cs{AfterEndPreamble}
 %   auf Beginn des Dokumentes verzögert}^^A
 % \changes{v2.06}{2018/08/21}{Farbeinstellungen integriert}^^A
 % \begin{macro}{\tud@cleardoublepage}
@@ -397,10 +397,10 @@
 % Beim Laden der Klasse selbst sind die speziellen Seitenstile der \KOMAScript-
 % bzw. \TUDScript-Klassen noch nicht definiert. Diese sollen als Werte jedoch
 % trotzdem erlaubt sein. Deshalb wird für diesen Fall das Überprüfen mit
-% \cs{AfterPreamble} auf den Beginn des Dokumentes verzögert.
+% \cs{AfterEndPreamble} auf den Beginn des Dokumentes verzögert.
 %    \begin{macrocode}
   \else%
-    \AfterPreamble{%
+    \AfterEndPreamble{%
       \ifcsundef{ps@#1}{%
         \ClassError{\TUD@Class@Name}{`#1' is no valid pagestyle}{%
           You tried to use `#1' as a pagestyle for option\MessageBreak%
@@ -521,11 +521,12 @@
 % Wird die Option innerhalb des Dokumentes verwendet, wird mit einer Box erst 
 % die gewählte Farbe verifiziert und anschließend auf die am Dokumentbeginn 
 % definierte Textfarbe umgestellt.
+% \ToDo{angucken, was soll das genau?}[v2.07]
 %    \begin{macrocode}
-  \if@atdocument%
+  \tud@if@preamble{}{%
     \ifdefvoid{\tud@pagecolor}{}{\sbox\z@{\color{\tud@pagecolor}}}%
     \normalcolor%
-  \fi%
+  }%
 }
 \TUD@key{backgroundcolor}[true]{\TUDoptions{backcolor=#1}}
 \TUD@key{bgcolor}[true]{\TUDoptions{backcolor=#1}}
@@ -534,7 +535,6 @@
 % hier in jedem Fall als Schriftfarbe \emph{weiß} zu verwenden.
 %    \begin{macrocode}
 \AfterPackage{xcolor}{%
-  \CheckCommand*\normalcolor{\let\current@color\default@color\set@color}%
   \apptocmd{\normalcolor}{%
     \ifstr{\tud@pagecolor}{HKS41}{\color{white}}{}%
   }{}{\tud@patch@wrn{normalcolor}}%
@@ -723,7 +723,7 @@
 % Damit die Einstellungen für die Größe wirksam werden, wird das Makro einmalig
 % zu Beginn des Dokumentes ausgeführt.
 %    \begin{macrocode}
-\AtEndPreamble{\tud@x@scr@headings@set}
+\AfterEndPreamble{\tud@x@scr@headings@set}
 %    \end{macrocode}
 % \end{macro}^^A \tud@thesis@fontsize
 % \end{macro}^^A \tud@sec@fontsize

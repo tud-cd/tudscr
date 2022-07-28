@@ -1,4 +1,4 @@
-% \CheckSum{842}
+% \CheckSum{849}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -45,7 +45,7 @@
 % \fi
 %
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
-\ProvidesFile{tudscr-base.dtx}[2020/09/29 v2.06j TUD-Script\space%
+\ProvidesFile{tudscr-base.dtx}[2022/07/25 v2.06o TUD-Script\space%
 %
 % \iffalse
 %</dtx>
@@ -220,6 +220,23 @@
 %    \end{macrocode}
 % \end{macro}^^A \eaddto@hook
 % \end{macro}^^A \tud@toks@
+%
+% \subsubsection{Verzweigung für Präambel und Dokument}
+%
+% \begin{macro}{\tud@if@preamble}
+% \changes{v2.05o}{2022/07/25}{als Ersatz für \cs{if@atdocument}}^^A
+% Mit \KOMAScript~v3.37 wurde das Aktivieren des Schalters \cs{if@atdocument} 
+% aufgrund des stark veränderten und damit leider nur bedingt deterministischen 
+% \hrfn{https://sourceforge.net/p/koma-script/tickets/23/}{Hook-Managements} 
+% des Kernels auf |begindocument/before| verschoben. Dieser Befehl wird als
+% Gegenstück definiert und führt in Abhängigkeit von |begindocument/after| 
+% Quelltext verzweigt aus.
+%    \begin{macrocode}
+\newcommand*\tud@if@preamble{}
+\let\tud@if@preamble\@firstoftwo
+\AfterEndPreamble{\let\tud@if@preamble\@secondoftwo}
+%    \end{macrocode}
+% \end{macro}^^A \tud@if@preamble
 %
 % \subsubsection{Robuster Test auf leeres Argument}
 %
@@ -1215,11 +1232,11 @@
 }
 \newcommand*\TUD@AfterPackage@do[2]{%
   \ifcsdef{if@tud@#1@loaded}{%
-    \if@atdocument%
-      \ifbool{@tud@#1@loaded}{#2}{}%
-    \else%
+    \tud@if@preamble{%
       \AfterAtEndOfPackage*{#1}{#2}%
-    \fi%
+    }{%
+      \ifbool{@tud@#1@loaded}{#2}{}%
+    }%
   }{%
     \PackageError{tudscrbase}{\string\TUD@AfterPackage@set{#1} missing}{%
       You have to set \string\TUD@AfterPackage@set{#1} before\MessageBreak%
