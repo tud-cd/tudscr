@@ -276,7 +276,14 @@
 % ist. Sollte dies nicht der Fall sein, wird ein Fehler erzeugt.
 %    \begin{macrocode}
 %<*class>
-  \ifcsdef{scr@v@\TUD@Version@KOMA}{%
+  \ifcsundef{scr@v@\TUD@Version@KOMA}{%
+    \ClassError{\TUD@Class@Name}{%
+      KOMA-Script v\TUD@Version@KOMA is required%
+    }{%
+      \TUD@Version\space must at least be used with\MessageBreak%
+      KOMA-Script v\TUD@Version@KOMA, but \KOMAScriptVersion was found.%
+    }%
+  }{%
     \ifnum\scr@compatibility<\csuse{scr@v@3.12}\relax%
       \ClassError{\TUD@Class@Name}{%
         KOMA-Script compatibility level too low%
@@ -285,13 +292,6 @@
         `version=3.12' KOMA-Script compatibility option.%
       }%
     \fi%
-  }{%
-    \ClassError{\TUD@Class@Name}{%
-      KOMA-Script v\TUD@Version@KOMA is required%
-    }{%
-      \TUD@Version\space must at least be used with\MessageBreak%
-      KOMA-Script v\TUD@Version@KOMA, but \KOMAScriptVersion was found.%
-    }%
   }%
 %</class>
 }
@@ -510,13 +510,7 @@
 \newcommand*\tud@if@v@lower[1]{%
   \begingroup%
     \tud@v@get\@tempa{#1}%
-    \ifcsdef{tud@v@\@tempa}{%
-      \ifnum\tud@v@comp<\csuse{tud@v@\@tempa}\relax%
-        \def\tud@reserved{\endgroup\@firstoftwo}%
-      \else%
-        \def\tud@reserved{\endgroup\@secondoftwo}%
-      \fi%
-    }{%
+    \ifcsundef{tud@v@\@tempa}{%
       \def\tud@reserved{%
 %<*class>
         \ClassWarningNoLine{\TUD@Class@Name}%
@@ -530,6 +524,12 @@
         }%
         \endgroup\@firstoftwo%
       }%
+    }{%
+      \ifnum\tud@v@comp<\csuse{tud@v@\@tempa}\relax%
+        \def\tud@reserved{\endgroup\@firstoftwo}%
+      \else%
+        \def\tud@reserved{\endgroup\@secondoftwo}%
+      \fi%
     }%
   \tud@reserved%
 }
@@ -1140,28 +1140,35 @@
 % \begin{macro}{\fachrichtung}
 % \begin{macro}{\institut}
 % \begin{macro}{\professur}
+% \begin{macro}{\moreauthor}
 % Es werden Aliasbefehle für die Eingabefelder definiert.
 %    \begin{macrocode}
 \newcommand*\einrichtung{\faculty}
 \newcommand*\fachrichtung{\department}
 \newcommand*\institut{\institute}
 \newcommand*\professur{\chair}
+\newcommand*\moreauthor{\authormore}
 %    \end{macrocode}
+% \end{macro}^^A \moreauthor
 % \end{macro}^^A \professur
 % \end{macro}^^A \institut
 % \end{macro}^^A \fachrichtung
 % \end{macro}^^A \einrichtung
+% \begin{macro}{\tudfont}
+% \changes{v2.04}{2015/04/24}{\cls{tudmathposter} wird unterstützt}^^A
 % \begin{macro}{\dinBold}
 % \changes{v2.05}{2015/07/13}{neu}^^A
 % \begin{macro}{\dinfamily}
 % \changes{v2.05}{2015/07/13}{neu}^^A
 % Für die explizite Schriftauswahl gibt es ebenfalls zwei ältere Befehle.
 %    \begin{macrocode}
+\newcommand*\tudfont{\cdfont}
 \newcommand*\dinBold{\dinbn}
 \newcommand*\dinfamily{\dinbn}
 %    \end{macrocode}
 % \end{macro}^^A \dinfamily
 % \end{macro}^^A \dinBold
+% \end{macro}^^A \tudfont
 %
 % \iffalse
 %</body>
@@ -1226,28 +1233,25 @@
 %<*body>
 % \fi
 %
-% \begin{macro}{\moreauthor}
 % \begin{macro}{\submitdate}
+% \begin{macro}{\submittedon}
 % \begin{macro}{\supervisorII}
 % \begin{macro}{\supervisedby}
 % \begin{macro}{\supervisedIIby}
-% \begin{macro}{\submittedon}
 % Es werden weitere Aliasbefehle für die Eingabefelder der \cls{tudbook}-Klasse 
 % definiert.
 %    \begin{macrocode}
-\newcommand*\moreauthor{\authormore}
 \newcommand*\submitdate{\date}
+\newcommand*\submittedon[1]{\gdef\datetext{#1}}
 \newcommand*\supervisorII[1]{\g@addto@macro\@supervisor{\and #1}}
 \newcommand*\supervisedby[1]{\gdef\supervisorname{#1}}
 \newcommand*\supervisedIIby[1]{\gdef\supervisorothername{#1}}
-\newcommand*\submittedon[1]{\gdef\datetext{#1}}
 %    \end{macrocode}
-% \end{macro}^^A \submittedon
 % \end{macro}^^A \supervisedIIby
 % \end{macro}^^A \supervisedby
 % \end{macro}^^A \supervisorII
+% \end{macro}^^A \submittedon
 % \end{macro}^^A \submitdate
-% \end{macro}^^A \moreauthor
 % \begin{macro}{\dissertation}
 % Bei der Definition des Typs der Abschlussarbeit mit \cs{dissertation} wird
 % die Lokalisierungsvariable \cs{dissertationname} verwendet und die Feldnamen
@@ -1260,41 +1264,13 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \dissertation
-% \begin{environment}{theglossary}
-% \begin{macro}{\glossaryname}
-% \begin{macro}{\glossitem}
-% Eine rudimentäre Umgebung für ein Glossar.
-%    \begin{macrocode}
-\AtBeginDocument{%
-  \ifundef{\theglossary}{%
-    \providecommand*\glossaryname{Glossar}%
-    \newenvironment{theglossary}[1][]{%
-      \PackageWarning{tudscrcomp}{%
-        Using the environment `theglossary' is not\MessageBreak%
-        recommended. You should rather use an appropriate\MessageBreak%
-        package such as glossaries%
-      }%
-      \let\bibname\glossaryname%
-      \bib@heading%
-      #1%
-      \list{}{%
-        \setlength\labelsep{\z@}%
-        \setlength\labelwidth{\z@}%
-        \setlength\itemindent{-\leftmargin}%
-      }%
-    }{\endlist}%
-    \newcommand\glossitem[1]{\item[] #1\par}%
-  }{}%
-}
-%    \end{macrocode}
-% \end{macro}^^A \glossitem
-% \end{macro}^^A \glossaryname
-% \end{environment}^^A theglossary
 % \begin{macro}{\chapterpage}
 % \begin{macro}{\if@tud@comp@chapterpage}
 % \begin{macro}{\tud@comp@chapterpage@set}
 % \begin{macro}{\tud@comp@chapterpage@unset}
 % \begin{macro}{\tud@comp@chapterpage@wrn}
+% \begin{macro}{\tud@chapter@pre}
+% \begin{macro}{\tud@chapter@app}
 % Die alte \cls{tudbook}-Klasse stellt den Befehl \cs{chapterpage} bereit.
 % Mit diesem ist es möglich, das Verhalten der Kapitelseiten~-- welches durch
 % die Option \opt{chapterpage} gesteuert wird~-- temporär umzuschalten, also
@@ -1340,13 +1316,6 @@
   \global\let\tud@comp@chapterpage@wrn\relax%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@comp@chapterpage@wrn
-% \end{macro}^^A \tud@comp@chapterpage@unset
-% \end{macro}^^A \tud@comp@chapterpage@set
-% \end{macro}^^A \if@tud@comp@chapterpage
-% \end{macro}^^A \chapterpage
-% \begin{macro}{\tud@chapter@pre}
-% \begin{macro}{\tud@chapter@app}
 % Hier erfolgt die notwendige Anpassungen der internen Gliederungsbefehle.
 %    \begin{macrocode}
 \AtEndPreamble{%
@@ -1362,19 +1331,77 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@chapter@app
 % \end{macro}^^A \tud@chapter@pre
+% \end{macro}^^A \tud@comp@chapterpage@wrn
+% \end{macro}^^A \tud@comp@chapterpage@unset
+% \end{macro}^^A \tud@comp@chapterpage@set
+% \end{macro}^^A \if@tud@comp@chapterpage
+% \end{macro}^^A \chapterpage
+% \begin{environment}{theglossary}
+% \begin{macro}{\glossaryname}
+% \begin{macro}{\glossitem}
+% Eine rudimentäre Umgebung für ein Glossar.
+%    \begin{macrocode}
+\AfterEndPreamble{%
+  \ifundef{\theglossary}{%
+    \providecommand*\glossaryname{Glossar}%
+    \newenvironment{theglossary}[1][]{%
+      \PackageWarning{tudscrcomp}{%
+        Using the environment `theglossary' is not\MessageBreak%
+        recommended. You should rather use an appropriate\MessageBreak%
+        package such as glossaries%
+      }%
+      \let\bibname\glossaryname%
+      \bib@heading%
+      #1%
+      \list{}{%
+        \setlength\labelsep{\z@}%
+        \setlength\labelwidth{\z@}%
+        \setlength\itemindent{-\leftmargin}%
+      }%
+    }{\endlist}%
+    \newcommand\glossitem[1]{\item[] #1\par}%
+  }{}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \glossitem
+% \end{macro}^^A \glossaryname
+% \end{environment}^^A theglossary
 %
 %
 % \iffalse
 %</body>
 %</book>
 %<*poster>
-%<*option>
+%<*body>
 % \fi
 %
 % \subsection{Kompatibilität zu \cls{tudmathposter}}
 %
 % Die hier bereitgestellten Optionen und Befehle werden durch die Klasse 
 % \cls{tudmathposter} bzw. \cls{tudposter} definiert.
+%
+% Die Klasse \cls{tudmathposter} lädt allerhand Pakete. Dies ist jedoch für den 
+% Anwender alles andere als vorteilhaft, da dadurch unter Umständen Konflikte
+% mit anderen Paketen entstehen oder der Nutzer im Zweifelsfall gar nicht weiß, 
+% dass verwendete Befehle aus bestimmten Paketen entspringen. Dennoch werden 
+% aus Kompatibilitätsgründen einige Pakete geladen, um bestehende Dokumente 
+% trotz alledem nach der Portierung kompiliert werden können. Um den Nutzer die 
+% Möglichkeit zu geben, die Pakete selber ggf. mit Optionen zu laden, erfolgt 
+% die Anforderung der Pakete erst am ende der Präambel.
+%    \begin{macrocode}
+\AtEndPreamble{%
+  \RequirePackage{amsmath}[2016/06/28]%
+  \RequirePackage{amsfonts}[2013/01/14]%
+  \RequirePackage{calc}[2014/10/28]%
+  \RequirePackage{textcomp}[2016/06/19]%
+  \RequirePackage{tabularx}[2016/02/03]%
+}
+%    \end{macrocode}
+%
+% \iffalse
+%</body>
+%<*option>
+% \fi
 %
 % \begin{option}{bluebg}
 % \changes{v2.05}{2016/04/17}{neu}^^A
@@ -1631,132 +1658,6 @@
 \setcounter{secnumdepth}{\m@ne}
 %    \end{macrocode}
 % \end{counter}^^A secnumdepth
-% \begin{macro}{\fusszeile}
-% \changes{v2.05}{2016/04/17}{neu}^^A
-% \begin{macro}{\footcolumn}
-% \changes{v2.05}{2016/04/17}{neu}^^A
-% Mit diesen Befehlen lässt sich der Inhalt des Fußbereiches angepassen. Wird
-% in einem und/oder beiden Argumente von \cs{footcontent} ein Stern \val{*} 
-% verwendet, so bleibt der bisherige Inhalt erhalten.
-%    \begin{macrocode}
-\newcommand*\fusszeile[2][]{\footcontent[{#1}]{#2}}
-\newcommand*\footcolumn[2]{%
-  \Ifnumber{#1}{%
-    \ifcase#1\relax%
-      \footcontent{#2}%
-    \or%
-      \footcontent{#2}[*]%
-    \or%
-      \footcontent{*}[{#2}]%
-    \fi%
-  }{}%
-}
-%    \end{macrocode}
-% \end{macro}^^A \footcolumn
-% \end{macro}^^A \fusszeile
-%
-% \iffalse
-%</body>
-%<*option>
-% \fi
-%
-% \begin{option}{tudmathposterfoot}
-% \changes{v2.05}{2016/04/17}{neu}^^A
-% \begin{macro}{\if@tud@mathposterfoot}
-% \changes{v2.05}{2016/04/17}{neu}^^A
-% Mit der Option \opt{tudmathposterfoot} kann die Darstellung des Fußes im 
-% Poster angepasst werden. Die Klasse \cls{tudmathposter} setzt den Fußbereich
-% in zwei asymmetrischen Spalten, wohingegen die \TUDScript-Klassen diesen
-% zentriert und symmetrisch zum Satzspiegel platzieren.
-%    \begin{macrocode}
-\tud@newif\if@tud@mathposterfoot
-\TUD@key{tudmathposterfoot}[true]{%
-  \TUD@set@ifkey{tudmathposterfoot}{@tud@mathposterfoot}{#1}%
-  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \if@tud@mathposterfoot%
-      \footcontent[\small]{%
-        \tud@footcontent@@left{}%
-      }[%
-        \tud@footcontent@@right{}{}%
-      ]%
-    \else%
-      \footcontent{%
-        \tud@footcontent@@left{\contactname}%
-      }[%
-        \tud@footcontent@@right{\authorname}{\contactpersonname}%
-      ]%
-    \fi%
-  \fi%
-}
-%    \end{macrocode}
-% Die Option \opt{cdfoot} wird um Werte für die Einstellung des Posterfußes
-% erweitert.
-%    \begin{macrocode}
-\TUD@key{cdfoot}[true]{%
-  \TUD@set@numkey{cdfoot}{@tempa}{%
-    {tudscrposter}{0},{tudscrposterfoot}{0},{cdposter}{0},{poster}{0},%
-    {tudmathposter}{1},{tudmathposterfoot}{1},{mathposter}{1},{tudposter}{1}%
-  }{#1}%
-  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \ifcase\@tempa\relax% tudscrposter
-      \TUDoptions{tudmathposterfoot=false}%
-    \else% tudmathposter
-      \TUDoptions{tudmathposterfoot=true}%
-    \fi%
-  \fi%
-}
-%    \end{macrocode}
-% \end{macro}^^A \if@tud@mathposterfoot
-% \end{option}^^A tudmathposterfoot
-%
-% \iffalse
-%</option>
-%<*body>
-% \fi
-%
-% \begin{macro}{\tud@footcontent@use}
-% \begin{macro}{\tud@comp@mathposterwidth@dim}
-% \changes{v2.05}{2016/04/17}{neu}^^A
-% Um die Option \opt{tudmathposterfoot} umzusetzen, muss für die Ausgabe des 
-% Fußbereichs eine Anpassung des Makros \cs{tud@footcontent@use} erfolgen.
-% Normalerweise wird der Fußbereich in zwei gleichbreite Spalten über die
-% komplette Textbreite aufgeteilt. Dahingegen werden durch die Klasse 
-% \cls{tudmathposter} beide Fußspalten nicht über den kompletten Textbereich
-% verteilt, sondern es verbleibt etwas ungenutzter Platz rechts davon, welcher
-% für ein etwaiges Logo verwendet wird. Dieses Verhalten kann über die Option 
-% \opt{tudmathposterfoot} aktiviert werden und wird hier nachgebildet.
-%    \begin{macrocode}
-\newcommand*\tud@comp@mathposterwidth@dim{4.2\tud@dim@widemargin}
-\patchcmd\tud@footcontent@use{%
-  \hsize=\dimexpr\glueexpr#2-\@tempdimc\relax\relax%
-}{%
-  \if@tud@mathposterfoot%
-    \hsize=\dimexpr\tud@comp@mathposterwidth@dim\relax%
-  \else%
-    \hsize=\dimexpr\glueexpr#2-\@tempdimc\relax\relax%
-  \fi%
-}{}{\tud@patch@wrn{tud@footcontent@use}}
-\patchcmd\tud@footcontent@use{%
-  \hsize=\dimexpr\glueexpr(#2-\columnsep)/2\relax\relax%
-}{%
-  \if@tud@mathposterfoot%
-    \hsize=\dimexpr(\tud@comp@mathposterwidth@dim-\columnsep)/2\relax%
-  \else%
-    \hsize=\dimexpr\glueexpr(#2-\columnsep)/2\relax\relax%
-  \fi%
-}{}{\tud@patch@wrn{tud@footcontent@use}}
-\patchcmd\tud@footcontent@use{%
-  \hsize=\dimexpr\glueexpr(#2-\columnsep)/2-\@tempdimc\relax\relax%
-}{%
-  \if@tud@mathposterfoot%
-    \hsize=\dimexpr(\tud@comp@mathposterwidth@dim-\columnsep)/2\relax%
-  \else%
-    \hsize=\dimexpr\glueexpr(#2-\columnsep)/2-\@tempdimc\relax\relax%
-  \fi%
-}{}{\tud@patch@wrn{tud@footcontent@use}}
-%    \end{macrocode}
-% \end{macro}^^A \tud@comp@mathposterwidth@dim
-% \end{macro}^^A \tud@footcontent@use
 % \begin{environment}{figurehere}
 % \changes{v2.05}{2016/04/17}{neu}^^A
 % \begin{environment}{tablehere}
@@ -1827,6 +1728,12 @@
 % \end{macro}^^A \blautabelle
 % \end{macro}^^A \if@tud@comp@graytable
 % \end{environment}^^A farbtabellen
+%
+% \iffalse
+%</body>
+%<*option>
+% \fi
+%
 % \begin{macro}{\schnittrand}
 % \changes{v2.05}{2016/04/17}{neu}^^A
 % Zu guter Letzt geht es an das Makro \cs{schnittrand}. Zur Intension dieses 
@@ -1853,27 +1760,129 @@
       a valid dimension expression.%
     }%
   }%
-}%
-%    \end{macrocode}
-% \end{macro}^^A \schnittrand
-%
-% Die Klasse \cls{tudmathposter} lädt allerhand Pakete. Dies ist jedoch für den 
-% Anwender alles andere als vorteilhaft, da dadurch unter Umständen Konflikte
-% mit anderen Paketen entstehen oder der Nutzer im Zweifelsfall gar nicht weiß, 
-% dass verwendete Befehle aus bestimmten Paketen entspringen. Dennoch werden 
-% aus Kompatibilitätsgründen einige Pakete geladen, um bestehende Dokumente 
-% trotz alledem nach der Portierung kompiliert werden können. Um den Nutzer die 
-% Möglichkeit zu geben, die Pakete selber ggf. mit Optionen zu laden, erfolgt 
-% die Anforderung der Pakete erst am ende der Präambel.
-%    \begin{macrocode}
-\AtEndPreamble{%
-  \RequirePackage{amsmath}[2016/06/28]%
-  \RequirePackage{amsfonts}[2013/01/14]%
-  \RequirePackage{calc}[2014/10/28]%
-  \RequirePackage{textcomp}[2016/06/19]%
-  \RequirePackage{tabularx}[2016/02/03]%
 }
 %    \end{macrocode}
+% \end{macro}^^A \schnittrand
+% \begin{option}{tudmathposterfoot}
+% \changes{v2.05}{2016/04/17}{neu}^^A
+% \begin{macro}{\if@tud@mathposterfoot}
+% \changes{v2.05}{2016/04/17}{neu}^^A
+% Mit der Option \opt{tudmathposterfoot} kann die Darstellung des Fußes im 
+% Poster angepasst werden. Die Klasse \cls{tudmathposter} setzt den Fußbereich
+% in zwei asymmetrischen Spalten, wohingegen die \TUDScript-Klassen diesen
+% zentriert und symmetrisch zum Satzspiegel platzieren.
+%    \begin{macrocode}
+\tud@newif\if@tud@mathposterfoot
+\TUD@key{tudmathposterfoot}[true]{%
+  \TUD@set@ifkey{tudmathposterfoot}{@tud@mathposterfoot}{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \if@tud@mathposterfoot%
+      \footcontent[\small]{%
+        \tud@footcontent@@left{}%
+      }[%
+        \tud@footcontent@@right{}{}%
+      ]%
+    \else%
+      \footcontent{%
+        \tud@footcontent@@left{\contactname}%
+      }[%
+        \tud@footcontent@@right{\authorname}{\contactpersonname}%
+      ]%
+    \fi%
+  \fi%
+}
+%    \end{macrocode}
+% Die Option \opt{cdfoot} wird um Werte für die Einstellung des Posterfußes
+% erweitert.
+%    \begin{macrocode}
+\TUD@key{cdfoot}[true]{%
+  \TUD@set@numkey{cdfoot}{@tempa}{%
+    {tudscrposter}{0},{tudscrposterfoot}{0},{cdposter}{0},{poster}{0},%
+    {tudmathposter}{1},{tudmathposterfoot}{1},{mathposter}{1},{tudposter}{1}%
+  }{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \ifcase\@tempa\relax% tudscrposter
+      \TUDoptions{tudmathposterfoot=false}%
+    \else% tudmathposter
+      \TUDoptions{tudmathposterfoot=true}%
+    \fi%
+  \fi%
+}
+%    \end{macrocode}
+% \end{macro}^^A \if@tud@mathposterfoot
+% \end{option}^^A tudmathposterfoot
+%
+% \iffalse
+%</option>
+%<*body>
+% \fi
+%
+% \begin{macro}{\fusszeile}
+% \changes{v2.05}{2016/04/17}{neu}^^A
+% \begin{macro}{\footcolumn}
+% \changes{v2.05}{2016/04/17}{neu}^^A
+% \begin{macro}{\tud@footcontent@use}
+% \begin{macro}{\tud@comp@mathposterwidth@dim}
+% \changes{v2.05}{2016/04/17}{neu}^^A
+% Mit diesen Befehlen lässt sich der Inhalt des Fußbereiches angepassen. Wird
+% in einem und/oder beiden Argumente von \cs{footcontent} ein Stern \val{*} 
+% verwendet, so bleibt der bisherige Inhalt erhalten.
+%    \begin{macrocode}
+\newcommand*\fusszeile[2][]{\footcontent[{#1}]{#2}}
+\newcommand*\footcolumn[2]{%
+  \Ifnumber{#1}{%
+    \ifcase#1\relax%
+      \footcontent{#2}%
+    \or%
+      \footcontent{#2}[*]%
+    \or%
+      \footcontent{*}[{#2}]%
+    \fi%
+  }{}%
+}
+%    \end{macrocode}
+% Um die Option \opt{tudmathposterfoot} umzusetzen, muss für die Ausgabe des 
+% Fußbereichs eine Anpassung des Makros \cs{tud@footcontent@use} erfolgen.
+% Normalerweise wird der Fußbereich in zwei gleichbreite Spalten über die
+% komplette Textbreite aufgeteilt. Dahingegen werden durch die Klasse 
+% \cls{tudmathposter} beide Fußspalten nicht über den kompletten Textbereich
+% verteilt, sondern es verbleibt etwas ungenutzter Platz rechts davon, welcher
+% für ein etwaiges Logo verwendet wird. Dieses Verhalten kann über die Option 
+% \opt{tudmathposterfoot} aktiviert werden und wird hier nachgebildet.
+%    \begin{macrocode}
+\newcommand*\tud@comp@mathposterwidth@dim{4.2\tud@dim@widemargin}
+\patchcmd\tud@footcontent@use{%
+  \hsize=\dimexpr\glueexpr#2-\@tempdimc\relax\relax%
+}{%
+  \if@tud@mathposterfoot%
+    \hsize=\dimexpr\tud@comp@mathposterwidth@dim\relax%
+  \else%
+    \hsize=\dimexpr\glueexpr#2-\@tempdimc\relax\relax%
+  \fi%
+}{}{\tud@patch@wrn{tud@footcontent@use}}
+\patchcmd\tud@footcontent@use{%
+  \hsize=\dimexpr\glueexpr(#2-\columnsep)/2\relax\relax%
+}{%
+  \if@tud@mathposterfoot%
+    \hsize=\dimexpr(\tud@comp@mathposterwidth@dim-\columnsep)/2\relax%
+  \else%
+    \hsize=\dimexpr\glueexpr(#2-\columnsep)/2\relax\relax%
+  \fi%
+}{}{\tud@patch@wrn{tud@footcontent@use}}
+\patchcmd\tud@footcontent@use{%
+  \hsize=\dimexpr\glueexpr(#2-\columnsep)/2-\@tempdimc\relax\relax%
+}{%
+  \if@tud@mathposterfoot%
+    \hsize=\dimexpr(\tud@comp@mathposterwidth@dim-\columnsep)/2\relax%
+  \else%
+    \hsize=\dimexpr\glueexpr(#2-\columnsep)/2-\@tempdimc\relax\relax%
+  \fi%
+}{}{\tud@patch@wrn{tud@footcontent@use}}
+%    \end{macrocode}
+% \end{macro}^^A \tud@comp@mathposterwidth@dim
+% \end{macro}^^A \tud@footcontent@use
+% \end{macro}^^A \footcolumn
+% \end{macro}^^A \fusszeile
 %
 % \iffalse
 %</body>

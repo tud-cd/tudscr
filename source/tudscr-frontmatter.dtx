@@ -107,7 +107,7 @@
 %    \end{macrocode}
 % Danach erfolgt ggf. die Prüfung der resultierenden Seitenhöhe.
 %    \begin{macrocode}
-  \ifnumless{\csuse{tud@#1@level@num}}{3}{% false/true/section
+  \ifnum\csuse{tud@#1@level@num}<3\relax% false/true/section
     \ifboolexpr{%
       bool {@titlepage} and bool {@tud@#1@fil} and bool {@tud@#1@multi}%
     }{%
@@ -134,12 +134,12 @@
 % jede Erklärung immer auf eine neue Seite gesetzt. Die Optionen zum vertikalen 
 % Zentrieren wird ignoriert. Auf eine Warnung für den Anwender wird verzichtet.
 %    \begin{macrocode}
-  }{% chapter
+  \else% chapter
 %<*book|report>
     \boolfalse{@tud@#1@multi}%
     \boolfalse{@tud@#1@fil}%
 %</book|report>
-  }%
+  \fi%
 %    \end{macrocode}
 % Zum Schluss wird ggf. der gesammelte Eintrag im Inhaltsverzeichnis erstellt.
 % Danach wird das übergebene Argument ausgeführt.
@@ -168,45 +168,46 @@
 % \changes{v2.06}{2018/02/22}{Bugfix: \cs{phantomsection} für Anker}^^A
 % \begin{macro}{\tud@fm@@toc}
 % \changes{v2.04}{2015/03/20}{neu}^^A
-% \begin{macro}{\tud@fm@@@toc}
-% \changes{v2.04}{2015/03/20}{neu}^^A
 % Ist die Einstellung \val{tocaggregate} aktiv, wird der gesammelte Eintrag ins 
 % Inhaltsverzeichnis generiert.
 %    \begin{macrocode}
 \newcommand*\tud@fm@@toc{}
-\newcommand*\tud@fm@@@toc{}
 \newcommand*\tud@fm@toc[2]{%
 %    \end{macrocode}
-% Der gesammelte Eintrag aller Überschriften ins Inhaltsverzeichnis.
+% Der gesammelte Eintrag aller Überschriften ins Inhaltsverzeichnis. Dafür 
+% wird der komplette Inhalt in einer Box gesetzt und nur die Überschriften
+% aggregiert.
 %    \begin{macrocode}
   \ifbool{@tud@#1@multi}{%
     \begingroup%
-      \let\tud@fm@@@toc\@empty%
+      \let\tud@fm@@toc\@empty%
       \renewcommand*\tud@fm@head[2]{%
-        \protected@edef\@tempa{##2}%
-        \protected@xdef\tud@fm@@toc{\tud@fm@@@toc\@tempa}%
-        \protected@xdef\tud@fm@@@toc{\tud@fm@@toc/}%
+        \protected@xdef\tud@fm@@toc{%
+          \ifx\tud@fm@@toc\@empty\else\tud@fm@@toc/\fi##2%
+        }%
       }%
       \let\clearpage\relax%
       \sbox\z@{\vbox{#2}}%
       \csuse{phantomsection}%
       \protected@edef\@tempa{%
-        \noexpand\endgroup%
-        \noexpand\ifnumodd{\csname tud@#1@toc@num\endcsname}{%
+        \endgroup%
+        \ifx\tud@fm@@toc\@empty\else%
+          \ifodd\csuse{tud@#1@toc@num}\relax
 %<*book|report>
-          \noexpand\addchaptertocentry{}{\tud@fm@@toc}%
+            \noexpand\addchaptertocentry{}{\tud@fm@@toc}%
 %</book|report>
 %<*article>
-          \noexpand\addsectiontocentry{}{\tud@fm@@toc}%
+            \noexpand\addsectiontocentry{}{\tud@fm@@toc}%
 %</article>
-        }{%
+          \else
 %<*book|report>
-          \noexpand\addsectiontocentry{}{\tud@fm@@toc}%
+            \noexpand\addsectiontocentry{}{\tud@fm@@toc}%
 %</book|report>
 %<*article>
-          \noexpand\addsubsectiontocentry{}{\tud@fm@@toc}%
+            \noexpand\addsubsectiontocentry{}{\tud@fm@@toc}%
 %</article>
-        }%
+          \fi
+        \fi%
       }%
     \@tempa%
   }{%
@@ -226,7 +227,6 @@
   }%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@fm@@@toc
 % \end{macro}^^A \tud@fm@@toc
 % \end{macro}^^A \tud@fm@toc
 %
@@ -532,7 +532,7 @@
 % \changes{v2.02}{2014/11/05}{neu}^^A
 % Das aus \KOMAScript{} bekannte Verhalten für die Zusammenfassung wird für die
 % beiden Klassen \cls{tudscrartcl} und \cls{tudscrreprt} adaptiert. Dazu werden
-% boolesche Schlüssel bei der Definiton der beiden Optionen \opt{abstract} und 
+% boolesche Schlüssel bei der Definition der beiden Optionen \opt{abstract} und 
 % \opt{declaration} eingefügt. Außerdem werden zusätzliche Werte zur Auswahl 
 % einer Gliederungsebene für die gesetzten Überschriften wie \cs{section} oder 
 % \cs{chapter}\footnote{nicht für \cls{tudscrartcl}} oder bereitgestellt, 

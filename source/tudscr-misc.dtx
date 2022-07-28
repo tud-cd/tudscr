@@ -371,6 +371,46 @@
 %
 % \iffalse
 %</class&body>
+%<*body>
+% \fi
+%
+% \subsection{Anpassungen für das Paket \pkg{textcase}}
+%
+% \begin{macro}{\@uclcnotmath}
+% \begin{macro}{\tud@x@textcase@uclcnotmath}
+% \changes{v2.02}{2014/06/27}{\pkg{textcase}: Ignorieren von Fußnoten im 
+%   Argument des Befehls \cs{MakeTextUppercase}}^^A
+% \changes{v2.03}{2015/01/21}{\pkg{textcase}: Ignorieren des Befehls 
+%   \cs{@mkboth} im Argument des Befehls \cs{MakeTextUppercase}}^^A
+% Damit Fußnoten innerhalb von \cs{MakeTextUppercase} nicht in Majuskeln
+% gesetzt werden, wird der interne Befehl \cs{@uclcnotmath} aus dem Paket
+% \pkg{textcase} angepasst.
+%    \begin{macrocode}
+\if@tud@cdoldfont@active
+  \AtEndPreamble{\RequirePackage{textcase}[2004/10/07]}
+\fi
+\AfterPackage*{textcase}{%
+  \newcommand*\tud@x@textcase@uclcnotmath{%
+    \@nonchangecase\thanks%
+    \def\footnote##1##{\toks@{\noexpand\footnote##1}\@footnote}%
+    \def\@footnote##1{\NoCaseChange{\the\toks@{##1}}}%
+    \def\@mkboth##1##2{\NoCaseChange{\@mkboth{##1}{##2}}}%
+  }%
+  \robustify\NoCaseChange%
+  \patchcmd\@uclcnotmath{%
+    \@nonchangecase\ensuremath%
+  }{%
+    \@nonchangecase\ensuremath%
+    \tud@x@textcase@uclcnotmath%
+  }{}{\tud@patch@wrn{@uclcnotmath}}%
+}
+\TUD@deprecated@cs{NoCaseChange}{@firstofone}
+%    \end{macrocode}
+% \end{macro}^^A \tud@x@textcase@uclcnotmath
+% \end{macro}^^A \@uclcnotmath
+%
+% \iffalse
+%</body>
 %<*class&!inherit|package&fonts>
 %<*option>
 % \fi
@@ -534,38 +574,6 @@
 %</class&!inherit|package&fonts>
 % \fi
 %
-% \subsection{Durchreichen von Optionen und Standardoptionen}
-%
-% Durchreichen aller Klassenoptionen an die \KOMAScript-Klasse bzw. an die
-% genutzte \TUDScript-Elternklasse. Für Klassen wird vor dem Durchreichen noch 
-% geprüft, ob ein spezielles Papierformat angegeben wurde.
-%    \begin{macrocode}
-%<*package>
-%<*fonts>
-\DeclareOption*{\expandafter\KOMAoptions\expandafter{\CurrentOption}}
-%</fonts>
-%<*fixfonts>
-\DeclareOption*{%
-  \expandafter\PassOptionsToPackage\expandafter{\CurrentOption}%
-  {tudscrfonts}%
-}
-%</fixfonts>
-%<*comp>
-\DeclareOption*{\expandafter\TUDoptions\expandafter{\CurrentOption}}
-%</comp>
-%</package>
-%<*class>
-%<*!inherit>
-\DeclareOption*{\tud@x@scr@checkoptions}
-%</!inherit>
-%<*inherit>
-\DeclareOption*{%
-  \expandafter\PassOptionsToClass\expandafter{\CurrentOption}%
-  {\TUD@Class@Parent}%
-}
-%</inherit>
-%</class>
-%    \end{macrocode}
 % Es werden die Standardoptionen ausgeführt. Für die Klasse \cls{tudscrposter} 
 % werden die Farben aktiviert.
 %    \begin{macrocode}
@@ -591,11 +599,44 @@
 %</poster>
 %</class&!inherit>
 }
-\TUDProcessOptions\relax
 %    \end{macrocode}
-% Die korrespindierende \KOMAScript-Klasse bzw. \TUDScript-Elternklasse wird 
-% geladen.
+%
+% \subsection{Durchreichen von Optionen und Standardoptionen}
+%
+% Durchreichen aller Klassenoptionen an die \KOMAScript-Klasse bzw. an die
+% genutzte \TUDScript-Elternklasse. Für Klassen wird vor dem Durchreichen noch 
+% geprüft, ob ein spezielles Papierformat angegeben wurde.
 %    \begin{macrocode}
+%<*package>
+%<*fonts>
+\DeclareOption*{\expandafter\TUD@KOMAoptions\expandafter{\CurrentOption}}
+%</fonts>
+%<*fixfonts>
+\DeclareOption*{%
+  \expandafter\PassOptionsToPackage\expandafter{\CurrentOption}%
+  {tudscrfonts}%
+}
+%</fixfonts>
+%<*comp>
+\DeclareOption*{\expandafter\TUDoptions\expandafter{\CurrentOption}}
+%</comp>
+%</package>
+%<*class>
+%<*!inherit>
+\DeclareOption*{\tud@x@scr@checkoptions}
+%</!inherit>
+%<*inherit>
+\DeclareOption*{%
+  \expandafter\PassOptionsToClass\expandafter{\CurrentOption}%
+  {\TUD@Class@Parent}%
+}
+%</inherit>
+%</class>
+%    \end{macrocode}
+% Nach der Auswerung der Optionen wird die korrespondierende \KOMAScript-Klasse 
+% bzw. \TUDScript-Elternklasse geladen.
+%    \begin{macrocode}
+\TUDProcessOptions\relax
 %<*class&!inherit>
 \LoadClass{\TUD@Class@KOMA}[2020/09/21]
 %</class&!inherit>
@@ -661,45 +702,6 @@
 % \iffalse
 %</class&!inherit|package&fonts>
 %</execute>
-%<*body>
-% \fi
-%
-% \subsection{Anpassungen für das Paket \pkg{textcase}}
-%
-% \begin{macro}{\@uclcnotmath}
-% \begin{macro}{\tud@x@textcase@uclcnotmath}
-% \changes{v2.02}{2014/06/27}{\pkg{textcase}: Ignorieren von Fußnoten im 
-%   Argument des Befehls \cs{MakeTextUppercase}}^^A
-% \changes{v2.03}{2015/01/21}{\pkg{textcase}: Ignorieren des Befehls 
-%   \cs{@mkboth} im Argument des Befehls \cs{MakeTextUppercase}}^^A
-% Damit Fußnoten innerhalb von \cs{MakeTextUppercase} nicht in Majuskeln
-% gesetzt werden, wird der interne Befehl \cs{@uclcnotmath} aus dem Paket
-% \pkg{textcase} angepasst.
-%    \begin{macrocode}
-\if@tud@cdoldfont@active
-  \RequirePackage{textcase}[2004/10/07]
-  \AfterPackage*{textcase}{%
-    \robustify\NoCaseChange%
-    \newcommand*\tud@x@textcase@uclcnotmath{%
-      \@nonchangecase\hologo%
-      \def\footnote##1##{\toks@{\noexpand\footnote##1}\@footnote}%
-      \def\@footnote##1{\NoCaseChange{\the\toks@{##1}}}%
-      \def\@mkboth##1##2{\NoCaseChange{\@mkboth{##1}{##2}}}%
-    }%
-    \patchcmd\@uclcnotmath{%
-      \@nonchangecase\ensuremath%
-    }{%
-      \@nonchangecase\ensuremath\tud@x@textcase@uclcnotmath%
-    }{}{\tud@patch@wrn{@uclcnotmath}}%
-  }%
-\fi
-\TUD@deprecated@cs{NoCaseChange}{@firstofone}
-%    \end{macrocode}
-% \end{macro}^^A \tud@x@textcase@uclcnotmath
-% \end{macro}^^A \@uclcnotmath
-%
-% \iffalse
-%</body>
 % \fi
 %
 % \PrintBackMatter

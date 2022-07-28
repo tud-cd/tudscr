@@ -126,11 +126,12 @@
 % für verschiedene Hooks vor sowie nach Klassen und Paketen.
 %    \begin{macrocode}
 \RequirePackage{scrbase}[2020/09/21]
-\RequirePackage{iftex}[2019/11/07]
 %    \end{macrocode}
 % Die folgenden Pakete werden für die Manipulation bereits definierter
-% Makros sowie zur erweiterten Auswertung boolescher Ausdrücke benötigt.
+% Makros, zur erweiterten Auswertung boolescher Ausdrücke und allgemein zur
+% Ablaufsteuerung benötigt.
 %    \begin{macrocode}
+\RequirePackage{iftex}[2019/11/07]
 \RequirePackage{etoolbox}[2011/01/03]
 \RequirePackage{xpatch}[2012/10/02]
 \RequirePackage{letltxmacro}[2016/05/16]
@@ -322,8 +323,6 @@
 % \changes{v2.06}{2018/07/12}{neu}^^A
 % \begin{macro}{\tud@res@cnt}
 % \changes{v2.06}{2019/06/13}{neu}^^A
-% \begin{macro}{\tud@res@read}
-% \changes{v2.06}{2019/06/21}{neu}^^A
 % Makros zur temporären Verwendung.
 %    \begin{macrocode}
 \newcommand*\tud@reserved{}
@@ -333,9 +332,7 @@
 \newcommand*\tud@res@d{}
 \tud@newif\if@tud@res@swa
 \tud@newcount\tud@res@cnt
-\newread\tud@res@read
 %    \end{macrocode}
-% \end{macro}^^A \tud@res@read
 % \end{macro}^^A \tud@res@cnt
 % \end{macro}^^A \if@tud@res@swa
 % \end{macro}^^A \tud@res@d
@@ -418,6 +415,24 @@
 %    \end{macrocode}
 % \end{macro}^^A \Ifstrbool
 %
+% \subsubsection{Erzwungene Kleinschreibung von Strings}
+%
+% Um angegebene Werte bei Schlüssel-Wert-Paaren oder Schlüsselwörter in
+% bestimmten Feldern mit Sicherheit erkennen zu können, werden diese zwingend 
+% in Kleinbuchstaben geschieben.
+% \begin{macro}{\tud@lowerstring}
+% Das Makro wird mit \cs{tud@lowerstring}\marg{Zielmakro}\marg{String} benutzt.
+% \ToDo{geht das eleganter als mit \cs{expandafter}?}[v2.07]
+%    \begin{macrocode}
+\newcommand*\tud@lowerstring[2]{%
+  \protected@edef#1{#2}%
+  \lowercase\expandafter{%
+    \expandafter\def\expandafter #1\expandafter{#1}%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@lowerstring
+%
 % \subsubsection{Test auf eine verwendbare Sprache}
 %
 % \begin{macro}{\iflanguageloaded}
@@ -449,7 +464,7 @@
 %
 % \subsubsection{Expansion geschützter Makros}
 %
-% Im \LaTeX-Kernel wird der Befehl \cs{@expandtwoargs} definiert, welcher zwei 
+% Im \LaTeX"~Kernel wird der Befehl \cs{@expandtwoargs} definiert, welcher zwei
 % Argumente in ein angegebenes Makro vollständig expandiert. Dabei erfolgt die 
 % Expansion der beiden Argumente aufgrund der standardmäßigen Verwendung von 
 % \cs{edef} allerdings vollständig und ohne die Beachtung von \cs{protect}.
@@ -522,24 +537,6 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@divide
-%
-% \subsubsection{Erzwungene Kleinschreibung von Strings}
-%
-% Um angegebene Werte bei Schlüssel-Wert-Paaren oder Schlüsselwörter in
-% bestimmten Feldern mit Sicherheit erkennen zu können, werden diese zwingend 
-% in Kleinbuchstaben geschieben.
-% \begin{macro}{\tud@lowerstring}
-% Das Makro wird mit \cs{tud@lowerstring}\marg{Zielmakro}\marg{String} benutzt.
-% \ToDo{geht das eleganter als mit \cs{expandafter}?}[v2.07]
-%    \begin{macrocode}
-\newcommand*\tud@lowerstring[2]{%
-  \protected@edef#1{#2}%
-  \lowercase\expandafter{%
-    \expandafter\def\expandafter #1\expandafter{#1}%
-  }%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@lowerstring
 %
 % \subsubsection{Test auf vorhandene Dateien von Schriftdefinitionen}
 %
@@ -630,9 +627,10 @@
 % aktualisiert werden.
 %    \begin{macrocode}
 \newrobustcmd*\tud@cs@store[1]{%
-  \tud@cs@check{#1}%
-  \ifcsdef{@@tud@#1}{}{%
-    \tud@cs@letltx{@@tud@#1}{#1}%
+  \tud@cs@check{#1}{%
+    \ifcsdef{@@tud@#1}{}{%
+      \tud@cs@letltx{@@tud@#1}{#1}%
+    }%
   }%
 }
 \newrobustcmd*\tud@cs@restore[1]{%
@@ -650,30 +648,34 @@
 %    \end{macrocode}
 % Die eigentliche Wiederherstellung.
 %    \begin{macrocode}
-  \tud@cs@check{#1}%
-  \ifcsdef{@@tud@#1}{%
-    \tud@cs@letltx{#1}{@@tud@#1}%
-    \csundef{@@tud@#1}%
-  }{}%
+  \tud@cs@check{#1}{%
+    \ifcsdef{@@tud@#1}{%
+      \tud@cs@letltx{#1}{@@tud@#1}%
+      \csundef{@@tud@#1}%
+    }{}%
+  }%
 }
 \newrobustcmd*\tud@cs@reset[1]{%
-  \tud@cs@check{#1}%
-  \ifcsdef{@@tud@#1}{%
-    \tud@cs@letltx{#1}{@@tud@#1}%
-  }{}%
+  \tud@cs@check{#1}{%
+    \ifcsdef{@@tud@#1}{%
+      \tud@cs@letltx{#1}{@@tud@#1}%
+    }{}%
+  }%
 }
 \newrobustcmd*\tud@cs@update[1]{%
-  \tud@cs@check{#1}%
-  \ifcsdef{@@tud@#1}{%
-    \tud@cs@letltx{@@tud@#1}{#1}%
-  }{}%
+  \tud@cs@check{#1}{%
+    \ifcsdef{@@tud@#1}{%
+      \tud@cs@letltx{@@tud@#1}{#1}%
+    }{}%
+  }%
 }
 \newrobustcmd*\tud@cs@use[1]{%
-  \tud@cs@check{#1}%
-  \ifcsdef{@@tud@#1}{%
-    \csuse{@@tud@#1}%
-  }{%
-    \csuse{#1}%
+  \tud@cs@check{#1}{%
+    \ifcsdef{@@tud@#1}{%
+      \csuse{@@tud@#1}%
+    }{%
+      \csuse{#1}%
+    }%
   }%
 }
 %    \end{macrocode}
@@ -682,14 +684,24 @@
 % Fall sein, wird ein Fehler ausgegeben.
 %    \begin{macrocode}
 \newrobustcmd*\tud@cs@check[1]{%
-  \ifcsdef{#1}{}{%
-    \PackageError{tudscrbase}{%
-      `\@backslashchar#1' is not defined}{%
-      The command `\@backslashchar#1' was never defined. \MessageBreak%
-      Please contact the TUD-Script maintainer\MessageBreak%
-      via \tudscrmail. A bugfix is urgently required.%
-    }%
-  }%
+  \begingroup%
+    \ifcsdef{#1}{\@tud@res@swatrue}{\@tud@res@swafalse}%
+    \if@tud@res@swa%
+      \ifcscounter{#1}{\@tud@res@swafalse}{}%
+      \ifcslength{#1}{\@tud@res@swafalse}{}%
+      \ifcsdimen{#1}{\@tud@res@swafalse}{}%
+    \fi%
+    \if@tud@res@swa%
+      \aftergroup\@firstofone%
+    \else%
+      \PackageError{tudscrbase}{`\@backslashchar#1' is not a defined macro}{%
+        The macro `\@backslashchar#1' was never defined. \MessageBreak%
+        Please contact the TUD-Script maintainer\MessageBreak%
+        via \tudscrmail. A bugfix is urgently required.%
+      }%
+      \aftergroup\@gobble%
+    \fi%
+  \endgroup%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@cs@check
@@ -699,58 +711,62 @@
 % \end{macro}^^A \tud@cs@restore
 % \end{macro}^^A \tud@cs@store
 % \end{macro}^^A \tud@cs@letltx
-% \begin{macro}{\tud@skip@store}
+% \begin{macro}{\tud@cslength@store}
 % \changes{v2.04}{2015/03/02}{neu}^^A
-% \changes{v2.05}{2016/07/13}{Verwendung von \cs{tud@skip@check}}^^A
-% \begin{macro}{\tud@skip@restore}
+% \changes{v2.05}{2016/07/13}{Verwendung von \cs{tud@cslength@check}}^^A
+% \begin{macro}{\tud@cslength@restore}
 % \changes{v2.04}{2015/03/02}{neu}^^A
-% \changes{v2.05}{2016/07/13}{Verwendung von \cs{tud@skip@check}}^^A
-% \begin{macro}{\tud@skip@reset}
+% \changes{v2.05}{2016/07/13}{Verwendung von \cs{tud@cslength@check}}^^A
+% \begin{macro}{\tud@cslength@reset}
 % \changes{v2.05}{2016/07/13}{neu}^^A
-% \begin{macro}{\tud@skip@check}
+% \begin{macro}{\tud@cslength@check}
 % \changes{v2.05}{2016/07/13}{neu}^^A
 % Hiermit können~-- äquivalent zum Sichern und Wiederherstellen von Befehlen~-- 
 % Längenregister abgespeichert werden.
 %    \begin{macrocode}
-\newcommand*\tud@skip@store[1]{%
-  \tud@skip@check{#1}{%
-    \ifcsdef{@@tud@skip@#1}{}{%
-      \csedef{@@tud@skip@#1}{\expandafter\the\csname #1\endcsname}%
+\newcommand*\tud@cslength@store[1]{%
+  \tud@cslength@check{#1}{%
+    \ifcsundef{@@tud@length@#1}{%
+      \csedef{@@tud@length@#1}{\expandafter\the\csname #1\endcsname}%
+    }{}%
+  }%
+}
+\newcommand*\tud@cslength@restore[1]{%
+  \tud@cslength@check{#1}{%
+    \ifcsundef{@@tud@length@#1}{}{%
+      \expandafter\setlength\csname #1\endcsname{%
+        \csname @@tud@length@#1\endcsname%
+      }%
+      \csundef{@@tud@length@#1}%
     }%
   }%
 }
-\newcommand*\tud@skip@restore[1]{%
-  \tud@skip@check{#1}{%
-    \ifcsdef{@@tud@skip@#1}{%
-      \csname #1\endcsname=\csname @@tud@skip@#1\endcsname%
-      \csundef{@@tud@skip@#1}%
-    }{}%
+\newcommand*\tud@cslength@reset[1]{%
+  \tud@cslength@check{#1}{%
+    \ifcsundef{@@tud@length@#1}{}{%
+      \expandafter\setlength\csname #1\endcsname{%
+        \csname @@tud@length@#1\endcsname%
+      }%
+    }%
   }%
 }
-\newcommand*\tud@skip@reset[1]{%
-  \tud@skip@check{#1}{%
-    \ifcsdef{@@tud@skip@#1}{%
-      \csname #1\endcsname=\csname @@tud@skip@#1\endcsname%
-    }{}%
+\newcommand*\tud@cslength@check[1]{%
+  \expandafter\tud@if@lengthregister\expandafter{\csname #1\endcsname}{%
+    \expandafter\@firstofone%
+  }{%
+    \PackageError{tudscrbase}{`\@backslashchar#1' is not a defined length}{%
+      The length `\@backslashchar#1' was never defined. \MessageBreak%
+      Please contact the TUD-Script maintainer\MessageBreak%
+      via \tudscrmail. A bugfix is urgently required.%
+    }%
+    \expandafter\@gobble%
   }%
-}
-\newcommand*\tud@skip@check[1]{%
-  \begingroup%
-    \@tempswafalse%
-    \expandafter\Ifisskip\expandafter{\csname #1\endcsname}{\@tempswatrue}{}%
-    \expandafter\Ifisdimen\expandafter{\csname #1\endcsname}{\@tempswatrue}{}%
-    \if@tempswa%
-      \aftergroup\@firstofone%
-    \else%
-      \aftergroup\@gobble%
-    \fi%
-  \endgroup%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@skip@check
-% \end{macro}^^A \tud@skip@reset
-% \end{macro}^^A \tud@skip@restore
-% \end{macro}^^A \tud@skip@store
+% \end{macro}^^A \tud@cslength@check
+% \end{macro}^^A \tud@cslength@reset
+% \end{macro}^^A \tud@cslength@restore
+% \end{macro}^^A \tud@cslength@store
 % \begin{macro}{\tud@patch@wrn}
 % \TUDScript verwendet die Möglichkeiten von \pkg{etoolbox} und \pkg{xpatch}, 
 % um mit den Makros  (\cs{[x]apptocmd}, \cs{[x]pretocmd}, \cs{[x]patchcmd}) 
@@ -860,34 +876,41 @@
 % \end{macro}^^A \TUD@key@@define
 % \end{macro}^^A \TUD@key@define
 % \end{macro}^^A \TUD@key
+%
+% Die folgenden Befehle dienen zum Verarbeiten der Optionen, wobei prinzipiell 
+% auch eine freie Definition mit anschließender Abarbeitung ohne diese möglich 
+% ist.
+%
 % \begin{macro}{\TUD@set@ifkey}
 % \changes{v2.06}{2018/08/01}{forcierte Kleinschreibung Schlüsselwerte}^^A
+% Hiermit wird der Option ein einfacher Schalterwert zugewiesen.
+%    \begin{macrocode}
+\newcommand*\TUD@set@ifkey[3]{%
+  \begingroup%
+    \tud@lowerstring\tud@res@a{#3}%
+    \edef\tud@res@a{%
+      \endgroup%
+      \unexpanded{\FamilySetBool{TUD}{#1}{#2}}{\tud@res@a}%
+    }%
+  \tud@res@a%
+}
+%    \end{macrocode}
+% \end{macro}^^A \TUD@set@ifkey
 % \begin{macro}{\TUD@set@numkey}
 % \changes{v2.02}{2014/11/05}{neu}^^A
 % \changes{v2.06}{2018/08/01}{forcierte Kleinschreibung Schlüsselwerte}^^A
 % \begin{macro}{\TUD@bool@numkey}
 % \changes{v2.03}{2015/01/09}{neu}^^A
-% \begin{macro}{\TUD@set@dimenkey}
-% \changes{v2.05}{2016/06/15}{neu}^^A
-% \changes{v2.06}{2018/08/01}{forcierte Kleinschreibung Schlüsselwerte}^^A
-% \begin{macro}{\TUD@unknown@keyval}
-% Dies sind die Befehle zum Setzen der Optionen. Diese können entweder als
-% Schalter (\cs{TUD@set@ifkey}) oder aber mit mehreren möglichen Werten
-% (\cs{TUD@set@numkey}) definiert werden. Prinzipiell ist auch eine freie
-% Definition mit anschließender Abarbeitung ohne die zuvor genannten Befehle
-% möglich.
+% Hiermit werden für eine Option mehrere mögliche Werte definiert. 
 %    \begin{macrocode}
-\newcommand*\TUD@set@ifkey[3]{%
-  \tud@lowerstring\tud@res@a{#3}%
-  \edef\tud@res@b{%
-    \unexpanded{\FamilySetBool{TUD}{#1}{#2}}{\tud@res@a}%
-  }\tud@res@b%
-}
 \newcommand*\TUD@set@numkey[4]{%
-  \tud@lowerstring\tud@res@a{#4}%
-  \edef\tud@res@b{%
-    \unexpanded{\FamilySetNumerical{TUD}{#1}{#2}{#3}}{\tud@res@a}%
-  }\tud@res@b%
+  \begingroup%
+    \tud@lowerstring\tud@res@a{#4}%
+    \edef\tud@res@a{%
+      \endgroup%
+      \unexpanded{\FamilySetNumerical{TUD}{#1}{#2}{#3}}{\tud@res@a}%
+    }%
+  \tud@res@a%
 }
 %    \end{macrocode}
 % Um Dopplungen im Code zu vermeiden, werden für die numerische Schlüssel die 
@@ -897,16 +920,26 @@
   {false}{0},{off}{0},{no}{0},{true}{1},{on}{1},{yes}{1}%
 }
 %    \end{macrocode}
+% \end{macro}^^A \TUD@bool@numkey
+% \end{macro}^^A \TUD@set@numkey
+% \begin{macro}{\TUD@set@dimenkey}
+% \changes{v2.05}{2016/06/15}{neu}^^A
+% \changes{v2.06}{2018/08/01}{forcierte Kleinschreibung Schlüsselwerte}^^A
 % Mit \cs{TUD@set@dimenkey} wird der übergebene Längenwert im spezifiezierten 
 % Makro gespeichert.
 %    \begin{macrocode}
 \newcommand*\TUD@set@dimenkey[3]{%
-  \tud@lowerstring\tud@res@a{#3}%
-  \edef\tud@res@b{%
-    \unexpanded{\FamilySetUseLengthMacro{TUD}{#1}{#2}}{\tud@res@a}%
-  }\tud@res@b%
+  \begingroup%
+    \tud@lowerstring\tud@res@a{#3}%
+    \edef\tud@res@a{%
+      \endgroup%
+      \unexpanded{\FamilySetUseLengthMacro{TUD}{#1}{#2}}{\tud@res@a}%
+    }%
+  \tud@res@a%
 }
 %    \end{macrocode}
+% \end{macro}^^A \TUD@set@dimenkey
+% \begin{macro}{\TUD@unknown@keyval}
 % Dieser Befehl wird lediglich pro forma definiert. An diesen kann eine Liste 
 % möglicher Wertzuweisungen übergeben werden, welche durch \KOMAScript{} 
 % derzeit jedoch nicht abgearbeitet und ausgegeben wird.
@@ -914,10 +947,6 @@
 \newcommand*\TUD@unknown@keyval{\FamilyUnknownKeyValue{TUD}}
 %    \end{macrocode}
 % \end{macro}^^A \TUD@unknown@keyval
-% \end{macro}^^A \TUD@set@dimenkey
-% \end{macro}^^A \TUD@set@numkey
-% \end{macro}^^A \TUD@bool@numkey
-% \end{macro}^^A \TUD@set@ifkey
 % \begin{macro}{\tud@locked@newnum}
 % \begin{macro}{\tud@locked@num@preset}
 % \begin{macro}{\tud@locked@num@set}
@@ -1297,22 +1326,22 @@
         {\tud@res@b[]}%
     }%
     \IfFileExists{#1.sty}{%
-      \openin\tud@res@read=#1.sty%
+      \openin\@inputcheck=#1.sty%
       \@tud@res@swatrue%
       \loop%
-        \read\tud@res@read to\tud@res@c%
+        \read\@inputcheck to\tud@res@c%
         \@expandtwoargs\in@{\string\ProvidesPackage}%
           {\expandafter\detokenize\expandafter{\tud@res@c}}%
         \ifin@%
           \@tud@res@swafalse%
           \tud@res@c%
         \fi%
-        \ifeof\tud@res@read\@tud@res@swafalse\fi%
+        \ifeof\@inputcheck\@tud@res@swafalse\fi%
         \if@tud@res@swa%
       \repeat%
-      \closein\tud@res@read%
+      \closein\@inputcheck%
     }{}%
-    \edef\tud@res@a{\endgroup\noexpand\@ifl@t@r{\tud@res@a}{#2}}
+    \edef\tud@res@a{\endgroup\noexpand\@ifl@t@r{\tud@res@a}{#2}}%
   \tud@res@a%
 }
 \@onlypreamble\tud@if@packagelater@exists
@@ -1321,18 +1350,19 @@
 % \end{macro}^^A \TUD@CheckPackage
 % \begin{macro}{\TUD@RecommendPackage}
 % \changes{v2.06}{2018/07/12}{neu}^^A
+% \begin{macro}{\TUD@Recommend@Package}
 % Bestimmte Pakete sind für die Funktionalität von \TUDScript empfohlen, aber 
 % nicht zwingend erforderlich. Sind diese nicht vorhanden, wird eine Warnung 
 % ausgegeben.
 %    \begin{macrocode}
 \newcommand*\TUD@RecommendPackage[1]{%
   \kernel@ifnextchar[%]
-    {\TUD@@RecommendPackage#1}%
-    {\TUD@@RecommendPackage#1[]}%
+    {\TUD@Recommend@Package#1}%
+    {\TUD@Recommend@Package#1[]}%
 }
 \@onlypreamble\TUD@RecommendPackage
-\newcommand*\TUD@@RecommendPackage{}
-\def\TUD@@RecommendPackage#1[#2]{%
+\newcommand*\TUD@Recommend@Package{}
+\def\TUD@Recommend@Package#1[#2]{%
   \IfFileExists{#1.sty}{%
     \RequirePackage{#1}[#2]%
   }{%
@@ -1342,8 +1372,9 @@
     }%
   }%
 }
-\@onlypreamble\TUD@@RecommendPackage
+\@onlypreamble\TUD@Recommend@Package
 %    \end{macrocode}
+% \end{macro}^^A \TUD@Recommend@Package
 % \end{macro}^^A \TUD@RecommendPackage
 % \begin{macro}{\TUD@AfterPackage@set}
 % \changes{v2.04}{2015/03/09}{neu}^^A
@@ -1395,13 +1426,14 @@
 \ifundef{\KOMAClassName}{%
   \renewcommand*\TUD@KOMAoptions[1]{%
     \PackageWarning{tudscrbase}{%
-      You should load package `scrextend' right after the\MessageBreak%
-      documentclass. Option \string\TUD@KOMAoptions{`#1'} is gobbled%
+      You should load package `scrextend' right after\MessageBreak%
+      the documentclass. The following option is gobbled:\MessageBreak%
+      \string\KOMAoptions{`#1'}%
     }%
   }%
-  \AfterPackage*{scrextend}{\let\TUD@KOMAoptions\KOMAoptions}%
+  \AfterPackage*{scrextend}{\def\TUD@KOMAoptions{\KOMAoptions}}%
 }{%
-  \let\TUD@KOMAoptions\KOMAoptions%
+  \def\TUD@KOMAoptions{\KOMAoptions}%
 }
 %</package&base>
 %    \end{macrocode}
@@ -1428,7 +1460,6 @@
 % \fi
 %
 % \section{Zusätzliches für die \TUDScript-Klassen}
-%
 % \subsection{Erweiterung von \KOMAScript-Schriftelementen}
 %
 % \begin{macro}{\tud@komafont@set}
