@@ -122,12 +122,21 @@
 % \changes{v2.02}{2014/06/23}{neu}^^A
 % \begin{layerpagestyle}{empty.tudheadings}
 % \changes{v2.02}{2014/06/23}{neu}^^A
-% Es wird ein neuer Seitenstil kreiert, der das \CD der \TnUD mit der
-% prägenden Kopfzeile umsetzt. Dabei soll dieser Kopf auch verwendbar sein,
-% wenn nicht die vom \CD vorgeschriebenen Seitenränder sondern das Paket
-% \pkg{typearea} genutzt wird. Dafür wird das Logo im Kopf so wie im \CD
-% vorgesehen mit dem Logo der \TnUD in den Rand und dem Schriftzug bündig zum
-% Textblock gesetzt. 
+% Es wird ein neuer Seitenstil kreiert, der das \TUDCD mit der prägenden
+% Kopfzeile umsetzt. Dabei soll dieser Kopf auch verwendbar sein, wenn nicht
+% die vom \CD vorgeschriebenen Seitenränder sondern das Paket \pkg{typearea}
+% genutzt wird. Dafür wird das Logo im Kopf so wie im \CD vorgesehen mit dem
+% Logo der \TnUD in den Rand und dem Schriftzug bündig zum Textblock gesetzt. 
+%
+% \Attention{%
+%   Um Längenangaben aus Makros sicher auf Dimensionsausdrücke zu reduzieren,
+%   müssen diese in \cs{dimexpr}\cs{glueexpr}\val{\dots}\cs{relax}\cs{relax}
+%   eingehüllt werden. Das Paket \pkg{scrlayer} verwendet allerdings lediglich 
+%   \cs{dimexpr}, weshalb hier noch zusätzlich \cs{glueexpr} genutzt wird. Dies
+%   ist insbesondere für \cs{tud@bleedmargin@dim} relevant. Siehe hierzu auch 
+%   \GitHubRepo(latex3/latex2e)<227>. 
+% }
+%
 % \begin{layer}{tudheadings.head.content}
 % \changes{v2.04}{2015/05/31}{neu}^^A
 % Dies sind das links aus dem Satzspiegel verschobene Logo der \TnUD und das 
@@ -136,8 +145,8 @@
 %    \begin{macrocode}
   \DeclareNewLayer[%
     background,headsep,%
-    addhoffset=\dimexpr\tud@dim@logox-\tud@dim@widemargin\relax,%
-    addwidth=\dimexpr-\tud@dim@logox+\tud@dim@widemargin\relax,%
+    addhoffset=\tud@dim@logox-\tud@dim@widemargin,%
+    addwidth=-\tud@dim@logox+\tud@dim@widemargin,%
     voffset=\tud@dim@logoy,%
     addvoffset=\tud@dim@layoutvoffset,%
     contents={%
@@ -161,10 +170,10 @@
 %    \begin{macrocode}
   \DeclareNewLayer[%
     background,%
-    width=\dimexpr\tud@dim@layoutwidth+\tud@bleedmargin@dim*2\relax,%
-    addhoffset=\dimexpr\tud@dim@layouthoffset-\tud@bleedmargin@dim\relax,%
-    height=\dimexpr\tud@dim@topmargin+\tud@bleedmargin@dim\relax,%
-    addvoffset=\dimexpr\tud@dim@layoutvoffset-\tud@bleedmargin@dim\relax,%
+    width=\glueexpr\tud@dim@layoutwidth+(\tud@bleedmargin@dim)*2\relax,%
+    addhoffset=\glueexpr\tud@dim@layouthoffset-\tud@bleedmargin@dim\relax,%
+    height=\glueexpr\tud@dim@topmargin+\tud@bleedmargin@dim\relax,%
+    addvoffset=\glueexpr\tud@dim@layoutvoffset-\tud@bleedmargin@dim\relax,%
     contents={%
       \ifnum\tud@head@bar@num>\tw@\relax% cdhead=color
         \color{HKS41}%
@@ -174,8 +183,8 @@
   ]{tudheadings.head.back}%
   \DeclareNewLayer[%
     background,%
-    width=\dimexpr\tud@dim@layoutwidth+\tud@bleedmargin@dim*2\relax,%
-    addhoffset=\dimexpr\tud@dim@layouthoffset-\tud@bleedmargin@dim\relax,%
+    width=\glueexpr\tud@dim@layoutwidth+(\tud@bleedmargin@dim)*2\relax,%
+    addhoffset=\glueexpr\tud@dim@layouthoffset-\tud@bleedmargin@dim\relax,%
     height=\tud@dim@barheight,%
     voffset=\tud@dim@topmargin,%
     addvoffset=\tud@dim@layoutvoffset,%
@@ -197,7 +206,7 @@
 %    \begin{macrocode}
   \DeclareNewLayer[%
     background,headsep,%
-    voffset=\dimexpr\tud@dim@topmargin+\tud@dim@line\relax,%
+    voffset=\tud@dim@topmargin+\tud@dim@line,%
     addvoffset=\tud@dim@layoutvoffset,%
     contents={%
       \tud@head@font@set%
@@ -223,7 +232,7 @@
 %    \begin{macrocode}
   \DeclareNewLayer[%
     background,headsep,%
-    voffset=\dimexpr\tud@dim@topmargin-.5\tud@dim@line\relax,%
+    voffset=\tud@dim@topmargin-\tud@dim@line/2,%
     addvoffset=\tud@dim@layoutvoffset,%
     contents={%
       \ifnum\tud@head@bar@num<\tw@\relax% cdhead=nocolor/litecolor
@@ -233,8 +242,7 @@
   ]{tudheadings.head.upline}%
   \DeclareNewLayer[%
     background,headsep,%
-    voffset=\dimexpr\tud@dim@topmargin+\tud@dim@barheight%
-      -\tud@dim@line/2\relax,%
+    voffset=\tud@dim@topmargin+\tud@dim@barheight-\tud@dim@line/2,%
     addvoffset=\tud@dim@layoutvoffset,%
     contents={%
       \ifnum\tud@head@bar@num<\tw@\relax% cdhead=nocolor/litecolor
@@ -244,9 +252,9 @@
   ]{tudheadings.head.lowline}%
   \DeclareNewLayer[%
     background,%
-    width=\dimexpr\tud@dim@layoutwidth+\tud@bleedmargin@dim*2\relax,%
-    addhoffset=\dimexpr\tud@dim@layouthoffset-\tud@bleedmargin@dim\relax,%
-    voffset=\dimexpr\tud@dim@topmargin-\tud@dim@line/2\relax,%
+    width=\glueexpr\tud@dim@layoutwidth+(\tud@bleedmargin@dim)*2\relax,%
+    addhoffset=\glueexpr\tud@dim@layouthoffset-\tud@bleedmargin@dim\relax,%
+    voffset=\tud@dim@topmargin-\tud@dim@line/2,%
     addvoffset=\tud@dim@layoutvoffset,%
     contents={%
       \ifnum\tud@head@bar@num<\tw@\relax% cdhead=nocolor/litecolor
@@ -256,10 +264,9 @@
   ]{tudheadings.head.uplinewide}%
   \DeclareNewLayer[%
     background,%
-    width=\dimexpr\tud@dim@layoutwidth+\tud@bleedmargin@dim*2\relax,%
-    addhoffset=\dimexpr\tud@dim@layouthoffset-\tud@bleedmargin@dim\relax,%
-    voffset=\dimexpr\tud@dim@topmargin+\tud@dim@barheight%
-      -\tud@dim@line/2\relax,%
+    width=\glueexpr\tud@dim@layoutwidth+(\tud@bleedmargin@dim)*2\relax,%
+    addhoffset=\glueexpr\tud@dim@layouthoffset-\tud@bleedmargin@dim\relax,%
+    voffset=\tud@dim@topmargin+\tud@dim@barheight-\tud@dim@line/2,%
     addvoffset=\tud@dim@layoutvoffset,%
     contents={%
       \ifnum\tud@head@bar@num<\tw@\relax% cdhead=nocolor/litecolor
@@ -278,8 +285,8 @@
 %    \begin{macrocode}
   \DeclareNewLayer[%
     foreground,headsep,%
-    height=\baselineskip,%
     addvoffset=\tud@dim@headsep/2,%
+    height=1\baselineskip,%
     contents={\if@tud@head@date\hfill\tud@date@print\fi},%
   ]{tudheadings.head.date}%
 %    \end{macrocode}
@@ -302,9 +309,9 @@
 %    \begin{macrocode}
   \DeclareNewLayer[%
     background,foot,%
-    width=\dimexpr\tud@dim@layoutwidth+\tud@bleedmargin@dim*2\relax,%
-    hoffset=\dimexpr\tud@dim@layouthoffset-\tud@bleedmargin@dim\relax,%
-    height=\dimexpr\tud@dim@layoutheight-\layeryoffset%
+    width=\glueexpr\tud@dim@layoutwidth+(\tud@bleedmargin@dim)*2\relax,%
+    hoffset=\glueexpr\tud@dim@layouthoffset-\tud@bleedmargin@dim\relax,%
+    height=\glueexpr\tud@dim@layoutheight-\layeryoffset%
       +\tud@dim@layoutvoffset+\tud@bleedmargin@dim\relax,%
     addvoffset=-\dp\strutbox,%
     contents={%
@@ -374,8 +381,7 @@
 %    \begin{macrocode}
   \DeclareNewLayer[%
     background,foot,%
-    height=\dimexpr\tud@dim@layoutheight-\layeryoffset%
-      +\tud@dim@layoutvoffset\relax,%
+    height=\tud@dim@layoutheight-\layeryoffset+\tud@dim@layoutvoffset,%
     contents={%
 %    \end{macrocode}
 % Falls die Höhe der Logos im Fuß nicht durch den Anwender festgelegt wurden, 
@@ -544,12 +550,10 @@
 %    \begin{macrocode}
   \DeclareNewLayer[%
     background,%
-    area=%
-      {\dimexpr\tud@dim@layouthoffset-\tud@bleedmargin@dim\relax}%
-      {\dimexpr\tud@dim@layoutvoffset-\tud@bleedmargin@dim\relax}%
-      {\dimexpr\tud@dim@layoutwidth+\tud@bleedmargin@dim*2\relax}%
-      {\dimexpr\tud@dim@layoutheight+\tud@bleedmargin@dim*2\relax}%
-    ,%
+    hoffset=\glueexpr\tud@dim@layouthoffset-\tud@bleedmargin@dim\relax,%
+    voffset=\glueexpr\tud@dim@layoutvoffset-\tud@bleedmargin@dim\relax,%
+    width=\glueexpr\tud@dim@layoutwidth+(\tud@bleedmargin@dim)*2\relax,%
+    height=\glueexpr\tud@dim@layoutheight+(\tud@bleedmargin@dim)*2\relax,%
     contents={%
       \ifdefvoid{\tud@pagecolor}{}{%
         \color{\tud@pagecolor}%
@@ -1020,9 +1024,11 @@
 % Befehl zur Ausgabe der ersten und evtl. zweiten Textzeile im TUD-Kopf
 %    \begin{macrocode}
 \newcommand*\tud@head@text@write[2][\z@]{%
-  \raisebox{\dimexpr(\tud@dim@barheight+2\tud@dim@line-\totalheight)/2\relax}[%
+  \raisebox{%
+    \dimexpr(\tud@dim@barheight+\tud@dim@line*2-\totalheight)/2\relax%
+  }[%
     \dimexpr\tud@dim@barheight-\depth\relax%
-  ][\dimexpr#1\relax]{#2\vphantom{gjpqy\"A\"O\"U}}%
+  ][\dimexpr\glueexpr#1\relax\relax]{#2\vphantom{gjpqy\"A\"O\"U}}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@head@text@write
@@ -1393,7 +1399,9 @@
     \def\@tempc##1##2{%
       \tud@savelayerbox{head@option}{%
         \includegraphics[{%
-          keepaspectratio,totalheight=\tud@dim@mainlogoheight,##2%
+          keepaspectratio,%
+          totalheight=\tud@dim@mainlogoheight,%
+          ##2%
         }]{##1}%
       }%
     }%
@@ -1642,7 +1650,7 @@
 \AtEndOfClass{%
   \ifdefvoid{\tud@footlogoheight@dim}{%
     \tud@if@v@lower{2.03}{%
-      \def\tud@footlogoheight@dim{\dimexpr\tud@dim@topmargin*3/5\relax}%
+      \def\tud@footlogoheight@dim{\tud@dim@topmargin*3/5}%
     }{%
       \def\tud@footlogoheight@dim{\tud@dim@mainlogoheight}%
     }%
@@ -1691,7 +1699,10 @@
 %    \begin{macrocode}
 \newcommand*\tud@footlogo@ddc@set[2]{%
   \tud@savelayerbox{foot@#1}{%
-    \includegraphics[keepaspectratio,totalheight=\tud@footlogoheight@dim]{#2}%
+    \includegraphics[%
+      keepaspectratio,%
+      totalheight=\dimexpr\glueexpr\tud@footlogoheight@dim\relax\relax%
+    ]{#2}%
   }%
 }
 %    \end{macrocode}
@@ -1865,7 +1876,8 @@
 % In jedem Fall werden die Grundeinstellungen als erstes ausgeführt.
 %    \begin{macrocode}
     \preto\tud@footlogo@fileoptions{%
-      keepaspectratio,totalheight=\tud@footlogoheight@dim,%
+      keepaspectratio,%
+      totalheight=\dimexpr\glueexpr\tud@footlogoheight@dim\relax\relax,%
     }%
 %    \end{macrocode}
 % Wurden tatsächlich inidviduelle Parameter übergeben, so werden diese als 
@@ -2188,7 +2200,7 @@
           \def\@tempa{\@nil}%
           \ifx\@tempa\tud@footcontent@right\relax%
             \vtop{%
-              \hsize=\dimexpr#2-\@tempdimc\relax%
+              \hsize=\dimexpr\glueexpr#2-\@tempdimc\relax\relax%
               \strut\ignorespaces\tud@footcontent@left\strut%
             }%
 %    \end{macrocode}
@@ -2197,12 +2209,12 @@
 %    \begin{macrocode}
           \else%
             \vtop{%
-              \hsize=\dimexpr(#2-\columnsep)/2\relax%
+              \hsize=\dimexpr\glueexpr(#2-\columnsep)/2\relax\relax%
               \strut\ignorespaces\tud@footcontent@left\strut%
             }%
             \hspace{\columnsep}%
             \vtop{%
-              \hsize=\dimexpr(#2-\columnsep)/2-\@tempdimc\relax%
+              \hsize=\dimexpr\glueexpr(#2-\columnsep)/2-\@tempdimc\relax\relax%
               \strut\ignorespaces\tud@footcontent@right\strut%
             }%
           \fi%
