@@ -602,7 +602,9 @@
 % Wird der Befehl \cs{thispagestyle} verwendet, muss dafür Sorge getragen 
 % werden, dass kein Alias-Seitenstil expandiert wird.
 %    \begin{macrocode}
-\patchcmd{\thispagestyle}{\gdef\@specialstyle{#1}}{%
+\patchcmd\thispagestyle{%
+  \gdef\@specialstyle{#1}%
+}{%
   \xdef\@specialstyle{\GetRealPageStyle{#1}}%
 }{}{\tud@patch@wrn{thispagestyle}}
 %    \end{macrocode}
@@ -619,7 +621,7 @@
 \newcommand*\tud@pagestyle{}
 \let\tud@pagestyle\pagestyle
 \newcommand*\currentpagestyle{plain}
-\pretocmd{\tud@pagestyle}{%
+\pretocmd\tud@pagestyle{%
   \tud@BeforeSelectAnyPageStyle{#1}%
   \edef\currentpagestyle{#1}%
 }{}{\tud@patch@wrn{pagestyle}}
@@ -662,9 +664,9 @@
 % einige notwendige Makros definiert.
 %    \begin{macrocode}
 \TUD@UnwindPackage{scrlayer-scrpage}{%
-  \ifcsundef{if@chapter}{%
+  \ifundef{\if@chapter}{%
     \newif\if@chapter%
-    \ifcsundef{chapter}{\@chapterfalse}{\@chaptertrue}%
+    \ifundef{\chapter}{\@chapterfalse}{\@chaptertrue}%
   }{}%
   \cslet{ps@tudheadings}{\ps@headings}%
   \cslet{ps@plain.tudheadings}{\ps@plain}%
@@ -876,7 +878,7 @@
     \edef\@tempa{%
       \expandonce\tud@head@text@line%
       \expandonce\tud@head@text@delimiter%
-      \etex@unexpanded{#2#3}%
+      \unexpanded{#2#3}%
     }%
 %    \end{macrocode}
 % Sollte das hinzuzufügende Feld die aktuelle Kopfzeile \cs{tud@head@text@line} 
@@ -981,7 +983,7 @@
     \@tempb%
     \tud@head@text@write[\@tempc]{##1}%
     \def\@tempb{\newline}%
-    \def\@tempc{\z@}%
+    \let\@tempc\z@%
 %    \end{macrocode}
 % Die weiteren Zeilen sind bei zweifarbigen Kopf normalerweise blau, nur für
 % einen dunklen Seitenhintergrund weiß.
@@ -1082,7 +1084,8 @@
     \ifdim\@tempdima>\z@\relax%
       \ClassWarning{\TUD@Class@Name}{%
         #3\MessageBreak%
-        The maximum height is exceeded by \the\@tempdima\MessageBreak%
+        The maximum height is exceeded by\MessageBreak%
+        \the\@tempdima%
       }%
     \fi%
   \endgroup%
@@ -1389,9 +1392,9 @@
   \if@tud@headlogo@option@set%
     \def\@tempc##1##2{%
       \tud@savelayerbox{head@option}{%
-        \includegraphics[%
+        \includegraphics[{%
           keepaspectratio,totalheight=\tud@len@mainlogoheight,##2%
-        ]{##1}%
+        }]{##1}%
       }%
     }%
     \tud@savelayerbox{head@option}{}%
@@ -1588,10 +1591,10 @@
   \tud@ps@@restore{#1}{even}{middle}{foot}%
 }
 \newcommand*\tud@ps@@restore[4]{%
-  \ifcsdef{@@tud@ps@#1@#2@#3@#4}{%
+  \ifcsundef{@@tud@ps@#1@#2@#3@#4}{}{%
     \csletcs{sls@ps@#1@#2@#3@#4}{@@tud@ps@#1@#2@#3@#4}%
     \csundef{@@tud@ps@#1@#2@#3@#4}%
-  }{}%
+  }%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@ps@@restore
@@ -1747,11 +1750,11 @@
         \vss\vss%
       }{%
         You should reduce `footlogoheight', because it is\MessageBreak%
-        too high (\the\dimexpr\tud@dim@footlogoheight\relax).%
+        too high (\the\dimexpr\tud@dim@footlogoheight\relax). %
         \ifnum\tud@cdgeometry@num>\@ne% true/symmetric/twoside
-          \MessageBreak%
-          Alternatively you can enlarge the bottom margin\MessageBreak%
-          by using option `extrabottommargin'.%
+          Alternatively you could use\MessageBreak%
+          option `extrabottommargin=<length>'\MessageBreak%
+          in order to enlarge the bottom margin. %
         \fi%
       }%
     }%
@@ -1873,7 +1876,9 @@
 %    \begin{macrocode}
     \eappto\tud@footlogo@fileoptions{\expandonce\@tempb}%
     \protected@edef\@tempc{%
-      \noexpand\includegraphics[\expandonce\tud@footlogo@fileoptions]{\@tempa}%
+      \noexpand\includegraphics[{%
+        \expandonce\tud@footlogo@fileoptions%
+      }]{\@tempa}%
     }%
 %    \end{macrocode}
 % Die Logos werden~-- wie auch das \DDC-Logo im Fuß~-- individuell optisch
@@ -2151,10 +2156,10 @@
 %    \begin{macrocode}
 \newcommand*\tud@footcontent@use[2]{%
   \@tempswafalse%
-  \ifx\tud@footcontent@left\@empty\relax%
+  \ifx\tud@footcontent@left\@empty%
     \def\@tempa{\@nil}%
-    \ifx\@tempa\tud@footcontent@right\relax\else%
-      \ifx\tud@footcontent@right\@empty\relax\else%
+    \ifx\@tempa\tud@footcontent@right\else%
+      \ifx\tud@footcontent@right\@empty\else%
         \@tempswatrue%
       \fi%
     \fi%

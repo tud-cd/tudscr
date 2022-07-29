@@ -596,7 +596,7 @@
 \newcommand*\tud@skip@reset[1]{%
   \tud@skip@check{#1}{%
     \ifcsdef{@@tud@skip@#1}{%
-      \csname#1\endcsname=\csname @@tud@skip@#1\endcsname%
+      \csname #1\endcsname=\csname @@tud@skip@#1\endcsname%
     }{}%
   }%
 }
@@ -608,8 +608,8 @@
 \newcommand*\tud@skip@check[1]{%
   \begingroup%
     \@tempswafalse%
-    \expandafter\ifisskip\expandafter{\csname#1\endcsname}{\@tempswatrue}{}%
-    \expandafter\ifisdimen\expandafter{\csname#1\endcsname}{\@tempswatrue}{}%
+    \expandafter\ifisskip\expandafter{\csname #1\endcsname}{\@tempswatrue}{}%
+    \expandafter\ifisdimen\expandafter{\csname #1\endcsname}{\@tempswatrue}{}%
     \if@tempswa%
       \aftergroup\@firstofone%
     \else%
@@ -752,13 +752,13 @@
 \newcommand*\TUD@set@ifkey[3]{%
   \tud@lowerstring\tud@res@a{#3}%
   \edef\tud@res@b{%
-    \etex@unexpanded{\FamilySetBool{TUD}{#1}{#2}}{\tud@res@a}%
+    \unexpanded{\FamilySetBool{TUD}{#1}{#2}}{\tud@res@a}%
   }\tud@res@b%
 }
 \newcommand*\TUD@set@numkey[4]{%
   \tud@lowerstring\tud@res@a{#4}%
   \edef\tud@res@b{%
-    \etex@unexpanded{\FamilySetNumerical{TUD}{#1}{#2}{#3}}{\tud@res@a}%
+    \unexpanded{\FamilySetNumerical{TUD}{#1}{#2}{#3}}{\tud@res@a}%
   }\tud@res@b%
 }
 %    \end{macrocode}
@@ -775,7 +775,7 @@
 \newcommand*\TUD@set@dimenkey[3]{%
   \tud@lowerstring\tud@res@a{#3}%
   \edef\tud@res@b{%
-    \etex@unexpanded{\FamilySetUseLengthMacro{TUD}{#1}{#2}}{\tud@res@a}%
+    \unexpanded{\FamilySetUseLengthMacro{TUD}{#1}{#2}}{\tud@res@a}%
   }\tud@res@b%
 }
 %    \end{macrocode}
@@ -800,7 +800,7 @@
 % wurde.
 %    \begin{macrocode}
 \newcommand*\tud@locked@newnum[2]{%
-  \expandafter\newcommand\expandafter*\csname#1\endcsname{#2}%
+  \expandafter\newcommand\expandafter*\csname #1\endcsname{#2}%
   \newbool{#1@locked}%
   \tud@num@set{#1}{#2}%
 }
@@ -815,7 +815,14 @@
   \booltrue{#1@locked}%
 }
 \newcommand*\tud@num@set[2]{%
-  \ifcsdef{#1}{%
+  \ifcsundef{#1}{%
+    \PackageError{tudscrbase}{%
+      `\@backslashchar#1' was never defined%
+    }{%
+      You tried using the numerical expression `\@backslashchar#1'\MessageBreak%
+      but you didn't define it with `\string\tud@locked@newnum'.%
+    }%
+  }{%
     \ifnumber{#2}{%
       \csdef{#1}{#2}%
     }{%
@@ -825,13 +832,6 @@
         You set the numerical expression `\@backslashchar#1'\MessageBreak%
         to value `#2', which isn't numerical.%
       }%
-    }%
-  }{%
-    \PackageError{tudscrbase}{%
-      `\@backslashchar#1' was never defined%
-    }{%
-      You tried using the numerical expression `\@backslashchar#1'\MessageBreak%
-      but you didn't define it with `\string\tud@locked@newnum'.%
     }%
   }%
 }
@@ -1057,7 +1057,7 @@
   \protected@edef\@tempa{%
     \noexpand\TUD@parameter@set{#1}{#2=\noexpand\kv@value}%
   }%
-  \def\@tempb{\TUD@parameter@handler@macro[#1]{\kv@handled@false}}%
+  \def\@tempb{\TUD@parameter@handler@macro[{#1}]{\kv@handled@false}}%
   \expandafter\@tempb\expandafter{\@tempa}%
 }
 %    \end{macrocode}
@@ -1096,7 +1096,7 @@
       \noexpand\TUD@parameter@set{#1}{\noexpand\tud@reserved}%
     \noexpand\fi%
   }%
-  \def\@tempb{\TUD@parameter@handler@macro[#1]{\kv@handled@false}}%
+  \def\@tempb{\TUD@parameter@handler@macro[{#1}]{\kv@handled@false}}%
   \expandafter\@tempb\expandafter{\@tempa}%
 }
 %    \end{macrocode}
@@ -1164,8 +1164,9 @@
     \let\tud@res@a\@empty%
     \def\tud@res@b[##1]{\def\tud@res@a{##1}}%
     \def\ProvidesPackage##1{%
-      \@ifnextchar[%]
-        {\tud@res@b}{\tud@res@b[]}%
+      \kernel@ifnextchar[%]
+        {\tud@res@b}%
+        {\tud@res@b[]}%
     }%
     \IfFileExists{#1.sty}{%
       \openin\tud@res@read=#1.sty%
@@ -1230,17 +1231,16 @@
   \AfterAtEndOfPackage*{#1}{\booltrue{@tud@#1@loaded}}%
 }
 \newcommand*\TUD@AfterPackage@do[2]{%
-  \ifcsdef{if@tud@#1@loaded}{%
+  \ifcsundef{if@tud@#1@loaded}{%
+    \PackageError{tudscrbase}{\string\TUD@AfterPackage@set{#1} missing}{%
+      You have to set \string\TUD@AfterPackage@set{#1} before\MessageBreak%
+      using \string\TUD@AfterPackage@do{#1}{<code>}.%
+    }%
+  }{%
     \tud@if@preamble{%
       \AfterAtEndOfPackage*{#1}{#2}%
     }{%
       \ifbool{@tud@#1@loaded}{#2}{}%
-    }%
-  }{%
-    \PackageError{tudscrbase}{\string\TUD@AfterPackage@set{#1} missing}{%
-      You have to set \string\TUD@AfterPackage@set{#1} before\MessageBreak%
-      the usage of \string\TUD@AfterPackage@do{#1}{<code>} is\MessageBreak%
-      possible.%
     }%
   }%
 }

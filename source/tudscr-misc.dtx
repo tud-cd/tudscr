@@ -120,8 +120,8 @@
   \renewcommand*\tudbookmark[3][]{%
     \relax%
     \if@tud@bookmarks%
-      \phantomsection%
-      \ifblank{#1}{\pdfbookmark{#2}{#3}}{\pdfbookmark[#1]{#2}{#3}}%
+      \csuse{phantomsection}%
+      \ifblank{#1}{\pdfbookmark{#2}{#3}}{\pdfbookmark[{#1}]{#2}{#3}}%
     \fi%
   }%
   \renewcommand*\tud@x@hyperref@realfootnotes{%
@@ -158,7 +158,7 @@
 % Titelseite PDF"=Lesezeichen bzw. Outline-Einträge erzeugt.
 %    \begin{macrocode}
 %<*book|report|article>
-\apptocmd{\titlepage}{%
+\apptocmd\titlepage{%
   \tud@x@bookmark@startatroot%
   \@tud@res@swafalse%
   \if@tud@coverpage\@tud@res@swatrue\fi%
@@ -179,14 +179,14 @@
 %    \end{macrocode}
 % Dies geschieht außerdem auch für die Titelköpfe.
 %    \begin{macrocode}
-\pretocmd{\tud@maketitle@inpage}{%
+\pretocmd\tud@maketitle@inpage{%
   \tud@x@bookmark@startatroot%
   \tudbookmark[%
 %<book|report>  0%
 %<article|poster>  1%
   ]{\titlename}{title}%
 }{}{\tud@patch@wrn{tud@maketitle@inpage}}
-\pretocmd{\@maketitle}{%
+\pretocmd\@maketitle{%
   \tud@x@bookmark@startatroot%
   \tudbookmark[%
 %<book|report>  0%
@@ -686,7 +686,9 @@
       \def\@footnote##1{\NoCaseChange{\the\toks@{##1}}}%
       \def\@mkboth##1##2{\NoCaseChange{\@mkboth{##1}{##2}}}%
     }%
-    \patchcmd{\@uclcnotmath}{\@nonchangecase\ensuremath}{%
+    \patchcmd\@uclcnotmath{%
+      \@nonchangecase\ensuremath%
+    }{%
       \@nonchangecase\ensuremath\tud@x@textcase@uclcnotmath%
     }{}{\tud@patch@wrn{@uclcnotmath}}%
   }%

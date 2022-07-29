@@ -487,12 +487,16 @@
 %    \begin{macrocode}
 \newcommand*\tud@v@get[2]{%
   \begingroup%
-    \def\@tempa{\kernel@ifnextchar v{\@tempb}{\@tempb v}}%
+    \def\@tempa{%
+      \kernel@ifnextchar v%
+        {\@tempb}%
+        {\@tempb v}%
+    }%
     \def\@tempb v##1\@nil{\def\@tempc{##1}}%
     \@tempa #2\@nil%
     \edef\tud@reserved{%
       \endgroup%
-      \etex@unexpanded{\def#1}{\@tempc}%
+      \unexpanded{\def#1}{\@tempc}%
     }%
   \tud@reserved%
 }
@@ -1051,8 +1055,8 @@
   \fi%
 }
 \if@tud@cdoldfont@active
-  \newcommand*\ifdin{}%
-  \let\ifdin\tud@ifdin%
+  \newcommand*\ifdin{}
+  \let\ifdin\tud@ifdin
 \fi
 %    \end{macrocode}
 % \end{macro}^^A \tud@ifdin
@@ -1329,7 +1333,7 @@
 %    \begin{macrocode}
 \newcommand*\tud@comp@chapterpage@wrn{%
   \PackageWarning{tudscrcomp}{%
-    The command \string\chapterpage\space is not\MessageBreak%
+    The command `\string\chapterpage'\space is not\MessageBreak%
     recommended. You should use the same style for\MessageBreak%
     chapters throughout the document%
   }%
@@ -1347,10 +1351,12 @@
 %    \begin{macrocode}
 \AtEndPreamble{%
   \if@chapter%
-    \pretocmd{\tud@chapter@pre}{\tud@comp@chapterpage@set}%
-      {}{\tud@patch@wrn{tud@chapter@pre}}%
-    \apptocmd{\tud@chapter@app}{\tud@comp@chapterpage@unset}%
-      {}{\tud@patch@wrn{tud@chapter@app}}%
+    \pretocmd\tud@chapter@pre{%
+      \tud@comp@chapterpage@set%
+    }{}{\tud@patch@wrn{tud@chapter@pre}}%
+    \apptocmd\tud@chapter@app{%
+      \tud@comp@chapterpage@unset%
+    }{}{\tud@patch@wrn{tud@chapter@app}}%
   \fi%
 }
 %    \end{macrocode}
@@ -1416,17 +1422,20 @@
 % das Makro \cs{tud@split@author@list} um diese Befehle erweitert.
 %    \begin{macrocode}
 \newrobustcmd*\telefon{\telephone}
-\patchcmd{\tud@split@author@list}{telephone}{%
-  telephone,telefon%
-}{}{\tud@patch@wrn{tud@split@author@list}}
+\patchcmd\tud@split@author@list
+  {telephone}
+  {telephone,telefon}
+  {}{\tud@patch@wrn{tud@split@author@list}}
 \newrobustcmd*\fax{\telefax}
-\patchcmd{\tud@split@author@list}{telefax}{%
-  telefax,fax%
-}{}{\tud@patch@wrn{tud@split@author@list}}
+\patchcmd\tud@split@author@list
+  {telefax}
+  {telefax,fax}
+  {}{\tud@patch@wrn{tud@split@author@list}}
 \newrobustcmd*\email[1]{\emailaddress*{#1}}
-\patchcmd{\tud@split@author@list}{emailaddress}{%
-  emailaddress,email%
-}{}{\tud@patch@wrn{tud@split@author@list}}
+\patchcmd\tud@split@author@list
+  {emailaddress}
+  {emailaddress,email}
+  {}{\tud@patch@wrn{tud@split@author@list}}
 %    \end{macrocode}
 % \end{macro}^^A \tud@split@author@list
 % \end{macro}^^A \email
@@ -1457,7 +1466,7 @@
 % Einbindung der Logos verantwortlich sind (|\...logo|), wird allerdings nicht
 % unterstützt.
 %    \begin{macrocode}
-\newcommand*\zweitlogofile[2][]{\headlogo[#1]{#2}}
+\newcommand*\zweitlogofile[2][]{\headlogo[{#1}]{#2}}
 \newcommand*\zweitlogo[1]{%
   \PackageWarning{tudscrcomp}{%
     It isn't possible to redefine the definition for\MessageBreak%
@@ -1465,7 +1474,7 @@
     documentation of \string\headlogo%
   }%
 }
-\newcommand*\institutslogofile[2][]{\footlogo[#1]{,,,,,,,#2,}}
+\newcommand*\institutslogofile[2][]{\footlogo[{#1}]{,,,,,,,#2,}}
 \newcommand*\institutslogo[1]{%
   \PackageWarning{tudscrcomp}{%
     It isn't possible to redefine the definition for\MessageBreak%
@@ -1589,7 +1598,7 @@
   \ifx#2\@nil\relax%
     \csuse{#1}{#3}%
   \else%
-    \csuse{#1}[#2]{#3}%
+    \csuse{#1}[{#2}]{#3}%
   \fi%
   \tud@cs@restore{raggedsection}%
 }
@@ -1630,7 +1639,7 @@
 % in einem und/oder beiden Argumente von \cs{footcontent} ein Stern \val{*} 
 % verwendet, so bleibt der bisherige Inhalt erhalten.
 %    \begin{macrocode}
-\newcommand*\fusszeile[2][]{\footcontent[#1]{#2}}
+\newcommand*\fusszeile[2][]{\footcontent[{#1}]{#2}}
 \newcommand*\footcolumn[2]{%
   \ifnumber{#1}{%
     \ifcase#1\relax%
@@ -1638,7 +1647,7 @@
     \or%
       \footcontent{#2}[*]%
     \or%
-      \footcontent{*}[#2]%
+      \footcontent{*}[{#2}]%
     \fi%
   }{}%
 }
@@ -1718,7 +1727,7 @@
 % \opt{tudmathposterfoot} aktiviert werden und wird hier nachgebildet.
 %    \begin{macrocode}
 \newcommand*\tud@comp@mathposterwidth{4.2\tud@len@widemargin}
-\patchcmd{\tud@footcontent@use}{%
+\patchcmd\tud@footcontent@use{%
   \hsize=\dimexpr#2-\@tempdimc\relax%
 }{%
   \if@tud@mathposterfoot%
@@ -1727,7 +1736,7 @@
     \hsize=\dimexpr#2-\@tempdimc\relax%
   \fi%
 }{}{\tud@patch@wrn{tud@footcontent@use}}
-\patchcmd{\tud@footcontent@use}{%
+\patchcmd\tud@footcontent@use{%
   \hsize=\dimexpr(#2-\columnsep)/2\relax%
 }{%
   \if@tud@mathposterfoot%
@@ -1736,7 +1745,7 @@
     \hsize=\dimexpr(#2-\columnsep)/2\relax%
   \fi%
 }{}{\tud@patch@wrn{tud@footcontent@use}}
-\patchcmd{\tud@footcontent@use}{%
+\patchcmd\tud@footcontent@use{%
   \hsize=\dimexpr(#2-\columnsep)/2-\@tempdimc\relax%
 }{%
   \if@tud@mathposterfoot%
@@ -2142,29 +2151,41 @@
 % zwingend in \DIN gesetzt werden.
 %    \begin{macrocode}
 \tud@fixfonts@class@adapt{tudbook}{%
-  \patchcmd{\@makechapterhead}{\dinBold\Huge\bfseries}{%
+  \patchcmd\@makechapterhead{%
+    \dinBold\Huge\bfseries%
+  }{%
     \tud@sec@fontface%
     \if@color\color{HKS41-100}\fi%
     \Huge%
   }{}{\tud@patch@wrn{@makechapterhead}}%
-  \patchcmd{\@makechapterhead}{\MakeUppercase}{%
+  \patchcmd\@makechapterhead{%
+    \MakeUppercase%
+  }{%
     \tud@sec@format%
   }{}{\tud@patch@wrn{@makechapterhead}}%
-  \patchcmd{\@makeschapterhead}{\dinBold\Huge\bfseries}{%
+  \patchcmd\@makeschapterhead{%
+    \dinBold\Huge\bfseries%
+  }{%
     \tud@sec@fontface%
     \if@color\color{HKS41-100}\fi%
     \Huge%
   }{}{\tud@patch@wrn{@makeschapterhead}}%
-  \patchcmd{\@makeschapterhead}{\MakeUppercase}{%
+  \patchcmd\@makeschapterhead{%
+    \MakeUppercase%
+  }{%
     \tud@sec@format%
   }{}{\tud@patch@wrn{@makeschapterhead}}%
-  \patchcmd{\section}{\dinBold\Large\bfseries\MakeUppercase}{%
+  \patchcmd\section{%
+    \dinBold\Large\bfseries\MakeUppercase%
+  }{%
     \tud@sec@fontface%
     \if@color\color{HKS41-100}\fi%
     \Large%
     \tud@sec@format%
   }{}{\tud@patch@wrn{section}}%
-  \patchcmd{\showtitle}{\dinBold\Huge\bfseries\MakeUppercase}{%
+  \patchcmd\showtitle{%
+    \dinBold\Huge\bfseries\MakeUppercase%
+  }{%
     \tud@sec@fontface%
     \if@colortitle\color{HKS41-30}\fi%
     \Huge%
@@ -2226,7 +2247,9 @@
       \fi
     }%
   }%
-  \apptocmd{\maketitle}{\vspace{-6ex}}{}{\tud@patch@wrn{maketitle}}%
+  \apptocmd\maketitle{%
+    \vspace{-6ex}%
+  }{}{\tud@patch@wrn{maketitle}}%
   \renewcommand*\subtitlefont{%
     \unskip%
     \tud@sec@fontface%
@@ -2243,7 +2266,9 @@
 % Für die Schriftstärke in der Kopfzeile muss der Seitenstil angepasst und  
 % anschließend nochmals akiviert werden.
 %    \begin{macrocode}
-  \patchcmd{\ps@tudposter}{\textbf{\@einrichtung}}{%
+  \patchcmd\ps@tudposter{%
+    \textbf{\@einrichtung}%
+  }{%
     \textbf{\fontseries{b}\selectfont\@einrichtung}%
   }{}{\tud@patch@wrn{ps@tudposter}}%
   \pagestyle{tudposter}%

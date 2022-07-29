@@ -779,6 +779,7 @@
 %</class>
   \providecommand*\tudhyperref[2]{#2}%
   \providecommand*\autorefname[1][]{??\xspace}%
+%    \end{macrocode}
 %
 % \iffalse
 %</!doc>
@@ -825,7 +826,7 @@
 % Verbesserte Referenzierungen auf Seiten.
 %    \begin{macrocode}
 \RequirePackage{varioref}[2011/10/02]
-\renewcommand*\fullref[1]{\hyperref[#1]{\autoref*{#1} \vpageref{#1}}}
+\renewcommand*\fullref[1]{\hyperref[{#1}]{\autoref*{#1} \vpageref{#1}}}
 %    \end{macrocode}
 % \end{macro}^^A \fullref
 %
@@ -1149,8 +1150,12 @@
 % Abstand in \cs{tud@lastskip} gesichert.
 %    \begin{macrocode}
 \newskip\tud@lastskip
-\pretocmd{\index}{\tud@lastskip=\lastskip}{}{\tud@patch@wrn{index}}
-\pretocmd{\label}{\tud@lastskip=\lastskip}{}{\tud@patch@wrn{label}}
+\pretocmd\index{%
+  \tud@lastskip=\lastskip%
+}{}{\tud@patch@wrn{index}}
+\pretocmd\label{%
+  \tud@lastskip=\lastskip%
+}{}{\tud@patch@wrn{label}}
 \NewDocumentCommand\printdeclarationlist{!s !d()}{%
   \ifx\tud@declaration@list\relax\else%
     \ifhmode%
@@ -2239,10 +2244,10 @@
 \NewDocumentCommand\tud@if@lbl@exists{%
   >{\tud@lbl@create}>{\SplitArgument{2}{:}}m%
 }{%
-  \ifcsdef{r@#1}{%
-    \expandafter\@firstoftwo%
-  }{%
+  \ifcsundef{r@#1}{%
     \expandafter\@secondoftwo%
+  }{%
+    \expandafter\@firstoftwo%
   }%
 }
 %</class>
@@ -2387,7 +2392,7 @@
     \expandafter\@secondoftwo%
   \fi%
 }
-\pretocmd{\tud@sec@format}{%
+\pretocmd\tud@sec@format{%
   \@tud@dispositiontrue%
 }{}{\tud@patch@wrn{tud@sec@format}}
 %    \end{macrocode}
@@ -2397,7 +2402,7 @@
 %
 % In der Klasse \cls{tudscrmanual} werden die Markup-Befehle zusätzlich auch 
 % als Argument der Umgebung \env{Declaration} genutzt. Für diese Verwendung
-% kommt die Definiton von \cs{Markup@Declare} und ggf. \cs{Markup@Suffix} zum 
+% kommt die Definition von \cs{Markup@Declare} und ggf. \cs{Markup@Suffix} zum 
 % Einsatz. 
 %
 % \begin{macro}{\Process@Markup}
@@ -2504,7 +2509,7 @@
 % Schalter hier genutzt, um lediglich zu Beginn einer Deklaration das Markup 
 % auszuführen. Dabei Angaben für eine |'|\meta{Referenzvariante}|'| nicht
 % erlaubt.
-%   \begin{macrocode}
+%    \begin{macrocode}
 %<*class>
   \if@tud@declare%
     \if@openindex%
@@ -2652,7 +2657,7 @@
 \NewDocumentCommand\Process@@MarkupInline{mmd==od<>d''}{%
   \Markup@CheckFormat%
 %    \end{macrocode}
-% Um die aktuelle Definiton der temporären Makros nicht zu ändern, erfolgt die
+% Um die aktuelle Definition der temporären Makros nicht zu ändern, erfolgt die
 % formatierte Ausgabe in einer Gruppe. Dabei wird in \cs{@tempc} die minimale 
 % Variante gesichert.
 %    \begin{macrocode}
@@ -2917,7 +2922,7 @@
       \NoCaseChange{#1{##2}}%
     }%
   }
-  \apptocmd{\tud@x@textcase@uclcnotmath}{%
+  \apptocmd\tud@x@textcase@uclcnotmath{%
     \tud@nonchangecase\Application%
     \tud@nonchangecase\Distribution%
     \tud@nonchangecase\Engine%
@@ -3000,12 +3005,12 @@
     \let\item\@idxitem
     \imki@othercode%
   }%
-  \patchcmd{\theindex}{%
+  \patchcmd\theindex{%
     \imki@indexlevel{\indexname}\imki@indexheaders%
   }{%
     \imki@indexheaders%
   }{}{\tud@patch@wrn{theindex}}%
-  \patchcmd{\theindex}{%
+  \patchcmd\theindex{%
     \ifnum\imki@columns>\@ne
       \columnsep \imki@columnsep
       \ifx\imki@idxprologue\relax
@@ -3049,7 +3054,7 @@
 %<*class>
   \IfBooleanT{#1}{%
     \def\@tempc{\jobname-#4-declare.idx}%
-    \makeindex[name={#4-declare}]%
+    \makeindex[name=#4-declare]%
     \IfFileExists{\@tempc}{%
       \edef\@tempb{-o \jobname-#4.ind \@tempc}%
     }{%
@@ -3568,7 +3573,7 @@
 % \verb+|+\val{declare}\verb+|+ eine Quasi-Deklaration verwendet werden kann. 
 % Dies wird beispielsweise für \KOMAScript-Optionen genutzt, um diese in der 
 % gewünschten Formatierung im Index erscheinen zu lassen.
-%    \begin{macrocode}    
+%    \begin{macrocode}
   \else%
 %</class>
     \IfValueT{#5}{%
@@ -3640,7 +3645,7 @@
 %    \end{macrocode}
 % Wurde im zweiten Argument ein Markup-Befehl angegeben, so wurde durch das 
 % Erstellen der Box das dazugehörige Indexformat in \cs{tud@idx@fmt} für den
-% Eintrag erstellt. Andernfalls wurde die Definiton von \cs{tud@idx@fmt} nicht 
+% Eintrag erstellt. Andernfalls wurde die Definition von \cs{tud@idx@fmt} nicht
 % geändert und das Argument wird nach der Box direkt in den Index eingetragen.
 %    \begin{macrocode}
     \ifx\tud@idx@fmt\relax%
@@ -3801,7 +3806,7 @@
 %    \end{macrocode}
 % Die Ausgabe des gewünschten Index und des leeren des Prologs.
 %    \begin{macrocode}
-  \ifblank{#1}{\printindex}{\printindex[#1]}%
+  \ifblank{#1}{\printindex}{\printindex[{#1}]}%
   \ifnum\imki@columns>\@ne\relax\vspace{-\multicolsep}\fi%
 %<class>  \let\tud@indexprologue\@empty%
 }
@@ -3842,7 +3847,7 @@
 % anstelle der Makros \cs{Process@Markup} und \cs{Process@Index} den Befehl 
 % \cs{Process@ChangedAt} auszuführen, mit welchem die Formatierung der Einträge 
 % der Änderungsliste erfolgt.
-%   \begin{macrocode}
+%    \begin{macrocode}
 \newif\if@tud@changedat
 %    \end{macrocode}
 % Die Formatierung der Änderungseinträge erfolgt~-- wie auch für den Index~-- 
@@ -3855,7 +3860,7 @@
 %   \cs{Process@ChangedAt}\marg{Element}|=|\meta{Wert}|=|\ignorespaces%
 %   \oarg{Ausgabesuffix}\parg{Bundleelement}\ignorespaces%
 % \endgroup
-%   \begin{macrocode}
+%    \begin{macrocode}
 \NewDocumentCommand\Process@ChangedAt{md==od()}{%
   \tud@idx@get*\tud@idx@key\tud@idx@fmt\tud@idx@val{#1}=#2=[#3](#4)%
 }
@@ -4257,7 +4262,7 @@
 % \cs{item}-Befehle werden eine Ebene nach oben gehoben.
 %    \begin{macrocode}
     \let\lettergroup\@gobble%
-    \apptocmd{\theindex}{%
+    \apptocmd\theindex{%
       \let\subsubsubitem\subsubitem%
       \let\subsubitem\subitem%
       \let\subitem\item%
@@ -4277,7 +4282,7 @@
         \endgroup%
         \let\@tempb\@firstofone%
         \if@tud@cdoldfont@active\def\@tempb##1{\NoCaseChange{##1}}\fi%
-        \addsec[##1]{\TUDScript \@tempb{##1}}%
+        \addsec[{##1}]{\TUDScript \@tempb{##1}}%
         \tudhyperdef*{idx:changelog:##1}%
         \def\@tempa{\indexname: \TUDScript \@tempb{##1}}%
         \@mkboth{\@tempa}{\@tempa}%
@@ -4328,7 +4333,7 @@
           \forlistloop\@tempa{\tud@templist}%
           \hline%
         \end{tabular}%
-      }[#2]%
+      }[{#2}]%
       \ignorespaces%
     }%
   \fi%
@@ -4392,7 +4397,7 @@
 \newcommand*\tud@values{}
 \NewDocumentEnvironment{values}{mo}{%
   \def\tud@values{#1}%
-  \IfValueTF{#2}{\@values[#2]}{\@values}%
+  \IfValueTF{#2}{\@values[{#2}]}{\@values}%
 }{%
   \end@values%
 }
@@ -4409,7 +4414,7 @@
 % \begin{macro}{\tud@item@values}
 % \begin{macro}{\forslashlist}
 % Das Makro \cs{tud@item@values} ersetzt in der Umgebung \env{values} die 
-% originale Definiton von \cs{item}. Die Sternversion kann dabei verwendet 
+% originale Definition von \cs{item}. Die Sternversion kann dabei verwendet 
 % werden, um die Einstellung für den Säumniswert hervorzuheben. Im ersten 
 % optionalen Argument können die möglichen Werte einer Option oder eines 
 % Parameters angegeben werden. Sind mehrere Werte gleichbedeutende Werte
@@ -4764,7 +4769,7 @@
 %    \begin{macrocode}
 \RequirePackage{listings}[2014/03/04]
 \lstdefinestyle{tudscr}{%
-  basicstyle=\ttfamily\ifdef{\setstretch}{\setstretch{1}}{},%
+  basicstyle=\ttfamily\ifundef{\setstretch}{}{\setstretch{1}},%
   keywordstyle=,%
   columns=fullflexible,keepspaces,%
   aboveskip=\smallskipamount,%
@@ -5518,7 +5523,7 @@
         \ifx\@tempa\@tempb\relax%
           \let\@tempb\@empty%
         \else%
-          \edef\@tempb{\etex@unexpanded{\def\StandaloneDate}{\@date}}%
+          \edef\@tempb{\unexpanded{\def\StandaloneDate}{\@date}}%
         \fi%
         \edef\@tempa{%
           \tud@latex@ext -jobname=\tud@tut@temp\space%
@@ -5725,7 +5730,7 @@
 % \cs{@currentHref} gesichert und am Ende wiederhergestellt.
 %    \begin{macrocode}
   \NewDocumentCommand\ToDo{s o m !o}{%
-    \ifbool{@tud@todo}{%
+    \if@tud@todo%
       \global\let\tud@currentHref\@currentHref%
       \begingroup%
 %    \end{macrocode}
@@ -5865,7 +5870,7 @@
 % Andernfalls erscheint im Rand die Anmerkung \emph{ToDo}.
 %    \begin{macrocode}
           \renewcommand*\marginpar[2][]{%
-            \marginnote[##1]{##2}[\dimexpr-\ht\z@+1.6ex+1.75pt\relax]%
+            \marginnote[{##1}]{##2}[\dimexpr-\ht\z@+1.6ex+1.75pt\relax]%
           }%
           \toks@\expandafter{\tud@res@a noline,nolist}%
           \settowidth\marginparwidth{\tud@res@c}%
@@ -5882,9 +5887,7 @@
           \ifx\tud@todo@type@use\@empty\else%
             \begingroup%
               \let\tud@res@c\@empty%
-              \renewcommand*{\do}[1]{%
-                \appto\tud@res@c{,##1}%
-              }%
+              \def\do##1{\appto\tud@res@c{,##1}}%
               \dolistloop{\tud@todo@type@use}%
               \edef\tud@res@c{%
                 \endgroup%
@@ -5898,7 +5901,7 @@
         \fi%
       \endgroup%
       \global\let\@currentHref\tud@currentHref%
-    }{}%
+    \fi%
     \ignorespaces%
   }%
 %    \end{macrocode}
@@ -6116,7 +6119,7 @@
   \marginnote{%
     \setlength\fboxsep{0.25em}%
     \fbox{Achtung!}%
-  }[#1]%
+  }[{#1}]%
   \emph{\trim@spaces{#2}}%
 }
 \newcommand*\TUDForum{%

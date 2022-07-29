@@ -123,7 +123,7 @@
     \advance\hoffset-\paperwidth
     \hoffset.5\hoffset
   }%
-  \pretocmd{\CROP@center}{%
+  \pretocmd\CROP@center{%
     \@tud@x@crop@centertrue%
   }{}{\tud@patch@wrn{CROP@center}}%
 }
@@ -776,11 +776,11 @@
 % sämtliche Einstellungen für den Satzspiegel unterdrückt.
 %    \begin{macrocode}
 \if@tud@x@standalone@crop
-  \PreventPackageFromLoading{geometry}%
-  \let\tud@cdgeometry@process\relax%
+  \PreventPackageFromLoading{geometry}
+  \let\tud@cdgeometry@process\relax
 \else
-  \RequirePackage{geometry}[2010/09/12]%
-\fi%
+  \RequirePackage{geometry}[2010/09/12]
+\fi
 \AfterPackage*{geometry}{%
   \CheckCommand*\Gm@initnewgm{%
     \Gm@passfalse
@@ -974,7 +974,7 @@
 % angepasst werden. Hierfür wird am Ende von \cs{Gm@changelayout} ein Patch 
 % eingehängt.
 %    \begin{macrocode}
-  \apptocmd{\Gm@changelayout}{%
+  \apptocmd\Gm@changelayout{%
     \if@tud@x@geometry@enabled%
       \tud@if@preamble{}{%
         \@tud@x@geometry@fixmarginstrue%
@@ -1205,7 +1205,7 @@
     \ifstr{\@tempa}{executive}{\@tempswatrue}{}%
     \ifstr{\@tempa}{legal}{\@tempswatrue}{}%
     \if@tempswa\else%
-      \ifx\@tempa\@empty\relax\else%
+      \ifx\@tempa\@empty\else%
         \def\@tempb##1##2\@nil{%
           \if ##1a\@tempswatrue%
             \else\if ##1b\@tempswatrue%
@@ -1328,7 +1328,7 @@
         \ifdim\tud@len@layoutheight=\paperheight\relax\else\@tud@res@swatrue\fi%
         \edef\tud@res@a{%
           \endgroup%
-          \etex@unexpanded{\def#1}{%
+          \unexpanded{\def#1}{%
             layoutoffset={%
               \the\tud@len@layouthoffset,\the\tud@len@layoutvoffset%
             }%
@@ -1640,8 +1640,8 @@
 % Seitenrand (\cs{@tempdima}), die Textbreite (\cs{@tempdimb}) sowie die Breite 
 % der Randnotizen (\cs{@tempdimc}). Danach kommt der Gleichanteil.
 %    \begin{macrocode}
-    \else%  true/symmetric/twoside
-      \ifcase\tud@cdgeometry@num\relax\or\or%  true
+    \else% true/symmetric/twoside
+      \ifcase\tud@cdgeometry@num\relax\or\or% true
         \setlength\@tempdima{\tud@len@widemargin}%
         \if@reversemargin%
           \setlength\@tempdimc{\tud@len@widemargin}%
@@ -2027,7 +2027,7 @@
 % werden zwei~-- für die KOmpatibilitätsvariante drei~-- Layouts erstellt.
 % Diese können mit \cs{loadgeometry}\marg{Stil} geladen werden.
 %    \begin{macrocode}
-  \newcommand*\tud@currentgeometry{}
+  \newcommand*\tud@currentgeometry{}%
   \newcommand*\tud@BeforeSelectAnyPageStyle[1]{%
 %    \end{macrocode}
 % Der \pgs{tudheadings}-Seitenstil wird mit dem Befehl \cs{newpairofpagestyles}
@@ -2127,7 +2127,7 @@
 %    \begin{macrocode}
       \global\tud@len@areavskip=\tud@len@areavskip%
     }{}%
-  }
+  }%
 %    \end{macrocode}
 % \end{macro}^^A \tud@currentgeometry
 % \end{macro}^^A \tud@BeforeSelectAnyPageStyle
@@ -2162,8 +2162,8 @@
     \tud@cdgeometry@assignlayout%
     \edef\tud@res@a{%
       \endgroup%
-      \etex@unexpanded{\setlength\paperheight}{\the\tud@len@layoutheight}%
-      \etex@unexpanded{\setlength\paperwidth}{\the\tud@len@layoutwidth}%
+      \unexpanded{\setlength\paperheight}{\the\tud@len@layoutheight}%
+      \unexpanded{\setlength\paperwidth}{\the\tud@len@layoutwidth}%
     }%
   \tud@res@a%
 }
@@ -2183,7 +2183,7 @@
 %    \begin{macrocode}
 \xpretocmd{\typearea}{%
   \tud@x@typearea@before%
-  \def\tud@x@typearea@init{\typearea[#1]{#2}}%
+  \def\tud@x@typearea@init{\typearea[{#1}]{#2}}%
 }{}{\tud@patch@wrn{typearea}}
 \xapptocmd{\typearea}{\tud@x@typearea@after}{}{\tud@patch@wrn{typearea}}
 \xpretocmd{\areaset}{%
@@ -2193,8 +2193,8 @@
     \setlength\@tempdimb{#3}%
     \edef\tud@res@a{%
       \endgroup%
-      \noexpand\def\noexpand\tud@x@typearea@init{%
-        \noexpand\areaset[#1]{\the\@tempdima}{\the\@tempdimb}%
+      \def\noexpand\tud@x@typearea@init{%
+        \unexpanded{\areaset[{#1}]}{\the\@tempdima}{\the\@tempdimb}%
       }%
     }%
   \tud@res@a%
@@ -2207,13 +2207,13 @@
 %    \begin{macrocode}
 \tud@cs@store{storeareas}
 \renewcommand*\storeareas[1]{%
-  \begingroup
+  \begingroup%
     \tud@x@geometry@fixmargins%
     \tud@cs@use{storeareas}{#1}%
     \def\tud@res@b##1{\unexpanded{\setlength##1}{\the##1}}%
     \edef\tud@res@a{%
       \endgroup%
-      \etex@unexpanded{\def#1}{%
+      \unexpanded{\def#1}{%
         \tud@res@b{\tud@len@layoutwidth}%
         \tud@res@b{\tud@len@layoutheight}%
         \tud@res@b{\tud@len@layouthoffset}%
@@ -2338,14 +2338,23 @@
 % folgenden \KOMAScript-Befehle Leerseiten erzeugt werden, müssen diese minimal
 % angepasst werden.
 %    \begin{macrocode}
-\patchcmd{\cleardoubleoddpageusingstyle}{\pagestyle}{%
-  \let\tud@BeforeSelectAnyPageStyle\@gobble\pagestyle%
+\patchcmd\cleardoubleoddpageusingstyle{%
+  \pagestyle%
+}{%
+  \let\tud@BeforeSelectAnyPageStyle\@gobble%
+  \pagestyle%
 }{}{\tud@patch@wrn{cleardoubleoddpageusingstyle}}
-\patchcmd{\cleardoubleevenpageusingstyle}{\pagestyle}{%
-  \let\tud@BeforeSelectAnyPageStyle\@gobble\pagestyle%
+\patchcmd\cleardoubleevenpageusingstyle{%
+  \pagestyle%
+}{%
+  \let\tud@BeforeSelectAnyPageStyle\@gobble%
+  \pagestyle%
 }{}{\tud@patch@wrn{cleardoubleevenpageusingstyle}}
-\patchcmd{\cleardoublepageusingstyle}{\pagestyle}{%
-  \let\tud@BeforeSelectAnyPageStyle\@gobble\pagestyle%
+\patchcmd\cleardoublepageusingstyle{%
+  \pagestyle%
+}{%
+  \let\tud@BeforeSelectAnyPageStyle\@gobble%
+  \pagestyle%
 }{}{\tud@patch@wrn{cleardoublepageusingstyle}}
 %    \end{macrocode}
 % \end{macro}^^A \cleardoublepageusingstyle
