@@ -541,11 +541,11 @@
 % \end{option}^^A backcolor
 % \begin{option}{pageheadingsvskip}
 % \changes{v2.05}{2016/06/20}{neu}^^A
-% \begin{macro}{\tud@dim@pageheadingsvskip}
+% \begin{macro}{\tud@pageheadingsvskip@dim}
 % \changes{v2.05}{2016/06/20}{neu}^^A
 % \begin{option}{headingsvskip}
 % \changes{v2.05}{2016/06/20}{neu}^^A
-% \begin{macro}{\tud@dim@headingsvskip}
+% \begin{macro}{\tud@headingsvskip@dim}
 % \changes{v2.05}{2016/06/20}{neu}^^A
 % Mit diesen Optionen kann der Anwender die Überschriften von Titel, Teilen und
 % Kapiteln vertikal von ihrer Standardposition verschieben, welche vom \CD
@@ -557,19 +557,19 @@
 % die des Titelkopfes (\opt{titlepage}|=|\val{false}) verschoben.
 %    \begin{macrocode}
 %<*book|report|article>
-\newcommand*\tud@dim@pageheadingsvskip{0pt}
+\newcommand*\tud@pageheadingsvskip@dim{0pt}
 \TUD@key{pageheadingsvskip}{%
-  \TUD@set@dimenkey{pageheadingsvskip}{\tud@dim@pageheadingsvskip}{#1}%
+  \TUD@set@dimenkey{pageheadingsvskip}{\tud@pageheadingsvskip@dim}{#1}%
 }
-\newcommand*\tud@dim@headingsvskip{0pt}
+\newcommand*\tud@headingsvskip@dim{0pt}
 \TUD@key{headingsvskip}{%
-  \TUD@set@dimenkey{headingsvskip}{\tud@dim@headingsvskip}{#1}%
+  \TUD@set@dimenkey{headingsvskip}{\tud@headingsvskip@dim}{#1}%
 }
 %</book|report|article>
 %    \end{macrocode}
-% \end{macro}^^A \tud@dim@headingsvskip
+% \end{macro}^^A \tud@headingsvskip@dim
 % \end{option}^^A headingsvskip
-% \end{macro}^^A \tud@dim@pageheadingsvskip
+% \end{macro}^^A \tud@pageheadingsvskip@dim
 % \end{option}^^A pageheadingsvskip
 %
 % \iffalse
@@ -700,12 +700,12 @@
 %    \begin{macrocode}
   \begingroup
     \tud@sec@fontsize%
-    \@tempskipa=\glueexpr%
+    \tud@setglue\@tempskipa{%
       .8\baselineskip \@plus .05\baselineskip \@minus .1\baselineskip%
-    \relax\relax%
+    }%
     \edef\tud@res@a{%
       \endgroup%
-      \def\noexpand\tud@cd@afterskip{\the\@tempskipa}%
+      \def\noexpand\tud@cd@aftervskip@glue{\the\@tempskipa}%
     }%
   \tud@res@a%
 }
@@ -1006,17 +1006,17 @@
   \else% !false
     \tud@cs@store{scr@part@beforeskip}%
 %<*book|report>
-    \renewcommand*\scr@part@beforeskip{\tud@cd@beforeskip}%
+    \renewcommand*\scr@part@beforeskip{\tud@cd@beforevskip@dim}%
 %</book|report>
 %<*article|poster>
-    \renewcommand*\scr@part@beforeskip{\tud@cd@afterskip+\baselineskip}%
+    \renewcommand*\scr@part@beforeskip{\tud@cd@aftervskip@glue+\baselineskip}%
 %</article|poster>
 %<*book|report>
     \tud@cs@store{scr@part@innerskip}%
-    \renewcommand*\scr@part@innerskip{\tud@cd@innerskip}%
+    \renewcommand*\scr@part@innerskip{\tud@cd@innervskip@dim}%
 %</book|report>
     \tud@cs@store{scr@part@afterskip}%
-    \renewcommand*\scr@part@afterskip{\tud@cd@afterskip}%
+    \renewcommand*\scr@part@afterskip{\tud@cd@aftervskip@glue}%
     \tud@cs@store{partheadstartvskip}%
     \let\partheadstartvskip\tud@partheadstartvskip%
 %<*book|report>
@@ -1069,11 +1069,11 @@
 %    \begin{macrocode}
   \else% !false
     \tud@cs@store{scr@chapter@beforeskip}%
-    \renewcommand*\scr@chapter@beforeskip{\tud@cd@beforeskip}%
+    \renewcommand*\scr@chapter@beforeskip{\tud@cd@beforevskip@dim}%
     \tud@cs@store{scr@chapter@innerskip}%
-    \renewcommand*\scr@chapter@innerskip{\tud@cd@innerskip}%
+    \renewcommand*\scr@chapter@innerskip{\tud@cd@innervskip@dim}%
     \tud@cs@store{scr@chapter@afterskip}%
-    \renewcommand*\scr@chapter@afterskip{\tud@cd@afterskip}%
+    \renewcommand*\scr@chapter@afterskip{\tud@cd@aftervskip@glue}%
     \tud@cs@store{chapterheadstartvskip}%
     \let\chapterheadstartvskip\tud@chapterheadstartvskip%
     \tud@cs@store{chapterlineswithprefixformat}%
@@ -1208,15 +1208,15 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@cd@specialpage@unset
 % \end{macro}^^A \tud@cd@specialpage@set
-% \begin{macro}{\tud@cd@headstartvskip}
+% \begin{macro}{\tud@cd@headstart@vskip}
 % \changes{v2.06}{2018/08/01}{neu}^^A
 % \begin{macro}{\tud@cd@vphantom}
 % \changes{v2.06}{2018/08/01}{neu}^^A
-% \begin{macro}{\tud@cd@beforeskip}
+% \begin{macro}{\tud@cd@beforevskip@dim}
 % \changes{v2.06}{2018/08/01}{neu}^^A
-% \begin{macro}{\tud@cd@innerskip}
+% \begin{macro}{\tud@cd@innervskip@dim}
 % \changes{v2.06}{2018/08/01}{neu}^^A
-% \begin{macro}{\tud@cd@afterskip}
+% \begin{macro}{\tud@cd@aftervskip@glue}
 % \changes{v2.06}{2018/08/01}{neu}^^A
 % Im \TUDCD werden sowohl Titel als auch Teil- und Kapitelüberschriften auf der 
 % gleichen Grundlinienhöhe gesetzt. Hierfür sind Anpassungen der entsprechenden
@@ -1225,25 +1225,26 @@
 % \cs{chapterheadstartvskip} gesetzt. Um das Layout des \CDs umzusetzen, werden 
 % diese beiden Makros als Haken genutzt.
 %
-% Das Makro \cs{tud@cd@beforeskip} enthält den Abstand vor einer Überschrift, 
-% welcher über \cs{tud@cd@headstartvskip} gesetzt wird. Der Abstand zwischen 
+% Das Makro \cs{tud@cd@beforevskip@dim} ist der Abstand vor einer Überschrift, 
+% welcher über \cs{tud@cd@headstart@vskip} gesetzt wird. Der Abstand zwischen 
 % der Nummerierung eines Teils und der eigentlichen Bezeichnung wird mit
-% \cs{tud@cd@innerskip} definiert und durch \KOMAScript{} eingefügt. Gleiches 
-% gilt für eine separate Kapitelnummernzeile (\opt{chapterprefix}) und dem 
-% eigentlichen Kapiteltitel. Durch \cs{tud@cd@afterskip} wird der Abstand
-% zwischen Titel und Fließtext respektive der unteren Prääambel definiert. 
-% Dieser Abstand ist abhängig von der gewählten Einstellung für \opt{headings}.
+% \cs{tud@cd@innervskip@dim} definiert und durch \KOMAScript{} eingefügt.
+% Gleiches gilt für eine separate Kapitelnummernzeile (\opt{chapterprefix}) und
+% dem eigentlichen Kapiteltitel. Durch \cs{tud@cd@aftervskip@glue} wird der
+% Abstand zwischen Titel und Fließtext respektive der unteren Prääambel
+% definiert. Dieser Abstand ist abhängig von der gewählten Einstellung für die 
+% Option \opt{headings}.
 %    \begin{macrocode}
-\newcommand*\tud@cd@beforeskip{%
-  \dimexpr-\tud@len@areavskip-\tud@len@areaheadvskip\relax%
+\newcommand*\tud@cd@beforevskip@dim{%
+  \dimexpr-\tud@dim@areavskip-\tud@dim@areaheadvskip\relax%
 }
-\newcommand*\tud@cd@innerskip{.25\baselineskip}%
-\newcommand*\tud@cd@afterskip{%
+\newcommand*\tud@cd@innervskip@dim{.25\baselineskip}%
+\newcommand*\tud@cd@aftervskip@glue{%
   .75\baselineskip \@plus .05\baselineskip \@minus .1\baselineskip%
 }
-\newcommand*\tud@cd@headstartvskip{%
-  \@tempskipa=\glueexpr\tud@cd@beforeskip\relax\relax%
-  \ifdim\@tempskipa<\z@\@tempskipa-\@tempskipa\fi%
+\newcommand*\tud@cd@headstart@vskip{%
+  \tud@setdim\@tempskipa{\tud@cd@beforevskip@dim}%
+  \tud@length@setabsolute\@tempskipa%
   \null\vskip-\baselineskip\vskip\@tempskipa%
 }
 %    \end{macrocode}
@@ -1254,16 +1255,16 @@
 \newcommand*\tud@cd@vphantom{%
   \begingroup%
     \usekomafont{partnumber}{\nobreak\tud@sec@strut}%
-    \setlength\@tempskipa{\tud@cd@innerskip}%
+    \tud@setdim\@tempskipa{\tud@cd@innervskip@dim}%
     \par\nobreak\vskip\@tempskipa%
   \endgroup%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@cd@afterskip
-% \end{macro}^^A \tud@cd@innerskip
-% \end{macro}^^A \tud@cd@beforeskip
+% \end{macro}^^A \tud@cd@aftervskip@glue
+% \end{macro}^^A \tud@cd@innervskip@dim
+% \end{macro}^^A \tud@cd@beforevskip@dim
 % \end{macro}^^A \tud@cd@vphantom
-% \end{macro}^^A \tud@cd@headstartvskip
+% \end{macro}^^A \tud@cd@headstart@vskip
 %
 % \iffalse
 %<*book|report>
@@ -1293,8 +1294,8 @@
 % Zunächst wird der unterschiedliche Abstand bei Teil- und Kapitelpräambeln 
 % ausgeglichen.
 %    \begin{macrocode}
-  \@tempskipa=\glueexpr\tud@cd@afterskip\relax%
-  \ifdim\@tempskipa<\z@\@tempskipa-\@tempskipa\fi%
+  \tud@setglue\@tempskipa{\tud@cd@aftervskip@glue}%
+  \tud@length@setabsolute\@tempskipa%
   \vskip\@tempskipa%
 %    \end{macrocode}
 % Anschließend folgen die Anpassungen für die Teilpräambel.
@@ -1303,7 +1304,7 @@
     \renewcommand*\tud@abstract@level@num{1}%
   \fi%
   \KOMAoptions{titlepage=false}%
-  \null\vskip-\baselineskip%
+  \null\vskip-1\baselineskip%
   \addtokomafont{disposition}{\tud@color{\tud@part@fontcolor}}%
   \addtokomafont{dictum}{\tud@color{\tud@part@fontcolor}}%
   \let\tud@preamble@fontcolor\tud@part@fontcolor%
@@ -1322,7 +1323,7 @@
     \renewcommand*\tud@abstract@level@num{1}%
   \fi%
   \KOMAoptions{titlepage=false}%
-  \null\vskip-\baselineskip%
+  \null\vskip-1\baselineskip%
 %    \end{macrocode}
 % Die Farb- und Schrifteinstellungen sind nur für reine Kapitelseiten notwendig.
 %    \begin{macrocode}
@@ -1481,9 +1482,9 @@
     \renewcommand*\tud@part@fontcolor{HKS41!30}%
   \fi%
   \tud@cd@specialpage@set{part}%
-  \tud@cd@headstartvskip%
+  \tud@cd@headstart@vskip%
   \TUD@deprecated@lengthcs{pageheadingsvskip}%
-  \vspace*{\tud@dim@pageheadingsvskip}%
+  \vspace*{\dimexpr\tud@pageheadingsvskip@dim\relax}%
 }
 %</book|report>
 %    \end{macrocode}
@@ -1580,13 +1581,13 @@
   \ifcase\tud@cd@chapter@num\relax\or\else% *color
     \renewcommand*\tud@chapter@fontcolor{HKS41}%
   \fi%
-  \tud@cd@headstartvskip%
+  \tud@cd@headstart@vskip%
   \if@tud@chapterpage%
     \TUD@deprecated@lengthcs{pageheadingsvskip}%
-    \vspace*{\tud@dim@pageheadingsvskip}%
+    \vspace*{\dimexpr\tud@pageheadingsvskip@dim\relax}%
   \else%
     \TUD@deprecated@lengthcs{headingsvskip}%
-    \vspace*{\tud@dim@headingsvskip}%
+    \vspace*{\dimexpr\tud@headingsvskip@dim\relax}%
   \fi%
 }
 %    \end{macrocode}

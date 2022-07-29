@@ -200,7 +200,7 @@
 % Schnittstelle, weshalb zusätzlich die Befehle |\Describe|\meta{Typ}|s| 
 % darauf aufbauend definiert werden.
 %
-% \begin{length}{\marginnotevskip}
+% \begin{length}{\tud@dim@marginnotevskip}
 % \changes{v2.05i}{2017/03/09}{neu}^^A
 % \begin{macro}{\marginpar}
 % Da die Befehle |\Describe|\meta{Typ} zur Erzeugung einer Randnotiz für 
@@ -208,19 +208,19 @@
 % Versatz gesetzt werden, falls gleich mehrere auf einmal zu erzeugen sind. 
 % Hierfür wird das Paket~\pkg{marginnote} genutzt.
 %    \begin{macrocode}
-\newlength\marginnotevskip
+\tud@newdim\tud@dim@marginnotevskip
 \AfterPackage*{marginnote}{%
   \renewcommand*\marginpar[2][]{%
     \IfArgIsEmpty{#1}{%
-      \marginnote{#2}[\marginnotevskip]%
+      \marginnote{#2}[\tud@dim@marginnotevskip]%
     }{%
-      \marginnote[{#1}]{#2}[\marginnotevskip]%
+      \marginnote[{#1}]{#2}[\tud@dim@marginnotevskip]%
     }%
   }%
 }
 %    \end{macrocode}
 % \end{macro}^^A \marginpar
-% \end{length}^^A \marginnotevskip
+% \end{length}^^A \tud@dim@marginnotevskip
 % \begin{macro}{\doc@createdescribes}
 % \changes{v2.05i}{2017/03/09}{neu}^^A
 % Die Definition für |\Describe|\meta{Typ}|s|. Die so erzeugten Befehle passen
@@ -231,17 +231,17 @@
 %    \begin{macrocode}
 \newcommand*\doc@createdescribes[1]{%
   \expandafter\newcommand\expandafter*\csname Describe#1s\endcsname[2][]{%
-    \setlength\marginnotevskip{\z@}%
+    \tud@setdim\tud@dim@marginnotevskip{\z@}%
     \def\@tempc{##2}%
     \@for\@tempa:=\@tempc\do{%
       \trim@spaces@in\@tempa%
       \ifx\@tempa\@empty\else%
         \def\@tempb{\@nameuse{Describe#1}[{##1}]}%
         \expandafter\@tempb\expandafter{\@tempa}%
-        \addtolength\marginnotevskip{\baselineskip}%
+        \tud@addtodim\tud@dim@marginnotevskip{1\baselineskip}%
       \fi%
     }%
-    \setlength\marginnotevskip{\z@}%
+    \tud@setdim\tud@dim@marginnotevskip{\z@}%
     \ignorespaces%
   }%
 }
@@ -1662,11 +1662,11 @@
 % die Seitenränder sowie den Abstand von Randnotizen und Textkörper dient.
 %    \begin{macrocode}
 \newcommand*\tud@setarea{%
-  \setlength\topmargin{-1in}%
-  \setlength\headheight{0pt}%
-  \setlength\headsep{3em}%
-  \setlength\footskip{\headsep}%
-  \setlength\textheight{\dimexpr\paperheight-\headsep*5/2-\footskip*3/2\relax}%
+  \tud@setdim\topmargin{-1in}%
+  \tud@setdim\headheight{0pt}%
+  \tud@setdim\headsep{3em}%
+  \tud@setdim\footskip{\headsep}%
+  \tud@setdim\textheight{\paperheight-\headsep*5/2-\footskip*3/2}%
   \@colht=\textheight%
   \@colroom=\textheight%
   \vsize=\textheight%
@@ -1674,23 +1674,21 @@
   \begingroup%
     \MacroFont\selectfont%
     \settowidth\@tempdima{\space}%
-    \setlength\@tempdima{80\@tempdima}%
-    \addtolength\@tempdima{\MacroIndent}%
+    \tud@setdim\@tempdima{80\@tempdima}%
+    \tud@addtodim\@tempdima{\MacroIndent}%
     \edef\@tempa{%
       \endgroup%
-      \noexpand\setlength\noexpand\textwidth{\the\@tempdima}%
+      \unexpanded{\tud@setdim\textwidth}{\the\@tempdima}%
     }%
   \@tempa%
   \columnwidth=\textwidth%
   \hsize=\columnwidth%
   \linewidth=\hsize%
-  \setlength\columnsep{1em}%
-  \setlength\labelsep{1em}%
-  \setlength\marginparsep{\labelsep}%
-  \setlength\oddsidemargin{\dimexpr\paperwidth-\textwidth-\labelsep-1in\relax}%
-  \setlength\marginparwidth{%
-    \dimexpr\oddsidemargin+1in-\labelsep-\marginparsep\relax%
-  }%
+  \tud@setdim\columnsep{1em}%
+  \tud@setdim\labelsep{1em}%
+  \tud@setdim\marginparsep{\labelsep}%
+  \tud@setdim\oddsidemargin{\paperwidth-\textwidth-\labelsep-1in}%
+  \tud@setdim\marginparwidth{\oddsidemargin+1in-\labelsep-\marginparsep}%
 }
 \AtBeginDocument{\tud@setarea}
 %    \end{macrocode}

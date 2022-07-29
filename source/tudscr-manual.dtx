@@ -593,8 +593,8 @@
 %<*class>
   \NewDocumentCommand\tudhyperdef{s t' m}{%
     \@tempswafalse%
-    \IfBooleanT{#1}{\@tempswatrue\setlength\@tempdima{3\baselineskip}}%
-    \IfBooleanT{#2}{\@tempswatrue\setlength\@tempdima{15\baselineskip}}%
+    \IfBooleanT{#1}{\@tempswatrue\tud@setdim\@tempdima{3\baselineskip}}%
+    \IfBooleanT{#2}{\@tempswatrue\tud@setdim\@tempdima{15\baselineskip}}%
     \if@tempswa%
       \raisebox{\@tempdima}[0pt][0pt]{\hyperdef{\tud@manualname}{#3}{}}%
       \par\nobreak\vskip\dimexpr-\parskip-\baselineskip\relax%
@@ -1149,7 +1149,7 @@
 % einfach bei der verwendung der genannten Befehle der zuvor gesetzte vertikale 
 % Abstand in \cs{tud@lastskip} gesichert.
 %    \begin{macrocode}
-\newskip\tud@lastskip
+\tud@newglue\tud@lastskip
 \pretocmd\index{%
   \tud@lastskip=\lastskip%
 }{}{\tud@patch@wrn{index}}
@@ -1167,7 +1167,7 @@
 % Sollte dann noch ein positiver Wert bestehen, wird dieser einfach zusätzlich
 % gesetzt.
 %    \begin{macrocode}
-      \@tempskipa=\glueexpr\medskipamount-\tud@lastskip\relax%
+      \tud@setglue\@tempskipa{\medskipamount-\tud@lastskip}%
       \ifdim\@tempskipa>\z@\relax%
         \addpenalty{\@beginparpenalty}%
         \addvspace{\@tempskipa}%
@@ -3894,7 +3894,7 @@
 % ein vertikaler Versatz dieser angegeben werden. Die Sternversion des Befehls 
 % unterdrückt die Ausgabe der Randnotiz. 
 %    \begin{macrocode}
-\newlength\changedatskip
+\tud@newdim\changedatskip
 \NewDocumentCommand\ChangedAt{s o d() m !O{\changedatskip}}{%
   \IfValueTF{#2}{%
     \Changed@At@CreateList[#2](#3){#4}%
@@ -4373,7 +4373,7 @@
 % Damit die Änderungsnotizen in der passenden vertikalen Position erscheinen, 
 % wird die Länge \cs{changedatskip} entsprechend angepasst.
 %    \begin{macrocode}
-    \setlength\changedatskip{-\baselineskip}%
+    \tud@setdim\changedatskip{-\baselineskip}%
   }{}%
 }
 %    \end{macrocode}
@@ -4611,16 +4611,16 @@
 % werden. Dabei ist das zu übergebende Argument die Anzahl der zu erzeugenden, 
 % linksbündigen Spalten.
 %    \begin{macrocode}
-\newlength\tempdim
+\tud@newglue\tempdim
 \newsavebox\tabularm@box
-\newlength\tabularm@wd
+\tud@newdim\tabularm@wd
 \newcommand*\tabularm@num{1}
 \NewEnviron{tabularm}[1]{%
   \begin{lrbox}{\tabularm@box}%
     \let\allcolumnpar\@gobble%
     \begin{tabular}{*{#1}l}\BODY\end{tabular}%
   \end{lrbox}%
-  \setlength\tabularm@wd{\wd\tabularm@box}%
+  \tud@setdim\tabularm@wd{\wd\tabularm@box}%
   \def\tabularm@num{#1}%
   \let\allcolumnpar\tabularm@allcolumnpar%
   \begin{tabular}{*{#1}l}\BODY\end{tabular}%
@@ -4660,11 +4660,11 @@
   \vskip\medskipamount%
   \@afterindentfalse\@afterheading%
   \IfBooleanTF{#1}{%
-    \IfValueTF{#3}{\setlength\@tempdima{#3}}{\setlength\@tempdima{\linewidth}}%
-    \setlength\@tempdimc{-.7\baselineskip}%
+    \tud@setdim\@tempdima{\IfValueTF{#3}{#3}{\linewidth}}%
+    \tud@setdim\@tempdimc{-.7\baselineskip}%
     \begin{tabularx}{\@tempdima}{lXX}\Term@Table\end{tabularx}%
   }{%
-    \setlength\@tempdimc{\z@}%
+    \tud@setdim\@tempdimc{\z@}%
     \begin{tabular}{lll}\Term@Table\end{tabular}%
   }%
   \par\addvspace{\medskipamount}%
@@ -5439,8 +5439,8 @@
 % Text vorangestellt werden kann.
 %    \begin{macrocode}
   \@tempa{\Code@Preamble}{}%
-  \setlength\@tempdimc{\leftskip}%
-  \setlength\leftskip{\leftmargin}%
+  \tud@setdim\@tempdimc{\leftskip}%
+  \tud@setdim\leftskip{\leftmargin}%
 %    \end{macrocode}
 % Durch die zweimalige Verwendung von \file{\string\tud@tut@temp.tex}~-- einmal 
 % direkt und einmal innerhalb einer Box~-- können darin verwendete Befehle wie
@@ -5450,7 +5450,7 @@
 %    \begin{macrocode}
   \@tempa{\input{\tud@tut@temp.tex}}{\Code@Hook}%
   \global\let\Code@Hook\relax%
-  \setlength\leftskip{\@tempdimc}%
+  \tud@setdim\leftskip{\@tempdimc}%
   \noindent\ignorespaces%
 }
 %    \end{macrocode}
@@ -5556,11 +5556,11 @@
     \@tempcnta\z@%
     \@for\@tempa:=#3\do{\advance\@tempcnta\@ne}%
     \ifnum\@tempcnta>\z@\relax%
-      \setlength\@tempdima{\textwidth}%
+      \tud@setdim\@tempdima{\textwidth}%
       \divide\@tempdima\@tempcnta%
       \advance\@tempcnta\m@ne%
       \multiply\@tempcnta 2%
-      \addtolength\@tempdima{-\@tempcnta\tabcolsep}%
+      \tud@addtodim\@tempdima{-\@tempcnta\tabcolsep}%
       \@for\@tempa:=#3\do{%
         \advance\@tempcnta\m@ne%
         \edef\@tempb{%
@@ -5631,7 +5631,7 @@
 \RequirePackage{todonotes}[2012/07/25]
 \AtEndPreamble{%
   \ifdim\marginparwidth<2cm\relax%
-    \setlength\marginparwidth{2cm}%
+    \tud@setdim\marginparwidth{2cm}%
   \fi%
 }
 %    \end{macrocode}
@@ -5871,7 +5871,7 @@
           }%
           \toks@\expandafter{\tud@res@a noline,nolist}%
           \settowidth\marginparwidth{\tud@res@c}%
-          \addtolength\marginparwidth{\dimexpr1.6ex+1pt\relax}%
+          \tud@addtodim\marginparwidth{1.6ex+1pt}%
           \expandafter\todo\expandafter[\the\toks@]{\tud@res@c\strut}%
           \aftergroup\par\aftergroup\noindent%
 %    \end{macrocode}
@@ -6114,7 +6114,7 @@
 %    \begin{macrocode}
 \newcommand*\Attention[2][\z@]{%
   \marginnote{%
-    \setlength\fboxsep{0.25em}%
+    \tud@setdim\fboxsep{0.25em}%
     \fbox{Achtung!}%
   }[{#1}]%
   \emph{\trim@spaces{#2}}%

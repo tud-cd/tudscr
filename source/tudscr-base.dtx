@@ -186,6 +186,120 @@
 % \end{macro}^^A \tud@newcount
 % \end{macro}^^A \tud@newif
 %
+% \subsubsection{Definition von Längen-Registern}
+%
+% \begin{macro}{\tud@newglue}
+% \changes{v2.06o}{2022/07/28}{neu}^^A
+% \begin{macro}{\tud@newdim}
+% \changes{v2.06o}{2022/07/28}{neu}^^A
+% \begin{macro}{\tud@setglue}
+% \changes{v2.06o}{2022/07/28}{neu}^^A
+% \begin{macro}{\tud@setdim}
+% \changes{v2.06o}{2022/07/28}{neu}^^A
+% \begin{macro}{\tud@addtoglue}
+% \changes{v2.06o}{2022/07/28}{neu}^^A
+% \begin{macro}{\tud@addtodim}
+% \changes{v2.06o}{2022/07/28}{neu}^^A
+% Der \LaTeX"~Kernel stellt lediglich \cs{newlength} zur Verfügung, um bereits 
+% bestehende Makros nicht zu überschreiben. Soll jedoch ein \cs{dimen}-Register 
+% definiert werden, gibt es keinen entsprechenden Befehl. Auch die Zuweisung 
+% von Längenwerte kann mit \cs{setlength} nicht sauber erfolgen, da nicht 
+% geprüft wird, ob die Zuweisung an ein \cs{skip}"~ oder \cs{dimen}-Register 
+% erfolgt. Deshalb werden hier für diese Aufgabe interne Befehle definiert.
+% Siehe dazu auch \GitHubRepo(latex3/latex2e)<227>.
+%    \begin{macrocode}
+\newcommand*\tud@newglue[1]{\@ifdefinable#1{\newskip#1}}
+\newcommand*\tud@newdim[1]{\@ifdefinable#1{\newdimen#1}}
+\newrobustcmd*\tud@setglue[2]{%
+  \ifdefdimen{#1}{%
+    \PackageWarning{tudscrbase}{%
+      You tried to assign dimen \string#1\MessageBreak%
+      so \string\tud@setdim\space is used%
+    }%
+    \tud@setdim{#1}{#2}%
+  }{%
+    \setlength#1{\glueexpr#2\relax}%
+  }%
+}
+\newrobustcmd*\tud@setdim[2]{%
+  \begingroup%
+    \@tud@res@swafalse%
+    \setlength\@tempskipa{\glueexpr#2\relax}%
+    \ifdim\gluestretch\@tempskipa=\z@\relax\else%
+      \@tud@res@swatrue%
+    \fi%
+    \ifdim\glueshrink\glueexpr\@tempskipa\relax=\z@\relax\else%
+      \@tud@res@swatrue%
+    \fi%
+    \if@tud@res@swa%
+      \PackageWarning{tudscrbase}{%
+        You tried to use \string\tud@setdim\string#1\MessageBreak%
+        with glue \detokenize{#2} (\the\@tempskipa)\MessageBreak%
+        but only the base value is used%
+      }%
+    \fi%
+  \endgroup%
+  \setlength#1{\dimexpr\glueexpr#2\relax\relax}%
+}
+\newrobustcmd*\tud@addtoglue[2]{%
+  \tud@setglue#1{\glueexpr#1+#2\relax}%
+}
+\newrobustcmd*\tud@addtodim[2]{%
+  \tud@setdim#1{\glueexpr#1+#2\relax}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@addtodim
+% \end{macro}^^A \tud@addtoglue
+% \end{macro}^^A \tud@setdim
+% \end{macro}^^A \tud@setglue
+% \end{macro}^^A \tud@newdim
+% \end{macro}^^A \tud@newglue
+% \begin{macro}{\tud@res@glue}
+% \changes{v2.06}{2019/06/21}{neu}^^A
+% Und gleich noch eine temporäre Länge mit dazu.
+%    \begin{macrocode}
+\tud@newglue\tud@res@glue
+%    \end{macrocode}
+% \end{macro}^^A \tud@res@glue
+% \begin{macro}{\tud@if@lengthregister}
+% \changes{v2.06o}{2022/07/28}{neu}^^A
+% Prüft, ob der übergebene Befehl ein \cs{skip}"~ oder \cs{dimen}-Register ist.
+%    \begin{macrocode}
+\newcommand*\tud@if@lengthregister[1]{%
+  \begingroup%
+    \@tud@res@swafalse%
+    \ifdeflength{#1}{\@tud@res@swatrue}{}%
+    \ifdefdimen{#1}{\@tud@res@swatrue}{}%
+    \if@tud@res@swa%
+      \aftergroup\@firstoftwo%
+    \else%
+      \aftergroup\@secondoftwo%
+    \fi%
+  \endgroup%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@if@lengthregister
+% \begin{macro}{\tud@length@setabsolute}
+% \changes{v2.06o}{2022/07/28}{neu}^^A
+% Um Schlüssel für Längen definieren zu können, die zwingend positiv sind, kann 
+% dieses Makro genutzt werden. Übergeben werden muss entweder eine Länge oder 
+% ein Makro, welches einen Längenausdruck enthält.
+%    \begin{macrocode}
+\newcommand*\tud@length@setabsolute[1]{%
+  \tud@if@lengthregister{#1}{%
+    \ifdim#1<\z@%
+      \setlength#1{-\glueexpr#1\relax}%
+    \fi%
+  }{%
+    \protected@edef#1{%
+      \noexpand\ifdim\noexpand\glueexpr\expandonce#1\relax<\z@-\noexpand\fi%
+      \noexpand\glueexpr\expandonce#1\relax%
+    }%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@length@setabsolute
+%
 % \subsubsection{Temporäre Makros zur internen Verwendung durch \TUDScript}
 %
 % Hier werden Makros definiert, die allein für die interne temporäre Nutzung 
@@ -593,9 +707,6 @@
 % \changes{v2.05}{2016/07/13}{Verwendung von \cs{tud@skip@check}}^^A
 % \begin{macro}{\tud@skip@reset}
 % \changes{v2.05}{2016/07/13}{neu}^^A
-% \begin{macro}{\tud@skip@set}
-% \changes{v2.04}{2015/05/05}{neu}^^A
-% \changes{v2.05}{2016/07/13}{Verwendung von \cs{tud@skip@check}}^^A
 % \begin{macro}{\tud@skip@check}
 % \changes{v2.05}{2016/07/13}{neu}^^A
 % Hiermit können~-- äquivalent zum Sichern und Wiederherstellen von Befehlen~-- 
@@ -623,11 +734,6 @@
     }{}%
   }%
 }
-\newcommand*\tud@skip@set[2]{%
-  \tud@skip@check{#1}{%
-    \expandafter\setlength\csname #1\endcsname{#2}%
-  }%
-}
 \newcommand*\tud@skip@check[1]{%
   \begingroup%
     \@tempswafalse%
@@ -642,7 +748,6 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@skip@check
-% \end{macro}^^A \tud@skip@set
 % \end{macro}^^A \tud@skip@reset
 % \end{macro}^^A \tud@skip@restore
 % \end{macro}^^A \tud@skip@store

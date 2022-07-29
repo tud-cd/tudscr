@@ -472,9 +472,9 @@
 % Das ganze Layout wird vertikal so verschoben, dass der Titel auf der gleichen
 % Höhe steht wie die Überschriften auf Teil- und Kapitelseiten.
 %    \begin{macrocode}
-    \tud@cd@headstartvskip%
+    \tud@cd@headstart@vskip%
     \TUD@deprecated@lengthcs{pageheadingsvskip}%
-    \vspace*{\tud@dim@pageheadingsvskip}%
+    \vspace*{\dimexpr\tud@pageheadingsvskip@dim\relax}%
     \tud@cd@vphantom%
     \setparsizes{\z@}{\z@}{\z@\@plus1fil}\par@updaterelative%
 %    \end{macrocode}
@@ -597,7 +597,7 @@
 %    \begin{macrocode}
         \if@tud@titlesignature%
           \let\tud@split@@author@do\tud@split@author@signature%
-          \vskip\tud@len@signatureskip\noindent%
+          \vskip\tud@glue@signaturevskip\noindent%
           \tud@ifin@and{\@@author}{}{\hfill}%
           \tud@multiple@split{@@author}%
         \fi%
@@ -787,10 +787,10 @@
 %    \begin{macrocode}
 \newcommand*\tud@maketitle@@inpage{%
   \global\@topnum=\z@%
-  \tud@cd@headstartvskip%
+  \tud@cd@headstart@vskip%
 %<*book|report|article>
   \TUD@deprecated@lengthcs{headingsvskip}%
-  \vspace*{\tud@dim@headingsvskip}%
+  \vspace*{\dimexpr\tud@headingsvskip@dim\relax}%
   \tud@cd@vphantom%
 %</book|report|article>
   \setparsizes{\z@}{\z@}{\z@\@plus1fil}\par@updaterelative%
@@ -910,7 +910,7 @@
 % Der ermittelte Offset muss~-- warum auch immer~-- um \val{1pt} vergrößert
 % werden. Zusätzlich wird ein mittlerer Abstand zwischen Kopf und Titel gesetzt.
 %    \begin{macrocode}
-  \setlength\@tempdima{\dimexpr\ht\z@+\dp\z@\relax}%
+  \tud@setdim\@tempdima{\ht\z@+\dp\z@}%
   \ifdim\@tempdima>\z@\relax%
 %<*book|report|article>
     \vskip\dimexpr-\@tempdima-\p@-\medskipamount\relax%
@@ -1211,11 +1211,11 @@
 % Vor der Version~v2.03 gab es für das \DDC-Logo einen abweichenden Satzspiegel 
 % der ggf. beachtet werden muss.
 %    \begin{macrocode}
-  \setlength\@tempdima{\textheight}%
+  \tud@setdim\@tempdima{\textheight}%
   \tud@if@v@lower{2.03}{%
     \tud@ddc@check%
     \ifcase\@tempb\relax\else% \tud@ddc@foot@num!=false
-      \setlength\@tempdima{\dimexpr\textheight-\tud@len@ddcdiff\relax}%
+      \tud@setdim\@tempdima{\textheight-\tud@dim@ddcdiff}%
       \@tempswatrue%
     \fi%
   }{}%
@@ -1229,7 +1229,7 @@
       \splitmaxdepth\maxdepth%
       \vsplit\tud@title@box to \@tempdima%
       \clearpage%
-      \setlength\@tempdima{\textheight}%
+      \tud@setdim\@tempdima{\textheight}%
       \tud@if@v@lower{2.03}{\@tempswafalse}{}%
     }%
 %    \end{macrocode}
@@ -1256,7 +1256,7 @@
         You are using a two-column title along with\MessageBreak%
         the DDC-logo. Unfortunately in this case, the\MessageBreak%
         type area has to be adjusted manually. Please\MessageBreak%
-        use `\string\enlargethispage{-\the\tud@len@ddcdiff}'\MessageBreak%
+        use `\string\enlargethispage{-\the\tud@dim@ddcdiff}'\MessageBreak%
         in both columns after the title%
       }%
     \fi%
@@ -1372,27 +1372,27 @@
     \if@tud@cdgeometry@cover%
 %    \end{macrocode}
 % Bei der Höhe des oberen Seitenrandes muss unterschieden werden, ob der
-% Satzspiegel im \CD oder aber im Buchblock erscheinen soll.
+% Satzspiegel im \CD oder aber im Buchblock erscheinen soll. Die Makros werden
+% von \KOMAScript via \cs{dimexpr} interpretiert.
 %    \begin{macrocode}
       \if@tud@coverpage%
         \def\coverpagetopmargin{%
-          \dimexpr\tud@len@topmargin+\tud@len@barheight%
-            +\tud@len@headsep\relax%
+          \tud@dim@topmargin+\tud@dim@barheight+\tud@dim@headsep%
         }%
       \else%
         \tud@if@v@lower{2.03}{%
-          \def\coverpagetopmargin{.5\tud@len@both}%
+          \def\coverpagetopmargin{\tud@dim@bothmargin/2}%
         }{%
-          \def\coverpagetopmargin{\tud@len@slimmargin}%
+          \def\coverpagetopmargin{\tud@dim@slimmargin}%
         }%
       \fi%
       \tud@if@v@lower{2.03}{%
-        \def\coverpagebottommargin{.5\tud@len@both}%
+        \def\coverpagebottommargin{\tud@dim@bothmargin/2}%
       }{%
-        \def\coverpagebottommargin{\tud@len@widemargin}%
+        \def\coverpagebottommargin{\tud@dim@widemargin}%
       }%
-      \def\coverpageleftmargin{\tud@len@widemargin}%
-      \def\coverpagerightmargin{\tud@len@slimmargin}%
+      \def\coverpageleftmargin{\tud@dim@widemargin}%
+      \def\coverpagerightmargin{\tud@dim@slimmargin}%
     \fi%
     \if@tud@coverpage%
 %    \end{macrocode}
@@ -1414,7 +1414,7 @@
 %    \begin{macrocode}
       \begingroup%
         \tud@cover@setmargins%
-        \tud@len@areavskip=\z@%
+        \tud@setdim\tud@dim@areavskip{\z@}%
 %    \end{macrocode}
 % Die Ausgabe des Covers und ggf. das Wiederherstellen des Satzspiegels.
 %    \begin{macrocode}
@@ -1490,16 +1490,16 @@
 %    \begin{macrocode}
 \renewcommand*\coverpagetopmargin{%
   \if@tud@coverpage%
-    \dimexpr\tud@len@topmargin+\tud@len@barheight+\tud@len@headsep\relax%
+    \tud@dim@topmargin+\tud@dim@barheight+\tud@dim@headsep%
   \else%
-    \dimexpr\topmargin+1in\relax%
+    \topmargin+1in%
   \fi%
 }
 \renewcommand*\coverpagebottommargin{%
   \if@tud@coverpage%
-    \dimexpr\tud@len@widemargin\relax%
+    \tud@dim@widemargin%
   \else%
-    2\dimexpr\coverpagetopmargin\relax%
+    \coverpagetopmargin*2%
   \fi%
 }
 %    \end{macrocode}
@@ -1523,26 +1523,22 @@
 % Standardmäßig ist \cs{coverbottommargin} abhängig von \cs{covertopmargin}, 
 % weshalb dieses Makro als erstes expandiert wird.
 %    \begin{macrocode}
-    \setlength\@tempdima{%
-      \dimexpr\coverpagebottommargin-\tud@len@layoutvoffset
-      +\paperheight-\tud@len@layoutheight\relax%
+    \tud@setdim\@tempdima{%
+      \coverpagebottommargin-\tud@dim@layoutvoffset%
+        +\paperheight-\tud@dim@layoutheight%
     }%
     \edef\coverpagebottommargin{\the\@tempdima}%
-    \setlength\@tempdima{%
-      \dimexpr\coverpagetopmargin+\tud@len@layoutvoffset\relax%
-    }%
+    \tud@setdim\@tempdima{\coverpagetopmargin+\tud@dim@layoutvoffset}%
     \edef\coverpagetopmargin{\the\@tempdima}%
 %    \end{macrocode}
 % Selbiges gilt für \cs{coverrightmargin} und \cs{coverleftmargin}.
 %    \begin{macrocode}
-    \setlength\@tempdima{%
-      \dimexpr\coverpagerightmargin-\tud@len@layouthoffset
-      +\paperwidth-\tud@len@layoutwidth\relax%
+    \tud@setdim\@tempdima{%
+      \coverpagerightmargin-\tud@dim@layouthoffset%
+        +\paperwidth-\tud@dim@layoutwidth%
     }%
     \edef\coverpagerightmargin{\the\@tempdima}%
-    \setlength\@tempdima{%
-      \dimexpr\coverpageleftmargin+\tud@len@layouthoffset\relax%
-    }%
+    \tud@setdim\@tempdima{\coverpageleftmargin+\tud@dim@layouthoffset}%
     \edef\coverpageleftmargin{\the\@tempdima}%
 %    \end{macrocode}
 % Abschließend werden die gewünschten Längen nach der lokalen Gruppe definiert.
