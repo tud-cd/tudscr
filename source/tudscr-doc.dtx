@@ -4,7 +4,7 @@
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
 % ----------------------------------------------------------------------------
 %
-%  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2021
+%  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2022
 %
 % ----------------------------------------------------------------------------
 %
@@ -34,7 +34,7 @@
 \endbatchfile
 %</ins>
 %<*dtx>
-\ProvidesFile{tudscr-doc.dtx}[2021/05/18]
+\ProvidesFile{tudscr-doc.dtx}[2022/09/03]
 \RequirePackage{tudscr-gitinfo}
 \documentclass[english,ngerman,xindy]{tudscrdoc}
 \iftutex
@@ -43,12 +43,13 @@
   \usepackage[T1]{fontenc}
   \usepackage[ngerman=ngerman-x-latest]{hyphsubst}
 \fi
-\usepackage{babel}
 \usepackage{tudscrfonts}
+\usepackage{babel}
 \usepackage[babel]{microtype}
 
 \GitHubBase{\TUDScriptRepository}
 \begin{document}
+  \author{Falk Hanisch\TUDScriptContactTitle}
   \maketitle
   \tableofcontents
   \DocInput{\filename}
@@ -56,14 +57,12 @@
 %</dtx>
 % \fi
 %
-% \selectlanguage{ngerman}
-%
-% \changes{v2.03}{2015/01/09}{\cls{tudscrdoc}: Indextyp Seitenstilebene}^^A
-% \changes{v2.05}{2016/04/21}{Verwendung von \app{texindy} möglich}^^A
-%
 %
 %
 % \section{Die Klasse \cls{tudscrdoc} -- Erweiterte Quelltextdokumentation}
+%
+% \changes{v2.03}{2015/01/09}{\cls{tudscrdoc}: Indextyp Seitenstilebene}^^A
+% \changes{v2.05}{2016/04/21}{Verwendung von \app{texindy} möglich}^^A
 %
 % Mit dieser Klasse erfolgt die Quelltextdokumentation des \TUDScript-Bundles. 
 % Sie lädt standarmäßig die Klasse \cls{ltxdoc}, ersetzt allerdings im Stile 
@@ -186,7 +185,6 @@
       \ifdefvoid{\filerevision}{}{\nobreakspace\texttt{\filerevision}}%
     }%
   }{}%
-  \KOMAoptions{parskip=half-}%
   \CodelineIndex%
   \RecordChanges%
 }
@@ -208,6 +206,7 @@
     \expandafter\GetFileInfo\expandafter{\filename}%
   }{}%
   \ifdefvoid{\filerevision}{\let\filerevision\@empty}{}%
+  \expandafter\selectlanguage\expandafter{\languagename}%
 }
 %    \end{macrocode}
 %
@@ -722,7 +721,7 @@
 % \subsubsection{Erstellen aller Deklarationselemente}
 %
 % Nachdem nun die Anpassungen für die Änderungsliste erfolgt sind, können nun 
-% die für die Dokumentatiton notwendigen Umgebungen mit \cs{NewDocElement} 
+% die für die Dokumentation notwendigen Umgebungen mit \cs{NewDocElement} 
 % erstellt werden, wobei die Lokalisierungsvariablen |\tud@|\meta{\dots}|@name| 
 % zum Tragen kommen.
 %    \begin{macrocode}
@@ -849,26 +848,27 @@
         {\expandonce\tud@idx@sortkey}{\expandonce\tud@idx@format}%
       }%
     \else%
-    \ClassError{\TUD@Class@Name}{No previous macro or environment}{%
-      Since parameters can only be used for macros or\MessageBreak%
-      environments, you have to use `parameter' within\MessageBreak%
-      `macro' or `environment'.%
-    }%
+      \ClassError{\TUD@Class@Name}{No previous macro or environment}{%
+        Since parameters can only be used for macros or\MessageBreak%
+        environments, you have to use `parameter' within\MessageBreak%
+        `macro' or `environment'.%
+      }%
+    \fi%
   \fi%
   \ifx\tud@idx@parent\relax\else%
     \gdef\tud@idx@sortkey{#1\space(\tud@parameter@name)}%
     \gdef\tud@idx@format{%
       {\string\ttfamily\space#1}%
       \tud@idx@typemarkup\space(\tud@parameter@name)%
-  }%
-  \@bsphack%
-  \special@index{%
+    }%
+    \@bsphack%
+    \special@index{%
       \expandafter\@firstoftwo\tud@idx@parent\actualchar%
       \expandafter\@secondoftwo\tud@idx@parent\levelchar%
       \tud@idx@sortkey\actualchar\tud@idx@format%
-    \encapchar main%
-  }%
-  \@esphack%
+      \encapchar main%
+    }%
+    \@esphack%
   \fi%
 }
 %    \end{macrocode}
@@ -890,9 +890,9 @@
     }%
     \@bsphack%
     \index{%
-        \expandafter\@firstoftwo\tud@idx@parent\actualchar%
-        \expandafter\@secondoftwo\tud@idx@parent\levelchar%
-        \tud@idx@sortkey\actualchar\tud@idx@format%
+      \expandafter\@firstoftwo\tud@idx@parent\actualchar%
+      \expandafter\@secondoftwo\tud@idx@parent\levelchar%
+      \tud@idx@sortkey\actualchar\tud@idx@format%
       \encapchar usage%
     }%
     \@esphack%
@@ -1001,6 +1001,29 @@
 % Nachdem die Form der Referenzierung für \app{texindy} definiert wurde, müssen
 % die Einträge im Index auch entsprechend erstellt werden.
 %
+% \begin{macro}{\lettergroup}
+% \changes{v2.06p}{2022/09/04}{neu}^^A
+% \begin{macro}{\lettergroupDefault}
+% \changes{v2.06o}{2022/09/04}{neu}^^A
+% Durch \app{texindy} werden die sortierten Einträge anhand ihres ersten 
+% Buchstabens mit \cs{lettergroup} gruppiert. Einträge ohne Buchstaben an 
+% erster Position werden unter \cs{lettergroupDefault}|default| zu Beginn des 
+% Indexes aufgeführt.
+%    \begin{macrocode}
+\ifdefined\tudxdyflag
+\newcommand*\lettergroup[1]{%
+  \ifundef{\belowpdfbookmark}%
+    {\expandafter\@gobbletwo}%
+    {\expandafter\belowpdfbookmark}%
+        {#1}{theindex/#1}%
+  \par\centerline{\normalsize\textbf{\textsf{#1}}}%
+  \par\smallskip\nopagebreak%
+}
+\newcommand*\lettergroupDefault[1]{\lettergroup{\tud@symbols@name}}
+\fi
+%    \end{macrocode}
+% \end{macro}^^A \lettergroupDefault
+% \end{macro}^^A \lettergroup
 % \begin{macro}{\tud@xdy@wrindex}
 % \changes{v2.06o}{2022/07/24}{neu}^^A
 % \begin{macro}{\tud@xdy@page@wrindex}
@@ -1128,8 +1151,8 @@
         \fi
         :\levelchar
         #2\space\protecting{#3}\actualchar\protecting{#3}%
-        }%
       }%
+    }%
     \@tempa\endgroup\@esphack%
   }%
 \else
@@ -1181,12 +1204,12 @@
     \ifx\special@index\@gobble\else\ifcodeline@index
       \ifx\saved@macroname\@empty\else\@tud@res@swatrue\fi
     \fi\fi
-      \global\advance\c@CodelineNo\@ne%
-      \protected@write\@glossaryfile{}{%
+    \global\advance\c@CodelineNo\@ne%
+    \protected@write\@glossaryfile{}{%
       \string\glossaryentry{#1|change}%
         {\tud@xdy@reference{\if@tud@res@swa\number\c@CodelineNo\else0\fi}}%
-      }%
-      \global\advance\c@CodelineNo\m@ne%
+    }%
+    \global\advance\c@CodelineNo\m@ne%
   \endgroup%
   \@esphack%
 }
@@ -1222,8 +1245,6 @@
 % \changes{v2.05g}{2016/11/02}{neu}^^A
 % \begin{macro}{\tud@lst@@@sub}
 % \changes{v2.05g}{2016/11/02}{neu}^^A
-% \begin{macro}{\efil}
-% \changes{v2.05g}{2016/11/02}{neu}^^A
 % Falls für die Sortierung der Änderungsliste in \cls{tudscrdoc} \app{texindy}
 % zum Einsatz kommt, wird bei der Beschreibung von Einträgen oder Parametern
 % nur dann eine Unterebene verwendet, wenn zu einem Eintrag mehrere Angaben
@@ -1232,7 +1253,6 @@
 %    \begin{macrocode}
 \newcommand*\tud@lst@@sub{}
 \newcommand*\tud@lst@@@sub{}
-\newcommand*\efil{\hfil\nopagebreak}%
 \newcommand*\tud@lst@def{%
   \newcommand*\tud@lst@values{}%
   \tud@newif\if@tud@lst@multi%
@@ -1285,7 +1305,6 @@
   }%
 }
 %    \end{macrocode}
-% \end{macro}^^A \efil
 % \end{macro}^^A \tud@lst@@@sub
 % \end{macro}^^A \tud@lst@@sub
 % \end{macro}^^A \tud@lst@@process
@@ -1406,7 +1425,7 @@
 % \begin{macro}{\actualchar}
 % \begin{macro}{\quotechar}
 % \begin{macro}{\levelchar}
-% \ToDo{äquivalent zu tudscrmanual.cls; shell-escape raus, via makefile}
+% \ToDo{äquivalent zu tudscrmanual.cls; shell-escape raus, via makefile}[v2.07]
 %    \begin{macrocode}
 %^^A\BeforeClosingMainAux{%
 %^^A\immediate\closeout\@indexfile%
@@ -1521,7 +1540,7 @@
   \fi%
 \fi
 %    \end{macrocode}
-% \ToDo{äquivalent zu tudscrmanual.cls}
+% \ToDo{äquivalent zu tudscrmanual.cls}[v2.07]
 %    \begin{macrocode}
 %^^A}
 %    \end{macrocode}
@@ -1761,11 +1780,11 @@
   \begingroup%
     \MacroFont\selectfont%
     \settowidth\@tempdima{\space}%
-    \tud@setdim\@tempdima{\@tempdima*80}%
+    \tud@setdim\@tempdima{80\@tempdima}%
     \tud@addtodim\@tempdima{\MacroIndent}%
     \edef\@tempa{%
       \endgroup%
-      \noexpand\tud@setdim\noexpand\textwidth{\the\@tempdima}%
+      \unexpanded{\tud@setdim\textwidth}{\the\@tempdima}%
     }%
   \@tempa%
   \columnwidth=\textwidth%
@@ -1797,7 +1816,7 @@
 % rudimentär definiert.
 %    \begin{macrocode}
 \TUD@UnwindPackage{tudscrfonts}{%
-  \RequirePackage{lmodern}[2009/10/30]%
+  \RequirePackage{lmodern}
   \providecommand*\textcdln[1]{\textsf{#1}}%
   \providecommand*\textcdrn[1]{\textcdln{#1}}%
   \providecommand*\textcdsn[1]{\textcdln{#1}}%

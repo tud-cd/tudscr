@@ -4,7 +4,7 @@
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
 % ----------------------------------------------------------------------------
 %
-%  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2021
+%  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2022
 %
 % ----------------------------------------------------------------------------
 %
@@ -34,7 +34,7 @@
 \endbatchfile
 %</ins>
 %<*dtx>
-\ProvidesFile{tudscr-manual.dtx}[2020/11/11]
+\ProvidesFile{tudscr-manual.dtx}[2022/09/03]
 \RequirePackage{tudscr-gitinfo}
 \documentclass[english,ngerman,xindy]{tudscrdoc}
 \iftutex
@@ -43,12 +43,13 @@
   \usepackage[T1]{fontenc}
   \usepackage[ngerman=ngerman-x-latest]{hyphsubst}
 \fi
-\usepackage{babel}
 \usepackage{tudscrfonts}
+\usepackage{babel}
 \usepackage[babel]{microtype}
 
 \GitHubBase{\TUDScriptRepository}
 \begin{document}
+  \author{Falk Hanisch\TUDScriptContactTitle}
   \maketitle
   \tableofcontents
   \DocInput{\filename}
@@ -56,31 +57,28 @@
 %</dtx>
 % \fi
 %
-% \selectlanguage{ngerman}
-%
-% \changes{v2.02}{2014/12/17}{Erstellung der \app{texindy}-Stildatei während
-%   der Kompilierung}^^A
-% \changes{v2.02}{2014/11/18}{\pkg{tudscrtutorial}: Index für Tutorials}^^A
-% \changes{v2.05}{2015/08/04}{Geteilte Deklarationen für Klasse und Paket}^^A
-%
 %
 %
 % \section{Anwenderdokumentation und Leitfäden zu \TUDScript}
 %
+% \changes{v2.02}{2014/12/17}{Erstellung der \app{texindy}-Stildatei während
+%   der Kompilierung}^^A
+% \changes{v2.02}{2014/11/18}{\pkg{tudscrmanual}: Index für Tutorials}^^A
+% \changes{v2.05}{2015/08/04}{Geteilte Deklarationen für Klasse und Paket}^^A
+%
 % Es werden die Klasse \cls{tudscrmanual} (auf Basis von \cls{tudscrreprt}) für 
-% die Anwenderdokumentation sowie das Paket \pkg{tudscrtutorial} für das Setzen
+% die Anwenderdokumentation sowie das Paket \pkg{tudscrmanual} für das Setzen
 % von einigen Anwenderleitfäden bzw. Tutorials erzeugt. Da es zwischen der
 % Klasse und dem Paket es eine große Menge an Überschneidungen gibt, basieren
 % diese auf der gleichen Quelldatei.
 % \ToDo{guards überarbeiten, korrelierenden Quelltext zusammenhalten}[v2.07]
-% \ToDo{Paket tudscrtutorial in tudscrmanual umbenennen}[v2.07]
 %    \begin{macrocode}
 %<*package&identify>
-\ProvidesPackage{tudscrtutorial}[%
+\ProvidesPackage{tudscrmanual}[%
 %!TUD@Version
   package (tudscr tutorials)%
 ]
-\TUD@Class@Check{tudscrtutorial}
+\TUD@Class@Check{tudscrmanual}
 %</package&identify>
 %    \end{macrocode}
 %
@@ -419,7 +417,7 @@
 % Einbinden von ganzseitigen PDF"~Dokumenten als Beispiel im Handbuch.
 %    \begin{macrocode}
 \RequirePackage{pdfpages}[2021/03/06]
-%    \end{macrocode}%
+%    \end{macrocode}
 %
 %
 % \subsubsection{Formatierung von Gleitobjekten}
@@ -461,7 +459,7 @@
   \ClassWarning{tudscrmanual}%
 %</class>
 %<*package>
-  \PackageWarning{tudscrtutorial}%
+  \PackageWarning{tudscrmanual}%
 %</package>
   {%
     File `#1' is missing!\MessageBreak%
@@ -609,7 +607,7 @@
 % vorgestellt und hier übernommen.
 %    \begin{macrocode}
   \newcommand*\autorefname[1][current]{%
-    \Ifstr{#1}{current}{%
+    \tud@if@strequal{#1}{current}{%
       \expandafter\HyPsd@@autorefname\@currentHref\@nil%
     }{%
       \auto@refname\HyPsd@@autorefname{#1}%
@@ -649,7 +647,7 @@
   \ClassWarningNoLine{tudscrmanual}%
 %</class>
 %<*package>
-  \PackageWarningNoLine{tudscrtutorial}%
+  \PackageWarningNoLine{tudscrmanual}%
 %</package>
   {%
     Loading the package `hyperref' is strongly\MessageBreak%
@@ -776,7 +774,7 @@
 % bei den catcodes von Labeln ignoriert und nur die Strings selbst verglichen
 % werden.
 %    \begin{macrocode}
-\tud@auxlist@register{tud@lbl@alias}[\detokenize\expandafter]%
+\tud@auxlist@register(\detokenize\expandafter){tud@lbl@alias}
 \NewDocumentCommand\tudhyperdef{s m !d==}{%
   \begingroup%
     \IfBooleanTF{#1}{%
@@ -819,7 +817,7 @@
 %    \begin{macrocode}
     \IfValueT{#3}{%
       \listadd\tud@res@b{#3}%
-      \ifstrequal{\PBoolean}{#3}{%
+      \tud@if@strequal{\PBoolean}{#3}{%
         \tudhyper@alias@values{\tud@res@a=true}%
         \tudhyper@alias@values{\tud@res@a=false}%
       }{}%
@@ -831,9 +829,8 @@
     \def\tud@res@c##1{%
       \ifstrbool{##1}{\@tud@res@swatrue}{\@tud@res@swatrue}{\@tud@res@swafalse}%
       \if@tud@res@swa%
-        \ifboolexpr{%
-          (test {\ifstrequal{##1}{true}} or test {\ifstrequal{##1}{false}})%
-        }{\@tud@res@swafalse}{\@tud@res@swatrue}%
+        \tud@if@strequal{##1}{true}{\@tud@res@swafalse}{}%
+        \tud@if@strequal{##1}{false}{\@tud@res@swafalse}{}%
         \if@tud@res@swa%
           \ClassWarning{tudscrmanual}{%
             Boolean values should only be referred with\MessageBreak%
@@ -946,7 +943,7 @@
 % unterdrückt (\opt{ToDo=\{not=\meta{Typ}\}}) wird.
 %    \begin{macrocode}
     \begingroup%
-      \tud@lowerstring\tud@res@a{#1}%
+      \tud@strlowercase\tud@res@a{#1}%
       \protected@expandtwoargs\in@{=}{\tud@res@a}%
       \ifin@%
         \def\tud@res@b##1=##2\@nil{%
@@ -1334,7 +1331,7 @@
 %^^A    \ClassError{tudscrmanual}%
 %^^A%</class>
 %^^A%<*package>
-%^^A    \PackageError{tudscrtutorial}%
+%^^A    \PackageError{tudscrmanual}%
 %^^A%</package>
 %^^A    {Wrong formatted label}{%
 %^^A      A label must be given at least with '<bundle>:<markup>'\MessageBreak%
@@ -1370,7 +1367,7 @@
       \IfValueTF{#2}{%
         \tud@attr@get\@tempb{#2}%
         \IfValueTF{#1}{%
-          \ifxblank{#1}{%
+          \tud@if@strblank{#1}{%
             \protected@edef\@tempa{\tud@bdl@dflt:\@tempb:#2}%
           }{%
             \protected@edef\@tempa{#1:\@tempb:#2}%
@@ -1497,7 +1494,7 @@
 %    \begin{macrocode}
 \NewDocumentCommand\tud@lbl@get@@dflt{m m m m r==}{%
   \edef\tud@reserved{\expandafter\detokenize\expandafter{\tud@bdl@dflt}}%
-  \Ifstr{\tud@reserved}{#2}{}{%
+  \tud@if@strequal{\tud@reserved}{#2}{}{%
 %    \end{macrocode}
 % Dabei erfolgt der Aufruf logischerweise mit dem richtigen Entitätpräfix. 
 %    \begin{macrocode}
@@ -1547,7 +1544,9 @@
 \newcommand*\tud@bdl@dflt{tudscr}
 \newcommand*\tud@bdl@curr{}
 \let\tud@bdl@curr\tud@bdl@dflt
-\newcommand*\tud@if@bdl[2]{\Ifstr{\tud@bdl@curr}{\tud@bdl@dflt}{#2}{#1}}
+\newcommand*\tud@if@bdl[2]{%
+  \tud@if@strequal{\tud@bdl@curr}{\tud@bdl@dflt}{#2}{#1}%
+}
 %    \end{macrocode}
 % Die Umgebung \env{Entity} kann nicht verschachtelt werden und prüft zuerst 
 % dementsprechend die Verwendung. Anschließend wird lediglich das Makro 
@@ -1560,7 +1559,7 @@
     \ClassError{tudscrmanual}%
 %</class>
 %<*package>
-    \PackageError{tudscrtutorial}%
+    \PackageError{tudscrmanual}%
 %</package>
       {Nested environment `Entity'}{%
       It is not possible to nest this environment, when\MessageBreak%
@@ -1573,7 +1572,7 @@
       \ClassError{tudscrmanual}%
 %</class>
 %<*package>
-      \PackageError{tudscrtutorial}%
+      \PackageError{tudscrmanual}%
 %</package>
       {Multiple values for environment `Entity'}{%
         Multiple elements are prohibited within the argument.%
@@ -1685,7 +1684,7 @@
 \tud@newif\if@tud@obsolete
 \NewDocumentEnvironment{Obsolete}{m o m o o d()}{%
   \@tud@obsoletetrue%
-  \ifxblank{#1}{%
+  \tud@if@strblank{#1}{%
 %    \end{macrocode}
 % Ohne Versionsnummer erfolgt die Ausgabe ohne Label. Für den Eintrag wird auch 
 % keine Änderungsnotiz erzeugt.
@@ -2114,7 +2113,7 @@
 % festgelegt. Ein Eintrag in den Index wird mit \cs{Process@Index} realisiert.
 % Für die Änderungsliste wird der Befehl \cs{Process@ChangedAt} genutzt, um die 
 % entsprechende Formatierung zu gewährleisten, wobei dies nur für die Klasse
-% \cls{tudscrmanual} und nicht für das Paket \pkg{tudscrtutorial} gilt.
+% \cls{tudscrmanual} und nicht für das Paket \pkg{tudscrmanual} gilt.
 %
 % Für Labels, Index- und Änderungs- sowie PDF-Outline-Einträge etc. müssen die
 % nachfolgend definierten Markup-Befehle durch eine expandierbare Version
@@ -2653,7 +2652,7 @@
   \ClassError{tudscrmanual}%
 %</class>
 %<*package>
-  \PackageError{tudscrtutorial}%
+  \PackageError{tudscrmanual}%
 %</package>
     {Wrong usage of optional argument for value}%
     {There are two optional arguments for a value given!}%
@@ -2838,7 +2837,7 @@
 % des zweiten obligatorischen Argumentes ausgeführt. Es ist zu beachten, dass
 % dieser \emph{expandiert} wird!
 %    \begin{macrocode}
-      \ifxblank{#2}{%
+      \tud@if@strblank{#2}{%
         \def\tud@reserved{\endgroup}%
       }{%
         \protected@edef\tud@reserved{\endgroup#3}%
@@ -2904,6 +2903,7 @@
   \let\PBoolean\@empty%
   \let\PLength\@empty%
 }
+%    \end{macrocode}
 % Mit dem zuvor definierten Makro \cs{Markup@Expandable} wird gleich dafür
 % Sorge getragen, dass die Auszeichnungsbefehle für PDF-Outline-Einträge
 % korrekt funktionieren.
@@ -3033,7 +3033,7 @@
 % Schalter hier genutzt, um lediglich zu Beginn einer Deklaration das Markup 
 % auszuführen. Dabei Angaben für eine |'|\meta{Referenzvariante}|'| nicht
 % erlaubt.
-%   \begin{macrocode}
+%    \begin{macrocode}
 %<*class>
   \if@tud@declare%
     \if@tud@openindex%
@@ -3066,7 +3066,9 @@
     \if@tud@index\else%
       \IfValueT{#4}{\addto@hook\tud@toks@{(#4)}}%
       \IfValueT{#5}{%
-        \ifxblank{#5}{}{\addto@hook\tud@toks@{<http://www.ctan.org/pkg/#5>}}%
+        \tud@if@strblank{#5}%
+          {}%
+          {\addto@hook\tud@toks@{<http://www.ctan.org/pkg/#5>}}%
       }%
       \IfValueT{#6}{\addto@hook\tud@toks@{'#6'}}%
     \fi%
@@ -3161,7 +3163,7 @@
 \NewDocumentCommand\Process@@MarkupInline{m m d== o d() d<> d''}{%
   \Markup@CheckFormat%
 %    \end{macrocode}
-% Um die aktuelle Definiton der temporären Makros nicht zu ändern, erfolgt die
+% Um die aktuelle Definition der temporären Makros nicht zu ändern, erfolgt die
 % formatierte Ausgabe in einer Gruppe. Dabei wird in \cs{@tempc} die minimale 
 % Variante gesichert.
 %    \begin{macrocode}
@@ -3184,30 +3186,27 @@
 % komplett unterbunden werden. Für den Befehl \cs{Package} kann mit zusätzlich 
 % |'|\val{url}|'| noch der CTAN-Link forciert werden, auch wenn eigentlich ein
 % Label für das Paket existiert.
+% \ToDo{numericalkey anstelle von \cs{tud@if@strequal}}[v2.07]
 %    \begin{macrocode}
       \let\@tempb\relax%
       \IfValueT{#7}{%
         \def\@tempb{%
-%<*class>
-          \ClassWarning{tudscrmanual}%
-%</class>
-%<*package>
-          \PackageWarning{tudscrtutorial}%
-%</package>
-          {%
+          \ClassWarning{tudscrmanual}{%
             You've used the unknown cross-reference\MessageBreak%
             shorthand '#7'. Only 'auto', 'page' and 'full'\MessageBreak%
             as well as 'none' \IfValueT{#6}{or 'url' }are valid%
           }%
         }%
-        \Ifstr{#7}{auto}{\def\@tempb{ in \autoref{#1}}}{%
-        \Ifstr{#7}{ref}{\def\@tempb{ in \autoref{#1}}}{
-        \Ifstr{#7}{page}{\def\@tempb{ \vpageref{#1}}}{%
-        \Ifstr{#7}{ppage}{\def\@tempb{ \reftextfaraway{#1}}}{%
-        \Ifstr{#7}{full}{\def\@tempb{ in \fullref{#1}}}{%
-        \Ifstr{#7}{none}{\let\@tempa\@tempc\let\@tempb\relax}{}}}}}}%
+        \tud@if@strequal{#7}{auto} {\def\@tempb{ in \autoref{#1}}}{%
+        \tud@if@strequal{#7}{ref}  {\def\@tempb{ in \autoref{#1}}}{
+        \tud@if@strequal{#7}{page} {\def\@tempb{ \vpageref{#1}}}{%
+        \tud@if@strequal{#7}{ppage}{\def\@tempb{ \reftextfaraway{#1}}}{%
+        \tud@if@strequal{#7}{full} {\def\@tempb{ in \fullref{#1}}}{%
+        \tud@if@strequal{#7}{none} {\let\@tempa\@tempc\let\@tempb\relax}{}}}}}}%
         \IfValueT{#6}{%
-          \Ifstr{#7}{url}{\def\@tempa{\href{#6}{\@tempc}}\let\@tempb\relax}{}%
+          \tud@if@strequal{#7}{url}%
+            {\def\@tempa{\href{#6}{\@tempc}}\let\@tempb\relax}%
+            {}%
         }%
       }%
       \tud@trace@lbl@add{matched}{#1}%
@@ -3226,14 +3225,16 @@
 %    \begin{macrocode}
       \let\@tempb\relax%
       \IfValueT{#7}{%
-        \Ifstr{#7}{none}{\let\@tempa\@tempc}{%
-%<package>        \Ifstr{#7}{manual}{\def\@tempa{\tudhyperref{#1}{\@tempc}}}{%
+        \tud@if@strequal{#7}{none}{\let\@tempa\@tempc}{%
+%<*package>
+        \tud@if@strequal{#7}{manual}{\def\@tempa{\tudhyperref{#1}{\@tempc}}}{%
+%</package>
           \def\@tempb{%
 %<*class> 
             \ClassWarning{tudscrmanual}%
 %</class>
 %<*package>
-            \PackageWarning{tudscrtutorial}%
+            \PackageWarning{tudscrmanual}%
 %</package>
             {%
 %<*class>
@@ -3370,16 +3371,7 @@
 \undef\Markup@Format
 \newcommand*\Markup@Suffix{}
 \NewDocumentCommand\Markup@SetFormat{o m o d()}{%
-%    \end{macrocode}
-% Außerdem ist noch eine weitere Besonderheit zu beachten. Sollte gerade eine
-% Überschrift gesetzt werden, wird das Hauptargument nicht formatiert sondern 
-% lediglich mit \cs{tud@sec@format} ausgegeben.
-%    \begin{macrocode}
-  \def\Markup@Format##1{%
-    \def\tud@res@a{#2}%
-    \tud@ifdin{\let\tud@res@a\tud@sec@format}{}%
-    \begingroup\tud@res@a{\IfValueT{#1}{#1}##1}\endgroup%
-  }%
+  \def\Markup@Format##1{\begingroup#2{\IfValueT{#1}{#1}##1}\endgroup}%
   \IfValueT{#3}{\def\Markup@Suffix{\suffix{#3}}}%
 %<*class>
   \IfValueT{#4}{\renewcommand*\Markup@Declare[1]{#4\Markup@Suffix}}%
@@ -3403,7 +3395,7 @@
     \ClassError{tudscrmanual}%
 %</class>
 %<*package>
-    \PackageError{tudscrtutorial}%
+    \PackageError{tudscrmanual}%
 %</package>
       {\string\Markup@SetFormat\space unused}%
       {It seems you have forgotten to use \string\Markup@SetFormat.}%
@@ -3776,7 +3768,9 @@
 % Für nicht-boolsche Werte wird im Nachgang geprüft (\cs{tud@res@c}), ob die 
 % aktuellen Deklarationen auf entsprechend angegeben wurden.
 %    \begin{macrocode}
-          \eappto\tud@res@c{\ifx\tud@res@c\@empty\else,\fi\expandonce\tud@res@a}%
+          \eappto\tud@res@c{%
+            \ifx\tud@res@c\@empty\else,\fi\expandonce\tud@res@a%
+          }%
           \eappto\tud@res@d{,\expandonce\tud@res@a}%
         \fi%
       \fi%
@@ -3934,7 +3928,13 @@
       \PassOptionsToPackage{noautomatic}{imakeidx}%
     \else%
       \ifnum\pdf@shellescape=\@ne\relax\else%
-        \ClassWarningNoLine{tudscrmanual}{%
+%<*class>
+        \ClassWarningNoLine{tudscrmanual}%
+%</class>
+%<*package>
+        \PackageWarningNoLine{tudscrmanual}%
+%</package>
+        {%
           The index file `\jobname.idx' has changed. Run again\MessageBreak%
           with --shell-escape flag enabled%
         }%
@@ -3947,7 +3947,7 @@
 % Nun erfolgt das eigentliche Laden des Paketes.
 %    \begin{macrocode}
   \PassOptionsToPackage{xindy,splitindex}{imakeidx}%
-  \RequirePackage{imakeidx}[2013/07/11]%
+  \RequirePackage{imakeidx}%
 %    \end{macrocode}
 % Zuerst ein paar kleinere Einstellungen für das Layout\dots
 %    \begin{macrocode}
@@ -4377,11 +4377,11 @@
     \@tempswafalse%
     \IfBooleanT{#1}{\@tempswatrue}%
     \IfValueT{#9}{%
-      \Ifstr{#9}{declare}{%
+      \tud@if@strequal{#9}{declare}{%
         \@tempswatrue%
         \tud@doifPValue{#6}{\noexpand\@tempswafalse}%
       }{}%
-      \Ifstr{#9}{default}{\@tempswatrue}{}%
+      \tud@if@strequal{#9}{default}{\@tempswatrue}{}%
     }%
 %    \end{macrocode}
 % In diesem Fall werden die Ergänzungen für Schlüssel und Formatierung ggf. um 
@@ -4435,7 +4435,6 @@
 % \end{macro}^^A \tud@idx@fmt
 % \end{macro}^^A \tud@idx@key
 % \end{macro}^^A \tud@idx@get
-%
 % \begin{macro}{\cleversee}
 % \changes{v2.05}{2015/11/02}{neu}^^A
 % \begin{macro}{\cleverseealso}
@@ -4456,7 +4455,7 @@
   \ClassWarning{tudscrmanual}%
 %</class>
 %<*package>
-  \PackageWarning{tudscrtutorial}%
+  \PackageWarning{tudscrmanual}%
 %</package>
     {You should use `|see' instead of `|seealso'}%
   \tud@cleversee{\alsoname}%
@@ -4491,6 +4490,8 @@
 % \end{macro}^^A \tud@cleversee
 % \end{macro}^^A \cleverseealso
 % \end{macro}^^A \cleversee
+% \begin{macro}{\seesep}
+% \changes{v2.06o}{2022/08/03}{neu}^^A
 % \begin{macro}{\seeref}
 % \changes{v2.05}{2015/11/02}{neu}^^A
 % \begin{macro}{\seeidx}
@@ -4498,15 +4499,17 @@
 % statt \cs{alsosee} genutzt werden. Das Makro \cs{seeidx} verweist auf die 
 % Seite eines Indexes.
 %    \begin{macrocode}
-%<*class>
+\newrobustcmd*\seesep{\txb}%
 \NewDocumentCommand\seeref{s m}{%
   \emph{\IfBooleanTF{#1}{\alsoname}{\seename}}\space#2%
 }
-\newcommand*\seeidx[2]{\pageref{idx:#1}}
+%<*class>
+\newrobustcmd*\seeidx[2]{\pageref{idx:#1}}
 %</class>
 %    \end{macrocode}
 % \end{macro}^^A \seeidx
 % \end{macro}^^A \seeref
+% \end{macro}^^A \seesep
 %
 % \subsubsection{Erstellen von Indexeinträgen}
 %
@@ -4544,7 +4547,7 @@
         \ClassWarning{tudscrmanual}%
 %</class>
 %<*package>
-        \PackageWarning{tudscrtutorial}%
+        \PackageWarning{tudscrmanual}%
 %</package>
         {%
           You've used the starred version. No index entry\MessageBreak%
@@ -4615,12 +4618,12 @@
 % \verb+|+\val{declare}\verb+|+ eine Quasi-Deklaration verwendet werden kann. 
 % Dies wird beispielsweise für \KOMAScript-Optionen genutzt, um diese in der 
 % gewünschten Formatierung im Index erscheinen zu lassen.
-%    \begin{macrocode}    
+%    \begin{macrocode}
   \else%
 %</class>
     \IfValueT{#5}{%
 %<*class>
-      \Ifstr{#5}{declare}{%
+      \tud@if@strequal{#5}{declare}{%
         \appto\tud@lbl@tmp{-declare}%
         \appto\tud@idx@fmt{|declare}%
       }{%
@@ -4687,7 +4690,7 @@
 %    \end{macrocode}
 % Wurde im zweiten Argument ein Markup-Befehl angegeben, so wurde durch das 
 % Erstellen der Box das dazugehörige Indexformat in \cs{tud@idx@fmt} für den
-% Eintrag erstellt. Andernfalls wurde die Definiton von \cs{tud@idx@fmt} nicht 
+% Eintrag erstellt. Andernfalls wurde die Definition von \cs{tud@idx@fmt} nicht
 % geändert und das Argument wird nach der Box direkt in den Index eingetragen.
 %    \begin{macrocode}
     \ifx\tud@idx@fmt\relax%
@@ -4859,7 +4862,7 @@
     }%
 %</class>
 %    \end{macrocode}
-% Fur das Paket \pkg{tudscrtutorial} erfolgt eine einfache Ausgabe der Indexe.
+% Fur das Paket \pkg{tudscrmanual} erfolgt eine einfache Ausgabe der Indexe.
 % Hier wird das zweite optionale Argument im Zweifel nur für Makrodefinitionen
 % genutzt.
 %    \begin{macrocode}
@@ -4880,7 +4883,12 @@
 %</package>
     \tud@idx@vskip%
   }{%
+%<*class>
     \ClassWarning{tudscrmanual}%
+%</class>
+%<*package>
+    \PackageWarning{tudscrmanual}%
+%</package>
     {%
       No index entries found, index file\MessageBreak%
       `\jobname-#1.idx' does not exist%
@@ -4924,7 +4932,7 @@
 % anstelle der Makros \cs{Process@Markup} und \cs{Process@Index} den Befehl 
 % \cs{Process@ChangedAt} auszuführen, mit welchem die Formatierung der Einträge 
 % der Änderungsliste erfolgt.
-%   \begin{macrocode}
+%    \begin{macrocode}
 \tud@newif\if@tud@changedat
 %    \end{macrocode}
 % Die Formatierung der Änderungseinträge erfolgt~-- wie auch für den Index~-- 
@@ -4938,7 +4946,7 @@
 %   \oarg{Ausgabesuffix}\parg{Entität}^^A
 % \endgroup
 % \ToDo{vorherige doc überarbeiten oder raus}[v2.07]
-%   \begin{macrocode}
+%    \begin{macrocode}
 \NewDocumentCommand\Process@ChangedAt{m d== o d()}{%
   \tud@idx@get*\tud@idx@key\tud@idx@fmt\tud@idx@val{#1}=#2=[{#3}](#4)%
 }
@@ -5355,7 +5363,7 @@
 % im dritten Argument gegebenen Markup-Befehl. Dies wird für Anmerkungen zu 
 % expliziten Schlüssel-Wert-Paaren bei Optionen oder Parametern genutzt. 
 %    \begin{macrocode}
-      \ifxblank{#4}{}{%
+      \tud@if@strblank{#4}{}{%
 %    \end{macrocode}
 % Hierfür wird die zuvor erhaltene Formatierung des Markup-Befehls des dritten
 % Argumentes an den Haupteintrag \cs{tud@idx@val} mit der zusätzlichen
@@ -5387,7 +5395,7 @@
 % Änderungsliste vermerkt, ob es sich bei dem Markup-Befehl respektive dessen 
 % Untereintrag um eine \emph{neue} bzw. eine \emph{obsolete} Variante handelt.
 %    \begin{macrocode}
-      \ifxblank{#5}{%
+      \tud@if@strblank{#5}{%
         \if@tud@obsolete%
           \appto\tud@idx@fmt{: \emph{entf\"allt}}%
         \else%
@@ -5571,6 +5579,7 @@
 % alle mit \cs{Term} definierten Bezeichner für die Sprachen Deutsch und
 % English in einer Tabelle auszugeben. Wird im optionalen Argument eine Länge 
 % angegeben, wird diese für die Breite einer \env{tabularx}-Umgebung genutzt.
+% \ToDo{replace \cs{selectlanguage} with \env{otherlanguage}}[v2.07]
 %    \begin{macrocode}
 \NewDocumentCommand\TermTable{!o}{%
   \ifhmode\par\fi%
@@ -5617,9 +5626,9 @@
 }
 \newcommand*\Term@@@Table[1]{%
   \Term*{#1} & %
-  \Ifstr{\csuse{#1}}{}{\PName{leer}}{\csuse{#1}} & %
+  \tud@if@strempty{\csuse{#1}}{\PName{leer}}{\csuse{#1}} & %
   \strut\selectlanguage{english}%
-  \Ifstr{\csuse{#1}}{}{\PName{empty}}{\csuse{#1}}\tabularnewline%
+  \tud@if@strempty{\csuse{#1}}{\PName{empty}}{\csuse{#1}}\tabularnewline%
 }
 %    \end{macrocode}
 % \end{macro}^^A \Term@@@Table
@@ -5941,10 +5950,10 @@
 % sortieren zu können.
 %    \begin{macrocode}
 \newcommand*\tud@tut@append[1]{%
-  \Ifstr{#1}{preamble}{%
+  \tud@if@strequal{#1}{preamble}{%
     \tud@tut@inputtostream{\tud@tut@temp.tex}{\tud@write@a}%
   }{%
-    \Ifstr{#1}{trunk}{%
+    \tud@if@strequal{#1}{trunk}{%
       \tud@tut@inputtostream{\tud@tut@temp.tex}{\tud@write@b}%
     }{%
       \tud@tut@inputtostream{\tud@tut@temp.tex}{#1}%
@@ -5974,7 +5983,7 @@
   \Hy@raisedlink{\hyperdef{\jobname}{tutorials:\jobname}{}}%
   \faculty{}%
   \maketitle%
-  \ifblank{#1}{}{%
+  \IfArgIsEmpty{#1}{}{%
     \noindent%
     \begin{abstract}%
     \noindent#1%
@@ -6466,7 +6475,7 @@
   \else%
     \PassOptionsToPackage{off}{auto-pst-pdf}%
   \fi%
-  \RequirePackage{auto-pst-pdf}[2009/04/26]%
+  \RequirePackage{auto-pst-pdf}
 %    \end{macrocode}
 % Nach dem Paket \pkg{auto-pst-pdf} seine Arbeit verrichtet hat, werden alle 
 % etwaigen temporär erzeugten Dateien radikal gelöscht.

@@ -4,7 +4,7 @@
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
 % ----------------------------------------------------------------------------
 %
-%  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2021
+%  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2022
 %
 % ----------------------------------------------------------------------------
 %
@@ -34,7 +34,7 @@
 \endbatchfile
 %</ins>
 %<*dtx>
-\ProvidesFile{tudscr-pagestyle.dtx}[2021/03/31]
+\ProvidesFile{tudscr-pagestyle.dtx}[2022/09/03]
 \RequirePackage{tudscr-gitinfo}
 \documentclass[english,ngerman,xindy]{tudscrdoc}
 \iftutex
@@ -43,12 +43,13 @@
   \usepackage[T1]{fontenc}
   \usepackage[ngerman=ngerman-x-latest]{hyphsubst}
 \fi
-\usepackage{babel}
 \usepackage{tudscrfonts}
+\usepackage{babel}
 \usepackage[babel]{microtype}
 
 \GitHubBase{\TUDScriptRepository}
 \begin{document}
+  \author{Falk Hanisch\TUDScriptContactTitle}
   \maketitle
   \tableofcontents
   \DocInput{\filename}
@@ -56,15 +57,13 @@
 %</dtx>
 % \fi
 %
-% \selectlanguage{ngerman}
+%
+%
+% \section{Der Seitenstil des \CDs}
 %
 % \changes{v2.02}{2014/06/23}{Paket \pkg{titlepage} nicht weiter unterstützt}^^A
 % \changes{v2.02}{2014/07/08}{\cs{FamilyKeyState} wird von Optionen genutzt}^^A
 % \changes{v2.05}{2015/07/06}{Seitenstil für Poster}^^A
-%
-%
-%
-% \section{Der Seitenstil des \CDs}
 %
 % Es wird der Seitenstil des \TUDCD mit Logo und dem charakteristischen 
 % Querbalken im Kopfbereich definiert. Hierfür kommt das \KOMAScript-Paket 
@@ -88,6 +87,8 @@
 % Ist die Klasse \cls{standalone} zusammen mit der Option \opt{crop} aktiv,
 % werden die Seitenränder auf die Einstellungen dieser Klasse gesetzt und das
 % Laden von \pkg{scrlayer-scrpage} verhindert.
+% \ToDo{Setzen der Boxen mit \cs{tud@vlayerbox} komplett überarbeiten}[v2.07]
+% \ToDo{lazy init der Boxen für Grafiken via \cs{ifvoid}?}[v2.07]
 %    \begin{macrocode}
 \if@tud@x@standalone@crop
   \PreventPackageFromLoading{scrlayer-scrpage}%
@@ -122,8 +123,9 @@
 %   Um Längenangaben aus Makros sicher auf Dimensionsausdrücke zu reduzieren,
 %   müssen diese in \cs{dimexpr}\cs{glueexpr}\val{\dots}\cs{relax}\cs{relax}
 %   eingehüllt werden. Das Paket \pkg{scrlayer} verwendet allerdings lediglich 
-%  \cs{dimexpr}, weshalb hier noch zusätzlich \cs{glueexpr} genutzt wird. Siehe 
-%  hierzu auch \GitHubRepo(latex3/latex2e)<227>.
+%   \cs{dimexpr}, weshalb hier noch zusätzlich \cs{glueexpr} genutzt wird. Dies
+%   ist insbesondere für \cs{tud@bleedmargin@dim} relevant. Siehe hierzu auch 
+%   \GitHubRepo(latex3/latex2e)<227>. 
 % }
 %
 % \begin{layer}{tudheadings.head.content}
@@ -134,10 +136,10 @@
 %    \begin{macrocode}
   \DeclareNewLayer[%
     background,headsep,%
-    addhoffset=\glueexpr\tud@dim@logox-\tud@dim@widemargin\relax,%
-    addwidth=\glueexpr-\tud@dim@logox+\tud@dim@widemargin\relax,%
-    voffset=\glueexpr\tud@dim@logoy\relax,%
-    addvoffset=\glueexpr\tud@dim@layoutvoffset\relax,%
+    addhoffset=\tud@dim@logox-\tud@dim@widemargin,%
+    addwidth=-\tud@dim@logox+\tud@dim@widemargin,%
+    voffset=\tud@dim@logoy,%
+    addvoffset=\tud@dim@layoutvoffset,%
     contents={%
 %    \end{macrocode}
 % Vor der Ausgabe der Logoboxen werden diese im Bedarfsfall neu gesetzt.
@@ -174,9 +176,9 @@
     background,%
     width=\glueexpr\tud@dim@layoutwidth+(\tud@bleedmargin@dim)*2\relax,%
     addhoffset=\glueexpr\tud@dim@layouthoffset-\tud@bleedmargin@dim\relax,%
-    height=\glueexpr\tud@dim@barheight\relax,%
-    voffset=\glueexpr\tud@dim@topmargin\relax,%
-    addvoffset=\glueexpr\tud@dim@layoutvoffset\relax,%
+    height=\tud@dim@barheight,%
+    voffset=\tud@dim@topmargin,%
+    addvoffset=\tud@dim@layoutvoffset,%
     contents={%
       \ifnum\tud@head@bar@num>\@ne\relax% cdhead=barcolor/color
         \color{HKS41!60}%
@@ -195,8 +197,8 @@
 %    \begin{macrocode}
   \DeclareNewLayer[%
     background,headsep,%
-    voffset=\glueexpr\tud@dim@topmargin+\tud@dim@line\relax,%
-    addvoffset=\glueexpr\tud@dim@layoutvoffset\relax,%
+    voffset=\tud@dim@topmargin+\tud@dim@line,%
+    addvoffset=\tud@dim@layoutvoffset,%
     contents={%
       \tud@head@font@set%
       \tud@head@text@set%
@@ -221,8 +223,8 @@
 %    \begin{macrocode}
   \DeclareNewLayer[%
     background,headsep,%
-    voffset=\glueexpr\tud@dim@topmargin-\tud@dim@line/2\relax,%
-    addvoffset=\glueexpr\tud@dim@layoutvoffset\relax,%
+    voffset=\tud@dim@topmargin-\tud@dim@line/2,%
+    addvoffset=\tud@dim@layoutvoffset,%
     contents={%
       \ifnum\tud@head@bar@num<\tw@\relax% cdhead=nocolor/litecolor
         \if@tud@head@widebar\else\tud@head@rule{\layerwidth}\fi%
@@ -231,9 +233,8 @@
   ]{tudheadings.head.upline}%
   \DeclareNewLayer[%
     background,headsep,%
-    voffset=\glueexpr\tud@dim@topmargin+\tud@dim@barheight%
-      -\tud@dim@line/2\relax,%
-    addvoffset=\glueexpr\tud@dim@layoutvoffset\relax,%
+    voffset=\tud@dim@topmargin+\tud@dim@barheight-\tud@dim@line/2,%
+    addvoffset=\tud@dim@layoutvoffset,%
     contents={%
       \ifnum\tud@head@bar@num<\tw@\relax% cdhead=nocolor/litecolor
         \if@tud@head@widebar\else\tud@head@rule{\layerwidth}\fi%
@@ -244,8 +245,8 @@
     background,%
     width=\glueexpr\tud@dim@layoutwidth+(\tud@bleedmargin@dim)*2\relax,%
     addhoffset=\glueexpr\tud@dim@layouthoffset-\tud@bleedmargin@dim\relax,%
-    voffset=\glueexpr\tud@dim@topmargin-\tud@dim@line/2\relax,%
-    addvoffset=\glueexpr\tud@dim@layoutvoffset\relax,%
+    voffset=\tud@dim@topmargin-\tud@dim@line/2,%
+    addvoffset=\tud@dim@layoutvoffset,%
     contents={%
       \ifnum\tud@head@bar@num<\tw@\relax% cdhead=nocolor/litecolor
         \if@tud@head@widebar\tud@head@rule{\layerwidth}\fi%
@@ -256,9 +257,8 @@
     background,%
     width=\glueexpr\tud@dim@layoutwidth+(\tud@bleedmargin@dim)*2\relax,%
     addhoffset=\glueexpr\tud@dim@layouthoffset-\tud@bleedmargin@dim\relax,%
-    voffset=\glueexpr\tud@dim@topmargin+\tud@dim@barheight%
-      -\tud@dim@line/2\relax,%
-    addvoffset=\glueexpr\tud@dim@layoutvoffset\relax,%
+    voffset=\tud@dim@topmargin+\tud@dim@barheight-\tud@dim@line/2,%
+    addvoffset=\tud@dim@layoutvoffset,%
     contents={%
       \ifnum\tud@head@bar@num<\tw@\relax% cdhead=nocolor/litecolor
         \if@tud@head@widebar\tud@head@rule{\layerwidth}\fi%
@@ -276,8 +276,8 @@
 %    \begin{macrocode}
   \DeclareNewLayer[%
     foreground,headsep,%
-    addvoffset=\glueexpr\tud@dim@headsep/2\relax,%
-    height=\glueexpr1\baselineskip\relax,%
+    addvoffset=\tud@dim@headsep/2,%
+    height=1\baselineskip,%
     contents={\if@tud@head@date\hfill\tud@date@print\fi},%
   ]{tudheadings.head.date}%
 %    \end{macrocode}
@@ -304,7 +304,7 @@
     hoffset=\glueexpr\tud@dim@layouthoffset-\tud@bleedmargin@dim\relax,%
     height=\glueexpr\tud@dim@layoutheight-\layeryoffset%
       +\tud@dim@layoutvoffset+\tud@bleedmargin@dim\relax,%
-    addvoffset=\glueexpr-\dp\strutbox\relax,%
+    addvoffset=-\dp\strutbox,%
     contents={%
       \if@tud@foot@colored%
         \let\@tempc\relax%
@@ -318,7 +318,9 @@
           \fi%
         }{%
           \def\@tempc{\color{HKS41}}%
-          \Ifstr{\tud@pagecolor}{HKS41}{\def\@tempc{\color{HKS41!60}}}{}%
+          \tud@if@strequal{\tud@pagecolor}{HKS41}%
+            {\def\@tempc{\color{HKS41!60}}}%
+            {}%
         }%
         \ifx\@tempc\relax\else%
           \@tempc\rule{\layerwidth}{\layerheight}%
@@ -333,7 +335,7 @@
 %    \begin{macrocode}
   \tud@if@v@lower{2.03}{%
     \ModifyLayer[%
-      addvoffset=\glueexpr-\tud@dim@ddcdiff+\ht\strutbox\relax,%
+      addvoffset=-\tud@dim@ddcdiff+\ht\strutbox,%
       contents={%
         \if@tud@foot@colored%
           \let\@tempc\relax%
@@ -345,7 +347,9 @@
             \fi%
           }{%
             \def\@tempc{\color{HKS41}}%
-            \Ifstr{\tud@pagecolor}{HKS41}{\def\@tempc{\color{HKS41!60}}}{}%
+            \tud@if@strequal{\tud@pagecolor}{HKS41}%
+              {\def\@tempc{\color{HKS41!60}}}%
+              {}%
           }%
           \ifx\@tempc\relax\else%
             \tud@ddc@check%
@@ -372,8 +376,7 @@
 %    \begin{macrocode}
   \DeclareNewLayer[%
     background,foot,%
-    height=\glueexpr\tud@dim@layoutheight-\layeryoffset%
-      +\tud@dim@layoutvoffset\relax,%
+    height=\tud@dim@layoutheight-\layeryoffset+\tud@dim@layoutvoffset,%
     contents={%
 %    \end{macrocode}
 % Falls die Höhe der Logos im Fuß nicht durch den Anwender festgelegt wurden, 
@@ -381,7 +384,6 @@
 % Layers nicht vollständig genutzt, um bei einem farbigen Fußbereich einen 
 % gewissen Abstand vom Inhalt zur Kante zu erhalten.
 %    \begin{macrocode}
-      \TUD@deprecated@length{\footlogoheight}%
       \tud@setdim\@tempdima{\layerheight-\dp\strutbox}%
 %    \end{macrocode}
 % Im Bedarfsfall werden die Boxen vor der Ausgabe durch die einzelnen 
@@ -399,9 +401,8 @@
 %    \begin{macrocode}
   \tud@if@v@lower{2.03}{%
     \ModifyLayer[%
-      addvoffset=\glueexpr-\tud@dim@ddcdiff+\ht\strutbox\relax,%
+      addvoffset=-\tud@dim@ddcdiff+\ht\strutbox,%
       contents={%
-        \TUD@deprecated@length{\footlogoheight}%
         \tud@setdim\@tempdima{\layerheight-\dp\strutbox}%
         \tud@ddc@check%
         \ifcase\@tempb\relax% \tud@ddc@foot@num=false
@@ -538,12 +539,10 @@
 %    \begin{macrocode}
   \DeclareNewLayer[%
     background,%
-    area=%
-      {\glueexpr\tud@dim@layouthoffset-\tud@bleedmargin@dim\relax}%
-      {\glueexpr\tud@dim@layoutvoffset-\tud@bleedmargin@dim\relax}%
-      {\glueexpr\tud@dim@layoutwidth+(\tud@bleedmargin@dim)*2\relax}%
-      {\glueexpr\tud@dim@layoutheight+(\tud@bleedmargin@dim)*2\relax}%
-    ,%
+    hoffset=\glueexpr\tud@dim@layouthoffset-\tud@bleedmargin@dim\relax,%
+    voffset=\glueexpr\tud@dim@layoutvoffset-\tud@bleedmargin@dim\relax,%
+    width=\glueexpr\tud@dim@layoutwidth+(\tud@bleedmargin@dim)*2\relax,%
+    height=\glueexpr\tud@dim@layoutheight+(\tud@bleedmargin@dim)*2\relax,%
     contents={%
       \ifdefvoid{\tud@pagecolor}{}{%
         \color{\tud@pagecolor}%
@@ -574,6 +573,7 @@
         \DeclarePageStyleAlias{headings}{tudheadings}%
         \def\sls@currentheadings{tudheadings}%
         \def\sls@currentplain{plain.tudheadings}%
+        \TUD@deprecated@length\footlogoheight%
 %    \end{macrocode}
 % Im Seitenfuß wird für die Seitenzahl und ggf. die Kolumnentitel die passende 
 % Schrift verwendet.
@@ -793,7 +793,7 @@
 % für farbige Titel- und Teileseiten\dots
 %    \begin{macrocode}
     \tud@locked@bool@preset{@tud@head@widebar}{true}%
-    \Ifstr{\tud@pagecolor}{HKS41}{%
+    \tud@if@strequal{\tud@pagecolor}{HKS41}{%
       \renewcommand*\tud@head@logocolor{white}%
       \renewcommand*\tud@head@fontcolor{white}%
       \renewcommand*\tud@foot@logocolor{white}%
@@ -836,7 +836,9 @@
 % damit Seitenzahl und Kolumnentitel gegebenenfalls angepasst werden.
 %    \begin{macrocode}
   \let\tud@dim@line\tud@dim@thinline%
-  \Ifstr{\tud@head@fontcolor}{white}{\let\tud@dim@line\tud@dim@heavyline}{}%
+  \tud@if@strequal{\tud@head@fontcolor}{white}%
+    {\let\tud@dim@line\tud@dim@heavyline}%
+    {}%
   \global\let\tud@foot@fontcolor\tud@foot@fontcolor%
 }
 %    \end{macrocode}
@@ -879,7 +881,7 @@
 % gesetzt werden soll, wenn ein weiteres Feld nachfolgt.
 %    \begin{macrocode}
 \newcommand*\tud@head@text@add[3][{, }]{%
-  \ifxblank{#3}{}{%
+  \tud@if@strblank{#3}{}{%
     \edef\tud@head@text@delimiter{\expandonce\tud@head@text@buffer}%
     \def\tud@head@text@buffer{#1}%
     \edef\@tempa{%
@@ -938,7 +940,7 @@
 % die zusätzliche Zeile in die Liste expandiert.
 %    \begin{macrocode}
     \listeadd\tud@head@text@list{\expandonce\tud@head@text@line}%
-    \ifxblank{\@extraheadline}{}{%
+    \tud@if@strblank{\@extraheadline}{}{%
       \listadd\tud@head@text@list{\tud@head@font@light\@extraheadline}%
     }%
     \gdef\tud@head@text@wrn##1{%
@@ -997,7 +999,7 @@
 %    \begin{macrocode}
     \ifnum\tud@head@bar@num>\@ne\relax% cdhead=barcolor/color
       \ifdefvoid{\tud@pagecolor}{\color{HKS41}}{%
-        \Ifstr{\tud@pagecolor}{HKS41}{\color{white}}{\color{HKS41}}%
+        \tud@if@strequal{\tud@pagecolor}{HKS41}{\color{white}}{\color{HKS41}}%
       }%
     \fi%
   }%
@@ -1031,7 +1033,7 @@
     \dimexpr(\tud@dim@barheight+\tud@dim@line*2-\totalheight)/2\relax%
   }[%
     \dimexpr\tud@dim@barheight-\depth\relax%
-  ][{\dimexpr\glueexpr#1\relax\relax}]{#2\vphantom{\tud@font@phantomglyphs}}%
+  ][\dimexpr\glueexpr#1\relax\relax]{#2\vphantom{\tud@font@phantomglyphs}}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@head@text@write
@@ -1063,7 +1065,7 @@
 % von \cs{includegraphics} möglichst gering zu halten.
 %    \begin{macrocode}
 \newcommand*\tud@newlayerbox[1]{%
-  \expandafter\newsavebox\csname tud@layer@#1\endcsname%
+  \global\expandafter\newsavebox\csname tud@layer@#1\endcsname%
 }
 \newcommand*\tud@savelayerbox[1]{%
   \global\expandafter\sbox\csname tud@layer@#1\endcsname%
@@ -1077,6 +1079,7 @@
 % \end{macro}^^A \tud@newlayerbox
 % \begin{macro}{\tud@vlayerbox}
 % \changes{v2.04}{2015/05/31}{neu}^^A
+% \changes{v2.06o}{2022/08/08}{unschöner Fix für duplizierte Warnungen}^^A
 % Für die Ausgabe der Logos und Inhalte wird dieser Befehl definiert. Dieser 
 % setzt die im zweiten Argument angegebenen Inhalte in eine vertikale Box, 
 % deren gewünschte Höhe im ersten Argument angegeben wird. Für den Fall, dass 
@@ -1086,19 +1089,27 @@
 % ergreifen und nicht lediglich eine Meldung einer zu übervollen \cs{vbox} zu
 % erhalten.
 %    \begin{macrocode}
-\newcommand*\tud@vlayerbox[3]{%
+\newcommand*\tud@vlayerbox[4][]{%
   \begingroup%
-    \setbox\z@\vbox{#2}%
-    \tud@setdim\@tempdima{\ht\z@+\dp\z@-#1}%
-    \ifdim\@tempdima>\z@\relax%
-      \ClassWarning{\TUD@Class@Name}{%
-        #3\MessageBreak%
-        The maximum height is exceeded by\MessageBreak%
-        \the\@tempdima%
+    \setbox\z@\vbox{#3}%
+    \tud@setdim\tud@res@glue{\dimexpr\glueexpr#2\relax\relax}%
+    \ifdim\dimexpr\ht\z@+\dp\z@-\tud@res@glue\relax>\p@\relax%
+      \edef\tud@res@a{%
+        \noexpand\ClassWarning{\noexpand\TUD@Class@Name}{%
+          #4\noexpand\MessageBreak%
+          The total height of \the\dimexpr\ht\z@+\dp\z@\relax\space exceeds the%
+          \noexpand\MessageBreak maximum height (\the\tud@res@glue)%
+        }%
+      }%
+      \IfArgIsEmpty{#1}{\tud@res@a}{%
+        \expandafter\ifx\csname tud@layer@#1@wrn\endcsname\tud@res@a\else%
+          \tud@res@a%
+          \global\cslet{tud@layer@#1@wrn}\tud@res@a%
+        \fi%
       }%
     \fi%
   \endgroup%
-  \vbox to #1{#2}%
+  \vbox to #2{#3}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@vlayerbox
@@ -1596,19 +1607,16 @@
 % \changes{v2.02}{2014/06/23}{neu}^^A
 % \begin{macro}{\tud@headlogo@fileoptions}
 % \changes{v2.02}{2014/06/23}{neu}^^A
-% \begin{macro}{\tud@headlogo@wrn}
-% \changes{v2.02}{2014/06/23}{neu}^^A
 % Diese Befehle dienen zum Einbinden eines möglichen Zweitlogos im Kopf bündig
 % zum rechten Seitenrand. Mit \cs{headlogo}\oarg{Optionsliste}\marg{Dateiname} 
 % werden der Dateiname und das optionale Argument in \cs{tud@headlogo@filename} 
 % bzw. \cs{tud@headlogo@fileoptions} gespeichert, damit diese später bei der
 % tatsächlichen Verwendung des Logos mit dem Makro \cs{tud@headlogo@set} an den
 % Befehl \cs{includegraphics} weitergereicht werden können.
-% \ToDo{angehängte Parameterliste \val{:} für tudpage unterstützen}
+% \ToDo{angehängte Parameterliste \val{:} für tudpage unterstützen}[v2.07]
 %    \begin{macrocode}
 \newcommand*\tud@headlogo@filename{}
 \newcommand*\tud@headlogo@fileoptions{}
-\newcommand*\tud@headlogo@wrn{}
 \newcommand*\headlogo[2][]{%
   \tud@comp@clearpage%
   \renewcommand*\tud@headlogo@filename{#2}%
@@ -1620,18 +1628,9 @@
 %    \begin{macrocode}
   \global\@tud@headlogo@option@settrue%
   \global\@tud@footlogo@option@settrue%
-  \gdef\tud@headlogo@wrn{%
-    \ClassWarning{\TUD@Class@Name}{%
-      Secondary logo `\string\headlogo{\tud@headlogo@filename}'\MessageBreak%
-      is overwritten with DDC logo. Maybe you should\MessageBreak%
-      use `ddcfoot' or better `ddc' instead of `ddchead'%
-    }%
-    \global\let\tud@headlogo@wrn\relax%
-  }%
   \tud@comp@resetpagestyle%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@headlogo@wrn
 % \end{macro}^^A \tud@headlogo@fileoptions
 % \end{macro}^^A \tud@headlogo@filename
 % \end{macro}^^A \headlogo
@@ -1657,24 +1656,24 @@
 % sowie ein ggf. gegebenes Zweitlogo gespeichert. Dies geschieht beim Aufruf 
 % des passenden Layers, falls der Schalter \cs{if@tud@headlogo@option@set} 
 % gesetzt wurde.
-% \ToDo{use \cs{trim@spaces@in}?}[v2.06]
 %    \begin{macrocode}
 \newcommand*\tud@headlogo@option@set{%
   \if@tud@headlogo@option@set%
     \def\@tempc##1##2{%
       \tud@savelayerbox{head@option}{%
-        \includegraphics[%
-          keepaspectratio,totalheight=\tud@dim@mainlogoheight,{##2}%
-        ]{##1}%
+        \includegraphics[{%
+          keepaspectratio,%
+          totalheight=\tud@dim@mainlogoheight,%
+          ##2%
+        }]{##1}%
       }%
     }%
     \tud@savelayerbox{head@option}{}%
     \tud@ddc@check%
     \ifcase\@tempa\relax% \tud@ddc@head@num=false
       \ifdefvoid{\tud@headlogo@filename}{}{%
-        \protected@edef\tud@headlogo@filename{%
-          \expandafter\trim@spaces\expandafter{\tud@headlogo@filename}%
-        }%
+        \protected@edef\tud@headlogo@filename{\tud@headlogo@filename}%
+        \trim@spaces@in\tud@headlogo@filename%
         \protected@edef\@tempb{%
           \noexpand\@tempc{\tud@headlogo@filename}{\tud@headlogo@fileoptions}%
         }%
@@ -1693,6 +1692,15 @@
     \or% \tud@ddc@head@num=white
       \@tempc{DDC-30}{}%
     \fi%
+    \ifnum\@tempa>\z@\relax
+      \ifdefvoid{\tud@headlogo@filename}{}{%
+        \ClassWarning{\TUD@Class@Name}{%
+          Secondary logo `\tud@headlogo@filename'\MessageBreak%
+          is overwritten with DDC logo. Maybe you should\MessageBreak%
+          use `ddcfoot' or better `ddc' instead of `ddchead'%
+        }%
+      }%
+    \fi%
     \global\@tud@headlogo@option@setfalse%
   \fi%
 }
@@ -1701,11 +1709,13 @@
 % \end{macro}^^A \tud@headlogo@set
 % \begin{macro}{\tud@headlogo@use}
 % \changes{v2.04}{2015/05/31}{neu}^^A
+% \begin{macro}{\tud@layer@headlogo@wrn}
 % Die Ausgabe von \DDC- oder Zweitlogo im Kopf erfolgt mit diesem Makro. Dabei 
 % werden diese in einer Box vertikal zentriert.
 %    \begin{macrocode}
+\newcommand*\tud@layer@headlogo@wrn{}
 \newcommand*\tud@headlogo@use{%
-  \tud@vlayerbox{\tud@dim@mainlogoheight}{%
+  \tud@vlayerbox[headlogo]{\tud@dim@mainlogoheight}{%
     \vss%
     \hbox{%
       \tud@ddc@check%
@@ -1719,12 +1729,9 @@
   }{%
     The given `\string\headlogo{\tud@headlogo@filename}' is too large.%
   }%
-  \ifdefvoid{\tud@headlogo@filename}{}{%
-    \tud@ddc@check%
-    \ifnum\@tempa>\z@\relax\tud@headlogo@wrn\fi%
-  }%
 }
 %    \end{macrocode}
+% \end{macro}^^A \tud@layer@headlogo@wrn
 % \end{macro}^^A \tud@headlogo@use
 %
 % \iffalse
@@ -1895,13 +1902,14 @@
 % vom Anwender mit dem Befehl \cs{footlogo} angegebene Logos~-- zentral
 % festzulegen. Dabei wird der gewünschte Wert in \cs{tud@footlogoheight@dim} 
 % abgelegt. Ist dieser \val{0pt}, wird die Höhe des Loogs der \TnUD genutzt.
+% \ToDo{\cs{tud@footlogoheight@dim} sollte raus, ergibt keinen Sinn}[v2.07]
 %    \begin{macrocode}
 %<*option>
 \newcommand*\tud@footlogoheight@dim{0pt}
 \TUD@key{footlogoheight}{%
   \TUD@set@dimkey{footlogoheight}{\tud@footlogoheight@dim}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \tud@length@setabsolute{\tud@footlogoheight@dim}%
+    \tud@length@setabsolute\tud@footlogoheight@dim%
     \global\@tud@footlogo@option@settrue%
   \fi%
 }
@@ -1915,7 +1923,7 @@
 \newcommand*\tud@footlogoheight@set{%
   \ifdim\dimexpr\tud@footlogoheight@dim\relax=\z@\relax%
     \tud@if@v@lower{2.03}{%
-      \def\tud@footlogoheight@dim{\dimexpr\tud@dim@topmargin*3/5\relax}%
+      \def\tud@footlogoheight@dim{\tud@dim@topmargin*3/5}%
     }{%
       \def\tud@footlogoheight@dim{\tud@dim@mainlogoheight}%
     }%
@@ -1964,9 +1972,10 @@
 % das Makro \cs{tud@footlogo@ddc@set} definiert.
 %    \begin{macrocode}
 \newcommand*\tud@footlogo@ddc@set[2]{%
-  \tud@savelayerbox{foot@#1}{%
+  \tud@savelayerbox{#1}{%
     \includegraphics[%
-      keepaspectratio,totalheight=\dimexpr\tud@footlogoheight@dim\relax%
+      keepaspectratio,%
+      totalheight=\dimexpr\glueexpr\tud@footlogoheight@dim\relax\relax%
     ]{#2}%
   }%
 }
@@ -1978,22 +1987,22 @@
 \newcommand*\tud@footlogo@option@set{%
   \tud@footlogoheight@set%
   \if@tud@footlogo@option@set%
-    \tud@footlogo@ddc@set{black}{DDC-22}%
-    \tud@footlogo@ddc@set{HKS41}{DDC-25}%
-    \tud@footlogo@ddc@set{white}{DDC-28}%
+    \tud@footlogo@ddc@set{foot@black}{DDC-22}%
+    \tud@footlogo@ddc@set{foot@HKS41}{DDC-25}%
+    \tud@footlogo@ddc@set{foot@white}{DDC-28}%
     \tud@ddc@check%
     \ifcase\@tempb\relax\or\or% \tud@ddc@foot@num=color
-      \tud@footlogo@ddc@set{option}{DDC-01}%
+      \tud@footlogo@ddc@set{foot@option}{DDC-01}%
     \or% \tud@ddc@foot@num=colorblack
-      \tud@footlogo@ddc@set{option}{DDC-07}%
+      \tud@footlogo@ddc@set{foot@option}{DDC-07}%
     \or% \tud@ddc@foot@num=gray
-      \tud@footlogo@ddc@set{option}{DDC-19}%
+      \tud@footlogo@ddc@set{foot@option}{DDC-19}%
     \or% \tud@ddc@foot@num=black
-      \tud@footlogo@ddc@set{option}{DDC-22}%
+      \tud@footlogo@ddc@set{foot@option}{DDC-22}%
     \or% \tud@ddc@foot@num=blue
-      \tud@footlogo@ddc@set{option}{DDC-25}%
+      \tud@footlogo@ddc@set{foot@option}{DDC-25}%
     \or% \tud@ddc@foot@num=white
-      \tud@footlogo@ddc@set{option}{DDC-28}%
+      \tud@footlogo@ddc@set{foot@option}{DDC-28}%
     \fi%
     \global\@tud@footlogo@option@setfalse%
     \global\@tud@footlogo@cmd@settrue%
@@ -2004,15 +2013,17 @@
 % \end{macro}^^A \tud@footlogo@ddc@set
 % \begin{macro}{\tud@footlogo@ddc@use}
 % \changes{v2.04}{2015/06/01}{neu}^^A
+% \begin{macro}{\tud@layer@footlogo@wrn}
 % Die Ausgabe des \DDC-Logos im Fuß erfolgt mit diesem Makro. Dabei wird dieses 
 % in einer Box optisch~-- leicht nach oben verschoben~-- vertikal zentriert.
 %    \begin{macrocode}
+\newcommand*\tud@layer@footlogo@wrn{}
 \newcommand*\tud@footlogo@ddc@use[2]{%
   \tud@ddc@check%
   \ifcase\@tempb\relax\else% \tud@ddc@foot@num=!false
     \tud@footlogo@option@set%
     \setbox\z@\hbox{%
-      \tud@vlayerbox{#1}{%
+      \tud@vlayerbox[footlogo]{#1}{%
         \vss%
         \hbox to #2{%
           \hss%
@@ -2024,11 +2035,11 @@
         }%
         \vss\vss%
       }{%
-        You should reduce `footlogoheight', because it is\MessageBreak%
-        too high (\the\dimexpr\tud@footlogoheight@dim\relax). %
+        You should reduce `footlogoheight', because it is\noexpand\MessageBreak%
+        too high. %
         \ifnum\tud@cdgeometry@num>\@ne% true/symmetric/twoside
-          Alternatively you could use\MessageBreak%
-          option `extrabottommargin=<length>'\MessageBreak%
+          Alternatively you could use\noexpand\MessageBreak%
+          option `extrabottommargin=<length>'\noexpand\MessageBreak%
           in order to enlarge the bottom margin. %
         \fi%
       }%
@@ -2041,6 +2052,7 @@
   \fi%
 }
 %    \end{macrocode}
+% \end{macro}^^A \tud@layer@footlogo@wrn
 % \end{macro}^^A \tud@footlogo@ddc@use
 % \begin{macro}{\tud@layer@foot@cmd}
 % \changes{v2.04}{2015/06/01}{neu}^^A
@@ -2096,11 +2108,11 @@
 % Durchlauf der Schleife der Inhalt von \cs{footlogosep} gespeichert und nach
 % dem ersten Logo vor jedem weiteren eingefügt. Um versehentlich angegebene 
 % Leerzeichen zu entfernen, werden diese mit \cs{trim@spaces} entfernt.
-% \ToDo{use \cs{trim@spaces@in}?}[v2.06]
 %    \begin{macrocode}
         \let\@tempa\relax%
         \@for\@tempb:=\tud@footlogo@filenames\do{%
-          \edef\@tempb{\expandafter\trim@spaces\expandafter{\@tempb}}%
+          \protected@edef\@tempb{\@tempb}%
+          \trim@spaces@in{\@tempb}%
           \@tempa%
           \ifx\@tempb\@empty\else%
             \expandafter\tud@footlogo@cmd@@set\expandafter{\@tempb}{#1}%
@@ -2125,7 +2137,7 @@
 % für einzelne Logos möglich sein. Zu diesem Zweck wird die Schnittstelle für 
 % den Anwender so gestaltet, dass individuelle Parameter mit einem Doppelpunkt
 % direkt an den Dateinamen angehangen werden können.
-% \ToDo{\cs{DeclareListParser} außerhalb global definieren}
+% \ToDo{\cs{DeclareListParser} außerhalb global definieren}[v2.07]
 %    \begin{macrocode}
     \let\@tempa\@empty%
     \let\@tempb\@empty%
@@ -2145,7 +2157,8 @@
 % In jedem Fall werden die Grundeinstellungen als erstes ausgeführt.
 %    \begin{macrocode}
     \preto\tud@footlogo@fileoptions{%
-      keepaspectratio,totalheight=\dimexpr\tud@footlogoheight@dim\relax,%
+      keepaspectratio,%
+      totalheight=\dimexpr\glueexpr\tud@footlogoheight@dim\relax\relax,%
     }%
 %    \end{macrocode}
 % Wurden tatsächlich inidviduelle Parameter übergeben, so werden diese als 
@@ -2153,7 +2166,9 @@
 %    \begin{macrocode}
     \eappto\tud@footlogo@fileoptions{\expandonce\@tempb}%
     \protected@edef\@tempc{%
-      \noexpand\includegraphics[\expandonce\tud@footlogo@fileoptions]{\@tempa}%
+      \noexpand\includegraphics[{%
+        \expandonce\tud@footlogo@fileoptions%
+      }]{\@tempa}%
     }%
 %    \end{macrocode}
 % Die Logos werden~-- wie auch das \DDC-Logo im Fuß~-- individuell optisch
@@ -2246,8 +2261,8 @@
     \tud@footcontent@do%
   }{%
     \renewcommand*\tud@footcontent@font@size{%
-      \tud@setdim\@tempdimb{\tud@head@fontsize\p@}%
-      \fontsize{\@tempdimb}{\dimexpr\@tempdimb*5/4\relax}%
+      \tud@setdim\tud@res@glue{\tud@head@fontsize\p@}%
+      \fontsize{\tud@res@glue}{\dimexpr1\tud@res@glue*5/4\relax}%
     }%
     \tud@footcontent@do%
   }%
@@ -2269,19 +2284,19 @@
 % Wurde im optionalen Argument für zusätzliche Schrifteinstellungen ein Stern 
 % verwendet, bleibt die bisherige Definition bestehen.
 %    \begin{macrocode}
-  \ifstrequal{#1}{*}{}{%
+  \if\detokenize{#1*}\relax\else%
     \renewcommand*\tud@footcontent@font@face{#1}%
-  }%
+  \fi%
 %    \end{macrocode}
 % Wurde in einem der Argumente für den linken und/oder rechten Inhalt ein Stern 
 % verwendet, bleibt die bisherige Definition bestehen.
 %    \begin{macrocode}
-  \ifstrequal{#2}{*}{}{%
+  \if\detokenize{#2*}\relax\else%
     \renewcommand*\tud@footcontent@left{#2}%
-  }%
-  \ifstrequal{#3}{*}{}{%
+  \fi%
+  \if\detokenize{#3*}\relax\else%
     \renewcommand*\tud@footcontent@right{#3}%
-  }%
+  \fi%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@footcontent@right
@@ -2314,7 +2329,7 @@
 %    \begin{macrocode}
 \newcommand*\tud@newline@poster{}
 \newcommand*\tud@footcontent@@left[1]{%
-  \ifxblank{#1}{}{{\tud@head@font@@bold#1\newline}}%
+  \tud@if@strblank{#1}{}{{\tud@head@font@@bold#1\newline}}%
   Technische Universit\"at Dresden%
   \tud@foot@line@write{faculty}%
   \tud@foot@line@write{department}%
@@ -2354,7 +2369,7 @@
     \let\@tempa\@author%
   }%
   \ifx\@tempa\@empty\else%
-    \ifxblank{#1}{}{{\tud@head@font@@bold#1\newline}}%
+    \tud@if@strblank{#1}{}{{\tud@head@font@@bold#1\newline}}%
 %    \end{macrocode}
 % Das Makro zum Aufteilen der Autorenangaben wird für die hier benötigte Form 
 % definiert. Die Ausgabe aller nicht \emph{lokal} angegebenen Felder wird
@@ -2390,7 +2405,7 @@
     \ifx\@telefax\@empty\else\newline\@telefax\fi%
   }%
   \ifx\@contactperson\@empty\else%
-    \ifxblank{#2}{}{{\tud@head@font@@bold#2\newline}}%
+    \tud@if@strblank{#2}{}{{\tud@head@font@@bold#2\newline}}%
     \renewcommand*\tud@split@contactperson@do[2]{%
       \tud@multiple@fields@store{@contactperson}{##1}%
       \tud@multiple@fields@preset{@contactperson}{*}{##1}%
@@ -2424,6 +2439,7 @@
 % \begin{macro}{\tud@footcontent@use}
 % \changes{v2.04}{2015/06/01}{neu}^^A
 % \begin{macro}{\tud@footcontent@@use}
+% \begin{macro}{\tud@layer@footcontent@wrn}
 % Mit \cs{tud@footcontent@use} erfolgt die Ausgabe der mit \cs{footcontent} 
 % definierten Inhalte. Dabei wird darauf geachtet, ob ein \DDC-Logo im Fuß
 % verwendet wird. Die Ausgabe erfolgt jedoch nur, falls tatsächlich etwas 
@@ -2431,6 +2447,7 @@
 % Breite ausgegeben. Dies ist notwendig, da nachgelagerte Funktionen diese Box
 % fester Breite erwarten.
 %    \begin{macrocode}
+\newcommand*\tud@layer@footcontent@wrn{}
 \newcommand*\tud@footcontent@use[2]{%
   \@tempswafalse%
   \ifx\tud@footcontent@left\@empty%
@@ -2455,13 +2472,13 @@
 % Inhalt des Fußes in einer vertikalen Box gesetzt. Mit \cs{@tempdimc} wird im 
 % Bedarfsfall der Freiraum für das \DDC-Logo bereitgestellt.
 %    \begin{macrocode}
-    \tud@vlayerbox{#1}{%
+    \tud@vlayerbox[footcontent]{#1}{%
       \linespread{1}%
       \vss%
       \hbox to #2{%
         \tud@footcontent@font@use{%
-          \tud@setdim\@tempdima{#2}%
-          \tud@footcontent@@use{\@tempdima}%
+          \tud@setglue\tud@res@glue{#2}%
+          \tud@footcontent@@use{\tud@res@glue}%
           \hss%
         }%
       }%
@@ -2470,12 +2487,12 @@
 % Sollte der Inhalt für den Fußbereich zu groß sein, wird eine Warnung erzeugt.
 %    \begin{macrocode}
     }{%
-      The content for the footer (`\string\footcontent')\MessageBreak%
-      is too high. You should either reduce the content\MessageBreak%
+      The content for the footer (`\string\footcontent')\noexpand\MessageBreak%
+      is too high. You should either reduce the content\noexpand\MessageBreak%
       or lower the fontsize via the optional argument.%
       \ifnum\tud@cdgeometry@num>\@ne% true/symmetric/twoside
-        \MessageBreak%
-        Alternatively you can enlarge the bottom margin\MessageBreak%
+        \noexpand\MessageBreak%
+        Alternatively you can enlarge the bottom margin\noexpand\MessageBreak%
         by using option `extrabottommargin'.%
       \fi%
     }%
@@ -2483,11 +2500,11 @@
     \hbox to #2{}%
   \fi%
 }
-\newcommand*\tud@footcontent@@use[1]{%
 %    \end{macrocode}
 % Wurde das optionale Argument nach dem obligatorischen nicht genutzt, so wird 
 % der Inhalt über die komplette Breite des Textbereiches ausgegeben.
 %    \begin{macrocode}
+\newcommand*\tud@footcontent@@use[1]{%
   \ifx\tud@footcontent@right\@nnil%
     \vtop{%
       \hsize=\dimexpr\glueexpr#1-\@tempdimc\relax\relax%
@@ -2510,6 +2527,7 @@
   \fi%
 }
 %    \end{macrocode}
+% \end{macro}^^A \tud@layer@footcontent@wrn
 % \end{macro}^^A \tud@footcontent@@use
 % \end{macro}^^A \tud@footcontent@use
 %
@@ -2653,13 +2671,12 @@
 % Umgebung wird nache einem weiteren Seitenumbruch das Standardseitenlayout
 % wiederhergestellt. Die gewünschte Sprache der Umgebung kann als einzelner
 % Wert ohne Schlüssel angegben werden.
-%
 % \ToDo{Umgebung raus? Auf alle Fälle cdgeometry=... etc. unterstützen}[v2.07]
 %    \begin{macrocode}
 \newcommand*\tud@envir@ps{tudheadings}
 \newcommand*\tud@envir@selectps{%
   \expandafter\pagestyle\expandafter{\tud@envir@ps}%
-  \Ifstr{\GetRealPageStyle{\tud@envir@ps}}{empty}{%
+  \tud@if@strequal{\GetRealPageStyle{\tud@envir@ps}}{empty}{%
     \renewcommand*\titlepagestyle{empty}%
 %<*book|report>
     \renewcommand*\partpagestyle{empty}%
@@ -2667,7 +2684,7 @@
 %</book|report>
     \renewcommand*\indexpagestyle{empty}%
   }{}%
-  \Ifstr{\GetRealPageStyle{\tud@envir@ps}}{empty.tudheadings}{%
+  \tud@if@strequal{\GetRealPageStyle{\tud@envir@ps}}{empty.tudheadings}{%
     \renewcommand*\titlepagestyle{empty.tudheadings}%
 %<*book|report>
     \renewcommand*\partpagestyle{empty.tudheadings}%
@@ -2745,10 +2762,11 @@
 % werden, wobei einer der \pgs{tudheadings}-Seitenstile verwendet wird.
 %    \begin{macrocode}
   \TUD@parameter@def{pagestyle}{%
-    \tud@if@tudheadings{#1}{\renewcommand*\tud@envir@ps{#1}}{%
-      \Ifstr{#1}{empty}{\renewcommand*\tud@envir@ps{empty.tudheadings}}{%
-      \Ifstr{#1}{plain}{\renewcommand*\tud@envir@ps{plain.tudheadings}}{%
-      \Ifstr{#1}{headings}{\renewcommand*\tud@envir@ps{tudheadings}}{%
+    \tud@if@tudheadings{#1}{\def\tud@envir@ps{#1}}{%
+      \def\tud@envir@ps{tudheadings}%
+      \tud@if@strequal{#1}{empty}{\def\tud@envir@ps{empty.tudheadings}}{%
+      \tud@if@strequal{#1}{plain}{\def\tud@envir@ps{plain.tudheadings}}{%
+      \tud@if@strequal{#1}{headings}{}{%
         \TUD@parameter@err{pagestyle}{%
           headings, plain, empty or any tudheadings page style type%
         }%

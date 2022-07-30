@@ -4,7 +4,7 @@
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
 % ----------------------------------------------------------------------------
 %
-%  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2021
+%  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2022
 %
 % ----------------------------------------------------------------------------
 %
@@ -34,7 +34,7 @@
 \endbatchfile
 %</ins>
 %<*dtx>
-\ProvidesFile{tudscr-title.dtx}[2021/02/24]
+\ProvidesFile{tudscr-title.dtx}[2022/09/03]
 \RequirePackage{tudscr-gitinfo}
 \documentclass[english,ngerman,xindy]{tudscrdoc}
 \iftutex
@@ -43,12 +43,13 @@
   \usepackage[T1]{fontenc}
   \usepackage[ngerman=ngerman-x-latest]{hyphsubst}
 \fi
-\usepackage{babel}
 \usepackage{tudscrfonts}
+\usepackage{babel}
 \usepackage[babel]{microtype}
 
 \GitHubBase{\TUDScriptRepository}
 \begin{document}
+  \author{Falk Hanisch\TUDScriptContactTitle}
   \maketitle
   \tableofcontents
   \DocInput{\filename}
@@ -56,14 +57,12 @@
 %</dtx>
 % \fi
 %
-% \selectlanguage{ngerman}
-%
-% \changes{v2.02}{2014/06/23}{Paket \pkg{titlepage} nicht weiter unterstützt}^^A
-% \changes{v2.05}{2015/07/13}{Titel für Poster}^^A
-%
 %
 %
 % \section{Titelei für die \TUDScript-Klassen}
+%
+% \changes{v2.02}{2014/06/23}{Paket \pkg{titlepage} nicht weiter unterstützt}^^A
+% \changes{v2.05}{2015/07/13}{Titel für Poster}^^A
 %
 % Ergänzend zu den \KOMAScript-Varianten werden für die \TUDScript-Klassen
 % spezielle, im \TUDCD gehaltene Ausführungen von Titelseite und Titelkopf
@@ -128,11 +127,9 @@
 % Warnung ausgegeben.
 %    \begin{macrocode}
 \DefineFamilyMember{KOMA}
-\DefineFamilyKey{KOMA}{titlepage}[true]{%
-  \TUD@set@numkey{titlepage}{@tempa}{\TUD@bool@numkey,{firstiscover}{2}}{#1}%
-  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \AtEndOfFamilyOptions{\tud@titlepage@deactivate}%
-  \fi%
+\DefineFamilyKey{KOMA}{titlepage}{%
+  \FamilyKeyStateUnknownValue%
+  \AtEndOfFamilyOptions{\tud@titlepage@deactivate}%
 }
 \newcommand*\tud@titlepage@deactivate{%
   \if@titlepage%
@@ -230,6 +227,10 @@
 \newcommand*\tud@title@pagenumber{}
 \let\tud@title@pagenumber\relax
 \newcommand*\tud@maketitle[1][]{%
+%<*book|report|article>
+  \TUD@deprecated@length\pageheadingsvskip%
+  \TUD@deprecated@length\headingsvskip%
+%</book|report|article>
   \begingroup%
     \cleardoublepage%
 %    \end{macrocode}
@@ -252,7 +253,9 @@
         \tud@cs@use{maketitle}[\tud@title@pagenumber]%
       \fi%
       \tud@if@tudheadings{\currentpagestyle}{%
-        \Ifstr{\titlepagestyle}{empty}{\thispagestyle{empty.tudheadings}}{}%
+        \tud@if@strequal{\titlepagestyle}{empty}%
+          {\thispagestyle{empty.tudheadings}}%
+          {}%
       }{}%
 %    \end{macrocode}
 % Für die \TUDScript-Klassen gibt es für doe Titleseite sowie den Titelkopf 
@@ -464,9 +467,8 @@
 % Höhe steht wie die Überschriften auf Teil- und Kapitelseiten.
 %    \begin{macrocode}
     \vspace*{-\baselineskip}%
-    \tud@cd@headstartvskip%
-    \TUD@deprecated@length{\pageheadingsvskip}%
-    \vspace*{\tud@pageheadingsvskip@dim}%
+    \tud@cd@headstart@vskip%
+    \vspace*{\dimexpr\tud@pageheadingsvskip@dim\relax}%
     \tud@cd@vphantom%
     \setparsizes{\z@}{\z@}{\z@\@plus1fil}\par@updaterelative%
 %    \end{macrocode}
@@ -503,7 +505,7 @@
 % Abschlussarbeit gesetzt wird oder nicht. Falls dies nicht der Fall ist, dann
 % wird das angegebene bzw. das heutige Datum und ggf. die Ergänzung ausgegeben.
 %    \begin{macrocode}
-      \ifx\@thesis\@empty%
+      \ifx\@@thesis\@empty%
         \if@tud@coverpage\else%
           \ifx\@date\@empty\else%
             \vskip 2ex\@plus.1fill%
@@ -534,7 +536,7 @@
             \def\@tempc{%
               \@graduation%
               \ifx\@graduationabbreviation\@empty\else%
-                \nobreakspace\@graduationabbreviation%
+                \nobreakspace(\@graduationabbreviation)%
               \fi%
             }%
             {\usekomafont{titlepage}{\graduationtext\par}}%
@@ -566,17 +568,17 @@
 % Durch das Paket \pkg{tudscrsupervisor} wird zusätzlich das Feld \cs{@duedate}
 % definiert, welches hier ggf. für auf ein nutzbares Datum geprüft wird.
 %    \begin{macrocode}
-        \ifx\@thesis\@empty\else%
+        \ifx\@@thesis\@empty\else%
           \tud@date@check%
           \ifx\@date\@empty\else%
             \vskip 2ex\@plus1ex\@minus1ex%
-            \ifxblank{\datetext}{}{\datetext\tud@title@delimiter}%
+            \tud@if@strblank{\datetext}{}{\datetext\tud@title@delimiter}%
             {\usekomafont{date}{\tud@date@print\par}}%
 %    \end{macrocode}
 % Zusätzlich kann noch ein Datum der mündlichen Verteidigung angegeben werden.
 %    \begin{macrocode}
             \ifx\@defensedate\@empty\else%
-              \ifxblank{\defensedatetext}{}{%
+              \tud@if@strblank{\defensedatetext}{}{%
                 \defensedatetext\tud@title@delimiter%
               }%
               {\usekomafont{date}{\@defensedate\par}}%
@@ -727,7 +729,9 @@
 \newcommand*\tud@maketitle@inpage{%
   \renewcommand*\tud@title@fontcolor{}%
   \ifcase\tud@cd@title@num\relax\or\else% *color
-    \Ifstr{\tud@pagecolor}{HKS41}{}{\renewcommand*\tud@title@fontcolor{HKS41}}%
+    \tud@if@strequal{\tud@pagecolor}{HKS41}%
+      {}%
+      {\renewcommand*\tud@title@fontcolor{HKS41}}%
   \fi%
   \par%
   \ifx\tud@title@pagenumber\relax\else%
@@ -780,10 +784,9 @@
 \newcommand*\tud@maketitle@@inpage{%
   \global\@topnum=\z@%
   \vspace*{-\baselineskip}%
-  \tud@cd@headstartvskip%
+  \tud@cd@headstart@vskip%
 %<*book|report|article>
-  \TUD@deprecated@length{\headingsvskip}%
-  \vspace*{\tud@headingsvskip@dim}%
+  \vspace*{\dimexpr\tud@headingsvskip@dim\relax}%
   \tud@cd@vphantom%
 %</book|report|article>
   \setparsizes{\z@}{\z@}{\z@\@plus1fil}\par@updaterelative%
@@ -819,7 +822,7 @@
 % Ausgabe eines Autors oder mehrerer Autoren ggf. mit Zusatzinformationen.
 %    \begin{macrocode}
 %<*book|report|article>
-    \vskip\glueexpr\bigskipamount*2\relax%
+    \vskip\bigskipamount%
     \let\tud@split@author@do\tud@split@author@title%
     \tud@multiple@split{@author}\par%
 %    \end{macrocode}
@@ -849,14 +852,10 @@
 %    \end{macrocode}
 % Am Ende wird noch etwas vertikaler Abstand eingefügt.
 %    \begin{macrocode}
-    \vskip\glueexpr\bigskipamount*2\relax%
+    \vskip\bigskipamount%
 %</book|report|article>
     \ifnum\col@number>\@ne\relax%
-      \ifdefvoid{\multicolsep}{}{%
-        \ifdeflength{\multicolsep}{\vspace{-\multicolsep}}{%
-          \ifdefdimen{\multicolsep}{\vspace{-\multicolsep}}{}%
-        }%
-      }%
+      \tud@if@lengthregister{\multicolsep}{\vspace{-\multicolsep}}{}%
     \fi%
 %    \end{macrocode}
 % Wird das \DDC-Logo im Kompatibilitätsmodus für die Version~v2.02 gesetzt, 
@@ -888,8 +887,22 @@
         \usekomafont{titlehead}{\@titlehead\strut\par}%
       \end{minipage}%
     \fi%
+%    \end{macrocode}
+% Bei der Verwendung der Option \opt{subjectthesis} wird zum einen geprüft, ob
+% das Feld \cs{@thesis} gesetzt ist und zum anderen, ob das Feld \cs{@subject}
+% auch leer ist.
+%    \begin{macrocode}
 %<*book|report|article>
-    \tud@thesis@tosubject%
+    \if@tud@subjectthesis\ifx\@thesis\@empty\else%
+      \ifx\@subject\@empty\else%
+        \ClassWarning{\TUD@Class@Name}{%
+          The option `subjectthesis' was activated, so\MessageBreak%
+          the field `subject' will be overwritten with the\MessageBreak%
+          given thesis%
+        }%
+      \fi%
+      \let\@subject\@thesis%
+    \fi\fi%
 %</book|report|article>
     \ifx\@subject\@empty\else%
       \par\medskip%
@@ -903,13 +916,13 @@
   \tud@setdim\@tempdima{\ht\z@+\dp\z@}%
   \ifdim\@tempdima>\z@\relax%
 %<*book|report|article>
-    \vskip\glueexpr-\@tempdima-\p@-\medskipamount\relax%
+    \vskip\dimexpr-\@tempdima-\p@-1\medskipamount\relax%
 %</book|report|article>
     \usebox\z@\par\medskip%
   \fi%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@maketitle@inpage
+% \end{macro}^^A \tud@maketitle@head
 %
 % \subsubsection{Hilfsmakros für die Ausgabe}
 %
@@ -932,25 +945,6 @@
 %<*book|report|article>
 % \fi
 %
-% \begin{macro}{\tud@thesis@tosubject}
-% Bei der Verwendung der Option \opt{subjectthesis} wird zum einen geprüft, ob
-% das Feld \cs{@thesis} gesetzt ist und zum anderen, ob das Feld \cs{@subject}
-% auch leer ist.
-%    \begin{macrocode}
-\newcommand*\tud@thesis@tosubject{%
-  \if@tud@subjectthesis\ifx\@thesis\@empty\else%
-    \ifx\@subject\@empty\else%
-      \ClassWarning{\TUD@Class@Name}{%
-        The option `subjectthesis' was activated, so\MessageBreak%
-        the field `subject' will be overwritten with the\MessageBreak%
-        given thesis%
-      }%
-    \fi%
-    \let\@subject\@thesis%
-  \fi\fi%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@thesis@tosubject
 % \begin{macro}{\tud@title@names}
 % Dieser Befehl dient zur getrennten Ausgabe von mehreren, mit dem Makro 
 % \cs{and} separierten Einträgen in den Feldern \cs{@supervisor}, \cs{@referee}
@@ -1030,7 +1024,9 @@
     \ifx\@dateofbirth\@empty\else%
       \if@titlepage%
         \tud@newline@title%
-        \ifxblank{\dateofbirthtext}{}{\dateofbirthtext\tud@title@delimiter}%
+        \tud@if@strblank{\dateofbirthtext}%
+          {}%
+          {\dateofbirthtext\tud@title@delimiter}%
         \@dateofbirth%
         \ifx\@placeofbirth\@empty\else%
           \nobreakspace\placeofbirthtext\nobreakspace\@placeofbirth%
@@ -1040,15 +1036,17 @@
       \fi%
     \fi%
     \def\@tempc##1{%
-      \Ifstr{\csuse{@##1}}{}{}{%
+      \expandafter\ifx\csname @##1\endcsname\@empty\else%
         \if@titlepage%
           \tud@newline@title%
-          \Ifstr{\csuse{##1name}}{}{}{\csuse{##1name}\tud@title@delimiter}%
+          \tud@if@strblank{\csuse{##1name}}%
+            {}%
+            {\csuse{##1name}\tud@title@delimiter}%
           \csuse{@##1}%
         \else%
           \tud@title@wrn{##1}%
         \fi%
-      }%
+      \fi%
     }%
     \@tempc{course}%
     \@tempc{discipline}%
@@ -1344,26 +1342,27 @@
     \if@tud@cdgeometry@cover%
 %    \end{macrocode}
 % Bei der Höhe des oberen Seitenrandes muss unterschieden werden, ob der
-% Satzspiegel im \CD oder aber im Buchblock erscheinen soll.
+% Satzspiegel im \CD oder aber im Buchblock erscheinen soll. Die Makros werden
+% von \KOMAScript via \cs{dimexpr} interpretiert.
 %    \begin{macrocode}
       \if@tud@coverpage%
         \def\coverpagetopmargin{%
-          \dimexpr\tud@dim@topmargin+\tud@dim@barheight+\tud@dim@headsep\relax%
+          \tud@dim@topmargin+\tud@dim@barheight+\tud@dim@headsep%
         }%
       \else%
         \tud@if@v@lower{2.03}{%
-          \def\coverpagetopmargin{\dimexpr(\tud@dim@bothmargin)/2\relax}%
+          \def\coverpagetopmargin{\tud@dim@bothmargin/2}%
         }{%
           \def\coverpagetopmargin{\tud@dim@slimmargin}%
         }%
       \fi%
       \tud@if@v@lower{2.03}{%
-        \def\coverpagebottommargin{\dimexpr(\tud@dim@bothmargin)/2\relax}%
+        \def\coverpagebottommargin{\tud@dim@bothmargin/2}%
       }{%
         \def\coverpagebottommargin{\tud@dim@widemargin}%
       }%
-      \def\coverpageleftmargin{\dimexpr\tud@dim@widemargin}%
-      \def\coverpagerightmargin{\dimexpr\tud@dim@slimmargin}%
+      \def\coverpageleftmargin{\tud@dim@widemargin}%
+      \def\coverpagerightmargin{\tud@dim@slimmargin}%
     \fi%
     \if@tud@coverpage%
 %    \end{macrocode}
@@ -1461,16 +1460,16 @@
 %    \begin{macrocode}
 \renewcommand*\coverpagetopmargin{%
   \if@tud@coverpage%
-    \dimexpr\tud@dim@topmargin+\tud@dim@barheight+\tud@dim@headsep\relax%
+    \tud@dim@topmargin+\tud@dim@barheight+\tud@dim@headsep%
   \else%
-    \dimexpr\topmargin+1in\relax%
+    \topmargin+1in%
   \fi%
 }
 \renewcommand*\coverpagebottommargin{%
   \if@tud@coverpage%
     \tud@dim@widemargin%
   \else%
-    \dimexpr(\coverpagetopmargin)*2\relax%
+    \coverpagetopmargin*2%
   \fi%
 }
 %    \end{macrocode}

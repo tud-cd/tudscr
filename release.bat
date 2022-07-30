@@ -28,10 +28,14 @@ echo.
 set sourceinput="\def\tudfinalflag{}\input{tudscrsource.tex}"
 set docinput="\def\tudfinalflag{}\input{tudscr.tex}"
 set docprintinput="\def\tudfinalflag{}\def\tudprintflag{}\input{tudscr.tex}"
+cd source
+pdflatex --shell-escape %sourceinput%
+cd ..
 xcopy source temp\ /s
 cd temp
 call clearsource.bat
 del clearsource.bat
+xcopy ..\source\tudscr-gitinfo-ver.aux .
 cd doc
 call cleardoc.bat
 del  cleardoc.bat

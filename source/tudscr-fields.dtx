@@ -4,7 +4,7 @@
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
 % ----------------------------------------------------------------------------
 %
-%  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2021
+%  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2022
 %
 % ----------------------------------------------------------------------------
 %
@@ -34,7 +34,7 @@
 \endbatchfile
 %</ins>
 %<*dtx>
-\ProvidesFile{tudscr-fields.dtx}[2021/03/04]
+\ProvidesFile{tudscr-fields.dtx}[2022/09/03]
 \RequirePackage{tudscr-gitinfo}
 \documentclass[english,ngerman,xindy]{tudscrdoc}
 \iftutex
@@ -43,12 +43,13 @@
   \usepackage[T1]{fontenc}
   \usepackage[ngerman=ngerman-x-latest]{hyphsubst}
 \fi
-\usepackage{babel}
 \usepackage{tudscrfonts}
+\usepackage{babel}
 \usepackage[babel]{microtype}
 
 \GitHubBase{\TUDScriptRepository}
 \begin{document}
+  \author{Falk Hanisch\TUDScriptContactTitle}
   \maketitle
   \tableofcontents
   \DocInput{\filename}
@@ -56,13 +57,11 @@
 %</dtx>
 % \fi
 %
-% \selectlanguage{ngerman}
-%
-% \changes{v2.02}{2014/06/23}{Paket \pkg{titlepage} nicht weiter unterstützt}^^A
-%
 %
 %
 % \section{Anwenderbefehle für Eingabefelder}
+%
+% \changes{v2.02}{2014/06/23}{Paket \pkg{titlepage} nicht weiter unterstützt}^^A
 %
 % Das \TUDScript-Bundle für das \TUDCD definieren mehrere Felder, welche durch
 % den Anwender festgelegt werden können und dadurch auf der Titelseite bzw. auf
@@ -87,7 +86,7 @@
 % \ToDo{getfield für thesis etc. überarbeiten}[v2.07]
 % \ToDo{getfield nur für festgelegte Felder (Liste) zulassen}[v2.07]
 % \ToDo{Ausgabe von definition und expandierte Version unterscheiden}[v2.07]
-%    \begin{macrocode} 
+%    \begin{macrocode}
 \newcommand*\getfield[2][\@firstofone]{%
   \begingroup%
     \def\tud@res@b{#1}%
@@ -141,7 +140,7 @@
 % \cs{@department}, \cs{@institute} und \cs{@chair} gespeichert werden.
 %
 % Das optionale Argument wird zur Kompatibilität zur Klasse \cls{tudscrposter}
-% vorgehalten. Wird das Paket geladen, kann mit dem optionalen Argument die 
+% vorgehalten. Wird diese Klasse geladen, kann mit dem optionalen Argument die 
 % Angabe der Struktureinheiten im Fußbereich variiert werden. Dafür werden die 
 % Felder \cs{@facultyfoot}, \cs{@departmentfoot}, \cs{@institutefoot} sowie 
 % \cs{@chairfoot} definiert.
@@ -150,22 +149,16 @@
 \newcommand*\@department{}
 \newcommand*\@institute{}
 \newcommand*\@chair{}
-%<*book|report|article>
-\newcommand*\faculty[2][]{\tud@head@text@field{faculty}{#2}}
-\newcommand*\department[2][]{\tud@head@text@field{department}{#2}}
-\newcommand*\institute[2][]{\tud@head@text@field{institute}{#2}}
-\newcommand*\chair[2][]{\tud@head@text@field{chair}{#2}}
-%</book|report|article>
 %<*poster>
 \newcommand*\@facultyfoot{}
 \newcommand*\@departmentfoot{}
 \newcommand*\@institutefoot{}
 \newcommand*\@chairfoot{}
-\newcommand*\faculty[2][\@nil]{\tud@foot@line@add{faculty}{#2}{#1}}
-\newcommand*\department[2][\@nil]{\tud@foot@line@add{department}{#2}{#1}}
-\newcommand*\institute[2][\@nil]{\tud@foot@line@add{institute}{#2}{#1}}
-\newcommand*\chair[2][\@nil]{\tud@foot@line@add{chair}{#2}{#1}}
 %</poster>
+\newcommand*\faculty{\@dblarg{\tud@head@text@field{faculty}}}
+\newcommand*\department{\@dblarg{\tud@head@text@field{department}}}
+\newcommand*\institute{\@dblarg{\tud@head@text@field{institute}}}
+\newcommand*\chair{\@dblarg{\tud@head@text@field{chair}}} 
 %    \end{macrocode}
 % \end{field}^^A \@chairfoot
 % \end{field}^^A \@chair
@@ -185,30 +178,21 @@
 % besonderen Ausnahmefällen gestattet.
 %    \begin{macrocode}
 \newcommand*\@extraheadline{}
-\newcommand*\extraheadline[1]{\tud@head@text@field{extraheadline}{#1}}
+\newcommand*\extraheadline[1]{\tud@head@text@field{extraheadline}[]{#1}}
 %    \end{macrocode}
 % \end{field}^^A \@extraheadline
 % \end{macro}^^A \extraheadline
 % \begin{macro}{\tud@head@text@field}
 % \changes{v2.05}{2015/11/26}{neu}^^A
-% Wird ein Feld gesetzt, muss im Zweifel die Kopfzeile neu erstellt werden.
-%    \begin{macrocode}
-\newcommand*\tud@head@text@field[2]{%
-  \csgdef{@#1}{\trim@spaces{#2}}%
-  \global\@tud@head@text@settrue%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@head@text@field
-% \begin{macro}{\tud@foot@line@add}
-% \changes{v2.05}{2015/07/06}{neu}^^A
 % \begin{macro}{\tud@foot@line@write}
 % \changes{v2.05}{2015/07/06}{neu}^^A
-% Mit \cs{tud@foot@line@add} wird der Inhalt eines Feldes in |\@|\meta{Feld} 
+% Mit \cs{tud@head@text@field} wird der Inhalt eines Feldes in |\@|\meta{Feld} 
 % gespeichert. Der Befehl erwartet als erstes obligatorisches Argument den
-% Feldnamen und als zweites den Inhalt. Entspricht das dritte obligatorische 
-% Argument \cs{@empty}, so wird in |\@|\meta{Feld}|foot| ebenfalls das zweite 
-% Argument abgelegt, andernfalls das dritte.
+% Feldnamen und als letztes den Inhalt. Wird ein Feld gesetzt, muss die 
+% Kopfzeile neu erstellt werden.
 %
+% Das (optionale) Argument dazwischen befüllt |\@|\meta{Feld}|foot| und wird 
+% mit \cs{@dblarg} standardmäßig auf den Inhalt von |\@|\meta{Feld} gesetzt.
 % Damit wird es für Poster möglich, die Befehle \cs{faculty}, \cs{department}, 
 % \cs{institute}, \cs{chair} und \cs{professor} dahingehend zu erweitern, dass 
 % unterschiedliche Angaben für die Kopf- und Fußzeile gemacht werden können.
@@ -217,15 +201,15 @@
 % jedoch zusätzlich das optionale Argument genutzt, so wird dessen Inhalt im 
 % Fußbereich mit \cs{tud@foot@line@write} ausgegeben.
 %    \begin{macrocode}
+\newcommand*\tud@head@text@field{}
+\def\tud@head@text@field#1[#2]#3{%
+  \expandafter\tud@trim@field\csname @#1\endcsname{#3}%
 %<*poster>
-\newcommand*\tud@foot@line@add[3]{%
-  \tud@head@text@field{#1}{#2}%
-  \tud@if@nil{#3}{%
-    \global\csletcs{@#1foot}{@#1}%
-  }{%
-    \csgdef{@#1foot}{\trim@spaces{#3}}%
-  }%
+  \expandafter\tud@trim@field\csname @#1foot\endcsname{#2}%
+%</poster>
+  \global\@tud@head@text@settrue%
 }
+%<*poster>
 \newcommand*\tud@foot@line@write[1]{%
   \protected@edef\@tempa{\csuse{@#1foot}}%
   \ifx\@tempa\@empty\else\newline\mbox{\csuse{@#1foot}}\fi%
@@ -233,7 +217,18 @@
 %</poster>
 %    \end{macrocode}
 % \end{macro}^^A \tud@foot@line@write
-% \end{macro}^^A \tud@foot@line@add
+% \end{macro}^^A \tud@head@text@field
+% \begin{macro}{\tud@trim@field}
+% Hiermit werden Feldinhalte gegebenenfalls um unnötige Leerzeichen befreit.
+% \changes{v2.06o}{2022/08/03}{neu}^^A
+%    \begin{macrocode}
+\newcommand*\tud@trim@field[2]{%
+  \def#1{#2}%
+  \trim@spaces@in#1%
+  \global\let#1#1%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@trim@field
 % \begin{macro}{\title}
 % \begin{field}{\@title}
 % \begin{field}{\@@title}
@@ -246,7 +241,7 @@
 \newcommand*\@@title{}
 \robustify\@title
 \renewcommand*\title[1]{%
-  \gdef\@title{#1}%
+  \tud@trim@field\@title{#1}%
   \begingroup%
     \let\thanks\@gobble%
     \let\footnote\@gobble%
@@ -271,7 +266,7 @@
 %    \begin{macrocode}
 \newcommand*\@@author{}
 \renewcommand*\author[1]{%
-  \gdef\@author{#1}%
+  \tud@trim@field\@author{#1}%
 %    \end{macrocode}
 % Das Feld \cs{@@author} soll lediglich die Autoren ohne weitere Anmerkungen 
 % enthalten. Deshalb werden die gewöhnlichen Formatierungsbefehle des Titels
@@ -308,6 +303,9 @@
       \expandafter\@tempb##1##2\@nil%
     }%
     \protected@edef\@@author{#1}%
+%    \end{macrocode}
+% Zuletzt werden alle eingefügten \cs{@tempc} entfernt.
+%    \begin{macrocode}
     \@tempa{\@@author}{ \@tempc }%
     \@tempa{\@@author}{\@tempc }%
     \@tempa{\@@author}{ \@tempc}%
@@ -316,7 +314,7 @@
   \endgroup%
 }
 \newcommand*\@authormore{}
-\newrobustcmd*\authormore[1]{\gdef\@authormore{#1}\ignorespaces}
+\newrobustcmd*\authormore[1]{\tud@trim@field\@authormore{#1}}
 %    \end{macrocode}
 % \end{field}^^A \@authormore
 % \end{macro}^^A \authormore
@@ -333,20 +331,23 @@
 % \changes{v2.05}{2016/07/09}{neu}^^A
 %    \begin{macrocode}
 \newcommand*\@emailaddress{}
-\newrobustcmd*\emailaddress{%
+\newrobustcmd*\emailaddress[2][]{%
   \kernel@ifstar%
-    {\tud@emailaddress@simple}%
-    {\tud@emailaddress@hyper}%
+    {\tud@emailaddress@simple{#2}}%
+    {\tud@emailaddress@hyper[{#1}]{#2}}%
 }
-\newrobustcmd*\tud@emailaddress@simple[1]{\gdef\@emailaddress{#1}}
-\newrobustcmd*\tud@emailaddress@hyper[2][]{\gdef\@emailaddress{#2}}
+\newrobustcmd*\tud@emailaddress@simple[1]{\tud@trim@field\@emailaddress{#1}}
+\newrobustcmd*\tud@emailaddress@hyper[2][]{\tud@trim@field\@emailaddress{#2}}
 \AfterPackage{hyperref}{%
   \renewrobustcmd*\tud@emailaddress@hyper[2][hidelinks]{%
-    \gdef\@emailaddress{%
+    \tud@trim@field\@emailaddress{#2}%
+    \xdef\@emailaddress{%
       \begingroup%
-        \urlstyle{same}%
-        \hypersetup{#1}%
-        \href{mailto:#2}{\nolinkurl{#2}}%
+        \noexpand\urlstyle{same}%
+        \unexpanded{\hypersetup{#1}}%
+        \noexpand\href%
+          {mailto:\expandonce\@emailaddress}%
+          {\noexpand\nolinkurl{\expandonce\@emailaddress}}%
       \endgroup%
     }%
   }%
@@ -362,7 +363,7 @@
 % \cs{@course} gespeichert.
 %    \begin{macrocode}
 \newcommand*\@course{}
-\newrobustcmd*\course[1]{\gdef\@course{#1}\ignorespaces}
+\newrobustcmd*\course[1]{\tud@trim@field\@course{#1}}
 %    \end{macrocode}
 % \end{field}^^A \@course
 % \end{macro}^^A \course
@@ -374,7 +375,7 @@
 % wird im Makro \cs{@discipline} gespeichert.
 %    \begin{macrocode}
 \newcommand*\@discipline{}
-\newrobustcmd*\discipline[1]{\gdef\@discipline{#1}\ignorespaces}
+\newrobustcmd*\discipline[1]{\tud@trim@field\@discipline{#1}}
 %    \end{macrocode}
 % \end{field}^^A \@discipline
 % \end{macro}^^A \discipline
@@ -389,9 +390,7 @@
 % \cs{@matriculationid} gespeichert.
 %    \begin{macrocode}
 \newcommand*\@matriculationnumber{}
-\newrobustcmd*\matriculationnumber[1]{%
-  \gdef\@matriculationnumber{#1}\ignorespaces%
-}
+\newrobustcmd*\matriculationnumber[1]{\tud@trim@field\@matriculationnumber{#1}}
 %    \end{macrocode}
 % \end{field}^^A \@matriculationnumber
 % \end{macro}^^A \matriculationnumber
@@ -401,7 +400,7 @@
 % gespeichert.
 %    \begin{macrocode}
 \newcommand*\@matriculationyear{}
-\newrobustcmd*\matriculationyear[1]{\gdef\@matriculationyear{#1}\ignorespaces}
+\newrobustcmd*\matriculationyear[1]{\tud@trim@field\@matriculationyear{#1}}
 %    \end{macrocode}
 % \end{field}^^A \@matriculationyear
 % \end{macro}^^A \matriculationyear
@@ -410,7 +409,7 @@
 % Der Geburtsort für den Titel wird in \cs{@placeofbirth} gespeichert.
 %    \begin{macrocode}
 \newcommand*\@placeofbirth{}
-\newrobustcmd*\placeofbirth[1]{\gdef\@placeofbirth{#1}\ignorespaces}
+\newrobustcmd*\placeofbirth[1]{\tud@trim@field\@placeofbirth{#1}}
 %    \end{macrocode}
 % \end{field}^^A \@placeofbirth
 % \end{macro}^^A \placeofbirth
@@ -421,89 +420,109 @@
 % \changes{v2.02}{2014/11/06}{\cs{protected@xdef} genutzt}^^A
 % \begin{macro}{\subject}
 % \begin{field}{\@subject}
-% \begin{macro}{\tud@thesis@do}
-% \begin{macro}{\tud@thesis@@do}
-% \begin{macro}{\tud@thanks}
+% \begin{field}{\@@subject}
+% \begin{macro}{\tud@thesis@evaluate}
 % Art bzw. Typ der Abschlussarbeit kann \cs{thesis}\marg{Abschlussarbeit}
 % angegeben werden und wird im Makro \cs{@thesis} gespeichert. Alternativ
 % dazu kann auch der Befehl \cs{subject} verwendet werden. Mit dem Befehl
-% \cs{tud@thesis@do} wird in den Feldern \cs{@thesis} respektive \cs{@subject} 
-% nach bestimmten Schlagwörtern für Abschlussarbeiten o.\,ä. gesucht. Wird 
-% eines dieser Wörter gefunden, wird der entsprechende Bezeichner für dieses
-% Feld gesetzt. Zusätzlich wird durch \cs{tud@thesis@@do} dafür gesorgt, dass
-% gegebenenfalls der Inhalt von \cs{@subject} in \cs{@thesis} verschoben und
-% entsprechend die Option \opt{subjectthesis} gesetzt wird. In \cs{@@thesis}
-% wird die angegebene Abschlussarbeit ohne etwaige Fußnoten gespeichert.
+% \cs{tud@thesis@evaluate} wird in den Feldern \cs{@thesis} respektive 
+% \cs{@subject} nach bestimmten Schlagwörtern für Abschlussarbeiten o.\,ä. 
+% gesucht. Bei einem Treffer wird der entsprechende Bezeichner für dieses Feld
+% gesetzt. In \cs{@@subject} beziehungsweise \cs{@@thesis} wird der gegebene 
+% oder substituierte Inhalt ohne etwaige Fußnoten gespeichert.
+% \ToDo{Option thesis}[v2.07]
 %    \begin{macrocode}
 \newcommand*\@thesis{}
 \newcommand*\@@thesis{}
-\newcommand*\thesis[1]{\tud@thesis@do{thesis}{#1}}
-\renewcommand*\subject[1]{\tud@thesis@do{subject}{#1}}
-\newcommand*\tud@thanks{}
-\newcommand*\tud@thesis@do[2]{%
+\newcommand*\thesis[1]{\tud@thesis@evaluate{thesis}{#1}}
+\CheckCommand*\subject[1]{\gdef\@subject{#1}}
+\newcommand*\@@subject{}
+\renewcommand*\subject[1]{\tud@thesis@evaluate{subject}{#1}}
+\newcommand*\tud@thesis@evaluate[2]{%
   \begingroup%
+    \expandafter\tud@trim@field\csname @#1\endcsname{#2}%
 %    \end{macrocode}
-% Hier das gleiche wie an anderer Stelle auch schon. Der Inhalt einer eventuell
-% vorhandenen Fußnote wird gesichert.
-% \ToDo{\val{habil}, numerical key o.ä. nutzen (nach allen Ifstr suchen)}[v2.07]
-% \ToDo{alle gültigen Werte in einer Liste ablegen (insbes. für Doku)}[v2.07]
-% \ToDo{verwendeten Wert (diploma,master,student,etc.) sichern}[v2.07]
-% \ToDo{zweites argument nicht expandieren, wenn captionname}[v2.07]
-% \ToDo{subjectthesis=true für alles, was keine Abschlussarbeit ist}[v2.07]
+% Der Inhalt des Befehls \cs{thanks} wird durch das Setzen einer temporären Box 
+% in ein temporäres Makro gesichert. Nach der Verarbeitung des Feldinhalts und
+% der möglichen Substitution durch den gewünschten Bezeichner wird \cs{thanks}
+% wieder hinzugefügt.
 %    \begin{macrocode}
-    \global\let\tud@thanks\relax%
-    \def\thanks##1{\gdef\tud@thanks{##1}}%
+    \let\tud@res@c\@empty%
+    \def\thanks##1{\listgadd\tud@res@c{##1}}%
     \let\footnote\thanks%
     \sbox\z@{#2}%
     \let\thanks\@gobble%
     \let\footnote\@gobble%
-    \tud@lowerstring{\@tempa}{#2}%
-    \Ifstr{#1}{thesis}{\protected@xdef\@@thesis{#2}}{}%
-    \protected@edef\@tempa{%
-      \endgroup%
-      \def\noexpand\@tempa{\@tempa}%
-    }%
-  \@tempa%
-  \Ifstr{\@tempa}{diss}{\tud@thesis@@do{#1}{\dissertationname}}{%
-  \Ifstr{\@tempa}{doctoral}{\tud@thesis@@do{#1}{\dissertationname}}{%
-  \Ifstr{\@tempa}{phd}{\tud@thesis@@do{#1}{\dissertationname}}{%
-  \Ifstr{\@tempa}{diploma}{\tud@thesis@@do{#1}{\diplomathesisname}}{%
-  \Ifstr{\@tempa}{master}{\tud@thesis@@do{#1}{\masterthesisname}}{%
-  \Ifstr{\@tempa}{bachelor}{\tud@thesis@@do{#1}{\bachelorthesisname}}{%
-  \Ifstr{\@tempa}{student}{\tud@thesis@@do{#1}{\studentthesisname}}{%
-  \Ifstr{\@tempa}{evidence}{\tud@thesis@@do{#1}{\studentresearchname}}{%
-  \Ifstr{\@tempa}{project}{\tud@thesis@@do{#1}{\projectpapername}}{%
-  \Ifstr{\@tempa}{seminar}{\tud@thesis@@do{#1}{\seminarpapername}}{%
-  \Ifstr{\@tempa}{term}{\tud@thesis@@do{#1}{\termpapername}}{%
-  \Ifstr{\@tempa}{research}{\tud@thesis@@do{#1}{\researchname}}{%
-  \Ifstr{\@tempa}{log}{\tud@thesis@@do{#1}{\logname}}{%
-  \Ifstr{\@tempa}{report}{\tud@thesis@@do{#1}{\reportname}}{%
-  \Ifstr{\@tempa}{internship}{\tud@thesis@@do{#1}{\internshipname}}{%
-    \csdef{@#1}{#2}%
-  }}}}}}}}}}}}}}}%
-}
-\newcommand*\tud@thesis@@do[2]{%
-  \Ifstr{#1}{subject}{%
-    \ifx\@thesis\@empty\else%
-      \ClassWarning{\TUD@Class@Name}{%
-        Field `thesis' is overwritten by `subject'%
-      }%
+    \protected@csxdef{@@#1}{\trim@spaces{#2}}%
+    \letcs\tud@res@a{@@#1}%
+    \TUD@set@numkey{thesis}{@tempa}{%
+      {habil}{0},
+      {diss}{1},{doctoral}{1},{phd}{1},
+      {diploma}{2},
+      {master}{3},
+      {bachelor}{4},
+      {student}{5},
+      {evidence}{6},
+      {project}{7},
+      {seminar}{8},
+      {term}{9},
+      {research}{10},
+      {log}{11},
+      {report}{12},
+      {internship}{13}
+    }{\tud@res@a}%
+    \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+      \ifcase\@tempa\relax% habil
+        \def\tud@res@a{\habilitationname}%
+      \or% diss
+        \def\tud@res@a{\dissertationname}%
+      \or% diploma
+        \def\tud@res@a{\diplomathesisname}%
+      \or% master
+        \def\tud@res@a{\masterthesisname}%
+      \or% bachelor
+        \def\tud@res@a{\bachelorthesisname}%
+      \or% student
+        \def\tud@res@a{\studentthesisname}%
+      \or% evidence
+        \def\tud@res@a{\studentresearchname}%
+      \or% project
+        \def\tud@res@a{\projectpapername}%
+      \or% seminar
+        \def\tud@res@a{\seminarpapername}%
+      \or% term
+        \def\tud@res@a{\termpapername}%
+      \or% research
+        \def\tud@res@a{\researchname}%
+      \or% log
+        \def\tud@res@a{\logname}%
+      \or% report
+        \def\tud@res@a{\reportname}%
+      \or% internship
+        \def\tud@res@a{\internshipname}%
+      \else%
+        \FamilyKeyStateUnknownValue%
+      \fi%
     \fi%
-    \TUD@key@preset{subjectthesis}{true}%
-  }{%
-    \TUD@key@preset{subjectthesis}{false}%
-  }%
-  \ifx\tud@thanks\relax%
-    \gdef\@thesis{#2}%
-  \else%
-    \protected@xdef\@thesis{\noexpand#2\noexpand\thanks{\tud@thanks}}%
-  \fi%
-  \protected@xdef\@@thesis{\trim@spaces{#2}}%
+    \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+      \global\cslet{@@#1}\tud@res@a%
+      \tud@if@strequal{#1}{subject}{%
+        \ifx\@@thesis\@empty\global\let\@@thesis\@@subject\fi%
+      }{}%
+      \def\do##1{\appto\tud@res@a{\thanks{##1}}}%
+      \dolistloop{\tud@res@c}%
+    \fi%
+    \edef\tud@res@a{%
+      \endgroup%
+      \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+        \noexpand\csgdef{@#1}{\expandonce\tud@res@a}%
+      \fi%
+    }%
+  \tud@res@a%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@thanks
-% \end{macro}^^A \tud@thesis@@do
-% \end{macro}^^A \tud@thesis@do
+% \end{macro}^^A \tud@thesis@evaluate
+% \end{field}^^A \@@subject
 % \end{field}^^A \@subject
 % \end{macro}^^A \subject
 % \end{field}^^A \@@thesis
@@ -524,9 +543,8 @@
 \newcommand*\@graduation{}
 \newcommand*\@graduationabbreviation{}
 \newcommand*\graduation[2][]{%
-  \gdef\@graduationabbreviation{}%
-  \ifxblank{#1}{}{\gdef\@graduationabbreviation{(#1)}}%
-  \gdef\@graduation{#2}%
+  \tud@trim@field\@graduationabbreviation{#1}%
+  \tud@trim@field\@graduation{#2}%
 }
 %    \end{macrocode}
 % \end{field}^^A \@graduationabbreviation
@@ -546,11 +564,11 @@
 %    \begin{macrocode}
 %<*book|report|article>
 \newcommand*\@professor{}
-\newcommand*\professor[1]{\gdef\@professor{#1}}
+\newcommand*\professor[1]{\tud@trim@field\@professor{#1}}
 %</book|report|article>
 %<*poster>
 \newcommand*\@professorfoot{}
-\newcommand*\professor[1]{\gdef\@professorfoot{#1}}
+\newcommand*\professor[1]{\tud@trim@field\@professorfoot{#1}}
 %</poster>
 %    \end{macrocode}
 % \end{field}^^A \@professorfoot
@@ -566,7 +584,7 @@
 %    \begin{macrocode}
 %<*book|report|article>
 \newcommand*\@supervisor{}
-\newcommand*\supervisor[1]{\gdef\@supervisor{#1}}
+\newcommand*\supervisor[1]{\tud@trim@field\@supervisor{#1}}
 %</book|report|article>
 %<*poster>
 \newcommand*\supervisor[1]{}
@@ -588,7 +606,7 @@
 % Hilfesteller werden durch \cs{and} voneinander getrennt.
 %    \begin{macrocode}
 \newcommand*\@supporter{}
-\newcommand*\supporter[1]{\gdef\@supporter{#1}}
+\newcommand*\supporter[1]{\tud@trim@field\@supporter{#1}}
 %    \end{macrocode}
 % \end{field}^^A \@supporter
 % \end{macro}^^A \supporter
@@ -597,7 +615,7 @@
 % Angabe einer externen Firma, wird im Makro \cs{@company} gespeichert.
 %    \begin{macrocode}
 \newcommand*\@company{}
-\newcommand*\company[1]{\gdef\@company{#1}}
+\newcommand*\company[1]{\tud@trim@field\@company{#1}}
 %    \end{macrocode}
 % \end{field}^^A \@company
 % \end{macro}^^A \company
@@ -607,7 +625,7 @@
 % Mehrere Gutachter werden durch \cs{and} getrennt.
 %    \begin{macrocode}
 \newcommand*\@referee{}
-\newcommand*\referee[1]{\gdef\@referee{#1}}
+\newcommand*\referee[1]{\tud@trim@field\@referee{#1}}
 %    \end{macrocode}
 % \end{field}^^A \@referee
 % \end{macro}^^A \referee
@@ -617,7 +635,7 @@
 % gespeichert. Mehrere Fachreferenten werden durch \cs{and} getrennt.
 %    \begin{macrocode}
 \newcommand*\@advisor{}
-\newcommand*\advisor[1]{\gdef\@advisor{#1}}
+\newcommand*\advisor[1]{\tud@trim@field\@advisor{#1}}
 %    \end{macrocode}
 % \end{field}^^A \@advisor
 % \end{macro}^^A \advisor
@@ -646,7 +664,7 @@
     \@@author\hfil%
   \endgroup%
 }
-\newcommand*\confirmationclosing[1]{\gdef\@confirmationclosing{#1}}
+\newcommand*\confirmationclosing[1]{\tud@trim@field\@confirmationclosing{#1}}
 %    \end{macrocode}
 % \end{field}^^A \@confirmationclosing
 % \end{macro}^^A \confirmationclosing
@@ -657,7 +675,7 @@
 % \enquote{Dresden} gesetzt.
 %    \begin{macrocode}
 \newcommand*\@place{Dresden}
-\newcommand*\place[1]{\gdef\@place{#1}}
+\newcommand*\place[1]{\tud@trim@field\@place{#1}}
 %    \end{macrocode}
 % \end{field}^^A \@place
 % \end{macro}^^A \place
@@ -666,12 +684,24 @@
 %</book|report|article>
 % \fi
 %
+% \begin{macro}{\subtitle}
+% \begin{macro}{\@subtitle}
+% \begin{macro}{\publishers}
+% \begin{macro}{\@publishers}
 % \begin{macro}{\publisher}
-% Kleine Korrektur für \KOMAScript, der Befehl sollte im Singular stehen.
+% Die Felder von \KOMAScript werden ebenfalls behandelt.
 %    \begin{macrocode}
+\CheckCommand*\subtitle[1]{\gdef\@subtitle{#1}}
+\renewcommand*\subtitle[1]{\tud@trim@field\@subtitle{#1}}
+\CheckCommand\publishers[1]{\gdef\@publishers{#1}}%
+\renewcommand*\publishers[1]{\tud@trim@field\@publishers{#1}}
 \providecommand*\publisher[1]{\publishers{#1}}
 %    \end{macrocode}
 % \end{macro}^^A \publisher
+% \end{macro}^^A \@publishers
+% \end{macro}^^A \publishers
+% \end{macro}^^A \@subtitle
+% \end{macro}^^A \subtitle
 %
 % \iffalse
 %<*poster>
@@ -689,20 +719,21 @@
 % \ToDo{auch für notice in tudscrsupervisor}[v2.07]
 %    \begin{macrocode}
 \newcommand*\@webpage{}
-\newrobustcmd*\webpage{%
+\newrobustcmd*\webpage[2][]{%
   \kernel@ifstar%
-    {\tud@webpage@simple}%
-    {\tud@webpage@hyper}%
+    {\tud@webpage@simple{#2}}%
+    {\tud@webpage@hyper[{#1}]{#2}}%
 }
-\newrobustcmd*\tud@webpage@simple[1]{\gdef\@webpage{#1}}
-\newrobustcmd*\tud@webpage@hyper[2][]{\gdef\@webpage{#2}}
+\newrobustcmd*\tud@webpage@simple[1]{\tud@trim@field\@webpage{#1}}
+\newrobustcmd*\tud@webpage@hyper[2][]{\tud@trim@field\@webpage{#2}}
 \AfterPackage{hyperref}{%
   \renewrobustcmd*\tud@webpage@hyper[2][hidelinks]{%
-    \gdef\@webpage{%
+    \tud@trim@field\@webpage{#2}%
+    \xdef\@webpage{%
       \begingroup%
-        \urlstyle{same}%
-        \hypersetup{#1}%
-        \url{#2}%
+        \noexpand\urlstyle{same}%
+        \unexpanded{\hypersetup{#1}}%
+        \noexpand\url{\expandonce\@webpage}%
       \endgroup%
     }%
   }%
@@ -754,9 +785,10 @@
   \ifx\today#2\relax%
     \gdef#1{#2}%
   \else%
-    \ifxblank{#2}%
-      {\gdef#1{}}%
-      {\gdef#1{\printdate{#2}}}%
+    \tud@trim@field#1{#2}%
+    \tud@if@strblank{#1}%
+      {}%
+      {\xdef#1{\noexpand\printdate{\expandonce#1}}}%
   \fi%
 }
 %    \end{macrocode}
@@ -858,16 +890,17 @@
 % \changes{v2.05}{2016/05/27}{neu}^^A
 % Mit diesem Makro erfolgt die eigentliche Ausgabe des Datums und ggf. der 
 % optionalen Ergänzungen.
-% \ToDo{use \cs{trim@spaces@in}?}[v2.06]
 %    \begin{macrocode}
 \newcommand*\tud@date@print{%
   \ifx\@date\@empty\else%
+    \trim@spaces@in\@beforedate%
     \ifx\@beforedate\@empty\else%
-      \expandafter\trim@spaces@noexp\expandafter{\@beforedate}\nobreakspace%
+      \@beforedate\nobreakspace%
     \fi%
     \@date%
+    \trim@spaces@in\@afterdate%
     \ifx\@afterdate\@empty\else%
-      \nobreakspace\expandafter\trim@spaces@noexp\expandafter{\@afterdate}%
+      \nobreakspace\@afterdate%
     \fi%
   \fi%
 }
@@ -894,9 +927,7 @@
 % gespeichert.
 %    \begin{macrocode}
 \newcommand*\@dateofbirth{}
-\newrobustcmd*\dateofbirth[1]{%
-  \tud@printdate{\@dateofbirth}{#1}\ignorespaces%
-}
+\newrobustcmd*\dateofbirth[1]{\tud@printdate{\@dateofbirth}{#1}}
 %    \end{macrocode}
 % \end{field}^^A \@dateofbirth
 % \end{macro}^^A \dateofbirth
@@ -918,21 +949,18 @@
 % im Makro \cs{@chairman} gespeichert.
 %    \begin{macrocode}
 \newcommand*\@chairman{}
-\newcommand*\chairman[1]{\gdef\@chairman{#1}}
+\newcommand*\chairman[1]{\tud@trim@field\@chairman{#1}}
 %    \end{macrocode}
 % \end{field}^^A \@chairman
 % \end{macro}^^A \chairman
 % \begin{macro}{\grade}
 % \begin{field}{\@grade}
-% \begin{field}{\@headline}
 % Die Befehle dienen zum Abspeichern der entsprechenden Parameter innerhalb
 % der neu definierten Umgebungen aus dem Paket \pkg{tudscrsupervisor}.
 %    \begin{macrocode}
 \newcommand*\@grade{}
-\newcommand*\grade[1]{\gdef\@grade{#1}}
-\newcommand*\@headline{}
+\newcommand*\grade[1]{\tud@trim@field\@grade{#1}}
 %    \end{macrocode}
-% \end{field}^^A \@headline
 % \end{field}^^A \@grade
 % \end{macro}^^A \grade
 % \begin{macro}{\issuedate}
@@ -988,16 +1016,16 @@
 % eine Telefonnummer und die E"~Mail-Adresse hinzugefügen.
 %    \begin{macrocode}
 \newcommand*\@contactperson{}
-\newcommand*\contactperson[1]{\gdef\@contactperson{#1}}
+\newcommand*\contactperson[1]{\tud@trim@field\@contactperson{#1}}
 %<*poster>
 \let\supervisor\contactperson
 %</poster>
 \newcommand*\@office{}
-\newrobustcmd*\office[1]{\gdef\@office{#1}}
+\newrobustcmd*\office[1]{\tud@trim@field\@office{#1}}
 \newcommand*\@telephone{}
-\newrobustcmd*\telephone[1]{\gdef\@telephone{#1}}
+\newrobustcmd*\telephone[1]{\tud@trim@field\@telephone{#1}}
 \newcommand*\@telefax{}
-\newrobustcmd*\telefax[1]{\gdef\@telefax{#1}}
+\newrobustcmd*\telefax[1]{\tud@trim@field\@telefax{#1}}
 %    \end{macrocode}
 % \end{field}^^A \@telefax
 % \end{macro}^^A \telefax
@@ -1021,7 +1049,7 @@
 % übernehmen diese Aufgabe.
 %
 % \begin{macro}{\tud@if@field@unset}
-% \changes{v2.07}{2019/09/18}{neu}^^A
+% \changes{v2.06o}{2022/08/02}{neu}^^A
 % Insbesondere das Autorenfeld (\cs{@author}) benötigt eine Sonderbehandlung, 
 % da dieses nicht leer sondern mit einer Warnung initialisiert ist. Mit diesem
 % Makro kann darauf geprüft werden, ob innerhalb eines Feldes ein Befehl 
@@ -1032,7 +1060,7 @@
   \begingroup%
     \edef\tud@res@a{%
       \def\noexpand\tud@res@a####1\string\@latex@####2\noexpand\@nil{%
-        \noexpand\ifblank{####2}%
+        \noexpand\IfArgIsEmpty{####2}%
         \unexpanded{\@tud@res@swafalse\@tud@res@swatrue}%
       }%
       \noexpand\tud@res@a%
@@ -1073,7 +1101,7 @@
 % Sollte ein Feld verwendet werden, welches initial eine Fehlermeldung enthält, 
 % wird die vorhandene Warnung ausgegeben und danach das Feld als leer definiert.
 %    \begin{macrocode}
-  \expandafter\tud@if@field@unset\expandafter{\csname#1\endcsname}{%
+  \expandafter\tud@if@field@unset\expandafter{\csname #1\endcsname}{%
     \csuse{#1}\csgdef{#1}{}%
   }{}%
 %    \end{macrocode}
@@ -1095,7 +1123,7 @@
 % Das Feld wird mit \cs{and} terminiert, um der Definition von
 % \cs{tud@multiple@@split} in jedem Fall zu entsprechen.
 %    \begin{macrocode}
-    \edef\@tempa{\csname#1\endcsname\and}%
+    \edef\@tempa{\csname #1\endcsname\and}%
   \expandafter\endgroup%
   \expandafter\tud@multiple@@split\@tempa\relax%
 }
@@ -1135,7 +1163,14 @@
 % zu erzeugen. 
 %    \begin{macrocode}
 \newcommand*\tud@multiple@fields@store[2]{%
-  \def\@tempa##1{\ifcsdef{@##1}{\tud@cs@store{@##1}}{}}%
+  \def\@tempa##1{%
+    \ifcsdef{@##1}{\tud@cs@store{@##1}}{}%
+    \ifcsdef{##1}{%
+      \tud@cs@store{##1}%
+      \expandafter\xapptocmd\csname ##1\endcsname{\ignorespaces}%
+        {}{\tud@patch@wrn##1}%
+    }{}%
+  }%
   \letcs\@tempb{tud@split#1@list}%
   \let\and\relax%
   \expandafter\forcsvlist\expandafter\@tempa\expandafter{\@tempb}%
@@ -1155,6 +1190,7 @@
       \tud@cs@restore{@##1}%
       \global\csletcs{@##1}{@##1}%
     }{}%
+    \ifcsdef{##1}{\tud@cs@restore{##1}}{}%
   }%
   \letcs\@tempb{tud@split#1@list}%
   \let\and\relax%
@@ -1171,16 +1207,16 @@
 \newcommand*\tud@multiple@fields@preset[3]{%
   \def\@tempa##1{%
     \edef\@tempc{\csuse{##1}}%
-    \ifstrequal{#2}{*}{%
+    \if\detokenize{#2*}\relax%
       \csdef{@##1}{}%
-    }{%
+    \else%
       \begingroup%
         \protected@expandtwoargs\in@{\@tempc}{\csuse{#1}}%
         \ifin@%
           \ifcsvoid{@##1}{\@tempc{#2}}{}%
         \fi%
       \endgroup%
-    }%
+    \fi%
   }%
   \letcs\@tempb{tud@split#1@list}%
   \let\and\relax%

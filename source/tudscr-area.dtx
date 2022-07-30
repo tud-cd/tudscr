@@ -4,7 +4,7 @@
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
 % ----------------------------------------------------------------------------
 %
-%  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2021
+%  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2022
 %
 % ----------------------------------------------------------------------------
 %
@@ -34,7 +34,7 @@
 \endbatchfile
 %</ins>
 %<*dtx>
-\ProvidesFile{tudscr-area.dtx}[2021/02/13]
+\ProvidesFile{tudscr-area.dtx}[2022/09/03]
 \RequirePackage{tudscr-gitinfo}
 \documentclass[english,ngerman,xindy]{tudscrdoc}
 \iftutex
@@ -43,12 +43,13 @@
   \usepackage[T1]{fontenc}
   \usepackage[ngerman=ngerman-x-latest]{hyphsubst}
 \fi
-\usepackage{babel}
 \usepackage{tudscrfonts}
+\usepackage{babel}
 \usepackage[babel]{microtype}
 
 \GitHubBase{\TUDScriptRepository}
 \begin{document}
+  \author{Falk Hanisch\TUDScriptContactTitle}
   \maketitle
   \tableofcontents
   \DocInput{\filename}
@@ -56,17 +57,15 @@
 %</dtx>
 % \fi
 %
-% \selectlanguage{ngerman}
+%
+%
+% \section{Der Satzspiegel für \TUDScript}
 %
 % \changes{v2.02}{2014/06/23}{Paket \pkg{titlepage} nicht weiter unterstützt}^^A
 % \changes{v2.02}{2014/07/08}{\cs{FamilyKeyState} wird von Optionen genutzt}^^A
 % \changes{v2.05}{2015/07/06}{Seitenstil für Poster}^^A
 % \changes{v2.05}{2016/04/03}{Unterstützung von Schnittmarken mit den Paketen
 %   \pkg{geometry} und \pkg{crop}}^^A
-%
-%
-%
-% \section{Der Satzspiegel für \TUDScript}
 %
 % Das \CD verlangt (eigentlich) einen fest vorgegebenen Satzspiegel. Für das
 % Setzen längerer wissenschaftlicher Abhandlungen ist dieser jedoch alles
@@ -79,7 +78,7 @@
 %^^A\url{http://tex.stackexchange.com/q/248902}
 %^^A\url{https://wiki.scribus.net/canvas/PDF_Boxes_:_mediabox,_cropbox,_bleedbox,_trimbox,_artbox}
 %^^A\url{http://www.prepressure.com/pdf/basics/page-boxes}
-% }[v2.07]
+% }[v2.08]
 %
 % \iffalse
 %<*class&body>
@@ -142,7 +141,7 @@
 %    \end{macrocode}
 % \end{macro}^^A \if@tud@x@standalone@crop
 %
-% \subsection{Definition der Größen und Maße in abhängig vom Papierformat}
+% \subsection{Definition der Größen und Maße abhängig vom Papierformat}
 %
 % Die \TUDScript-Klassen sollen neben den vom \CD vorgegebenen Seitenrändern 
 % weitere Satzspiegel ermöglichen und u.\,a. auch die Nutzung des Paketes
@@ -687,7 +686,7 @@
 % \ToDo{^^A%
 %   Was genau ist der Unterschied zwischen cropmargin und bleedmargin? 
 %   Wo kommt der Standardwert her? Sinnvoll für Standardklassen?
-% }[v2.07]^^A
+% }[v2.07]
 %    \begin{macrocode}
 \newcommand*\tud@bleedmargin@dim{.2in}
 \TUD@key{bleedmargin}{%
@@ -696,7 +695,7 @@
 % Negative Werte sind nicht möglich, diese werden automatisch korrigiert.
 %    \begin{macrocode}
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \tud@length@setabsolute{\tud@bleedmargin@dim}%
+    \tud@length@setabsolute\tud@bleedmargin@dim%
   \fi%
 }
 %    \end{macrocode}
@@ -710,12 +709,12 @@
 %    \begin{macrocode}
 \DefineFamilyMember{KOMA}
 \DefineFamilyKey{KOMA}{twoside}{%
+  \FamilyKeyStateUnknownValue%
   \TUD@SpecialOptionAtDocument{tud@cdgeometry@process}%
-  \FamilyKeyStateProcessed%
 }
 \DefineFamilyKey{KOMA}{twocolumn}{%
+  \FamilyKeyStateUnknownValue%
   \TUD@SpecialOptionAtDocument{tud@cdgeometry@process}%
-  \FamilyKeyStateProcessed%
 }
 %    \end{macrocode}
 % \end{option}^^A twocolumn
@@ -766,7 +765,7 @@
   \PreventPackageFromLoading{geometry}
   \let\tud@cdgeometry@process\relax
 \else
-  \RequirePackage{geometry}[2010/09/12]
+  \RequirePackage{geometry}
 \fi
 \AfterPackage*{geometry}{%
   \CheckCommand*\Gm@initnewgm{%
@@ -1054,11 +1053,14 @@
         }%
       \tud@res@a%
     \fi%
-    \Ifstr{#2}{newgeometry}{%
-      \eappto\Gm@restore@org{%
+    \tud@if@strequal{#2}{newgeometry}{%
+      \edef\@tempb{%
         \noexpand\paperwidth=\the\paperwidth\relax%
         \noexpand\paperheight=\the\paperheight\relax%
       }%
+      \expandafter\apptocmd\expandafter\Gm@restore@org\expandafter{%
+        \@tempb%
+      }{}{\tud@patch@wrn{Gm@restore@org}}%
 %    \end{macrocode}
 % Wird der Befehl verwendet, wenn eigentlich \pkg{typearea} aktiv ist, so 
 % werden lediglich die Einstellungen zu \prm{paper} und \prm{layout} beachtet. 
@@ -1093,7 +1095,7 @@
 % sowie \val{layout} des Paketes \pkg{geometry} auf die passenden Optionen von 
 % \KOMAScript{} abbilden zu können und insbesondere Schnittmarken für alle 
 % Seitenstile bereitzustellen.
-% \ToDo{%
+% \ToDo{^^A
 %   Leider ist aus der dem Versuch, eine halbwegs einheitliche Schnittstelle 
 %   zwischen den Paketen \pkg{typearea} und \pkg{geometry} zu schaffen, ein
 %   ziemlich unübersichtliches Konstrukt geworden, weshalb das Ganze in einer
@@ -1121,7 +1123,7 @@
       \tud@x@geometry@area@def{paper}{\paperwidth:#1}%
     }%
     \TUD@parameter@def{layout}{%
-      \Ifstr{#1}{false}{%
+      \tud@if@strequal{#1}{false}{%
         \tud@setdim\tud@dim@layoutwidth{\z@}%
         \tud@setdim\tud@dim@layoutheight{\z@}%
         \tud@setdim\tud@dim@layouthoffset{\z@}%
@@ -1179,18 +1181,22 @@
 % \val{parameter} für alles Übrige.
 %    \begin{macrocode}
   \newcommand*\tud@x@geometry@area@def[2]{%
-    \tud@lowerstring{\@tempa}{#2}%
+    \tud@strlowercase\@tempa{#2}%
     \def\@tempb##1paper##2\@nil{%
-      \Ifstr{##2}{paper}{\def\@tempa{##1}}{}%
+      \tud@if@strequal{##2}{paper}{\def\@tempa{##1}}{}%
     }%
     \expandafter\@tempb\@tempa paper\@nil%
     \@tempswafalse%
-    \Ifstr{\@tempa}{seascape}{\@tempswatrue}{}%
-    \Ifstr{\@tempa}{landscape}{\@tempswatrue}{}%
-    \Ifstr{\@tempa}{portrait}{\@tempswatrue}{}%
-    \Ifstr{\@tempa}{letter}{\@tempswatrue}{}%
-    \Ifstr{\@tempa}{executive}{\@tempswatrue}{}%
-    \Ifstr{\@tempa}{legal}{\@tempswatrue}{}%
+    \TUD@set@numkey{paper}{@tempc}{%
+      {seascape}{0},{landscape}{0},{portrait}{0},%
+      {letter}{0},{executive}{0},{legal}{0}%
+    }{\@tempa}%
+    \@tempswafalse%
+    \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+      \ifcase\@tempc\relax%
+        \@tempswatrue%
+      \fi%
+    \fi%
     \if@tempswa\else%
       \ifx\@tempa\@empty\else%
         \def\@tempb##1##2\@nil{%
@@ -1217,7 +1223,7 @@
         \if@tempswa\else%
           \def\tud@reserved##1:##2:##3:##4\@nil{%
             \if@tempswa\else%
-              \Ifstr{\@tempa}{##1}{%
+              \tud@if@strequal{\@tempa}{##1}{%
                 \@tempswatrue%
                 \def\@tempa{##2##4:##3##4}%
               }{}%
@@ -1264,7 +1270,7 @@
 % \emph{Dies geschieht hier direkt und nicht in einer Gruppe,} weil der Aufruf 
 % von \cs{tud@x@geometry@area@set}|{layout}| lokal erfolgt.
 %    \begin{macrocode}
-          \ifstr{#1}{layout}{\let\scr@setpaperorientation\relax}{}%
+          \tud@if@strequal{#1}{layout}{\let\scr@setpaperorientation\relax}{}%
           \KOMAoption{paper}{##1:##2}%
         }%
       }%
@@ -1361,10 +1367,13 @@
 %    \begin{macrocode}
       \edef\@tempa{#1}%
       \tud@cs@store{Gm@restore@org}%
-      \eappto\Gm@restore@org{%
+      \edef\@tempb{%
         \noexpand\paperwidth=\the\paperwidth\relax%
         \noexpand\paperheight=\the\paperheight\relax%
       }%
+      \expandafter\apptocmd\expandafter\Gm@restore@org\expandafter{%
+        \@tempb%
+      }{}{\tud@patch@wrn{Gm@restore@org}}%
       \def\@tempc{\tud@cs@use{newgeometry}}%
       \expandafter\@tempc\expandafter{\@tempa}%
       \tud@cs@restore{Gm@restore@org}%
@@ -1480,7 +1489,7 @@
 %    \begin{macrocode}
       \ifcase\tud@cdgeometry@num\relax%
         \edef\tud@cdgeometry@hmargin{%
-          left=\the\dimexpr\oddsidemargin+1in-\ta@bcor\relax,%
+          left=\the\dimexpr\glueexpr\oddsidemargin+1in-\ta@bcor\relax\relax,%
           textwidth=\the\textwidth,%
           \tud@cdgeometry@mpincl,%
           marginparwidth=\the\marginparwidth,%
@@ -1513,7 +1522,8 @@
       \else% custom
         \ifGm@pass\else%
           \edef\tud@cdgeometry@hmargin{%
-            left=\the\dimexpr\oddsidemargin+1in-\Gm@bindingoffset\relax,%
+            left=\the\dimexpr\glueexpr\oddsidemargin+1in%
+              -\Gm@bindingoffset\relax\relax,%
             textwidth=\the\textwidth,%
             \ifGm@includemp%
               includemp=true,%
@@ -1548,6 +1558,15 @@
             footskip=\the\footskip%
           }%
         \fi%
+      \fi%
+%    \end{macrocode}
+% Die Einstellungen für zweiseitigen respektive zweispaltigen Satz.
+%    \begin{macrocode}
+      \if@twoside%
+        \appto\tud@cdgeometry@hmargin{,twoside}%
+      \fi%
+      \if@twocolumn%
+        \appto\tud@cdgeometry@hmargin{,twocolumn}%
       \fi%
 %    \end{macrocode}
 % Es wird die Höhendifferenz zwischen TUD-Kopf und Standardkopfzeile für den
@@ -1702,8 +1721,8 @@
           top=\the\dimexpr\tud@dim@bothmargin/2\relax,%
           headheight=\the\headheight,%
           headsep=\the\tud@dim@headsep,%
-          bottom=\the\dimexpr\tud@dim@bothmargin/2%
-            +\tud@extrabottommargin@dim\relax,%
+          bottom=\the\dimexpr\glueexpr\tud@dim@bothmargin/2%
+            +\tud@extrabottommargin@dim\relax\relax,%
           \tud@cdgeometry@fincl,%
           footskip=\the\dimexpr\tud@dim@headsep+\footheight%
             -1\baselineskip*5/4\relax%
@@ -1714,8 +1733,8 @@
           top=\the\tud@dim@slimmargin,%
           headheight=\the\headheight,%
           headsep=\the\headsep,%
-          bottom=\the\dimexpr\tud@dim@widemargin%
-            +\tud@extrabottommargin@dim\relax,%
+          bottom=\the\dimexpr\glueexpr\tud@dim@widemargin%
+            +\tud@extrabottommargin@dim\relax\relax,%
           \tud@cdgeometry@fincl,%
           footskip=\the\dimexpr\tud@dim@footsep+\footheight\relax%
         }%
@@ -1751,12 +1770,12 @@
         \tud@setdim\tud@dim@ddcdiff{\tud@dim@topmargin*3/5}%
         \edef\tud@cdgeometry@ddcmargin{%
           \if@fincl%
-            bottom=\the\dimexpr\tud@dim@bothmargin/2%
+            bottom=\the\dimexpr\glueexpr\tud@dim@bothmargin/2%
               +\tud@extrabottommargin@dim+\tud@dim@ddcdiff+\tud@dim@headsep%
-              +\footheight-1\baselineskip*5/4\relax,%
+              +\footheight-1\baselineskip*5/4\relax\relax,%
           \else%
-            bottom=\the\dimexpr\tud@dim@bothmargin/2%
-              +\tud@extrabottommargin@dim+\tud@dim@ddcdiff\relax,%
+            bottom=\the\dimexpr\glueexpr\tud@dim@bothmargin/2%
+              +\tud@extrabottommargin@dim+\tud@dim@ddcdiff\relax\relax,%
           \fi%
           footskip=\the\dimexpr\tud@dim@headsep+\footheight%
             -1\baselineskip*5/4+\tud@dim@ddcdiff\relax,%
@@ -1854,7 +1873,7 @@
 % anschließend auch der richtige Satzspiegel wieder ausgewählt werden.
 %    \begin{macrocode}
     \tud@if@preamble{}{%
-      \Ifstr{\tud@currentgeometry}{stdarea}{}{%
+      \tud@if@strequal{\tud@currentgeometry}{stdarea}{}{%
         \expandafter\tud@loadgeometry\expandafter{\tud@currentgeometry}%
       }%
     }%
@@ -1904,10 +1923,10 @@
 % \changes{v2.04}{2015/03/10}{neu}^^A
 % Damit alle Satzspiegeleinstellungen vollständig vorgenommen und auch alle
 % Klassenoptionen korrekt verarbeitet werden, wird die Berechnung erstmalig 
-% mit \cs{AtEndPreamble}|{|\cs{tud@cdgeometry@init}|}| ausgeführt, nachdem der 
-% Ladezustandes des Paketes \pkg{scrlayer-scrpage} geprüft wurde. Dabei werden 
-% sowohl der benutzerdefinierte Satzspiegel als auch die durch \pkg{typearea}
-% berechneten Einstellungen gesichert.
+% am Ende der Präambel mit \cs{AtEndPreamble}|{|\cs{tud@cdgeometry@init}|}| 
+% ausgeführt, nachdem der Ladezustandes des Paketes \pkg{scrlayer-scrpage}
+% geprüft wurde. Dabei werden sowohl der benutzerdefinierte Satzspiegel als
+% auch die durch \pkg{typearea} berechneten Einstellungen gesichert.
 %    \begin{macrocode}
   \newcommand*\tud@cdgeometry@@init{%
     \csuse{@ta@usegeometryfalse}%
@@ -1962,12 +1981,12 @@
 % Alle gesammelten Warnungen von \pkg{typearea} werden dem initialisierten
 % Satzspiegel hinzugefügt.
 %    \begin{macrocode}
-    \def\tud@res@b##1{%
-      \eappto\Gm@restore@@init@typearea{%
-        \noexpand\PackageWarningNoLine{typearea}{##1}%
-      }%
+    \def\do##1{%
+      \apptocmd\Gm@restore@@init@typearea{%
+        ##1%
+      }{}{\tud@patch@wrn{Gm@restore@@init@typearea}}%
     }%
-    \forlistloop\tud@res@b{\tud@res@a}%
+    \dolistloop{\tud@res@a}%
 %    \end{macrocode}
 % Hier werden die temporär geäanderten Einstellungen zurückgesetzt.
 %    \begin{macrocode}
@@ -2018,7 +2037,7 @@
 % auch mit \LaTeX-Standardseitenstilen \pgs{headings} bzw. \pgs{plain} 
 % umgeschaltet werden kann. Dies wird hiermit beachtet.
 %    \begin{macrocode}
-    \Ifstr{#1}{\GetRealPageStyle{#1}}{%
+    \tud@if@strequal{#1}{\GetRealPageStyle{#1}}{%
 %    \end{macrocode}
 % Für den Fall, das ein \pgs{tudheadings}-Seitenstil geladen werden soll, muss 
 % der dazugehörige Satzspiegel ausgewählt werden\dots
@@ -2040,7 +2059,7 @@
 % Das \DDC-Logo im Fuß ist nicht aktiviert.
 %    \begin{macrocode}
           \ifcase\@tempb\relax% \tud@ddc@foot@num=false
-            \Ifstr{\tud@currentgeometry}{tudarea}{}{%
+            \tud@if@strequal{\tud@currentgeometry}{tudarea}{}{%
               \tud@loadgeometry{tudarea}%
               \gdef\tud@currentgeometry{tudarea}%
             }%
@@ -2048,7 +2067,7 @@
 % Das \DDC-Logo im Fuß ist aktiviert.
 %    \begin{macrocode}
           \else% \tud@ddc@foot@num!=false
-            \Ifstr{\tud@currentgeometry}{tudareaddc}{}{%
+            \tud@if@strequal{\tud@currentgeometry}{tudareaddc}{}{%
               \tud@loadgeometry{tudareaddc}%
               \gdef\tud@currentgeometry{tudareaddc}%
             }%
@@ -2057,7 +2076,7 @@
 % Ab der Version~v2.03 ist nur noch ein Satzspiegel vonnöten.
 %    \begin{macrocode}
         }{%
-          \Ifstr{\tud@currentgeometry}{tudarea}{}{%
+          \tud@if@strequal{\tud@currentgeometry}{tudarea}{}{%
             \tud@loadgeometry{tudarea}%
             \gdef\tud@currentgeometry{tudarea}%
           }%
@@ -2075,7 +2094,7 @@
 % zurückgesetzt.
 %    \begin{macrocode}
       }{%
-        \Ifstr{\tud@currentgeometry}{stdarea}{}{%
+        \tud@if@strequal{\tud@currentgeometry}{stdarea}{}{%
           \tud@loadgeometry{stdarea}%
           \gdef\tud@currentgeometry{stdarea}%
         }%
@@ -2230,17 +2249,23 @@
   \tud@cs@store{PackageWarningNoLine}%
   \renewcommand*\PackageWarningNoLine[2]{%
     \@tud@res@swatrue%
-    \Ifstr{##1}{typearea}{%
-      \Ifstrstart{##2}{Bad type area settings!}{\@tud@res@swafalse}{}%
-      \Ifstrstart{##2}{%
+    \tud@if@strequal{##1}{typearea}{%
+      \tud@if@strstart{##2}{%
+        Bad type area settings!%
+      }{\@tud@res@swafalse}{}%
+      \tud@if@strstart{##2}{%
         Maybe no optimal type area settings!%
       }{\@tud@res@swafalse}{}%
-      \Ifstrstart{##2}{Very low DIV value!}{\@tud@res@swafalse}{}%
+      \tud@if@strstart{##2}{%
+        Very low DIV value!%
+      }{\@tud@res@swafalse}{}%
     }{}%
     \if@tud@res@swa%
-      \tud@cs@use{PackageWarning}{##1}{##2}%
+      \tud@cs@use{PackageWarningNoLine}{##1}{##2}%
     \else%
-      \IfArgIsEmpty{#1}{}{\listeadd#1{##2}}%
+      \IfArgIsEmpty{#1}{}{%
+        \listeadd#1{\noexpand\tud@cs@use{PackageWarningNoLine}{##1}{##2}}%
+      }%
     \fi%
   }%
 }
@@ -2342,7 +2367,7 @@
 \tud@if@v@lower{2.03}{%
   \newcommand*\tud@ddc@enlargepage[1][]{%
     \tud@if@tudheadings{#1}{%
-      \Ifstr{\tud@currentgeometry}{tudareaddc}{}{%
+      \tud@if@strequal{\tud@currentgeometry}{tudareaddc}{}{%
         \tud@ddc@check%
         \ifcase\@tempb\relax\else% \tud@ddc@foot@num!=false
           \enlargethispage{-\tud@dim@ddcdiff}%

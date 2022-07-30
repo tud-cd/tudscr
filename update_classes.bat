@@ -9,7 +9,7 @@ xcopy source\logo temp\tex\latex\tudscr\logo
 cd temp
 echo \BaseDirectory{.}> docstrip.cfg
 echo \UseTDS>> docstrip.cfg
-pdftex tudscr.ins
+tex tudscr.ins
 kpsewhich --var-value=TEXMFLOCAL> texmfpath.tmp
 set /p texmfpath=< texmfpath.tmp
 xcopy tex "%texmfpath%\tex\" /s /y
